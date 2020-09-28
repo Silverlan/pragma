@@ -39,11 +39,11 @@ void CParticleOperatorLua::Simulate(double tDelta)
 
 //////////////
 
-void CParticleRendererLua::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags)
+void CParticleRendererLua::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags)
 {
-	CallLuaMember<void,std::reference_wrapper<prosper::ICommandBuffer>,std::reference_wrapper<pragma::rendering::RasterizationRenderer>,uint32_t>("Render",std::ref(*drawCmd),std::ref(const_cast<pragma::rendering::RasterizationRenderer&>(renderer)),umath::to_integral(renderFlags));
+	CallLuaMember<void,std::reference_wrapper<prosper::ICommandBuffer>,std::reference_wrapper<Scene>,std::reference_wrapper<pragma::rendering::RasterizationRenderer>,uint32_t>("Render",std::ref(*drawCmd),scene,std::ref(const_cast<pragma::rendering::RasterizationRenderer&>(renderer)),umath::to_integral(renderFlags));
 }
-void CParticleRendererLua::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
+void CParticleRendererLua::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
 {
 	// TODO
 }

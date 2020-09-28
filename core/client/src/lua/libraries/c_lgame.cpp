@@ -927,7 +927,10 @@ int Lua::game::Client::create_scene(lua_State *l)
 	::Scene::CreateInfo createInfo {};
 	if(Lua::IsSet(l,argIdx))
 		createInfo.sampleCount = static_cast<prosper::SampleCountFlags>(Lua::CheckInt(l,argIdx++));
-	auto scene = ::Scene::Create(createInfo);
+	::Scene *parent = nullptr;
+	if(Lua::IsSet(l,argIdx))
+		parent = &Lua::Check<::Scene>(l,argIdx++);
+	auto scene = ::Scene::Create(createInfo,parent);
 	if(scene == nullptr)
 		return 0;
 	Lua::Push<decltype(scene)>(l,scene);
@@ -952,6 +955,12 @@ int Lua::game::Client::get_scene(lua_State *l)
 {
 	auto &scene = c_game->GetScene();
 	Lua::Push<decltype(scene)>(l,scene);
+	return 1;
+}
+int Lua::game::Client::get_scene_by_index(lua_State *l)
+{
+	auto *scene = ::Scene::GetByIndex(Lua::CheckInt(l,1));
+	Lua::Push(l,scene->shared_from_this());
 	return 1;
 }
 int Lua::game::Client::get_scene_camera(lua_State *l)

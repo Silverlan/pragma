@@ -75,7 +75,7 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderParticle2DBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
-		bool Draw(const rendering::RasterizationRenderer &renderer,const CParticleSystemComponent &ps,CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags renderFlags);
+		bool Draw(Scene &scene,const rendering::RasterizationRenderer &renderer,const CParticleSystemComponent &ps,CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags renderFlags);
 		bool BeginDraw(
 			const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,
 			CParticleSystemComponent &pSys,ParticleRenderFlags renderFlags,Pipeline pipelineIdx=Pipeline::Regular,

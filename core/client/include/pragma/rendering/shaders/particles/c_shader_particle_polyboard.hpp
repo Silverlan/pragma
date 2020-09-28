@@ -37,7 +37,7 @@ namespace pragma
 			float viewportH;
 		};
 #pragma pack(pop)
-		bool Draw(const rendering::RasterizationRenderer &renderer,const pragma::CParticleSystemComponent &ps,prosper::IBuffer &vertexBuffer,prosper::IBuffer &indexBuffer,uint32_t numIndices,float radius,float curvature);
+		bool Draw(Scene &scene,const rendering::RasterizationRenderer &renderer,const pragma::CParticleSystemComponent &ps,prosper::IBuffer &vertexBuffer,prosper::IBuffer &indexBuffer,uint32_t numIndices,float radius,float curvature);
 	protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	private:

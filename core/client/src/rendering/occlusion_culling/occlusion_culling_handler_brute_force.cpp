@@ -15,11 +15,10 @@ using namespace pragma;
 extern DLLCLIENT CGame *c_game;
 
 void OcclusionCullingHandlerBruteForce::PerformCulling(
-	const pragma::rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+	Scene &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
 	std::vector<OcclusionMeshInfo> &culledMeshesOut,bool cullByViewFrustum
 )
 {
-	auto &scene = renderer.GetScene();
 	//auto d = uvec::distance(m_lastLodCamPos,posCam);
 	//auto bUpdateLod = (d >= LOD_SWAP_DISTANCE) ? true : false;
 	culledMeshesOut.clear();
@@ -35,7 +34,7 @@ void OcclusionCullingHandlerBruteForce::PerformCulling(
 			continue;
 		bool bViewModel = false;
 		std::vector<Plane> *planes = nullptr;
-		if((ShouldExamine(renderer,*ent,bViewModel,cullByViewFrustum ? &planes : nullptr) == true))
+		if((ShouldExamine(scene,renderer,*ent,bViewModel,cullByViewFrustum ? &planes : nullptr) == true))
 		{
 			//if(bUpdateLod == true) // Needs to be updated every frame (in case the entity is moving towards or away from us)
 			pRenderComponent->GetModelComponent()->UpdateLOD(camPos);

@@ -40,11 +40,11 @@ void ShaderParticlePolyboard::InitializeGfxPipeline(prosper::GraphicsPipelineCre
 	RegisterDefaultGfxPipelineDescriptorSetGroups(pipelineInfo);
 }
 
-bool ShaderParticlePolyboard::Draw(const rendering::RasterizationRenderer &renderer,const pragma::CParticleSystemComponent &ps,prosper::IBuffer &vertexBuffer,prosper::IBuffer &indexBuffer,uint32_t numIndices,float radius,float curvature)
+bool ShaderParticlePolyboard::Draw(Scene &scene,const rendering::RasterizationRenderer &renderer,const pragma::CParticleSystemComponent &ps,prosper::IBuffer &vertexBuffer,prosper::IBuffer &indexBuffer,uint32_t numIndices,float radius,float curvature)
 {
 	if(BindParticleMaterial(renderer,ps) == false)
 		return false;
-	auto &cam = renderer.GetScene().GetActiveCamera();
+	auto &cam = scene.GetActiveCamera();
 	if(RecordPushConstants(GeometryPushConstants{
 		cam.valid() ? cam->GetEntity().GetPosition() : Vector3{},radius,curvature
 			}) == false ||

@@ -236,12 +236,12 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 	classDef.def("GetClass",&GetClass);
 	classDef.def("Think",&Think);
 	classDef.def("InjectMouseMoveInput",&InjectMouseMoveInput);
-	classDef.def("InjectMouseInput",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&,int,int,int)>(&InjectMouseInput));
-	classDef.def("InjectMouseInput",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&,int,int)>(&InjectMouseInput));
-	classDef.def("InjectKeyboardInput",static_cast<void(*)(lua_State*,WIHandle&,int,int,int)>(&InjectKeyboardInput));
-	classDef.def("InjectKeyboardInput",static_cast<void(*)(lua_State*,WIHandle&,int,int)>(&InjectKeyboardInput));
-	classDef.def("InjectCharInput",static_cast<void(*)(lua_State*,WIHandle&,std::string,uint32_t)>(&InjectCharInput));
-	classDef.def("InjectCharInput",static_cast<void(*)(lua_State*,WIHandle&,std::string)>(&InjectCharInput));
+	classDef.def("InjectMouseInput",static_cast<::util::EventReply(*)(lua_State*,WIHandle&,const Vector2&,int,int,int)>(&InjectMouseInput));
+	classDef.def("InjectMouseInput",static_cast<::util::EventReply(*)(lua_State*,WIHandle&,const Vector2&,int,int)>(&InjectMouseInput));
+	classDef.def("InjectKeyboardInput",static_cast<::util::EventReply(*)(lua_State*,WIHandle&,int,int,int)>(&InjectKeyboardInput));
+	classDef.def("InjectKeyboardInput",static_cast<::util::EventReply(*)(lua_State*,WIHandle&,int,int)>(&InjectKeyboardInput));
+	classDef.def("InjectCharInput",static_cast<::util::EventReply(*)(lua_State*,WIHandle&,std::string,uint32_t)>(&InjectCharInput));
+	classDef.def("InjectCharInput",static_cast<::util::EventReply(*)(lua_State*,WIHandle&,std::string)>(&InjectCharInput));
 	classDef.def("InjectScrollInput",&InjectScrollInput);
 	classDef.def("IsDescendant",&IsDescendant);
 	classDef.def("IsDescendantOf",&IsDescendantOf);
@@ -511,6 +511,22 @@ void Lua::WITexturedShape::register_class(luabind::class_<WITexturedShapeHandle,
 	classDef.def("SetShader",static_cast<void(*)(lua_State*,WITexturedShapeHandle&,wgui::ShaderTextured&)>([](lua_State *l,WITexturedShapeHandle &hPanel,wgui::ShaderTextured &shader) {
 		lua_checkgui(l,hPanel);
 		static_cast<::WITexturedShape*>(hPanel.get())->SetShader(shader);
+	}));
+	classDef.def("GetAlphaMode",static_cast<AlphaMode(*)(lua_State*,WITexturedShapeHandle&)>([](lua_State *l,WITexturedShapeHandle &hPanel) -> AlphaMode {
+		lua_checkgui_ret(l,hPanel,{});
+		return static_cast<::WITexturedShape*>(hPanel.get())->GetAlphaMode();
+	}));
+	classDef.def("SetAlphaMode",static_cast<void(*)(lua_State*,WITexturedShapeHandle&,AlphaMode)>([](lua_State *l,WITexturedShapeHandle &hPanel,AlphaMode alphaMode) {
+		lua_checkgui(l,hPanel);
+		static_cast<::WITexturedShape*>(hPanel.get())->SetAlphaMode(alphaMode);
+	}));
+	classDef.def("SetAlphaCutoff",static_cast<void(*)(lua_State*,WITexturedShapeHandle&,float)>([](lua_State *l,WITexturedShapeHandle &hPanel,float cutoff) {
+		lua_checkgui(l,hPanel);
+		static_cast<::WITexturedShape*>(hPanel.get())->SetAlphaCutoff(cutoff);
+	}));
+	classDef.def("GetAlphaCutoff",static_cast<float(*)(lua_State*,WITexturedShapeHandle&)>([](lua_State *l,WITexturedShapeHandle &hPanel) -> float {
+		lua_checkgui_ret(l,hPanel,{});
+		return static_cast<::WITexturedShape*>(hPanel.get())->GetAlphaCutoff();
 	}));
 	classDef.add_static_constant("CHANNEL_RED",umath::to_integral(::wgui::ShaderTextured::Channel::Red));
 	classDef.add_static_constant("CHANNEL_GREEN",umath::to_integral(::wgui::ShaderTextured::Channel::Green));
@@ -2016,50 +2032,51 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l,WIHandle &hPanel,const Vecto
 	}};
 	hPanel->InjectMouseMoveInput(mousePos.x,mousePos.y);
 }
-void Lua::WIBase::InjectMouseInput(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos,int button,int action,int mods)
+::util::EventReply Lua::WIBase::InjectMouseInput(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos,int button,int action,int mods)
 {
- 	lua_checkgui(l,hPanel);
+	lua_checkgui_ret(l,hPanel,::util::EventReply::Unhandled);
 	auto &window = c_engine->GetWindow();
 	auto absPos = hPanel->GetAbsolutePos();
 	window.SetCursorPosOverride(Vector2{static_cast<float>(absPos.x +mousePos.x),static_cast<float>(absPos.y +mousePos.y)});
 	ScopeGuard sg {[&window]() {
 		window.ClearCursorPosOverride();
 	}};
-	hPanel->InjectMouseInput(GLFW::MouseButton(button),GLFW::KeyState(action),GLFW::Modifier(mods));
+	return hPanel->InjectMouseInput(GLFW::MouseButton(button),GLFW::KeyState(action),GLFW::Modifier(mods));
 }
-void Lua::WIBase::InjectMouseInput(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos,int button,int action) {InjectMouseInput(l,hPanel,mousePos,button,action,0);}
-void Lua::WIBase::InjectKeyboardInput(lua_State *l,WIHandle &hPanel,int key,int action,int mods)
+::util::EventReply Lua::WIBase::InjectMouseInput(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos,int button,int action) {return InjectMouseInput(l,hPanel,mousePos,button,action,0);}
+::util::EventReply Lua::WIBase::InjectKeyboardInput(lua_State *l,WIHandle &hPanel,int key,int action,int mods)
 {
-	lua_checkgui(l,hPanel);
-	hPanel->InjectKeyboardInput(GLFW::Key(key),0,GLFW::KeyState(action),GLFW::Modifier(mods));
+	lua_checkgui_ret(l,hPanel,::util::EventReply::Unhandled);
+	return hPanel->InjectKeyboardInput(GLFW::Key(key),0,GLFW::KeyState(action),GLFW::Modifier(mods));
 	 // Vulkan TODO
 }
-void Lua::WIBase::InjectKeyboardInput(lua_State *l,WIHandle &hPanel,int key,int action) {InjectKeyboardInput(l,hPanel,key,action,0);}
-void Lua::WIBase::InjectCharInput(lua_State *l,WIHandle &hPanel,std::string c,uint32_t mods)
+::util::EventReply Lua::WIBase::InjectKeyboardInput(lua_State *l,WIHandle &hPanel,int key,int action) {return InjectKeyboardInput(l,hPanel,key,action,0);}
+::util::EventReply Lua::WIBase::InjectCharInput(lua_State *l,WIHandle &hPanel,std::string c,uint32_t mods)
 {
-	lua_checkgui(l,hPanel);
+	lua_checkgui_ret(l,hPanel,::util::EventReply::Unhandled);
 	if(c.empty())
-		return;
+		return ::util::EventReply::Unhandled;
 	const char *cStr = c.c_str();
-	hPanel->InjectCharInput(cStr[0],static_cast<GLFW::Modifier>(mods));
+	return hPanel->InjectCharInput(cStr[0],static_cast<GLFW::Modifier>(mods));
 }
-void Lua::WIBase::InjectCharInput(lua_State *l,WIHandle &hPanel,std::string c)
+::util::EventReply Lua::WIBase::InjectCharInput(lua_State *l,WIHandle &hPanel,std::string c)
 {
-	lua_checkgui(l,hPanel);
+	lua_checkgui_ret(l,hPanel,::util::EventReply::Unhandled);
 	if(c.empty())
-		return;
+		return ::util::EventReply::Unhandled;
 	const char *cStr = c.c_str();
-	hPanel->InjectCharInput(cStr[0]);
+	return hPanel->InjectCharInput(cStr[0]);
 }
-void Lua::WIBase::InjectScrollInput(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos,const Vector2 &offset)
+::util::EventReply Lua::WIBase::InjectScrollInput(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos,const Vector2 &offset)
 {
-	lua_checkgui(l,hPanel);
+	lua_checkgui_ret(l,hPanel,::util::EventReply::Unhandled);
 	auto &window = c_engine->GetWindow();
 	auto cursorPos = window.GetCursorPos();
 	auto absPos = hPanel->GetAbsolutePos();
 	window.SetCursorPosOverride(Vector2{static_cast<float>(absPos.x +mousePos.x),static_cast<float>(absPos.y +mousePos.y)});
-	hPanel->InjectScrollInput(offset);
+	auto result = hPanel->InjectScrollInput(offset);
 	window.ClearCursorPosOverride();
+	return result;
 }
 void Lua::WIBase::IsDescendant(lua_State *l,WIHandle &hPanel,WIHandle &hOther)
 {

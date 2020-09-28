@@ -110,7 +110,7 @@ std::pair<Vector3,Vector3> CParticleRendererBeam::GetRenderBounds() const
 	return bounds;
 }
 
-void CParticleRendererBeam::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags)
+void CParticleRendererBeam::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags)
 {
 	if(m_shader.expired())
 		return;
@@ -118,14 +118,14 @@ void CParticleRendererBeam::Render(const std::shared_ptr<prosper::IPrimaryComman
 	if(shader == nullptr || shader->BeginDraw(drawCmd,GetParticleSystem(),renderFlags) == false)
 		return;
 	shader->BindLights(*renderer.GetLightSourceDescriptorSet());
-	shader->BindSceneCamera(renderer,(GetParticleSystem().GetRenderMode() == RenderMode::View) ? true : false);
+	shader->BindSceneCamera(scene,renderer,(GetParticleSystem().GetRenderMode() == RenderMode::View) ? true : false);
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
-	shader->Draw(renderer,*m_particleSystem,*m_vertexBuffer,*m_indexBuffer,m_indexCount,GetParticleSystem().GetRadius(),m_curvature); // TODO: bloom
+	shader->Draw(scene,renderer,*m_particleSystem,*m_vertexBuffer,*m_indexBuffer,m_indexCount,GetParticleSystem().GetRadius(),m_curvature); // TODO: bloom
 	shader->EndDraw();
 }
 
 
-void CParticleRendererBeam::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
+void CParticleRendererBeam::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
 {
 	/*static auto hShader = c_engine->GetShader("particlepolyboardshadow");
 	if(!hShader.IsValid())

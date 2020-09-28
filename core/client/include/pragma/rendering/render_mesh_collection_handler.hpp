@@ -34,8 +34,8 @@ namespace pragma::rendering
 			HasGlowMeshes = 1u
 		};
 		RenderMeshCollectionHandler()=default;
-		const std::vector<pragma::OcclusionMeshInfo> &PerformOcclusionCulling(RasterizationRenderer &renderer,const Vector3 &posCam,bool cullByViewFrustum=true);
-		ResultFlags GenerateOptimizedRenderObjectStructures(RasterizationRenderer &renderer,const Vector3 &posCam,FRender renderFlags,RenderMode renderMode,bool useGlowMeshes,bool useTranslucentMeshes);
+		const std::vector<pragma::OcclusionMeshInfo> &PerformOcclusionCulling(Scene &scene,RasterizationRenderer &renderer,const Vector3 &posCam,bool cullByViewFrustum=true);
+		ResultFlags GenerateOptimizedRenderObjectStructures(Scene &scene,RasterizationRenderer &renderer,const Vector3 &posCam,FRender renderFlags,RenderMode renderMode,bool useGlowMeshes,bool useTranslucentMeshes);
 	
 		const std::vector<pragma::OcclusionMeshInfo> &GetOcclusionFilteredMeshes() const;
 		std::vector<pragma::OcclusionMeshInfo> &GetOcclusionFilteredMeshes();

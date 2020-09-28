@@ -311,7 +311,7 @@ void ShadowRenderer::RenderShadows(
 			{
 				auto p = ent->GetComponent<pragma::CParticleSystemComponent>();
 				if(p.valid() && p->GetCastShadows() == true)
-					p->RenderShadow(drawCmd,*static_cast<pragma::rendering::RasterizationRenderer*>(renderer),&light,layerId);
+					p->RenderShadow(drawCmd,*scene,*static_cast<pragma::rendering::RasterizationRenderer*>(renderer),&light,layerId);
 			}
 		}
 		drawCmd->RecordEndRenderPass();

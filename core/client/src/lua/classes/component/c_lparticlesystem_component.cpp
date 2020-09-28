@@ -578,11 +578,11 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->Simulate(tDelta);
 		}));
-	defCParticleSystem.def("Render",static_cast<void(*)(lua_State*,CParticleSystemHandle&,std::shared_ptr<prosper::ICommandBuffer>&,pragma::rendering::RasterizationRenderer&,uint32_t)>([](lua_State *l,CParticleSystemHandle &hComponent,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pragma::rendering::RasterizationRenderer &renderer,uint32_t renderFlags) {
+	defCParticleSystem.def("Render",static_cast<void(*)(lua_State*,CParticleSystemHandle&,std::shared_ptr<prosper::ICommandBuffer>&,Scene&,pragma::rendering::RasterizationRenderer&,uint32_t)>([](lua_State *l,CParticleSystemHandle &hComponent,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,Scene &scene,pragma::rendering::RasterizationRenderer &renderer,uint32_t renderFlags) {
 		pragma::Lua::check_component(l,hComponent);
 		if(drawCmd->IsPrimary() == false)
 			return;
-		hComponent->Render(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd),renderer,static_cast<pragma::ParticleRenderFlags>(renderFlags));
+		hComponent->Render(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd),scene,renderer,static_cast<pragma::ParticleRenderFlags>(renderFlags));
 		}));
 	defCParticleSystem.def("GetRenderParticleCount",static_cast<void(*)(lua_State*,CParticleSystemHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);

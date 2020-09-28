@@ -58,7 +58,7 @@ void ShaderPPHDR::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 }
 
 static auto cvToneMapping = GetClientConVar("cl_render_tone_mapping");
-bool ShaderPPHDR::Draw(prosper::IDescriptorSet &descSetTexture,float exposure,float bloomScale,float glowScale)
+bool ShaderPPHDR::Draw(prosper::IDescriptorSet &descSetTexture,float exposure,float bloomScale,float glowScale,bool flipVertically)
 {
 	auto toneMapping = rendering::ToneMapping::Reinhard;
 	auto toneMappingCvarVal = cvToneMapping->GetInt();
@@ -70,6 +70,6 @@ bool ShaderPPHDR::Draw(prosper::IDescriptorSet &descSetTexture,float exposure,fl
 		toneMapping = static_cast<rendering::ToneMapping>(toneMappingCvarVal +1);
 		break;
 	}
-	return RecordPushConstants(PushConstants{exposure,bloomScale,glowScale,toneMapping}) &&
+	return RecordPushConstants(PushConstants{exposure,bloomScale,glowScale,toneMapping,flipVertically ? 1u : 0u}) &&
 		ShaderPPBase::Draw(descSetTexture) == true;
 }

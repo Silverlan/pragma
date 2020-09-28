@@ -43,9 +43,9 @@ static auto cvDrawView = GetClientConVar("render_draw_view");
 void RasterizationRenderer::RenderPrepass(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto prepassMode = GetPrepassMode();
-	if(prepassMode == PrepassMode::NoPrepass)
+	if(prepassMode == PrepassMode::NoPrepass || drawSceneInfo.scene == nullptr)
 		return;
-	auto &scene = GetScene();
+	auto &scene = *drawSceneInfo.scene;
 	auto &hCam = scene.GetActiveCamera();
 	// Pre-render depths and normals (if SSAO is enabled)
 	c_game->StartProfilingStage(CGame::CPUProfilingPhase::Prepass);
@@ -94,7 +94,7 @@ void RasterizationRenderer::RenderPrepass(const util::DrawSceneInfo &drawSceneIn
 	if(shaderDepthStage.BeginDraw(drawCmd,pipelineType) == true)
 	{
 		shaderDepthStage.BindClipPlane(c_game->GetRenderClipPlane());
-		shaderDepthStage.BindSceneCamera(*this,false);
+		shaderDepthStage.BindSceneCamera(scene,*this,false);
 		if((drawSceneInfo.renderFlags &FRender::Skybox) != FRender::None)
 		{
 			c_game->StartProfilingStage(CGame::GPUProfilingPhase::PrepassSkybox);
@@ -133,7 +133,7 @@ void RasterizationRenderer::RenderPrepass(const util::DrawSceneInfo &drawSceneIn
 		c_game->CallCallbacks<void>("RenderPrepass");
 		c_game->CallLuaCallbacks("RenderPrepass");
 
-		shaderDepthStage.BindSceneCamera(*this,true);
+		shaderDepthStage.BindSceneCamera(scene,*this,true);
 		auto *pl = c_game->GetLocalPlayer();
 		if((drawSceneInfo.renderFlags &FRender::View) != FRender::None && pl != nullptr && pl->IsInFirstPersonMode() == true && cvDrawView->GetBool() == true)
 		{
@@ -149,47 +149,47 @@ void RasterizationRenderer::RenderPrepass(const util::DrawSceneInfo &drawSceneIn
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::Prepass);
 }
 
-void RasterizationRenderer::PerformOcclusionCulling()
+void RasterizationRenderer::PerformOcclusionCulling(Scene &scene)
 {
 	c_game->StartProfilingStage(CGame::CPUProfilingPhase::OcclusionCulling);
-	GetOcclusionCullingHandler().PerformCulling(*this,GetCulledParticles());
+	GetOcclusionCullingHandler().PerformCulling(scene,*this,GetCulledParticles());
 
 	auto &renderMeshes = GetCulledMeshes();
-	GetOcclusionCullingHandler().PerformCulling(*this,renderMeshes);
+	GetOcclusionCullingHandler().PerformCulling(scene,*this,renderMeshes);
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::OcclusionCulling);
 }
 
-void RasterizationRenderer::CollectRenderObjects(FRender renderFlags)
+void RasterizationRenderer::CollectRenderObjects(Scene &scene,FRender renderFlags)
 {
 	// Prepare rendering
 	c_game->StartProfilingStage(CGame::CPUProfilingPhase::PrepareRendering);
 	auto bGlow = cvDrawGlow->GetBool();
 	auto bTranslucent = cvDrawTranslucent->GetBool();
 	if((renderFlags &FRender::Skybox) == FRender::Skybox && c_game->IsRenderModeEnabled(RenderMode::Skybox) && cvDrawSky->GetBool() == true)
-		PrepareRendering(RenderMode::Skybox,renderFlags,bTranslucent,bGlow);
+		PrepareRendering(scene,RenderMode::Skybox,renderFlags,bTranslucent,bGlow);
 	else
 		renderFlags &= ~FRender::Skybox;
 
 	if((renderFlags &FRender::World) == FRender::World && c_game->IsRenderModeEnabled(RenderMode::World))
-		PrepareRendering(RenderMode::World,renderFlags,bTranslucent,bGlow);
+		PrepareRendering(scene,RenderMode::World,renderFlags,bTranslucent,bGlow);
 	else
 		renderFlags &= ~FRender::World;
 
 	if((renderFlags &FRender::Water) == FRender::Water && c_game->IsRenderModeEnabled(RenderMode::Water) && cvDrawWater->GetBool() == true)
-		PrepareRendering(RenderMode::Water,renderFlags,bTranslucent,bGlow);
+		PrepareRendering(scene,RenderMode::Water,renderFlags,bTranslucent,bGlow);
 	else
 		renderFlags &= ~FRender::Water;
 
 	auto *pl = c_game->GetLocalPlayer();
 	if((renderFlags &FRender::View) == FRender::View && c_game->IsRenderModeEnabled(RenderMode::View) && pl != nullptr && pl->IsInFirstPersonMode() == true && cvDrawView->GetBool() == true)
-		PrepareRendering(RenderMode::View,renderFlags,bTranslucent,bGlow);
+		PrepareRendering(scene,RenderMode::View,renderFlags,bTranslucent,bGlow);
 	else
 		renderFlags &= ~FRender::View;
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::PrepareRendering);
 }
 
 static auto cvDrawWorld = GetClientConVar("render_draw_world");
-void RasterizationRenderer::PrepareRendering(RenderMode renderMode,FRender renderFlags,bool bUpdateTranslucentMeshes,bool bUpdateGlowMeshes)
+void RasterizationRenderer::PrepareRendering(Scene &scene,RenderMode renderMode,FRender renderFlags,bool bUpdateTranslucentMeshes,bool bUpdateGlowMeshes)
 {
 	auto &renderMeshData = m_renderMeshCollectionHandler.GetRenderMeshData();
 	auto it = renderMeshData.find(renderMode);
@@ -197,7 +197,7 @@ void RasterizationRenderer::PrepareRendering(RenderMode renderMode,FRender rende
 		it = renderMeshData.insert(std::remove_reference_t<decltype(renderMeshData)>::value_type(renderMode,std::make_shared<CulledMeshData>())).first;
 
 	auto &renderInfo = it->second;
-	auto &cam = GetScene().GetActiveCamera();
+	auto &cam = scene.GetActiveCamera();
 	auto &posCam = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 
 	auto drawWorld = cvDrawWorld->GetInt();

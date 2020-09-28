@@ -284,14 +284,13 @@ bool ShaderParticle2DBase::BindParticleMaterial(const rendering::RasterizationRe
 	return RecordBindDescriptorSets({&descSetTexture,descSetDepth,&animDescSet},DESCRIPTOR_SET_TEXTURE.setIndex);
 }
 
-bool ShaderParticle2DBase::Draw(const rendering::RasterizationRenderer &renderer,const pragma::CParticleSystemComponent &ps,pragma::CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags ptRenderFlags)
+bool ShaderParticle2DBase::Draw(Scene &scene,const rendering::RasterizationRenderer &renderer,const pragma::CParticleSystemComponent &ps,pragma::CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags ptRenderFlags)
 {
 	if(BindParticleMaterial(renderer,ps) == false)
 		return false;
-	auto &scene = renderer.GetScene();
 	auto &cam = scene.GetActiveCamera();
 
-	auto colorFactor = renderer.GetScene().GetParticleSystemColorFactor();
+	auto colorFactor = scene.GetParticleSystemColorFactor();
 	if(umath::is_flag_set(ptRenderFlags,ParticleRenderFlags::Bloom))
 	{
 		auto bloomColorFactor = ps.GetEffectiveBloomColorFactor();

@@ -36,11 +36,12 @@ namespace pragma
 			float bloomScale;
 			float glowScale;
 			rendering::ToneMapping toneMapping;
+			uint32_t flipVertically;
 		};
 #pragma pack(pop)
 
 		ShaderPPHDR(prosper::IPrContext &context,const std::string &identifier);
-		bool Draw(prosper::IDescriptorSet &descSetTexture,float exposure,float bloomScale,float glowScale);
+		bool Draw(prosper::IDescriptorSet &descSetTexture,float exposure,float bloomScale,float glowScale,bool flipVertically=false);
 	protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;

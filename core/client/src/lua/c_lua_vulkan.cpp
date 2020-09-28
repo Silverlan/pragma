@@ -2617,7 +2617,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	}));
 	defRenderPassInfo.def("SetClearValues",static_cast<void(*)(lua_State*,Lua::Vulkan::RenderPassInfo&,luabind::object)>([](lua_State *l,Lua::Vulkan::RenderPassInfo &rpInfo,luabind::object tClearValues) {
 		auto t = 2;
-		Lua::CheckInt(l,t);
+		Lua::CheckTable(l,t);
 		auto numClearValues = Lua::GetObjectLength(l,t);
 		rpInfo.clearValues.clear();
 		rpInfo.clearValues.reserve(numClearValues);

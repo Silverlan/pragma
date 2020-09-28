@@ -23,14 +23,14 @@ namespace pragma::rendering
 
 		virtual void EndRendering() override;
 		virtual bool RenderScene(const util::DrawSceneInfo &drawSceneInfo) override;
-		virtual bool ReloadRenderTarget(uint32_t width,uint32_t height) override;
+		virtual bool ReloadRenderTarget(Scene &scene,uint32_t width,uint32_t height) override;
 		virtual bool IsRayTracingRenderer() const override;
 		virtual prosper::Texture *GetSceneTexture() override;
 		virtual prosper::Texture *GetHDRPresentationTexture() override;
 	private:
 		friend BaseRenderer;
 		using BaseRenderer::BaseRenderer;
-		virtual bool Initialize() override;
+		virtual bool Initialize(uint32_t w,uint32_t h) override;
 		std::shared_ptr<prosper::Texture> m_outputTexture = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_dsgOutputImage = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_dsgLights = nullptr;

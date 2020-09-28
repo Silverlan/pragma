@@ -55,8 +55,9 @@ void RasterizationRenderer::RenderBloom(const util::DrawSceneInfo &drawSceneInfo
 void RasterizationRenderer::RenderGlowObjects(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &glowInfo = GetGlowInfo();
-	if(glowInfo.bGlowScheduled == false)
+	if(glowInfo.bGlowScheduled == false || drawSceneInfo.scene == nullptr)
 		return;
+	auto &scene = *drawSceneInfo.scene;
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingGlow);
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	drawCmd->RecordBeginRenderPass(*glowInfo.renderTarget,{
@@ -74,7 +75,7 @@ void RasterizationRenderer::RenderGlowObjects(const util::DrawSceneInfo &drawSce
 		auto *renderInfo = GetRenderInfo(static_cast<RenderMode>(i));
 		if(renderInfo == nullptr || renderInfo->glowMeshes.empty() == true)
 			continue;
-		RenderGlowMeshes(drawCmd,static_cast<RenderMode>(i));
+		RenderGlowMeshes(drawCmd,scene,static_cast<RenderMode>(i));
 	}
 
 	drawCmd->RecordEndRenderPass();
@@ -100,7 +101,7 @@ void RasterizationRenderer::RenderGlowObjects(const util::DrawSceneInfo &drawSce
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingGlow);
 }
 
-void RasterizationRenderer::RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,RenderMode renderMode)
+void RasterizationRenderer::RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,Scene &scene,RenderMode renderMode)
 {
 	auto &glowInfo = GetGlowInfo();
 	auto *shader = static_cast<pragma::ShaderGlow*>(glowInfo.shader.get());
@@ -111,7 +112,7 @@ void RasterizationRenderer::RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCo
 		return;
 	if(shader->BeginDraw(drawCmd) == true)
 	{
-		shader->BindSceneCamera(*this,(renderMode == RenderMode::View) ? true : false);
+		shader->BindSceneCamera(scene,*this,(renderMode == RenderMode::View) ? true : false);
 		for(auto &matContainer : renderInfo->glowMeshes)
 		{
 			auto *mat = matContainer->material;

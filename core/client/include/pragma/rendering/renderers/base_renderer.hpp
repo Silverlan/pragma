@@ -26,12 +26,12 @@ namespace pragma::rendering
 	{
 	public:
 		template<class TRenderer>
-			static std::shared_ptr<TRenderer> Create(Scene &scene);
+			static std::shared_ptr<TRenderer> Create(uint32_t w,uint32_t h);
 		bool operator==(const BaseRenderer &other) const;
 		bool operator!=(const BaseRenderer &other) const;
 		virtual ~BaseRenderer()=default;
 		virtual bool RenderScene(const util::DrawSceneInfo &drawSceneInfo);
-		virtual bool ReloadRenderTarget(uint32_t width,uint32_t height)=0;
+		virtual bool ReloadRenderTarget(Scene &scene,uint32_t width,uint32_t height)=0;
 		virtual prosper::Texture *GetSceneTexture()=0;
 		virtual prosper::Texture *GetPresentationTexture();
 		virtual prosper::Texture *GetHDRPresentationTexture()=0;
@@ -39,29 +39,27 @@ namespace pragma::rendering
 		const prosper::Texture *GetPresentationTexture() const;
 		const prosper::Texture *GetHDRPresentationTexture() const;
 		virtual void UpdateRenderSettings();
-		virtual void UpdateCameraData(pragma::CameraData &cameraData);
+		virtual void UpdateCameraData(Scene &scene,pragma::CameraData &cameraData);
 		void Resize(uint32_t width, uint32_t height);
 
 		virtual bool IsRasterizationRenderer() const;
 		virtual bool IsRayTracingRenderer() const;
 
-		Scene &GetScene() const;
 		uint32_t GetWidth() const;
 		uint32_t GetHeight() const;
 	protected:
-		virtual void BeginRendering(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
+		virtual void BeginRendering(const util::DrawSceneInfo &drawSceneInfo);
 		virtual void EndRendering()=0;
-		BaseRenderer(Scene &scene);
-		virtual bool Initialize() = 0;
-		Scene &m_scene;
+		BaseRenderer();
+		virtual bool Initialize(uint32_t w,uint32_t h) = 0;
 	};
 };
 
 template<class TRenderer>
-	std::shared_ptr<TRenderer> pragma::rendering::BaseRenderer::Create(Scene &scene)
+	std::shared_ptr<TRenderer> pragma::rendering::BaseRenderer::Create(uint32_t w,uint32_t h)
 {
-	auto res = std::shared_ptr<TRenderer>{new TRenderer{scene}};
-	if(res->Initialize() == false)
+	auto res = std::shared_ptr<TRenderer>{new TRenderer{}};
+	if(res->Initialize(w,h) == false)
 		return nullptr;
 	return res;
 }

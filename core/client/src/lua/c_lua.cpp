@@ -111,6 +111,7 @@ void CGame::RegisterLua()
 		{"get_render_scene",Lua::game::Client::get_render_scene},
 		{"get_render_scene_camera",Lua::game::Client::get_render_scene_camera},
 		{"get_scene",Lua::game::Client::get_scene},
+		{"get_scene_by_index",Lua::game::Client::get_scene_by_index},
 		{"get_primary_camera",Lua::game::Client::get_scene_camera},
 		{"get_draw_command_buffer",Lua::game::Client::get_draw_command_buffer},
 		{"get_setup_command_buffer",Lua::game::Client::get_setup_command_buffer},
@@ -329,6 +330,12 @@ void CGame::RegisterLua()
 
 	auto classDefBaseRenderer = luabind::class_<pragma::rendering::BaseRenderer>("BaseRenderer");
 	classDefBaseRenderer.def(luabind::const_self == luabind::const_self);
+	classDefBaseRenderer.def("GetWidth",static_cast<void(*)(lua_State*,pragma::rendering::BaseRenderer&)>([](lua_State *l,pragma::rendering::BaseRenderer &renderer) {
+		Lua::PushInt(l,renderer.GetWidth());
+	}));
+	classDefBaseRenderer.def("GetHeight",static_cast<void(*)(lua_State*,pragma::rendering::BaseRenderer&)>([](lua_State *l,pragma::rendering::BaseRenderer &renderer) {
+		Lua::PushInt(l,renderer.GetHeight());
+	}));
 	gameMod[classDefBaseRenderer];
 
 	auto classDefRasterizationRenderer = luabind::class_<pragma::rendering::RasterizationRenderer,pragma::rendering::BaseRenderer>("RasterizationRenderer");
@@ -343,15 +350,21 @@ void CGame::RegisterLua()
 	classDefRasterizationRenderer.def("ClearShaderOverride",&Lua::RasterizationRenderer::ClearShaderOverride);
 	classDefRasterizationRenderer.def("SetPrepassMode",&Lua::RasterizationRenderer::SetPrepassMode);
 	classDefRasterizationRenderer.def("GetPrepassMode",&Lua::RasterizationRenderer::GetPrepassMode);
-	classDefRasterizationRenderer.def("InitializeRenderTarget", static_cast<void(*)(lua_State*, pragma::rendering::RasterizationRenderer&,uint32_t,uint32_t,bool)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer,uint32_t width,uint32_t height,bool reload) {
+	classDefRasterizationRenderer.def("InitializeRenderTarget", static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&,const Scene&,uint32_t,uint32_t,bool)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const Scene &scene,uint32_t width,uint32_t height,bool reload) {
 		if(reload == false && width == renderer.GetWidth() && height == renderer.GetHeight())
 			return;
-		renderer.ReloadRenderTarget(width,height);
+		renderer.ReloadRenderTarget(const_cast<Scene&>(scene),width,height);
 	}));
-	classDefRasterizationRenderer.def("InitializeRenderTarget", static_cast<void(*)(lua_State*, pragma::rendering::RasterizationRenderer&,uint32_t,uint32_t)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer,uint32_t width,uint32_t height) {
+	classDefRasterizationRenderer.def("InitializeRenderTarget", static_cast<void(*)(lua_State*, pragma::rendering::RasterizationRenderer&,const Scene&,uint32_t,uint32_t)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const Scene &scene,uint32_t width,uint32_t height) {
 		if(width == renderer.GetWidth() && height == renderer.GetHeight())
 			return;
-		renderer.ReloadRenderTarget(width,height);
+		renderer.ReloadRenderTarget(const_cast<Scene&>(scene),width,height);
+	}));
+	classDefRasterizationRenderer.def("SetSSAOEnabled", static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&,Scene&,bool)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer,Scene &scene,bool ssaoEnabled) {
+		renderer.SetSSAOEnabled(scene,ssaoEnabled);
+	}));
+	classDefRasterizationRenderer.def("IsSSAOEnabled", static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
+		Lua::PushBool(l,renderer.IsSSAOEnabled());
 	}));
 	classDefRasterizationRenderer.def("GetLightSourceDescriptorSet", static_cast<void(*)(lua_State*, pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
 		auto *ds = pragma::CShadowManagerComponent::GetShadowManager()->GetDescriptorSet();
@@ -501,7 +514,7 @@ void CGame::RegisterLua()
 		{
 		case RendererType::Rasterization:
 		{
-			auto renderer = pragma::rendering::BaseRenderer::Create<pragma::rendering::RasterizationRenderer>(scene);
+			auto renderer = pragma::rendering::BaseRenderer::Create<pragma::rendering::RasterizationRenderer>(scene.GetWidth(),scene.GetHeight());
 			if(renderer == nullptr)
 				return;
 			Lua::Push(l,renderer);
@@ -509,7 +522,7 @@ void CGame::RegisterLua()
 		}
 		case RendererType::Raytracing:
 		{
-			auto renderer = pragma::rendering::BaseRenderer::Create<pragma::rendering::RaytracingRenderer>(scene);
+			auto renderer = pragma::rendering::BaseRenderer::Create<pragma::rendering::RaytracingRenderer>(scene.GetWidth(),scene.GetHeight());
 			if(renderer == nullptr)
 				return;
 			Lua::Push(l,renderer);
@@ -522,7 +535,7 @@ void CGame::RegisterLua()
 		{
 		case RendererType::Rasterization:
 		{
-			auto renderer = pragma::rendering::BaseRenderer::Create<pragma::rendering::RasterizationRenderer>(scene);
+			auto renderer = pragma::rendering::BaseRenderer::Create<pragma::rendering::RasterizationRenderer>(scene.GetWidth(),scene.GetHeight());
 			if(renderer == nullptr)
 				return;
 			scene.SetRenderer(renderer);
@@ -531,7 +544,7 @@ void CGame::RegisterLua()
 		}
 		case RendererType::Raytracing:
 		{
-			auto renderer = pragma::rendering::BaseRenderer::Create<pragma::rendering::RaytracingRenderer>(scene);
+			auto renderer = pragma::rendering::BaseRenderer::Create<pragma::rendering::RaytracingRenderer>(scene.GetWidth(),scene.GetHeight());
 			if(renderer == nullptr)
 				return;
 			scene.SetRenderer(renderer);

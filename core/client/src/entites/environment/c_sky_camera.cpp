@@ -12,6 +12,7 @@
 #include "pragma/entities/environment/c_sky_camera.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/entities/baseentity_events.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
@@ -37,14 +38,17 @@ void CSkyCameraComponent::Initialize()
 	});
 
 	m_renderMeshCollectionHandler.GetRenderMeshData().insert(std::make_pair(RenderMode::World,std::make_shared<rendering::CulledMeshData>()));
-	m_cbOnPreRender = c_game->AddCallback("OnPreRender",FunctionCallback<void,rendering::RasterizationRenderer*>::Create([this](rendering::RasterizationRenderer *renderer) {
+	m_cbOnPreRender = c_game->AddCallback("OnPreRender",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([this](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
+		auto *renderer = drawSceneInfo.get().scene->GetRenderer();
+		if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+			return;
 		auto &posCam = GetEntity().GetPosition();
-		m_renderMeshCollectionHandler.PerformOcclusionCulling(*renderer,posCam,false);
+		m_renderMeshCollectionHandler.PerformOcclusionCulling(*drawSceneInfo.get().scene,*static_cast<pragma::rendering::RasterizationRenderer*>(renderer),posCam,false);
 
 		//umath::set_flag(renderFlags,FRender::View | FRender::Skybox,false);
 		auto renderFlags = FRender::World | FRender::Static | FRender::Dynamic;
 		// TODO: No glow or translucent meshes are supported in 3D skybox for now
-		auto resultFlags = m_renderMeshCollectionHandler.GenerateOptimizedRenderObjectStructures(*renderer,posCam,renderFlags,RenderMode::World,false,false);
+		auto resultFlags = m_renderMeshCollectionHandler.GenerateOptimizedRenderObjectStructures(*drawSceneInfo.get().scene,*static_cast<pragma::rendering::RasterizationRenderer*>(renderer),posCam,renderFlags,RenderMode::World,false,false);
 	}));
 }
 

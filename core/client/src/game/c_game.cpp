@@ -178,7 +178,7 @@ CGame::CGame(NetworkState *state)
 	RegisterCallback<void>("PostRenderScenes");
 	RegisterCallback<void>("PostRenderScenes");
 	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing");
-	RegisterCallback<void,pragma::rendering::RasterizationRenderer*>("OnPreRender");
+	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("OnPreRender");
 	RegisterCallback<void>("RenderPrepass");
 	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("PostRenderScene");
 	RegisterCallback<void,pragma::CPlayerComponent*>("OnLocalPlayerSpawned");
@@ -550,12 +550,12 @@ void CGame::Initialize()
 	m_scene = Scene::Create(Scene::CreateInfo{});
 	m_scene->SetDebugMode(static_cast<Scene::DebugMode>(GetConVarInt("render_debug_mode")));
 	SetViewModelFOV(GetConVarFloat("cl_fov_viewmodel"));
-	auto renderer = pragma::rendering::RasterizationRenderer::Create<pragma::rendering::RasterizationRenderer>(*m_scene);
+	auto renderer = pragma::rendering::RasterizationRenderer::Create<pragma::rendering::RasterizationRenderer>(m_scene->GetWidth(),m_scene->GetHeight());
 	m_scene->SetRenderer(renderer);
 	m_scene->ReloadRenderTarget(static_cast<uint32_t>(resolution.x),static_cast<uint32_t>(resolution.y));
 	m_scene->SetWorldEnvironment(GetWorldEnvironment());
 	if(renderer && renderer->IsRasterizationRenderer())
-		renderer->SetSSAOEnabled(GetConVarBool("cl_render_ssao"));
+		renderer->SetSSAOEnabled(*m_scene,GetConVarBool("cl_render_ssao"));
 
 	SetRenderScene(m_scene);
 

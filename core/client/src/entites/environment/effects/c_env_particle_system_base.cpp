@@ -1315,7 +1315,7 @@ void CParticleSystemComponent::ResumeEmission()
 }
 void CParticleSystemComponent::SetAlwaysSimulate(bool b) {umath::set_flag(m_flags,Flags::AlwaysSimulate,b);}
 
-void CParticleSystemComponent::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,ParticleRenderFlags renderFlags)
+void CParticleSystemComponent::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,ParticleRenderFlags renderFlags)
 {
 	if(umath::is_flag_set(renderFlags,ParticleRenderFlags::Bloom) && IsBloomEnabled() == false)
 		return;
@@ -1332,7 +1332,7 @@ void CParticleSystemComponent::Render(const std::shared_ptr<prosper::IPrimaryCom
 		if(hChild.child.expired() || hChild.child->IsActiveOrPaused() == false)
 			continue;
 		numRenderParticles += hChild.child->GetRenderParticleCount();
-		hChild.child->Render(drawCmd,renderer,renderFlags);
+		hChild.child->Render(drawCmd,scene,renderer,renderFlags);
 	}
 	if(numRenderParticles == 0)
 	{
@@ -1344,22 +1344,22 @@ void CParticleSystemComponent::Render(const std::shared_ptr<prosper::IPrimaryCom
 	if(m_bufParticles != nullptr)
 	{
 		for(auto &r : m_renderers)
-			r->Render(drawCmd,renderer,renderFlags);
+			r->Render(drawCmd,scene,renderer,renderFlags);
 	}
 	umath::set_flag(m_flags,Flags::RendererBufferUpdateRequired,false);
 }
 
-void CParticleSystemComponent::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent *light,uint32_t layerId)
+void CParticleSystemComponent::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent *light,uint32_t layerId)
 {
 	if(!IsActiveOrPaused() || m_numRenderParticles == 0)
 		return;
 	for(auto &hChild : m_childSystems)
 	{
 		if(hChild.child.valid() && hChild.child->IsActiveOrPaused())
-			hChild.child->RenderShadow(drawCmd,renderer,light,layerId);
+			hChild.child->RenderShadow(drawCmd,scene,renderer,light,layerId);
 	}
 	for(auto &r : m_renderers)
-		r->RenderShadow(drawCmd,renderer,*light,layerId);
+		r->RenderShadow(drawCmd,scene,renderer,*light,layerId);
 }
 
 CParticle &CParticleSystemComponent::CreateParticle(uint32_t idx,float timeCreated,float timeAlive)

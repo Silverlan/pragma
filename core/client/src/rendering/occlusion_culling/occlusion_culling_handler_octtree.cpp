@@ -39,12 +39,11 @@ template<class T>
 }
 
 void OcclusionCullingHandlerOctTree::PerformCulling(
-	const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+	Scene &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
 	std::vector<OcclusionMeshInfo> &culledMeshesOut,bool cullByViewFrustum
 )
 {
 	// TODO: Is this function still being used somewhere? If not, get rid of it!
-	auto &scene = renderer.GetScene();
 	auto d = uvec::distance(m_lastLodCamPos,camPos);
 	m_lastLodCamPos = camPos;
 	auto bUpdateLod = (d >= LOD_SWAP_DISTANCE) ? true : false;
@@ -80,7 +79,7 @@ void OcclusionCullingHandlerOctTree::PerformCulling(
 				return;
 			bool bViewModel = false;
 			std::vector<Plane> *planes = nullptr;
-			if(ShouldExamine(renderer,*ent,bViewModel,cullByViewFrustum ? &planes : nullptr) == false)
+			if(ShouldExamine(scene,renderer,*ent,bViewModel,cullByViewFrustum ? &planes : nullptr) == false)
 				return;
 			auto pRenderComponent = ent->GetRenderComponent();
 			if(pRenderComponent.expired())
@@ -120,7 +119,7 @@ void OcclusionCullingHandlerOctTree::PerformCulling(
 			auto &entWorld = static_cast<CBaseEntity&>(pWorld->GetEntity());
 			auto bViewModel = false;
 			std::vector<Plane> *planes = nullptr;
-			if(ShouldExamine(renderer,entWorld,bViewModel,cullByViewFrustum ? &planes : nullptr) == true)
+			if(ShouldExamine(scene,renderer,entWorld,bViewModel,cullByViewFrustum ? &planes : nullptr) == true)
 			{
 				auto &root = wrldTree->GetRootNode();
 				auto pTrComponent = entWorld.GetTransformComponent();

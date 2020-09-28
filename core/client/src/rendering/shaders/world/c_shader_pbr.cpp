@@ -108,11 +108,10 @@ bool ShaderPBR::BeginDraw(
 	m_extRenderFlags = RenderFlags::None;
 	return ShaderTextured3DBase::BeginDraw(cmdBuffer,clipPlane,drawOrigin,pipelineIdx,recordFlags);
 }
-bool ShaderPBR::BindSceneCamera(const rendering::RasterizationRenderer &renderer,bool bView)
+bool ShaderPBR::BindSceneCamera(Scene &scene,const rendering::RasterizationRenderer &renderer,bool bView)
 {
-	if(ShaderTextured3DBase::BindSceneCamera(renderer,bView) == false)
+	if(ShaderTextured3DBase::BindSceneCamera(scene,renderer,bView) == false)
 		return false;
-	auto &scene = renderer.GetScene();
 	auto hCam = scene.GetActiveCamera();
 	if(hCam.expired())
 		return false;

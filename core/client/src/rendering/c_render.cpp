@@ -235,6 +235,8 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 		Con::cwar<<"WARNING: Attempted to render invalid scene!"<<Con::endl;
 		return;
 	}
+	if(drawSceneInfo.scene == nullptr)
+		drawSceneInfo.scene = GetScene();
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	if(cvClearScene->GetBool() == true || drawWorld == 2 || drawSceneInfo.clearColor.has_value())
 	{

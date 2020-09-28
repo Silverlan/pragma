@@ -164,7 +164,7 @@ bool HDRData::EndRenderPass(const util::DrawSceneInfo &drawSceneInfo)
 	return drawSceneInfo.commandBuffer->RecordEndRenderPass();
 }
 
-bool HDRData::Initialize(RasterizationRenderer &renderer,uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount,bool bEnableSSAO)
+bool HDRData::Initialize(Scene &scene,RasterizationRenderer &renderer,uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount,bool bEnableSSAO)
 {
 	// Initialize depth prepass
 	auto &context = c_engine->GetRenderContext();
@@ -304,7 +304,6 @@ bool HDRData::Initialize(RasterizationRenderer &renderer,uint32_t width,uint32_t
 	}
 
 	// Initialize forward+
-	auto &scene = renderer.GetScene();
 	auto resolvedTexture = prepass.textureDepth->IsMSAATexture() ? static_cast<prosper::MSAATexture&>(*prepass.textureDepth).GetResolvedTexture() : prepass.textureDepth;
 	if(forwardPlusInstance.Initialize(context,width,height,*resolvedTexture) == false)
 		return false;

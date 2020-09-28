@@ -330,9 +330,9 @@ bool pragma::LuaShaderTextured3D::BindVertexAnimationOffset(uint32_t offset)
 {
 	return ShaderTextured3DBase::BindVertexAnimationOffset(offset);
 }
-bool pragma::LuaShaderTextured3D::BindScene(rendering::RasterizationRenderer &renderer,bool bView)
+bool pragma::LuaShaderTextured3D::BindScene(Scene &scene,rendering::RasterizationRenderer &renderer,bool bView)
 {
-	if(ShaderTextured3DBase::BindScene(renderer,bView) == false)
+	if(ShaderTextured3DBase::BindScene(scene,renderer,bView) == false)
 		return false;
 	CallLuaMember<void,rendering::RasterizationRenderer*,bool>("OnBindScene",&renderer,bView);
 	return true;

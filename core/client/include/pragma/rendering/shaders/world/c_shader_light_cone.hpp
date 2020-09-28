@@ -28,7 +28,7 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderLightCone(prosper::IPrContext &context,const std::string &identifier);
-		virtual bool BindSceneCamera(const pragma::rendering::RasterizationRenderer &renderer,bool bView) override;
+		virtual bool BindSceneCamera(Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,bool bView) override;
 		virtual bool BindEntity(CBaseEntity &ent) override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		virtual bool Draw(CModelSubMesh &mesh) override;

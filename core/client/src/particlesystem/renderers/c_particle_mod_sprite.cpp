@@ -55,25 +55,25 @@ pragma::ShaderParticleBase *CParticleRendererSprite::GetShader() const
 	return static_cast<pragma::ShaderParticle2DBase*>(m_shader.get());
 }
 
-void CParticleRendererSprite::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags)
+void CParticleRendererSprite::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags)
 {
 	auto *shader = static_cast<pragma::ShaderParticle2DBase*>(m_shader.get());
 	if(shader == nullptr || shader->BeginDraw(drawCmd,GetParticleSystem(),renderFlags) == false) // prosper TODO: Use unlit pipeline if low shader quality?
 		return;
 	shader->BindLights(*renderer.GetLightSourceDescriptorSet());
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
-	shader->BindSceneCamera(renderer,(m_particleSystem->GetRenderMode() == RenderMode::View) ? true : false);
+	shader->BindSceneCamera(scene,renderer,(m_particleSystem->GetRenderMode() == RenderMode::View) ? true : false);
 	if(m_bPlanarRotation == false)
 		static_cast<pragma::ShaderParticleRotational&>(*shader).BindWorldRotationBuffer(*m_rotationalBuffer->GetBuffer());
 	shader->Draw(
-		renderer,*m_particleSystem,
+		scene,renderer,*m_particleSystem,
 		(m_rotationalBuffer != nullptr && m_rotationalBuffer->ShouldRotationAlignVelocity()) ? pragma::CParticleSystemComponent::OrientationType::Velocity : m_particleSystem->GetOrientationType(),
 		renderFlags
 	);
 	shader->EndDraw();
 }
 
-void CParticleRendererSprite::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
+void CParticleRendererSprite::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
 {
 	/*static auto hShader = c_engine->GetShader("particleshadow");
 	if(!hShader.IsValid())

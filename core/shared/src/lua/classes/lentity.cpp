@@ -419,6 +419,32 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 		LUA_CHECK_ENTITY(l,hParent);
 		hEnt->SetParent(hParent.get());
 	}));
+	classDef.def("SetOwner",static_cast<void(*)(lua_State*,EntityHandle&,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt,EntityHandle &hOwner) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		LUA_CHECK_ENTITY(l,hOwner);
+		auto *ownableC = dynamic_cast<pragma::BaseOwnableComponent*>(hEnt->AddComponent("ownable").get());
+		if(ownableC == nullptr)
+			return;
+		ownableC->SetOwner(*hOwner.get());
+	}));
+	classDef.def("GetOwner",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		auto *ownableC = dynamic_cast<pragma::BaseOwnableComponent*>(hEnt->FindComponent("ownable").get());
+		if(ownableC == nullptr)
+			return;
+		auto *owner = ownableC->GetOwner();
+		if(owner == nullptr)
+			return;
+		owner->GetLuaObject()->push(l);
+	}));
+	classDef.def("SetEnabled",&Lua::Entity::SetEnabled);
+	classDef.def("SetTurnedOn",&Lua::Entity::SetEnabled);
+	classDef.def("Enable",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {SetEnabled(l,hEnt,true);}));
+	classDef.def("TurnOn",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {SetEnabled(l,hEnt,true);}));
+	classDef.def("Disable",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {SetEnabled(l,hEnt,false);}));
+	classDef.def("TurnOff",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {SetEnabled(l,hEnt,false);}));
+	classDef.def("IsEnabled",&Lua::Entity::IsEnabled);
+	classDef.def("IsTurnedOn",&Lua::Entity::IsEnabled);
 	classDef.def("GetPhysicsObject",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);
 		auto *physObj = hEnt->GetPhysicsObject();
@@ -732,6 +758,29 @@ void Lua::Entity::IsDynamic(lua_State *l,EntityHandle &hEnt)
 {
 	LUA_CHECK_ENTITY(l,hEnt);
 	Lua::PushBool(l,hEnt->IsDynamic());
+}
+
+void Lua::Entity::SetEnabled(lua_State *l,EntityHandle &hEnt,bool enabled)
+{
+	LUA_CHECK_ENTITY(l,hEnt);
+	auto *toggleC = dynamic_cast<pragma::BaseToggleComponent*>(hEnt->FindComponent("toggle").get());
+	if(toggleC == nullptr && enabled == false)
+		return;
+	if(toggleC == nullptr)
+		toggleC = dynamic_cast<pragma::BaseToggleComponent*>(hEnt->AddComponent("toggle").get());
+	if(toggleC == nullptr)
+		return;
+	toggleC->SetTurnedOn(enabled);
+}
+
+void Lua::Entity::IsEnabled(lua_State *l,EntityHandle &hEnt)
+{
+	LUA_CHECK_ENTITY(l,hEnt);
+	auto isEnabled = true;
+	auto *toggleC = dynamic_cast<pragma::BaseToggleComponent*>(hEnt->FindComponent("toggle").get());
+	if(toggleC == nullptr)
+		isEnabled = toggleC->IsTurnedOn();
+	Lua::PushBool(l,isEnabled);
 }
 
 void Lua::Entity::Save(lua_State *l,EntityHandle &hEnt,::DataStream &ds)

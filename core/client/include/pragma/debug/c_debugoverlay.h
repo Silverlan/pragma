@@ -51,20 +51,24 @@ namespace DebugRenderer
 	{
 	protected:
 		BaseObject();
-		Vector3 m_position = {};
-		Quat m_rotation = uquat::identity();
+		umath::ScaledTransform m_pose {};
 		Mat4 m_modelMatrix = umat::identity();
 		bool m_bValid = false;
 		bool m_bVisible = true;
 		void UpdateModelMatrix();
 	public:
 		virtual ~BaseObject()=default;
+		const umath::ScaledTransform &GetPose() const;
+		umath::ScaledTransform &GetPose();
+		void SetPose(const umath::ScaledTransform &pose);
 		const Vector3 &GetPos() const;
 		virtual void SetPos(const Vector3 &pos);
 		const Quat &GetRotation() const;
 		virtual void SetRotation(const Quat &rot);
 		EulerAngles GetAngles() const;
 		virtual void SetAngles(const EulerAngles &ang);
+		const Vector3 &GetScale() const;
+		virtual void SetScale(const Vector3 &scale);
 		const Mat4 &GetModelMatrix() const;
 		bool IsVisible() const;
 		void SetVisible(bool b);
@@ -83,6 +87,7 @@ namespace DebugRenderer
 		virtual void SetPos(const Vector3 &pos) override;
 		virtual void SetRotation(const Quat &rot) override;
 		virtual void SetAngles(const EulerAngles &ang) override;
+		virtual void SetScale(const Vector3 &scale) override;
 		virtual ObjectType GetType() const override;
 	};
 	class DLLCLIENT WorldObject

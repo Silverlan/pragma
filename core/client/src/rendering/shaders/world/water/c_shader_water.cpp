@@ -114,12 +114,11 @@ void ShaderWater::EndDraw()
 	m_boundScene = {};
 }
 
-bool ShaderWater::BindSceneCamera(const rendering::RasterizationRenderer &renderer,bool bView)
+bool ShaderWater::BindSceneCamera(Scene &scene,const rendering::RasterizationRenderer &renderer,bool bView)
 {
-	auto r = ShaderTextured3DBase::BindSceneCamera(renderer,bView);
+	auto r = ShaderTextured3DBase::BindSceneCamera(scene,renderer,bView);
 	if(r == false)
 		return false;
-	auto &scene = renderer.GetScene();
 	auto &cam = scene.GetActiveCamera();
 	if(cam.expired())
 		return false;

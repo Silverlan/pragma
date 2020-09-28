@@ -209,7 +209,7 @@ void Scene::UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &
 	m_cameraData.VP = p *v;
 
 	if(bView == false && m_renderer)
-		m_renderer->UpdateCameraData(m_cameraData);
+		m_renderer->UpdateCameraData(*this,m_cameraData);
 
 	drawCmd->RecordBufferBarrier(
 		*bufCam,
@@ -465,7 +465,7 @@ void Scene::ReloadRenderTarget(uint32_t width,uint32_t height)
 {
 	m_bValid = false;
 
-	if(m_renderer == nullptr || m_renderer->ReloadRenderTarget(width,height) == false)
+	if(m_renderer == nullptr || m_renderer->ReloadRenderTarget(*this,width,height) == false)
 		return;
 
 	m_bValid = true;

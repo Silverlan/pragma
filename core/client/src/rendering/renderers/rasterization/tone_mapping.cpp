@@ -44,7 +44,7 @@ void RasterizationRenderer::RenderToneMapping(const util::DrawSceneInfo &drawSce
 		{
 			const float bloomAdditiveScale = 0.5f;
 			auto glowScale = (GetGlowInfo().bGlowScheduled == true) ? 1.f : 0.f;
-			shaderPPHdr.Draw(descSetHdrResolve,GetHDRExposure(),bloomAdditiveScale,glowScale);
+			shaderPPHdr.Draw(descSetHdrResolve,GetHDRExposure(),bloomAdditiveScale,glowScale,drawSceneInfo.flipVertically);
 			shaderPPHdr.EndDraw();
 		}
 		drawCmd->RecordEndRenderPass();

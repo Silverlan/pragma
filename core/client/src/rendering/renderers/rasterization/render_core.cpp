@@ -38,8 +38,9 @@ using namespace pragma::rendering;
 void RasterizationRenderer::RenderParticleSystems(const util::DrawSceneInfo &drawSceneInfo,std::vector<pragma::CParticleSystemComponent*> &particles,RenderMode renderMode,Bool bloom,std::vector<pragma::CParticleSystemComponent*> *bloomParticles)
 {
 	auto depthOnly = umath::is_flag_set(drawSceneInfo.renderFlags,FRender::ParticleDepth);
-	if(depthOnly && bloom)
+	if((depthOnly && bloom) || drawSceneInfo.scene == nullptr)
 		return;
+	auto &scene = *drawSceneInfo.scene;
 	auto renderFlags = ParticleRenderFlags::None;
 	umath::set_flag(renderFlags,ParticleRenderFlags::DepthOnly,depthOnly);
 	umath::set_flag(renderFlags,ParticleRenderFlags::Bloom,bloom);
@@ -75,7 +76,7 @@ void RasterizationRenderer::RenderParticleSystems(const util::DrawSceneInfo &dra
 				BeginRenderPass(drawSceneInfo,hdrInfo.rpPostParticle.get());
 			}
 			//scene->ResolveDepthTexture(drawCmd); // Particles aren't multisampled, but requires scene depth buffer
-			particle->Render(drawCmd,*this,renderFlags);
+			particle->Render(drawCmd,scene,*this,renderFlags);
 			if(bloomParticles != nullptr)
 			{
 				if(particle->IsBloomEnabled())

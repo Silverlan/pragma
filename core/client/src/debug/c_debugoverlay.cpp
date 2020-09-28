@@ -64,23 +64,27 @@ static std::unordered_map<DebugRenderer::Type,std::vector<DebugRenderer::Runtime
 };
 
 DebugRenderer::BaseObject::BaseObject()
-	: m_bValid(true),m_position{0.f,0.f,0.f},m_rotation{1.f,0.f,0.f,0.f}
+	: m_bValid(true)
 {}
 bool DebugRenderer::BaseObject::IsValid() const {return m_bValid;}
 void DebugRenderer::BaseObject::Remove() {m_bValid = false;}
-const Vector3 &DebugRenderer::BaseObject::GetPos() const {return m_position;}
-void DebugRenderer::BaseObject::SetPos(const Vector3 &pos) {m_position = pos; UpdateModelMatrix();}
-const Quat &DebugRenderer::BaseObject::GetRotation() const {return m_rotation;}
-void DebugRenderer::BaseObject::SetRotation(const Quat &rot) {m_rotation = rot; UpdateModelMatrix();}
-EulerAngles DebugRenderer::BaseObject::GetAngles() const{return EulerAngles(m_rotation);}
+const umath::ScaledTransform &DebugRenderer::BaseObject::GetPose() const {return const_cast<BaseObject*>(this)->GetPose();}
+umath::ScaledTransform &DebugRenderer::BaseObject::GetPose() {return m_pose;}
+void DebugRenderer::BaseObject::SetPose(const umath::ScaledTransform &pose) {m_pose = pose;}
+const Vector3 &DebugRenderer::BaseObject::GetPos() const {return m_pose.GetOrigin();}
+void DebugRenderer::BaseObject::SetPos(const Vector3 &pos) {m_pose.SetOrigin(pos); UpdateModelMatrix();}
+const Quat &DebugRenderer::BaseObject::GetRotation() const {return m_pose.GetRotation();}
+void DebugRenderer::BaseObject::SetRotation(const Quat &rot) {m_pose.SetRotation(rot); UpdateModelMatrix();}
+EulerAngles DebugRenderer::BaseObject::GetAngles() const{return EulerAngles(m_pose.GetRotation());}
 void DebugRenderer::BaseObject::SetAngles(const EulerAngles &ang) {SetRotation(uquat::create(ang));}
+const Vector3 &DebugRenderer::BaseObject::GetScale() const {return m_pose.GetScale();}
+void DebugRenderer::BaseObject::SetScale(const Vector3 &scale) {m_pose.SetScale(scale); UpdateModelMatrix();}
 const Mat4 &DebugRenderer::BaseObject::GetModelMatrix() const {return m_modelMatrix;}
 bool DebugRenderer::BaseObject::IsVisible() const {return m_bVisible;}
 void DebugRenderer::BaseObject::SetVisible(bool b) {m_bVisible = b;}
 void DebugRenderer::BaseObject::UpdateModelMatrix()
 {
-	m_modelMatrix = glm::translate(umat::identity(),GetPos());
-	m_modelMatrix = m_modelMatrix *umat::create(GetRotation());
+	m_modelMatrix = m_pose.::umath::Transform::ToMatrix() *glm::scale(glm::mat4{1.f},GetScale());
 }
 
 ///////////////////////////
@@ -106,6 +110,12 @@ void DebugRenderer::CollectionObject::SetAngles(const EulerAngles &ang)
 	BaseObject::SetAngles(ang);
 	for(auto &o : m_objects)
 		o->SetAngles(ang);
+}
+void DebugRenderer::CollectionObject::SetScale(const Vector3 &scale)
+{
+	BaseObject::SetScale(scale);
+	for(auto &o : m_objects)
+		o->SetScale(scale);
 }
 DebugRenderer::ObjectType DebugRenderer::CollectionObject::GetType() const
 {

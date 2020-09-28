@@ -22,7 +22,9 @@ extern DLLCLIENT CGame *c_game;
 
 void RasterizationRenderer::RenderSceneFog(const util::DrawSceneInfo &drawSceneInfo)
 {
-	auto &scene = GetScene();
+	if(drawSceneInfo.scene == nullptr)
+		return;
+	auto &scene = *drawSceneInfo.scene;
 	auto &hdrInfo = GetHDRInfo();
 	auto descSetGroupFog = m_descSetGroupFogOverride;
 	if(descSetGroupFog == nullptr)

@@ -42,7 +42,7 @@ namespace pragma::rendering
 		HDRData(RasterizationRenderer &rasterizer);
 		~HDRData();
 		void UpdateExposure();
-		bool Initialize(RasterizationRenderer &renderer,uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount,bool bEnableSSAO);
+		bool Initialize(Scene &scene,RasterizationRenderer &renderer,uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount,bool bEnableSSAO);
 		bool InitializeDescriptorSets();
 		prosper::RenderTarget &GetRenderTarget(const util::DrawSceneInfo &drawSceneInfo);
 

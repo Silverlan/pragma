@@ -43,7 +43,7 @@ namespace pragma
 			const std::shared_ptr<prosper::IBuffer> &GetTileVisLightIndexBuffer() const;
 			const std::shared_ptr<prosper::IBuffer> &GetVisLightIndexBuffer() const;
 
-			void Compute(prosper::IPrimaryCommandBuffer &cmdBuffer,prosper::IImage &imgDepth,prosper::IDescriptorSet &descSetCam);
+			void Compute(prosper::IPrimaryCommandBuffer &cmdBuffer,Scene &scene,prosper::IImage &imgDepth,prosper::IDescriptorSet &descSetCam);
 
 			static std::pair<uint32_t,uint32_t> CalcWorkGroupCount(uint32_t w,uint32_t h);
 			static uint32_t CalcTileCount(uint32_t w,uint32_t h);

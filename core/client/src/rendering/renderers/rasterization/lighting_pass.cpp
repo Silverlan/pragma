@@ -31,7 +31,9 @@ static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");
 
 void RasterizationRenderer::RenderLightingPass(const util::DrawSceneInfo &drawSceneInfo)
 {
-	auto &scene = GetScene();
+	if(drawSceneInfo.scene == nullptr)
+		return;
+	auto &scene = *drawSceneInfo.scene;
 	auto &cam = scene.GetActiveCamera();
 	bool bShadows = (drawSceneInfo.renderFlags &FRender::Shadows) == FRender::Shadows;
 	auto &renderMeshes = GetCulledMeshes();

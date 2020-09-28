@@ -34,26 +34,26 @@ namespace pragma
 		virtual void Initialize() {}
 		// This function will not cull anything, culling behavior has to be implemented by derived classes
 		virtual void PerformCulling(
-			const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+			Scene &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
 			std::vector<OcclusionMeshInfo> &culledMeshesOut,
 			bool cullByViewFrustum=true
 		)=0;
-		void PerformCulling(const rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut);
-		void PerformCulling(const rendering::RasterizationRenderer &renderer,std::vector<pragma::CParticleSystemComponent*> &particlesOut);
+		void PerformCulling(Scene &scene,const rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut);
+		void PerformCulling(Scene &scene,const rendering::RasterizationRenderer &renderer,std::vector<pragma::CParticleSystemComponent*> &particlesOut);
 
 		virtual void PerformCulling(
-			const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+			Scene &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
 			std::vector<pragma::CParticleSystemComponent*> &particlesOut
 		);
 		virtual void PerformCulling(
-			const rendering::RasterizationRenderer &renderer,const std::vector<pragma::CLightComponent*> &lightsIn,
+			Scene &scene,const rendering::RasterizationRenderer &renderer,const std::vector<pragma::CLightComponent*> &lightsIn,
 			std::vector<pragma::CLightComponent*> &lightsOut
 		);
-		virtual void PerformCulling(const rendering::RasterizationRenderer &renderer,const Vector3 &origin,float radius,std::vector<OcclusionMeshInfo> &culledMeshesOut);
+		virtual void PerformCulling(Scene &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &origin,float radius,std::vector<OcclusionMeshInfo> &culledMeshesOut);
 	protected:
 		OcclusionCullingHandler()=default;
 		virtual bool ShouldExamine(CModelMesh &mesh,const Vector3 &pos,bool bViewModel,std::size_t numMeshes,const std::vector<Plane> *optPlanes=nullptr) const;
-		virtual bool ShouldExamine(const rendering::RasterizationRenderer &renderer,CBaseEntity &cent,bool &outViewModel,std::vector<Plane> **outPlanes) const;
+		virtual bool ShouldExamine(Scene &scene,const rendering::RasterizationRenderer &renderer,CBaseEntity &cent,bool &outViewModel,std::vector<Plane> **outPlanes) const;
 	};
 };
 

@@ -595,9 +595,9 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defShaderParticleBase.def(luabind::constructor<>());
 	defShaderParticleBase.add_static_constant("PUSH_CONSTANTS_SIZE",sizeof(pragma::ShaderParticle2DBase::PushConstants));
 	defShaderParticleBase.add_static_constant("PUSH_CONSTANTS_USER_DATA_OFFSET",sizeof(pragma::ShaderParticle2DBase::PushConstants));
-	defShaderParticleBase.def("RecordDraw",static_cast<void(*)(lua_State*,pragma::LuaShaderGUIParticle2D&,pragma::rendering::RasterizationRenderer&,CParticleSystemHandle&,uint32_t)>([](lua_State *l,pragma::LuaShaderGUIParticle2D &shader,pragma::rendering::RasterizationRenderer &renderer,CParticleSystemHandle &ps,uint32_t renderFlags) {
+	defShaderParticleBase.def("RecordDraw",static_cast<void(*)(lua_State*,pragma::LuaShaderGUIParticle2D&,Scene&,pragma::rendering::RasterizationRenderer&,CParticleSystemHandle&,uint32_t)>([](lua_State *l,pragma::LuaShaderGUIParticle2D &shader,Scene &scene,pragma::rendering::RasterizationRenderer &renderer,CParticleSystemHandle &ps,uint32_t renderFlags) {
 		pragma::Lua::check_component(l,ps);
-		Lua::PushBool(l,shader.Draw(renderer,*ps,ps->GetOrientationType(),static_cast<pragma::ParticleRenderFlags>(renderFlags)));
+		Lua::PushBool(l,shader.Draw(scene,renderer,*ps,ps->GetOrientationType(),static_cast<pragma::ParticleRenderFlags>(renderFlags)));
 	}));
 	defShaderParticleBase.def("RecordBeginDraw",static_cast<void(*)(lua_State*,pragma::LuaShaderGUIParticle2D&,Lua::Vulkan::CommandBuffer&,CParticleSystemHandle&,uint32_t)>([](lua_State *l,pragma::LuaShaderGUIParticle2D &shader,Lua::Vulkan::CommandBuffer &drawCmd,CParticleSystemHandle &ps,uint32_t renderFlags) {
 		pragma::Lua::check_component(l,ps);
@@ -655,6 +655,10 @@ void CGame::RegisterLuaClasses()
 	defDebugRendererObject.def("GetAngles",&Lua::DebugRenderer::Client::Object::GetAngles);
 	defDebugRendererObject.def("IsVisible",&Lua::DebugRenderer::Client::Object::IsVisible);
 	defDebugRendererObject.def("SetVisible",&Lua::DebugRenderer::Client::Object::SetVisible);
+	defDebugRendererObject.def("SetScale",&::DebugRenderer::BaseObject::SetScale);
+	defDebugRendererObject.def("GetScale",&::DebugRenderer::BaseObject::GetScale);
+	defDebugRendererObject.def("SetPose",&::DebugRenderer::BaseObject::SetPose);
+	defDebugRendererObject.def("GetPose",static_cast<const umath::ScaledTransform&(::DebugRenderer::BaseObject::*)() const>(&::DebugRenderer::BaseObject::GetPose));
 	debugMod[defDebugRendererObject];
 
 	auto &modGame = GetLuaInterface().RegisterLibrary("game");
@@ -676,6 +680,7 @@ void CGame::RegisterLuaClasses()
 	defDrawSceneInfo.def_readwrite("renderTarget",&::util::DrawSceneInfo::renderTarget);
 	defDrawSceneInfo.def_readwrite("outputImage",&::util::DrawSceneInfo::outputImage);
 	defDrawSceneInfo.def_readwrite("outputLayerId",reinterpret_cast<uint32_t util::DrawSceneInfo::*>(&::util::DrawSceneInfo::outputLayerId));
+	defDrawSceneInfo.def_readwrite("flipVertically",&::util::DrawSceneInfo::flipVertically);
 	defDrawSceneInfo.property("clearColor",static_cast<Color(*)(::util::DrawSceneInfo&)>([](::util::DrawSceneInfo &drawSceneInfo) -> Color {
 		return *drawSceneInfo.clearColor;
 	}),static_cast<void(*)(::util::DrawSceneInfo&,const Color&)>([](::util::DrawSceneInfo &drawSceneInfo,const Color &color) {

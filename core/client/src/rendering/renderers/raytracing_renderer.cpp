@@ -20,13 +20,12 @@ using namespace pragma::rendering;
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-bool RaytracingRenderer::Initialize()
+bool RaytracingRenderer::Initialize(uint32_t w,uint32_t h)
 {
-	auto &scene = GetScene();
 	prosper::util::ImageCreateInfo imgCreateInfo {};
 	imgCreateInfo.format = prosper::Format::R8G8B8A8_UNorm;
-	imgCreateInfo.width = scene.GetWidth();
-	imgCreateInfo.height = scene.GetHeight();
+	imgCreateInfo.width = w;
+	imgCreateInfo.height = h;
 	imgCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	imgCreateInfo.tiling = prosper::ImageTiling::Optimal;
 	imgCreateInfo.usage = prosper::ImageUsageFlags::StorageBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::SampledBit;
@@ -64,7 +63,7 @@ bool RaytracingRenderer::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 		prosper::AccessFlags::ShaderReadBit,prosper::AccessFlags::ShaderWriteBit
 	);
 
-	auto &scene = GetScene();
+	auto &scene = *drawSceneInfo.scene;
 	auto &cam = scene.GetActiveCamera();
 	auto extents = imgOutput.GetExtents();
 	ShaderRayTracing::PushConstants pushConstants {
@@ -169,7 +168,7 @@ bool RaytracingRenderer::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 	);
 	return true;
 }
-bool RaytracingRenderer::ReloadRenderTarget(uint32_t width,uint32_t height)
+bool RaytracingRenderer::ReloadRenderTarget(Scene &scene,uint32_t width,uint32_t height)
 {
 	// TODO
 	return true;

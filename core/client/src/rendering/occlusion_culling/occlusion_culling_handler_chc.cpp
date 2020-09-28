@@ -14,7 +14,7 @@ using namespace pragma;
 extern DLLCLIENT CGame *c_game;
 
 void OcclusionCullingHandlerCHC::PerformCulling(
-	const pragma::rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+	Scene &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
 	std::vector<OcclusionMeshInfo> &culledMeshesOut,bool cullByViewFrustum
 )
 {

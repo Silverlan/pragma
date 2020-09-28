@@ -37,9 +37,9 @@ ShaderLightCone::ShaderLightCone(prosper::IPrContext &context,const std::string 
 	umath::set_flag(m_stateFlags,StateFlags::ShouldUseLightMap,false);
 }
 
-bool ShaderLightCone::BindSceneCamera(const pragma::rendering::RasterizationRenderer &renderer,bool bView)
+bool ShaderLightCone::BindSceneCamera(Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,bool bView)
 {
-	if(ShaderTextured3DBase::BindSceneCamera(renderer,bView) == false)
+	if(ShaderTextured3DBase::BindSceneCamera(scene,renderer,bView) == false)
 		return false;
 	auto *descSetDepth = renderer.GetDepthDescriptorSet();
 	if(descSetDepth == nullptr)

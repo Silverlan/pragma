@@ -12,6 +12,14 @@
 
 LUA_SETUP_HANDLE_CHECK(GUIElement,::WIBase,WIHandle);
 
+#define lua_checkgui_ret(l,hGUI,RET) \
+	if(!hGUI.IsValid()) \
+	{ \
+		lua_pushstring(l,"Attempted to use a NULL GUI Element"); \
+		lua_error(l); \
+		return RET; \
+	}
+
 #define lua_checkgui(l,hGUI) \
 	if(!hGUI.IsValid()) \
 	{ \

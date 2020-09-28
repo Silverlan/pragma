@@ -23,7 +23,9 @@ extern DLLCLIENT CGame *c_game;
 
 void RasterizationRenderer::CullLightSources(const util::DrawSceneInfo &drawSceneInfo)
 {
-	auto &scene = GetScene();
+	if(drawSceneInfo.scene == nullptr)
+		return;
+	auto &scene = *drawSceneInfo.scene;
 	auto &prepass = GetPrepass();
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	{
@@ -60,9 +62,9 @@ void RasterizationRenderer::CullLightSources(const util::DrawSceneInfo &drawScen
 		);
 
 		auto *worldEnv = scene.GetWorldEnvironment();
-		if(worldEnv->IsUnlit() == false)
+		if(worldEnv && worldEnv->IsUnlit() == false)
 		{
-			fp.Compute(*drawCmd,depthTex->GetImage(),*scene.GetCameraDescriptorSetCompute());
+			fp.Compute(*drawCmd,scene,depthTex->GetImage(),*scene.GetCameraDescriptorSetCompute());
 			auto &lightBits = fp.GetShadowLightBits();
 			for(auto i=decltype(lightBits.size()){0};i<lightBits.size();++i)
 			{
@@ -126,7 +128,7 @@ void RasterizationRenderer::CullLightSources(const util::DrawSceneInfo &drawScen
 			prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 		);
 
-		if(worldEnv->IsUnlit() == false)
+		if(worldEnv && worldEnv->IsUnlit() == false)
 		{
 			// Note: We want light sources to re-use their previous render target texture if they have one.
 			// To achieve this, we simply update their render target by calling 'RequestRenderTarget' again.

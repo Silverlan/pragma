@@ -126,7 +126,7 @@ bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::IPrContext &con
 	return true;
 }
 
-void pragma::rendering::ForwardPlusInstance::Compute(prosper::IPrimaryCommandBuffer &cmdBuffer,prosper::IImage &imgDepth,prosper::IDescriptorSet &descSetCam)
+void pragma::rendering::ForwardPlusInstance::Compute(prosper::IPrimaryCommandBuffer &cmdBuffer,Scene &scene,prosper::IImage &imgDepth,prosper::IDescriptorSet &descSetCam)
 {
 	if(m_shaderLightCulling.expired() || m_shaderLightIndexing.expired() || m_shadowLightBits.empty() == true)
 		return;
@@ -164,7 +164,7 @@ void pragma::rendering::ForwardPlusInstance::Compute(prosper::IPrimaryCommandBuf
 	);
 
 	auto workGroupCount = GetWorkGroupCount();
-	auto sceneIndex = m_rasterizer.GetScene().GetSceneIndex();
+	auto sceneIndex = scene.GetSceneIndex();
 	auto vpWidth = m_rasterizer.GetWidth();
 	auto vpHeight = m_rasterizer.GetHeight();
 	if(

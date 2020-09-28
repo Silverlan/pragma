@@ -55,9 +55,35 @@ void Game::RegisterLuaEntityComponent(luabind::class_<BaseEntityComponentHandleW
 				luaEvent.arguments.push_back(luabind::object(luabind::from_stack(l,-1)));
 				Lua::Pop(l,1);
 			}
-			hComponent->BroadcastEvent(eventId,luaEvent);
+			auto handled = hComponent->BroadcastEvent(eventId,luaEvent);
 			//hComponent->InvokeEventCallbacks(eventId,luaEvent);
+			Lua::PushInt(l,umath::to_integral(handled));
+			return;
 		}
+		Lua::PushInt(l,umath::to_integral(util::EventReply::Handled));
+	}));
+	def.def("InvokeEventCallbacks",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,uint32_t)>([](lua_State *l,BaseEntityComponentHandle &hComponent,uint32_t eventId) {
+		pragma::Lua::check_component(l,hComponent);
+		auto handled = hComponent->InvokeEventCallbacks(eventId);
+		Lua::PushInt(l,umath::to_integral(handled));
+	}));
+	def.def("InvokeEventCallbacks",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,uint32_t,luabind::object)>([](lua_State *l,BaseEntityComponentHandle &hComponent,uint32_t eventId,luabind::object) {
+		pragma::Lua::check_component(l,hComponent);
+		auto t = 3;
+		Lua::CheckTable(l,t);
+
+		LuaComponentEvent luaEvent {};
+		auto numArgs = Lua::GetObjectLength(l,t);
+		luaEvent.arguments.reserve(numArgs);
+		for(auto i=decltype(numArgs){0u};i<numArgs;++i)
+		{
+			Lua::PushInt(l,i +1u);
+			Lua::GetTableValue(l,t);
+			luaEvent.arguments.push_back(luabind::object(luabind::from_stack(l,-1)));
+			Lua::Pop(l,1);
+		}
+		auto handled = hComponent->InvokeEventCallbacks(eventId,luaEvent);
+		Lua::PushInt(l,umath::to_integral(handled));
 	}));
 	def.def("GetEntity",&Lua::BaseEntityComponent::GetEntity);
 	def.def("GetComponentId",&Lua::BaseEntityComponent::GetComponentId);

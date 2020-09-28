@@ -86,7 +86,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		virtual bool BindSceneCamera(const rendering::RasterizationRenderer &renderer,bool bView);
+		virtual bool BindSceneCamera(Scene &scene,const rendering::RasterizationRenderer &renderer,bool bView);
 		virtual bool BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings);
 	protected:
 		ShaderScene(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
@@ -131,7 +131,7 @@ namespace pragma
 #pragma pack(pop)
 
 		virtual bool BindLights(prosper::IDescriptorSet &dsLights);
-		virtual bool BindScene(rendering::RasterizationRenderer &renderer,bool bView);
+		virtual bool BindScene(Scene &scene,rendering::RasterizationRenderer &renderer,bool bView);
 	protected:
 		ShaderSceneLit(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 		virtual uint32_t GetLightDescriptorSetIndex() const=0;
@@ -191,7 +191,7 @@ namespace pragma
 		bool BindInstanceDescriptorSet(prosper::IDescriptorSet &descSet);
 		virtual bool BindEntity(CBaseEntity &ent);
 		virtual bool BindVertexAnimationOffset(uint32_t offset);
-		virtual bool BindScene(rendering::RasterizationRenderer &renderer,bool bView) override;
+		virtual bool BindScene(Scene &scene,rendering::RasterizationRenderer &renderer,bool bView) override;
 		virtual bool Draw(CModelSubMesh &mesh);
 		virtual void EndDraw() override;
 		virtual bool GetRenderBufferTargets(

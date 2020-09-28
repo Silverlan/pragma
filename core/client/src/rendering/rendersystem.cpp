@@ -208,7 +208,7 @@ void RenderSystem::Render(
 				shader->SetDebugMode(debugMode);
 			shader->Set3DSky(renderAs3dSky);
 			shaderPrev = shader;
-			if(shader->BindScene(rasterizer,renderMode == RenderMode::View) == false)
+			if(shader->BindScene(*scene,rasterizer,renderMode == RenderMode::View) == false)
 			{
 				shaderPrev = nullptr;
 				continue;
@@ -318,7 +318,7 @@ uint32_t RenderSystem::Render(
 		) == true
 			)
 		{
-			if(shader->BindScene(rasterizer,bView) == true)
+			if(shader->BindScene(*scene,rasterizer,bView) == true)
 			{
 				if(debugMode != ::Scene::DebugMode::None)
 					shader->SetDebugMode(debugMode);

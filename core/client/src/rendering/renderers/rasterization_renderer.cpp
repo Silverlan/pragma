@@ -46,12 +46,12 @@ static void cl_render_ssao_callback(NetworkState*,ConVar*,bool,bool val)
 	auto *renderer = dynamic_cast<RasterizationRenderer*>(scene->GetRenderer());
 	if(renderer == nullptr)
 		return;
-	renderer->SetSSAOEnabled(val);
+	renderer->SetSSAOEnabled(*scene,val);
 }
 REGISTER_CONVAR_CALLBACK_CL(cl_render_ssao,cl_render_ssao_callback);
 
-RasterizationRenderer::RasterizationRenderer(Scene &scene)
-	: BaseRenderer{scene},m_hdrInfo{*this}
+RasterizationRenderer::RasterizationRenderer()
+	: BaseRenderer{},m_hdrInfo{*this}
 {
 	m_whShaderWireframe = c_engine->GetShader("wireframe");
 
@@ -83,7 +83,7 @@ void RasterizationRenderer::UpdateRendererBuffer(std::shared_ptr<prosper::IPrima
 	drawCmd->RecordUpdateBuffer(*m_rendererBuffer,0ull,m_rendererData);
 }
 
-bool RasterizationRenderer::Initialize() {return true;}
+bool RasterizationRenderer::Initialize(uint32_t w,uint32_t h) {return true;}
 
 CulledMeshData *RasterizationRenderer::GetRenderInfo(RenderMode renderMode) const
 {
@@ -145,12 +145,15 @@ void RasterizationRenderer::UpdateCSMDescriptorSet(pragma::CLightDirectionalComp
 void RasterizationRenderer::SetFogOverride(const std::shared_ptr<prosper::IDescriptorSetGroup> &descSetGroup) {m_descSetGroupFogOverride = descSetGroup;}
 void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawSceneInfo)
 {
+	if(drawSceneInfo.scene == nullptr)
+		return;
+	auto &scene = *drawSceneInfo.scene;
 	// Occlusion Culling
-	PerformOcclusionCulling();
+	PerformOcclusionCulling(scene);
 
 	// Collect render objects
-	c_game->CallCallbacks<void,RasterizationRenderer*>("OnPreRender",this);
-	CollectRenderObjects(drawSceneInfo.renderFlags);
+	c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("OnPreRender",drawSceneInfo);
+	CollectRenderObjects(scene,drawSceneInfo.renderFlags);
 	c_game->CallLuaCallbacks<void,RasterizationRenderer*>("PrepareRendering",this);
 
 	// Collect 3D skybox data
@@ -159,7 +162,7 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CSkyCameraComponent>>();
 	for(auto *ent : entIt)
 	{
-		if(static_cast<CBaseEntity*>(ent)->IsInScene(GetScene()) == false)
+		if(static_cast<CBaseEntity*>(ent)->IsInScene(scene) == false)
 			continue;
 
 		auto skyCamera = ent->GetComponent<pragma::CSkyCameraComponent>();
@@ -223,12 +226,11 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
 }
 
-bool RasterizationRenderer::ReloadRenderTarget(uint32_t width,uint32_t height)
+bool RasterizationRenderer::ReloadRenderTarget(Scene &scene,uint32_t width,uint32_t height)
 {
-	auto &scene = GetScene();
 	auto bSsao = IsSSAOEnabled();
 	if(
-		m_hdrInfo.Initialize(*this,width,height,m_sampleCount,bSsao) == false || 
+		m_hdrInfo.Initialize(scene,*this,width,height,m_sampleCount,bSsao) == false || 
 		m_glowInfo.Initialize(width,height,m_hdrInfo) == false ||
 		m_hdrInfo.InitializeDescriptorSets() == false
 		)
@@ -240,8 +242,6 @@ bool RasterizationRenderer::ReloadRenderTarget(uint32_t width,uint32_t height)
 		resolvedGlowTex = static_cast<prosper::MSAATexture*>(resolvedGlowTex)->GetResolvedTexture().get();
 	descSetHdrResolve.SetBindingTexture(*resolvedGlowTex,umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Glow));
 
-	auto &descSetCam = *scene.GetCameraDescriptorSetGraphics();
-	auto &descSetCamView = *scene.GetViewCameraDescriptorSet();
 	if(bSsao == true)
 	{
 		auto &ssaoInfo = GetSSAOInfo();
@@ -260,18 +260,18 @@ bool RasterizationRenderer::ReloadRenderTarget(uint32_t width,uint32_t height)
 }
 void RasterizationRenderer::SetFrameDepthBufferSamplingRequired() {m_bFrameDepthBufferSamplingRequired = true;}
 void RasterizationRenderer::EndRendering() {}
-void RasterizationRenderer::BeginRendering(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void RasterizationRenderer::BeginRendering(const util::DrawSceneInfo &drawSceneInfo)
 {
-	BaseRenderer::BeginRendering(drawCmd);
+	BaseRenderer::BeginRendering(drawSceneInfo);
 	umath::set_flag(m_stateFlags,StateFlags::DepthResolved | StateFlags::BloomResolved | StateFlags::RenderResolved,false);
 }
 
 bool RasterizationRenderer::IsSSAOEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::SSAOEnabled);}
-void RasterizationRenderer::SetSSAOEnabled(bool b)
+void RasterizationRenderer::SetSSAOEnabled(Scene &scene,bool b)
 {
 	umath::set_flag(m_stateFlags,StateFlags::SSAOEnabled,b);
 	UpdateRenderSettings();
-	ReloadRenderTarget(GetWidth(),GetHeight());
+	ReloadRenderTarget(scene,GetWidth(),GetHeight());
 	/*m_hdrInfo.prepass.SetUseExtendedPrepass(b);
 	if(b == true)
 	{
@@ -282,13 +282,12 @@ void RasterizationRenderer::SetSSAOEnabled(bool b)
 	m_hdrInfo.ssaoInfo.Clear();
 	UpdateRenderSettings();*/
 }
-void RasterizationRenderer::UpdateCameraData(pragma::CameraData &cameraData)
+void RasterizationRenderer::UpdateCameraData(Scene &scene,pragma::CameraData &cameraData)
 {
-	UpdateFrustumPlanes();
+	UpdateFrustumPlanes(scene);
 }
 void RasterizationRenderer::UpdateRenderSettings()
 {
-	auto &scene = GetScene();
 	auto &tileInfo = m_rendererData.tileInfo;
 	tileInfo = static_cast<uint32_t>(pragma::ShaderForwardPLightCulling::TILE_SIZE)<<16;
 	tileInfo |= static_cast<uint32_t>(pragma::rendering::ForwardPlusInstance::CalcWorkGroupCount(GetWidth(),GetHeight()).first);
@@ -419,11 +418,10 @@ void RasterizationRenderer::ReloadOcclusionCullingHandler()
 const std::vector<Plane> &RasterizationRenderer::GetFrustumPlanes() const {return m_frustumPlanes;}
 const std::vector<Plane> &RasterizationRenderer::GetClippedFrustumPlanes() const {return m_clippedFrustumPlanes;}
 
-void RasterizationRenderer::UpdateFrustumPlanes()
+void RasterizationRenderer::UpdateFrustumPlanes(Scene &scene)
 {
 	m_frustumPlanes.clear();
 	m_clippedFrustumPlanes.clear();
-	auto &scene = GetScene();
 	auto &cam = scene.GetActiveCamera();
 	if(cam.expired())
 		return;

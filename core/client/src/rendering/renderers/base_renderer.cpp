@@ -11,23 +11,24 @@
 
 using namespace pragma::rendering;
 
-BaseRenderer::BaseRenderer(Scene &scene)
-	: m_scene{scene}
+BaseRenderer::BaseRenderer()
 {}
 bool BaseRenderer::operator==(const BaseRenderer &other) const {return &other == this;}
 bool BaseRenderer::operator!=(const BaseRenderer &other) const {return !operator==(other);}
 bool BaseRenderer::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 {
-	BeginRendering(drawSceneInfo.commandBuffer);
+	if(drawSceneInfo.scene == nullptr || drawSceneInfo.scene->GetRenderer() != this)
+		return false;
+	BeginRendering(drawSceneInfo);
 	return true;
 }
-void BaseRenderer::BeginRendering(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void BaseRenderer::BeginRendering(const util::DrawSceneInfo &drawSceneInfo)
 {
-	GetScene().UpdateBuffers(drawCmd);
+	drawSceneInfo.scene->UpdateBuffers(drawSceneInfo.commandBuffer);
 }
 void BaseRenderer::Resize(uint32_t width, uint32_t height) {}
 void BaseRenderer::UpdateRenderSettings() {}
-void BaseRenderer::UpdateCameraData(pragma::CameraData &cameraData) {}
+void BaseRenderer::UpdateCameraData(Scene &scene,pragma::CameraData &cameraData) {}
 bool BaseRenderer::IsRasterizationRenderer() const {return false;}
 bool BaseRenderer::IsRayTracingRenderer() const {return false;}
 prosper::Texture *BaseRenderer::GetPresentationTexture() {return GetSceneTexture();}
@@ -45,5 +46,3 @@ uint32_t BaseRenderer::GetHeight() const
 	auto *tex = GetSceneTexture();
 	return tex ? tex->GetImage().GetHeight() : 0;
 }
-
-Scene &BaseRenderer::GetScene() const {return m_scene;}

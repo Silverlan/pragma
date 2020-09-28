@@ -29,6 +29,7 @@ namespace Lua
 			DLLCLIENT int get_render_scene(lua_State *l);
 			DLLCLIENT int get_render_scene_camera(lua_State *l);
 			DLLCLIENT int get_scene(lua_State *l);
+			DLLCLIENT int get_scene_by_index(lua_State *l);
 			DLLCLIENT int get_scene_camera(lua_State *l);
 			DLLCLIENT int get_draw_command_buffer(lua_State *l);
 			DLLCLIENT int get_setup_command_buffer(lua_State *l);

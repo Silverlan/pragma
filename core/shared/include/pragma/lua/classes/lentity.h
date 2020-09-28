@@ -48,6 +48,9 @@ namespace Lua
 
 		DLLNETWORK void IsStatic(lua_State *l,EntityHandle &hEnt);
 		DLLNETWORK void IsDynamic(lua_State *l,EntityHandle &hEnt);
+
+		DLLNETWORK void SetEnabled(lua_State *l,EntityHandle &hEnt,bool enabled);
+		DLLNETWORK void IsEnabled(lua_State *l,EntityHandle &hEnt);
 	};
 };
 

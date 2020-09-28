@@ -31,9 +31,8 @@ bool OcclusionCullingHandler::ShouldExamine(CModelMesh &mesh,const Vector3 &pos,
 	max += pos;
 	return (Intersection::AABBInPlaneMesh(min,max,*planes) != INTERSECT_OUTSIDE) ? true : false;
 }
-bool OcclusionCullingHandler::ShouldExamine(const rendering::RasterizationRenderer &renderer,CBaseEntity &ent,bool &outViewModel,std::vector<Plane> **outPlanes) const
+bool OcclusionCullingHandler::ShouldExamine(Scene &scene,const rendering::RasterizationRenderer &renderer,CBaseEntity &ent,bool &outViewModel,std::vector<Plane> **outPlanes) const
 {
-	auto &scene = renderer.GetScene();
 	if(ent.IsInScene(scene) == false)
 		return false;
 	if(outPlanes == nullptr)
@@ -65,22 +64,20 @@ bool OcclusionCullingHandler::ShouldExamine(const rendering::RasterizationRender
 	uvec::to_min_max(min,max);
 	return Intersection::AABBInPlaneMesh(min,max,*(*outPlanes)) != INTERSECT_OUTSIDE;
 }
-void OcclusionCullingHandler::PerformCulling(const rendering::RasterizationRenderer &renderer,std::vector<pragma::CParticleSystemComponent*> &particlesOut)
+void OcclusionCullingHandler::PerformCulling(Scene &scene,const rendering::RasterizationRenderer &renderer,std::vector<pragma::CParticleSystemComponent*> &particlesOut)
 {
-	auto &scene = renderer.GetScene();
 	auto &cam = scene.GetActiveCamera();
 	auto &posCam = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
-	PerformCulling(renderer,posCam,particlesOut);
+	PerformCulling(scene,renderer,posCam,particlesOut);
 }
-void OcclusionCullingHandler::PerformCulling(const rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut)
+void OcclusionCullingHandler::PerformCulling(Scene &scene,const rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut)
 {
-	auto &scene = renderer.GetScene();
 	auto &cam = scene.GetActiveCamera();
 	auto &posCam = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
-	PerformCulling(renderer,posCam,culledMeshesOut);
+	PerformCulling(scene,renderer,posCam,culledMeshesOut);
 }
 void OcclusionCullingHandler::PerformCulling(
-	const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+	Scene &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
 	std::vector<pragma::CParticleSystemComponent*> &particlesOut
 )
 {
@@ -88,7 +85,6 @@ void OcclusionCullingHandler::PerformCulling(
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CParticleSystemComponent>>();
 	particlesOut.reserve(entIt.GetCount());
 	particlesOut.clear();
-	auto &scene = renderer.GetScene();
 	auto &frustumPlanes = renderer.GetFrustumPlanes();
 	for(auto *ent : entIt)
 	{
@@ -101,9 +97,8 @@ void OcclusionCullingHandler::PerformCulling(
 			particlesOut.push_back(hPt.get());
 	}
 }
-void OcclusionCullingHandler::PerformCulling(const rendering::RasterizationRenderer &renderer,const std::vector<pragma::CLightComponent*> &lightsIn,std::vector<pragma::CLightComponent*> &lightsOut)
+void OcclusionCullingHandler::PerformCulling(Scene &scene,const rendering::RasterizationRenderer &renderer,const std::vector<pragma::CLightComponent*> &lightsIn,std::vector<pragma::CLightComponent*> &lightsOut)
 {
-	auto &scene = renderer.GetScene();
 	auto &cam = scene.GetActiveCamera();
 	auto &pos = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	std::vector<float> distances;
@@ -189,11 +184,10 @@ void OcclusionCullingHandler::PerformCulling(const rendering::RasterizationRende
 	if(lightsOut.size() > static_cast<uint32_t>(GameLimits::MaxAbsoluteLights))
 		lightsOut.resize(static_cast<uint32_t>(GameLimits::MaxAbsoluteLights));
 }
-void OcclusionCullingHandler::PerformCulling(const rendering::RasterizationRenderer &renderer,const Vector3 &origin,float radius,std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut)
+void OcclusionCullingHandler::PerformCulling(Scene &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &origin,float radius,std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut)
 {
 	auto *cam = c_game->GetPrimaryCamera();
 	auto &posCam = cam ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
-	auto &scene = renderer.GetScene();
 	auto radiusSqr = umath::pow(radius,2.f);
 	culledMeshesOut.clear();
 	culledMeshesOut.reserve(10);

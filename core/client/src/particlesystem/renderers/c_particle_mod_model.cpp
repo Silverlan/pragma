@@ -198,7 +198,7 @@ bool CParticleRendererModel::Update()
 	return bSuccessful;
 }
 
-void CParticleRendererModel::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags)
+void CParticleRendererModel::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags)
 {
 	if(m_shader.expired())
 		return;
@@ -213,7 +213,7 @@ void CParticleRendererModel::Render(const std::shared_ptr<prosper::IPrimaryComma
 	)
 		return;
 	shader->BindLights(*renderer.GetLightSourceDescriptorSet());
-	shader->BindSceneCamera(renderer,(GetParticleSystem().GetRenderMode() == RenderMode::View) ? true : false);
+	shader->BindSceneCamera(scene,renderer,(GetParticleSystem().GetRenderMode() == RenderMode::View) ? true : false);
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 
 	auto mdlComponent = GetParticleSystem().GetEntity().GetModelComponent();
@@ -260,7 +260,7 @@ void CParticleRendererModel::Render(const std::shared_ptr<prosper::IPrimaryComma
 	shader->EndDraw();
 }
 
-void CParticleRendererModel::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
+void CParticleRendererModel::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
 {
 	/*if(s_instanceDescSet == nullptr)
 		return;

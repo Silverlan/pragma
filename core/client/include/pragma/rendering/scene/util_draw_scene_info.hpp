@@ -32,6 +32,7 @@ namespace util
 
 		std::shared_ptr<prosper::IImage> outputImage = nullptr;
 		uint32_t outputLayerId = 0u;
+		bool flipVertically = false;
 	};
 };
 

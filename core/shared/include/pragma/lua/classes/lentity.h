@@ -51,6 +51,9 @@ namespace Lua
 
 		DLLNETWORK void SetEnabled(lua_State *l,EntityHandle &hEnt,bool enabled);
 		DLLNETWORK void IsEnabled(lua_State *l,EntityHandle &hEnt);
+
+		DLLNETWORK Color GetColor(lua_State *l,EntityHandle &hEnt);
+		DLLNETWORK void SetColor(lua_State *l,EntityHandle &hEnt,const Color &color);
 	};
 };
 

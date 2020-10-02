@@ -53,6 +53,10 @@ namespace Lua
 		DLLNETWORK int world_to_local(lua_State *l);
 
 		DLLNETWORK int calc_world_direction_from_2d_coordinates(lua_State *l);
+		DLLNETWORK int world_space_point_to_screen_space_uv(lua_State *l);
+		DLLNETWORK int world_space_direction_to_screen_space(lua_State *l);
+		DLLNETWORK int calc_screenspace_distance_to_worldspace_position(lua_State *l);
+		DLLNETWORK int depth_to_distance(lua_State *l);
 
 		DLLNETWORK int is_same_object(lua_State *l);
 		DLLNETWORK int clamp_resolution_to_aspect_ratio(lua_State *l);
@@ -132,7 +136,11 @@ namespace Lua
 	{"is_same_object",Lua::util::is_same_object}, \
 	{"clamp_resolution_to_aspect_ratio",Lua::util::clamp_resolution_to_aspect_ratio}, \
 	{"get_class_value",Lua::util::get_class_value}, \
-	{"pack_zip_archive",Lua::util::pack_zip_archive},
+	{"pack_zip_archive",Lua::util::pack_zip_archive}, \
+	{"world_space_point_to_screen_space_uv",Lua::util::world_space_point_to_screen_space_uv}, \
+	{"world_space_direction_to_screen_space",Lua::util::world_space_direction_to_screen_space}, \
+	{"calc_screen_space_distance_to_world_space_position",Lua::util::calc_screenspace_distance_to_worldspace_position}, \
+	{"depth_to_distance",Lua::util::depth_to_distance},
 
 #define REGISTER_SHARED_UTIL \
 	REGISTER_SHARED_UTIL_GENERIC \

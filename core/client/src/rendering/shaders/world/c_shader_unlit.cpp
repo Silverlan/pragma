@@ -16,7 +16,7 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-
+#pragma optimize("",off)
 decltype(ShaderUnlit::DESCRIPTOR_SET_MATERIAL) ShaderUnlit::DESCRIPTOR_SET_MATERIAL = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Material settings
@@ -34,11 +34,12 @@ ShaderUnlit::ShaderUnlit(prosper::IPrContext &context,const std::string &identif
 {
 	SetPipelineCount(umath::to_integral(Pipeline::Count));
 }
-prosper::DescriptorSetInfo &ShaderUnlit::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
+prosper::DescriptorSetInfo &ShaderUnlit::GetMaterialDescriptorSetInfo() const {return ShaderTextured3DBase::DESCRIPTOR_SET_MATERIAL;}//DESCRIPTOR_SET_MATERIAL;}
 bool ShaderUnlit::BindLights(prosper::IDescriptorSet &dsLights) {return true;}
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderUnlit::InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo)
 {
-	auto *albedoMap = mat.GetDiffuseMap();
+	return ShaderTextured3DBase::InitializeMaterialDescriptorSet(mat,descSetInfo);
+	/*auto *albedoMap = mat.GetDiffuseMap();
 	if(albedoMap == nullptr || albedoMap->texture == nullptr)
 		return nullptr;
 	auto albedoTexture = std::static_pointer_cast<Texture>(albedoMap->texture);
@@ -54,10 +55,11 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderUnlit::InitializeMaterialDes
 	// that seems to cause crashes in some cases
 	if(descSet.Update() == false)
 		return false;
-	return descSetGroup;
+	return descSetGroup;*/
 }
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderUnlit::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
-	return InitializeMaterialDescriptorSet(mat,DESCRIPTOR_SET_MATERIAL);
+	return InitializeMaterialDescriptorSet(mat,ShaderTextured3DBase::DESCRIPTOR_SET_MATERIAL);
+	//return InitializeMaterialDescriptorSet(mat,DESCRIPTOR_SET_MATERIAL);
 }
-
+#pragma optimize("",on)

@@ -366,9 +366,15 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 	auto ldir = dir;
 	uvec::rotate(&ldir,invPose.GetRotation());
 
+	auto &scale = GetEntity().GetScale();
+	lstart /= scale;
+	ldir /= scale;
+
 	// Cheap line-aabb check
 	Vector3 min,max;
 	GetRenderBounds(&min,&max);
+	min /= scale;
+	max /= scale;
 	auto n = ldir;
 	auto d = uvec::length(n);
 	n /= d;

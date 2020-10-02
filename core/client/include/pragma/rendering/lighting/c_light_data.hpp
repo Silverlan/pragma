@@ -30,7 +30,7 @@ namespace pragma
 			BakedLightSource = TypeDirectional<<1
 		};
 		Vector4 position {}; // position.w = distance
-		Vector3 color {};
+		Vector3 color {1.f,1.f,1.f};
 		Candela intensity = 0.f;
 		Vector4 direction {}; // direction.w is unused
 

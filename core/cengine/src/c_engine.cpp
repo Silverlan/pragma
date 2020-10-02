@@ -479,7 +479,7 @@ bool CEngine::IsWindowFocused() const {return umath::is_flag_set(m_stateFlags,St
 
 bool CEngine::Initialize(int argc,char *argv[])
 {
-	Engine::Initialize(argc,argv,false);
+	Engine::Initialize(argc,argv);
 
 	auto &cmds = *m_preloadedConfig.get();
 
@@ -703,14 +703,10 @@ bool CEngine::Initialize(int argc,char *argv[])
 
 	InitializeSoundEngine();
 
-	auto *cl = OpenClientState();
+	OpenClientState();
 
 	if(umath::is_flag_set(m_stateFlags,StateFlags::ConsoleOpen))
 		OpenConsole(); // GUI Console mustn't be opened before client has been created!
-
-	RunLaunchCommands();
-	if(cl != nullptr)
-		SetHRTFEnabled(cl->GetConVarBool("cl_audio_hrtf_enabled"));
 
 #ifdef _WIN32
 	if(GetRenderContext().IsValidationEnabled())
@@ -724,6 +720,13 @@ bool CEngine::Initialize(int argc,char *argv[])
 	}
 #endif
 	return true;
+}
+void CEngine::RunLaunchCommands()
+{
+	Engine::RunLaunchCommands();
+	auto *cl = GetClientState();
+	if(cl != nullptr)
+		SetHRTFEnabled(cl->GetConVarBool("cl_audio_hrtf_enabled"));
 }
 void CEngine::ClearConsole()
 {

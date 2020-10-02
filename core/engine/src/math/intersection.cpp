@@ -394,6 +394,8 @@ bool Intersection::LineMesh(const Vector3 &_start,const Vector3 &_dir,ModelMesh 
 
 bool Intersection::LineMesh(const Vector3 &_start,const Vector3 &_dir,ModelSubMesh &subMesh,LineMeshResult &r,bool precise,const Vector3 *origin,const Quat *rot)
 {
+	if(subMesh.GetTriangleCount() == 0)
+		return false;
 	auto start = _start;
 	auto dir = _dir;
 	if(origin != nullptr && rot != nullptr)
@@ -404,6 +406,14 @@ bool Intersection::LineMesh(const Vector3 &_start,const Vector3 &_dir,ModelSubMe
 
 	Vector3 min,max;
 	subMesh.GetBounds(min,max);
+	if(uvec::distance_sqr(min,max) == 0.f)
+		return false;
+	for(uint8_t i=0;i<3;++i)
+	{
+		// If the mesh is flat on one plane, we'll inflate it slightly
+		if(max[i] -min[i] < 0.001)
+			max[i] = min[i] +0.001;
+	}
 	auto tBounds = 0.f;
 	if(LineAABB(start,dir,min,max,&tBounds) == Result::NoIntersection)
 		return false;

@@ -445,6 +445,8 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	classDef.def("TurnOff",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {SetEnabled(l,hEnt,false);}));
 	classDef.def("IsEnabled",&Lua::Entity::IsEnabled);
 	classDef.def("IsTurnedOn",&Lua::Entity::IsEnabled);
+	classDef.def("SetColor",&Lua::Entity::SetColor);
+	classDef.def("GetColor",&Lua::Entity::GetColor);
 	classDef.def("GetPhysicsObject",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);
 		auto *physObj = hEnt->GetPhysicsObject();
@@ -781,6 +783,23 @@ void Lua::Entity::IsEnabled(lua_State *l,EntityHandle &hEnt)
 	if(toggleC == nullptr)
 		isEnabled = toggleC->IsTurnedOn();
 	Lua::PushBool(l,isEnabled);
+}
+
+Color Lua::Entity::GetColor(lua_State *l,EntityHandle &hEnt)
+{
+	LUA_CHECK_ENTITY_RET(l,hEnt,Color::White);
+	auto *colorC = dynamic_cast<pragma::BaseColorComponent*>(hEnt->FindComponent("color").get());
+	if(colorC == nullptr)
+		return Color::White;
+	return colorC->GetColor();
+}
+void Lua::Entity::SetColor(lua_State *l,EntityHandle &hEnt,const Color &color)
+{
+	LUA_CHECK_ENTITY(l,hEnt);
+	auto *colorC = dynamic_cast<pragma::BaseColorComponent*>(hEnt->AddComponent("color").get());
+	if(colorC == nullptr)
+		return;
+	colorC->SetColor(color);
 }
 
 void Lua::Entity::Save(lua_State *l,EntityHandle &hEnt,::DataStream &ds)

@@ -1808,6 +1808,34 @@ namespace Lua
 				Lua::SetTableValue(l,t);
 			}
 		}));
+		def.def("ScreenSpaceToWorldSpace",static_cast<Vector3(*)(lua_State*,THandle&,const Vector2&,float,float)>([](lua_State *l,THandle &hComponent,const Vector2 &uv,float width,float height) -> Vector3 {
+			pragma::Lua::check_component(l,hComponent);
+			auto &ent = hComponent->GetEntity();
+			return uvec::calc_world_direction_from_2d_coordinates(ent.GetForward(),ent.GetRight(),ent.GetUp(),hComponent->GetFOVRad(),hComponent->GetNearZ(),hComponent->GetFarZ(),hComponent->GetAspectRatio(),width,height,uv);
+		}));
+		def.def("WorldSpaceToScreenSpace",static_cast<void(*)(lua_State*,THandle&,const Vector3&)>([](lua_State *l,THandle &hComponent,const Vector3 &point) {
+			pragma::Lua::check_component(l,hComponent);
+			float dist;
+			auto uv = uvec::calc_screenspace_uv_from_worldspace_position(point,hComponent->GetProjectionMatrix() *hComponent->GetViewMatrix(),hComponent->GetNearZ(),hComponent->GetFarZ(),dist);
+			Lua::Push<Vector2>(l,uv);
+			Lua::PushNumber(l,dist);
+		}));
+		def.def("WorldSpaceToScreenSpaceDirection",static_cast<Vector2(*)(lua_State*,THandle&,const Vector3&)>([](lua_State *l,THandle &hComponent,const Vector3 &dir) -> Vector2 {
+			pragma::Lua::check_component(l,hComponent);
+			return uvec::calc_screenspace_direction_from_worldspace_direction(dir,hComponent->GetProjectionMatrix() *hComponent->GetViewMatrix());
+		}));
+		def.def("CalcScreenSpaceDistance",static_cast<float(*)(lua_State*,THandle&,const Vector3&)>([](lua_State *l,THandle &hComponent,const Vector3 &point) -> float {
+			pragma::Lua::check_component(l,hComponent);
+			return uvec::calc_screenspace_distance_to_worldspace_position(point,hComponent->GetProjectionMatrix() *hComponent->GetViewMatrix(),hComponent->GetNearZ(),hComponent->GetFarZ());
+		}));
+		def.def("DepthToDistance",static_cast<float(*)(lua_State*,THandle&,double,float,float)>([](lua_State *l,THandle &hComponent,double depth,float nearZ,float farZ) -> float {
+			pragma::Lua::check_component(l,hComponent);
+			return uvec::depth_to_distance(depth,nearZ,farZ);
+		}));
+		def.def("CalcRayDirection",static_cast<Vector3(*)(lua_State*,THandle&,const Vector2&)>([](lua_State *l,THandle &hComponent,const Vector2 &uv) -> Vector3 {
+			auto &ent = hComponent->GetEntity();
+			return uvec::calc_world_direction_from_2d_coordinates(ent.GetForward(),ent.GetRight(),ent.GetUp(),hComponent->GetFOVRad(),hComponent->GetNearZ(),hComponent->GetFarZ(),hComponent->GetAspectRatio(),0.f,0.f,uv);
+		}));
 	}
 
 	template<class TLuaClass,class THandle>

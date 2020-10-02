@@ -143,7 +143,8 @@ int Lua_cvar_Run(lua_State *l)
 		cmd += " \"" +arg +"\"";
 		i++;
 	}
-	engine->ConsoleInput(cmd.c_str());
+	//engine->ConsoleInput(cmd.c_str());
+	engine->ProcessConsoleInput(cmd);
 	return 0;
 }
 

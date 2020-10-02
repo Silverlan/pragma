@@ -82,8 +82,20 @@ void Engine::InitLaunchOptions(int argc,char *argv[])
 				break;
 			}
 			case '+':
+			{
+				std::vector<std::string> subArgs;
+				ustring::explode_whitespace(arg,subArgs);
+				if(subArgs.empty() == false)
+				{
+					arg = subArgs.front();
+					subArgs.erase(subArgs.begin());
+				}
+				launchCmdArgs.reserve(launchCmdArgs.size() +subArgs.size());
+				for(auto &arg : subArgs)
+					launchCmdArgs.insert(launchCmdArgs.begin(),arg);
 				m_launchCommands.push_back({arg.substr(1),launchCmdArgs});
 				break;
+			}
 		}
 		launchCmdArgs.clear();
 	}

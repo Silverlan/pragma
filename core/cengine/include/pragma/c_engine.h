@@ -202,6 +202,7 @@ protected:
 	void WriteClientConfig(VFilePtrReal f);
 	void PreloadClientConfig();
 	void OnRenderResolutionChanged(uint32_t width,uint32_t height);
+	virtual void RunLaunchCommands() override;
 	virtual void DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t swapchainImageIdx) override;
 	virtual void OnResolutionChanged(uint32_t w,uint32_t h) override;
 	virtual void OnClose() override;

@@ -36,15 +36,16 @@ void OcclusionCullingHandlerInert::PerformCulling(
 	//auto bUpdateLod = (d >= LOD_SWAP_DISTANCE) ? true : false;
 	culledMeshesOut.clear();
 
-	std::vector<CBaseEntity*> *ents;
-	c_game->GetEntities(&ents);
-	for(auto *ent : *ents)
+	EntityIterator entIt {*c_game};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
+	for(auto *e : entIt)
 	{
-		if(ent == nullptr)
+		if(e == nullptr)
 			continue;
-		auto pRenderComponent = ent->GetRenderComponent();
-		if(pRenderComponent.expired() || ent->IsInScene(scene) == false)
+		auto *ent = static_cast<CBaseEntity*>(e);
+		if(ent->IsInScene(scene) == false)
 			continue;
+		auto &pRenderComponent = ent->GetRenderComponent();
 		bool bViewModel = false;
 		if((ent->IsSpawned() == true && pRenderComponent->GetModelComponent().valid() && pRenderComponent->GetModelComponent()->GetModel() != nullptr && pRenderComponent->ShouldDraw(camPos) != false))
 		{

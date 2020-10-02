@@ -689,12 +689,53 @@ int Lua::util::calc_world_direction_from_2d_coordinates(lua_State *l)
 	auto nearZ = Lua::CheckNumber(l,arg++);
 	auto farZ = Lua::CheckNumber(l,arg++);
 	auto aspectRatio = Lua::CheckNumber(l,arg++);
-	auto width = Lua::CheckInt(l,arg++);
-	auto height = Lua::CheckInt(l,arg++);
 	auto *uv = Lua::CheckVector2(l,arg++);
 
-	auto dir = uvec::calc_world_direction_from_2d_coordinates(*forward,*right,*up,static_cast<float>(umath::deg_to_rad(fov)),nearZ,farZ,aspectRatio,static_cast<float>(width),static_cast<float>(height),*uv);
+	auto dir = uvec::calc_world_direction_from_2d_coordinates(*forward,*right,*up,static_cast<float>(umath::deg_to_rad(fov)),nearZ,farZ,aspectRatio,0.f,0.f,*uv);
 	Lua::Push<Vector3>(l,dir);
+	return 1;
+}
+int Lua::util::world_space_point_to_screen_space_uv(lua_State *l)
+{
+	auto point = *Lua::CheckVector(l,1);
+	auto vp = Lua::Check<Mat4>(l,2);
+	if(Lua::IsSet(l,3))
+	{
+		auto nearZ = Lua::CheckNumber(l,3);
+		auto farZ = Lua::CheckNumber(l,4);
+		float dist;
+		auto uv = uvec::calc_screenspace_uv_from_worldspace_position(point,vp,nearZ,farZ,dist);
+		Lua::Push(l,uv);
+		Lua::PushNumber(l,dist);
+		return 2;
+	}
+	auto uv = uvec::calc_screenspace_uv_from_worldspace_position(point,vp);
+	Lua::Push(l,uv);
+	return 1;
+}
+int Lua::util::world_space_direction_to_screen_space(lua_State *l)
+{
+	auto dir = *Lua::CheckVector(l,1);
+	auto vp = Lua::Check<Mat4>(l,2);
+	auto ssDir = uvec::calc_screenspace_direction_from_worldspace_direction(dir,vp);
+	Lua::Push(l,ssDir);
+	return 1;
+}
+int Lua::util::calc_screenspace_distance_to_worldspace_position(lua_State *l)
+{
+	auto point = *Lua::CheckVector(l,1);
+	auto vp = Lua::Check<Mat4>(l,2);
+	auto nearZ = Lua::CheckNumber(l,3);
+	auto farZ = Lua::CheckNumber(l,4);
+	Lua::PushNumber(l,uvec::calc_screenspace_distance_to_worldspace_position(point,vp,nearZ,farZ));
+	return 1;
+}
+int Lua::util::depth_to_distance(lua_State *l)
+{
+	auto depth = Lua::CheckNumber(l,1);
+	auto nearZ = Lua::CheckNumber(l,2);
+	auto farZ = Lua::CheckNumber(l,3);
+	Lua::PushNumber(l,uvec::depth_to_distance(depth,nearZ,farZ));
 	return 1;
 }
 void Lua::util::open_url_in_browser(const std::string &url) {return ::util::open_url_in_browser(url);}

@@ -24,6 +24,7 @@ namespace prosper
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
+class Scene;
 namespace pragma
 {
 	class CCameraComponent;

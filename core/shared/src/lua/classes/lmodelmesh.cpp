@@ -13,7 +13,7 @@
 
 extern DLLENGINE Engine *engine;
 
-
+#pragma optimize("",off)
 void Lua::ModelMesh::register_class(luabind::class_<::ModelMesh> &classDef)
 {
 	classDef.def(luabind::const_self == luabind::const_self);
@@ -688,7 +688,8 @@ void Lua::ModelSubMesh::InitializeRing(lua_State *l,::ModelSubMesh &mesh,std::op
 
 	if(innerRadius.has_value() == false)
 		verts.push_back({});
-	for(uint32_t i=0;i<=(360 +(innerRadius.has_value() ? stepSize : 0));i+=stepSize)
+	auto end = (360 +(innerRadius.has_value() ? stepSize : 0));
+	for(uint32_t i=0;i<=end;i+=stepSize)
 	{
 		auto rad = umath::deg_to_rad(i);
 		if(innerRadius.has_value())
@@ -710,6 +711,8 @@ void Lua::ModelSubMesh::InitializeRing(lua_State *l,::ModelSubMesh &mesh,std::op
 				add_back_face(triangles);
 			continue;
 		}
+		if(i == end)
+			break; // Skip last iteration
 		triangles.push_back(verts.size() -1);
 		triangles.push_back(verts.size() -2);
 		triangles.push_back(verts.size());
@@ -731,4 +734,4 @@ void Lua::ModelSubMesh::InitializeCircle(lua_State *l,::ModelSubMesh &mesh,float
 {
 	InitializeRing(l,mesh,{},radius,doubleSided,segmentCount);
 }
-
+#pragma optimize("",on)

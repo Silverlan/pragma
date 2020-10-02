@@ -87,7 +87,6 @@ public:
 	};
 public:
 	DEBUGCONSOLE;
-	bool Initialize(int argc,char *argv[],bool bRunLaunchCommands);
 	virtual bool Initialize(int argc,char *argv[]);
 	virtual void Start();
 	void AddLaunchConVar(std::string cvar,std::string val);
@@ -215,7 +214,7 @@ protected:
 		std::vector<std::string> args;
 	};
 	std::vector<LaunchCommand> m_launchCommands;
-	void RunLaunchCommands();
+	virtual void RunLaunchCommands();
 	virtual void InitializeExternalArchiveManager();
 
 	// Console

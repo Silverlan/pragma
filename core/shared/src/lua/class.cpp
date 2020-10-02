@@ -45,6 +45,7 @@
 #include "pragma/util/util_splash_damage_info.hpp"
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/entities/entity_property.hpp"
+#include "pragma/entities/environment/lights/env_light.h"
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/lua/classes/lproperty_generic.hpp"
 #include "pragma/lua/classes/lproperty_entity.hpp"
@@ -168,7 +169,37 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		luabind::def("watts_to_lumens",static_cast<Watt(*)(Lumen,LuminousEfficacy)>(ulighting::watts_to_lumens)),
 		luabind::def("watts_to_lumens",static_cast<Watt(*)(Lumen)>([](Watt watt) -> Lumen {return ulighting::watts_to_lumens(watt);})),
 		luabind::def("irradiance_to_lux",ulighting::irradiance_to_lux),
-		luabind::def("lux_to_irradiance",ulighting::lux_to_irradiance)
+		luabind::def("lux_to_irradiance",ulighting::lux_to_irradiance),
+		luabind::def("convert_light_intensity",static_cast<float(*)(float,pragma::BaseEnvLightComponent::LightIntensityType,pragma::BaseEnvLightComponent::LightIntensityType,float)>([](float intensity,pragma::BaseEnvLightComponent::LightIntensityType srcType,pragma::BaseEnvLightComponent::LightIntensityType dstType,float cutoffAngle) -> float {
+			auto result = 0.f;
+			switch(dstType)
+			{
+			case pragma::BaseEnvLightComponent::LightIntensityType::Candela:
+				result = pragma::BaseEnvLightComponent::GetLightIntensityCandela(intensity,srcType,cutoffAngle);
+				break;
+			case pragma::BaseEnvLightComponent::LightIntensityType::Lumen:
+				result = pragma::BaseEnvLightComponent::GetLightIntensityLumen(intensity,srcType,cutoffAngle);
+				break;
+			default:
+				break;
+			}
+			return result;
+		})),
+		luabind::def("convert_light_intensity",static_cast<float(*)(float,pragma::BaseEnvLightComponent::LightIntensityType,pragma::BaseEnvLightComponent::LightIntensityType)>([](float intensity,pragma::BaseEnvLightComponent::LightIntensityType srcType,pragma::BaseEnvLightComponent::LightIntensityType dstType) -> float {
+			auto result = 0.f;
+			switch(dstType)
+			{
+			case pragma::BaseEnvLightComponent::LightIntensityType::Candela:
+				result = pragma::BaseEnvLightComponent::GetLightIntensityCandela(intensity,srcType);
+				break;
+			case pragma::BaseEnvLightComponent::LightIntensityType::Lumen:
+				result = pragma::BaseEnvLightComponent::GetLightIntensityLumen(intensity,srcType);
+				break;
+			default:
+				break;
+			}
+			return result;
+		}))
 	];
 
 	Lua::RegisterLibraryEnums(lua.GetState(),"light",{

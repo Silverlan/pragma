@@ -402,7 +402,7 @@ void Engine::Release()
 	Close();
 }
 
-bool Engine::Initialize(int argc,char *argv[],bool bRunLaunchCommands)
+bool Engine::Initialize(int argc,char *argv[])
 {
 	CVarHandler::Initialize();
 	RegisterConsoleCommands();
@@ -428,18 +428,11 @@ bool Engine::Initialize(int argc,char *argv[],bool bRunLaunchCommands)
 	ServerState *server = OpenServerState();
 	if(server != nullptr && IsServerOnly())
 		LoadConfig();
-	if(bRunLaunchCommands == true)
-		RunLaunchCommands();
 
 	return true;
 }
 
 void Engine::InitializeExternalArchiveManager() {util::initialize_external_archive_manager(GetServerState());}
-
-bool Engine::Initialize(int argc,char *argv[])
-{
-	return Initialize(argc,argv,true);
-}
 
 void Engine::RunLaunchCommands()
 {
@@ -549,7 +542,9 @@ void Engine::Start()
 		RunConsoleCommand("sv_gamemode",argv);
 	}
 	if(!__lp_map.empty())
-		StartNewGame(__lp_map,true);
+		StartDefaultGame(__lp_map);
+
+	RunLaunchCommands();
 
 	InvokeConVarChangeCallbacks("steam_steamworks_enabled");
 

@@ -780,7 +780,7 @@ void Lua::Entity::IsEnabled(lua_State *l,EntityHandle &hEnt)
 	LUA_CHECK_ENTITY(l,hEnt);
 	auto isEnabled = true;
 	auto *toggleC = dynamic_cast<pragma::BaseToggleComponent*>(hEnt->FindComponent("toggle").get());
-	if(toggleC == nullptr)
+	if(toggleC != nullptr)
 		isEnabled = toggleC->IsTurnedOn();
 	Lua::PushBool(l,isEnabled);
 }

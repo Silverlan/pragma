@@ -155,3 +155,20 @@ void Lua::DataBlock::IsVector4(lua_State *l,ds::Block &data,const std::string &k
 	}
 	Lua::PushBool(l,typeid(*val) == typeid(ds::Vector4));
 }
+void Lua::DataBlock::ToString(lua_State *l,ds::Block &data,const std::string &rootIdentifier,uint8_t tabDepth)
+{
+	Lua::PushString(l,data.ToString(rootIdentifier,tabDepth));
+}
+void Lua::DataBlock::ToString(lua_State *l,ds::Block &data,const std::string &rootIdentifier)
+{
+	Lua::PushString(l,data.ToString(rootIdentifier));
+}
+void Lua::DataBlock::ToString(lua_State *l,ds::Block &data,uint8_t tabDepth)
+{
+	Lua::PushString(l,data.ToString({},tabDepth));
+}
+void Lua::DataBlock::ToString(lua_State *l,ds::Block &data)
+{
+	Lua::PushString(l,data.ToString({}));
+}
+

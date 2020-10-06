@@ -557,6 +557,10 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defDataBlock.def("IsColor",&Lua::DataBlock::IsColor);
 	defDataBlock.def("IsVector",&Lua::DataBlock::IsVector);
 	defDataBlock.def("IsVector4",&Lua::DataBlock::IsVector4);
+	defDataBlock.def("ToString",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,uint8_t)>(&Lua::DataBlock::ToString));
+	defDataBlock.def("ToString",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::ToString));
+	defDataBlock.def("ToString",static_cast<void(*)(lua_State*,ds::Block&,uint8_t)>(&Lua::DataBlock::ToString));
+	defDataBlock.def("ToString",static_cast<void(*)(lua_State*,ds::Block&)>(&Lua::DataBlock::ToString));
 	defDataBlock.def("FindBlock",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::FindBlock));
 	defDataBlock.def("FindBlock",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,uint32_t)>(&Lua::DataBlock::FindBlock));
 	modUtil[defDataBlock];

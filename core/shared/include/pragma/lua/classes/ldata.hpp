@@ -57,6 +57,11 @@ namespace Lua
 		DLLNETWORK void IsColor(lua_State *l,ds::Block &data,const std::string &key);
 		DLLNETWORK void IsVector(lua_State *l,ds::Block &data,const std::string &key);
 		DLLNETWORK void IsVector4(lua_State *l,ds::Block &data,const std::string &key);
+		
+		DLLNETWORK void ToString(lua_State *l,ds::Block &data,const std::string &rootIdentifier,uint8_t tabDepth);
+		DLLNETWORK void ToString(lua_State *l,ds::Block &data,const std::string &rootIdentifier);
+		DLLNETWORK void ToString(lua_State *l,ds::Block &data,uint8_t tabDepth);
+		DLLNETWORK void ToString(lua_State *l,ds::Block &data);
 	};
 };
 

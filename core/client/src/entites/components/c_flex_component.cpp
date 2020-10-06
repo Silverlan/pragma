@@ -19,7 +19,7 @@
 using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 static auto cvFlexPhonemeDrag = GetClientConVar("cl_flex_phoneme_drag");
 luabind::object CFlexComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CFlexComponentHandleWrapper>(l);}
 void CFlexComponent::UpdateFlexControllers()
@@ -338,3 +338,4 @@ void CFlexComponent::UpdateSoundPhonemes(CALSound &snd)
 		}
 	}
 }
+#pragma optimize("",on)

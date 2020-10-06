@@ -9,6 +9,7 @@
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_brute_force.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/model/c_modelmesh.h"
+#include <pragma/entities/entity_iterator.hpp>
 
 using namespace pragma;
 
@@ -23,15 +24,16 @@ void OcclusionCullingHandlerBruteForce::PerformCulling(
 	//auto bUpdateLod = (d >= LOD_SWAP_DISTANCE) ? true : false;
 	culledMeshesOut.clear();
 
-	std::vector<CBaseEntity*> *ents;
-	c_game->GetEntities(&ents);
-	for(auto *ent : *ents)
+	EntityIterator entIt {*c_game};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
+	for(auto *e : entIt)
 	{
-		if(ent == nullptr)
+		if(e == nullptr)
+			continue;
+		auto *ent = static_cast<CBaseEntity*>(e);
+		if(ent->IsInScene(scene) == false)
 			continue;
 		auto pRenderComponent = ent->GetRenderComponent();
-		if(pRenderComponent.expired())
-			continue;
 		bool bViewModel = false;
 		std::vector<Plane> *planes = nullptr;
 		if((ShouldExamine(scene,renderer,*ent,bViewModel,cullByViewFrustum ? &planes : nullptr) == true))

@@ -191,36 +191,39 @@ void OcclusionCullingHandler::PerformCulling(Scene &scene,const rendering::Raste
 	auto radiusSqr = umath::pow(radius,2.f);
 	culledMeshesOut.clear();
 	culledMeshesOut.reserve(10);
-	std::vector<CBaseEntity*> *ents = nullptr;
-	c_game->GetEntities(&ents);
-	for(auto *ent : *ents)
+
+	EntityIterator entIt {*c_game};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
+	for(auto *e : entIt)
 	{
-		if(ent == nullptr)
+		if(e == nullptr)
 			continue;
-		auto pRenderComponent = (ent != nullptr) ? ent->GetRenderComponent() : util::WeakHandle<pragma::CRenderComponent>{};
-		if(pRenderComponent.valid() && pRenderComponent->ShouldDrawShadow(posCam))
+		auto *ent = static_cast<CBaseEntity*>(e);
+		if(ent->IsInScene(scene) == false)
+			continue;
+		auto pRenderComponent = ent->GetRenderComponent();
+		if(pRenderComponent->ShouldDrawShadow(posCam) == false)
+			continue;
+		auto exemptFromCulling = pRenderComponent->IsExemptFromOcclusionCulling();
+		auto pTrComponent = ent->GetTransformComponent();
+		auto sphere = pRenderComponent->GetRenderSphereBounds();
+		auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+		if(exemptFromCulling || uvec::length_sqr((pos +sphere.pos) -origin) <= radiusSqr +umath::pow(sphere.radius,2.f))
 		{
-			auto exemptFromCulling = pRenderComponent->IsExemptFromOcclusionCulling();
-			auto pTrComponent = ent->GetTransformComponent();
-			auto sphere = pRenderComponent->GetRenderSphereBounds();
-			auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
-			if(exemptFromCulling || uvec::length_sqr((pos +sphere.pos) -origin) <= radiusSqr +umath::pow(sphere.radius,2.f))
+			auto &meshes = pRenderComponent->GetLODMeshes();
+			for(auto itMesh=meshes.begin();itMesh!=meshes.end();++itMesh)
 			{
-				auto &meshes = pRenderComponent->GetLODMeshes();
-				for(auto itMesh=meshes.begin();itMesh!=meshes.end();++itMesh)
+				auto *mesh = static_cast<CModelMesh*>(itMesh->get());
+				Vector3 min;
+				Vector3 max;
+				mesh->GetBounds(min,max);
+				min += pos;
+				max += pos;
+				if(exemptFromCulling || Intersection::AABBSphere(min,max,origin,radius) == true)
 				{
-					auto *mesh = static_cast<CModelMesh*>(itMesh->get());
-					Vector3 min;
-					Vector3 max;
-					mesh->GetBounds(min,max);
-					min += pos;
-					max += pos;
-					if(exemptFromCulling || Intersection::AABBSphere(min,max,origin,radius) == true)
-					{
-						if(culledMeshesOut.capacity() -culledMeshesOut.size() == 0)
-							culledMeshesOut.reserve(culledMeshesOut.capacity() +10);
-						culledMeshesOut.push_back(OcclusionMeshInfo{*ent,*mesh});
-					}
+					if(culledMeshesOut.capacity() -culledMeshesOut.size() == 0)
+						culledMeshesOut.reserve(culledMeshesOut.capacity() +10);
+					culledMeshesOut.push_back(OcclusionMeshInfo{*ent,*mesh});
 				}
 			}
 		}

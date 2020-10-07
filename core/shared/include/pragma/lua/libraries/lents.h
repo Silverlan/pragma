@@ -44,6 +44,7 @@ namespace Lua
 		DLLNETWORK int get_null(lua_State *l);
 		DLLNETWORK LuaEntityObject create(lua_State *l,const std::string &classname);
 		DLLNETWORK int create_trigger(lua_State *l);
+		DLLNETWORK int create_prop(lua_State *l);
 		DLLNETWORK int find_by_filter(lua_State *l);
 		DLLNETWORK int find_by_class(lua_State *l);
 		DLLNETWORK int find_by_name(lua_State *l);
@@ -171,6 +172,7 @@ namespace Lua
 	{"find_in_aabb",Lua::ents::find_in_aabb}, \
 	{"find_in_cone",Lua::ents::find_in_cone}, \
 	{"create_trigger",Lua::ents::create_trigger}, \
+	{"create_prop",Lua::ents::create_prop}, \
 	{"register",Lua::ents::register_class}, \
 	{"get_closest",Lua::ents::get_closest}, \
 	{"get_farthest",Lua::ents::get_farthest}, \

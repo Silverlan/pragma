@@ -71,8 +71,7 @@ namespace pragma
 
 		void InitializeDescriptorSet();
 		util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> CaptureRaytracedIBLReflectionsFromScene(
-			uint32_t width,uint32_t height,uint32_t layerIndex,
-			const Vector3 &camPos,const Quat &camRot,float nearZ,float farZ,umath::Degree fov
+			uint32_t width,uint32_t height,const Vector3 &camPos,const Quat &camRot,float nearZ,float farZ,umath::Degree fov
 		);
 		bool FinalizeCubemap(prosper::IImage &imgCubemap);
 		std::string GetCubemapIBLMaterialPath() const;
@@ -85,10 +84,9 @@ namespace pragma
 		{
 			RaytracingJobManager(CReflectionProbeComponent &probe);
 			~RaytracingJobManager();
-			std::array<util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>,6> jobs = {};
-			std::array<std::shared_ptr<uimg::ImageBuffer>,6> m_layerImageBuffers = {};
+			util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> job = {};
+			std::shared_ptr<uimg::ImageBuffer> m_equirectImageBuffer = nullptr;
 			CReflectionProbeComponent &probe;
-			uint32_t m_nextJobIndex = 0u;
 			void StartNextJob();
 			void Finalize();
 		};

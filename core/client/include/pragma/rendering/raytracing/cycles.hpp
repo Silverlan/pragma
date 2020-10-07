@@ -50,6 +50,7 @@ namespace pragma::rendering::cycles
 	{
 		Vector3 cameraPosition = {};
 		Quat cameraRotation = {};
+		bool equirectPanorama = false;
 		Mat4 viewProjectionMatrix = {};
 		float nearZ = pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z;
 		float farZ = pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z;

@@ -163,6 +163,10 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	gameMod[defUsable];
 
 	auto defMap = luabind::class_<MapHandle,BaseEntityComponentHandle>("MapComponent");
+	defMap.def("GetMapIndex",static_cast<void(*)(lua_State*,MapHandle&)>([](lua_State *l,MapHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		Lua::PushInt(l,hComponent->GetMapIndex());
+	}));
 	gameMod[defMap];
 
 	auto defSubmergible = luabind::class_<SubmergibleHandle,BaseEntityComponentHandle>("SubmergibleComponent");

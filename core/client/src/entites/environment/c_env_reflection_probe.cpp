@@ -105,23 +105,13 @@ CReflectionProbeComponent::RaytracingJobManager::RaytracingJobManager(CReflectio
 {}
 CReflectionProbeComponent::RaytracingJobManager::~RaytracingJobManager()
 {
-	for(auto &job : jobs)
-		job.Cancel();
-	for(auto &job : jobs)
-		job.Wait();
+	job.Cancel();
+	job.Wait();
 }
 void CReflectionProbeComponent::RaytracingJobManager::StartNextJob()
 {
-	if(m_nextJobIndex >= jobs.size())
-	{
-		auto pThis = std::move(probe.m_raytracingJobManager); // Keep alive until end of scope
-		Finalize();
-		return;
-	}
-	auto jobId = m_nextJobIndex++;
-	auto &job = jobs.at(jobId);
 	auto preprocessCompletionHandler = job.GetCompletionHandler();
-	job.SetCompletionHandler([this,jobId,preprocessCompletionHandler](util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>> &worker) {
+	job.SetCompletionHandler([this,preprocessCompletionHandler](util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>> &worker) {
 		if(worker.IsSuccessful() == false)
 		{
 			Con::cwar<<"WARNING: Raytracing scene for reflection probe has failed: "<<worker.GetResultMessage()<<Con::endl;
@@ -131,8 +121,9 @@ void CReflectionProbeComponent::RaytracingJobManager::StartNextJob()
 		if(preprocessCompletionHandler)
 			preprocessCompletionHandler(worker);
 		auto imgBuffer = worker.GetResult();
-		m_layerImageBuffers.at(jobId) = imgBuffer;
-		StartNextJob();
+		m_equirectImageBuffer = imgBuffer;
+		auto pThis = std::move(probe.m_raytracingJobManager); // Keep alive until end of scope
+		Finalize();
 	});
 	job.Start();
 	c_engine->AddParallelJob(job,"Reflection probe");
@@ -143,11 +134,22 @@ void CReflectionProbeComponent::RaytracingJobManager::Finalize()
 	// Since the cubemap image is in optimal layout with device memory,
 	// we'll have to copy the data to a temporary buffer first and then
 	// to the image via the command buffer.
-	auto cubemapImage = probe.CreateCubemapImage();
-	auto extents = cubemapImage->GetExtents();
 
+	//auto cubemapImage = probe.CreateCubemapImage();
+	//auto extents = cubemapImage->GetExtents();
+
+	auto *shaderEquiRectToCubemap = static_cast<pragma::ShaderEquirectangularToCubemap*>(c_engine->GetShader("equirectangular_to_cubemap").get());
+	if(shaderEquiRectToCubemap == nullptr)
+		return;
+	auto imgEquirect = c_engine->GetRenderContext().CreateImage(*m_equirectImageBuffer);
+	auto texEquirect = c_engine->GetRenderContext().CreateTexture({},*imgEquirect,prosper::util::ImageViewCreateInfo{},prosper::util::SamplerCreateInfo{});
+	auto cubemapTex = shaderEquiRectToCubemap->EquirectangularTextureToCubemap(*texEquirect,256); // TODO: What resolution?
+	probe.FinalizeCubemap(cubemapTex->GetImage());
+
+	// TODO: Equirect to cubemap
 	//auto *memBlock = cubemapImage->GetAnvilImage().get_memory_block();
 	//auto totalSize = memBlock->get_create_info_ptr()->get_size();
+#if 0
 	for(auto layerIndex=decltype(m_layerImageBuffers.size()){0u};layerIndex<m_layerImageBuffers.size();++layerIndex)
 	{
 		auto &imgBuffer = m_layerImageBuffers.at(layerIndex);
@@ -167,6 +169,7 @@ void CReflectionProbeComponent::RaytracingJobManager::Finalize()
 		imgBuffer = nullptr;
 	}
 	probe.FinalizeCubemap(*cubemapImage);
+#endif
 }
 
 ////////////////
@@ -425,18 +428,13 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 }
 
 util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> CReflectionProbeComponent::CaptureRaytracedIBLReflectionsFromScene(
-	uint32_t width,uint32_t height,uint32_t layerIndex,
-	const Vector3 &camPos,const Quat &camRot,float nearZ,float farZ,umath::Degree fov
+	uint32_t width,uint32_t height,const Vector3 &camPos,const Quat &camRot,float nearZ,float farZ,umath::Degree fov
 )
 {
-	static auto jobActive = false;
-	if(jobActive == true)
-		return {};
-	//jobActive = true;
-
 	rendering::cycles::SceneInfo sceneInfo {};
 	sceneInfo.width = width;
 	sceneInfo.height = height;
+	sceneInfo.device = pragma::rendering::cycles::SceneInfo::DeviceType::GPU;
 
 	rendering::cycles::RenderImageInfo renderImgInfo {};
 	renderImgInfo.cameraPosition = camPos;
@@ -444,37 +442,31 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> CReflectionProbeComponent:
 	renderImgInfo.nearZ = nearZ;
 	renderImgInfo.farZ = farZ;
 	renderImgInfo.fov = fov;
+	renderImgInfo.equirectPanorama = true;
 
 	// TODO: Replace these with command arguments?
 	sceneInfo.sky = "skies/dusk379.hdr";
 	sceneInfo.skyAngles = {0.f,160.f,0.f};
-	sceneInfo.skyStrength = 72.f;
+	sceneInfo.skyStrength = 10.f;
 
 	sceneInfo.samples = RAYTRACING_SAMPLE_COUNT;
 	sceneInfo.denoise = true;
 	sceneInfo.hdrOutput = true;
+	umath::set_flag(sceneInfo.sceneFlags,rendering::cycles::SceneInfo::SceneFlags::CullObjectsOutsideCameraFrustum,false);
 
-	// Top and bottom layers have to be flipped vertically, all others horizontally.
-	// Most likely to do with the view matrices being set up incorrectly.
-	auto flipVertically = (layerIndex == 2 || layerIndex == 3);
 	std::shared_ptr<uimg::ImageBuffer> imgBuffer = nullptr;
 	renderImgInfo.entityFilter = [](BaseEntity &ent) -> bool {
-		return ent.IsStatic();
+		return ent.IsMapEntity();
 	};
 	auto job = rendering::cycles::render_image(*client,sceneInfo,renderImgInfo);
 	if(job.IsValid() == false)
 		return {};
-	job.SetCompletionHandler([flipVertically](util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>> &worker) {
+	job.SetCompletionHandler([](util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>> &worker) {
 		if(worker.IsSuccessful() == false)
 		{
 			Con::cwar<<"WARNING: Raytracing scene for IBL reflections has failed: "<<worker.GetResultMessage()<<Con::endl;
 			return;
 		}
-		auto imgBuffer = worker.GetResult();
-		if(flipVertically)
-			imgBuffer->FlipVertically();
-		else
-			imgBuffer->FlipHorizontally();
 	});
 	return job;
 }
@@ -516,6 +508,20 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene()
 		return false;
 	}
 
+	m_raytracingJobManager = std::unique_ptr<RaytracingJobManager>{new RaytracingJobManager{*this}};
+	uint32_t width = 512;
+	uint32_t height = 256;
+	auto job = CaptureRaytracedIBLReflectionsFromScene(width,height,pos,uquat::identity(),hCam->GetNearZ(),hCam->GetFarZ(),90.f /* fov */);
+	if(job.IsValid() == false)
+	{
+		Con::cwar<<"WARNING: Unable to set scene up for reflection probe raytracing!"<<Con::endl;
+		m_raytracingJobManager = nullptr;
+		return false;
+	}
+	m_raytracingJobManager->job = job;
+	m_raytracingJobManager->StartNextJob();
+	return true;
+#if 0
 	constexpr auto useRaytracing = true;
 
 	static const std::array<std::pair<Vector3,Vector3>,6> forwardUpDirs = {
@@ -614,6 +620,7 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene()
 		c_engine->SetRenderResolution(oldRenderResolution);
 	}
 	return FinalizeCubemap(*img);
+#endif
 }
 
 bool CReflectionProbeComponent::FinalizeCubemap(prosper::IImage &imgCubemap)

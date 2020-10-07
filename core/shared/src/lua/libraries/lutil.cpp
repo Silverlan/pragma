@@ -1007,16 +1007,38 @@ int Lua::util::pack_zip_archive(lua_State *l)
 
 	int32_t t = 2;
 	Lua::CheckTable(l,t);
-	std::vector<std::string> files {};
+	std::unordered_map<std::string,std::string> files {};
+	std::unordered_map<std::string,std::string> customFiles {};
 	auto numFiles = Lua::GetObjectLength(l,t);
-	files.reserve(numFiles);
-	for(auto i=decltype(numFiles){0u};i<numFiles;++i)
+	if(numFiles > 0)
 	{
-		Lua::PushInt(l,i +1);
-		Lua::GetTableValue(l,t);
-		std::string fileName = Lua::CheckString(l,-1);
-		files.push_back(fileName);
-		Lua::Pop(l,1);
+		// Table format: t{[1] = diskFileName/zipFileName,...}
+		files.reserve(numFiles);
+		for(auto i=decltype(numFiles){0u};i<numFiles;++i)
+		{
+			Lua::PushInt(l,i +1);
+			Lua::GetTableValue(l,t);
+			std::string fileName = Lua::CheckString(l,-1);
+			files[fileName] = fileName;
+			Lua::Pop(l,1);
+		}
+	}
+	else
+	{
+		// Table format: t{[zipFileName] = diskFileName,...}
+		auto o = luabind::object{luabind::from_stack{l,t}};
+		for(luabind::iterator i(o), e; i != e; ++i)
+		{
+			auto zipFileName = luabind::object_cast<std::string>(i.key());
+			auto value = *i;
+			if(luabind::type(value) == LUA_TTABLE)
+				customFiles[zipFileName] = luabind::object_cast<std::string>(value["contents"]);
+			else
+			{
+				auto diskFileName = luabind::object_cast<std::string>(*i);
+				files[zipFileName] = diskFileName;
+			}
+		}
 	}
 
 	auto zip = ZIPFile::Open(zipFileName,ZIPFile::OpenFlags::CreateIfNotExist);
@@ -1025,17 +1047,19 @@ int Lua::util::pack_zip_archive(lua_State *l)
 		Lua::PushBool(l,false);
 		return 1;
 	}
-	for(auto &fileName : files)
+	for(auto &pair : files)
 	{
-		auto f = FileManager::OpenFile(fileName.c_str(),"rb");
+		auto f = FileManager::OpenFile(pair.second.c_str(),"rb");
 		if(f == nullptr)
 			continue;
 		auto sz = f->GetSize();
 		std::vector<uint8_t> data {};
 		data.resize(sz);
 		f->Read(data.data(),sz);
-		zip->AddFile(fileName,data.data(),sz);
+		zip->AddFile(pair.first,data.data(),sz);
 	}
+	for(auto &pair : customFiles)
+		zip->AddFile(pair.first,pair.second);
 	zip = nullptr;
 	Lua::PushBool(l,true);
 	return 1;

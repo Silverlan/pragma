@@ -592,6 +592,20 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 		LUA_CHECK_ENTITY(l,hEnt);
 		hEnt->StopLayeredAnimation(slot);
 	}));
+	classDef.def("PlayAnimation",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t anim,uint32_t flags) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		auto animC = hEnt->GetAnimatedComponent();
+		if(animC.expired())
+			return;
+		animC->PlayAnimation(anim,static_cast<pragma::FPlayAnim>(flags));
+	}));
+	classDef.def("PlayAnimation",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t anim) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		auto animC = hEnt->GetAnimatedComponent();
+		if(animC.expired())
+			return;
+		animC->PlayAnimation(anim);
+	}));
 	classDef.def("PlayAnimation",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,const std::string &anim,uint32_t flags) {
 		LUA_CHECK_ENTITY(l,hEnt);
 		Lua::PushBool(l,hEnt->PlayAnimation(anim,static_cast<pragma::FPlayAnim>(flags)));

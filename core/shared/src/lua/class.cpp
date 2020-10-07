@@ -567,6 +567,12 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 
 	// Path
 	auto defPath = luabind::class_<util::Path>("Path");
+	defPath.scope[luabind::def("CreateFilePath",static_cast<void(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &path) {
+		Lua::Push<util::Path>(l,util::Path::CreateFile(path));
+	}))];
+	defPath.scope[luabind::def("CreatePath",static_cast<void(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &path) {
+		Lua::Push<util::Path>(l,util::Path::CreatePath(path));
+	}))];
 	defPath.scope[luabind::def("CreateFromComponents",static_cast<void(*)(lua_State*,luabind::object)>([](lua_State *l,luabind::object o) {
 		int32_t t = 1;
 		Lua::CheckTable(l,t);

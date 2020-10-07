@@ -48,6 +48,28 @@ LuaEntityObject Lua::ents::create(lua_State *l,const std::string &classname)
 	return *ent->GetLuaObject();
 }
 
+int Lua::ents::create_prop(lua_State *l)
+{
+	auto &origin = *Lua::CheckVector(l,1);
+	auto &ang = *Lua::CheckEulerAngles(l,2);
+	auto *mdl = Lua::CheckString(l,3);
+	auto physicsProp = true;
+	if(Lua::IsSet(l,4))
+		physicsProp = Lua::CheckBool(l,4);
+	
+	NetworkState *state = engine->GetNetworkState(l);
+	Game *game = state->GetGameState();
+	auto *ent = game->CreateEntity(physicsProp ? "prop_physics" : "prop_dynamic");
+	if(ent == nullptr)
+		return 0;
+	ent->SetPosition(origin);
+	ent->SetRotation(uquat::create(ang));
+	ent->SetModel(mdl);
+	ent->Spawn();
+	lua_pushentity(l,ent);
+	return 1;
+}
+
 int Lua::ents::create_trigger(lua_State *l)
 {
 	auto origin = *Lua::CheckVector(l,1);

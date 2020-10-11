@@ -25,6 +25,9 @@ struct DLLNETWORK Bone
 	std::unordered_map<uint32_t,std::shared_ptr<Bone>> children;
 	std::weak_ptr<Bone> parent;
 	uint32_t ID;
+
+	bool IsAncestorOf(const Bone &other) const;
+	bool IsDescendantOf(const Bone &other) const;
 };
 
 struct DLLNETWORK BoneList // Simplified Skeleton without an hierarchy

@@ -11,6 +11,7 @@
 #include <wgui/wihandle.h>
 #include "luasystem.h"
 #include <wgui/types/wirect.h>
+#include <wgui/types/widropdownmenu.h>
 #include "pragma/gui/wisilkicon.h"
 #include "pragma/gui/wisnaparea.hpp"
 #include "pragma/lua/classes/c_ldef_wgui.h"
@@ -769,6 +770,22 @@ void Lua::WIDropDownMenu::register_class(luabind::class_<WIDropDownMenuHandle,lu
 	classDef.def("ClearSelectedOption",static_cast<void(*)(lua_State*,WIDropDownMenuHandle&)>([](lua_State *l,WIDropDownMenuHandle &hPanel) {
 		lua_checkgui(l,hPanel);
 		static_cast<::WIDropDownMenu*>(hPanel.get())->ClearSelectedOption();
+	}));
+	classDef.def("GetOptionElement",static_cast<void(*)(lua_State*,WIDropDownMenuHandle&,uint32_t)>([](lua_State *l,WIDropDownMenuHandle &hPanel,uint32_t idx) {
+		lua_checkgui(l,hPanel);
+		auto *el = static_cast<::WIDropDownMenu*>(hPanel.get())->GetOptionElement(idx);
+		if(el == nullptr)
+			return;
+		auto o = WGUILuaInterface::GetLuaObject(l,*el);
+		o.push(l);
+	}));
+	classDef.def("FindOptionSelectedByCursor",static_cast<void(*)(lua_State*,WIDropDownMenuHandle&)>([](lua_State *l,WIDropDownMenuHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		auto *el = static_cast<::WIDropDownMenu*>(hPanel.get())->FindOptionSelectedByCursor();
+		if(el == nullptr)
+			return;
+		auto o = WGUILuaInterface::GetLuaObject(l,*el);
+		o.push(l);
 	}));
 }
 
@@ -1929,6 +1946,23 @@ void Lua::WIBase::AddCallback(lua_State *l,WIHandle &hPanel,std::string name,lua
 
 				Lua::PushNumber(l,progress);
 				Lua::PushNumber(l,value);
+				return Lua::StatusCode::Ok;
+			},0);
+		});
+	}
+	else if(name == "onselectionchanged" && typeid(*hPanel.get()) == typeid(::WIDropDownMenuOption))
+	{
+		hCallback = FunctionCallback<void,bool>::Create([l,hPanel,o](bool selected) {
+			if(!hPanel.IsValid())
+				return;
+			Lua::CallFunction(l,[&o,hPanel,selected](lua_State *l) {
+				o.push(l);
+
+				auto *p = hPanel.get();
+				auto obj = WGUILuaInterface::GetLuaObject(l,*p);
+				obj.push(l);
+
+				Lua::PushBool(l,selected);
 				return Lua::StatusCode::Ok;
 			},0);
 		});

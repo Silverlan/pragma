@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/model/model.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <prosper_command_buffer.hpp>
@@ -72,6 +73,17 @@ void Lua::Animated::register_class(lua_State *l,luabind::module_ &entsMod)
 			return;
 		Lua::Push<Vector3>(l,pos);
 		}));
+	defCAnimated.def("GetBindPose",static_cast<void(*)(lua_State*,CAnimatedHandle&)>([](lua_State *l,CAnimatedHandle &hAnim) {
+		pragma::Lua::check_component(l,hAnim);
+		auto *frame = hAnim->GetBindPose();
+		if(frame == nullptr)
+			return;
+		Lua::Push(l,frame->shared_from_this());
+	}));
+	defCAnimated.def("SetBindPose",static_cast<void(*)(lua_State*,CAnimatedHandle&,const Frame&)>([](lua_State *l,CAnimatedHandle &hAnim,const Frame &frame) {
+		pragma::Lua::check_component(l,hAnim);
+		hAnim->SetBindPose(frame);
+	}));
 	defCAnimated.add_static_constant("EVENT_ON_SKELETON_UPDATED",pragma::CAnimatedComponent::EVENT_ON_SKELETON_UPDATED);
 	defCAnimated.add_static_constant("EVENT_ON_BONE_MATRICES_UPDATED",pragma::CAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED);
 	defCAnimated.add_static_constant("EVENT_ON_BONE_BUFFER_INITIALIZED",pragma::CAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED);

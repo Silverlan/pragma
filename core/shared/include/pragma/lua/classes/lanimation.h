@@ -90,6 +90,8 @@ namespace Lua
 		DLLNETWORK void SetBoneTransform(lua_State *l,::Frame &frame,unsigned int boneID,const Vector3 &pos,const Quat &rot,const Vector3 &scale);
 		DLLNETWORK void Localize(lua_State *l,::Frame &frame,::Animation &anim,::Skeleton *skeleton);
 		DLLNETWORK void Globalize(lua_State *l,::Frame &frame,::Animation &anim,::Skeleton *skeleton);
+		DLLNETWORK void Localize(lua_State *l,::Frame &frame,::Skeleton *skeleton);
+		DLLNETWORK void Globalize(lua_State *l,::Frame &frame,::Skeleton *skeleton);
 		DLLNETWORK void CalcRenderBounds(lua_State *l,::Frame &frame,::Animation &anim,const std::shared_ptr<::Model> &mdl);
 		DLLNETWORK void Rotate(lua_State *l,::Frame &frame,::Animation &anim,::Skeleton *skeleton,const Quat &rot);
 		DLLNETWORK void Translate(lua_State *l,::Frame &frame,::Animation &anim,::Skeleton *skeleton,const Vector3 &t);
@@ -105,6 +107,9 @@ namespace Lua
 		DLLNETWORK void GetLocalBoneTransform(lua_State*,::Frame &frame,::Skeleton &skeleton,uint32_t boneId);
 		DLLNETWORK void GetBoneCount(lua_State*,::Frame &frame);
 		DLLNETWORK void SetBoneCount(lua_State*,::Frame &frame,uint32_t boneCount);
+		DLLNETWORK void SetBonePose(lua_State*,::Frame &frame,uint32_t boneId,const umath::ScaledTransform &pose);
+		DLLNETWORK void SetBonePose(lua_State*,::Frame &frame,uint32_t boneId,const umath::Transform &pose);
+		DLLNETWORK void GetBonePose(lua_State*,::Frame &frame,uint32_t boneId);
 	};
 	namespace VertexAnimation
 	{

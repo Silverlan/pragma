@@ -118,9 +118,11 @@ void CAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 {
 	BaseAnimatedComponent::OnModelChanged(mdl);
 	m_boneMatrices.clear();
+	m_bindPose = nullptr;
 	if(mdl == nullptr || GetBoneCount() == 0)
 		return;
 	m_boneMatrices.resize(mdl->GetBoneCount(),umat::identity());
+	m_bindPose = mdl->GetReference().shared_from_this();
 	UpdateBoneMatrices();
 	SetBoneBufferDirty();
 
@@ -218,13 +220,16 @@ bool CAnimatedComponent::MaintainAnimations(double dt)
 	return true;
 }
 
+void CAnimatedComponent::SetBindPose(const Frame &frame) {m_bindPose = frame.shared_from_this();}
+const Frame *CAnimatedComponent::GetBindPose() const {return m_bindPose.get();}
+
 void CAnimatedComponent::UpdateBoneMatrices()
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
 	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 	if(mdl == nullptr)
 		return;
-	if(m_boneMatrices.empty())
+	if(m_boneMatrices.empty() || m_bindPose == nullptr)
 		return;
 	UpdateSkeleton(); // Costly
 	auto physRootBoneId = OnSkeletonUpdated();
@@ -232,7 +237,7 @@ void CAnimatedComponent::UpdateBoneMatrices()
 	CEOnSkeletonUpdated evData{physRootBoneId};
 	InvokeEventCallbacks(EVENT_ON_SKELETON_UPDATED,evData);
 
-	auto &refFrame = mdl->GetReference();
+	auto &refFrame = *m_bindPose;
 	for(unsigned int i=0;i<GetBoneCount();i++)
 	{
 		auto &t = m_processedBones.at(i);

@@ -588,8 +588,10 @@ void Lua::Model::register_class(
 		.def("GetBoneRotation",&Lua::Frame::GetBoneOrientation)
 		.def("SetBonePosition",&Lua::Frame::SetBonePosition)
 		.def("SetBoneRotation",&Lua::Frame::SetBoneOrientation)
-		.def("Localize",&Lua::Frame::Localize)
-		.def("Globalize",&Lua::Frame::Globalize)
+		.def("Localize",static_cast<void(*)(lua_State*,::Frame&,::Animation&,::Skeleton*)>(&Lua::Frame::Localize))
+		.def("Localize",static_cast<void(*)(lua_State*,::Frame&,::Skeleton*)>(&Lua::Frame::Localize))
+		.def("Globalize",static_cast<void(*)(lua_State*,::Frame&,::Animation&,::Skeleton*)>(&Lua::Frame::Globalize))
+		.def("Globalize",static_cast<void(*)(lua_State*,::Frame&,::Skeleton*)>(&Lua::Frame::Globalize))
 		.def("CalcRenderBounds",&Lua::Frame::CalcRenderBounds)
 		.def("Rotate",&Lua::Frame::Rotate)
 		.def("Translate",&Lua::Frame::Translate)
@@ -607,6 +609,9 @@ void Lua::Model::register_class(
 		.def("GetLocalBoneTransform",&Lua::Frame::GetLocalBoneTransform)
 		.def("GetBoneCount",&Lua::Frame::GetBoneCount)
 		.def("SetBoneCount",&Lua::Frame::SetBoneCount)
+		.def("SetBonePose",static_cast<void(*)(lua_State*,::Frame&,uint32_t,const umath::ScaledTransform&)>(&Lua::Frame::SetBonePose))
+		.def("SetBonePose",static_cast<void(*)(lua_State*,::Frame&,uint32_t,const umath::Transform&)>(&Lua::Frame::SetBonePose))
+		.def("GetBonePose",&Lua::Frame::GetBonePose)
 		.def("GetFlexControllerWeights",static_cast<void(*)(lua_State*,::Frame&)>([](lua_State *l,::Frame &frame) {
 			auto &flexFrameData = frame.GetFlexFrameData();
 			auto t = Lua::CreateTable(l);
@@ -647,6 +652,10 @@ void Lua::Model::register_class(
 
 				Lua::Pop(l,1);
 			}
+		}))
+		.def("Copy",static_cast<void(*)(lua_State*,::Frame&)>([](lua_State *l,::Frame &frame) {
+			auto cpy = ::Frame::Create(frame);
+			Lua::Push(l,cpy);
 		}))
 	;
 	classDefFrame.scope[luabind::def("Create",&Lua::Frame::Create)];

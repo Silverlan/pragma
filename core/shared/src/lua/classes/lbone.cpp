@@ -19,5 +19,7 @@ void Lua::Bone::register_class(lua_State *l,luabind::class_<::Skeleton> &classDe
 	classDefBone.def("SetName",&Lua::Bone::SetName);
 	classDefBone.def("SetParent",&Lua::Bone::SetParent);
 	classDefBone.def("ClearParent",&Lua::Bone::ClearParent);
+	classDefBone.def("IsAncestorOf",&::Bone::IsAncestorOf);
+	classDefBone.def("IsDescendantOf",&::Bone::IsDescendantOf);
 	classDef.scope[classDefBone];
 }

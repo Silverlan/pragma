@@ -3250,6 +3250,18 @@ namespace Lua
 				return;
 			Lua::Push<umath::ScaledTransform>(l,umath::ScaledTransform{pos,rot,scale});
 		}));
+		def.def("GetBindPose",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t boneId) {
+			pragma::Lua::check_component(l,hEnt);
+			auto &ent = hEnt->GetEntity();
+			auto mdl = ent.GetModel();
+			if(mdl == nullptr)
+				return;
+			auto &ref = mdl->GetReference();
+			umath::ScaledTransform transform;
+			if(ref.GetBonePose(boneId,transform) == false)
+				return;
+			Lua::Push<umath::ScaledTransform>(l,transform);
+		}));
 		def.def("GetBonePos",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t boneId) {
 			pragma::Lua::check_component(l,hEnt);
 			auto *pos = hEnt->GetBonePosition(boneId);
@@ -3303,7 +3315,6 @@ namespace Lua
 				return;
 			Lua::Push<EulerAngles>(l,ang);
 		}));
-
 		def.def("SetBoneTransform",static_cast<void(*)(lua_State*,THandle&,uint32_t,const Vector3&,const Quat&,const Vector3&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const Vector3 &pos,const Quat &rot,const Vector3 &scale) {
 			pragma::Lua::check_component(l,hEnt);
 			hEnt->SetBonePosition(boneId,pos,rot,scale);
@@ -3319,6 +3330,14 @@ namespace Lua
 		def.def("SetBoneTransform",static_cast<void(*)(lua_State*,THandle&,uint32_t,const Vector3&,const EulerAngles&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const Vector3 &pos,const EulerAngles &ang) {
 			pragma::Lua::check_component(l,hEnt);
 			hEnt->SetBonePosition(boneId,pos,ang);
+		}));
+		def.def("SetBonePose",static_cast<void(*)(lua_State*,THandle&,uint32_t,const umath::ScaledTransform&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const umath::ScaledTransform &pose) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt->SetBonePosition(boneId,pose.GetOrigin(),pose.GetRotation(),pose.GetScale());
+		}));
+		def.def("SetBonePose",static_cast<void(*)(lua_State*,THandle&,uint32_t,const umath::Transform&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const umath::Transform &pose) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt->SetBonePosition(boneId,pose.GetOrigin(),pose.GetRotation());
 		}));
 
 		def.def("SetBonePos",static_cast<void(*)(lua_State*,THandle&,uint32_t,const Vector3&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const Vector3 &pos) {

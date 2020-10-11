@@ -10,19 +10,21 @@
 #include "pragma/model/modelmesh.h"
 #include "pragma/model/model.h"
 
-static unsigned int get_bone_index(const std::vector<unsigned int> &boneList,unsigned int id)
+static unsigned int get_bone_index(const std::vector<unsigned int> *optBoneList,unsigned int id)
 {
-	for(UInt i=0;i<boneList.size();i++)
+	if(optBoneList == nullptr)
+		return id;
+	for(UInt i=0;i<optBoneList->size();i++)
 	{
-		if(boneList[i] == id)
+		if(optBoneList->at(i) == id)
 			return CUInt32(i);
 	}
 	return 0;
 }
 
-static void get_global_bone_transforms(const Animation &anim,const Skeleton &skeleton,Frame &frame)
+static void get_global_bone_transforms(const Animation *optAnim,const Skeleton &skeleton,Frame &frame)
 {
-	auto &boneList = anim.GetBoneList();
+	auto *boneList = optAnim ? &optAnim->GetBoneList() : nullptr;
 	std::function<void(Frame&,const std::unordered_map<uint32_t,std::shared_ptr<Bone>>&,const Vector3&,const Quat&)> fGetGlobalBoneTransforms;
 	fGetGlobalBoneTransforms = [&fGetGlobalBoneTransforms,&boneList](Frame &frame,const std::unordered_map<uint32_t,std::shared_ptr<Bone>> &bones,const Vector3 &posParent,const Quat &rotParent) {
 		for(auto &pair : bones)
@@ -44,15 +46,15 @@ static void get_global_bone_transforms(const Animation &anim,const Skeleton &ske
 	fGetGlobalBoneTransforms(frame,skeleton.GetRootBones(),{},uquat::identity());
 }
 
-static void get_local_bone_transforms(const Animation &anim,const Skeleton &skeleton,Frame &frame)
+static void get_local_bone_transforms(const Animation *optAnim,const Skeleton &skeleton,Frame &frame)
 {
-	std::function<void(const Animation&,Frame&,const std::unordered_map<uint32_t,std::shared_ptr<Bone>>&)> fGetLocalBoneTransforms;
-	fGetLocalBoneTransforms = [&fGetLocalBoneTransforms](const Animation &anim,Frame &frame,const std::unordered_map<uint32_t,std::shared_ptr<Bone>> &bones) {
-		auto &boneList = anim.GetBoneList();
+	std::function<void(const Animation*,Frame&,const std::unordered_map<uint32_t,std::shared_ptr<Bone>>&)> fGetLocalBoneTransforms;
+	fGetLocalBoneTransforms = [&fGetLocalBoneTransforms](const Animation *optAnim,Frame &frame,const std::unordered_map<uint32_t,std::shared_ptr<Bone>> &bones) {
+		auto *boneList = optAnim ? &optAnim->GetBoneList() : nullptr;
 		for(auto it=bones.begin();it!=bones.end();++it)
 		{
 			auto &bone = it->second;
-			fGetLocalBoneTransforms(anim,frame,bone->children);
+			fGetLocalBoneTransforms(optAnim,frame,bone->children);
 
 			auto parent = bone->parent.lock();
 			if(parent != nullptr)
@@ -70,7 +72,7 @@ static void get_local_bone_transforms(const Animation &anim,const Skeleton &skel
 			}
 		}
 	};
-	fGetLocalBoneTransforms(anim,frame,skeleton.GetRootBones());
+	fGetLocalBoneTransforms(optAnim,frame,skeleton.GetRootBones());
 }
 /*
 static void get_global_bone_transforms(Animation *anim,Frame *frame,std::unordered_map<unsigned int,Bone*> &bones,const Vector3 &origin=Vector3(0.f,0.f,0.f),const Quat &originRot=uquat::identity())
@@ -227,12 +229,21 @@ void Frame::SetBonePose(uint32_t boneId,const umath::Transform &pose)
 */
 void Frame::Localize(const Animation &anim,const Skeleton &skeleton)
 {
-	get_local_bone_transforms(anim,skeleton,*this);
+	get_local_bone_transforms(&anim,skeleton,*this);
 }
 
 void Frame::Globalize(const Animation &anim,const Skeleton &skeleton)
 {
-	get_global_bone_transforms(anim,skeleton,*this);
+	get_global_bone_transforms(&anim,skeleton,*this);
+}
+
+void Frame::Localize(const Skeleton &skeleton)
+{
+	get_local_bone_transforms(nullptr,skeleton,*this);
+}
+void Frame::Globalize(const Skeleton &skeleton)
+{
+	get_global_bone_transforms(nullptr,skeleton,*this);
 }
 
 Vector2 *Frame::GetMoveOffset() {return m_move.get();}

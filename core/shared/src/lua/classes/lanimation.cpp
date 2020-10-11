@@ -462,6 +462,14 @@ void Lua::Frame::Globalize(lua_State*,::Frame &frame,::Animation &anim,::Skeleto
 {
 	frame.Globalize(anim,*skeleton);
 }
+void Lua::Frame::Localize(lua_State*,::Frame &frame,::Skeleton *skeleton)
+{
+	frame.Localize(*skeleton);
+}
+void Lua::Frame::Globalize(lua_State*,::Frame &frame,::Skeleton *skeleton)
+{
+	frame.Globalize(*skeleton);
+}
 void Lua::Frame::CalcRenderBounds(lua_State *l,::Frame &frame,::Animation &anim,const std::shared_ptr<::Model> &mdl)
 {
 	auto renderBounds = frame.CalcRenderBounds(anim,*mdl);
@@ -587,6 +595,15 @@ void Lua::Frame::GetLocalBoneTransform(lua_State *l,::Frame &frame,::Skeleton &s
 }
 void Lua::Frame::GetBoneCount(lua_State *l,::Frame &frame) {Lua::PushInt(l,frame.GetBoneCount());}
 void Lua::Frame::SetBoneCount(lua_State *l,::Frame &frame,uint32_t boneCount) {frame.SetBoneCount(boneCount);}
+void Lua::Frame::SetBonePose(lua_State*,::Frame &frame,uint32_t boneId,const umath::ScaledTransform &pose) {frame.SetBonePose(boneId,pose);}
+void Lua::Frame::SetBonePose(lua_State*,::Frame &frame,uint32_t boneId,const umath::Transform &pose) {frame.SetBonePose(boneId,pose);}
+void Lua::Frame::GetBonePose(lua_State *l,::Frame &frame,uint32_t boneId)
+{
+	umath::ScaledTransform pose;
+	if(frame.GetBonePose(boneId,pose) == false)
+		return;
+	Lua::Push(l,pose);
+}
 ///////////////////////////////////////
 void Lua::VertexAnimation::GetMeshAnimations(lua_State *l,::VertexAnimation &anim)
 {

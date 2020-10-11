@@ -50,6 +50,11 @@ public:
 	void SetMoveOffset(Vector2 move);
 	void Localize(const Animation &anim,const Skeleton &skeleton);
 	void Globalize(const Animation &anim,const Skeleton &skeleton);
+
+	// These assume that the bones of the frame match the skeleton exactly
+	void Localize(const Skeleton &skeleton);
+	void Globalize(const Skeleton &skeleton);
+
 	uint32_t GetBoneCount() const;
 	void SetBoneCount(uint32_t numBones);
 	std::pair<Vector3,Vector3> CalcRenderBounds(const Animation &anim,const Model &mdl) const;

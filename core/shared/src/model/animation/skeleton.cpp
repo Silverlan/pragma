@@ -19,6 +19,15 @@ Bone::Bone(const Bone &other)
 		children[pair.first] = std::make_shared<Bone>(*pair.second);
 }
 
+bool Bone::IsAncestorOf(const Bone &other) const
+{
+	if(other.parent.expired())
+		return false;
+	auto *parent = other.parent.lock().get();
+	return (parent == this) ? true : IsAncestorOf(*parent);
+}
+bool Bone::IsDescendantOf(const Bone &other) const {return other.IsAncestorOf(*this);}
+
 ////////////////////////////////////////
 
 uint32_t BoneList::AddBone(const std::string &name)

@@ -19,7 +19,6 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
 template<class T>
 	void iterate_occlusion_tree(const typename OcclusionOctree<T>::Node &node,std::vector<OcclusionMeshInfo> &culledMeshes,const std::vector<Plane> *optFrustumPlanes,const std::function<void(const T&)> &fObjectCallback)
 {
@@ -140,4 +139,3 @@ void OcclusionCullingHandlerOctTree::PerformCulling(
 		}
 	}
 }
-#pragma optimize("",on)

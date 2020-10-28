@@ -46,7 +46,6 @@
 
 extern DLLENGINE Engine *engine;
 
-#pragma optimize("",off)
 static auto s_bIgnoreIncludeCache = false;
 void Lua::set_ignore_include_cache(bool b) {s_bIgnoreIncludeCache = b;}
 
@@ -184,6 +183,26 @@ luabind::object Lua::global::include(lua_State *l,const std::string &f,bool igno
 	return {};
 }
 
+luabind::object Lua::global::exec(lua_State *l,const std::string &f)
+{
+	auto n = Lua::GetStackTop(l);
+	std::string fileName = f;
+	auto r = Lua::ExecuteFile(l,fileName,Lua::HandleTracebackError,LUA_MULTRET);
+	switch(r)
+	{
+		case Lua::StatusCode::ErrorFile:
+			lua_error(l);
+			/* unreachable */
+			break;
+		case Lua::StatusCode::ErrorSyntax:
+			Lua::HandleSyntaxError(l,r,fileName);
+			break;
+		case Lua::StatusCode::Ok:
+			return luabind::object{luabind::from_stack{l,Lua::GetStackTop(l) -n}};
+	}
+	return {};
+}
+
 std::string Lua::global::get_script_path() {return Lua::GetIncludePath();}
 EulerAngles Lua::global::angle_rand() {return EulerAngles(umath::random(-180.f,180.f),umath::random(-180.f,180.f),umath::random(-180.f,180.f));}
 EulerAngles Lua::global::create_from_string(const std::string &str) {return EulerAngles{str};}
@@ -249,28 +268,43 @@ int Lua::util::is_valid_entity(lua_State *l)
 	return ::is_valid(l);
 }
 
-int Lua::util::remove(lua_State *l)
+static void safely_remove(luabind::object &o)
 {
-	auto valid = ::is_valid(l);
-	if(valid == false)
-		return 0;
-	auto o = luabind::object(luabind::from_stack(l,1));
 	auto *pEnt = luabind::object_cast_nothrow<EntityHandle*>(o,static_cast<EntityHandle*>(nullptr));
-	if(pEnt != nullptr)// Used frequently, and is faster than looking up "IsValid"
+	if(pEnt != nullptr) // Used frequently, and is faster than looking up "IsValid"
 	{
 		if(pEnt->IsValid())
 			(*pEnt)->Remove();
-		return 0;
+		return;
 	}
 	try
 	{
 		auto oRemove = o["Remove"];
 		if(!oRemove)
-			return 0;
+			return;
 		luabind::call_member<void>(o,"Remove");
 	}
 	catch(std::exception&) // No "IsValid" method exists
 	{}
+}
+
+int Lua::util::remove(lua_State *l)
+{
+	if(Lua::IsSet(l,1) && Lua::IsTable(l,1))
+	{
+		auto t = luabind::object(luabind::from_stack(l,1));
+		for(luabind::iterator i(t), e; i != e; ++i)
+		{
+			auto o = luabind::object{*i};
+			safely_remove(o);
+		}
+		return 0;
+	}
+	auto valid = ::is_valid(l);
+	if(valid == false)
+		return 0;
+	auto o = luabind::object(luabind::from_stack(l,1));
+	safely_remove(o);
 	return 0;
 }
 
@@ -1079,4 +1113,3 @@ std::string Lua::util::get_addon_path(lua_State *l)
 	path += '/';
 	return path;
 }
-#pragma optimize("",on)

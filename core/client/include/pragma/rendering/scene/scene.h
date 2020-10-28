@@ -77,6 +77,8 @@ public:
 
 	static std::shared_ptr<Scene> Create(const CreateInfo &createInfo,Scene *optParent=nullptr);
 	static Scene *GetByIndex(SceneIndex sceneIndex);
+	static uint32_t GetSceneFlag(SceneIndex sceneIndex);
+	static SceneIndex GetSceneIndex(uint32_t flag);
 
 	//static void ClearLightCache();
 	~Scene();

@@ -22,7 +22,6 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
 ComponentEventId BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ANIMATION = pragma::INVALID_COMPONENT_ID;
@@ -124,9 +123,11 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 	m_blendControllers.clear();
 	m_bones.clear();
 	m_processedBones.clear();
+	m_bindPose = nullptr;
 	ApplyAnimationEventTemplates();
 	if(mdl == nullptr || mdl->HasVertexWeights() == false)
 		return;
+	m_bindPose = mdl->GetReference().shared_from_this();
 	std::vector<BlendController> &blendControllers = mdl->GetBlendControllers();
 	for(unsigned int i=0;i<blendControllers.size();i++)
 	{
@@ -603,6 +604,9 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 	eventItem.lastFrame = frameLast;
 	return true;
 }
+
+void BaseAnimatedComponent::SetBindPose(const Frame &frame) {m_bindPose = frame.shared_from_this();}
+const Frame *BaseAnimatedComponent::GetBindPose() const {return m_bindPose.get();}
 
 bool BaseAnimatedComponent::MaintainAnimations(double dt)
 {
@@ -1398,4 +1402,3 @@ void CEMaintainAnimationMovement::PushArguments(lua_State *l)
 CEShouldUpdateBones::CEShouldUpdateBones()
 {}
 void CEShouldUpdateBones::PushArguments(lua_State *l) {}
-#pragma optimize("",on)

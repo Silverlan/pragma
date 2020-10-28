@@ -63,7 +63,6 @@ extern "C"
 	}
 }
 
-#pragma optimize("",off)
 static std::unordered_map<std::string,std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &Engine::GetConVarPtrs() {return *conVarPtrs;}
 ConVarHandle Engine::GetConVarHandle(std::string scvar)
@@ -682,4 +681,3 @@ REGISTER_ENGINE_CONVAR_CALLBACK(debug_profiling_enabled,[](NetworkState*,ConVar*
 		return;
 	engine->SetProfilingEnabled(enabled);
 });
-#pragma optimize("",on)

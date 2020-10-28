@@ -19,6 +19,7 @@ namespace Lua
 	{
 		DLLNETWORK luabind::object include(lua_State *l,const std::string &f,bool ignoreCache);
 		DLLNETWORK luabind::object include(lua_State *l,const std::string &f);
+		DLLNETWORK luabind::object exec(lua_State *l,const std::string &f);
 		DLLNETWORK std::string get_script_path();
 
 		DLLNETWORK EulerAngles angle_rand();

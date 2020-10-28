@@ -16,7 +16,7 @@
 
 
 extern DLLCENGINE CEngine *c_engine;
-#pragma optimize("",off)
+
 CParticleModifierLua *pragma::LuaParticleModifierManager::CreateModifier(std::string className) const
 {
 	ustring::to_lower(className);
@@ -450,4 +450,3 @@ void Lua::ParticleSystemModifier::register_modifier_class(luabind::class_<CParti
 	}));
 	defPtc.scope[defPtRendererBase];
 }
-#pragma optimize("",on)

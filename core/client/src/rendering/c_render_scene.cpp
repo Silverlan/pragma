@@ -31,7 +31,6 @@
 
 extern DLLCENGINE CEngine *c_engine;
 
-#pragma optimize("",off)
 void CGame::RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::Texture &texPostHdr,prosper::IImage *optOutImage,uint32_t layerId)
 {
 	if(optOutImage)
@@ -75,4 +74,3 @@ void CGame::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 	CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PostRenderScene",drawSceneInfo);
 	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PostRenderScene",drawSceneInfo);
 }
-#pragma optimize("",on)

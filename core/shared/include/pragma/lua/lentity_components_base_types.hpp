@@ -3250,7 +3250,7 @@ namespace Lua
 				return;
 			Lua::Push<umath::ScaledTransform>(l,umath::ScaledTransform{pos,rot,scale});
 		}));
-		def.def("GetBindPose",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t boneId) {
+		def.def("GetBoneBindPose",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t boneId) {
 			pragma::Lua::check_component(l,hEnt);
 			auto &ent = hEnt->GetEntity();
 			auto mdl = ent.GetModel();
@@ -3261,6 +3261,17 @@ namespace Lua
 			if(ref.GetBonePose(boneId,transform) == false)
 				return;
 			Lua::Push<umath::ScaledTransform>(l,transform);
+		}));
+		def.def("GetBindPose",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hAnim) {
+			pragma::Lua::check_component(l,hAnim);
+			auto *frame = hAnim->GetBindPose();
+			if(frame == nullptr)
+				return;
+			Lua::Push(l,frame->shared_from_this());
+		}));
+		def.def("SetBindPose",static_cast<void(*)(lua_State*,THandle&,const Frame&)>([](lua_State *l,THandle &hAnim,const Frame &frame) {
+			pragma::Lua::check_component(l,hAnim);
+			hAnim->SetBindPose(frame);
 		}));
 		def.def("GetBonePos",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t boneId) {
 			pragma::Lua::check_component(l,hEnt);

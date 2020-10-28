@@ -59,7 +59,7 @@ bool pragma::asset::WorldData::Read(VFilePtr &f,EntityData::Flags entMask,std::s
 	if(umath::is_flag_set(headerData.flags,DataFlags::HasLightmapAtlas))
 	{
 		m_lightMapIntensity = f->Read<float>();
-		m_lightMapSqrtFactor = f->Read<float>();
+		m_lightMapExposure = f->Read<float>();
 	}
 	ReadEntities(f,materials,entMask);
 	return true;

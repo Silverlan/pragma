@@ -132,8 +132,12 @@ namespace Lua
 		DLLCLIENT void InjectMouseMoveInput(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos);
 		DLLCLIENT ::util::EventReply InjectMouseInput(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos,int button,int action,int mods);
 		DLLCLIENT ::util::EventReply InjectMouseInput(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos,int button,int action);
+		DLLCLIENT ::util::EventReply InjectMouseClick(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos,int button,int mods);
+		DLLCLIENT ::util::EventReply InjectMouseClick(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos,int button);
 		DLLCLIENT ::util::EventReply InjectKeyboardInput(lua_State *l,WIHandle &hPanel,int key,int action,int mods);
 		DLLCLIENT ::util::EventReply InjectKeyboardInput(lua_State *l,WIHandle &hPanel,int key,int action);
+		DLLCLIENT ::util::EventReply InjectKeyPress(lua_State *l,WIHandle &hPanel,int key,int mods);
+		DLLCLIENT ::util::EventReply InjectKeyPress(lua_State *l,WIHandle &hPanel,int key);
 		DLLCLIENT ::util::EventReply InjectCharInput(lua_State *l,WIHandle &hPanel,std::string c,uint32_t mods);
 		DLLCLIENT ::util::EventReply InjectCharInput(lua_State *l,WIHandle &hPanel,std::string c);
 		DLLCLIENT ::util::EventReply InjectScrollInput(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos,const Vector2 &offset);

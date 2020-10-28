@@ -12,7 +12,6 @@
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/physics/physsoftbodyinfo.hpp"
 
-#pragma optimize("",off)
 void FWMD::LoadBones(unsigned short version,unsigned int numBones,Model &mdl)
 {
 	auto &skeleton = mdl.GetSkeleton();
@@ -167,6 +166,11 @@ void FWMD::LoadMeshes(unsigned short version,Model &mdl,const std::function<std:
 		for(uint32_t j=0;j<numMeshes;j++)
 		{
 			auto mesh = meshFactory();
+			if(version >= 35)
+			{
+				auto refId = Read<uint32_t>();
+				mesh->SetReferenceId(refId);
+			}
 			if(version <= 0x0017)
 			{
 				unsigned long long numVerts = Read<unsigned long long>();
@@ -291,6 +295,12 @@ void FWMD::LoadMeshes(unsigned short version,Model &mdl,const std::function<std:
 					{
 						auto geometryType = Read<ModelSubMesh::GeometryType>();
 						subMesh->SetGeometryType(geometryType);
+					}
+
+					if(version >= 35)
+					{
+						auto refId = Read<uint32_t>();
+						subMesh->SetReferenceId(refId);
 					}
 
 					auto &verts = subMesh->GetVertices();
@@ -901,4 +911,3 @@ void FWMD::LoadBodygroups(Model &mdl)
 		}
 	}
 }
-#pragma optimize("",on)

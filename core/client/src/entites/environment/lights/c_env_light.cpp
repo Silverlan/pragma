@@ -25,7 +25,6 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
 decltype(CLightComponent::s_lightCount) CLightComponent::s_lightCount = 0u;
 prosper::IUniformResizableBuffer &CLightComponent::GetGlobalRenderBuffer() {return pragma::LightDataBufferManager::GetInstance().GetGlobalRenderBuffer();}
 prosper::IUniformResizableBuffer &CLightComponent::GetGlobalShadowBuffer() {return pragma::ShadowDataBufferManager::GetInstance().GetGlobalRenderBuffer();}
@@ -154,7 +153,7 @@ Scene *CLightComponent::FindShadowScene() const
 	// A shadowed light source should always only be assigned to one scene slot, so
 	// we'll just pick whichever is the first
 	auto lowestBit = static_cast<int32_t>(sceneFlags) &-static_cast<int32_t>(sceneFlags);
-	return Scene::GetByIndex(lowestBit);
+	return Scene::GetByIndex(Scene::GetSceneIndex(lowestBit));
 }
 COcclusionCullerComponent *CLightComponent::FindShadowOcclusionCuller() const
 {
@@ -254,8 +253,8 @@ void CLightComponent::UpdateShadowTypes()
 	else
 	{
 		DestroyShadowBuffer();
-		if(m_bufferData.shadowIndex == 0)
-			return;
+		SetShadowMapIndex(std::numeric_limits<uint32_t>::max(),ShadowMapType::Dynamic);
+		SetShadowMapIndex(std::numeric_limits<uint32_t>::max(),ShadowMapType::Static);
 	}
 	m_bufferData.shadowIndex = shadowIndex;
 	if(m_renderBuffer != nullptr)
@@ -599,8 +598,8 @@ void Console::commands::debug_light_sources(NetworkState *state,pragma::BasePlay
 			Con::cout<<"\t\tDirection: ("<<data.direction.x<<","<<data.direction.y<<","<<data.direction.z<<")"<<Con::endl;
 			Con::cout<<"\t\tCone Start Offset: "<<data.direction.w<<Con::endl;
 			Con::cout<<"\t\tDistance: "<<data.position.w<<Con::endl;
-			Con::cout<<"\t\tOuter cutoff angle (cosine): "<<data.cutoffOuterCos<<Con::endl;
-			Con::cout<<"\t\tInner cutoff angle (cosine): "<<data.cutoffInnerCos<<Con::endl;
+			Con::cout<<"\t\tOuter cutoff angle: "<<umath::rad_to_deg(data.cutoffOuter)<<Con::endl;
+			Con::cout<<"\t\tInner cutoff angle: "<<umath::rad_to_deg(data.cutoffInner)<<Con::endl;
 			Con::cout<<"\t\tAttenuation: "<<data.attenuation<<Con::endl;
 			Con::cout<<"\t\tFlags: "<<umath::to_integral(data.flags)<<Con::endl;
 			Con::cout<<"\t\tTurned On: "<<(((data.flags &LightBufferData::BufferFlags::TurnedOn) == LightBufferData::BufferFlags::TurnedOn) ? "Yes" : "No")<<Con::endl;
@@ -666,4 +665,3 @@ void CEOnShadowBufferInitialized::PushArguments(lua_State *l)
 {
 	Lua::Push<std::shared_ptr<Lua::Vulkan::Buffer>>(l,shadowBuffer.shared_from_this());
 }
-#pragma optimize("",on)

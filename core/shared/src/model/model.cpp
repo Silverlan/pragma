@@ -25,7 +25,6 @@
 
 extern DLLENGINE Engine *engine;
 
-#pragma optimize("",off)
 std::shared_ptr<ModelMeshGroup> ModelMeshGroup::Create(const std::string &name)
 {
 	return std::shared_ptr<ModelMeshGroup>(new ModelMeshGroup{name});
@@ -710,6 +709,8 @@ std::optional<uint32_t> Model::GetMaterialIndex(const ModelSubMesh &mesh,uint32_
 {
 	auto idx = mesh.GetSkinTextureIndex();
 	auto *texGroup = GetTextureGroup(skinId);
+	if(texGroup == nullptr && skinId > 0)
+		texGroup = GetTextureGroup(0u); // Fall back to default skin
 	if(texGroup == nullptr || idx >= texGroup->textures.size())
 		return {};
 	return texGroup->textures.at(idx);
@@ -1730,4 +1731,3 @@ void Model::UpdateShape(const std::vector<SurfaceMaterial>*)
 		cmesh->UpdateShape();
 }
 //void Model::GetWeights(std::vector<VertexWeight*> **weights) {*weights = &m_weights;}
-#pragma optimize("",on)

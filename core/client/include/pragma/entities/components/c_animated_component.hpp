@@ -55,15 +55,11 @@ namespace pragma
 		uint32_t OnSkeletonUpdated();
 		bool MaintainAnimations(double dt) override;
 
-		void SetBindPose(const Frame &frame);
-		const Frame *GetBindPose() const;
-
 		void SetBoneBufferDirty();
 	protected:
 		virtual void OnModelChanged(const std::shared_ptr<Model> &mdl) override;
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	private:
-		std::shared_ptr<const Frame> m_bindPose = nullptr;
 		std::shared_ptr<prosper::IBuffer> m_boneBuffer = nullptr;
 		std::vector<Mat4> m_boneMatrices;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_boneDescSetGroup = nullptr;

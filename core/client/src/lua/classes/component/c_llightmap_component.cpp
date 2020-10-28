@@ -23,8 +23,24 @@ void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hLightMapC);
 		hLightMapC->ConvertLightmapToBSPLuxelData();
 		}));
+	defCLightMap.def("UpdateLightmapUvBuffers",static_cast<void(*)(lua_State*,CLightMapHandle&)>([](lua_State *l,CLightMapHandle &hLightMapC) {
+		pragma::Lua::check_component(l,hLightMapC);
+		hLightMapC->UpdateLightmapUvBuffers();
+	}));;
+	defCLightMap.def("ReloadLightmapData",static_cast<void(*)(lua_State*,CLightMapHandle&)>([](lua_State *l,CLightMapHandle &hLightMapC) {
+		pragma::Lua::check_component(l,hLightMapC);
+		hLightMapC->ReloadLightMapData();
+	}));
+	defCLightMap.def("SetLightmapAtlas",static_cast<void(*)(lua_State*,CLightMapHandle&,prosper::Texture&)>([](lua_State *l,CLightMapHandle &hLightMapC,prosper::Texture &texture) {
+		pragma::Lua::check_component(l,hLightMapC);
+		hLightMapC->SetLightMapAtlas(texture.shared_from_this());
+	}));
 	entsMod[defCLightMap];
 
 	auto defCLightMapReceiver = luabind::class_<CLightMapReceiverHandle,BaseEntityComponentHandle>("LightMapReceiverComponent");
+	defCLightMapReceiver.def("UpdateLightmapUvData",static_cast<void(*)(lua_State*,CLightMapReceiverHandle&)>([](lua_State *l,CLightMapReceiverHandle &hLightMapReceiverC) {
+		pragma::Lua::check_component(l,hLightMapReceiverC);
+		hLightMapReceiverC->UpdateLightMapUvData();
+	}));
 	entsMod[defCLightMapReceiver];
 }

@@ -33,15 +33,17 @@ namespace pragma
 			const std::shared_ptr<prosper::IDynamicResizableBuffer> &lightMapUvBuffer,
 			const std::vector<std::shared_ptr<prosper::IBuffer>> &meshUvBuffers
 		);
+		void SetLightMapAtlas(const std::shared_ptr<prosper::Texture> &lightMap);
+		void ReloadLightMapData();
 
 		prosper::IBuffer *GetMeshLightMapUvBuffer(uint32_t meshIdx) const;
 		const std::vector<std::shared_ptr<prosper::IBuffer>> &GetMeshLightMapUvBuffers() const;
 		std::vector<std::shared_ptr<prosper::IBuffer>> &GetMeshLightMapUvBuffers();
 
 		void SetLightMapIntensity(float intensity);
-		void SetLightMapSqrtFactor(float sqrtFactor);
+		void SetLightMapExposure(float exp);
 		float GetLightMapIntensity() const;
-		float GetLightMapSqrtFactor() const;
+		float GetLightMapExposure() const;
 
 		void ConvertLightmapToBSPLuxelData() const;
 
@@ -50,7 +52,7 @@ namespace pragma
 	protected:
 		std::shared_ptr<prosper::Texture> m_lightMapAtlas = nullptr;
 		float m_lightMapIntensity = 1.f;
-		float m_lightMapSqrt = 0.f; // Experimental; can be 1 or 0
+		float m_lightMapExposure = 0.f;
 
 		// Contains the light map uv-buffer for each mesh of the world in the same order
 		// they are in the model's mesh group

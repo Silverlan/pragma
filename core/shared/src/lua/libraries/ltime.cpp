@@ -9,7 +9,6 @@
 #include "pragma/lua/libraries/ltime.hpp"
 #include "pragma/util/util_duration_type.hpp"
 
-#pragma optimize("",off)
 extern DLLENGINE Engine *engine;
 double Lua::time::cur_time(lua_State *l)
 {
@@ -87,4 +86,3 @@ int64_t Lua::time::convert_duration(int64_t duration,util::DurationType srcType,
 	}
 	return 0;
 }
-#pragma optimize("",on)

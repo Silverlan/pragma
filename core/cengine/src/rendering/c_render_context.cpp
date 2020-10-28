@@ -15,7 +15,7 @@
 #include <pragma/util/util_module.hpp>
 
 using namespace pragma;
-#pragma optimize("",off)
+
 RenderContext::RenderContext()
 	: m_monitor(nullptr),m_aspectRatio(1.f),m_renderAPI{"opengl"}
 {
@@ -86,9 +86,9 @@ void RenderContext::Release()
 const prosper::IPrContext &RenderContext::GetRenderContext() const {return const_cast<RenderContext*>(this)->GetRenderContext();}
 prosper::IPrContext &RenderContext::GetRenderContext() {return *m_renderContext;}
 prosper::ShaderManager &RenderContext::GetShaderManager() const {return GetRenderContext().GetShaderManager();}
-::util::WeakHandle<prosper::Shader> RenderContext::RegisterShader(const std::string &identifier,const std::function<prosper::Shader*(prosper::IPrContext&,const std::string&)> &fFactory)
+void RenderContext::RegisterShader(const std::string &identifier,const std::function<prosper::Shader*(prosper::IPrContext&,const std::string&)> &fFactory)
 {
-	return GetRenderContext().RegisterShader(identifier,fFactory);
+	GetRenderContext().RegisterShader(identifier,fFactory);
 }
 ::util::WeakHandle<prosper::Shader> RenderContext::GetShader(const std::string &identifier) const
 {
@@ -235,4 +235,3 @@ void RenderContext::SetResolutionHeight(uint32_t h)
 float RenderContext::GetAspectRatio() const {return m_aspectRatio;}
 void RenderContext::SetRenderAPI(const std::string &renderAPI) {m_renderAPI = renderAPI;}
 const std::string &RenderContext::GetRenderAPI() const {return m_renderAPI;}
-#pragma optimize("",on)

@@ -12,6 +12,7 @@
 #include <sharedutils/util_file.h>
 #include <cmaterialmanager.h>
 
+extern DLLCLIENT void debug_render_stats();
 void CEngine::RegisterConsoleCommands()
 {
 	Engine::RegisterConsoleCommands();
@@ -71,6 +72,9 @@ void CEngine::RegisterConsoleCommands()
 		auto &context = GetRenderContext();
 		Con::cout<<"Active render API: "<<renderAPI<<" ("<<context.GetAPIAbbreviation()<<")"<<Con::endl;
 	},ConVarFlags::None,"Prints information about the current render API to the console.");
+	conVarMap.RegisterConCommand("debug_render_stats",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		debug_render_stats();
+	},ConVarFlags::None,"Prints information about the next frame.");
 #if LUA_ENABLE_RUN_GUI == 1
 	conVarMap.RegisterConCommand("lua_exec_gui",[](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		if(argv.empty()) return;

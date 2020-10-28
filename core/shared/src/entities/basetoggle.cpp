@@ -11,6 +11,7 @@
 #include "pragma/util/util_handled.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
+#include <sharedutils/datastream.h>
 #include <algorithm>
 
 using namespace pragma;
@@ -58,6 +59,20 @@ void BaseToggleComponent::OnEntitySpawn()
 	BaseEntityComponent::OnEntitySpawn();
 	if(m_bStartDisabled == false && (GetEntity().GetSpawnFlags() &SF_STARTON) == SF_STARTON)
 		TurnOn();
+}
+
+void BaseToggleComponent::Save(DataStream &ds)
+{
+	BaseEntityComponent::Save(ds);
+	ds->Write<bool>(m_bStartDisabled);
+	ds->Write<bool>(*m_bTurnedOn);
+}
+
+void BaseToggleComponent::Load(DataStream &ds,uint32_t version)
+{
+	BaseEntityComponent::Load(ds,version);
+	m_bStartDisabled = ds->Read<bool>();
+	SetTurnedOn(ds->Read<bool>());
 }
 
 bool BaseToggleComponent::ToggleInput(std::string input,BaseEntity*,BaseEntity*,std::string data)

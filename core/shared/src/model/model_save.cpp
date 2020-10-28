@@ -31,7 +31,6 @@
 #define INDEX_OFFSET_IK_CONTROLLERS (INDEX_OFFSET_PHONEMES +1)
 #define INDEX_OFFSET_EYEBALLS (INDEX_OFFSET_IK_CONTROLLERS +1)
 
-#pragma optimize("",off)
 static void write_offset(VFilePtrReal f,uint64_t offIndex)
 {
 	auto cur = f->Tell();
@@ -343,6 +342,8 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 		f->Write<uint32_t>(static_cast<uint32_t>(meshes.size()));
 		for(auto &mesh : meshes)
 		{
+			f->Write<uint32_t>(mesh->GetReferenceId());
+
 			auto &subMeshes = mesh->GetSubMeshes();
 			f->Write<uint32_t>(static_cast<uint32_t>(subMeshes.size()));
 			for(auto &subMesh : subMeshes)
@@ -356,6 +357,7 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 				// Version 27
 				f->Write<ModelSubMesh::GeometryType>(subMesh->GetGeometryType());
 				//
+				f->Write<uint32_t>(subMesh->GetReferenceId());
 
 				auto &verts = subMesh->GetVertices();
 				auto numVerts = verts.size();
@@ -855,4 +857,3 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 		f->WriteString(inc);
 	return true;
 }
-#pragma optimize("",on)

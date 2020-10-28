@@ -16,7 +16,6 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-#pragma optimize("",off)
 decltype(ShaderUnlit::DESCRIPTOR_SET_MATERIAL) ShaderUnlit::DESCRIPTOR_SET_MATERIAL = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Material settings
@@ -62,4 +61,3 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderUnlit::InitializeMaterialDes
 	return InitializeMaterialDescriptorSet(mat,ShaderTextured3DBase::DESCRIPTOR_SET_MATERIAL);
 	//return InitializeMaterialDescriptorSet(mat,DESCRIPTOR_SET_MATERIAL);
 }
-#pragma optimize("",on)

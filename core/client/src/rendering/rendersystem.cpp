@@ -19,6 +19,7 @@
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/renderers/rasterization/culled_mesh_data.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include "pragma/rendering/render_stats.hpp"
 #include "pragma/debug/renderdebuginfo.hpp"
 #include "textureinfo.h"
 #include "pragma/console/c_cvar.h"
@@ -37,7 +38,7 @@ extern DLLCLIENT CGame *c_game;
 
 // Disables rendering of meshes and shadows; For debug purposes only!
 #define DEBUG_RENDER_DISABLED 0
-
+#pragma optimize("",off)
 RenderSystem::TranslucentMesh::TranslucentMesh(CBaseEntity *_ent,CModelSubMesh *_mesh,Material *_mat,::util::WeakHandle<prosper::Shader> shader,float _distance)
 	: ent(_ent),mesh(_mesh),distance(_distance),material(_mat),shader(shader)
 {}
@@ -279,6 +280,63 @@ void RenderSystem::Render(
 		shaderPrev->EndDraw();
 }
 
+RenderStats g_renderStats;
+bool g_collectRenderStats = false;
+static void print_pass_stats(const RenderPassStats &stats)
+{
+	Con::cout<<"\nEntities:"<<Con::endl;
+	for(auto &hEnt : stats.entities)
+	{
+		if(hEnt.IsValid() == false)
+			continue;
+		hEnt.get()->print(Con::cout);
+		Con::cout<<Con::endl;
+	}
+
+	Con::cout<<"\nMaterials:"<<Con::endl;
+	for(auto &hMat : stats.materials)
+	{
+		if(hMat.IsValid() == false)
+			continue;
+		auto *albedoMap = hMat.get()->GetAlbedoMap();
+		Con::cout<<hMat.get()->GetName();
+		if(albedoMap)
+			Con::cout<<" ["<<albedoMap->name<<"]";
+		Con::cout<<Con::endl;
+	}
+
+	Con::cout<<"\nShaders:"<<Con::endl;
+	for(auto &hShader : stats.shaders)
+	{
+		if(hShader.expired())
+			continue;
+		Con::cout<<hShader->GetIdentifier()<<Con::endl;
+	}
+	
+	Con::cout<<"\nMeshes:"<<Con::endl;
+	for(auto &mesh : stats.meshes)
+	{
+		Con::cout<<"Mesh["<<mesh->GetVertexCount()<<"]["<<mesh->GetTriangleCount()<<"]"<<Con::endl;
+	}
+}
+DLLCLIENT void debug_render_stats()
+{
+	g_renderStats = {};
+	g_collectRenderStats = true;
+}
+DLLCLIENT void print_debug_render_stats()
+{
+	g_collectRenderStats = false;
+	Con::cout<<"Lighting pass:"<<Con::endl;
+	print_pass_stats(g_renderStats.lightingPass);
+
+	Con::cout<<"Depth prepass:"<<Con::endl;
+	print_pass_stats(g_renderStats.prepass);
+
+	Con::cout<<"Transparency pass:"<<Con::endl;
+	print_pass_stats(g_renderStats.transparencyPass);
+}
+
 static CVar cvDebugNormals = GetClientConVar("debug_render_normals");
 uint32_t RenderSystem::Render(
 	const util::DrawSceneInfo &drawSceneInfo,const pragma::rendering::CulledMeshData &renderMeshes,
@@ -306,6 +364,7 @@ uint32_t RenderSystem::Render(
 	auto depthBiasActive = false;
 	auto debugMode = scene->GetDebugMode();
 	auto &drawCmd = drawSceneInfo.commandBuffer;
+	auto *stats = g_collectRenderStats ? &g_renderStats.lightingPass : nullptr;
 	for(auto itShader=containers.begin();itShader!=containers.end();itShader++)
 	{
 		auto &shaderContainer = *itShader;
@@ -318,6 +377,8 @@ uint32_t RenderSystem::Render(
 		) == true
 			)
 		{
+			if(stats)
+				stats->shaders.push_back(shader->GetHandle());
 			if(shader->BindScene(*scene,rasterizer,bView) == true)
 			{
 				if(debugMode != ::Scene::DebugMode::None)
@@ -331,6 +392,8 @@ uint32_t RenderSystem::Render(
 					auto &mat = static_cast<CMaterial&>(*matContainer->material);
 					if(mat.IsInitialized() && shader->BindMaterial(mat) == true)
 					{
+						if(stats)
+							stats->materials.push_back(mat.GetHandle());
 						++debugInfo.materialCount;
 						for(auto &pair : matContainer->containers)
 						{
@@ -339,6 +402,8 @@ uint32_t RenderSystem::Render(
 							{
 								if(shader->BindEntity(*ent) == false)
 									continue;
+								if(stats)
+									stats->entities.push_back(ent->GetHandle());
 								entLast = ent;
 								shaderLast = shader;
 								renderC = entLast->GetRenderComponent().get();
@@ -393,7 +458,9 @@ uint32_t RenderSystem::Render(
 									}
 									if(bUseVertexAnim == false)
 										shader->BindVertexAnimationOffset(0u);
-
+									
+									if(stats)
+										stats->meshes.push_back(std::static_pointer_cast<CModelSubMesh>(mesh->shared_from_this()));
 									shader->Draw(*mesh);
 
 									auto numTriangles = mesh->GetTriangleCount();
@@ -429,3 +496,4 @@ uint32_t RenderSystem::Render(const util::DrawSceneInfo &drawSceneInfo,RenderMod
 	auto *renderInfo = rasterizer.GetRenderInfo(renderMode);
 	return renderInfo ? Render(drawSceneInfo,*renderInfo,renderMode,flags,drawOrigin) : 0;
 }
+#pragma optimize("",on)

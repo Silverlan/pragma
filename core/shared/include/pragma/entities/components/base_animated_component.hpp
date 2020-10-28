@@ -214,6 +214,9 @@ namespace pragma
 		bool GetVertexPosition(uint32_t meshGroupId,uint32_t meshId,uint32_t subMeshId,uint32_t vertexId,Vector3 &pos) const;
 		bool GetVertexPosition(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 &pos) const;
 
+		void SetBindPose(const Frame &frame);
+		const Frame *GetBindPose() const;
+
 		CallbackHandle BindAnimationEvent(AnimationEvent::Type eventId,const std::function<void(std::reference_wrapper<const AnimationEvent>)> &fCallback);
 
 		virtual void Save(DataStream &ds) override;
@@ -290,7 +293,8 @@ namespace pragma
 
 		std::vector<TemplateAnimationEvent> m_animEventTemplates;
 		std::unordered_map<uint32_t,std::unordered_map<uint32_t,std::vector<CustomAnimationEvent>>> m_animEvents;
-
+		
+		std::shared_ptr<const Frame> m_bindPose = nullptr;
 		std::unordered_map<unsigned int,float> m_blendControllers = {};
 		util::PFloatProperty m_playbackRate = nullptr;
 

@@ -118,10 +118,10 @@ namespace pragma::asset
 		void SetLightMapEnabled(bool enabled);
 
 		void SetLightMapIntensity(float intensity);
-		void SetLightMapSqrtFactor(float factor);
+		void SetLightMapExposure(float exp);
 
 		float GetLightMapIntensity() const;
-		float GetLightMapSqrtFactor() const;
+		float GetLightMapExposure() const;
 
 		const std::vector<std::shared_ptr<EntityData>> &GetEntities() const;
 		const std::vector<std::string> &GetMaterialTable() const;
@@ -143,7 +143,7 @@ namespace pragma::asset
 		std::shared_ptr<uimg::ImageBuffer> m_lightMapAtlas = nullptr;
 		bool m_lightMapAtlasEnabled = false;
 		float m_lightMapIntensity = 1.f;
-		float m_lightMapSqrtFactor = 0.f;
+		float m_lightMapExposure = 0.f;
 		std::vector<uint16_t> m_staticPropLeaves {};
 		std::vector<std::shared_ptr<EntityData>> m_entities {};
 		std::vector<std::string> m_materialTable {};

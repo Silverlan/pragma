@@ -25,7 +25,6 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
 namespace pragma
 {
 	using ::operator<<;
@@ -689,4 +688,3 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 		animComponent->SetLocalBonePosition(footData.boneId,posBone,rotBone);
 	}
 }
-#pragma optimize("",on)

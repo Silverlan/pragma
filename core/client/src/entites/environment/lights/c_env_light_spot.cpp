@@ -47,10 +47,10 @@ void CLightSpotComponent::Initialize()
 		if(pLightComponent.expired())
 			return;
 		auto &bufferData = pLightComponent->GetBufferData();
-		bufferData.cutoffInnerCos = static_cast<umath::Radian>(umath::cos(umath::deg_to_rad(newAng.get())));
+		bufferData.cutoffInner = static_cast<umath::Radian>(umath::deg_to_rad(newAng.get()));
 		auto &renderBuffer = pLightComponent->GetRenderBuffer();
 		if(renderBuffer != nullptr)
-			c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,cutoffInnerCos),bufferData.cutoffInnerCos);
+			c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,cutoffInner),bufferData.cutoffInner);
 	});
 	m_angOuterCutoff->AddCallback([this](std::reference_wrapper<const float> oldAng,std::reference_wrapper<const float> newAng) {
 		SetShadowDirty();
@@ -59,10 +59,10 @@ void CLightSpotComponent::Initialize()
 		if(pLightComponent.expired())
 			return;
 		auto &bufferData = pLightComponent->GetBufferData();
-		bufferData.cutoffOuterCos = static_cast<umath::Radian>(umath::cos(umath::deg_to_rad(newAng.get())));
+		bufferData.cutoffOuter = static_cast<umath::Radian>(umath::deg_to_rad(newAng.get()));
 		auto &renderBuffer = pLightComponent->GetRenderBuffer();
 		if(renderBuffer != nullptr)
-			c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,cutoffOuterCos),bufferData.cutoffOuterCos);
+			c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,cutoffOuter),bufferData.cutoffOuter);
 
 		if(pLightComponent->GetLightIntensityType() == CBaseLightComponent::LightIntensityType::Lumen)
 		{

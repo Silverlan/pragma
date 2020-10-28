@@ -19,7 +19,6 @@ extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
 
-#pragma optimize("",off)
 LINK_ENTITY_TO_CLASS(game_occlusion_culler,COcclusionCuller);
 
 luabind::object COcclusionCullerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CShadowManagerComponentHandleWrapper>(l);}
@@ -230,4 +229,3 @@ static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(NetworkState*,ConVar*
 	octree.SetDebugModeEnabled(val);
 }
 REGISTER_CONVAR_CALLBACK_CL(debug_render_octree_dynamic_draw,CVAR_CALLBACK_debug_render_octree_dynamic_draw);
-#pragma optimize("",on)

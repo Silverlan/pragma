@@ -10,7 +10,7 @@
 #include "pragma/model/c_model.h"
 
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 void pragma::CEyeComponent::UpdateEyeballs()
 {
 	auto mdlC = GetEntity().GetModelComponent();
@@ -167,6 +167,8 @@ void pragma::CEyeComponent::SetViewTarget(const Vector3 &viewTarget)
 }
 umath::Transform pragma::CEyeComponent::CalcEyeballPose(uint32_t eyeballIndex,umath::Transform *optOutBonePose) const
 {
+	if(m_animC.expired())
+		return {};
 	auto *eyeballData = GetEyeballData(eyeballIndex);
 	auto mdl = GetEntity().GetModel();
 	auto *eyeball = mdl ? mdl->GetEyeball(eyeballIndex) : nullptr;
@@ -260,4 +262,3 @@ void pragma::CEyeComponent::UpdateEyeball(const Eyeball &eyeball,uint32_t eyebal
 	state.irisProjectionV.z = v.z;
 	state.irisProjectionV.w = -uvec::dot(org,v);
 }
-#pragma optimize("",on)

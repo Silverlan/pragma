@@ -324,7 +324,7 @@ void RasterizationRenderer::PrepareRendering(Scene &scene,RenderMode renderMode,
 							if(shader != nullptr && shader->GetBaseTypeHashCode() == pragma::ShaderTextured3DBase::HASH_TYPE)
 							{
 								// Translucent?
-								if(mat->IsTranslucent() == true)
+								if(mat->GetAlphaMode() == AlphaMode::Blend)
 								{
 									if(bUpdateTranslucentMeshes == true)
 									{

@@ -32,7 +32,7 @@
 #include "pragma/util/util_image.hpp"
 #include "pragma/model/vk_mesh.h"
 #include <prosper_event.hpp>
-#pragma optimize("",off)
+
 extern DLLCENGINE CEngine *c_engine;
 namespace Lua
 {
@@ -3693,4 +3693,3 @@ void Lua::Vulkan::VKTimerQuery::QueryResult(lua_State *l,TimerQuery &hTimerQuery
 	else
 		Lua::PushInt(l,r.count());
 }
-#pragma optimize("",on)

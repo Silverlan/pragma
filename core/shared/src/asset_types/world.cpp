@@ -46,9 +46,9 @@ void pragma::asset::WorldData::SetLightMapAtlas(uimg::ImageBuffer &imgAtlas)
 }
 void pragma::asset::WorldData::SetLightMapEnabled(bool enabled) {m_lightMapAtlasEnabled = enabled;}
 void pragma::asset::WorldData::SetLightMapIntensity(float intensity) {m_lightMapIntensity = intensity;}
-void pragma::asset::WorldData::SetLightMapSqrtFactor(float factor) {m_lightMapSqrtFactor = factor;}
+void pragma::asset::WorldData::SetLightMapExposure(float exp) {m_lightMapExposure = exp;}
 float pragma::asset::WorldData::GetLightMapIntensity() const {return m_lightMapIntensity;}
-float pragma::asset::WorldData::GetLightMapSqrtFactor() const {return m_lightMapSqrtFactor;}
+float pragma::asset::WorldData::GetLightMapExposure() const {return m_lightMapExposure;}
 
 NetworkState &pragma::asset::WorldData::GetNetworkState() const {return m_nw;}
 

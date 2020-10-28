@@ -61,6 +61,7 @@ namespace pragma::rendering
 		: public BaseRenderer
 	{
 	public:
+		static void UpdateLightmap(const std::shared_ptr<prosper::Texture> &lightMapTexture);
 		enum class PrepassMode : uint32_t
 		{
 			NoPrepass = 0,

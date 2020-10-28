@@ -17,13 +17,46 @@ extern DLLCLIENT ClientState *client;
 extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 void CLightMapReceiverComponent::SetupLightMapUvData(CBaseEntity &ent)
 {
 	auto mdl = ent.GetModel();
 	auto meshGroup = mdl ? mdl->GetMeshGroup(0u) : nullptr;
 	if(meshGroup == nullptr)
 		return;
+	auto hasLightmapUvs = false;
+	for(auto &mesh : meshGroup->GetMeshes())
+	{
+		for(auto &subMesh : mesh->GetSubMeshes())
+		{
+			auto *uvSet = subMesh->GetUVSet("lightmap");
+			if(uvSet)
+			{
+				hasLightmapUvs = true;
+				goto endLoop;
+			}
+		}
+	}
+endLoop:
+	if(hasLightmapUvs)
+	{
+		auto lightMapReceiverC = ent.AddComponent<CLightMapReceiverComponent>();
+		if(lightMapReceiverC.valid())
+			lightMapReceiverC->UpdateLightMapUvData();
+	}
+}
+void CLightMapReceiverComponent::UpdateLightMapUvData()
+{
+	auto mdl = GetEntity().GetModel();
+	auto meshGroup = mdl ? mdl->GetMeshGroup(0u) : nullptr;
+	if(meshGroup == nullptr)
+		return;
+	m_modelName = GetEntity().GetModelName();
+	m_isModelBakedWithLightMaps = true;
+	m_uvDataPerMesh.clear();
+	m_meshes.clear();
+	m_meshToMeshIdx.clear();
+	m_meshToBufIdx.clear();
 	uint32_t subMeshIdx = 0u;
 	auto wasInitialized = false;
 	for(auto &mesh : meshGroup->GetMeshes())
@@ -36,16 +69,9 @@ void CLightMapReceiverComponent::SetupLightMapUvData(CBaseEntity &ent)
 				++subMeshIdx;
 				continue;
 			}
-			auto lightMapReceiverC = ent.AddComponent<pragma::CLightMapReceiverComponent>();
-			if(wasInitialized == false)
-			{
-				wasInitialized = true;
-				lightMapReceiverC->m_modelName = ent.GetModelName();
-				lightMapReceiverC->m_isModelBakedWithLightMaps = true;
-			}
-			lightMapReceiverC->m_uvDataPerMesh.insert(std::make_pair(subMeshIdx,*uvSet));
-			lightMapReceiverC->m_meshes.insert(std::make_pair(subMeshIdx,subMesh));
-			lightMapReceiverC->m_meshToMeshIdx.insert(std::make_pair(static_cast<CModelSubMesh*>(subMesh.get()),subMeshIdx));
+			m_uvDataPerMesh.insert(std::make_pair(subMeshIdx,*uvSet));
+			m_meshes.insert(std::make_pair(subMeshIdx,subMesh));
+			m_meshToMeshIdx.insert(std::make_pair(static_cast<CModelSubMesh*>(subMesh.get()),subMeshIdx));
 			++subMeshIdx;
 		}
 	}
@@ -55,10 +81,17 @@ void CLightMapReceiverComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<ComponentEvent> evData) {
-		m_isModelBakedWithLightMaps = (GetEntity().GetModelName() == m_modelName);
-		if(m_isModelBakedWithLightMaps)
+		//m_isModelBakedWithLightMaps = (GetEntity().GetModelName() == m_modelName); // TODO
+		//if(m_isModelBakedWithLightMaps)
 			UpdateModelMeshes();
 	});
+	BindEventUnhandled(CBaseEntity::EVENT_ON_SPAWN,[this](std::reference_wrapper<ComponentEvent> evData) {
+		//m_isModelBakedWithLightMaps = (GetEntity().GetModelName() == m_modelName); // TODO
+		//if(m_isModelBakedWithLightMaps)
+			UpdateModelMeshes();
+	});
+	if(GetEntity().IsSpawned())
+		UpdateModelMeshes();
 }
 void CLightMapReceiverComponent::UpdateModelMeshes()
 {
@@ -143,4 +176,3 @@ void CLightMapReceiverComponent::UpdateMeshLightmapUvBuffers(CLightMapComponent 
 		}
 	}
 }
-#pragma optimize("",on)

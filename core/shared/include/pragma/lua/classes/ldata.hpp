@@ -15,12 +15,13 @@ namespace ds
 {
 	class Block;
 };
+class LFile;
 namespace Lua
 {
 	namespace DataBlock
 	{
 		DLLNETWORK void load(lua_State *l,const std::string &fileName);
-		DLLNETWORK void load(lua_State *l,VFilePtr f);
+		DLLNETWORK void load(lua_State *l,LFile &f);
 		DLLNETWORK void create(lua_State *l);
 
 		DLLNETWORK void GetInt(lua_State *l,ds::Block &data,const std::string &val);

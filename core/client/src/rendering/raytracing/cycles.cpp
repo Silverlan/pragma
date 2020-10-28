@@ -18,6 +18,7 @@ struct CyclesModuleInterface
 	{
 		render_image = FindSymbolAddress<decltype(render_image)>(lib,"pr_cycles_render_image");
 		bake_ao = FindSymbolAddress<decltype(bake_ao)>(lib,"pr_cycles_bake_ao");
+		bake_ao_ent = FindSymbolAddress<decltype(bake_ao_ent)>(lib,"pr_cycles_bake_ao_ent");
 		bake_lightmaps = FindSymbolAddress<decltype(bake_lightmaps)>(lib,"pr_cycles_bake_lightmaps");
 	}
 	void(*render_image)(
@@ -27,8 +28,9 @@ struct CyclesModuleInterface
 		const std::function<bool(BaseEntity&)>&,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>&
 	) = nullptr;
 
-	void(*bake_ao)(Model&,uint32_t,uint32_t,uint32_t,uint32_t,bool,bool,const std::string&,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> &outJob) = nullptr;
-	void(*bake_lightmaps)(BaseEntity&,uint32_t,uint32_t,uint32_t,bool,bool,std::string,EulerAngles,float,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> &outJob) = nullptr;
+	void(*bake_ao)(Model&,uint32_t,uint32_t,uint32_t,uint32_t,bool,bool,const std::string&,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>&) = nullptr;
+	void(*bake_ao_ent)(BaseEntity&,uint32_t,uint32_t,uint32_t,uint32_t,bool,bool,const std::string&,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>&) = nullptr;
+	void(*bake_lightmaps)(uint32_t,uint32_t,uint32_t,bool,bool,std::string,EulerAngles,float,bool,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>&) = nullptr;
 
 	bool IsValid() const {return m_bValid;}
 private:
@@ -75,6 +77,20 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> cycles::render_image(Clien
 		return {};
 	return job;
 }
+util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> cycles::bake_ambient_occlusion(ClientState &client,const SceneInfo &sceneInfo,BaseEntity &ent,uint32_t materialIndex)
+{
+	auto cyclesInterface = initialize_library(client);
+	if(cyclesInterface.has_value() == false)
+		return {};
+	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> job = {};
+	auto sDeviceType = (sceneInfo.device == SceneInfo::DeviceType::GPU) ? "gpu" : "cpu";
+	cyclesInterface->bake_ao_ent(
+		ent,materialIndex,sceneInfo.width,sceneInfo.height,sceneInfo.samples,sceneInfo.hdrOutput,sceneInfo.denoise,sDeviceType,job
+	);
+	if(job.IsValid() == false)
+		return {};
+	return job;
+}
 util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> cycles::bake_ambient_occlusion(ClientState &client,const SceneInfo &sceneInfo,Model &mdl,uint32_t materialIndex)
 {
 	auto cyclesInterface = initialize_library(client);
@@ -89,15 +105,15 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> cycles::bake_ambient_occlu
 		return {};
 	return job;
 }
-util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> cycles::bake_lightmaps(ClientState &client,const SceneInfo &sceneInfo,BaseEntity &entTarget)
+util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> cycles::bake_lightmaps(ClientState &client,const SceneInfo &sceneInfo)
 {
 	auto cyclesInterface = initialize_library(client);
 	if(cyclesInterface.has_value() == false)
 		return {};
 	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> job = {};
 	cyclesInterface->bake_lightmaps(
-		entTarget,sceneInfo.width,sceneInfo.height,sceneInfo.samples,sceneInfo.hdrOutput,sceneInfo.denoise,
-		sceneInfo.sky,sceneInfo.skyAngles,sceneInfo.skyStrength,
+		sceneInfo.width,sceneInfo.height,sceneInfo.samples,sceneInfo.hdrOutput,sceneInfo.denoise,
+		sceneInfo.sky,sceneInfo.skyAngles,sceneInfo.skyStrength,sceneInfo.renderJob,
 		job
 	);
 	if(job.IsValid() == false)

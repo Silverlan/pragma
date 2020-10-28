@@ -10,7 +10,6 @@
 #include <mathutil/uvec.h>
 #include <pragma/math/intersection.h>
 
-#pragma optimize("",off)
 ModelMesh::ModelMesh()
 	: std::enable_shared_from_this<ModelMesh>(),m_numVerts(0),m_numTriangleVerts(0)
 {}
@@ -618,4 +617,3 @@ void ModelSubMesh::RemoveVertex(uint64_t idx)
 	if(idx < m_extendedVertexWeights->size())
 		m_extendedVertexWeights->erase(m_extendedVertexWeights->begin() +idx);
 }
-#pragma optimize("",on)

@@ -753,22 +753,18 @@ void Game::Tick()
 
 	StartProfilingStage(CPUProfilingPhase::GameObjectLogic);
 	static std::vector<util::WeakHandle<pragma::LogicComponent>> logicComponents {};
+	logicComponents.clear();
 	EntityIterator entItLogic {*this};
 	entItLogic.AttachFilter<TEntityIteratorFilterComponent<pragma::LogicComponent>>();
-	if(entItLogic.GetCount() > logicComponents.size())
-		logicComponents.resize(entItLogic.GetCount(),util::WeakHandle<pragma::LogicComponent>{});
 
-	uint32_t idx = 0u;
 	for(auto *ent : entItLogic)
 	{
 		auto pLogicComponent = ent->GetComponent<pragma::LogicComponent>();
 		if(m_tCur < pLogicComponent->GetNextThink())
 			continue;
 		pLogicComponent->Think(m_tDeltaTick);
-		logicComponents.at(idx++) = pLogicComponent;
+		logicComponents.push_back(pLogicComponent);
 	}
-	if(idx < logicComponents.size())
-		logicComponents.at(idx) = {};
 
 	for(auto logicComponent : logicComponents)
 	{

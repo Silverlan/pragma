@@ -39,6 +39,7 @@ namespace pragma::rendering::cycles
 		uint32_t samples = 1'024;
 		bool denoise = true;
 		bool hdrOutput = false;
+		bool renderJob = false;
 		SceneFlags sceneFlags = static_cast<SceneFlags>(umath::to_integral(SceneFlags::CullObjectsOutsidePvs) | umath::to_integral(SceneFlags::CullObjectsOutsideCameraFrustum));
 		DeviceType device = DeviceType::CPU;
 		std::string sky = "";
@@ -60,7 +61,8 @@ namespace pragma::rendering::cycles
 	};
 	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> render_image(ClientState &client,const SceneInfo &sceneInfo,const RenderImageInfo &renderImageInfo);
 	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> bake_ambient_occlusion(ClientState &client,const SceneInfo &sceneInfo,Model &mdl,uint32_t materialIndex);
-	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> bake_lightmaps(ClientState &client,const SceneInfo &sceneInfo,BaseEntity &entTarget);
+	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> bake_ambient_occlusion(ClientState &client,const SceneInfo &sceneInfo,BaseEntity &ent,uint32_t materialIndex);
+	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> bake_lightmaps(ClientState &client,const SceneInfo &sceneInfo);
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::rendering::cycles::SceneInfo::SceneFlags)
 

@@ -59,7 +59,6 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
 static void CVAR_CALLBACK_render_vsync_enabled(NetworkState*,ConVar*,int,int val)
 {
 	glfwSwapInterval((val == 0) ? 0 : 1);
@@ -298,4 +297,3 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 }
 
 bool CGame::IsInMainRenderPass() const {return m_bMainRenderPass;}
-#pragma optimize("",on)

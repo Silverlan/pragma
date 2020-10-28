@@ -13,7 +13,7 @@
 #include <sharedutils/util_file.h>
 
 extern DLLENGINE Engine *engine;
-#pragma optimize("",off)
+
 static void Lua::TypeError(const luabind::object &o,Type type)
 {
 	// TODO
@@ -70,4 +70,3 @@ Lua::ErrorColorMode Lua::GetErrorColorMode(lua_State *l)
 		return state->GetLuaErrorColorMode();
 	return ErrorColorMode::White;
 }
-#pragma optimize("",on)

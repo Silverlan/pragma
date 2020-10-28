@@ -239,8 +239,12 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 	classDef.def("InjectMouseMoveInput",&InjectMouseMoveInput);
 	classDef.def("InjectMouseInput",static_cast<::util::EventReply(*)(lua_State*,WIHandle&,const Vector2&,int,int,int)>(&InjectMouseInput));
 	classDef.def("InjectMouseInput",static_cast<::util::EventReply(*)(lua_State*,WIHandle&,const Vector2&,int,int)>(&InjectMouseInput));
+	classDef.def("InjectMouseClick",static_cast<::util::EventReply(*)(lua_State*,WIHandle&,const Vector2&,int,int)>(&InjectMouseClick));
+	classDef.def("InjectMouseClick",static_cast<::util::EventReply(*)(lua_State*,WIHandle&,const Vector2&,int)>(&InjectMouseClick));
 	classDef.def("InjectKeyboardInput",static_cast<::util::EventReply(*)(lua_State*,WIHandle&,int,int,int)>(&InjectKeyboardInput));
 	classDef.def("InjectKeyboardInput",static_cast<::util::EventReply(*)(lua_State*,WIHandle&,int,int)>(&InjectKeyboardInput));
+	classDef.def("InjectKeyPress",static_cast<::util::EventReply(*)(lua_State*,WIHandle&,int,int)>(&InjectKeyPress));
+	classDef.def("InjectKeyPress",static_cast<::util::EventReply(*)(lua_State*,WIHandle&,int)>(&InjectKeyPress));
 	classDef.def("InjectCharInput",static_cast<::util::EventReply(*)(lua_State*,WIHandle&,std::string,uint32_t)>(&InjectCharInput));
 	classDef.def("InjectCharInput",static_cast<::util::EventReply(*)(lua_State*,WIHandle&,std::string)>(&InjectCharInput));
 	classDef.def("InjectScrollInput",&InjectScrollInput);
@@ -787,6 +791,10 @@ void Lua::WIDropDownMenu::register_class(luabind::class_<WIDropDownMenuHandle,lu
 		auto o = WGUILuaInterface::GetLuaObject(l,*el);
 		o.push(l);
 	}));
+	classDef.def("SetListItemCount",static_cast<void(*)(lua_State*,WIDropDownMenuHandle&,uint32_t)>([](lua_State *l,WIDropDownMenuHandle &hPanel,uint32_t n) {
+		lua_checkgui(l,hPanel);
+		static_cast<::WIDropDownMenu*>(hPanel.get())->SetListItemCount(n);
+	}));
 }
 
 void Lua::WIText::register_class(luabind::class_<WITextHandle,WIHandle> &classDef)
@@ -1265,7 +1273,7 @@ void Lua::WIBase::SetParent(lua_State *l,WIHandle &hPanel,WIHandle &hParent)
 void Lua::WIBase::ClearParent(lua_State *l,WIHandle &hPanel)
 {
 	lua_checkgui(l,hPanel);
-	hPanel->ClearParent();
+	hPanel->SetParent(WGUI::GetInstance().GetBaseElement());
 }
 void Lua::WIBase::GetChildren(lua_State *l,WIHandle &hPanel)
 {
@@ -2078,6 +2086,15 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l,WIHandle &hPanel,const Vecto
 	return hPanel->InjectMouseInput(GLFW::MouseButton(button),GLFW::KeyState(action),GLFW::Modifier(mods));
 }
 ::util::EventReply Lua::WIBase::InjectMouseInput(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos,int button,int action) {return InjectMouseInput(l,hPanel,mousePos,button,action,0);}
+::util::EventReply Lua::WIBase::InjectMouseClick(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos,int button,int mods)
+{
+	auto handled0 = InjectMouseInput(l,hPanel,mousePos,button,GLFW_PRESS,mods);
+	auto handled1 = InjectMouseInput(l,hPanel,mousePos,button,GLFW_RELEASE,mods);
+	if(handled1 == ::util::EventReply::Handled)
+		handled0 = handled1;
+	return handled0;
+}
+::util::EventReply Lua::WIBase::InjectMouseClick(lua_State *l,WIHandle &hPanel,const Vector2 &mousePos,int button) {return InjectMouseClick(l,hPanel,mousePos,button,0);}
 ::util::EventReply Lua::WIBase::InjectKeyboardInput(lua_State *l,WIHandle &hPanel,int key,int action,int mods)
 {
 	lua_checkgui_ret(l,hPanel,::util::EventReply::Unhandled);
@@ -2085,6 +2102,15 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l,WIHandle &hPanel,const Vecto
 	 // Vulkan TODO
 }
 ::util::EventReply Lua::WIBase::InjectKeyboardInput(lua_State *l,WIHandle &hPanel,int key,int action) {return InjectKeyboardInput(l,hPanel,key,action,0);}
+::util::EventReply Lua::WIBase::InjectKeyPress(lua_State *l,WIHandle &hPanel,int key,int mods)
+{
+	auto handled0 = InjectKeyboardInput(l,hPanel,key,GLFW_PRESS,mods);
+	auto handled1 = InjectKeyboardInput(l,hPanel,key,GLFW_RELEASE,mods);
+	if(handled1 == ::util::EventReply::Handled)
+		handled0 = handled1;
+	return handled0;
+}
+::util::EventReply Lua::WIBase::InjectKeyPress(lua_State *l,WIHandle &hPanel,int key) {return InjectKeyPress(l,hPanel,key,0);}
 ::util::EventReply Lua::WIBase::InjectCharInput(lua_State *l,WIHandle &hPanel,std::string c,uint32_t mods)
 {
 	lua_checkgui_ret(l,hPanel,::util::EventReply::Unhandled);

@@ -30,7 +30,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 std::shared_ptr<const FontInfo> Lua::engine::create_font(lua_State *l,const std::string &identifier,const std::string &font,uint32_t size,bool reload) {return FontManager::LoadFont(identifier.c_str(),font.c_str(),size,reload);}
 std::shared_ptr<const FontInfo> Lua::engine::create_font(lua_State *l,const std::string &identifier,const std::string &font,uint32_t size) {return create_font(l,identifier,font,size,false);}
 std::shared_ptr<const FontInfo> Lua::engine::get_font(lua_State *l,const std::string &identifier) {return FontManager::GetFont(identifier);}
@@ -550,4 +550,3 @@ Vector2i Lua::engine::get_window_resolution()
 	return Vector2i{createInfo.width,createInfo.height};
 }
 Vector2i Lua::engine::get_render_resolution() {return c_engine->GetRenderResolution();}
-#pragma optimize("",on)

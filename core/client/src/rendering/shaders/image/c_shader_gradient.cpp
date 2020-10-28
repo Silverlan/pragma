@@ -18,7 +18,7 @@
 using namespace pragma;
 
 extern DLLCENGINE CEngine *c_engine;
-#pragma optimize("",off)
+
 static bool get_line_line_intersection(const Vector2 &p0,const Vector2 &p1,const Vector2 &p3,Vector2 &intersection)
 {
 	Vector2 p2(0.f,0.f);
@@ -102,4 +102,3 @@ bool pragma::util::record_draw_gradient(prosper::IPrContext &context,const std::
 	}
 	return cmdBuffer->RecordEndRenderPass();
 }
-#pragma optimize("",on)

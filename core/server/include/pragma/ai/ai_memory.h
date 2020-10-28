@@ -33,6 +33,7 @@ namespace pragma
 				Fragment();
 				Fragment(const Fragment&)=delete;
 				Fragment &operator=(const Fragment&)=delete;
+				Fragment Copy() const;
 				bool occupied;
 				EntityHandle hEntity;
 				Vector3 lastPosition;
@@ -57,6 +58,7 @@ namespace pragma
 		public:
 			Memory();
 			Memory(const Memory&)=delete;
+			Memory Copy() const;
 			Memory &operator=(const Memory&)=delete;
 			uint32_t occupiedFragmentCount;
 			std::array<Fragment,MAX_AIMEMORY_FRAGMENTS> fragments;

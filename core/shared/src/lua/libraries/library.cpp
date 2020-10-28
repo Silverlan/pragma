@@ -363,7 +363,11 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		luabind::def("calc_ballistic_angle_of_reach",umath::approach<double>),
 		luabind::def("approach",umath::approach<double>),
 		luabind::def("get_frustum_plane_center",umath::frustum::get_plane_center),
-		luabind::def("approach",umath::approach<double>)
+		luabind::def("approach",umath::approach<double>),
+		luabind::def("calc_average_rotation",static_cast<Quat(*)(lua_State*,luabind::table<>)>([](lua_State *l,luabind::table<> t) -> Quat {
+			auto rotations = Lua::table_to_vector<Quat>(l,t,1);
+			return uquat::calc_average(rotations);
+		}))
 	];
 	lua_pushtablecfunction(lua.GetState(),"math","randomf",Lua::math::randomf);
 	lua_pushtablecfunction(lua.GetState(),"math","normalize_angle",Lua::math::normalize_angle);
@@ -1211,7 +1215,19 @@ void Game::RegisterLuaLibraries()
 			return FileManager::GetFileSize(path);
 		})),
 		luabind::def("compare_path",Lua::file::ComparePath),
-		luabind::def("remove_file_extension",Lua::file::RemoveFileExtension)
+		luabind::def("remove_file_extension",Lua::file::RemoveFileExtension),
+		luabind::def("strip_illegal_filename_characters",static_cast<std::string(*)(std::string)>([](std::string path) {
+			// See https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
+			std::string illegalCharacters = "/\\?%*:|\"<>";
+			for(auto it=path.begin();it!=path.end();)
+			{
+				if(illegalCharacters.find(*it) != std::string::npos)
+					it = path.erase(it);
+				else
+					++it;
+			}
+			return path;
+		}))
 	];
 
 	auto classDefFile = luabind::class_<LFile>("File");

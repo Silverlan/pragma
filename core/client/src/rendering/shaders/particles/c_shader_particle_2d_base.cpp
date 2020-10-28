@@ -20,7 +20,7 @@
 extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 decltype(ShaderParticle2DBase::VERTEX_BINDING_PARTICLE) ShaderParticle2DBase::VERTEX_BINDING_PARTICLE = {prosper::VertexInputRate::Instance,sizeof(pragma::CParticleSystemComponent::ParticleData)};
 decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_POSITION) ShaderParticle2DBase::VERTEX_ATTRIBUTE_POSITION = {VERTEX_BINDING_PARTICLE,prosper::Format::R32G32B32_SFloat};
 decltype(ShaderParticle2DBase::VERTEX_ATTRIBUTE_RADIUS) ShaderParticle2DBase::VERTEX_ATTRIBUTE_RADIUS = {VERTEX_BINDING_PARTICLE,prosper::Format::R32_SFloat};
@@ -437,4 +437,3 @@ Vector3 ShaderParticle2DBase::CalcVertexPosition(
 {
 	return DoCalcVertexPosition(ptc,ptIdx,get_vertex_index(absVertIdx),camPos,camUpWs,camRightWs,nearZ,farZ);
 }
-#pragma optimize("",on)

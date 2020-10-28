@@ -29,7 +29,7 @@ using namespace pragma;
 
 // 10 MiB
 #define PARTICLE_BUFFER_SIZE 10'485'760
-#pragma optimize("",off)
+
 decltype(CParticleSystemComponent::s_particleData) CParticleSystemComponent::s_particleData;
 decltype(CParticleSystemComponent::s_precached) CParticleSystemComponent::s_precached;
 
@@ -1824,4 +1824,3 @@ void CParticleSystemComponent::OnParticleDestroyed(CParticle &particle)
 	for(auto &r : m_renderers)
 		r->OnParticleDestroyed(particle);
 }
-#pragma optimize("",on)

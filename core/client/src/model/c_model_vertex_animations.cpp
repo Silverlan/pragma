@@ -12,7 +12,7 @@
 #include <prosper_util.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
-#pragma optimize("",off)
+
 void CModel::UpdateVertexAnimationBuffer()
 {
 	m_frameIndices.clear();
@@ -119,4 +119,3 @@ bool CModel::GetVertexAnimationBufferFrameOffset(uint32_t vaIdx,CModelSubMesh &s
 	offset = frameOffsets.at(frameId);
 	return true;
 }
-#pragma optimize("",on)

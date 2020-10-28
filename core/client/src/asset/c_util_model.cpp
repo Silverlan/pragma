@@ -29,7 +29,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 void pragma::asset::ModelExportInfo::SetAnimationList(const std::vector<std::string> &animations)
 {
 	exportAnimations = true;
@@ -1365,4 +1365,3 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(
 	});
 	return AOResult::AOJobReady;
 }
-#pragma optimize("",on)

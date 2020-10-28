@@ -25,7 +25,6 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-#pragma optimize("",off)
 decltype(ShaderPBR::DESCRIPTOR_SET_MATERIAL) ShaderPBR::DESCRIPTOR_SET_MATERIAL = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Material settings
@@ -333,4 +332,3 @@ bool ShaderPBRBlend::GetRenderBufferTargets(
 	outOffsets.push_back(0ull);
 	return true;
 }
-#pragma optimize("",on)

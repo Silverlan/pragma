@@ -11,6 +11,7 @@
 #include "pragma/game/game_resources.hpp"
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
+#include <sharedutils/util_path.hpp>
 
 extern DLLENGINE Engine *engine;
 
@@ -298,6 +299,25 @@ void Lua_LFile_GetPath(lua_State *l,LFile &f)
 
 bool Lua::file::validate_write_operation(lua_State *l,std::string &path,std::string &outRootPath)
 {
+	if(path.length() >= 7 && ustring::compare(path.c_str(),"addons",false,6) && (path.at(6) == '/' || path.at(6) == '\\'))
+	{
+		// Validate that this is an addon path
+		auto opath = util::Path::CreateFile(path);
+		opath.Canonicalize();
+		
+		auto addonPath = opath;
+		while(addonPath.GetComponentCount() > 2)
+			addonPath.PopBack();
+
+		if(ustring::compare(addonPath.GetFront(),"addons",false) && FileManager::Exists(addonPath.GetString()))
+		{
+			opath.PopFront();
+			opath.PopFront();
+			outRootPath = addonPath.GetString();
+			path = opath.GetString();
+			return true;
+		}
+	}
 	auto fname = FileManager::GetCanonicalizedPath(Lua::get_current_file(l));
 	if(fname.length() < 8 || ustring::compare(fname.c_str(),"addons\\",false,7) == false)
 	{
@@ -451,12 +471,14 @@ luabind::object Lua::file::Read(lua_State *l,const std::string &path)
 	return luabind::object{l,str};
 }
 
-bool Lua::file::Write(lua_State *l,std::string path,const std::string &content)
+bool Lua::file::Write(lua_State *l,std::string strPath,const std::string &content)
 {
-	path = FileManager::GetCanonicalizedPath(path);
-	if(validate_write_operation(l,path) == false)
+	strPath = FileManager::GetCanonicalizedPath(strPath);
+	if(validate_write_operation(l,strPath) == false)
 		return false;
-	auto f = FileManager::OpenFile(path.c_str(),"w");
+	auto path = util::Path::CreateFile(strPath);
+	FileManager::CreatePath(path.GetPath().c_str());
+	auto f = FileManager::OpenFile(path.GetString().c_str(),"w");
 	if(f == NULL || f->GetType() != VFILE_LOCAL)
 		return false;
 	auto freal = std::static_pointer_cast<VFilePtrInternalReal>(f);

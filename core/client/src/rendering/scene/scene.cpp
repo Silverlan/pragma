@@ -104,6 +104,16 @@ Scene *Scene::GetByIndex(SceneIndex sceneIndex)
 	return (sceneIndex < g_scenes.size()) ? g_scenes.at(sceneIndex) : nullptr;
 }
 
+uint32_t Scene::GetSceneFlag(SceneIndex sceneIndex)
+{
+	return 1<<sceneIndex;
+}
+
+Scene::SceneIndex Scene::GetSceneIndex(uint32_t flag)
+{
+	return umath::get_least_significant_set_bit_index(flag);
+}
+
 Scene::Scene(const CreateInfo &createInfo,SceneIndex sceneIndex)
 	: std::enable_shared_from_this<Scene>(),
 	m_sceneIndex{sceneIndex}
@@ -141,7 +151,7 @@ void Scene::InitializeRenderSettingsBuffer()
 	m_renderSettings.shadowRatioY = 1.f /szShadowMap;
 	m_renderSettings.shaderQuality = cvShaderQuality->GetInt();
 	m_renderSettings.lightmapIntensity = 1.f;
-	m_renderSettings.lightmapSqrt = 0.f;
+	m_renderSettings.lightmapExposurePow = 1.f;
 
 	if(m_renderer)
 		m_renderer->UpdateRenderSettings();
@@ -366,7 +376,7 @@ void Scene::SetLightMap(pragma::CLightMapComponent &lightMapC)
 {
 	auto &renderSettings = GetRenderSettings();
 	renderSettings.lightmapIntensity = lightMapC.GetLightMapIntensity();
-	renderSettings.lightmapSqrt = lightMapC.GetLightMapSqrtFactor();
+	renderSettings.lightmapExposurePow = umath::pow(2.0,static_cast<double>(lightMapC.GetLightMapExposure()));
 	m_lightMap = lightMapC.GetHandle<pragma::CLightMapComponent>();
 	UpdateRenderSettings();
 	UpdateRendererLightMap();

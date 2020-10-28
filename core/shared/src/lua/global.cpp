@@ -66,6 +66,7 @@ void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 	luabind::module(lua.GetState())[
 		luabind::def("include",static_cast<luabind::object(*)(lua_State*,const std::string&,bool)>(Lua::global::include)),
 		luabind::def("include",static_cast<luabind::object(*)(lua_State*,const std::string&)>(Lua::global::include)),
+		luabind::def("exec",Lua::global::exec),
 		luabind::def("get_script_path",Lua::global::get_script_path)
 	];
 	lua_register(lua.GetState(),"toboolean",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {

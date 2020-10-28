@@ -43,15 +43,21 @@ namespace Lua
 		DLLNETWORK void InitializeCone(lua_State *l,::ModelSubMesh &mesh,float startRadius,float length,float endRadius,uint32_t segmentCount=12);
 		DLLNETWORK void InitializeCircle(lua_State *l,::ModelSubMesh &mesh,float radius,bool doubleSided=true,uint32_t segmentCount=36);
 		DLLNETWORK void InitializeRing(lua_State *l,::ModelSubMesh &mesh,std::optional<float> innerRadius,float outerRadius,bool doubleSided=true,uint32_t segmentCount=36);
+		DLLNETWORK void FlipTriangleWindingOrder(lua_State *l,::ModelSubMesh &mesh);
 
 		DLLNETWORK void register_class(luabind::class_<::ModelSubMesh> &classDef);
 		DLLNETWORK void GetVertexCount(lua_State *l,::ModelSubMesh &mdl);
+		DLLNETWORK void SetVertexCount(lua_State *l,::ModelSubMesh &mdl,uint32_t n);
+		DLLNETWORK void SetIndexCount(lua_State *l,::ModelSubMesh &mdl,uint32_t n);
 		DLLNETWORK void GetTriangleVertexCount(lua_State *l,::ModelSubMesh &mdl);
 		DLLNETWORK void GetTriangleCount(lua_State *l,::ModelSubMesh &mdl);
 		DLLNETWORK void GetSkinTextureIndex(lua_State *l,::ModelSubMesh &mdl);
 		DLLNETWORK void GetVertices(lua_State *l,::ModelSubMesh &mdl);
 		DLLNETWORK void GetTriangles(lua_State *l,::ModelSubMesh &mdl);
+		DLLNETWORK void AddUVSet(lua_State *l,::ModelSubMesh &mdl,const std::string &uvSetName);
 		DLLNETWORK void GetUVMapping(lua_State *l,::ModelSubMesh &mdl);
+		DLLNETWORK luabind::object GetUVMapping(lua_State *l,::ModelSubMesh &mdl,const std::string &uvSet);
+		DLLNETWORK luabind::object GetUVSetNames(lua_State *l,::ModelSubMesh &mdl);
 		DLLNETWORK void GetNormalMapping(lua_State *l,::ModelSubMesh &mdl);
 		DLLNETWORK void GetVertexWeights(lua_State *l,::ModelSubMesh &mdl);
 		DLLNETWORK void AddTriangle(lua_State *l,::ModelSubMesh &mdl,const ::Vertex &v1,const ::Vertex &v2,const ::Vertex &v3);
@@ -65,12 +71,14 @@ namespace Lua
 		DLLNETWORK void SetVertexPosition(lua_State *l,::ModelSubMesh &mdl,uint32_t idx,const Vector3 &pos);
 		DLLNETWORK void SetVertexNormal(lua_State *l,::ModelSubMesh &mdl,uint32_t idx,const Vector3 &normal);
 		DLLNETWORK void SetVertexUV(lua_State *l,::ModelSubMesh &mdl,uint32_t idx,const ::Vector2 &uv);
+		DLLNETWORK void SetVertexUV(lua_State *l,::ModelSubMesh &mdl,const std::string &uvSetName,uint32_t idx,const ::Vector2 &uv);
 		DLLNETWORK void SetVertexAlpha(lua_State *l,::ModelSubMesh &mdl,uint32_t idx,const ::Vector2 &alpha);
 		DLLNETWORK void SetVertexWeight(lua_State *l,::ModelSubMesh &mdl,uint32_t idx,const ::VertexWeight &weight);
 		DLLNETWORK void GetVertex(lua_State *l,::ModelSubMesh &mdl,uint32_t idx);
 		DLLNETWORK void GetVertexPosition(lua_State *l,::ModelSubMesh &mdl,uint32_t idx);
 		DLLNETWORK void GetVertexNormal(lua_State *l,::ModelSubMesh &mdl,uint32_t idx);
 		DLLNETWORK void GetVertexUV(lua_State *l,::ModelSubMesh &mdl,uint32_t idx);
+		DLLNETWORK void GetVertexUV(lua_State *l,::ModelSubMesh &mdl,const std::string &uvSetName,uint32_t idx);
 		DLLNETWORK void GetVertexAlpha(lua_State *l,::ModelSubMesh &mdl,uint32_t idx);
 		DLLNETWORK void GetVertexWeight(lua_State *l,::ModelSubMesh &mdl,uint32_t idx);
 		DLLNETWORK void GetCenter(lua_State *l,::ModelSubMesh &mdl);

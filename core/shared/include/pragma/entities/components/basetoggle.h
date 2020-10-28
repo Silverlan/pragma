@@ -37,6 +37,9 @@ namespace pragma
 		void Toggle();
 		const ::util::PBoolProperty &GetTurnedOnProperty() const;
 		virtual void OnEntitySpawn() override;
+
+		virtual void Save(DataStream &ds) override;
+		virtual void Load(DataStream &ds,uint32_t version) override;
 	protected:
 		::util::PBoolProperty m_bTurnedOn = nullptr;
 		bool m_bStartDisabled = false;

@@ -26,7 +26,7 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <pragma/physics/movetypes.h>
 #include <pragma/lua/lua_call.hpp>
-#pragma optimize("",off)
+
 namespace Lua
 {
 	namespace PBRConverter
@@ -46,6 +46,27 @@ namespace Lua
 		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,Model &mdl)
 		{
 			hComponent->GenerateAmbientOcclusionMaps(mdl);
+		}
+		
+		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,EntityHandle &hEnt,uint32_t width,uint32_t height,uint32_t samples,bool rebuild)
+		{
+			LUA_CHECK_ENTITY(l,hEnt);
+			hComponent->GenerateAmbientOcclusionMaps(*hEnt.get(),width,height,samples,rebuild);
+		}
+		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,EntityHandle &hEnt,uint32_t width,uint32_t height,uint32_t samples)
+		{
+			LUA_CHECK_ENTITY(l,hEnt);
+			hComponent->GenerateAmbientOcclusionMaps(*hEnt.get(),width,height,samples);
+		}
+		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,EntityHandle &hEnt,uint32_t width,uint32_t height)
+		{
+			LUA_CHECK_ENTITY(l,hEnt);
+			hComponent->GenerateAmbientOcclusionMaps(*hEnt.get(),width,height);
+		}
+		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,EntityHandle &hEnt)
+		{
+			LUA_CHECK_ENTITY(l,hEnt);
+			hComponent->GenerateAmbientOcclusionMaps(*hEnt.get());
 		}
 	};
 	namespace ParticleSystem
@@ -621,6 +642,10 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,Model&,uint32_t,uint32_t,uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
 	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,Model&,uint32_t,uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
 	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,Model&)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,EntityHandle&,uint32_t,uint32_t,uint32_t,bool)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,EntityHandle&,uint32_t,uint32_t,uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,EntityHandle&,uint32_t,uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,EntityHandle&)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
 	entsMod[defCPBRConverter];
 
 	auto defShadow = luabind::class_<CShadowHandle,BaseEntityComponentHandle>("ShadowMapComponent");
@@ -852,4 +877,3 @@ void Lua::ParticleSystem::AddRenderer(lua_State *l,pragma::CParticleSystemCompon
 		return;
 	Lua::Push(l,renderer);
 }
-#pragma optimize("",on)

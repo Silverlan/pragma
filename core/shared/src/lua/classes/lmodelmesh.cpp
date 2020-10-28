@@ -13,7 +13,6 @@
 
 extern DLLENGINE Engine *engine;
 
-#pragma optimize("",off)
 void Lua::ModelMesh::register_class(luabind::class_<::ModelMesh> &classDef)
 {
 	classDef.def(luabind::const_self == luabind::const_self);
@@ -29,6 +28,9 @@ void Lua::ModelMesh::register_class(luabind::class_<::ModelMesh> &classDef)
 	classDef.def("GetCenter",&Lua::ModelMesh::GetCenter);
 	classDef.def("Centralize",&Lua::ModelMesh::Centralize);
 	classDef.def("Scale",&Lua::ModelMesh::Scale);
+	classDef.def("GetReferenceId",static_cast<void(*)(lua_State*,::ModelMesh&)>([](lua_State *l,::ModelMesh &mesh) {
+		Lua::PushInt(l,mesh.GetReferenceId());
+	}));
 	classDef.def("Translate",static_cast<void(*)(lua_State*,::ModelMesh&,const Vector3&)>([](lua_State *l,::ModelMesh &mesh,const Vector3 &translation) {
 		mesh.Translate(translation);
 	}));
@@ -126,12 +128,18 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 {
 	classDef.def(luabind::const_self == luabind::const_self);
 	classDef.def("GetSkinTextureIndex",&Lua::ModelSubMesh::GetSkinTextureIndex);
+	classDef.def("FlipTriangleWindingOrder",&Lua::ModelSubMesh::FlipTriangleWindingOrder);
 	classDef.def("GetVertexCount",&Lua::ModelSubMesh::GetVertexCount);
+	classDef.def("SetVertexCount",&Lua::ModelSubMesh::SetVertexCount);
+	classDef.def("SetIndexCount",&Lua::ModelSubMesh::SetIndexCount);
 	classDef.def("GetTriangleVertexCount",&Lua::ModelSubMesh::GetTriangleVertexCount);
 	classDef.def("GetTriangleCount",&Lua::ModelSubMesh::GetTriangleCount);
 	classDef.def("GetVertices",&Lua::ModelSubMesh::GetVertices);
 	classDef.def("GetTriangles",&Lua::ModelSubMesh::GetTriangles);
-	classDef.def("GetUVs",&Lua::ModelSubMesh::GetUVMapping);
+	classDef.def("AddUVSet",&Lua::ModelSubMesh::AddUVSet);
+	classDef.def("GetUVs",static_cast<void(*)(lua_State*,::ModelSubMesh&)>(&Lua::ModelSubMesh::GetUVMapping));
+	classDef.def("GetUVs",static_cast<luabind::object(*)(lua_State*,::ModelSubMesh&,const std::string&)>(&Lua::ModelSubMesh::GetUVMapping));
+	classDef.def("GetUVSetNames",&Lua::ModelSubMesh::GetUVSetNames);
 	classDef.def("GetNormals",&Lua::ModelSubMesh::GetNormalMapping);
 	classDef.def("GetVertexWeights",&Lua::ModelSubMesh::GetVertexWeights);
 	classDef.def("AddTriangle",static_cast<void(*)(lua_State*,::ModelSubMesh&,const Vertex&,const Vertex&,const Vertex&)>(&Lua::ModelSubMesh::AddTriangle));
@@ -145,13 +153,15 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("SetVertex",&Lua::ModelSubMesh::SetVertex);
 	classDef.def("SetVertexPosition",&Lua::ModelSubMesh::SetVertexPosition);
 	classDef.def("SetVertexNormal",&Lua::ModelSubMesh::SetVertexNormal);
-	classDef.def("SetVertexUV",&Lua::ModelSubMesh::SetVertexUV);
+	classDef.def("SetVertexUV",static_cast<void(*)(lua_State*,::ModelSubMesh&,const std::string&,uint32_t,const ::Vector2&)>(&Lua::ModelSubMesh::SetVertexUV));
+	classDef.def("SetVertexUV",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t,const ::Vector2&)>(&Lua::ModelSubMesh::SetVertexUV));
 	classDef.def("SetVertexAlpha",&Lua::ModelSubMesh::SetVertexAlpha);
 	classDef.def("SetVertexWeight",&Lua::ModelSubMesh::SetVertexWeight);
 	classDef.def("GetVertex",&Lua::ModelSubMesh::GetVertex);
 	classDef.def("GetVertexPosition",&Lua::ModelSubMesh::GetVertexPosition);
 	classDef.def("GetVertexNormal",&Lua::ModelSubMesh::GetVertexNormal);
-	classDef.def("GetVertexUV",&Lua::ModelSubMesh::GetVertexUV);
+	classDef.def("GetVertexUV",static_cast<void(*)(lua_State*,::ModelSubMesh&,const std::string&,uint32_t)>(&Lua::ModelSubMesh::GetVertexUV));
+	classDef.def("GetVertexUV",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t)>(&Lua::ModelSubMesh::GetVertexUV));
 	classDef.def("GetVertexAlpha",&Lua::ModelSubMesh::GetVertexAlpha);
 	classDef.def("GetVertexWeight",&Lua::ModelSubMesh::GetVertexWeight);
 	classDef.def("Optimize",&Lua::ModelSubMesh::Optimize);
@@ -163,6 +173,12 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("ApplyUVMapping",static_cast<void(*)(lua_State*,::ModelSubMesh&,::Model&,const Vector3&,const Vector3&,float,float,float,float)>(&Lua::ModelSubMesh::ApplyUVMapping));
 	classDef.def("ApplyUVMapping",static_cast<void(*)(lua_State*,::ModelSubMesh&,const Vector3&,const Vector3&,uint32_t,uint32_t,float,float,float,float)>(&Lua::ModelSubMesh::ApplyUVMapping));
 	classDef.def("Scale",&Lua::ModelSubMesh::Scale);
+	classDef.def("SetVertexTangent",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t,const Vector4&)>([](lua_State *l,::ModelSubMesh &mesh,uint32_t idx,const Vector4 &t) {
+		if(idx >= mesh.GetVertexCount())
+			return;
+		auto &verts = mesh.GetVertices();
+		verts.at(idx).tangent = t;
+	}));
 	classDef.def("Translate",static_cast<void(*)(lua_State*,::ModelSubMesh&,const Vector3&)>([](lua_State *l,::ModelSubMesh &mesh,const Vector3 &translation) {
 		mesh.Translate(translation);
 	}));
@@ -219,6 +235,10 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 		mesh.GetVertexWeights().clear();
 		mesh.GetExtendedVertexWeights().clear();
 	}));
+	classDef.def("HasUVSet",static_cast<void(*)(lua_State*,::ModelSubMesh&,const std::string&)>([](lua_State *l,::ModelSubMesh &mesh,const std::string &uvSetName) {
+		auto *uvSet = mesh.GetUVSet(uvSetName);
+		Lua::PushBool(l,uvSet ? true : false);
+	}));
 	classDef.def("ReserveVertices",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t)>([](lua_State *l,::ModelSubMesh &mesh,uint32_t numVerts) {
 		mesh.GetVertices().reserve(numVerts);
 	}));
@@ -240,6 +260,16 @@ void Lua::ModelSubMesh::GetVertexCount(lua_State *l,::ModelSubMesh &mdl)
 {
 	Lua::PushInt(l,mdl.GetVertexCount());
 }
+void Lua::ModelSubMesh::SetVertexCount(lua_State *l,::ModelSubMesh &mdl,uint32_t n)
+{
+	mdl.GetVertices().resize(n);
+	for(auto &pair : mdl.GetUVSets())
+		pair.second.resize(n);
+}
+void Lua::ModelSubMesh::SetIndexCount(lua_State *l,::ModelSubMesh &mdl,uint32_t n)
+{
+	mdl.GetTriangles().resize(n);
+}
 void Lua::ModelSubMesh::GetTriangleVertexCount(lua_State *l,::ModelSubMesh &mdl)
 {
 	Lua::PushInt(l,mdl.GetTriangleVertexCount());
@@ -247,6 +277,11 @@ void Lua::ModelSubMesh::GetTriangleVertexCount(lua_State *l,::ModelSubMesh &mdl)
 void Lua::ModelSubMesh::GetTriangleCount(lua_State *l,::ModelSubMesh &mdl)
 {
 	Lua::PushInt(l,mdl.GetTriangleCount());
+}
+void Lua::ModelSubMesh::AddUVSet(lua_State *l,::ModelSubMesh &mdl,const std::string &uvSetName)
+{
+	auto &uvSet = mdl.AddUVSet(uvSetName);
+	uvSet.resize(mdl.GetVertexCount());
 }
 void Lua::ModelSubMesh::GetVertices(lua_State *l,::ModelSubMesh &mesh)
 {
@@ -280,6 +315,24 @@ void Lua::ModelSubMesh::GetUVMapping(lua_State *l,::ModelSubMesh &mesh)
 		Lua::Push<Vector2>(l,verts[i].uv);
 		lua_rawseti(l,top,i +1);
 	}
+}
+luabind::object Lua::ModelSubMesh::GetUVMapping(lua_State *l,::ModelSubMesh &mesh,const std::string &uvSetName)
+{
+	auto *uvSet = mesh.GetUVSet(uvSetName);
+	if(uvSet == nullptr)
+		return {};
+	auto t = luabind::newtable(l);
+	for(auto i=decltype(uvSet->size()){0u};i<uvSet->size();++i)
+		t[i +1] = uvSet->at(i);
+	return t;
+}
+luabind::object Lua::ModelSubMesh::GetUVSetNames(lua_State *l,::ModelSubMesh &mesh)
+{
+	auto t = luabind::newtable(l);
+	uint32_t idx = 1;
+	for(auto &pair : mesh.GetUVSets())
+		t[idx++] = pair.first;
+	return t;
 }
 void Lua::ModelSubMesh::GetNormalMapping(lua_State *l,::ModelSubMesh &mesh)
 {
@@ -363,6 +416,13 @@ void Lua::ModelSubMesh::SetVertexNormal(lua_State*,::ModelSubMesh &mdl,uint32_t 
 {
 	mdl.SetVertexNormal(idx,normal);
 }
+void Lua::ModelSubMesh::SetVertexUV(lua_State *l,::ModelSubMesh &mdl,const std::string &uvSetName,uint32_t idx,const ::Vector2 &uv)
+{
+	auto *uvSet = mdl.GetUVSet(uvSetName);
+	if(uvSet == nullptr || idx >= uvSet->size())
+		return;
+	uvSet->at(idx) = uv;
+}
 void Lua::ModelSubMesh::SetVertexUV(lua_State*,::ModelSubMesh &mdl,uint32_t idx,const Vector2 &uv)
 {
 	mdl.SetVertexUV(idx,uv);
@@ -392,6 +452,13 @@ void Lua::ModelSubMesh::GetVertexNormal(lua_State *l,::ModelSubMesh &mdl,uint32_
 	if(idx >= mdl.GetVertexCount())
 		return;
 	Lua::Push<Vector3>(l,mdl.GetVertexNormal(idx));
+}
+void Lua::ModelSubMesh::GetVertexUV(lua_State *l,::ModelSubMesh &mdl,const std::string &uvSetName,uint32_t idx)
+{
+	auto *uvSet = mdl.GetUVSet(uvSetName);
+	if(uvSet == nullptr || idx >= uvSet->size())
+		return;
+	Lua::Push<Vector2>(l,uvSet->at(idx));
 }
 void Lua::ModelSubMesh::GetVertexUV(lua_State *l,::ModelSubMesh &mdl,uint32_t idx)
 {
@@ -664,6 +731,14 @@ static void add_back_face(std::vector<uint16_t> &tris)
 	for(auto idx : {tris.at(tris.size() -3),tris.at(tris.size() -1),tris.at(tris.size() -2)})
 		tris.push_back(idx);
 }
+void Lua::ModelSubMesh::FlipTriangleWindingOrder(lua_State *l,::ModelSubMesh &mesh)
+{
+	auto &tris = mesh.GetTriangles();
+	if((tris.size() %3) != 0)
+		return;
+	for(auto i=decltype(tris.size()){0u};i<tris.size();i+=3)
+		umath::swap(tris.at(i),tris.at(i +1));
+}
 void Lua::ModelSubMesh::InitializeRing(lua_State *l,::ModelSubMesh &mesh,std::optional<float> innerRadius,float outerRadius,bool doubleSided,uint32_t segmentCount)
 {
 	if(innerRadius.has_value() && *innerRadius == 0.f)
@@ -734,4 +809,3 @@ void Lua::ModelSubMesh::InitializeCircle(lua_State *l,::ModelSubMesh &mesh,float
 {
 	InitializeRing(l,mesh,{},radius,doubleSided,segmentCount);
 }
-#pragma optimize("",on)

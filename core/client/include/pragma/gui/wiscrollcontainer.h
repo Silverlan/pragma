@@ -36,6 +36,9 @@ public:
 	int GetContentWidth();
 	int GetContentHeight();
 	Vector2i GetContentSize();
+	void SetScrollAmount(int32_t amX,int32_t amY);
+	void SetScrollAmountX(int32_t amX);
+	void SetScrollAmountY(int32_t amY);
 
 	void ScrollToBottom();
 
@@ -55,6 +58,8 @@ protected:
 	CallbackHandle m_hChildAdded = {};
 	CallbackHandle m_hChildRemoved = {};
 	Vector2i m_lastOffset = {};
+	int32_t m_scrollAmountX = 64;
+	int32_t m_scrollAmountY = 64;
 	std::unordered_map<WIBase*,std::vector<CallbackHandle>> m_childCallbackHandles;
 	virtual void OnChildAdded(WIBase *child) override;
 	virtual void OnChildRemoved(WIBase *child) override;

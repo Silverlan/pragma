@@ -61,6 +61,11 @@ public:
 	std::vector<uint16_t> &GetTriangles();
 	std::vector<VertexWeight> &GetVertexWeights(); // Vertex weights 0-3
 	std::vector<VertexWeight> &GetExtendedVertexWeights(); // Vertex weights 0-7
+	const std::vector<Vertex> &GetVertices() const {return const_cast<ModelSubMesh*>(this)->GetVertices();}
+	const std::vector<Vector2> &GetAlphas() const {return const_cast<ModelSubMesh*>(this)->GetAlphas();}
+	const std::vector<uint16_t> &GetTriangles() const {return const_cast<ModelSubMesh*>(this)->GetTriangles();}
+	const std::vector<VertexWeight> &GetVertexWeights() const {return const_cast<ModelSubMesh*>(this)->GetVertexWeights();}
+	const std::vector<VertexWeight> &GetExtendedVertexWeights() const {return const_cast<ModelSubMesh*>(this)->GetExtendedVertexWeights();}
 	void GetBounds(Vector3 &min,Vector3 &max) const;
 	uint8_t GetAlphaCount() const;
 	void SetAlphaCount(uint8_t numAlpha);

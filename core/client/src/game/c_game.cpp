@@ -1137,7 +1137,7 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 			if(lightMapC.valid())
 			{
 				lightMapC->SetLightMapIntensity(worldData.GetLightMapIntensity());
-				lightMapC->SetLightMapSqrtFactor(worldData.GetLightMapSqrtFactor());
+				lightMapC->SetLightMapExposure(worldData.GetLightMapExposure());
 				lightMapC->InitializeLightMapData(lightmapAtlas,globalLightmapUvBuffer,buffers);
 				auto &scene = GetRenderScene();
 				if(scene)

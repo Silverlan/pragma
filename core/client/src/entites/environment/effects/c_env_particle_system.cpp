@@ -19,7 +19,6 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_particle_system,CEnvParticleSystem);
 
-#pragma optimize("",off)
 void CParticleSystemComponent::Initialize()
 {
 	BaseEnvParticleSystemComponent::Initialize();
@@ -239,4 +238,3 @@ void CEnvParticleSystem::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CParticleSystemComponent>();
 }
-#pragma optimize("",on)

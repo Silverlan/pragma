@@ -22,7 +22,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 decltype(ShaderScene::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderScene::DESCRIPTOR_SET_RENDER_SETTINGS = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Debug
@@ -391,4 +391,3 @@ bool ShaderEntity::Draw(CModelSubMesh &mesh,bool bUseVertexWeightBuffer)
 }
 
 bool ShaderEntity::Draw(CModelSubMesh &mesh) {return Draw(mesh,true);}
-#pragma optimize("",on)

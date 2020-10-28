@@ -502,10 +502,11 @@ void pragma::LuaShaderManager::RegisterShader(std::string className,luabind::obj
 	}
 	::Lua::Pop(l);
 
-	pair.whShader = c_engine->GetShaderManager().RegisterShader(className,[shader](prosper::IPrContext &context,const std::string &identifier,bool &bExternalOwnership) {
+	c_engine->GetShaderManager().RegisterShader(className,[shader](prosper::IPrContext &context,const std::string &identifier,bool &bExternalOwnership) {
 		bExternalOwnership = true;
 		return dynamic_cast<prosper::Shader*>(shader);
 	});
+	pair.whShader = c_engine->GetShaderManager().GetShader(className);
 }
 
 luabind::object *pragma::LuaShaderManager::GetClassObject(std::string className)

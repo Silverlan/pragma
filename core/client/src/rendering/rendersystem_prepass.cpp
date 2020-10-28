@@ -14,15 +14,16 @@
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
+#include <sharedutils/alpha_mode.hpp>
 #include <pragma/model/animation/vertex_animation.hpp>
 #include <prosper_command_buffer.hpp>
 #include <image/prosper_render_target.hpp>
 #include <pragma/model/c_vertex_buffer_data.hpp>
 #include <pragma/model/vk_mesh.h>
-#pragma optimize("",off)
+
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 void RenderSystem::RenderPrepass(const util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode)
 {
 	auto &scene = c_game->GetRenderScene();
@@ -115,7 +116,9 @@ void RenderSystem::RenderPrepass(const util::DrawSceneInfo &drawSceneInfo,const 
 					if(bUseVertexAnim == false)
 						shaderDepthStage.BindVertexAnimationOffset(0u);
 
-					//if(ent->Render(&shaderDepthStage,mat,cmesh) == false)
+					if(matMeshInfo->material && matMeshInfo->material->GetAlphaMode() == AlphaMode::Mask)
+						shaderDepthStage.Draw(*cmesh,*matMeshInfo->material);
+					else
 						shaderDepthStage.Draw(*cmesh);
 				}
 			}

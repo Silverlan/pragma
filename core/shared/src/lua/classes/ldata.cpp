@@ -7,6 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/lua/classes/ldata.hpp"
+#include "pragma/lua/libraries/lfile.h"
 #include <pragma/lua/luaapi.h>
 #include <datasystem.h>
 #include <datasystem_color.h>
@@ -19,9 +20,12 @@ void Lua::DataBlock::load(lua_State *l,const std::string &fileName)
 		return;
 	Lua::Push(l,db);
 }
-void Lua::DataBlock::load(lua_State *l,VFilePtr f)
+void Lua::DataBlock::load(lua_State *l,LFile &f)
 {
-	auto db = ds::System::ReadData(f);
+	if(!f.IsValid())
+		return;
+	auto file = f.GetHandle();
+	auto db = ds::System::ReadData(file);
 	if(db == nullptr)
 		return;
 	Lua::Push(l,db);

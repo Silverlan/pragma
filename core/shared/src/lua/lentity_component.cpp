@@ -23,7 +23,6 @@
 
 extern DLLENGINE Engine *engine;
 
-#pragma optimize("",off)
 namespace Lua
 {
 	namespace BaseEntityComponent
@@ -177,4 +176,3 @@ void Lua::BaseEntityComponent::GetName(lua_State *l,BaseEntityComponentHandle &c
 	auto &info = *componentManager.GetComponentInfo(component->GetComponentId());
 	Lua::PushString(l,info.name);
 }
-#pragma optimize("",on)

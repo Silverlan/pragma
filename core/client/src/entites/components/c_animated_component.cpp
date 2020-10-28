@@ -21,7 +21,7 @@ extern DLLCENGINE CEngine *c_engine;
 using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 ComponentEventId CAnimatedComponent::EVENT_ON_SKELETON_UPDATED = INVALID_COMPONENT_ID;
 ComponentEventId CAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED = INVALID_COMPONENT_ID;
 ComponentEventId CAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED = INVALID_COMPONENT_ID;
@@ -118,11 +118,9 @@ void CAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 {
 	BaseAnimatedComponent::OnModelChanged(mdl);
 	m_boneMatrices.clear();
-	m_bindPose = nullptr;
 	if(mdl == nullptr || GetBoneCount() == 0)
 		return;
 	m_boneMatrices.resize(mdl->GetBoneCount(),umat::identity());
-	m_bindPose = mdl->GetReference().shared_from_this();
 	UpdateBoneMatrices();
 	SetBoneBufferDirty();
 
@@ -220,16 +218,14 @@ bool CAnimatedComponent::MaintainAnimations(double dt)
 	return true;
 }
 
-void CAnimatedComponent::SetBindPose(const Frame &frame) {m_bindPose = frame.shared_from_this();}
-const Frame *CAnimatedComponent::GetBindPose() const {return m_bindPose.get();}
-
 void CAnimatedComponent::UpdateBoneMatrices()
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
 	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 	if(mdl == nullptr)
 		return;
-	if(m_boneMatrices.empty() || m_bindPose == nullptr)
+	auto *bindPose = GetBindPose();
+	if(m_boneMatrices.empty() || bindPose == nullptr)
 		return;
 	UpdateSkeleton(); // Costly
 	auto physRootBoneId = OnSkeletonUpdated();
@@ -237,7 +233,7 @@ void CAnimatedComponent::UpdateBoneMatrices()
 	CEOnSkeletonUpdated evData{physRootBoneId};
 	InvokeEventCallbacks(EVENT_ON_SKELETON_UPDATED,evData);
 
-	auto &refFrame = *m_bindPose;
+	auto &refFrame = *bindPose;
 	for(unsigned int i=0;i<GetBoneCount();i++)
 	{
 		auto &t = m_processedBones.at(i);
@@ -256,7 +252,8 @@ void CAnimatedComponent::UpdateBoneMatrices()
 				tBindPose = tBindPose.GetInverse();
 				umath::ScaledTransform tBone {pos,orientation,scale};
 
-				mat = (tBone *tBindPose).ToMatrix();
+				mat = tBone.ToMatrix() *tBindPose.ToMatrix();
+				//mat = (tBone *tBindPose).ToMatrix();
 			}
 			else
 				mat = umat::identity();
@@ -294,3 +291,4 @@ void CEOnBoneBufferInitialized::PushArguments(lua_State *l)
 {
 	Lua::Push<std::shared_ptr<Lua::Vulkan::Buffer>>(l,buffer);
 }
+#pragma optimize("",on)

@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
@@ -35,9 +36,18 @@ decltype(ShaderPrepassBase::VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT) ShaderPrepassBase:
 
 decltype(ShaderPrepassBase::VERTEX_BINDING_VERTEX) ShaderPrepassBase::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex,sizeof(VertexBufferData)};
 decltype(ShaderPrepassBase::VERTEX_ATTRIBUTE_POSITION) ShaderPrepassBase::VERTEX_ATTRIBUTE_POSITION = {ShaderEntity::VERTEX_ATTRIBUTE_POSITION,VERTEX_BINDING_VERTEX};
+decltype(ShaderPrepassBase::VERTEX_ATTRIBUTE_UV) ShaderPrepassBase::VERTEX_ATTRIBUTE_UV = {ShaderEntity::VERTEX_ATTRIBUTE_UV,VERTEX_BINDING_VERTEX};
 
 decltype(ShaderPrepassBase::DESCRIPTOR_SET_INSTANCE) ShaderPrepassBase::DESCRIPTOR_SET_INSTANCE = {&ShaderEntity::DESCRIPTOR_SET_INSTANCE};
 decltype(ShaderPrepassBase::DESCRIPTOR_SET_CAMERA) ShaderPrepassBase::DESCRIPTOR_SET_CAMERA = {&ShaderScene::DESCRIPTOR_SET_CAMERA};
+decltype(ShaderPrepassBase::DESCRIPTOR_SET_MATERIAL) ShaderPrepassBase::DESCRIPTOR_SET_MATERIAL = {
+	{
+		prosper::DescriptorSetInfo::Binding { // Diffuse Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
+		}
+	}
+};
 
 static prosper::util::RenderPassCreateInfo::AttachmentInfo get_depth_render_pass_attachment_info(prosper::SampleCountFlags sampleCount)
 {
@@ -82,6 +92,44 @@ void ShaderPrepassBase::InitializeRenderPass(std::shared_ptr<prosper::IRenderPas
 
 void ShaderPrepassBase::Set3DSky(bool is3dSky) {umath::set_flag(m_stateFlags,Flags::RenderAs3DSky,is3dSky);}
 
+std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPrepassBase::InitializeMaterialDescriptorSet(CMaterial &mat)
+{
+	auto *diffuseMap = mat.GetDiffuseMap();
+	if(diffuseMap == nullptr || diffuseMap->texture == nullptr)
+		return nullptr;
+	auto diffuseTexture = std::static_pointer_cast<Texture>(diffuseMap->texture);
+	if(diffuseTexture->HasValidVkTexture() == false)
+		return nullptr;
+	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
+	mat.SetDescriptorSetGroup(*this,descSetGroup);
+	auto &descSet = *descSetGroup->GetDescriptorSet();
+	descSet.SetBindingTexture(*diffuseTexture->GetVkTexture(),umath::to_integral(MaterialBinding::AlbedoMap));
+	return descSetGroup;
+}
+
+bool ShaderPrepassBase::BindMaterial(CMaterial &mat)
+{
+	auto descSetGroup = mat.GetDescriptorSetGroup(*this);
+	if(descSetGroup == nullptr)
+		descSetGroup = InitializeMaterialDescriptorSet(mat); // Attempt to initialize on the fly
+	if(descSetGroup == nullptr)
+		return false;
+	return RecordBindDescriptorSet(*descSetGroup->GetDescriptorSet(),GetMaterialDescriptorSetIndex());
+}
+
+bool ShaderPrepassBase::Draw(CModelSubMesh &mesh,Material &matAlphaCutoff)
+{
+	auto flags = Flags::None;
+	if(mesh.GetExtendedVertexWeights().empty() == false)
+		flags |= Flags::UseExtendedVertexWeights;
+	if(umath::is_flag_set(m_stateFlags,Flags::RenderAs3DSky))
+		flags |= Flags::RenderAs3DSky;
+	flags |= Flags::AlphaTest;
+	if(RecordPushConstants(matAlphaCutoff.GetAlphaCutoff(),offsetof(PushConstants,alphaCutoff)) == false)
+		return false;
+	return RecordPushConstants(flags,offsetof(PushConstants,flags)) && BindMaterial(static_cast<CMaterial&>(matAlphaCutoff)) && ShaderEntity::Draw(mesh);
+}
+
 bool ShaderPrepassBase::Draw(CModelSubMesh &mesh)
 {
 	auto flags = Flags::None;
@@ -112,15 +160,18 @@ void ShaderPrepassBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInf
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT);
 
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
+	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_UV);
 
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::VertexBit);
 
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_MATERIAL);
 }
 
 uint32_t ShaderPrepassBase::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_CAMERA.setIndex;}
 uint32_t ShaderPrepassBase::GetInstanceDescriptorSetIndex() const {return DESCRIPTOR_SET_INSTANCE.setIndex;}
+uint32_t ShaderPrepassBase::GetMaterialDescriptorSetIndex() const {return DESCRIPTOR_SET_MATERIAL.setIndex;}
 void ShaderPrepassBase::GetVertexAnimationPushConstantInfo(uint32_t &offset) const
 {
 	offset = offsetof(PushConstants,vertexAnimInfo);

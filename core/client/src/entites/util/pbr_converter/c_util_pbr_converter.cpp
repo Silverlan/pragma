@@ -107,12 +107,20 @@ void CPBRConverterComponent::GenerateAmbientOcclusionMaps(Model &mdl,uint32_t w,
 	ScheduleModelUpdate(mdl,false,AmbientOcclusionInfo{w,h,samples,rebuild});
 }
 
-void CPBRConverterComponent::UpdateModel(Model &mdl,ModelUpdateInfo &updateInfo)
+void CPBRConverterComponent::GenerateAmbientOcclusionMaps(BaseEntity &ent,uint32_t w,uint32_t h,uint32_t samples,bool rebuild)
+{
+	auto mdl = ent.GetModel();
+	if(mdl == nullptr)
+		return;
+	ScheduleModelUpdate(*mdl,false,AmbientOcclusionInfo{w,h,samples,rebuild},&ent);
+}
+
+void CPBRConverterComponent::UpdateModel(Model &mdl,ModelUpdateInfo &updateInfo,BaseEntity *optEnt)
 {
 	if(updateInfo.updateMetalness)
 		UpdateMetalness(mdl);
 	if(updateInfo.updateAmbientOcclusion.has_value())
-		UpdateAmbientOcclusion(mdl,*updateInfo.updateAmbientOcclusion);
+		UpdateAmbientOcclusion(mdl,*updateInfo.updateAmbientOcclusion,optEnt);
 	if(updateInfo.cbOnMaterialsLoaded.IsValid())
 		updateInfo.cbOnMaterialsLoaded.Remove();
 	auto it = m_scheduledModelUpdates.find(&mdl);
@@ -120,7 +128,7 @@ void CPBRConverterComponent::UpdateModel(Model &mdl,ModelUpdateInfo &updateInfo)
 		m_scheduledModelUpdates.erase(it);
 }
 
-void CPBRConverterComponent::ScheduleModelUpdate(Model &mdl,bool updateMetalness,std::optional<AmbientOcclusionInfo> updateAOInfo)
+void CPBRConverterComponent::ScheduleModelUpdate(Model &mdl,bool updateMetalness,std::optional<AmbientOcclusionInfo> updateAOInfo,BaseEntity *optEnt)
 {
 	auto itUpdateInfo = m_scheduledModelUpdates.find(&mdl);
 	if(itUpdateInfo == m_scheduledModelUpdates.end())
@@ -130,8 +138,9 @@ void CPBRConverterComponent::ScheduleModelUpdate(Model &mdl,bool updateMetalness
 		updateInfo.updateMetalness = true;
 	if(updateAOInfo.has_value())
 		updateInfo.updateAmbientOcclusion = *updateAOInfo;
-	auto cb = mdl.CallOnMaterialsLoaded([this,&mdl,&updateInfo]() {
-		UpdateModel(mdl,updateInfo);
+	auto hEnt = optEnt ? optEnt->GetHandle() : EntityHandle{};
+	auto cb = mdl.CallOnMaterialsLoaded([this,&mdl,&updateInfo,hEnt]() {
+		UpdateModel(mdl,updateInfo,hEnt.get());
 	});
 	if(cb.IsValid())
 		updateInfo.cbOnMaterialsLoaded = cb;
@@ -163,7 +172,7 @@ void CPBRConverterComponent::OnEntitySpawn()
 	{
 		auto &mdl = pair.second;
 		UpdateMetalness(*mdl);
-		UpdateAmbientOcclusion(*mdl);
+		//UpdateAmbientOcclusion(*mdl);
 	}
 }
 bool CPBRConverterComponent::ShouldConvertMaterial(CMaterial &mat) const

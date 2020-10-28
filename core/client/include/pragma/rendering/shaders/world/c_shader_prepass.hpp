@@ -30,7 +30,14 @@ namespace pragma
 		{
 			None = 0u,
 			UseExtendedVertexWeights = 1u,
-			RenderAs3DSky = UseExtendedVertexWeights<<1u
+			RenderAs3DSky = UseExtendedVertexWeights<<1u,
+			AlphaTest = RenderAs3DSky<<1u
+		};
+		enum class MaterialBinding : uint32_t
+		{
+			AlbedoMap = 0u,
+
+			Count
 		};
 		static Pipeline GetPipelineIndex(prosper::SampleCountFlags sampleCount);
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT;
@@ -43,9 +50,11 @@ namespace pragma
 
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSITION;
+		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_UV;
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 
 #pragma pack(push,1)
 		struct PushConstants
@@ -54,6 +63,7 @@ namespace pragma
 			Vector4 drawOrigin; // w is scale
 			uint32_t vertexAnimInfo;
 			Flags flags;
+			float alphaCutoff;
 		};
 #pragma pack(pop)
 
@@ -65,10 +75,14 @@ namespace pragma
 		bool BindDrawOrigin(const Vector4 &drawOrigin);
 		void Set3DSky(bool is3dSky);
 		virtual bool Draw(CModelSubMesh &mesh) override;
+		bool Draw(CModelSubMesh &mesh,Material &matAlphaCutoff);
 	protected:
+		bool BindMaterial(CMaterial &mat);
+		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-
+		
+		uint32_t GetMaterialDescriptorSetIndex() const;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
 		virtual uint32_t GetInstanceDescriptorSetIndex() const override;
 		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const override;

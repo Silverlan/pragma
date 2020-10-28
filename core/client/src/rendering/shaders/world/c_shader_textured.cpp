@@ -29,7 +29,6 @@ extern DLLCENGINE CEngine *c_engine;
 using namespace pragma;
 
 
-#pragma optimize("",off)
 ShaderTextured3DBase::Pipeline ShaderTextured3DBase::GetPipelineIndex(prosper::SampleCountFlags sampleCount,bool bReflection)
 {
 	if(sampleCount == prosper::SampleCountFlags::e1Bit)
@@ -536,4 +535,3 @@ REGISTER_CONVAR_CALLBACK_CL(debug_light_depth,[](NetworkState*,ConVar*,int,int v
 REGISTER_CONVAR_CALLBACK_CL(debug_forwardplus_heatmap,[](NetworkState*,ConVar*,bool,bool val) {
 	set_debug_flag(pragma::ShaderScene::DebugFlags::ForwardPlusHeatmap,val);
 });
-#pragma optimize("",on)

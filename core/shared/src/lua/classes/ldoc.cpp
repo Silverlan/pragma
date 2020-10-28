@@ -15,7 +15,6 @@
 #include <luabind/detail/call.hpp>
 #include <luabind/class_info.hpp>
 
-#pragma optimize("",off)
 #if 0
 struct LUABIND_API class_base : scope
 {
@@ -985,4 +984,3 @@ void Lua::doc::register_library(Lua::Interface &lua)
 	}));
 	docLib[cdefCollection];
 }
-#pragma optimize("",on)

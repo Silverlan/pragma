@@ -26,7 +26,7 @@ namespace pragma
 		int32_t shaderQuality;
 
 		float lightmapIntensity;
-		float lightmapSqrt; // Experimental; can be 1 or 0
+		float lightmapExposurePow;
 	};
 	struct CameraData
 	{

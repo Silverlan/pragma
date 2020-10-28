@@ -10,7 +10,6 @@
 #include <wgui/types/wiscrollbar.h>
 #include <mathutil/umath.h>
 
-#pragma optimize("",off)
 LINK_WGUI_TO_CLASS(WIScrollContainer,WIScrollContainer);
 WIScrollContainer::WIScrollContainer()
 	: WIBase()
@@ -223,6 +222,14 @@ void WIScrollContainer::ScrollToBottom()
 	pScrollBar->SetScrollOffset(pScrollBar->GetElementCount());
 }
 
+void WIScrollContainer::SetScrollAmount(int32_t amX,int32_t amY)
+{
+	SetScrollAmountX(amX);
+	SetScrollAmountY(amY);
+}
+void WIScrollContainer::SetScrollAmountX(int32_t amX) {m_scrollAmountX = amX; ScheduleUpdate();}
+void WIScrollContainer::SetScrollAmountY(int32_t amY) {m_scrollAmountY = amY; ScheduleUpdate();}
+
 void WIScrollContainer::DoUpdate()
 {
 	if(m_hWrapper.IsValid())
@@ -254,7 +261,7 @@ void WIScrollContainer::DoUpdate()
 		{
 			WIScrollBar *pScrollBar = m_hScrollBarH.get<WIScrollBar>();
 			pScrollBar->SetUp(size.x,w);
-			pScrollBar->SetScrollAmount(10);
+			pScrollBar->SetScrollAmount(m_scrollAmountX);
 			pScrollBar->SetSize(GetWidth(),10);
 			pScrollBar->SetY(GetHeight() -pScrollBar->GetHeight());
 			pScrollBar->SetVisible(w > size.x); // set scroll offset to 0
@@ -265,7 +272,7 @@ void WIScrollContainer::DoUpdate()
 			auto bAtBottom = pScrollBar->GetBottomScrollOffset() == pScrollBar->GetElementCount();
 				
 			pScrollBar->SetUp(size.y,h);
-			pScrollBar->SetScrollAmount(10u);
+			pScrollBar->SetScrollAmount(m_scrollAmountY);
 			pScrollBar->SetSize(10,GetHeight());
 			pScrollBar->SetX(GetWidth() -pScrollBar->GetWidth());
 
@@ -276,4 +283,3 @@ void WIScrollContainer::DoUpdate()
 	}
 	WIBase::DoUpdate();
 }
-#pragma optimize("",on)

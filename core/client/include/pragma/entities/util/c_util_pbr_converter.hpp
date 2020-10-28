@@ -31,6 +31,7 @@ namespace pragma
 		PBRAOBakeJob(Model &mdl,Material &mat);
 		util::WeakHandle<Model> hModel = {};
 		MaterialHandle hMaterial = {};
+		EntityHandle hEntity = {};
 		util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> job = {};
 		bool isRunning = false;
 		uint32_t width = 512;
@@ -48,6 +49,7 @@ namespace pragma
 		virtual void OnRemove() override;
 		virtual void OnEntitySpawn() override;
 		void GenerateAmbientOcclusionMaps(Model &mdl,uint32_t w=512,uint32_t h=512,uint32_t samples=512,bool rebuild=false);
+		void GenerateAmbientOcclusionMaps(BaseEntity &ent,uint32_t w=512,uint32_t h=512,uint32_t samples=512,bool rebuild=false);
 
 		bool ConvertToPBR(CMaterial &matTraditional);
 		void PollEvents();
@@ -69,10 +71,10 @@ namespace pragma
 		void ConvertMaterialsToPBR(Model &mdl);
 		void UpdateMetalness(Model &mdl);
 		void UpdateMetalness(Model &mdl,CMaterial &mat);
-		void UpdateAmbientOcclusion(Model &mdl,const AmbientOcclusionInfo &aoInfo={});
-		void UpdateModel(Model &mdl,ModelUpdateInfo &updateInfo);
+		void UpdateAmbientOcclusion(Model &mdl,const AmbientOcclusionInfo &aoInfo={},BaseEntity *optEnt=nullptr);
+		void UpdateModel(Model &mdl,ModelUpdateInfo &updateInfo,BaseEntity *optEnt=nullptr);
 		void ApplyMiscMaterialProperties(ds::Block &dataBlock,const SurfaceMaterial &surfMat,const std::string &surfMatName);
-		void ScheduleModelUpdate(Model &mdl,bool updateMetalness,std::optional<AmbientOcclusionInfo> updateAOInfo={});
+		void ScheduleModelUpdate(Model &mdl,bool updateMetalness,std::optional<AmbientOcclusionInfo> updateAOInfo={},BaseEntity *optEnt=nullptr);
 
 		void ProcessQueue();
 		void WriteAOMap(Model &mdl,CMaterial &mat,uimg::ImageBuffer &imgBuffer,uint32_t w,uint32_t h) const;

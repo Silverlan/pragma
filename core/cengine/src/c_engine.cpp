@@ -66,7 +66,7 @@ decltype(CEngine::AXIS_PRESS_THRESHOLD) CEngine::AXIS_PRESS_THRESHOLD = 0.5f;
 
 // If set to true, each joystick axes will be split into a positive and a negative axis, which
 // can be bound individually
-#pragma optimize("",off)
+
 static const auto SEPARATE_JOYSTICK_AXES = true;
 CEngine::CEngine(int argc,char* argv[])
 	: Engine(argc,argv),pragma::RenderContext(),
@@ -579,6 +579,9 @@ bool CEngine::Initialize(int argc,char *argv[])
 	auto &shaderManager = GetRenderContext().GetShaderManager();
 	shaderManager.RegisterShader("clear_color",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderClearColor(context,identifier);});
 	shaderManager.RegisterShader("gradient",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderGradient(context,identifier);});
+
+	shaderManager.GetShader("blur_horizontal");
+	shaderManager.GetShader("blur_vertical");
 
 	// Initialize Client Instance
 	auto matManager = std::make_shared<CMaterialManager>(this->GetRenderContext());
@@ -1291,4 +1294,3 @@ REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled,[](NetworkState*,ConVar
 		return;
 	c_engine->SetGPUProfilingEnabled(enabled);
 })
-#pragma optimize("",on)

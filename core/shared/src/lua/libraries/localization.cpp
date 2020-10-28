@@ -118,7 +118,10 @@ std::string Locale::GetText(const std::string &id,const std::vector<std::string>
 {
 	auto it = m_localization.texts.find(id);
 	if(it == m_localization.texts.end())
+	{
+		Con::cwar<<"WARNING: Missing localization for '"<<id<<"'!"<<Con::endl;
 		return std::string("<MISSING LOCALIZATION: ") +id +std::string(">");
+	}
 	auto r = it->second;
 	insert_arguments(args,r);
 	return r;

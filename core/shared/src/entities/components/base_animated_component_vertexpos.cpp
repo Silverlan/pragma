@@ -38,10 +38,8 @@ std::optional<Mat4> BaseAnimatedComponent::GetVertexTransformMatrix(const ModelS
 	auto &verts = const_cast<ModelSubMesh&>(subMesh).GetVertices();
 	if(vertexId >= verts.size())
 		return {};
-	auto &ent = GetEntity();
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
-	if(hMdl == nullptr)
+	auto *bindPose = GetBindPose();
+	if(bindPose == nullptr)
 		return {};
 	auto &vertWeights = const_cast<ModelSubMesh&>(subMesh).GetVertexWeights();
 	auto transformMatrix = glm::mat4{0.f};
@@ -59,20 +57,20 @@ std::optional<Mat4> BaseAnimatedComponent::GetVertexTransformMatrix(const ModelS
 			auto &t = processedBones.at(boneId);
 
 			//
-			auto &refFrame = hMdl->GetReference();
 			auto &pos = t.GetOrigin();
 
 			auto &orientation = t.GetRotation();
 			auto &scale = t.GetScale();
 
-			auto *posBind = refFrame.GetBonePosition(boneId);
-			auto *rotBind = refFrame.GetBoneOrientation(boneId);
+			auto *posBind = bindPose->GetBonePosition(boneId);
+			auto *rotBind = bindPose->GetBoneOrientation(boneId);
 			if(posBind != nullptr && rotBind != nullptr)
 			{
 				umath::Transform tBindPose {*posBind,*rotBind};
 				tBindPose = tBindPose.GetInverse();
 
-				auto mat = (t *tBindPose).ToMatrix();
+				auto mat = t.ToMatrix() *tBindPose.ToMatrix();
+				//auto mat = (t *tBindPose).ToMatrix();
 				transformMatrix += weight *mat;
 				valid = true;
 			}

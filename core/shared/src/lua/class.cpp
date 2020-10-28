@@ -150,7 +150,10 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		luabind::def("fill_zeroes",ustring::fill_zeroes),
 		luabind::def("compare",static_cast<bool(*)(const char*,const char*,bool,size_t)>(ustring::compare)),
 		luabind::def("compare",static_cast<bool(*)(const std::string&,const std::string&,bool)>(ustring::compare)),
-		luabind::def("compare",static_cast<bool(*)(const std::string&,const std::string&)>([](const std::string &a,const std::string &b) -> bool {return ustring::compare(a,b,true);}))
+		luabind::def("compare",static_cast<bool(*)(const std::string&,const std::string&)>([](const std::string &a,const std::string &b) -> bool {return ustring::compare(a,b,true);})),
+		luabind::def("hash",static_cast<std::string(*)(const std::string&)>([](const std::string &str) -> std::string {
+			return std::to_string(std::hash<std::string>{}(str));
+		}))
 	];
 
 	auto modLight = luabind::module_(lua.GetState(),"light");
@@ -506,7 +509,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 
 	auto defDataBlock = luabind::class_<ds::Block>("DataBlock");
 	defDataBlock.scope[luabind::def("load",static_cast<void(*)(lua_State*,const std::string&)>(Lua::DataBlock::load))];
-	defDataBlock.scope[luabind::def("load",static_cast<void(*)(lua_State*,VFilePtr)>(Lua::DataBlock::load))];
+	defDataBlock.scope[luabind::def("load",static_cast<void(*)(lua_State*,LFile&)>(Lua::DataBlock::load))];
 	defDataBlock.scope[luabind::def("create",static_cast<void(*)(lua_State*)>(Lua::DataBlock::create))];
 
 	defDataBlock.def("GetInt",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::GetInt));
@@ -564,6 +567,24 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defDataBlock.def("FindBlock",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::FindBlock));
 	defDataBlock.def("FindBlock",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,uint32_t)>(&Lua::DataBlock::FindBlock));
 	modUtil[defDataBlock];
+
+	// Version
+	auto defVersion = luabind::class_<util::Version>("Version");
+	defVersion.def(luabind::constructor<>());
+	defVersion.def(luabind::constructor<uint32_t,uint32_t>());
+	defVersion.def(luabind::constructor<uint32_t,uint32_t,uint32_t>());
+	defVersion.def(luabind::constructor<const std::string&>());
+	defVersion.def(luabind::const_self ==luabind::const_self);
+	defVersion.def(luabind::const_self <luabind::const_self);
+	defVersion.def(luabind::const_self <=luabind::const_self);
+	defVersion.def(luabind::tostring(luabind::self));
+	defVersion.def_readwrite("major",&util::Version::major);
+	defVersion.def_readwrite("minor",&util::Version::minor);
+	defVersion.def_readwrite("revision",&util::Version::revision);
+	defVersion.def("Reset",&util::Version::Reset);
+	defVersion.def("ToString",&util::Version::ToString);
+	modUtil[defVersion];
+	//
 
 	// Path
 	auto defPath = luabind::class_<util::Path>("Path");

@@ -38,7 +38,7 @@ namespace pragma
 		const prosper::IPrContext &GetRenderContext() const;
 		prosper::IPrContext &GetRenderContext();
 		prosper::ShaderManager &GetShaderManager() const;
-		::util::WeakHandle<prosper::Shader> RegisterShader(const std::string &identifier,const std::function<prosper::Shader*(prosper::IPrContext&,const std::string&)> &fFactory);
+		void RegisterShader(const std::string &identifier,const std::function<prosper::Shader*(prosper::IPrContext&,const std::string&)> &fFactory);
 		::util::WeakHandle<prosper::Shader> GetShader(const std::string &identifier) const;
 
 		GLFW::Window &GetWindow();

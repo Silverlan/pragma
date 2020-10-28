@@ -138,6 +138,7 @@ bool Animation::Save(VFilePtrReal &f)
 	f->Seek(offsetToLen);
 	f->Write<uint64_t>(len);
 	f->Seek(curOffset);
+	return true;
 }
 
 std::shared_ptr<Animation> Animation::Create()

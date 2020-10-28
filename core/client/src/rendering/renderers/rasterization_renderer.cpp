@@ -35,7 +35,7 @@ using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
-
+#pragma optimize("",off)
 static void cl_render_ssao_callback(NetworkState*,ConVar*,bool,bool val)
 {
 	if(c_game == nullptr)
@@ -50,9 +50,19 @@ static void cl_render_ssao_callback(NetworkState*,ConVar*,bool,bool val)
 }
 REGISTER_CONVAR_CALLBACK_CL(cl_render_ssao,cl_render_ssao_callback);
 
+static std::vector<RasterizationRenderer*> g_renderers {};
+static std::weak_ptr<prosper::Texture> g_lightmap = {};
+void RasterizationRenderer::UpdateLightmap(const std::shared_ptr<prosper::Texture> &lightMapTexture)
+{
+	for(auto *renderer : g_renderers)
+		renderer->SetLightMap(lightMapTexture);
+	g_lightmap = lightMapTexture;
+}
+
 RasterizationRenderer::RasterizationRenderer()
 	: BaseRenderer{},m_hdrInfo{*this}
 {
+	g_renderers.push_back(this);
 	m_whShaderWireframe = c_engine->GetShader("wireframe");
 
 	InitializeLightDescriptorSets();
@@ -75,6 +85,9 @@ RasterizationRenderer::RasterizationRenderer()
 
 RasterizationRenderer::~RasterizationRenderer()
 {
+	auto it = std::find(g_renderers.begin(),g_renderers.end(),this);
+	if(it != g_renderers.end())
+		g_renderers.erase(it);
 	m_occlusionCullingHandler = nullptr;
 }
 
@@ -143,19 +156,29 @@ void RasterizationRenderer::UpdateCSMDescriptorSet(pragma::CLightDirectionalComp
 }
 
 void RasterizationRenderer::SetFogOverride(const std::shared_ptr<prosper::IDescriptorSetGroup> &descSetGroup) {m_descSetGroupFogOverride = descSetGroup;}
+
+extern bool g_collectRenderStats;
+extern void print_debug_render_stats();
 void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.scene == nullptr)
 		return;
+	static auto skipMode = 0;
+	if(skipMode == 1)
+		return;
 	auto &scene = *drawSceneInfo.scene;
 	// Occlusion Culling
 	PerformOcclusionCulling(scene);
-
+	
+	if(skipMode == 2)
+		return;
 	// Collect render objects
 	c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("OnPreRender",drawSceneInfo);
 	CollectRenderObjects(scene,drawSceneInfo.renderFlags);
 	c_game->CallLuaCallbacks<void,RasterizationRenderer*>("PrepareRendering",this);
-
+	
+	if(skipMode == 3)
+		return;
 	// Collect 3D skybox data
 	m_3dSkyCameras.clear();
 	EntityIterator entIt {*c_game};
@@ -170,24 +193,36 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 		m_3dSkyCameras.push_back(skyCamera);
 	}
 	//
-
+	
+	if(skipMode == 4)
+		return;
 	// Prepass
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::Scene);
 
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	if(drawSceneInfo.renderTarget == nullptr)
 		RenderPrepass(drawSceneInfo);
-
+	
+	if(skipMode == 5)
+		return;
 	// SSAO
 	RenderSSAO(drawSceneInfo);
-
+	
+	if(skipMode == 6)
+		return;
 	// Cull light sources
 	CullLightSources(drawSceneInfo);
-
+	
+	if(skipMode == 7)
+		return;
 	// Lighting pass
 	RenderLightingPass(drawSceneInfo);
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::Scene);
 
+
+	
+	if(skipMode == 8)
+		return;
 	// Post processing
 	c_game->StartProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
@@ -196,15 +231,19 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingFog);
 	RenderSceneFog(drawSceneInfo);
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingFog);
-
+	
+	if(skipMode == 9)
+		return;
 	// Glow
-	RenderGlowObjects(drawSceneInfo);
+	// RenderGlowObjects(drawSceneInfo);
 	c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing",drawSceneInfo);
 	c_game->CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing",drawSceneInfo);
 
 	// Bloom
-	RenderBloom(drawSceneInfo);
-
+	// RenderBloom(drawSceneInfo);
+	
+	if(skipMode == 10)
+		return;
 	// Tone mapping
 	if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::HDR))
 	{
@@ -219,11 +258,16 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	auto &dsgBloomTonemapping = GetHDRInfo().dsgBloomTonemapping;
 	RenderToneMapping(drawSceneInfo,*dsgBloomTonemapping->GetDescriptorSet());
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingHDR);
-
+	
+	if(skipMode == 11)
+		return;
 	// FXAA
 	RenderFXAA(drawSceneInfo);
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
+
+	if(g_collectRenderStats)
+		print_debug_render_stats();
 }
 
 bool RasterizationRenderer::ReloadRenderTarget(Scene &scene,uint32_t width,uint32_t height)
@@ -255,6 +299,11 @@ bool RasterizationRenderer::ReloadRenderTarget(Scene &scene,uint32_t width,uint3
 	auto &dummyTex = c_engine->GetRenderContext().GetDummyTexture();
 	auto &ds = *m_descSetGroupRenderer->GetDescriptorSet();
 	ds.SetBindingTexture(*dummyTex,umath::to_integral(pragma::ShaderScene::RendererBinding::LightMap));
+
+	m_lightMapInfo.lightMapTexture = nullptr;
+	if(g_lightmap.expired() == false)
+		SetLightMap(g_lightmap.lock());
+
 	UpdateRenderSettings();
 	return true;
 }
@@ -505,3 +554,4 @@ RenderMeshCollectionHandler &RasterizationRenderer::GetRenderMeshCollectionHandl
 const RenderMeshCollectionHandler &RasterizationRenderer::GetRenderMeshCollectionHandler() const {return const_cast<RasterizationRenderer*>(this)->GetRenderMeshCollectionHandler();}
 
 prosper::Shader *RasterizationRenderer::GetWireframeShader() {return m_whShaderWireframe.get();}
+#pragma optimize("",on)

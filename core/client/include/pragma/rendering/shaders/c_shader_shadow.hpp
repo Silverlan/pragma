@@ -25,6 +25,10 @@ namespace pragma
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_ID;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT;
 
+		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT_EXT;
+		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT_ID;
+		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_EXT;
+
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSITION;
 

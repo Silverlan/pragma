@@ -13,6 +13,7 @@
 
 namespace pragma
 {
+	class CLightMapComponent;
 	class DLLCLIENT CLightMapReceiverComponent final
 		: public BaseEntityComponent
 	{
@@ -24,7 +25,8 @@ namespace pragma
 		CLightMapReceiverComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
-
+		
+		void UpdateLightMapUvData();
 		const std::unordered_map<MeshIdx,std::vector<Vector2>> &GetMeshLightMapUvData() const;
 		void AssignBufferIndex(MeshIdx meshIdx,BufferIdx bufIdx);
 		std::optional<BufferIdx> FindBufferIndex(CModelSubMesh &mesh) const;

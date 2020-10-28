@@ -128,7 +128,8 @@ bool pragma::ShaderComposeRMA::InsertAmbientOcclusion(prosper::IPrContext &conte
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	auto aoTex = context.CreateTexture(texCreateInfo,aoImg,imgViewCreateInfo,samplerCreateInfo);
 
-	auto texRMA = std::static_pointer_cast<Texture>(rmaTexInfo)->GetVkTexture();
+	auto tex = std::static_pointer_cast<Texture>(rmaTexInfo);
+	auto texRMA = (tex->IsError() == false) ? tex->GetVkTexture() : nullptr;
 	auto newRMA = ComposeRMA(context,texRMA.get(),texRMA.get(),aoTex.get());
 
 	uimg::TextureInfo imgWriteInfo {};

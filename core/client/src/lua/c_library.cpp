@@ -348,6 +348,18 @@ static void register_gui(Lua::Interface &lua)
 		auto o = WGUILuaInterface::GetLuaObject(l,*pScrollBar);
 		o.push(l);
 	}));
+	wiScrollContainerClassDef.def("SetScrollAmount",static_cast<void(*)(lua_State*,WIScrollContainerHandle&,int32_t,int32_t)>([](lua_State *l,WIScrollContainerHandle &hEl,int32_t amX,int32_t amY) {
+		lua_checkgui(l,hEl);
+		static_cast<::WIScrollContainer*>(hEl.get())->SetScrollAmount(amX,amY);
+	}));
+	wiScrollContainerClassDef.def("SetScrollAmountX",static_cast<void(*)(lua_State*,WIScrollContainerHandle&,int32_t)>([](lua_State *l,WIScrollContainerHandle &hEl,int32_t am) {
+		lua_checkgui(l,hEl);
+		static_cast<::WIScrollContainer*>(hEl.get())->SetScrollAmountX(am);
+	}));
+	wiScrollContainerClassDef.def("SetScrollAmountY",static_cast<void(*)(lua_State*,WIScrollContainerHandle&,int32_t)>([](lua_State *l,WIScrollContainerHandle &hEl,int32_t am) {
+		lua_checkgui(l,hEl);
+		static_cast<::WIScrollContainer*>(hEl.get())->SetScrollAmountY(am);
+	}));
 	guiMod[wiScrollContainerClassDef];
 
 	auto wiContainerClassDef = luabind::class_<WIContainerHandle,WIHandle>("Container");

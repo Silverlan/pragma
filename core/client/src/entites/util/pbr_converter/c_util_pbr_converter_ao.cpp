@@ -66,7 +66,10 @@ void CPBRConverterComponent::ProcessQueue()
 	sceneInfo.height = item.height;
 	sceneInfo.samples = item.samples;
 
-	item.job = rendering::cycles::bake_ambient_occlusion(*client,sceneInfo,*item.hModel.get(),itMat -mats.begin() /* materialIndex */);
+	if(item.hEntity.IsValid())
+		item.job = rendering::cycles::bake_ambient_occlusion(*client,sceneInfo,*item.hEntity.get(),itMat -mats.begin() /* materialIndex */);
+	else
+		item.job = rendering::cycles::bake_ambient_occlusion(*client,sceneInfo,*item.hModel.get(),itMat -mats.begin() /* materialIndex */);
 	if(item.job.IsValid() == false)
 		return;
 	auto hMat = item.hMaterial;
@@ -86,10 +89,8 @@ void CPBRConverterComponent::ProcessQueue()
 	c_engine->AddParallelJob(item.job,"Ambient Occlusion");
 }
 
-void CPBRConverterComponent::UpdateAmbientOcclusion(Model &mdl,const AmbientOcclusionInfo &aoInfo)
+void CPBRConverterComponent::UpdateAmbientOcclusion(Model &mdl,const AmbientOcclusionInfo &aoInfo,BaseEntity *optEnt)
 {
-	// TODO: Re-enable this (but don't run it automatically?)
-#if 0
 	ConvertMaterialsToPBR(mdl);
 
 	// We will have to generate ao maps for all materials of the first skin.
@@ -112,9 +113,9 @@ void CPBRConverterComponent::UpdateAmbientOcclusion(Model &mdl,const AmbientOccl
 		job.width = aoInfo.width;
 		job.height = aoInfo.height;
 		job.samples = aoInfo.samples;
+		job.hEntity = optEnt ? optEnt->GetHandle() : EntityHandle{};
 		m_workQueue.push(job);
 	}
-#endif
 }
 void CPBRConverterComponent::WriteAOMap(Model &mdl,CMaterial &mat,uimg::ImageBuffer &imgBuffer,uint32_t w,uint32_t h) const
 {

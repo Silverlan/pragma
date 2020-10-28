@@ -445,6 +445,8 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	classDef.def("TurnOff",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {SetEnabled(l,hEnt,false);}));
 	classDef.def("IsEnabled",&Lua::Entity::IsEnabled);
 	classDef.def("IsTurnedOn",&Lua::Entity::IsEnabled);
+	classDef.def("IsDisabled",&Lua::Entity::IsDisabled);
+	classDef.def("IsTurnedOff",&Lua::Entity::IsDisabled);
 	classDef.def("SetColor",&Lua::Entity::SetColor);
 	classDef.def("GetColor",&Lua::Entity::GetColor);
 	classDef.def("GetPhysicsObject",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
@@ -797,6 +799,16 @@ void Lua::Entity::IsEnabled(lua_State *l,EntityHandle &hEnt)
 	if(toggleC != nullptr)
 		isEnabled = toggleC->IsTurnedOn();
 	Lua::PushBool(l,isEnabled);
+}
+
+void Lua::Entity::IsDisabled(lua_State *l,EntityHandle &hEnt)
+{
+	LUA_CHECK_ENTITY(l,hEnt);
+	auto isEnabled = true;
+	auto *toggleC = dynamic_cast<pragma::BaseToggleComponent*>(hEnt->FindComponent("toggle").get());
+	if(toggleC != nullptr)
+		isEnabled = toggleC->IsTurnedOn();
+	Lua::PushBool(l,!isEnabled);
 }
 
 Color Lua::Entity::GetColor(lua_State *l,EntityHandle &hEnt)

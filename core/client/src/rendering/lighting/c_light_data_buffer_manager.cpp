@@ -12,7 +12,6 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-#pragma optimize("",off)
 //#define ENABLE_LIGHT_BUFFER_DEBUGGING
 void BaseLightBufferManager::Initialize()
 {
@@ -164,4 +163,3 @@ void LightDataBufferManager::Free(const std::shared_ptr<prosper::IBuffer> &rende
 		//c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer,offsetof(BufferData,flags),flags);
 	}
 }
-#pragma optimize("",on)

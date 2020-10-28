@@ -24,7 +24,7 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
-
+#pragma optimize("",off)
 ShadowRenderer::ShadowRenderer()
 {
 	m_shader = c_game->GetGameShader(CGame::GameShader::Shadow);
@@ -341,3 +341,4 @@ void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffe
 	RenderShadows(drawCmd,light,pragma::CLightComponent::ShadowMapType::Static,type,bDrawParticleShadows);
 	RenderShadows(drawCmd,light,pragma::CLightComponent::ShadowMapType::Dynamic,type,bDrawParticleShadows);
 }
+#pragma optimize("",on)

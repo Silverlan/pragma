@@ -287,7 +287,7 @@ void Model::Merge(const Model &other,MergeFlags flags)
 			Hitbox hb(hitboxOther.group,hitboxOther.min,hitboxOther.max);
 			auto it = hitboxes.find(boneId);
 			if(it != hitboxes.end())
-				it->second = hb;
+				;// it->second = hb;
 			else
 				hitboxes.insert(std::make_pair(boneId,hb));
 		}

@@ -15,9 +15,6 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 {
 	auto defCRender = luabind::class_<CRenderHandle,BaseEntityComponentHandle>("RenderComponent");
 	Lua::register_base_render_component_methods<luabind::class_<CRenderHandle,BaseEntityComponentHandle>,CRenderHandle>(l,defCRender);
-	defCRender.def("GetModelMatrix",&Lua::Render::GetModelMatrix);
-	defCRender.def("GetTranslationMatrix",&Lua::Render::GetTranslationMatrix);
-	defCRender.def("GetRotationMatrix",&Lua::Render::GetRotationMatrix);
 	defCRender.def("GetTransformationMatrix",&Lua::Render::GetTransformationMatrix);
 	defCRender.def("SetRenderMode",&Lua::Render::SetRenderMode);
 	defCRender.def("GetRenderMode",&Lua::Render::GetRenderMode);
@@ -68,30 +65,8 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->SetDepthBias(constantFactor,biasClamp,slopeFactor);
 	}));
-	defCRender.def("CalcRayIntersection",static_cast<void(*)(lua_State*,CRenderHandle&,const Vector3&,const Vector3&)>([](lua_State *l,CRenderHandle &hComponent,const Vector3 &start,const Vector3 &dir) {
-		pragma::Lua::check_component(l,hComponent);
-		auto result = hComponent->CalcRayIntersection(start,dir);
-		if(result.has_value() == false)
-		{
-			Lua::PushInt(l,umath::to_integral(Intersection::Result::NoIntersection));
-			return;
-		}
-		Lua::Push(l,umath::to_integral(result->result));
-
-		auto t = Lua::CreateTable(l);
-
-		Lua::PushString(l,"position"); /* 1 */
-		Lua::Push<Vector3>(l,result->hitPos); /* 2 */
-		Lua::SetTableValue(l,t); /* 0 */
-
-		Lua::PushString(l,"distance"); /* 1 */
-		Lua::PushNumber(l,result->hitValue); /* 2 */
-		Lua::SetTableValue(l,t); /* 0 */
-
-		Lua::PushString(l,"uv"); /* 1 */
-		Lua::Push<Vector2>(l,Vector2{result->u,result->v}); /* 2 */
-		Lua::SetTableValue(l,t); /* 0 */
-	}));
+	defCRender.def("CalcRayIntersection",static_cast<void(*)(lua_State*,CRenderHandle&,const Vector3&,const Vector3&,bool)>(&Lua::Render::CalcRayIntersection));
+	defCRender.def("CalcRayIntersection",static_cast<void(*)(lua_State*,CRenderHandle&,const Vector3&,const Vector3&)>(&Lua::Render::CalcRayIntersection));
 	defCRender.def("SetDepthPassEnabled",static_cast<void(*)(lua_State*,CRenderHandle&,bool)>([](lua_State *l,CRenderHandle &hComponent,bool depthPassEnabled) {
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->SetDepthPassEnabled(depthPassEnabled);
@@ -99,6 +74,40 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCRender.def("IsDepthPassEnabled",static_cast<void(*)(lua_State*,CRenderHandle&)>([](lua_State *l,CRenderHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);
 		Lua::PushBool(l,hComponent->IsDepthPassEnabled());
+	}));
+	defCRender.def("GetRenderClipPlane",static_cast<void(*)(lua_State*,CRenderHandle&)>([](lua_State *l,CRenderHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		auto *clipPlane = hComponent->GetRenderClipPlane();
+		if(clipPlane == nullptr)
+			return;
+		Lua::Push(l,*clipPlane);
+	}));
+	defCRender.def("SetRenderClipPlane",static_cast<void(*)(lua_State*,CRenderHandle&,const Vector4&)>([](lua_State *l,CRenderHandle &hComponent,const Vector4 &clipPlane) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->SetRenderClipPlane(clipPlane);
+	}));
+	defCRender.def("ClearRenderClipPlane",static_cast<void(*)(lua_State*,CRenderHandle&)>([](lua_State *l,CRenderHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->ClearRenderClipPlane();
+	}));
+	defCRender.def("GetRenderPose",static_cast<void(*)(lua_State*,CRenderHandle&)>([](lua_State *l,CRenderHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		Lua::Push(l,hComponent->GetRenderPose());
+	}));
+	defCRender.def("SetRenderOffsetTransform",static_cast<void(*)(lua_State*,CRenderHandle&,const umath::ScaledTransform&)>([](lua_State *l,CRenderHandle &hComponent,const umath::ScaledTransform &pose) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->SetRenderOffsetTransform(pose);
+	}));
+	defCRender.def("ClearRenderOffsetTransform",static_cast<void(*)(lua_State*,CRenderHandle&)>([](lua_State *l,CRenderHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->ClearRenderOffsetTransform();
+	}));
+	defCRender.def("GetRenderOffsetTransform",static_cast<void(*)(lua_State*,CRenderHandle&)>([](lua_State *l,CRenderHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		auto *t = hComponent->GetRenderOffsetTransform();
+		if(t == nullptr)
+			return;
+		Lua::Push(l,*t);
 	}));
 	defCRender.add_static_constant("EVENT_ON_UPDATE_RENDER_DATA",pragma::CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA);
 	defCRender.add_static_constant("EVENT_ON_RENDER_BOUNDS_CHANGED",pragma::CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED);
@@ -116,27 +125,40 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCRender.add_static_constant("RENDERMODE_WATER",umath::to_integral(RenderMode::Water));
 	entsMod[defCRender];
 }
-void Lua::Render::GetModelMatrix(lua_State *l,CRenderHandle &hEnt)
+void Lua::Render::CalcRayIntersection(lua_State *l,CRenderHandle &hComponent,const Vector3 &start,const Vector3 &dir,bool precise)
 {
-	pragma::Lua::check_component(l,hEnt);
-	Mat4 mat = hEnt->GetModelMatrix();
-	luabind::object(l,mat).push(l);
-}
+	pragma::Lua::check_component(l,hComponent);
+	auto result = hComponent->CalcRayIntersection(start,dir,precise);
+	if(result.has_value() == false)
+	{
+		Lua::PushInt(l,umath::to_integral(Intersection::Result::NoIntersection));
+		return;
+	}
+	Lua::Push(l,umath::to_integral(result->result));
 
-void Lua::Render::GetTranslationMatrix(lua_State *l,CRenderHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	Mat4 mat = hEnt->GetTranslationMatrix();
-	luabind::object(l,mat).push(l);
-}
+	auto t = Lua::CreateTable(l);
 
-void Lua::Render::GetRotationMatrix(lua_State *l,CRenderHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	Mat4 mat = hEnt->GetRotationMatrix();
-	luabind::object(l,mat).push(l);
-}
+	Lua::PushString(l,"position"); /* 1 */
+	Lua::Push<Vector3>(l,result->hitPos); /* 2 */
+	Lua::SetTableValue(l,t); /* 0 */
 
+	Lua::PushString(l,"distance"); /* 1 */
+	Lua::PushNumber(l,result->hitValue); /* 2 */
+	Lua::SetTableValue(l,t); /* 0 */
+
+	if(precise)
+	{
+		Lua::PushString(l,"uv"); /* 1 */
+		Lua::Push<Vector2>(l,Vector2{result->u,result->v}); /* 2 */
+		Lua::SetTableValue(l,t); /* 0 */
+		return;
+	}
+	
+	Lua::PushString(l,"boneId"); /* 1 */
+	Lua::PushInt(l,result->boneId); /* 2 */
+	Lua::SetTableValue(l,t); /* 0 */
+}
+void Lua::Render::CalcRayIntersection(lua_State *l,CRenderHandle &hComponent,const Vector3 &start,const Vector3 &dir) {CalcRayIntersection(l,hComponent,start,dir,false);}
 void Lua::Render::GetTransformationMatrix(lua_State *l,CRenderHandle &hEnt)
 {
 	pragma::Lua::check_component(l,hEnt);

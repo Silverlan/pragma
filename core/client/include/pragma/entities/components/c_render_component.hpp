@@ -71,10 +71,8 @@ namespace pragma
 		RenderMode GetRenderMode() const;
 		const util::PEnumProperty<RenderMode> &GetRenderModeProperty() const;
 
-		Mat4 &GetModelMatrix();
-		Mat4 &GetTranslationMatrix();
-		Mat4 &GetRotationMatrix();
 		Mat4 &GetTransformationMatrix();
+		const umath::ScaledTransform &GetRenderPose() const;
 
 		virtual void ReceiveData(NetPacket &packet) override;
 
@@ -106,8 +104,16 @@ namespace pragma
 		void SetDepthPassEnabled(bool enabled);
 		bool IsDepthPassEnabled() const;
 
+		void SetRenderClipPlane(const Vector4 &plane);
+		void ClearRenderClipPlane();
+		const Vector4 *GetRenderClipPlane() const;
+
 		void SetRenderBufferDirty();
-		std::optional<Intersection::LineMeshResult> CalcRayIntersection(const Vector3 &start,const Vector3 &dir) const;
+		std::optional<Intersection::LineMeshResult> CalcRayIntersection(const Vector3 &start,const Vector3 &dir,bool precise=false) const;
+
+		void SetRenderOffsetTransform(const umath::ScaledTransform &t);
+		void ClearRenderOffsetTransform();
+		const umath::ScaledTransform *GetRenderOffsetTransform() const;
 	protected:
 		void UpdateRenderBuffer() const;
 		virtual void UpdateMatrices();
@@ -122,9 +128,8 @@ namespace pragma
 		void InitializeRenderBuffers();
 		void UpdateBoneBuffer();
 
-		Mat4 m_matModel = umat::identity();
-		Mat4 m_matRotation = umat::identity();
-		Mat4 m_matTranslation = umat::identity();
+		std::optional<umath::ScaledTransform> m_renderOffset {};
+		umath::ScaledTransform m_renderPose {};
 		Mat4 m_matTransformation = umat::identity();
 		util::PEnumProperty<RenderMode> m_renderMode = nullptr;
 
@@ -138,6 +143,8 @@ namespace pragma
 		Vector3 m_renderMinRot = {};
 		Vector3 m_renderMaxRot = {};
 		Sphere m_renderSphere = {};
+
+		std::optional<Vector4> m_renderClipPlane {};
 
 		StateFlags m_stateFlags = static_cast<StateFlags>(umath::to_integral(StateFlags::RenderBufferDirty) | umath::to_integral(StateFlags::EnableDepthPass));
 		unsigned long long m_lastRender = 0ull;
@@ -177,12 +184,11 @@ namespace pragma
 	struct DLLCLIENT CEOnUpdateRenderMatrices
 		: public ComponentEvent
 	{
-		CEOnUpdateRenderMatrices(Mat4 &translation,Mat4 &rotation,Mat4 &transformation);
+		CEOnUpdateRenderMatrices(umath::ScaledTransform &pose,Mat4 &transformation);
 		virtual void PushArguments(lua_State *l) override;
 		virtual uint32_t GetReturnCount() override;
 		virtual void HandleReturnValues(lua_State *l) override;
-		Mat4 &translation;
-		Mat4 &rotation;
+		umath::ScaledTransform &pose;
 		Mat4 &transformation;
 	};
 

@@ -425,6 +425,26 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 			return;
 		Lua::PushInt(l,*index);
 	}));
+	classDef.def("SetScale",static_cast<void(*)(lua_State*,WIHandle&,const Vector2&)>([](lua_State *l,WIHandle &hPanel,const Vector2 &scale) {
+		lua_checkgui(l,hPanel);
+		hPanel->SetScale(scale);
+	}));
+	classDef.def("SetScale",static_cast<void(*)(lua_State*,WIHandle&,float,float)>([](lua_State *l,WIHandle &hPanel,float x,float y) {
+		lua_checkgui(l,hPanel);
+		hPanel->SetScale(x,y);
+	}));
+	classDef.def("GetScale",static_cast<Vector2(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) -> Vector2 {
+		lua_checkgui_ret(l,hPanel,Vector2(1.f,1.f));
+		return hPanel->GetScale();
+	}));
+	classDef.def("GetScaleProperty",static_cast<void(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) {
+		lua_checkgui(l,hPanel);
+		Lua::Property::push(l,*hPanel->GetScaleProperty());
+	}));
+	classDef.def("IsUpdateScheduled",static_cast<bool(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) -> bool {
+		lua_checkgui_ret(l,hPanel,false);
+		return hPanel->IsUpdateScheduled();
+	}));
 
 	auto defDrawInfo = luabind::class_<::WIBase::DrawInfo>("DrawInfo");
 	defDrawInfo.def(luabind::constructor<>());
@@ -1370,12 +1390,17 @@ void Lua::WIBase::Draw(lua_State *l,WIHandle &hPanel,const ::WIBase::DrawInfo &d
 void Lua::WIBase::Draw(lua_State *l,WIHandle &hPanel,const ::WIBase::DrawInfo &drawInfo,const Vector2i &scissorOffset,const Vector2i &scissorSize)
 {
 	lua_checkgui(l,hPanel);
-	hPanel->Draw(drawInfo,Vector2i{},scissorOffset,scissorSize);
+	hPanel->Draw(drawInfo,Vector2i{},scissorOffset,scissorSize,hPanel->GetScale());
 }
 void Lua::WIBase::Draw(lua_State *l,WIHandle &hPanel,const ::WIBase::DrawInfo &drawInfo,const Vector2i &scissorOffset,const Vector2i &scissorSize,const Vector2i &offsetParent)
 {
 	lua_checkgui(l,hPanel);
-	hPanel->Draw(drawInfo,offsetParent,scissorOffset,scissorSize);
+	hPanel->Draw(drawInfo,offsetParent,scissorOffset,scissorSize,hPanel->GetScale());
+}
+void Lua::WIBase::Draw(lua_State *l,WIHandle &hPanel,const ::WIBase::DrawInfo &drawInfo,const Vector2i &scissorOffset,const Vector2i &scissorSize,const Vector2i &offsetParent,const Vector2 &scale)
+{
+	lua_checkgui(l,hPanel);
+	hPanel->Draw(drawInfo,offsetParent,scissorOffset,scissorSize,scale);
 }
 void Lua::WIBase::GetX(lua_State *l,WIHandle &hPanel)
 {

@@ -683,8 +683,11 @@ void CGame::RegisterLuaClasses()
 	defDrawSceneInfo.def_readwrite("flipVertically",&::util::DrawSceneInfo::flipVertically);
 	defDrawSceneInfo.property("clearColor",static_cast<Color(*)(::util::DrawSceneInfo&)>([](::util::DrawSceneInfo &drawSceneInfo) -> Color {
 		return *drawSceneInfo.clearColor;
-	}),static_cast<void(*)(::util::DrawSceneInfo&,const Color&)>([](::util::DrawSceneInfo &drawSceneInfo,const Color &color) {
-		drawSceneInfo.clearColor = color;
+	}),static_cast<void(*)(lua_State*,::util::DrawSceneInfo&,const luabind::object&)>([](lua_State *l,::util::DrawSceneInfo &drawSceneInfo,const luabind::object &color) {
+		if(luabind::type(color) == LUA_TNIL)
+			drawSceneInfo.clearColor = {};
+		else
+			drawSceneInfo.clearColor = Lua::Check<Color>(l,2);
 	}));
 	defDrawSceneInfo.def("SetEntityRenderFilter",static_cast<void(*)(lua_State*,util::DrawSceneInfo&,luabind::object)>([](lua_State *l,util::DrawSceneInfo &drawSceneInfo,luabind::object f) {
 		Lua::CheckFunction(l,2);

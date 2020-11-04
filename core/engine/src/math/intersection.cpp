@@ -367,6 +367,30 @@ bool Intersection::LineMesh(const Vector3 &start,const Vector3 &dir,Model &mdl,L
 bool Intersection::LineMesh(const Vector3 &start,const Vector3 &dir,Model &mdl,LineMeshResult &r,bool precise,const std::vector<uint32_t> &bodyGroups,const Vector3 &origin,const Quat &rot) {return LineMesh(start,dir,mdl,r,precise,&bodyGroups,0,origin,rot);}
 bool Intersection::LineMesh(const Vector3 &start,const Vector3 &dir,Model &mdl,LineMeshResult &r,bool precise,const Vector3 &origin,const Quat &rot) {return LineMesh(start,dir,mdl,r,precise,0,origin,rot);}
 
+bool Intersection::LineSphere(const Vector3 &lineOrigin,const Vector3 &lineDir,const Vector3 &sphereOrigin,float sphereRadius,float &outT,Vector3 &outP)
+{
+	// Source: https://gamedev.stackexchange.com/a/96487/49279
+	auto m = lineOrigin -sphereOrigin;
+	float b = uvec::dot(m,lineDir);
+	float c = uvec::dot(m,m) -umath::pow2(sphereRadius);
+
+	// Exit if r’s origin outside s (c > 0) and r pointing away from s (b > 0) 
+	if(c > 0.0f && b > 0.0f)
+		return false;
+	float discr = b*b - c;
+
+	// A negative discriminant corresponds to ray missing sphere 
+	if(discr < 0.0f) return 0;
+
+	// Ray now found to intersect sphere, compute smallest t value of intersection
+	outT = -b - umath::sqrt(discr);
+
+	// If t is negative, ray started inside sphere so clamp t to zero 
+	if(outT < 0.0f) outT = 0.0f;
+	outP = lineOrigin +outT *lineDir;
+	return true;
+}
+
 bool Intersection::LineMesh(const Vector3 &_start,const Vector3 &_dir,ModelMesh &mesh,LineMeshResult &r,bool precise,const Vector3 *origin,const Quat *rot)
 {
 	auto start = _start;

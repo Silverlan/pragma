@@ -103,6 +103,7 @@ namespace Lua
 		DLLCLIENT void Draw(lua_State *l,WIHandle &hPanel,const ::WIBase::DrawInfo &drawInfo);
 		DLLCLIENT void Draw(lua_State *l,WIHandle &hPanel,const ::WIBase::DrawInfo &drawInfo,const Vector2i &scissorOffset,const Vector2i &scissorSize);
 		DLLCLIENT void Draw(lua_State *l,WIHandle &hPanel,const ::WIBase::DrawInfo &drawInfo,const Vector2i &scissorOffset,const Vector2i &scissorSize,const Vector2i &offsetParent);
+		DLLCLIENT void Draw(lua_State *l,WIHandle &hPanel,const ::WIBase::DrawInfo &drawInfo,const Vector2i &scissorOffset,const Vector2i &scissorSize,const Vector2i &offsetParent,const Vector2 &scale);
 		DLLCLIENT void GetX(lua_State *l,WIHandle &hPanel);
 		DLLCLIENT void GetY(lua_State *l,WIHandle &hPanel);
 		DLLCLIENT void SetX(lua_State *l,WIHandle &hPanel,float x); // TODO This should be int, but float-to-int conversion is currently broken with luabind

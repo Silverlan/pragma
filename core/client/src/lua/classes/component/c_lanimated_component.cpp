@@ -65,6 +65,16 @@ void Lua::Animated::register_class(lua_State *l,luabind::module_ &entsMod)
 		auto &m = mats.at(boneIndex);
 		Lua::Push<Mat4>(l,m);
 		}));
+	defCAnimated.def("SetBoneRenderMatrix",static_cast<void(*)(lua_State*,CAnimatedHandle&,uint32_t,const Mat4&)>([](lua_State *l,CAnimatedHandle &hAnim,uint32_t boneIndex,const Mat4 &m) {
+		pragma::Lua::check_component(l,hAnim);
+		auto *pAnimComponent = hAnim.get();
+		if(pAnimComponent == nullptr)
+			return;
+		auto &mats = pAnimComponent->GetBoneMatrices();
+		if(boneIndex >= mats.size())
+			return;
+		mats.at(boneIndex) = m;
+	}));
 	defCAnimated.def("GetLocalVertexPosition",static_cast<void(*)(lua_State*,CAnimatedHandle&,std::shared_ptr<::ModelSubMesh>&,uint32_t)>([](lua_State *l,CAnimatedHandle &hAnim,std::shared_ptr<::ModelSubMesh> &subMesh,uint32_t vertexId) {
 		pragma::Lua::check_component(l,hAnim);
 		Vector3 pos,n;

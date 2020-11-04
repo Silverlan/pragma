@@ -1019,6 +1019,12 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		float epsilon = 0.001f;
 		Lua::PushBool(l,umath::abs(a.x -b.x) <= epsilon && umath::abs(a.y -b.y) <= epsilon && umath::abs(a.z -b.z) <= epsilon);
 	}));
+	defVector.def("GetAngle",static_cast<float(*)(lua_State*,const Vector3&,const Vector3&)>([](lua_State *l,const Vector3 &a,const Vector3 &b) -> float {
+		auto dot = uvec::dot(a,b);
+		auto la = uvec::length(a);
+		auto lb = uvec::length(b);
+		return umath::acos(dot /(la *lb));
+	}));
 	defVector.def("Slerp",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,float)>([](lua_State *l,const Vector3 &a,const Vector3 &b,float factor) {
 		auto result = glm::slerp(a,b,factor);
 		Lua::Push<Vector3>(l,result);

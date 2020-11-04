@@ -58,9 +58,6 @@ namespace Lua
 	namespace Render
 	{
 		DLLCLIENT void register_class(lua_State *l,luabind::module_ &entsMod);
-		DLLCLIENT void GetModelMatrix(lua_State *l,CRenderHandle &hEnt);
-		DLLCLIENT void GetTranslationMatrix(lua_State *l,CRenderHandle &hEnt);
-		DLLCLIENT void GetRotationMatrix(lua_State *l,CRenderHandle &hEnt);
 		DLLCLIENT void GetTransformationMatrix(lua_State *l,CRenderHandle &hEnt);
 		DLLCLIENT void RenderModel(lua_State *l,CRenderHandle &hEnt);
 		DLLCLIENT void SetRenderMode(lua_State *l,CRenderHandle &hEnt,unsigned int mode);
@@ -72,6 +69,8 @@ namespace Lua
 		DLLCLIENT void UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd);
 		DLLCLIENT void GetRenderBuffer(lua_State *l,CRenderHandle &hEnt);
 		DLLCLIENT void GetBoneBuffer(lua_State *l,CRenderHandle &hEnt);
+		DLLCLIENT void CalcRayIntersection(lua_State *l,CRenderHandle &hComponent,const Vector3 &start,const Vector3 &dir,bool precise);
+		DLLCLIENT void CalcRayIntersection(lua_State *l,CRenderHandle &hComponent,const Vector3 &start,const Vector3 &dir);
 	};
 	namespace SoundEmitter
 	{

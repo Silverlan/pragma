@@ -101,6 +101,9 @@ void CRenderComponent::SetDepthBias(float constantFactor,float biasClamp,float s
 CRenderComponent::StateFlags CRenderComponent::GetStateFlags() const {return m_stateFlags;}
 void CRenderComponent::SetDepthPassEnabled(bool enabled) {umath::set_flag(m_stateFlags,StateFlags::EnableDepthPass,enabled);}
 bool CRenderComponent::IsDepthPassEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::EnableDepthPass);}
+void CRenderComponent::SetRenderClipPlane(const Vector4 &plane) {m_renderClipPlane = plane;}
+void CRenderComponent::ClearRenderClipPlane() {m_renderClipPlane = {};}
+const Vector4 *CRenderComponent::GetRenderClipPlane() const {return m_renderClipPlane.has_value() ? &*m_renderClipPlane : nullptr;}
 void CRenderComponent::Initialize()
 {
 	BaseRenderComponent::Initialize();
@@ -260,7 +263,7 @@ void CRenderComponent::UpdateRenderBounds()
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
 	auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(phys == nullptr || pPhysComponent->GetPhysicsType() != PHYSICSTYPE::SOFTBODY || !phys->IsSoftBody())
-		AABB::GetRotatedBounds(m_renderMin,m_renderMax,GetRotationMatrix(),&m_renderMinRot,&m_renderMaxRot); // TODO: Use orientation
+		AABB::GetRotatedBounds(m_renderMin,m_renderMax,Mat4{m_renderPose.GetRotation()},&m_renderMinRot,&m_renderMaxRot); // TODO: Use orientation
 	else
 	{
 		phys->GetAABB(m_renderMin,m_renderMax);
@@ -269,10 +272,8 @@ void CRenderComponent::UpdateRenderBounds()
 	}
 }
 
-Mat4 &CRenderComponent::GetModelMatrix() {return m_matModel;}
-Mat4 &CRenderComponent::GetTranslationMatrix() {return m_matTranslation;}
-Mat4 &CRenderComponent::GetRotationMatrix() {return m_matRotation;}
 Mat4 &CRenderComponent::GetTransformationMatrix() {return m_matTransformation;}
+const umath::ScaledTransform &CRenderComponent::GetRenderPose() const {return m_renderPose;}
 void CRenderComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseRenderComponent::OnEntityComponentAdded(component);
@@ -308,26 +309,28 @@ void CRenderComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 util::WeakHandle<CModelComponent> &CRenderComponent::GetModelComponent() const {return m_mdlComponent;}
 util::WeakHandle<CAnimatedComponent> &CRenderComponent::GetAnimatedComponent() const {return m_animComponent;}
 util::WeakHandle<CLightMapReceiverComponent> &CRenderComponent::GetLightMapReceiverComponent() const {return m_lightMapReceiverComponent;}
+void CRenderComponent::SetRenderOffsetTransform(const umath::ScaledTransform &t) {m_renderOffset = t;}
+void CRenderComponent::ClearRenderOffsetTransform() {m_renderOffset = {};}
+const umath::ScaledTransform *CRenderComponent::GetRenderOffsetTransform() const {return m_renderOffset.has_value() ? &*m_renderOffset : nullptr;}
 void CRenderComponent::UpdateMatrices()
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto orientation = pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
+	umath::ScaledTransform pose {};
 	if(pPhysComponent.expired() || pPhysComponent->GetPhysicsType() != PHYSICSTYPE::SOFTBODY)
 	{
-		m_matTranslation = glm::translate(umat::identity(),pPhysComponent.valid() ? pPhysComponent->GetOrigin() : pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{});
-		m_matRotation = umat::create(orientation);
+		pose.SetOrigin(pPhysComponent.valid() ? pPhysComponent->GetOrigin() : pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{});
+		pose.SetRotation(orientation);
 	}
-	else
-	{
-		m_matTranslation = umat::identity();
-		m_matRotation = umat::identity();
-	}
-	auto scale = pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
-	m_matTransformation = m_matTranslation *m_matRotation *glm::scale(umat::identity(),scale);
+	if(pTrComponent.valid())
+		pose.SetScale(pTrComponent->GetScale());
+	if(m_renderOffset.has_value())
+		pose = *m_renderOffset *pose;
+	m_matTransformation = pose.ToMatrix();
 
-	CEOnUpdateRenderMatrices evData{m_matTranslation,m_matRotation,m_matTransformation};
+	CEOnUpdateRenderMatrices evData{pose,m_matTransformation};
 	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_MATRICES,evData);
 }
 unsigned long long &CRenderComponent::GetLastRenderFrame() {return m_lastRender;}
@@ -352,7 +355,7 @@ void CRenderComponent::ReceiveData(NetPacket &packet)
 {
 	m_renderFlags = packet->Read<decltype(m_renderFlags)>();
 }
-std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersection(const Vector3 &start,const Vector3 &dir) const
+std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersection(const Vector3 &start,const Vector3 &dir,bool precise) const
 {
 	auto &lodMeshes = GetLODMeshes();
 	if(lodMeshes.empty())
@@ -381,6 +384,45 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 	float dIntersect;
 	if(Intersection::LineAABB(lstart,n,min,max,&dIntersect) == Intersection::Result::NoIntersection || dIntersect > d)
 		return {};
+
+	auto mdlC = GetEntity().GetModelComponent();
+	auto mdl = mdlC.valid() ? mdlC->GetModel() : nullptr;
+	if(mdl)
+	{
+		auto &hitboxes = mdl->GetHitboxes();
+		if(hitboxes.empty() == false)
+		{
+			// We'll assume that there are enough hitboxes to cover the entire model
+			Hitbox *closestHitbox = nullptr;
+			auto closestHitboxDistance = std::numeric_limits<float>::max();
+			uint32_t closestHitboxBoneId = std::numeric_limits<uint32_t>::max();
+			for(auto &hb : hitboxes)
+			{
+				Vector3 min,max,origin;
+				Quat rot;
+				if(mdlC->GetHitboxBounds(hb.first,min,max,origin,rot) == false)
+					continue;
+				float dist;
+				if(Intersection::LineOBB(start,dir,min,max,&dist,origin,rot) == false || dist >= closestHitboxDistance)
+					continue;
+				closestHitboxDistance = dist;
+				closestHitbox = &hb.second;
+				closestHitboxBoneId = hb.first;
+			}
+			if(closestHitbox == nullptr)
+				return {};
+			if(precise == false)
+			{
+				Intersection::LineMeshResult result {};
+				result.hitPos = start +dir *closestHitboxDistance;
+				result.hitValue = closestHitboxDistance;
+				result.result = Intersection::Result::Intersect;
+				result.hitbox = closestHitbox;
+				result.boneId = closestHitboxBoneId;
+				return result;
+			}
+		}
+	}
 
 	std::optional<Intersection::LineMeshResult> bestResult = {};
 	for(auto &mesh : lodMeshes)
@@ -626,24 +668,21 @@ void CEShouldDraw::HandleReturnValues(lua_State *l)
 
 /////////////////
 
-CEOnUpdateRenderMatrices::CEOnUpdateRenderMatrices(Mat4 &translation,Mat4 &rotation,Mat4 &transformation)
-	: translation{translation},rotation{rotation},transformation{transformation}
+CEOnUpdateRenderMatrices::CEOnUpdateRenderMatrices(umath::ScaledTransform &pose,Mat4 &transformation)
+	: pose{pose},transformation{transformation}
 {}
 void CEOnUpdateRenderMatrices::PushArguments(lua_State *l)
 {
-	Lua::Push<Mat4>(l,translation);
-	Lua::Push<Mat4>(l,rotation);
+	Lua::Push<umath::ScaledTransform>(l,pose);
 	Lua::Push<Mat4>(l,transformation);
 }
 uint32_t CEOnUpdateRenderMatrices::GetReturnCount() {return 3;}
 void CEOnUpdateRenderMatrices::HandleReturnValues(lua_State *l)
 {
-	if(Lua::IsSet(l,-3))
-		translation = *Lua::CheckMat4(l,-3);
 	if(Lua::IsSet(l,-2))
-		translation = *Lua::CheckMat4(l,-2);
+		pose = Lua::Check<umath::ScaledTransform>(l,-2);
 	if(Lua::IsSet(l,-1))
-		translation = *Lua::CheckMat4(l,-1);
+		transformation = *Lua::CheckMat4(l,-1);
 }
 
 /////////////////

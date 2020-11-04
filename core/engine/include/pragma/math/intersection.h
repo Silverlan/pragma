@@ -46,12 +46,18 @@ namespace Intersection
 	struct DLLENGINE LineMeshResult
 	{
 		Result result = Result::NoIntersection;
+		Vector3 hitPos = {};
+		double hitValue = std::numeric_limits<double>::max(); // Range if hit: [0,1]
+
+		// Only for imprecise results
+		Hitbox *hitbox = nullptr;
+		uint32_t boneId;
+
+		// Only for precise results
 		uint32_t meshGroupIndex = std::numeric_limits<uint32_t>::max();
 		uint32_t meshIdx = std::numeric_limits<uint32_t>::max();
 		uint32_t subMeshIdx = std::numeric_limits<uint32_t>::max();
 		uint64_t triIdx = std::numeric_limits<uint64_t>::max();
-		Vector3 hitPos = {};
-		double hitValue = std::numeric_limits<double>::max(); // Range if hit: [0,1]
 		double t = 0.0;
 		double u = 0.0;
 		double v = 0.0;
@@ -62,6 +68,7 @@ namespace Intersection
 	DLLENGINE bool LineMesh(const Vector3 &start,const Vector3 &dir,Model &mdl,LineMeshResult &outResult,bool precise,uint32_t lod,const Vector3 &origin,const Quat &rot);
 	DLLENGINE bool LineMesh(const Vector3 &start,const Vector3 &dir,Model &mdl,LineMeshResult &outResult,bool precise,const std::vector<uint32_t> &bodyGroups,const Vector3 &origin,const Quat &rot);
 	DLLENGINE bool LineMesh(const Vector3 &start,const Vector3 &dir,Model &mdl,LineMeshResult &outResult,bool precise,const Vector3 &origin,const Quat &rot);
+	DLLENGINE bool LineSphere(const Vector3 &lineOrigin,const Vector3 &lineDir,const Vector3 &sphereOrigin,float sphereRadius,float &outT,Vector3 &outP);
 	DLLENGINE bool SphereSphere(const Vector3 &originA,float rA,const Vector3 &originB,float rB);
 	DLLENGINE bool AABBSphere(const Vector3 &min,const Vector3 &max,const Vector3 &origin,float r);
 	DLLENGINE bool PointInPlaneMesh(const Vector3 &vec,const std::vector<Plane> &planes);

@@ -248,6 +248,8 @@ static bool is_valid(lua_State *l)
 					break;
 			}
 		}
+		else if(Lua::IsBool(l,1))
+			bValid = Lua::CheckBool(l,1);
 	}
 	return bValid;
 }
@@ -268,7 +270,7 @@ int Lua::util::is_valid_entity(lua_State *l)
 	return ::is_valid(l);
 }
 
-static void safely_remove(luabind::object &o)
+static void safely_remove(luabind::object &o,const char *removeFunction)
 {
 	auto *pEnt = luabind::object_cast_nothrow<EntityHandle*>(o,static_cast<EntityHandle*>(nullptr));
 	if(pEnt != nullptr) // Used frequently, and is faster than looking up "IsValid"
@@ -279,10 +281,10 @@ static void safely_remove(luabind::object &o)
 	}
 	try
 	{
-		auto oRemove = o["Remove"];
+		auto oRemove = o[removeFunction];
 		if(!oRemove)
 			return;
-		luabind::call_member<void>(o,"Remove");
+		luabind::call_member<void>(o,removeFunction);
 	}
 	catch(std::exception&) // No "IsValid" method exists
 	{}
@@ -290,13 +292,15 @@ static void safely_remove(luabind::object &o)
 
 int Lua::util::remove(lua_State *l)
 {
+	auto safeRemove = Lua::IsSet(l,2) && Lua::CheckBool(l,2);
+	auto *removeFunction = safeRemove ? "RemoveSafely" : "Remove";
 	if(Lua::IsSet(l,1) && Lua::IsTable(l,1))
 	{
 		auto t = luabind::object(luabind::from_stack(l,1));
 		for(luabind::iterator i(t), e; i != e; ++i)
 		{
 			auto o = luabind::object{*i};
-			safely_remove(o);
+			safely_remove(o,removeFunction);
 		}
 		return 0;
 	}
@@ -304,7 +308,7 @@ int Lua::util::remove(lua_State *l)
 	if(valid == false)
 		return 0;
 	auto o = luabind::object(luabind::from_stack(l,1));
-	safely_remove(o);
+	safely_remove(o,removeFunction);
 	return 0;
 }
 

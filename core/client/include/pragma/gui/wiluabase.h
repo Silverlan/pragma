@@ -64,7 +64,7 @@ public:
 	virtual void OnVisibilityChanged(bool bVisible) override;
 	virtual void SetColor(float r,float g,float b,float a=1.f) override;
 	virtual void SetAlpha(float alpha) override;
-	virtual void Render(const DrawInfo &drawInfo,const Mat4 &matDraw) override;
+	virtual void Render(const DrawInfo &drawInfo,const Mat4 &matDraw,const Vector2 &scale) override;
 	virtual void OnCursorEntered() override;
 	virtual void OnCursorExited() override;
 	virtual void OnFocusGained() override;
@@ -114,8 +114,8 @@ public:
 	void OnSetAlpha(float alpha);
 	static void default_OnSetAlpha(lua_State *l,WIHandle &hElement,float alpha);
 
-	void Render(const ::WIBase::DrawInfo &drawInfo,const Mat4 &matDraw);
-	static void default_Render(lua_State *l,WIHandle &hElement,const ::WIBase::DrawInfo &drawInfo,const Mat4 &matDraw);
+	void Render(const ::WIBase::DrawInfo &drawInfo,const Mat4 &matDraw,const Vector2 &scale);
+	static void default_Render(lua_State *l,WIHandle &hElement,const ::WIBase::DrawInfo &drawInfo,const Mat4 &matDraw,const Vector2 &scale);
 
 	void OnCursorEntered();
 	static void default_OnCursorEntered(lua_State *l,WIHandle &hElement);

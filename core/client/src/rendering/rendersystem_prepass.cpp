@@ -50,6 +50,7 @@ void RenderSystem::RenderPrepass(const util::DrawSceneInfo &drawSceneInfo,const 
 	//shaderDepthStage.BindLights(lights,descSetShadowmps,descSetLightSources);
 	CBaseEntity *entPrev = nullptr;
 	pragma::CRenderComponent *renderC = nullptr;
+	std::optional<Vector4> clipPlane {};
 	auto depthBiasActive = false;
 	auto &shaderDepthStage = rasterizer->GetPrepass().GetShader();
 	auto &drawCmd = drawSceneInfo.commandBuffer;
@@ -86,6 +87,8 @@ void RenderSystem::RenderPrepass(const util::DrawSceneInfo &drawSceneInfo,const 
 						depthBiasActive = false;
 						drawCmd->RecordSetDepthBias();
 					}
+					auto *entClipPlane = renderC->GetRenderClipPlane();
+					clipPlane = entClipPlane ? *entClipPlane : std::optional<Vector4>{};
 				}
 				if(renderC == nullptr)
 					continue;
@@ -115,11 +118,18 @@ void RenderSystem::RenderPrepass(const util::DrawSceneInfo &drawSceneInfo,const 
 					}
 					if(bUseVertexAnim == false)
 						shaderDepthStage.BindVertexAnimationOffset(0u);
+					
+					if(clipPlane.has_value())
+						shaderDepthStage.BindClipPlane(*clipPlane);
 
 					if(matMeshInfo->material && matMeshInfo->material->GetAlphaMode() == AlphaMode::Mask)
 						shaderDepthStage.Draw(*cmesh,*matMeshInfo->material);
 					else
 						shaderDepthStage.Draw(*cmesh);
+
+
+					if(clipPlane.has_value())
+						shaderDepthStage.BindClipPlane(c_game->GetRenderClipPlane());
 				}
 			}
 		}

@@ -3299,6 +3299,16 @@ namespace Lua
 			Lua::Push<Quat>(l,rot);
 			Lua::Push<Vector3>(l,scale);
 		}));
+		def.def("GetLocalBonePose",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t boneId) {
+			pragma::Lua::check_component(l,hEnt);
+			Vector3 pos = {};
+			auto rot = uquat::identity();
+			Vector3 scale(1.f,1.f,1.f);
+			auto r = hEnt->GetLocalBonePosition(boneId,pos,rot,&scale);
+			if(r == false)
+				return;
+			Lua::Push<umath::ScaledTransform>(l,{pos,rot,scale});
+		}));
 		def.def("GetGlobalBoneTransform",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t boneId) {
 			pragma::Lua::check_component(l,hEnt);
 			Vector3 pos = {};
@@ -3310,6 +3320,16 @@ namespace Lua
 			Lua::Push<Vector3>(l,pos);
 			Lua::Push<Quat>(l,rot);
 			Lua::Push<Vector3>(l,scale);
+		}));
+		def.def("GetGlobalBonePose",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t boneId) {
+			pragma::Lua::check_component(l,hEnt);
+			Vector3 pos = {};
+			auto rot = uquat::identity();
+			Vector3 scale(1.f,1.f,1.f);
+			auto r = hEnt->GetGlobalBonePosition(boneId,pos,rot,&scale);
+			if(r == false)
+				return;
+			Lua::Push<umath::ScaledTransform>(l,{pos,rot,scale});
 		}));
 		def.def("GetBoneRotation",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t boneId) {
 			pragma::Lua::check_component(l,hEnt);
@@ -3379,6 +3399,10 @@ namespace Lua
 			pragma::Lua::check_component(l,hEnt);
 			hEnt->SetLocalBonePosition(boneId,pos,rot,scale);
 		}));
+		def.def("SetLocalBonePose",static_cast<void(*)(lua_State*,THandle&,uint32_t,const umath::ScaledTransform&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const umath::ScaledTransform &pose) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt->SetLocalBonePosition(boneId,pose.GetOrigin(),pose.GetRotation(),pose.GetScale());
+		}));
 		def.def("SetLocalBonePos",static_cast<void(*)(lua_State*,THandle&,uint32_t,const Vector3&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const Vector3 &pos) {
 			pragma::Lua::check_component(l,hEnt);
 			hEnt->SetLocalBonePosition(boneId,pos);
@@ -3391,6 +3415,10 @@ namespace Lua
 		def.def("SetGlobalBoneTransform",static_cast<void(*)(lua_State*,THandle&,uint32_t,const Vector3&,const Quat&,const Vector3&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const Vector3 &pos,const Quat &rot,const Vector3 &scale) {
 			pragma::Lua::check_component(l,hEnt);
 			hEnt->SetGlobalBonePosition(boneId,pos,rot,scale);
+		}));
+		def.def("SetGlobalBonePose",static_cast<void(*)(lua_State*,THandle&,uint32_t,const umath::ScaledTransform&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const umath::ScaledTransform &pose) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt->SetGlobalBonePosition(boneId,pose.GetOrigin(),pose.GetRotation(),pose.GetScale());
 		}));
 		def.def("SetGlobalBonePos",static_cast<void(*)(lua_State*,THandle&,uint32_t,const Vector3&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const Vector3 &pos) {
 			pragma::Lua::check_component(l,hEnt);

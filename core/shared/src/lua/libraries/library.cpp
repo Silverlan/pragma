@@ -1227,6 +1227,11 @@ void Game::RegisterLuaLibraries()
 					++it;
 			}
 			return path;
+		})),
+		luabind::def("copy",static_cast<bool(*)(lua_State*,const std::string&,std::string)>([](lua_State *l,const std::string &srcFile,std::string dstFile) -> bool {
+			if(Lua::file::validate_write_operation(l,dstFile) == false)
+				return false;
+			return FileManager::CopyFile(srcFile.c_str(),dstFile.c_str());
 		}))
 	];
 
@@ -1442,7 +1447,18 @@ void Game::RegisterLuaLibraries()
 		luabind::def("aabb_with_plane",Intersection::AABBPlane),
 		luabind::def("aabb_with_triangle",Intersection::AABBTriangle),
 		luabind::def("obb_with_plane",Intersection::OBBPlane),
-		luabind::def("sphere_with_plane",Intersection::SpherePlane)
+		luabind::def("sphere_with_plane",Intersection::SpherePlane),
+		luabind::def("line_with_sphere",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,const Vector3&,float)>([](lua_State *l,const Vector3 &lineOrigin,const Vector3 &lineDir,const Vector3 &sphereOrigin,float sphereRadius) {
+			float t;
+			Vector3 p;
+			if(Intersection::LineSphere(lineOrigin,lineDir,sphereOrigin,sphereRadius,t,p) == false)
+			{
+				Lua::PushBool(l,false);
+				return;
+			}
+			Lua::PushNumber(l,t);
+			Lua::Push(l,p);
+		}))
 	];
 
 	auto modGeometry = luabind::module_(GetLuaState(),"geometry");

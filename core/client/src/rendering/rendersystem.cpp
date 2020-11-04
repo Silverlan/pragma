@@ -182,6 +182,7 @@ void RenderSystem::Render(
 	pragma::ShaderTextured3DBase *shaderPrev = nullptr;
 	CBaseEntity *entPrev = nullptr;
 	pragma::CRenderComponent *renderC = nullptr;
+	std::optional<Vector4> clipPlane {};
 	auto depthBiasActive = false;
 	auto debugMode = scene->GetDebugMode();
 	auto &drawCmd = drawSceneInfo.commandBuffer;
@@ -246,6 +247,8 @@ void RenderSystem::Render(
 					depthBiasActive = false;
 					drawCmd->RecordSetDepthBias();
 				}
+				auto *entClipPlane = renderC->GetRenderClipPlane();
+				clipPlane = entClipPlane ? *entClipPlane : std::optional<Vector4>{};
 			}
 			if(renderC == nullptr)
 				continue;
@@ -271,8 +274,14 @@ void RenderSystem::Render(
 				}
 				if(bUseVertexAnim == false)
 					shader->BindVertexAnimationOffset(0u);
+				
+				if(clipPlane.has_value())
+					shader->BindClipPlane(*clipPlane);
 
 				shader->Draw(*mesh);
+
+				if(clipPlane.has_value())
+					shader->BindClipPlane(c_game->GetRenderClipPlane());
 			}
 		}
 	}
@@ -359,6 +368,7 @@ uint32_t RenderSystem::Render(
 	auto pipelineType = pragma::ShaderTextured3DBase::GetPipelineIndex(rasterizer.GetSampleCount(),bReflection);
 	//auto frameId = c_engine->GetRenderContext().GetLastFrameId();
 	CBaseEntity *entLast = nullptr;
+	std::optional<Vector4> clipPlane {};
 	pragma::CRenderComponent *renderC = nullptr;
 	pragma::ShaderTextured3DBase *shaderLast = nullptr;
 	auto depthBiasActive = false;
@@ -427,6 +437,8 @@ uint32_t RenderSystem::Render(
 									depthBiasActive = false;
 									drawCmd->RecordSetDepthBias();
 								}
+								auto *entClipPlane = renderC->GetRenderClipPlane();
+								clipPlane = entClipPlane ? *entClipPlane : std::optional<Vector4>{};
 							}
 							if(renderC == nullptr)
 								continue;
@@ -459,6 +471,9 @@ uint32_t RenderSystem::Render(
 									if(bUseVertexAnim == false)
 										shader->BindVertexAnimationOffset(0u);
 									
+									if(clipPlane.has_value())
+										shader->BindClipPlane(*clipPlane);
+
 									if(stats)
 										stats->meshes.push_back(std::static_pointer_cast<CModelSubMesh>(mesh->shared_from_this()));
 									shader->Draw(*mesh);
@@ -469,6 +484,9 @@ uint32_t RenderSystem::Render(
 										++debugInfo.staticMeshCount;
 									debugInfo.triangleCount += numTriangles;
 									debugInfo.vertexCount += mesh->GetVertexCount();
+									
+									if(clipPlane.has_value())
+										shader->BindClipPlane(c_game->GetRenderClipPlane());
 								}
 #endif
 							}

@@ -14,14 +14,14 @@
 #include <functional>
 #include <mathutil/color.h>
 
-class Scene;
 class CBaseEntity;
 namespace prosper {class IPrimaryCommandBuffer;};
+namespace pragma {class CSceneComponent;};
 namespace util
 {
 	struct DLLCLIENT DrawSceneInfo
 	{
-		std::shared_ptr<::Scene> scene = nullptr;
+		util::WeakHandle<::pragma::CSceneComponent> scene = {};
 		mutable std::shared_ptr<prosper::IPrimaryCommandBuffer> commandBuffer = nullptr;
 		std::shared_ptr<prosper::RenderTarget> renderTarget = nullptr;
 		FRender renderFlags = FRender::All;

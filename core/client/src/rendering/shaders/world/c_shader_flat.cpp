@@ -91,7 +91,7 @@ ShaderFlat::ShaderFlat(prosper::IPrContext &context,const std::string &identifie
 {
 	// SetBaseShader<ShaderTextured3DBase>();
 }
-bool ShaderFlat::BindScene(const Scene &scene,bool bView)
+bool ShaderFlat::BindScene(const pragma::CSceneComponent &scene,bool bView)
 {
 	auto descSet = (bView == true) ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
 	return RecordBindDescriptorSet(*descSet,DESCRIPTOR_SET_CAMERA.setIndex);
@@ -148,7 +148,9 @@ bool ShaderFlat::Draw(CModelSubMesh &mesh)
 		return false;
 	}
 
-	auto &scene = static_cast<CGame*>(c_engine->GetClientState()->GetGameState())->GetRenderScene();
+	auto *scene = static_cast<CGame*>(c_engine->GetClientState()->GetGameState())->GetRenderScene();
+	if(scene == nullptr)
+		return false;
 	auto &cam = scene->GetActiveCamera();
 	auto mvp = cam.valid() ? cam->GetProjectionMatrix() *cam->GetViewMatrix() : Mat4{1.f};
 	RecordBindVertexBuffer(*vertexBuffer);

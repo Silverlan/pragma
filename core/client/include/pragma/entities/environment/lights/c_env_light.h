@@ -163,7 +163,7 @@ namespace pragma
 		bool IsInCone(const CBaseEntity &ent,const Vector3 &dir,float angle) const;
 
 		// A shadowed light source may only be assigned to one scene / one scene slot
-		Scene *FindShadowScene() const;
+		CSceneComponent *FindShadowScene() const;
 		COcclusionCullerComponent *FindShadowOcclusionCuller() const;
 
 		virtual void SetLightIntensityType(LightIntensityType type) override;

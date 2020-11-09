@@ -19,7 +19,7 @@ namespace pragma
 	public:
 		OcclusionCullingHandlerOctTree()=default;
 		virtual void PerformCulling(
-			Scene &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+			CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
 			std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut,bool cullByViewFrustum=true
 		) override;
 	private:

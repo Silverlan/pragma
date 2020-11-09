@@ -30,7 +30,7 @@ static void cmd_forwardplus_tile_size(NetworkState*,ConVar*,int32_t,int32_t val)
 {
 	if(c_game == NULL)
 		return;
-	auto &scene = c_game->GetScene();
+	auto *scene = c_game->GetScene();
 	auto *renderer = scene ? scene->GetRenderer() : nullptr;
 	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 		return;
@@ -126,7 +126,7 @@ bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::IPrContext &con
 	return true;
 }
 
-void pragma::rendering::ForwardPlusInstance::Compute(prosper::IPrimaryCommandBuffer &cmdBuffer,Scene &scene,prosper::IImage &imgDepth,prosper::IDescriptorSet &descSetCam)
+void pragma::rendering::ForwardPlusInstance::Compute(prosper::IPrimaryCommandBuffer &cmdBuffer,pragma::CSceneComponent &scene,prosper::IImage &imgDepth,prosper::IDescriptorSet &descSetCam)
 {
 	if(m_shaderLightCulling.expired() || m_shaderLightIndexing.expired() || m_shadowLightBits.empty() == true)
 		return;

@@ -22,7 +22,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
-
+#pragma optimize("",off)
 decltype(ShaderScene::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderScene::DESCRIPTOR_SET_RENDER_SETTINGS = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Debug
@@ -121,7 +121,7 @@ bool ShaderScene::BindRenderSettings(prosper::IDescriptorSet &descSetRenderSetti
 {
 	return RecordBindDescriptorSet(descSetRenderSettings,GetRenderSettingsDescriptorSetIndex());
 }
-bool ShaderScene::BindSceneCamera(Scene &scene,const rendering::RasterizationRenderer &renderer,bool bView)
+bool ShaderScene::BindSceneCamera(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,bool bView)
 {
 	auto *descSet = (bView == true) ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
 	return RecordBindDescriptorSet(*descSet,GetCameraDescriptorSetIndex());
@@ -171,7 +171,7 @@ bool ShaderSceneLit::BindLights(prosper::IDescriptorSet &dsLights)
 		return false;
 	return RecordBindDescriptorSets({&dsLights,descSetShadow},GetLightDescriptorSetIndex());
 }
-bool ShaderSceneLit::BindScene(Scene &scene,rendering::RasterizationRenderer &renderer,bool bView)
+bool ShaderSceneLit::BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView)
 {
 	return BindSceneCamera(scene,renderer,bView) && RecordBindDescriptorSet(*renderer.GetRendererDescriptorSet(),GetRendererDescriptorSetIndex()) &&
 		BindLights(*renderer.GetLightSourceDescriptorSet());
@@ -220,6 +220,8 @@ ShaderEntity::ShaderEntity(prosper::IPrContext &context,const std::string &ident
 	: ShaderSceneLit(context,identifier,vsShader,fsShader,gsShader)
 {}
 
+void ShaderEntity::OnBindEntity(CBaseEntity &ent,CRenderComponent &renderC) {}
+
 bool ShaderEntity::BindEntity(CBaseEntity &ent)
 {
 	auto pRenderComponent = ent.GetRenderComponent();
@@ -232,6 +234,7 @@ bool ShaderEntity::BindEntity(CBaseEntity &ent)
 		// Con::cwar<<"WARNING: Attempted to render entity "<<ent.GetClass()<<", but it has an invalid render descriptor set! Skipping..."<<Con::endl;
 		return false;
 	}
+	OnBindEntity(ent,*pRenderComponent);
 	//if(pRenderComponent->GetLastRenderFrame() != c_engine->GetRenderContext().GetLastFrameId())
 	//	Con::cwar<<"WARNING: Entity buffer data for entity "<<ent.GetClass()<<" ("<<ent.GetIndex()<<") hasn't been updated for this frame, but entity is used in rendering! This may cause rendering issues!"<<Con::endl;
 	return BindInstanceDescriptorSet(*descSet);
@@ -303,7 +306,7 @@ bool ShaderEntity::BindVertexAnimationOffset(uint32_t offset)
 	return RecordPushConstants(sizeof(offset),&offset,pushConstantOffset);
 }
 
-bool ShaderEntity::BindScene(::Scene &scene,rendering::RasterizationRenderer &renderer,bool bView)
+bool ShaderEntity::BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView)
 {
 	return ShaderSceneLit::BindScene(scene,renderer,bView) &&
 		BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
@@ -391,3 +394,4 @@ bool ShaderEntity::Draw(CModelSubMesh &mesh,bool bUseVertexWeightBuffer)
 }
 
 bool ShaderEntity::Draw(CModelSubMesh &mesh) {return Draw(mesh,true);}
+#pragma optimize("",on)

@@ -22,8 +22,12 @@ void BaseAnimatedComponent::MaintainAnimationMovement(const Vector3 &disp)
 
 void BaseAnimatedComponent::SetGlobalBonePosition(UInt32 boneId,const Vector3 &pos,const Quat &rot,const Vector3 &scale)
 {
-	auto npos = pos;
-	auto nrot = rot;
+	umath::Transform pose;
+	GetEntity().GetPose(pose);
+	pose = pose.GetInverse();
+	pose *= umath::ScaledTransform{pos,rot,scale};
+	auto npos = pose.GetOrigin();
+	auto nrot = pose.GetRotation();
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
 	if(pPhysComponent.valid())
 		pPhysComponent->WorldToOrigin(&npos,&nrot);
@@ -31,8 +35,12 @@ void BaseAnimatedComponent::SetGlobalBonePosition(UInt32 boneId,const Vector3 &p
 }
 void BaseAnimatedComponent::SetGlobalBonePosition(UInt32 boneId,const Vector3 &pos,const Quat &rot)
 {
-	auto npos = pos;
-	auto nrot = rot;
+	umath::Transform pose;
+	GetEntity().GetPose(pose);
+	pose = pose.GetInverse();
+	pose *= umath::Transform{pos,rot};
+	auto npos = pose.GetOrigin();
+	auto nrot = pose.GetRotation();
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
 	if(pPhysComponent.valid())
 		pPhysComponent->WorldToOrigin(&npos,&nrot);
@@ -40,7 +48,11 @@ void BaseAnimatedComponent::SetGlobalBonePosition(UInt32 boneId,const Vector3 &p
 }
 void BaseAnimatedComponent::SetGlobalBonePosition(UInt32 boneId,const Vector3 &pos)
 {
-	auto npos = pos;
+	umath::Transform pose;
+	GetEntity().GetPose(pose);
+	pose = pose.GetInverse();
+	pose *= umath::Transform{pos,uquat::identity()};
+	auto npos = pose.GetOrigin();
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
 	if(pPhysComponent.valid())
 		pPhysComponent->WorldToOrigin(&npos);
@@ -48,7 +60,11 @@ void BaseAnimatedComponent::SetGlobalBonePosition(UInt32 boneId,const Vector3 &p
 }
 void BaseAnimatedComponent::SetGlobalBoneRotation(UInt32 boneId,const Quat &rot)
 {
-	auto nrot = rot;
+	umath::Transform pose;
+	GetEntity().GetPose(pose);
+	pose = pose.GetInverse();
+	pose *= umath::Transform{Vector3{},rot};
+	auto nrot = pose.GetRotation();
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(pTrComponent.valid())
 		pTrComponent->WorldToLocal(&nrot);

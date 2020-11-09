@@ -15,10 +15,10 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fxaa.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/world_environment.hpp"
-#include "pragma/rendering/scene/scene.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/entities/components/c_player_component.hpp"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/rendering/c_settings.hpp"
 #include <shader/prosper_shader_blur.hpp>
 #include <prosper_util.hpp>
@@ -53,8 +53,8 @@ void CGame::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 		m_currentDrawCmd = {};
 	}};
 
-	auto &scene = GetRenderScene();
-	auto *renderer = scene->GetRenderer();
+	auto &scene = drawSceneInfo.scene;
+	auto *renderer = const_cast<pragma::rendering::BaseRenderer*>(scene->GetRenderer());
 	if(renderer)
 	{
 		renderer->RenderScene(drawSceneInfo);

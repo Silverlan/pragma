@@ -26,23 +26,19 @@ extern DLLCLIENT CGame *c_game;
 #pragma optimize("",off)
 void RenderSystem::RenderPrepass(const util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode)
 {
-	auto &scene = c_game->GetRenderScene();
-	auto *renderer = scene->GetRenderer();
-	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
-		return;
-	auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
-	auto *renderInfo = rasterizer->GetRenderInfo(renderMode);
+	auto &scene = drawSceneInfo.scene;
+	auto *renderInfo = scene->GetSceneRenderDesc().GetRenderInfo(renderMode);
 	if(renderInfo == nullptr)
 		return;
 	RenderPrepass(drawSceneInfo,*renderInfo);
 }
 void RenderSystem::RenderPrepass(const util::DrawSceneInfo &drawSceneInfo,const pragma::rendering::CulledMeshData &renderMeshes)
 {
-	auto &scene = c_game->GetRenderScene();
+	auto &scene = drawSceneInfo.scene;
 	auto *renderer = scene->GetRenderer();
 	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 		return;
-	auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
+	auto *rasterizer = const_cast<pragma::rendering::RasterizationRenderer*>(static_cast<const pragma::rendering::RasterizationRenderer*>(renderer));
 	auto &containers = renderMeshes.containers;
 	//auto &descSetLightSources = scene->GetLightSourceDescriptorSet();
 	// Render depth, positions and normals
@@ -73,6 +69,11 @@ void RenderSystem::RenderPrepass(const util::DrawSceneInfo &drawSceneInfo,const 
 					auto bWeighted = false;
 					shaderDepthStage.BindEntity(*ent);//,bWeighted); // prosper TODO
 
+					auto *entClipPlane = renderC->GetRenderClipPlane();
+					clipPlane = entClipPlane ? *entClipPlane : std::optional<Vector4>{};
+				}
+				if(renderC == nullptr)
+					continue;
 					if(umath::is_flag_set(renderC->GetStateFlags(),pragma::CRenderComponent::StateFlags::HasDepthBias))
 					{
 						float constantFactor,biasClamp,slopeFactor;
@@ -87,11 +88,6 @@ void RenderSystem::RenderPrepass(const util::DrawSceneInfo &drawSceneInfo,const 
 						depthBiasActive = false;
 						drawCmd->RecordSetDepthBias();
 					}
-					auto *entClipPlane = renderC->GetRenderClipPlane();
-					clipPlane = entClipPlane ? *entClipPlane : std::optional<Vector4>{};
-				}
-				if(renderC == nullptr)
-					continue;
 				for(auto *cmesh : pair.second.meshes)
 				{
 					if(cmesh->GetGeometryType() != ModelSubMesh::GeometryType::Triangles)

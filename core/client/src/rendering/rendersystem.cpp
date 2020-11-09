@@ -170,14 +170,14 @@ void RenderSystem::Render(
 {
 	if(translucentMeshes.empty())
 		return;
-	auto &scene = c_game->GetRenderScene();
+	auto &scene = drawSceneInfo.scene;
 	auto *renderer = scene->GetRenderer();
 	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 		return;
 	auto bReflection = umath::is_flag_set(flags,RenderFlags::Reflection);
 	auto renderAs3dSky = umath::is_flag_set(flags,RenderFlags::RenderAs3DSky);
 	//auto &lights = scene->GetCulledLights();
-	auto &rasterizer = *static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
+	auto &rasterizer = *static_cast<const pragma::rendering::RasterizationRenderer*>(renderer);
 	auto pipelineType = pragma::ShaderTextured3DBase::GetPipelineIndex(rasterizer.GetSampleCount(),bReflection);
 	pragma::ShaderTextured3DBase *shaderPrev = nullptr;
 	CBaseEntity *entPrev = nullptr;
@@ -206,11 +206,11 @@ void RenderSystem::Render(
 				pipelineType
 			) == false)
 				continue;
-			if(debugMode != ::Scene::DebugMode::None)
+			if(debugMode != pragma::CSceneComponent::DebugMode::None)
 				shader->SetDebugMode(debugMode);
 			shader->Set3DSky(renderAs3dSky);
 			shaderPrev = shader;
-			if(shader->BindScene(*scene,rasterizer,renderMode == RenderMode::View) == false)
+			if(shader->BindScene(*scene.get(),const_cast<pragma::rendering::RasterizationRenderer&>(rasterizer),renderMode == RenderMode::View) == false)
 			{
 				shaderPrev = nullptr;
 				continue;
@@ -226,6 +226,7 @@ void RenderSystem::Render(
 			auto *ent = meshInfo->ent;
 			if(ent != entPrev)
 			{
+			// TODO: Enable/disable shadows
 				entPrev = ent;
 				renderC = entPrev->GetRenderComponent().get();
 				if(shader->BindEntity(*meshInfo->ent) == false || renderC == nullptr || (drawSceneInfo.renderFilter && drawSceneInfo.renderFilter(*ent) == false))
@@ -353,13 +354,13 @@ uint32_t RenderSystem::Render(
 )
 {
 	auto &debugInfo = get_render_debug_info();
-	auto &scene = c_game->GetRenderScene();
+	auto &scene = drawSceneInfo.scene;
 	auto *renderer = scene->GetRenderer();
 	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 		return 0;
 	auto bReflection = umath::is_flag_set(flags,RenderFlags::Reflection);
 	auto renderAs3dSky = umath::is_flag_set(flags,RenderFlags::RenderAs3DSky);
-	auto &rasterizer = *static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
+	auto &rasterizer = *static_cast<const pragma::rendering::RasterizationRenderer*>(renderer);
 	auto numShaderInvocations = 0u;
 
 	auto &containers = renderMeshes.containers;
@@ -389,9 +390,9 @@ uint32_t RenderSystem::Render(
 		{
 			if(stats)
 				stats->shaders.push_back(shader->GetHandle());
-			if(shader->BindScene(*scene,rasterizer,bView) == true)
+			if(shader->BindScene(*scene.get(),const_cast<pragma::rendering::RasterizationRenderer&>(rasterizer),bView) == true)
 			{
-				if(debugMode != ::Scene::DebugMode::None)
+				if(debugMode != ::pragma::CSceneComponent::DebugMode::None)
 					shader->SetDebugMode(debugMode);
 				shader->Set3DSky(renderAs3dSky);
 
@@ -423,6 +424,11 @@ uint32_t RenderSystem::Render(
 									continue;
 								}
 
+								auto *entClipPlane = renderC->GetRenderClipPlane();
+								clipPlane = entClipPlane ? *entClipPlane : std::optional<Vector4>{};
+							}
+							if(renderC == nullptr)
+								continue;
 								if(umath::is_flag_set(renderC->GetStateFlags(),pragma::CRenderComponent::StateFlags::HasDepthBias))
 								{
 									float constantFactor,biasClamp,slopeFactor;
@@ -437,11 +443,6 @@ uint32_t RenderSystem::Render(
 									depthBiasActive = false;
 									drawCmd->RecordSetDepthBias();
 								}
-								auto *entClipPlane = renderC->GetRenderClipPlane();
-								clipPlane = entClipPlane ? *entClipPlane : std::optional<Vector4>{};
-							}
-							if(renderC == nullptr)
-								continue;
 							for(auto *mesh : pair.second.meshes)
 							{
 #if DEBUG_RENDER_DISABLED == 0
@@ -506,12 +507,8 @@ uint32_t RenderSystem::Render(
 }
 uint32_t RenderSystem::Render(const util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode,RenderFlags flags,const Vector4 &drawOrigin)
 {
-	auto &scene = c_game->GetRenderScene();
-	auto *renderer = scene->GetRenderer();
-	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
-		return 0;
-	auto &rasterizer = *static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
-	auto *renderInfo = rasterizer.GetRenderInfo(renderMode);
+	auto &scene = drawSceneInfo.scene;
+	auto *renderInfo = scene->GetSceneRenderDesc().GetRenderInfo(renderMode);
 	return renderInfo ? Render(drawSceneInfo,*renderInfo,renderMode,flags,drawOrigin) : 0;
 }
 #pragma optimize("",on)

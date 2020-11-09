@@ -14,7 +14,7 @@
 #include <sharedutils/property/util_property.hpp>
 #include <pragma/basewaterobject.hpp>
 
-class Scene;
+namespace pragma {class CSceneComponent;};
 class DLLCLIENT CWaterObject
 	: virtual public BaseWaterObject
 {
@@ -24,7 +24,7 @@ public:
 	struct DLLCLIENT WaterScene
 	{
 		~WaterScene();
-		std::shared_ptr<Scene> sceneReflection = nullptr;
+		util::WeakHandle<pragma::CSceneComponent> sceneReflection = {};
 		std::shared_ptr<prosper::IBuffer> settingsBuffer = nullptr;
 
 		// Fog

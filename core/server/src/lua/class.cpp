@@ -38,6 +38,13 @@ void SGame::RegisterLuaClasses()
 	auto &modGame = GetLuaInterface().RegisterLibrary("game");
 	auto materialClassDef = luabind::class_<Material>("Material");
 	Lua::Material::register_class(materialClassDef);
+	materialClassDef.def("SetShader",static_cast<void(*)(lua_State*,::Material&,const std::string&)>([](lua_State *l,::Material &mat,const std::string &shader) {
+		auto db = mat.GetDataBlock();
+		if(db == nullptr)
+			return;
+		mat.Initialize(shader,db);
+		mat.SetLoaded(true);
+	}));
 	modGame[materialClassDef];
 
 	auto modelMeshClassDef = luabind::class_<ModelMesh>("Mesh");

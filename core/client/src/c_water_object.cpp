@@ -108,7 +108,9 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 	if(mat == nullptr || pragma::ShaderWater::DESCRIPTOR_SET_WATER.IsValid() == false || pragma::ShaderPPFog::DESCRIPTOR_SET_FOG.IsValid() == false)
 		return;
 	auto whShader = mat->GetPrimaryShader();
-	auto &scene = c_game->GetScene();
+	auto *scene = c_game->GetScene();
+	if(scene == nullptr)
+		return;
 	auto renderer = dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer());
 	if(whShader.expired() || renderer == nullptr)
 		return;
@@ -129,7 +131,8 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		return;
 	m_waterScene = std::make_unique<WaterScene>();
 	m_waterScene->descSetGroupTexEffects = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderWater::DESCRIPTOR_SET_WATER);
-	auto &sceneReflection = m_waterScene->sceneReflection = Scene::Create(Scene::CreateInfo{});
+	auto *sceneC = pragma::CSceneComponent::Create(pragma::CSceneComponent::CreateInfo{});
+	auto &sceneReflection = m_waterScene->sceneReflection = sceneC ? sceneC->GetHandle<pragma::CSceneComponent>() : util::WeakHandle<pragma::CSceneComponent>{};
 	sceneReflection->ReloadRenderTarget(width,height);
 	if(cam)
 	{
@@ -222,8 +225,8 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		// This is called before the water render pass
 		if(cvDrawWater->GetBool() == false)
 			return;
-		auto &scene = c_game->GetRenderScene();
-		if(scene != c_game->GetScene())
+		auto *scene = c_game->GetRenderScene();
+		if(scene == nullptr || scene != c_game->GetScene())
 			return;
 		auto *renderer = scene ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer()) : nullptr;
 		if(renderer == nullptr)
@@ -283,7 +286,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 			return;
 		if(c_game->GetRenderScene() != c_game->GetScene())
 			return;
-		auto &scene = c_game->GetRenderScene();
+		auto *scene = c_game->GetRenderScene();
 		auto *renderer = scene ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer()) : nullptr;
 		auto camScene = scene ? scene->GetActiveCamera() : util::WeakHandle<pragma::CCameraComponent>{};
 		if(renderer == nullptr || camScene.expired())
@@ -368,7 +371,9 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 			matReflect = glm::translate(matReflect,n *d *2.f);
 		}
 
-		auto &scene = c_game->GetRenderScene();
+		auto *scene = c_game->GetRenderScene();
+		if(scene == nullptr)
+			return CallbackReturnType::NoReturnValue;
 		auto &camScene = scene->GetActiveCamera();
 		if(camScene.expired())
 			return CallbackReturnType::NoReturnValue;
@@ -391,7 +396,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 			if(bRenderReflection == true)
 			{
 				auto &sceneReflection = m_waterScene->sceneReflection;
-				auto *renderer = sceneReflection ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(sceneReflection->GetRenderer()) : nullptr;
+				auto *renderer = sceneReflection.valid() ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(sceneReflection->GetRenderer()) : nullptr;
 				if(renderer)
 				{
 					auto &rtReflection = renderer->GetHDRInfo().sceneRenderTarget;
@@ -430,9 +435,9 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 					reflectionDrawSceneInfo.renderFlags = renderFlags;
 					reflectionDrawSceneInfo.outputLayerId = 0u;
 					c_game->SetRenderClipPlane({n.x *planeSign,n.y *planeSign,n.z *planeSign,(planeDist -offset *planeSign) *planeSign});
-						c_game->SetRenderScene(sceneReflection);
+						c_game->SetRenderScene(*sceneReflection);
 							c_game->RenderScene(drawSceneInfo.get());
-						c_game->SetRenderScene(nullptr);
+						c_game->ResetRenderScene();
 					c_game->SetRenderClipPlane({});
 
 					drawCmd.get()->RecordImageBarrier(imgReflection,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);

@@ -10,6 +10,7 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/audio/alsound_type.h"
 
+enum class DLLNETWORK ALState : uint32_t;
 namespace pragma
 {
 	class DLLNETWORK BaseEnvSoundComponent

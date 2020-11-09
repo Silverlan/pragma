@@ -1803,6 +1803,9 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 			m[i][colDst] = tmpCol.at(i);
 		}
 	}));
+	defMat4.def("ApplyProjectionDepthBiasOffset",static_cast<void(*)(lua_State*,Mat4&,float,float,float,float)>([](lua_State *l,Mat4 &p,float nearZ,float farZ,float d,float delta) {
+		umat::apply_projection_depth_bias_offset(p,nearZ,farZ,d,delta);
+	}));
 	defMat4.def(luabind::const_self ==luabind::const_self);
 	defMat4.def(luabind::const_self +luabind::const_self);
 	defMat4.def(luabind::const_self -luabind::const_self);

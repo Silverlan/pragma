@@ -170,7 +170,7 @@ void CGame::SetupEntity(BaseEntity *ent,unsigned int idx)
 		clIdx = CUInt32(m_ents.size()) -1;
 	}
 	auto *cEnt = static_cast<CBaseEntity*>(ent);
-	auto &scene = GetScene();
+	auto *scene = GetScene();
 	if(scene)
 		cEnt->AddToScene(*scene); // Add to default scene automatically
 	cEnt->Construct(idx,clIdx);

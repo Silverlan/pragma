@@ -10,6 +10,7 @@
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/baseentity.h>
 #include "pragma/rendering/sortedrendermeshcontainer.h"
+#include <sharedutils/property/util_property.hpp>
 
 class CALSound;
 class EntityHandle;
@@ -19,13 +20,13 @@ enum class RenderMode : uint32_t;
 class RenderInstance;
 class RenderObject;
 class Material;
-class Scene;
 namespace pragma
 {
 	class BaseEntityComponent;
 	class ShaderTextured3DBase;
 	class CRenderComponent;
 	class CPhysicsComponent;
+	class CSceneComponent;
 };
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -77,9 +78,13 @@ public:
 	virtual uint32_t GetLocalIndex() const override;
 
 	uint32_t GetSceneFlags() const;
-	void AddToScene(Scene &scene);
-	void RemoveFromScene(Scene &scene);
-	bool IsInScene(Scene &scene) const;
+	const util::PUInt32Property &GetSceneFlagsProperty() const;
+	void AddToScene(pragma::CSceneComponent &scene);
+	void RemoveFromScene(pragma::CSceneComponent &scene);
+	void RemoveFromAllScenes();
+	bool IsInScene(const pragma::CSceneComponent &scene) const;
+
+	void AddChild(CBaseEntity &ent);
 
 	// Quick-access
 	std::pair<Vector3,Vector3> GetRenderBounds() const;
@@ -99,7 +104,7 @@ protected:
 
 	friend pragma::BaseEntityComponent;
 	uint32_t m_clientIdx = 0u;
-	uint32_t m_sceneFlags = 0;
+	util::PUInt32Property m_sceneFlags = nullptr;
 	mutable util::WeakHandle<pragma::CRenderComponent> m_renderComponent = {};
 	mutable util::WeakHandle<pragma::CPhysicsComponent> m_physComponent = {};
 

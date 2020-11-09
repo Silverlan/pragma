@@ -43,12 +43,12 @@ void CSkyCameraComponent::Initialize()
 		if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 			return;
 		auto &posCam = GetEntity().GetPosition();
-		m_renderMeshCollectionHandler.PerformOcclusionCulling(*drawSceneInfo.get().scene,*static_cast<pragma::rendering::RasterizationRenderer*>(renderer),posCam,false);
+		m_renderMeshCollectionHandler.PerformOcclusionCulling(*drawSceneInfo.get().scene.get(),*static_cast<const pragma::rendering::RasterizationRenderer*>(renderer),posCam,false);
 
 		//umath::set_flag(renderFlags,FRender::View | FRender::Skybox,false);
 		auto renderFlags = FRender::World | FRender::Static | FRender::Dynamic;
 		// TODO: No glow or translucent meshes are supported in 3D skybox for now
-		auto resultFlags = m_renderMeshCollectionHandler.GenerateOptimizedRenderObjectStructures(*drawSceneInfo.get().scene,*static_cast<pragma::rendering::RasterizationRenderer*>(renderer),posCam,renderFlags,RenderMode::World,false,false);
+		auto resultFlags = m_renderMeshCollectionHandler.GenerateOptimizedRenderObjectStructures(*drawSceneInfo.get().scene.get(),*static_cast<const pragma::rendering::RasterizationRenderer*>(renderer),posCam,renderFlags,RenderMode::World,false,false);
 	}));
 }
 

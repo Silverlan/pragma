@@ -27,13 +27,13 @@ void RasterizationRenderer::RenderSSAO(const util::DrawSceneInfo &drawSceneInfo)
 	auto &ssaoInfo = GetSSAOInfo();
 	auto *shaderSSAO = static_cast<pragma::ShaderSSAO*>(ssaoInfo.GetSSAOShader());
 	auto *shaderSSAOBlur = static_cast<pragma::ShaderSSAOBlur*>(ssaoInfo.GetSSAOBlurShader());
-	if(IsSSAOEnabled() == false || shaderSSAO == nullptr || shaderSSAOBlur == nullptr || drawSceneInfo.scene == nullptr)
+	if(IsSSAOEnabled() == false || shaderSSAO == nullptr || shaderSSAOBlur == nullptr || drawSceneInfo.scene.expired())
 		return;
 	auto &scene = *drawSceneInfo.scene;
 	c_game->StartProfilingStage(CGame::CPUProfilingPhase::SSAO);
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::SSAO);
 	// Pre-render depths, positions and normals (Required for SSAO)
-	auto *renderInfo  = GetRenderInfo(RenderMode::World);
+	auto *renderInfo  = scene.GetSceneRenderDesc().GetRenderInfo(RenderMode::World);
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	if(renderInfo != nullptr)
 	{

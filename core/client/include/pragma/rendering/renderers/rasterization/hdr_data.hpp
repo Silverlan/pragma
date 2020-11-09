@@ -12,6 +12,7 @@
 #include "pragma/rendering/c_ssao.hpp"
 #include "pragma/rendering/c_prepass.hpp"
 #include "pragma/rendering/c_forwardplus.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <cinttypes>
 #include <memory>
 #include <sharedutils/util_weak_handle.hpp>
@@ -42,7 +43,7 @@ namespace pragma::rendering
 		HDRData(RasterizationRenderer &rasterizer);
 		~HDRData();
 		void UpdateExposure();
-		bool Initialize(Scene &scene,RasterizationRenderer &renderer,uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount,bool bEnableSSAO);
+		bool Initialize(pragma::CSceneComponent &scene,RasterizationRenderer &renderer,uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount,bool bEnableSSAO);
 		bool InitializeDescriptorSets();
 		prosper::RenderTarget &GetRenderTarget(const util::DrawSceneInfo &drawSceneInfo);
 

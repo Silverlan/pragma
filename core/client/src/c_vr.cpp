@@ -145,7 +145,7 @@ static void draw_vr(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pro
 	else
 		bg->SetVisible(false);
 
-	auto &scene = c_game->GetRenderScene();
+	//auto *scene = c_game->GetRenderScene();
 	//auto &tex = scene->GetRenderTexture();
 	//scene->BeginRendering();
 	//auto &img = tex->GetImage();

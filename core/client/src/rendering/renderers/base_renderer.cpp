@@ -17,18 +17,18 @@ bool BaseRenderer::operator==(const BaseRenderer &other) const {return &other ==
 bool BaseRenderer::operator!=(const BaseRenderer &other) const {return !operator==(other);}
 bool BaseRenderer::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 {
-	if(drawSceneInfo.scene == nullptr || drawSceneInfo.scene->GetRenderer() != this)
+	if(drawSceneInfo.scene.expired() || drawSceneInfo.scene->GetRenderer() != this)
 		return false;
 	BeginRendering(drawSceneInfo);
 	return true;
 }
 void BaseRenderer::BeginRendering(const util::DrawSceneInfo &drawSceneInfo)
 {
-	drawSceneInfo.scene->UpdateBuffers(drawSceneInfo.commandBuffer);
+	drawSceneInfo.scene.get()->UpdateBuffers(drawSceneInfo.commandBuffer);
 }
 void BaseRenderer::Resize(uint32_t width, uint32_t height) {}
 void BaseRenderer::UpdateRenderSettings() {}
-void BaseRenderer::UpdateCameraData(Scene &scene,pragma::CameraData &cameraData) {}
+void BaseRenderer::UpdateCameraData(pragma::CSceneComponent &scene,pragma::CameraData &cameraData) {}
 bool BaseRenderer::IsRasterizationRenderer() const {return false;}
 bool BaseRenderer::IsRayTracingRenderer() const {return false;}
 prosper::Texture *BaseRenderer::GetPresentationTexture() {return GetSceneTexture();}

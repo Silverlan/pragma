@@ -399,9 +399,23 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 		LUA_CHECK_ENTITY(l,hEnt);
 		Lua::PushInt(l,hEnt->GetBodyGroup(name));
 	}));
+	classDef.def("GetBodyGroup",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t bgId) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		auto mdlC = hEnt->GetModelComponent();
+		if(mdlC.expired())
+			return;
+		Lua::PushInt(l,mdlC->GetBodyGroup(bgId));
+	}));
 	classDef.def("SetBodyGroup",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,const std::string &group,uint32_t id) {
 		LUA_CHECK_ENTITY(l,hEnt);
 		hEnt->SetBodyGroup(group,id);
+	}));
+	classDef.def("SetBodyGroup",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t bgId,uint32_t id) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		auto mdlC = hEnt->GetModelComponent();
+		if(mdlC.expired())
+			return;
+		mdlC->SetBodyGroup(bgId,id);
 	}));
 	classDef.def("GetParent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);

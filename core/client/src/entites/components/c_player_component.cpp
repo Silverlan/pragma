@@ -16,7 +16,7 @@
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/c_viewmodel.h"
 #include "pragma/entities/c_viewbody.h"
-#include "pragma/rendering/scene/scene.h"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/entities/c_listener.h"
@@ -543,7 +543,7 @@ bool CPlayerComponent::ShouldDraw(const Vector3 &camOrigin) const
 	if(!IsLocalPlayer())
 		return true;
 #pragma message ("TODO: Find a better way to enable rendering, if being rendered through anything but the main camera (e.g. reflections)!")
-	auto &scene = c_game->GetScene();
+	auto *scene = c_game->GetScene();
 	if(c_game->GetRenderScene() != scene)
 		return true;
 	return (GetObserverMode() != OBSERVERMODE::FIRSTPERSON) ? true : false;

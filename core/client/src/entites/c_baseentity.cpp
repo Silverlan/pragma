@@ -24,7 +24,6 @@
 #include <pragma/lua/luacallback.h>
 #include <pragma/networking/nwm_util.h>
 #include "luasystem.h"
-#include "pragma/rendering/scene/scene.h"
 #include <pragma/lua/luafunction_call.h>
 #include "pragma/util/util_smoke_trail.h"
 #include "pragma/entities/components/c_player_component.hpp"
@@ -33,6 +32,7 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
 #include "pragma/entities/components/c_name_component.hpp"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include <pragma/util/bulletinfo.h>
 #include <pragma/physics/raytraces.h>
 #include <pragma/physics/collisionmasks.h>
@@ -75,7 +75,7 @@ void CBaseEntity::RegisterEvents(pragma::EntityComponentManager &componentManage
 }
 
 CBaseEntity::CBaseEntity()
-	: BaseEntity()
+	: BaseEntity(),m_sceneFlags{util::UInt32Property::Create(0)}
 {}
 
 BaseEntity *CBaseEntity::GetServersideEntity() const
@@ -91,23 +91,29 @@ BaseEntity *CBaseEntity::GetServersideEntity() const
 	return game->GetEntity(GetIndex());
 }
 
-static uint64_t get_scene_flag(Scene &scene)
+static uint64_t get_scene_flag(const pragma::CSceneComponent &scene)
 {
 	auto index = scene.GetSceneIndex();
 	return 1<<index;
 }
-uint32_t CBaseEntity::GetSceneFlags() const {return m_sceneFlags;}
-void CBaseEntity::AddToScene(Scene &scene)
+const util::PUInt32Property &CBaseEntity::GetSceneFlagsProperty() const {return m_sceneFlags;}
+uint32_t CBaseEntity::GetSceneFlags() const {return *m_sceneFlags;}
+void CBaseEntity::AddToScene(pragma::CSceneComponent &scene)
 {
-	m_sceneFlags |= get_scene_flag(scene);
+	*m_sceneFlags = **m_sceneFlags | get_scene_flag(scene);
 	BroadcastEvent(EVENT_ON_SCENE_FLAGS_CHANGED);
 }
-void CBaseEntity::RemoveFromScene(Scene &scene)
+void CBaseEntity::RemoveFromScene(pragma::CSceneComponent &scene)
 {
-	m_sceneFlags &= ~get_scene_flag(scene);
+	*m_sceneFlags = **m_sceneFlags &~get_scene_flag(scene);
 	BroadcastEvent(EVENT_ON_SCENE_FLAGS_CHANGED);
 }
-bool CBaseEntity::IsInScene(Scene &scene) const {return (m_sceneFlags &get_scene_flag(scene)) != 0;}
+void CBaseEntity::RemoveFromAllScenes()
+{
+	*m_sceneFlags = 0;
+	BroadcastEvent(EVENT_ON_SCENE_FLAGS_CHANGED);
+}
+bool CBaseEntity::IsInScene(const pragma::CSceneComponent &scene) const {return (**m_sceneFlags &get_scene_flag(scene)) != 0;}
 
 void CBaseEntity::Construct(unsigned int idx,unsigned int clientIdx)
 {
@@ -327,4 +333,10 @@ std::pair<Vector3,Vector3> CBaseEntity::GetRenderBounds() const
 	Vector3 min,max;
 	renderC->GetRenderBounds(&min,&max);
 	return {min,max};
+}
+
+void CBaseEntity::AddChild(CBaseEntity &ent)
+{
+	RemoveEntityOnRemoval(&ent);
+	ent.m_sceneFlags->Link(*m_sceneFlags);
 }

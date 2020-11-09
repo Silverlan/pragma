@@ -6,7 +6,6 @@
  */
 
 #include "stdafx_client.h"
-#include "pragma/rendering/scene/scene.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/c_msaa.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
@@ -19,6 +18,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/gui/widebugdepthtexture.h"
@@ -164,7 +164,7 @@ bool HDRData::EndRenderPass(const util::DrawSceneInfo &drawSceneInfo)
 	return drawSceneInfo.commandBuffer->RecordEndRenderPass();
 }
 
-bool HDRData::Initialize(Scene &scene,RasterizationRenderer &renderer,uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount,bool bEnableSSAO)
+bool HDRData::Initialize(pragma::CSceneComponent &scene,RasterizationRenderer &renderer,uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount,bool bEnableSSAO)
 {
 	// Initialize depth prepass
 	auto &context = c_engine->GetRenderContext();
@@ -449,8 +449,8 @@ void Console::commands::debug_render_scene(NetworkState *state,pragma::BasePlaye
 	static WIHandle hTexture = {};
 	static WIHandle hBloomTexture = {};
 	dbg = std::make_unique<DebugGameGUI>([size]() {
-		auto &scene = c_game->GetScene();
-		auto *renderer = scene->GetRenderer();
+		auto *scene = c_game->GetScene();
+		auto *renderer = scene ? scene->GetRenderer() : nullptr;
 		if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 			return WIHandle{};
 		auto &hdrInfo = static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetHDRInfo();

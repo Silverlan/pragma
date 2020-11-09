@@ -147,13 +147,13 @@ bool CLightComponent::ShouldPass(const CBaseEntity &ent,const CModelMesh &mesh,u
 	return evData.shouldPass;
 }
 
-Scene *CLightComponent::FindShadowScene() const
+CSceneComponent *CLightComponent::FindShadowScene() const
 {
 	auto sceneFlags = static_cast<const CBaseEntity&>(GetEntity()).GetSceneFlags();
 	// A shadowed light source should always only be assigned to one scene slot, so
 	// we'll just pick whichever is the first
 	auto lowestBit = static_cast<int32_t>(sceneFlags) &-static_cast<int32_t>(sceneFlags);
-	return Scene::GetByIndex(Scene::GetSceneIndex(lowestBit));
+	return CSceneComponent::GetByIndex(CSceneComponent::GetSceneIndex(lowestBit));
 }
 COcclusionCullerComponent *CLightComponent::FindShadowOcclusionCuller() const
 {

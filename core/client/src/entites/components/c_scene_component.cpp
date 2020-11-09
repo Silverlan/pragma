@@ -6,7 +6,8 @@
  */
 
 #include "stdafx_client.h"
-#include "pragma/rendering/scene/scene.h"
+#include "pragma/entities/components/c_scene_component.hpp"
+#include "pragma/console/c_cvar.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_hdr.hpp"
@@ -15,30 +16,18 @@
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include "pragma/rendering/renderers/base_renderer.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
-#include "pragma/console/c_cvar.h"
-#include "pragma/rendering/world_environment.hpp"
-#include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
-#include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/c_generic_component.hpp"
-#include "pragma/entities/game/c_game_occlusion_culler.hpp"
-#include <buffers/prosper_buffer.hpp>
-#include <prosper_util.hpp>
-#include <image/prosper_render_target.hpp>
-#include <prosper_command_buffer.hpp>
-#include <prosper_descriptor_set_group.hpp>
-#include <image/prosper_msaa_texture.hpp>
-#include <sharedutils/property/util_property.hpp>
-#include <sharedutils/property/util_property_color.hpp>
-#include <sharedutils/property/util_property_vector.h>
-#include <pragma/entities/components/base_transform_component.hpp>
+#include "pragma/entities/c_entityfactories.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
+
+using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
-Scene::CSMCascadeDescriptor::CSMCascadeDescriptor()
+LINK_ENTITY_TO_CLASS(scene,CScene);
+
+CSceneComponent::CSMCascadeDescriptor::CSMCascadeDescriptor()
 {}
 
 ///////////////////////////
@@ -49,16 +38,23 @@ ShaderMeshContainer::ShaderMeshContainer(pragma::ShaderTextured3DBase *shader)
 
 ///////////////////////////
 
-Scene::CreateInfo::CreateInfo()
+CSceneComponent::CreateInfo::CreateInfo()
 	: sampleCount{static_cast<prosper::SampleCountFlags>(c_game->GetMSAASampleCount())}
 {}
 
 ///////////////////////////
 
+void CSceneComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+{
+	EVENT_ON_ACTIVE_CAMERA_CHANGED = componentManager.RegisterEvent("ON_ACTIVE_CAMERA_CHANGED");
+}
+
 using SceneCount = uint32_t;
 static std::array<SceneCount,32> g_sceneUseCount {};
-static std::array<Scene*,32> g_scenes {};
-std::shared_ptr<Scene> Scene::Create(const CreateInfo &createInfo,Scene *optParent)
+static std::array<CSceneComponent*,32> g_scenes {};
+
+ComponentEventId CSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED = INVALID_COMPONENT_ID;
+CSceneComponent *CSceneComponent::Create(const CreateInfo &createInfo,CSceneComponent *optParent)
 {
 	SceneIndex sceneIndex;
 	if(optParent)
@@ -71,53 +67,63 @@ std::shared_ptr<Scene> Scene::Create(const CreateInfo &createInfo,Scene *optPare
 			return nullptr;
 		sceneIndex = (it -g_sceneUseCount.begin());
 	}
+	auto *scene = c_game->CreateEntity<CScene>();
+	if(scene == nullptr)
+		return nullptr;
+	auto sceneC = scene->GetComponent<CSceneComponent>();
+	if(sceneC.expired())
+	{
+		scene->Remove();
+		return nullptr;
+	}
 	++g_sceneUseCount.at(sceneIndex);
-	auto scene = std::shared_ptr<Scene>{new Scene{createInfo,sceneIndex},[](Scene *ptr) {
-		auto sceneIndex = ptr->GetSceneIndex();
-		assert(g_sceneUseCount > 0);
-		--g_sceneUseCount.at(sceneIndex);
-		g_scenes.at(sceneIndex) = nullptr;
+	sceneC->Setup(createInfo,sceneIndex);
+	g_scenes.at(sceneIndex) = sceneC.get();
 
-		// Clear all entities from this scene
-		std::vector<CBaseEntity*> *ents;
-		c_game->GetEntities(&ents);
-		for(auto *ent : *ents)
-		{
-			if(ent == nullptr)
-				continue;
-			ent->RemoveFromScene(*ptr);
-		}
-		delete ptr;
-	}};
-	g_scenes.at(sceneIndex) = scene.get();
-	return scene;
+	scene->Spawn();
+	return sceneC.get();
 }
 
-void Scene::InitializeShadowDescriptorSet()
+CSceneComponent::CSceneComponent(BaseEntity &ent)
+	: BaseEntityComponent{ent},m_sceneRenderDesc{*this}
+{}
+CSceneComponent::~CSceneComponent()
 {
-	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS.IsValid())
-		m_shadowDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS);
+	ClearWorldEnvironment();
+	//c_engine->FlushCommandBuffers(); // We need to make sure all rendering commands have been completed, in case this scene is still in use somewhere // prosper TODO
+}
+void CSceneComponent::OnRemove()
+{
+	BaseEntityComponent::OnRemove();
+	if(m_cbLink.IsValid())
+		m_cbLink.Remove();
+
+	auto sceneIndex = GetSceneIndex();
+	if(sceneIndex == std::numeric_limits<SceneIndex>::max())
+		return;
+	assert(g_sceneUseCount > 0);
+	--g_sceneUseCount.at(sceneIndex);
+	g_scenes.at(sceneIndex) = nullptr;
+
+	// Clear all entities from this scene
+	std::vector<CBaseEntity*> *ents;
+	c_game->GetEntities(&ents);
+	for(auto *ent : *ents)
+	{
+		if(ent == nullptr)
+			continue;
+		ent->RemoveFromScene(*this);
+	}
+}
+luabind::object CSceneComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CSceneComponentHandleWrapper>(l);}
+void CSceneComponent::Initialize()
+{
+	BaseEntityComponent::Initialize();
 }
 
-Scene *Scene::GetByIndex(SceneIndex sceneIndex)
+void CSceneComponent::Setup(const CreateInfo &createInfo,SceneIndex sceneIndex)
 {
-	return (sceneIndex < g_scenes.size()) ? g_scenes.at(sceneIndex) : nullptr;
-}
-
-uint32_t Scene::GetSceneFlag(SceneIndex sceneIndex)
-{
-	return 1<<sceneIndex;
-}
-
-Scene::SceneIndex Scene::GetSceneIndex(uint32_t flag)
-{
-	return umath::get_least_significant_set_bit_index(flag);
-}
-
-Scene::Scene(const CreateInfo &createInfo,SceneIndex sceneIndex)
-	: std::enable_shared_from_this<Scene>(),
-	m_sceneIndex{sceneIndex}
-{
+	m_sceneIndex = sceneIndex;
 	for(auto i=decltype(pragma::CShadowCSMComponent::MAX_CASCADE_COUNT){0};i<pragma::CShadowCSMComponent::MAX_CASCADE_COUNT;++i)
 		m_csmDescriptors.push_back(std::unique_ptr<CSMCascadeDescriptor>(new CSMCascadeDescriptor()));
 	InitializeCameraBuffer();
@@ -129,15 +135,63 @@ Scene::Scene(const CreateInfo &createInfo,SceneIndex sceneIndex)
 	InitializeShadowDescriptorSet();
 }
 
-Scene::~Scene()
+void CSceneComponent::Link(const CSceneComponent &other)
 {
-	ClearWorldEnvironment();
-	//c_engine->FlushCommandBuffers(); // We need to make sure all rendering commands have been completed, in case this scene is still in use somewhere // prosper TODO
+	auto &hCam = other.GetActiveCamera();
+	if(hCam.valid())
+		SetActiveCamera(*hCam.get());
+	else
+		SetActiveCamera();
+
+	auto *renderer = const_cast<CSceneComponent&>(other).GetRenderer();
+	SetRenderer(renderer ? renderer->shared_from_this() : nullptr);
+
+	m_sceneRenderDesc.SetOcclusionCullingHandler(const_cast<pragma::OcclusionCullingHandler&>(other.m_sceneRenderDesc.GetOcclusionCullingHandler()).shared_from_this());
+
+	auto *occlusionCuller = const_cast<CSceneComponent&>(other).FindOcclusionCuller();
+	if(occlusionCuller)
+		static_cast<CBaseEntity&>(occlusionCuller->GetEntity()).AddToScene(*this);
+
+	auto *worldEnv = other.GetWorldEnvironment();
+	if(worldEnv)
+		SetWorldEnvironment(*worldEnv);
+
+	if(m_cbLink.IsValid())
+		m_cbLink.Remove();
+	m_cbLink = const_cast<CSceneComponent&>(other).AddEventCallback(EVENT_ON_ACTIVE_CAMERA_CHANGED,[this,&other](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &hCam = other.GetActiveCamera();
+		if(hCam.valid())
+			SetActiveCamera(*hCam.get());
+		else
+			SetActiveCamera();
+		return util::EventReply::Unhandled;
+	});
+}
+
+void CSceneComponent::InitializeShadowDescriptorSet()
+{
+	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS.IsValid())
+		m_shadowDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS);
+}
+
+pragma::CSceneComponent *CSceneComponent::GetByIndex(SceneIndex sceneIndex)
+{
+	return (sceneIndex < g_scenes.size()) ? g_scenes.at(sceneIndex) : nullptr;
+}
+
+uint32_t CSceneComponent::GetSceneFlag(SceneIndex sceneIndex)
+{
+	return 1<<sceneIndex;
+}
+
+CSceneComponent::SceneIndex CSceneComponent::GetSceneIndex(uint32_t flag)
+{
+	return umath::get_least_significant_set_bit_index(flag);
 }
 
 static CVar cvShadowmapSize = GetClientConVar("cl_render_shadow_resolution");
 static CVar cvShaderQuality = GetClientConVar("cl_render_shader_quality");
-void Scene::InitializeRenderSettingsBuffer()
+void CSceneComponent::InitializeRenderSettingsBuffer()
 {
 	// Initialize Render Settings
 	auto szShadowMap = cvShadowmapSize->GetFloat();
@@ -165,7 +219,7 @@ void Scene::InitializeRenderSettingsBuffer()
 	UpdateRenderSettings();
 	//
 }
-void Scene::InitializeCameraBuffer()
+void CSceneComponent::InitializeCameraBuffer()
 {
 	// Camera
 	m_cameraData.P = umat::identity();
@@ -185,7 +239,7 @@ void Scene::InitializeCameraBuffer()
 	m_cameraViewBuffer->SetDebugName("camera_view_buf");
 	//
 }
-void Scene::InitializeFogBuffer()
+void CSceneComponent::InitializeFogBuffer()
 {
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
@@ -194,7 +248,7 @@ void Scene::InitializeFogBuffer()
 	m_fogBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,&m_cameraData);
 	m_fogBuffer->SetDebugName("fog_buf");
 }
-pragma::COcclusionCullerComponent *Scene::FindOcclusionCuller()
+pragma::COcclusionCullerComponent *CSceneComponent::FindOcclusionCuller()
 {
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::COcclusionCullerComponent>>();
@@ -205,8 +259,8 @@ pragma::COcclusionCullerComponent *Scene::FindOcclusionCuller()
 	auto *ent = (it != entIt.end()) ? *it : nullptr;
 	return ent ? ent->GetComponent<pragma::COcclusionCullerComponent>().get() : nullptr;
 }
-const std::shared_ptr<prosper::IBuffer> &Scene::GetFogBuffer() const {return m_fogBuffer;}
-void Scene::UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bView)
+const std::shared_ptr<prosper::IBuffer> &CSceneComponent::GetFogBuffer() const {return m_fogBuffer;}
+void CSceneComponent::UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bView)
 {
 	auto &cam = GetActiveCamera();
 	if(cam.expired())
@@ -228,7 +282,7 @@ void Scene::UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &
 	);
 	drawCmd->RecordUpdateBuffer(*bufCam,0ull,m_cameraData);
 }
-void Scene::UpdateBuffers(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+void CSceneComponent::UpdateBuffers(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	UpdateCameraBuffer(drawCmd,false);
 	UpdateCameraBuffer(drawCmd,true);
@@ -244,7 +298,7 @@ void Scene::UpdateBuffers(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawC
 	if(m_renderer && m_renderer->IsRasterizationRenderer())
 		static_cast<pragma::rendering::RasterizationRenderer*>(m_renderer.get())->UpdateRendererBuffer(drawCmd);
 }
-void Scene::InitializeDescriptorSetLayouts()
+void CSceneComponent::InitializeDescriptorSetLayouts()
 {
 	/*auto &context = c_engine->GetRenderContext();
 	m_descSetLayoutCamGraphics = Vulkan::DescriptorSetLayout::Create(context,{
@@ -257,7 +311,7 @@ void Scene::InitializeDescriptorSetLayouts()
 		{prosper::DescriptorType::UniformBuffer,prosper::ShaderStageFlags::ComputeBit} // Render Settings
 	});*/ // prosper TODO
 }
-void Scene::InitializeSwapDescriptorBuffers()
+void CSceneComponent::InitializeSwapDescriptorBuffers()
 {
 	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA.IsValid() == false || pragma::ShaderPPFog::DESCRIPTOR_SET_FOG.IsValid() == false)
 		return;
@@ -291,12 +345,12 @@ void Scene::InitializeSwapDescriptorBuffers()
 	m_fogDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPPFog::DESCRIPTOR_SET_FOG);
 	m_fogDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(*m_fogBuffer,0u);
 }
-const std::shared_ptr<prosper::IBuffer> &Scene::GetRenderSettingsBuffer() const {return m_renderSettingsBuffer;}
-pragma::RenderSettings &Scene::GetRenderSettings() {return m_renderSettings;}
-const pragma::RenderSettings &Scene::GetRenderSettings() const {return const_cast<Scene*>(this)->GetRenderSettings();}
-const std::shared_ptr<prosper::IBuffer> &Scene::GetCameraBuffer() const {return m_cameraBuffer;}
-const std::shared_ptr<prosper::IBuffer> &Scene::GetViewCameraBuffer() const {return m_cameraViewBuffer;}
-const std::shared_ptr<prosper::IDescriptorSetGroup> &Scene::GetCameraDescriptorSetGroup(prosper::PipelineBindPoint bindPoint) const
+const std::shared_ptr<prosper::IBuffer> &CSceneComponent::GetRenderSettingsBuffer() const {return m_renderSettingsBuffer;}
+pragma::RenderSettings &CSceneComponent::GetRenderSettings() {return m_renderSettings;}
+const pragma::RenderSettings &CSceneComponent::GetRenderSettings() const {return const_cast<CSceneComponent*>(this)->GetRenderSettings();}
+const std::shared_ptr<prosper::IBuffer> &CSceneComponent::GetCameraBuffer() const {return m_cameraBuffer;}
+const std::shared_ptr<prosper::IBuffer> &CSceneComponent::GetViewCameraBuffer() const {return m_cameraViewBuffer;}
+const std::shared_ptr<prosper::IDescriptorSetGroup> &CSceneComponent::GetCameraDescriptorSetGroup(prosper::PipelineBindPoint bindPoint) const
 {
 	switch(bindPoint)
 	{
@@ -308,14 +362,14 @@ const std::shared_ptr<prosper::IDescriptorSetGroup> &Scene::GetCameraDescriptorS
 	static std::shared_ptr<prosper::IDescriptorSetGroup> nptr = nullptr;
 	return nptr;
 }
-const std::shared_ptr<prosper::IDescriptorSetGroup> &Scene::GetViewCameraDescriptorSetGroup() const {return m_camViewDescSetGroup;}
-prosper::IDescriptorSet *Scene::GetCameraDescriptorSetGraphics() const {return m_camDescSetGroupGraphics->GetDescriptorSet();}
-prosper::IDescriptorSet *Scene::GetCameraDescriptorSetCompute() const {return m_camDescSetGroupCompute->GetDescriptorSet();}
-prosper::IDescriptorSet *Scene::GetViewCameraDescriptorSet() const {return m_camViewDescSetGroup->GetDescriptorSet();}
-const std::shared_ptr<prosper::IDescriptorSetGroup> &Scene::GetFogDescriptorSetGroup() const {return m_fogDescSetGroup;}
+const std::shared_ptr<prosper::IDescriptorSetGroup> &CSceneComponent::GetViewCameraDescriptorSetGroup() const {return m_camViewDescSetGroup;}
+prosper::IDescriptorSet *CSceneComponent::GetCameraDescriptorSetGraphics() const {return m_camDescSetGroupGraphics->GetDescriptorSet();}
+prosper::IDescriptorSet *CSceneComponent::GetCameraDescriptorSetCompute() const {return m_camDescSetGroupCompute->GetDescriptorSet();}
+prosper::IDescriptorSet *CSceneComponent::GetViewCameraDescriptorSet() const {return m_camViewDescSetGroup->GetDescriptorSet();}
+const std::shared_ptr<prosper::IDescriptorSetGroup> &CSceneComponent::GetFogDescriptorSetGroup() const {return m_fogDescSetGroup;}
 
-WorldEnvironment *Scene::GetWorldEnvironment() const {return m_worldEnvironment.get();}
-void Scene::SetWorldEnvironment(WorldEnvironment &env)
+WorldEnvironment *CSceneComponent::GetWorldEnvironment() const {return m_worldEnvironment.get();}
+void CSceneComponent::SetWorldEnvironment(WorldEnvironment &env)
 {
 	ClearWorldEnvironment();
 
@@ -372,7 +426,7 @@ void Scene::SetWorldEnvironment(WorldEnvironment &env)
 	m_fogData.flags = fog.IsEnabled();
 	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer,0ull,m_fogData);
 }
-void Scene::SetLightMap(pragma::CLightMapComponent &lightMapC)
+void CSceneComponent::SetLightMap(pragma::CLightMapComponent &lightMapC)
 {
 	auto &renderSettings = GetRenderSettings();
 	renderSettings.lightmapIntensity = lightMapC.GetLightMapIntensity();
@@ -381,7 +435,7 @@ void Scene::SetLightMap(pragma::CLightMapComponent &lightMapC)
 	UpdateRenderSettings();
 	UpdateRendererLightMap();
 }
-void Scene::UpdateRendererLightMap()
+void CSceneComponent::UpdateRendererLightMap()
 {
 	if(m_renderer == nullptr || m_renderer->IsRasterizationRenderer() == false || m_lightMap.expired())
 		return;
@@ -391,7 +445,7 @@ void Scene::UpdateRendererLightMap()
 	// TODO: Not ideal to have this here; How to handle this in a better way?
 	static_cast<pragma::rendering::RasterizationRenderer*>(m_renderer.get())->SetLightMap(texLightMap);
 }
-void Scene::UpdateRenderSettings()
+void CSceneComponent::UpdateRenderSettings()
 {
 	if(m_worldEnvironment == nullptr)
 		return;
@@ -403,7 +457,7 @@ void Scene::UpdateRenderSettings()
 	if(m_renderer)
 		m_renderer->UpdateRenderSettings();
 }
-void Scene::ClearWorldEnvironment()
+void CSceneComponent::ClearWorldEnvironment()
 {
 	for(auto &hCb : m_envCallbacks)
 	{
@@ -416,11 +470,11 @@ void Scene::ClearWorldEnvironment()
 	m_worldEnvironment = nullptr;
 }
 
-/*Vulkan::Texture &Scene::ResolveRenderTexture(Vulkan::CommandBufferObject *cmdBuffer) {return const_cast<Vulkan::Texture&>(m_hdrInfo.texture->Resolve(cmdBuffer));}
-Vulkan::Texture &Scene::ResolveDepthTexture(Vulkan::CommandBufferObject *cmdBuffer) {return const_cast<Vulkan::Texture&>(m_hdrInfo.prepass.textureDepth->Resolve(cmdBuffer));}
-Vulkan::Texture &Scene::ResolveBloomTexture(Vulkan::CommandBufferObject *cmdBuffer) {return const_cast<Vulkan::Texture&>(m_hdrInfo.textureBloom->Resolve(cmdBuffer));}*/ // prosper TODO
+/*Vulkan::Texture &CSceneComponent::ResolveRenderTexture(Vulkan::CommandBufferObject *cmdBuffer) {return const_cast<Vulkan::Texture&>(m_hdrInfo.texture->Resolve(cmdBuffer));}
+Vulkan::Texture &CSceneComponent::ResolveDepthTexture(Vulkan::CommandBufferObject *cmdBuffer) {return const_cast<Vulkan::Texture&>(m_hdrInfo.prepass.textureDepth->Resolve(cmdBuffer));}
+Vulkan::Texture &CSceneComponent::ResolveBloomTexture(Vulkan::CommandBufferObject *cmdBuffer) {return const_cast<Vulkan::Texture&>(m_hdrInfo.textureBloom->Resolve(cmdBuffer));}*/ // prosper TODO
 
-void Scene::Resize(uint32_t width,uint32_t height,bool reload)
+void CSceneComponent::Resize(uint32_t width,uint32_t height,bool reload)
 {
 	if(m_renderer == nullptr)
 		return;
@@ -428,7 +482,7 @@ void Scene::Resize(uint32_t width,uint32_t height,bool reload)
 		return;
 	ReloadRenderTarget(width,height);
 }
-void Scene::LinkWorldEnvironment(Scene &other)
+void CSceneComponent::LinkWorldEnvironment(CSceneComponent &other)
 {
 	// T
 	auto &worldEnv = *GetWorldEnvironment();
@@ -448,30 +502,34 @@ void Scene::LinkWorldEnvironment(Scene &other)
 	fogSettings.GetTypeProperty()->Link(*fogSettingsOther.GetTypeProperty());
 }
 
-void Scene::SetRenderer(const std::shared_ptr<pragma::rendering::BaseRenderer> &renderer)
+void CSceneComponent::SetRenderer(const std::shared_ptr<pragma::rendering::BaseRenderer> &renderer)
 {
 	m_renderer = renderer;
 	UpdateRenderSettings();
 	UpdateRendererLightMap();
 }
-pragma::rendering::BaseRenderer *Scene::GetRenderer() {return m_renderer.get();}
+pragma::rendering::BaseRenderer *CSceneComponent::GetRenderer() {return m_renderer.get();}
+const pragma::rendering::BaseRenderer *CSceneComponent::GetRenderer() const {return const_cast<CSceneComponent*>(this)->GetRenderer();}
 
-Scene::DebugMode Scene::GetDebugMode() const {return m_debugMode;}
-void Scene::SetDebugMode(Scene::DebugMode debugMode) {m_debugMode = debugMode;}
+CSceneComponent::DebugMode CSceneComponent::GetDebugMode() const {return m_debugMode;}
+void CSceneComponent::SetDebugMode(CSceneComponent::DebugMode debugMode) {m_debugMode = debugMode;}
 
-void Scene::SetParticleSystemColorFactor(const Vector4 &colorFactor) {m_particleSystemColorFactor = colorFactor;}
-const Vector4 &Scene::GetParticleSystemColorFactor() const {return m_particleSystemColorFactor;}
+SceneRenderDesc &CSceneComponent::GetSceneRenderDesc() {return m_sceneRenderDesc;}
+const SceneRenderDesc &CSceneComponent::GetSceneRenderDesc() const {return const_cast<CSceneComponent*>(this)->GetSceneRenderDesc();}
 
-bool Scene::IsValid() const {return m_bValid;}
+void CSceneComponent::SetParticleSystemColorFactor(const Vector4 &colorFactor) {m_particleSystemColorFactor = colorFactor;}
+const Vector4 &CSceneComponent::GetParticleSystemColorFactor() const {return m_particleSystemColorFactor;}
 
-Scene::SceneIndex Scene::GetSceneIndex() const {return m_sceneIndex;}
+bool CSceneComponent::IsValid() const {return m_bValid;}
 
-uint32_t Scene::GetWidth() const {return m_renderer ? m_renderer->GetWidth() : 0;}
-uint32_t Scene::GetHeight() const {return m_renderer ? m_renderer->GetHeight() : 0;}
+CSceneComponent::SceneIndex CSceneComponent::GetSceneIndex() const {return m_sceneIndex;}
 
-//const Vulkan::DescriptorSet &Scene::GetBloomGlowDescriptorSet() const {return m_descSetBloomGlow;} // prosper TODO
+uint32_t CSceneComponent::GetWidth() const {return m_renderer ? m_renderer->GetWidth() : 0;}
+uint32_t CSceneComponent::GetHeight() const {return m_renderer ? m_renderer->GetHeight() : 0;}
 
-void Scene::ReloadRenderTarget(uint32_t width,uint32_t height)
+//const Vulkan::DescriptorSet &CSceneComponent::GetBloomGlowDescriptorSet() const {return m_descSetBloomGlow;} // prosper TODO
+
+void CSceneComponent::ReloadRenderTarget(uint32_t width,uint32_t height)
 {
 	m_bValid = false;
 
@@ -481,12 +539,27 @@ void Scene::ReloadRenderTarget(uint32_t width,uint32_t height)
 	m_bValid = true;
 }
 
-const util::WeakHandle<pragma::CCameraComponent> &Scene::GetActiveCamera() const {return const_cast<Scene*>(this)->GetActiveCamera();}
-util::WeakHandle<pragma::CCameraComponent> &Scene::GetActiveCamera() {return m_camera;}
-void Scene::SetActiveCamera(pragma::CCameraComponent &cam)
+const util::WeakHandle<pragma::CCameraComponent> &CSceneComponent::GetActiveCamera() const {return const_cast<CSceneComponent*>(this)->GetActiveCamera();}
+util::WeakHandle<pragma::CCameraComponent> &CSceneComponent::GetActiveCamera() {return m_camera;}
+void CSceneComponent::SetActiveCamera(pragma::CCameraComponent &cam)
 {
 	m_camera = cam.GetHandle<pragma::CCameraComponent>();
 	m_renderSettings.nearZ = cam.GetNearZ();
 	m_renderSettings.farZ = cam.GetFarZ();
+
+	BroadcastEvent(EVENT_ON_ACTIVE_CAMERA_CHANGED);
 }
-void Scene::SetActiveCamera() {m_camera = {};}
+void CSceneComponent::SetActiveCamera()
+{
+	m_camera = {};
+
+	BroadcastEvent(EVENT_ON_ACTIVE_CAMERA_CHANGED);
+}
+
+////////
+
+void CScene::Initialize()
+{
+	CBaseEntity::Initialize();
+	AddComponent<CSceneComponent>();
+}

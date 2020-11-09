@@ -29,6 +29,9 @@ namespace pragma
 		BaseEnvCameraComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 
+		virtual void Save(DataStream &ds) override;
+		virtual void Load(DataStream &ds,uint32_t version) override;
+
 		void UpdateMatrices();
 		void UpdateViewMatrix();
 		void UpdateProjectionMatrix();

@@ -8,12 +8,12 @@
 #include "stdafx_client.h"
 #include "pragma/entities/point/c_point_rendertarget.h"
 #include "pragma/entities/c_entityfactories.h"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include <cmaterialmanager.h>
 #include <mathutil/umat.h>
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/c_engine.h"
 #include <texturemanager/texturemanager.h>
-#include "pragma/rendering/scene/scene.h"
 #include "textureinfo.h"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/lua/c_lentity_handles.hpp"

@@ -604,10 +604,30 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	modVec[
 		luabind::def("move_state_to_string",Lua::debug::move_state_to_string)
 	];
+	auto isBreakDefined = false;
 	if(Lua::get_extended_lua_modules_enabled())
 	{
 		DLLLUA int lua_snapshot(lua_State *L);
 		lua_pushtablecfunction(lua.GetState(),"debug","snapshot",lua_snapshot);
+#ifdef _WIN32
+#ifdef _MSC_VER
+		isBreakDefined = true;
+		lua_pushtablecfunction(lua.GetState(),"debug","breakpoint",static_cast<int(*)(lua_State*)>([](lua_State *l) -> int {
+			__debugbreak();
+			return 0;
+		}))
+#endif
+#else
+		isBreakDefined = true;
+		lua_pushtablecfunction(lua.GetState(),"debug","breakpoint",static_cast<int(*)(lua_State*)>([](lua_State *l) -> int {
+			__builtin_trap();
+			return 0;
+		}))
+#endif
+	}
+	if(isBreakDefined == false)
+	{
+		lua_pushtablecfunction(lua.GetState(),"debug","breakpoint",static_cast<int(*)(lua_State*)>([](lua_State *l) -> int {return 0;}))
 	}
 	//lua_pushtablecfunction(lua.GetState(),"debug","enable_remote_debugging",Lua::debug::enable_remote_debugging);
 
@@ -1554,7 +1574,9 @@ void Game::RegisterLuaLibraries()
 		luabind::def("create_perspective_matrix",Lua::matrix::create_perspective_matrix),
 		luabind::def("create_look_at_matrix",glm::lookAtRH<float,glm::packed_highp>),
 		luabind::def("calc_covariance_matrix",static_cast<::Mat3(*)(lua_State*,luabind::table<>,const Vector3&)>(Lua::matrix::calc_covariance_matrix)),
-		luabind::def("calc_covariance_matrix",static_cast<::Mat3(*)(lua_State*,luabind::table<>)>(Lua::matrix::calc_covariance_matrix))
+		luabind::def("calc_covariance_matrix",static_cast<::Mat3(*)(lua_State*,luabind::table<>)>(Lua::matrix::calc_covariance_matrix)),
+		luabind::def("calc_covariance_matrix",static_cast<::Mat3(*)(lua_State*,luabind::table<>)>(Lua::matrix::calc_covariance_matrix)),
+		luabind::def("calc_projection_depth_bias_offset",&umat::calc_projection_depth_bias_offset)
 	];
 
 	Lua::RegisterLibrary(GetLuaState(),"mesh",{

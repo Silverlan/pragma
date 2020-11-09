@@ -23,7 +23,7 @@ extern DLLCLIENT CGame *c_game;
 
 void RasterizationRenderer::CullLightSources(const util::DrawSceneInfo &drawSceneInfo)
 {
-	if(drawSceneInfo.scene == nullptr)
+	if(drawSceneInfo.scene.expired())
 		return;
 	auto &scene = *drawSceneInfo.scene;
 	auto &prepass = GetPrepass();
@@ -64,7 +64,7 @@ void RasterizationRenderer::CullLightSources(const util::DrawSceneInfo &drawScen
 		auto *worldEnv = scene.GetWorldEnvironment();
 		if(worldEnv && worldEnv->IsUnlit() == false)
 		{
-			fp.Compute(*drawCmd,scene,depthTex->GetImage(),*scene.GetCameraDescriptorSetCompute());
+			fp.Compute(*drawCmd,const_cast<pragma::CSceneComponent&>(scene),depthTex->GetImage(),*scene.GetCameraDescriptorSetCompute());
 			auto &lightBits = fp.GetShadowLightBits();
 			for(auto i=decltype(lightBits.size()){0};i<lightBits.size();++i)
 			{

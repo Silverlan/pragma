@@ -28,8 +28,8 @@ void WIDebugSSAO::DoUpdate()
 	WITexturedRect::DoUpdate();
 	if(c_game == nullptr)
 		return;
-	auto &scene = c_game->GetScene();
-	auto *renderer = dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer());
+	auto *scene = c_game->GetScene();
+	auto *renderer = scene ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer()) : nullptr;
 	if(renderer == nullptr)
 		return;
 	auto &ssaoInfo = renderer->GetSSAOInfo();

@@ -10,7 +10,8 @@
 
 extern DLLCLIENT CGame *c_game;
 
-const std::shared_ptr<Scene> &CGame::GetScene() const {return m_scene;}
+pragma::CSceneComponent *CGame::GetScene() {return m_scene.get();}
+const pragma::CSceneComponent *CGame::GetScene() const {return const_cast<CGame*>(this)->GetScene();}
 
 static void cl_fov_callback(NetworkState*,ConVar*,float,float val)
 {

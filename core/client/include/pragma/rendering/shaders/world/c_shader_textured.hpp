@@ -108,7 +108,8 @@ namespace pragma
 			None = 0u,
 			ClipPlaneBound = 1u,
 			ShouldUseLightMap = ClipPlaneBound<<1u,
-			RenderAs3DSky = ShouldUseLightMap<<1u
+			RenderAs3DSky = ShouldUseLightMap<<1u,
+			DisableShadows = RenderAs3DSky<<1u
 		};
 
 #pragma pack(push,1)
@@ -127,13 +128,13 @@ namespace pragma
 
 		struct PushConstants
 		{
-			Vector4 clipPlane; // w is reflection probe intensity
+			Vector4 clipPlane;
 			Vector4 drawOrigin; // w is scale
 			uint32_t vertexAnimInfo;
 			RenderFlags flags;
-			static_assert(sizeof(Scene::DebugMode) == sizeof(uint32_t));
-			Scene::DebugMode debugMode;
-			float padding; // Padding to vec4
+			static_assert(sizeof(pragma::CSceneComponent::DebugMode) == sizeof(uint32_t));
+			pragma::CSceneComponent::DebugMode debugMode;
+			float reflectionProbeIntensity;
 		};
 
 		struct MaterialData
@@ -170,11 +171,13 @@ namespace pragma
 		) const override;
 		bool BindReflectionProbeIntensity(float intensity);
 		std::optional<MaterialData> UpdateMaterialBuffer(CMaterial &mat) const;
-		bool SetDebugMode(Scene::DebugMode debugMode);
+		bool SetDebugMode(pragma::CSceneComponent::DebugMode debugMode);
 		void Set3DSky(bool is3dSky);
+		void SetShadowsEnabled(bool enabled);
 	protected:
 		using ShaderEntity::Draw;
 		bool BindLightMapUvBuffer(CModelSubMesh &mesh,bool &outShouldUseLightmaps);
+		virtual void OnBindEntity(CBaseEntity &ent,CRenderComponent &renderC) override;
 		virtual void ApplyMaterialFlags(CMaterial &mat,MaterialFlags &outFlags) const;
 		virtual void UpdateRenderFlags(CModelSubMesh &mesh,RenderFlags &inOutFlags);
 		virtual void OnPipelineBound() override;

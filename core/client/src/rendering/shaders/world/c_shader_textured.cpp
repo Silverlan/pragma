@@ -188,14 +188,15 @@ bool ShaderTextured3DBase::BindMaterialParameters(CMaterial &mat) {return true;}
 void ShaderTextured3DBase::ApplyMaterialFlags(CMaterial &mat,MaterialFlags &outFlags) const {}
 bool ShaderTextured3DBase::BindReflectionProbeIntensity(float intensity)
 {
-	return RecordPushConstants(intensity,offsetof(PushConstants,clipPlane) +sizeof(Vector3));
+	return RecordPushConstants(intensity,offsetof(PushConstants,reflectionProbeIntensity));
 }
 bool ShaderTextured3DBase::BindClipPlane(const Vector4 &clipPlane)
 {
 	umath::set_flag(m_stateFlags,StateFlags::ClipPlaneBound);
-	return RecordPushConstants(Vector3(clipPlane.x,clipPlane.y,clipPlane.z) *clipPlane.w,offsetof(PushConstants,clipPlane));
+	return RecordPushConstants(clipPlane,offsetof(PushConstants,clipPlane));
 }
 void ShaderTextured3DBase::Set3DSky(bool is3dSky) {umath::set_flag(m_stateFlags,StateFlags::RenderAs3DSky,is3dSky);}
+void ShaderTextured3DBase::SetShadowsEnabled(bool enabled) {umath::set_flag(m_stateFlags,StateFlags::DisableShadows,!enabled);}
 void ShaderTextured3DBase::OnPipelineBound()
 {
 	ShaderEntity::OnPipelineBound();
@@ -206,6 +207,11 @@ void ShaderTextured3DBase::OnPipelineUnbound()
 	ShaderEntity::OnPipelineUnbound();
 	umath::set_flag(m_stateFlags,StateFlags::ClipPlaneBound,false);
 }
+void ShaderTextured3DBase::OnBindEntity(CBaseEntity &ent,CRenderComponent &renderC)
+{
+	ShaderEntity::OnBindEntity(ent,renderC);
+	SetShadowsEnabled(renderC.IsReceivingShadows());
+}
 bool ShaderTextured3DBase::BeginDraw(
 	const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,Pipeline pipelineIdx,RecordFlags recordFlags
 )
@@ -214,10 +220,10 @@ bool ShaderTextured3DBase::BeginDraw(
 	return ShaderScene::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx),recordFlags) == true &&
 		BindClipPlane(clipPlane) == true &&
 		RecordPushConstants(drawOrigin,offsetof(PushConstants,drawOrigin)) &&
-		RecordPushConstants(Scene::DebugMode::None,offsetof(PushConstants,debugMode)) &&
+		RecordPushConstants(pragma::CSceneComponent::DebugMode::None,offsetof(PushConstants,debugMode)) &&
 		cmdBuffer->RecordSetDepthBias() == true;
 }
-bool ShaderTextured3DBase::SetDebugMode(Scene::DebugMode debugMode)
+bool ShaderTextured3DBase::SetDebugMode(pragma::CSceneComponent::DebugMode debugMode)
 {
 	return RecordPushConstants(debugMode,offsetof(PushConstants,debugMode));
 }

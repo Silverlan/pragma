@@ -281,8 +281,8 @@ void ShadowRenderer::RenderShadows(
 
 	auto *smRt = hShadowMap->GetDepthRenderTarget();
 	auto &tex = smRt->GetTexture();
-	auto &scene = c_game->GetScene();
-	auto *renderer = scene->GetRenderer();
+	auto *scene = c_game->GetScene();
+	auto *renderer = scene ? scene->GetRenderer() : nullptr;
 	if(renderer->IsRasterizationRenderer() == false)
 		renderer = nullptr;
 
@@ -303,7 +303,7 @@ void ShadowRenderer::RenderShadows(
 			RenderShadows(drawCmd,light,layerId,depthMVP,shader,true); // Draw translucent shadows
 		if(drawParticleShadows == true && renderer)
 		{
-			auto &scene = c_game->GetRenderScene();
+			auto *scene = c_game->GetRenderScene();
 			// TODO: Only culled particles
 			EntityIterator entIt {*c_game};
 			entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CParticleSystemComponent>>();

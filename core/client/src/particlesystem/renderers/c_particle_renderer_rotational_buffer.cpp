@@ -10,7 +10,7 @@
 #include "pragma/game/c_game.h"
 #include "pragma/particlesystem/renderers/c_particle_renderer_rotational_buffer.hpp"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/rendering/scene/scene.h"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>

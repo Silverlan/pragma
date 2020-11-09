@@ -896,7 +896,7 @@ int Lua::game::Client::set_action_input(lua_State *l)
 int Lua::game::Client::draw_scene(lua_State *l)
 {
 	auto &drawSceneInfo = Lua::Check<::util::DrawSceneInfo>(l,1);
-	auto scene = (drawSceneInfo.scene != nullptr) ? drawSceneInfo.scene : c_game->GetRenderScene();
+	auto scene = drawSceneInfo.scene.valid() ? drawSceneInfo.scene.get() : c_game->GetRenderScene();
 	auto *renderer = scene ? scene->GetRenderer() : nullptr;
 	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 		return 0;
@@ -904,7 +904,7 @@ int Lua::game::Client::draw_scene(lua_State *l)
 	if(cmdBuffer == nullptr || cmdBuffer->IsPrimary() == false)
 		return 0;
 	auto *clearColor = drawSceneInfo.clearColor.has_value() ? &drawSceneInfo.clearColor.value() : nullptr;
-	c_game->SetRenderScene(scene);
+	c_game->SetRenderScene(*scene);
 
 	if(clearColor != nullptr)
 	{
@@ -918,33 +918,37 @@ int Lua::game::Client::draw_scene(lua_State *l)
 
 	auto primCmdBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(cmdBuffer);
 	c_game->RenderScene(drawSceneInfo);
-	c_game->SetRenderScene(nullptr);
+	c_game->ResetRenderScene();
 	return 0;
 }
 int Lua::game::Client::create_scene(lua_State *l)
 {
 	auto argIdx = 1;
-	::Scene::CreateInfo createInfo {};
+	pragma::CSceneComponent::CreateInfo createInfo {};
 	if(Lua::IsSet(l,argIdx))
 		createInfo.sampleCount = static_cast<prosper::SampleCountFlags>(Lua::CheckInt(l,argIdx++));
-	::Scene *parent = nullptr;
+	::pragma::CSceneComponent *parent = nullptr;
 	if(Lua::IsSet(l,argIdx))
-		parent = &Lua::Check<::Scene>(l,argIdx++);
-	auto scene = ::Scene::Create(createInfo,parent);
+		parent = Lua::Check<::CSceneHandle>(l,argIdx++).get();
+	auto *scene = pragma::CSceneComponent::Create(createInfo,parent);
 	if(scene == nullptr)
 		return 0;
-	Lua::Push<decltype(scene)>(l,scene);
+	scene->GetLuaObject().push(l);
 	return 1;
 }
 int Lua::game::Client::get_render_scene(lua_State *l)
 {
-	auto &scene = c_game->GetRenderScene();
-	Lua::Push<decltype(scene)>(l,scene);
+	auto *scene = c_game->GetRenderScene();
+	if(scene == nullptr)
+		return 0;
+	scene->GetLuaObject().push(l);
 	return 1;
 }
 int Lua::game::Client::get_render_scene_camera(lua_State *l)
 {
-	auto &scene = c_game->GetRenderScene();
+	auto *scene = c_game->GetRenderScene();
+	if(scene == nullptr)
+		return 0;
 	auto &cam = scene->GetActiveCamera();
 	if(cam.expired())
 		return 0;
@@ -953,14 +957,18 @@ int Lua::game::Client::get_render_scene_camera(lua_State *l)
 }
 int Lua::game::Client::get_scene(lua_State *l)
 {
-	auto &scene = c_game->GetScene();
-	Lua::Push<decltype(scene)>(l,scene);
+	auto *scene = c_game->GetScene();
+	if(scene == nullptr)
+		return 0;
+	scene->GetLuaObject().push(l);
 	return 1;
 }
 int Lua::game::Client::get_scene_by_index(lua_State *l)
 {
-	auto *scene = ::Scene::GetByIndex(Lua::CheckInt(l,1));
-	Lua::Push(l,scene->shared_from_this());
+	auto *scene = ::pragma::CSceneComponent::GetByIndex(Lua::CheckInt(l,1));
+	if(scene == nullptr)
+		return 0;
+	scene->GetLuaObject().push(l);
 	return 1;
 }
 int Lua::game::Client::get_scene_camera(lua_State *l)

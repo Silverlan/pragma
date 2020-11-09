@@ -30,7 +30,7 @@
 #include "pragma/rendering/rendersystem.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/lua/luacallback.h>
-#include "pragma/rendering/scene/scene.h"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include "luasystem.h"
 #include "pragma/gui/widebugdepthtexture.h"
 #include "pragma/debug/c_debug_game_gui.h"
@@ -161,8 +161,8 @@ static void CVAR_CALLBACK_debug_render_depth_buffer(NetworkState*,ConVar*,bool,b
 		if(val == false)
 			return;
 		dbg = std::make_unique<DebugGameGUI>([]() {
-			auto &scene = c_game->GetScene();
-			auto *renderer = scene->GetRenderer();
+			auto *scene = c_game->GetScene();
+			auto *renderer = scene ? scene->GetRenderer() : nullptr;
 			if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 				return WIHandle{};
 			auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
@@ -223,8 +223,18 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 			pt->Simulate(tDelta);
 	}
 
-	auto &scene = GetRenderScene();
-	if(scene == nullptr)
+	if(drawSceneInfo.scene.expired())
+	{
+		auto *sceneC = GetRenderScene();
+		drawSceneInfo.scene = sceneC ? sceneC->GetHandle<pragma::CSceneComponent>() : util::WeakHandle<pragma::CSceneComponent>{};
+	}
+	if(drawSceneInfo.scene.expired())
+	{
+		auto *sceneC = GetScene();
+		drawSceneInfo.scene = sceneC ? sceneC->GetHandle<pragma::CSceneComponent>() : util::WeakHandle<pragma::CSceneComponent>{};
+	}
+	auto &scene = drawSceneInfo.scene;
+	if(scene.expired())
 	{
 		Con::cwar<<"WARNING: No active render scene!"<<Con::endl;
 		return;
@@ -234,8 +244,6 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 		Con::cwar<<"WARNING: Attempted to render invalid scene!"<<Con::endl;
 		return;
 	}
-	if(drawSceneInfo.scene == nullptr)
-		drawSceneInfo.scene = GetScene();
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	if(cvClearScene->GetBool() == true || drawWorld == 2 || drawSceneInfo.clearColor.has_value())
 	{

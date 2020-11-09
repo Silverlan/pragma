@@ -55,7 +55,7 @@ void RasterizationRenderer::RenderBloom(const util::DrawSceneInfo &drawSceneInfo
 void RasterizationRenderer::RenderGlowObjects(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &glowInfo = GetGlowInfo();
-	if(glowInfo.bGlowScheduled == false || drawSceneInfo.scene == nullptr)
+	if(glowInfo.bGlowScheduled == false || drawSceneInfo.scene.expired())
 		return;
 	auto &scene = *drawSceneInfo.scene;
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingGlow);
@@ -72,7 +72,7 @@ void RasterizationRenderer::RenderGlowObjects(const util::DrawSceneInfo &drawSce
 	}
 	for(auto i=std::underlying_type_t<RenderMode>{0};i<umath::to_integral(RenderMode::Count);++i)
 	{
-		auto *renderInfo = GetRenderInfo(static_cast<RenderMode>(i));
+		auto *renderInfo = scene.GetSceneRenderDesc().GetRenderInfo(static_cast<RenderMode>(i));
 		if(renderInfo == nullptr || renderInfo->glowMeshes.empty() == true)
 			continue;
 		RenderGlowMeshes(drawCmd,scene,static_cast<RenderMode>(i));
@@ -101,18 +101,18 @@ void RasterizationRenderer::RenderGlowObjects(const util::DrawSceneInfo &drawSce
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingGlow);
 }
 
-void RasterizationRenderer::RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,Scene &scene,RenderMode renderMode)
+void RasterizationRenderer::RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::CSceneComponent &scene,RenderMode renderMode)
 {
 	auto &glowInfo = GetGlowInfo();
 	auto *shader = static_cast<pragma::ShaderGlow*>(glowInfo.shader.get());
 	if(shader == nullptr)
 		return;
-	auto *renderInfo = GetRenderInfo(renderMode);
+	auto *renderInfo = scene.GetSceneRenderDesc().GetRenderInfo(renderMode);
 	if(renderInfo == nullptr)
 		return;
 	if(shader->BeginDraw(drawCmd) == true)
 	{
-		shader->BindSceneCamera(scene,*this,(renderMode == RenderMode::View) ? true : false);
+		shader->BindSceneCamera(const_cast<pragma::CSceneComponent&>(scene),*this,(renderMode == RenderMode::View) ? true : false);
 		for(auto &matContainer : renderInfo->glowMeshes)
 		{
 			auto *mat = matContainer->material;

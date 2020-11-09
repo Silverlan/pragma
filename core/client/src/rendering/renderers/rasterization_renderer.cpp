@@ -6,14 +6,7 @@
  */
 
 #include "stdafx_client.h"
-#include "pragma/rendering/scene/scene.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
-#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_brute_force.hpp"
-#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_bsp.hpp"
-#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_chc.hpp"
-#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_inert.hpp"
-#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_octtree.hpp"
-#include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
@@ -21,6 +14,7 @@
 #include "pragma/rendering/renderers/rasterization/hdr_data.hpp"
 #include "pragma/rendering/renderers/rasterization/glow_data.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include <pragma/lua/luafunction_call.h>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_msaa_texture.hpp>
@@ -40,7 +34,7 @@ static void cl_render_ssao_callback(NetworkState*,ConVar*,bool,bool val)
 {
 	if(c_game == nullptr)
 		return;
-	auto &scene = c_game->GetScene();
+	auto *scene = c_game->GetScene();
 	if(scene == nullptr)
 		return;
 	auto *renderer = dynamic_cast<RasterizationRenderer*>(scene->GetRenderer());
@@ -66,7 +60,6 @@ RasterizationRenderer::RasterizationRenderer()
 	m_whShaderWireframe = c_engine->GetShader("wireframe");
 
 	InitializeLightDescriptorSets();
-	ReloadOcclusionCullingHandler();
 
 	prosper::util::BufferCreateInfo bufCreateInfo {};
 	bufCreateInfo.size = sizeof(m_rendererData);
@@ -88,7 +81,6 @@ RasterizationRenderer::~RasterizationRenderer()
 	auto it = std::find(g_renderers.begin(),g_renderers.end(),this);
 	if(it != g_renderers.end())
 		g_renderers.erase(it);
-	m_occlusionCullingHandler = nullptr;
 }
 
 void RasterizationRenderer::UpdateRendererBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
@@ -97,15 +89,6 @@ void RasterizationRenderer::UpdateRendererBuffer(std::shared_ptr<prosper::IPrima
 }
 
 bool RasterizationRenderer::Initialize(uint32_t w,uint32_t h) {return true;}
-
-CulledMeshData *RasterizationRenderer::GetRenderInfo(RenderMode renderMode) const
-{
-	auto &renderMeshData = m_renderMeshCollectionHandler.GetRenderMeshData();
-	auto it = renderMeshData.find(renderMode);
-	if(it == renderMeshData.end())
-		return nullptr;
-	return it->second.get();
-}
 
 prosper::IDescriptorSet *RasterizationRenderer::GetDepthDescriptorSet() const {return (m_hdrInfo.dsgSceneDepth != nullptr) ? m_hdrInfo.dsgSceneDepth->GetDescriptorSet() : nullptr;}
 prosper::IDescriptorSet *RasterizationRenderer::GetRendererDescriptorSet() const {return m_descSetGroupRenderer->GetDescriptorSet();}
@@ -161,20 +144,20 @@ extern bool g_collectRenderStats;
 extern void print_debug_render_stats();
 void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawSceneInfo)
 {
-	if(drawSceneInfo.scene == nullptr)
+	if(drawSceneInfo.scene.expired())
 		return;
 	static auto skipMode = 0;
 	if(skipMode == 1)
 		return;
-	auto &scene = *drawSceneInfo.scene;
+	auto &scene = const_cast<pragma::CSceneComponent&>(*drawSceneInfo.scene);
 	// Occlusion Culling
-	PerformOcclusionCulling(scene);
+	scene.GetSceneRenderDesc().PerformOcclusionCulling();
 	
 	if(skipMode == 2)
 		return;
 	// Collect render objects
 	c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("OnPreRender",drawSceneInfo);
-	CollectRenderObjects(scene,drawSceneInfo.renderFlags);
+	scene.GetSceneRenderDesc().CollectRenderObjects(drawSceneInfo.renderFlags);
 	c_game->CallLuaCallbacks<void,RasterizationRenderer*>("PrepareRendering",this);
 	
 	if(skipMode == 3)
@@ -201,7 +184,59 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	if(drawSceneInfo.renderTarget == nullptr)
-		RenderPrepass(drawSceneInfo);
+	{
+		auto prepassMode = GetPrepassMode();
+		if(prepassMode == PrepassMode::NoPrepass || drawSceneInfo.scene.expired())
+			return;
+		auto &scene = *drawSceneInfo.scene;
+		auto &hCam = scene.GetActiveCamera();
+		// Pre-render depths and normals (if SSAO is enabled)
+		c_game->StartProfilingStage(CGame::CPUProfilingPhase::Prepass);
+		c_game->StartProfilingStage(CGame::GPUProfilingPhase::Prepass);
+		auto &prepass = GetPrepass();
+		if(prepass.textureDepth->IsMSAATexture())
+			static_cast<prosper::MSAATexture&>(*prepass.textureDepth).Reset();
+		if(prepass.textureNormals != nullptr && prepass.textureNormals->IsMSAATexture())
+			static_cast<prosper::MSAATexture&>(*prepass.textureNormals).Reset();
+
+		// Entity instance buffer barrier
+		auto &drawCmd = drawSceneInfo.commandBuffer;
+		drawCmd->RecordBufferBarrier(
+			*pragma::CRenderComponent::GetInstanceBuffer(),
+			prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
+			prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
+		);
+
+		// Entity bone buffer barrier
+		drawCmd->RecordBufferBarrier(
+			*pragma::get_instance_bone_buffer(),
+			prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
+			prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
+		);
+
+		// Camera buffer barrier
+		drawCmd->RecordBufferBarrier(
+			*scene.GetCameraBuffer(),
+			prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::GeometryShaderBit,
+			prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
+		);
+
+		// View camera buffer barrier
+		drawCmd->RecordBufferBarrier(
+			*scene.GetViewCameraBuffer(),
+			prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
+			prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
+		);
+
+		prepass.BeginRenderPass(drawSceneInfo);
+
+			RenderPrepass(drawSceneInfo);
+			c_game->CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderPrepass",drawSceneInfo);
+
+		prepass.EndRenderPass(drawSceneInfo);
+		c_game->StopProfilingStage(CGame::GPUProfilingPhase::Prepass);
+		c_game->StopProfilingStage(CGame::CPUProfilingPhase::Prepass);
+	}
 	
 	if(skipMode == 5)
 		return;
@@ -270,7 +305,7 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 		print_debug_render_stats();
 }
 
-bool RasterizationRenderer::ReloadRenderTarget(Scene &scene,uint32_t width,uint32_t height)
+bool RasterizationRenderer::ReloadRenderTarget(pragma::CSceneComponent &scene,uint32_t width,uint32_t height)
 {
 	auto bSsao = IsSSAOEnabled();
 	if(
@@ -316,7 +351,7 @@ void RasterizationRenderer::BeginRendering(const util::DrawSceneInfo &drawSceneI
 }
 
 bool RasterizationRenderer::IsSSAOEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::SSAOEnabled);}
-void RasterizationRenderer::SetSSAOEnabled(Scene &scene,bool b)
+void RasterizationRenderer::SetSSAOEnabled(pragma::CSceneComponent &scene,bool b)
 {
 	umath::set_flag(m_stateFlags,StateFlags::SSAOEnabled,b);
 	UpdateRenderSettings();
@@ -331,7 +366,7 @@ void RasterizationRenderer::SetSSAOEnabled(Scene &scene,bool b)
 	m_hdrInfo.ssaoInfo.Clear();
 	UpdateRenderSettings();*/
 }
-void RasterizationRenderer::UpdateCameraData(Scene &scene,pragma::CameraData &cameraData)
+void RasterizationRenderer::UpdateCameraData(pragma::CSceneComponent &scene,pragma::CameraData &cameraData)
 {
 	UpdateFrustumPlanes(scene);
 }
@@ -359,7 +394,7 @@ void RasterizationRenderer::SetShaderOverride(const std::string &srcShaderId,con
 		return;
 	m_shaderOverrides[typeid(*srcShader).hash_code()] = dstShader->GetHandle();
 }
-pragma::ShaderTextured3DBase *RasterizationRenderer::GetShaderOverride(pragma::ShaderTextured3DBase *srcShader)
+pragma::ShaderTextured3DBase *RasterizationRenderer::GetShaderOverride(pragma::ShaderTextured3DBase *srcShader) const
 {
 	if(srcShader == nullptr)
 		return nullptr;
@@ -379,11 +414,6 @@ void RasterizationRenderer::ClearShaderOverride(const std::string &srcShaderId)
 		return;
 	m_shaderOverrides.erase(it);
 }
-
-const std::vector<pragma::OcclusionMeshInfo> &RasterizationRenderer::GetCulledMeshes() const {return m_renderMeshCollectionHandler.GetOcclusionFilteredMeshes();}
-std::vector<pragma::OcclusionMeshInfo> &RasterizationRenderer::GetCulledMeshes() {return m_renderMeshCollectionHandler.GetOcclusionFilteredMeshes();}
-const std::vector<pragma::CParticleSystemComponent*> &RasterizationRenderer::GetCulledParticles() const {return m_renderMeshCollectionHandler.GetOcclusionFilteredParticleSystems();}
-std::vector<pragma::CParticleSystemComponent*> &RasterizationRenderer::GetCulledParticles() {return m_renderMeshCollectionHandler.GetOcclusionFilteredParticleSystems();}
 
 void RasterizationRenderer::SetPrepassMode(PrepassMode mode)
 {
@@ -414,6 +444,7 @@ RasterizationRenderer::PrepassMode RasterizationRenderer::GetPrepassMode() const
 pragma::ShaderPrepassBase &RasterizationRenderer::GetPrepassShader() const {return const_cast<RasterizationRenderer*>(this)->GetPrepass().GetShader();}
 
 HDRData &RasterizationRenderer::GetHDRInfo() {return m_hdrInfo;}
+const HDRData &RasterizationRenderer::GetHDRInfo() const {return const_cast<RasterizationRenderer*>(this)->GetHDRInfo();}
 GlowData &RasterizationRenderer::GetGlowInfo() {return m_glowInfo;}
 SSAOInfo &RasterizationRenderer::GetSSAOInfo() {return m_hdrInfo.ssaoInfo;}
 pragma::rendering::Prepass &RasterizationRenderer::GetPrepass() {return m_hdrInfo.prepass;}
@@ -424,50 +455,10 @@ Float RasterizationRenderer::GetHDRExposure() const {return m_hdrInfo.exposure;}
 Float RasterizationRenderer::GetMaxHDRExposure() const {return m_hdrInfo.max_exposure;}
 void RasterizationRenderer::SetMaxHDRExposure(Float exposure) {m_hdrInfo.max_exposure = exposure;}
 
-const pragma::OcclusionCullingHandler &RasterizationRenderer::GetOcclusionCullingHandler() const {return const_cast<RasterizationRenderer*>(this)->GetOcclusionCullingHandler();}
-pragma::OcclusionCullingHandler &RasterizationRenderer::GetOcclusionCullingHandler() {return *m_occlusionCullingHandler;}
-void RasterizationRenderer::SetOcclusionCullingHandler(const std::shared_ptr<pragma::OcclusionCullingHandler> &handler) {m_occlusionCullingHandler = handler;}
-void RasterizationRenderer::ReloadOcclusionCullingHandler()
-{
-	auto occlusionCullingMode = c_game->GetConVarInt("cl_render_occlusion_culling");
-	switch(occlusionCullingMode)
-	{
-	case 1: /* Brute-force */
-		m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerBruteForce>();
-		break;
-	case 2: /* CHC++ */
-		m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerCHC>();
-		break;
-	case 4: /* BSP */
-	{
-		auto *world = c_game->GetWorld();
-		if(world)
-		{
-			auto &entWorld = world->GetEntity();
-			auto pWorldComponent = entWorld.GetComponent<pragma::CWorldComponent>();
-			auto bspTree = pWorldComponent.valid() ? pWorldComponent->GetBSPTree() : nullptr;
-			if(bspTree != nullptr && bspTree->GetNodes().size() > 1u)
-			{
-				m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerBSP>(bspTree);
-				break;
-			}
-		}
-	}
-	case 3: /* Octtree */
-		m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerOctTree>();
-		break;
-	case 0: /* Off */
-	default:
-		m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerInert>();
-		break;
-	}
-	m_occlusionCullingHandler->Initialize();
-}
-
 const std::vector<Plane> &RasterizationRenderer::GetFrustumPlanes() const {return m_frustumPlanes;}
 const std::vector<Plane> &RasterizationRenderer::GetClippedFrustumPlanes() const {return m_clippedFrustumPlanes;}
 
-void RasterizationRenderer::UpdateFrustumPlanes(Scene &scene)
+void RasterizationRenderer::UpdateFrustumPlanes(pragma::CSceneComponent &scene)
 {
 	m_frustumPlanes.clear();
 	m_clippedFrustumPlanes.clear();
@@ -550,8 +541,6 @@ bool RasterizationRenderer::ResolveRenderPass(const util::DrawSceneInfo &drawSce
 	auto &hdrInfo = GetHDRInfo();
 	return hdrInfo.ResolveRenderPass(drawSceneInfo);
 }
-RenderMeshCollectionHandler &RasterizationRenderer::GetRenderMeshCollectionHandler() {return m_renderMeshCollectionHandler;}
-const RenderMeshCollectionHandler &RasterizationRenderer::GetRenderMeshCollectionHandler() const {return const_cast<RasterizationRenderer*>(this)->GetRenderMeshCollectionHandler();}
 
-prosper::Shader *RasterizationRenderer::GetWireframeShader() {return m_whShaderWireframe.get();}
+prosper::Shader *RasterizationRenderer::GetWireframeShader() const {return m_whShaderWireframe.get();}
 #pragma optimize("",on)

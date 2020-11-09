@@ -10,7 +10,7 @@
 #include "pragma/model/modelmesh.h"
 #include "pragma/physics/collisionmesh.h"
 
-
+#pragma optimize("",off)
 static void subtract_frame(Frame &frame,const Frame &frameToSubtract)
 {
 	auto numBones = frameToSubtract.GetBoneCount(); // TODO
@@ -42,6 +42,7 @@ static void add_frame(Frame &frame,const Frame &frameToAdd)
 
 void Model::Merge(const Model &other,MergeFlags flags)
 {
+	Con::cout<<"Merging model '"<<other.GetName()<<"' into '"<<GetName()<<"'..."<<Con::endl;
 	std::vector<std::size_t> boneTranslations; // 'other' bone Id to 'this' bone Id
 	auto bMerged = false;
 	const auto fMergeSkeletons = [this,&other,&boneTranslations,&bMerged]() {
@@ -93,6 +94,7 @@ void Model::Merge(const Model &other,MergeFlags flags)
 		auto &reference = GetReference();
 		if(numNewBones > numOldBones)
 		{
+			auto diffBoneCount = numNewBones -numOldBones;
 			reference.SetBoneCount(numNewBones);
 			auto &referenceOther = other.GetReference();
 			for(auto i=decltype(newBoneIndicesToOtherBoneIndices.size()){0u};i<newBoneIndicesToOtherBoneIndices.size();++i)
@@ -111,6 +113,9 @@ void Model::Merge(const Model &other,MergeFlags flags)
 			{
 				auto &frameRef = animReference->GetFrame(0);
 				auto &frameRefOther = animReferenceOther->GetFrame(0);
+				animReference->ReserveBoneIds(numNewBones);
+				for(auto i=decltype(diffBoneCount){0u};i<diffBoneCount;++i)
+					animReference->AddBoneId(numOldBones +i);
 				frameRef->SetBoneCount(numNewBones);
 				for(auto i=decltype(newBoneIndicesToOtherBoneIndices.size()){0u};i<newBoneIndicesToOtherBoneIndices.size();++i)
 				{
@@ -373,4 +378,4 @@ void Model::Merge(const Model &other,MergeFlags flags)
 		}
 	}
 }
-
+#pragma optimize("",on)

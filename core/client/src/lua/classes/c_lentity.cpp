@@ -10,6 +10,7 @@
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/lua/classes/ldef_entity.h"
 #include "pragma/lua/classes/lentity.h"
+#include "pragma/lua/lua_entity_component.hpp"
 #include "luasystem.h"
 #include "pragma/model/c_model.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
@@ -31,7 +32,10 @@ void Lua::Entity::Client::register_class(luabind::class_<EntityHandle> &classDef
 	classDef.def("GetSceneFlags",&GetSceneFlags);
 	classDef.def("AddToScene",&AddToScene);
 	classDef.def("RemoveFromScene",&RemoveFromScene);
+	classDef.def("RemoveFromAllScenes",&RemoveFromAllScenes);
 	classDef.def("IsInScene",&IsInScene);
+
+	classDef.def("AddChild",&AddChild);
 }
 
 void Lua::Entity::Client::IsClientsideOnly(lua_State *l,EntityHandle &hEnt)
@@ -64,19 +68,33 @@ void Lua::Entity::Client::GetSceneFlags(lua_State *l,EntityHandle &hEnt)
 	LUA_CHECK_ENTITY(l,hEnt);
 	Lua::PushInt(l,static_cast<CBaseEntity*>(hEnt.get())->GetSceneFlags());
 }
-void Lua::Entity::Client::AddToScene(lua_State *l,EntityHandle &hEnt,Scene &scene)
+void Lua::Entity::Client::AddToScene(lua_State *l,EntityHandle &hEnt,CSceneHandle &scene)
 {
+	pragma::Lua::check_component(l,scene);
 	LUA_CHECK_ENTITY(l,hEnt);
-	static_cast<CBaseEntity*>(hEnt.get())->AddToScene(scene);
+	static_cast<CBaseEntity*>(hEnt.get())->AddToScene(*scene);
 }
-void Lua::Entity::Client::RemoveFromScene(lua_State *l,EntityHandle &hEnt,Scene &scene)
+void Lua::Entity::Client::RemoveFromScene(lua_State *l,EntityHandle &hEnt,CSceneHandle &scene)
 {
+	pragma::Lua::check_component(l,scene);
 	LUA_CHECK_ENTITY(l,hEnt);
-	static_cast<CBaseEntity*>(hEnt.get())->RemoveFromScene(scene);
+	static_cast<CBaseEntity*>(hEnt.get())->RemoveFromScene(*scene);
 }
-void Lua::Entity::Client::IsInScene(lua_State *l,EntityHandle &hEnt,Scene &scene)
+void Lua::Entity::Client::RemoveFromAllScenes(lua_State *l,EntityHandle &hEnt)
 {
 	LUA_CHECK_ENTITY(l,hEnt);
-	Lua::PushBool(l,static_cast<CBaseEntity*>(hEnt.get())->IsInScene(scene));
+	static_cast<CBaseEntity*>(hEnt.get())->RemoveFromAllScenes();
+}
+void Lua::Entity::Client::IsInScene(lua_State *l,EntityHandle &hEnt,CSceneHandle &scene)
+{
+	pragma::Lua::check_component(l,scene);
+	LUA_CHECK_ENTITY(l,hEnt);
+	Lua::PushBool(l,static_cast<CBaseEntity*>(hEnt.get())->IsInScene(*scene));
 }
 
+void Lua::Entity::Client::AddChild(lua_State *l,EntityHandle &hEnt,EntityHandle &hEntOther)
+{
+	LUA_CHECK_ENTITY(l,hEnt);
+	LUA_CHECK_ENTITY(l,hEntOther);
+	static_cast<CBaseEntity*>(hEnt.get())->AddChild(static_cast<CBaseEntity&>(*hEntOther.get()));
+}

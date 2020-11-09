@@ -15,9 +15,9 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/file_formats/wmd_load.h"
 #include "pragma/lua/libraries/c_lengine.h"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include <wgui/fontmanager.h>
 #include "pragma/lua/classes/c_ldef_fontinfo.h"
-#include "pragma/rendering/scene/scene.h"
 #include <texturemanager/texturemanager.h>
 #include "textureinfo.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"

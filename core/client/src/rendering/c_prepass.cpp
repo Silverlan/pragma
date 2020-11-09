@@ -165,8 +165,8 @@ void Console::commands::debug_prepass(NetworkState *state,pragma::BasePlayerComp
 		return;
 	pEl->SetName(name);
 
-	auto &scene = c_game->GetScene();
-	auto *renderer = scene->GetRenderer();
+	auto *scene = c_game->GetScene();
+	auto *renderer = scene ? scene->GetRenderer() : nullptr;
 	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 		return;
 	auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);

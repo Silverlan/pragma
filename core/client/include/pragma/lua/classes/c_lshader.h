@@ -182,14 +182,14 @@ namespace Lua
 		namespace Scene3D
 		{
 			DLLCLIENT void GetRenderPass(lua_State *l,uint32_t pipelineIdx);
-			DLLCLIENT void BindSceneCamera(lua_State *l,pragma::ShaderScene &shader,::Scene &scene,pragma::rendering::RasterizationRenderer &renderer,bool bView);
+			DLLCLIENT void BindSceneCamera(lua_State *l,pragma::ShaderScene &shader,CSceneHandle &scene,pragma::rendering::RasterizationRenderer &renderer,bool bView);
 			DLLCLIENT void BindRenderSettings(lua_State *l,pragma::ShaderScene &shader,std::shared_ptr<prosper::IDescriptorSetGroup> &descSet);
 		};
 
 		namespace SceneLit3D
 		{
 			DLLCLIENT void BindLights(lua_State *l,pragma::ShaderSceneLit &shader,std::shared_ptr<prosper::IDescriptorSetGroup> &dsLights);
-			DLLCLIENT void BindScene(lua_State *l,pragma::ShaderSceneLit &shader,::Scene &scene,pragma::rendering::RasterizationRenderer &renderer,bool bView);
+			DLLCLIENT void BindScene(lua_State *l,pragma::ShaderSceneLit &shader,CSceneHandle &scene,pragma::rendering::RasterizationRenderer &renderer,bool bView);
 		};
 
 		namespace ShaderEntity

@@ -19,9 +19,13 @@ namespace pragma
 	public:
 		CCameraComponent(BaseEntity &ent) : BaseEnvCameraComponent(ent) {}
 		virtual ~CCameraComponent() override;
+		virtual void Save(DataStream &ds) override;
+		virtual void Load(DataStream &ds,uint32_t version) override;
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void OnEntitySpawn() override;
 	protected:
+		void UpdateState();
 		CallbackHandle m_cbCameraUpdate;
 	};
 };

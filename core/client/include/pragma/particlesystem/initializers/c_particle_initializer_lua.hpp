@@ -110,13 +110,13 @@ class DLLCLIENT CParticleRendererLua
 {
 public:
 	CParticleRendererLua()=default;
-	virtual void Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags) override;
-	virtual void RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId=0) override;
+	virtual void Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags) override;
+	virtual void RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId=0) override;
 	virtual pragma::ShaderParticleBase *GetShader() const override;
 	void SetShader(pragma::ShaderParticleBase *shader);
 
-	void Lua_Render(prosper::ICommandBuffer &drawCmd,const Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,bool bloom) {}
-	static void Lua_default_Render(lua_State *l,CParticleRendererLua &mod,prosper::ICommandBuffer &drawCmd,const Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,bool bloom) {mod.Lua_Render(drawCmd,scene,renderer,bloom);}
+	void Lua_Render(prosper::ICommandBuffer &drawCmd,const pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,bool bloom) {}
+	static void Lua_default_Render(lua_State *l,CParticleRendererLua &mod,prosper::ICommandBuffer &drawCmd,const pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,bool bloom) {mod.Lua_Render(drawCmd,scene,renderer,bloom);}
 private:
 	pragma::ShaderParticleBase *m_shader = nullptr;
 };

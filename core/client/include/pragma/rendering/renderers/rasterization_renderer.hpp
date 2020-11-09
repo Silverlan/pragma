@@ -12,7 +12,6 @@
 #include "pragma/rendering/renderers/rasterization/glow_data.hpp"
 #include "pragma/rendering/renderers/rasterization/hdr_data.hpp"
 #include "pragma/rendering/c_rendermode.h"
-#include "pragma/rendering/render_mesh_collection_handler.hpp"
 #include <pragma/math/plane.h>
 #include <sharedutils/util_weak_handle.hpp>
 #include <string>
@@ -31,11 +30,11 @@ namespace pragma
 	class ShaderPrepassBase;
 	class CLightComponent;
 	class CParticleSystemComponent;
-	struct OcclusionMeshInfo;
-	class OcclusionCullingHandler;
 	class CLightDirectionalComponent;
 	class CSkyCameraComponent;
+	class CSceneComponent;
 };
+class SceneRenderDesc;
 namespace pragma::rendering
 {
 	struct DLLCLIENT RendererData
@@ -62,6 +61,7 @@ namespace pragma::rendering
 	{
 	public:
 		static void UpdateLightmap(const std::shared_ptr<prosper::Texture> &lightMapTexture);
+		friend SceneRenderDesc;
 		enum class PrepassMode : uint32_t
 		{
 			NoPrepass = 0,
@@ -107,8 +107,8 @@ namespace pragma::rendering
 
 		virtual void EndRendering() override;
 		virtual void UpdateRenderSettings() override;
-		virtual void UpdateCameraData(Scene &scene,pragma::CameraData &cameraData) override;
-		virtual bool ReloadRenderTarget(Scene &scene,uint32_t width,uint32_t height) override;
+		virtual void UpdateCameraData(CSceneComponent &scene,pragma::CameraData &cameraData) override;
+		virtual bool ReloadRenderTarget(CSceneComponent &scene,uint32_t width,uint32_t height) override;
 		using BaseRenderer::GetSceneTexture;
 		using BaseRenderer::GetPresentationTexture;
 		using BaseRenderer::GetHDRPresentationTexture;
@@ -124,7 +124,7 @@ namespace pragma::rendering
 		const std::shared_ptr<prosper::Texture> &GetLightMap() const;
 
 		void SetShaderOverride(const std::string &srcShader,const std::string &shaderOverride);
-		pragma::ShaderTextured3DBase *GetShaderOverride(pragma::ShaderTextured3DBase *srcShader);
+		pragma::ShaderTextured3DBase *GetShaderOverride(pragma::ShaderTextured3DBase *srcShader) const;
 		void ClearShaderOverride(const std::string &srcShader);
 
 		const std::vector<Plane> &GetFrustumPlanes() const;
@@ -132,17 +132,12 @@ namespace pragma::rendering
 
 		// SSAO
 		bool IsSSAOEnabled() const;
-		void SetSSAOEnabled(Scene &scene,bool b);
-
-		// Culled objects
-		const std::vector<pragma::OcclusionMeshInfo> &GetCulledMeshes() const;
-		std::vector<pragma::OcclusionMeshInfo> &GetCulledMeshes();
-		const std::vector<pragma::CParticleSystemComponent*> &GetCulledParticles() const;
-		std::vector<pragma::CParticleSystemComponent*> &GetCulledParticles();
+		void SetSSAOEnabled(CSceneComponent &scene,bool b);
 
 		Float GetHDRExposure() const;
 		Float GetMaxHDRExposure() const;
 		void SetMaxHDRExposure(Float exposure);
+		const HDRData &GetHDRInfo() const;
 		HDRData &GetHDRInfo();
 		GlowData &GetGlowInfo();
 		SSAOInfo &GetSSAOInfo();
@@ -154,19 +149,12 @@ namespace pragma::rendering
 		pragma::rendering::Prepass &GetPrepass();
 		const pragma::rendering::ForwardPlusInstance &GetForwardPlusInstance() const;
 		pragma::rendering::ForwardPlusInstance &GetForwardPlusInstance();
-		CulledMeshData *GetRenderInfo(RenderMode mode) const;
 		prosper::SampleCountFlags GetSampleCount() const;
 		bool IsMultiSampled() const;
 
 		bool BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *customRenderPass=nullptr);
 		bool EndRenderPass(const util::DrawSceneInfo &drawSceneInfo);
 		bool ResolveRenderPass(const util::DrawSceneInfo &drawSceneInfo);
-		void PrepareRendering(Scene &scene,RenderMode mode,FRender renderFlags,bool bUpdateTranslucentMeshes=false,bool bUpdateGlowMeshes=false);
-
-		const pragma::OcclusionCullingHandler &GetOcclusionCullingHandler() const;
-		pragma::OcclusionCullingHandler &GetOcclusionCullingHandler();
-		void SetOcclusionCullingHandler(const std::shared_ptr<pragma::OcclusionCullingHandler> &handler);
-		void ReloadOcclusionCullingHandler();
 
 		pragma::ShaderPrepassBase &GetPrepassShader() const;
 
@@ -174,23 +162,23 @@ namespace pragma::rendering
 		void RenderParticleSystems(const util::DrawSceneInfo &drawSceneInfo,std::vector<pragma::CParticleSystemComponent*> &particles,RenderMode renderMode,Bool bloom=false,std::vector<pragma::CParticleSystemComponent*> *bloomParticles=nullptr);
 
 		// Renders all meshes from m_glowInfo.tmpGlowMeshes, and clears the container when done
-		void RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,Scene &scene,RenderMode renderMode);
+		void RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const CSceneComponent &scene,RenderMode renderMode);
 
 		// If this flag is set, the prepass depth buffer will be blitted into a sampleable buffer
 		// before rendering, which can then be used as shader sampler input. This flag will be reset once
 		// rendering has finished.
 		void SetFrameDepthBufferSamplingRequired();
 
-		RenderMeshCollectionHandler &GetRenderMeshCollectionHandler();
-		const RenderMeshCollectionHandler &GetRenderMeshCollectionHandler() const;
-
 		prosper::IDescriptorSet *GetLightSourceDescriptorSet() const;
 		prosper::IDescriptorSet *GetLightSourceDescriptorSetCompute() const;
 
-		prosper::Shader *GetWireframeShader();
+		prosper::Shader *GetWireframeShader() const;
 		virtual bool RenderScene(const util::DrawSceneInfo &drawSceneInfo) override;
 		void UpdateRendererBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
 		void UpdateCSMDescriptorSet(pragma::CLightDirectionalComponent &lightSource);
+
+		// For internal use only
+		void RenderPrepass(const util::DrawSceneInfo &drawSceneInfo);
 	private:
 		friend BaseRenderer;
 		RasterizationRenderer();
@@ -198,9 +186,6 @@ namespace pragma::rendering
 
 		void RenderGameScene(const util::DrawSceneInfo &drawSceneInfo);
 
-		void PerformOcclusionCulling(Scene &scene);
-		void CollectRenderObjects(Scene &scene,FRender renderFlags);
-		void RenderPrepass(const util::DrawSceneInfo &drawSceneInfo);
 		void RenderSSAO(const util::DrawSceneInfo &drawSceneInfo);
 		void CullLightSources(const util::DrawSceneInfo &drawSceneInfo);
 		void RenderLightingPass(const util::DrawSceneInfo &drawSceneInfo);
@@ -217,7 +202,6 @@ namespace pragma::rendering
 		StateFlags m_stateFlags = StateFlags::PrepassEnabled;
 
 		prosper::SampleCountFlags m_sampleCount = prosper::SampleCountFlags::e1Bit;
-		std::shared_ptr<pragma::OcclusionCullingHandler> m_occlusionCullingHandler = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupFogOverride = nullptr;
 
 		LightMapInfo m_lightMapInfo = {};
@@ -232,7 +216,7 @@ namespace pragma::rendering
 		// Frustum planes (Required for culling)
 		std::vector<Plane> m_frustumPlanes = {};
 		std::vector<Plane> m_clippedFrustumPlanes = {};
-		void UpdateFrustumPlanes(Scene &scene);
+		void UpdateFrustumPlanes(CSceneComponent &scene);
 
 		RendererData m_rendererData {};
 		std::shared_ptr<prosper::IBuffer> m_rendererBuffer = nullptr;
@@ -240,8 +224,6 @@ namespace pragma::rendering
 
 		// 3D sky cameras used for the current rendering pass
 		std::vector<util::WeakHandle<pragma::CSkyCameraComponent>> m_3dSkyCameras = {};
-
-		RenderMeshCollectionHandler m_renderMeshCollectionHandler = {};
 
 		std::unordered_map<size_t,::util::WeakHandle<prosper::Shader>> m_shaderOverrides;
 		mutable ::util::WeakHandle<prosper::Shader> m_whShaderWireframe = {};

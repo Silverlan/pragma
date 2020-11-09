@@ -12,7 +12,6 @@
 #include <mathutil/glmutil.h>
 class EntityHandle;
 class NetPacket;
-class Scene;
 namespace Lua
 {
 	namespace Entity
@@ -27,9 +26,12 @@ namespace Lua
 			DLLCLIENT void SendNetEvent(lua_State *l,EntityHandle &hEnt,uint32_t protocol,unsigned int eventId);
 
 			DLLCLIENT void GetSceneFlags(lua_State *l,EntityHandle &hEnt);
-			DLLCLIENT void AddToScene(lua_State *l,EntityHandle &hEnt,::Scene &scene);
-			DLLCLIENT void RemoveFromScene(lua_State *l,EntityHandle &hEnt,::Scene &scene);
-			DLLCLIENT void IsInScene(lua_State *l,EntityHandle &hEnt,::Scene &scene);
+			DLLCLIENT void AddToScene(lua_State *l,EntityHandle &hEnt,CSceneHandle &scene);
+			DLLCLIENT void RemoveFromScene(lua_State *l,EntityHandle &hEnt,CSceneHandle &scene);
+			DLLCLIENT void RemoveFromAllScenes(lua_State *l,EntityHandle &hEnt);
+			DLLCLIENT void IsInScene(lua_State *l,EntityHandle &hEnt,CSceneHandle &scene);
+
+			DLLCLIENT void AddChild(lua_State *l,EntityHandle &hEnt,EntityHandle &hEntOther);
 		};
 	};
 };

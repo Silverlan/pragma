@@ -164,7 +164,7 @@ void ShaderSSAO::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipe
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
 }
 
-bool ShaderSSAO::Draw(const Scene &scene,prosper::IDescriptorSet &descSetPrepass,const std::array<uint32_t,2> &renderTargetDimensions)
+bool ShaderSSAO::Draw(const pragma::CSceneComponent &scene,prosper::IDescriptorSet &descSetPrepass,const std::array<uint32_t,2> &renderTargetDimensions)
 {
 	auto *descSetCamera = scene.GetCameraDescriptorSetGraphics();
 	return RecordBindDescriptorSets({

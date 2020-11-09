@@ -11,10 +11,10 @@
 #include "pragma/c_enginedefinitions.h"
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_world.h"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/rendering/c_renderflags.h"
 #include "pragma/lua/c_lua_gui_manager.h"
 #include "pragma/rendering/rendersystem.h"
-#include "pragma/rendering/scene/scene.h"
 #include "pragma/rendering/lighting/shadows/c_shadow_type.hpp"
 #include "pragma/lua/c_listener_handle.hpp"
 #include <material.h>
@@ -48,7 +48,6 @@ class CSide;
 class CBaseLuaEntity;
 class CMaterial;
 enum class ShadowType : uint8_t;
-class Scene;
 class WorldEnvironment;
 template<class T>
 	class OcclusionOctree;
@@ -76,6 +75,7 @@ namespace pragma
 	class CParticleSystemComponent;
 	class CLightDirectionalComponent;
 	class CCameraComponent;
+	class CSceneComponent;
 };
 namespace uimg {class ImageBuffer; struct TextureInfo;};
 namespace prosper {class DescriptorSetGroup; class IImage; class IDescriptorSet;};
@@ -316,7 +316,8 @@ public:
 	pragma::CCameraComponent *CreateCamera(uint32_t width,uint32_t height,float fov,float nearZ,float farZ);
 	pragma::CCameraComponent *CreateCamera(float aspectRatio,float fov,float nearZ,float farZ);
 	pragma::CCameraComponent *GetPrimaryCamera() const;
-	const std::shared_ptr<Scene> &GetScene() const;
+	const pragma::CSceneComponent *GetScene() const;
+	pragma::CSceneComponent *GetScene();
 	const WorldEnvironment &GetWorldEnvironment() const;
 	WorldEnvironment &GetWorldEnvironment();
 
@@ -380,8 +381,10 @@ public:
 	virtual std::string GetLuaNetworkDirectoryName() const override;
 	virtual std::string GetLuaNetworkFileName() const override;
 
-	void SetRenderScene(const std::shared_ptr<Scene> &scene);
-	std::shared_ptr<Scene> &GetRenderScene();
+	void SetRenderScene(pragma::CSceneComponent &scene);
+	void ResetRenderScene();
+	pragma::CSceneComponent *GetRenderScene();
+	const pragma::CSceneComponent *GetRenderScene() const;
 	pragma::CCameraComponent *GetRenderCamera() const;
 
 	prosper::IDescriptorSet &GetGlobalRenderSettingsDescriptorSet();
@@ -467,7 +470,7 @@ private:
 	std::unique_ptr<GlobalRenderSettingsBufferData> m_globalRenderSettingsBufferData = nullptr;
 
 	// Scene
-	std::shared_ptr<Scene> m_scene = nullptr;
+	util::WeakHandle<pragma::CSceneComponent> m_scene = {};
 	std::shared_ptr<WorldEnvironment> m_worldEnvironment = nullptr;
 
 	void OnEnvironmentLightSourceChanged(pragma::CLightDirectionalComponent *oldSource,pragma::CLightDirectionalComponent *newSource);
@@ -489,7 +492,7 @@ private:
 	util::WeakHandle<pragma::CViewBodyComponent> m_viewBody = {};
 	util::WeakHandle<pragma::CCameraComponent> m_primaryCamera = {};
 
-	std::shared_ptr<Scene> m_renderScene = nullptr;
+	util::WeakHandle<pragma::CSceneComponent> m_renderScene = {};
 
 	// Map
 	virtual std::shared_ptr<pragma::nav::Mesh> LoadNavMesh(const std::string &fname) override;

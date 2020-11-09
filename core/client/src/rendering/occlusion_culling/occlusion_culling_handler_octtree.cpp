@@ -40,7 +40,7 @@ template<class T>
 }
 
 void OcclusionCullingHandlerOctTree::PerformCulling(
-	Scene &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+	pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
 	std::vector<OcclusionMeshInfo> &culledMeshesOut,bool cullByViewFrustum
 )
 {

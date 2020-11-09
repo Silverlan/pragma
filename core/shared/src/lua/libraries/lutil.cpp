@@ -270,13 +270,18 @@ int Lua::util::is_valid_entity(lua_State *l)
 	return ::is_valid(l);
 }
 
-static void safely_remove(luabind::object &o,const char *removeFunction)
+static void safely_remove(luabind::object &o,const char *removeFunction,bool useSafeMethod)
 {
 	auto *pEnt = luabind::object_cast_nothrow<EntityHandle*>(o,static_cast<EntityHandle*>(nullptr));
 	if(pEnt != nullptr) // Used frequently, and is faster than looking up "IsValid"
 	{
 		if(pEnt->IsValid())
-			(*pEnt)->Remove();
+		{
+			if(useSafeMethod)
+				(*pEnt)->RemoveSafely();
+			else
+				(*pEnt)->Remove();
+		}
 		return;
 	}
 	try
@@ -300,7 +305,7 @@ int Lua::util::remove(lua_State *l)
 		for(luabind::iterator i(t), e; i != e; ++i)
 		{
 			auto o = luabind::object{*i};
-			safely_remove(o,removeFunction);
+			safely_remove(o,removeFunction,safeRemove);
 		}
 		return 0;
 	}
@@ -308,7 +313,7 @@ int Lua::util::remove(lua_State *l)
 	if(valid == false)
 		return 0;
 	auto o = luabind::object(luabind::from_stack(l,1));
-	safely_remove(o,removeFunction);
+	safely_remove(o,removeFunction,safeRemove);
 	return 0;
 }
 

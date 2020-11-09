@@ -31,7 +31,7 @@ bool OcclusionCullingHandler::ShouldExamine(CModelMesh &mesh,const Vector3 &pos,
 	max += pos;
 	return (Intersection::AABBInPlaneMesh(min,max,*planes) != INTERSECT_OUTSIDE) ? true : false;
 }
-bool OcclusionCullingHandler::ShouldExamine(Scene &scene,const rendering::RasterizationRenderer &renderer,CBaseEntity &ent,bool &outViewModel,std::vector<Plane> **outPlanes) const
+bool OcclusionCullingHandler::ShouldExamine(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,CBaseEntity &ent,bool &outViewModel,std::vector<Plane> **outPlanes) const
 {
 	if(ent.IsInScene(scene) == false)
 		return false;
@@ -64,20 +64,20 @@ bool OcclusionCullingHandler::ShouldExamine(Scene &scene,const rendering::Raster
 	uvec::to_min_max(min,max);
 	return Intersection::AABBInPlaneMesh(min,max,*(*outPlanes)) != INTERSECT_OUTSIDE;
 }
-void OcclusionCullingHandler::PerformCulling(Scene &scene,const rendering::RasterizationRenderer &renderer,std::vector<pragma::CParticleSystemComponent*> &particlesOut)
+void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,std::vector<pragma::CParticleSystemComponent*> &particlesOut)
 {
 	auto &cam = scene.GetActiveCamera();
 	auto &posCam = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	PerformCulling(scene,renderer,posCam,particlesOut);
 }
-void OcclusionCullingHandler::PerformCulling(Scene &scene,const rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut)
+void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut)
 {
 	auto &cam = scene.GetActiveCamera();
 	auto &posCam = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	PerformCulling(scene,renderer,posCam,culledMeshesOut);
 }
 void OcclusionCullingHandler::PerformCulling(
-	Scene &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+	pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
 	std::vector<pragma::CParticleSystemComponent*> &particlesOut
 )
 {
@@ -97,7 +97,7 @@ void OcclusionCullingHandler::PerformCulling(
 			particlesOut.push_back(hPt.get());
 	}
 }
-void OcclusionCullingHandler::PerformCulling(Scene &scene,const rendering::RasterizationRenderer &renderer,const std::vector<pragma::CLightComponent*> &lightsIn,std::vector<pragma::CLightComponent*> &lightsOut)
+void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const std::vector<pragma::CLightComponent*> &lightsIn,std::vector<pragma::CLightComponent*> &lightsOut)
 {
 	auto &cam = scene.GetActiveCamera();
 	auto &pos = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
@@ -184,7 +184,7 @@ void OcclusionCullingHandler::PerformCulling(Scene &scene,const rendering::Raste
 	if(lightsOut.size() > static_cast<uint32_t>(GameLimits::MaxAbsoluteLights))
 		lightsOut.resize(static_cast<uint32_t>(GameLimits::MaxAbsoluteLights));
 }
-void OcclusionCullingHandler::PerformCulling(Scene &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &origin,float radius,std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut)
+void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &origin,float radius,std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut)
 {
 	auto *cam = c_game->GetPrimaryCamera();
 	auto &posCam = cam ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
@@ -234,12 +234,8 @@ static void cl_render_occlusion_culling_callback(NetworkState*,ConVar*,int,int v
 {
 	if(c_game == nullptr)
 		return;
-	auto &scene = c_game->GetScene();
+	auto *scene = c_game->GetScene();
 	if(scene != nullptr)
-	{
-		auto *renderer = scene->GetRenderer();
-		if(renderer && renderer->IsRasterizationRenderer())
-			static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->ReloadOcclusionCullingHandler();
-	}
+		scene->GetSceneRenderDesc().ReloadOcclusionCullingHandler();
 }
 REGISTER_CONVAR_CALLBACK_CL(cl_render_occlusion_culling,cl_render_occlusion_culling_callback);

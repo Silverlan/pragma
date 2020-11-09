@@ -297,6 +297,12 @@ void Lua::Model::register_class(
 	classDef.def("GetBodyGroupMeshes",static_cast<void(*)(lua_State*,::Model&,luabind::object,uint32_t)>(&Lua::Model::GetBodyGroupMeshes));
 	classDef.def("GetBodyGroupMeshes",static_cast<void(*)(lua_State*,::Model&,uint32_t)>(&Lua::Model::GetBodyGroupMeshes));
 	classDef.def("GetBodyGroupMeshes",static_cast<void(*)(lua_State*,::Model&)>(&Lua::Model::GetBodyGroupMeshes));
+	classDef.def("GetBodyGroupMesh",static_cast<void(*)(lua_State*,::Model&,uint32_t,uint32_t)>([](lua_State *l,::Model &mdl,uint32_t bodyGroupId,uint32_t bgValue) {
+		uint32_t meshId;
+		if(mdl.GetMesh(bodyGroupId,bgValue,meshId) == false)
+			return;
+		Lua::PushInt(l,meshId);
+	}));
 	classDef.def("GetFlexControllers",&Lua::Model::GetFlexControllers);
 	classDef.def("LookupFlexController",&Lua::Model::GetFlexControllerId);
 	classDef.def("GetFlexController",static_cast<void(*)(lua_State*,::Model&,const std::string&)>(&Lua::Model::GetFlexController));
@@ -1303,10 +1309,10 @@ void Lua::Model::GetMeshGroup(lua_State *l,::Model &mdl,const std::string &meshG
 	Lua::Push<std::shared_ptr<::ModelMeshGroup>>(l,meshGroup);
 }
 
-void Lua::Model::GetMeshGroup(lua_State *l,::Model &mdl,uint32_t)
+void Lua::Model::GetMeshGroup(lua_State *l,::Model &mdl,uint32_t mgId)
 {
 	//Lua::CheckModel(l,1);
-	auto group = mdl.GetMeshGroup(0);
+	auto group = mdl.GetMeshGroup(mgId);
 	if(group == nullptr)
 		return;
 	Lua::Push<decltype(group)>(l,group);

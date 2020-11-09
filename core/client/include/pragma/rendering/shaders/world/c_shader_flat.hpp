@@ -27,7 +27,7 @@ namespace pragma
 
 		ShaderFlat(prosper::IPrContext &context,const std::string &identifier);
 
-		bool BindScene(const Scene &scene,bool bView);
+		bool BindScene(const pragma::CSceneComponent &scene,bool bView);
 		bool BindEntity(CBaseEntity &ent);
 		bool BindMaterial(CMaterial &mat);
 		bool Draw(CModelSubMesh &mesh);
@@ -35,7 +35,7 @@ namespace pragma
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	private:
 		// These are unused
-		virtual bool BindSceneCamera(Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,bool bView) override {return false;}
+		virtual bool BindSceneCamera(pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,bool bView) override {return false;}
 		virtual bool BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings) override {return false;}
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override {return std::numeric_limits<uint32_t>::max();}
 		virtual uint32_t GetCameraDescriptorSetIndex() const override {return std::numeric_limits<uint32_t>::max();}

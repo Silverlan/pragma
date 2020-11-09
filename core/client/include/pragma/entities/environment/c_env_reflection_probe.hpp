@@ -16,6 +16,7 @@
 namespace prosper {class Texture; class DescriptorSetGroup;};
 namespace pragma
 {
+	class CSceneComponent;
 	namespace rendering
 	{
 		struct DLLCLIENT IBLData
@@ -46,7 +47,7 @@ namespace pragma
 		};
 		static void BuildAllReflectionProbes(Game &game,bool rebuild=false);
 		static void BuildReflectionProbes(Game &game,std::vector<CReflectionProbeComponent*> &probes,bool rebuild=false);
-		static prosper::IDescriptorSet *FindDescriptorSetForClosestProbe(Scene &scene,const Vector3 &origin,float &outIntensity);
+		static prosper::IDescriptorSet *FindDescriptorSetForClosestProbe(const CSceneComponent &scene,const Vector3 &origin,float &outIntensity);
 
 		CReflectionProbeComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;

@@ -37,11 +37,11 @@ namespace pragma
 			float viewportH;
 		};
 #pragma pack(pop)
-		bool Draw(Scene &scene,const rendering::RasterizationRenderer &renderer,const pragma::CParticleSystemComponent &ps,prosper::IBuffer &vertexBuffer,prosper::IBuffer &indexBuffer,uint32_t numIndices,float radius,float curvature);
+		bool Draw(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const pragma::CParticleSystemComponent &ps,prosper::IBuffer &vertexBuffer,prosper::IBuffer &indexBuffer,uint32_t numIndices,float radius,float curvature);
 	protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	private:
-		bool Draw(Scene &scene,const pragma::CParticleSystemComponent &ps,bool bloom)=delete;
+		bool Draw(pragma::CSceneComponent &scene,const pragma::CParticleSystemComponent &ps,bool bloom)=delete;
 	};
 };
 

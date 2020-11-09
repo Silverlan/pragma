@@ -53,7 +53,7 @@ namespace pragma
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		) override;
 		virtual void EndDraw() override;
-		virtual bool BindSceneCamera(Scene &scene,const rendering::RasterizationRenderer &renderer,bool bView) override;
+		virtual bool BindSceneCamera(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,bool bView) override;
 		virtual bool BindEntity(CBaseEntity &ent) override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 	protected:
@@ -64,7 +64,7 @@ namespace pragma
 	private:
 		bool UpdateBindFogDensity();
 		bool m_bReflectionEnabled = false;
-		std::weak_ptr<Scene> m_boundScene = {};
+		util::WeakHandle<pragma::CSceneComponent> m_boundScene = {};
 		EntityHandle m_boundEntity = {};
 	};
 };

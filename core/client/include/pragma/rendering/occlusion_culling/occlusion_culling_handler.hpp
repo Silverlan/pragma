@@ -12,11 +12,11 @@
 #include <pragma/entities/baseentity_handle.h>
 #include <pragma/util/util_bsp_tree.hpp>
 
-class Scene;
 class CBaseEntity;
 class CModelMesh;
 namespace pragma
 {
+	class CSceneComponent;
 	namespace rendering {class RasterizationRenderer;};
 	class CParticleSystemComponent;
 	class CLightComponent;
@@ -27,6 +27,7 @@ namespace pragma
 		EntityHandle hEntity;
 	};
 	class DLLCLIENT OcclusionCullingHandler
+		: public std::enable_shared_from_this<OcclusionCullingHandler>
 	{
 	public:
 		virtual ~OcclusionCullingHandler()=default;
@@ -34,26 +35,26 @@ namespace pragma
 		virtual void Initialize() {}
 		// This function will not cull anything, culling behavior has to be implemented by derived classes
 		virtual void PerformCulling(
-			Scene &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+			CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
 			std::vector<OcclusionMeshInfo> &culledMeshesOut,
 			bool cullByViewFrustum=true
 		)=0;
-		void PerformCulling(Scene &scene,const rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut);
-		void PerformCulling(Scene &scene,const rendering::RasterizationRenderer &renderer,std::vector<pragma::CParticleSystemComponent*> &particlesOut);
+		void PerformCulling(CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut);
+		void PerformCulling(CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,std::vector<pragma::CParticleSystemComponent*> &particlesOut);
 
 		virtual void PerformCulling(
-			Scene &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+			CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
 			std::vector<pragma::CParticleSystemComponent*> &particlesOut
 		);
 		virtual void PerformCulling(
-			Scene &scene,const rendering::RasterizationRenderer &renderer,const std::vector<pragma::CLightComponent*> &lightsIn,
+			CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const std::vector<pragma::CLightComponent*> &lightsIn,
 			std::vector<pragma::CLightComponent*> &lightsOut
 		);
-		virtual void PerformCulling(Scene &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &origin,float radius,std::vector<OcclusionMeshInfo> &culledMeshesOut);
+		virtual void PerformCulling(CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &origin,float radius,std::vector<OcclusionMeshInfo> &culledMeshesOut);
 	protected:
 		OcclusionCullingHandler()=default;
 		virtual bool ShouldExamine(CModelMesh &mesh,const Vector3 &pos,bool bViewModel,std::size_t numMeshes,const std::vector<Plane> *optPlanes=nullptr) const;
-		virtual bool ShouldExamine(Scene &scene,const rendering::RasterizationRenderer &renderer,CBaseEntity &cent,bool &outViewModel,std::vector<Plane> **outPlanes) const;
+		virtual bool ShouldExamine(CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,CBaseEntity &cent,bool &outViewModel,std::vector<Plane> **outPlanes) const;
 	};
 };
 

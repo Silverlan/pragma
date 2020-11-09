@@ -13,7 +13,7 @@
 #include "pragma/rendering/shaders/particles/c_shader_particle_model_shadow.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/rendering/scene/scene.h"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include <pragma/math/intersection.h>
 #include <pragma/model/model.h>
 #include <prosper_util.hpp>
@@ -198,7 +198,7 @@ bool CParticleRendererModel::Update()
 	return bSuccessful;
 }
 
-void CParticleRendererModel::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags)
+void CParticleRendererModel::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags)
 {
 	if(m_shader.expired())
 		return;
@@ -260,7 +260,7 @@ void CParticleRendererModel::Render(const std::shared_ptr<prosper::IPrimaryComma
 	shader->EndDraw();
 }
 
-void CParticleRendererModel::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
+void CParticleRendererModel::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
 {
 	/*if(s_instanceDescSet == nullptr)
 		return;

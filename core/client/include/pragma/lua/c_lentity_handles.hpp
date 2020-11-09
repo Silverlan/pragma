@@ -36,6 +36,7 @@
 #include "pragma/entities/components/c_time_scale_component.hpp"
 #include "pragma/entities/components/c_generic_component.hpp"
 #include "pragma/entities/components/c_point_at_target_component.hpp"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/entities/c_filter_entity_class.h"
@@ -226,5 +227,6 @@ DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CShadowCSM);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,COcclusionCuller);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CEye);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CSkyCamera);
+DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CScene);
 
 #endif

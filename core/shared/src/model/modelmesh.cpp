@@ -61,8 +61,16 @@ void ModelMesh::Update(ModelUpdateFlags flags)
 	}
 	if((flags &ModelUpdateFlags::UpdateBounds) != ModelUpdateFlags::None)
 	{
-		m_min = Vector3(std::numeric_limits<Vector3::value_type>::max(),std::numeric_limits<Vector3::value_type>::max(),std::numeric_limits<Vector3::value_type>::max());
-		m_max = Vector3(std::numeric_limits<Vector3::value_type>::lowest(),std::numeric_limits<Vector3::value_type>::lowest(),std::numeric_limits<Vector3::value_type>::lowest());
+		if(m_subMeshes.empty())
+		{
+			m_min = {};
+			m_max = {};
+		}
+		else
+		{
+			m_min = Vector3(std::numeric_limits<Vector3::value_type>::max(),std::numeric_limits<Vector3::value_type>::max(),std::numeric_limits<Vector3::value_type>::max());
+			m_max = Vector3(std::numeric_limits<Vector3::value_type>::lowest(),std::numeric_limits<Vector3::value_type>::lowest(),std::numeric_limits<Vector3::value_type>::lowest());
+		}
 		m_center = {};
 	}
 	uint32_t vertCount = 0;

@@ -168,7 +168,7 @@ bool RaytracingRenderer::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 	);
 	return true;
 }
-bool RaytracingRenderer::ReloadRenderTarget(Scene &scene,uint32_t width,uint32_t height)
+bool RaytracingRenderer::ReloadRenderTarget(CSceneComponent &scene,uint32_t width,uint32_t height)
 {
 	// TODO
 	return true;

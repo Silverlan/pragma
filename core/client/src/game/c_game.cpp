@@ -28,6 +28,7 @@
 #include "pragma/entities/components/c_bsp_leaf_component.hpp"
 #include "pragma/entities/components/c_toggle_component.hpp"
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/level/mapgeometry.h"
@@ -50,7 +51,6 @@
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/luacallback.h>
 #include "pragma/rendering/occlusion_culling/chc.hpp"
-#include "pragma/rendering/scene/scene.h"
 #include "pragma/rendering/c_msaa.h"
 #include "pragma/gui/wgui_luainterface.h"
 #include "textureinfo.h"
@@ -335,7 +335,8 @@ void CGame::OnRemove()
 	c_engine->ClearLuaKeyMappings();
 
 	c_physEnv = nullptr;
-	m_renderScene = nullptr;
+	if(m_renderScene.valid())
+		m_renderScene->GetEntity().Remove();
 	m_worldEnvironment = nullptr;
 	m_globalRenderSettingsBufferData = nullptr;
 	m_luaGUIElements = {};
@@ -545,22 +546,6 @@ void CGame::Initialize()
 	// Initialize Scene (Has to be initialized AFTER shaders!)
 
 	InitializeWorldEnvironment();
-
-	auto resolution = c_engine->GetRenderResolution();
-	m_scene = Scene::Create(Scene::CreateInfo{});
-	m_scene->SetDebugMode(static_cast<Scene::DebugMode>(GetConVarInt("render_debug_mode")));
-	SetViewModelFOV(GetConVarFloat("cl_fov_viewmodel"));
-	auto renderer = pragma::rendering::RasterizationRenderer::Create<pragma::rendering::RasterizationRenderer>(m_scene->GetWidth(),m_scene->GetHeight());
-	m_scene->SetRenderer(renderer);
-	m_scene->ReloadRenderTarget(static_cast<uint32_t>(resolution.x),static_cast<uint32_t>(resolution.y));
-	m_scene->SetWorldEnvironment(GetWorldEnvironment());
-	if(renderer && renderer->IsRasterizationRenderer())
-		renderer->SetSSAOEnabled(*m_scene,GetConVarBool("cl_render_ssao"));
-
-	SetRenderScene(m_scene);
-
-	Resize();
-
 	m_matLoad = client->LoadMaterial("loading",CallbackHandle{},false,true);
 }
 
@@ -568,10 +553,10 @@ static void render_debug_mode(NetworkState*,ConVar*,int32_t,int32_t debugMode)
 {
 	if(c_game == nullptr)
 		return;
-	auto &scene = c_game->GetScene();
+	auto *scene = c_game->GetScene();
 	if(scene == nullptr)
 		return;
-	scene->SetDebugMode(static_cast<Scene::DebugMode>(debugMode));
+	scene->SetDebugMode(static_cast<pragma::CSceneComponent::DebugMode>(debugMode));
 }
 REGISTER_CONVAR_CALLBACK_CL(render_debug_mode,render_debug_mode);
 
@@ -617,6 +602,25 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 {
 	Game::InitializeGame();
 	SetupLua();
+
+	auto resolution = c_engine->GetRenderResolution();
+	auto *scene = pragma::CSceneComponent::Create(pragma::CSceneComponent::CreateInfo{});
+	if(scene)
+	{
+		m_scene = scene->GetHandle<pragma::CSceneComponent>();
+		m_scene->SetDebugMode(static_cast<pragma::CSceneComponent::DebugMode>(GetConVarInt("render_debug_mode")));
+		SetViewModelFOV(GetConVarFloat("cl_fov_viewmodel"));
+		auto renderer = pragma::rendering::RasterizationRenderer::Create<pragma::rendering::RasterizationRenderer>(m_scene->GetWidth(),m_scene->GetHeight());
+		m_scene->SetRenderer(renderer);
+		m_scene->ReloadRenderTarget(static_cast<uint32_t>(resolution.x),static_cast<uint32_t>(resolution.y));
+		m_scene->SetWorldEnvironment(GetWorldEnvironment());
+		if(renderer && renderer->IsRasterizationRenderer())
+			renderer->SetSSAOEnabled(*scene,GetConVarBool("cl_render_ssao"));
+
+		SetRenderScene(*scene);
+	}
+
+	Resize();
 
 	m_hCbDrawFrame = c_engine->AddCallback("DrawFrame",FunctionCallback<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>::Create([this](std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>> drawCmd) {
 		auto baseDrawCmd = std::static_pointer_cast<prosper::ICommandBuffer>(drawCmd.get());
@@ -679,19 +683,13 @@ void CGame::PostGUIDraw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 {
 	CallLuaCallbacks<void,std::shared_ptr<prosper::ICommandBuffer>>("PostGUIDraw",drawCmd);
 }
-void CGame::SetRenderScene(const std::shared_ptr<Scene> &scene)
-{
-	if(scene == nullptr)
-	{
-		m_renderScene = m_scene;
-		return;
-	}
-	m_renderScene = scene;
-}
-std::shared_ptr<Scene> &CGame::GetRenderScene() {return m_renderScene;}
+void CGame::SetRenderScene(pragma::CSceneComponent &scene) {m_renderScene = scene.GetHandle<pragma::CSceneComponent>();}
+void CGame::ResetRenderScene() {m_renderScene = m_scene;}
+pragma::CSceneComponent *CGame::GetRenderScene() {return m_renderScene.get();}
+const pragma::CSceneComponent *CGame::GetRenderScene() const {return const_cast<CGame*>(this)->GetRenderScene();}
 pragma::CCameraComponent *CGame::GetRenderCamera() const
 {
-	if(m_renderScene == nullptr)
+	if(m_renderScene.expired())
 		return nullptr;
 	return m_renderScene->GetActiveCamera().get();
 }
@@ -948,14 +946,14 @@ uint32_t CGame::GetMSAASampleCount()
 }
 void CGame::ReloadRenderFrameBuffer()
 {
-	if(m_scene != nullptr)
+	if(m_scene.valid())
 		m_scene->ReloadRenderTarget(m_scene->GetWidth(),m_scene->GetHeight());
 }
 
 void CGame::Think()
 {
 	Game::Think();
-	auto &scene = GetRenderScene();
+	auto *scene = GetRenderScene();
 	auto *cam = GetPrimaryCamera();
 	if(cam)
 		cam->UpdateFrustumPlanes();
@@ -967,7 +965,8 @@ void CGame::Think()
 	CallLuaCallbacks("Think");
 	CalcView();
 
-	SetRenderScene(m_scene);
+	if(scene)
+		SetRenderScene(*scene);
 
 	auto &info = get_render_debug_info();
 	info.Reset();
@@ -1005,12 +1004,12 @@ std::shared_ptr<ModelSubMesh> CGame::CreateModelSubMesh() const {return std::mak
 Float CGame::GetHDRExposure() const
 {
 	auto *renderer = m_scene->GetRenderer();
-	return renderer && renderer->IsRasterizationRenderer() ? static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetHDRExposure() : 0.f;
+	return renderer && renderer->IsRasterizationRenderer() ? static_cast<const pragma::rendering::RasterizationRenderer*>(renderer)->GetHDRExposure() : 0.f;
 }
 Float CGame::GetMaxHDRExposure() const
 {
 	auto *renderer = m_scene->GetRenderer();
-	return renderer && renderer->IsRasterizationRenderer() ? static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetMaxHDRExposure() : 0.f;
+	return renderer && renderer->IsRasterizationRenderer() ? static_cast<const pragma::rendering::RasterizationRenderer*>(renderer)->GetMaxHDRExposure() : 0.f;
 }
 void CGame::SetMaxHDRExposure(Float exposure)
 {
@@ -1110,12 +1109,12 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 		auto &tex = *static_cast<Texture*>(texture.get());
 		auto lightmapAtlas = tex.GetVkTexture();
 		//auto lightmapAtlas = pragma::CLightMapComponent::CreateLightmapTexture(img->GetWidth(),img->GetHeight(),static_cast<uint16_t*>(img->GetData()));
-		auto &scene = GetScene();
+		auto *scene = GetScene();
 		auto *renderer = scene ? scene->GetRenderer() : nullptr;
 		if(renderer != nullptr && renderer->IsRasterizationRenderer())
 		{
 			auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
-			rasterizer->ReloadOcclusionCullingHandler(); // Required if BSP occlusion culling is specified
+			scene->GetSceneRenderDesc().ReloadOcclusionCullingHandler(); // Required if BSP occlusion culling is specified
 			if(lightmapAtlas != nullptr)
 				rasterizer->SetLightMap(lightmapAtlas);
 		}
@@ -1139,7 +1138,7 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 				lightMapC->SetLightMapIntensity(worldData.GetLightMapIntensity());
 				lightMapC->SetLightMapExposure(worldData.GetLightMapExposure());
 				lightMapC->InitializeLightMapData(lightmapAtlas,globalLightmapUvBuffer,buffers);
-				auto &scene = GetRenderScene();
+				auto *scene = GetRenderScene();
 				if(scene)
 					scene->SetLightMap(*lightMapC);
 			}

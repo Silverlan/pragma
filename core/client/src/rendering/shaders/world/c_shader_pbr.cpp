@@ -107,7 +107,7 @@ bool ShaderPBR::BeginDraw(
 	m_extRenderFlags = RenderFlags::None;
 	return ShaderTextured3DBase::BeginDraw(cmdBuffer,clipPlane,drawOrigin,pipelineIdx,recordFlags);
 }
-bool ShaderPBR::BindSceneCamera(Scene &scene,const rendering::RasterizationRenderer &renderer,bool bView)
+bool ShaderPBR::BindSceneCamera(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,bool bView)
 {
 	if(ShaderTextured3DBase::BindSceneCamera(scene,renderer,bView) == false)
 		return false;

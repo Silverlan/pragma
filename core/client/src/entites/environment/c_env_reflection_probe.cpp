@@ -284,7 +284,7 @@ void CReflectionProbeComponent::BuildAllReflectionProbes(Game &game,bool rebuild
 	BuildReflectionProbes(game,probes,rebuild);
 }
 
-prosper::IDescriptorSet *CReflectionProbeComponent::FindDescriptorSetForClosestProbe(Scene &scene,const Vector3 &origin,float &outIntensity)
+prosper::IDescriptorSet *CReflectionProbeComponent::FindDescriptorSetForClosestProbe(const CSceneComponent &scene,const Vector3 &origin,float &outIntensity)
 {
 	if(c_game == nullptr)
 		return nullptr;
@@ -493,7 +493,9 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene()
 	auto pos = GetEntity().GetPosition();
 	Con::cout<<"Capturing reflection probe IBL reflections for probe at position ("<<pos.x<<","<<pos.y<<","<<pos.z<<")..."<<Con::endl;
 
-	auto &scene = c_game->GetScene();
+	auto *scene = c_game->GetScene();
+	if(scene == nullptr)
+		return false;
 	auto hCam = scene->GetActiveCamera();
 	if(hCam.expired())
 	{

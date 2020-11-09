@@ -50,10 +50,14 @@ LuaEntityObject Lua::ents::create(lua_State *l,const std::string &classname)
 
 int Lua::ents::create_prop(lua_State *l)
 {
-	auto &origin = *Lua::CheckVector(l,1);
-	auto &ang = *Lua::CheckEulerAngles(l,2);
-	auto *mdl = Lua::CheckString(l,3);
-	auto physicsProp = true;
+	auto *mdl = Lua::CheckString(l,1);
+	Vector3 origin {};
+	if(Lua::IsSet(l,2))
+		origin = *Lua::CheckVector(l,2);
+	EulerAngles ang {};
+	if(Lua::IsSet(l,3))
+		ang = *Lua::CheckEulerAngles(l,3);
+	auto physicsProp = false;
 	if(Lua::IsSet(l,4))
 		physicsProp = Lua::CheckBool(l,4);
 	

@@ -98,7 +98,7 @@ bool ShaderWater::UpdateBindFogDensity()
 	auto whWaterComponent = m_boundEntity->GetComponent<CWaterComponent>();
 	if(whWaterComponent.expired())
 		return true;
-	auto &scene = *m_boundScene.lock();
+	auto &scene = *m_boundScene;
 	auto &cam = scene.GetActiveCamera();
 	if(cam.expired())
 		return false;
@@ -114,7 +114,7 @@ void ShaderWater::EndDraw()
 	m_boundScene = {};
 }
 
-bool ShaderWater::BindSceneCamera(Scene &scene,const rendering::RasterizationRenderer &renderer,bool bView)
+bool ShaderWater::BindSceneCamera(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,bool bView)
 {
 	auto r = ShaderTextured3DBase::BindSceneCamera(scene,renderer,bView);
 	if(r == false)
@@ -123,7 +123,7 @@ bool ShaderWater::BindSceneCamera(Scene &scene,const rendering::RasterizationRen
 	if(cam.expired())
 		return false;
 	auto m = cam->GetProjectionMatrix() *cam->GetViewMatrix();
-	m_boundScene = const_cast<Scene&>(scene).shared_from_this();
+	m_boundScene = scene.GetHandle<pragma::CSceneComponent>();
 	return UpdateBindFogDensity() &&
 		RecordPushConstants(m,sizeof(ShaderTextured3DBase::PushConstants) +offsetof(PushConstants,reflectionVp));
 }

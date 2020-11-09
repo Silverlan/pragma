@@ -107,7 +107,6 @@ void CGame::RegisterLua()
 		{"get_action_input",Lua::game::Client::get_action_input},
 		{"set_action_input",Lua::game::Client::set_action_input},
 		{"draw_scene",Lua::game::Client::draw_scene},
-		{"create_scene",Lua::game::Client::create_scene},
 		{"get_render_scene",Lua::game::Client::get_render_scene},
 		{"get_render_scene_camera",Lua::game::Client::get_render_scene_camera},
 		{"get_scene",Lua::game::Client::get_scene},
@@ -177,7 +176,8 @@ void CGame::RegisterLua()
 				return 0;
 			cam->PushLuaObject(l);
 			return 1;
-		})}
+		})},
+		{"create_scene",Lua::game::Client::create_scene}
 	});
 
 	auto entityClassDef = luabind::class_<EntityHandle>("Entity");
@@ -350,18 +350,21 @@ void CGame::RegisterLua()
 	classDefRasterizationRenderer.def("ClearShaderOverride",&Lua::RasterizationRenderer::ClearShaderOverride);
 	classDefRasterizationRenderer.def("SetPrepassMode",&Lua::RasterizationRenderer::SetPrepassMode);
 	classDefRasterizationRenderer.def("GetPrepassMode",&Lua::RasterizationRenderer::GetPrepassMode);
-	classDefRasterizationRenderer.def("InitializeRenderTarget", static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&,const Scene&,uint32_t,uint32_t,bool)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const Scene &scene,uint32_t width,uint32_t height,bool reload) {
+	classDefRasterizationRenderer.def("InitializeRenderTarget", static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&,CSceneHandle&,uint32_t,uint32_t,bool)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer,CSceneHandle &scene,uint32_t width,uint32_t height,bool reload) {
+		pragma::Lua::check_component(l,scene);
 		if(reload == false && width == renderer.GetWidth() && height == renderer.GetHeight())
 			return;
-		renderer.ReloadRenderTarget(const_cast<Scene&>(scene),width,height);
+		renderer.ReloadRenderTarget(*scene.get(),width,height);
 	}));
-	classDefRasterizationRenderer.def("InitializeRenderTarget", static_cast<void(*)(lua_State*, pragma::rendering::RasterizationRenderer&,const Scene&,uint32_t,uint32_t)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const Scene &scene,uint32_t width,uint32_t height) {
+	classDefRasterizationRenderer.def("InitializeRenderTarget", static_cast<void(*)(lua_State*, pragma::rendering::RasterizationRenderer&,CSceneHandle&,uint32_t,uint32_t)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer,CSceneHandle &scene,uint32_t width,uint32_t height) {
+		pragma::Lua::check_component(l,scene);
 		if(width == renderer.GetWidth() && height == renderer.GetHeight())
 			return;
-		renderer.ReloadRenderTarget(const_cast<Scene&>(scene),width,height);
+		renderer.ReloadRenderTarget(*scene.get(),width,height);
 	}));
-	classDefRasterizationRenderer.def("SetSSAOEnabled", static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&,Scene&,bool)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer,Scene &scene,bool ssaoEnabled) {
-		renderer.SetSSAOEnabled(scene,ssaoEnabled);
+	classDefRasterizationRenderer.def("SetSSAOEnabled", static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&,CSceneHandle&,bool)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer,CSceneHandle &scene,bool ssaoEnabled) {
+		pragma::Lua::check_component(l,scene);
+		renderer.SetSSAOEnabled(*scene.get(),ssaoEnabled);
 	}));
 	classDefRasterizationRenderer.def("IsSSAOEnabled", static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
 		Lua::PushBool(l,renderer.IsSSAOEnabled());
@@ -429,27 +432,14 @@ void CGame::RegisterLua()
 			return;
 		Lua::Push(l,dsg);
 	}));
-	classDefRasterizationRenderer.def("GetRenderParticleSystems",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
-		auto &particleSystems = renderer.GetCulledParticles();
-		auto t = Lua::CreateTable(l);
-		int32_t idx = 1;
-		for(auto &pts : particleSystems)
-		{
-			if(pts == nullptr)
-				continue;
-			Lua::PushInt(l,idx++);
-			pts->PushLuaObject(l);
-			Lua::SetTableValue(l,t);
-		}
-	}));
 	classDefRasterizationRenderer.def("ScheduleMeshForRendering",static_cast<void(*)(
-		lua_State*,pragma::rendering::RasterizationRenderer&,uint32_t,pragma::ShaderTextured3DBase&,Material&,EntityHandle&,ModelSubMesh&
+		lua_State*,pragma::rendering::RasterizationRenderer&,CSceneHandle&,uint32_t,pragma::ShaderTextured3DBase&,Material&,EntityHandle&,ModelSubMesh&
 	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));
 	classDefRasterizationRenderer.def("ScheduleMeshForRendering",static_cast<void(*)(
-		lua_State*,pragma::rendering::RasterizationRenderer&,uint32_t,const std::string&,Material&,EntityHandle&,ModelSubMesh&
+		lua_State*,pragma::rendering::RasterizationRenderer&,CSceneHandle&,uint32_t,const std::string&,Material&,EntityHandle&,ModelSubMesh&
 	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));
 	classDefRasterizationRenderer.def("ScheduleMeshForRendering",static_cast<void(*)(
-		lua_State*,pragma::rendering::RasterizationRenderer&,uint32_t,::Material&,EntityHandle&,ModelSubMesh&
+		lua_State*,pragma::rendering::RasterizationRenderer&,CSceneHandle&,uint32_t,::Material&,EntityHandle&,ModelSubMesh&
 	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));
 	//lua_State*,pragma::rendering::RasterizationRenderer&,uint32_t,const std::string&,Material&,EntityHandle&,ModelSubMesh&
 	classDefRasterizationRenderer.add_static_constant("PREPASS_MODE_DISABLED",umath::to_integral(pragma::rendering::RasterizationRenderer::PrepassMode::NoPrepass));
@@ -460,118 +450,6 @@ void CGame::RegisterLua()
 	auto classDefRaytracingRenderer = luabind::class_<pragma::rendering::RaytracingRenderer,pragma::rendering::BaseRenderer>("RaytracingRenderer");
 	gameMod[classDefRaytracingRenderer];
 
-	auto classDefScene = luabind::class_<Scene>("Scene");
-	classDefScene.add_static_constant("DEBUG_MODE_NONE",umath::to_integral(Scene::DebugMode::None));
-	classDefScene.add_static_constant("DEBUG_MODE_AMBIENT_OCCLUSION",umath::to_integral(Scene::DebugMode::AmbientOcclusion));
-	classDefScene.add_static_constant("DEBUG_MODE_ALBEDO",umath::to_integral(Scene::DebugMode::Albedo));
-	classDefScene.add_static_constant("DEBUG_MODE_METALNESS",umath::to_integral(Scene::DebugMode::Metalness));
-	classDefScene.add_static_constant("DEBUG_MODE_ROUGHNESS",umath::to_integral(Scene::DebugMode::Roughness));
-	classDefScene.add_static_constant("DEBUG_MODE_DIFFUSE_LIGHTING",umath::to_integral(Scene::DebugMode::DiffuseLighting));
-	classDefScene.add_static_constant("DEBUG_MODE_NORMAL",umath::to_integral(Scene::DebugMode::Normal));
-	classDefScene.add_static_constant("DEBUG_MODE_NORMAL_MAP",umath::to_integral(Scene::DebugMode::NormalMap));
-	classDefScene.add_static_constant("DEBUG_MODE_REFLECTANCE",umath::to_integral(Scene::DebugMode::Reflectance));
-	classDefScene.add_static_constant("DEBUG_MODE_IBL_PREFILTER",umath::to_integral(Scene::DebugMode::IBLPrefilter));
-	classDefScene.add_static_constant("DEBUG_MODE_IBL_IRRADIANCE",umath::to_integral(Scene::DebugMode::IBLIrradiance));
-	classDefScene.add_static_constant("DEBUG_MODE_EMISSION",umath::to_integral(Scene::DebugMode::Emission));
-	classDefScene.def("GetActiveCamera",&Lua::Scene::GetCamera);
-	classDefScene.def("SetActiveCamera",static_cast<void(*)(lua_State*,::Scene&,CCameraHandle&)>([](lua_State *l,::Scene &scene,CCameraHandle &hCam) {
-		pragma::Lua::check_component(l,hCam);
-		scene.SetActiveCamera(*hCam);
-	}));
-	classDefScene.def("GetWidth",&Lua::Scene::GetWidth);
-	classDefScene.def("GetHeight",&Lua::Scene::GetHeight);
-	classDefScene.def("GetSize",&Lua::Scene::GetSize);
-	classDefScene.def("Resize",&Lua::Scene::Resize);
-	classDefScene.def("BeginDraw",&Lua::Scene::BeginDraw);
-	classDefScene.def("UpdateBuffers",&Lua::Scene::UpdateBuffers);
-	classDefScene.def("GetWorldEnvironment",&Lua::Scene::GetWorldEnvironment);
-	classDefScene.def("SetWorldEnvironment",&Lua::Scene::SetWorldEnvironment);
-	classDefScene.def("ClearWorldEnvironment",&Lua::Scene::ClearWorldEnvironment);
-	classDefScene.def("InitializeRenderTarget",&Lua::Scene::ReloadRenderTarget);
-
-	classDefScene.def("GetIndex",&Lua::Scene::GetIndex);
-	classDefScene.def("GetCameraDescriptorSet",static_cast<void(*)(lua_State*,::Scene&,uint32_t)>(&Lua::Scene::GetCameraDescriptorSet));
-	classDefScene.def("GetCameraDescriptorSet",static_cast<void(*)(lua_State*,::Scene&)>(&Lua::Scene::GetCameraDescriptorSet));
-	classDefScene.def("GetViewCameraDescriptorSet",&Lua::Scene::GetViewCameraDescriptorSet);
-	classDefScene.def("GetDebugMode",&Lua::Scene::GetDebugMode);
-	classDefScene.def("SetDebugMode",&Lua::Scene::SetDebugMode);
-	classDefScene.def("GetRenderer",static_cast<void(*)(lua_State*,::Scene&)>([](lua_State *l,::Scene &scene) {
-		auto *renderer = scene.GetRenderer();
-		if(renderer == nullptr)
-			return;
-		Lua::Push<std::shared_ptr<pragma::rendering::BaseRenderer>>(l,renderer->shared_from_this());
-	}));
-	classDefScene.def("SetRenderer",static_cast<void(*)(lua_State*,::Scene&,pragma::rendering::BaseRenderer&)>([](lua_State *l,::Scene &scene,pragma::rendering::BaseRenderer &renderer) {
-		scene.SetRenderer(renderer.shared_from_this());
-	}));
-	enum class RendererType : uint32_t
-	{
-		Rasterization = 0u,
-		Raytracing
-	};
-	classDefScene.def("CreateRenderer",static_cast<void(*)(lua_State*,::Scene&,uint32_t)>([](lua_State *l,::Scene &scene,uint32_t type) {
-		switch(static_cast<RendererType>(type))
-		{
-		case RendererType::Rasterization:
-		{
-			auto renderer = pragma::rendering::BaseRenderer::Create<pragma::rendering::RasterizationRenderer>(scene.GetWidth(),scene.GetHeight());
-			if(renderer == nullptr)
-				return;
-			Lua::Push(l,renderer);
-			break;
-		}
-		case RendererType::Raytracing:
-		{
-			auto renderer = pragma::rendering::BaseRenderer::Create<pragma::rendering::RaytracingRenderer>(scene.GetWidth(),scene.GetHeight());
-			if(renderer == nullptr)
-				return;
-			Lua::Push(l,renderer);
-			break;
-		}
-		}
-	}));
-	classDefScene.def("SetRenderer",static_cast<void(*)(lua_State*,::Scene&,uint32_t)>([](lua_State *l,::Scene &scene,uint32_t type) {
-		switch(static_cast<RendererType>(type))
-		{
-		case RendererType::Rasterization:
-		{
-			auto renderer = pragma::rendering::BaseRenderer::Create<pragma::rendering::RasterizationRenderer>(scene.GetWidth(),scene.GetHeight());
-			if(renderer == nullptr)
-				return;
-			scene.SetRenderer(renderer);
-			Lua::Push(l,renderer);
-			break;
-		}
-		case RendererType::Raytracing:
-		{
-			auto renderer = pragma::rendering::BaseRenderer::Create<pragma::rendering::RaytracingRenderer>(scene.GetWidth(),scene.GetHeight());
-			if(renderer == nullptr)
-				return;
-			scene.SetRenderer(renderer);
-			Lua::Push(l,renderer);
-			break;
-		}
-		}
-	}));
-	classDefScene.def("GetSceneIndex",static_cast<void(*)(lua_State*,::Scene&)>([](lua_State *l,::Scene &scene) {
-		Lua::PushInt(l,scene.GetSceneIndex());
-	}));
-	classDefScene.def("SetParticleSystemColorFactor",static_cast<void(*)(lua_State*,::Scene&,const Vector4&)>([](lua_State *l,::Scene &scene,const Vector4 &factor) {
-		scene.SetParticleSystemColorFactor(factor);
-	}));
-	classDefScene.def("GetParticleSystemColorFactor",static_cast<void(*)(lua_State*,::Scene&)>([](lua_State *l,::Scene &scene) {
-		Lua::Push<Vector4>(l,scene.GetParticleSystemColorFactor());
-	}));
-
-	// Texture indices for scene render target
-	classDefScene.add_static_constant("RENDER_TARGET_TEXTURE_COLOR",0u);
-	classDefScene.add_static_constant("RENDER_TARGET_TEXTURE_BLOOM",1u);
-	classDefScene.add_static_constant("RENDER_TARGET_TEXTURE_DEPTH",2u);
-
-	classDefScene.add_static_constant("RENDERER_TYPE_RASTERIZATION",umath::to_integral(RendererType::Rasterization));
-	classDefScene.add_static_constant("RENDERER_TYPE_RAYTRACING",umath::to_integral(RendererType::Raytracing));
-
-	gameMod[classDefScene];
 	RegisterLuaGameClasses(gameMod);
 
 	// Needs to be registered AFTER RegisterLuaGameClasses has been called!

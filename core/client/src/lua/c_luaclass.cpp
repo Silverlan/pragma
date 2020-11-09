@@ -59,8 +59,10 @@
 #include <prosper_render_pass.hpp>
 #include <pragma/lua/lua_call.hpp>
 #include <luainterface.hpp>
+#include <cmaterialmanager.h>
 
 extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
@@ -182,6 +184,17 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 		if(spriteSheetAnim == nullptr)
 			return;
 		Lua::Push<SpriteSheetAnimation*>(l,spriteSheetAnim);
+	}));
+	materialClassDef.def("SetShader",static_cast<void(*)(lua_State*,::Material&,const std::string&)>([](lua_State *l,::Material &mat,const std::string &shader) {
+		auto db = mat.GetDataBlock();
+		if(db == nullptr)
+			return;
+		auto shaderInfo = c_engine->GetShaderManager().PreRegisterShader(shader);
+		mat.Initialize(shaderInfo,db);
+		mat.SetLoaded(true);
+		auto shaderHandler = static_cast<CMaterialManager&>(client->GetMaterialManager()).GetShaderHandler();
+		if(shaderHandler)
+			shaderHandler(&mat);
 	}));
 	modGame[materialClassDef];
 
@@ -595,9 +608,10 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defShaderParticleBase.def(luabind::constructor<>());
 	defShaderParticleBase.add_static_constant("PUSH_CONSTANTS_SIZE",sizeof(pragma::ShaderParticle2DBase::PushConstants));
 	defShaderParticleBase.add_static_constant("PUSH_CONSTANTS_USER_DATA_OFFSET",sizeof(pragma::ShaderParticle2DBase::PushConstants));
-	defShaderParticleBase.def("RecordDraw",static_cast<void(*)(lua_State*,pragma::LuaShaderGUIParticle2D&,Scene&,pragma::rendering::RasterizationRenderer&,CParticleSystemHandle&,uint32_t)>([](lua_State *l,pragma::LuaShaderGUIParticle2D &shader,Scene &scene,pragma::rendering::RasterizationRenderer &renderer,CParticleSystemHandle &ps,uint32_t renderFlags) {
+	defShaderParticleBase.def("RecordDraw",static_cast<void(*)(lua_State*,pragma::LuaShaderGUIParticle2D&,CSceneHandle&,pragma::rendering::RasterizationRenderer&,CParticleSystemHandle&,uint32_t)>([](lua_State *l,pragma::LuaShaderGUIParticle2D &shader,CSceneHandle &scene,pragma::rendering::RasterizationRenderer &renderer,CParticleSystemHandle &ps,uint32_t renderFlags) {
 		pragma::Lua::check_component(l,ps);
-		Lua::PushBool(l,shader.Draw(scene,renderer,*ps,ps->GetOrientationType(),static_cast<pragma::ParticleRenderFlags>(renderFlags)));
+		pragma::Lua::check_component(l,scene);
+		Lua::PushBool(l,shader.Draw(*scene,renderer,*ps,ps->GetOrientationType(),static_cast<pragma::ParticleRenderFlags>(renderFlags)));
 	}));
 	defShaderParticleBase.def("RecordBeginDraw",static_cast<void(*)(lua_State*,pragma::LuaShaderGUIParticle2D&,Lua::Vulkan::CommandBuffer&,CParticleSystemHandle&,uint32_t)>([](lua_State *l,pragma::LuaShaderGUIParticle2D &shader,Lua::Vulkan::CommandBuffer &drawCmd,CParticleSystemHandle &ps,uint32_t renderFlags) {
 		pragma::Lua::check_component(l,ps);
@@ -664,10 +678,11 @@ void CGame::RegisterLuaClasses()
 	auto &modGame = GetLuaInterface().RegisterLibrary("game");
 	auto defDrawSceneInfo = luabind::class_<::util::DrawSceneInfo>("DrawSceneInfo");
 	defDrawSceneInfo.def(luabind::constructor<>());
-	defDrawSceneInfo.property("scene",static_cast<std::shared_ptr<::Scene>(*)(::util::DrawSceneInfo&)>([](::util::DrawSceneInfo &drawSceneInfo) -> std::shared_ptr<::Scene> {
-		return drawSceneInfo.scene;
-	}),static_cast<void(*)(::util::DrawSceneInfo&,const std::shared_ptr<::Scene>&)>([](::util::DrawSceneInfo &drawSceneInfo,const std::shared_ptr<::Scene> &scene) {
-		drawSceneInfo.scene = scene;
+	defDrawSceneInfo.property("scene",static_cast<luabind::object(*)(::util::DrawSceneInfo&)>([](::util::DrawSceneInfo &drawSceneInfo) -> luabind::object {
+		return drawSceneInfo.scene.valid() ? drawSceneInfo.scene->GetLuaObject() : luabind::object{};
+	}),static_cast<void(*)(lua_State*,::util::DrawSceneInfo&,CSceneHandle&)>([](lua_State *l,::util::DrawSceneInfo &drawSceneInfo,CSceneHandle &scene) {
+		pragma::Lua::check_component(l,scene);
+		drawSceneInfo.scene = scene->GetHandle<pragma::CSceneComponent>();
 	}));
 	defDrawSceneInfo.property("commandBuffer",static_cast<std::shared_ptr<Lua::Vulkan::CommandBuffer>(*)(::util::DrawSceneInfo&)>([](::util::DrawSceneInfo &drawSceneInfo) -> std::shared_ptr<Lua::Vulkan::CommandBuffer> {
 		return drawSceneInfo.commandBuffer;

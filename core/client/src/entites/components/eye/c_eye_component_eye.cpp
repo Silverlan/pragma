@@ -11,6 +11,8 @@
 
 extern DLLCLIENT CGame *c_game;
 
+#pragma optimize("",off)
+static auto g_debugPrint = false;
 void pragma::CEyeComponent::UpdateEyeballs()
 {
 	auto mdlC = GetEntity().GetModelComponent();
@@ -205,6 +207,8 @@ void pragma::CEyeComponent::UpdateEyeball(const Eyeball &eyeball,uint32_t eyebal
 {
 	if(eyeballIndex >= m_eyeballData.size() || m_animC.expired())
 		return;
+	if(g_debugPrint)
+		Con::cout<<"Eyeball state "<<eyeballIndex<<Con::endl;
 	auto &eyeballData = m_eyeballData.at(eyeballIndex);
 	auto &state = eyeballData.state;
 	auto &config = eyeballData.config;
@@ -261,4 +265,23 @@ void pragma::CEyeComponent::UpdateEyeball(const Eyeball &eyeball,uint32_t eyebal
 	state.irisProjectionV.y = v.y;
 	state.irisProjectionV.z = v.z;
 	state.irisProjectionV.w = -uvec::dot(org,v);
+
+	if(g_debugPrint)
+	{
+		Con::cout<<"View target: "<<viewTarget<<Con::endl;
+
+		Con::cout<<"Dilation: "<<config.dilation<<Con::endl;
+		Con::cout<<"Eye move: "<<config.eyeMove<<Con::endl;
+		Con::cout<<"Eye shift: "<<config.eyeShift<<Con::endl;
+		Con::cout<<"Eye size: "<<config.eyeSize<<Con::endl;
+		Con::cout<<"Jitter: "<<config.jitter<<Con::endl;
+
+		Con::cout<<"Forward: "<<state.forward<<Con::endl;
+		Con::cout<<"Iris projection u: "<<state.irisProjectionU<<Con::endl;
+		Con::cout<<"Iris projection v: "<<state.irisProjectionV<<Con::endl;
+		Con::cout<<"Origin: "<<state.origin<<Con::endl;
+		Con::cout<<"Right: "<<state.right<<Con::endl;
+		Con::cout<<"Up: "<<state.up<<Con::endl;
+	}
 }
+#pragma optimize("",on)

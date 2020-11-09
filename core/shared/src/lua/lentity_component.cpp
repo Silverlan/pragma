@@ -20,6 +20,7 @@
 #include "pragma/entities/entity_component_event.hpp"
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/lua/lua_component_event.hpp"
+#include <sharedutils/datastream.h>
 
 extern DLLENGINE Engine *engine;
 
@@ -149,6 +150,25 @@ void Game::RegisterLuaEntityComponent(luabind::class_<BaseEntityComponentHandleW
 			}
 			hComponent->InjectEvent(eventId,luaEvent);
 		}
+	}));
+	def.def("Save",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,DataStream&)>([](lua_State *l,BaseEntityComponentHandle &hComponent,DataStream &ds) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->Save(ds);
+	}));
+	def.def("Load",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,DataStream&)>([](lua_State *l,BaseEntityComponentHandle &hComponent,DataStream &ds) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->Load(ds);
+	}));
+	def.def("Copy",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,BaseEntityComponentHandle&)>([](lua_State *l,BaseEntityComponentHandle &hComponent,BaseEntityComponentHandle &hComponentOther) {
+		pragma::Lua::check_component(l,hComponent);
+		pragma::Lua::check_component(l,hComponentOther);
+		if(hComponent->GetComponentId() != hComponentOther->GetComponentId() || hComponent.get() == hComponentOther.get())
+			return;
+		DataStream ds {};
+		ds->SetOffset(0);
+		hComponent->Save(ds);
+		ds->SetOffset(0);
+		hComponentOther->Load(ds);
 	}));
 	def.add_static_constant("FREGISTER_NONE",umath::to_integral(pragma::ComponentFlags::None));
 	def.add_static_constant("FREGISTER_BIT_NETWORKED",umath::to_integral(pragma::ComponentFlags::Networked));

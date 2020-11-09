@@ -70,6 +70,7 @@ namespace pragma::networking
 	class IClient;
 	enum class Protocol : uint8_t;
 };
+namespace prosper {class RenderTarget;};
 class DLLCLIENT ClientState
 	: public NetworkState
 {

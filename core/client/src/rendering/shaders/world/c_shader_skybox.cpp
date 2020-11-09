@@ -114,7 +114,7 @@ bool ShaderSkybox::BindEntity(CBaseEntity &ent)
 	m_skyAngles = skyC.valid() ? skyC->GetSkyAngles() : EulerAngles{};
 	return true;
 }
-bool ShaderSkybox::BindSceneCamera(Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,bool bView)
+bool ShaderSkybox::BindSceneCamera(pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,bool bView)
 {
 	auto &cam = scene.GetActiveCamera();
 	if(ShaderTextured3DBase::BindSceneCamera(scene,renderer,bView) == false)

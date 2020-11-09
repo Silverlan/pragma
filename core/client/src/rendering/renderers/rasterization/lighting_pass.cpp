@@ -31,16 +31,16 @@ static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");
 
 void RasterizationRenderer::RenderLightingPass(const util::DrawSceneInfo &drawSceneInfo)
 {
-	if(drawSceneInfo.scene == nullptr)
+	if(drawSceneInfo.scene.expired())
 		return;
-	auto &scene = *drawSceneInfo.scene;
+	auto &scene = const_cast<pragma::CSceneComponent&>(*drawSceneInfo.scene);
 	auto &cam = scene.GetActiveCamera();
 	bool bShadows = (drawSceneInfo.renderFlags &FRender::Shadows) == FRender::Shadows;
-	auto &renderMeshes = GetCulledMeshes();
+	auto &renderMeshes = scene.GetSceneRenderDesc().GetCulledMeshes();
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 
 	//ScopeGuard sgDepthImg {};
-	auto &culledParticles = GetCulledParticles();
+	auto &culledParticles = scene.GetSceneRenderDesc().GetCulledParticles();
 	auto bShouldDrawParticles = (drawSceneInfo.renderFlags &FRender::Particles) == FRender::Particles && cvDrawParticles->GetBool() == true && culledParticles.empty() == false;
 	if(bShouldDrawParticles == true)
 		SetFrameDepthBufferSamplingRequired();
@@ -182,12 +182,13 @@ void RasterizationRenderer::RenderLightingPass(const util::DrawSceneInfo &drawSc
 		//c_engine->StopGPUTimer(GPUTimerEvent::World); // prosper TODO
 
 		//c_engine->StartGPUTimer(GPUTimerEvent::WorldTranslucent); // prosper TODO
-		auto *renderInfo = GetRenderInfo(RenderMode::World);
+		auto *renderInfo = scene.GetSceneRenderDesc().GetRenderInfo(RenderMode::World);
 		if(renderInfo != nullptr && cam.valid())
 			RenderSystem::Render(drawSceneInfo,*cam,RenderMode::World,rsFlags,renderInfo->translucentMeshes);
 		//c_engine->StopGPUTimer(GPUTimerEvent::WorldTranslucent); // prosper TODO
 
 		c_game->CallCallbacks("PostRenderWorld");
+		c_game->CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PostRenderWorld",std::ref(drawSceneInfo));
 		c_game->StopProfilingStage(CGame::GPUProfilingPhase::World);
 	}
 
@@ -307,7 +308,7 @@ void RasterizationRenderer::RenderLightingPass(const util::DrawSceneInfo &drawSc
 			//c_engine->StartGPUTimer(GPUTimerEvent::ViewParticles); // prosper TODO
 			if((drawSceneInfo.renderFlags &FRender::Particles) == FRender::Particles)
 			{
-				auto &culledParticles = GetCulledParticles();
+				auto &culledParticles = scene.GetSceneRenderDesc().GetCulledParticles();
 				auto &glowInfo = GetGlowInfo();
 				RenderParticleSystems(drawSceneInfo,culledParticles,RenderMode::View,false,&glowInfo.tmpBloomParticles);
 				if(bGlow == false)

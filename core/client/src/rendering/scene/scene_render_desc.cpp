@@ -5,69 +5,155 @@
  * Copyright (c) 2020 Florian Weischer
  */
 
-#include "pragma/clientstate/clientstate.h"
-#include "pragma/game/c_game.h"
-#include "pragma/rendering/render_mesh_collection_handler.hpp"
+#include "stdafx_client.h"
+#include "pragma/entities/components/c_scene_component.hpp"
+#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_brute_force.hpp"
+#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_bsp.hpp"
+#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_chc.hpp"
+#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_inert.hpp"
+#include "pragma/rendering/occlusion_culling/occlusion_culling_handler_octtree.hpp"
+#include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
+#include "pragma/rendering/renderers/base_renderer.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
-#include "pragma/entities/components/c_render_component.hpp"
-#include "pragma/entities/components/c_animated_component.hpp"
-#include "pragma/entities/components/c_model_component.hpp"
-#include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/rendering/renderers/rasterization/culled_mesh_data.hpp"
+#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
-#include "pragma/entities/c_world.h"
 #include "pragma/console/c_cvar.h"
-#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
-#include <pragma/console/convars.h>
-#include <prosper_util.hpp>
 #include <sharedutils/util_shaderinfo.hpp>
-#include <cmaterialmanager.h>
-#include <cmaterial.h>
-
-using namespace pragma;
+#include <sharedutils/alpha_mode.hpp>
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
+#pragma optimize("",off)
+SceneRenderDesc::SceneRenderDesc(pragma::CSceneComponent &scene)
+	: m_scene{scene}
+{
+	ReloadOcclusionCullingHandler();
+}
+SceneRenderDesc::~SceneRenderDesc()
+{
+	m_occlusionCullingHandler = nullptr;
+}
+void SceneRenderDesc::PerformOcclusionCulling()
+{
+	if(m_scene.m_renderer == nullptr || m_scene.m_renderer->IsRasterizationRenderer() == false)
+		return;
+	c_game->StartProfilingStage(CGame::CPUProfilingPhase::OcclusionCulling);
+	GetOcclusionCullingHandler().PerformCulling(m_scene,static_cast<pragma::rendering::RasterizationRenderer&>(*m_scene.m_renderer),GetCulledParticles());
 
+	auto &renderMeshes = GetCulledMeshes();
+	GetOcclusionCullingHandler().PerformCulling(m_scene,static_cast<pragma::rendering::RasterizationRenderer&>(*m_scene.m_renderer),renderMeshes);
+	c_game->StopProfilingStage(CGame::CPUProfilingPhase::OcclusionCulling);
+}
+
+const std::vector<pragma::OcclusionMeshInfo> &SceneRenderDesc::GetCulledMeshes() const {return m_renderMeshCollectionHandler.GetOcclusionFilteredMeshes();}
+std::vector<pragma::OcclusionMeshInfo> &SceneRenderDesc::GetCulledMeshes() {return m_renderMeshCollectionHandler.GetOcclusionFilteredMeshes();}
+const std::vector<pragma::CParticleSystemComponent*> &SceneRenderDesc::GetCulledParticles() const {return m_renderMeshCollectionHandler.GetOcclusionFilteredParticleSystems();}
+std::vector<pragma::CParticleSystemComponent*> &SceneRenderDesc::GetCulledParticles() {return m_renderMeshCollectionHandler.GetOcclusionFilteredParticleSystems();}
+
+const pragma::OcclusionCullingHandler &SceneRenderDesc::GetOcclusionCullingHandler() const {return const_cast<SceneRenderDesc*>(this)->GetOcclusionCullingHandler();}
+pragma::OcclusionCullingHandler &SceneRenderDesc::GetOcclusionCullingHandler() {return *m_occlusionCullingHandler;}
+void SceneRenderDesc::SetOcclusionCullingHandler(const std::shared_ptr<pragma::OcclusionCullingHandler> &handler) {m_occlusionCullingHandler = handler;}
+void SceneRenderDesc::ReloadOcclusionCullingHandler()
+{
+	auto occlusionCullingMode = c_game->GetConVarInt("cl_render_occlusion_culling");
+	switch(occlusionCullingMode)
+	{
+	case 1: /* Brute-force */
+		m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerBruteForce>();
+		break;
+	case 2: /* CHC++ */
+		m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerCHC>();
+		break;
+	case 4: /* BSP */
+	{
+		auto *world = c_game->GetWorld();
+		if(world)
+		{
+			auto &entWorld = world->GetEntity();
+			auto pWorldComponent = entWorld.GetComponent<pragma::CWorldComponent>();
+			auto bspTree = pWorldComponent.valid() ? pWorldComponent->GetBSPTree() : nullptr;
+			if(bspTree != nullptr && bspTree->GetNodes().size() > 1u)
+			{
+				m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerBSP>(bspTree);
+				break;
+			}
+		}
+	}
+	case 3: /* Octtree */
+		m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerOctTree>();
+		break;
+	case 0: /* Off */
+	default:
+		m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerInert>();
+		break;
+	}
+	m_occlusionCullingHandler->Initialize();
+}
+
+static auto cvDrawGlow = GetClientConVar("render_draw_glow");
+static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");
+static auto cvDrawSky = GetClientConVar("render_draw_sky");
+static auto cvDrawWater = GetClientConVar("render_draw_water");
+static auto cvDrawView = GetClientConVar("render_draw_view");
+pragma::rendering::CulledMeshData *SceneRenderDesc::GetRenderInfo(RenderMode renderMode) const
+{
+	auto &renderMeshData = m_renderMeshCollectionHandler.GetRenderMeshData();
+	auto it = renderMeshData.find(renderMode);
+	if(it == renderMeshData.end())
+		return nullptr;
+	return it->second.get();
+}
+void SceneRenderDesc::CollectRenderObjects(FRender renderFlags)
+{
+	// Prepare rendering
+	c_game->StartProfilingStage(CGame::CPUProfilingPhase::PrepareRendering);
+	auto bGlow = cvDrawGlow->GetBool();
+	auto bTranslucent = cvDrawTranslucent->GetBool();
+	if((renderFlags &FRender::Skybox) == FRender::Skybox && c_game->IsRenderModeEnabled(RenderMode::Skybox) && cvDrawSky->GetBool() == true)
+		PrepareRendering(m_scene,RenderMode::Skybox,renderFlags,bTranslucent,bGlow);
+	else
+		renderFlags &= ~FRender::Skybox;
+
+	if((renderFlags &FRender::World) == FRender::World && c_game->IsRenderModeEnabled(RenderMode::World))
+		PrepareRendering(m_scene,RenderMode::World,renderFlags,bTranslucent,bGlow);
+	else
+		renderFlags &= ~FRender::World;
+
+	if((renderFlags &FRender::Water) == FRender::Water && c_game->IsRenderModeEnabled(RenderMode::Water) && cvDrawWater->GetBool() == true)
+		PrepareRendering(m_scene,RenderMode::Water,renderFlags,bTranslucent,bGlow);
+	else
+		renderFlags &= ~FRender::Water;
+
+	auto *pl = c_game->GetLocalPlayer();
+	if((renderFlags &FRender::View) == FRender::View && c_game->IsRenderModeEnabled(RenderMode::View) && pl != nullptr && pl->IsInFirstPersonMode() == true && cvDrawView->GetBool() == true)
+		PrepareRendering(m_scene,RenderMode::View,renderFlags,bTranslucent,bGlow);
+	else
+		renderFlags &= ~FRender::View;
+	c_game->StopProfilingStage(CGame::CPUProfilingPhase::PrepareRendering);
+}
+
+pragma::rendering::RenderMeshCollectionHandler &SceneRenderDesc::GetRenderMeshCollectionHandler() {return m_renderMeshCollectionHandler;}
+const pragma::rendering::RenderMeshCollectionHandler &SceneRenderDesc::GetRenderMeshCollectionHandler() const {return const_cast<SceneRenderDesc*>(this)->GetRenderMeshCollectionHandler();}
 
 static auto cvDrawWorld = GetClientConVar("render_draw_world");
-const std::vector<pragma::OcclusionMeshInfo> &rendering::RenderMeshCollectionHandler::PerformOcclusionCulling(pragma::CSceneComponent &scene,const RasterizationRenderer &renderer,const Vector3 &posCam,bool cullByViewFrustum)
+void SceneRenderDesc::PrepareRendering(pragma::CSceneComponent &scene,RenderMode renderMode,FRender renderFlags,bool bUpdateTranslucentMeshes,bool bUpdateGlowMeshes)
 {
-	m_culledMeshes.clear();
-	auto *world = static_cast<pragma::CWorldComponent*>(c_game->GetWorld());
-	if(world == nullptr)
-		return m_culledMeshes;
-	auto &occlusionCullingHandler = scene.GetSceneRenderDesc().GetOcclusionCullingHandler();
-	occlusionCullingHandler.PerformCulling(scene,renderer,posCam,m_culledMeshes,cullByViewFrustum);
-	return m_culledMeshes;
-}
+	if(m_scene.m_renderer == nullptr || m_scene.m_renderer->IsRasterizationRenderer() == false)
+		return;
+	auto &renderMeshData = m_renderMeshCollectionHandler.GetRenderMeshData();
+	auto it = renderMeshData.find(renderMode);
+	if(it == renderMeshData.end())
+		it = renderMeshData.insert(std::remove_reference_t<decltype(renderMeshData)>::value_type(renderMode,std::make_shared<pragma::rendering::CulledMeshData>())).first;
 
-const std::vector<pragma::OcclusionMeshInfo> &rendering::RenderMeshCollectionHandler::GetOcclusionFilteredMeshes() const {return const_cast<RenderMeshCollectionHandler*>(this)->GetOcclusionFilteredMeshes();}
-std::vector<pragma::OcclusionMeshInfo> &rendering::RenderMeshCollectionHandler::GetOcclusionFilteredMeshes() {return m_culledMeshes;}
-
-const std::vector<pragma::CParticleSystemComponent*> &rendering::RenderMeshCollectionHandler::GetOcclusionFilteredParticleSystems() const {return const_cast<RenderMeshCollectionHandler*>(this)->GetOcclusionFilteredParticleSystems();}
-std::vector<pragma::CParticleSystemComponent*> &rendering::RenderMeshCollectionHandler::GetOcclusionFilteredParticleSystems() {return m_culledParticles;}
-
-const std::unordered_map<RenderMode,std::shared_ptr<rendering::CulledMeshData>> &rendering::RenderMeshCollectionHandler::GetRenderMeshData() const {return const_cast<RenderMeshCollectionHandler*>(this)->GetRenderMeshData();}
-std::unordered_map<RenderMode,std::shared_ptr<rendering::CulledMeshData>> &rendering::RenderMeshCollectionHandler::GetRenderMeshData() {return m_culledMeshData;}
-std::shared_ptr<rendering::CulledMeshData> rendering::RenderMeshCollectionHandler::GetRenderMeshData(RenderMode renderMode) const
-{
-	auto it = m_culledMeshData.find(renderMode);
-	if(it == m_culledMeshData.end())
-		return nullptr;
-	return it->second;
-}
-
-rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollectionHandler::GenerateOptimizedRenderObjectStructures(pragma::CSceneComponent &scene,const RasterizationRenderer &renderer,const Vector3 &posCam,FRender renderFlags,RenderMode renderMode,bool useGlowMeshes,bool useTranslucentMeshes)
-{
-	auto it = m_culledMeshData.find(renderMode);
-	if(it == m_culledMeshData.end())
-		return ResultFlags::None;
 	auto &renderInfo = it->second;
+	auto &cam = scene.GetActiveCamera();
+	auto &posCam = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 
 	auto drawWorld = cvDrawWorld->GetInt();
 	auto *matLoad = c_game->GetLoadMaterial();
-	auto &renderMeshes = m_culledMeshes;
+	auto &renderMeshes = GetCulledMeshes();
 	auto &glowMeshes = renderInfo->glowMeshes;
 	auto &translucentMeshes = renderInfo->translucentMeshes;
 	auto &processed = renderInfo->processed;
@@ -133,7 +219,11 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 			for(auto it=meshes.begin();it!=meshes.end();++it)
 			{
 				auto *subMesh = static_cast<CModelSubMesh*>(it->get());
-				auto idxTexture = mdl->GetMaterialIndex(*subMesh,mdlComponent->GetSkin());
+				auto skin = mdlComponent->GetSkin();
+				auto numSkins = mdl->GetTextureGroups().size();
+				if(skin >= numSkins)
+					skin = 0;
+				auto idxTexture = mdl->GetMaterialIndex(*subMesh,skin);
 				auto *mat = (idxTexture.has_value() && mdlComponent.valid()) ? mdlComponent->GetRenderMaterial(*idxTexture) : nullptr;
 				if(mat == nullptr)
 					mat = static_cast<CMaterial*>(client->GetMaterialManager().GetErrorMaterial());
@@ -154,7 +244,7 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 					{
 						// Fill glow map
 						auto *glowMap = mat->GetGlowMap();
-						if(useGlowMeshes == true)
+						if(bUpdateGlowMeshes == true)
 						{
 							if(glowMap != nullptr)
 							{
@@ -179,15 +269,15 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 							auto *base = static_cast<::util::WeakHandle<prosper::Shader>*>(const_cast<util::ShaderInfo*>(info)->GetShader().get())->get();
 							prosper::Shader *shader = nullptr;
 							if(drawWorld == 2)
-								shader = renderer.GetWireframeShader();
+								shader = static_cast<pragma::rendering::RasterizationRenderer&>(*m_scene.m_renderer).m_whShaderWireframe.get();
 							else if(base != nullptr && base->GetBaseTypeHashCode() == pragma::ShaderTextured3DBase::HASH_TYPE)
-								shader = renderer.GetShaderOverride(static_cast<pragma::ShaderTextured3DBase*>(base));
+								shader = static_cast<pragma::rendering::RasterizationRenderer&>(*m_scene.m_renderer).GetShaderOverride(static_cast<pragma::ShaderTextured3DBase*>(base));
 							if(shader != nullptr && shader->GetBaseTypeHashCode() == pragma::ShaderTextured3DBase::HASH_TYPE)
 							{
 								// Translucent?
-								if(mat->IsTranslucent() == true)
+								if(mat->GetAlphaMode() == AlphaMode::Blend)
 								{
-									if(useTranslucentMeshes == true)
+									if(bUpdateTranslucentMeshes == true)
 									{
 										auto pTrComponent = ent->GetTransformComponent();
 										auto pos = subMesh->GetCenter();
@@ -242,16 +332,14 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 			}
 		}
 	}
-	auto flags = ResultFlags::None;
 	if(glowMeshes.empty() == false)
-		flags |= ResultFlags::HasGlowMeshes;
-	if(useTranslucentMeshes == true)
+		static_cast<pragma::rendering::RasterizationRenderer&>(*m_scene.m_renderer).m_glowInfo.bGlowScheduled = true;
+	if(bUpdateTranslucentMeshes == true)
 	{
 		// Sort translucent meshes by distance
 		std::sort(translucentMeshes.begin(),translucentMeshes.end(),[](const std::unique_ptr<RenderSystem::TranslucentMesh> &a,const std::unique_ptr<RenderSystem::TranslucentMesh> &b) {
 			return a->distance < b->distance;
-			});
+		});
 	}
-	return flags;
 }
-
+#pragma optimize("",on)

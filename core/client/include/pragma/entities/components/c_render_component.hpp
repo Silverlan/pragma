@@ -34,7 +34,8 @@ namespace pragma
 			RenderBufferDirty = 1u,
 			ExemptFromOcclusionCulling = RenderBufferDirty<<1u,
 			HasDepthBias = ExemptFromOcclusionCulling<<1u,
-			EnableDepthPass = HasDepthBias<<1u
+			EnableDepthPass = HasDepthBias<<1u,
+			DisableShadows = EnableDepthPass<<1u
 		};
 		static ComponentEventId EVENT_ON_UPDATE_RENDER_DATA;
 		static ComponentEventId EVENT_ON_RENDER_BUFFERS_INITIALIZED;
@@ -107,6 +108,9 @@ namespace pragma
 		void SetRenderClipPlane(const Vector4 &plane);
 		void ClearRenderClipPlane();
 		const Vector4 *GetRenderClipPlane() const;
+
+		void SetReceiveShadows(bool enabled);
+		bool IsReceivingShadows() const;
 
 		void SetRenderBufferDirty();
 		std::optional<Intersection::LineMeshResult> CalcRayIntersection(const Vector3 &start,const Vector3 &dir,bool precise=false) const;

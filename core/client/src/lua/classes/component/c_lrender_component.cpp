@@ -49,6 +49,14 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hComponent);
 		Lua::PushBool(l,hComponent->IsExemptFromOcclusionCulling());
 		}));
+	defCRender.def("SetReceiveShadows",static_cast<void(*)(lua_State*,CRenderHandle&,bool)>([](lua_State *l,CRenderHandle &hComponent,bool enabled) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->SetReceiveShadows(enabled);
+	}));
+	defCRender.def("IsReceivingShadows",static_cast<void(*)(lua_State*,CRenderHandle&)>([](lua_State *l,CRenderHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		Lua::PushBool(l,hComponent->IsReceivingShadows());
+	}));
 	defCRender.def("SetRenderBufferDirty",static_cast<void(*)(lua_State*,CRenderHandle&)>([](lua_State *l,CRenderHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->SetRenderBufferDirty();

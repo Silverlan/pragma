@@ -173,8 +173,8 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_print(NetworkState*,pragma::BaseP
 {
 	if(c_game == nullptr)
 		return;
-	auto &scene = c_game->GetScene();
-	auto *culler = scene->FindOcclusionCuller();
+	auto *scene = c_game->GetScene();
+	auto *culler = scene ? scene->FindOcclusionCuller() : nullptr;
 	if(culler == nullptr)
 		return;
 	auto &octree = culler->GetOcclusionOctree();
@@ -221,8 +221,8 @@ static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(NetworkState*,ConVar*
 {
 	if(c_game == nullptr)
 		return;
-	auto &scene = c_game->GetScene();
-	auto *culler = scene->FindOcclusionCuller();
+	auto *scene = c_game->GetScene();
+	auto *culler = scene ? scene->FindOcclusionCuller() : nullptr;
 	if(culler == nullptr)
 		return;
 	auto &octree = culler->GetOcclusionOctree();

@@ -36,6 +36,7 @@ namespace pragma
 		DepthOnly = Bloom<<1u
 	};
 	class CParticleSystemComponent;
+	class CSceneComponent;
 	class DLLCLIENT CParticleSystemComponent final
 		: public BaseEnvParticleSystemComponent,
 		public CBaseNetComponent,
@@ -238,8 +239,8 @@ namespace pragma
 		void SetColorFactor(const Vector4 &colorFactor);
 		
 		void Simulate(double tDelta);
-		void Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,ParticleRenderFlags renderFlags);
-		void RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent *light,uint32_t layerId=0);
+		void Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,ParticleRenderFlags renderFlags);
+		void RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent *light,uint32_t layerId=0);
 		uint32_t GetParticleCount() const;
 		// Same as m_numParticles, minus particles with a radius of 0, alpha of 0 or similar (Invisible particles)
 		uint32_t GetRenderParticleCount() const;

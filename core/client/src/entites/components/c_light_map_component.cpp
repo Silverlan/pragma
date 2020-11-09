@@ -371,7 +371,6 @@ static void generate_lightmaps(uint32_t width,uint32_t height,uint32_t sampleCou
 		auto &ent = c_game->GetWorld()->GetEntity();
 		auto lightmapC = ent.GetComponent<pragma::CLightMapComponent>();
 
-		auto &scene = c_game->GetRenderScene();
 		if(lightmapC.valid())
 			lightmapC->SetLightMapAtlas(tex);
 
@@ -452,7 +451,7 @@ void Console::commands::debug_lightmaps(NetworkState *state,pragma::BasePlayerCo
 	if(c_game == nullptr)
 		return;
 
-	auto &scene = c_game->GetRenderScene();
+	auto *scene = c_game->GetRenderScene();
 	auto *renderer = scene ? scene->GetRenderer() : nullptr;
 	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 		return;

@@ -50,7 +50,7 @@ namespace pragma
 		virtual bool ShouldInitializePipeline(uint32_t pipelineIdx) override;
 	private:
 		// These are unused
-		virtual bool BindSceneCamera(Scene &scene,const rendering::RasterizationRenderer &renderer,bool bView) override {return false;}
+		virtual bool BindSceneCamera(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,bool bView) override {return false;}
 		virtual bool BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings) override {return false;}
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override {return std::numeric_limits<uint32_t>::max();}
 		virtual uint32_t GetCameraDescriptorSetIndex() const override {return std::numeric_limits<uint32_t>::max();}

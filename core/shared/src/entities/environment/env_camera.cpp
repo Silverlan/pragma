@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <mathutil/umath_frustum.hpp>
 #include <mathutil/umat.h>
+#include <sharedutils/datastream.h>
 #include <glm/gtx/matrix_decompose.hpp>
 
 #define EPSILON 0.001f
@@ -33,6 +34,27 @@ void BaseEnvCameraComponent::Initialize()
 	auto &ent = GetEntity();
 	ent.AddComponent("toggle");
 	ent.AddComponent("transform");
+}
+
+void BaseEnvCameraComponent::Save(DataStream &ds)
+{
+	BaseEntityComponent::Save(ds);
+	ds->Write<Mat4>(*m_projectionMatrix);
+	ds->Write<Mat4>(*m_viewMatrix);
+	ds->Write<float>(*m_fov);
+	ds->Write<float>(*m_aspectRatio);
+	ds->Write<float>(*m_nearZ);
+	ds->Write<float>(*m_farZ);
+}
+void BaseEnvCameraComponent::Load(DataStream &ds,uint32_t version)
+{
+	BaseEntityComponent::Load(ds,version);
+	*m_projectionMatrix = ds->Read<Mat4>();
+	*m_viewMatrix = ds->Read<Mat4>();
+	*m_fov = ds->Read<float>();
+	*m_aspectRatio = ds->Read<float>();
+	*m_nearZ = ds->Read<float>();
+	*m_farZ = ds->Read<float>();
 }
 
 void BaseEnvCameraComponent::SetOrientation(const Vector3 &forward,const Vector3 &up)

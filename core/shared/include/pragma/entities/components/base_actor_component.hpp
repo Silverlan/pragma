@@ -9,10 +9,12 @@
 
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/entities/entity_component_event.hpp"
+#include "pragma/physics/physobj.h"
 #include <sharedutils/property/util_property.hpp>
 
 namespace pragma
 {
+	namespace physics {class ICollisionObject;};
 	struct DLLNETWORK CEOnCharacterKilled
 		: public ComponentEvent
 	{

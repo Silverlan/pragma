@@ -104,6 +104,8 @@ bool CRenderComponent::IsDepthPassEnabled() const {return umath::is_flag_set(m_s
 void CRenderComponent::SetRenderClipPlane(const Vector4 &plane) {m_renderClipPlane = plane;}
 void CRenderComponent::ClearRenderClipPlane() {m_renderClipPlane = {};}
 const Vector4 *CRenderComponent::GetRenderClipPlane() const {return m_renderClipPlane.has_value() ? &*m_renderClipPlane : nullptr;}
+void CRenderComponent::SetReceiveShadows(bool enabled) {umath::set_flag(m_stateFlags,StateFlags::DisableShadows,!enabled);}
+bool CRenderComponent::IsReceivingShadows() const {return !umath::is_flag_set(m_stateFlags,StateFlags::DisableShadows);}
 void CRenderComponent::Initialize()
 {
 	BaseRenderComponent::Initialize();
@@ -309,8 +311,8 @@ void CRenderComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 util::WeakHandle<CModelComponent> &CRenderComponent::GetModelComponent() const {return m_mdlComponent;}
 util::WeakHandle<CAnimatedComponent> &CRenderComponent::GetAnimatedComponent() const {return m_animComponent;}
 util::WeakHandle<CLightMapReceiverComponent> &CRenderComponent::GetLightMapReceiverComponent() const {return m_lightMapReceiverComponent;}
-void CRenderComponent::SetRenderOffsetTransform(const umath::ScaledTransform &t) {m_renderOffset = t;}
-void CRenderComponent::ClearRenderOffsetTransform() {m_renderOffset = {};}
+void CRenderComponent::SetRenderOffsetTransform(const umath::ScaledTransform &t) {m_renderOffset = t; SetRenderBufferDirty();}
+void CRenderComponent::ClearRenderOffsetTransform() {m_renderOffset = {}; SetRenderBufferDirty();}
 const umath::ScaledTransform *CRenderComponent::GetRenderOffsetTransform() const {return m_renderOffset.has_value() ? &*m_renderOffset : nullptr;}
 void CRenderComponent::UpdateMatrices()
 {

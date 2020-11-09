@@ -20,8 +20,8 @@ class DLLCLIENT CParticleRendererSprite
 public:
 	CParticleRendererSprite()=default;
 	virtual void Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values);
-	virtual void Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags) override;
-	virtual void RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,Scene &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId=0) override;
+	virtual void Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags) override;
+	virtual void RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId=0) override;
 	virtual void PostSimulate(double tDelta) override;
 	virtual pragma::ShaderParticleBase *GetShader() const override;
 private:

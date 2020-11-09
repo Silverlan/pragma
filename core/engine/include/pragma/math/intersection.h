@@ -21,6 +21,7 @@ struct AABB;
 class ModelMesh;
 class ModelSubMesh;
 class Model;
+struct Hitbox;
 namespace Intersection
 {
 	enum class Result : uint32_t

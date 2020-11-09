@@ -17,7 +17,7 @@
 
 class Scene;
 class CBaseEntity;
-namespace pragma {struct RenderSettings; struct CameraData;};
+namespace pragma {struct RenderSettings; struct CameraData; class CSceneComponent;};
 namespace util {struct DrawSceneInfo;};
 namespace pragma::rendering
 {
@@ -31,7 +31,7 @@ namespace pragma::rendering
 		bool operator!=(const BaseRenderer &other) const;
 		virtual ~BaseRenderer()=default;
 		virtual bool RenderScene(const util::DrawSceneInfo &drawSceneInfo);
-		virtual bool ReloadRenderTarget(Scene &scene,uint32_t width,uint32_t height)=0;
+		virtual bool ReloadRenderTarget(CSceneComponent &scene,uint32_t width,uint32_t height)=0;
 		virtual prosper::Texture *GetSceneTexture()=0;
 		virtual prosper::Texture *GetPresentationTexture();
 		virtual prosper::Texture *GetHDRPresentationTexture()=0;
@@ -39,7 +39,7 @@ namespace pragma::rendering
 		const prosper::Texture *GetPresentationTexture() const;
 		const prosper::Texture *GetHDRPresentationTexture() const;
 		virtual void UpdateRenderSettings();
-		virtual void UpdateCameraData(Scene &scene,pragma::CameraData &cameraData);
+		virtual void UpdateCameraData(CSceneComponent &scene,pragma::CameraData &cameraData);
 		void Resize(uint32_t width, uint32_t height);
 
 		virtual bool IsRasterizationRenderer() const;

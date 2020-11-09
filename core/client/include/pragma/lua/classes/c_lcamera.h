@@ -13,36 +13,41 @@
 #include "pragma/lua/c_ldefinitions.h"
 #include <mathutil/glmutil.h>
 
-lua_registercheck(Scene,::Scene);
-
 class WorldEnvironment;
 class Material;
 namespace util {struct DrawSceneInfo;};
+class Scene;
 namespace Lua
 {
 	namespace Scene
 	{
-		DLLCLIENT void GetCamera(lua_State *l,::Scene &scene);
-		DLLCLIENT void GetSize(lua_State *l,::Scene &scene);
-		DLLCLIENT void GetWidth(lua_State *l,::Scene &scene);
-		DLLCLIENT void GetHeight(lua_State *l,::Scene &scene);
-		DLLCLIENT void Resize(lua_State *l,::Scene &scene,uint32_t width,uint32_t height);
+		DLLCLIENT void GetCamera(lua_State *l,CSceneHandle &scene);
+		DLLCLIENT void GetSize(lua_State *l,CSceneHandle &scene);
+		DLLCLIENT void GetWidth(lua_State *l,CSceneHandle &scene);
+		DLLCLIENT void GetHeight(lua_State *l,CSceneHandle &scene);
+		DLLCLIENT void Resize(lua_State *l,CSceneHandle &scene,uint32_t width,uint32_t height);
 
-		DLLCLIENT void BeginDraw(lua_State *l,::Scene &scene);
-		DLLCLIENT void UpdateBuffers(lua_State *l,::Scene &scene,prosper::ICommandBuffer &hCommandBuffer);
-		DLLCLIENT void GetWorldEnvironment(lua_State *l,::Scene &scene);
-		DLLCLIENT void ClearWorldEnvironment(lua_State *l,::Scene &scene);
-		DLLCLIENT void SetWorldEnvironment(lua_State *l,::Scene &scene,WorldEnvironment &worldEnv);
+		DLLCLIENT void BeginDraw(lua_State *l,CSceneHandle &scene);
+		DLLCLIENT void UpdateBuffers(lua_State *l,CSceneHandle &scene,prosper::ICommandBuffer &hCommandBuffer);
+		DLLCLIENT void GetWorldEnvironment(lua_State *l,CSceneHandle &scene);
+		DLLCLIENT void ClearWorldEnvironment(lua_State *l,CSceneHandle &scene);
+		DLLCLIENT void SetWorldEnvironment(lua_State *l,CSceneHandle &scene,WorldEnvironment &worldEnv);
 
-		DLLCLIENT void ReloadRenderTarget(lua_State *l,::Scene &scene,uint32_t width,uint32_t height);
+		DLLCLIENT void ReloadRenderTarget(lua_State *l,CSceneHandle &scene,uint32_t width,uint32_t height);
 
-		DLLCLIENT void GetCameraDescriptorSet(lua_State *l,::Scene &scene);
-		DLLCLIENT void GetCameraDescriptorSet(lua_State *l,::Scene &scene,uint32_t bindPoint);
-		DLLCLIENT void GetViewCameraDescriptorSet(lua_State *l,::Scene &scene);
-		DLLCLIENT void GetIndex(lua_State *l,::Scene &scene);
+		DLLCLIENT void GetCameraDescriptorSet(lua_State *l,CSceneHandle &scene);
+		DLLCLIENT void GetCameraDescriptorSet(lua_State *l,CSceneHandle &scene,uint32_t bindPoint);
+		DLLCLIENT void GetViewCameraDescriptorSet(lua_State *l,CSceneHandle &scene);
+		DLLCLIENT void GetIndex(lua_State *l,CSceneHandle &scene);
 
-		DLLCLIENT void GetDebugMode(lua_State *l,::Scene &scene);
-		DLLCLIENT void SetDebugMode(lua_State *l,::Scene &scene,uint32_t debugMode);
+		DLLCLIENT void GetDebugMode(lua_State *l,CSceneHandle &scene);
+		DLLCLIENT void SetDebugMode(lua_State *l,CSceneHandle &scene,uint32_t debugMode);
+		
+		DLLCLIENT void Link(lua_State *l,CSceneHandle &scene,CSceneHandle &sceneOther);
+		DLLCLIENT void UpdateRenderInfo(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo);
+		DLLCLIENT void RenderPrepass(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode);
+		DLLCLIENT void Render(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode,RenderSystem::RenderFlags renderFlags);
+		DLLCLIENT void Render(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode);
 	};
 	namespace RasterizationRenderer
 	{
@@ -61,9 +66,9 @@ namespace Lua
 		DLLCLIENT void SetPrepassMode(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,uint32_t mode);
 		DLLCLIENT void GetPrepassMode(lua_State *l,pragma::rendering::RasterizationRenderer &renderer);
 
-		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,uint32_t renderMode,pragma::ShaderTextured3DBase &shader,::Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh);
-		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,uint32_t renderMode,const std::string &shaderName,::Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh);
-		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,uint32_t renderMode,::Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh);
+		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,CSceneHandle &scene,uint32_t renderMode,pragma::ShaderTextured3DBase &shader,::Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh);
+		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,CSceneHandle &scene,uint32_t renderMode,const std::string &shaderName,::Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh);
+		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,CSceneHandle &scene,uint32_t renderMode,::Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh);
 	};
 };
 

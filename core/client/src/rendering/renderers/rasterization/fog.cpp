@@ -22,7 +22,7 @@ extern DLLCLIENT CGame *c_game;
 
 void RasterizationRenderer::RenderSceneFog(const util::DrawSceneInfo &drawSceneInfo)
 {
-	if(drawSceneInfo.scene == nullptr)
+	if(drawSceneInfo.scene.expired())
 		return;
 	auto &scene = *drawSceneInfo.scene;
 	auto &hdrInfo = GetHDRInfo();

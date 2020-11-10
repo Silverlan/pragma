@@ -48,20 +48,23 @@ void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 	auto mdl = whMdlComponent.valid() ? whMdlComponent->GetModel() : nullptr;
 	auto wpRenderBuffer = whRenderComponent.valid() ? whRenderComponent->GetRenderBuffer() : std::weak_ptr<prosper::IBuffer>{};
 	auto *pRenderDescSet = whRenderComponent.valid() ? whRenderComponent->GetRenderDescriptorSet() : nullptr;
-	if(wpRenderBuffer.expired() == true || m_vertexAnimationBuffer != nullptr || mdl == nullptr || pRenderDescSet == nullptr)
+	if(wpRenderBuffer.expired() == true || mdl == nullptr || pRenderDescSet == nullptr)
 		return;
-	auto &vertAnimations = mdl->GetVertexAnimations();
-	m_maxVertexAnimations = 0u;
-	for(auto &va : vertAnimations)
-		m_maxVertexAnimations += va->GetMeshAnimations().size();
-	if(m_maxVertexAnimations == 0u)
-		return;
-	// m_maxVertexAnimations = 500u;
-	prosper::util::BufferCreateInfo createInfo {};
-	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit | prosper::BufferUsageFlags::TransferDstBit;
-	createInfo.size = m_maxVertexAnimations *sizeof(VertexAnimationData);
-	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
-	m_vertexAnimationBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo);
+	if(m_vertexAnimationBuffer == nullptr)
+	{
+		auto &vertAnimations = mdl->GetVertexAnimations();
+		m_maxVertexAnimations = 0u;
+		for(auto &va : vertAnimations)
+			m_maxVertexAnimations += va->GetMeshAnimations().size();
+		if(m_maxVertexAnimations == 0u)
+			return;
+		// m_maxVertexAnimations = 500u;
+		prosper::util::BufferCreateInfo createInfo {};
+		createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit | prosper::BufferUsageFlags::TransferDstBit;
+		createInfo.size = m_maxVertexAnimations *sizeof(VertexAnimationData);
+		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
+		m_vertexAnimationBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo);
+	}
 
 	auto &vertAnimBuffer = static_cast<CModel&>(*mdl).GetVertexAnimationBuffer();
 	pRenderDescSet->SetBindingStorageBuffer(*m_vertexAnimationBuffer,umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::VertexAnimationFrameData));

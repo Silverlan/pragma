@@ -55,18 +55,17 @@ std::vector<pragma::CParticleSystemComponent*> &SceneRenderDesc::GetCulledPartic
 const pragma::OcclusionCullingHandler &SceneRenderDesc::GetOcclusionCullingHandler() const {return const_cast<SceneRenderDesc*>(this)->GetOcclusionCullingHandler();}
 pragma::OcclusionCullingHandler &SceneRenderDesc::GetOcclusionCullingHandler() {return *m_occlusionCullingHandler;}
 void SceneRenderDesc::SetOcclusionCullingHandler(const std::shared_ptr<pragma::OcclusionCullingHandler> &handler) {m_occlusionCullingHandler = handler;}
-void SceneRenderDesc::ReloadOcclusionCullingHandler()
+void SceneRenderDesc::SetOcclusionCullingMethod(OcclusionCullingMethod method)
 {
-	auto occlusionCullingMode = c_game->GetConVarInt("cl_render_occlusion_culling");
-	switch(occlusionCullingMode)
+	switch(method)
 	{
-	case 1: /* Brute-force */
+	case OcclusionCullingMethod::BruteForce: /* Brute-force */
 		m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerBruteForce>();
 		break;
-	case 2: /* CHC++ */
+	case OcclusionCullingMethod::CHCPP: /* CHC++ */
 		m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerCHC>();
 		break;
-	case 4: /* BSP */
+	case OcclusionCullingMethod::BSP: /* BSP */
 	{
 		auto *world = c_game->GetWorld();
 		if(world)
@@ -81,15 +80,20 @@ void SceneRenderDesc::ReloadOcclusionCullingHandler()
 			}
 		}
 	}
-	case 3: /* Octtree */
+	case OcclusionCullingMethod::Octree: /* Octtree */
 		m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerOctTree>();
 		break;
-	case 0: /* Off */
+	case OcclusionCullingMethod::Inert: /* Off */
 	default:
 		m_occlusionCullingHandler = std::make_shared<pragma::OcclusionCullingHandlerInert>();
 		break;
 	}
 	m_occlusionCullingHandler->Initialize();
+}
+void SceneRenderDesc::ReloadOcclusionCullingHandler()
+{
+	auto occlusionCullingMode = static_cast<OcclusionCullingMethod>(c_game->GetConVarInt("cl_render_occlusion_culling"));
+	SetOcclusionCullingMethod(occlusionCullingMode);
 }
 
 static auto cvDrawGlow = GetClientConVar("render_draw_glow");

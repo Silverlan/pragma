@@ -352,6 +352,11 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defCEye];
 
 	auto defCScene = luabind::class_<CSceneHandle,BaseEntityComponentHandle>("SceneComponent");
+	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_BRUTE_FORCE",umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::BruteForce));
+	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_CHC_PLUSPLUS",umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::CHCPP));
+	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_BSP",umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::BSP));
+	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_OCTREE",umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::Octree));
+	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_INERT",umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::Inert));
 	defCScene.add_static_constant("EVENT_ON_ACTIVE_CAMERA_CHANGED",pragma::CSceneComponent::CSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED);
 	defCScene.add_static_constant("DEBUG_MODE_NONE",umath::to_integral(pragma::CSceneComponent::DebugMode::None));
 	defCScene.add_static_constant("DEBUG_MODE_AMBIENT_OCCLUSION",umath::to_integral(pragma::CSceneComponent::DebugMode::AmbientOcclusion));
@@ -370,6 +375,10 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,scene);
 		pragma::Lua::check_component(l,hCam);
 		scene->SetActiveCamera(*hCam);
+	}));
+	defCScene.def("SetOcclusionCullingMethod",static_cast<void(*)(lua_State*,CSceneHandle&,uint32_t)>([](lua_State *l,CSceneHandle &scene,uint32_t method) {
+		pragma::Lua::check_component(l,scene);
+		scene->GetSceneRenderDesc().SetOcclusionCullingMethod(static_cast<SceneRenderDesc::OcclusionCullingMethod>(method));
 	}));
 	defCScene.def("GetWidth",&Lua::Scene::GetWidth);
 	defCScene.def("GetHeight",&Lua::Scene::GetHeight);

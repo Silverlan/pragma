@@ -30,11 +30,20 @@ namespace pragma
 class DLLCLIENT SceneRenderDesc
 {
 public:
+	enum class OcclusionCullingMethod : uint8_t
+	{
+		BruteForce = 0,
+		CHCPP,
+		BSP,
+		Octree,
+		Inert
+	};
 	SceneRenderDesc(pragma::CSceneComponent &scene);
 	~SceneRenderDesc();
 	const pragma::OcclusionCullingHandler &GetOcclusionCullingHandler() const;
 	pragma::OcclusionCullingHandler &GetOcclusionCullingHandler();
 	void SetOcclusionCullingHandler(const std::shared_ptr<pragma::OcclusionCullingHandler> &handler);
+	void SetOcclusionCullingMethod(OcclusionCullingMethod method);
 	void ReloadOcclusionCullingHandler();
 	void PrepareRendering(pragma::CSceneComponent &scene,RenderMode mode,FRender renderFlags,bool bUpdateTranslucentMeshes=false,bool bUpdateGlowMeshes=false);
 

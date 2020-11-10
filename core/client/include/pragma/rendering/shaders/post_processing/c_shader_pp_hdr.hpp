@@ -9,6 +9,7 @@
 #define __C_SHADER_PP_HDR_HPP__
 
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_base.hpp"
+#include "pragma/rendering/c_settings.hpp"
 
 namespace pragma
 {
@@ -41,7 +42,7 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderPPHDR(prosper::IPrContext &context,const std::string &identifier);
-		bool Draw(prosper::IDescriptorSet &descSetTexture,float exposure,float bloomScale,float glowScale,bool flipVertically=false);
+		bool Draw(prosper::IDescriptorSet &descSetTexture,pragma::rendering::ToneMapping toneMapping,float exposure,float bloomScale,float glowScale,bool flipVertically=false);
 	protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;

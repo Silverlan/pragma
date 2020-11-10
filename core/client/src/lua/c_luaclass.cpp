@@ -633,6 +633,9 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defShaderImageProcessing.add_static_constant("DESCRIPTOR_SET_TEXTURE",0);
 	defShaderImageProcessing.add_static_constant("DESCRIPTOR_SET_TEXTURE_BINDING_TEXTURE",0);
 	defShaderImageProcessing.def(luabind::constructor<>());
+	defShaderImageProcessing.def("RecordDraw",static_cast<bool(*)(lua_State*,pragma::LuaShaderImageProcessing&,prosper::IDescriptorSetGroup&)>([](lua_State *l,pragma::LuaShaderImageProcessing &shader,prosper::IDescriptorSetGroup &dsg) -> bool {
+		return shader.Draw(*dsg.GetDescriptorSet());
+	}));
 	modShader[defShaderImageProcessing];
 
 	auto defShaderTextured3DBase = luabind::class_<pragma::LuaShaderTextured3D,luabind::bases<pragma::LuaShaderGraphicsBase,pragma::ShaderTextured3DBase,prosper::ShaderGraphics,prosper::Shader,pragma::LuaShaderBase>>("BaseTexturedLit3D");
@@ -680,9 +683,25 @@ void CGame::RegisterLuaClasses()
 	defDrawSceneInfo.def(luabind::constructor<>());
 	defDrawSceneInfo.property("scene",static_cast<luabind::object(*)(::util::DrawSceneInfo&)>([](::util::DrawSceneInfo &drawSceneInfo) -> luabind::object {
 		return drawSceneInfo.scene.valid() ? drawSceneInfo.scene->GetLuaObject() : luabind::object{};
-	}),static_cast<void(*)(lua_State*,::util::DrawSceneInfo&,CSceneHandle&)>([](lua_State *l,::util::DrawSceneInfo &drawSceneInfo,CSceneHandle &scene) {
+	}),static_cast<void(*)(lua_State*,::util::DrawSceneInfo&,luabind::object)>([](lua_State *l,::util::DrawSceneInfo &drawSceneInfo,luabind::object o) {
+		if(Lua::IsSet(l,2) == false)
+		{
+			drawSceneInfo.scene = {};
+			return;
+		}
+		auto &scene = Lua::Check<CSceneHandle>(l,2);
 		pragma::Lua::check_component(l,scene);
 		drawSceneInfo.scene = scene->GetHandle<pragma::CSceneComponent>();
+	}));
+	defDrawSceneInfo.property("toneMapping",static_cast<luabind::object(*)(lua_State*,::util::DrawSceneInfo&)>([](lua_State *l,::util::DrawSceneInfo &drawSceneInfo) -> luabind::object {
+		return drawSceneInfo.toneMapping.has_value() ? luabind::object{l,umath::to_integral(*drawSceneInfo.toneMapping)} : luabind::object{};
+	}),static_cast<void(*)(lua_State*,::util::DrawSceneInfo&,luabind::object)>([](lua_State *l,::util::DrawSceneInfo &drawSceneInfo,luabind::object o) {
+		if(Lua::IsSet(l,2) == false)
+		{
+			drawSceneInfo.toneMapping = {};
+			return;
+		}
+		drawSceneInfo.toneMapping = static_cast<pragma::rendering::ToneMapping>(Lua::CheckInt(l,2));
 	}));
 	defDrawSceneInfo.property("commandBuffer",static_cast<std::shared_ptr<Lua::Vulkan::CommandBuffer>(*)(::util::DrawSceneInfo&)>([](::util::DrawSceneInfo &drawSceneInfo) -> std::shared_ptr<Lua::Vulkan::CommandBuffer> {
 		return drawSceneInfo.commandBuffer;

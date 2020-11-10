@@ -8,7 +8,6 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/c_settings.hpp"
-#include "pragma/console/c_cvar.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <pragma/console/convars.h>
 #include <prosper_util.hpp>
@@ -57,19 +56,8 @@ void ShaderPPHDR::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
 }
 
-static auto cvToneMapping = GetClientConVar("cl_render_tone_mapping");
-bool ShaderPPHDR::Draw(prosper::IDescriptorSet &descSetTexture,float exposure,float bloomScale,float glowScale,bool flipVertically)
+bool ShaderPPHDR::Draw(prosper::IDescriptorSet &descSetTexture,pragma::rendering::ToneMapping toneMapping,float exposure,float bloomScale,float glowScale,bool flipVertically)
 {
-	auto toneMapping = rendering::ToneMapping::Reinhard;
-	auto toneMappingCvarVal = cvToneMapping->GetInt();
-	switch(toneMappingCvarVal)
-	{
-	case -1:
-		break;
-	default:
-		toneMapping = static_cast<rendering::ToneMapping>(toneMappingCvarVal +1);
-		break;
-	}
 	return RecordPushConstants(PushConstants{exposure,bloomScale,glowScale,toneMapping,flipVertically ? 1u : 0u}) &&
 		ShaderPPBase::Draw(descSetTexture) == true;
 }

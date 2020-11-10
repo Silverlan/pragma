@@ -232,6 +232,12 @@ void Lua::Model::register_class(
 			return;
 		Lua::Push<Material*>(l,mat);
 	}));
+	classDef.def("GetMaterialIndex",static_cast<void(*)(lua_State*,::Model&,::ModelSubMesh&,uint32_t)>([](lua_State *l,::Model &mdl,::ModelSubMesh &mesh,uint32_t skinId) {
+		auto idx = mdl.GetMaterialIndex(mesh,skinId);
+		if(idx.has_value() == false)
+			return;
+		Lua::PushInt(l,*idx);
+	}));
 	classDef.def("GetMaterialCount",&Lua::Model::GetMaterialCount);
 	classDef.def("GetMeshGroupCount",&Lua::Model::GetMeshGroupCount);
 	classDef.def("GetMeshCount",&Lua::Model::GetMeshCount);

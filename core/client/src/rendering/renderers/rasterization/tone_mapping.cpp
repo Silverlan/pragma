@@ -10,6 +10,7 @@
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/game/c_game.h"
+#include "pragma/console/c_cvar.h"
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_render_target.hpp>
@@ -18,6 +19,7 @@ using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
 
+static auto cvToneMapping = GetClientConVar("cl_render_tone_mapping");
 void RasterizationRenderer::RenderToneMapping(const util::DrawSceneInfo &drawSceneInfo,prosper::IDescriptorSet &descSetHdrResolve)
 {
 	auto hShaderTonemapping = c_game->GetGameShader(CGame::GameShader::PPTonemapping);
@@ -44,7 +46,25 @@ void RasterizationRenderer::RenderToneMapping(const util::DrawSceneInfo &drawSce
 		{
 			const float bloomAdditiveScale = 0.5f;
 			auto glowScale = (GetGlowInfo().bGlowScheduled == true) ? 1.f : 0.f;
-			shaderPPHdr.Draw(descSetHdrResolve,GetHDRExposure(),bloomAdditiveScale,glowScale,drawSceneInfo.flipVertically);
+
+			rendering::ToneMapping toneMapping;
+			if(drawSceneInfo.toneMapping.has_value())
+				toneMapping = *drawSceneInfo.toneMapping;
+			else
+			{
+				toneMapping = rendering::ToneMapping::Reinhard;
+				auto toneMappingCvarVal = cvToneMapping->GetInt();
+				switch(toneMappingCvarVal)
+				{
+				case -1:
+					break;
+				default:
+					toneMapping = static_cast<rendering::ToneMapping>(toneMappingCvarVal +1);
+					break;
+				}
+			}
+
+			shaderPPHdr.Draw(descSetHdrResolve,toneMapping,GetHDRExposure(),bloomAdditiveScale,glowScale,drawSceneInfo.flipVertically);
 			shaderPPHdr.EndDraw();
 		}
 		drawCmd->RecordEndRenderPass();

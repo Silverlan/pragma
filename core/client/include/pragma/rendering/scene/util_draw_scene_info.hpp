@@ -9,6 +9,7 @@
 #define __UTIL_DRAW_SCENE_INFO_HPP__
 
 #include "pragma/rendering/c_renderflags.h"
+#include "pragma/rendering/c_settings.hpp"
 #include <memory>
 #include <optional>
 #include <functional>
@@ -26,6 +27,7 @@ namespace util
 		std::shared_ptr<prosper::RenderTarget> renderTarget = nullptr;
 		FRender renderFlags = FRender::All;
 		std::optional<Color> clearColor = {};
+		std::optional<::pragma::rendering::ToneMapping> toneMapping {};
 		
 		std::function<bool(CBaseEntity&)> prepassFilter = nullptr;
 		std::function<bool(CBaseEntity&)> renderFilter = nullptr;

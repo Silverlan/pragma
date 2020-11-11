@@ -70,12 +70,32 @@ void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 		luabind::def("get_script_path",Lua::global::get_script_path)
 	];
 	lua_register(lua.GetState(),"toboolean",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		if(Lua::IsBool(l,1))
+		{
+			Lua::PushBool(l,Lua::CheckBool(l,1));
+			return 1;
+		}
+		if(Lua::IsNumber(l,1))
+		{
+			Lua::PushBool(l,Lua::CheckNumber(l,1) != 0.f);
+			return 1;
+		}
 		std::string v = Lua::CheckString(l,1);
 		auto b = util::to_boolean(v);
 		Lua::PushBool(l,b);
 		return 1;
 	}));
 	lua_register(lua.GetState(),"toint",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		if(Lua::IsBool(l,1))
+		{
+			Lua::PushInt(l,Lua::CheckBool(l,1) ? 1 : 0);
+			return 1;
+		}
+		if(Lua::IsNumber(l,1))
+		{
+			Lua::PushInt(l,umath::round(Lua::CheckNumber(l,1)));
+			return 1;
+		}
 		std::string v = Lua::CheckString(l,1);
 		auto i = util::to_int(v);
 		Lua::PushInt(l,i);

@@ -174,6 +174,8 @@ template<class T>
 		m_dbgObjects.push_back(o);
 #endif
 	}
+	else
+		return; // Object already exists in tree
 	auto &nodes = it->second;
 	Vector3 min,max;
 	GetObjectBounds(o,min,max);

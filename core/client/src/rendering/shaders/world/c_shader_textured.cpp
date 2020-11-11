@@ -403,6 +403,8 @@ bool ShaderTextured3DBase::Draw(CModelSubMesh &mesh)
 	umath::set_flag(renderFlags,RenderFlags::UseExtendedVertexWeights,mesh.GetExtendedVertexWeights().empty() == false);
 	if(umath::is_flag_set(m_stateFlags,StateFlags::RenderAs3DSky))
 		umath::set_flag(renderFlags,RenderFlags::Is3DSky);
+	if(umath::is_flag_set(m_stateFlags,StateFlags::DisableShadows))
+		umath::set_flag(renderFlags,RenderFlags::DisableShadows);
 	UpdateRenderFlags(mesh,renderFlags);
 	return RecordPushConstants(renderFlags,offsetof(ShaderTextured3DBase::PushConstants,flags)) && ShaderEntity::Draw(mesh);
 }

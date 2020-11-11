@@ -27,7 +27,7 @@
 
 REGISTER_SHARED_CONVAR(sv_cheats,"0",ConVarFlags::Replicated | ConVarFlags::Notify,"Allows clients to run console commands which are marked as cheats if set to 1.");
 REGISTER_SHARED_CONVAR(sv_player_air_move_scale,"0.05",ConVarFlags::Replicated | ConVarFlags::Archive,"The scale at which players are still able to move while in the air. 0 = Players can't move until they've landed, 1 = Players can move freely while in the air");
-REGISTER_SHARED_CONVAR(sv_noclip_speed,"50",ConVarFlags::Replicated | ConVarFlags::Archive,"The speed at which players can move in noclip mode.");
+REGISTER_SHARED_CONVAR(sv_noclip_speed,"200",ConVarFlags::Replicated | ConVarFlags::Archive,"The speed at which players can move in noclip mode.");
 REGISTER_SHARED_CONVAR(sv_allowcslua,"1",ConVarFlags::Replicated | ConVarFlags::Notify | ConVarFlags::Archive,"1 = Clients can run own clientside scripts, 0 = Custom clientside scripts aren't allowed.");
 REGISTER_SHARED_CONVAR(host_timescale,"1",ConVarFlags::Replicated | ConVarFlags::Notify,"Specifies the timescale. A value of 2 means the game will run at twice the default speed.");
 REGISTER_SHARED_CONVAR(sv_gravity,"0 -600 0",ConVarFlags::Replicated | ConVarFlags::Notify,"Specifies the default gravity force and direction. Certain entities may overwrite this for themselves.");

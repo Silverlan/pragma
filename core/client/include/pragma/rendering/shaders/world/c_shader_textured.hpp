@@ -123,7 +123,8 @@ namespace pragma
 
 			TranslucencyEnabled = NoIBL<<1u,
 			UseExtendedVertexWeights = TranslucencyEnabled<<1u,
-			Is3DSky = UseExtendedVertexWeights<<1u
+			Is3DSky = UseExtendedVertexWeights<<1u,
+			DisableShadows = Is3DSky<<1u
 		};
 
 		struct PushConstants

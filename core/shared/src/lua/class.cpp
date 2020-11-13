@@ -518,6 +518,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defDataBlock.def("GetString",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::GetString));
 	defDataBlock.def("GetColor",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::GetColor));
 	defDataBlock.def("GetVector",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::GetVector));
+	defDataBlock.def("GetVector2",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::GetVector2));
 	defDataBlock.def("GetVector4",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::GetVector4));
 
 	defDataBlock.def("GetInt",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,int32_t)>(&Lua::DataBlock::GetInt));
@@ -526,6 +527,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defDataBlock.def("GetString",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,const std::string&)>(&Lua::DataBlock::GetString));
 	defDataBlock.def("GetColor",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,const Color&)>(&Lua::DataBlock::GetColor));
 	defDataBlock.def("GetVector",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,const Vector3&)>(&Lua::DataBlock::GetVector));
+	defDataBlock.def("GetVector2",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,const ::Vector2&)>(&Lua::DataBlock::GetVector2));
 	defDataBlock.def("GetVector4",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,const Vector4&)>(&Lua::DataBlock::GetVector4));
 
 	defDataBlock.def("GetData",&Lua::DataBlock::GetData);

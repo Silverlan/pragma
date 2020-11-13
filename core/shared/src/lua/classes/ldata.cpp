@@ -42,6 +42,7 @@ void Lua::DataBlock::GetBool(lua_State *l,ds::Block &data,const std::string &val
 void Lua::DataBlock::GetString(lua_State *l,ds::Block &data,const std::string &val,const std::string &default) {Lua::PushString(l,data.GetString(val,default));}
 void Lua::DataBlock::GetColor(lua_State *l,ds::Block &data,const std::string &val,const Color &default) {Lua::Push<Color>(l,data.GetColor(val,default));}
 void Lua::DataBlock::GetVector(lua_State *l,ds::Block &data,const std::string &val,const Vector3 &default) {Lua::Push<Vector3>(l,data.GetVector3(val,default));}
+void Lua::DataBlock::GetVector2(lua_State *l,ds::Block &data,const std::string &val,const Vector2 &default) {Lua::Push<Vector2>(l,data.GetVector2(val,default));}
 void Lua::DataBlock::GetVector4(lua_State *l,ds::Block &data,const std::string &val,const ::Vector4 &default) {Lua::Push<Vector4>(l,data.GetVector4(val,default));}
 void Lua::DataBlock::GetInt(lua_State *l,ds::Block &data,const std::string &val) {Lua::PushInt(l,data.GetInt(val));}
 void Lua::DataBlock::GetFloat(lua_State *l,ds::Block &data,const std::string &val) {Lua::PushNumber(l,data.GetFloat(val));}
@@ -49,6 +50,7 @@ void Lua::DataBlock::GetBool(lua_State *l,ds::Block &data,const std::string &val
 void Lua::DataBlock::GetString(lua_State *l,ds::Block &data,const std::string &val) {Lua::PushString(l,data.GetString(val));}
 void Lua::DataBlock::GetColor(lua_State *l,ds::Block &data,const std::string &val) {Lua::Push<Color>(l,data.GetColor(val));}
 void Lua::DataBlock::GetVector(lua_State *l,ds::Block &data,const std::string &val) {Lua::Push<Vector3>(l,data.GetVector3(val));}
+void Lua::DataBlock::GetVector2(lua_State *l,ds::Block &data,const std::string &val) {Lua::Push<Vector2>(l,data.GetVector2(val));}
 void Lua::DataBlock::GetVector4(lua_State *l,ds::Block &data,const std::string &val) {Lua::Push<Vector4>(l,data.GetVector4(val));}
 
 void Lua::DataBlock::GetData(lua_State *l,ds::Block &data,const std::string &val)

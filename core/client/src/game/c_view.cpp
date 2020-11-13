@@ -24,7 +24,7 @@ static CVar cvSpeed = GetClientConVar("cl_mouse_sensitivity");
 static CVar cvAcceleration = GetClientConVar("cl_mouse_acceleration");
 static CVar cvYaw = GetClientConVar("cl_mouse_yaw");
 static CVar cvPitch = GetClientConVar("cl_mouse_pitch");
-
+#pragma optimize("",off)
 void CGame::CalcLocalPlayerOrientation()
 {
 	auto *pl = GetLocalPlayer();
@@ -49,9 +49,11 @@ void CGame::CalcLocalPlayerOrientation()
 	if(window.IsFocused() && WGUI::GetInstance().GetFocusedElement() == nullptr)
 	{
 		auto pos = window.GetCursorPos();
-		window.SetCursorPos(Vector2i(w /2,h /2));
+		window.SetCursorPos(Vector2i(umath::round(w /2.f),umath::round(h /2.f)));
 		wDelta = pos.x -w /2.f;
 		hDelta = pos.y -h /2.f;
+		if((h %2) != 0)
+			hDelta -= 0.5f;
 	}
 	else
 	{
@@ -183,3 +185,4 @@ void CGame::CalcView()
 	cam->GetEntity().SetRotation(orientation);
 	cam->UpdateViewMatrix();
 }
+#pragma optimize("",on)

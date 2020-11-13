@@ -30,6 +30,7 @@ namespace Lua
 		DLLNETWORK void GetString(lua_State *l,ds::Block &data,const std::string &val);
 		DLLNETWORK void GetColor(lua_State *l,ds::Block &data,const std::string &key);
 		DLLNETWORK void GetVector(lua_State *l,ds::Block &data,const std::string &key);
+		DLLNETWORK void GetVector2(lua_State *l,ds::Block &data,const std::string &key);
 		DLLNETWORK void GetVector4(lua_State *l,ds::Block &data,const std::string &key);
 
 		DLLNETWORK void GetInt(lua_State *l,ds::Block &data,const std::string &val,int32_t default);
@@ -38,6 +39,7 @@ namespace Lua
 		DLLNETWORK void GetString(lua_State *l,ds::Block &data,const std::string &val,const std::string &default);
 		DLLNETWORK void GetColor(lua_State *l,ds::Block &data,const std::string &key,const Color &default);
 		DLLNETWORK void GetVector(lua_State *l,ds::Block &data,const std::string &key,const Vector3 &default);
+		DLLNETWORK void GetVector2(lua_State *l,ds::Block &data,const std::string &key,const ::Vector2 &default);
 		DLLNETWORK void GetVector4(lua_State *l,ds::Block &data,const std::string &key,const ::Vector4 &default);
 
 		DLLNETWORK void GetData(lua_State *l,ds::Block &data,const std::string &val);

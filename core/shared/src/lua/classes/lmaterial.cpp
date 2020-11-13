@@ -10,6 +10,7 @@
 #include "pragma/lua/libraries/lfile.h"
 #include "luasystem.h"
 #include "material.h"
+#include <detail_mode.hpp>
 #include <sharedutils/alpha_mode.hpp>
 #include <sharedutils/util_shaderinfo.hpp>
 
@@ -19,6 +20,23 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 	classDef.add_static_constant("ALPHA_MODE_OPAQUE",umath::to_integral(::AlphaMode::Opaque));
 	classDef.add_static_constant("ALPHA_MODE_MASK",umath::to_integral(::AlphaMode::Mask));
 	classDef.add_static_constant("ALPHA_MODE_BLEND",umath::to_integral(::AlphaMode::Blend));
+	classDef.add_static_constant("DETAIL_BLEND_MODE_DECAL_MODULATE",umath::to_integral(msys::DetailMode::DecalModulate));
+	classDef.add_static_constant("DETAIL_BLEND_MODE_ADDITIVE",umath::to_integral(msys::DetailMode::Additive));
+	classDef.add_static_constant("DETAIL_BLEND_MODE_TRANSLUCENT_DETAIL",umath::to_integral(msys::DetailMode::TranslucentDetail));
+	classDef.add_static_constant("DETAIL_BLEND_MODE_BLEND_FACTOR_FADE",umath::to_integral(msys::DetailMode::BlendFactorFade));
+	classDef.add_static_constant("DETAIL_BLEND_MODE_TRANSLUCENT_BASE",umath::to_integral(msys::DetailMode::TranslucentBase));
+	classDef.add_static_constant("DETAIL_BLEND_MODE_UNLIT_ADDITIVE",umath::to_integral(msys::DetailMode::UnlitAdditive));
+	classDef.add_static_constant("DETAIL_BLEND_MODE_UNLIT_ADDITIVE_THRESHOLD_FADE",umath::to_integral(msys::DetailMode::UnlitAdditiveThresholdFade));
+	classDef.add_static_constant("DETAIL_BLEND_MODE_TWO_PATTERN_DECAL_MODULATE",umath::to_integral(msys::DetailMode::TwoPatternDecalModulate));
+	classDef.add_static_constant("DETAIL_BLEND_MODE_MULTIPLY",umath::to_integral(msys::DetailMode::Multiply));
+	classDef.add_static_constant("DETAIL_BLEND_MODE_BASE_MASK_VIA_DETAIL_ALPHA",umath::to_integral(msys::DetailMode::BaseMaskViaDetailAlpha));
+	classDef.add_static_constant("DETAIL_BLEND_MODE_SELF_SHADOWED_BUMPMAP",umath::to_integral(msys::DetailMode::SelfShadowedBumpmap));
+	classDef.add_static_constant("DETAIL_BLEND_MODE_SSBUMP_ALBEDO",umath::to_integral(msys::DetailMode::SSBumpAlbedo));
+	classDef.add_static_constant("DETAIL_BLEND_MODE_COUNT",umath::to_integral(msys::DetailMode::Count));
+	classDef.add_static_constant("DETAIL_BLEND_MODE_INVALID",umath::to_integral(msys::DetailMode::Invalid));
+	classDef.scope[luabind::def("detail_blend_mode_to_enum",static_cast<void(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &name) {
+		Lua::PushInt(l,umath::to_integral(msys::to_detail_mode(name)));
+	}))];
 	classDef.def("IsValid",&Lua::Material::IsValid);
 	classDef.def("GetShaderName",&Lua::Material::GetShaderName);
 	classDef.def("GetName",&Lua::Material::GetName);

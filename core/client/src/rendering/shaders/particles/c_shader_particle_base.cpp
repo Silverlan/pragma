@@ -125,12 +125,12 @@ void Console::commands::debug_particle_alpha_mode(NetworkState *state,pragma::Ba
 	if(argv.size() > 5)
 		g_customAlphaBlendMode.opAlpha = name_to_blend_op(argv.at(5));
 
-	for(auto &pair : c_engine->GetShaderManager().GetShaders())
+	for(auto &hShader : c_engine->GetShaderManager().GetShaders())
 	{
-		auto *ptShader = dynamic_cast<ShaderParticleBase*>(pair.second.get());
+		auto *ptShader = dynamic_cast<ShaderParticleBase*>(hShader.get());
 		if(ptShader == nullptr)
 			continue;
-		pair.second->ReloadPipelines();
+		hShader->ReloadPipelines();
 	}
 }
 

@@ -122,7 +122,7 @@ bool BrushMesh::IntersectAABB(const Vector3 &pos,const Vector3 &posNew,const Vec
 
 bool BrushMesh::IntersectAABB(Vector3 *min,Vector3 *max) const
 {
-	if(!Intersection::AABBAABB(m_min,m_max,*min,*max))
+	if(Intersection::AABBAABB(m_min,m_max,*min,*max) == Intersection::Intersect::Outside)
 		return false;
 	return true;
 }

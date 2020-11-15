@@ -67,5 +67,7 @@ REGISTER_CONVAR_CL(render_pp_nightvision_luminance_threshold,"0.2",ConVarFlags::
 REGISTER_CONVAR_CL(render_pp_nightvision_color_amplification,"4",ConVarFlags::Archive,"Amplification factor for pixels with low luminance.");
 REGISTER_CONVAR_CL(render_pp_nightvision_noise_texture,"effects/noise1",ConVarFlags::Archive,"Noise texture to use for the night vision post-processing effect.");
 
+REGISTER_CONVAR_CL(debug_occlusion_culling_freeze_camera,"0",ConVarFlags::None,"Freezes the current camera position in place for occlusion culling.");
+
 #endif
 #endif

@@ -19,6 +19,7 @@ namespace util
 		: public std::enable_shared_from_this<BSPTree>
 	{
 	public:
+		using ClusterIndex = uint16_t;
 		struct Node
 			: public std::enable_shared_from_this<Node>
 		{
@@ -37,7 +38,7 @@ namespace util
 			int32_t numFaces = 0u;
 
 			// Only valid if this is a leaf node
-			uint16_t cluster = std::numeric_limits<uint16_t>::max();
+			ClusterIndex cluster = std::numeric_limits<ClusterIndex>::max();
 			Vector3 minVisible = {}; // Min bounds encompassing entire visible area of this leaf
 			Vector3 maxVisible = {}; // Max bounds encompassing entire visible area of this leaf
 
@@ -48,7 +49,7 @@ namespace util
 		};
 		static std::shared_ptr<BSPTree> Create();
 		bool IsValid() const;
-		bool IsClusterVisible(uint16_t clusterSrc,uint16_t clusterDst) const;
+		bool IsClusterVisible(ClusterIndex clusterSrc,ClusterIndex clusterDst) const;
 		const Node &GetRootNode() const;
 		Node &GetRootNode();
 		const std::vector<std::shared_ptr<Node>> &GetNodes() const;

@@ -23,6 +23,7 @@ namespace pragma
 	public:
 		static ComponentEventId EVENT_ON_UPDATE_LOD;
 		static ComponentEventId EVENT_ON_UPDATE_LOD_BY_POS;
+		static ComponentEventId EVENT_ON_RENDER_MESHES_UPDATED;
 
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
@@ -48,6 +49,8 @@ namespace pragma
 		virtual void UpdateLOD(const Vector3 &posCam);
 		std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes();
 		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes() const;
+		std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes();
+		const std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes() const;
 		using BaseModelComponent::SetBodyGroup;
 		using BaseModelComponent::SetModel;
 		virtual bool SetBodyGroup(uint32_t groupId,uint32_t id) override;
@@ -60,6 +63,7 @@ namespace pragma
 		std::vector<MaterialHandle> m_materialOverrides = {};
 		uint8_t m_lod = 0u; // Current level of detail
 		std::vector<std::shared_ptr<ModelMesh>> m_lodMeshes;
+		std::vector<std::shared_ptr<ModelSubMesh>> m_renderMeshes;
 	};
 
 	// Events

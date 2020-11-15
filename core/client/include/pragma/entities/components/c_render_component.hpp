@@ -23,6 +23,7 @@ namespace pragma
 	class CModelComponent;
 	class CAnimatedComponent;
 	class CLightMapReceiverComponent;
+	using RenderMeshIndex = uint32_t;
 	class DLLCLIENT CRenderComponent final
 		: public BaseRenderComponent,
 		public CBaseNetComponent
@@ -56,6 +57,8 @@ namespace pragma
 
 		virtual void Initialize() override;
 		virtual ~CRenderComponent() override;
+		std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes();
+		const std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes() const;
 		std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes();
 		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes() const;
 

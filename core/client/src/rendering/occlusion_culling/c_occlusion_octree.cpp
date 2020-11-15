@@ -43,7 +43,7 @@ bool BaseOcclusionOctree::Node::IsContained(const Vector3 &min,const Vector3 &ma
 {
 	if(m_tree->IsSingleReferenceMode() == true)
 		return Intersection::AABBInAABB(min,max,m_worldBounds.first,m_worldBounds.second);
-	return (Intersection::AABBAABB(min,max,m_worldBounds.first,m_worldBounds.second) != INTERSECT_OUTSIDE) ? true : false;
+	return (Intersection::AABBAABB(min,max,m_worldBounds.first,m_worldBounds.second) != Intersection::Intersect::Outside) ? true : false;
 }
 
 bool BaseOcclusionOctree::Node::UpdateState(bool bForceUpdateParents)

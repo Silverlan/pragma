@@ -202,6 +202,8 @@ public:
 	CallbackHandle CallOnMaterialsLoaded(const std::function<void(void)> &f);
 	void GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups,std::vector<std::shared_ptr<ModelMesh>> &outMeshes) const;
 	void GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups,uint32_t lod,std::vector<std::shared_ptr<ModelMesh>> &outMeshes) const;
+	void GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups,std::vector<std::shared_ptr<ModelSubMesh>> &outMeshes) const;
+	void GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups,uint32_t lod,std::vector<std::shared_ptr<ModelSubMesh>> &outMeshes) const;
 	// Returns all existing meshes in this model (Including LOD meshes)
 	std::vector<std::shared_ptr<ModelMesh>> *GetMeshes(const std::string &meshGroup);
 	std::shared_ptr<ModelMeshGroup> GetMeshGroup(const std::string &meshGroup);
@@ -225,6 +227,7 @@ public:
 	// Returns true if the bodygroup exists and sets 'outMeshId' to the mesh Id. If the bodygroup mesh is none/blank, 'outMeshId' will be (unsigned int)(-1)
 	bool GetMesh(uint32_t bodyGroupId,uint32_t groupId,uint32_t &outMeshId);
 	void GetMeshes(const std::vector<uint32_t> &meshIds,std::vector<std::shared_ptr<ModelMesh>> &outMeshes);
+	void GetSubMeshes(const std::vector<uint32_t> &meshIds,std::vector<std::shared_ptr<ModelSubMesh>> &outMeshes);
 	//void GetWeights(std::vector<VertexWeight*> **weights);
 	static void ClearCache();
 	const std::string &GetName() const;

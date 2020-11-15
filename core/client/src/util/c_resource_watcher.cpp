@@ -79,13 +79,13 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 		};
 
 		// Iterate all materials and update the ones that use this texture
-		for(auto &pair : matManager.GetMaterials())
+		for(auto &hMat : matManager.GetMaterials())
 		{
-			if(pair.second.IsValid() == false)
+			if(hMat.IsValid() == false)
 				continue;
-			auto &data = pair.second.get()->GetDataBlock();
+			auto &data = hMat.get()->GetDataBlock();
 			if(data != nullptr)
-				fLookForTextureAndUpdate(*data,static_cast<CMaterial&>(*pair.second.get()));
+				fLookForTextureAndUpdate(*data,static_cast<CMaterial&>(*hMat.get()));
 		}
 	};
 	texManager.ReloadTexture(path,loadInfo);
@@ -113,9 +113,12 @@ void CResourceWatcherManager::OnResourceChanged(const std::string &path,const st
 		ustring::to_lower(canonShader);
 		auto &shaderManager = c_engine->GetShaderManager();
 		std::vector<std::string> reloadShaders;
-		for(auto &pair : shaderManager.GetShaders())
+		for(auto &pair : shaderManager.GetShaderNameToIndexTable())
 		{
-			for(auto &src : pair.second->GetSourceFilePaths())
+			auto *shader = shaderManager.GetShader(pair.second);
+			if(shader == nullptr)
+				continue;
+			for(auto &src : shader->GetSourceFilePaths())
 			{
 				auto fname = FileManager::GetCanonicalizedPath(src);
 				ufile::remove_extension_from_filename(fname);

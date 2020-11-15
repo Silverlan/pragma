@@ -1413,7 +1413,7 @@ void Game::RegisterLuaLibraries()
 
 	auto intersectMod = luabind::module(GetLuaState(),"intersect");
 	intersectMod[
-		luabind::def("aabb_with_aabb",static_cast<int(*)(const Vector3&,const Vector3&,const Vector3&,const Vector3&)>(Intersection::AABBAABB)),
+		luabind::def("aabb_with_aabb",static_cast<Intersection::Intersect(*)(const Vector3&,const Vector3&,const Vector3&,const Vector3&)>(Intersection::AABBAABB)),
 		luabind::def("sphere_with_sphere",Intersection::SphereSphere),
 		luabind::def("aabb_with_sphere",Intersection::AABBSphere),
 		luabind::def("line_with_aabb",Lua::intersect::line_aabb,luabind::meta::join<luabind::pure_out_value<6>,luabind::pure_out_value<7>,luabind::pure_out_value<8>>::type{}),

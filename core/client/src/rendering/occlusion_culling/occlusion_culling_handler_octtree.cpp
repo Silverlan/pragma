@@ -25,7 +25,7 @@ template<class T>
 	if(node.IsEmpty() == true)
 		return;
 	auto &nodeBounds = node.GetWorldBounds();
-	if(optFrustumPlanes && Intersection::AABBInPlaneMesh(nodeBounds.first,nodeBounds.second,*optFrustumPlanes) == INTERSECT_OUTSIDE)
+	if(optFrustumPlanes && Intersection::AABBInPlaneMesh(nodeBounds.first,nodeBounds.second,*optFrustumPlanes) == Intersection::Intersect::Outside)
 		return;
 	auto &objs = node.GetObjects();
 	for(auto &o : objs)

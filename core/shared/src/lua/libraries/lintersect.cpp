@@ -120,13 +120,13 @@ bool Lua::intersect::point_in_plane_mesh(lua_State *l,const Vector3 &vec,luabind
 int Lua::intersect::sphere_in_plane_mesh(lua_State *l,const Vector3 &vec,float r,luabind::table<> planeTable)
 {
 	auto planes = Lua::table_to_vector<Plane>(l,planeTable,3);
-	return Intersection::SphereInPlaneMesh(vec,r,planes);
+	return umath::to_integral(Intersection::SphereInPlaneMesh(vec,r,planes));
 }
 
 int Lua::intersect::aabb_in_plane_mesh(lua_State *l,const Vector3 &min,const Vector3 &max,luabind::table<> planeTable)
 {
 	auto planes = Lua::table_to_vector<Plane>(l,planeTable,3);
-	return Intersection::AABBInPlaneMesh(min,max,planes);
+	return umath::to_integral(Intersection::AABBInPlaneMesh(min,max,planes));
 }
 
 void Lua::intersect::line_triangle(lua_State *l,const Vector3 &lineOrigin,const Vector3 &lineDir,const Vector3 &v0,const Vector3 &v1,const Vector3 &v2,luabind::object &outT,luabind::object &outUv,bool cull)

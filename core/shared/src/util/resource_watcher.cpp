@@ -192,9 +192,8 @@ void ResourceWatcherManager::OnResourceChanged(const std::string &path,const std
 #endif
 		ReloadTexture(path);
 		auto &matManager = nw->GetMaterialManager();
-		for(auto &pair : matManager.GetMaterials()) // Find all materials which use this texture
+		for(auto &hMat : matManager.GetMaterials()) // Find all materials which use this texture
 		{
-			auto &hMat = pair.second;
 			if(hMat.IsValid() == false)
 				continue;
 			auto *mat = hMat.get();

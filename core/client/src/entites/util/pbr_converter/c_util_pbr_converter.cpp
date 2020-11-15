@@ -159,9 +159,8 @@ void CPBRConverterComponent::OnEntitySpawn()
 		ConvertToPBR(*mat);
 	}));
 
-	for(auto &pair : client->GetMaterialManager().GetMaterials())
+	for(auto &hMat : client->GetMaterialManager().GetMaterials())
 	{
-		auto &hMat = pair.second;
 		if(hMat.IsValid() == false || hMat.get()->IsLoaded() == false || ShouldConvertMaterial(static_cast<CMaterial&>(*hMat.get())) == false)
 			continue;
 		ConvertToPBR(static_cast<CMaterial&>(*hMat.get()));

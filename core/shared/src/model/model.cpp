@@ -231,6 +231,21 @@ void Model::GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups,uint32_t l
 	//const_cast<Model*>(this)->TranslateLODMeshes(lod,meshIds);
 	const_cast<Model*>(this)->GetMeshes(meshIds,outMeshes);
 }
+void Model::GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups,std::vector<std::shared_ptr<ModelSubMesh>> &outMeshes) const {return GetBodyGroupMeshes(bodyGroups,0,outMeshes);}
+void Model::GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups,uint32_t lod,std::vector<std::shared_ptr<ModelSubMesh>> &outMeshes) const
+{
+	auto meshIds = const_cast<Model*>(this)->GetBaseMeshes();
+	meshIds.reserve(meshIds.size() +m_bodyGroups.size());
+	for(auto i=decltype(bodyGroups.size()){0};i<bodyGroups.size();++i)
+	{
+		auto bg = bodyGroups[i];
+		auto meshGroupId = std::numeric_limits<uint32_t>::max();
+		if(const_cast<Model*>(this)->GetMesh(static_cast<uint32_t>(i),bg,meshGroupId) == true && meshGroupId != std::numeric_limits<uint32_t>::max())
+			meshIds.push_back(meshGroupId);
+	}
+	//const_cast<Model*>(this)->TranslateLODMeshes(lod,meshIds);
+	const_cast<Model*>(this)->GetSubMeshes(meshIds,outMeshes);
+}
 BodyGroup &Model::AddBodyGroup(const std::string &name)
 {
 	auto id = GetBodyGroupId(name);
@@ -887,6 +902,26 @@ void Model::GetMeshes(const std::vector<uint32_t> &meshIds,std::vector<std::shar
 		}
 	}
 }
+void Model::GetSubMeshes(const std::vector<uint32_t> &meshIds,std::vector<std::shared_ptr<ModelSubMesh>> &outMeshes)
+{
+	auto numGroups = m_meshGroups.size();
+	for(auto meshId : meshIds)
+	{
+		if(meshId < numGroups)
+		{
+			auto &group = m_meshGroups[meshId];
+			auto &groupMeshes = group->GetMeshes();
+			outMeshes.reserve(outMeshes.size() +groupMeshes.size());
+			for(auto it=groupMeshes.begin();it!=groupMeshes.end();++it)
+			{
+				auto &mesh = *it;
+				outMeshes.reserve(outMeshes.size() +mesh->GetSubMeshCount());
+				for(auto &subMesh : outMeshes)
+					outMeshes.push_back(subMesh);
+			}
+		}
+	}
+}
 void Model::SetCollisionBounds(const Vector3 &min,const Vector3 &max)
 {
 	m_collisionMin = min;
@@ -1014,7 +1049,7 @@ void Model::GetRenderBounds(Vector3 &min,Vector3 &max)
 
 bool Model::IntersectAABB(Vector3 &min,Vector3 &max)
 {
-	if(!Intersection::AABBAABB(m_collisionMin,m_collisionMax,min,max))
+	if(Intersection::AABBAABB(m_collisionMin,m_collisionMax,min,max) == Intersection::Intersect::Outside)
 		return false;
 	for(int i=0;i<m_collisionMeshes.size();i++)
 		if(m_collisionMeshes[i]->IntersectAABB(&min,&max))

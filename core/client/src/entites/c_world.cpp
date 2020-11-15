@@ -17,6 +17,8 @@
 #include "pragma/entities/components/c_bsp_component.hpp"
 #include "pragma/entities/components/c_light_map_component.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
+#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/rendering/render_queue.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <util_bsp.hpp>
 #include <buffers/prosper_buffer.hpp>
@@ -29,7 +31,7 @@ using namespace pragma;
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 void CWorldComponent::Initialize()
 {
 	BaseWorldComponent::Initialize();
@@ -53,6 +55,7 @@ void CWorldComponent::Initialize()
 				m_lodBaseMeshIds[pair.first] = true;
 		}
 		ReloadMeshCache();
+		UpdateRenderMeshes();
 	});
 	BindEventUnhandled(CPhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		Vector3 min {};
@@ -66,11 +69,10 @@ void CWorldComponent::Initialize()
 			pRenderComponent->SetRenderBounds(min,max);
 	});
 	BindEvent(CModelComponent::EVENT_ON_UPDATE_LOD,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		// World determines LOD meshes individually, so do nothing here
-		return util::EventReply::Handled;
+		BuildOfflineRenderQueues(true);
+		return util::EventReply::Handled; // No LODs for the world
 	});
 	BindEvent(CModelComponent::EVENT_ON_UPDATE_LOD_BY_POS,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		OnUpdateLOD(static_cast<CEOnUpdateLODByPos&>(evData.get()).posCam);
 		return util::EventReply::Handled;
 	});
 	BindEventUnhandled(CColorComponent::EVENT_ON_COLOR_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
@@ -85,6 +87,9 @@ void CWorldComponent::Initialize()
 		}
 		c_game->GetWorldEnvironment().SetAmbientColor(onColorChangedData.color.ToVector4());
 	});
+	//BindEventUnhandled(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	//	BuildOfflineRenderQueues(true);
+	//});
 	auto &ent = GetEntity();
 	ent.AddComponent<CBSPComponent>();
 	ent.AddComponent<CLightMapComponent>();
@@ -96,7 +101,11 @@ void CWorldComponent::ReloadCHCController()
 	m_chcController = std::make_shared<CHC>(*cam);
 	m_chcController->Reset(m_meshTree);*/ // prosper TODO
 }
-void CWorldComponent::SetBSPTree(const std::shared_ptr<util::BSPTree> &bspTree) {m_bspTree = bspTree;}
+void CWorldComponent::SetBSPTree(const std::shared_ptr<util::BSPTree> &bspTree)
+{
+	m_bspTree = bspTree;
+	BuildOfflineRenderQueues(false);
+}
 const std::shared_ptr<util::BSPTree> &CWorldComponent::GetBSPTree() const {return m_bspTree;}
 void CWorldComponent::ReloadMeshCache()
 {
@@ -127,7 +136,7 @@ void CWorldComponent::ReloadMeshCache()
 		ss<<subMesh.get()<<" ("<<subMesh->GetTriangleCount()<<" Tris, "<<subMesh->GetVertexCount()<<" Vertices)";
 		return ss.str();
 	});
-	OnUpdateLOD(Vector3{});
+	// OnUpdateLOD(Vector3{});
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(pRenderComponent.valid())
 	{
@@ -147,22 +156,111 @@ void CWorldComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 std::shared_ptr<OcclusionOctree<std::shared_ptr<ModelMesh>>> CWorldComponent::GetMeshTree() const {return m_meshTree;};
 std::shared_ptr<CHC> CWorldComponent::GetCHCController() const {return m_chcController;}
 
-void CWorldComponent::OnUpdateLOD(const Vector3 &posCam)
+const pragma::rendering::RenderQueue *CWorldComponent::GetClusterRenderQueue(util::BSPTree::ClusterIndex clusterIndex,bool translucent) const
+{
+	auto &queue = translucent ? m_clusterRenderTranslucentQueues : m_clusterRenderQueues;
+	return (clusterIndex < queue.size()) ? queue.at(clusterIndex).get() : nullptr;
+}
+void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
+{
+	auto &clusterRenderQueues = m_clusterRenderQueues;
+	auto &clusterRenderTranslucentQueues = m_clusterRenderTranslucentQueues;
+	if(rebuild == false && clusterRenderQueues.empty() == false)
+		return;
+	clusterRenderQueues.clear();
+	clusterRenderTranslucentQueues.clear();
+
+	auto &bspTree = GetBSPTree();
+	auto renderC = GetEntity().GetComponent<CRenderComponent>();
+	auto mdlC = GetEntity().GetComponent<CModelComponent>();
+	if(bspTree == nullptr || renderC.expired() || mdlC.expired())
+		return;
+	auto &renderMeshes = renderC->GetRenderMeshes();
+	auto numClusters = m_bspTree->GetClusterCount();
+
+	std::unordered_map<ModelSubMesh*,ModelMesh*> subMeshToMesh;
+	auto &mdl = mdlC->GetModel();
+	for(auto &meshGroup : mdl->GetMeshGroups())
+	{
+		for(auto &mesh : meshGroup->GetMeshes())
+		{
+			for(auto &subMesh : mesh->GetSubMeshes())
+				subMeshToMesh[subMesh.get()] = mesh.get();
+		}
+	}
+
+	std::vector<std::vector<RenderMeshIndex>> meshesPerClusters;
+	meshesPerClusters.resize(numClusters);
+	for(auto meshIdx=decltype(renderMeshes.size()){0u};meshIdx<renderMeshes.size();++meshIdx)
+	{
+		auto &subMesh = renderMeshes.at(meshIdx);
+		auto it = subMeshToMesh.find(subMesh.get());
+		if(it == subMeshToMesh.end())
+			continue;
+		auto *mesh = it->second;
+		auto meshClusterIdx = mesh->GetReferenceId();
+		if(meshClusterIdx == std::numeric_limits<uint32_t>::max())
+			continue;
+		for(auto clusterIdx=decltype(numClusters){0u};clusterIdx<numClusters;++clusterIdx)
+		{
+			if(m_bspTree->IsClusterVisible(clusterIdx,meshClusterIdx) == false)
+				continue;
+			auto &clusterMeshes = meshesPerClusters.at(clusterIdx);
+			if(clusterMeshes.size() == clusterMeshes.capacity())
+				clusterMeshes.reserve(clusterMeshes.size() *1.1 +100);
+			clusterMeshes.push_back(meshIdx);
+		}
+	}
+
+	clusterRenderQueues.reserve(numClusters);
+	clusterRenderTranslucentQueues.reserve(numClusters);
+	for(auto clusterIdx=decltype(meshesPerClusters.size()){0u};clusterIdx<meshesPerClusters.size();++clusterIdx)
+	{
+		clusterRenderQueues.push_back(pragma::rendering::RenderQueue::Create());
+		std::shared_ptr<pragma::rendering::RenderQueue> clusterRenderTranslucentQueue = nullptr;
+		auto &clusterRenderQueue = clusterRenderQueues.back();
+		auto &meshes = meshesPerClusters.at(clusterIdx);
+		for(auto subMeshIdx : meshes)
+		{
+			auto subMesh = renderMeshes.at(subMeshIdx);
+			auto *mat = mdlC->GetRenderMaterial(subMesh->GetSkinTextureIndex());
+			if(mat == nullptr)
+				continue;
+			auto hShader = mat->GetPrimaryShader();
+			if(hShader.expired())
+				continue;
+			auto *shader = dynamic_cast<pragma::ShaderTextured3DBase*>(hShader.get());
+			if(shader == nullptr)
+				continue;
+			if(mat->IsTranslucent())
+			{
+				clusterRenderTranslucentQueue = clusterRenderTranslucentQueue ? clusterRenderTranslucentQueue : pragma::rendering::RenderQueue::Create();
+				// TODO: Sort by distance: dist = cameraForward:DotProduct(origin)
+				clusterRenderTranslucentQueue->Add(static_cast<CBaseEntity&>(GetEntity()),subMeshIdx,*mat,*shader);
+				continue;
+			}
+			clusterRenderQueue->Add(static_cast<CBaseEntity&>(GetEntity()),subMeshIdx,*mat,*shader);
+		}
+		clusterRenderTranslucentQueues.push_back(clusterRenderTranslucentQueue);
+		clusterRenderQueue->Sort();
+		if(clusterRenderTranslucentQueue)
+			clusterRenderTranslucentQueue->Sort();
+	}
+}
+
+void CWorldComponent::UpdateRenderMeshes()
 {
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
-	auto *mdlComponent = static_cast<CModelComponent*>(ent.GetModelComponent().get());
-	mdlComponent->SetLOD(0);
-	auto &mdl = mdlComponent->GetModel();
-	if(mdl == nullptr)
-		return;
+	auto mdl = ent.GetModel();
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(pRenderComponent.expired())
+	if(mdl == nullptr || pRenderComponent.expired())
 		return;
-	auto pTrComponent = ent.GetTransformComponent();
-	auto &lodMeshes = pRenderComponent->GetLODMeshes();
-	lodMeshes.clear();
-	auto &pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
 	auto &baseMeshes = mdl->GetBaseMeshes();
+	auto &lodMeshes = pRenderComponent->GetLODMeshes();
+	auto &renderMeshes = pRenderComponent->GetRenderMeshes();
+	lodMeshes.clear();
+	renderMeshes.clear();
+	uint32_t numSubMeshes = 0;
 	for(auto id : baseMeshes)
 	{
 		auto it = m_lodBaseMeshIds.find(id);
@@ -172,7 +270,10 @@ void CWorldComponent::OnUpdateLOD(const Vector3 &posCam)
 			if(group != nullptr)
 			{
 				for(auto &mesh : group->GetMeshes())
+				{
 					lodMeshes.push_back(mesh);
+					numSubMeshes += mesh->GetSubMeshCount();
+				}
 			}
 			continue;
 		}
@@ -183,16 +284,7 @@ void CWorldComponent::OnUpdateLOD(const Vector3 &posCam)
 		if(meshes.empty())
 			continue;
 		auto &mesh = meshes.front();
-		Vector3 min,max;
-		mesh->GetBounds(min,max);
-		min += pos;
-		max += pos;
-		Vector3 aabbPos;
-		Geometry::ClosestPointOnAABBToPoint(min,max,posCam,&aabbPos);
-
-		auto dist = uvec::distance(posCam,aabbPos);
-		auto lod = CUInt32(dist /LOD_SWAP_DISTANCE);
-		auto *lodInfo = mdl->GetLODInfo(lod);
+		auto *lodInfo = mdl->GetLODInfo(0);
 		if(lodInfo != nullptr)
 		{
 			auto it = lodInfo->meshReplacements.find(id);
@@ -204,7 +296,16 @@ void CWorldComponent::OnUpdateLOD(const Vector3 &posCam)
 			}
 		}
 		for(auto &mesh : group->GetMeshes())
+		{
 			lodMeshes.push_back(mesh);
+			numSubMeshes += mesh->GetSubMeshCount();
+		}
+	}
+	renderMeshes.reserve(numSubMeshes);
+	for(auto &mesh : lodMeshes)
+	{
+		for(auto &subMesh : mesh->GetSubMeshes())
+			renderMeshes.push_back(subMesh);
 	}
 }
 luabind::object CWorldComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CWorldComponentHandleWrapper>(l);}
@@ -245,3 +346,4 @@ std::ostream& CWorld::print(std::ostream &os)
 	os<<"]";
 	return os;
 }
+#pragma optimize("",on)

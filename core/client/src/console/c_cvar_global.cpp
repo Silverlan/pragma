@@ -685,8 +685,7 @@ DLLCLIENT void CMD_shader_reload(NetworkState*,pragma::BasePlayerComponent*,std:
 	if(argv.empty())
 	{
 		auto &shaderManager = c_engine->GetShaderManager();
-		auto &shaders = shaderManager.GetShaders();
-		for(auto &pair : shaders)
+		for(auto &pair : shaderManager.GetShaderNameToIndexTable())
 		{
 			Con::cout<<"Reloading shader '"<<pair.first<<"'..."<<Con::endl;
 			c_engine->ReloadShader(pair.first);
@@ -703,8 +702,8 @@ void CMD_shader_list(NetworkState*,pragma::BasePlayerComponent*,std::vector<std:
 	std::vector<std::shared_ptr<prosper::Shader>> shaderList;
 	auto shaders = shaderManager.GetShaders();
 	shaderList.reserve(shaders.size());
-	for(auto &pair : shaders)
-		shaderList.push_back(pair.second);
+	for(auto &hShader : shaders)
+		shaderList.push_back(hShader);
 	std::sort(shaderList.begin(),shaderList.end(),[](const std::shared_ptr<prosper::Shader> &a,const std::shared_ptr<prosper::Shader> &b) {
 		return (a->GetIdentifier() < b->GetIdentifier()) ? true : false;
 	});

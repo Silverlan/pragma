@@ -60,7 +60,7 @@ void CLightPointComponent::Initialize()
 		for(auto i=decltype(directions.size()){0};i<directions.size();++i)
 		{
 			//auto &dir = directions[i];
-			if(Intersection::SphereInPlaneMesh(pTrComponent->GetPosition() +sphere.pos -this->GetEntity().GetPosition(),sphere.radius,m_frustumPlanes.at(i),true) != INTERSECT_OUTSIDE)
+			if(Intersection::SphereInPlaneMesh(pTrComponent->GetPosition() +sphere.pos -this->GetEntity().GetPosition(),sphere.radius,m_frustumPlanes.at(i),true) != Intersection::Intersect::Outside)
 				shouldPassData.renderFlags |= 1<<i;
 			//if(pLightComponent->IsInCone(shouldPassData.entity,dir,ang) == true)
 			//	shouldPassData.renderFlags |= 1<<i;

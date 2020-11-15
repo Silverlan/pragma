@@ -25,7 +25,8 @@ namespace pragma
 	class CParticleSystemComponent;
 	class COcclusionCullerComponent;
 	struct OcclusionMeshInfo;
-	namespace rendering {class BaseRenderer;};
+	using RenderMeshIndex = uint32_t;
+	namespace rendering {class RenderQueue; class BaseRenderer;};
 };
 class DLLCLIENT SceneRenderDesc
 {
@@ -38,6 +39,18 @@ public:
 		Octree,
 		Inert
 	};
+	enum class RenderQueueId : uint8_t
+	{
+		Skybox = 0u,
+		View,
+		ViewTranslucent,
+		World,
+		WorldTranslucent,
+		Water,
+
+		Invalid = std::numeric_limits<uint8_t>::max()
+	};
+	using WorldMeshVisibility = std::vector<bool>;
 	SceneRenderDesc(pragma::CSceneComponent &scene);
 	~SceneRenderDesc();
 	const pragma::OcclusionCullingHandler &GetOcclusionCullingHandler() const;
@@ -46,6 +59,9 @@ public:
 	void SetOcclusionCullingMethod(OcclusionCullingMethod method);
 	void ReloadOcclusionCullingHandler();
 	void PrepareRendering(pragma::CSceneComponent &scene,RenderMode mode,FRender renderFlags,bool bUpdateTranslucentMeshes=false,bool bUpdateGlowMeshes=false);
+	void BuildRenderQueue(pragma::CSceneComponent &scene,FRender renderFlags);
+
+	bool IsWorldMeshVisible(uint32_t worldRenderQueueIndex,pragma::RenderMeshIndex meshIdx) const;
 
 	// Culled objects
 	const std::vector<pragma::OcclusionMeshInfo> &GetCulledMeshes() const;
@@ -56,12 +72,28 @@ public:
 	pragma::rendering::RenderMeshCollectionHandler &GetRenderMeshCollectionHandler();
 	const pragma::rendering::RenderMeshCollectionHandler &GetRenderMeshCollectionHandler() const;
 
+	RenderQueueId GetRenderQueueId(RenderMode renderMode,bool translucent) const;
+	pragma::rendering::RenderQueue *GetRenderQueue(RenderMode renderMode,bool translucent);
+	const pragma::rendering::RenderQueue *GetRenderQueue(RenderMode renderMode,bool translucent) const;
+	const std::vector<std::shared_ptr<const pragma::rendering::RenderQueue>> &GetWorldRenderQueues() const;
 	void PerformOcclusionCulling();
 	void CollectRenderObjects(FRender renderFlags);
 	pragma::rendering::CulledMeshData *GetRenderInfo(RenderMode mode) const;
 private:
+	static bool ShouldConsiderEntity(CBaseEntity &ent,pragma::CSceneComponent &scene,FRender renderFlags);
+	static bool ShouldCull(CBaseEntity &ent,const std::vector<Plane> &frustumPlanes);
+	static bool ShouldCull(pragma::CRenderComponent &renderC,const std::vector<Plane> &frustumPlanes);
+	static bool ShouldCull(pragma::CRenderComponent &renderC,pragma::RenderMeshIndex meshIdx,const std::vector<Plane> &frustumPlanes);
+	void AddRenderMeshesToRenderQueue(pragma::CRenderComponent &renderC,const std::vector<Plane> *frustumPlanes=nullptr);
+	void CollectRenderMeshesFromOctree(const OcclusionOctree<CBaseEntity*> &tree,pragma::CSceneComponent &scene,FRender renderFlags,const std::vector<Plane> &frustumPlanes,const std::vector<util::BSPTree::Node*> *bspLeafNodes=nullptr);
+
 	std::shared_ptr<pragma::OcclusionCullingHandler> m_occlusionCullingHandler = nullptr;
 	pragma::rendering::RenderMeshCollectionHandler m_renderMeshCollectionHandler = {};
+
+	std::vector<WorldMeshVisibility> m_worldMeshVisibility;
+	std::array<std::shared_ptr<pragma::rendering::RenderQueue>,6> m_renderQueues;
+	std::vector<std::shared_ptr<const pragma::rendering::RenderQueue>> m_worldRenderQueues;
+
 	pragma::CSceneComponent &m_scene;
 };
 
@@ -112,6 +144,7 @@ namespace pragma
 		};
 
 		using SceneIndex = uint8_t;
+		using SceneFlags = uint32_t;
 		struct DLLCLIENT CreateInfo
 		{
 			CreateInfo();
@@ -120,8 +153,8 @@ namespace pragma
 
 		static CSceneComponent *Create(const CreateInfo &createInfo,CSceneComponent *optParent=nullptr);
 		static CSceneComponent *GetByIndex(SceneIndex sceneIndex);
-		static uint32_t GetSceneFlag(SceneIndex sceneIndex);
-		static SceneIndex GetSceneIndex(uint32_t flag);
+		static SceneFlags GetSceneFlag(SceneIndex sceneIndex);
+		static SceneIndex GetSceneIndex(SceneFlags flag);
 
 		CSceneComponent(BaseEntity &ent);
 		virtual void Initialize() override;

@@ -159,6 +159,8 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("OnPreRender",drawSceneInfo);
 	scene.GetSceneRenderDesc().CollectRenderObjects(drawSceneInfo.renderFlags);
 	c_game->CallLuaCallbacks<void,RasterizationRenderer*>("PrepareRendering",this);
+
+	scene.GetSceneRenderDesc().BuildRenderQueue(scene,drawSceneInfo.renderFlags);
 	
 	if(skipMode == 3)
 		return;

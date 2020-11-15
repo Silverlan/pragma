@@ -13,6 +13,9 @@
 void Lua::ModelDef::register_class(lua_State *l,luabind::module_ &entsMod)
 {
 	auto defCModel = luabind::class_<CModelHandle,BaseEntityComponentHandle>("ModelComponent");
+	defCModel.add_static_constant("EVENT_ON_UPDATE_LOD",pragma::CModelComponent::EVENT_ON_UPDATE_LOD);
+	defCModel.add_static_constant("EVENT_ON_UPDATE_LOD_BY_POS",pragma::CModelComponent::EVENT_ON_UPDATE_LOD_BY_POS);
+	defCModel.add_static_constant("EVENT_ON_RENDER_MESHES_UPDATED",pragma::CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED);
 	Lua::register_base_model_component_methods<luabind::class_<CModelHandle,BaseEntityComponentHandle>,CModelHandle>(l,defCModel);
 	defCModel.def("SetMaterialOverride",static_cast<void(*)(lua_State*,CModelHandle&,uint32_t,const std::string&)>([](lua_State *l,CModelHandle &hModel,uint32_t matIdx,const std::string &material) {
 		pragma::Lua::check_component(l,hModel);

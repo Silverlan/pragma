@@ -12,6 +12,7 @@
 #include "pragma/entities/c_baseentity.h"
 #include <pragma/entities/baseworld.h>
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree.hpp"
+#include <pragma/util/util_bsp_tree.hpp>
 #include <unordered_map>
 
 #pragma warning(push)
@@ -22,6 +23,7 @@ namespace util {class BSPTree;};
 class CHC;
 namespace pragma
 {
+	namespace rendering {class RenderQueue;};
 	class DLLCLIENT CWorldComponent final
 		: public BaseWorldComponent
 	{
@@ -34,12 +36,16 @@ namespace pragma
 		std::shared_ptr<CHC> GetCHCController() const;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 
+		const rendering::RenderQueue *GetClusterRenderQueue(util::BSPTree::ClusterIndex clusterIndex,bool translucent=false) const;
 		void SetBSPTree(const std::shared_ptr<util::BSPTree> &bspTree);
 		const std::shared_ptr<util::BSPTree> &GetBSPTree() const;
 	protected:
+		void BuildOfflineRenderQueues(bool rebuild=false);
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
-		void OnUpdateLOD(const Vector3 &posCam);
+		void UpdateRenderMeshes();
 		void ReloadCHCController();
+		std::vector<std::shared_ptr<rendering::RenderQueue>> m_clusterRenderQueues;
+		std::vector<std::shared_ptr<rendering::RenderQueue>> m_clusterRenderTranslucentQueues;
 		std::unordered_map<uint32_t,bool> m_lodBaseMeshIds;
 		std::shared_ptr<OcclusionOctree<std::shared_ptr<ModelMesh>>> m_meshTree;
 		std::shared_ptr<CHC> m_chcController;

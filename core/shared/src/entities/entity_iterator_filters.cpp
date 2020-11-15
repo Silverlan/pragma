@@ -224,7 +224,7 @@ bool EntityIteratorFilterBox::ShouldPass(BaseEntity &ent)
 	Vector3 entMax {};
 	if(pPhysComponent.valid())
 		pPhysComponent->GetCollisionBounds(&entMin,&entMax);
-	return Intersection::AABBAABB(m_min,m_max,entMin,entMax) != INTERSECT_OUTSIDE;
+	return Intersection::AABBAABB(m_min,m_max,entMin,entMax) != Intersection::Intersect::Outside;
 }
 
 /////////////////

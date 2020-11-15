@@ -897,8 +897,12 @@ void CEngine::ReloadShaderPipelines()
 		Con::cout<<"Reloading shaders"<<Con::endl;
 	auto &shaderManager = GetRenderContext().GetShaderManager();
 	auto &shaders = shaderManager.GetShaders();
-	for(auto &pair : shaders)
-		pair.second->Initialize(true);
+	for(auto &shader : shaders)
+	{
+		if(shader == nullptr)
+			continue;
+		shader->Initialize(true);
+	}
 }
 
 CEngine::~CEngine() {}

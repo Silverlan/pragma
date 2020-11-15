@@ -60,6 +60,7 @@ const double ENT_EPSILON = 0.000'01;
 
 class EntityHandle;
 class DataStream;
+using EntityIndex = uint32_t;
 #pragma warning(push)
 #pragma warning(disable : 4251)
 class DLLNETWORK BaseEntity
@@ -222,7 +223,7 @@ public:
 	virtual void PrecacheModels();
 
 	virtual void Initialize();
-	unsigned int GetIndex() const;
+	EntityIndex GetIndex() const;
 	virtual uint32_t GetLocalIndex() const;
 	uint64_t GetUniqueIndex() const;
 	void SetUniqueIndex(uint64_t idx);
@@ -269,7 +270,7 @@ protected:
 
 	std::vector<EntityHandle> m_entsRemove; // List of entities that should be removed when this entity is removed
 	std::string m_class = "BaseEntity";
-	uint32_t m_index = 0u;
+	EntityIndex m_index = 0u;
 	uint64_t m_uniqueIndex = 0ull;
 	virtual void EraseFunction(int function);
 	virtual void DoSpawn();

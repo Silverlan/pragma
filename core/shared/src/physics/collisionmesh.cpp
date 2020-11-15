@@ -244,7 +244,7 @@ void CollisionMesh::SetAABB(Vector3 &min,Vector3 &max)
 std::shared_ptr<pragma::physics::IShape> CollisionMesh::GetShape() {return m_shape;}
 bool CollisionMesh::IntersectAABB(Vector3 *min,Vector3 *max)
 {
-	if(!Intersection::AABBAABB(m_min,m_max,*min,*max))
+	if(Intersection::AABBAABB(m_min,m_max,*min,*max) == Intersection::Intersect::Outside)
 		return false;
 	for(int i=0;i<m_vertices.size();i+=3)
 	{

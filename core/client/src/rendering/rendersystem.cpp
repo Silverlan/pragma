@@ -9,6 +9,7 @@
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/rendersystem.h"
+#include "pragma/rendering/render_queue.hpp"
 #include "cmaterialmanager.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/entities/c_baseentity.h"
@@ -347,12 +348,320 @@ DLLCLIENT void print_debug_render_stats()
 	print_pass_stats(g_renderStats.transparencyPass);
 }
 
+class RenderSys
+{
+public:
+	enum class StateFlags : uint8_t
+	{
+		None = 0u,
+		ShaderBound = 1u,
+		MaterialBound = ShaderBound<<1u,
+		EntityBound = MaterialBound<<1u
+	};
+	RenderSys(const util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode,RenderSystem::RenderFlags flags,const Vector4 &drawOrigin);
+	~RenderSys();
+	void Render(const pragma::rendering::RenderQueue &renderQueue,std::optional<uint32_t> worldRenderQueueIndex={});
+	bool BindShader(prosper::Shader &shader);
+	bool BindMaterial(CMaterial &mat);
+	bool BindEntity(CBaseEntity &ent);
+	bool Render(CModelSubMesh &mesh);
+private:
+	void UnbindShader();
+	void UnbindMaterial();
+	void UnbindEntity();
+	prosper::ShaderIndex m_curShaderIndex = std::numeric_limits<prosper::ShaderIndex>::max();
+	MaterialIndex m_curMaterialIndex = std::numeric_limits<MaterialIndex>::max();
+	EntityIndex m_curEntityIndex = std::numeric_limits<EntityIndex>::max();
+
+	prosper::Shader *m_curShader = nullptr;
+	pragma::ShaderTextured3DBase *m_shaderScene = nullptr;
+	CMaterial *m_curMaterial = nullptr;
+	CBaseEntity *m_curEntity = nullptr;
+	pragma::CRenderComponent *m_curRenderC = nullptr;
+	std::vector<std::shared_ptr<ModelSubMesh>> *m_curEntityMeshList = nullptr;
+
+	const util::DrawSceneInfo &m_drawSceneInfo;
+	RenderMode m_renderMode;
+	const Vector4 &m_drawOrigin;
+	pragma::ShaderTextured3DBase::Pipeline m_pipelineType;
+	RenderPassStats *m_stats = nullptr;
+	const pragma::rendering::RasterizationRenderer *m_renderer = nullptr;
+	RenderDebugInfo &m_debugInfo;
+	RenderSystem::RenderFlags m_renderFlags;
+	uint32_t m_numShaderInvocations = 0;
+	StateFlags m_stateFlags = StateFlags::None;
+};
+REGISTER_BASIC_BITWISE_OPERATORS(RenderSys::StateFlags);
+
+RenderSys::RenderSys(const util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode,RenderSystem::RenderFlags flags,const Vector4 &drawOrigin)
+	: m_drawSceneInfo{drawSceneInfo},m_drawOrigin{drawOrigin},m_renderMode{renderMode},m_renderFlags{flags},m_debugInfo{get_render_debug_info()}
+{
+	auto &scene = drawSceneInfo.scene;
+	auto *renderer = scene->GetRenderer();
+	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+		return;
+	auto bReflection = umath::is_flag_set(flags,RenderSystem::RenderFlags::Reflection);
+	m_renderer = static_cast<const pragma::rendering::RasterizationRenderer*>(renderer);
+	m_pipelineType = pragma::ShaderTextured3DBase::GetPipelineIndex(m_renderer->GetSampleCount(),bReflection);
+	m_stats = g_collectRenderStats ? &g_renderStats.lightingPass : nullptr;
+}
+RenderSys::~RenderSys()
+{
+	UnbindShader();
+}
+
+void RenderSys::Render(const pragma::rendering::RenderQueue &renderQueue,std::optional<uint32_t> worldRenderQueueIndex)
+{
+	if(m_renderer == nullptr)
+		return;
+	UnbindShader();
+	auto &shaderManager = c_engine->GetShaderManager();
+	auto &matManager = client->GetMaterialManager();
+	uint32_t numShaderStateChanges = 0;
+	uint32_t numMaterialStateChanges = 0;
+	uint32_t numEntityStateChanges = 0;
+	uint32_t numMeshes = 0;
+	for(auto &itemSortPair : renderQueue.sortedItemIndices)
+	{
+		auto &item = renderQueue.queue.at(itemSortPair.first);
+		
+		if(worldRenderQueueIndex.has_value() && m_drawSceneInfo.scene->GetSceneRenderDesc().IsWorldMeshVisible(*worldRenderQueueIndex,item.mesh) == false)
+			continue;
+
+		if(item.shader != m_curShaderIndex)
+		{
+			auto *shader = shaderManager.GetShader(item.shader);
+			assert(shader);
+			BindShader(*shader);
+			++numShaderStateChanges;
+		}
+		if(umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false)
+			continue;
+		if(item.material != m_curMaterialIndex)
+		{
+			auto *mat = matManager.GetMaterial(item.material);
+			assert(mat);
+			BindMaterial(static_cast<CMaterial&>(*mat));
+			++numMaterialStateChanges;
+		}
+		if(umath::is_flag_set(m_stateFlags,StateFlags::MaterialBound) == false)
+			continue;
+		if(item.entity != m_curEntityIndex)
+		{
+			auto *ent = c_game->GetEntityByLocalIndex(item.entity);
+			assert(ent);
+			BindEntity(static_cast<CBaseEntity&>(*ent));
+			++numEntityStateChanges;
+		}
+		if(umath::is_flag_set(m_stateFlags,StateFlags::EntityBound) == false || item.mesh >= m_curEntityMeshList->size())
+			continue;
+		Render(static_cast<CModelSubMesh&>(*m_curEntityMeshList->at(item.mesh)));
+		++numMeshes;
+	}
+	std::cout<<"";
+}
+
+void RenderSys::UnbindShader()
+{
+	if(umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false)
+		return;
+	m_shaderScene->EndDraw();
+	m_curShader = nullptr;
+	m_curShaderIndex = std::numeric_limits<decltype(m_curShaderIndex)>::max();
+	umath::set_flag(m_stateFlags,StateFlags::ShaderBound,false);
+}
+
+void RenderSys::UnbindMaterial()
+{
+	if(umath::is_flag_set(m_stateFlags,StateFlags::MaterialBound) == false)
+		return;
+	m_curMaterial = nullptr;
+	m_curMaterialIndex = std::numeric_limits<decltype(m_curMaterialIndex)>::max();
+	umath::set_flag(m_stateFlags,StateFlags::MaterialBound,false);
+}
+
+void RenderSys::UnbindEntity()
+{
+	if(umath::is_flag_set(m_stateFlags,StateFlags::EntityBound) == false)
+		return;
+	m_curEntity = nullptr;
+	m_curEntityIndex = std::numeric_limits<decltype(m_curEntityIndex)>::max();
+	umath::set_flag(m_stateFlags,StateFlags::EntityBound,false);
+}
+
+bool RenderSys::BindShader(prosper::Shader &shader)
+{
+	if(&shader == m_curShader)
+		return umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound);
+	UnbindShader();
+	UnbindMaterial();
+	UnbindEntity();
+	m_curShader = &shader;
+	auto bView = (m_renderMode == RenderMode::View) ? true : false;
+	auto *shaderScene = dynamic_cast<pragma::ShaderTextured3DBase*>(&shader);
+	if(shaderScene == nullptr)
+		return false;
+	if(shaderScene->BeginDraw(
+		m_drawSceneInfo.commandBuffer,c_game->GetRenderClipPlane(),m_drawOrigin,
+		m_pipelineType
+	) == false)
+		return false;
+	if(m_stats)
+		m_stats->shaders.push_back(shader.GetHandle());
+	auto &scene = *m_drawSceneInfo.scene;
+	if(shaderScene->BindScene(const_cast<pragma::CSceneComponent&>(scene),const_cast<pragma::rendering::RasterizationRenderer&>(*m_renderer),bView) == false)
+		return false;
+	auto debugMode = scene.GetDebugMode();
+	if(debugMode != ::pragma::CSceneComponent::DebugMode::None)
+		shaderScene->SetDebugMode(debugMode);
+	shaderScene->Set3DSky(umath::is_flag_set(m_renderFlags,RenderSystem::RenderFlags::RenderAs3DSky));
+	
+	++m_debugInfo.shaderCount;
+	umath::set_flag(m_stateFlags,StateFlags::ShaderBound);
+
+	m_shaderScene = shaderScene;
+	m_curShaderIndex = shader.GetIndex();
+	return true;
+}
+bool RenderSys::BindMaterial(CMaterial &mat)
+{
+	if(&mat == m_curMaterial)
+		return umath::is_flag_set(m_stateFlags,StateFlags::MaterialBound);
+	UnbindMaterial();
+	// UnbindEntity();
+	m_curMaterial = &mat;
+	if(umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false || mat.IsInitialized() == false || m_shaderScene->BindMaterial(mat) == false)
+		return false;
+	if(m_stats)
+		m_stats->materials.push_back(mat.GetHandle());
+	++m_debugInfo.materialCount;
+	
+	umath::set_flag(m_stateFlags,StateFlags::MaterialBound);
+
+	m_curMaterialIndex = mat.GetIndex();
+	return true;
+}
+bool RenderSys::BindEntity(CBaseEntity &ent)
+{
+	if(&ent == m_curEntity)
+		return umath::is_flag_set(m_stateFlags,StateFlags::EntityBound);
+	UnbindEntity();
+	m_curEntity = &ent;
+	auto *renderC = ent.GetRenderComponent().get();
+	if(umath::is_flag_set(m_stateFlags,StateFlags::MaterialBound) == false || renderC == nullptr || m_shaderScene->BindEntity(ent) == false)
+		return false;
+	if(m_stats)
+		m_stats->entities.push_back(ent.GetHandle());
+	if(m_drawSceneInfo.renderFilter && m_drawSceneInfo.renderFilter(ent) == false)
+		return false;
+	
+	m_curRenderC = renderC;
+	m_curEntityMeshList = &renderC->GetRenderMeshes();
+	auto *entClipPlane = m_curRenderC->GetRenderClipPlane();
+	m_shaderScene->BindClipPlane(entClipPlane ? *entClipPlane : Vector4{});
+
+	if(umath::is_flag_set(m_curRenderC->GetStateFlags(),pragma::CRenderComponent::StateFlags::HasDepthBias))
+	{
+		float constantFactor,biasClamp,slopeFactor;
+		m_curRenderC->GetDepthBias(constantFactor,biasClamp,slopeFactor);
+		m_drawSceneInfo.commandBuffer->RecordSetDepthBias(constantFactor,biasClamp,slopeFactor);
+	}
+	else
+		m_drawSceneInfo.commandBuffer->RecordSetDepthBias();
+
+	umath::set_flag(m_stateFlags,StateFlags::EntityBound);
+
+	m_curEntityIndex = ent.GetLocalIndex();
+	return true;
+}
+
+bool RenderSys::Render(CModelSubMesh &mesh)
+{
+	if(umath::is_flag_set(m_stateFlags,StateFlags::EntityBound) == false || m_curRenderC == nullptr || m_curRenderC->Render(m_shaderScene,m_curMaterial,&mesh) == true)
+		return false;
+	++m_numShaderInvocations;
+
+	auto &mdlComponent = m_curRenderC->GetModelComponent();
+	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &vertAnimBuffer = static_cast<CModel&>(*mdl).GetVertexAnimationBuffer();
+	auto bUseVertexAnim = false;
+	if(vertAnimBuffer != nullptr)
+	{
+		auto pVertexAnimatedComponent = m_curEntity->GetComponent<pragma::CVertexAnimatedComponent>();
+		if(pVertexAnimatedComponent.valid())
+		{
+			auto offset = 0u;
+			auto animCount = 0u;
+			if(pVertexAnimatedComponent->GetVertexAnimationBufferMeshOffset(mesh,offset,animCount) == true)
+			{
+				auto vaData = ((offset<<16)>>16) | animCount<<16;
+				m_shaderScene->BindVertexAnimationOffset(vaData);
+				bUseVertexAnim = true;
+			}
+		}
+	}
+	if(bUseVertexAnim == false)
+		m_shaderScene->BindVertexAnimationOffset(0u);
+
+	if(m_stats)
+		m_stats->meshes.push_back(std::static_pointer_cast<CModelSubMesh>(mesh.shared_from_this()));
+	m_shaderScene->Draw(mesh);
+
+	auto numTriangles = mesh.GetTriangleCount();
+	++m_debugInfo.meshCount;
+	if(m_curEntity->IsStatic() == true)
+		++m_debugInfo.staticMeshCount;
+	m_debugInfo.triangleCount += numTriangles;
+	m_debugInfo.vertexCount += mesh.GetVertexCount();
+	return true;
+}
+
 static CVar cvDebugNormals = GetClientConVar("debug_render_normals");
 uint32_t RenderSystem::Render(
 	const util::DrawSceneInfo &drawSceneInfo,const pragma::rendering::CulledMeshData &renderMeshes,
 	RenderMode renderMode,RenderFlags flags,const Vector4 &drawOrigin
 )
 {
+
+	{
+		RenderSys rsys {drawSceneInfo,renderMode,flags,drawOrigin};
+		if(renderMode == RenderMode::World)
+		{
+			// For optimization purposes, world geometry is stored in separate render queues.
+			// This could be less efficient if many models in the scene use the same materials as
+			// the world, but this generally doesn't happen.
+			// By rendering world geometry first, we can also avoid overdraw.
+			// This does *not* include translucent geometry, which is instead copied over to the
+			// general translucency world render queue.
+			auto &worldRenderQueues = drawSceneInfo.scene->GetSceneRenderDesc().GetWorldRenderQueues();
+			for(auto i=decltype(worldRenderQueues.size()){0u};i<worldRenderQueues.size();++i)
+				rsys.Render(*worldRenderQueues.at(i),i);
+		}
+		auto *renderQueue = drawSceneInfo.scene->GetSceneRenderDesc().GetRenderQueue(renderMode,false /* translucent */);
+		if(renderQueue)
+		{
+			rsys.Render(*renderQueue);
+			// TODO: Get world queue
+			/*auto *worldC = static_cast<pragma::CWorldComponent*>(c_game->GetWorld());
+			if(worldC)
+			{
+				auto *node = worldC->GetBSPTree()->FindLeafNode(drawSceneInfo.scene->GetActiveCamera().get()->GetEntity().GetPosition());
+				if(node)
+				{
+					auto *renderQueue = worldC->GetClusterRenderQueue(node->cluster);
+					if(renderQueue == nullptr)
+						worldC->BuildOptimizedLeafMeshTable();
+					if(renderQueue)
+					{
+						RenderSys rsys {drawSceneInfo,renderMode,flags,drawOrigin};
+						rsys.Render(*renderQueue);
+					}
+				}
+			}*/
+		}
+		return 0;
+	}
+
 	auto &debugInfo = get_render_debug_info();
 	auto &scene = drawSceneInfo.scene;
 	auto *renderer = scene->GetRenderer();
@@ -411,6 +720,8 @@ uint32_t RenderSystem::Render(
 							auto *ent = pair.first;
 							if(ent != entLast || shader != shaderLast)
 							{
+								if(ent->IsWorld())
+									continue;
 								if(shader->BindEntity(*ent) == false)
 									continue;
 								if(stats)

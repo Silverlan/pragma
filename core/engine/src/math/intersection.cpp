@@ -75,7 +75,7 @@ bool Intersection::AABBInAABB(const Vector3 &minA,const Vector3 &maxA,const Vect
 		(maxA.x <= maxB.x && maxA.y <= maxB.y && maxA.z <= maxB.z))) ? true : false;
 }
 
-DLLENGINE int Intersection::AABBAABB(const Vector3 &minA,const Vector3 &maxA,const Vector3 &minB,const Vector3 &maxB)
+DLLENGINE Intersection::Intersect Intersection::AABBAABB(const Vector3 &minA,const Vector3 &maxA,const Vector3 &minB,const Vector3 &maxB)
 {
 	if((maxA.x < minB.x) ||
 			(minA.x > maxB.x) ||
@@ -84,10 +84,10 @@ DLLENGINE int Intersection::AABBAABB(const Vector3 &minA,const Vector3 &maxA,con
 			(maxA.z < minB.z) ||
 			(minA.z > maxB.z)
 		)
-		return INTERSECT_OUTSIDE;
+		return Intersect::Outside;
 	if(AABBInAABB(minA,maxA,minB,maxB) || AABBInAABB(minB,maxB,minA,maxA))
-		return INTERSECT_INSIDE;
-	return INTERSECT_OVERLAP;
+		return Intersect::Inside;
+	return Intersect::Overlap;
 }
 
 DLLENGINE bool Intersection::AABBAABB(const AABB &a,const AABB &b)
@@ -112,7 +112,7 @@ DLLENGINE bool Intersection::AABBTriangle(const Vector3 &min,const Vector3 &max,
 	uvec::min(&minTri,c);
 	uvec::max(&maxTri,b);
 	uvec::max(&maxTri,c);
-	if(!AABBAABB(min,max,minTri,maxTri))
+	if(AABBAABB(min,max,minTri,maxTri) == Intersect::Outside)
 		return false;
 	// TODO
 	return true;
@@ -490,7 +490,7 @@ DLLENGINE bool Intersection::PointInPlaneMesh(const Vector3 &vec,const std::vect
 	return true;
 }
 
-DLLENGINE int Intersection::SphereInPlaneMesh(const Vector3 &vec,float radius,const std::vector<Plane> &planes,bool skipInsideTest)
+DLLENGINE Intersection::Intersect Intersection::SphereInPlaneMesh(const Vector3 &vec,float radius,const std::vector<Plane> &planes,bool skipInsideTest)
 {
 	if(PointInPlaneMesh(vec,planes) == false)
 	{
@@ -499,12 +499,12 @@ DLLENGINE int Intersection::SphereInPlaneMesh(const Vector3 &vec,float radius,co
 			auto &plane = const_cast<Plane&>(*it);
 			Vector3 p = vec +plane.GetNormal() *radius; // Closest point on sphere to plane
 			if(plane.GetDistance(p) < 0)
-				return INTERSECT_OUTSIDE;
+				return Intersect::Outside;
 		}
-		return INTERSECT_OVERLAP;
+		return Intersect::Overlap;
 	}
 	if(skipInsideTest == true)
-		return INTERSECT_OVERLAP;
+		return Intersect::Overlap;
 	auto radiusSqr = umath::pow(radius,2.f);
 	for(auto it=planes.begin();it!=planes.end();++it)
 	{
@@ -512,12 +512,12 @@ DLLENGINE int Intersection::SphereInPlaneMesh(const Vector3 &vec,float radius,co
 		Vector3 r;
 		Geometry::ClosestPointOnPlaneToPoint(plane.GetNormal(),CFloat(-plane.GetDistance()),vec,&r);
 		if(uvec::length_sqr(r -vec) < radiusSqr)
-			return INTERSECT_OVERLAP;
+			return Intersect::Overlap;
 	}
-	return INTERSECT_INSIDE;
+	return Intersect::Inside;
 }
 
-DLLENGINE int Intersection::AABBInPlaneMesh(const Vector3 &min,const Vector3 &max,const std::vector<Plane> &planes)
+DLLENGINE Intersection::Intersect Intersection::AABBInPlaneMesh(const Vector3 &min,const Vector3 &max,const std::vector<Plane> &planes)
 {
 	// Note: If the current method causes problems, try switching to the other one.
 	// The second method is faster for most cases.
@@ -553,11 +553,10 @@ DLLENGINE int Intersection::AABBInPlaneMesh(const Vector3 &min,const Vector3 &ma
 	return result;
 #else
 	Vector3 vMin,vMax;
-	int r = INTERSECT_INSIDE;
-	for(unsigned int i=0;i<planes.size();i++)
+	auto r = Intersect::Inside;
+	for(auto &plane : planes)
 	{
-		Plane &plane = const_cast<Plane&>(planes[i]);
-		Vector3 &n = plane.GetNormal();
+		auto &n = plane.GetNormal();
 		if(n.x > 0)
 		{
 			vMin.x = min.x; 
@@ -588,10 +587,10 @@ DLLENGINE int Intersection::AABBInPlaneMesh(const Vector3 &min,const Vector3 &ma
 			vMin.z = max.z; 
 			vMax.z = min.z; 
 		} 
-		if(planes[i].GetDistance(vMax) < 0)
-			return INTERSECT_OUTSIDE;
-		else if(planes[i].GetDistance(vMin) < 0)
-			r = INTERSECT_OVERLAP;
+		if(plane.GetDistance(vMax) < 0)
+			return Intersect::Outside;
+		else if(plane.GetDistance(vMin) < 0)
+			r = Intersect::Overlap;
 	}
 	return r;
 #endif

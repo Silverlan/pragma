@@ -18,12 +18,14 @@ extern DLLCLIENT ClientState *client;
 
 ComponentEventId CModelComponent::EVENT_ON_UPDATE_LOD = INVALID_COMPONENT_ID;
 ComponentEventId CModelComponent::EVENT_ON_UPDATE_LOD_BY_POS = INVALID_COMPONENT_ID;
+ComponentEventId CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED = INVALID_COMPONENT_ID;
 luabind::object CModelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CModelComponentHandleWrapper>(l);}
 void CModelComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	BaseModelComponent::RegisterEvents(componentManager);
 	EVENT_ON_UPDATE_LOD = componentManager.RegisterEvent("EVENT_ON_UPDATE_LOD",std::type_index(typeid(CModelComponent)));
 	EVENT_ON_UPDATE_LOD_BY_POS = componentManager.RegisterEvent("EVENT_ON_UPDATE_LOD_BY_POS",std::type_index(typeid(CModelComponent)));
+	EVENT_ON_RENDER_MESHES_UPDATED = componentManager.RegisterEvent("EVENT_ON_RENDER_MESHES_UPDATED");
 }
 
 void CModelComponent::Initialize()
@@ -115,15 +117,24 @@ void CModelComponent::UpdateLOD(UInt32 lod)
 	//if(it != m_renderInstances.end())
 	//	it->second->SetEnabled(false);
 	m_lod = lod;//CUChar(lod);
+	m_renderMeshes.clear();
 	m_lodMeshes.clear();
 
 	auto &mdl = GetModel();
 	if(mdl != nullptr)
+	{
 		mdl->GetBodyGroupMeshes(GetBodyGroups(),lod,m_lodMeshes);
+		for(auto &mesh : m_lodMeshes)
+		{
+			for(auto &subMesh : mesh->GetSubMeshes())
+				m_renderMeshes.push_back(subMesh);
+		}
+	}
 	//UpdateRenderMeshes();
 	//it = m_renderInstances.find(m_lod);
 	//if(it != m_renderInstances.end())
 	//	it->second->SetEnabled(true);
+	BroadcastEvent(EVENT_ON_RENDER_MESHES_UPDATED);
 }
 
 void CModelComponent::SetLOD(uint8_t lod) {m_lod = lod;}
@@ -143,6 +154,9 @@ void CModelComponent::UpdateLOD(const Vector3 &posCam)
 		return;
 	UpdateLOD(lod);
 }
+std::vector<std::shared_ptr<ModelSubMesh>> &CModelComponent::GetRenderMeshes() {return m_renderMeshes;}
+const std::vector<std::shared_ptr<ModelSubMesh>> &CModelComponent::GetRenderMeshes() const {return const_cast<CModelComponent*>(this)->GetRenderMeshes();}
+
 std::vector<std::shared_ptr<ModelMesh>> &CModelComponent::GetLODMeshes() {return m_lodMeshes;}
 const std::vector<std::shared_ptr<ModelMesh>> &CModelComponent::GetLODMeshes() const {return const_cast<CModelComponent*>(this)->GetLODMeshes();}
 
@@ -158,6 +172,7 @@ bool CModelComponent::SetBodyGroup(UInt32 groupId,UInt32 id)
 void CModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 {
 	m_lod = 0;
+	m_renderMeshes.clear();
 	m_lodMeshes.clear();
 	if(model == nullptr)
 	{

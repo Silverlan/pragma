@@ -54,7 +54,7 @@ bool OcclusionCullingHandlerBSP::ShouldPass(CBaseEntity &ent) const
 	pRenderComponent->GetRenderBounds(&min,&max);
 	min += pos;
 	max += pos;
-	return Intersection::AABBAABB(min,max,m_pCurrentNode->minVisible,m_pCurrentNode->maxVisible);
+	return Intersection::AABBAABB(min,max,m_pCurrentNode->minVisible,m_pCurrentNode->maxVisible) != Intersection::Intersect::Outside;
 }
 bool OcclusionCullingHandlerBSP::ShouldPass(CModelMesh &modelMesh,const Vector3 &entityPos) const
 {
@@ -79,7 +79,7 @@ bool OcclusionCullingHandlerBSP::ShouldPass(CModelSubMesh &subMesh,const Vector3
 	subMesh.GetBounds(min,max);
 	min += entityPos;
 	max += entityPos;
-	return Intersection::AABBAABB(min,max,m_pCurrentNode->minVisible,m_pCurrentNode->maxVisible);
+	return Intersection::AABBAABB(min,max,m_pCurrentNode->minVisible,m_pCurrentNode->maxVisible) != Intersection::Intersect::Outside;
 }
 const util::BSPTree::Node *OcclusionCullingHandlerBSP::FindLeafNode(const Vector3 &point) const {return m_bspTree->FindLeafNode(point);}
 const util::BSPTree::Node *OcclusionCullingHandlerBSP::GetCurrentNode() const {return m_pCurrentNode;}

@@ -420,9 +420,9 @@ static void CVAR_CALLBACK_render_msaa_enabled(NetworkState*,ConVar*,int,int)
 	pragma::ShaderScene::SetRenderPassSampleCount(static_cast<prosper::SampleCountFlags>(samples));
 	// Reload entity shader pipelines
 	auto &shaderManager = c_engine->GetShaderManager();
-	for(auto &pair : shaderManager.GetShaders())
+	for(auto &hShader : shaderManager.GetShaders())
 	{
-		auto *shader = dynamic_cast<pragma::ShaderScene*>(pair.second.get());
+		auto *shader = dynamic_cast<pragma::ShaderScene*>(hShader.get());
 		if(shader == nullptr)
 			continue;
 		shader->ReloadPipelines();

@@ -13,10 +13,6 @@
 #include "pragma/math/vector/util_winding_order.hpp"
 #include <optional>
 
-#define INTERSECT_OUTSIDE 0
-#define INTERSECT_INSIDE 1
-#define INTERSECT_OVERLAP 2
-
 struct AABB;
 class ModelMesh;
 class ModelSubMesh;
@@ -30,12 +26,18 @@ namespace Intersection
 		Intersect,
 		OutOfRange // There is an intersection, but not within the specified range (t will be < 0 or > 1)
 	};
+	enum class Intersect : uint8_t
+	{
+		Outside = 0,
+		Inside,
+		Overlap
+	};
 	DLLENGINE bool VectorInBounds(const Vector3 &vec,const Vector3 &min,const Vector3 &max,float EPSILON=0.f);
 
 	// Return true if the first AABB is contained within the second AABB
 	DLLENGINE bool AABBInAABB(const Vector3 &minA,const Vector3 &maxA,const Vector3 &minB,const Vector3 &maxB);
 
-	DLLENGINE int AABBAABB(const Vector3 &minA,const Vector3 &maxA,const Vector3 &minB,const Vector3 &maxB);
+	DLLENGINE Intersect AABBAABB(const Vector3 &minA,const Vector3 &maxA,const Vector3 &minB,const Vector3 &maxB);
 	DLLENGINE bool AABBAABB(const ::AABB &a,const ::AABB &b);
 	DLLENGINE bool AABBTriangle(const Vector3 &min,const Vector3 &max,const Vector3 &a,const Vector3 &b,const Vector3 &c);
 	DLLENGINE bool AABBPlane(const Vector3 &min,const Vector3 &max,const Vector3 &n,double d);
@@ -73,8 +75,8 @@ namespace Intersection
 	DLLENGINE bool SphereSphere(const Vector3 &originA,float rA,const Vector3 &originB,float rB);
 	DLLENGINE bool AABBSphere(const Vector3 &min,const Vector3 &max,const Vector3 &origin,float r);
 	DLLENGINE bool PointInPlaneMesh(const Vector3 &vec,const std::vector<Plane> &planes);
-	DLLENGINE int SphereInPlaneMesh(const Vector3 &vec,float radius,const std::vector<Plane> &planes,bool skipInsideTest=false);
-	DLLENGINE int AABBInPlaneMesh(const Vector3 &min,const Vector3 &max,const std::vector<Plane> &planes);
+	DLLENGINE Intersect SphereInPlaneMesh(const Vector3 &vec,float radius,const std::vector<Plane> &planes,bool skipInsideTest=false);
+	DLLENGINE Intersect AABBInPlaneMesh(const Vector3 &min,const Vector3 &max,const std::vector<Plane> &planes);
 	DLLENGINE bool SphereCone(const Vector3 &sphereOrigin,float radius,const Vector3 &coneOrigin,const Vector3 &coneDir,float coneAngle);
 	DLLENGINE bool LineTriangle(const Vector3 &lineOrigin,const Vector3 &lineDir,const Vector3 &v0,const Vector3 &v1,const Vector3 &v2,double &t,double &u,double &v,bool bCull=false);
 	DLLENGINE std::optional<Vector2> LineLine(const Vector2 &start0,const Vector2 &end0,const Vector2 &start1,const Vector2 &end1);

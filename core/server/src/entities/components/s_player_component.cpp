@@ -129,7 +129,7 @@ void SPlayerComponent::OnRespawn()
 {
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->InitializePhysics(PHYSICSTYPE::CAPSULECONTROLLER);
 	SetObserverMode(OBSERVERMODE::FIRSTPERSON);
 
@@ -209,13 +209,13 @@ void SPlayerComponent::InitializeFlashlight()
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return;
 	auto *light = game->CreateEntity<Flashlight>();
 	if(light == nullptr)
 		return;
 	auto pTrComponentLight = light->GetTransformComponent();
-	if(pTrComponentLight.valid())
+	if(pTrComponentLight)
 	{
 		pTrComponentLight->SetPosition(pTrComponent->GetPosition());
 		pTrComponentLight->SetRotation(charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetRotation());

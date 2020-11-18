@@ -26,7 +26,6 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
 
 #include "pragma/rendering/render_processor.hpp"
 
@@ -37,6 +36,9 @@ pragma::rendering::DepthStageRenderProcessor::DepthStageRenderProcessor(const ut
 }
 uint32_t pragma::rendering::DepthStageRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue,RenderPassStats *optStats,std::optional<uint32_t> worldRenderQueueIndex)
 {
+	static auto skipRender = false;
+	if(skipRender)
+		return 0;
 	if(m_renderer == nullptr || umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false)
 		return 0;
 	m_stats = optStats;
@@ -201,4 +203,3 @@ void RenderSystem::RenderPrepass(const util::DrawSceneInfo &drawSceneInfo,Render
 	//
 #endif
 }
-#pragma optimize("",on)

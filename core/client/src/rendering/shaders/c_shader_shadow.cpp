@@ -75,7 +75,7 @@ bool ShaderShadow::BindEntity(CBaseEntity &ent,const Mat4 &depthMVP)
 	if(ShaderEntity::BindEntity(ent) == false)
 		return false;
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(pRenderComponent.expired())
+	if(!pRenderComponent)
 		return false;
 	auto entMvp = depthMVP *pRenderComponent->GetTransformationMatrix();
 	return BindDepthMatrix(entMvp);
@@ -85,7 +85,7 @@ bool ShaderShadow::BindLight(CLightComponent &light)
 	auto &ent = light.GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pRadiusComponent = ent.GetComponent<CRadiusComponent>();
-	auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 	auto lightPos = Vector4{pos.x,pos.y,pos.z,static_cast<float>(pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f)};
 	return RecordPushConstants(lightPos,offsetof(PushConstants,lightPos));
 }

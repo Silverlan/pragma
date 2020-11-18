@@ -77,7 +77,7 @@ void BaseTouchComponent::OnPhysicsInitialized()
 		if((m_triggerFlags &TriggerFlags::Everything) != TriggerFlags::Physics)
 			masks |= CollisionMask::Dynamic;
 	}
-	if(physComponent.valid())
+	if(physComponent)
 	{
 		physComponent->SetCollisionFilterMask(masks);
 		physComponent->SetCollisionFilterGroup(CollisionMask::Trigger);
@@ -109,7 +109,7 @@ void BaseTouchComponent::OnEntitySpawn()
 		m_triggerFlags |= TriggerFlags::Physics;
 
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 	{
 		auto *physObj = pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
 		if(physObj)
@@ -222,7 +222,7 @@ bool BaseTouchComponent::CanTrigger(BaseEntity &ent)
 	return (m_triggerFlags &TriggerFlags::Everything) == TriggerFlags::Everything ||
 		((m_triggerFlags &TriggerFlags::NPCs) != TriggerFlags::None && ent.IsNPC()) ||
 		((m_triggerFlags &TriggerFlags::Players) != TriggerFlags::None && ent.IsPlayer()) ||
-		((m_triggerFlags &TriggerFlags::Physics) != TriggerFlags::None && ent.IsNPC() == false && ent.IsPlayer() == false && ent.GetPhysicsComponent().expired() == false && ent.GetPhysicsComponent()->GetPhysicsObject() != nullptr);
+		((m_triggerFlags &TriggerFlags::Physics) != TriggerFlags::None && ent.IsNPC() == false && ent.IsPlayer() == false && ent.GetPhysicsComponent() && ent.GetPhysicsComponent()->GetPhysicsObject() != nullptr);
 }
 void BaseTouchComponent::OnStartTouch(BaseEntity &ent)
 {
@@ -264,7 +264,7 @@ void BaseTouchComponent::FireStartTouchEvents(TouchInfo &touch,bool isFirstTouch
 		return;
 	auto &entThis = GetEntity();
 	auto pPhysComponent = ent->GetPhysicsComponent();
-	PhysObj *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	PhysObj *phys = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
 	auto hEnt = entThis.GetHandle();
 	OnStartTouch(*ent);
 	if(isFirstTouch)
@@ -275,7 +275,7 @@ void BaseTouchComponent::FireStartTouchEvents(TouchInfo &touch,bool isFirstTouch
 	}
 	if(!hEnt.IsValid())
 		return;
-	if(pPhysComponent.valid() && pPhysComponent->IsTrigger())
+	if(pPhysComponent != nullptr && pPhysComponent->IsTrigger())
 		Trigger(*ent);
 }
 

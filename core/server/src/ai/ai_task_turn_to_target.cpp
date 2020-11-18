@@ -47,7 +47,7 @@ bool ai::TaskTurnToTarget::IsFacingTarget(pragma::SAIComponent &ai,const Vector3
 		return false;
 	auto &ent = ai.GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	return (pTrComponent.valid() && pTrComponent->GetDotProduct(pos) >= *m_targetAng) ? true : false;
+	return (pTrComponent != nullptr && pTrComponent->GetDotProduct(pos) >= *m_targetAng) ? true : false;
 }
 
 void ai::TaskTurnToTarget::Print(const Schedule *sched,std::ostream &o) const

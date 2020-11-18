@@ -17,7 +17,7 @@
 namespace pragma
 {
 	class ShaderGameWorld;
-	namespace rendering {struct BaseRenderProcessor;};
+	namespace rendering {struct BaseRenderProcessor; class RenderQueue;};
 	class DLLCLIENT CSkyCameraComponent final
 		: public BaseEntityComponent
 	{

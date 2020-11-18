@@ -42,7 +42,7 @@ void CLightDirectionalComponent::Initialize()
 		auto &ent = shouldPassData.entity;
 		auto pTrComponent = ent.GetTransformComponent();
 		auto pRenderComponent = ent.GetRenderComponent();
-		if(pTrComponent.expired() || pRenderComponent.expired())
+		if(pTrComponent == nullptr || !pRenderComponent)
 		{
 			shouldPassData.shouldPass = false;
 			return util::EventReply::Handled;
@@ -78,7 +78,7 @@ void CLightDirectionalComponent::Initialize()
 		{
 			auto &entTgt = shouldPassData.entity;
 			auto pTrComponent = entTgt.GetTransformComponent();
-			if(pTrComponent.expired())
+			if(pTrComponent == nullptr)
 			{
 				shouldPassData.shouldPass = false;
 				return util::EventReply::Handled;
@@ -119,7 +119,7 @@ void CLightDirectionalComponent::Initialize()
 
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 	{
 		Vector3 pos = pTrComponent->GetPosition();
 		auto dir = pTrComponent->GetForward();
@@ -135,7 +135,7 @@ void CLightDirectionalComponent::Initialize()
 			if(pLight == nullptr || type != util::pragma::LightType::Directional)
 				return util::EventReply::Unhandled;
 			auto pTrComponent = pLight->GetEntity().GetTransformComponent();
-			if(pTrComponent.valid())
+			if(pTrComponent != nullptr)
 				pTrComponent->SetRotation(trC.GetRotation());
 			return util::EventReply::Unhandled;
 		}),CallbackType::Entity);
@@ -322,7 +322,7 @@ void CLightDirectionalComponent::UpdateFrustum(uint32_t frustumId)
 	auto pLightComponent = ent.GetComponent<CLightComponent>();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pToggleComponent = ent.GetComponent<CToggleComponent>();
-	if((pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false) || pLightComponent.expired() || pTrComponent.expired())
+	if((pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false) || pLightComponent.expired() || pTrComponent == nullptr)
 		return;
 	auto hShadow = GetEntity().GetComponent<CShadowCSMComponent>();
 	if(hShadow.expired())
@@ -337,7 +337,7 @@ void CLightDirectionalComponent::UpdateFrustum()
 	auto pLightComponent = ent.GetComponent<CLightComponent>();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pToggleComponent = ent.GetComponent<CToggleComponent>();
-	if((pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false) || pLightComponent.expired() || pTrComponent.expired())
+	if((pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false) || pLightComponent.expired() || pTrComponent == nullptr)
 		return;
 	auto hShadow = GetEntity().GetComponent<CShadowCSMComponent>();
 	if(hShadow.expired())

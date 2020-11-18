@@ -63,7 +63,7 @@ void BaseVehicleComponent::InitializeVehiclePhysics(PHYSICSTYPE type,BasePhysics
 	auto mdlComponent = ent.GetModelComponent();
 	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(mdl == nullptr || pPhysComponent.expired())
+	if(mdl == nullptr || !pPhysComponent)
 		return;
 	auto &colMeshes = mdl->GetCollisionMeshes();
 	if(colMeshes.empty())
@@ -161,7 +161,7 @@ void BaseVehicleComponent::InitializeSteeringWheel()
 
 	m_cbSteeringWheel = pAttachableComponent->AddEventCallback(BaseAttachableComponent::EVENT_ON_ATTACHMENT_UPDATE,[this,pAttachableComponent](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto pTrComponentSteeringWheel = pAttachableComponent->GetEntity().GetTransformComponent();
-		if(pTrComponentSteeringWheel.expired())
+		if(!pTrComponentSteeringWheel)
 			return util::EventReply::Unhandled;
 		auto ang = EulerAngles(-GetSteeringFactor() *m_maxSteeringWheelAngle,0.f,0.f);
 		auto rot = uquat::create(ang);
@@ -301,7 +301,7 @@ void BaseVehicleComponent::Initialize()
 
 	BindEvent(BasePhysicsComponent::EVENT_INITIALIZE_PHYSICS,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto pPhysComponent = GetEntity().GetPhysicsComponent();
-		if(pPhysComponent.expired())
+		if(!pPhysComponent)
 			return util::EventReply::Unhandled;
 		auto &physInitData = static_cast<CEInitializePhysics&>(evData.get());
 		if(physInitData.physicsType != PHYSICSTYPE::DYNAMIC)
@@ -318,7 +318,7 @@ void BaseVehicleComponent::Initialize()
 
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent)
 		pPhysComponent->SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter() | CollisionMask::Vehicle);
 	ent.AddComponent("model");
 	ent.AddComponent("physics");

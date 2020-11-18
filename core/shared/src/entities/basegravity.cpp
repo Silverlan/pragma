@@ -124,7 +124,7 @@ void GravityComponent::Initialize()
 void GravityComponent::ApplyGravity(double dt)
 {
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
-	auto *pPhys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	auto *pPhys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(pPhys == nullptr || pPhys->IsDisabled() == true)
 		return;
 	auto moveType = pPhysComponent->GetMoveType();
@@ -261,7 +261,7 @@ bool GravityComponent::CalcBallisticVelocity(const Vector3 &origin,const Vector3
 
 	// Clamp to maximum angles
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 	{
 		auto velAng = uvec::to_angle(vel);
 		auto ang = pTrComponent->GetAngles();

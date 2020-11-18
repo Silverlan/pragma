@@ -166,7 +166,7 @@ bool CLightComponent::IsInCone(const CBaseEntity &ent,const Vector3 &dir,float a
 	auto pRenderComponent = ent.GetRenderComponent();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pTrComponentThis = GetEntity().GetTransformComponent();
-	if(pRenderComponent.expired() || pTrComponent.expired() || pTrComponentThis.expired())
+	if(!pRenderComponent || pTrComponent == nullptr || !pTrComponentThis)
 		return false;
 	auto &start = pTrComponentThis->GetPosition();
 	auto sphere = pRenderComponent->GetRenderSphereBounds();
@@ -195,7 +195,7 @@ bool CLightComponent::IsInRange(const CBaseEntity &ent) const
 	auto pRenderComponent = ent.GetRenderComponent();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pTrComponentThis = GetEntity().GetTransformComponent();
-	if(pRadiusComponent.expired() || pRenderComponent.expired() || pTrComponent.expired() || pTrComponentThis.expired())
+	if(pRadiusComponent.expired() || !pRenderComponent || pTrComponent == nullptr || !pTrComponentThis)
 		return false;
 	auto &origin = pTrComponentThis->GetPosition();
 	auto sphere = pRenderComponent->GetRenderSphereBounds();
@@ -208,7 +208,7 @@ bool CLightComponent::IsInRange(const CBaseEntity &ent,const CModelMesh &mesh) c
 	auto pRadiusComponent = GetEntity().GetComponent<CRadiusComponent>();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pTrComponentThis = GetEntity().GetTransformComponent();
-	if(pRadiusComponent.expired() || pTrComponent.expired() || pTrComponentThis.expired())
+	if(pRadiusComponent.expired() || pTrComponent == nullptr || !pTrComponentThis)
 		return false;
 	auto &origin = pTrComponentThis->GetPosition();
 	auto radius = pRadiusComponent->GetRadius();
@@ -394,7 +394,7 @@ void CLightComponent::Initialize()
 			c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,sceneFlags),m_bufferData.sceneFlags);
 	});
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 		reinterpret_cast<Vector3&>(m_bufferData.position) = pTrComponent->GetPosition();
 	if(m_bufferData.direction.x == 0.f && m_bufferData.direction.y == 0.f && m_bufferData.direction.z == 0.f)
 		m_bufferData.direction.z = 1.f;

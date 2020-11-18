@@ -150,7 +150,7 @@ void SWaterComponent::CreateSplash(const Vector3 &origin,float radius,float forc
 {
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired() || pPhysComponent->GetPhysicsObject() == nullptr)
+	if(pPhysComponent == nullptr || pPhysComponent->GetPhysicsObject() == nullptr)
 		return;
 	BaseFuncWaterComponent::CreateSplash(origin,radius,force);
 	if(ent.IsShared() == false)
@@ -164,13 +164,13 @@ void SWaterComponent::CreateSplash(const Vector3 &origin,float radius,float forc
 const Vector3 &SWaterComponent::GetPosition() const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	return pTrComponent.valid() ? pTrComponent->GetPosition() : uvec::ORIGIN;
+	return pTrComponent != nullptr ? pTrComponent->GetPosition() : uvec::ORIGIN;
 }
 const Quat &SWaterComponent::GetOrientation() const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	static auto identity = uquat::identity();
-	return pTrComponent.valid() ? pTrComponent->GetRotation() : identity;
+	return pTrComponent != nullptr ? pTrComponent->GetRotation() : identity;
 }
 
 ///////////////

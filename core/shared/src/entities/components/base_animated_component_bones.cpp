@@ -164,7 +164,7 @@ Bool BaseAnimatedComponent::GetGlobalBonePosition(UInt32 boneId,Vector3 &pos,Qua
 	if(GetLocalBonePosition(boneId,pos,rot,scale) == false)
 		return false;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.expired())
+	if(!pTrComponent)
 		return true;
 	uvec::local_to_world(pTrComponent->GetOrigin(),pTrComponent->GetRotation(),pos,rot);//uvec::local_to_world(GetOrigin(),GetOrientation(),pos,rot);
 	return true;
@@ -174,7 +174,7 @@ Bool BaseAnimatedComponent::GetGlobalBonePosition(UInt32 boneId,Vector3 &pos) co
 	if(GetLocalBonePosition(boneId,pos) == false)
 		return false;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.expired())
+	if(!pTrComponent)
 		return true;
 	uvec::local_to_world(pTrComponent->GetOrigin(),pTrComponent->GetRotation(),pos);//uvec::local_to_world(GetOrigin(),GetOrientation(),pos);
 	return true;
@@ -184,7 +184,7 @@ Bool BaseAnimatedComponent::GetGlobalBoneRotation(UInt32 boneId,Quat &rot) const
 	if(GetLocalBoneRotation(boneId,rot) == false)
 		return false;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.expired())
+	if(!pTrComponent)
 		return true;
 	uvec::local_to_world(pTrComponent->GetRotation(),rot);
 	return true;
@@ -252,7 +252,7 @@ void BaseAnimatedComponent::SetLocalBonePosition(UInt32 boneId,const Vector3 &po
 	auto nrot = rot;
 	auto nscale = scale;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	get_local_bone_position(hModel,m_bones,bone,pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f},&npos,&nrot,&nscale);
+	get_local_bone_position(hModel,m_bones,bone,pTrComponent ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f},&npos,&nrot,&nscale);
 	SetBonePosition(boneId,npos,nrot,nscale);
 }
 void BaseAnimatedComponent::SetLocalBonePosition(UInt32 boneId,const Vector3 &pos,const Quat &rot)
@@ -270,7 +270,7 @@ void BaseAnimatedComponent::SetLocalBonePosition(UInt32 boneId,const Vector3 &po
 	auto npos = pos;
 	auto nrot = rot;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	get_local_bone_position(hModel,m_bones,bone,pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f},&npos,&nrot);
+	get_local_bone_position(hModel,m_bones,bone,pTrComponent ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f},&npos,&nrot);
 	SetBonePosition(boneId,npos,nrot);
 }
 void BaseAnimatedComponent::SetLocalBonePosition(UInt32 boneId,const Vector3 &pos)
@@ -287,7 +287,7 @@ void BaseAnimatedComponent::SetLocalBonePosition(UInt32 boneId,const Vector3 &po
 		return;
 	auto npos = pos;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	get_local_bone_position(hModel,m_bones,bone,pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f},&npos);
+	get_local_bone_position(hModel,m_bones,bone,pTrComponent ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f},&npos);
 	SetBonePosition(boneId,npos);
 }
 void BaseAnimatedComponent::SetLocalBoneRotation(UInt32 boneId,const Quat &rot)
@@ -304,7 +304,7 @@ void BaseAnimatedComponent::SetLocalBoneRotation(UInt32 boneId,const Quat &rot)
 		return;
 	auto nrot = rot;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	get_local_bone_position(hModel,m_bones,bone,pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f},nullptr,&nrot);
+	get_local_bone_position(hModel,m_bones,bone,pTrComponent ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f},nullptr,&nrot);
 	SetBoneRotation(boneId,nrot);
 }
 

@@ -74,7 +74,7 @@ void BaseFuncKinematicComponent::OnEntitySpawn()
 	BaseEntityComponent::OnEntitySpawn();
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 	{
 		pPhysComponent->InitializePhysics(PHYSICSTYPE::DYNAMIC);
 		pPhysComponent->SetKinematic(true);
@@ -111,14 +111,14 @@ void BaseFuncKinematicComponent::MoveToTarget(BaseEntity *node,float speed)
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	auto *phys = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(phys == nullptr || phys->IsStatic())
 		return;
 	auto pTrComponent = ent.GetTransformComponent();
 	auto *kinematic = dynamic_cast<PhysObjKinematic*>(phys);
-	auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 	auto pTrComponentNode = node->GetTransformComponent();
-	auto posTarget = pTrComponentNode.valid() ? pTrComponentNode->GetPosition() : Vector3{};
+	auto posTarget = pTrComponentNode ? pTrComponentNode->GetPosition() : Vector3{};
 	auto dir = posTarget -pos;
 	uvec::normalize(&dir);
 	float d = glm::distance(pos,posTarget);

@@ -73,7 +73,7 @@ void CShooterComponent::FireBullets(const BulletInfo &bulletInfo,const Vector3 &
 							if(pt != nullptr)
 							{
 								auto pTrComponent = pt->GetEntity().GetTransformComponent();
-								if(pTrComponent.valid())
+								if(pTrComponent != nullptr)
 								{
 									pTrComponent->SetPosition(result.position);
 

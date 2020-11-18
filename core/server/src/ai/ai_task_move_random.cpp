@@ -40,7 +40,7 @@ ai::BehaviorNode::Result ai::TaskMoveRandom::Start(const Schedule *sched,pragma:
 {
 	BehaviorNode::Start(sched,ent);
 	auto pTrComponent = ent.GetEntity().GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return Result::Failed;
 	auto dist = GetMoveDistance(sched);
 	auto dir2 = uvec::create_random_unit_vector2();

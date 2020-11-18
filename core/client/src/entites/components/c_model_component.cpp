@@ -12,19 +12,15 @@
 #include "pragma/model/c_modelmanager.h"
 
 using namespace pragma;
-#pragma optimize("",off)
+
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 
-ComponentEventId CModelComponent::EVENT_ON_UPDATE_LOD = INVALID_COMPONENT_ID;
-ComponentEventId CModelComponent::EVENT_ON_UPDATE_LOD_BY_POS = INVALID_COMPONENT_ID;
 ComponentEventId CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED = INVALID_COMPONENT_ID;
 luabind::object CModelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CModelComponentHandleWrapper>(l);}
 void CModelComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	BaseModelComponent::RegisterEvents(componentManager);
-	EVENT_ON_UPDATE_LOD = componentManager.RegisterEvent("EVENT_ON_UPDATE_LOD",std::type_index(typeid(CModelComponent)));
-	EVENT_ON_UPDATE_LOD_BY_POS = componentManager.RegisterEvent("EVENT_ON_UPDATE_LOD_BY_POS",std::type_index(typeid(CModelComponent)));
 	EVENT_ON_RENDER_MESHES_UPDATED = componentManager.RegisterEvent("EVENT_ON_RENDER_MESHES_UPDATED");
 }
 
@@ -105,14 +101,10 @@ bool CModelComponent::IsWeighted() const
 	return animComponent.valid() && animComponent->GetBoneCount() > 0u;
 }
 
-unsigned char CModelComponent::GetLOD() {return m_lod;}
+uint32_t CModelComponent::GetLOD() const {return m_lod;}
 
 void CModelComponent::UpdateLOD(UInt32 lod)
 {
-	//lod = 0u;
-	CEOnUpdateLOD evData{lod};
-	if(InvokeEventCallbacks(EVENT_ON_UPDATE_LOD,evData) == util::EventReply::Handled)
-		return;
 	//std::unordered_map<unsigned int,RenderInstance*>::iterator it = m_renderInstances.find(m_lod);
 	//if(it != m_renderInstances.end())
 	//	it->second->SetEnabled(false);
@@ -137,16 +129,17 @@ void CModelComponent::UpdateLOD(UInt32 lod)
 	BroadcastEvent(EVENT_ON_RENDER_MESHES_UPDATED);
 }
 
-void CModelComponent::SetLOD(uint8_t lod) {m_lod = lod;}
+void CModelComponent::SetLOD(uint32_t lod) {m_lod = lod;}
+
+void CModelComponent::SetAutoLodEnabled(bool enabled) {umath::set_flag(m_stateFlags,StateFlags::AutoLodDisabled,enabled);}
+bool CModelComponent::IsAutoLodEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::AutoLodDisabled);}
 
 void CModelComponent::UpdateLOD(const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp)
 {
+	if(IsAutoLodEnabled() == false)
+		return;
 	auto &mdl = GetModel();
 	if(mdl == nullptr || mdl->GetLODCount() == 0)
-		return;
-
-	CEOnUpdateLODByPos evData{scene,cam,vp};
-	if(InvokeEventCallbacks(EVENT_ON_UPDATE_LOD_BY_POS,evData) == util::EventReply::Handled)
 		return;
 
 	// TODO: This needs optimizing
@@ -206,26 +199,3 @@ void CModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 	UpdateLOD(0);
 	BaseModelComponent::OnModelChanged(model);
 }
-
-///////////////
-
-CEOnUpdateLOD::CEOnUpdateLOD(uint32_t lod)
-	: lod{lod}
-{}
-void CEOnUpdateLOD::PushArguments(lua_State *l)
-{
-	Lua::PushInt(l,lod);
-}
-
-///////////////
-
-CEOnUpdateLODByPos::CEOnUpdateLODByPos(const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp)
-	: scene{scene},camera{cam},viewProjection{vp}
-{}
-void CEOnUpdateLODByPos::PushArguments(lua_State *l)
-{
-	scene.GetLuaObject().push(l);
-	camera.GetLuaObject().push(l);
-	Lua::Push<Mat4>(l,viewProjection);
-}
-#pragma optimize("",on)

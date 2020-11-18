@@ -871,7 +871,7 @@ void Console::commands::debug_pbr_ibl(NetworkState *state,pragma::BasePlayerComp
 	for(auto *ent : entIt)
 	{
 		auto trC = ent->GetTransformComponent();
-		if(trC.expired())
+		if(!trC)
 			continue;
 		auto d = uvec::distance_sqr(origin,trC->GetOrigin());
 		if(d > dClosest)

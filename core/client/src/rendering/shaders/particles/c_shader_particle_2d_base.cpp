@@ -197,7 +197,7 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(
 ) const
 {
 	auto pTrComponent = particle.GetEntity().GetTransformComponent();
-	auto rot = pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity();
+	auto rot = pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity();
 
 	nearZ = camNearZ;
 	farZ = camFarZ;

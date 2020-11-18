@@ -23,9 +23,13 @@ namespace pragma
 		public CBaseNetComponent
 	{
 	public:
-		static ComponentEventId EVENT_ON_UPDATE_LOD;
-		static ComponentEventId EVENT_ON_UPDATE_LOD_BY_POS;
 		static ComponentEventId EVENT_ON_RENDER_MESHES_UPDATED;
+
+		enum class StateFlags : uint8_t
+		{
+			None = 0u,
+			AutoLodDisabled = 1u
+		};
 
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
@@ -47,7 +51,7 @@ namespace pragma
 		bool IsWeighted() const;
 
 		void UpdateLOD(uint32_t lod);
-		uint8_t GetLOD();
+		uint32_t GetLOD() const;
 		void UpdateLOD(const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp);
 		std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes();
 		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes() const;
@@ -57,36 +61,21 @@ namespace pragma
 		using BaseModelComponent::SetModel;
 		virtual bool SetBodyGroup(uint32_t groupId,uint32_t id) override;
 
+		void SetAutoLodEnabled(bool enabled);
+		bool IsAutoLodEnabled() const;
+
 		// Only use if LOD is handled externally!
-		void SetLOD(uint8_t lod);
+		void SetLOD(uint32_t lod);
 	protected:
 		virtual void OnModelChanged(const std::shared_ptr<Model> &model) override;
 
 		std::vector<MaterialHandle> m_materialOverrides = {};
-		uint8_t m_lod = 0u; // Current level of detail
+		uint32_t m_lod = 0u;
+		StateFlags m_stateFlags = StateFlags::None;
 		std::vector<std::shared_ptr<ModelMesh>> m_lodMeshes;
 		std::vector<std::shared_ptr<ModelSubMesh>> m_renderMeshes;
 	};
-
-	// Events
-
-	struct DLLCLIENT CEOnUpdateLOD
-		: public ComponentEvent
-	{
-		CEOnUpdateLOD(uint32_t lod);
-		virtual void PushArguments(lua_State *l) override;
-		uint32_t lod;
-	};
-
-	struct DLLCLIENT CEOnUpdateLODByPos
-		: public ComponentEvent
-	{
-		CEOnUpdateLODByPos(const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp);
-		virtual void PushArguments(lua_State *l) override;
-		const CSceneComponent &scene;
-		const CCameraComponent &camera;
-		const Mat4 &viewProjection;
-	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::CModelComponent::StateFlags)
 
 #endif

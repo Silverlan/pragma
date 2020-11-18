@@ -22,7 +22,7 @@ void CButtonComponent::Initialize()
 {
 	BaseFuncButtonComponent::Initialize();
 	auto pRenderComponent = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
-	if(pRenderComponent.valid())
+	if(pRenderComponent)
 		pRenderComponent->SetRenderMode(RenderMode::World);
 }
 luabind::object CButtonComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CButtonComponentHandleWrapper>(l);}

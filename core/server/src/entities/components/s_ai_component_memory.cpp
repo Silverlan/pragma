@@ -125,7 +125,7 @@ ai::Memory::Fragment *SAIComponent::Memorize(BaseEntity *ent,ai::Memory::MemoryT
 	if(&GetEntity() == ent || HasCharacterNoTargetEnabled(*ent) == true)
 		return nullptr;
 	auto pTrComponent = ent->GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return nullptr;
 	ai::Memory::Fragment *fragment = nullptr;
 	if(m_memory.Memorize(*ent,memType,pos,uvec::distance(pTrComponent->GetEyePosition(),pos),vel,&fragment) == true)
@@ -135,7 +135,7 @@ ai::Memory::Fragment *SAIComponent::Memorize(BaseEntity *ent,ai::Memory::MemoryT
 ai::Memory::Fragment *SAIComponent::Memorize(BaseEntity *ent,ai::Memory::MemoryType memType)
 {
 	auto pTrComponent = ent->GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return nullptr;
 	auto pVelComponent = ent->GetComponent<pragma::VelocityComponent>();
 	return Memorize(ent,memType,pTrComponent->GetEyePosition(),pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3{});

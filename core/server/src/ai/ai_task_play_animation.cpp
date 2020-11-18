@@ -142,7 +142,7 @@ bool ai::TaskPlayAnimation::GetFaceTarget(const Schedule *sched,pragma::SAICompo
 		if(ent != nullptr)
 		{
 			auto pTrComponentEnt = ent->GetTransformComponent();
-			if(pTrComponentEnt.expired())
+			if(!pTrComponentEnt)
 				return false;
 			tgt = pTrComponentEnt->GetPosition();
 			return true;
@@ -154,7 +154,7 @@ bool ai::TaskPlayAnimation::GetFaceTarget(const Schedule *sched,pragma::SAICompo
 		if(fragment == nullptr || !fragment->hEntity.IsValid())
 			return false;
 		auto pTrComponentTgt = fragment->hEntity.get()->GetTransformComponent();
-		if(pTrComponentTgt.expired())
+		if(!pTrComponentTgt)
 			return false;
 		tgt = pTrComponentTgt->GetPosition();
 		return true;

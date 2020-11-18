@@ -61,7 +61,7 @@ std::shared_ptr<ALSound> CSoundEmitterComponent::EmitSound(std::string sndname,A
 	ALSound *al = snd.get();
 	al->SetGain(gain);
 	al->SetPitch(pitch);
-	al->SetPosition(pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{});
+	al->SetPosition(pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{});
 	//al->SetVelocity(*GetVelocity());
 	// TODO: Orientation
 	al->Play();

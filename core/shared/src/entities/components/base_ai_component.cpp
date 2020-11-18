@@ -66,7 +66,7 @@ bool BaseAIComponent::TurnStep(const Vector3 &target,float &turnAngle,const floa
 	}
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(!pTrComponent)
 		return true;
 	auto *nw = ent.GetNetworkState();
 	auto *game = nw->GetGameState();
@@ -304,7 +304,7 @@ void BaseAIComponent::OnPhysicsInitialized()
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent)
 		pPhysComponent->AddCollisionFilter(CollisionMask::NPC);
 }
 

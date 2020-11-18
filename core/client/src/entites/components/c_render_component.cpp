@@ -135,7 +135,7 @@ void CRenderComponent::Initialize()
 		Vector3 rMin,rMax;
 		mdl->GetRenderBounds(rMin,rMax);
 		auto pPhysComponent = ent.GetPhysicsComponent();
-		auto lorigin = pPhysComponent.valid() ? pPhysComponent->GetLocalOrigin() : Vector3{};
+		auto lorigin = pPhysComponent != nullptr ? pPhysComponent->GetLocalOrigin() : Vector3{};
 		rMin += lorigin;
 		rMax += lorigin;
 		SetRenderBounds(rMin,rMax);
@@ -175,13 +175,13 @@ Sphere CRenderComponent::GetRenderSphereBounds() const
 	auto r = m_renderSphere;
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 	{
 		auto scale = pTrComponent->GetScale();
 		r.radius *= umath::abs_max(scale.x,scale.y,scale.z);
 	}
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return r;
 	auto physType = pPhysComponent->GetPhysicsType();
 	if(physType == PHYSICSTYPE::DYNAMIC || physType == PHYSICSTYPE::STATIC)
@@ -205,14 +205,14 @@ void CRenderComponent::GetRenderBounds(Vector3 *min,Vector3 *max) const
 	*max = m_renderMax;
 	auto &ent = GetEntity();
 	auto ptrComponent = ent.GetTransformComponent();
-	if(ptrComponent.valid())
+	if(ptrComponent != nullptr)
 	{
 		auto &scale = ptrComponent->GetScale();
 		*min *= scale;
 		*max *= scale;
 	}
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	auto physType = pPhysComponent->GetPhysicsType();
 	if(physType != PHYSICSTYPE::DYNAMIC && physType != PHYSICSTYPE::STATIC)
@@ -227,14 +227,14 @@ void CRenderComponent::GetRotatedRenderBounds(Vector3 *min,Vector3 *max)
 	*max = m_renderMaxRot;
 	auto &ent = GetEntity();
 	auto ptrComponent = ent.GetTransformComponent();
-	if(ptrComponent.valid())
+	if(ptrComponent != nullptr)
 	{
 		auto &scale = ptrComponent->GetScale();
 		*min = scale;
 		*max = scale;
 	}
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	auto physType = pPhysComponent->GetPhysicsType();
 	if(physType != PHYSICSTYPE::DYNAMIC && physType != PHYSICSTYPE::STATIC)
@@ -262,7 +262,7 @@ void CRenderComponent::SetRenderBounds(Vector3 min,Vector3 max)
 void CRenderComponent::UpdateRenderBounds()
 {
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
-	auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	auto *phys = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(phys == nullptr || pPhysComponent->GetPhysicsType() != PHYSICSTYPE::SOFTBODY || !phys->IsSoftBody())
 		AABB::GetRotatedBounds(m_renderMin,m_renderMax,Mat4{m_renderPose.GetRotation()},&m_renderMinRot,&m_renderMaxRot); // TODO: Use orientation
 	else
@@ -312,15 +312,15 @@ void CRenderComponent::UpdateMatrices()
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	auto orientation = pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity();
+	auto orientation = pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	umath::ScaledTransform pose {};
-	if(pPhysComponent.expired() || pPhysComponent->GetPhysicsType() != PHYSICSTYPE::SOFTBODY)
+	if(pPhysComponent == nullptr || pPhysComponent->GetPhysicsType() != PHYSICSTYPE::SOFTBODY)
 	{
-		pose.SetOrigin(pPhysComponent.valid() ? pPhysComponent->GetOrigin() : pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{});
+		pose.SetOrigin(pPhysComponent != nullptr ? pPhysComponent->GetOrigin() : pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{});
 		pose.SetRotation(orientation);
 	}
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 		pose.SetScale(pTrComponent->GetScale());
 	if(m_renderOffset.has_value())
 		pose = *m_renderOffset *pose;
@@ -639,7 +639,7 @@ std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes()
 bool CRenderComponent::RenderCallback(RenderObject *o,CBaseEntity *ent,pragma::CCameraComponent *cam,pragma::ShaderTextured3DBase *shader,Material *mat)
 {
 	auto pRenderComponent = ent->GetRenderComponent();
-	return pRenderComponent.valid() && pRenderComponent->RenderCallback(o,cam,shader,mat);
+	return pRenderComponent && pRenderComponent->RenderCallback(o,cam,shader,mat);
 }
 bool CRenderComponent::RenderCallback(RenderObject*,pragma::CCameraComponent *cam,pragma::ShaderTextured3DBase*,Material*)
 {

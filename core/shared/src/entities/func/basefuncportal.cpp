@@ -23,7 +23,7 @@ void BaseFuncPortalComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
 }

@@ -69,7 +69,7 @@ void SWeaponComponent::Drop()
 	pOwnerComponent->ClearOwner();
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto *phys = pPhysComponent.valid() ? pPhysComponent->InitializePhysics(PHYSICSTYPE::DYNAMIC) : nullptr;
+	auto *phys = pPhysComponent != nullptr ? pPhysComponent->InitializePhysics(PHYSICSTYPE::DYNAMIC) : nullptr;
 	if(owner != nullptr && owner->IsPlayer())
 	{
 		auto &ent = GetEntity();
@@ -81,7 +81,7 @@ void SWeaponComponent::Drop()
 		if(hEnt.IsValid() == false)
 			return;
 		auto pTrComponent = ent.GetTransformComponent();
-		if(pTrComponent.expired())
+		if(pTrComponent == nullptr)
 			return;
 		auto pos = pTrComponent->GetEyePosition();
 		auto ang = charComponent.valid() ? charComponent->GetViewAngles() : pTrComponent->GetAngles();
@@ -101,7 +101,7 @@ void SWeaponComponent::Drop()
 			return;
 		}
 	}
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->DropToFloor();
 }
 
@@ -140,7 +140,7 @@ void SWeaponComponent::OnEntitySpawn()
 	BaseWeaponComponent::OnEntitySpawn();
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->InitializePhysics(PHYSICSTYPE::DYNAMIC);
 }
 

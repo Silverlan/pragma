@@ -77,7 +77,7 @@ bool ShaderPrepassBase::BeginDraw(
 	return ShaderScene::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx),recordFlags) == true &&
 		BindClipPlane(clipPlane) == true &&
 		RecordPushConstants(drawOrigin,offsetof(PushConstants,drawOrigin)) &&
-		// RecordPushConstants(pragma::CSceneComponent::DebugMode::None,offsetof(PushConstants,debugMode)) &&
+		// RecordPushConstants(pragma::SceneDebugMode::None,offsetof(PushConstants,debugMode)) &&
 		cmdBuffer->RecordSetDepthBias() == true;
 }
 

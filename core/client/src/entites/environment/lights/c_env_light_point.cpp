@@ -50,7 +50,7 @@ void CLightPointComponent::Initialize()
 		auto pRenderComponent = ent.GetRenderComponent();
 		auto pTrComponent = ent.GetTransformComponent();
 		auto pTrComponentThis = GetEntity().GetTransformComponent();
-		if(pRenderComponent.expired() || pTrComponent.expired() || pTrComponentThis.expired())
+		if(!pRenderComponent || pTrComponent == nullptr || !pTrComponentThis)
 		{
 			shouldPassData.shouldPass = false;
 			return util::EventReply::Handled;
@@ -197,7 +197,7 @@ void CLightPointComponent::UpdateViewMatrices()
 	auto b = m_bSkipMatrixUpdate;
 	m_bSkipMatrixUpdate = true;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 	SetViewMatrix(glm::lookAtRH(pos,pos +directions[umath::to_integral(CubeMapSide::Left)],Vector3(0,1,0)),umath::to_integral(CubeMapSide::Left));//umat::look_at(pos,pos +Vector3(1,0,0),Vector3(0,1,0)),1); // Vulkan TODO
 	SetViewMatrix(glm::lookAtRH(pos,pos +directions[umath::to_integral(CubeMapSide::Right)],Vector3(0,1,0)),umath::to_integral(CubeMapSide::Right));
 	SetViewMatrix(glm::lookAtRH(pos,pos +directions[umath::to_integral(CubeMapSide::Top)],Vector3(0,0,-1)),umath::to_integral(CubeMapSide::Top));

@@ -46,10 +46,10 @@ void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 			auto pTrComponent = ent->GetTransformComponent();
 			auto pVelComponent = ent->GetComponent<pragma::VelocityComponent>();
 			nwm::write_entity(packet,ent);
-			nwm::write_vector(packet,pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{});
+			nwm::write_vector(packet,pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{});
 			nwm::write_vector(packet,pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3{});
 			nwm::write_vector(packet,pVelComponent.valid() ? pVelComponent->GetAngularVelocity() : Vector3{});
-			nwm::write_quat(packet,pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity());
+			nwm::write_quat(packet,pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity());
 
 			auto offsetEntData = packet->GetSize();
 			packet->Write<UInt8>(UInt8(0));
@@ -66,7 +66,7 @@ void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 			packet->Write<decltype(flags)>(flags);
 
 			auto pPhysComponent = ent->GetPhysicsComponent();
-			PhysObj *physObj = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+			PhysObj *physObj = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
 			if(physObj != NULL && !physObj->IsStatic())
 			{
 				flags |= pragma::SnapshotFlags::PhysicsData;

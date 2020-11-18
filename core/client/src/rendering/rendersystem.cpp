@@ -39,7 +39,7 @@ extern DLLCLIENT CGame *c_game;
 
 // Disables rendering of meshes and shadows; For debug purposes only!
 #define DEBUG_RENDER_DISABLED 0
-#pragma optimize("",off)
+
 RenderSystem::TranslucentMesh::TranslucentMesh(CBaseEntity *_ent,CModelSubMesh *_mesh,Material *_mat,::util::WeakHandle<prosper::Shader> shader,float _distance)
 	: ent(_ent),mesh(_mesh),distance(_distance),material(_mat),shader(shader)
 {}
@@ -209,7 +209,7 @@ void RenderSystem::Render(
 				pipelineType
 			) == false)
 				continue;
-			if(debugMode != pragma::CSceneComponent::DebugMode::None)
+			if(debugMode != pragma::SceneDebugMode::None)
 				shader->SetDebugMode(debugMode);
 			shader->Set3DSky(renderAs3dSky);
 			shaderPrev = shader;
@@ -231,7 +231,7 @@ void RenderSystem::Render(
 			{
 			// TODO: Enable/disable shadows
 				entPrev = ent;
-				renderC = entPrev->GetRenderComponent().get();
+				renderC = entPrev->GetRenderComponent();
 				if(shader->BindEntity(*meshInfo->ent) == false || renderC == nullptr || (drawSceneInfo.renderFilter && drawSceneInfo.renderFilter(*ent) == false))
 				{
 					renderC = nullptr;
@@ -258,7 +258,7 @@ void RenderSystem::Render(
 				continue;
 			auto *mesh = meshInfo->mesh;
 			auto pRenderComponent = ent->GetRenderComponent();
-			if(pRenderComponent.valid())
+			if(pRenderComponent)
 			{
 				auto pVertAnimComponent = ent->GetComponent<pragma::CVertexAnimatedComponent>();
 				auto &mdlComponent = pRenderComponent->GetModelComponent();
@@ -298,6 +298,9 @@ void RenderSystem::Render(
 
 uint32_t pragma::rendering::LightingStageRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue,RenderPassStats *optStats,std::optional<uint32_t> worldRenderQueueIndex)
 {
+	static auto skipRender = false;
+	if(skipRender)
+		return 0;
 	if(m_renderer == nullptr)
 		return 0;
 	m_stats = optStats;
@@ -378,4 +381,3 @@ uint32_t RenderSystem::Render(const util::DrawSceneInfo &drawSceneInfo,RenderMod
 	auto *renderInfo = scene->GetSceneRenderDesc().GetRenderInfo(renderMode);
 	return renderInfo ? Render(drawSceneInfo,*renderInfo,renderMode,flags,drawOrigin) : 0;*/
 }
-#pragma optimize("",on)

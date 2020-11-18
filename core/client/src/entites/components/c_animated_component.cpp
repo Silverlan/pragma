@@ -21,7 +21,7 @@ extern DLLCENGINE CEngine *c_engine;
 using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 ComponentEventId CAnimatedComponent::EVENT_ON_SKELETON_UPDATED = INVALID_COMPONENT_ID;
 ComponentEventId CAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED = INVALID_COMPONENT_ID;
 ComponentEventId CAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED = INVALID_COMPONENT_ID;
@@ -164,7 +164,7 @@ void CAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 						if(pAttachableComponent.valid())
 						{
 							auto pTrComponentPt = entPt.GetTransformComponent();
-							if(pTrComponentPt.valid())
+							if(pTrComponentPt)
 							{
 								pTrComponentPt->SetPosition(translation);
 								pTrComponentPt->SetRotation(rotation);
@@ -291,4 +291,3 @@ void CEOnBoneBufferInitialized::PushArguments(lua_State *l)
 {
 	Lua::Push<std::shared_ptr<Lua::Vulkan::Buffer>>(l,buffer);
 }
-#pragma optimize("",on)

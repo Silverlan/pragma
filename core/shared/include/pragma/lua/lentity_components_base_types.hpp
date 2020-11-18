@@ -1511,13 +1511,13 @@ namespace Lua
 		}));
 		def.def("LookAt",static_cast<void(*)(lua_State*,THandle&,const Vector3&)>([](lua_State *l,THandle &hComponent,const Vector3 &lookAtPos) {
 			pragma::Lua::check_component(l,hComponent);
-			auto &trComponent = hComponent->GetEntity().GetTransformComponent();
-			if(trComponent.expired())
+			auto *trComponent = hComponent->GetEntity().GetTransformComponent();
+			if(!trComponent)
 				return;
 			auto &camPos = trComponent->GetPosition();
 			auto dir = lookAtPos -camPos;
 			uvec::normalize(&dir);
-			trComponent.get()->SetRotation(uquat::create_look_rotation(dir,trComponent->GetUp()));
+			trComponent->SetRotation(uquat::create_look_rotation(dir,trComponent->GetUp()));
 		}));
 		def.def("UpdateMatrices",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
 			pragma::Lua::check_component(l,hComponent);

@@ -133,7 +133,7 @@ void CPlayerComponent::OnDeployWeapon(BaseEntity &ent)
 	if(vm == nullptr)
 		return;
 	auto pRenderComponent = static_cast<CBaseEntity&>(vm->GetEntity()).GetRenderComponent();
-	if(pRenderComponent.valid())
+	if(pRenderComponent)
 		pRenderComponent->SetRenderMode(RenderMode::View); // TODO: Set render mode to none when weapon is holstered
 }
 
@@ -262,12 +262,12 @@ void CPlayerComponent::UpdateObserverCallback()
 		auto &rot = refRot.get();
 		//auto physType = ent->GetPhysicsType();
 		auto pTrComponentObs = obsC->GetEntity().GetTransformComponent();
-		auto camRot = (obsCamData == nullptr || obsCamData->angleLimits.has_value() == false) ? rot : pTrComponentObs.valid() ? pTrComponentObs->GetRotation() : uquat::identity();
+		auto camRot = (obsCamData == nullptr || obsCamData->angleLimits.has_value() == false) ? rot : pTrComponentObs ? pTrComponentObs->GetRotation() : uquat::identity();
 
 		auto pose = obsC->GetEntity().GetPose();
 		if(obsCamData && obsCamData->localOrigin.has_value())
 			pose.TranslateLocal(*obsCamData->localOrigin);
-		else if(pTrComponentObs.valid())
+		else if(pTrComponentObs)
 			pose.SetOrigin(pTrComponentObs->GetEyePosition());
 
 		auto &entThis = GetEntity();
@@ -278,10 +278,10 @@ void CPlayerComponent::UpdateObserverCallback()
 			if(charComponent.valid())
 				rot = charComponent->GetViewOrientation();
 			else
-				rot = pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity();
+				rot = pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity();
 		}
 		else
-			rot = pTrComponentObs.valid() ? pTrComponentObs->GetRotation() : uquat::identity();
+			rot = pTrComponentObs ? pTrComponentObs->GetRotation() : uquat::identity();
 
 		auto rotateWithObservee = (obsCamData && obsCamData->rotateWithObservee) ? true : false;
 		auto rotPos = camRot;
@@ -393,7 +393,7 @@ void CPlayerComponent::OnUpdateMatrices(Mat4 &transformMatrix)
 	if(IsLocalPlayer() && IsInFirstPersonMode())
 	{
 		auto pTrComponent = GetEntity().GetTransformComponent();
-		auto t = (pTrComponent.valid() ? pTrComponent->GetForward() : uvec::FORWARD) *VIEW_BODY_OFFSET;
+		auto t = (pTrComponent != nullptr ? pTrComponent->GetForward() : uvec::FORWARD) *VIEW_BODY_OFFSET;
 		transformMatrix = glm::translate(umat::identity(),t) *transformMatrix; // Translate to align shadow with view body
 	}
 }
@@ -432,10 +432,10 @@ void CPlayerComponent::Initialize()
 
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(pRenderComponent.valid())
+	if(pRenderComponent)
 		pRenderComponent->SetRenderMode(RenderMode::World);
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->SetCollisionType(COLLISIONTYPE::AABB);
 }
 
@@ -449,7 +449,7 @@ void CPlayerComponent::UpdateViewModelTransform()
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pTrComponentVm = vmEnt.GetTransformComponent();
-	if(pTrComponentVm.valid() && (charComponent.valid() || pTrComponent.valid()))
+	if(pTrComponentVm && (charComponent.valid() || pTrComponent != nullptr))
 	{
 		auto pos = charComponent.valid() ? charComponent->GetEyePosition() : pTrComponent->GetPosition();
 		auto &rot = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetRotation();
@@ -496,7 +496,7 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 		auto &entBody = body->GetEntity();
 		auto pTrComponent = ent.GetTransformComponent();
 		auto pTrComponentBody = body->GetEntity().GetTransformComponent();
-		if(pTrComponent.valid() && pTrComponentBody.valid())
+		if(pTrComponent != nullptr && pTrComponentBody)
 		{
 			Vector3 pos = pTrComponent->GetPosition() +pTrComponent->GetForward() *VIEW_BODY_OFFSET;
 			auto &rot = pTrComponent->GetRotation();
@@ -520,7 +520,7 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 		auto &entListener = listener->GetEntity();
 		auto pTrComponent = ent.GetTransformComponent();
 		auto pTrComponentListener = entListener.GetTransformComponent();
-		if(pTrComponent.valid() && pTrComponentListener.valid())
+		if(pTrComponent != nullptr && pTrComponentListener)
 		{
 			pTrComponentListener->SetPosition(pTrComponent->GetPosition());
 			pTrComponentListener->SetRotation(pTrComponent->GetRotation());
@@ -551,7 +551,7 @@ bool CPlayerComponent::ShouldDraw(const Vector3 &camOrigin) const
 bool CPlayerComponent::ShouldDrawShadow(const Vector3 &camOrigin) const
 {
 	auto pRenderComponent = static_cast<const CBaseEntity&>(GetEntity()).GetRenderComponent();
-	return pRenderComponent.valid() ? pRenderComponent->GetCastShadows() : false;;
+	return pRenderComponent ? pRenderComponent->GetCastShadows() : false;;
 }
 
 Vector3 &CPlayerComponent::GetViewOffset() {return m_viewOffset;}
@@ -621,7 +621,7 @@ void CPlayerComponent::ReceiveData(NetPacket &packet)
 		auto charComponent = entThis.GetCharacterComponent();
 		auto pTrComponentEnt = ent->GetTransformComponent();
 		auto pTrComponent = entThis.GetTransformComponent();
-		if(pTrComponentEnt.valid() && (charComponent.valid() || pTrComponent.valid()))
+		if(pTrComponentEnt && (charComponent.valid() || pTrComponent != nullptr))
 		{
 			pTrComponentEnt->SetPosition(charComponent.valid() ? (charComponent->GetEyePosition() +charComponent->GetViewRight() *12.f +charComponent->GetViewForward() *5.f) : pTrComponent->GetPosition());
 			pTrComponentEnt->SetRotation(charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetRotation());
@@ -704,7 +704,7 @@ void CPlayerComponent::OnSetCharacterOrientation(const Vector3 &up)
 		auto &ent = GetEntity();
 		auto charComponent = ent.GetCharacterComponent();
 		auto pTrComponent = ent.GetTransformComponent();
-		auto rotCur = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
+		auto rotCur = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent != nullptr ? pTrComponent->GetOrientation() : uquat::identity();
 		//auto &up = GetUpDirection();
 
 		auto rotRel = charComponent.valid() ? charComponent->GetOrientationAxesRotation() : uquat::identity();

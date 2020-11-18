@@ -52,13 +52,13 @@ ai::BehaviorNode::Result ai::TaskDebugDrawText::Start(const Schedule *sched,prag
 		return Result::Succeeded;
 	auto &ent = aiComponent.GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return Result::Failed;
 	auto pos = pTrComponent->GetPosition();
 	Vector3 min {};
 	Vector3 max {};
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		pPhysComponent->GetCollisionBounds(&min,&max);
 	pos.y += max.y;
 	SDebugRenderer::DrawText(msg,pos,0.5f,Color::White,1.f);

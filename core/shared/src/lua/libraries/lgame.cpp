@@ -207,7 +207,7 @@ int Lua::game::get_light_color(lua_State *l)
 		if(pLightComponent == nullptr || (pToggleComponent != nullptr && pToggleComponent->IsTurnedOn() == false))
 			continue;
 		auto pTrComponent = ent->GetTransformComponent();
-		auto lightPos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+		auto lightPos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 		auto pRadiusComponent = static_cast<pragma::BaseRadiusComponent*>(ent->FindComponent("radius").get());
 		auto lightDist = (pRadiusComponent != nullptr) ? pRadiusComponent->GetRadius() : 0.f;
 		auto dist = uvec::distance(pos,lightPos);
@@ -382,7 +382,7 @@ int Lua::game::raycast(lua_State *l)
 		auto pTrComponent = ent->GetTransformComponent();
 		auto mdlComponent = ent->GetModelComponent();
 		auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
-		if(hMdl == nullptr || pTrComponent.expired())
+		if(hMdl == nullptr || pTrComponent == nullptr)
 			continue;
 #ifdef ENABLE_DEPRECATED_PHYSICS
 		if(dataFilter != nullptr && filter->ShouldPass(ent,nullptr,nullptr) == false)

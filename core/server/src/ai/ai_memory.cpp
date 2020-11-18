@@ -45,7 +45,7 @@ void ai::Memory::Fragment::UpdateVisibility(float dist)
 	auto *ent = hEntity.get();
 
 	auto pTrComponent = ent->GetTransformComponent();
-	lastPosition = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	lastPosition = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 
 	auto pVelComponent = ent->GetComponent<pragma::VelocityComponent>();
 	lastVelocity = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3{};

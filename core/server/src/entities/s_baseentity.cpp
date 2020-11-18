@@ -28,6 +28,7 @@
 #include "pragma/entities/components/s_physics_component.hpp"
 #include "pragma/entities/components/s_time_scale_component.hpp"
 #include "pragma/entities/components/s_name_component.hpp"
+#include "pragma/entities/components/s_transform_component.hpp"
 #include <servermanager/sv_nwm_recipientfilter.h>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
@@ -68,7 +69,11 @@ void SBaseEntity::DoSpawn()
 void SBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 {
 	BaseEntity::OnComponentAdded(component);
-	if(typeid(component) == typeid(pragma::SWorldComponent))
+	if(typeid(component) == typeid(pragma::STransformComponent))
+		m_transformComponent = &static_cast<pragma::STransformComponent&>(component);
+	else if(typeid(component) == typeid(pragma::SPhysicsComponent))
+		m_physicsComponent = &static_cast<pragma::SPhysicsComponent&>(component);
+	else if(typeid(component) == typeid(pragma::SWorldComponent))
 		umath::set_flag(m_stateFlags,StateFlags::HasWorldComponent);
 }
 void SBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
@@ -76,6 +81,10 @@ void SBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
 	BaseEntity::OnComponentRemoved(component);
 	if(typeid(component) == typeid(pragma::SWorldComponent))
 		umath::set_flag(m_stateFlags,StateFlags::HasWorldComponent,false);
+	else if(typeid(component) == typeid(pragma::STransformComponent))
+		m_transformComponent = nullptr;
+	else if(typeid(component) == typeid(pragma::SPhysicsComponent))
+		m_physicsComponent = nullptr;
 }
 
 BaseEntity *SBaseEntity::GetClientsideEntity() const
@@ -247,11 +256,6 @@ util::WeakHandle<pragma::BasePlayerComponent> SBaseEntity::GetPlayerComponent() 
 {
 	auto pComponent = GetComponent<pragma::SPlayerComponent>();
 	return pComponent.valid() ? std::static_pointer_cast<pragma::BasePlayerComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BasePlayerComponent>{};
-}
-util::WeakHandle<pragma::BasePhysicsComponent> SBaseEntity::GetPhysicsComponent() const
-{
-	auto pComponent = GetComponent<pragma::SPhysicsComponent>();
-	return pComponent.valid() ? std::static_pointer_cast<pragma::BasePhysicsComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BasePhysicsComponent>{};
 }
 util::WeakHandle<pragma::BaseTimeScaleComponent> SBaseEntity::GetTimeScaleComponent() const
 {

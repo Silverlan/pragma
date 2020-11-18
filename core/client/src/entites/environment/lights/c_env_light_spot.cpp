@@ -119,7 +119,7 @@ void CLightSpotComponent::UpdateViewMatrices()
 	//SetViewMatrix(umat::look_at(GetPosition(),GetPosition() +m_dir,Vector3(0,1,0))); // Vulkan TODO
 	//SetViewMatrix(umat::look_at(GetPosition(),GetPosition() +m_dir,Vector3(0,1,0)));
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return;
 	auto dir = pTrComponent->GetForward();
 	SetViewMatrix(glm::lookAtRH(pTrComponent->GetPosition(),pTrComponent->GetPosition() +dir,uvec::get_perpendicular(dir)));

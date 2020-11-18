@@ -43,7 +43,7 @@ void CWeatherComponent::OnEntitySpawn()
 			auto &ent = pt->GetEntity();
 			auto pTrComponent = ent.GetTransformComponent();
 			auto pTrComponentPl = plEnt.GetTransformComponent();
-			if(pTrComponent.valid() && pTrComponentPl.valid())
+			if(pTrComponent != nullptr && pTrComponentPl)
 				pTrComponent->SetPosition(pTrComponentPl->GetPosition());
 			auto pAttComponent = ent.AddComponent<CAttachableComponent>();
 			if(pAttComponent.valid())

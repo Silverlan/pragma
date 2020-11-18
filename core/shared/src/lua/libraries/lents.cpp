@@ -118,7 +118,7 @@ int Lua::ents::create_trigger(lua_State *l)
 	if(ent == nullptr)
 		return 0;
 	auto pTrComponent = ent->GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 	{
 		if(ang != nullptr)
 			pTrComponent->SetAngles(*ang);
@@ -129,7 +129,7 @@ int Lua::ents::create_trigger(lua_State *l)
 	if(shape != nullptr)
 	{
 		auto pPhysComponent = ent->GetPhysicsComponent();
-		if(pPhysComponent.valid())
+		if(pPhysComponent != nullptr)
 			pPhysComponent->InitializePhysics(*shape);
 	}
 	lua_pushentity(l,ent);
@@ -194,7 +194,7 @@ int Lua::ents::get_closest(lua_State *l)
 	BaseEntity *entClosest = nullptr;
 	iterate_entities(l,[&dClosest,&entClosest,&origin](BaseEntity *ent) {
 		auto pTransformComponent = ent->GetTransformComponent();
-		if(pTransformComponent.expired())
+		if(!pTransformComponent)
 			return;
 		auto d = uvec::distance_sqr(pTransformComponent->GetPosition(),origin);
 		if(d >= dClosest)
@@ -215,7 +215,7 @@ int Lua::ents::get_farthest(lua_State *l)
 	BaseEntity *entClosest = nullptr;
 	iterate_entities(l,[&dFarthest,&entClosest,&origin](BaseEntity *ent) {
 		auto pTransformComponent = ent->GetTransformComponent();
-		if(pTransformComponent.expired())
+		if(!pTransformComponent)
 			return;
 		auto d = uvec::distance_sqr(pTransformComponent->GetPosition(),origin);
 		if(d <= dFarthest)
@@ -235,7 +235,7 @@ int Lua::ents::get_sorted_by_distance(lua_State *l)
 	std::vector<std::pair<BaseEntity*,float>> ents {};
 	iterate_entities(l,[&ents,&origin](BaseEntity *ent) {
 		auto pTransformComponent = ent->GetTransformComponent();
-		if(pTransformComponent.expired())
+		if(!pTransformComponent)
 			return;
 		auto d = uvec::distance_sqr(pTransformComponent->GetPosition(),origin);
 		ents.push_back({ent,d});

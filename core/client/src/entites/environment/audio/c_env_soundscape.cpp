@@ -52,7 +52,7 @@ void CSoundScapeComponent::Initialize()
 		auto pLogicComponent = entThis.GetComponent<pragma::LogicComponent>();
 		if(pLogicComponent.valid())
 			pLogicComponent->SetNextThink(c_game->CurTime() +0.25f);
-		if(pTrComponent.valid() && IsPlayerInRange())
+		if(pTrComponent != nullptr && IsPlayerInRange())
 		{
 			if(s_active != this)
 			{
@@ -60,7 +60,7 @@ void CSoundScapeComponent::Initialize()
 				auto &ent = pl->GetEntity();
 				auto charComponentEnt = ent.GetCharacterComponent();
 				auto pTrComponentEnt = ent.GetTransformComponent();
-				if(charComponentEnt.valid() || pTrComponentEnt.valid())
+				if(charComponentEnt.valid() || pTrComponentEnt)
 				{
 					TraceData tr;
 					tr.SetSource(charComponentEnt.valid() ? charComponentEnt->GetEyePosition() : pTrComponentEnt->GetPosition());
@@ -141,7 +141,7 @@ void CSoundScapeComponent::UpdateTargetPositions()
 		if(hEnt.IsValid())
 		{
 			auto pTrComponent = hEnt->GetTransformComponent();
-			if(pTrComponent.valid())
+			if(pTrComponent != nullptr)
 				al->SetTargetPosition(it->first,pTrComponent->GetPosition());
 		}
 	}
@@ -178,7 +178,7 @@ bool CSoundScapeComponent::IsPlayerInRange()
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pTrComponentPl = pl->GetEntity().GetTransformComponent();
-	if(pTrComponent.expired() || pTrComponentPl.expired())
+	if(pTrComponent == nullptr || !pTrComponentPl)
 		return false;
 	auto &origin = pTrComponent->GetPosition();
 	auto &pos = pTrComponentPl->GetPosition();

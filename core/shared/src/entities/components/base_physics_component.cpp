@@ -101,7 +101,7 @@ void BasePhysicsComponent::Initialize()
 Vector3 BasePhysicsComponent::GetCenter() const
 {
 	auto trComponent = GetEntity().GetTransformComponent();
-	if(trComponent.expired())
+	if(!trComponent)
 		return uvec::ORIGIN;
 	auto &pos = trComponent->GetPosition();
 	auto colCenter = GetCollisionCenter();
@@ -112,7 +112,7 @@ void BasePhysicsComponent::Sweep(const Vector3&,float) const {}
 float BasePhysicsComponent::GetAABBDistance(const Vector3 &p) const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	auto origin = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto origin = pTrComponent ? pTrComponent->GetPosition() : Vector3{};
 	Vector3 min,max;
 	GetCollisionBounds(&min,&max);
 	min += origin;
@@ -125,10 +125,10 @@ float BasePhysicsComponent::GetAABBDistance(const Vector3 &p) const
 float BasePhysicsComponent::GetAABBDistance(const BaseEntity &ent) const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	auto origin0 = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto origin0 = pTrComponent ? pTrComponent->GetPosition() : Vector3{};
 
 	auto pTrComponentEnt = ent.GetTransformComponent();
-	auto origin1 = pTrComponentEnt.valid() ? pTrComponentEnt->GetPosition() : Vector3{};
+	auto origin1 = pTrComponentEnt ? pTrComponentEnt->GetPosition() : Vector3{};
 
 	Vector3 min0,max0;
 	GetCollisionBounds(&min0,&max0);
@@ -138,7 +138,7 @@ float BasePhysicsComponent::GetAABBDistance(const BaseEntity &ent) const
 	auto pPhysComponentEnt = ent.GetPhysicsComponent();
 	Vector3 min1 {};
 	Vector3 max1 {};
-	if(pPhysComponentEnt.valid())
+	if(pPhysComponentEnt)
 		pPhysComponentEnt->GetCollisionBounds(&min1,&max1);
 	min1 += origin1;
 	max1 += origin1;
@@ -193,7 +193,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 	auto t = o->GetWorldTransform();
 	Vector3 pos = phys->GetPosition();
 	Quat rot = t.GetRotation();
-	if(!m_physObject->IsController() && pTrComponent.valid()) // TODO
+	if(!m_physObject->IsController() && pTrComponent) // TODO
 	{
 		auto &rotCur = pTrComponent->GetRotation();
 		if(
@@ -233,7 +233,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 			umath::set_flag(m_stateFlags,StateFlags::ApplyingAngularVelocity,false);
 		}
 	}
-	if(pTrComponent.valid())
+	if(pTrComponent)
 	{
 		auto &posCur = pTrComponent->GetPosition();
 		if(
@@ -384,7 +384,7 @@ float BasePhysicsComponent::GetCollisionRadius(Vector3 *center) const
 	if(center != NULL)
 		*center = GetCollisionCenter();
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.expired())
+	if(!pTrComponent)
 		return m_colRadius;
 	auto &scale = pTrComponent->GetScale();
 	return m_colRadius *umath::abs_max(scale.x,scale.y,scale.z);
@@ -445,7 +445,7 @@ Vector3 BasePhysicsComponent::GetOrigin() const
 	if(phys == nullptr || (physType != PHYSICSTYPE::DYNAMIC && physType != PHYSICSTYPE::STATIC))
 	{
 		auto pTrComponent = GetEntity().GetTransformComponent();
-		return pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+		return pTrComponent ? pTrComponent->GetPosition() : Vector3{};
 	}
 	return phys->GetOrigin();
 }
@@ -453,7 +453,7 @@ Vector3 BasePhysicsComponent::GetOrigin() const
 void BasePhysicsComponent::GetCollisionBounds(Vector3 *min,Vector3 *max) const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	auto scale = pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
+	auto scale = pTrComponent ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
 	*min = m_colMin *scale;
 	*max = m_colMax *scale;
 }
@@ -476,7 +476,7 @@ void BasePhysicsComponent::SetCollisionBounds(const Vector3 &min,const Vector3 &
 void BasePhysicsComponent::GetRotatedCollisionBounds(Vector3 *min,Vector3 *max) const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	AABB::GetRotatedBounds(m_colMin,m_colMax,pTrComponent.valid() ? pTrComponent->GetRotationMatrix() : umat::identity(),min,max);
+	AABB::GetRotatedBounds(m_colMin,m_colMax,pTrComponent ? pTrComponent->GetRotationMatrix() : umat::identity(),min,max);
 }
 
 BasePhysicsComponent::StateFlags BasePhysicsComponent::GetStateFlags() const {return m_stateFlags;}
@@ -485,7 +485,7 @@ Vector3 BasePhysicsComponent::GetCollisionExtents() const
 {
 	auto r = (m_colMax -m_colMin) *0.5f;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 		r *= pTrComponent->GetScale();
 	return r;
 }
@@ -494,7 +494,7 @@ Vector3 BasePhysicsComponent::GetCollisionCenter() const
 {
 	auto r = m_colMin +(m_colMax -m_colMin) *0.5f;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 		r *= pTrComponent->GetScale();
 	return r;
 }
@@ -587,7 +587,7 @@ void BasePhysicsComponent::UpdatePhysicsBone(Frame &reference,const std::shared_
 	uvec::rotate(&boneOffset,o->GetRotation());
 	auto boneWorldPos = o->GetPos() +boneOffset;
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 		uvec::world_to_local(GetOrigin(),pTrComponent->GetRotation(),boneWorldPos);
 	auto localOffset = boneWorldPos;
 
@@ -722,7 +722,7 @@ void BasePhysicsComponent::UpdateRagdollPose()
 		return;
 	auto physRootBoneId = physRoot->GetBoneID();
 	auto pTrComponent = ent.GetTransformComponent();
-	auto invRot = pTrComponent.valid() ? uquat::get_inverse(pTrComponent->GetRotation()) : uquat::identity();
+	auto invRot = pTrComponent ? uquat::get_inverse(pTrComponent->GetRotation()) : uquat::identity();
 
 	auto physRootBone = skeleton.GetBone(physRootBoneId).lock();
 	if(physRootBone != nullptr)
@@ -765,7 +765,7 @@ void BasePhysicsComponent::DropToFloor()
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(!pTrComponent)
 		return;
 	auto *nw = ent.GetNetworkState();
 	auto *game = nw->GetGameState();
@@ -821,26 +821,26 @@ void BasePhysicsComponent::OnEntityComponentAdded(BaseEntityComponent &component
 void BasePhysicsComponent::OriginToWorld(Vector3 *origin) const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	uvec::local_to_world(GetOrigin(),pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity(),*origin);
+	uvec::local_to_world(GetOrigin(),pTrComponent ? pTrComponent->GetRotation() : uquat::identity(),*origin);
 }
 void BasePhysicsComponent::OriginToWorld(Vector3 *origin,Quat *rot) const
 {
 	OriginToWorld(origin);
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 		pTrComponent->LocalToWorld(rot);
 }
 
 void BasePhysicsComponent::WorldToOrigin(Vector3 *origin) const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	uvec::world_to_local(GetOrigin(),pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity(),*origin);
+	uvec::world_to_local(GetOrigin(),pTrComponent ? pTrComponent->GetRotation() : uquat::identity(),*origin);
 }
 void BasePhysicsComponent::WorldToOrigin(Vector3 *origin,Quat *rot) const
 {
 	WorldToOrigin(origin);
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 		pTrComponent->WorldToLocal(rot);
 }
 
@@ -893,17 +893,17 @@ void BasePhysicsComponent::UpdateBoneCollisionObject(UInt32 boneId,Bool updatePo
 				oPos += -offset +offsetRoot;
 				if(updateRot == true)
 				{
-					if(pTrComponent.valid())
+					if(pTrComponent)
 						pTrComponent->LocalToWorld(&oPos,&oRot);
 					o->SetRotation(oRot);
 				}
-				else if(pTrComponent.valid())
+				else if(pTrComponent)
 					pTrComponent->LocalToWorld(&oPos);
 				o->SetPos(oPos);
 			}
 			else
 			{
-				if(pTrComponent.valid())
+				if(pTrComponent)
 					pTrComponent->LocalToWorld(&oRot);
 				o->SetRotation(oRot);
 			}

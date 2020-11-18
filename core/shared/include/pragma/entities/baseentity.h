@@ -132,10 +132,10 @@ public:
 	virtual util::WeakHandle<pragma::BaseAIComponent> GetAIComponent() const=0;
 	virtual util::WeakHandle<pragma::BaseCharacterComponent> GetCharacterComponent() const=0;
 	virtual util::WeakHandle<pragma::BasePlayerComponent> GetPlayerComponent() const=0;
-	virtual util::WeakHandle<pragma::BasePhysicsComponent> GetPhysicsComponent() const=0;
 	virtual util::WeakHandle<pragma::BaseTimeScaleComponent> GetTimeScaleComponent() const=0;
 	virtual util::WeakHandle<pragma::BaseNameComponent> GetNameComponent() const=0;
-	const util::WeakHandle<pragma::BaseTransformComponent> &GetTransformComponent() const;
+	pragma::BaseTransformComponent *GetTransformComponent() const;
+	pragma::BasePhysicsComponent *GetPhysicsComponent() const;
 
 	// These are quick-access functions for commonly used component functions.
 	// In some cases these may create the component, if it doesn't exist, and transmit
@@ -257,10 +257,8 @@ protected:
 	StateFlags m_stateFlags = StateFlags::None;
 
 	// Transform component is needed frequently, so we store a direct reference to it for faster access
-	util::WeakHandle<pragma::BaseTransformComponent> m_transformComponent = {};
-
-	virtual void OnComponentAdded(pragma::BaseEntityComponent &component) override;
-	virtual void OnComponentRemoved(pragma::BaseEntityComponent &component) override;
+	pragma::BaseTransformComponent *m_transformComponent = nullptr;
+	pragma::BasePhysicsComponent *m_physicsComponent = nullptr;
 
 	// Should only be used by quick-access methods!
 	// Adds the component and trasmits the information

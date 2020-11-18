@@ -49,7 +49,7 @@ void CParticleSystemComponent::Initialize()
 
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 	{
 		auto &trC = *pTrComponent;
 		FlagCallbackForRemoval(pTrComponent->AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,&trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
@@ -61,7 +61,7 @@ void CParticleSystemComponent::Initialize()
 				if(hChild.child.valid())
 				{
 					auto pTrComponent = hChild.child->GetEntity().GetTransformComponent();
-					if(pTrComponent.valid())
+					if(pTrComponent != nullptr)
 						pTrComponent->SetPosition(trC.GetPosition());
 				}
 			}

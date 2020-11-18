@@ -33,7 +33,7 @@ void CWaterSurfaceComponent::Initialize()
 	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &ent = GetEntity();
 		auto pTrComponent = ent.GetTransformComponent();
-		auto scale = pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
+		auto scale = pTrComponent != nullptr ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
 		auto &matData = static_cast<CEOnUpdateRenderMatrices&>(evData.get());
 		matData.pose = {};
 		matData.transformation = glm::scale(umat::identity(),scale);
@@ -46,7 +46,7 @@ void CWaterSurfaceComponent::Initialize()
 
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(pRenderComponent.valid())
+	if(pRenderComponent)
 	{
 		pRenderComponent->SetRenderMode(RenderMode::Water);
 		pRenderComponent->SetCastShadows(false);
@@ -198,13 +198,13 @@ luabind::object CWaterSurfaceComponent::InitializeLuaObject(lua_State *l) {retur
 const Vector3 &CWaterSurfaceComponent::GetPosition() const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	return pTrComponent.valid() ? pTrComponent->GetPosition() : uvec::ORIGIN;
+	return pTrComponent != nullptr ? pTrComponent->GetPosition() : uvec::ORIGIN;
 }
 const Quat &CWaterSurfaceComponent::GetOrientation() const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	static auto identity = uquat::identity();
-	return pTrComponent.valid() ? pTrComponent->GetRotation() : identity;
+	return pTrComponent != nullptr ? pTrComponent->GetRotation() : identity;
 }
 
 ////////////

@@ -72,7 +72,7 @@ void BasePropComponent::InitializePhysics(PHYSICSTYPE physType)
 	if((ent.GetSpawnFlags() &umath::to_integral(SpawnFlags::DisableCollisions)) != 0 || physType == PHYSICSTYPE::NONE)
 		return;
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	auto *phys = pPhysComponent->InitializePhysics(physType);
 	if(phys != nullptr)
@@ -93,7 +93,7 @@ void BasePropComponent::Initialize()
 	});
 	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto physComponent = GetEntity().GetPhysicsComponent();
-		if(physComponent.expired() || physComponent->GetJoints().empty() == true)
+		if(!physComponent || physComponent->GetJoints().empty() == true)
 			return;
 		// We only need an animated component if this is a ragdoll (i.e. the physics component has joints)
 		GetEntity().AddComponent("animated");
@@ -119,7 +119,7 @@ void BasePropComponent::InitializePhysics()
 	if(ent.IsSpawned() == false)
 		return;
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	auto mdlC = ent.GetModelComponent();
 	auto hMdl = mdlC.valid() ? mdlC->GetModel() : nullptr;
@@ -143,7 +143,7 @@ void BasePropComponent::OnEntitySpawn()
 	if(m_kvScale != 1.f)
 	{
 		auto pTrComponent = ent.GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent != nullptr)
 			pTrComponent->SetScale(m_kvScale);
 	}
 	InitializePhysics();

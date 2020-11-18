@@ -66,7 +66,7 @@ std::vector<Vector3> BaseShooterComponent::GetBulletDestinations(const Vector3 &
 void BaseShooterComponent::OnFireBullets(const BulletInfo &bulletInfo,Vector3 &bulletOrigin,Vector3 &bulletDir,Vector3 *effectsOrigin)
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 	{
 		bulletOrigin = pTrComponent->GetEyePosition();
 		bulletDir = pTrComponent->GetForward();
@@ -99,7 +99,7 @@ void BaseShooterComponent::GetBulletTraceData(const BulletInfo &bulletInfo,Trace
 	});
 	auto physComponent = GetEntity().GetPhysicsComponent();
 	auto filterGroup = CollisionMask::None;
-	if(physComponent.valid())
+	if(physComponent)
 		filterGroup = physComponent->GetCollisionFilter();
 	filterGroup |= CollisionMask::Water | CollisionMask::WaterSurface | CollisionMask::PlayerHitbox | CollisionMask::NPCHitbox;
 	data.SetCollisionFilterGroup(filterGroup);

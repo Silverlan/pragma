@@ -99,7 +99,7 @@ bool ShaderFlat::BindScene(const pragma::CSceneComponent &scene,bool bView)
 bool ShaderFlat::BindEntity(CBaseEntity &ent)
 {
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(pRenderComponent.expired())
+	if(!pRenderComponent)
 		return false;
 	// pRenderComponent->UpdateRenderData(c_game->GetCurrentDrawCommandBuffer());
 	return RecordBindDescriptorSet(*pRenderComponent->GetRenderDescriptorSet(),DESCRIPTOR_SET_INSTANCE.setIndex,{0u,0u});

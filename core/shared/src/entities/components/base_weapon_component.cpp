@@ -73,7 +73,7 @@ void BaseWeaponComponent::OnPhysicsInitialized()
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(!pPhysComponent)
 		return;
 	pPhysComponent->AddCollisionFilter(CollisionMask::Item);
 	pPhysComponent->SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter() | CollisionMask::Item);
@@ -85,7 +85,7 @@ void BaseWeaponComponent::OnFireBullets(const BulletInfo &bulletInfo,Vector3 &bu
 	if(owner != nullptr)
 	{
 		auto pTrComponent = owner->GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent)
 		{
 			bulletOrigin = pTrComponent->GetEyePosition(); // TODO ShootPos?
 			bulletDir = pTrComponent->GetForward(); // TODO View Forward
@@ -99,7 +99,7 @@ void BaseWeaponComponent::OnFireBullets(const BulletInfo &bulletInfo,Vector3 &bu
 		if(mdlC.valid() && mdlC->GetAttachment(m_attMuzzle,static_cast<Vector3*>(nullptr),&rot) == true)
 		{
 			auto pTrComponent = ent.GetTransformComponent();
-			if(pTrComponent.valid())
+			if(pTrComponent)
 				pTrComponent->LocalToWorld(&rot);
 			bulletDir = uquat::forward(rot);
 		}
@@ -240,7 +240,7 @@ void BaseWeaponComponent::Initialize()
 		auto &ownerChangedData = static_cast<pragma::CEOnOwnerChanged&>(evData.get());
 		auto &ent = GetEntity();
 		auto ptrPhysComponent = ent.GetPhysicsComponent();
-		if(ptrPhysComponent.valid())
+		if(ptrPhysComponent)
 			ptrPhysComponent->DestroyPhysicsObject();
 		if(ownerChangedData.newOwner == nullptr)
 			EndAttack();

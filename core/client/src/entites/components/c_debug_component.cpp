@@ -86,8 +86,8 @@ void CDebugLineComponent::ReloadDebugObject(Color color,const Vector3 &pos)
 		if(it == entIt.end())
 			return;
 		auto *ent = *it;
-		auto trComponent = (ent != nullptr) ? ent->GetTransformComponent() : util::WeakHandle<pragma::BaseTransformComponent>{};
-		if(trComponent.expired())
+		auto trComponent = (ent != nullptr) ? ent->GetTransformComponent() : nullptr;
+		if(!trComponent)
 			return;
 		origin = trComponent->GetPosition();
 	}
@@ -114,7 +114,7 @@ luabind::object CDebugBoxComponent::InitializeLuaObject(lua_State *l) {return Ba
 void CDebugBoxComponent::ReloadDebugObject(Color color,const Vector3 &pos)
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	auto ang = pTrComponent.valid() ? pTrComponent->GetAngles() : EulerAngles{};
+	auto ang = pTrComponent != nullptr ? pTrComponent->GetAngles() : EulerAngles{};
 	if(m_outlineColor.a > 0)
 		m_debugObject = DebugRenderer::DrawBox(pos,m_bounds.first,m_bounds.second,ang,color,m_outlineColor);
 	else
@@ -182,7 +182,7 @@ void CDebugConeComponent::ReloadDebugObject(Color color,const Vector3 &pos)
 	auto &ent = GetEntity();
 	auto pRadiusComponent = ent.GetComponent<CRadiusComponent>();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pRadiusComponent.expired() || pTrComponent.expired())
+	if(pRadiusComponent.expired() || pTrComponent == nullptr)
 		return;
 	if(m_startRadius > 0.f)
 	{
@@ -232,7 +232,7 @@ void CDebugCylinderComponent::ReloadDebugObject(Color color,const Vector3 &pos)
 	auto &ent = GetEntity();
 	auto pRadiusComponent = ent.GetComponent<CRadiusComponent>();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pRadiusComponent.expired() || pTrComponent.expired())
+	if(pRadiusComponent.expired() || pTrComponent == nullptr)
 		return;
 	if(m_outlineColor.a > 0)
 		m_debugObject = DebugRenderer::DrawCylinder(pos,pTrComponent->GetForward(),m_length,pRadiusComponent->GetRadius(),color,m_outlineColor,m_segmentCount);
@@ -254,7 +254,7 @@ luabind::object CDebugPlaneComponent::InitializeLuaObject(lua_State *l) {return 
 void CDebugPlaneComponent::ReloadDebugObject(Color color,const Vector3 &pos)
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return;
 	Plane plane {pTrComponent->GetForward(),0.0};
 	plane.MoveToPos(pos);

@@ -24,7 +24,7 @@ std::vector<std::pair<BaseEntity*,float>> util::cmd::get_sorted_entities(Game &g
 			continue;
 		auto d = std::numeric_limits<float>::max();
 		auto trComponent = ent->GetTransformComponent();
-		if(trComponent.valid() && charComponent.valid())
+		if(trComponent && charComponent.valid())
 			d = uvec::distance(charComponent->GetEyePosition(),ent->GetCenter());
 		sortedEntities.push_back(std::make_pair(ent,d));
 	}

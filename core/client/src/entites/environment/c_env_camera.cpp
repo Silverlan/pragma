@@ -67,7 +67,7 @@ void CCameraComponent::UpdateState()
 				auto pTrComponent = ent.GetTransformComponent();
 				auto &pos = refPos.get();
 				auto &rot = refRot.get();
-				if(pTrComponent.expired())
+				if(pTrComponent == nullptr)
 				{
 					pos = {};
 					rot = uquat::identity();

@@ -45,18 +45,18 @@ void OcclusionCullingHandlerInert::PerformCulling(
 		auto *ent = static_cast<CBaseEntity*>(e);
 		if(ent->IsInScene(scene) == false)
 			continue;
-		auto &pRenderComponent = ent->GetRenderComponent();
+		auto *pRenderComponent = ent->GetRenderComponent();
 		bool bViewModel = false;
 		if((ent->IsSpawned() == true && pRenderComponent->GetModelComponent().valid() && pRenderComponent->GetModelComponent()->GetModel() != nullptr && pRenderComponent->ShouldDraw(camPos) != false))
 		{
 			//if(bUpdateLod == true) // Needs to be updated every frame (in case the entity is moving towards or away from us)
 			//pRenderComponent->GetModelComponent()->UpdateLOD(camPos);
-			if(pRenderComponent.valid())
+			if(pRenderComponent)
 			{
 				auto pTrComponent = ent->GetTransformComponent();
 				auto &meshes = pRenderComponent->GetLODMeshes();
 				auto numMeshes = meshes.size();
-				auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+				auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 				for(auto itMesh=meshes.begin();itMesh!=meshes.end();++itMesh)
 				{
 					auto *mesh = static_cast<CModelMesh*>(itMesh->get());

@@ -17,7 +17,9 @@ class CModelSubMesh;
 namespace prosper {class IRenderBuffer;};
 namespace pragma
 {
+	class CSceneComponent;
 	class SceneMesh;
+	enum class SceneDebugMode : uint32_t;
 	namespace rendering {class RasterizationRenderer;};
 	class DLLCLIENT ShaderScene
 		: public Shader3DBase,
@@ -232,7 +234,7 @@ namespace pragma
 			const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},ShaderGameWorldPipeline pipelineIdx=ShaderGameWorldPipeline::Regular,
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		)=0;
-		virtual bool SetDebugMode(pragma::CSceneComponent::DebugMode debugMode) {return true;};
+		virtual bool SetDebugMode(pragma::SceneDebugMode debugMode) {return true;};
 		virtual void Set3DSky(bool is3dSky)=0;
 		virtual bool BindDrawOrigin(const Vector4 &drawOrigin)=0;
 	};

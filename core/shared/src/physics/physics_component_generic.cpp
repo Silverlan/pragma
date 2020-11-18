@@ -77,8 +77,8 @@ util::TSharedHandle<pragma::physics::IRigidBody> BasePhysicsComponent::CreateRig
 	if(body == nullptr)
 		return nullptr;
 	body->TransformLocalPose(localPose);
-	auto originOffset = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
-	auto rot = (pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity()) *localPose.GetRotation();
+	auto originOffset = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
+	auto rot = (pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity()) *localPose.GetRotation();
 	auto tOrigin = localPose.GetOrigin();
 	uvec::rotate(&tOrigin,rot);
 	umath::Transform startTransform;
@@ -414,7 +414,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics:
 	auto animComponent = ent.GetAnimatedComponent();
 	pragma::physics::ICollisionObject *root = nullptr;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	auto posRoot = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto posRoot = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 	if(!collisionObjs.empty())
 	{
 		auto &hRoot = collisionObjs.front();
@@ -422,7 +422,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics:
 		{
 			root = hRoot.Get();
 			auto boneId = root->GetBoneID();
-			if(animComponent.valid() && animComponent->GetLocalBonePosition(boneId,posRoot) == true && pTrComponent.valid())
+			if(animComponent.valid() && animComponent->GetLocalBonePosition(boneId,posRoot) == true && pTrComponent != nullptr)
 				uvec::local_to_world(pTrComponent->GetPosition(),pTrComponent->GetRotation(),posRoot); // World space position of root collision object bone
 		}
 	}
@@ -464,7 +464,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics:
 				auto offset = *posRef +colObj->GetOrigin();
 				uvec::rotate(&offset,rot);
 				pos = pos +(-offset);
-				if(pTrComponent.valid())
+				if(pTrComponent != nullptr)
 					pTrComponent->LocalToWorld(&pos,&rot);
 
 				colObj->SetPos(pos);
@@ -535,7 +535,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 	physObjCreateInfo.SetModel(*hMdl);
 	unsigned int meshId = 0;
 	auto pTrComponent = ent.GetTransformComponent();
-	auto scale = pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
+	auto scale = pTrComponent != nullptr ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
 	auto bScale = (scale != Vector3{1.f,1.f,1.f}) ? true : false;
 	for(auto &mesh : meshes)
 	{
@@ -749,7 +749,7 @@ void BasePhysicsComponent::DestroyPhysicsObject()
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(!collisionObjs.empty())
 	{
-		posRoot = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+		posRoot = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 		root = collisionObjs.front().Get();
 		originRoot = root->GetOrigin();
 		rotRoot = root->GetRotation();
@@ -765,7 +765,7 @@ void BasePhysicsComponent::DestroyPhysicsObject()
 	if(root != nullptr)
 	{
 		//posRoot += originRoot *rotRoot;//uquat::get_inverse(rotRoot);
-		if(pTrComponent.valid())
+		if(pTrComponent != nullptr)
 			pTrComponent->SetPosition(posRoot,true);
 	}
 	//SetPosition(pos,true);

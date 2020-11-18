@@ -33,7 +33,7 @@ BaseEntity *Game::CreateMapEntity(pragma::asset::EntityData &entData)
 	if(ent == nullptr)
 		return nullptr;
 	auto pTrComponent = ent->GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 		pTrComponent->SetPosition(entData.GetOrigin());
 
 	for(auto &componentName : entData.GetComponents())

@@ -124,8 +124,8 @@ namespace pragma
 			Vector4 drawOrigin; // w is scale
 			uint32_t vertexAnimInfo;
 			RenderFlags flags;
-			static_assert(sizeof(pragma::CSceneComponent::DebugMode) == sizeof(uint32_t));
-			pragma::CSceneComponent::DebugMode debugMode;
+			static_assert(sizeof(pragma::SceneDebugMode) == sizeof(uint32_t));
+			pragma::SceneDebugMode debugMode;
 			float reflectionProbeIntensity;
 		};
 
@@ -164,7 +164,7 @@ namespace pragma
 		) const override;
 		bool BindReflectionProbeIntensity(float intensity);
 		std::optional<MaterialData> UpdateMaterialBuffer(CMaterial &mat) const;
-		virtual bool SetDebugMode(pragma::CSceneComponent::DebugMode debugMode) override;
+		virtual bool SetDebugMode(pragma::SceneDebugMode debugMode) override;
 		virtual void Set3DSky(bool is3dSky) override;
 		void SetShadowsEnabled(bool enabled);
 	protected:

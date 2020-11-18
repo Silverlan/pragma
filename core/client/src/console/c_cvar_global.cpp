@@ -116,7 +116,7 @@ DLLCLIENT void CMD_getpos(NetworkState *state,pragma::BasePlayerComponent *pl,st
 	}
 	auto *cPl = game->GetLocalPlayer();
 	auto pTrComponent = cPl->GetEntity().GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 	{
 		Con::cout<<"0 0 0"<<Con::endl;
 		return;

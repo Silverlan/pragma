@@ -25,7 +25,7 @@ extern DLLCLIENT CGame *c_game;
 using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(sky_camera,CSkyCamera);
-#pragma optimize("",off)
+
 void CSkyCameraComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -192,4 +192,3 @@ void CSkyCamera::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CSkyCameraComponent>();
 }
-#pragma optimize("",on)

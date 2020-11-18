@@ -68,7 +68,7 @@ void BaseTransformComponent::OnPoseChanged(TransformChangeFlags changeFlags)
 		ent.SetStateFlag(BaseEntity::StateFlags::RotationChanged);
 	m_tLastMoved = ent.GetNetworkState()->GetGameState()->CurTime();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto *pPhys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	auto *pPhys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(pPhys)
 	{
 		if(umath::is_flag_set(changeFlags,TransformChangeFlags::PositionChanged) && umath::is_flag_set(pPhysComponent->GetStateFlags(),BasePhysicsComponent::StateFlags::ApplyingPhysicsPosition) == false)
@@ -129,7 +129,7 @@ float BaseTransformComponent::GetDistance(const Vector3 &p) const {return uvec::
 float BaseTransformComponent::GetDistance(const BaseEntity &ent) const
 {
 	auto pTrComponent = ent.GetTransformComponent();
-	return uvec::distance(GetPosition(),pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{});
+	return uvec::distance(GetPosition(),pTrComponent ? pTrComponent->GetPosition() : Vector3{});
 }
 
 void BaseTransformComponent::SetPosition(const Vector3 &pos,Bool bForceUpdate)
@@ -276,17 +276,17 @@ void BaseTransformComponent::SetRawScale(const Vector3 &scale) {m_pose.SetScale(
 Vector3 BaseTransformComponent::GetDirection(const BaseEntity &ent,bool bIgnoreYAxis) const
 {
 	auto pTrComponent = ent.GetTransformComponent();
-	return GetDirection(pTrComponent.valid() ? ent.GetCenter() : Vector3{},bIgnoreYAxis);
+	return GetDirection(pTrComponent ? ent.GetCenter() : Vector3{},bIgnoreYAxis);
 }
 EulerAngles BaseTransformComponent::GetAngles(const BaseEntity &ent,bool bIgnoreYAxis) const
 {
 	auto pTrComponent = ent.GetTransformComponent();
-	return GetAngles(pTrComponent.valid() ? ent.GetCenter() : Vector3{},bIgnoreYAxis);
+	return GetAngles(pTrComponent ? ent.GetCenter() : Vector3{},bIgnoreYAxis);
 }
 float BaseTransformComponent::GetDotProduct(const BaseEntity &ent,bool bIgnoreYAxis) const
 {
 	auto pTrComponent = ent.GetTransformComponent();
-	return GetDotProduct(pTrComponent.valid() ? ent.GetCenter() : Vector3{},bIgnoreYAxis);
+	return GetDotProduct(pTrComponent ? ent.GetCenter() : Vector3{},bIgnoreYAxis);
 }
 Vector3 BaseTransformComponent::GetDirection(const Vector3 &pos,bool bIgnoreYAxis) const
 {
@@ -303,7 +303,7 @@ float BaseTransformComponent::GetDotProduct(const Vector3 &pos,bool bIgnoreYAxis
 Vector3 BaseTransformComponent::GetOrigin() const
 {
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
-	return pPhysComponent.valid() ? pPhysComponent->GetOrigin() : GetPosition();
+	return pPhysComponent ? pPhysComponent->GetOrigin() : GetPosition();
 }
 
 double BaseTransformComponent::GetLastMoveTime() const {return m_tLastMoved;}
@@ -330,7 +330,7 @@ TraceData util::get_entity_trace_data(BaseTransformComponent &component)
 	trData.SetFilter(component.GetEntity());
 	trData.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
 	auto pPhysComponent = component.GetEntity().GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent)
 	{
 		trData.SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter());
 		trData.SetCollisionFilterMask(pPhysComponent->GetCollisionFilterMask() &~CollisionMask::Trigger &~CollisionMask::Water &~CollisionMask::WaterSurface);

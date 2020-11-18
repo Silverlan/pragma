@@ -16,7 +16,7 @@
 #include "pragma/rendering/render_stats.hpp"
 
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 static bool g_collectRenderStats = false;
 static CallbackHandle g_cbPreRenderScene = {};
 static CallbackHandle g_cbPostRenderScene = {};
@@ -182,7 +182,7 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::Shader &shader)
 	if(shaderScene->BindScene(const_cast<pragma::CSceneComponent&>(scene),const_cast<pragma::rendering::RasterizationRenderer&>(*m_renderer),bView) == false)
 		return false;
 	auto debugMode = scene.GetDebugMode();
-	if(debugMode != ::pragma::CSceneComponent::DebugMode::None)
+	if(debugMode != ::pragma::SceneDebugMode::None)
 		shaderScene->SetDebugMode(debugMode);
 	shaderScene->Set3DSky(umath::is_flag_set(m_renderFlags,RenderFlags::RenderAs3DSky));
 	
@@ -250,7 +250,7 @@ bool pragma::rendering::BaseRenderProcessor::BindEntity(CBaseEntity &ent)
 		return umath::is_flag_set(m_stateFlags,StateFlags::EntityBound);
 	UnbindEntity();
 	m_curEntity = &ent;
-	auto *renderC = ent.GetRenderComponent().get();
+	auto *renderC = ent.GetRenderComponent();
 	if(umath::is_flag_set(m_stateFlags,StateFlags::MaterialBound) == false || renderC == nullptr || m_shaderScene->BindEntity(ent) == false)
 		return false;
 	if(m_drawSceneInfo.renderFilter && m_drawSceneInfo.renderFilter(ent) == false)
@@ -321,8 +321,6 @@ bool pragma::rendering::BaseRenderProcessor::Render(CModelSubMesh &mesh)
 		m_stats->numDrawnTrianges += mesh.GetTriangleCount();
 		m_stats->meshes.push_back(std::static_pointer_cast<CModelSubMesh>(mesh.shared_from_this()));
 	}
-
 	m_shaderScene->Draw(mesh);
 	return true;
 }
-#pragma optimize("",on)

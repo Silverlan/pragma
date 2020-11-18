@@ -68,7 +68,7 @@ void BaseFuncButtonComponent::OnEntitySpawn()
 	BaseEntityComponent::OnEntitySpawn();
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
 	if(!m_kvUseSound.empty())
 	{

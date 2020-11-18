@@ -42,7 +42,7 @@ void SFlammableComponent::ApplyIgnitionDamage()
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pDamageableComponent = ent.GetComponent<pragma::DamageableComponent>();
-	if(pTrComponent.expired() || pDamageableComponent.expired())
+	if(pTrComponent == nullptr || pDamageableComponent.expired())
 		return;
 	auto pos = ent.GetCenter();
 	DamageInfo info {};

@@ -223,7 +223,7 @@ DLLCLIENT void NET_cl_fire_bullet(NetPacket packet)
 				if(pt != nullptr)
 				{
 					auto pTrComponent = pt->GetEntity().GetTransformComponent();
-					if(pTrComponent.valid())
+					if(pTrComponent != nullptr)
 					{
 						pTrComponent->SetPosition(p);
 
@@ -277,7 +277,7 @@ DLLCLIENT void NET_cl_ent_setunlit(NetPacket packet)
 	if(ent == NULL)
 		return;
 	auto pRenderComponent = ent->GetRenderComponent();
-	if(pRenderComponent.expired())
+	if(!pRenderComponent)
 		return;
 	bool b = packet->Read<bool>();
 	pRenderComponent->SetUnlit(b);
@@ -291,7 +291,7 @@ DLLCLIENT void NET_cl_ent_setcastshadows(NetPacket packet)
 	if(ent == NULL)
 		return;
 	auto pRenderComponent = ent->GetRenderComponent();
-	if(pRenderComponent.expired())
+	if(!pRenderComponent)
 		return;
 	bool b = packet->Read<bool>();
 	pRenderComponent->SetCastShadows(b);
@@ -437,7 +437,7 @@ DLLCLIENT void NET_cl_ent_phys_init(NetPacket packet)
 	if(ent == NULL)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	unsigned int type = packet->Read<unsigned int>();
 	pPhysComponent->InitializePhysics(PHYSICSTYPE(type));
@@ -451,7 +451,7 @@ DLLCLIENT void NET_cl_ent_phys_destroy(NetPacket packet)
 	if(ent == NULL)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	pPhysComponent->DestroyPhysicsObject();
 }
@@ -477,7 +477,7 @@ DLLCLIENT void NET_cl_ent_movetype(NetPacket packet)
 	if(ent == NULL)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	MOVETYPE movetype = MOVETYPE(packet->Read<unsigned char>());
 	pPhysComponent->SetMoveType(movetype);
@@ -492,7 +492,7 @@ DLLCLIENT void NET_cl_pl_toggle_noclip(NetPacket packet)
 		return;
 	auto bNoclip = packet->Read<bool>();
 	auto pPhysComponent = ent->GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	if(bNoclip == false)
 	{
@@ -515,7 +515,7 @@ DLLCLIENT void NET_cl_ent_collisiontype(NetPacket packet)
 	if(ent == NULL)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	COLLISIONTYPE collisiontype = COLLISIONTYPE(packet->Read<unsigned char>());
 	pPhysComponent->SetCollisionType(collisiontype);
@@ -529,7 +529,7 @@ DLLCLIENT void NET_cl_ent_eyeoffset(NetPacket packet)
 	if(ent == NULL)
 		return;
 	auto pTrComponent = ent->GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return;
 	Vector3 offset = nwm::read_vector(packet);
 	pTrComponent->SetEyeOffset(offset);
@@ -958,7 +958,7 @@ DLLCLIENT void NET_cl_ent_setcollisionfilter(NetPacket packet)
 	if(ent == NULL)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	CollisionMask filterGroup = static_cast<CollisionMask>(packet->Read<unsigned int>());
 	CollisionMask filterMask = static_cast<CollisionMask>(packet->Read<unsigned int>());
@@ -971,7 +971,7 @@ DLLCLIENT void NET_cl_ent_setkinematic(NetPacket packet)
 	if(ent == NULL)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	bool bKinematic = packet->Read<bool>();
 	pPhysComponent->SetKinematic(bKinematic);
@@ -1056,7 +1056,7 @@ void NET_cl_create_explosion(NetPacket packet)
 	if(pt != nullptr)
 	{
 		auto pTrComponent = pt->GetEntity().GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent != nullptr)
 			pTrComponent->SetPosition(origin);
 		pt->SetRemoveOnComplete(true);
 		pt->Start();
@@ -1075,7 +1075,7 @@ void NET_cl_create_explosion(NetPacket packet)
 	{
 		auto *pQuakeComponent = static_cast<pragma::BaseEnvQuakeComponent*>(entQuake->FindComponent("quake").get());
 		auto pTrComponent = entQuake->GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent != nullptr)
 			pTrComponent->SetPosition(origin);
 		if(pQuakeComponent != nullptr)
 		{

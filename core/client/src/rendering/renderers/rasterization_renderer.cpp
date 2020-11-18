@@ -30,7 +30,7 @@ using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
-#pragma optimize("",off)
+
 static void cl_render_ssao_callback(NetworkState*,ConVar*,bool,bool val)
 {
 	if(c_game == nullptr)
@@ -548,4 +548,3 @@ bool RasterizationRenderer::ResolveRenderPass(const util::DrawSceneInfo &drawSce
 }
 
 prosper::Shader *RasterizationRenderer::GetWireframeShader() const {return m_whShaderWireframe.get();}
-#pragma optimize("",on)

@@ -43,11 +43,11 @@ void BasePointConstraintSliderComponent::Initialize()
 void BasePointConstraintSliderComponent::InitializeConstraint(BaseEntity *src,BaseEntity *tgt)
 {
 	auto pPhysComponentTgt = tgt->GetPhysicsComponent();
-	auto *physTgt = pPhysComponentTgt.valid() ? dynamic_cast<RigidPhysObj*>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;
+	auto *physTgt = pPhysComponentTgt ? dynamic_cast<RigidPhysObj*>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;
 	if(physTgt == nullptr)
 		return;
 	auto pPhysComponentSrc = src->GetPhysicsComponent();
-	auto *physSrc = pPhysComponentSrc.valid() ? dynamic_cast<RigidPhysObj*>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
+	auto *physSrc = pPhysComponentSrc ? dynamic_cast<RigidPhysObj*>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
 	if(physSrc == nullptr)
 		return;
 	auto *bodySrc = physSrc->GetRigidBody();
@@ -58,7 +58,7 @@ void BasePointConstraintSliderComponent::InitializeConstraint(BaseEntity *src,Ba
 	auto *game = state->GetGameState();
 	auto *physEnv = game->GetPhysicsEnvironment();
 	auto pTrComponent = entThis.GetTransformComponent();
-	auto posThis = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto posThis = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 
 	auto dir = m_posTarget -posThis;
 	auto l = uvec::length(dir);

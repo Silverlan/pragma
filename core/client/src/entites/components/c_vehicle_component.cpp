@@ -126,7 +126,7 @@ void CVehicleComponent::ClearDriver()
 			if(vb != nullptr)
 			{
 				auto pRenderComponent = static_cast<CBaseEntity&>(vb->GetEntity()).GetRenderComponent();
-				if(pRenderComponent.valid())
+				if(pRenderComponent)
 					pRenderComponent->SetRenderMode(RenderMode::View);
 			}
 
@@ -149,7 +149,7 @@ void CVehicleComponent::SetDriver(BaseEntity *ent)
 	if(vb != nullptr)
 	{
 		auto pRenderComponent = static_cast<CBaseEntity&>(vb->GetEntity()).GetRenderComponent();
-		if(pRenderComponent.valid())
+		if(pRenderComponent)
 			pRenderComponent->SetRenderMode(RenderMode::None);
 	}
 	auto plComponent = ent->GetPlayerComponent();

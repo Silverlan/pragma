@@ -32,12 +32,12 @@ void CListenerComponent::Initialize()
 		auto &ent = GetEntity();
 		auto pTrComponent = ent.GetTransformComponent();
 		auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
-		if(pTrComponent.valid())
+		if(pTrComponent != nullptr)
 			m_listener->SetPosition(pTrComponent->GetPosition());
 		if(pVelComponent.valid())
 			m_listener->SetVelocity(pVelComponent->GetVelocity());
 
-		if(pTrComponent.valid())
+		if(pTrComponent != nullptr)
 		{
 			Vector3 forward,up;
 			pTrComponent->GetOrientation(&forward,nullptr,&up);

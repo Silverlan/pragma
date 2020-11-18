@@ -94,7 +94,7 @@ void CCharacterComponent::CreateWaterSplash()
 	auto pSoundEmitterComponent = ent.GetComponent<CSoundEmitterComponent>();
 	auto *pWater = pSubmergibleComponent.valid() ? pSubmergibleComponent->GetWaterEntity() : nullptr;
 	auto pWaterComponent = (pWater != nullptr) ? pWater->GetComponent<CWaterComponent>() : util::WeakHandle<CWaterComponent>{};
-	if(pSoundEmitterComponent.valid() && pTrComponent.valid() && pWaterComponent.valid())
+	if(pSoundEmitterComponent.valid() && pTrComponent != nullptr && pWaterComponent.valid())
 	{
 		auto pos = pTrComponent->GetPosition();
 		pos = pWaterComponent->ProjectToSurface(pos);
@@ -103,7 +103,7 @@ void CCharacterComponent::CreateWaterSplash()
 		if(pt != nullptr)
 		{
 			auto pTrComponent = pt->GetEntity().GetTransformComponent();
-			if(pTrComponent.valid())
+			if(pTrComponent != nullptr)
 			{
 				pTrComponent->SetPosition(pos);
 				Vector3 n;

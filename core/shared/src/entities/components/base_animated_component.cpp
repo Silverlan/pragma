@@ -99,7 +99,7 @@ void BaseAnimatedComponent::Initialize()
 		if(IsPlayingAnimation() == false)
 			return;
 		auto pPhysComponent = GetEntity().GetPhysicsComponent();
-		if(pPhysComponent.expired())
+		if(!pPhysComponent)
 			return;
 		auto *phys = pPhysComponent->GetPhysicsObject();
 		if(phys != nullptr && phys->IsController() == true)

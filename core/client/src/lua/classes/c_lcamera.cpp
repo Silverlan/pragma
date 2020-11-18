@@ -28,7 +28,7 @@
 #include <sharedutils/util_shaderinfo.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
-#pragma optimize("",off)
+
 void Lua::Scene::GetCamera(lua_State *l,CSceneHandle &scene)
 {
 	pragma::Lua::check_component(l,scene);
@@ -127,7 +127,7 @@ void Lua::Scene::GetDebugMode(lua_State *l,CSceneHandle &scene)
 void Lua::Scene::SetDebugMode(lua_State *l,CSceneHandle &scene,uint32_t debugMode)
 {
 	pragma::Lua::check_component(l,scene);
-	scene->SetDebugMode(static_cast<::pragma::CSceneComponent::DebugMode>(debugMode));
+	scene->SetDebugMode(static_cast<::pragma::SceneDebugMode>(debugMode));
 }
 void Lua::Scene::Link(lua_State *l,CSceneHandle &scene,CSceneHandle &sceneOther)
 {
@@ -282,4 +282,3 @@ void Lua::RasterizationRenderer::ScheduleMeshForRendering(
 	auto &shaderTex = static_cast<pragma::ShaderTextured3DBase&>(**shader);
 	ScheduleMeshForRendering(l,renderer,scene,renderMode,shaderTex,mat,hEnt,mesh);
 }
-#pragma optimize("",on)

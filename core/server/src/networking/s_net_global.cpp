@@ -90,7 +90,7 @@ DLLSERVER void NET_sv_cmd_setpos(pragma::networking::IServerClient &session,NetP
 	if(pl == NULL)
 		return;
 	auto pTrComponent = pl->GetEntity().GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return;
 	Vector3 pos = nwm::read_vector(packet);
 	pTrComponent->SetPosition(pos);
@@ -258,7 +258,7 @@ DLLSERVER void NET_sv_noclip(pragma::networking::IServerClient &session,NetPacke
 	if(pl == NULL)
 		return;
 	auto pPhysComponent = pl->GetEntity().GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	auto bNoclip = pPhysComponent->GetMoveType() != MOVETYPE::NOCLIP;
 	if(bNoclip == false)

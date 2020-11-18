@@ -157,7 +157,7 @@ void CSpriteComponent::StartParticle()
 	pt->SetContinuous(true);
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pTrComponentPt = pt->GetEntity().GetTransformComponent();
-	if(pTrComponent.valid() && pTrComponentPt.valid())
+	if(pTrComponent != nullptr && pTrComponentPt)
 	{
 		pTrComponentPt->SetPosition(pTrComponent->GetPosition());
 		pTrComponentPt->SetRotation(pTrComponent->GetRotation());

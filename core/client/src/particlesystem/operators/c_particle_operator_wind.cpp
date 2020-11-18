@@ -37,7 +37,7 @@ void CParticleOperatorWind::Simulate(double tDelta)
 	if(m_bRotateWithEmitter)
 	{
 		auto pTrComponent = GetParticleSystem().GetEntity().GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent != nullptr)
 			uvec::rotate(&m_vDelta,pTrComponent->GetRotation());
 	}
 }

@@ -10,7 +10,7 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 
 using namespace pragma::rendering;
-#pragma optimize("",off)
+
 void SortingKey::SetDistance(const Vector3 &origin,const CCameraComponent &cam)
 {
 	auto &p0 = origin;
@@ -59,8 +59,8 @@ void RenderQueue::Add(CBaseEntity &ent,RenderMeshIndex meshIdx,CMaterial &mat,pr
 	if(optCam)
 	{
 		// TODO: This isn't very efficient, find a better way to handle this!
-		auto &renderC = ent.GetRenderComponent();
-		if(renderC.valid())
+		auto *renderC = ent.GetRenderComponent();
+		if(renderC)
 		{
 			auto &renderMeshes = renderC->GetRenderMeshes();
 			if(meshIdx < renderMeshes.size())
@@ -99,4 +99,3 @@ void RenderQueue::Merge(const RenderQueue &other)
 		sortedItemIndices.back().first = queue.size() -1;
 	}
 }
-#pragma optimize("",on)

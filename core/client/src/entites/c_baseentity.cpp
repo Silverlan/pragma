@@ -57,10 +57,13 @@ extern DLLCLIENT CGame *c_game;
 void CBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 {
 	BaseEntity::OnComponentAdded(component);
+	auto typeIndex = std::type_index(typeid(component));
 	if(typeid(component) == typeid(pragma::CRenderComponent))
-		m_renderComponent = std::static_pointer_cast<pragma::CRenderComponent>(component.shared_from_this());
+		m_renderComponent = &static_cast<pragma::CRenderComponent&>(component);
+	else if(typeid(component) == typeid(pragma::CTransformComponent))
+		m_transformComponent = &static_cast<pragma::CTransformComponent&>(component);
 	else if(typeid(component) == typeid(pragma::CPhysicsComponent))
-		m_physComponent = std::static_pointer_cast<pragma::CPhysicsComponent>(component.shared_from_this());
+		m_physicsComponent = &static_cast<pragma::CPhysicsComponent&>(component);
 	else if(typeid(component) == typeid(pragma::CWorldComponent))
 		umath::set_flag(m_stateFlags,StateFlags::HasWorldComponent);
 }
@@ -69,9 +72,14 @@ void CBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
 	BaseEntity::OnComponentRemoved(component);
 	if(typeid(component) == typeid(pragma::CWorldComponent))
 		umath::set_flag(m_stateFlags,StateFlags::HasWorldComponent,false);
+	else if(typeid(component) == typeid(pragma::CRenderComponent))
+		m_renderComponent = nullptr;
+	else if(typeid(component) == typeid(pragma::CTransformComponent))
+		m_transformComponent = nullptr;
+	else if(typeid(component) == typeid(pragma::CPhysicsComponent))
+		m_physicsComponent = nullptr;
 }
-util::WeakHandle<pragma::CRenderComponent> &CBaseEntity::GetRenderComponent() const {return m_renderComponent;}
-util::WeakHandle<pragma::CPhysicsComponent> &CBaseEntity::GetCPhysicsComponent() const {return m_physComponent;}
+pragma::CRenderComponent *CBaseEntity::GetRenderComponent() const {return m_renderComponent;}
 
 //////////////////////////////////
 
@@ -312,11 +320,6 @@ util::WeakHandle<pragma::BasePlayerComponent> CBaseEntity::GetPlayerComponent() 
 	auto pComponent = GetComponent<pragma::CPlayerComponent>();
 	return pComponent.valid() ? std::static_pointer_cast<pragma::BasePlayerComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BasePlayerComponent>{};
 }
-util::WeakHandle<pragma::BasePhysicsComponent> CBaseEntity::GetPhysicsComponent() const
-{
-	auto pComponent = GetComponent<pragma::CPhysicsComponent>();
-	return pComponent.valid() ? std::static_pointer_cast<pragma::BasePhysicsComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BasePhysicsComponent>{};
-}
 util::WeakHandle<pragma::BaseTimeScaleComponent> CBaseEntity::GetTimeScaleComponent() const
 {
 	auto pComponent = GetComponent<pragma::CTimeScaleComponent>();
@@ -336,7 +339,7 @@ bool CBaseEntity::IsNPC() const {return HasComponent<pragma::CAIComponent>();}
 std::pair<Vector3,Vector3> CBaseEntity::GetRenderBounds() const
 {
 	auto renderC = GetRenderComponent();
-	if(renderC.expired())
+	if(renderC == nullptr)
 		return {Vector3{},Vector3{}};
 	Vector3 min,max;
 	renderC->GetRenderBounds(&min,&max);

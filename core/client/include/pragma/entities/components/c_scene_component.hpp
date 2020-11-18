@@ -125,6 +125,21 @@ struct DLLCLIENT ShaderMeshContainer
 class WorldEnvironment;
 namespace pragma
 {
+	enum class SceneDebugMode : uint32_t
+	{
+		None = 0,
+		AmbientOcclusion,
+		Albedo,
+		Metalness,
+		Roughness,
+		DiffuseLighting,
+		Normal,
+		NormalMap,
+		Reflectance,
+		IBLPrefilter,
+		IBLIrradiance,
+		Emission
+	};
 	class DLLCLIENT CSceneComponent final
 		: public BaseEntityComponent
 	{
@@ -138,22 +153,6 @@ namespace pragma
 		{
 			None = 0,
 			Unlit = 1
-		};
-
-		enum class DebugMode : uint32_t
-		{
-			None = 0,
-			AmbientOcclusion,
-			Albedo,
-			Metalness,
-			Roughness,
-			DiffuseLighting,
-			Normal,
-			NormalMap,
-			Reflectance,
-			IBLPrefilter,
-			IBLIrradiance,
-			Emission
 		};
 
 		using SceneIndex = uint8_t;
@@ -214,8 +213,8 @@ namespace pragma
 		pragma::rendering::BaseRenderer *GetRenderer();
 		const pragma::rendering::BaseRenderer *GetRenderer() const;
 
-		DebugMode GetDebugMode() const;
-		void SetDebugMode(DebugMode debugMode);
+		SceneDebugMode GetDebugMode() const;
+		void SetDebugMode(SceneDebugMode debugMode);
 
 		SceneRenderDesc &GetSceneRenderDesc();
 		const SceneRenderDesc &GetSceneRenderDesc() const;
@@ -252,7 +251,7 @@ namespace pragma
 		std::shared_ptr<prosper::IBuffer> m_renderSettingsBuffer = nullptr;
 		pragma::RenderSettings m_renderSettings = {};
 		pragma::CameraData m_cameraData = {};
-		DebugMode m_debugMode = DebugMode::None;
+		SceneDebugMode m_debugMode = SceneDebugMode::None;
 		Vector4 m_particleSystemColorFactor {1.f,1.f,1.f,1.f};
 
 		// Fog

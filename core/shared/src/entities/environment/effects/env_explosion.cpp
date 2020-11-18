@@ -37,7 +37,7 @@ void BaseEnvExplosionComponent::Explode()
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	auto &origin = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto &origin = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 	float radius = 512.f;
 	unsigned short damage = 12;
 	Vector3 force(0.f,0.f,0.f);
@@ -52,7 +52,7 @@ void BaseEnvExplosionComponent::Explode()
 		auto &pos = pTrComponentOther->GetPosition();
 		Vector3 min {};
 		Vector3 max {};
-		if(pPhysComponentOther.valid())
+		if(pPhysComponentOther)
 			pPhysComponentOther->GetCollisionBounds(&min,&max);
 		Vector3 r;
 		Geometry::ClosestPointOnAABBToPoint((min +pos),(max +pos),origin,&r);

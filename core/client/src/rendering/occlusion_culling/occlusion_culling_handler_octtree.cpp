@@ -83,7 +83,7 @@ void OcclusionCullingHandlerOctTree::PerformCulling(
 			if(ShouldExamine(scene,renderer,*ent,bViewModel,cullByViewFrustum ? &planes : nullptr) == false)
 				return;
 			auto pRenderComponent = ent->GetRenderComponent();
-			if(pRenderComponent.expired())
+			if(!pRenderComponent)
 				return;
 			auto pTrComponent = ent->GetTransformComponent();
 			if(bUpdateLod == true)
@@ -95,7 +95,7 @@ void OcclusionCullingHandlerOctTree::PerformCulling(
 			auto exemptFromCulling = pRenderComponent->IsExemptFromOcclusionCulling();
 			auto &meshes = pRenderComponent->GetLODMeshes();
 			auto numMeshes = meshes.size();
-			auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+			auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 			for(auto &mesh : meshes)
 			{
 				auto *cmesh = static_cast<CModelMesh*>(mesh.get());
@@ -126,7 +126,7 @@ void OcclusionCullingHandlerOctTree::PerformCulling(
 		{
 			auto &root = wrldTree->GetRootNode();
 			auto pTrComponent = entWorld.GetTransformComponent();
-			auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+			auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 			std::size_t numMeshes = 2; // Value doesn't matter, but has to be > 1
 			iterate_occlusion_tree<std::shared_ptr<ModelMesh>>(root,culledMeshesOut,planes,[this,&pos,&bViewModel,&planes,&entWorld,numMeshes,&culledMeshesOut](const std::shared_ptr<ModelMesh> &mesh) {
 				auto *cmesh = static_cast<CModelMesh*>(mesh.get());

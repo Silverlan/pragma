@@ -24,7 +24,7 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 ShadowRenderer::ShadowRenderer()
 {
 	m_shader = c_game->GetGameShader(CGame::GameShader::Shadow);
@@ -53,7 +53,7 @@ ShadowRenderer::ShadowRenderer()
 		info.entity = &ent;
 		info.renderFlags = (m_lightSourceData.type == util::pragma::LightType::Point) ? renderFlags : 1u; // Spot-lights only have 1 layer, so we can ignore the flags
 		auto pRenderComponent = ent.GetRenderComponent();
-		if(pRenderComponent.valid())
+		if(pRenderComponent)
 		{
 			// Make sure entity buffer data is up to date
 			// TODO
@@ -128,7 +128,7 @@ void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimary
 		return Intersection::AABBSphere(bounds.first,bounds.second,m_lightSourceData.position,m_lightSourceData.radius);
 		},[this,&light,&drawCmd,scene](const CBaseEntity *ent) {
 			auto pRenderComponent = ent->GetRenderComponent();
-			if(pRenderComponent.expired() || ent->IsInScene(*scene) == false || pRenderComponent->ShouldDrawShadow(m_lightSourceData.position) == false || ent->IsWorld() == true)
+			if(!pRenderComponent || ent->IsInScene(*scene) == false || pRenderComponent->ShouldDrawShadow(m_lightSourceData.position) == false || ent->IsWorld() == true)
 				return;
 			uint32_t renderFlags = 0;
 			if(light.ShouldPass(*ent,renderFlags) == false)
@@ -342,4 +342,3 @@ void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffe
 	RenderShadows(drawCmd,light,pragma::CLightComponent::ShadowMapType::Static,type,bDrawParticleShadows);
 	RenderShadows(drawCmd,light,pragma::CLightComponent::ShadowMapType::Dynamic,type,bDrawParticleShadows);
 }
-#pragma optimize("",on)

@@ -30,11 +30,11 @@ void CTouchComponent::OnEntitySpawn()
 	if(ent.IsClientsideOnly() == true)
 	{
 		auto pPhysComponent = ent.GetPhysicsComponent();
-		if(pPhysComponent.valid())
+		if(pPhysComponent != nullptr)
 			pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
 	}
 	auto pRenderComponent = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
-	if(pRenderComponent.valid())
+	if(pRenderComponent)
 		pRenderComponent->SetRenderMode(RenderMode::World);
 }
 luabind::object CTouchComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CTouchComponentHandleWrapper>(l);}

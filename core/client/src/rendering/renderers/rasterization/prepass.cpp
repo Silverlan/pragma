@@ -34,7 +34,7 @@ using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
-#pragma optimize("",off)
+
 static auto cvDrawView = GetClientConVar("render_draw_view");
 void RasterizationRenderer::RenderPrepass(const util::DrawSceneInfo &drawSceneInfo)
 {
@@ -48,4 +48,3 @@ void RasterizationRenderer::RenderPrepass(const util::DrawSceneInfo &drawSceneIn
 	//RenderSystem::RenderPrepass(drawSceneInfo,RenderMode::Skybox);
 	RenderSystem::RenderPrepass(drawSceneInfo,RenderMode::World);
 }
-#pragma optimize("",on)

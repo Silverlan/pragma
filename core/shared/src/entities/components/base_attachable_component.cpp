@@ -185,13 +185,13 @@ AttachmentData *BaseAttachableComponent::SetupAttachment(BaseEntity *ent,const A
 		else
 		{
 			auto pTrComponentEnt = ent->GetTransformComponent();
-			pos = pTrComponentEnt.valid() ? pTrComponentEnt->GetPosition() : Vector3{};
-			orientation = pTrComponentEnt.valid() ? pTrComponentEnt->GetRotation() : uquat::identity();
+			pos = pTrComponentEnt ? pTrComponentEnt->GetPosition() : Vector3{};
+			orientation = pTrComponentEnt ? pTrComponentEnt->GetRotation() : uquat::identity();
 		}
 		auto pTrComponent = GetEntity().GetTransformComponent();
 		if((attInfo.flags &FAttachmentMode::SnapToOrigin) != FAttachmentMode::None)
 		{
-			if(pTrComponent.valid())
+			if(pTrComponent)
 			{
 				pTrComponent->SetPosition(pos);
 				pTrComponent->SetRotation(orientation);
@@ -200,17 +200,17 @@ AttachmentData *BaseAttachableComponent::SetupAttachment(BaseEntity *ent,const A
 		else
 		{
 			auto invRot = uquat::get_inverse(orientation);
-			auto offset = (pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{}) -pos;
+			auto offset = (pTrComponent ? pTrComponent->GetPosition() : Vector3{}) -pos;
 			uvec::rotate(&offset,invRot);
 			if(attInfo.offset.has_value() == false)
 				m_attachment->offset = offset;
 			if(attInfo.rotation.has_value() == false)
-				m_attachment->rotation = uquat::get_inverse(orientation) *(pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity());
+				m_attachment->rotation = uquat::get_inverse(orientation) *(pTrComponent ? pTrComponent->GetRotation() : uquat::identity());
 		}
 		UpdateAttachmentData();
 		pParentComponent->AddChild(*this);
 
-		if(pTrComponent.valid())
+		if(pTrComponent)
 		{
 			// Update local pose (relative to parent) if absolute pose
 			// has been changed externally
@@ -273,11 +273,11 @@ AttachmentData *BaseAttachableComponent::AttachToBone(BaseEntity *ent,uint32_t b
 		auto rot = uquat::identity();
 		animComponentParent->GetBonePosition(m_attachment->bone,pos,rot);
 		auto pTrComponentParent = entParent.GetTransformComponent();
-		if(pTrComponentParent.valid())
+		if(pTrComponentParent)
 			pTrComponentParent->LocalToWorld(&pos,&rot);
 
 		auto pTrComponent = GetEntity().GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent)
 		{
 			pTrComponent->SetPosition(pos);
 			pTrComponent->SetRotation(rot);
@@ -324,11 +324,11 @@ AttachmentData *BaseAttachableComponent::AttachToAttachment(BaseEntity *ent,uint
 		if(mdlCParent.valid())
 			mdlCParent->GetAttachment(m_attachment->attachment,&pos,&rot);
 		auto pTrComponentParent = entParent.GetTransformComponent();
-		if(pTrComponentParent.valid())
+		if(pTrComponentParent)
 			pTrComponentParent->LocalToWorld(&pos,&rot);
 
 		auto pTrComponent = GetEntity().GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent)
 		{
 			pTrComponent->SetPosition(pos);
 			pTrComponent->SetRotation(rot);
@@ -406,8 +406,8 @@ void BaseAttachableComponent::UpdateViewAttachmentOffset(BaseEntity *ent,pragma:
 	else
 	{
 		auto pTrComponentEnt = ent->GetTransformComponent();
-		pos = pTrComponentEnt.valid() ? pTrComponentEnt->GetPosition() : Vector3{};
-		rot = pTrComponentEnt.valid() ? pTrComponentEnt->GetRotation() : uquat::identity();
+		pos = pTrComponentEnt ? pTrComponentEnt->GetPosition() : Vector3{};
+		rot = pTrComponentEnt ? pTrComponentEnt->GetRotation() : uquat::identity();
 
 		auto &rotRef = pl.GetOrientationAxesRotation();
 		auto viewRot = rotRef *pl.GetViewOrientation();
@@ -485,7 +485,7 @@ std::optional<umath::Transform> BaseAttachableComponent::GetParentPose() const
 				pMdlCParent->GetAttachment(m_attachment->attachment,&pos,&rot);
 		}
 		auto pTrComponentParent = entParent.GetTransformComponent();
-		if(pTrComponentParent.valid())
+		if(pTrComponentParent)
 			pTrComponentParent->LocalToWorld(&pos,&rot);
 		pose = {pos,rot};
 	}
@@ -511,7 +511,7 @@ void BaseAttachableComponent::UpdateAttachmentOffset()
 
 		pose->TranslateLocal(m_attachment->offset);
 		auto pTrComponent = entThis.GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent)
 		{
 			umath::set_flag(m_stateFlags,StateFlags::UpdatingPosition);
 			pTrComponent->SetPosition(pose->GetOrigin());
@@ -519,7 +519,7 @@ void BaseAttachableComponent::UpdateAttachmentOffset()
 		}
 		if((m_attachment->flags &FAttachmentMode::PositionOnly) == FAttachmentMode::None)
 		{
-			if(pTrComponent.valid())
+			if(pTrComponent)
 			{
 				pose->RotateLocal(m_attachment->rotation);
 

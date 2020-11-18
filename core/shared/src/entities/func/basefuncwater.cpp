@@ -106,7 +106,7 @@ util::EventReply BaseFuncWaterComponent::HandleEvent(ComponentEventId eventId,Co
 		if(triggerData.entity != nullptr)
 		{
 			auto pPhysComponent = triggerData.entity->GetPhysicsComponent();
-			if(pPhysComponent.valid() && (pPhysComponent->GetCollisionFilterMask() &CollisionMask::Water) == CollisionMask::None)
+			if(pPhysComponent != nullptr && (pPhysComponent->GetCollisionFilterMask() &CollisionMask::Water) == CollisionMask::None)
 				triggerData.canTrigger = false;
 		}
 		return util::EventReply::Handled;
@@ -118,7 +118,7 @@ void BaseFuncWaterComponent::OnPhysicsInitialized()
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	pPhysComponent->SetCollisionFilterMask(CollisionMask::Dynamic | CollisionMask::Generic);
 	pPhysComponent->SetCollisionFilterGroup(CollisionMask::Water | CollisionMask::WaterSurface);
@@ -293,7 +293,7 @@ void BaseFuncWaterComponent::ReloadSurfaceSimulator()
 	auto mesh = m_waterMesh.lock();
 	Vector3 min,max;
 	mesh->GetBounds(min,max);
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 	{
 		pTrComponent->LocalToWorld(&min);
 		pTrComponent->LocalToWorld(&max);

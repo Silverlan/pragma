@@ -117,7 +117,7 @@ void BaseActorComponent::UpdateMoveController()
 	if(l > 0.f)
 	{
 		auto dirMove = uvec::get_normal(vel);
-		auto dir = pTrComponent.valid() ? pTrComponent->GetForward() : uvec::FORWARD;
+		auto dir = pTrComponent ? pTrComponent->GetForward() : uvec::FORWARD;
 		float yawMove = uvec::get_yaw(dirMove);
 		float yawDir = uvec::get_yaw(dir);
 		float yawOffset = umath::get_angle_difference(yawDir,yawMove);
@@ -138,7 +138,7 @@ void BaseActorComponent::Ragdolize()
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(!pPhysComponent)
 		return;
 	auto *phys = pPhysComponent->GetPhysicsObject();
 	if(phys != nullptr && pPhysComponent->GetPhysicsType() == PHYSICSTYPE::DYNAMIC)
@@ -174,10 +174,10 @@ void BaseActorComponent::Respawn()
 	m_bAlive = true;
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent)
 		pPhysComponent->SetMoveType(MOVETYPE::WALK);
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 		pTrComponent->SetRotation(uquat::identity());
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
 	if(pVelComponent.valid())
@@ -203,7 +203,7 @@ void BaseActorComponent::OnPhysicsInitialized()
 		return;
 	auto hitboxBones = hMdl->GetHitboxBones();
 	auto pTrComponent = ent.GetTransformComponent();
-	auto scale = pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
+	auto scale = pTrComponent ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
 
 	auto &hitboxes = hMdl->GetHitboxes();
 	std::vector<pragma::physics::ICollisionObject*> physHitboxes;

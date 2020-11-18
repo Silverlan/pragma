@@ -24,7 +24,7 @@ void CBrushComponent::Initialize()
 {
 	BaseFuncBrushComponent::Initialize();
 	auto pRenderComponent = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
-	if(pRenderComponent.valid())
+	if(pRenderComponent)
 		pRenderComponent->SetRenderMode(RenderMode::World);
 }
 void CBrushComponent::OnEntitySpawn()
@@ -34,7 +34,7 @@ void CBrushComponent::OnEntitySpawn()
 	if(m_kvSolid)
 	{
 		auto pPhysComponent = ent.GetPhysicsComponent();
-		if(pPhysComponent.valid())
+		if(pPhysComponent != nullptr)
 			pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
 		UpdateSurfaceMaterial(ent.GetNetworkState()->GetGameState());
 	}

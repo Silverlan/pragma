@@ -370,7 +370,7 @@ int Lua::util::fire_bullets(lua_State *l,const std::function<void(DamageInfo&,::
 		if(attacker != nullptr)
 		{
 			auto pPhysComponent = attacker->GetPhysicsComponent();
-			if(pPhysComponent.valid())
+			if(pPhysComponent != nullptr)
 				filterGroup = pPhysComponent->GetCollisionFilter();
 			filterGroup |= CollisionMask::Water | CollisionMask::WaterSurface | CollisionMask::PlayerHitbox | CollisionMask::NPCHitbox;
 		}
@@ -588,10 +588,10 @@ void Lua::util::splash_damage(
 			Vector3 min {};
 			Vector3 max {};
 			auto pPhysComponent = ent->GetPhysicsComponent();
-			if(pPhysComponent.valid())
+			if(pPhysComponent != nullptr)
 				pPhysComponent->GetCollisionBounds(&min,&max);
 			auto pTrComponent = ent->GetTransformComponent();
-			auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+			auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 			min += pos;
 			max += pos;
 			Vector3 posCone {};
@@ -637,7 +637,7 @@ int Lua::util::shake_screen(lua_State *l)
 		if(bUseRadius == true)
 		{
 			auto pTrComponent = ent->GetTransformComponent();
-			if(pTrComponent.valid())
+			if(pTrComponent != nullptr)
 				pTrComponent->SetPosition(pos);
 			pQuakeComponent->SetRadius(radius);
 		}

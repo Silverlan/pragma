@@ -111,14 +111,14 @@ bool EntityIteratorFilterFlags::ShouldPass(BaseEntity &ent)
 		bIncludeEntity = true;
 	if(bIncludeEntity == false || (m_flags &EntityIterator::FilterFlags::AnyType) == EntityIterator::FilterFlags::AnyType || (m_flags &EntityIterator::FilterFlags::AnyType) == EntityIterator::FilterFlags::None)
 	{
-		if((m_flags &EntityIterator::FilterFlags::HasTransform) != EntityIterator::FilterFlags::None && ent.GetTransformComponent().valid())
+		if((m_flags &EntityIterator::FilterFlags::HasTransform) != EntityIterator::FilterFlags::None && ent.GetTransformComponent())
 			return true;
 
 		if((m_flags &EntityIterator::FilterFlags::HasModel) != EntityIterator::FilterFlags::None && ent.GetModelComponent().valid())
 			return true;
 		return bIncludeEntity;
 	}
-	if((m_flags &EntityIterator::FilterFlags::HasTransform) != EntityIterator::FilterFlags::None && ent.GetTransformComponent().expired())
+	if((m_flags &EntityIterator::FilterFlags::HasTransform) != EntityIterator::FilterFlags::None && !ent.GetTransformComponent())
 		return false;
 	if((m_flags &EntityIterator::FilterFlags::HasModel) != EntityIterator::FilterFlags::None && ent.GetModelComponent().expired())
 		return false;
@@ -140,7 +140,7 @@ bool EntityIteratorFilterFlags::ShouldPass(BaseEntity &ent)
 	if((m_flags &EntityIterator::FilterFlags::Physical) != EntityIterator::FilterFlags::None)
 	{
 		auto pPhysComponent = ent.GetPhysicsComponent();
-		if(pPhysComponent.valid() && pPhysComponent->GetPhysicsObject() != nullptr)
+		if(pPhysComponent != nullptr && pPhysComponent->GetPhysicsObject() != nullptr)
 			return true;
 	}
 	return false;
@@ -182,19 +182,19 @@ EntityIteratorFilterSphere::EntityIteratorFilterSphere(Game &game,const Vector3 
 bool EntityIteratorFilterSphere::ShouldPass(BaseEntity &ent,Vector3 &outClosestPointOnEntityBounds,float &outDistToEntity) const
 {
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return false;
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	Vector3 colCenter;
 	auto &pos = pTrComponent->GetPosition();
-	auto colRadius = pPhysComponent.valid() ? pPhysComponent->GetCollisionRadius(&colCenter) : 0.f;
+	auto colRadius = pPhysComponent != nullptr ? pPhysComponent->GetCollisionRadius(&colCenter) : 0.f;
 	colCenter += pos;
 	auto distToCol = uvec::distance(m_origin,colCenter) -colRadius;
 	if(distToCol > m_radius)
 		return false;
 	Vector3 min {};
 	Vector3 max {};
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->GetCollisionBounds(&min,&max);
 	Geometry::ClosestPointOnAABBToPoint(min,max,m_origin -pos,&outClosestPointOnEntityBounds);
 	outDistToEntity = uvec::length(outClosestPointOnEntityBounds);
@@ -217,12 +217,12 @@ EntityIteratorFilterBox::EntityIteratorFilterBox(Game &game,const Vector3 &min,c
 bool EntityIteratorFilterBox::ShouldPass(BaseEntity &ent)
 {
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return false;
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	Vector3 entMin {};
 	Vector3 entMax {};
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->GetCollisionBounds(&entMin,&entMax);
 	return Intersection::AABBAABB(m_min,m_max,entMin,entMax) != Intersection::Intersect::Outside;
 }

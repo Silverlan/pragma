@@ -47,7 +47,7 @@ bool ai::TaskTarget::GetTargetPosition(const Schedule *sched,pragma::SAIComponen
 		if(memFragment == nullptr || memFragment->hEntity.IsValid() == false)
 			return false;
 		auto pTrComponentEnt = memFragment->hEntity.get()->GetTransformComponent();
-		if(pTrComponentEnt.expired())
+		if(!pTrComponentEnt)
 			return false;
 		pos = pTrComponentEnt->GetPosition();
 	}
@@ -61,7 +61,7 @@ bool ai::TaskTarget::GetTargetPosition(const Schedule *sched,pragma::SAIComponen
 			if(ent == nullptr)
 				return false;
 			auto pTrComponentEnt = ent->GetTransformComponent();
-			if(pTrComponentEnt.expired())
+			if(!pTrComponentEnt)
 				return false;
 			pos = pTrComponentEnt->GetPosition();
 		}

@@ -20,7 +20,7 @@ bool SAIComponent::IsInViewCone(BaseEntity *ent,float *dist)
 	auto &entThis = GetEntity();
 	auto charComponent = entThis.GetCharacterComponent();
 	auto pTrComponent = ent->GetTransformComponent();
-	if(charComponent.expired() || pTrComponent.expired())
+	if(charComponent.expired() || pTrComponent == nullptr)
 		return false;
 	auto dir = charComponent->GetViewForward();
 	auto pos = charComponent->GetEyePosition();
@@ -74,7 +74,7 @@ void SAIComponent::Listen(std::vector<TargetInfo> &targets)
 	if(CanHear() == false)
 		return;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return;
 	auto hearingIntensity = 1.f -umath::clamp(GetHearingStrength(),0.f,1.f);
 	auto &pos = pTrComponent->GetPosition();

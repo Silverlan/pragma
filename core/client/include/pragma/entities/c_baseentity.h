@@ -47,7 +47,6 @@ public:
 	virtual util::WeakHandle<pragma::BaseAIComponent> GetAIComponent() const override;
 	virtual util::WeakHandle<pragma::BaseCharacterComponent> GetCharacterComponent() const override;
 	virtual util::WeakHandle<pragma::BasePlayerComponent> GetPlayerComponent() const override;
-	virtual util::WeakHandle<pragma::BasePhysicsComponent> GetPhysicsComponent() const override;
 	virtual util::WeakHandle<pragma::BaseTimeScaleComponent> GetTimeScaleComponent() const override;
 	virtual util::WeakHandle<pragma::BaseNameComponent> GetNameComponent() const override;
 	virtual bool IsCharacter() const override;
@@ -60,8 +59,7 @@ public:
 	// This only works for single-player / listen servers!
 	BaseEntity *GetServersideEntity() const;
 
-	util::WeakHandle<pragma::CRenderComponent> &GetRenderComponent() const;
-	util::WeakHandle<pragma::CPhysicsComponent> &GetCPhysicsComponent() const;
+	pragma::CRenderComponent *GetRenderComponent() const;
 
 	virtual void Initialize() override;
 	virtual void ReceiveData(NetPacket &packet);
@@ -106,10 +104,7 @@ protected:
 	friend pragma::BaseEntityComponent;
 	uint32_t m_clientIdx = 0u;
 	util::PUInt32Property m_sceneFlags = nullptr;
-	mutable util::WeakHandle<pragma::CRenderComponent> m_renderComponent = {};
-	mutable util::WeakHandle<pragma::CPhysicsComponent> m_physComponent = {};
-
-	//std::unique_ptr<std::shared_ptr<prosper::IBuffer>> m_softBodyBuffers = nullptr; // prosper TODO
+	pragma::CRenderComponent *m_renderComponent = nullptr;
 };
 #pragma warning(pop)
 

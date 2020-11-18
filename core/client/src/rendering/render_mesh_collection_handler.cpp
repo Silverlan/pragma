@@ -88,7 +88,7 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 			)
 			continue;
 		auto pRenderComponent = ent->GetRenderComponent();
-		if(pRenderComponent.expired())
+		if(!pRenderComponent)
 			continue;
 		auto rm = pRenderComponent->GetRenderMode();
 		if(renderMode == rm)
@@ -190,7 +190,7 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 									{
 										auto pTrComponent = ent->GetTransformComponent();
 										auto pos = subMesh->GetCenter();
-										if(pTrComponent.valid())
+										if(pTrComponent != nullptr)
 										{
 											uvec::rotate(&pos,pTrComponent->GetRotation());
 											pos += pTrComponent->GetPosition();

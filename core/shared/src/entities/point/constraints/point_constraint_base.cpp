@@ -97,7 +97,7 @@ void BasePointConstraintComponent::InitializeConstraint()
 	std::vector<BaseEntity*> entsTgt;
 	GetTargetEntities(entsTgt);
 	auto pPhysComponentSrc = entSrc->GetPhysicsComponent();
-	RigidPhysObj *physSrc = pPhysComponentSrc.valid() ? dynamic_cast<RigidPhysObj*>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
+	RigidPhysObj *physSrc = pPhysComponentSrc ? dynamic_cast<RigidPhysObj*>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
 	if(physSrc == NULL)
 		return;
 	auto *bodySrc = physSrc->GetRigidBody();

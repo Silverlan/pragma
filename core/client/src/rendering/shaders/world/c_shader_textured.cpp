@@ -221,10 +221,10 @@ bool ShaderTextured3DBase::BeginDraw(
 	return ShaderScene::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx),recordFlags) == true &&
 		BindClipPlane(clipPlane) == true &&
 		RecordPushConstants(drawOrigin,offsetof(PushConstants,drawOrigin)) &&
-		RecordPushConstants(pragma::CSceneComponent::DebugMode::None,offsetof(PushConstants,debugMode)) &&
+		RecordPushConstants(pragma::SceneDebugMode::None,offsetof(PushConstants,debugMode)) &&
 		cmdBuffer->RecordSetDepthBias() == true;
 }
-bool ShaderTextured3DBase::SetDebugMode(pragma::CSceneComponent::DebugMode debugMode)
+bool ShaderTextured3DBase::SetDebugMode(pragma::SceneDebugMode debugMode)
 {
 	return RecordPushConstants(debugMode,offsetof(PushConstants,debugMode));
 }
@@ -361,8 +361,8 @@ bool ShaderTextured3DBase::BindLightMapUvBuffer(CModelSubMesh &mesh,bool &outSho
 	auto *pLightMapUvBuffer = c_engine->GetRenderContext().GetDummyBuffer().get();
 	if(m_boundEntity)
 	{
-		auto &renderC = m_boundEntity->GetRenderComponent();
-		if(renderC.valid())
+		auto *renderC = m_boundEntity->GetRenderComponent();
+		if(renderC)
 		{
 			auto lightMapReceiverC = renderC->GetLightMapReceiverComponent();
 			auto bufIdx = lightMapReceiverC.valid() ? lightMapReceiverC->FindBufferIndex(mesh) : std::optional<uint32_t>{};

@@ -129,8 +129,8 @@ void CGame::ReloadSoundCache(bool bReloadBakedCache,SoundCacheFlags cacheFlags,f
 						return;
 					auto pPhysComponent = ent->GetPhysicsComponent();
 					auto pTrComponent = ent->GetTransformComponent();
-					auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
-					if(phys == nullptr || pTrComponent.expired())
+					auto *phys = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
+					if(phys == nullptr || pTrComponent == nullptr)
 						return;
 					auto &pos = pTrComponent->GetPosition();
 					auto &rot = pTrComponent->GetRotation();
@@ -270,7 +270,7 @@ void CGame::ReloadSoundCache(bool bReloadBakedCache,SoundCacheFlags cacheFlags,f
 					auto pTrComponent = ent->GetTransformComponent();
 
 					auto *pSoundComponent = (ent != nullptr) ? static_cast<pragma::CSoundComponent*>(ent->FindComponent("sound").get()) : nullptr;
-					if(pTrComponent.expired() || pSoundComponent == nullptr)
+					if(pTrComponent == nullptr || pSoundComponent == nullptr)
 						continue;
 					auto pAttComponent = ent->GetComponent<pragma::CAttachableComponent>();
 					if(pAttComponent.valid() && pAttComponent->GetParent() != nullptr)

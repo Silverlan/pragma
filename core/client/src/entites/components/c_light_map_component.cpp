@@ -34,7 +34,7 @@ extern DLLCLIENT ClientState *client;
 extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 luabind::object CLightMapComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CLightMapComponentHandleWrapper>(l);}
 void CLightMapComponent::Initialize()
 {
@@ -474,4 +474,3 @@ void Console::commands::debug_lightmaps(NetworkState *state,pragma::BasePlayerCo
 	pFrame->SizeToContents();
 	pLightmaps->SetAnchor(0.f,0.f,1.f,1.f);
 }
-#pragma optimize("",on)

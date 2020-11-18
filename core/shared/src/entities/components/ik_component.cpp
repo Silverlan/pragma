@@ -384,8 +384,8 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 	};
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	const auto up = pTrComponent.valid() ? pTrComponent->GetUp() : uvec::UP;
-	auto yExtent = pPhysComponent.valid() ? pPhysComponent->GetCollisionExtents().y : 0.f;
+	const auto up = pTrComponent ? pTrComponent->GetUp() : uvec::UP;
+	auto yExtent = pPhysComponent ? pPhysComponent->GetCollisionExtents().y : 0.f;
 	std::unordered_map<uint32_t,FootData> feetData {};
 	auto &reference = hMdl->GetReference();
 	for(auto &pair : m_ikTrees)
@@ -403,7 +403,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 
 		auto srcPos = pos +up *yExtent;
 		auto dstPos = pos -up *yExtent;
-		if(pTrComponent.valid())
+		if(pTrComponent)
 			pTrComponent->WorldToLocal(&pos,&rot);
 
 		auto &footData = feetData.insert(std::make_pair(pair.first,FootData{})).first->second;
@@ -420,7 +420,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 		}
 
 		auto bIkPlaced = false;
-		if(pTrComponent.valid())
+		if(pTrComponent)
 		{
 			auto traceData = ::util::get_entity_trace_data(*pTrComponent);
 			traceData.SetSource(srcPos);
@@ -431,13 +431,13 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 			if(rayResult.hitType != RayCastHitType::None)
 			{
 				auto posRay = rayResult.position +rayResult.normal *footInfo.yOffset;
-				if(pTrComponent.valid())
+				if(pTrComponent)
 					pTrComponent->WorldToLocal(&posRay);
 				SetIKEffectorPos(pair.first,0u,posRay);
 				footData.upNormal = rayResult.normal;
 				footData.boneId = boneId;
 				footData.rotation = rot;
-				uvec::rotate(&footData.upNormal,pTrComponent.valid() ? uquat::get_inverse(pTrComponent->GetRotation()) : uquat::identity());
+				uvec::rotate(&footData.upNormal,pTrComponent ? uquat::get_inverse(pTrComponent->GetRotation()) : uquat::identity());
 				bIkPlaced = true;
 			}
 		}
@@ -657,8 +657,8 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 	}
 
 	// Update feet rotations (Has to be done AFTER inverse kinematics have been applied)
-	const auto forward = pTrComponent.valid() ? pTrComponent->GetForward() : uvec::FORWARD;
-	const auto right = pTrComponent.valid() ? pTrComponent->GetRight() : uvec::RIGHT;
+	const auto forward = pTrComponent ? pTrComponent->GetForward() : uvec::FORWARD;
+	const auto right = pTrComponent ? pTrComponent->GetRight() : uvec::RIGHT;
 	const auto rot = uquat::create(forward,right,up);
 	for(auto &pair : feetData)
 	{

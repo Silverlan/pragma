@@ -29,7 +29,7 @@ void SAIComponent::_debugSendNavInfo(pragma::SPlayerComponent &pl)
 
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return;
 	auto nodePrev = pTrComponent->GetPosition();
 	NetPacket p {};

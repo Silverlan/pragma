@@ -40,7 +40,7 @@ void CExplosionComponent::Explode()
 	{
 		auto pTrComponent = ent.GetTransformComponent();
 		auto pTrComponentPt = particle->GetEntity().GetTransformComponent();
-		if(pTrComponent.valid() && pTrComponentPt.valid())
+		if(pTrComponent != nullptr && pTrComponentPt)
 			pTrComponentPt->SetPosition(pTrComponent->GetPosition());
 		particle->SetRemoveOnComplete(true);
 		if(particle != NULL)

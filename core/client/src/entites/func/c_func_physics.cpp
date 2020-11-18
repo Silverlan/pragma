@@ -24,7 +24,7 @@ void CFuncPhysicsComponent::Initialize()
 {
 	BaseFuncPhysicsComponent::Initialize();
 	auto pRenderComponent = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
-	if(pRenderComponent.valid())
+	if(pRenderComponent)
 		pRenderComponent->SetRenderMode(RenderMode::World);
 }
 

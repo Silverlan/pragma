@@ -29,7 +29,7 @@ void BaseSkyboxComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(!pPhysComponent)
 		return;
 	pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
 }

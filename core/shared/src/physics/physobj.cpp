@@ -160,7 +160,7 @@ void PhysObj::OnSleep()
 	if(m_owner.expired())
 		return;
 	auto pPhysComponent = m_owner->GetEntity().GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->OnPhysicsSleep(this);
 }
 void PhysObj::OnWake()
@@ -168,7 +168,7 @@ void PhysObj::OnWake()
 	if(m_owner.expired())
 		return;
 	auto pPhysComponent = m_owner->GetEntity().GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->OnPhysicsWake(this);
 }
 void PhysObj::Enable() {umath::set_flag(m_stateFlags,StateFlags::Disabled,false);}

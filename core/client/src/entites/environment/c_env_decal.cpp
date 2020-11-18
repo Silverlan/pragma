@@ -311,7 +311,7 @@ void CDecalComponent::OnEntitySpawn()
 	BaseEnvDecalComponent::OnEntitySpawn();
 	/*auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return;
 	auto &pos = pTrComponent->GetPosition();
 	auto dir = -pTrComponent->GetForward();

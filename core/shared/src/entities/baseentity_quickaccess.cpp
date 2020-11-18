@@ -145,7 +145,7 @@ pragma::BaseParentComponent *BaseEntity::GetParent() const
 PhysObj *BaseEntity::GetPhysicsObject() const
 {
 	auto physC = GetPhysicsComponent();
-	return physC.valid() ? physC->GetPhysicsObject() : nullptr;
+	return physC ? physC->GetPhysicsObject() : nullptr;
 }
 PhysObj *BaseEntity::InitializePhysics(PHYSICSTYPE type)
 {
@@ -157,21 +157,21 @@ PhysObj *BaseEntity::InitializePhysics(PHYSICSTYPE type)
 void BaseEntity::DestroyPhysicsObject()
 {
 	auto physC = GetPhysicsComponent();
-	if(physC.expired())
+	if(!physC)
 		return;
 	physC->DestroyPhysicsObject();
 }
 void BaseEntity::DropToFloor()
 {
 	auto physC = GetPhysicsComponent();
-	if(physC.expired())
+	if(!physC)
 		return;
 	physC->DropToFloor();
 }
 std::pair<Vector3,Vector3> BaseEntity::GetCollisionBounds() const
 {
 	auto physC = GetPhysicsComponent();
-	if(physC.expired())
+	if(!physC)
 		return {Vector3{},Vector3{}};
 	Vector3 min,max;
 	physC->GetCollisionBounds(&min,&max);
@@ -180,28 +180,28 @@ std::pair<Vector3,Vector3> BaseEntity::GetCollisionBounds() const
 void BaseEntity::SetCollisionFilterMask(CollisionMask filterMask)
 {
 	auto physC = GetPhysicsComponent();
-	if(physC.expired())
+	if(!physC)
 		return;
 	physC->SetCollisionFilterMask(filterMask);
 }
 void BaseEntity::SetCollisionFilterGroup(CollisionMask filterGroup)
 {
 	auto physC = GetPhysicsComponent();
-	if(physC.expired())
+	if(!physC)
 		return;
 	physC->SetCollisionFilter(filterGroup);
 }
 CollisionMask BaseEntity::GetCollisionFilterGroup() const
 {
 	auto physC = GetPhysicsComponent();
-	if(physC.expired())
+	if(!physC)
 		return CollisionMask::None;
 	return physC->GetCollisionFilter();
 }
 CollisionMask BaseEntity::GetCollisionFilterMask() const
 {
 	auto physC = GetPhysicsComponent();
-	if(physC.expired())
+	if(!physC)
 		return CollisionMask::None;
 	return physC->GetCollisionFilterMask();
 }
@@ -209,17 +209,17 @@ CollisionMask BaseEntity::GetCollisionFilterMask() const
 Vector3 BaseEntity::GetForward() const
 {
 	auto trC = GetTransformComponent();
-	return trC.valid() ? trC->GetForward() : uvec::FORWARD;
+	return trC ? trC->GetForward() : uvec::FORWARD;
 }
 Vector3 BaseEntity::GetUp() const
 {
 	auto trC = GetTransformComponent();
-	return trC.valid() ? trC->GetUp() : uvec::UP;
+	return trC ? trC->GetUp() : uvec::UP;
 }
 Vector3 BaseEntity::GetRight() const
 {
 	auto trC = GetTransformComponent();
-	return trC.valid() ? trC->GetRight() : uvec::RIGHT;
+	return trC ? trC->GetRight() : uvec::RIGHT;
 }
 
 void BaseEntity::Input(const std::string &input,BaseEntity *activator,BaseEntity *caller,const std::string &data)

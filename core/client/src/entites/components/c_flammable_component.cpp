@@ -95,7 +95,7 @@ void CFlammableComponent::UpdateFlameParticlePositions()
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(!IsOnFire() || pTrComponent.expired())
+	if(!IsOnFire() || pTrComponent == nullptr)
 		return;
 	auto &rot = pTrComponent->GetRotation();
 	for(auto &info : m_igniteInfo.flameParticles)
@@ -103,7 +103,7 @@ void CFlammableComponent::UpdateFlameParticlePositions()
 		if(info.hParticle.expired())
 			continue;
 		auto pTrComponent = info.hParticle->GetEntity().GetTransformComponent();
-		if(pTrComponent.expired())
+		if(pTrComponent == nullptr)
 			continue;
 		Vector3 pos {};
 		if(info.boneId == 0)
@@ -128,7 +128,7 @@ util::EventReply CFlammableComponent::Ignite(float duration,BaseEntity *attacker
 		return util::EventReply::Handled;
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(bOnFire == true || pTrComponent.expired())
+	if(bOnFire == true || pTrComponent == nullptr)
 		return util::EventReply::Handled;
 	auto pSndComponent = ent.GetComponent<pragma::CSoundEmitterComponent>();
 	if(pSndComponent.valid())
@@ -167,7 +167,7 @@ util::EventReply CFlammableComponent::Ignite(float duration,BaseEntity *attacker
 		{"fade_end","0.3"}
 	};
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto extents = pPhysComponent.valid() ? pPhysComponent->GetCollisionExtents() : Vector3{};
+	auto extents = pPhysComponent != nullptr ? pPhysComponent->GetCollisionExtents() : Vector3{};
 	auto radius = uvec::length(extents);
 	auto particleDistance = radius *0.06f;
 	auto distSqr = particleDistance *particleDistance;
@@ -217,7 +217,7 @@ util::EventReply CFlammableComponent::Ignite(float duration,BaseEntity *attacker
 	// Create remaining particles
 	Vector3 min {};
 	Vector3 max {};
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->GetCollisionBounds(&min,&max);
 	for(auto i=particleId;i<particleCount;++i)
 	{
@@ -248,7 +248,7 @@ util::EventReply CFlammableComponent::Ignite(float duration,BaseEntity *attacker
 			pt->AddInitializer("rotation_random",rotationRandom);
 			pt->AddInitializer("color_fade",colorFade);
 			auto pTrComponent = pt->GetEntity().GetTransformComponent();
-			if(pTrComponent.valid())
+			if(pTrComponent != nullptr)
 			{
 				pTrComponent->SetPosition(pos);
 				pTrComponent->SetRotation(rot);
@@ -265,7 +265,7 @@ util::EventReply CFlammableComponent::Ignite(float duration,BaseEntity *attacker
 		if(pt != nullptr)
 		{
 			auto pTrComponent = pt->GetEntity().GetTransformComponent();
-			if(pTrComponent.valid())
+			if(pTrComponent != nullptr)
 				pTrComponent->SetPosition(pos);
 			pt->SetRemoveOnComplete(true);
 			pt->Start();

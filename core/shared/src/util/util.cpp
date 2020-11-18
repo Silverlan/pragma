@@ -47,7 +47,7 @@ void Game::SplashDamage(const Vector3 &origin,Float radius,DamageInfo &dmg,const
 		auto pPhysComponent = ent->GetPhysicsComponent();
 		Vector3 min {};
 		Vector3 max {};
-		if(pPhysComponent.valid())
+		if(pPhysComponent != nullptr)
 			pPhysComponent->GetCollisionBounds(&min,&max);
 		Vector3 pos;
 		Geometry::ClosestPointOnAABBToPoint(min,max,origin -pTrComponent->GetPosition(),&pos);
@@ -72,7 +72,7 @@ void Game::SplashDamage(const Vector3 &origin,Float radius,DamageInfo &dmg,const
 		{
 			auto *ent = c.hEntity.get();
 			auto pTrComponent = ent->GetTransformComponent();
-			if(pTrComponent.expired())
+			if(pTrComponent == nullptr)
 				continue;
 			auto pos = c.position +pTrComponent->GetPosition();
 
@@ -82,7 +82,7 @@ void Game::SplashDamage(const Vector3 &origin,Float radius,DamageInfo &dmg,const
 			if(l == 0.f) // Damage origin is within entity
 			{
 				pos = pTrComponent->GetPosition();
-				if(pPhysComponent.valid())
+				if(pPhysComponent != nullptr)
 					pos += pPhysComponent->GetCollisionCenter();
 				dir = pos -origin;
 				l = uvec::length(dir);
@@ -103,7 +103,7 @@ void Game::SplashDamage(const Vector3 &origin,Float radius,DamageInfo &dmg,const
 			data.SetTarget(pos);
 			data.SetFilter(traceFilter);
 			data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
-			if(entOrigin != nullptr && pPhysComponent.valid())
+			if(entOrigin != nullptr && pPhysComponent != nullptr)
 			{
 				data.SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter());
 				data.SetCollisionFilterMask(pPhysComponent->GetCollisionFilterMask());
@@ -113,10 +113,10 @@ void Game::SplashDamage(const Vector3 &origin,Float radius,DamageInfo &dmg,const
 			{
 				auto pPhysComponent = ent->GetPhysicsComponent();
 				auto &pos = pTrComponent->GetPosition();
-				auto center = (pPhysComponent.valid()) ? pPhysComponent->GetCollisionCenter() : Vector3{};
+				auto center = (pPhysComponent != nullptr) ? pPhysComponent->GetCollisionCenter() : Vector3{};
 				Vector3 min {};
 				Vector3 max {};
-				if(pPhysComponent.valid())
+				if(pPhysComponent != nullptr)
 					pPhysComponent->GetCollisionBounds(&min,&max);
 				min = pos +center +(min -center) *0.5f;
 				data.SetTarget(min);

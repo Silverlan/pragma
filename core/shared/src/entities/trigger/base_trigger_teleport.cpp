@@ -55,7 +55,7 @@ util::EventReply BaseTriggerTeleportComponent::HandleEvent(ComponentEventId even
 		auto *entTarget = targetCandidates[umath::random(0,targetCandidates.size() -1)];
 		auto ptrTrComponent = ent.GetTransformComponent();
 		auto ptrTrComponentTgt = entTarget->GetTransformComponent();
-		if(ptrTrComponent.valid() && ptrTrComponentTgt.valid())
+		if(ptrTrComponent && ptrTrComponentTgt)
 		{
 			ptrTrComponent->SetPosition(ptrTrComponentTgt->GetPosition());
 			if(ent.GetSpawnFlags() &umath::to_integral(SpawnFlags::FaceTargetDirectionOnTeleport))

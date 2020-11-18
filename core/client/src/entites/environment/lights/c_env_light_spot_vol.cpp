@@ -80,13 +80,13 @@ util::EventReply CLightSpotVolComponent::HandleEvent(ComponentEventId eventId,Co
 	if(eventId == BaseToggleComponent::EVENT_ON_TURN_ON)
 	{
 		auto pRenderComponent = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
-		if(pRenderComponent.valid())
+		if(pRenderComponent)
 			pRenderComponent->SetRenderMode(RenderMode::World);
 	}
 	else if(eventId == BaseToggleComponent::EVENT_ON_TURN_OFF)
 	{
 		auto pRenderComponent = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
-		if(pRenderComponent.valid())
+		if(pRenderComponent)
 			pRenderComponent->SetRenderMode(RenderMode::None);
 	}
 	return util::EventReply::Unhandled;

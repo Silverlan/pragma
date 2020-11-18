@@ -40,7 +40,7 @@ bool OcclusionCullingHandler::ShouldExamine(pragma::CSceneComponent &scene,const
 	auto *cam = c_game->GetPrimaryCamera();
 	auto &posCam = cam ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(ent.IsSpawned() == false || pRenderComponent.expired() || pRenderComponent->ShouldDraw(posCam) == false)
+	if(ent.IsSpawned() == false || !pRenderComponent || pRenderComponent->ShouldDraw(posCam) == false)
 		return false;
 	auto mdlComponent = ent.GetModelComponent();
 	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
@@ -126,7 +126,7 @@ void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,cons
 			{
 				auto pTrComponent = ent.GetTransformComponent();
 				auto pRadiusComponent = ent.GetComponent<pragma::CRadiusComponent>();
-				if(pTrComponent.valid() && pRadiusComponent.valid())
+				if(pTrComponent != nullptr && pRadiusComponent.valid())
 				{
 					auto &posLight = pTrComponent->GetPosition();
 					if(Intersection::SphereInPlaneMesh(posLight,pRadiusComponent->GetRadius(),frustumPlanes) != Intersection::Intersect::Outside)
@@ -206,7 +206,7 @@ void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,cons
 		auto exemptFromCulling = pRenderComponent->IsExemptFromOcclusionCulling();
 		auto pTrComponent = ent->GetTransformComponent();
 		auto sphere = pRenderComponent->GetRenderSphereBounds();
-		auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+		auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 		if(exemptFromCulling || uvec::length_sqr((pos +sphere.pos) -origin) <= radiusSqr +umath::pow(sphere.radius,2.f))
 		{
 			auto &meshes = pRenderComponent->GetLODMeshes();

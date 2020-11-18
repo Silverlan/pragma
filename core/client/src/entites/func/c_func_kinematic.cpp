@@ -23,7 +23,7 @@ void CKinematicComponent::Initialize()
 	BaseFuncKinematicComponent::Initialize();
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(pRenderComponent.valid())
+	if(pRenderComponent)
 		pRenderComponent->SetRenderMode(RenderMode::World);
 }
 

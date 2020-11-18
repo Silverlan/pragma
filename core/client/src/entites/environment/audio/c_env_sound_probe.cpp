@@ -51,7 +51,7 @@ void CEnvSoundProbeComponent::OnEntitySpawn()
 
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return;
 	auto &origin = pTrComponent->GetPosition();
 	auto mdlComponent = ent.GetModelComponent();
@@ -64,7 +64,7 @@ void CEnvSoundProbeComponent::OnEntitySpawn()
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	Vector3 min {};
 	Vector3 max {};
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->GetCollisionBounds(&min,&max);
 	s_probes.push_back({origin +min,origin +max,Placement::UniformFloor,m_spacing,m_heightAboveFloor});
 	if(s_probeCallback.IsValid() == false)

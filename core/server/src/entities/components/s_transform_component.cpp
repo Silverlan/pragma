@@ -33,7 +33,7 @@ void STransformComponent::SetScale(const Vector3 &scale)
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	ent.SendNetEvent(m_netEvSetScale,p,pragma::networking::Protocol::SlowReliable);
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->InitializePhysics(pPhysComponent->GetPhysicsType());
 }
 luabind::object STransformComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<STransformComponentHandleWrapper>(l);}

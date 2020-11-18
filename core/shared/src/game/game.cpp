@@ -535,7 +535,7 @@ public:
 	{
 		auto *physObj = o.GetPhysObj();
 		auto *ent = physObj ? physObj->GetOwner() : nullptr;
-		auto *physC = ent ? ent->GetEntity().GetPhysicsComponent().get() : nullptr;
+		auto *physC = ent ? ent->GetEntity().GetPhysicsComponent() : nullptr;
 		if(physC == nullptr)
 			return;
 		physC->OnWake();
@@ -544,7 +544,7 @@ public:
 	{
 		auto *physObj = o.GetPhysObj();
 		auto *ent = physObj ? physObj->GetOwner() : nullptr;
-		auto *physC = ent ? ent->GetEntity().GetPhysicsComponent().get() : nullptr;
+		auto *physC = ent ? ent->GetEntity().GetPhysicsComponent() : nullptr;
 		if(physC == nullptr)
 			return;
 		physC->OnSleep();

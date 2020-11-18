@@ -27,7 +27,7 @@
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 SceneRenderDesc::SceneRenderDesc(pragma::CSceneComponent &scene)
 	: m_scene{scene}
 {
@@ -186,8 +186,8 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(const util::DrawSceneInfo &dr
 
 bool SceneRenderDesc::ShouldCull(CBaseEntity &ent,const std::vector<Plane> &frustumPlanes)
 {
-	auto &renderC = ent.GetRenderComponent();
-	return renderC.expired() || ShouldCull(*renderC,frustumPlanes);
+	auto *renderC = ent.GetRenderComponent();
+	return !renderC || ShouldCull(*renderC,frustumPlanes);
 }
 bool SceneRenderDesc::ShouldCull(pragma::CRenderComponent &renderC,const std::vector<Plane> &frustumPlanes)
 {
@@ -248,8 +248,8 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 			}
 			if(ent->IsWorld())
 				continue; // World entities are handled separately
-			auto &renderC = static_cast<CBaseEntity*>(ent)->GetRenderComponent();
-			if(renderC.expired() || renderC->IsExemptFromOcclusionCulling() || ShouldConsiderEntity(*static_cast<CBaseEntity*>(ent),scene,cam.GetEntity().GetPosition(),renderFlags) == false)
+			auto *renderC = static_cast<CBaseEntity*>(ent)->GetRenderComponent();
+			if(!renderC || renderC->IsExemptFromOcclusionCulling() || ShouldConsiderEntity(*static_cast<CBaseEntity*>(ent),scene,cam.GetEntity().GetPosition(),renderFlags) == false)
 				continue;
 			if(optFrustumPlanes && ShouldCull(*renderC,*optFrustumPlanes))
 				continue;
@@ -273,9 +273,9 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 
 bool SceneRenderDesc::ShouldConsiderEntity(CBaseEntity &ent,const pragma::CSceneComponent &scene,const Vector3 &camOrigin,FRender renderFlags)
 {
-	if(ent.IsInScene(scene) == false || ent.GetRenderComponent().expired())
+	if(ent.IsInScene(scene) == false || !ent.GetRenderComponent())
 		return false;
-	auto &renderC = ent.GetRenderComponent();
+	auto *renderC = ent.GetRenderComponent();
 	auto renderMode = renderC->GetRenderMode();
 	return umath::is_flag_set(renderFlags,render_mode_to_render_flag(renderMode)) && ent.GetModel() != nullptr && renderC->ShouldDraw(camOrigin);
 }
@@ -358,7 +358,7 @@ void SceneRenderDesc::BuildRenderQueue(const util::DrawSceneInfo &drawSceneInfo)
 		if(node == nullptr)
 			continue;
 		bspLeafNodes.push_back(node);
-		auto &renderC = static_cast<CBaseEntity&>(worldC->GetEntity()).GetRenderComponent();
+		auto *renderC = static_cast<CBaseEntity&>(worldC->GetEntity()).GetRenderComponent();
 		renderC->UpdateRenderData(drawSceneInfo.commandBuffer,m_scene,cam,vp);
 		auto *renderQueue = worldC->GetClusterRenderQueue(node->cluster);
 		if(renderQueue)
@@ -399,7 +399,7 @@ void SceneRenderDesc::BuildRenderQueue(const util::DrawSceneInfo &drawSceneInfo)
 			renderQueueTranslucentDst->sortedItemIndices.push_back(renderQueueTranslucentSrc->sortedItemIndices.at(i));
 			renderQueueTranslucentDst->sortedItemIndices.back().first = renderQueueTranslucentDst->queue.size() -1;
 
-			auto renderMeshes = renderC->GetRenderMeshes();
+			auto &renderMeshes = renderC->GetRenderMeshes();
 			if(item.mesh >= renderMeshes.size())
 				continue;
 			auto &pos = pose *renderMeshes.at(item.mesh)->GetCenter();
@@ -453,7 +453,7 @@ void SceneRenderDesc::BuildRenderQueue(const util::DrawSceneInfo &drawSceneInfo)
 			auto exemptFromCulling = pRenderComponent->IsExemptFromOcclusionCulling();
 			auto &meshes = pRenderComponent->GetLODMeshes();
 			auto numMeshes = meshes.size();
-			auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+			auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 			for(auto &mesh : meshes)
 			{
 				auto *cmesh = static_cast<CModelMesh*>(mesh.get());
@@ -474,4 +474,3 @@ void SceneRenderDesc::BuildRenderQueue(const util::DrawSceneInfo &drawSceneInfo)
 		renderQueue->Sort();
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::BuildRenderQueue);
 }
-#pragma optimize("",on)

@@ -17,5 +17,5 @@ TraceData util::get_entity_trace_data(BaseEntity &ent)
 	if(pCharComponent.valid())
 		return pCharComponent->GetAimTraceData();
 	auto pTrComponent = ent.GetTransformComponent();
-	return pTrComponent.valid() ? get_entity_trace_data(*pTrComponent) : TraceData{};
+	return pTrComponent != nullptr ? get_entity_trace_data(*pTrComponent) : TraceData{};
 }

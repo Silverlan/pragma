@@ -39,8 +39,8 @@ void TraceResult::InitializeMeshes()
 	auto closestDist = std::numeric_limits<float>::max();
 
 	auto pTrComponent = entity->GetTransformComponent();
-	auto origin = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
-	auto rot = pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity();
+	auto origin = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
+	auto rot = pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity();
 
 	auto startPosLocal = startPosition;
 	uvec::world_to_local(origin,rot,startPosLocal);

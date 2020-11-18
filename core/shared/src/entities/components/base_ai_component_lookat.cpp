@@ -22,7 +22,7 @@ void BaseAIComponent::LookAtStep(float tDelta)
 		return;
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(!pTrComponent)
 		return;
 	auto *nw = ent.GetNetworkState();
 	auto *game = nw->GetGameState();
@@ -113,7 +113,7 @@ void BaseAIComponent::SetLookTarget(const BaseEntity &ent,float t)
 		return;
 	auto pTrComponentEnt = ent.GetTransformComponent();
 	m_neckInfo.lookTargetType = BaseAIComponent::LookTargetType::Entity;
-	m_neckInfo.lookTarget = pTrComponentEnt.valid() ? pTrComponentEnt->GetEyePosition() : Vector3{};
+	m_neckInfo.lookTarget = pTrComponentEnt ? pTrComponentEnt->GetEyePosition() : Vector3{};
 	m_neckInfo.hEntityLookTarget = ent.GetHandle();
 
 	OnLookTargetChanged();
@@ -128,7 +128,7 @@ Vector3 BaseAIComponent::GetLookTarget() const
 		{
 			if(m_neckInfo.hEntityLookTarget.IsValid() == false)
 				return uvec::ORIGIN;
-			return m_neckInfo.hEntityLookTarget.get()->GetTransformComponent().valid() ? m_neckInfo.hEntityLookTarget.get()->GetCenter() : uvec::ORIGIN;
+			return m_neckInfo.hEntityLookTarget.get()->GetTransformComponent() ? m_neckInfo.hEntityLookTarget.get()->GetCenter() : uvec::ORIGIN;
 		}
 		default:
 			return uvec::ORIGIN;

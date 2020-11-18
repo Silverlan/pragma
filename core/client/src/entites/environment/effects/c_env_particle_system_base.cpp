@@ -599,13 +599,13 @@ Vector3 CParticleSystemComponent::PointToParticleSpace(const Vector3 &p,bool bRo
 	if(bRotateWithEmitter == true)
 	{
 		auto pTrComponent = GetEntity().GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent != nullptr)
 			uvec::rotate(&r,pTrComponent->GetRotation());
 	}
 	if(ShouldParticlesMoveWithEmitter())
 	{
 		auto pTrComponent = GetEntity().GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent != nullptr)
 			r += pTrComponent->GetPosition();
 	}
 	return r;
@@ -617,7 +617,7 @@ Vector3 CParticleSystemComponent::DirectionToParticleSpace(const Vector3 &p,bool
 	if(bRotateWithEmitter == true)
 	{
 		auto pTrComponent = GetEntity().GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent != nullptr)
 			uvec::rotate(&r,pTrComponent->GetRotation());
 	}
 	return r;
@@ -902,7 +902,7 @@ void CParticleSystemComponent::SetParent(CParticleSystemComponent *particle)
 	particle->AddChild(*this);
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	auto pTrComponentPt = particle->GetEntity().GetTransformComponent();
-	if(pTrComponent.valid() && pTrComponentPt.valid())
+	if(pTrComponent != nullptr && pTrComponentPt)
 	{
 		pTrComponent->SetPosition(pTrComponentPt->GetPosition());
 		pTrComponent->SetRotation(pTrComponentPt->GetRotation());
@@ -1253,7 +1253,7 @@ Vector3 CParticleSystemComponent::GetNodePosition(uint32_t node) const
 	if(node == 0)
 	{
 		auto pTrComponent = GetEntity().GetTransformComponent();
-		return pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+		return pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 	}
 	--node;
 	if(node >= m_nodes.size() || (m_nodes[node].bEntity == true && !m_nodes[node].hEntity.IsValid()))
@@ -1261,7 +1261,7 @@ Vector3 CParticleSystemComponent::GetNodePosition(uint32_t node) const
 	if(m_nodes[node].bEntity == false)
 		return m_nodes[node].position;
 	auto pTrComponent = m_nodes[node].hEntity.get()->GetTransformComponent();
-	return pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	return pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 }
 CBaseEntity *CParticleSystemComponent::GetNodeTarget(uint32_t node) const
 {
@@ -1376,7 +1376,7 @@ CParticle &CParticleSystemComponent::CreateParticle(uint32_t idx,float timeCreat
 	if(umath::is_flag_set(m_flags,Flags::MoveWithEmitter) == false) // If the particle is moving with the emitter, the position is added elsewhere!
 	{
 		auto pTrComponent = GetEntity().GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent != nullptr)
 			pos += pTrComponent->GetPosition();
 	}
 	particle.SetPosition(pos);
@@ -1384,7 +1384,7 @@ CParticle &CParticleSystemComponent::CreateParticle(uint32_t idx,float timeCreat
 	if(umath::is_flag_set(m_flags,Flags::RotateWithEmitter) == false)
 	{
 		auto pTrComponent = GetEntity().GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent != nullptr)
 			rot = pTrComponent->GetOrientation() *rot;
 	}
 	particle.SetWorldRotation(rot);
@@ -1690,7 +1690,7 @@ void CParticleSystemComponent::Simulate(double tDelta)
 		}
 	}
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	auto psPos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto psPos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 	auto alphaMode = GetEffectiveAlphaMode();
 	for(auto i=decltype(m_maxParticlesCur){0};i<m_maxParticlesCur;++i)
 	{

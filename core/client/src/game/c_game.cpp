@@ -555,7 +555,7 @@ static void render_debug_mode(NetworkState*,ConVar*,int32_t,int32_t debugMode)
 	auto *scene = c_game->GetScene();
 	if(scene == nullptr)
 		return;
-	scene->SetDebugMode(static_cast<pragma::CSceneComponent::DebugMode>(debugMode));
+	scene->SetDebugMode(static_cast<pragma::SceneDebugMode>(debugMode));
 }
 REGISTER_CONVAR_CALLBACK_CL(render_debug_mode,render_debug_mode);
 
@@ -607,7 +607,7 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 	if(scene)
 	{
 		m_scene = scene->GetHandle<pragma::CSceneComponent>();
-		m_scene->SetDebugMode(static_cast<pragma::CSceneComponent::DebugMode>(GetConVarInt("render_debug_mode")));
+		m_scene->SetDebugMode(static_cast<pragma::SceneDebugMode>(GetConVarInt("render_debug_mode")));
 		SetViewModelFOV(GetConVarFloat("cl_fov_viewmodel"));
 		auto renderer = pragma::rendering::RasterizationRenderer::Create<pragma::rendering::RasterizationRenderer>(m_scene->GetWidth(),m_scene->GetHeight());
 		m_scene->SetRenderer(renderer);
@@ -861,7 +861,7 @@ void CGame::CreateGiblet(const GibletCreateInfo &info,pragma::CParticleSystemCom
 		{"fade_end",std::to_string(info.lifetime)}
 	});
 	auto pTrComponent = pt->GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 		pTrComponent->SetPosition(info.position);
 	pt->SetRemoveOnComplete(true);
 	pt->Start();
@@ -1077,12 +1077,12 @@ void CGame::InitializeMapEntities(pragma::asset::WorldData &worldData,std::vecto
 		if(mdl == nullptr)
 		{
 			auto pRenderComponent = static_cast<CBaseEntity&>(ent).GetRenderComponent();
-			if(pRenderComponent.valid())
+			if(pRenderComponent)
 			{
 				Vector3 min {};
 				Vector3 max {};
 				auto pPhysComponent = ent.GetPhysicsComponent();
-				if(pPhysComponent.valid())
+				if(pPhysComponent != nullptr)
 					pPhysComponent->GetCollisionBounds(&min,&max);
 				pRenderComponent->SetRenderBounds(min,max);
 			}
@@ -1227,7 +1227,7 @@ void CGame::SendUserInput()
 	auto &ent = pl->GetEntity();
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
-	auto orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity();
+	auto orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity();
 	nwm::write_quat(p,orientation);
 	p->Write<Vector3>(pl->GetViewPos());
 
@@ -1301,7 +1301,7 @@ void CGame::ReceiveSnapshot(NetPacket &packet)
 			// Move the entity to the correct position without teleporting it.
 			// Teleporting can lead to odd physics glitches.
 			auto pTrComponent = ent->GetTransformComponent();
-			auto posEnt = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+			auto posEnt = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 			auto correctionVel = pos -posEnt;
 			auto l = uvec::length_sqr(correctionVel);
 #ifdef ENABLE_DEPRECATED_PHYSICS
@@ -1309,7 +1309,7 @@ void CGame::ReceiveSnapshot(NetPacket &packet)
 			if(l > maxCorrectionDistance)
 #endif
 			{
-				if(pTrComponent.valid())
+				if(pTrComponent != nullptr)
 					pTrComponent->SetPosition(pos); // Too far away, just snap into position
 			}
 #ifdef ENABLE_DEPRECATED_PHYSICS
@@ -1328,7 +1328,7 @@ void CGame::ReceiveSnapshot(NetPacket &packet)
 				pVelComponent->SetVelocity(vel);
 				pVelComponent->SetAngularVelocity(angVel);
 			}
-			if(pTrComponent.valid())
+			if(pTrComponent != nullptr)
 				pTrComponent->SetRotation(orientation);
 			ent->ReceiveSnapshotData(packet);
 		}
@@ -1342,7 +1342,7 @@ void CGame::ReceiveSnapshot(NetPacket &packet)
 			if(ent != NULL)
 			{
 				auto pPhysComponent = ent->GetPhysicsComponent();
-				PhysObj *physObj = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+				PhysObj *physObj = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
 				if(physObj != NULL && !physObj->IsStatic())
 				{
 					auto colObjs = physObj->GetCollisionObjects();

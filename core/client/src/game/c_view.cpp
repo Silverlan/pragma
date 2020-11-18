@@ -24,7 +24,7 @@ static CVar cvSpeed = GetClientConVar("cl_mouse_sensitivity");
 static CVar cvAcceleration = GetClientConVar("cl_mouse_acceleration");
 static CVar cvYaw = GetClientConVar("cl_mouse_yaw");
 static CVar cvPitch = GetClientConVar("cl_mouse_pitch");
-#pragma optimize("",off)
+
 void CGame::CalcLocalPlayerOrientation()
 {
 	auto *pl = GetLocalPlayer();
@@ -33,7 +33,7 @@ void CGame::CalcLocalPlayerOrientation()
 	auto &ent = pl->GetEntity();
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(charComponent.expired() && pTrComponent.expired())
+	if(charComponent.expired() && pTrComponent == nullptr)
 		return;
 	//Vector3 pos = pl->GetPosition();
 	auto orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetRotation();
@@ -139,11 +139,11 @@ void CGame::CalcView()
 	auto &ent = pl->GetEntity();
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(charComponent.expired() && pTrComponent.expired())
+	if(charComponent.expired() && pTrComponent == nullptr)
 		return;
 	Vector3 pos;
 	Quat orientation = uquat::identity();
-	pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 	Vector3 offset = pl->GetViewOffset();
 	Vector3 upDir = charComponent.valid() ? charComponent->GetUpDirection() : uvec::UP;
 	offset = Vector3(offset.x,0,offset.z) +upDir *offset.y;
@@ -185,4 +185,3 @@ void CGame::CalcView()
 	cam->GetEntity().SetRotation(orientation);
 	cam->UpdateViewMatrix();
 }
-#pragma optimize("",on)

@@ -64,7 +64,7 @@ void BasePointAtTargetComponent::SetPointAtTarget(BaseEntity *ent)
 			return;
 		}
 		auto pTransformComponent = GetEntity().GetTransformComponent();
-		if(pTransformComponent.expired())
+		if(!pTransformComponent)
 			return;
 		auto posTgt = entPointAtTarget->GetPosition();
 		auto pos = pTransformComponent->GetPosition();

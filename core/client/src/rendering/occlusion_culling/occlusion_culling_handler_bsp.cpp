@@ -40,7 +40,7 @@ bool OcclusionCullingHandlerBSP::ShouldExamine(pragma::CSceneComponent &scene,co
 bool OcclusionCullingHandlerBSP::ShouldPass(CBaseEntity &ent) const
 {
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(m_pCurrentNode == nullptr || pRenderComponent.expired())
+	if(m_pCurrentNode == nullptr || !pRenderComponent)
 		return false;
 	if(pRenderComponent->IsExemptFromOcclusionCulling())
 		return true;
@@ -48,7 +48,7 @@ bool OcclusionCullingHandlerBSP::ShouldPass(CBaseEntity &ent) const
 	//if(pBspLeafComponent.valid())
 		//return false;//pBspLeafComponent->GetLeafVisibility(m_pCurrentNode->cluster); // TODO
 	auto pTrComponent = ent.GetTransformComponent();
-	auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 	Vector3 min;
 	Vector3 max;
 	pRenderComponent->GetRenderBounds(&min,&max);
@@ -210,7 +210,7 @@ static void debug_bsp_nodes(NetworkState*,ConVar*,int32_t,int32_t val)
 				{
 					auto &posWorld = entWorld.GetPosition();
 					auto pTrComponent = entWorld.GetTransformComponent();
-					auto rotWorld = pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity();
+					auto rotWorld = pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity();
 					auto clusterCenter = (pCurrentNode->min +pCurrentNode->max) *0.5f;
 					for(auto &mesh : meshes)
 					{

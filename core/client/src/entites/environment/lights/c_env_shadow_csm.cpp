@@ -195,8 +195,8 @@ void CShadowCSMComponent::UpdateFrustum(uint32_t splitId,pragma::CCameraComponen
 		split.neard,split.fard,
 		cam.GetFOVRad(),cam.GetAspectRatio(),
 		entCam.GetPosition(),
-		trCam.valid() ? trCam->GetForward() : uvec::FORWARD,
-		trCam.valid() ? trCam->GetUp() : uvec::UP
+		trCam ? trCam->GetForward() : uvec::FORWARD,
+		trCam ? trCam->GetUp() : uvec::UP
 	);
 
 	cam.SetNearZ(zNear);

@@ -127,7 +127,7 @@ void SPhysicsComponent::PostPhysicsSimulate()
 	auto *phys = GetPhysicsObject();
 	auto *entCl = ent.GetClientsideEntity();
 	auto pPhysComponent = (entCl != nullptr) ? entCl->GetPhysicsComponent() : util::WeakHandle<BasePhysicsComponent>{};
-	auto *physCl = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	auto *physCl = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(phys == nullptr || physCl == nullptr)
 		return;
 	// Only executed on listen servers; Serverside soft-body data will be transferred to client directly

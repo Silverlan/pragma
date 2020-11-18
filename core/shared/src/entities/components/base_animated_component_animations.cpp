@@ -28,7 +28,7 @@ void BaseAnimatedComponent::SetGlobalBonePosition(UInt32 boneId,const Vector3 &p
 	auto npos = pose.GetOrigin();
 	auto nrot = pose.GetRotation();
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent)
 		pPhysComponent->WorldToOrigin(&npos,&nrot);
 	SetLocalBonePosition(boneId,npos,nrot,scale);
 }
@@ -40,7 +40,7 @@ void BaseAnimatedComponent::SetGlobalBonePosition(UInt32 boneId,const Vector3 &p
 	auto npos = pose.GetOrigin();
 	auto nrot = pose.GetRotation();
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent)
 		pPhysComponent->WorldToOrigin(&npos,&nrot);
 	SetLocalBonePosition(boneId,npos,nrot);
 }
@@ -51,7 +51,7 @@ void BaseAnimatedComponent::SetGlobalBonePosition(UInt32 boneId,const Vector3 &p
 	pose *= umath::Transform{pos,uquat::identity()};
 	auto npos = pose.GetOrigin();
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent)
 		pPhysComponent->WorldToOrigin(&npos);
 	SetLocalBonePosition(boneId,npos);
 }
@@ -62,7 +62,7 @@ void BaseAnimatedComponent::SetGlobalBoneRotation(UInt32 boneId,const Quat &rot)
 	pose *= umath::Transform{Vector3{},rot};
 	auto nrot = pose.GetRotation();
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 		pTrComponent->WorldToLocal(&nrot);
 	SetLocalBoneRotation(boneId,nrot);
 }

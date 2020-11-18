@@ -41,7 +41,7 @@ void SSoundEmitterComponent::UpdateSoundTransform(ALSound &snd) const
 	auto *baseSnd = SALSound::GetBase(&snd);
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 	{
 		baseSnd->SetPosition(pTrComponent->GetPosition(),true);
 		baseSnd->SetDirection(pTrComponent->GetForward(),true);
@@ -81,7 +81,7 @@ std::shared_ptr<ALSound> SSoundEmitterComponent::EmitSound(std::string sndname,A
 	al->SetPitch(pitch);
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 		al->SetPosition(pTrComponent->GetPosition());
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
 	if(pVelComponent.valid())

@@ -24,8 +24,8 @@ bool BaseEntity::IsStatic() const
 {
 	if(GetAnimatedComponent().valid())
 		return false;
-	auto physComponent = GetPhysicsComponent();
-	auto type = physComponent.valid() ? physComponent->GetPhysicsType() : PHYSICSTYPE::NONE;
+	auto *physComponent = GetPhysicsComponent();
+	auto type = physComponent ? physComponent->GetPhysicsType() : PHYSICSTYPE::NONE;
 	return (type == PHYSICSTYPE::NONE || type == PHYSICSTYPE::STATIC) ? true : false;
 }
 bool BaseEntity::IsDynamic() const {return !IsStatic();}
@@ -181,7 +181,7 @@ std::string BaseEntity::GetClass() const {return m_class;}
 void BaseEntity::SetPose(const umath::Transform &outTransform)
 {
 	auto trComponent = GetTransformComponent();
-	if(trComponent.expired())
+	if(!trComponent)
 		return;
 	SetPosition(outTransform.GetOrigin());
 	SetRotation(outTransform.GetRotation());
@@ -194,52 +194,52 @@ void BaseEntity::SetPose(const umath::ScaledTransform &outTransform)
 }
 const umath::ScaledTransform &BaseEntity::GetPose() const
 {
-	if(m_transformComponent.expired())
+	if(!m_transformComponent)
 	{
 		static umath::ScaledTransform defaultPose {};
 		return defaultPose;
 	}
-	return m_transformComponent.get()->GetPose();
+	return m_transformComponent->GetPose();
 }
 const Vector3 &BaseEntity::GetPosition() const
 {
 	auto trComponent = GetTransformComponent();
-	if(trComponent.expired())
+	if(!trComponent)
 		return uvec::ORIGIN;
 	return trComponent->GetPosition();
 }
 void BaseEntity::SetPosition(const Vector3 &pos)
 {
 	auto trComponent = GetTransformComponent();
-	if(trComponent.expired())
+	if(!trComponent)
 		return;
 	trComponent->SetPosition(pos);
 }
 Vector3 BaseEntity::GetCenter() const
 {
 	auto physComponent = GetPhysicsComponent();
-	if(physComponent.expired())
+	if(!physComponent)
 		return GetPosition();
 	return physComponent->GetCenter();
 }
 const Quat &BaseEntity::GetRotation() const
 {
 	auto trComponent = GetTransformComponent();
-	if(trComponent.expired())
+	if(!trComponent)
 		return uquat::UNIT;
 	return trComponent->GetRotation();
 }
 void BaseEntity::SetRotation(const Quat &rot)
 {
 	auto trComponent = GetTransformComponent();
-	if(trComponent.expired())
+	if(!trComponent)
 		return;
 	trComponent->SetRotation(rot);
 }
 const Vector3 &BaseEntity::GetScale() const
 {
 	auto trComponent = GetTransformComponent();
-	if(trComponent.expired())
+	if(!trComponent)
 	{
 		static Vector3 defaultScale {1.f,1.f,1.f};
 		return defaultScale;
@@ -249,21 +249,9 @@ const Vector3 &BaseEntity::GetScale() const
 void BaseEntity::SetScale(const Vector3 &scale)
 {
 	auto trComponent = GetTransformComponent();
-	if(trComponent.expired())
+	if(!trComponent)
 		return;
 	trComponent->SetScale(scale);
-}
-
-void BaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
-{
-	pragma::BaseEntityComponentSystem::OnComponentAdded(component);
-	auto *ptrTransformComponent = dynamic_cast<pragma::BaseTransformComponent*>(&component);
-	if(ptrTransformComponent != nullptr)
-		m_transformComponent = ptrTransformComponent->GetHandle<pragma::BaseTransformComponent>();
-}
-void BaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
-{
-	pragma::BaseEntityComponentSystem::OnComponentRemoved(component);
 }
 
 void BaseEntity::DoSpawn()
@@ -295,7 +283,7 @@ bool BaseEntity::IsInert() const
 	if(IsStatic() == true)
 		return true;
 	auto pPhysComponent = GetPhysicsComponent();
-	auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	return (phys != nullptr && phys->IsSleeping()) ? true : false;
 }
 
@@ -307,7 +295,8 @@ bool BaseEntity::IsScripted() const {return false;}
 
 void BaseEntity::PrecacheModels() {}
 
-const util::WeakHandle<pragma::BaseTransformComponent> &BaseEntity::GetTransformComponent() const {return m_transformComponent;}
+pragma::BaseTransformComponent *BaseEntity::GetTransformComponent() const {return m_transformComponent;}
+pragma::BasePhysicsComponent *BaseEntity::GetPhysicsComponent() const {return m_physicsComponent;}
 
 void BaseEntity::Remove() {}
 void BaseEntity::RemoveSafely() {GetNetworkState()->GetGameState()->ScheduleEntityForRemoval(*this);}

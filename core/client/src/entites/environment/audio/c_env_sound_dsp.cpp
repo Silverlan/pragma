@@ -35,7 +35,7 @@ void CBaseSoundDspComponent::Initialize()
 		auto &ent = GetEntity();
 		auto pTrComponent = ent.GetTransformComponent();
 		auto pToggleComponent = ent.GetComponent<CToggleComponent>();
-		if(pTrComponent.expired() || (pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false))
+		if(pTrComponent == nullptr || (pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false))
 			return;
 		auto radiusInnerSqr = umath::pow2(m_kvInnerRadius);
 		auto radiusOuterSqr = umath::pow2(m_kvOuterRadius);

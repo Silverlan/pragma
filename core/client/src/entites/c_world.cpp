@@ -31,7 +31,7 @@ using namespace pragma;
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 void CWorldComponent::Initialize()
 {
 	BaseWorldComponent::Initialize();
@@ -62,17 +62,14 @@ void CWorldComponent::Initialize()
 		Vector3 max {};
 		auto &ent = GetEntity();
 		auto pPhysComponent = ent.GetPhysicsComponent();
-		if(pPhysComponent.valid())
+		if(pPhysComponent != nullptr)
 			pPhysComponent->GetCollisionBounds(&min,&max);
 		auto pRenderComponent = ent.GetComponent<pragma::CRenderComponent>();
 		if(pRenderComponent.valid())
 			pRenderComponent->SetRenderBounds(min,max);
 	});
-	BindEvent(CModelComponent::EVENT_ON_UPDATE_LOD,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEvent(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		BuildOfflineRenderQueues(true);
-		return util::EventReply::Handled; // No LODs for the world
-	});
-	BindEvent(CModelComponent::EVENT_ON_UPDATE_LOD_BY_POS,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		return util::EventReply::Handled;
 	});
 	BindEventUnhandled(CColorComponent::EVENT_ON_COLOR_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
@@ -138,7 +135,7 @@ void CWorldComponent::ReloadMeshCache()
 	});
 	// OnUpdateLOD(Vector3{});
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(pRenderComponent.valid())
+	if(pRenderComponent)
 	{
 		for(auto &mesh : pRenderComponent->GetLODMeshes())
 			m_meshTree->InsertObject(mesh);
@@ -152,6 +149,8 @@ void CWorldComponent::OnEntitySpawn()
 void CWorldComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseWorldComponent::OnEntityComponentAdded(component);
+	if(typeid(component) == typeid(CModelComponent))
+		static_cast<CModelComponent&>(component).SetAutoLodEnabled(false);
 }
 std::shared_ptr<OcclusionOctree<std::shared_ptr<ModelMesh>>> CWorldComponent::GetMeshTree() const {return m_meshTree;};
 std::shared_ptr<CHC> CWorldComponent::GetCHCController() const {return m_chcController;}
@@ -280,7 +279,7 @@ void CWorldComponent::UpdateRenderMeshes()
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	auto mdl = ent.GetModel();
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(mdl == nullptr || pRenderComponent.expired())
+	if(mdl == nullptr || !pRenderComponent)
 		return;
 	auto &baseMeshes = mdl->GetBaseMeshes();
 	auto &lodMeshes = pRenderComponent->GetLODMeshes();
@@ -372,4 +371,3 @@ std::ostream& CWorld::print(std::ostream &os)
 	os<<"]";
 	return os;
 }
-#pragma optimize("",on)

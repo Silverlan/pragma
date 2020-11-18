@@ -52,7 +52,7 @@ void SAIComponent::OnPrePhysicsSimulate()
 
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
-	if(pTrComponent.valid() && pVelComponent.valid())
+	if(pTrComponent != nullptr && pVelComponent.valid())
 	{
 		auto &vel = pVelComponent->GetVelocity();
 		if(uvec::length_sqr(vel) > 1.f)

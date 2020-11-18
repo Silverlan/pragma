@@ -511,8 +511,8 @@ void CSceneComponent::SetRenderer(const std::shared_ptr<pragma::rendering::BaseR
 pragma::rendering::BaseRenderer *CSceneComponent::GetRenderer() {return m_renderer.get();}
 const pragma::rendering::BaseRenderer *CSceneComponent::GetRenderer() const {return const_cast<CSceneComponent*>(this)->GetRenderer();}
 
-CSceneComponent::DebugMode CSceneComponent::GetDebugMode() const {return m_debugMode;}
-void CSceneComponent::SetDebugMode(CSceneComponent::DebugMode debugMode) {m_debugMode = debugMode;}
+SceneDebugMode CSceneComponent::GetDebugMode() const {return m_debugMode;}
+void CSceneComponent::SetDebugMode(SceneDebugMode debugMode) {m_debugMode = debugMode;}
 
 SceneRenderDesc &CSceneComponent::GetSceneRenderDesc() {return m_sceneRenderDesc;}
 const SceneRenderDesc &CSceneComponent::GetSceneRenderDesc() const {return const_cast<CSceneComponent*>(this)->GetSceneRenderDesc();}

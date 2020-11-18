@@ -11,7 +11,6 @@
 
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
 static auto g_debugPrint = false;
 void pragma::CEyeComponent::UpdateEyeballs()
 {
@@ -282,4 +281,3 @@ void pragma::CEyeComponent::UpdateEyeball(const Eyeball &eyeball,uint32_t eyebal
 		Con::cout<<"Up: "<<state.up<<Con::endl;
 	}
 }
-#pragma optimize("",on)

@@ -333,16 +333,16 @@ bool BaseModelComponent::GetHitboxBounds(uint32_t boneId,Vector3 &min,Vector3 &m
 	GetModel().get()->GetHitboxBounds(boneId,min,max);
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	auto scale = pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
+	auto scale = pTrComponent ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
 	min *= scale;
 	max *= scale;
 	auto animComponent = ent.GetAnimatedComponent();
 	if(animComponent.valid() && animComponent->GetGlobalBonePosition(boneId,origin,rot) == false)
 	{
 		auto pPhysComponent = ent.GetPhysicsComponent();
-		if(pPhysComponent.valid())
+		if(pPhysComponent)
 			origin = pPhysComponent->GetOrigin();
-		if(pTrComponent.valid())
+		if(pTrComponent)
 			rot = pTrComponent->GetRotation();
 	}
 	return true;

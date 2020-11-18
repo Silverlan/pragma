@@ -23,7 +23,7 @@ void CFuncPortalComponent::Initialize()
 {
 	BaseFuncPortalComponent::Initialize();
 	auto pRenderComponent = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
-	if(pRenderComponent.valid())
+	if(pRenderComponent)
 		pRenderComponent->SetRenderMode(RenderMode::World);
 }
 luabind::object CFuncPortalComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CFuncPortalComponentHandleWrapper>(l);}

@@ -72,7 +72,7 @@ void CWeaponComponent::UpdateViewModel()
 	auto pRenderComponentVm = vmEnt.GetRenderComponent();
 	if(m_viewModel.empty() == true)
 	{
-		if(pRenderComponentVm.valid())
+		if(pRenderComponentVm)
 			pRenderComponentVm->SetRenderMode(RenderMode::None);
 		vm->SetViewModelOffset({});
 		return;
@@ -80,7 +80,7 @@ void CWeaponComponent::UpdateViewModel()
 	auto mdlComponentVm = vmEnt.GetModelComponent();
 	if(mdlComponentVm.valid())
 		mdlComponentVm->SetModel(m_viewModel);
-	if(pRenderComponentVm.valid())
+	if(pRenderComponentVm)
 		pRenderComponentVm->SetRenderMode(RenderMode::View);
 	vm->SetViewModelOffset(GetViewModelOffset());
 	vm->SetViewFOV(GetViewFOV());
@@ -187,7 +187,7 @@ void CWeaponComponent::UpdateWorldModel()
 {
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(pRenderComponent.expired())
+	if(!pRenderComponent)
 		return;
 	pRenderComponent->SetRenderMode(IsInFirstPersonMode() ? ((m_bHideWorldModelInFirstPerson == true) ? RenderMode::None : RenderMode::View) : RenderMode::World);
 }
@@ -211,7 +211,7 @@ void CWeaponComponent::OnFireBullets(const BulletInfo &bulletInfo,Vector3 &bulle
 		{
 			auto charComponent = owner->GetCharacterComponent();
 			auto pTrComponent = owner->GetTransformComponent();
-			bulletDir = charComponent.valid() ? charComponent->GetViewForward() : pTrComponent.valid() ? pTrComponent->GetForward() : uvec::FORWARD;
+			bulletDir = charComponent.valid() ? charComponent->GetViewForward() : pTrComponent != nullptr ? pTrComponent->GetForward() : uvec::FORWARD;
 			bulletOrigin = plComponent->GetViewPos();
 		}
 	}
@@ -226,7 +226,7 @@ void CWeaponComponent::OnFireBullets(const BulletInfo &bulletInfo,Vector3 &bulle
 	if(pMdlC.valid() && pMdlC->GetAttachment(m_attMuzzle,effectsOrigin,static_cast<Quat*>(nullptr)) == true)
 	{
 		auto pTrComponent = ent.GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent != nullptr)
 			pTrComponent->LocalToWorld(effectsOrigin);
 	}
 }
@@ -268,7 +268,7 @@ void CWeaponComponent::UpdateOwnerAttachment()
 	m_hTarget = parent->GetHandle();
 	auto pTransformComponent = ent.GetTransformComponent();
 	auto pTransformComponentParent = parent->GetTransformComponent();
-	if(pTransformComponent.valid() && pTransformComponentParent.valid())
+	if(pTransformComponent && pTransformComponentParent)
 	{
 		pTransformComponent->SetPosition(pTransformComponentParent->GetPosition());
 		pTransformComponent->SetRotation(pTransformComponentParent->GetRotation());

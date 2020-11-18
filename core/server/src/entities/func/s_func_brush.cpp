@@ -30,7 +30,7 @@ void SBrushComponent::OnEntitySpawn()
 		return;
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
 	UpdateSurfaceMaterial(s_game);
 }

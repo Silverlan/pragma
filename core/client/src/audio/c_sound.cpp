@@ -403,7 +403,7 @@ void ClientState::UpdateSounds()
 			if(source == nullptr)
 				continue;
 			auto pTrComponent = source->GetTransformComponent();
-			auto srcPos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+			auto srcPos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 			auto sndPos = snd->GetPosition();
 			if(uvec::cmp(srcPos,sndPos) == false)
 				snd->SetPosition(srcPos);

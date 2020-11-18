@@ -103,7 +103,7 @@ void ControllerPhysObj::PostSimulate()
 
 	/* // Obsolete; Now handled by simulation and ControllerPhysObj::SetGroundContactPoint
 	auto pTrComponent = owner->GetEntity().GetTransformComponent();
-	auto up = pTrComponent.valid() ? pTrComponent->GetUp() : uvec::UP;
+	auto up = pTrComponent != nullptr ? pTrComponent->GetUp() : uvec::UP;
 	auto origin = GetPosition();
 	//auto d = m_controller->GetCharacterController()->Get
 	const auto upDist = 20.f; // Ray starts slightly above ground position, in case we're stuck inside an object
@@ -114,7 +114,7 @@ void ControllerPhysObj::PostSimulate()
 	data.SetFilter(GetHandle());
 	data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
 	auto pPhysComponent = owner->GetEntity().GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 	{
 		data.SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter());
 		data.SetCollisionFilterMask(pPhysComponent->GetCollisionFilterMask() &~CollisionMask::Trigger &~CollisionMask::Water &~CollisionMask::WaterSurface);
@@ -279,7 +279,7 @@ bool BoxControllerPhysObj::Initialize(const Vector3 &halfExtents,unsigned int st
 	m_stepHeight = static_cast<float>(stepHeight);
 
 	auto pTrComponent = GetOwner()->GetEntity().GetTransformComponent();
-	auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 	umath::Transform startTransform;
 	startTransform.SetIdentity();
 	startTransform.SetOrigin(pos);
@@ -360,7 +360,7 @@ bool CapsuleControllerPhysObj::Initialize(unsigned int width,unsigned int height
 	m_stepHeight = static_cast<float>(stepHeight);
 
 	auto pTrComponent = GetOwner()->GetEntity().GetTransformComponent();
-	auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 	umath::Transform startTransform;
 	startTransform.SetIdentity();
 	startTransform.SetOrigin(pos);

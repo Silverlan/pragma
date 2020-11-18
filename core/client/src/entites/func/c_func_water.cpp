@@ -77,23 +77,23 @@ void CWaterComponent::Initialize()
 const Vector3 &CWaterComponent::GetPosition() const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	return pTrComponent.valid() ? pTrComponent->GetPosition() : uvec::ORIGIN;
+	return pTrComponent != nullptr ? pTrComponent->GetPosition() : uvec::ORIGIN;
 }
 const Quat &CWaterComponent::GetOrientation() const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	static auto identity = uquat::identity();
-	return pTrComponent.valid() ? pTrComponent->GetRotation() : identity;
+	return pTrComponent != nullptr ? pTrComponent->GetRotation() : identity;
 }
 void CWaterComponent::OnEntitySpawn()
 {
 	BaseFuncWaterComponent::OnEntitySpawn();
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	//auto pPhysComponent = ent.GetPhysicsComponent();
-	//if(pPhysComponent.valid())
+	//if(pPhysComponent != nullptr)
 	//	pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(pRenderComponent.valid())
+	if(pRenderComponent)
 	{
 		pRenderComponent->SetRenderMode(RenderMode::Water);
 		pRenderComponent->GetRenderModeProperty()->SetLocked(true);
@@ -119,7 +119,7 @@ CWaterSurface *CWaterComponent::GetSurfaceEntity() const {return static_cast<CWa
 void CWaterComponent::CreateSplash(const Vector3 &origin,float radius,float force)
 {
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
-	if(pPhysComponent.expired() || pPhysComponent->GetPhysicsObject() == nullptr)
+	if(pPhysComponent == nullptr || pPhysComponent->GetPhysicsObject() == nullptr)
 		return;
 	BaseFuncWaterComponent::CreateSplash(origin,radius,force); // TODO
 	if(m_physSurfaceSim != nullptr)
@@ -163,7 +163,7 @@ bool CWaterComponent::OnBulletHit(const BulletInfo &bulletInfo,const TraceData &
 			if(pt != nullptr)
 			{
 				auto pTrComponent = pt->GetEntity().GetTransformComponent();
-				if(pTrComponent.valid())
+				if(pTrComponent != nullptr)
 				{
 					pTrComponent->SetPosition(hitPos);
 

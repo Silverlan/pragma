@@ -236,7 +236,7 @@ Vector3 SALSound::GetPosition() const
 	if(m_hSourceEntity.IsValid())
 	{
 		auto pTrComponent = m_hSourceEntity.get()->GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent != nullptr)
 			return pTrComponent->GetPosition();
 	}
 	return ALSoundBase::GetPosition();

@@ -162,7 +162,7 @@ void BaseWheelComponent::UpdateWheel()
 	auto rotation = Quat(CFloat(btRot.w()),CFloat(btRot.x()),CFloat(btRot.y()),CFloat(btRot.z()));
 	rotation = rotation *GetModelRotation();
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 	{
 		pTrComponent->SetPosition(origin);
 		pTrComponent->SetOrientation(rotation);

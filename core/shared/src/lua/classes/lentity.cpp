@@ -84,7 +84,7 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	}));
 	classDef.def("GetPos",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);
-		if(hEnt->GetTransformComponent().expired())
+		if(!hEnt->GetTransformComponent())
 		{
 			Lua::Push<Vector3>(l,Vector3{});
 			return;
@@ -100,7 +100,7 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	}));
 	classDef.def("GetAngles",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);
-		if(hEnt->GetTransformComponent().expired())
+		if(!hEnt->GetTransformComponent())
 		{
 			Lua::Push<EulerAngles>(l,EulerAngles{});
 			return;
@@ -123,7 +123,7 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	}));
 	classDef.def("GetScale",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);
-		if(hEnt->GetTransformComponent().expired())
+		if(!hEnt->GetTransformComponent())
 		{
 			Lua::Push<Vector3>(l,Vector3{1.f,1.f,1.f});
 			return;
@@ -132,7 +132,7 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	}));
 	classDef.def("GetRotation",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);
-		if(hEnt->GetTransformComponent().expired())
+		if(!hEnt->GetTransformComponent())
 		{
 			Lua::Push<Quat>(l,Quat{});
 			return;
@@ -148,9 +148,9 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	}));
 	classDef.def("GetCenter",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);
-		if(hEnt->GetPhysicsComponent().expired())
+		if(!hEnt->GetPhysicsComponent())
 		{
-			if(hEnt->GetTransformComponent().expired())
+			if(!hEnt->GetTransformComponent())
 			{
 				Lua::Push<Vector3>(l,Vector3{});
 				return;
@@ -252,14 +252,14 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	classDef.def("GetTransformComponent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);
 		auto pTrComponent = hEnt->GetTransformComponent();
-		if(pTrComponent.expired())
+		if(pTrComponent == nullptr)
 			return;
 		pTrComponent->PushLuaObject(l);
 	}));
 	classDef.def("GetPhysicsComponent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);
 		auto pPhysComponent = hEnt->GetPhysicsComponent();
-		if(pPhysComponent.expired())
+		if(pPhysComponent == nullptr)
 			return;
 		pPhysComponent->PushLuaObject(l);
 	}));

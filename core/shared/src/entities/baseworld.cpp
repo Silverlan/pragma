@@ -36,7 +36,7 @@ void BaseWorldComponent::InitializePhysics()
 	if(ent.IsSpawned() == false)
 		return;
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(!pPhysComponent)
 		return;
 	auto mdl = ent.GetModel();
 	if(mdl)

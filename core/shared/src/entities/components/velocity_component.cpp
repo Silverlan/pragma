@@ -83,14 +83,14 @@ const Vector3 &VelocityComponent::GetAngularVelocity() const {return *m_angVeloc
 void VelocityComponent::SetLocalAngularVelocity(Vector3 vel)
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 		uvec::rotate(&vel,pTrComponent->GetRotation());
 	SetAngularVelocity(vel);
 }
 void VelocityComponent::AddLocalAngularVelocity(Vector3 vel)
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 		uvec::rotate(&vel,pTrComponent->GetRotation());
 	AddAngularVelocity(vel);
 }
@@ -98,7 +98,7 @@ Vector3 VelocityComponent::GetLocalAngularVelocity() const
 {
 	auto vel = GetAngularVelocity();
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 	{
 		auto rot = pTrComponent->GetRotation();
 		uquat::inverse(rot);
@@ -109,14 +109,14 @@ Vector3 VelocityComponent::GetLocalAngularVelocity() const
 void VelocityComponent::SetLocalVelocity(Vector3 vel)
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 		uvec::rotate(&vel,pTrComponent->GetRotation());
 	SetVelocity(vel);
 }
 void VelocityComponent::AddLocalVelocity(Vector3 vel)
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 		uvec::rotate(&vel,pTrComponent->GetRotation());
 	AddVelocity(vel);
 }
@@ -124,7 +124,7 @@ Vector3 VelocityComponent::GetLocalVelocity() const
 {
 	auto vel = GetVelocity();
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 	{
 		auto rot = pTrComponent->GetRotation();
 		uquat::inverse(rot);

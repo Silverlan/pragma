@@ -104,7 +104,7 @@ bool BasePlayerComponent::CanUnCrouch() const
 		return true;
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(phys == nullptr)
 		return true;
 	auto *col = phys->GetCollisionObject();
@@ -119,7 +119,7 @@ bool BasePlayerComponent::CanUnCrouch() const
 	auto *game = nw->GetGameState();
 	auto data = charComponent.GetAimTraceData();
 	data.SetSource(colPos);
-	data.SetTarget(colPos +(pTrComponent.valid() ? pTrComponent->GetUp() : uvec::UP) *0.001f); // Target position musn't be the same as the source position, otherwise the trace will never detect a hit
+	data.SetTarget(colPos +(pTrComponent ? pTrComponent->GetUp() : uvec::UP) *0.001f); // Target position musn't be the same as the source position, otherwise the trace will never detect a hit
 	data.SetShape(*m_shapeStand);
 	return game->Sweep(data).hitType == RayCastHitType::None; // Overlap only works with collision objects, not with individual shapes, so we have to use Sweep instead
 }
@@ -127,7 +127,7 @@ void BasePlayerComponent::Think(double tDelta)
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(m_bCrouching || m_crouchTransition != CrouchTransition::None)
 	{
 		if(GetActionInput(Action::Crouch) == false && m_crouchTransition != CrouchTransition::Uncrouching)
@@ -188,7 +188,7 @@ void BasePlayerComponent::Think(double tDelta)
 				m_movementActivity = animComponent->GetActivity();
 			m_bForceAnimationUpdate = false;
 			
-			if(pTrComponent.valid())
+			if(pTrComponent)
 			{
 				auto rot = pTrComponent->GetRotation();
 				auto rotView = charComponent.valid() ? charComponent->GetViewOrientation() : rot;
@@ -385,7 +385,7 @@ void BasePlayerComponent::OnPhysicsInitialized()
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent)
 		pPhysComponent->AddCollisionFilter(CollisionMask::Player);
 }
 
@@ -396,8 +396,8 @@ BaseEntity *BasePlayerComponent::FindUseEntity() const
 	Game *game = state->GetGameState();
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
-	Vector3 origin = charComponent.valid() ? charComponent->GetEyePosition() : (pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{});
-	Vector3 viewDir = charComponent.valid() ? charComponent->GetViewForward() : (pTrComponent.valid() ? pTrComponent->GetForward() : Vector3{});
+	Vector3 origin = charComponent.valid() ? charComponent->GetEyePosition() : (pTrComponent ? pTrComponent->GetPosition() : Vector3{});
+	Vector3 viewDir = charComponent.valid() ? charComponent->GetViewForward() : (pTrComponent ? pTrComponent->GetForward() : Vector3{});
 	const auto dotMin = 0.6f;
 	float dotClosest = 1.f;
 	float maxDist = 96.f;
@@ -411,13 +411,13 @@ BaseEntity *BasePlayerComponent::FindUseEntity() const
 		if(pUsableComponent->CanUse(const_cast<BaseEntity*>(&ent)))
 		{
 			auto pTrComponentOther = entOther->GetTransformComponent();
-			if(pTrComponentOther.expired())
+			if(!pTrComponentOther)
 				continue;
 			auto pPhysComponentOther = entOther->GetPhysicsComponent();
 			auto &posEnt = pTrComponentOther->GetPosition();
 			Vector3 min {};
 			Vector3 max {};
-			if(pPhysComponentOther.valid())
+			if(pPhysComponentOther)
 				pPhysComponentOther->GetCollisionBounds(&min,&max);
 			min += posEnt;
 			max += posEnt;
@@ -480,7 +480,7 @@ Vector2 BasePlayerComponent::CalcMovementSpeed() const
 {
 	float speed;
 	auto physComponent = GetEntity().GetPhysicsComponent();
-	if(physComponent.valid() && physComponent->GetMoveType() == MOVETYPE::NOCLIP)
+	if(physComponent && physComponent->GetMoveType() == MOVETYPE::NOCLIP)
 	{
 		speed = GetEntity().GetNetworkState()->GetGameState()->GetConVarFloat("sv_noclip_speed");
 		if(IsWalking())
@@ -535,7 +535,7 @@ void BasePlayerComponent::OnEntitySpawn()
 	m_timeConnected = state->RealTime();
 
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent)
 		pPhysComponent->SetCollisionBounds(Vector3(-16,0,-16),Vector3(16,m_standHeight,16));
 	PlaySharedActivity(Activity::Idle);
 }
@@ -753,7 +753,7 @@ void BasePlayerComponent::Crouch()
 		return;
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	m_shapeStand = nullptr;
 	NetworkState *state = ent.GetNetworkState();
 	Game *game = state->GetGameState();
@@ -825,7 +825,7 @@ float BasePlayerComponent::GetWalkSpeed() const
 {
 	auto r = m_speedWalk;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 	{
 		auto &scale = pTrComponent->GetScale();
 		r *= umath::abs_max(scale.x,scale.y,scale.z);
@@ -836,7 +836,7 @@ float BasePlayerComponent::GetRunSpeed() const
 {
 	auto r = m_speedRun;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 	{
 		auto &scale = pTrComponent->GetScale();
 		r *= umath::abs_max(scale.x,scale.y,scale.z);
@@ -847,7 +847,7 @@ float BasePlayerComponent::GetSprintSpeed() const
 {
 	auto r = m_speedSprint;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 	{
 		auto &scale = pTrComponent->GetScale();
 		r *= umath::abs_max(scale.x,scale.y,scale.z);
@@ -861,7 +861,7 @@ float BasePlayerComponent::GetCrouchedWalkSpeed() const
 {
 	auto r = m_speedCrouchWalk;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 	{
 		auto &scale = pTrComponent->GetScale();
 		r *= umath::abs_max(scale.x,scale.y,scale.z);

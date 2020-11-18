@@ -22,7 +22,7 @@ using namespace pragma;
 
 
 LINK_ENTITY_TO_CLASS(game_occlusion_culler,COcclusionCuller);
-#pragma optimize("",off)
+
 luabind::object COcclusionCullerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CShadowManagerComponentHandleWrapper>(l);}
 
 void COcclusionCullerComponent::Initialize()
@@ -32,14 +32,14 @@ void COcclusionCullerComponent::Initialize()
 	m_occlusionOctree = std::make_shared<OcclusionOctree<CBaseEntity*>>(256.f,1'073'741'824.f,4096.f,[](const CBaseEntity *ent,Vector3 &min,Vector3 &max) {
 		auto pRenderComponent = ent->GetRenderComponent();
 		auto pTrComponent = ent->GetTransformComponent();
-		if(pRenderComponent.valid())
+		if(pRenderComponent)
 			pRenderComponent->GetRenderBounds(&min,&max);
 		else
 		{
 			min = {};
 			max = {};
 		}
-		if(pTrComponent.expired())
+		if(pTrComponent == nullptr)
 			return;
 		auto &pos = pTrComponent->GetPosition();
 		min += pos;
@@ -65,7 +65,7 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 	auto fInsertOctreeObject = [this](CBaseEntity *ent) {
 		m_occlusionOctree->InsertObject(ent);
 		auto pTrComponent = ent->GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent != nullptr)
 		{
 			auto &trC = static_cast<CTransformComponent&>(*pTrComponent);
 			m_callbacks.push_back(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,&ent](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
@@ -100,7 +100,7 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 		}
 	};
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(pRenderComponent.expired())
+	if(!pRenderComponent)
 		return;
 	auto hThis = GetHandle();
 	static_cast<Callback<void,std::reference_wrapper<const RenderMode>,std::reference_wrapper<const RenderMode>>*>(cbRenderMode.get())->SetFunction([this,&ent,fInsertOctreeObject,hThis,cbRenderMode](std::reference_wrapper<const RenderMode> old,std::reference_wrapper<const RenderMode> newMode) mutable {
@@ -284,4 +284,3 @@ static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(NetworkState*,ConVar*
 	octree.SetDebugModeEnabled(val);
 }
 REGISTER_CONVAR_CALLBACK_CL(debug_render_octree_dynamic_draw,CVAR_CALLBACK_debug_render_octree_dynamic_draw);
-#pragma optimize("",on)

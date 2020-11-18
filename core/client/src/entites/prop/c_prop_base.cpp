@@ -22,7 +22,7 @@ void CPropComponent::Initialize()
 		auto &shouldDrawData = static_cast<CEShouldDraw&>(evData.get());
 		auto &ent = GetEntity();
 		auto pTrComponent = ent.GetTransformComponent();
-		auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+		auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 		if((m_sqrMaxVisibleDist == 0.0 || static_cast<double>(uvec::length_sqr(shouldDrawData.camOrigin -pos)) <= m_sqrMaxVisibleDist) == false)
 		{
 			shouldDrawData.shouldDraw = CEShouldDraw::ShouldDraw::No;

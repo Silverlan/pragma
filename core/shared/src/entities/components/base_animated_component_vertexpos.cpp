@@ -99,12 +99,7 @@ bool BaseAnimatedComponent::GetVertexPosition(const ModelSubMesh &subMesh,uint32
 	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
 	if(hMdl == nullptr || GetLocalVertexPosition(subMesh,vertexId,pos) == false)
 		return false;
-	auto pTrComponent = ent.GetTransformComponent();
-	auto scale = pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
-	umath::Transform t;
-	ent.GetPose(t);
-	umath::ScaledTransform st {t};
-	st.SetScale(scale);
-	pos *= st;
+	auto &pose = ent.GetPose();
+	pos *= pose;
 	return true;
 }

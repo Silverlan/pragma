@@ -225,7 +225,7 @@ void pragma::physics::WaterBuoyancySimulator::Simulate(BaseEntity &entWater,cons
 		auto volume = bounds.x *bounds.y *bounds.z;
 
 		auto pTrComponent = ent.GetTransformComponent();
-		auto rot = pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
+		auto rot = pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity();
 		std::array<Vector3,8> verts = {
 			min,
 			{min.x,min.y,max.z},

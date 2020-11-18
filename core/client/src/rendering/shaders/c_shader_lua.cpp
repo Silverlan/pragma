@@ -339,7 +339,7 @@ bool pragma::LuaShaderTextured3D::BindScene(pragma::CSceneComponent &scene,rende
 }
 bool pragma::LuaShaderTextured3D::BeginDraw(
 	const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,
-	const Vector4 &drawOrigin,Pipeline pipelineIdx,RecordFlags recordFlags
+	const Vector4 &drawOrigin,ShaderGameWorldPipeline pipelineIdx,RecordFlags recordFlags
 )
 {
 	if(ShaderTextured3DBase::BeginDraw(cmdBuffer,clipPlane,drawOrigin,pipelineIdx,recordFlags) == false)

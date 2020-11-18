@@ -44,9 +44,9 @@ namespace Lua
 		DLLCLIENT void SetDebugMode(lua_State *l,CSceneHandle &scene,uint32_t debugMode);
 		
 		DLLCLIENT void Link(lua_State *l,CSceneHandle &scene,CSceneHandle &sceneOther);
-		DLLCLIENT void UpdateRenderInfo(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo);
+		DLLCLIENT void BuildRenderQueue(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo);
 		DLLCLIENT void RenderPrepass(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode);
-		DLLCLIENT void Render(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode,RenderSystem::RenderFlags renderFlags);
+		DLLCLIENT void Render(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode,RenderFlags renderFlags);
 		DLLCLIENT void Render(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode);
 	};
 	namespace RasterizationRenderer

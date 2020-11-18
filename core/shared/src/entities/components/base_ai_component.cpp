@@ -81,8 +81,8 @@ bool BaseAIComponent::TurnStep(const Vector3 &target,float &turnAngle,const floa
 	auto speedMax = static_cast<double>((turnSpeed != nullptr) ? *turnSpeed : (charComponent.valid() ? charComponent->GetTurnSpeed() : 100.f)) *game->DeltaTickTime();
 	Vector2 rotAm = {};
 	const Vector2 pitchLimit {0.f,0.f};
-	auto newRot = uquat::approach_direction(pTrComponent->GetOrientation(),charComponent.valid() ? charComponent->GetUpDirection() : uvec::UP,dir,Vector2(speedMax,speedMax),&rotAm,&pitchLimit);
-	pTrComponent->SetOrientation(newRot);
+	auto newRot = uquat::approach_direction(pTrComponent->GetRotation(),charComponent.valid() ? charComponent->GetUpDirection() : uvec::UP,dir,Vector2(speedMax,speedMax),&rotAm,&pitchLimit);
+	pTrComponent->SetRotation(newRot);
 	return (umath::abs(rotAm.y) <= speedMax) ? true : false;
 
 	// Deprecated if the above code works properly

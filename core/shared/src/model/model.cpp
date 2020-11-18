@@ -228,7 +228,7 @@ void Model::GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups,uint32_t l
 		if(const_cast<Model*>(this)->GetMesh(static_cast<uint32_t>(i),bg,meshGroupId) == true && meshGroupId != std::numeric_limits<uint32_t>::max())
 			meshIds.push_back(meshGroupId);
 	}
-	//const_cast<Model*>(this)->TranslateLODMeshes(lod,meshIds);
+	const_cast<Model*>(this)->TranslateLODMeshes(lod,meshIds);
 	const_cast<Model*>(this)->GetMeshes(meshIds,outMeshes);
 }
 void Model::GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups,std::vector<std::shared_ptr<ModelSubMesh>> &outMeshes) const {return GetBodyGroupMeshes(bodyGroups,0,outMeshes);}
@@ -243,7 +243,7 @@ void Model::GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups,uint32_t l
 		if(const_cast<Model*>(this)->GetMesh(static_cast<uint32_t>(i),bg,meshGroupId) == true && meshGroupId != std::numeric_limits<uint32_t>::max())
 			meshIds.push_back(meshGroupId);
 	}
-	//const_cast<Model*>(this)->TranslateLODMeshes(lod,meshIds);
+	const_cast<Model*>(this)->TranslateLODMeshes(lod,meshIds);
 	const_cast<Model*>(this)->GetSubMeshes(meshIds,outMeshes);
 }
 BodyGroup &Model::AddBodyGroup(const std::string &name)
@@ -775,7 +775,7 @@ uint32_t Model::GetLOD(uint32_t id) const
 	return m_lods[id].lod;
 }
 
-LODInfo *Model::AddLODInfo(uint32_t lod,std::unordered_map<uint32_t,uint32_t> &replaceIds)
+LODInfo *Model::AddLODInfo(uint32_t lod,float distance,std::unordered_map<uint32_t,uint32_t> &replaceIds)
 {
 	LODInfo *info = nullptr;
 	auto itLod = std::find_if(m_lods.begin(),m_lods.end(),[lod](const LODInfo &lodInfo) {
@@ -792,6 +792,7 @@ LODInfo *Model::AddLODInfo(uint32_t lod,std::unordered_map<uint32_t,uint32_t> &r
 		info = &(*itLod);
 	}
 	info->lod = lod;
+	info->distance = distance;
 	for(auto &pair : replaceIds)
 		info->meshReplacements.insert(pair);
 	if(m_lods.size() > 1)

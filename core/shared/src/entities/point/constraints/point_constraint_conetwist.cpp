@@ -68,8 +68,8 @@ void BasePointConstraintConeTwistComponent::InitializeConstraint(BaseEntity *src
 	auto originConstraint = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
 	auto originTgt = pTrComponentTgt.valid() ? pTrComponentTgt->GetPosition() : Vector3{};
 
-	auto rotConstraint = pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
-	auto rotTgt = pTrComponentTgt.valid() ? pTrComponentTgt->GetOrientation() : uquat::identity();
+	auto rotConstraint = pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity();
+	auto rotTgt = pTrComponentTgt.valid() ? pTrComponentTgt->GetRotation() : uquat::identity();
 
 	auto pTrComponentSrc = src->GetTransformComponent();
 	originTgt = originConstraint -originTgt;

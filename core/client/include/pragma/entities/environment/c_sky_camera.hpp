@@ -16,7 +16,8 @@
 
 namespace pragma
 {
-	namespace rendering {struct CulledMeshData;};
+	class ShaderGameWorld;
+	namespace rendering {struct BaseRenderProcessor;};
 	class DLLCLIENT CSkyCameraComponent final
 		: public BaseEntityComponent
 	{
@@ -28,14 +29,15 @@ namespace pragma
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 
 		float GetSkyboxScale() const;
-		const rendering::CulledMeshData &UpdateRenderMeshes(rendering::RasterizationRenderer &renderer,FRender renderFlags);
-
-		rendering::RenderMeshCollectionHandler &GetRenderMeshCollectionHandler();
-		const rendering::RenderMeshCollectionHandler &GetRenderMeshCollectionHandler() const;
 	private:
-		rendering::RenderMeshCollectionHandler m_renderMeshCollectionHandler = {};
+		void BindToShader(pragma::rendering::BaseRenderProcessor &processor);
+		void UnbindFromShader(pragma::rendering::BaseRenderProcessor &processor);
 		float m_skyboxScale = 1.f;
-		CallbackHandle m_cbOnPreRender = {};
+		CallbackHandle m_cbOnBuildRenderQueue = {};
+		CallbackHandle m_cbRenderPrepass = {};
+		CallbackHandle m_cbPostRenderSkybox = {};
+		std::shared_ptr<pragma::rendering::RenderQueue> m_renderQueue = nullptr;
+		std::shared_ptr<pragma::rendering::RenderQueue> m_renderQueueTranslucent = nullptr;
 	};
 };
 

@@ -167,9 +167,13 @@ void CLightPointComponent::OnEntityComponentAdded(BaseEntityComponent &component
 	}
 	else if(typeid(component) == typeid(CTransformComponent))
 	{
-		FlagCallbackForRemoval(static_cast<CTransformComponent&>(component).GetPosProperty()->AddCallback([this](std::reference_wrapper<const Vector3> oldPos,std::reference_wrapper<const Vector3> pos) {
+		auto &trC = static_cast<CTransformComponent&>(component);
+		FlagCallbackForRemoval(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,&trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags,pragma::TransformChangeFlags::PositionChanged) == false)
+				return util::EventReply::Unhandled;
 			SetShadowDirty();
 			UpdateViewMatrices();
+			return util::EventReply::Unhandled;
 		}),CallbackType::Component,&component);
 	}
 	else if(typeid(component) == typeid(CLightComponent))

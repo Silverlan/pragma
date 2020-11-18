@@ -65,6 +65,19 @@ void SBaseEntity::DoSpawn()
 	game->SpawnEntity(this);
 }
 
+void SBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
+{
+	BaseEntity::OnComponentAdded(component);
+	if(typeid(component) == typeid(pragma::SWorldComponent))
+		umath::set_flag(m_stateFlags,StateFlags::HasWorldComponent);
+}
+void SBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
+{
+	BaseEntity::OnComponentRemoved(component);
+	if(typeid(component) == typeid(pragma::SWorldComponent))
+		umath::set_flag(m_stateFlags,StateFlags::HasWorldComponent,false);
+}
+
 BaseEntity *SBaseEntity::GetClientsideEntity() const
 {
 	if(IsShared() == false)

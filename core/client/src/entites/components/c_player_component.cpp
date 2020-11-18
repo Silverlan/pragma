@@ -262,10 +262,9 @@ void CPlayerComponent::UpdateObserverCallback()
 		auto &rot = refRot.get();
 		//auto physType = ent->GetPhysicsType();
 		auto pTrComponentObs = obsC->GetEntity().GetTransformComponent();
-		auto camRot = (obsCamData == nullptr || obsCamData->angleLimits.has_value() == false) ? rot : pTrComponentObs.valid() ? pTrComponentObs->GetOrientation() : uquat::identity();
+		auto camRot = (obsCamData == nullptr || obsCamData->angleLimits.has_value() == false) ? rot : pTrComponentObs.valid() ? pTrComponentObs->GetRotation() : uquat::identity();
 
-		umath::Transform pose;
-		obsC->GetEntity().GetPose(pose);
+		auto pose = obsC->GetEntity().GetPose();
 		if(obsCamData && obsCamData->localOrigin.has_value())
 			pose.TranslateLocal(*obsCamData->localOrigin);
 		else if(pTrComponentObs.valid())
@@ -279,10 +278,10 @@ void CPlayerComponent::UpdateObserverCallback()
 			if(charComponent.valid())
 				rot = charComponent->GetViewOrientation();
 			else
-				rot = pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
+				rot = pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity();
 		}
 		else
-			rot = pTrComponentObs.valid() ? pTrComponentObs->GetOrientation() : uquat::identity();
+			rot = pTrComponentObs.valid() ? pTrComponentObs->GetRotation() : uquat::identity();
 
 		auto rotateWithObservee = (obsCamData && obsCamData->rotateWithObservee) ? true : false;
 		auto rotPos = camRot;
@@ -453,11 +452,11 @@ void CPlayerComponent::UpdateViewModelTransform()
 	if(pTrComponentVm.valid() && (charComponent.valid() || pTrComponent.valid()))
 	{
 		auto pos = charComponent.valid() ? charComponent->GetEyePosition() : pTrComponent->GetPosition();
-		auto &rot = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetOrientation();
+		auto &rot = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetRotation();
 		auto offset = vm->GetViewModelOffset();
 		uvec::local_to_world(pos,rot,offset);
 		pTrComponentVm->SetPosition(offset);
-		pTrComponentVm->SetOrientation(rot);
+		pTrComponentVm->SetRotation(rot);
 	}
 	auto pAttComponent = vmEnt.AddComponent<CAttachableComponent>();
 	if(pAttComponent.valid())
@@ -500,9 +499,9 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 		if(pTrComponent.valid() && pTrComponentBody.valid())
 		{
 			Vector3 pos = pTrComponent->GetPosition() +pTrComponent->GetForward() *VIEW_BODY_OFFSET;
-			auto rot = pTrComponent->GetOrientation();
+			auto &rot = pTrComponent->GetRotation();
 			pTrComponentBody->SetPosition(pos);
-			pTrComponentBody->SetOrientation(Quat(rot));
+			pTrComponentBody->SetRotation(Quat(rot));
 		}
 		auto pAttComponent = entBody.AddComponent<CAttachableComponent>();
 		if(pAttComponent.valid())
@@ -524,7 +523,7 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 		if(pTrComponent.valid() && pTrComponentListener.valid())
 		{
 			pTrComponentListener->SetPosition(pTrComponent->GetPosition());
-			pTrComponentListener->SetOrientation(pTrComponent->GetOrientation());
+			pTrComponentListener->SetRotation(pTrComponent->GetRotation());
 		}
 		auto pAttComponent = entListener.AddComponent<CAttachableComponent>();
 		if(pAttComponent.valid())
@@ -625,7 +624,7 @@ void CPlayerComponent::ReceiveData(NetPacket &packet)
 		if(pTrComponentEnt.valid() && (charComponent.valid() || pTrComponent.valid()))
 		{
 			pTrComponentEnt->SetPosition(charComponent.valid() ? (charComponent->GetEyePosition() +charComponent->GetViewRight() *12.f +charComponent->GetViewForward() *5.f) : pTrComponent->GetPosition());
-			pTrComponentEnt->SetOrientation(charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetOrientation());
+			pTrComponentEnt->SetRotation(charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetRotation());
 		}
 		auto pAttComponent = ent->AddComponent<CAttachableComponent>();
 		if(pAttComponent.valid())

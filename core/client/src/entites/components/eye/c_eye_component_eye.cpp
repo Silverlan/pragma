@@ -57,8 +57,7 @@ Vector3 pragma::CEyeComponent::GetViewTarget() const
 			auto attRot = uquat::identity();
 			if(mdlC->GetAttachment(m_eyeAttachmentIndex,&attPos,&attRot))
 			{
-				umath::Transform attPose;
-				ent.GetPose(attPose);
+				auto attPose = ent.GetPose();
 				attPose *= umath::Transform{attPos,attRot};
 				pos = attPose.GetOrigin() +uquat::forward(attPose.GetRotation()) *dist;
 			}
@@ -105,8 +104,7 @@ Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 		auto rot = uquat::identity();
 		mdlC->GetAttachment(m_eyeAttachmentIndex,&pos,&rot);
 
-		umath::Transform attPose;
-		GetEntity().GetPose(attPose);
+		auto attPose = GetEntity().GetPose();
 		attPose *= umath::Transform{pos,rot};
 		auto localPos = attPose.GetInverse() *tmp;
 		

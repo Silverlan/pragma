@@ -112,7 +112,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
 		umath::Transform startTransform;
 		startTransform.SetIdentity();
 		startTransform.SetOrigin(-origin +originOffset);
-		startTransform.SetRotation(pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity());
+		startTransform.SetRotation(pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity());
 		auto contactProcessingThreshold = 1e30;
 
 		auto group = GetCollisionFilter();

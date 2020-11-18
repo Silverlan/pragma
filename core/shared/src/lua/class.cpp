@@ -1047,6 +1047,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector.def("ProjectToPlane",uvec::project_to_plane);
 	defVector.def("GetPerpendicular",uvec::get_perpendicular);
 	defVector.def("OuterProduct",&uvec::calc_outer_product);
+	defVector.def("ToScreenUv",&umat::to_screen_uv);
 	modMath[defVector];
 
 	auto defVector2 = luabind::class_<Vector2>("Vector2");

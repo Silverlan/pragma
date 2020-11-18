@@ -167,7 +167,7 @@ void CAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 							if(pTrComponentPt.valid())
 							{
 								pTrComponentPt->SetPosition(translation);
-								pTrComponentPt->SetOrientation(rotation);
+								pTrComponentPt->SetRotation(rotation);
 							}
 							pAttachableComponent->AttachToAttachment(&ent,objAttachment.attachment);
 						}

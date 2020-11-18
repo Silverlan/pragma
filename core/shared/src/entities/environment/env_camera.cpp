@@ -64,7 +64,7 @@ void BaseEnvCameraComponent::SetOrientation(const Vector3 &forward,const Vector3
 		return;
 	auto right = uvec::cross(forward,up);
 	uvec::normalize(&right);
-	trComponent->SetOrientation(uquat::create(forward,right,up));
+	trComponent->SetRotation(uquat::create(forward,right,up));
 }
 
 void BaseEnvCameraComponent::UpdateMatrices()
@@ -112,7 +112,7 @@ void BaseEnvCameraComponent::SetViewMatrix(const Mat4 &mat)
 		rotation = uquat::create(forward,right,up);
 
 		whTrComponent->SetPosition(translation);
-		whTrComponent->SetOrientation(rotation);
+		whTrComponent->SetRotation(rotation);
 	}
 }
 void BaseEnvCameraComponent::SetProjectionMatrix(const Mat4 &mat) {*m_projectionMatrix = mat;}

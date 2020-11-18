@@ -160,7 +160,7 @@ void CSpriteComponent::StartParticle()
 	if(pTrComponent.valid() && pTrComponentPt.valid())
 	{
 		pTrComponentPt->SetPosition(pTrComponent->GetPosition());
-		pTrComponentPt->SetOrientation(pTrComponent->GetOrientation());
+		pTrComponentPt->SetRotation(pTrComponent->GetRotation());
 	}
 	pt->Start();
 	m_hParticle = pt->GetHandle<pragma::CParticleSystemComponent>();

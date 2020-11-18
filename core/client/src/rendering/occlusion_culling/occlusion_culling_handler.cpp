@@ -51,9 +51,8 @@ bool OcclusionCullingHandler::ShouldExamine(pragma::CSceneComponent &scene,const
 	if(pRenderComponent->IsExemptFromOcclusionCulling() || outViewModel)
 		return true; // Always draw
 	auto sphere = pRenderComponent->GetRenderSphereBounds();
-	umath::Transform pose;
-	ent.GetPose(pose);
-	auto pos = pose.GetOrigin();
+	auto &pose = ent.GetPose();
+	auto &pos = pose.GetOrigin();
 	if(Intersection::SphereInPlaneMesh(pos +sphere.pos,sphere.radius,*(*outPlanes),true) == Intersection::Intersect::Outside)
 		return false;
 	Vector3 min;

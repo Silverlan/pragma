@@ -39,7 +39,7 @@ void OcclusionCullingHandlerBruteForce::PerformCulling(
 		if((ShouldExamine(scene,renderer,*ent,bViewModel,cullByViewFrustum ? &planes : nullptr) == true))
 		{
 			//if(bUpdateLod == true) // Needs to be updated every frame (in case the entity is moving towards or away from us)
-			pRenderComponent->GetModelComponent()->UpdateLOD(camPos);
+			//pRenderComponent->GetModelComponent()->UpdateLOD(camPos);
 			if(pRenderComponent.valid())
 			{
 				auto pTrComponent = ent->GetTransformComponent();

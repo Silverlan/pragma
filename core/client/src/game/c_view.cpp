@@ -36,7 +36,7 @@ void CGame::CalcLocalPlayerOrientation()
 	if(charComponent.expired() && pTrComponent.expired())
 		return;
 	//Vector3 pos = pl->GetPosition();
-	auto orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetOrientation();
+	auto orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetRotation();
 	uquat::inverse(m_curFrameRotationModifier);
 	orientation = m_curFrameRotationModifier *orientation;
 	m_curFrameRotationModifier = uquat::identity();
@@ -126,7 +126,7 @@ void CGame::CalcLocalPlayerOrientation()
 		if(charComponent.valid())
 			charComponent->SetViewOrientation(orientation);
 		else
-			pTrComponent->SetOrientation(orientation);
+			pTrComponent->SetRotation(orientation);
 		return;
 	//}
 }
@@ -149,7 +149,7 @@ void CGame::CalcView()
 	offset = Vector3(offset.x,0,offset.z) +upDir *offset.y;
 	pos += offset;
 
-	orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetOrientation();
+	orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetRotation();
 
 	auto rotModifier = uquat::identity();
 	CallCallbacks<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>,std::reference_wrapper<Quat>>("CalcView",std::ref(pos),std::ref(orientation),std::ref(rotModifier));
@@ -161,7 +161,7 @@ void CGame::CalcView()
 	if(charComponent.valid())
 		charComponent->SetViewOrientation(orientation);
 	else
-		pTrComponent->SetOrientation(orientation);
+		pTrComponent->SetRotation(orientation);
 	pl->SetViewPos(pos);
 
 	// Update entities attached to player camera

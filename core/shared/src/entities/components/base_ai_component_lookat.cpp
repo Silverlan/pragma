@@ -32,7 +32,7 @@ void BaseAIComponent::LookAtStep(float tDelta)
 	Vector3 pos = {};
 	auto rot = uquat::identity();
 	pos = pTrComponent->GetEyePosition();
-	rot = pTrComponent->GetOrientation();
+	rot = pTrComponent->GetRotation();
 	//if(ent.GetLocalBonePosition(m_neckInfo.boneId,pos,rot) == false)
 	//	return;
 	//ent.LocalToWorld(&pos,&rot);
@@ -44,7 +44,7 @@ void BaseAIComponent::LookAtStep(float tDelta)
 		auto dir = tgtPos -pos;
 		uvec::normalize(&dir);
 
-		auto rotInv = pTrComponent->GetOrientation();
+		auto rotInv = pTrComponent->GetRotation();
 		uquat::inverse(rotInv);
 		ang = EulerAngles(rotInv *uquat::create_look_rotation(dir,pTrComponent->GetUp()));
 		// Deprecated

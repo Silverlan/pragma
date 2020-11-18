@@ -101,7 +101,7 @@ bool ShaderFlat::BindEntity(CBaseEntity &ent)
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(pRenderComponent.expired())
 		return false;
-	pRenderComponent->UpdateRenderData(c_game->GetCurrentDrawCommandBuffer());
+	// pRenderComponent->UpdateRenderData(c_game->GetCurrentDrawCommandBuffer());
 	return RecordBindDescriptorSet(*pRenderComponent->GetRenderDescriptorSet(),DESCRIPTOR_SET_INSTANCE.setIndex,{0u,0u});
 }
 bool ShaderFlat::BindMaterial(CMaterial &mat)

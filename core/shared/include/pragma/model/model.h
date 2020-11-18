@@ -50,6 +50,7 @@ struct DLLNETWORK LODInfo
 {
 	unsigned int lod;
 	std::unordered_map<unsigned int,unsigned int> meshReplacements;
+	float distance = 0.f;
 };
 
 struct DLLNETWORK BlendController
@@ -219,7 +220,7 @@ public:
 	void AddCollisionMesh(const std::shared_ptr<CollisionMesh> &mesh);
 	// Gets the level of detail info for the given lod, or the next best
 	LODInfo *GetLODInfo(uint32_t lod);
-	LODInfo *AddLODInfo(uint32_t lod,std::unordered_map<uint32_t,uint32_t> &replaceIds);
+	LODInfo *AddLODInfo(uint32_t lod,float distance,std::unordered_map<uint32_t,uint32_t> &replaceIds);
 	uint32_t GetLODCount() const;
 	uint32_t GetLOD(uint32_t id) const;
 	const std::vector<LODInfo> &GetLODs() const;

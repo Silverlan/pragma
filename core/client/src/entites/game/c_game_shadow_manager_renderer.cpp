@@ -56,7 +56,8 @@ ShadowRenderer::ShadowRenderer()
 		if(pRenderComponent.valid())
 		{
 			// Make sure entity buffer data is up to date
-			pRenderComponent->UpdateRenderData(m_lightSourceData.drawCmd);
+			// TODO
+			//pRenderComponent->UpdateRenderData(m_lightSourceData.drawCmd,{}); // TODO: Camera position
 		}
 	};
 

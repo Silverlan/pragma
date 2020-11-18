@@ -851,7 +851,7 @@ bool pragma::asset::export_map(const std::string &mapName,const ModelExportInfo 
 			camScene.vFov = camC.GetFOV();
 			camScene.zNear = camC.GetNearZ();
 			camScene.zFar = camC.GetFarZ();
-			ent.GetPose(camScene.pose);
+			camScene.pose = ent.GetPose();
 		}
 
 		auto &lightSources = mapExp->GetLightSources();
@@ -866,7 +866,7 @@ bool pragma::asset::export_map(const std::string &mapName,const ModelExportInfo 
 
 			auto &lightScene = sceneDesc.lightSources.back();
 			lightScene.name = ent.GetName();
-			ent.GetPose(lightScene.pose);
+			lightScene.pose = ent.GetPose();
 
 			auto colorC = ent.GetComponent<CColorComponent>();
 			if(colorC.valid())

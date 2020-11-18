@@ -189,6 +189,7 @@ namespace pragma
 #pragma pack(pop)
 
 		bool BindInstanceDescriptorSet(prosper::IDescriptorSet &descSet);
+		virtual bool BindMaterial(CMaterial &mat)=0;
 		virtual bool BindEntity(CBaseEntity &ent);
 		virtual bool BindVertexAnimationOffset(uint32_t offset);
 		virtual bool BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) override;
@@ -210,6 +211,30 @@ namespace pragma
 		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const=0;
 
 		CBaseEntity *m_boundEntity = nullptr;
+	};
+
+	enum class ShaderGameWorldPipeline : uint32_t
+	{
+		Regular = umath::to_integral(ShaderScene::Pipeline::Regular),
+		MultiSample = umath::to_integral(ShaderScene::Pipeline::MultiSample),
+		//LightMap = umath::to_integral(ShaderScene::Pipeline::LightMap),
+
+		Reflection = umath::to_integral(ShaderScene::Pipeline::Count),
+		Count
+	};
+	class DLLCLIENT ShaderGameWorld
+		: public ShaderEntity
+	{
+	public:
+		using ShaderEntity::ShaderEntity;
+		virtual bool BindClipPlane(const Vector4 &clipPlane)=0;
+		virtual bool BeginDraw(
+			const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},ShaderGameWorldPipeline pipelineIdx=ShaderGameWorldPipeline::Regular,
+			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
+		)=0;
+		virtual bool SetDebugMode(pragma::CSceneComponent::DebugMode debugMode) {return true;};
+		virtual void Set3DSky(bool is3dSky)=0;
+		virtual bool BindDrawOrigin(const Vector4 &drawOrigin)=0;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderEntity::InstanceData::RenderFlags);

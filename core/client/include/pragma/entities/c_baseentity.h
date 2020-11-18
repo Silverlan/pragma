@@ -99,6 +99,7 @@ public:
 protected:
 	virtual void DoSpawn() override;
 	virtual void OnComponentAdded(pragma::BaseEntityComponent &component) override;
+	virtual void OnComponentRemoved(pragma::BaseEntityComponent &component) override;
 	// TODO: Obsolete? (Also remove from BaseEntity and SBaseEntity)
 	void EraseFunction(int function);
 

@@ -97,7 +97,7 @@ bool RaytracingRenderer::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 	for(auto *ent : entIt)
 	{
 		auto renderC = ent->GetComponent<CRenderComponent>();
-		renderC->UpdateRenderData(drawCmd);
+		//renderC->UpdateRenderData(drawCmd); // TODO: Camera pos
 	}
 
 	constexpr uint8_t localWorkGroupSize = 4;

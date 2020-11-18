@@ -229,7 +229,7 @@ DLLCLIENT void NET_cl_fire_bullet(NetPacket packet)
 
 						auto ang = uvec::to_angle(n);
 						auto rot = uquat::create(ang);
-						pTrComponent->SetOrientation(rot);
+						pTrComponent->SetRotation(rot);
 					}
 					pt->SetRemoveOnComplete(true);
 					pt->Start();

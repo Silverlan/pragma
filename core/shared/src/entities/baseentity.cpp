@@ -178,24 +178,28 @@ void BaseEntity::Initialize()
 
 std::string BaseEntity::GetClass() const {return m_class;}
 
-void BaseEntity::GetPose(umath::Transform &outTransform) const
-{
-	outTransform = {GetPosition(),GetRotation()};
-}
 void BaseEntity::SetPose(const umath::Transform &outTransform)
 {
+	auto trComponent = GetTransformComponent();
+	if(trComponent.expired())
+		return;
 	SetPosition(outTransform.GetOrigin());
 	SetRotation(outTransform.GetRotation());
-}
-void BaseEntity::GetPose(umath::ScaledTransform &outTransform) const
-{
-	outTransform = {GetPosition(),GetRotation(),GetScale()};
 }
 void BaseEntity::SetPose(const umath::ScaledTransform &outTransform)
 {
 	SetPosition(outTransform.GetOrigin());
 	SetRotation(outTransform.GetRotation());
 	SetScale(outTransform.GetScale());
+}
+const umath::ScaledTransform &BaseEntity::GetPose() const
+{
+	if(m_transformComponent.expired())
+	{
+		static umath::ScaledTransform defaultPose {};
+		return defaultPose;
+	}
+	return m_transformComponent.get()->GetPose();
 }
 const Vector3 &BaseEntity::GetPosition() const
 {
@@ -223,14 +227,14 @@ const Quat &BaseEntity::GetRotation() const
 	auto trComponent = GetTransformComponent();
 	if(trComponent.expired())
 		return uquat::UNIT;
-	return trComponent->GetOrientation();
+	return trComponent->GetRotation();
 }
 void BaseEntity::SetRotation(const Quat &rot)
 {
 	auto trComponent = GetTransformComponent();
 	if(trComponent.expired())
 		return;
-	trComponent->SetOrientation(rot);
+	trComponent->SetRotation(rot);
 }
 const Vector3 &BaseEntity::GetScale() const
 {
@@ -255,7 +259,7 @@ void BaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 	pragma::BaseEntityComponentSystem::OnComponentAdded(component);
 	auto *ptrTransformComponent = dynamic_cast<pragma::BaseTransformComponent*>(&component);
 	if(ptrTransformComponent != nullptr)
-		m_transformComponent = std::static_pointer_cast<pragma::BaseTransformComponent>(ptrTransformComponent->shared_from_this());
+		m_transformComponent = ptrTransformComponent->GetHandle<pragma::BaseTransformComponent>();
 }
 void BaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
 {
@@ -298,12 +302,12 @@ bool BaseEntity::IsInert() const
 unsigned int BaseEntity::GetIndex() const {return m_index;}
 uint32_t BaseEntity::GetLocalIndex() const {return GetIndex();}
 
-bool BaseEntity::IsWorld() const {return false;}
+bool BaseEntity::IsWorld() const {return umath::is_flag_set(m_stateFlags,StateFlags::HasWorldComponent);}
 bool BaseEntity::IsScripted() const {return false;}
 
 void BaseEntity::PrecacheModels() {}
 
-util::WeakHandle<pragma::BaseTransformComponent> BaseEntity::GetTransformComponent() const {return m_transformComponent.expired() ? nullptr : m_transformComponent.lock();}
+const util::WeakHandle<pragma::BaseTransformComponent> &BaseEntity::GetTransformComponent() const {return m_transformComponent;}
 
 void BaseEntity::Remove() {}
 void BaseEntity::RemoveSafely() {GetNetworkState()->GetGameState()->ScheduleEntityForRemoval(*this);}

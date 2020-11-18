@@ -42,15 +42,32 @@ public:
 	enum class RenderQueueId : uint8_t
 	{
 		Skybox = 0u,
+		SkyboxTranslucent,
 		View,
 		ViewTranslucent,
 		World,
 		WorldTranslucent,
 		Water,
 
+		Count,
 		Invalid = std::numeric_limits<uint8_t>::max()
 	};
 	using WorldMeshVisibility = std::vector<bool>;
+	static void AddRenderMeshesToRenderQueue(
+		const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,
+		const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
+		const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,const std::vector<Plane> *frustumPlanes=nullptr
+	);
+	static void CollectRenderMeshesFromOctree(
+		const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
+		const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
+		const std::vector<Plane> *optFrustumPlanes,const std::vector<util::BSPTree::Node*> *bspLeafNodes=nullptr
+	);
+	static bool ShouldConsiderEntity(CBaseEntity &ent,const pragma::CSceneComponent &scene,const Vector3 &camOrigin,FRender renderFlags);
+	static bool ShouldCull(CBaseEntity &ent,const std::vector<Plane> &frustumPlanes);
+	static bool ShouldCull(pragma::CRenderComponent &renderC,const std::vector<Plane> &frustumPlanes);
+	static bool ShouldCull(pragma::CRenderComponent &renderC,pragma::RenderMeshIndex meshIdx,const std::vector<Plane> &frustumPlanes);
+
 	SceneRenderDesc(pragma::CSceneComponent &scene);
 	~SceneRenderDesc();
 	const pragma::OcclusionCullingHandler &GetOcclusionCullingHandler() const;
@@ -58,8 +75,7 @@ public:
 	void SetOcclusionCullingHandler(const std::shared_ptr<pragma::OcclusionCullingHandler> &handler);
 	void SetOcclusionCullingMethod(OcclusionCullingMethod method);
 	void ReloadOcclusionCullingHandler();
-	void PrepareRendering(pragma::CSceneComponent &scene,RenderMode mode,FRender renderFlags,bool bUpdateTranslucentMeshes=false,bool bUpdateGlowMeshes=false);
-	void BuildRenderQueue(pragma::CSceneComponent &scene,FRender renderFlags);
+	void BuildRenderQueue(const util::DrawSceneInfo &drawSceneInfo);
 
 	bool IsWorldMeshVisible(uint32_t worldRenderQueueIndex,pragma::RenderMeshIndex meshIdx) const;
 
@@ -76,22 +92,19 @@ public:
 	pragma::rendering::RenderQueue *GetRenderQueue(RenderMode renderMode,bool translucent);
 	const pragma::rendering::RenderQueue *GetRenderQueue(RenderMode renderMode,bool translucent) const;
 	const std::vector<std::shared_ptr<const pragma::rendering::RenderQueue>> &GetWorldRenderQueues() const;
-	void PerformOcclusionCulling();
-	void CollectRenderObjects(FRender renderFlags);
 	pragma::rendering::CulledMeshData *GetRenderInfo(RenderMode mode) const;
 private:
-	static bool ShouldConsiderEntity(CBaseEntity &ent,pragma::CSceneComponent &scene,FRender renderFlags);
-	static bool ShouldCull(CBaseEntity &ent,const std::vector<Plane> &frustumPlanes);
-	static bool ShouldCull(pragma::CRenderComponent &renderC,const std::vector<Plane> &frustumPlanes);
-	static bool ShouldCull(pragma::CRenderComponent &renderC,pragma::RenderMeshIndex meshIdx,const std::vector<Plane> &frustumPlanes);
-	void AddRenderMeshesToRenderQueue(pragma::CRenderComponent &renderC,const std::vector<Plane> *frustumPlanes=nullptr);
-	void CollectRenderMeshesFromOctree(const OcclusionOctree<CBaseEntity*> &tree,pragma::CSceneComponent &scene,FRender renderFlags,const std::vector<Plane> &frustumPlanes,const std::vector<util::BSPTree::Node*> *bspLeafNodes=nullptr);
+	void AddRenderMeshesToRenderQueue(const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,const std::vector<Plane> *frustumPlanes=nullptr);
+	void CollectRenderMeshesFromOctree(
+		const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
+		const std::vector<Plane> &frustumPlanes,const std::vector<util::BSPTree::Node*> *bspLeafNodes=nullptr
+	);
 
 	std::shared_ptr<pragma::OcclusionCullingHandler> m_occlusionCullingHandler = nullptr;
 	pragma::rendering::RenderMeshCollectionHandler m_renderMeshCollectionHandler = {};
 
 	std::vector<WorldMeshVisibility> m_worldMeshVisibility;
-	std::array<std::shared_ptr<pragma::rendering::RenderQueue>,6> m_renderQueues;
+	std::array<std::shared_ptr<pragma::rendering::RenderQueue>,umath::to_integral(RenderQueueId::Count)> m_renderQueues;
 	std::vector<std::shared_ptr<const pragma::rendering::RenderQueue>> m_worldRenderQueues;
 
 	pragma::CSceneComponent &m_scene;

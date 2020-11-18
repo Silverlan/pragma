@@ -210,7 +210,7 @@ static void debug_bsp_nodes(NetworkState*,ConVar*,int32_t,int32_t val)
 				{
 					auto &posWorld = entWorld.GetPosition();
 					auto pTrComponent = entWorld.GetTransformComponent();
-					auto rotWorld = pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
+					auto rotWorld = pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity();
 					auto clusterCenter = (pCurrentNode->min +pCurrentNode->max) *0.5f;
 					for(auto &mesh : meshes)
 					{

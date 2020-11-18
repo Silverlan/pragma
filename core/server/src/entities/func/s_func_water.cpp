@@ -170,7 +170,7 @@ const Quat &SWaterComponent::GetOrientation() const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	static auto identity = uquat::identity();
-	return pTrComponent.valid() ? pTrComponent->GetOrientation() : identity;
+	return pTrComponent.valid() ? pTrComponent->GetRotation() : identity;
 }
 
 ///////////////

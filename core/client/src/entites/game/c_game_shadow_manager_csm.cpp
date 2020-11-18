@@ -153,7 +153,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 					{
 						auto pRenderComponent = const_cast<CBaseEntity*>(info.entity)->GetRenderComponent();
 						if(pRenderComponent.valid())
-							pRenderComponent->UpdateRenderData(drawCmd);
+							;//pRenderComponent->UpdateRenderData(drawCmd); // TODO
 					}
 				}
 			}

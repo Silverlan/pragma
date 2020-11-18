@@ -398,9 +398,9 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.def("GetDebugMode",&Lua::Scene::GetDebugMode);
 	defCScene.def("SetDebugMode",&Lua::Scene::SetDebugMode);
 	defCScene.def("Link",&Lua::Scene::Link);
-	defCScene.def("PrepareRender",&Lua::Scene::UpdateRenderInfo);
+	defCScene.def("BuildRenderQueue",&Lua::Scene::BuildRenderQueue);
 	defCScene.def("RenderPrepass",&Lua::Scene::RenderPrepass);
-	defCScene.def("Render",static_cast<void(*)(lua_State*,CSceneHandle&,::util::DrawSceneInfo&,RenderMode,RenderSystem::RenderFlags)>(Lua::Scene::Render));
+	defCScene.def("Render",static_cast<void(*)(lua_State*,CSceneHandle&,::util::DrawSceneInfo&,RenderMode,RenderFlags)>(Lua::Scene::Render));
 	defCScene.def("Render",static_cast<void(*)(lua_State*,CSceneHandle&,::util::DrawSceneInfo&,RenderMode)>(Lua::Scene::Render));
 	defCScene.def("GetRenderer",static_cast<void(*)(lua_State*,CSceneHandle&)>([](lua_State *l,CSceneHandle &scene) {
 		pragma::Lua::check_component(l,scene);

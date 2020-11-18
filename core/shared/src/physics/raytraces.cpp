@@ -40,7 +40,7 @@ void TraceResult::InitializeMeshes()
 
 	auto pTrComponent = entity->GetTransformComponent();
 	auto origin = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
-	auto rot = pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
+	auto rot = pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity();
 
 	auto startPosLocal = startPosition;
 	uvec::world_to_local(origin,rot,startPosLocal);

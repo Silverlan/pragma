@@ -193,8 +193,7 @@ Sphere CRenderComponent::GetRenderSphereBounds() const
 }
 void CRenderComponent::GetAbsoluteRenderBounds(Vector3 &outMin,Vector3 &outMax) const
 {
-	umath::Transform pose;
-	GetEntity().GetPose(pose);
+	auto &pose = GetEntity().GetPose();
 	GetRenderBounds(&outMin,&outMax);
 	outMin = pose *outMin;
 	outMax = pose *outMax;
@@ -281,14 +280,9 @@ void CRenderComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	BaseRenderComponent::OnEntityComponentAdded(component);
 	if(typeid(component) == typeid(pragma::CTransformComponent))
 	{
-		FlagCallbackForRemoval(static_cast<pragma::CTransformComponent&>(component).GetPosProperty()->AddCallback([this](std::reference_wrapper<const Vector3> oldPos,std::reference_wrapper<const Vector3> pos) {
+		FlagCallbackForRemoval(static_cast<pragma::CTransformComponent&>(component).AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			SetRenderBufferDirty();
-		}),CallbackType::Component,&component);
-		FlagCallbackForRemoval(static_cast<pragma::CTransformComponent&>(component).GetOrientationProperty()->AddCallback([this](std::reference_wrapper<const Quat> oldRot,std::reference_wrapper<const Quat> rot) {
-			SetRenderBufferDirty();
-		}),CallbackType::Component,&component);
-		FlagCallbackForRemoval(static_cast<pragma::CTransformComponent&>(component).GetScaleProperty()->AddCallback([this](std::reference_wrapper<const Vector3> oldScale,std::reference_wrapper<const Vector3> scale) {
-			SetRenderBufferDirty();
+			return util::EventReply::Unhandled;
 		}),CallbackType::Component,&component);
 	}
 	else if(typeid(component) == typeid(pragma::CModelComponent))
@@ -318,7 +312,7 @@ void CRenderComponent::UpdateMatrices()
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	auto orientation = pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
+	auto orientation = pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	umath::ScaledTransform pose {};
 	if(pPhysComponent.expired() || pPhysComponent->GetPhysicsType() != PHYSICSTYPE::SOFTBODY)
@@ -351,8 +345,6 @@ void CRenderComponent::UpdateRenderMeshes()
 		return;
 	m_renderMeshContainer = std::make_unique<SortedRenderMeshContainer>(&ent,static_cast<CModelComponent&>(*mdlComponent).GetLODMeshes());
 }
-void CRenderComponent::PostRender(RenderMode) {}
-bool CRenderComponent::Render(pragma::ShaderTextured3DBase*,Material*,CModelSubMesh*) {return false;}
 void CRenderComponent::ReceiveData(NetPacket &packet)
 {
 	m_renderFlags = packet->Read<decltype(m_renderFlags)>();
@@ -362,8 +354,7 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 	auto &lodMeshes = GetLODMeshes();
 	if(lodMeshes.empty())
 		return {};
-	umath::Transform pose;
-	GetEntity().GetPose(pose);
+	auto &pose = GetEntity().GetPose();
 	auto invPose = pose.GetInverse();
 
 	// Move ray into entity space
@@ -467,7 +458,7 @@ void CRenderComponent::SetExemptFromOcclusionCulling(bool exempt)
 }
 bool CRenderComponent::IsExemptFromOcclusionCulling() const {return umath::is_flag_set(m_stateFlags,StateFlags::ExemptFromOcclusionCulling);}
 void CRenderComponent::SetRenderBufferDirty() {umath::set_flag(m_stateFlags,StateFlags::RenderBufferDirty);}
-void CRenderComponent::UpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bForceBufferUpdate)
+void CRenderComponent::UpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp,bool bForceBufferUpdate)
 {
 	InitializeRenderBuffers();
 
@@ -491,6 +482,10 @@ void CRenderComponent::UpdateRenderData(const std::shared_ptr<prosper::IPrimaryC
 			if(attInfo != nullptr && (attInfo->flags &FAttachmentMode::UpdateEachFrame) != FAttachmentMode::None && attInfo->parent.valid())
 				pAttComponent->UpdateAttachmentOffset();
 		}
+
+		auto &mdlC = GetModelComponent();
+		if(mdlC.valid())
+			mdlC->UpdateLOD(scene,cam,vp); // TODO: Don't update this every frame for every entity!
 	}
 
 	auto updateRenderBuffer = umath::is_flag_set(m_stateFlags,StateFlags::RenderBufferDirty) || bForceBufferUpdate;
@@ -524,7 +519,6 @@ void CRenderComponent::UpdateRenderData(const std::shared_ptr<prosper::IPrimaryC
 	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_DATA,evData);
 }
 
-void CRenderComponent::Render(RenderMode) {}
 void CRenderComponent::SetRenderMode(RenderMode mode)
 {
 	if(mode == **m_renderMode)
@@ -650,10 +644,6 @@ bool CRenderComponent::RenderCallback(RenderObject *o,CBaseEntity *ent,pragma::C
 bool CRenderComponent::RenderCallback(RenderObject*,pragma::CCameraComponent *cam,pragma::ShaderTextured3DBase*,Material*)
 {
 	return ShouldDraw(cam->GetEntity().GetPosition());
-}
-void CRenderComponent::PreRender()
-{
-	// TODO: Remove me
 }
 const std::vector<CRenderComponent*> &CRenderComponent::GetEntitiesExemptFromOcclusionCulling() {return s_ocExemptEntities;}
 const std::shared_ptr<prosper::IUniformResizableBuffer> &CRenderComponent::GetInstanceBuffer() {return s_instanceBuffer;}

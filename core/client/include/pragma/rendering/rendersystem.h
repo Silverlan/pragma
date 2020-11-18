@@ -30,6 +30,12 @@ namespace util {struct DrawSceneInfo;};
 class CModelMesh;
 #pragma warning(push)
 #pragma warning(disable : 4251)
+enum class RenderFlags : uint8_t
+{
+	None = 0u,
+	Reflection = 1u,
+	RenderAs3DSky = Reflection<<1u
+};
 class DLLCLIENT RenderSystem
 {
 public:
@@ -50,12 +56,6 @@ public:
 		::util::WeakHandle<prosper::Shader> shader = {};
 		float distance;
 	};
-	enum class RenderFlags : uint8_t
-	{
-		None = 0u,
-		Reflection = 1u,
-		RenderAs3DSky = Reflection<<1u
-	};
 public:
 	static void Render(const util::DrawSceneInfo &drawSceneInfo,pragma::CCameraComponent &cam,RenderMode renderMode,RenderFlags flags,std::vector<std::unique_ptr<RenderSystem::TranslucentMesh>> &translucentMeshes,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f});
 	
@@ -63,10 +63,9 @@ public:
 	static uint32_t Render(const util::DrawSceneInfo &drawSceneInfo,const pragma::rendering::CulledMeshData &renderMeshes,RenderMode renderMode=RenderMode::World,RenderFlags flags=RenderFlags::None,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f});
 
 	static void RenderPrepass(const util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode=RenderMode::World);
-	static void RenderPrepass(const util::DrawSceneInfo &drawSceneInfo,const pragma::rendering::CulledMeshData &renderMeshes);
 	static void RenderShadows(const util::DrawSceneInfo &drawSceneInfo,pragma::rendering::RasterizationRenderer &renderer,std::vector<pragma::CLightComponent*> &lights);
 };
-REGISTER_BASIC_BITWISE_OPERATORS(RenderSystem::RenderFlags)
+REGISTER_BASIC_BITWISE_OPERATORS(RenderFlags)
 #pragma warning(pop)
 
 #endif

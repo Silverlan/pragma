@@ -67,7 +67,7 @@ namespace pragma
 
 		void GetAbsoluteRenderBounds(Vector3 &outMin,Vector3 &outMax) const;
 		void GetRenderBounds(Vector3 *min,Vector3 *max) const;
-		virtual void SetRenderBounds(Vector3 min,Vector3 max);
+		void SetRenderBounds(Vector3 min,Vector3 max);
 		Sphere GetRenderSphereBounds() const;
 		void GetRotatedRenderBounds(Vector3 *min,Vector3 *max);
 
@@ -80,15 +80,10 @@ namespace pragma
 
 		virtual void ReceiveData(NetPacket &packet) override;
 
-		virtual void UpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bForceBufferUpdate=false);
+		void UpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp,bool bForceBufferUpdate=false);
 
-		virtual void Render(RenderMode renderMode);
-		virtual void PostRender(RenderMode renderMode);
-		virtual bool Render(pragma::ShaderTextured3DBase *shader,Material *mat,CModelSubMesh *mesh); // Return true to override default rendering
-		virtual void PreRender();
-
-		virtual bool ShouldDraw(const Vector3 &camOrigin) const;
-		virtual bool ShouldDrawShadow(const Vector3 &camOrigin) const;
+		bool ShouldDraw(const Vector3 &camOrigin) const;
+		bool ShouldDrawShadow(const Vector3 &camOrigin) const;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual void OnEntitySpawn() override;
@@ -123,13 +118,13 @@ namespace pragma
 		const umath::ScaledTransform *GetRenderOffsetTransform() const;
 	protected:
 		void UpdateRenderBuffer() const;
-		virtual void UpdateMatrices();
+		void UpdateMatrices();
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 		void ClearRenderObjects();
 		static bool RenderCallback(RenderObject *o,CBaseEntity *ent,pragma::CCameraComponent *cam,pragma::ShaderTextured3DBase *shader,Material *mat);
-		virtual bool RenderCallback(RenderObject *o,pragma::CCameraComponent *cam,pragma::ShaderTextured3DBase *shader,Material *mat);
-		virtual void UpdateRenderMeshes();
+		bool RenderCallback(RenderObject *o,pragma::CCameraComponent *cam,pragma::ShaderTextured3DBase *shader,Material *mat);
+		void UpdateRenderMeshes();
 
 		void ClearRenderBuffers();
 		void InitializeRenderBuffers();

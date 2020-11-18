@@ -26,7 +26,8 @@
 #include <wgui/wihandle.h>
 #include <sharedutils/property/util_property.hpp>
 
-#define LOD_SWAP_DISTANCE 500.f
+static constexpr auto LOD_SWAP_DISTANCE = 500.f;
+static constexpr auto LOD_SWAP_DISTANCE_SQR = umath::pow2(LOD_SWAP_DISTANCE);
 
 struct DLLCLIENT KeyAction
 {
@@ -139,8 +140,7 @@ public:
 	enum class CPUProfilingPhase : uint32_t
 	{
 		Present = 0u,
-		OcclusionCulling,
-		PrepareRendering,
+		BuildRenderQueue,
 		Prepass,
 		SSAO,
 		CullLightSources,
@@ -154,9 +154,6 @@ public:
 	{
 		Scene = 0u,
 		Prepass,
-		PrepassSkybox,
-		PrepassWorld,
-		PrepassView,
 		SSAO,
 		PostProcessing,
 		Present,

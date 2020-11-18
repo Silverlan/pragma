@@ -133,7 +133,7 @@ void CGame::ReloadSoundCache(bool bReloadBakedCache,SoundCacheFlags cacheFlags,f
 					if(phys == nullptr || pTrComponent.expired())
 						return;
 					auto &pos = pTrComponent->GetPosition();
-					auto &rot = pTrComponent->GetOrientation();
+					auto &rot = pTrComponent->GetRotation();
 					auto &hColObjs = phys->GetCollisionObjects();
 					for(auto &hColObj : hColObjs)
 					{

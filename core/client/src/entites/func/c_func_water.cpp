@@ -83,7 +83,7 @@ const Quat &CWaterComponent::GetOrientation() const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	static auto identity = uquat::identity();
-	return pTrComponent.valid() ? pTrComponent->GetOrientation() : identity;
+	return pTrComponent.valid() ? pTrComponent->GetRotation() : identity;
 }
 void CWaterComponent::OnEntitySpawn()
 {
@@ -170,7 +170,7 @@ bool CWaterComponent::OnBulletHit(const BulletInfo &bulletInfo,const TraceData &
 					auto up = result.hitNormalLocal;
 					uvec::normalize(&up);
 					const auto rot = Quat{0.5f,-0.5f,-0.5f,-0.5f};
-					pTrComponent->SetOrientation(uquat::create_look_rotation(uvec::get_perpendicular(up),up) *rot);
+					pTrComponent->SetRotation(uquat::create_look_rotation(uvec::get_perpendicular(up),up) *rot);
 				}
 				pt->SetRemoveOnComplete(true);
 				pt->Start();

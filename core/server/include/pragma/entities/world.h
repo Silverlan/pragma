@@ -27,7 +27,6 @@ class DLLSERVER World
 {
 public:
 	virtual void Initialize() override;
-	virtual bool IsWorld() const override {return true;} // TODO: Move this to component
 };
 
 #endif

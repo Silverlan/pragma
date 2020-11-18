@@ -166,7 +166,7 @@ Bool BaseAnimatedComponent::GetGlobalBonePosition(UInt32 boneId,Vector3 &pos,Qua
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(pTrComponent.expired())
 		return true;
-	uvec::local_to_world(pTrComponent->GetOrigin(),pTrComponent->GetOrientation(),pos,rot);//uvec::local_to_world(GetOrigin(),GetOrientation(),pos,rot);
+	uvec::local_to_world(pTrComponent->GetOrigin(),pTrComponent->GetRotation(),pos,rot);//uvec::local_to_world(GetOrigin(),GetOrientation(),pos,rot);
 	return true;
 }
 Bool BaseAnimatedComponent::GetGlobalBonePosition(UInt32 boneId,Vector3 &pos) const
@@ -176,7 +176,7 @@ Bool BaseAnimatedComponent::GetGlobalBonePosition(UInt32 boneId,Vector3 &pos) co
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(pTrComponent.expired())
 		return true;
-	uvec::local_to_world(pTrComponent->GetOrigin(),pTrComponent->GetOrientation(),pos);//uvec::local_to_world(GetOrigin(),GetOrientation(),pos);
+	uvec::local_to_world(pTrComponent->GetOrigin(),pTrComponent->GetRotation(),pos);//uvec::local_to_world(GetOrigin(),GetOrientation(),pos);
 	return true;
 }
 Bool BaseAnimatedComponent::GetGlobalBoneRotation(UInt32 boneId,Quat &rot) const
@@ -186,7 +186,7 @@ Bool BaseAnimatedComponent::GetGlobalBoneRotation(UInt32 boneId,Quat &rot) const
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(pTrComponent.expired())
 		return true;
-	uvec::local_to_world(pTrComponent->GetOrientation(),rot);
+	uvec::local_to_world(pTrComponent->GetRotation(),rot);
 	return true;
 }
 void BaseAnimatedComponent::SetBoneScale(uint32_t boneId,const Vector3 &scale)

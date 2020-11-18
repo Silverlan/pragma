@@ -112,7 +112,7 @@ void CCharacterComponent::CreateWaterSplash()
 				auto up = uvec::create(n);
 				uvec::normalize(&up);
 				const auto rot = Quat{0.5f,-0.5f,-0.5f,-0.5f};
-				pTrComponent->SetOrientation(uquat::create_look_rotation(uvec::get_perpendicular(up),up) *rot);
+				pTrComponent->SetRotation(uquat::create_look_rotation(uvec::get_perpendicular(up),up) *rot);
 			}
 			pt->SetRemoveOnComplete(true);
 			pt->Start();

@@ -79,7 +79,7 @@ void CShooterComponent::FireBullets(const BulletInfo &bulletInfo,const Vector3 &
 
 									auto ang = uvec::to_angle(result.normal);
 									auto rot = uquat::create(ang);
-									pTrComponent->SetOrientation(rot);
+									pTrComponent->SetRotation(rot);
 								}
 								pt->SetRemoveOnComplete(true);
 								pt->GetEntity().Spawn();

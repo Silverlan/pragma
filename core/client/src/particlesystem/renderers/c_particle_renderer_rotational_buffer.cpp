@@ -46,7 +46,7 @@ bool CParticleRendererRotationalBuffer::Update()
 	// Update rotation buffer
 	auto *ps = m_hParticleSystem.get();
 	auto pTrComponent = ps->GetEntity().GetTransformComponent();
-	auto psRot = pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
+	auto psRot = pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity();
 	if(ps->IsRendererBufferUpdateRequired() == true)
 	{
 		auto numParticles = ps->GetRenderParticleCount();

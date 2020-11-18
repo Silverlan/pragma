@@ -190,7 +190,7 @@ void BasePlayerComponent::Think(double tDelta)
 			
 			if(pTrComponent.valid())
 			{
-				auto rot = pTrComponent->GetOrientation();
+				auto rot = pTrComponent->GetRotation();
 				auto rotView = charComponent.valid() ? charComponent->GetViewOrientation() : rot;
 				auto rotRef = charComponent.valid() ? charComponent->GetOrientationAxesRotation() : rot;
 				rotView = rotRef *rotView;
@@ -198,7 +198,7 @@ void BasePlayerComponent::Think(double tDelta)
 				auto ang = EulerAngles(rot);
 				ang.y = EulerAngles(rotView).y;
 				rot = uquat::get_inverse(rotRef) *uquat::create(ang);
-				pTrComponent->SetOrientation(rot);
+				pTrComponent->SetRotation(rot);
 			}
 		}
 		else

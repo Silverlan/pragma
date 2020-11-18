@@ -82,7 +82,9 @@ public:
 		PositionChanged = SnapshotUpdateRequired<<1u,
 		RotationChanged = PositionChanged<<1u,
 		CollisionBoundsChanged = RotationChanged<<1u,
-		RenderBoundsChanged = CollisionBoundsChanged<<1u
+		RenderBoundsChanged = CollisionBoundsChanged<<1u,
+
+		HasWorldComponent = RenderBoundsChanged<<1u
 	};
 
 	static void RegisterEvents(pragma::EntityComponentManager &componentManager);
@@ -107,9 +109,8 @@ public:
 	pragma::ComponentEventId RegisterComponentEvent(const std::string &name) const;
 	pragma::ComponentEventId GetEventId(const std::string &name) const;
 
-	// Returns ORIGIN if the entity has no transform component
-	void GetPose(umath::ScaledTransform &outTransform) const;
-	void GetPose(umath::Transform &outTransform) const;
+	// Returns IDENTITY if the entity has no transform component
+	const umath::ScaledTransform &GetPose() const;
 	void SetPose(const umath::ScaledTransform &outTransform);
 	void SetPose(const umath::Transform &outTransform);
 	const Vector3 &GetPosition() const;
@@ -134,7 +135,7 @@ public:
 	virtual util::WeakHandle<pragma::BasePhysicsComponent> GetPhysicsComponent() const=0;
 	virtual util::WeakHandle<pragma::BaseTimeScaleComponent> GetTimeScaleComponent() const=0;
 	virtual util::WeakHandle<pragma::BaseNameComponent> GetNameComponent() const=0;
-	util::WeakHandle<pragma::BaseTransformComponent> GetTransformComponent() const;
+	const util::WeakHandle<pragma::BaseTransformComponent> &GetTransformComponent() const;
 
 	// These are quick-access functions for commonly used component functions.
 	// In some cases these may create the component, if it doesn't exist, and transmit
@@ -233,7 +234,7 @@ public:
 	virtual bool IsWeapon() const=0;
 	virtual bool IsVehicle() const=0;
 	virtual bool IsNPC() const=0;
-	virtual bool IsWorld() const;
+	bool IsWorld() const;
 	virtual bool IsScripted() const;
 
 	virtual Con::c_cout& print(Con::c_cout&);
@@ -256,7 +257,7 @@ protected:
 	StateFlags m_stateFlags = StateFlags::None;
 
 	// Transform component is needed frequently, so we store a direct reference to it for faster access
-	std::weak_ptr<pragma::BaseTransformComponent> m_transformComponent = {};
+	util::WeakHandle<pragma::BaseTransformComponent> m_transformComponent = {};
 
 	virtual void OnComponentAdded(pragma::BaseEntityComponent &component) override;
 	virtual void OnComponentRemoved(pragma::BaseEntityComponent &component) override;

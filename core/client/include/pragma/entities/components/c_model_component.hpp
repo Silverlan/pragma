@@ -16,6 +16,8 @@
 
 namespace pragma
 {
+	class CCameraComponent;
+	class CSceneComponent;
 	class DLLCLIENT CModelComponent final
 		: public BaseModelComponent,
 		public CBaseNetComponent
@@ -44,9 +46,9 @@ namespace pragma
 
 		bool IsWeighted() const;
 
-		virtual void UpdateLOD(uint32_t lod);
+		void UpdateLOD(uint32_t lod);
 		uint8_t GetLOD();
-		virtual void UpdateLOD(const Vector3 &posCam);
+		void UpdateLOD(const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp);
 		std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes();
 		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes() const;
 		std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes();
@@ -79,9 +81,11 @@ namespace pragma
 	struct DLLCLIENT CEOnUpdateLODByPos
 		: public ComponentEvent
 	{
-		CEOnUpdateLODByPos(const Vector3 &posCam);
+		CEOnUpdateLODByPos(const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp);
 		virtual void PushArguments(lua_State *l) override;
-		const Vector3 &posCam;
+		const CSceneComponent &scene;
+		const CCameraComponent &camera;
+		const Mat4 &viewProjection;
 	};
 };
 

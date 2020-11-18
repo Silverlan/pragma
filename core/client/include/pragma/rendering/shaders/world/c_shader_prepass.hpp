@@ -15,7 +15,7 @@
 namespace pragma
 {
 	class DLLCLIENT ShaderPrepassBase
-		: public ShaderEntity
+		: public ShaderGameWorld
 	{
 	public:
 		enum class Pipeline : uint32_t
@@ -70,14 +70,17 @@ namespace pragma
 		ShaderPrepassBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader);
 		ShaderPrepassBase(prosper::IPrContext &context,const std::string &identifier);
 
-		bool BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx=Pipeline::Regular);
-		bool BindClipPlane(const Vector4 &clipPlane);
-		bool BindDrawOrigin(const Vector4 &drawOrigin);
-		void Set3DSky(bool is3dSky);
+		virtual bool BeginDraw(
+			const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},ShaderGameWorldPipeline pipelineIdx=ShaderGameWorldPipeline::Regular,
+			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
+		) override;
+		virtual bool BindClipPlane(const Vector4 &clipPlane) override;
+		virtual bool BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) override;
+		virtual bool BindDrawOrigin(const Vector4 &drawOrigin) override;
+		virtual void Set3DSky(bool is3dSky) override;
 		virtual bool Draw(CModelSubMesh &mesh) override;
-		bool Draw(CModelSubMesh &mesh,Material &matAlphaCutoff);
 	protected:
-		bool BindMaterial(CMaterial &mat);
+		virtual bool BindMaterial(CMaterial &mat) override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
@@ -93,6 +96,7 @@ namespace pragma
 		virtual bool BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings) override {return false;}
 		virtual bool BindLights(prosper::IDescriptorSet &dsLights) override {return false;}
 		Flags m_stateFlags = Flags::None;
+		std::optional<float> m_alphaCutoff {};
 	};
 	using ShaderPrepassDepth = ShaderPrepassBase;
 

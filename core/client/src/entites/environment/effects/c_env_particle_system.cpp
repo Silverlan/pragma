@@ -51,9 +51,10 @@ void CParticleSystemComponent::Initialize()
 	auto pTrComponent = ent.GetTransformComponent();
 	if(pTrComponent.valid())
 	{
-		FlagCallbackForRemoval(pTrComponent->GetPosProperty()->AddCallback([this](std::reference_wrapper<const Vector3> oldPos,std::reference_wrapper<const Vector3> pos) {
-			if(IsActive() == false)
-				return;
+		auto &trC = *pTrComponent;
+		FlagCallbackForRemoval(pTrComponent->AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,&trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			if(IsActive() == false || umath::is_flag_set(static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags,pragma::TransformChangeFlags::PositionChanged) == false)
+				return util::EventReply::Unhandled;
 			for(auto it=m_childSystems.begin();it!=m_childSystems.end();++it)
 			{
 				auto &hChild = *it;
@@ -61,9 +62,10 @@ void CParticleSystemComponent::Initialize()
 				{
 					auto pTrComponent = hChild.child->GetEntity().GetTransformComponent();
 					if(pTrComponent.valid())
-						pTrComponent->SetPosition(pos);
+						pTrComponent->SetPosition(trC.GetPosition());
 				}
 			}
+			return util::EventReply::Unhandled;
 		}),CallbackType::Entity);
 	}
 }

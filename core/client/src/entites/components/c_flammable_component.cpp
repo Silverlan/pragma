@@ -97,7 +97,7 @@ void CFlammableComponent::UpdateFlameParticlePositions()
 	auto pTrComponent = ent.GetTransformComponent();
 	if(!IsOnFire() || pTrComponent.expired())
 		return;
-	auto &rot = pTrComponent->GetOrientation();
+	auto &rot = pTrComponent->GetRotation();
 	for(auto &info : m_igniteInfo.flameParticles)
 	{
 		if(info.hParticle.expired())
@@ -232,7 +232,7 @@ util::EventReply CFlammableComponent::Ignite(float duration,BaseEntity *attacker
 	//
 
 	auto &origin = pTrComponent->GetPosition();
-	auto &rot = pTrComponent->GetOrientation();
+	auto &rot = pTrComponent->GetRotation();
 	for(auto &info : particlePositions)
 	{
 		auto pos = info.position;
@@ -251,7 +251,7 @@ util::EventReply CFlammableComponent::Ignite(float duration,BaseEntity *attacker
 			if(pTrComponent.valid())
 			{
 				pTrComponent->SetPosition(pos);
-				pTrComponent->SetOrientation(rot);
+				pTrComponent->SetRotation(rot);
 			}
 			pt->SetRemoveOnComplete(true);
 			pt->SetContinuous(true);

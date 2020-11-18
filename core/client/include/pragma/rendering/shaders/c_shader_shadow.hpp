@@ -54,7 +54,7 @@ namespace pragma
 
 		bool BindLight(CLightComponent &light);
 		bool BindEntity(CBaseEntity &ent,const Mat4 &depthMVP);
-		bool BindMaterial(CMaterial &mat); // TODO: Transparent only
+		virtual bool BindMaterial(CMaterial &mat) override; // TODO: Transparent only
 		virtual bool Draw(CModelSubMesh &mesh) override;
 	protected:
 		bool BindDepthMatrix(const Mat4 &depthMVP);

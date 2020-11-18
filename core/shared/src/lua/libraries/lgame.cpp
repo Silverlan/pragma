@@ -388,7 +388,7 @@ int Lua::game::raycast(lua_State *l)
 		if(dataFilter != nullptr && filter->ShouldPass(ent,nullptr,nullptr) == false)
 			continue;
 #endif
-		Intersection::LineMesh(start,end -start,*hMdl,meshResult,true,pTrComponent->GetPosition(),pTrComponent->GetOrientation());
+		Intersection::LineMesh(start,end -start,*hMdl,meshResult,true,pTrComponent->GetPosition(),pTrComponent->GetRotation());
 	}
 	if(entClosest != nullptr)
 	{

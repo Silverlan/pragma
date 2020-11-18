@@ -167,21 +167,24 @@ template<class T>
 	void OcclusionOctree<T>::InsertObject(const T &o)
 {
 	auto it = m_objectNodes.find(o);
-	if(it == m_objectNodes.end())
-	{
-		it = m_objectNodes.insert(typename decltype(m_objectNodes)::value_type(o,std::vector<std::weak_ptr<BaseOcclusionOctree::Node>>{})).first;
-#if ENABLE_OCCLUSION_DEBUG_MODE == 1
-		m_dbgObjects.push_back(o);
-#endif
-	}
-	else
+	if(it != m_objectNodes.end())
 		return; // Object already exists in tree
+	it = m_objectNodes.insert(typename decltype(m_objectNodes)::value_type(o,std::vector<std::weak_ptr<BaseOcclusionOctree::Node>>{})).first;
+#if ENABLE_OCCLUSION_DEBUG_MODE == 1
+	m_dbgObjects.push_back(o);
+#endif
 	auto &nodes = it->second;
 	Vector3 min,max;
 	GetObjectBounds(o,min,max);
 	auto &root = GetRootNode();
 	if(root.InsertObject(o,min,max,nodes) == false)
+	{
+		m_objectNodes.erase(it);
+#if ENABLE_OCCLUSION_DEBUG_MODE == 1
+		m_dbgObjects.erase(m_dbgObjects.end() -1);
+#endif
 		root.InsertObjectReverse(o,min,max,nodes);
+	}
 }
 
 template<class T>

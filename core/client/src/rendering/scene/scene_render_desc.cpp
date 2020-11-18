@@ -39,17 +39,6 @@ SceneRenderDesc::~SceneRenderDesc()
 {
 	m_occlusionCullingHandler = nullptr;
 }
-void SceneRenderDesc::PerformOcclusionCulling()
-{
-	if(m_scene.m_renderer == nullptr || m_scene.m_renderer->IsRasterizationRenderer() == false)
-		return;
-	c_game->StartProfilingStage(CGame::CPUProfilingPhase::OcclusionCulling);
-	GetOcclusionCullingHandler().PerformCulling(m_scene,static_cast<pragma::rendering::RasterizationRenderer&>(*m_scene.m_renderer),GetCulledParticles());
-
-	auto &renderMeshes = GetCulledMeshes();
-	GetOcclusionCullingHandler().PerformCulling(m_scene,static_cast<pragma::rendering::RasterizationRenderer&>(*m_scene.m_renderer),renderMeshes);
-	c_game->StopProfilingStage(CGame::CPUProfilingPhase::OcclusionCulling);
-}
 
 const std::vector<pragma::OcclusionMeshInfo> &SceneRenderDesc::GetCulledMeshes() const {return m_renderMeshCollectionHandler.GetOcclusionFilteredMeshes();}
 std::vector<pragma::OcclusionMeshInfo> &SceneRenderDesc::GetCulledMeshes() {return m_renderMeshCollectionHandler.GetOcclusionFilteredMeshes();}
@@ -113,243 +102,9 @@ pragma::rendering::CulledMeshData *SceneRenderDesc::GetRenderInfo(RenderMode ren
 		return nullptr;
 	return it->second.get();
 }
-void SceneRenderDesc::CollectRenderObjects(FRender renderFlags)
-{
-	// Prepare rendering
-	c_game->StartProfilingStage(CGame::CPUProfilingPhase::PrepareRendering);
-	auto bGlow = cvDrawGlow->GetBool();
-	auto bTranslucent = cvDrawTranslucent->GetBool();
-	if((renderFlags &FRender::Skybox) == FRender::Skybox && c_game->IsRenderModeEnabled(RenderMode::Skybox) && cvDrawSky->GetBool() == true)
-		PrepareRendering(m_scene,RenderMode::Skybox,renderFlags,bTranslucent,bGlow);
-	else
-		renderFlags &= ~FRender::Skybox;
-
-	if((renderFlags &FRender::World) == FRender::World && c_game->IsRenderModeEnabled(RenderMode::World))
-		PrepareRendering(m_scene,RenderMode::World,renderFlags,bTranslucent,bGlow);
-	else
-		renderFlags &= ~FRender::World;
-
-	if((renderFlags &FRender::Water) == FRender::Water && c_game->IsRenderModeEnabled(RenderMode::Water) && cvDrawWater->GetBool() == true)
-		PrepareRendering(m_scene,RenderMode::Water,renderFlags,bTranslucent,bGlow);
-	else
-		renderFlags &= ~FRender::Water;
-
-	auto *pl = c_game->GetLocalPlayer();
-	if((renderFlags &FRender::View) == FRender::View && c_game->IsRenderModeEnabled(RenderMode::View) && pl != nullptr && pl->IsInFirstPersonMode() == true && cvDrawView->GetBool() == true)
-		PrepareRendering(m_scene,RenderMode::View,renderFlags,bTranslucent,bGlow);
-	else
-		renderFlags &= ~FRender::View;
-	c_game->StopProfilingStage(CGame::CPUProfilingPhase::PrepareRendering);
-}
 
 pragma::rendering::RenderMeshCollectionHandler &SceneRenderDesc::GetRenderMeshCollectionHandler() {return m_renderMeshCollectionHandler;}
 const pragma::rendering::RenderMeshCollectionHandler &SceneRenderDesc::GetRenderMeshCollectionHandler() const {return const_cast<SceneRenderDesc*>(this)->GetRenderMeshCollectionHandler();}
-
-static auto cvDrawWorld = GetClientConVar("render_draw_world");
-void SceneRenderDesc::PrepareRendering(pragma::CSceneComponent &scene,RenderMode renderMode,FRender renderFlags,bool bUpdateTranslucentMeshes,bool bUpdateGlowMeshes)
-{
-	if(m_scene.m_renderer == nullptr || m_scene.m_renderer->IsRasterizationRenderer() == false)
-		return;
-	auto &renderMeshData = m_renderMeshCollectionHandler.GetRenderMeshData();
-	auto it = renderMeshData.find(renderMode);
-	if(it == renderMeshData.end())
-		it = renderMeshData.insert(std::remove_reference_t<decltype(renderMeshData)>::value_type(renderMode,std::make_shared<pragma::rendering::CulledMeshData>())).first;
-
-	auto &renderInfo = it->second;
-	auto &cam = scene.GetActiveCamera();
-	auto &posCam = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
-
-	auto drawWorld = cvDrawWorld->GetInt();
-	auto *matLoad = c_game->GetLoadMaterial();
-	auto &renderMeshes = GetCulledMeshes();
-	auto &glowMeshes = renderInfo->glowMeshes;
-	auto &translucentMeshes = renderInfo->translucentMeshes;
-	auto &processed = renderInfo->processed;
-	auto &containers = renderInfo->containers;
-	glowMeshes.clear();
-	translucentMeshes.clear();
-	processed.clear();
-	containers.clear();
-
-	for(auto it=renderMeshes.begin();it!=renderMeshes.end();++it)
-	{
-		auto &info = *it;
-		auto *ent = static_cast<CBaseEntity*>(info.hEntity.get());
-		auto isStatic = ent->IsStatic();
-		if(
-			(umath::is_flag_set(renderFlags,FRender::Static) == false && isStatic) ||
-			(umath::is_flag_set(renderFlags,FRender::Dynamic) == false && isStatic == false)
-			)
-			continue;
-		auto pRenderComponent = ent->GetRenderComponent();
-		if(pRenderComponent.expired())
-			continue;
-		auto rm = pRenderComponent->GetRenderMode();
-		if(renderMode == rm)
-		{
-			auto itProcessed = renderInfo->processed.find(ent);
-			if(itProcessed == renderInfo->processed.end())
-			{
-				auto drawCmd = c_game->GetCurrentDrawCommandBuffer();
-				pRenderComponent->UpdateRenderData(drawCmd);//,true);
-				pRenderComponent->Render(renderMode);
-
-				auto wpRenderBuffer = pRenderComponent->GetRenderBuffer();
-				if(wpRenderBuffer.expired() == false)
-				{
-					drawCmd->RecordBufferBarrier(
-						*wpRenderBuffer.lock(),
-						prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::FragmentShaderBit,
-						prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
-					);
-					auto pAnimComponent = ent->GetAnimatedComponent();
-					if(pAnimComponent.valid())
-					{
-						auto wpBoneBuffer = static_cast<pragma::CAnimatedComponent*>(pAnimComponent.get())->GetBoneBuffer();
-						if(wpBoneBuffer.expired() == false)
-						{
-							drawCmd->RecordBufferBarrier(
-								*wpBoneBuffer.lock(),
-								prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::FragmentShaderBit,
-								prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
-							);
-						}
-					}
-				}
-				processed.insert(std::remove_reference_t<decltype(processed)>::value_type(ent,true));
-			}
-
-			auto &mdlComponent = pRenderComponent->GetModelComponent();
-			auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
-			assert(mdl != nullptr);
-			auto *mesh = static_cast<CModelMesh*>(info.mesh);
-			auto &meshes = mesh->GetSubMeshes();
-			for(auto it=meshes.begin();it!=meshes.end();++it)
-			{
-				auto *subMesh = static_cast<CModelSubMesh*>(it->get());
-				auto skin = mdlComponent->GetSkin();
-				auto numSkins = mdl->GetTextureGroups().size();
-				if(skin >= numSkins)
-					skin = 0;
-				auto idxTexture = mdl->GetMaterialIndex(*subMesh,skin);
-				auto *mat = (idxTexture.has_value() && mdlComponent.valid()) ? mdlComponent->GetRenderMaterial(*idxTexture) : nullptr;
-				if(mat == nullptr)
-					mat = static_cast<CMaterial*>(client->GetMaterialManager().GetErrorMaterial());
-				/*else
-				{
-				auto *diffuse = mat->GetDiffuseMap();
-				if(diffuse == nullptr || diffuse->texture == nullptr)
-				mat = client->GetMaterialManager().GetErrorMaterial();
-				}*/
-				if(mat != nullptr)
-				{
-					if(!mat->IsLoaded())
-						mat = static_cast<CMaterial*>(matLoad);
-					//auto &hMat = materials[idxTexture];
-					//if(hMat.IsValid())
-					//{
-					if(mat != nullptr)// && mat->GetDiffuseMap() != nullptr && static_cast<Texture*>(mat->GetDiffuseMap()->texture) != nullptr &&static_cast<Texture*>(mat->GetDiffuseMap()->texture)->error == false && static_cast<Texture*>(mat->GetDiffuseMap()->texture)->GetTextureID() != 0)
-					{
-						// Fill glow map
-						auto *glowMap = mat->GetGlowMap();
-						if(bUpdateGlowMeshes == true)
-						{
-							if(glowMap != nullptr)
-							{
-								auto itMat = std::find_if(glowMeshes.begin(),glowMeshes.end(),[&mat](const std::unique_ptr<RenderSystem::MaterialMeshContainer> &m) {
-									return (m->material == mat) ? true : false;
-									});
-								if(itMat == glowMeshes.end())
-								{
-									glowMeshes.push_back(std::make_unique<RenderSystem::MaterialMeshContainer>(mat));
-									itMat = glowMeshes.end() -1;
-								}
-								auto itEnt = (*itMat)->containers.find(ent);
-								if(itEnt == (*itMat)->containers.end())
-									itEnt = (*itMat)->containers.emplace(ent,EntityMeshInfo{ent}).first;
-								itEnt->second.meshes.push_back(subMesh);
-							}
-						}
-						//
-						auto *info = mat->GetShaderInfo();
-						if(info != nullptr && info->GetShader() != nullptr)
-						{
-							auto *base = static_cast<::util::WeakHandle<prosper::Shader>*>(const_cast<util::ShaderInfo*>(info)->GetShader().get())->get();
-							prosper::Shader *shader = nullptr;
-							if(drawWorld == 2)
-								shader = static_cast<pragma::rendering::RasterizationRenderer&>(*m_scene.m_renderer).m_whShaderWireframe.get();
-							else if(base != nullptr && base->GetBaseTypeHashCode() == pragma::ShaderTextured3DBase::HASH_TYPE)
-								shader = static_cast<pragma::rendering::RasterizationRenderer&>(*m_scene.m_renderer).GetShaderOverride(static_cast<pragma::ShaderTextured3DBase*>(base));
-							if(shader != nullptr && shader->GetBaseTypeHashCode() == pragma::ShaderTextured3DBase::HASH_TYPE)
-							{
-								// Translucent?
-								if(mat->GetAlphaMode() == AlphaMode::Blend)
-								{
-									if(bUpdateTranslucentMeshes == true)
-									{
-										auto pTrComponent = ent->GetTransformComponent();
-										auto pos = subMesh->GetCenter();
-										if(pTrComponent.valid())
-										{
-											uvec::rotate(&pos,pTrComponent->GetOrientation());
-											pos += pTrComponent->GetPosition();
-										}
-										auto distance = uvec::length_sqr(pos -posCam);
-										translucentMeshes.push_back(std::make_unique<RenderSystem::TranslucentMesh>(ent,subMesh,mat,shader->GetHandle(),distance));
-									}
-									continue; // Skip translucent meshes
-								}
-								//
-								ShaderMeshContainer *shaderContainer = nullptr;
-								auto itShader = std::find_if(containers.begin(),containers.end(),[shader](const std::unique_ptr<ShaderMeshContainer> &c) {
-									return (c->shader.get() == shader) ? true : false;
-									});
-								if(itShader != containers.end())
-									shaderContainer = itShader->get();
-								if(shaderContainer == nullptr)
-								{
-									if(containers.size() == containers.capacity())
-										containers.reserve(containers.capacity() +10);
-									containers.push_back(std::make_unique<ShaderMeshContainer>(static_cast<pragma::ShaderTextured3DBase*>(shader)));
-									shaderContainer = containers.back().get();
-								}
-								RenderSystem::MaterialMeshContainer *matContainer = nullptr;
-								auto itMat = std::find_if(shaderContainer->containers.begin(),shaderContainer->containers.end(),[mat](const std::unique_ptr<RenderSystem::MaterialMeshContainer> &m) {
-									return (m->material == mat) ? true : false;
-									});
-								if(itMat != shaderContainer->containers.end())
-									matContainer = itMat->get();
-								if(matContainer == nullptr)
-								{
-									if(shaderContainer->containers.size() == shaderContainer->containers.capacity())
-										shaderContainer->containers.reserve(shaderContainer->containers.capacity() +10);
-									shaderContainer->containers.push_back(std::make_unique<RenderSystem::MaterialMeshContainer>(mat));
-									matContainer = shaderContainer->containers.back().get();
-								}
-								EntityMeshInfo *entContainer = nullptr;
-								auto itEnt = matContainer->containers.find(ent);
-								if(itEnt != matContainer->containers.end())
-									entContainer = &itEnt->second;
-								if(entContainer == nullptr)
-									entContainer = &matContainer->containers.emplace(ent,EntityMeshInfo{ent}).first->second;
-								entContainer->meshes.push_back(subMesh);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	if(glowMeshes.empty() == false)
-		static_cast<pragma::rendering::RasterizationRenderer&>(*m_scene.m_renderer).m_glowInfo.bGlowScheduled = true;
-	if(bUpdateTranslucentMeshes == true)
-	{
-		// Sort translucent meshes by distance
-		std::sort(translucentMeshes.begin(),translucentMeshes.end(),[](const std::unique_ptr<RenderSystem::TranslucentMesh> &a,const std::unique_ptr<RenderSystem::TranslucentMesh> &b) {
-			return a->distance < b->distance;
-		});
-	}
-}
 
 static FRender render_mode_to_render_flag(RenderMode renderMode)
 {
@@ -372,7 +127,7 @@ SceneRenderDesc::RenderQueueId SceneRenderDesc::GetRenderQueueId(RenderMode rend
 	switch(renderMode)
 	{
 	case RenderMode::Skybox:
-		return !translucent ? RenderQueueId::Skybox : RenderQueueId::Invalid;
+		return !translucent ? RenderQueueId::Skybox : RenderQueueId::SkyboxTranslucent;
 	case RenderMode::View:
 		return !translucent ? RenderQueueId::View : RenderQueueId::ViewTranslucent;
 	case RenderMode::Water:
@@ -380,6 +135,7 @@ SceneRenderDesc::RenderQueueId SceneRenderDesc::GetRenderQueueId(RenderMode rend
 	case RenderMode::World:
 		return !translucent ? RenderQueueId::World : RenderQueueId::WorldTranslucent;
 	}
+	static_assert(umath::to_integral(RenderQueueId::Count) == 7u);
 	return RenderQueueId::Invalid;
 }
 pragma::rendering::RenderQueue *SceneRenderDesc::GetRenderQueue(RenderMode renderMode,bool translucent)
@@ -392,12 +148,16 @@ const pragma::rendering::RenderQueue *SceneRenderDesc::GetRenderQueue(RenderMode
 	return const_cast<SceneRenderDesc*>(this)->GetRenderQueue(renderMode,translucent);
 }
 const std::vector<std::shared_ptr<const pragma::rendering::RenderQueue>> &SceneRenderDesc::GetWorldRenderQueues() const {return m_worldRenderQueues;}
-
-void SceneRenderDesc::AddRenderMeshesToRenderQueue(pragma::CRenderComponent &renderC,const std::vector<Plane> *frustumPlanes)
+void SceneRenderDesc::AddRenderMeshesToRenderQueue(
+	const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,
+	const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
+	const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,const std::vector<Plane> *frustumPlanes
+)
 {
 	auto &mdlC = renderC.GetModelComponent();
 	auto &renderMeshes = renderC.GetRenderMeshes();
 	auto renderMode = renderC.GetRenderMode();
+	auto first = false;
 	for(auto meshIdx=decltype(renderMeshes.size()){0u};meshIdx<renderMeshes.size();++meshIdx)
 	{
 		if(frustumPlanes && ShouldCull(renderC,meshIdx,*frustumPlanes))
@@ -407,11 +167,21 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(pragma::CRenderComponent &ren
 		auto *shader = mat ? dynamic_cast<pragma::ShaderTextured3DBase*>(mat->GetPrimaryShader().get()) : nullptr;
 		if(shader == nullptr)
 			continue;
-		auto *renderQueue = GetRenderQueue(renderMode,mat->IsTranslucent());
+		auto nonOpaque = mat->GetAlphaMode() != AlphaMode::Opaque;
+		auto *renderQueue = getRenderQueue(renderMode,nonOpaque);
 		if(renderQueue == nullptr)
 			continue;
-		renderQueue->Add(static_cast<CBaseEntity&>(renderC.GetEntity()),meshIdx,*mat,*shader);
+		if(first == false)
+		{
+			first = true;
+			renderC.UpdateRenderData(drawSceneInfo.commandBuffer,scene,cam,vp);
+		}
+		renderQueue->Add(static_cast<CBaseEntity&>(renderC.GetEntity()),meshIdx,*mat,*shader,nonOpaque ? &cam : nullptr);
 	}
+}
+void SceneRenderDesc::AddRenderMeshesToRenderQueue(const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,const std::vector<Plane> *frustumPlanes)
+{
+	AddRenderMeshesToRenderQueue(drawSceneInfo,renderC,[this](RenderMode renderMode,bool translucent) {return GetRenderQueue(renderMode,translucent);},scene,cam,vp,frustumPlanes);
 }
 
 bool SceneRenderDesc::ShouldCull(CBaseEntity &ent,const std::vector<Plane> &frustumPlanes)
@@ -442,12 +212,16 @@ bool SceneRenderDesc::ShouldCull(pragma::CRenderComponent &renderC,pragma::Rende
 	return Intersection::AABBInPlaneMesh(min,max,frustumPlanes) == Intersection::Intersect::Outside;
 }
 
-void SceneRenderDesc::CollectRenderMeshesFromOctree(const OcclusionOctree<CBaseEntity*> &tree,pragma::CSceneComponent &scene,FRender renderFlags,const std::vector<Plane> &frustumPlanes,const std::vector<util::BSPTree::Node*> *bspLeafNodes)
+void SceneRenderDesc::CollectRenderMeshesFromOctree(
+	const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
+	const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
+	const std::vector<Plane> *optFrustumPlanes,const std::vector<util::BSPTree::Node*> *bspLeafNodes
+)
 {
 	std::function<void(const OcclusionOctree<CBaseEntity*>::Node &node)> iterateTree = nullptr;
-	iterateTree = [this,&iterateTree,&scene,renderFlags,&frustumPlanes,bspLeafNodes](const OcclusionOctree<CBaseEntity*>::Node &node) {
+	iterateTree = [&iterateTree,&scene,&cam,renderFlags,optFrustumPlanes,&drawSceneInfo,&getRenderQueue,&vp,bspLeafNodes](const OcclusionOctree<CBaseEntity*>::Node &node) {
 		auto &nodeBounds = node.GetWorldBounds();
-		if(Intersection::AABBInPlaneMesh(nodeBounds.first,nodeBounds.second,frustumPlanes) == Intersection::Intersect::Outside)
+		if(optFrustumPlanes && Intersection::AABBInPlaneMesh(nodeBounds.first,nodeBounds.second,*optFrustumPlanes) == Intersection::Intersect::Outside)
 			return;
 		if(bspLeafNodes)
 		{
@@ -475,11 +249,11 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(const OcclusionOctree<CBaseE
 			if(ent->IsWorld())
 				continue; // World entities are handled separately
 			auto &renderC = static_cast<CBaseEntity*>(ent)->GetRenderComponent();
-			if(renderC.expired() || renderC->IsExemptFromOcclusionCulling() || ShouldConsiderEntity(*static_cast<CBaseEntity*>(ent),scene,renderFlags) == false)
+			if(renderC.expired() || renderC->IsExemptFromOcclusionCulling() || ShouldConsiderEntity(*static_cast<CBaseEntity*>(ent),scene,cam.GetEntity().GetPosition(),renderFlags) == false)
 				continue;
-			if(ShouldCull(*renderC,frustumPlanes))
+			if(optFrustumPlanes && ShouldCull(*renderC,*optFrustumPlanes))
 				continue;
-			AddRenderMeshesToRenderQueue(*renderC,&frustumPlanes);
+			AddRenderMeshesToRenderQueue(drawSceneInfo,*renderC,getRenderQueue,scene,cam,vp,optFrustumPlanes);
 		}
 		auto *children = node.GetChildren();
 		if(children == nullptr)
@@ -489,13 +263,21 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(const OcclusionOctree<CBaseE
 	};
 	iterateTree(tree.GetRootNode());
 }
+void SceneRenderDesc::CollectRenderMeshesFromOctree(
+	const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
+	const std::vector<Plane> &frustumPlanes,const std::vector<util::BSPTree::Node*> *bspLeafNodes
+)
+{
+	CollectRenderMeshesFromOctree(drawSceneInfo,tree,scene,cam,vp,renderFlags,[this](RenderMode renderMode,bool translucent) {return GetRenderQueue(renderMode,translucent);},&frustumPlanes,bspLeafNodes);
+}
 
-bool SceneRenderDesc::ShouldConsiderEntity(CBaseEntity &ent,pragma::CSceneComponent &scene,FRender renderFlags)
+bool SceneRenderDesc::ShouldConsiderEntity(CBaseEntity &ent,const pragma::CSceneComponent &scene,const Vector3 &camOrigin,FRender renderFlags)
 {
 	if(ent.IsInScene(scene) == false || ent.GetRenderComponent().expired())
 		return false;
-	auto renderMode = ent.GetRenderComponent()->GetRenderMode();
-	return umath::is_flag_set(renderFlags,render_mode_to_render_flag(renderMode)) && ent.GetModel() != nullptr;
+	auto &renderC = ent.GetRenderComponent();
+	auto renderMode = renderC->GetRenderMode();
+	return umath::is_flag_set(renderFlags,render_mode_to_render_flag(renderMode)) && ent.GetModel() != nullptr && renderC->ShouldDraw(camOrigin);
 }
 
 struct DebugFreezeCamData
@@ -529,20 +311,31 @@ bool SceneRenderDesc::IsWorldMeshVisible(uint32_t worldRenderQueueIndex,pragma::
 	return (meshIdx < worldMeshVisibility.size()) ? worldMeshVisibility.at(meshIdx) : false;
 }
 
-void SceneRenderDesc::BuildRenderQueue(pragma::CSceneComponent &scene,FRender renderFlags)
+static auto cvDrawWorld = GetClientConVar("render_draw_world");
+void SceneRenderDesc::BuildRenderQueue(const util::DrawSceneInfo &drawSceneInfo)
 {
-	auto &cam = scene.GetActiveCamera();
-	auto &posCam = g_debugFreezeCamData.has_value() ? g_debugFreezeCamData->pos : (cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN);
+	auto &hCam = m_scene.GetActiveCamera();
+	if(hCam.expired())
+		return;
+	auto &cam = *hCam;
+	auto renderFlags = drawSceneInfo.renderFlags;
+	c_game->StartProfilingStage(CGame::CPUProfilingPhase::BuildRenderQueue);
+	auto &posCam = g_debugFreezeCamData.has_value() ? g_debugFreezeCamData->pos : cam.GetEntity().GetPosition();
 
 	auto drawWorld = cvDrawWorld->GetBool();
 	if(drawWorld == false)
 		umath::set_flag(renderFlags,FRender::World,false);
 
+	auto *pl = c_game->GetLocalPlayer();
+	if(pl == nullptr || pl->IsInFirstPersonMode() == false)
+		umath::set_flag(renderFlags,FRender::View,false);
+
 	for(auto &renderQueue : m_renderQueues)
 		renderQueue->Clear();
 	m_worldRenderQueues.clear();
 
-	auto &frustumPlanes = g_debugFreezeCamData.has_value() ? g_debugFreezeCamData->frustumPlanes : cam->GetFrustumPlanes();
+	auto &frustumPlanes = g_debugFreezeCamData.has_value() ? g_debugFreezeCamData->frustumPlanes : cam.GetFrustumPlanes();
+	auto vp = cam.GetProjectionMatrix() *cam.GetViewMatrix();
 
 	// Note: World geometry is handled differently than other entities. World entities have their
 	// own pre-built render queues, which we only have to iterate for maximum efficiency. Whether or not a world mesh is culled from the
@@ -557,7 +350,7 @@ void SceneRenderDesc::BuildRenderQueue(pragma::CSceneComponent &scene,FRender re
 	m_worldMeshVisibility.reserve(entItWorld.GetCount());
 	for(auto *entWorld : entItWorld)
 	{
-		if(ShouldConsiderEntity(*static_cast<CBaseEntity*>(entWorld),scene,renderFlags) == false)
+		if(ShouldConsiderEntity(*static_cast<CBaseEntity*>(entWorld),m_scene,posCam,renderFlags) == false)
 			continue;
 		auto worldC = entWorld->GetComponent<pragma::CWorldComponent>();
 		auto &bspTree = worldC->GetBSPTree();
@@ -566,6 +359,7 @@ void SceneRenderDesc::BuildRenderQueue(pragma::CSceneComponent &scene,FRender re
 			continue;
 		bspLeafNodes.push_back(node);
 		auto &renderC = static_cast<CBaseEntity&>(worldC->GetEntity()).GetRenderComponent();
+		renderC->UpdateRenderData(drawSceneInfo.commandBuffer,m_scene,cam,vp);
 		auto *renderQueue = worldC->GetClusterRenderQueue(node->cluster);
 		if(renderQueue)
 		{
@@ -591,19 +385,25 @@ void SceneRenderDesc::BuildRenderQueue(pragma::CSceneComponent &scene,FRender re
 		// so we'll copy the information to the dynamic queue
 		auto *renderQueueTranslucentSrc = worldC->GetClusterRenderQueue(node->cluster,true /* translucent */);
 		auto *renderQueueTranslucentDst = renderQueueTranslucentSrc ? GetRenderQueue(static_cast<CBaseEntity*>(entWorld)->GetRenderComponent()->GetRenderMode(),true) : nullptr;
-		if(renderQueueTranslucentDst == nullptr)
+		if(renderQueueTranslucentDst == nullptr || renderQueueTranslucentSrc->queue.empty())
 			continue;
-		auto offset = renderQueueTranslucentDst->queue.size();
-		renderQueueTranslucentDst->queue.reserve(offset +renderQueueTranslucentSrc->queue.size());
+		renderQueueTranslucentDst->queue.reserve(renderQueueTranslucentDst->queue.size() +renderQueueTranslucentSrc->queue.size());
 		renderQueueTranslucentDst->sortedItemIndices.reserve(renderQueueTranslucentDst->queue.size());
+		auto &pose = entWorld->GetPose();
 		for(auto i=decltype(renderQueueTranslucentSrc->queue.size()){0u};i<renderQueueTranslucentSrc->queue.size();++i)
 		{
 			auto &item = renderQueueTranslucentSrc->queue.at(i);
 			if(ShouldCull(*renderC,item.mesh,frustumPlanes))
 				continue;
-			// TODO: Add distance information
 			renderQueueTranslucentDst->queue.push_back(item);
 			renderQueueTranslucentDst->sortedItemIndices.push_back(renderQueueTranslucentSrc->sortedItemIndices.at(i));
+			renderQueueTranslucentDst->sortedItemIndices.back().first = renderQueueTranslucentDst->queue.size() -1;
+
+			auto renderMeshes = renderC->GetRenderMeshes();
+			if(item.mesh >= renderMeshes.size())
+				continue;
+			auto &pos = pose *renderMeshes.at(item.mesh)->GetCenter();
+			renderQueueTranslucentDst->queue.back().sortingKey.SetDistance(pos,cam);
 		}
 	}
 	m_worldMeshVisibility.resize(m_worldRenderQueues.size());
@@ -611,17 +411,17 @@ void SceneRenderDesc::BuildRenderQueue(pragma::CSceneComponent &scene,FRender re
 	// Some entities are exempt from occlusion culling altogether, we'll handle them here
 	for(auto *pRenderComponent : pragma::CRenderComponent::GetEntitiesExemptFromOcclusionCulling())
 	{
-		if(ShouldConsiderEntity(static_cast<CBaseEntity&>(pRenderComponent->GetEntity()),scene,renderFlags) == false)
+		if(ShouldConsiderEntity(static_cast<CBaseEntity&>(pRenderComponent->GetEntity()),m_scene,posCam,renderFlags) == false)
 			continue;
-		AddRenderMeshesToRenderQueue(*pRenderComponent);
+		AddRenderMeshesToRenderQueue(drawSceneInfo,*pRenderComponent,m_scene,cam,vp);
 	}
 
 	// Now we just need the remaining entities, for which we'll use the scene octree
-	auto *culler = scene.FindOcclusionCuller();
+	auto *culler = m_scene.FindOcclusionCuller();
 	if(culler)
 	{
 		auto &dynOctree = culler->GetOcclusionOctree();
-		CollectRenderMeshesFromOctree(dynOctree,scene,renderFlags,frustumPlanes,&bspLeafNodes);
+		CollectRenderMeshesFromOctree(drawSceneInfo,dynOctree,m_scene,cam,vp,renderFlags,frustumPlanes,&bspLeafNodes);
 #if 0
 		// TODO: Planes
 		iterate_occlusion_tree<CBaseEntity*>(root,culledMeshesOut,cullByViewFrustum ? &renderer.GetFrustumPlanes() : nullptr,[this,&renderer,&scene,&bUpdateLod,&camPos,&culledMeshesOut,cullByViewFrustum](const CBaseEntity *cent) {
@@ -667,8 +467,11 @@ void SceneRenderDesc::BuildRenderQueue(pragma::CSceneComponent &scene,FRender re
 #endif
 	}
 
+	c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>,std::reference_wrapper<const std::vector<Plane>>,std::reference_wrapper<std::vector<util::BSPTree::Node*>>>("OnBuildRenderQueue",std::ref(drawSceneInfo),std::ref(frustumPlanes),std::ref(bspLeafNodes));
+
 	// All render queues (aside from world render queues) need to be sorted
 	for(auto &renderQueue : m_renderQueues)
 		renderQueue->Sort();
+	c_game->StopProfilingStage(CGame::CPUProfilingPhase::BuildRenderQueue);
 }
 #pragma optimize("",on)

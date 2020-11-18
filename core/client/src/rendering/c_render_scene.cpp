@@ -53,6 +53,9 @@ void CGame::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 		m_currentDrawCmd = {};
 	}};
 
+	CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScene",drawSceneInfo);
+	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScene",drawSceneInfo);
+
 	auto &scene = drawSceneInfo.scene;
 	auto *renderer = const_cast<pragma::rendering::BaseRenderer*>(scene->GetRenderer());
 	if(renderer)

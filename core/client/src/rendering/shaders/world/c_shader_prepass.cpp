@@ -58,32 +58,32 @@ static prosper::util::RenderPassCreateInfo::AttachmentInfo get_depth_render_pass
 }
 
 ShaderPrepassBase::ShaderPrepassBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader)
-	: ShaderEntity(context,identifier,vsShader,fsShader)
+	: ShaderGameWorld(context,identifier,vsShader,fsShader)
 {
 	SetPipelineCount(umath::to_integral(Pipeline::Count));
 }
 ShaderPrepassBase::ShaderPrepassBase(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderEntity(context,identifier,"world/prepass/vs_prepass_depth","")
+	: ShaderGameWorld(context,identifier,"world/prepass/vs_prepass_depth","")
 {
 	SetPipelineCount(umath::to_integral(Pipeline::Count));
 }
 
-bool ShaderPrepassBase::BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx)
+bool ShaderPrepassBase::BeginDraw(
+	const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,ShaderGameWorldPipeline pipelineIdx,
+	RecordFlags recordFlags
+)
 {
 	Set3DSky(false);
-	return ShaderEntity::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx)) &&
-		cmdBuffer->RecordSetDepthBias();
+	return ShaderScene::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx),recordFlags) == true &&
+		BindClipPlane(clipPlane) == true &&
+		RecordPushConstants(drawOrigin,offsetof(PushConstants,drawOrigin)) &&
+		// RecordPushConstants(pragma::CSceneComponent::DebugMode::None,offsetof(PushConstants,debugMode)) &&
+		cmdBuffer->RecordSetDepthBias() == true;
 }
 
-bool ShaderPrepassBase::BindClipPlane(const Vector4 &clipPlane)
-{
-	return RecordPushConstants(clipPlane);
-}
-
-bool ShaderPrepassBase::BindDrawOrigin(const Vector4 &drawOrigin)
-{
-	return RecordPushConstants(drawOrigin,offsetof(PushConstants,drawOrigin));
-}
+bool ShaderPrepassBase::BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) {return BindSceneCamera(scene,renderer,bView);}
+bool ShaderPrepassBase::BindClipPlane(const Vector4 &clipPlane) {return RecordPushConstants(clipPlane);}
+bool ShaderPrepassBase::BindDrawOrigin(const Vector4 &drawOrigin) {return RecordPushConstants(drawOrigin,offsetof(PushConstants,drawOrigin));}
 
 void ShaderPrepassBase::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
@@ -109,25 +109,22 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPrepassBase::InitializeMater
 
 bool ShaderPrepassBase::BindMaterial(CMaterial &mat)
 {
+	m_alphaCutoff = {};
+	auto alphaMode = mat.GetAlphaMode();
+	if(alphaMode == AlphaMode::Opaque)
+	{
+		// We don't need this material
+		return true;
+	}
 	auto descSetGroup = mat.GetDescriptorSetGroup(*this);
 	if(descSetGroup == nullptr)
 		descSetGroup = InitializeMaterialDescriptorSet(mat); // Attempt to initialize on the fly
 	if(descSetGroup == nullptr)
 		return false;
-	return RecordBindDescriptorSet(*descSetGroup->GetDescriptorSet(),GetMaterialDescriptorSetIndex());
-}
-
-bool ShaderPrepassBase::Draw(CModelSubMesh &mesh,Material &matAlphaCutoff)
-{
-	auto flags = Flags::None;
-	if(mesh.GetExtendedVertexWeights().empty() == false)
-		flags |= Flags::UseExtendedVertexWeights;
-	if(umath::is_flag_set(m_stateFlags,Flags::RenderAs3DSky))
-		flags |= Flags::RenderAs3DSky;
-	flags |= Flags::AlphaTest;
-	if(RecordPushConstants(matAlphaCutoff.GetAlphaCutoff(),offsetof(PushConstants,alphaCutoff)) == false)
+	if(RecordBindDescriptorSet(*descSetGroup->GetDescriptorSet(),GetMaterialDescriptorSetIndex()) == false)
 		return false;
-	return RecordPushConstants(flags,offsetof(PushConstants,flags)) && BindMaterial(static_cast<CMaterial&>(matAlphaCutoff)) && ShaderEntity::Draw(mesh);
+	m_alphaCutoff = (alphaMode == AlphaMode::Mask) ? mat.GetAlphaCutoff() : 0.5f;
+	return true;
 }
 
 bool ShaderPrepassBase::Draw(CModelSubMesh &mesh)
@@ -137,6 +134,12 @@ bool ShaderPrepassBase::Draw(CModelSubMesh &mesh)
 		flags |= Flags::UseExtendedVertexWeights;
 	if(umath::is_flag_set(m_stateFlags,Flags::RenderAs3DSky))
 		flags |= Flags::RenderAs3DSky;
+	if(m_alphaCutoff.has_value())
+	{
+		flags |= Flags::AlphaTest;
+		if(RecordPushConstants(*m_alphaCutoff,offsetof(PushConstants,alphaCutoff)) == false)
+			return false;
+	}
 	return RecordPushConstants(flags,offsetof(PushConstants,flags)) && ShaderEntity::Draw(mesh);
 }
 

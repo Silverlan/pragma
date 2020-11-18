@@ -101,7 +101,7 @@ prosper::DescriptorSetInfo &ShaderPBR::GetMaterialDescriptorSetInfo() const {ret
 void ShaderPBR::SetForceNonIBLMode(bool b) {m_bNonIBLMode = b;}
 bool ShaderPBR::BeginDraw(
 	const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,
-	const Vector4 &drawOrigin,Pipeline pipelineIdx,RecordFlags recordFlags
+	const Vector4 &drawOrigin,ShaderGameWorldPipeline pipelineIdx,RecordFlags recordFlags
 )
 {
 	m_extRenderFlags = RenderFlags::None;

@@ -29,13 +29,13 @@ extern DLLCENGINE CEngine *c_engine;
 using namespace pragma;
 
 
-ShaderTextured3DBase::Pipeline ShaderTextured3DBase::GetPipelineIndex(prosper::SampleCountFlags sampleCount,bool bReflection)
+ShaderGameWorldPipeline ShaderTextured3DBase::GetPipelineIndex(prosper::SampleCountFlags sampleCount,bool bReflection)
 {
 	if(sampleCount == prosper::SampleCountFlags::e1Bit)
-		return bReflection ? Pipeline::Reflection : Pipeline::Regular;
+		return bReflection ? ShaderGameWorldPipeline::Reflection : ShaderGameWorldPipeline::Regular;
 	if(bReflection)
 		throw std::logic_error("Multi-sampled reflection pipeline not supported!");
-	return Pipeline::MultiSample;
+	return ShaderGameWorldPipeline::MultiSample;
 }
 
 decltype(ShaderTextured3DBase::HASH_TYPE) ShaderTextured3DBase::HASH_TYPE = typeid(ShaderTextured3DBase).hash_code();
@@ -112,7 +112,7 @@ static void initialize_material_settings_buffer()
 	g_materialSettingsBuffer->SetPermanentlyMapped(true);
 }
 ShaderTextured3DBase::ShaderTextured3DBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
-	: ShaderEntity(context,identifier,vsShader,fsShader,gsShader)
+	: ShaderGameWorld(context,identifier,vsShader,fsShader,gsShader)
 {
 	SetPipelineCount(umath::to_integral(Pipeline::Count));
 	if(g_instanceCount++ == 0u)
@@ -166,7 +166,7 @@ void ShaderTextured3DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreate
 {
 	ShaderEntity::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
-	if(pipelineIdx == umath::to_integral(Pipeline::Reflection))
+	if(pipelineIdx == umath::to_integral(ShaderGameWorldPipeline::Reflection))
 		prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::FrontBit);
 
 	pipelineInfo.ToggleDepthWrites(false);
@@ -212,8 +212,9 @@ void ShaderTextured3DBase::OnBindEntity(CBaseEntity &ent,CRenderComponent &rende
 	ShaderEntity::OnBindEntity(ent,renderC);
 	SetShadowsEnabled(renderC.IsReceivingShadows());
 }
+bool ShaderTextured3DBase::BindDrawOrigin(const Vector4 &drawOrigin) {return RecordPushConstants(drawOrigin,offsetof(PushConstants,drawOrigin));}
 bool ShaderTextured3DBase::BeginDraw(
-	const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,Pipeline pipelineIdx,RecordFlags recordFlags
+	const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,ShaderGameWorldPipeline pipelineIdx,RecordFlags recordFlags
 )
 {
 	Set3DSky(false);

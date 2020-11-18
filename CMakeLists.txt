@@ -636,7 +636,7 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL OFF FORCE)
 
 add_subdirectory("${VULKAN_SDK}/spirv-tools" third_party_libs/vulkan/spirv-tools)
 set(BUILD_SHARED_LIBS ON CACHE BOOL ".." FORCE)
-set_target_properties(core_tables PROPERTIES FOLDER third_party_libs/anvil/tools/spirv)
+#set_target_properties(core_tables PROPERTIES FOLDER third_party_libs/anvil/tools/spirv)
 set_target_properties(enum_string_mapping PROPERTIES FOLDER third_party_libs/anvil/tools/spirv)
 set_target_properties(extinst_tables PROPERTIES FOLDER third_party_libs/anvil/tools/spirv)
 set_target_properties(spirv-tools-pkg-config PROPERTIES FOLDER third_party_libs/anvil/tools/spirv)
@@ -650,7 +650,7 @@ set_target_properties(spirv-tools-header-DebugInfo PROPERTIES FOLDER third_party
 # set_target_properties(spirv-tools-spv-amd-shader-explicit-vertex-parameter PROPERTIES FOLDER third_party_libs/anvil/tools/spirv/build)
 # set_target_properties(spirv-tools-spv-amd-shader-trinary-minmax PROPERTIES FOLDER third_party_libs/anvil/tools/spirv/build)
 
-set_target_properties(SPIRV-Tools PROPERTIES FOLDER third_party_libs/anvil/tools/spirv/libraries)
+# set_target_properties(SPIRV-Tools PROPERTIES FOLDER third_party_libs/anvil/tools/spirv/libraries)
 set_target_properties(SPIRV-Tools-link PROPERTIES FOLDER third_party_libs/anvil/tools/spirv/libraries)
 set_target_properties(SPIRV-Tools-opt PROPERTIES FOLDER third_party_libs/anvil/tools/spirv/libraries)
 set_target_properties(SPIRV-Tools-reduce PROPERTIES FOLDER third_party_libs/anvil/tools/spirv/libraries)

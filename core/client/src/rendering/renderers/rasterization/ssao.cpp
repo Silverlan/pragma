@@ -33,9 +33,9 @@ void RasterizationRenderer::RenderSSAO(const util::DrawSceneInfo &drawSceneInfo)
 	c_game->StartProfilingStage(CGame::CPUProfilingPhase::SSAO);
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::SSAO);
 	// Pre-render depths, positions and normals (Required for SSAO)
-	auto *renderInfo  = scene.GetSceneRenderDesc().GetRenderInfo(RenderMode::World);
+	//auto *renderInfo  = scene.GetSceneRenderDesc().GetRenderInfo(RenderMode::World);
 	auto &drawCmd = drawSceneInfo.commandBuffer;
-	if(renderInfo != nullptr)
+	//if(renderInfo != nullptr)
 	{
 		// SSAO
 		auto &prepass = GetPrepass();

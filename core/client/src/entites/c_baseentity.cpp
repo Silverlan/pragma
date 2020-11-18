@@ -61,6 +61,14 @@ void CBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 		m_renderComponent = std::static_pointer_cast<pragma::CRenderComponent>(component.shared_from_this());
 	else if(typeid(component) == typeid(pragma::CPhysicsComponent))
 		m_physComponent = std::static_pointer_cast<pragma::CPhysicsComponent>(component.shared_from_this());
+	else if(typeid(component) == typeid(pragma::CWorldComponent))
+		umath::set_flag(m_stateFlags,StateFlags::HasWorldComponent);
+}
+void CBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
+{
+	BaseEntity::OnComponentRemoved(component);
+	if(typeid(component) == typeid(pragma::CWorldComponent))
+		umath::set_flag(m_stateFlags,StateFlags::HasWorldComponent,false);
 }
 util::WeakHandle<pragma::CRenderComponent> &CBaseEntity::GetRenderComponent() const {return m_renderComponent;}
 util::WeakHandle<pragma::CPhysicsComponent> &CBaseEntity::GetCPhysicsComponent() const {return m_physComponent;}

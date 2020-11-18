@@ -49,7 +49,7 @@ void SGame::SendSnapshot(pragma::SPlayerComponent *pl)
 			nwm::write_vector(packet,pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{});
 			nwm::write_vector(packet,pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3{});
 			nwm::write_vector(packet,pVelComponent.valid() ? pVelComponent->GetAngularVelocity() : Vector3{});
-			nwm::write_quat(packet,pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity());
+			nwm::write_quat(packet,pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity());
 
 			auto offsetEntData = packet->GetSize();
 			packet->Write<UInt8>(UInt8(0));

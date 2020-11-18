@@ -9,6 +9,7 @@
 #include "pragma/rendering/renderers/rasterization/culled_mesh_data.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include "pragma/rendering/render_processor.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
@@ -142,62 +143,52 @@ void RasterizationRenderer::RenderLightingPass(const util::DrawSceneInfo &drawSc
 	c_game->StartProfilingStage(CGame::CPUProfilingPhase::RenderWorld);
 	auto bGlow = cvDrawGlow->GetBool();
 	auto bTranslucent = cvDrawTranslucent->GetBool();
-	auto rsFlags = RenderSystem::RenderFlags::None;
+	auto rsFlags = RenderFlags::None;
 	if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Reflection))
-		rsFlags |= RenderSystem::RenderFlags::Reflection;
-	//c_engine->StartGPUTimer(GPUTimerEvent::Skybox); // prosper TODO
+		rsFlags |= RenderFlags::Reflection;
+
+	auto *lightingStageStats = drawSceneInfo.renderStats.has_value() ? &drawSceneInfo.renderStats->lightingPass : nullptr;
+	auto *lightingStageTranslucentStats = drawSceneInfo.renderStats.has_value() ? &drawSceneInfo.renderStats->lightingPassTranslucent : nullptr;
+	pragma::rendering::LightingStageRenderProcessor rsys {drawSceneInfo,rsFlags,{} /* drawOrigin */};
+	auto &sceneRenderDesc = drawSceneInfo.scene->GetSceneRenderDesc();
+
 	if((drawSceneInfo.renderFlags &FRender::Skybox) != FRender::None)
 	{
 		c_game->StartProfilingStage(CGame::GPUProfilingPhase::Skybox);
 		c_game->CallCallbacks("PreRenderSkybox");
 
-		RenderSystem::Render(drawSceneInfo,RenderMode::Skybox,rsFlags);
+		rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,false /* translucent */),lightingStageStats);
+		rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,true /* translucent */),lightingStageTranslucentStats);
 
-		// 3D Skybox
-		for(auto &hSkyCam : m_3dSkyCameras)
-		{
-			auto filteredMeshes = hSkyCam.valid() ? hSkyCam->GetRenderMeshCollectionHandler().GetRenderMeshData(RenderMode::World) : nullptr;
-			if(filteredMeshes == nullptr)
-				continue;
-			auto &ent = hSkyCam->GetEntity();
-			auto &pos = ent.GetPosition();
-			Vector4 drawOrigin {pos.x,pos.y,pos.z,hSkyCam->GetSkyboxScale()};
-			RenderSystem::Render(drawSceneInfo,*filteredMeshes,RenderMode::Skybox,rsFlags | RenderSystem::RenderFlags::RenderAs3DSky,drawOrigin);
-		}
-
-		c_game->CallCallbacks("PostRenderSkybox");
+		c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>,std::reference_wrapper<pragma::rendering::LightingStageRenderProcessor>>("PostRenderSkybox",std::ref(drawSceneInfo),std::ref(rsys));
 		c_game->StopProfilingStage(CGame::GPUProfilingPhase::Skybox);
 	}
 
+	// Render static world geometry
 	if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
 	{
-		//#ifdef _DEBUG
-		//#error "Handle this via RenderMode, not renderflags!"
-		//#endif
 		c_game->StartProfilingStage(CGame::GPUProfilingPhase::World);
 		c_game->CallCallbacks("PreRenderWorld");
 
-		//c_engine->StartGPUTimer(GPUTimerEvent::World); // prosper TODO
-		RenderSystem::Render(drawSceneInfo,RenderMode::World,rsFlags);
-		//c_engine->StopGPUTimer(GPUTimerEvent::World); // prosper TODO
+		// For optimization purposes, world geometry is stored in separate render queues.
+		// This could be less efficient if many models in the scene use the same materials as
+		// the world, but this generally doesn't happen.
+		// By rendering world geometry first, we can also avoid overdraw.
+		// This does *not* include translucent geometry, which is instead copied over to the
+		// general translucency world render queue.
+		auto &worldRenderQueues = drawSceneInfo.scene->GetSceneRenderDesc().GetWorldRenderQueues();
+		for(auto i=decltype(worldRenderQueues.size()){0u};i<worldRenderQueues.size();++i)
+			rsys.Render(*worldRenderQueues.at(i),lightingStageStats,i);
 
-		//c_engine->StartGPUTimer(GPUTimerEvent::WorldTranslucent); // prosper TODO
-		auto *renderInfo = scene.GetSceneRenderDesc().GetRenderInfo(RenderMode::World);
-		if(renderInfo != nullptr && cam.valid())
-			RenderSystem::Render(drawSceneInfo,*cam,RenderMode::World,rsFlags,renderInfo->translucentMeshes);
-		//c_engine->StopGPUTimer(GPUTimerEvent::WorldTranslucent); // prosper TODO
+		// Note: The non-translucent render queues also include transparent (alpha masked) objects
+		rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::World,false /* translucent */),lightingStageStats);
+		rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),lightingStageTranslucentStats);
 
 		c_game->CallCallbacks("PostRenderWorld");
 		c_game->CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PostRenderWorld",std::ref(drawSceneInfo));
 		c_game->StopProfilingStage(CGame::GPUProfilingPhase::World);
 	}
 
-	// Start particle sub-pass
-	//prosper::util::record_next_sub_pass(**drawCmd);
-
-	//if((renderFlags &FRENDER_WORLD) == FRENDER_WORLD)
-	//	RenderWorldEntities(interpolation,entsRender);
-	//c_engine->StartGPUTimer(GPUTimerEvent::Particles); // prosper TODO
 	if(bShouldDrawParticles)
 	{
 		c_game->StartProfilingStage(CGame::GPUProfilingPhase::Particles);
@@ -256,7 +247,6 @@ void RasterizationRenderer::RenderLightingPass(const util::DrawSceneInfo &drawSc
 	c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("Render",std::ref(drawSceneInfo));
 	c_game->CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("Render",std::ref(drawSceneInfo));
 
-	//c_engine->StartGPUTimer(GPUTimerEvent::Debug); // prosper TODO
 	if((drawSceneInfo.renderFlags &FRender::Debug) == FRender::Debug)
 	{
 		c_game->StartProfilingStage(CGame::GPUProfilingPhase::Debug);
@@ -265,19 +255,17 @@ void RasterizationRenderer::RenderLightingPass(const util::DrawSceneInfo &drawSc
 		if(cam.valid())
 			DebugRenderer::Render(drawCmd,*cam);
 		c_game->RenderDebugPhysics(drawCmd,*cam);
+
 		c_game->CallCallbacks("PostRenderDebug");
 		c_game->StopProfilingStage(CGame::GPUProfilingPhase::Debug);
 	}
-	//c_engine->StopGPUTimer(GPUTimerEvent::Debug); // prosper TODO
 
 	if((drawSceneInfo.renderFlags &FRender::Water) != FRender::None)
 	{
 		c_game->StartProfilingStage(CGame::GPUProfilingPhase::Water);
 		c_game->CallCallbacks("PreRenderWater");
 
-		//c_engine->StartGPUTimer(GPUTimerEvent::Water); // prosper TODO
-		auto numShaderInvocations = RenderSystem::Render(drawSceneInfo,RenderMode::Water,rsFlags);
-		//c_engine->StopGPUTimer(GPUTimerEvent::Water); // prosper TODO
+		auto numShaderInvocations = rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::Water,false /* translucent */),lightingStageStats);
 
 		c_game->CallCallbacks("PostRenderWater");
 
@@ -295,35 +283,29 @@ void RasterizationRenderer::RenderLightingPass(const util::DrawSceneInfo &drawSc
 
 	if((drawSceneInfo.renderFlags &FRender::View) != FRender::None)
 	{
-		auto *pl = c_game->GetLocalPlayer();
-		if(pl != nullptr && pl->IsInFirstPersonMode())
+		c_game->StartProfilingStage(CGame::GPUProfilingPhase::View);
+		c_game->CallCallbacks("PreRenderView");
+
+		rsys.SetCameraType(pragma::rendering::BaseRenderProcessor::CameraType::View);
+		rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),lightingStageStats);
+		rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::View,true /* translucent */),lightingStageTranslucentStats);
+
+		if((drawSceneInfo.renderFlags &FRender::Particles) == FRender::Particles)
 		{
-			c_game->StartProfilingStage(CGame::GPUProfilingPhase::View);
-			c_game->CallCallbacks("PreRenderView");
-
-			//c_engine->StartGPUTimer(GPUTimerEvent::View); // prosper TODO
-			RenderSystem::Render(drawSceneInfo,RenderMode::View,rsFlags);
-			//c_engine->StopGPUTimer(GPUTimerEvent::View); // prosper TODO
-
-			//c_engine->StartGPUTimer(GPUTimerEvent::ViewParticles); // prosper TODO
-			if((drawSceneInfo.renderFlags &FRender::Particles) == FRender::Particles)
-			{
-				auto &culledParticles = scene.GetSceneRenderDesc().GetCulledParticles();
-				auto &glowInfo = GetGlowInfo();
-				RenderParticleSystems(drawSceneInfo,culledParticles,RenderMode::View,false,&glowInfo.tmpBloomParticles);
-				if(bGlow == false)
-					glowInfo.tmpBloomParticles.clear();
-				if(!glowInfo.tmpBloomParticles.empty())
-					glowInfo.bGlowScheduled = true;
-			}
-			//c_engine->StartGPUTimer(GPUTimerEvent::ViewParticles); // prosper TODO
-			//RenderGlowMeshes(cam,true);
-
-			c_game->CallCallbacks("PostRenderView");
-			c_game->StopProfilingStage(CGame::GPUProfilingPhase::View);
+			auto &culledParticles = scene.GetSceneRenderDesc().GetCulledParticles();
+			auto &glowInfo = GetGlowInfo();
+			RenderParticleSystems(drawSceneInfo,culledParticles,RenderMode::View,false,&glowInfo.tmpBloomParticles);
+			if(bGlow == false)
+				glowInfo.tmpBloomParticles.clear();
+			if(!glowInfo.tmpBloomParticles.empty())
+				glowInfo.bGlowScheduled = true;
 		}
+		//RenderGlowMeshes(cam,true);
+
+		c_game->CallCallbacks("PostRenderView");
+		c_game->StopProfilingStage(CGame::GPUProfilingPhase::View);
 	}
+
 	EndRenderPass(drawSceneInfo);
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::RenderWorld);
 }
-

@@ -297,7 +297,7 @@ void BaseCharacterComponent::SetViewOrientation(const Quat &orientation)
 	if(animComponent.valid() && hMdl != nullptr)
 	{
 		auto pTrComponent = ent.GetTransformComponent();
-		auto rotCur = pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
+		auto rotCur = pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity();
 		auto angCur = EulerAngles(rotRef *rotCur);
 		float pitchDelta = umath::get_angle_difference(angView.p,angCur.p);
 		if(m_pitchController != -1)
@@ -325,7 +325,7 @@ Quat BaseCharacterComponent::GetLocalOrientationRotation() const
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	return GetOrientationAxesRotation() *(pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity());
+	return GetOrientationAxesRotation() *(pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity());
 }
 EulerAngles BaseCharacterComponent::GetLocalOrientationViewAngles() const {return EulerAngles(GetLocalOrientationViewRotation());}
 Quat BaseCharacterComponent::GetLocalOrientationViewRotation() const {return GetOrientationAxesRotation() *GetViewOrientation();}
@@ -809,12 +809,12 @@ void BaseCharacterComponent::Think(double tDelta)
 			if(phys == nullptr || phys->IsController())
 			{
 				auto &rotRef = GetOrientationAxesRotation();
-				auto &rotCur = pTrComponent->GetOrientation();
+				auto &rotCur = pTrComponent->GetRotation();
 				auto rot = rotRef *rotCur;
 				auto angCur = EulerAngles(rot);
 				angCur.y = umath::approach_angle(angCur.y,*m_turnYaw,m_turnSpeed *CFloat(tDelta));
 				rot = uquat::get_inverse(rotRef) *uquat::create(angCur);
-				pTrComponent->SetOrientation(rot);
+				pTrComponent->SetRotation(rot);
 			}
 		}
 	}

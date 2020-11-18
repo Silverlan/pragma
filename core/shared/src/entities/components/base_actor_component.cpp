@@ -178,7 +178,7 @@ void BaseActorComponent::Respawn()
 		pPhysComponent->SetMoveType(MOVETYPE::WALK);
 	auto pTrComponent = ent.GetTransformComponent();
 	if(pTrComponent.valid())
-		pTrComponent->SetOrientation(uquat::identity());
+		pTrComponent->SetRotation(uquat::identity());
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
 	if(pVelComponent.valid())
 	{

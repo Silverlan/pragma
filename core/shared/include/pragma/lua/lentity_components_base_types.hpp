@@ -1209,11 +1209,11 @@ namespace Lua
 		}));
 		def.def("GetRotation",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);
-			luabind::object(l,hEnt->GetOrientation()).push(l);
+			luabind::object(l,hEnt->GetRotation()).push(l);
 		}));
 		def.def("SetRotation",static_cast<void(*)(lua_State*,THandle&,Quat)>([](lua_State *l,THandle &hEnt,Quat q) {
 			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetOrientation(q);
+			hEnt->SetRotation(q);
 		}));
 		def.def("GetAngles",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);
@@ -1418,19 +1418,6 @@ namespace Lua
 		def.def("GetDotProduct",static_cast<void(*)(lua_State*,THandle&,EntityHandle&)>([](lua_State *l,THandle &hEnt,EntityHandle &hOther) {
 			Lua::Transform::GetDotProduct<THandle>(l,hEnt,hOther,false);
 		}));
-
-		def.def("GetPosProperty",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
-			pragma::Lua::check_component(l,hComponent);
-			Lua::Property::push(l,*hComponent->GetPosProperty());
-		}));
-		def.def("GetRotationProperty",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
-			pragma::Lua::check_component(l,hComponent);
-			Lua::Property::push(l,*hComponent->GetOrientationProperty());
-		}));
-		def.def("GetScaleProperty",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
-			pragma::Lua::check_component(l,hComponent);
-			Lua::Property::push(l,*hComponent->GetScaleProperty());
-		}));
 	}
 
 	template<class TLuaClass,class THandle>
@@ -1530,7 +1517,7 @@ namespace Lua
 			auto &camPos = trComponent->GetPosition();
 			auto dir = lookAtPos -camPos;
 			uvec::normalize(&dir);
-			trComponent->SetOrientation(uquat::create_look_rotation(dir,trComponent->GetUp()));
+			trComponent.get()->SetRotation(uquat::create_look_rotation(dir,trComponent->GetUp()));
 		}));
 		def.def("UpdateMatrices",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
 			pragma::Lua::check_component(l,hComponent);

@@ -97,8 +97,7 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 			if(itProcessed == renderInfo->processed.end())
 			{
 				auto drawCmd = c_game->GetCurrentDrawCommandBuffer();
-				pRenderComponent->UpdateRenderData(drawCmd);//,true);
-				pRenderComponent->Render(renderMode);
+				//pRenderComponent->UpdateRenderData(drawCmd);//,true); // TODO
 
 				auto wpRenderBuffer = pRenderComponent->GetRenderBuffer();
 				if(wpRenderBuffer.expired() == false)
@@ -193,7 +192,7 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 										auto pos = subMesh->GetCenter();
 										if(pTrComponent.valid())
 										{
-											uvec::rotate(&pos,pTrComponent->GetOrientation());
+											uvec::rotate(&pos,pTrComponent->GetRotation());
 											pos += pTrComponent->GetPosition();
 										}
 										auto distance = uvec::length_sqr(pos -posCam);

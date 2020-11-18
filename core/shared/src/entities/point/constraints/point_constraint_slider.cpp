@@ -82,7 +82,7 @@ void BasePointConstraintSliderComponent::InitializeConstraint(BaseEntity *src,Ba
 		auto pivot1 = rigidBody0->GetPos();
 		auto rotation0 = -rot *uquat::create(EulerAngles(0,90,0));
 		auto rotation1 = rotation0;
-		rotation0 = tgt->GetTransformComponent()->GetOrientation() *rotation0;
+		rotation0 = tgt->GetTransformComponent()->GetRotation() *rotation0;
 
 		auto slider = physEnv->CreateSliderConstraint(*rigidBody0,pivot0,rotation0,*rigidBody1,pivot1,rotation1);
 		if(slider != nullptr)

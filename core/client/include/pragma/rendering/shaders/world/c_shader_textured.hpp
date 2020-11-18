@@ -17,19 +17,10 @@ namespace pragma
 	const float DefaultParallaxHeightScale = 0.025f;
 	const float DefaultAlphaDiscardThreshold = 0.99f;
 	class DLLCLIENT ShaderTextured3DBase
-		: public ShaderEntity
+		: public ShaderGameWorld
 	{
 	public:
-		enum class Pipeline : uint32_t
-		{
-			Regular = umath::to_integral(ShaderScene::Pipeline::Regular),
-			MultiSample = umath::to_integral(ShaderScene::Pipeline::MultiSample),
-			//LightMap = umath::to_integral(ShaderScene::Pipeline::LightMap),
-
-			Reflection = umath::to_integral(ShaderScene::Pipeline::Count),
-			Count
-		};
-		static Pipeline GetPipelineIndex(prosper::SampleCountFlags sampleCount,bool bReflection=false);
+		static ShaderGameWorldPipeline GetPipelineIndex(prosper::SampleCountFlags sampleCount,bool bReflection=false);
 		static uint32_t HASH_TYPE;
 
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT;
@@ -157,23 +148,24 @@ namespace pragma
 
 		ShaderTextured3DBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 		virtual ~ShaderTextured3DBase() override;
-		virtual bool BindClipPlane(const Vector4 &clipPlane);
+		virtual bool BindClipPlane(const Vector4 &clipPlane) override;
 		virtual bool BeginDraw(
-			const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},Pipeline pipelineIdx=Pipeline::Regular,
+			const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},ShaderGameWorldPipeline pipelineIdx=ShaderGameWorldPipeline::Regular,
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
-		);
+		) override;
 		virtual size_t GetBaseTypeHashCode() const override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
-		virtual bool BindMaterial(CMaterial &mat);
+		virtual bool BindMaterial(CMaterial &mat) override;
 		virtual bool Draw(CModelSubMesh &mesh) override;
+		virtual bool BindDrawOrigin(const Vector4 &drawOrigin) override;
 		virtual bool GetRenderBufferTargets(
 			CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
 			std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
 		) const override;
 		bool BindReflectionProbeIntensity(float intensity);
 		std::optional<MaterialData> UpdateMaterialBuffer(CMaterial &mat) const;
-		bool SetDebugMode(pragma::CSceneComponent::DebugMode debugMode);
-		void Set3DSky(bool is3dSky);
+		virtual bool SetDebugMode(pragma::CSceneComponent::DebugMode debugMode) override;
+		virtual void Set3DSky(bool is3dSky) override;
 		void SetShadowsEnabled(bool enabled);
 	protected:
 		using ShaderEntity::Draw;

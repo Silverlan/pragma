@@ -69,7 +69,7 @@ bool ShaderSkybox::GetRenderBufferTargets(
 
 void ShaderSkybox::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	if(pipelineIdx == umath::to_integral(Pipeline::Reflection))
+	if(pipelineIdx == umath::to_integral(ShaderGameWorldPipeline::Reflection))
 		prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::FrontBit);
 
 	pipelineInfo.ToggleDepthWrites(false);
@@ -101,7 +101,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderSkybox::InitializeMaterialDe
 uint32_t ShaderSkybox::GetMaterialDescriptorSetIndex() const {return DESCRIPTOR_SET_MATERIAL.setIndex;}
 bool ShaderSkybox::BeginDraw(
 	const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &drawOrigin,
-	const Vector4 &clipPlane,Pipeline pipelineIdx,RecordFlags recordFlags
+	const Vector4 &clipPlane,ShaderGameWorldPipeline pipelineIdx,RecordFlags recordFlags
 )
 {
 	return ShaderScene::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx),recordFlags);

@@ -222,9 +222,6 @@ namespace pragma::rendering
 		std::shared_ptr<prosper::IBuffer> m_rendererBuffer = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupRenderer = nullptr;
 
-		// 3D sky cameras used for the current rendering pass
-		std::vector<util::WeakHandle<pragma::CSkyCameraComponent>> m_3dSkyCameras = {};
-
 		std::unordered_map<size_t,::util::WeakHandle<prosper::Shader>> m_shaderOverrides;
 		mutable ::util::WeakHandle<prosper::Shader> m_whShaderWireframe = {};
 	};

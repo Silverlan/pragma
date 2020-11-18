@@ -762,6 +762,11 @@ void FWMD::LoadLODData(unsigned short version,Model &mdl)
 		for(UChar i=0;i<numLods;i++)
 		{
 			auto lod = Read<unsigned char>();
+			float dist;
+			if(version >= 36)
+				dist = Read<float>();
+			else
+				dist = (i +1) *500.f;
 			auto numReplace = Read<unsigned char>();
 			std::unordered_map<unsigned int,unsigned int> meshReplacements;
 			meshReplacements.reserve(numReplace);
@@ -771,7 +776,7 @@ void FWMD::LoadLODData(unsigned short version,Model &mdl)
 				auto repId = Read<unsigned int>();
 				meshReplacements[origId] = repId;
 			}
-			mdl.AddLODInfo(lod,meshReplacements);
+			mdl.AddLODInfo(lod,dist,meshReplacements);
 		}
 		return;
 	}

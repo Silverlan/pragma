@@ -11,9 +11,11 @@
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
+#include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/renderers/rasterization/hdr_data.hpp"
 #include "pragma/rendering/renderers/rasterization/glow_data.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include "pragma/rendering/render_processor.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include <pragma/lua/luafunction_call.h>
 #include <image/prosper_render_target.hpp>
@@ -23,7 +25,6 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
-
 
 using namespace pragma::rendering;
 
@@ -140,8 +141,6 @@ void RasterizationRenderer::UpdateCSMDescriptorSet(pragma::CLightDirectionalComp
 
 void RasterizationRenderer::SetFogOverride(const std::shared_ptr<prosper::IDescriptorSetGroup> &descSetGroup) {m_descSetGroupFogOverride = descSetGroup;}
 
-extern bool g_collectRenderStats;
-extern void print_debug_render_stats();
 void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.scene.expired())
@@ -150,34 +149,14 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	if(skipMode == 1)
 		return;
 	auto &scene = const_cast<pragma::CSceneComponent&>(*drawSceneInfo.scene);
-	// Occlusion Culling
-	scene.GetSceneRenderDesc().PerformOcclusionCulling();
 	
 	if(skipMode == 2)
 		return;
-	// Collect render objects
+
 	c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("OnPreRender",drawSceneInfo);
-	scene.GetSceneRenderDesc().CollectRenderObjects(drawSceneInfo.renderFlags);
 	c_game->CallLuaCallbacks<void,RasterizationRenderer*>("PrepareRendering",this);
 
-	scene.GetSceneRenderDesc().BuildRenderQueue(scene,drawSceneInfo.renderFlags);
-	
-	if(skipMode == 3)
-		return;
-	// Collect 3D skybox data
-	m_3dSkyCameras.clear();
-	EntityIterator entIt {*c_game};
-	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CSkyCameraComponent>>();
-	for(auto *ent : entIt)
-	{
-		if(static_cast<CBaseEntity*>(ent)->IsInScene(scene) == false)
-			continue;
-
-		auto skyCamera = ent->GetComponent<pragma::CSkyCameraComponent>();
-		auto &renderMeshes = skyCamera->UpdateRenderMeshes(*this,drawSceneInfo.renderFlags);
-		m_3dSkyCameras.push_back(skyCamera);
-	}
-	//
+	scene.GetSceneRenderDesc().BuildRenderQueue(drawSceneInfo);
 	
 	if(skipMode == 4)
 		return;
@@ -185,6 +164,7 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::Scene);
 
 	auto &drawCmd = drawSceneInfo.commandBuffer;
+	auto &sceneRenderDesc = drawSceneInfo.scene->GetSceneRenderDesc();
 	if(drawSceneInfo.renderTarget == nullptr)
 	{
 		auto prepassMode = GetPrepassMode();
@@ -232,8 +212,33 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 
 		prepass.BeginRenderPass(drawSceneInfo);
 
-			RenderPrepass(drawSceneInfo);
+		auto &shaderPrepass = GetPrepassShader();
+		auto *prepassStats = drawSceneInfo.renderStats.has_value() ? &drawSceneInfo.renderStats->prepass : nullptr;
+		pragma::rendering::DepthStageRenderProcessor rsys {drawSceneInfo,RenderFlags::None,{} /* drawOrigin */,};
+		if(rsys.BindShader(shaderPrepass))
+		{
+			// Render static world geometry
+			if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
+			{
+				auto &worldRenderQueues = drawSceneInfo.scene->GetSceneRenderDesc().GetWorldRenderQueues();
+				for(auto i=decltype(worldRenderQueues.size()){0u};i<worldRenderQueues.size();++i)
+					rsys.Render(*worldRenderQueues.at(i),prepassStats,i);
+			}
+
+			// Note: The non-translucent render queues also include transparent (alpha masked) objects
+			if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
+				rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::World,false /* translucent */),prepassStats);
+
+			if((drawSceneInfo.renderFlags &FRender::View) != FRender::None)
+			{
+				rsys.SetCameraType(pragma::rendering::BaseRenderProcessor::CameraType::View);
+				rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),prepassStats);
+			}
+
+			c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>,std::reference_wrapper<pragma::rendering::DepthStageRenderProcessor>>("RenderPrepass",drawSceneInfo,rsys);
 			c_game->CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderPrepass",drawSceneInfo);
+		}
+		rsys.UnbindShader();
 
 		prepass.EndRenderPass(drawSceneInfo);
 		c_game->StopProfilingStage(CGame::GPUProfilingPhase::Prepass);
@@ -252,6 +257,7 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	
 	if(skipMode == 7)
 		return;
+
 	// Lighting pass
 	RenderLightingPass(drawSceneInfo);
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::Scene);
@@ -302,9 +308,6 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	RenderFXAA(drawSceneInfo);
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
-
-	if(g_collectRenderStats)
-		print_debug_render_stats();
 }
 
 bool RasterizationRenderer::ReloadRenderTarget(pragma::CSceneComponent &scene,uint32_t width,uint32_t height)

@@ -75,7 +75,7 @@ void CCameraComponent::UpdateState()
 				else
 				{
 					pos = pTrComponent->GetPosition();
-					rot = pTrComponent->GetOrientation();
+					rot = pTrComponent->GetRotation();
 				}
 			}));
 			renderScene->SetActiveCamera(*this);

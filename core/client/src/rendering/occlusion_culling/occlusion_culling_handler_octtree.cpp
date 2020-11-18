@@ -89,8 +89,8 @@ void OcclusionCullingHandlerOctTree::PerformCulling(
 			if(bUpdateLod == true)
 			{
 				auto &mdlComponent = pRenderComponent->GetModelComponent();
-				if(mdlComponent.valid())
-					static_cast<pragma::CModelComponent&>(*mdlComponent).UpdateLOD(camPos);
+				//if(mdlComponent.valid())
+				//	static_cast<pragma::CModelComponent&>(*mdlComponent).UpdateLOD(camPos);
 			}
 			auto exemptFromCulling = pRenderComponent->IsExemptFromOcclusionCulling();
 			auto &meshes = pRenderComponent->GetLODMeshes();

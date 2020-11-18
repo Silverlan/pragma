@@ -16,13 +16,19 @@ struct DLLCLIENT RenderPassStats
 	std::vector<MaterialHandle> materials;
 	std::vector<util::WeakHandle<prosper::Shader>> shaders;
 	std::vector<std::shared_ptr<const CModelSubMesh>> meshes;
+	uint32_t numShaderStateChanges = 0;
+	uint32_t numMaterialStateChanges = 0;
+	uint32_t numEntityStateChanges = 0;
+	uint32_t numDrawnMeshes = 0;
+	uint64_t numDrawnVertices = 0;
+	uint64_t numDrawnTrianges = 0;
 };
 
 struct DLLCLIENT RenderStats
 {
 	RenderPassStats lightingPass;
+	RenderPassStats lightingPassTranslucent;
 	RenderPassStats prepass;
-	RenderPassStats transparencyPass;
 };
 
 #endif

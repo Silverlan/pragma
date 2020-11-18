@@ -161,6 +161,7 @@ const pragma::rendering::RenderQueue *CWorldComponent::GetClusterRenderQueue(uti
 	auto &queue = translucent ? m_clusterRenderTranslucentQueues : m_clusterRenderQueues;
 	return (clusterIndex < queue.size()) ? queue.at(clusterIndex).get() : nullptr;
 }
+
 void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 {
 	auto &clusterRenderQueues = m_clusterRenderQueues;
@@ -191,6 +192,12 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 
 	std::vector<std::vector<RenderMeshIndex>> meshesPerClusters;
 	meshesPerClusters.resize(numClusters);
+	auto fAddClusterMesh = [&meshesPerClusters](util::BSPTree::ClusterIndex clusterIndex,RenderMeshIndex meshIdx) {
+		auto &clusterMeshes = meshesPerClusters.at(clusterIndex);
+		if(clusterMeshes.size() == clusterMeshes.capacity())
+			clusterMeshes.reserve(clusterMeshes.size() *1.1 +100);
+		clusterMeshes.push_back(meshIdx);
+	};
 	for(auto meshIdx=decltype(renderMeshes.size()){0u};meshIdx<renderMeshes.size();++meshIdx)
 	{
 		auto &subMesh = renderMeshes.at(meshIdx);
@@ -200,15 +207,36 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 		auto *mesh = it->second;
 		auto meshClusterIdx = mesh->GetReferenceId();
 		if(meshClusterIdx == std::numeric_limits<uint32_t>::max())
+		{
+			// Probably a displacement, which don't have a single cluster associated with them.
+			// We'll have to determine which clusters they belong to manually.
+			Vector3 min,max;
+			mesh->GetBounds(min,max);
+			auto leafNodes = m_bspTree->FindLeafNodesInAABB(min,max);
+			std::unordered_set<util::BSPTree::ClusterIndex> clusters;
+			for(auto *node : leafNodes)
+			{
+				auto meshClusterIdx = node->cluster;
+				if(meshClusterIdx == std::numeric_limits<util::BSPTree::ClusterIndex>::max())
+					continue;
+				for(auto clusterIdx=decltype(numClusters){0u};clusterIdx<numClusters;++clusterIdx)
+				{
+					if(m_bspTree->IsClusterVisible(clusterIdx,meshClusterIdx) == false)
+						continue;
+					auto it = clusters.find(clusterIdx);
+					if(it != clusters.end())
+						continue;
+					clusters.insert(clusterIdx);
+					fAddClusterMesh(clusterIdx,meshIdx);
+				}
+			}
 			continue;
+		}
 		for(auto clusterIdx=decltype(numClusters){0u};clusterIdx<numClusters;++clusterIdx)
 		{
 			if(m_bspTree->IsClusterVisible(clusterIdx,meshClusterIdx) == false)
 				continue;
-			auto &clusterMeshes = meshesPerClusters.at(clusterIdx);
-			if(clusterMeshes.size() == clusterMeshes.capacity())
-				clusterMeshes.reserve(clusterMeshes.size() *1.1 +100);
-			clusterMeshes.push_back(meshIdx);
+			fAddClusterMesh(clusterIdx,meshIdx);
 		}
 	}
 
@@ -232,10 +260,9 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 			auto *shader = dynamic_cast<pragma::ShaderTextured3DBase*>(hShader.get());
 			if(shader == nullptr)
 				continue;
-			if(mat->IsTranslucent())
+			if(mat->GetAlphaMode() != AlphaMode::Opaque)
 			{
 				clusterRenderTranslucentQueue = clusterRenderTranslucentQueue ? clusterRenderTranslucentQueue : pragma::rendering::RenderQueue::Create();
-				// TODO: Sort by distance: dist = cameraForward:DotProduct(origin)
 				clusterRenderTranslucentQueue->Add(static_cast<CBaseEntity&>(GetEntity()),subMeshIdx,*mat,*shader);
 				continue;
 			}
@@ -319,7 +346,6 @@ void CWorld::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CWorldComponent>();
 }
-bool CWorld::IsWorld() const {return true;}
 
 Con::c_cout& CWorld::print(Con::c_cout &os)
 {

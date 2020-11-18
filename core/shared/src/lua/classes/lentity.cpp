@@ -72,9 +72,7 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	classDef.def("GetSpawnFlags",&GetSpawnFlags);
 	classDef.def("GetPose",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);
-		umath::ScaledTransform t;
-		hEnt->GetPose(t);
-		Lua::Push<umath::ScaledTransform>(l,t);
+		Lua::Push<umath::ScaledTransform>(l,hEnt->GetPose());
 	}));
 	classDef.def("SetPose",static_cast<void(*)(lua_State*,EntityHandle&,const umath::Transform&)>([](lua_State *l,EntityHandle &hEnt,const umath::Transform &t) {
 		LUA_CHECK_ENTITY(l,hEnt);
@@ -139,14 +137,14 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 			Lua::Push<Quat>(l,Quat{});
 			return;
 		}
-		Lua::Push<Quat>(l,hEnt->GetTransformComponent()->GetOrientation());
+		Lua::Push<Quat>(l,hEnt->GetTransformComponent()->GetRotation());
 	}));
 	classDef.def("SetRotation",static_cast<void(*)(lua_State*,EntityHandle&,const Quat&)>([](lua_State *l,EntityHandle &hEnt,const Quat &rot) {
 		LUA_CHECK_ENTITY(l,hEnt);
 		auto *trComponent = static_cast<pragma::BaseTransformComponent*>(hEnt->AddComponent("transform").get());
 		if(trComponent == nullptr)
 			return;
-		trComponent->SetOrientation(rot);
+		trComponent->SetRotation(rot);
 	}));
 	classDef.def("GetCenter",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);

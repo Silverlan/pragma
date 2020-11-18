@@ -15,10 +15,11 @@ using namespace pragma;
 
 extern DLLSERVER ServerState *server;
 
+void STransformComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BaseTransformComponent));}
 void STransformComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	nwm::write_vector(packet,GetPosition());
-	nwm::write_quat(packet,GetOrientation());
+	nwm::write_quat(packet,GetRotation());
 	packet->Write<Vector3>(GetEyeOffset());
 	packet->Write<Vector3>(GetScale());
 }

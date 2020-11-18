@@ -343,7 +343,7 @@ bool BaseModelComponent::GetHitboxBounds(uint32_t boneId,Vector3 &min,Vector3 &m
 		if(pPhysComponent.valid())
 			origin = pPhysComponent->GetOrigin();
 		if(pTrComponent.valid())
-			rot = pTrComponent->GetOrientation();
+			rot = pTrComponent->GetRotation();
 	}
 	return true;
 }

@@ -25,8 +25,8 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCRender.def("GetRenderBounds",&Lua::Render::GetRenderBounds);
 	defCRender.def("SetRenderBounds",&Lua::Render::SetRenderBounds);
 	defCRender.def("GetRenderSphereBounds",&Lua::Render::GetRenderSphereBounds);
-	defCRender.def("UpdateRenderBuffers",static_cast<void(*)(lua_State*,CRenderHandle&,std::shared_ptr<prosper::ICommandBuffer>&,bool)>(&Lua::Render::UpdateRenderBuffers));
-	defCRender.def("UpdateRenderBuffers",static_cast<void(*)(lua_State*,CRenderHandle&,std::shared_ptr<prosper::ICommandBuffer>&)>(&Lua::Render::UpdateRenderBuffers));
+	defCRender.def("UpdateRenderBuffers",static_cast<void(*)(lua_State*,CRenderHandle&,std::shared_ptr<prosper::ICommandBuffer>&,CSceneHandle&,CCameraHandle&,bool)>(&Lua::Render::UpdateRenderBuffers));
+	defCRender.def("UpdateRenderBuffers",static_cast<void(*)(lua_State*,CRenderHandle&,std::shared_ptr<prosper::ICommandBuffer>&,CSceneHandle&,CCameraHandle&)>(&Lua::Render::UpdateRenderBuffers));
 	defCRender.def("GetRenderBuffer",&Lua::Render::GetRenderBuffer);
 	defCRender.def("GetBoneBuffer",&Lua::Render::GetBoneBuffer);
 	defCRender.def("GetLODMeshes",static_cast<void(*)(lua_State*,CRenderHandle&)>([](lua_State *l,CRenderHandle &hComponent) {
@@ -211,14 +211,17 @@ void Lua::Render::SetRenderBounds(lua_State *l,CRenderHandle &hEnt,Vector3 &min,
 	hEnt->SetRenderBounds(min,max);
 }
 
-void Lua::Render::UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,bool bForceBufferUpdate)
+void Lua::Render::UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,CSceneHandle &hScene,CCameraHandle &hCam,bool bForceBufferUpdate)
 {
 	pragma::Lua::check_component(l,hEnt);
+	pragma::Lua::check_component(l,hScene);
+	pragma::Lua::check_component(l,hCam);
 	if(drawCmd->IsPrimary() == false)
 		return;
-	hEnt->UpdateRenderData(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd),bForceBufferUpdate);
+	auto vp = hCam->GetProjectionMatrix() *hCam->GetViewMatrix();
+	hEnt->UpdateRenderData(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd),*hScene,*hCam,vp,bForceBufferUpdate);
 }
-void Lua::Render::UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd) {UpdateRenderBuffers(l,hEnt,drawCmd,false);}
+void Lua::Render::UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,CSceneHandle &hScene,CCameraHandle &hCam) {UpdateRenderBuffers(l,hEnt,drawCmd,hScene,hCam,false);}
 void Lua::Render::GetRenderBuffer(lua_State *l,CRenderHandle &hEnt)
 {
 	pragma::Lua::check_component(l,hEnt);

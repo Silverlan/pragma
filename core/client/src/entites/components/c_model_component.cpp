@@ -12,7 +12,7 @@
 #include "pragma/model/c_modelmanager.h"
 
 using namespace pragma;
-
+#pragma optimize("",off)
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 
@@ -139,17 +139,41 @@ void CModelComponent::UpdateLOD(UInt32 lod)
 
 void CModelComponent::SetLOD(uint8_t lod) {m_lod = lod;}
 
-void CModelComponent::UpdateLOD(const Vector3 &posCam)
+void CModelComponent::UpdateLOD(const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp)
 {
-	CEOnUpdateLODByPos evData{posCam};
+	auto &mdl = GetModel();
+	if(mdl == nullptr || mdl->GetLODCount() == 0)
+		return;
+
+	CEOnUpdateLODByPos evData{scene,cam,vp};
 	if(InvokeEventCallbacks(EVENT_ON_UPDATE_LOD_BY_POS,evData) == util::EventReply::Handled)
 		return;
-	auto mdl = GetModel();
-	if(mdl == nullptr)
-		return;
-	auto pTrComponent = GetEntity().GetTransformComponent();
-	auto dist = pTrComponent.valid() ? uvec::distance(pTrComponent->GetPosition(),posCam) : 0.f;
-	auto lod = c_game->GetLOD(dist,mdl->GetLODCount());
+
+	// TODO: This needs optimizing
+	auto &pos = GetEntity().GetPosition();
+	auto w = scene.GetWidth();
+	auto h = scene.GetHeight();
+	auto posOffset = pos +cam.GetEntity().GetUp() *1.f;
+	auto uvMin = umat::to_screen_uv(pos,vp);
+	auto uvMax = umat::to_screen_uv(posOffset,vp);
+	auto extents = umath::max(uvMin.y,uvMax.y) -umath::min(uvMin.y,uvMax.y);
+	extents *= h;
+	extents *= 2.f; // TODO: Why?
+
+	auto size = 100.f /extents;
+	auto &lods = mdl->GetLODs();
+	uint32_t lod = 0;
+	for(auto i=decltype(lods.size()){0u};i<lods.size();++i)
+	{
+		auto &lodInfo = lods.at(i);
+		if(size >= lodInfo.distance)
+		{
+			lod = i +1;
+			continue;
+		}
+		break;
+	}
+	lod += c_game->GetLODBias();
 	if(m_lod == lod)
 		return;
 	UpdateLOD(lod);
@@ -195,10 +219,13 @@ void CEOnUpdateLOD::PushArguments(lua_State *l)
 
 ///////////////
 
-CEOnUpdateLODByPos::CEOnUpdateLODByPos(const Vector3 &posCam)
-	: posCam{posCam}
+CEOnUpdateLODByPos::CEOnUpdateLODByPos(const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp)
+	: scene{scene},camera{cam},viewProjection{vp}
 {}
 void CEOnUpdateLODByPos::PushArguments(lua_State *l)
 {
-	Lua::Push<Vector3>(l,posCam);
+	scene.GetLuaObject().push(l);
+	camera.GetLuaObject().push(l);
+	Lua::Push<Mat4>(l,viewProjection);
 }
+#pragma optimize("",on)

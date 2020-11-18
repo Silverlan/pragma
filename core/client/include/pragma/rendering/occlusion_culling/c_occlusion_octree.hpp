@@ -18,7 +18,7 @@
 
 namespace DebugRenderer {class BaseObject;};
 
-#define ENABLE_OCCLUSION_DEBUG_MODE 1
+#define ENABLE_OCCLUSION_DEBUG_MODE 0
 
 #pragma warning(push)
 #pragma warning(disable : 4251)

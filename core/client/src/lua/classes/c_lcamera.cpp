@@ -135,12 +135,11 @@ void Lua::Scene::Link(lua_State *l,CSceneHandle &scene,CSceneHandle &sceneOther)
 	pragma::Lua::check_component(l,sceneOther);
 	scene->Link(*sceneOther);
 }
-void Lua::Scene::UpdateRenderInfo(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo)
+void Lua::Scene::BuildRenderQueue(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo)
 {
 	pragma::Lua::check_component(l,scene);
 	scene->UpdateBuffers(drawSceneInfo.commandBuffer);
-	scene->GetSceneRenderDesc().PerformOcclusionCulling();
-	scene->GetSceneRenderDesc().CollectRenderObjects(drawSceneInfo.renderFlags);
+	scene->GetSceneRenderDesc().BuildRenderQueue(drawSceneInfo);
 }
 void Lua::Scene::RenderPrepass(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode)
 {
@@ -156,7 +155,7 @@ void Lua::Scene::RenderPrepass(lua_State *l,CSceneHandle &scene,::util::DrawScen
 	RenderSystem::RenderPrepass(drawSceneInfo,renderMode);
 	drawSceneInfo.scene = curScene;
 }
-void Lua::Scene::Render(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode,RenderSystem::RenderFlags renderFlags)
+void Lua::Scene::Render(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode,RenderFlags renderFlags)
 {
 	pragma::Lua::check_component(l,scene);
 	auto &cam = scene->GetActiveCamera();
@@ -174,7 +173,7 @@ void Lua::Scene::Render(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &
 		drawSceneInfo.scene = curScene;
 	}
 }
-void Lua::Scene::Render(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode) {Render(l,scene,drawSceneInfo,renderMode,RenderSystem::RenderFlags::None);}
+void Lua::Scene::Render(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode) {Render(l,scene,drawSceneInfo,renderMode,RenderFlags::None);}
 
 ////////////////////////////////
 

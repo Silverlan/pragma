@@ -65,7 +65,6 @@ class DLLCLIENT CWorld
 {
 public:
 	virtual void Initialize() override;
-	virtual bool IsWorld() const override; // TODO: Move this to component
 	Con::c_cout& print(Con::c_cout&);
 	std::ostream& print(std::ostream&);
 };

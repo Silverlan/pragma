@@ -12,6 +12,7 @@
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
+#include <pragma/console/sh_cmd.h>
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -19,8 +20,9 @@ extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(game_occlusion_culler,COcclusionCuller);
 
+LINK_ENTITY_TO_CLASS(game_occlusion_culler,COcclusionCuller);
+#pragma optimize("",off)
 luabind::object COcclusionCullerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CShadowManagerComponentHandleWrapper>(l);}
 
 void COcclusionCullerComponent::Initialize()
@@ -65,8 +67,12 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 		auto pTrComponent = ent->GetTransformComponent();
 		if(pTrComponent.valid())
 		{
-			m_callbacks.push_back(pTrComponent->GetPosProperty()->AddCallback([this,ent](std::reference_wrapper<const Vector3> oldPos,std::reference_wrapper<const Vector3> pos) {
+			auto &trC = static_cast<CTransformComponent&>(*pTrComponent);
+			m_callbacks.push_back(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,&ent](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+				if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags,pragma::TransformChangeFlags::PositionChanged) == false)
+					return util::EventReply::Unhandled;
 				m_occlusionOctree->UpdateObject(ent);
+				return util::EventReply::Unhandled;
 			}));
 		}
 		auto pGenericComponent = ent->GetComponent<pragma::CGenericComponent>();
@@ -169,7 +175,7 @@ DLLCLIENT void CMD_debug_render_octree_static_print(NetworkState*,pragma::BasePl
 	meshTree->DebugPrint();
 }
 
-DLLCLIENT void CMD_debug_render_octree_dynamic_print(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
+DLLCLIENT void CMD_debug_render_octree_dynamic_print(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {
 	if(c_game == nullptr)
 		return;
@@ -179,6 +185,55 @@ DLLCLIENT void CMD_debug_render_octree_dynamic_print(NetworkState*,pragma::BaseP
 		return;
 	auto &octree = culler->GetOcclusionOctree();
 	octree.DebugPrint();
+}
+
+DLLCLIENT void CMD_debug_render_octree_dynamic_find(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+{
+	if(c_game == NULL || pl == NULL)
+		return;
+	auto &entPl = pl->GetEntity();
+	if(entPl.IsCharacter() == false)
+		return;
+	auto charComponent = entPl.GetCharacterComponent();
+	auto ents = command::find_target_entity(state,*charComponent,argv);
+	if(ents.empty())
+		return;
+	auto *scene = c_game->GetScene();
+	auto *culler = scene ? scene->FindOcclusionCuller() : nullptr;
+	if(culler == nullptr)
+		return;
+	Con::cout<<"Searching for entity '";
+	auto *entFind = ents.front();
+	entFind->print(Con::cout);
+	Con::cout<<"'..."<<Con::endl;
+
+	auto &octree = culler->GetOcclusionOctree();
+	std::function<const OcclusionOctree<CBaseEntity*>::Node*(const OcclusionOctree<CBaseEntity*>::Node &node)> iterateTree = nullptr;
+	iterateTree = [&iterateTree,entFind](const OcclusionOctree<CBaseEntity*>::Node &node) -> const OcclusionOctree<CBaseEntity*>::Node* {
+		auto &nodeBounds = node.GetWorldBounds();
+		auto &objs = node.GetObjects();
+		auto it = std::find(objs.begin(),objs.end(),entFind);
+		if(it != objs.end())
+			return &node;
+		auto *children = node.GetChildren();
+		if(children == nullptr)
+			return nullptr;
+		for(auto &c : *children)
+		{
+			auto *node = iterateTree(static_cast<OcclusionOctree<CBaseEntity*>::Node&>(*c));
+			if(node)
+				return node;
+		}
+		return nullptr;
+	};
+	auto *node = iterateTree(octree.GetRootNode());
+	if(node == nullptr)
+	{
+		Con::cout<<"Not found!"<<Con::endl;
+		return;
+	}
+	Con::cout<<"Found in:"<<Con::endl;
+	node->DebugPrint();
 }
 
 static void CVAR_CALLBACK_debug_render_octree_static_draw(NetworkState*,ConVar*,bool,bool val)
@@ -229,3 +284,4 @@ static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(NetworkState*,ConVar*
 	octree.SetDebugModeEnabled(val);
 }
 REGISTER_CONVAR_CALLBACK_CL(debug_render_octree_dynamic_draw,CVAR_CALLBACK_debug_render_octree_dynamic_draw);
+#pragma optimize("",on)

@@ -418,28 +418,40 @@ void CLightComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	CBaseLightComponent::OnEntityComponentAdded(component);
 	if(typeid(component) == typeid(CTransformComponent))
 	{
-		FlagCallbackForRemoval(static_cast<CTransformComponent&>(component).GetPosProperty()->AddCallback([this](std::reference_wrapper<const Vector3> oldPos,std::reference_wrapper<const Vector3> pos) {
-			if(uvec::cmp(pos.get(),reinterpret_cast<Vector3&>(m_bufferData.position)) == true)
-				return;
-			reinterpret_cast<Vector3&>(m_bufferData.position) = pos;
-			if(m_renderBuffer != nullptr)
-				c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,position),m_bufferData.position);
-			umath::set_flag(m_stateFlags,StateFlags::FullUpdateRequired);
-		}),CallbackType::Component,&component);
-		FlagCallbackForRemoval(static_cast<CTransformComponent&>(component).GetOrientationProperty()->AddCallback([this](std::reference_wrapper<const Quat> oldRot,std::reference_wrapper<const Quat> rot) {
-			util::pragma::LightType lightType;
-			GetLight(lightType);
-			if(lightType == util::pragma::LightType::Point)
-				return;
-			auto dir = uquat::forward(rot);
-			if(uvec::cmp(dir,reinterpret_cast<Vector3&>(m_bufferData.direction)) == true)
-				return;
-			reinterpret_cast<Vector3&>(m_bufferData.direction) = dir;
-			if(m_bufferData.direction.x == 0.f && m_bufferData.direction.y == 0.f && m_bufferData.direction.z == 0.f)
-				m_bufferData.direction.z = 1.f;
-			if(m_renderBuffer != nullptr)
-				c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,direction),m_bufferData.direction);
-			umath::set_flag(m_stateFlags,StateFlags::FullUpdateRequired);
+		auto &trC = static_cast<CTransformComponent&>(component);
+		FlagCallbackForRemoval(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,&trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags,pragma::TransformChangeFlags::PositionChanged))
+			{
+				auto &pos = trC.GetPosition();
+				if(uvec::cmp(pos,reinterpret_cast<Vector3&>(m_bufferData.position)) == false)
+				{
+					reinterpret_cast<Vector3&>(m_bufferData.position) = pos;
+					if(m_renderBuffer != nullptr)
+						c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,position),m_bufferData.position);
+					umath::set_flag(m_stateFlags,StateFlags::FullUpdateRequired);
+				}
+			}
+
+			if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags,pragma::TransformChangeFlags::RotationChanged))
+			{
+				util::pragma::LightType lightType;
+				GetLight(lightType);
+				if(lightType != util::pragma::LightType::Point)
+				{
+					auto &rot = trC.GetRotation();
+					auto dir = uquat::forward(rot);
+					if(uvec::cmp(dir,reinterpret_cast<Vector3&>(m_bufferData.direction)) == false)
+					{
+						reinterpret_cast<Vector3&>(m_bufferData.direction) = dir;
+						if(m_bufferData.direction.x == 0.f && m_bufferData.direction.y == 0.f && m_bufferData.direction.z == 0.f)
+							m_bufferData.direction.z = 1.f;
+						if(m_renderBuffer != nullptr)
+							c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,direction),m_bufferData.direction);
+						umath::set_flag(m_stateFlags,StateFlags::FullUpdateRequired);
+					}
+				}
+			}
+			return util::EventReply::Unhandled;
 		}),CallbackType::Component,&component);
 	}
 	else if(typeid(component) == typeid(CRadiusComponent))

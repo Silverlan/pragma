@@ -16,12 +16,13 @@ using namespace pragma;
 extern DLLCLIENT CGame *c_game;
 
 luabind::object CTransformComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CTransformComponentHandleWrapper>(l);}
+void CTransformComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BaseTransformComponent));}
 void CTransformComponent::ReceiveData(NetPacket &packet)
 {
 	Vector3 pos = nwm::read_vector(packet);
 	auto rot = nwm::read_quat(packet);
 	SetPosition(pos);
-	SetOrientation(rot);
+	SetRotation(rot);
 	SetEyeOffset(packet->Read<Vector3>());
 
 	auto scale = packet->Read<Vector3>();

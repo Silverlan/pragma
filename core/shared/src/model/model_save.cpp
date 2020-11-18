@@ -438,22 +438,14 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 	// Version 0x0004
 	auto numLods = mdl.GetLODCount();
 
-	std::vector<LODInfo*> lodInfos;
-	lodInfos.reserve(numLods);
-	for(auto i=decltype(numLods){0};i<numLods;++i)
-	{
-		auto *lodInfo = mdl.GetLODInfo(i);
-		if(lodInfo == nullptr)
-			continue;
-		lodInfos.push_back(lodInfo);
-	}
-
+	auto &lodInfos = GetLODs();
 	f->Write<uint8_t>(static_cast<uint8_t>(lodInfos.size()));
-	for(auto *lodInfo : lodInfos)
+	for(auto &lodInfo : lodInfos)
 	{
-		f->Write<uint8_t>(static_cast<uint8_t>(lodInfo->lod));
-		f->Write<uint8_t>(static_cast<uint8_t>(lodInfo->meshReplacements.size()));
-		for(auto &pair : lodInfo->meshReplacements)
+		f->Write<uint8_t>(static_cast<uint8_t>(lodInfo.lod));
+		f->Write<float>(lodInfo.distance);
+		f->Write<uint8_t>(static_cast<uint8_t>(lodInfo.meshReplacements.size()));
+		for(auto &pair : lodInfo.meshReplacements)
 		{
 			f->Write<uint32_t>(pair.first);
 			f->Write<uint32_t>(pair.second);

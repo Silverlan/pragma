@@ -218,7 +218,7 @@ void SPlayerComponent::InitializeFlashlight()
 	if(pTrComponentLight.valid())
 	{
 		pTrComponentLight->SetPosition(pTrComponent->GetPosition());
-		pTrComponentLight->SetOrientation(charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetOrientation());
+		pTrComponentLight->SetRotation(charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetRotation());
 	}
 	light->Spawn();
 	m_entFlashlight = light->GetHandle();

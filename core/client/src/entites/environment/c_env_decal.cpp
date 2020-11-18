@@ -359,8 +359,7 @@ bool CDecalComponent::ApplyDecal(DecalProjector &projector,const std::vector<Dec
 		return false;
 
 	// Vertices are in world space; Move them into entity space
-	umath::ScaledTransform pose;
-	GetEntity().GetPose(pose);
+	auto &pose = GetEntity().GetPose();
 	auto invPose = pose.GetInverse();
 	for(auto &v : verts)
 		v.position = invPose *v.position;
@@ -416,8 +415,7 @@ bool CDecalComponent::ApplyDecal()
 		Vector3 min,max;
 		renderC->GetRenderBounds(&min,&max);
 
-		umath::Transform pose;
-		ent->GetPose(pose);
+		auto &pose = ent->GetPose();
 		min = pose *min;
 		max = pose *max;
 
@@ -433,8 +431,7 @@ bool CDecalComponent::ApplyDecal()
 	meshDatas.reserve(targetEnts.size());
 	for(auto *ent : targetEnts)
 	{
-		umath::ScaledTransform pose;
-		ent->GetPose(pose);
+		auto &pose = ent->GetPose();
 
 		auto renderC = ent->GetComponent<CRenderComponent>();
 		auto targetMeshes = renderC->GetLODMeshes();
@@ -480,7 +477,7 @@ bool CDecalComponent::ApplyDecal()
 			for(auto &subMesh : mesh->GetSubMeshes())
 				meshData.subMeshes.push_back(subMesh.get());
 		}
-		ent->GetPose(meshData.pose);
+		meshData.pose = ent->GetPose();
 	}
 	return ApplyDecal(projector,meshDatas);
 }

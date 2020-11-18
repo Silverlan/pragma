@@ -93,8 +93,7 @@ static aiMatrix4x4 to_assimp_matrix(const Mat4 &m)
 
 static aiNode &add_node(aiNode &parentNode,uint32_t index,const std::string &name,BaseEntity &ent)
 {
-	umath::Transform t {};
-	ent.GetPose(t);
+	auto &t = ent.GetPose();
 
 	auto scale = static_cast<float>(util::pragma::units_to_metres(1.f));
 	umath::ScaledTransform tScaled = t;

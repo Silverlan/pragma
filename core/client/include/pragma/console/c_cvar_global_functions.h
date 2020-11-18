@@ -28,6 +28,7 @@ DLLCLIENT void CMD_debug_light_shadowmap(NetworkState *state,pragma::BasePlayerC
 DLLCLIENT void CMD_debug_glow_bloom(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 DLLCLIENT void CMD_debug_hdr_bloom(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 DLLCLIENT void CMD_debug_render_octree_dynamic_print(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
+DLLCLIENT void CMD_debug_render_octree_dynamic_find(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 DLLCLIENT void CMD_debug_render_octree_static_print(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 DLLCLIENT void CMD_debug_ai_schedule_print(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 DLLCLIENT void CMD_debug_ai_schedule(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);

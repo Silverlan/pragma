@@ -91,7 +91,7 @@ void CAttachableComponent::UpdateViewAttachmentOffset(BaseEntity *ent,pragma::Ba
 		if(pTrComponentEnt.valid())
 		{
 			pos = pTrComponentEnt->GetPosition();//cam->GetPos();
-			rot = pTrComponentEnt->GetOrientation();//cam->GetRotation();
+			rot = pTrComponentEnt->GetRotation();//cam->GetRotation();
 		}
 
 		auto &rotRef = pl.GetOrientationAxesRotation();

@@ -271,7 +271,7 @@ void CWeaponComponent::UpdateOwnerAttachment()
 	if(pTransformComponent.valid() && pTransformComponentParent.valid())
 	{
 		pTransformComponent->SetPosition(pTransformComponentParent->GetPosition());
-		pTransformComponent->SetOrientation(pTransformComponentParent->GetOrientation());
+		pTransformComponent->SetRotation(pTransformComponentParent->GetRotation());
 	}
 	auto pAttComponent = ent.AddComponent<CAttachableComponent>();
 	if(pAttComponent.valid())

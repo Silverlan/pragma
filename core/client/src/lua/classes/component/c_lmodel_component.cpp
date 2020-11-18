@@ -43,5 +43,9 @@ void Lua::ModelDef::register_class(lua_State *l,luabind::module_ &entsMod)
 			return;
 		Lua::Push<Material*>(l,mat);
 		}));
+	defCModel.def("GetLOD",static_cast<void(*)(lua_State*,CModelHandle&)>([](lua_State *l,CModelHandle &hModel) {
+		pragma::Lua::check_component(l,hModel);
+		Lua::PushInt(l,hModel->GetLOD());
+	}));
 	entsMod[defCModel];
 }

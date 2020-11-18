@@ -119,7 +119,7 @@ int Lua::util::Client::create_muzzle_flash(lua_State *l)
 	if(pTrComponent.valid())
 	{
 		pTrComponent->SetPosition(pos);
-		pTrComponent->SetOrientation(rot);
+		pTrComponent->SetRotation(rot);
 	}
 	pt->SetRemoveOnComplete(true);
 	pt->Start();

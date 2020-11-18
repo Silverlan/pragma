@@ -165,9 +165,9 @@ void BaseVehicleComponent::InitializeSteeringWheel()
 			return util::EventReply::Unhandled;
 		auto ang = EulerAngles(-GetSteeringFactor() *m_maxSteeringWheelAngle,0.f,0.f);
 		auto rot = uquat::create(ang);
-		auto rotEnt = pTrComponentSteeringWheel->GetOrientation();
+		auto rotEnt = pTrComponentSteeringWheel->GetRotation();
 		rotEnt = rotEnt *rot;
-		pTrComponentSteeringWheel->SetOrientation(rotEnt);
+		pTrComponentSteeringWheel->SetRotation(rotEnt);
 		return util::EventReply::Unhandled;
 	});
 }

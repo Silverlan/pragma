@@ -10,6 +10,7 @@
 
 #include "pragma/rendering/c_renderflags.h"
 #include "pragma/rendering/c_settings.hpp"
+#include "pragma/rendering/render_stats.hpp"
 #include <memory>
 #include <optional>
 #include <functional>
@@ -35,6 +36,8 @@ namespace util
 		std::shared_ptr<prosper::IImage> outputImage = nullptr;
 		uint32_t outputLayerId = 0u;
 		bool flipVertically = false;
+
+		mutable std::optional<RenderStats> renderStats {};
 	};
 };
 

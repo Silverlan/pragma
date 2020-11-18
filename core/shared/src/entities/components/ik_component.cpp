@@ -437,7 +437,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 				footData.upNormal = rayResult.normal;
 				footData.boneId = boneId;
 				footData.rotation = rot;
-				uvec::rotate(&footData.upNormal,pTrComponent.valid() ? uquat::get_inverse(pTrComponent->GetOrientation()) : uquat::identity());
+				uvec::rotate(&footData.upNormal,pTrComponent.valid() ? uquat::get_inverse(pTrComponent->GetRotation()) : uquat::identity());
 				bIkPlaced = true;
 			}
 		}

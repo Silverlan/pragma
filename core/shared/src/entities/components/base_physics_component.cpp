@@ -105,7 +105,7 @@ Vector3 BasePhysicsComponent::GetCenter() const
 		return uvec::ORIGIN;
 	auto &pos = trComponent->GetPosition();
 	auto colCenter = GetCollisionCenter();
-	uvec::rotate(&colCenter,trComponent->GetOrientation());
+	uvec::rotate(&colCenter,trComponent->GetRotation());
 	return pos +colCenter;
 }
 void BasePhysicsComponent::Sweep(const Vector3&,float) const {}
@@ -195,7 +195,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 	Quat rot = t.GetRotation();
 	if(!m_physObject->IsController() && pTrComponent.valid()) // TODO
 	{
-		auto &rotCur = pTrComponent->GetOrientation();
+		auto &rotCur = pTrComponent->GetRotation();
 		if(
 			fabsf(rot.w -rotCur.w) > ENT_EPSILON ||
 			fabsf(rot.x -rotCur.x) > ENT_EPSILON ||
@@ -215,7 +215,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 			throw std::runtime_error(ss.str());
 		}
 		umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsRotation);
-		pTrComponent->SetRawOrientation(rot);
+		pTrComponent->SetRawRotation(rot);
 		umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsRotation,false);
 
 		if(!bStatic && pVelComponent.valid())
@@ -588,7 +588,7 @@ void BasePhysicsComponent::UpdatePhysicsBone(Frame &reference,const std::shared_
 	auto boneWorldPos = o->GetPos() +boneOffset;
 	auto pTrComponent = ent.GetTransformComponent();
 	if(pTrComponent.valid())
-		uvec::world_to_local(GetOrigin(),pTrComponent->GetOrientation(),boneWorldPos);
+		uvec::world_to_local(GetOrigin(),pTrComponent->GetRotation(),boneWorldPos);
 	auto localOffset = boneWorldPos;
 
 	auto rotConstraint = invRot *o->GetRotation() *(*rotRef);
@@ -722,7 +722,7 @@ void BasePhysicsComponent::UpdateRagdollPose()
 		return;
 	auto physRootBoneId = physRoot->GetBoneID();
 	auto pTrComponent = ent.GetTransformComponent();
-	auto invRot = pTrComponent.valid() ? uquat::get_inverse(pTrComponent->GetOrientation()) : uquat::identity();
+	auto invRot = pTrComponent.valid() ? uquat::get_inverse(pTrComponent->GetRotation()) : uquat::identity();
 
 	auto physRootBone = skeleton.GetBone(physRootBoneId).lock();
 	if(physRootBone != nullptr)
@@ -821,7 +821,7 @@ void BasePhysicsComponent::OnEntityComponentAdded(BaseEntityComponent &component
 void BasePhysicsComponent::OriginToWorld(Vector3 *origin) const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	uvec::local_to_world(GetOrigin(),pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity(),*origin);
+	uvec::local_to_world(GetOrigin(),pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity(),*origin);
 }
 void BasePhysicsComponent::OriginToWorld(Vector3 *origin,Quat *rot) const
 {
@@ -834,7 +834,7 @@ void BasePhysicsComponent::OriginToWorld(Vector3 *origin,Quat *rot) const
 void BasePhysicsComponent::WorldToOrigin(Vector3 *origin) const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	uvec::world_to_local(GetOrigin(),pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity(),*origin);
+	uvec::world_to_local(GetOrigin(),pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity(),*origin);
 }
 void BasePhysicsComponent::WorldToOrigin(Vector3 *origin,Quat *rot) const
 {

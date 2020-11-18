@@ -38,7 +38,7 @@ void CParticleOperatorWind::Simulate(double tDelta)
 	{
 		auto pTrComponent = GetParticleSystem().GetEntity().GetTransformComponent();
 		if(pTrComponent.valid())
-			uvec::rotate(&m_vDelta,pTrComponent->GetOrientation());
+			uvec::rotate(&m_vDelta,pTrComponent->GetRotation());
 	}
 }
 void CParticleOperatorWind::Simulate(CParticle &particle,double tDelta,float strength)

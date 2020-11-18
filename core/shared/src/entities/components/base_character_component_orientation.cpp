@@ -42,12 +42,12 @@ void BaseCharacterComponent::UpdateOrientation()
 	auto *game = nw->GetGameState();
 	auto pTimeScaleComponent = ent.GetTimeScaleComponent();
 	auto t = game->DeltaTickTime() *(pTimeScaleComponent.valid() ? pTimeScaleComponent->GetEffectiveTimeScale() : 1.f);
-	auto curRot = pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
+	auto curRot = pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity();
 	auto dstRot = uquat::create_look_rotation(forward,normal);
 	const auto speed = 4.f; // TODO
 	dstRot = uquat::slerp(curRot,dstRot,t *speed);
 	if(pTrComponent.valid())
-		pTrComponent->SetOrientation(dstRot);
+		pTrComponent->SetRotation(dstRot);
 	auto *phys = physComponent.valid() ? physComponent->GetPhysicsObject() : nullptr;
 	if(phys != nullptr && phys->IsController())
 	{

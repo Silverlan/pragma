@@ -78,7 +78,7 @@ util::TSharedHandle<pragma::physics::IRigidBody> BasePhysicsComponent::CreateRig
 		return nullptr;
 	body->TransformLocalPose(localPose);
 	auto originOffset = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
-	auto rot = (pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity()) *localPose.GetRotation();
+	auto rot = (pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity()) *localPose.GetRotation();
 	auto tOrigin = localPose.GetOrigin();
 	uvec::rotate(&tOrigin,rot);
 	umath::Transform startTransform;
@@ -423,7 +423,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics:
 			root = hRoot.Get();
 			auto boneId = root->GetBoneID();
 			if(animComponent.valid() && animComponent->GetLocalBonePosition(boneId,posRoot) == true && pTrComponent.valid())
-				uvec::local_to_world(pTrComponent->GetPosition(),pTrComponent->GetOrientation(),posRoot); // World space position of root collision object bone
+				uvec::local_to_world(pTrComponent->GetPosition(),pTrComponent->GetRotation(),posRoot); // World space position of root collision object bone
 		}
 	}
 

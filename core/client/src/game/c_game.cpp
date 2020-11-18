@@ -142,6 +142,7 @@ void CGame::MessagePacketTracker::CheckMessages(uint8_t messageId,std::vector<do
 
 //////////////////////////
 
+namespace pragma::rendering {class LightingStageRenderProcessor; class DepthStageRenderProcessor;};
 CGame::CGame(NetworkState *state)
 	: Game(state),
 	m_tServer(0),m_renderScene(NULL),
@@ -161,7 +162,7 @@ CGame::CGame(NetworkState *state)
 	RegisterCallback<void,CGame*>("OnGameEnd");
 	RegisterCallback<void,pragma::CLightDirectionalComponent*,pragma::CLightDirectionalComponent*>("OnEnvironmentLightSourceChanged");
 	RegisterCallback<void>("PreRenderSkybox");
-	RegisterCallback<void>("PostRenderSkybox");
+	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>,std::reference_wrapper<pragma::rendering::LightingStageRenderProcessor>>("PostRenderSkybox");
 	RegisterCallback<void>("PreRenderWorld");
 	RegisterCallback<void>("PostRenderWorld");
 	RegisterCallback<void>("PreRenderParticles");
@@ -179,7 +180,8 @@ CGame::CGame(NetworkState *state)
 	RegisterCallback<void>("PostRenderScenes");
 	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing");
 	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("OnPreRender");
-	RegisterCallback<void>("RenderPrepass");
+	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>,std::reference_wrapper<pragma::rendering::DepthStageRenderProcessor>>("RenderPrepass");
+	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScene");
 	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("PostRenderScene");
 	RegisterCallback<void,pragma::CPlayerComponent*>("OnLocalPlayerSpawned");
 	RegisterCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>,std::reference_wrapper<Quat>>("CalcView");
@@ -194,6 +196,7 @@ CGame::CGame(NetworkState *state)
 	>("PostRender");
 	RegisterCallback<void,CBaseEntity*>("UpdateEntityModel");
 	RegisterCallback<void,WIBase*,WIBase*>("OnGUIFocusChanged");
+	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>,std::reference_wrapper<const std::vector<Plane>>,std::reference_wrapper<std::vector<util::BSPTree::Node*>>>("OnBuildRenderQueue");
 
 	auto &staticCallbacks = get_static_client_callbacks();
 	for(auto it=staticCallbacks.begin();it!=staticCallbacks.end();++it)
@@ -243,9 +246,6 @@ CGame::CGame(NetworkState *state)
 		m_gpuProfilingStageManager->InitializeProfilingStageManager(gpuProfiler,{
 			stageScene,
 			stagePrepass,
-			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"PrepassSkybox",defaultStage,stagePrepass.get()),
-			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"PrepassWorld",defaultStage,stagePrepass.get()),
-			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"PrepassView",defaultStage,stagePrepass.get()),
 			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"SSAO",defaultStage,stageScene.get()),
 			stagePostProcessing,
 			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"Present",defaultStage,&stageDrawScene),
@@ -265,7 +265,7 @@ CGame::CGame(NetworkState *state)
 			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"CullLightSources",defaultStage,stageScene.get()),
 			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"Shadows",defaultStage,stageScene.get())
 		});
-		static_assert(umath::to_integral(GPUProfilingPhase::Count) == 21u,"Added new profiling phase, but did not create associated profiling stage!");
+		static_assert(umath::to_integral(GPUProfilingPhase::Count) == 18u,"Added new profiling phase, but did not create associated profiling stage!");
 	});
 	m_cbProfilingHandle = c_engine->AddProfilingHandler([this](bool profilingEnabled) {
 		if(profilingEnabled == false)
@@ -279,8 +279,7 @@ CGame::CGame(NetworkState *state)
 		auto &stageDrawFrame = c_engine->GetProfilingStageManager()->GetProfilerStage(CEngine::CPUProfilingPhase::DrawFrame);
 		m_profilingStageManager->InitializeProfilingStageManager(cpuProfiler,{
 			pragma::debug::ProfilingStage::Create(cpuProfiler,"Present",&stageDrawFrame),
-			pragma::debug::ProfilingStage::Create(cpuProfiler,"OcclusionCulling",&stageDrawFrame),
-			pragma::debug::ProfilingStage::Create(cpuProfiler,"PrepareRendering",&stageDrawFrame),
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"BuildRenderQueue",&stageDrawFrame),
 			pragma::debug::ProfilingStage::Create(cpuProfiler,"Prepass",&stageDrawFrame),
 			pragma::debug::ProfilingStage::Create(cpuProfiler,"SSAO",&stageDrawFrame),
 			pragma::debug::ProfilingStage::Create(cpuProfiler,"CullLightSources",&stageDrawFrame),
@@ -288,7 +287,7 @@ CGame::CGame(NetworkState *state)
 			pragma::debug::ProfilingStage::Create(cpuProfiler,"RenderWorld",&stageDrawFrame),
 			pragma::debug::ProfilingStage::Create(cpuProfiler,"PostProcessing",&stageDrawFrame)
 		});
-		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 9u,"Added new profiling phase, but did not create associated profiling stage!");
+		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 8u,"Added new profiling phase, but did not create associated profiling stage!");
 	});
 }
 
@@ -1228,7 +1227,7 @@ void CGame::SendUserInput()
 	auto &ent = pl->GetEntity();
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
-	auto orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
+	auto orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent.valid() ? pTrComponent->GetRotation() : uquat::identity();
 	nwm::write_quat(p,orientation);
 	p->Write<Vector3>(pl->GetViewPos());
 
@@ -1330,7 +1329,7 @@ void CGame::ReceiveSnapshot(NetPacket &packet)
 				pVelComponent->SetAngularVelocity(angVel);
 			}
 			if(pTrComponent.valid())
-				pTrComponent->SetOrientation(orientation);
+				pTrComponent->SetRotation(orientation);
 			ent->ReceiveSnapshotData(packet);
 		}
 		else

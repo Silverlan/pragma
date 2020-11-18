@@ -18,7 +18,8 @@ namespace pragma::rendering
 {
 	struct SortingKey
 	{
-		uint64_t shader : 16, material : 16, depth : 16, translucent : 1, unused : 15;
+		uint64_t distance : 32, shader : 16, material : 16;
+		void SetDistance(const Vector3 &origin,const CCameraComponent &cam);
 	};
 	struct RenderQueueItem
 	{
@@ -42,8 +43,9 @@ namespace pragma::rendering
 		void Clear();
 		void Reserve();
 		void Add(const RenderQueueItem &item);
-		void Add(CBaseEntity &ent,RenderMeshIndex meshIdx,CMaterial &mat,pragma::ShaderTextured3DBase &shader);
+		void Add(CBaseEntity &ent,RenderMeshIndex meshIdx,CMaterial &mat,pragma::ShaderTextured3DBase &shader,const CCameraComponent *optCam=nullptr);
 		void Sort();
+		void Merge(const RenderQueue &other);
 		std::vector<RenderQueueItem> queue;
 		RenderQueueSortList sortedItemIndices;
 	private:

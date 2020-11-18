@@ -22,8 +22,7 @@ void BaseAnimatedComponent::MaintainAnimationMovement(const Vector3 &disp)
 
 void BaseAnimatedComponent::SetGlobalBonePosition(UInt32 boneId,const Vector3 &pos,const Quat &rot,const Vector3 &scale)
 {
-	umath::Transform pose;
-	GetEntity().GetPose(pose);
+	auto pose = GetEntity().GetPose();
 	pose = pose.GetInverse();
 	pose *= umath::ScaledTransform{pos,rot,scale};
 	auto npos = pose.GetOrigin();
@@ -35,8 +34,7 @@ void BaseAnimatedComponent::SetGlobalBonePosition(UInt32 boneId,const Vector3 &p
 }
 void BaseAnimatedComponent::SetGlobalBonePosition(UInt32 boneId,const Vector3 &pos,const Quat &rot)
 {
-	umath::Transform pose;
-	GetEntity().GetPose(pose);
+	auto pose = GetEntity().GetPose();
 	pose = pose.GetInverse();
 	pose *= umath::Transform{pos,rot};
 	auto npos = pose.GetOrigin();
@@ -48,8 +46,7 @@ void BaseAnimatedComponent::SetGlobalBonePosition(UInt32 boneId,const Vector3 &p
 }
 void BaseAnimatedComponent::SetGlobalBonePosition(UInt32 boneId,const Vector3 &pos)
 {
-	umath::Transform pose;
-	GetEntity().GetPose(pose);
+	auto pose = GetEntity().GetPose();
 	pose = pose.GetInverse();
 	pose *= umath::Transform{pos,uquat::identity()};
 	auto npos = pose.GetOrigin();
@@ -60,8 +57,7 @@ void BaseAnimatedComponent::SetGlobalBonePosition(UInt32 boneId,const Vector3 &p
 }
 void BaseAnimatedComponent::SetGlobalBoneRotation(UInt32 boneId,const Quat &rot)
 {
-	umath::Transform pose;
-	GetEntity().GetPose(pose);
+	auto pose = GetEntity().GetPose();
 	pose = pose.GetInverse();
 	pose *= umath::Transform{Vector3{},rot};
 	auto nrot = pose.GetRotation();

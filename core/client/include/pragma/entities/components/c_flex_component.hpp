@@ -30,7 +30,7 @@ namespace pragma
 		bool GetFlexWeight(uint32_t flexId,float &outWeight) const;
 		void SetFlexWeight(uint32_t flexId,float weight);
 		void UpdateSoundPhonemes(CALSound &snd);
-		void UpdateFlexWeights();
+		void UpdateFlexWeightsMT();
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 
 		void SetFlexWeightOverride(uint32_t flexId,float weight);
@@ -53,6 +53,7 @@ namespace pragma
 		std::unordered_map<uint32_t,FlexControllerInfo> m_flexControllers = {};
 		std::vector<float> m_flexWeights = {};
 		std::vector<bool> m_updatedFlexWeights = {};
+		bool m_flexDataUpdateRequired = false;
 
 		std::vector<std::optional<float>> m_flexOverrides {};
 	};

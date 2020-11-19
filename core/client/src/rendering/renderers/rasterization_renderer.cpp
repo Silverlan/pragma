@@ -156,7 +156,7 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("OnPreRender",drawSceneInfo);
 	c_game->CallLuaCallbacks<void,RasterizationRenderer*>("PrepareRendering",this);
 
-	scene.GetSceneRenderDesc().BuildRenderQueue(drawSceneInfo);
+	// scene.GetSceneRenderDesc().BuildRenderQueue(drawSceneInfo);
 	
 	if(skipMode == 4)
 		return;
@@ -220,7 +220,8 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 			// Render static world geometry
 			if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
 			{
-				auto &worldRenderQueues = drawSceneInfo.scene->GetSceneRenderDesc().GetWorldRenderQueues();
+				sceneRenderDesc.WaitForWorldRenderQueues();
+				auto &worldRenderQueues = sceneRenderDesc.GetWorldRenderQueues();
 				for(auto i=decltype(worldRenderQueues.size()){0u};i<worldRenderQueues.size();++i)
 					rsys.Render(*worldRenderQueues.at(i),prepassStats,i);
 			}

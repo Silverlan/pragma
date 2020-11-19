@@ -36,6 +36,7 @@ namespace pragma
 			const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},ShaderGameWorldPipeline pipelineIdx=ShaderGameWorldPipeline::Regular,
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		) override;
+		virtual bool BindClipPlane(const Vector4 &clipPlane) override {return true;}
 		virtual bool BindEntity(CBaseEntity &ent) override;
 		virtual bool BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings) override;
 		virtual bool BindSceneCamera(pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,bool bView) override;

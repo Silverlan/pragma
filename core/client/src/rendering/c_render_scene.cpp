@@ -45,7 +45,11 @@ void CGame::RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &
 }
 
 std::shared_ptr<prosper::IPrimaryCommandBuffer> CGame::GetCurrentDrawCommandBuffer() const {return m_currentDrawCmd.lock();}
-	
+
+
+
+
+
 void CGame::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 {
 	m_currentDrawCmd = drawSceneInfo.commandBuffer;

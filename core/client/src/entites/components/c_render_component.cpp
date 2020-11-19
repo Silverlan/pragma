@@ -39,19 +39,21 @@ extern DLLCENGINE CEngine *c_engine;
 
 static std::shared_ptr<prosper::IUniformResizableBuffer> s_instanceBuffer = nullptr;
 decltype(CRenderComponent::s_ocExemptEntities) CRenderComponent::s_ocExemptEntities = {};
-ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA = INVALID_COMPONENT_ID;
+ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_SHOULD_DRAW = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_SHOULD_DRAW_SHADOW = INVALID_COMPONENT_ID;
+ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS = INVALID_COMPONENT_ID;;
 ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES = INVALID_COMPONENT_ID;
 void CRenderComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
-	EVENT_ON_UPDATE_RENDER_DATA = componentManager.RegisterEvent("ON_UPDATE_RENDER_DATA",std::type_index(typeid(CRenderComponent)));
+	EVENT_ON_UPDATE_RENDER_DATA_MT = componentManager.RegisterEvent("ON_UPDATE_RENDER_DATA_MT",std::type_index(typeid(CRenderComponent)));
 	EVENT_ON_RENDER_BUFFERS_INITIALIZED = componentManager.RegisterEvent("ON_RENDER_BUFFERS_INITIALIZED");
 	EVENT_ON_RENDER_BOUNDS_CHANGED = componentManager.RegisterEvent("ON_RENDER_BUFFERS_INITIALIZED");
 	EVENT_SHOULD_DRAW = componentManager.RegisterEvent("SHOULD_DRAW",std::type_index(typeid(CRenderComponent)));
 	EVENT_SHOULD_DRAW_SHADOW = componentManager.RegisterEvent("SHOULD_DRAW_SHADOW",std::type_index(typeid(CRenderComponent)));
+	EVENT_ON_UPDATE_RENDER_BUFFERS = componentManager.RegisterEvent("ON_UPDATE_RENDER_BUFFERS",std::type_index(typeid(CRenderComponent)));
 	EVENT_ON_UPDATE_RENDER_MATRICES = componentManager.RegisterEvent("ON_UPDATE_RENDER_MATRICES",std::type_index(typeid(CRenderComponent)));
 }
 CRenderComponent::CRenderComponent(BaseEntity &ent)
@@ -64,7 +66,10 @@ void CRenderComponent::InitializeBuffers()
 	auto instanceCount = 32'768u;
 	auto maxInstanceCount = instanceCount *100u;
 	prosper::util::BufferCreateInfo createInfo {};
-	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+	if constexpr(USE_HOST_MEMORY_FOR_RENDER_DATA)
+		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostCoherent;
+	else
+		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
 	createInfo.size = instanceSize *instanceCount;
 	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
@@ -72,6 +77,8 @@ void CRenderComponent::InitializeBuffers()
 #endif
 	s_instanceBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(createInfo,instanceSize,instanceSize *maxInstanceCount,0.1f);
 	s_instanceBuffer->SetDebugName("entity_instance_data_buf");
+	if constexpr(USE_HOST_MEMORY_FOR_RENDER_DATA)
+		s_instanceBuffer->SetPermanentlyMapped(true);
 
 	pragma::initialize_articulated_buffers();
 }
@@ -458,36 +465,9 @@ void CRenderComponent::SetExemptFromOcclusionCulling(bool exempt)
 }
 bool CRenderComponent::IsExemptFromOcclusionCulling() const {return umath::is_flag_set(m_stateFlags,StateFlags::ExemptFromOcclusionCulling);}
 void CRenderComponent::SetRenderBufferDirty() {umath::set_flag(m_stateFlags,StateFlags::RenderBufferDirty);}
-void CRenderComponent::UpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp,bool bForceBufferUpdate)
+void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bForceBufferUpdate)
 {
 	InitializeRenderBuffers();
-
-	auto &ent = static_cast<CBaseEntity&>(GetEntity());
-	auto frameId = c_engine->GetRenderContext().GetLastFrameId();
-
-	auto firstFrame = (frameId != m_lastRender);
-	if(firstFrame)
-	{
-		auto pFlexComponent = ent.GetComponent<pragma::CFlexComponent>();
-		if(pFlexComponent.valid())
-			pFlexComponent->UpdateFlexWeights(); // TODO: Move this to CFlexComponent code
-
-		auto pVertexAnimatedComponent = ent.GetComponent<pragma::CVertexAnimatedComponent>();
-		if(pVertexAnimatedComponent.valid())
-			pVertexAnimatedComponent->UpdateVertexAnimationBuffer(drawCmd); // TODO: Move this to CVertexAnimatedComponent code
-		auto pAttComponent = ent.GetComponent<CAttachableComponent>();
-		if(pAttComponent.valid())
-		{
-			auto *attInfo = pAttComponent->GetAttachmentData();
-			if(attInfo != nullptr && (attInfo->flags &FAttachmentMode::UpdateEachFrame) != FAttachmentMode::None && attInfo->parent.valid())
-				pAttComponent->UpdateAttachmentOffset();
-		}
-
-		auto &mdlC = GetModelComponent();
-		if(mdlC.valid())
-			mdlC->UpdateLOD(scene,cam,vp); // TODO: Don't update this every frame for every entity!
-	}
-
 	auto updateRenderBuffer = umath::is_flag_set(m_stateFlags,StateFlags::RenderBufferDirty) || bForceBufferUpdate;
 	if(updateRenderBuffer)
 	{
@@ -499,7 +479,7 @@ void CRenderComponent::UpdateRenderData(const std::shared_ptr<prosper::IPrimaryC
 		{
 			auto renderBuffer = wpRenderBuffer.lock();
 			Vector4 color(1.f,1.f,1.f,1.f);
-			auto pColorComponent = ent.GetComponent<CColorComponent>();
+			auto pColorComponent = GetEntity().GetComponent<CColorComponent>();
 			if(pColorComponent.valid())
 				color = pColorComponent->GetColor().ToVector4();
 
@@ -510,13 +490,36 @@ void CRenderComponent::UpdateRenderData(const std::shared_ptr<prosper::IPrimaryC
 				renderFlags |= pragma::ShaderEntity::InstanceData::RenderFlags::Weighted;
 			auto &m = GetTransformationMatrix();
 			pragma::ShaderEntity::InstanceData instanceData {m,color,renderFlags};
-			drawCmd->RecordUpdateGenericShaderReadBuffer(*renderBuffer,0ull,sizeof(instanceData),&instanceData);
+			if constexpr(USE_HOST_MEMORY_FOR_RENDER_DATA)
+				renderBuffer->Write(0ull,sizeof(instanceData),&instanceData);
+			else
+				drawCmd->RecordUpdateGenericShaderReadBuffer(*renderBuffer,0ull,sizeof(instanceData),&instanceData); // Note: Command buffer mustn't be in active render pass!
 		}
 	}
-	m_lastRender = frameId;
 
-	CEOnUpdateRenderData evData {drawCmd,updateRenderBuffer,firstFrame};
-	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_DATA,evData);
+	CEOnUpdateRenderBuffers evData {drawCmd};
+	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_BUFFERS,evData);
+}
+void CRenderComponent::UpdateRenderDataMT(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp)
+{
+	// Note: This is called from the render thread, which is why we can't update the render buffers here
+	m_lastRender = c_engine->GetRenderContext().GetLastFrameId();
+	auto &ent = static_cast<CBaseEntity&>(GetEntity());
+
+	auto &mdlC = GetModelComponent();
+	if(mdlC.valid())
+		mdlC->UpdateLOD(scene,cam,vp); // TODO: Don't update this every frame for every entity!
+
+	CEOnUpdateRenderData evData {drawCmd};
+	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_DATA_MT,evData);
+
+	auto pAttComponent = ent.GetComponent<CAttachableComponent>();
+	if(pAttComponent.valid())
+	{
+		auto *attInfo = pAttComponent->GetAttachmentData();
+		if(attInfo != nullptr && (attInfo->flags &FAttachmentMode::UpdateEachFrame) != FAttachmentMode::None && attInfo->parent.valid())
+			pAttComponent->UpdateAttachmentOffset(false);
+	}
 }
 
 void CRenderComponent::SetRenderMode(RenderMode mode)
@@ -691,14 +694,18 @@ void CEOnUpdateRenderMatrices::HandleReturnValues(lua_State *l)
 
 /////////////////
 
-CEOnUpdateRenderData::CEOnUpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &commandBuffer,bool bufferUpdateRequired,bool firstUpdateThisFrame)
-	: bufferUpdateRequired{bufferUpdateRequired},commandBuffer{commandBuffer},firstUpdateThisFrame{firstUpdateThisFrame}
+CEOnUpdateRenderData::CEOnUpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &commandBuffer)
+	: commandBuffer{commandBuffer}
 {}
-void CEOnUpdateRenderData::PushArguments(lua_State *l)
-{
-	Lua::PushBool(l,bufferUpdateRequired);
-	Lua::PushBool(l,firstUpdateThisFrame);
-}
+void CEOnUpdateRenderData::PushArguments(lua_State *l) {throw std::runtime_error{"Lua callbacks of multi-threaded events are not allowed!"};}
+
+/////////////////
+
+CEOnUpdateRenderBuffers::CEOnUpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &commandBuffer)
+	: commandBuffer{commandBuffer}
+{}
+void CEOnUpdateRenderBuffers::PushArguments(lua_State *l)
+{}
 
 /////////////////
 

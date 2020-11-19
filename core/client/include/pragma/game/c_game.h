@@ -66,6 +66,7 @@ namespace pragma
 {
 	namespace debug {class GPUProfilingStage;};
 	namespace physics {class IVisualDebugger;};
+	namespace rendering {class RenderQueueBuilder;};
 	class LuaShaderManager;
 	class LuaParticleModifierManager;
 	class CPlayerComponent;
@@ -378,12 +379,14 @@ public:
 	virtual std::string GetLuaNetworkDirectoryName() const override;
 	virtual std::string GetLuaNetworkFileName() const override;
 
+	void QueueForRendering(const util::DrawSceneInfo &drawSceneInfo);
 	void SetRenderScene(pragma::CSceneComponent &scene);
 	void ResetRenderScene();
 	pragma::CSceneComponent *GetRenderScene();
 	const pragma::CSceneComponent *GetRenderScene() const;
 	pragma::CCameraComponent *GetRenderCamera() const;
 
+	pragma::rendering::RenderQueueBuilder &GetRenderQueueBuilder();
 	prosper::IDescriptorSet &GetGlobalRenderSettingsDescriptorSet();
 	GlobalRenderSettingsBufferData &GetGlobalRenderSettingsBufferData();
 protected:
@@ -456,6 +459,8 @@ private:
 	bool LoadAuxEffects(const std::string &fname);
 
 	// Render
+	std::vector<util::DrawSceneInfo> m_sceneRenderQueue {};
+	std::shared_ptr<pragma::rendering::RenderQueueBuilder> m_renderQueueBuilder = nullptr;
 	Vector4 m_clipPlane = {};
 	Vector4 m_colScale = {};
 	Material *m_matOverride = nullptr;

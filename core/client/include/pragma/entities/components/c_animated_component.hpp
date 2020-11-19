@@ -30,8 +30,8 @@ namespace pragma
 			BoneBufferDirty = 1u
 		};
 
-		static ComponentEventId EVENT_ON_SKELETON_UPDATED;
-		static ComponentEventId EVENT_ON_BONE_MATRICES_UPDATED;
+		// static ComponentEventId EVENT_ON_SKELETON_UPDATED;
+		// static ComponentEventId EVENT_ON_BONE_MATRICES_UPDATED;
 		static ComponentEventId EVENT_ON_BONE_BUFFER_INITIALIZED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
@@ -46,7 +46,7 @@ namespace pragma
 		std::weak_ptr<prosper::IBuffer> GetBoneBuffer() const;
 		const std::vector<Mat4> &GetBoneMatrices() const;
 		std::vector<Mat4> &GetBoneMatrices();
-		void UpdateBoneMatrices();
+		void UpdateBoneMatricesMT();
 		void UpdateBoneBuffer(prosper::IPrimaryCommandBuffer &commandBuffer);
 		void InitializeBoneBuffer();
 		std::optional<Mat4> GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 *optOutNormalOffset=nullptr,float *optOutDelta=nullptr) const;

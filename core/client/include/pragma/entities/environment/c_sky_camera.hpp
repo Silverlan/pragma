@@ -34,7 +34,6 @@ namespace pragma
 		void UnbindFromShader(pragma::rendering::BaseRenderProcessor &processor);
 		float m_skyboxScale = 1.f;
 		CallbackHandle m_cbOnBuildRenderQueue = {};
-		CallbackHandle m_cbRenderPrepass = {};
 		CallbackHandle m_cbPostRenderSkybox = {};
 		std::shared_ptr<pragma::rendering::RenderQueue> m_renderQueue = nullptr;
 		std::shared_ptr<pragma::rendering::RenderQueue> m_renderQueueTranslucent = nullptr;

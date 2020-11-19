@@ -12,7 +12,7 @@
 extern DLLCLIENT CGame *c_game;
 
 static auto g_debugPrint = false;
-void pragma::CEyeComponent::UpdateEyeballs()
+void pragma::CEyeComponent::UpdateEyeballsMT()
 {
 	auto mdlC = GetEntity().GetModelComponent();
 	if(mdlC.expired())
@@ -22,8 +22,8 @@ void pragma::CEyeComponent::UpdateEyeballs()
 		return;
 	auto &eyeballs = mdl->GetEyeballs();
 	for(auto eyeballIndex=decltype(eyeballs.size()){0u};eyeballIndex<eyeballs.size();++eyeballIndex)
-		UpdateEyeball(eyeballs.at(eyeballIndex),eyeballIndex);
-	InvokeEventCallbacks(EVENT_ON_EYEBALLS_UPDATED);
+		UpdateEyeballMT(eyeballs.at(eyeballIndex),eyeballIndex);
+	// InvokeEventCallbacks(EVENT_ON_EYEBALLS_UPDATED);
 }
 
 const pragma::CEyeComponent::EyeballConfig *pragma::CEyeComponent::GetEyeballConfig(uint32_t eyeballIndex) const {return const_cast<CEyeComponent*>(this)->GetEyeballConfig(eyeballIndex);}
@@ -200,7 +200,7 @@ bool pragma::CEyeComponent::GetEyeballProjectionVectors(uint32_t eyeballIndex,Ve
 	outProjV = eyeballData->state.irisProjectionV;
 	return true;
 }
-void pragma::CEyeComponent::UpdateEyeball(const Eyeball &eyeball,uint32_t eyeballIndex)
+void pragma::CEyeComponent::UpdateEyeballMT(const Eyeball &eyeball,uint32_t eyeballIndex)
 {
 	if(eyeballIndex >= m_eyeballData.size() || m_animC.expired())
 		return;

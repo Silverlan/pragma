@@ -17,13 +17,13 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-ComponentEventId CEyeComponent::EVENT_ON_EYEBALLS_UPDATED = INVALID_COMPONENT_ID;
-ComponentEventId CEyeComponent::EVENT_ON_BLINK = INVALID_COMPONENT_ID;
+// ComponentEventId CEyeComponent::EVENT_ON_EYEBALLS_UPDATED = INVALID_COMPONENT_ID;
+// ComponentEventId CEyeComponent::EVENT_ON_BLINK = INVALID_COMPONENT_ID;
 void CEyeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	BaseAnimatedComponent::RegisterEvents(componentManager);
-	EVENT_ON_EYEBALLS_UPDATED = componentManager.RegisterEvent("ON_EYEBALLS_UPDATED",std::type_index(typeid(CEyeComponent)));
-	EVENT_ON_BLINK = componentManager.RegisterEvent("EVENT_ON_BLINK");
+	// EVENT_ON_EYEBALLS_UPDATED = componentManager.RegisterEvent("ON_EYEBALLS_UPDATED",std::type_index(typeid(CEyeComponent)));
+	// EVENT_ON_BLINK = componentManager.RegisterEvent("EVENT_ON_BLINK");
 }
 luabind::object CEyeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CEyeComponentHandleWrapper>(l);}
 
@@ -38,11 +38,12 @@ void CEyeComponent::Initialize()
 	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		OnModelChanged(static_cast<pragma::CEOnModelChanged&>(evData.get()).model);
 	});
-	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		if(static_cast<CEOnUpdateRenderData&>(evData.get()).firstUpdateThisFrame == false)
+	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		auto mdlC = static_cast<CModelComponent*>(GetEntity().GetModelComponent().get());
+		if(mdlC == nullptr || mdlC->GetLOD() > 0)
 			return;
-		UpdateEyeballs();
-		UpdateBlink();
+		UpdateEyeballsMT();
+		UpdateBlinkMT();
 	});
 	GetEntity().AddComponent<CAnimatedComponent>();
 	GetEntity().AddComponent<CFlexComponent>();

@@ -138,8 +138,8 @@ void Lua::Scene::Link(lua_State *l,CSceneHandle &scene,CSceneHandle &sceneOther)
 void Lua::Scene::BuildRenderQueue(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo)
 {
 	pragma::Lua::check_component(l,scene);
-	scene->UpdateBuffers(drawSceneInfo.commandBuffer);
-	scene->GetSceneRenderDesc().BuildRenderQueue(drawSceneInfo);
+	//scene->UpdateBuffers(drawSceneInfo.commandBuffer);
+	//scene->GetSceneRenderDesc().BuildRenderQueue(drawSceneInfo);
 }
 void Lua::Scene::RenderPrepass(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode)
 {

@@ -19,6 +19,7 @@ namespace pragma
 	public:
 		CVertexAnimatedComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
+		void UpdateVertexAnimationDataMT();
 		void UpdateVertexAnimationBuffer(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
 		const std::shared_ptr<prosper::IBuffer> &GetVertexAnimationBuffer() const;
 		bool GetVertexAnimationBufferMeshOffset(CModelSubMesh &mesh,uint32_t &offset,uint32_t &animCount) const;
@@ -55,6 +56,7 @@ namespace pragma
 		uint32_t m_maxVertexAnimations = 0u;
 		uint32_t m_activeVertexAnimations = 0u;
 		std::shared_ptr<prosper::IBuffer> m_vertexAnimationBuffer = nullptr;
+		bool m_bufferUpdateRequired = false;
 		void InitializeVertexAnimationBuffer();
 		void DestroyVertexAnimationBuffer();
 	};

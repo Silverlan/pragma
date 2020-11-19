@@ -38,11 +38,14 @@ namespace pragma
 			EnableDepthPass = HasDepthBias<<1u,
 			DisableShadows = EnableDepthPass<<1u
 		};
-		static ComponentEventId EVENT_ON_UPDATE_RENDER_DATA;
+		static constexpr auto USE_HOST_MEMORY_FOR_RENDER_DATA = true;
+
+		static ComponentEventId EVENT_ON_UPDATE_RENDER_DATA_MT;
 		static ComponentEventId EVENT_ON_RENDER_BUFFERS_INITIALIZED;
 		static ComponentEventId EVENT_ON_RENDER_BOUNDS_CHANGED;
 		static ComponentEventId EVENT_SHOULD_DRAW;
 		static ComponentEventId EVENT_SHOULD_DRAW_SHADOW;
+		static ComponentEventId EVENT_ON_UPDATE_RENDER_BUFFERS;
 		static ComponentEventId EVENT_ON_UPDATE_RENDER_MATRICES;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
@@ -80,7 +83,10 @@ namespace pragma
 
 		virtual void ReceiveData(NetPacket &packet) override;
 
-		void UpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp,bool bForceBufferUpdate=false);
+		// Note: Called in render thread
+		void UpdateRenderDataMT(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp);
+
+		void UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bForceBufferUpdate=false);
 
 		bool ShouldDraw(const Vector3 &camOrigin) const;
 		bool ShouldDrawShadow(const Vector3 &camOrigin) const;
@@ -197,10 +203,16 @@ namespace pragma
 	struct DLLCLIENT CEOnUpdateRenderData
 		: public ComponentEvent
 	{
-		CEOnUpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &commandBuffer,bool bufferUpdateRequired,bool firstUpdateThisFrame);
+		CEOnUpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &commandBuffer);
 		virtual void PushArguments(lua_State *l) override;
-		const bool bufferUpdateRequired;
-		const bool firstUpdateThisFrame;
+		std::shared_ptr<prosper::IPrimaryCommandBuffer> commandBuffer;
+	};
+
+	struct DLLCLIENT CEOnUpdateRenderBuffers
+		: public ComponentEvent
+	{
+		CEOnUpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &commandBuffer);
+		virtual void PushArguments(lua_State *l) override;
 		std::shared_ptr<prosper::IPrimaryCommandBuffer> commandBuffer;
 	};
 

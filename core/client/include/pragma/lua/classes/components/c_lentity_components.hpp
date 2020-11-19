@@ -65,8 +65,8 @@ namespace Lua
 		DLLCLIENT void GetRenderBounds(lua_State *l,CRenderHandle &hEnt);
 		DLLCLIENT void GetRenderSphereBounds(lua_State *l,CRenderHandle &hEnt);
 		DLLCLIENT void SetRenderBounds(lua_State *l,CRenderHandle &hEnt,Vector3 &min,Vector3 &max);
-		DLLCLIENT void UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,CSceneHandle &hScene,CCameraHandle &hCam,bool bForceBufferUpdate);
-		DLLCLIENT void UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,CSceneHandle &hScene,CCameraHandle &hCam);
+		// DLLCLIENT void UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,CSceneHandle &hScene,CCameraHandle &hCam,bool bForceBufferUpdate);
+		// DLLCLIENT void UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,CSceneHandle &hScene,CCameraHandle &hCam);
 		DLLCLIENT void GetRenderBuffer(lua_State *l,CRenderHandle &hEnt);
 		DLLCLIENT void GetBoneBuffer(lua_State *l,CRenderHandle &hEnt);
 		DLLCLIENT void CalcRayIntersection(lua_State *l,CRenderHandle &hComponent,const Vector3 &start,const Vector3 &dir,bool precise);

@@ -251,7 +251,10 @@ bool pragma::rendering::BaseRenderProcessor::BindEntity(CBaseEntity &ent)
 	UnbindEntity();
 	m_curEntity = &ent;
 	auto *renderC = ent.GetRenderComponent();
-	if(umath::is_flag_set(m_stateFlags,StateFlags::MaterialBound) == false || renderC == nullptr || m_shaderScene->BindEntity(ent) == false)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::MaterialBound) == false || renderC == nullptr)
+		return false;
+	renderC->UpdateRenderBuffers(m_drawSceneInfo.commandBuffer);
+	if(m_shaderScene->BindEntity(ent) == false)
 		return false;
 	if(m_drawSceneInfo.renderFilter && m_drawSceneInfo.renderFilter(ent) == false)
 		return false;

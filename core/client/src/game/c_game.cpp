@@ -47,6 +47,7 @@
 #include <texturemanager/texturemanager.h>
 #include <pragma/physics/environment.hpp>
 #include "pragma/rendering/rendersystem.h"
+#include "pragma/rendering/render_queue.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/luacallback.h>
@@ -196,7 +197,6 @@ CGame::CGame(NetworkState *state)
 	>("PostRender");
 	RegisterCallback<void,CBaseEntity*>("UpdateEntityModel");
 	RegisterCallback<void,WIBase*,WIBase*>("OnGUIFocusChanged");
-	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>,std::reference_wrapper<const std::vector<Plane>>,std::reference_wrapper<std::vector<util::BSPTree::Node*>>>("OnBuildRenderQueue");
 
 	auto &staticCallbacks = get_static_client_callbacks();
 	for(auto it=staticCallbacks.begin();it!=staticCallbacks.end();++it)
@@ -289,12 +289,15 @@ CGame::CGame(NetworkState *state)
 		});
 		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 8u,"Added new profiling phase, but did not create associated profiling stage!");
 	});
+
+	m_renderQueueBuilder = std::make_unique<pragma::rendering::RenderQueueBuilder>();
 }
 
 CGame::~CGame() {}
 
 void CGame::OnRemove()
 {
+	m_renderQueueBuilder = nullptr;
 	c_engine->GetRenderContext().WaitIdle();
 	WGUI::GetInstance().SetFocusCallback(nullptr);
 	if(m_hCbDrawFrame.IsValid())
@@ -348,6 +351,8 @@ void CGame::OnRemove()
 
 	Game::OnRemove();
 }
+
+pragma::rendering::RenderQueueBuilder &CGame::GetRenderQueueBuilder() {return *m_renderQueueBuilder;}
 
 void CGame::UpdateTime()
 {
@@ -682,6 +687,7 @@ void CGame::PostGUIDraw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 {
 	CallLuaCallbacks<void,std::shared_ptr<prosper::ICommandBuffer>>("PostGUIDraw",drawCmd);
 }
+void CGame::QueueForRendering(const util::DrawSceneInfo &drawSceneInfo) {m_sceneRenderQueue.push_back(drawSceneInfo);}
 void CGame::SetRenderScene(pragma::CSceneComponent &scene) {m_renderScene = scene.GetHandle<pragma::CSceneComponent>();}
 void CGame::ResetRenderScene() {m_renderScene = m_scene;}
 pragma::CSceneComponent *CGame::GetRenderScene() {return m_renderScene.get();}

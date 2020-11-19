@@ -30,6 +30,8 @@ void CPhysicsComponent::Initialize()
 {
 	BasePhysicsComponent::Initialize();
 
+#if 0
+	// TODO
 	BindEvent(CAnimatedComponent::EVENT_ON_SKELETON_UPDATED,[this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto *phys = GetPhysicsObject();
 		if(phys != nullptr && GetPhysicsType() == PHYSICSTYPE::DYNAMIC)
@@ -59,6 +61,7 @@ void CPhysicsComponent::Initialize()
 		if(mdl != nullptr && static_cast<CAnimatedComponent&>(*animComponent).GetBoneMatrices().empty() == false)
 			UpdateRagdollPose();
 	});
+#endif
 }
 void CPhysicsComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BasePhysicsComponent));}
 void CPhysicsComponent::OnEntitySpawn()

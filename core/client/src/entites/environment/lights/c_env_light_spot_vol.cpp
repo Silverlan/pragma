@@ -34,12 +34,13 @@ void CLightSpotVolComponent::Initialize()
 	auto pRenderComponent = ent.AddComponent<CRenderComponent>();
 	if(pRenderComponent.valid())
 	{
-		FlagCallbackForRemoval(pRenderComponent->BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		// TODO
+		/*FlagCallbackForRemoval(pRenderComponent->BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 			auto *scene = c_game->GetScene();
 			auto *renderer = scene ? scene->GetRenderer() : nullptr;
 			if(renderer != nullptr && renderer->IsRasterizationRenderer())
 				static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->SetFrameDepthBufferSamplingRequired();
-		}),CallbackType::Entity);
+		}),CallbackType::Entity);*/
 	}
 }
 

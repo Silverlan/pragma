@@ -38,17 +38,22 @@ void CFlexComponent::UpdateFlexControllers()
 
 void CFlexComponent::SetFlexWeight(uint32_t flexIdx,float weight)
 {
-	if(flexIdx >= m_flexWeights.size())
+	if(flexIdx >= m_flexWeights.size() || m_flexWeights.at(flexIdx) == weight)
 		return;
 	m_flexWeights.at(flexIdx) = weight;
 	m_updatedFlexWeights.at(flexIdx) = true;
+	m_flexDataUpdateRequired = true;
 }
 
 void CFlexComponent::SetFlexWeightOverride(uint32_t flexId,float weight)
 {
 	if(flexId < m_flexOverrides.size())
 	{
-		m_flexOverrides.at(flexId) = weight;
+		if(m_flexOverrides.at(flexId) != weight)
+		{
+			m_flexOverrides.at(flexId) = weight;
+			m_flexDataUpdateRequired = true;
+		}
 		return;
 	}
 	auto mdl = GetEntity().GetModel();
@@ -56,12 +61,14 @@ void CFlexComponent::SetFlexWeightOverride(uint32_t flexId,float weight)
 		return;
 	m_flexOverrides.resize(flexId +1);
 	m_flexOverrides.at(flexId) = weight;
+	m_flexDataUpdateRequired = true;
 }
 void CFlexComponent::ClearFlexWeightOverride(uint32_t flexId)
 {
-	if(flexId >= m_flexOverrides.size())
+	if(flexId >= m_flexOverrides.size() || m_flexOverrides.at(flexId).has_value() == false)
 		return;
 	m_flexOverrides.at(flexId) = {};
+	m_flexDataUpdateRequired = true;
 }
 bool CFlexComponent::HasFlexWeightOverride(uint32_t flexId) const
 {
@@ -145,6 +152,9 @@ void CFlexComponent::Initialize()
 	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		OnModelChanged(static_cast<pragma::CEOnModelChanged&>(evData.get()).model);
 	});
+	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		UpdateFlexWeightsMT();
+	});
 	GetEntity().AddComponent<LogicComponent>();
 	OnModelChanged(GetEntity().GetModel());
 }
@@ -186,9 +196,14 @@ bool CFlexComponent::GetFlexController(uint32_t flexId,float &val) const
 	return true;
 }
 
-void CFlexComponent::UpdateFlexWeights()
+void CFlexComponent::UpdateFlexWeightsMT()
 {
-	auto mdl = GetEntity().GetModel();
+	if(m_flexDataUpdateRequired == false)
+		return;
+	auto mdlC = static_cast<CModelComponent*>(GetEntity().GetModelComponent().get());
+	if(mdlC == nullptr || mdlC->GetLOD() > 0)
+		return;
+	auto &mdl = mdlC->GetModel();
 	if(mdl == nullptr)
 		return;
 	auto &flexes = mdl->GetFlexes();
@@ -204,6 +219,7 @@ void CFlexComponent::UpdateFlexWeights()
 
 	// Clear for next update
 	std::fill(m_updatedFlexWeights.begin(),m_updatedFlexWeights.end(),false);
+	m_flexDataUpdateRequired = false;
 }
 
 const std::vector<float> &CFlexComponent::GetFlexWeights() const {return m_flexWeights;}

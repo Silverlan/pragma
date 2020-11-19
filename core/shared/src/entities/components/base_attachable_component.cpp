@@ -491,7 +491,7 @@ std::optional<umath::Transform> BaseAttachableComponent::GetParentPose() const
 	}
 	return pose;
 }
-void BaseAttachableComponent::UpdateAttachmentOffset()
+void BaseAttachableComponent::UpdateAttachmentOffset(bool invokeUpdateEvents)
 {
 	auto &entThis = GetEntity();
 	NetworkState *state = entThis.GetNetworkState();
@@ -564,7 +564,7 @@ void BaseAttachableComponent::UpdateAttachmentOffset()
 			}
 		}
 	}
-
-	InvokeEventCallbacks(EVENT_ON_ATTACHMENT_UPDATE);
+	if(invokeUpdateEvents)
+		InvokeEventCallbacks(EVENT_ON_ATTACHMENT_UPDATE);
 }
 

@@ -19,9 +19,10 @@ using namespace pragma;
 void CSoftBodyComponent::Initialize()
 {
 	BaseSoftBodyComponent::Initialize();
-	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		UpdateSoftBodyGeometry(); // TODO: Is this update ALWAYS required?
-	});
+	// TODO
+	//BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	//	UpdateSoftBodyGeometry(); // TODO: Is this update ALWAYS required?
+	//});
 }
 luabind::object CSoftBodyComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CSoftBodyComponentHandleWrapper>(l);}
 bool CSoftBodyComponent::InitializeSoftBodyData()

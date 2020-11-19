@@ -28,6 +28,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/rendering/rendersystem.h"
+#include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/lua/luacallback.h>
 #include "pragma/entities/components/c_scene_component.hpp"
@@ -213,6 +214,8 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 		drawSceneInfo.renderFlags &= ~FRender::Particles;
 
 	// Update particle systems
+	// TODO: This isn't a good place for this and particle systems should
+	// only be updated if visible (?)
 	EntityIterator itParticles {*this};
 	itParticles.AttachFilter<TEntityIteratorFilterComponent<pragma::CParticleSystemComponent>>();
 	for(auto *ent : itParticles)
@@ -228,11 +231,6 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 		auto *sceneC = GetRenderScene();
 		drawSceneInfo.scene = sceneC ? sceneC->GetHandle<pragma::CSceneComponent>() : util::WeakHandle<pragma::CSceneComponent>{};
 	}
-	if(drawSceneInfo.scene.expired())
-	{
-		auto *sceneC = GetScene();
-		drawSceneInfo.scene = sceneC ? sceneC->GetHandle<pragma::CSceneComponent>() : util::WeakHandle<pragma::CSceneComponent>{};
-	}
 	auto &scene = drawSceneInfo.scene;
 	if(scene.expired())
 	{
@@ -244,62 +242,94 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 		Con::cwar<<"WARNING: Attempted to render invalid scene!"<<Con::endl;
 		return;
 	}
-	auto &drawCmd = drawSceneInfo.commandBuffer;
-	if(cvClearScene->GetBool() == true || drawWorld == 2 || drawSceneInfo.clearColor.has_value())
+	QueueForRendering(drawSceneInfo); // TODO
+
+
+	// We'll queue up building the render queues before we start rendering, so
+	// most of it can be done in the background
+	for(auto &drawSceneInfo : m_sceneRenderQueue)
 	{
-		auto clearCol = drawSceneInfo.clearColor.has_value() ? drawSceneInfo.clearColor->ToVector4() : Color(cvClearSceneColor->GetString()).ToVector4();
-		auto &hdrImg = scene->GetRenderer()->GetSceneTexture()->GetImage();
-		drawCmd->RecordImageBarrier(hdrImg,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferDstOptimal);
-		drawCmd->RecordClearImage(hdrImg,prosper::ImageLayout::TransferDstOptimal,{{clearCol.r,clearCol.g,clearCol.b,clearCol.a}});
-		drawCmd->RecordImageBarrier(hdrImg,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+		if(drawSceneInfo.scene.expired())
+			continue;
+		if(drawSceneInfo.commandBuffer == nullptr)
+			drawSceneInfo.commandBuffer = c_engine->GetRenderContext().GetDrawCommandBuffer();
+		// Modify render flags depending on console variables
+		auto &renderFlags = drawSceneInfo.renderFlags;
+		auto drawWorld = cvDrawWorld->GetBool();
+		if(drawWorld == false)
+			umath::set_flag(renderFlags,FRender::World,false);
+
+		auto *pl = c_game->GetLocalPlayer();
+		if(pl == nullptr || pl->IsInFirstPersonMode() == false)
+			umath::set_flag(renderFlags,FRender::View,false);
+
+		drawSceneInfo.scene->GetSceneRenderDesc().BuildRenderQueues(drawSceneInfo);
 	}
 
-	// Update Exposure
-	auto *renderer = scene->GetRenderer();
-	if(renderer && renderer->IsRasterizationRenderer())
+	for(auto &drawSceneInfo : m_sceneRenderQueue)
 	{
-		//c_engine->StartGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
-		auto frame = c_engine->GetRenderContext().GetLastFrameId();
-		if(frame > 0)
-			static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetHDRInfo().UpdateExposure();
-		//c_engine->StopGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
-	}
-
-	// Update time
-	UpdateShaderTimeData();
-
-	CallCallbacks("PreRenderScenes");
-	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes",std::ref(drawSceneInfo));
-
-	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderScenes",std::ref(drawSceneInfo));
-
-	static auto bSkipCallbacks = false;
-	if(bSkipCallbacks == false)
-	{
-		bSkipCallbacks = true;
-		ScopeGuard guard([]() {bSkipCallbacks = false;});
-		auto ret = false;
-		m_bMainRenderPass = false;
-
-		auto bSkipScene = CallCallbacksWithOptionalReturn<
-			bool,std::reference_wrapper<const util::DrawSceneInfo>
-		>("DrawScene",ret,std::ref(drawSceneInfo)) == CallbackReturnType::HasReturnValue;
-		m_bMainRenderPass = true;
-		if(bSkipScene == true && ret == true)
-			return;
-		m_bMainRenderPass = false;
-		if(CallLuaCallbacks<
-			bool,std::reference_wrapper<const util::DrawSceneInfo>
-		>("DrawScene",&bSkipScene,std::ref(drawSceneInfo)) == CallbackReturnType::HasReturnValue && bSkipScene == true)
+		if(drawSceneInfo.scene.expired())
+			continue;
+		auto &drawCmd = drawSceneInfo.commandBuffer;
+		if(cvClearScene->GetBool() == true || drawWorld == 2 || drawSceneInfo.clearColor.has_value())
 		{
-			CallCallbacks("PostRenderScenes");
-			m_bMainRenderPass = true;
-			return;
+			auto clearCol = drawSceneInfo.clearColor.has_value() ? drawSceneInfo.clearColor->ToVector4() : Color(cvClearSceneColor->GetString()).ToVector4();
+			auto &hdrImg = scene->GetRenderer()->GetSceneTexture()->GetImage();
+			drawCmd->RecordImageBarrier(hdrImg,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferDstOptimal);
+			drawCmd->RecordClearImage(hdrImg,prosper::ImageLayout::TransferDstOptimal,{{clearCol.r,clearCol.g,clearCol.b,clearCol.a}});
+			drawCmd->RecordImageBarrier(hdrImg,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 		}
-		else
+
+		// Update Exposure
+		auto *renderer = scene->GetRenderer();
+		if(renderer && renderer->IsRasterizationRenderer())
+		{
+			//c_engine->StartGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
+			auto frame = c_engine->GetRenderContext().GetLastFrameId();
+			if(frame > 0)
+				static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetHDRInfo().UpdateExposure();
+			//c_engine->StopGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
+		}
+
+		// Update time
+		UpdateShaderTimeData();
+
+		CallCallbacks("PreRenderScenes");
+		CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes",std::ref(drawSceneInfo));
+
+		CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderScenes",std::ref(drawSceneInfo));
+
+		static auto bSkipCallbacks = false;
+		if(bSkipCallbacks == false)
+		{
+			bSkipCallbacks = true;
+			ScopeGuard guard([]() {bSkipCallbacks = false;});
+			auto ret = false;
+			m_bMainRenderPass = false;
+
+			auto bSkipScene = CallCallbacksWithOptionalReturn<
+				bool,std::reference_wrapper<const util::DrawSceneInfo>
+			>("DrawScene",ret,std::ref(drawSceneInfo)) == CallbackReturnType::HasReturnValue;
 			m_bMainRenderPass = true;
+			if(bSkipScene == true && ret == true)
+				return;
+			m_bMainRenderPass = false;
+			if(CallLuaCallbacks<
+				bool,std::reference_wrapper<const util::DrawSceneInfo>
+			>("DrawScene",&bSkipScene,std::ref(drawSceneInfo)) == CallbackReturnType::HasReturnValue && bSkipScene == true)
+			{
+				CallCallbacks("PostRenderScenes");
+				m_bMainRenderPass = true;
+				return;
+			}
+			else
+				m_bMainRenderPass = true;
+		}
+		RenderScene(drawSceneInfo);
 	}
-	RenderScene(drawSceneInfo);
+	m_renderQueueBuilder->Flush();
+	m_sceneRenderQueue.clear();
+
 	CallCallbacks("PostRenderScenes");
 	CallLuaCallbacks("PostRenderScenes");
 }

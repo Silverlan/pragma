@@ -99,3 +99,83 @@ void RenderQueue::Merge(const RenderQueue &other)
 		sortedItemIndices.back().first = queue.size() -1;
 	}
 }
+
+void RenderQueue::Lock()
+{
+	m_threadWaitMutex.lock();
+		m_locked = true;
+	m_threadWaitMutex.unlock();
+}
+void RenderQueue::Unlock()
+{
+	m_threadWaitMutex.lock();
+		m_locked = false;
+		m_threadWaitCondition.notify_all();
+	m_threadWaitMutex.unlock();
+}
+void RenderQueue::WaitForCompletion() const
+{
+	std::unique_lock<std::mutex> mlock(m_threadWaitMutex);
+	m_threadWaitCondition.wait(mlock,[this]() -> bool {return !m_locked;});
+}
+
+//////////////////////
+
+RenderQueueBuilder::RenderQueueBuilder()
+{
+	Exec();
+}
+
+RenderQueueBuilder::~RenderQueueBuilder()
+{
+	m_threadRunning = false;
+	Flush();
+	if(m_thread.joinable())
+		m_thread.join();
+}
+
+void RenderQueueBuilder::Exec()
+{
+	m_threadRunning = true;
+	m_thread = std::thread{[this]() {
+		std::unique_lock<std::mutex> mlock(m_threadWaitMutex);
+		for(;;)
+		{
+			m_threadWaitCondition.wait(mlock,[this]() -> bool {return m_threadRunning || m_hasWork;});
+			m_workMutex.lock();
+				if(m_workQueue.empty())
+				{
+					if(m_threadRunning == false)
+						break;
+					m_hasWork = false;
+					m_workMutex.unlock();
+					continue;
+				}
+				auto worker = m_workQueue.front();
+				m_workQueue.pop();
+			m_workMutex.unlock();
+
+			worker();
+		}
+	}};
+}
+
+void RenderQueueBuilder::Append(const std::function<void()> &worker)
+{
+	m_workMutex.lock();
+		m_workQueue.push(worker);
+		m_hasWork = true;
+	m_workMutex.unlock();
+	m_threadWaitCondition.notify_one();
+}
+
+void RenderQueueBuilder::Flush()
+{
+	// TODO: Use a condition variable?
+	while(m_hasWork);
+}
+
+void RenderQueueBuilder::BuildRenderQueues()
+{
+
+}

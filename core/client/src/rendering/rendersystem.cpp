@@ -298,6 +298,8 @@ void RenderSystem::Render(
 
 uint32_t pragma::rendering::LightingStageRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue,RenderPassStats *optStats,std::optional<uint32_t> worldRenderQueueIndex)
 {
+	renderQueue.WaitForCompletion();
+
 	static auto skipRender = false;
 	if(skipRender)
 		return 0;

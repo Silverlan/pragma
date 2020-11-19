@@ -41,12 +41,13 @@ public:
 	};
 	enum class RenderQueueId : uint8_t
 	{
+		// Note: The order should match the actual render order for performance reasons!
 		Skybox = 0u,
 		SkyboxTranslucent,
-		View,
-		ViewTranslucent,
 		World,
 		WorldTranslucent,
+		View,
+		ViewTranslucent,
 		Water,
 
 		Count,
@@ -75,7 +76,7 @@ public:
 	void SetOcclusionCullingHandler(const std::shared_ptr<pragma::OcclusionCullingHandler> &handler);
 	void SetOcclusionCullingMethod(OcclusionCullingMethod method);
 	void ReloadOcclusionCullingHandler();
-	void BuildRenderQueue(const util::DrawSceneInfo &drawSceneInfo);
+	void BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo);
 
 	bool IsWorldMeshVisible(uint32_t worldRenderQueueIndex,pragma::RenderMeshIndex meshIdx) const;
 
@@ -87,6 +88,8 @@ public:
 
 	pragma::rendering::RenderMeshCollectionHandler &GetRenderMeshCollectionHandler();
 	const pragma::rendering::RenderMeshCollectionHandler &GetRenderMeshCollectionHandler() const;
+	
+	void WaitForWorldRenderQueues() const;
 
 	RenderQueueId GetRenderQueueId(RenderMode renderMode,bool translucent) const;
 	pragma::rendering::RenderQueue *GetRenderQueue(RenderMode renderMode,bool translucent);
@@ -100,12 +103,14 @@ private:
 		const std::vector<Plane> &frustumPlanes,const std::vector<util::BSPTree::Node*> *bspLeafNodes=nullptr
 	);
 
+	// TODO: Remove these, they're obsolete
 	std::shared_ptr<pragma::OcclusionCullingHandler> m_occlusionCullingHandler = nullptr;
 	pragma::rendering::RenderMeshCollectionHandler m_renderMeshCollectionHandler = {};
 
 	std::vector<WorldMeshVisibility> m_worldMeshVisibility;
 	std::array<std::shared_ptr<pragma::rendering::RenderQueue>,umath::to_integral(RenderQueueId::Count)> m_renderQueues;
 	std::vector<std::shared_ptr<const pragma::rendering::RenderQueue>> m_worldRenderQueues;
+	std::atomic<bool> m_worldRenderQueuesReady = false;
 
 	pragma::CSceneComponent &m_scene;
 };

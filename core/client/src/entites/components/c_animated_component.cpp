@@ -22,14 +22,14 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 
-ComponentEventId CAnimatedComponent::EVENT_ON_SKELETON_UPDATED = INVALID_COMPONENT_ID;
-ComponentEventId CAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED = INVALID_COMPONENT_ID;
+//ComponentEventId CAnimatedComponent::EVENT_ON_SKELETON_UPDATED = INVALID_COMPONENT_ID;
+//ComponentEventId CAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED = INVALID_COMPONENT_ID;
 ComponentEventId CAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED = INVALID_COMPONENT_ID;
 void CAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	BaseAnimatedComponent::RegisterEvents(componentManager);
-	EVENT_ON_SKELETON_UPDATED = componentManager.RegisterEvent("ON_SKELETON_UPDATED",std::type_index(typeid(CAnimatedComponent)));
-	EVENT_ON_BONE_MATRICES_UPDATED = componentManager.RegisterEvent("ON_BONE_MATRICES_UPDATED",std::type_index(typeid(CAnimatedComponent)));
+	//EVENT_ON_SKELETON_UPDATED = componentManager.RegisterEvent("ON_SKELETON_UPDATED",std::type_index(typeid(CAnimatedComponent)));
+	//EVENT_ON_BONE_MATRICES_UPDATED = componentManager.RegisterEvent("ON_BONE_MATRICES_UPDATED",std::type_index(typeid(CAnimatedComponent)));
 	EVENT_ON_BONE_BUFFER_INITIALIZED = componentManager.RegisterEvent("ON_BONE_BUFFER_INITIALIZED");
 }
 void CAnimatedComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BaseAnimatedComponent));}
@@ -42,7 +42,11 @@ void pragma::initialize_articulated_buffers()
 	auto instanceCount = 512u;
 	auto maxInstanceCount = instanceCount *4u;
 	prosper::util::BufferCreateInfo createInfo {};
-	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+
+	if constexpr(CRenderComponent::USE_HOST_MEMORY_FOR_RENDER_DATA)
+		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostCoherent;
+	else
+		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = instanceSize *maxInstanceCount;
 	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
@@ -50,6 +54,9 @@ void pragma::initialize_articulated_buffers()
 #endif
 	s_instanceBoneBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(createInfo,instanceSize,instanceSize *maxInstanceCount,0.05f);
 	s_instanceBoneBuffer->SetDebugName("entity_anim_bone_buf");
+
+	if constexpr(CRenderComponent::USE_HOST_MEMORY_FOR_RENDER_DATA)
+		s_instanceBoneBuffer->SetPermanentlyMapped(true);
 }
 void pragma::clear_articulated_buffers() {s_instanceBoneBuffer = nullptr;}
 
@@ -65,7 +72,10 @@ void CAnimatedComponent::Initialize()
 		if(pRenderComponent.valid())
 			pRenderComponent->UpdateRenderBounds();
 	});
-	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		UpdateBoneMatricesMT();
+	});
+	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		if(umath::is_flag_set(m_stateFlags,StateFlags::BoneBufferDirty) == false)
 			return;
 		umath::set_flag(m_stateFlags,StateFlags::BoneBufferDirty,false);
@@ -121,7 +131,7 @@ void CAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 	if(mdl == nullptr || GetBoneCount() == 0)
 		return;
 	m_boneMatrices.resize(mdl->GetBoneCount(),umat::identity());
-	UpdateBoneMatrices();
+	UpdateBoneMatricesMT();
 	SetBoneBufferDirty();
 
 	// Attach particles defined in the model
@@ -198,7 +208,10 @@ void CAnimatedComponent::UpdateBoneBuffer(prosper::IPrimaryCommandBuffer &comman
 	{
 		// Update bone buffer
 		auto buffer = wpBoneBuffer.lock();
-		commandBuffer.RecordUpdateGenericShaderReadBuffer(*buffer,0ull,GetBoneCount() *sizeof(Mat4),m_boneMatrices.data());
+		if constexpr(CRenderComponent::USE_HOST_MEMORY_FOR_RENDER_DATA)
+			buffer->Write(0ull,GetBoneCount() *sizeof(Mat4),m_boneMatrices.data());
+		else
+			commandBuffer.RecordUpdateGenericShaderReadBuffer(*buffer,0ull,GetBoneCount() *sizeof(Mat4),m_boneMatrices.data());
 	}
 }
 const std::vector<Mat4> &CAnimatedComponent::GetBoneMatrices() const {return const_cast<CAnimatedComponent*>(this)->GetBoneMatrices();}
@@ -212,13 +225,11 @@ bool CAnimatedComponent::MaintainAnimations(double dt)
 	if(ShouldUpdateBones() == false)
 		return false;
 	BaseAnimatedComponent::MaintainAnimations(dt);
-
-	UpdateBoneMatrices();
-	SetBoneBufferDirty();
+	SetBoneBufferDirty(); // TODO: Only if anything has actually changed
 	return true;
 }
 
-void CAnimatedComponent::UpdateBoneMatrices()
+void CAnimatedComponent::UpdateBoneMatricesMT()
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
 	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
@@ -230,8 +241,8 @@ void CAnimatedComponent::UpdateBoneMatrices()
 	UpdateSkeleton(); // Costly
 	auto physRootBoneId = OnSkeletonUpdated();
 
-	CEOnSkeletonUpdated evData{physRootBoneId};
-	InvokeEventCallbacks(EVENT_ON_SKELETON_UPDATED,evData);
+	//CEOnSkeletonUpdated evData{physRootBoneId};
+	//InvokeEventCallbacks(EVENT_ON_SKELETON_UPDATED,evData);
 
 	auto &refFrame = *bindPose;
 	for(unsigned int i=0;i<GetBoneCount();i++)
@@ -261,7 +272,7 @@ void CAnimatedComponent::UpdateBoneMatrices()
 		else
 			Con::cwar<<"WARNING: Attempted to update bone "<<i<<" in "<<mdl->GetName()<<" which doesn't exist in the reference pose! Ignoring..."<<Con::endl;
 	}
-	InvokeEventCallbacks(EVENT_ON_BONE_MATRICES_UPDATED);
+	//InvokeEventCallbacks(EVENT_ON_BONE_MATRICES_UPDATED);
 }
 
 uint32_t CAnimatedComponent::OnSkeletonUpdated() {return std::numeric_limits<uint32_t>::max();}

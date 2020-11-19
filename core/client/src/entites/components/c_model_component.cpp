@@ -131,8 +131,8 @@ void CModelComponent::UpdateLOD(UInt32 lod)
 
 void CModelComponent::SetLOD(uint32_t lod) {m_lod = lod;}
 
-void CModelComponent::SetAutoLodEnabled(bool enabled) {umath::set_flag(m_stateFlags,StateFlags::AutoLodDisabled,enabled);}
-bool CModelComponent::IsAutoLodEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::AutoLodDisabled);}
+void CModelComponent::SetAutoLodEnabled(bool enabled) {umath::set_flag(m_stateFlags,StateFlags::AutoLodDisabled,!enabled);}
+bool CModelComponent::IsAutoLodEnabled() const {return !umath::is_flag_set(m_stateFlags,StateFlags::AutoLodDisabled);}
 
 void CModelComponent::UpdateLOD(const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp)
 {

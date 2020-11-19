@@ -43,106 +43,66 @@ void CSkyCameraComponent::Initialize()
 	m_renderQueue = pragma::rendering::RenderQueue::Create();
 	m_renderQueueTranslucent = pragma::rendering::RenderQueue::Create();
 
-	m_cbOnBuildRenderQueue = c_game->AddCallback("OnBuildRenderQueue",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>,std::reference_wrapper<const std::vector<Plane>>,std::reference_wrapper<std::vector<util::BSPTree::Node*>>>::Create(
-		[this](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo,std::reference_wrapper<const std::vector<Plane>> frustumPlanes,std::reference_wrapper<std::vector<util::BSPTree::Node*>>) {
-		if(drawSceneInfo.get().scene.expired())
-			return;
-		
 #if 0
-		auto &scene = *drawSceneInfo.get().scene.get();
-		auto &sceneRenderDesc = scene.GetSceneRenderDesc();
-		auto *renderQueue = sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,false);
-		auto *renderQueueTranslucent = sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,true);
-		
-		auto &pos = GetEntity().GetPosition();
-		EntityIterator entItWorld {*c_game};
-		entItWorld.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
-		std::vector<util::BSPTree::Node*> bspLeafNodes;
-		bspLeafNodes.reserve(entItWorld.GetCount());
-		for(auto *entWorld : entItWorld)
-		{
-			if(SceneRenderDesc::ShouldConsiderEntity(*static_cast<CBaseEntity*>(entWorld),scene,drawSceneInfo.get().renderFlags) == false)
-				continue;
-			auto worldC = entWorld->GetComponent<pragma::CWorldComponent>();
-			auto &bspTree = worldC->GetBSPTree();
-			auto *node = bspTree ? bspTree->FindLeafNode(pos) : nullptr;
-			if(node == nullptr)
-				continue;
-			bspLeafNodes.push_back(node);
-		}
-
-		auto *culler = scene.FindOcclusionCuller();
-		if(culler)
-		{
-			auto &dynOctree = culler->GetOcclusionOctree();
-			SceneRenderDesc::CollectRenderMeshesFromOctree(
-				drawSceneInfo,dynOctree,scene,drawSceneInfo.get().renderFlags,
-				[this,renderQueue,renderQueueTranslucent](RenderMode renderMode,bool translucent) -> pragma::rendering::RenderQueue* {
-					return (renderMode != RenderMode::World) ? nullptr : (translucent ? renderQueueTranslucent : renderQueue);
-				},
-				nullptr,&bspLeafNodes
-			);
-		}
-#endif
+	m_cbOnBuildRenderQueue = c_game->AddCallback("BuildRenderQueues",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([this](std::reference_wrapper<const util::DrawSceneInfo> refDrawSceneInfo) {
+		if(refDrawSceneInfo.get().scene.expired())
+			return;
 		m_renderQueue->Clear();
 		m_renderQueueTranslucent->Clear();
-		auto &scene = *drawSceneInfo.get().scene.get();
-
-		auto &pos = GetEntity().GetPosition();
-
-		EntityIterator entItWorld {*c_game};
-		entItWorld.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
-		std::vector<util::BSPTree::Node*> bspLeafNodes;
-		bspLeafNodes.reserve(entItWorld.GetCount());
-		for(auto *entWorld : entItWorld)
-		{
-			if(SceneRenderDesc::ShouldConsiderEntity(*static_cast<CBaseEntity*>(entWorld),scene,pos,drawSceneInfo.get().renderFlags) == false)
-				continue;
-			auto worldC = entWorld->GetComponent<pragma::CWorldComponent>();
-			auto &bspTree = worldC->GetBSPTree();
-			auto *node = bspTree ? bspTree->FindLeafNode(pos) : nullptr;
-			if(node == nullptr)
-				continue;
-			bspLeafNodes.push_back(node);
-			
-			auto *renderQueue = worldC->GetClusterRenderQueue(node->cluster,false /* translucent */);
-			auto *renderQueueTranslucent = worldC->GetClusterRenderQueue(node->cluster,true /* translucent */);
-			if(renderQueue)
-				m_renderQueue->Merge(*renderQueue);
-			if(renderQueueTranslucent)
-				m_renderQueueTranslucent->Merge(*renderQueueTranslucent);
-		}
+		m_renderQueue->Lock();
+		m_renderQueueTranslucent->Lock();
 		
-		auto &hCam = scene.GetActiveCamera();
-		auto *culler = scene.FindOcclusionCuller();
-		if(culler && hCam.valid())
-		{
-			auto vp = hCam->GetProjectionMatrix() *hCam->GetViewMatrix();
-			auto &dynOctree = culler->GetOcclusionOctree();
-			SceneRenderDesc::CollectRenderMeshesFromOctree(
-				drawSceneInfo,dynOctree,scene,*hCam,vp,drawSceneInfo.get().renderFlags,
-				[this](RenderMode renderMode,bool translucent) -> pragma::rendering::RenderQueue* {
-					return (renderMode != RenderMode::World) ? nullptr : (translucent ? m_renderQueueTranslucent.get() : m_renderQueue.get());
-				},
-				nullptr,&bspLeafNodes
-			);
-		}
+		auto &drawSceneInfo = refDrawSceneInfo.get();
+		c_game->GetRenderQueueBuilder().Append([this,&drawSceneInfo]() {
+			auto &scene = *drawSceneInfo.scene.get();
 
-		m_renderQueue->Sort();
-		m_renderQueueTranslucent->Sort();
+			auto &pos = GetEntity().GetPosition();
+
+			EntityIterator entItWorld {*c_game};
+			entItWorld.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
+			std::vector<util::BSPTree::Node*> bspLeafNodes;
+			bspLeafNodes.reserve(entItWorld.GetCount());
+			for(auto *entWorld : entItWorld)
+			{
+				if(SceneRenderDesc::ShouldConsiderEntity(*static_cast<CBaseEntity*>(entWorld),scene,pos,drawSceneInfo.renderFlags) == false)
+					continue;
+				auto worldC = entWorld->GetComponent<pragma::CWorldComponent>();
+				auto &bspTree = worldC->GetBSPTree();
+				auto *node = bspTree ? bspTree->FindLeafNode(pos) : nullptr;
+				if(node == nullptr)
+					continue;
+				bspLeafNodes.push_back(node);
+			
+				auto *renderQueue = worldC->GetClusterRenderQueue(node->cluster,false /* translucent */);
+				auto *renderQueueTranslucent = worldC->GetClusterRenderQueue(node->cluster,true /* translucent */);
+				if(renderQueue)
+					m_renderQueue->Merge(*renderQueue);
+				if(renderQueueTranslucent)
+					m_renderQueueTranslucent->Merge(*renderQueueTranslucent);
+			}
+		
+			auto &hCam = scene.GetActiveCamera();
+			auto *culler = scene.FindOcclusionCuller();
+			if(culler && hCam.valid())
+			{
+				auto vp = hCam->GetProjectionMatrix() *hCam->GetViewMatrix();
+				auto &dynOctree = culler->GetOcclusionOctree();
+				SceneRenderDesc::CollectRenderMeshesFromOctree(
+					drawSceneInfo,dynOctree,scene,*hCam,vp,drawSceneInfo.renderFlags,
+					[this](RenderMode renderMode,bool translucent) -> pragma::rendering::RenderQueue* {
+						return (renderMode != RenderMode::World) ? nullptr : (translucent ? m_renderQueueTranslucent.get() : m_renderQueue.get());
+					},
+					nullptr,&bspLeafNodes
+				);
+			}
+
+			m_renderQueue->Sort();
+			m_renderQueueTranslucent->Sort();
+
+			m_renderQueue->Unlock();
+			m_renderQueueTranslucent->Unlock();
+		});
 	}));
-
-	/*m_cbRenderPrepass = c_game->AddCallback("RenderPrepass",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>,std::reference_wrapper<pragma::rendering::DepthStageRenderProcessor>>::Create(
-		[this](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo,std::reference_wrapper<pragma::rendering::DepthStageRenderProcessor> rsys) {
-		auto *shader = rsys.get().GetCurrentShader();
-		if(shader == nullptr)
-			return;
-		BindToShader(rsys.get());
-			rsys.get().Render(*m_renderQueue);
-			rsys.get().Render(*m_renderQueueTranslucent);
-		UnbindFromShader(rsys.get());
-	}));*/
-
 	m_cbPostRenderSkybox = c_game->AddCallback("PostRenderSkybox",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>,std::reference_wrapper<pragma::rendering::LightingStageRenderProcessor>>::Create(
 		[this](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo,std::reference_wrapper<pragma::rendering::LightingStageRenderProcessor> rsys) {
 		BindToShader(rsys.get());
@@ -150,6 +110,7 @@ void CSkyCameraComponent::Initialize()
 			rsys.get().Render(*m_renderQueueTranslucent);
 		UnbindFromShader(rsys.get());
 	}));
+#endif
 }
 
 void CSkyCameraComponent::BindToShader(pragma::rendering::BaseRenderProcessor &processor)
@@ -171,8 +132,6 @@ void CSkyCameraComponent::OnRemove()
 	BaseEntityComponent::OnRemove();
 	if(m_cbOnBuildRenderQueue.IsValid())
 		m_cbOnBuildRenderQueue.Remove();
-	if(m_cbRenderPrepass.IsValid())
-		m_cbRenderPrepass.Remove();
 	if(m_cbPostRenderSkybox.IsValid())
 		m_cbPostRenderSkybox.Remove();
 }

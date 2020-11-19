@@ -54,8 +54,8 @@ namespace pragma
 			EyeballConfig config = {};
 		};
 
-		static ComponentEventId EVENT_ON_EYEBALLS_UPDATED;
-		static ComponentEventId EVENT_ON_BLINK;
+		// static ComponentEventId EVENT_ON_EYEBALLS_UPDATED;
+		// static ComponentEventId EVENT_ON_BLINK;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
 		CEyeComponent(BaseEntity &ent);
@@ -86,12 +86,12 @@ namespace pragma
 
 		umath::Transform CalcEyeballPose(uint32_t eyeballIndex,umath::Transform *optOutBonePose=nullptr) const;
 		
-		void UpdateEyeballs();
+		void UpdateEyeballsMT();
 	protected:
-		void UpdateBlink();
+		void UpdateBlinkMT();
 		void OnModelChanged(const std::shared_ptr<Model> &mdl);
 		Vector3 ClampViewTarget(const Vector3 &viewTarget) const;
-		void UpdateEyeball(const Eyeball &eyeball,uint32_t eyeballIndex);
+		void UpdateEyeballMT(const Eyeball &eyeball,uint32_t eyeballIndex);
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 	private:
 		EyeballConfig m_eyeballConfig = {};

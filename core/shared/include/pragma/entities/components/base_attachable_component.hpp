@@ -33,7 +33,7 @@ namespace pragma
 
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
-		void UpdateAttachmentOffset();
+		void UpdateAttachmentOffset(bool invokeUpdateEvents=true);
 
 		AttachmentData *AttachToEntity(BaseEntity *ent,const AttachmentInfo &attInfo={});
 		AttachmentData *AttachToBone(BaseEntity *ent,uint32_t boneID,const AttachmentInfo &attInfo={});

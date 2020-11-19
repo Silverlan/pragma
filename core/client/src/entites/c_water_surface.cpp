@@ -39,10 +39,11 @@ void CWaterSurfaceComponent::Initialize()
 		matData.transformation = glm::scale(umat::identity(),scale);
 		//matData.transformation = matData.translation *matData.rotation *glm::scale(umat::identity(),scale);
 	});
-	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		if(static_cast<CEOnUpdateRenderData&>(evData.get()).bufferUpdateRequired)
-			UpdateSurfaceMesh();
-	});
+	// TODO
+	//BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	//	if(static_cast<CEOnUpdateRenderData&>(evData.get()).bufferUpdateRequired)
+	//		UpdateSurfaceMesh();
+	//});
 
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	auto pRenderComponent = ent.GetRenderComponent();

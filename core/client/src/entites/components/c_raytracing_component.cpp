@@ -92,9 +92,10 @@ void CRaytracingComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(CAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		SetBoneBufferDirty();
-	});
+	// TODO
+	//BindEventUnhandled(CAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	//	SetBoneBufferDirty();
+	//});
 	BindEventUnhandled(CRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		SetRenderBufferDirty();
 	});
@@ -233,9 +234,10 @@ void CRaytracingComponent::InitializeBufferUpdateCallback()
 	auto renderC = GetEntity().GetComponent<CRenderComponent>();
 	if(renderC.valid())
 		renderC->SetRenderBufferDirty();
-	m_cbUpdateBuffers = BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		UpdateBuffers(*static_cast<CEOnUpdateRenderData&>(evData.get()).commandBuffer);
-	});
+	// TODO
+	//m_cbUpdateBuffers = BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	//	UpdateBuffers(*static_cast<CEOnUpdateRenderData&>(evData.get()).commandBuffer);
+	//});
 }
 
 static void cmd_render_technique(NetworkState*,ConVar*,int32_t,int32_t val)

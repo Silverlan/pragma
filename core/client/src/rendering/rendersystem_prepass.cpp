@@ -36,6 +36,8 @@ pragma::rendering::DepthStageRenderProcessor::DepthStageRenderProcessor(const ut
 }
 uint32_t pragma::rendering::DepthStageRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue,RenderPassStats *optStats,std::optional<uint32_t> worldRenderQueueIndex)
 {
+	renderQueue.WaitForCompletion();
+
 	static auto skipRender = false;
 	if(skipRender)
 		return 0;

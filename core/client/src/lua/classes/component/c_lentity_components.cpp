@@ -347,8 +347,8 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defEyeballState.def_readwrite("irisProjectionV",&pragma::CEyeComponent::EyeballState::irisProjectionV);
 	defCEye.scope[defEyeballState];
 
-	defCEye.add_static_constant("EVENT_ON_EYEBALLS_UPDATED",pragma::CEyeComponent::EVENT_ON_EYEBALLS_UPDATED);
-	defCEye.add_static_constant("EVENT_ON_BLINK",pragma::CEyeComponent::EVENT_ON_BLINK);
+	// defCEye.add_static_constant("EVENT_ON_EYEBALLS_UPDATED",pragma::CEyeComponent::EVENT_ON_EYEBALLS_UPDATED);
+	// defCEye.add_static_constant("EVENT_ON_BLINK",pragma::CEyeComponent::EVENT_ON_BLINK);
 	entsMod[defCEye];
 
 	auto defCScene = luabind::class_<CSceneHandle,BaseEntityComponentHandle>("SceneComponent");

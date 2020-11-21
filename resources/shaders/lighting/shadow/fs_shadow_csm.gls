@@ -37,12 +37,11 @@ float calculate_csm_shadow(int index,vec4 worldCoord,float bias)
 float get_shadow_value(sampler2DArray shadowMap,vec4 shadowCoord,vec2 offset,int layer)
 {
 #ifdef GL_EXT_texture_array
-	float r = texture(shadowMap,shadowCoord +vec4(
+	float r = texture(shadowMap,shadowCoord.xyz +vec3(
 		offset.x *u_renderSettings.shadowRatioX *shadowCoord.w,
 		offset.y *u_renderSettings.shadowRatioY *shadowCoord.w,
-		0.0,
 		0.0
-	)).x;
+	),shadowCoord.w /* bias */).x;
 	return r /shadowCoord.w;
 #else
 	return 0.0; // Not supported by drivers

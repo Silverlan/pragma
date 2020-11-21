@@ -33,13 +33,13 @@
 
 layout(location = 0) in vec2 vs_vert_uv;
 
-layout(set = SHADER_UNIFORM_TEXTURE_SET,binding = SHADER_UNIFORM_TEXTURE_BINDING) uniform sampler2D u_texture;
-layout(set = SHADER_UNIFORM_DEPTH_BUFFER_SET,binding = SHADER_UNIFORM_DEPTH_BUFFER_BINDING) uniform sampler2D u_depthBuffer;
-layout(set = SHADER_UNIFORM_REFRACTION_MAP_SET,binding = SHADER_UNIFORM_REFRACTION_MAP_BINDING) uniform sampler2D u_refractionMap;
+layout(LAYOUT_ID(SHADER_UNIFORM_TEXTURE_SET,SHADER_UNIFORM_TEXTURE_BINDING)) uniform sampler2D u_texture;
+layout(LAYOUT_ID(SHADER_UNIFORM_DEPTH_BUFFER_SET,SHADER_UNIFORM_DEPTH_BUFFER_BINDING)) uniform sampler2D u_depthBuffer;
+layout(LAYOUT_ID(SHADER_UNIFORM_REFRACTION_MAP_SET,SHADER_UNIFORM_REFRACTION_MAP_BINDING)) uniform sampler2D u_refractionMap;
 
 layout(location = 0) out vec4 fs_color;
 
-layout(push_constant) uniform PushConstants
+layout(LAYOUT_PUSH_CONSTANTS()) uniform PushConstants
 {
 	vec4 clipPlane;
 } u_pushConstants;
@@ -48,7 +48,7 @@ void main()
 {
 	float d = texture(u_depthBuffer,vs_vert_uv).r;
 	
-	mat4 invVp = inverse(u_camera.VP);
+	mat4 invVp = inverse(get_view_projection_matrix());
 	vec3 fragPosWs = calc_position_from_depth(d,vs_vert_uv,invVp);
 
 	if(dot(vec4(fragPosWs.xyz,1.0),vec4(u_pushConstants.clipPlane.xyz,u_pushConstants.clipPlane.w -0.1)) > gl_ClipDistance[0])

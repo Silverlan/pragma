@@ -94,7 +94,6 @@ ShaderPBR::ShaderPBR(prosper::IPrContext &context,const std::string &identifier)
 }
 bool ShaderPBR::BindMaterialParameters(CMaterial &mat)
 {
-	umath::set_flag(m_extRenderFlags,RenderFlags::TranslucencyEnabled,mat.IsTranslucent());
 	return ShaderTextured3DBase::BindMaterialParameters(mat);
 }
 prosper::DescriptorSetInfo &ShaderPBR::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
@@ -301,7 +300,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBRBlend::InitializeMaterial
 	}
 	return descSetGroup;
 }
-bool ShaderPBRBlend::Draw(CModelSubMesh &mesh)
+bool ShaderPBRBlend::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx)
 {
 	auto numAlpha = 0;
 	auto alphaBuffer = c_engine->GetRenderContext().GetDummyBuffer();
@@ -317,7 +316,7 @@ bool ShaderPBRBlend::Draw(CModelSubMesh &mesh)
 	}
 	return RecordPushConstants(PushConstants{numAlpha},sizeof(ShaderPBR::PushConstants)) == true &&
 		RecordBindVertexBuffer(*alphaBuffer,VERTEX_BINDING_VERTEX.GetBindingIndex() +2u) == true &&
-		ShaderPBR::Draw(mesh) == true;
+		ShaderPBR::Draw(mesh,meshIdx) == true;
 }
 bool ShaderPBRBlend::GetRenderBufferTargets(
 	CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,

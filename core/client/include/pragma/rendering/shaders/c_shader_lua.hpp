@@ -112,7 +112,7 @@ namespace pragma
 
 		virtual void SetIdentifier(const std::string &identifier)=0;
 		virtual void SetPipelineCount(uint32_t pipelineCount)=0;
-		virtual std::shared_ptr<prosper::IPrimaryCommandBuffer> GetCurrentCommandBuffer()=0;
+		virtual prosper::IPrimaryCommandBuffer *GetCurrentCommandBuffer()=0;
 
 		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {}
 		static void Lua_default_InitializePipeline(lua_State *l,LuaShaderBase *shader,prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {shader->Lua_InitializePipeline(pipelineInfo,pipelineIdx);}
@@ -165,7 +165,7 @@ namespace pragma
 			: public TBaseShader,public TLuaBaseShader
 	{
 	public:
-		virtual std::shared_ptr<prosper::IPrimaryCommandBuffer> GetCurrentCommandBuffer() override;
+		virtual prosper::IPrimaryCommandBuffer *GetCurrentCommandBuffer() override;
 	protected:
 		template<typename... TARGS>
 			TLuaShaderBase(prosper::IPrContext &context,TARGS ...args)
@@ -308,7 +308,7 @@ namespace pragma
 		static void Lua_default_OnEndDraw(lua_State *l,LuaShaderTextured3D &shader) {shader.Lua_OnEndDraw();}
 
 		virtual bool BindMaterial(CMaterial &mat) override;
-		virtual bool Draw(CModelSubMesh &mesh) override;
+		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx) override;
 		virtual bool BindEntity(CBaseEntity &ent) override;
 		virtual bool BindVertexAnimationOffset(uint32_t offset) override;
 		virtual bool BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) override;
@@ -328,7 +328,7 @@ namespace pragma
 	};
 };
 template<class TBaseShader,class TLuaBaseShader>
-	std::shared_ptr<prosper::IPrimaryCommandBuffer> pragma::TLuaShaderBase<TBaseShader,TLuaBaseShader>::GetCurrentCommandBuffer() {return TBaseShader::GetCurrentCommandBuffer();}
+	prosper::IPrimaryCommandBuffer *pragma::TLuaShaderBase<TBaseShader,TLuaBaseShader>::GetCurrentCommandBuffer() {return TBaseShader::GetCurrentCommandBuffer();}
 template<class TBaseShader,class TLuaBaseShader>
 	void pragma::TLuaShaderBase<TBaseShader,TLuaBaseShader>::SetIdentifier(const std::string &identifier) {return TBaseShader::SetIdentifier(identifier);}
 template<class TBaseShader,class TLuaBaseShader>

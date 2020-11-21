@@ -12,7 +12,7 @@ layout(location = SHADER_VERTEX_BUFFER_LOCATION) in vec3 in_vert_pos;
 
 void main()
 {
-	mat4 MVP = u_camera.VP *get_model_matrix();
+	mat4 MVP = API_DEPTH_TRANSFORM(u_camera.P) *get_view_matrix() *get_model_matrix();
 	vec3 vtrans = in_vert_pos;
 	vec4 MVP_Pos = MVP *vec4(vtrans,1);
 	gl_Position = MVP_Pos.xyww;

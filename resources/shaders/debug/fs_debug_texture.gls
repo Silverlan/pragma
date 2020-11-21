@@ -8,7 +8,7 @@
 layout(location = 0) out vec4 fs_color;
 layout(location = 1) out vec4 fs_brightColor;
 
-layout(set = 0,binding = 0) uniform sampler2D u_texture;
+layout(LAYOUT_ID(0,0)) uniform sampler2D u_texture;
 
 void main()
 {

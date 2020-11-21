@@ -5,6 +5,7 @@
 
 mat4 get_rotation_matrix(vec3 axis,float angle)
 {
+	// Source: http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/
 	axis = normalize(axis);
 	float s = sin(angle);
 	float c = cos(angle);

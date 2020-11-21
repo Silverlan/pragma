@@ -29,45 +29,61 @@ void export_world_fragment_data(mat4 mdlMatrix,vec3 vertPos)
 	uint vertexAnimOffset = (u_pushConstants.vertexAnimInfo<<16)>>16;
 	uint vertexAnimCount = u_pushConstants.vertexAnimInfo>>16;
 	float wrinkleDelta = 0.0;
+	vec3 vertNorm = in_vert_normal.xyz;
 	for(uint i=0;i<vertexAnimCount;++i)
 	{
 		uint offset = vertexAnimOffset +i;
 		VertexAnimationFrameData frameData = vaFrameData.data[offset];
-		vec4 v0 = vertexAnimation.verts[frameData.srcFrameOffset +gl_VertexIndex];
-		vec4 v1 = vertexAnimation.verts[frameData.dstFrameOffset +gl_VertexIndex];
-		wrinkleDelta += v0.w *frameData.blend;
-		vertPos += v0.xyz *frameData.blend;//v0 +(v1 -v0) *frameData.blend;
+
+		vec3 vpos0;
+		vec3 vnorm0;
+		float vwrinkle0;
+		get_vertex_anim_vertex_position(frameData.srcFrameOffset,vpos0,vnorm0,vwrinkle0);
+
+		vec3 vpos1;
+		vec3 vnorm1;
+		float vwrinkle1;
+		get_vertex_anim_vertex_position(frameData.srcFrameOffset,vpos1,vnorm1,vwrinkle1);
+
+		wrinkleDelta += vwrinkle0 *frameData.blend;
+		vertPos += vpos0 *frameData.blend;//v0 +(v1 -v0) *frameData.blend;
+		vertNorm += vnorm0 *frameData.blend;
 	}
+	vertNorm = normalize(vertNorm);
 
 	vs_out.wrinkleDelta = wrinkleDelta;
 
-	mat4 MV = u_camera.V *mdlMatrix;
-	mat4 MVP = u_camera.P *MV;
+	//mat4 MV = V *mdlMatrix;
+	//mat4 MVP = u_camera.P *MV;
 
-	mat4 mBone = calc_bone_matrix(is_weighted());
-	vec4 vpos = mBone *vec4(vertPos,1.0);
+	mat4 mBone = calc_bone_matrix(is_weighted(),is_weighted_ext());
+	vec4 weightedVertPos = mBone *vec4(vertPos,1.0);
 
-	gl_Position = MVP *vpos;
+	vec4 vposWs = mdlMatrix *weightedVertPos;
+	if(is_3d_sky())
+	{
+		vposWs.xyz -= u_pushConstants.drawOrigin.xyz;
+		vposWs.xyz *= u_pushConstants.drawOrigin.w;
+	}
 
-	vec4 vposWs = mdlMatrix *vpos;
+	mat4 V = get_view_matrix();
+	gl_Position = API_DEPTH_TRANSFORM(u_camera.P) *V *vposWs;
+
 	vposWs.xyz /= vposWs.w;
 	vposWs.w = 1.0;
 
-	float lenSqrClipPlane = length_sqr(u_pushConstants.clipPlane);
-	if(lenSqrClipPlane > 0.0)
-	{
-		float lenClipPlane = sqrt(lenSqrClipPlane);
-		gl_ClipDistance[0] = dot(vec4(vposWs.xyz,1.0),vec4(u_pushConstants.clipPlane /lenClipPlane,lenClipPlane));
-	}
+	if(length_sqr(u_pushConstants.clipPlane.xyz) > 0.0)
+		gl_ClipDistance[0] = dot(vec4(vposWs.xyz,1.0),u_pushConstants.clipPlane);
 	else
 		gl_ClipDistance[0] = 1.0;
 
-	vec3 normal = normalize((mBone *vec4(in_vert_normal.xyz,0.0)).xyz);
+	vec3 normal = normalize((mBone *vec4(vertNorm.xyz,0.0)).xyz);
 	vs_out.vert_pos_ws = vposWs.xyz;
-	//vs_out.vert_pos_cs = (u_camera.V *vposWs).xyz;
+	//vs_out.vert_pos = vertPos;
+	//vs_out.vert_pos_cs = (V *vposWs).xyz;
 
 	vs_out.vert_normal = normal;
-	vs_out.vert_normal_cs = (u_camera.V *mdlMatrix *vec4(normal,0)).xyz;
+	vs_out.vert_normal_cs = (V *mdlMatrix *vec4(normal,0)).xyz;
 	
 	vs_out.vert_uv = in_vert_uv.xy;
 

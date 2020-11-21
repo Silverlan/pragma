@@ -21,6 +21,8 @@ extern DLLCLIENT CGame *c_game;
 
 void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightDirectionalComponent &light,bool drawParticleShadows)
 {
+	// TODO
+#if 0
 	auto pLightComponent = light.GetEntity().GetComponent<pragma::CLightComponent>();
 	auto *shadowScene = pLightComponent.valid() ? pLightComponent->FindShadowScene() : nullptr;
 	// TODO
@@ -231,4 +233,5 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 			drawCmd->RecordEndRenderPass();
 		}
 	}
+#endif
 }

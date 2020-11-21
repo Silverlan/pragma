@@ -42,7 +42,7 @@ namespace pragma
 		virtual bool BindSceneCamera(pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,bool bView) override;
 		virtual bool BindLights(prosper::IDescriptorSet &dsLights) override;
 		virtual bool BindVertexAnimationOffset(uint32_t offset) override;
-		virtual bool Draw(CModelSubMesh &mesh) override;
+		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx) override;
 		virtual bool GetRenderBufferTargets(
 			CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
 			std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo

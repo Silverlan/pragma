@@ -306,6 +306,8 @@ void CShadowCSMComponent::UpdateFrustum(pragma::CCameraComponent &cam,const Mat4
 
 void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightDirectionalComponent &light)
 {
+	// TODO
+#if 0
 	auto pLightComponent = light.GetEntity().GetComponent<pragma::CLightComponent>();
 	auto *shadowScene = pLightComponent.valid() ? pLightComponent->FindShadowScene() : nullptr;
 	auto &rt = GetStaticPendingRenderTarget();
@@ -536,4 +538,5 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 
 		drawCmd->RecordImageBarrier(img,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal,layer);
 	}
+#endif
 }

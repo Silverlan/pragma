@@ -31,7 +31,7 @@ namespace pragma
 		virtual bool BindSceneCamera(pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,bool bView) override;
 		virtual bool BindEntity(CBaseEntity &ent) override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
-		virtual bool Draw(CModelSubMesh &mesh) override;
+		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx) override;
 	protected:
 		virtual bool BindMaterialParameters(CMaterial &mat) override;
 		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;

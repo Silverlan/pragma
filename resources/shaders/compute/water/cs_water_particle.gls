@@ -10,7 +10,7 @@ struct WaterParticle
 	float velocity;
 };
 
-layout(std140,set = SHADER_STORAGE_WATER_PARTICLE_SET,binding = SHADER_STORAGE_WATER_PARTICLE_BINDING) buffer CS_PARTICLE_DATA
+layout(std140,LAYOUT_ID(SHADER_STORAGE_WATER_PARTICLE_SET,SHADER_STORAGE_WATER_PARTICLE_BINDING)) buffer CS_PARTICLE_DATA
 {
 	WaterParticle particles[];
 } u_particles;

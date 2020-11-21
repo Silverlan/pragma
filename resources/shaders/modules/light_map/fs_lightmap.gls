@@ -6,7 +6,7 @@
 #if ENABLE_LIGHTMAP == 1
 #include "../sh_uniform_locations.gls"
 
-layout(set = SHADER_UNIFORM_LIGHT_MAP_SET,binding = SHADER_UNIFORM_LIGHT_MAP_BINDING) uniform sampler2D u_lightMap;
+layout(LAYOUT_ID(SHADER_UNIFORM_LIGHT_MAP_SET,SHADER_UNIFORM_LIGHT_MAP_BINDING)) uniform sampler2D u_lightMap;
 #endif
 
 #endif

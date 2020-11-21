@@ -112,8 +112,7 @@ namespace pragma
 			// PBR only
 			NoIBL = LightmapsEnabled<<1u,
 
-			TranslucencyEnabled = NoIBL<<1u,
-			UseExtendedVertexWeights = TranslucencyEnabled<<1u,
+			UseExtendedVertexWeights = NoIBL<<1u,
 			Is3DSky = UseExtendedVertexWeights<<1u,
 			DisableShadows = Is3DSky<<1u
 		};
@@ -156,7 +155,7 @@ namespace pragma
 		virtual size_t GetBaseTypeHashCode() const override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		virtual bool BindMaterial(CMaterial &mat) override;
-		virtual bool Draw(CModelSubMesh &mesh) override;
+		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx) override;
 		virtual bool BindDrawOrigin(const Vector4 &drawOrigin) override;
 		virtual bool GetRenderBufferTargets(
 			CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
@@ -169,7 +168,7 @@ namespace pragma
 		void SetShadowsEnabled(bool enabled);
 	protected:
 		using ShaderEntity::Draw;
-		bool BindLightMapUvBuffer(CModelSubMesh &mesh,bool &outShouldUseLightmaps);
+		bool BindLightMapUvBuffer(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,bool &outShouldUseLightmaps);
 		virtual void OnBindEntity(CBaseEntity &ent,CRenderComponent &renderC) override;
 		virtual void ApplyMaterialFlags(CMaterial &mat,MaterialFlags &outFlags) const;
 		virtual void UpdateRenderFlags(CModelSubMesh &mesh,RenderFlags &inOutFlags);

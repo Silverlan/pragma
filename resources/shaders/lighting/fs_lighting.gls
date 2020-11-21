@@ -23,6 +23,7 @@
 #include "fs_lighting_spot.gls"
 #include "fs_lighting_point.gls"
 #include "../modules/fs_ssao.gls"
+#include "../modules/fs_renderer.gls"
 #include "../compute/cs_forwardp_settings.gls"
 
 bool is_fragment_in_shadow() // Only for spot-lights for the time being
@@ -111,7 +112,7 @@ vec3 calculate_lighting(vec3 diffuseColor,vec2 texCoords,mat4 mdlMatrix,vec3 fra
 		ambientColor = diffuseColor;
 		ambientColor *= u_renderSettings.ambientColor.rgb *u_renderSettings.ambientColor.a;
 		if(is_ssao_enabled() == true)
-			ssaoFactor = get_ssao_occlusion();
+			ssaoFactor = get_ssao_occlusion(get_viewport_width(),get_viewport_height());
 	}
 
 	ivec2 location = ivec2(gl_FragCoord.xy);

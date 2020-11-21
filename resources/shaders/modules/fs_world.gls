@@ -81,10 +81,12 @@ vec4 get_processed_color(vec4 texCol,vec2 texCoords)
 	}
 	else if(renderMode == DEBUG_RENDER_SPECULAR_MAP)
 	{
+#if 0
 #if USE_SPECULAR_MAP == 1
 		if(use_specular_map() == true)
 			colProcessed.rgb = texture(u_specularMap,texCoords).rgb;
 		else
+#endif
 #endif
 			colProcessed.rgb = diffuseColor;
 	}

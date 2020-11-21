@@ -30,18 +30,21 @@
 #include "../modules/sh_rendersettings.gls"
 #include "../lighting/sh_light_sources.gls"
 #include "../functions/fs_linearize_depth.gls"
+#include "../math/intersection.gls"
 #include "cs_forwardp_settings.gls"
 
-layout(std430,set = SHADER_UNIFORM_VIS_LIGHT_INDEX_BUFFER_SET,binding = SHADER_UNIFORM_VIS_LIGHT_INDEX_BUFFER_BINDING) buffer VisibleLightIndicesBuffer {
+layout(std430,LAYOUT_ID(SHADER_UNIFORM_VIS_LIGHT_INDEX_BUFFER_SET,SHADER_UNIFORM_VIS_LIGHT_INDEX_BUFFER_BINDING)) buffer VisibleLightIndicesBuffer {
 	uint visibleBits[];
 } visibleLightIndicesBuffer;
 
-layout(push_constant) uniform LightInfo
+layout(LAYOUT_PUSH_CONSTANTS()) uniform LightInfo
 {
 	uint lightCount;
+	uint sceneFlag;
+	uint viewportResolution;
 } u_lightInfo;
 
-layout(set = SHADER_UNIFORM_DEPTH_MAP_SET,binding = SHADER_UNIFORM_DEPTH_MAP_BINDING) uniform sampler2D u_sceneDepth;
+layout(LAYOUT_ID(SHADER_UNIFORM_DEPTH_MAP_SET,SHADER_UNIFORM_DEPTH_MAP_BINDING)) uniform sampler2D u_sceneDepth;
 
 // Specialization constants not supported on some GPUs?
 // layout(constant_id = 1) const uint FORWARDP_TILE_SIZE = 16;
@@ -53,8 +56,6 @@ shared uint maxDepthInt;
 shared uint visibleLightCount;
 // Shared local storage for visible indices, will be written out to the global buffer at the end
 shared int visibleLightIndices[MAX_SCENE_LIGHTS];
-shared mat4 viewProjection;
-shared mat4 view;
 
 // vulkan ndc, minDepth = 0.0, maxDepth = 1.0
 const vec2 ndc_upper_left = vec2(-1.0,-1.0);
@@ -65,15 +66,24 @@ struct ViewFrustum
 {
 	vec4 planes[6];
 	vec3 points[8]; // 0-3 near 4-7 far
+
+	float minDepth;
+	float maxDepth;
+
+	// AABB
+	vec3 min;
+	vec3 max;
 };
 shared ViewFrustum frustum;
 
 // Construct view frustum
-ViewFrustum create_frustum(ivec2 tile_id,float min_depth,float max_depth)
+ViewFrustum create_frustum(ivec2 tile_id,float min_depth,float max_depth,uint viewportW,uint viewportH)
 {
+	//min_depth = (min_depth +1) /2.0;
+	//max_depth = (max_depth +1) /2.0;
 	mat4 inv_projview = inverse(u_camera.VP);
 
-	vec2 ndc_size_per_tile = 2.0 *vec2(FORWARDP_TILE_SIZE,FORWARDP_TILE_SIZE) /vec2(u_renderSettings.viewportW,u_renderSettings.viewportH);
+	vec2 ndc_size_per_tile = 2.0 *vec2(FORWARDP_TILE_SIZE,FORWARDP_TILE_SIZE) /vec2(viewportW,viewportH);
 
 	vec2 ndc_pts[4];  // corners of tile in ndc
 	ndc_pts[0] = ndc_upper_left +tile_id *ndc_size_per_tile;  // upper left
@@ -83,6 +93,9 @@ ViewFrustum create_frustum(ivec2 tile_id,float min_depth,float max_depth)
 
 	ViewFrustum frustum;
 
+	frustum.min = vec3(FLT_MAX,FLT_MAX,FLT_MAX);
+	frustum.max = -frustum.min;
+
 	vec4 temp;
 	for(int i=0; i<4;i++)
 	{
@@ -90,6 +103,17 @@ ViewFrustum create_frustum(ivec2 tile_id,float min_depth,float max_depth)
 		frustum.points[i] = temp.xyz /temp.w;
 		temp = inv_projview *vec4(ndc_pts[i],max_depth,1.0);
 		frustum.points[i +4] = temp.xyz /temp.w;
+
+		vec3 p0 = frustum.points[i];
+		vec3 p1 = frustum.points[i +4];
+		for(int j=0;j<3;++j)
+		{
+			frustum.min[j] = min(frustum.min[j],p0[j]);
+			frustum.min[j] = min(frustum.min[j],p1[j]);
+
+			frustum.max[j] = max(frustum.max[j],p0[j]);
+			frustum.max[j] = max(frustum.max[j],p1[j]);
+		}
 	}
 
 	vec3 temp_normal;
@@ -107,6 +131,8 @@ ViewFrustum create_frustum(ivec2 tile_id,float min_depth,float max_depth)
 		temp_normal = normalize(temp_normal);
 		frustum.planes[4] = vec4(temp_normal, -dot(temp_normal,frustum.points[0]));
 	}
+
+
 	// far plane
 	{
 		temp_normal = cross(frustum.points[7] -frustum.points[4],frustum.points[5] -frustum.points[4]);
@@ -114,13 +140,15 @@ ViewFrustum create_frustum(ivec2 tile_id,float min_depth,float max_depth)
 		frustum.planes[5] = vec4(temp_normal,-dot(temp_normal,frustum.points[4]));
 	}
 
+	frustum.minDepth = min_depth;
+	frustum.maxDepth = max_depth;
 	return frustum;
 }
 
-bool is_light_in_frustum(vec4 lightPosition,ViewFrustum frustum)
+bool is_light_in_frustum(LightSourceData light,ViewFrustum frustum)
 {
-	vec3 lightPos = lightPosition.xyz;
-	float lightDist = lightPosition.w;
+	vec3 lightPos = light.position.xyz;
+	float lightDist = light.position.w;
 	bool result = true;
 
     // Step1: sphere-plane test
@@ -147,9 +175,19 @@ bool is_light_in_frustum(vec4 lightPosition,ViewFrustum frustum)
     probe=0; for(int i=0; i<8; i++) probe += ((frustum.points[i].z > light_bbox_max.z)?1:0); if(probe==8) return false;
     probe=0; for(int i=0; i<8; i++) probe += ((frustum.points[i].z < light_bbox_min.z)?1:0); if(probe==8) return false;
 
+    if((light.flags &FLIGHT_TYPE_SPOT) != 0)
+    {
+    	// Cone culling
+		// See https://simoncoenen.com/blog/programming/graphics/SpotlightCulling.html
+		vec3 extents = (frustum.max -frustum.min) /2.0;
+		vec3 center = (frustum.max +frustum.min) /2.0;
+		float radius = length(extents);
+		if(!intersect_cone_sphere(light.position.xyz,light.direction.xyz,light.position.w,light.cutoffOuter,vec4(center,radius)))
+			return false;
+	}
+
 	return true;
 }
-
 
 #define SHADOW_INDEX_INTEGER_COUNT ((MAX_ACTIVE_SHADOW_SOURCES /32) +1)
 
@@ -167,8 +205,6 @@ void main()
 		minDepthInt = 0xFFFFFFFF;
 		maxDepthInt = 0;
 		visibleLightCount = 0;
-		viewProjection = u_camera.VP;
-		view = u_camera.V;
 	}
 
 	if(gl_WorkGroupID.x == 0 && gl_WorkGroupID.y == 0)
@@ -177,11 +213,15 @@ void main()
 			visibleLightIndicesBuffer.visibleBits[i] = 0;
 	}
 
+	memoryBarrierShared();
 	barrier();
+
+	uint viewportW = u_lightInfo.viewportResolution>>16;
+	uint viewportH = (u_lightInfo.viewportResolution<<16)>>16;
 
 	// Step 1: Calculate the minimum and maximum depth values (from the depth buffer) for this group's tile
 	float maxDepth, minDepth;
-	vec2 uv = vec2(location) /vec2(u_renderSettings.viewportW,u_renderSettings.viewportH);
+	vec2 uv = vec2(location) /vec2(float(viewportW),float(viewportH));
 	float depth = texture(u_sceneDepth,uv).r;
 
 	// Convert depth to uint so we can do atomic min and max comparisons between the threads
@@ -189,6 +229,7 @@ void main()
 	atomicMin(minDepthInt,depthInt);
 	atomicMax(maxDepthInt,depthInt);
 
+	memoryBarrierShared();
 	barrier();
 
 	// Step 2: One thread should calculate the frustum planes to be used for this tile
@@ -198,9 +239,10 @@ void main()
 		minDepth = uintBitsToFloat(minDepthInt);
 		maxDepth = uintBitsToFloat(maxDepthInt);
 
-		frustum = create_frustum(tileID,minDepth,maxDepth);
+		frustum = create_frustum(tileID,minDepth,maxDepth,viewportW,viewportH);
 	}
 
+	memoryBarrierShared();
 	barrier();
 
 	// Step 3: Cull lights.
@@ -216,15 +258,19 @@ void main()
 			break;
 		if((lightBuffer.data[lightIndex].flags &FLIGHT_TURNED_ON) == 0)
 			continue;
+
+		if((lightBuffer.data[lightIndex].sceneFlags &u_lightInfo.sceneFlag) == 0)
+			continue; // Light is not in scene
 			
 		// We check if the light exists in our frustum
-		if(((lightBuffer.data[lightIndex].flags &FLIGHT_TYPE_DIRECTIONAL) != 0 || is_light_in_frustum(lightBuffer.data[lightIndex].position,frustum)))
+		if(((lightBuffer.data[lightIndex].flags &FLIGHT_TYPE_DIRECTIONAL) != 0 || is_light_in_frustum(lightBuffer.data[lightIndex],frustum)))
 		{
 			uint offset = atomicAdd(visibleLightCount, 1);
 			visibleLightIndices[offset] = int(lightIndex);
 		}
 	}
 
+	memoryBarrierShared();
 	barrier();
 
 	// One thread should fill the global light buffer

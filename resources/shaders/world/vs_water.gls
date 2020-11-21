@@ -9,10 +9,11 @@ void main()
 {
 	mat4 mdlMatrix = get_model_matrix();
 	vec3 vertPos = in_vert_pos;
-	mat4 MV = u_camera.V *mdlMatrix;
-	mat4 MVP = u_camera.P *MV;
+	mat4 V = get_view_matrix();
+	mat4 MV = V *mdlMatrix;
+	mat4 MVP = get_projection_matrix() *MV;
 
-	mat4 mBone = calc_bone_matrix(is_weighted());
+	mat4 mBone = calc_bone_matrix(is_weighted(),is_weighted_ext());
 	vec4 vpos = mBone *vec4(vertPos,1.0);
 
 	gl_Position = MVP *vpos;
@@ -32,10 +33,10 @@ void main()
 
 	vec3 normal = normalize((mBone *vec4(in_vert_normal,0.0)).xyz);
 	vs_out.vert_pos_ws = vposWs.xyz;
-	//vs_out.vert_pos_cs = (u_camera.V *vposWs).xyz;
+	//vs_out.vert_pos_cs = (V *vposWs).xyz;
 
 	vs_out.vert_normal = normal;
-	vs_out.vert_normal_cs = (u_camera.V *mdlMatrix *vec4(normal,0)).xyz;
+	vs_out.vert_normal_cs = (V *mdlMatrix *vec4(normal,0)).xyz;
 	
 	vs_out.vert_uv = in_vert_uv;
 

@@ -379,6 +379,9 @@ public:
 	virtual std::string GetLuaNetworkDirectoryName() const override;
 	virtual std::string GetLuaNetworkFileName() const override;
 
+	void SetDefaultGameRenderEnabled(bool enabled);
+	bool IsDefaultGameRenderEnabled() const;
+
 	void QueueForRendering(const util::DrawSceneInfo &drawSceneInfo);
 	void SetRenderScene(pragma::CSceneComponent &scene);
 	void ResetRenderScene();
@@ -459,6 +462,7 @@ private:
 	bool LoadAuxEffects(const std::string &fname);
 
 	// Render
+	bool m_defaultGameRenderEnabled = true;
 	std::vector<util::DrawSceneInfo> m_sceneRenderQueue {};
 	std::shared_ptr<pragma::rendering::RenderQueueBuilder> m_renderQueueBuilder = nullptr;
 	Vector4 m_clipPlane = {};

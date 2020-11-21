@@ -216,6 +216,8 @@ ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(
 	pragma::ShaderShadow &shader,bool bTranslucent
 )
 {
+	// TODO
+#if 0
 	auto bRetTranslucent = false;
 	if(shader.BeginDraw(drawCmd) == false)
 		return ShadowRenderer::RenderResultFlags::None;
@@ -256,6 +258,8 @@ ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(
 	}
 	shader.EndDraw();
 	return hasTranslucents ? ShadowRenderer::RenderResultFlags::TranslucentPending : ShadowRenderer::RenderResultFlags::None;
+#endif
+	return RenderResultFlags::None;
 }
 
 static CVar cvParticleQuality = GetClientConVar("cl_render_particle_quality");

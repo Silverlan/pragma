@@ -6,7 +6,7 @@
 struct VisibleIndex {
 	int index;
 };
-layout(std430,set = SHADER_UNIFORM_TILE_VIS_LIGHT_INDEX_BUFFER_SET,binding = SHADER_UNIFORM_TILE_VIS_LIGHT_INDEX_BUFFER_BINDING) buffer VisibleLightTileIndicesBuffer {
+layout(std430,LAYOUT_ID(SHADER_UNIFORM_TILE_VIS_LIGHT_INDEX_BUFFER_SET,SHADER_UNIFORM_TILE_VIS_LIGHT_INDEX_BUFFER_BINDING)) buffer VisibleLightTileIndicesBuffer {
 	VisibleIndex data[];
 } visibleLightTileIndicesBuffer;
 

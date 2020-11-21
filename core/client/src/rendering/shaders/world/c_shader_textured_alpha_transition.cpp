@@ -75,7 +75,7 @@ void ShaderTexturedAlphaTransition::InitializeGfxPipeline(prosper::GraphicsPipel
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_ALPHA);
 }
 
-bool ShaderTexturedAlphaTransition::Draw(CModelSubMesh &mesh)
+bool ShaderTexturedAlphaTransition::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx)
 {
 	auto numAlpha = 0;
 	auto alphaBuffer = c_engine->GetRenderContext().GetDummyBuffer();
@@ -91,5 +91,5 @@ bool ShaderTexturedAlphaTransition::Draw(CModelSubMesh &mesh)
 	}
 	return RecordPushConstants(PushConstants{numAlpha},sizeof(ShaderTextured3DBase::PushConstants)) == true &&
 		RecordBindVertexBuffer(*alphaBuffer,VERTEX_BINDING_VERTEX.GetBindingIndex() +2u) == true &&
-		ShaderTextured3DBase::Draw(mesh) == true;
+		ShaderTextured3DBase::Draw(mesh,meshIdx) == true;
 }

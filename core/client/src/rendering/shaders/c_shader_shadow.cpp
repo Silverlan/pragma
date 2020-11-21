@@ -62,12 +62,12 @@ bool ShaderShadow::BindMaterial(CMaterial &mat)
 	return false; // prosper TODO
 }
 
-bool ShaderShadow::Draw(CModelSubMesh &mesh)
+bool ShaderShadow::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx)
 {
 	auto flags = Flags::None;
 	if(mesh.GetExtendedVertexWeights().empty() == false)
 		flags |= Flags::UseExtendedVertexWeights;
-	return RecordPushConstants(flags,offsetof(PushConstants,flags)) && ShaderEntity::Draw(mesh);
+	return RecordPushConstants(flags,offsetof(PushConstants,flags)) && ShaderEntity::Draw(mesh,meshIdx);
 }
 
 bool ShaderShadow::BindEntity(CBaseEntity &ent,const Mat4 &depthMVP)

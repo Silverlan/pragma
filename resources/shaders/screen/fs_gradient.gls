@@ -1,4 +1,4 @@
-#version 400
+#version 440
 
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shading_language_420pack : enable
@@ -15,7 +15,7 @@ struct Node
 	float offset; // 4 Bytes + 12 Bytes alignment
 };
 
-layout(push_constant) uniform pushConstants {
+layout(LAYOUT_PUSH_CONSTANTS()) uniform pushConstants {
 	ivec2 textureSize; // 8 Bytes
 	vec2 boxIntersection; // 8 Bytes
 	int nodeCount; // 4 Bytes + 12 Bytes alignment

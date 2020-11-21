@@ -1,4 +1,4 @@
-#version 400
+#version 440
 
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shading_language_420pack : enable
@@ -11,8 +11,8 @@ struct VertexData
 };
 layout(location = 0) in VertexData fs_in;
 
-layout(set = 0,binding = 0) uniform samplerCube u_cubemap;
-layout(std140,set = 1,binding = 0) uniform RoughnessData
+layout(LAYOUT_ID(0,0)) uniform samplerCube u_cubemap;
+layout(std140,LAYOUT_ID(1,0)) uniform RoughnessData
 {
      float roughness;
      float resolution;

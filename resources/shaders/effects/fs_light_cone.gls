@@ -17,7 +17,7 @@
 void main()
 {
 	fs_color = get_instance_color();
-	extract_bright_color(fs_color);
+	float intensity = fs_color.a;
 
 	mat4 m = get_model_matrix();
 	vec3 origin = vec3(m[3][0],m[3][1],m[3][2]); // Origin (Tip) of the cone in world-space
@@ -51,4 +51,6 @@ void main()
 			fs_color.a *= 1.0 -(1.0 -shadow) *0.8;
 		}
 	}
+	fs_color.a *= intensity;
+	extract_bright_color(vec4(fs_color.rgb *intensity,1.0));
 }

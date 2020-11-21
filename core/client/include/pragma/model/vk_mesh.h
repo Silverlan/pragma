@@ -38,7 +38,7 @@ namespace pragma
 		const std::shared_ptr<prosper::IRenderBuffer> &GetRenderBuffer(CModelSubMesh &mesh,pragma::ShaderEntity &shader,uint32_t pipelineIdx=0u);
 	private:
 		void SetDirty();
-		std::unordered_map<prosper::PipelineID,std::shared_ptr<prosper::IRenderBuffer>> m_renderBuffers;
+		std::vector<std::pair<prosper::PipelineID,std::shared_ptr<prosper::IRenderBuffer>>> m_renderBuffers;
 
 		std::shared_ptr<prosper::IBuffer> m_vertexBuffer = nullptr;
 		std::shared_ptr<prosper::IBuffer> m_vertexWeightBuffer = nullptr;

@@ -220,7 +220,13 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 			// Render static world geometry
 			if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
 			{
+				std::chrono::steady_clock::time_point t;
+				if(drawSceneInfo.renderStats.has_value())
+					t = std::chrono::steady_clock::now();
 				sceneRenderDesc.WaitForWorldRenderQueues();
+				if(drawSceneInfo.renderStats.has_value())
+					drawSceneInfo.renderStats->prepass.renderThreadWaitTime += std::chrono::steady_clock::now() -t;
+
 				auto &worldRenderQueues = sceneRenderDesc.GetWorldRenderQueues();
 				for(auto i=decltype(worldRenderQueues.size()){0u};i<worldRenderQueues.size();++i)
 					rsys.Render(*worldRenderQueues.at(i),prepassStats,i);

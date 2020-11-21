@@ -203,5 +203,5 @@ void Lua::Shader::GetCurrentCommandBuffer(lua_State *l,pragma::LuaShaderBase &sh
 	auto wpDrawCmd = shader.GetCurrentCommandBuffer();
 	if(wpDrawCmd == nullptr)
 		return;
-	Lua::Push(l,std::static_pointer_cast<prosper::ICommandBuffer>(wpDrawCmd));
+	Lua::Push(l,std::static_pointer_cast<prosper::ICommandBuffer>(wpDrawCmd->shared_from_this()));
 }

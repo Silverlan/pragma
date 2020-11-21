@@ -88,7 +88,8 @@ namespace pragma::asset
 		uint32_t m_firstLeaf = 0u;
 		uint32_t m_numLeaves = 0u;
 	};
-
+	
+	using WorldModelMeshIndex = uint32_t;
 	class DLLNETWORK WorldData
 	{
 	public:
@@ -111,6 +112,7 @@ namespace pragma::asset
 		EntityData *FindWorld();
 		void SetBSPTree(util::BSPTree &bspTree);
 		util::BSPTree *GetBSPTree();
+		std::vector<std::vector<WorldModelMeshIndex>> &GetClusterMeshIndices() {return m_meshesPerCluster;}
 		std::vector<uint16_t> &GetStaticPropLeaves();
 		NetworkState &GetNetworkState() const;
 
@@ -136,10 +138,11 @@ namespace pragma::asset
 		void WriteEntities(VFilePtrReal &f);
 
 		std::vector<MaterialHandle> ReadMaterials(VFilePtr &f);
-		void ReadBSPTree(VFilePtr &f);
+		void ReadBSPTree(VFilePtr &f,uint32_t version);
 		void ReadEntities(VFilePtr &f,const std::vector<MaterialHandle> &materials,EntityData::Flags entMask);
 
 		NetworkState &m_nw;
+		std::vector<std::vector<WorldModelMeshIndex>> m_meshesPerCluster;
 		std::shared_ptr<uimg::ImageBuffer> m_lightMapAtlas = nullptr;
 		bool m_lightMapAtlasEnabled = false;
 		float m_lightMapIntensity = 1.f;

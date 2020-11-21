@@ -103,6 +103,8 @@ void RasterizationRenderer::RenderGlowObjects(const util::DrawSceneInfo &drawSce
 
 void RasterizationRenderer::RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::CSceneComponent &scene,RenderMode renderMode)
 {
+	// TODO
+#if 0
 	auto &glowInfo = GetGlowInfo();
 	auto *shader = static_cast<pragma::ShaderGlow*>(glowInfo.shader.get());
 	if(shader == nullptr)
@@ -128,5 +130,6 @@ void RasterizationRenderer::RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCo
 		}
 		shader->EndDraw();
 	}
+#endif
 }
 

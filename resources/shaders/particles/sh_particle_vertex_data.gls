@@ -10,13 +10,12 @@
 layout(location = SHADER_VERTEX_DATA_LOCATION) EXPORT_VS VS_OUT
 {
 	vec2 vert_uv;
-#if ENABLE_PARTICLE_TEXTURE == 1
-	float particle_start;
-#endif
 	vec4 particle_color;
 #if LIGHTING_ENABLED == 1
-	vec4 vert_pos_ws;
+	vec3 vert_pos_ws;
+	flat uint animationFrameIndices;
 	vec3 vert_pos_cs;
+	flat float animationFrameInterpFactor;
 	vec3 vert_normal;
 	vec3 vert_normal_cs;
 #endif

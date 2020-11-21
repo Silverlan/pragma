@@ -55,7 +55,7 @@ namespace pragma
 		bool BindLight(CLightComponent &light);
 		bool BindEntity(CBaseEntity &ent,const Mat4 &depthMVP);
 		virtual bool BindMaterial(CMaterial &mat) override; // TODO: Transparent only
-		virtual bool Draw(CModelSubMesh &mesh) override;
+		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx) override;
 	protected:
 		bool BindDepthMatrix(const Mat4 &depthMVP);
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;

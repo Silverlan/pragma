@@ -353,7 +353,7 @@ std::optional<ShaderTextured3DBase::MaterialData> ShaderTextured3DBase::UpdateMa
 	buf->Write(0,matData);
 	return matData;
 }
-bool ShaderTextured3DBase::BindLightMapUvBuffer(CModelSubMesh &mesh,bool &outShouldUseLightmaps)
+bool ShaderTextured3DBase::BindLightMapUvBuffer(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,bool &outShouldUseLightmaps)
 {
 	outShouldUseLightmaps = false;
 	if(umath::is_flag_set(m_stateFlags,StateFlags::ShouldUseLightMap) == false)
@@ -364,8 +364,8 @@ bool ShaderTextured3DBase::BindLightMapUvBuffer(CModelSubMesh &mesh,bool &outSho
 		auto *renderC = m_boundEntity->GetRenderComponent();
 		if(renderC)
 		{
-			auto lightMapReceiverC = renderC->GetLightMapReceiverComponent();
-			auto bufIdx = lightMapReceiverC.valid() ? lightMapReceiverC->FindBufferIndex(mesh) : std::optional<uint32_t>{};
+			auto &lightMapReceiverC = renderC->GetLightMapReceiverComponent();
+			auto bufIdx = lightMapReceiverC.valid() ? (meshIdx.has_value() ? lightMapReceiverC->GetBufferIndex(*meshIdx) : lightMapReceiverC->FindBufferIndex(mesh)) : std::optional<uint32_t>{};
 			if(bufIdx.has_value())
 			{
 				outShouldUseLightmaps = true;
@@ -392,12 +392,12 @@ bool ShaderTextured3DBase::BindLightMapUvBuffer(CModelSubMesh &mesh,bool &outSho
 	return true;//RecordBindVertexBuffer(*pLightMapUvBuffer,umath::to_integral(VertexBinding::LightmapUv));
 }
 void ShaderTextured3DBase::UpdateRenderFlags(CModelSubMesh &mesh,RenderFlags &inOutFlags) {}
-bool ShaderTextured3DBase::Draw(CModelSubMesh &mesh)
+bool ShaderTextured3DBase::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx)
 {
 	if(umath::is_flag_set(m_stateFlags,StateFlags::ClipPlaneBound) == false && BindClipPlane({}) == false)
 		return false;
 	auto shouldUseLightmaps = false;
-	if(BindLightMapUvBuffer(mesh,shouldUseLightmaps) == false)
+	if(BindLightMapUvBuffer(mesh,meshIdx,shouldUseLightmaps) == false)
 		return false;
 	auto renderFlags = RenderFlags::None;
 	umath::set_flag(renderFlags,RenderFlags::LightmapsEnabled,shouldUseLightmaps);
@@ -407,7 +407,7 @@ bool ShaderTextured3DBase::Draw(CModelSubMesh &mesh)
 	if(umath::is_flag_set(m_stateFlags,StateFlags::DisableShadows))
 		umath::set_flag(renderFlags,RenderFlags::DisableShadows);
 	UpdateRenderFlags(mesh,renderFlags);
-	return RecordPushConstants(renderFlags,offsetof(ShaderTextured3DBase::PushConstants,flags)) && ShaderEntity::Draw(mesh);
+	return RecordPushConstants(renderFlags,offsetof(ShaderTextured3DBase::PushConstants,flags)) && ShaderEntity::Draw(mesh,meshIdx);
 }
 bool ShaderTextured3DBase::GetRenderBufferTargets(
 	CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,

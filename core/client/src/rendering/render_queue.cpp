@@ -175,6 +175,15 @@ void RenderQueueBuilder::Flush()
 	while(m_hasWork);
 }
 
+bool RenderQueueBuilder::HasWork() const {return m_hasWork;}
+uint32_t RenderQueueBuilder::GetWorkQueueCount() const
+{
+	const_cast<RenderQueueBuilder*>(this)->m_workMutex.lock();
+		auto numEls = m_workQueue.size();
+	const_cast<RenderQueueBuilder*>(this)->m_workMutex.unlock();
+	return numEls;
+}
+
 void RenderQueueBuilder::BuildRenderQueues()
 {
 

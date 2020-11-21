@@ -1,4 +1,4 @@
-#version 400
+#version 440
 
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shading_language_420pack : enable
@@ -8,10 +8,12 @@ layout(location = 1) in vec2 in_vert_uv;
 
 layout(location = 0) out vec2 vs_vert_uv;
 
-layout(push_constant) uniform PushConstants {
+layout(LAYOUT_PUSH_CONSTANTS()) uniform PushConstants {
 	mat4 modelMatrix;
 	vec4 color;
 	int alphaOnly;
+	float lod;
+	uint channels;
 } u_pushConstants;
 
 void main()

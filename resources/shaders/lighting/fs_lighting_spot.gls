@@ -41,8 +41,8 @@ float calc_spot_light_attenuation(uint lightIdx)
 	vec3 dirToLight = normalize(posFromWorldSpace);
 	vec3 lightDir = light.direction.xyz;
 	float cos_cur_angle = dot(-dirToLight,lightDir);
-	float cos_inner_cone_angle = light.cutoffInnerCos;
-	float cos_outer_cone_angle = light.cutoffOuterCos;
+	float cos_inner_cone_angle = cos(light.cutoffInner);
+	float cos_outer_cone_angle = cos(light.cutoffOuter);
 	if(cos_cur_angle <= cos_outer_cone_angle) return 0.0;
 	float attenuation = calc_light_falloff(length(posFromWorldSpace),light.position.w); // Distance falloff
 	attenuation = pow(attenuation,light.falloffExponent);

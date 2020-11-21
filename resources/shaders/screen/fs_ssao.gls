@@ -23,9 +23,9 @@ layout(location = 0) in vec2 vs_vert_uv;
 #define SHADER_UNIFORM_RENDER_SETTINGS_SET SHADER_UNIFORM_CAMERA_SET
 #define SHADER_UNIFORM_RENDER_SETTINGS_BINDING (SHADER_UNIFORM_CAMERA_BINDING +1)
 
-layout(set = SHADER_UNIFORM_NORMAL_BUFFER_SET,binding = SHADER_UNIFORM_NORMAL_BUFFER_BINDING) uniform sampler2D u_normalBuffer;
-layout(set = SHADER_UNIFORM_DEPTH_BUFFER_SET,binding = SHADER_UNIFORM_DEPTH_BUFFER_BINDING) uniform sampler2D u_depthBuffer;
-layout(set = SHADER_UNIFORM_NOISE_TEXTURE_SET,binding = SHADER_UNIFORM_NOISE_TEXTURE_BINDING) uniform sampler2D u_noiseTexture;
+layout(LAYOUT_ID(SHADER_UNIFORM_NORMAL_BUFFER_SET,SHADER_UNIFORM_NORMAL_BUFFER_BINDING)) uniform sampler2D u_normalBuffer;
+layout(LAYOUT_ID(SHADER_UNIFORM_DEPTH_BUFFER_SET,SHADER_UNIFORM_DEPTH_BUFFER_BINDING)) uniform sampler2D u_depthBuffer;
+layout(LAYOUT_ID(SHADER_UNIFORM_NOISE_TEXTURE_SET,SHADER_UNIFORM_NOISE_TEXTURE_BINDING)) uniform sampler2D u_noiseTexture;
 
 #include "../modules/sh_camera_info.gls"
 #include "../modules/sh_rendersettings.gls"
@@ -33,7 +33,7 @@ layout(set = SHADER_UNIFORM_NOISE_TEXTURE_SET,binding = SHADER_UNIFORM_NOISE_TEX
 #include "../functions/fs_linearize_depth.gls"
 
 const int kernelSize = 64;
-layout(std140,set = SHADER_UNIFORM_SAMPLE_BUFFER_SET,binding = SHADER_UNIFORM_SAMPLE_BUFFER_BINDING) uniform SampleBuffer
+layout(std140,LAYOUT_ID(SHADER_UNIFORM_SAMPLE_BUFFER_SET,SHADER_UNIFORM_SAMPLE_BUFFER_BINDING)) uniform SampleBuffer
 {
 	vec4 samples[kernelSize];
 } u_sampleBuffer;
@@ -43,14 +43,14 @@ layout(location = 0) out float fs_occlusion;
 const float radius = 40;
 const float bias = 1;//0.025;
 
-layout(push_constant) uniform pushConstants {
+layout(LAYOUT_PUSH_CONSTANTS()) uniform pushConstants {
 	uvec2 renderTargetDimensions;
 } u_pushConstants;
 
 // Source: https://learnopengl.com/Advanced-Lighting/SSAO
 void main()
 {
-	vec2 noiseScale = vec2(u_pushConstants.renderTargetDimensions.x /4.0,u_pushConstants.renderTargetDimensions.y /4.0);
+	/*vec2 noiseScale = vec2(u_pushConstants.renderTargetDimensions.x,u_pushConstants.renderTargetDimensions.y) /4.0;
 	
 	float d = texture(u_depthBuffer,vs_vert_uv).r;
 	mat4 invVp = inverse(u_camera.VP);
@@ -85,5 +85,6 @@ void main()
 		occlusion += (sampleDepth >= sampleValue.z +bias ? 1.0 : 0.0) *rangeCheck;
 	}
 	occlusion = 1.0 -(occlusion /kernelSize);
-	fs_occlusion = pow(occlusion,0.5);
+	fs_occlusion = pow(occlusion,0.5);*/
+	fs_occlusion = 1;
 }

@@ -21,7 +21,7 @@ extern DLLCENGINE CEngine *c_engine;
 using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 //ComponentEventId CAnimatedComponent::EVENT_ON_SKELETON_UPDATED = INVALID_COMPONENT_ID;
 //ComponentEventId CAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED = INVALID_COMPONENT_ID;
 ComponentEventId CAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED = INVALID_COMPONENT_ID;
@@ -44,9 +44,12 @@ void pragma::initialize_articulated_buffers()
 	prosper::util::BufferCreateInfo createInfo {};
 
 	if constexpr(CRenderComponent::USE_HOST_MEMORY_FOR_RENDER_DATA)
-		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostCoherent;
+	{
+		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent;
+		createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
+	}
 	else
-		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
 	createInfo.size = instanceSize *maxInstanceCount;
 	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
@@ -302,3 +305,4 @@ void CEOnBoneBufferInitialized::PushArguments(lua_State *l)
 {
 	Lua::Push<std::shared_ptr<Lua::Vulkan::Buffer>>(l,buffer);
 }
+#pragma optimize("",on)

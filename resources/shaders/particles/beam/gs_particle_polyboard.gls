@@ -3,7 +3,7 @@
 #include "sh_particle_polyboard.gls"
 #include "../../modules/sh_camera_info.gls"
 
-layout(push_constant) uniform Instance {
+layout(LAYOUT_PUSH_CONSTANTS()) uniform Instance {
 	vec3 posCam;
 	float radius;
 	float curvature;

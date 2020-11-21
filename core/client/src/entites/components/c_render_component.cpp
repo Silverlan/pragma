@@ -67,7 +67,10 @@ void CRenderComponent::InitializeBuffers()
 	auto maxInstanceCount = instanceCount *100u;
 	prosper::util::BufferCreateInfo createInfo {};
 	if constexpr(USE_HOST_MEMORY_FOR_RENDER_DATA)
-		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostCoherent;
+	{
+		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent;
+		createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
+	}
 	else
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
 	createInfo.size = instanceSize *instanceCount;

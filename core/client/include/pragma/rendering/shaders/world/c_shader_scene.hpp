@@ -195,7 +195,7 @@ namespace pragma
 		virtual bool BindEntity(CBaseEntity &ent);
 		virtual bool BindVertexAnimationOffset(uint32_t offset);
 		virtual bool BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) override;
-		virtual bool Draw(CModelSubMesh &mesh);
+		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx);
 		virtual void EndDraw() override;
 		virtual bool GetRenderBufferTargets(
 			CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
@@ -206,8 +206,8 @@ namespace pragma
 	protected:
 		ShaderEntity(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 		virtual void OnBindEntity(CBaseEntity &ent,CRenderComponent &renderC);
-		bool Draw(CModelSubMesh &mesh,bool bUseVertexWeightBuffer);
-		bool Draw(CModelSubMesh &mesh,const std::function<bool(CModelSubMesh&)> &fDraw,bool bUseVertexWeightBuffer);
+		bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,bool bUseVertexWeightBuffer);
+		bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,const std::function<bool(CModelSubMesh&)> &fDraw,bool bUseVertexWeightBuffer);
 
 		virtual uint32_t GetInstanceDescriptorSetIndex() const=0;
 		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const=0;

@@ -9,10 +9,6 @@
 #define SHADER_UNIFORM_BONE_MATRIX_SET SHADER_UNIFORM_INSTANCE_SET
 #define SHADER_UNIFORM_BONE_MATRIX_BINDING (SHADER_UNIFORM_INSTANCE_BINDING +1)
 
-#define SHADER_BONE_WEIGHT_ID_LOCATION 0
-#define SHADER_BONE_WEIGHT_LOCATION 1
-#define SHADER_VERTEX_BUFFER_LOCATION 2
-
 #include "../modules/vs_weighted.gls"
 #include "../modules/sh_entity_info.gls"
 #include "sh_shadow.gls"
@@ -21,10 +17,10 @@ layout(location = SHADER_VERTEX_BUFFER_LOCATION) in vec3 u_vert_pos;
 
 void main()
 {
-	mat4 mBone = calc_bone_matrix(is_weighted());
+	mat4 mBone = calc_bone_matrix(is_weighted(),is_weighted_ext());
 	vec4 vpos = mBone *vec4(u_vert_pos,1.0);
 
-	gl_Position = u_pushConstants.depthMVP *vpos;
+	gl_Position = API_DEPTH_TRANSFORM(u_pushConstants.depthMVP) *vpos;
 
 	vec4 vposWs = get_model_matrix() *vpos;
 	vposWs.xyz /= vposWs.w;

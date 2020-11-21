@@ -69,7 +69,10 @@ void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 		createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit | prosper::BufferUsageFlags::TransferDstBit;
 		createInfo.size = m_maxVertexAnimations *sizeof(VertexAnimationData);
 		if constexpr(CRenderComponent::USE_HOST_MEMORY_FOR_RENDER_DATA)
-			createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostCoherent;
+		{
+			createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent;
+			createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
+		}
 		else
 			createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
 

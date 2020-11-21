@@ -168,6 +168,8 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 		if(shader == nullptr)
 			continue;
 		auto nonOpaque = mat->GetAlphaMode() != AlphaMode::Opaque;
+		if(nonOpaque && umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Translucent) == false)
+			continue;
 		auto *renderQueue = getRenderQueue(renderMode,nonOpaque);
 		if(renderQueue == nullptr)
 			continue;
@@ -336,6 +338,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 		auto &frustumPlanes = g_debugFreezeCamData.has_value() ? g_debugFreezeCamData->frustumPlanes : cam.GetFrustumPlanes();
 		auto vp = cam.GetProjectionMatrix() *cam.GetViewMatrix();
 
+		std::vector<util::BSPTree::Node*> bspLeafNodes;
 		// Note: World geometry is handled differently than other entities. World entities have their
 		// own pre-built render queues, which we only have to iterate for maximum efficiency. Whether or not a world mesh is culled from the
 		// camera frustum is stored in 'm_worldMeshVisibility', which is simply a boolean array so we don't have to copy any
@@ -344,7 +347,6 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 		// main render queue.
 		EntityIterator entItWorld {*c_game};
 		entItWorld.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
-		std::vector<util::BSPTree::Node*> bspLeafNodes;
 		bspLeafNodes.reserve(entItWorld.GetCount());
 		m_worldMeshVisibility.reserve(entItWorld.GetCount());
 		for(auto *entWorld : entItWorld)
@@ -357,6 +359,10 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 			if(node == nullptr)
 				continue;
 			bspLeafNodes.push_back(node);
+
+			if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Static) == false)
+				continue;
+
 			auto *renderC = static_cast<CBaseEntity&>(worldC->GetEntity()).GetRenderComponent();
 			renderC->UpdateRenderDataMT(drawSceneInfo.commandBuffer,m_scene,cam,vp);
 			auto *renderQueue = worldC->GetClusterRenderQueue(node->cluster);
@@ -380,48 +386,54 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 				}
 			}
 
-			// Translucent meshes will have to be sorted dynamically with all other non-world translucent objects,
-			// so we'll copy the information to the dynamic queue
-			auto *renderQueueTranslucentSrc = worldC->GetClusterRenderQueue(node->cluster,true /* translucent */);
-			auto *renderQueueTranslucentDst = renderQueueTranslucentSrc ? GetRenderQueue(static_cast<CBaseEntity*>(entWorld)->GetRenderComponent()->GetRenderMode(),true) : nullptr;
-			if(renderQueueTranslucentDst == nullptr || renderQueueTranslucentSrc->queue.empty())
-				continue;
-			renderQueueTranslucentDst->queue.reserve(renderQueueTranslucentDst->queue.size() +renderQueueTranslucentSrc->queue.size());
-			renderQueueTranslucentDst->sortedItemIndices.reserve(renderQueueTranslucentDst->queue.size());
-			auto &pose = entWorld->GetPose();
-			for(auto i=decltype(renderQueueTranslucentSrc->queue.size()){0u};i<renderQueueTranslucentSrc->queue.size();++i)
+			if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Translucent))
 			{
-				auto &item = renderQueueTranslucentSrc->queue.at(i);
-				if(ShouldCull(*renderC,item.mesh,frustumPlanes))
+				// Translucent meshes will have to be sorted dynamically with all other non-world translucent objects,
+				// so we'll copy the information to the dynamic queue
+				auto *renderQueueTranslucentSrc = worldC->GetClusterRenderQueue(node->cluster,true /* translucent */);
+				auto *renderQueueTranslucentDst = renderQueueTranslucentSrc ? GetRenderQueue(static_cast<CBaseEntity*>(entWorld)->GetRenderComponent()->GetRenderMode(),true) : nullptr;
+				if(renderQueueTranslucentDst == nullptr || renderQueueTranslucentSrc->queue.empty())
 					continue;
-				renderQueueTranslucentDst->queue.push_back(item);
-				renderQueueTranslucentDst->sortedItemIndices.push_back(renderQueueTranslucentSrc->sortedItemIndices.at(i));
-				renderQueueTranslucentDst->sortedItemIndices.back().first = renderQueueTranslucentDst->queue.size() -1;
+				renderQueueTranslucentDst->queue.reserve(renderQueueTranslucentDst->queue.size() +renderQueueTranslucentSrc->queue.size());
+				renderQueueTranslucentDst->sortedItemIndices.reserve(renderQueueTranslucentDst->queue.size());
+				auto &pose = entWorld->GetPose();
+				for(auto i=decltype(renderQueueTranslucentSrc->queue.size()){0u};i<renderQueueTranslucentSrc->queue.size();++i)
+				{
+					auto &item = renderQueueTranslucentSrc->queue.at(i);
+					if(ShouldCull(*renderC,item.mesh,frustumPlanes))
+						continue;
+					renderQueueTranslucentDst->queue.push_back(item);
+					renderQueueTranslucentDst->sortedItemIndices.push_back(renderQueueTranslucentSrc->sortedItemIndices.at(i));
+					renderQueueTranslucentDst->sortedItemIndices.back().first = renderQueueTranslucentDst->queue.size() -1;
 
-				auto &renderMeshes = renderC->GetRenderMeshes();
-				if(item.mesh >= renderMeshes.size())
-					continue;
-				auto &pos = pose *renderMeshes.at(item.mesh)->GetCenter();
-				renderQueueTranslucentDst->queue.back().sortingKey.SetDistance(pos,cam);
+					auto &renderMeshes = renderC->GetRenderMeshes();
+					if(item.mesh >= renderMeshes.size())
+						continue;
+					auto &pos = pose *renderMeshes.at(item.mesh)->GetCenter();
+					renderQueueTranslucentDst->queue.back().sortingKey.SetDistance(pos,cam);
+				}
 			}
 		}
 		m_worldMeshVisibility.resize(m_worldRenderQueues.size());
 		m_worldRenderQueuesReady = true;
 
-		// Some entities are exempt from occlusion culling altogether, we'll handle them here
-		for(auto *pRenderComponent : pragma::CRenderComponent::GetEntitiesExemptFromOcclusionCulling())
+		if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Dynamic))
 		{
-			if(ShouldConsiderEntity(static_cast<CBaseEntity&>(pRenderComponent->GetEntity()),m_scene,posCam,drawSceneInfo.renderFlags) == false)
-				continue;
-			AddRenderMeshesToRenderQueue(drawSceneInfo,*pRenderComponent,m_scene,cam,vp);
-		}
+			// Some entities are exempt from occlusion culling altogether, we'll handle them here
+			for(auto *pRenderComponent : pragma::CRenderComponent::GetEntitiesExemptFromOcclusionCulling())
+			{
+				if(ShouldConsiderEntity(static_cast<CBaseEntity&>(pRenderComponent->GetEntity()),m_scene,posCam,drawSceneInfo.renderFlags) == false)
+					continue;
+				AddRenderMeshesToRenderQueue(drawSceneInfo,*pRenderComponent,m_scene,cam,vp);
+			}
 
-		// Now we just need the remaining entities, for which we'll use the scene octree
-		auto *culler = m_scene.FindOcclusionCuller();
-		if(culler)
-		{
-			auto &dynOctree = culler->GetOcclusionOctree();
-			CollectRenderMeshesFromOctree(drawSceneInfo,dynOctree,m_scene,cam,vp,drawSceneInfo.renderFlags,frustumPlanes,&bspLeafNodes);
+			// Now we just need the remaining entities, for which we'll use the scene octree
+			auto *culler = m_scene.FindOcclusionCuller();
+			if(culler)
+			{
+				auto &dynOctree = culler->GetOcclusionOctree();
+				CollectRenderMeshesFromOctree(drawSceneInfo,dynOctree,m_scene,cam,vp,drawSceneInfo.renderFlags,frustumPlanes,&bspLeafNodes);
+			}
 		}
 
 		// All render queues (aside from world render queues) need to be sorted

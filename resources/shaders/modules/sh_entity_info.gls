@@ -18,7 +18,7 @@ struct EntityInstanceData
 	ivec4 flags; // flags.x = flags, rest is padding
 };
 
-layout(std140,set = SHADER_UNIFORM_INSTANCE_SET,binding = SHADER_UNIFORM_INSTANCE_BINDING) uniform Instance
+layout(std140,LAYOUT_ID(SHADER_UNIFORM_INSTANCE_SET,SHADER_UNIFORM_INSTANCE_BINDING)) uniform Instance
 {
 	EntityInstanceData data;
 } u_instance;

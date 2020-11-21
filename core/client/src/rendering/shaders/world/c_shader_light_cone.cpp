@@ -78,12 +78,12 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderLightCone::InitializeMateria
 	return descSetGroup;
 }
 
-bool ShaderLightCone::Draw(CModelSubMesh &mesh)
+bool ShaderLightCone::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx)
 {
 	return RecordPushConstants( // Light cone shader doesn't use lightmaps, so we hijack the lightmapFlags push constant for our own purposes
 		static_cast<uint32_t>(m_boundLightIndex),
 		sizeof(ShaderTextured3DBase::PushConstants) +offsetof(PushConstants,boundLightIndex)
-	) && ShaderTextured3DBase::Draw(mesh);
+	) && ShaderTextured3DBase::Draw(mesh,meshIdx);
 }
 
 bool ShaderLightCone::BindMaterialParameters(CMaterial &mat)

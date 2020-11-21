@@ -6,6 +6,7 @@
 struct VertexData
 {
 	vec3 vert_normal_cs; // Vertex Normal in camera space
+	vec2 vert_uv;
 };
 layout(location = SHADER_VERTEX_DATA_LOCATION) EXPORT_VS VertexData
 #ifdef GLS_FRAGMENT_SHADER

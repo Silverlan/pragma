@@ -52,11 +52,12 @@ void CLightMapReceiverComponent::UpdateLightMapUvData()
 	if(meshGroup == nullptr)
 		return;
 	m_modelName = GetEntity().GetModelName();
-	m_isModelBakedWithLightMaps = true;
+	umath::set_flag(m_stateFlags,StateFlags::IsModelBakedWithLightMaps,true);
 	m_uvDataPerMesh.clear();
 	m_meshes.clear();
 	m_meshToMeshIdx.clear();
 	m_meshToBufIdx.clear();
+	umath::set_flag(m_stateFlags,StateFlags::RenderMeshBufferIndexTableDirty);
 	uint32_t subMeshIdx = 0u;
 	auto wasInitialized = false;
 	for(auto &mesh : meshGroup->GetMeshes())
@@ -75,6 +76,7 @@ void CLightMapReceiverComponent::UpdateLightMapUvData()
 			++subMeshIdx;
 		}
 	}
+	UpdateRenderMeshBufferList();
 }
 luabind::object CLightMapReceiverComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CLightMapReceiverComponentHandleWrapper>(l);}
 void CLightMapReceiverComponent::Initialize()
@@ -83,7 +85,11 @@ void CLightMapReceiverComponent::Initialize()
 	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<ComponentEvent> evData) {
 		//m_isModelBakedWithLightMaps = (GetEntity().GetModelName() == m_modelName); // TODO
 		//if(m_isModelBakedWithLightMaps)
-			UpdateModelMeshes();
+		m_meshBufferIndices.clear();
+		UpdateModelMeshes();
+	});
+	BindEventUnhandled(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED,[this](std::reference_wrapper<ComponentEvent> evData) {
+		UpdateRenderMeshBufferList();
 	});
 	BindEventUnhandled(CBaseEntity::EVENT_ON_SPAWN,[this](std::reference_wrapper<ComponentEvent> evData) {
 		//m_isModelBakedWithLightMaps = (GetEntity().GetModelName() == m_modelName); // TODO
@@ -91,7 +97,25 @@ void CLightMapReceiverComponent::Initialize()
 			UpdateModelMeshes();
 	});
 	if(GetEntity().IsSpawned())
+	{
 		UpdateModelMeshes();
+		UpdateRenderMeshBufferList();
+	}
+}
+void CLightMapReceiverComponent::UpdateRenderMeshBufferList()
+{
+	m_meshBufferIndices.clear();
+	auto mdlC = GetEntity().GetModelComponent();
+	if(mdlC.expired())
+		return;
+	umath::set_flag(m_stateFlags,StateFlags::RenderMeshBufferIndexTableDirty,false);
+	auto &renderMeshes = static_cast<CModelComponent*>(mdlC.get())->GetRenderMeshes();
+	m_meshBufferIndices.resize(renderMeshes.size());
+	for(auto i=decltype(renderMeshes.size()){0u};i<renderMeshes.size();++i)
+	{
+		auto bufIdx = FindBufferIndex(static_cast<CModelSubMesh&>(*renderMeshes[i]));
+		m_meshBufferIndices[i] = bufIdx.has_value() ? *bufIdx : std::numeric_limits<BufferIdx>::max();
+	}
 }
 void CLightMapReceiverComponent::UpdateModelMeshes()
 {
@@ -111,6 +135,7 @@ void CLightMapReceiverComponent::UpdateModelMeshes()
 			continue;
 		meshIdxToBufIdx.insert(std::make_pair(pair.second,it->second));
 	}
+	umath::set_flag(m_stateFlags,StateFlags::RenderMeshBufferIndexTableDirty);
 	m_meshToBufIdx.clear();
 	m_meshToMeshIdx.clear();
 	uint32_t subMeshIdx = 0u;
@@ -142,10 +167,17 @@ void CLightMapReceiverComponent::AssignBufferIndex(MeshIdx meshIdx,BufferIdx buf
 	if(itMesh == m_meshes.end())
 		return;
 	m_meshToBufIdx.insert(std::make_pair(static_cast<CModelSubMesh*>(itMesh->second.get()),bufIdx));
+	umath::set_flag(m_stateFlags,StateFlags::RenderMeshBufferIndexTableDirty);
+}
+std::optional<pragma::CLightMapReceiverComponent::BufferIdx> CLightMapReceiverComponent::GetBufferIndex(RenderMeshIndex meshIdx) const
+{
+	if(umath::is_flag_set(m_stateFlags,StateFlags::RenderMeshBufferIndexTableDirty))
+		const_cast<CLightMapReceiverComponent*>(this)->UpdateRenderMeshBufferList();
+	return (meshIdx < m_meshBufferIndices.size() && m_meshBufferIndices[meshIdx] != std::numeric_limits<BufferIdx>::max()) ? m_meshBufferIndices[meshIdx] : std::optional<pragma::CLightMapReceiverComponent::BufferIdx>{};
 }
 std::optional<CLightMapReceiverComponent::BufferIdx> CLightMapReceiverComponent::FindBufferIndex(CModelSubMesh &mesh) const
 {
-	if(m_isModelBakedWithLightMaps == false)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::IsModelBakedWithLightMaps) == false)
 		return {};
 	auto it = m_meshToBufIdx.find(&mesh);
 	if(it == m_meshToBufIdx.end())

@@ -12,7 +12,7 @@ const int LIGHT_TYPE_DIRECTIONAL = 1;
 const int LIGHT_TYPE_POINT = 2;
 const int LIGHT_TYPE_SPOT = 3;
 
-layout(std430,set = SHADER_UNIFORM_LIGHT_SOURCES_SET,binding = SHADER_UNIFORM_LIGHT_SOURCES_BINDING) readonly buffer LightBuffer {
+layout(std430,LAYOUT_ID(SHADER_UNIFORM_LIGHT_SOURCES_SET,SHADER_UNIFORM_LIGHT_SOURCES_BINDING)) readonly buffer LightBuffer {
 	LightSourceData data[];
 } lightBuffer;
 
@@ -27,7 +27,7 @@ struct ShadowData
 	mat4 view;
 	mat4 projection;
 };
-layout(std430,set = SHADER_UNIFORM_SHADOW_DATA_BUFFER_SET,binding = SHADER_UNIFORM_SHADOW_DATA_BUFFER_BINDING) readonly buffer ShadowBuffer {
+layout(std430,LAYOUT_ID(SHADER_UNIFORM_SHADOW_DATA_BUFFER_SET,SHADER_UNIFORM_SHADOW_DATA_BUFFER_BINDING)) readonly buffer ShadowBuffer {
 	ShadowData data[];
 } shadowBuffer;
 

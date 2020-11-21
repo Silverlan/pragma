@@ -40,7 +40,7 @@ const std::shared_ptr<prosper::IRenderBuffer> &SceneMesh::GetRenderBuffer(CModel
 		static std::shared_ptr<prosper::IRenderBuffer> nptr = nullptr;
 		return nptr;
 	}
-	auto it = m_renderBuffers.find(pipelineId);
+	auto it = std::find_if(m_renderBuffers.begin(),m_renderBuffers.end(),[pipelineId](const std::pair<prosper::PipelineID,std::shared_ptr<prosper::IRenderBuffer>> &pair) {return pair.first == pipelineId;});
 	if(it != m_renderBuffers.end())
 		return it->second;
 	auto renderBuffer = shader.CreateRenderBuffer(mesh,pipelineIdx);
@@ -49,6 +49,6 @@ const std::shared_ptr<prosper::IRenderBuffer> &SceneMesh::GetRenderBuffer(CModel
 		static std::shared_ptr<prosper::IRenderBuffer> nptr = nullptr;
 		return nptr;
 	}
-	it = m_renderBuffers.insert(std::make_pair(pipelineId,renderBuffer)).first;
-	return it->second;
+	m_renderBuffers.push_back(std::make_pair(pipelineId,renderBuffer));
+	return m_renderBuffers.back().second;
 }

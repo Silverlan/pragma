@@ -17,9 +17,14 @@ layout(location = SHADER_VERTEX_DATA_LOCATION) EXPORT_VS VertexData
 #endif
 ;
 
-layout(push_constant) uniform pushConstants {
+#define FRENDER_USE_EXTENDED_VERTEX_WEIGHTS 1
+
+layout(LAYOUT_PUSH_CONSTANTS()) uniform pushConstants {
 	mat4 depthMVP;
 	vec4 lightPos; // 4th component stores the distance
+	uint flags;
 } u_pushConstants;
+
+bool is_weighted_ext() {return (u_pushConstants.flags &FRENDER_USE_EXTENDED_VERTEX_WEIGHTS) != 0;}
 
 #endif

@@ -1,0 +1,17 @@
+#ifndef F_ANIMATED_TEXTURE_NEW_GLS
+#define F_ANIMATED_TEXTURE_NEW_GLS
+
+#include "sh_time.gls"
+
+struct TextureAnimationFrame
+{
+	vec2 uvStart;
+	vec2 uvEnd;
+};
+
+layout(std430,LAYOUT_ID(SHADER_UNIFORM_TEXTURE_ANIMATION_SET,SHADER_UNIFORM_TEXTURE_ANIMATION_BINDING)) buffer TextureAnimation
+{
+	TextureAnimationFrame frames[];
+} u_animation;
+
+#endif

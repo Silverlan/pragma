@@ -5,7 +5,7 @@
 #include "fs_fog_data.gls"
 #include "../functions/fs_linearize_depth.gls"
 
-layout(std140,set = SHADER_UNIFORM_FOG_SET,binding = SHADER_UNIFORM_FOG_BINDING) uniform UFog
+layout(std140,LAYOUT_ID(SHADER_UNIFORM_FOG_SET,SHADER_UNIFORM_FOG_BINDING)) uniform UFog
 {
 	Fog fog;
 } u_fog;

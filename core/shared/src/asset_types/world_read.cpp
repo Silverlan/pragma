@@ -55,7 +55,7 @@ bool pragma::asset::WorldData::Read(VFilePtr &f,EntityData::Flags entMask,std::s
 
 	auto materials = ReadMaterials(f);
 	if(umath::is_flag_set(headerData.flags,DataFlags::HasBSPTree))
-		ReadBSPTree(f);
+		ReadBSPTree(f,version);
 	if(umath::is_flag_set(headerData.flags,DataFlags::HasLightmapAtlas))
 	{
 		m_lightMapIntensity = f->Read<float>();
@@ -78,7 +78,7 @@ std::vector<MaterialHandle> pragma::asset::WorldData::ReadMaterials(VFilePtr &f)
 	}
 	return materials;
 }
-void pragma::asset::WorldData::ReadBSPTree(VFilePtr &f)
+void pragma::asset::WorldData::ReadBSPTree(VFilePtr &f,uint32_t version)
 {
 	m_bspTree = util::BSPTree::Create();
 	std::function<void(util::BSPTree::Node&)> fReadNode = nullptr;
@@ -113,6 +113,20 @@ void pragma::asset::WorldData::ReadBSPTree(VFilePtr &f)
 	compressedClusterData.resize(numCompressedClusters);
 	f->Read(compressedClusterData.data(),compressedClusterData.size() *sizeof(compressedClusterData.front()));
 	m_bspTree->SetClusterCount(numClusters);
+
+	if(version <= 11)
+		return;
+	auto hasClusterMeshList = f->Read<bool>();
+	if(hasClusterMeshList == false)
+		return;
+	m_meshesPerCluster.resize(numClusters);
+	for(auto i=decltype(numClusters){0u};i<numClusters;++i)
+	{
+		auto &meshIndices = m_meshesPerCluster.at(i);
+		auto n = f->Read<uint32_t>();
+		meshIndices.resize(n);
+		f->Read(meshIndices.data(),meshIndices.size() *sizeof(meshIndices.front()));
+	}
 }
 void pragma::asset::WorldData::ReadEntities(VFilePtr &f,const std::vector<MaterialHandle> &materials,EntityData::Flags entMask)
 {

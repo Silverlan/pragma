@@ -23,8 +23,10 @@ enum class FRender : uint32_t
 	Water = Debug<<1,
 	Static = Water<<1,
 	Dynamic = Static<<1,
-	All = (Dynamic <<1) -1,
-	Reflection = Dynamic<<1,
+	Translucent = Dynamic<<1,
+
+	All = (Translucent <<1) -1,
+	Reflection = Translucent<<1,
 	HDR = Reflection<<1,
 	ParticleDepth = HDR<<1
 };

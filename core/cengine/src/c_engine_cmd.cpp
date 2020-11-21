@@ -11,8 +11,9 @@
 #include <pragma/console/convars.h>
 #include <sharedutils/util_file.h>
 #include <cmaterialmanager.h>
+#include <pragma/console/command_options.hpp>
 
-extern DLLCLIENT void debug_render_stats();
+extern DLLCLIENT void debug_render_stats(bool);
 void CEngine::RegisterConsoleCommands()
 {
 	Engine::RegisterConsoleCommands();
@@ -73,8 +74,18 @@ void CEngine::RegisterConsoleCommands()
 		Con::cout<<"Active render API: "<<renderAPI<<" ("<<context.GetAPIAbbreviation()<<")"<<Con::endl;
 	},ConVarFlags::None,"Prints information about the current render API to the console.");
 	conVarMap.RegisterConCommand("debug_render_stats",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
-		debug_render_stats();
+		std::unordered_map<std::string,pragma::console::CommandOption> commandOptions {};
+		pragma::console::parse_command_options(argv,commandOptions);
+		auto full = util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions,"full","0"));
+		debug_render_stats(full);
 	},ConVarFlags::None,"Prints information about the next frame.");
+
+	conVarMap.RegisterConVar("render_vsync_enabled","1",ConVarFlags::Archive,"Enables or disables vsync. OpenGL only.");
+	conVarMap.RegisterConVarCallback("render_vsync_enabled",std::function<void(NetworkState*,ConVar*,bool,bool)>{[this](
+		NetworkState *nw,ConVar *cv,bool oldVal,bool newVal) -> void {
+			GetRenderContext().GetWindow().SetVSyncEnabled(newVal);
+	}});
+
 #if LUA_ENABLE_RUN_GUI == 1
 	conVarMap.RegisterConCommand("lua_exec_gui",[](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		if(argv.empty()) return;

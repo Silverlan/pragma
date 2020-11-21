@@ -5,14 +5,14 @@
 #include "sh_limits.gls"
 #include "../lighting/shadow/sh_shadow.gls"
 
-layout(std140,set = SHADER_UNIFORM_CSM_SET,binding = SHADER_UNIFORM_CSM_BINDING) uniform CSM
+layout(std140,LAYOUT_ID(SHADER_UNIFORM_CSM_SET,SHADER_UNIFORM_CSM_BINDING)) uniform CSM
 {
 	mat4 VP[4]; // View-Projection Matrix
 	vec4 fard;
 	int count;
 } u_csm;
 #ifdef GLS_FRAGMENT_SHADER
-	layout(set = SHADER_UNIFORM_CSM_TEXTURE_ARRAY_SET,binding = SHADER_UNIFORM_CSM_TEXTURE_ARRAY_BINDING) uniform shadowMapSamplerType csmTextures[MAX_CSM_CASCADES];
+	layout(LAYOUT_ID(SHADER_UNIFORM_CSM_TEXTURE_ARRAY_SET,SHADER_UNIFORM_CSM_TEXTURE_ARRAY_BINDING)) uniform sampler2D csmTextures[MAX_CSM_CASCADES];
 
 	int get_csm_cascade_index()
 	{

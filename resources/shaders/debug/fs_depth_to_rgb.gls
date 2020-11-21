@@ -7,9 +7,9 @@
 
 layout(location = 0) in vec2 vs_vert_uv;
 
-layout(set = 0,binding = 0) uniform sampler2D u_depthTexture;
+layout(LAYOUT_ID(0,0)) uniform sampler2D u_depthTexture;
 
-layout(push_constant) uniform Depth {
+layout(LAYOUT_PUSH_CONSTANTS()) uniform Depth {
 	float near;
 	float far;
 	float contrastFactor;
@@ -17,9 +17,38 @@ layout(push_constant) uniform Depth {
 
 layout(location = 0) out vec4 fs_color;
 
+float linearize_depth(float d)
+{
+    //return u_depth.near * u_depth.far / (u_depth.far + d * (u_depth.near - u_depth.far));
+    return (2.0 *d) /(u_depth.far -d *(u_depth.far -u_depth.near));
+}
+
+float linearDepth(float depthSample)
+{
+    depthSample = 2.0 * depthSample - 1.0;
+    float zLinear = 2.0 * u_depth.near * u_depth.far / (u_depth.far + u_depth.near - depthSample * (u_depth.far - u_depth.near));
+    return zLinear;
+}
+
 void main()
 {
-	float d = texture(u_depthTexture,vs_vert_uv).r;//get_linearized_depth(u_depthTexture,vs_vert_uv,u_depth.near,u_depth.far);
+	float d = get_linearized_depth(u_depthTexture,vs_vert_uv,u_depth.near,u_depth.far);
+	float l = get_depth_distance(texture(u_depthTexture,vs_vert_uv).r,u_depth.near,u_depth.far);
+
+	float l2 = u_depth.near +d *(u_depth.far -u_depth.near);
+	float d2 = linearize_depth(texture(u_depthTexture,vs_vert_uv).r);
+	float d3 = linearDepth(texture(u_depthTexture,vs_vert_uv).r);
+	float l3 = u_depth.near +d2 *(u_depth.far -u_depth.near);
+	float l4 = u_depth.near +d3 *(u_depth.far -u_depth.near);
+
+	float dTarget = 2000 +54;
+	float dmin = dTarget -1;
+	float dmax = dTarget +1;
+	if((l > dmin && l < dmax))
+	{
+		fs_color = vec4(1,0,0,1);
+		return;
+	}
 	d = pow(d,u_depth.contrastFactor);
 	fs_color = vec4(d,d,d,1.0);
 }

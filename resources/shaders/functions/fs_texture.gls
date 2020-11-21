@@ -1,7 +1,7 @@
 #ifndef F_FS_TEXTURE_GLS
 #define F_FS_TEXTURE_GLS
 
-float texture(samplerCube depthTexture,int cubeSide,vec2 uv)
+float texture_cube(samplerCube depthTexture,int cubeSide,vec2 uv)
 {
 	float uvx = uv.x *2.0;
 	float uvy = uv.y *2.0;

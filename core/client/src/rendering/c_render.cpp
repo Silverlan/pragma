@@ -59,7 +59,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 static void CVAR_CALLBACK_render_vsync_enabled(NetworkState*,ConVar*,int,int val)
 {
 	glfwSwapInterval((val == 0) ? 0 : 1);
@@ -197,6 +197,9 @@ REGISTER_CONVAR_CALLBACK_CL(debug_render_depth_buffer,CVAR_CALLBACK_debug_render
 
 static CVar cvDrawScene = GetClientConVar("render_draw_scene");
 static CVar cvDrawWorld = GetClientConVar("render_draw_world");
+static CVar cvDrawStatic = GetClientConVar("render_draw_static");
+static CVar cvDrawDynamic = GetClientConVar("render_draw_dynamic");
+static CVar cvDrawTranslucent = GetClientConVar("render_draw_translucent");
 static CVar cvClearScene = GetClientConVar("render_clear_scene");
 static CVar cvClearSceneColor = GetClientConVar("render_clear_scene_color");
 static CVar cvParticleQuality = GetClientConVar("cl_render_particle_quality");
@@ -209,6 +212,13 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 		drawSceneInfo.renderFlags &= ~(FRender::Shadows | FRender::Glow);
 	else if(drawWorld == 0)
 		drawSceneInfo.renderFlags &= ~(FRender::Shadows | FRender::Glow | FRender::View | FRender::World | FRender::Skybox);
+
+	if(cvDrawStatic->GetBool() == false)
+		drawSceneInfo.renderFlags &= ~FRender::Static;
+	if(cvDrawDynamic->GetBool() == false)
+		drawSceneInfo.renderFlags &= ~FRender::Dynamic;
+	if(cvDrawTranslucent->GetBool() == false)
+		drawSceneInfo.renderFlags &= ~FRender::Translucent;
 
 	if(cvParticleQuality->GetInt() <= 0)
 		drawSceneInfo.renderFlags &= ~FRender::Particles;
@@ -242,8 +252,12 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 		Con::cwar<<"WARNING: Attempted to render invalid scene!"<<Con::endl;
 		return;
 	}
-	QueueForRendering(drawSceneInfo); // TODO
+	if(IsDefaultGameRenderEnabled())
+		QueueForRendering(drawSceneInfo);
 
+	CallCallbacks("PreRenderScenes");
+	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes",std::ref(drawSceneInfo));
+	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderScenes",std::ref(drawSceneInfo));
 
 	// We'll queue up building the render queues before we start rendering, so
 	// most of it can be done in the background
@@ -265,6 +279,9 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 
 		drawSceneInfo.scene->GetSceneRenderDesc().BuildRenderQueues(drawSceneInfo);
 	}
+
+	// Update time
+	UpdateShaderTimeData();
 
 	for(auto &drawSceneInfo : m_sceneRenderQueue)
 	{
@@ -290,41 +307,29 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 				static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetHDRInfo().UpdateExposure();
 			//c_engine->StopGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
 		}
+		// TODO
+#if 0
+		auto ret = false;
+		m_bMainRenderPass = false;
 
-		// Update time
-		UpdateShaderTimeData();
-
-		CallCallbacks("PreRenderScenes");
-		CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes",std::ref(drawSceneInfo));
-
-		CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderScenes",std::ref(drawSceneInfo));
-
-		static auto bSkipCallbacks = false;
-		if(bSkipCallbacks == false)
+		auto bSkipScene = CallCallbacksWithOptionalReturn<
+			bool,std::reference_wrapper<const util::DrawSceneInfo>
+		>("DrawScene",ret,std::ref(drawSceneInfo)) == CallbackReturnType::HasReturnValue;
+		m_bMainRenderPass = true;
+		if(bSkipScene == true && ret == true)
+			return;
+		m_bMainRenderPass = false;
+		if(CallLuaCallbacks<
+			bool,std::reference_wrapper<const util::DrawSceneInfo>
+		>("DrawScene",&bSkipScene,std::ref(drawSceneInfo)) == CallbackReturnType::HasReturnValue && bSkipScene == true)
 		{
-			bSkipCallbacks = true;
-			ScopeGuard guard([]() {bSkipCallbacks = false;});
-			auto ret = false;
-			m_bMainRenderPass = false;
-
-			auto bSkipScene = CallCallbacksWithOptionalReturn<
-				bool,std::reference_wrapper<const util::DrawSceneInfo>
-			>("DrawScene",ret,std::ref(drawSceneInfo)) == CallbackReturnType::HasReturnValue;
+			CallCallbacks("PostRenderScenes");
 			m_bMainRenderPass = true;
-			if(bSkipScene == true && ret == true)
-				return;
-			m_bMainRenderPass = false;
-			if(CallLuaCallbacks<
-				bool,std::reference_wrapper<const util::DrawSceneInfo>
-			>("DrawScene",&bSkipScene,std::ref(drawSceneInfo)) == CallbackReturnType::HasReturnValue && bSkipScene == true)
-			{
-				CallCallbacks("PostRenderScenes");
-				m_bMainRenderPass = true;
-				return;
-			}
-			else
-				m_bMainRenderPass = true;
+			return;
 		}
+		else
+			m_bMainRenderPass = true;
+#endif
 		RenderScene(drawSceneInfo);
 	}
 	m_renderQueueBuilder->Flush();
@@ -335,3 +340,4 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 }
 
 bool CGame::IsInMainRenderPass() const {return m_bMainRenderPass;}
+#pragma optimize("",on)

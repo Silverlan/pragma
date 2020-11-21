@@ -51,12 +51,14 @@ REGISTER_CONVAR_CL(render_texture_filtering,"1",ConVarFlags::Archive,"0 = Neares
 REGISTER_CONVAR_CL(render_hdr_max_exposure,"8",ConVarFlags::Archive,"Expore will be clamped at this value. Can be overwritten by the map.");
 REGISTER_CONVAR_CL(render_draw_scene,"1",ConVarFlags::Cheat,"1 = Default, 0 = Scene isn't drawn.");
 REGISTER_CONVAR_CL(render_draw_world,"1",ConVarFlags::Cheat,"1 = Default, 2 = Wireframe, 0 = Don't draw world.");
+REGISTER_CONVAR_CL(render_draw_static,"1",ConVarFlags::Cheat,"1 = Default, 0 = Don't draw level geometry.");
+REGISTER_CONVAR_CL(render_draw_dynamic,"1",ConVarFlags::Cheat,"1 = Default, 0 = Don't draw props.");
+REGISTER_CONVAR_CL(render_draw_translucent,"1",ConVarFlags::Cheat,"1 = Default, 0 = Don't draw translucent objects.");
 REGISTER_CONVAR_CL(render_draw_sky,"1",ConVarFlags::Cheat,"1 = Default, 0 = Sky isn't drawn.");
 REGISTER_CONVAR_CL(render_draw_water,"1",ConVarFlags::Cheat,"1 = Default, 0 = Water isn't drawn.");
 REGISTER_CONVAR_CL(render_draw_view,"1",ConVarFlags::Cheat,"1 = Default, 0 = View-Models aren't drawn.");
 REGISTER_CONVAR_CL(render_draw_particles,"1",ConVarFlags::Cheat,"1 = Default, 0 = Particles aren't drawn.");
 REGISTER_CONVAR_CL(render_draw_glow,"1",ConVarFlags::Cheat,"1 = Default, 0 = Glow-effects aren't drawn.");
-REGISTER_CONVAR_CL(render_draw_translucent,"1",ConVarFlags::Cheat,"1 = Default, 0 = Translucent geometry isn't drawn.");
 REGISTER_CONVAR_CL(render_clear_scene,"0",static_cast<ConVarFlags>(0),"0 = Default, 1 = Screen is cleared before scene is rendered.");
 REGISTER_CONVAR_CL(render_clear_scene_color,"0 0 0 255",static_cast<ConVarFlags>(0),"Clear color to use if render_clear_scene is set to 1.");
 REGISTER_CONVAR_CL(render_forwardplus_tile_size,"16",static_cast<ConVarFlags>(0),"Changes the tile size used for the light culling in forward+.");

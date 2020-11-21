@@ -22,8 +22,8 @@
 
 layout(location = 0) in vec2 vs_vert_uv;
 
-layout(set = SHADER_UNIFORM_TEXTURE_SET,binding = SHADER_UNIFORM_TEXTURE_BINDING) uniform sampler2D u_texture;
-layout(set = SHADER_UNIFORM_DEPTH_BUFFER_SET,binding = SHADER_UNIFORM_DEPTH_BUFFER_BINDING) uniform sampler2D u_depthBuffer;
+layout(LAYOUT_ID(SHADER_UNIFORM_TEXTURE_SET,SHADER_UNIFORM_TEXTURE_BINDING)) uniform sampler2D u_texture;
+layout(LAYOUT_ID(SHADER_UNIFORM_DEPTH_BUFFER_SET,SHADER_UNIFORM_DEPTH_BUFFER_BINDING)) uniform sampler2D u_depthBuffer;
 
 layout(location = 0) out vec4 fs_color;
 

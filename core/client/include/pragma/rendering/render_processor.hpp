@@ -58,7 +58,7 @@ namespace pragma::rendering
 		bool BindShader(prosper::Shader &shader);
 		bool BindMaterial(CMaterial &mat);
 		bool BindEntity(CBaseEntity &ent);
-		bool Render(CModelSubMesh &mesh);
+		bool Render(CModelSubMesh &mesh,pragma::RenderMeshIndex meshIdx);
 		pragma::ShaderGameWorld *GetCurrentShader();
 		void UnbindShader();
 		void SetCountNonOpaqueMaterialsOnly(bool b);

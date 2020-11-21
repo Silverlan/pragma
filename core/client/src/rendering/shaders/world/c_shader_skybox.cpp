@@ -127,7 +127,7 @@ bool ShaderSkybox::BindMaterialParameters(CMaterial &mat) {return true;}
 bool ShaderSkybox::BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings) {return true;}
 bool ShaderSkybox::BindLights(prosper::IDescriptorSet &dsLights) {return true;}
 bool ShaderSkybox::BindVertexAnimationOffset(uint32_t offset) {return true;}
-bool ShaderSkybox::Draw(CModelSubMesh &mesh) {return ShaderTextured3DBase::Draw(mesh,false);}
+bool ShaderSkybox::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx) {return ShaderTextured3DBase::Draw(mesh,meshIdx,false);}
 
 //////////////
 

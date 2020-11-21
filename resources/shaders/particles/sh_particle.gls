@@ -16,9 +16,6 @@
 #ifdef GLS_VERTEX_SHADER
 	#include "vs_particle_vertex.gls"
 	layout(location = SHADER_COLOR_BUFFER_LOCATION) in vec4 in_color;
-	#if ENABLE_PARTICLE_TEXTURE == 1
-		layout(location = SHADER_ANIMATION_START_LOCATION) in float in_animationStart;
-	#endif
 #endif
 
 #endif

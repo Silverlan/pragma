@@ -6,14 +6,14 @@
 layout(location = 0) in vec3 in_vert_pos;
 layout(location = 1) in vec2 in_vert_uv;
 
-layout(std140,set = 0,binding = 0) uniform Instance
+layout(std140,LAYOUT_ID(0,0)) uniform Instance
 {
 	mat4 M;
 	vec4 color;
 	uint flags;
 } u_instance;
 
-layout(std140,set = 1,binding = 0) uniform Camera
+layout(std140,LAYOUT_ID(1,0)) uniform Camera
 {
 	mat4 V;
 	mat4 P;
@@ -26,6 +26,6 @@ void main()
 {
 	vs_vert_uv = in_vert_uv;
 	
-	mat4 MVP = u_camera.VP *u_instance.M;
+	mat4 MVP = API_COORD_TRANSFORM(u_camera.VP) *u_instance.M;
 	gl_Position = MVP *vec4(in_vert_pos,1);
 }

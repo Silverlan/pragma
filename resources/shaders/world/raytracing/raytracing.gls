@@ -29,7 +29,7 @@ layout (local_size_x = 4,local_size_y = 4) in;
 #define SHADER_UNIFORM_BRDF_MAP_SET SHADER_UNIFORM_IRRADIANCE_MAP_SET
 #define SHADER_UNIFORM_BRDF_MAP_BINDING (SHADER_UNIFORM_PREFILTER_MAP_BINDING +1)
 
-layout(set = SHADER_OUTPUT_IMAGE_SET,binding = SHADER_OUTPUT_IMAGE_BINDING,rgba8) uniform image2D raytracedImage;
+layout(LAYOUT_ID(SHADER_OUTPUT_IMAGE_SET,SHADER_OUTPUT_IMAGE_BINDING,rgba8)) uniform image2D raytracedImage;
 
 #include "/modules/sh_camera_info.gls"
 #include "/modules/sh_rendersettings.gls"
@@ -48,7 +48,7 @@ struct Ray
 	float distSqr;
 };
 
-layout(std430,set = SHADER_UNIFORM_LIGHT_SOURCES_SET,binding = SHADER_UNIFORM_LIGHT_SOURCES_BINDING) readonly buffer LightBuffer {
+layout(std430,LAYOUT_ID(SHADER_UNIFORM_LIGHT_SOURCES_SET,SHADER_UNIFORM_LIGHT_SOURCES_BINDING)) readonly buffer LightBuffer {
 	LightSourceData data[];
 } lightBuffer;
 
@@ -80,7 +80,7 @@ float calc_point_light_attenuation(uint lightIdx,vec3 fragWorldPos)
 
 //////////////////////////////
 
-layout(push_constant) uniform PushConstants {
+layout(LAYOUT_PUSH_CONSTANTS()) uniform PushConstants {
 	uint numMeshes;
 	uint numLights;
 	uint width;
@@ -156,7 +156,7 @@ void raycast_mesh_detail(
 			mat4 m2 = mat4(1.0);
 			//uint boneBufferStartIndex = 512;
 			//m0 = boneMatrixBuffer.data[subMeshInfo.boneBufferStartIndex].matrices[0];
-			for(int i=0;i<BONE_WEIGHT_COUNT;++i)
+			for(int i=0;i<4;++i)
 			{
 				if(vw0.boneIds[i] != -1)
 					m0 += vw0.weights[i] *boneMatrixBuffer.data[subMeshInfo.boneBufferStartIndex].matrices[vw0.boneIds[i]];

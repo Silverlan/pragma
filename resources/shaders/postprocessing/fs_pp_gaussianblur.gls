@@ -24,7 +24,7 @@ float kernel21[] = float[](0.061476,0.060998,0.059587,0.057307,0.054261,0.050582
 		col += texture(tex,vec2(UV.x,UV.y +i *blurSize)) *kernel[i]; \
 	}
 
-layout(push_constant) uniform pushConstants {
+layout(LAYOUT_PUSH_CONSTANTS()) uniform pushConstants {
 	vec4 colorScale;
 	float blurSize;
 	int kernelSize;

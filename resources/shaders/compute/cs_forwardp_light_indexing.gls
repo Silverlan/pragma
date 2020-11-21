@@ -9,11 +9,11 @@
 #include "../lighting/sh_vis_light_buffer.gls"
 #include "../modules/sh_limits.gls"
 
-layout(std430,set = SHADER_UNIFORM_VIS_LIGHT_INDEX_BUFFER_SET,binding = SHADER_UNIFORM_VIS_LIGHT_INDEX_BUFFER_BINDING) buffer VisibleLightIndicesBuffer {
+layout(std430,LAYOUT_ID(SHADER_UNIFORM_VIS_LIGHT_INDEX_BUFFER_SET,SHADER_UNIFORM_VIS_LIGHT_INDEX_BUFFER_BINDING)) buffer VisibleLightIndicesBuffer {
 	uint fragmentCount[];
 } visibleLightIndicesBuffer;
 
-layout(push_constant) uniform ComputeInfo
+layout(LAYOUT_PUSH_CONSTANTS()) uniform ComputeInfo
 {
 	uint tileCount;
 } u_computeInfo;

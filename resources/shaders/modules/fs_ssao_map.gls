@@ -1,0 +1,13 @@
+#ifndef F_FS_SSAO_MAP_GLS
+#define F_FS_SSAO_MAP_GLS
+
+#include "sh_uniform_locations.gls"
+
+#ifndef ENABLE_SSAO
+	#define ENABLE_SSAO 1
+#endif
+#if ENABLE_SSAO == 1
+	layout(LAYOUT_ID(SHADER_UNIFORM_SSAO_MAP_SET,SHADER_UNIFORM_SSAO_MAP_BINDING)) uniform sampler2D u_ssao;
+#endif
+
+#endif

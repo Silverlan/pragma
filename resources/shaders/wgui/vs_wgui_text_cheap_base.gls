@@ -10,7 +10,7 @@ layout(location = 3) in vec4 in_glyph_bounds;
 
 layout(location = 0) out vec2 vs_vert_uv;
 
-layout(push_constant) uniform Font {
+layout(LAYOUT_PUSH_CONSTANTS()) uniform Font {
 	mat4 modelMatrix;
 	vec4 color;
 	float widthScale;

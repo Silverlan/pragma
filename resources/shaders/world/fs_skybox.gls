@@ -8,9 +8,13 @@
 #include "../modules/sh_entity_info.gls"
 #include "../modules/vs_buffer_locations.gls"
 
-layout(set = SHADER_UNIFORM_SKYBOX_MAP_SET,binding = SHADER_UNIFORM_SKYBOX_MAP_BINDING) uniform samplerCube u_skyboxTexture;
+// Unused, but required to make sure Pragma can determine the descriptor set binding points for the camera descriptor set correctly
+#include "../modules/light_map/fs_lightmap.gls"
+#include "../modules/fs_ssao_map.gls"
 
-layout(push_constant) uniform RenderSettings {
+layout(LAYOUT_ID(SHADER_UNIFORM_SKYBOX_MAP_SET,SHADER_UNIFORM_SKYBOX_MAP_BINDING)) uniform samplerCube u_skyboxTexture;
+
+layout(LAYOUT_PUSH_CONSTANTS()) uniform RenderSettings {
 	vec3 posCam;
 } u_renderSettings;
 
@@ -18,7 +22,7 @@ void main()
 {
 	vec3 camOffset = (inverse(get_model_matrix()) *vec4(u_renderSettings.posCam,1)).xyz;
 	vec3 pos = fs_in.vert_pos_ws -camOffset;
-	fs_color = textureLod(u_skyboxTexture, pos, 0).rgba; 
+	fs_color = textureLod(u_skyboxTexture,pos,0).rgba;
 	fs_color *= get_instance_color();
 
 	extract_bright_color(fs_color);

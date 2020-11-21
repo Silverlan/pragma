@@ -14,6 +14,7 @@
 #include "../modules/sh_csm.gls"
 #include "../modules/sh_parallaxmapping.gls"
 #include "../modules/sh_time.gls"
+#include "../modules/fs_renderer.gls"
 
 vec3 calc_light_specular(vec3 normal,vec3 viewVector)
 {
@@ -56,11 +57,11 @@ vec3 calc_light_specular(vec3 normal,vec3 viewVector)
 #define SHADER_UNIFORM_WATER_FOG_SET SHADER_UNIFORM_WATER_SETTINGS_SET
 #define SHADER_UNIFORM_WATER_FOG_BINDING (SHADER_UNIFORM_WATER_SETTINGS_BINDING +1)
 
-layout(set = SHADER_UNIFORM_WATER_EFFECTS_SET,binding = SHADER_UNIFORM_REFLECTION_MAP_BINDING) uniform sampler2D u_reflectionMap;
-layout(set = SHADER_UNIFORM_WATER_EFFECTS_SET,binding = SHADER_UNIFORM_REFRACTION_MAP_BINDING) uniform sampler2D u_refractionMap;
-layout(set = SHADER_UNIFORM_WATER_EFFECTS_SET,binding = SHADER_UNIFORM_REFRACTION_DEPTH_MAP_BINDING) uniform sampler2D u_refractionDepthMap;
+layout(LAYOUT_ID(SHADER_UNIFORM_WATER_EFFECTS_SET,SHADER_UNIFORM_REFLECTION_MAP_BINDING)) uniform sampler2D u_reflectionMap;
+layout(LAYOUT_ID(SHADER_UNIFORM_WATER_EFFECTS_SET,SHADER_UNIFORM_REFRACTION_MAP_BINDING)) uniform sampler2D u_refractionMap;
+layout(LAYOUT_ID(SHADER_UNIFORM_WATER_EFFECTS_SET,SHADER_UNIFORM_REFRACTION_DEPTH_MAP_BINDING)) uniform sampler2D u_refractionDepthMap;
 
-layout(std140,set = SHADER_UNIFORM_WATER_SETTINGS_SET,binding = SHADER_UNIFORM_WATER_SETTINGS_BINDING) uniform WaterSettings
+layout(std140,LAYOUT_ID(SHADER_UNIFORM_WATER_SETTINGS_SET,SHADER_UNIFORM_WATER_SETTINGS_BINDING)) uniform WaterSettings
 {
 	float waterScale; // TODO: Remove me, let mapper decide!
 	float waveStrength;
@@ -68,14 +69,14 @@ layout(std140,set = SHADER_UNIFORM_WATER_SETTINGS_SET,binding = SHADER_UNIFORM_W
 	float reflectiveIntensity;
 } u_water;
 
-layout(std140,set = SHADER_UNIFORM_WATER_FOG_SET,binding = SHADER_UNIFORM_WATER_FOG_BINDING) uniform UWaterFog
+layout(std140,LAYOUT_ID(SHADER_UNIFORM_WATER_FOG_SET,SHADER_UNIFORM_WATER_FOG_BINDING)) uniform UWaterFog
 {
 	Fog fog;
 } u_waterFog;
 
 void main()
 {
-	vec4 wposWorld = inverse(u_camera.V) *get_model_matrix() *vec4(fs_in.vert_pos_ws,1.0);
+	vec4 wposWorld = inverse(get_view_matrix()) *get_model_matrix() *vec4(fs_in.vert_pos_ws,1.0);
 	vec4 shadowCoord = u_material.reflectionVp *vec4(fs_in.vert_pos_ws,1.0);
 
 	shadowCoord.xy /= shadowCoord.w;

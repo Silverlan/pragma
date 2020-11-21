@@ -16,9 +16,9 @@
 	#include "sh_material.gls"
 	#include "sh_light_data.gls"
 
-	layout(set = SHADER_UNIFORM_NORMAL_MAP_SET,binding = SHADER_UNIFORM_NORMAL_MAP_BINDING) uniform sampler2D u_normalMap;
-	//layout(set = SHADER_UNIFORM_BUMP_MAP_SET,binding = 0) uniform sampler2D u_bumpMap;
-	//layout(set = SHADER_UNIFORM_DISPLACEMENT_MAP_SET,binding = 0) uniform sampler2D u_displacementMap;
+	layout(LAYOUT_ID(SHADER_UNIFORM_NORMAL_MAP_SET,SHADER_UNIFORM_NORMAL_MAP_BINDING)) uniform sampler2D u_normalMap;
+	//layout(LAYOUT_ID(SHADER_UNIFORM_BUMP_MAP_SET,0)) uniform sampler2D u_bumpMap;
+	//layout(LAYOUT_ID(SHADER_UNIFORM_DISPLACEMENT_MAP_SET,0)) uniform sampler2D u_displacementMap;
 #endif
 #if ENABLE_TANGENT_SPACE_NORMALS == 1
 	vec3 calc_tangent_space_normal(vec2 uv)

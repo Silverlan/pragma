@@ -36,7 +36,12 @@ pragma::rendering::DepthStageRenderProcessor::DepthStageRenderProcessor(const ut
 }
 uint32_t pragma::rendering::DepthStageRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue,RenderPassStats *optStats,std::optional<uint32_t> worldRenderQueueIndex)
 {
+	std::chrono::steady_clock::time_point t;
+	if(optStats)
+		t = std::chrono::steady_clock::now();
 	renderQueue.WaitForCompletion();
+	if(optStats)
+		optStats->renderThreadWaitTime += std::chrono::steady_clock::now() -t;
 
 	static auto skipRender = false;
 	if(skipRender)
@@ -70,9 +75,11 @@ uint32_t pragma::rendering::DepthStageRenderProcessor::Render(const pragma::rend
 		if(umath::is_flag_set(m_stateFlags,StateFlags::EntityBound) == false || item.mesh >= m_curEntityMeshList->size())
 			continue;
 		auto &mesh = static_cast<CModelSubMesh&>(*m_curEntityMeshList->at(item.mesh));
-		if(BaseRenderProcessor::Render(mesh))
+		if(BaseRenderProcessor::Render(mesh,item.mesh))
 			++numShaderInvocations;
 	}
+	if(optStats)
+		optStats->cpuExecutionTime += std::chrono::steady_clock::now() -t;
 	return numShaderInvocations;
 }
 

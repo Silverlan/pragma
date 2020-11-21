@@ -23,6 +23,7 @@ namespace util {class BSPTree;};
 class CHC;
 namespace pragma
 {
+	using RenderMeshIndex = uint32_t;
 	namespace rendering {class RenderQueue;};
 	class DLLCLIENT CWorldComponent final
 		: public BaseWorldComponent
@@ -37,7 +38,7 @@ namespace pragma
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 
 		const rendering::RenderQueue *GetClusterRenderQueue(util::BSPTree::ClusterIndex clusterIndex,bool translucent=false) const;
-		void SetBSPTree(const std::shared_ptr<util::BSPTree> &bspTree);
+		void SetBSPTree(const std::shared_ptr<util::BSPTree> &bspTree,const std::vector<std::vector<RenderMeshIndex>> &meshesPerCluster);
 		const std::shared_ptr<util::BSPTree> &GetBSPTree() const;
 	protected:
 		void BuildOfflineRenderQueues(bool rebuild=false);
@@ -51,6 +52,7 @@ namespace pragma
 		std::shared_ptr<CHC> m_chcController;
 
 		std::shared_ptr<util::BSPTree> m_bspTree = nullptr;
+		std::vector<std::vector<RenderMeshIndex>> m_meshesPerCluster;
 	};
 };
 #pragma warning(pop)

@@ -123,7 +123,15 @@ void CGame::RegisterLua()
 		{"get_debug_buffer",Lua::game::Client::get_debug_buffer},
 		{"get_time_buffer",Lua::game::Client::get_time_buffer},
 		{"get_csm_buffer",Lua::game::Client::get_csm_buffer},
-		{"get_render_settings_descriptor_set",Lua::game::Client::get_render_settings_descriptor_set}
+		{"get_render_settings_descriptor_set",Lua::game::Client::get_render_settings_descriptor_set},
+		{"set_default_game_render_enabled",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			c_game->SetDefaultGameRenderEnabled(Lua::CheckBool(l,1));
+			return 0;
+		})},
+		{"is_default_game_render_enabled",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			Lua::PushBool(l,c_game->IsDefaultGameRenderEnabled());
+			return 1;
+		})}
 		
 		/*{"debug_vehicle",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			Con::cout<<"Creating vehicle..."<<Con::endl;
@@ -317,6 +325,7 @@ void CGame::RegisterLua()
 		{"RENDER_FLAG_WATER_BIT",umath::to_integral(FRender::Water)},
 		{"RENDER_FLAG_STATIC_BIT",umath::to_integral(FRender::Static)},
 		{"RENDER_FLAG_DYNAMIC_BIT",umath::to_integral(FRender::Dynamic)},
+		{"RENDER_FLAG_TRANSLUCENT_BIT",umath::to_integral(FRender::Translucent)},
 		{"RENDER_FLAG_HDR_BIT",umath::to_integral(FRender::HDR)},
 		{"RENDER_FLAG_PARTICLE_DEPTH_BIT",umath::to_integral(FRender::ParticleDepth)},
 

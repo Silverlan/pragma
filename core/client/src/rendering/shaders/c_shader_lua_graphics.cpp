@@ -685,7 +685,7 @@ void Lua::Shader::ShaderEntity::BindVertexAnimationOffset(lua_State *l,pragma::S
 }
 void Lua::Shader::ShaderEntity::Draw(lua_State *l,pragma::ShaderEntity &shader,::ModelSubMesh &mesh)
 {
-	Lua::PushBool(l,shader.Draw(static_cast<CModelSubMesh&>(mesh)));
+	Lua::PushBool(l,shader.Draw(static_cast<CModelSubMesh&>(mesh),{}));
 }
 void Lua::Shader::TexturedLit3D::BindMaterial(lua_State *l,pragma::ShaderTextured3DBase &shader,::Material &mat)
 {

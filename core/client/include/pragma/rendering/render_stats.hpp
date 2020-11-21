@@ -6,6 +6,7 @@
 #include <material.h>
 #include <sharedutils/util_weak_handle.hpp>
 #include <vector>
+#include <chrono>
 
 namespace prosper {class Shader;};
 
@@ -22,6 +23,9 @@ struct DLLCLIENT RenderPassStats
 	uint32_t numDrawnMeshes = 0;
 	uint64_t numDrawnVertices = 0;
 	uint64_t numDrawnTrianges = 0;
+	uint32_t numEntityBufferUpdates = 0;
+	std::chrono::nanoseconds renderThreadWaitTime {0};
+	std::chrono::nanoseconds cpuExecutionTime {0};
 };
 
 struct DLLCLIENT RenderStats

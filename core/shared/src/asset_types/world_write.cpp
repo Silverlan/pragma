@@ -70,7 +70,7 @@ void pragma::asset::WorldData::Write(VFilePtrReal &f)
 	f->Write(header.data(),header.size());
 
 	f->Write<uint32_t>(WLD_VERSION);
-	static_assert(WLD_VERSION == 11);
+	static_assert(WLD_VERSION == 12);
 	auto offsetToDataFlags = f->Tell();
 	f->Write<DataFlags>(DataFlags::None);
 	auto offsetMaterials = f->Tell();
@@ -93,6 +93,26 @@ void pragma::asset::WorldData::Write(VFilePtrReal &f)
 		WriteDataOffset(f,offsetBSPTree);
 		flags |= DataFlags::HasBSPTree;
 		WriteBSPTree(f);
+
+		auto &clusterMeshIndices = GetClusterMeshIndices();
+		f->Write<bool>(!clusterMeshIndices.empty());
+		if(clusterMeshIndices.empty() == false)
+		{
+			assert(clusterMeshIndices.size() == m_bspTree->GetClusterCount());
+			if(clusterMeshIndices.size() != m_bspTree->GetClusterCount())
+			{
+				m_messageLogger("Error: Number of items in cluster mesh list mismatches number of BSP tree clusters!");
+				return;
+			}
+
+			auto numClusters = m_bspTree->GetClusterCount();
+			for(auto i=decltype(numClusters){0u};i<numClusters;++i)
+			{
+				auto &meshIndices = clusterMeshIndices.at(i);
+				f->Write<uint32_t>(meshIndices.size());
+				f->Write(meshIndices.data(),meshIndices.size() *sizeof(meshIndices.front()));
+			}
+		}
 	}
 
 	m_messageLogger("Saving lightmap atlas...");

@@ -16,11 +16,11 @@
 #include "pragma/rendering/render_stats.hpp"
 
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 static bool g_collectRenderStats = false;
 static CallbackHandle g_cbPreRenderScene = {};
 static CallbackHandle g_cbPostRenderScene = {};
-static void print_pass_stats(const RenderPassStats &stats)
+static void print_pass_stats(const RenderPassStats &stats,bool full)
 {
 	auto *cam = c_game->GetRenderCamera();
 	struct EntityData
@@ -45,30 +45,42 @@ static void print_pass_stats(const RenderPassStats &stats)
 		return entData0.distance < entData1.distance;
 	});
 
-	Con::cout<<"\nEntities:"<<Con::endl;
-	for(auto &entData : entities)
+	Con::cout<<"\nEntities:";
+	if(full == false)
+		Con::cout<<" "<<entities.size()<<Con::endl;
+	else
 	{
-		auto &hEnt = entData.hEntity;
-		if(hEnt.IsValid() == false)
-			continue;
-		uint32_t lod = 0;
-		auto mdlC = hEnt.get()->GetComponent<pragma::CModelComponent>();
-		if(mdlC.valid())
-			lod = mdlC->GetLOD();
-		hEnt.get()->print(Con::cout);
-		Con::cout<<" (Distance: "<<entData.distance<<") (Lod: "<<lod<<")"<<Con::endl;
-	}
-
-	Con::cout<<"\nMaterials:"<<Con::endl;
-	for(auto &hMat : stats.materials)
-	{
-		if(hMat.IsValid() == false)
-			continue;
-		auto *albedoMap = hMat.get()->GetAlbedoMap();
-		Con::cout<<hMat.get()->GetName();
-		if(albedoMap)
-			Con::cout<<" ["<<albedoMap->name<<"]";
 		Con::cout<<Con::endl;
+		for(auto &entData : entities)
+		{
+			auto &hEnt = entData.hEntity;
+			if(hEnt.IsValid() == false)
+				continue;
+			uint32_t lod = 0;
+			auto mdlC = hEnt.get()->GetComponent<pragma::CModelComponent>();
+			if(mdlC.valid())
+				lod = mdlC->GetLOD();
+			hEnt.get()->print(Con::cout);
+			Con::cout<<" (Distance: "<<entData.distance<<") (Lod: "<<lod<<")"<<Con::endl;
+		}
+	}
+	
+	Con::cout<<"\nMaterials:";
+	if(full == false)
+		Con::cout<<" "<<stats.materials.size()<<Con::endl;
+	else
+	{
+		Con::cout<<Con::endl;
+		for(auto &hMat : stats.materials)
+		{
+			if(hMat.IsValid() == false)
+				continue;
+			auto *albedoMap = hMat.get()->GetAlbedoMap();
+			Con::cout<<hMat.get()->GetName();
+			if(albedoMap)
+				Con::cout<<" ["<<albedoMap->name<<"]";
+			Con::cout<<Con::endl;
+		}
 	}
 
 	Con::cout<<"\nShaders:"<<Con::endl;
@@ -83,31 +95,36 @@ static void print_pass_stats(const RenderPassStats &stats)
 	Con::cout<<"Shader state changes: "<<stats.numShaderStateChanges<<Con::endl;
 	Con::cout<<"Material state changes: "<<stats.numMaterialStateChanges<<Con::endl;
 	Con::cout<<"Entity state changes: "<<stats.numEntityStateChanges<<Con::endl;
+	Con::cout<<"Entity buffer updates: "<<stats.numEntityBufferUpdates<<Con::endl;
 	Con::cout<<"Number of meshes drawn: "<<stats.numDrawnMeshes<<Con::endl;
 	Con::cout<<"Number of vertices drawn: "<<stats.numDrawnVertices<<Con::endl;
 	Con::cout<<"Number of triangles drawn: "<<stats.numDrawnTrianges<<Con::endl;
+	Con::cout<<"Wait time: "<<(static_cast<long double>(stats.renderThreadWaitTime.count()) /static_cast<long double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds{1}).count()))<<Con::endl;
+	Con::cout<<"CPU Execution time: "<<(static_cast<long double>(stats.cpuExecutionTime.count()) /static_cast<long double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds{1}).count()))<<Con::endl;
 }
-DLLCLIENT void print_debug_render_stats(const RenderStats &renderStats)
+DLLCLIENT void print_debug_render_stats(const RenderStats &renderStats,bool full)
 {
 	g_collectRenderStats = false;
+	auto t = renderStats.lightingPass.cpuExecutionTime +renderStats.lightingPassTranslucent.cpuExecutionTime +renderStats.prepass.cpuExecutionTime;
+	Con::cout<<"Total CPU Execution time: "<<(static_cast<long double>(t.count()) /static_cast<long double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds{1}).count()))<<Con::endl;
 	Con::cout<<"----- Lighting pass: -----"<<Con::endl;
-	print_pass_stats(renderStats.lightingPass);
+	print_pass_stats(renderStats.lightingPass,full);
 
 	Con::cout<<"\n----- Lighting translucent pass: -----"<<Con::endl;
-	print_pass_stats(renderStats.lightingPassTranslucent);
+	print_pass_stats(renderStats.lightingPassTranslucent,full);
 
 	Con::cout<<"\n----- Depth prepass: -----"<<Con::endl;
-	print_pass_stats(renderStats.prepass);
+	print_pass_stats(renderStats.prepass,full);
 }
-DLLCLIENT void debug_render_stats()
+DLLCLIENT void debug_render_stats(bool full)
 {
 	g_collectRenderStats = true;
 	g_cbPreRenderScene = c_game->AddCallback("PreRenderScene",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
 		drawSceneInfo.get().renderStats = RenderStats{};
 	}));
-	g_cbPostRenderScene = c_game->AddCallback("PostRenderScene",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
+	g_cbPostRenderScene = c_game->AddCallback("PostRenderScene",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([full](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
 		if(drawSceneInfo.get().renderStats.has_value())
-			print_debug_render_stats(*drawSceneInfo.get().renderStats);
+			print_debug_render_stats(*drawSceneInfo.get().renderStats,full);
 		if(g_cbPreRenderScene.IsValid())
 			g_cbPreRenderScene.Remove();
 		if(g_cbPostRenderScene.IsValid())
@@ -253,6 +270,8 @@ bool pragma::rendering::BaseRenderProcessor::BindEntity(CBaseEntity &ent)
 	auto *renderC = ent.GetRenderComponent();
 	if(umath::is_flag_set(m_stateFlags,StateFlags::MaterialBound) == false || renderC == nullptr)
 		return false;
+	if(m_stats && umath::is_flag_set(renderC->GetStateFlags(),CRenderComponent::StateFlags::RenderBufferDirty))
+		++m_stats->numEntityBufferUpdates;
 	renderC->UpdateRenderBuffers(m_drawSceneInfo.commandBuffer);
 	if(m_shaderScene->BindEntity(ent) == false)
 		return false;
@@ -289,28 +308,30 @@ pragma::ShaderGameWorld *pragma::rendering::BaseRenderProcessor::GetCurrentShade
 	return umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) ? m_shaderScene : nullptr;
 }
 
-bool pragma::rendering::BaseRenderProcessor::Render(CModelSubMesh &mesh)
+bool pragma::rendering::BaseRenderProcessor::Render(CModelSubMesh &mesh,pragma::RenderMeshIndex meshIdx)
 {
 	if(umath::is_flag_set(m_stateFlags,StateFlags::EntityBound) == false || m_curRenderC == nullptr)
 		return false;
 	++m_numShaderInvocations;
-
-	auto &mdlComponent = m_curRenderC->GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
-	auto &vertAnimBuffer = static_cast<CModel&>(*mdl).GetVertexAnimationBuffer();
+	
 	auto bUseVertexAnim = false;
-	if(vertAnimBuffer != nullptr)
+	auto &mdlComponent = m_curRenderC->GetModelComponent();
+	if(mdlComponent.valid())
 	{
-		auto pVertexAnimatedComponent = m_curEntity->GetComponent<pragma::CVertexAnimatedComponent>();
-		if(pVertexAnimatedComponent.valid())
+		auto &vertAnimBuffer = static_cast<CModel&>(*mdlComponent->GetModel()).GetVertexAnimationBuffer();
+		if(vertAnimBuffer != nullptr)
 		{
-			auto offset = 0u;
-			auto animCount = 0u;
-			if(pVertexAnimatedComponent->GetVertexAnimationBufferMeshOffset(mesh,offset,animCount) == true)
+			auto pVertexAnimatedComponent = m_curEntity->GetComponent<pragma::CVertexAnimatedComponent>();
+			if(pVertexAnimatedComponent.valid())
 			{
-				auto vaData = ((offset<<16)>>16) | animCount<<16;
-				m_shaderScene->BindVertexAnimationOffset(vaData);
-				bUseVertexAnim = true;
+				auto offset = 0u;
+				auto animCount = 0u;
+				if(pVertexAnimatedComponent->GetVertexAnimationBufferMeshOffset(mesh,offset,animCount) == true)
+				{
+					auto vaData = ((offset<<16)>>16) | animCount<<16;
+					m_shaderScene->BindVertexAnimationOffset(vaData);
+					bUseVertexAnim = true;
+				}
 			}
 		}
 	}
@@ -324,6 +345,7 @@ bool pragma::rendering::BaseRenderProcessor::Render(CModelSubMesh &mesh)
 		m_stats->numDrawnTrianges += mesh.GetTriangleCount();
 		m_stats->meshes.push_back(std::static_pointer_cast<CModelSubMesh>(mesh.shared_from_this()));
 	}
-	m_shaderScene->Draw(mesh);
+	m_shaderScene->Draw(mesh,meshIdx);
 	return true;
 }
+#pragma optimize("",on)

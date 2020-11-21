@@ -19,6 +19,12 @@ namespace pragma
 	{
 	public:
 		static void SetupLightMapUvData(CBaseEntity &ent);
+		enum class StateFlags : uint8_t
+		{
+			None = 0,
+			IsModelBakedWithLightMaps = 1u,
+			RenderMeshBufferIndexTableDirty = IsModelBakedWithLightMaps<<1u
+		};
 		using MeshIdx = uint32_t;
 		using BufferIdx = uint32_t;
 
@@ -30,18 +36,25 @@ namespace pragma
 		const std::unordered_map<MeshIdx,std::vector<Vector2>> &GetMeshLightMapUvData() const;
 		void AssignBufferIndex(MeshIdx meshIdx,BufferIdx bufIdx);
 		std::optional<BufferIdx> FindBufferIndex(CModelSubMesh &mesh) const;
+		std::optional<BufferIdx> GetBufferIndex(RenderMeshIndex meshIdx) const;
 
 		void UpdateMeshLightmapUvBuffers(CLightMapComponent &lightMapC);
 	protected:
 		void UpdateModelMeshes();
+		void UpdateRenderMeshBufferList();
 
 		std::unordered_map<MeshIdx,std::vector<Vector2>> m_uvDataPerMesh {};
 		std::unordered_map<MeshIdx,std::shared_ptr<ModelSubMesh>> m_meshes {};
 		std::unordered_map<CModelSubMesh*,MeshIdx> m_meshToMeshIdx {};
 		std::unordered_map<CModelSubMesh*,BufferIdx> m_meshToBufIdx {};
+
+		// Matches the render meshes from the model component (for faster lookup)
+		std::vector<BufferIdx> m_meshBufferIndices;
+
 		std::string m_modelName; // Uvs are only valid for the model they were built with
-		bool m_isModelBakedWithLightMaps = false;
+		StateFlags m_stateFlags = StateFlags::RenderMeshBufferIndexTableDirty;
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::CLightMapReceiverComponent::StateFlags)
 
 #endif

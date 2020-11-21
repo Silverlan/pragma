@@ -176,7 +176,14 @@ void RasterizationRenderer::RenderLightingPass(const util::DrawSceneInfo &drawSc
 		// By rendering world geometry first, we can also avoid overdraw.
 		// This does *not* include translucent geometry, which is instead copied over to the
 		// general translucency world render queue.
+
+		std::chrono::steady_clock::time_point t;
+		if(drawSceneInfo.renderStats.has_value())
+			t = std::chrono::steady_clock::now();
 		sceneRenderDesc.WaitForWorldRenderQueues();
+		if(drawSceneInfo.renderStats.has_value())
+			drawSceneInfo.renderStats->lightingPass.renderThreadWaitTime += std::chrono::steady_clock::now() -t;
+
 		auto &worldRenderQueues = sceneRenderDesc.GetWorldRenderQueues();
 		for(auto i=decltype(worldRenderQueues.size()){0u};i<worldRenderQueues.size();++i)
 			rsys.Render(*worldRenderQueues.at(i),lightingStageStats,i);

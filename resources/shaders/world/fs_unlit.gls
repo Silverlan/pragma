@@ -3,16 +3,16 @@
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shading_language_420pack : enable
 
-#include "../modules/sh_vertex_data.gls"
-#include "../modules/fs_scene.gls"
+#define DEBUG_MODE DEBUG_MODE_NONE
 
-#define SHADER_UNIFORM_ALBEDO_MAP_SET 2
-#define SHADER_UNIFORM_ALBEDO_MAP_BINDING 1
-
-layout(set = SHADER_UNIFORM_ALBEDO_MAP_SET,binding = SHADER_UNIFORM_ALBEDO_MAP_BINDING) uniform sampler2D u_albedoMap;
+#include "pbr/pbr.gls"
 
 void main()
 {
-	fs_color = texture(u_albedoMap,fs_in.vert_uv);
+	vec4 albedoColor = texture(u_albedoMap,fs_in.vert_uv);
+	fs_color = albedoColor;
+	vec4 colorMod = get_instance_color();
+	fs_color.rgb *= colorMod.rgb *u_material.color.rgb;
+	fs_color.a = apply_alpha_mode(albedoColor.a *colorMod.a *u_material.color.a,u_material.alphaMode,u_material.alphaCutoff);
 	extract_bright_color(fs_color);
 }

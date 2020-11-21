@@ -7,9 +7,9 @@
 #include "../../modules/fs_animated_texture.gls"
 #include "../../modules/sh_export.gls"
 
-layout(set = SHADER_UNIFORM_SCENE_DEPTH_MAP_SET,binding = SHADER_UNIFORM_SCENE_DEPTH_MAP_BINDING) uniform sampler2D u_smpSceneDepth;
+layout(LAYOUT_ID(SHADER_UNIFORM_SCENE_DEPTH_MAP_SET,SHADER_UNIFORM_SCENE_DEPTH_MAP_BINDING)) uniform sampler2D u_smpSceneDepth;
 
-layout(push_constant) uniform Instance {
+layout(LAYOUT_PUSH_CONSTANTS()) uniform Instance {
 	layout(offset = 20) int renderFlags;
 	float viewportW;
 	float viewportH;

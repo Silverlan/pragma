@@ -127,7 +127,7 @@ bool ShaderPrepassBase::BindMaterial(CMaterial &mat)
 	return true;
 }
 
-bool ShaderPrepassBase::Draw(CModelSubMesh &mesh)
+bool ShaderPrepassBase::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx)
 {
 	auto flags = Flags::None;
 	if(mesh.GetExtendedVertexWeights().empty() == false)
@@ -140,7 +140,7 @@ bool ShaderPrepassBase::Draw(CModelSubMesh &mesh)
 		if(RecordPushConstants(*m_alphaCutoff,offsetof(PushConstants,alphaCutoff)) == false)
 			return false;
 	}
-	return RecordPushConstants(flags,offsetof(PushConstants,flags)) && ShaderEntity::Draw(mesh);
+	return RecordPushConstants(flags,offsetof(PushConstants,flags)) && ShaderEntity::Draw(mesh,meshIdx);
 }
 
 void ShaderPrepassBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)

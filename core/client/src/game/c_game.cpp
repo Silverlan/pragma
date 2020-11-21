@@ -687,6 +687,8 @@ void CGame::PostGUIDraw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 {
 	CallLuaCallbacks<void,std::shared_ptr<prosper::ICommandBuffer>>("PostGUIDraw",drawCmd);
 }
+void CGame::SetDefaultGameRenderEnabled(bool enabled) {m_defaultGameRenderEnabled = enabled;}
+bool CGame::IsDefaultGameRenderEnabled() const {return m_defaultGameRenderEnabled;}
 void CGame::QueueForRendering(const util::DrawSceneInfo &drawSceneInfo) {m_sceneRenderQueue.push_back(drawSceneInfo);}
 void CGame::SetRenderScene(pragma::CSceneComponent &scene) {m_renderScene = scene.GetHandle<pragma::CSceneComponent>();}
 void CGame::ResetRenderScene() {m_renderScene = m_scene;}
@@ -1074,7 +1076,7 @@ void CGame::InitializeMapEntities(pragma::asset::WorldData &worldData,std::vecto
 			{
 				auto *bspTree = worldData.GetBSPTree();
 				if(bspTree)
-					pWorldComponent->SetBSPTree(bspTree->shared_from_this());
+					pWorldComponent->SetBSPTree(bspTree->shared_from_this(),worldData.GetClusterMeshIndices());
 			}
 		}
 

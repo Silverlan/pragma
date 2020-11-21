@@ -112,7 +112,7 @@ bool ShaderParticleModel::BindParticleBuffers(prosper::IBuffer &particleBuffer,p
 
 bool ShaderParticleModel::Draw(CModelSubMesh &mesh,uint32_t numInstances,uint32_t firstInstance)
 {
-	return ShaderTextured3DBase::Draw(mesh,[this,numInstances,firstInstance](CModelSubMesh &mesh) {
+	return ShaderTextured3DBase::Draw(mesh,{},[this,numInstances,firstInstance](CModelSubMesh &mesh) {
 		return RecordDrawIndexed(mesh.GetTriangleVertexCount(),numInstances,0u,firstInstance);
 	},true);
 }

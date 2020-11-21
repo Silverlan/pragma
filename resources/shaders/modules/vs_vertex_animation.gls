@@ -11,9 +11,27 @@
     #define SHADER_UNIFORM_VERTEX_ANIMATION_FRAME_DATA_BINDING (SHADER_UNIFORM_VERTEX_ANIMATION_BINDING +1)
 #endif
 
-layout(std430,set = SHADER_UNIFORM_VERTEX_ANIMATION_SET,binding = SHADER_UNIFORM_VERTEX_ANIMATION_BINDING) buffer VertexAnimation {
-	vec4 verts[];
+#include "/math/half_float.gls"
+
+layout(std430,LAYOUT_ID(SHADER_UNIFORM_VERTEX_ANIMATION_SET,SHADER_UNIFORM_VERTEX_ANIMATION_BINDING)) buffer VertexAnimation {
+	ivec4 verts[];
 } vertexAnimation;
+
+void get_vertex_anim_vertex_position(uint frameOffset,out vec3 vpos,out vec3 vnorm,out float vwrinkle)
+{
+	uvec4 v = vertexAnimation.verts[frameOffset +SH_VERTEX_INDEX];
+	vpos = vec3(
+		float16_to_float(int(v[0]>>16)),
+		float16_to_float(int((v[0]<<16)>>16)),
+		float16_to_float(int(v[1]>>16))
+	);
+	vwrinkle = float16_to_float(int((v[1]<<16)>>16));
+	vnorm = vec3(
+		float16_to_float(int(v[2]>>16)),
+		float16_to_float(int((v[2]<<16)>>16)),
+		float16_to_float(int(v[3]>>16))
+	);
+}
 
 struct VertexAnimationFrameData
 {
@@ -22,7 +40,7 @@ struct VertexAnimationFrameData
     float blend;
     float padding;
 };
-layout(std430,set = SHADER_UNIFORM_VERTEX_ANIMATION_FRAME_DATA_SET,binding = SHADER_UNIFORM_VERTEX_ANIMATION_FRAME_DATA_BINDING) buffer VAFrameData {
+layout(std430,LAYOUT_ID(SHADER_UNIFORM_VERTEX_ANIMATION_FRAME_DATA_SET,SHADER_UNIFORM_VERTEX_ANIMATION_FRAME_DATA_BINDING)) buffer VAFrameData {
 	VertexAnimationFrameData data[];
 } vaFrameData;
 

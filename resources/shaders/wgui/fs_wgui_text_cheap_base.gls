@@ -3,11 +3,11 @@
 
 layout(location = 0) in vec2 vs_vert_uv;
 
-layout(set = 0,binding = 0) uniform sampler2D u_texture;
+layout(LAYOUT_ID(0,0)) uniform sampler2D u_texture;
 
 layout(location = 0) out vec4 fs_color;
 
-layout(push_constant) uniform Font {
+layout(LAYOUT_PUSH_CONSTANTS()) uniform Font {
 	mat4 modelMatrix;
 	vec4 color;
 	float widthScale;
@@ -15,6 +15,7 @@ layout(push_constant) uniform Font {
 	uint glyphMapWidth;
 	uint glyphMapHeight;
 	uint maxGlyphBitmapWidth;
+	uint yOffset;
 } u_font;
 
 #ifdef USE_VERTEX_COLOR

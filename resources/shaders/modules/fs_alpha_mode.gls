@@ -1,0 +1,24 @@
+#ifndef F_FS_ALPHA_MODE_GLS
+#define F_FS_ALPHA_MODE_GLS
+
+#define ALPHA_MODE_OPAQUE 0
+#define ALPHA_MODE_MASK 1
+#define ALPHA_MODE_BLEND 2
+
+float apply_alpha_mode(float a,uint alphaMode,float alphaCutoff)
+{
+	switch(alphaMode)
+	{
+		case ALPHA_MODE_OPAQUE:
+			a = 1.0;
+			break;
+		case ALPHA_MODE_MASK:
+			a = (a >= alphaCutoff) ? 1.0 : 0.0;
+			break;
+		case ALPHA_MODE_BLEND:
+			break;
+	}
+	return a;
+}
+
+#endif

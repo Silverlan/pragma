@@ -171,6 +171,7 @@ void RenderSystem::Render(
 {
 	if(true)
 		return; // TODO
+#if 0
 	if(translucentMeshes.empty())
 		return;
 	auto &scene = drawSceneInfo.scene;
@@ -291,6 +292,7 @@ void RenderSystem::Render(
 	}
 	if(shaderPrev != nullptr)
 		shaderPrev->EndDraw();
+#endif
 }
 
 #include "pragma/rendering/render_processor.hpp"
@@ -298,7 +300,12 @@ void RenderSystem::Render(
 
 uint32_t pragma::rendering::LightingStageRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue,RenderPassStats *optStats,std::optional<uint32_t> worldRenderQueueIndex)
 {
+	std::chrono::steady_clock::time_point t;
+	if(optStats)
+		t = std::chrono::steady_clock::now();
 	renderQueue.WaitForCompletion();
+	if(optStats)
+		optStats->renderThreadWaitTime += std::chrono::steady_clock::now() -t;
 
 	static auto skipRender = false;
 	if(skipRender)
@@ -343,9 +350,11 @@ uint32_t pragma::rendering::LightingStageRenderProcessor::Render(const pragma::r
 		if(umath::is_flag_set(m_stateFlags,StateFlags::EntityBound) == false || item.mesh >= m_curEntityMeshList->size())
 			continue;
 		auto &mesh = static_cast<CModelSubMesh&>(*m_curEntityMeshList->at(item.mesh));
-		if(BaseRenderProcessor::Render(mesh))
+		if(BaseRenderProcessor::Render(mesh,item.mesh))
 			++numShaderInvocations;
 	}
+	if(optStats)
+		optStats->cpuExecutionTime += std::chrono::steady_clock::now() -t;
 	return numShaderInvocations;
 }
 

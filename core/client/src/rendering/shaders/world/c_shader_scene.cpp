@@ -22,7 +22,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
-
+#pragma optimize("",off)
 decltype(ShaderScene::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderScene::DESCRIPTOR_SET_RENDER_SETTINGS = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Debug
@@ -311,7 +311,7 @@ bool ShaderEntity::BindScene(pragma::CSceneComponent &scene,rendering::Rasteriza
 	return ShaderSceneLit::BindScene(scene,renderer,bView) &&
 		BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 }
-bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::function<bool(CModelSubMesh&)> &fDraw,bool bUseVertexWeightBuffer)
+bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,const std::function<bool(CModelSubMesh&)> &fDraw,bool bUseVertexWeightBuffer)
 {
 	auto numTriangleVertices = mesh.GetTriangleVertexCount();
 	if(numTriangleVertices > umath::to_integral(GameLimits::MaxMeshVertices))
@@ -320,7 +320,7 @@ bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::function<bool(CModelSubMe
 		return false;
 	}
 	auto &vkMesh = mesh.GetSceneMesh();
-	auto renderBuffer = vkMesh->GetRenderBuffer(mesh,*this,m_currentPipelineIdx);
+	auto &renderBuffer = vkMesh->GetRenderBuffer(mesh,*this,m_currentPipelineIdx);
 	return RecordBindRenderBuffer(*renderBuffer) && fDraw(mesh);
 #if 0
 	auto &vertexBuffer = vkMesh->GetVertexBuffer();
@@ -366,9 +366,10 @@ bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::function<bool(CModelSubMe
 #endif
 }
 
-bool ShaderEntity::Draw(CModelSubMesh &mesh,bool bUseVertexWeightBuffer)
+bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,bool bUseVertexWeightBuffer)
 {
-	return Draw(mesh,[this](CModelSubMesh &mesh) {
+	static auto skipDrawTest = false;
+	return Draw(mesh,meshIdx,[this](CModelSubMesh &mesh) {
 #if 0
 		static std::shared_ptr<prosper::IBuffer> vertexBuffer = nullptr;
 		if(vertexBuffer == nullptr)
@@ -389,8 +390,11 @@ bool ShaderEntity::Draw(CModelSubMesh &mesh,bool bUseVertexWeightBuffer)
 		RecordDraw(9);
 		return true;
 #endif
+		if(skipDrawTest)
+			return true;
 		return RecordDrawIndexed(mesh.GetTriangleVertexCount());
 	},bUseVertexWeightBuffer);
 }
 
-bool ShaderEntity::Draw(CModelSubMesh &mesh) {return Draw(mesh,true);}
+bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx) {return Draw(mesh,meshIdx,true);}
+#pragma optimize("",on)

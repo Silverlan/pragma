@@ -12,14 +12,16 @@ struct LightSourceData
 	vec4 position; // position.w = distance
 	vec4 color; // color.a = light intensity in candela
 	vec4 direction; // direction.w = start offset for spotlights
+
+	uint sceneFlags;
 	
 	// If light type is directional, this is a boolean specifying whether csm shadows are enabled,
 	// otherwise this is an index into the shadowmap or shadowcubemap array.
 	uint shadowIndex;
 	
 	// Spotlights
-	float cutoffOuterCos;
-	float cutoffInnerCos;
+	float cutoffOuter;
+	float cutoffInner;
 	float attenuation;
 
 	uint flags;
@@ -27,6 +29,11 @@ struct LightSourceData
 	uint shadowMapIndexDynamic;
 
 	float falloffExponent;
+
+	// Alignment to vec4!
+	float padding0;
+	float padding1;
+	float padding2;
 };
 
 #endif

@@ -76,6 +76,8 @@ namespace pragma::rendering
 		~RenderQueueBuilder();
 		void Append(const std::function<void()> &worker);
 		void Flush();
+		bool HasWork() const;
+		uint32_t GetWorkQueueCount() const;
 	private:
 		void Exec();
 		void BuildRenderQueues();

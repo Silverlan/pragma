@@ -11,7 +11,7 @@
 	#define SHADER_UNIFORM_SCENE_DEPTH_MAP_BINDING 0
 #endif
 
-layout(set = SHADER_UNIFORM_SCENE_DEPTH_MAP_SET,binding = SHADER_UNIFORM_SCENE_DEPTH_MAP_BINDING) uniform sampler2D u_smpSceneDepth;
+layout(LAYOUT_ID(SHADER_UNIFORM_SCENE_DEPTH_MAP_SET,SHADER_UNIFORM_SCENE_DEPTH_MAP_BINDING)) uniform sampler2D u_smpSceneDepth;
 
 float get_scene_depth(float wViewport,float hViewport)
 {

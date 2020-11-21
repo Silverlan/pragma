@@ -11,14 +11,16 @@
 
 #define SHADER_UNIFORM_TEXTURE_SET 0
 #define SHADER_UNIFORM_TEXTURE_BINDING 0
+#define SHADER_UNIFORM_TEXTURE_BINDING_ALPHA (SHADER_UNIFORM_TEXTURE_BINDING +1)
 
 layout(location = 0) in vec2 vs_vert_uv;
 
-layout(set = SHADER_UNIFORM_TEXTURE_SET,binding = SHADER_UNIFORM_TEXTURE_BINDING) uniform sampler2D u_texture;
+layout(LAYOUT_ID(SHADER_UNIFORM_TEXTURE_SET,SHADER_UNIFORM_TEXTURE_BINDING)) uniform sampler2D u_texture;
+layout(LAYOUT_ID(SHADER_UNIFORM_TEXTURE_SET,SHADER_UNIFORM_TEXTURE_BINDING_ALPHA)) uniform sampler2D u_alphaTexture;
 
 layout(location = 0) out vec4 fs_color;
 
-layout(push_constant) uniform FXAAConstants {
+layout(LAYOUT_PUSH_CONSTANTS()) uniform FXAAConstants {
 	float subPixelAliasingRemoval;
 	float edgeThreshold;
 	float minEdgeThreshold;
@@ -45,4 +47,5 @@ void main()
 		0.0, /* unused */
 		vec4(0,0,0,0) /* unused */
 	);
+	fs_color.a = texture(u_alphaTexture,vs_vert_uv).a;
 }

@@ -222,6 +222,18 @@ void ModelSubMesh::Merge(const ModelSubMesh &other)
 		for(auto &vw : *other.m_extendedVertexWeights)
 			m_extendedVertexWeights->push_back(vw);
 	}
+
+	for(auto &pair : *other.m_uvSets)
+	{
+		auto it = m_uvSets->find(pair.first);
+		if(it == m_uvSets->end())
+		{
+			it = m_uvSets->insert(std::make_pair<std::string,std::vector<Vector2>>(std::string{pair.first},{})).first;
+			it->second.resize(vertCount);
+		}
+		it->second.resize(newVertCount);
+		memcpy(it->second.data() +vertCount,pair.second.data(),pair.second.size() *sizeof(pair.second.front()));
+	}
 }
 void ModelSubMesh::SetShared(const ModelSubMesh &other,ShareMode mode)
 {

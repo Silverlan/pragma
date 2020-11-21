@@ -78,7 +78,7 @@ namespace pragma
 		virtual bool BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) override;
 		virtual bool BindDrawOrigin(const Vector4 &drawOrigin) override;
 		virtual void Set3DSky(bool is3dSky) override;
-		virtual bool Draw(CModelSubMesh &mesh) override;
+		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx) override;
 	protected:
 		virtual bool BindMaterial(CMaterial &mat) override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;

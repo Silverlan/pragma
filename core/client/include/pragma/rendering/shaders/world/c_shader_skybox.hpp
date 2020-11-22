@@ -23,13 +23,6 @@ namespace pragma
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 
-#pragma pack(push,1)
-		struct PushConstants
-		{
-			Vector3 posCam;
-		};
-#pragma pack(pop)
-
 		ShaderSkybox(prosper::IPrContext &context,const std::string &identifier);
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		virtual bool BeginDraw(

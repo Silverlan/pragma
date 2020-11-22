@@ -46,7 +46,7 @@
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 extern DLLCENGINE CEngine *c_engine;
-
+#pragma optimize("",off)
 static void register_gui(Lua::Interface &lua)
 {
 	auto *l = lua.GetState();
@@ -752,15 +752,15 @@ void CGame::RegisterLuaLibraries()
 		{"create_muzzle_flash",Lua::util::Client::create_muzzle_flash},
 		{"fire_bullets",static_cast<int(*)(lua_State*)>(Lua::util::fire_bullets)},
 		{"save_image",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			std::string fileName = Lua::CheckString(l,2);
+			if(Lua::file::validate_write_operation(l,fileName) == false)
+			{
+				Lua::PushBool(l,false);
+				return 1;
+			}
 			if(Lua::IsType<uimg::ImageBuffer>(l,1))
 			{
 				auto &imgBuffer = Lua::Check<uimg::ImageBuffer>(l,1);
-				std::string fileName = Lua::CheckString(l,2);
-				if(Lua::file::validate_write_operation(l,fileName) == false)
-				{
-					Lua::PushBool(l,false);
-					return 1;
-				}
 				if(Lua::IsType<uimg::TextureInfo>(l,3))
 				{
 					auto &imgWriteInfo = Lua::Check<uimg::TextureInfo>(l,3);
@@ -784,8 +784,40 @@ void CGame::RegisterLuaLibraries()
 					Lua::PushBool(l,uimg::save_image(f,imgBuffer,format,quality));
 				return 1;
 			}
+			if(Lua::IsTable(l,1))
+			{
+				auto n = Lua::GetObjectLength(l,1);
+				std::vector<std::shared_ptr<uimg::ImageBuffer>> imgBufs;
+				imgBufs.reserve(n);
+				auto o = luabind::object{luabind::from_stack(l,1)};
+				uint32_t maxWidth = 0;
+				uint32_t maxHeight = 0;
+				for(luabind::iterator it{o},end;it!=end;++it)
+				{
+					auto val = *it;
+					auto *imgBuf = luabind::object_cast<uimg::ImageBuffer*>(val);
+					imgBufs.push_back(imgBuf->shared_from_this());
+					maxWidth = umath::max(maxWidth,imgBuf->GetWidth());
+					maxHeight = umath::max(maxHeight,imgBuf->GetHeight());
+				}
+				for(auto &imgBuf : imgBufs)
+					imgBuf->Resize(maxWidth,maxHeight);
+				if(imgBufs.empty())
+					return 0;
+				auto &imgBuf = imgBufs.front();
+				auto &texInfo = Lua::Check<uimg::TextureInfo>(l,3);
+				auto cubemap = false;
+				if(Lua::IsSet(l,4))
+					cubemap = Lua::CheckBool(l,4);
+				auto res = uimg::save_texture(fileName,[&imgBufs](uint32_t iLayer,uint32_t iMipmap,std::function<void(void)> &outDeleter) -> const uint8_t* {
+					if(iMipmap > 0)
+						return nullptr;
+					return static_cast<uint8_t*>(imgBufs.at(iLayer)->GetData());
+				},imgBuf->GetWidth(),imgBuf->GetHeight(),imgBuf->GetPixelSize(),imgBufs.size(),0,cubemap,texInfo);
+				Lua::PushBool(l,res);
+				return 1;
+			}
 			auto &img = Lua::Check<prosper::IImage>(l,1);
-			std::string fileName = Lua::CheckString(l,2);
 			if(Lua::file::validate_write_operation(l,fileName) == false)
 			{
 				Lua::PushBool(l,false);
@@ -1122,3 +1154,4 @@ void CGame::RegisterLuaLibraries()
 		lua_pushtablecfunction(GetLuaState(),"debug",(f.name),(f.func));
 	}
 }
+#pragma optimize("",on)

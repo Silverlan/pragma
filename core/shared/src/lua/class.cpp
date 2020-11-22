@@ -458,6 +458,9 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defImageBuffer.def("Flip",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,bool,bool)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,bool flipH,bool flipV) {
 		imgBuffer.Flip(flipH,flipV);
 	}));
+	defImageBuffer.def("SwapChannels",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uimg::ImageBuffer::Channel,uimg::ImageBuffer::Channel)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uimg::ImageBuffer::Channel channel0,uimg::ImageBuffer::Channel channel1) {
+		imgBuffer.SwapChannels(channel0,channel1);
+	}));
 	defImageBuffer.def("ApplyToneMapping",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t toneMapping) {
 		auto tonemappedImg = imgBuffer.ApplyToneMapping(static_cast<uimg::ImageBuffer::ToneMapping>(toneMapping));
 		if(tonemappedImg == nullptr)

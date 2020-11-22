@@ -18,6 +18,7 @@
 #include <util_image_buffer.hpp>
 #include <util_texture_info.hpp>
 #include <prosper_command_buffer.hpp>
+#include <pragma/entities/entity_iterator.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -276,3 +277,24 @@ void CSkybox::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CSkyboxComponent>();
 }
+
+static void sky_override(NetworkState*,ConVar*,std::string,std::string skyMat)
+{
+	if(c_game == nullptr)
+		return;
+	CMaterial *matSky = nullptr;
+	if(skyMat.empty() == false)
+		matSky = static_cast<CMaterial*>(client->LoadMaterial(skyMat,true,false));
+	EntityIterator entIt {*c_game};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CSkyboxComponent>>();
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CModelComponent>>();
+	for(auto *ent : entIt)
+	{
+		auto mdlC = ent->GetComponent<CModelComponent>();
+		if(matSky)
+			mdlC->SetMaterialOverride(0,*matSky);
+		else
+			mdlC->ClearMaterialOverride(0);
+	}
+}
+REGISTER_CONVAR_CALLBACK_CL(sky_override,sky_override);

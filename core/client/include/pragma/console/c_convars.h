@@ -63,6 +63,7 @@ REGISTER_CONVAR_CL(render_clear_scene,"0",static_cast<ConVarFlags>(0),"0 = Defau
 REGISTER_CONVAR_CL(render_clear_scene_color,"0 0 0 255",static_cast<ConVarFlags>(0),"Clear color to use if render_clear_scene is set to 1.");
 REGISTER_CONVAR_CL(render_forwardplus_tile_size,"16",static_cast<ConVarFlags>(0),"Changes the tile size used for the light culling in forward+.");
 REGISTER_CONVAR_CL(render_technique,"0",static_cast<ConVarFlags>(0),"0 = Rasterization, 1 = Raytracing");
+REGISTER_CONVAR_CL(sky_override,"",static_cast<ConVarFlags>(0),"Replaces the material for all current skyboxes with the specified material.");
 
 REGISTER_CONVAR_CL(render_pp_nightvision,"0",ConVarFlags::None,"Enables or disables night vision.");
 REGISTER_CONVAR_CL(render_pp_nightvision_luminance_threshold,"0.2",ConVarFlags::Archive,"Changes the luminance threshold for the night vision post-processing effect.");

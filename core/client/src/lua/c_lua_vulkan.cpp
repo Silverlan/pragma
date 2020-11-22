@@ -1063,7 +1063,7 @@ int Lua::Vulkan::create_gradient_texture(lua_State *l)
 	return 1;
 }
 
-static void push_image_buffers(lua_State *l,uint32_t includeLayers,uint32_t includeMipmaps,const std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &imgBuffers)
+static void push_image_buffers(lua_State *l,bool includeLayers,bool includeMipmaps,const std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &imgBuffers)
 {
 	if(imgBuffers.empty())
 		return;
@@ -2169,14 +2169,14 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkImage.def("GetCreateInfo",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&)>([](lua_State *l,Lua::Vulkan::Image &img) {
 		Lua::Push(l,img.GetCreateInfo());
 	}));
-	defVkImage.def("ToImageBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uint32_t,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::Image &img,uint32_t includeLayers,uint32_t includeMipmaps,uint32_t targetFormat) {
+	defVkImage.def("ToImageBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,bool,bool,uint32_t)>([](lua_State *l,Lua::Vulkan::Image &img,bool includeLayers,bool includeMipmaps,uint32_t targetFormat) {
 		std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> imgBuffers;
 		auto result = util::to_image_buffer(img,static_cast<uimg::ImageBuffer::Format>(targetFormat),imgBuffers,includeLayers,includeMipmaps);
 		if(result == false || imgBuffers.empty())
 			return;
 		push_image_buffers(l,includeLayers,includeMipmaps,imgBuffers);
 	}));
-	defVkImage.def("ToImageBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::Image &img,uint32_t includeLayers,uint32_t includeMipmaps) {
+	defVkImage.def("ToImageBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,bool,bool)>([](lua_State *l,Lua::Vulkan::Image &img,bool includeLayers,bool includeMipmaps) {
 		std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> imgBuffers;
 		auto result = util::to_image_buffer(img,imgBuffers,includeLayers,includeMipmaps);
 		if(result == false || imgBuffers.empty())

@@ -76,8 +76,6 @@ void ShaderSkybox::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pi
 	pipelineInfo.ToggleDepthTest(false,prosper::CompareOp::Always);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
 
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
-
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_MATERIAL);
@@ -116,12 +114,13 @@ bool ShaderSkybox::BindEntity(CBaseEntity &ent)
 }
 bool ShaderSkybox::BindSceneCamera(pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,bool bView)
 {
-	auto &cam = scene.GetActiveCamera();
+	return ShaderTextured3DBase::BindSceneCamera(scene,renderer,bView);
+	/*auto &cam = scene.GetActiveCamera();
 	if(ShaderTextured3DBase::BindSceneCamera(scene,renderer,bView) == false)
 		return false;
 	auto origin = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	uvec::rotate(&origin,m_skyAngles);
-	return RecordPushConstants(PushConstants{origin}) == true;
+	return RecordPushConstants(PushConstants{origin}) == true;*/
 }
 bool ShaderSkybox::BindMaterialParameters(CMaterial &mat) {return true;}
 bool ShaderSkybox::BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings) {return true;}

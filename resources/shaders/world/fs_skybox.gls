@@ -7,16 +7,13 @@
 #include "../modules/fs_scene.gls"
 #include "../modules/sh_entity_info.gls"
 #include "../modules/vs_buffer_locations.gls"
+#include "../modules/sh_rendersettings.gls"
 
 // Unused, but required to make sure Pragma can determine the descriptor set binding points for the camera descriptor set correctly
 #include "../modules/light_map/fs_lightmap.gls"
 #include "../modules/fs_ssao_map.gls"
 
 layout(LAYOUT_ID(SHADER_UNIFORM_SKYBOX_MAP_SET,SHADER_UNIFORM_SKYBOX_MAP_BINDING)) uniform samplerCube u_skyboxTexture;
-
-layout(LAYOUT_PUSH_CONSTANTS()) uniform RenderSettings {
-	vec3 posCam;
-} u_renderSettings;
 
 void main()
 {

@@ -176,7 +176,7 @@ void CFlexComponent::SetFlexController(uint32_t flexId,float val,float duration,
 	auto &flexInfo = it->second;
 	flexInfo.targetValue = val;
 	flexInfo.endTime = (duration > 0.f) ? c_game->CurTime() +duration : 0.f;
-	
+	m_flexDataUpdateRequired = true;
 	//InitializeVertexAnimationBuffer();
 
 	//if(m_vertexAnimationBuffer == nullptr) // prosper TODO

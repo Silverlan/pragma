@@ -113,6 +113,7 @@ void RenderQueue::Unlock()
 		m_threadWaitCondition.notify_all();
 	m_threadWaitMutex.unlock();
 }
+bool RenderQueue::IsComplete() const {return !m_locked;}
 void RenderQueue::WaitForCompletion() const
 {
 	std::unique_lock<std::mutex> mlock(m_threadWaitMutex);

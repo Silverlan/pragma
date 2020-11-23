@@ -151,7 +151,7 @@ const std::vector<std::shared_ptr<const pragma::rendering::RenderQueue>> &SceneR
 void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 	const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,
 	const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
-	const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,const std::vector<Plane> *frustumPlanes
+	const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull
 )
 {
 	auto &mdlC = renderC.GetModelComponent();
@@ -160,7 +160,7 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 	auto first = false;
 	for(auto meshIdx=decltype(renderMeshes.size()){0u};meshIdx<renderMeshes.size();++meshIdx)
 	{
-		if(frustumPlanes && ShouldCull(renderC,meshIdx,*frustumPlanes))
+		if(fShouldCull && ShouldCull(renderC,meshIdx,fShouldCull))
 			continue;
 		auto &renderMesh = renderMeshes.at(meshIdx);
 		auto *mat = mdlC->GetRenderMaterial(renderMesh->GetSkinTextureIndex());
@@ -181,26 +181,29 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 		renderQueue->Add(static_cast<CBaseEntity&>(renderC.GetEntity()),meshIdx,*mat,*shader,nonOpaque ? &cam : nullptr);
 	}
 }
-void SceneRenderDesc::AddRenderMeshesToRenderQueue(const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,const std::vector<Plane> *frustumPlanes)
+void SceneRenderDesc::AddRenderMeshesToRenderQueue(
+	const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,
+	const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull
+)
 {
-	AddRenderMeshesToRenderQueue(drawSceneInfo,renderC,[this](RenderMode renderMode,bool translucent) {return GetRenderQueue(renderMode,translucent);},scene,cam,vp,frustumPlanes);
+	AddRenderMeshesToRenderQueue(drawSceneInfo,renderC,[this](RenderMode renderMode,bool translucent) {return GetRenderQueue(renderMode,translucent);},scene,cam,vp,fShouldCull);
 }
 
-bool SceneRenderDesc::ShouldCull(CBaseEntity &ent,const std::vector<Plane> &frustumPlanes)
+bool SceneRenderDesc::ShouldCull(CBaseEntity &ent,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull)
 {
 	auto *renderC = ent.GetRenderComponent();
-	return !renderC || ShouldCull(*renderC,frustumPlanes);
+	return !renderC || ShouldCull(*renderC,fShouldCull);
 }
-bool SceneRenderDesc::ShouldCull(pragma::CRenderComponent &renderC,const std::vector<Plane> &frustumPlanes)
+bool SceneRenderDesc::ShouldCull(pragma::CRenderComponent &renderC,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull)
 {
 	Vector3 min,max;
 	renderC.GetRenderBounds(&min,&max);
 	auto &pos = renderC.GetEntity().GetPosition();
 	min += pos;
 	max += pos;
-	return Intersection::AABBInPlaneMesh(min,max,frustumPlanes) == Intersection::Intersect::Outside;
+	return fShouldCull(min,max);
 }
-bool SceneRenderDesc::ShouldCull(pragma::CRenderComponent &renderC,pragma::RenderMeshIndex meshIdx,const std::vector<Plane> &frustumPlanes)
+bool SceneRenderDesc::ShouldCull(pragma::CRenderComponent &renderC,pragma::RenderMeshIndex meshIdx,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull)
 {
 	auto &renderMeshes = renderC.GetRenderMeshes();
 	if(meshIdx >= renderMeshes.size())
@@ -211,19 +214,23 @@ bool SceneRenderDesc::ShouldCull(pragma::CRenderComponent &renderC,pragma::Rende
 	auto &pos = renderC.GetEntity().GetPosition();
 	min += pos;
 	max += pos;
+	return fShouldCull(min,max);
+}
+bool SceneRenderDesc::ShouldCull(const Vector3 &min,const Vector3 &max,const std::vector<Plane> &frustumPlanes)
+{
 	return Intersection::AABBInPlaneMesh(min,max,frustumPlanes) == Intersection::Intersect::Outside;
 }
 
 void SceneRenderDesc::CollectRenderMeshesFromOctree(
 	const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
 	const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
-	const std::vector<Plane> *optFrustumPlanes,const std::vector<util::BSPTree::Node*> *bspLeafNodes
+	const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,const std::vector<util::BSPTree::Node*> *bspLeafNodes
 )
 {
 	std::function<void(const OcclusionOctree<CBaseEntity*>::Node &node)> iterateTree = nullptr;
-	iterateTree = [&iterateTree,&scene,&cam,renderFlags,optFrustumPlanes,&drawSceneInfo,&getRenderQueue,&vp,bspLeafNodes](const OcclusionOctree<CBaseEntity*>::Node &node) {
+	iterateTree = [&iterateTree,&scene,&cam,renderFlags,fShouldCull,&drawSceneInfo,&getRenderQueue,&vp,bspLeafNodes](const OcclusionOctree<CBaseEntity*>::Node &node) {
 		auto &nodeBounds = node.GetWorldBounds();
-		if(optFrustumPlanes && Intersection::AABBInPlaneMesh(nodeBounds.first,nodeBounds.second,*optFrustumPlanes) == Intersection::Intersect::Outside)
+		if(fShouldCull && fShouldCull(nodeBounds.first,nodeBounds.second))
 			return;
 		if(bspLeafNodes)
 		{
@@ -253,9 +260,9 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 			auto *renderC = static_cast<CBaseEntity*>(ent)->GetRenderComponent();
 			if(!renderC || renderC->IsExemptFromOcclusionCulling() || ShouldConsiderEntity(*static_cast<CBaseEntity*>(ent),scene,cam.GetEntity().GetPosition(),renderFlags) == false)
 				continue;
-			if(optFrustumPlanes && ShouldCull(*renderC,*optFrustumPlanes))
+			if(fShouldCull && ShouldCull(*renderC,fShouldCull))
 				continue;
-			AddRenderMeshesToRenderQueue(drawSceneInfo,*renderC,getRenderQueue,scene,cam,vp,optFrustumPlanes);
+			AddRenderMeshesToRenderQueue(drawSceneInfo,*renderC,getRenderQueue,scene,cam,vp,fShouldCull);
 		}
 		auto *children = node.GetChildren();
 		if(children == nullptr)
@@ -270,7 +277,10 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 	const std::vector<Plane> &frustumPlanes,const std::vector<util::BSPTree::Node*> *bspLeafNodes
 )
 {
-	CollectRenderMeshesFromOctree(drawSceneInfo,tree,scene,cam,vp,renderFlags,[this](RenderMode renderMode,bool translucent) {return GetRenderQueue(renderMode,translucent);},&frustumPlanes,bspLeafNodes);
+	CollectRenderMeshesFromOctree(drawSceneInfo,tree,scene,cam,vp,renderFlags,[this](RenderMode renderMode,bool translucent) {return GetRenderQueue(renderMode,translucent);},
+	[&frustumPlanes](const Vector3 &min,const Vector3 &max) -> bool {
+		return Intersection::AABBInPlaneMesh(min,max,frustumPlanes) == Intersection::Intersect::Outside;
+	},bspLeafNodes);
 }
 
 bool SceneRenderDesc::ShouldConsiderEntity(CBaseEntity &ent,const pragma::CSceneComponent &scene,const Vector3 &camOrigin,FRender renderFlags)
@@ -336,6 +346,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 	m_worldRenderQueuesReady = false;
 	c_game->GetRenderQueueBuilder().Append([this,&cam,posCam,&drawSceneInfo]() {
 		auto &frustumPlanes = g_debugFreezeCamData.has_value() ? g_debugFreezeCamData->frustumPlanes : cam.GetFrustumPlanes();
+		auto fShouldCull = [&frustumPlanes](const Vector3 &min,const Vector3 &max) -> bool {return SceneRenderDesc::ShouldCull(min,max,frustumPlanes);};
 		auto vp = cam.GetProjectionMatrix() *cam.GetViewMatrix();
 
 		std::vector<util::BSPTree::Node*> bspLeafNodes;
@@ -382,7 +393,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 					auto &item = renderQueue->queue.at(i);
 					if(item.mesh >= renderMeshes.size())
 						continue;
-					worldMeshVisibility.at(item.mesh) = !ShouldCull(*renderC,item.mesh,frustumPlanes);
+					worldMeshVisibility.at(item.mesh) = !ShouldCull(*renderC,item.mesh,fShouldCull);
 				}
 			}
 
@@ -400,7 +411,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 				for(auto i=decltype(renderQueueTranslucentSrc->queue.size()){0u};i<renderQueueTranslucentSrc->queue.size();++i)
 				{
 					auto &item = renderQueueTranslucentSrc->queue.at(i);
-					if(ShouldCull(*renderC,item.mesh,frustumPlanes))
+					if(ShouldCull(*renderC,item.mesh,fShouldCull))
 						continue;
 					renderQueueTranslucentDst->queue.push_back(item);
 					renderQueueTranslucentDst->sortedItemIndices.push_back(renderQueueTranslucentSrc->sortedItemIndices.at(i));
@@ -424,7 +435,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 			{
 				if(ShouldConsiderEntity(static_cast<CBaseEntity&>(pRenderComponent->GetEntity()),m_scene,posCam,drawSceneInfo.renderFlags) == false)
 					continue;
-				AddRenderMeshesToRenderQueue(drawSceneInfo,*pRenderComponent,m_scene,cam,vp);
+				AddRenderMeshesToRenderQueue(drawSceneInfo,*pRenderComponent,m_scene,cam,vp,nullptr);
 			}
 
 			// Now we just need the remaining entities, for which we'll use the scene octree

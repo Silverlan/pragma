@@ -57,17 +57,18 @@ public:
 	static void AddRenderMeshesToRenderQueue(
 		const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,
 		const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
-		const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,const std::vector<Plane> *frustumPlanes=nullptr
+		const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull
 	);
 	static void CollectRenderMeshesFromOctree(
 		const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
 		const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
-		const std::vector<Plane> *optFrustumPlanes,const std::vector<util::BSPTree::Node*> *bspLeafNodes=nullptr
+		const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,const std::vector<util::BSPTree::Node*> *bspLeafNodes=nullptr
 	);
 	static bool ShouldConsiderEntity(CBaseEntity &ent,const pragma::CSceneComponent &scene,const Vector3 &camOrigin,FRender renderFlags);
-	static bool ShouldCull(CBaseEntity &ent,const std::vector<Plane> &frustumPlanes);
-	static bool ShouldCull(pragma::CRenderComponent &renderC,const std::vector<Plane> &frustumPlanes);
-	static bool ShouldCull(pragma::CRenderComponent &renderC,pragma::RenderMeshIndex meshIdx,const std::vector<Plane> &frustumPlanes);
+	static bool ShouldCull(CBaseEntity &ent,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);
+	static bool ShouldCull(pragma::CRenderComponent &renderC,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);
+	static bool ShouldCull(pragma::CRenderComponent &renderC,pragma::RenderMeshIndex meshIdx,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);
+	static bool ShouldCull(const Vector3 &min,const Vector3 &max,const std::vector<Plane> &frustumPlanes);
 
 	SceneRenderDesc(pragma::CSceneComponent &scene);
 	~SceneRenderDesc();
@@ -97,7 +98,10 @@ public:
 	const std::vector<std::shared_ptr<const pragma::rendering::RenderQueue>> &GetWorldRenderQueues() const;
 	pragma::rendering::CulledMeshData *GetRenderInfo(RenderMode mode) const;
 private:
-	void AddRenderMeshesToRenderQueue(const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,const std::vector<Plane> *frustumPlanes=nullptr);
+	void AddRenderMeshesToRenderQueue(
+		const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,
+		const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull
+	);
 	void CollectRenderMeshesFromOctree(
 		const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
 		const std::vector<Plane> &frustumPlanes,const std::vector<util::BSPTree::Node*> *bspLeafNodes=nullptr
@@ -130,6 +134,7 @@ struct DLLCLIENT ShaderMeshContainer
 class WorldEnvironment;
 namespace pragma
 {
+	class CLightComponent;
 	enum class SceneDebugMode : uint32_t
 	{
 		None = 0,
@@ -152,6 +157,8 @@ namespace pragma
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
 		static ComponentEventId EVENT_ON_ACTIVE_CAMERA_CHANGED;
+		static ComponentEventId EVENT_ON_BUILD_RENDER_QUEUES;
+		static ComponentEventId EVENT_POST_RENDER_PREPASS;
 
 		friend SceneRenderDesc;
 		enum class FRenderSetting : uint32_t
@@ -228,8 +235,14 @@ namespace pragma
 		const Vector4 &GetParticleSystemColorFactor() const;
 
 		pragma::COcclusionCullerComponent *FindOcclusionCuller();
+		const pragma::COcclusionCullerComponent *FindOcclusionCuller() const;
 		SceneIndex GetSceneIndex() const;
 		bool IsValid() const;
+
+		void BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo);
+
+		const std::vector<util::WeakHandle<pragma::CLightComponent>> &GetPreviouslyVisibleShadowedLights() const {return m_previouslyVisibleShadowedLights;}
+		void SwapPreviouslyVisibleLights(std::vector<util::WeakHandle<pragma::CLightComponent>> &&components) {std::swap(m_previouslyVisibleShadowedLights,components);}
 	private:
 		void InitializeShadowDescriptorSet();
 		void UpdateRendererLightMap();
@@ -248,6 +261,7 @@ namespace pragma
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_camViewDescSetGroup = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_shadowDsg = nullptr;
 
+		std::vector<util::WeakHandle<pragma::CLightComponent>> m_previouslyVisibleShadowedLights;
 		util::WeakHandle<pragma::CLightMapComponent> m_lightMap = {};
 		util::WeakHandle<pragma::CCameraComponent> m_camera = {};
 		std::shared_ptr<prosper::IBuffer> m_cameraBuffer = nullptr;
@@ -282,6 +296,16 @@ namespace pragma
 		void InitializeFogBuffer();
 		void InitializeDescriptorSetLayouts();
 		void InitializeSwapDescriptorBuffers();
+	};
+
+	// Events
+
+	struct DLLCLIENT CEDrawSceneInfo
+		: public ComponentEvent
+	{
+		CEDrawSceneInfo(const util::DrawSceneInfo &drawSceneInfo);
+		virtual void PushArguments(lua_State *l) override;
+		const util::DrawSceneInfo &drawSceneInfo;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::CSceneComponent::FRenderSetting);

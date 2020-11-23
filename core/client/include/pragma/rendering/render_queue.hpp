@@ -52,10 +52,11 @@ namespace pragma::rendering
 		void Lock();
 		void Unlock();
 		void WaitForCompletion() const;
+		bool IsComplete() const;
 	private:
 		RenderQueue();
 
-		bool m_locked = false;
+		std::atomic<bool> m_locked = false;
 		mutable std::condition_variable m_threadWaitCondition {};
 		mutable std::mutex m_threadWaitMutex {};
 	};

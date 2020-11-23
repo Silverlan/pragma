@@ -100,7 +100,9 @@ namespace pragma
 
 		void InitializeLightSource();
 	};
-
+	
+	using LightBufferIndex = uint32_t;
+	using ShadowBufferIndex = uint32_t;
 	class DLLCLIENT CLightComponent final
 		: public CBaseLightComponent
 	{
@@ -116,8 +118,8 @@ namespace pragma
 
 		static prosper::IUniformResizableBuffer &GetGlobalRenderBuffer();
 		static prosper::IUniformResizableBuffer &GetGlobalShadowBuffer();
-		static CLightComponent *GetLightByBufferIndex(uint32_t idx);
-		static CLightComponent *GetLightByShadowBufferIndex(uint32_t idx);
+		static CLightComponent *GetLightByBufferIndex(LightBufferIndex idx);
+		static CLightComponent *GetLightByShadowBufferIndex(ShadowBufferIndex idx);
 		static uint32_t GetMaxLightCount();
 		static uint32_t GetMaxShadowCount();
 		static uint32_t GetLightCount();
@@ -142,6 +144,9 @@ namespace pragma
 
 		CLightComponent(BaseEntity &ent);
 		virtual ~CLightComponent() override;
+		CShadowComponent *GetShadowComponent();
+		const CShadowComponent *GetShadowComponent() const;
+		bool HasShadowsEnabled() const;
 		Mat4 &GetTransformationMatrix(unsigned int j);
 		virtual void Initialize() override;
 		bool ShouldUpdateRenderPass(ShadowMapType smType) const;
@@ -197,6 +202,7 @@ namespace pragma
 		void DestroyShadowBuffer();
 		void InitializeLight(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
+		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 
 		LightBufferData m_bufferData {};
 		std::unique_ptr<ShadowBufferData> m_shadowBufferData = nullptr;
@@ -228,6 +234,7 @@ namespace pragma
 		uint64_t m_lastThink = std::numeric_limits<uint64_t>::max();
 		util::WeakHandle<CShadowComponent> m_shadowMapStatic = {};
 		util::WeakHandle<CShadowComponent> m_shadowMapDynamic = {};
+		CShadowComponent *m_shadowComponent = nullptr;
 		void InitializeShadowMap(CShadowComponent &sm);
 		virtual void InitializeShadowMap();
 	};

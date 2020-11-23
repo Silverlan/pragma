@@ -16,7 +16,7 @@ namespace pragma
 	class CLightSpotComponent;
 	class CLightComponent;
 	class DLLCLIENT ShaderShadow
-		: public ShaderEntity
+		: public ShaderGameWorld
 	{
 	public:
 		static prosper::Format RENDER_PASS_DEPTH_FORMAT;
@@ -53,11 +53,21 @@ namespace pragma
 		ShaderShadow(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader);
 
 		bool BindLight(CLightComponent &light);
-		bool BindEntity(CBaseEntity &ent,const Mat4 &depthMVP);
-		virtual bool BindMaterial(CMaterial &mat) override; // TODO: Transparent only
-		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx) override;
-	protected:
 		bool BindDepthMatrix(const Mat4 &depthMVP);
+		virtual bool BindEntity(CBaseEntity &ent) override;
+		virtual bool BindMaterial(CMaterial &mat) override; // TODO: Transparent only
+		virtual bool BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) override {return true;}
+		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx) override;
+		virtual bool BindClipPlane(const Vector4 &clipPlane) override {return true;}
+		virtual bool SetDebugMode(pragma::SceneDebugMode debugMode) override {return true;}
+		virtual void Set3DSky(bool is3dSky) override {}
+		virtual bool BindDrawOrigin(const Vector4 &drawOrigin) override {return true;}
+		virtual bool BeginDraw(
+			const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},ShaderGameWorldPipeline pipelineIdx=ShaderGameWorldPipeline::Regular,
+			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
+		) override;
+	protected:
+		bool BindEntityDepthMatrix(const Mat4 &depthMVP);
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 	private:
@@ -66,7 +76,7 @@ namespace pragma
 		virtual uint32_t GetLightDescriptorSetIndex() const override;
 		virtual uint32_t GetInstanceDescriptorSetIndex() const override;
 		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const override;
-		virtual bool BindEntity(CBaseEntity &ent) override {return false;}
+		Mat4 m_depthMvp = Mat4{1.f};
 	};
 
 	class DLLCLIENT ShaderShadowTransparent

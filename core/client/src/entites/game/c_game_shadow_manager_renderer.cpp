@@ -10,6 +10,7 @@
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/render_queue.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/console/c_cvar.h"
@@ -160,6 +161,8 @@ void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimary
 
 bool ShadowRenderer::UpdateShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light,pragma::CLightComponent::ShadowMapType smType)
 {
+	// TODO: Remove me
+#if 0
 	m_shadowCasters.clear();
 	auto hShadowMap = light.GetShadowMap(smType);
 	if(hShadowMap.expired())
@@ -207,6 +210,7 @@ bool ShadowRenderer::UpdateShadowCasters(std::shared_ptr<prosper::IPrimaryComman
 		UpdateEntityShadowCasters(drawCmd,light);
 		break;
 	}
+#endif
 	return true;
 }
 
@@ -303,9 +307,10 @@ void ShadowRenderer::RenderShadows(
 		const prosper::ClearValue clearVal {prosper::ClearDepthStencilValue{1.f}};
 		if(drawCmd->RecordBeginRenderPass(*smRt,layerId,&clearVal) == false)
 			continue;
-		auto renderResultFlags = RenderShadows(drawCmd,light,layerId,depthMVP,shader,false);
-		if(umath::is_flag_set(renderResultFlags,RenderResultFlags::TranslucentPending) && shaderTransparent != nullptr)
-			RenderShadows(drawCmd,light,layerId,depthMVP,shader,true); // Draw translucent shadows
+		// TODO
+		//auto renderResultFlags = RenderShadows(drawCmd,light,layerId,depthMVP,shader,false);
+		//if(umath::is_flag_set(renderResultFlags,RenderResultFlags::TranslucentPending) && shaderTransparent != nullptr)
+		//	RenderShadows(drawCmd,light,layerId,depthMVP,shader,true); // Draw translucent shadows
 		if(drawParticleShadows == true && renderer)
 		{
 			auto *scene = c_game->GetRenderScene();

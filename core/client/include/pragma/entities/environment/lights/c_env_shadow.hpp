@@ -18,6 +18,38 @@
 namespace prosper {class Framebuffer; class RenderPass; class RenderTarget; class Texture;};
 namespace pragma
 {
+	class DLLCLIENT LightShadowRenderer
+	{
+	public:
+		enum class RenderState
+		{
+			NoRenderRequired = 0,
+			RenderRequiredOnChange,
+			RenderRequired
+		};
+		LightShadowRenderer(CLightComponent &l);
+		~LightShadowRenderer();
+
+		void BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo);
+		void Render(const util::DrawSceneInfo &drawSceneInfo);
+		bool DoesRenderQueueRequireBuilding() const;
+		bool IsRenderQueueComplete() const;
+
+		RenderState GetRenderState() const {return m_renderState;}
+		void SetRenderState(RenderState renderState) {m_renderState = renderState;}
+	private:
+		void UpdateSceneCallbacks();
+
+		std::vector<std::shared_ptr<pragma::rendering::RenderQueue>> m_renderQueues {};
+		std::atomic<bool> m_renderQueuesComplete = false;
+		std::vector<CallbackHandle> m_sceneCallbacks {};
+		CallbackHandle m_cbOnSceneFlagsChanged {};
+		CallbackHandle m_cbPreRenderScenes {};
+		util::WeakHandle<CLightComponent> m_hLight {};
+		RenderState m_renderState = RenderState::NoRenderRequired;
+		bool m_requiresRenderQueueUpdate = false;
+	};
+
 	class DLLCLIENT CShadowComponent final
 		: public BaseEntityComponent
 	{
@@ -45,9 +77,6 @@ namespace pragma
 		prosper::IRenderPass *GetRenderPass() const;
 		prosper::IFramebuffer *GetFramebuffer(uint32_t layerId=0u);
 
-		int64_t GetLastFrameRendered() const;
-		void SetLastFrameRendered(int64_t frameId);
-
 		bool IsDirty() const;
 		void SetDirty(bool dirty);
 
@@ -55,14 +84,20 @@ namespace pragma
 		void FreeRenderTarget();
 		bool HasRenderTarget() const;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+
+		LightShadowRenderer &GetRenderer();
+		const LightShadowRenderer &GetRenderer() const;
+
+		void RenderShadows(const util::DrawSceneInfo &drawSceneInfo);
 	protected:
 		void DestroyTextures();
-		int64_t m_lastFrameRendered = -1;
 		bool m_bDirty = true;
 		Type m_type = CShadowComponent::Type::Generic;
 		CShadowManagerComponent::RtHandle m_hRt = {};
 		std::function<void(void)> m_onTexturesReloaded = nullptr;
 		void InitializeDepthTextures(uint32_t size);
+
+		std::unique_ptr<LightShadowRenderer> m_lightShadowRenderer = nullptr;
 	};
 };
 

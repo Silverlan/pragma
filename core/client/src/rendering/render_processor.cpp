@@ -105,16 +105,20 @@ static void print_pass_stats(const RenderPassStats &stats,bool full)
 DLLCLIENT void print_debug_render_stats(const RenderStats &renderStats,bool full)
 {
 	g_collectRenderStats = false;
-	auto t = renderStats.lightingPass.cpuExecutionTime +renderStats.lightingPassTranslucent.cpuExecutionTime +renderStats.prepass.cpuExecutionTime;
+	auto t = renderStats.lightingPass.cpuExecutionTime +renderStats.lightingPassTranslucent.cpuExecutionTime +renderStats.prepass.cpuExecutionTime +renderStats.shadowPass.cpuExecutionTime;
 	Con::cout<<"Total CPU Execution time: "<<(static_cast<long double>(t.count()) /static_cast<long double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds{1}).count()))<<Con::endl;
-	Con::cout<<"----- Lighting pass: -----"<<Con::endl;
+	Con::cout<<"Light culling time time: "<<(static_cast<long double>(renderStats.lightCullingTime.count()) /static_cast<long double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds{1}).count()))<<Con::endl;
+	Con::cout<<"\n----- Depth prepass: -----"<<Con::endl;
+	print_pass_stats(renderStats.prepass,full);
+
+	Con::cout<<"\n----- Shadow pass: -----"<<Con::endl;
+	print_pass_stats(renderStats.shadowPass,full);
+
+	Con::cout<<"\n----- Lighting pass: -----"<<Con::endl;
 	print_pass_stats(renderStats.lightingPass,full);
 
 	Con::cout<<"\n----- Lighting translucent pass: -----"<<Con::endl;
 	print_pass_stats(renderStats.lightingPassTranslucent,full);
-
-	Con::cout<<"\n----- Depth prepass: -----"<<Con::endl;
-	print_pass_stats(renderStats.prepass,full);
 }
 DLLCLIENT void debug_render_stats(bool full)
 {

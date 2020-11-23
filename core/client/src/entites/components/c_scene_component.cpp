@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_scene_component.hpp"
+#include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
@@ -47,6 +48,8 @@ CSceneComponent::CreateInfo::CreateInfo()
 void CSceneComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	EVENT_ON_ACTIVE_CAMERA_CHANGED = componentManager.RegisterEvent("ON_ACTIVE_CAMERA_CHANGED");
+	EVENT_ON_BUILD_RENDER_QUEUES = componentManager.RegisterEvent("ON_BUILD_RENDER_QUEUES",typeid(CSceneComponent));
+	EVENT_POST_RENDER_PREPASS = componentManager.RegisterEvent("POST_RENDER_PREPASS",typeid(CSceneComponent));
 }
 
 using SceneCount = uint32_t;
@@ -54,6 +57,8 @@ static std::array<SceneCount,32> g_sceneUseCount {};
 static std::array<CSceneComponent*,32> g_scenes {};
 
 ComponentEventId CSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId CSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES = INVALID_COMPONENT_ID;
+ComponentEventId CSceneComponent::EVENT_POST_RENDER_PREPASS = INVALID_COMPONENT_ID;
 CSceneComponent *CSceneComponent::Create(const CreateInfo &createInfo,CSceneComponent *optParent)
 {
 	SceneIndex sceneIndex;
@@ -259,6 +264,7 @@ pragma::COcclusionCullerComponent *CSceneComponent::FindOcclusionCuller()
 	auto *ent = (it != entIt.end()) ? *it : nullptr;
 	return ent ? ent->GetComponent<pragma::COcclusionCullerComponent>().get() : nullptr;
 }
+const pragma::COcclusionCullerComponent *CSceneComponent::FindOcclusionCuller() const {return const_cast<CSceneComponent*>(this)->FindOcclusionCuller();}
 const std::shared_ptr<prosper::IBuffer> &CSceneComponent::GetFogBuffer() const {return m_fogBuffer;}
 void CSceneComponent::UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bView)
 {
@@ -367,6 +373,27 @@ prosper::IDescriptorSet *CSceneComponent::GetCameraDescriptorSetGraphics() const
 prosper::IDescriptorSet *CSceneComponent::GetCameraDescriptorSetCompute() const {return m_camDescSetGroupCompute->GetDescriptorSet();}
 prosper::IDescriptorSet *CSceneComponent::GetViewCameraDescriptorSet() const {return m_camViewDescSetGroup->GetDescriptorSet();}
 const std::shared_ptr<prosper::IDescriptorSetGroup> &CSceneComponent::GetFogDescriptorSetGroup() const {return m_fogDescSetGroup;}
+
+void CSceneComponent::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo)
+{
+	pragma::CEDrawSceneInfo evData {drawSceneInfo};
+	InvokeEventCallbacks(pragma::CSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES,evData);
+	GetSceneRenderDesc().BuildRenderQueues(drawSceneInfo);
+
+	// Start building the render queues for the light sources
+	// that create shadows and were previously visible.
+	// At this point we don't actually know if they're still visible,
+	// but it's very likely.
+	for(auto &hLight : m_previouslyVisibleShadowedLights)
+	{
+		if(hLight.expired())
+			continue;
+		auto *shadowC = hLight->GetShadowComponent();
+		if(shadowC == nullptr)
+			continue;
+		shadowC->GetRenderer().BuildRenderQueues(drawSceneInfo);
+	}
+}
 
 WorldEnvironment *CSceneComponent::GetWorldEnvironment() const {return m_worldEnvironment.get();}
 void CSceneComponent::SetWorldEnvironment(WorldEnvironment &env)
@@ -554,6 +581,16 @@ void CSceneComponent::SetActiveCamera()
 	m_camera = {};
 
 	BroadcastEvent(EVENT_ON_ACTIVE_CAMERA_CHANGED);
+}
+
+/////////////////
+
+CEDrawSceneInfo::CEDrawSceneInfo(const util::DrawSceneInfo &drawSceneInfo)
+	: drawSceneInfo{drawSceneInfo}
+{}
+void CEDrawSceneInfo::PushArguments(lua_State *l)
+{
+	Lua::Push<const util::DrawSceneInfo*>(l,&drawSceneInfo);
 }
 
 ////////

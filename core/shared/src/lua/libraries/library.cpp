@@ -1459,7 +1459,8 @@ void Game::RegisterLuaLibraries()
 		luabind::def("point_in_plane_mesh",Lua::intersect::point_in_plane_mesh),
 		luabind::def("sphere_in_plane_mesh",Lua::intersect::sphere_in_plane_mesh),
 		luabind::def("aabb_in_plane_mesh",Lua::intersect::aabb_in_plane_mesh),
-		luabind::def("sphere_with_cone",Intersection::SphereCone),
+		luabind::def("sphere_with_cone",static_cast<bool(*)(const Vector3&,float,const Vector3&,const Vector3&,float,float)>(&Intersection::SphereCone)),
+		luabind::def("sphere_with_cone",static_cast<bool(*)(const Vector3&,float,const Vector3&,const Vector3&,float)>(&Intersection::SphereCone)),
 		luabind::def("line_with_triangle",Lua::intersect::line_triangle,luabind::meta::join<luabind::pure_out_value<7>,luabind::pure_out_value<8>>::type{}),
 		luabind::def("line_with_triangle",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,const Vector3&,const Vector3&,const Vector3&,luabind::object&,luabind::object&)>([](lua_State *l,const Vector3 &lineOrigin,const Vector3 &lineDir,const Vector3 &v0,const Vector3 &v1,const Vector3 &v2,luabind::object &outT,luabind::object &outUv) {
 			Lua::intersect::line_triangle(l,lineOrigin,lineDir,v0,v1,v2,outT,outUv);

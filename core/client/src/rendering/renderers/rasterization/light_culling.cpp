@@ -20,7 +20,7 @@
 using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 void RasterizationRenderer::CullLightSources(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.scene.expired())
@@ -43,8 +43,11 @@ void RasterizationRenderer::CullLightSources(const util::DrawSceneInfo &drawScen
 		else
 			drawCmd->RecordImageBarrier(depthTex->GetImage(),prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 
-		static std::vector<pragma::CLightComponent*> culledLightSources;
-		culledLightSources.clear();
+		static std::vector<pragma::CLightComponent*> visLightSources;
+		visLightSources.clear();
+		static std::vector<util::WeakHandle<pragma::CLightComponent>> visShadowedLights;
+		visShadowedLights.clear();
+
 		auto &fp = GetForwardPlusInstance();
 
 		// Camera buffer
@@ -64,6 +67,10 @@ void RasterizationRenderer::CullLightSources(const util::DrawSceneInfo &drawScen
 		auto *worldEnv = scene.GetWorldEnvironment();
 		if(worldEnv && worldEnv->IsUnlit() == false)
 		{
+			std::chrono::steady_clock::time_point t;
+			if(drawSceneInfo.renderStats.has_value())
+				t = std::chrono::steady_clock::now();
+
 			fp.Compute(*drawCmd,const_cast<pragma::CSceneComponent&>(scene),depthTex->GetImage(),*scene.GetCameraDescriptorSetCompute());
 			auto &lightBits = fp.GetShadowLightBits();
 			for(auto i=decltype(lightBits.size()){0};i<lightBits.size();++i)
@@ -78,7 +85,7 @@ void RasterizationRenderer::CullLightSources(const util::DrawSceneInfo &drawScen
 					auto *l = pragma::CLightComponent::GetLightByShadowBufferIndex(shadowIdx);
 					if(l == nullptr || static_cast<CBaseEntity&>(l->GetEntity()).IsInScene(scene) == false)
 						continue;
-					culledLightSources.push_back(l);
+					visLightSources.push_back(l);
 
 					auto &renderBuffer = l->GetRenderBuffer();
 					if(renderBuffer)
@@ -97,9 +104,28 @@ void RasterizationRenderer::CullLightSources(const util::DrawSceneInfo &drawScen
 							prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
 							prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 						);
+
+						// Determine light sources that should actually cast shadows
+						if(l->ShouldCastShadows())
+						{
+							auto *shadowC = l->GetShadowComponent();
+							auto hSm = l->GetShadowMap(pragma::CLightComponent::ShadowMapType::Dynamic);
+							if(hSm.valid() && hSm->HasRenderTarget())
+							{
+								// Request render target for light sources that already had one before.
+								// This will make sure the shadow map is the same as before, which increases the likelihood
+								// we don't actually have to re-render the shadows for this light.
+								hSm->RequestRenderTarget();
+							}
+							if(shadowC->GetRenderer().GetRenderState() != LightShadowRenderer::RenderState::NoRenderRequired)
+								visShadowedLights.push_back(l->GetHandle<CLightComponent>());
+						}
 					}
 				}
 			}
+
+			if(drawSceneInfo.renderStats.has_value())
+				drawSceneInfo.renderStats->lightCullingTime += std::chrono::steady_clock::now() -t;
 		}
 
 		// Don't write to depth image until compute shader has completed reading from it
@@ -129,21 +155,65 @@ void RasterizationRenderer::CullLightSources(const util::DrawSceneInfo &drawScen
 		);
 
 		if(worldEnv && worldEnv->IsUnlit() == false)
-		{
-			// Note: We want light sources to re-use their previous render target texture if they have one.
-			// To achieve this, we simply update their render target by calling 'RequestRenderTarget' again.
-			// Shadowmaps that don't have a render target assigned, will get one in 'RenderSystem::RenderShadows'.
-			for(auto *l : culledLightSources)
+		{			
+			std::queue<uint32_t> lightSourcesReadyForShadowRendering;
+			std::queue<uint32_t> lightSourcesWaitingForRenderQueues;
+			for(auto i=decltype(visShadowedLights.size()){0u};i<visShadowedLights.size();++i)
 			{
-				auto hSm = l->GetShadowMap(pragma::CLightComponent::ShadowMapType::Static);
-				if(hSm.valid() && hSm->HasRenderTarget())
+				auto *l = visShadowedLights[i].get();
+				auto hSm = l->GetShadowMap(pragma::CLightComponent::ShadowMapType::Dynamic);
+				if(hSm.valid() && hSm->HasRenderTarget() == false)
 					hSm->RequestRenderTarget();
 
-				hSm = l->GetShadowMap(pragma::CLightComponent::ShadowMapType::Dynamic);
-				if(hSm.valid() && hSm->HasRenderTarget())
-					hSm->RequestRenderTarget();
+				if(hSm.expired() || hSm->HasRenderTarget() == false)
+					continue; // No render target available for this light; No shadows will be rendered
+
+				// Note: At this point the engine has already initiated render queue generation
+				// for shadowed light sources that were visible in the previous frame.
+				// If these light sources are still visible this frame, their render queues are likely
+				// to be complete already, in which case we can start rendering shadows immediately.
+				// In the meantime, any shadowed lights that don't have a render queue ready yet
+				// will start generating one now, which should be complete by the time the other
+				// light sources have completed rendering their shadow maps.
+				auto *shadowC = l->GetShadowComponent();
+				auto &renderer = shadowC->GetRenderer();
+				if(renderer.IsRenderQueueComplete())
+					lightSourcesReadyForShadowRendering.push(i);
+				else
+				{
+					// Render queue creation has either not been initiated yet, or is still processing
+					lightSourcesWaitingForRenderQueues.push(i);
+					if(renderer.DoesRenderQueueRequireBuilding())
+						renderer.BuildRenderQueues(drawSceneInfo);
+				}
 			}
-			RenderSystem::RenderShadows(drawSceneInfo,*this,culledLightSources);
+
+			while(lightSourcesReadyForShadowRendering.empty() == false)
+			{
+				auto idx = lightSourcesReadyForShadowRendering.front();
+				lightSourcesReadyForShadowRendering.pop();
+
+				// TODO: Compare render queue hash to determine if we need to re-render
+				// Note: Always have to re-render if render target has changed!!
+				// Also do the same below
+				auto &lightC = visShadowedLights.at(idx);
+				auto &renderer = lightC->GetShadowComponent()->GetRenderer();
+				renderer.Render(drawSceneInfo);
+			}
+
+			while(lightSourcesWaitingForRenderQueues.empty() == false)
+			{
+				auto idx = lightSourcesWaitingForRenderQueues.front();
+				lightSourcesWaitingForRenderQueues.pop();
+				
+				// Render remaining light sources. If their render queues are still not
+				// completed, we'll have no choice but to wait.
+				auto &lightC = visShadowedLights.at(idx);
+				auto &renderer = lightC->GetShadowComponent()->GetRenderer();
+				renderer.Render(drawSceneInfo);
+			}
+
+			const_cast<CSceneComponent&>(*drawSceneInfo.scene).SwapPreviouslyVisibleLights(std::move(visShadowedLights));
 		}
 		//c_engine->StopGPUTimer(GPUTimerEvent::Shadow); // prosper TODO
 		//drawCmd->SetViewport(w,h); // Reset the viewport
@@ -154,3 +224,4 @@ void RasterizationRenderer::CullLightSources(const util::DrawSceneInfo &drawScen
 		c_game->StopProfilingStage(CGame::CPUProfilingPhase::Shadows);
 	}
 }
+#pragma optimize("",on)

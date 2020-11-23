@@ -130,6 +130,20 @@ void CBaseEntity::RemoveFromAllScenes()
 	BroadcastEvent(EVENT_ON_SCENE_FLAGS_CHANGED);
 }
 bool CBaseEntity::IsInScene(const pragma::CSceneComponent &scene) const {return (**m_sceneFlags &get_scene_flag(scene)) != 0;}
+std::vector<pragma::CSceneComponent*> CBaseEntity::GetScenes() const
+{
+	std::vector<pragma::CSceneComponent*> scenes {};
+	auto numScenes = sizeof(pragma::CSceneComponent::SceneFlags) *8;
+	scenes.reserve(numScenes);
+	for(auto i=decltype(numScenes){0u};i<numScenes;++i)
+	{
+		auto *scene = pragma::CSceneComponent::GetByIndex(pragma::CSceneComponent::GetSceneIndex(static_cast<pragma::CSceneComponent::SceneFlags>(i)));
+		if(scene == nullptr)
+			continue;
+		scenes.push_back(scene);
+	}
+	return scenes;
+}
 
 void CBaseEntity::Construct(unsigned int idx,unsigned int clientIdx)
 {

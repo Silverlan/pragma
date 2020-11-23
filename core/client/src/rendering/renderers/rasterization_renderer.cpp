@@ -250,6 +250,8 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 		prepass.EndRenderPass(drawSceneInfo);
 		c_game->StopProfilingStage(CGame::GPUProfilingPhase::Prepass);
 		c_game->StopProfilingStage(CGame::CPUProfilingPhase::Prepass);
+
+		drawSceneInfo.scene->InvokeEventCallbacks(CSceneComponent::EVENT_POST_RENDER_PREPASS,pragma::CEDrawSceneInfo{drawSceneInfo});
 	}
 	
 	if(skipMode == 5)
@@ -261,6 +263,8 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 		return;
 	// Cull light sources
 	CullLightSources(drawSceneInfo);
+
+
 	
 	if(skipMode == 7)
 		return;

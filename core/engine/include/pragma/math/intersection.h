@@ -78,6 +78,7 @@ namespace Intersection
 	DLLENGINE Intersect SphereInPlaneMesh(const Vector3 &vec,float radius,const std::vector<Plane> &planes,bool skipInsideTest=false);
 	DLLENGINE Intersect AABBInPlaneMesh(const Vector3 &min,const Vector3 &max,const std::vector<Plane> &planes);
 	DLLENGINE bool SphereCone(const Vector3 &sphereOrigin,float radius,const Vector3 &coneOrigin,const Vector3 &coneDir,float coneAngle);
+	DLLENGINE bool SphereCone(const Vector3 &sphereOrigin,float radius,const Vector3 &coneOrigin,const Vector3 &coneDir,float coneAngle,float coneSize);
 	DLLENGINE bool LineTriangle(const Vector3 &lineOrigin,const Vector3 &lineDir,const Vector3 &v0,const Vector3 &v1,const Vector3 &v2,double &t,double &u,double &v,bool bCull=false);
 	DLLENGINE std::optional<Vector2> LineLine(const Vector2 &start0,const Vector2 &end0,const Vector2 &start1,const Vector2 &end1);
 };

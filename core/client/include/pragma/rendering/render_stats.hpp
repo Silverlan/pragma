@@ -30,9 +30,11 @@ struct DLLCLIENT RenderPassStats
 
 struct DLLCLIENT RenderStats
 {
+	std::chrono::nanoseconds lightCullingTime {0};
 	RenderPassStats lightingPass;
 	RenderPassStats lightingPassTranslucent;
 	RenderPassStats prepass;
+	RenderPassStats shadowPass;
 };
 
 #endif

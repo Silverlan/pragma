@@ -81,6 +81,7 @@ public:
 	void RemoveFromScene(pragma::CSceneComponent &scene);
 	void RemoveFromAllScenes();
 	bool IsInScene(const pragma::CSceneComponent &scene) const;
+	std::vector<pragma::CSceneComponent*> GetScenes() const;
 
 	void AddChild(CBaseEntity &ent);
 

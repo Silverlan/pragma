@@ -277,7 +277,7 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 		if(pl == nullptr || pl->IsInFirstPersonMode() == false)
 			umath::set_flag(renderFlags,FRender::View,false);
 
-		drawSceneInfo.scene->GetSceneRenderDesc().BuildRenderQueues(drawSceneInfo);
+		drawSceneInfo.scene->BuildRenderQueues(drawSceneInfo);
 	}
 
 	// Update time

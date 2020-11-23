@@ -28,7 +28,7 @@ void BaseLightBufferManager::Reset()
 
 	m_maxCount = 0u;
 }
-CLightComponent *BaseLightBufferManager::GetLightByBufferIndex(uint32_t idx)
+CLightComponent *BaseLightBufferManager::GetLightByBufferIndex(ShadowBufferIndex idx)
 {
 	return (idx < m_bufferIndexToLightSource.size()) ? m_bufferIndexToLightSource.at(idx) : nullptr;
 }

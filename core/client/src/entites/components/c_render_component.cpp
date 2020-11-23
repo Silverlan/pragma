@@ -339,7 +339,7 @@ void CRenderComponent::UpdateMatrices()
 	CEOnUpdateRenderMatrices evData{pose,m_matTransformation};
 	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_MATRICES,evData);
 }
-unsigned long long &CRenderComponent::GetLastRenderFrame() {return m_lastRender;}
+uint64_t CRenderComponent::GetLastRenderFrame() const {return m_lastRender;}
 void CRenderComponent::SetLastRenderFrame(unsigned long long &t) {m_lastRender = t;}
 
 void CRenderComponent::UpdateRenderMeshes()
@@ -506,7 +506,10 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 void CRenderComponent::UpdateRenderDataMT(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp)
 {
 	// Note: This is called from the render thread, which is why we can't update the render buffers here
-	m_lastRender = c_engine->GetRenderContext().GetLastFrameId();
+	auto frameId = c_engine->GetRenderContext().GetLastFrameId();
+	if(m_lastRender == frameId)
+		return; // Only update once per frame
+	m_lastRender = frameId;
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
 
 	auto &mdlC = GetModelComponent();

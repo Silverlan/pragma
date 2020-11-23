@@ -65,7 +65,7 @@ namespace pragma
 		std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes();
 		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes() const;
 
-		unsigned long long &GetLastRenderFrame();
+		uint64_t GetLastRenderFrame() const;
 		void SetLastRenderFrame(unsigned long long &t);
 
 		void GetAbsoluteRenderBounds(Vector3 &outMin,Vector3 &outMax) const;
@@ -155,7 +155,7 @@ namespace pragma
 		std::optional<Vector4> m_renderClipPlane {};
 
 		StateFlags m_stateFlags = static_cast<StateFlags>(umath::to_integral(StateFlags::RenderBufferDirty) | umath::to_integral(StateFlags::EnableDepthPass));
-		unsigned long long m_lastRender = 0ull;
+		std::atomic<uint64_t> m_lastRender = 0ull;
 		std::unordered_map<unsigned int,RenderInstance*> m_renderInstances;
 		std::unique_ptr<SortedRenderMeshContainer> m_renderMeshContainer = nullptr;
 		static std::vector<CRenderComponent*> s_ocExemptEntities;

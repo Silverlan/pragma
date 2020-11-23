@@ -181,6 +181,9 @@ void CLightPointComponent::OnEntityComponentAdded(BaseEntityComponent &component
 }
 luabind::object CLightPointComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CLightPointComponentHandleWrapper>(l);}
 
+const std::array<std::vector<Plane>,6u> &CLightPointComponent::GetFrustumPlanes() const {return m_frustumPlanes;}
+const std::vector<Plane> &CLightPointComponent::GetFrustumPlanes(CubeMapSide side) const {return m_frustumPlanes.at(umath::to_integral(side));}
+
 /////////////
 
 void CEnvLightPoint::Initialize()

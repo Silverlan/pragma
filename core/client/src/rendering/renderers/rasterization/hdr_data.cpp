@@ -43,6 +43,7 @@ extern DLLCLIENT CGame *c_game;
 
 static const float EXPOSURE_FRAME_UPDATE = 0.25f; // Exposure will be updated every x seconds
 
+
 static CVar cvMaxExposure = GetClientConVar("render_hdr_max_exposure");
 static void CVAR_CALLBACK_render_hdr_max_exposure(NetworkState*,ConVar*,float,float val)
 {

@@ -65,8 +65,8 @@ DLLENGINE bool Intersection::AABBSphere(const Vector3 &min,const Vector3 &max,co
 {
 	Vector3 pClosest;
 	Geometry::ClosestPointOnAABBToPoint(min,max,origin,&pClosest);
-	float d = glm::distance(pClosest,origin);
-	return d <= r;
+	float d = glm::distance2(pClosest,origin);
+	return d <= r *r;
 }
 
 bool Intersection::AABBInAABB(const Vector3 &minA,const Vector3 &maxA,const Vector3 &minB,const Vector3 &maxB)
@@ -594,6 +594,20 @@ DLLENGINE Intersection::Intersect Intersection::AABBInPlaneMesh(const Vector3 &m
 	}
 	return r;
 #endif
+}
+
+bool Intersection::SphereCone(const Vector3 &sphereOrigin,float radius,const Vector3 &coneOrigin,const Vector3 &coneDir,float coneAngle,float coneSize)
+{
+	// Source: https://bartwronski.com/2017/04/13/cull-that-cone/
+	auto V = sphereOrigin -coneOrigin;
+	auto VlenSq = uvec::dot(V,V);
+	auto V1len = uvec::dot(V,coneDir);
+	auto distanceClosestPoint = cos(coneAngle) *sqrt(VlenSq -V1len *V1len) -V1len *sin(coneAngle);
+
+	auto angleCull = distanceClosestPoint > radius;
+	auto frontCull = V1len > radius +coneSize;
+	auto backCull = V1len < -radius;
+	return /*testSphere.w > 1 ||*/ !(angleCull || frontCull || backCull);
 }
 
 bool Intersection::SphereCone(const Vector3 &sphereOrigin,float radius,const Vector3 &coneOrigin,const Vector3 &coneDir,float coneAngle)

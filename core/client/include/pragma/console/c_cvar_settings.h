@@ -14,6 +14,7 @@
 REGISTER_CONVAR_CL(cl_language,"en",ConVarFlags::Archive,"Game language.");
 
 REGISTER_CONVAR_CL(cl_render_lod_bias,"0",ConVarFlags::Archive,"Model LOD-bias. Higher values means higher LOD-Models will be used at lower distance (=Lower quality).");
+REGISTER_CONVAR_CL(cl_render_shadow_lod_bias,"10",ConVarFlags::Archive,"Model LOD-bias for shadows. Higher values means higher LOD-Models will be used at lower distance (=Lower quality). This value is added on top of cl_render_lod_bias!");
 REGISTER_CONVAR_CL(cl_render_vsync_enabled,"1",ConVarFlags::Archive,"Turns vertical sync on or off.");
 REGISTER_CONVAR_CL(cl_window_resolution,"1280x1024",ConVarFlags::Archive,"Changes the window resolution.");
 REGISTER_CONVAR_CL(cl_render_resolution,"",ConVarFlags::Archive,"Changes the internal rendering resolution. If left empty, the resolution will be the same as the window resolution!");

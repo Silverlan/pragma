@@ -27,7 +27,7 @@ namespace pragma
 		public:
 			bool Initialize(prosper::IPrContext &context,uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount,bool bExtended);
 			pragma::ShaderPrepassBase &GetShader() const;
-			void BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo);
+			void BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *optRenderPass=nullptr);
 			void EndRenderPass(const util::DrawSceneInfo &drawSceneInfo);
 			std::shared_ptr<prosper::Texture> textureNormals = nullptr;
 
@@ -38,6 +38,7 @@ namespace pragma
 			std::shared_ptr<prosper::Texture> textureDepthSampled = nullptr;
 
 			std::shared_ptr<prosper::RenderTarget> renderTarget = nullptr;
+			std::shared_ptr<prosper::IRenderPass> subsequentRenderPass = nullptr;
 
 			void SetUseExtendedPrepass(bool b,bool bForceReload=false);
 			bool IsExtended() const;

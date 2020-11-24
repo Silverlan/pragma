@@ -151,11 +151,13 @@ const std::vector<std::shared_ptr<const pragma::rendering::RenderQueue>> &SceneR
 void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 	const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,
 	const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
-	const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull
+	const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,
+	int32_t lodBias
 )
 {
 	auto &mdlC = renderC.GetModelComponent();
-	auto &renderMeshes = renderC.GetRenderMeshes();
+	auto lod = umath::max(static_cast<int32_t>(mdlC->GetLOD()) +lodBias,0);
+	auto &renderMeshes = renderC.GetRenderMeshes(lod);
 	auto renderMode = renderC.GetRenderMode();
 	auto first = false;
 	for(auto meshIdx=decltype(renderMeshes.size()){0u};meshIdx<renderMeshes.size();++meshIdx)
@@ -224,11 +226,12 @@ bool SceneRenderDesc::ShouldCull(const Vector3 &min,const Vector3 &max,const std
 void SceneRenderDesc::CollectRenderMeshesFromOctree(
 	const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
 	const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
-	const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,const std::vector<util::BSPTree::Node*> *bspLeafNodes
+	const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,const std::vector<util::BSPTree::Node*> *bspLeafNodes,
+	int32_t lodBias
 )
 {
 	std::function<void(const OcclusionOctree<CBaseEntity*>::Node &node)> iterateTree = nullptr;
-	iterateTree = [&iterateTree,&scene,&cam,renderFlags,fShouldCull,&drawSceneInfo,&getRenderQueue,&vp,bspLeafNodes](const OcclusionOctree<CBaseEntity*>::Node &node) {
+	iterateTree = [&iterateTree,&scene,&cam,renderFlags,fShouldCull,&drawSceneInfo,&getRenderQueue,&vp,bspLeafNodes,lodBias](const OcclusionOctree<CBaseEntity*>::Node &node) {
 		auto &nodeBounds = node.GetWorldBounds();
 		if(fShouldCull && fShouldCull(nodeBounds.first,nodeBounds.second))
 			return;
@@ -262,7 +265,7 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 				continue;
 			if(fShouldCull && ShouldCull(*renderC,fShouldCull))
 				continue;
-			AddRenderMeshesToRenderQueue(drawSceneInfo,*renderC,getRenderQueue,scene,cam,vp,fShouldCull);
+			AddRenderMeshesToRenderQueue(drawSceneInfo,*renderC,getRenderQueue,scene,cam,vp,fShouldCull,lodBias);
 		}
 		auto *children = node.GetChildren();
 		if(children == nullptr)

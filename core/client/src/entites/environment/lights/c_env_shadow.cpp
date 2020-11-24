@@ -250,6 +250,7 @@ void LightShadowRenderer::UpdateSceneCallbacks()
 	}
 }
 
+static auto cvLodBias = GetClientConVar("cl_render_shadow_lod_bias");
 void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(m_hLight.expired())
@@ -273,7 +274,8 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 	}
 
 	// TODO: Use separate shadow queue builder thread
-	c_game->GetRenderQueueBuilder().Append([this,&drawSceneInfo,&scene,&light,&ent]() {
+	auto lodBias = cvLodBias->GetInt();
+	c_game->GetRenderQueueBuilder().Append([this,&drawSceneInfo,&scene,&light,&ent,lodBias]() {
 		auto &mainRenderQueue = m_renderQueues.front();
 		auto &hCam = scene.GetActiveCamera();
 		if(hCam.valid())
@@ -352,7 +354,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 				auto &dynOctree = culler->GetOcclusionOctree();
 				SceneRenderDesc::CollectRenderMeshesFromOctree(drawSceneInfo,dynOctree,scene,*hCam,vp,drawSceneInfo.renderFlags,[&mainRenderQueue](RenderMode renderMode,bool translucent) -> pragma::rendering::RenderQueue* {
 					return (renderMode == RenderMode::World) ? mainRenderQueue.get() : nullptr;
-				},fShouldCull);
+				},fShouldCull,nullptr,lodBias);
 			}
 		}
 		

@@ -131,12 +131,19 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b,bool bForceReload)
 			prosper::ClearValue{prosper::ClearDepthStencilValue{1.f,0}} // Clear depth
 		};
 	}
+	prosper::util::RenderPassCreateInfo rpInfo {{
+		pragma::ShaderPrepass::get_normal_render_pass_attachment_info(sampleCount),
+		pragma::ShaderPrepass::get_depth_render_pass_attachment_info(sampleCount)
+	}};
+	for(auto &att : rpInfo.attachments)
+		att.loadOp = prosper::AttachmentLoadOp::Load;
+	subsequentRenderPass = c_engine->GetRenderContext().CreateRenderPass(rpInfo);
 }
 
-void pragma::rendering::Prepass::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo)
+void pragma::rendering::Prepass::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *optRenderPass)
 {
 	// prosper TODO: Barriers for imgDepth and imgNormals
-	drawSceneInfo.commandBuffer->RecordBeginRenderPass(*renderTarget,m_clearValues);
+	drawSceneInfo.commandBuffer->RecordBeginRenderPass(*renderTarget,m_clearValues,optRenderPass);
 }
 void pragma::rendering::Prepass::EndRenderPass(const util::DrawSceneInfo &drawSceneInfo)
 {

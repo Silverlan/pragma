@@ -259,6 +259,10 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes",std::ref(drawSceneInfo));
 	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderScenes",std::ref(drawSceneInfo));
 
+	// Note: At this point no changes must be done to the scene whatsoever!
+	// Any change in the scene will result in undefined behavior until this function
+	// has completed execution!
+
 	// We'll queue up building the render queues before we start rendering, so
 	// most of it can be done in the background
 	for(auto &drawSceneInfo : m_sceneRenderQueue)
@@ -287,6 +291,7 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 	{
 		if(drawSceneInfo.scene.expired())
 			continue;
+		auto &scene = drawSceneInfo.scene;
 		auto &drawCmd = drawSceneInfo.commandBuffer;
 		if(cvClearScene->GetBool() == true || drawWorld == 2 || drawSceneInfo.clearColor.has_value())
 		{

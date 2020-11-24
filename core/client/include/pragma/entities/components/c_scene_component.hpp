@@ -57,12 +57,14 @@ public:
 	static void AddRenderMeshesToRenderQueue(
 		const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,
 		const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
-		const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull
+		const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,
+		int32_t lodBias=0
 	);
 	static void CollectRenderMeshesFromOctree(
 		const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
 		const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
-		const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,const std::vector<util::BSPTree::Node*> *bspLeafNodes=nullptr
+		const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,const std::vector<util::BSPTree::Node*> *bspLeafNodes=nullptr,
+		int32_t lodBias=0
 	);
 	static bool ShouldConsiderEntity(CBaseEntity &ent,const pragma::CSceneComponent &scene,const Vector3 &camOrigin,FRender renderFlags);
 	static bool ShouldCull(CBaseEntity &ent,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);

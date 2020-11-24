@@ -40,6 +40,7 @@ namespace pragma
 			Count
 		};
 		static Pipeline GetPipelineIndex(prosper::SampleCountFlags sampleCount);
+		static prosper::util::RenderPassCreateInfo::AttachmentInfo get_depth_render_pass_attachment_info(prosper::SampleCountFlags sampleCount);
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_ID;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT;
@@ -109,6 +110,7 @@ namespace pragma
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_NORMAL;
 
 		static prosper::Format RENDER_PASS_NORMAL_FORMAT;
+		static prosper::util::RenderPassCreateInfo::AttachmentInfo get_normal_render_pass_attachment_info(prosper::SampleCountFlags sampleCount);
 
 		ShaderPrepass(prosper::IPrContext &context,const std::string &identifier);
 	protected:

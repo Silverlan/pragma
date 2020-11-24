@@ -106,7 +106,7 @@ void CGame::RegisterLua()
 		{"create_model",Lua::game::Client::create_model},
 		{"get_action_input",Lua::game::Client::get_action_input},
 		{"set_action_input",Lua::game::Client::set_action_input},
-		{"draw_scene",Lua::game::Client::draw_scene},
+		{"queue_scene_for_rendering",Lua::game::Client::draw_scene},
 		{"get_render_scene",Lua::game::Client::get_render_scene},
 		{"get_render_scene_camera",Lua::game::Client::get_render_scene_camera},
 		{"get_scene",Lua::game::Client::get_scene},

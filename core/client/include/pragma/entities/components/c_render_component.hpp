@@ -64,6 +64,10 @@ namespace pragma
 		const std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes() const;
 		std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes();
 		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes() const;
+		std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes(uint32_t lod);
+		const std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes(uint32_t lod) const;
+		std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes(uint32_t lod);
+		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes(uint32_t lod) const;
 
 		uint64_t GetLastRenderFrame() const;
 		void SetLastRenderFrame(unsigned long long &t);

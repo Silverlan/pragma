@@ -613,6 +613,30 @@ bool CRenderComponent::ShouldDrawShadow(const Vector3 &camOrigin) const
 	return (evData.shouldDraw == CEShouldDraw::ShouldDraw::No) ? false : true;
 }
 
+std::vector<std::shared_ptr<ModelSubMesh>> &CRenderComponent::GetRenderMeshes(uint32_t lod)
+{
+	auto &pMdlComponent = GetModelComponent();
+	if(pMdlComponent.expired())
+	{
+		static std::vector<std::shared_ptr<ModelSubMesh>> meshes {};
+		meshes.clear();
+		return meshes;
+	}
+	return static_cast<pragma::CModelComponent&>(*pMdlComponent).GetRenderMeshes(lod);
+}
+const std::vector<std::shared_ptr<ModelSubMesh>> &CRenderComponent::GetRenderMeshes(uint32_t lod) const {return const_cast<CRenderComponent*>(this)->GetRenderMeshes(lod);}
+std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes(uint32_t lod)
+{
+	auto &pMdlComponent = GetModelComponent();
+	if(pMdlComponent.expired())
+	{
+		static std::vector<std::shared_ptr<ModelMesh>> meshes {};
+		meshes.clear();
+		return meshes;
+	}
+	return static_cast<pragma::CModelComponent&>(*pMdlComponent).GetLODMeshes(lod);
+}
+const std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes(uint32_t lod) const {return const_cast<CRenderComponent*>(this)->GetLODMeshes(lod);}
 const std::vector<std::shared_ptr<ModelSubMesh>> &CRenderComponent::GetRenderMeshes() const {return const_cast<CRenderComponent*>(this)->GetRenderMeshes();}
 std::vector<std::shared_ptr<ModelSubMesh>> &CRenderComponent::GetRenderMeshes()
 {

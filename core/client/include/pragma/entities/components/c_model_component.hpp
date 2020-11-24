@@ -28,7 +28,8 @@ namespace pragma
 		enum class StateFlags : uint8_t
 		{
 			None = 0u,
-			AutoLodDisabled = 1u
+			AutoLodDisabled = 1u,
+			RenderMeshUpdateRequired = AutoLodDisabled<<1u
 		};
 
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
@@ -57,6 +58,10 @@ namespace pragma
 		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes() const;
 		std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes();
 		const std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes() const;
+		std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes(uint32_t lod);
+		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes(uint32_t lod) const;
+		std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes(uint32_t lod);
+		const std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes(uint32_t lod) const;
 		using BaseModelComponent::SetBodyGroup;
 		using BaseModelComponent::SetModel;
 		virtual bool SetBodyGroup(uint32_t groupId,uint32_t id) override;
@@ -68,12 +73,13 @@ namespace pragma
 		void SetLOD(uint32_t lod);
 	protected:
 		virtual void OnModelChanged(const std::shared_ptr<Model> &model) override;
+		void UpdateRenderMeshes();
 
 		std::vector<MaterialHandle> m_materialOverrides = {};
 		uint32_t m_lod = 0u;
 		StateFlags m_stateFlags = StateFlags::None;
-		std::vector<std::shared_ptr<ModelMesh>> m_lodMeshes;
-		std::vector<std::shared_ptr<ModelSubMesh>> m_renderMeshes;
+		std::vector<std::vector<std::shared_ptr<ModelMesh>>> m_lodMeshes;
+		std::vector<std::vector<std::shared_ptr<ModelSubMesh>>> m_lodRenderMeshes;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::CModelComponent::StateFlags)

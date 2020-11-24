@@ -49,7 +49,7 @@ decltype(ShaderPrepassBase::DESCRIPTOR_SET_MATERIAL) ShaderPrepassBase::DESCRIPT
 	}
 };
 
-static prosper::util::RenderPassCreateInfo::AttachmentInfo get_depth_render_pass_attachment_info(prosper::SampleCountFlags sampleCount)
+prosper::util::RenderPassCreateInfo::AttachmentInfo ShaderPrepassBase::get_depth_render_pass_attachment_info(prosper::SampleCountFlags sampleCount)
 {
 	return prosper::util::RenderPassCreateInfo::AttachmentInfo {
 		ShaderTextured3DBase::RENDER_PASS_DEPTH_FORMAT,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AttachmentLoadOp::Clear,
@@ -185,6 +185,15 @@ void ShaderPrepassBase::GetVertexAnimationPushConstantInfo(uint32_t &offset) con
 decltype(ShaderPrepass::VERTEX_ATTRIBUTE_NORMAL) ShaderPrepass::VERTEX_ATTRIBUTE_NORMAL = {ShaderTextured3DBase::VERTEX_ATTRIBUTE_NORMAL,VERTEX_BINDING_VERTEX};
 
 decltype(ShaderPrepass::RENDER_PASS_NORMAL_FORMAT) ShaderPrepass::RENDER_PASS_NORMAL_FORMAT = prosper::Format::R16G16B16A16_SFloat;
+
+prosper::util::RenderPassCreateInfo::AttachmentInfo ShaderPrepass::get_normal_render_pass_attachment_info(prosper::SampleCountFlags sampleCount)
+{
+	return prosper::util::RenderPassCreateInfo::AttachmentInfo {
+		RENDER_PASS_NORMAL_FORMAT,prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::DontCare,
+		prosper::AttachmentStoreOp::Store,sampleCount,prosper::ImageLayout::ColorAttachmentOptimal
+	};
+}
+
 ShaderPrepass::ShaderPrepass(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderPrepassBase(context,identifier,"world/prepass/vs_prepass","world/prepass/fs_prepass")
 {
@@ -194,10 +203,10 @@ ShaderPrepass::ShaderPrepass(prosper::IPrContext &context,const std::string &ide
 void ShaderPrepass::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
 	auto sampleCount = GetSampleCount(pipelineIdx);
-	prosper::util::RenderPassCreateInfo rpInfo {{{
-		RENDER_PASS_NORMAL_FORMAT,prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::DontCare,
-		prosper::AttachmentStoreOp::Store,sampleCount,prosper::ImageLayout::ColorAttachmentOptimal
-	},get_depth_render_pass_attachment_info(sampleCount)}};
+	prosper::util::RenderPassCreateInfo rpInfo {{
+		get_normal_render_pass_attachment_info(sampleCount),
+		get_depth_render_pass_attachment_info(sampleCount)
+	}};
 	CreateCachedRenderPass<ShaderPrepass>({rpInfo},outRenderPass,pipelineIdx);
 }
 

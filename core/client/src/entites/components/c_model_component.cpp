@@ -103,29 +103,45 @@ bool CModelComponent::IsWeighted() const
 
 uint32_t CModelComponent::GetLOD() const {return m_lod;}
 
+void CModelComponent::UpdateRenderMeshes()
+{
+	if(umath::is_flag_set(m_stateFlags,StateFlags::RenderMeshUpdateRequired) == false)
+		return;
+	umath::set_flag(m_stateFlags,StateFlags::RenderMeshUpdateRequired,false);
+	m_lodRenderMeshes.clear();
+	m_lodMeshes.clear();
+
+	auto &mdl = GetModel();
+	auto numLods = umath::max(mdl ? mdl->GetLODCount() : 1u,static_cast<uint32_t>(1));
+	m_lodRenderMeshes.resize(numLods);
+	m_lodMeshes.resize(numLods);
+	if(mdl != nullptr)
+	{
+		for(auto i=decltype(numLods){0u};i<numLods;++i)
+		{
+			mdl->GetBodyGroupMeshes(GetBodyGroups(),i,m_lodMeshes[i]);
+			for(auto &mesh : m_lodMeshes[i])
+			{
+				for(auto &subMesh : mesh->GetSubMeshes())
+					m_lodRenderMeshes[i].push_back(subMesh);
+			}
+		}
+	}
+}
+
 void CModelComponent::UpdateLOD(UInt32 lod)
 {
+	UpdateRenderMeshes();
 	//std::unordered_map<unsigned int,RenderInstance*>::iterator it = m_renderInstances.find(m_lod);
 	//if(it != m_renderInstances.end())
 	//	it->second->SetEnabled(false);
 	m_lod = lod;//CUChar(lod);
-	m_renderMeshes.clear();
-	m_lodMeshes.clear();
 
-	auto &mdl = GetModel();
-	if(mdl != nullptr)
-	{
-		mdl->GetBodyGroupMeshes(GetBodyGroups(),lod,m_lodMeshes);
-		for(auto &mesh : m_lodMeshes)
-		{
-			for(auto &subMesh : mesh->GetSubMeshes())
-				m_renderMeshes.push_back(subMesh);
-		}
-	}
 	//UpdateRenderMeshes();
 	//it = m_renderInstances.find(m_lod);
 	//if(it != m_renderInstances.end())
 	//	it->second->SetEnabled(true);
+	UpdateRenderMeshes();
 	BroadcastEvent(EVENT_ON_RENDER_MESHES_UPDATED);
 }
 
@@ -136,6 +152,7 @@ bool CModelComponent::IsAutoLodEnabled() const {return !umath::is_flag_set(m_sta
 
 void CModelComponent::UpdateLOD(const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp)
 {
+	UpdateRenderMeshes();
 	if(IsAutoLodEnabled() == false)
 		return;
 	auto &mdl = GetModel();
@@ -171,11 +188,28 @@ void CModelComponent::UpdateLOD(const CSceneComponent &scene,const CCameraCompon
 		return;
 	UpdateLOD(lod);
 }
-std::vector<std::shared_ptr<ModelSubMesh>> &CModelComponent::GetRenderMeshes() {return m_renderMeshes;}
+
+std::vector<std::shared_ptr<ModelMesh>> &CModelComponent::GetLODMeshes() {return GetLODMeshes(m_lod);}
+const std::vector<std::shared_ptr<ModelMesh>> &CModelComponent::GetLODMeshes() const {return const_cast<CModelComponent*>(this)->GetLODMeshes();}
+std::vector<std::shared_ptr<ModelSubMesh>> &CModelComponent::GetRenderMeshes() {return GetRenderMeshes(m_lod);}
 const std::vector<std::shared_ptr<ModelSubMesh>> &CModelComponent::GetRenderMeshes() const {return const_cast<CModelComponent*>(this)->GetRenderMeshes();}
 
-std::vector<std::shared_ptr<ModelMesh>> &CModelComponent::GetLODMeshes() {return m_lodMeshes;}
-const std::vector<std::shared_ptr<ModelMesh>> &CModelComponent::GetLODMeshes() const {return const_cast<CModelComponent*>(this)->GetLODMeshes();}
+std::vector<std::shared_ptr<ModelMesh>> &CModelComponent::GetLODMeshes(uint32_t lod)
+{
+	UpdateRenderMeshes();
+	lod = umath::min(lod,static_cast<uint32_t>(m_lodMeshes.size() -1));
+	assert(lod < m_lodMeshes.size());
+	return m_lodMeshes[lod];
+}
+const std::vector<std::shared_ptr<ModelMesh>> &CModelComponent::GetLODMeshes(uint32_t lod) const {return const_cast<CModelComponent*>(this)->GetLODMeshes(lod);}
+std::vector<std::shared_ptr<ModelSubMesh>> &CModelComponent::GetRenderMeshes(uint32_t lod)
+{
+	UpdateRenderMeshes();
+	lod = umath::min(lod,static_cast<uint32_t>(m_lodRenderMeshes.size() -1));
+	assert(lod < m_lodRenderMeshes.size());
+	return m_lodRenderMeshes[lod];
+}
+const std::vector<std::shared_ptr<ModelSubMesh>> &CModelComponent::GetRenderMeshes(uint32_t lod) const {return const_cast<CModelComponent*>(this)->GetRenderMeshes(lod);}
 
 bool CModelComponent::SetBodyGroup(UInt32 groupId,UInt32 id)
 {
@@ -183,14 +217,22 @@ bool CModelComponent::SetBodyGroup(UInt32 groupId,UInt32 id)
 	if(r == false)
 		return r;
 	UpdateLOD(m_lod); // Update our active meshes
+	umath::set_flag(m_stateFlags,StateFlags::RenderMeshUpdateRequired);
 	return true;
 }
 
 void CModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 {
 	m_lod = 0;
-	m_renderMeshes.clear();
+
+	m_lodRenderMeshes.clear();
+	m_lodRenderMeshes.push_back({});
+
 	m_lodMeshes.clear();
+	m_lodMeshes.push_back({});
+
+	umath::set_flag(m_stateFlags,StateFlags::RenderMeshUpdateRequired);
+
 	if(model == nullptr)
 	{
 		BaseModelComponent::OnModelChanged(model);

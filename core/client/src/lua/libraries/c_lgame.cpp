@@ -896,6 +896,8 @@ int Lua::game::Client::set_action_input(lua_State *l)
 int Lua::game::Client::draw_scene(lua_State *l)
 {
 	auto &drawSceneInfo = Lua::Check<::util::DrawSceneInfo>(l,1);
+	c_game->QueueForRendering(drawSceneInfo);
+#if 0
 	auto scene = drawSceneInfo.scene.valid() ? drawSceneInfo.scene.get() : c_game->GetRenderScene();
 	auto *renderer = scene ? scene->GetRenderer() : nullptr;
 	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
@@ -919,6 +921,7 @@ int Lua::game::Client::draw_scene(lua_State *l)
 	auto primCmdBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(cmdBuffer);
 	c_game->RenderScene(drawSceneInfo);
 	c_game->ResetRenderScene();
+#endif
 	return 0;
 }
 int Lua::game::Client::create_scene(lua_State *l)

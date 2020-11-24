@@ -157,14 +157,15 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 {
 	auto &mdlC = renderC.GetModelComponent();
 	auto lod = umath::max(static_cast<int32_t>(mdlC->GetLOD()) +lodBias,0);
-	auto &renderMeshes = renderC.GetRenderMeshes(lod);
+	auto &renderMeshes = renderC.GetRenderMeshes();
+	auto &lodGroup = renderC.GetLodRenderMeshGroup(lod);
 	auto renderMode = renderC.GetRenderMode();
 	auto first = false;
-	for(auto meshIdx=decltype(renderMeshes.size()){0u};meshIdx<renderMeshes.size();++meshIdx)
+	for(auto meshIdx=lodGroup.first;meshIdx<lodGroup.first +lodGroup.second;++meshIdx)
 	{
 		if(fShouldCull && ShouldCull(renderC,meshIdx,fShouldCull))
 			continue;
-		auto &renderMesh = renderMeshes.at(meshIdx);
+		auto &renderMesh = renderMeshes[meshIdx];
 		auto *mat = mdlC->GetRenderMaterial(renderMesh->GetSkinTextureIndex());
 		auto *shader = mat ? dynamic_cast<pragma::ShaderTextured3DBase*>(mat->GetPrimaryShader().get()) : nullptr;
 		if(shader == nullptr)
@@ -210,7 +211,7 @@ bool SceneRenderDesc::ShouldCull(pragma::CRenderComponent &renderC,pragma::Rende
 	auto &renderMeshes = renderC.GetRenderMeshes();
 	if(meshIdx >= renderMeshes.size())
 		return false;
-	auto &renderMesh = renderMeshes.at(meshIdx);
+	auto &renderMesh = renderMeshes[meshIdx];
 	Vector3 min,max;
 	renderMesh->GetBounds(min,max);
 	auto &pos = renderC.GetEntity().GetPosition();
@@ -423,7 +424,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 					auto &renderMeshes = renderC->GetRenderMeshes();
 					if(item.mesh >= renderMeshes.size())
 						continue;
-					auto &pos = pose *renderMeshes.at(item.mesh)->GetCenter();
+					auto &pos = pose *renderMeshes[item.mesh]->GetCenter();
 					renderQueueTranslucentDst->queue.back().sortingKey.SetDistance(pos,cam);
 				}
 			}

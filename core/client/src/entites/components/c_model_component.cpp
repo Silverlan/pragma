@@ -110,21 +110,31 @@ void CModelComponent::UpdateRenderMeshes()
 	umath::set_flag(m_stateFlags,StateFlags::RenderMeshUpdateRequired,false);
 	m_lodRenderMeshes.clear();
 	m_lodMeshes.clear();
+	m_lodMeshGroups.clear();
+	m_lodRenderMeshGroups.clear();
 
 	auto &mdl = GetModel();
 	auto numLods = umath::max(mdl ? mdl->GetLODCount() : 1u,static_cast<uint32_t>(1));
-	m_lodRenderMeshes.resize(numLods);
-	m_lodMeshes.resize(numLods);
+	m_lodRenderMeshGroups.resize(numLods);
+	m_lodMeshGroups.resize(numLods);
 	if(mdl != nullptr)
 	{
 		for(auto i=decltype(numLods){0u};i<numLods;++i)
 		{
-			mdl->GetBodyGroupMeshes(GetBodyGroups(),i,m_lodMeshes[i]);
-			for(auto &mesh : m_lodMeshes[i])
+			auto meshOffset = m_lodMeshes.size();
+			auto subMeshOffset = m_lodRenderMeshes.size();
+			mdl->GetBodyGroupMeshes(GetBodyGroups(),i,m_lodMeshes);
+			for(auto &mesh : m_lodMeshes)
 			{
 				for(auto &subMesh : mesh->GetSubMeshes())
-					m_lodRenderMeshes[i].push_back(subMesh);
+				{
+					if(m_lodRenderMeshes.size() == m_lodRenderMeshes.capacity())
+						m_lodRenderMeshes.reserve(m_lodRenderMeshes.size() *1.4 +10);
+					m_lodRenderMeshes.push_back(subMesh);
+				}
 			}
+			m_lodMeshGroups[i] = {meshOffset,m_lodMeshes.size() -meshOffset};
+			m_lodRenderMeshGroups[i] = {subMeshOffset,m_lodRenderMeshes.size() -subMeshOffset};
 		}
 	}
 }
@@ -189,27 +199,27 @@ void CModelComponent::UpdateLOD(const CSceneComponent &scene,const CCameraCompon
 	UpdateLOD(lod);
 }
 
-std::vector<std::shared_ptr<ModelMesh>> &CModelComponent::GetLODMeshes() {return GetLODMeshes(m_lod);}
+std::vector<std::shared_ptr<ModelMesh>> &CModelComponent::GetLODMeshes() {return m_lodMeshes;}
 const std::vector<std::shared_ptr<ModelMesh>> &CModelComponent::GetLODMeshes() const {return const_cast<CModelComponent*>(this)->GetLODMeshes();}
-std::vector<std::shared_ptr<ModelSubMesh>> &CModelComponent::GetRenderMeshes() {return GetRenderMeshes(m_lod);}
+std::vector<std::shared_ptr<ModelSubMesh>> &CModelComponent::GetRenderMeshes() {return m_lodRenderMeshes;}
 const std::vector<std::shared_ptr<ModelSubMesh>> &CModelComponent::GetRenderMeshes() const {return const_cast<CModelComponent*>(this)->GetRenderMeshes();}
 
-std::vector<std::shared_ptr<ModelMesh>> &CModelComponent::GetLODMeshes(uint32_t lod)
+RenderMeshGroup &CModelComponent::GetLodMeshGroup(uint32_t lod)
 {
 	UpdateRenderMeshes();
-	lod = umath::min(lod,static_cast<uint32_t>(m_lodMeshes.size() -1));
-	assert(lod < m_lodMeshes.size());
-	return m_lodMeshes[lod];
+	lod = umath::min(lod,static_cast<uint32_t>(m_lodMeshGroups.size() -1));
+	assert(lod < m_lodMeshGroups.size());
+	return m_lodMeshGroups[lod];
 }
-const std::vector<std::shared_ptr<ModelMesh>> &CModelComponent::GetLODMeshes(uint32_t lod) const {return const_cast<CModelComponent*>(this)->GetLODMeshes(lod);}
-std::vector<std::shared_ptr<ModelSubMesh>> &CModelComponent::GetRenderMeshes(uint32_t lod)
+const RenderMeshGroup &CModelComponent::GetLodMeshGroup(uint32_t lod) const {return const_cast<CModelComponent*>(this)->GetLodMeshGroup(lod);}
+RenderMeshGroup &CModelComponent::GetLodRenderMeshGroup(uint32_t lod)
 {
 	UpdateRenderMeshes();
-	lod = umath::min(lod,static_cast<uint32_t>(m_lodRenderMeshes.size() -1));
-	assert(lod < m_lodRenderMeshes.size());
-	return m_lodRenderMeshes[lod];
+	lod = umath::min(lod,static_cast<uint32_t>(m_lodRenderMeshGroups.size() -1));
+	assert(lod < m_lodRenderMeshGroups.size());
+	return m_lodRenderMeshGroups[lod];
 }
-const std::vector<std::shared_ptr<ModelSubMesh>> &CModelComponent::GetRenderMeshes(uint32_t lod) const {return const_cast<CModelComponent*>(this)->GetRenderMeshes(lod);}
+const RenderMeshGroup &CModelComponent::GetLodRenderMeshGroup(uint32_t lod) const {return const_cast<CModelComponent*>(this)->GetLodRenderMeshGroup(lod);}
 
 bool CModelComponent::SetBodyGroup(UInt32 groupId,UInt32 id)
 {
@@ -230,6 +240,11 @@ void CModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 
 	m_lodMeshes.clear();
 	m_lodMeshes.push_back({});
+
+	m_lodMeshGroups.clear();
+	m_lodMeshGroups.push_back({0,0});
+	m_lodRenderMeshGroups.clear();
+	m_lodRenderMeshGroups.push_back({0,0});
 
 	umath::set_flag(m_stateFlags,StateFlags::RenderMeshUpdateRequired);
 

@@ -54,14 +54,17 @@ namespace pragma
 		void UpdateLOD(uint32_t lod);
 		uint32_t GetLOD() const;
 		void UpdateLOD(const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp);
+
 		std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes();
 		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes() const;
 		std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes();
 		const std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes() const;
-		std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes(uint32_t lod);
-		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes(uint32_t lod) const;
-		std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes(uint32_t lod);
-		const std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes(uint32_t lod) const;
+
+		RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod);
+		const RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod) const;
+		RenderMeshGroup &GetLodMeshGroup(uint32_t lod);
+		const RenderMeshGroup &GetLodMeshGroup(uint32_t lod) const;
+
 		using BaseModelComponent::SetBodyGroup;
 		using BaseModelComponent::SetModel;
 		virtual bool SetBodyGroup(uint32_t groupId,uint32_t id) override;
@@ -78,8 +81,11 @@ namespace pragma
 		std::vector<MaterialHandle> m_materialOverrides = {};
 		uint32_t m_lod = 0u;
 		StateFlags m_stateFlags = StateFlags::None;
-		std::vector<std::vector<std::shared_ptr<ModelMesh>>> m_lodMeshes;
-		std::vector<std::vector<std::shared_ptr<ModelSubMesh>>> m_lodRenderMeshes;
+		std::vector<std::shared_ptr<ModelMesh>> m_lodMeshes;
+		std::vector<std::shared_ptr<ModelSubMesh>> m_lodRenderMeshes;
+
+		std::vector<RenderMeshGroup> m_lodMeshGroups;
+		std::vector<RenderMeshGroup> m_lodRenderMeshGroups;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::CModelComponent::StateFlags)

@@ -66,7 +66,7 @@ void RenderQueue::Add(CBaseEntity &ent,RenderMeshIndex meshIdx,CMaterial &mat,pr
 			if(meshIdx < renderMeshes.size())
 			{
 				auto &pose = ent.GetPose();
-				auto pos = pose *renderMeshes.at(meshIdx)->GetCenter();
+				auto pos = pose *renderMeshes[meshIdx]->GetCenter();
 				item.sortingKey.SetDistance(pos,*optCam);
 			}
 		}

@@ -613,30 +613,28 @@ bool CRenderComponent::ShouldDrawShadow(const Vector3 &camOrigin) const
 	return (evData.shouldDraw == CEShouldDraw::ShouldDraw::No) ? false : true;
 }
 
-std::vector<std::shared_ptr<ModelSubMesh>> &CRenderComponent::GetRenderMeshes(uint32_t lod)
+RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod)
 {
 	auto &pMdlComponent = GetModelComponent();
 	if(pMdlComponent.expired())
 	{
-		static std::vector<std::shared_ptr<ModelSubMesh>> meshes {};
-		meshes.clear();
+		static RenderMeshGroup meshes {};
 		return meshes;
 	}
-	return static_cast<pragma::CModelComponent&>(*pMdlComponent).GetRenderMeshes(lod);
+	return static_cast<pragma::CModelComponent&>(*pMdlComponent).GetLodRenderMeshGroup(lod);
 }
-const std::vector<std::shared_ptr<ModelSubMesh>> &CRenderComponent::GetRenderMeshes(uint32_t lod) const {return const_cast<CRenderComponent*>(this)->GetRenderMeshes(lod);}
-std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes(uint32_t lod)
+const RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod) const {return const_cast<CRenderComponent*>(this)->GetLodRenderMeshGroup(lod);}
+RenderMeshGroup &CRenderComponent::GetLodMeshGroup(uint32_t lod)
 {
 	auto &pMdlComponent = GetModelComponent();
 	if(pMdlComponent.expired())
 	{
-		static std::vector<std::shared_ptr<ModelMesh>> meshes {};
-		meshes.clear();
+		static RenderMeshGroup meshes {};
 		return meshes;
 	}
-	return static_cast<pragma::CModelComponent&>(*pMdlComponent).GetLODMeshes(lod);
+	return static_cast<pragma::CModelComponent&>(*pMdlComponent).GetLodMeshGroup(lod);
 }
-const std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes(uint32_t lod) const {return const_cast<CRenderComponent*>(this)->GetLODMeshes(lod);}
+const RenderMeshGroup &CRenderComponent::GetLodMeshGroup(uint32_t lod) const {return const_cast<CRenderComponent*>(this)->GetLodMeshGroup(lod);}
 const std::vector<std::shared_ptr<ModelSubMesh>> &CRenderComponent::GetRenderMeshes() const {return const_cast<CRenderComponent*>(this)->GetRenderMeshes();}
 std::vector<std::shared_ptr<ModelSubMesh>> &CRenderComponent::GetRenderMeshes()
 {
@@ -644,7 +642,6 @@ std::vector<std::shared_ptr<ModelSubMesh>> &CRenderComponent::GetRenderMeshes()
 	if(pMdlComponent.expired())
 	{
 		static std::vector<std::shared_ptr<ModelSubMesh>> meshes {};
-		meshes.clear();
 		return meshes;
 	}
 	return static_cast<pragma::CModelComponent&>(*pMdlComponent).GetRenderMeshes();
@@ -656,15 +653,17 @@ std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes()
 	auto pSoftBodyComponent = ent.GetComponent<pragma::CSoftBodyComponent>();
 	if(pSoftBodyComponent.valid())
 	{
-		auto *pSoftBodyData = pSoftBodyComponent->GetSoftBodyData();
-		if(pSoftBodyData != nullptr)
-			return pSoftBodyData->meshes;
+		static std::vector<std::shared_ptr<ModelMesh>> meshes {};
+		return meshes;
+		// TODO
+		//auto *pSoftBodyData = pSoftBodyComponent->GetSoftBodyData();
+		//if(pSoftBodyData != nullptr)
+		//	return pSoftBodyData->meshes;
 	}
 	auto &pMdlComponent = GetModelComponent();
 	if(pMdlComponent.expired())
 	{
 		static std::vector<std::shared_ptr<ModelMesh>> meshes {};
-		meshes.clear();
 		return meshes;
 	}
 	return static_cast<pragma::CModelComponent&>(*pMdlComponent).GetLODMeshes();

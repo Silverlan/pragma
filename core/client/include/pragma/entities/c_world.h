@@ -24,6 +24,7 @@ class CHC;
 namespace pragma
 {
 	using RenderMeshIndex = uint32_t;
+	using RenderMeshGroup = std::pair<RenderMeshIndex,RenderMeshIndex>; // Start index +count
 	namespace rendering {class RenderQueue;};
 	class DLLCLIENT CWorldComponent final
 		: public BaseWorldComponent

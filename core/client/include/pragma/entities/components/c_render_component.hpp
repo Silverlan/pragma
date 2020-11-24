@@ -60,14 +60,16 @@ namespace pragma
 
 		virtual void Initialize() override;
 		virtual ~CRenderComponent() override;
+
 		std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes();
 		const std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes() const;
 		std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes();
 		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes() const;
-		std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes(uint32_t lod);
-		const std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes(uint32_t lod) const;
-		std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes(uint32_t lod);
-		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes(uint32_t lod) const;
+
+		RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod);
+		const RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod) const;
+		RenderMeshGroup &GetLodMeshGroup(uint32_t lod);
+		const RenderMeshGroup &GetLodMeshGroup(uint32_t lod) const;
 
 		uint64_t GetLastRenderFrame() const;
 		void SetLastRenderFrame(unsigned long long &t);

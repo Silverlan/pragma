@@ -19,11 +19,16 @@
 using namespace pragma;
 
 extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CGame *c_game;
 
 static auto SHADOW_DEPTH_BIAS_CONSTANT = 1.25f;
 static auto SHADOW_DEPTH_BIAS_SLOPE = 1.75f;
 
 decltype(ShaderShadow::RENDER_PASS_DEPTH_FORMAT) ShaderShadow::RENDER_PASS_DEPTH_FORMAT = prosper::Format::D32_SFloat;
+
+decltype(ShaderShadow::VERTEX_BINDING_RENDER_BUFFER_INDEX) ShaderShadow::VERTEX_BINDING_RENDER_BUFFER_INDEX = {prosper::VertexInputRate::Instance};
+decltype(ShaderShadow::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX) ShaderShadow::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX = {ShaderGameWorld::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX,VERTEX_BINDING_RENDER_BUFFER_INDEX};
+
 decltype(ShaderShadow::VERTEX_BINDING_BONE_WEIGHT) ShaderShadow::VERTEX_BINDING_BONE_WEIGHT = {prosper::VertexInputRate::Vertex};
 decltype(ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID) ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID = {ShaderGameWorld::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID,VERTEX_BINDING_BONE_WEIGHT};
 decltype(ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT) ShaderShadow::VERTEX_ATTRIBUTE_BONE_WEIGHT = {ShaderGameWorld::VERTEX_ATTRIBUTE_BONE_WEIGHT,VERTEX_BINDING_BONE_WEIGHT};
@@ -36,6 +41,7 @@ decltype(ShaderShadow::VERTEX_BINDING_VERTEX) ShaderShadow::VERTEX_BINDING_VERTE
 decltype(ShaderShadow::VERTEX_ATTRIBUTE_POSITION) ShaderShadow::VERTEX_ATTRIBUTE_POSITION = {ShaderGameWorld::VERTEX_ATTRIBUTE_POSITION,VERTEX_BINDING_VERTEX};
 
 decltype(ShaderShadow::DESCRIPTOR_SET_INSTANCE) ShaderShadow::DESCRIPTOR_SET_INSTANCE = {&ShaderGameWorld::DESCRIPTOR_SET_INSTANCE};
+decltype(ShaderShadow::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderShadow::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderGameWorld::DESCRIPTOR_SET_RENDER_SETTINGS};
 ShaderShadow::ShaderShadow(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader)
 	: ShaderGameWorld(context,identifier,vsShader,fsShader)
 {}
@@ -89,8 +95,8 @@ bool ShaderShadow::BindEntity(CBaseEntity &ent)
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(!pRenderComponent)
 		return false;
-	auto entMvp = m_depthMvp *pRenderComponent->GetTransformationMatrix();
-	return BindEntityDepthMatrix(entMvp);
+	// auto entMvp = m_depthMvp *pRenderComponent->GetTransformationMatrix();
+	return BindEntityDepthMatrix(m_depthMvp);
 }
 bool ShaderShadow::BindLight(CLightComponent &light)
 {
@@ -110,10 +116,11 @@ void ShaderShadow::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &o
 		}
 	}}},outRenderPass,pipelineIdx);
 }
-uint32_t ShaderShadow::GetRenderSettingsDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
+uint32_t ShaderShadow::GetRenderSettingsDescriptorSetIndex() const {return DESCRIPTOR_SET_RENDER_SETTINGS.setIndex;}
 uint32_t ShaderShadow::GetCameraDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
 uint32_t ShaderShadow::GetLightDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
 uint32_t ShaderShadow::GetInstanceDescriptorSetIndex() const{return DESCRIPTOR_SET_INSTANCE.setIndex;}
+bool ShaderShadow::BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) {return BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());}
 void ShaderShadow::GetVertexAnimationPushConstantInfo(uint32_t &offset) const {}
 void ShaderShadow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
@@ -123,6 +130,8 @@ void ShaderShadow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pi
 	pipelineInfo.ToggleDepthWrites(true);
 	pipelineInfo.ToggleDepthTest(true,prosper::CompareOp::LessOrEqual);
 	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::None);
+	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX);
+
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT_ID);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT);
 
@@ -134,6 +143,7 @@ void ShaderShadow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pi
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit);
 
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDER_SETTINGS);
 
 	pipelineInfo.ToggleDepthBias(true,SHADOW_DEPTH_BIAS_CONSTANT,0.f,SHADOW_DEPTH_BIAS_SLOPE);
 }

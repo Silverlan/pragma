@@ -18,7 +18,7 @@ rendering::EntityInstanceIndexBuffer::EntityInstanceIndexBuffer()
 	prosper::util::BufferCreateInfo bufCreateInfo = {};
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent;
 	bufCreateInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
-	bufCreateInfo.size = sizeof(RenderBufferIndex) *1'000; // TODO: Move to game limits
+	bufCreateInfo.size = umath::to_integral(GameLimits::MaxEntityInstanceCount) *sizeof(RenderBufferIndex);
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
 
 	m_buffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(bufCreateInfo,bufCreateInfo.size);
@@ -94,6 +94,9 @@ std::shared_ptr<prosper::IBuffer> rendering::EntityInstanceIndexBuffer::AddInsta
 	// 2) We mustn't write data to the buffer here (this would also invoke gl-calls)
 	// The actual buffer updates will be performed on the main thread
 	auto buf = m_buffer->AllocateBuffer(instanceList.size() *sizeof(instanceList.front()),sizeof(uint32_t) *4 /* uvec4 alignment */,nullptr,false /* don't re-allocate buffer */);
+	assert(buf != nullptr);
+	if(buf == nullptr)
+		return nullptr;
 	// Buffers are cached for temporal frame coherence (objects on screen in the next frame are likely to be the same as in this frame).
 	// The buffer is global, so this also works for special cases like VR, if the objects for both eyes are the same
 	m_cachedBuffers[hash] = {buf,GetCurrentFrameIndex()};

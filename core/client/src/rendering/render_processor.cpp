@@ -457,7 +457,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 		}
 		if(umath::is_flag_set(m_stateFlags,StateFlags::EntityBound) == false || item.mesh >= m_curEntityMeshList->size())
 			continue;
-		if(m_stats && m_curInstanceSet)
+		if(m_stats && curInstanceSet)
 		{
 			++m_stats->numInstanceSets;
 			if(newInstance)

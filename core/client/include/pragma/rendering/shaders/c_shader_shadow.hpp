@@ -21,6 +21,9 @@ namespace pragma
 	public:
 		static prosper::Format RENDER_PASS_DEPTH_FORMAT;
 
+		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_RENDER_BUFFER_INDEX;
+		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX;
+
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_ID;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT;
@@ -33,6 +36,7 @@ namespace pragma
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSITION;
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
 
 		enum class Flags : uint32_t
 		{
@@ -56,7 +60,7 @@ namespace pragma
 		bool BindDepthMatrix(const Mat4 &depthMVP);
 		virtual bool BindEntity(CBaseEntity &ent) override;
 		virtual bool BindMaterial(CMaterial &mat) override; // TODO: Transparent only
-		virtual bool BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) override {return true;}
+		virtual bool BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) override;
 		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
 		virtual bool BindClipPlane(const Vector4 &clipPlane) override {return true;}
 		virtual bool SetDebugMode(pragma::SceneDebugMode debugMode) override {return true;}

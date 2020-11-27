@@ -12,6 +12,7 @@
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
+#include "pragma/rendering/render_queue_instancer.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <prosper_render_pass.hpp>
 #include <prosper_framebuffer.hpp>
@@ -251,6 +252,7 @@ void LightShadowRenderer::UpdateSceneCallbacks()
 }
 
 static auto cvLodBias = GetClientConVar("cl_render_shadow_lod_bias");
+static auto cvInstancingEnabled = GetClientConVar("render_instancing_enabled");
 void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(m_hLight.expired())
@@ -276,6 +278,8 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 	// TODO: Use separate shadow queue builder thread
 	auto lodBias = cvLodBias->GetInt();
 	c_game->GetRenderQueueBuilder().Append([this,&drawSceneInfo,&scene,&light,&ent,lodBias]() {
+		for(auto &renderQueue : m_renderQueues)
+			renderQueue->instanceSets.clear();
 		auto &mainRenderQueue = m_renderQueues.front();
 		auto &hCam = scene.GetActiveCamera();
 		if(hCam.valid())
@@ -409,6 +413,15 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 			ds<<item.second;
 		auto hash = util::murmur_hash3(ds->GetData(),ds->GetInternalSize(),0 /* seed */);
 #endif
+		if(cvInstancingEnabled->GetBool())
+		{
+			for(auto &renderQueue : m_renderQueues)
+			{
+				pragma::rendering::RenderQueueInstancer instancer {*renderQueue};
+				instancer.Process();
+			}
+		}
+
 		for(auto &renderQueue : m_renderQueues)
 			renderQueue->Unlock();
 		m_renderQueuesComplete = true;

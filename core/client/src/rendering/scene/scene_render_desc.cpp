@@ -18,6 +18,7 @@
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/renderers/rasterization/culled_mesh_data.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/rendering/render_queue_instancer.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
@@ -274,7 +275,11 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 		if(children == nullptr)
 			return;
 		for(auto &c : *children)
+		{
+			if(!c)
+				continue;
 			iterateTree(static_cast<OcclusionOctree<CBaseEntity*>::Node&>(*c));
+		}
 	};
 	iterateTree(tree.GetRootNode());
 }
@@ -331,133 +336,13 @@ bool SceneRenderDesc::IsWorldMeshVisible(uint32_t worldRenderQueueIndex,pragma::
 
 void SceneRenderDesc::WaitForWorldRenderQueues() const {while(m_worldRenderQueuesReady == false);}
 
-static auto cvInstancingThreshold = GetClientConVar("render_instancing_threshold");
 static auto cvInstancingEnabled = GetClientConVar("render_instancing_enabled");
-class RenderMeshInstancer
-{
-public:
-	RenderMeshInstancer(pragma::rendering::RenderQueue &renderQueue);
-	void Process();
-private:
-	util::Hash CalcNextEntityHash(uint32_t &outNumMeshes,EntityIndex &entIndex);
-	void ProcessInstantiableList(uint32_t endIndex,uint32_t numMeshes,util::Hash hash);
-
-	pragma::rendering::RenderQueue &m_renderQueue;
-	uint32_t m_curIndex = 0;
-	uint32_t m_instanceThreshold = 2;
-	std::vector<EntityIndex> m_instantiableEntityList;
-};
-
-RenderMeshInstancer::RenderMeshInstancer(pragma::rendering::RenderQueue &renderQueue)
-	: m_renderQueue{renderQueue},m_instanceThreshold{static_cast<uint32_t>(umath::max(cvInstancingThreshold->GetInt(),2))}
-{}
-
-void RenderMeshInstancer::Process()
-{
-	uint32_t prevNumMeshes = 0;
-	EntityIndex entIndex;
-	auto prevHash = CalcNextEntityHash(prevNumMeshes,entIndex);
-	m_instantiableEntityList.push_back(entIndex);
-	uint32_t numMeshes = 0;
-	auto &sortedItemIndices = m_renderQueue.sortedItemIndices;
-	while(m_curIndex < sortedItemIndices.size())
-	{
-		auto hash = CalcNextEntityHash(numMeshes,entIndex);
-		if(hash != prevHash) // New entity is different; no instantiation possible
-		{
-			// Process the instantiation list for everything before the current entity
-			ProcessInstantiableList(m_curIndex -1,prevNumMeshes,prevHash);
-			m_instantiableEntityList.push_back(entIndex);
-			prevHash = hash;
-			prevNumMeshes = numMeshes;
-			continue;
-		}
-		m_instantiableEntityList.push_back(entIndex);
-	}
-	ProcessInstantiableList(m_curIndex,prevNumMeshes,prevHash);
-}
-
-void RenderMeshInstancer::ProcessInstantiableList(uint32_t endIndex,uint32_t numMeshes,util::Hash hash)
-{
-	auto numInstantiableEntities = m_instantiableEntityList.size();
-	if(numInstantiableEntities < m_instanceThreshold)
-	{
-		m_instantiableEntityList.clear();
-		return;
-	}
-
-	std::vector<pragma::RenderBufferIndex> renderBufferIndices {};
-	renderBufferIndices.reserve(numInstantiableEntities);
-	for(auto entIdx : m_instantiableEntityList)
-	{
-		auto renderBufferIndex = static_cast<CBaseEntity*>(c_game->GetEntityByLocalIndex(entIdx))->GetRenderComponent()->GetRenderBufferIndex();
-		renderBufferIndices.push_back(*renderBufferIndex);
-	}
-		
-	auto &instanceIndexBuffer = pragma::CSceneComponent::GetEntityInstanceIndexBuffer();
-	auto instanceBuf = instanceIndexBuffer->AddInstanceList(m_renderQueue,std::move(renderBufferIndices),util::hash_combine<uint64_t>(hash,numInstantiableEntities));
-
-	m_renderQueue.instanceSets.push_back({});
-
-	auto setIdx = m_renderQueue.instanceSets.size() -1;
-	auto startIndex = endIndex -(numInstantiableEntities *numMeshes);
-
-	auto &instanceSet = m_renderQueue.instanceSets.back();
-	instanceSet.instanceCount = numInstantiableEntities;
-	instanceSet.instanceBuffer = instanceBuf;
-	instanceSet.meshCount = numMeshes;
-	instanceSet.startSkipIndex = startIndex;
-
-	for(auto i=startIndex;i<(startIndex +numMeshes);++i)
-	{
-		auto &item = m_renderQueue.queue[m_renderQueue.sortedItemIndices[i].first];
-		item.instanceSetIndex = setIdx;
-	}
-	// TODO: Instanced items are skipped anyway, so technically we don't need this second loop
-	for(auto i=(startIndex +numMeshes);i<endIndex;++i)
-	{
-		auto &item = m_renderQueue.queue[m_renderQueue.sortedItemIndices[i].first];
-		item.instanceSetIndex = pragma::rendering::RenderQueueItem::INSTANCED;
-	}
-
-	m_instantiableEntityList.clear();
-}
-
-util::Hash RenderMeshInstancer::CalcNextEntityHash(uint32_t &outNumMeshes,EntityIndex &entIndex)
-{
-	auto &sortedItemIndices = m_renderQueue.sortedItemIndices;
-	if(m_curIndex >= sortedItemIndices.size())
-		return 0;
-	util::Hash hash = 0;
-	auto entity = m_renderQueue.queue[sortedItemIndices[m_curIndex].first].entity;
-	entIndex = entity;
-	outNumMeshes = 0;
-	while(m_curIndex < sortedItemIndices.size())
-	{
-		auto &sortKey = sortedItemIndices[m_curIndex];
-		auto &item = m_renderQueue.queue[sortKey.first];
-		if(item.entity != entity)
-			break;
-		++outNumMeshes;
-		++m_curIndex;
-		hash = util::hash_combine<uint64_t>(hash,*reinterpret_cast<uint64_t*>(&sortKey.second));
-	}
-	return hash;
-}
-
-
-
-
-
-
-
-
 void SceneRenderDesc::BuildRenderQueueInstanceLists(pragma::rendering::RenderQueue &renderQueue)
 {
 	renderQueue.instanceSets.clear();
 	if(cvInstancingEnabled->GetBool() == false)
 		return;
-	RenderMeshInstancer instancer {renderQueue};
+	pragma::rendering::RenderQueueInstancer instancer {renderQueue};
 	instancer.Process();
 
 #if 0

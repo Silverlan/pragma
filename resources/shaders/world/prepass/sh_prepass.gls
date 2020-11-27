@@ -10,6 +10,12 @@
 #define SHADER_UNIFORM_CAMERA_SET (SHADER_UNIFORM_INSTANCE_SET +1)
 #define SHADER_UNIFORM_CAMERA_BINDING 0
 
+#define SHADER_UNIFORM_MATERIAL_SET (SHADER_UNIFORM_CAMERA_SET +1)
+#define SHADER_UNIFORM_MATERIAL_BINDING 0
+
+#define SHADER_UNIFORM_DEBUG_SET (SHADER_UNIFORM_MATERIAL_SET +1)
+#define SHADER_UNIFORM_DEBUG_BINDING 0
+
 #include "../../modules/sh_camera_info.gls"
 #include "../../modules/sh_entity_info.gls"
 #include "../../modules/sh_export.gls"

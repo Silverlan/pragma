@@ -18,6 +18,7 @@
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
+#include "pragma/entities/entity_instance_index_buffer.hpp"
 #include <pragma/lua/luafunction_call.h>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_msaa_texture.hpp>
@@ -168,6 +169,7 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto fUpdateRenderBuffers = [&drawSceneInfo,&drawCmd](const RenderQueue &renderQueue,RenderPassStats *stats=nullptr) {
 		renderQueue.WaitForCompletion();
+		CSceneComponent::GetEntityInstanceIndexBuffer()->UpdateBufferData(renderQueue);
 		auto curEntity = std::numeric_limits<EntityIndex>::max();
 		for(auto &item : renderQueue.queue)
 		{
@@ -234,14 +236,14 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 		if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
 		{
 			std::chrono::steady_clock::time_point t;
-			if(drawSceneInfo.renderStats.has_value())
+			if(drawSceneInfo.renderStats)
 				t = std::chrono::steady_clock::now();
 			sceneRenderDesc.WaitForWorldRenderQueues();
-			if(drawSceneInfo.renderStats.has_value())
+			if(drawSceneInfo.renderStats)
 				drawSceneInfo.renderStats->prepass.renderThreadWaitTime += std::chrono::steady_clock::now() -t;
 
 			for(auto &renderQueue : worldRenderQueues)
-				fUpdateRenderBuffers(*renderQueue,drawSceneInfo.renderStats.has_value() ? &drawSceneInfo.renderStats->prepass : nullptr);
+				fUpdateRenderBuffers(*renderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
 		}
 
 		// If we're lucky, the render queues for everything else have already been built
@@ -253,16 +255,16 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 		if(worldObjectRenderQueueReady)
 		{
 			if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
-				fUpdateRenderBuffers(worldObjectsRenderQueue,drawSceneInfo.renderStats.has_value() ? &drawSceneInfo.renderStats->prepass : nullptr);
+				fUpdateRenderBuffers(worldObjectsRenderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
 
 			if((drawSceneInfo.renderFlags &FRender::View) != FRender::None)
-				fUpdateRenderBuffers(*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),drawSceneInfo.renderStats.has_value() ? &drawSceneInfo.renderStats->prepass : nullptr);
+				fUpdateRenderBuffers(*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
 		}
 
 		prepass.BeginRenderPass(drawSceneInfo);
 
 		auto &shaderPrepass = GetPrepassShader();
-		auto *prepassStats = drawSceneInfo.renderStats.has_value() ? &drawSceneInfo.renderStats->prepass : nullptr;
+		auto *prepassStats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr;
 		pragma::rendering::DepthStageRenderProcessor rsys {drawSceneInfo,RenderFlags::None,{} /* drawOrigin */,};
 		if(rsys.BindShader(shaderPrepass))
 		{
@@ -280,10 +282,10 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 				prepass.EndRenderPass(drawSceneInfo);
 
 				if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
-					fUpdateRenderBuffers(worldObjectsRenderQueue,drawSceneInfo.renderStats.has_value() ? &drawSceneInfo.renderStats->prepass : nullptr);
+					fUpdateRenderBuffers(worldObjectsRenderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
 
 				if((drawSceneInfo.renderFlags &FRender::View) != FRender::None)
-					fUpdateRenderBuffers(*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),drawSceneInfo.renderStats.has_value() ? &drawSceneInfo.renderStats->prepass : nullptr);
+					fUpdateRenderBuffers(*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
 
 				prepass.BeginRenderPass(drawSceneInfo,prepass.subsequentRenderPass.get());
 				rsys.BindShader(shaderPrepass);
@@ -332,10 +334,10 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	
 	// We still need to update the render buffers for some entities
 	// (All others have already been updated in the prepass)
-	fUpdateRenderBuffers(*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,false /* translucent */),drawSceneInfo.renderStats.has_value() ? &drawSceneInfo.renderStats->lightingPass : nullptr);
-	fUpdateRenderBuffers(*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,true /* translucent */),drawSceneInfo.renderStats.has_value() ? &drawSceneInfo.renderStats->lightingPass : nullptr);
-	fUpdateRenderBuffers(*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),drawSceneInfo.renderStats.has_value() ? &drawSceneInfo.renderStats->lightingPass : nullptr);
-	fUpdateRenderBuffers(*sceneRenderDesc.GetRenderQueue(RenderMode::View,true /* translucent */),drawSceneInfo.renderStats.has_value() ? &drawSceneInfo.renderStats->lightingPass : nullptr);
+	fUpdateRenderBuffers(*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
+	fUpdateRenderBuffers(*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
+	fUpdateRenderBuffers(*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
+	fUpdateRenderBuffers(*sceneRenderDesc.GetRenderQueue(RenderMode::View,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
 
 	// Lighting pass
 	RenderLightingPass(drawSceneInfo);

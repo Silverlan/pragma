@@ -85,6 +85,9 @@ void CEngine::RegisterConsoleCommands()
 		NetworkState *nw,ConVar *cv,bool oldVal,bool newVal) -> void {
 			GetRenderContext().GetWindow().SetVSyncEnabled(newVal);
 	}});
+	
+	conVarMap.RegisterConVar("render_instancing_threshold","2",ConVarFlags::Archive,"The threshold at which to start instancing entities if instanced rendering is enabled (render_instancing_threshold). Must not be lower than 2!");
+	conVarMap.RegisterConVar("render_instancing_enabled","1",ConVarFlags::Archive,"Enables or disables instanced rendering.");
 
 #if LUA_ENABLE_RUN_GUI == 1
 	conVarMap.RegisterConCommand("lua_exec_gui",[](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {

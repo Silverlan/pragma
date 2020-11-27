@@ -19,7 +19,7 @@ namespace pragma
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_DEPTH_BUFFER;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_REFRACTION_MAP;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_FOG;
 

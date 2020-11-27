@@ -22,7 +22,7 @@ namespace pragma
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_UV;
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 
 		ShaderFlat(prosper::IPrContext &context,const std::string &identifier);

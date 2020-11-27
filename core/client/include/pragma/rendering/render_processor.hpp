@@ -9,6 +9,7 @@
 #define __RENDER_PROCESSOR_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/rendering/render_queue.hpp"
 #include <mathutil/uvec.h>
 
 class CMaterial;
@@ -58,11 +59,13 @@ namespace pragma::rendering
 		bool BindShader(prosper::Shader &shader);
 		bool BindMaterial(CMaterial &mat);
 		bool BindEntity(CBaseEntity &ent);
-		bool Render(CModelSubMesh &mesh,pragma::RenderMeshIndex meshIdx);
+		bool Render(CModelSubMesh &mesh,pragma::RenderMeshIndex meshIdx,const RenderQueue::InstanceSet *instanceSet=nullptr);
 		pragma::ShaderGameWorld *GetCurrentShader();
 		void UnbindShader();
 		void SetCountNonOpaqueMaterialsOnly(bool b);
 	protected:
+		uint32_t Render(const pragma::rendering::RenderQueue &renderQueue,bool bindShaders,RenderPassStats *optStats=nullptr,std::optional<uint32_t> worldRenderQueueIndex={});
+		bool BindInstanceSet(pragma::ShaderGameWorld &shaderScene,const RenderQueue::InstanceSet *instanceSet=nullptr);
 		void UnbindMaterial();
 		void UnbindEntity();
 		prosper::ShaderIndex m_curShaderIndex = std::numeric_limits<prosper::ShaderIndex>::max();
@@ -75,6 +78,7 @@ namespace pragma::rendering
 		CBaseEntity *m_curEntity = nullptr;
 		pragma::CRenderComponent *m_curRenderC = nullptr;
 		std::vector<std::shared_ptr<ModelSubMesh>> *m_curEntityMeshList = nullptr;
+		const RenderQueue::InstanceSet *m_curInstanceSet = nullptr;
 
 		CameraType m_camType = CameraType::World;
 		const util::DrawSceneInfo &m_drawSceneInfo;

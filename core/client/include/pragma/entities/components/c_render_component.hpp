@@ -16,6 +16,8 @@
 #include <pragma/entities/components/base_render_component.hpp>
 #include <mathutil/uvec.h>
 
+#define ENTITY_RENDER_BUFFER_USE_STORAGE_BUFFER 1
+
 namespace prosper {class IUniformResizableBuffer; class IDescriptorSet;};
 namespace Intersection {struct LineMeshResult;};
 namespace pragma
@@ -24,6 +26,7 @@ namespace pragma
 	class CAnimatedComponent;
 	class CLightMapReceiverComponent;
 	using RenderMeshIndex = uint32_t;
+	using RenderBufferIndex = uint32_t;
 	class DLLCLIENT CRenderComponent final
 		: public BaseRenderComponent,
 		public CBaseNetComponent
@@ -36,7 +39,9 @@ namespace pragma
 			ExemptFromOcclusionCulling = RenderBufferDirty<<1u,
 			HasDepthBias = ExemptFromOcclusionCulling<<1u,
 			EnableDepthPass = HasDepthBias<<1u,
-			DisableShadows = EnableDepthPass<<1u
+			DisableShadows = EnableDepthPass<<1u,
+			IsInstantiable = DisableShadows<<1u,
+			InstantiationDisabled = IsInstantiable<<1u
 		};
 		static constexpr auto USE_HOST_MEMORY_FOR_RENDER_DATA = true;
 
@@ -47,10 +52,12 @@ namespace pragma
 		static ComponentEventId EVENT_SHOULD_DRAW_SHADOW;
 		static ComponentEventId EVENT_ON_UPDATE_RENDER_BUFFERS;
 		static ComponentEventId EVENT_ON_UPDATE_RENDER_MATRICES;
+		static ComponentEventId EVENT_UPDATE_INSTANTIABILITY;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
 		CRenderComponent(BaseEntity &ent);
-		std::weak_ptr<prosper::IBuffer> GetRenderBuffer() const;
+		const std::shared_ptr<prosper::IBuffer> &GetRenderBuffer() const;
+		std::optional<RenderBufferIndex> GetRenderBufferIndex() const;
 		prosper::IDescriptorSet *GetRenderDescriptorSet() const;
 
 		static const std::vector<CRenderComponent*> &GetEntitiesExemptFromOcclusionCulling();
@@ -125,6 +132,10 @@ namespace pragma
 		void SetRenderBufferDirty();
 		std::optional<Intersection::LineMeshResult> CalcRayIntersection(const Vector3 &start,const Vector3 &dir,bool precise=false) const;
 
+		bool IsInstantiable() const;
+		void SetInstaniationEnabled(bool enabled);
+		void UpdateInstantiability();
+
 		void SetRenderOffsetTransform(const umath::ScaledTransform &t);
 		void ClearRenderOffsetTransform();
 		const umath::ScaledTransform *GetRenderOffsetTransform() const;
@@ -177,6 +188,16 @@ namespace pragma
 	};
 
 	// Events
+	
+	struct DLLCLIENT CEUpdateInstantiability
+		: public ComponentEvent
+	{
+		CEUpdateInstantiability(bool &instantiable);
+		virtual void PushArguments(lua_State *l) override;
+		virtual uint32_t GetReturnCount() override;
+		virtual void HandleReturnValues(lua_State *l) override;
+		bool &instantiable;
+	};
 
 	struct DLLCLIENT CEShouldDraw
 		: public ComponentEvent

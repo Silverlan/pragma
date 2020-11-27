@@ -69,7 +69,7 @@ decltype(ShaderRayTracing::DESCRIPTOR_SET_GAME_SCENE) ShaderRayTracing::DESCRIPT
 	}
 };
 
-decltype(ShaderRayTracing::DESCRIPTOR_SET_CAMERA) ShaderRayTracing::DESCRIPTOR_SET_CAMERA = {&ShaderForwardPLightCulling::DESCRIPTOR_SET_CAMERA};
+decltype(ShaderRayTracing::DESCRIPTOR_SET_SCENE) ShaderRayTracing::DESCRIPTOR_SET_SCENE = {&ShaderForwardPLightCulling::DESCRIPTOR_SET_SCENE};
 decltype(ShaderRayTracing::DESCRIPTOR_SET_LIGHTS) ShaderRayTracing::DESCRIPTOR_SET_LIGHTS = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Light Buffers
@@ -109,7 +109,7 @@ void ShaderRayTracing::InitializeComputePipeline(prosper::ComputePipelineCreateI
 
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_IMAGE_OUTPUT);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_GAME_SCENE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_LIGHTS);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_IBL);
 }

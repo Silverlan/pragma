@@ -480,7 +480,7 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 			if(shader->BindLight(*m_hLight))
 			{
 				shader->BindDepthMatrix(depthMVP);
-				shadowRenderProcessor.Render(*m_renderQueues.at(layerId),drawSceneInfo.renderStats.has_value() ? &drawSceneInfo.renderStats->shadowPass : nullptr);
+				shadowRenderProcessor.Render(*m_renderQueues.at(layerId),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->shadowPass : nullptr);
 		
 				// TODO: Translucent render pass ?
 			}

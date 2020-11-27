@@ -1167,8 +1167,6 @@ void CEngine::Think()
 	GLFW::poll_events(); // Needs to be called AFTER rendering!
 	if(GetWindow().ShouldClose())
 		ShutDown();
-
-	GetRenderContext().EndFrame();
 }
 
 void CEngine::SetFixedFrameDeltaTimeInterpretation(std::optional<std::chrono::nanoseconds> frameDeltaTime)

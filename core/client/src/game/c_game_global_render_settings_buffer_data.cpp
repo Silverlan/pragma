@@ -55,4 +55,8 @@ CGame::GlobalRenderSettingsBufferData::GlobalRenderSettingsBufferData()
 	descSet.SetBindingUniformBuffer(
 		*csmBuffer,umath::to_integral(pragma::ShaderScene::RenderSettingsBinding::CSMData)
 	);
+	auto &entInstanceBuffer = *pragma::CRenderComponent::GetInstanceBuffer();
+	descSet.SetBindingStorageBuffer(
+		entInstanceBuffer,umath::to_integral(pragma::ShaderScene::RenderSettingsBinding::GlobalInstance)
+	);
 }

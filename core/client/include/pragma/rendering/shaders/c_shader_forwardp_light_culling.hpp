@@ -18,7 +18,7 @@ namespace pragma
 	{
 	public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
 
 		static uint32_t TILE_SIZE;
 

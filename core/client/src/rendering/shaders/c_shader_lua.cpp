@@ -309,14 +309,14 @@ bool pragma::LuaShaderTextured3D::BindMaterial(CMaterial &mat)
 	CallLuaMember<void,Material*>("OnBindMaterial",&mat);
 	return true;
 }
-bool pragma::LuaShaderTextured3D::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx)
+bool pragma::LuaShaderTextured3D::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount)
 {
 	CallLuaMember<void,ModelSubMesh*>("OnDraw",&mesh);
 
 	int32_t result = -1;
 	if(CallLuaMember<int32_t,ModelSubMesh*>("OnDraw",&result,&mesh) == CallbackReturnType::HasReturnValue && static_cast<util::EventReply>(result) == util::EventReply::Handled)
 		return true; // Skip default drawing
-	return ShaderTextured3DBase::Draw(mesh,meshIdx);
+	return ShaderTextured3DBase::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount);
 }
 bool pragma::LuaShaderTextured3D::BindEntity(CBaseEntity &ent)
 {

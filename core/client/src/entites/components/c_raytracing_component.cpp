@@ -201,7 +201,7 @@ void CRaytracingComponent::UpdateBuffers(prosper::IPrimaryCommandBuffer &cmd)
 		umath::set_flag(m_stateFlags,StateFlags::RenderBufferDirty,false);
 		auto &renderComponent = *whRenderComponent;
 		auto wpRenderBuffer = renderComponent.GetRenderBuffer();
-		auto index = wpRenderBuffer.expired() == false ? static_cast<prosper::IBuffer::SmallOffset>(wpRenderBuffer.lock()->GetBaseIndex()) : prosper::IBuffer::INVALID_SMALL_OFFSET;
+		auto index = wpRenderBuffer ? static_cast<prosper::IBuffer::SmallOffset>(wpRenderBuffer->GetBaseIndex()) : prosper::IBuffer::INVALID_SMALL_OFFSET;
 		for(auto &buf : m_subMeshBuffers)
 			cmd.RecordUpdateGenericShaderReadBuffer(*buf,offsetof(SubMeshRenderInfoBufferData,entityBufferIndex),sizeof(index),&index);
 	}

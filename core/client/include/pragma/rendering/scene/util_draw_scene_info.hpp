@@ -23,6 +23,31 @@ namespace util
 {
 	struct DLLCLIENT DrawSceneInfo
 	{
+		DrawSceneInfo()=default;
+		DrawSceneInfo(const DrawSceneInfo &other)
+			: scene{other.scene},commandBuffer{other.commandBuffer},renderTarget{other.renderTarget},
+			renderFlags{other.renderFlags},clearColor{other.clearColor},toneMapping{other.toneMapping},
+			prepassFilter{other.prepassFilter},renderFilter{other.renderFilter},outputImage{other.outputImage},
+			outputLayerId{other.outputLayerId},flipVertically{other.flipVertically},renderStats{other.renderStats ? std::make_unique<RenderStats>(*other.renderStats) : nullptr}
+		{}
+		DrawSceneInfo &operator=(const DrawSceneInfo &other)
+		{
+			scene = other.scene;
+			commandBuffer = other.commandBuffer;
+			renderTarget = other.renderTarget;
+			renderFlags = other.renderFlags;
+			clearColor = other.clearColor;
+			toneMapping = other.toneMapping;
+
+			prepassFilter = other.prepassFilter;
+			renderFilter = other.renderFilter;
+			outputImage = other.outputImage;
+
+			outputLayerId = other.outputLayerId;
+			flipVertically = other.flipVertically;
+			renderStats = other.renderStats ? std::make_unique<RenderStats>(*other.renderStats) : nullptr;
+			return *this;
+		}
 		util::WeakHandle<::pragma::CSceneComponent> scene = {};
 		mutable std::shared_ptr<prosper::IPrimaryCommandBuffer> commandBuffer = nullptr;
 		std::shared_ptr<prosper::RenderTarget> renderTarget = nullptr;
@@ -37,7 +62,7 @@ namespace util
 		uint32_t outputLayerId = 0u;
 		bool flipVertically = false;
 
-		mutable std::optional<RenderStats> renderStats {};
+		mutable std::unique_ptr<RenderStats> renderStats = nullptr;
 	};
 };
 

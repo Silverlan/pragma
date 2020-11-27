@@ -20,11 +20,15 @@
 using namespace pragma;
 
 extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CGame *c_game;
 
 ShaderPrepassBase::Pipeline ShaderPrepassBase::GetPipelineIndex(prosper::SampleCountFlags sampleCount)
 {
 	return (sampleCount == prosper::SampleCountFlags::e1Bit) ? Pipeline::Regular : Pipeline::MultiSample;
 }
+
+decltype(ShaderPrepassBase::VERTEX_BINDING_RENDER_BUFFER_INDEX) ShaderPrepassBase::VERTEX_BINDING_RENDER_BUFFER_INDEX = {prosper::VertexInputRate::Instance};
+decltype(ShaderPrepassBase::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX) ShaderPrepassBase::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX = {ShaderEntity::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX,VERTEX_BINDING_RENDER_BUFFER_INDEX};
 
 decltype(ShaderPrepassBase::VERTEX_BINDING_BONE_WEIGHT) ShaderPrepassBase::VERTEX_BINDING_BONE_WEIGHT = {prosper::VertexInputRate::Vertex};
 decltype(ShaderPrepassBase::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID) ShaderPrepassBase::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID,VERTEX_BINDING_BONE_WEIGHT};
@@ -39,7 +43,7 @@ decltype(ShaderPrepassBase::VERTEX_ATTRIBUTE_POSITION) ShaderPrepassBase::VERTEX
 decltype(ShaderPrepassBase::VERTEX_ATTRIBUTE_UV) ShaderPrepassBase::VERTEX_ATTRIBUTE_UV = {ShaderEntity::VERTEX_ATTRIBUTE_UV,VERTEX_BINDING_VERTEX};
 
 decltype(ShaderPrepassBase::DESCRIPTOR_SET_INSTANCE) ShaderPrepassBase::DESCRIPTOR_SET_INSTANCE = {&ShaderEntity::DESCRIPTOR_SET_INSTANCE};
-decltype(ShaderPrepassBase::DESCRIPTOR_SET_CAMERA) ShaderPrepassBase::DESCRIPTOR_SET_CAMERA = {&ShaderScene::DESCRIPTOR_SET_CAMERA};
+decltype(ShaderPrepassBase::DESCRIPTOR_SET_SCENE) ShaderPrepassBase::DESCRIPTOR_SET_SCENE = {&ShaderScene::DESCRIPTOR_SET_SCENE};
 decltype(ShaderPrepassBase::DESCRIPTOR_SET_MATERIAL) ShaderPrepassBase::DESCRIPTOR_SET_MATERIAL = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Diffuse Map
@@ -48,6 +52,7 @@ decltype(ShaderPrepassBase::DESCRIPTOR_SET_MATERIAL) ShaderPrepassBase::DESCRIPT
 		}
 	}
 };
+decltype(ShaderPrepassBase::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderPrepassBase::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderScene::DESCRIPTOR_SET_RENDER_SETTINGS};
 
 prosper::util::RenderPassCreateInfo::AttachmentInfo ShaderPrepassBase::get_depth_render_pass_attachment_info(prosper::SampleCountFlags sampleCount)
 {
@@ -81,7 +86,10 @@ bool ShaderPrepassBase::BeginDraw(
 		cmdBuffer->RecordSetDepthBias() == true;
 }
 
-bool ShaderPrepassBase::BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) {return BindSceneCamera(scene,renderer,bView);}
+bool ShaderPrepassBase::BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView)
+{
+	return BindSceneCamera(scene,renderer,bView) && BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
+}
 bool ShaderPrepassBase::BindClipPlane(const Vector4 &clipPlane) {return RecordPushConstants(clipPlane);}
 bool ShaderPrepassBase::BindDrawOrigin(const Vector4 &drawOrigin) {return RecordPushConstants(drawOrigin,offsetof(PushConstants,drawOrigin));}
 
@@ -127,7 +135,7 @@ bool ShaderPrepassBase::BindMaterial(CMaterial &mat)
 	return true;
 }
 
-bool ShaderPrepassBase::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx)
+bool ShaderPrepassBase::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount)
 {
 	auto flags = Flags::None;
 	if(mesh.GetExtendedVertexWeights().empty() == false)
@@ -140,7 +148,7 @@ bool ShaderPrepassBase::Draw(CModelSubMesh &mesh,const std::optional<pragma::Ren
 		if(RecordPushConstants(*m_alphaCutoff,offsetof(PushConstants,alphaCutoff)) == false)
 			return false;
 	}
-	return RecordPushConstants(flags,offsetof(PushConstants,flags)) && ShaderEntity::Draw(mesh,meshIdx);
+	return RecordPushConstants(flags,offsetof(PushConstants,flags)) && ShaderEntity::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount);
 }
 
 void ShaderPrepassBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
@@ -155,6 +163,8 @@ void ShaderPrepassBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInf
 
 	pipelineInfo.ToggleDepthBias(true,0.f,0.f,0.f);
 	pipelineInfo.ToggleDynamicState(true,prosper::DynamicState::DepthBias); // Required for decals
+	
+	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX);
 
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT_ID);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT);
@@ -168,13 +178,15 @@ void ShaderPrepassBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInf
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::VertexBit);
 
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_MATERIAL);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDER_SETTINGS);
 }
 
-uint32_t ShaderPrepassBase::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_CAMERA.setIndex;}
+uint32_t ShaderPrepassBase::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_SCENE.setIndex;}
 uint32_t ShaderPrepassBase::GetInstanceDescriptorSetIndex() const {return DESCRIPTOR_SET_INSTANCE.setIndex;}
 uint32_t ShaderPrepassBase::GetMaterialDescriptorSetIndex() const {return DESCRIPTOR_SET_MATERIAL.setIndex;}
+uint32_t ShaderPrepassBase::GetRenderSettingsDescriptorSetIndex() const {return DESCRIPTOR_SET_RENDER_SETTINGS.setIndex;}
 void ShaderPrepassBase::GetVertexAnimationPushConstantInfo(uint32_t &offset) const
 {
 	offset = offsetof(PushConstants,vertexAnimInfo);

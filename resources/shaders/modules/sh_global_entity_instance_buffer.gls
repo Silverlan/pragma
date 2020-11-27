@@ -1,0 +1,19 @@
+#ifndef F_SH_GLOBAL_ENTITY_INSTANCE_BUFFER_GLS
+#define F_SH_GLOBAL_ENTITY_INSTANCE_BUFFER_GLS
+
+#include "sh_uniform_locations.gls"
+#include "sh_entity_instance_data.gls"
+
+struct StorageEntityInstanceData
+{
+	EntityInstanceData entData;
+	vec4 padding[10]; // Padding to 256 bytes (uniform buffer alignment)
+};
+
+// Storage buffer containing instance data for *all* entities; can be indexed
+layout(std140,LAYOUT_ID(SHADER_UNIFORM_GLOBAL_INSTANCE_SET,SHADER_UNIFORM_GLOBAL_INSTANCE_BINDING)) buffer Instances
+{
+	StorageEntityInstanceData data[];
+} u_instances;
+
+#endif

@@ -308,7 +308,7 @@ namespace pragma
 		static void Lua_default_OnEndDraw(lua_State *l,LuaShaderTextured3D &shader) {shader.Lua_OnEndDraw();}
 
 		virtual bool BindMaterial(CMaterial &mat) override;
-		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx) override;
+		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
 		virtual bool BindEntity(CBaseEntity &ent) override;
 		virtual bool BindVertexAnimationOffset(uint32_t offset) override;
 		virtual bool BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) override;

@@ -38,7 +38,7 @@ decltype(ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS) ShaderForwardPLightC
 		}
 	}
 };
-decltype(ShaderForwardPLightCulling::DESCRIPTOR_SET_CAMERA) ShaderForwardPLightCulling::DESCRIPTOR_SET_CAMERA = {
+decltype(ShaderForwardPLightCulling::DESCRIPTOR_SET_SCENE) ShaderForwardPLightCulling::DESCRIPTOR_SET_SCENE = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Camera
 			prosper::DescriptorType::UniformBuffer,
@@ -63,7 +63,7 @@ void ShaderForwardPLightCulling::InitializeComputePipeline(prosper::ComputePipel
 	// AddSpecializationConstant(pipelineInfo,0u /* constant id */,sizeof(TILE_SIZE),&TILE_SIZE);
 
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_LIGHTS);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 }
 
 bool ShaderForwardPLightCulling::Compute(
@@ -75,6 +75,6 @@ bool ShaderForwardPLightCulling::Compute(
 			lightCount,1u<<sceneIndex,vpWidth<<16 | static_cast<uint16_t>(vpHeight)
 		}) &&
 		RecordBindDescriptorSet(descSetLights,DESCRIPTOR_SET_LIGHTS.setIndex) &&
-		RecordBindDescriptorSet(descSetCamera,DESCRIPTOR_SET_CAMERA.setIndex) &&
+		RecordBindDescriptorSet(descSetCamera,DESCRIPTOR_SET_SCENE.setIndex) &&
 		RecordDispatch(workGroupsX,workGroupsY);
 }

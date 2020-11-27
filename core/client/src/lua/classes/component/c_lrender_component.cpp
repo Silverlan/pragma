@@ -123,6 +123,7 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCRender.add_static_constant("EVENT_SHOULD_DRAW",pragma::CRenderComponent::EVENT_SHOULD_DRAW);
 	defCRender.add_static_constant("EVENT_SHOULD_DRAW_SHADOW",pragma::CRenderComponent::EVENT_SHOULD_DRAW_SHADOW);
 	defCRender.add_static_constant("EVENT_ON_UPDATE_RENDER_MATRICES",pragma::CRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES);
+	defCRender.add_static_constant("EVENT_UPDATE_INSTANTIABILITY",pragma::CRenderComponent::EVENT_UPDATE_INSTANTIABILITY);
 
 	// Enums
 	defCRender.add_static_constant("RENDERMODE_NONE",umath::to_integral(RenderMode::None));
@@ -225,10 +226,10 @@ void Lua::Render::UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shar
 void Lua::Render::GetRenderBuffer(lua_State *l,CRenderHandle &hEnt)
 {
 	pragma::Lua::check_component(l,hEnt);
-	auto buf = hEnt->GetRenderBuffer();
-	if(buf.expired())
+	auto &buf = hEnt->GetRenderBuffer();
+	if(buf == nullptr)
 		return;
-	Lua::Push(l,buf.lock());
+	Lua::Push(l,buf);
 }
 void Lua::Render::GetBoneBuffer(lua_State *l,CRenderHandle &hEnt)
 {

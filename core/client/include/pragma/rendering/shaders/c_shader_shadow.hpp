@@ -57,7 +57,7 @@ namespace pragma
 		virtual bool BindEntity(CBaseEntity &ent) override;
 		virtual bool BindMaterial(CMaterial &mat) override; // TODO: Transparent only
 		virtual bool BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) override {return true;}
-		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx) override;
+		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
 		virtual bool BindClipPlane(const Vector4 &clipPlane) override {return true;}
 		virtual bool SetDebugMode(pragma::SceneDebugMode debugMode) override {return true;}
 		virtual void Set3DSky(bool is3dSky) override {}

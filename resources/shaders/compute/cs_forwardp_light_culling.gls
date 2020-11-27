@@ -25,6 +25,9 @@
 #define SHADER_UNIFORM_RENDER_SETTINGS_SET SHADER_UNIFORM_CAMERA_SET
 #define SHADER_UNIFORM_RENDER_SETTINGS_BINDING (SHADER_UNIFORM_CAMERA_BINDING +1)
 
+#define SHADER_UNIFORM_INSTANCE_INDEX_SET SHADER_UNIFORM_RENDER_SETTINGS_SET
+#define SHADER_UNIFORM_INSTANCE_INDEX_BINDING (SHADER_UNIFORM_RENDER_SETTINGS_BINDING +1)
+
 #include "../modules/sh_light_source.gls"
 #include "../modules/sh_camera_info.gls"
 #include "../modules/sh_rendersettings.gls"
@@ -256,7 +259,7 @@ void main()
 		uint lightIndex = i *threadCount +gl_LocalInvocationIndex;
 		if(lightIndex >= u_lightInfo.lightCount)
 			break;
-		if((lightBuffer.data[lightIndex].flags &FLIGHT_TURNED_ON) == 0)
+		if((lightBuffer.data[lightIndex].flags &FLIGHT_TURNED_ON) == 0 || (lightBuffer.data[lightIndex].flags &FLIGHT_BAKED_LIGHT_SOURCE) != 0)
 			continue;
 
 		if((lightBuffer.data[lightIndex].sceneFlags &u_lightInfo.sceneFlag) == 0)

@@ -17,7 +17,7 @@ namespace pragma
 	{
 	public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 
 		static prosper::Format RENDER_PASS_FORMAT;

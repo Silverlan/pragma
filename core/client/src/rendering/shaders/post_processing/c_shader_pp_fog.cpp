@@ -23,7 +23,7 @@ decltype(ShaderPPFog::DESCRIPTOR_SET_DEPTH_BUFFER) ShaderPPFog::DESCRIPTOR_SET_D
 		}
 	}
 };
-decltype(ShaderPPFog::DESCRIPTOR_SET_CAMERA) ShaderPPFog::DESCRIPTOR_SET_CAMERA = {&ShaderScene::DESCRIPTOR_SET_CAMERA};
+decltype(ShaderPPFog::DESCRIPTOR_SET_SCENE) ShaderPPFog::DESCRIPTOR_SET_SCENE = {&ShaderScene::DESCRIPTOR_SET_SCENE};
 decltype(ShaderPPFog::DESCRIPTOR_SET_FOG) ShaderPPFog::DESCRIPTOR_SET_FOG = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Fog
@@ -44,7 +44,7 @@ void ShaderPPFog::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 	AddDefaultVertexAttributes(pipelineInfo);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_TEXTURE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_DEPTH_BUFFER);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_FOG);
 }
 

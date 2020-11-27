@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle_model.hpp"
+#include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <buffers/prosper_buffer.hpp>
@@ -112,7 +113,7 @@ bool ShaderParticleModel::BindParticleBuffers(prosper::IBuffer &particleBuffer,p
 
 bool ShaderParticleModel::Draw(CModelSubMesh &mesh,uint32_t numInstances,uint32_t firstInstance)
 {
-	return ShaderTextured3DBase::Draw(mesh,{},[this,numInstances,firstInstance](CModelSubMesh &mesh) {
+	return ShaderTextured3DBase::Draw(mesh,{},*CSceneComponent::GetEntityInstanceIndexBuffer()->GetZeroIndexBuffer(),[this,numInstances,firstInstance](CModelSubMesh &mesh) {
 		return RecordDrawIndexed(mesh.GetTriangleVertexCount(),numInstances,0u,firstInstance);
 	},true);
 }

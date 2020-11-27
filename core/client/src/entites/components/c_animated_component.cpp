@@ -84,11 +84,19 @@ void CAnimatedComponent::Initialize()
 		umath::set_flag(m_stateFlags,StateFlags::BoneBufferDirty,false);
 		UpdateBoneBuffer(*static_cast<pragma::CEOnUpdateRenderData&>(evData.get()).commandBuffer);
 	});
+	BindEvent(CRenderComponent::EVENT_UPDATE_INSTANTIABILITY,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		// TODO: Allow instantiability for animated entities
+		static_cast<CEUpdateInstantiability&>(evData.get()).instantiable = false;
+		return util::EventReply::Handled;
+	});
 	auto &ent = GetEntity();
 	ent.AddComponent<LogicComponent>();
 	auto pRenderComponent = ent.GetComponent<CRenderComponent>();
 	if(pRenderComponent.valid())
+	{
 		pRenderComponent->SetRenderBufferDirty();
+		pRenderComponent->UpdateInstantiability();
+	}
 }
 
 void CAnimatedComponent::OnRemove()

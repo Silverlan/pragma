@@ -36,10 +36,14 @@ decltype(ShaderScene::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderScene::DESCRIPTOR_SE
 		prosper::DescriptorSetInfo::Binding { // CSM Data
 			prosper::DescriptorType::UniformBuffer,
 			prosper::ShaderStageFlags::FragmentBit
+		},
+		prosper::DescriptorSetInfo::Binding { // Global Entity Instance Data
+			prosper::DescriptorType::StorageBuffer,
+			prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit
 		}
 	}
 };
-decltype(ShaderScene::DESCRIPTOR_SET_CAMERA) ShaderScene::DESCRIPTOR_SET_CAMERA = {
+decltype(ShaderScene::DESCRIPTOR_SET_SCENE) ShaderScene::DESCRIPTOR_SET_SCENE = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Camera
 			prosper::DescriptorType::UniformBuffer,
@@ -179,6 +183,9 @@ bool ShaderSceneLit::BindScene(pragma::CSceneComponent &scene,rendering::Rasteri
 
 /////////////////////
 
+decltype(ShaderEntity::VERTEX_BINDING_RENDER_BUFFER_INDEX) ShaderEntity::VERTEX_BINDING_RENDER_BUFFER_INDEX = {prosper::VertexInputRate::Instance};
+decltype(ShaderEntity::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX) ShaderEntity::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX = {VERTEX_BINDING_LIGHTMAP,prosper::Format::R32_UInt};
+
 decltype(ShaderEntity::VERTEX_BINDING_BONE_WEIGHT) ShaderEntity::VERTEX_BINDING_BONE_WEIGHT = {prosper::VertexInputRate::Vertex};
 decltype(ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID) ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID = {VERTEX_BINDING_BONE_WEIGHT,prosper::Format::R32G32B32A32_SInt};
 decltype(ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT) ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT = {VERTEX_BINDING_BONE_WEIGHT,prosper::Format::R32G32B32A32_SFloat};
@@ -196,6 +203,7 @@ decltype(ShaderEntity::VERTEX_ATTRIBUTE_BI_TANGENT) ShaderEntity::VERTEX_ATTRIBU
 
 decltype(ShaderEntity::VERTEX_BINDING_LIGHTMAP) ShaderEntity::VERTEX_BINDING_LIGHTMAP = {prosper::VertexInputRate::Vertex};
 decltype(ShaderEntity::VERTEX_ATTRIBUTE_LIGHTMAP_UV) ShaderEntity::VERTEX_ATTRIBUTE_LIGHTMAP_UV = {VERTEX_BINDING_LIGHTMAP,prosper::Format::R32G32_SFloat};
+
 decltype(ShaderEntity::DESCRIPTOR_SET_INSTANCE) ShaderEntity::DESCRIPTOR_SET_INSTANCE = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Instance
@@ -283,6 +291,8 @@ std::shared_ptr<prosper::IRenderBuffer> ShaderEntity::CreateRenderBuffer(CModelS
 	std::optional<prosper::IndexBufferInfo> indexBufferInfo {};
 	if(GetRenderBufferTargets(mesh,pipelineIdx,buffers,offsets,indexBufferInfo) == false)
 		return nullptr;
+	buffers.insert(buffers.begin(),nullptr); // Instance buffer
+	offsets.insert(offsets.begin(),0);
 	auto *dummyBuffer = c_engine->GetRenderContext().GetDummyBuffer().get();
 	for(auto it=buffers.begin();it!=buffers.end();++it)
 	{
@@ -311,7 +321,7 @@ bool ShaderEntity::BindScene(pragma::CSceneComponent &scene,rendering::Rasteriza
 	return ShaderSceneLit::BindScene(scene,renderer,bView) &&
 		BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 }
-bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,const std::function<bool(CModelSubMesh&)> &fDraw,bool bUseVertexWeightBuffer)
+bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,const std::function<bool(CModelSubMesh&)> &fDraw,bool bUseVertexWeightBuffer)
 {
 	auto numTriangleVertices = mesh.GetTriangleVertexCount();
 	if(numTriangleVertices > umath::to_integral(GameLimits::MaxMeshVertices))
@@ -321,7 +331,9 @@ bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMe
 	}
 	auto &vkMesh = mesh.GetSceneMesh();
 	auto &renderBuffer = vkMesh->GetRenderBuffer(mesh,*this,m_currentPipelineIdx);
-	return RecordBindRenderBuffer(*renderBuffer) && fDraw(mesh);
+	if(RecordBindRenderBuffer(*renderBuffer) == false)
+		return false;
+	return RecordBindVertexBuffer(renderBufferIndexBuffer,umath::to_integral(VertexBinding::RenderBufferIndex)) && fDraw(mesh);
 #if 0
 	auto &vertexBuffer = vkMesh->GetVertexBuffer();
 	auto &indexBuffer = vkMesh->GetIndexBuffer();
@@ -366,10 +378,9 @@ bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMe
 #endif
 }
 
-bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,bool bUseVertexWeightBuffer)
+bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,bool bUseVertexWeightBuffer,uint32_t instanceCount)
 {
-	static auto skipDrawTest = false;
-	return Draw(mesh,meshIdx,[this](CModelSubMesh &mesh) {
+	return Draw(mesh,meshIdx,renderBufferIndexBuffer,[this,instanceCount](CModelSubMesh &mesh) {
 #if 0
 		static std::shared_ptr<prosper::IBuffer> vertexBuffer = nullptr;
 		if(vertexBuffer == nullptr)
@@ -390,11 +401,9 @@ bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMe
 		RecordDraw(9);
 		return true;
 #endif
-		if(skipDrawTest)
-			return true;
-		return RecordDrawIndexed(mesh.GetTriangleVertexCount());
+		return RecordDrawIndexed(mesh.GetTriangleVertexCount(),instanceCount);
 	},bUseVertexWeightBuffer);
 }
 
-bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx) {return Draw(mesh,meshIdx,true);}
+bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount) {return Draw(mesh,meshIdx,renderBufferIndexBuffer,true,instanceCount);}
 #pragma optimize("",on)

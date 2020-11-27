@@ -35,7 +35,7 @@ namespace pragma
 			Count
 		};
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDERER;
 
 		static prosper::Format RENDER_PASS_FORMAT;
@@ -44,7 +44,7 @@ namespace pragma
 		static prosper::SampleCountFlags RENDER_PASS_SAMPLES;
 		static void SetRenderPassSampleCount(prosper::SampleCountFlags samples);
 
-		enum class CameraBinding : uint32_t
+		enum class SceneBinding : uint32_t
 		{
 			Camera = 0u,
 			RenderSettings
@@ -61,7 +61,8 @@ namespace pragma
 		{
 			Debug = 0u,
 			Time,
-			CSMData
+			CSMData,
+			GlobalInstance
 		};
 
 		enum class DebugFlags : uint32_t
@@ -145,6 +146,9 @@ namespace pragma
 		: public ShaderSceneLit
 	{
 	public:
+		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_RENDER_BUFFER_INDEX;
+		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX;
+
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_ID;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT;
@@ -167,7 +171,9 @@ namespace pragma
 
 		enum class VertexBinding : uint32_t
 		{
-			BoneWeight = 0u,
+			RenderBufferIndex = 0u,
+
+			BoneWeight,
 			BoneWeightExt,
 			
 			Vertex,
@@ -195,7 +201,7 @@ namespace pragma
 		virtual bool BindEntity(CBaseEntity &ent);
 		virtual bool BindVertexAnimationOffset(uint32_t offset);
 		virtual bool BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) override;
-		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx);
+		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1);
 		virtual void EndDraw() override;
 		virtual bool GetRenderBufferTargets(
 			CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
@@ -206,8 +212,8 @@ namespace pragma
 	protected:
 		ShaderEntity(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 		virtual void OnBindEntity(CBaseEntity &ent,CRenderComponent &renderC);
-		bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,bool bUseVertexWeightBuffer);
-		bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,const std::function<bool(CModelSubMesh&)> &fDraw,bool bUseVertexWeightBuffer);
+		bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,bool bUseVertexWeightBuffer,uint32_t instanceCount=1);
+		bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,const std::function<bool(CModelSubMesh&)> &fDraw,bool bUseVertexWeightBuffer);
 
 		virtual uint32_t GetInstanceDescriptorSetIndex() const=0;
 		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const=0;

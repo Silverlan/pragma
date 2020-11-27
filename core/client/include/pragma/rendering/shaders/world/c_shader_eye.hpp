@@ -30,7 +30,7 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderEye(prosper::IPrContext &context,const std::string &identifier);
-		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx) override;
+		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
 	protected:
 		bool BindEyeball(uint32_t skinMatIdx);
 		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;

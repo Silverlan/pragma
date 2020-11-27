@@ -68,7 +68,7 @@ void RasterizationRenderer::CullLightSources(const util::DrawSceneInfo &drawScen
 		if(worldEnv && worldEnv->IsUnlit() == false)
 		{
 			std::chrono::steady_clock::time_point t;
-			if(drawSceneInfo.renderStats.has_value())
+			if(drawSceneInfo.renderStats)
 				t = std::chrono::steady_clock::now();
 
 			fp.Compute(*drawCmd,const_cast<pragma::CSceneComponent&>(scene),depthTex->GetImage(),*scene.GetCameraDescriptorSetCompute());
@@ -124,7 +124,7 @@ void RasterizationRenderer::CullLightSources(const util::DrawSceneInfo &drawScen
 				}
 			}
 
-			if(drawSceneInfo.renderStats.has_value())
+			if(drawSceneInfo.renderStats)
 				drawSceneInfo.renderStats->lightCullingTime += std::chrono::steady_clock::now() -t;
 		}
 

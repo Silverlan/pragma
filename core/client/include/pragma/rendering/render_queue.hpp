@@ -18,17 +18,23 @@ namespace pragma::rendering
 {
 	struct SortingKey
 	{
-		uint64_t distance : 32, shader : 16, material : 16;
+		// Note: Order is important!
+		// Distance should *not* be set unless necessary (e.g. translucent geometry),
+		// otherwise instancing effectiveness will be reduced
+		uint64_t distance : 32, shader : 15, material : 16, instantiable : 1;
 		void SetDistance(const Vector3 &origin,const CCameraComponent &cam);
 	};
 	struct RenderQueueItem
 	{
+		static auto constexpr INSTANCED = std::numeric_limits<uint16_t>::max();
+		static auto constexpr UNIQUE = std::numeric_limits<uint16_t>::max() -1;
 		MaterialIndex material;
 		prosper::ShaderIndex shader;
 		EntityIndex entity;
 		pragma::RenderMeshIndex mesh;
-		// float distance;
 		SortingKey sortingKey;
+
+		uint16_t instanceSetIndex;
 	};
 
 	// using SortingKey = uint32_t;
@@ -39,6 +45,15 @@ namespace pragma::rendering
 		: public std::enable_shared_from_this<RenderQueue>
 	{
 	public:
+		struct InstanceSet
+		{
+			uint32_t instanceCount;
+			std::shared_ptr<prosper::IBuffer> instanceBuffer;
+			
+			uint32_t meshCount;
+			uint32_t startSkipIndex;
+			uint32_t GetSkipCount() const {return instanceCount *meshCount;}
+		};
 		static std::shared_ptr<RenderQueue> Create();
 		void Clear();
 		void Reserve();
@@ -48,6 +63,7 @@ namespace pragma::rendering
 		void Merge(const RenderQueue &other);
 		std::vector<RenderQueueItem> queue;
 		RenderQueueSortList sortedItemIndices;
+		std::vector<InstanceSet> instanceSets;
 
 		void Lock();
 		void Unlock();

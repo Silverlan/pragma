@@ -13,6 +13,7 @@
 #include "cmaterialmanager.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/entities/c_baseentity.h"
+#include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/shaders/world/c_shader_wireframe.hpp"
@@ -300,62 +301,7 @@ void RenderSystem::Render(
 
 uint32_t pragma::rendering::LightingStageRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue,RenderPassStats *optStats,std::optional<uint32_t> worldRenderQueueIndex)
 {
-	std::chrono::steady_clock::time_point t;
-	if(optStats)
-		t = std::chrono::steady_clock::now();
-	renderQueue.WaitForCompletion();
-	if(optStats)
-		optStats->renderThreadWaitTime += std::chrono::steady_clock::now() -t;
-
-	static auto skipRender = false;
-	if(skipRender)
-		return 0;
-	if(m_renderer == nullptr)
-		return 0;
-	m_stats = optStats;
-	UnbindShader();
-	auto &shaderManager = c_engine->GetShaderManager();
-	auto &matManager = client->GetMaterialManager();
-	auto &sceneRenderDesc = m_drawSceneInfo.scene->GetSceneRenderDesc();
-	uint32_t numShaderInvocations = 0;
-	for(auto &itemSortPair : renderQueue.sortedItemIndices)
-	{
-		auto &item = renderQueue.queue.at(itemSortPair.first);
-		
-		if(worldRenderQueueIndex.has_value() && sceneRenderDesc.IsWorldMeshVisible(*worldRenderQueueIndex,item.mesh) == false)
-			continue;
-
-		if(item.shader != m_curShaderIndex)
-		{
-			auto *shader = shaderManager.GetShader(item.shader);
-			assert(shader);
-			BindShader(*shader);
-		}
-		if(umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false)
-			continue;
-		if(item.material != m_curMaterialIndex)
-		{
-			auto *mat = matManager.GetMaterial(item.material);
-			assert(mat);
-			BindMaterial(static_cast<CMaterial&>(*mat));
-		}
-		if(umath::is_flag_set(m_stateFlags,StateFlags::MaterialBound) == false)
-			continue;
-		if(item.entity != m_curEntityIndex)
-		{
-			auto *ent = c_game->GetEntityByLocalIndex(item.entity);
-			assert(ent);
-			BindEntity(static_cast<CBaseEntity&>(*ent));
-		}
-		if(umath::is_flag_set(m_stateFlags,StateFlags::EntityBound) == false || item.mesh >= m_curEntityMeshList->size())
-			continue;
-		auto &mesh = static_cast<CModelSubMesh&>(*m_curEntityMeshList->at(item.mesh));
-		if(BaseRenderProcessor::Render(mesh,item.mesh))
-			++numShaderInvocations;
-	}
-	if(optStats)
-		optStats->cpuExecutionTime += std::chrono::steady_clock::now() -t;
-	return numShaderInvocations;
+	return BaseRenderProcessor::Render(renderQueue,true,optStats,worldRenderQueueIndex);
 }
 
 static CVar cvDebugNormals = GetClientConVar("debug_render_normals");

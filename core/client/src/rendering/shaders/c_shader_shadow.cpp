@@ -74,12 +74,12 @@ bool ShaderShadow::BindMaterial(CMaterial &mat)
 	return true; // TODO
 }
 
-bool ShaderShadow::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx)
+bool ShaderShadow::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount)
 {
 	auto flags = Flags::None;
 	if(mesh.GetExtendedVertexWeights().empty() == false)
 		flags |= Flags::UseExtendedVertexWeights;
-	return RecordPushConstants(flags,offsetof(PushConstants,flags)) && ShaderGameWorld::Draw(mesh,meshIdx);
+	return RecordPushConstants(flags,offsetof(PushConstants,flags)) && ShaderGameWorld::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount);
 }
 
 bool ShaderShadow::BindEntity(CBaseEntity &ent)

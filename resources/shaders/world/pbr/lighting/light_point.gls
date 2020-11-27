@@ -16,7 +16,7 @@ vec3 apply_point_light(LightSourceData light, uint lightIndex, MaterialInfo mate
 		get_point_light_shadow_factor(lightIndex,false), // static sample
 		get_point_light_shadow_factor(lightIndex,true) // dynamic sample
 	) : 1.0;
-	return attenuation * light.color.a * light.color.rgb * shade;// *shadowFactor;
+	return attenuation * light.color.a * light.color.rgb * shade *shadowFactor;
 }
 
 #endif

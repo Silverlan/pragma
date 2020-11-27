@@ -22,7 +22,7 @@ namespace pragma
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_PREPASS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_NOISE_TEXTURE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SAMPLE_BUFFER;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
 
 		enum class PrepassBinding : uint32_t
 		{

@@ -11,7 +11,7 @@
 	#define SHADER_VERTEX_DATA_LOCATION 0
 #endif
 #ifndef SHADER_USER1_LOCATION
-	#define SHADER_USER1_LOCATION 9
+	#define SHADER_USER1_LOCATION 17
 #endif
 
 // Note: Number of attributes must NOT exceed 32!

@@ -41,6 +41,10 @@ namespace pragma
 		};
 		static Pipeline GetPipelineIndex(prosper::SampleCountFlags sampleCount);
 		static prosper::util::RenderPassCreateInfo::AttachmentInfo get_depth_render_pass_attachment_info(prosper::SampleCountFlags sampleCount);
+
+		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_RENDER_BUFFER_INDEX;
+		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX;
+
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_ID;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT;
@@ -54,8 +58,9 @@ namespace pragma
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_UV;
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
 
 #pragma pack(push,1)
 		struct PushConstants
@@ -79,7 +84,7 @@ namespace pragma
 		virtual bool BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) override;
 		virtual bool BindDrawOrigin(const Vector4 &drawOrigin) override;
 		virtual void Set3DSky(bool is3dSky) override;
-		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx) override;
+		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
 	protected:
 		virtual bool BindMaterial(CMaterial &mat) override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
@@ -89,12 +94,11 @@ namespace pragma
 		uint32_t GetMaterialDescriptorSetIndex() const;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
 		virtual uint32_t GetInstanceDescriptorSetIndex() const override;
+		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override;
 		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const override;
 	private:
 		// These are unused
-		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override {return std::numeric_limits<uint32_t>::max();}
 		virtual uint32_t GetLightDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
-		virtual bool BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings) override {return false;}
 		virtual bool BindLights(prosper::IDescriptorSet &dsLights) override {return false;}
 		Flags m_stateFlags = Flags::None;
 		std::optional<float> m_alphaCutoff {};

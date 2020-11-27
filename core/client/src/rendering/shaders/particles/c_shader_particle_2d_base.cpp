@@ -51,7 +51,7 @@ decltype(ShaderParticle2DBase::DESCRIPTOR_SET_DEPTH_MAP) ShaderParticle2DBase::D
 	}
 };
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION) ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION = {&ShaderParticleBase::DESCRIPTOR_SET_ANIMATION};
-decltype(ShaderParticle2DBase::DESCRIPTOR_SET_CAMERA) ShaderParticle2DBase::DESCRIPTOR_SET_CAMERA = {&ShaderSceneLit::DESCRIPTOR_SET_CAMERA};
+decltype(ShaderParticle2DBase::DESCRIPTOR_SET_SCENE) ShaderParticle2DBase::DESCRIPTOR_SET_SCENE = {&ShaderSceneLit::DESCRIPTOR_SET_SCENE};
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderParticle2DBase::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderSceneLit::DESCRIPTOR_SET_RENDER_SETTINGS};
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_LIGHTS) ShaderParticle2DBase::DESCRIPTOR_SET_LIGHTS = {&ShaderSceneLit::DESCRIPTOR_SET_LIGHTS};
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_SHADOWS) ShaderParticle2DBase::DESCRIPTOR_SET_SHADOWS = {&ShaderSceneLit::DESCRIPTOR_SET_SHADOWS};
@@ -103,7 +103,7 @@ void ShaderParticle2DBase::RegisterDefaultGfxPipelineDescriptorSetGroups(prosper
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_TEXTURE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_DEPTH_MAP);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_ANIMATION);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDER_SETTINGS);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_LIGHTS);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SHADOWS);
@@ -137,7 +137,7 @@ bool ShaderParticle2DBase::BeginDraw(const std::shared_ptr<prosper::IPrimaryComm
 
 uint32_t ShaderParticle2DBase::GetRenderSettingsDescriptorSetIndex() const {return DESCRIPTOR_SET_RENDER_SETTINGS.setIndex;}
 uint32_t ShaderParticle2DBase::GetLightDescriptorSetIndex() const {return DESCRIPTOR_SET_LIGHTS.setIndex;}
-uint32_t ShaderParticle2DBase::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_CAMERA.setIndex;}
+uint32_t ShaderParticle2DBase::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_SCENE.setIndex;}
 
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderParticle2DBase::InitializeMaterialDescriptorSet(CMaterial &mat)
 {

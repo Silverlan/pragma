@@ -22,9 +22,9 @@ using namespace pragma;
 ShaderEye::ShaderEye(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderPBR{context,identifier,"world/eye/vs_eye","world/eye/fs_eye"}
 {}
-bool ShaderEye::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx)
+bool ShaderEye::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount)
 {
-	return BindEyeball(mesh.GetSkinTextureIndex()) && ShaderPBR::Draw(mesh,meshIdx);
+	return BindEyeball(mesh.GetSkinTextureIndex()) && ShaderPBR::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount);
 }
 bool ShaderEye::BindEyeball(uint32_t skinMatIdx)
 {

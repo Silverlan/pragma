@@ -3,7 +3,7 @@
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shading_language_420pack : enable
 
-#define SHADER_BONE_WEIGHT_ID_LOCATION 0
+#define SHADER_BONE_WEIGHT_ID_LOCATION 1
 #define SHADER_BONE_WEIGHT_LOCATION (SHADER_BONE_WEIGHT_ID_LOCATION +1)
 
 #define SHADER_BONE_WEIGHT_EXT_ID_LOCATION (SHADER_BONE_WEIGHT_LOCATION +1)

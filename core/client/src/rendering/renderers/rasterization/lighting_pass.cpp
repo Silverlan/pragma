@@ -147,8 +147,8 @@ void RasterizationRenderer::RenderLightingPass(const util::DrawSceneInfo &drawSc
 	if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Reflection))
 		rsFlags |= RenderFlags::Reflection;
 
-	auto *lightingStageStats = drawSceneInfo.renderStats.has_value() ? &drawSceneInfo.renderStats->lightingPass : nullptr;
-	auto *lightingStageTranslucentStats = drawSceneInfo.renderStats.has_value() ? &drawSceneInfo.renderStats->lightingPassTranslucent : nullptr;
+	auto *lightingStageStats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr;
+	auto *lightingStageTranslucentStats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPassTranslucent : nullptr;
 	pragma::rendering::LightingStageRenderProcessor rsys {drawSceneInfo,rsFlags,{} /* drawOrigin */};
 	auto &sceneRenderDesc = drawSceneInfo.scene->GetSceneRenderDesc();
 
@@ -178,10 +178,10 @@ void RasterizationRenderer::RenderLightingPass(const util::DrawSceneInfo &drawSc
 		// general translucency world render queue.
 
 		std::chrono::steady_clock::time_point t;
-		if(drawSceneInfo.renderStats.has_value())
+		if(drawSceneInfo.renderStats)
 			t = std::chrono::steady_clock::now();
 		sceneRenderDesc.WaitForWorldRenderQueues();
-		if(drawSceneInfo.renderStats.has_value())
+		if(drawSceneInfo.renderStats)
 			drawSceneInfo.renderStats->lightingPass.renderThreadWaitTime += std::chrono::steady_clock::now() -t;
 
 		auto &worldRenderQueues = sceneRenderDesc.GetWorldRenderQueues();

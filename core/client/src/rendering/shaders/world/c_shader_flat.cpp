@@ -46,7 +46,7 @@ decltype(ShaderFlat::DESCRIPTOR_SET_INSTANCE) ShaderFlat::DESCRIPTOR_SET_INSTANC
 		}
 	}
 };
-decltype(ShaderFlat::DESCRIPTOR_SET_CAMERA) ShaderFlat::DESCRIPTOR_SET_CAMERA = {
+decltype(ShaderFlat::DESCRIPTOR_SET_SCENE) ShaderFlat::DESCRIPTOR_SET_SCENE = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Camera
 			prosper::DescriptorType::UniformBuffer,
@@ -94,7 +94,7 @@ ShaderFlat::ShaderFlat(prosper::IPrContext &context,const std::string &identifie
 bool ShaderFlat::BindScene(const pragma::CSceneComponent &scene,bool bView)
 {
 	auto descSet = (bView == true) ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
-	return RecordBindDescriptorSet(*descSet,DESCRIPTOR_SET_CAMERA.setIndex);
+	return RecordBindDescriptorSet(*descSet,DESCRIPTOR_SET_SCENE.setIndex);
 }
 bool ShaderFlat::BindEntity(CBaseEntity &ent)
 {
@@ -119,7 +119,7 @@ void ShaderFlat::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipe
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_UV);
 
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_MATERIAL);
 }
 bool ShaderFlat::Draw(CModelSubMesh &mesh)

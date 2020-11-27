@@ -3,9 +3,6 @@
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shading_language_420pack : enable
 
-#define SHADER_UNIFORM_MATERIAL_SET 2
-#define SHADER_UNIFORM_MATERIAL_BINDING 0
-
 #include "sh_prepass.gls"
 #include "sh_prepass_vertex_data.gls"
 #include "/modules/sh_material.gls"

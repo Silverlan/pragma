@@ -7,6 +7,7 @@
 #include <sharedutils/util_weak_handle.hpp>
 #include <vector>
 #include <chrono>
+#include <unordered_set>
 
 namespace prosper {class Shader;};
 
@@ -24,6 +25,12 @@ struct DLLCLIENT RenderPassStats
 	uint64_t numDrawnVertices = 0;
 	uint64_t numDrawnTrianges = 0;
 	uint32_t numEntityBufferUpdates = 0;
+	uint32_t numInstanceSets = 0;
+	uint32_t numInstanceSetMeshes = 0;
+	std::unordered_set<EntityIndex> instancedEntities;
+	uint32_t numInstancedMeshes = 0;
+	uint32_t numInstancedSkippedRenderItems = 0;
+	uint32_t numEntitiesWithoutInstancing = 0;
 	std::chrono::nanoseconds renderThreadWaitTime {0};
 	std::chrono::nanoseconds cpuExecutionTime {0};
 };

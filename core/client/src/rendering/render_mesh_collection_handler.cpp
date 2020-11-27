@@ -99,11 +99,11 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 				auto drawCmd = c_game->GetCurrentDrawCommandBuffer();
 				//pRenderComponent->UpdateRenderData(drawCmd);//,true); // TODO
 
-				auto wpRenderBuffer = pRenderComponent->GetRenderBuffer();
-				if(wpRenderBuffer.expired() == false)
+				auto &wpRenderBuffer = pRenderComponent->GetRenderBuffer();
+				if(wpRenderBuffer)
 				{
 					drawCmd->RecordBufferBarrier(
-						*wpRenderBuffer.lock(),
+						*wpRenderBuffer,
 						prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::FragmentShaderBit,
 						prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 					);

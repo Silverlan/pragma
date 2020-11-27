@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
+#include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/lua/lua_entity_component.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -685,7 +686,7 @@ void Lua::Shader::ShaderEntity::BindVertexAnimationOffset(lua_State *l,pragma::S
 }
 void Lua::Shader::ShaderEntity::Draw(lua_State *l,pragma::ShaderEntity &shader,::ModelSubMesh &mesh)
 {
-	Lua::PushBool(l,shader.Draw(static_cast<CModelSubMesh&>(mesh),{}));
+	Lua::PushBool(l,shader.Draw(static_cast<CModelSubMesh&>(mesh),{},*pragma::CSceneComponent::GetEntityInstanceIndexBuffer()->GetZeroIndexBuffer()));
 }
 void Lua::Shader::TexturedLit3D::BindMaterial(lua_State *l,pragma::ShaderTextured3DBase &shader,::Material &mat)
 {

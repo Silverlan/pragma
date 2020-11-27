@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
+#include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
@@ -52,6 +53,12 @@ void CSceneComponent::RegisterEvents(pragma::EntityComponentManager &componentMa
 	EVENT_POST_RENDER_PREPASS = componentManager.RegisterEvent("POST_RENDER_PREPASS",typeid(CSceneComponent));
 }
 
+static std::shared_ptr<rendering::EntityInstanceIndexBuffer> g_entityInstanceIndexBuffer = nullptr;
+const std::shared_ptr<rendering::EntityInstanceIndexBuffer> &CSceneComponent::GetEntityInstanceIndexBuffer()
+{
+	return g_entityInstanceIndexBuffer;
+}
+
 using SceneCount = uint32_t;
 static std::array<SceneCount,32> g_sceneUseCount {};
 static std::array<CSceneComponent*,32> g_scenes {};
@@ -89,9 +96,12 @@ CSceneComponent *CSceneComponent::Create(const CreateInfo &createInfo,CSceneComp
 	return sceneC.get();
 }
 
+static uint32_t g_numScenes = 0;
 CSceneComponent::CSceneComponent(BaseEntity &ent)
 	: BaseEntityComponent{ent},m_sceneRenderDesc{*this}
-{}
+{
+	++g_numScenes;
+}
 CSceneComponent::~CSceneComponent()
 {
 	ClearWorldEnvironment();
@@ -119,12 +129,16 @@ void CSceneComponent::OnRemove()
 			continue;
 		ent->RemoveFromScene(*this);
 	}
+
+	if(--g_numScenes == 0)
+		g_entityInstanceIndexBuffer = nullptr;
 }
 luabind::object CSceneComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CSceneComponentHandleWrapper>(l);}
 void CSceneComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 }
+
 
 void CSceneComponent::Setup(const CreateInfo &createInfo,SceneIndex sceneIndex)
 {
@@ -138,6 +152,9 @@ void CSceneComponent::Setup(const CreateInfo &createInfo,SceneIndex sceneIndex)
 	InitializeRenderSettingsBuffer();
 	InitializeSwapDescriptorBuffers();
 	InitializeShadowDescriptorSet();
+
+	if(g_entityInstanceIndexBuffer == nullptr)
+		g_entityInstanceIndexBuffer = std::make_shared<rendering::EntityInstanceIndexBuffer>();
 }
 
 void CSceneComponent::Link(const CSceneComponent &other)
@@ -319,18 +336,18 @@ void CSceneComponent::InitializeDescriptorSetLayouts()
 }
 void CSceneComponent::InitializeSwapDescriptorBuffers()
 {
-	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA.IsValid() == false || pragma::ShaderPPFog::DESCRIPTOR_SET_FOG.IsValid() == false)
+	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SCENE.IsValid() == false || pragma::ShaderPPFog::DESCRIPTOR_SET_FOG.IsValid() == false)
 		return;
-	m_camDescSetGroupGraphics = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA);
+	m_camDescSetGroupGraphics = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SCENE);
 	auto &descSetGraphics = *m_camDescSetGroupGraphics->GetDescriptorSet();
 	descSetGraphics.SetBindingUniformBuffer(
-		*m_cameraBuffer,umath::to_integral(pragma::ShaderTextured3DBase::CameraBinding::Camera)
+		*m_cameraBuffer,umath::to_integral(pragma::ShaderTextured3DBase::SceneBinding::Camera)
 	);
 	descSetGraphics.SetBindingUniformBuffer(
-		*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderTextured3DBase::CameraBinding::RenderSettings)
+		*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderTextured3DBase::SceneBinding::RenderSettings)
 	);
 
-	m_camDescSetGroupCompute = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_CAMERA);
+	m_camDescSetGroupCompute = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_SCENE);
 	auto &descSetCompute = *m_camDescSetGroupCompute->GetDescriptorSet();
 	descSetCompute.SetBindingUniformBuffer(
 		*m_cameraBuffer,umath::to_integral(pragma::ShaderForwardPLightCulling::CameraBinding::Camera)
@@ -339,13 +356,13 @@ void CSceneComponent::InitializeSwapDescriptorBuffers()
 		*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderForwardPLightCulling::CameraBinding::RenderSettings)
 	);
 
-	m_camViewDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA);
+	m_camViewDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SCENE);
 	auto &descSetViewGraphics = *m_camViewDescSetGroup->GetDescriptorSet();
 	descSetViewGraphics.SetBindingUniformBuffer(
-		*m_cameraViewBuffer,umath::to_integral(pragma::ShaderTextured3DBase::CameraBinding::Camera)
+		*m_cameraViewBuffer,umath::to_integral(pragma::ShaderTextured3DBase::SceneBinding::Camera)
 	);
 	descSetViewGraphics.SetBindingUniformBuffer(
-		*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderTextured3DBase::CameraBinding::RenderSettings)
+		*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderTextured3DBase::SceneBinding::RenderSettings)
 	);
 
 	m_fogDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPPFog::DESCRIPTOR_SET_FOG);

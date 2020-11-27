@@ -17,6 +17,7 @@
 #include "../modules/sh_math.gls"
 #include "../modules/vs_vertex_animation.gls"
 #include "../modules/light_map/vs_lightmap.gls"
+#include "../modules/vs_instanced_entity_data.gls"
 
 layout(location = SHADER_VERTEX_BUFFER_LOCATION) in vec3 in_vert_pos;
 layout(location = SHADER_UV_BUFFER_LOCATION) in vec2 in_vert_uv;
@@ -56,7 +57,7 @@ void export_world_fragment_data(mat4 mdlMatrix,vec3 vertPos)
 	//mat4 MV = V *mdlMatrix;
 	//mat4 MVP = u_camera.P *MV;
 
-	mat4 mBone = calc_bone_matrix(is_weighted(),is_weighted_ext());
+	mat4 mBone = calc_bone_matrix(is_instanced_weighted(),is_weighted_ext());
 	vec4 weightedVertPos = mBone *vec4(vertPos,1.0);
 
 	vec4 vposWs = mdlMatrix *weightedVertPos;
@@ -78,7 +79,10 @@ void export_world_fragment_data(mat4 mdlMatrix,vec3 vertPos)
 		gl_ClipDistance[0] = 1.0;
 
 	vec3 normal = normalize((mBone *vec4(vertNorm.xyz,0.0)).xyz);
+	
 	vs_out.vert_pos_ws = vposWs.xyz;
+	vs_out.M = get_instanced_model_matrix();
+	vs_out.color = get_instanced_instance_color();
 	//vs_out.vert_pos = vertPos;
 	//vs_out.vert_pos_cs = (V *vposWs).xyz;
 
@@ -118,7 +122,7 @@ void export_world_fragment_data(mat4 mdlMatrix,vec3 vertPos)
 	//export_light_fragment_data(vposWs,mBone,normal,MV);
 }
 
-void export_world_fragment_data(vec3 vertPos) {export_world_fragment_data(get_model_matrix(),vertPos);}
+void export_world_fragment_data(vec3 vertPos) {export_world_fragment_data(get_instanced_model_matrix(),vertPos);}
 
 void export_world_fragment_data() {export_world_fragment_data(in_vert_pos.xyz);}
 

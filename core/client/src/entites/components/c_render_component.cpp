@@ -36,7 +36,7 @@ namespace pragma
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
-
+#pragma optimize("",off)
 static std::shared_ptr<prosper::IUniformResizableBuffer> s_instanceBuffer = nullptr;
 decltype(CRenderComponent::s_ocExemptEntities) CRenderComponent::s_ocExemptEntities = {};
 ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT = INVALID_COMPONENT_ID;
@@ -44,8 +44,9 @@ ComponentEventId CRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED = INVALID
 ComponentEventId CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_SHOULD_DRAW = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_SHOULD_DRAW_SHADOW = INVALID_COMPONENT_ID;
-ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS = INVALID_COMPONENT_ID;;
+ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES = INVALID_COMPONENT_ID;
+ComponentEventId CRenderComponent::EVENT_UPDATE_INSTANTIABILITY = INVALID_COMPONENT_ID;
 void CRenderComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	EVENT_ON_UPDATE_RENDER_DATA_MT = componentManager.RegisterEvent("ON_UPDATE_RENDER_DATA_MT",std::type_index(typeid(CRenderComponent)));
@@ -55,6 +56,7 @@ void CRenderComponent::RegisterEvents(pragma::EntityComponentManager &componentM
 	EVENT_SHOULD_DRAW_SHADOW = componentManager.RegisterEvent("SHOULD_DRAW_SHADOW",std::type_index(typeid(CRenderComponent)));
 	EVENT_ON_UPDATE_RENDER_BUFFERS = componentManager.RegisterEvent("ON_UPDATE_RENDER_BUFFERS",std::type_index(typeid(CRenderComponent)));
 	EVENT_ON_UPDATE_RENDER_MATRICES = componentManager.RegisterEvent("ON_UPDATE_RENDER_MATRICES",std::type_index(typeid(CRenderComponent)));
+	EVENT_UPDATE_INSTANTIABILITY = componentManager.RegisterEvent("UPDATE_INSTANTIABILITY");
 }
 CRenderComponent::CRenderComponent(BaseEntity &ent)
 	: BaseRenderComponent(ent),m_renderMode(util::TEnumProperty<RenderMode>::Create(RenderMode::Auto))
@@ -74,18 +76,26 @@ void CRenderComponent::InitializeBuffers()
 	else
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
 	createInfo.size = instanceSize *instanceCount;
-	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
-#ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
-	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
+	createInfo.usageFlags = prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
+#if ENTITY_RENDER_BUFFER_USE_STORAGE_BUFFER == 0
+		createInfo.usageFlags |= prosper::BufferUsageFlags::UniformBufferBit;
 #endif
-	s_instanceBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(createInfo,instanceSize,instanceSize *maxInstanceCount,0.1f);
+#ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
+	createInfo.usageFlags |= prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::StorageBufferBit;
+#endif
+	constexpr prosper::DeviceSize alignment = 256; // See https://vulkan.gpuinfo.org/displaydevicelimit.php?name=minUniformBufferOffsetAlignment
+	auto internalAlignment = c_engine->GetRenderContext().CalcBufferAlignment(prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::StorageBufferBit);
+	if(internalAlignment > alignment)
+		throw std::runtime_error{"Unsupported minimum uniform buffer alignment (" +std::to_string(internalAlignment) +"!"};
+	s_instanceBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(createInfo,instanceSize,instanceSize *maxInstanceCount,0.1f,nullptr,alignment);
 	s_instanceBuffer->SetDebugName("entity_instance_data_buf");
 	if constexpr(USE_HOST_MEMORY_FOR_RENDER_DATA)
 		s_instanceBuffer->SetPermanentlyMapped(true);
 
 	pragma::initialize_articulated_buffers();
 }
-std::weak_ptr<prosper::IBuffer> CRenderComponent::GetRenderBuffer() const {return m_renderBuffer;}
+const std::shared_ptr<prosper::IBuffer> &CRenderComponent::GetRenderBuffer() const {return m_renderBuffer;}
+std::optional<RenderBufferIndex> CRenderComponent::GetRenderBufferIndex() const {return m_renderBuffer ? m_renderBuffer->GetBaseIndex() : std::optional<RenderBufferIndex>{};}
 prosper::IDescriptorSet *CRenderComponent::GetRenderDescriptorSet() const {return (m_renderDescSetGroup != nullptr) ? m_renderDescSetGroup->GetDescriptorSet() : nullptr;}
 void CRenderComponent::ClearRenderObjects()
 {
@@ -154,6 +164,7 @@ void CRenderComponent::Initialize()
 		UpdateRenderMeshes();
 		m_renderMode->InvokeCallbacks();
 	});
+	UpdateInstantiability();
 }
 CRenderComponent::~CRenderComponent()
 {
@@ -311,6 +322,21 @@ void CRenderComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 		m_animComponent = {};
 	else if(typeid(component) == typeid(pragma::CLightMapReceiverComponent))
 		m_lightMapReceiverComponent = {};
+}
+bool CRenderComponent::IsInstantiable() const {return umath::is_flag_set(m_stateFlags,StateFlags::IsInstantiable);}
+void CRenderComponent::SetInstaniationEnabled(bool enabled)
+{
+	umath::set_flag(m_stateFlags,StateFlags::InstantiationDisabled,!enabled);
+	UpdateInstantiability();
+}
+void CRenderComponent::UpdateInstantiability()
+{
+	umath::set_flag(m_stateFlags,StateFlags::IsInstantiable,false);
+	if(m_renderBuffer == nullptr || umath::is_flag_set(m_stateFlags,StateFlags::InstantiationDisabled))
+		return;
+	auto instantiable = true;
+	BroadcastEvent(EVENT_UPDATE_INSTANTIABILITY,CEUpdateInstantiability{instantiable});
+	umath::set_flag(m_stateFlags,StateFlags::IsInstantiable,instantiable);
 }
 util::WeakHandle<CModelComponent> &CRenderComponent::GetModelComponent() const {return m_mdlComponent;}
 util::WeakHandle<CAnimatedComponent> &CRenderComponent::GetAnimatedComponent() const {return m_animComponent;}
@@ -477,10 +503,9 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 		umath::set_flag(m_stateFlags,StateFlags::RenderBufferDirty,false);
 		UpdateMatrices();
 		// Update Render Buffer
-		auto wpRenderBuffer = GetRenderBuffer();
-		if(wpRenderBuffer.expired() == false)
+		auto &renderBuffer = GetRenderBuffer();
+		if(renderBuffer)
 		{
-			auto renderBuffer = wpRenderBuffer.lock();
 			Vector4 color(1.f,1.f,1.f,1.f);
 			auto pColorComponent = GetEntity().GetComponent<CColorComponent>();
 			if(pColorComponent.valid())
@@ -558,6 +583,7 @@ void CRenderComponent::InitializeRenderBuffers()
 	);
 	UpdateBoneBuffer();
 	m_renderDescSetGroup->GetDescriptorSet()->Update();
+	UpdateInstantiability();
 
 	BroadcastEvent(EVENT_ON_RENDER_BUFFERS_INITIALIZED);
 }
@@ -688,6 +714,22 @@ void CRenderComponent::ClearBuffers()
 
 /////////////////
 
+CEUpdateInstantiability::CEUpdateInstantiability(bool &instantiable)
+	: instantiable{instantiable}
+{}
+void CEUpdateInstantiability::PushArguments(lua_State *l)
+{
+	Lua::PushBool(l,instantiable);
+}
+uint32_t CEUpdateInstantiability::GetReturnCount() {return 1u;}
+void CEUpdateInstantiability::HandleReturnValues(lua_State *l)
+{
+	if(Lua::IsSet(l,-1))
+		instantiable = Lua::CheckBool(l,-1);
+}
+
+/////////////////
+
 CEShouldDraw::CEShouldDraw(const Vector3 &camOrigin)
 	: camOrigin{camOrigin}
 {}
@@ -748,3 +790,4 @@ void CEOnRenderBoundsChanged::PushArguments(lua_State *l)
 	Lua::Push<Vector3>(l,sphere.pos);
 	Lua::PushNumber(l,sphere.radius);
 }
+#pragma optimize("",on)

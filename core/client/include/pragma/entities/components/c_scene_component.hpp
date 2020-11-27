@@ -79,7 +79,9 @@ public:
 	void SetOcclusionCullingHandler(const std::shared_ptr<pragma::OcclusionCullingHandler> &handler);
 	void SetOcclusionCullingMethod(OcclusionCullingMethod method);
 	void ReloadOcclusionCullingHandler();
+
 	void BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo);
+	void BuildRenderQueueInstanceLists(pragma::rendering::RenderQueue &renderQueue);
 
 	bool IsWorldMeshVisible(uint32_t worldRenderQueueIndex,pragma::RenderMeshIndex meshIdx) const;
 
@@ -136,6 +138,7 @@ struct DLLCLIENT ShaderMeshContainer
 class WorldEnvironment;
 namespace pragma
 {
+	namespace rendering {class EntityInstanceIndexBuffer;};
 	class CLightComponent;
 	enum class SceneDebugMode : uint32_t
 	{
@@ -181,6 +184,7 @@ namespace pragma
 		static CSceneComponent *GetByIndex(SceneIndex sceneIndex);
 		static SceneFlags GetSceneFlag(SceneIndex sceneIndex);
 		static SceneIndex GetSceneIndex(SceneFlags flag);
+		static const std::shared_ptr<rendering::EntityInstanceIndexBuffer> &GetEntityInstanceIndexBuffer();
 
 		CSceneComponent(BaseEntity &ent);
 		virtual void Initialize() override;

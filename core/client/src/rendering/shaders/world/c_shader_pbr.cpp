@@ -300,7 +300,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBRBlend::InitializeMaterial
 	}
 	return descSetGroup;
 }
-bool ShaderPBRBlend::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx)
+bool ShaderPBRBlend::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount)
 {
 	auto numAlpha = 0;
 	auto alphaBuffer = c_engine->GetRenderContext().GetDummyBuffer();
@@ -316,7 +316,7 @@ bool ShaderPBRBlend::Draw(CModelSubMesh &mesh,const std::optional<pragma::Render
 	}
 	return RecordPushConstants(PushConstants{numAlpha},sizeof(ShaderPBR::PushConstants)) == true &&
 		RecordBindVertexBuffer(*alphaBuffer,VERTEX_BINDING_VERTEX.GetBindingIndex() +2u) == true &&
-		ShaderPBR::Draw(mesh,meshIdx) == true;
+		ShaderPBR::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount) == true;
 }
 bool ShaderPBRBlend::GetRenderBufferTargets(
 	CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,

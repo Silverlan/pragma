@@ -36,48 +36,7 @@ pragma::rendering::DepthStageRenderProcessor::DepthStageRenderProcessor(const ut
 }
 uint32_t pragma::rendering::DepthStageRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue,RenderPassStats *optStats,std::optional<uint32_t> worldRenderQueueIndex)
 {
-	std::chrono::steady_clock::time_point t;
-	if(optStats)
-		t = std::chrono::steady_clock::now();
-	renderQueue.WaitForCompletion();
-	if(optStats)
-		optStats->renderThreadWaitTime += std::chrono::steady_clock::now() -t;
-
-	if(m_renderer == nullptr || umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false)
-		return 0;
-	m_stats = optStats;
-	auto &matManager = client->GetMaterialManager();
-	auto &sceneRenderDesc = m_drawSceneInfo.scene->GetSceneRenderDesc();
-	uint32_t numShaderInvocations = 0;
-	for(auto &itemSortPair : renderQueue.sortedItemIndices)
-	{
-		auto &item = renderQueue.queue.at(itemSortPair.first);
-		
-		if(worldRenderQueueIndex.has_value() && sceneRenderDesc.IsWorldMeshVisible(*worldRenderQueueIndex,item.mesh) == false)
-			continue;
-		if(item.material != m_curMaterialIndex)
-		{
-			auto *mat = matManager.GetMaterial(item.material);
-			assert(mat);
-			BindMaterial(static_cast<CMaterial&>(*mat));
-		}
-		if(umath::is_flag_set(m_stateFlags,StateFlags::MaterialBound) == false)
-			continue;
-		if(item.entity != m_curEntityIndex)
-		{
-			auto *ent = c_game->GetEntityByLocalIndex(item.entity);
-			assert(ent);
-			BindEntity(static_cast<CBaseEntity&>(*ent));
-		}
-		if(umath::is_flag_set(m_stateFlags,StateFlags::EntityBound) == false || item.mesh >= m_curEntityMeshList->size())
-			continue;
-		auto &mesh = static_cast<CModelSubMesh&>(*m_curEntityMeshList->at(item.mesh));
-		if(BaseRenderProcessor::Render(mesh,item.mesh))
-			++numShaderInvocations;
-	}
-	if(optStats)
-		optStats->cpuExecutionTime += std::chrono::steady_clock::now() -t;
-	return numShaderInvocations;
+	return BaseRenderProcessor::Render(renderQueue,false,optStats,worldRenderQueueIndex);
 }
 
 void RenderSystem::RenderPrepass(const util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode)

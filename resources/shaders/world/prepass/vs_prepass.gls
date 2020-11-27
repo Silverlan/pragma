@@ -8,6 +8,7 @@
 #include "../../modules/sh_rendersettings.gls"
 #include "../../modules/vs_weighted.gls"
 #include "../../modules/vs_vertex_animation.gls"
+#include "../../modules/vs_instanced_entity_data.gls"
 
 layout(location = SHADER_VERTEX_BUFFER_LOCATION) in vec3 in_vert_pos;
 layout(location = SHADER_UV_BUFFER_LOCATION) in vec2 in_vert_uv;
@@ -36,10 +37,10 @@ void main()
 		vertPos += vpos0 *frameData.blend;//v0 +(v1 -v0) *frameData.blend;
 	}
 
-	mat4 mBone = calc_bone_matrix(is_weighted(),is_weighted_ext());
+	mat4 mBone = calc_bone_matrix(is_instanced_weighted(),is_weighted_ext());
 	vec4 weightedVertPos = mBone *vec4(vertPos,1.0);
 
-	mat4 mdlMatrix = get_model_matrix();
+	mat4 mdlMatrix = get_instanced_model_matrix();
 	vec4 vposWs = mdlMatrix *weightedVertPos;
 	if(is_3d_sky())
 	{

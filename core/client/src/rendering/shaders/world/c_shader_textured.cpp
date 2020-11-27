@@ -28,7 +28,7 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-
+#pragma optimize("",off)
 ShaderGameWorldPipeline ShaderTextured3DBase::GetPipelineIndex(prosper::SampleCountFlags sampleCount,bool bReflection)
 {
 	if(sampleCount == prosper::SampleCountFlags::e1Bit)
@@ -39,6 +39,9 @@ ShaderGameWorldPipeline ShaderTextured3DBase::GetPipelineIndex(prosper::SampleCo
 }
 
 decltype(ShaderTextured3DBase::HASH_TYPE) ShaderTextured3DBase::HASH_TYPE = typeid(ShaderTextured3DBase).hash_code();
+decltype(ShaderTextured3DBase::VERTEX_BINDING_RENDER_BUFFER_INDEX) ShaderTextured3DBase::VERTEX_BINDING_RENDER_BUFFER_INDEX = {prosper::VertexInputRate::Instance};
+decltype(ShaderTextured3DBase::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX) ShaderTextured3DBase::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX = {ShaderEntity::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX,VERTEX_BINDING_RENDER_BUFFER_INDEX};
+
 decltype(ShaderTextured3DBase::VERTEX_BINDING_BONE_WEIGHT) ShaderTextured3DBase::VERTEX_BINDING_BONE_WEIGHT = {prosper::VertexInputRate::Vertex};
 decltype(ShaderTextured3DBase::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID) ShaderTextured3DBase::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID,VERTEX_BINDING_BONE_WEIGHT};
 decltype(ShaderTextured3DBase::VERTEX_ATTRIBUTE_BONE_WEIGHT) ShaderTextured3DBase::VERTEX_ATTRIBUTE_BONE_WEIGHT = {ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT,VERTEX_BINDING_BONE_WEIGHT};
@@ -86,7 +89,7 @@ decltype(ShaderTextured3DBase::DESCRIPTOR_SET_MATERIAL) ShaderTextured3DBase::DE
 		}
 	}
 };
-decltype(ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA) ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA = {&ShaderEntity::DESCRIPTOR_SET_CAMERA};
+decltype(ShaderTextured3DBase::DESCRIPTOR_SET_SCENE) ShaderTextured3DBase::DESCRIPTOR_SET_SCENE = {&ShaderEntity::DESCRIPTOR_SET_SCENE};
 decltype(ShaderTextured3DBase::DESCRIPTOR_SET_RENDERER) ShaderTextured3DBase::DESCRIPTOR_SET_RENDERER = {&ShaderEntity::DESCRIPTOR_SET_RENDERER};
 decltype(ShaderTextured3DBase::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderTextured3DBase::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderEntity::DESCRIPTOR_SET_RENDER_SETTINGS};
 decltype(ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS) ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS = {&ShaderEntity::DESCRIPTOR_SET_LIGHTS};
@@ -130,6 +133,8 @@ void ShaderTextured3DBase::InitializeGfxPipelinePushConstantRanges(prosper::Grap
 }
 void ShaderTextured3DBase::InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
+	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX);
+
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT_ID);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_BONE_WEIGHT);
 
@@ -155,7 +160,7 @@ void ShaderTextured3DBase::InitializeGfxPipelineVertexAttributes(prosper::Graphi
 void ShaderTextured3DBase::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDERER);
 	AddDescriptorSetGroup(pipelineInfo,GetMaterialDescriptorSetInfo());
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDER_SETTINGS);
@@ -392,7 +397,7 @@ bool ShaderTextured3DBase::BindLightMapUvBuffer(CModelSubMesh &mesh,const std::o
 	return true;//RecordBindVertexBuffer(*pLightMapUvBuffer,umath::to_integral(VertexBinding::LightmapUv));
 }
 void ShaderTextured3DBase::UpdateRenderFlags(CModelSubMesh &mesh,RenderFlags &inOutFlags) {}
-bool ShaderTextured3DBase::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx)
+bool ShaderTextured3DBase::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount)
 {
 	if(umath::is_flag_set(m_stateFlags,StateFlags::ClipPlaneBound) == false && BindClipPlane({}) == false)
 		return false;
@@ -407,7 +412,7 @@ bool ShaderTextured3DBase::Draw(CModelSubMesh &mesh,const std::optional<pragma::
 	if(umath::is_flag_set(m_stateFlags,StateFlags::DisableShadows))
 		umath::set_flag(renderFlags,RenderFlags::DisableShadows);
 	UpdateRenderFlags(mesh,renderFlags);
-	return RecordPushConstants(renderFlags,offsetof(ShaderTextured3DBase::PushConstants,flags)) && ShaderEntity::Draw(mesh,meshIdx);
+	return RecordPushConstants(renderFlags,offsetof(ShaderTextured3DBase::PushConstants,flags)) && ShaderEntity::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount);
 }
 bool ShaderTextured3DBase::GetRenderBufferTargets(
 	CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
@@ -423,7 +428,7 @@ bool ShaderTextured3DBase::GetRenderBufferTargets(
 	return true;
 }
 size_t ShaderTextured3DBase::GetBaseTypeHashCode() const {return HASH_TYPE;}
-uint32_t ShaderTextured3DBase::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_CAMERA.setIndex;}
+uint32_t ShaderTextured3DBase::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_SCENE.setIndex;}
 uint32_t ShaderTextured3DBase::GetRendererDescriptorSetIndex() const {return DESCRIPTOR_SET_RENDERER.setIndex;}
 uint32_t ShaderTextured3DBase::GetInstanceDescriptorSetIndex() const {return DESCRIPTOR_SET_INSTANCE.setIndex;}
 uint32_t ShaderTextured3DBase::GetRenderSettingsDescriptorSetIndex() const {return DESCRIPTOR_SET_RENDER_SETTINGS.setIndex;}
@@ -544,3 +549,4 @@ REGISTER_CONVAR_CALLBACK_CL(debug_light_depth,[](NetworkState*,ConVar*,int,int v
 REGISTER_CONVAR_CALLBACK_CL(debug_forwardplus_heatmap,[](NetworkState*,ConVar*,bool,bool val) {
 	set_debug_flag(pragma::ShaderScene::DebugFlags::ForwardPlusHeatmap,val);
 });
+#pragma optimize("",on)

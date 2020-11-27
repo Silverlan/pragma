@@ -20,7 +20,7 @@ extern DLLCENGINE CEngine *c_engine;
 
 
 decltype(ShaderGlow::DESCRIPTOR_SET_INSTANCE) ShaderGlow::DESCRIPTOR_SET_INSTANCE = {&ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE};
-decltype(ShaderGlow::DESCRIPTOR_SET_CAMERA) ShaderGlow::DESCRIPTOR_SET_CAMERA = {&ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA};
+decltype(ShaderGlow::DESCRIPTOR_SET_SCENE) ShaderGlow::DESCRIPTOR_SET_SCENE = {&ShaderTextured3DBase::DESCRIPTOR_SET_SCENE};
 decltype(ShaderGlow::DESCRIPTOR_SET_MATERIAL) ShaderGlow::DESCRIPTOR_SET_MATERIAL = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Glow Map
@@ -43,7 +43,7 @@ void ShaderGlow::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipeli
 void ShaderGlow::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 	AddDescriptorSetGroup(pipelineInfo,GetMaterialDescriptorSetInfo());
 }
 void ShaderGlow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
@@ -55,7 +55,7 @@ bool ShaderGlow::BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer>
 {
 	return ShaderSceneLit::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx));
 }
-uint32_t ShaderGlow::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_CAMERA.setIndex;}
+uint32_t ShaderGlow::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_SCENE.setIndex;}
 uint32_t ShaderGlow::GetInstanceDescriptorSetIndex() const {return DESCRIPTOR_SET_INSTANCE.setIndex;}
 void ShaderGlow::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {

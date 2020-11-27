@@ -18,7 +18,7 @@ namespace pragma
 	public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_DEPTH_BUFFER;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_FOG;
 
 #pragma pack(push,1)

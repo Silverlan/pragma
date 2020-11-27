@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_scene_component.hpp"
+#include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_brute_force.hpp"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_bsp.hpp"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_chc.hpp"
@@ -23,6 +24,7 @@
 #include "pragma/console/c_cvar.h"
 #include <sharedutils/util_shaderinfo.hpp>
 #include <sharedutils/alpha_mode.hpp>
+#include <sharedutils/util_hash.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 
 extern DLLCLIENT ClientState *client;
@@ -329,6 +331,292 @@ bool SceneRenderDesc::IsWorldMeshVisible(uint32_t worldRenderQueueIndex,pragma::
 
 void SceneRenderDesc::WaitForWorldRenderQueues() const {while(m_worldRenderQueuesReady == false);}
 
+static auto cvInstancingThreshold = GetClientConVar("render_instancing_threshold");
+static auto cvInstancingEnabled = GetClientConVar("render_instancing_enabled");
+class RenderMeshInstancer
+{
+public:
+	RenderMeshInstancer(pragma::rendering::RenderQueue &renderQueue);
+	void Process();
+private:
+	util::Hash CalcNextEntityHash(uint32_t &outNumMeshes,EntityIndex &entIndex);
+	void ProcessInstantiableList(uint32_t endIndex,uint32_t numMeshes,util::Hash hash);
+
+	pragma::rendering::RenderQueue &m_renderQueue;
+	uint32_t m_curIndex = 0;
+	uint32_t m_instanceThreshold = 2;
+	std::vector<EntityIndex> m_instantiableEntityList;
+};
+
+RenderMeshInstancer::RenderMeshInstancer(pragma::rendering::RenderQueue &renderQueue)
+	: m_renderQueue{renderQueue},m_instanceThreshold{static_cast<uint32_t>(umath::max(cvInstancingThreshold->GetInt(),2))}
+{}
+
+void RenderMeshInstancer::Process()
+{
+	uint32_t prevNumMeshes = 0;
+	EntityIndex entIndex;
+	auto prevHash = CalcNextEntityHash(prevNumMeshes,entIndex);
+	m_instantiableEntityList.push_back(entIndex);
+	uint32_t numMeshes = 0;
+	auto &sortedItemIndices = m_renderQueue.sortedItemIndices;
+	while(m_curIndex < sortedItemIndices.size())
+	{
+		auto hash = CalcNextEntityHash(numMeshes,entIndex);
+		if(hash != prevHash) // New entity is different; no instantiation possible
+		{
+			// Process the instantiation list for everything before the current entity
+			ProcessInstantiableList(m_curIndex -1,prevNumMeshes,prevHash);
+			m_instantiableEntityList.push_back(entIndex);
+			prevHash = hash;
+			prevNumMeshes = numMeshes;
+			continue;
+		}
+		m_instantiableEntityList.push_back(entIndex);
+	}
+	ProcessInstantiableList(m_curIndex,prevNumMeshes,prevHash);
+}
+
+void RenderMeshInstancer::ProcessInstantiableList(uint32_t endIndex,uint32_t numMeshes,util::Hash hash)
+{
+	auto numInstantiableEntities = m_instantiableEntityList.size();
+	if(numInstantiableEntities < m_instanceThreshold)
+	{
+		m_instantiableEntityList.clear();
+		return;
+	}
+
+	std::vector<pragma::RenderBufferIndex> renderBufferIndices {};
+	renderBufferIndices.reserve(numInstantiableEntities);
+	for(auto entIdx : m_instantiableEntityList)
+	{
+		auto renderBufferIndex = static_cast<CBaseEntity*>(c_game->GetEntityByLocalIndex(entIdx))->GetRenderComponent()->GetRenderBufferIndex();
+		renderBufferIndices.push_back(*renderBufferIndex);
+	}
+		
+	auto &instanceIndexBuffer = pragma::CSceneComponent::GetEntityInstanceIndexBuffer();
+	auto instanceBuf = instanceIndexBuffer->AddInstanceList(m_renderQueue,std::move(renderBufferIndices),util::hash_combine<uint64_t>(hash,numInstantiableEntities));
+
+	m_renderQueue.instanceSets.push_back({});
+
+	auto setIdx = m_renderQueue.instanceSets.size() -1;
+	auto startIndex = endIndex -(numInstantiableEntities *numMeshes);
+
+	auto &instanceSet = m_renderQueue.instanceSets.back();
+	instanceSet.instanceCount = numInstantiableEntities;
+	instanceSet.instanceBuffer = instanceBuf;
+	instanceSet.meshCount = numMeshes;
+	instanceSet.startSkipIndex = startIndex;
+
+	for(auto i=startIndex;i<(startIndex +numMeshes);++i)
+	{
+		auto &item = m_renderQueue.queue[m_renderQueue.sortedItemIndices[i].first];
+		item.instanceSetIndex = setIdx;
+	}
+	// TODO: Instanced items are skipped anyway, so technically we don't need this second loop
+	for(auto i=(startIndex +numMeshes);i<endIndex;++i)
+	{
+		auto &item = m_renderQueue.queue[m_renderQueue.sortedItemIndices[i].first];
+		item.instanceSetIndex = pragma::rendering::RenderQueueItem::INSTANCED;
+	}
+
+	m_instantiableEntityList.clear();
+}
+
+util::Hash RenderMeshInstancer::CalcNextEntityHash(uint32_t &outNumMeshes,EntityIndex &entIndex)
+{
+	auto &sortedItemIndices = m_renderQueue.sortedItemIndices;
+	if(m_curIndex >= sortedItemIndices.size())
+		return 0;
+	util::Hash hash = 0;
+	auto entity = m_renderQueue.queue[sortedItemIndices[m_curIndex].first].entity;
+	entIndex = entity;
+	outNumMeshes = 0;
+	while(m_curIndex < sortedItemIndices.size())
+	{
+		auto &sortKey = sortedItemIndices[m_curIndex];
+		auto &item = m_renderQueue.queue[sortKey.first];
+		if(item.entity != entity)
+			break;
+		++outNumMeshes;
+		++m_curIndex;
+		hash = util::hash_combine<uint64_t>(hash,*reinterpret_cast<uint64_t*>(&sortKey.second));
+	}
+	return hash;
+}
+
+
+
+
+
+
+
+
+void SceneRenderDesc::BuildRenderQueueInstanceLists(pragma::rendering::RenderQueue &renderQueue)
+{
+	renderQueue.instanceSets.clear();
+	if(cvInstancingEnabled->GetBool() == false)
+		return;
+	RenderMeshInstancer instancer {renderQueue};
+	instancer.Process();
+
+#if 0
+	util::Hash prevEntityHash = 0;
+	util::Hash curEntityHash = 0;
+	uint32_t numHashMatches = 0;
+	auto instanceThreshold = umath::max(cvInstancingThreshold->GetInt(),2);
+	std::vector<EntityIndex> instantiableEntityList;
+	auto fUpdateEntityInstanceLists = [&instantiableEntityList,&curEntityHash,&prevEntityHash,instanceThreshold](
+		pragma::rendering::RenderQueue &renderQueue,EntityIndex entIdx,uint32_t numMeshes,pragma::rendering::RenderQueueItemSortPair *sortItem
+	) {
+		// New entity
+		auto *ent = static_cast<CBaseEntity*>(c_game->GetEntityByLocalIndex(entIdx));
+		auto *renderC = ent ? ent ->GetRenderComponent() : nullptr;
+		if(instantiableEntityList.size() > 1 && curEntityHash != prevEntityHash)
+		{
+			// Last entity has a different hash than the one before; We'll close the instantiation list and open a new one
+			auto numInstantiable = instantiableEntityList.size() -1;
+			if(numInstantiable < instanceThreshold)
+				instantiableEntityList.erase(instantiableEntityList.begin(),instantiableEntityList.begin() +(numInstantiable -1));
+			else
+			{
+				auto newItem = instantiableEntityList.back(); // NOT part of our instance list!
+				instantiableEntityList.erase(instantiableEntityList.end() -1);
+
+				// [0,#instantiableEntityList) can be instanced
+				std::vector<pragma::RenderBufferIndex> renderBufferIndices {};
+				renderBufferIndices.reserve(instantiableEntityList.size());
+				for(auto &entIdx : instantiableEntityList)
+				{
+					auto renderBufferIndex = static_cast<CBaseEntity*>(c_game->GetEntityByLocalIndex(entIdx))->GetRenderComponent()->GetRenderBufferIndex();
+					renderBufferIndices.push_back(*renderBufferIndex);
+				}
+				auto &instanceIndexBuffer = pragma::CSceneComponent::GetEntityInstanceIndexBuffer();
+				auto numInstances = renderBufferIndices.size();
+				auto instanceBuf = instanceIndexBuffer->AddInstanceList(renderQueue,std::move(renderBufferIndices),util::hash_combine<uint64_t>(prevEntityHash,numInstances));
+				// We'll iterate backwards through the sorted render queue and mark the
+				// items as instanced.
+				for(auto i=decltype(numInstances){0u};i<(numInstances -1);++i)
+				{
+					// The renderer will know to skip all items mark as 'INSTANCED'
+					// (Marking the first mesh per entity is enough)
+					sortItem -= numMeshes;
+					renderQueue.queue[sortItem->first].instanceSetIndex = pragma::rendering::RenderQueueItem::INSTANCED;
+				}
+				
+				auto startSkipIndex = (sortItem -renderQueue.sortedItemIndices.data()) /sizeof(decltype(renderQueue.sortedItemIndices.front()));
+				sortItem -= numMeshes;
+				renderQueue.instanceSets.push_back({});
+				renderQueue.queue[sortItem->first].instanceSetIndex = renderQueue.instanceSets.size() -1;
+				auto &instanceSet = renderQueue.instanceSets.back();
+				instanceSet.instanceCount = numInstances;
+				instanceSet.instanceBuffer = instanceBuf;
+				instanceSet.meshCount = numMeshes;
+				instanceSet.startSkipIndex = startSkipIndex;
+
+				instantiableEntityList = {};
+				instantiableEntityList.push_back(newItem); // Restore the last item
+			}
+		}
+		
+		prevEntityHash = curEntityHash;
+		curEntityHash = 0;
+		
+		if(renderC && sortItem->second.instantiable)
+			instantiableEntityList.push_back(entIdx);
+	};
+	auto &sortedItemIndices = renderQueue.sortedItemIndices;
+	auto fCalcNextEntityHash = [&sortedItemIndices,&renderQueue](uint32_t &inOutStartIndex,uint32_t &outNumMeshes) -> util::Hash {
+		if(inOutStartIndex >= sortedItemIndices.size())
+			return 0;
+		util::Hash hash = 0;
+		auto entity = renderQueue.queue[sortedItemIndices[inOutStartIndex].first].entity;
+		uint32_t numMeshes = 0;
+		while(inOutStartIndex < sortedItemIndices.size())
+		{
+			auto &sortKey = sortedItemIndices[inOutStartIndex];
+			auto &item = renderQueue.queue[sortKey.first];
+			if(item.entity != entity)
+				break;
+			++numMeshes;
+			hash = util::hash_combine<uint64_t>(hash,*reinterpret_cast<uint64_t*>(&sortKey.second));
+		}
+		return hash;
+	};
+
+	auto fProcessInstantiable = [&renderQueue,instanceThreshold](uint32_t index,uint32_t numInstantiableEntities,uint32_t numMeshes) {
+		if(numInstantiableEntities < instanceThreshold)
+			return;
+		auto startIndex = index -(numInstantiableEntities *numMeshes);
+
+		std::vector<pragma::RenderBufferIndex> renderBufferIndices {};
+		renderBufferIndices.reserve(instantiableEntityList.size());
+		for(auto &entIdx : instantiableEntityList)
+		{
+			auto renderBufferIndex = static_cast<CBaseEntity*>(c_game->GetEntityByLocalIndex(entIdx))->GetRenderComponent()->GetRenderBufferIndex();
+			renderBufferIndices.push_back(*renderBufferIndex);
+		}
+		
+		auto &instanceIndexBuffer = pragma::CSceneComponent::GetEntityInstanceIndexBuffer();
+		auto instanceBuf = instanceIndexBuffer->AddInstanceList(renderQueue,std::move(renderBufferIndices),util::hash_combine<uint64_t>(prevEntityHash,numInstantiableEntities));
+
+		auto &instanceSet = renderQueue.instanceSets.back();
+		instanceSet.instanceCount = numInstantiableEntities;
+		instanceSet.instanceBuffer = instanceBuf;
+		instanceSet.meshCount = numMeshes;
+		instanceSet.startSkipIndex = startSkipIndex;
+	};
+
+	uint32_t prevNumMeshes = 0;
+	uint32_t startIdx = 0;
+	auto prevHash = fCalcNextEntityHash(startIdx,prevNumMeshes);
+	uint32_t numInstantiableEntities = 1;
+	uint32_t numMeshes = 0;
+	while(startIdx < sortedItemIndices.size())
+	{
+		auto hash = fCalcNextEntityHash(startIdx,numMeshes);
+		if(hash != prevHash) // New entity is different; no instantiation possible
+		{
+			// Process the instantiation list for everything before the current entity
+			fProcessInstantiable(startIdx -numMeshes,numInstantiableEntities,prevNumMeshes);
+			numInstantiableEntities = 1;
+			continue;
+		}
+		++numInstantiableEntities;
+		// Add to instance list
+		// TODO
+	}
+	fProcessInstantiable(startIdx -numMeshes,numInstantiableEntities,prevNumMeshes);
+
+
+	if(sortedItemIndices.empty() == false)
+	{
+		uint32_t curEntityMeshes = 0;
+		auto prevEntityIndex = renderQueue.queue[sortedItemIndices.front().first].entity;
+		for(auto i=decltype(sortedItemIndices.size()){0u};i<sortedItemIndices.size();++i)
+		{
+			auto &sortKey = sortedItemIndices.at(i);
+			auto &item = renderQueue.queue[sortKey.first];
+			if(item.entity != prevEntityIndex)
+			{
+				instantiableEntityList.push_back(entIdx);
+				fUpdateEntityInstanceLists(renderQueue,item.entity,curEntityMeshes,&sortKey);
+
+				prevEntityIndex = item.entity;
+				curEntityMeshes = 0;
+			}
+			++curEntityMeshes;
+
+			static_assert(sizeof(decltype(sortKey.second)) == sizeof(uint64_t));
+			curEntityHash = util::hash_combine<uint64_t>(curEntityHash,*reinterpret_cast<uint64_t*>(&sortKey.second));
+		}
+		curEntityHash = 0;
+		instantiableEntityList.push_back(std::numeric_limits<EntityIndex>::max());
+		fUpdateEntityInstanceLists(renderQueue,instantiableEntityList.back(),curEntityMeshes,(&sortedItemIndices.back()) +1);
+	}
+#endif
+}
+
 static auto cvDrawWorld = GetClientConVar("render_draw_world");
 void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo)
 {
@@ -349,6 +637,8 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 
 	m_worldRenderQueuesReady = false;
 	c_game->GetRenderQueueBuilder().Append([this,&cam,posCam,&drawSceneInfo]() {
+		pragma::CSceneComponent::GetEntityInstanceIndexBuffer()->UpdateAndClearUnusedBuffers();
+
 		auto &frustumPlanes = g_debugFreezeCamData.has_value() ? g_debugFreezeCamData->frustumPlanes : cam.GetFrustumPlanes();
 		auto fShouldCull = [&frustumPlanes](const Vector3 &min,const Vector3 &max) -> bool {return SceneRenderDesc::ShouldCull(min,max,frustumPlanes);};
 		auto vp = cam.GetProjectionMatrix() *cam.GetViewMatrix();
@@ -455,6 +745,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 		for(auto &renderQueue : m_renderQueues)
 		{
 			renderQueue->Sort();
+			BuildRenderQueueInstanceLists(*renderQueue);
 			renderQueue->Unlock();
 		}
 		// c_game->StopProfilingStage(CGame::CPUProfilingPhase::BuildRenderQueue);

@@ -25,7 +25,7 @@ extern DLLCENGINE CEngine *c_engine;
 decltype(ShaderSkybox::VERTEX_BINDING_VERTEX) ShaderSkybox::VERTEX_BINDING_VERTEX = {prosper::VertexInputRate::Vertex,sizeof(VertexBufferData)};
 decltype(ShaderSkybox::VERTEX_ATTRIBUTE_POSITION) ShaderSkybox::VERTEX_ATTRIBUTE_POSITION = {ShaderTextured3DBase::VERTEX_ATTRIBUTE_POSITION,VERTEX_BINDING_VERTEX};
 decltype(ShaderSkybox::DESCRIPTOR_SET_INSTANCE) ShaderSkybox::DESCRIPTOR_SET_INSTANCE = {&ShaderEntity::DESCRIPTOR_SET_INSTANCE};
-decltype(ShaderSkybox::DESCRIPTOR_SET_CAMERA) ShaderSkybox::DESCRIPTOR_SET_CAMERA = {&ShaderEntity::DESCRIPTOR_SET_CAMERA};
+decltype(ShaderSkybox::DESCRIPTOR_SET_SCENE) ShaderSkybox::DESCRIPTOR_SET_SCENE = {&ShaderEntity::DESCRIPTOR_SET_SCENE};
 decltype(ShaderSkybox::DESCRIPTOR_SET_MATERIAL) ShaderSkybox::DESCRIPTOR_SET_MATERIAL = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Skybox Map
@@ -77,7 +77,7 @@ void ShaderSkybox::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pi
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
 
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_MATERIAL);
 	ToggleDynamicScissorState(pipelineInfo,true);
 }
@@ -126,7 +126,7 @@ bool ShaderSkybox::BindMaterialParameters(CMaterial &mat) {return true;}
 bool ShaderSkybox::BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings) {return true;}
 bool ShaderSkybox::BindLights(prosper::IDescriptorSet &dsLights) {return true;}
 bool ShaderSkybox::BindVertexAnimationOffset(uint32_t offset) {return true;}
-bool ShaderSkybox::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx) {return ShaderTextured3DBase::Draw(mesh,meshIdx,false);}
+bool ShaderSkybox::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount) {return ShaderTextured3DBase::Draw(mesh,meshIdx,renderBufferIndexBuffer,false,instanceCount);}
 
 //////////////
 

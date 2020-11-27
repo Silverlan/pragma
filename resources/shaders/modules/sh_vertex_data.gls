@@ -7,6 +7,8 @@
 
 struct VertexData
 {
+	mat4 M;
+	vec4 color;
 	mat3 TBN;
 	vec3 vert_pos_ws; // Vertex Position in world space
 
@@ -36,5 +38,10 @@ vec3 get_vertex_position_ws() {return VERTEX_DATA.vert_pos_ws;}
 //vec3 get_vertex_position_cs() {return VERTEX_DATA.vert_pos_cs;}
 vec3 get_vertex_normal() {return VERTEX_DATA.vert_normal;}
 vec3 get_vertex_normal_cs() {return VERTEX_DATA.vert_normal_cs;}
+
+#ifdef GLS_FRAGMENT_SHADER
+mat4 get_model_matrix() {return fs_in.M;}
+vec4 get_instance_color() {return fs_in.color;}
+#endif
 
 #endif

@@ -56,19 +56,18 @@ void RenderQueue::Add(CBaseEntity &ent,RenderMeshIndex meshIdx,CMaterial &mat,pr
 	item.mesh = meshIdx;
 	item.sortingKey.material = item.material;
 	item.sortingKey.shader = item.shader;
+	item.instanceSetIndex = RenderQueueItem::UNIQUE;
+	auto &renderC = *ent.GetRenderComponent();
+	item.sortingKey.instantiable = renderC.IsInstantiable();
 	if(optCam)
 	{
 		// TODO: This isn't very efficient, find a better way to handle this!
-		auto *renderC = ent.GetRenderComponent();
-		if(renderC)
+		auto &renderMeshes = renderC.GetRenderMeshes();
+		if(meshIdx < renderMeshes.size())
 		{
-			auto &renderMeshes = renderC->GetRenderMeshes();
-			if(meshIdx < renderMeshes.size())
-			{
-				auto &pose = ent.GetPose();
-				auto pos = pose *renderMeshes[meshIdx]->GetCenter();
-				item.sortingKey.SetDistance(pos,*optCam);
-			}
+			auto &pose = ent.GetPose();
+			auto pos = pose *renderMeshes[meshIdx]->GetCenter();
+			item.sortingKey.SetDistance(pos,*optCam);
 		}
 	}
 	sortedItemIndices.push_back({queue.size() -1,item.sortingKey});
@@ -146,10 +145,10 @@ void RenderQueueBuilder::Exec()
 			m_workMutex.lock();
 				if(m_workQueue.empty())
 				{
-					if(m_threadRunning == false)
-						break;
 					m_hasWork = false;
 					m_workMutex.unlock();
+					if(m_threadRunning == false)
+						return;
 					continue;
 				}
 				auto worker = m_workQueue.front();

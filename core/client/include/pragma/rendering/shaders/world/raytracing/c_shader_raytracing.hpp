@@ -20,7 +20,7 @@ namespace pragma
 	public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_IMAGE_OUTPUT;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_GAME_SCENE;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_IBL;
 

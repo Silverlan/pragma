@@ -124,8 +124,9 @@ void CModelComponent::UpdateRenderMeshes()
 			auto meshOffset = m_lodMeshes.size();
 			auto subMeshOffset = m_lodRenderMeshes.size();
 			mdl->GetBodyGroupMeshes(GetBodyGroups(),i,m_lodMeshes);
-			for(auto &mesh : m_lodMeshes)
+			for(auto i=meshOffset;i<m_lodMeshes.size();++i)
 			{
+				auto &mesh = m_lodMeshes[i];
 				for(auto &subMesh : mesh->GetSubMeshes())
 				{
 					if(m_lodRenderMeshes.size() == m_lodRenderMeshes.capacity())

@@ -50,7 +50,7 @@ decltype(ShaderSSAO::DESCRIPTOR_SET_SAMPLE_BUFFER) ShaderSSAO::DESCRIPTOR_SET_SA
 		}
 	}
 };
-decltype(ShaderSSAO::DESCRIPTOR_SET_CAMERA) ShaderSSAO::DESCRIPTOR_SET_CAMERA = {&ShaderScene::DESCRIPTOR_SET_CAMERA};
+decltype(ShaderSSAO::DESCRIPTOR_SET_SCENE) ShaderSSAO::DESCRIPTOR_SET_SCENE = {&ShaderScene::DESCRIPTOR_SET_SCENE};
 ShaderSSAO::ShaderSSAO(prosper::IPrContext &context,const std::string &identifier)
 	: prosper::ShaderBaseImageProcessing(context,identifier,"screen/fs_ssao")
 {
@@ -160,7 +160,7 @@ void ShaderSSAO::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipe
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_PREPASS);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_NOISE_TEXTURE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SAMPLE_BUFFER);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
 }
 

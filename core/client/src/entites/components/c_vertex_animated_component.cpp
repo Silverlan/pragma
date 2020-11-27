@@ -42,9 +42,17 @@ void CVertexAnimatedComponent::Initialize()
 	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS,[this](std::reference_wrapper<ComponentEvent> evData) {
 		UpdateVertexAnimationBuffer(static_cast<CEOnUpdateRenderBuffers&>(evData.get()).commandBuffer);
 	});
+	BindEvent(CRenderComponent::EVENT_UPDATE_INSTANTIABILITY,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		// TODO: Allow instantiability for vertex animated entities
+		static_cast<CEUpdateInstantiability&>(evData.get()).instantiable = false;
+		return util::EventReply::Handled;
+	});
 	auto whRenderComponent = GetEntity().GetComponent<CRenderComponent>();
-	if(whRenderComponent.valid() && whRenderComponent->GetRenderBuffer().expired() == false)
+	if(whRenderComponent.valid() && whRenderComponent->GetRenderBuffer())
+	{
 		InitializeVertexAnimationBuffer();
+		whRenderComponent->UpdateInstantiability();
+	}
 }
 void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 {

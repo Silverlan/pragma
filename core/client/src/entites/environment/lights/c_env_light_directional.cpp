@@ -47,12 +47,7 @@ void CLightDirectionalComponent::Initialize()
 			shouldPassData.shouldPass = false;
 			return util::EventReply::Handled;
 		}
-		auto &pos = pTrComponent->GetPosition();
-		Vector3 min;
-		Vector3 max;
-		pRenderComponent->GetRenderBounds(&min,&max);
-		min += pos;
-		max += pos;
+		auto &aabb = pRenderComponent->GetUpdatedAbsoluteRenderBounds();
 
 		auto hShadow = GetEntity().GetComponent<CShadowCSMComponent>();
 		if(hShadow.expired())
@@ -61,7 +56,7 @@ void CLightDirectionalComponent::Initialize()
 		for(auto i=decltype(numLayers){0};i<numLayers;++i)
 		{
 			auto &frustum = *hShadow->GetFrustumSplit(i);
-			if(Intersection::AABBAABB(min,max,frustum.aabb.min +frustum.obbCenter,frustum.aabb.max +frustum.obbCenter) != Intersection::Intersect::Outside)
+			if(Intersection::AABBAABB(aabb.min,aabb.max,frustum.aabb.min +frustum.obbCenter,frustum.aabb.max +frustum.obbCenter) != Intersection::Intersect::Outside)
 				shouldPassData.renderFlags |= 1<<i;
 		}
 		if(shouldPassData.renderFlags == 0)

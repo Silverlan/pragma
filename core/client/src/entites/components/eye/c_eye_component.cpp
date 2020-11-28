@@ -39,7 +39,7 @@ void CEyeComponent::Initialize()
 		OnModelChanged(static_cast<pragma::CEOnModelChanged&>(evData.get()).model);
 	});
 	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		auto mdlC = static_cast<CModelComponent*>(GetEntity().GetModelComponent().get());
+		auto mdlC = static_cast<CModelComponent*>(GetEntity().GetModelComponent());
 		if(mdlC == nullptr || mdlC->GetLOD() > 0)
 			return;
 		UpdateEyeballsMT();

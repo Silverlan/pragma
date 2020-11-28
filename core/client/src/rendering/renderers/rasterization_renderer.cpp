@@ -168,7 +168,7 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto fUpdateRenderBuffers = [&drawSceneInfo,&drawCmd](const RenderQueue &renderQueue,RenderPassStats *stats=nullptr) {
-		renderQueue.WaitForCompletion();
+		renderQueue.WaitForCompletion(stats);
 		CSceneComponent::GetEntityInstanceIndexBuffer()->UpdateBufferData(renderQueue);
 		auto curEntity = std::numeric_limits<EntityIndex>::max();
 		for(auto &item : renderQueue.queue)

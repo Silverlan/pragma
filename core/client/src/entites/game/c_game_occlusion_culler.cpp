@@ -30,20 +30,9 @@ void COcclusionCullerComponent::Initialize()
 	BaseEntityComponent::Initialize();
 
 	m_occlusionOctree = std::make_shared<OcclusionOctree<CBaseEntity*>>(256.f,1'073'741'824.f,4096.f,[](const CBaseEntity *ent,Vector3 &min,Vector3 &max) {
-		auto pRenderComponent = ent->GetRenderComponent();
-		auto pTrComponent = ent->GetTransformComponent();
-		if(pRenderComponent)
-			pRenderComponent->GetRenderBounds(&min,&max);
-		else
-		{
-			min = {};
-			max = {};
-		}
-		if(pTrComponent == nullptr)
-			return;
-		auto &pos = pTrComponent->GetPosition();
-		min += pos;
-		max += pos;
+		auto &renderBounds = ent->GetAbsoluteRenderBounds();
+		min = renderBounds.min;
+		max = renderBounds.max;
 	});
 	m_occlusionOctree->Initialize();
 	m_occlusionOctree->SetSingleReferenceMode(true);

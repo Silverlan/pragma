@@ -11,10 +11,12 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/rendering/c_rendermode.h"
+#include <pragma/util/orientedpoint.h>
 #include <sharedutils/property/util_property.hpp>
 #include <pragma/math/sphere.h>
 #include <pragma/entities/components/base_render_component.hpp>
 #include <mathutil/uvec.h>
+#include <mathutil/boundingvolume.h>
 
 #define ENTITY_RENDER_BUFFER_USE_STORAGE_BUFFER 1
 
@@ -32,7 +34,7 @@ namespace pragma
 		public CBaseNetComponent
 	{
 	public:
-		enum class StateFlags : uint8_t
+		enum class StateFlags : uint16_t
 		{
 			None = 0u,
 			RenderBufferDirty = 1u,
@@ -41,7 +43,10 @@ namespace pragma
 			EnableDepthPass = HasDepthBias<<1u,
 			DisableShadows = EnableDepthPass<<1u,
 			IsInstantiable = DisableShadows<<1u,
-			InstantiationDisabled = IsInstantiable<<1u
+			InstantiationDisabled = IsInstantiable<<1u,
+			RenderBoundsDirty = InstantiationDisabled<<1u,
+			ShouldDraw = RenderBoundsDirty<<1u,
+			ShouldDrawShadow = ShouldDraw<<1u
 		};
 		static constexpr auto USE_HOST_MEMORY_FOR_RENDER_DATA = true;
 
@@ -81,11 +86,20 @@ namespace pragma
 		uint64_t GetLastRenderFrame() const;
 		void SetLastRenderFrame(unsigned long long &t);
 
-		void GetAbsoluteRenderBounds(Vector3 &outMin,Vector3 &outMax) const;
-		void GetRenderBounds(Vector3 *min,Vector3 *max) const;
-		void SetRenderBounds(Vector3 min,Vector3 max);
-		Sphere GetRenderSphereBounds() const;
-		void GetRotatedRenderBounds(Vector3 *min,Vector3 *max);
+		void SetLocalRenderBounds(Vector3 min,Vector3 max);
+
+		const bounding_volume::AABB &GetLocalRenderBounds() const;
+		const Sphere &GetLocalRenderSphere() const;
+		
+		const bounding_volume::AABB &GetAbsoluteRenderBounds() const;
+		const Sphere &GetAbsoluteRenderSphere() const;
+
+		// Note: These mustn't be called during rendering!
+		const bounding_volume::AABB &GetUpdatedAbsoluteRenderBounds() const;
+		const Sphere &GetUpdatedAbsoluteRenderSphere() const;
+
+		bounding_volume::AABB CalcAbsoluteRenderBounds() const;
+		Sphere CalcAbsoluteRenderSphere() const;
 
 		void SetRenderMode(RenderMode mode);
 		RenderMode GetRenderMode() const;
@@ -101,12 +115,11 @@ namespace pragma
 
 		void UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bForceBufferUpdate=false);
 
-		bool ShouldDraw(const Vector3 &camOrigin) const;
-		bool ShouldDrawShadow(const Vector3 &camOrigin) const;
+		bool ShouldDraw() const;
+		bool ShouldDrawShadow() const;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual void OnEntitySpawn() override;
-		void UpdateRenderBounds();
 
 		util::WeakHandle<CModelComponent> &GetModelComponent() const;
 		util::WeakHandle<CAnimatedComponent> &GetAnimatedComponent() const;
@@ -130,16 +143,20 @@ namespace pragma
 		bool IsReceivingShadows() const;
 
 		void SetRenderBufferDirty();
+		void SetRenderBoundsDirty();
 		std::optional<Intersection::LineMeshResult> CalcRayIntersection(const Vector3 &start,const Vector3 &dir,bool precise=false) const;
 
 		bool IsInstantiable() const;
 		void SetInstaniationEnabled(bool enabled);
 		void UpdateInstantiability();
 
+		void UpdateShouldDrawState();
+
 		void SetRenderOffsetTransform(const umath::ScaledTransform &t);
 		void ClearRenderOffsetTransform();
 		const umath::ScaledTransform *GetRenderOffsetTransform() const;
 	protected:
+		void UpdateShouldDrawShadowState();
 		void UpdateRenderBuffer() const;
 		void UpdateMatrices();
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
@@ -163,20 +180,25 @@ namespace pragma
 		mutable util::WeakHandle<CAnimatedComponent> m_animComponent = {};
 		mutable util::WeakHandle<CLightMapReceiverComponent> m_lightMapReceiverComponent = {};
 
-		Vector3 m_renderMin = {};
-		Vector3 m_renderMax = {};
-		Vector3 m_renderMinRot = {};
-		Vector3 m_renderMaxRot = {};
-		Sphere m_renderSphere = {};
+		bounding_volume::AABB m_localRenderBounds {};
+		Sphere m_localRenderSphere {};
+
+		bounding_volume::AABB m_absoluteRenderBounds {};
+		Sphere m_absoluteRenderSphere {};
 
 		std::optional<Vector4> m_renderClipPlane {};
 
-		StateFlags m_stateFlags = static_cast<StateFlags>(umath::to_integral(StateFlags::RenderBufferDirty) | umath::to_integral(StateFlags::EnableDepthPass));
+		StateFlags m_stateFlags = static_cast<StateFlags>(umath::to_integral(StateFlags::RenderBufferDirty) | umath::to_integral(StateFlags::EnableDepthPass) | umath::to_integral(StateFlags::RenderBoundsDirty) |
+			 umath::to_integral(StateFlags::ShouldDraw) | umath::to_integral(StateFlags::ShouldDrawShadow));
 		std::atomic<uint64_t> m_lastRender = 0ull;
+		std::mutex m_renderDataMutex;
 		std::unordered_map<unsigned int,RenderInstance*> m_renderInstances;
 		std::unique_ptr<SortedRenderMeshContainer> m_renderMeshContainer = nullptr;
 		static std::vector<CRenderComponent*> s_ocExemptEntities;
 	private:
+		void UpdateAbsoluteRenderBounds();
+		void UpdateAbsoluteSphereRenderBounds();
+		void UpdateAbsoluteAABBRenderBounds();
 		struct
 		{
 			float constantFactor = 0.f;
@@ -202,18 +224,11 @@ namespace pragma
 	struct DLLCLIENT CEShouldDraw
 		: public ComponentEvent
 	{
-		enum class ShouldDraw : uint8_t
-		{
-			Undefined = 0u,
-			Yes,
-			No
-		};
-		CEShouldDraw(const Vector3 &camOrigin);
+		CEShouldDraw(bool &shouldDraw);
 		virtual void PushArguments(lua_State *l) override;
 		virtual uint32_t GetReturnCount() override;
 		virtual void HandleReturnValues(lua_State *l) override;
-		const Vector3 &camOrigin;
-		ShouldDraw shouldDraw = ShouldDraw::Undefined;
+		bool &shouldDraw;
 	};
 
 	struct DLLCLIENT CEOnUpdateRenderMatrices

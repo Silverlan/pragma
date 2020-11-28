@@ -72,21 +72,22 @@ void BaseEntity::SetModel(const std::shared_ptr<Model> &mdl)
 		return;
 	mdlC->SetModel(mdl);
 }
-std::shared_ptr<Model> BaseEntity::GetModel() const
+const std::shared_ptr<Model> &BaseEntity::GetModel() const
 {
 	auto mdlC = GetModelComponent();
-	return mdlC.valid() ? mdlC->GetModel() : nullptr;
+	static std::shared_ptr<Model> nptr = nullptr;
+	return mdlC ? mdlC->GetModel() : nptr;
 }
 std::string BaseEntity::GetModelName() const
 {
 	auto mdlC = GetModelComponent();
-	return mdlC.valid() ? mdlC->GetModelName() : "";
+	return mdlC ? mdlC->GetModelName() : "";
 }
 std::optional<umath::Transform> BaseEntity::GetAttachmentPose(uint32_t attId) const
 {
 	auto mdlC = GetModelComponent();
 	umath::Transform t {};
-	if(mdlC.valid())
+	if(mdlC)
 	{
 		Vector3 pos;
 		Quat rot;
@@ -98,19 +99,19 @@ std::optional<umath::Transform> BaseEntity::GetAttachmentPose(uint32_t attId) co
 uint32_t BaseEntity::GetSkin() const
 {
 	auto mdlC = GetModelComponent();
-	return mdlC.valid() ? mdlC->GetSkin() : 0;
+	return mdlC ? mdlC->GetSkin() : 0;
 }
 void BaseEntity::SetSkin(uint32_t skin)
 {
 	auto mdlC = GetModelComponent();
-	if(mdlC.expired())
+	if(!mdlC)
 		return;
 	mdlC->SetSkin(skin);
 }
 uint32_t BaseEntity::GetBodyGroup(const std::string &name) const
 {
 	auto mdlC = GetModelComponent();
-	if(mdlC.expired())
+	if(!mdlC)
 		return 0;
 	auto &mdl = mdlC->GetModel();
 	auto id = mdl ? mdl->GetBodyGroupId(name) : -1;
@@ -119,7 +120,7 @@ uint32_t BaseEntity::GetBodyGroup(const std::string &name) const
 void BaseEntity::SetBodyGroup(const std::string &name,uint32_t id)
 {
 	auto mdlC = GetModelComponent();
-	if(mdlC.expired())
+	if(!mdlC)
 		return;
 	mdlC->SetBodyGroup(name,id);
 }

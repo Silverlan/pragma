@@ -25,6 +25,7 @@ using namespace pragma;
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
+
 static std::shared_ptr<prosper::IUniformResizableBuffer> s_entityMeshInfoBuffer = nullptr;
 static uint32_t m_entityMeshCount = 0;
 static std::shared_ptr<MaterialDescriptorArrayManager> s_materialDescriptorArrayManager = nullptr;
@@ -109,8 +110,7 @@ void CRaytracingComponent::InitializeModelRaytracingBuffers()
 	if(s_entityMeshInfoBuffer == nullptr || s_materialDescriptorArrayManager == nullptr)
 		return;
 	auto &ent = GetEntity();
-	auto wpMdlComponent = ent.GetModelComponent();
-	auto mdl = wpMdlComponent.valid() ? wpMdlComponent->GetModel() : nullptr;
+	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)
 	{
 		m_subMeshBuffers.clear();

@@ -22,7 +22,7 @@ void BaseFlexComponent::SetFlexController(const std::string &name,float val,floa
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
 	auto flexId = 0u;
-	if(mdlComponent.expired() || mdlComponent->LookupFlexController(name,flexId) == false)
+	if(!mdlComponent || mdlComponent->LookupFlexController(name,flexId) == false)
 		return;
 	SetFlexController(flexId,val,duration,clampToLimits);
 }
@@ -46,7 +46,7 @@ float BaseFlexComponent::GetFlexController(const std::string &flexController) co
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
 	auto flexId = 0u;
-	if(mdlComponent.expired() || mdlComponent->LookupFlexController(flexController,flexId) == false)
+	if(!mdlComponent || mdlComponent->LookupFlexController(flexController,flexId) == false)
 		return 0.f;
 	return GetFlexController(flexId);
 }

@@ -66,6 +66,8 @@ void CBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 		m_physicsComponent = &static_cast<pragma::CPhysicsComponent&>(component);
 	else if(typeid(component) == typeid(pragma::CWorldComponent))
 		umath::set_flag(m_stateFlags,StateFlags::HasWorldComponent);
+	else if(typeid(component) == typeid(pragma::CModelComponent))
+		m_modelComponent = &static_cast<pragma::CModelComponent&>(component);
 }
 void CBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
 {
@@ -78,6 +80,8 @@ void CBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
 		m_transformComponent = nullptr;
 	else if(typeid(component) == typeid(pragma::CPhysicsComponent))
 		m_physicsComponent = nullptr;
+	else if(typeid(component) == typeid(pragma::CModelComponent))
+		m_modelComponent = nullptr;
 }
 pragma::CRenderComponent *CBaseEntity::GetRenderComponent() const {return m_renderComponent;}
 
@@ -251,7 +255,7 @@ void CBaseEntity::EraseFunction(int function)
 void CBaseEntity::OnRemove()
 {
 	auto mdlComponent = GetModelComponent();
-	if(mdlComponent.valid())
+	if(mdlComponent)
 		mdlComponent->SetModel(std::shared_ptr<Model>(nullptr)); // Make sure to clear all clientside model mesh references
 	BaseEntity::OnRemove();
 }
@@ -299,11 +303,6 @@ void CBaseEntity::SendNetEventUDP(UInt32 eventId,NetPacket &data) const
 	data->Write<UInt32>(eventId);
 	client->SendPacket("ent_event",data,pragma::networking::Protocol::FastUnreliable);
 }
-util::WeakHandle<pragma::BaseModelComponent> CBaseEntity::GetModelComponent() const
-{
-	auto pComponent = GetComponent<pragma::CModelComponent>();
-	return pComponent.valid() ? std::static_pointer_cast<pragma::BaseModelComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BaseModelComponent>{};
-}
 util::WeakHandle<pragma::BaseAnimatedComponent> CBaseEntity::GetAnimatedComponent() const
 {
 	auto pComponent = GetComponent<pragma::CAnimatedComponent>();
@@ -350,14 +349,25 @@ bool CBaseEntity::IsWeapon() const {return HasComponent<pragma::CWeaponComponent
 bool CBaseEntity::IsVehicle() const {return HasComponent<pragma::CVehicleComponent>();}
 bool CBaseEntity::IsNPC() const {return HasComponent<pragma::CAIComponent>();}
 
-std::pair<Vector3,Vector3> CBaseEntity::GetRenderBounds() const
+const bounding_volume::AABB &CBaseEntity::GetLocalRenderBounds() const
 {
-	auto renderC = GetRenderComponent();
+	auto *renderC = GetRenderComponent();
 	if(renderC == nullptr)
-		return {Vector3{},Vector3{}};
-	Vector3 min,max;
-	renderC->GetRenderBounds(&min,&max);
-	return {min,max};
+	{
+		static bounding_volume::AABB bounds {};
+		return bounds;
+	}
+	return renderC->GetLocalRenderBounds();
+}
+const bounding_volume::AABB &CBaseEntity::GetAbsoluteRenderBounds(bool updateBounds) const
+{
+	auto *renderC = GetRenderComponent();
+	if(renderC == nullptr)
+	{
+		static bounding_volume::AABB bounds {};
+		return bounds;
+	}
+	return updateBounds ? renderC->GetUpdatedAbsoluteRenderBounds() : renderC->GetAbsoluteRenderBounds();
 }
 
 void CBaseEntity::AddChild(CBaseEntity &ent)

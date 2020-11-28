@@ -230,8 +230,7 @@ void BaseCharacterComponent::UpdateNeckControllers()
 	m_yawController = -1;
 	m_pitchController = -1;
 	auto &ent = GetEntity();
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = GetEntity().GetModel();
 	if(hMdl == nullptr)
 		return;
 	m_yawController = hMdl->LookupBlendController(m_yawControllerName);
@@ -292,8 +291,7 @@ void BaseCharacterComponent::SetViewOrientation(const Quat &orientation)
 	auto rot = rotRef *orientation;
 	EulerAngles angView(rot);
 	auto animComponent = ent.GetAnimatedComponent();
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(animComponent.valid() && hMdl != nullptr)
 	{
 		auto pTrComponent = ent.GetTransformComponent();

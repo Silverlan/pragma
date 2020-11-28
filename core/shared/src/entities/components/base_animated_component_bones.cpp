@@ -124,8 +124,7 @@ Bool BaseAnimatedComponent::GetLocalBonePosition(UInt32 boneId,Vector3 &pos,Quat
 {
 	if(boneId >= m_bones.size())
 		return false;
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return false;
 	auto &skeleton = hModel->GetSkeleton();
@@ -240,8 +239,7 @@ void BaseAnimatedComponent::SetLocalBonePosition(UInt32 boneId,const Vector3 &po
 {
 	if(boneId >= m_bones.size())
 		return;
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return;
 	auto &skeleton = hModel->GetSkeleton();
@@ -259,8 +257,7 @@ void BaseAnimatedComponent::SetLocalBonePosition(UInt32 boneId,const Vector3 &po
 {
 	if(boneId >= m_bones.size())
 		return;
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return;
 	auto &skeleton = hModel->GetSkeleton();
@@ -277,8 +274,7 @@ void BaseAnimatedComponent::SetLocalBonePosition(UInt32 boneId,const Vector3 &po
 {
 	if(boneId >= m_bones.size())
 		return;
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return;
 	auto &skeleton = hModel->GetSkeleton();
@@ -294,8 +290,7 @@ void BaseAnimatedComponent::SetLocalBoneRotation(UInt32 boneId,const Quat &rot)
 {
 	if(boneId >= m_bones.size())
 		return;
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return;
 	auto &skeleton = hModel->GetSkeleton();
@@ -431,8 +426,7 @@ static void get_global_bone_transforms(std::vector<umath::ScaledTransform> &tran
 }
 void BaseAnimatedComponent::UpdateSkeleton()
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return;
 	auto &skeleton = hModel->GetSkeleton();

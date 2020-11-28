@@ -28,6 +28,7 @@ namespace pragma
 	class CPhysicsComponent;
 	class CSceneComponent;
 };
+namespace bounding_volume {class AABB;};
 #pragma warning(push)
 #pragma warning(disable : 4251)
 class DLLCLIENT CBaseEntity
@@ -40,7 +41,6 @@ public:
 	CBaseEntity();
 	void Construct(unsigned int idx,unsigned int clientIdx);
 
-	virtual util::WeakHandle<pragma::BaseModelComponent> GetModelComponent() const override;
 	virtual util::WeakHandle<pragma::BaseAnimatedComponent> GetAnimatedComponent() const override;
 	virtual util::WeakHandle<pragma::BaseWeaponComponent> GetWeaponComponent() const override;
 	virtual util::WeakHandle<pragma::BaseVehicleComponent> GetVehicleComponent() const override;
@@ -86,7 +86,8 @@ public:
 	void AddChild(CBaseEntity &ent);
 
 	// Quick-access
-	std::pair<Vector3,Vector3> GetRenderBounds() const;
+	const bounding_volume::AABB &GetLocalRenderBounds() const;
+	const bounding_volume::AABB &GetAbsoluteRenderBounds(bool updateBounds=true) const;
 	//
 
 	void SendNetEventTCP(UInt32 eventId,NetPacket &data) const;

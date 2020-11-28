@@ -44,7 +44,7 @@ int32_t ai::TaskPlayAnimationBase::SelectAnimation(const Schedule *sched,pragma:
 		{
 			auto &animName = *param->GetString();
 			auto mdlComponent = ent.GetEntity().GetModelComponent();
-			if(mdlComponent.valid())
+			if(mdlComponent)
 				animId = mdlComponent->LookupAnimation(animName);
 			break;
 		}

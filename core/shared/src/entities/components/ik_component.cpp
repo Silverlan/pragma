@@ -52,8 +52,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 	if(it != m_ikTrees.end())
 		return true;
 	auto &ent = GetEntity();
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr)
 		return false;
 	auto *ikController = hMdl->GetIKController(ikControllerId);
@@ -249,7 +248,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 	{
 		auto &ent = GetEntity();
 		auto mdlComponent = ent.GetModelComponent();
-		if(mdlComponent.valid())
+		if(mdlComponent)
 		{
 			auto boneId = mdlComponent->LookupBone(ikController->GetEffectorName());
 			if(boneId != -1)
@@ -370,7 +369,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 	auto &ent = GetEntity();
 	auto mdlComponent = ent.GetModelComponent();
 	auto animComponent = ent.GetAnimatedComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr || animComponent.expired())
 		return;
 

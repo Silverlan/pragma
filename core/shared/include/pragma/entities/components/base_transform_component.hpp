@@ -98,9 +98,9 @@ namespace pragma
 		void SetRawScale(const Vector3 &scale);
 
 		void UpdateLastMovedTime();
+		void OnPoseChanged(TransformChangeFlags changeFlags,bool updatePhysics=true);
 	protected:
 		BaseTransformComponent(BaseEntity &ent);
-		void OnPoseChanged(TransformChangeFlags changeFlags);
 		pragma::NetEventId m_netEvSetScale = pragma::INVALID_NET_EVENT;
 		double m_tLastMoved = 0.0; // Last time the entity moved or changed rotation
 		Vector3 m_eyeOffset = {};

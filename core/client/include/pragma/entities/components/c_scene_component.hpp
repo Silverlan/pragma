@@ -54,19 +54,21 @@ public:
 		Invalid = std::numeric_limits<uint8_t>::max()
 	};
 	using WorldMeshVisibility = std::vector<bool>;
+	// Note: All arguments have to be thread safe for the duration of the render (except vp)
 	static void AddRenderMeshesToRenderQueue(
 		const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,
 		const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
 		const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,
 		int32_t lodBias=0
 	);
+	// Note: All arguments have to be thread safe for the duration of the render (except vp)
 	static void CollectRenderMeshesFromOctree(
 		const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
 		const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
 		const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,const std::vector<util::BSPTree::Node*> *bspLeafNodes=nullptr,
 		int32_t lodBias=0
 	);
-	static bool ShouldConsiderEntity(CBaseEntity &ent,const pragma::CSceneComponent &scene,const Vector3 &camOrigin,FRender renderFlags);
+	static bool ShouldConsiderEntity(CBaseEntity &ent,const pragma::CSceneComponent &scene,FRender renderFlags);
 	static bool ShouldCull(CBaseEntity &ent,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);
 	static bool ShouldCull(pragma::CRenderComponent &renderC,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);
 	static bool ShouldCull(pragma::CRenderComponent &renderC,pragma::RenderMeshIndex meshIdx,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);

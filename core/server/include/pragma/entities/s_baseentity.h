@@ -50,7 +50,6 @@ public:
 	Bool IsSynchronized() const;
 	void SetSynchronized(Bool b);
 
-	virtual util::WeakHandle<pragma::BaseModelComponent> GetModelComponent() const override;
 	virtual util::WeakHandle<pragma::BaseAnimatedComponent> GetAnimatedComponent() const override;
 	virtual util::WeakHandle<pragma::BaseWeaponComponent> GetWeaponComponent() const override;
 	virtual util::WeakHandle<pragma::BaseVehicleComponent> GetVehicleComponent() const override;

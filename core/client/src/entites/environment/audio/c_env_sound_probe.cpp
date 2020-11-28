@@ -55,7 +55,7 @@ void CEnvSoundProbeComponent::OnEntitySpawn()
 		return;
 	auto &origin = pTrComponent->GetPosition();
 	auto mdlComponent = ent.GetModelComponent();
-	if(mdlComponent.expired() || mdlComponent->GetModel() == nullptr)
+	if(!mdlComponent || mdlComponent->GetModel() == nullptr)
 	{
 		// Use radius
 		s_probes.push_back({origin,origin,Placement::Centroid,m_radius,0.f});

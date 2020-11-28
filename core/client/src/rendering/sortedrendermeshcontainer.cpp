@@ -165,7 +165,7 @@ SortedRenderMeshContainer::SortedRenderMeshContainer(CBaseEntity *ent,std::vecto
 	if(true)
 		return;
 	auto mdlComponent = ent->GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 	assert(mdl != nullptr);
 	auto &materials = mdl->GetMaterials();
 	if(materials.empty())

@@ -100,8 +100,7 @@ void ShadowRenderer::UpdateWorldShadowCasters(std::shared_ptr<prosper::IPrimaryC
 	auto &entWorld = static_cast<CBaseEntity&>(pWorld->GetEntity());
 	if(entWorld.IsInScene(*scene) == false)
 		return;
-	auto mdlComponent = entWorld.GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = entWorld.GetModel();
 	auto meshTree = mdl ? static_cast<pragma::CWorldComponent*>(pWorld)->GetMeshTree() : nullptr;
 	if(meshTree == nullptr)
 		return;
@@ -129,7 +128,7 @@ void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimary
 		return Intersection::AABBSphere(bounds.first,bounds.second,m_lightSourceData.position,m_lightSourceData.radius);
 		},[this,&light,&drawCmd,scene](const CBaseEntity *ent) {
 			auto pRenderComponent = ent->GetRenderComponent();
-			if(!pRenderComponent || ent->IsInScene(*scene) == false || pRenderComponent->ShouldDrawShadow(m_lightSourceData.position) == false || ent->IsWorld() == true)
+			if(!pRenderComponent || ent->IsInScene(*scene) == false || pRenderComponent->ShouldDrawShadow() == false || ent->IsWorld() == true)
 				return;
 			uint32_t renderFlags = 0;
 			if(light.ShouldPass(*ent,renderFlags) == false)

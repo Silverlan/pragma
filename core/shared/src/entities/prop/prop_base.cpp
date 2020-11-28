@@ -31,8 +31,7 @@ PHYSICSTYPE BasePropComponent::UpdatePhysicsType(BaseEntity *ent)
 		m_kvMass = 0.f;
 		return PHYSICSTYPE::STATIC;
 	}
-	auto mdlComponent = ent->GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent->GetModel();
 	if(hMdl != nullptr)
 	{
 		// TODO: Do this in a better way
@@ -65,8 +64,7 @@ bool BasePropComponent::SetKeyValue(std::string key,std::string val)
 void BasePropComponent::InitializePhysics(PHYSICSTYPE physType)
 {
 	auto &ent = GetEntity();
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr)
 		return;
 	if((ent.GetSpawnFlags() &umath::to_integral(SpawnFlags::DisableCollisions)) != 0 || physType == PHYSICSTYPE::NONE)
@@ -121,8 +119,7 @@ void BasePropComponent::InitializePhysics()
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent == nullptr)
 		return;
-	auto mdlC = ent.GetModelComponent();
-	auto hMdl = mdlC.valid() ? mdlC->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(hMdl != nullptr && m_physicsType != PHYSICSTYPE::NONE && m_physicsType != pPhysComponent->GetPhysicsType())
 		InitializePhysics(m_physicsType);
 	if(m_moveType != MOVETYPE::NONE)

@@ -70,11 +70,11 @@ void CAnimatedComponent::Initialize()
 	BaseAnimatedComponent::Initialize();
 	InitializeBoneBuffer();
 
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	/*BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto pRenderComponent = GetEntity().GetComponent<CRenderComponent>();
 		if(pRenderComponent.valid())
 			pRenderComponent->UpdateRenderBounds();
-	});
+	});*/
 	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		UpdateBoneMatricesMT();
 	});
@@ -242,8 +242,7 @@ bool CAnimatedComponent::MaintainAnimations(double dt)
 
 void CAnimatedComponent::UpdateBoneMatricesMT()
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = GetEntity().GetModel();
 	if(mdl == nullptr)
 		return;
 	auto *bindPose = GetBindPose();

@@ -411,15 +411,9 @@ bool CDecalComponent::ApplyDecal()
 		if(physC->GetPhysicsType() != PHYSICSTYPE::STATIC)
 			continue;
 		// TODO: We can speed this up by using the BSP Tree for occlusion culling
-		auto renderC = ent->GetComponent<CRenderComponent>();
-		Vector3 min,max;
-		renderC->GetRenderBounds(&min,&max);
+		auto &aabb = static_cast<CBaseEntity*>(ent)->GetAbsoluteRenderBounds();
 
-		auto &pose = ent->GetPose();
-		min = pose *min;
-		max = pose *max;
-
-		if(Intersection::AABBInAABB(projectorAABB.first,projectorAABB.second,min,max) == false)
+		if(Intersection::AABBInAABB(projectorAABB.first,projectorAABB.second,aabb.min,aabb.max) == false)
 			continue;
 
 		targetEnts.push_back(static_cast<CBaseEntity*>(ent));

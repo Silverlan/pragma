@@ -36,8 +36,8 @@ Con::c_cout& BaseEntity::print(Con::c_cout &os)
 	auto *componentManager = GetComponentManager();
 	auto pNameComponent = componentManager ? static_cast<pragma::BaseNameComponent*>(FindComponent("name").get()) : nullptr;
 	os<<"Entity["<<m_index<<"]["<<GetLocalIndex()<<"]["<<GetClass()<<"]["<<(pNameComponent != nullptr ? pNameComponent->GetName() : "")<<"][";
-	auto mdlComponent = componentManager ? GetModelComponent() : util::WeakHandle<pragma::BaseModelComponent>{};
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto mdlComponent = componentManager ? GetModelComponent() : nullptr;
+	auto hMdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 	if(hMdl == nullptr)
 		os<<"NULL";
 	else
@@ -51,7 +51,7 @@ std::ostream& BaseEntity::print(std::ostream &os)
 	auto pNameComponent = static_cast<pragma::BaseNameComponent*>(FindComponent("name").get());
 	os<<"Entity["<<m_index<<"]["<<GetLocalIndex()<<"]["<<GetClass()<<"]["<<(pNameComponent != nullptr ? pNameComponent->GetName() : "")<<"][";
 	auto mdlComponent = GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto hMdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 	if(hMdl == nullptr)
 		os<<"NULL";
 	else
@@ -297,6 +297,7 @@ void BaseEntity::PrecacheModels() {}
 
 pragma::BaseTransformComponent *BaseEntity::GetTransformComponent() const {return m_transformComponent;}
 pragma::BasePhysicsComponent *BaseEntity::GetPhysicsComponent() const {return m_physicsComponent;}
+pragma::BaseModelComponent *BaseEntity::GetModelComponent() const {return m_modelComponent;}
 
 void BaseEntity::Remove() {}
 void BaseEntity::RemoveSafely() {GetNetworkState()->GetGameState()->ScheduleEntityForRemoval(*this);}

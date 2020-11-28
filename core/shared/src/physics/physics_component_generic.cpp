@@ -108,7 +108,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics:
 {
 	auto &ent = GetEntity();
 	auto mdlComponent = ent.GetModelComponent();
-	if(mdlComponent.expired() || mdlComponent->HasModel() == false)
+	if(!mdlComponent || mdlComponent->HasModel() == false)
 		return {};
 
 	auto &physObjShapes = physObjCreateInfo.GetShapes();
@@ -526,9 +526,9 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 
 	auto &ent = GetEntity();
 	auto mdlComponent = ent.GetModelComponent();
-	if(mdlComponent.expired() || mdlComponent->HasModel() == false)
+	if(!mdlComponent || mdlComponent->HasModel() == false)
 		return {};
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto hMdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 	auto &meshes = hMdl->GetCollisionMeshes();
 	if(meshes.empty())
 		return {};
@@ -713,7 +713,7 @@ PhysObj *BasePhysicsComponent::InitializePhysics(PHYSICSTYPE type,PhysFlags flag
 		case PHYSICSTYPE::DYNAMIC:
 		{
 			auto mdlComponent = GetEntity().GetModelComponent();
-			auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+			auto hMdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 			if(hMdl != nullptr)
 			{
 				Model *mdl = hMdl.get();

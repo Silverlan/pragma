@@ -47,7 +47,7 @@ void OcclusionCullingHandlerInert::PerformCulling(
 			continue;
 		auto *pRenderComponent = ent->GetRenderComponent();
 		bool bViewModel = false;
-		if((ent->IsSpawned() == true && pRenderComponent->GetModelComponent().valid() && pRenderComponent->GetModelComponent()->GetModel() != nullptr && pRenderComponent->ShouldDraw(camPos) != false))
+		if((ent->IsSpawned() == true && pRenderComponent->GetModelComponent().valid() && pRenderComponent->GetModelComponent()->GetModel() != nullptr && pRenderComponent->ShouldDraw() != false))
 		{
 			//if(bUpdateLod == true) // Needs to be updated every frame (in case the entity is moving towards or away from us)
 			//pRenderComponent->GetModelComponent()->UpdateLOD(camPos);

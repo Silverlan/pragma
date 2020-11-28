@@ -30,7 +30,7 @@ void CViewBodyComponent::Initialize()
 		auto *pl = c_game->GetLocalPlayer();
 		if(pl == nullptr || pl->GetObserverMode() != OBSERVERMODE::FIRSTPERSON)
 		{
-			shouldDrawData.shouldDraw = CEShouldDraw::ShouldDraw::No;
+			shouldDrawData.shouldDraw = false;
 			return util::EventReply::Handled;
 		}
 		return util::EventReply::Unhandled;

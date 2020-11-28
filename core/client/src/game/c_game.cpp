@@ -43,6 +43,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_hdr.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/renderers/raytracing_renderer.hpp"
+#include "pragma/rendering/render_queue_worker.hpp"
 #include "pragma/ai/c_navsystem.h"
 #include <texturemanager/texturemanager.h>
 #include <pragma/physics/environment.hpp>
@@ -144,6 +145,7 @@ void CGame::MessagePacketTracker::CheckMessages(uint8_t messageId,std::vector<do
 //////////////////////////
 
 namespace pragma::rendering {class LightingStageRenderProcessor; class DepthStageRenderProcessor;};
+static auto cvWorkerThreadCount = GetClientConVar("render_queue_worker_thread_count");
 CGame::CGame(NetworkState *state)
 	: Game(state),
 	m_tServer(0),m_renderScene(NULL),
@@ -175,7 +177,7 @@ CGame::CGame(NetworkState *state)
 	RegisterCallback<void>("PostRenderWater");
 	RegisterCallback<void>("PreRenderView");
 	RegisterCallback<void>("PostRenderView");
-	RegisterCallback<void>("PreRenderScenes");
+	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes");
 	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<const util::DrawSceneInfo>>("DrawScene");
 	RegisterCallback<void>("PostRenderScenes");
 	RegisterCallback<void>("PostRenderScenes");
@@ -291,12 +293,14 @@ CGame::CGame(NetworkState *state)
 	});
 
 	m_renderQueueBuilder = std::make_unique<pragma::rendering::RenderQueueBuilder>();
+	m_renderQueueWorkerManager = std::make_unique<pragma::rendering::RenderQueueWorkerManager>(umath::clamp(cvWorkerThreadCount->GetInt(),1,20));
 }
 
 CGame::~CGame() {}
 
 void CGame::OnRemove()
 {
+	m_renderQueueWorkerManager = nullptr;
 	m_renderQueueBuilder = nullptr;
 	c_engine->GetRenderContext().WaitIdle();
 	WGUI::GetInstance().SetFocusCallback(nullptr);
@@ -352,7 +356,17 @@ void CGame::OnRemove()
 	Game::OnRemove();
 }
 
+static void cmd_render_queue_worker_thread_count(NetworkState*,ConVar*,int,int val)
+{
+	if(c_game == nullptr)
+		return;
+	val = umath::clamp(val,1,20);
+	c_game->GetRenderQueueWorkerManager().SetWorkerCount(val);
+}
+REGISTER_CONVAR_CALLBACK_CL(render_queue_worker_thread_count,cmd_render_queue_worker_thread_count);
+
 pragma::rendering::RenderQueueBuilder &CGame::GetRenderQueueBuilder() {return *m_renderQueueBuilder;}
+pragma::rendering::RenderQueueWorkerManager &CGame::GetRenderQueueWorkerManager() {return *m_renderQueueWorkerManager;}
 
 void CGame::UpdateTime()
 {
@@ -1080,8 +1094,7 @@ void CGame::InitializeMapEntities(pragma::asset::WorldData &worldData,std::vecto
 			}
 		}
 
-		auto mdlComponent = ent.GetModelComponent();
-		auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+		auto &mdl = ent.GetModel();
 		if(mdl == nullptr)
 		{
 			auto pRenderComponent = static_cast<CBaseEntity&>(ent).GetRenderComponent();
@@ -1092,7 +1105,7 @@ void CGame::InitializeMapEntities(pragma::asset::WorldData &worldData,std::vecto
 				auto pPhysComponent = ent.GetPhysicsComponent();
 				if(pPhysComponent != nullptr)
 					pPhysComponent->GetCollisionBounds(&min,&max);
-				pRenderComponent->SetRenderBounds(min,max);
+				pRenderComponent->SetLocalRenderBounds(min,max);
 			}
 		}
 	}

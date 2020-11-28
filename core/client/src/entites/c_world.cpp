@@ -41,8 +41,7 @@ void CWorldComponent::Initialize()
 
 		m_lodBaseMeshIds.clear();
 		auto &ent = GetEntity();
-		auto mdlComponent = ent.GetModelComponent();
-		auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+		auto &mdl = ent.GetModel();
 		if(mdl == nullptr)
 		{
 			ReloadMeshCache();
@@ -66,7 +65,7 @@ void CWorldComponent::Initialize()
 			pPhysComponent->GetCollisionBounds(&min,&max);
 		auto pRenderComponent = ent.GetComponent<pragma::CRenderComponent>();
 		if(pRenderComponent.valid())
-			pRenderComponent->SetRenderBounds(min,max);
+			pRenderComponent->SetLocalRenderBounds(min,max);
 	});
 	BindEvent(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		BuildOfflineRenderQueues(true);
@@ -110,8 +109,7 @@ void CWorldComponent::ReloadMeshCache()
 	m_meshTree = nullptr;
 	m_chcController = nullptr;
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
-	auto mdlComponent = ent.GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)
 		return;
 	m_meshTree = std::make_shared<OcclusionOctree<std::shared_ptr<ModelMesh>>>(256.f,1'073'741'824.f,4096.f,[](const std::weak_ptr<ModelMesh> ptrSubMesh,Vector3 &min,Vector3 &max) {
@@ -353,8 +351,7 @@ void CWorld::Initialize()
 Con::c_cout& CWorld::print(Con::c_cout &os)
 {
 	os<<"CWorld["<<m_index<<"]"<<"["<<GetClass()<<"]"<<"[";
-	auto mdlComponent = GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = GetModel();
 	if(mdl == nullptr)
 		os<<"NULL";
 	else
@@ -366,8 +363,7 @@ Con::c_cout& CWorld::print(Con::c_cout &os)
 std::ostream& CWorld::print(std::ostream &os)
 {
 	os<<"CWorld["<<m_index<<"]"<<"["<<GetClass()<<"]"<<"[";
-	auto mdlComponent = GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = GetModel();
 	if(mdl == nullptr)
 		os<<"NULL";
 	else

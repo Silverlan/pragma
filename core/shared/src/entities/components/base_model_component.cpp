@@ -82,8 +82,7 @@ bool BaseModelComponent::GetAttachment(unsigned int attID,Vector3 *pos,EulerAngl
 }
 bool BaseModelComponent::GetAttachment(const std::string &name,Vector3 *pos,EulerAngles *angles) const
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = GetEntity().GetModel();
 	if(hMdl == nullptr)
 		return false;
 	int attID = hMdl->LookupAttachment(name);
@@ -124,8 +123,7 @@ bool BaseModelComponent::GetAttachment(unsigned int attID,Vector3 *pos,Quat *rot
 }
 bool BaseModelComponent::GetAttachment(const std::string &name,Vector3 *pos,Quat *rot) const
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = GetEntity().GetModel();
 	if(hMdl == nullptr)
 		return false;
 	return GetAttachment(hMdl->LookupAttachment(name),pos,rot);
@@ -354,8 +352,7 @@ uint32_t BaseModelComponent::GetFlexControllerCount() const
 }
 int BaseModelComponent::LookupAnimation(const std::string &name) const
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return -1;
 	return hModel->LookupAnimation(name);

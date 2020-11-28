@@ -380,8 +380,7 @@ int Lua::game::raycast(lua_State *l)
 		if(ent == nullptr || ent->IsSpawned() == false)
 			continue;
 		auto pTrComponent = ent->GetTransformComponent();
-		auto mdlComponent = ent->GetModelComponent();
-		auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+		auto &hMdl = ent->GetModel();
 		if(hMdl == nullptr || pTrComponent == nullptr)
 			continue;
 #ifdef ENABLE_DEPRECATED_PHYSICS

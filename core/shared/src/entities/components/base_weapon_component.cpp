@@ -96,7 +96,7 @@ void BaseWeaponComponent::OnFireBullets(const BulletInfo &bulletInfo,Vector3 &bu
 		auto rot = uquat::identity();
 		auto &ent = GetEntity();
 		auto mdlC = ent.GetModelComponent();
-		if(mdlC.valid() && mdlC->GetAttachment(m_attMuzzle,static_cast<Vector3*>(nullptr),&rot) == true)
+		if(mdlC && mdlC->GetAttachment(m_attMuzzle,static_cast<Vector3*>(nullptr),&rot) == true)
 		{
 			auto pTrComponent = ent.GetTransformComponent();
 			if(pTrComponent)
@@ -230,7 +230,7 @@ void BaseWeaponComponent::Initialize()
 	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &ent = GetEntity();
 		auto mdlComponent = ent.GetModelComponent();
-		m_attMuzzle = mdlComponent.valid() ? mdlComponent->LookupAttachment("muzzle") : -1;
+		m_attMuzzle = mdlComponent ? mdlComponent->LookupAttachment("muzzle") : -1;
 	});
 	BindEventUnhandled(BaseShooterComponent::EVENT_ON_FIRE_BULLETS,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &evDataOnFireBullets = static_cast<pragma::CEOnFireBullets&>(evData.get());

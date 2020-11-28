@@ -169,7 +169,7 @@ bool CLightComponent::IsInCone(const CBaseEntity &ent,const Vector3 &dir,float a
 	if(!pRenderComponent || pTrComponent == nullptr || !pTrComponentThis)
 		return false;
 	auto &start = pTrComponentThis->GetPosition();
-	auto sphere = pRenderComponent->GetRenderSphereBounds();
+	auto &sphere = pRenderComponent->GetUpdatedAbsoluteRenderSphere();
 	return Intersection::SphereCone(pTrComponent->GetPosition() +sphere.pos,sphere.radius,start,dir,angle);
 }
 void CLightComponent::SetLightIntensity(float intensity,LightIntensityType type)
@@ -198,7 +198,7 @@ bool CLightComponent::IsInRange(const CBaseEntity &ent) const
 	if(pRadiusComponent.expired() || !pRenderComponent || pTrComponent == nullptr || !pTrComponentThis)
 		return false;
 	auto &origin = pTrComponentThis->GetPosition();
-	auto sphere = pRenderComponent->GetRenderSphereBounds();
+	auto &sphere = pRenderComponent->GetAbsoluteRenderSphere();
 	auto &pos = pTrComponent->GetPosition();
 	auto radius = pRadiusComponent->GetRadius();
 	return (uvec::distance(pos +sphere.pos,origin) <= (radius +sphere.radius)) ? true : false;

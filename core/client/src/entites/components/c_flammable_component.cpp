@@ -191,8 +191,7 @@ util::EventReply CFlammableComponent::Ignite(float duration,BaseEntity *attacker
 	std::vector<ParticleInfo> particlePositions;
 	particlePositions.reserve(particleCount);
 	decltype(particleCount) particleId = 0;
-	auto mdlComponent = ent.GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = ent.GetModel();
 	if(mdl != nullptr)
 	{
 		auto &skeleton = mdl->GetSkeleton();

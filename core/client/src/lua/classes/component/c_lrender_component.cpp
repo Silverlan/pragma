@@ -22,9 +22,11 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hComponent);
 		Lua::Property::push(l,*hComponent->GetRenderModeProperty());
 		}));
-	defCRender.def("GetRenderBounds",&Lua::Render::GetRenderBounds);
-	defCRender.def("SetRenderBounds",&Lua::Render::SetRenderBounds);
-	defCRender.def("GetRenderSphereBounds",&Lua::Render::GetRenderSphereBounds);
+	defCRender.def("GetLocalRenderBounds",&Lua::Render::GetLocalRenderBounds);
+	defCRender.def("GetLocalRenderSphereBounds",&Lua::Render::GetLocalRenderSphereBounds);
+	defCRender.def("GetAbsoluteRenderBounds",&Lua::Render::GetAbsoluteRenderBounds);
+	defCRender.def("GetAbsoluteRenderSphereBounds",&Lua::Render::GetAbsoluteRenderSphereBounds);
+	defCRender.def("SetLocalRenderBounds",&Lua::Render::SetLocalRenderBounds);
 	// defCRender.def("UpdateRenderBuffers",static_cast<void(*)(lua_State*,CRenderHandle&,std::shared_ptr<prosper::ICommandBuffer>&,CSceneHandle&,CCameraHandle&,bool)>(&Lua::Render::UpdateRenderBuffers));
 	// defCRender.def("UpdateRenderBuffers",static_cast<void(*)(lua_State*,CRenderHandle&,std::shared_ptr<prosper::ICommandBuffer>&,CSceneHandle&,CCameraHandle&)>(&Lua::Render::UpdateRenderBuffers));
 	defCRender.def("GetRenderBuffer",&Lua::Render::GetRenderBuffer);
@@ -187,29 +189,39 @@ void Lua::Render::GetRenderMode(lua_State *l,CRenderHandle &hEnt)
 	RenderMode mode = hEnt->GetRenderMode();
 	Lua::PushInt(l,static_cast<int>(mode));
 }
-
-void Lua::Render::GetRenderSphereBounds(lua_State *l,CRenderHandle &hEnt)
+void Lua::Render::GetLocalRenderBounds(lua_State *l,CRenderHandle &hEnt)
 {
 	pragma::Lua::check_component(l,hEnt);
-	auto sphere = hEnt->GetRenderSphereBounds();
+	auto &aabb = hEnt->GetLocalRenderBounds();
+	Lua::Push<Vector3>(l,aabb.min);
+	Lua::Push<Vector3>(l,aabb.max);
+}
+void Lua::Render::GetLocalRenderSphereBounds(lua_State *l,CRenderHandle &hEnt)
+{
+	pragma::Lua::check_component(l,hEnt);
+	auto &sphere = hEnt->GetLocalRenderSphere();
+	Lua::Push<Vector3>(l,sphere.pos);
+	Lua::PushNumber(l,sphere.radius);
+}
+void Lua::Render::GetAbsoluteRenderBounds(lua_State *l,CRenderHandle &hEnt)
+{
+	pragma::Lua::check_component(l,hEnt);
+	auto &aabb = hEnt->GetUpdatedAbsoluteRenderBounds();
+	Lua::Push<Vector3>(l,aabb.min);
+	Lua::Push<Vector3>(l,aabb.max);
+}
+void Lua::Render::GetAbsoluteRenderSphereBounds(lua_State *l,CRenderHandle &hEnt)
+{
+	pragma::Lua::check_component(l,hEnt);
+	auto &sphere = hEnt->GetUpdatedAbsoluteRenderSphere();
 	Lua::Push<Vector3>(l,sphere.pos);
 	Lua::PushNumber(l,sphere.radius);
 }
 
-void Lua::Render::GetRenderBounds(lua_State *l,CRenderHandle &hEnt)
+void Lua::Render::SetLocalRenderBounds(lua_State *l,CRenderHandle &hEnt,Vector3 &min,Vector3 &max)
 {
 	pragma::Lua::check_component(l,hEnt);
-	Vector3 min;
-	Vector3 max;
-	hEnt->GetRenderBounds(&min,&max);
-	Lua::Push<Vector3>(l,min);
-	Lua::Push<Vector3>(l,max);
-}
-
-void Lua::Render::SetRenderBounds(lua_State *l,CRenderHandle &hEnt,Vector3 &min,Vector3 &max)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->SetRenderBounds(min,max);
+	hEnt->SetLocalRenderBounds(min,max);
 }
 
 /*void Lua::Render::UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,CSceneHandle &hScene,CCameraHandle &hCam,bool bForceBufferUpdate)

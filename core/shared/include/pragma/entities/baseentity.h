@@ -125,7 +125,6 @@ public:
 	void SetScale(const Vector3 &scale);
 
 	// Helper functions
-	virtual util::WeakHandle<pragma::BaseModelComponent> GetModelComponent() const=0;
 	virtual util::WeakHandle<pragma::BaseAnimatedComponent> GetAnimatedComponent() const=0;
 	virtual util::WeakHandle<pragma::BaseWeaponComponent> GetWeaponComponent() const=0;
 	virtual util::WeakHandle<pragma::BaseVehicleComponent> GetVehicleComponent() const=0;
@@ -134,6 +133,7 @@ public:
 	virtual util::WeakHandle<pragma::BasePlayerComponent> GetPlayerComponent() const=0;
 	virtual util::WeakHandle<pragma::BaseTimeScaleComponent> GetTimeScaleComponent() const=0;
 	virtual util::WeakHandle<pragma::BaseNameComponent> GetNameComponent() const=0;
+	pragma::BaseModelComponent *GetModelComponent() const;
 	pragma::BaseTransformComponent *GetTransformComponent() const;
 	pragma::BasePhysicsComponent *GetPhysicsComponent() const;
 
@@ -148,7 +148,7 @@ public:
 
 	void SetModel(const std::string &mdl);
 	void SetModel(const std::shared_ptr<Model> &mdl);
-	std::shared_ptr<Model> GetModel() const;
+	const std::shared_ptr<Model> &GetModel() const;
 	std::string GetModelName() const;
 	std::optional<umath::Transform> GetAttachmentPose(uint32_t attId) const;
 	uint32_t GetSkin() const;
@@ -259,6 +259,7 @@ protected:
 	// Transform component is needed frequently, so we store a direct reference to it for faster access
 	pragma::BaseTransformComponent *m_transformComponent = nullptr;
 	pragma::BasePhysicsComponent *m_physicsComponent = nullptr;
+	pragma::BaseModelComponent *m_modelComponent = nullptr;
 
 	// Should only be used by quick-access methods!
 	// Adds the component and trasmits the information

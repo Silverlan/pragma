@@ -15,7 +15,7 @@ static auto g_debugPrint = false;
 void pragma::CEyeComponent::UpdateEyeballsMT()
 {
 	auto mdlC = GetEntity().GetModelComponent();
-	if(mdlC.expired())
+	if(!mdlC)
 		return;
 	auto &mdl = mdlC->GetModel();
 	if(mdl == nullptr)
@@ -50,7 +50,7 @@ Vector3 pragma::CEyeComponent::GetViewTarget() const
 	if(m_eyeAttachmentIndex != std::numeric_limits<uint32_t>::max())
 	{
 		auto mdlC = ent.GetModelComponent();
-		if(mdlC.valid())
+		if(mdlC)
 		{
 			Vector3 attPos {};
 			auto attRot = uquat::identity();

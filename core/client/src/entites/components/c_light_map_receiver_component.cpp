@@ -106,10 +106,10 @@ void CLightMapReceiverComponent::UpdateRenderMeshBufferList()
 {
 	m_meshBufferIndices.clear();
 	auto mdlC = GetEntity().GetModelComponent();
-	if(mdlC.expired())
+	if(!mdlC)
 		return;
 	umath::set_flag(m_stateFlags,StateFlags::RenderMeshBufferIndexTableDirty,false);
-	auto &renderMeshes = static_cast<CModelComponent*>(mdlC.get())->GetRenderMeshes();
+	auto &renderMeshes = static_cast<CModelComponent*>(mdlC)->GetRenderMeshes();
 	m_meshBufferIndices.resize(renderMeshes.size());
 	for(auto i=decltype(renderMeshes.size()){0u};i<renderMeshes.size();++i)
 	{

@@ -71,7 +71,7 @@ void Console::commands::debug_hitboxes(NetworkState *state,pragma::BasePlayerCom
 	for(auto *ent : ents)
 	{
 		auto mdlComponent = ent->GetModelComponent();
-		auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+		auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 		if(mdl == nullptr)
 			return;
 		auto boneIds = mdl->GetHitboxBones();
@@ -135,7 +135,7 @@ void Console::commands::debug_hitboxes(NetworkState *state,pragma::BasePlayerCom
 		{
 			auto &hEnt = o.hEntity;
 			auto mdlComponent = hEnt.get()->GetModelComponent();
-			auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+			auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 			if(mdl == nullptr)
 				return;
 			auto boneIds = mdl->GetHitboxBones();

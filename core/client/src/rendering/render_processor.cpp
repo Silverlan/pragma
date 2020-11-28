@@ -23,6 +23,10 @@ extern DLLCLIENT CGame *c_game;
 static bool g_collectRenderStats = false;
 static CallbackHandle g_cbPreRenderScene = {};
 static CallbackHandle g_cbPostRenderScene = {};
+static std::string nanoseconds_to_ms(std::chrono::nanoseconds t)
+{
+	return std::to_string(static_cast<long double>(t.count()) /static_cast<long double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds{1}).count())) +"ms";
+}
 static void print_pass_stats(const RenderPassStats &stats,bool full)
 {
 	auto *cam = c_game->GetRenderCamera();
@@ -107,15 +111,29 @@ static void print_pass_stats(const RenderPassStats &stats,bool full)
 	Con::cout<<"Number of meshes drawn: "<<stats.numDrawnMeshes<<Con::endl;
 	Con::cout<<"Number of vertices drawn: "<<stats.numDrawnVertices<<Con::endl;
 	Con::cout<<"Number of triangles drawn: "<<stats.numDrawnTrianges<<Con::endl;
-	Con::cout<<"Wait time: "<<(static_cast<long double>(stats.renderThreadWaitTime.count()) /static_cast<long double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds{1}).count()))<<Con::endl;
-	Con::cout<<"CPU Execution time: "<<(static_cast<long double>(stats.cpuExecutionTime.count()) /static_cast<long double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds{1}).count()))<<"ms"<<Con::endl;
+	Con::cout<<"Wait time: "<<nanoseconds_to_ms(stats.renderThreadWaitTime)<<Con::endl;
+	Con::cout<<"CPU Execution time: "<<nanoseconds_to_ms(stats.cpuExecutionTime)<<Con::endl;
 }
 DLLCLIENT void print_debug_render_stats(const RenderStats &renderStats,bool full)
 {
 	g_collectRenderStats = false;
 	auto t = renderStats.lightingPass.cpuExecutionTime +renderStats.lightingPassTranslucent.cpuExecutionTime +renderStats.prepass.cpuExecutionTime +renderStats.shadowPass.cpuExecutionTime;
-	Con::cout<<"Total CPU Execution time: "<<(static_cast<long double>(t.count()) /static_cast<long double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds{1}).count()))<<"ms"<<Con::endl;
-	Con::cout<<"Light culling time time: "<<(static_cast<long double>(renderStats.lightCullingTime.count()) /static_cast<long double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds{1}).count()))<<"ms"<<Con::endl;
+	Con::cout<<"Total CPU Execution time: "<<nanoseconds_to_ms(t)<<Con::endl;
+	Con::cout<<"Light culling time time: "<<nanoseconds_to_ms(renderStats.lightCullingTime)<<Con::endl;
+
+	Con::cout<<"\n----- Render queue builder stats: -----"<<Con::endl;
+	Con::cout<<"Total execution time: "<<nanoseconds_to_ms(renderStats.renderQueueBuilderStats.totalExecutionTime)<<Con::endl;
+	Con::cout<<"World queue update time: "<<nanoseconds_to_ms(renderStats.renderQueueBuilderStats.worldQueueUpdateTime)<<Con::endl;
+	Con::cout<<"Octree processing time: "<<nanoseconds_to_ms(renderStats.renderQueueBuilderStats.octreeProcessingTime)<<Con::endl;
+	Con::cout<<"Worker wait time: "<<nanoseconds_to_ms(renderStats.renderQueueBuilderStats.workerWaitTime)<<Con::endl;
+	Con::cout<<"Queue sort time: "<<nanoseconds_to_ms(renderStats.renderQueueBuilderStats.queueSortTime)<<Con::endl;
+	Con::cout<<"Queue instancing time: "<<nanoseconds_to_ms(renderStats.renderQueueBuilderStats.queueInstancingTime)<<Con::endl;
+
+	Con::cout<<"Workers:"<<Con::endl;
+	uint32_t workerId = 0;
+	for(auto &workerStats : renderStats.renderQueueBuilderStats.workerStats)
+		Con::cout<<"Worker #"<<workerId++<<": "<<workerStats.numJobs<<" jobs with total execution time of "<<nanoseconds_to_ms(workerStats.totalExecutionTime)<<Con::endl;
+
 	Con::cout<<"\n----- Depth prepass: -----"<<Con::endl;
 	print_pass_stats(renderStats.prepass,full);
 
@@ -131,7 +149,7 @@ DLLCLIENT void print_debug_render_stats(const RenderStats &renderStats,bool full
 DLLCLIENT void debug_render_stats(bool full)
 {
 	g_collectRenderStats = true;
-	g_cbPreRenderScene = c_game->AddCallback("PreRenderScene",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
+	g_cbPreRenderScene = c_game->AddCallback("PreRenderScenes",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
 		drawSceneInfo.get().renderStats = std::make_unique<RenderStats>();
 	}));
 	g_cbPostRenderScene = c_game->AddCallback("PostRenderScene",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([full](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
@@ -378,9 +396,8 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 	std::chrono::steady_clock::time_point t;
 	if(optStats)
 		t = std::chrono::steady_clock::now();
-	renderQueue.WaitForCompletion();
-	if(optStats)
-		optStats->renderThreadWaitTime += std::chrono::steady_clock::now() -t;
+
+	renderQueue.WaitForCompletion(optStats);
 	if(m_renderer == nullptr || (bindShaders == false && umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false))
 		return 0;
 	m_stats = optStats;

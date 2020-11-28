@@ -47,7 +47,7 @@ Con::c_cout& SPlayerComponent::print(Con::c_cout &os)
 	auto nameC = ent.GetNameComponent();
 	os<<"Player["<<(nameC.valid() ? nameC->GetName() : "")<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
 	auto mdlComponent = ent.GetModelComponent();
-	if(mdlComponent.expired() || mdlComponent->GetModel() == nullptr)
+	if(!mdlComponent || mdlComponent->GetModel() == nullptr)
 		os<<"NULL";
 	else
 		os<<mdlComponent->GetModel()->GetName();
@@ -61,7 +61,7 @@ std::ostream& SPlayerComponent::print(std::ostream &os)
 	auto nameC = ent.GetNameComponent();
 	os<<"Player["<<(nameC.valid() ? nameC->GetName() : "")<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
 	auto mdlComponent = ent.GetModelComponent();
-	if(mdlComponent.expired() || mdlComponent->GetModel() == nullptr)
+	if(!mdlComponent || mdlComponent->GetModel() == nullptr)
 		os<<"NULL";
 	else
 		os<<mdlComponent->GetModel()->GetName();

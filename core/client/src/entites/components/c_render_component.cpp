@@ -137,10 +137,10 @@ void CRenderComponent::Initialize()
 		SetRenderBufferDirty();
 	});
 	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		uvec::zero(&m_renderMin);
-		uvec::zero(&m_renderMax);
-		uvec::zero(&m_renderMinRot);
-		uvec::zero(&m_renderMaxRot);
+		m_localRenderBounds = {};
+		m_absoluteRenderBounds = {};
+		m_localRenderSphere = {};
+		m_absoluteRenderSphere = {};
 
 		auto &ent = GetEntity();
 		auto &mdlComponent = GetModelComponent();
@@ -158,8 +158,7 @@ void CRenderComponent::Initialize()
 		auto lorigin = pPhysComponent != nullptr ? pPhysComponent->GetLocalOrigin() : Vector3{};
 		rMin += lorigin;
 		rMax += lorigin;
-		SetRenderBounds(rMin,rMax);
-		UpdateRenderBounds();
+		SetLocalRenderBounds(rMin,rMax);
 
 		UpdateRenderMeshes();
 		m_renderMode->InvokeCallbacks();
@@ -191,95 +190,89 @@ void CRenderComponent::OnEntitySpawn()
 		occlusionCullerC->AddEntity(static_cast<CBaseEntity&>(GetEntity()));
 	}
 }
-Sphere CRenderComponent::GetRenderSphereBounds() const
+void CRenderComponent::UpdateAbsoluteRenderBounds()
 {
-	auto r = m_renderSphere;
+	if(umath::is_flag_set(m_stateFlags,StateFlags::RenderBoundsDirty) == false)
+		return;
+	umath::set_flag(m_stateFlags,StateFlags::RenderBoundsDirty,false);
+	UpdateAbsoluteAABBRenderBounds();
+	UpdateAbsoluteSphereRenderBounds();
+}
+void CRenderComponent::UpdateAbsoluteSphereRenderBounds() {m_absoluteRenderSphere = CalcAbsoluteRenderSphere();}
+void CRenderComponent::UpdateAbsoluteAABBRenderBounds() {m_absoluteRenderBounds = CalcAbsoluteRenderBounds();}
+const bounding_volume::AABB &CRenderComponent::GetLocalRenderBounds() const {return m_localRenderBounds;}
+const Sphere &CRenderComponent::GetLocalRenderSphere() const {return m_localRenderSphere;}
+
+const bounding_volume::AABB &CRenderComponent::GetUpdatedAbsoluteRenderBounds() const
+{
+	const_cast<CRenderComponent*>(this)->UpdateAbsoluteRenderBounds();
+	return GetAbsoluteRenderBounds();
+}
+const Sphere &CRenderComponent::GetUpdatedAbsoluteRenderSphere() const
+{
+	const_cast<CRenderComponent*>(this)->UpdateAbsoluteRenderBounds();
+	return GetAbsoluteRenderSphere();
+}
+
+const bounding_volume::AABB &CRenderComponent::GetAbsoluteRenderBounds() const {return m_absoluteRenderBounds;}
+const Sphere &CRenderComponent::GetAbsoluteRenderSphere() const {return m_absoluteRenderSphere;}
+
+bounding_volume::AABB CRenderComponent::CalcAbsoluteRenderBounds() const
+{
+	auto absBounds = m_localRenderBounds;
+	auto &min = absBounds.min;
+	auto &max = absBounds.max;
+
 	auto &ent = GetEntity();
-	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent != nullptr)
-	{
-		auto scale = pTrComponent->GetScale();
-		r.radius *= umath::abs_max(scale.x,scale.y,scale.z);
-	}
+	auto pose = ent.GetPose();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent == nullptr)
-		return r;
-	auto physType = pPhysComponent->GetPhysicsType();
-	if(physType == PHYSICSTYPE::DYNAMIC || physType == PHYSICSTYPE::STATIC)
+	if(pPhysComponent)
 	{
-		auto &lorigin = pPhysComponent->GetLocalOrigin();
-		r.pos += lorigin;
+		auto physType = pPhysComponent->GetPhysicsType();
+		if(physType == PHYSICSTYPE::DYNAMIC || physType == PHYSICSTYPE::STATIC)
+			pose.SetOrigin(pose.GetOrigin() +pPhysComponent->GetLocalOrigin());
 	}
+	absBounds = absBounds.Transform(pose);
+	return absBounds;
+}
+Sphere CRenderComponent::CalcAbsoluteRenderSphere() const
+{
+	auto r = m_localRenderSphere;
+
+	auto &ent = GetEntity();
+	auto pose = ent.GetPose();
+	auto pPhysComponent = ent.GetPhysicsComponent();
+	if(pPhysComponent)
+	{
+		auto physType = pPhysComponent->GetPhysicsType();
+		if(physType == PHYSICSTYPE::DYNAMIC || physType == PHYSICSTYPE::STATIC)
+			pose.SetOrigin(pose.GetOrigin() +pPhysComponent->GetLocalOrigin());
+	}
+	auto &scale = pose.GetScale();
+	r.radius *= umath::abs_max(scale.x,scale.y,scale.z);
+	r.pos = pose *r.pos;
 	return r;
 }
-void CRenderComponent::GetAbsoluteRenderBounds(Vector3 &outMin,Vector3 &outMax) const
+void CRenderComponent::SetLocalRenderBounds(Vector3 min,Vector3 max)
 {
-	auto &pose = GetEntity().GetPose();
-	GetRenderBounds(&outMin,&outMax);
-	outMin = pose *outMin;
-	outMax = pose *outMax;
-	uvec::to_min_max(outMin,outMax);
-}
-void CRenderComponent::GetRenderBounds(Vector3 *min,Vector3 *max) const
-{
-	*min = m_renderMin;
-	*max = m_renderMax;
-	auto &ent = GetEntity();
-	auto ptrComponent = ent.GetTransformComponent();
-	if(ptrComponent != nullptr)
-	{
-		auto &scale = ptrComponent->GetScale();
-		*min *= scale;
-		*max *= scale;
-	}
-	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent == nullptr)
-		return;
-	auto physType = pPhysComponent->GetPhysicsType();
-	if(physType != PHYSICSTYPE::DYNAMIC && physType != PHYSICSTYPE::STATIC)
-		return;
-	auto &lorigin = pPhysComponent->GetLocalOrigin();
-	*min += lorigin;
-	*max += lorigin;
-}
-void CRenderComponent::GetRotatedRenderBounds(Vector3 *min,Vector3 *max)
-{
-	*min = m_renderMinRot;
-	*max = m_renderMaxRot;
-	auto &ent = GetEntity();
-	auto ptrComponent = ent.GetTransformComponent();
-	if(ptrComponent != nullptr)
-	{
-		auto &scale = ptrComponent->GetScale();
-		*min = scale;
-		*max = scale;
-	}
-	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent == nullptr)
-		return;
-	auto physType = pPhysComponent->GetPhysicsType();
-	if(physType != PHYSICSTYPE::DYNAMIC && physType != PHYSICSTYPE::STATIC)
-		return;
-	auto &lorigin = pPhysComponent->GetLocalOrigin();
-	*min += lorigin;
-	*max += lorigin;
-}
-void CRenderComponent::SetRenderBounds(Vector3 min,Vector3 max)
-{
-	//auto &mdl = GetModel();
 	uvec::to_min_max(min,max);
-	if(min.x != m_renderMin.x || min.y != m_renderMin.y || min.z != m_renderMin.z || max.x != m_renderMax.x || max.y != m_renderMax.y || max.z != m_renderMax.z)
-		GetEntity().SetStateFlag(BaseEntity::StateFlags::RenderBoundsChanged);
-	m_renderMin = min;
-	m_renderMax = max;
-	m_renderSphere.pos = (min +max) *0.5f;
-	Vector3 bounds = (max -min) *0.5f;
-	m_renderSphere.radius = uvec::length(bounds);
 
-	CEOnRenderBoundsChanged ceData {min,max,m_renderSphere};
+	if(min == m_localRenderBounds.min && max == m_localRenderBounds.max)
+		return;
+	umath::set_flag(m_stateFlags,StateFlags::RenderBoundsDirty);
+	GetEntity().SetStateFlag(BaseEntity::StateFlags::RenderBoundsChanged);
+
+	m_localRenderBounds = {min,max};
+	m_localRenderSphere.pos = (min +max) *0.5f;
+	
+	auto bounds = (max -min) *0.5f;
+	m_localRenderSphere.radius = uvec::length(bounds);
+
+	CEOnRenderBoundsChanged ceData {min,max,m_localRenderSphere};
 	BroadcastEvent(EVENT_ON_RENDER_BOUNDS_CHANGED);
 }
 
+#if 0
 void CRenderComponent::UpdateRenderBounds()
 {
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
@@ -293,6 +286,7 @@ void CRenderComponent::UpdateRenderBounds()
 		m_renderMaxRot = m_renderMax;
 	}
 }
+#endif
 
 Mat4 &CRenderComponent::GetTransformationMatrix() {return m_matTransformation;}
 const umath::ScaledTransform &CRenderComponent::GetRenderPose() const {return m_renderPose;}
@@ -338,6 +332,21 @@ void CRenderComponent::UpdateInstantiability()
 	BroadcastEvent(EVENT_UPDATE_INSTANTIABILITY,CEUpdateInstantiability{instantiable});
 	umath::set_flag(m_stateFlags,StateFlags::IsInstantiable,instantiable);
 }
+void CRenderComponent::UpdateShouldDrawState()
+{
+	auto shouldDraw = true;
+	BroadcastEvent(EVENT_SHOULD_DRAW,CEShouldDraw{shouldDraw});
+	umath::set_flag(m_stateFlags,StateFlags::ShouldDraw,shouldDraw);
+
+	UpdateShouldDrawShadowState();
+}
+void CRenderComponent::UpdateShouldDrawShadowState()
+{
+	auto shouldDraw = GetCastShadows();
+	if(shouldDraw)
+		BroadcastEvent(EVENT_SHOULD_DRAW_SHADOW,CEShouldDraw{shouldDraw});
+	umath::set_flag(m_stateFlags,StateFlags::ShouldDrawShadow,shouldDraw);
+}
 util::WeakHandle<CModelComponent> &CRenderComponent::GetModelComponent() const {return m_mdlComponent;}
 util::WeakHandle<CAnimatedComponent> &CRenderComponent::GetAnimatedComponent() const {return m_animComponent;}
 util::WeakHandle<CLightMapReceiverComponent> &CRenderComponent::GetLightMapReceiverComponent() const {return m_lightMapReceiverComponent;}
@@ -376,10 +385,12 @@ void CRenderComponent::UpdateRenderMeshes()
 	c_game->UpdateEntityModel(&ent);
 	auto &mdlComponent = GetModelComponent();
 	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+#if 0
 	m_renderMeshContainer = nullptr;
 	if(mdl == nullptr)
 		return;
 	m_renderMeshContainer = std::make_unique<SortedRenderMeshContainer>(&ent,static_cast<CModelComponent&>(*mdlComponent).GetLODMeshes());
+#endif
 }
 void CRenderComponent::ReceiveData(NetPacket &packet)
 {
@@ -403,19 +414,18 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 	ldir /= scale;
 
 	// Cheap line-aabb check
-	Vector3 min,max;
-	GetRenderBounds(&min,&max);
-	min /= scale;
-	max /= scale;
+	auto aabb = GetLocalRenderBounds();
+	aabb.min /= scale;
+	aabb.max /= scale;
 	auto n = ldir;
 	auto d = uvec::length(n);
 	n /= d;
 	float dIntersect;
-	if(Intersection::LineAABB(lstart,n,min,max,&dIntersect) == Intersection::Result::NoIntersection || dIntersect > d)
+	if(Intersection::LineAABB(lstart,n,aabb.min,aabb.max,&dIntersect) == Intersection::Result::NoIntersection || dIntersect > d)
 		return {};
 
 	auto mdlC = GetEntity().GetModelComponent();
-	auto mdl = mdlC.valid() ? mdlC->GetModel() : nullptr;
+	auto mdl = mdlC ? mdlC->GetModel() : nullptr;
 	if(mdl)
 	{
 		auto &hitboxes = mdl->GetHitboxes();
@@ -456,6 +466,7 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 	std::optional<Intersection::LineMeshResult> bestResult = {};
 	for(auto &mesh : lodMeshes)
 	{
+		Vector3 min,max;
 		mesh->GetBounds(min,max);
 		if(Intersection::LineAABB(lstart,n,min,max,&dIntersect) == Intersection::Result::NoIntersection || dIntersect > d)
 			continue;
@@ -494,6 +505,7 @@ void CRenderComponent::SetExemptFromOcclusionCulling(bool exempt)
 }
 bool CRenderComponent::IsExemptFromOcclusionCulling() const {return umath::is_flag_set(m_stateFlags,StateFlags::ExemptFromOcclusionCulling);}
 void CRenderComponent::SetRenderBufferDirty() {umath::set_flag(m_stateFlags,StateFlags::RenderBufferDirty);}
+void CRenderComponent::SetRenderBoundsDirty() {umath::set_flag(m_stateFlags,StateFlags::RenderBoundsDirty);}
 void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bForceBufferUpdate)
 {
 	InitializeRenderBuffers();
@@ -530,13 +542,20 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 }
 void CRenderComponent::UpdateRenderDataMT(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp)
 {
-	// Note: This is called from the render thread, which is why we can't update the render buffers here
-	auto frameId = c_engine->GetRenderContext().GetLastFrameId();
-	if(m_lastRender == frameId)
-		return; // Only update once per frame
-	m_lastRender = frameId;
-	auto &ent = static_cast<CBaseEntity&>(GetEntity());
+	m_renderDataMutex.lock();
+		// Note: This is called from the render thread, which is why we can't update the render buffers here
+		auto frameId = c_engine->GetRenderContext().GetLastFrameId();
+		if(m_lastRender == frameId)
+		{
+			m_renderDataMutex.unlock();
+			return; // Only update once per frame
+		}
+		m_lastRender = frameId;
+	m_renderDataMutex.unlock();
 
+	UpdateAbsoluteRenderBounds();
+
+	auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	auto &mdlC = GetModelComponent();
 	if(mdlC.valid())
 		mdlC->UpdateLOD(scene,cam,vp); // TODO: Don't update this every frame for every entity!
@@ -570,6 +589,8 @@ void CRenderComponent::SetRenderMode(RenderMode mode)
 
 	if(mode == RenderMode::None)
 		ClearRenderBuffers();
+
+	UpdateShouldDrawState();
 }
 void CRenderComponent::InitializeRenderBuffers()
 {
@@ -620,24 +641,8 @@ RenderMode CRenderComponent::GetRenderMode() const
 	}
 	return *m_renderMode;
 }
-bool CRenderComponent::ShouldDraw(const Vector3 &camOrigin) const
-{
-	auto &ent = static_cast<const CBaseEntity&>(GetEntity());
-	auto &mdlComponent = GetModelComponent();
-	if(mdlComponent.expired() || mdlComponent->HasModel() == false)
-		return false;
-	CEShouldDraw evData {camOrigin};
-	InvokeEventCallbacks(EVENT_SHOULD_DRAW,evData);
-	return (evData.shouldDraw == CEShouldDraw::ShouldDraw::No) ? false : true;
-}
-bool CRenderComponent::ShouldDrawShadow(const Vector3 &camOrigin) const
-{
-	if(GetCastShadows() == false)
-		return false;
-	CEShouldDraw evData {camOrigin};
-	InvokeEventCallbacks(EVENT_SHOULD_DRAW_SHADOW,evData);
-	return (evData.shouldDraw == CEShouldDraw::ShouldDraw::No) ? false : true;
-}
+bool CRenderComponent::ShouldDraw() const {return umath::is_flag_set(m_stateFlags,StateFlags::ShouldDraw);}
+bool CRenderComponent::ShouldDrawShadow() const {return umath::is_flag_set(m_stateFlags,StateFlags::ShouldDrawShadow);}
 
 RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod)
 {
@@ -701,7 +706,7 @@ bool CRenderComponent::RenderCallback(RenderObject *o,CBaseEntity *ent,pragma::C
 }
 bool CRenderComponent::RenderCallback(RenderObject*,pragma::CCameraComponent *cam,pragma::ShaderTextured3DBase*,Material*)
 {
-	return ShouldDraw(cam->GetEntity().GetPosition());
+	return ShouldDraw();
 }
 const std::vector<CRenderComponent*> &CRenderComponent::GetEntitiesExemptFromOcclusionCulling() {return s_ocExemptEntities;}
 const std::shared_ptr<prosper::IUniformResizableBuffer> &CRenderComponent::GetInstanceBuffer() {return s_instanceBuffer;}
@@ -730,18 +735,18 @@ void CEUpdateInstantiability::HandleReturnValues(lua_State *l)
 
 /////////////////
 
-CEShouldDraw::CEShouldDraw(const Vector3 &camOrigin)
-	: camOrigin{camOrigin}
+CEShouldDraw::CEShouldDraw(bool &shouldDraw)
+	: shouldDraw{shouldDraw}
 {}
 void CEShouldDraw::PushArguments(lua_State *l)
 {
-	Lua::Push<Vector3>(l,camOrigin);
+	Lua::PushBool(l,shouldDraw);
 }
 uint32_t CEShouldDraw::GetReturnCount() {return 1u;}
 void CEShouldDraw::HandleReturnValues(lua_State *l)
 {
 	if(Lua::IsSet(l,-1))
-		shouldDraw = Lua::CheckBool(l,-1) ? ShouldDraw::Yes : ShouldDraw::No;
+		shouldDraw = Lua::CheckBool(l,-1);
 }
 
 /////////////////

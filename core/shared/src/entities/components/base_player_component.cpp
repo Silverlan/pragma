@@ -229,8 +229,7 @@ Con::c_cout& BasePlayerComponent::print(Con::c_cout &os)
 	auto &ent = GetEntity();
 	auto nameComponent = ent.GetNameComponent();
 	os<<"Player["<<(nameComponent.valid() ? nameComponent->GetName() : "")<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = GetEntity().GetModel();
 	if(hMdl == nullptr)
 		os<<"NULL";
 	else
@@ -244,8 +243,7 @@ std::ostream& BasePlayerComponent::print(std::ostream &os)
 	auto &ent = GetEntity();
 	auto nameComponent = ent.GetNameComponent();
 	os<<"Player["<<(nameComponent.valid() ? nameComponent->GetName() : "")<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = GetEntity().GetModel();
 	if(hMdl == nullptr)
 		os<<"NULL";
 	else
@@ -323,8 +321,7 @@ void BasePlayerComponent::Initialize()
 		return util::EventReply::Handled;
 	});
 	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto mdlComponent = GetEntity().GetModelComponent();
-		auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+		auto &hMdl = GetEntity().GetModel();
 		if(hMdl == nullptr)
 			return util::EventReply::Unhandled;
 		auto anim = hMdl->GetAnimation(static_cast<CEOnAnimationComplete&>(evData.get()).animation);

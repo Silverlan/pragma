@@ -193,6 +193,8 @@ void BasePhysicsComponent::UpdatePhysicsData()
 	auto t = o->GetWorldTransform();
 	Vector3 pos = phys->GetPosition();
 	Quat rot = t.GetRotation();
+	
+	auto transformChangeFlags = TransformChangeFlags::None;
 	if(!m_physObject->IsController() && pTrComponent) // TODO
 	{
 		auto &rotCur = pTrComponent->GetRotation();
@@ -216,6 +218,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 		}
 		umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsRotation);
 		pTrComponent->SetRawRotation(rot);
+		transformChangeFlags |= TransformChangeFlags::RotationChanged;
 		umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsRotation,false);
 
 		if(!bStatic && pVelComponent.valid())
@@ -255,6 +258,7 @@ void BasePhysicsComponent::UpdatePhysicsData()
 		}
 		umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsPosition);
 		pTrComponent->SetRawPosition(pos);
+		transformChangeFlags |= TransformChangeFlags::PositionChanged;
 		umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsPosition,false);
 	}
 	if(type == PHYSICSTYPE::DYNAMIC)
@@ -298,6 +302,8 @@ void BasePhysicsComponent::UpdatePhysicsData()
 	}
 	if(bSnapshot)
 		ent.MarkForSnapshot(true);
+	if(transformChangeFlags != TransformChangeFlags::None)
+		pTrComponent->OnPoseChanged(transformChangeFlags,false);
 }
 
 BaseEntity *BasePhysicsComponent::GetGroundEntity() const {return nullptr;}
@@ -654,8 +660,7 @@ void BasePhysicsComponent::PostPhysicsSimulate(Frame &reference,std::unordered_m
 
 float BasePhysicsComponent::GetPhysicsMass() const
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = GetEntity().GetModel();
 	return (hMdl != nullptr) ? hMdl->GetMass() : 0.f;
 }
 
@@ -705,7 +710,7 @@ void BasePhysicsComponent::UpdateRagdollPose()
 	auto &ent = GetEntity();
 	auto animatedComponent = ent.GetAnimatedComponent();
 	auto mdlComponent = ent.GetModelComponent();
-	if(mdlComponent.expired() || animatedComponent.expired() || IsRagdoll() == false)
+	if(!mdlComponent || animatedComponent.expired() || IsRagdoll() == false)
 		return;
 	auto *phys = GetPhysicsObject();
 	if(phys == nullptr || phys->IsStatic() == true)
@@ -854,8 +859,7 @@ void BasePhysicsComponent::UpdateBoneCollisionObject(UInt32 boneId,Bool updatePo
 		return;
 	auto &ent = GetEntity();
 	auto animatedComponent = ent.GetAnimatedComponent();
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = GetEntity().GetModel();
 	if(animatedComponent.expired() || hMdl == nullptr)
 		return;
 	auto &reference = hMdl->GetReference();

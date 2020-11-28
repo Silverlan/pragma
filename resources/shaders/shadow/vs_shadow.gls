@@ -9,20 +9,28 @@
 #define SHADER_UNIFORM_BONE_MATRIX_SET SHADER_UNIFORM_INSTANCE_SET
 #define SHADER_UNIFORM_BONE_MATRIX_BINDING (SHADER_UNIFORM_INSTANCE_BINDING +1)
 
+#define SHADER_UNIFORM_DEBUG_SET (SHADER_UNIFORM_BONE_MATRIX_SET +1)
+#define SHADER_UNIFORM_DEBUG_BINDING 0
+
 #include "../modules/vs_weighted.gls"
 #include "../modules/sh_entity_info.gls"
+#include "../modules/vs_instanced_entity_data.gls"
+
+// Unused, but required for correct binding points in OpenGL
+#include "../modules/vs_vertex_animation_frame_data.gls"
+
 #include "sh_shadow.gls"
 
 layout(location = SHADER_VERTEX_BUFFER_LOCATION) in vec3 u_vert_pos;
 
 void main()
 {
-	mat4 mBone = calc_bone_matrix(is_weighted(),is_weighted_ext());
+	mat4 mBone = calc_bone_matrix(is_instanced_weighted(),is_weighted_ext());
 	vec4 vpos = mBone *vec4(u_vert_pos,1.0);
 
-	gl_Position = API_DEPTH_TRANSFORM(u_pushConstants.depthMVP) *vpos;
+	gl_Position = API_DEPTH_TRANSFORM(u_pushConstants.depthMVP *get_instanced_model_matrix()) *vpos;
 
-	vec4 vposWs = get_model_matrix() *vpos;
+	vec4 vposWs = get_instanced_model_matrix() *vpos;
 	vposWs.xyz /= vposWs.w;
 	vposWs.w = 1.0;
 

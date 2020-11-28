@@ -78,7 +78,7 @@ void CWeaponComponent::UpdateViewModel()
 		return;
 	}
 	auto mdlComponentVm = vmEnt.GetModelComponent();
-	if(mdlComponentVm.valid())
+	if(mdlComponentVm)
 		mdlComponentVm->SetModel(m_viewModel);
 	if(pRenderComponentVm)
 		pRenderComponentVm->SetRenderMode(RenderMode::View);
@@ -121,7 +121,7 @@ void CWeaponComponent::Initialize()
 				auto *plComponent = static_cast<CPlayerComponent*>(pl->GetEntity().GetPlayerComponent().get());
 				if(pl->IsInFirstPersonMode() == false)
 				{
-					shouldDrawData.shouldDraw = CEShouldDraw::ShouldDraw::No;
+					shouldDrawData.shouldDraw = false;
 					return util::EventReply::Handled;
 				}
 				return util::EventReply::Unhandled;
@@ -134,7 +134,7 @@ void CWeaponComponent::Initialize()
 				{
 					if(charComponent->GetActiveWeapon() != &GetEntity())
 					{
-						shouldDrawData.shouldDraw = CEShouldDraw::ShouldDraw::No;
+						shouldDrawData.shouldDraw = false;
 						return util::EventReply::Handled;
 					}
 					return util::EventReply::Unhandled;
@@ -146,7 +146,7 @@ void CWeaponComponent::Initialize()
 	BindEvent(CRenderComponent::EVENT_SHOULD_DRAW_SHADOW,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		if(m_bDeployed == false)
 		{
-			static_cast<CEShouldDraw&>(evData.get()).shouldDraw = CEShouldDraw::ShouldDraw::No;
+			static_cast<CEShouldDraw&>(evData.get()).shouldDraw = false;
 			return util::EventReply::Handled;
 		}
 		return util::EventReply::Unhandled;
@@ -163,6 +163,16 @@ void CWeaponComponent::Initialize()
 			});
 			FlagCallbackForRemoval(m_cbOnOwnerObserverModeChanged,CallbackType::Component);
 		}
+	});
+	BindEventUnhandled(EVENT_ON_DEPLOY,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		auto *renderC = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
+		if(renderC)
+			renderC->UpdateShouldDrawState();
+	});
+	BindEventUnhandled(EVENT_ON_HOLSTER,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		auto *renderC = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
+		if(renderC)
+			renderC->UpdateShouldDrawState();
 	});
 }
 float CWeaponComponent::GetViewFOV() const
@@ -223,7 +233,7 @@ void CWeaponComponent::OnFireBullets(const BulletInfo &bulletInfo,Vector3 &bulle
 		return;
 	}
 	auto pMdlC = ent.GetModelComponent();
-	if(pMdlC.valid() && pMdlC->GetAttachment(m_attMuzzle,effectsOrigin,static_cast<Quat*>(nullptr)) == true)
+	if(pMdlC && pMdlC->GetAttachment(m_attMuzzle,effectsOrigin,static_cast<Quat*>(nullptr)) == true)
 	{
 		auto pTrComponent = ent.GetTransformComponent();
 		if(pTrComponent != nullptr)
@@ -277,7 +287,7 @@ void CWeaponComponent::UpdateOwnerAttachment()
 	if(pAttComponent.valid())
 	{
 		auto pMdlComponent = parent->GetModelComponent();
-		auto attId = pMdlComponent.valid() ? pMdlComponent->LookupAttachment("weapon") : -1;
+		auto attId = pMdlComponent ? pMdlComponent->LookupAttachment("weapon") : -1;
 		AttachmentInfo attInfo {};
 		attInfo.flags |= FAttachmentMode::SnapToOrigin | FAttachmentMode::UpdateEachFrame;
 		if(attId != -1)

@@ -47,14 +47,8 @@ bool OcclusionCullingHandlerBSP::ShouldPass(CBaseEntity &ent) const
 	auto pBspLeafComponent = ent.GetComponent<CBSPLeafComponent>();
 	//if(pBspLeafComponent.valid())
 		//return false;//pBspLeafComponent->GetLeafVisibility(m_pCurrentNode->cluster); // TODO
-	auto pTrComponent = ent.GetTransformComponent();
-	auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
-	Vector3 min;
-	Vector3 max;
-	pRenderComponent->GetRenderBounds(&min,&max);
-	min += pos;
-	max += pos;
-	return Intersection::AABBAABB(min,max,m_pCurrentNode->minVisible,m_pCurrentNode->maxVisible) != Intersection::Intersect::Outside;
+	auto &aabb = ent.GetAbsoluteRenderBounds();
+	return Intersection::AABBAABB(aabb.min,aabb.max,m_pCurrentNode->minVisible,m_pCurrentNode->maxVisible) != Intersection::Intersect::Outside;
 }
 bool OcclusionCullingHandlerBSP::ShouldPass(CModelMesh &modelMesh,const Vector3 &entityPos) const
 {
@@ -165,7 +159,7 @@ static void debug_bsp_nodes(NetworkState*,ConVar*,int32_t,int32_t val)
 		{
 			auto &entWorld = pWorld->GetEntity();
 			auto mdlComponent = entWorld.GetModelComponent();
-			auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+			auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 			auto meshGroup = (mdl != nullptr) ? mdl->GetMeshGroup(0u) : nullptr;
 			if(meshGroup != nullptr)
 			{

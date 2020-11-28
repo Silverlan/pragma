@@ -59,9 +59,10 @@ void CWaterComponent::Initialize()
 	BaseFuncWaterComponent::Initialize();
 
 	BindEvent(CRenderComponent::EVENT_SHOULD_DRAW,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		// TODO: Run CRenderComponent::UpdateShouldDrawState when any of these change
 		if(!(m_hWaterSurface.IsValid() == false && (m_waterScene == nullptr || m_waterScene->descSetGroupTexEffects != nullptr)))
 		{
-			static_cast<CEShouldDraw&>(evData.get()).shouldDraw = CEShouldDraw::ShouldDraw::No;
+			static_cast<CEShouldDraw&>(evData.get()).shouldDraw = false;
 			return util::EventReply::Handled;
 		}
 		return util::EventReply::Unhandled;
@@ -99,8 +100,7 @@ void CWaterComponent::OnEntitySpawn()
 		pRenderComponent->GetRenderModeProperty()->SetLocked(true);
 	}
 
-	auto mdlComponent = ent.GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)
 		return;
 	BaseFuncWaterComponent::InitializeWaterSurface();
@@ -197,8 +197,7 @@ CMaterial *CWaterComponent::GetWaterMaterial() const
 	if(m_waterMesh.expired() == true)
 		return nullptr;
 	auto &ent = GetEntity();
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)
 		return nullptr;
 	auto matIdx = mdl->GetMaterialIndex(*m_waterMesh.lock());
@@ -252,8 +251,7 @@ void CWaterComponent::SetupWater()
 		return;
 	auto *meshSurface = waterSurfaces.front(); // TODO: All surfaces?
 	*/
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = GetEntity().GetModel();
 	if(mdl == nullptr)
 		return;
 	auto &mats = mdl->GetMaterials();

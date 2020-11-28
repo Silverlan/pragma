@@ -32,7 +32,7 @@ void TraceResult::InitializeMeshes()
 	if(entity.IsValid() == false)
 		return;
 	auto mdlComponent = entity->GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto hMdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 	if(hMdl == nullptr)
 		return;
 	hMdl->GetBodyGroupMeshes(mdlComponent->GetBodyGroups(),0u,m_meshInfo->meshes);
@@ -84,8 +84,7 @@ Material *TraceResult::GetMaterial()
 {
 	if(entity.IsValid() == false)
 		return nullptr;
-	auto mdlComponent = entity->GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = entity->GetModel();
 	if(hMdl == nullptr)
 		return nullptr;
 	ModelMesh *mesh = nullptr;
@@ -103,8 +102,7 @@ bool TraceResult::GetMaterial(std::string &mat)
 {
 	if(entity.IsValid() == false)
 		return false;
-	auto mdlComponent = entity->GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = entity->GetModel();
 	if(hMdl == nullptr)
 		return false;
 	ModelMesh *mesh = nullptr;

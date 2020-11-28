@@ -117,8 +117,7 @@ static std::shared_ptr<dtNavMesh> initialize_detour_mesh(rcPolyMesh &polyMesh,rc
 
 std::shared_ptr<RcNavMesh> pragma::nav::generate(Game &game,const Config &config,const BaseEntity &ent,std::string *err)
 {
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr)
 		return nullptr;
 	auto numTris = hMdl->GetTriangleCount();

@@ -37,31 +37,22 @@ bool OcclusionCullingHandler::ShouldExamine(pragma::CSceneComponent &scene,const
 		return false;
 	if(outPlanes == nullptr)
 		return true; // Skip the frustum culling
-	auto *cam = c_game->GetPrimaryCamera();
-	auto &posCam = cam ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(ent.IsSpawned() == false || !pRenderComponent || pRenderComponent->ShouldDraw(posCam) == false)
+	if(ent.IsSpawned() == false || !pRenderComponent || pRenderComponent->ShouldDraw() == false)
 		return false;
 	auto mdlComponent = ent.GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 	if(mdl == nullptr)
 		return false;
 	outViewModel = (pRenderComponent->GetRenderMode() == RenderMode::View) ? true : false; // TODO: Remove me once the render bounds accurately encompass animation bounds
 	*outPlanes = (pRenderComponent->GetRenderMode() == RenderMode::Skybox) ? const_cast<std::vector<Plane>*>(&renderer.GetFrustumPlanes()) : const_cast<std::vector<Plane>*>(&renderer.GetClippedFrustumPlanes());
 	if(pRenderComponent->IsExemptFromOcclusionCulling() || outViewModel)
 		return true; // Always draw
-	auto sphere = pRenderComponent->GetRenderSphereBounds();
-	auto &pose = ent.GetPose();
-	auto &pos = pose.GetOrigin();
-	if(Intersection::SphereInPlaneMesh(pos +sphere.pos,sphere.radius,*(*outPlanes),true) == Intersection::Intersect::Outside)
+	auto &sphere = pRenderComponent->GetUpdatedAbsoluteRenderSphere();
+	if(Intersection::SphereInPlaneMesh(sphere.pos,sphere.radius,*(*outPlanes),true) == Intersection::Intersect::Outside)
 		return false;
-	Vector3 min;
-	Vector3 max;
-	pRenderComponent->GetRenderBounds(&min,&max);
-	min = pose *min;
-	max = pose *max;
-	uvec::to_min_max(min,max);
-	return Intersection::AABBInPlaneMesh(min,max,*(*outPlanes)) != Intersection::Intersect::Outside;
+	auto &aabb = pRenderComponent->GetAbsoluteRenderBounds();
+	return Intersection::AABBInPlaneMesh(aabb.min,aabb.max,*(*outPlanes)) != Intersection::Intersect::Outside;
 }
 void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,std::vector<pragma::CParticleSystemComponent*> &particlesOut)
 {
@@ -185,8 +176,6 @@ void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,cons
 }
 void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &origin,float radius,std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut)
 {
-	auto *cam = c_game->GetPrimaryCamera();
-	auto &posCam = cam ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	auto radiusSqr = umath::pow(radius,2.f);
 	culledMeshesOut.clear();
 	culledMeshesOut.reserve(10);
@@ -201,13 +190,13 @@ void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,cons
 		if(ent->IsInScene(scene) == false)
 			continue;
 		auto pRenderComponent = ent->GetRenderComponent();
-		if(pRenderComponent->ShouldDrawShadow(posCam) == false)
+		if(pRenderComponent->ShouldDrawShadow() == false)
 			continue;
 		auto exemptFromCulling = pRenderComponent->IsExemptFromOcclusionCulling();
 		auto pTrComponent = ent->GetTransformComponent();
-		auto sphere = pRenderComponent->GetRenderSphereBounds();
+		auto &sphere = pRenderComponent->GetAbsoluteRenderSphere();
 		auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
-		if(exemptFromCulling || uvec::length_sqr((pos +sphere.pos) -origin) <= radiusSqr +umath::pow(sphere.radius,2.f))
+		if(exemptFromCulling || uvec::length_sqr(sphere.pos -origin) <= radiusSqr +umath::pow(sphere.radius,2.f))
 		{
 			auto &meshes = pRenderComponent->GetLODMeshes();
 			for(auto itMesh=meshes.begin();itMesh!=meshes.end();++itMesh)

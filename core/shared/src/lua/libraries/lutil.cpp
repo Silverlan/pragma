@@ -362,7 +362,7 @@ int Lua::util::fire_bullets(lua_State *l,const std::function<void(DamageInfo&,::
 				return RayCastHitType::None;
 			auto filterGroup = phys->GetCollisionFilter();
 			auto mdlComponent = ent->GetEntity().GetModelComponent();
-			if(mdlComponent.valid() && mdlComponent->GetHitboxCount() > 0 && (filterGroup &CollisionMask::NPC) != CollisionMask::None || (filterGroup &CollisionMask::Player) != CollisionMask::None) // Filter out player and NPC collision objects, since we only want to check their hitboxes
+			if(mdlComponent && mdlComponent->GetHitboxCount() > 0 && (filterGroup &CollisionMask::NPC) != CollisionMask::None || (filterGroup &CollisionMask::Player) != CollisionMask::None) // Filter out player and NPC collision objects, since we only want to check their hitboxes
 				return RayCastHitType::None;
 			return RayCastHitType::Block;
 		});

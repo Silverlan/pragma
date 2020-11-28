@@ -912,7 +912,7 @@ void Lua::Flex::GetFlexController(lua_State *l,CFlexHandle &hEnt,const std::stri
 	pragma::Lua::check_component(l,hEnt);
 	auto flexId = 0u;
 	auto mdlComponent = hEnt->GetEntity().GetModelComponent();
-	if(mdlComponent.expired() || mdlComponent->LookupFlexController(flexController,flexId) == false)
+	if(!mdlComponent || mdlComponent->LookupFlexController(flexController,flexId) == false)
 		return;
 	auto val = 0.f;
 	if(hEnt->GetFlexController(flexId,val) == false)

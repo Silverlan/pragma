@@ -189,8 +189,7 @@ float BaseAnimatedComponent::GetAnimationDuration() const
 	int seq = GetAnimation();
 	if(seq == -1)
 		return 0.f;
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return 0.f;
 	auto anim = hModel->GetAnimation(seq);
@@ -201,8 +200,7 @@ float BaseAnimatedComponent::GetAnimationDuration() const
 
 int BaseAnimatedComponent::SelectWeightedAnimation(Activity activity,int animAvoid) const
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return -1;
 	return hModel->SelectWeightedAnimation(activity,animAvoid);
@@ -215,8 +213,7 @@ void BaseAnimatedComponent::SetLastAnimationBlendScale(float scale)
 
 void BaseAnimatedComponent::SetBlendController(unsigned int controller,float val)
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return;
 	auto it = m_blendControllers.find(controller);
@@ -248,7 +245,7 @@ void BaseAnimatedComponent::SetBlendController(unsigned int controller,float val
 void BaseAnimatedComponent::SetBlendController(const std::string &controller,float val)
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
-	if(mdlComponent.expired())
+	if(!mdlComponent)
 		return;
 	int id = mdlComponent->LookupBlendController(controller);
 	if(id == -1)
@@ -259,7 +256,7 @@ const std::unordered_map<unsigned int,float> &BaseAnimatedComponent::GetBlendCon
 float BaseAnimatedComponent::GetBlendController(const std::string &controller) const
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
-	if(mdlComponent.expired())
+	if(!mdlComponent)
 		return 0.f;
 	int id = mdlComponent->LookupBlendController(controller);
 	if(id == -1)
@@ -301,7 +298,7 @@ void BaseAnimatedComponent::GetAnimationBlendController(Animation *anim,float cy
 Frame *BaseAnimatedComponent::GetPreviousAnimationBlendFrame(AnimationSlotInfo &animInfo,double tDelta,float &blendScale)
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return nullptr;
 	Frame *frameLastAnim = nullptr;
@@ -334,8 +331,7 @@ void BaseAnimatedComponent::ApplyAnimationBlending(AnimationSlotInfo &animInfo,d
 
 bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double dt,int32_t layeredSlot)
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return false;
 	CEMaintainAnimation evData{animInfo,dt};
@@ -610,8 +606,7 @@ const Frame *BaseAnimatedComponent::GetBindPose() const {return m_bindPose.get()
 
 bool BaseAnimatedComponent::MaintainAnimations(double dt)
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return false;
 	CEMaintainAnimations evData{dt};
@@ -725,8 +720,7 @@ Animation *BaseAnimatedComponent::GetAnimationObject() const
 	auto animId = GetAnimation();
 	if(animId == -1)
 		return nullptr;
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return nullptr;
 	auto anim = hModel->GetAnimation(animId);
@@ -757,8 +751,7 @@ void BaseAnimatedComponent::PlayAnimation(int animation,FPlayAnim flags)
 		return;
 	if(m_baseAnim.animation == animation && (flags &FPlayAnim::Reset) == FPlayAnim::None)
 	{
-		auto mdlComponent = GetEntity().GetModelComponent();
-		auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+		auto &hModel = GetEntity().GetModel();
 		if(hModel != nullptr)
 		{
 			auto anim = hModel->GetAnimation(animation);
@@ -784,8 +777,7 @@ void BaseAnimatedComponent::PlayAnimation(int animation,FPlayAnim flags)
 		lastAnim.blendScale = 1.f;
 
 		// Update animation fade time
-		auto mdlComponent = GetEntity().GetModelComponent();
-		auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+		auto &hModel = GetEntity().GetModel();
 		if(hModel != nullptr)
 		{
 			auto anim = hModel->GetAnimation(animation);
@@ -821,8 +813,7 @@ void BaseAnimatedComponent::PlayAnimation(int animation,FPlayAnim flags)
 	m_baseAnim.cycle = 0;
 	m_baseAnim.flags = flags;
 	m_baseAnim.activity = Activity::Invalid;
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel != nullptr)
 	{
 		auto anim = hModel->GetAnimation(animation);
@@ -860,8 +851,7 @@ Activity BaseAnimatedComponent::GetActivity() const
 		return Activity::Invalid;
 	if(m_baseAnim.activity != Activity::Invalid)
 		return m_baseAnim.activity;
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return Activity::Invalid;
 	auto anim = hModel->GetAnimation(m_baseAnim.animation);
@@ -911,7 +901,7 @@ std::unordered_map<uint32_t,BaseAnimatedComponent::AnimationSlotInfo> &BaseAnima
 bool BaseAnimatedComponent::PlayAnimation(const std::string &name,FPlayAnim flags)
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
-	if(mdlComponent.expired())
+	if(!mdlComponent)
 		return false;
 	auto prevAnim = GetAnimation();
 	int anim = mdlComponent->LookupAnimation(name);
@@ -949,7 +939,7 @@ void BaseAnimatedComponent::PlayLayeredAnimation(int slot,int animation,FPlayAni
 bool BaseAnimatedComponent::PlayLayeredAnimation(int slot,std::string animation,FPlayAnim flags)
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
-	if(mdlComponent.expired())
+	if(!mdlComponent)
 		return false;
 	auto anim = mdlComponent->LookupAnimation(animation);
 	if(anim == -1)
@@ -989,8 +979,7 @@ std::vector<umath::ScaledTransform> &BaseAnimatedComponent::GetProcessedBones() 
 bool BaseAnimatedComponent::CalcAnimationMovementSpeed(float *x,float *z,int32_t frameOffset) const
 {
 	auto &ent = GetEntity();
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	auto animId = GetAnimation();
 	if(hMdl == nullptr || animId == -1)
 		return false;

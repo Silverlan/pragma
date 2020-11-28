@@ -195,8 +195,7 @@ void BaseFuncWaterComponent::InitializeWaterSurface()
 {
 	ClearWaterSurface();
 	auto &ent = GetEntity();
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr)
 		return;
 	Material *mat = nullptr;

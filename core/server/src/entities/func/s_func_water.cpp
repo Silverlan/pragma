@@ -96,8 +96,7 @@ void SWaterComponent::OnEntitySpawn()
 		}));
 		return;
 	}
-	auto mdlComponent = ent.GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)
 		return;
 	InitializeWaterSurface();

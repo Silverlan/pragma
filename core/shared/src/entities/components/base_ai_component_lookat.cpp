@@ -55,9 +55,8 @@ void BaseAIComponent::LookAtStep(float tDelta)
 	auto turnAcceleration = maxTurnSpeed /fadeTime; // Reach full acceleration after x seconds
 	m_neckInfo.neckTurned = false;
 
-	auto mdlComponent = ent.GetModelComponent();
 	auto animComponent = ent.GetAnimatedComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr || animComponent.expired())
 		return;
 	std::array<int32_t,2> blendControllers = {0,0};

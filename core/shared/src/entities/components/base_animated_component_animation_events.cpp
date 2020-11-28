@@ -27,7 +27,7 @@ BaseAnimatedComponent::CustomAnimationEvent::CustomAnimationEvent(const Callback
 void BaseAnimatedComponent::ApplyAnimationEventTemplate(const TemplateAnimationEvent &t)
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto hModel = mdlComponent ? mdlComponent->GetModel() : nullptr;
 	if(hModel == nullptr)
 		return;
 	auto animId = t.animId;
@@ -50,7 +50,7 @@ void BaseAnimatedComponent::ApplyAnimationEventTemplates()
 {
 	m_animEvents.clear();
 	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto hModel = mdlComponent ? mdlComponent->GetModel() : nullptr;
 	if(hModel == nullptr)
 		return;
 	for(auto &t : m_animEventTemplates)
@@ -147,7 +147,7 @@ void BaseAnimatedComponent::ClearAnimationEvents(uint32_t animId,uint32_t frameI
 void BaseAnimatedComponent::ClearAnimationEvents(const std::string &anim)
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto hModel = mdlComponent ? mdlComponent->GetModel() : nullptr;
 	if(hModel != nullptr)
 	{
 		auto animId = hModel->LookupAnimation(anim);
@@ -167,7 +167,7 @@ void BaseAnimatedComponent::ClearAnimationEvents(const std::string &anim)
 void BaseAnimatedComponent::ClearAnimationEvents(const std::string &anim,uint32_t frameId)
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto hModel = mdlComponent ? mdlComponent->GetModel() : nullptr;
 	if(hModel != nullptr)
 	{
 		auto animId = hModel->LookupAnimation(anim);

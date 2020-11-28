@@ -47,6 +47,7 @@ namespace pragma
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
 
 		void UpdateObserverOffset();
+		virtual void SetObserverMode(OBSERVERMODE mode) override;
 		virtual void SetObserverTarget(BaseObservableComponent *ent) override;
 		virtual void DoSetObserverMode(OBSERVERMODE mode) override;
 		virtual void ApplyViewRotationOffset(const EulerAngles &ang,float dur=0.5f) override;
@@ -74,8 +75,8 @@ namespace pragma
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
 		void UpdateObserverCallback();
 		void OnSetCharacterOrientation(const Vector3 &up);
-		bool ShouldDraw(const Vector3 &camOrigin) const;
-		bool ShouldDrawShadow(const Vector3 &camOrigin) const;
+		bool ShouldDraw() const;
+		bool ShouldDrawShadow() const;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	};

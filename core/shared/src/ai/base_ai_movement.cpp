@@ -227,8 +227,7 @@ void BaseAIComponent::SetMoveSpeed(int32_t animId,float speed)
 void BaseAIComponent::SetMoveSpeed(const std::string &name,float speed)
 {
 	m_animMoveSpeed[name] = speed;
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = GetEntity().GetModel();
 	if(hMdl == nullptr)
 		return;
 	auto animId = hMdl->LookupAnimation(name);
@@ -268,8 +267,7 @@ void BaseAIComponent::ClearMoveSpeed(int32_t animId)
 }
 void BaseAIComponent::ClearMoveSpeed(const std::string &name)
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = GetEntity().GetModel();
 	if(hMdl == nullptr)
 		return;
 	auto it = m_animMoveSpeed.find(name);
@@ -291,8 +289,7 @@ void BaseAIComponent::BlendAnimationMovement(std::vector<umath::Transform> &bone
 	//	return;
 	auto &ent = GetEntity();
 	auto animComponent = ent.GetAnimatedComponent();
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = GetEntity().GetModel();
 	if(animComponent.expired() || hMdl == nullptr/* || animComponent->GetActivity() != m_moveInfo.moveActivity*/)
 		return;
 	auto *anim = animComponent->GetAnimationObject();
@@ -634,8 +631,7 @@ Vector3 BaseAIComponent::CalcMovementDirection(const Vector3&,const Vector3&) co
 	{
 		auto bMoveForward = true;
 		auto animComponent = ent.GetAnimatedComponent();
-		auto mdlComponent = ent.GetModelComponent();
-		auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+		auto &hMdl = GetEntity().GetModel();
 		if(hMdl != nullptr && animComponent.valid())
 		{
 			auto anim = hMdl->GetAnimation(animComponent->GetAnimation());

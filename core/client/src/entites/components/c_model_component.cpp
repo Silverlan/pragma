@@ -170,8 +170,25 @@ void CModelComponent::UpdateLOD(const CSceneComponent &scene,const CCameraCompon
 	if(mdl == nullptr || mdl->GetLODCount() == 0)
 		return;
 
-	// TODO: This needs optimizing
+	auto t = c_game->CurTime();
+	if(t < m_tNextLodUpdate)
+		return;
+	// Updating LODs is relatively expensive, but there's really no reason to update them every frame,
+	// so we'll only update them once a while.
+	// We'll use random time intervals to lower the risk of a bunch of objects updating at the same time.
+	// TODO: This doesn't really work if the object is being rendered from multiple perspectives with different distances in the same frame!
+	// Also, changing LODs should occur via a fade-effect (both meshes could be added to render queue with alpha modifier)
+	m_tNextLodUpdate = t +umath::random(0.2f,0.6f);
+	
 	auto &pos = GetEntity().GetPosition();
+	auto d = uvec::distance_sqr(pos,cam.GetEntity().GetPosition());
+	constexpr auto LOD_CAMERA_DISTANCE_THRESHOLD = umath::pow2(20.f);
+	if(d -m_lastLodCamDistanceSqr < LOD_CAMERA_DISTANCE_THRESHOLD)
+		return; // Don't bother updating if the distance to the camera hasn't changed much. TODO: This also doesn't work well with different perspectives in the same frame!
+
+	m_lastLodCamDistanceSqr = d;
+
+	// TODO: This needs optimizing
 	auto w = scene.GetWidth();
 	auto h = scene.GetHeight();
 	auto posOffset = pos +cam.GetEntity().GetUp() *1.f;

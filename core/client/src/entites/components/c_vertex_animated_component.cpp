@@ -57,9 +57,8 @@ void CVertexAnimatedComponent::Initialize()
 void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 {
 	auto &ent = GetEntity();
-	auto whMdlComponent = ent.GetModelComponent();
 	auto whRenderComponent = ent.GetComponent<CRenderComponent>();
-	auto mdl = whMdlComponent.valid() ? whMdlComponent->GetModel() : nullptr;
+	auto &mdl = GetEntity().GetModel();
 	auto wpRenderBuffer = whRenderComponent.valid() ? whRenderComponent->GetRenderBuffer() : std::weak_ptr<prosper::IBuffer>{};
 	auto *pRenderDescSet = whRenderComponent.valid() ? whRenderComponent->GetRenderDescriptorSet() : nullptr;
 	if(wpRenderBuffer.expired() == true || mdl == nullptr || pRenderDescSet == nullptr)
@@ -106,7 +105,7 @@ const std::shared_ptr<prosper::IBuffer> &CVertexAnimatedComponent::GetVertexAnim
 
 void CVertexAnimatedComponent::UpdateVertexAnimationDataMT()
 {
-	auto mdlC = static_cast<CModelComponent*>(GetEntity().GetModelComponent().get());
+	auto mdlC = static_cast<CModelComponent*>(GetEntity().GetModelComponent());
 	if(mdlC == nullptr || mdlC->GetLOD() > 0)
 		return;
 	auto &mdl = mdlC->GetModel();
@@ -257,7 +256,7 @@ bool CVertexAnimatedComponent::GetLocalVertexPosition(const ModelSubMesh &subMes
 		*optOutDelta = 0.f;
 
 	auto mdlComponent = GetEntity().GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 	if(mdl == nullptr)
 		return false;
 	auto &vaAnims = mdl->GetVertexAnimations();

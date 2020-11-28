@@ -35,9 +35,28 @@ struct DLLCLIENT RenderPassStats
 	std::chrono::nanoseconds cpuExecutionTime {0};
 };
 
+struct DLLCLIENT RenderQueueWorkerStats
+{
+	std::chrono::nanoseconds totalExecutionTime {0};
+	uint32_t numJobs = 0;
+};
+
+struct DLLCLIENT RenderQueueBuilderStats
+{
+	std::chrono::nanoseconds totalExecutionTime {0};
+	std::chrono::nanoseconds worldQueueUpdateTime {0};
+	std::chrono::nanoseconds octreeProcessingTime {0};
+	std::chrono::nanoseconds workerWaitTime {0};
+	std::chrono::nanoseconds queueSortTime {0};
+	std::chrono::nanoseconds queueInstancingTime {0};
+
+	std::vector<RenderQueueWorkerStats> workerStats;
+};
+
 struct DLLCLIENT RenderStats
 {
 	std::chrono::nanoseconds lightCullingTime {0};
+	RenderQueueBuilderStats renderQueueBuilderStats;
 	RenderPassStats lightingPass;
 	RenderPassStats lightingPassTranslucent;
 	RenderPassStats prepass;

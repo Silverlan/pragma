@@ -43,9 +43,8 @@ void CCharacterComponent::Initialize()
 	BaseCharacterComponent::Initialize();
 	BindEventUnhandled(CAnimatedComponent::EVENT_ON_BLEND_ANIMATION,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &ent = GetEntity();
-		auto mdlComponent = ent.GetModelComponent();
 		auto animComponent = ent.GetAnimatedComponent();
-		auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+		auto &hMdl = ent.GetModel();
 		if(hMdl == nullptr || animComponent.expired())
 			return;
 		// Apply movement blending

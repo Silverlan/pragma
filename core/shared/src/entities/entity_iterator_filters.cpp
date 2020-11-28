@@ -114,13 +114,13 @@ bool EntityIteratorFilterFlags::ShouldPass(BaseEntity &ent)
 		if((m_flags &EntityIterator::FilterFlags::HasTransform) != EntityIterator::FilterFlags::None && ent.GetTransformComponent())
 			return true;
 
-		if((m_flags &EntityIterator::FilterFlags::HasModel) != EntityIterator::FilterFlags::None && ent.GetModelComponent().valid())
+		if((m_flags &EntityIterator::FilterFlags::HasModel) != EntityIterator::FilterFlags::None && ent.GetModelComponent())
 			return true;
 		return bIncludeEntity;
 	}
 	if((m_flags &EntityIterator::FilterFlags::HasTransform) != EntityIterator::FilterFlags::None && !ent.GetTransformComponent())
 		return false;
-	if((m_flags &EntityIterator::FilterFlags::HasModel) != EntityIterator::FilterFlags::None && ent.GetModelComponent().expired())
+	if((m_flags &EntityIterator::FilterFlags::HasModel) != EntityIterator::FilterFlags::None && !ent.GetModelComponent())
 		return false;
 
 	if((m_flags &EntityIterator::FilterFlags::Character) != EntityIterator::FilterFlags::None && ent.IsCharacter())

@@ -18,6 +18,7 @@
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/renderers/rasterization/culled_mesh_data.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/rendering/render_queue_worker.hpp"
 #include "pragma/rendering/render_queue_instancer.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/model/c_model.h"
@@ -151,6 +152,7 @@ const pragma::rendering::RenderQueue *SceneRenderDesc::GetRenderQueue(RenderMode
 	return const_cast<SceneRenderDesc*>(this)->GetRenderQueue(renderMode,translucent);
 }
 const std::vector<std::shared_ptr<const pragma::rendering::RenderQueue>> &SceneRenderDesc::GetWorldRenderQueues() const {return m_worldRenderQueues;}
+
 void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 	const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,
 	const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
@@ -202,12 +204,8 @@ bool SceneRenderDesc::ShouldCull(CBaseEntity &ent,const std::function<bool(const
 }
 bool SceneRenderDesc::ShouldCull(pragma::CRenderComponent &renderC,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull)
 {
-	Vector3 min,max;
-	renderC.GetRenderBounds(&min,&max);
-	auto &pos = renderC.GetEntity().GetPosition();
-	min += pos;
-	max += pos;
-	return fShouldCull(min,max);
+	auto &aabb = renderC.GetAbsoluteRenderBounds();
+	return fShouldCull(aabb.min,aabb.max);
 }
 bool SceneRenderDesc::ShouldCull(pragma::CRenderComponent &renderC,pragma::RenderMeshIndex meshIdx,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull)
 {
@@ -264,12 +262,14 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 			}
 			if(ent->IsWorld())
 				continue; // World entities are handled separately
-			auto *renderC = static_cast<CBaseEntity*>(ent)->GetRenderComponent();
-			if(!renderC || renderC->IsExemptFromOcclusionCulling() || ShouldConsiderEntity(*static_cast<CBaseEntity*>(ent),scene,cam.GetEntity().GetPosition(),renderFlags) == false)
-				continue;
-			if(fShouldCull && ShouldCull(*renderC,fShouldCull))
-				continue;
-			AddRenderMeshesToRenderQueue(drawSceneInfo,*renderC,getRenderQueue,scene,cam,vp,fShouldCull,lodBias);
+			c_game->GetRenderQueueWorkerManager().AddJob([&drawSceneInfo,ent,renderFlags,getRenderQueue,&scene,&cam,vp,fShouldCull,lodBias]() {
+				auto *renderC = static_cast<CBaseEntity*>(ent)->GetRenderComponent();
+				if(!renderC || renderC->IsExemptFromOcclusionCulling() || ShouldConsiderEntity(*static_cast<CBaseEntity*>(ent),scene,renderFlags) == false)
+					return;
+				if(fShouldCull && ShouldCull(*renderC,fShouldCull))
+					return;
+				AddRenderMeshesToRenderQueue(drawSceneInfo,*renderC,getRenderQueue,scene,cam,vp,fShouldCull,lodBias);
+			});
 		}
 		auto *children = node.GetChildren();
 		if(children == nullptr)
@@ -294,13 +294,13 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 	},bspLeafNodes);
 }
 
-bool SceneRenderDesc::ShouldConsiderEntity(CBaseEntity &ent,const pragma::CSceneComponent &scene,const Vector3 &camOrigin,FRender renderFlags)
+bool SceneRenderDesc::ShouldConsiderEntity(CBaseEntity &ent,const pragma::CSceneComponent &scene,FRender renderFlags)
 {
 	if(ent.IsInScene(scene) == false || !ent.GetRenderComponent())
 		return false;
 	auto *renderC = ent.GetRenderComponent();
 	auto renderMode = renderC->GetRenderMode();
-	return umath::is_flag_set(renderFlags,render_mode_to_render_flag(renderMode)) && ent.GetModel() != nullptr && renderC->ShouldDraw(camOrigin);
+	return umath::is_flag_set(renderFlags,render_mode_to_render_flag(renderMode)) && ent.GetModel() != nullptr && renderC->ShouldDraw();
 }
 
 struct DebugFreezeCamData
@@ -522,6 +522,18 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 
 	m_worldRenderQueuesReady = false;
 	c_game->GetRenderQueueBuilder().Append([this,&cam,posCam,&drawSceneInfo]() {
+		auto *stats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->renderQueueBuilderStats : nullptr;
+		std::chrono::steady_clock::time_point tStart;
+		if(stats)
+		{
+			auto &queueWorkerManager = c_game->GetRenderQueueWorkerManager();
+			auto numWorkers = queueWorkerManager.GetWorkerCount();
+			stats->workerStats.resize(numWorkers);
+			for(auto i=decltype(numWorkers){0u};i<numWorkers;++i)
+				queueWorkerManager.GetWorker(i).SetStats(&stats->workerStats[i]);
+			tStart = std::chrono::steady_clock::now();
+		}
+
 		pragma::CSceneComponent::GetEntityInstanceIndexBuffer()->UpdateAndClearUnusedBuffers();
 
 		auto &frustumPlanes = g_debugFreezeCamData.has_value() ? g_debugFreezeCamData->frustumPlanes : cam.GetFrustumPlanes();
@@ -535,13 +547,18 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 		// data between render queues. (The data in 'm_worldMeshVisibility' is only valid for this render pass.)
 		// Translucent world meshes still need to be sorted with other entity meshes, so they are just copied over to the
 		// main render queue.
+
+		std::chrono::steady_clock::time_point t;
+		if(stats)
+			t = std::chrono::steady_clock::now();
+
 		EntityIterator entItWorld {*c_game};
 		entItWorld.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
 		bspLeafNodes.reserve(entItWorld.GetCount());
 		m_worldMeshVisibility.reserve(entItWorld.GetCount());
 		for(auto *entWorld : entItWorld)
 		{
-			if(ShouldConsiderEntity(*static_cast<CBaseEntity*>(entWorld),m_scene,posCam,drawSceneInfo.renderFlags) == false)
+			if(ShouldConsiderEntity(*static_cast<CBaseEntity*>(entWorld),m_scene,drawSceneInfo.renderFlags) == false)
 				continue;
 			auto worldC = entWorld->GetComponent<pragma::CWorldComponent>();
 			auto &bspTree = worldC->GetBSPTree();
@@ -607,15 +624,21 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 		m_worldMeshVisibility.resize(m_worldRenderQueues.size());
 		m_worldRenderQueuesReady = true;
 
+		if(stats)
+			stats->worldQueueUpdateTime += std::chrono::steady_clock::now() -t;
+
 		if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Dynamic))
 		{
 			// Some entities are exempt from occlusion culling altogether, we'll handle them here
 			for(auto *pRenderComponent : pragma::CRenderComponent::GetEntitiesExemptFromOcclusionCulling())
 			{
-				if(ShouldConsiderEntity(static_cast<CBaseEntity&>(pRenderComponent->GetEntity()),m_scene,posCam,drawSceneInfo.renderFlags) == false)
+				if(ShouldConsiderEntity(static_cast<CBaseEntity&>(pRenderComponent->GetEntity()),m_scene,drawSceneInfo.renderFlags) == false)
 					continue;
 				AddRenderMeshesToRenderQueue(drawSceneInfo,*pRenderComponent,m_scene,cam,vp,nullptr);
 			}
+
+			if(stats)
+				t = std::chrono::steady_clock::now();
 
 			// Now we just need the remaining entities, for which we'll use the scene octree
 			auto *culler = m_scene.FindOcclusionCuller();
@@ -624,16 +647,42 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 				auto &dynOctree = culler->GetOcclusionOctree();
 				CollectRenderMeshesFromOctree(drawSceneInfo,dynOctree,m_scene,cam,vp,drawSceneInfo.renderFlags,frustumPlanes,&bspLeafNodes);
 			}
+
+			if(stats)
+				stats->octreeProcessingTime += std::chrono::steady_clock::now() -t;
 		}
+
+		if(stats)
+			t = std::chrono::steady_clock::now();
+		c_game->GetRenderQueueWorkerManager().WaitForCompletion();
+		if(stats)
+			stats->workerWaitTime += std::chrono::steady_clock::now() -t;
 
 		// All render queues (aside from world render queues) need to be sorted
 		for(auto &renderQueue : m_renderQueues)
 		{
+			if(stats)
+				t = std::chrono::steady_clock::now();
 			renderQueue->Sort();
+			if(stats)
+				stats->queueSortTime += std::chrono::steady_clock::now() -t;
+			
+			if(stats)
+				t = std::chrono::steady_clock::now();
 			BuildRenderQueueInstanceLists(*renderQueue);
+			if(stats)
+				stats->queueInstancingTime += std::chrono::steady_clock::now() -t;
 			renderQueue->Unlock();
 		}
 		// c_game->StopProfilingStage(CGame::CPUProfilingPhase::BuildRenderQueue);
+		if(stats)
+		{
+			stats->totalExecutionTime += std::chrono::steady_clock::now() -tStart;
+			auto &queueWorkerManager = c_game->GetRenderQueueWorkerManager();
+			auto numWorkers = queueWorkerManager.GetWorkerCount();
+			for(auto i=decltype(numWorkers){0u};i<numWorkers;++i)
+				queueWorkerManager.GetWorker(i).SetStats(nullptr);
+		}
 	});
 }
 #pragma optimize("",on)

@@ -252,12 +252,12 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 		Con::cwar<<"WARNING: Attempted to render invalid scene!"<<Con::endl;
 		return;
 	}
-	if(IsDefaultGameRenderEnabled())
-		QueueForRendering(drawSceneInfo);
-
-	CallCallbacks("PreRenderScenes");
+	CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes",std::ref(drawSceneInfo));
 	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes",std::ref(drawSceneInfo));
 	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderScenes",std::ref(drawSceneInfo));
+
+	if(IsDefaultGameRenderEnabled())
+		QueueForRendering(drawSceneInfo);
 
 	// Note: At this point no changes must be done to the scene whatsoever!
 	// Any change in the scene will result in undefined behavior until this function

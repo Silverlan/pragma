@@ -66,7 +66,7 @@ namespace pragma
 {
 	namespace debug {class GPUProfilingStage;};
 	namespace physics {class IVisualDebugger;};
-	namespace rendering {class RenderQueueBuilder;};
+	namespace rendering {class RenderQueueBuilder; class RenderQueueWorkerManager;};
 	class LuaShaderManager;
 	class LuaParticleModifierManager;
 	class CPlayerComponent;
@@ -390,6 +390,7 @@ public:
 	pragma::CCameraComponent *GetRenderCamera() const;
 
 	pragma::rendering::RenderQueueBuilder &GetRenderQueueBuilder();
+	pragma::rendering::RenderQueueWorkerManager &GetRenderQueueWorkerManager();
 	prosper::IDescriptorSet &GetGlobalRenderSettingsDescriptorSet();
 	GlobalRenderSettingsBufferData &GetGlobalRenderSettingsBufferData();
 protected:
@@ -465,6 +466,7 @@ private:
 	bool m_defaultGameRenderEnabled = true;
 	std::vector<util::DrawSceneInfo> m_sceneRenderQueue {};
 	std::shared_ptr<pragma::rendering::RenderQueueBuilder> m_renderQueueBuilder = nullptr;
+	std::shared_ptr<pragma::rendering::RenderQueueWorkerManager> m_renderQueueWorkerManager = nullptr;
 	Vector4 m_clipPlane = {};
 	Vector4 m_colScale = {};
 	Material *m_matOverride = nullptr;

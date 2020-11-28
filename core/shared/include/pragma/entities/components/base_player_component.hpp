@@ -46,7 +46,7 @@ namespace pragma
 		// Same as PlayActivity, but doesn't automatically transmit to clients if called serverside
 		virtual bool PlaySharedActivity(Activity activity);
 
-		void SetObserverMode(OBSERVERMODE mode);
+		virtual void SetObserverMode(OBSERVERMODE mode);
 		OBSERVERMODE GetObserverMode() const;
 		const util::PEnumProperty<OBSERVERMODE> &GetObserverModeProperty() const;
 

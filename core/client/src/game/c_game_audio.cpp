@@ -123,8 +123,7 @@ void CGame::ReloadSoundCache(bool bReloadBakedCache,SoundCacheFlags cacheFlags,f
 			{
 				std::unordered_map<uint32_t,uint32_t> surfMatToIplMat {};
 				auto fAddEntityMeshes = [this,iplScene,&surfMatToIplMat](CBaseEntity *ent) {
-					auto mdlComponent = ent->GetModelComponent();
-					auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+					auto &mdl = ent->GetModel();
 					if(mdl == nullptr)
 						return;
 					auto pPhysComponent = ent->GetPhysicsComponent();

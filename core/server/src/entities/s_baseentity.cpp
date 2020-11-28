@@ -75,6 +75,8 @@ void SBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 		m_physicsComponent = &static_cast<pragma::SPhysicsComponent&>(component);
 	else if(typeid(component) == typeid(pragma::SWorldComponent))
 		umath::set_flag(m_stateFlags,StateFlags::HasWorldComponent);
+	else if(typeid(component) == typeid(pragma::SModelComponent))
+		m_modelComponent = &static_cast<pragma::SModelComponent&>(component);
 }
 void SBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
 {
@@ -85,6 +87,8 @@ void SBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
 		m_transformComponent = nullptr;
 	else if(typeid(component) == typeid(pragma::SPhysicsComponent))
 		m_physicsComponent = nullptr;
+	else if(typeid(component) == typeid(pragma::SModelComponent))
+		m_modelComponent = nullptr;
 }
 
 BaseEntity *SBaseEntity::GetClientsideEntity() const
@@ -222,11 +226,6 @@ Bool SBaseEntity::ReceiveNetEvent(pragma::BasePlayerComponent &pl,pragma::NetEve
 	return false;
 }
 
-util::WeakHandle<pragma::BaseModelComponent> SBaseEntity::GetModelComponent() const
-{
-	auto pComponent = GetComponent<pragma::SModelComponent>();
-	return pComponent.valid() ? std::static_pointer_cast<pragma::BaseModelComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BaseModelComponent>{};
-}
 util::WeakHandle<pragma::BaseAnimatedComponent> SBaseEntity::GetAnimatedComponent() const
 {
 	auto pComponent = GetComponent<pragma::SAnimatedComponent>();

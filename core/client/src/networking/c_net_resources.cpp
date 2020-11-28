@@ -206,7 +206,7 @@ ModelLoadManager::ModelLoadManager()
 						if(ent == nullptr)
 							continue;
 						auto mdlComponent = ent->GetModelComponent();
-						if(mdlComponent.expired())
+						if(!mdlComponent)
 							continue;
 						auto mdlName = mdlComponent->GetModelName();
 						if(mdlName != query->fileName)

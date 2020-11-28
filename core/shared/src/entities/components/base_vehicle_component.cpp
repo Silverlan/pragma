@@ -60,8 +60,7 @@ void BaseVehicleComponent::InitializeVehiclePhysics(PHYSICSTYPE type,BasePhysics
 	auto *physEnv = game->GetPhysicsEnvironment();
 	if(physEnv == nullptr)
 		return;
-	auto mdlComponent = ent.GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = ent.GetModel();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(mdl == nullptr || !pPhysComponent)
 		return;
@@ -189,7 +188,7 @@ void BaseVehicleComponent::SetupSteeringWheel(const std::string &mdl,umath::Degr
 		entThis.RemoveEntityOnRemoval(ent);
 	}
 	auto mdlComponent = m_steeringWheel->GetModelComponent();
-	if(mdlComponent.expired())
+	if(!mdlComponent)
 		return;
 	mdlComponent->SetModel(mdl.c_str());
 	InitializeSteeringWheel();
@@ -243,7 +242,7 @@ void BaseVehicleComponent::InitializeWheelEntities()
 		if(wheel == nullptr)
 			continue;
 		auto mdlComponent = wheel->GetEntity().GetModelComponent();
-		if(mdlComponent.valid())
+		if(mdlComponent)
 			mdlComponent->SetModel(wheelData.model);
 		wheel->SetupWheel(*this,wheelDesc,i);
 		wheel->GetEntity().Spawn();

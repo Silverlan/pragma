@@ -30,7 +30,7 @@ bool BaseSoftBodyComponent::InitializeSoftBodyData()
 	ReleaseSoftBodyData();
 	auto &ent = GetEntity();
 	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr)
 		return false;
 	m_softBodyData = std::unique_ptr<SoftBodyData>(new SoftBodyData);

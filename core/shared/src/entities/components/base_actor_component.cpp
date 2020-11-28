@@ -95,8 +95,7 @@ void BaseActorComponent::InitializeMoveController()
 {
 	m_moveController = -1;
 	auto &ent = GetEntity();
-	auto mdlComponent = ent.GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)
 		return;
 	m_moveController = mdl->LookupBlendController(m_moveControllerName);
@@ -197,8 +196,7 @@ void BaseActorComponent::OnPhysicsInitialized()
 	if(physEnv == nullptr)
 		return;
 	m_hitboxData.clear();
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr)
 		return;
 	auto hitboxBones = hMdl->GetHitboxBones();
@@ -248,8 +246,7 @@ bool BaseActorComponent::FindHitgroup(const pragma::physics::ICollisionObject &p
 		return false;
 	auto &hitboxData = m_hitboxData[idx];
 	auto &ent = GetEntity();
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr)
 		return false;
 	auto &hitboxes = hMdl->GetHitboxes();
@@ -270,7 +267,7 @@ void BaseActorComponent::UpdateHitboxPhysics()
 		return;
 	auto &ent = GetEntity();
 	auto mdlComponent = ent.GetModelComponent();
-	if(mdlComponent.expired())
+	if(!mdlComponent)
 		return;
 	auto &colObjs = m_physHitboxes->GetCollisionObjects();
 	auto numColObjs = colObjs.size();

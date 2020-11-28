@@ -59,7 +59,7 @@ void BaseTransformComponent::Initialize()
 		return util::EventReply::Handled;
 	});
 }
-void BaseTransformComponent::OnPoseChanged(TransformChangeFlags changeFlags)
+void BaseTransformComponent::OnPoseChanged(TransformChangeFlags changeFlags,bool updatePhysics)
 {
 	auto &ent = GetEntity();
 	if(umath::is_flag_set(changeFlags,TransformChangeFlags::PositionChanged))
@@ -67,14 +67,17 @@ void BaseTransformComponent::OnPoseChanged(TransformChangeFlags changeFlags)
 	if(umath::is_flag_set(changeFlags,TransformChangeFlags::RotationChanged))
 		ent.SetStateFlag(BaseEntity::StateFlags::RotationChanged);
 	m_tLastMoved = ent.GetNetworkState()->GetGameState()->CurTime();
-	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto *pPhys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
-	if(pPhys)
+	if(updatePhysics)
 	{
-		if(umath::is_flag_set(changeFlags,TransformChangeFlags::PositionChanged) && umath::is_flag_set(pPhysComponent->GetStateFlags(),BasePhysicsComponent::StateFlags::ApplyingPhysicsPosition) == false)
-			pPhys->SetPosition(GetPosition());
-		if(umath::is_flag_set(changeFlags,TransformChangeFlags::RotationChanged) && umath::is_flag_set(pPhysComponent->GetStateFlags(),BasePhysicsComponent::StateFlags::ApplyingPhysicsRotation) == false)
-			pPhys->SetOrientation(GetRotation());
+		auto pPhysComponent = ent.GetPhysicsComponent();
+		auto *pPhys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
+		if(pPhys)
+		{
+			if(umath::is_flag_set(changeFlags,TransformChangeFlags::PositionChanged) && umath::is_flag_set(pPhysComponent->GetStateFlags(),BasePhysicsComponent::StateFlags::ApplyingPhysicsPosition) == false)
+				pPhys->SetPosition(GetPosition());
+			if(umath::is_flag_set(changeFlags,TransformChangeFlags::RotationChanged) && umath::is_flag_set(pPhysComponent->GetStateFlags(),BasePhysicsComponent::StateFlags::ApplyingPhysicsRotation) == false)
+				pPhys->SetOrientation(GetRotation());
+		}
 	}
 	InvokeEventCallbacks(EVENT_ON_POSE_CHANGED,CEOnPoseChanged{changeFlags});
 }

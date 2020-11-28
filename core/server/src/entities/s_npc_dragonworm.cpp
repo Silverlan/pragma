@@ -22,6 +22,6 @@ void SDragonWormComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
 	auto mdlComponent = GetEntity().GetModelComponent();
-	if(mdlComponent.valid())
+	if(mdlComponent)
 		mdlComponent->SetModel("creatures/dragonworm.wmd");
 }

@@ -162,7 +162,7 @@ void ResourceWatcherManager::OnResourceChanged(const std::string &path,const std
 					for(auto *ent : entIt)
 					{
 						auto mdlComponent = ent->GetModelComponent();
-						if(mdlComponent.expired() || FileManager::ComparePath(mdlComponent->GetModelName(),path) == false)
+						if(!mdlComponent || FileManager::ComparePath(mdlComponent->GetModelName(),path) == false)
 							continue;
 #if RESOURCE_WATCHER_VERBOSE > 0
 						Con::cout<<"[ResourceWatcher] Reloading model for entity "<<ent->GetClass()<<"..."<<Con::endl;

@@ -96,7 +96,7 @@ util::EventReply CLightSpotVolComponent::HandleEvent(ComponentEventId eventId,Co
 void CLightSpotVolComponent::InitializeVolumetricLight()
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
-	if(mdlComponent.expired())
+	if(!mdlComponent)
 		return;
 	auto mdl = c_game->CreateModel();
 	auto group = mdl->AddMeshGroup("reference");

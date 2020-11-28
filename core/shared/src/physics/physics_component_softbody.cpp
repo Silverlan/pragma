@@ -32,8 +32,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
 	});
 	if(pSoftBodyComponent->InitializeSoftBodyData() == false)
 		return {};
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr)
 		return {};
 	auto &colMeshes = hMdl->GetCollisionMeshes();

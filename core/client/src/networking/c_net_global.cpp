@@ -335,7 +335,7 @@ DLLCLIENT void NET_cl_ent_model(NetPacket packet)
 	std::string mdl = packet->ReadString();
 	CBaseEntity *cent = static_cast<CBaseEntity*>(ent);
 	auto mdlComponent = cent->GetModelComponent();
-	if(mdlComponent.valid())
+	if(mdlComponent)
 		mdlComponent->SetModel(mdl.c_str());
 }
 
@@ -348,7 +348,7 @@ DLLCLIENT void NET_cl_ent_skin(NetPacket packet)
 		return;
 	unsigned int skin = packet->Read<unsigned int>();
 	auto mdlComponent = ent->GetModelComponent();
-	if(mdlComponent.valid())
+	if(mdlComponent)
 		mdlComponent->SetSkin(skin);
 }
 

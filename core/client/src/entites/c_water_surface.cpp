@@ -159,7 +159,7 @@ void CWaterSurfaceComponent::InitializeSurface()
 	meshGroup->AddMesh(mesh);
 	mdl->Update(ModelUpdateFlags::All); // TODO: Don't update vertex and index buffers
 	auto mdlComponent = GetEntity().GetModelComponent();
-	if(mdlComponent.valid())
+	if(mdlComponent)
 		mdlComponent->SetModel(mdl);
 
 	prosper::util::BufferCreateInfo bufCreateInfo {};

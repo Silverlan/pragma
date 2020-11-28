@@ -2160,8 +2160,7 @@ namespace Lua
 		}));
 		def.def("GetMoveSpeed",static_cast<void(*)(lua_State*,THandle&,const std::string&)>([](lua_State *l,THandle &hNPC,const std::string &anim) {
 			pragma::Lua::check_component(l,hNPC);
-			auto mdlComponent = hNPC->GetEntity().GetModelComponent();
-			auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+			auto &mdl = hNPC->GetEntity().GetModel();
 			if(mdl == nullptr)
 				return;
 			auto animId = mdl->LookupAnimation(anim);

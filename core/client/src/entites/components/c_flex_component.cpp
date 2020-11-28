@@ -161,8 +161,7 @@ void CFlexComponent::Initialize()
 
 void CFlexComponent::SetFlexController(uint32_t flexId,float val,float duration,bool clampToLimits)
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = GetEntity().GetModel();
 	if(mdl == nullptr)
 		return;
 	auto *flexC = mdl->GetFlexController(flexId);
@@ -184,8 +183,7 @@ void CFlexComponent::SetFlexController(uint32_t flexId,float val,float duration,
 }
 bool CFlexComponent::GetFlexController(uint32_t flexId,float &val) const
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = GetEntity().GetModel();
 	if(mdl == nullptr || mdl->GetFlexController(flexId) == nullptr)
 		return false;
 	auto it = m_flexControllers.find(flexId);
@@ -200,7 +198,7 @@ void CFlexComponent::UpdateFlexWeightsMT()
 {
 	if(m_flexDataUpdateRequired == false)
 		return;
-	auto mdlC = static_cast<CModelComponent*>(GetEntity().GetModelComponent().get());
+	auto mdlC = static_cast<CModelComponent*>(GetEntity().GetModelComponent());
 	if(mdlC == nullptr || mdlC->GetLOD() > 0)
 		return;
 	auto &mdl = mdlC->GetModel();
@@ -242,8 +240,7 @@ bool CFlexComponent::CalcFlexValue(uint32_t flexId,float &val) const {return con
 
 bool CFlexComponent::UpdateFlexWeight(uint32_t flexId,float &val,bool storeInCache)
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = GetEntity().GetModel();
 	if(mdl == nullptr || flexId >= m_updatedFlexWeights.size())
 		return false;
 	if(m_updatedFlexWeights.at(flexId))
@@ -286,8 +283,7 @@ void CFlexComponent::UpdateSoundPhonemes(CALSound &snd)
 	auto userData = (buf != nullptr) ? buf->GetUserData() : nullptr;
 	if(userData == nullptr)
 		return;
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = GetEntity().GetModel();
 	if(mdl == nullptr)
 		return;
 	auto &phonemeMap = mdl->GetPhonemeMap();

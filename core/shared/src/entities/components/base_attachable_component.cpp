@@ -109,13 +109,11 @@ void BaseAttachableComponent::UpdateAttachmentData(bool bForceReload)
 			else
 				return;
 		}
-		auto mdlComponent = GetEntity().GetModelComponent();
-		auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+		auto &hMdl = GetEntity().GetModel();
 		if(hMdl != nullptr)
 		{
 			Skeleton &skel = hMdl->GetSkeleton();
-			auto mdlComponentParent = entParent.GetModelComponent();
-			auto hMdlParent = mdlComponentParent.valid() ? mdlComponentParent->GetModel() : nullptr;
+			auto &hMdlParent = entParent.GetModel();
 			if(hMdlParent != nullptr)
 			{
 				auto *mdlParent = hMdlParent.get();
@@ -293,8 +291,7 @@ AttachmentData *BaseAttachableComponent::AttachToBone(BaseEntity *ent,std::strin
 		ClearAttachment();
 		return nullptr;
 	}
-	auto mdlComponent = ent->GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent->GetModel();
 	if(hMdl == nullptr)
 	{
 		SetupAttachment(ent,attInfo);
@@ -321,7 +318,7 @@ AttachmentData *BaseAttachableComponent::AttachToAttachment(BaseEntity *ent,uint
 		Vector3 pos {};
 		auto rot = uquat::identity();
 		auto mdlCParent = entParent.GetModelComponent();
-		if(mdlCParent.valid())
+		if(mdlCParent)
 			mdlCParent->GetAttachment(m_attachment->attachment,&pos,&rot);
 		auto pTrComponentParent = entParent.GetTransformComponent();
 		if(pTrComponentParent)
@@ -345,7 +342,7 @@ AttachmentData *BaseAttachableComponent::AttachToAttachment(BaseEntity *ent,std:
 		return nullptr;
 	}
 	auto pMdlComponent = ent->GetModelComponent();
-	if(pMdlComponent.expired())
+	if(!pMdlComponent)
 		return nullptr;
 	int attachmentID = pMdlComponent->LookupAttachment(attachment);
 	if(attachmentID == -1)
@@ -481,7 +478,7 @@ std::optional<umath::Transform> BaseAttachableComponent::GetParentPose() const
 		else if(m_attachment->attachment != -1)
 		{
 			auto pMdlCParent = entParent.GetModelComponent();
-			if(pMdlCParent.valid())
+			if(pMdlCParent)
 				pMdlCParent->GetAttachment(m_attachment->attachment,&pos,&rot);
 		}
 		auto pTrComponentParent = entParent.GetTransformComponent();
@@ -531,7 +528,7 @@ void BaseAttachableComponent::UpdateAttachmentOffset(bool invokeUpdateEvents)
 			{
 				auto mdlComponent = entThis.GetModelComponent();
 				auto animComponent = entThis.GetAnimatedComponent();
-				auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+				auto hMdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 				if(hMdl != nullptr && animComponent.valid())
 				{
 					auto *parent = m_attachment->parent.get();
@@ -540,7 +537,7 @@ void BaseAttachableComponent::UpdateAttachmentOffset(bool invokeUpdateEvents)
 					Skeleton &skel = hMdl->GetSkeleton();
 					auto mdlComponentParent = entParent.GetModelComponent();
 					auto animComponentParent = entParent.GetAnimatedComponent();
-					auto hMdlParent = mdlComponentParent.valid() ? mdlComponentParent->GetModel() : nullptr;
+					auto hMdlParent = mdlComponentParent ? mdlComponentParent->GetModel() : nullptr;
 					if(hMdlParent != nullptr && animComponentParent.valid())
 					{
 						Skeleton &skelParent = hMdlParent->GetSkeleton();

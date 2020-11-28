@@ -14,6 +14,7 @@
 #include <cmaterialmanager.h>
 #include <shader/prosper_shader.hpp>
 
+struct RenderPassStats;
 namespace pragma::rendering
 {
 	struct SortingKey
@@ -67,7 +68,7 @@ namespace pragma::rendering
 
 		void Lock();
 		void Unlock();
-		void WaitForCompletion() const;
+		void WaitForCompletion(RenderPassStats *optStats=nullptr) const;
 		bool IsComplete() const;
 	private:
 		RenderQueue();
@@ -75,6 +76,7 @@ namespace pragma::rendering
 		std::atomic<bool> m_locked = false;
 		mutable std::condition_variable m_threadWaitCondition {};
 		mutable std::mutex m_threadWaitMutex {};
+		std::mutex m_queueMutex {};
 	};
 
 	class RenderQueueJob

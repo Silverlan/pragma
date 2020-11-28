@@ -187,7 +187,7 @@ bool CParticleRendererModel::Update()
 
 	auto bSuccessful = true;
 	auto mdlComponent = GetParticleSystem().GetEntity().GetModelComponent();
-	if(mdlComponent.valid() && mdlComponent->HasModel())
+	if(mdlComponent && mdlComponent->HasModel())
 	{
 		auto &mdl = mdlComponent->GetModel();
 		auto lod = c_game->GetLOD(dist,mdl->GetLODCount());
@@ -217,7 +217,7 @@ void CParticleRendererModel::Render(const std::shared_ptr<prosper::IPrimaryComma
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 
 	auto mdlComponent = GetParticleSystem().GetEntity().GetModelComponent();
-	if(mdlComponent.valid() && mdlComponent->HasModel())
+	if(mdlComponent && mdlComponent->HasModel())
 	{
 		auto &mdl = *mdlComponent->GetModel();
 		auto &materials = mdl.GetMaterials();

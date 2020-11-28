@@ -34,7 +34,7 @@ void CViewModelComponent::Initialize()
 		auto *pl = c_game->GetLocalPlayer();
 		if(pl == nullptr || pl->GetObserverMode() != OBSERVERMODE::FIRSTPERSON)
 		{
-			shouldDrawData.shouldDraw = CEShouldDraw::ShouldDraw::No;
+			shouldDrawData.shouldDraw = false;
 			return util::EventReply::Handled;
 		}
 		return util::EventReply::Unhandled;
@@ -57,8 +57,7 @@ void CViewModelComponent::Initialize()
 	});
 	BindEventUnhandled(CAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &ent = GetEntity();
-		auto mdlComponent = ent.GetModelComponent();
-		auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+		auto &hMdl = ent.GetModel();
 		if(hMdl != nullptr)
 		{
 			auto anim = hMdl->GetAnimation(static_cast<CEOnAnimationComplete&>(evData.get()).animation);

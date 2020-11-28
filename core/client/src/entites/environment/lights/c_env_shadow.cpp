@@ -314,7 +314,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 			bspLeafNodes.reserve(entItWorld.GetCount());
 			for(auto *entWorld : entItWorld)
 			{
-				if(SceneRenderDesc::ShouldConsiderEntity(*static_cast<CBaseEntity*>(entWorld),scene,posCam,drawSceneInfo.renderFlags) == false)
+				if(SceneRenderDesc::ShouldConsiderEntity(*static_cast<CBaseEntity*>(entWorld),scene,drawSceneInfo.renderFlags) == false)
 					continue;
 				auto worldC = entWorld->GetComponent<pragma::CWorldComponent>();
 				auto &bspTree = worldC->GetBSPTree();

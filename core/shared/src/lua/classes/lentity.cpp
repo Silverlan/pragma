@@ -301,7 +301,7 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	classDef.def("GetModelComponent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);
 		auto pMdlComponent = hEnt->GetModelComponent();
-		if(pMdlComponent.expired())
+		if(!pMdlComponent)
 			return;
 		pMdlComponent->PushLuaObject(l);
 	}));
@@ -400,7 +400,7 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	classDef.def("GetBodyGroup",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t bgId) {
 		LUA_CHECK_ENTITY(l,hEnt);
 		auto mdlC = hEnt->GetModelComponent();
-		if(mdlC.expired())
+		if(!mdlC)
 			return;
 		Lua::PushInt(l,mdlC->GetBodyGroup(bgId));
 	}));
@@ -411,7 +411,7 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	classDef.def("SetBodyGroup",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t bgId,uint32_t id) {
 		LUA_CHECK_ENTITY(l,hEnt);
 		auto mdlC = hEnt->GetModelComponent();
-		if(mdlC.expired())
+		if(!mdlC)
 			return;
 		mdlC->SetBodyGroup(bgId,id);
 	}));

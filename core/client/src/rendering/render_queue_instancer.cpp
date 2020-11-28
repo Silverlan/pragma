@@ -60,10 +60,12 @@ void rendering::RenderQueueInstancer::ProcessInstantiableList(uint32_t endIndex,
 	{
 		auto renderBufferIndex = static_cast<CBaseEntity*>(c_game->GetEntityByLocalIndex(entIdx))->GetRenderComponent()->GetRenderBufferIndex();
 		renderBufferIndices.push_back(*renderBufferIndex);
+
+		hash = util::hash_combine<uint64_t>(hash,static_cast<uint64_t>(entIdx));
 	}
 		
 	auto &instanceIndexBuffer = pragma::CSceneComponent::GetEntityInstanceIndexBuffer();
-	auto instanceBuf = instanceIndexBuffer->AddInstanceList(m_renderQueue,std::move(renderBufferIndices),util::hash_combine<uint64_t>(hash,numInstantiableEntities));
+	auto instanceBuf = instanceIndexBuffer->AddInstanceList(m_renderQueue,std::move(renderBufferIndices),hash);
 	if(instanceBuf == nullptr)
 		return;
 
@@ -83,12 +85,16 @@ void rendering::RenderQueueInstancer::ProcessInstantiableList(uint32_t endIndex,
 		auto &item = m_renderQueue.queue[m_renderQueue.sortedItemIndices[i].first];
 		item.instanceSetIndex = setIdx;
 	}
-	// TODO: Instanced items are skipped anyway, so technically we don't need this second loop
-	for(auto i=(startIndex +numMeshes);i<endIndex;++i)
+	if(startIndex +numMeshes < endIndex)
+	{
+		// We only need to set the first item after our base instance set to INSTANCED, since all others are skipped by the renderer anyway
+		m_renderQueue.queue[m_renderQueue.sortedItemIndices[startIndex +numMeshes].first].instanceSetIndex = pragma::rendering::RenderQueueItem::INSTANCED;
+	}
+	/*for(auto i=(startIndex +numMeshes);i<endIndex;++i)
 	{
 		auto &item = m_renderQueue.queue[m_renderQueue.sortedItemIndices[i].first];
 		item.instanceSetIndex = pragma::rendering::RenderQueueItem::INSTANCED;
-	}
+	}*/
 
 	m_instantiableEntityList.clear();
 }
@@ -110,6 +116,7 @@ util::Hash rendering::RenderQueueInstancer::CalcNextEntityHash(uint32_t &outNumM
 			break;
 		++outNumMeshes;
 		++m_curIndex;
+		static_assert(sizeof(SortingKey) == sizeof(uint64_t));
 		hash = util::hash_combine<uint64_t>(hash,*reinterpret_cast<uint64_t*>(&sortKey.second));
 	}
 	return hash;

@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/render_queue.hpp"
+#include "pragma/rendering/render_stats.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 
 using namespace pragma::rendering;
@@ -47,9 +48,7 @@ void RenderQueue::Clear()
 }
 void RenderQueue::Add(CBaseEntity &ent,RenderMeshIndex meshIdx,CMaterial &mat,pragma::ShaderTextured3DBase &shader,const CCameraComponent *optCam)
 {
-	Reserve();
-	queue.push_back({});
-	auto &item = queue.back();
+	RenderQueueItem item;
 	item.material = mat.GetIndex();
 	item.shader = shader.GetIndex();
 	item.entity = ent.GetLocalIndex();
@@ -70,7 +69,12 @@ void RenderQueue::Add(CBaseEntity &ent,RenderMeshIndex meshIdx,CMaterial &mat,pr
 			item.sortingKey.SetDistance(pos,*optCam);
 		}
 	}
-	sortedItemIndices.push_back({queue.size() -1,item.sortingKey});
+
+	m_queueMutex.lock();
+		Reserve();
+		queue.push_back(item);
+		sortedItemIndices.push_back({queue.size() -1,item.sortingKey});
+	m_queueMutex.unlock();
 }
 void RenderQueue::Add(const RenderQueueItem &item)
 {
@@ -113,10 +117,17 @@ void RenderQueue::Unlock()
 	m_threadWaitMutex.unlock();
 }
 bool RenderQueue::IsComplete() const {return !m_locked;}
-void RenderQueue::WaitForCompletion() const
+void RenderQueue::WaitForCompletion(RenderPassStats *optStats) const
 {
+	std::chrono::steady_clock::time_point t;
+	if(optStats)
+		t = std::chrono::steady_clock::now();
+
 	std::unique_lock<std::mutex> mlock(m_threadWaitMutex);
 	m_threadWaitCondition.wait(mlock,[this]() -> bool {return !m_locked;});
+
+	if(optStats)
+		optStats->renderThreadWaitTime += std::chrono::steady_clock::now() -t;
 }
 
 //////////////////////

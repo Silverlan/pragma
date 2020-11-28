@@ -54,8 +54,7 @@ Con::c_cout& CPlayerComponent::print(Con::c_cout &os)
 	auto &ent = GetEntity();
 	auto nameC = ent.GetNameComponent();
 	os<<"CPlayer["<<(nameC.valid() ? nameC->GetName() : "")<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
-	auto mdlComponent = ent.GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)
 		os<<"NULL";
 	else
@@ -69,8 +68,7 @@ std::ostream& CPlayerComponent::print(std::ostream &os)
 	auto &ent = GetEntity();
 	auto nameC = ent.GetNameComponent();
 	os<<"CPlayer["<<(nameC.valid() ? nameC->GetName() : "")<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
-	auto mdlComponent = ent.GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)
 		os<<"NULL";
 	else
@@ -410,18 +408,18 @@ void CPlayerComponent::Initialize()
 	});
 	BindEvent(CRenderComponent::EVENT_SHOULD_DRAW,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &shouldDrawData = static_cast<CEShouldDraw&>(evData.get());
-		if(ShouldDraw(shouldDrawData.camOrigin) == false)
+		if(ShouldDraw() == false)
 		{
-			shouldDrawData.shouldDraw = CEShouldDraw::ShouldDraw::No;
+			shouldDrawData.shouldDraw = false;
 			return util::EventReply::Handled;
 		}
 		return util::EventReply::Unhandled;
 	});
 	BindEvent(CRenderComponent::EVENT_SHOULD_DRAW_SHADOW,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &shouldDrawData = static_cast<CEShouldDraw&>(evData.get());
-		if(ShouldDrawShadow(shouldDrawData.camOrigin) == false)
+		if(ShouldDrawShadow() == false)
 		{
-			shouldDrawData.shouldDraw = CEShouldDraw::ShouldDraw::No;
+			shouldDrawData.shouldDraw = false;
 			return util::EventReply::Handled;
 		}
 		return util::EventReply::Unhandled;
@@ -437,6 +435,14 @@ void CPlayerComponent::Initialize()
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr)
 		pPhysComponent->SetCollisionType(COLLISIONTYPE::AABB);
+}
+
+void CPlayerComponent::SetObserverMode(OBSERVERMODE mode)
+{
+	BasePlayerComponent::SetObserverMode(mode);
+	auto *renderC = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
+	if(renderC)
+		renderC->UpdateShouldDrawState();
 }
 
 void CPlayerComponent::UpdateViewModelTransform()
@@ -537,7 +543,7 @@ void CPlayerComponent::SetLocalPlayer(bool b)
 	}
 }
 
-bool CPlayerComponent::ShouldDraw(const Vector3 &camOrigin) const
+bool CPlayerComponent::ShouldDraw() const
 {
 	if(!IsLocalPlayer())
 		return true;
@@ -548,7 +554,7 @@ bool CPlayerComponent::ShouldDraw(const Vector3 &camOrigin) const
 	return (GetObserverMode() != OBSERVERMODE::FIRSTPERSON) ? true : false;
 }
 
-bool CPlayerComponent::ShouldDrawShadow(const Vector3 &camOrigin) const
+bool CPlayerComponent::ShouldDrawShadow() const
 {
 	auto pRenderComponent = static_cast<const CBaseEntity&>(GetEntity()).GetRenderComponent();
 	return pRenderComponent ? pRenderComponent->GetCastShadows() : false;;

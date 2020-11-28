@@ -134,8 +134,8 @@ void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimary
 			if(light.ShouldPass(*ent,renderFlags) == false)
 				return;
 			m_octreeCallbacks.entityCallback(*ent,renderFlags);
-			auto &mdlComponent = pRenderComponent->GetModelComponent();
-			if(mdlComponent.valid())
+			auto *mdlComponent = pRenderComponent->GetModelComponent();
+			if(mdlComponent)
 			{
 				auto mdl = mdlComponent->GetModel();
 				for(auto &mesh : static_cast<pragma::CModelComponent&>(*mdlComponent).GetLODMeshes())

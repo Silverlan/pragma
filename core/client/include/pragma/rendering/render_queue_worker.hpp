@@ -23,7 +23,6 @@ namespace pragma::rendering
 	{
 	public:
 		using Job = std::function<void(void)>;
-		static auto constexpr BATCH_SIZE = 20;
 		RenderQueueWorkerManager(uint32_t numWorkers);
 		~RenderQueueWorkerManager();
 		void WaitForCompletion();
@@ -31,6 +30,9 @@ namespace pragma::rendering
 		void AddJob(const Job &job);
 		uint32_t GetWorkerCount() const;
 		void SetWorkerCount(uint32_t numWorkers);
+
+		void SetJobsPerBatchCount(uint32_t numJobsPerBatch) {m_numJobsPerBatch = numJobsPerBatch;}
+		uint32_t GetJobsPerBatchCount() const {return m_numJobsPerBatch;}
 
 		RenderQueueWorker &GetWorker(uint32_t i);
 		const RenderQueueWorker &GetWorker(uint32_t i) const;
@@ -47,6 +49,7 @@ namespace pragma::rendering
 
 		std::condition_variable m_workCompleteCondition;
 		std::mutex m_workCompleteMutex;
+		uint32_t m_numJobsPerBatch = 2;
 	};
 
 	class RenderQueueWorker

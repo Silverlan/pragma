@@ -31,7 +31,7 @@ using namespace pragma;
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 void CWorldComponent::Initialize()
 {
 	BaseWorldComponent::Initialize();
@@ -256,9 +256,9 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 			if(mat == nullptr)
 				continue;
 			auto hShader = mat->GetPrimaryShader();
-			if(hShader.expired())
+			if(!hShader)
 				continue;
-			auto *shader = dynamic_cast<pragma::ShaderTextured3DBase*>(hShader.get());
+			auto *shader = dynamic_cast<pragma::ShaderTextured3DBase*>(hShader);
 			if(shader == nullptr)
 				continue;
 			if(mat->GetAlphaMode() != AlphaMode::Opaque)
@@ -371,4 +371,3 @@ std::ostream& CWorld::print(std::ostream &os)
 	os<<"]";
 	return os;
 }
-#pragma optimize("",on)

@@ -17,6 +17,8 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 
+
+
 OcclusionMeshInfo::OcclusionMeshInfo(CBaseEntity &ent,CModelMesh &mesh)
 	: mesh{&mesh},hEntity{ent.GetHandle()}
 {}

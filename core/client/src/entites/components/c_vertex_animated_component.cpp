@@ -24,7 +24,7 @@
 extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 luabind::object CVertexAnimatedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CVertexAnimatedComponentHandleWrapper>(l);}
 void CVertexAnimatedComponent::Initialize()
 {
@@ -292,4 +292,3 @@ bool CVertexAnimatedComponent::GetLocalVertexPosition(const ModelSubMesh &subMes
 	}
 	return true;
 }
-#pragma optimize("",on)

@@ -27,14 +27,14 @@ void RenderQueueWorker::StartThread()
 		while(m_running)
 		{
 			std::unique_lock<std::mutex> mlock(m_manager.m_readyJobMutex);
-			m_manager.m_readyJobCondition.wait(mlock,[this]() -> bool {return m_manager.m_workAvailable;});
+			m_manager.m_readyJobCondition.wait(mlock,[this]() -> bool {return m_manager.m_workAvailable || !m_running;});
 
 			std::chrono::steady_clock::time_point t;
 			if(m_stats)
 				t = std::chrono::steady_clock::now();
 			
 			++m_manager.m_numThreadsWorking;
-			while(m_manager.m_readyJobs.empty() == false && jobs.size() < RenderQueueWorkerManager::BATCH_SIZE)
+			while(m_manager.m_readyJobs.empty() == false && jobs.size() < m_manager.m_numJobsPerBatch)
 			{
 				jobs.push(m_manager.m_readyJobs.front());
 				m_manager.m_readyJobs.pop();
@@ -69,7 +69,10 @@ void RenderQueueWorker::StartThread()
 
 RenderQueueWorker::~RenderQueueWorker()
 {
-	assert(!m_manager.m_running);
+	assert(!m_running);
+	m_manager.m_readyJobMutex.lock();
+		m_manager.m_readyJobCondition.notify_all();
+	m_manager.m_readyJobMutex.unlock();
 	if(m_thread.joinable())
 		m_thread.join();
 }
@@ -126,7 +129,7 @@ void RenderQueueWorkerManager::FlushPendingJobs()
 		}
 		m_workAvailable = !m_readyJobs.empty();
 		auto num = m_readyJobs.size();
-		if(num > BATCH_SIZE)
+		if(num > m_numJobsPerBatch)
 			m_readyJobCondition.notify_all();
 		else
 			m_readyJobCondition.notify_one();
@@ -136,7 +139,7 @@ void RenderQueueWorkerManager::FlushPendingJobs()
 void RenderQueueWorkerManager::AddJob(const Job &job)
 {
 	m_pendingJobs.push(job);
-	if(m_pendingJobs.size() < BATCH_SIZE)
+	if(m_pendingJobs.size() < m_numJobsPerBatch)
 		return; // We'll submit the jobs as batches, to reduce the overhead of the mutex
 	FlushPendingJobs();
 }

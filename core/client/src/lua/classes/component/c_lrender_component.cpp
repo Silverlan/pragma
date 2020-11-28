@@ -18,10 +18,6 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCRender.def("GetTransformationMatrix",&Lua::Render::GetTransformationMatrix);
 	defCRender.def("SetRenderMode",&Lua::Render::SetRenderMode);
 	defCRender.def("GetRenderMode",&Lua::Render::GetRenderMode);
-	defCRender.def("GetRenderModeProperty",static_cast<void(*)(lua_State*,CRenderHandle&)>([](lua_State *l,CRenderHandle &hComponent) {
-		pragma::Lua::check_component(l,hComponent);
-		Lua::Property::push(l,*hComponent->GetRenderModeProperty());
-		}));
 	defCRender.def("GetLocalRenderBounds",&Lua::Render::GetLocalRenderBounds);
 	defCRender.def("GetLocalRenderSphereBounds",&Lua::Render::GetLocalRenderSphereBounds);
 	defCRender.def("GetAbsoluteRenderBounds",&Lua::Render::GetAbsoluteRenderBounds);
@@ -121,6 +117,7 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 	}));
 	// defCRender.add_static_constant("EVENT_ON_UPDATE_RENDER_DATA",pragma::CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA);
 	defCRender.add_static_constant("EVENT_ON_RENDER_BOUNDS_CHANGED",pragma::CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED);
+	defCRender.add_static_constant("EVENT_ON_RENDER_MODE_CHANGED",pragma::CRenderComponent::EVENT_ON_RENDER_MODE_CHANGED);
 	defCRender.add_static_constant("EVENT_ON_RENDER_BUFFERS_INITIALIZED",pragma::CRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED);
 	defCRender.add_static_constant("EVENT_SHOULD_DRAW",pragma::CRenderComponent::EVENT_SHOULD_DRAW);
 	defCRender.add_static_constant("EVENT_SHOULD_DRAW_SHADOW",pragma::CRenderComponent::EVENT_SHOULD_DRAW_SHADOW);
@@ -129,7 +126,6 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 
 	// Enums
 	defCRender.add_static_constant("RENDERMODE_NONE",umath::to_integral(RenderMode::None));
-	defCRender.add_static_constant("RENDERMODE_AUTO",umath::to_integral(RenderMode::Auto));
 	defCRender.add_static_constant("RENDERMODE_WORLD",umath::to_integral(RenderMode::World));
 	defCRender.add_static_constant("RENDERMODE_VIEW",umath::to_integral(RenderMode::View));
 	defCRender.add_static_constant("RENDERMODE_SKYBOX",umath::to_integral(RenderMode::Skybox));

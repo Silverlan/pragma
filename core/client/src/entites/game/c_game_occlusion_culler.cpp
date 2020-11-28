@@ -92,12 +92,12 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 	if(!pRenderComponent)
 		return;
 	auto hThis = GetHandle();
-	static_cast<Callback<void,std::reference_wrapper<const RenderMode>,std::reference_wrapper<const RenderMode>>*>(cbRenderMode.get())->SetFunction([this,&ent,fInsertOctreeObject,hThis,cbRenderMode](std::reference_wrapper<const RenderMode> old,std::reference_wrapper<const RenderMode> newMode) mutable {
+	static_cast<Callback<util::EventReply,std::reference_wrapper<pragma::ComponentEvent>>*>(cbRenderMode.get())->SetFunction([this,&ent,fInsertOctreeObject,hThis,cbRenderMode](std::reference_wrapper<pragma::ComponentEvent> evData) mutable -> util::EventReply {
 		if(hThis.expired())
 		{
 			if(cbRenderMode.IsValid())
 				cbRenderMode.Remove();
-			return;
+			return util::EventReply::Unhandled;
 		}
 		auto pRenderComponent = ent.GetComponent<pragma::CRenderComponent>();
 		auto renderMode = pRenderComponent.valid() ? pRenderComponent->GetRenderMode() : RenderMode::None;
@@ -109,8 +109,9 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 		}
 		else
 			occlusionTree.RemoveObject(&ent);
+		return util::EventReply::Unhandled;
 	});
-	pRenderComponent->GetRenderModeProperty()->AddCallback(cbRenderMode);
+	pRenderComponent->AddEventCallback(CRenderComponent::EVENT_ON_RENDER_MODE_CHANGED,cbRenderMode);
 	auto renderMode = pRenderComponent->GetRenderMode();
 	if(renderMode != RenderMode::World && renderMode != RenderMode::Skybox && renderMode != RenderMode::Water)
 		return;

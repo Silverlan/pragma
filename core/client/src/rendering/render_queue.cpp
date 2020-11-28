@@ -12,6 +12,9 @@
 
 using namespace pragma::rendering;
 
+SortingKey::SortingKey(MaterialIndex material,prosper::ShaderIndex shader,bool instantiable)
+	: material{material},shader{shader},instantiable{instantiable}
+{}
 void SortingKey::SetDistance(const Vector3 &origin,const CCameraComponent &cam)
 {
 	auto &p0 = origin;
@@ -26,6 +29,27 @@ void SortingKey::SetDistance(const Vector3 &origin,const CCameraComponent &cam)
 	// Note: 16 bit precision is not enough, but 24 bit might be. For now we'll use a 32 bit integer,
 	// since we have that much space available anyway
 	distance = glm::floatBitsToUint(static_cast<float>(distSqr));
+}
+
+RenderQueueItem::RenderQueueItem(CBaseEntity &ent,RenderMeshIndex meshIdx,CMaterial &mat,pragma::ShaderTextured3DBase &pshader,const CCameraComponent *optCam)
+	: material{mat.GetIndex()},shader{pshader.GetIndex()},entity{ent.GetLocalIndex()},mesh{meshIdx}
+{
+	sortingKey.material = material;
+	sortingKey.shader = shader;
+	instanceSetIndex = RenderQueueItem::UNIQUE;
+	auto &renderC = *ent.GetRenderComponent();
+	sortingKey.instantiable = renderC.IsInstantiable();
+	if(optCam)
+	{
+		// TODO: This isn't very efficient, find a better way to handle this!
+		auto &renderMeshes = renderC.GetRenderMeshes();
+		if(meshIdx < renderMeshes.size())
+		{
+			auto &pose = ent.GetPose();
+			auto pos = pose *renderMeshes[meshIdx]->GetCenter();
+			sortingKey.SetDistance(pos,*optCam);
+		}
+	}
 }
 
 std::shared_ptr<RenderQueue> RenderQueue::Create() {return std::shared_ptr<RenderQueue>{new RenderQueue{}};}
@@ -48,39 +72,28 @@ void RenderQueue::Clear()
 }
 void RenderQueue::Add(CBaseEntity &ent,RenderMeshIndex meshIdx,CMaterial &mat,pragma::ShaderTextured3DBase &shader,const CCameraComponent *optCam)
 {
-	RenderQueueItem item;
-	item.material = mat.GetIndex();
-	item.shader = shader.GetIndex();
-	item.entity = ent.GetLocalIndex();
-	item.mesh = meshIdx;
-	item.sortingKey.material = item.material;
-	item.sortingKey.shader = item.shader;
-	item.instanceSetIndex = RenderQueueItem::UNIQUE;
-	auto &renderC = *ent.GetRenderComponent();
-	item.sortingKey.instantiable = renderC.IsInstantiable();
-	if(optCam)
-	{
-		// TODO: This isn't very efficient, find a better way to handle this!
-		auto &renderMeshes = renderC.GetRenderMeshes();
-		if(meshIdx < renderMeshes.size())
-		{
-			auto &pose = ent.GetPose();
-			auto pos = pose *renderMeshes[meshIdx]->GetCenter();
-			item.sortingKey.SetDistance(pos,*optCam);
-		}
-	}
-
+	Add({ent,meshIdx,mat,shader,optCam});
+}
+void RenderQueue::Add(const RenderQueueItem &item)
+{
 	m_queueMutex.lock();
 		Reserve();
 		queue.push_back(item);
 		sortedItemIndices.push_back({queue.size() -1,item.sortingKey});
 	m_queueMutex.unlock();
 }
-void RenderQueue::Add(const RenderQueueItem &item)
+void RenderQueue::Add(const std::vector<RenderQueueItem> &items)
 {
-	Reserve();
-	queue.push_back(item);
-	sortedItemIndices.push_back({queue.size() -1,item.sortingKey});
+	m_queueMutex.lock();
+		auto offset = queue.size();
+		queue.resize(queue.size() +items.size());
+		sortedItemIndices.resize(queue.size());
+		for(auto i=decltype(items.size()){0u};i<items.size();++i)
+		{
+			queue[offset +i] = items[i];
+			sortedItemIndices[offset +i] = {offset +i,items[i].sortingKey};
+		}
+	m_queueMutex.unlock();
 }
 void RenderQueue::Sort()
 {

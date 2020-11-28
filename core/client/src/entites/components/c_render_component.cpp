@@ -42,6 +42,7 @@ decltype(CRenderComponent::s_ocExemptEntities) CRenderComponent::s_ocExemptEntit
 ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId CRenderComponent::EVENT_ON_RENDER_MODE_CHANGED = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_SHOULD_DRAW = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_SHOULD_DRAW_SHADOW = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS = INVALID_COMPONENT_ID;
@@ -52,6 +53,7 @@ void CRenderComponent::RegisterEvents(pragma::EntityComponentManager &componentM
 	EVENT_ON_UPDATE_RENDER_DATA_MT = componentManager.RegisterEvent("ON_UPDATE_RENDER_DATA_MT",std::type_index(typeid(CRenderComponent)));
 	EVENT_ON_RENDER_BUFFERS_INITIALIZED = componentManager.RegisterEvent("ON_RENDER_BUFFERS_INITIALIZED");
 	EVENT_ON_RENDER_BOUNDS_CHANGED = componentManager.RegisterEvent("ON_RENDER_BUFFERS_INITIALIZED");
+	EVENT_ON_RENDER_MODE_CHANGED = componentManager.RegisterEvent("ON_RENDER_MODE_CHANGED");
 	EVENT_SHOULD_DRAW = componentManager.RegisterEvent("SHOULD_DRAW",std::type_index(typeid(CRenderComponent)));
 	EVENT_SHOULD_DRAW_SHADOW = componentManager.RegisterEvent("SHOULD_DRAW_SHADOW",std::type_index(typeid(CRenderComponent)));
 	EVENT_ON_UPDATE_RENDER_BUFFERS = componentManager.RegisterEvent("ON_UPDATE_RENDER_BUFFERS",std::type_index(typeid(CRenderComponent)));
@@ -59,7 +61,7 @@ void CRenderComponent::RegisterEvents(pragma::EntityComponentManager &componentM
 	EVENT_UPDATE_INSTANTIABILITY = componentManager.RegisterEvent("UPDATE_INSTANTIABILITY");
 }
 CRenderComponent::CRenderComponent(BaseEntity &ent)
-	: BaseRenderComponent(ent),m_renderMode(util::TEnumProperty<RenderMode>::Create(RenderMode::Auto))
+	: BaseRenderComponent(ent)
 {}
 luabind::object CRenderComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CRenderComponentHandleWrapper>(l);}
 void CRenderComponent::InitializeBuffers()
@@ -143,12 +145,12 @@ void CRenderComponent::Initialize()
 		m_absoluteRenderSphere = {};
 
 		auto &ent = GetEntity();
-		auto &mdlComponent = GetModelComponent();
-		auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+		auto *mdlComponent = GetModelComponent();
+		auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 		if(mdl == nullptr)
 		{
 			UpdateRenderMeshes();
-			m_renderMode->InvokeCallbacks();
+			BroadcastEvent(EVENT_ON_RENDER_MODE_CHANGED);
 			return;
 		}
 
@@ -161,7 +163,7 @@ void CRenderComponent::Initialize()
 		SetLocalRenderBounds(rMin,rMax);
 
 		UpdateRenderMeshes();
-		m_renderMode->InvokeCallbacks();
+		BroadcastEvent(EVENT_ON_RENDER_MODE_CHANGED);
 	});
 	UpdateInstantiability();
 }
@@ -300,22 +302,22 @@ void CRenderComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 			return util::EventReply::Unhandled;
 		}),CallbackType::Component,&component);
 	}
-	else if(typeid(component) == typeid(pragma::CModelComponent))
-		m_mdlComponent = component.GetHandle<CModelComponent>();
+	else if(typeid(component) == typeid(pragma::CAttachableComponent))
+		m_attachableComponent = static_cast<CAttachableComponent*>(&component);
 	else if(typeid(component) == typeid(pragma::CAnimatedComponent))
-		m_animComponent = component.GetHandle<CAnimatedComponent>();
+		m_animComponent = static_cast<CAnimatedComponent*>(&component);
 	else if(typeid(component) == typeid(pragma::CLightMapReceiverComponent))
-		m_lightMapReceiverComponent = component.GetHandle<CLightMapReceiverComponent>();
+		m_lightMapReceiverComponent = static_cast<CLightMapReceiverComponent*>(&component);
 }
 void CRenderComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 {
 	BaseRenderComponent::OnEntityComponentRemoved(component);
-	if(typeid(component) == typeid(pragma::CModelComponent))
-		m_mdlComponent = {};
+	if(typeid(component) == typeid(pragma::CAttachableComponent))
+		m_attachableComponent = nullptr;
 	else if(typeid(component) == typeid(pragma::CAnimatedComponent))
-		m_animComponent = {};
+		m_animComponent = nullptr;
 	else if(typeid(component) == typeid(pragma::CLightMapReceiverComponent))
-		m_lightMapReceiverComponent = {};
+		m_lightMapReceiverComponent = nullptr;
 }
 bool CRenderComponent::IsInstantiable() const {return umath::is_flag_set(m_stateFlags,StateFlags::IsInstantiable);}
 void CRenderComponent::SetInstaniationEnabled(bool enabled)
@@ -347,9 +349,10 @@ void CRenderComponent::UpdateShouldDrawShadowState()
 		BroadcastEvent(EVENT_SHOULD_DRAW_SHADOW,CEShouldDraw{shouldDraw});
 	umath::set_flag(m_stateFlags,StateFlags::ShouldDrawShadow,shouldDraw);
 }
-util::WeakHandle<CModelComponent> &CRenderComponent::GetModelComponent() const {return m_mdlComponent;}
-util::WeakHandle<CAnimatedComponent> &CRenderComponent::GetAnimatedComponent() const {return m_animComponent;}
-util::WeakHandle<CLightMapReceiverComponent> &CRenderComponent::GetLightMapReceiverComponent() const {return m_lightMapReceiverComponent;}
+CModelComponent *CRenderComponent::GetModelComponent() const {return static_cast<CModelComponent*>(GetEntity().GetModelComponent());}
+CAttachableComponent *CRenderComponent::GetAttachableComponent() const {return m_attachableComponent;}
+CAnimatedComponent *CRenderComponent::GetAnimatedComponent() const {return m_animComponent;}
+CLightMapReceiverComponent *CRenderComponent::GetLightMapReceiverComponent() const {return m_lightMapReceiverComponent;}
 void CRenderComponent::SetRenderOffsetTransform(const umath::ScaledTransform &t) {m_renderOffset = t; SetRenderBufferDirty();}
 void CRenderComponent::ClearRenderOffsetTransform() {m_renderOffset = {}; SetRenderBufferDirty();}
 const umath::ScaledTransform *CRenderComponent::GetRenderOffsetTransform() const {return m_renderOffset.has_value() ? &*m_renderOffset : nullptr;}
@@ -383,8 +386,8 @@ void CRenderComponent::UpdateRenderMeshes()
 	if(!ent.IsSpawned())
 		return;
 	c_game->UpdateEntityModel(&ent);
-	auto &mdlComponent = GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto *mdlComponent = GetModelComponent();
+	auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 #if 0
 	m_renderMeshContainer = nullptr;
 	if(mdl == nullptr)
@@ -524,8 +527,8 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 				color = pColorComponent->GetColor().ToVector4();
 
 			auto renderFlags = pragma::ShaderEntity::InstanceData::RenderFlags::None;
-			auto &pMdlComponent = GetModelComponent();
-			auto bWeighted = pMdlComponent.valid() && static_cast<const pragma::CModelComponent&>(*pMdlComponent).IsWeighted();
+			auto *pMdlComponent = GetModelComponent();
+			auto bWeighted = pMdlComponent && static_cast<const pragma::CModelComponent&>(*pMdlComponent).IsWeighted();
 			if(bWeighted == true)
 				renderFlags |= pragma::ShaderEntity::InstanceData::RenderFlags::Weighted;
 			auto &m = GetTransformationMatrix();
@@ -556,15 +559,15 @@ void CRenderComponent::UpdateRenderDataMT(const std::shared_ptr<prosper::IPrimar
 	UpdateAbsoluteRenderBounds();
 
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
-	auto &mdlC = GetModelComponent();
-	if(mdlC.valid())
+	auto *mdlC = GetModelComponent();
+	if(mdlC)
 		mdlC->UpdateLOD(scene,cam,vp); // TODO: Don't update this every frame for every entity!
 
 	CEOnUpdateRenderData evData {drawCmd};
 	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_DATA_MT,evData);
 
-	auto pAttComponent = ent.GetComponent<CAttachableComponent>();
-	if(pAttComponent.valid())
+	auto pAttComponent = GetAttachableComponent();
+	if(pAttComponent)
 	{
 		auto *attInfo = pAttComponent->GetAttachmentData();
 		if(attInfo != nullptr && (attInfo->flags &FAttachmentMode::UpdateEachFrame) != FAttachmentMode::None && attInfo->parent.valid())
@@ -574,9 +577,9 @@ void CRenderComponent::UpdateRenderDataMT(const std::shared_ptr<prosper::IPrimar
 
 void CRenderComponent::SetRenderMode(RenderMode mode)
 {
-	if(mode == **m_renderMode)
+	if(mode == m_renderMode)
 		return;
-	*m_renderMode = mode;
+	m_renderMode = mode;
 
 	auto it = std::find(s_ocExemptEntities.begin(),s_ocExemptEntities.end(),this);
 	if(mode == RenderMode::View)
@@ -591,6 +594,7 @@ void CRenderComponent::SetRenderMode(RenderMode mode)
 		ClearRenderBuffers();
 
 	UpdateShouldDrawState();
+	BroadcastEvent(EVENT_ON_RENDER_MODE_CHANGED);
 }
 void CRenderComponent::InitializeRenderBuffers()
 {
@@ -628,26 +632,14 @@ void CRenderComponent::ClearRenderBuffers()
 	m_renderBuffer = nullptr;
 	m_renderDescSetGroup = nullptr;
 }
-const util::PEnumProperty<RenderMode> &CRenderComponent::GetRenderModeProperty() const {return m_renderMode;}
-RenderMode CRenderComponent::GetRenderMode() const
-{
-	if(*m_renderMode == RenderMode::Auto)
-	{
-		auto &mdlComponent = GetModelComponent();
-		auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
-		if(mdl == nullptr)
-			return RenderMode::None;
-		return RenderMode::World;
-	}
-	return *m_renderMode;
-}
+RenderMode CRenderComponent::GetRenderMode() const {return m_renderMode;}
 bool CRenderComponent::ShouldDraw() const {return umath::is_flag_set(m_stateFlags,StateFlags::ShouldDraw);}
 bool CRenderComponent::ShouldDrawShadow() const {return umath::is_flag_set(m_stateFlags,StateFlags::ShouldDrawShadow);}
 
 RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod)
 {
-	auto &pMdlComponent = GetModelComponent();
-	if(pMdlComponent.expired())
+	auto *pMdlComponent = GetModelComponent();
+	if(!pMdlComponent)
 	{
 		static RenderMeshGroup meshes {};
 		return meshes;
@@ -657,8 +649,8 @@ RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod)
 const RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod) const {return const_cast<CRenderComponent*>(this)->GetLodRenderMeshGroup(lod);}
 RenderMeshGroup &CRenderComponent::GetLodMeshGroup(uint32_t lod)
 {
-	auto &pMdlComponent = GetModelComponent();
-	if(pMdlComponent.expired())
+	auto *pMdlComponent = GetModelComponent();
+	if(!pMdlComponent)
 	{
 		static RenderMeshGroup meshes {};
 		return meshes;
@@ -669,8 +661,8 @@ const RenderMeshGroup &CRenderComponent::GetLodMeshGroup(uint32_t lod) const {re
 const std::vector<std::shared_ptr<ModelSubMesh>> &CRenderComponent::GetRenderMeshes() const {return const_cast<CRenderComponent*>(this)->GetRenderMeshes();}
 std::vector<std::shared_ptr<ModelSubMesh>> &CRenderComponent::GetRenderMeshes()
 {
-	auto &pMdlComponent = GetModelComponent();
-	if(pMdlComponent.expired())
+	auto *pMdlComponent = GetModelComponent();
+	if(!pMdlComponent)
 	{
 		static std::vector<std::shared_ptr<ModelSubMesh>> meshes {};
 		return meshes;
@@ -691,8 +683,8 @@ std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes()
 		//if(pSoftBodyData != nullptr)
 		//	return pSoftBodyData->meshes;
 	}
-	auto &pMdlComponent = GetModelComponent();
-	if(pMdlComponent.expired())
+	auto *pMdlComponent = GetModelComponent();
+	if(!pMdlComponent)
 	{
 		static std::vector<std::shared_ptr<ModelMesh>> meshes {};
 		return meshes;

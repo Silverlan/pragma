@@ -89,6 +89,8 @@ void CEngine::RegisterConsoleCommands()
 	conVarMap.RegisterConVar("render_instancing_threshold","2",ConVarFlags::Archive,"The threshold at which to start instancing entities if instanced rendering is enabled (render_instancing_threshold). Must not be lower than 2!");
 	conVarMap.RegisterConVar("render_instancing_enabled","1",ConVarFlags::Archive,"Enables or disables instanced rendering.");
 	conVarMap.RegisterConVar("render_queue_worker_thread_count","3",ConVarFlags::Archive,"Number of threads to use for generating render queues.");
+	conVarMap.RegisterConVar("render_queue_entities_per_worker_job","5",ConVarFlags::Archive,"Number of entities for each job processed by a worker thread.");
+	conVarMap.RegisterConVar("render_queue_worker_jobs_per_batch","2",ConVarFlags::Archive,"Number of worker jobs to accumulate in a batch before assigning a worker.");
 
 #if LUA_ENABLE_RUN_GUI == 1
 	conVarMap.RegisterConCommand("lua_exec_gui",[](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {

@@ -22,6 +22,8 @@ namespace pragma::rendering
 		// Note: Order is important!
 		// Distance should *not* be set unless necessary (e.g. translucent geometry),
 		// otherwise instancing effectiveness will be reduced
+		SortingKey()=default;
+		SortingKey(MaterialIndex material,prosper::ShaderIndex shader,bool instantiable);
 		uint64_t distance : 32, shader : 15, material : 16, instantiable : 1;
 		void SetDistance(const Vector3 &origin,const CCameraComponent &cam);
 	};
@@ -29,6 +31,8 @@ namespace pragma::rendering
 	{
 		static auto constexpr INSTANCED = std::numeric_limits<uint16_t>::max();
 		static auto constexpr UNIQUE = std::numeric_limits<uint16_t>::max() -1;
+		RenderQueueItem()=default;
+		RenderQueueItem(CBaseEntity &ent,RenderMeshIndex meshIdx,CMaterial &mat,pragma::ShaderTextured3DBase &shader,const CCameraComponent *optCam=nullptr);
 		MaterialIndex material;
 		prosper::ShaderIndex shader;
 		EntityIndex entity;
@@ -58,6 +62,7 @@ namespace pragma::rendering
 		static std::shared_ptr<RenderQueue> Create();
 		void Clear();
 		void Reserve();
+		void Add(const std::vector<RenderQueueItem> &items);
 		void Add(const RenderQueueItem &item);
 		void Add(CBaseEntity &ent,RenderMeshIndex meshIdx,CMaterial &mat,pragma::ShaderTextured3DBase &shader,const CCameraComponent *optCam=nullptr);
 		void Sort();

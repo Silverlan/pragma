@@ -12,7 +12,6 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/util/orientedpoint.h>
-#include <sharedutils/property/util_property.hpp>
 #include <pragma/math/sphere.h>
 #include <pragma/entities/components/base_render_component.hpp>
 #include <mathutil/uvec.h>
@@ -26,6 +25,7 @@ namespace pragma
 {
 	class CModelComponent;
 	class CAnimatedComponent;
+	class CAttachableComponent;
 	class CLightMapReceiverComponent;
 	using RenderMeshIndex = uint32_t;
 	using RenderBufferIndex = uint32_t;
@@ -53,6 +53,7 @@ namespace pragma
 		static ComponentEventId EVENT_ON_UPDATE_RENDER_DATA_MT;
 		static ComponentEventId EVENT_ON_RENDER_BUFFERS_INITIALIZED;
 		static ComponentEventId EVENT_ON_RENDER_BOUNDS_CHANGED;
+		static ComponentEventId EVENT_ON_RENDER_MODE_CHANGED;
 		static ComponentEventId EVENT_SHOULD_DRAW;
 		static ComponentEventId EVENT_SHOULD_DRAW_SHADOW;
 		static ComponentEventId EVENT_ON_UPDATE_RENDER_BUFFERS;
@@ -103,7 +104,6 @@ namespace pragma
 
 		void SetRenderMode(RenderMode mode);
 		RenderMode GetRenderMode() const;
-		const util::PEnumProperty<RenderMode> &GetRenderModeProperty() const;
 
 		Mat4 &GetTransformationMatrix();
 		const umath::ScaledTransform &GetRenderPose() const;
@@ -121,9 +121,10 @@ namespace pragma
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual void OnEntitySpawn() override;
 
-		util::WeakHandle<CModelComponent> &GetModelComponent() const;
-		util::WeakHandle<CAnimatedComponent> &GetAnimatedComponent() const;
-		util::WeakHandle<CLightMapReceiverComponent> &GetLightMapReceiverComponent() const;
+		CModelComponent *GetModelComponent() const;
+		CAttachableComponent *GetAttachableComponent() const;
+		CAnimatedComponent *GetAnimatedComponent() const;
+		CLightMapReceiverComponent *GetLightMapReceiverComponent() const;
 
 		void SetExemptFromOcclusionCulling(bool exempt);
 		bool IsExemptFromOcclusionCulling() const;
@@ -173,12 +174,12 @@ namespace pragma
 		std::optional<umath::ScaledTransform> m_renderOffset {};
 		umath::ScaledTransform m_renderPose {};
 		Mat4 m_matTransformation = umat::identity();
-		util::PEnumProperty<RenderMode> m_renderMode = nullptr;
+		RenderMode m_renderMode = RenderMode::World;
 
 		// Used for quick access to avoid having to do a lookup on the entity's components
-		mutable util::WeakHandle<CModelComponent> m_mdlComponent = {};
-		mutable util::WeakHandle<CAnimatedComponent> m_animComponent = {};
-		mutable util::WeakHandle<CLightMapReceiverComponent> m_lightMapReceiverComponent = {};
+		mutable CAttachableComponent *m_attachableComponent = nullptr;
+		mutable CAnimatedComponent *m_animComponent = nullptr;
+		mutable CLightMapReceiverComponent *m_lightMapReceiverComponent = nullptr;
 
 		bounding_volume::AABB m_localRenderBounds {};
 		Sphere m_localRenderSphere {};

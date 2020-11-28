@@ -112,9 +112,9 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 	if(scene == nullptr)
 		return;
 	auto renderer = dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer());
-	if(whShader.expired() || renderer == nullptr)
+	if(!whShader || renderer == nullptr)
 		return;
-	auto *shader = dynamic_cast<pragma::ShaderWater*>(whShader.get());
+	auto *shader = dynamic_cast<pragma::ShaderWater*>(whShader);
 	auto whShaderPPWater = c_engine->GetShader("pp_water");
 	if(shader == nullptr || whShaderPPWater.expired())
 		return;

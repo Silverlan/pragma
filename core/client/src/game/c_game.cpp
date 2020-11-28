@@ -365,6 +365,15 @@ static void cmd_render_queue_worker_thread_count(NetworkState*,ConVar*,int,int v
 }
 REGISTER_CONVAR_CALLBACK_CL(render_queue_worker_thread_count,cmd_render_queue_worker_thread_count);
 
+static void cmd_render_queue_worker_jobs_per_batch(NetworkState*,ConVar*,int,int val)
+{
+	if(c_game == nullptr)
+		return;
+	val = umath::max(val,1);
+	c_game->GetRenderQueueWorkerManager().SetJobsPerBatchCount(val);
+}
+REGISTER_CONVAR_CALLBACK_CL(render_queue_worker_jobs_per_batch,cmd_render_queue_worker_jobs_per_batch);
+
 pragma::rendering::RenderQueueBuilder &CGame::GetRenderQueueBuilder() {return *m_renderQueueBuilder;}
 pragma::rendering::RenderQueueWorkerManager &CGame::GetRenderQueueWorkerManager() {return *m_renderQueueWorkerManager;}
 

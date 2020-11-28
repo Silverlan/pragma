@@ -46,7 +46,7 @@
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 extern DLLCENGINE CEngine *c_engine;
-#pragma optimize("",off)
+
 static void register_gui(Lua::Interface &lua)
 {
 	auto *l = lua.GetState();
@@ -1154,4 +1154,3 @@ void CGame::RegisterLuaLibraries()
 		lua_pushtablecfunction(GetLuaState(),"debug",(f.name),(f.func));
 	}
 }
-#pragma optimize("",on)

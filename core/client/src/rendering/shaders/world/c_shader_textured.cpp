@@ -369,8 +369,8 @@ bool ShaderTextured3DBase::BindLightMapUvBuffer(CModelSubMesh &mesh,const std::o
 		auto *renderC = m_boundEntity->GetRenderComponent();
 		if(renderC)
 		{
-			auto &lightMapReceiverC = renderC->GetLightMapReceiverComponent();
-			auto bufIdx = lightMapReceiverC.valid() ? (meshIdx.has_value() ? lightMapReceiverC->GetBufferIndex(*meshIdx) : lightMapReceiverC->FindBufferIndex(mesh)) : std::optional<uint32_t>{};
+			auto *lightMapReceiverC = renderC->GetLightMapReceiverComponent();
+			auto bufIdx = lightMapReceiverC ? (meshIdx.has_value() ? lightMapReceiverC->GetBufferIndex(*meshIdx) : lightMapReceiverC->FindBufferIndex(mesh)) : std::optional<uint32_t>{};
 			if(bufIdx.has_value())
 			{
 				outShouldUseLightmaps = true;

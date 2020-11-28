@@ -124,8 +124,8 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 				processed.insert(std::remove_reference_t<decltype(processed)>::value_type(ent,true));
 			}
 
-			auto &mdlComponent = pRenderComponent->GetModelComponent();
-			auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+			auto *mdlComponent = pRenderComponent->GetModelComponent();
+			auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 			assert(mdl != nullptr);
 			auto *mesh = static_cast<CModelMesh*>(info.mesh);
 			auto &meshes = mesh->GetSubMeshes();
@@ -133,7 +133,7 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 			{
 				auto *subMesh = static_cast<CModelSubMesh*>(it->get());
 				auto idxTexture = mdl->GetMaterialIndex(*subMesh,mdlComponent->GetSkin());
-				auto *mat = (idxTexture.has_value() && mdlComponent.valid()) ? mdlComponent->GetRenderMaterial(*idxTexture) : nullptr;
+				auto *mat = (idxTexture.has_value() && mdlComponent) ? mdlComponent->GetRenderMaterial(*idxTexture) : nullptr;
 				if(mat == nullptr)
 					mat = static_cast<CMaterial*>(client->GetMaterialManager().GetErrorMaterial());
 				/*else

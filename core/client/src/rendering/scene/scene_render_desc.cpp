@@ -157,10 +157,10 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 	const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,
 	const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
 	const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,
-	int32_t lodBias
+	int32_t lodBias,const std::function<void(pragma::rendering::RenderQueue&,const pragma::rendering::RenderQueueItem&)> &fOptInsertItemToQueue
 )
 {
-	auto &mdlC = renderC.GetModelComponent();
+	auto *mdlC = renderC.GetModelComponent();
 	auto lod = umath::max(static_cast<int32_t>(mdlC->GetLOD()) +lodBias,0);
 	auto &renderMeshes = renderC.GetRenderMeshes();
 	auto &lodGroup = renderC.GetLodRenderMeshGroup(lod);
@@ -172,7 +172,14 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 			continue;
 		auto &renderMesh = renderMeshes[meshIdx];
 		auto *mat = mdlC->GetRenderMaterial(renderMesh->GetSkinTextureIndex());
-		auto *shader = mat ? dynamic_cast<pragma::ShaderTextured3DBase*>(mat->GetPrimaryShader().get()) : nullptr;
+		if(mat == nullptr)
+			continue;
+		auto *shader = static_cast<pragma::ShaderTextured3DBase*>(mat->GetUserData2());
+		if(shader == nullptr)
+		{
+			shader = dynamic_cast<pragma::ShaderTextured3DBase*>(mat->GetPrimaryShader());
+			mat->SetUserData2(shader); // TODO: This is technically *not* thread safe and could be called from multiple threads!
+		}
 		if(shader == nullptr)
 			continue;
 		auto nonOpaque = mat->GetAlphaMode() != AlphaMode::Opaque;
@@ -186,7 +193,11 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 			first = true;
 			renderC.UpdateRenderDataMT(drawSceneInfo.commandBuffer,scene,cam,vp);
 		}
-		renderQueue->Add(static_cast<CBaseEntity&>(renderC.GetEntity()),meshIdx,*mat,*shader,nonOpaque ? &cam : nullptr);
+		pragma::rendering::RenderQueueItem item {static_cast<CBaseEntity&>(renderC.GetEntity()),meshIdx,*mat,*shader,nonOpaque ? &cam : nullptr};
+		if(fOptInsertItemToQueue)
+			fOptInsertItemToQueue(*renderQueue,item);
+		else
+			renderQueue->Add(item);
 	}
 }
 void SceneRenderDesc::AddRenderMeshesToRenderQueue(
@@ -225,6 +236,7 @@ bool SceneRenderDesc::ShouldCull(const Vector3 &min,const Vector3 &max,const std
 	return Intersection::AABBInPlaneMesh(min,max,frustumPlanes) == Intersection::Intersect::Outside;
 }
 
+static auto cvEntitiesPerJob = GetClientConVar("render_queue_entities_per_worker_job");
 void SceneRenderDesc::CollectRenderMeshesFromOctree(
 	const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
 	const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
@@ -232,8 +244,9 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 	int32_t lodBias
 )
 {
+	auto numEntitiesPerWorkerJob = umath::max(cvEntitiesPerJob->GetInt(),1);
 	std::function<void(const OcclusionOctree<CBaseEntity*>::Node &node)> iterateTree = nullptr;
-	iterateTree = [&iterateTree,&scene,&cam,renderFlags,fShouldCull,&drawSceneInfo,&getRenderQueue,&vp,bspLeafNodes,lodBias](const OcclusionOctree<CBaseEntity*>::Node &node) {
+	iterateTree = [&iterateTree,&scene,&cam,renderFlags,fShouldCull,&drawSceneInfo,&getRenderQueue,&vp,bspLeafNodes,lodBias,numEntitiesPerWorkerJob](const OcclusionOctree<CBaseEntity*>::Node &node) {
 		auto &nodeBounds = node.GetWorldBounds();
 		if(fShouldCull && fShouldCull(nodeBounds.first,nodeBounds.second))
 			return;
@@ -251,24 +264,43 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 				return;
 		}
 		auto &objs = node.GetObjects();
-		for(auto *ent : objs)
+		auto numObjects = objs.size();
+		auto numBatches = (numObjects /numEntitiesPerWorkerJob) +(((numObjects %numEntitiesPerWorkerJob) > 0) ? 1 : 0);
+		for(auto i=decltype(numBatches){0u};i<numBatches;++i)
 		{
-			assert(ent);
-			if(ent == nullptr)
-			{
-				// This should NEVER occur, but seems to anyway in some rare cases
-				Con::cerr<<"ERROR: NULL Entity in dynamic scene occlusion octree! Ignoring..."<<Con::endl;
-				continue;
-			}
-			if(ent->IsWorld())
-				continue; // World entities are handled separately
-			c_game->GetRenderQueueWorkerManager().AddJob([&drawSceneInfo,ent,renderFlags,getRenderQueue,&scene,&cam,vp,fShouldCull,lodBias]() {
-				auto *renderC = static_cast<CBaseEntity*>(ent)->GetRenderComponent();
-				if(!renderC || renderC->IsExemptFromOcclusionCulling() || ShouldConsiderEntity(*static_cast<CBaseEntity*>(ent),scene,renderFlags) == false)
-					return;
-				if(fShouldCull && ShouldCull(*renderC,fShouldCull))
-					return;
-				AddRenderMeshesToRenderQueue(drawSceneInfo,*renderC,getRenderQueue,scene,cam,vp,fShouldCull,lodBias);
+			auto iStart = i *numEntitiesPerWorkerJob;
+			auto iEnd = umath::min(static_cast<size_t>(iStart +numEntitiesPerWorkerJob),numObjects);
+			c_game->GetRenderQueueWorkerManager().AddJob([iStart,iEnd,&drawSceneInfo,&objs,renderFlags,getRenderQueue,&scene,&cam,vp,fShouldCull,lodBias]() {
+				// Note: We don't add individual items directly to the render queue, because that would invoke
+				// a mutex lock which can stall all of the worker threads.
+				// Instead we'll collect the entire batch of items, then add all of them to the render queue at once.
+				std::unordered_map<pragma::rendering::RenderQueue*,std::vector<pragma::rendering::RenderQueueItem>> items;
+				for(auto i=iStart;i<iEnd;++i)
+				{
+					auto *ent = objs[i];
+					assert(ent);
+					if(ent == nullptr)
+					{
+						// This should NEVER occur, but seems to anyway in some rare cases
+						Con::cerr<<"ERROR: NULL Entity in dynamic scene occlusion octree! Ignoring..."<<Con::endl;
+						continue;
+					}
+					if(ent->IsWorld())
+						continue; // World entities are handled separately
+					auto *renderC = static_cast<CBaseEntity*>(ent)->GetRenderComponent();
+					if(!renderC || renderC->IsExemptFromOcclusionCulling() || ShouldConsiderEntity(*static_cast<CBaseEntity*>(ent),scene,renderFlags) == false)
+						continue;
+					if(fShouldCull && ShouldCull(*renderC,fShouldCull))
+						continue;
+					AddRenderMeshesToRenderQueue(drawSceneInfo,*renderC,getRenderQueue,scene,cam,vp,fShouldCull,lodBias,[&items](pragma::rendering::RenderQueue &renderQueue,const pragma::rendering::RenderQueueItem &item) {
+						auto &v = items[&renderQueue];
+						if(v.size() == v.capacity())
+							v.reserve(v.size() *1.1f +50);
+						v.push_back(item);
+					});
+				}
+				for(auto &pair : items)
+					pair.first->Add(pair.second);
 			});
 		}
 		auto *children = node.GetChildren();

@@ -20,7 +20,7 @@
 using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 void RasterizationRenderer::CullLightSources(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.scene.expired())
@@ -224,4 +224,3 @@ void RasterizationRenderer::CullLightSources(const util::DrawSceneInfo &drawScen
 		c_game->StopProfilingStage(CGame::CPUProfilingPhase::Shadows);
 	}
 }
-#pragma optimize("",on)

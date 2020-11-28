@@ -12,7 +12,6 @@ using namespace pragma;
 
 extern DLLCENGINE CEngine *c_engine;
 
-#pragma optimize("",off)
 rendering::EntityInstanceIndexBuffer::EntityInstanceIndexBuffer()
 {
 	prosper::util::BufferCreateInfo bufCreateInfo = {};
@@ -108,4 +107,3 @@ std::shared_ptr<prosper::IBuffer> rendering::EntityInstanceIndexBuffer::AddInsta
 	m_bufferUpdateQueueMutex.unlock();
 	return buf;
 }
-#pragma optimize("",on)

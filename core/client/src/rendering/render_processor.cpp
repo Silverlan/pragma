@@ -19,7 +19,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 static bool g_collectRenderStats = false;
 static CallbackHandle g_cbPreRenderScene = {};
 static CallbackHandle g_cbPostRenderScene = {};
@@ -354,8 +354,8 @@ bool pragma::rendering::BaseRenderProcessor::Render(CModelSubMesh &mesh,pragma::
 	++m_numShaderInvocations;
 	
 	auto bUseVertexAnim = false;
-	auto &mdlComponent = m_curRenderC->GetModelComponent();
-	if(mdlComponent.valid())
+	auto *mdlComponent = m_curRenderC->GetModelComponent();
+	if(mdlComponent)
 	{
 		auto &vertAnimBuffer = static_cast<CModel&>(*mdlComponent->GetModel()).GetVertexAnimationBuffer();
 		if(vertAnimBuffer != nullptr)
@@ -501,4 +501,3 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 	}
 	return numShaderInvocations;
 }
-#pragma optimize("",on)

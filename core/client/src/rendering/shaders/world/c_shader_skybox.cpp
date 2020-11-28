@@ -74,6 +74,9 @@ void ShaderSkybox::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pi
 
 	pipelineInfo.ToggleDepthWrites(false);
 	pipelineInfo.ToggleDepthTest(false,prosper::CompareOp::Always);
+
+	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX);
+
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
 
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);

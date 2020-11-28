@@ -26,7 +26,7 @@ namespace pragma
 	class COcclusionCullerComponent;
 	struct OcclusionMeshInfo;
 	using RenderMeshIndex = uint32_t;
-	namespace rendering {class RenderQueue; class BaseRenderer;};
+	namespace rendering {class RenderQueue; class BaseRenderer; struct RenderQueueItem;};
 };
 class DLLCLIENT SceneRenderDesc
 {
@@ -59,7 +59,7 @@ public:
 		const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,
 		const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
 		const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,
-		int32_t lodBias=0
+		int32_t lodBias=0,const std::function<void(pragma::rendering::RenderQueue&,const pragma::rendering::RenderQueueItem&)> &fOptInsertItemToQueue=nullptr
 	);
 	// Note: All arguments have to be thread safe for the duration of the render (except vp)
 	static void CollectRenderMeshesFromOctree(

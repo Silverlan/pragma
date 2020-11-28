@@ -88,7 +88,7 @@ void OcclusionCullingHandlerOctTree::PerformCulling(
 			auto pTrComponent = ent->GetTransformComponent();
 			if(bUpdateLod == true)
 			{
-				auto &mdlComponent = pRenderComponent->GetModelComponent();
+				//auto &mdlComponent = pRenderComponent->GetModelComponent();
 				//if(mdlComponent.valid())
 				//	static_cast<pragma::CModelComponent&>(*mdlComponent).UpdateLOD(camPos);
 			}

@@ -12,7 +12,6 @@
 enum class DLLCLIENT RenderMode : uint32_t
 {
 	None = 0,
-	Auto,
 	World,
 	View,
 	Skybox,

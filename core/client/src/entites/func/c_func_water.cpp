@@ -97,7 +97,7 @@ void CWaterComponent::OnEntitySpawn()
 	if(pRenderComponent)
 	{
 		pRenderComponent->SetRenderMode(RenderMode::Water);
-		pRenderComponent->GetRenderModeProperty()->SetLocked(true);
+		// pRenderComponent->GetRenderModeProperty()->SetLocked(true);
 	}
 
 	auto &mdl = ent.GetModel();

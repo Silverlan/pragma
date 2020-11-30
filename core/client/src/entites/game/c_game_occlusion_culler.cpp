@@ -22,7 +22,7 @@ using namespace pragma;
 
 
 LINK_ENTITY_TO_CLASS(game_occlusion_culler,COcclusionCuller);
-
+#pragma optimize("",off)
 luabind::object COcclusionCullerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CShadowManagerComponentHandleWrapper>(l);}
 
 void COcclusionCullerComponent::Initialize()
@@ -49,7 +49,7 @@ void COcclusionCullerComponent::Initialize()
 void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 {
 	// Add entity to octree
-	auto cbRenderMode = FunctionCallback<void,std::reference_wrapper<const RenderMode>,std::reference_wrapper<const RenderMode>>::Create(nullptr);
+	auto cbRenderMode = FunctionCallback<util::EventReply,std::reference_wrapper<ComponentEvent>>::Create(nullptr);
 	m_callbacks.push_back(cbRenderMode); // Render mode callback has to be removed in the EVENT_ON_REMOVE event, otherwise the callback will cause the entity to be re-added to the tree AFTER it just has been removed
 	auto fInsertOctreeObject = [this](CBaseEntity *ent) {
 		m_occlusionOctree->InsertObject(ent);
@@ -78,13 +78,6 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 			m_callbacks.push_back(pGenericComponent->BindEventUnhandled(BaseEntity::EVENT_ON_REMOVE,[this,pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
 				auto *ent = static_cast<CBaseEntity*>(&pGenericComponent->GetEntity());
 				m_occlusionOctree->RemoveObject(ent);
-				m_occlusionOctree->IterateObjects([](const OcclusionOctree<CBaseEntity*>::Node &node) -> bool {
-
-					return true;
-					},[&](const CBaseEntity *entOther) {
-						if(entOther == ent)
-							throw std::runtime_error("!!"); // TODO: What is this?
-					});
 			}));
 		}
 	};
@@ -274,3 +267,4 @@ static void CVAR_CALLBACK_debug_render_octree_dynamic_draw(NetworkState*,ConVar*
 	octree.SetDebugModeEnabled(val);
 }
 REGISTER_CONVAR_CALLBACK_CL(debug_render_octree_dynamic_draw,CVAR_CALLBACK_debug_render_octree_dynamic_draw);
+#pragma optimize("",on)

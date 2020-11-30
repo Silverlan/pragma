@@ -89,6 +89,10 @@ void CWorldComponent::Initialize()
 	auto &ent = GetEntity();
 	ent.AddComponent<CBSPComponent>();
 	ent.AddComponent<CLightMapComponent>();
+
+	auto mdlC = ent.GetComponent<CModelComponent>();
+	if(mdlC.valid())
+		mdlC->SetAutoLodEnabled(false);
 }
 void CWorldComponent::ReloadCHCController()
 {

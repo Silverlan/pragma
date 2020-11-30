@@ -393,6 +393,9 @@ public:
 	pragma::rendering::RenderQueueWorkerManager &GetRenderQueueWorkerManager();
 	prosper::IDescriptorSet &GetGlobalRenderSettingsDescriptorSet();
 	GlobalRenderSettingsBufferData &GetGlobalRenderSettingsBufferData();
+
+	// For internal use only!
+	const std::vector<util::DrawSceneInfo> &GetQueuedRenderScenes() const;
 protected:
 	virtual void RegisterLuaEntityComponents(luabind::module_ &gameMod) override;
 	virtual void OnMapLoaded() override;

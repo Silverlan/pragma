@@ -15,6 +15,5 @@ luabind::object PropComponent::InitializeLuaObject(lua_State *l) {return BaseEnt
 
 void PropComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
-	packet->Write<float>(m_kvMaxVisibleDist);
 	packet->Write<float>(m_kvMass);
 }

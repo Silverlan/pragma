@@ -303,7 +303,7 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 			}
 
 			c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>,std::reference_wrapper<pragma::rendering::DepthStageRenderProcessor>>("RenderPrepass",drawSceneInfo,rsys);
-			c_game->CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderPrepass",drawSceneInfo);
+			c_game->CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>,std::reference_wrapper<pragma::rendering::DepthStageRenderProcessor>>("RenderPrepass",drawSceneInfo,std::ref(rsys));
 		}
 		rsys.UnbindShader();
 
@@ -441,7 +441,8 @@ void RasterizationRenderer::SetSSAOEnabled(pragma::CSceneComponent &scene,bool b
 {
 	umath::set_flag(m_stateFlags,StateFlags::SSAOEnabled,b);
 	UpdateRenderSettings();
-	ReloadRenderTarget(scene,GetWidth(),GetHeight());
+	if(GetWidth() > 0 && GetHeight() > 0)
+		ReloadRenderTarget(scene,GetWidth(),GetHeight());
 	/*m_hdrInfo.prepass.SetUseExtendedPrepass(b);
 	if(b == true)
 	{

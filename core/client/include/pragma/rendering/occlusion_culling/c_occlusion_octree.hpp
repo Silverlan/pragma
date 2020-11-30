@@ -167,6 +167,7 @@ public:
 	ValidationError Validate(const T **r=nullptr) const;
 #endif
 protected:
+	void InsertObject(const T &o,Node *optNode);
 	void GetObjectBounds(const T &o,Vector3 &min,Vector3 &max) const;
 	void RemoveNodeReference(const Node &node,const T &o);
 private:

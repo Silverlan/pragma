@@ -81,7 +81,7 @@ namespace pragma
 		std::vector<MaterialHandle> m_materialOverrides = {};
 		uint32_t m_lod = 0u;
 		float m_tNextLodUpdate = 0.f;
-		float m_lastLodCamDistanceSqr = 0.f;
+		float m_lastLodCamDistance = 0.f;
 		StateFlags m_stateFlags = StateFlags::None;
 		std::vector<std::shared_ptr<ModelMesh>> m_lodMeshes;
 		std::vector<std::shared_ptr<ModelSubMesh>> m_lodRenderMeshes;

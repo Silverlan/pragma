@@ -34,7 +34,6 @@ namespace pragma
 		virtual void OnEntitySpawn() override;
 	protected:
 		void InitializePhysics();
-		float m_kvMaxVisibleDist = 0.f;
 		float m_kvScale;
 		float m_kvMass = std::numeric_limits<float>::quiet_NaN();
 		BasePropComponent(BaseEntity &ent);

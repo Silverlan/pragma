@@ -15,6 +15,8 @@
 #include "pragma/lua/classes/c_lmaterial.h"
 #include "pragma/lua/classes/c_lpoint_rendertarget.h"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
+#include "pragma/rendering/render_processor.hpp"
+#include "pragma/rendering/render_queue.hpp"
 #include "pragma/lua/classes/lmaterial.h"
 #include "pragma/lua/classes/lentity.h"
 #include "pragma/entities/point/c_point_rendertarget.h"
@@ -680,6 +682,8 @@ void CGame::RegisterLuaClasses()
 
 	auto &modGame = GetLuaInterface().RegisterLibrary("game");
 	auto defDrawSceneInfo = luabind::class_<::util::DrawSceneInfo>("DrawSceneInfo");
+	defDrawSceneInfo.add_static_constant("FLAG_FLIP_VERTICALLY_BIT",umath::to_integral(::util::DrawSceneInfo::Flags::FlipVertically));
+	defDrawSceneInfo.add_static_constant("FLAG_DISABLE_RENDER_BIT",umath::to_integral(::util::DrawSceneInfo::Flags::DisableRender));
 	defDrawSceneInfo.def(luabind::constructor<>());
 	defDrawSceneInfo.property("scene",static_cast<luabind::object(*)(::util::DrawSceneInfo&)>([](::util::DrawSceneInfo &drawSceneInfo) -> luabind::object {
 		return drawSceneInfo.scene.valid() ? drawSceneInfo.scene->GetLuaObject() : luabind::object{};
@@ -710,11 +714,14 @@ void CGame::RegisterLuaClasses()
 			return;
 		drawSceneInfo.commandBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(commandBuffer.shared_from_this());
 	}));
+	static_assert(sizeof(::util::DrawSceneInfo::flags) == sizeof(uint8_t));
+	defDrawSceneInfo.def_readwrite("flags",reinterpret_cast<uint8_t util::DrawSceneInfo::*>(&::util::DrawSceneInfo::flags));
+	static_assert(sizeof(::util::DrawSceneInfo::renderFlags) == sizeof(uint32_t));
 	defDrawSceneInfo.def_readwrite("renderFlags",reinterpret_cast<uint32_t util::DrawSceneInfo::*>(&::util::DrawSceneInfo::renderFlags));
 	defDrawSceneInfo.def_readwrite("renderTarget",&::util::DrawSceneInfo::renderTarget);
 	defDrawSceneInfo.def_readwrite("outputImage",&::util::DrawSceneInfo::outputImage);
+	static_assert(sizeof(::util::DrawSceneInfo::outputLayerId) == sizeof(uint32_t));
 	defDrawSceneInfo.def_readwrite("outputLayerId",reinterpret_cast<uint32_t util::DrawSceneInfo::*>(&::util::DrawSceneInfo::outputLayerId));
-	defDrawSceneInfo.def_readwrite("flipVertically",&::util::DrawSceneInfo::flipVertically);
 	defDrawSceneInfo.property("clearColor",static_cast<Color(*)(::util::DrawSceneInfo&)>([](::util::DrawSceneInfo &drawSceneInfo) -> Color {
 		return *drawSceneInfo.clearColor;
 	}),static_cast<void(*)(lua_State*,::util::DrawSceneInfo&,const luabind::object&)>([](lua_State *l,::util::DrawSceneInfo &drawSceneInfo,const luabind::object &color) {
@@ -758,6 +765,31 @@ void CGame::RegisterLuaClasses()
 		};
 	}));
 	modGame[defDrawSceneInfo];
+
+	auto defRenderQueue = luabind::class_<pragma::rendering::RenderQueue>("RenderQueue");
+	defRenderQueue.def("WaitForCompletion",static_cast<void(*)(lua_State*,const pragma::rendering::RenderQueue&)>(
+		[](lua_State *l,const pragma::rendering::RenderQueue &renderQueue) {
+		renderQueue.WaitForCompletion();
+	}));
+	defRenderQueue.def("IsComplete",static_cast<bool(*)(lua_State*,const pragma::rendering::RenderQueue&)>(
+		[](lua_State *l,const pragma::rendering::RenderQueue &renderQueue) -> bool {
+		return renderQueue.IsComplete();
+	}));
+	modGame[defRenderQueue];
+
+	auto defDepthStageRenderProcessor = luabind::class_<pragma::rendering::DepthStageRenderProcessor>("DepthStageRenderProcessor");
+	defDepthStageRenderProcessor.def("Render",static_cast<void(*)(lua_State*,pragma::rendering::DepthStageRenderProcessor&,const pragma::rendering::RenderQueue&)>(
+		[](lua_State *l,pragma::rendering::DepthStageRenderProcessor &processor,const pragma::rendering::RenderQueue &renderQueue) {
+		processor.Render(renderQueue);
+	}));
+	modGame[defDepthStageRenderProcessor];
+
+	auto defLightingStageRenderProcessor = luabind::class_<pragma::rendering::LightingStageRenderProcessor>("LightingStageRenderProcessor");
+	defLightingStageRenderProcessor.def("Render",static_cast<void(*)(lua_State*,pragma::rendering::LightingStageRenderProcessor&,const pragma::rendering::RenderQueue&)>(
+		[](lua_State *l,pragma::rendering::LightingStageRenderProcessor &processor,const pragma::rendering::RenderQueue &renderQueue) {
+		processor.Render(renderQueue);
+	}));
+	modGame[defLightingStageRenderProcessor];
 
 	auto modelMeshClassDef = luabind::class_<ModelMesh>("Mesh");
 	Lua::ModelMesh::register_class(modelMeshClassDef);

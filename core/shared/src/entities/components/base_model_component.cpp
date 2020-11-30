@@ -17,7 +17,7 @@
 #include <pragma/entities/baseentity_events.hpp>
 
 using namespace pragma;
-
+#pragma optimize("",off)
 ComponentEventId BaseModelComponent::EVENT_ON_MODEL_CHANGED = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseModelComponent::EVENT_ON_MODEL_MATERIALS_LOADED = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseModelComponent::EVENT_ON_SKIN_CHANGED = pragma::INVALID_COMPONENT_ID;
@@ -42,6 +42,7 @@ void BaseModelComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	m_netEvSetBodyGroup = SetupNetEvent("set_body_group");
+	m_netEvMaxDrawDist = SetupNetEvent("set_max_draw_distance");
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
 		if(ustring::compare(kvData.key,"model",false))
@@ -56,11 +57,16 @@ void BaseModelComponent::Initialize()
 			if(GetEntity().IsSpawned())
 				SetSkin(m_kvSkin);
 		}
+		else if(ustring::compare(kvData.key,"maxvisibledist",false))
+			SetMaxDrawDistance(ustring::to_float(kvData.value));
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
 }
+
+void BaseModelComponent::SetMaxDrawDistance(float maxDist) {m_maxDrawDistance = maxDist;}
+float BaseModelComponent::GetMaxDrawDistance() const {return m_maxDrawDistance;}
 
 void BaseModelComponent::OnEntitySpawn()
 {
@@ -427,3 +433,4 @@ void CEOnModelChanged::PushArguments(lua_State *l)
 {
 	Lua::Push<std::shared_ptr<Model>>(l,model);
 }
+#pragma optimize("",on)

@@ -265,6 +265,7 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 
 	// We'll queue up building the render queues before we start rendering, so
 	// most of it can be done in the background
+	CallCallbacks("OnRenderScenes");
 	for(auto &drawSceneInfo : m_sceneRenderQueue)
 	{
 		if(drawSceneInfo.scene.expired())
@@ -289,7 +290,7 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 
 	for(auto &drawSceneInfo : m_sceneRenderQueue)
 	{
-		if(drawSceneInfo.scene.expired())
+		if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags,util::DrawSceneInfo::Flags::DisableRender))
 			continue;
 		auto &scene = drawSceneInfo.scene;
 		auto &drawCmd = drawSceneInfo.commandBuffer;
@@ -338,10 +339,11 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 		RenderScene(drawSceneInfo);
 	}
 	m_renderQueueBuilder->Flush();
-	m_sceneRenderQueue.clear();
 
 	CallCallbacks("PostRenderScenes");
 	CallLuaCallbacks("PostRenderScenes");
+
+	m_sceneRenderQueue.clear();
 }
 
 bool CGame::IsInMainRenderPass() const {return m_bMainRenderPass;}

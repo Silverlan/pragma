@@ -64,7 +64,7 @@ void RasterizationRenderer::RenderToneMapping(const util::DrawSceneInfo &drawSce
 				}
 			}
 
-			shaderPPHdr.Draw(descSetHdrResolve,toneMapping,GetHDRExposure(),bloomAdditiveScale,glowScale,drawSceneInfo.flipVertically);
+			shaderPPHdr.Draw(descSetHdrResolve,toneMapping,GetHDRExposure(),bloomAdditiveScale,glowScale,umath::is_flag_set(drawSceneInfo.flags,util::DrawSceneInfo::Flags::FlipVertically));
 			shaderPPHdr.EndDraw();
 		}
 		drawCmd->RecordEndRenderPass();

@@ -1144,7 +1144,15 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		{"get_byte_size",Lua::Vulkan::get_byte_size},
 		{"get_swapchain_image_count",Lua::Vulkan::get_swapchain_image_count},
 		{"wait_idle",Lua::Vulkan::wait_idle},
-		{"flush",Lua::Vulkan::flush}
+		{"flush",Lua::Vulkan::flush},
+		{"get_api_identifier",static_cast<int(*)(lua_State*)>([](lua_State *l) -> int {
+			Lua::PushString(l,c_engine->GetRenderContext().GetAPIIdentifier());
+			return 1;
+		})},
+		{"get_api_abbreviation",static_cast<int(*)(lua_State*)>([](lua_State *l) -> int {
+			Lua::PushString(l,c_engine->GetRenderContext().GetAPIAbbreviation());
+			return 1;
+		})}
 	});
 	auto prosperMod = luabind::module_(lua.GetState(),"prosper");
 	prosperMod[

@@ -164,8 +164,8 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 	auto lod = umath::max(static_cast<int32_t>(mdlC->GetLOD()) +lodBias,0);
 	auto &renderMeshes = renderC.GetRenderMeshes();
 	auto &lodGroup = renderC.GetLodRenderMeshGroup(lod);
+	renderC.UpdateRenderDataMT(drawSceneInfo.commandBuffer,scene,cam,vp);
 	auto renderMode = renderC.GetRenderMode();
-	auto first = false;
 	for(auto meshIdx=lodGroup.first;meshIdx<lodGroup.first +lodGroup.second;++meshIdx)
 	{
 		if(fShouldCull && ShouldCull(renderC,meshIdx,fShouldCull))
@@ -188,11 +188,6 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 		auto *renderQueue = getRenderQueue(renderMode,nonOpaque);
 		if(renderQueue == nullptr)
 			continue;
-		if(first == false)
-		{
-			first = true;
-			renderC.UpdateRenderDataMT(drawSceneInfo.commandBuffer,scene,cam,vp);
-		}
 		pragma::rendering::RenderQueueItem item {static_cast<CBaseEntity&>(renderC.GetEntity()),meshIdx,*mat,*shader,nonOpaque ? &cam : nullptr};
 		if(fOptInsertItemToQueue)
 			fOptInsertItemToQueue(*renderQueue,item);
@@ -285,6 +280,7 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 						Con::cerr<<"ERROR: NULL Entity in dynamic scene occlusion octree! Ignoring..."<<Con::endl;
 						continue;
 					}
+
 					if(ent->IsWorld())
 						continue; // World entities are handled separately
 					auto *renderC = static_cast<CBaseEntity*>(ent)->GetRenderComponent();

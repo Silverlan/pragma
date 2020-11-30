@@ -15,7 +15,7 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
-
+#pragma optimize("",off)
 ComponentEventId CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED = INVALID_COMPONENT_ID;
 luabind::object CModelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CModelComponentHandleWrapper>(l);}
 void CModelComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
@@ -77,6 +77,11 @@ Bool CModelComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &pack
 		SetBodyGroup(groupId,id);
 		return true;
 	}
+	else if(eventId == m_netEvMaxDrawDist)
+	{
+		m_maxDrawDistance = packet->Read<float>();
+		return true;
+	}
 	return false;
 }
 
@@ -86,6 +91,7 @@ void CModelComponent::ReceiveData(NetPacket &packet)
 	if(!mdl.empty())
 		SetModel(mdl.c_str());
 	SetSkin(packet->Read<unsigned int>());
+	m_maxDrawDistance = packet->Read<float>();
 
 	auto numBodyGroups = packet->Read<uint32_t>();
 	for(auto i=decltype(numBodyGroups){0};i<numBodyGroups;++i)
@@ -152,7 +158,6 @@ void CModelComponent::UpdateLOD(UInt32 lod)
 	//it = m_renderInstances.find(m_lod);
 	//if(it != m_renderInstances.end())
 	//	it->second->SetEnabled(true);
-	UpdateRenderMeshes();
 	BroadcastEvent(EVENT_ON_RENDER_MESHES_UPDATED);
 }
 
@@ -167,9 +172,11 @@ void CModelComponent::UpdateLOD(const CSceneComponent &scene,const CCameraCompon
 	if(IsAutoLodEnabled() == false)
 		return;
 	auto &mdl = GetModel();
-	if(mdl == nullptr || mdl->GetLODCount() == 0)
+	if(mdl == nullptr)
 		return;
-
+	auto numLods = mdl->GetLODCount();
+	if(numLods <= 1 && m_maxDrawDistance == 0.f)
+		return;
 	auto t = c_game->CurTime();
 	if(t < m_tNextLodUpdate)
 		return;
@@ -181,12 +188,24 @@ void CModelComponent::UpdateLOD(const CSceneComponent &scene,const CCameraCompon
 	m_tNextLodUpdate = t +umath::random(0.2f,0.6f);
 	
 	auto &pos = GetEntity().GetPosition();
-	auto d = uvec::distance_sqr(pos,cam.GetEntity().GetPosition());
-	constexpr auto LOD_CAMERA_DISTANCE_THRESHOLD = umath::pow2(20.f);
-	if(d -m_lastLodCamDistanceSqr < LOD_CAMERA_DISTANCE_THRESHOLD)
+	auto d = uvec::distance(pos,cam.GetEntity().GetPosition());
+	constexpr auto LOD_CAMERA_DISTANCE_THRESHOLD = 20.f;
+	if(umath::abs(d -m_lastLodCamDistance) < LOD_CAMERA_DISTANCE_THRESHOLD)
 		return; // Don't bother updating if the distance to the camera hasn't changed much. TODO: This also doesn't work well with different perspectives in the same frame!
 
-	m_lastLodCamDistanceSqr = d;
+	if(m_maxDrawDistance > 0.f && d >= m_maxDrawDistance)
+	{
+		UpdateLOD(std::numeric_limits<uint32_t>::max());
+		return;
+	}
+	m_lastLodCamDistance = d;
+
+	if(numLods <= 1)
+	{
+		UpdateLOD(0);
+		return;
+	}
+
 
 	// TODO: This needs optimizing
 	auto w = scene.GetWidth();
@@ -224,6 +243,11 @@ const std::vector<std::shared_ptr<ModelSubMesh>> &CModelComponent::GetRenderMesh
 
 RenderMeshGroup &CModelComponent::GetLodMeshGroup(uint32_t lod)
 {
+	if(m_lod == std::numeric_limits<uint32_t>::max())
+	{
+		static RenderMeshGroup emptyGroup {};
+		return emptyGroup; // TODO: This should only be returned as const!
+	}
 	UpdateRenderMeshes();
 	lod = umath::min(lod,static_cast<uint32_t>(m_lodMeshGroups.size() -1));
 	assert(lod < m_lodMeshGroups.size());
@@ -232,6 +256,11 @@ RenderMeshGroup &CModelComponent::GetLodMeshGroup(uint32_t lod)
 const RenderMeshGroup &CModelComponent::GetLodMeshGroup(uint32_t lod) const {return const_cast<CModelComponent*>(this)->GetLodMeshGroup(lod);}
 RenderMeshGroup &CModelComponent::GetLodRenderMeshGroup(uint32_t lod)
 {
+	if(m_lod == std::numeric_limits<uint32_t>::max())
+	{
+		static RenderMeshGroup emptyGroup {};
+		return emptyGroup; // TODO: This should only be returned as const!
+	}
 	UpdateRenderMeshes();
 	lod = umath::min(lod,static_cast<uint32_t>(m_lodRenderMeshGroups.size() -1));
 	assert(lod < m_lodRenderMeshGroups.size());
@@ -274,3 +303,4 @@ void CModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 	UpdateLOD(0);
 	BaseModelComponent::OnModelChanged(model);
 }
+#pragma optimize("",on)

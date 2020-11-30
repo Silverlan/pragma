@@ -149,6 +149,20 @@ void FWMD::LoadAttachments(Model &mdl)
 	}
 }
 
+static void clamp_bounds(Vector3 &min,Vector3 &max,unsigned short version)
+{
+	if(version >= 36)
+		return;
+	for(auto &v : {&min,&max})
+	{
+		for(uint8_t i=0;i<3;++i)
+		{
+			if((*v)[i] == std::numeric_limits<float>::lowest() || (*v)[i] == std::numeric_limits<float>::max())
+				(*v)[i] = 0.f;
+		}
+	}
+}
+
 void FWMD::LoadMeshes(unsigned short version,Model &mdl,const std::function<std::shared_ptr<ModelMesh>()> &meshFactory,const std::function<std::shared_ptr<ModelSubMesh>()> &subMeshFactory)
 {
 	Vector3 renderMin,renderMax;
@@ -156,6 +170,7 @@ void FWMD::LoadMeshes(unsigned short version,Model &mdl,const std::function<std:
 		renderMin[i] = Read<float>();
 	for(char i=0;i<3;i++)
 		renderMax[i] = Read<float>();
+	clamp_bounds(renderMin,renderMax,version);
 	mdl.SetRenderBounds(renderMin,renderMax);
 	unsigned int numMeshGroups = Read<unsigned int>();
 	for(unsigned int i=0;i<numMeshGroups;i++)
@@ -556,6 +571,7 @@ void FWMD::LoadAnimations(unsigned short version,Model &mdl)
 			{
 				Vector3 min,max;
 				mdl.GetRenderBounds(min,max);
+				clamp_bounds(min,max,version);
 				anim->SetRenderBounds(min,max);
 			}
 			mdl.AddAnimation(name,anim);

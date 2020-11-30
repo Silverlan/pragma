@@ -72,6 +72,9 @@ namespace pragma
 		void SetBodyGroup(const std::string &name,UInt32 id);
 		virtual bool SetBodyGroup(UInt32 groupId,UInt32 id);
 
+		virtual void SetMaxDrawDistance(float maxDist);
+		float GetMaxDrawDistance() const;
+
 		bool GetAttachment(unsigned int attID,Vector3 *pos,EulerAngles *angles) const;
 		bool GetAttachment(const std::string &name,Vector3 *pos,EulerAngles *angles) const;
 		bool GetAttachment(unsigned int attID,Vector3 *pos,Quat *rot) const;
@@ -95,7 +98,9 @@ namespace pragma
 		std::unique_ptr<std::string> m_modelName = nullptr;
 		std::shared_ptr<util::UInt32Property> m_skin = nullptr;
 		pragma::NetEventId m_netEvSetBodyGroup = pragma::INVALID_NET_EVENT;
+		pragma::NetEventId m_netEvMaxDrawDist = pragma::INVALID_NET_EVENT;
 		CallbackHandle m_onModelMaterialsLoaded = {};
+		float m_maxDrawDistance = 0.f;
 
 		std::string m_kvModel = "";
 		uint32_t m_kvSkin = std::numeric_limits<uint32_t>::max();

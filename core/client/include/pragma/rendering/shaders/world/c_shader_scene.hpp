@@ -17,6 +17,7 @@ class CModelSubMesh;
 namespace prosper {class IRenderBuffer;};
 namespace pragma
 {
+	using RenderMeshIndex = uint32_t;
 	class CSceneComponent;
 	class SceneMesh;
 	enum class SceneDebugMode : uint32_t;

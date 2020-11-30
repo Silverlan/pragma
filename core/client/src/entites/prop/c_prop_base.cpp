@@ -42,7 +42,6 @@ void CPropComponent::Initialize()
 luabind::object CPropComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CPropComponentHandleWrapper>(l);}
 void CPropComponent::ReceiveData(NetPacket &packet)
 {
-	m_sqrMaxVisibleDist = umath::pow2(static_cast<double>(packet->Read<float>()));
 	m_kvMass = packet->Read<float>();
 }
 

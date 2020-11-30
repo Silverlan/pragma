@@ -27,6 +27,7 @@ namespace pragma
 		using BaseModelComponent::SetModel;
 		virtual bool SetBodyGroup(UInt32 groupId,UInt32 id) override;
 		virtual void SetSkin(unsigned int skin) override;
+		virtual void SetMaxDrawDistance(float maxDist) override;
 	protected:
 		virtual void OnModelChanged(const std::shared_ptr<Model> &model) override;
 	};

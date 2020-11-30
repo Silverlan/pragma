@@ -48,8 +48,6 @@ bool BasePropComponent::SetKeyValue(std::string key,std::string val)
 {
 	if(key == "scale")
 		m_kvScale = ustring::to_float(val);
-	else if(key == "maxvisibledist")
-		m_kvMaxVisibleDist = ustring::to_float(val);
 	else if(key == "mass")
 	{
 		ustring::remove_whitespace(val);

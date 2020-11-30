@@ -929,7 +929,7 @@ int Lua::game::Client::create_scene(lua_State *l)
 	auto argIdx = 1;
 	pragma::CSceneComponent::CreateInfo createInfo {};
 	if(Lua::IsSet(l,argIdx))
-		createInfo.sampleCount = static_cast<prosper::SampleCountFlags>(Lua::CheckInt(l,argIdx++));
+		createInfo = Lua::Check<pragma::CSceneComponent::CreateInfo>(l,argIdx++);
 	::pragma::CSceneComponent *parent = nullptr;
 	if(Lua::IsSet(l,argIdx))
 		parent = Lua::Check<::CSceneHandle>(l,argIdx++).get();

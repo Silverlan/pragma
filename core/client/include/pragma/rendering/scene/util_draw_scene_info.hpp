@@ -23,12 +23,18 @@ namespace util
 {
 	struct DLLCLIENT DrawSceneInfo
 	{
+		enum class Flags : uint8_t
+		{
+			None = 0u,
+			FlipVertically = 1u,
+			DisableRender = FlipVertically<<1u
+		};
 		DrawSceneInfo()=default;
 		DrawSceneInfo(const DrawSceneInfo &other)
 			: scene{other.scene},commandBuffer{other.commandBuffer},renderTarget{other.renderTarget},
 			renderFlags{other.renderFlags},clearColor{other.clearColor},toneMapping{other.toneMapping},
 			prepassFilter{other.prepassFilter},renderFilter{other.renderFilter},outputImage{other.outputImage},
-			outputLayerId{other.outputLayerId},flipVertically{other.flipVertically},renderStats{other.renderStats ? std::make_unique<RenderStats>(*other.renderStats) : nullptr}
+			outputLayerId{other.outputLayerId},flags{other.flags},renderStats{other.renderStats ? std::make_unique<RenderStats>(*other.renderStats) : nullptr}
 		{}
 		DrawSceneInfo &operator=(const DrawSceneInfo &other)
 		{
@@ -44,7 +50,7 @@ namespace util
 			outputImage = other.outputImage;
 
 			outputLayerId = other.outputLayerId;
-			flipVertically = other.flipVertically;
+			flags = other.flags;
 			renderStats = other.renderStats ? std::make_unique<RenderStats>(*other.renderStats) : nullptr;
 			return *this;
 		}
@@ -60,10 +66,11 @@ namespace util
 
 		std::shared_ptr<prosper::IImage> outputImage = nullptr;
 		uint32_t outputLayerId = 0u;
-		bool flipVertically = false;
+		Flags flags = Flags::None;
 
 		mutable std::unique_ptr<RenderStats> renderStats = nullptr;
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(util::DrawSceneInfo::Flags)
 
 #endif

@@ -45,5 +45,13 @@ void Lua::ModelDef::register_class(lua_State *l,luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hModel);
 		Lua::PushInt(l,hModel->GetLOD());
 	}));
+	defCModel.def("SetMaxDrawDistance",static_cast<void(*)(lua_State*,CModelHandle&,float)>([](lua_State *l,CModelHandle &hModel,float maxDrawDist) {
+		pragma::Lua::check_component(l,hModel);
+		hModel->SetMaxDrawDistance(maxDrawDist);
+	}));
+	defCModel.def("GetMaxDrawDistance",static_cast<void(*)(lua_State*,CModelHandle&)>([](lua_State *l,CModelHandle &hModel) {
+		pragma::Lua::check_component(l,hModel);
+		Lua::PushNumber(l,hModel->GetMaxDrawDistance());
+	}));
 	entsMod[defCModel];
 }

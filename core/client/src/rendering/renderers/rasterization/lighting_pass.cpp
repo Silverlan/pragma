@@ -193,7 +193,7 @@ void RasterizationRenderer::RenderLightingPass(const util::DrawSceneInfo &drawSc
 		rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),lightingStageTranslucentStats);
 
 		c_game->CallCallbacks("PostRenderWorld");
-		c_game->CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PostRenderWorld",std::ref(drawSceneInfo));
+		c_game->CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>,std::reference_wrapper<pragma::rendering::LightingStageRenderProcessor>>("PostRenderWorld",std::ref(drawSceneInfo),std::ref(rsys));
 		c_game->StopProfilingStage(CGame::GPUProfilingPhase::World);
 	}
 

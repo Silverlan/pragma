@@ -178,8 +178,8 @@ CGame::CGame(NetworkState *state)
 	RegisterCallback<void>("PreRenderView");
 	RegisterCallback<void>("PostRenderView");
 	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes");
+	RegisterCallback<void>("OnRenderScenes");
 	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<const util::DrawSceneInfo>>("DrawScene");
-	RegisterCallback<void>("PostRenderScenes");
 	RegisterCallback<void>("PostRenderScenes");
 	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing");
 	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("OnPreRender");
@@ -713,6 +713,7 @@ void CGame::PostGUIDraw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 void CGame::SetDefaultGameRenderEnabled(bool enabled) {m_defaultGameRenderEnabled = enabled;}
 bool CGame::IsDefaultGameRenderEnabled() const {return m_defaultGameRenderEnabled;}
 void CGame::QueueForRendering(const util::DrawSceneInfo &drawSceneInfo) {m_sceneRenderQueue.push_back(drawSceneInfo);}
+const std::vector<util::DrawSceneInfo> &CGame::GetQueuedRenderScenes() const {return m_sceneRenderQueue;}
 void CGame::SetRenderScene(pragma::CSceneComponent &scene) {m_renderScene = scene.GetHandle<pragma::CSceneComponent>();}
 void CGame::ResetRenderScene() {m_renderScene = m_scene;}
 pragma::CSceneComponent *CGame::GetRenderScene() {return m_renderScene.get();}
@@ -1145,7 +1146,7 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 			auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
 			scene->GetSceneRenderDesc().ReloadOcclusionCullingHandler(); // Required if BSP occlusion culling is specified
 			if(lightmapAtlas != nullptr)
-				rasterizer->SetLightMap(lightmapAtlas);
+				pragma::rendering::RasterizationRenderer::UpdateLightmap(lightmapAtlas);
 		}
 
 		// Find map entities with lightmap uv sets

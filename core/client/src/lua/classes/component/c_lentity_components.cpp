@@ -14,6 +14,7 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/renderers/raytracing_renderer.hpp"
+#include "pragma/rendering/render_queue.hpp"
 #include <pragma/lua/classes/lproperty_generic.hpp>
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/ldef_color.h>
@@ -490,6 +491,13 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 			Lua::SetTableValue(l,t);
 		}
 	}));
+	defCScene.def("GetRenderQueue",static_cast<void(*)(lua_State*,CSceneHandle&,RenderMode,bool)>([](lua_State *l,CSceneHandle &scene,RenderMode renderMode,bool translucent) {
+		pragma::Lua::check_component(l,scene);
+		auto *renderQueue = scene->GetSceneRenderDesc().GetRenderQueue(renderMode,translucent);
+		if(renderQueue == nullptr)
+			return;
+		Lua::Push<pragma::rendering::RenderQueue*>(l,renderQueue);
+	}));
 
 	// Texture indices for scene render target
 	defCScene.add_static_constant("RENDER_TARGET_TEXTURE_COLOR",0u);
@@ -498,6 +506,12 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 
 	defCScene.add_static_constant("RENDERER_TYPE_RASTERIZATION",umath::to_integral(RendererType::Rasterization));
 	defCScene.add_static_constant("RENDERER_TYPE_RAYTRACING",umath::to_integral(RendererType::Raytracing));
+
+	auto defCreateInfo = luabind::class_<pragma::CSceneComponent::CreateInfo>("CreateInfo");
+	defCreateInfo.def(luabind::constructor<>());
+	defCreateInfo.def_readwrite("sampleCount",&pragma::CSceneComponent::CreateInfo::sampleCount);
+	defCScene.scope[defCreateInfo];
+
 	entsMod[defCScene];
 
 	Lua::Render::register_class(l,entsMod);

@@ -28,7 +28,6 @@ namespace pragma
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 	protected:
-		double m_sqrMaxVisibleDist = 0.f;
 		PHYSICSTYPE m_propPhysType = PHYSICSTYPE::NONE;
 		MOVETYPE m_propMoveType = MOVETYPE::NONE;
 	};

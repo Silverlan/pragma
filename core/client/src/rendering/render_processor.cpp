@@ -103,6 +103,7 @@ static void print_pass_stats(const RenderPassStats &stats,bool full)
 	Con::cout<<"Material state changes: "<<stats.numMaterialStateChanges<<Con::endl;
 	Con::cout<<"Entity state changes: "<<stats.numEntityStateChanges<<Con::endl;
 	Con::cout<<"Entity buffer updates: "<<stats.numEntityBufferUpdates<<Con::endl;
+	Con::cout<<"Number of draw calls: "<<stats.numDrawCalls<<Con::endl;
 	Con::cout<<"Number of instance sets: "<<stats.numInstanceSets<<" ("<<stats.numInstanceSetMeshes<<" meshes)"<<Con::endl;
 	Con::cout<<"Number of instanced entities: "<<stats.instancedEntities.size()<<Con::endl;
 	Con::cout<<"Number of instanced meshes: "<<stats.numInstancedMeshes<<Con::endl;
@@ -149,12 +150,37 @@ DLLCLIENT void print_debug_render_stats(const RenderStats &renderStats,bool full
 DLLCLIENT void debug_render_stats(bool full)
 {
 	g_collectRenderStats = true;
-	g_cbPreRenderScene = c_game->AddCallback("PreRenderScenes",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
-		drawSceneInfo.get().renderStats = std::make_unique<RenderStats>();
+	g_cbPreRenderScene = c_game->AddCallback("OnRenderScenes",FunctionCallback<void>::Create([]() {
+		for(auto &drawSceneInfo : c_game->GetQueuedRenderScenes())
+			drawSceneInfo.renderStats = std::make_unique<RenderStats>();
 	}));
-	g_cbPostRenderScene = c_game->AddCallback("PostRenderScene",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([full](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
-		if(drawSceneInfo.get().renderStats)
-			print_debug_render_stats(*drawSceneInfo.get().renderStats,full);
+	g_cbPostRenderScene = c_game->AddCallback("PostRenderScenes",FunctionCallback<void>::Create([full]() {
+		auto &renderScenes = c_game->GetQueuedRenderScenes();
+		Con::cout<<renderScenes.size()<<" scenes have been rendered:"<<Con::endl;
+		RenderStats accumulated {};
+		for(auto &drawSceneInfo : renderScenes)
+		{
+			if(drawSceneInfo.renderStats == nullptr || drawSceneInfo.scene.expired())
+				continue;
+			util::set_console_color(util::ConsoleColorFlags::BackgroundGreen);
+			Con::cout<<"########### ";
+			const_cast<BaseEntity&>(drawSceneInfo.scene->GetEntity()).print(Con::cout);
+			Con::cout<<": ###########"<<Con::endl;
+			util::reset_console_color();
+			print_debug_render_stats(*drawSceneInfo.renderStats,full);
+
+			auto &stats = *drawSceneInfo.renderStats;
+			accumulated += stats;
+		}
+
+		if(renderScenes.size() > 1)
+		{
+			util::set_console_color(util::ConsoleColorFlags::BackgroundGreen);
+			Con::cout<<"\n----- Accumulated: -----"<<Con::endl;
+			util::reset_console_color();
+			print_debug_render_stats(accumulated,full);
+		}
+
 		if(g_cbPreRenderScene.IsValid())
 			g_cbPreRenderScene.Remove();
 		if(g_cbPostRenderScene.IsValid())
@@ -385,6 +411,8 @@ bool pragma::rendering::BaseRenderProcessor::Render(CModelSubMesh &mesh,pragma::
 		m_stats->numDrawnVertices += mesh.GetVertexCount() *instanceCount;
 		m_stats->numDrawnTrianges += mesh.GetTriangleCount() *instanceCount;
 		m_stats->meshes.push_back(std::static_pointer_cast<CModelSubMesh>(mesh.shared_from_this()));
+
+		++m_stats->numDrawCalls;
 	}
 	auto instanceBuffer = m_curInstanceSet ? m_curInstanceSet->instanceBuffer : CSceneComponent::GetEntityInstanceIndexBuffer()->GetBuffer();
 	m_shaderScene->Draw(mesh,meshIdx,*instanceBuffer,instanceCount);

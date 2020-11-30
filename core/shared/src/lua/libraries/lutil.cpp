@@ -280,7 +280,16 @@ static void safely_remove(luabind::object &o,const char *removeFunction,bool use
 			if(useSafeMethod)
 				(*pEnt)->RemoveSafely();
 			else
-				(*pEnt)->Remove();
+			{
+				try
+				{
+					(*pEnt)->Remove();
+				}
+				catch(const std::exception &e)
+				{
+					Lua::Error(o.interpreter(),e.what());
+				}
+			}
 		}
 		return;
 	}

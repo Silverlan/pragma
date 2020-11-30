@@ -379,7 +379,8 @@ bool CDecalComponent::ApplyDecal(DecalProjector &projector,const std::vector<Dec
 	mdl->Update(ModelUpdateFlags::All);
 
 	auto decalRenderC = GetEntity().AddComponent<pragma::CRenderComponent>();
-	decalRenderC->SetDepthBias(-1'000.f,0.f,-2.f);
+	//decalRenderC->SetDepthBias(-1'000.f,0.f,-2.f);
+	// TODO
 
 	GetEntity().SetModel(mdl);
 	// GetEntity().SetPose(pose);

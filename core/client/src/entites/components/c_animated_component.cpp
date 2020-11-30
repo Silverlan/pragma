@@ -22,14 +22,14 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 
-//ComponentEventId CAnimatedComponent::EVENT_ON_SKELETON_UPDATED = INVALID_COMPONENT_ID;
-//ComponentEventId CAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED = INVALID_COMPONENT_ID;
+ComponentEventId CAnimatedComponent::EVENT_ON_SKELETON_UPDATED = INVALID_COMPONENT_ID;
+ComponentEventId CAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED = INVALID_COMPONENT_ID;
 ComponentEventId CAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED = INVALID_COMPONENT_ID;
 void CAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	BaseAnimatedComponent::RegisterEvents(componentManager);
-	//EVENT_ON_SKELETON_UPDATED = componentManager.RegisterEvent("ON_SKELETON_UPDATED",std::type_index(typeid(CAnimatedComponent)));
-	//EVENT_ON_BONE_MATRICES_UPDATED = componentManager.RegisterEvent("ON_BONE_MATRICES_UPDATED",std::type_index(typeid(CAnimatedComponent)));
+	EVENT_ON_SKELETON_UPDATED = componentManager.RegisterEvent("ON_SKELETON_UPDATED",std::type_index(typeid(CAnimatedComponent)));
+	EVENT_ON_BONE_MATRICES_UPDATED = componentManager.RegisterEvent("ON_BONE_MATRICES_UPDATED",std::type_index(typeid(CAnimatedComponent)));
 	EVENT_ON_BONE_BUFFER_INITIALIZED = componentManager.RegisterEvent("ON_BONE_BUFFER_INITIALIZED");
 }
 void CAnimatedComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BaseAnimatedComponent));}
@@ -64,6 +64,8 @@ void pragma::initialize_articulated_buffers()
 void pragma::clear_articulated_buffers() {s_instanceBoneBuffer = nullptr;}
 
 void CAnimatedComponent::SetBoneBufferDirty() {umath::set_flag(m_stateFlags,StateFlags::BoneBufferDirty);}
+void CAnimatedComponent::SetSkeletonUpdateCallbacksEnabled(bool enabled) {umath::set_flag(m_stateFlags,StateFlags::EnableSkeletonUpdateCallbacks,enabled);}
+bool CAnimatedComponent::AreSkeletonUpdateCallbacksEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::EnableSkeletonUpdateCallbacks);}
 
 void CAnimatedComponent::Initialize()
 {
@@ -76,6 +78,8 @@ void CAnimatedComponent::Initialize()
 			pRenderComponent->UpdateRenderBounds();
 	});*/
 	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		if(AreSkeletonUpdateCallbacksEnabled())
+			return; // Bone matrices will be updated from main thread
 		UpdateBoneMatricesMT();
 	});
 	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
@@ -251,8 +255,12 @@ void CAnimatedComponent::UpdateBoneMatricesMT()
 	UpdateSkeleton(); // Costly
 	auto physRootBoneId = OnSkeletonUpdated();
 
-	//CEOnSkeletonUpdated evData{physRootBoneId};
-	//InvokeEventCallbacks(EVENT_ON_SKELETON_UPDATED,evData);
+	auto callbacksEnabled = AreSkeletonUpdateCallbacksEnabled();
+	if(callbacksEnabled)
+	{
+		CEOnSkeletonUpdated evData{physRootBoneId};
+		InvokeEventCallbacks(EVENT_ON_SKELETON_UPDATED,evData);
+	}
 
 	auto &refFrame = *bindPose;
 	for(unsigned int i=0;i<GetBoneCount();i++)
@@ -282,7 +290,8 @@ void CAnimatedComponent::UpdateBoneMatricesMT()
 		else
 			Con::cwar<<"WARNING: Attempted to update bone "<<i<<" in "<<mdl->GetName()<<" which doesn't exist in the reference pose! Ignoring..."<<Con::endl;
 	}
-	//InvokeEventCallbacks(EVENT_ON_BONE_MATRICES_UPDATED);
+	if(callbacksEnabled)
+		InvokeEventCallbacks(EVENT_ON_BONE_MATRICES_UPDATED);
 }
 
 uint32_t CAnimatedComponent::OnSkeletonUpdated() {return std::numeric_limits<uint32_t>::max();}

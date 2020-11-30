@@ -182,13 +182,13 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 		}
 		if(shader == nullptr)
 			continue;
-		auto nonOpaque = mat->GetAlphaMode() != AlphaMode::Opaque;
-		if(nonOpaque && umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Translucent) == false)
+		auto translucent = mat->GetAlphaMode() == AlphaMode::Blend;
+		if(translucent && umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Translucent) == false)
 			continue;
-		auto *renderQueue = getRenderQueue(renderMode,nonOpaque);
+		auto *renderQueue = getRenderQueue(renderMode,translucent);
 		if(renderQueue == nullptr)
 			continue;
-		pragma::rendering::RenderQueueItem item {static_cast<CBaseEntity&>(renderC.GetEntity()),meshIdx,*mat,*shader,nonOpaque ? &cam : nullptr};
+		pragma::rendering::RenderQueueItem item {static_cast<CBaseEntity&>(renderC.GetEntity()),meshIdx,*mat,*shader,translucent ? &cam : nullptr};
 		if(fOptInsertItemToQueue)
 			fOptInsertItemToQueue(*renderQueue,item);
 		else
@@ -245,7 +245,7 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 		auto &nodeBounds = node.GetWorldBounds();
 		if(fShouldCull && fShouldCull(nodeBounds.first,nodeBounds.second))
 			return;
-		if(bspLeafNodes)
+		if(bspLeafNodes && bspLeafNodes->empty() == false)
 		{
 			auto hasIntersection = false;
 			for(auto *node : *bspLeafNodes)

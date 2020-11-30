@@ -14,6 +14,7 @@
 #include "pragma/lua/classes/c_lcamera.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/render_queue.hpp"
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include <pragma/util/transform.h>
 #include <pragma/lua/libraries/lgame.h>
@@ -891,6 +892,13 @@ int Lua::game::Client::set_action_input(lua_State *l)
 	auto input = Lua::CheckInt(l,1);
 	auto pressed = Lua::CheckBool(l,2);
 	c_game->SetActionInput(static_cast<Action>(input),pressed);
+	return 0;
+}
+int Lua::game::Client::update_render_buffers(lua_State *l)
+{
+	auto &drawSceneInfo = Lua::Check<const ::util::DrawSceneInfo>(l,1);
+	auto &renderQueue = Lua::Check<const pragma::rendering::RenderQueue>(l,2);
+	pragma::CSceneComponent::UpdateRenderBuffers(drawSceneInfo.commandBuffer,renderQueue);
 	return 0;
 }
 int Lua::game::Client::draw_scene(lua_State *l)

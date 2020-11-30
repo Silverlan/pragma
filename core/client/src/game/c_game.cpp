@@ -634,6 +634,7 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 	auto *scene = pragma::CSceneComponent::Create(pragma::CSceneComponent::CreateInfo{});
 	if(scene)
 	{
+		scene->GetEntity().SetName("scene_game");
 		m_scene = scene->GetHandle<pragma::CSceneComponent>();
 		m_scene->SetDebugMode(static_cast<pragma::SceneDebugMode>(GetConVarInt("render_debug_mode")));
 		SetViewModelFOV(GetConVarFloat("cl_fov_viewmodel"));

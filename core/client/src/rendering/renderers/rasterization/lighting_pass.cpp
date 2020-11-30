@@ -193,7 +193,7 @@ void RasterizationRenderer::RenderLightingPass(const util::DrawSceneInfo &drawSc
 		rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),lightingStageTranslucentStats);
 
 		c_game->CallCallbacks("PostRenderWorld");
-		c_game->CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>,std::reference_wrapper<pragma::rendering::LightingStageRenderProcessor>>("PostRenderWorld",std::ref(drawSceneInfo),std::ref(rsys));
+		c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*,pragma::rendering::LightingStageRenderProcessor*>("PostRenderWorld",&drawSceneInfo,&rsys);
 		c_game->StopProfilingStage(CGame::GPUProfilingPhase::World);
 	}
 
@@ -253,7 +253,7 @@ void RasterizationRenderer::RenderLightingPass(const util::DrawSceneInfo &drawSc
 	//c_engine->StopGPUTimer(GPUTimerEvent::Particles); // prosper TODO
 
 	c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("Render",std::ref(drawSceneInfo));
-	c_game->CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("Render",std::ref(drawSceneInfo));
+	c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*>("Render",&drawSceneInfo);
 
 	if((drawSceneInfo.renderFlags &FRender::Debug) == FRender::Debug)
 	{

@@ -263,6 +263,8 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::Shader &shader)
 	auto bView = (m_camType == CameraType::View) ? true : false;
 	if(shaderScene->BindScene(const_cast<pragma::CSceneComponent&>(scene),const_cast<pragma::rendering::RasterizationRenderer&>(*m_renderer),bView) == false)
 		return false;
+	if(m_depthBias.has_value())
+		shaderScene->SetDepthBias(*m_depthBias);
 	auto debugMode = scene.GetDebugMode();
 	if(debugMode != ::pragma::SceneDebugMode::None)
 		shaderScene->SetDebugMode(debugMode);
@@ -303,6 +305,13 @@ void pragma::rendering::BaseRenderProcessor::SetDrawOrigin(const Vector4 &drawOr
 	if(umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
 		return;
 	m_shaderScene->BindDrawOrigin(drawOrigin);
+}
+void pragma::rendering::BaseRenderProcessor::SetDepthBias(float d,float delta)
+{
+	m_depthBias = (d > 0.f && delta > 0.f) ? Vector2{d,delta} : std::optional<Vector2>{};
+	if(umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
+		return;
+	m_shaderScene->SetDepthBias(m_depthBias.has_value() ? *m_depthBias : Vector2{});
 }
 bool pragma::rendering::BaseRenderProcessor::BindMaterial(CMaterial &mat)
 {
@@ -348,13 +357,13 @@ bool pragma::rendering::BaseRenderProcessor::BindEntity(CBaseEntity &ent)
 	auto *entClipPlane = m_curRenderC->GetRenderClipPlane();
 	m_shaderScene->BindClipPlane(entClipPlane ? *entClipPlane : Vector4{});
 
-	if(umath::is_flag_set(m_curRenderC->GetStateFlags(),pragma::CRenderComponent::StateFlags::HasDepthBias))
+	/*if(umath::is_flag_set(m_curRenderC->GetStateFlags(),pragma::CRenderComponent::StateFlags::HasDepthBias))
 	{
 		float constantFactor,biasClamp,slopeFactor;
 		m_curRenderC->GetDepthBias(constantFactor,biasClamp,slopeFactor);
 		m_drawSceneInfo.commandBuffer->RecordSetDepthBias(constantFactor,biasClamp,slopeFactor);
 	}
-	else
+	else*/
 		m_drawSceneInfo.commandBuffer->RecordSetDepthBias();
 	
 	if(m_stats)

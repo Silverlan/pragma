@@ -114,7 +114,7 @@ void Lua::Scene::GetViewCameraDescriptorSet(lua_State *l,CSceneHandle &scene)
 		return;
 	Lua::Push(l,descSet);
 }
-void Lua::Scene::GetIndex(lua_State *l,CSceneHandle &scene)
+void Lua::Scene::GetIndex(lua_State *l,const CSceneHandle &scene)
 {
 	pragma::Lua::check_component(l,scene);
 	Lua::PushInt(l,scene->GetSceneIndex());

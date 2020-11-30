@@ -124,6 +124,7 @@ namespace pragma
 		{
 			Vector4 clipPlane;
 			Vector4 drawOrigin; // w is scale
+			Vector2	depthBias;
 			uint32_t vertexAnimInfo;
 			RenderFlags flags;
 			static_assert(sizeof(pragma::SceneDebugMode) == sizeof(uint32_t));
@@ -160,6 +161,7 @@ namespace pragma
 		virtual bool BindMaterial(CMaterial &mat) override;
 		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
 		virtual bool BindDrawOrigin(const Vector4 &drawOrigin) override;
+		virtual bool SetDepthBias(const Vector2 &depthBias) override;
 		virtual bool GetRenderBufferTargets(
 			CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
 			std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo

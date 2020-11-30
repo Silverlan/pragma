@@ -50,14 +50,20 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 {
 	// Add entity to octree
 	auto cbRenderMode = FunctionCallback<util::EventReply,std::reference_wrapper<ComponentEvent>>::Create(nullptr);
-	m_callbacks.push_back(cbRenderMode); // Render mode callback has to be removed in the EVENT_ON_REMOVE event, otherwise the callback will cause the entity to be re-added to the tree AFTER it just has been removed
+	auto it = m_callbacks.find(&ent);
+	if(it == m_callbacks.end())
+		it = m_callbacks.insert(std::make_pair(&ent,std::vector<CallbackHandle>{})).first;
+	it->second.push_back(cbRenderMode); // Render mode callback has to be removed in the EVENT_ON_REMOVE event, otherwise the callback will cause the entity to be re-added to the tree AFTER it just has been removed
 	auto fInsertOctreeObject = [this](CBaseEntity *ent) {
+		auto it = m_callbacks.find(ent);
+		if(it == m_callbacks.end())
+			return;
 		m_occlusionOctree->InsertObject(ent);
 		auto pTrComponent = ent->GetTransformComponent();
 		if(pTrComponent != nullptr)
 		{
 			auto &trC = static_cast<CTransformComponent&>(*pTrComponent);
-			m_callbacks.push_back(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,&ent](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			it->second.push_back(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,&ent](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 				if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags,pragma::TransformChangeFlags::PositionChanged) == false)
 					return util::EventReply::Unhandled;
 				m_occlusionOctree->UpdateObject(ent);
@@ -67,16 +73,27 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 		auto pGenericComponent = ent->GetComponent<pragma::CGenericComponent>();
 		if(pGenericComponent.valid())
 		{
-			m_callbacks.push_back(pGenericComponent->BindEventUnhandled(pragma::CModelComponent::EVENT_ON_MODEL_CHANGED,[this,pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
+			it->second.push_back(pGenericComponent->BindEventUnhandled(pragma::CModelComponent::EVENT_ON_MODEL_CHANGED,[this,pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
 				auto *ent = static_cast<CBaseEntity*>(&pGenericComponent->GetEntity());
 				m_occlusionOctree->UpdateObject(ent);
 			}));
-			m_callbacks.push_back(pGenericComponent->BindEventUnhandled(pragma::CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED,[this,pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
+			it->second.push_back(pGenericComponent->BindEventUnhandled(pragma::CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED,[this,pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
 				auto *ent = static_cast<CBaseEntity*>(&pGenericComponent->GetEntity());
 				m_occlusionOctree->UpdateObject(ent);
 			}));
-			m_callbacks.push_back(pGenericComponent->BindEventUnhandled(BaseEntity::EVENT_ON_REMOVE,[this,pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
+			it->second.push_back(pGenericComponent->BindEventUnhandled(BaseEntity::EVENT_ON_REMOVE,[this,pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
 				auto *ent = static_cast<CBaseEntity*>(&pGenericComponent->GetEntity());
+				auto it = m_callbacks.find(ent);
+				if(it != m_callbacks.end())
+				{
+					for(auto &hCb : it->second)
+					{
+						if(hCb.IsValid() == false)
+							continue;
+						hCb.Remove();
+					}
+					m_callbacks.erase(it);
+				}
 				m_occlusionOctree->RemoveObject(ent);
 			}));
 		}
@@ -117,11 +134,14 @@ OcclusionOctree<CBaseEntity*> &COcclusionCullerComponent::GetOcclusionOctree() {
 void COcclusionCullerComponent::OnRemove()
 {
 	BaseEntityComponent::OnRemove();
-	for(auto &hCb : m_callbacks)
+	for(auto &pair : m_callbacks)
 	{
-		if(hCb.IsValid() == false)
-			continue;
-		hCb.Remove();
+		for(auto &hCb : pair.second)
+		{
+			if(hCb.IsValid() == false)
+				continue;
+			hCb.Remove();
+		}
 	}
 }
 

@@ -59,6 +59,7 @@ namespace pragma::rendering
 		bool BindShader(prosper::Shader &shader);
 		bool BindMaterial(CMaterial &mat);
 		bool BindEntity(CBaseEntity &ent);
+		void SetDepthBias(float d,float delta);
 		bool Render(CModelSubMesh &mesh,pragma::RenderMeshIndex meshIdx,const RenderQueue::InstanceSet *instanceSet=nullptr);
 		pragma::ShaderGameWorld *GetCurrentShader();
 		void UnbindShader();
@@ -83,6 +84,7 @@ namespace pragma::rendering
 		CameraType m_camType = CameraType::World;
 		const util::DrawSceneInfo &m_drawSceneInfo;
 		Vector4 m_drawOrigin;
+		std::optional<Vector2> m_depthBias {};
 		pragma::ShaderGameWorldPipeline m_pipelineType;
 		RenderPassStats *m_stats = nullptr;
 		const pragma::rendering::RasterizationRenderer *m_renderer = nullptr;

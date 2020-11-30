@@ -82,6 +82,7 @@ bool ShaderPrepassBase::BeginDraw(
 	return ShaderScene::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx),recordFlags) == true &&
 		BindClipPlane(clipPlane) == true &&
 		RecordPushConstants(drawOrigin,offsetof(PushConstants,drawOrigin)) &&
+		RecordPushConstants(Vector2{},offsetof(PushConstants,depthBias)) &&
 		// RecordPushConstants(pragma::SceneDebugMode::None,offsetof(PushConstants,debugMode)) &&
 		cmdBuffer->RecordSetDepthBias() == true;
 }
@@ -92,6 +93,7 @@ bool ShaderPrepassBase::BindScene(pragma::CSceneComponent &scene,rendering::Rast
 }
 bool ShaderPrepassBase::BindClipPlane(const Vector4 &clipPlane) {return RecordPushConstants(clipPlane);}
 bool ShaderPrepassBase::BindDrawOrigin(const Vector4 &drawOrigin) {return RecordPushConstants(drawOrigin,offsetof(PushConstants,drawOrigin));}
+bool ShaderPrepassBase::SetDepthBias(const Vector2 &depthBias) {return RecordPushConstants(depthBias,offsetof(PushConstants,depthBias));}
 
 void ShaderPrepassBase::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {

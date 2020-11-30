@@ -63,6 +63,7 @@ namespace pragma
 		virtual bool BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) override;
 		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
 		virtual bool BindClipPlane(const Vector4 &clipPlane) override {return true;}
+		virtual bool SetDepthBias(const Vector2 &depthBias) override {return true;}
 		virtual bool SetDebugMode(pragma::SceneDebugMode debugMode) override {return true;}
 		virtual void Set3DSky(bool is3dSky) override {}
 		virtual bool BindDrawOrigin(const Vector4 &drawOrigin) override {return true;}

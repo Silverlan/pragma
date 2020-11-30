@@ -27,11 +27,12 @@ namespace pragma
 		enum class StateFlags : uint8_t
 		{
 			None = 0u,
-			BoneBufferDirty = 1u
+			BoneBufferDirty = 1u,
+			EnableSkeletonUpdateCallbacks = BoneBufferDirty<<1u
 		};
 
-		// static ComponentEventId EVENT_ON_SKELETON_UPDATED;
-		// static ComponentEventId EVENT_ON_BONE_MATRICES_UPDATED;
+		static ComponentEventId EVENT_ON_SKELETON_UPDATED;
+		static ComponentEventId EVENT_ON_BONE_MATRICES_UPDATED;
 		static ComponentEventId EVENT_ON_BONE_BUFFER_INITIALIZED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
@@ -55,6 +56,8 @@ namespace pragma
 		uint32_t OnSkeletonUpdated();
 		bool MaintainAnimations(double dt) override;
 
+		void SetSkeletonUpdateCallbacksEnabled(bool enabled);
+		bool AreSkeletonUpdateCallbacksEnabled() const;
 		void SetBoneBufferDirty();
 	protected:
 		virtual void OnModelChanged(const std::shared_ptr<Model> &mdl) override;

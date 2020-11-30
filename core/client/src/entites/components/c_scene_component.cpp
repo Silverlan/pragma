@@ -18,6 +18,7 @@
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include "pragma/rendering/renderers/base_renderer.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/render_queue.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
@@ -57,6 +58,27 @@ static std::shared_ptr<rendering::EntityInstanceIndexBuffer> g_entityInstanceInd
 const std::shared_ptr<rendering::EntityInstanceIndexBuffer> &CSceneComponent::GetEntityInstanceIndexBuffer()
 {
 	return g_entityInstanceIndexBuffer;
+}
+
+void CSceneComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const rendering::RenderQueue &renderQueue,RenderPassStats *optStats)
+{
+	renderQueue.WaitForCompletion(optStats);
+	CSceneComponent::GetEntityInstanceIndexBuffer()->UpdateBufferData(renderQueue);
+	auto curEntity = std::numeric_limits<EntityIndex>::max();
+	for(auto &item : renderQueue.queue)
+	{
+		if(item.entity == curEntity)
+			continue;
+		curEntity = item.entity;
+		auto &ent = static_cast<CBaseEntity&>(*c_game->GetEntityByLocalIndex(item.entity));
+		auto &renderC = *ent.GetRenderComponent();
+		if(optStats && umath::is_flag_set(renderC.GetStateFlags(),CRenderComponent::StateFlags::RenderBufferDirty))
+			++optStats->numEntityBufferUpdates;
+		auto *animC = renderC.GetAnimatedComponent();
+		if(animC && animC->AreSkeletonUpdateCallbacksEnabled())
+			animC->UpdateBoneMatricesMT();
+		renderC.UpdateRenderBuffers(drawCmd);
+	}
 }
 
 using SceneCount = uint32_t;

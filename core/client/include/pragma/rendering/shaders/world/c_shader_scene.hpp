@@ -244,6 +244,7 @@ namespace pragma
 		virtual bool SetDebugMode(pragma::SceneDebugMode debugMode) {return true;};
 		virtual void Set3DSky(bool is3dSky)=0;
 		virtual bool BindDrawOrigin(const Vector4 &drawOrigin)=0;
+		virtual bool SetDepthBias(const Vector2 &depthBias)=0;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderEntity::InstanceData::RenderFlags);

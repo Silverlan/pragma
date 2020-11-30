@@ -167,23 +167,6 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::Scene);
 	
 	auto &drawCmd = drawSceneInfo.commandBuffer;
-	auto fUpdateRenderBuffers = [&drawSceneInfo,&drawCmd](const RenderQueue &renderQueue,RenderPassStats *stats=nullptr) {
-		renderQueue.WaitForCompletion(stats);
-		CSceneComponent::GetEntityInstanceIndexBuffer()->UpdateBufferData(renderQueue);
-		auto curEntity = std::numeric_limits<EntityIndex>::max();
-		for(auto &item : renderQueue.queue)
-		{
-			if(item.entity == curEntity)
-				continue;
-			curEntity = item.entity;
-			auto &ent = static_cast<CBaseEntity&>(*c_game->GetEntityByLocalIndex(item.entity));
-			auto &renderC = *ent.GetRenderComponent();
-			if(stats && umath::is_flag_set(renderC.GetStateFlags(),CRenderComponent::StateFlags::RenderBufferDirty))
-				++stats->numEntityBufferUpdates;
-			renderC.UpdateRenderBuffers(drawCmd);
-		}
-	};
-
 	auto &sceneRenderDesc = drawSceneInfo.scene->GetSceneRenderDesc();
 	if(drawSceneInfo.renderTarget == nullptr)
 	{
@@ -243,7 +226,7 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 				drawSceneInfo.renderStats->prepass.renderThreadWaitTime += std::chrono::steady_clock::now() -t;
 
 			for(auto &renderQueue : worldRenderQueues)
-				fUpdateRenderBuffers(*renderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
+				CSceneComponent::UpdateRenderBuffers(drawCmd,*renderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
 		}
 
 		// If we're lucky, the render queues for everything else have already been built
@@ -255,10 +238,11 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 		if(worldObjectRenderQueueReady)
 		{
 			if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
-				fUpdateRenderBuffers(worldObjectsRenderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
+				CSceneComponent::UpdateRenderBuffers(drawCmd,worldObjectsRenderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
 
 			if((drawSceneInfo.renderFlags &FRender::View) != FRender::None)
-				fUpdateRenderBuffers(*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
+				CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
+			c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*>("UpdateRenderBuffers",&drawSceneInfo);
 		}
 
 		prepass.BeginRenderPass(drawSceneInfo);
@@ -282,10 +266,12 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 				prepass.EndRenderPass(drawSceneInfo);
 
 				if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
-					fUpdateRenderBuffers(worldObjectsRenderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
+					CSceneComponent::UpdateRenderBuffers(drawCmd,worldObjectsRenderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
 
 				if((drawSceneInfo.renderFlags &FRender::View) != FRender::None)
-					fUpdateRenderBuffers(*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
+					CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
+
+				c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*>("UpdateRenderBuffers",&drawSceneInfo);
 
 				prepass.BeginRenderPass(drawSceneInfo,prepass.subsequentRenderPass.get());
 				rsys.BindShader(shaderPrepass);
@@ -303,7 +289,7 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 			}
 
 			c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>,std::reference_wrapper<pragma::rendering::DepthStageRenderProcessor>>("RenderPrepass",drawSceneInfo,rsys);
-			c_game->CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>,std::reference_wrapper<pragma::rendering::DepthStageRenderProcessor>>("RenderPrepass",drawSceneInfo,std::ref(rsys));
+			c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*,pragma::rendering::DepthStageRenderProcessor*>("RenderPrepass",&drawSceneInfo,&rsys);
 		}
 		rsys.UnbindShader();
 
@@ -334,10 +320,10 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	
 	// We still need to update the render buffers for some entities
 	// (All others have already been updated in the prepass)
-	fUpdateRenderBuffers(*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
-	fUpdateRenderBuffers(*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
-	fUpdateRenderBuffers(*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
-	fUpdateRenderBuffers(*sceneRenderDesc.GetRenderQueue(RenderMode::View,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
+	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
+	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
+	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
+	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
 
 	// Lighting pass
 	RenderLightingPass(drawSceneInfo);
@@ -361,7 +347,7 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	// Glow
 	// RenderGlowObjects(drawSceneInfo);
 	c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing",drawSceneInfo);
-	c_game->CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing",drawSceneInfo);
+	c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*>("RenderPostProcessing",&drawSceneInfo);
 
 	// Bloom
 	// RenderBloom(drawSceneInfo);

@@ -59,7 +59,7 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->SetRenderBufferDirty();
 		}));
-	defCRender.def("GetDepthBias",static_cast<void(*)(lua_State*,CRenderHandle&)>([](lua_State *l,CRenderHandle &hComponent) {
+	/*defCRender.def("GetDepthBias",static_cast<void(*)(lua_State*,CRenderHandle&)>([](lua_State *l,CRenderHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);
 		float constantFactor,biasClamp,slopeFactor;
 		hComponent->GetDepthBias(constantFactor,biasClamp,slopeFactor);
@@ -70,7 +70,7 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCRender.def("SetDepthBias",static_cast<void(*)(lua_State*,CRenderHandle&,float,float,float)>([](lua_State *l,CRenderHandle &hComponent,float constantFactor,float biasClamp,float slopeFactor) {
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->SetDepthBias(constantFactor,biasClamp,slopeFactor);
-	}));
+	}));*/
 	defCRender.def("CalcRayIntersection",static_cast<void(*)(lua_State*,CRenderHandle&,const Vector3&,const Vector3&,bool)>(&Lua::Render::CalcRayIntersection));
 	defCRender.def("CalcRayIntersection",static_cast<void(*)(lua_State*,CRenderHandle&,const Vector3&,const Vector3&)>(&Lua::Render::CalcRayIntersection));
 	defCRender.def("SetDepthPassEnabled",static_cast<void(*)(lua_State*,CRenderHandle&,bool)>([](lua_State *l,CRenderHandle &hComponent,bool depthPassEnabled) {

@@ -218,6 +218,7 @@ void ShaderTextured3DBase::OnBindEntity(CBaseEntity &ent,CRenderComponent &rende
 	SetShadowsEnabled(renderC.IsReceivingShadows());
 }
 bool ShaderTextured3DBase::BindDrawOrigin(const Vector4 &drawOrigin) {return RecordPushConstants(drawOrigin,offsetof(PushConstants,drawOrigin));}
+bool ShaderTextured3DBase::SetDepthBias(const Vector2 &depthBias) {return RecordPushConstants(depthBias,offsetof(PushConstants,depthBias));}
 bool ShaderTextured3DBase::BeginDraw(
 	const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,ShaderGameWorldPipeline pipelineIdx,RecordFlags recordFlags
 )
@@ -226,6 +227,7 @@ bool ShaderTextured3DBase::BeginDraw(
 	return ShaderScene::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx),recordFlags) == true &&
 		BindClipPlane(clipPlane) == true &&
 		RecordPushConstants(drawOrigin,offsetof(PushConstants,drawOrigin)) &&
+		RecordPushConstants(Vector2{},offsetof(PushConstants,depthBias)) &&
 		RecordPushConstants(pragma::SceneDebugMode::None,offsetof(PushConstants,debugMode)) &&
 		cmdBuffer->RecordSetDepthBias() == true;
 }

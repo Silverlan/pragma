@@ -138,6 +138,7 @@ struct DLLCLIENT ShaderMeshContainer
 #pragma warning(pop)
 
 class WorldEnvironment;
+struct RenderPassStats;
 namespace pragma
 {
 	namespace rendering {class EntityInstanceIndexBuffer;};
@@ -187,6 +188,7 @@ namespace pragma
 		static SceneFlags GetSceneFlag(SceneIndex sceneIndex);
 		static SceneIndex GetSceneIndex(SceneFlags flag);
 		static const std::shared_ptr<rendering::EntityInstanceIndexBuffer> &GetEntityInstanceIndexBuffer();
+		static void UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const rendering::RenderQueue &renderQueue,RenderPassStats *optStats=nullptr);
 
 		CSceneComponent(BaseEntity &ent);
 		virtual void Initialize() override;

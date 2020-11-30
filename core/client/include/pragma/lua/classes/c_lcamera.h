@@ -38,7 +38,7 @@ namespace Lua
 		DLLCLIENT void GetCameraDescriptorSet(lua_State *l,CSceneHandle &scene);
 		DLLCLIENT void GetCameraDescriptorSet(lua_State *l,CSceneHandle &scene,uint32_t bindPoint);
 		DLLCLIENT void GetViewCameraDescriptorSet(lua_State *l,CSceneHandle &scene);
-		DLLCLIENT void GetIndex(lua_State *l,CSceneHandle &scene);
+		DLLCLIENT void GetIndex(lua_State *l,const CSceneHandle &scene);
 
 		DLLCLIENT void GetDebugMode(lua_State *l,CSceneHandle &scene);
 		DLLCLIENT void SetDebugMode(lua_State *l,CSceneHandle &scene,uint32_t debugMode);

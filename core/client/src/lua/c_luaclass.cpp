@@ -391,7 +391,13 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	}));
 	modShader[defShaderEntity];
 
-	auto defShaderTextured3D = luabind::class_<pragma::ShaderTextured3DBase,luabind::bases<pragma::ShaderEntity,pragma::ShaderSceneLit,pragma::ShaderScene,prosper::ShaderGraphics,prosper::Shader>>("TexturedLit3D");
+	auto defShaderGameWorld = luabind::class_<pragma::ShaderGameWorld,luabind::bases<pragma::ShaderEntity,pragma::ShaderSceneLit,pragma::ShaderScene,prosper::ShaderGraphics,prosper::Shader>>("GameWorld");
+	defShaderGameWorld.def("SetDepthBias",static_cast<bool(*)(lua_State*,pragma::ShaderGameWorld&,const Vector2&)>([](lua_State *state,pragma::ShaderGameWorld &shader,const Vector2 &depthBias) -> bool {
+		return shader.SetDepthBias(depthBias);
+	}));
+	modShader[defShaderGameWorld];
+
+	auto defShaderTextured3D = luabind::class_<pragma::ShaderTextured3DBase,luabind::bases<pragma::ShaderGameWorld,pragma::ShaderEntity,pragma::ShaderSceneLit,pragma::ShaderScene,prosper::ShaderGraphics,prosper::Shader>>("TexturedLit3D");
 	defShaderTextured3D.def("RecordBindMaterial",&Lua::Shader::TexturedLit3D::BindMaterial);
 	defShaderTextured3D.def("RecordBindClipPlane",&Lua::Shader::TexturedLit3D::RecordBindClipPlane);
 	defShaderTextured3D.add_static_constant("PUSH_CONSTANTS_SIZE",sizeof(pragma::ShaderTextured3DBase::PushConstants));
@@ -685,7 +691,7 @@ void CGame::RegisterLuaClasses()
 	defDrawSceneInfo.add_static_constant("FLAG_FLIP_VERTICALLY_BIT",umath::to_integral(::util::DrawSceneInfo::Flags::FlipVertically));
 	defDrawSceneInfo.add_static_constant("FLAG_DISABLE_RENDER_BIT",umath::to_integral(::util::DrawSceneInfo::Flags::DisableRender));
 	defDrawSceneInfo.def(luabind::constructor<>());
-	defDrawSceneInfo.property("scene",static_cast<luabind::object(*)(::util::DrawSceneInfo&)>([](::util::DrawSceneInfo &drawSceneInfo) -> luabind::object {
+	defDrawSceneInfo.property("scene",static_cast<luabind::object(*)(const ::util::DrawSceneInfo&)>([](const ::util::DrawSceneInfo &drawSceneInfo) -> luabind::object {
 		return drawSceneInfo.scene.valid() ? drawSceneInfo.scene->GetLuaObject() : luabind::object{};
 	}),static_cast<void(*)(lua_State*,::util::DrawSceneInfo&,luabind::object)>([](lua_State *l,::util::DrawSceneInfo &drawSceneInfo,luabind::object o) {
 		if(Lua::IsSet(l,2) == false)
@@ -777,14 +783,21 @@ void CGame::RegisterLuaClasses()
 	}));
 	modGame[defRenderQueue];
 
-	auto defDepthStageRenderProcessor = luabind::class_<pragma::rendering::DepthStageRenderProcessor>("DepthStageRenderProcessor");
+	auto defBaseRenderProcessor = luabind::class_<pragma::rendering::BaseRenderProcessor>("BaseRenderProcessor");
+	defBaseRenderProcessor.def("SetDepthBias",static_cast<void(*)(lua_State*,pragma::rendering::BaseRenderProcessor&,float,float)>(
+		[](lua_State *l,pragma::rendering::BaseRenderProcessor &processor,float d,float delta) {
+		processor.SetDepthBias(d,delta);
+	}));
+	modGame[defBaseRenderProcessor];
+
+	auto defDepthStageRenderProcessor = luabind::class_<pragma::rendering::DepthStageRenderProcessor,luabind::bases<pragma::rendering::BaseRenderProcessor>>("DepthStageRenderProcessor");
 	defDepthStageRenderProcessor.def("Render",static_cast<void(*)(lua_State*,pragma::rendering::DepthStageRenderProcessor&,const pragma::rendering::RenderQueue&)>(
 		[](lua_State *l,pragma::rendering::DepthStageRenderProcessor &processor,const pragma::rendering::RenderQueue &renderQueue) {
 		processor.Render(renderQueue);
 	}));
 	modGame[defDepthStageRenderProcessor];
 
-	auto defLightingStageRenderProcessor = luabind::class_<pragma::rendering::LightingStageRenderProcessor>("LightingStageRenderProcessor");
+	auto defLightingStageRenderProcessor = luabind::class_<pragma::rendering::LightingStageRenderProcessor,luabind::bases<pragma::rendering::BaseRenderProcessor>>("LightingStageRenderProcessor");
 	defLightingStageRenderProcessor.def("Render",static_cast<void(*)(lua_State*,pragma::rendering::LightingStageRenderProcessor&,const pragma::rendering::RenderQueue&)>(
 		[](lua_State *l,pragma::rendering::LightingStageRenderProcessor &processor,const pragma::rendering::RenderQueue &renderQueue) {
 		processor.Render(renderQueue);

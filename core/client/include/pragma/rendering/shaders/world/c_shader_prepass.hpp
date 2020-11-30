@@ -67,6 +67,7 @@ namespace pragma
 		{
 			Vector4 clipPlane;
 			Vector4 drawOrigin; // w is scale
+			Vector2 depthBias;
 			uint32_t vertexAnimInfo;
 			Flags flags;
 			float alphaCutoff;
@@ -83,6 +84,7 @@ namespace pragma
 		virtual bool BindClipPlane(const Vector4 &clipPlane) override;
 		virtual bool BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) override;
 		virtual bool BindDrawOrigin(const Vector4 &drawOrigin) override;
+		virtual bool SetDepthBias(const Vector2 &depthBias) override;
 		virtual void Set3DSky(bool is3dSky) override;
 		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
 	protected:

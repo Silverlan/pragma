@@ -32,7 +32,7 @@ namespace pragma
 		void AddEntity(CBaseEntity &ent);
 	private:
 		std::shared_ptr<OcclusionOctree<CBaseEntity*>> m_occlusionOctree = nullptr;
-		std::vector<CallbackHandle> m_callbacks {};
+		std::unordered_map<CBaseEntity*,std::vector<CallbackHandle>> m_callbacks {};
 	};
 };
 

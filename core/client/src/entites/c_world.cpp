@@ -265,7 +265,7 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 			auto *shader = dynamic_cast<pragma::ShaderTextured3DBase*>(hShader);
 			if(shader == nullptr)
 				continue;
-			if(mat->GetAlphaMode() != AlphaMode::Opaque)
+			if(mat->GetAlphaMode() == AlphaMode::Blend)
 			{
 				clusterRenderTranslucentQueue = clusterRenderTranslucentQueue ? clusterRenderTranslucentQueue : pragma::rendering::RenderQueue::Create();
 				clusterRenderTranslucentQueue->Add(static_cast<CBaseEntity&>(GetEntity()),subMeshIdx,*mat,*shader);

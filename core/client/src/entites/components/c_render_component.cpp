@@ -109,17 +109,6 @@ void CRenderComponent::ClearRenderObjects()
 	}
 	m_renderInstances.clear();*/ // Vulkan TODO
 }
-void CRenderComponent::GetDepthBias(float &outConstantFactor,float &outBiasClamp,float &outSlopeFactor) const
-{
-	outConstantFactor = m_depthBias.constantFactor;
-	outBiasClamp = m_depthBias.biasClamp;
-	outSlopeFactor = m_depthBias.slopeFactor;
-}
-void CRenderComponent::SetDepthBias(float constantFactor,float biasClamp,float slopeFactor)
-{
-	m_depthBias = {constantFactor,biasClamp,slopeFactor};
-	umath::set_flag(m_stateFlags,StateFlags::HasDepthBias,(constantFactor != 0.f) || (biasClamp != 0.f) || (slopeFactor != 0.f));
-}
 CRenderComponent::StateFlags CRenderComponent::GetStateFlags() const {return m_stateFlags;}
 void CRenderComponent::SetDepthPassEnabled(bool enabled) {umath::set_flag(m_stateFlags,StateFlags::EnableDepthPass,enabled);}
 bool CRenderComponent::IsDepthPassEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::EnableDepthPass);}

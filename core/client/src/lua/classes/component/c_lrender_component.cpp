@@ -115,6 +115,10 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 			return;
 		Lua::Push(l,*t);
 	}));
+	defCRender.def("ShouldCastShadows",static_cast<bool(*)(lua_State*,CRenderHandle&)>([](lua_State *l,CRenderHandle &hComponent) -> bool {
+		pragma::Lua::check_component(l,hComponent);
+		return hComponent->GetCastShadows();
+	}));
 	// defCRender.add_static_constant("EVENT_ON_UPDATE_RENDER_DATA",pragma::CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA);
 	defCRender.add_static_constant("EVENT_ON_RENDER_BOUNDS_CHANGED",pragma::CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED);
 	defCRender.add_static_constant("EVENT_ON_RENDER_MODE_CHANGED",pragma::CRenderComponent::EVENT_ON_RENDER_MODE_CHANGED);

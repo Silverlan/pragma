@@ -19,6 +19,7 @@
 #include <wgui/wgui.h>
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/console/c_cvar.h"
+#include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/entities/components/c_vehicle_component.hpp"
 //#include "shader_gaussianblur.h" // prosper TODO
 #include "pragma/rendering/world_environment.hpp"
@@ -44,6 +45,8 @@
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include "pragma/physics/c_phys_visual_debugger.hpp"
+#include <pragma/console/sh_cmd.h>
+#include <pragma/entities/entity_component_system_t.hpp>
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>
 #include <prosper_util.hpp>
@@ -154,46 +157,61 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState*,ConVar*,int,int val,b
 REGISTER_CONVAR_CALLBACK_CL(debug_physics_draw,[](NetworkState *nw,ConVar *cv,int oldVal,int val) {CVAR_CALLBACK_debug_physics_draw(nw,cv,oldVal,val,false);});
 REGISTER_CONVAR_CALLBACK_CL(sv_debug_physics_draw,[](NetworkState *nw,ConVar *cv,int oldVal,int val) {CVAR_CALLBACK_debug_physics_draw(nw,cv,oldVal,val,true);});
 
-static void CVAR_CALLBACK_debug_render_depth_buffer(NetworkState*,ConVar*,bool,bool val)
+void Console::commands::debug_render_depth_buffer(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
-	if(dbg == nullptr)
+	if(dbg)
 	{
-		if(val == false)
-			return;
-		dbg = std::make_unique<DebugGameGUI>([]() {
-			auto *scene = c_game->GetScene();
-			auto *renderer = scene ? scene->GetRenderer() : nullptr;
-			if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
-				return WIHandle{};
-			auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
-			auto &wgui = WGUI::GetInstance();
-			
-			auto r = wgui.Create<WIDebugDepthTexture>();
-			r->SetTexture(*rasterizer->GetPrepass().textureDepth,{
-				prosper::PipelineStageFlags::LateFragmentTestsBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit
-			},{
-				prosper::PipelineStageFlags::EarlyFragmentTestsBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit
-			});
-			r->SetShouldResolveImage(true);
-			r->SetSize(1024,1024);
-			r->Update();
-			return r->GetHandle();
-		});
-		auto *d = dbg.get();
-		dbg->AddCallback("PostRenderScene",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([d](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
-			auto *el = d->GetGUIElement();
-			if(el == nullptr)
-				return;
-			static_cast<WIDebugDepthTexture*>(el)->Update();
-		}));
+		dbg = nullptr;
 		return;
 	}
-	else if(val == true)
+	auto &ent = pl->GetEntity();
+	if(ent.IsCharacter() == false)
 		return;
-	dbg = nullptr;
+	auto charComponent = ent.GetCharacterComponent();
+	auto ents = command::find_target_entity(state,*charComponent,argv);
+	EntityHandle hEnt {};
+	if(ents.empty() == false)
+		hEnt = ents.front()->GetHandle();
+	dbg = std::make_unique<DebugGameGUI>([hEnt]() {
+		pragma::CSceneComponent *scene = nullptr;
+		if(hEnt.IsValid())
+		{
+			auto sceneC = hEnt.get()->GetComponent<pragma::CSceneComponent>();
+			if(sceneC.expired())
+			{
+				Con::cwar<<"WARNING: Scene not found!"<<Con::endl;
+				return WIHandle{};
+			}
+			scene = sceneC.get();
+		}
+		else
+			scene = c_game->GetScene();
+		auto *renderer = scene ? scene->GetRenderer() : nullptr;
+		if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+			return WIHandle{};
+		auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
+		auto &wgui = WGUI::GetInstance();
+			
+		auto r = wgui.Create<WIDebugDepthTexture>();
+		r->SetTexture(*rasterizer->GetPrepass().textureDepth,{
+			prosper::PipelineStageFlags::LateFragmentTestsBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit
+		},{
+			prosper::PipelineStageFlags::EarlyFragmentTestsBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit
+		});
+		r->SetShouldResolveImage(true);
+		r->SetSize(1024,1024);
+		r->Update();
+		return r->GetHandle();
+	});
+	auto *d = dbg.get();
+	dbg->AddCallback("PostRenderScene",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([d](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
+		auto *el = d->GetGUIElement();
+		if(el == nullptr)
+			return;
+		static_cast<WIDebugDepthTexture*>(el)->Update();
+	}));
 }
-REGISTER_CONVAR_CALLBACK_CL(debug_render_depth_buffer,CVAR_CALLBACK_debug_render_depth_buffer);
 
 static CVar cvDrawScene = GetClientConVar("render_draw_scene");
 static CVar cvDrawWorld = GetClientConVar("render_draw_world");
@@ -205,24 +223,6 @@ static CVar cvClearSceneColor = GetClientConVar("render_clear_scene_color");
 static CVar cvParticleQuality = GetClientConVar("cl_render_particle_quality");
 void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 {
-	if(cvDrawScene->GetBool() == false)
-		return;
-	auto drawWorld = cvDrawWorld->GetInt();
-	if(drawWorld == 2)
-		drawSceneInfo.renderFlags &= ~(FRender::Shadows | FRender::Glow);
-	else if(drawWorld == 0)
-		drawSceneInfo.renderFlags &= ~(FRender::Shadows | FRender::Glow | FRender::View | FRender::World | FRender::Skybox);
-
-	if(cvDrawStatic->GetBool() == false)
-		drawSceneInfo.renderFlags &= ~FRender::Static;
-	if(cvDrawDynamic->GetBool() == false)
-		drawSceneInfo.renderFlags &= ~FRender::Dynamic;
-	if(cvDrawTranslucent->GetBool() == false)
-		drawSceneInfo.renderFlags &= ~FRender::Translucent;
-
-	if(cvParticleQuality->GetInt() <= 0)
-		drawSceneInfo.renderFlags &= ~FRender::Particles;
-
 	// Update particle systems
 	// TODO: This isn't a good place for this and particle systems should
 	// only be updated if visible (?)
@@ -266,10 +266,40 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 	// We'll queue up building the render queues before we start rendering, so
 	// most of it can be done in the background
 	CallCallbacks("OnRenderScenes");
-	for(auto &drawSceneInfo : m_sceneRenderQueue)
+	RenderScenes(m_sceneRenderQueue);
+
+	CallCallbacks("PostRenderScenes");
+	CallLuaCallbacks("PostRenderScenes");
+
+	m_sceneRenderQueue.clear();
+}
+
+void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
+{
+	if(cvDrawScene->GetBool() == false)
+		return;
+	auto drawWorld = cvDrawWorld->GetInt();
+	for(auto &cdrawSceneInfo : drawSceneInfos)
 	{
+		auto &drawSceneInfo = const_cast<util::DrawSceneInfo&>(cdrawSceneInfo);
 		if(drawSceneInfo.scene.expired())
 			continue;
+
+		if(drawWorld == 2)
+			drawSceneInfo.renderFlags &= ~(FRender::Shadows | FRender::Glow);
+		else if(drawWorld == 0)
+			drawSceneInfo.renderFlags &= ~(FRender::Shadows | FRender::Glow | FRender::View | FRender::World | FRender::Skybox);
+
+		if(cvDrawStatic->GetBool() == false)
+			drawSceneInfo.renderFlags &= ~FRender::Static;
+		if(cvDrawDynamic->GetBool() == false)
+			drawSceneInfo.renderFlags &= ~FRender::Dynamic;
+		if(cvDrawTranslucent->GetBool() == false)
+			drawSceneInfo.renderFlags &= ~FRender::Translucent;
+
+		if(cvParticleQuality->GetInt() <= 0)
+			drawSceneInfo.renderFlags &= ~FRender::Particles;
+
 		if(drawSceneInfo.commandBuffer == nullptr)
 			drawSceneInfo.commandBuffer = c_engine->GetRenderContext().GetDrawCommandBuffer();
 		// Modify render flags depending on console variables
@@ -283,13 +313,28 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 			umath::set_flag(renderFlags,FRender::View,false);
 
 		drawSceneInfo.scene->BuildRenderQueues(drawSceneInfo);
+
+		auto &lights = drawSceneInfo.scene->GetPreviouslyVisibleShadowedLights();
+		for(auto &l : lights)
+		{
+			auto *shadowC = l.valid() ? l->GetShadowComponent() : nullptr;
+			if(shadowC == nullptr)
+				continue;
+			// Also start building render queues for light sources with shadow maps
+			// that were visible in the previous frame.
+			// The internal light source code already makes sure they're rebuilt (and rendered) only once
+			// per frame, so we don't have to worry about that here.
+			auto &renderer = shadowC->GetRenderer();
+			const_cast<pragma::LightShadowRenderer&>(renderer).BuildRenderQueues(drawSceneInfo);
+		}
 	}
 
 	// Update time
 	UpdateShaderTimeData();
 
-	for(auto &drawSceneInfo : m_sceneRenderQueue)
+	for(auto &cdrawSceneInfo : drawSceneInfos)
 	{
+		auto &drawSceneInfo = const_cast<util::DrawSceneInfo&>(cdrawSceneInfo);
 		if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags,util::DrawSceneInfo::Flags::DisableRender))
 			continue;
 		auto &scene = drawSceneInfo.scene;
@@ -339,11 +384,6 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 		RenderScene(drawSceneInfo);
 	}
 	m_renderQueueBuilder->Flush();
-
-	CallCallbacks("PostRenderScenes");
-	CallLuaCallbacks("PostRenderScenes");
-
-	m_sceneRenderQueue.clear();
 }
 
 bool CGame::IsInMainRenderPass() const {return m_bMainRenderPass;}

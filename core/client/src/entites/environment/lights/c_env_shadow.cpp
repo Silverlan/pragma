@@ -352,13 +352,21 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 				}
 			}
 
+			auto fGetRenderQueue = [&mainRenderQueue](RenderMode renderMode,bool translucent) -> pragma::rendering::RenderQueue* {
+				return (renderMode == RenderMode::World) ? mainRenderQueue.get() : nullptr;
+			};
+			for(auto *pRenderComponent : pragma::CRenderComponent::GetEntitiesExemptFromOcclusionCulling())
+			{
+				if(SceneRenderDesc::ShouldConsiderEntity(static_cast<CBaseEntity&>(pRenderComponent->GetEntity()),scene,drawSceneInfo.renderFlags) == false)
+					continue;
+				SceneRenderDesc::AddRenderMeshesToRenderQueue(drawSceneInfo,*pRenderComponent,fGetRenderQueue,scene,*hCam,vp,nullptr);
+			}
+
 			auto *culler = scene.FindOcclusionCuller();
 			if(culler)
 			{
 				auto &dynOctree = culler->GetOcclusionOctree();
-				SceneRenderDesc::CollectRenderMeshesFromOctree(drawSceneInfo,dynOctree,scene,*hCam,vp,drawSceneInfo.renderFlags,[&mainRenderQueue](RenderMode renderMode,bool translucent) -> pragma::rendering::RenderQueue* {
-					return (renderMode == RenderMode::World) ? mainRenderQueue.get() : nullptr;
-				},fShouldCull,nullptr,lodBias);
+				SceneRenderDesc::CollectRenderMeshesFromOctree(drawSceneInfo,dynOctree,scene,*hCam,vp,drawSceneInfo.renderFlags,fGetRenderQueue,fShouldCull,nullptr,lodBias);
 			}
 		}
 		
@@ -481,7 +489,6 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 	rendering::DepthStageRenderProcessor shadowRenderProcessor {drawSceneInfo,RenderFlags::None,{}};
 	for(auto layerId=decltype(numLayers){0};layerId<numLayers;++layerId)
 	{
-		auto &depthMVP = light.GetTransformationMatrix(layerId);
 		auto *framebuffer = shadowC->GetFramebuffer(layerId);
 
 		const prosper::ClearValue clearVal {prosper::ClearDepthStencilValue{1.f}};
@@ -490,9 +497,8 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 
 		if(shadowRenderProcessor.BindShader(*shader))
 		{
-			if(shader->BindLight(*m_hLight))
+			if(shader->BindLight(*m_hLight,layerId))
 			{
-				shader->BindDepthMatrix(depthMVP);
 				shadowRenderProcessor.Render(*m_renderQueues.at(layerId),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->shadowPass : nullptr);
 		
 				// TODO: Translucent render pass ?

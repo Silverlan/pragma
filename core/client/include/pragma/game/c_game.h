@@ -383,6 +383,7 @@ public:
 	bool IsDefaultGameRenderEnabled() const;
 
 	void QueueForRendering(const util::DrawSceneInfo &drawSceneInfo);
+	void RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos);
 	void SetRenderScene(pragma::CSceneComponent &scene);
 	void ResetRenderScene();
 	pragma::CSceneComponent *GetRenderScene();

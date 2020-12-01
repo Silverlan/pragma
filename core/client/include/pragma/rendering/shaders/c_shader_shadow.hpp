@@ -56,15 +56,14 @@ namespace pragma
 		ShaderShadow(prosper::IPrContext &context,const std::string &identifier);
 		ShaderShadow(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader);
 
-		bool BindLight(CLightComponent &light);
-		bool BindDepthMatrix(const Mat4 &depthMVP);
-		virtual bool BindEntity(CBaseEntity &ent) override;
+		bool BindLight(CLightComponent &light,uint32_t layerId);
 		virtual bool BindMaterial(CMaterial &mat) override; // TODO: Transparent only
 		virtual bool BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) override;
 		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
 		virtual bool BindClipPlane(const Vector4 &clipPlane) override {return true;}
 		virtual bool SetDepthBias(const Vector2 &depthBias) override {return true;}
 		virtual bool SetDebugMode(pragma::SceneDebugMode debugMode) override {return true;}
+		virtual bool BindVertexAnimationOffset(uint32_t offset) {return true;}
 		virtual void Set3DSky(bool is3dSky) override {}
 		virtual bool BindDrawOrigin(const Vector4 &drawOrigin) override {return true;}
 		virtual bool BeginDraw(
@@ -81,7 +80,6 @@ namespace pragma
 		virtual uint32_t GetLightDescriptorSetIndex() const override;
 		virtual uint32_t GetInstanceDescriptorSetIndex() const override;
 		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const override;
-		Mat4 m_depthMvp = Mat4{1.f};
 	};
 
 	class DLLCLIENT ShaderShadowTransparent

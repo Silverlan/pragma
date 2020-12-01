@@ -130,6 +130,7 @@ namespace pragma
 			static_assert(sizeof(pragma::SceneDebugMode) == sizeof(uint32_t));
 			pragma::SceneDebugMode debugMode;
 			float reflectionProbeIntensity;
+			Vector2 padding;
 		};
 
 		struct MaterialData

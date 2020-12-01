@@ -78,6 +78,7 @@ namespace Console
 		DLLCLIENT void debug_lightmaps(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 		DLLCLIENT void debug_particle_alpha_mode(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 		DLLCLIENT void debug_font_glyph_map(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
+		DLLCLIENT void debug_render_depth_buffer(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 
 		DLLCLIENT void debug_audio_aux_effect(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 		DLLCLIENT void debug_audio_sounds(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);

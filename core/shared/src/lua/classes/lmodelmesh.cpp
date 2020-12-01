@@ -40,6 +40,12 @@ void Lua::ModelMesh::register_class(luabind::class_<::ModelMesh> &classDef)
 	classDef.def("ClearSubMeshes",static_cast<void(*)(lua_State*,::ModelMesh&)>([](lua_State *l,::ModelMesh &mesh) {
 		mesh.GetSubMeshes().clear();
 	}));
+	classDef.def("RemoveSubMesh",static_cast<void(*)(lua_State*,::ModelMesh&,uint32_t)>([](lua_State *l,::ModelMesh &mesh,uint32_t i) {
+		auto &subMeshes = mesh.GetSubMeshes();
+		if(i >= subMeshes.size())
+			return;
+		subMeshes.erase(subMeshes.begin() +i);
+	}));
 	classDef.def("SetSubMeshes",static_cast<void(*)(lua_State*,::ModelMesh&,luabind::object)>([](lua_State *l,::ModelMesh &mesh,luabind::object tSubMeshes) {
 		auto idxSubMeshes = 2;
 		Lua::CheckTable(l,idxSubMeshes);

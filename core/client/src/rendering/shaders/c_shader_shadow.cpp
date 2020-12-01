@@ -60,11 +60,6 @@ bool ShaderShadow::BindEntityDepthMatrix(const Mat4 &depthMVP)
 {
 	return RecordPushConstants(depthMVP);
 }
-bool ShaderShadow::BindDepthMatrix(const Mat4 &depthMVP)
-{
-	m_depthMvp = depthMVP;
-	return true;
-}
 bool ShaderShadow::BindMaterial(CMaterial &mat)
 {
 	/*auto &descTexture = mat.GetDescriptorSetGroup(*this);
@@ -88,24 +83,15 @@ bool ShaderShadow::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMe
 	return RecordPushConstants(flags,offsetof(PushConstants,flags)) && ShaderGameWorld::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount);
 }
 
-bool ShaderShadow::BindEntity(CBaseEntity &ent)
-{
-	if(ShaderGameWorld::BindEntity(ent) == false)
-		return false;
-	auto pRenderComponent = ent.GetRenderComponent();
-	if(!pRenderComponent)
-		return false;
-	// auto entMvp = m_depthMvp *pRenderComponent->GetTransformationMatrix();
-	return BindEntityDepthMatrix(m_depthMvp);
-}
-bool ShaderShadow::BindLight(CLightComponent &light)
+bool ShaderShadow::BindLight(CLightComponent &light,uint32_t layerId)
 {
 	auto &ent = light.GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pRadiusComponent = ent.GetComponent<CRadiusComponent>();
 	auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 	auto lightPos = Vector4{pos.x,pos.y,pos.z,static_cast<float>(pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f)};
-	return RecordPushConstants(lightPos,offsetof(PushConstants,lightPos));
+	auto &depthMVP = light.GetTransformationMatrix(layerId);
+	return RecordPushConstants(lightPos,offsetof(PushConstants,lightPos)) && RecordPushConstants(depthMVP);
 }
 void ShaderShadow::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {

@@ -67,9 +67,10 @@ void CMD_debug_light_shadowmap(NetworkState *nw,pragma::BasePlayerComponent*,std
 	if(pEl != nullptr)
 		pEl->Remove();
 
-	auto smType = pragma::CLightComponent::ShadowMapType::Static;
-	if(argv.size() > 1 && util::to_boolean(argv.at(1)))
-		smType = pragma::CLightComponent::ShadowMapType::Dynamic;
+	//auto smType = pragma::CLightComponent::ShadowMapType::Static;
+	//if(argv.size() > 1 && util::to_boolean(argv.at(1)))
+	//	smType = pragma::CLightComponent::ShadowMapType::Dynamic;
+	auto smType = pragma::CLightComponent::ShadowMapType::Dynamic;
 
 	pragma::CLightComponent *light;
 	if(get_shadow_map(nw,argv,&light,smType) == false)

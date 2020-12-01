@@ -33,7 +33,6 @@ REGISTER_CONVAR_CL(debug_bsp_nodes,"0",ConVarFlags::Cheat,"Prints and draws vari
 REGISTER_CONVAR_CL(debug_bsp_lock,"0",ConVarFlags::Cheat,"Locks BSP culling so it doesn't change when the camera moves.");
 REGISTER_CONVAR_CL(debug_render_octree_static_draw,"0",ConVarFlags::Cheat,"Draws the octree for static world geometry.");
 REGISTER_CONVAR_CL(debug_render_octree_dynamic_draw,"0",ConVarFlags::Cheat,"Draws the octree for dynamic objects.");
-REGISTER_CONVAR_CL(debug_render_depth_buffer,"0",ConVarFlags::Cheat,"Draws the scene depth buffer to screen.");
 REGISTER_CONVAR_CL(debug_forwardplus_heatmap,"0",ConVarFlags::Cheat,"Renders a heatmap of the visible lights for forward+ rendering.");
 REGISTER_CONVAR_CL(debug_ai_navigation,"0",ConVarFlags::Cheat,"Displays the current navigation path for all NPCs.");
 REGISTER_CONVAR_CL(debug_steam_audio_probe_boxes,"0",ConVarFlags::Cheat,"Displays the sound probe spheres for the current map.");

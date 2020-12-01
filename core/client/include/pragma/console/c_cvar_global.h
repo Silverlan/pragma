@@ -38,6 +38,7 @@ REGISTER_CONCOMMAND_CL(debug_aim_info,CMD_debug_aim_info,ConVarFlags::None,"Prin
 REGISTER_CONCOMMAND_CL(debug_light_sources,Console::commands::debug_light_sources,ConVarFlags::None,"Prints debug information about all light sources in the scene.");
 REGISTER_CONCOMMAND_CL(debug_gui_cursor,Console::commands::debug_gui_cursor,ConVarFlags::None,"Prints information about the GUI element currently hovered over by the cursor.");
 REGISTER_CONCOMMAND_CL(debug_font_glyph_map,Console::commands::debug_font_glyph_map,ConVarFlags::None,"Displays the glyph map for the specified font.");
+REGISTER_CONCOMMAND_CL(debug_render_depth_buffer,Console::commands::debug_render_depth_buffer,ConVarFlags::None,"Draws the scene depth buffer to screen.");
 
 REGISTER_CONCOMMAND_CL(debug_render_info,Console::commands::debug_render_info,ConVarFlags::None,"Prints some timing information to the console.");
 

@@ -207,33 +207,33 @@ void BasePhysicsComponent::UpdatePhysicsData()
 		{
 			ent.SetStateFlag(BaseEntity::StateFlags::RotationChanged);
 			bSnapshot = true;
-		}
 
-		// Sanity check
-		if(std::isnan(rot.w) || std::isnan(rot.x) || std::isnan(rot.y) || std::isnan(rot.z))
-		{
-			std::stringstream ss {};
-			ss<<"UpdatePhysicsData: NaN rotation ("<<rot.w<<","<<rot.x<<","<<rot.y<<","<<rot.z<<") for entity "<<ent.GetClass()<<"!";
-			throw std::runtime_error(ss.str());
-		}
-		umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsRotation);
-		pTrComponent->SetRawRotation(rot);
-		transformChangeFlags |= TransformChangeFlags::RotationChanged;
-		umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsRotation,false);
-
-		if(!bStatic && pVelComponent.valid())
-		{
-			auto angVel = phys->GetAngularVelocity();
 			// Sanity check
-			if(std::isnan(angVel.x) || std::isnan(angVel.y) || std::isnan(angVel.z))
+			if(std::isnan(rot.w) || std::isnan(rot.x) || std::isnan(rot.y) || std::isnan(rot.z))
 			{
 				std::stringstream ss {};
-				ss<<"UpdatePhysicsData: NaN angular velocity ("<<angVel.x<<","<<angVel.y<<","<<angVel.z<<") for entity "<<ent.GetClass()<<"!";
+				ss<<"UpdatePhysicsData: NaN rotation ("<<rot.w<<","<<rot.x<<","<<rot.y<<","<<rot.z<<") for entity "<<ent.GetClass()<<"!";
 				throw std::runtime_error(ss.str());
 			}
-			umath::set_flag(m_stateFlags,StateFlags::ApplyingAngularVelocity);
-			pVelComponent->SetRawAngularVelocity(angVel);
-			umath::set_flag(m_stateFlags,StateFlags::ApplyingAngularVelocity,false);
+			umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsRotation);
+			pTrComponent->SetRawRotation(rot);
+			transformChangeFlags |= TransformChangeFlags::RotationChanged;
+			umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsRotation,false);
+
+			if(!bStatic && pVelComponent.valid())
+			{
+				auto angVel = phys->GetAngularVelocity();
+				// Sanity check
+				if(std::isnan(angVel.x) || std::isnan(angVel.y) || std::isnan(angVel.z))
+				{
+					std::stringstream ss {};
+					ss<<"UpdatePhysicsData: NaN angular velocity ("<<angVel.x<<","<<angVel.y<<","<<angVel.z<<") for entity "<<ent.GetClass()<<"!";
+					throw std::runtime_error(ss.str());
+				}
+				umath::set_flag(m_stateFlags,StateFlags::ApplyingAngularVelocity);
+				pVelComponent->SetRawAngularVelocity(angVel);
+				umath::set_flag(m_stateFlags,StateFlags::ApplyingAngularVelocity,false);
+			}
 		}
 	}
 	if(pTrComponent)
@@ -248,18 +248,19 @@ void BasePhysicsComponent::UpdatePhysicsData()
 			ent.SetStateFlag(BaseEntity::StateFlags::PositionChanged);
 			pTrComponent->UpdateLastMovedTime();
 			bSnapshot = true;
+
+			// Sanity check
+			if(std::isnan(pos.x) || std::isnan(pos.y) || std::isnan(pos.z))
+			{
+				std::stringstream ss {};
+				ss<<"UpdatePhysicsData: NaN position ("<<pos.x<<","<<pos.y<<","<<pos.z<<") for entity "<<ent.GetClass()<<"!";
+				throw std::runtime_error(ss.str());
+			}
+			umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsPosition);
+			pTrComponent->SetRawPosition(pos);
+			transformChangeFlags |= TransformChangeFlags::PositionChanged;
+			umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsPosition,false);
 		}
-		// Sanity check
-		if(std::isnan(pos.x) || std::isnan(pos.y) || std::isnan(pos.z))
-		{
-			std::stringstream ss {};
-			ss<<"UpdatePhysicsData: NaN position ("<<pos.x<<","<<pos.y<<","<<pos.z<<") for entity "<<ent.GetClass()<<"!";
-			throw std::runtime_error(ss.str());
-		}
-		umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsPosition);
-		pTrComponent->SetRawPosition(pos);
-		transformChangeFlags |= TransformChangeFlags::PositionChanged;
-		umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsPosition,false);
 	}
 	if(type == PHYSICSTYPE::DYNAMIC)
 	{

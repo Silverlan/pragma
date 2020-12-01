@@ -901,7 +901,23 @@ int Lua::game::Client::update_render_buffers(lua_State *l)
 	pragma::CSceneComponent::UpdateRenderBuffers(drawSceneInfo.commandBuffer,renderQueue);
 	return 0;
 }
-int Lua::game::Client::draw_scene(lua_State *l)
+int Lua::game::Client::render_scenes(lua_State *l)
+{
+	std::vector<::util::DrawSceneInfo> scenes {};
+	auto n = Lua::GetObjectLength(l,1);
+	scenes.reserve(n);
+
+	auto t = luabind::object{luabind::from_stack(l,1)};
+	for(luabind::iterator i{t},end;i!=end;++i)
+	{
+		auto val = *i;
+		auto *drawSceneInfo = luabind::object_cast<::util::DrawSceneInfo*>(val);
+		scenes.push_back(*drawSceneInfo);
+	}
+	c_game->RenderScenes(scenes);
+
+}
+int Lua::game::Client::queue_scene_for_rendering(lua_State *l)
 {
 	auto &drawSceneInfo = Lua::Check<::util::DrawSceneInfo>(l,1);
 	c_game->QueueForRendering(drawSceneInfo);

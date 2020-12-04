@@ -200,8 +200,8 @@ void CRaytracingComponent::UpdateBuffers(prosper::IPrimaryCommandBuffer &cmd)
 	{
 		umath::set_flag(m_stateFlags,StateFlags::RenderBufferDirty,false);
 		auto &renderComponent = *whRenderComponent;
-		auto wpRenderBuffer = renderComponent.GetRenderBuffer();
-		auto index = wpRenderBuffer ? static_cast<prosper::IBuffer::SmallOffset>(wpRenderBuffer->GetBaseIndex()) : prosper::IBuffer::INVALID_SMALL_OFFSET;
+		auto &wpRenderBuffer = renderComponent.GetRenderBuffer();
+		auto index = wpRenderBuffer.GetBaseIndex();//wpRenderBuffer ? static_cast<prosper::IBuffer::SmallOffset>(wpRenderBuffer->GetBaseIndex()) : prosper::IBuffer::INVALID_SMALL_OFFSET;
 		for(auto &buf : m_subMeshBuffers)
 			cmd.RecordUpdateGenericShaderReadBuffer(*buf,offsetof(SubMeshRenderInfoBufferData,entityBufferIndex),sizeof(index),&index);
 	}
@@ -209,8 +209,8 @@ void CRaytracingComponent::UpdateBuffers(prosper::IPrimaryCommandBuffer &cmd)
 	{
 		auto whAnimatedComponent = GetEntity().GetComponent<CAnimatedComponent>();
 		umath::set_flag(m_stateFlags,StateFlags::BoneBufferDirty,false);
-		auto wpBoneBuffer = whAnimatedComponent.valid() ? whAnimatedComponent->GetBoneBuffer() : std::weak_ptr<prosper::IBuffer>{};
-		auto index = wpBoneBuffer.expired() == false ? static_cast<prosper::IBuffer::SmallOffset>(wpBoneBuffer.lock()->GetBaseIndex()) : prosper::IBuffer::INVALID_SMALL_OFFSET;
+		auto wpBoneBuffer = whAnimatedComponent->GetBoneBuffer();//whAnimatedComponent.valid() ? whAnimatedComponent->GetBoneBuffer() : std::weak_ptr<prosper::IBuffer>{};
+		auto index = wpBoneBuffer ? static_cast<prosper::IBuffer::SmallOffset>(wpBoneBuffer->GetBaseIndex()) : prosper::IBuffer::INVALID_SMALL_OFFSET;
 		for(auto &buf : m_subMeshBuffers)
 			cmd.RecordUpdateGenericShaderReadBuffer(*buf,offsetof(SubMeshRenderInfoBufferData,boneBufferStartIndex),sizeof(index),&index);
 	}

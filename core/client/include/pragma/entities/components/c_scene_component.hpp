@@ -73,6 +73,7 @@ public:
 	static bool ShouldCull(pragma::CRenderComponent &renderC,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);
 	static bool ShouldCull(pragma::CRenderComponent &renderC,pragma::RenderMeshIndex meshIdx,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);
 	static bool ShouldCull(const Vector3 &min,const Vector3 &max,const std::vector<Plane> &frustumPlanes);
+	static uint32_t GetActiveRenderQueueThreadCount();
 
 	SceneRenderDesc(pragma::CSceneComponent &scene);
 	~SceneRenderDesc();

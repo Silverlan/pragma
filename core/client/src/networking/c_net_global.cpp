@@ -33,6 +33,8 @@
 #include "pragma/entities/components/c_health_component.hpp"
 #include "pragma/entities/components/c_attachable_component.hpp"
 #include "pragma/gui/wiluabase.h"
+#include <pragma/math/intersection.h>
+#include <pragma/entities/baseentity_trace.hpp>
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/audio/alsound_type.h>
 #include <pragma/debug/debugbehaviortree.h>
@@ -43,6 +45,7 @@
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/entities/entity_iterator.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/util/giblet_create_info.hpp>
 
@@ -1208,12 +1211,68 @@ void CMD_debug_aim_info(NetworkState *state,pragma::BasePlayerComponent *pl,std:
 {
 	if(pl == nullptr)
 		return;
-	auto &ent = pl->GetEntity();
-	if(ent.IsCharacter() == false)
+	auto &entPl = pl->GetEntity();
+	if(entPl.IsCharacter() == false)
 		return;
-	auto *game = state->GetGameState();
-	auto aimData = ent.GetCharacterComponent()->GetAimTraceData();
-	auto res = game->RayCast(aimData);
+	auto charComponent = entPl.GetCharacterComponent();
+	auto ents = command::find_target_entity(state,*charComponent,argv);
+	pragma::CCameraComponent *cam = nullptr;
+	if(ents.empty() == false)
+	{
+		for(auto *ent : ents)
+		{
+			auto sceneC = ent->GetComponent<pragma::CSceneComponent>();
+			if(sceneC.expired() || sceneC->GetActiveCamera().expired())
+				continue;
+			cam = sceneC->GetActiveCamera().get();
+			break;
+		}
+	}
+	cam = cam ? cam : c_game->GetPrimaryCamera();
+	if(cam == nullptr)
+		return;
+	auto trC = cam->GetEntity().GetComponent<pragma::CTransformComponent>();
+	if(trC.expired())
+		return;
+	auto trData = util::get_entity_trace_data(*trC);
+	trData.SetFlags(RayCastFlags::InvertFilter);
+	trData.SetFilter(entPl);
+	auto res = c_game->RayCast(trData);
+	if(res.hitType == RayCastHitType::None)
+	{
+		EntityIterator entIt {*c_game};
+		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
+		std::optional<Intersection::LineMeshResult> closestMesh {};
+		BaseEntity *entClosest = nullptr;
+		for(auto *ent : entIt)
+		{
+			if(ent == &entPl)
+				continue;
+			auto renderC = ent->GetComponent<pragma::CRenderComponent>();
+			auto lineMeshResult = renderC->CalcRayIntersection(trData.GetSourceOrigin(),trData.GetTargetOrigin(),true);
+			if(lineMeshResult.has_value() == false || lineMeshResult->result != Intersection::Result::Intersect)
+				continue;
+			if(closestMesh.has_value() && lineMeshResult->hitValue > closestMesh->hitValue)
+				continue;
+			closestMesh = lineMeshResult;
+			entClosest = ent;
+		}
+		if(closestMesh.has_value())
+		{
+			res.hitType = RayCastHitType::Block;
+			res.entity = entClosest->GetHandle();
+			res.position = closestMesh->hitPos;
+			res.normal = {};
+			res.distance = uvec::distance(closestMesh->hitPos,trData.GetSourceOrigin());
+			if(closestMesh->precise)
+			{
+				res.meshInfo = std::make_shared<TraceResult::MeshInfo>();
+				res.meshInfo->mesh = closestMesh->precise->mesh.get();
+				res.meshInfo->subMesh = closestMesh->precise->subMesh.get();
+			}
+		}
+	}
+
 	if(res.hitType == RayCastHitType::None)
 	{
 		Con::cout<<"Nothing found in player aim direction!"<<Con::endl;

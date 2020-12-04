@@ -26,16 +26,16 @@
 
 void TraceResult::InitializeMeshes()
 {
-	if(m_meshInfo != nullptr)
+	if(meshInfo != nullptr)
 		return;
-	m_meshInfo = std::make_shared<MeshInfo>();
+	meshInfo = std::make_shared<MeshInfo>();
 	if(entity.IsValid() == false)
 		return;
 	auto mdlComponent = entity->GetModelComponent();
 	auto hMdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 	if(hMdl == nullptr)
 		return;
-	hMdl->GetBodyGroupMeshes(mdlComponent->GetBodyGroups(),0u,m_meshInfo->meshes);
+	hMdl->GetBodyGroupMeshes(mdlComponent->GetBodyGroups(),0u,meshInfo->meshes);
 	auto closestDist = std::numeric_limits<float>::max();
 
 	auto pTrComponent = entity->GetTransformComponent();
@@ -52,7 +52,7 @@ void TraceResult::InitializeMeshes()
 	dir *= maxDist;
 
 	Intersection::LineMeshResult res{};
-	for(auto &mesh : m_meshInfo->meshes)
+	for(auto &mesh : meshInfo->meshes)
 	{
 		Vector3 min,max;
 		mesh->GetBounds(min,max);
@@ -68,8 +68,8 @@ void TraceResult::InitializeMeshes()
 				continue;
 			if(Intersection::LineMesh(startPosLocal,dir,*subMesh,res,true,nullptr,nullptr) == false || umath::abs(res.hitValue) > (dist /maxDist))
 				continue;
-			m_meshInfo->mesh = mesh.get();
-			m_meshInfo->subMesh = subMesh.get();
+			meshInfo->mesh = mesh.get();
+			meshInfo->subMesh = subMesh.get();
 		}
 	}
 }
@@ -77,8 +77,8 @@ void TraceResult::InitializeMeshes()
 void TraceResult::GetMeshes(ModelMesh **outMesh,ModelSubMesh **outSubMesh)
 {
 	InitializeMeshes();
-	*outMesh = m_meshInfo->mesh;
-	*outSubMesh = m_meshInfo->subMesh;
+	*outMesh = meshInfo->mesh;
+	*outSubMesh = meshInfo->subMesh;
 }
 Material *TraceResult::GetMaterial()
 {

@@ -20,6 +20,8 @@
 #include <pragma/entities/parentinfo.h>
 #include <prosper_descriptor_set_group.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
+#include <buffers/prosper_swap_buffer.hpp>
+#include <prosper_descriptor_set_group.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <prosper_command_buffer.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
@@ -92,13 +94,16 @@ void CRenderComponent::InitializeBuffers()
 	s_instanceBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(createInfo,instanceSize,instanceSize *maxInstanceCount,0.1f,nullptr,alignment);
 	s_instanceBuffer->SetDebugName("entity_instance_data_buf");
 	if constexpr(USE_HOST_MEMORY_FOR_RENDER_DATA)
-		s_instanceBuffer->SetPermanentlyMapped(true);
+		s_instanceBuffer->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::WriteBit | prosper::IBuffer::MapFlags::Unsynchronized);
 
 	pragma::initialize_articulated_buffers();
+	pragma::initialize_vertex_animation_buffer();
 }
-const std::shared_ptr<prosper::IBuffer> &CRenderComponent::GetRenderBuffer() const {return m_renderBuffer;}
-std::optional<RenderBufferIndex> CRenderComponent::GetRenderBufferIndex() const {return m_renderBuffer ? m_renderBuffer->GetBaseIndex() : std::optional<RenderBufferIndex>{};}
-prosper::IDescriptorSet *CRenderComponent::GetRenderDescriptorSet() const {return (m_renderDescSetGroup != nullptr) ? m_renderDescSetGroup->GetDescriptorSet() : nullptr;}
+const prosper::IBuffer &CRenderComponent::GetRenderBuffer() const {return m_renderBuffer->GetBuffer();}
+const std::shared_ptr<prosper::SwapBuffer> &CRenderComponent::GetSwapRenderBuffer() const {return m_renderBuffer;}
+std::optional<RenderBufferIndex> CRenderComponent::GetRenderBufferIndex() const {return m_renderBuffer ? m_renderBuffer->GetBuffer().GetBaseIndex() : std::optional<RenderBufferIndex>{};}
+prosper::IDescriptorSet *CRenderComponent::GetRenderDescriptorSet() const {return (m_renderDescSetGroup != nullptr) ? &m_renderDescSetGroup->GetDescriptorSet() : nullptr;}
+prosper::SwapDescriptorSet *CRenderComponent::GetSwapRenderDescriptorSet() const {return m_renderDescSetGroup.get();}
 void CRenderComponent::ClearRenderObjects()
 {
 	/*std::unordered_map<unsigned int,RenderInstance*>::iterator it;
@@ -473,6 +478,8 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 			// Confirm that this is the best result so far
 			if(bestResult.has_value() && result.hitValue > bestResult->hitValue)
 				continue;
+			if(result.precise)
+				result.precise->mesh = mesh;
 			bestResult = result;
 		}
 	}
@@ -502,32 +509,32 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 {
 	InitializeRenderBuffers();
 	auto updateRenderBuffer = umath::is_flag_set(m_stateFlags,StateFlags::RenderBufferDirty) || bForceBufferUpdate;
+	auto bufferDirty = false;
 	if(updateRenderBuffer)
 	{
 		umath::set_flag(m_stateFlags,StateFlags::RenderBufferDirty,false);
 		UpdateMatrices();
-		// Update Render Buffer
-		auto &renderBuffer = GetRenderBuffer();
-		if(renderBuffer)
-		{
-			Vector4 color(1.f,1.f,1.f,1.f);
-			auto pColorComponent = GetEntity().GetComponent<CColorComponent>();
-			if(pColorComponent.valid())
-				color = pColorComponent->GetColor().ToVector4();
 
-			auto renderFlags = pragma::ShaderEntity::InstanceData::RenderFlags::None;
-			auto *pMdlComponent = GetModelComponent();
-			auto bWeighted = pMdlComponent && static_cast<const pragma::CModelComponent&>(*pMdlComponent).IsWeighted();
-			if(bWeighted == true)
-				renderFlags |= pragma::ShaderEntity::InstanceData::RenderFlags::Weighted;
-			auto &m = GetTransformationMatrix();
-			pragma::ShaderEntity::InstanceData instanceData {m,color,renderFlags};
-			if constexpr(USE_HOST_MEMORY_FOR_RENDER_DATA)
-				renderBuffer->Write(0ull,sizeof(instanceData),&instanceData);
-			else
-				drawCmd->RecordUpdateGenericShaderReadBuffer(*renderBuffer,0ull,sizeof(instanceData),&instanceData); // Note: Command buffer mustn't be in active render pass!
-		}
+		// Update Render Buffer
+		Vector4 color(1.f,1.f,1.f,1.f);
+		auto pColorComponent = GetEntity().GetComponent<CColorComponent>();
+		if(pColorComponent.valid())
+			color = pColorComponent->GetColor().ToVector4();
+
+		auto renderFlags = pragma::ShaderEntity::InstanceData::RenderFlags::None;
+		auto *pMdlComponent = GetModelComponent();
+		auto bWeighted = pMdlComponent && static_cast<const pragma::CModelComponent&>(*pMdlComponent).IsWeighted();
+		if(bWeighted == true)
+			renderFlags |= pragma::ShaderEntity::InstanceData::RenderFlags::Weighted;
+		auto &m = GetTransformationMatrix();
+		m_instanceData.modelMatrix = m;
+		m_instanceData.color = color;
+		m_instanceData.renderFlags = renderFlags;
+		bufferDirty = true;
 	}
+	auto &renderBuffer = GetSwapRenderBuffer();
+	if(renderBuffer)
+		renderBuffer->Update(0ull,sizeof(m_instanceData),&m_instanceData,bufferDirty);
 
 	CEOnUpdateRenderBuffers evData {drawCmd};
 	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_BUFFERS,evData);
@@ -590,13 +597,14 @@ void CRenderComponent::InitializeRenderBuffers()
 	// Initialize render buffer if it doesn't exist
 	if(m_renderBuffer != nullptr || pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE.IsValid() == false)
 		return;
-	m_renderBuffer = s_instanceBuffer->AllocateBuffer();
-	m_renderDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
-	m_renderDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(
+
+	m_renderBuffer = prosper::SwapBuffer::Create(*s_instanceBuffer);
+	m_renderDescSetGroup = prosper::SwapDescriptorSet::Create(c_engine->GetRenderContext(),pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
+	m_renderDescSetGroup->SetBindingUniformBuffer(
 		*m_renderBuffer,umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::Instance)
 	);
 	UpdateBoneBuffer();
-	m_renderDescSetGroup->GetDescriptorSet()->Update();
+	m_renderDescSetGroup->Update();
 	UpdateInstantiability();
 
 	BroadcastEvent(EVENT_ON_RENDER_BUFFERS_INITIALIZED);
@@ -609,11 +617,11 @@ void CRenderComponent::UpdateBoneBuffer()
 	auto pAnimComponent = ent.GetAnimatedComponent();
 	if(pAnimComponent.expired())
 		return;
-	auto wpBoneBuffer = static_cast<pragma::CAnimatedComponent&>(*pAnimComponent).GetBoneBuffer();
-	if(wpBoneBuffer.expired())
+	auto wpBoneBuffer = static_cast<pragma::CAnimatedComponent&>(*pAnimComponent).GetSwapBoneBuffer();
+	if(!wpBoneBuffer)
 		return;
-	m_renderDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(
-		*wpBoneBuffer.lock(),umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::BoneMatrices)
+	m_renderDescSetGroup->SetBindingUniformBuffer(
+		*wpBoneBuffer,umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::BoneMatrices)
 	);
 }
 void CRenderComponent::ClearRenderBuffers()
@@ -695,6 +703,7 @@ void CRenderComponent::ClearBuffers()
 {
 	s_instanceBuffer = nullptr;
 	pragma::clear_articulated_buffers();
+	pragma::clear_vertex_animation_buffer();
 	CRaytracingComponent::ClearBuffers();
 }
 

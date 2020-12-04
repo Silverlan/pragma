@@ -14,6 +14,7 @@
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
+#include <buffers/prosper_swap_buffer.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
@@ -21,7 +22,7 @@ extern DLLCENGINE CEngine *c_engine;
 using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 ComponentEventId CAnimatedComponent::EVENT_ON_SKELETON_UPDATED = INVALID_COMPONENT_ID;
 ComponentEventId CAnimatedComponent::EVENT_ON_BONE_MATRICES_UPDATED = INVALID_COMPONENT_ID;
 ComponentEventId CAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED = INVALID_COMPONENT_ID;
@@ -59,7 +60,7 @@ void pragma::initialize_articulated_buffers()
 	s_instanceBoneBuffer->SetDebugName("entity_anim_bone_buf");
 
 	if constexpr(CRenderComponent::USE_HOST_MEMORY_FOR_RENDER_DATA)
-		s_instanceBoneBuffer->SetPermanentlyMapped(true);
+		s_instanceBoneBuffer->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::WriteBit | prosper::IBuffer::MapFlags::Unsynchronized);
 }
 void pragma::clear_articulated_buffers() {s_instanceBoneBuffer = nullptr;}
 
@@ -83,10 +84,9 @@ void CAnimatedComponent::Initialize()
 		UpdateBoneMatricesMT();
 	});
 	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		if(umath::is_flag_set(m_stateFlags,StateFlags::BoneBufferDirty) == false)
-			return;
+		auto isDirty = umath::is_flag_set(m_stateFlags,StateFlags::BoneBufferDirty);
 		umath::set_flag(m_stateFlags,StateFlags::BoneBufferDirty,false);
-		UpdateBoneBuffer(*static_cast<pragma::CEOnUpdateRenderData&>(evData.get()).commandBuffer);
+		UpdateBoneBuffer(*static_cast<pragma::CEOnUpdateRenderData&>(evData.get()).commandBuffer,isDirty);
 	});
 	BindEvent(CRenderComponent::EVENT_UPDATE_INSTANTIABILITY,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		// TODO: Allow instantiability for animated entities
@@ -204,30 +204,22 @@ void CAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 	}
 }
 
-std::weak_ptr<prosper::IBuffer> CAnimatedComponent::GetBoneBuffer() const {return m_boneBuffer;}
+prosper::SwapBuffer *CAnimatedComponent::GetSwapBoneBuffer() {return m_boneBuffer.get();}
+const prosper::IBuffer *CAnimatedComponent::GetBoneBuffer() const {return m_boneBuffer ? &m_boneBuffer->GetBuffer() : nullptr;}
 void CAnimatedComponent::InitializeBoneBuffer()
 {
 	if(m_boneBuffer != nullptr)
 		return;
-	m_boneBuffer = pragma::get_instance_bone_buffer()->AllocateBuffer();
+	m_boneBuffer = prosper::SwapBuffer::Create(*pragma::get_instance_bone_buffer());
 
 	CEOnBoneBufferInitialized evData{m_boneBuffer};
 	BroadcastEvent(EVENT_ON_BONE_BUFFER_INITIALIZED,evData);
 }
-void CAnimatedComponent::UpdateBoneBuffer(prosper::IPrimaryCommandBuffer &commandBuffer)
+void CAnimatedComponent::UpdateBoneBuffer(prosper::IPrimaryCommandBuffer &commandBuffer,bool flagAsDirty)
 {
-	// Update Bone Buffer
-	auto wpBoneBuffer = GetBoneBuffer();
 	auto numBones = GetBoneCount();
-	if(wpBoneBuffer.expired() == false && numBones > 0u && m_boneMatrices.empty() == false)
-	{
-		// Update bone buffer
-		auto buffer = wpBoneBuffer.lock();
-		if constexpr(CRenderComponent::USE_HOST_MEMORY_FOR_RENDER_DATA)
-			buffer->Write(0ull,GetBoneCount() *sizeof(Mat4),m_boneMatrices.data());
-		else
-			commandBuffer.RecordUpdateGenericShaderReadBuffer(*buffer,0ull,GetBoneCount() *sizeof(Mat4),m_boneMatrices.data());
-	}
+	if(m_boneBuffer && numBones > 0u && m_boneMatrices.empty() == false)
+		m_boneBuffer->Update(0ull,GetBoneCount() *sizeof(Mat4),m_boneMatrices.data(),flagAsDirty);
 }
 const std::vector<Mat4> &CAnimatedComponent::GetBoneMatrices() const {return const_cast<CAnimatedComponent*>(this)->GetBoneMatrices();}
 std::vector<Mat4> &CAnimatedComponent::GetBoneMatrices() {return m_boneMatrices;}
@@ -314,10 +306,11 @@ void CEOnSkeletonUpdated::HandleReturnValues(lua_State *l)
 
 //////////////
 
-CEOnBoneBufferInitialized::CEOnBoneBufferInitialized(const std::shared_ptr<prosper::IBuffer> &buffer)
+CEOnBoneBufferInitialized::CEOnBoneBufferInitialized(const std::shared_ptr<prosper::SwapBuffer> &buffer)
 	: buffer{buffer}
 {}
 void CEOnBoneBufferInitialized::PushArguments(lua_State *l)
 {
-	Lua::Push<std::shared_ptr<Lua::Vulkan::Buffer>>(l,buffer);
+	Lua::Push<std::shared_ptr<Lua::Vulkan::SwapBuffer>>(l,buffer);
 }
+#pragma optimize("",on)

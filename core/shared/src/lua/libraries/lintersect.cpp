@@ -38,11 +38,14 @@ static bool get_line_mesh_result(lua_State *l,const Intersection::LineMeshResult
 	}
 	r0 = luabind::object{l,res.result};
 	r1 = luabind::newtable(l);
-
-	r1["triIdx"] = res.triIdx;
+	
 	r1["hitPos"] = res.hitPos;
 	r1["hitValue"] = res.hitValue;
-	r1["barycentricCoords"] = Vector3{static_cast<float>(res.t),static_cast<float>(res.u),static_cast<float>(res.v)};
+	if(res.precise)
+	{
+		r1["triIdx"] = res.precise->triIdx;
+		r1["barycentricCoords"] = Vector3{static_cast<float>(res.precise->t),static_cast<float>(res.precise->u),static_cast<float>(res.precise->v)};
+	}
 	return true;
 }
 
@@ -63,7 +66,8 @@ void Lua::intersect::line_mesh(lua_State *l,const Vector3 &rayStart,const Vector
 	Intersection::LineMesh(rayStart,rayDir,mesh,res,precise,&origin,&rot);
 	if(get_line_mesh_result(l,res,precise,r0,r1) == false)
 		return;
-	r1["subMeshIdx"] = res.subMeshIdx;
+	if(res.precise)
+		r1["subMeshIdx"] = res.precise->subMeshIdx;
 }
 
 void Lua::intersect::line_mesh(lua_State *l,const Vector3 &rayStart,const Vector3 &rayDir,Model &mdl,uint32_t lod,luabind::object &r0,luabind::object &r1,bool precise,const umath::Transform &meshPose)
@@ -72,9 +76,12 @@ void Lua::intersect::line_mesh(lua_State *l,const Vector3 &rayStart,const Vector
 	Intersection::LineMesh(rayStart,rayDir,mdl,res,precise,nullptr,lod,meshPose.GetOrigin(),meshPose.GetRotation());
 	if(get_line_mesh_result(l,res,precise,r0,r1) == false)
 		return;
-	r1["subMeshIdx"] = res.subMeshIdx;
-	r1["meshGroupIdx"] = res.meshGroupIndex;
-	r1["meshIdx"] = res.meshIdx;
+	if(res.precise)
+	{
+		r1["subMeshIdx"] = res.precise->subMeshIdx;
+		r1["meshGroupIdx"] = res.precise->meshGroupIndex;
+		r1["meshIdx"] = res.precise->meshIdx;
+	}
 }
 
 void Lua::intersect::line_mesh(lua_State *l,const Vector3 &rayStart,const Vector3 &rayDir,Model &mdl,luabind::table<> tBodyGroups,luabind::object &r0,luabind::object &r1,bool precise,const umath::Transform &meshPose)
@@ -84,9 +91,12 @@ void Lua::intersect::line_mesh(lua_State *l,const Vector3 &rayStart,const Vector
 	Intersection::LineMesh(rayStart,rayDir,mdl,res,precise,&bodyGroups,0,meshPose.GetOrigin(),meshPose.GetRotation());
 	if(get_line_mesh_result(l,res,precise,r0,r1) == false)
 		return;
-	r1["subMeshIdx"] = res.subMeshIdx;
-	r1["meshGroupIdx"] = res.meshGroupIndex;
-	r1["meshIdx"] = res.meshIdx;
+	if(res.precise)
+	{
+		r1["subMeshIdx"] = res.precise->subMeshIdx;
+		r1["meshGroupIdx"] = res.precise->meshGroupIndex;
+		r1["meshIdx"] = res.precise->meshIdx;
+	}
 }
 
 void Lua::intersect::line_aabb(lua_State *l,const Vector3 &start,const Vector3 &dir,const Vector3 &min,const Vector3 &max,luabind::object &outMin,luabind::object &outMax)

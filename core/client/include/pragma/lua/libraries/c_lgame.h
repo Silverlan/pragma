@@ -26,6 +26,7 @@ namespace Lua
 			DLLCLIENT int set_action_input(lua_State *l);
 			DLLCLIENT int queue_scene_for_rendering(lua_State *l);
 			DLLCLIENT int render_scenes(lua_State *l);
+			DLLCLIENT int set_debug_render_filter(lua_State *l);
 			DLLCLIENT int update_render_buffers(lua_State *l);
 			DLLCLIENT int create_scene(lua_State *l);
 			DLLCLIENT int get_render_scene(lua_State *l);

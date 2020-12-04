@@ -9,6 +9,7 @@
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <prosper_command_buffer.hpp>
+#include <buffers/prosper_swap_buffer.hpp>
 #include <pragma/math/intersection.h>
 
 void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
@@ -157,10 +158,10 @@ void Lua::Render::CalcRayIntersection(lua_State *l,CRenderHandle &hComponent,con
 	Lua::PushNumber(l,result->hitValue); /* 2 */
 	Lua::SetTableValue(l,t); /* 0 */
 
-	if(precise)
+	if(precise && result->precise)
 	{
 		Lua::PushString(l,"uv"); /* 1 */
-		Lua::Push<Vector2>(l,Vector2{result->u,result->v}); /* 2 */
+		Lua::Push<Vector2>(l,Vector2{result->precise->u,result->precise->v}); /* 2 */
 		Lua::SetTableValue(l,t); /* 0 */
 		return;
 	}
@@ -238,10 +239,12 @@ void Lua::Render::UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shar
 void Lua::Render::GetRenderBuffer(lua_State *l,CRenderHandle &hEnt)
 {
 	pragma::Lua::check_component(l,hEnt);
-	auto &buf = hEnt->GetRenderBuffer();
-	if(buf == nullptr)
+	if(hEnt->GetSwapRenderBuffer() == nullptr)
 		return;
-	Lua::Push(l,buf);
+	auto &buf = hEnt->GetRenderBuffer();
+	//if(buf == nullptr)
+	//	return;
+	Lua::Push(l,buf.shared_from_this());
 }
 void Lua::Render::GetBoneBuffer(lua_State *l,CRenderHandle &hEnt)
 {
@@ -249,8 +252,8 @@ void Lua::Render::GetBoneBuffer(lua_State *l,CRenderHandle &hEnt)
 	auto *pAnimComponent = static_cast<pragma::CAnimatedComponent*>(hEnt->GetEntity().GetAnimatedComponent().get());
 	if(pAnimComponent == nullptr)
 		return;
-	auto buf = pAnimComponent->GetBoneBuffer();
-	if(buf.expired())
+	auto buf = pAnimComponent->GetSwapBoneBuffer();
+	if(!buf)
 		return;
-	Lua::Push(l,buf.lock());
+	Lua::Push(l,buf->shared_from_this());
 }

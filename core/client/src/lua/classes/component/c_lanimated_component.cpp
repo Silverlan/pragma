@@ -9,6 +9,7 @@
 #include "pragma/model/model.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/model/c_modelmesh.h"
+#include <buffers/prosper_swap_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 
 void Lua::Animated::register_class(lua_State *l,luabind::module_ &entsMod)
@@ -34,10 +35,10 @@ void Lua::Animated::register_class(lua_State *l,luabind::module_ &entsMod)
 		auto *pAnimComponent = hAnim.get();
 		if(pAnimComponent == nullptr)
 			return;
-		auto buf = pAnimComponent->GetBoneBuffer();
-		if(buf.expired())
+		auto buf = pAnimComponent->GetSwapBoneBuffer();
+		if(!buf)
 			return;
-		Lua::Push(l,buf.lock());
+		Lua::Push(l,buf->shared_from_this());
 		}));
 	defCAnimated.def("GetBoneRenderMatrices",static_cast<void(*)(lua_State*,CAnimatedHandle&)>([](lua_State *l,CAnimatedHandle &hAnim) {
 		pragma::Lua::check_component(l,hAnim);

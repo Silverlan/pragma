@@ -70,7 +70,7 @@ void CModelSubMesh::InitializeBuffers()
 #endif
 	s_vertexBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo,createInfo.size *4u,0.05f);
 	s_vertexBuffer->SetDebugName("mesh_vertex_data_buf");
-	s_vertexBuffer->SetPermanentlyMapped(true);
+	s_vertexBuffer->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::WriteBit);
 
 	// Initialize global vertex weight buffer
 	createInfo.size = GLOBAL_MESH_VERTEX_WEIGHT_BUFFER_SIZE;
@@ -80,7 +80,7 @@ void CModelSubMesh::InitializeBuffers()
 #endif
 	s_vertexWeightBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo,createInfo.size *4u,0.025f);
 	s_vertexWeightBuffer->SetDebugName("mesh_vertex_weight_data_buf");
-	s_vertexWeightBuffer->SetPermanentlyMapped(true);
+	s_vertexWeightBuffer->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::WriteBit);
 
 	// Initialize global alpha buffer
 	createInfo.size = GLOBAL_MESH_ALPHA_BUFFER_SIZE;
@@ -90,7 +90,7 @@ void CModelSubMesh::InitializeBuffers()
 #endif
 	s_alphaBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo,createInfo.size *4u,0.025f);
 	s_alphaBuffer->SetDebugName("mesh_alpha_data_buf");
-	s_alphaBuffer->SetPermanentlyMapped(true);
+	s_alphaBuffer->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::WriteBit);
 
 	// Initialize global index buffer
 	createInfo.size = GLOBAL_MESH_INDEX_BUFFER_SIZE;
@@ -100,7 +100,7 @@ void CModelSubMesh::InitializeBuffers()
 #endif
 	s_indexBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo,createInfo.size *4u,0.025f);
 	s_indexBuffer->SetDebugName("mesh_index_data_buf");
-	s_indexBuffer->SetPermanentlyMapped(true);
+	s_indexBuffer->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::WriteBit);
 }
 void CModelSubMesh::ClearBuffers()
 {

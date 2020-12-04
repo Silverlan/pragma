@@ -21,7 +21,7 @@ rendering::EntityInstanceIndexBuffer::EntityInstanceIndexBuffer()
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
 
 	m_buffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(bufCreateInfo,bufCreateInfo.size);
-	m_buffer->SetPermanentlyMapped(true);
+	m_buffer->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::WriteBit);
 
 	auto id = SINGLE_INSTANCE_RENDER_BUFFER_INDEX;
 	m_zeroIndexBuffer = m_buffer->AllocateBuffer(sizeof(RenderBufferIndex),&id);

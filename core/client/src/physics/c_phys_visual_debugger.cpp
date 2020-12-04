@@ -72,7 +72,7 @@ void CPhysVisualDebugger::InitializeBuffers()
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
 	createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
 	m_debugBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo);
-	m_debugBuffer->SetPermanentlyMapped(true);
+	m_debugBuffer->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::WriteBit);
 
 	constexpr auto colorBufferSize = (decltype(m_lineBuffer)::VERTS_PER_INSTANCE *decltype(m_lineBuffer)::MAX_INSTANCES +
 		decltype(m_pointBuffer)::VERTS_PER_INSTANCE *decltype(m_pointBuffer)::MAX_INSTANCES +
@@ -81,7 +81,7 @@ void CPhysVisualDebugger::InitializeBuffers()
 	createInfo.size = colorBufferSize;
 
 	m_colorBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo);
-	m_colorBuffer->SetPermanentlyMapped(true);
+	m_colorBuffer->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::WriteBit);
 
 	prosper::DeviceSize offset = 0;
 	prosper::DeviceSize colorOffset = 0;

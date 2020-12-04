@@ -15,6 +15,7 @@
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/render_stats.hpp"
+#include "pragma/debug/debug_render_filter.hpp"
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -23,6 +24,11 @@ extern DLLCLIENT CGame *c_game;
 static bool g_collectRenderStats = false;
 static CallbackHandle g_cbPreRenderScene = {};
 static CallbackHandle g_cbPostRenderScene = {};
+static std::unique_ptr<DebugRenderFilter> g_debugRenderFilter = nullptr;
+void set_debug_render_filter(std::unique_ptr<DebugRenderFilter> filter)
+{
+	g_debugRenderFilter = std::move(filter);
+}
 static std::string nanoseconds_to_ms(std::chrono::nanoseconds t)
 {
 	return std::to_string(static_cast<long double>(t.count()) /static_cast<long double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds{1}).count())) +"ms";
@@ -252,7 +258,7 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::Shader &shader)
 	UnbindEntity();
 	m_curShader = &shader;
 	auto *shaderScene = dynamic_cast<pragma::ShaderGameWorld*>(&shader);
-	if(shaderScene == nullptr)
+	if(shaderScene == nullptr || (g_debugRenderFilter && g_debugRenderFilter->shaderFilter && g_debugRenderFilter->shaderFilter(*shaderScene) == false))
 		return false;
 	if(shaderScene->BeginDraw(
 		m_drawSceneInfo.commandBuffer,c_game->GetRenderClipPlane(),m_drawOrigin,
@@ -319,7 +325,7 @@ bool pragma::rendering::BaseRenderProcessor::BindMaterial(CMaterial &mat)
 		return umath::is_flag_set(m_stateFlags,StateFlags::MaterialBound);
 	UnbindMaterial();
 	m_curMaterial = &mat;
-	if(umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false || mat.IsInitialized() == false || m_shaderScene->BindMaterial(mat) == false)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false || mat.IsInitialized() == false || (g_debugRenderFilter && g_debugRenderFilter->materialFilter && g_debugRenderFilter->materialFilter(mat) == false) || m_shaderScene->BindMaterial(mat) == false)
 		return false;
 
 	if(m_stats)
@@ -342,7 +348,7 @@ bool pragma::rendering::BaseRenderProcessor::BindEntity(CBaseEntity &ent)
 	UnbindEntity();
 	m_curEntity = &ent;
 	auto *renderC = ent.GetRenderComponent();
-	if(umath::is_flag_set(m_stateFlags,StateFlags::MaterialBound) == false || renderC == nullptr)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::MaterialBound) == false || renderC == nullptr || (g_debugRenderFilter && g_debugRenderFilter->entityFilter && g_debugRenderFilter->entityFilter(ent,*m_curMaterial) == false))
 		return false;
 	// if(m_stats && umath::is_flag_set(renderC->GetStateFlags(),CRenderComponent::StateFlags::RenderBufferDirty))
 	// 	++m_stats->numEntityBufferUpdates;
@@ -384,7 +390,7 @@ pragma::ShaderGameWorld *pragma::rendering::BaseRenderProcessor::GetCurrentShade
 
 bool pragma::rendering::BaseRenderProcessor::Render(CModelSubMesh &mesh,pragma::RenderMeshIndex meshIdx,const RenderQueue::InstanceSet *instanceSet)
 {
-	if(umath::is_flag_set(m_stateFlags,StateFlags::EntityBound) == false || m_curRenderC == nullptr)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::EntityBound) == false || m_curRenderC == nullptr || (g_debugRenderFilter && g_debugRenderFilter->meshFilter && g_debugRenderFilter->meshFilter(*m_curEntity,m_curMaterial,mesh,meshIdx) == false))
 		return false;
 	++m_numShaderInvocations;
 	

@@ -112,7 +112,7 @@ static void initialize_material_settings_buffer()
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit | prosper::BufferUsageFlags::UniformBufferBit;
 	bufCreateInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
 	g_materialSettingsBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(bufCreateInfo,sizeof(ShaderTextured3DBase::MaterialData),sizeof(ShaderTextured3DBase::MaterialData) *524'288,0.05f);
-	g_materialSettingsBuffer->SetPermanentlyMapped(true);
+	g_materialSettingsBuffer->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::WriteBit);
 }
 ShaderTextured3DBase::ShaderTextured3DBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
 	: ShaderGameWorld(context,identifier,vsShader,fsShader,gsShader)
@@ -177,7 +177,7 @@ void ShaderTextured3DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreate
 	pipelineInfo.ToggleDepthWrites(false);
 	pipelineInfo.ToggleDepthTest(true,prosper::CompareOp::LessOrEqual);
 
-	pipelineInfo.ToggleDepthBias(true,0.f,0.f,0.f);
+	//pipelineInfo.ToggleDepthBias(true,0.f,0.f,0.f);
 	pipelineInfo.ToggleDynamicState(true,prosper::DynamicState::DepthBias); // Required for decals
 
 	SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
@@ -513,11 +513,12 @@ static void set_debug_flag(pragma::ShaderScene::DebugFlags setFlags,pragma::Shad
 
 	auto debugFlags = decltype(pragma::ShaderTextured3DBase::DebugData::flags){};
 	auto offset = offsetof(pragma::ShaderTextured3DBase::DebugData,flags);
-	debugBuffer->Map(offset,sizeof(debugFlags));
+	debugBuffer->Map(offset,sizeof(debugFlags),prosper::IBuffer::MapFlags::ReadBit | prosper::IBuffer::MapFlags::WriteBit);
 	debugBuffer->Read(offset,debugFlags);
 	debugFlags |= umath::to_integral(setFlags);
 	debugFlags &= ~umath::to_integral(unsetFlags);
 	debugBuffer->Write(offset,debugFlags);
+	debugBuffer->Unmap();
 }
 static void set_debug_flag(pragma::ShaderScene::DebugFlags flag,bool set)
 {

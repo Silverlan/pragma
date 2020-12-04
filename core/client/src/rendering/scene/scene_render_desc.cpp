@@ -531,6 +531,8 @@ void SceneRenderDesc::BuildRenderQueueInstanceLists(pragma::rendering::RenderQue
 }
 
 static auto cvDrawWorld = GetClientConVar("render_draw_world");
+static std::atomic<uint32_t> g_activeRenderQueueThreads = 0;
+uint32_t SceneRenderDesc::GetActiveRenderQueueThreadCount() {return g_activeRenderQueueThreads;}
 void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &hCam = m_scene.GetActiveCamera();
@@ -550,6 +552,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 
 	m_worldRenderQueuesReady = false;
 	c_game->GetRenderQueueBuilder().Append([this,&cam,posCam,&drawSceneInfo]() {
+		++g_activeRenderQueueThreads;
 		auto *stats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->renderQueueBuilderStats : nullptr;
 		std::chrono::steady_clock::time_point tStart;
 		if(stats)
@@ -711,6 +714,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 			for(auto i=decltype(numWorkers){0u};i<numWorkers;++i)
 				queueWorkerManager.GetWorker(i).SetStats(nullptr);
 		}
+		--g_activeRenderQueueThreads;
 	});
 }
 #pragma optimize("",on)

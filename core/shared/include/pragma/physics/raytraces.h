@@ -101,6 +101,12 @@ class Material;
 class PhysObj;
 struct DLLNETWORK TraceResult
 {
+	struct DLLNETWORK MeshInfo
+	{
+		std::vector<std::shared_ptr<ModelMesh>> meshes;
+		ModelMesh *mesh = nullptr;
+		ModelSubMesh *subMesh = nullptr;
+	};
 	TraceResult()
 	{}
 	TraceResult(const TraceData &data);
@@ -116,17 +122,12 @@ struct DLLNETWORK TraceResult
 	Vector3 position = {};
 	Vector3 startPosition = Vector3{};
 
+	std::shared_ptr<MeshInfo> meshInfo = nullptr;
+
 	void GetMeshes(ModelMesh **mesh,ModelSubMesh **subMesh);
 	Material *GetMaterial();
 	bool GetMaterial(std::string &mat);
 private:
-	struct MeshInfo
-	{
-		std::vector<std::shared_ptr<ModelMesh>> meshes;
-		ModelMesh *mesh = nullptr;
-		ModelSubMesh *subMesh = nullptr;
-	};
-	std::shared_ptr<MeshInfo> m_meshInfo = nullptr;
 	void InitializeMeshes();
 };
 

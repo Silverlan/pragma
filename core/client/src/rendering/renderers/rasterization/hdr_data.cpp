@@ -78,7 +78,7 @@ bool HDRData::Exposure::Initialize(prosper::Texture &texture)
 	avgColorBuffer->SetDebugName("avg_color_buf");
 	descSetGroupAverageColorBuffer = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderCalcImageColor::DESCRIPTOR_SET_COLOR);
 	descSetGroupAverageColorBuffer->GetDescriptorSet()->SetBindingStorageBuffer(*avgColorBuffer,0u);
-	avgColorBuffer->SetPermanentlyMapped(true);
+	avgColorBuffer->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::ReadBit);
 
 	descSetGroupAverageColorTexture = nullptr; // Has to be cleared first! (To release any previous descriptor sets)
 	descSetGroupAverageColorTexture = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderCalcImageColor::DESCRIPTOR_SET_TEXTURE);

@@ -22,7 +22,7 @@ LINK_ENTITY_TO_CLASS(env_light_spot,CEnvLightSpot);
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 CLightSpotComponent::CLightSpotComponent(BaseEntity &ent)
 	: BaseEnvLightSpotComponent(ent)
 {}
@@ -96,7 +96,7 @@ void CLightSpotComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	{
 		auto &trC = static_cast<CTransformComponent&>(component);
 		FlagCallbackForRemoval(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,&trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-			if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags,pragma::TransformChangeFlags::PositionChanged) == false)
+			if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags,pragma::TransformChangeFlags::PositionChanged | pragma::TransformChangeFlags::RotationChanged) == false)
 				return util::EventReply::Unhandled;
 			SetShadowDirty();
 			UpdateViewMatrices();
@@ -180,3 +180,4 @@ void CEnvLightSpot::Initialize()
 	AddComponent<CLightComponent>();
 	AddComponent<CLightSpotComponent>();
 }
+#pragma optimize("",on)

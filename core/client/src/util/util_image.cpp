@@ -138,7 +138,7 @@ bool util::to_image_buffer(
 			auto &mipmapData = layerData.mipmaps.at(iMipmap);
 			auto &mipmapImg = layerImages.at(iMipmap);
 			mipmapImg = uimg::ImageBuffer::Create(mipmapData.extents.width,mipmapData.extents.height,targetFormat);
-			if(buf->Map(mipmapData.bufferOffset,mipmapData.bufferSize))
+			if(buf->Map(mipmapData.bufferOffset,mipmapData.bufferSize,prosper::IBuffer::MapFlags::ReadBit))
 			{
 				buf->Read(0,mipmapData.bufferSize,mipmapImg->GetData());
 				buf->Unmap();

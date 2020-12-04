@@ -108,7 +108,7 @@ bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::IPrContext &con
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUToCPU;
 	createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
 	m_bufVisLightIndex = context.CreateBuffer(createInfo,m_shadowLightBits.data());
-	m_bufVisLightIndex->SetPermanentlyMapped(true);
+	m_bufVisLightIndex->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::ReadBit);
 	m_bufVisLightIndex->SetDebugName("vis_light_index_buf");
 	
 	m_rasterizer.GetLightSourceDescriptorSet()->SetBindingStorageBuffer(

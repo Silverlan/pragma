@@ -101,7 +101,7 @@ void CParticleRendererModel::Initialize(pragma::CParticleSystemComponent &pSyste
 		for(auto &ptComponent : m_particleComponents)
 		{
 			auto wpBoneBuffer = ptComponent.animatedComponent->GetBoneBuffer();
-			if(wpBoneBuffer.expired() == false)
+			if(wpBoneBuffer)
 			{
 				// If we are animated, we have to create a unique descriptor set
 				ptComponent.instanceDescSetGroupAnimated = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
@@ -109,7 +109,7 @@ void CParticleRendererModel::Initialize(pragma::CParticleSystemComponent &pSyste
 					*s_instanceBufferAnimated,0u
 				);
 				ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet()->SetBindingUniformBuffer(
-					*wpBoneBuffer.lock(),umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::BoneMatrices)
+					const_cast<prosper::IBuffer&>(*wpBoneBuffer),umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::BoneMatrices)
 				);
 			}
 		}

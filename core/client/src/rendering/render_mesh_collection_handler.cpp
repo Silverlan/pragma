@@ -99,7 +99,7 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 				auto drawCmd = c_game->GetCurrentDrawCommandBuffer();
 				//pRenderComponent->UpdateRenderData(drawCmd);//,true); // TODO
 
-				auto &wpRenderBuffer = pRenderComponent->GetRenderBuffer();
+				/*auto &wpRenderBuffer = pRenderComponent->GetRenderBuffer();
 				if(wpRenderBuffer)
 				{
 					drawCmd->RecordBufferBarrier(
@@ -120,7 +120,7 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 							);
 						}
 					}
-				}
+				}*/
 				processed.insert(std::remove_reference_t<decltype(processed)>::value_type(ent,true));
 			}
 

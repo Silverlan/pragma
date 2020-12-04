@@ -17,6 +17,8 @@
 #include <alsound_buffer.hpp>
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
+#include <buffers/prosper_swap_buffer.hpp>
+#include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -24,7 +26,28 @@
 extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
-
+#pragma optimize("",off)
+static std::shared_ptr<prosper::IDynamicResizableBuffer> g_vertexAnimationBuffer = nullptr;
+const std::shared_ptr<prosper::IDynamicResizableBuffer> &pragma::get_vertex_animation_buffer() {return g_vertexAnimationBuffer;}
+void pragma::initialize_vertex_animation_buffer()
+{
+	auto instanceSize = sizeof(CVertexAnimatedComponent::VertexAnimationData);
+	prosper::util::BufferCreateInfo createInfo {};
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent;
+	createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
+	createInfo.size = 1 *1'024 *1'024; // 1 MiB
+	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit | prosper::BufferUsageFlags::TransferDstBit;
+#ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
+	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
+#endif
+	g_vertexAnimationBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo,createInfo.size *5 /* 5 MiB */,0.05f);
+	g_vertexAnimationBuffer->SetDebugName("entity_vertex_anim_bone_buf");
+	g_vertexAnimationBuffer->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::WriteBit | prosper::IBuffer::MapFlags::Unsynchronized);
+	assert(g_vertexAnimationBuffer->GetAlignment() == 0 || (sizeof(CVertexAnimatedComponent::VertexAnimationData) %g_vertexAnimationBuffer->GetAlignment()) == 0);
+	if(g_vertexAnimationBuffer->GetAlignment() > 0 && (sizeof(CVertexAnimatedComponent::VertexAnimationData) %g_vertexAnimationBuffer->GetAlignment()) != 0)
+		throw std::logic_error{"Invalid morph target animation buffer alignment!"};
+}
+void pragma::clear_vertex_animation_buffer() {g_vertexAnimationBuffer = nullptr;}
 luabind::object CVertexAnimatedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CVertexAnimatedComponentHandleWrapper>(l);}
 void CVertexAnimatedComponent::Initialize()
 {
@@ -48,7 +71,7 @@ void CVertexAnimatedComponent::Initialize()
 		return util::EventReply::Handled;
 	});
 	auto whRenderComponent = GetEntity().GetComponent<CRenderComponent>();
-	if(whRenderComponent.valid() && whRenderComponent->GetRenderBuffer())
+	if(whRenderComponent.valid() && whRenderComponent->GetSwapRenderBuffer())
 	{
 		InitializeVertexAnimationBuffer();
 		whRenderComponent->UpdateInstantiability();
@@ -59,8 +82,8 @@ void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 	auto &ent = GetEntity();
 	auto whRenderComponent = ent.GetComponent<CRenderComponent>();
 	auto &mdl = GetEntity().GetModel();
-	auto wpRenderBuffer = whRenderComponent.valid() ? whRenderComponent->GetRenderBuffer() : std::weak_ptr<prosper::IBuffer>{};
-	auto *pRenderDescSet = whRenderComponent.valid() ? whRenderComponent->GetRenderDescriptorSet() : nullptr;
+	auto wpRenderBuffer = whRenderComponent.valid() ? whRenderComponent->GetSwapRenderBuffer() : std::weak_ptr<prosper::SwapBuffer>{};
+	auto *pRenderDescSet = whRenderComponent.valid() ? whRenderComponent->GetSwapRenderDescriptorSet() : nullptr;
 	if(wpRenderBuffer.expired() == true || mdl == nullptr || pRenderDescSet == nullptr)
 		return;
 	if(m_vertexAnimationBuffer == nullptr)
@@ -71,21 +94,8 @@ void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 			m_maxVertexAnimations += va->GetMeshAnimations().size();
 		if(m_maxVertexAnimations == 0u)
 			return;
-		// m_maxVertexAnimations = 500u;
-		prosper::util::BufferCreateInfo createInfo {};
-		createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit | prosper::BufferUsageFlags::TransferDstBit;
-		createInfo.size = m_maxVertexAnimations *sizeof(VertexAnimationData);
-		if constexpr(CRenderComponent::USE_HOST_MEMORY_FOR_RENDER_DATA)
-		{
-			createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent;
-			createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
-		}
-		else
-			createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
-
-		m_vertexAnimationBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo);
-		if constexpr(CRenderComponent::USE_HOST_MEMORY_FOR_RENDER_DATA)
-			m_vertexAnimationBuffer->SetPermanentlyMapped(true);
+		m_vertexAnimationBuffer = prosper::SwapBuffer::Create(*pragma::get_vertex_animation_buffer(),sizeof(VertexAnimationData),m_maxVertexAnimations);
+		m_vertexAnimationBufferData.resize(m_maxVertexAnimations);
 	}
 
 	auto &vertAnimBuffer = static_cast<CModel&>(*mdl).GetVertexAnimationBuffer();
@@ -101,7 +111,7 @@ void CVertexAnimatedComponent::DestroyVertexAnimationBuffer()
 	m_vertexAnimationMeshBufferOffsets.clear();
 }
 
-const std::shared_ptr<prosper::IBuffer> &CVertexAnimatedComponent::GetVertexAnimationBuffer() const {return m_vertexAnimationBuffer;}
+const std::shared_ptr<prosper::SwapBuffer> &CVertexAnimatedComponent::GetVertexAnimationBuffer() const {return m_vertexAnimationBuffer;}
 
 void CVertexAnimatedComponent::UpdateVertexAnimationDataMT()
 {
@@ -126,6 +136,7 @@ void CVertexAnimatedComponent::UpdateVertexAnimationDataMT()
 	if(whFlexComponent.expired())
 		return;
 	// TODO: This should be in the CFlexComponent component code, not here!
+	whFlexComponent->UpdateFlexWeightsMT();
 	auto &flexWeights = whFlexComponent->GetFlexWeights();
 	auto &flexes = mdl->GetFlexes();
 	assert(flexes.size() == flexWeights.size());
@@ -208,34 +219,25 @@ endLoop:
 
 void CVertexAnimatedComponent::UpdateVertexAnimationBuffer(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
-	if(m_bufferUpdateRequired == false)
+	if(!m_vertexAnimationBuffer)
 		return;
 	auto &buf = *m_vertexAnimationBuffer;
-	m_bufferUpdateRequired = false;
-	auto bufferOffset = 0ull;
-	auto &data = m_vertexAnimationData;
-	for(auto &pair : data)
+	auto flagAsDirty = m_bufferUpdateRequired;
+	if(m_bufferUpdateRequired)
 	{
-		m_vertexAnimationMeshBufferOffsets.insert(std::make_pair(pair.first,std::make_pair(bufferOffset,pair.second.size())));
-		if constexpr(CRenderComponent::USE_HOST_MEMORY_FOR_RENDER_DATA)
-			buf.Write(bufferOffset *sizeof(pair.second.front()),pair.second.size() *sizeof(pair.second.front()),pair.second.data());
-		else
-			drawCmd->RecordUpdateGenericShaderReadBuffer(buf,bufferOffset *sizeof(pair.second.front()),pair.second.size() *sizeof(pair.second.front()),pair.second.data());
-		bufferOffset += pair.second.size();
-
-		//for(auto &vaData : pair.second)
-		//	bufferData.push_back(vaData);
+		m_bufferUpdateRequired = false;
+		auto bufferOffset = 0ull;
+		auto &data = m_vertexAnimationData;
+		for(auto &pair : data)
+		{
+			m_vertexAnimationMeshBufferOffsets.insert(std::make_pair(pair.first,std::make_pair(bufferOffset,pair.second.size())));
+			memcpy(reinterpret_cast<uint8_t*>(m_vertexAnimationBufferData.data()) +bufferOffset *sizeof(pair.second.front()),pair.second.data(),pair.second.size() *sizeof(pair.second.front()));
+			bufferOffset += pair.second.size();
+		}
+		m_vertexAnimationBufferDataCount = bufferOffset;
 	}
-
-	// Vertex animation buffer barrier
-	if constexpr(CRenderComponent::USE_HOST_MEMORY_FOR_RENDER_DATA)
-	{
-		drawCmd->RecordBufferBarrier(
-			*m_vertexAnimationBuffer,
-			prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::VertexShaderBit,
-			prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
-		);
-	}
+	if(m_vertexAnimationBufferDataCount > 0)
+		buf.Update(0ull,m_vertexAnimationBufferDataCount *sizeof(m_vertexAnimationBufferData.front()),m_vertexAnimationBufferData.data(),flagAsDirty);
 }
 
 bool CVertexAnimatedComponent::GetVertexAnimationBufferMeshOffset(CModelSubMesh &mesh,uint32_t &offset,uint32_t &animCount) const
@@ -292,3 +294,4 @@ bool CVertexAnimatedComponent::GetLocalVertexPosition(const ModelSubMesh &subMes
 	}
 	return true;
 }
+#pragma optimize("",on)

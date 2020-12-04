@@ -10,6 +10,7 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
+#include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/util/orientedpoint.h>
 #include <pragma/math/sphere.h>
@@ -19,7 +20,7 @@
 
 #define ENTITY_RENDER_BUFFER_USE_STORAGE_BUFFER 1
 
-namespace prosper {class IUniformResizableBuffer; class IDescriptorSet;};
+namespace prosper {class IUniformResizableBuffer; class IDescriptorSet; class SwapDescriptorSet; class SwapBuffer;};
 namespace Intersection {struct LineMeshResult;};
 namespace pragma
 {
@@ -61,9 +62,11 @@ namespace pragma
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
 		CRenderComponent(BaseEntity &ent);
-		const std::shared_ptr<prosper::IBuffer> &GetRenderBuffer() const;
+		const std::shared_ptr<prosper::SwapBuffer> &GetSwapRenderBuffer() const;
+		const prosper::IBuffer &GetRenderBuffer() const;
 		std::optional<RenderBufferIndex> GetRenderBufferIndex() const;
 		prosper::IDescriptorSet *GetRenderDescriptorSet() const;
+		prosper::SwapDescriptorSet *GetSwapRenderDescriptorSet() const;
 
 		static const std::vector<CRenderComponent*> &GetEntitiesExemptFromOcclusionCulling();
 		static const std::shared_ptr<prosper::IUniformResizableBuffer> &GetInstanceBuffer();
@@ -197,8 +200,9 @@ namespace pragma
 		void UpdateAbsoluteRenderBounds();
 		void UpdateAbsoluteSphereRenderBounds();
 		void UpdateAbsoluteAABBRenderBounds();
-		std::shared_ptr<prosper::IBuffer> m_renderBuffer = nullptr;
-		std::shared_ptr<prosper::IDescriptorSetGroup> m_renderDescSetGroup = nullptr;
+		pragma::ShaderEntity::InstanceData m_instanceData {};
+		std::shared_ptr<prosper::SwapBuffer> m_renderBuffer = nullptr;
+		std::shared_ptr<prosper::SwapDescriptorSet> m_renderDescSetGroup = nullptr;
 	};
 
 	// Events

@@ -68,6 +68,7 @@ namespace Lua
 		//using Memory = prosper::MemoryBlock;
 		using CommandBuffer = prosper::ICommandBuffer;
 		using Buffer = prosper::IBuffer;
+		using SwapBuffer = prosper::SwapBuffer;
 		using DescriptorSet = prosper::IDescriptorSetGroup;
 		using RenderTarget = prosper::RenderTarget;
 		using TimestampQuery = prosper::TimestampQuery;

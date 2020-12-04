@@ -100,7 +100,7 @@ void CLightMapComponent::UpdateLightmapUvBuffers()
 	auto uvBuffer = GetGlobalLightMapUvBuffer();
 	auto mdl = GetEntity().GetModel();
 	auto meshGroup = mdl ? mdl->GetMeshGroup(0) : nullptr;
-	if(uvBuffer == nullptr || meshGroup == nullptr || uvBuffer->Map(0ull,uvBuffer->GetSize()) == false)
+	if(uvBuffer == nullptr || meshGroup == nullptr || uvBuffer->Map(0ull,uvBuffer->GetSize(),prosper::IBuffer::MapFlags::WriteBit) == false)
 		return;
 	auto &uvBuffers = GetMeshLightMapUvBuffers();
 	EntityIterator entIt {*c_game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
@@ -152,7 +152,7 @@ std::shared_ptr<prosper::IDynamicResizableBuffer> CLightMapComponent::GenerateLi
 	// Generate the lightmap uv buffer
 	bufCreateInfo.size = requiredBufferSize;
 	auto lightMapUvBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(bufCreateInfo,bufCreateInfo.size,0.2f);
-	if(lightMapUvBuffer == nullptr || lightMapUvBuffer->Map(0ull,lightMapUvBuffer->GetSize()) == false)
+	if(lightMapUvBuffer == nullptr || lightMapUvBuffer->Map(0ull,lightMapUvBuffer->GetSize(),prosper::IBuffer::MapFlags::WriteBit) == false)
 		return nullptr;
 
 	outMeshLightMapUvBuffers.reserve(numMeshes);
@@ -183,7 +183,7 @@ std::shared_ptr<prosper::Texture> CLightMapComponent::CreateLightmapTexture(uint
 	lightMapCreateInfo.format = prosper::Format::R16G16B16A16_SFloat;
 	lightMapCreateInfo.postCreateLayout = prosper::ImageLayout::TransferSrcOptimal;
 	lightMapCreateInfo.usage = prosper::ImageUsageFlags::TransferSrcBit;
-	lightMapCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
+	lightMapCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostCoherent | prosper::MemoryFeatureFlags::HostAccessable;
 	lightMapCreateInfo.tiling = prosper::ImageTiling::Linear;
 	auto imgStaging = c_engine->GetRenderContext().CreateImage(lightMapCreateInfo,reinterpret_cast<const uint8_t*>(hdrPixelData));
 

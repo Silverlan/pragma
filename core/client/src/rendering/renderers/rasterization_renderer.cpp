@@ -234,11 +234,16 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 		// Otherwise we have to split the pass into two and update the remaining render buffers
 		// inbetween both passes.
 		auto &worldObjectsRenderQueue = *sceneRenderDesc.GetRenderQueue(RenderMode::World,false /* translucent */);
+		// worldObjectsRenderQueue.WaitForCompletion();
 		auto worldObjectRenderQueueReady = worldObjectsRenderQueue.IsComplete();
 		if(worldObjectRenderQueueReady)
 		{
 			if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
+			{
 				CSceneComponent::UpdateRenderBuffers(drawCmd,worldObjectsRenderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
+				// CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
+
+			}
 
 			if((drawSceneInfo.renderFlags &FRender::View) != FRender::None)
 				CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
@@ -280,7 +285,11 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 			// Note: The non-translucent render queues also include transparent (alpha masked) objects.
 			// We don't care about translucent objects here.
 			if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
+			{
 				rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::World,false /* translucent */),prepassStats);
+				rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),prepassStats);
+
+			}
 
 			if((drawSceneInfo.renderFlags &FRender::View) != FRender::None)
 			{
@@ -322,7 +331,7 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	// (All others have already been updated in the prepass)
 	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
 	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
-	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
+	//CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
 	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
 
 	// Lighting pass

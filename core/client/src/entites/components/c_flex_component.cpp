@@ -152,9 +152,10 @@ void CFlexComponent::Initialize()
 	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		OnModelChanged(static_cast<pragma::CEOnModelChanged&>(evData.get()).model);
 	});
-	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		UpdateFlexWeightsMT();
-	});
+	// This has been moved to vertex animated component
+	//BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	//	UpdateFlexWeightsMT();
+	//});
 	GetEntity().AddComponent<LogicComponent>();
 	OnModelChanged(GetEntity().GetModel());
 }

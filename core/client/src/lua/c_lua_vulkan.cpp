@@ -20,6 +20,7 @@
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_image_view.hpp>
 #include <buffers/prosper_buffer.hpp>
+#include <buffers/prosper_swap_buffer.hpp>
 #include <queries/prosper_timer_query.hpp>
 #include <queries/prosper_timestamp_query.hpp>
 #include <image/prosper_render_target.hpp>
@@ -304,12 +305,12 @@ namespace Lua
 			DLLCLIENT void GetBaseIndex(lua_State *l,Buffer &hBuffer);
 			DLLCLIENT void GetSize(lua_State *l,Buffer &hBuffer);
 			DLLCLIENT void GetUsageFlags(lua_State *l,Buffer &hBuffer);
-			DLLCLIENT void SetPermanentlyMapped(lua_State *l,Buffer &hBuffer,bool b);
+			DLLCLIENT void SetPermanentlyMapped(lua_State *l,Buffer &hBuffer,bool b,Buffer::MapFlags mapFlags);
 			DLLCLIENT void GetParent(lua_State *l,Buffer &hBuffer);
 			DLLCLIENT void Write(lua_State *l,Buffer &hBuffer,uint32_t offset,::DataStream &ds,uint32_t dsOffset,uint32_t dsSize);
 			DLLCLIENT void Read(lua_State *l,Buffer &hBuffer,uint32_t offset,uint32_t size);
 			DLLCLIENT void Read(lua_State *l,Buffer &hBuffer,uint32_t offset,uint32_t size,::DataStream &ds,uint32_t dsOffset);
-			DLLCLIENT void Map(lua_State *l,Buffer &hBuffer,uint32_t offset,uint32_t size);
+			DLLCLIENT void Map(lua_State *l,Buffer &hBuffer,uint32_t offset,uint32_t size,Buffer::MapFlags mapFlags);
 			DLLCLIENT void Unmap(lua_State *l,Buffer &hBuffer);
 		};
 		namespace VKDescriptorSet
@@ -2467,6 +2468,9 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkCommandBuffer.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &cb) {
 		Lua::Vulkan::VKContextObject::GetDebugName<Lua::Vulkan::CommandBuffer>(l,cb,&Lua::Check<Lua::Vulkan::CommandBuffer>);
 	}));
+	defVkCommandBuffer.def("Flush",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &cb) {
+		c_engine->GetRenderContext().FlushCommandBuffer(cb);
+	}));
 	prosperMod[defVkCommandBuffer];
 
 	auto devVkBuffer = luabind::class_<Lua::Vulkan::Buffer>("Buffer");
@@ -2501,11 +2505,14 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		Lua::Vulkan::VKBuffer::Read(l,hBuffer,0u,hBuffer.GetSize());
 	}));
 	devVkBuffer.def("MapMemory",&Lua::Vulkan::VKBuffer::Map);
-	devVkBuffer.def("MapMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Buffer&)>([](lua_State *l,Lua::Vulkan::Buffer &hBuffer) {
-		Lua::Vulkan::VKBuffer::Map(l,hBuffer,0u,hBuffer.GetSize());
+	devVkBuffer.def("MapMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Buffer&,Lua::Vulkan::Buffer::MapFlags)>([](lua_State *l,Lua::Vulkan::Buffer &hBuffer,Lua::Vulkan::Buffer::MapFlags mapFlags) {
+		Lua::Vulkan::VKBuffer::Map(l,hBuffer,0u,hBuffer.GetSize(),mapFlags);
 	}));
 	devVkBuffer.def("UnmapMemory",&Lua::Vulkan::VKBuffer::Unmap);
 	prosperMod[devVkBuffer];
+	
+	auto devVkSwapBuffer = luabind::class_<Lua::Vulkan::SwapBuffer>("SwapBuffer");
+	prosperMod[devVkSwapBuffer];
 
 	auto defVkDescriptorSet = luabind::class_<Lua::Vulkan::DescriptorSet>("DescriptorSet");
 	defVkDescriptorSet.def(luabind::tostring(luabind::self));
@@ -3444,9 +3451,9 @@ void Lua::Vulkan::VKBuffer::GetStartOffset(lua_State *l,Buffer &hBuffer)
 {
 	Lua::PushInt(l,hBuffer.GetStartOffset());
 }
-void Lua::Vulkan::VKBuffer::SetPermanentlyMapped(lua_State *l,Buffer &hBuffer,bool b)
+void Lua::Vulkan::VKBuffer::SetPermanentlyMapped(lua_State *l,Buffer &hBuffer,bool b,Buffer::MapFlags mapFlags)
 {
-	hBuffer.SetPermanentlyMapped(b);
+	hBuffer.SetPermanentlyMapped(b,mapFlags);
 }
 void Lua::Vulkan::VKBuffer::GetBaseIndex(lua_State *l,Buffer &hBuffer)
 {
@@ -3486,9 +3493,9 @@ void Lua::Vulkan::VKBuffer::Read(lua_State *l,Buffer &hBuffer,uint32_t offset,ui
 		ds->Resize(reqSize);
 	Lua::PushBool(l,hBuffer.Read(offset,size,ds->GetData() +dsOffset));
 }
-void Lua::Vulkan::VKBuffer::Map(lua_State *l,Buffer &hBuffer,uint32_t offset,uint32_t size)
+void Lua::Vulkan::VKBuffer::Map(lua_State *l,Buffer &hBuffer,uint32_t offset,uint32_t size,Buffer::MapFlags mapFlags)
 {
-	Lua::PushBool(l,hBuffer.Map(offset,size));
+	Lua::PushBool(l,hBuffer.Map(offset,size,mapFlags));
 }
 void Lua::Vulkan::VKBuffer::Unmap(lua_State *l,Buffer &hBuffer)
 {

@@ -325,7 +325,8 @@ bool Intersection::LineMesh(
 	auto dir = _dir;
 	uvec::world_to_local(origin,rot,start);
 	uvec::rotate(&dir,uquat::get_inverse(rot));
-
+	
+	r.precise = r.precise ? r.precise : std::make_shared<LineMeshResult::Precise>();
 	std::vector<std::shared_ptr<ModelMesh>> meshes;
 	auto hasFoundBetterCandidate = false;
 	if(bodyGroups == nullptr)
@@ -338,8 +339,10 @@ bool Intersection::LineMesh(
 			if(LineMesh(start,dir,*mesh,r,precise,nullptr,nullptr) == false)
 				continue;
 			hasFoundBetterCandidate = true;
-			r.meshGroupIndex = 0;
-			r.meshIdx = i;
+			r.precise->meshGroup = mdl.GetMeshGroup(0);
+			r.precise->meshGroupIndex = 0;
+			r.precise->mesh = mesh;
+			r.precise->meshIdx = i;
 			if(precise == false && r.result == Result::Intersect)
 				return true;
 		}
@@ -355,8 +358,10 @@ bool Intersection::LineMesh(
 			if(LineMesh(start,dir,*mesh,r,precise,nullptr,nullptr) == false)
 				continue;
 			hasFoundBetterCandidate = true;
-			r.meshGroupIndex = outMeshGroupIdx;
-			r.meshIdx = i;
+			r.precise->meshGroupIndex = outMeshGroupIdx;
+			r.precise->meshGroup = mdl.GetMeshGroup(outMeshGroupIdx);
+			r.precise->meshIdx = i;
+			r.precise->mesh = mesh;
 			if(precise == false && r.result == Result::Intersect)
 				return true;
 		}
@@ -400,7 +405,8 @@ bool Intersection::LineMesh(const Vector3 &_start,const Vector3 &_dir,ModelMesh 
 		uvec::world_to_local(*origin,*rot,start);
 		uvec::rotate(&dir,uquat::get_inverse(*rot));
 	}
-
+	
+	r.precise = r.precise ? r.precise : std::make_shared<LineMeshResult::Precise>();
 	auto &subMeshes = mesh.GetSubMeshes();
 	auto hasFoundBetterCandidate = false;
 	for(auto i=decltype(subMeshes.size()){0u};i<subMeshes.size();++i)
@@ -409,7 +415,8 @@ bool Intersection::LineMesh(const Vector3 &_start,const Vector3 &_dir,ModelMesh 
 		if(LineMesh(start,dir,*subMesh,r,precise,nullptr,nullptr) == false)
 			continue;
 		hasFoundBetterCandidate = true;
-		r.subMeshIdx = i;
+		r.precise->subMeshIdx = i;
+		r.precise->subMesh = subMesh;
 		if(precise == false && r.result == Result::Intersect)
 			return true;
 	}
@@ -441,7 +448,8 @@ bool Intersection::LineMesh(const Vector3 &_start,const Vector3 &_dir,ModelSubMe
 	auto tBounds = 0.f;
 	if(LineAABB(start,dir,min,max,&tBounds) == Result::NoIntersection)
 		return false;
-
+	
+	r.precise = r.precise ? r.precise : std::make_shared<LineMeshResult::Precise>();
 	auto &triangles = subMesh.GetTriangles();
 	auto &verts = subMesh.GetVertices();
 	auto bHit = false;
@@ -463,7 +471,7 @@ bool Intersection::LineMesh(const Vector3 &_start,const Vector3 &_dir,ModelSubMe
 		hasFoundBetterCandidate = true;
 		r.result = rCur;
 		bHit = true;
-		r.triIdx = i /3;
+		r.precise->triIdx = i /3;
 		r.hitValue = tl;
 		r.hitPos = start +dir *static_cast<float>(r.hitValue);
 
@@ -472,6 +480,8 @@ bool Intersection::LineMesh(const Vector3 &_start,const Vector3 &_dir,ModelSubMe
 	}
 	if(bHit == true)
 	{
+		if(r.precise)
+			r.precise->subMesh = subMesh.shared_from_this();
 		if(r.hitValue >= 0.f && r.hitValue <= 1.f)
 			r.result = Result::Intersect;
 		else

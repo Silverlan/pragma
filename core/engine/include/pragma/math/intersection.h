@@ -14,6 +14,7 @@
 #include <optional>
 
 struct AABB;
+class ModelMeshGroup;
 class ModelMesh;
 class ModelSubMesh;
 class Model;
@@ -48,6 +49,21 @@ namespace Intersection
 	DLLENGINE bool LineOBB(const Vector3 &rayStart,const Vector3 &rayDir,const Vector3 &min,const Vector3 &max,float *dist=nullptr,const Vector3 &origin={},const Quat &rot=uquat::identity());
 	struct DLLENGINE LineMeshResult
 	{
+		struct DLLENGINE Precise
+		{
+			std::shared_ptr<ModelMeshGroup> meshGroup;
+			std::shared_ptr<ModelMesh> mesh;
+			std::shared_ptr<ModelSubMesh> subMesh;
+
+			uint32_t meshGroupIndex = std::numeric_limits<uint32_t>::max();
+			uint32_t meshIdx = std::numeric_limits<uint32_t>::max();
+			uint32_t subMeshIdx = std::numeric_limits<uint32_t>::max();
+
+			uint64_t triIdx = std::numeric_limits<uint64_t>::max();
+			double t = 0.0;
+			double u = 0.0;
+			double v = 0.0;
+		};
 		Result result = Result::NoIntersection;
 		Vector3 hitPos = {};
 		double hitValue = std::numeric_limits<double>::max(); // Range if hit: [0,1]
@@ -57,13 +73,7 @@ namespace Intersection
 		uint32_t boneId;
 
 		// Only for precise results
-		uint32_t meshGroupIndex = std::numeric_limits<uint32_t>::max();
-		uint32_t meshIdx = std::numeric_limits<uint32_t>::max();
-		uint32_t subMeshIdx = std::numeric_limits<uint32_t>::max();
-		uint64_t triIdx = std::numeric_limits<uint64_t>::max();
-		double t = 0.0;
-		double u = 0.0;
-		double v = 0.0;
+		std::shared_ptr<Precise> precise = nullptr;
 	};
 	DLLENGINE bool LineMesh(const Vector3 &start,const Vector3 &dir,ModelMesh &mesh,LineMeshResult &outResult,bool precise=false,const Vector3 *origin=nullptr,const Quat *rot=nullptr);
 	DLLENGINE bool LineMesh(const Vector3 &start,const Vector3 &dir,ModelSubMesh &subMesh,LineMeshResult &outResult,bool precise=false,const Vector3 *origin=nullptr,const Quat *rot=nullptr);

@@ -15,6 +15,8 @@
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/render_queue.hpp"
+#include "pragma/rendering/shaders/world/c_shader_scene.hpp"
+#include "pragma/debug/debug_render_filter.hpp"
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include <pragma/util/transform.h>
 #include <pragma/lua/libraries/lgame.h>
@@ -915,7 +917,55 @@ int Lua::game::Client::render_scenes(lua_State *l)
 		scenes.push_back(*drawSceneInfo);
 	}
 	c_game->RenderScenes(scenes);
-
+	return 0;
+}
+extern void set_debug_render_filter(std::unique_ptr<DebugRenderFilter> filter);
+int Lua::game::Client::set_debug_render_filter(lua_State *l)
+{
+	if(Lua::IsSet(l,1) == false)
+	{
+		::set_debug_render_filter(nullptr);
+		return 0;
+	}
+	Lua::CheckTable(l,1);
+	auto t = luabind::object{luabind::from_stack{l,1}};
+	auto filter = std::make_unique<DebugRenderFilter>();
+	if(t["shaderFilter"])
+	{
+		auto shaderFilter = luabind::object{t["shaderFilter"]};
+		filter->shaderFilter = [shaderFilter](pragma::ShaderGameWorld &shader) mutable -> bool {
+			auto r = shaderFilter(&shader);
+			return luabind::object_cast<bool>(r);
+		};
+	}
+	if(t["materialFilter"])
+	{
+		auto materialFilter = luabind::object{t["materialFilter"]};
+		filter->materialFilter = [materialFilter](CMaterial &mat) mutable -> bool {
+			auto r = materialFilter(static_cast<Material*>(&mat));
+			return luabind::object_cast<bool>(r);
+		};
+	}
+	if(t["entityFilter"])
+	{
+		auto entityFilter = luabind::object{t["entityFilter"]};
+		filter->entityFilter = [entityFilter](CBaseEntity &ent,CMaterial &mat) mutable -> bool {
+			auto &oEnt = *ent.GetLuaObject();
+			auto r = entityFilter(oEnt,static_cast<Material*>(&mat));
+			return luabind::object_cast<bool>(r);
+		};
+	}
+	if(t["meshFilter"])
+	{
+		auto meshFilter = luabind::object{t["meshFilter"]};
+		filter->meshFilter = [meshFilter](CBaseEntity &ent,CMaterial *mat,CModelSubMesh &mesh,pragma::RenderMeshIndex meshIdx) mutable -> bool {
+			auto &oEnt = *ent.GetLuaObject();
+			auto r = meshFilter(oEnt,mat ? static_cast<Material*>(mat) : nullptr,mesh.shared_from_this(),meshIdx);
+			return luabind::object_cast<bool>(r);
+		};
+	}
+	set_debug_render_filter(std::move(filter));
+	return 0;
 }
 int Lua::game::Client::queue_scene_for_rendering(lua_State *l)
 {

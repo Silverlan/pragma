@@ -262,6 +262,13 @@ void CBaseEntity::OnRemove()
 
 void CBaseEntity::Remove()
 {
+	if(SceneRenderDesc::GetActiveRenderQueueThreadCount() > 0)
+	{
+		std::string msg = "ERROR: Entity was removed during rendering, this is not allowed!";
+		Con::crit<<msg<<Con::endl;
+		throw std::logic_error{msg};
+		return;
+	}
 	BaseEntity::Remove();
 	Game *game = client->GetGameState();
 	game->RemoveEntity(this);

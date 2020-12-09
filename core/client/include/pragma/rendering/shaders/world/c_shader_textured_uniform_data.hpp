@@ -25,7 +25,6 @@ namespace pragma
 		float farZ;
 		int32_t shaderQuality;
 
-		float lightmapIntensity;
 		float lightmapExposurePow;
 	};
 	struct CameraData

@@ -20,10 +20,20 @@ namespace pragma
 		: public BaseEntityComponent
 	{
 	public:
+		struct DLLCLIENT LightmapBakeSettings
+		{
+			std::optional<uint32_t> width {};
+			std::optional<uint32_t> height {};
+			uint32_t samples = 1'225;
+			bool denoise = true;
+			bool createAsRenderJob = false;
+			bool rebuildUvAtlas = false;
+		};
 		static std::shared_ptr<prosper::IDynamicResizableBuffer> GenerateLightmapUVBuffers(std::vector<std::shared_ptr<prosper::IBuffer>> &outMeshLightMapUvBuffers);
 		static std::shared_ptr<prosper::Texture> CreateLightmapTexture(uint32_t width,uint32_t height,const uint16_t *hdrPixelData);
+		static bool BakeLightmaps(const LightmapBakeSettings &bakeSettings);
 
-		CLightMapComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+		CLightMapComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		const std::shared_ptr<prosper::Texture> &GetLightMap() const;
@@ -40,10 +50,9 @@ namespace pragma
 		const std::vector<std::shared_ptr<prosper::IBuffer>> &GetMeshLightMapUvBuffers() const;
 		std::vector<std::shared_ptr<prosper::IBuffer>> &GetMeshLightMapUvBuffers();
 
-		void SetLightMapIntensity(float intensity);
 		void SetLightMapExposure(float exp);
-		float GetLightMapIntensity() const;
 		float GetLightMapExposure() const;
+		const util::PFloatProperty &GetLightMapExposureProperty() const {return m_lightMapExposure;}
 
 		void ConvertLightmapToBSPLuxelData() const;
 
@@ -51,8 +60,7 @@ namespace pragma
 		std::shared_ptr<prosper::IDynamicResizableBuffer> GetGlobalLightMapUvBuffer() const;
 	protected:
 		std::shared_ptr<prosper::Texture> m_lightMapAtlas = nullptr;
-		float m_lightMapIntensity = 1.f;
-		float m_lightMapExposure = 0.f;
+		util::PFloatProperty m_lightMapExposure = nullptr;
 
 		// Contains the light map uv-buffer for each mesh of the world in the same order
 		// they are in the model's mesh group

@@ -58,6 +58,7 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 		auto it = m_callbacks.find(ent);
 		if(it == m_callbacks.end())
 			return;
+		SceneRenderDesc::AssertRenderQueueThreadInactive();
 		m_occlusionOctree->InsertObject(ent);
 		auto pTrComponent = ent->GetTransformComponent();
 		if(pTrComponent != nullptr)
@@ -66,6 +67,7 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 			it->second.push_back(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,&ent](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 				if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags,pragma::TransformChangeFlags::PositionChanged) == false)
 					return util::EventReply::Unhandled;
+				SceneRenderDesc::AssertRenderQueueThreadInactive();
 				m_occlusionOctree->UpdateObject(ent);
 				return util::EventReply::Unhandled;
 			}));
@@ -74,10 +76,12 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 		if(pGenericComponent.valid())
 		{
 			it->second.push_back(pGenericComponent->BindEventUnhandled(pragma::CModelComponent::EVENT_ON_MODEL_CHANGED,[this,pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
+				SceneRenderDesc::AssertRenderQueueThreadInactive();
 				auto *ent = static_cast<CBaseEntity*>(&pGenericComponent->GetEntity());
 				m_occlusionOctree->UpdateObject(ent);
 			}));
 			it->second.push_back(pGenericComponent->BindEventUnhandled(pragma::CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED,[this,pGenericComponent](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
+				SceneRenderDesc::AssertRenderQueueThreadInactive();
 				auto *ent = static_cast<CBaseEntity*>(&pGenericComponent->GetEntity());
 				m_occlusionOctree->UpdateObject(ent);
 			}));
@@ -94,6 +98,7 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 					}
 					m_callbacks.erase(it);
 				}
+				SceneRenderDesc::AssertRenderQueueThreadInactive();
 				m_occlusionOctree->RemoveObject(ent);
 			}));
 		}

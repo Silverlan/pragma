@@ -74,6 +74,7 @@ public:
 	static bool ShouldCull(pragma::CRenderComponent &renderC,pragma::RenderMeshIndex meshIdx,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);
 	static bool ShouldCull(const Vector3 &min,const Vector3 &max,const std::vector<Plane> &frustumPlanes);
 	static uint32_t GetActiveRenderQueueThreadCount();
+	static bool AssertRenderQueueThreadInactive();
 
 	SceneRenderDesc(pragma::CSceneComponent &scene);
 	~SceneRenderDesc();
@@ -255,6 +256,7 @@ namespace pragma
 		const std::vector<util::WeakHandle<pragma::CLightComponent>> &GetPreviouslyVisibleShadowedLights() const {return m_previouslyVisibleShadowedLights;}
 		void SwapPreviouslyVisibleLights(std::vector<util::WeakHandle<pragma::CLightComponent>> &&components) {std::swap(m_previouslyVisibleShadowedLights,components);}
 	private:
+		static float CalcLightMapPowExposure(pragma::CLightMapComponent &lightMapC);
 		void InitializeShadowDescriptorSet();
 		void UpdateRendererLightMap();
 		// CSM Data
@@ -273,6 +275,7 @@ namespace pragma
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_shadowDsg = nullptr;
 
 		std::vector<util::WeakHandle<pragma::CLightComponent>> m_previouslyVisibleShadowedLights;
+		CallbackHandle m_lightMapExposureCb {};
 		util::WeakHandle<pragma::CLightMapComponent> m_lightMap = {};
 		util::WeakHandle<pragma::CCameraComponent> m_camera = {};
 		std::shared_ptr<prosper::IBuffer> m_cameraBuffer = nullptr;

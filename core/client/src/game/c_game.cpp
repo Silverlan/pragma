@@ -1166,7 +1166,7 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 			auto lightMapC = world->GetEntity().GetComponent<pragma::CLightMapComponent>();
 			if(lightMapC.valid())
 			{
-				lightMapC->SetLightMapIntensity(worldData.GetLightMapIntensity());
+				// lightMapC->SetLightMapIntensity(worldData.GetLightMapIntensity());
 				lightMapC->SetLightMapExposure(worldData.GetLightMapExposure());
 				lightMapC->InitializeLightMapData(lightmapAtlas,globalLightmapUvBuffer,buffers);
 				auto *scene = GetRenderScene();

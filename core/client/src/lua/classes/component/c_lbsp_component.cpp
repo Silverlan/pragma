@@ -53,6 +53,14 @@ void Lua::BSP::register_class(lua_State *l,luabind::module_ &entsMod,luabind::cl
 			return;
 		Lua::Push(l,node->shared_from_this());
 		}));
+	defBspTree.def("FindLeafNodesInAABB",static_cast<luabind::object(*)(lua_State*,::util::BSPTree&,const Vector3&,const Vector3&)>([](lua_State *l,::util::BSPTree &tree,const Vector3 &min,const Vector3 &max) -> luabind::object {
+		auto nodes = tree.FindLeafNodesInAABB(min,max);
+		auto t = luabind::newtable(l);
+		int32_t idx = 1;
+		for(auto &n : nodes)
+			t[idx++] = n;
+		return t;
+	}));
 
 	auto defBspNode = luabind::class_<::util::BSPTree::Node>("Node");
 	defBspNode.def("IsLeaf",static_cast<void(*)(lua_State*,::util::BSPTree::Node&)>([](lua_State *l,::util::BSPTree::Node &node) {

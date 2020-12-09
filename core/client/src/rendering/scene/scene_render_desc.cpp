@@ -533,6 +533,15 @@ void SceneRenderDesc::BuildRenderQueueInstanceLists(pragma::rendering::RenderQue
 static auto cvDrawWorld = GetClientConVar("render_draw_world");
 static std::atomic<uint32_t> g_activeRenderQueueThreads = 0;
 uint32_t SceneRenderDesc::GetActiveRenderQueueThreadCount() {return g_activeRenderQueueThreads;}
+bool SceneRenderDesc::AssertRenderQueueThreadInactive()
+{
+	if(SceneRenderDesc::GetActiveRenderQueueThreadCount() == 0)
+		return true;
+	std::string msg = "ERROR: Game scene was changed during rendering, this is not allowed!";
+	Con::crit<<msg<<Con::endl;
+	throw std::logic_error{msg};
+	return false;
+}
 void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &hCam = m_scene.GetActiveCamera();

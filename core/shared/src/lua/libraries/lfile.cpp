@@ -319,7 +319,7 @@ bool Lua::file::validate_write_operation(lua_State *l,std::string &path,std::str
 		}
 	}
 	auto fname = FileManager::GetCanonicalizedPath(Lua::get_current_file(l));
-	if(fname.length() < 8 || ustring::compare(fname.c_str(),"addons\\",false,7) == false)
+	if(Lua::get_extended_lua_modules_enabled() == false && (fname.length() < 8 || ustring::compare(fname.c_str(),"addons\\",false,7) == false))
 	{
 		Con::cwar<<"WARNING: File write-operations can only be performed by Lua-scripts inside an addon!"<<Con::endl;
 		return false;

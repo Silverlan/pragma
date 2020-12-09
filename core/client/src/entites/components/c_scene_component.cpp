@@ -134,6 +134,8 @@ void CSceneComponent::OnRemove()
 	BaseEntityComponent::OnRemove();
 	if(m_cbLink.IsValid())
 		m_cbLink.Remove();
+	if(m_lightMapExposureCb.IsValid())
+		m_lightMapExposureCb.Remove();
 
 	auto sceneIndex = GetSceneIndex();
 	if(sceneIndex == std::numeric_limits<SceneIndex>::max())
@@ -248,7 +250,6 @@ void CSceneComponent::InitializeRenderSettingsBuffer()
 	m_renderSettings.shadowRatioX = 1.f /szShadowMap;
 	m_renderSettings.shadowRatioY = 1.f /szShadowMap;
 	m_renderSettings.shaderQuality = cvShaderQuality->GetInt();
-	m_renderSettings.lightmapIntensity = 1.f;
 	m_renderSettings.lightmapExposurePow = 1.f;
 
 	if(m_renderer)
@@ -492,12 +493,22 @@ void CSceneComponent::SetWorldEnvironment(WorldEnvironment &env)
 	m_fogData.flags = fog.IsEnabled();
 	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer,0ull,m_fogData);
 }
+float CSceneComponent::CalcLightMapPowExposure(pragma::CLightMapComponent &lightMapC)
+{
+	return umath::pow(2.0,static_cast<double>(lightMapC.GetLightMapExposure()));
+}
 void CSceneComponent::SetLightMap(pragma::CLightMapComponent &lightMapC)
 {
 	auto &renderSettings = GetRenderSettings();
-	renderSettings.lightmapIntensity = lightMapC.GetLightMapIntensity();
-	renderSettings.lightmapExposurePow = umath::pow(2.0,static_cast<double>(lightMapC.GetLightMapExposure()));
+	renderSettings.lightmapExposurePow = CalcLightMapPowExposure(lightMapC);
 	m_lightMap = lightMapC.GetHandle<pragma::CLightMapComponent>();
+	auto &prop = lightMapC.GetLightMapExposureProperty();
+	if(m_lightMapExposureCb.IsValid())
+		m_lightMapExposureCb.Remove();
+	m_lightMapExposureCb = prop->AddCallback([this,&lightMapC](std::reference_wrapper<const float> oldValue,std::reference_wrapper<const float> newValue) {
+		auto &renderSettings = GetRenderSettings();
+		renderSettings.lightmapExposurePow = CalcLightMapPowExposure(lightMapC);
+	});
 	UpdateRenderSettings();
 	UpdateRendererLightMap();
 }

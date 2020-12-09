@@ -22,7 +22,7 @@ namespace util
 	static const std::string IMPORT_PATH = "addons\\imported\\";
 	namespace impl
 	{
-		void *get_module_func(NetworkState *nw,const std::string &name);
+		DLLNETWORK void *get_module_func(NetworkState *nw,const std::string &name);
 	};
 	DLLNETWORK std::shared_ptr<util::Library> initialize_external_archive_manager(NetworkState *nw);
 	DLLNETWORK void close_external_archive_manager();

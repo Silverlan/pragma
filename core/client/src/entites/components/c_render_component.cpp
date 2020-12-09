@@ -54,7 +54,7 @@ void CRenderComponent::RegisterEvents(pragma::EntityComponentManager &componentM
 {
 	EVENT_ON_UPDATE_RENDER_DATA_MT = componentManager.RegisterEvent("ON_UPDATE_RENDER_DATA_MT",std::type_index(typeid(CRenderComponent)));
 	EVENT_ON_RENDER_BUFFERS_INITIALIZED = componentManager.RegisterEvent("ON_RENDER_BUFFERS_INITIALIZED");
-	EVENT_ON_RENDER_BOUNDS_CHANGED = componentManager.RegisterEvent("ON_RENDER_BUFFERS_INITIALIZED");
+	EVENT_ON_RENDER_BOUNDS_CHANGED = componentManager.RegisterEvent("ON_RENDER_BOUNDS_CHANGED");
 	EVENT_ON_RENDER_MODE_CHANGED = componentManager.RegisterEvent("ON_RENDER_MODE_CHANGED");
 	EVENT_SHOULD_DRAW = componentManager.RegisterEvent("SHOULD_DRAW",std::type_index(typeid(CRenderComponent)));
 	EVENT_SHOULD_DRAW_SHADOW = componentManager.RegisterEvent("SHOULD_DRAW_SHADOW",std::type_index(typeid(CRenderComponent)));

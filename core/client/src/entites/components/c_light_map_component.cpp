@@ -35,6 +35,10 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
+CLightMapComponent::CLightMapComponent(BaseEntity &ent)
+	: BaseEntityComponent(ent),m_lightMapExposure{util::FloatProperty::Create(0.f)}
+{}
+
 luabind::object CLightMapComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CLightMapComponentHandleWrapper>(l);}
 void CLightMapComponent::Initialize()
 {
@@ -89,10 +93,8 @@ std::shared_ptr<prosper::IDynamicResizableBuffer> CLightMapComponent::GetGlobalL
 const std::vector<std::shared_ptr<prosper::IBuffer>> &CLightMapComponent::GetMeshLightMapUvBuffers() const {return const_cast<CLightMapComponent*>(this)->GetMeshLightMapUvBuffers();}
 std::vector<std::shared_ptr<prosper::IBuffer>> &CLightMapComponent::GetMeshLightMapUvBuffers() {return m_meshLightMapUvBuffers;}
 
-void CLightMapComponent::SetLightMapIntensity(float intensity) {m_lightMapIntensity = intensity;}
-void CLightMapComponent::SetLightMapExposure(float exp) {m_lightMapExposure = exp;}
-float CLightMapComponent::GetLightMapIntensity() const {return m_lightMapIntensity;}
-float CLightMapComponent::GetLightMapExposure() const {return m_lightMapExposure;}
+void CLightMapComponent::SetLightMapExposure(float exp) {*m_lightMapExposure = exp;}
+float CLightMapComponent::GetLightMapExposure() const {return *m_lightMapExposure;}
 
 void CLightMapComponent::UpdateLightmapUvBuffers()
 {
@@ -368,8 +370,13 @@ static void generate_lightmaps(uint32_t width,uint32_t height,uint32_t sampleCou
 		auto mapName = c_game->GetMapName();
 		Con::cout<<"Lightmap atlas save result: "<<uimg::save_texture("materials/maps/" +mapName +"/lightmap_atlas.dds",*imgBuffer,texInfo,false)<<Con::endl;
 
-		auto &ent = c_game->GetWorld()->GetEntity();
-		auto lightmapC = ent.GetComponent<pragma::CLightMapComponent>();
+		EntityIterator entIt {*c_game};
+		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightMapComponent>>();
+		auto it = entIt.begin();
+		if(it == entIt.end())
+			return;
+		auto *ent = *it;
+		auto lightmapC = ent->GetComponent<pragma::CLightMapComponent>();
 
 		if(lightmapC.valid())
 			lightmapC->SetLightMapAtlas(tex);
@@ -385,29 +392,18 @@ static void generate_lightmaps(uint32_t width,uint32_t height,uint32_t sampleCou
 	c_engine->AddParallelJob(job,"Baked lightmaps");
 }
 
-void Console::commands::map_rebuild_lightmaps(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+bool CLightMapComponent::BakeLightmaps(const LightmapBakeSettings &bakeSettings)
 {
-	if(c_game == nullptr)
+	EntityIterator entIt {*c_game};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightMapComponent>>();
+	auto it = entIt.begin();
+	if(it == entIt.end())
 	{
-		Con::cwar<<"WARNING: No map loaded!"<<Con::endl;
-		return;
+		Con::cwar<<"WARNING: No lightmap entity found!"<<Con::endl;
+		return false;
 	}
-	auto *world = c_game->GetWorld();
-	if(world == nullptr)
-	{
-		Con::cwar<<"WARNING: World is invalid!"<<Con::endl;
-		return;
-	}
-	auto &ent = world->GetEntity();
-	auto lightmapC = ent.GetComponent<pragma::CLightMapComponent>();
-	if(lightmapC.expired())
-	{
-		Con::cwar<<"WARNING: World has no lightmap component! Lightmaps cannot be generated!"<<Con::endl;
-		return;
-	}
-
-	std::unordered_map<std::string,pragma::console::CommandOption> commandOptions {};
-	pragma::console::parse_command_options(argv,commandOptions);
+	auto *ent = *it;
+	auto lightmapC = ent->GetComponent<pragma::CLightMapComponent>();
 
 	//auto resolution = c_engine->GetRenderResolution();
 	auto &lightMap = lightmapC->GetLightMap();
@@ -417,23 +413,42 @@ void Console::commands::map_rebuild_lightmaps(NetworkState *state,pragma::BasePl
 		auto extents = lightMap->GetImage().GetExtents();
 		resolution = {extents.width,extents.height};
 	}
-	auto width = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"width",std::to_string(resolution.x)));
-	auto height = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"height",std::to_string(resolution.y)));
-	auto sampleCount = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"samples","1225"));
-	auto denoise = util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions,"denoise","1"));
-	auto renderJob = util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions,"render_job","0"));
-	auto hEnt = ent.GetHandle();
-	auto itRebuildUvAtlas = commandOptions.find("rebuild_uv_atlas");
-	if(itRebuildUvAtlas != commandOptions.end())
+	if(bakeSettings.width.has_value())
+		resolution.x = *bakeSettings.width;
+	if(bakeSettings.height.has_value())
+		resolution.y = *bakeSettings.height;
+	auto hEnt = ent->GetHandle();
+	if(bakeSettings.rebuildUvAtlas)
 	{
-		generate_lightmap_uv_atlas(ent,width,height,[hEnt,width,height,sampleCount,denoise,renderJob](bool success) {
+		generate_lightmap_uv_atlas(*ent,resolution.x,resolution.y,[hEnt,resolution,bakeSettings](bool success) {
 			if(success == false || hEnt.IsValid() == false)
 				return;
-			generate_lightmaps(width,height,sampleCount,denoise,renderJob);
+			generate_lightmaps(resolution.x,resolution.y,bakeSettings.samples,bakeSettings.denoise,bakeSettings.createAsRenderJob);
 		});
-		return;
+		return true;
 	}
-	generate_lightmaps(width,height,sampleCount,denoise,renderJob);
+	generate_lightmaps(resolution.x,resolution.y,bakeSettings.samples,bakeSettings.denoise,bakeSettings.createAsRenderJob);
+	return true;
+}
+
+void Console::commands::map_rebuild_lightmaps(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+{
+	std::unordered_map<std::string,pragma::console::CommandOption> commandOptions {};
+	pragma::console::parse_command_options(argv,commandOptions);
+
+	auto width = pragma::console::get_command_option_parameter_value(commandOptions,"width","");
+	auto height = pragma::console::get_command_option_parameter_value(commandOptions,"height","");
+	CLightMapComponent::LightmapBakeSettings bakeSettings {};
+	if(width.empty() == false)
+		bakeSettings.width = util::to_uint(width);
+	if(height.empty() == false)
+		bakeSettings.height = util::to_uint(height);
+	bakeSettings.samples = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"samples","1225"));
+	bakeSettings.denoise = util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions,"denoise","1"));
+	bakeSettings.createAsRenderJob = util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions,"render_job","0"));
+	auto itRebuildUvAtlas = commandOptions.find("rebuild_uv_atlas");
+	bakeSettings.rebuildUvAtlas = (itRebuildUvAtlas != commandOptions.end());
+	CLightMapComponent::BakeLightmaps(bakeSettings);
 }
 
 void Console::commands::debug_lightmaps(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)

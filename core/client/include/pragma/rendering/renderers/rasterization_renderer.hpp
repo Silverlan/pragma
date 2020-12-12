@@ -51,6 +51,7 @@ namespace pragma::rendering
 		Flags flags = Flags::None;
 		uint32_t vpResolution = 0;
 		uint32_t tileInfo; // First 16 bits = number of tiles (x-axis), second 16 bits = tile size
+		float lightmapExposurePow = 0.f;
 	};
 
 	class Prepass;
@@ -60,7 +61,7 @@ namespace pragma::rendering
 		: public BaseRenderer
 	{
 	public:
-		static void UpdateLightmap(const std::shared_ptr<prosper::Texture> &lightMapTexture);
+		static void UpdateLightmap(CLightMapComponent &lightMapC);
 		friend SceneRenderDesc;
 		enum class PrepassMode : uint32_t
 		{
@@ -101,7 +102,14 @@ namespace pragma::rendering
 
 		struct DLLCLIENT LightMapInfo
 		{
+			~LightMapInfo()
+			{
+				if(cbExposure.IsValid())
+					cbExposure.Remove();
+			}
 			std::shared_ptr<prosper::Texture> lightMapTexture = nullptr;
+			util::WeakHandle<pragma::CLightMapComponent> lightMapComponent {};
+			CallbackHandle cbExposure {};
 		};
 		virtual ~RasterizationRenderer() override;
 
@@ -120,8 +128,8 @@ namespace pragma::rendering
 		void SetPrepassMode(PrepassMode mode);
 		PrepassMode GetPrepassMode() const;
 
-		void SetLightMap(const std::shared_ptr<prosper::Texture> &lightMapTexture);
-		const std::shared_ptr<prosper::Texture> &GetLightMap() const;
+		void SetLightMap(pragma::CLightMapComponent &lightMapC);
+		const util::WeakHandle<pragma::CLightMapComponent> &GetLightMap() const;
 
 		void SetShaderOverride(const std::string &srcShader,const std::string &shaderOverride);
 		pragma::ShaderTextured3DBase *GetShaderOverride(pragma::ShaderTextured3DBase *srcShader) const;

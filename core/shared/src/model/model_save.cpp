@@ -12,6 +12,7 @@
 #include "pragma/model/animation/fanim.h"
 #include "pragma/physics/physsoftbodyinfo.hpp"
 #include "pragma/model/animation/vertex_animation.hpp"
+#include "pragma/model/animation/flex_animation.hpp"
 #include "pragma/file_formats/wmd.h"
 #include <fsys/filesystem.h>
 #include <sharedutils/util_file.h>
@@ -30,6 +31,7 @@
 #define INDEX_OFFSET_PHONEMES (INDEX_OFFSET_FLEXES +1)
 #define INDEX_OFFSET_IK_CONTROLLERS (INDEX_OFFSET_PHONEMES +1)
 #define INDEX_OFFSET_EYEBALLS (INDEX_OFFSET_IK_CONTROLLERS +1)
+#define INDEX_OFFSET_FLEX_ANIMATIONS (INDEX_OFFSET_EYEBALLS +1)
 
 static void write_offset(VFilePtrReal f,uint64_t offIndex)
 {
@@ -230,6 +232,10 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 
 		// Version 28
 		f->Write<uint64_t>(0ull); // INDEX_OFFSET_EYEBALLS
+		//
+
+		// Version 37
+		f->Write<uint64_t>(0ull); // INDEX_OFFSET_FLEX_ANIMATIONS
 		//
 	}
 
@@ -839,6 +845,20 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 		{
 			f->WriteString(eyeball.name);
 			f->Write(reinterpret_cast<const uint8_t*>(&eyeball) +sizeof(std::string),sizeof(Eyeball) -sizeof(std::string));
+		}
+		//
+
+		// Flex animations
+		write_offset(f,offIndex +INDEX_OFFSET_FLEX_ANIMATIONS *INDEX_OFFSET_INDEX_SIZE);
+		auto &flexAnims = mdl.GetFlexAnimations();
+		auto &flexAnimNames = mdl.GetFlexAnimationNames();
+		f->Write<uint32_t>(static_cast<uint32_t>(flexAnims.size()));
+		for(auto i=decltype(flexAnims.size()){0};i<flexAnims.size();++i)
+		{
+			auto &anim = flexAnims[i];
+			auto &animName = flexAnimNames[i];
+			f->WriteString(animName);
+			anim->Save(f);
 		}
 		//
 	}

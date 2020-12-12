@@ -21,6 +21,7 @@
 #include "pragma/model/vertex.h"
 #include "pragma/physics/physsoftbodyinfo.hpp"
 #include "pragma/model/animation/vertex_animation.hpp"
+#include "pragma/model/animation/flex_animation.hpp"
 #include "pragma/model/modelmesh.h"
 #include <luabind/iterator_policy.hpp>
 #include <pragma/lua/lua_call.hpp>
@@ -433,6 +434,52 @@ void Lua::Model::register_class(
 		Lua::PushBool(l,mdl.HasVertexWeights());
 	}));
 
+	// Flex animations
+	classDef.def("GetFlexAnimations",static_cast<luabind::object(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) -> luabind::object {
+		return Lua::vector_to_table(l,mdl.GetFlexAnimations());
+	}));
+	classDef.def("GetFlexAnimationNames",static_cast<luabind::object(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) -> luabind::object {
+		return Lua::vector_to_table(l,mdl.GetFlexAnimationNames());
+	}));
+	classDef.def("GetFlexAnimationCount",static_cast<uint32_t(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) -> uint32_t {
+		return mdl.GetFlexAnimations().size();
+	}));
+	classDef.def("AddFlexAnimation",static_cast<std::shared_ptr<FlexAnimation>(*)(lua_State*,::Model&,const std::string&)>([](lua_State *l,::Model &mdl,const std::string &name) -> std::shared_ptr<FlexAnimation> {
+		auto anim = std::make_shared<FlexAnimation>();
+		mdl.AddFlexAnimation(name,*anim);
+		return anim;
+	}));
+	classDef.def("AddFlexAnimation",static_cast<void(*)(lua_State*,::Model&,const std::string&,FlexAnimation&)>([](lua_State *l,::Model &mdl,const std::string &name,FlexAnimation &flexAnim) {
+		mdl.AddFlexAnimation(name,flexAnim);
+	}));
+	classDef.def("LookupFlexAnimation",static_cast<luabind::object(*)(lua_State*,::Model&,const std::string&)>([](lua_State *l,::Model &mdl,const std::string &name) -> luabind::object {
+		auto id = mdl.LookupFlexAnimation(name);
+		if(id.has_value() == false)
+			return {};
+		return luabind::object{l,*id};
+	}));
+	classDef.def("GetFlexAnimation",static_cast<luabind::object(*)(lua_State*,::Model&,uint32_t)>([](lua_State *l,::Model &mdl,uint32_t idx) -> luabind::object {
+		auto *flexAnim = mdl.GetFlexAnimation(idx);
+		if(flexAnim == nullptr)
+			return {};
+		return luabind::object{l,flexAnim->shared_from_this()};
+	}));
+	classDef.def("GetFlexAnimationName",static_cast<luabind::object(*)(lua_State*,::Model&,uint32_t)>([](lua_State *l,::Model &mdl,uint32_t idx) -> luabind::object {
+		auto *name = mdl.GetFlexAnimationName(idx);
+		if(name == nullptr)
+			return {};
+		return luabind::object{l,*name};
+	}));
+	classDef.def("ClearFlexAnimations",static_cast<void(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) {
+		mdl.GetFlexAnimations().clear();
+	}));
+	classDef.def("RemoveFlexAnimation",static_cast<void(*)(lua_State*,::Model&,uint32_t)>([](lua_State *l,::Model &mdl,uint32_t idx) {
+		auto &flexAnims = mdl.GetFlexAnimations();
+		if(idx >= flexAnims.size())
+			return;
+		flexAnims.erase(flexAnims.begin() +idx);
+	}));
+
 	classDef.add_static_constant("FLAG_NONE",umath::to_integral(::Model::Flags::None));
 	classDef.add_static_constant("FLAG_BIT_STATIC",umath::to_integral(::Model::Flags::Static));
 	classDef.add_static_constant("FLAG_BIT_INANIMATE",umath::to_integral(::Model::Flags::Inanimate));
@@ -751,6 +798,89 @@ void Lua::Model::register_class(
 
 	//for(auto &pair : ACTIVITY_NAMES)
 	//	classDefAnimation.add_static_constant(pair.second.c_str(),pair.first);
+	
+	// Flex Animation
+	auto classDefFlexAnim = luabind::class_<FlexAnimation>("FlexAnimation");
+	classDefFlexAnim.def("GetFps",static_cast<float(*)(lua_State*,FlexAnimation&)>([](lua_State *l,FlexAnimation &flexAnim) -> float {
+		return flexAnim.GetFps();
+	}));
+	classDefFlexAnim.def("SetFps",static_cast<void(*)(lua_State*,FlexAnimation&,float)>([](lua_State *l,FlexAnimation &flexAnim,float fps) {
+		return flexAnim.SetFps(fps);
+	}));
+	classDefFlexAnim.def("GetFrames",static_cast<luabind::object(*)(lua_State*,FlexAnimation&)>([](lua_State *l,FlexAnimation &flexAnim) -> luabind::object {
+		return Lua::vector_to_table(l,flexAnim.GetFrames());
+	}));
+	classDefFlexAnim.def("GetFrame",static_cast<std::shared_ptr<FlexAnimationFrame>(*)(lua_State*,FlexAnimation&,uint32_t)>([](lua_State *l,FlexAnimation &flexAnim,uint32_t frameId) -> std::shared_ptr<FlexAnimationFrame> {
+		auto &frames = flexAnim.GetFrames();
+		if(frameId >= frames.size())
+			return nullptr;
+		return frames[frameId];
+	}));
+	classDefFlexAnim.def("GetFrameCount",static_cast<uint32_t(*)(lua_State*,FlexAnimation&)>([](lua_State *l,FlexAnimation &flexAnim) -> uint32_t {
+		return flexAnim.GetFrames().size();
+	}));
+	classDefFlexAnim.def("GetFlexControllerIds",static_cast<luabind::object(*)(lua_State*,FlexAnimation&)>([](lua_State *l,FlexAnimation &flexAnim) -> luabind::object {
+		return Lua::vector_to_table(l,flexAnim.GetFlexControllerIds());
+	}));
+	classDefFlexAnim.def("SetFlexControllerIds",static_cast<void(*)(lua_State*,FlexAnimation&,luabind::table<>)>([](lua_State *l,FlexAnimation &flexAnim,luabind::table<> tIds) {
+		flexAnim.SetFlexControllerIds(Lua::table_to_vector<FlexControllerId>(l,tIds,2));
+	}));
+	classDefFlexAnim.def("GetFlexControllerCount",static_cast<uint32_t(*)(lua_State*,FlexAnimation&)>([](lua_State *l,FlexAnimation &flexAnim) -> uint32_t {
+		auto &flexControllerIds = flexAnim.GetFlexControllerIds();
+		return flexControllerIds.size();
+	}));
+	classDefFlexAnim.def("AddFrame",static_cast<std::shared_ptr<FlexAnimationFrame>(*)(lua_State*,FlexAnimation&)>([](lua_State *l,FlexAnimation &flexAnim) -> std::shared_ptr<FlexAnimationFrame> {
+		return flexAnim.AddFrame().shared_from_this();
+	}));
+	classDefFlexAnim.def("ClearFrames",static_cast<void(*)(lua_State*,FlexAnimation&)>([](lua_State *l,FlexAnimation &flexAnim) {
+		flexAnim.GetFrames().clear();
+	}));
+	classDefFlexAnim.def("RemoveFrame",static_cast<void(*)(lua_State*,FlexAnimation&,uint32_t)>([](lua_State *l,FlexAnimation &flexAnim,uint32_t idx) {
+		auto &frames = flexAnim.GetFrames();
+		if(idx >= frames.size())
+			return;
+		frames.erase(frames.begin() +idx);
+	}));
+	classDefFlexAnim.def("Save",static_cast<bool(*)(lua_State*,FlexAnimation&,LFile&)>([](lua_State *l,FlexAnimation &flexAnim,LFile &f) -> bool {
+		auto fptr = std::dynamic_pointer_cast<VFilePtrInternalReal>(f.GetHandle());
+		if(fptr == nullptr)
+			return false;
+		return flexAnim.Save(fptr);
+	}));
+	classDefFlexAnim.scope[luabind::def("Load",static_cast<luabind::object(*)(lua_State*,LFile&)>([](lua_State *l,LFile &f) -> luabind::object {
+		auto fptr = std::dynamic_pointer_cast<VFilePtrInternal>(f.GetHandle());
+		if(fptr == nullptr)
+			return {};
+		return luabind::object{l,FlexAnimation::Load(fptr)};
+	}))];
+
+	auto classDefFlexAnimFrame = luabind::class_<FlexAnimationFrame>("Frame");
+	classDefFlexAnimFrame.def("GetFlexControllerValues",static_cast<luabind::object(*)(lua_State*,FlexAnimationFrame&)>([](lua_State *l,FlexAnimationFrame &flexAnimFrame) -> luabind::object {
+		return Lua::vector_to_table(l,flexAnimFrame.GetValues());
+	}));
+	classDefFlexAnimFrame.def("SetFlexControllerValues",static_cast<void(*)(lua_State*,FlexAnimationFrame&,luabind::table<>)>([](lua_State *l,FlexAnimationFrame &flexAnimFrame,luabind::table<> t) {
+		flexAnimFrame.GetValues() = Lua::table_to_vector<float>(l,t,2);
+	}));
+	classDefFlexAnimFrame.def("GetFlexControllerValue",static_cast<void(*)(lua_State*,FlexAnimationFrame&,uint32_t)>([](lua_State *l,FlexAnimationFrame &flexAnimFrame,uint32_t id) {
+		auto &values = flexAnimFrame.GetValues();
+		if(id >= values.size())
+			return;
+		Lua::PushNumber(l,values[id]);
+	}));
+	classDefFlexAnimFrame.def("GetFlexControllerValueCount",static_cast<uint32_t(*)(lua_State*,FlexAnimationFrame&)>([](lua_State *l,FlexAnimationFrame &flexAnimFrame) -> uint32_t {
+		auto &values = flexAnimFrame.GetValues();
+		return values.size();
+	}));
+	classDefFlexAnimFrame.def("SetFlexControllerValue",static_cast<void(*)(lua_State*,FlexAnimationFrame&,uint32_t,float)>([](lua_State *l,FlexAnimationFrame &flexAnimFrame,uint32_t id,float val) {
+		auto &values = flexAnimFrame.GetValues();
+		if(id >= values.size())
+			return;
+		values[id] = val;
+	}));
+	classDefFlexAnim.scope[classDefFlexAnimFrame];
+
+	classDef.scope[classDefFlexAnim];
+
 
 	// Vertex Animation
 	auto classDefVertexAnimation = luabind::class_<::VertexAnimation>("VertexAnimation")

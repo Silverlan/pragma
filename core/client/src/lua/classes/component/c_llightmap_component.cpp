@@ -38,15 +38,15 @@ void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hLightMapC);
 		hLightMapC->SetLightMapAtlas(texture.shared_from_this());
 	}));
-	defCLightMap.def("SetLightMapExposure",static_cast<void(*)(lua_State*,CLightMapHandle&,float)>([](lua_State *l,CLightMapHandle &hLightMapC,float exposure) {
+	defCLightMap.def("SetExposure",static_cast<void(*)(lua_State*,CLightMapHandle&,float)>([](lua_State *l,CLightMapHandle &hLightMapC,float exposure) {
 		pragma::Lua::check_component(l,hLightMapC);
 		hLightMapC->SetLightMapExposure(exposure);
 	}));
-	defCLightMap.def("GetLightMapExposure",static_cast<float(*)(lua_State*,CLightMapHandle&,float)>([](lua_State *l,CLightMapHandle &hLightMapC,float exposure) -> float {
+	defCLightMap.def("GetExposure",static_cast<float(*)(lua_State*,CLightMapHandle&)>([](lua_State *l,CLightMapHandle &hLightMapC) -> float {
 		pragma::Lua::check_component(l,hLightMapC);
 		return hLightMapC->GetLightMapExposure();
 	}));
-	defCLightMap.def("GetLightMapExposureProperty",static_cast<void(*)(lua_State*,CLightMapHandle&,float)>([](lua_State *l,CLightMapHandle &hLightMapC,float exposure) {
+	defCLightMap.def("GetExposureProperty",static_cast<void(*)(lua_State*,CLightMapHandle&)>([](lua_State *l,CLightMapHandle &hLightMapC) {
 		pragma::Lua::check_component(l,hLightMapC);
 		Lua::Property::push(l,*hLightMapC->GetLightMapExposureProperty());
 	}));
@@ -77,6 +77,15 @@ void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 	defLightmapBakeSettings.def_readwrite("denoise",&pragma::CLightMapComponent::LightmapBakeSettings::denoise);
 	defLightmapBakeSettings.def_readwrite("createAsRenderJob",&pragma::CLightMapComponent::LightmapBakeSettings::createAsRenderJob);
 	defLightmapBakeSettings.def_readwrite("rebuildUvAtlas",&pragma::CLightMapComponent::LightmapBakeSettings::rebuildUvAtlas);
+	defLightmapBakeSettings.def_readwrite("exposure",&pragma::CLightMapComponent::LightmapBakeSettings::exposure);
+	defLightmapBakeSettings.def("SetColorTransform",static_cast<void(*)(lua_State*,pragma::CLightMapComponent::LightmapBakeSettings&,const std::string&,const std::string&)>([](lua_State *l,pragma::CLightMapComponent::LightmapBakeSettings &bakeSettings,const std::string &config,const std::string &look) {
+		bakeSettings.colorTransform = pragma::rendering::cycles::SceneInfo::ColorTransform{};
+		bakeSettings.colorTransform->config = config;
+		bakeSettings.colorTransform->look = look;
+	}));
+	defLightmapBakeSettings.def("ResetColorTransform",static_cast<void(*)(lua_State*,pragma::CLightMapComponent::LightmapBakeSettings&)>([](lua_State *l,pragma::CLightMapComponent::LightmapBakeSettings &bakeSettings) {
+		bakeSettings.colorTransform = {};
+	}));
 	defCLightMap.scope[defLightmapBakeSettings];
 
 	entsMod[defCLightMap];

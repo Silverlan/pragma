@@ -17,7 +17,7 @@ extern DLLCLIENT ClientState *client;
 extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
-
+#pragma optimize("",off)
 void CLightMapReceiverComponent::SetupLightMapUvData(CBaseEntity &ent)
 {
 	auto mdl = ent.GetModel();
@@ -47,9 +47,9 @@ endLoop:
 }
 void CLightMapReceiverComponent::UpdateLightMapUvData()
 {
+	auto mdlC = GetEntity().GetComponent<CModelComponent>();
 	auto mdl = GetEntity().GetModel();
-	auto meshGroup = mdl ? mdl->GetMeshGroup(0u) : nullptr;
-	if(meshGroup == nullptr)
+	if(mdlC.expired() || mdl == nullptr)
 		return;
 	m_modelName = GetEntity().GetModelName();
 	umath::set_flag(m_stateFlags,StateFlags::IsModelBakedWithLightMaps,true);
@@ -60,7 +60,9 @@ void CLightMapReceiverComponent::UpdateLightMapUvData()
 	umath::set_flag(m_stateFlags,StateFlags::RenderMeshBufferIndexTableDirty);
 	uint32_t subMeshIdx = 0u;
 	auto wasInitialized = false;
-	for(auto &mesh : meshGroup->GetMeshes())
+	std::vector<std::shared_ptr<ModelMesh>> meshes;
+	mdlC->GetBaseModelMeshes(meshes);
+	for(auto &mesh : meshes)
 	{
 		for(auto &subMesh : mesh->GetSubMeshes())
 		{
@@ -119,12 +121,13 @@ void CLightMapReceiverComponent::UpdateRenderMeshBufferList()
 }
 void CLightMapReceiverComponent::UpdateModelMeshes()
 {
-	auto mdl = GetEntity().GetModel();
-	if(mdl == nullptr)
-		return;
 	m_meshes.clear();
-	auto meshGroup = mdl ? mdl->GetMeshGroup(0u) : nullptr;
-	if(meshGroup == nullptr)
+	auto mdlC = GetEntity().GetComponent<CModelComponent>();
+	auto mdl = GetEntity().GetModel();
+	if(mdlC.expired() || mdl == nullptr)
+		return;
+	auto renderC = GetEntity().GetComponent<CRenderComponent>();
+	if(renderC.expired())
 		return;
 	std::unordered_map<MeshIdx,BufferIdx> meshIdxToBufIdx {};
 	for(auto &pair : m_meshToMeshIdx)
@@ -139,7 +142,9 @@ void CLightMapReceiverComponent::UpdateModelMeshes()
 	m_meshToBufIdx.clear();
 	m_meshToMeshIdx.clear();
 	uint32_t subMeshIdx = 0u;
-	for(auto &mesh : meshGroup->GetMeshes())
+	std::vector<std::shared_ptr<ModelMesh>> meshes;
+	mdlC->GetBaseModelMeshes(meshes);
+	for(auto &mesh : meshes)
 	{
 		for(auto &subMesh : mesh->GetSubMeshes())
 		{
@@ -186,11 +191,14 @@ std::optional<CLightMapReceiverComponent::BufferIdx> CLightMapReceiverComponent:
 }
 void CLightMapReceiverComponent::UpdateMeshLightmapUvBuffers(CLightMapComponent &lightMapC)
 {
+	auto mdlC = GetEntity().GetComponent<CModelComponent>();
 	auto mdl = GetEntity().GetModel();
-	auto meshGroup = mdl ? mdl->GetMeshGroup(0u) : nullptr;
-	if(meshGroup == nullptr)
+	if(mdlC.expired() || mdl == nullptr)
 		return;
-	for(auto &mesh : meshGroup->GetMeshes())
+	uint32_t subMeshIdx = 0u;
+	std::vector<std::shared_ptr<ModelMesh>> meshes;
+	mdlC->GetBaseModelMeshes(meshes);
+	for(auto &mesh : meshes)
 	{
 		for(auto &subMesh : mesh->GetSubMeshes())
 		{
@@ -208,3 +216,4 @@ void CLightMapReceiverComponent::UpdateMeshLightmapUvBuffers(CLightMapComponent 
 		}
 	}
 }
+#pragma optimize("",on)

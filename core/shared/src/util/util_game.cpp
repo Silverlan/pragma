@@ -7,6 +7,7 @@
 
 #include "pragma/util/util_game.hpp"
 #include "pragma/networkstate/networkstate.h"
+#include "pragma/util/lookup_identifier.hpp"
 #include <sharedutils/util_library.hpp>
 
 

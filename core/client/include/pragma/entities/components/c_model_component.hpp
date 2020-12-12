@@ -72,6 +72,8 @@ namespace pragma
 		void SetAutoLodEnabled(bool enabled);
 		bool IsAutoLodEnabled() const;
 
+		void GetBaseModelMeshes(std::vector<std::shared_ptr<ModelMesh>> &outMeshes,uint32_t lod=0) const;
+
 		// Only use if LOD is handled externally!
 		void SetLOD(uint32_t lod);
 	protected:

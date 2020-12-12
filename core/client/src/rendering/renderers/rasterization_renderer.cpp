@@ -49,12 +49,12 @@ static void cl_render_ssao_callback(NetworkState*,ConVar*,bool,bool val)
 REGISTER_CONVAR_CALLBACK_CL(cl_render_ssao,cl_render_ssao_callback);
 
 static std::vector<RasterizationRenderer*> g_renderers {};
-static std::weak_ptr<prosper::Texture> g_lightmap = {};
-void RasterizationRenderer::UpdateLightmap(const std::shared_ptr<prosper::Texture> &lightMapTexture)
+static util::WeakHandle<pragma::CLightMapComponent> g_lightmapC = {};
+void RasterizationRenderer::UpdateLightmap(CLightMapComponent &lightMapC)
 {
 	for(auto *renderer : g_renderers)
-		renderer->SetLightMap(lightMapTexture);
-	g_lightmap = lightMapTexture;
+		renderer->SetLightMap(lightMapC);
+	g_lightmapC = lightMapC.GetHandle<CLightMapComponent>();
 }
 
 RasterizationRenderer::RasterizationRenderer()
@@ -417,8 +417,8 @@ bool RasterizationRenderer::ReloadRenderTarget(pragma::CSceneComponent &scene,ui
 	ds.SetBindingTexture(*dummyTex,umath::to_integral(pragma::ShaderScene::RendererBinding::LightMap));
 
 	m_lightMapInfo.lightMapTexture = nullptr;
-	if(g_lightmap.expired() == false)
-		SetLightMap(g_lightmap.lock());
+	if(g_lightmapC.expired() == false)
+		SetLightMap(*g_lightmapC);
 
 	UpdateRenderSettings();
 	return true;
@@ -586,16 +586,24 @@ void RasterizationRenderer::UpdateFrustumPlanes(pragma::CSceneComponent &scene)
 	}*/
 }
 
-void RasterizationRenderer::SetLightMap(const std::shared_ptr<prosper::Texture> &lightMapTexture)
+void RasterizationRenderer::SetLightMap(pragma::CLightMapComponent &lightMapC)
 {
-	if(lightMapTexture == m_lightMapInfo.lightMapTexture)
+	m_rendererData.lightmapExposurePow = lightMapC.CalcLightMapPowExposurePow();
+	if(m_lightMapInfo.lightMapComponent.get() == &lightMapC && lightMapC.GetLightMap() == m_lightMapInfo.lightMapTexture)
 		return;
-	m_lightMapInfo.lightMapTexture = lightMapTexture;
-
+	m_lightMapInfo.lightMapComponent = lightMapC.GetHandle<CLightMapComponent>();
+	m_lightMapInfo.lightMapTexture = lightMapC.GetLightMap();
+	if(m_lightMapInfo.cbExposure.IsValid())
+		m_lightMapInfo.cbExposure.Remove();
+	m_lightMapInfo.cbExposure = lightMapC.GetLightMapExposureProperty()->AddCallback([this,&lightMapC](std::reference_wrapper<const float> oldValue,std::reference_wrapper<const float> newValue) {
+		m_rendererData.lightmapExposurePow = lightMapC.CalcLightMapPowExposurePow();
+	});
+	if(m_lightMapInfo.lightMapTexture == nullptr)
+		return;
 	auto &ds = *m_descSetGroupRenderer->GetDescriptorSet();
-	ds.SetBindingTexture(*lightMapTexture,umath::to_integral(pragma::ShaderScene::RendererBinding::LightMap));
+	ds.SetBindingTexture(*m_lightMapInfo.lightMapTexture,umath::to_integral(pragma::ShaderScene::RendererBinding::LightMap));
 }
-const std::shared_ptr<prosper::Texture> &RasterizationRenderer::GetLightMap() const {return m_lightMapInfo.lightMapTexture;}
+const util::WeakHandle<pragma::CLightMapComponent> &RasterizationRenderer::GetLightMap() const {return m_lightMapInfo.lightMapComponent;}
 prosper::Texture *RasterizationRenderer::GetSceneTexture() {return m_hdrInfo.sceneRenderTarget ? &m_hdrInfo.sceneRenderTarget->GetTexture() : nullptr;}
 prosper::Texture *RasterizationRenderer::GetPresentationTexture() {return m_hdrInfo.toneMappedRenderTarget ? &m_hdrInfo.toneMappedRenderTarget->GetTexture() : nullptr;}
 prosper::Texture *RasterizationRenderer::GetHDRPresentationTexture() {return m_hdrInfo.sceneRenderTarget ? &m_hdrInfo.sceneRenderTarget->GetTexture() : nullptr;}

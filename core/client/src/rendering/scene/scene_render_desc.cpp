@@ -177,6 +177,8 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 		auto *shader = static_cast<pragma::ShaderTextured3DBase*>(mat->GetUserData2());
 		if(shader == nullptr)
 		{
+			// TODO: Shaders are initialized lazily and calling GetPrimaryShader may invoke the load process.
+			// This is illegal here, since this function may be called from a thread other than the main thread!
 			shader = dynamic_cast<pragma::ShaderTextured3DBase*>(mat->GetPrimaryShader());
 			mat->SetUserData2(shader); // TODO: This is technically *not* thread safe and could be called from multiple threads!
 		}
@@ -544,20 +546,20 @@ bool SceneRenderDesc::AssertRenderQueueThreadInactive()
 }
 void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo)
 {
+	for(auto &renderQueue : m_renderQueues)
+		renderQueue->Clear();
+	m_worldRenderQueues.clear();
+
 	auto &hCam = m_scene.GetActiveCamera();
 	if(hCam.expired())
 		return;
 
+	for(auto &renderQueue : m_renderQueues)
+		renderQueue->Lock();
+
 	auto &cam = *hCam;
 	// c_game->StartProfilingStage(CGame::CPUProfilingPhase::BuildRenderQueue);
 	auto &posCam = g_debugFreezeCamData.has_value() ? g_debugFreezeCamData->pos : cam.GetEntity().GetPosition();
-
-	for(auto &renderQueue : m_renderQueues)
-	{
-		renderQueue->Clear();
-		renderQueue->Lock();
-	}
-	m_worldRenderQueues.clear();
 
 	m_worldRenderQueuesReady = false;
 	c_game->GetRenderQueueBuilder().Append([this,&cam,posCam,&drawSceneInfo]() {

@@ -30,7 +30,7 @@ struct CyclesModuleInterface
 
 	void(*bake_ao)(Model&,uint32_t,uint32_t,uint32_t,uint32_t,bool,bool,const std::string&,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>&) = nullptr;
 	void(*bake_ao_ent)(BaseEntity&,uint32_t,uint32_t,uint32_t,uint32_t,bool,bool,const std::string&,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>&) = nullptr;
-	void(*bake_lightmaps)(uint32_t,uint32_t,uint32_t,bool,bool,std::string,EulerAngles,float,bool,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>&) = nullptr;
+	void(*bake_lightmaps)(uint32_t,uint32_t,uint32_t,bool,bool,std::string,EulerAngles,float,bool,float,const std::optional<std::string>&,const std::optional<std::string>&,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>&) = nullptr;
 
 	bool IsValid() const {return m_bValid;}
 private:
@@ -114,6 +114,9 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> cycles::bake_lightmaps(Cli
 	cyclesInterface->bake_lightmaps(
 		sceneInfo.width,sceneInfo.height,sceneInfo.samples,sceneInfo.hdrOutput,sceneInfo.denoise,
 		sceneInfo.sky,sceneInfo.skyAngles,sceneInfo.skyStrength,sceneInfo.renderJob,
+		sceneInfo.exposure,
+		sceneInfo.colorTransform.has_value() ? sceneInfo.colorTransform->config : std::optional<std::string>{},
+		sceneInfo.colorTransform.has_value() ? sceneInfo.colorTransform->look : std::optional<std::string>{},
 		job
 	);
 	if(job.IsValid() == false)

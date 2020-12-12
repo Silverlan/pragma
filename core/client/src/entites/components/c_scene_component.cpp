@@ -29,7 +29,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
 LINK_ENTITY_TO_CLASS(scene,CScene);
-
+#pragma optimize("",off)
 CSceneComponent::CSMCascadeDescriptor::CSMCascadeDescriptor()
 {}
 
@@ -134,8 +134,6 @@ void CSceneComponent::OnRemove()
 	BaseEntityComponent::OnRemove();
 	if(m_cbLink.IsValid())
 		m_cbLink.Remove();
-	if(m_lightMapExposureCb.IsValid())
-		m_lightMapExposureCb.Remove();
 
 	auto sceneIndex = GetSceneIndex();
 	if(sceneIndex == std::numeric_limits<SceneIndex>::max())
@@ -250,7 +248,6 @@ void CSceneComponent::InitializeRenderSettingsBuffer()
 	m_renderSettings.shadowRatioX = 1.f /szShadowMap;
 	m_renderSettings.shadowRatioY = 1.f /szShadowMap;
 	m_renderSettings.shaderQuality = cvShaderQuality->GetInt();
-	m_renderSettings.lightmapExposurePow = 1.f;
 
 	if(m_renderer)
 		m_renderer->UpdateRenderSettings();
@@ -493,22 +490,11 @@ void CSceneComponent::SetWorldEnvironment(WorldEnvironment &env)
 	m_fogData.flags = fog.IsEnabled();
 	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer,0ull,m_fogData);
 }
-float CSceneComponent::CalcLightMapPowExposure(pragma::CLightMapComponent &lightMapC)
-{
-	return umath::pow(2.0,static_cast<double>(lightMapC.GetLightMapExposure()));
-}
 void CSceneComponent::SetLightMap(pragma::CLightMapComponent &lightMapC)
 {
 	auto &renderSettings = GetRenderSettings();
-	renderSettings.lightmapExposurePow = CalcLightMapPowExposure(lightMapC);
 	m_lightMap = lightMapC.GetHandle<pragma::CLightMapComponent>();
 	auto &prop = lightMapC.GetLightMapExposureProperty();
-	if(m_lightMapExposureCb.IsValid())
-		m_lightMapExposureCb.Remove();
-	m_lightMapExposureCb = prop->AddCallback([this,&lightMapC](std::reference_wrapper<const float> oldValue,std::reference_wrapper<const float> newValue) {
-		auto &renderSettings = GetRenderSettings();
-		renderSettings.lightmapExposurePow = CalcLightMapPowExposure(lightMapC);
-	});
 	UpdateRenderSettings();
 	UpdateRendererLightMap();
 }
@@ -520,7 +506,7 @@ void CSceneComponent::UpdateRendererLightMap()
 	if(texLightMap == nullptr)
 		return;
 	// TODO: Not ideal to have this here; How to handle this in a better way?
-	static_cast<pragma::rendering::RasterizationRenderer*>(m_renderer.get())->SetLightMap(texLightMap);
+	static_cast<pragma::rendering::RasterizationRenderer*>(m_renderer.get())->SetLightMap(*m_lightMap);
 }
 void CSceneComponent::UpdateRenderSettings()
 {
@@ -650,3 +636,4 @@ void CScene::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CSceneComponent>();
 }
+#pragma optimize("",on)

@@ -34,7 +34,7 @@ extern DLLCLIENT ClientState *client;
 extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
-
+#pragma optimize("",off)
 CLightMapComponent::CLightMapComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_lightMapExposure{util::FloatProperty::Create(0.f)}
 {}
@@ -69,7 +69,7 @@ void CLightMapComponent::SetLightMapAtlas(const std::shared_ptr<prosper::Texture
 	m_lightMapAtlas = lightMap;
 
 	// TODO: This method only allows one lightmap atlas globally; Implement this in a way that allows multiple (maybe add to entity descriptor set?)!
-	pragma::rendering::RasterizationRenderer::UpdateLightmap(lightMap);
+	pragma::rendering::RasterizationRenderer::UpdateLightmap(*this);
 }
 
 void CLightMapComponent::ReloadLightMapData()
@@ -95,6 +95,10 @@ std::vector<std::shared_ptr<prosper::IBuffer>> &CLightMapComponent::GetMeshLight
 
 void CLightMapComponent::SetLightMapExposure(float exp) {*m_lightMapExposure = exp;}
 float CLightMapComponent::GetLightMapExposure() const {return *m_lightMapExposure;}
+float CLightMapComponent::CalcLightMapPowExposurePow() const
+{
+	return umath::pow(2.0,static_cast<double>(GetLightMapExposure()));
+}
 
 void CLightMapComponent::UpdateLightmapUvBuffers()
 {
@@ -311,7 +315,7 @@ static void generate_lightmap_uv_atlas(BaseEntity &ent,uint32_t width,uint32_t h
 	c_engine->AddParallelJob(job,"Lightmap UV Atlas");
 }
 
-static void generate_lightmaps(uint32_t width,uint32_t height,uint32_t sampleCount,bool denoise,bool renderJob)
+static void generate_lightmaps(uint32_t width,uint32_t height,uint32_t sampleCount,bool denoise,bool renderJob,float exposure,const std::optional<pragma::rendering::cycles::SceneInfo::ColorTransform> &colorTransform)
 {
 	Con::cout<<"Baking lightmaps... This may take a few minutes!"<<Con::endl;
 	auto hdrOutput = true;
@@ -322,6 +326,8 @@ static void generate_lightmaps(uint32_t width,uint32_t height,uint32_t sampleCou
 	sceneInfo.denoise = denoise;
 	sceneInfo.hdrOutput = hdrOutput;
 	sceneInfo.renderJob = renderJob;
+	sceneInfo.exposure = exposure;
+	sceneInfo.colorTransform = colorTransform;
 	sceneInfo.device = pragma::rendering::cycles::SceneInfo::DeviceType::GPU;
 
 	// TODO: Replace these with command arguments?
@@ -423,11 +429,11 @@ bool CLightMapComponent::BakeLightmaps(const LightmapBakeSettings &bakeSettings)
 		generate_lightmap_uv_atlas(*ent,resolution.x,resolution.y,[hEnt,resolution,bakeSettings](bool success) {
 			if(success == false || hEnt.IsValid() == false)
 				return;
-			generate_lightmaps(resolution.x,resolution.y,bakeSettings.samples,bakeSettings.denoise,bakeSettings.createAsRenderJob);
+			generate_lightmaps(resolution.x,resolution.y,bakeSettings.samples,bakeSettings.denoise,bakeSettings.createAsRenderJob,bakeSettings.exposure,bakeSettings.colorTransform);
 		});
 		return true;
 	}
-	generate_lightmaps(resolution.x,resolution.y,bakeSettings.samples,bakeSettings.denoise,bakeSettings.createAsRenderJob);
+	generate_lightmaps(resolution.x,resolution.y,bakeSettings.samples,bakeSettings.denoise,bakeSettings.createAsRenderJob,bakeSettings.exposure,bakeSettings.colorTransform);
 	return true;
 }
 
@@ -471,7 +477,10 @@ void Console::commands::debug_lightmaps(NetworkState *state,pragma::BasePlayerCo
 	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 		return;
 	auto &lightmap = static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetLightMap();
-	if(lightmap == nullptr)
+	if(lightmap.expired())
+		return;
+	auto &tex = lightmap->GetLightMap();
+	if(tex == nullptr)
 		return;
 
 	auto *pElContainer = wgui.Create<WIBase>();
@@ -485,7 +494,8 @@ void Console::commands::debug_lightmaps(NetworkState *state,pragma::BasePlayerCo
 	auto *pLightmaps = wgui.Create<WITexturedRect>(pFrame);
 	pLightmaps->SetSize(256,256);
 	pLightmaps->SetY(24);
-	pLightmaps->SetTexture(*lightmap);
+	pLightmaps->SetTexture(*lightmap->GetLightMap());
 	pFrame->SizeToContents();
 	pLightmaps->SetAnchor(0.f,0.f,1.f,1.f);
 }
+#pragma optimize("",on)

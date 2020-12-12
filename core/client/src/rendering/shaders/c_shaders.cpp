@@ -171,6 +171,7 @@ void CGame::InitShaders()
 
 	// Make sure these are always loaded
 	shaderManager.GetShader("pbr");
+	shaderManager.GetShader("light_cone");
 	shaderManager.GetShader("forwardp_light_culling");
 	shaderManager.GetShader("prepass");
 	shaderManager.GetShader("shadow");

@@ -10,6 +10,7 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
+#include <pragma/util/lookup_identifier.hpp>
 #include <pragma/entities/components/base_flex_component.hpp>
 
 namespace pragma
@@ -18,6 +19,13 @@ namespace pragma
 		: public BaseFlexComponent
 	{
 	public:
+		struct FlexAnimationData
+		{
+			uint32_t flexAnimationId = std::numeric_limits<uint32_t>::max();
+			float t = 0.f;
+			bool loop = false;
+			float playbackRate = 1.f;
+		};
 		CFlexComponent(BaseEntity &ent) : BaseFlexComponent(ent) {}
 		virtual void Initialize() override;
 		// Vertex animations
@@ -36,11 +44,19 @@ namespace pragma
 		void SetFlexWeightOverride(uint32_t flexId,float weight);
 		void ClearFlexWeightOverride(uint32_t flexId);
 		bool HasFlexWeightOverride(uint32_t flexId) const;
+
+		void SetFlexAnimationCycle(const LookupIdentifier &id,float cycle);
+		float GetFlexAnimationCycle(const LookupIdentifier &id) const;
+		void PlayFlexAnimation(const LookupIdentifier &id,bool loop=true,bool reset=false);
+		void StopFlexAnimation(const LookupIdentifier &id);
+		void SetFlexAnimationPlaybackRate(const LookupIdentifier &id,float playbackRate);
 	protected:
+		void ResolveFlexAnimation(const LookupIdentifier &lookupId) const;
+		void MaintainFlexAnimations(float dt);
 		bool UpdateFlexWeight(uint32_t flexId,float &val,bool storeInCache=true);
 		void UpdateEyeFlexes();
 		void UpdateEyeFlexes(Eyeball &eyeball,uint32_t eyeballIdx);
-		void UpdateFlexControllers();
+		void UpdateFlexControllers(float dt);
 		void OnModelChanged(const std::shared_ptr<Model> &mdl);
 
 		// Flex controllers
@@ -54,8 +70,9 @@ namespace pragma
 		std::vector<float> m_flexWeights = {};
 		std::vector<bool> m_updatedFlexWeights = {};
 		bool m_flexDataUpdateRequired = false;
-
 		std::vector<std::optional<float>> m_flexOverrides {};
+
+		std::vector<FlexAnimationData> m_flexAnimations;
 	};
 };
 

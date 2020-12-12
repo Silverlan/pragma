@@ -10,6 +10,7 @@
 #include "pragma/model/modelmesh.h"
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/model/animation/vertex_animation.hpp"
+#include "pragma/model/animation/flex_animation.hpp"
 #include "pragma/physics/physsoftbodyinfo.hpp"
 
 void FWMD::LoadBones(unsigned short version,unsigned int numBones,Model &mdl)
@@ -765,6 +766,22 @@ void FWMD::LoadAnimations(unsigned short version,Model &mdl)
 				auto &eyeball = eyeballs.back();
 				eyeball.name = ReadString();
 				Read(reinterpret_cast<uint8_t*>(&eyeball) +sizeof(std::string),sizeof(Eyeball) -sizeof(std::string));
+			}
+		}
+
+		if(version >= 37)
+		{
+			auto numFlexAnims = Read<uint32_t>();
+			auto &flexAnims = mdl.GetFlexAnimations();
+			auto &flexAnimNames = mdl.GetFlexAnimationNames();
+			flexAnimNames.reserve(numFlexAnims);
+			flexAnims.reserve(numFlexAnims);
+			for(auto i=decltype(numFlexAnims){0u};i<numFlexAnims;++i)
+			{
+				auto name = ReadString();
+				auto flexAnim = FlexAnimation::Load(m_file);
+				flexAnimNames.push_back(name);
+				flexAnims.push_back(flexAnim);
 			}
 		}
 	}

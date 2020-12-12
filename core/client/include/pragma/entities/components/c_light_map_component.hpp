@@ -9,6 +9,7 @@
 #define __C_LIGHT_MAP_COMPONENT_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/rendering/raytracing/cycles.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 
 namespace bsp {class File;};
@@ -24,6 +25,8 @@ namespace pragma
 		{
 			std::optional<uint32_t> width {};
 			std::optional<uint32_t> height {};
+			std::optional<pragma::rendering::cycles::SceneInfo::ColorTransform> colorTransform {};
+			float exposure = 1.f;
 			uint32_t samples = 1'225;
 			bool denoise = true;
 			bool createAsRenderJob = false;
@@ -52,6 +55,7 @@ namespace pragma
 
 		void SetLightMapExposure(float exp);
 		float GetLightMapExposure() const;
+		float CalcLightMapPowExposurePow() const;
 		const util::PFloatProperty &GetLightMapExposureProperty() const {return m_lightMapExposure;}
 
 		void ConvertLightmapToBSPLuxelData() const;

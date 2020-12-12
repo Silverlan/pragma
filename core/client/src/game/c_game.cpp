@@ -1147,7 +1147,12 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 			auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
 			scene->GetSceneRenderDesc().ReloadOcclusionCullingHandler(); // Required if BSP occlusion culling is specified
 			if(lightmapAtlas != nullptr)
-				pragma::rendering::RasterizationRenderer::UpdateLightmap(lightmapAtlas);
+			{
+				auto *entWorld = c_game->GetWorld();
+				auto lightMapC = entWorld ? entWorld->GetEntity().GetComponent<pragma::CLightMapComponent>() : util::WeakHandle<pragma::CLightMapComponent>{};
+				if(lightMapC.valid())
+					pragma::rendering::RasterizationRenderer::UpdateLightmap(*lightMapC);
+			}
 		}
 
 		// Find map entities with lightmap uv sets

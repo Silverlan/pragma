@@ -17,6 +17,7 @@
 #include <sharedutils/util_string.h>
 #include "pragma/physics/physsoftbodyinfo.hpp"
 #include "pragma/model/animation/vertex_animation.hpp"
+#include "pragma/model/animation/flex_animation.hpp"
 #include "pragma/file_formats/wmd.h"
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_file.h>
@@ -1576,6 +1577,33 @@ int32_t Model::LookupBone(const std::string &name) const
 {
 	auto &skeleton = GetSkeleton();
 	return skeleton.LookupBone(name);
+}
+std::optional<uint32_t> Model::LookupFlexAnimation(const std::string &name) const
+{
+	auto it = std::find(m_flexAnimationNames.begin(),m_flexAnimationNames.end(),name);
+	if(it == m_flexAnimationNames.end())
+		return {};
+	return it -m_flexAnimationNames.begin();
+}
+uint32_t Model::AddFlexAnimation(const std::string &name,FlexAnimation &anim)
+{
+	auto id = LookupFlexAnimation(name);
+	if(id.has_value())
+	{
+		m_flexAnimations[*id] = anim.shared_from_this();
+		return *id;
+	}
+	m_flexAnimationNames.push_back(name);
+	m_flexAnimations.push_back(anim.shared_from_this());
+	return m_flexAnimationNames.size() -1;
+}
+FlexAnimation *Model::GetFlexAnimation(uint32_t idx)
+{
+	return (idx < m_flexAnimations.size()) ? m_flexAnimations[idx].get() : nullptr;
+}
+const std::string *Model::GetFlexAnimationName(uint32_t idx) const
+{
+	return (idx < m_flexAnimationNames.size()) ? &m_flexAnimationNames[idx] : nullptr;
 }
 int32_t Model::LookupAttachment(const std::string &name)
 {

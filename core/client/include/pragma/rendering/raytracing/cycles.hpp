@@ -34,6 +34,11 @@ namespace pragma::rendering::cycles
 			CullObjectsOutsidePvs = 1u,
 			CullObjectsOutsideCameraFrustum = CullObjectsOutsidePvs<<1u
 		};
+		struct DLLCLIENT ColorTransform
+		{
+			std::string config;
+			std::string look;
+		};
 		uint32_t width = 1'024;
 		uint32_t height = 768;
 		uint32_t samples = 1'024;
@@ -46,6 +51,8 @@ namespace pragma::rendering::cycles
 		float skyStrength = 1.f;
 		EulerAngles skyAngles = {};
 		uint32_t maxTransparencyBounces = 64;
+		float exposure = 1.f;
+		std::optional<ColorTransform> colorTransform {};
 	};
 	struct DLLCLIENT RenderImageInfo
 	{

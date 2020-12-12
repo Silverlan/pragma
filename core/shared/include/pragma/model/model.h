@@ -127,7 +127,9 @@ struct DLLNETWORK Eyeball
 class CollisionMesh;
 class Game;
 class VertexAnimation;
+class FlexAnimation;
 class NetworkState;
+using FlexControllerId = uint32_t;
 namespace umath {class ScaledTransform;};
 class DLLNETWORK Model
 	: public std::enable_shared_from_this<Model>
@@ -444,6 +446,16 @@ public:
 	util::WeakHandle<Model> GetHandle();
 
 	void ClipAgainstPlane(const Vector3 &n,double d,Model &mdlA,Model &mdlB,const std::vector<Mat4> *boneMatrices=nullptr);
+
+	std::vector<std::shared_ptr<FlexAnimation>> &GetFlexAnimations() {return m_flexAnimations;}
+	const std::vector<std::shared_ptr<FlexAnimation>> &GetFlexAnimations() const {return const_cast<Model*>(this)->GetFlexAnimations();}
+	std::vector<std::string> &GetFlexAnimationNames() {return m_flexAnimationNames;}
+	const std::vector<std::string> &GetFlexAnimationNames() const {return const_cast<Model*>(this)->GetFlexAnimationNames();}
+	std::optional<uint32_t> LookupFlexAnimation(const std::string &name) const;
+	uint32_t AddFlexAnimation(const std::string &name,FlexAnimation &anim);
+	FlexAnimation *GetFlexAnimation(uint32_t idx);
+	const FlexAnimation *GetFlexAnimation(uint32_t idx) const {return const_cast<Model*>(this)->GetFlexAnimation(idx);}
+	const std::string *GetFlexAnimationName(uint32_t idx) const;
 protected:
 	Model(NetworkState *nw,uint32_t numBones,const std::string &name="");
 	Model(const Model &other);
@@ -496,6 +508,9 @@ private:
 	std::vector<Flex> m_flexes;
 
 	std::vector<std::shared_ptr<IKController>> m_ikControllers;
+
+	std::vector<std::shared_ptr<FlexAnimation>> m_flexAnimations;
+	std::vector<std::string> m_flexAnimationNames;
 
 	// Bind pose matrices are currently unused; Bind pose is extracted from reference pose instead!
 	std::vector<Mat4> m_bindPose;

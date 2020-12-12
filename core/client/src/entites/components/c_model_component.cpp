@@ -115,6 +115,14 @@ bool CModelComponent::IsWeighted() const
 
 uint32_t CModelComponent::GetLOD() const {return m_lod;}
 
+void CModelComponent::GetBaseModelMeshes(std::vector<std::shared_ptr<ModelMesh>> &outMeshes,uint32_t lod) const
+{
+	auto &mdl = GetModel();
+	if(mdl == nullptr)
+		return;
+	mdl->GetBodyGroupMeshes(GetBodyGroups(),lod,outMeshes);
+}
+
 void CModelComponent::UpdateRenderMeshes()
 {
 	if(umath::is_flag_set(m_stateFlags,StateFlags::RenderMeshUpdateRequired) == false)

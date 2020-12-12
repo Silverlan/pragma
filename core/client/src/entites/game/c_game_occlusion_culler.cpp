@@ -67,8 +67,13 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 			it->second.push_back(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,&ent](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 				if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags,pragma::TransformChangeFlags::PositionChanged) == false)
 					return util::EventReply::Unhandled;
-				SceneRenderDesc::AssertRenderQueueThreadInactive();
-				m_occlusionOctree->UpdateObject(ent);
+				// SceneRenderDesc::AssertRenderQueueThreadInactive();
+				// Note: Entity positions should generally not be updated during rendering,
+				// however in some cases they have to be updated every frame (e.g. for attachables).
+				// In those cases we still mustn't update the entity in the octree though, so we
+				// check for it here. TODO: This is a messy solution, find a better way!
+				if(SceneRenderDesc::GetActiveRenderQueueThreadCount() == 0)
+					m_occlusionOctree->UpdateObject(ent);
 				return util::EventReply::Unhandled;
 			}));
 		}

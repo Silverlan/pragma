@@ -275,7 +275,6 @@ namespace pragma
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_shadowDsg = nullptr;
 
 		std::vector<util::WeakHandle<pragma::CLightComponent>> m_previouslyVisibleShadowedLights;
-		CallbackHandle m_lightMapExposureCb {};
 		util::WeakHandle<pragma::CLightMapComponent> m_lightMap = {};
 		util::WeakHandle<pragma::CCameraComponent> m_camera = {};
 		std::shared_ptr<prosper::IBuffer> m_cameraBuffer = nullptr;

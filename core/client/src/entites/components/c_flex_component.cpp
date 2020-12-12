@@ -19,20 +19,21 @@
 using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 static auto cvFlexPhonemeDrag = GetClientConVar("cl_flex_phoneme_drag");
 luabind::object CFlexComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CFlexComponentHandleWrapper>(l);}
-void CFlexComponent::UpdateFlexControllers()
+void CFlexComponent::UpdateFlexControllers(float dt)
 {
+	// TODO: Update every frame!
 	auto t = c_game->CurTime();
-	auto dt = c_game->DeltaTime();
+	MaintainFlexAnimations(dt);
 	auto flexDrag = cvFlexPhonemeDrag->GetFloat();
 	for(auto &pair : m_flexControllers)
 	{
 		auto &info = pair.second;
 		if(info.endTime != 0.f && t >= info.endTime && info.targetValue != 0.f)
 			info.targetValue = 0.f;
-		info.value = umath::lerp(info.value,info.targetValue,umath::min(dt /flexDrag,1.0));
+		info.value = umath::lerp(info.value,info.targetValue,umath::min(dt /flexDrag,1.f));
 	}
 }
 
@@ -147,7 +148,7 @@ void CFlexComponent::Initialize()
 {
 	BaseFlexComponent::Initialize();
 	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		UpdateFlexControllers();
+		UpdateFlexControllers(static_cast<CEOnTick&>(evData.get()).deltaTime);
 	});
 	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		OnModelChanged(static_cast<pragma::CEOnModelChanged&>(evData.get()).model);
@@ -351,3 +352,4 @@ void CFlexComponent::UpdateSoundPhonemes(CALSound &snd)
 		}
 	}
 }
+#pragma optimize("",on)

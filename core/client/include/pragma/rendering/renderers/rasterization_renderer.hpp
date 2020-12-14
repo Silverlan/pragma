@@ -124,6 +124,7 @@ namespace pragma::rendering
 		virtual prosper::Texture *GetPresentationTexture() override;
 		virtual prosper::Texture *GetHDRPresentationTexture() override;
 		virtual bool IsRasterizationRenderer() const override;
+		void ReloadPresentationRenderTarget();
 
 		void SetPrepassMode(PrepassMode mode);
 		PrepassMode GetPrepassMode() const;

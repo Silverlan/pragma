@@ -1153,6 +1153,32 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		{"get_api_abbreviation",static_cast<int(*)(lua_State*)>([](lua_State *l) -> int {
 			Lua::PushString(l,c_engine->GetRenderContext().GetAPIAbbreviation());
 			return 1;
+		})},
+		{"wait_for_current_swapchain_command_buffer_completion",static_cast<int(*)(lua_State*)>([](lua_State *l) -> int {
+			std::string err;
+			if(c_engine->GetRenderContext().WaitForCurrentSwapchainCommandBuffer(err))
+			{
+				Lua::PushBool(l,true);
+				return 1;
+			}
+			Lua::PushString(l,err);
+			return 1;
+		})},
+		{"create_primary_command_buffer",static_cast<int(*)(lua_State*)>([](lua_State *l) -> int {
+			uint32_t universalQueueFamilyIndex;
+			auto buf = c_engine->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Universal,universalQueueFamilyIndex);
+			if(buf == nullptr)
+				return 0;
+			Lua::Push(l,std::static_pointer_cast<prosper::ICommandBuffer>(buf));
+			return 1;
+		})},
+		{"create_secondary_command_buffer",static_cast<int(*)(lua_State*)>([](lua_State *l) -> int {
+			uint32_t universalQueueFamilyIndex;
+			auto buf = c_engine->GetRenderContext().AllocateSecondaryLevelCommandBuffer(prosper::QueueFamilyType::Universal,universalQueueFamilyIndex);
+			if(buf == nullptr)
+				return 0;
+			Lua::Push(l,std::static_pointer_cast<prosper::ICommandBuffer>(buf));
+			return 1;
 		})}
 	});
 	auto prosperMod = luabind::module_(lua.GetState(),"prosper");

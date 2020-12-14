@@ -28,6 +28,7 @@ namespace prosper
 	class RenderPass;
 	class ICommandBuffer;
 	class IDescriptorSetGroup;
+	class SwapBuffer;
 };
 
 namespace vk

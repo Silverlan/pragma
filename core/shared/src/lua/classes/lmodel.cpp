@@ -28,7 +28,7 @@
 
 extern DLLENGINE Engine *engine;
 
-
+#pragma optimize("",off)
 void Lua::ModelMeshGroup::register_class(luabind::class_<::ModelMeshGroup> &classDef)
 {
 	classDef.scope[luabind::def("Create",&Create)];
@@ -825,9 +825,29 @@ void Lua::Model::register_class(
 	classDefFlexAnim.def("SetFlexControllerIds",static_cast<void(*)(lua_State*,FlexAnimation&,luabind::table<>)>([](lua_State *l,FlexAnimation &flexAnim,luabind::table<> tIds) {
 		flexAnim.SetFlexControllerIds(Lua::table_to_vector<FlexControllerId>(l,tIds,2));
 	}));
+	classDefFlexAnim.def("AddFlexControllerId",static_cast<uint32_t(*)(lua_State*,FlexAnimation&,FlexControllerId)>([](lua_State *l,FlexAnimation &flexAnim,FlexControllerId id) -> uint32_t {
+		return flexAnim.AddFlexControllerId(id);
+	}));
+	classDefFlexAnim.def("SetFlexControllerValue",static_cast<void(*)(lua_State*,FlexAnimation&,uint32_t,FlexControllerId,float)>([](lua_State *l,FlexAnimation &flexAnim,uint32_t frameId,FlexControllerId id,float val) {
+		auto &frames = flexAnim.GetFrames();
+		frames.reserve(frameId +1);
+		while(frames.size() <= frameId)
+			flexAnim.AddFrame();
+
+		auto &frame = frames[frameId];
+		auto idx = flexAnim.AddFlexControllerId(id);
+		frame->GetValues()[idx] = val;
+	}));
 	classDefFlexAnim.def("GetFlexControllerCount",static_cast<uint32_t(*)(lua_State*,FlexAnimation&)>([](lua_State *l,FlexAnimation &flexAnim) -> uint32_t {
 		auto &flexControllerIds = flexAnim.GetFlexControllerIds();
 		return flexControllerIds.size();
+	}));
+	classDefFlexAnim.def("LookupLocalFlexControllerIndex",static_cast<luabind::object(*)(lua_State*,FlexAnimation&,FlexControllerId)>([](lua_State *l,FlexAnimation &flexAnim,FlexControllerId id) -> luabind::object {
+		auto &ids = flexAnim.GetFlexControllerIds();
+		auto it = std::find(ids.begin(),ids.end(),id);
+		if(it == ids.end())
+			return {};
+		return luabind::object{l,it -ids.begin()};
 	}));
 	classDefFlexAnim.def("AddFrame",static_cast<std::shared_ptr<FlexAnimationFrame>(*)(lua_State*,FlexAnimation&)>([](lua_State *l,FlexAnimation &flexAnim) -> std::shared_ptr<FlexAnimationFrame> {
 		return flexAnim.AddFrame().shared_from_this();
@@ -2489,4 +2509,4 @@ void Lua::Model::RemoveObjectAttachment(lua_State *l,::Model &mdl,uint32_t idx)
 	//Lua::CheckModel(l,1);
 	mdl.RemoveObjectAttachment(idx);
 }
-
+#pragma optimize("",on)

@@ -51,6 +51,8 @@ namespace pragma
 		void StopFlexAnimation(const LookupIdentifier &id);
 		void SetFlexAnimationPlaybackRate(const LookupIdentifier &id,float playbackRate);
 	protected:
+		FlexAnimationData *FindFlexAnimationData(uint32_t flexAnimId);
+		const FlexAnimationData *FindFlexAnimationData(uint32_t flexAnimId) const {return const_cast<CFlexComponent*>(this)->FindFlexAnimationData(flexAnimId);}
 		void ResolveFlexAnimation(const LookupIdentifier &lookupId) const;
 		void MaintainFlexAnimations(float dt);
 		bool UpdateFlexWeight(uint32_t flexId,float &val,bool storeInCache=true);

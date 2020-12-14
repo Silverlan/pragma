@@ -320,7 +320,7 @@ void CSceneComponent::UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryComman
 
 	drawCmd->RecordBufferBarrier(
 		*bufCam,
-		prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::GeometryShaderBit,prosper::PipelineStageFlags::TransferBit,
+		prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::GeometryShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,prosper::PipelineStageFlags::TransferBit,
 		prosper::AccessFlags::ShaderReadBit,prosper::AccessFlags::TransferWriteBit
 	);
 	drawCmd->RecordUpdateBuffer(*bufCam,0ull,m_cameraData);
@@ -335,6 +335,11 @@ void CSceneComponent::UpdateBuffers(std::shared_ptr<prosper::IPrimaryCommandBuff
 	auto camPos = cam.valid() ? cam->GetEntity().GetPosition() : Vector3{};
 	m_renderSettings.posCam = camPos;
 
+	drawCmd->RecordBufferBarrier(
+		*m_renderSettingsBuffer,
+		prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::GeometryShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,prosper::PipelineStageFlags::TransferBit,
+		prosper::AccessFlags::ShaderReadBit,prosper::AccessFlags::TransferWriteBit
+	);
 	drawCmd->RecordUpdateBuffer(*m_renderSettingsBuffer,0ull,m_renderSettings);
 	// prosper TODO: Move camPos to camera buffer, and don't update render settings buffer every frame (update when needed instead)
 

@@ -83,7 +83,7 @@ namespace pragma
 			None = 0,
 			Diffuse = 0,
 			Normal = 1,
-			Parallax = Normal<<2,
+			Parallax = Normal<<1,
 			Glow = Parallax<<1,
 			Translucent = Glow<<1,
 			BlackToAlpha = Translucent<<1,

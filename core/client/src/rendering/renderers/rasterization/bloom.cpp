@@ -23,9 +23,12 @@ using namespace pragma::rendering;
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-
+#pragma optimize("",off)
 void RasterizationRenderer::RenderBloom(const util::DrawSceneInfo &drawSceneInfo)
 {
+	static auto skipBloom = false;
+	if(skipBloom)
+		return;
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingBloom);
 	auto &hdrInfo = GetHDRInfo();
 	auto bloomTexMsaa = hdrInfo.sceneRenderTarget->GetTexture(1u);
@@ -37,7 +40,7 @@ void RasterizationRenderer::RenderBloom(const util::DrawSceneInfo &drawSceneInfo
 
 	static auto blurSize = 5.f;
 	static int32_t kernelSize = 9u;
-	static uint32_t blurAmount = 5u;
+	static uint32_t blurAmount = 9u;
 
 	drawCmd->RecordImageBarrier(hdrInfo.bloomBlurRenderTarget->GetTexture().GetImage(),prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 	for(auto i=decltype(blurAmount){0};i<blurAmount;++i)
@@ -132,4 +135,4 @@ void RasterizationRenderer::RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCo
 	}
 #endif
 }
-
+#pragma optimize("",on)

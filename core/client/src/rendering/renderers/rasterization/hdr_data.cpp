@@ -42,8 +42,7 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 static const float EXPOSURE_FRAME_UPDATE = 0.25f; // Exposure will be updated every x seconds
-
-
+#pragma optimize("",off)
 static CVar cvMaxExposure = GetClientConVar("render_hdr_max_exposure");
 static void CVAR_CALLBACK_render_hdr_max_exposure(NetworkState*,ConVar*,float,float val)
 {
@@ -165,6 +164,44 @@ bool HDRData::EndRenderPass(const util::DrawSceneInfo &drawSceneInfo)
 	return drawSceneInfo.commandBuffer->RecordEndRenderPass();
 }
 
+prosper::util::SamplerCreateInfo HDRData::GetSamplerCreateInfo()
+{
+	prosper::util::SamplerCreateInfo hdrSamplerCreateInfo {};
+	hdrSamplerCreateInfo.addressModeU = prosper::SamplerAddressMode::ClampToEdge;
+	hdrSamplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
+	hdrSamplerCreateInfo.minFilter = prosper::Filter::Linear; // Note: These have to be linear for FXAA!
+	hdrSamplerCreateInfo.magFilter = prosper::Filter::Linear;
+	return hdrSamplerCreateInfo;
+}
+
+void HDRData::ReloadPresentationRenderTarget(uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount)
+{
+	auto &context = c_engine->GetRenderContext();
+	if(toneMappedRenderTarget)
+		context.KeepResourceAliveUntilPresentationComplete(toneMappedRenderTarget);
+	prosper::util::ImageCreateInfo imgCreateInfo {};
+	imgCreateInfo.format = pragma::ShaderPPHDR::RENDER_PASS_FORMAT;
+	imgCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
+	imgCreateInfo.samples = prosper::SampleCountFlags::e1Bit;
+	imgCreateInfo.width = width;
+	imgCreateInfo.height = height;
+	imgCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
+	imgCreateInfo.samples = sampleCount;
+	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
+	
+	prosper::util::TextureCreateInfo texCreateInfo {};
+	texCreateInfo.flags = prosper::util::TextureCreateInfo::Flags::Resolvable;
+
+	auto postHdrImg = context.CreateImage(imgCreateInfo);
+	auto postHdrTex = context.CreateTexture(texCreateInfo,*postHdrImg,prosper::util::ImageViewCreateInfo{},GetSamplerCreateInfo());
+	
+	auto &hShaderTonemapping = c_game->GetGameShader(CGame::GameShader::PPTonemapping);
+	toneMappedRenderTarget = context.CreateRenderTarget({postHdrTex},static_cast<prosper::ShaderGraphics*>(hShaderTonemapping.get())->GetRenderPass());
+	toneMappedRenderTarget->SetDebugName("scene_post_hdr_rt");
+
+	dsgTonemappedPostProcessing->GetDescriptorSet()->SetBindingTexture(*postHdrTex,0u);
+}
+
 bool HDRData::Initialize(pragma::CSceneComponent &scene,RasterizationRenderer &renderer,uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount,bool bEnableSSAO)
 {
 	// Initialize depth prepass
@@ -205,11 +242,7 @@ bool HDRData::Initialize(pragma::CSceneComponent &scene,RasterizationRenderer &r
 	prosper::util::ImageViewCreateInfo hdrImgViewCreateInfo {};
 	// Note: We need the alpha channel for FXAA Luma
 	// hdrImgViewCreateInfo.swizzleAlpha = prosper::ComponentSwizzle::One;
-	prosper::util::SamplerCreateInfo hdrSamplerCreateInfo {};
-	hdrSamplerCreateInfo.addressModeU = prosper::SamplerAddressMode::ClampToEdge;
-	hdrSamplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
-	hdrSamplerCreateInfo.minFilter = prosper::Filter::Linear; // Note: These have to be linear for FXAA!
-	hdrSamplerCreateInfo.magFilter = prosper::Filter::Linear;
+	auto hdrSamplerCreateInfo = GetSamplerCreateInfo();
 	auto hdrTex = context.CreateTexture(texCreateInfo,*hdrImg,hdrImgViewCreateInfo,hdrSamplerCreateInfo);
 	auto resolvedTex = hdrTex;
 	if(resolvedTex->IsMSAATexture())
@@ -236,8 +269,11 @@ bool HDRData::Initialize(pragma::CSceneComponent &scene,RasterizationRenderer &r
 	// The bloom image has to be blurred multiple times, which is expensive for larger resolutions.
 	// We don't really care about the quality of the blur image though, so we're using a smaller
 	// version of the bloom image for post-processing.
-	imgCreateInfo.width = 1024;
-	imgCreateInfo.height = 1024;
+	auto aspectRatio = width /static_cast<float>(height);
+	imgCreateInfo.width = 512;
+	imgCreateInfo.height = static_cast<uint32_t>(imgCreateInfo.width /aspectRatio);
+	if((imgCreateInfo.height %2) != 0)
+		++imgCreateInfo.height;
 	auto hdrBloomBlurImg = context.CreateImage(imgCreateInfo);
 	auto bloomBlurTexture = context.CreateTexture(texCreateInfo,*hdrBloomBlurImg,hdrImgViewCreateInfo,hdrSamplerCreateInfo);
 	imgCreateInfo.width = width;
@@ -265,13 +301,10 @@ bool HDRData::Initialize(pragma::CSceneComponent &scene,RasterizationRenderer &r
 	imgCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
 	imgCreateInfo.samples = prosper::SampleCountFlags::e1Bit;
 	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
-	auto postHdrImg = context.CreateImage(imgCreateInfo);
-	auto postHdrTex = context.CreateTexture(texCreateInfo,*postHdrImg,hdrImgViewCreateInfo,hdrSamplerCreateInfo);
-	toneMappedRenderTarget = context.CreateRenderTarget({postHdrTex},static_cast<prosper::ShaderGraphics*>(hShaderTonemapping.get())->GetRenderPass());
-	toneMappedRenderTarget->SetDebugName("scene_post_hdr_rt");
 	dsgTonemappedPostProcessing = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPPFXAA::DESCRIPTOR_SET_TEXTURE);
-	dsgTonemappedPostProcessing->GetDescriptorSet()->SetBindingTexture(*postHdrTex,0u);
 	dsgTonemappedPostProcessing->GetDescriptorSet()->SetBindingTexture(*resolvedTex,1u);
+
+	ReloadPresentationRenderTarget(width,height,sampleCount);
 
 	{
 		auto hShaderFXAA = c_engine->GetShader("pp_fxaa");
@@ -490,3 +523,4 @@ void Console::commands::debug_render_scene(NetworkState *state,pragma::BasePlaye
 			static_cast<WIDebugMSAATexture*>(hBloomTexture.get())->Update();
 		}));
 }
+#pragma optimize("",on)

@@ -52,6 +52,19 @@ bool FlexAnimation::Save(std::shared_ptr<VFilePtrInternalReal> &f)
 	}
 	return true;
 }
+uint32_t FlexAnimation::AddFlexControllerId(FlexControllerId id)
+{
+	auto &ids = GetFlexControllerIds();
+	auto it = std::find(ids.begin(),ids.end(),id);
+	if(it == ids.end())
+	{
+		ids.push_back(id);
+		for(auto &frame : m_frames)
+			frame->GetValues().push_back(0.f);
+		it = ids.end() -1;
+	}
+	return it -ids.begin();
+}
 FlexAnimationFrame &FlexAnimation::AddFrame()
 {
 	m_frames.push_back(std::make_shared<FlexAnimationFrame>());

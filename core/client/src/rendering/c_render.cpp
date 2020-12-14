@@ -313,20 +313,6 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 			umath::set_flag(renderFlags,FRender::View,false);
 
 		drawSceneInfo.scene->BuildRenderQueues(drawSceneInfo);
-
-		auto &lights = drawSceneInfo.scene->GetPreviouslyVisibleShadowedLights();
-		for(auto &l : lights)
-		{
-			auto *shadowC = l.valid() ? l->GetShadowComponent() : nullptr;
-			if(shadowC == nullptr)
-				continue;
-			// Also start building render queues for light sources with shadow maps
-			// that were visible in the previous frame.
-			// The internal light source code already makes sure they're rebuilt (and rendered) only once
-			// per frame, so we don't have to worry about that here.
-			auto &renderer = shadowC->GetRenderer();
-			const_cast<pragma::LightShadowRenderer&>(renderer).BuildRenderQueues(drawSceneInfo);
-		}
 	}
 
 	// Update time

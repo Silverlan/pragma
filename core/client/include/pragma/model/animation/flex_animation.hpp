@@ -33,6 +33,7 @@ public:
 	const std::vector<std::shared_ptr<FlexAnimationFrame>> &GetFrames() const {return const_cast<FlexAnimation*>(this)->GetFrames();}
 	std::vector<FlexControllerId> &GetFlexControllerIds() {return m_flexControllerIds;}
 	const std::vector<FlexControllerId> &GetFlexControllerIds() const {return const_cast<FlexAnimation*>(this)->GetFlexControllerIds();}
+	uint32_t AddFlexControllerId(FlexControllerId id);
 	FlexAnimationFrame &AddFrame();
 	void SetFlexControllerIds(std::vector<FlexControllerId> &&ids);
 	void SetFps(float fps) {m_fps = fps;}

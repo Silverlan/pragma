@@ -78,11 +78,14 @@ bool ShaderPrepassBase::BeginDraw(
 	RecordFlags recordFlags
 )
 {
+	if(m_dummyMaterialDsg == nullptr)
+		m_dummyMaterialDsg = CreateDescriptorSetGroup(GetMaterialDescriptorSetIndex());
 	Set3DSky(false);
 	return ShaderScene::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx),recordFlags) == true &&
 		BindClipPlane(clipPlane) == true &&
 		RecordPushConstants(drawOrigin,offsetof(PushConstants,drawOrigin)) &&
 		RecordPushConstants(Vector2{},offsetof(PushConstants,depthBias)) &&
+		RecordBindDescriptorSet(*m_dummyMaterialDsg->GetDescriptorSet(),GetMaterialDescriptorSetIndex()) &&
 		// RecordPushConstants(pragma::SceneDebugMode::None,offsetof(PushConstants,debugMode)) &&
 		cmdBuffer->RecordSetDepthBias() == true;
 }

@@ -297,6 +297,17 @@ void Lua_LFile_GetPath(lua_State *l,LFile &f)
 
 ////////////////////////////////////
 
+std::string Lua::file::to_relative_path(lua_State *l,const std::string &path)
+{
+	auto opath = util::Path::CreateFile(path);
+	opath.Canonicalize();
+	if(ustring::compare(opath.GetFront(),"addons",false))
+	{
+		opath.PopFront();
+		opath.PopFront();
+	}
+	return opath.GetString();
+}
 bool Lua::file::validate_write_operation(lua_State *l,std::string &path,std::string &outRootPath)
 {
 	if(path.length() >= 7 && ustring::compare(path.c_str(),"addons",false,6) && (path.at(6) == '/' || path.at(6) == '\\'))

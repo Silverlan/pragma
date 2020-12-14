@@ -319,10 +319,9 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	
 	if(skipMode == 6)
 		return;
+
 	// Cull light sources
 	CullLightSources(drawSceneInfo);
-
-
 	
 	if(skipMode == 7)
 		return;
@@ -359,7 +358,7 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*>("RenderPostProcessing",&drawSceneInfo);
 
 	// Bloom
-	// RenderBloom(drawSceneInfo);
+	RenderBloom(drawSceneInfo);
 	
 	if(skipMode == 10)
 		return;
@@ -608,6 +607,11 @@ prosper::Texture *RasterizationRenderer::GetSceneTexture() {return m_hdrInfo.sce
 prosper::Texture *RasterizationRenderer::GetPresentationTexture() {return m_hdrInfo.toneMappedRenderTarget ? &m_hdrInfo.toneMappedRenderTarget->GetTexture() : nullptr;}
 prosper::Texture *RasterizationRenderer::GetHDRPresentationTexture() {return m_hdrInfo.sceneRenderTarget ? &m_hdrInfo.sceneRenderTarget->GetTexture() : nullptr;}
 bool RasterizationRenderer::IsRasterizationRenderer() const {return true;}
+
+void RasterizationRenderer::ReloadPresentationRenderTarget()
+{
+	m_hdrInfo.ReloadPresentationRenderTarget(GetWidth(),GetHeight(),GetSampleCount());
+}
 
 prosper::SampleCountFlags RasterizationRenderer::GetSampleCount() const {return const_cast<RasterizationRenderer*>(this)->GetHDRInfo().sceneRenderTarget->GetTexture().GetImage().GetSampleCount();}
 bool RasterizationRenderer::IsMultiSampled() const {return GetSampleCount() != prosper::SampleCountFlags::e1Bit;}

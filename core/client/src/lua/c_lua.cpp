@@ -444,6 +444,9 @@ void CGame::RegisterLua()
 			return;
 		Lua::Push(l,dsg);
 	}));
+	classDefRasterizationRenderer.def("ReloadPresentationRenderTarget",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
+		renderer.ReloadPresentationRenderTarget();
+	}));
 	classDefRasterizationRenderer.def("ScheduleMeshForRendering",static_cast<void(*)(
 		lua_State*,pragma::rendering::RasterizationRenderer&,CSceneHandle&,uint32_t,pragma::ShaderTextured3DBase&,Material&,EntityHandle&,ModelSubMesh&
 	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));

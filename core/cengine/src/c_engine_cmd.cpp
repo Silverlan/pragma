@@ -12,7 +12,9 @@
 #include <sharedutils/util_file.h>
 #include <cmaterialmanager.h>
 #include <pragma/console/command_options.hpp>
-
+#include <buffers/prosper_buffer.hpp>
+#include <buffers/prosper_dynamic_resizable_buffer.hpp>
+#pragma optimize("",off)
 extern DLLCLIENT void debug_render_stats(bool);
 void CEngine::RegisterConsoleCommands()
 {
@@ -91,7 +93,56 @@ void CEngine::RegisterConsoleCommands()
 	conVarMap.RegisterConVar("render_queue_worker_thread_count","3",ConVarFlags::Archive,"Number of threads to use for generating render queues.");
 	conVarMap.RegisterConVar("render_queue_entities_per_worker_job","5",ConVarFlags::Archive,"Number of entities for each job processed by a worker thread.");
 	conVarMap.RegisterConVar("render_queue_worker_jobs_per_batch","2",ConVarFlags::Archive,"Number of worker jobs to accumulate in a batch before assigning a worker.");
+	
+	conVarMap.RegisterConCommand("debug_textures",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		auto &texManager = static_cast<CMaterialManager&>(static_cast<ClientState*>(GetClientState())->GetMaterialManager()).GetTextureManager();
+		auto textures = texManager.GetTextures();
+		std::vector<prosper::DeviceSize> textureSizes;
+		std::vector<size_t> sortedIndices {};
+		textureSizes.reserve(textures.size());
+		sortedIndices.reserve(textures.size());
+		for(auto &tex : textures)
+		{
+			prosper::DeviceSize size = 0;
+			auto &vkTex = tex->GetVkTexture();
+			if(vkTex)
+			{
+				auto &img = vkTex->GetImage();
+				auto *buf = img.GetMemoryBuffer();
+				if(buf)
+					size = buf->GetSize();
+			}
+			sortedIndices.push_back(textureSizes.size());
+			textureSizes.push_back(size);
+		}
+		std::sort(sortedIndices.begin(),sortedIndices.end(),[&textureSizes](size_t idx0,size_t idx1) {
+			return textureSizes[idx0] > textureSizes[idx1];
+		});
+		prosper::DeviceSize totalSize = 0;
+		Con::cout<<textures.size()<<" textures are currently loaded:"<<Con::endl;
+		for(auto idx : sortedIndices)
+		{
+			auto &tex = textures[idx];
+			auto useCount = tex.use_count() -2;
+			Con::cout<<tex->GetName()<<":"<<Con::endl;
+			if(useCount == 0)
+				util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
+			Con::cout<<"\tUse count: "<<useCount<<Con::endl;
+			if(useCount == 0)
+				util::reset_console_color();
+			Con::cout<<"\tResolution: "<<tex->GetWidth()<<"x"<<tex->GetHeight()<<Con::endl;
+			auto size = textureSizes[idx];
+			Con::cout<<"\tSize: "<<util::get_pretty_bytes(size)<<Con::endl;
+			totalSize += size;
+		}
+		Con::cout<<"Total memory: "<<util::get_pretty_bytes(totalSize)<<Con::endl;
 
+		auto &imgBufs = GetRenderContext().GetDeviceImageBuffers();
+		totalSize = 0;
+		for(auto &imgBuf : imgBufs)
+			totalSize += imgBuf->GetSize() -imgBuf->GetFreeSize();
+		Con::cout<<"Total device image memory: "<<util::get_pretty_bytes(totalSize)<<Con::endl;
+	},ConVarFlags::None,"Prints information about the currently loaded textures.");
 #if LUA_ENABLE_RUN_GUI == 1
 	conVarMap.RegisterConCommand("lua_exec_gui",[](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		if(argv.empty()) return;
@@ -113,3 +164,4 @@ void CEngine::RegisterConsoleCommands()
 	});
 #endif
 }
+#pragma optimize("",on)

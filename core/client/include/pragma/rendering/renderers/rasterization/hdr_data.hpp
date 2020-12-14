@@ -52,6 +52,7 @@ namespace pragma::rendering
 		bool BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *customRenderPass=nullptr);
 		bool EndRenderPass(const util::DrawSceneInfo &drawSceneInfo);
 		bool ResolveRenderPass(const util::DrawSceneInfo &drawSceneInfo);
+		void ReloadPresentationRenderTarget(uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount);
 
 		void ResetIOTextureIndex();
 		bool BlitStagingRenderTargetToMainRenderTarget(const util::DrawSceneInfo &drawSceneInfo);
@@ -105,6 +106,7 @@ namespace pragma::rendering
 		float max_exposure = 1,f;
 		std::array<float,3> luminescence = {0.f,0.f,0.f};
 	private:
+		static prosper::util::SamplerCreateInfo GetSamplerCreateInfo();
 		uint32_t m_curTex = 0;
 		CallbackHandle m_cbReloadCommandBuffer;
 		struct Exposure

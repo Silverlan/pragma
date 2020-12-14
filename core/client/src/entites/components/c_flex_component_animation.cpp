@@ -23,19 +23,30 @@ void CFlexComponent::ResolveFlexAnimation(const LookupIdentifier &lookupId) cons
 		return;
 	lookupId.id = mdl->LookupFlexAnimation(*lookupId.name);
 }
+CFlexComponent::FlexAnimationData *CFlexComponent::FindFlexAnimationData(uint32_t flexAnimId)
+{
+	auto it = std::find_if(m_flexAnimations.begin(),m_flexAnimations.end(),[flexAnimId](const FlexAnimationData &data) {
+		return data.flexAnimationId == flexAnimId;
+	});
+	return (it != m_flexAnimations.end()) ? &*it : nullptr;
+}
 void CFlexComponent::SetFlexAnimationCycle(const LookupIdentifier &id,float cycle)
 {
 	ResolveFlexAnimation(id);
-	if(id.resolved() == false || *id.id >= m_flexAnimations.size())
+	if(id.resolved() == false)
 		return;
-	m_flexAnimations.at(*id.id).t = cycle;
+	auto *flexAnimData = FindFlexAnimationData(*id.id);
+	if(flexAnimData == nullptr)
+		return;
+	flexAnimData->t = cycle;
 }
 float CFlexComponent::GetFlexAnimationCycle(const LookupIdentifier &id) const
 {
 	ResolveFlexAnimation(id);
-	if(id.resolved() == false || *id.id >= m_flexAnimations.size())
+	if(id.resolved() == false)
 		return 0.f;
-	return m_flexAnimations.at(*id.id).t;
+	auto *flexAnimData = FindFlexAnimationData(*id.id);
+	return flexAnimData ? flexAnimData->t : 0.f;
 }
 void CFlexComponent::PlayFlexAnimation(const LookupIdentifier &id,bool loop,bool reset)
 {
@@ -64,9 +75,12 @@ void CFlexComponent::PlayFlexAnimation(const LookupIdentifier &id,bool loop,bool
 void CFlexComponent::SetFlexAnimationPlaybackRate(const LookupIdentifier &id,float playbackRate)
 {
 	ResolveFlexAnimation(id);
-	if(id.resolved() == false || id.id >= m_flexAnimations.size())
+	if(id.resolved() == false)
 		return;
-	m_flexAnimations[*id.id].playbackRate = playbackRate;
+	auto *flexAnimData = FindFlexAnimationData(*id.id);
+	if(flexAnimData == nullptr)
+		return;
+	flexAnimData->playbackRate = playbackRate;
 }
 void CFlexComponent::StopFlexAnimation(const LookupIdentifier &id)
 {

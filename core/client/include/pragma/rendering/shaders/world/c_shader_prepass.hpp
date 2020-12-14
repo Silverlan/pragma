@@ -103,6 +103,7 @@ namespace pragma
 		virtual uint32_t GetLightDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
 		virtual bool BindLights(prosper::IDescriptorSet &dsLights) override {return false;}
 		Flags m_stateFlags = Flags::None;
+		std::shared_ptr<prosper::IDescriptorSetGroup> m_dummyMaterialDsg = nullptr;
 		std::optional<float> m_alphaCutoff {};
 	};
 	using ShaderPrepassDepth = ShaderPrepassBase;

@@ -151,7 +151,7 @@ void Lua::Render::CalcRayIntersection(lua_State *l,CRenderHandle &hComponent,con
 	auto result = hComponent->CalcRayIntersection(start,dir,precise);
 	if(result.has_value() == false)
 	{
-		Lua::PushInt(l,umath::to_integral(Intersection::Result::NoIntersection));
+		Lua::PushInt(l,umath::to_integral(umath::intersection::Result::NoIntersection));
 		return;
 	}
 	Lua::Push(l,umath::to_integral(result->result));

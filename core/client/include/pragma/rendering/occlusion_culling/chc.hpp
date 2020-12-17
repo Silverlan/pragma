@@ -107,7 +107,7 @@ private:
 	std::queue<std::shared_ptr<CHCQuery>> m_queryQueue;
 	std::queue<CHCNodeHandle> m_visQueue;
 	std::queue<CHCNodeHandle> m_invisQueue;
-	std::vector<Plane> m_frustumPlanes;
+	std::vector<umath::Plane> m_frustumPlanes;
 	std::vector<pragma::OcclusionMeshInfo> m_renderMeshes;
 	std::vector<std::shared_ptr<CHCNode>> m_nodes;
 	CallbackHandle m_cbOnNodeCreated;

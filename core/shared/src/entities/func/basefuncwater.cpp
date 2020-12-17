@@ -232,7 +232,7 @@ void BaseFuncWaterComponent::InitializeWaterSurface()
 			auto &v1 = verts.at(1);
 			auto &v2 = verts.at(2);
 
-			Plane p {v0.position,v1.position,v2.position};
+			umath::Plane p {v0.position,v1.position,v2.position};
 			auto dot = umath::abs(uvec::dot(dir,p.GetNormal()) -1.f);
 			if(dot >= minDot)
 				continue;
@@ -409,8 +409,8 @@ bool BaseFuncWaterComponent::CalcLineSurfaceIntersection(const Vector3 &lineOrig
 				auto ptIdx3 = m_physSurfaceSim->GetParticleIndex(i +1,j +1);
 				auto v3 = m_physSurfaceSim->CalcParticlePosition(ptIdx3);
 				if(
-					Intersection::LineTriangle(lineOrigin,lineDir,v0,v1,v2,t,u,v,bCull) == true ||
-					Intersection::LineTriangle(lineOrigin,lineDir,v3,v2,v1,t,u,v,bCull) == true
+					umath::intersection::line_triangle(lineOrigin,lineDir,v0,v1,v2,t,u,v,bCull) == true ||
+					umath::intersection::line_triangle(lineOrigin,lineDir,v3,v2,v1,t,u,v,bCull) == true
 				)
 				{
 					if(outT != nullptr)
@@ -433,10 +433,10 @@ bool BaseFuncWaterComponent::CalcLineSurfaceIntersection(const Vector3 &lineOrig
 		double d;
 		GetWaterPlaneWs(n,d);
 		auto t = 0.f;
-		auto r = Intersection::LinePlane(lineOrigin,lineDir,n,d,&t);
+		auto r = umath::intersection::line_plane(lineOrigin,lineDir,n,d,&t);
 		if(outT != nullptr)
 			*outT = t;
-		return r == Intersection::Result::Intersect;
+		return r == umath::intersection::Result::Intersect;
 	}
 	return false;
 }

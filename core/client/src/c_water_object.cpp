@@ -76,7 +76,7 @@ static void is_camera_submerged(const pragma::CCameraComponent &cam,const Vector
 	auto isPointInAabb = false;
 	for(auto &p : nearPlaneBounds)
 	{
-		if(isPointInAabb == false && Intersection::VectorInBounds(p,waterAabbMin,waterAabbMax))
+		if(isPointInAabb == false && umath::intersection::vector_in_bounds(p,waterAabbMin,waterAabbMax))
 			isPointInAabb = true;
 
 		auto dot = glm::dot(Vector4(p.x,p.y,p.z,1.f),Vector4(-n.x,-n.y,-n.z,-planeDist));

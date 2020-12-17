@@ -98,7 +98,7 @@ void pragma::asset::WorldData::ReadBSPTree(VFilePtr &f,uint32_t version)
 		}
 		auto normal = f->Read<Vector3>();
 		auto d = f->Read<float>();
-		node.plane = Plane{normal,static_cast<double>(d)};
+		node.plane = umath::Plane{normal,static_cast<double>(d)};
 		node.children.at(0) = m_bspTree->CreateNode();
 		node.children.at(1) = m_bspTree->CreateNode();
 		fReadNode(*node.children.at(0));

@@ -58,13 +58,13 @@ void TraceResult::InitializeMeshes()
 		mesh->GetBounds(min,max);
 		auto dist = umath::min(maxDist,static_cast<float>(res.hitValue));
 		auto t = 0.f;
-		if(Intersection::LineAABB(startPosLocal,dir,min,max,&t) != Intersection::Result::Intersect || umath::abs(t) > (dist /maxDist))
+		if(umath::intersection::line_aabb(startPosLocal,dir,min,max,&t) != umath::intersection::Result::Intersect || umath::abs(t) > (dist /maxDist))
 			continue;
 		auto &subMeshes = mesh->GetSubMeshes();
 		for(auto &subMesh : subMeshes)
 		{
 			subMesh->GetBounds(min,max);
-			if(Intersection::LineAABB(startPosLocal,dir,min,max,&t) != Intersection::Result::Intersect || umath::abs(t) > (dist /maxDist))
+			if(umath::intersection::line_aabb(startPosLocal,dir,min,max,&t) != umath::intersection::Result::Intersect || umath::abs(t) > (dist /maxDist))
 				continue;
 			if(Intersection::LineMesh(startPosLocal,dir,*subMesh,res,true,nullptr,nullptr) == false || umath::abs(res.hitValue) > (dist /maxDist))
 				continue;

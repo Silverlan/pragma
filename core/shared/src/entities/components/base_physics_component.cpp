@@ -119,7 +119,7 @@ float BasePhysicsComponent::GetAABBDistance(const Vector3 &p) const
 	max += origin;
 
 	Vector3 r {};
-	Geometry::ClosestPointOnAABBToPoint(min,max,p,&r);
+	umath::geometry::closest_point_on_aabb_to_point(min,max,p,&r);
 	return uvec::distance(r,p);
 }
 float BasePhysicsComponent::GetAABBDistance(const BaseEntity &ent) const
@@ -144,10 +144,10 @@ float BasePhysicsComponent::GetAABBDistance(const BaseEntity &ent) const
 	max1 += origin1;
 
 	Vector3 r0 {};
-	Geometry::ClosestPointOnAABBToPoint(min0,max0,origin1,&r0);
+	umath::geometry::closest_point_on_aabb_to_point(min0,max0,origin1,&r0);
 
 	Vector3 r1 {};
-	Geometry::ClosestPointOnAABBToPoint(min1,max1,origin0,&r1);
+	umath::geometry::closest_point_on_aabb_to_point(min1,max1,origin0,&r1);
 
 	return uvec::distance(r0,r1);
 }
@@ -483,7 +483,7 @@ void BasePhysicsComponent::SetCollisionBounds(const Vector3 &min,const Vector3 &
 void BasePhysicsComponent::GetRotatedCollisionBounds(Vector3 *min,Vector3 *max) const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	AABB::GetRotatedBounds(m_colMin,m_colMax,pTrComponent ? pTrComponent->GetRotationMatrix() : umat::identity(),min,max);
+	bounding_volume::AABB::GetRotatedBounds(m_colMin,m_colMax,pTrComponent ? pTrComponent->GetRotationMatrix() : umat::identity(),min,max);
 }
 
 BasePhysicsComponent::StateFlags BasePhysicsComponent::GetStateFlags() const {return m_stateFlags;}

@@ -50,7 +50,7 @@ void Game::SplashDamage(const Vector3 &origin,Float radius,DamageInfo &dmg,const
 		if(pPhysComponent != nullptr)
 			pPhysComponent->GetCollisionBounds(&min,&max);
 		Vector3 pos;
-		Geometry::ClosestPointOnAABBToPoint(min,max,origin -pTrComponent->GetPosition(),&pos);
+		umath::geometry::closest_point_on_aabb_to_point(min,max,origin -pTrComponent->GetPosition(),&pos);
 		auto dist = uvec::length(pos);
 		ents.push_back(EntityCandidate(ent,pos,dist));
 	}

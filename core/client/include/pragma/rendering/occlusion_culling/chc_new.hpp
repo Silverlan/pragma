@@ -69,7 +69,7 @@ namespace pragma
 		std::queue<PCHCQuery> m_queryQueue;
 		std::queue<WPCHCNode> m_visQueue;
 		std::queue<WPCHCNode> m_invisQueue;
-		std::vector<Plane> m_frustumPlanes;
+		std::vector<umath::Plane> m_frustumPlanes;
 		std::vector<PCHCNode> m_nodes;
 		util::WeakHandle<pragma::CCameraComponent> m_cam = {};
 		void TraverseNode(CHCNode &cNode);

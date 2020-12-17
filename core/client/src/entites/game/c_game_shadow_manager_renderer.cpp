@@ -37,7 +37,7 @@ ShadowRenderer::ShadowRenderer()
 
 	m_octreeCallbacks.nodeCallback = [this](const OcclusionOctree<std::shared_ptr<ModelMesh>>::Node &node) -> bool {
 		auto &bounds = node.GetWorldBounds();
-		return Intersection::AABBSphere(bounds.first,bounds.second,m_lightSourceData.position,m_lightSourceData.radius);
+		return umath::intersection::aabb_sphere(bounds.first,bounds.second,m_lightSourceData.position,m_lightSourceData.radius);
 	};
 
 	m_octreeCallbacks.entityCallback = [this](const CBaseEntity &ent,uint32_t renderFlags) {
@@ -125,7 +125,7 @@ void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimary
 	// Iterate all entities in the scene and populate m_shadowCasters
 	octree.IterateObjects([this](const OcclusionOctree<CBaseEntity*>::Node &node) -> bool {
 		auto &bounds = node.GetWorldBounds();
-		return Intersection::AABBSphere(bounds.first,bounds.second,m_lightSourceData.position,m_lightSourceData.radius);
+		return umath::intersection::aabb_sphere(bounds.first,bounds.second,m_lightSourceData.position,m_lightSourceData.radius);
 		},[this,&light,&drawCmd,scene](const CBaseEntity *ent) {
 			auto pRenderComponent = ent->GetRenderComponent();
 			if(!pRenderComponent || ent->IsInScene(*scene) == false || pRenderComponent->ShouldDrawShadow() == false || ent->IsWorld() == true)

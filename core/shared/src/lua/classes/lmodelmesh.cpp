@@ -354,24 +354,7 @@ void Lua::ModelSubMesh::GetNormalMapping(lua_State *l,::ModelSubMesh &mesh)
 void Lua::ModelSubMesh::GetVertexWeights(lua_State *l,::ModelSubMesh &mesh)
 {
 	auto &vertWeights = mesh.GetVertexWeights();
-	auto t = Lua::CreateTable(l); /* 1 */
-	for(auto i=decltype(vertWeights.size()){0};i<vertWeights.size();++i)
-	{
-		auto &w = vertWeights[i];
-		Lua::PushInt(l,i +1); /* 2 */
-
-		auto tWeight = Lua::CreateTable(l); /* 3 */
-
-		Lua::PushInt(l,1); /* 4 */
-		Lua::Push<Vector4i>(l,w.boneIds); /* 5 */
-		Lua::SetTableValue(l,tWeight); /* 3 */
-
-		Lua::PushInt(l,2); /* 4 */
-		Lua::Push<Vector4>(l,w.weights); /* 5 */
-		Lua::SetTableValue(l,tWeight); /* 3 */
-
-		Lua::SetTableValue(l,t); /* 1 */
-	}
+	Lua::vector_to_table(l,vertWeights).push(l);
 }
 void Lua::ModelSubMesh::GetCenter(lua_State *l,::ModelSubMesh &mdl)
 {
@@ -699,7 +682,7 @@ void Lua::ModelSubMesh::InitializeCylinder(lua_State *l,::ModelSubMesh &mesh,flo
 	auto &meshVerts = mesh.GetVertices();
 	auto &triangles = mesh.GetTriangles();
 	std::vector<Vector3> verts;
-	Geometry::GenerateTruncatedConeMesh({},startRadius,{0.f,0.f,1.f},length,startRadius,verts,&triangles,nullptr,segmentCount);
+	umath::geometry::generate_truncated_cone_mesh({},startRadius,{0.f,0.f,1.f},length,startRadius,verts,&triangles,nullptr,segmentCount);
 	meshVerts.reserve(verts.size());
 	for(auto &v : verts)
 	{
@@ -719,7 +702,7 @@ void Lua::ModelSubMesh::InitializeCone(lua_State *l,::ModelSubMesh &mesh,float s
 	auto &meshVerts = mesh.GetVertices();
 	auto &triangles = mesh.GetTriangles();
 	std::vector<Vector3> verts;
-	Geometry::GenerateTruncatedConeMesh({},startRadius,{0.f,0.f,1.f},length,endRadius,verts,&triangles,nullptr,segmentCount);
+	umath::geometry::generate_truncated_cone_mesh({},startRadius,{0.f,0.f,1.f},length,endRadius,verts,&triangles,nullptr,segmentCount);
 	meshVerts.reserve(verts.size());
 	for(auto &v : verts)
 	{

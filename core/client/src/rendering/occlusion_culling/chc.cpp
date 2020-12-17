@@ -517,7 +517,7 @@ bool CHC::InsideViewFrustum(CHCNode *cNode)
 {
 	if(cvCulling->GetInt() == 0)
 		return true;
-	return Intersection::AABBInPlaneMesh(cNode->GetMin(),cNode->GetMax(),m_frustumPlanes) != Intersection::Intersect::Outside;
+	return umath::intersection::aabb_in_plane_mesh(cNode->GetMin(),cNode->GetMax(),m_frustumPlanes) != umath::intersection::Intersect::Outside;
 }
 
 bool CHC::WasVisible(CHCNode *cNode)

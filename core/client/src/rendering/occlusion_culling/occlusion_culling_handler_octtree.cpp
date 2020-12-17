@@ -20,12 +20,12 @@ using namespace pragma;
 extern DLLCLIENT CGame *c_game;
 
 template<class T>
-	void iterate_occlusion_tree(const typename OcclusionOctree<T>::Node &node,std::vector<OcclusionMeshInfo> &culledMeshes,const std::vector<Plane> *optFrustumPlanes,const std::function<void(const T&)> &fObjectCallback)
+	void iterate_occlusion_tree(const typename OcclusionOctree<T>::Node &node,std::vector<OcclusionMeshInfo> &culledMeshes,const std::vector<umath::Plane> *optFrustumPlanes,const std::function<void(const T&)> &fObjectCallback)
 {
 	if(node.IsEmpty() == true)
 		return;
 	auto &nodeBounds = node.GetWorldBounds();
-	if(optFrustumPlanes && Intersection::AABBInPlaneMesh(nodeBounds.first,nodeBounds.second,*optFrustumPlanes) == Intersection::Intersect::Outside)
+	if(optFrustumPlanes && umath::intersection::aabb_in_plane_mesh(nodeBounds.first,nodeBounds.second,*optFrustumPlanes) == umath::intersection::Intersect::Outside)
 		return;
 	auto &objs = node.GetObjects();
 	for(auto &o : objs)
@@ -79,7 +79,7 @@ void OcclusionCullingHandlerOctTree::PerformCulling(
 			if(ent->IsWorld() == true)
 				return;
 			bool bViewModel = false;
-			std::vector<Plane> *planes = nullptr;
+			std::vector<umath::Plane> *planes = nullptr;
 			if(ShouldExamine(scene,renderer,*ent,bViewModel,cullByViewFrustum ? &planes : nullptr) == false)
 				return;
 			auto pRenderComponent = ent->GetRenderComponent();
@@ -121,7 +121,7 @@ void OcclusionCullingHandlerOctTree::PerformCulling(
 		// TODO: Assign tree to ModelMesh instead of ModelSubMesh!!!
 		auto &entWorld = static_cast<CBaseEntity&>(worldC->GetEntity());
 		auto bViewModel = false;
-		std::vector<Plane> *planes = nullptr;
+		std::vector<umath::Plane> *planes = nullptr;
 		if(ShouldExamine(scene,renderer,entWorld,bViewModel,cullByViewFrustum ? &planes : nullptr) == true)
 		{
 			auto &root = wrldTree->GetRootNode();

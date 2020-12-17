@@ -22,7 +22,7 @@ static Vector2 calc_barycentric_coordinates(
 )
 {
 	Vector2 uv;
-	Geometry::calc_barycentric_coordinates(va,a.uv,vb,b.uv,vc,c.uv,hitPoint,uv.x,uv.y);
+	umath::geometry::calc_barycentric_coordinates(va,a.uv,vb,b.uv,vc,c.uv,hitPoint,uv.x,uv.y);
 	return uv;
 }
 
@@ -295,7 +295,7 @@ void ModelSubMesh::ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clip
 
 		std::vector<Vector2> points2d;
 		points2d.reserve(newPoints.size());
-		auto rot = Geometry::calc_rotation_between_planes(n,uvec::UP);
+		auto rot = umath::geometry::calc_rotation_between_planes(n,uvec::UP);
 		for(auto &v : newPoints)
 		{
 			auto p = v.vertex.position;
@@ -304,7 +304,7 @@ void ModelSubMesh::ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clip
 		}
 		
 		std::vector<uint16_t> newTriangles {};
-		auto outlineIndices = Geometry::get_outline_vertices(points2d);
+		auto outlineIndices = umath::geometry::get_outline_vertices(points2d);
 		if(outlineIndices.has_value())
 		{
 			newTriangles.reserve((outlineIndices->size() -1) *3);
@@ -399,7 +399,7 @@ void ModelSubMesh::ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clip
 			auto &p0 = newPoints.at(newTriangles.at(0));
 			auto &p1 = newPoints.at(newTriangles.at(1));
 			auto &p2 = newPoints.at(newTriangles.at(2));
-			auto nTriangulated = Geometry::CalcFaceNormal(p0.vertex.position,p1.vertex.position,p2.vertex.position);
+			auto nTriangulated = uvec::calc_face_normal(p0.vertex.position,p1.vertex.position,p2.vertex.position);
 			auto d = uvec::dot(n,nTriangulated);
 			if(d < 0.0) // Wrong orientation; Triangles have to be flipped
 			{
@@ -436,7 +436,7 @@ void ModelSubMesh::ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clip
 
 					v.vertex.normal = nTriangulated;
 					v.vertex.uv = {};
-					Geometry::calc_barycentric_coordinates(p0.vertex.position,p1.vertex.position,p2.vertex.position,v.vertex.position,v.vertex.uv.x,v.vertex.uv.y);
+					umath::geometry::calc_barycentric_coordinates(p0.vertex.position,p1.vertex.position,p2.vertex.position,v.vertex.position,v.vertex.uv.x,v.vertex.uv.y);
 
 					pCoverVerts->push_back(v.vertex);
 					pCoverTriangles->push_back(pCoverVerts->size() -1u);

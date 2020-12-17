@@ -29,11 +29,11 @@ void OcclusionCullingHandlerBSP::Update(const Vector3 &camPos)
 		return;
 	m_pCurrentNode = FindLeafNode(camPos);
 }
-bool OcclusionCullingHandlerBSP::ShouldExamine(CModelMesh &mesh,const Vector3 &pos,bool bViewModel,std::size_t numMeshes,const std::vector<Plane> *optPlanes) const
+bool OcclusionCullingHandlerBSP::ShouldExamine(CModelMesh &mesh,const Vector3 &pos,bool bViewModel,std::size_t numMeshes,const std::vector<umath::Plane> *optPlanes) const
 {
 	return ShouldPass(mesh,pos) && OcclusionCullingHandlerOctTree::ShouldExamine(mesh,pos,bViewModel,numMeshes,optPlanes);
 }
-bool OcclusionCullingHandlerBSP::ShouldExamine(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,CBaseEntity &cent,bool &outViewModel,std::vector<Plane> **outPlanes) const
+bool OcclusionCullingHandlerBSP::ShouldExamine(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,CBaseEntity &cent,bool &outViewModel,std::vector<umath::Plane> **outPlanes) const
 {
 	return ShouldPass(cent) && OcclusionCullingHandlerOctTree::ShouldExamine(scene,renderer,cent,outViewModel,outPlanes);
 }
@@ -48,7 +48,7 @@ bool OcclusionCullingHandlerBSP::ShouldPass(CBaseEntity &ent) const
 	//if(pBspLeafComponent.valid())
 		//return false;//pBspLeafComponent->GetLeafVisibility(m_pCurrentNode->cluster); // TODO
 	auto &aabb = ent.GetAbsoluteRenderBounds();
-	return Intersection::AABBAABB(aabb.min,aabb.max,m_pCurrentNode->minVisible,m_pCurrentNode->maxVisible) != Intersection::Intersect::Outside;
+	return umath::intersection::aabb_aabb(aabb.min,aabb.max,m_pCurrentNode->minVisible,m_pCurrentNode->maxVisible) != umath::intersection::Intersect::Outside;
 }
 bool OcclusionCullingHandlerBSP::ShouldPass(CModelMesh &modelMesh,const Vector3 &entityPos) const
 {
@@ -65,7 +65,7 @@ bool OcclusionCullingHandlerBSP::ShouldPass(CModelMesh &modelMesh,const Vector3 
 	modelMesh.GetBounds(min,max);
 	min += entityPos;
 	max += entityPos;
-	return Intersection::AABBAABB(min,max,m_pCurrentNode->min,m_pCurrentNode->max);*/
+	return umath::intersection::aabb_aabb(min,max,m_pCurrentNode->min,m_pCurrentNode->max);*/
 }
 bool OcclusionCullingHandlerBSP::ShouldPass(CModelSubMesh &subMesh,const Vector3 &entityPos) const
 {
@@ -73,7 +73,7 @@ bool OcclusionCullingHandlerBSP::ShouldPass(CModelSubMesh &subMesh,const Vector3
 	subMesh.GetBounds(min,max);
 	min += entityPos;
 	max += entityPos;
-	return Intersection::AABBAABB(min,max,m_pCurrentNode->minVisible,m_pCurrentNode->maxVisible) != Intersection::Intersect::Outside;
+	return umath::intersection::aabb_aabb(min,max,m_pCurrentNode->minVisible,m_pCurrentNode->maxVisible) != umath::intersection::Intersect::Outside;
 }
 const util::BSPTree::Node *OcclusionCullingHandlerBSP::FindLeafNode(const Vector3 &point) const {return m_bspTree->FindLeafNode(point);}
 const util::BSPTree::Node *OcclusionCullingHandlerBSP::GetCurrentNode() const {return m_pCurrentNode;}

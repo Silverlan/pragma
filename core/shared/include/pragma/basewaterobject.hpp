@@ -9,7 +9,7 @@
 #define __BASEWATEROBJECT_HPP__
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/math/plane.h"
+#include <mathutil/plane.hpp>
 
 class DLLNETWORK BaseWaterObject
 {
@@ -20,7 +20,7 @@ public:
 	virtual const Vector3 &GetPosition() const=0;
 	virtual const Quat &GetOrientation() const=0;
 protected:
-	Plane m_waterPlane = {{0.f,1.f,0.f},1.f};
+	umath::Plane m_waterPlane = {{0.f,1.f,0.f},1.f};
 };
 
 #endif

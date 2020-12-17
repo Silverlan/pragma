@@ -36,8 +36,8 @@ namespace pragma
 		void SetCurrentNodeLocked(bool bLocked);
 		bool IsCurrentNodeLocked() const;
 	protected:
-		virtual bool ShouldExamine(CModelMesh &mesh,const Vector3 &pos,bool bViewModel,std::size_t numMeshes,const std::vector<Plane> *optPlanes=nullptr) const override;
-		virtual bool ShouldExamine(CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,CBaseEntity &cent,bool &outViewModel,std::vector<Plane> **outPlanes) const override;
+		virtual bool ShouldExamine(CModelMesh &mesh,const Vector3 &pos,bool bViewModel,std::size_t numMeshes,const std::vector<umath::Plane> *optPlanes=nullptr) const override;
+		virtual bool ShouldExamine(CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,CBaseEntity &cent,bool &outViewModel,std::vector<umath::Plane> **outPlanes) const override;
 		std::shared_ptr<util::BSPTree> m_bspTree = nullptr;
 		bool m_bLockCurrentNode = false;
 

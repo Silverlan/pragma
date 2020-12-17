@@ -60,7 +60,7 @@ void CLightPointComponent::Initialize()
 		for(auto i=decltype(directions.size()){0};i<directions.size();++i)
 		{
 			//auto &dir = directions[i];
-			if(Intersection::SphereInPlaneMesh(sphere.pos -this->GetEntity().GetPosition(),sphere.radius,m_frustumPlanes.at(i),true) != Intersection::Intersect::Outside)
+			if(umath::intersection::sphere_in_plane_mesh(sphere.pos -this->GetEntity().GetPosition(),sphere.radius,m_frustumPlanes.at(i),true) != umath::intersection::Intersect::Outside)
 				shouldPassData.renderFlags |= 1<<i;
 			//if(pLightComponent->IsInCone(shouldPassData.entity,dir,ang) == true)
 			//	shouldPassData.renderFlags |= 1<<i;
@@ -181,8 +181,8 @@ void CLightPointComponent::OnEntityComponentAdded(BaseEntityComponent &component
 }
 luabind::object CLightPointComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CLightPointComponentHandleWrapper>(l);}
 
-const std::array<std::vector<Plane>,6u> &CLightPointComponent::GetFrustumPlanes() const {return m_frustumPlanes;}
-const std::vector<Plane> &CLightPointComponent::GetFrustumPlanes(CubeMapSide side) const {return m_frustumPlanes.at(umath::to_integral(side));}
+const std::array<std::vector<umath::Plane>,6u> &CLightPointComponent::GetFrustumPlanes() const {return m_frustumPlanes;}
+const std::vector<umath::Plane> &CLightPointComponent::GetFrustumPlanes(CubeMapSide side) const {return m_frustumPlanes.at(umath::to_integral(side));}
 
 /////////////
 

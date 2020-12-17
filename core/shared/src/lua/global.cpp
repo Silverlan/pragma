@@ -216,14 +216,14 @@ void Game::RegisterLuaGlobals()
 
 	Lua::RegisterLibraryEnums(GetLuaState(),"intersect",{
 		// TODO: These should be obsolete?
-		{"RESULT_OUTSIDE",umath::to_integral(Intersection::Intersect::Outside)},
-		{"RESULT_INSIDE",umath::to_integral(Intersection::Intersect::Inside)},
-		{"RESULT_OVERLAP",umath::to_integral(Intersection::Intersect::Overlap)},
+		{"RESULT_OUTSIDE",umath::to_integral(umath::intersection::Intersect::Outside)},
+		{"RESULT_INSIDE",umath::to_integral(umath::intersection::Intersect::Inside)},
+		{"RESULT_OVERLAP",umath::to_integral(umath::intersection::Intersect::Overlap)},
 		//
 
-		{"RESULT_NO_INTERSECTION",umath::to_integral(Intersection::Result::NoIntersection)},
-		{"RESULT_INTERSECT",umath::to_integral(Intersection::Result::Intersect)},
-		{"RESULT_OUT_OF_RANGE",umath::to_integral(Intersection::Result::OutOfRange)}
+		{"RESULT_NO_INTERSECTION",umath::to_integral(umath::intersection::Result::NoIntersection)},
+		{"RESULT_INTERSECT",umath::to_integral(umath::intersection::Result::Intersect)},
+		{"RESULT_OUT_OF_RANGE",umath::to_integral(umath::intersection::Result::OutOfRange)}
 	});
 
 	Lua::RegisterLibraryEnums(GetLuaState(),"time",{

@@ -56,7 +56,7 @@ void CLightDirectionalComponent::Initialize()
 		for(auto i=decltype(numLayers){0};i<numLayers;++i)
 		{
 			auto &frustum = *hShadow->GetFrustumSplit(i);
-			if(Intersection::AABBAABB(aabb.min,aabb.max,frustum.aabb.min +frustum.obbCenter,frustum.aabb.max +frustum.obbCenter) != Intersection::Intersect::Outside)
+			if(umath::intersection::aabb_aabb(aabb.min,aabb.max,frustum.aabb.min +frustum.obbCenter,frustum.aabb.max +frustum.obbCenter) != umath::intersection::Intersect::Outside)
 				shouldPassData.renderFlags |= 1<<i;
 		}
 		if(shouldPassData.renderFlags == 0)
@@ -89,7 +89,7 @@ void CLightDirectionalComponent::Initialize()
 			for(auto i=decltype(numLayers){0};i<numLayers;++i)
 			{
 				auto &frustum = *hShadow->GetFrustumSplit(i);
-				if(Intersection::AABBAABB(min,max,frustum.aabb.min +frustum.obbCenter,frustum.aabb.max +frustum.obbCenter) != Intersection::Intersect::Outside)
+				if(umath::intersection::aabb_aabb(min,max,frustum.aabb.min +frustum.obbCenter,frustum.aabb.max +frustum.obbCenter) != umath::intersection::Intersect::Outside)
 					shouldPassData.renderFlags |= 1<<i;
 			}
 		}
@@ -286,7 +286,7 @@ bool CLightDirectionalComponent::ShouldPass(uint32_t layer,const Vector3 &min,co
 		return false;
 	auto numLayers = hShadow->GetLayerCount();
 	auto &frustum = *hShadow->GetFrustumSplit(layer);
-	return (Intersection::AABBAABB(min,max,frustum.aabb.min +frustum.obbCenter,frustum.aabb.max +frustum.obbCenter) != Intersection::Intersect::Outside) ? true : false;
+	return (umath::intersection::aabb_aabb(min,max,frustum.aabb.min +frustum.obbCenter,frustum.aabb.max +frustum.obbCenter) != umath::intersection::Intersect::Outside) ? true : false;
 }
 
 void CLightDirectionalComponent::OnEntityComponentAdded(BaseEntityComponent &component)

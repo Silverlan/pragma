@@ -1338,21 +1338,21 @@ void Game::RegisterLuaClasses()
 	_G["GMBase"] = _G["game"]["Base"];
 
 	auto &modMath = m_lua->RegisterLibrary("math");
-	auto defPlane = luabind::class_<Plane>("Plane");
+	auto defPlane = luabind::class_<umath::Plane>("Plane");
 	defPlane.def(luabind::constructor<Vector3,Vector3,Vector3>());
 	defPlane.def(luabind::constructor<Vector3,Vector3>());
 	defPlane.def(luabind::constructor<Vector3,double>());
-	defPlane.def("Copy",static_cast<void(*)(lua_State*,Plane&)>([](lua_State *l,Plane &plane) {
-		Lua::Push<Plane>(l,Plane{plane});
+	defPlane.def("Copy",static_cast<void(*)(lua_State*,umath::Plane&)>([](lua_State *l,umath::Plane &plane) {
+		Lua::Push<umath::Plane>(l,umath::Plane{plane});
 	}));
 	defPlane.def("GetNormal",&Lua_Plane_GetNormal);
 	defPlane.def("GetPos",&Lua_Plane_GetPos);
-	defPlane.def("GetDistance",static_cast<void(*)(lua_State*,Plane&)>(&Lua_Plane_GetDistance));
-	defPlane.def("GetDistance",static_cast<void(*)(lua_State*,Plane&,const Vector3&)>(&Lua_Plane_GetDistance));
+	defPlane.def("GetDistance",static_cast<void(*)(lua_State*,umath::Plane&)>(&Lua_Plane_GetDistance));
+	defPlane.def("GetDistance",static_cast<void(*)(lua_State*,umath::Plane&,const Vector3&)>(&Lua_Plane_GetDistance));
 	defPlane.def("MoveToPos",&Lua_Plane_MoveToPos);
 	defPlane.def("Rotate",&Lua_Plane_Rotate);
 	defPlane.def("GetCenterPos",&Lua_Plane_GetCenterPos);
-	defPlane.def("Transform",static_cast<void(*)(lua_State*,Plane&,const Mat4&)>([](lua_State *l,Plane &plane,const Mat4 &transform) {
+	defPlane.def("Transform",static_cast<void(*)(lua_State*,umath::Plane&,const Mat4&)>([](lua_State *l,umath::Plane &plane,const Mat4 &transform) {
 		const auto &n = plane.GetNormal();
 		auto p = n *static_cast<float>(plane.GetDistance());
 		auto n0 = uvec::get_perpendicular(n);
@@ -1364,7 +1364,7 @@ void Game::RegisterLuaClasses()
 		auto p14 = transform *Vector4{p1.x,p1.y,p1.z,1.f};
 		auto p2 = p +n1 *10.f;
 		auto p24 = transform *Vector4{p2.x,p2.y,p2.z,1.f};
-		plane = Plane{Vector3{p04.x,p04.y,p04.z},Vector3{p14.x,p14.y,p14.z},Vector3{p24.x,p24.y,p24.z}};
+		plane = umath::Plane{Vector3{p04.x,p04.y,p04.z},Vector3{p14.x,p14.y,p14.z},Vector3{p24.x,p24.y,p24.z}};
 	}));
 	modMath[defPlane];
 }

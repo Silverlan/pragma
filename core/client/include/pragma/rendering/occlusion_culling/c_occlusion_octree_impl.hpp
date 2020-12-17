@@ -317,7 +317,7 @@ template<class T>
 	{
 		Vector3 r;
 		auto &rootBounds = root.GetWorldBounds();
-		Geometry::ClosestPointOnAABBToPoint(rootBounds.first,rootBounds.second,p,&r);
+		umath::geometry::closest_point_on_aabb_to_point(rootBounds.first,rootBounds.second,p,&r);
 		auto d = uvec::length_sqr(p -r);
 		if(d > dFurthest)
 		{

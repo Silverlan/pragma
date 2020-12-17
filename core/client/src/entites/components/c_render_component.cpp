@@ -418,7 +418,7 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 	auto d = uvec::length(n);
 	n /= d;
 	float dIntersect;
-	if(Intersection::LineAABB(lstart,n,aabb.min,aabb.max,&dIntersect) == Intersection::Result::NoIntersection || dIntersect > d)
+	if(umath::intersection::line_aabb(lstart,n,aabb.min,aabb.max,&dIntersect) == umath::intersection::Result::NoIntersection || dIntersect > d)
 		return {};
 
 	auto mdlC = GetEntity().GetModelComponent();
@@ -439,7 +439,7 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 				if(mdlC->GetHitboxBounds(hb.first,min,max,origin,rot) == false)
 					continue;
 				float dist;
-				if(Intersection::LineOBB(start,dir,min,max,&dist,origin,rot) == false || dist >= closestHitboxDistance)
+				if(umath::intersection::line_obb(start,dir,min,max,&dist,origin,rot) == false || dist >= closestHitboxDistance)
 					continue;
 				closestHitboxDistance = dist;
 				closestHitbox = &hb.second;
@@ -452,7 +452,7 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 				Intersection::LineMeshResult result {};
 				result.hitPos = start +dir *closestHitboxDistance;
 				result.hitValue = closestHitboxDistance;
-				result.result = Intersection::Result::Intersect;
+				result.result = umath::intersection::Result::Intersect;
 				result.hitbox = closestHitbox;
 				result.boneId = closestHitboxBoneId;
 				return result;
@@ -465,12 +465,12 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 	{
 		Vector3 min,max;
 		mesh->GetBounds(min,max);
-		if(Intersection::LineAABB(lstart,n,min,max,&dIntersect) == Intersection::Result::NoIntersection || dIntersect > d)
+		if(umath::intersection::line_aabb(lstart,n,min,max,&dIntersect) == umath::intersection::Result::NoIntersection || dIntersect > d)
 			continue;
 		for(auto &subMesh : mesh->GetSubMeshes())
 		{
 			subMesh->GetBounds(min,max);
-			if(Intersection::LineAABB(lstart,n,min,max,&dIntersect) == Intersection::Result::NoIntersection || dIntersect > d)
+			if(umath::intersection::line_aabb(lstart,n,min,max,&dIntersect) == umath::intersection::Result::NoIntersection || dIntersect > d)
 				continue;
 			Intersection::LineMeshResult result;
 			if(Intersection::LineMesh(lstart,ldir,*subMesh,result,true) == false)

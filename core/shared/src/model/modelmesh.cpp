@@ -288,7 +288,7 @@ void ModelSubMesh::GenerateNormals()
 					n += it->second;
 					continue;
 				}
-				auto faceNormal = Geometry::CalcFaceNormal(verts[idx0].position,verts[idx1].position,verts[idx2].position);
+				auto faceNormal = uvec::calc_face_normal(verts[idx0].position,verts[idx1].position,verts[idx2].position);
 				n += faceNormal;
 				processed[i] = faceNormal;
 			}

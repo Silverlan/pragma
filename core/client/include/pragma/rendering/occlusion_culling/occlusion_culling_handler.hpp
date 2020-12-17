@@ -11,6 +11,7 @@
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/baseentity_handle.h>
 #include <pragma/util/util_bsp_tree.hpp>
+#include <mathutil/plane.hpp>
 
 class CBaseEntity;
 class CModelMesh;
@@ -53,8 +54,8 @@ namespace pragma
 		virtual void PerformCulling(CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &origin,float radius,std::vector<OcclusionMeshInfo> &culledMeshesOut);
 	protected:
 		OcclusionCullingHandler()=default;
-		virtual bool ShouldExamine(CModelMesh &mesh,const Vector3 &pos,bool bViewModel,std::size_t numMeshes,const std::vector<Plane> *optPlanes=nullptr) const;
-		virtual bool ShouldExamine(CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,CBaseEntity &cent,bool &outViewModel,std::vector<Plane> **outPlanes) const;
+		virtual bool ShouldExamine(CModelMesh &mesh,const Vector3 &pos,bool bViewModel,std::size_t numMeshes,const std::vector<umath::Plane> *optPlanes=nullptr) const;
+		virtual bool ShouldExamine(CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,CBaseEntity &cent,bool &outViewModel,std::vector<umath::Plane> **outPlanes) const;
 	};
 };
 

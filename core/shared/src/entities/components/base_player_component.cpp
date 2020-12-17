@@ -419,7 +419,7 @@ BaseEntity *BasePlayerComponent::FindUseEntity() const
 			min += posEnt;
 			max += posEnt;
 			Vector3 res;
-			Geometry::ClosestPointOnAABBToPoint(min,max,origin,&res);
+			umath::geometry::closest_point_on_aabb_to_point(min,max,origin,&res);
 			
 			float dist = glm::distance(origin,res);
 			if(dist <= maxDist)

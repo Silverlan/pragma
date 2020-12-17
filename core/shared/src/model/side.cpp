@@ -79,7 +79,7 @@ void Side::SetDisplacementAlpha(unsigned char numAlpha)
 
 bool Side::IsPointInside(Vector3 &p,double epsilon) const
 {
-	if(!Intersection::VectorInBounds(p,m_min,m_max,static_cast<float>(EPSILON)))
+	if(!umath::intersection::vector_in_bounds(p,m_min,m_max,static_cast<float>(EPSILON)))
 		return false;
 	auto numVerts = m_vertices.size();
 	if(numVerts < 3)

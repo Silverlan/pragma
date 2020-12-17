@@ -91,5 +91,5 @@ void Lua::DebugRenderer::Server::DrawSpline(lua_State *l,luabind::table<> points
 }
 void Lua::DebugRenderer::Server::DrawPlane(const DebugRenderInfo &renderInfo)
 {
-	::SDebugRenderer::DrawPlane(Plane{uquat::forward(renderInfo.pose.GetRotation()),renderInfo.pose.GetOrigin()},renderInfo.color,renderInfo.duration);
+	::SDebugRenderer::DrawPlane(umath::Plane{uquat::forward(renderInfo.pose.GetRotation()),renderInfo.pose.GetOrigin()},renderInfo.color,renderInfo.duration);
 }

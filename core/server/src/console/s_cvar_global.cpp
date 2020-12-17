@@ -120,9 +120,14 @@ DLLSERVER void CMD_entities_sv(NetworkState *state,pragma::BasePlayerComponent *
 	std::optional<std::string> className = {};
 	if(argv.empty() == false)
 		className = '*' +argv.front() +'*';
+	std::optional<std::string> modelName {};
+	if(argv.size() > 1)
+		modelName = '*' +argv[1] +'*';
 	for(auto &pair : sortedEnts)
 	{
 		if(className.has_value() && ustring::match(pair.first->GetClass(),*className) == false)
+			continue;
+		if(modelName.has_value() && ustring::match(pair.first->GetModelName(),*modelName) == false)
 			continue;
 		Con::cout<<*pair.first<<Con::endl;
 	}

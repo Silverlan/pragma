@@ -295,16 +295,16 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 				auto coneDir = ent.GetForward();
 				auto coneAngle = umath::deg_to_rad(lightSpotC->GetOuterCutoffAngle());
 				fShouldCull = [&lightOrigin,lightRadius,coneDir,coneAngle](const Vector3 &min,const Vector3 &max) -> bool {
-					if(Intersection::AABBSphere(min,max,lightOrigin,lightRadius) == false)
+					if(umath::intersection::aabb_sphere(min,max,lightOrigin,lightRadius) == false)
 						return true;
 					auto center = (min +max) /2.f;
 					auto extents = (max -min) /2.f;
 					auto radius = uvec::length(extents);
-					return !Intersection::SphereCone(center,radius,lightOrigin,coneDir,coneAngle,lightRadius); // TODO: Frustum culling might be more efficient?
+					return !umath::intersection::sphere_cone(center,radius,lightOrigin,coneDir,coneAngle,lightRadius); // TODO: Frustum culling might be more efficient?
 				};
 			}
 			else
-				fShouldCull = [&lightOrigin,lightRadius](const Vector3 &min,const Vector3 &max) -> bool {return !Intersection::AABBSphere(min,max,lightOrigin,lightRadius);};
+				fShouldCull = [&lightOrigin,lightRadius](const Vector3 &min,const Vector3 &max) -> bool {return !umath::intersection::aabb_sphere(min,max,lightOrigin,lightRadius);};
 
 			auto &posCam = hCam->GetEntity().GetPosition();
 			auto vp = hCam->GetProjectionMatrix() *hCam->GetViewMatrix();
@@ -390,7 +390,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 				
 				auto &planes = lightPointC->GetFrustumPlanes(static_cast<CubeMapSide>(i));
 				auto fShouldCull = [&planes](const Vector3 &min,const Vector3 &max) -> bool {
-					return Intersection::AABBInPlaneMesh(min,max,planes) == Intersection::Intersect::Outside;
+					return umath::intersection::aabb_in_plane_mesh(min,max,planes) == umath::intersection::Intersect::Outside;
 				};
 				for(auto it=renderQueue->queue.begin();it!=renderQueue->queue.end();)
 				{

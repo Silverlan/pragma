@@ -536,8 +536,8 @@ Float RasterizationRenderer::GetHDRExposure() const {return m_hdrInfo.exposure;}
 Float RasterizationRenderer::GetMaxHDRExposure() const {return m_hdrInfo.max_exposure;}
 void RasterizationRenderer::SetMaxHDRExposure(Float exposure) {m_hdrInfo.max_exposure = exposure;}
 
-const std::vector<Plane> &RasterizationRenderer::GetFrustumPlanes() const {return m_frustumPlanes;}
-const std::vector<Plane> &RasterizationRenderer::GetClippedFrustumPlanes() const {return m_clippedFrustumPlanes;}
+const std::vector<umath::Plane> &RasterizationRenderer::GetFrustumPlanes() const {return m_frustumPlanes;}
+const std::vector<umath::Plane> &RasterizationRenderer::GetClippedFrustumPlanes() const {return m_clippedFrustumPlanes;}
 
 void RasterizationRenderer::UpdateFrustumPlanes(pragma::CSceneComponent &scene)
 {

@@ -325,6 +325,12 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 			continue;
 		auto &scene = drawSceneInfo.scene;
 		auto &drawCmd = drawSceneInfo.commandBuffer;
+		if(drawCmd == nullptr || drawCmd->IsPrimary() == false)
+			continue;
+		auto *primCmd = static_cast<prosper::IPrimaryCommandBuffer*>(drawCmd.get());
+		auto newRecording = !primCmd->IsRecording();
+		if(newRecording)
+			static_cast<prosper::IPrimaryCommandBuffer*>(drawCmd.get())->StartRecording();
 		if(cvClearScene->GetBool() == true || drawWorld == 2 || drawSceneInfo.clearColor.has_value())
 		{
 			auto clearCol = drawSceneInfo.clearColor.has_value() ? drawSceneInfo.clearColor->ToVector4() : Color(cvClearSceneColor->GetString()).ToVector4();
@@ -368,6 +374,8 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 			m_bMainRenderPass = true;
 #endif
 		RenderScene(drawSceneInfo);
+		if(newRecording)
+			static_cast<prosper::IPrimaryCommandBuffer*>(drawCmd.get())->StopRecording();
 	}
 	m_renderQueueBuilder->Flush();
 }

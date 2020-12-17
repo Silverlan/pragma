@@ -23,7 +23,7 @@ luabind::object Lua::intersect::line_obb(lua_State *l,const Vector3 &rayStart,co
 	float *pDist = nullptr;
 	if(precise == true)
 		pDist = &dist;
-	auto r = Intersection::LineOBB(rayStart,rayDir,min,max,pDist,pose.GetOrigin(),pose.GetRotation());
+	auto r = umath::intersection::line_obb(rayStart,rayDir,min,max,pDist,pose.GetOrigin(),pose.GetRotation());
 	if(r == false || precise == false)
 		return luabind::object{l,r};
 	return luabind::object{l,dist};
@@ -33,7 +33,7 @@ static bool get_line_mesh_result(lua_State *l,const Intersection::LineMeshResult
 {
 	if(precise == false)
 	{
-		r0 = luabind::object{l,res.result == Intersection::Result::Intersect};
+		r0 = luabind::object{l,res.result == umath::intersection::Result::Intersect};
 		return false;
 	}
 	r0 = luabind::object{l,res.result};
@@ -102,7 +102,7 @@ void Lua::intersect::line_mesh(lua_State *l,const Vector3 &rayStart,const Vector
 void Lua::intersect::line_aabb(lua_State *l,const Vector3 &start,const Vector3 &dir,const Vector3 &min,const Vector3 &max,luabind::object &outMin,luabind::object &outMax)
 {
 	float tMin,tMax;
-	auto res = Intersection::LineAABB(start,dir,min,max,&tMin,&tMax) == Intersection::Result::Intersect;
+	auto res = umath::intersection::line_aabb(start,dir,min,max,&tMin,&tMax) == umath::intersection::Result::Intersect;
 	if(res == false)
 	{
 		outMin = luabind::object{l,false};
@@ -115,7 +115,7 @@ void Lua::intersect::line_aabb(lua_State *l,const Vector3 &start,const Vector3 &
 luabind::object Lua::intersect::line_plane(lua_State *l,const Vector3 &origin,const Vector3 &dir,const Vector3 &n,float d)
 {
 	float t;
-	bool b = Intersection::LinePlane(origin,dir,n,d,&t) == Intersection::Result::Intersect;
+	bool b = umath::intersection::line_plane(origin,dir,n,d,&t) == umath::intersection::Result::Intersect;
 	if(b == false)
 		return luabind::object{l,false};
 	return luabind::object{l,t};
@@ -123,26 +123,26 @@ luabind::object Lua::intersect::line_plane(lua_State *l,const Vector3 &origin,co
 
 bool Lua::intersect::point_in_plane_mesh(lua_State *l,const Vector3 &vec,luabind::table<> planeTable)
 {
-	auto planes = Lua::table_to_vector<Plane>(l,planeTable,2);
-	return Intersection::PointInPlaneMesh(vec,planes);
+	auto planes = Lua::table_to_vector<umath::Plane>(l,planeTable,2);
+	return umath::intersection::point_in_plane_mesh(vec,planes);
 }
 
 int Lua::intersect::sphere_in_plane_mesh(lua_State *l,const Vector3 &vec,float r,luabind::table<> planeTable)
 {
-	auto planes = Lua::table_to_vector<Plane>(l,planeTable,3);
-	return umath::to_integral(Intersection::SphereInPlaneMesh(vec,r,planes));
+	auto planes = Lua::table_to_vector<umath::Plane>(l,planeTable,3);
+	return umath::to_integral(umath::intersection::sphere_in_plane_mesh(vec,r,planes));
 }
 
 int Lua::intersect::aabb_in_plane_mesh(lua_State *l,const Vector3 &min,const Vector3 &max,luabind::table<> planeTable)
 {
-	auto planes = Lua::table_to_vector<Plane>(l,planeTable,3);
-	return umath::to_integral(Intersection::AABBInPlaneMesh(min,max,planes));
+	auto planes = Lua::table_to_vector<umath::Plane>(l,planeTable,3);
+	return umath::to_integral(umath::intersection::aabb_in_plane_mesh(min,max,planes));
 }
 
 void Lua::intersect::line_triangle(lua_State *l,const Vector3 &lineOrigin,const Vector3 &lineDir,const Vector3 &v0,const Vector3 &v1,const Vector3 &v2,luabind::object &outT,luabind::object &outUv,bool cull)
 {
 	double t,u,v;
-	auto bIntersect = Intersection::LineTriangle(lineOrigin,lineDir,v0,v1,v2,t,u,v,cull);
+	auto bIntersect = umath::intersection::line_triangle(lineOrigin,lineDir,v0,v1,v2,t,u,v,cull);
 	if(bIntersect == false)
 	{
 		outT = luabind::object{l,false};
@@ -154,7 +154,7 @@ void Lua::intersect::line_triangle(lua_State *l,const Vector3 &lineOrigin,const 
 
 luabind::object Lua::intersect::line_line(lua_State *l,const Vector2 &start0,const Vector2 &end0,const Vector2 &start1,const Vector2 &end1)
 {
-	auto result = Intersection::LineLine(start0,end0,start1,end1);
+	auto result = umath::intersection::line_line(start0,end0,start1,end1);
 	if(result.has_value() == false)
 		return luabind::object{l,false};
 	return luabind::object{l,*result};

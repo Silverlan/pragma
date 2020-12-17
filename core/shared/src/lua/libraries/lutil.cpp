@@ -604,7 +604,7 @@ void Lua::util::splash_damage(
 			min += pos;
 			max += pos;
 			Vector3 posCone {};
-			Geometry::ClosestPointOnAABBToPoint(min,max,posEnd,&posCone);
+			umath::geometry::closest_point_on_aabb_to_point(min,max,posEnd,&posCone);
 			auto dirEnt = posCone -splashDamageInfo.origin;
 			uvec::normalize(&dirEnt);
 			if(uvec::dot(forward,dirEnt) < coneAngle)

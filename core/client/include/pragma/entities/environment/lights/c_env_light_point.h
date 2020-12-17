@@ -12,6 +12,7 @@
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/env_light_point.h"
 #include "pragma/rendering/c_cubemapside.h"
+#include <mathutil/plane.hpp>
 #include <pragma/util/mvpbase.h>
 
 namespace pragma
@@ -23,14 +24,14 @@ namespace pragma
 		CLightPointComponent(BaseEntity &ent) : BaseEnvLightPointComponent(ent) {}
 		virtual void Initialize() override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
-		const std::array<std::vector<Plane>,6u> &GetFrustumPlanes() const;
-		const std::vector<Plane> &GetFrustumPlanes(CubeMapSide side) const;
+		const std::array<std::vector<umath::Plane>,6u> &GetFrustumPlanes() const;
+		const std::vector<umath::Plane> &GetFrustumPlanes(CubeMapSide side) const;
 	protected:
 		void UpdateProjectionMatrix();
 		void UpdateFrustumPlanes();
 		bool m_bSkipMatrixUpdate = false;
 		// Frustum planes for each side of the cubemap
-		std::array<std::vector<Plane>,6u> m_frustumPlanes = {};
+		std::array<std::vector<umath::Plane>,6u> m_frustumPlanes = {};
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void UpdateTransformationMatrix(unsigned int j) override;
 		void SetShadowDirty();

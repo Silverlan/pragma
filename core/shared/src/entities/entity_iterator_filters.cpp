@@ -196,7 +196,7 @@ bool EntityIteratorFilterSphere::ShouldPass(BaseEntity &ent,Vector3 &outClosestP
 	Vector3 max {};
 	if(pPhysComponent != nullptr)
 		pPhysComponent->GetCollisionBounds(&min,&max);
-	Geometry::ClosestPointOnAABBToPoint(min,max,m_origin -pos,&outClosestPointOnEntityBounds);
+	umath::geometry::closest_point_on_aabb_to_point(min,max,m_origin -pos,&outClosestPointOnEntityBounds);
 	outDistToEntity = uvec::length(outClosestPointOnEntityBounds);
 	return outDistToEntity <= m_radius;
 }
@@ -224,7 +224,7 @@ bool EntityIteratorFilterBox::ShouldPass(BaseEntity &ent)
 	Vector3 entMax {};
 	if(pPhysComponent != nullptr)
 		pPhysComponent->GetCollisionBounds(&entMin,&entMax);
-	return Intersection::AABBAABB(m_min,m_max,entMin,entMax) != Intersection::Intersect::Outside;
+	return umath::intersection::aabb_aabb(m_min,m_max,entMin,entMax) != umath::intersection::Intersect::Outside;
 }
 
 /////////////////

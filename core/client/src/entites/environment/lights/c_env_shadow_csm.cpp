@@ -238,7 +238,7 @@ void CShadowCSMComponent::UpdateFrustum(uint32_t splitId,pragma::CCameraComponen
 	obb.rotation = uquat::create_look_rotation(dir,perp);
 
 	auto &aabb = frustumSplit.aabb;
-	AABB::GetRotatedBounds(obb.min,obb.max,umat::create(obb.rotation),&aabb.min,&aabb.max);
+	bounding_volume::AABB::GetRotatedBounds(obb.min,obb.max,umat::create(obb.rotation),&aabb.min,&aabb.max);
 	//
 
 	m_vpMatrices.at(splitId) = m_frustums.at(splitId).viewProjection;

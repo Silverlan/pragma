@@ -228,9 +228,9 @@ bool SceneRenderDesc::ShouldCull(pragma::CRenderComponent &renderC,pragma::Rende
 	max += pos;
 	return fShouldCull(min,max);
 }
-bool SceneRenderDesc::ShouldCull(const Vector3 &min,const Vector3 &max,const std::vector<Plane> &frustumPlanes)
+bool SceneRenderDesc::ShouldCull(const Vector3 &min,const Vector3 &max,const std::vector<umath::Plane> &frustumPlanes)
 {
-	return Intersection::AABBInPlaneMesh(min,max,frustumPlanes) == Intersection::Intersect::Outside;
+	return umath::intersection::aabb_in_plane_mesh(min,max,frustumPlanes) == umath::intersection::Intersect::Outside;
 }
 
 static auto cvEntitiesPerJob = GetClientConVar("render_queue_entities_per_worker_job");
@@ -252,7 +252,7 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 			auto hasIntersection = false;
 			for(auto *node : *bspLeafNodes)
 			{
-				if(Intersection::AABBAABB(nodeBounds.first,nodeBounds.second,node->minVisible,node->maxVisible) == Intersection::Intersect::Outside)
+				if(umath::intersection::aabb_aabb(nodeBounds.first,nodeBounds.second,node->minVisible,node->maxVisible) == umath::intersection::Intersect::Outside)
 					continue;
 				hasIntersection = true;
 				break;
@@ -315,12 +315,12 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 }
 void SceneRenderDesc::CollectRenderMeshesFromOctree(
 	const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
-	const std::vector<Plane> &frustumPlanes,const std::vector<util::BSPTree::Node*> *bspLeafNodes
+	const std::vector<umath::Plane> &frustumPlanes,const std::vector<util::BSPTree::Node*> *bspLeafNodes
 )
 {
 	CollectRenderMeshesFromOctree(drawSceneInfo,tree,scene,cam,vp,renderFlags,[this](RenderMode renderMode,bool translucent) {return GetRenderQueue(renderMode,translucent);},
 	[&frustumPlanes](const Vector3 &min,const Vector3 &max) -> bool {
-		return Intersection::AABBInPlaneMesh(min,max,frustumPlanes) == Intersection::Intersect::Outside;
+		return umath::intersection::aabb_in_plane_mesh(min,max,frustumPlanes) == umath::intersection::Intersect::Outside;
 	},bspLeafNodes);
 }
 
@@ -336,7 +336,7 @@ bool SceneRenderDesc::ShouldConsiderEntity(CBaseEntity &ent,const pragma::CScene
 struct DebugFreezeCamData
 {
 	Vector3 pos;
-	std::vector<Plane> frustumPlanes;
+	std::vector<umath::Plane> frustumPlanes;
 };
 static std::optional<DebugFreezeCamData> g_debugFreezeCamData = {};
 static void cmd_debug_occlusion_culling_freeze_camera(NetworkState*,ConVar*,bool,bool val)

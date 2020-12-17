@@ -12,7 +12,7 @@
 #include "pragma/rendering/renderers/rasterization/glow_data.hpp"
 #include "pragma/rendering/renderers/rasterization/hdr_data.hpp"
 #include "pragma/rendering/c_rendermode.h"
-#include <pragma/math/plane.h>
+#include <mathutil/plane.hpp>
 #include <sharedutils/util_weak_handle.hpp>
 #include <string>
 #include <vector>
@@ -136,8 +136,8 @@ namespace pragma::rendering
 		pragma::ShaderTextured3DBase *GetShaderOverride(pragma::ShaderTextured3DBase *srcShader) const;
 		void ClearShaderOverride(const std::string &srcShader);
 
-		const std::vector<Plane> &GetFrustumPlanes() const;
-		const std::vector<Plane> &GetClippedFrustumPlanes() const;
+		const std::vector<umath::Plane> &GetFrustumPlanes() const;
+		const std::vector<umath::Plane> &GetClippedFrustumPlanes() const;
 
 		// SSAO
 		bool IsSSAOEnabled() const;
@@ -223,8 +223,8 @@ namespace pragma::rendering
 		GlowData m_glowInfo;
 
 		// Frustum planes (Required for culling)
-		std::vector<Plane> m_frustumPlanes = {};
-		std::vector<Plane> m_clippedFrustumPlanes = {};
+		std::vector<umath::Plane> m_frustumPlanes = {};
+		std::vector<umath::Plane> m_clippedFrustumPlanes = {};
 		void UpdateFrustumPlanes(CSceneComponent &scene);
 
 		RendererData m_rendererData {};

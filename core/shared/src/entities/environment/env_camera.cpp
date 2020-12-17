@@ -116,19 +116,19 @@ void BaseEnvCameraComponent::SetViewMatrix(const Mat4 &mat)
 	}
 }
 void BaseEnvCameraComponent::SetProjectionMatrix(const Mat4 &mat) {*m_projectionMatrix = mat;}
-void BaseEnvCameraComponent::GetFrustumPlanes(std::vector<Plane> &outPlanes) const
+void BaseEnvCameraComponent::GetFrustumPlanes(std::vector<umath::Plane> &outPlanes) const
 {
 	std::vector<Vector3> points {};
 	GetFrustumPoints(points);
 	GetFrustumPlanes(points,outPlanes);
 }
-void BaseEnvCameraComponent::GetFrustumPlanes(std::vector<Plane> &outPlanes,float neard,float fard,float fov,float ratio,const Vector3 &center,const Vector3 &viewDir,const Vector3 &viewUp)
+void BaseEnvCameraComponent::GetFrustumPlanes(std::vector<umath::Plane> &outPlanes,float neard,float fard,float fov,float ratio,const Vector3 &center,const Vector3 &viewDir,const Vector3 &viewUp)
 {
 	std::vector<Vector3> points;
 	GetFrustumPoints(points,neard,fard,fov,ratio,center,viewDir,viewUp);
 	return GetFrustumPlanes(points,outPlanes);
 }
-void BaseEnvCameraComponent::GetFrustumPlanes(const std::vector<Vector3> &points,std::vector<Plane> &outPlanes)
+void BaseEnvCameraComponent::GetFrustumPlanes(const std::vector<Vector3> &points,std::vector<umath::Plane> &outPlanes)
 {
 	/*float wNear,hNear;
 	float wFar,hFar;
@@ -164,42 +164,42 @@ void BaseEnvCameraComponent::GetFrustumPlanes(const std::vector<Vector3> &points
 
 	outPlanes.reserve(outPlanes.size() +6u);
 	// Left Plane
-	outPlanes.push_back(Plane{
+	outPlanes.push_back(umath::Plane{
 		points.at(umath::to_integral(FrustumPoint::NearBottomLeft)),
 		points.at(umath::to_integral(FrustumPoint::FarBottomLeft)),
 		points.at(umath::to_integral(FrustumPoint::NearTopLeft)),
 		});
 
 	// Right Plane
-	outPlanes.push_back(Plane{
+	outPlanes.push_back(umath::Plane{
 		points.at(umath::to_integral(FrustumPoint::NearBottomRight)),
 		points.at(umath::to_integral(FrustumPoint::NearTopRight)),
 		points.at(umath::to_integral(FrustumPoint::FarBottomRight)),
 		});
 
 	// Top Plane
-	outPlanes.push_back(Plane{
+	outPlanes.push_back(umath::Plane{
 		points.at(umath::to_integral(FrustumPoint::NearBottomRight)),
 		points.at(umath::to_integral(FrustumPoint::FarBottomLeft)),
 		points.at(umath::to_integral(FrustumPoint::NearBottomLeft)),
 		});
 
 	// Bottom Plane
-	outPlanes.push_back(Plane{
+	outPlanes.push_back(umath::Plane{
 		points.at(umath::to_integral(FrustumPoint::NearTopRight)),
 		points.at(umath::to_integral(FrustumPoint::NearTopLeft)),
 		points.at(umath::to_integral(FrustumPoint::FarTopLeft)),
 		});
 
 	// Near Plane
-	outPlanes.push_back(Plane{
+	outPlanes.push_back(umath::Plane{
 		points.at(umath::to_integral(FrustumPoint::NearTopRight)),
 		points.at(umath::to_integral(FrustumPoint::NearBottomLeft)),
 		points.at(umath::to_integral(FrustumPoint::NearTopLeft)),
 		});
 
 	// Far Plane
-	outPlanes.push_back(Plane{
+	outPlanes.push_back(umath::Plane{
 		points.at(umath::to_integral(FrustumPoint::FarTopRight)),
 		points.at(umath::to_integral(FrustumPoint::FarTopLeft)),
 		points.at(umath::to_integral(FrustumPoint::FarBottomLeft)),
@@ -288,7 +288,7 @@ void BaseEnvCameraComponent::UpdateFrustumPlanes()
 	m_frustumPlanes.clear();
 	GetFrustumPlanes(m_frustumPlanes);
 }
-const std::vector<Plane> &BaseEnvCameraComponent::GetFrustumPlanes() const {return m_frustumPlanes;}
+const std::vector<umath::Plane> &BaseEnvCameraComponent::GetFrustumPlanes() const {return m_frustumPlanes;}
 Vector3 BaseEnvCameraComponent::GetNearPlanePoint(const Vector2 &uv) const
 {
 	return GetPlanePoint(*m_nearZ,uv);
@@ -344,7 +344,7 @@ void BaseEnvCameraComponent::CreateFrustumMesh(const Vector2 &uvStart,const Vect
 		4,6,7
 	};
 }
-void BaseEnvCameraComponent::CreateFrustumKDop(const Vector2 &uvStart,const Vector2 &uvEnd,std::vector<Plane> &kDop) const
+void BaseEnvCameraComponent::CreateFrustumKDop(const Vector2 &uvStart,const Vector2 &uvEnd,std::vector<umath::Plane> &kDop) const
 {
 	auto uvTopLeft = Vector2(umath::min(uvStart.x,uvEnd.x),umath::min(uvStart.y,uvEnd.y));
 	auto uvBottomRight = Vector2(umath::max(uvStart.x,uvEnd.x),umath::max(uvStart.y,uvEnd.y));
@@ -374,12 +374,12 @@ void BaseEnvCameraComponent::CreateFrustumKDop(const Vector2 &uvStart,const Vect
 	}
 
 	kDop = {
-		Plane(verts.at(2),verts.at(0),verts.at(1)),
-		Plane(verts.at(0),verts.at(4),verts.at(1)),
-		Plane(verts.at(1),verts.at(5),verts.at(2)),
-		Plane(verts.at(7),verts.at(3),verts.at(2)),
-		Plane(verts.at(4),verts.at(0),verts.at(3)),
-		Plane(verts.at(4),verts.at(6),verts.at(5))
+		umath::Plane(verts.at(2),verts.at(0),verts.at(1)),
+		umath::Plane(verts.at(0),verts.at(4),verts.at(1)),
+		umath::Plane(verts.at(1),verts.at(5),verts.at(2)),
+		umath::Plane(verts.at(7),verts.at(3),verts.at(2)),
+		umath::Plane(verts.at(4),verts.at(0),verts.at(3)),
+		umath::Plane(verts.at(4),verts.at(6),verts.at(5))
 	};
 	kDop.back().MoveToPos(GetFarPlaneCenter()); // Move back plane back to its actual position. TODO: Can this also cause precision errors?
 }
@@ -586,12 +586,12 @@ void BaseEnvCameraComponent::GetFrustumPlaneCornerPoints(FrustumPlane planeA,Fru
 	cornerPoints[0] = points[static_cast<int>(planeA)][static_cast<int>(planeB)][0];
 	cornerPoints[1] = points[static_cast<int>(planeA)][static_cast<int>(planeB)][1];
 }
-void BaseEnvCameraComponent::CreateFrustumKDop(const std::vector<Plane> &planes,const std::vector<Vector3> &points,const Vector3 &dir,std::vector<Plane> *kDop)
+void BaseEnvCameraComponent::CreateFrustumKDop(const std::vector<umath::Plane> &planes,const std::vector<Vector3> &points,const Vector3 &dir,std::vector<umath::Plane> *kDop)
 {
 	std::array<float,6> fDir;
 	for(unsigned int i=0;i<6;i++)
 	{
-		Plane &plane = const_cast<Plane&>(planes[i]);
+		umath::Plane &plane = const_cast<umath::Plane&>(planes[i]);
 		fDir[i] = uvec::dot(plane.GetNormal(),dir);
 		if(fDir[i] < EPSILON)
 			kDop->push_back(plane);
@@ -610,7 +610,7 @@ void BaseEnvCameraComponent::CreateFrustumKDop(const std::vector<Plane> &planes,
 				{
 					FrustumPoint corners[2];
 					GetFrustumPlaneCornerPoints(FrustumPlane(i),neighbors[j],&corners[0]);
-					Plane p(points[static_cast<int>(corners[0])],points[static_cast<int>(corners[1])],points[static_cast<int>(corners[0])] -dir);
+					umath::Plane p(points[static_cast<int>(corners[0])],points[static_cast<int>(corners[1])],points[static_cast<int>(corners[0])] -dir);
 					kDop->push_back(p);
 				}
 			}

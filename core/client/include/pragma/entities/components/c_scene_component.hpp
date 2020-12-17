@@ -14,6 +14,7 @@
 #include "pragma/rendering/render_mesh_collection_handler.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <shader/prosper_descriptor_array_manager.hpp>
+#include <mathutil/plane.hpp>
 
 namespace pragma
 {
@@ -72,7 +73,7 @@ public:
 	static bool ShouldCull(CBaseEntity &ent,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);
 	static bool ShouldCull(pragma::CRenderComponent &renderC,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);
 	static bool ShouldCull(pragma::CRenderComponent &renderC,pragma::RenderMeshIndex meshIdx,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);
-	static bool ShouldCull(const Vector3 &min,const Vector3 &max,const std::vector<Plane> &frustumPlanes);
+	static bool ShouldCull(const Vector3 &min,const Vector3 &max,const std::vector<umath::Plane> &frustumPlanes);
 	static uint32_t GetActiveRenderQueueThreadCount();
 	static bool AssertRenderQueueThreadInactive();
 
@@ -112,7 +113,7 @@ private:
 	);
 	void CollectRenderMeshesFromOctree(
 		const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
-		const std::vector<Plane> &frustumPlanes,const std::vector<util::BSPTree::Node*> *bspLeafNodes=nullptr
+		const std::vector<umath::Plane> &frustumPlanes,const std::vector<util::BSPTree::Node*> *bspLeafNodes=nullptr
 	);
 
 	// TODO: Remove these, they're obsolete

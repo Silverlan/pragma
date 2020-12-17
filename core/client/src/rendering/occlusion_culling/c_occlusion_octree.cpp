@@ -42,8 +42,8 @@ const std::array<std::shared_ptr<BaseOcclusionOctree::Node>,8> *BaseOcclusionOct
 bool BaseOcclusionOctree::Node::IsContained(const Vector3 &min,const Vector3 &max) const
 {
 	if(m_tree->IsSingleReferenceMode() == true)
-		return Intersection::AABBInAABB(min,max,m_worldBounds.first,m_worldBounds.second);
-	return (Intersection::AABBAABB(min,max,m_worldBounds.first,m_worldBounds.second) != Intersection::Intersect::Outside) ? true : false;
+		return umath::intersection::aabb_in_aabb(min,max,m_worldBounds.first,m_worldBounds.second);
+	return (umath::intersection::aabb_aabb(min,max,m_worldBounds.first,m_worldBounds.second) != umath::intersection::Intersect::Outside) ? true : false;
 }
 
 bool BaseOcclusionOctree::Node::UpdateState(bool bForceUpdateParents)

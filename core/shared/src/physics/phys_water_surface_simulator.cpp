@@ -250,8 +250,8 @@ bool PhysWaterSurfaceSimulator::CalcPointSurfaceIntersection(const Vector3 &orig
 	const auto n = Vector3(0,1,0); // TODO
 	double t,u,v;
 	if(
-		Intersection::LineTriangle(origin,n,particlePositions.at(0),particlePositions.at(1),particlePositions.at(2),t,u,v) == true ||
-		Intersection::LineTriangle(origin,n,particlePositions.at(3),particlePositions.at(2),particlePositions.at(1),t,u,v) == true
+		umath::intersection::line_triangle(origin,n,particlePositions.at(0),particlePositions.at(1),particlePositions.at(2),t,u,v) == true ||
+		umath::intersection::line_triangle(origin,n,particlePositions.at(3),particlePositions.at(2),particlePositions.at(1),t,u,v) == true
 	)
 	{
 		intersection = origin +n *static_cast<float>(t);

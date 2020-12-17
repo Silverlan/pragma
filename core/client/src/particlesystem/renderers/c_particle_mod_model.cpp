@@ -182,7 +182,7 @@ bool CParticleRendererModel::Update()
 	auto &posCam = cam->GetEntity().GetPosition();
 	auto &renderBounds = GetParticleSystem().GetRenderBounds();
 	Vector3 p;
-	Geometry::ClosestPointOnAABBToPoint(renderBounds.first,renderBounds.second,posCam,&p);
+	umath::geometry::closest_point_on_aabb_to_point(renderBounds.first,renderBounds.second,posCam,&p);
 	auto dist = uvec::distance(posCam,p);
 
 	auto bSuccessful = true;

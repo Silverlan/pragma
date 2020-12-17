@@ -55,7 +55,7 @@ void BaseEnvExplosionComponent::Explode()
 		if(pPhysComponentOther)
 			pPhysComponentOther->GetCollisionBounds(&min,&max);
 		Vector3 r;
-		Geometry::ClosestPointOnAABBToPoint((min +pos),(max +pos),origin,&r);
+		umath::geometry::closest_point_on_aabb_to_point((min +pos),(max +pos),origin,&r);
 		float d = glm::distance(origin,r);
 		if(d <= radius)
 		{

@@ -1051,7 +1051,7 @@ void Model::GetRenderBounds(Vector3 &min,Vector3 &max)
 
 bool Model::IntersectAABB(Vector3 &min,Vector3 &max)
 {
-	if(Intersection::AABBAABB(m_collisionMin,m_collisionMax,min,max) == Intersection::Intersect::Outside)
+	if(umath::intersection::aabb_aabb(m_collisionMin,m_collisionMax,min,max) == umath::intersection::Intersect::Outside)
 		return false;
 	for(int i=0;i<m_collisionMeshes.size();i++)
 		if(m_collisionMeshes[i]->IntersectAABB(&min,&max))

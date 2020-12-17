@@ -1250,7 +1250,7 @@ void CMD_debug_aim_info(NetworkState *state,pragma::BasePlayerComponent *pl,std:
 				continue;
 			auto renderC = ent->GetComponent<pragma::CRenderComponent>();
 			auto lineMeshResult = renderC->CalcRayIntersection(trData.GetSourceOrigin(),trData.GetTargetOrigin(),true);
-			if(lineMeshResult.has_value() == false || lineMeshResult->result != Intersection::Result::Intersect)
+			if(lineMeshResult.has_value() == false || lineMeshResult->result != umath::intersection::Result::Intersect)
 				continue;
 			if(closestMesh.has_value() && lineMeshResult->hitValue > closestMesh->hitValue)
 				continue;

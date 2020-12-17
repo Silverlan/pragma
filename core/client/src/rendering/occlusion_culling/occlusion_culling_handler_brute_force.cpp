@@ -35,7 +35,7 @@ void OcclusionCullingHandlerBruteForce::PerformCulling(
 			continue;
 		auto pRenderComponent = ent->GetRenderComponent();
 		bool bViewModel = false;
-		std::vector<Plane> *planes = nullptr;
+		std::vector<umath::Plane> *planes = nullptr;
 		if((ShouldExamine(scene,renderer,*ent,bViewModel,cullByViewFrustum ? &planes : nullptr) == true))
 		{
 			//if(bUpdateLod == true) // Needs to be updated every frame (in case the entity is moving towards or away from us)

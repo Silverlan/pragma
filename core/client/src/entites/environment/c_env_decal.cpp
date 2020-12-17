@@ -87,8 +87,8 @@ std::vector<DecalProjector::VertexInfo> DecalProjector::CropTriangleVertsByLine(
 	for(auto i=decltype(verts.size()){0u};i<verts.size();++i)
 	{
 		auto &vInfo = verts.at(i);
-		auto side = Geometry::get_side_of_point_to_line(lineStart,lineEnd,vInfo.position);
-		pointsOutOfBounds.at(i) = (side == Geometry::LineSide::Right);
+		auto side = umath::geometry::get_side_of_point_to_line(lineStart,lineEnd,vInfo.position);
+		pointsOutOfBounds.at(i) = (side == umath::geometry::LineSide::Right);
 	}
 
 	std::vector<VertexInfo> newVerts {};
@@ -107,11 +107,11 @@ std::vector<DecalProjector::VertexInfo> DecalProjector::CropTriangleVertsByLine(
 			(pointsOutOfBounds.at(v0Idx) == false && pointsOutOfBounds.at(v1Idx) == true)
 		)
 		{
-			auto intersectionPos = Intersection::LineLine(lineStart,lineEnd,verts.at(v0Idx).position,verts.at(v1Idx).position);
+			auto intersectionPos = umath::intersection::line_line(lineStart,lineEnd,verts.at(v0Idx).position,verts.at(v1Idx).position);
 			if(intersectionPos.has_value())
 			{
 				float u,v;
-				if(Geometry::calc_barycentric_coordinates(v0,v1,v2,Vector3{intersectionPos->x,intersectionPos->y,0.f},u,v))
+				if(umath::geometry::calc_barycentric_coordinates(v0,v1,v2,Vector3{intersectionPos->x,intersectionPos->y,0.f},u,v))
 					newVerts.push_back({*intersectionPos,std::numeric_limits<uint32_t>::max(),Vector2{u,v}});
 			}
 		}
@@ -157,7 +157,7 @@ bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas,st
 				auto p1 = effectivePose *v1.position;
 				auto p2 = effectivePose *v2.position;
 
-				if(Intersection::AABBTriangle(bounds.first,bounds.second,p0,p1,p2) == false)
+				if(umath::intersection::aabb_triangle(bounds.first,bounds.second,p0,p1,p2) == false)
 					continue;
 				intersectingTris.push_back({
 					indices,
@@ -192,7 +192,7 @@ bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas,st
 					uvec::project_to_plane(triInfo.vertices.at(1),n,d),
 					uvec::project_to_plane(triInfo.vertices.at(2),n,d)
 				};
-				auto area = Geometry::calc_triangle_area(vertsPs.at(0),vertsPs.at(1),vertsPs.at(2));
+				auto area = umath::geometry::calc_triangle_area(vertsPs.at(0),vertsPs.at(1),vertsPs.at(2));
 				constexpr auto AREA_EPSILON = 0.004f;
 				if(area < AREA_EPSILON)
 					continue; // Points don't actually create a triangle; skip it; TODO: It would be cheaper to use dot products for this!
@@ -414,7 +414,7 @@ bool CDecalComponent::ApplyDecal()
 		// TODO: We can speed this up by using the BSP Tree for occlusion culling
 		auto &aabb = static_cast<CBaseEntity*>(ent)->GetAbsoluteRenderBounds();
 
-		if(Intersection::AABBInAABB(projectorAABB.first,projectorAABB.second,aabb.min,aabb.max) == false)
+		if(umath::intersection::aabb_in_aabb(projectorAABB.first,projectorAABB.second,aabb.min,aabb.max) == false)
 			continue;
 
 		targetEnts.push_back(static_cast<CBaseEntity*>(ent));

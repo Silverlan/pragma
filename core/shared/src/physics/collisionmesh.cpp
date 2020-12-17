@@ -244,11 +244,11 @@ void CollisionMesh::SetAABB(Vector3 &min,Vector3 &max)
 std::shared_ptr<pragma::physics::IShape> CollisionMesh::GetShape() {return m_shape;}
 bool CollisionMesh::IntersectAABB(Vector3 *min,Vector3 *max)
 {
-	if(Intersection::AABBAABB(m_min,m_max,*min,*max) == Intersection::Intersect::Outside)
+	if(umath::intersection::aabb_aabb(m_min,m_max,*min,*max) == umath::intersection::Intersect::Outside)
 		return false;
 	for(int i=0;i<m_vertices.size();i+=3)
 	{
-		if(Intersection::AABBTriangle(m_min,m_max,m_vertices[i],m_vertices[i +1],m_vertices[i +2]))
+		if(umath::intersection::aabb_triangle(m_min,m_max,m_vertices[i],m_vertices[i +1],m_vertices[i +2]))
 			return true;
 	}
 	// TODO: Check if bounds are WITHIN mesh (Before checking triangles?)
@@ -259,7 +259,7 @@ const std::vector<uint16_t> &CollisionMesh::GetTriangles() const {return const_c
 std::vector<uint16_t> &CollisionMesh::GetTriangles() {return m_triangles;}
 void CollisionMesh::CalculateVolumeAndCom()
 {
-	m_volume = Geometry::calc_volume_of_polyhedron(m_vertices,m_triangles,&m_centerOfMass);
+	m_volume = umath::geometry::calc_volume_of_polyhedron(m_vertices,m_triangles,&m_centerOfMass);
 }
 const Vector3 &CollisionMesh::GetCenterOfMass() const {return m_centerOfMass;}
 void CollisionMesh::SetCenterOfMass(const Vector3 &com) {m_centerOfMass = com;}

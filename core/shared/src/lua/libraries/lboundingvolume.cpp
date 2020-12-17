@@ -12,8 +12,9 @@
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/lua/classes/ldef_mat4.h"
 #include <pragma/math/intersection.h>
+#include <mathutil/boundingvolume.h>
 
 void Lua::boundingvolume::GetRotatedAABB(const Vector3 &min,const Vector3 &max,const Mat4 &rot,Vector3 &rmin,Vector3 &rmax)
 {
-	AABB::GetRotatedBounds(min,max,rot,&rmin,&rmax);
+	bounding_volume::AABB::GetRotatedBounds(min,max,rot,&rmin,&rmax);
 }

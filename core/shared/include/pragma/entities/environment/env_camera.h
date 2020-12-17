@@ -12,6 +12,7 @@
 #include <sharedutils/property/util_property.hpp>
 #include <sharedutils/property/util_property_vector.h>
 #include <sharedutils/property/util_property_matrix.hpp>
+#include <mathutil/plane.hpp>
 
 enum class FrustumPlane : uint32_t;
 enum class FrustumPoint : uint32_t;
@@ -38,7 +39,7 @@ namespace pragma
 		void SetViewMatrix(const Mat4 &mat);
 		void SetProjectionMatrix(const Mat4 &mat);
 		// Returns the six sides of the frustum in the order near,far,left,right,top,bottom
-		void GetFrustumPlanes(std::vector<Plane> &outPlanes) const;
+		void GetFrustumPlanes(std::vector<umath::Plane> &outPlanes) const;
 		void GetFrustumPoints(std::vector<Vector3> &outPoints) const;
 		Vector3 GetFarPlaneCenter() const;
 		Vector3 GetNearPlaneCenter() const;
@@ -78,21 +79,21 @@ namespace pragma
 		float GetNearZ() const;
 		float GetFarZ() const;
 		void UpdateFrustumPlanes();
-		const std::vector<Plane> &GetFrustumPlanes() const;
+		const std::vector<umath::Plane> &GetFrustumPlanes() const;
 		Vector3 GetNearPlanePoint(const Vector2 &uv) const;
 		Vector3 GetFarPlanePoint(const Vector2 &uv) const;
 		Vector3 GetPlanePoint(float z,const Vector2 &uv) const;
 
 		void CreateFrustumMesh(const Vector2 &uvStart,const Vector2 &uvEnd,std::vector<Vector3> &verts,std::vector<uint16_t> &indices) const;
-		void CreateFrustumKDop(const Vector2 &uvStart,const Vector2 &uvEnd,std::vector<Plane> &kDop) const;
+		void CreateFrustumKDop(const Vector2 &uvStart,const Vector2 &uvEnd,std::vector<umath::Plane> &kDop) const;
 
 		static void GetFrustumPoints(std::vector<Vector3> &outPoints,float neard,float fard,float fov,float ratio,const Vector3 &center,const Vector3 &viewDir,const Vector3 &viewUp);
 		static void GetFrustumNeighbors(FrustumPlane planeID,FrustumPlane *neighborIDs);
 		static void GetFrustumPlaneCornerPoints(FrustumPlane planeA,FrustumPlane planeB,FrustumPoint *cornerPoints);
-		static void CreateFrustumKDop(const std::vector<Plane> &planes,const std::vector<Vector3> &points,const Vector3 &dir,std::vector<Plane> *kDop);
+		static void CreateFrustumKDop(const std::vector<umath::Plane> &planes,const std::vector<Vector3> &points,const Vector3 &dir,std::vector<umath::Plane> *kDop);
 		static Mat4 CalcProjectionMatrix(float fovRad,float aspectRatio,float nearZ,float farZ);
-		static void GetFrustumPlanes(const std::vector<Vector3> &points,std::vector<Plane> &outPlanes);
-		static void GetFrustumPlanes(std::vector<Plane> &outPlanes,float neard,float fard,float fov,float ratio,const Vector3 &center,const Vector3 &viewDir,const Vector3 &viewUp);
+		static void GetFrustumPlanes(const std::vector<Vector3> &points,std::vector<umath::Plane> &outPlanes);
+		static void GetFrustumPlanes(std::vector<umath::Plane> &outPlanes,float neard,float fard,float fov,float ratio,const Vector3 &center,const Vector3 &viewDir,const Vector3 &viewUp);
 	private:
 		util::PMatrix4Property m_projectionMatrix = nullptr;
 		util::PMatrix4Property m_viewMatrix = nullptr;
@@ -100,7 +101,7 @@ namespace pragma
 		util::PFloatProperty m_aspectRatio = nullptr;
 		util::PFloatProperty m_nearZ = nullptr;
 		util::PFloatProperty m_farZ = nullptr;
-		std::vector<Plane> m_frustumPlanes;
+		std::vector<umath::Plane> m_frustumPlanes;
 	};
 };
 

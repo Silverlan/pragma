@@ -18,6 +18,7 @@
 #include "pragma/model/animation/animation.h"
 #include "pragma/lua/l_entity_handles.hpp"
 #include <sharedutils/util_weak_handle.hpp>
+#include <mathutil/plane.hpp>
 
 extern DLLENGINE Engine *engine;
 
@@ -1593,14 +1594,14 @@ namespace Lua
 		}));
 		def.def("GetFrustumPlanes",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
 			pragma::Lua::check_component(l,hComponent);
-			std::vector<Plane> planes;
+			std::vector<umath::Plane> planes;
 			hComponent->GetFrustumPlanes(planes);
 
 			lua_newtable(l);
 			int top = lua_gettop(l);
 			for(unsigned int i=0;i<planes.size();i++)
 			{
-				Lua::Push<Plane>(l,planes[i]);
+				Lua::Push<umath::Plane>(l,planes[i]);
 				lua_rawseti(l,top,i +1);
 			}
 		}));
@@ -1760,7 +1761,7 @@ namespace Lua
 		}));
 		def.def("CreateFrustumKDop",static_cast<void(*)(lua_State*,THandle&,const Vector2&,const Vector2&)>([](lua_State *l,THandle &hComponent,const Vector2 &uvStart,const Vector2 &uvEnd) {
 			pragma::Lua::check_component(l,hComponent);
-			std::vector<Plane> kDop;
+			std::vector<umath::Plane> kDop;
 			hComponent->CreateFrustumKDop(uvStart,uvEnd,kDop);
 
 			auto table = Lua::CreateTable(l);
@@ -1768,7 +1769,7 @@ namespace Lua
 			for(auto &plane : kDop)
 			{
 				Lua::PushInt(l,idx++);
-				Lua::Push<Plane>(l,plane);
+				Lua::Push<umath::Plane>(l,plane);
 				Lua::SetTableValue(l,table);
 			}
 		}));

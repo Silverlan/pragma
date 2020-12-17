@@ -9,9 +9,9 @@
 #define __UTIL_BSP_TREE_HPP__
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/math/plane.h"
 #include <array>
 #include <mathutil/uvec.h>
+#include <mathutil/plane.hpp>
 
 namespace util
 {
@@ -43,7 +43,7 @@ namespace util
 			Vector3 maxVisible = {}; // Max bounds encompassing entire visible area of this leaf
 
 			// Only valid if this is a non-leaf node
-			Plane plane = {};
+			umath::Plane plane = {};
 
 			friend BSPTree;
 		};

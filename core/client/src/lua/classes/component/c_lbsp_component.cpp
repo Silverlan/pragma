@@ -87,7 +87,7 @@ void Lua::BSP::register_class(lua_State *l,luabind::module_ &entsMod,luabind::cl
 		Lua::Push<Vector3>(l,node.maxVisible);
 		}));
 	defBspNode.def("GetInternalNodePlane",static_cast<void(*)(lua_State*,::util::BSPTree::Node&)>([](lua_State *l,::util::BSPTree::Node &node) {
-		Lua::Push<Plane>(l,node.plane);
+		Lua::Push<umath::Plane>(l,node.plane);
 		}));
 	defBspNode.def("GetInternalNodeFirstFaceIndex",static_cast<void(*)(lua_State*,::util::BSPTree::Node&)>([](lua_State *l,::util::BSPTree::Node &node) {
 		Lua::PushInt(l,node.firstFace);

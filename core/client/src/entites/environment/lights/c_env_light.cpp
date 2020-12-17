@@ -170,7 +170,7 @@ bool CLightComponent::IsInCone(const CBaseEntity &ent,const Vector3 &dir,float a
 		return false;
 	auto &start = pTrComponentThis->GetPosition();
 	auto &sphere = pRenderComponent->GetUpdatedAbsoluteRenderSphere();
-	return Intersection::SphereCone(pTrComponent->GetPosition() +sphere.pos,sphere.radius,start,dir,angle);
+	return umath::intersection::sphere_cone(pTrComponent->GetPosition() +sphere.pos,sphere.radius,start,dir,angle);
 }
 void CLightComponent::SetLightIntensity(float intensity,LightIntensityType type)
 {
@@ -218,7 +218,7 @@ bool CLightComponent::IsInRange(const CBaseEntity &ent,const CModelMesh &mesh) c
 	mesh.GetBounds(min,max);
 	min += pos;
 	max += pos;
-	return Intersection::AABBSphere(min,max,origin,radius);
+	return umath::intersection::aabb_sphere(min,max,origin,radius);
 }
 
 bool CLightComponent::ShouldUpdateRenderPass(ShadowMapType smType) const

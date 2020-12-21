@@ -130,6 +130,8 @@ class VertexAnimation;
 class FlexAnimation;
 class NetworkState;
 using FlexControllerId = uint32_t;
+using BoneId = uint32_t;
+enum class JointType : uint8_t;
 namespace umath {class ScaledTransform;};
 class DLLNETWORK Model
 	: public std::enable_shared_from_this<Model>
@@ -430,7 +432,7 @@ public:
 
 	const std::vector<JointInfo> &GetJoints() const;
 	std::vector<JointInfo> &GetJoints();
-	JointInfo &AddJoint(uint8_t type,uint32_t src,uint32_t tgt);
+	JointInfo &AddJoint(JointType type,BoneId child,BoneId parent);
 
 	const std::vector<Eyeball> &GetEyeballs() const;
 	std::vector<Eyeball> &GetEyeballs();

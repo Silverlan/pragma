@@ -331,9 +331,9 @@ const Frame &Model::GetReference() const {return *m_reference;}
 void Model::SetReference(std::shared_ptr<Frame> frame) {m_reference = frame;}
 const std::vector<JointInfo> &Model::GetJoints() const {return const_cast<Model*>(this)->GetJoints();}
 std::vector<JointInfo> &Model::GetJoints() {return m_joints;}
-JointInfo &Model::AddJoint(uint8_t type,uint32_t src,uint32_t tgt)
+JointInfo &Model::AddJoint(JointType type,BoneId child,BoneId parent)
 {
-	m_joints.push_back(JointInfo(type,src,tgt));
+	m_joints.push_back(JointInfo(type,child,parent));
 	return m_joints.back();
 }
 

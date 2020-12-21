@@ -59,7 +59,7 @@ float calculate_spot_shadow(shadowMapSamplerType shadowMap,vec4 shadowCoord,floa
 	float sampleSpread = 0.0;
 	int numPoissonSamples = 0;
 
-	int quality = u_renderSettings.shaderQuality;
+	int quality = 2;//u_renderSettings.shaderQuality;
 	if(quality > 1)
 	{
 		numPoissonSamples = 2;

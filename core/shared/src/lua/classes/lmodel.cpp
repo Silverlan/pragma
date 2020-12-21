@@ -97,13 +97,13 @@ void Lua::Joint::GetType(lua_State *l,JointInfo &joint)
 {
 	Lua::PushInt(l,joint.type);
 }
-void Lua::Joint::GetCollisionMeshId(lua_State *l,JointInfo &joint)
+void Lua::Joint::GetChildBoneId(lua_State *l,JointInfo &joint)
 {
-	Lua::PushInt(l,joint.src);
+	Lua::PushInt(l,joint.child);
 }
-void Lua::Joint::GetParentCollisionMeshId(lua_State *l,JointInfo &joint)
+void Lua::Joint::GetParentBoneId(lua_State *l,JointInfo &joint)
 {
-	Lua::PushInt(l,joint.dest);
+	Lua::PushInt(l,joint.parent);
 }
 void Lua::Joint::GetCollisionsEnabled(lua_State *l,JointInfo &joint)
 {
@@ -119,9 +119,9 @@ void Lua::Joint::GetKeyValues(lua_State *l,JointInfo &joint)
 		Lua::SetTableValue(l,t);
 	}
 }
-void Lua::Joint::SetType(lua_State *l,JointInfo &joint,uint32_t type) {joint.type = type;}
-void Lua::Joint::SetCollisionMeshId(lua_State *l,JointInfo &joint,uint32_t meshId) {joint.src = meshId;}
-void Lua::Joint::SetParentCollisionMeshId(lua_State *l,JointInfo &joint,uint32_t meshId) {joint.dest = meshId;}
+void Lua::Joint::SetType(lua_State *l,JointInfo &joint,uint32_t type) {joint.type = static_cast<JointType>(type);}
+void Lua::Joint::SetCollisionMeshId(lua_State *l,JointInfo &joint,uint32_t meshId) {joint.child = meshId;}
+void Lua::Joint::SetParentCollisionMeshId(lua_State *l,JointInfo &joint,uint32_t meshId) {joint.parent = meshId;}
 void Lua::Joint::SetCollisionsEnabled(lua_State *l,JointInfo &joint,bool bEnabled) {joint.collide = bEnabled;}
 void Lua::Joint::SetKeyValues(lua_State *l,JointInfo &joint,luabind::object keyValues)
 {
@@ -297,6 +297,11 @@ void Lua::Model::register_class(
 	classDef.def("TranslateLODMeshes",static_cast<void(*)(lua_State*,::Model&,uint32_t,luabind::object)>(&Lua::Model::TranslateLODMeshes));
 	classDef.def("TranslateLODMeshes",static_cast<void(*)(lua_State*,::Model&,uint32_t)>(&Lua::Model::TranslateLODMeshes));
 	classDef.def("GetJoints",&Lua::Model::GetJoints);
+	classDef.def("AddJoint",static_cast<JointInfo*(*)(lua_State*,::Model&,JointType,BoneId,BoneId)>([](lua_State *l,::Model &mdl,JointType type,BoneId child,BoneId parent) -> JointInfo* {
+		auto &joint = mdl.AddJoint(type,child,parent);
+		return &joint;
+	}));
+	classDef.def("ClearJoints",static_cast<void(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) {mdl.GetJoints().clear();}));
 	classDef.def("GetVertexAnimations",&Lua::Model::GetVertexAnimations);
 	classDef.def("GetVertexAnimation",&Lua::Model::GetVertexAnimation);
 	classDef.def("AddVertexAnimation",&Lua::Model::AddVertexAnimation);
@@ -1004,9 +1009,11 @@ void Lua::Model::register_class(
 
 	// Joint
 	auto defJoint = luabind::class_<JointInfo>("Joint");
+	defJoint.def_readwrite("collide",&JointInfo::collide);
+
 	defJoint.def("GetType",&Lua::Joint::GetType);
-	defJoint.def("GetCollisionMeshId",&Lua::Joint::GetCollisionMeshId);
-	defJoint.def("GetParentCollisionMeshId",&Lua::Joint::GetParentCollisionMeshId);
+	defJoint.def("GetChildBoneId",&Lua::Joint::GetChildBoneId);
+	defJoint.def("GetParentBoneId",&Lua::Joint::GetParentBoneId);
 	defJoint.def("GetCollisionsEnabled",&Lua::Joint::GetCollisionsEnabled);
 	defJoint.def("GetKeyValues",&Lua::Joint::GetKeyValues);
 
@@ -1017,14 +1024,20 @@ void Lua::Model::register_class(
 	defJoint.def("SetKeyValues",&Lua::Joint::SetKeyValues);
 	defJoint.def("SetKeyValue",&Lua::Joint::SetKeyValue);
 	defJoint.def("RemoveKeyValue",&Lua::Joint::RemoveKeyValue);
+	defJoint.def("GetArgs",static_cast<luabind::object(*)(lua_State*,JointInfo&)>([](lua_State *l,JointInfo &jointInfo) -> luabind::object {
+		return Lua::map_to_table(l,jointInfo.args);
+	}));
+	defJoint.def("SetArgs",static_cast<void(*)(lua_State*,JointInfo&,luabind::table<>)>([](lua_State *l,JointInfo &jointInfo,luabind::table<> t) {
+		jointInfo.args = Lua::table_to_map<std::string,std::string>(l,t,2);
+	}));
 
-	defJoint.add_static_constant("TYPE_NONE",JOINT_TYPE_NONE);
-	defJoint.add_static_constant("TYPE_FIXED",JOINT_TYPE_FIXED);
-	defJoint.add_static_constant("TYPE_BALLSOCKET",JOINT_TYPE_BALLSOCKET);
-	defJoint.add_static_constant("TYPE_HINGE",JOINT_TYPE_HINGE);
-	defJoint.add_static_constant("TYPE_SLIDER",JOINT_TYPE_SLIDER);
-	defJoint.add_static_constant("TYPE_CONETWIST",JOINT_TYPE_CONETWIST);
-	defJoint.add_static_constant("TYPE_DOF",JOINT_TYPE_DOF);
+	defJoint.add_static_constant("TYPE_NONE",umath::to_integral(JointType::None));
+	defJoint.add_static_constant("TYPE_FIXED",umath::to_integral(JointType::Fixed));
+	defJoint.add_static_constant("TYPE_BALLSOCKET",umath::to_integral(JointType::BallSocket));
+	defJoint.add_static_constant("TYPE_HINGE",umath::to_integral(JointType::Hinge));
+	defJoint.add_static_constant("TYPE_SLIDER",umath::to_integral(JointType::Slider));
+	defJoint.add_static_constant("TYPE_CONETWIST",umath::to_integral(JointType::ConeTwist));
+	defJoint.add_static_constant("TYPE_DOF",umath::to_integral(JointType::DOF));
 	classDef.scope[defJoint];
 
 	// Assign definitions

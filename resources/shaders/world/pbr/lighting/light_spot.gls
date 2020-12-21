@@ -26,10 +26,7 @@ vec3 apply_spot_light(LightSourceData light, uint lightIndex, MaterialInfo mater
 	float spotAttenuation = get_spot_attenuation(pointToLight, light.direction.xyz, cos(light.cutoffOuter), cos(light.cutoffInner));
 	vec3 shade = get_point_shade(pointToLight, materialInfo, normal, view);
 
-	float shadowFactor = are_shadows_enabled() ? min(
-		get_spot_light_shadow_factor(lightIndex,false), // static sample
-		get_spot_light_shadow_factor(lightIndex,true) // dynamic sample
-	) : 1.0;
+	float shadowFactor = are_shadows_enabled() ? get_spot_light_shadow_factor(lightIndex,true) : 1.0;
 	return rangeAttenuation * spotAttenuation * light.color.a * light.color.rgb *shade *shadowFactor;
 }
 

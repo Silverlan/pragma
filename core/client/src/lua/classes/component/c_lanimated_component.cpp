@@ -16,20 +16,6 @@ void Lua::Animated::register_class(lua_State *l,luabind::module_ &entsMod)
 {
 	auto defCAnimated = luabind::class_<CAnimatedHandle,BaseEntityComponentHandle>("AnimatedComponent");
 	Lua::register_base_animated_component_methods<luabind::class_<CAnimatedHandle,BaseEntityComponentHandle>,CAnimatedHandle>(l,defCAnimated);
-	defCAnimated.def("GetEffectiveBoneTransform",static_cast<void(*)(lua_State*,CAnimatedHandle&,uint32_t)>([](lua_State *l,CAnimatedHandle &hAnim,uint32_t boneIdx) {
-		pragma::Lua::check_component(l,hAnim);
-		auto &transforms = hAnim->GetProcessedBones();
-		if(boneIdx >= transforms.size())
-			return;
-		Lua::Push<umath::ScaledTransform*>(l,&transforms.at(boneIdx));
-		}));
-	defCAnimated.def("SetEffectiveBoneTransform",static_cast<void(*)(lua_State*,CAnimatedHandle&,uint32_t,const umath::ScaledTransform&)>([](lua_State *l,CAnimatedHandle &hAnim,uint32_t boneIdx,const umath::ScaledTransform &t) {
-		pragma::Lua::check_component(l,hAnim);
-		auto &transforms = hAnim->GetProcessedBones();
-		if(boneIdx >= transforms.size())
-			return;
-		transforms.at(boneIdx) = t;
-		}));
 	defCAnimated.def("GetBoneBuffer",static_cast<void(*)(lua_State*,CAnimatedHandle&)>([](lua_State *l,CAnimatedHandle &hAnim) {
 		pragma::Lua::check_component(l,hAnim);
 		auto *pAnimComponent = hAnim.get();

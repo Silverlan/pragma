@@ -16,6 +16,7 @@
 #include "pragma/math/orientation.h"
 #include "pragma/physics/jointinfo.h"
 
+using BoneId = uint32_t;
 struct DLLNETWORK Bone
 	: public std::enable_shared_from_this<Bone>
 {
@@ -24,7 +25,7 @@ struct DLLNETWORK Bone
 	std::string name;
 	std::unordered_map<uint32_t,std::shared_ptr<Bone>> children;
 	std::weak_ptr<Bone> parent;
-	uint32_t ID;
+	BoneId ID;
 
 	bool IsAncestorOf(const Bone &other) const;
 	bool IsDescendantOf(const Bone &other) const;

@@ -9,25 +9,30 @@
 #define __JOINTINFO_H__
 
 #include "pragma/networkdefinitions.h"
-#define JOINT_TYPE_NONE 0
-#define JOINT_TYPE_FIXED 1
-#define JOINT_TYPE_BALLSOCKET 2
-#define JOINT_TYPE_HINGE 3
-#define JOINT_TYPE_SLIDER 4
-#define JOINT_TYPE_CONETWIST 5
-#define JOINT_TYPE_DOF 6
 
+enum class JointType : uint8_t
+{
+	None = 0,
+	Fixed,
+	BallSocket,
+	Hinge,
+	Slider,
+	ConeTwist,
+	DOF
+};
+
+using BoneId = uint32_t;
 struct DLLNETWORK JointInfo
 {
-	JointInfo(unsigned char ptype,unsigned int _src,unsigned int _dest)
-		: type(ptype),src(_src),dest(_dest),collide(false)
+	JointInfo(JointType type,BoneId child,BoneId parent)
+		: type(type),parent(parent),child(child),collide(false)
 	{}
 	JointInfo()
-		: JointInfo(JOINT_TYPE_NONE,0,0)
+		: JointInfo(JointType::None,0,0)
 	{}
-	unsigned char type;
-	unsigned int src;
-	unsigned int dest;
+	JointType type;
+	BoneId parent;
+	BoneId child;
 	bool collide;
 	std::unordered_map<std::string,std::string> args;
 };

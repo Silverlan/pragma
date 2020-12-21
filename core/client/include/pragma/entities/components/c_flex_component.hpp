@@ -50,6 +50,7 @@ namespace pragma
 		void PlayFlexAnimation(const LookupIdentifier &id,bool loop=true,bool reset=false);
 		void StopFlexAnimation(const LookupIdentifier &id);
 		void SetFlexAnimationPlaybackRate(const LookupIdentifier &id,float playbackRate);
+		const std::vector<FlexAnimationData> &GetFlexAnimations() const;
 	protected:
 		FlexAnimationData *FindFlexAnimationData(uint32_t flexAnimId);
 		const FlexAnimationData *FindFlexAnimationData(uint32_t flexAnimId) const {return const_cast<CFlexComponent*>(this)->FindFlexAnimationData(flexAnimId);}

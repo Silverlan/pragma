@@ -14,7 +14,7 @@
 #include "pragma/file_formats/wad.h"
 
 // Note: Changing this version will directly affect model saving as well as loading, both have to be updated accordingly
-#define WMD_VERSION 37
+#define WMD_VERSION 38
 
 enum class CollisionMeshLoadFlags : uint64_t
 {
@@ -102,6 +102,7 @@ private:
 	void LoadMeshes(unsigned short version,Model &mdl,const std::function<std::shared_ptr<ModelMesh>()> &meshFactory,const std::function<std::shared_ptr<ModelSubMesh>()> &subMeshFactory);
 	void LoadLODData(unsigned short version,Model &mdl);
 	void LoadBodygroups(Model &mdl);
+	void LoadJoints(Model &mdl);
 	void LoadSoftBodyData(Model &mdl,CollisionMesh &colMesh);
 	void LoadCollisionMeshes(Game *game,unsigned short version,Model &mdl,SurfaceMaterial *smDefault=nullptr);
 	void LoadBlendControllers(Model &mdl);

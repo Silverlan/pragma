@@ -37,7 +37,7 @@ vec3 calc_pbr_lighting(vec2 uv,MaterialInfo materialInfo,vec4 baseColor)
     if(useLightmaps)
     {
 		vec4 colLightMap = texture(u_lightMap,fs_in.vert_uv_lightmap.xy);
-		color.rgb = color.rgb *(u_renderSettings.lightmapExposurePow *colLightMap.rgb);
+		color.rgb = color.rgb *(get_lightmap_exposure_pow() *colLightMap.rgb);
     }
 
     ivec2 location = ivec2(gl_FragCoord.xy);

@@ -17,10 +17,8 @@ layout(LAYOUT_ID(SHADER_UNIFORM_SKYBOX_MAP_SET,SHADER_UNIFORM_SKYBOX_MAP_BINDING
 
 void main()
 {
-	vec3 camOffset = (inverse(get_model_matrix()) *vec4(u_renderSettings.posCam,1)).xyz;
-	vec3 pos = fs_in.vert_pos_ws -camOffset;
-	fs_color = textureLod(u_skyboxTexture,pos,0).rgba;
-	fs_color *= get_instance_color();
+	fs_color = textureLod(u_skyboxTexture,fs_in.cubemap_dir,0).rgba;
+	fs_color *= fs_in.color;
 
 	extract_bright_color(fs_color);
 }

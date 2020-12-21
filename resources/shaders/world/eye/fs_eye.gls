@@ -99,8 +99,6 @@ void main()
 
 	//vSphereUv *= 3.0;
 
-	vec2 test = vSphereUv;
-
 	vSphereUv += 1.0;
 	vSphereUv /= 2.0;
 

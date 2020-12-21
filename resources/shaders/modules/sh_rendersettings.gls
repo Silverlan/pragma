@@ -15,9 +15,6 @@ layout(std140,LAYOUT_ID(SHADER_UNIFORM_RENDER_SETTINGS_SET,SHADER_UNIFORM_RENDER
 	float nearZ;
 	float farZ;
 	int shaderQuality; // 1 = lowest, 10 = highest
-
-	float lightmapIntensity;
-	float lightmapExposurePow;
 } u_renderSettings;
 
 bool is_unlit() {return (u_renderSettings.flags &FRENDER_UNLIT) != 0;}

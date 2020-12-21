@@ -82,6 +82,7 @@ void CFlexComponent::SetFlexAnimationPlaybackRate(const LookupIdentifier &id,flo
 		return;
 	flexAnimData->playbackRate = playbackRate;
 }
+const std::vector<CFlexComponent::FlexAnimationData> &CFlexComponent::GetFlexAnimations() const {return m_flexAnimations;}
 void CFlexComponent::StopFlexAnimation(const LookupIdentifier &id)
 {
 	ResolveFlexAnimation(id);

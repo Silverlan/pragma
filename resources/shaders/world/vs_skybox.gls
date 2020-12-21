@@ -7,15 +7,19 @@
 #include "../modules/sh_entity_info.gls"
 #include "../modules/sh_camera_info.gls"
 #include "../modules/vs_buffer_locations.gls"
+#include "../modules/vs_instanced_entity_data.gls"
+#include "../modules/sh_rendersettings.gls"
 
 layout(location = SHADER_VERTEX_BUFFER_LOCATION) in vec3 in_vert_pos;
 
 void main()
 {
-	mat4 MVP = API_DEPTH_TRANSFORM(u_camera.P) *get_view_matrix() *get_model_matrix();
+	mat4 MVP = API_DEPTH_TRANSFORM(u_camera.P) *get_view_matrix() *get_instanced_model_matrix();
 	vec3 vtrans = in_vert_pos;
 	vec4 MVP_Pos = MVP *vec4(vtrans,1);
 	gl_Position = MVP_Pos.xyww;
-	
-	vs_out.vert_pos_ws = in_vert_pos;
+
+	vec3 camOffset = (inverse(get_instanced_model_matrix()) *vec4(u_renderSettings.posCam,1)).xyz;
+	vs_out.color = get_instanced_instance_color();
+	vs_out.cubemap_dir = in_vert_pos -camOffset;
 }

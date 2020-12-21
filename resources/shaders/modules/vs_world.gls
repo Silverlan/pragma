@@ -18,6 +18,7 @@
 #include "../modules/vs_vertex_animation.gls"
 #include "../modules/light_map/vs_lightmap.gls"
 #include "../modules/vs_instanced_entity_data.gls"
+#include "../math/depth_bias.gls"
 
 layout(location = SHADER_VERTEX_BUFFER_LOCATION) in vec3 in_vert_pos;
 layout(location = SHADER_UV_BUFFER_LOCATION) in vec2 in_vert_uv;
@@ -68,7 +69,10 @@ void export_world_fragment_data(mat4 mdlMatrix,vec3 vertPos)
 	}
 
 	mat4 V = get_view_matrix();
-	gl_Position = API_DEPTH_TRANSFORM(u_camera.P) *V *vposWs;
+	mat4 P = u_camera.P;
+	if(u_pushConstants.depthBias.x > 0.0)
+		apply_projection_depth_bias_offset(P,u_renderSettings.nearZ,u_renderSettings.farZ,u_pushConstants.depthBias[0],u_pushConstants.depthBias[1]);
+	gl_Position = API_DEPTH_TRANSFORM(P) *V *vposWs;
 
 	vposWs.xyz /= vposWs.w;
 	vposWs.w = 1.0;

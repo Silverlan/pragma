@@ -244,8 +244,8 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics:
 		for(auto it=joints->begin();it!=joints->end();++it)
 		{
 			auto &joint = *it;
-			auto itSrc = modelMeshIndexToShapeIndex.find(joint.dest);//joint.src); // TODO: Swap variable names
-			auto itDest = modelMeshIndexToShapeIndex.find(joint.src);
+			auto itSrc = modelMeshIndexToShapeIndex.find(joint.parent);//joint.src); // TODO: Swap variable names
+			auto itDest = modelMeshIndexToShapeIndex.find(joint.child);
 			if(itSrc != modelMeshIndexToShapeIndex.end() && itDest != modelMeshIndexToShapeIndex.end())
 			{
 				auto it0 = physObjShapes.find(itSrc->second);
@@ -274,9 +274,9 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics:
 				posConstraint = posConstraint +bodySrc->GetOrigin();
 				//Con::cerr<<"Constraint for bone "<<boneId<<": ("<<posConstraint.x<<","<<posConstraint.y<<","<<posConstraint.z<<") ("<<posTgt.x<<","<<posTgt.y<<","<<posTgt.z<<") "<<Con::endl;
 				//
-				if(joint.type == JOINT_TYPE_FIXED)
+				if(joint.type == JointType::Fixed)
 					c = util::shared_handle_cast<pragma::physics::IFixedConstraint,pragma::physics::IConstraint>(physEnv->CreateFixedConstraint(*bodySrc,posConstraint,uquat::identity(),*bodyTgt,posTgt,uquat::identity()));
-				else if(joint.type == JOINT_TYPE_CONETWIST)
+				else if(joint.type == JointType::ConeTwist)
 				{
 					// Conetwist constraints are deprecated for ragdolls and should be avoided.
 					// Use DoF constraints instead!
@@ -343,7 +343,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics:
 					ct->SetDamping(relaxationFactor);
 					c = util::shared_handle_cast<pragma::physics::IConeTwistConstraint,pragma::physics::IConstraint>(ct);
 				}
-				else if(joint.type == JOINT_TYPE_DOF)
+				else if(joint.type == JointType::DOF)
 				{
 					auto limitLinMin = Vector3(0.f,0.f,0.f);
 					auto limitLinMax = Vector3(0.f,0.f,0.f);

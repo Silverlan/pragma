@@ -304,7 +304,7 @@ void Model::Merge(const Model &other,MergeFlags flags)
 		joints.reserve(joints.size() +jointsOther.size());
 		for(auto &jointOther : jointsOther)
 		{
-			joints.push_back(JointInfo(jointOther.type,boneTranslations.at(jointOther.src),boneTranslations.at(jointOther.dest)));
+			joints.push_back(JointInfo(jointOther.type,boneTranslations.at(jointOther.parent),boneTranslations.at(jointOther.child)));
 			auto &joint = joints.back();
 			joint.args = jointOther.args;
 			joint.collide = jointOther.collide;

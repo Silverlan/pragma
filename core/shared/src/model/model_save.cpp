@@ -22,7 +22,8 @@
 #define INDEX_OFFSET_MODEL_MESHES (INDEX_OFFSET_MODEL_DATA +1)
 #define INDEX_OFFSET_LOD_DATA (INDEX_OFFSET_MODEL_MESHES +1)
 #define INDEX_OFFSET_BODYGROUPS (INDEX_OFFSET_LOD_DATA +1)
-#define INDEX_OFFSET_COLLISION_MESHES (INDEX_OFFSET_BODYGROUPS +1)
+#define INDEX_OFFSET_JOINTS (INDEX_OFFSET_BODYGROUPS +1)
+#define INDEX_OFFSET_COLLISION_MESHES (INDEX_OFFSET_JOINTS +1)
 #define INDEX_OFFSET_BONES (INDEX_OFFSET_COLLISION_MESHES +1)
 #define INDEX_OFFSET_ANIMATIONS (INDEX_OFFSET_BONES +1)
 #define INDEX_OFFSET_VERTEX_ANIMATIONS (INDEX_OFFSET_ANIMATIONS +1)
@@ -211,6 +212,10 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 
 	// Version 0x0004
 	f->Write<uint64_t>(0); // Offset to bodygroups
+	//
+
+	// Version 38
+	f->Write<uint64_t>(0); // Offset to joints
 	//
 
 	f->Write<uint64_t>(0); // Offset to collision mesh (0 if there is none)
@@ -472,20 +477,28 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 	}
 	//
 
+	// Version 38
+	write_offset(f,offIndex +INDEX_OFFSET_JOINTS *INDEX_OFFSET_INDEX_SIZE);
+	auto &joints = mdl.GetJoints();
+	f->Write<uint32_t>(joints.size());
+	for(auto &joint : joints)
+	{
+		f->Write<JointType>(joint.type);
+		f->Write<BoneId>(joint.child);
+		f->Write<BoneId>(joint.parent);
+		f->Write<bool>(joint.collide);
+		f->Write<uint8_t>(joint.args.size());
+		for(auto &pair : joint.args)
+		{
+			f->WriteString(pair.first);
+			f->WriteString(pair.second);
+		}
+	}
+	//
+
 	auto &collisionMeshes = mdl.GetCollisionMeshes();
 	if(!collisionMeshes.empty())
 	{
-		std::unordered_map<uint32_t,std::vector<uint32_t>> collisionJoints;
-		auto &joints = mdl.GetJoints();
-		for(auto i=decltype(joints.size()){0};i<joints.size();++i)
-		{
-			auto &joint = joints[i];
-			auto it = collisionJoints.find(joint.src);
-			if(it == collisionJoints.end())
-				it = collisionJoints.insert(decltype(collisionJoints)::value_type(joint.src,{})).first;
-			it->second.push_back(static_cast<uint32_t>(i));
-		}
-
 		write_offset(f,offIndex +INDEX_OFFSET_COLLISION_MESHES *INDEX_OFFSET_INDEX_SIZE);
 		f->Write<float>(mdl.GetMass());
 		f->Write<uint32_t>(collisionMeshes.size());
@@ -568,25 +581,6 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 			// Version 0x0011
 			f->Write<double>(mesh->GetVolume());
 			f->Write<Vector3>(mesh->GetCenterOfMass());
-			//
-
-			// Version 0x0002
-			auto it = collisionJoints.find(static_cast<uint32_t>(i));
-			auto numJoints = (it != collisionJoints.end()) ? it->second.size() : 0;
-			f->Write<uint8_t>(static_cast<uint8_t>(numJoints));
-			for(auto j=decltype(numJoints){0};j<numJoints;++j)
-			{
-				auto &joint = joints[it->second[j]];
-				f->Write<uint8_t>(joint.type);
-				f->Write<uint32_t>(joint.dest);
-				f->Write<bool>(joint.collide);
-				f->Write<uint8_t>(static_cast<uint8_t>(joint.args.size()));
-				for(auto &pair : joint.args)
-				{
-					f->WriteString(pair.first);
-					f->WriteString(pair.second);
-				}
-			}
 			//
 
 			// Version 0x0014

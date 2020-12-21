@@ -125,6 +125,13 @@ namespace Lua
 		std::vector<T> table_to_vector(lua_State *l,luabind::table<> t,int32_t tableStackIndex);
 	template<typename T>
 		luabind::object vector_to_table(lua_State *l,const std::vector<T> &data);
+
+	template<typename T0,typename T1>
+		void table_to_map(lua_State *l,luabind::table<> t,int32_t tableStackIndex,std::unordered_map<T0,T1> &outData);
+	template<typename T0,typename T1>
+		std::unordered_map<T0,T1> table_to_map(lua_State *l,luabind::table<> t,int32_t tableStackIndex);
+	template<typename T0,typename T1>
+		luabind::object map_to_table(lua_State *l,const std::unordered_map<T0,T1> &data);
 };
 
 template<typename T>
@@ -154,6 +161,34 @@ template<typename T>
 	uint32_t idx = 1;
 	for(auto &v : data)
 		t[idx++] = v;
+	return t;
+}
+
+template<typename T0,typename T1>
+	void Lua::table_to_map(lua_State *l,luabind::table<> t,int32_t tableStackIndex,std::unordered_map<T0,T1> &outData)
+{
+	for(auto it=luabind::iterator{t},end=luabind::iterator{};it!=end;++it)
+	{
+		auto key = luabind::object_cast_nothrow<T0>(it.key(),T0{});
+		auto val = luabind::object_cast_nothrow<T1>(*it,T1{});
+		outData[key] = val;
+	}
+}
+
+template<typename T0,typename T1>
+	std::unordered_map<T0,T1> Lua::table_to_map(lua_State *l,luabind::table<> t,int32_t tableStackIndex)
+{
+	std::unordered_map<T0,T1> result {};
+	table_to_map(l,t,tableStackIndex,result);
+	return result;
+}
+
+template<typename T0,typename T1>
+	luabind::object Lua::map_to_table(lua_State *l,const std::unordered_map<T0,T1> &data)
+{
+	auto t = luabind::newtable(l);
+	for(auto &pair : data)
+		t[pair.first] = pair.second;
 	return t;
 }
 

@@ -29,7 +29,7 @@ namespace pragma
 {
 	using ::operator<<;
 };
-
+#pragma optimize("",off)
 IKComponent::IKComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)
 {}
@@ -81,11 +81,10 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 	auto &reference = hMdl->GetReference();
 	struct IKJointInfo
 	{
-		IKJointInfo(uint32_t _boneId,uint32_t cmId)
-			: boneId(_boneId),colMeshId(cmId)
+		IKJointInfo(uint32_t boneId)
+			: boneId(boneId)
 		{}
 		uint32_t boneId = std::numeric_limits<uint32_t>::max();
-		uint32_t colMeshId = std::numeric_limits<uint32_t>::max();
 		uint32_t jointId = std::numeric_limits<uint32_t>::max();
 		OrientedPoint referenceTransform = {};
 
@@ -95,17 +94,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 	auto ikTreeInfo = std::make_shared<IKTreeInfo>();
 	std::vector<IKJointInfo> ikJoints;
 	ikJoints.reserve(chainLen);
-
-	auto &colMeshes = hMdl->GetCollisionMeshes();
-	auto itColMesh = std::find_if(colMeshes.begin(),colMeshes.end(),[boneId](const std::shared_ptr<CollisionMesh> &colMesh) {
-		return colMesh->GetBoneParent() == boneId;
-	});
-	if(itColMesh == colMeshes.end())
-	{
-		Con::cwar<<"WARNING: Unable to initialize ik controller for "<<ikController->GetEffectorName()<<": Effector doesn't have collision mesh assigned to it!"<<Con::endl;
-		return false;
-	}
-	ikJoints.push_back({static_cast<uint32_t>(boneId),static_cast<uint32_t>(itColMesh -colMeshes.begin())});
+	ikJoints.push_back({static_cast<uint32_t>(boneId)});
 
 	auto bone = wpBone.lock();
 	for(auto i=decltype(chainLen){0};i<(chainLen -1);++i)
@@ -117,12 +106,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 			return false;
 		}
 		bone = parent.lock();
-		auto itColMesh = std::find_if(colMeshes.begin(),colMeshes.end(),[&bone](const std::shared_ptr<CollisionMesh> &colMesh) {
-			return colMesh->GetBoneParent() == bone->ID;
-		});
-		if(itColMesh == colMeshes.end())
-			continue; // Skip this bone if it doesn't have a valid collision mesh assigned to it
-		ikJoints.push_back({bone->ID,static_cast<uint32_t>(itColMesh -colMeshes.begin())});
+		ikJoints.push_back({bone->ID});
 	}
 	
 	for(auto &ikJoint : ikJoints)
@@ -138,13 +122,13 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 	auto &joints = hMdl->GetJoints();
 	for(auto &ikJoint : ikJoints)
 	{
-		auto colMeshId = ikJoint.colMeshId;
-		auto itJoint = std::find_if(joints.begin(),joints.end(),[colMeshId](const JointInfo &joint) {
-			return joint.src == colMeshId && (joint.type == JOINT_TYPE_DOF || joint.type == JOINT_TYPE_CONETWIST);
+		auto boneId = ikJoint.boneId;
+		auto itJoint = std::find_if(joints.begin(),joints.end(),[boneId](const JointInfo &joint) {
+			return joint.child == boneId && (joint.type == JointType::DOF || joint.type == JointType::ConeTwist);
 		});
 		if(itJoint == joints.end())
 		{
-			Con::cwar<<"WARNING: Unable to initialize ik controller for "<<ikController->GetEffectorName()<<": Collision mesh for bone "<<ikJoint.boneId<<" in chain does not have joint assigned to it!"<<Con::endl;
+			Con::cwar<<"WARNING: Unable to initialize ik controller for "<<ikController->GetEffectorName()<<": Joint for bone "<<ikJoint.boneId<<" in chain does not have joint assigned to it!"<<Con::endl;
 			return false; // All bones in chain need to have a valid joint assigned to them
 		}
 		ikJoint.jointId = itJoint -joints.begin();
@@ -165,7 +149,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 		auto max = EulerAngles{};
 		switch(joint.type)
 		{
-			case JOINT_TYPE_DOF:
+		case JointType::DOF:
 			{
 				auto itMin = joint.args.find("ang_limit_l");
 				if(itMin != joint.args.end())
@@ -175,7 +159,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 					max = EulerAngles(itMax->second);
 				break;
 			}
-			case JOINT_TYPE_CONETWIST:
+		case JointType::ConeTwist:
 			{
 				auto itSp1l = joint.args.find("sp1l");
 				if(itSp1l != joint.args.end())
@@ -687,3 +671,4 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 		animComponent->SetLocalBonePosition(footData.boneId,posBone,rotBone);
 	}
 }
+#pragma optimize("",on)

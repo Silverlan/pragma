@@ -4,11 +4,12 @@
 #include "../modules/sh_vertex_data_locations.gls"
 #include "../modules/sh_export.gls"
 
-#define SHADER_VERTEX_BUFFER_LOCATION 0
+#define SHADER_VERTEX_BUFFER_LOCATION 1
 
 #define SHADER_UNIFORM_INSTANCE_SET 0
 #define SHADER_UNIFORM_CAMERA_SET 1
-#define SHADER_UNIFORM_SKYBOX_MAP_SET 2
+#define SHADER_UNIFORM_RENDERER_SET 2
+#define SHADER_UNIFORM_SKYBOX_MAP_SET 3
 
 #define SHADER_UNIFORM_INSTANCE_BINDING 0
 #define SHADER_UNIFORM_CAMERA_BINDING 0
@@ -16,7 +17,8 @@
 
 struct VertexData
 {
-	vec3 vert_pos_ws; // Vertex Position in world space
+	vec4 color;
+	vec3 cubemap_dir;
 };
 
 layout(location = SHADER_VERTEX_DATA_LOCATION) EXPORT_VS VertexData

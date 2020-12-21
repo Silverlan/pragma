@@ -107,6 +107,19 @@ void Lua::Flex::register_class(lua_State *l,luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hEnt);
 		hEnt->SetFlexWeightOverride(flexId,weight);
 	}));
+	defCFlex.def("GetFlexAnimations",static_cast<luabind::object(*)(lua_State*,CFlexHandle&)>([](lua_State *l,CFlexHandle &hEnt) -> luabind::object {
+		pragma::Lua::check_component(l,hEnt);
+		auto &flexAnims = hEnt->GetFlexAnimations();
+		auto t = luabind::newtable(l);
+		int32_t idx = 1;
+		for(auto &flexAnim : flexAnims)
+			t[idx++] = flexAnim.flexAnimationId;
+		return t;
+	}));
+	defCFlex.def("GetFlexAnimationCount",static_cast<uint32_t(*)(lua_State*,CFlexHandle&)>([](lua_State *l,CFlexHandle &hEnt) -> uint32_t {
+		pragma::Lua::check_component(l,hEnt);
+		return hEnt->GetFlexAnimations().size();
+	}));
 	defCFlex.def("PlayFlexAnimation",static_cast<void(*)(lua_State*,CFlexHandle&,uint32_t,bool,bool)>([](lua_State *l,CFlexHandle &hEnt,uint32_t id,bool loop,bool reset) {pragma::Lua::check_component(l,hEnt); hEnt->PlayFlexAnimation(id,loop,reset);}));
 	defCFlex.def("PlayFlexAnimation",static_cast<void(*)(lua_State*,CFlexHandle&,uint32_t,bool)>([](lua_State *l,CFlexHandle &hEnt,uint32_t id,bool loop) {pragma::Lua::check_component(l,hEnt); hEnt->PlayFlexAnimation(id,loop);}));
 	defCFlex.def("PlayFlexAnimation",static_cast<void(*)(lua_State*,CFlexHandle&,uint32_t)>([](lua_State *l,CFlexHandle &hEnt,uint32_t id) {pragma::Lua::check_component(l,hEnt); hEnt->PlayFlexAnimation(id);}));

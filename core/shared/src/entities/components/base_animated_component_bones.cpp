@@ -193,6 +193,7 @@ void BaseAnimatedComponent::SetBoneScale(uint32_t boneId,const Vector3 &scale)
 	if(boneId >= m_bones.size())
 		return;
 	m_bones.at(boneId).SetScale(scale);
+	umath::set_flag(m_stateFlags,StateFlags::AbsolutePosesDirty);
 }
 const Vector3 *BaseAnimatedComponent::GetBoneScale(uint32_t boneId) const
 {
@@ -208,6 +209,7 @@ void BaseAnimatedComponent::SetBonePosition(UInt32 boneId,const Vector3 &pos,con
 	m_bones[boneId].SetRotation(rot);
 	if(scale != nullptr)
 		m_bones[boneId].SetScale(*scale);
+	umath::set_flag(m_stateFlags,StateFlags::AbsolutePosesDirty);
 	//if(updatePhysics == false)
 	//	return;
 	CEOnBoneTransformChanged evData {boneId,&pos,&rot,scale};
@@ -221,6 +223,7 @@ void BaseAnimatedComponent::SetBonePosition(UInt32 boneId,const Vector3 &pos)
 	if(boneId >= m_bones.size())
 		return;
 	m_bones[boneId].SetOrigin(pos);
+	umath::set_flag(m_stateFlags,StateFlags::AbsolutePosesDirty);
 
 	CEOnBoneTransformChanged evData {boneId,&pos,nullptr,nullptr};
 	InvokeEventCallbacks(EVENT_ON_BONE_TRANSFORM_CHANGED,evData);
@@ -230,6 +233,7 @@ void BaseAnimatedComponent::SetBoneRotation(UInt32 boneId,const Quat &rot)
 	if(boneId >= m_bones.size())
 		return;
 	m_bones[boneId].SetRotation(rot);
+	umath::set_flag(m_stateFlags,StateFlags::AbsolutePosesDirty);
 
 	CEOnBoneTransformChanged evData {boneId,nullptr,&rot,nullptr};
 	InvokeEventCallbacks(EVENT_ON_BONE_TRANSFORM_CHANGED,evData);
@@ -427,9 +431,12 @@ static void get_global_bone_transforms(std::vector<umath::ScaledTransform> &tran
 }
 void BaseAnimatedComponent::UpdateSkeleton()
 {
+	if(umath::is_flag_set(m_stateFlags,StateFlags::AbsolutePosesDirty) == false)
+		return;
 	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return;
+	umath::set_flag(m_stateFlags,StateFlags::AbsolutePosesDirty,false);
 	auto &skeleton = hModel->GetSkeleton();
 	m_processedBones = m_bones;
 	get_global_bone_transforms(m_processedBones,skeleton.GetRootBones());

@@ -29,6 +29,7 @@ layout(LAYOUT_PUSH_CONSTANTS()) uniform PushConstants
 {
 	vec4 clipPlane;
 	vec4 drawOrigin; // w is scale
+	vec2 depthBias;
 	uint vertexAnimInfo;
 	uint flags;
 	float alphaCutoff;

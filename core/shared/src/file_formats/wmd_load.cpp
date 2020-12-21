@@ -431,6 +431,7 @@ void FWMD::LoadCollisionMeshes(Game *game,unsigned short version,Model &mdl,Surf
 	Vector3 collisionMax(std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest());
 	uint32_t numMeshes = (version < 30) ? Read<uint8_t>() : Read<uint32_t>();
 	auto massPerMesh = mass /static_cast<float>(numMeshes); // TODO: Allow individual mass per collision mesh
+	std::vector<JointInfo> oldJointSystemJoints;
 	for(auto i=decltype(numMeshes){0u};i<numMeshes;++i)
 	{
 		auto flags = CollisionMeshLoadFlags::None;
@@ -487,14 +488,15 @@ void FWMD::LoadCollisionMeshes(Game *game,unsigned short version,Model &mdl,Surf
 			else
 				mesh->CalculateVolumeAndCom();
 		}
-		if(version >= 0x0002)
+		if(version >= 0x0002 && version < 38)
 		{
 			auto numConstraints = Read<unsigned char>();
 			for(unsigned char iConstraint=0;iConstraint<numConstraints;iConstraint++)
 			{
-				auto type = Read<unsigned char>();
+				auto type = Read<JointType>();
 				auto idTgt = Read<unsigned int>();
-				auto &joint = mdl.AddJoint(type,i,idTgt);
+				oldJointSystemJoints.push_back(JointInfo{type,i,idTgt});
+				auto &joint = oldJointSystemJoints.back();
 				joint.collide = Read<bool>();
 				auto numArgs = Read<unsigned char>();
 				for(unsigned char i=0;i<numArgs;i++)
@@ -518,6 +520,26 @@ void FWMD::LoadCollisionMeshes(Game *game,unsigned short version,Model &mdl,Surf
 	}
 	mdl.SetCollisionBounds(collisionMin,collisionMax);
 	mdl.UpdateShape();
+
+	// Old joint system, where joints referenced collision meshes instead of bones.
+	// We'll translate it into the new system here
+	auto &colMeshes = mdl.GetCollisionMeshes();
+	for(auto &jointInfo : oldJointSystemJoints)
+	{
+		auto colSrcId = jointInfo.child;
+		auto colDstId = jointInfo.parent;
+		if(colSrcId >= numMeshes || colDstId >= numMeshes)
+			continue;
+		auto &meshSrc = colMeshes[colSrcId];
+		auto &meshDst = colMeshes[colDstId];
+		auto srcBoneId = meshSrc->GetBoneParent();
+		auto dstBoneId = meshDst->GetBoneParent();
+		if(srcBoneId < 0 || dstBoneId < 0)
+			continue;
+		auto &jointInfoMdl = mdl.AddJoint(jointInfo.type,srcBoneId,dstBoneId);
+		jointInfoMdl.args = jointInfo.args;
+		jointInfoMdl.collide = jointInfo.collide;
+	}
 }
 
 void FWMD::LoadBlendControllers(Model &mdl)
@@ -932,6 +954,26 @@ void FWMD::LoadSoftBodyData(Model &mdl,CollisionMesh &colMesh)
 
 	if(bValid == false)
 		colMesh.SetSoftBody(false);
+}
+
+void FWMD::LoadJoints(Model &mdl)
+{
+	auto numJoints = Read<uint32_t>();
+	for(auto i=decltype(numJoints){0u};i<numJoints;++i)
+	{
+		auto type = Read<JointType>();
+		auto child = Read<BoneId>();
+		auto parent = Read<BoneId>();
+		auto &joint = mdl.AddJoint(type,child,parent);
+		joint.collide = Read<bool>();
+		auto numArgs = Read<uint8_t>();
+		for(auto i=decltype(numArgs){0u};i<numArgs;++i)
+		{
+			auto k = ReadString();
+			auto v = ReadString();
+			joint.args[k] = v;
+		}
+	}
 }
 
 void FWMD::LoadBodygroups(Model &mdl)

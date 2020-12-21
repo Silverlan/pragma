@@ -3569,6 +3569,24 @@ namespace Lua
 			pragma::Lua::check_component(l,hEnt);
 			Lua::PushInt(l,hEnt->GetBoneCount());
 		}));
+		def.def("GetEffectiveBoneTransform",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hAnim,uint32_t boneIdx) {
+			pragma::Lua::check_component(l,hAnim);
+			auto &transforms = hAnim->GetProcessedBones();
+			if(boneIdx >= transforms.size())
+				return;
+			Lua::Push<umath::ScaledTransform*>(l,&transforms.at(boneIdx));
+		}));
+		def.def("SetEffectiveBoneTransform",static_cast<void(*)(lua_State*,THandle&,uint32_t,const umath::ScaledTransform&)>([](lua_State *l,THandle &hAnim,uint32_t boneIdx,const umath::ScaledTransform &t) {
+			pragma::Lua::check_component(l,hAnim);
+			auto &transforms = hAnim->GetProcessedBones();
+			if(boneIdx >= transforms.size())
+				return;
+			transforms.at(boneIdx) = t;
+		}));
+		def.def("UpdateEffectiveBoneTransforms",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt->UpdateSkeleton();
+		}));
 
 		def.add_static_constant("EVENT_HANDLE_ANIMATION_EVENT",pragma::BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT);
 		def.add_static_constant("EVENT_ON_PLAY_ANIMATION",pragma::BaseAnimatedComponent::EVENT_ON_PLAY_ANIMATION);

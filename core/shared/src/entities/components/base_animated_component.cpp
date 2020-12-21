@@ -124,6 +124,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 	m_bones.clear();
 	m_processedBones.clear();
 	m_bindPose = nullptr;
+	umath::set_flag(m_stateFlags,StateFlags::AbsolutePosesDirty);
 	ApplyAnimationEventTemplates();
 	if(mdl == nullptr || mdl->HasVertexWeights() == false)
 		return;
@@ -162,9 +163,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 	if(frame != nullptr)
 	{
 		for(UInt32 i=0;i<anim->GetBoneCount();i++)
-		{
 			m_bones[i] = umath::ScaledTransform{*frame->GetBonePosition(i),*frame->GetBoneOrientation(i)};
-		}
 	}
 }
 

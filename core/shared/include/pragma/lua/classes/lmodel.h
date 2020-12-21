@@ -25,8 +25,8 @@ namespace Lua
 	namespace Joint
 	{
 		DLLNETWORK void GetType(lua_State *l,JointInfo &joint);
-		DLLNETWORK void GetCollisionMeshId(lua_State *l,JointInfo &joint);
-		DLLNETWORK void GetParentCollisionMeshId(lua_State *l,JointInfo &joint);
+		DLLNETWORK void GetChildBoneId(lua_State *l,JointInfo &joint);
+		DLLNETWORK void GetParentBoneId(lua_State *l,JointInfo &joint);
 		DLLNETWORK void GetCollisionsEnabled(lua_State *l,JointInfo &joint);
 		DLLNETWORK void GetKeyValues(lua_State *l,JointInfo &joint);
 

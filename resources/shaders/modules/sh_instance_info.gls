@@ -21,10 +21,12 @@ layout(LAYOUT_PUSH_CONSTANTS()) uniform PushConstants
 {
 	vec4 clipPlane;
 	vec4 drawOrigin; // w is scale
+	vec2 depthBias;
 	uint vertexAnimInfo;
 	uint flags;
 	uint debugMode;
 	float reflectionProbeIntensity;
+	vec2 padding;
 	PUSH_USER_CONSTANTS
 } u_pushConstants;
 

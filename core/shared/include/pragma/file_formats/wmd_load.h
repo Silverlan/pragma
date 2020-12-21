@@ -80,6 +80,8 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 		auto offBodygroups = Read<unsigned long long>();
 		UNUSED(offBodygroups);
 	}
+	if(ver >= 38)
+		Read<unsigned long long>(); // Joints
 	unsigned long long offCollisionMesh = Read<unsigned long long>();
 	if(!m_bStatic)
 	{
@@ -177,6 +179,10 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 	// Bodygroups
 	if(ver >= 0x0004)
 		LoadBodygroups(*mdl);
+
+	// Joints
+	if(ver >= 38)
+		LoadJoints(*mdl);
 	
 	// Collision Meshes
 	if(offCollisionMesh > 0)

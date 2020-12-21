@@ -20,7 +20,7 @@
 
 using namespace pragma;
 
-
+#pragma optimize("",off)
 ComponentEventId BaseAttachableComponent::EVENT_ON_ATTACHMENT_UPDATE = INVALID_COMPONENT_ID;
 void BaseAttachableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
@@ -212,7 +212,7 @@ AttachmentData *BaseAttachableComponent::SetupAttachment(BaseEntity *ent,const A
 		{
 			// Update local pose (relative to parent) if absolute pose
 			// has been changed externally
-			m_poseChangeCallback = pTrComponent->AddEventCallback(pragma::BaseTransformComponent::EVENT_ON_ENTITY_COMPONENT_ADDED,[this,pTrComponent](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+			m_poseChangeCallback = pTrComponent->AddEventCallback(pragma::BaseTransformComponent::EVENT_ON_POSE_CHANGED,[this,pTrComponent](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 				auto changeFlags = static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags;
 				if(umath::is_flag_set(changeFlags,TransformChangeFlags::PositionChanged))
 				{
@@ -564,4 +564,4 @@ void BaseAttachableComponent::UpdateAttachmentOffset(bool invokeUpdateEvents)
 	if(invokeUpdateEvents)
 		InvokeEventCallbacks(EVENT_ON_ATTACHMENT_UPDATE);
 }
-
+#pragma optimize("",on)

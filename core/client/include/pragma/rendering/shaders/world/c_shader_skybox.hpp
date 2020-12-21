@@ -21,6 +21,7 @@ namespace pragma
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDERER;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 
 		ShaderSkybox(prosper::IPrContext &context,const std::string &identifier);

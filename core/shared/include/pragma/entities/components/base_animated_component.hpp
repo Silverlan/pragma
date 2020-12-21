@@ -51,6 +51,12 @@ namespace pragma
 		static ComponentEventId EVENT_PLAY_ANIMATION;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
+		enum class StateFlags : uint8_t
+		{
+			None = 0u,
+			AbsolutePosesDirty = 1u
+		};
+
 		struct DLLNETWORK AnimationSlotInfo
 		{
 		public:
@@ -294,6 +300,7 @@ namespace pragma
 		std::vector<TemplateAnimationEvent> m_animEventTemplates;
 		std::unordered_map<uint32_t,std::unordered_map<uint32_t,std::vector<CustomAnimationEvent>>> m_animEvents;
 		
+		StateFlags m_stateFlags = StateFlags::AbsolutePosesDirty;
 		std::shared_ptr<const Frame> m_bindPose = nullptr;
 		std::unordered_map<unsigned int,float> m_blendControllers = {};
 		util::PFloatProperty m_playbackRate = nullptr;
@@ -469,5 +476,6 @@ namespace pragma
 		bool shouldUpdate = true;
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseAnimatedComponent::StateFlags)
 
 #endif

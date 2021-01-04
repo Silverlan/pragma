@@ -5,7 +5,6 @@
 
 #include "sh_prepass.gls"
 #include "sh_prepass_vertex_data.gls"
-#include "/modules/sh_material.gls"
 
 layout(LAYOUT_ID(SHADER_UNIFORM_MATERIAL_SET,SHADER_UNIFORM_MATERIAL_BINDING)) uniform sampler2D u_albedoMap;
 
@@ -13,7 +12,6 @@ layout(location = 0) out vec4 fs_normalBuffer;
 
 void main()
 {
-	fs_normalBuffer = vec4(fs_in.vert_normal_cs,1.0);
 	if(is_alpha_test_enabled())
 	{
 		vec2 texCoords = fs_in.vert_uv; // apply_parallax(use_parallax_map(),fs_in.vert_uv);
@@ -21,4 +19,5 @@ void main()
 		if(albedoColor.a < u_pushConstants.alphaCutoff)
 			discard;
 	}
+	fs_normalBuffer = vec4(fs_in.vert_normal_cs,1.0);
 }

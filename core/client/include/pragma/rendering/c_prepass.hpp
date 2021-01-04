@@ -27,7 +27,7 @@ namespace pragma
 		public:
 			bool Initialize(prosper::IPrContext &context,uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount,bool bExtended);
 			pragma::ShaderPrepassBase &GetShader() const;
-			void BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *optRenderPass=nullptr);
+			prosper::RenderTarget &BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *optRenderPass=nullptr,bool secondaryCommandBuffers=false);
 			void EndRenderPass(const util::DrawSceneInfo &drawSceneInfo);
 			std::shared_ptr<prosper::Texture> textureNormals = nullptr;
 

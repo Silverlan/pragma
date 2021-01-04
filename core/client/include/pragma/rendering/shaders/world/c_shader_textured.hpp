@@ -21,7 +21,6 @@ namespace pragma
 	{
 	public:
 		static ShaderGameWorldPipeline GetPipelineIndex(prosper::SampleCountFlags sampleCount,bool bReflection=false);
-		static uint32_t HASH_TYPE;
 
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_RENDER_BUFFER_INDEX;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX;
@@ -154,10 +153,9 @@ namespace pragma
 		virtual ~ShaderTextured3DBase() override;
 		virtual bool BindClipPlane(const Vector4 &clipPlane) override;
 		virtual bool BeginDraw(
-			const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},ShaderGameWorldPipeline pipelineIdx=ShaderGameWorldPipeline::Regular,
+			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},ShaderGameWorldPipeline pipelineIdx=ShaderGameWorldPipeline::Regular,
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		) override;
-		virtual size_t GetBaseTypeHashCode() const override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		virtual bool BindMaterial(CMaterial &mat) override;
 		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
@@ -175,6 +173,7 @@ namespace pragma
 	protected:
 		using ShaderEntity::Draw;
 		bool BindLightMapUvBuffer(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,bool &outShouldUseLightmaps);
+		virtual bool BindRenderFlags(RenderFlags flags);
 		virtual void OnBindEntity(CBaseEntity &ent,CRenderComponent &renderC) override;
 		virtual void ApplyMaterialFlags(CMaterial &mat,MaterialFlags &outFlags) const;
 		virtual void UpdateRenderFlags(CModelSubMesh &mesh,RenderFlags &inOutFlags);

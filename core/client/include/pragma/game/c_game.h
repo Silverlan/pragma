@@ -80,7 +80,7 @@ namespace pragma
 	class CSceneComponent;
 };
 namespace uimg {class ImageBuffer; struct TextureInfo;};
-namespace prosper {class DescriptorSetGroup; class IImage; class IDescriptorSet;};
+namespace prosper {class DescriptorSetGroup; class IImage; class IDescriptorSet; class ICommandBuffer;};
 namespace util {struct DrawSceneInfo;};
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -281,7 +281,7 @@ public:
 	virtual void DrawLine(const Vector3 &start,const Vector3 &end,const Color &color,float duration=0.f) override;
 	virtual void DrawBox(const Vector3 &start,const Vector3 &end,const EulerAngles &ang,const Color &color,float duration=0.f) override;
 	virtual void DrawPlane(const Vector3 &n,float dist,const Color &color,float duration=0.f) override;
-	void RenderDebugPhysics(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam);
+	void RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pragma::CCameraComponent &cam);
 
 	using Game::LoadNavMesh;
 	const std::vector<DroppedFile> &GetDroppedFiles() const;

@@ -29,7 +29,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
 LINK_ENTITY_TO_CLASS(scene,CScene);
-#pragma optimize("",off)
+
 CSceneComponent::CSMCascadeDescriptor::CSMCascadeDescriptor()
 {}
 
@@ -641,4 +641,3 @@ void CScene::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CSceneComponent>();
 }
-#pragma optimize("",on)

@@ -763,7 +763,7 @@ void DebugRenderer::ClearObjects()
 	for(auto &it : s_debugObjects)
 		it.second.clear();
 }
-void DebugRenderer::Render(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
+void DebugRenderer::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
 {
 	if(s_debugObjects.empty())
 		return;

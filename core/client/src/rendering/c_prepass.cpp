@@ -140,10 +140,11 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b,bool bForceReload)
 	subsequentRenderPass = c_engine->GetRenderContext().CreateRenderPass(rpInfo);
 }
 
-void pragma::rendering::Prepass::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *optRenderPass)
+prosper::RenderTarget &pragma::rendering::Prepass::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *optRenderPass,bool secondaryCommandBuffers)
 {
 	// prosper TODO: Barriers for imgDepth and imgNormals
-	drawSceneInfo.commandBuffer->RecordBeginRenderPass(*renderTarget,m_clearValues,optRenderPass);
+	drawSceneInfo.commandBuffer->RecordBeginRenderPass(*renderTarget,m_clearValues,secondaryCommandBuffers ? prosper::IPrimaryCommandBuffer::RenderPassFlags::SecondaryCommandBuffers : prosper::IPrimaryCommandBuffer::RenderPassFlags::None,optRenderPass);
+	return *renderTarget;
 }
 void pragma::rendering::Prepass::EndRenderPass(const util::DrawSceneInfo &drawSceneInfo)
 {

@@ -38,7 +38,7 @@ namespace pragma
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
-#pragma optimize("",off)
+
 static std::shared_ptr<prosper::IUniformResizableBuffer> s_instanceBuffer = nullptr;
 decltype(CRenderComponent::s_ocExemptEntities) CRenderComponent::s_ocExemptEntities = {};
 ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT = INVALID_COMPONENT_ID;
@@ -631,7 +631,11 @@ void CRenderComponent::ClearRenderBuffers()
 }
 RenderMode CRenderComponent::GetRenderMode() const {return m_renderMode;}
 bool CRenderComponent::ShouldDraw() const {return umath::is_flag_set(m_stateFlags,StateFlags::ShouldDraw);}
-bool CRenderComponent::ShouldDrawShadow() const {return umath::is_flag_set(m_stateFlags,StateFlags::ShouldDrawShadow);}
+bool CRenderComponent::ShouldDrawShadow() const
+{
+	// TODO: Streamline this! We only need one flag!
+	return umath::is_flag_set(m_stateFlags,StateFlags::ShouldDrawShadow) && !umath::is_flag_set(m_stateFlags,StateFlags::DisableShadows) && GetCastShadows();
+}
 
 RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod)
 {
@@ -785,4 +789,3 @@ void CEOnRenderBoundsChanged::PushArguments(lua_State *l)
 	Lua::Push<Vector3>(l,sphere.pos);
 	Lua::PushNumber(l,sphere.radius);
 }
-#pragma optimize("",on)

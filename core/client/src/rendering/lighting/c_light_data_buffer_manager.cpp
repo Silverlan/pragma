@@ -46,16 +46,28 @@ void ShadowDataBufferManager::DoInitialize()
 {
 	auto limits = c_engine->GetRenderContext().GetPhysicalDeviceLimits();
 
-	auto shadowDataSize = sizeof(ShadowBufferData);
-	auto numShadows = static_cast<uint32_t>(umath::min(static_cast<uint64_t>(limits.maxStorageBufferRange /shadowDataSize),static_cast<uint64_t>(GameLimits::MaxAbsoluteShadowLights)));
-	m_maxCount = numShadows;
+	prosper::DeviceSize limit = 0;
 
 	prosper::util::BufferCreateInfo createInfo {};
-	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit | prosper::BufferUsageFlags::TransferDstBit;
+	createInfo.usageFlags = prosper::BufferUsageFlags::TransferDstBit;
+	std::optional<uint64_t> alignment {};
+#if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1
+	createInfo.usageFlags |= prosper::BufferUsageFlags::UniformBufferBit;
+	alignment = sizeof(Vector4);
+	limit = umath::to_integral(GameLimits::MaxUniformBufferSize);
+#else
+	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
+	limit = limits.maxStorageBufferRange;
+#endif
+
+	auto shadowDataSize = sizeof(ShadowBufferData);
+	auto numShadows = static_cast<uint32_t>(umath::min(static_cast<uint64_t>(limit /shadowDataSize),static_cast<uint64_t>(GameLimits::MaxAbsoluteShadowLights)));
+	m_maxCount = numShadows;
+
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = m_maxCount *shadowDataSize;
 
-	m_masterBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(createInfo,shadowDataSize,createInfo.size,0.05f);
+	m_masterBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(createInfo,shadowDataSize,createInfo.size,0.05f,nullptr,alignment);
 	m_masterBuffer->SetDebugName("light_shadow_data_buf");
 
 	m_bufferIndexToLightSource.resize(m_maxCount,nullptr);
@@ -84,18 +96,28 @@ void LightDataBufferManager::DoInitialize()
 	auto limits = c_engine->GetRenderContext().GetPhysicalDeviceLimits();
 
 	auto lightDataSize = sizeof(LightBufferData);
-	auto numLights = static_cast<uint32_t>(umath::min(static_cast<uint64_t>(limits.maxStorageBufferRange /lightDataSize),static_cast<uint64_t>(GameLimits::MaxAbsoluteLights)));
-	m_maxCount = numLights;
+	prosper::DeviceSize maxBufferSize = 0;
 
 	prosper::util::BufferCreateInfo createInfo {};
-	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit | prosper::BufferUsageFlags::TransferDstBit;
+	createInfo.usageFlags = prosper::BufferUsageFlags::TransferDstBit;
+	std::optional<uint64_t> alignment {};
+#if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1
+	createInfo.usageFlags |= prosper::BufferUsageFlags::UniformBufferBit;
+	maxBufferSize = umath::to_integral(GameLimits::MaxUniformBufferSize);
+	alignment = sizeof(Vector4);
+#else
+	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
+	maxBufferSize = limits.maxStorageBufferRange;
+#endif
+	auto numLights = static_cast<uint32_t>(umath::min(static_cast<uint64_t>(maxBufferSize /lightDataSize),static_cast<uint64_t>(GameLimits::MaxAbsoluteLights)));
+	m_maxCount = numLights;
 #ifdef ENABLE_LIGHT_BUFFER_DEBUGGING
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
 #else
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 #endif
 	createInfo.size = m_maxCount *lightDataSize;
-	m_masterBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(createInfo,lightDataSize,createInfo.size,0.05f);
+	m_masterBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(createInfo,lightDataSize,createInfo.size,0.05f,nullptr,alignment);
 	m_masterBuffer->SetDebugName("light_data_buf");
 
 	m_bufferIndexToLightSource.resize(m_maxCount,nullptr);
@@ -117,6 +139,8 @@ std::shared_ptr<prosper::IBuffer> LightDataBufferManager::Request(CLightComponen
 	else
 		renderBuffer = m_masterBuffer->AllocateBuffer(&bufferData);
 
+	if(renderBuffer == nullptr)
+		return nullptr;
 	auto baseIndex = renderBuffer->GetBaseIndex();
 	m_bufferIndexToLightSource.at(baseIndex) = &lightSource;
 	assert(baseIndex >= (m_highestBufferIndexInUse +1));

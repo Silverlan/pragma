@@ -338,13 +338,13 @@ bool pragma::LuaShaderTextured3D::BindScene(pragma::CSceneComponent &scene,rende
 	return true;
 }
 bool pragma::LuaShaderTextured3D::BeginDraw(
-	const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,
+	const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,
 	const Vector4 &drawOrigin,ShaderGameWorldPipeline pipelineIdx,RecordFlags recordFlags
 )
 {
 	if(ShaderTextured3DBase::BeginDraw(cmdBuffer,clipPlane,drawOrigin,pipelineIdx,recordFlags) == false)
 		return false;
-	CallLuaMember<void,prosper::ICommandBuffer*,const Vector4&,uint32_t,uint32_t>("OnBeginDraw",const_cast<prosper::IPrimaryCommandBuffer*>(cmdBuffer.get()),clipPlane,umath::to_integral(pipelineIdx),umath::to_integral(recordFlags));
+	CallLuaMember<void,prosper::ICommandBuffer*,const Vector4&,uint32_t,uint32_t>("OnBeginDraw",const_cast<prosper::ICommandBuffer*>(cmdBuffer.get()),clipPlane,umath::to_integral(pipelineIdx),umath::to_integral(recordFlags));
 	return true;
 }
 void pragma::LuaShaderTextured3D::EndDraw()

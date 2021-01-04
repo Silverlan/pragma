@@ -48,11 +48,12 @@
 #include <pragma/console/command_options.hpp>
 #include <util_image.hpp>
 #include <util_image_buffer.hpp>
+#include <sharedutils/util_file.h>
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 DLLCLIENT void CMD_entities_cl(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {
 	if(!state->IsGameActive())
@@ -701,6 +702,84 @@ DLLCLIENT void CMD_shader_reload(NetworkState*,pragma::BasePlayerComponent*,std:
 	c_engine->ReloadShader(argv.front());
 }
 
+void CMD_shader_optimize(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+{
+	std::unordered_map<std::string,pragma::console::CommandOption> commandOptions {};
+	pragma::console::parse_command_options(argv,commandOptions);
+	if(argv.empty())
+	{
+		Con::cwar<<"WARNING: No shader specified!"<<Con::endl;
+		return;
+	}
+	auto &shaderName = argv.front();
+	auto &renderContext = c_engine->GetRenderContext();
+	if(renderContext.GetAPIAbbreviation() != "VK")
+	{
+		Con::cwar<<"WARNING: Shader optimization only supported for Vulkan!"<<Con::endl;
+		return;
+	}
+	auto shader = renderContext.GetShader(shaderName);
+	if(shader.expired())
+	{
+		Con::cwar<<"WARNING: Shader '"<<shaderName<<"' not found!"<<Con::endl;
+		return;
+	}
+	if(shader->IsValid() == false)
+	{
+		Con::cwar<<"WARNING: Shader '"<<shaderName<<"' is invalid!"<<Con::endl;
+		return;
+	}
+	std::unordered_map<prosper::ShaderStage,std::string> shaderStages;
+	for(auto &stageData : shader->GetStages())
+	{
+		if(stageData == nullptr)
+			continue;
+		shaderStages[stageData->stage] = stageData->path;
+	}
+	std::string infoLog;
+	auto optimizedShaders = renderContext.OptimizeShader(shaderStages,infoLog);
+	if(optimizedShaders.has_value() == false)
+	{
+		Con::cwar<<"WARNING: Unable to optimize shader: "<<infoLog<<Con::endl;
+		return;
+	}
+	auto validate = pragma::console::get_command_option_parameter_value(commandOptions,"validate","0");
+	if(util::to_boolean(validate))
+	{
+		Con::cout<<"Optimization complete!"<<Con::endl;
+		return; // Don't save shaders
+	}
+	Con::cout<<"Optimization complete! Saving optimized shader files..."<<Con::endl;
+	std::string outputPath = "addons/vulkan/";
+	auto reload = util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions,"reload","0"));
+	for(auto &pair : *optimizedShaders)
+	{
+		auto itSrc = shaderStages.find(pair.first);
+		if(itSrc == shaderStages.end())
+			continue;
+		auto shaderFile = renderContext.FindShaderFile("shaders/" +itSrc->second);
+		if(shaderFile.has_value() == false)
+		{
+			Con::cwar<<"WARNING: Unable to find shader file for '"<<pair.second<<"'!"<<Con::endl;
+			return;
+		}
+		auto fileName = outputPath +*shaderFile;
+		ufile::remove_extension_from_filename(fileName);
+		fileName += "_vk.gls";
+		if(reload == false && FileManager::Exists(fileName))
+			continue;
+		FileManager::CreatePath(ufile::get_path_from_filename(fileName).c_str());
+		auto f = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(),"w");
+		if(f == nullptr)
+		{
+			Con::cwar<<"WARNING: Unable to open file '"<<fileName<<"' for writing!"<<Con::endl;
+			return;
+		}
+		f->WriteString(pair.second);
+		f = nullptr;
+	}
+}
+
 void CMD_shader_list(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
 {
 	auto &shaderManager = c_engine->GetShaderManager();
@@ -818,7 +897,7 @@ void Console::commands::cl_find(NetworkState *state,pragma::BasePlayerComponent*
 
 void CMD_fps(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
 {
-	Con::cout<<"FPS: "<<c_engine->GetFPS()<<Con::endl<<"Frame Time: "<<c_engine->GetFrameTime()<<"ms"<<Con::endl;
+	Con::cout<<"FPS: "<<util::round_string(c_engine->GetFPS(),0)<<Con::endl<<"Frame Time: "<<util::round_string(c_engine->GetFrameTime(),2)<<"ms"<<Con::endl;
 }
 
 void Console::commands::vk_dump_limits(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
@@ -1092,3 +1171,4 @@ static void cvar_net_graph(bool val)
 REGISTER_CONVAR_CALLBACK_CL(net_graph,[](NetworkState*,ConVar*,bool,bool val) {
 	cvar_net_graph(val);
 })
+#pragma optimize("",on)

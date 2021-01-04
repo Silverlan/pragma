@@ -9,6 +9,7 @@
 #include "pragma/rendering/renderers/raytracing_renderer.hpp"
 #include "pragma/rendering/shaders/world/raytracing/c_shader_raytracing.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
 #include <prosper_descriptor_set_group.hpp>
 #include <image/prosper_sampler.hpp>
 #include <prosper_command_buffer.hpp>
@@ -39,9 +40,15 @@ bool RaytracingRenderer::Initialize(uint32_t w,uint32_t h)
 	m_dsgOutputImage = descSetImage;
 
 	m_dsgLights = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderRayTracing::DESCRIPTOR_SET_LIGHTS);
+#if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1
+	m_dsgLights->GetDescriptorSet()->SetBindingUniformBuffer(
+		const_cast<prosper::IUniformResizableBuffer&>(pragma::CLightComponent::GetGlobalRenderBuffer()),0
+	);
+#else
 	m_dsgLights->GetDescriptorSet()->SetBindingStorageBuffer(
 		const_cast<prosper::IUniformResizableBuffer&>(pragma::CLightComponent::GetGlobalRenderBuffer()),0
 	);
+#endif
 
 	m_whShader = c_engine->GetShader("raytracing");
 	return m_whShader.valid() && CRaytracingComponent::InitializeBuffers();

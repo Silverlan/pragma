@@ -28,7 +28,7 @@ using namespace pragma;
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 CShadowComponent::CShadowComponent(BaseEntity &ent)
 	: BaseEntityComponent{ent}
 {}
@@ -327,6 +327,8 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 					continue;
 
 				auto *renderC = static_cast<CBaseEntity&>(worldC->GetEntity()).GetRenderComponent();
+				if(renderC->ShouldDrawShadow() == false)
+					continue;
 				renderC->UpdateRenderDataMT(drawSceneInfo.commandBuffer,scene,*hCam,vp);
 
 				for(auto *renderQueue : {worldC->GetClusterRenderQueue(node->cluster),worldC->GetClusterRenderQueue(node->cluster,true)})
@@ -357,7 +359,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 			};
 			for(auto *pRenderComponent : pragma::CRenderComponent::GetEntitiesExemptFromOcclusionCulling())
 			{
-				if(SceneRenderDesc::ShouldConsiderEntity(static_cast<CBaseEntity&>(pRenderComponent->GetEntity()),scene,drawSceneInfo.renderFlags) == false)
+				if(SceneRenderDesc::ShouldConsiderEntity(static_cast<CBaseEntity&>(pRenderComponent->GetEntity()),scene,drawSceneInfo.renderFlags) == false || pRenderComponent->ShouldDrawShadow() == false)
 					continue;
 				SceneRenderDesc::AddRenderMeshesToRenderQueue(drawSceneInfo,*pRenderComponent,fGetRenderQueue,scene,*hCam,vp,nullptr);
 			}
@@ -366,7 +368,12 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 			if(culler)
 			{
 				auto &dynOctree = culler->GetOcclusionOctree();
-				SceneRenderDesc::CollectRenderMeshesFromOctree(drawSceneInfo,dynOctree,scene,*hCam,vp,drawSceneInfo.renderFlags,fGetRenderQueue,fShouldCull,nullptr,lodBias);
+				SceneRenderDesc::CollectRenderMeshesFromOctree(
+					drawSceneInfo,dynOctree,scene,*hCam,vp,drawSceneInfo.renderFlags,fGetRenderQueue,fShouldCull,nullptr,lodBias,
+					[](CBaseEntity &ent,const pragma::CSceneComponent&,FRender) -> bool {
+						return ent.GetRenderComponent()->ShouldDrawShadow();
+					}
+				);
 			}
 		}
 		
@@ -486,13 +493,14 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 	auto numLayers = shadowC->GetLayerCount();
 	drawCmd->RecordImageBarrier(img,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal);
 	
-	rendering::DepthStageRenderProcessor shadowRenderProcessor {drawSceneInfo,RenderFlags::None,{}};
+	util::RenderPassDrawInfo rpDrawInfo {drawSceneInfo,*drawSceneInfo.commandBuffer};
+	rendering::DepthStageRenderProcessor shadowRenderProcessor {rpDrawInfo,RenderFlags::None,{}};
 	for(auto layerId=decltype(numLayers){0};layerId<numLayers;++layerId)
 	{
 		auto *framebuffer = shadowC->GetFramebuffer(layerId);
 
 		const prosper::ClearValue clearVal {prosper::ClearDepthStencilValue{1.f}};
-		if(drawCmd->RecordBeginRenderPass(*smRt,layerId,&clearVal) == false)
+		if(drawCmd->RecordBeginRenderPass(*smRt,layerId,prosper::IPrimaryCommandBuffer::RenderPassFlags::None,&clearVal) == false)
 			continue;
 
 		if(shadowRenderProcessor.BindShader(*shader))
@@ -519,4 +527,3 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 		);
 	}
 }
-#pragma optimize("",on)

@@ -15,6 +15,29 @@
 #include "/debug/fs_debug_csm.gls"
 #include "debug.gls"
 
+void apply_debug_heatmap_color(uint istart,uint iend,inout vec3 color)
+{
+    ivec2 location = ivec2(gl_FragCoord.xy);
+    uint tileSize = get_tile_size();
+    ivec2 tileID = location /ivec2(tileSize,tileSize);
+    uint index = tileID.y *get_number_of_tiles_x() +tileID.x;
+    uint tileStartOffset = index *MAX_SCENE_LIGHTS;
+	uint numLights = 0;
+	for(uint i=istart; i < iend && visibleLightTileIndicesBuffer.data[tileStartOffset + i].index != -1; i++)
+	{
+		uint lightIndex = visibleLightTileIndicesBuffer.data[tileStartOffset + i].index;
+		LightSourceData light = get_light_source(int(lightIndex));
+		if((light.flags &FLIGHT_TYPE_DIRECTIONAL) == 0)
+			++numLights;
+	}
+	if(numLights > 0)
+	{
+		const float dbgIntensity = 0.95;
+		color.rgb = (vec3(tileID.x /float(tileSize),tileID.y /float(tileSize),0) *(numLights /float(5))) *pow(1.0,dbgIntensity *1.0)
+				+color.rgb *(1.0 -dbgIntensity);
+	}
+}
+
 vec4 calc_pbr(vec4 albedoColor,vec2 texCoords,uint debugMode)
 {
 	// Metallic and Roughness material properties are packed together
@@ -68,7 +91,6 @@ vec4 calc_pbr(vec4 albedoColor,vec2 texCoords,uint debugMode)
 		baseColor.rgb = baseColorFactor *baseColor.rgb +wrinkle *wrinkleCol.rgb +stretch *stretchCol.rgb;
 	}
 
-
 	if(true)//is_diffuse_srgb()) // TODO
 		baseColor.rgb = srgb_to_linear(baseColor.rgb);
 	//baseColor *= u_DiffuseFactor;
@@ -102,28 +124,11 @@ vec4 calc_pbr(vec4 albedoColor,vec2 texCoords,uint debugMode)
 
 	// Lighting
 	vec3 color = calc_pbr_lighting(texCoords,materialInfo,baseColor);
-
 	if((u_debug.flags &DEBUG_FORWARD_PLUS_HEATMAP) != 0)
 	{
-		ivec2 location = ivec2(gl_FragCoord.xy);
-		uint tileSize = get_tile_size();
-		ivec2 tileID = location /ivec2(tileSize,tileSize);
-		uint index = tileID.y *get_number_of_tiles_x() +tileID.x;
-		uint offset = index *MAX_SCENE_LIGHTS;
-		uint numLights = 0;
-		for (uint i = 0; i < MAX_SCENE_LIGHTS && visibleLightTileIndicesBuffer.data[offset + i].index != -1; i++)
-		{
-			uint lightIndex = visibleLightTileIndicesBuffer.data[offset + i].index;
-			LightSourceData light = get_light_source(int(lightIndex));
-			if((light.flags &FLIGHT_TYPE_DIRECTIONAL) == 0)
-				++numLights;
-		}
-		if(numLights > 0)
-		{
-			const float dbgIntensity = 0.95;
-			color.rgb = (vec3(tileID.x /float(tileSize),tileID.y /float(tileSize),0) *(numLights /float(5))) *pow(1.0,dbgIntensity *1.0)
-					+color.rgb *(1.0 -dbgIntensity);
-		}
+		apply_debug_heatmap_color(SCENE_SPOT_LIGHT_BUFFER_START,SCENE_SPOT_LIGHT_BUFFER_END,color);
+		apply_debug_heatmap_color(SCENE_POINT_LIGHT_BUFFER_START,SCENE_POINT_LIGHT_BUFFER_END,color);
+		apply_debug_heatmap_color(SCENE_DIRECTIONAL_LIGHT_BUFFER_START,SCENE_DIRECTIONAL_LIGHT_BUFFER_END,color);
 	}
 
 	// regular shading

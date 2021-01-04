@@ -26,6 +26,7 @@ REGISTER_CONCOMMAND_CL(screenshot,CMD_screenshot,ConVarFlags::None,"Writes the c
 REGISTER_CONCOMMAND_CL(thirdperson,CMD_thirdperson,ConVarFlags::None,"Toggles between first- and third-person mode.");
 REGISTER_CONCOMMAND_CL(shader_reload,CMD_shader_reload,ConVarFlags::None,"Reloads a specific shader, or all registered shaders if no arguments are given. Usage: shader_reload <shaderName>");
 REGISTER_CONCOMMAND_CL(shader_list,CMD_shader_list,ConVarFlags::None,"Prints a list of all currently loaded shaders");
+REGISTER_CONCOMMAND_CL(shader_optimize,CMD_shader_optimize,ConVarFlags::None,"Uses LunarGLASS to optimize the specified shader.");
 REGISTER_CONCOMMAND_CL(debug_light_shadowmap,CMD_debug_light_shadowmap,ConVarFlags::None,"Displays the depth map for the given light on screen. Call without arguments to turn the display off. Usage: debug_light_shadowmap <lightEntityIndex>");
 REGISTER_CONCOMMAND_CL(debug_glow_bloom,CMD_debug_glow_bloom,ConVarFlags::None,"Displays the scene glow texture on screen. Usage: debug_glow_bloom <1/0>");
 REGISTER_CONCOMMAND_CL(debug_hdr_bloom,CMD_debug_hdr_bloom,ConVarFlags::None,"Displays the scene bloom texture on screen. Usage: debug_hdr_bloom <1/0>");

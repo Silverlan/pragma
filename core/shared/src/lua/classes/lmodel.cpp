@@ -28,7 +28,7 @@
 
 extern DLLENGINE Engine *engine;
 
-#pragma optimize("",off)
+
 void Lua::ModelMeshGroup::register_class(luabind::class_<::ModelMeshGroup> &classDef)
 {
 	classDef.scope[luabind::def("Create",&Create)];
@@ -2522,4 +2522,3 @@ void Lua::Model::RemoveObjectAttachment(lua_State *l,::Model &mdl,uint32_t idx)
 	//Lua::CheckModel(l,1);
 	mdl.RemoveObjectAttachment(idx);
 }
-#pragma optimize("",on)

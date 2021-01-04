@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
+#include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 
 using namespace pragma;
@@ -17,7 +18,7 @@ uint32_t ShaderForwardPLightCulling::TILE_SIZE = 16u;
 decltype(ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS) ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Light Buffers
-			prosper::DescriptorType::StorageBuffer,
+			LIGHT_SOURCE_BUFFER_TYPE,
 			prosper::ShaderStageFlags::ComputeBit
 		},
 		prosper::DescriptorSetInfo::Binding { // Visible light tile index buffer
@@ -25,7 +26,7 @@ decltype(ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS) ShaderForwardPLightC
 			prosper::ShaderStageFlags::ComputeBit
 		},
 		prosper::DescriptorSetInfo::Binding { // Shadow Buffers
-			prosper::DescriptorType::StorageBuffer,
+			LIGHT_SOURCE_BUFFER_TYPE,
 			prosper::ShaderStageFlags::ComputeBit
 		},
 		prosper::DescriptorSetInfo::Binding { // Visible light index buffer

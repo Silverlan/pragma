@@ -15,7 +15,7 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
-#pragma optimize("",off)
+
 ComponentEventId CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED = INVALID_COMPONENT_ID;
 luabind::object CModelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CModelComponentHandleWrapper>(l);}
 void CModelComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
@@ -317,4 +317,3 @@ void CModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 	UpdateLOD(0);
 	BaseModelComponent::OnModelChanged(model);
 }
-#pragma optimize("",on)

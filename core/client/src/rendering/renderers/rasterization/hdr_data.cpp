@@ -42,7 +42,7 @@ extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 static const float EXPOSURE_FRAME_UPDATE = 0.25f; // Exposure will be updated every x seconds
-#pragma optimize("",off)
+
 static CVar cvMaxExposure = GetClientConVar("render_hdr_max_exposure");
 static void CVAR_CALLBACK_render_hdr_max_exposure(NetworkState*,ConVar*,float,float val)
 {
@@ -151,13 +151,13 @@ HDRData::~HDRData()
 		m_cbReloadCommandBuffer.Remove();
 }
 
-bool HDRData::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *customRenderPass)
+bool HDRData::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *customRenderPass,bool secondaryCommandBuffers)
 {
 	auto &rt = GetRenderTarget(drawSceneInfo);
 	return drawSceneInfo.commandBuffer->RecordBeginRenderPass(rt,{
 		prosper::ClearValue{}, // Unused
 		prosper::ClearValue{prosper::ClearColorValue{std::array<float,4>{0.f,0.f,0.f,0.f}}} // Clear bloom
-	},customRenderPass);
+	},secondaryCommandBuffers ? prosper::IPrimaryCommandBuffer::RenderPassFlags::SecondaryCommandBuffers : prosper::IPrimaryCommandBuffer::RenderPassFlags::None,customRenderPass);
 }
 bool HDRData::EndRenderPass(const util::DrawSceneInfo &drawSceneInfo)
 {
@@ -523,4 +523,3 @@ void Console::commands::debug_render_scene(NetworkState *state,pragma::BasePlaye
 			static_cast<WIDebugMSAATexture*>(hBloomTexture.get())->Update();
 		}));
 }
-#pragma optimize("",on)

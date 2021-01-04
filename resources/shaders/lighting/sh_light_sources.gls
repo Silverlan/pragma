@@ -12,14 +12,7 @@ const int LIGHT_TYPE_DIRECTIONAL = 1;
 const int LIGHT_TYPE_POINT = 2;
 const int LIGHT_TYPE_SPOT = 3;
 
-layout(std430,LAYOUT_ID(SHADER_UNIFORM_LIGHT_SOURCES_SET,SHADER_UNIFORM_LIGHT_SOURCES_BINDING)) readonly buffer LightBuffer {
-	LightSourceData data[];
-} lightBuffer;
-
-LightSourceData get_light_source(uint i)
-{
-	return lightBuffer.data[i];
-}
+#define USE_LIGHT_SOURCE_UNIFORM_BUFFER 1
 
 struct ShadowData
 {
@@ -27,9 +20,31 @@ struct ShadowData
 	mat4 view;
 	mat4 projection;
 };
+
+#if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 0
+
+layout(std430,LAYOUT_ID(SHADER_UNIFORM_LIGHT_SOURCES_SET,SHADER_UNIFORM_LIGHT_SOURCES_BINDING)) readonly buffer LightBuffer {
+	LightSourceData data[];
+} lightBuffer;
 layout(std430,LAYOUT_ID(SHADER_UNIFORM_SHADOW_DATA_BUFFER_SET,SHADER_UNIFORM_SHADOW_DATA_BUFFER_BINDING)) readonly buffer ShadowBuffer {
 	ShadowData data[];
 } shadowBuffer;
+
+#else
+
+layout(std140,LAYOUT_ID(SHADER_UNIFORM_LIGHT_SOURCES_SET,SHADER_UNIFORM_LIGHT_SOURCES_BINDING)) uniform LightBuffer {
+	LightSourceData data[MAX_SCENE_LIGHTS];
+} lightBuffer;
+layout(std140,LAYOUT_ID(SHADER_UNIFORM_SHADOW_DATA_BUFFER_SET,SHADER_UNIFORM_SHADOW_DATA_BUFFER_BINDING)) uniform ShadowBuffer {
+	ShadowData data[MAX_ACTIVE_SHADOW_SOURCES];
+} shadowBuffer;
+
+#endif
+
+LightSourceData get_light_source(uint i)
+{
+	return lightBuffer.data[i];
+}
 
 // See https://de45xmedrsdbp.cloudfront.net/Resources/files/2013SiggraphPresentationsNotes-26915738.pdf ("Real Shading in Unreal Engine 4" - Lighting Model)
 float calc_light_falloff(in float distance,in float radius)

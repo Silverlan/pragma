@@ -82,7 +82,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderWater::InitializeMaterialDes
 	}
 	return descSetGroup;
 }
-bool ShaderWater::BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,ShaderGameWorldPipeline pipelineIdx,RecordFlags recordFlags)
+bool ShaderWater::BeginDraw(const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,ShaderGameWorldPipeline pipelineIdx,RecordFlags recordFlags)
 {
 	if(ShaderTextured3DBase::BeginDraw(cmdBuffer,clipPlane,drawOrigin,pipelineIdx,recordFlags) == false)
 		return false;

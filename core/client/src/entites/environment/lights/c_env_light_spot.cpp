@@ -22,7 +22,7 @@ LINK_ENTITY_TO_CLASS(env_light_spot,CEnvLightSpot);
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 CLightSpotComponent::CLightSpotComponent(BaseEntity &ent)
 	: BaseEnvLightSpotComponent(ent)
 {}
@@ -180,4 +180,3 @@ void CEnvLightSpot::Initialize()
 	AddComponent<CLightComponent>();
 	AddComponent<CLightSpotComponent>();
 }
-#pragma optimize("",on)

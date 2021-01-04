@@ -51,7 +51,7 @@ void ShaderGlow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipe
 	ShaderTextured3DBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	pipelineInfo.ToggleDepthBias(true,-180.f /* constant factor */,-180.f /* clamp */,0.f /* slope factor */);
 }
-bool ShaderGlow::BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx)
+bool ShaderGlow::BeginDraw(const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,Pipeline pipelineIdx)
 {
 	return ShaderSceneLit::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx));
 }

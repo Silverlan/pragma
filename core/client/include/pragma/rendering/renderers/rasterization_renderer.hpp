@@ -12,10 +12,13 @@
 #include "pragma/rendering/renderers/rasterization/glow_data.hpp"
 #include "pragma/rendering/renderers/rasterization/hdr_data.hpp"
 #include "pragma/rendering/c_rendermode.h"
+#include <prosper_swap_command_buffer.hpp>
 #include <mathutil/plane.hpp>
 #include <sharedutils/util_weak_handle.hpp>
 #include <string>
 #include <vector>
+
+#define DEBUG_RENDER_PERFORMANCE_TEST_ENABLED 0
 
 namespace prosper
 {
@@ -23,10 +26,11 @@ namespace prosper
 	class IDescriptorSetGroup;
 	class IPrimaryCommandBuffer;
 	class IDescriptorSet;
+	class ISwapCommandBufferGroup;
 };
 namespace pragma
 {
-	class ShaderTextured3DBase;
+	class ShaderGameWorld;
 	class ShaderPrepassBase;
 	class CLightComponent;
 	class CParticleSystemComponent;
@@ -133,7 +137,7 @@ namespace pragma::rendering
 		const util::WeakHandle<pragma::CLightMapComponent> &GetLightMap() const;
 
 		void SetShaderOverride(const std::string &srcShader,const std::string &shaderOverride);
-		pragma::ShaderTextured3DBase *GetShaderOverride(pragma::ShaderTextured3DBase *srcShader) const;
+		pragma::ShaderGameWorld *GetShaderOverride(pragma::ShaderGameWorld *srcShader) const;
 		void ClearShaderOverride(const std::string &srcShader);
 
 		const std::vector<umath::Plane> &GetFrustumPlanes() const;
@@ -161,7 +165,7 @@ namespace pragma::rendering
 		prosper::SampleCountFlags GetSampleCount() const;
 		bool IsMultiSampled() const;
 
-		bool BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *customRenderPass=nullptr);
+		prosper::RenderTarget *BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *customRenderPass=nullptr,bool secondaryCommandBuffers=false);
 		bool EndRenderPass(const util::DrawSceneInfo &drawSceneInfo);
 		bool ResolveRenderPass(const util::DrawSceneInfo &drawSceneInfo);
 
@@ -195,9 +199,17 @@ namespace pragma::rendering
 
 		void RenderGameScene(const util::DrawSceneInfo &drawSceneInfo);
 
+		prosper::RenderTarget *GetPrepassRenderTarget(const util::DrawSceneInfo &drawSceneInfo);
+		prosper::RenderTarget *GetLightingPassRenderTarget(const util::DrawSceneInfo &drawSceneInfo);
+
+		void RecordLightingPass(const util::DrawSceneInfo &drawSceneInfo);
+		void ExecuteLightinPass(const util::DrawSceneInfo &drawSceneInfo);
+
+		void RecordPrepass(const util::DrawSceneInfo &drawSceneInfo);
+		void ExecutePrepass(const util::DrawSceneInfo &drawSceneInfo);
+
 		void RenderSSAO(const util::DrawSceneInfo &drawSceneInfo);
 		void CullLightSources(const util::DrawSceneInfo &drawSceneInfo);
-		void RenderLightingPass(const util::DrawSceneInfo &drawSceneInfo);
 		void RenderGlowObjects(const util::DrawSceneInfo &drawSceneInfo);
 		void RenderBloom(const util::DrawSceneInfo &drawSceneInfo);
 		void RenderToneMapping(const util::DrawSceneInfo &drawSceneInfo,prosper::IDescriptorSet &descSetHdrResolve);
@@ -207,6 +219,11 @@ namespace pragma::rendering
 		virtual void BeginRendering(const util::DrawSceneInfo &drawSceneInfo) override;
 
 		void RenderSceneFog(const util::DrawSceneInfo &drawSceneInfo);
+
+		void InitializeCommandBufferGroups();
+		std::shared_ptr<prosper::ISwapCommandBufferGroup> m_prepassCommandBufferGroup = nullptr;
+		std::shared_ptr<prosper::ISwapCommandBufferGroup> m_shadowCommandBufferGroup = nullptr;
+		std::shared_ptr<prosper::ISwapCommandBufferGroup> m_lightingCommandBufferGroup = nullptr;
 
 		StateFlags m_stateFlags = StateFlags::PrepassEnabled;
 

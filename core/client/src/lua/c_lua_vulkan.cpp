@@ -3309,6 +3309,7 @@ void Lua::Vulkan::VKCommandBuffer::RecordBeginRenderPass(lua_State *l,CommandBuf
 			*rpInfo.renderTarget,
 			*rpInfo.layerId,
 			reinterpret_cast<std::vector<prosper::ClearValue>&>(rpInfo.clearValues),
+			prosper::IPrimaryCommandBuffer::RenderPassFlags::None,
 			rpInfo.renderPass.get()
 		);
 		Lua::PushBool(l,r);
@@ -3317,6 +3318,7 @@ void Lua::Vulkan::VKCommandBuffer::RecordBeginRenderPass(lua_State *l,CommandBuf
 	auto r = primaryCmdBuffer.RecordBeginRenderPass(
 		*rpInfo.renderTarget,
 		reinterpret_cast<std::vector<prosper::ClearValue>&>(rpInfo.clearValues),
+		prosper::IPrimaryCommandBuffer::RenderPassFlags::None,
 		rpInfo.renderPass.get()
 	);
 	Lua::PushBool(l,r);

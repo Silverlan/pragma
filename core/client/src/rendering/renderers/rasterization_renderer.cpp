@@ -17,6 +17,7 @@
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/render_queue.hpp"
+#include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include <pragma/lua/luafunction_call.h>
@@ -33,7 +34,7 @@ using namespace pragma::rendering;
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
-
+#pragma optimize("",off)
 static void cl_render_ssao_callback(NetworkState*,ConVar*,bool,bool val)
 {
 	if(c_game == nullptr)
@@ -64,6 +65,7 @@ RasterizationRenderer::RasterizationRenderer()
 	m_whShaderWireframe = c_engine->GetShader("wireframe");
 
 	InitializeLightDescriptorSets();
+	InitializeCommandBufferGroups();
 
 	prosper::util::BufferCreateInfo bufCreateInfo {};
 	bufCreateInfo.size = sizeof(m_rendererData);
@@ -100,6 +102,14 @@ prosper::IDescriptorSet *RasterizationRenderer::GetRendererDescriptorSet() const
 prosper::IDescriptorSet *RasterizationRenderer::GetLightSourceDescriptorSet() const {return m_dsgLights->GetDescriptorSet();}
 prosper::IDescriptorSet *RasterizationRenderer::GetLightSourceDescriptorSetCompute() const {return m_dsgLightsCompute->GetDescriptorSet();}
 
+void RasterizationRenderer::InitializeCommandBufferGroups()
+{
+	auto &context = c_engine->GetRenderContext();
+	m_prepassCommandBufferGroup = context.CreateSwapCommandBufferGroup();
+	m_shadowCommandBufferGroup = context.CreateSwapCommandBufferGroup();
+	m_lightingCommandBufferGroup = context.CreateSwapCommandBufferGroup();
+}
+
 void RasterizationRenderer::InitializeLightDescriptorSets()
 {
 	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS.IsValid())
@@ -107,20 +117,38 @@ void RasterizationRenderer::InitializeLightDescriptorSets()
 		auto &bufLightSources = pragma::CLightComponent::GetGlobalRenderBuffer();
 		auto &bufShadowData = pragma::CLightComponent::GetGlobalShadowBuffer();
 		m_dsgLights = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS);
+#if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1
+		m_dsgLights->GetDescriptorSet()->SetBindingUniformBuffer(
+			const_cast<prosper::IUniformResizableBuffer&>(bufLightSources),umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::LightBuffers)
+		);
+		m_dsgLights->GetDescriptorSet()->SetBindingUniformBuffer(
+			const_cast<prosper::IUniformResizableBuffer&>(bufShadowData),umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::ShadowData)
+		);
+#else
 		m_dsgLights->GetDescriptorSet()->SetBindingStorageBuffer(
 			const_cast<prosper::IUniformResizableBuffer&>(bufLightSources),umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::LightBuffers)
 		);
 		m_dsgLights->GetDescriptorSet()->SetBindingStorageBuffer(
 			const_cast<prosper::IUniformResizableBuffer&>(bufShadowData),umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::ShadowData)
 		);
+#endif
 
 		m_dsgLightsCompute = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS);
+#if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1
+		m_dsgLightsCompute->GetDescriptorSet()->SetBindingUniformBuffer(
+			const_cast<prosper::IUniformResizableBuffer&>(bufLightSources),umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::LightBuffers)
+		);
+		m_dsgLightsCompute->GetDescriptorSet()->SetBindingUniformBuffer(
+			const_cast<prosper::IUniformResizableBuffer&>(bufShadowData),umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::ShadowData)
+		);
+#else
 		m_dsgLightsCompute->GetDescriptorSet()->SetBindingStorageBuffer(
 			const_cast<prosper::IUniformResizableBuffer&>(bufLightSources),umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::LightBuffers)
 		);
 		m_dsgLightsCompute->GetDescriptorSet()->SetBindingStorageBuffer(
 			const_cast<prosper::IUniformResizableBuffer&>(bufShadowData),umath::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::ShadowData)
 		);
+#endif
 	}
 }
 
@@ -144,204 +172,88 @@ void RasterizationRenderer::UpdateCSMDescriptorSet(pragma::CLightDirectionalComp
 
 void RasterizationRenderer::SetFogOverride(const std::shared_ptr<prosper::IDescriptorSetGroup> &descSetGroup) {m_descSetGroupFogOverride = descSetGroup;}
 
+#if DEBUG_RENDER_PERFORMANCE_TEST_ENABLED == 1
+extern int g_dbgMode;
+#endif
 void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.scene.expired())
 		return;
-	static auto skipMode = 0;
-	if(skipMode == 1)
-		return;
 	auto &scene = const_cast<pragma::CSceneComponent&>(*drawSceneInfo.scene);
-	
-	if(skipMode == 2)
-		return;
 
 	c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("OnPreRender",drawSceneInfo);
 	c_game->CallLuaCallbacks<void,RasterizationRenderer*>("PrepareRendering",this);
 
 	// scene.GetSceneRenderDesc().BuildRenderQueue(drawSceneInfo);
-	
-	if(skipMode == 4)
-		return;
+
 	// Prepass
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::Scene);
 	
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto &sceneRenderDesc = drawSceneInfo.scene->GetSceneRenderDesc();
-	if(drawSceneInfo.renderTarget == nullptr)
+	auto prepassMode = GetPrepassMode();
+	auto runPrepass = (drawSceneInfo.renderTarget == nullptr && prepassMode != PrepassMode::NoPrepass && drawSceneInfo.scene.valid());
+	if(runPrepass)
+		RecordPrepass(drawSceneInfo);
+	//drawSceneInfo.scene->InvokeEventCallbacks(CSceneComponent::EVENT_POST_RENDER_PREPASS,pragma::CEDrawSceneInfo{drawSceneInfo});
+
+	RecordLightingPass(drawSceneInfo);
+
+	// Prepass and lighting pass are now being recorded in parallel on separate threads.
+	// In the meantime, we can make use of the wait time by updating the entity buffers
+	// for the entity we need for the prepass.
+	auto &worldObjectsRenderQueue = *sceneRenderDesc.GetRenderQueue(RenderMode::World,false /* translucent */);
+	if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
+		CSceneComponent::UpdateRenderBuffers(drawCmd,worldObjectsRenderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
+
+	if((drawSceneInfo.renderFlags &FRender::View) != FRender::None)
+		CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
+
+	c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*>("UpdateRenderBuffers",&drawSceneInfo);
+	//
+	
+	std::chrono::steady_clock::time_point t;
+	// Start executing the prepass; This may require a waiting period of the recording
+	// of the prepass hasn't completed yet
+	if(runPrepass)
 	{
-		auto prepassMode = GetPrepassMode();
-		if(prepassMode == PrepassMode::NoPrepass || drawSceneInfo.scene.expired())
-			return;
-		auto &scene = *drawSceneInfo.scene;
-		auto &hCam = scene.GetActiveCamera();
-		// Pre-render depths and normals (if SSAO is enabled)
-		c_game->StartProfilingStage(CGame::CPUProfilingPhase::Prepass);
-		c_game->StartProfilingStage(CGame::GPUProfilingPhase::Prepass);
-		auto &prepass = GetPrepass();
-		if(prepass.textureDepth->IsMSAATexture())
-			static_cast<prosper::MSAATexture&>(*prepass.textureDepth).Reset();
-		if(prepass.textureNormals != nullptr && prepass.textureNormals->IsMSAATexture())
-			static_cast<prosper::MSAATexture&>(*prepass.textureNormals).Reset();
-
-		// Entity instance buffer barrier
-		auto &drawCmd = drawSceneInfo.commandBuffer;
-		drawCmd->RecordBufferBarrier(
-			*pragma::CRenderComponent::GetInstanceBuffer(),
-			prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
-			prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
-		);
-
-		// Entity bone buffer barrier
-		drawCmd->RecordBufferBarrier(
-			*pragma::get_instance_bone_buffer(),
-			prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
-			prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
-		);
-
-		// Camera buffer barrier
-		drawCmd->RecordBufferBarrier(
-			*scene.GetCameraBuffer(),
-			prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::GeometryShaderBit,
-			prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
-		);
-
-		// View camera buffer barrier
-		drawCmd->RecordBufferBarrier(
-			*scene.GetViewCameraBuffer(),
-			prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
-			prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
-		);
-
-		// We still have to update entity buffers *before* we start the render pass (since buffer updates
-		// are not allowed during a render pass).
-		auto &worldRenderQueues = sceneRenderDesc.GetWorldRenderQueues();
-		if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
-		{
-			std::chrono::steady_clock::time_point t;
-			if(drawSceneInfo.renderStats)
-				t = std::chrono::steady_clock::now();
-			sceneRenderDesc.WaitForWorldRenderQueues();
-			if(drawSceneInfo.renderStats)
-				drawSceneInfo.renderStats->prepass.renderThreadWaitTime += std::chrono::steady_clock::now() -t;
-
-			for(auto &renderQueue : worldRenderQueues)
-				CSceneComponent::UpdateRenderBuffers(drawCmd,*renderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
-		}
-
-		// If we're lucky, the render queues for everything else have already been built
-		// as well, so we can update them right now and do everything in one render pass.
-		// Otherwise we have to split the pass into two and update the remaining render buffers
-		// inbetween both passes.
-		auto &worldObjectsRenderQueue = *sceneRenderDesc.GetRenderQueue(RenderMode::World,false /* translucent */);
-		// worldObjectsRenderQueue.WaitForCompletion();
-		auto worldObjectRenderQueueReady = worldObjectsRenderQueue.IsComplete();
-		if(worldObjectRenderQueueReady)
-		{
-			if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
-			{
-				CSceneComponent::UpdateRenderBuffers(drawCmd,worldObjectsRenderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
-				// CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
-
-			}
-
-			if((drawSceneInfo.renderFlags &FRender::View) != FRender::None)
-				CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
-			c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*>("UpdateRenderBuffers",&drawSceneInfo);
-		}
-
-		prepass.BeginRenderPass(drawSceneInfo);
-
-		auto &shaderPrepass = GetPrepassShader();
-		auto *prepassStats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr;
-		pragma::rendering::DepthStageRenderProcessor rsys {drawSceneInfo,RenderFlags::None,{} /* drawOrigin */,};
-		if(rsys.BindShader(shaderPrepass))
-		{
-			// Render static world geometry
-			if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
-			{
-				for(auto i=decltype(worldRenderQueues.size()){0u};i<worldRenderQueues.size();++i)
-					rsys.Render(*worldRenderQueues.at(i),prepassStats,i);
-			}
-
-			if(worldObjectRenderQueueReady == false)
-			{
-				// We have to suspend the render pass temporarily to update the remaining render buffers
-				rsys.UnbindShader();
-				prepass.EndRenderPass(drawSceneInfo);
-
-				if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
-					CSceneComponent::UpdateRenderBuffers(drawCmd,worldObjectsRenderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
-
-				if((drawSceneInfo.renderFlags &FRender::View) != FRender::None)
-					CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
-
-				c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*>("UpdateRenderBuffers",&drawSceneInfo);
-
-				prepass.BeginRenderPass(drawSceneInfo,prepass.subsequentRenderPass.get());
-				rsys.BindShader(shaderPrepass);
-			}
-
-			// Note: The non-translucent render queues also include transparent (alpha masked) objects.
-			// We don't care about translucent objects here.
-			if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
-			{
-				rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::World,false /* translucent */),prepassStats);
-				rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),prepassStats);
-
-			}
-
-			if((drawSceneInfo.renderFlags &FRender::View) != FRender::None)
-			{
-				rsys.SetCameraType(pragma::rendering::BaseRenderProcessor::CameraType::View);
-				rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),prepassStats);
-			}
-
-			c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>,std::reference_wrapper<pragma::rendering::DepthStageRenderProcessor>>("RenderPrepass",drawSceneInfo,rsys);
-			c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*,pragma::rendering::DepthStageRenderProcessor*>("RenderPrepass",&drawSceneInfo,&rsys);
-		}
-		rsys.UnbindShader();
-
-		prepass.EndRenderPass(drawSceneInfo);
-
-
-
-		c_game->StopProfilingStage(CGame::GPUProfilingPhase::Prepass);
-		c_game->StopProfilingStage(CGame::CPUProfilingPhase::Prepass);
-
-		drawSceneInfo.scene->InvokeEventCallbacks(CSceneComponent::EVENT_POST_RENDER_PREPASS,pragma::CEDrawSceneInfo{drawSceneInfo});
+		if(drawSceneInfo.renderStats)
+			t = std::chrono::steady_clock::now();
+		ExecutePrepass(drawSceneInfo);
+		if(drawSceneInfo.renderStats)
+			drawSceneInfo.renderStats->prepassExecutionTime = std::chrono::steady_clock::now() -t;
 	}
-	
-	if(skipMode == 5)
-		return;
-	// SSAO
-	RenderSSAO(drawSceneInfo);
-	
-	if(skipMode == 6)
-		return;
 
-	// Cull light sources
+	// SSAO (requires prepass)
+	RenderSSAO(drawSceneInfo);
+
+	// Cull light sources (requires prepass)
 	CullLightSources(drawSceneInfo);
-	
-	if(skipMode == 7)
-		return;
 	
 	// We still need to update the render buffers for some entities
 	// (All others have already been updated in the prepass)
+	if(drawSceneInfo.renderStats)
+		t = std::chrono::steady_clock::now();
+	// TODO: This would be a good spot to start recording the shadow command buffers
 	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
 	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
 	//CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
 	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
+	if(drawSceneInfo.renderStats)
+		drawSceneInfo.renderStats->updateRenderBufferTime = std::chrono::steady_clock::now() -t;
+	// TODO: Execute shadow command buffers here
 
 	// Lighting pass
-	RenderLightingPass(drawSceneInfo);
+	if(drawSceneInfo.renderStats)
+		t = std::chrono::steady_clock::now();
+	ExecuteLightinPass(drawSceneInfo);
+	if(drawSceneInfo.renderStats)
+		drawSceneInfo.renderStats->lightingPassExecutionTime = std::chrono::steady_clock::now() -t;
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::Scene);
 
-
-	
-	if(skipMode == 8)
-		return;
 	// Post processing
+	if(drawSceneInfo.renderStats)
+		t = std::chrono::steady_clock::now();
 	c_game->StartProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
 
@@ -350,8 +262,6 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	RenderSceneFog(drawSceneInfo);
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingFog);
 	
-	if(skipMode == 9)
-		return;
 	// Glow
 	// RenderGlowObjects(drawSceneInfo);
 	c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing",drawSceneInfo);
@@ -360,8 +270,6 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	// Bloom
 	RenderBloom(drawSceneInfo);
 	
-	if(skipMode == 10)
-		return;
 	// Tone mapping
 	if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::HDR))
 	{
@@ -377,12 +285,12 @@ void RasterizationRenderer::RenderGameScene(const util::DrawSceneInfo &drawScene
 	RenderToneMapping(drawSceneInfo,*dsgBloomTonemapping->GetDescriptorSet());
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingHDR);
 	
-	if(skipMode == 11)
-		return;
 	// FXAA
 	RenderFXAA(drawSceneInfo);
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
+	if(drawSceneInfo.renderStats)
+		drawSceneInfo.renderStats->postProcessingExecutionTime = std::chrono::steady_clock::now() -t;
 }
 
 bool RasterizationRenderer::ReloadRenderTarget(pragma::CSceneComponent &scene,uint32_t width,uint32_t height)
@@ -464,30 +372,30 @@ void RasterizationRenderer::UpdateRenderSettings()
 void RasterizationRenderer::SetShaderOverride(const std::string &srcShaderId,const std::string &shaderOverrideId)
 {
 	auto hSrcShader = c_engine->GetShader(srcShaderId);
-	if(hSrcShader.get()->GetBaseTypeHashCode() != pragma::ShaderTextured3DBase::HASH_TYPE)
+	if(hSrcShader.get()->GetBaseTypeHashCode() != pragma::ShaderGameWorld::HASH_TYPE)
 		return;
-	auto *srcShader = dynamic_cast<pragma::ShaderTextured3DBase*>(hSrcShader.get());
+	auto *srcShader = dynamic_cast<pragma::ShaderGameWorld*>(hSrcShader.get());
 	if(srcShader == nullptr)
 		return;
 	auto hDstShader = c_engine->GetShader(shaderOverrideId);
-	auto dstShader = dynamic_cast<pragma::ShaderTextured3DBase*>(hDstShader.get());
+	auto dstShader = dynamic_cast<pragma::ShaderGameWorld*>(hDstShader.get());
 	if(dstShader == nullptr)
 		return;
 	m_shaderOverrides[typeid(*srcShader).hash_code()] = dstShader->GetHandle();
 }
-pragma::ShaderTextured3DBase *RasterizationRenderer::GetShaderOverride(pragma::ShaderTextured3DBase *srcShader) const
+pragma::ShaderGameWorld *RasterizationRenderer::GetShaderOverride(pragma::ShaderGameWorld *srcShader) const
 {
 	if(srcShader == nullptr)
 		return nullptr;
 	auto it = m_shaderOverrides.find(typeid(*srcShader).hash_code());
 	if(it == m_shaderOverrides.end())
 		return srcShader;
-	return static_cast<pragma::ShaderTextured3DBase*>(it->second.get());
+	return static_cast<pragma::ShaderGameWorld*>(it->second.get());
 }
 void RasterizationRenderer::ClearShaderOverride(const std::string &srcShaderId)
 {
 	auto hSrcShader = c_engine->GetShader(srcShaderId);
-	auto *srcShader = dynamic_cast<pragma::ShaderTextured3DBase*>(hSrcShader.get());
+	auto *srcShader = dynamic_cast<pragma::ShaderGameWorld*>(hSrcShader.get());
 	if(srcShader == nullptr)
 		return;
 	auto it = m_shaderOverrides.find(typeid(*srcShader).hash_code());
@@ -616,14 +524,27 @@ void RasterizationRenderer::ReloadPresentationRenderTarget()
 prosper::SampleCountFlags RasterizationRenderer::GetSampleCount() const {return const_cast<RasterizationRenderer*>(this)->GetHDRInfo().sceneRenderTarget->GetTexture().GetImage().GetSampleCount();}
 bool RasterizationRenderer::IsMultiSampled() const {return GetSampleCount() != prosper::SampleCountFlags::e1Bit;}
 
-bool RasterizationRenderer::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *customRenderPass)
+prosper::RenderTarget *RasterizationRenderer::GetPrepassRenderTarget(const util::DrawSceneInfo &drawSceneInfo)
+{
+	return GetPrepass().renderTarget.get();
+}
+prosper::RenderTarget *RasterizationRenderer::GetLightingPassRenderTarget(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &hdrInfo = GetHDRInfo();
 	auto &rt = hdrInfo.GetRenderTarget(drawSceneInfo);
-	auto &tex = rt.GetTexture();
+	return &rt;
+}
+
+prosper::RenderTarget *RasterizationRenderer::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *customRenderPass,bool secondaryCommandBuffers)
+{
+	auto *rt = GetLightingPassRenderTarget(drawSceneInfo);
+	if(rt == nullptr)
+		return nullptr;
+	auto &tex = rt->GetTexture();
 	if(tex.IsMSAATexture())
 		static_cast<prosper::MSAATexture&>(tex).Reset();
-	return hdrInfo.BeginRenderPass(drawSceneInfo,customRenderPass);
+	auto result = GetHDRInfo().BeginRenderPass(drawSceneInfo,customRenderPass,secondaryCommandBuffers);
+	return result ? rt : nullptr;;
 }
 bool RasterizationRenderer::EndRenderPass(const util::DrawSceneInfo &drawSceneInfo)
 {
@@ -637,3 +558,4 @@ bool RasterizationRenderer::ResolveRenderPass(const util::DrawSceneInfo &drawSce
 }
 
 prosper::Shader *RasterizationRenderer::GetWireframeShader() const {return m_whShaderWireframe.get();}
+#pragma optimize("",on)

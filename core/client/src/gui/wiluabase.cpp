@@ -133,7 +133,7 @@ void WILuaBase::SetAlpha(float alpha)
 void WILuaBase::Render(const DrawInfo &drawInfo,const Mat4 &matDraw,const Vector2 &scale)
 {
 	WIBase::Render(drawInfo,matDraw);
-	CallLuaMember<void,std::reference_wrapper<const DrawInfo>,Mat4,Vector2>("OnDraw",std::ref(drawInfo),matDraw,scale);
+	//CallLuaMember<void,std::reference_wrapper<const DrawInfo>,Mat4,Vector2>("OnDraw",std::ref(drawInfo),matDraw,scale);
 }
 void WILuaBase::OnCursorEntered()
 {

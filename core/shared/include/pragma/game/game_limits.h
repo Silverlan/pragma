@@ -12,7 +12,10 @@
 
 enum class GameLimits : uint32_t
 {
-	MaxAbsoluteLights = 1'024,
+	// Note: These have to match shaders/modules/sh_limits.gls!
+	MaxUniformBufferSize = 16'384,
+	MaxAbsoluteLights = 192, // MaxUniformBufferSize /sizeof(LightBufferData) (16k = common max size for uniform buffer)
+	// MaxAbsoluteLights = 1'024, // TODO: Use this limit for storage buffers (test performance with uniform)
 	MaxAbsoluteShadowLights = 20,
 	MaxCSMCascades = 4,
 	MaxDirectionalLightSources = 4,

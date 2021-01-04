@@ -180,7 +180,7 @@ namespace DebugRenderer
 	std::array<std::shared_ptr<DebugRenderer::BaseObject>,3> DrawAxis(const Vector3 &origin,const EulerAngles &ang,float duration=0.f);
 	std::array<std::shared_ptr<DebugRenderer::BaseObject>,3> DrawAxis(const Vector3 &origin,float duration=0.f);
 	void ClearObjects();
-	void Render(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam);
+	void Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pragma::CCameraComponent &cam);
 };
 
 #endif

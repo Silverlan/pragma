@@ -10,6 +10,7 @@
 
 #include "pragma/clientdefinitions.h"
 #include <memory>
+#include <mutex>
 
 namespace prosper
 {
@@ -24,6 +25,8 @@ namespace pragma
 	{
 	public:
 		SceneMesh();
+		SceneMesh(const SceneMesh &other);
+		SceneMesh &operator=(const SceneMesh &other);
 		const std::shared_ptr<prosper::IBuffer> &GetVertexBuffer() const;
 		const std::shared_ptr<prosper::IBuffer> &GetVertexWeightBuffer() const;
 		const std::shared_ptr<prosper::IBuffer> &GetAlphaBuffer() const;
@@ -45,6 +48,7 @@ namespace pragma
 		std::shared_ptr<prosper::IBuffer> m_alphaBuffer = nullptr;
 		std::shared_ptr<prosper::IBuffer> m_indexBuffer = nullptr;
 		std::shared_ptr<prosper::IBuffer> m_lightmapUvBuffer = nullptr;
+		std::mutex m_renderBufferMutex;
 	};
 };
 #endif

@@ -17,7 +17,7 @@
 #include <mathutil/color.h>
 
 class CBaseEntity;
-namespace prosper {class IPrimaryCommandBuffer;};
+namespace prosper {class IPrimaryCommandBuffer; class ICommandBuffer;};
 namespace pragma {class CSceneComponent;};
 namespace util
 {
@@ -69,6 +69,12 @@ namespace util
 		Flags flags = Flags::None;
 
 		mutable std::unique_ptr<RenderStats> renderStats = nullptr;
+	};
+	struct DLLCLIENT RenderPassDrawInfo
+	{
+		RenderPassDrawInfo(const DrawSceneInfo &drawSceneInfo,prosper::ICommandBuffer &cmdBuffer);
+		const DrawSceneInfo &drawSceneInfo;
+		mutable std::shared_ptr<prosper::ICommandBuffer> commandBuffer = nullptr;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(util::DrawSceneInfo::Flags)

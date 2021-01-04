@@ -29,7 +29,7 @@ extern DLLCLIENT CGame *c_game;
 
 #include "pragma/rendering/render_processor.hpp"
 
-pragma::rendering::DepthStageRenderProcessor::DepthStageRenderProcessor(const util::DrawSceneInfo &drawSceneInfo,RenderFlags flags,const Vector4 &drawOrigin)
+pragma::rendering::DepthStageRenderProcessor::DepthStageRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo,RenderFlags flags,const Vector4 &drawOrigin)
 	: BaseRenderProcessor{drawSceneInfo,flags,drawOrigin}
 {
 	SetCountNonOpaqueMaterialsOnly(true);

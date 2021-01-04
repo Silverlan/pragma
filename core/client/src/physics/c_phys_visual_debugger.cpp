@@ -19,7 +19,7 @@ CPhysVisualDebugger::CPhysVisualDebugger()
 	InitializeBuffers();
 }
 
-void CPhysVisualDebugger::Render(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
+void CPhysVisualDebugger::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
 {
 	auto vp = cam.GetProjectionMatrix() *cam.GetViewMatrix();
 	auto m = umat::identity();

@@ -37,6 +37,7 @@
 #include <image/prosper_render_target.hpp>
 #include <debug/prosper_debug.hpp>
 #include <prosper_command_buffer.hpp>
+#include <prosper_swap_command_buffer.hpp>
 #include <pragma/entities/environment/env_camera.h>
 #include <pragma/entities/components/c_render_component.hpp>
 #include <pragma/entities/environment/effects/c_env_particle_system.h>
@@ -66,7 +67,7 @@ decltype(CEngine::AXIS_PRESS_THRESHOLD) CEngine::AXIS_PRESS_THRESHOLD = 0.5f;
 
 // If set to true, each joystick axes will be split into a positive and a negative axis, which
 // can be bound individually
-
+#pragma optimize("",off)
 static const auto SEPARATE_JOYSTICK_AXES = true;
 CEngine::CEngine(int argc,char* argv[])
 	: Engine(argc,argv),pragma::RenderContext(),
@@ -219,8 +220,8 @@ Vector2i CEngine::GetRenderResolution() const
 	return Vector2i{windowCreateInfo.width,windowCreateInfo.height};
 }
 
-UInt32 CEngine::GetFPS() const {return m_fps;}
-UInt32 CEngine::GetFrameTime() const {return CUInt32(m_tFPSTime *1000.f);}
+double CEngine::GetFPS() const {return m_fps;}
+double CEngine::GetFrameTime() const {return m_tFPSTime *1'000.0;}
 Double CEngine::GetDeltaFrameTime() const {return util::clock::to_seconds(m_tDeltaFrameTime);}
 
 static auto cvFrameLimit = GetClientConVar("cl_max_fps");
@@ -707,6 +708,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 	InitializeSoundEngine();
 
 	OpenClientState();
+	m_guiCommandBufferGroup = c_engine->GetRenderContext().CreateSwapCommandBufferGroup();
 
 	if(umath::is_flag_set(m_stateFlags,StateFlags::ConsoleOpen))
 		OpenConsole(); // GUI Console mustn't be opened before client has been created!
@@ -1019,6 +1021,7 @@ void CEngine::Close()
 	m_clInstance = nullptr;
 	WGUI::Close(); // Has to be closed after client state
 	c_engine = nullptr;
+	m_guiCommandBufferGroup = nullptr;
 	pragma::RenderContext::Release();
 
 	Engine::Close();
@@ -1037,12 +1040,13 @@ void CEngine::OnClose()
 	pragma::CParticleSystemComponent::ClearBuffers();
 }
 
+static auto cvFpsDecayFactor = GetClientConVar("cl_fps_decay_factor");
 void CEngine::UpdateFPS(float t)
 {
-	const auto weightRatio = 0.8f;
-	m_tFPSTime = t *(1.f -weightRatio) +m_tFPSTime *weightRatio;
-	if(m_tFPSTime > 0.f)
-		m_fps = CUInt32(1.f /m_tFPSTime);
+	auto weightRatio = cvFpsDecayFactor->GetFloat();
+	m_tFPSTime = t *(1.0 -weightRatio) +m_tFPSTime *weightRatio;
+	if(m_tFPSTime > 0.0)
+		m_fps = 1.0 /m_tFPSTime;
 }
 
 static CVar cvProfiling = GetEngineConVar("debug_profiling_enabled");
@@ -1085,9 +1089,22 @@ void CEngine::DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t n_curre
 	StopProfilingStage(GPUProfilingPhase::Frame);
 }
 
+static auto cvHideGui = GetClientConVar("debug_hide_gui");
 void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt)
 {
-	auto bProfiling = cvProfiling->GetBool();
+	auto drawGui = !cvHideGui->GetBool();
+	if(drawGui)
+	{
+		auto &rp = rt->GetRenderPass();
+		auto &fb = rt->GetFramebuffer();
+		StartProfilingStage(GPUProfilingPhase::GUI);
+		m_guiCommandBufferGroup->Draw(rt->GetRenderPass(),rt->GetFramebuffer(),[&rp,&fb](prosper::ISecondaryCommandBuffer &drawCmd) {
+			auto &gui = WGUI::GetInstance();
+			gui.Draw(rp,fb,drawCmd);
+		});
+		StopProfilingStage(GPUProfilingPhase::GUI);
+	}
+
 	auto *cl = static_cast<ClientState*>(GetClientState());
 	auto tStart = util::Clock::now();
 	if(cl != nullptr)
@@ -1100,23 +1117,21 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 
 		StopProfilingStage(GPUProfilingPhase::DrawScene);
 	}
-
-	CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("PreDrawGUI",std::ref(drawCmd));
-	if(c_game != nullptr)
-		c_game->PreGUIDraw(drawCmd);
-
-	drawCmd->RecordBeginRenderPass(*rt);
 	
-	StartProfilingStage(GPUProfilingPhase::GUI);
-		auto &gui = WGUI::GetInstance();
-		gui.Draw();
-	StopProfilingStage(GPUProfilingPhase::GUI);
+	if(drawGui)
+	{
+		CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("PreDrawGUI",std::ref(drawCmd));
+		if(c_game != nullptr)
+			c_game->PreGUIDraw(drawCmd);
 
-	drawCmd->RecordEndRenderPass();
-	CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("PostDrawGUI",std::ref(drawCmd));
+		drawCmd->RecordBeginRenderPass(*rt,prosper::IPrimaryCommandBuffer::RenderPassFlags::SecondaryCommandBuffers);
+		m_guiCommandBufferGroup->ExecuteCommands(*drawCmd);
+		drawCmd->RecordEndRenderPass();
+		CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("PostDrawGUI",std::ref(drawCmd));
 
-	if(c_game != nullptr)
-		c_game->PostGUIDraw(drawCmd);
+		if(c_game != nullptr)
+			c_game->PostGUIDraw(drawCmd);
+	}
 }
 
 #include <prosper_util.hpp>
@@ -1296,3 +1311,4 @@ REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled,[](NetworkState*,ConVar
 		return;
 	c_engine->SetGPUProfilingEnabled(enabled);
 })
+#pragma optimize("",on)

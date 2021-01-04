@@ -24,7 +24,7 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-#pragma optimize("",off)
+
 //#define TEST_SCALE_LIGHTMAP_ATLAS
 void CLightMapComponent::ConvertLightmapToBSPLuxelData() const
 {
@@ -86,4 +86,3 @@ void CLightMapComponent::ConvertLightmapToBSPLuxelData() const
 	}
 	Con::cout<<"Successfully written lightmap luxel data!"<<Con::endl;
 }
-#pragma optimize("",on)

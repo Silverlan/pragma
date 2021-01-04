@@ -31,7 +31,7 @@
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 SceneRenderDesc::SceneRenderDesc(pragma::CSceneComponent &scene)
 	: m_scene{scene}
 {
@@ -166,6 +166,10 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 	auto &lodGroup = renderC.GetLodRenderMeshGroup(lod);
 	renderC.UpdateRenderDataMT(drawSceneInfo.commandBuffer,scene,cam,vp);
 	auto renderMode = renderC.GetRenderMode();
+	auto *renderer = drawSceneInfo.scene->GetRenderer();
+	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+		return;
+	auto *rasterizationRenderer = static_cast<const pragma::rendering::RasterizationRenderer*>(renderer);
 	for(auto meshIdx=lodGroup.first;meshIdx<lodGroup.first +lodGroup.second;++meshIdx)
 	{
 		if(fShouldCull && ShouldCull(renderC,meshIdx,fShouldCull))
@@ -174,14 +178,15 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 		auto *mat = mdlC->GetRenderMaterial(renderMesh->GetSkinTextureIndex());
 		if(mat == nullptr)
 			continue;
-		auto *shader = static_cast<pragma::ShaderTextured3DBase*>(mat->GetUserData2());
+		auto *shader = static_cast<pragma::ShaderGameWorld*>(mat->GetUserData2());
 		if(shader == nullptr)
 		{
 			// TODO: Shaders are initialized lazily and calling GetPrimaryShader may invoke the load process.
 			// This is illegal here, since this function may be called from a thread other than the main thread!
-			shader = dynamic_cast<pragma::ShaderTextured3DBase*>(mat->GetPrimaryShader());
+			shader = dynamic_cast<pragma::ShaderGameWorld*>(mat->GetPrimaryShader());
 			mat->SetUserData2(shader); // TODO: This is technically *not* thread safe and could be called from multiple threads!
 		}
+		shader = rasterizationRenderer->GetShaderOverride(shader);
 		if(shader == nullptr)
 			continue;
 		auto translucent = mat->GetAlphaMode() == AlphaMode::Blend;
@@ -238,12 +243,12 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 	const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
 	const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
 	const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,const std::vector<util::BSPTree::Node*> *bspLeafNodes,
-	int32_t lodBias
+	int32_t lodBias,const std::function<bool(CBaseEntity&,const pragma::CSceneComponent&,FRender)> &shouldConsiderEntity
 )
 {
 	auto numEntitiesPerWorkerJob = umath::max(cvEntitiesPerJob->GetInt(),1);
 	std::function<void(const OcclusionOctree<CBaseEntity*>::Node &node)> iterateTree = nullptr;
-	iterateTree = [&iterateTree,&scene,&cam,renderFlags,fShouldCull,&drawSceneInfo,&getRenderQueue,&vp,bspLeafNodes,lodBias,numEntitiesPerWorkerJob](const OcclusionOctree<CBaseEntity*>::Node &node) {
+	iterateTree = [&iterateTree,&shouldConsiderEntity,&scene,&cam,renderFlags,fShouldCull,&drawSceneInfo,&getRenderQueue,&vp,bspLeafNodes,lodBias,numEntitiesPerWorkerJob](const OcclusionOctree<CBaseEntity*>::Node &node) {
 		auto &nodeBounds = node.GetWorldBounds();
 		if(fShouldCull && fShouldCull(nodeBounds.first,nodeBounds.second))
 			return;
@@ -267,7 +272,7 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 		{
 			auto iStart = i *numEntitiesPerWorkerJob;
 			auto iEnd = umath::min(static_cast<size_t>(iStart +numEntitiesPerWorkerJob),numObjects);
-			c_game->GetRenderQueueWorkerManager().AddJob([iStart,iEnd,&drawSceneInfo,&objs,renderFlags,getRenderQueue,&scene,&cam,vp,fShouldCull,lodBias]() {
+			c_game->GetRenderQueueWorkerManager().AddJob([iStart,iEnd,&drawSceneInfo,shouldConsiderEntity,&objs,renderFlags,getRenderQueue,&scene,&cam,vp,fShouldCull,lodBias]() {
 				// Note: We don't add individual items directly to the render queue, because that would invoke
 				// a mutex lock which can stall all of the worker threads.
 				// Instead we'll collect the entire batch of items, then add all of them to the render queue at once.
@@ -286,7 +291,10 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 					if(ent->IsWorld())
 						continue; // World entities are handled separately
 					auto *renderC = static_cast<CBaseEntity*>(ent)->GetRenderComponent();
-					if(!renderC || renderC->IsExemptFromOcclusionCulling() || ShouldConsiderEntity(*static_cast<CBaseEntity*>(ent),scene,renderFlags) == false)
+					if(
+						!renderC || renderC->IsExemptFromOcclusionCulling() || ShouldConsiderEntity(*static_cast<CBaseEntity*>(ent),scene,renderFlags) == false || 
+						(shouldConsiderEntity && shouldConsiderEntity(*static_cast<CBaseEntity*>(ent),scene,renderFlags) == false)
+					)
 						continue;
 					if(fShouldCull && ShouldCull(*renderC,fShouldCull))
 						continue;
@@ -728,4 +736,3 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 		--g_activeRenderQueueThreads;
 	});
 }
-#pragma optimize("",on)

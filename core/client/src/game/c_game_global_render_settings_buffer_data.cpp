@@ -21,7 +21,7 @@ CGame::GlobalRenderSettingsBufferData::GlobalRenderSettingsBufferData()
 {
 	pragma::ShaderTextured3DBase::DebugData debugData {0};
 	prosper::util::BufferCreateInfo createInfo {};
-	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit;
+	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit | prosper::BufferUsageFlags::TransferSrcBit;
 	createInfo.size = sizeof(pragma::ShaderTextured3DBase::DebugData);
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	debugBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,&debugData);

@@ -24,6 +24,7 @@ DLLCLIENT void CMD_status_cl(NetworkState *state,pragma::BasePlayerComponent *pl
 DLLCLIENT void CMD_screenshot(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 DLLCLIENT void CMD_shader_reload(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 DLLCLIENT void CMD_shader_list(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
+DLLCLIENT void CMD_shader_optimize(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 DLLCLIENT void CMD_debug_light_shadowmap(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 DLLCLIENT void CMD_debug_glow_bloom(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 DLLCLIENT void CMD_debug_hdr_bloom(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);

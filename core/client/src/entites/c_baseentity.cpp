@@ -53,7 +53,7 @@ LINK_ENTITY_TO_CLASS(entity,CBaseEntity);
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 void CBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 {
 	BaseEntity::OnComponentAdded(component);
@@ -376,4 +376,3 @@ void CBaseEntity::AddChild(CBaseEntity &ent)
 	RemoveEntityOnRemoval(&ent);
 	ent.m_sceneFlags->Link(*m_sceneFlags);
 }
-#pragma optimize("",on)

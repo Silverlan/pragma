@@ -18,8 +18,8 @@ float calculate_csm_shadow(shadowMapSamplerType shadowMap,mat4 vp,vec4 worldCoor
 
 float calculate_csm_shadow(int index,vec4 worldCoord,float bias)
 {
-	//return calculate_csm_shadow(index,csmTextureArray[i],worldCoord,bias); // Indexing by non-const int causes rendering artifacts on some hardware
-	switch(index)
+	return calculate_csm_shadow(csmTextures[index],u_csm.VP[index],worldCoord,bias); // Indexing by non-const int causes rendering artifacts on some hardware
+	/*switch(index)
 	{
 		case 0:
 			return calculate_csm_shadow(csmTextures[0],u_csm.VP[0],worldCoord,bias);
@@ -29,7 +29,7 @@ float calculate_csm_shadow(int index,vec4 worldCoord,float bias)
 			return calculate_csm_shadow(csmTextures[2],u_csm.VP[2],worldCoord,bias);
 		default:
 			return calculate_csm_shadow(csmTextures[3],u_csm.VP[3],worldCoord,bias);
-	}
+	}*/
 }
 
 ////////////////////////////////////

@@ -23,7 +23,7 @@ using namespace pragma::rendering;
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
+
 void RasterizationRenderer::RenderBloom(const util::DrawSceneInfo &drawSceneInfo)
 {
 	static auto skipBloom = false;
@@ -135,4 +135,3 @@ void RasterizationRenderer::RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCo
 	}
 #endif
 }
-#pragma optimize("",on)

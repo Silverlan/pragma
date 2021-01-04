@@ -37,6 +37,10 @@ struct DLLCLIENT RenderPassStats
 		numEntitiesWithoutInstancing += other.numEntitiesWithoutInstancing;
 		renderThreadWaitTime += other.renderThreadWaitTime;
 		cpuExecutionTime += other.cpuExecutionTime;
+		cpuMaterialBindTime += other.cpuMaterialBindTime;
+		cpuEntityBindTime += other.cpuEntityBindTime;
+		cpuDrawCallTime += other.cpuDrawCallTime;
+		cpuShaderBindTime += other.cpuShaderBindTime;
 		return *this;
 	}
 	RenderPassStats &operator+=(const RenderPassStats &other)
@@ -64,6 +68,10 @@ struct DLLCLIENT RenderPassStats
 	uint32_t numEntitiesWithoutInstancing = 0;
 	std::chrono::nanoseconds renderThreadWaitTime {0};
 	std::chrono::nanoseconds cpuExecutionTime {0};
+	std::chrono::nanoseconds cpuMaterialBindTime {0};
+	std::chrono::nanoseconds cpuEntityBindTime {0};
+	std::chrono::nanoseconds cpuDrawCallTime {0};
+	std::chrono::nanoseconds cpuShaderBindTime {0};
 };
 
 struct DLLCLIENT RenderQueueWorkerStats
@@ -123,6 +131,10 @@ struct DLLCLIENT RenderStats
 		lightingPassTranslucent += other.lightingPassTranslucent;
 		prepass += other.prepass;
 		shadowPass += other.shadowPass;
+		prepassExecutionTime += other.prepassExecutionTime;
+		lightingPassExecutionTime += other.lightingPassExecutionTime;
+		postProcessingExecutionTime += other.postProcessingExecutionTime;
+		updateRenderBufferTime += other.updateRenderBufferTime;
 		return *this;
 	}
 	RenderStats &operator+=(const RenderStats &other)
@@ -131,6 +143,10 @@ struct DLLCLIENT RenderStats
 		return *this;
 	}
 	std::chrono::nanoseconds lightCullingTime {0};
+	std::chrono::nanoseconds prepassExecutionTime {0};
+	std::chrono::nanoseconds lightingPassExecutionTime {0};
+	std::chrono::nanoseconds postProcessingExecutionTime {0};
+	std::chrono::nanoseconds updateRenderBufferTime {0};
 	RenderQueueBuilderStats renderQueueBuilderStats;
 	RenderPassStats lightingPass;
 	RenderPassStats lightingPassTranslucent;

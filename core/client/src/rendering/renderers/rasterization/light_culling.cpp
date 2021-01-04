@@ -20,7 +20,7 @@
 using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 void RasterizationRenderer::CullLightSources(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.scene.expired())
@@ -45,7 +45,7 @@ void RasterizationRenderer::CullLightSources(const util::DrawSceneInfo &drawScen
 
 		drawCmd->RecordImageBarrier(
 			depthTex->GetImage(),
-			{prosper::PipelineStageFlags::FragmentShaderBit,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit},
+			{prosper::PipelineStageFlags::LateFragmentTestsBit,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit},
 			{prosper::PipelineStageFlags::ComputeShaderBit,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::AccessFlags::ShaderReadBit}
 		);
 
@@ -141,7 +141,7 @@ void RasterizationRenderer::CullLightSources(const util::DrawSceneInfo &drawScen
 		drawCmd->RecordImageBarrier(
 			depthTex->GetImage(),
 			{prosper::PipelineStageFlags::ComputeShaderBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::ShaderReadBit},
-			{prosper::PipelineStageFlags::FragmentShaderBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit}
+			{prosper::PipelineStageFlags::EarlyFragmentTestsBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit}
 		);
 
 		c_game->StopProfilingStage(CGame::GPUProfilingPhase::CullLightSources);
@@ -236,4 +236,3 @@ void RasterizationRenderer::CullLightSources(const util::DrawSceneInfo &drawScen
 		c_game->StopProfilingStage(CGame::CPUProfilingPhase::Shadows);
 	}
 }
-#pragma optimize("",on)

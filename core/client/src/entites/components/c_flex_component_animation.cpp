@@ -13,7 +13,7 @@
 using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 void CFlexComponent::ResolveFlexAnimation(const LookupIdentifier &lookupId) const
 {
 	if(lookupId.resolved() || lookupId.name.has_value() == false)
@@ -156,4 +156,3 @@ void CFlexComponent::MaintainFlexAnimations(float dt)
 		++it;
 	}
 }
-#pragma optimize("",on)

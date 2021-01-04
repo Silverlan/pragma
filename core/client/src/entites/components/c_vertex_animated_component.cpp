@@ -26,7 +26,7 @@
 extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 static std::shared_ptr<prosper::IDynamicResizableBuffer> g_vertexAnimationBuffer = nullptr;
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &pragma::get_vertex_animation_buffer() {return g_vertexAnimationBuffer;}
 void pragma::initialize_vertex_animation_buffer()
@@ -294,4 +294,3 @@ bool CVertexAnimatedComponent::GetLocalVertexPosition(const ModelSubMesh &subMes
 	}
 	return true;
 }
-#pragma optimize("",on)

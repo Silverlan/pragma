@@ -20,7 +20,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 static bool g_collectRenderStats = false;
 static CallbackHandle g_cbPreRenderScene = {};
 static CallbackHandle g_cbPostRenderScene = {};
@@ -103,11 +103,16 @@ static void print_pass_stats(const RenderPassStats &stats,bool full)
 			continue;
 		Con::cout<<hShader->GetIdentifier()<<Con::endl;
 	}
+
+	std::unordered_set<CBaseEntity*> uniqueEntities;
+	for(auto &entData : entities)
+		uniqueEntities.insert(static_cast<CBaseEntity*>(entData.hEntity.get()));
 	
 	Con::cout<<"\nUnique meshes: "<<stats.meshes.size()<<Con::endl;
 	Con::cout<<"Shader state changes: "<<stats.numShaderStateChanges<<Con::endl;
 	Con::cout<<"Material state changes: "<<stats.numMaterialStateChanges<<Con::endl;
 	Con::cout<<"Entity state changes: "<<stats.numEntityStateChanges<<Con::endl;
+	Con::cout<<"Unique entities: "<<uniqueEntities.size()<<Con::endl;
 	Con::cout<<"Entity buffer updates: "<<stats.numEntityBufferUpdates<<Con::endl;
 	Con::cout<<"Number of draw calls: "<<stats.numDrawCalls<<Con::endl;
 	Con::cout<<"Number of instance sets: "<<stats.numInstanceSets<<" ("<<stats.numInstanceSetMeshes<<" meshes)"<<Con::endl;
@@ -120,13 +125,21 @@ static void print_pass_stats(const RenderPassStats &stats,bool full)
 	Con::cout<<"Number of triangles drawn: "<<stats.numDrawnTrianges<<Con::endl;
 	Con::cout<<"Wait time: "<<nanoseconds_to_ms(stats.renderThreadWaitTime)<<Con::endl;
 	Con::cout<<"CPU Execution time: "<<nanoseconds_to_ms(stats.cpuExecutionTime)<<Con::endl;
+	Con::cout<<"CPU Material Bind time: "<<nanoseconds_to_ms(stats.cpuMaterialBindTime)<<Con::endl;
+	Con::cout<<"CPU Entity Bind time: "<<nanoseconds_to_ms(stats.cpuEntityBindTime)<<Con::endl;
+	Con::cout<<"CPU Draw Call time: "<<nanoseconds_to_ms(stats.cpuDrawCallTime)<<Con::endl;
+	Con::cout<<"CPU Shader Bind time: "<<nanoseconds_to_ms(stats.cpuShaderBindTime)<<Con::endl;
 }
 DLLCLIENT void print_debug_render_stats(const RenderStats &renderStats,bool full)
 {
 	g_collectRenderStats = false;
 	auto t = renderStats.lightingPass.cpuExecutionTime +renderStats.lightingPassTranslucent.cpuExecutionTime +renderStats.prepass.cpuExecutionTime +renderStats.shadowPass.cpuExecutionTime;
 	Con::cout<<"Total CPU Execution time: "<<nanoseconds_to_ms(t)<<Con::endl;
-	Con::cout<<"Light culling time time: "<<nanoseconds_to_ms(renderStats.lightCullingTime)<<Con::endl;
+	Con::cout<<"Light culling time: "<<nanoseconds_to_ms(renderStats.lightCullingTime)<<Con::endl;
+	Con::cout<<"Prepass execution time: "<<nanoseconds_to_ms(renderStats.prepassExecutionTime)<<Con::endl;
+	Con::cout<<"Lighting pass execution time: "<<nanoseconds_to_ms(renderStats.lightingPassExecutionTime)<<Con::endl;
+	Con::cout<<"Post processing execution time: "<<nanoseconds_to_ms(renderStats.postProcessingExecutionTime)<<Con::endl;
+	Con::cout<<"Render buffer update time: "<<nanoseconds_to_ms(renderStats.updateRenderBufferTime)<<Con::endl;
 
 	Con::cout<<"\n----- Render queue builder stats: -----"<<Con::endl;
 	Con::cout<<"Total execution time: "<<nanoseconds_to_ms(renderStats.renderQueueBuilderStats.totalExecutionTime)<<Con::endl;
@@ -194,10 +207,10 @@ DLLCLIENT void debug_render_stats(bool full)
 	}));
 }
 
-pragma::rendering::BaseRenderProcessor::BaseRenderProcessor(const util::DrawSceneInfo &drawSceneInfo,RenderFlags flags,const Vector4 &drawOrigin)
+pragma::rendering::BaseRenderProcessor::BaseRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo,RenderFlags flags,const Vector4 &drawOrigin)
 	: m_drawSceneInfo{drawSceneInfo},m_drawOrigin{drawOrigin},m_renderFlags{flags}
 {
-	auto &scene = drawSceneInfo.scene;
+	auto &scene = drawSceneInfo.drawSceneInfo.scene;
 	auto *renderer = scene->GetRenderer();
 	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 		return;
@@ -265,7 +278,7 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::Shader &shader)
 		m_pipelineType
 	) == false)
 		return false;
-	auto &scene = *m_drawSceneInfo.scene;
+	auto &scene = *m_drawSceneInfo.drawSceneInfo.scene;
 	auto bView = (m_camType == CameraType::View) ? true : false;
 	if(shaderScene->BindScene(const_cast<pragma::CSceneComponent&>(scene),const_cast<pragma::rendering::RasterizationRenderer&>(*m_renderer),bView) == false)
 		return false;
@@ -292,7 +305,7 @@ void pragma::rendering::BaseRenderProcessor::SetCameraType(CameraType camType)
 	m_camType = camType;
 	if(umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
 		return;
-	auto &scene = *m_drawSceneInfo.scene.get();
+	auto &scene = *m_drawSceneInfo.drawSceneInfo.scene.get();
 	auto *renderer = scene.GetRenderer();
 	if(renderer == nullptr)
 		return;
@@ -355,7 +368,7 @@ bool pragma::rendering::BaseRenderProcessor::BindEntity(CBaseEntity &ent)
 	// renderC->UpdateRenderBuffers(m_drawSceneInfo.commandBuffer);
 	if(m_shaderScene->BindEntity(ent) == false)
 		return false;
-	if(m_drawSceneInfo.renderFilter && m_drawSceneInfo.renderFilter(ent) == false)
+	if(m_drawSceneInfo.drawSceneInfo.renderFilter && m_drawSceneInfo.drawSceneInfo.renderFilter(ent) == false)
 		return false;
 	
 	m_curRenderC = renderC;
@@ -449,10 +462,11 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 
 	auto &shaderManager = c_engine->GetShaderManager();
 	auto &matManager = client->GetMaterialManager();
-	auto &sceneRenderDesc = m_drawSceneInfo.scene->GetSceneRenderDesc();
+	auto &sceneRenderDesc = m_drawSceneInfo.drawSceneInfo.scene->GetSceneRenderDesc();
 	uint32_t numShaderInvocations = 0;
 	const RenderQueue::InstanceSet *curInstanceSet = nullptr;
 	auto inInstancedEntityGroup = false;
+	std::chrono::steady_clock::time_point ttmp;
 	for(auto i=decltype(renderQueue.sortedItemIndices.size()){0u};i<renderQueue.sortedItemIndices.size();++i)
 	{
 		auto &itemSortPair = renderQueue.sortedItemIndices[i];
@@ -479,23 +493,33 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 		{
 			if(item.shader != m_curShaderIndex)
 			{
+				if(optStats)
+					ttmp = std::chrono::steady_clock::now();
 				auto *shader = shaderManager.GetShader(item.shader);
 				assert(shader);
 				BindShader(*shader);
+				if(optStats)
+					optStats->cpuShaderBindTime += std::chrono::steady_clock::now() -ttmp;
 			}
 			if(umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false)
 				continue;
 		}
 		if(item.material != m_curMaterialIndex)
 		{
+			if(optStats)
+				ttmp = std::chrono::steady_clock::now();
 			auto *mat = matManager.GetMaterial(item.material);
 			assert(mat);
 			BindMaterial(static_cast<CMaterial&>(*mat));
+			if(optStats)
+				optStats->cpuMaterialBindTime += std::chrono::steady_clock::now() -ttmp;
 		}
 		if(umath::is_flag_set(m_stateFlags,StateFlags::MaterialBound) == false)
 			continue;
 		if(item.entity != m_curEntityIndex)
 		{
+			if(optStats)
+				ttmp = std::chrono::steady_clock::now();
 			// During instanced rendering, the entity index may flip between the mesh instances (because entity indices are *not* included in the sort key),
 			// but we don't really care about which of the entity is bound, as long as *one of them*
 			// is bound. That means if we have already bound one, we can skip this block.
@@ -514,6 +538,8 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 				if(newInstance)
 					inInstancedEntityGroup = true;
 			}
+			if(optStats)
+				optStats->cpuEntityBindTime += std::chrono::steady_clock::now() -ttmp;
 		}
 		if(umath::is_flag_set(m_stateFlags,StateFlags::EntityBound) == false || item.mesh >= m_curEntityMeshList->size())
 			continue;
@@ -527,9 +553,13 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 				m_stats->numInstancedSkippedRenderItems += curInstanceSet->GetSkipCount() -curInstanceSet->meshCount;
 			}
 		}
+		if(optStats)
+			ttmp = std::chrono::steady_clock::now();
 		auto &mesh = static_cast<CModelSubMesh&>(*m_curEntityMeshList->at(item.mesh));
 		if(BaseRenderProcessor::Render(mesh,item.mesh,curInstanceSet))
 			++numShaderInvocations;
+		if(optStats)
+			optStats->cpuDrawCallTime += std::chrono::steady_clock::now() -ttmp;
 	}
 	if(optStats)
 	{
@@ -544,3 +574,4 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 	}
 	return numShaderInvocations;
 }
+#pragma optimize("",on)

@@ -18,7 +18,7 @@ class ModelSubMesh;
 class CModelSubMesh;
 struct RenderPassStats;
 class RenderDebugInfo;
-namespace util {struct DrawSceneInfo;};
+namespace util {struct RenderPassDrawInfo;};
 namespace pragma
 {
 	class ShaderGameWorld;
@@ -51,7 +51,7 @@ namespace pragma::rendering
 			World = 0,
 			View
 		};
-		BaseRenderProcessor(const util::DrawSceneInfo &drawSceneInfo,RenderFlags flags,const Vector4 &drawOrigin);
+		BaseRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo,RenderFlags flags,const Vector4 &drawOrigin);
 		~BaseRenderProcessor();
 		void SetCameraType(CameraType camType);
 		void Set3DSky(bool enabled);
@@ -82,7 +82,7 @@ namespace pragma::rendering
 		const RenderQueue::InstanceSet *m_curInstanceSet = nullptr;
 
 		CameraType m_camType = CameraType::World;
-		const util::DrawSceneInfo &m_drawSceneInfo;
+		const util::RenderPassDrawInfo &m_drawSceneInfo;
 		Vector4 m_drawOrigin;
 		std::optional<Vector2> m_depthBias {};
 		pragma::ShaderGameWorldPipeline m_pipelineType;
@@ -97,7 +97,7 @@ namespace pragma::rendering
 		: public pragma::rendering::BaseRenderProcessor
 	{
 	public:
-		DepthStageRenderProcessor(const util::DrawSceneInfo &drawSceneInfo,RenderFlags flags,const Vector4 &drawOrigin);
+		DepthStageRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo,RenderFlags flags,const Vector4 &drawOrigin);
 		uint32_t Render(const pragma::rendering::RenderQueue &renderQueue,RenderPassStats *optStats=nullptr,std::optional<uint32_t> worldRenderQueueIndex={});
 	};
 

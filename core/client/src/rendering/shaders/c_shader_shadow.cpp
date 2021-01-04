@@ -50,7 +50,7 @@ ShaderShadow::ShaderShadow(prosper::IPrContext &context,const std::string &ident
 	: ShaderShadow(context,identifier,"shadow/vs_shadow","shadow/fs_shadow")
 {}
 bool ShaderShadow::BeginDraw(
-	const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,ShaderGameWorldPipeline pipelineIdx,
+	const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,ShaderGameWorldPipeline pipelineIdx,
 	RecordFlags recordFlags
 )
 {

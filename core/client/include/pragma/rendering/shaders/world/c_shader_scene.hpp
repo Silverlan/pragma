@@ -235,16 +235,18 @@ namespace pragma
 		: public ShaderEntity
 	{
 	public:
+		static uint32_t HASH_TYPE;
 		using ShaderEntity::ShaderEntity;
 		virtual bool BindClipPlane(const Vector4 &clipPlane)=0;
 		virtual bool BeginDraw(
-			const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},ShaderGameWorldPipeline pipelineIdx=ShaderGameWorldPipeline::Regular,
+			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},ShaderGameWorldPipeline pipelineIdx=ShaderGameWorldPipeline::Regular,
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		)=0;
 		virtual bool SetDebugMode(pragma::SceneDebugMode debugMode) {return true;};
 		virtual void Set3DSky(bool is3dSky)=0;
 		virtual bool BindDrawOrigin(const Vector4 &drawOrigin)=0;
 		virtual bool SetDepthBias(const Vector2 &depthBias)=0;
+		virtual size_t GetBaseTypeHashCode() const override;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderEntity::InstanceData::RenderFlags);

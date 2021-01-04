@@ -1544,7 +1544,7 @@ void CGame::DrawPlane(const Vector3 &n,float dist,const Color &color,float durat
 }
 static auto cvRenderPhysics = GetClientConVar("debug_physics_draw");
 static auto cvSvRenderPhysics = GetClientConVar("sv_debug_physics_draw");
-void CGame::RenderDebugPhysics(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
+void CGame::RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
 {
 	if(cvRenderPhysics->GetBool())
 	{

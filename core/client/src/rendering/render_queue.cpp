@@ -12,9 +12,21 @@
 
 using namespace pragma::rendering;
 
-SortingKey::SortingKey(MaterialIndex material,prosper::ShaderIndex shader,bool instantiable)
-	: material{material},shader{shader},instantiable{instantiable}
-{}
+SortingKey::SortingKey(MaterialIndex material,prosper::ShaderIndex shader,bool instantiable,bool translucentKey)
+{
+	if(translucentKey)
+	{
+		translucent.material = material;
+		translucent.shader = shader;
+		translucent.instantiable = instantiable;
+	}
+	else
+	{
+		opaque.material = material;
+		opaque.shader = shader;
+		opaque.instantiable = instantiable;
+	}
+}
 void SortingKey::SetDistance(const Vector3 &origin,const CCameraComponent &cam)
 {
 	auto &p0 = origin;
@@ -28,17 +40,15 @@ void SortingKey::SetDistance(const Vector3 &origin,const CCameraComponent &cam)
 	distSqr = 1.0 -std::clamp(distSqr /(farZ +nearZ),0.0,1.0);
 	// Note: 16 bit precision is not enough, but 24 bit might be. For now we'll use a 32 bit integer,
 	// since we have that much space available anyway
-	distance = glm::floatBitsToUint(static_cast<float>(distSqr));
+	translucent.distance = glm::floatBitsToUint(static_cast<float>(distSqr));
 }
 
-RenderQueueItem::RenderQueueItem(CBaseEntity &ent,RenderMeshIndex meshIdx,CMaterial &mat,pragma::ShaderTextured3DBase &pshader,const CCameraComponent *optCam)
-	: material{mat.GetIndex()},shader{pshader.GetIndex()},entity{ent.GetLocalIndex()},mesh{meshIdx}
+RenderQueueItem::RenderQueueItem(CBaseEntity &ent,RenderMeshIndex meshIdx,CMaterial &mat,pragma::ShaderGameWorld &pshader,const CCameraComponent *optCam)
+	: material{mat.GetIndex()},shader{pshader.GetIndex()},entity{ent.GetLocalIndex()},mesh{meshIdx},translucentKey{optCam ? true : false}
 {
-	sortingKey.material = material;
-	sortingKey.shader = shader;
 	instanceSetIndex = RenderQueueItem::UNIQUE;
 	auto &renderC = *ent.GetRenderComponent();
-	sortingKey.instantiable = renderC.IsInstantiable();
+	auto instantiable = renderC.IsInstantiable();
 	if(optCam)
 	{
 		// TODO: This isn't very efficient, find a better way to handle this!
@@ -49,6 +59,17 @@ RenderQueueItem::RenderQueueItem(CBaseEntity &ent,RenderMeshIndex meshIdx,CMater
 			auto pos = pose *renderMeshes[meshIdx]->GetCenter();
 			sortingKey.SetDistance(pos,*optCam);
 		}
+
+		sortingKey.translucent.material = material;
+		sortingKey.translucent.shader = shader;
+		sortingKey.translucent.instantiable = renderC.IsInstantiable();
+	}
+	else
+	{
+		sortingKey.opaque.distance = 0;
+		sortingKey.opaque.material = material;
+		sortingKey.opaque.shader = shader;
+		sortingKey.opaque.instantiable = renderC.IsInstantiable();
 	}
 }
 

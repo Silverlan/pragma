@@ -81,6 +81,7 @@ void CEngine::RegisterConsoleCommands()
 		auto full = util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions,"full","0"));
 		debug_render_stats(full);
 	},ConVarFlags::None,"Prints information about the next frame.");
+	conVarMap.RegisterConVar("debug_hide_gui","0",ConVarFlags::None,"Disables GUI rendering.");
 
 	conVarMap.RegisterConVar("render_vsync_enabled","1",ConVarFlags::Archive,"Enables or disables vsync. OpenGL only.");
 	conVarMap.RegisterConVarCallback("render_vsync_enabled",std::function<void(NetworkState*,ConVar*,bool,bool)>{[this](
@@ -125,15 +126,52 @@ void CEngine::RegisterConsoleCommands()
 			auto &tex = textures[idx];
 			auto useCount = tex.use_count() -2;
 			Con::cout<<tex->GetName()<<":"<<Con::endl;
+
 			if(useCount == 0)
 				util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
 			Con::cout<<"\tUse count: "<<useCount<<Con::endl;
 			if(useCount == 0)
 				util::reset_console_color();
+
 			Con::cout<<"\tResolution: "<<tex->GetWidth()<<"x"<<tex->GetHeight()<<Con::endl;
+
+			auto &img = tex->GetVkTexture()->GetImage();
+			Con::cout<<"\tLayers: "<<img.GetLayerCount()<<Con::endl;
+			
+			auto numMipmaps = img.GetMipmapCount();
+			if(numMipmaps <= 1)
+				util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
+			Con::cout<<"\tMipmaps: "<<numMipmaps<<Con::endl;
+			if(numMipmaps <= 1)
+				util::reset_console_color();
+
+			auto tiling = img.GetTiling();
+			auto optimal = tiling == prosper::ImageTiling::Optimal;
+			if(!optimal)
+				util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
+			Con::cout<<"\tTiling: "<<prosper::util::to_string(tiling)<<Con::endl;
+			if(!optimal)
+				util::reset_console_color();
+
+			auto format = img.GetFormat();
+			auto isCompressed = prosper::util::is_compressed_format(format);
+			if(!isCompressed)
+				util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
+			Con::cout<<"\tFormat: "<<prosper::util::to_string(format)<<Con::endl;
+			if(!isCompressed)
+				util::reset_console_color();
+
 			auto size = textureSizes[idx];
 			Con::cout<<"\tSize: "<<util::get_pretty_bytes(size)<<Con::endl;
 			totalSize += size;
+
+			auto deviceLocal = umath::is_flag_set(img.GetCreateInfo().memoryFeatures,prosper::MemoryFeatureFlags::DeviceLocal);
+			if(!deviceLocal)
+			{
+				util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
+				Con::cout<<"\tPerformance Warning: Image memory is not device local!"<<Con::endl;
+				util::reset_console_color();
+			}
 		}
 		Con::cout<<"Total memory: "<<util::get_pretty_bytes(totalSize)<<Con::endl;
 

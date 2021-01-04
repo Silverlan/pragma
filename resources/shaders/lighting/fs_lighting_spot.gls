@@ -14,7 +14,7 @@ float get_spot_light_shadow_sample(uint lightIdx,bool dynamic)
 	depthCoord = depthCoord /light.position.w;
 	depthCoord.xy /= depthCoord.w;
 
-	uint shadowMapIndex = dynamic ? light.shadowMapIndexDynamic : light.shadowMapIndexStatic;
+	uint shadowMapIndex = light.shadowMapIndexDynamic;
 
 	vec3 lightVec = normalize(fragPosWs -light.position.xyz);
 	return (shadowMapIndex > 0) ? get_shadow_value(shadowMaps[shadowMapIndex -1],depthCoord.xy,depthCoord.z) : 1.0;

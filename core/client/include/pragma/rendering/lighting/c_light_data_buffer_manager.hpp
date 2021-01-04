@@ -15,6 +15,14 @@
 #include <cinttypes>
 #include <memory>
 
+#define USE_LIGHT_SOURCE_UNIFORM_BUFFER 1
+
+#if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1
+#define LIGHT_SOURCE_BUFFER_TYPE prosper::DescriptorType::UniformBuffer
+#else
+#define LIGHT_SOURCE_BUFFER_TYPE prosper::DescriptorType::StorageBuffer
+#endif
+
 namespace pragma
 {
 	class CLightComponent;

@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/entities/components/c_render_component.hpp"
@@ -22,7 +23,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 decltype(ShaderScene::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderScene::DESCRIPTOR_SET_RENDER_SETTINGS = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Debug
@@ -136,7 +137,7 @@ bool ShaderScene::BindSceneCamera(pragma::CSceneComponent &scene,const rendering
 decltype(ShaderSceneLit::DESCRIPTOR_SET_LIGHTS) ShaderSceneLit::DESCRIPTOR_SET_LIGHTS = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Light sources
-			prosper::DescriptorType::StorageBuffer,
+			LIGHT_SOURCE_BUFFER_TYPE,
 			prosper::ShaderStageFlags::FragmentBit
 		},
 		prosper::DescriptorSetInfo::Binding { // Visible light index buffer
@@ -144,7 +145,7 @@ decltype(ShaderSceneLit::DESCRIPTOR_SET_LIGHTS) ShaderSceneLit::DESCRIPTOR_SET_L
 			prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit
 		},
 		prosper::DescriptorSetInfo::Binding { // Shadow buffers
-			prosper::DescriptorType::StorageBuffer,
+			LIGHT_SOURCE_BUFFER_TYPE,
 			prosper::ShaderStageFlags::FragmentBit
 		},
 		prosper::DescriptorSetInfo::Binding { // Cascade Maps
@@ -180,6 +181,11 @@ bool ShaderSceneLit::BindScene(pragma::CSceneComponent &scene,rendering::Rasteri
 	return BindSceneCamera(scene,renderer,bView) && RecordBindDescriptorSet(*renderer.GetRendererDescriptorSet(),GetRendererDescriptorSetIndex()) &&
 		BindLights(*renderer.GetLightSourceDescriptorSet());
 }
+
+/////////////////////
+
+decltype(ShaderGameWorld::HASH_TYPE) ShaderGameWorld::HASH_TYPE = typeid(ShaderGameWorld).hash_code();
+size_t ShaderGameWorld::GetBaseTypeHashCode() const {return HASH_TYPE;}
 
 /////////////////////
 
@@ -331,7 +337,7 @@ bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMe
 	}
 	auto &vkMesh = mesh.GetSceneMesh();
 	auto &renderBuffer = vkMesh->GetRenderBuffer(mesh,*this,m_currentPipelineIdx);
-	if(RecordBindRenderBuffer(*renderBuffer) == false)
+	if(renderBuffer == nullptr || RecordBindRenderBuffer(*renderBuffer) == false)
 		return false;
 	return RecordBindVertexBuffer(renderBufferIndexBuffer,umath::to_integral(VertexBinding::RenderBufferIndex)) && fDraw(mesh);
 #if 0
@@ -406,4 +412,3 @@ bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMe
 }
 
 bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount) {return Draw(mesh,meshIdx,renderBufferIndexBuffer,true,instanceCount);}
-#pragma optimize("",on)

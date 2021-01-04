@@ -38,7 +38,7 @@ public:
 	static constexpr uint32_t TRI_SIZE = sizeof(Vector3) *3;
 
 	CPhysVisualDebugger();
-	void Render(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam);
+	void Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pragma::CCameraComponent &cam);
 
 	virtual void DrawLine(const Vector3 &from,const Vector3 &to,const Color &fromColor,const Color &toColor) override;
 	virtual void DrawPoint(const Vector3 &pos,const Color &color) override;

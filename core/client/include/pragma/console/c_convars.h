@@ -36,6 +36,7 @@ REGISTER_CONVAR_CL(debug_render_octree_dynamic_draw,"0",ConVarFlags::Cheat,"Draw
 REGISTER_CONVAR_CL(debug_forwardplus_heatmap,"0",ConVarFlags::Cheat,"Renders a heatmap of the visible lights for forward+ rendering.");
 REGISTER_CONVAR_CL(debug_ai_navigation,"0",ConVarFlags::Cheat,"Displays the current navigation path for all NPCs.");
 REGISTER_CONVAR_CL(debug_steam_audio_probe_boxes,"0",ConVarFlags::Cheat,"Displays the sound probe spheres for the current map.");
+REGISTER_CONVAR_CL(cl_fps_decay_factor,"0.8",ConVarFlags::None,"How slowly to decay the previous fps.");
 
 REGISTER_CONVAR_CL(debug_particle_blob_show_neighbor_links,"0",ConVarFlags::Cheat,"Displays the links to adjacent neighbors for blob particles.");
 

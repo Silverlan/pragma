@@ -20,7 +20,7 @@
 class ClientState;
 namespace GLFW {class Joystick;};
 namespace al {class SoundSystem;class Effect;};
-namespace prosper {class RenderTarget;};
+namespace prosper {class RenderTarget; class ISwapCommandBufferGroup;};
 #pragma warning(push)
 #pragma warning(disable : 4251)
 class DLLCENGINE CEngine
@@ -185,8 +185,8 @@ public:
 	//
 
 	Double GetDeltaFrameTime() const;
-	UInt32 GetFPS() const;
-	UInt32 GetFrameTime() const;
+	double GetFPS() const;
+	double GetFrameTime() const;
 
 	// If specified, 'frameDeltaTime' will be used as the delta time between
 	// frames, regardless of the actual delta time. This can be used to make the game think
@@ -218,8 +218,8 @@ private:
 	std::shared_ptr<al::SoundSystem> m_soundSystem = nullptr;
 
 	// FPS
-	UInt32 m_fps;
-	Float m_tFPSTime;
+	double m_fps;
+	double m_tFPSTime;
 	util::Clock::time_point m_tLastFrame;
 	util::Clock::duration m_tDeltaFrameTime;
 	std::optional<std::chrono::nanoseconds> m_fixedFrameDeltaTimeInterpretation = {};
@@ -235,6 +235,7 @@ private:
 	float m_nearZ,m_farZ;
 	std::unique_ptr<StateInstance> m_clInstance;
 	std::shared_ptr<prosper::RenderTarget> m_stagingRenderTarget = nullptr;
+	std::shared_ptr<prosper::ISwapCommandBufferGroup> m_guiCommandBufferGroup = nullptr;
 	std::optional<Vector2i> m_renderResolution = {};
 
 	std::shared_ptr<pragma::debug::GPUProfiler> m_gpuProfiler;

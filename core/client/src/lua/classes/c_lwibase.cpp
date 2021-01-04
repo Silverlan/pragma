@@ -445,7 +445,7 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 		lua_checkgui_ret(l,hPanel,false);
 		return hPanel->IsUpdateScheduled();
 	}));
-
+#if 0
 	auto defDrawInfo = luabind::class_<::WIBase::DrawInfo>("DrawInfo");
 	defDrawInfo.def(luabind::constructor<>());
 	defDrawInfo.def_readwrite("offset",&::WIBase::DrawInfo::offset);
@@ -459,6 +459,7 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 		drawInfo.postTransform = t;
 	}));
 	classDef.scope[defDrawInfo];
+#endif
 }
 
 void Lua::WIButton::register_class(luabind::class_<WIButtonHandle,WIHandle> &classDef)
@@ -818,6 +819,14 @@ void Lua::WIDropDownMenu::register_class(luabind::class_<WIDropDownMenuHandle,lu
 	classDef.def("SetListItemCount",static_cast<void(*)(lua_State*,WIDropDownMenuHandle&,uint32_t)>([](lua_State *l,WIDropDownMenuHandle &hPanel,uint32_t n) {
 		lua_checkgui(l,hPanel);
 		static_cast<::WIDropDownMenu*>(hPanel.get())->SetListItemCount(n);
+	}));
+	classDef.def("ScrollToOption",static_cast<void(*)(lua_State*,WIDropDownMenuHandle&,uint32_t)>([](lua_State *l,WIDropDownMenuHandle &hPanel,uint32_t idx) {
+		lua_checkgui(l,hPanel);
+		static_cast<::WIDropDownMenu*>(hPanel.get())->ScrollToOption(idx);
+	}));
+	classDef.def("ScrollToOption",static_cast<void(*)(lua_State*,WIDropDownMenuHandle&,uint32_t,bool)>([](lua_State *l,WIDropDownMenuHandle &hPanel,uint32_t idx,bool center) {
+		lua_checkgui(l,hPanel);
+		static_cast<::WIDropDownMenu*>(hPanel.get())->ScrollToOption(idx,center);
 	}));
 }
 

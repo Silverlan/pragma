@@ -29,7 +29,7 @@ namespace pragma
 {
 	using ::operator<<;
 };
-#pragma optimize("",off)
+
 IKComponent::IKComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)
 {}
@@ -671,4 +671,3 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 		animComponent->SetLocalBonePosition(footData.boneId,posBone,rotBone);
 	}
 }
-#pragma optimize("",on)

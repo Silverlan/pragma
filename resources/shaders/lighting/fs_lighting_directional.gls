@@ -12,15 +12,12 @@ float get_directional_light_shadow_factor(uint lightIdx)
 	vec4 shadowCoord = vec4(fs_in.vert_pos_ws.xyz,1.0);
 	float shadow = 1.0;
 	int layer = get_csm_cascade_index();
-	if(layer != -1 && light.shadowIndex != 0)
-	{
-		shadow = calculate_shadow(
-			layer,
-			shadowCoord,
-			0.0 // Bias is already applied in shader pipeline
-		);
-	}
-	return shadow;
+	uint shadowMapIndex = light.shadowIndex;
+	return (layer != -1 && shadowMapIndex != 0) ? calculate_shadow(
+		layer,
+		shadowCoord,
+		0.0 // Bias is already applied in shader pipeline
+	) : 1.0;
 }
 
 float calc_directional_light_attenuation(uint lightIdx)

@@ -304,7 +304,7 @@ void ShadowRenderer::RenderShadows(
 		auto *framebuffer = hShadowMap->GetFramebuffer(layerId);
 
 		const prosper::ClearValue clearVal {prosper::ClearDepthStencilValue{1.f}};
-		if(drawCmd->RecordBeginRenderPass(*smRt,layerId,&clearVal) == false)
+		if(drawCmd->RecordBeginRenderPass(*smRt,layerId,prosper::IPrimaryCommandBuffer::RenderPassFlags::None,&clearVal) == false)
 			continue;
 		// TODO
 		//auto renderResultFlags = RenderShadows(drawCmd,light,layerId,depthMVP,shader,false);

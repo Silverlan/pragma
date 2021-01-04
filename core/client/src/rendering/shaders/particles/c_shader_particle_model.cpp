@@ -119,7 +119,7 @@ bool ShaderParticleModel::Draw(CModelSubMesh &mesh,uint32_t numInstances,uint32_
 }
 
 bool ShaderParticleModel::BeginDraw(
-	const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,pragma::CParticleSystemComponent &pSys,
+	const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,pragma::CParticleSystemComponent &pSys,
 	const Vector4 &drawOrigin,ShaderGameWorldPipeline pipelineIdx,ShaderScene::RecordFlags recordFlags
 )
 {

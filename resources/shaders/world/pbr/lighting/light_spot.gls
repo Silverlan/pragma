@@ -7,20 +7,15 @@
 // https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_lights_punctual/README.md#inner-and-outer-cone-angles
 float get_spot_attenuation(vec3 pointToLight, vec3 spotDirection, float outerConeCos, float innerConeCos)
 {
-	float actualCos = dot(normalize(spotDirection), normalize(-pointToLight));
-	if (actualCos > outerConeCos)
-	{
-		if (actualCos < innerConeCos)
-			return smoothstep(outerConeCos, innerConeCos, actualCos);
-		return 1.0;
-	}
-	return 0.0;
+	float actualCos = clamp(dot(spotDirection,-pointToLight),outerConeCos,innerConeCos);
+	return smoothstep(outerConeCos, innerConeCos, actualCos);
 }
 
 vec3 apply_spot_light(LightSourceData light, uint lightIndex, MaterialInfo materialInfo, vec3 normal, vec3 view)
 {
 	vec3 pointToLight = light.position.xyz - fs_in.vert_pos_ws.xyz;
 	float distance = length(pointToLight);
+	pointToLight /= distance;
 	float rangeAttenuation = calc_light_falloff(distance,light.position.w);
 	rangeAttenuation = pow(rangeAttenuation,light.falloffExponent);
 	float spotAttenuation = get_spot_attenuation(pointToLight, light.direction.xyz, cos(light.cutoffOuter), cos(light.cutoffInner));

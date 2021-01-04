@@ -28,6 +28,7 @@
 #define SHADER_UNIFORM_INSTANCE_INDEX_SET SHADER_UNIFORM_RENDER_SETTINGS_SET
 #define SHADER_UNIFORM_INSTANCE_INDEX_BINDING (SHADER_UNIFORM_RENDER_SETTINGS_BINDING +1)
 
+#include "../modules/conditionals.gls"
 #include "../modules/sh_light_source.gls"
 #include "../modules/sh_camera_info.gls"
 #include "../modules/sh_rendersettings.gls"
@@ -279,23 +280,60 @@ void main()
 	// One thread should fill the global light buffer
 	if(gl_LocalInvocationIndex == 0)
 	{
-		uint offset = index *MAX_SCENE_LIGHTS; // Determine position in global buffer
+		// Note: Spot-, point- and directional lights have separate ranges in visibleLightTileIndicesBuffer (for each tile),
+		// which avoids having to do expensive if-conditionals in the fragment shader later.
+		// Spot light range: [SCENE_SPOT_LIGHT_BUFFER_START,SCENE_SPOT_LIGHT_BUFFER_END)
+		// Point light range: [SCENE_POINT_LIGHT_BUFFER_START,SCENE_POINT_LIGHT_BUFFER_END)
+		// Directional light range: [SCENE_DIRECTIONAL_LIGHT_BUFFER_START,SCENE_DIRECTIONAL_LIGHT_BUFFER_END)
+		// (Each is relative to (index *MAX_SCENE_LIGHTS), i.e. the tile start offset)
+
+		// Determine position in global buffer
+		uint startOffset = index *MAX_SCENE_LIGHTS;
+		uint ispot = 0;
+		uint ipoint = 0;
+		uint idirectional = 0;
 		for(uint i=0;i<visibleLightCount;i++)
 		{
-			visibleLightTileIndicesBuffer.data[offset +i].index = visibleLightIndices[i];
-			if(lightBuffer.data[visibleLightIndices[i]].shadowIndex != 0) // Light source with shadow?
-			{
-				uint shadowIdx = lightBuffer.data[visibleLightIndices[i]].shadowIndex -1; // Shadow index is offset by 1, index of 0 means no shadow
-				uint integerIdx = shadowIdx /32;
-				visibleLightIndicesBuffer.visibleBits[integerIdx] |= 1<<shadowIdx; // Set bit according to shadow buffer index
-			}
+			uint lightIndex = visibleLightIndices[i];
+			LightSourceData lightData = lightBuffer.data[lightIndex];
+
+			uint spotLight = lightData.flags &FLIGHT_TYPE_SPOT;
+			uint pointLight = lightData.flags &FLIGHT_TYPE_POINT;
+			uint dirLight = lightData.flags &FLIGHT_TYPE_DIRECTIONAL;
+
+			uint offset = 
+				(SCENE_SPOT_LIGHT_BUFFER_START +ispot) *when_neq(spotLight,0) +
+				(SCENE_POINT_LIGHT_BUFFER_START +ipoint) *when_neq(pointLight,0) +
+				(SCENE_DIRECTIONAL_LIGHT_BUFFER_START +idirectional) *when_neq(dirLight,0);
+			uint endOffset = 
+				SCENE_SPOT_LIGHT_BUFFER_END *when_neq(spotLight,0) +
+				SCENE_POINT_LIGHT_BUFFER_END *when_neq(pointLight,0) +
+				SCENE_DIRECTIONAL_LIGHT_BUFFER_END *when_neq(dirLight,0);
+			if(offset >= endOffset)
+				continue;
+			ispot += when_neq(spotLight,0);
+			ipoint += when_neq(pointLight,0);
+			idirectional += when_neq(dirLight,0);
+
+			visibleLightTileIndicesBuffer.data[startOffset +offset].index = int(lightIndex);
+			if(lightData.shadowIndex == 0) // Light source with shadow?
+				continue;
+			uint shadowIdx = lightData.shadowIndex -1; // Shadow index is offset by 1, index of 0 means no shadow
+			uint integerIdx = shadowIdx /32;
+			visibleLightIndicesBuffer.visibleBits[integerIdx] |= 1<<shadowIdx; // Set bit according to shadow buffer index
 		}
 
-		if(visibleLightCount != MAX_SCENE_LIGHTS)
-		{
-			// Unless we have totally filled the entire array, mark its end with -1
-			// Final shader step will use this to determine where to stop (without having to pass the light count)
-			visibleLightTileIndicesBuffer.data[offset +visibleLightCount].index = -1;
-		}
+		//visibleLightTileIndicesBuffer.data[startOffset +SCENE_SPOT_LIGHT_BUFFER_START].index = int(ispot) -1;
+		//visibleLightTileIndicesBuffer.data[startOffset +SCENE_POINT_LIGHT_BUFFER_START].index = int(ipoint) -1;
+		//visibleLightTileIndicesBuffer.data[startOffset +SCENE_DIRECTIONAL_LIGHT_BUFFER_START].index = int(idirectional) -1;
+
+		// Unless we have totally filled the entire array, mark its end with -1
+		// Final shader step will use this to determine where to stop (without having to pass the light count)
+		if(startOffset +ispot != SCENE_SPOT_LIGHT_BUFFER_END)
+			visibleLightTileIndicesBuffer.data[startOffset +SCENE_SPOT_LIGHT_BUFFER_START +ispot].index = -1;
+		if(startOffset +ipoint != SCENE_POINT_LIGHT_BUFFER_END)
+			visibleLightTileIndicesBuffer.data[startOffset +SCENE_POINT_LIGHT_BUFFER_START +ipoint].index = -1;
+		if(startOffset +idirectional != SCENE_DIRECTIONAL_LIGHT_BUFFER_END)
+			visibleLightTileIndicesBuffer.data[startOffset +SCENE_DIRECTIONAL_LIGHT_BUFFER_START +idirectional].index = -1;
 	}
 }

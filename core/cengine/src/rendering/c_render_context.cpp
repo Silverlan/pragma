@@ -15,7 +15,7 @@
 #include <pragma/util/util_module.hpp>
 
 using namespace pragma;
-
+#pragma optimize("",off)
 RenderContext::RenderContext()
 	: m_monitor(nullptr),m_aspectRatio(1.f),m_renderAPI{"opengl"}
 {
@@ -112,10 +112,7 @@ void RenderContext::ValidationCallback(
 		// We'll just ignore it for now, since it doesn't affect us in any way.
 		// TODO: Remove this condition once the Anvil bug has been dealt with.
 		if(ustring::compare(strMsg.c_str(),"VkImageStencilUsageCreateInfoEXT",true,strlen("VkImageStencilUsageCreateInfoEXT")) == false)
-		{
-			m_renderContext->AddDebugObjectInformation(strMsg);
 			Con::cerr<<"[PR] "<<strMsg<<Con::endl;
-		}
 	}
 }
 
@@ -235,3 +232,4 @@ void RenderContext::SetResolutionHeight(uint32_t h)
 float RenderContext::GetAspectRatio() const {return m_aspectRatio;}
 void RenderContext::SetRenderAPI(const std::string &renderAPI) {m_renderAPI = renderAPI;}
 const std::string &RenderContext::GetRenderAPI() const {return m_renderAPI;}
+#pragma optimize("",on)

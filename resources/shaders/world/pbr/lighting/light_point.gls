@@ -8,14 +8,12 @@ vec3 apply_point_light(LightSourceData light, uint lightIndex, MaterialInfo mate
 {
 	vec3 pointToLight = light.position.xyz - fs_in.vert_pos_ws.xyz;
 	float distance = length(pointToLight);
+	pointToLight /= distance;
 	float attenuation = calc_light_falloff(distance,light.position.w);
 	attenuation = pow(attenuation,light.falloffExponent);
 	vec3 shade = get_point_shade(pointToLight, materialInfo, normal, view);
 
-	float shadowFactor = are_shadows_enabled() ? min(
-		get_point_light_shadow_factor(lightIndex,false), // static sample
-		get_point_light_shadow_factor(lightIndex,true) // dynamic sample
-	) : 1.0;
+	float shadowFactor = are_shadows_enabled() ? get_point_light_shadow_factor(lightIndex,true) : 1.0;
 	return attenuation * light.color.a * light.color.rgb * shade *shadowFactor;
 }
 

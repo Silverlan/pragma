@@ -15,6 +15,7 @@
 #include "pragma/rendering/shaders/debug/c_shader_debug.hpp"
 #include "pragma/rendering/shaders/debug/c_shader_debug_text.hpp"
 #include "pragma/rendering/shaders/world/c_shader_flat.hpp"
+#include "pragma/rendering/shaders/world/c_shader_test.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/shaders/c_shader_depth_to_rgb.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
@@ -107,6 +108,7 @@ void CGame::InitShaders()
 	shaderManager.RegisterShader("eye",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderEye(context,identifier);});
 
 	shaderManager.RegisterShader("flat",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderFlat(context,identifier);});
+	shaderManager.RegisterShader("test",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderTest(context,identifier);});
 	shaderManager.RegisterShader("unlit",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderUnlit(context,identifier);});
 	shaderManager.RegisterShader("wireframe",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderWireframe(context,identifier);});
 	shaderManager.RegisterShader("texturedalphatransition",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderTexturedAlphaTransition(context,identifier);});
@@ -171,6 +173,7 @@ void CGame::InitShaders()
 
 	// Make sure these are always loaded
 	shaderManager.GetShader("pbr");
+	shaderManager.GetShader("test");
 	shaderManager.GetShader("light_cone");
 	shaderManager.GetShader("forwardp_light_culling");
 	shaderManager.GetShader("prepass");

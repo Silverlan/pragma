@@ -19,6 +19,21 @@ SceneMesh::SceneMesh()
 	: m_vertexBuffer(nullptr),m_vertexWeightBuffer(nullptr),
 	m_alphaBuffer(nullptr),m_indexBuffer(nullptr)
 {}
+SceneMesh::SceneMesh(const SceneMesh &other)
+	: m_renderBuffers{other.m_renderBuffers},m_vertexBuffer{other.m_vertexBuffer},
+	m_vertexWeightBuffer{other.m_vertexWeightBuffer},m_alphaBuffer{other.m_alphaBuffer},
+	m_indexBuffer{other.m_indexBuffer},m_lightmapUvBuffer{other.m_lightmapUvBuffer}
+{}
+SceneMesh &SceneMesh::operator=(const SceneMesh &other)
+{
+	m_renderBuffers = other.m_renderBuffers;
+	m_vertexBuffer = other.m_vertexBuffer;
+	m_vertexWeightBuffer = other.m_vertexWeightBuffer;
+	m_alphaBuffer = other.m_alphaBuffer;
+	m_indexBuffer = other.m_indexBuffer;
+	m_lightmapUvBuffer = other.m_lightmapUvBuffer;
+	return *this;
+}
 const std::shared_ptr<prosper::IBuffer> &SceneMesh::GetVertexBuffer() const {return m_vertexBuffer;}
 const std::shared_ptr<prosper::IBuffer> &SceneMesh::GetVertexWeightBuffer() const {return m_vertexWeightBuffer;}
 const std::shared_ptr<prosper::IBuffer> &SceneMesh::GetAlphaBuffer() const {return m_alphaBuffer;}
@@ -40,6 +55,7 @@ const std::shared_ptr<prosper::IRenderBuffer> &SceneMesh::GetRenderBuffer(CModel
 		static std::shared_ptr<prosper::IRenderBuffer> nptr = nullptr;
 		return nptr;
 	}
+	std::unique_lock lock {m_renderBufferMutex};
 	auto it = std::find_if(m_renderBuffers.begin(),m_renderBuffers.end(),[pipelineId](const std::pair<prosper::PipelineID,std::shared_ptr<prosper::IRenderBuffer>> &pair) {return pair.first == pipelineId;});
 	if(it != m_renderBuffers.end())
 		return it->second;

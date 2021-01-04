@@ -34,7 +34,7 @@ void WIFPS::Initialize()
 		t->SetShadowOffset(2,2);
 		t->SetShadowBlurSize(0.1f);
 		t->SetShadowColor(0.f,0.f,0.f,1.f);
-		t->SetText("FPS 000 Frame Time: 000ms");
+		t->SetText("FPS 000 Frame Time: 000.00ms");
 		t->AddStyleClass("fps_counter");
 		t->SetColor(1.f,1.f,1.f,1.f);
 		t->SizeToContents();
@@ -57,7 +57,7 @@ void WIFPS::Think()
 		{
 			auto frameTime = c_engine->GetFrameTime();
 			m_fpsLast = fps;
-			auto strFps = std::to_string(fps);
+			auto strFps = util::round_string(fps,0);
 			auto l = strFps.length();
 			if(l < 3)
 				strFps += std::string(3 -l,' ');
@@ -76,7 +76,7 @@ void WIFPS::Think()
 				}
 			}
 			t->SetColor(col);
-			t->SetText("FPS " +strFps +" Frame Time: " +std::to_string(frameTime) +"ms");
+			t->SetText("FPS " +strFps +" Frame Time: " +util::round_string(frameTime,2) +"ms");
 		}
 	}
 }

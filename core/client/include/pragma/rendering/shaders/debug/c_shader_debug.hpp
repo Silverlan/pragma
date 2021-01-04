@@ -41,7 +41,7 @@ namespace pragma
 
 		ShaderDebug(prosper::IPrContext &context,const std::string &identifier);
 
-		bool BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx=Pipeline::Triangle);
+		bool BeginDraw(const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,Pipeline pipelineIdx=Pipeline::Triangle);
 		bool Draw(prosper::IBuffer &vertexBuffer,uint32_t vertexCount,const Mat4 &mvp=umat::identity(),const Vector4 &color=Vector4(1.f,1.f,1.f,1.f));
 	protected:
 		ShaderDebug(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader);

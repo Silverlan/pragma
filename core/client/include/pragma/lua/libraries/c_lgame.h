@@ -50,6 +50,8 @@ namespace Lua
 			DLLCLIENT int build_reflection_probes(lua_State *l);
 
 			DLLCLIENT int test(lua_State *l);
+			DLLCLIENT int set_render_stats_enabled(lua_State *l);
+			DLLCLIENT int get_queued_render_scenes(lua_State *l);
 		};
 	};
 };

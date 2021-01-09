@@ -2,7 +2,7 @@
 
 #include "sh_glow.gls"
 
-layout(LAYOUT_ID(SHADER_UNIFORM_GLOW_MAP_SET,SHADER_UNIFORM_GLOW_MAP_BINDING)) uniform sampler2D u_glowMap;
+layout(LAYOUT_ID(DESCRIPTOR_SET_MATERIAL,DESCRIPTOR_SET_MATERIAL_BINDING_ALBEDO_MAP)) uniform sampler2D u_glowMap;
 
 vec4 get_glow_map_color() {return texture(u_glowMap,fs_in.vert_uv).rgba;}
 

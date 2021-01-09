@@ -61,16 +61,16 @@ namespace pragma
 		void SetForceNonIBLMode(bool b);
 	protected:
 		using ShaderTextured3DBase::Draw;
-		virtual bool BindRenderFlags(RenderFlags flags) override {return true;}
+		virtual bool BindRenderFlags(SceneFlags flags) override {return true;}
 		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		virtual void UpdateRenderFlags(CModelSubMesh &mesh,RenderFlags &inOutFlags) override;
+		virtual void UpdateRenderFlags(CModelSubMesh &mesh,SceneFlags &inOutFlags) override;
 		virtual bool BindMaterialParameters(CMaterial &mat) override;
 		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
 		virtual void InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo);
 
-		RenderFlags m_extRenderFlags = RenderFlags::None;
+		SceneFlags m_extRenderFlags = SceneFlags::None;
 		bool m_bNonIBLMode = false;
 		Mat4 m_testMvp;
 	};

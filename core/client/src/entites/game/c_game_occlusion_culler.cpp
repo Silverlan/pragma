@@ -64,7 +64,7 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 		if(pTrComponent != nullptr)
 		{
 			auto &trC = static_cast<CTransformComponent&>(*pTrComponent);
-			it->second.push_back(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,&ent](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			it->second.push_back(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,ent](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 				if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags,pragma::TransformChangeFlags::PositionChanged) == false)
 					return util::EventReply::Unhandled;
 				// SceneRenderDesc::AssertRenderQueueThreadInactive();

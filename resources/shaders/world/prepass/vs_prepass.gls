@@ -18,8 +18,8 @@ layout(location = SHADER_NORMAL_BUFFER_LOCATION) in vec3 in_vert_normal;
 void main()
 {
 	vec3 vertPos = in_vert_pos.xyz;
-	uint vertexAnimOffset = (u_pushConstants.vertexAnimInfo<<16)>>16;
-	uint vertexAnimCount = u_pushConstants.vertexAnimInfo>>16;
+	uint vertexAnimOffset = (u_pushConstants.scene.vertexAnimInfo<<16)>>16;
+	uint vertexAnimCount = u_pushConstants.scene.vertexAnimInfo>>16;
 	for(uint i=0;i<vertexAnimCount;++i)
 	{
 		uint offset = vertexAnimOffset +i;
@@ -45,21 +45,21 @@ void main()
 	vec4 vposWs = mdlMatrix *weightedVertPos;
 	if(is_3d_sky())
 	{
-		vposWs.xyz -= u_pushConstants.drawOrigin.xyz;
-		vposWs.xyz *= u_pushConstants.drawOrigin.w;
+		vposWs.xyz -= u_pushConstants.scene.drawOrigin.xyz;
+		vposWs.xyz *= u_pushConstants.scene.drawOrigin.w;
 	}
 
 	mat4 V = get_view_matrix();
 	mat4 P = u_camera.P;
-	if(u_pushConstants.depthBias.x > 0.0)
-		apply_projection_depth_bias_offset(P,u_renderSettings.nearZ,u_renderSettings.farZ,u_pushConstants.depthBias[0],u_pushConstants.depthBias[1]);
+	if(u_pushConstants.scene.depthBias.x > 0.0)
+		apply_projection_depth_bias_offset(P,u_renderSettings.nearZ,u_renderSettings.farZ,u_pushConstants.scene.depthBias[0],u_pushConstants.scene.depthBias[1]);
 	gl_Position = API_DEPTH_TRANSFORM(P) *V *vposWs;
 
 	vposWs.xyz /= vposWs.w;
 	vposWs.w = 1.0;
 
-	if(length_sqr(u_pushConstants.clipPlane.xyz) > 0.0)
-		gl_ClipDistance[0] = dot(vec4(vposWs.xyz,1.0),u_pushConstants.clipPlane);
+	if(length_sqr(u_pushConstants.scene.clipPlane.xyz) > 0.0)
+		gl_ClipDistance[0] = dot(vec4(vposWs.xyz,1.0),u_pushConstants.scene.clipPlane);
 	else
 		gl_ClipDistance[0] = 1.0;
 

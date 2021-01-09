@@ -11,7 +11,7 @@ struct StorageEntityInstanceData
 };
 
 // Storage buffer containing instance data for *all* entities; can be indexed
-layout(std140,LAYOUT_ID(SHADER_UNIFORM_GLOBAL_INSTANCE_SET,SHADER_UNIFORM_GLOBAL_INSTANCE_BINDING)) buffer Instances
+layout(std140,LAYOUT_ID(DESCRIPTOR_SET_RENDER_SETTINGS,DESCRIPTOR_SET_RENDER_SETTINGS_BINDING_GLOBAL_INSTANCE)) buffer Instances
 {
 	StorageEntityInstanceData data[];
 } u_instances;

@@ -34,7 +34,7 @@ ShaderLightCone::ShaderLightCone(prosper::IPrContext &context,const std::string 
 	: ShaderTextured3DBase(context,identifier,"effects/vs_light_cone","effects/fs_light_cone")
 {
 	// SetBaseShader<ShaderTextured3DBase>();
-	umath::set_flag(m_stateFlags,StateFlags::ShouldUseLightMap,false);
+	umath::set_flag(m_sceneFlags,SceneFlags::LightmapsEnabled,false);
 }
 
 bool ShaderLightCone::BindSceneCamera(pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,bool bView)

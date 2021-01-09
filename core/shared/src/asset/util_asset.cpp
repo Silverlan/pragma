@@ -32,7 +32,15 @@ std::optional<std::string> pragma::asset::find_file(NetworkState &nw,const std::
 	case Type::Sound:
 		return {}; // TODO
 	case Type::Texture:
-		return {}; // Only client knows about textures
+	{
+		for(auto &format : MaterialManager::get_supported_image_formats())
+		{
+			auto extFileName = name +'.' +format.extension;
+			if(FileManager::Exists("materials/" +extFileName))
+				return extFileName;
+		}
+		return {};
+	}
 	case Type::ParticleSystem:
 	{
 		auto normName = name;

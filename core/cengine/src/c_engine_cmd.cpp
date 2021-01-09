@@ -14,8 +14,8 @@
 #include <pragma/console/command_options.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
-#pragma optimize("",off)
-extern DLLCLIENT void debug_render_stats(bool);
+
+extern DLLCLIENT void debug_render_stats(bool enabled,bool full,bool print,bool continuous);
 void CEngine::RegisterConsoleCommands()
 {
 	Engine::RegisterConsoleCommands();
@@ -79,8 +79,80 @@ void CEngine::RegisterConsoleCommands()
 		std::unordered_map<std::string,pragma::console::CommandOption> commandOptions {};
 		pragma::console::parse_command_options(argv,commandOptions);
 		auto full = util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions,"full","0"));
-		debug_render_stats(full);
+		debug_render_stats(true,full,true,false);
 	},ConVarFlags::None,"Prints information about the next frame.");
+	conVarMap.RegisterConVar("render_multithreaded_rendering_enabled","1",ConVarFlags::Archive,"Enables or disables multi-threaded rendering. Some renderers (like OpenGL) don't support multi-threaded rendering and will ignore this flag.");
+	conVarMap.RegisterConVarCallback("render_multithreaded_rendering_enabled",std::function<void(NetworkState*,ConVar*,bool,bool)>{[this](
+		NetworkState *nw,ConVar *cv,bool,bool enabled) -> void {
+			GetRenderContext().SetMultiThreadedRenderingEnabled(enabled);
+	}});
+	conVarMap.RegisterConCommand("debug_dump_shader_code",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		if(argv.empty())
+		{
+			Con::cwar<<"No shader specified!"<<Con::endl;
+			return;
+		}
+		auto &shaderName = argv.front();
+		auto shader = GetShader(shaderName);
+		if(shader.expired())
+		{
+			Con::cwar<<"WARNING:: Shader '"<<shaderName<<"' is invalid!"<<Con::endl;
+			return;
+		}
+		std::vector<std::string> glslCodePerStage;
+		std::vector<prosper::ShaderStage> glslCodeStages;
+		std::string infoLog,debugInfoLog;
+		prosper::ShaderStage errStage;
+		auto result = GetRenderContext().GetParsedShaderSourceCode(*shader,glslCodePerStage,glslCodeStages,infoLog,debugInfoLog,errStage);
+		if(result == false)
+		{
+			Con::cwar<<"WARNING: Parsing shader '"<<shaderName<<"' has failed:"<<Con::endl;
+			Con::cwar<<"Info Log: "<<infoLog<<Con::endl;
+			Con::cwar<<"Debug info Log: "<<debugInfoLog<<Con::endl;
+			Con::cwar<<"Stage: "<<prosper::util::to_string(errStage)<<Con::endl;
+			return;
+		}
+		std::string path = "shader_dump/" +shaderName +"/";
+		FileManager::CreatePath(path.c_str());
+		for(auto i=decltype(glslCodeStages.size()){0u};i<glslCodeStages.size();++i)
+		{
+			auto &glslCode = glslCodePerStage[i];
+			auto stage = glslCodeStages[i];
+			std::string stageName;
+			switch(stage)
+			{
+			case prosper::ShaderStage::Compute:
+				stageName = "compute";
+				break;
+			case prosper::ShaderStage::Fragment:
+				stageName = "fragment";
+				break;
+			case prosper::ShaderStage::Geometry:
+				stageName = "geometry";
+				break;
+			case prosper::ShaderStage::TessellationControl:
+				stageName = "tessellation_control";
+				break;
+			case prosper::ShaderStage::TessellationEvaluation:
+				stageName = "tessellation_evaluation";
+				break;
+			case prosper::ShaderStage::Vertex:
+				stageName = "vertex";
+				break;
+			}
+			static_assert(umath::to_integral(prosper::ShaderStage::Count) == 6);
+			auto stageFileName = path +stageName +".gls";
+			auto f = FileManager::OpenFile<VFilePtrReal>(stageFileName.c_str(),"w");
+			if(f)
+			{
+				f->WriteString(glslCode);
+				f = nullptr;
+			}
+			else
+				Con::cwar<<"WARNING: Unable to write file '"<<stageFileName<<"'!"<<Con::endl;
+		}
+		Con::cout<<"Done! Written shader files to '"<<path<<"'!"<<Con::endl;
+	},ConVarFlags::None,"Dumps the glsl code for the specified shader.");
 	conVarMap.RegisterConVar("debug_hide_gui","0",ConVarFlags::None,"Disables GUI rendering.");
 
 	conVarMap.RegisterConVar("render_vsync_enabled","1",ConVarFlags::Archive,"Enables or disables vsync. OpenGL only.");
@@ -202,4 +274,3 @@ void CEngine::RegisterConsoleCommands()
 	});
 #endif
 }
-#pragma optimize("",on)

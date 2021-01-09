@@ -81,9 +81,9 @@ void ShaderSkybox::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pi
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
 
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_MATERIAL);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDERER);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_MATERIAL);
 	ToggleDynamicScissorState(pipelineInfo,true);
 }
 

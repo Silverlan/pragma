@@ -33,6 +33,44 @@ enum class RenderFlags : uint8_t;
 namespace prosper {class Shader;};
 namespace pragma::rendering
 {
+	class DLLCLIENT ShaderProcessor
+	{
+	public:
+		ShaderProcessor(prosper::ICommandBuffer &cmdBuffer)
+			: m_cmdBuffer{cmdBuffer}
+		{}
+		bool RecordBindShader(const pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,bool view,pragma::ShaderGameWorld &shader,uint32_t pipelineIdx=0u);
+		bool RecordBindEntity(CBaseEntity &ent);
+		bool RecordBindMaterial(CMaterial &mat);
+		bool RecordDraw(CModelSubMesh &mesh,pragma::RenderMeshIndex meshIdx,const pragma::rendering::RenderQueue::InstanceSet *instanceSet=nullptr);
+
+		void SetStats(RenderPassStats *stats) {m_stats = stats;}
+	private:
+		bool RecordBindScene(const pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,const pragma::ShaderGameWorld &referenceShader,bool view);
+		bool BindInstanceSet(pragma::ShaderGameWorld &shaderScene,const pragma::rendering::RenderQueue::InstanceSet *instanceSet=nullptr);
+		void UpdateSceneFlags(ShaderGameWorld::SceneFlags sceneFlags);
+
+		prosper::ICommandBuffer &m_cmdBuffer;
+		std::unique_ptr<prosper::IShaderPipelineLayout> m_currentPipelineLayout = nullptr;
+		std::optional<Vector4> m_clipPlane {};
+		pragma::CVertexAnimatedComponent *m_vertexAnimC = nullptr;
+		pragma::CModelComponent *m_modelC = nullptr;
+		pragma::CLightMapReceiverComponent *m_lightMapReceiverC = nullptr;
+		ShaderGameWorld::SceneFlags m_sceneFlags = ShaderGameWorld::SceneFlags::None;
+		bool m_view = false;
+
+		uint32_t m_materialDescriptorSetIndex = std::numeric_limits<uint32_t>::max();
+		uint32_t m_entityInstanceDescriptorSetIndex = std::numeric_limits<uint32_t>::max();
+		const RenderQueue::InstanceSet *m_curInstanceSet = nullptr;
+
+		pragma::ShaderGameWorld *m_curShader = nullptr;
+		bool m_prepassShader = false;
+		uint32_t m_curVertexAnimationOffset = 0;
+		RenderPassStats *m_stats = nullptr;
+
+		float m_alphaCutoff = 0.5f;
+	};
+
 	class RasterizationRenderer;
 	class DLLCLIENT BaseRenderProcessor
 	{
@@ -64,6 +102,8 @@ namespace pragma::rendering
 		pragma::ShaderGameWorld *GetCurrentShader();
 		void UnbindShader();
 		void SetCountNonOpaqueMaterialsOnly(bool b);
+		prosper::Extent2D GetExtents() const;
+		void RecordViewport();
 	protected:
 		uint32_t Render(const pragma::rendering::RenderQueue &renderQueue,bool bindShaders,RenderPassStats *optStats=nullptr,std::optional<uint32_t> worldRenderQueueIndex={});
 		bool BindInstanceSet(pragma::ShaderGameWorld &shaderScene,const RenderQueue::InstanceSet *instanceSet=nullptr);
@@ -72,6 +112,8 @@ namespace pragma::rendering
 		prosper::ShaderIndex m_curShaderIndex = std::numeric_limits<prosper::ShaderIndex>::max();
 		MaterialIndex m_curMaterialIndex = std::numeric_limits<MaterialIndex>::max();
 		EntityIndex m_curEntityIndex = std::numeric_limits<EntityIndex>::max();
+
+		ShaderProcessor m_shaderProcessor;
 
 		prosper::Shader *m_curShader = nullptr;
 		pragma::ShaderGameWorld *m_shaderScene = nullptr;

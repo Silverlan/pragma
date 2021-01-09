@@ -318,6 +318,18 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 	// Update time
 	UpdateShaderTimeData();
 
+	// Initiate the command buffer build threads for all queued scenes.
+	// If we have multiple scenes to render (e.g. left eye and right eye for VR),
+	// the command buffers can all be built in parallel.
+	for(auto &cdrawSceneInfo : drawSceneInfos)
+	{
+		auto &drawSceneInfo = const_cast<util::DrawSceneInfo&>(cdrawSceneInfo);
+		if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags,util::DrawSceneInfo::Flags::DisableRender))
+			continue;
+		RecordSceneCommandBuffers(drawSceneInfo);
+	}
+
+	// Render the scenes
 	for(auto &cdrawSceneInfo : drawSceneInfos)
 	{
 		auto &drawSceneInfo = const_cast<util::DrawSceneInfo&>(cdrawSceneInfo);
@@ -378,6 +390,9 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 			static_cast<prosper::IPrimaryCommandBuffer*>(drawCmd.get())->StopRecording();
 	}
 	m_renderQueueBuilder->Flush();
+
+	// At this point all render threads (render queue and command buffer builders) are guaranteed
+	// to have completed their work for this frame. The scene is now safe for writing again.
 }
 
 bool CGame::IsInMainRenderPass() const {return m_bMainRenderPass;}

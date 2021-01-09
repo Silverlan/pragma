@@ -103,7 +103,7 @@ bool ShaderPBR::BeginDraw(
 	const Vector4 &drawOrigin,ShaderGameWorldPipeline pipelineIdx,RecordFlags recordFlags
 )
 {
-	m_extRenderFlags = RenderFlags::None;
+	m_extRenderFlags = SceneFlags::None;
 	return ShaderTextured3DBase::BeginDraw(cmdBuffer,clipPlane,drawOrigin,pipelineIdx,recordFlags);
 }
 bool ShaderPBR::BindSceneCamera(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,bool bView)
@@ -121,12 +121,10 @@ bool ShaderPBR::BindSceneCamera(pragma::CSceneComponent &scene,const rendering::
 			return BindReflectionProbeIntensity(iblStrength) && RecordBindDescriptorSet(*ds,DESCRIPTOR_SET_PBR.setIndex);
 	}
 	// No reflection probe and therefore no IBL available. Fallback to non-IBL rendering.
-	m_extRenderFlags |= RenderFlags::NoIBL;
-	if(m_defaultPbrDsg == nullptr)
-		m_defaultPbrDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_PBR);
+	m_extRenderFlags |= SceneFlags::NoIBL;
 	return RecordBindDescriptorSet(*m_defaultPbrDsg->GetDescriptorSet(),DESCRIPTOR_SET_PBR.setIndex);
 }
-void ShaderPBR::UpdateRenderFlags(CModelSubMesh &mesh,RenderFlags &inOutFlags)
+void ShaderPBR::UpdateRenderFlags(CModelSubMesh &mesh,SceneFlags &inOutFlags)
 {
 	ShaderTextured3DBase::UpdateRenderFlags(mesh,inOutFlags);
 	inOutFlags |= m_extRenderFlags;
@@ -243,6 +241,13 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescr
 		return false;
 	return descSetGroup;
 }
+void ShaderPBR::OnPipelinesInitialized()
+{
+	ShaderTextured3DBase::OnPipelinesInitialized();
+	m_defaultPbrDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_PBR);
+	m_defaultMatDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_MATERIAL);
+}
+prosper::IDescriptorSet &ShaderPBR::GetDefaultPbrDescriptorSet() const {return *m_defaultPbrDsg->GetDescriptorSet();}
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
 	return InitializeMaterialDescriptorSet(mat,DESCRIPTOR_SET_MATERIAL);

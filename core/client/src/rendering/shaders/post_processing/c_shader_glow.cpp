@@ -43,8 +43,8 @@ void ShaderGlow::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipeli
 void ShaderGlow::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 	AddDescriptorSetGroup(pipelineInfo,GetMaterialDescriptorSetInfo());
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 }
 void ShaderGlow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {

@@ -4,7 +4,7 @@
 #include "sh_uniform_locations.gls"
 
 // Change per camera
-layout(std140,LAYOUT_ID(SHADER_UNIFORM_CAMERA_SET,SHADER_UNIFORM_CAMERA_BINDING)) uniform Camera
+layout(std140,LAYOUT_ID(DESCRIPTOR_SET_SCENE,DESCRIPTOR_SET_SCENE_BINDING_CAMERA)) uniform Camera
 {
 	mat4 V;
 	mat4 P;

@@ -7,7 +7,7 @@
 	#define USE_GLOW_MAP 1
 #endif
 #if USE_GLOW_MAP == 1
-	layout(LAYOUT_ID(SHADER_UNIFORM_EMISSION_MAP_SET,SHADER_UNIFORM_EMISSION_MAP_BINDING)) uniform sampler2D u_glowMap;
+	layout(LAYOUT_ID(DESCRIPTOR_SET_MATERIAL,DESCRIPTOR_SET_MATERIAL_BINDING_EMISSION_MAP)) uniform sampler2D u_glowMap;
 	vec4 get_glow_map_color() {return texture(u_glowMap,fs_in.vert_uv).rgba;}
 #endif
 

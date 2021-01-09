@@ -6,7 +6,7 @@
 #include "sh_prepass.gls"
 #include "sh_prepass_vertex_data.gls"
 
-layout(LAYOUT_ID(SHADER_UNIFORM_MATERIAL_SET,SHADER_UNIFORM_MATERIAL_BINDING)) uniform sampler2D u_albedoMap;
+layout(LAYOUT_ID(DESCRIPTOR_SET_MATERIAL,DESCRIPTOR_SET_MATERIAL_BINDING_ALBEDO_MAP)) uniform sampler2D u_albedoMap;
 
 layout(location = 0) out vec4 fs_normalBuffer;
 

@@ -59,6 +59,7 @@ namespace pragma
 		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes() const;
 		std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes();
 		const std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes() const;
+		const std::shared_ptr<prosper::IRenderBuffer> &GetRenderBuffer(uint32_t idx) const;
 
 		RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod);
 		const RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod) const;
@@ -73,11 +74,13 @@ namespace pragma
 		bool IsAutoLodEnabled() const;
 
 		void GetBaseModelMeshes(std::vector<std::shared_ptr<ModelMesh>> &outMeshes,uint32_t lod=0) const;
+		void SetRenderMeshesDirty();
 
 		// Only use if LOD is handled externally!
 		void SetLOD(uint32_t lod);
 	protected:
 		virtual void OnModelChanged(const std::shared_ptr<Model> &model) override;
+		void UpdateRenderBufferList();
 		void UpdateRenderMeshes();
 
 		std::vector<MaterialHandle> m_materialOverrides = {};
@@ -85,6 +88,7 @@ namespace pragma
 		float m_tNextLodUpdate = 0.f;
 		float m_lastLodCamDistance = 0.f;
 		StateFlags m_stateFlags = StateFlags::None;
+		std::vector<std::shared_ptr<prosper::IRenderBuffer>> m_lodMeshRenderBuffers;
 		std::vector<std::shared_ptr<ModelMesh>> m_lodMeshes;
 		std::vector<std::shared_ptr<ModelSubMesh>> m_lodRenderMeshes;
 

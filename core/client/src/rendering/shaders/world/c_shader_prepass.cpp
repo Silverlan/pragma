@@ -44,14 +44,7 @@ decltype(ShaderPrepassBase::VERTEX_ATTRIBUTE_UV) ShaderPrepassBase::VERTEX_ATTRI
 
 decltype(ShaderPrepassBase::DESCRIPTOR_SET_INSTANCE) ShaderPrepassBase::DESCRIPTOR_SET_INSTANCE = {&ShaderEntity::DESCRIPTOR_SET_INSTANCE};
 decltype(ShaderPrepassBase::DESCRIPTOR_SET_SCENE) ShaderPrepassBase::DESCRIPTOR_SET_SCENE = {&ShaderScene::DESCRIPTOR_SET_SCENE};
-decltype(ShaderPrepassBase::DESCRIPTOR_SET_MATERIAL) ShaderPrepassBase::DESCRIPTOR_SET_MATERIAL = {
-	{
-		prosper::DescriptorSetInfo::Binding { // Diffuse Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
-		}
-	}
-};
+decltype(ShaderPrepassBase::DESCRIPTOR_SET_MATERIAL) ShaderPrepassBase::DESCRIPTOR_SET_MATERIAL = {&ShaderTextured3DBase::DESCRIPTOR_SET_MATERIAL};
 decltype(ShaderPrepassBase::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderPrepassBase::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderScene::DESCRIPTOR_SET_RENDER_SETTINGS};
 
 prosper::util::RenderPassCreateInfo::AttachmentInfo ShaderPrepassBase::get_depth_render_pass_attachment_info(prosper::SampleCountFlags sampleCount)
@@ -71,6 +64,12 @@ ShaderPrepassBase::ShaderPrepassBase(prosper::IPrContext &context,const std::str
 	: ShaderGameWorld(context,identifier,"world/prepass/vs_prepass_depth","")
 {
 	SetPipelineCount(umath::to_integral(Pipeline::Count));
+}
+
+void ShaderPrepassBase::OnPipelinesInitialized()
+{
+	ShaderGameWorld::OnPipelinesInitialized();
+	m_defaultMatDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
 }
 
 bool ShaderPrepassBase::BeginDraw(
@@ -103,7 +102,7 @@ void ShaderPrepassBase::InitializeRenderPass(std::shared_ptr<prosper::IRenderPas
 	CreateCachedRenderPass<ShaderPrepassBase>({{get_depth_render_pass_attachment_info(GetSampleCount(pipelineIdx))}},outRenderPass,pipelineIdx);
 }
 
-void ShaderPrepassBase::Set3DSky(bool is3dSky) {umath::set_flag(m_stateFlags,Flags::RenderAs3DSky,is3dSky);}
+void ShaderPrepassBase::Set3DSky(bool is3dSky) {umath::set_flag(m_sceneFlags,SceneFlags::RenderAs3DSky,is3dSky);}
 
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPrepassBase::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
@@ -142,14 +141,14 @@ bool ShaderPrepassBase::BindMaterial(CMaterial &mat)
 
 bool ShaderPrepassBase::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount)
 {
-	auto flags = Flags::None;
+	auto flags = SceneFlags::None;
 	if(mesh.GetExtendedVertexWeights().empty() == false)
-		flags |= Flags::UseExtendedVertexWeights;
-	if(umath::is_flag_set(m_stateFlags,Flags::RenderAs3DSky))
-		flags |= Flags::RenderAs3DSky;
+		flags |= SceneFlags::UseExtendedVertexWeights;
+	if(umath::is_flag_set(m_sceneFlags,SceneFlags::RenderAs3DSky))
+		flags |= SceneFlags::RenderAs3DSky;
 	if(m_alphaCutoff.has_value())
 	{
-		flags |= Flags::AlphaTest;
+		flags |= SceneFlags::AlphaTest;
 		if(RecordPushConstants(*m_alphaCutoff,offsetof(PushConstants,alphaCutoff)) == false)
 			return false;
 	}
@@ -183,8 +182,8 @@ void ShaderPrepassBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInf
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit);
 
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_MATERIAL);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDER_SETTINGS);
 }
 

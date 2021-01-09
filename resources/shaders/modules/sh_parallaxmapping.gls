@@ -17,7 +17,7 @@
 		float heightScale;
 	} u_parallax;*/ // Defined in push constants
 #if USE_PARALLAX_MAP == 1
-	layout(LAYOUT_ID(SHADER_UNIFORM_PARALLAX_MAP_SET,SHADER_UNIFORM_PARALLAX_MAP_BINDING)) uniform sampler2D u_parallaxMap;
+	layout(LAYOUT_ID(DESCRIPTOR_SET_MATERIAL,DESCRIPTOR_SET_MATERIAL_BINDING_PARALLAX_MAP)) uniform sampler2D u_parallaxMap;
 #endif
 
 	vec2 get_parallax_coordinates(bool useParallaxMap,vec2 texCoords)

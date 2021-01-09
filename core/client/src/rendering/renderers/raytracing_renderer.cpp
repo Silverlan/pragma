@@ -57,9 +57,13 @@ bool RaytracingRenderer::IsRayTracingRenderer() const {return true;}
 // TODO
 // void RaytracingRenderer::OnEntityAddedToScene(CBaseEntity &ent) {ent.AddComponent<CRaytracingComponent>();}
 //#include <wgui/types/wirect.h>
-bool RaytracingRenderer::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
+bool RaytracingRenderer::RecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo)
 {
-	if(m_whShader.expired() || BaseRenderer::RenderScene(drawSceneInfo) == false)
+	return BaseRenderer::RecordCommandBuffers(drawSceneInfo);
+}
+bool RaytracingRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
+{
+	if(m_whShader.expired() || BaseRenderer::Render(drawSceneInfo) == false)
 		return false;
 	auto &imgOutput = GetSceneTexture()->GetImage();
 	auto &drawCmd = drawSceneInfo.commandBuffer;

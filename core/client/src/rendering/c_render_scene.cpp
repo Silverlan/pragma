@@ -46,9 +46,14 @@ void CGame::RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &
 
 std::shared_ptr<prosper::IPrimaryCommandBuffer> CGame::GetCurrentDrawCommandBuffer() const {return m_currentDrawCmd.lock();}
 
-
-
-
+void CGame::RecordSceneCommandBuffers(const util::DrawSceneInfo &drawSceneInfo)
+{
+	auto &scene = drawSceneInfo.scene;
+	auto *renderer = const_cast<pragma::rendering::BaseRenderer*>(scene->GetRenderer());
+	if(renderer == nullptr)
+		return;
+	renderer->RecordCommandBuffers(drawSceneInfo);
+}
 
 void CGame::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 {
@@ -64,7 +69,7 @@ void CGame::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 	auto *renderer = const_cast<pragma::rendering::BaseRenderer*>(scene->GetRenderer());
 	if(renderer)
 	{
-		renderer->RenderScene(drawSceneInfo);
+		renderer->Render(drawSceneInfo);
 		StartProfilingStage(CGame::GPUProfilingPhase::Present);
 		StartProfilingStage(CGame::CPUProfilingPhase::Present);
 

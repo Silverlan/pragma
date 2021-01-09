@@ -15,7 +15,8 @@ BaseRenderer::BaseRenderer()
 {}
 bool BaseRenderer::operator==(const BaseRenderer &other) const {return &other == this;}
 bool BaseRenderer::operator!=(const BaseRenderer &other) const {return !operator==(other);}
-bool BaseRenderer::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
+bool BaseRenderer::RecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo) {return true;}
+bool BaseRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.scene.expired() || drawSceneInfo.scene->GetRenderer() != this)
 		return false;

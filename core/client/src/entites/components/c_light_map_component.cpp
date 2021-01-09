@@ -61,6 +61,13 @@ void CLightMapComponent::InitializeLightMapData(
 	{
 		auto lightMapReceiverC = ent->GetComponent<pragma::CLightMapReceiverComponent>();
 		lightMapReceiverC->UpdateMeshLightmapUvBuffers(*this);
+
+		auto mdlC = ent->GetComponent<pragma::CModelComponent>();
+		if(mdlC.valid())
+		{
+			mdlC->SetRenderMeshesDirty();
+			mdlC->UpdateLOD(0);
+		}
 	}
 }
 

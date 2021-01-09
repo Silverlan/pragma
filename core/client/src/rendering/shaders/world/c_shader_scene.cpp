@@ -9,6 +9,7 @@
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
+#include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/entities/components/c_render_component.hpp"
@@ -186,6 +187,7 @@ bool ShaderSceneLit::BindScene(pragma::CSceneComponent &scene,rendering::Rasteri
 
 decltype(ShaderGameWorld::HASH_TYPE) ShaderGameWorld::HASH_TYPE = typeid(ShaderGameWorld).hash_code();
 size_t ShaderGameWorld::GetBaseTypeHashCode() const {return HASH_TYPE;}
+prosper::IDescriptorSet &ShaderGameWorld::GetDefaultMaterialDescriptorSet() const {return *m_defaultMatDsg->GetDescriptorSet();}
 
 /////////////////////
 
@@ -213,11 +215,11 @@ decltype(ShaderEntity::VERTEX_ATTRIBUTE_LIGHTMAP_UV) ShaderEntity::VERTEX_ATTRIB
 decltype(ShaderEntity::DESCRIPTOR_SET_INSTANCE) ShaderEntity::DESCRIPTOR_SET_INSTANCE = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Instance
-			prosper::DescriptorType::UniformBufferDynamic,
+			prosper::DescriptorType::UniformBuffer,
 			prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit
 		},
 		prosper::DescriptorSetInfo::Binding { // Bone Matrices
-			prosper::DescriptorType::UniformBufferDynamic,
+			prosper::DescriptorType::UniformBuffer,
 			prosper::ShaderStageFlags::VertexBit
 		},
 		prosper::DescriptorSetInfo::Binding { // Vertex Animations
@@ -297,7 +299,7 @@ std::shared_ptr<prosper::IRenderBuffer> ShaderEntity::CreateRenderBuffer(CModelS
 	std::optional<prosper::IndexBufferInfo> indexBufferInfo {};
 	if(GetRenderBufferTargets(mesh,pipelineIdx,buffers,offsets,indexBufferInfo) == false)
 		return nullptr;
-	buffers.insert(buffers.begin(),nullptr); // Instance buffer
+	buffers.insert(buffers.begin(),CSceneComponent::GetEntityInstanceIndexBuffer()->GetBuffer().get()); // Instance buffer
 	offsets.insert(offsets.begin(),0);
 	auto *dummyBuffer = c_engine->GetRenderContext().GetDummyBuffer().get();
 	for(auto it=buffers.begin();it!=buffers.end();++it)
@@ -312,7 +314,7 @@ CBaseEntity *ShaderEntity::GetBoundEntity() {return m_boundEntity;}
 
 bool ShaderEntity::BindInstanceDescriptorSet(prosper::IDescriptorSet &descSet)
 {
-	return RecordBindDescriptorSet(descSet,GetInstanceDescriptorSetIndex(),{0u,0u});
+	return RecordBindDescriptorSet(descSet,GetInstanceDescriptorSetIndex());//,{0u,0u});
 }
 
 bool ShaderEntity::BindVertexAnimationOffset(uint32_t offset)

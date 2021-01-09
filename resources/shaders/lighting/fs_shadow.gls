@@ -22,8 +22,8 @@
 #include "shadow/fs_shadow_point.gls"
 #include "shadow/fs_shadow_csm.gls"
 
-layout(LAYOUT_ID(SHADER_UNIFORM_SHADOW_MAPS_SET,SHADER_UNIFORM_SHADOW_MAPS_BINDING)) uniform sampler2D shadowMaps[MAX_SHADOW_MAPS];
-layout(LAYOUT_ID(SHADER_UNIFORM_SHADOW_CUBE_MAPS_SET,SHADER_UNIFORM_SHADOW_CUBE_MAPS_BINDING)) uniform samplerCube shadowCubemaps[MAX_SHADOW_CUBE_MAPS];
+layout(LAYOUT_ID(DESCRIPTOR_SET_SHADOWS,DESCRIPTOR_SET_SHADOW_BINDING_SHADOW_MAPS)) uniform sampler2D shadowMaps[MAX_SHADOW_MAPS];
+layout(LAYOUT_ID(DESCRIPTOR_SET_SHADOWS,DESCRIPTOR_SET_SHADOW_BINDING_SHADOW_CUBE_MAPS)) uniform samplerCube shadowCubemaps[MAX_SHADOW_CUBE_MAPS];
 
 float calculate_shadow(shadowMapSamplerType shadowMap,vec4 shadowCoord,float bias)
 {

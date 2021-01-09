@@ -26,13 +26,6 @@ namespace pragma
 			Reflection = umath::to_integral(ShaderEntity::Pipeline::Count),
 			Count
 		};
-		enum class Flags : uint32_t
-		{
-			None = 0u,
-			UseExtendedVertexWeights = 1u,
-			RenderAs3DSky = UseExtendedVertexWeights<<1u,
-			AlphaTest = RenderAs3DSky<<1u
-		};
 		enum class MaterialBinding : uint32_t
 		{
 			AlbedoMap = 0u,
@@ -64,13 +57,16 @@ namespace pragma
 
 #pragma pack(push,1)
 		struct PushConstants
+			: public ScenePushConstants
 		{
-			Vector4 clipPlane;
-			Vector4 drawOrigin; // w is scale
-			Vector2 depthBias;
-			uint32_t vertexAnimInfo;
-			Flags flags;
+			ScenePushConstants scene;
 			float alphaCutoff;
+
+			void Initialize()
+			{
+				ScenePushConstants::Initialize();
+				alphaCutoff = 0.5f;
+			}
 		};
 #pragma pack(pop)
 
@@ -87,13 +83,15 @@ namespace pragma
 		virtual bool SetDepthBias(const Vector2 &depthBias) override;
 		virtual void Set3DSky(bool is3dSky) override;
 		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
+		virtual bool IsPrepass() const override {return true;}
 	protected:
+		virtual void OnPipelinesInitialized() override;
 		virtual bool BindMaterial(CMaterial &mat) override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		
-		uint32_t GetMaterialDescriptorSetIndex() const;
+		virtual uint32_t GetMaterialDescriptorSetIndex() const override;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
 		virtual uint32_t GetInstanceDescriptorSetIndex() const override;
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override;
@@ -102,7 +100,6 @@ namespace pragma
 		// These are unused
 		virtual uint32_t GetLightDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
 		virtual bool BindLights(prosper::IDescriptorSet &dsLights) override {return false;}
-		Flags m_stateFlags = Flags::None;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_dummyMaterialDsg = nullptr;
 		std::optional<float> m_alphaCutoff {};
 	};
@@ -125,6 +122,5 @@ namespace pragma
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	};
 };
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderPrepassBase::Flags)
 
 #endif

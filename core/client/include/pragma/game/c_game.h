@@ -136,6 +136,9 @@ public:
 		DebugTexture,
 		DebugVertex,
 
+		Prepass,
+		Pbr,
+
 		Count
 	};
 	enum class CPUProfilingPhase : uint32_t
@@ -329,6 +332,7 @@ public:
 	void ReloadRenderFrameBuffer();
 
 	void RenderScenes(util::DrawSceneInfo &drawSceneInfo);
+	void RecordSceneCommandBuffers(const util::DrawSceneInfo &drawSceneInfo);
 	void RenderScene(const util::DrawSceneInfo &drawSceneInfo);
 
 	// GUI

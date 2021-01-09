@@ -96,40 +96,21 @@ namespace pragma
 			GlowSRGB = DiffuseSRGB<<1u
 		};
 
-		enum class StateFlags : uint32_t
-		{
-			None = 0u,
-			ClipPlaneBound = 1u,
-			ShouldUseLightMap = ClipPlaneBound<<1u,
-			RenderAs3DSky = ShouldUseLightMap<<1u,
-			DisableShadows = RenderAs3DSky<<1u
-		};
-
 #pragma pack(push,1)
-		enum class RenderFlags : uint32_t
-		{
-			None = 0u,
-			LightmapsEnabled = 1u,
-
-			// PBR only
-			NoIBL = LightmapsEnabled<<1u,
-
-			UseExtendedVertexWeights = NoIBL<<1u,
-			Is3DSky = UseExtendedVertexWeights<<1u,
-			DisableShadows = Is3DSky<<1u
-		};
-
 		struct PushConstants
+			: public ScenePushConstants
 		{
-			Vector4 clipPlane;
-			Vector4 drawOrigin; // w is scale
-			Vector2	depthBias;
-			uint32_t vertexAnimInfo;
-			RenderFlags flags;
 			static_assert(sizeof(pragma::SceneDebugMode) == sizeof(uint32_t));
 			pragma::SceneDebugMode debugMode;
 			float reflectionProbeIntensity;
 			Vector2 padding;
+
+			void Initialize()
+			{
+				ScenePushConstants::Initialize();
+				debugMode = pragma::SceneDebugMode::None;
+				reflectionProbeIntensity = 1.f;
+			}
 		};
 
 		struct MaterialData
@@ -170,13 +151,20 @@ namespace pragma
 		virtual bool SetDebugMode(pragma::SceneDebugMode debugMode) override;
 		virtual void Set3DSky(bool is3dSky) override;
 		void SetShadowsEnabled(bool enabled);
+
+		virtual uint32_t GetMaterialDescriptorSetIndex() const override;
+		virtual uint32_t GetCameraDescriptorSetIndex() const override;
+		virtual uint32_t GetRendererDescriptorSetIndex() const override;
+		virtual uint32_t GetInstanceDescriptorSetIndex() const override;
+		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override;
+		virtual uint32_t GetLightDescriptorSetIndex() const override;
 	protected:
 		using ShaderEntity::Draw;
 		bool BindLightMapUvBuffer(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,bool &outShouldUseLightmaps);
-		virtual bool BindRenderFlags(RenderFlags flags);
+		virtual bool BindRenderFlags(SceneFlags flags);
 		virtual void OnBindEntity(CBaseEntity &ent,CRenderComponent &renderC) override;
 		virtual void ApplyMaterialFlags(CMaterial &mat,MaterialFlags &outFlags) const;
-		virtual void UpdateRenderFlags(CModelSubMesh &mesh,RenderFlags &inOutFlags);
+		virtual void UpdateRenderFlags(CModelSubMesh &mesh,SceneFlags &inOutFlags);
 		virtual void OnPipelineBound() override;
 		virtual void OnPipelineUnbound() override;
 		virtual bool BindMaterialParameters(CMaterial &mat);
@@ -186,19 +174,10 @@ namespace pragma
 		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 		virtual void InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const;
-		virtual uint32_t GetMaterialDescriptorSetIndex() const;
-		virtual uint32_t GetCameraDescriptorSetIndex() const override;
-		virtual uint32_t GetRendererDescriptorSetIndex() const override;
-		virtual uint32_t GetInstanceDescriptorSetIndex() const override;
-		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override;
-		virtual uint32_t GetLightDescriptorSetIndex() const override;
 		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		StateFlags m_stateFlags = StateFlags::ShouldUseLightMap;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderTextured3DBase::MaterialFlags)
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderTextured3DBase::RenderFlags)
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderTextured3DBase::StateFlags)
 
 #endif

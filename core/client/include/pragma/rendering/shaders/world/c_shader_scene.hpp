@@ -208,6 +208,8 @@ namespace pragma
 			CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
 			std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
 		) const;
+		virtual uint32_t GetInstanceDescriptorSetIndex() const=0;
+		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const=0;
 		std::shared_ptr<prosper::IRenderBuffer> CreateRenderBuffer(CModelSubMesh &mesh,uint32_t pipelineIdx) const;
 		CBaseEntity *GetBoundEntity();
 	protected:
@@ -215,9 +217,6 @@ namespace pragma
 		virtual void OnBindEntity(CBaseEntity &ent,CRenderComponent &renderC);
 		bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,bool bUseVertexWeightBuffer,uint32_t instanceCount=1);
 		bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,const std::function<bool(CModelSubMesh&)> &fDraw,bool bUseVertexWeightBuffer);
-
-		virtual uint32_t GetInstanceDescriptorSetIndex() const=0;
-		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const=0;
 
 		CBaseEntity *m_boundEntity = nullptr;
 	};
@@ -235,6 +234,38 @@ namespace pragma
 		: public ShaderEntity
 	{
 	public:
+		static constexpr auto MATERIAL_DESCRIPTOR_SET_INDEX = 1u;
+		static constexpr auto SCENE_DESCRIPTOR_SET_START_INDEX = 2u;
+		enum class SceneFlags : uint32_t
+		{
+			None = 0u,
+			UseExtendedVertexWeights = 1u,
+			RenderAs3DSky = UseExtendedVertexWeights<<1u,
+			AlphaTest = RenderAs3DSky<<1u,
+			LightmapsEnabled = AlphaTest<<1u,
+			NoIBL = LightmapsEnabled<<1u,
+			DisableShadows = NoIBL<<1u
+		};
+#pragma pack(push,1)
+		struct ScenePushConstants
+		{
+			Vector4 clipPlane;
+			Vector4 drawOrigin; // w is scale
+			Vector2 depthBias;
+			uint32_t vertexAnimInfo;
+			SceneFlags flags;
+
+			void Initialize()
+			{
+				clipPlane = {};
+				drawOrigin = {0.f,0.f,0.f,1.f};
+				depthBias = {};
+				vertexAnimInfo = 0;
+				flags = SceneFlags::None;
+			}
+		};
+#pragma pack(pop)
+
 		static uint32_t HASH_TYPE;
 		using ShaderEntity::ShaderEntity;
 		virtual bool BindClipPlane(const Vector4 &clipPlane)=0;
@@ -246,10 +277,17 @@ namespace pragma
 		virtual void Set3DSky(bool is3dSky)=0;
 		virtual bool BindDrawOrigin(const Vector4 &drawOrigin)=0;
 		virtual bool SetDepthBias(const Vector2 &depthBias)=0;
+		virtual bool IsPrepass() const {return false;}
 		virtual size_t GetBaseTypeHashCode() const override;
+		virtual uint32_t GetMaterialDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
+		prosper::IDescriptorSet &GetDefaultMaterialDescriptorSet() const;
+	protected:
+		SceneFlags m_sceneFlags = SceneFlags::None;
+		std::shared_ptr<prosper::IDescriptorSetGroup> m_defaultMatDsg = nullptr;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderEntity::InstanceData::RenderFlags);
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderScene::DebugFlags);
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderGameWorld::SceneFlags);
 
 #endif

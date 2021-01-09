@@ -53,7 +53,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 DLLCLIENT void CMD_entities_cl(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {
 	if(!state->IsGameActive())
@@ -1171,4 +1171,3 @@ static void cvar_net_graph(bool val)
 REGISTER_CONVAR_CALLBACK_CL(net_graph,[](NetworkState*,ConVar*,bool,bool val) {
 	cvar_net_graph(val);
 })
-#pragma optimize("",on)

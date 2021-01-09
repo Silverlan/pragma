@@ -52,16 +52,18 @@ namespace pragma
 			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},ShaderGameWorldPipeline pipelineIdx=ShaderGameWorldPipeline::Regular,
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		) override;
+		prosper::IDescriptorSet &GetDefaultPbrDescriptorSet() const;
 		void SetForceNonIBLMode(bool b);
 	protected:
 		using ShaderTextured3DBase::Draw;
-		virtual void UpdateRenderFlags(CModelSubMesh &mesh,RenderFlags &inOutFlags) override;
+		virtual void OnPipelinesInitialized() override;
+		virtual void UpdateRenderFlags(CModelSubMesh &mesh,SceneFlags &inOutFlags) override;
 		virtual bool BindMaterialParameters(CMaterial &mat) override;
 		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
 		virtual void InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo);
 
-		RenderFlags m_extRenderFlags = RenderFlags::None;
+		SceneFlags m_extRenderFlags = SceneFlags::None;
 		bool m_bNonIBLMode = false;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_defaultPbrDsg = nullptr;
 	};

@@ -186,7 +186,8 @@ namespace pragma::rendering
 		prosper::IDescriptorSet *GetLightSourceDescriptorSetCompute() const;
 
 		prosper::Shader *GetWireframeShader() const;
-		virtual bool RenderScene(const util::DrawSceneInfo &drawSceneInfo) override;
+		virtual bool RecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo) override;
+		virtual bool Render(const util::DrawSceneInfo &drawSceneInfo) override;
 		void UpdateRendererBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
 		void UpdateCSMDescriptorSet(pragma::CLightDirectionalComponent &lightSource);
 
@@ -196,8 +197,6 @@ namespace pragma::rendering
 		friend BaseRenderer;
 		RasterizationRenderer();
 		void InitializeLightDescriptorSets();
-
-		void RenderGameScene(const util::DrawSceneInfo &drawSceneInfo);
 
 		prosper::RenderTarget *GetPrepassRenderTarget(const util::DrawSceneInfo &drawSceneInfo);
 		prosper::RenderTarget *GetLightingPassRenderTarget(const util::DrawSceneInfo &drawSceneInfo);

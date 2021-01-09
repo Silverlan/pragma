@@ -25,7 +25,7 @@
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 static void cmd_forwardplus_tile_size(NetworkState*,ConVar*,int32_t,int32_t val)
 {
 	if(c_game == NULL)
@@ -191,4 +191,3 @@ uint32_t pragma::rendering::ForwardPlusInstance::GetTileCount() const {return m_
 prosper::IDescriptorSet *pragma::rendering::ForwardPlusInstance::GetDepthDescriptorSetGraphics() const {return m_dsgSceneDepthBuffer->GetDescriptorSet();}
 const std::shared_ptr<prosper::IBuffer> &pragma::rendering::ForwardPlusInstance::GetTileVisLightIndexBuffer() const {return m_bufTileVisLightIndex;}
 const std::shared_ptr<prosper::IBuffer> &pragma::rendering::ForwardPlusInstance::GetVisLightIndexBuffer() const {return m_bufVisLightIndex;}
-#pragma optimize("",on)

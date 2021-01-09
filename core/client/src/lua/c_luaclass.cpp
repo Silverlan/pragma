@@ -687,6 +687,37 @@ void CGame::RegisterLuaClasses()
 	debugMod[defDebugRendererObject];
 
 	auto &modGame = GetLuaInterface().RegisterLibrary("game");
+	auto defRenderPassStats = luabind::class_<RenderPassStats>("RenderPassStats");
+	defRenderPassStats.def_readwrite("numShaderStateChanges",&RenderPassStats::numShaderStateChanges);
+	defRenderPassStats.def_readwrite("numMaterialStateChanges",&RenderPassStats::numMaterialStateChanges);
+	defRenderPassStats.def_readwrite("numEntityStateChanges",&RenderPassStats::numEntityStateChanges);
+	defRenderPassStats.def_readwrite("numDrawCalls",&RenderPassStats::numDrawCalls);
+	defRenderPassStats.def_readwrite("numDrawnMeshes",&RenderPassStats::numDrawnMeshes);
+	defRenderPassStats.def_readwrite("numDrawnVertices",&RenderPassStats::numDrawnVertices);
+	defRenderPassStats.def_readwrite("numDrawnTrianges",&RenderPassStats::numDrawnTrianges);
+	defRenderPassStats.def_readwrite("numEntityBufferUpdates",&RenderPassStats::numEntityBufferUpdates);
+	defRenderPassStats.def_readwrite("numInstanceSets",&RenderPassStats::numInstanceSets);
+	defRenderPassStats.def_readwrite("numInstanceSetMeshes",&RenderPassStats::numInstanceSetMeshes);
+	defRenderPassStats.def_readwrite("numInstancedMeshes",&RenderPassStats::numInstancedMeshes);
+	defRenderPassStats.def_readwrite("numInstancedSkippedRenderItems",&RenderPassStats::numInstancedSkippedRenderItems);
+	defRenderPassStats.def_readwrite("numEntitiesWithoutInstancing",&RenderPassStats::numEntitiesWithoutInstancing);
+	modGame[defRenderPassStats];
+
+	auto defRenderStats = luabind::class_<RenderStats>("RenderStats");
+	defRenderStats.property("lightingPass",static_cast<RenderPassStats*(*)(::RenderStats&)>([](::RenderStats &renderStats) -> RenderPassStats* {
+		return &renderStats.lightingPass;
+	}));
+	defRenderStats.property("lightingPassTranslucent",static_cast<RenderPassStats*(*)(::RenderStats&)>([](::RenderStats &renderStats) -> RenderPassStats* {
+		return &renderStats.lightingPassTranslucent;
+	}));
+	defRenderStats.property("prepass",static_cast<RenderPassStats*(*)(::RenderStats&)>([](::RenderStats &renderStats) -> RenderPassStats* {
+		return &renderStats.prepass;
+	}));
+	defRenderStats.property("shadowPass",static_cast<RenderPassStats*(*)(::RenderStats&)>([](::RenderStats &renderStats) -> RenderPassStats* {
+		return &renderStats.shadowPass;
+	}));
+	modGame[defRenderStats];
+
 	auto defDrawSceneInfo = luabind::class_<::util::DrawSceneInfo>("DrawSceneInfo");
 	defDrawSceneInfo.add_static_constant("FLAG_FLIP_VERTICALLY_BIT",umath::to_integral(::util::DrawSceneInfo::Flags::FlipVertically));
 	defDrawSceneInfo.add_static_constant("FLAG_DISABLE_RENDER_BIT",umath::to_integral(::util::DrawSceneInfo::Flags::DisableRender));
@@ -735,6 +766,11 @@ void CGame::RegisterLuaClasses()
 			drawSceneInfo.clearColor = {};
 		else
 			drawSceneInfo.clearColor = Lua::Check<Color>(l,2);
+	}));
+	defDrawSceneInfo.property("renderStats",static_cast<luabind::object(*)(lua_State*,::util::DrawSceneInfo&)>([](lua_State *l,::util::DrawSceneInfo &drawSceneInfo) -> luabind::object {
+		if(drawSceneInfo.renderStats == nullptr)
+			return {};
+		return luabind::object{l,drawSceneInfo.renderStats.get()};
 	}));
 	defDrawSceneInfo.def("SetEntityRenderFilter",static_cast<void(*)(lua_State*,util::DrawSceneInfo&,luabind::object)>([](lua_State *l,util::DrawSceneInfo &drawSceneInfo,luabind::object f) {
 		Lua::CheckFunction(l,2);

@@ -51,46 +51,10 @@ void RasterizationRenderer::RecordPrepass(const util::DrawSceneInfo &drawSceneIn
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto &prepass = GetPrepass();
 
-	// We still have to update entity buffers *before* we start the render pass (since buffer updates
-	// are not allowed during a render pass).
-	auto &worldRenderQueues = sceneRenderDesc.GetWorldRenderQueues();
-	if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
-	{
-		std::chrono::steady_clock::time_point t;
-		if(drawSceneInfo.renderStats)
-			t = std::chrono::steady_clock::now();
-		sceneRenderDesc.WaitForWorldRenderQueues();
-		if(drawSceneInfo.renderStats)
-			drawSceneInfo.renderStats->prepass.renderThreadWaitTime += std::chrono::steady_clock::now() -t;
-
-		for(auto &renderQueue : worldRenderQueues)
-			CSceneComponent::UpdateRenderBuffers(drawCmd,*renderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
-	}
-
-	// If we're lucky, the render queues for everything else have already been built
-	// as well, so we can update them right now and do everything in one render pass.
-	// Otherwise we have to split the pass into two and update the remaining render buffers
-	// inbetween both passes.
-	auto &worldObjectsRenderQueue = *sceneRenderDesc.GetRenderQueue(RenderMode::World,false /* translucent */);
-	// worldObjectsRenderQueue.WaitForCompletion();
-	auto worldObjectRenderQueueReady = worldObjectsRenderQueue.IsComplete();
-	if(worldObjectRenderQueueReady)
-	{
-		if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
-		{
-			CSceneComponent::UpdateRenderBuffers(drawCmd,worldObjectsRenderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
-			// CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
-
-		}
-
-		if((drawSceneInfo.renderFlags &FRender::View) != FRender::None)
-			CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
-		c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*>("UpdateRenderBuffers",&drawSceneInfo);
-	}
-
 	auto &shaderPrepass = GetPrepassShader();
 	auto *prepassStats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr;
 	auto &prepassRt = *prepass.renderTarget;
+	auto &worldRenderQueues = sceneRenderDesc.GetWorldRenderQueues();
 	m_prepassCommandBufferGroup->Draw(prepassRt.GetRenderPass(),prepassRt.GetFramebuffer(),[this,&drawSceneInfo,&shaderPrepass,&worldRenderQueues,&sceneRenderDesc,prepassStats](prosper::ISecondaryCommandBuffer &cmd) {
 		util::RenderPassDrawInfo renderPassDrawInfo {drawSceneInfo,cmd};
 		pragma::rendering::DepthStageRenderProcessor rsys {renderPassDrawInfo,RenderFlags::None,{} /* drawOrigin */,};
@@ -99,6 +63,12 @@ void RasterizationRenderer::RecordPrepass(const util::DrawSceneInfo &drawSceneIn
 			// Render static world geometry
 			if((renderPassDrawInfo.drawSceneInfo.renderFlags &FRender::World) != FRender::None)
 			{
+				std::chrono::steady_clock::time_point t;
+				if(drawSceneInfo.renderStats)
+					t = std::chrono::steady_clock::now();
+				sceneRenderDesc.WaitForWorldRenderQueues();
+				if(drawSceneInfo.renderStats)
+					drawSceneInfo.renderStats->prepass.renderThreadWaitTime += std::chrono::steady_clock::now() -t;
 				for(auto i=decltype(worldRenderQueues.size()){0u};i<worldRenderQueues.size();++i)
 					rsys.Render(*worldRenderQueues.at(i),prepassStats,i);
 			}
@@ -109,7 +79,6 @@ void RasterizationRenderer::RecordPrepass(const util::DrawSceneInfo &drawSceneIn
 			{
 				rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::World,false /* translucent */),prepassStats);
 				rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),prepassStats);
-
 			}
 
 			if((renderPassDrawInfo.drawSceneInfo.renderFlags &FRender::View) != FRender::None)

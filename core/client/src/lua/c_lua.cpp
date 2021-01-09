@@ -123,6 +123,9 @@ void CGame::RegisterLua()
 		{"set_render_clip_plane",Lua::game::Client::set_render_clip_plane},
 		{"build_reflection_probes",Lua::game::Client::build_reflection_probes},
 
+		{"set_render_stats_enabled",Lua::game::Client::set_render_stats_enabled},
+		{"get_queued_render_scenes",Lua::game::Client::get_queued_render_scenes},
+
 		{"get_debug_buffer",Lua::game::Client::get_debug_buffer},
 		{"get_time_buffer",Lua::game::Client::get_time_buffer},
 		{"get_csm_buffer",Lua::game::Client::get_csm_buffer},

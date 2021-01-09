@@ -12,7 +12,7 @@ layout(location = SHADER_BONE_WEIGHT_EXT_ID_LOCATION) in ivec4 in_boneWeightExtI
 layout(location = SHADER_BONE_WEIGHT_EXT_LOCATION) in vec4 in_weightsExt;
 
 //uniform bool u_weighted; // Defined in push constants
-layout(std140,LAYOUT_ID(SHADER_UNIFORM_BONE_MATRIX_SET,SHADER_UNIFORM_BONE_MATRIX_BINDING)) uniform Bones
+layout(std140,LAYOUT_ID(DESCRIPTOR_SET_INSTANCE,DESCRIPTOR_SET_INSTANCE_BINDING_BONE_MATRICES)) uniform Bones
 {
 	mat4 matrices[MAX_BONES];
 } u_bones;

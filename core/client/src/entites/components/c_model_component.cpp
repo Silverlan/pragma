@@ -123,6 +123,24 @@ void CModelComponent::GetBaseModelMeshes(std::vector<std::shared_ptr<ModelMesh>>
 	mdl->GetBodyGroupMeshes(GetBodyGroups(),lod,outMeshes);
 }
 
+const std::shared_ptr<prosper::IRenderBuffer> &CModelComponent::GetRenderBuffer(uint32_t idx) const {return m_lodMeshRenderBuffers[idx];}
+
+void CModelComponent::UpdateRenderBufferList()
+{
+	m_lodMeshRenderBuffers.reserve(m_lodRenderMeshes.size());
+	m_lodMeshRenderBuffers.clear();
+	for(auto i=decltype(m_lodRenderMeshes.size()){0u};i<m_lodRenderMeshes.size();++i)
+	{
+		auto &mesh = static_cast<CModelSubMesh&>(*m_lodRenderMeshes[i]);
+		auto *mat = GetRenderMaterial(mesh.GetSkinTextureIndex());
+		std::shared_ptr<prosper::IRenderBuffer> renderBuffer = nullptr;
+		auto *shader = mat ? dynamic_cast<pragma::ShaderEntity*>(mat->GetPrimaryShader()) : nullptr;
+		if(shader)
+			renderBuffer = mesh.GetRenderBuffer(*shader);
+		m_lodMeshRenderBuffers.push_back(renderBuffer);
+	}
+}
+
 void CModelComponent::UpdateRenderMeshes()
 {
 	if(umath::is_flag_set(m_stateFlags,StateFlags::RenderMeshUpdateRequired) == false)
@@ -158,6 +176,7 @@ void CModelComponent::UpdateRenderMeshes()
 			m_lodRenderMeshGroups[i] = {subMeshOffset,m_lodRenderMeshes.size() -subMeshOffset};
 		}
 	}
+	UpdateRenderBufferList();
 }
 
 void CModelComponent::UpdateLOD(UInt32 lod)
@@ -292,6 +311,8 @@ bool CModelComponent::SetBodyGroup(UInt32 groupId,UInt32 id)
 	return true;
 }
 
+void CModelComponent::SetRenderMeshesDirty() {umath::set_flag(m_stateFlags,StateFlags::RenderMeshUpdateRequired);}
+
 void CModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 {
 	m_lod = 0;
@@ -307,7 +328,7 @@ void CModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 	m_lodRenderMeshGroups.clear();
 	m_lodRenderMeshGroups.push_back({0,0});
 
-	umath::set_flag(m_stateFlags,StateFlags::RenderMeshUpdateRequired);
+	SetRenderMeshesDirty();
 
 	if(model == nullptr)
 	{

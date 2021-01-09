@@ -172,11 +172,11 @@ void CGame::InitShaders()
 	m_gameShaders.at(umath::to_integral(GameShader::PPFXAA)) = shaderManager.GetShader("pp_fxaa");
 
 	// Make sure these are always loaded
-	shaderManager.GetShader("pbr");
+	m_gameShaders.at(umath::to_integral(GameShader::Pbr)) = shaderManager.GetShader("pbr");
 	shaderManager.GetShader("test");
 	shaderManager.GetShader("light_cone");
 	shaderManager.GetShader("forwardp_light_culling");
-	shaderManager.GetShader("prepass");
+	m_gameShaders.at(umath::to_integral(GameShader::Prepass)) = shaderManager.GetShader("prepass");
 	shaderManager.GetShader("shadow");
 	shaderManager.GetShader("pp_fog");
 	shaderManager.GetShader("pp_hdr");

@@ -159,9 +159,9 @@ void ShaderTextured3DBase::InitializeGfxPipelineVertexAttributes(prosper::Graphi
 void ShaderTextured3DBase::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
+	AddDescriptorSetGroup(pipelineInfo,GetMaterialDescriptorSetInfo());
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDERER);
-	AddDescriptorSetGroup(pipelineInfo,GetMaterialDescriptorSetInfo());
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDER_SETTINGS);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_LIGHTS);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SHADOWS);
@@ -196,20 +196,23 @@ bool ShaderTextured3DBase::BindReflectionProbeIntensity(float intensity)
 }
 bool ShaderTextured3DBase::BindClipPlane(const Vector4 &clipPlane)
 {
-	umath::set_flag(m_stateFlags,StateFlags::ClipPlaneBound);
+	// TODO
+	//umath::set_flag(m_sceneFlags,SceneFlags::Cli);
 	return RecordPushConstants(clipPlane,offsetof(PushConstants,clipPlane));
 }
-void ShaderTextured3DBase::Set3DSky(bool is3dSky) {umath::set_flag(m_stateFlags,StateFlags::RenderAs3DSky,is3dSky);}
-void ShaderTextured3DBase::SetShadowsEnabled(bool enabled) {umath::set_flag(m_stateFlags,StateFlags::DisableShadows,!enabled);}
+void ShaderTextured3DBase::Set3DSky(bool is3dSky) {umath::set_flag(m_sceneFlags,SceneFlags::RenderAs3DSky,is3dSky);}
+void ShaderTextured3DBase::SetShadowsEnabled(bool enabled) {umath::set_flag(m_sceneFlags,SceneFlags::DisableShadows,!enabled);}
 void ShaderTextured3DBase::OnPipelineBound()
 {
+	// TODO
 	ShaderEntity::OnPipelineBound();
-	umath::set_flag(m_stateFlags,StateFlags::ClipPlaneBound,false);
+	//umath::set_flag(m_sceneFlags,SceneFlags::ClipPlaneBound,false);
 }
 void ShaderTextured3DBase::OnPipelineUnbound()
 {
+	// TODO
 	ShaderEntity::OnPipelineUnbound();
-	umath::set_flag(m_stateFlags,StateFlags::ClipPlaneBound,false);
+	//umath::set_flag(m_sceneFlags,SceneFlags::ClipPlaneBound,false);
 }
 void ShaderTextured3DBase::OnBindEntity(CBaseEntity &ent,CRenderComponent &renderC)
 {
@@ -362,7 +365,7 @@ std::optional<ShaderTextured3DBase::MaterialData> ShaderTextured3DBase::UpdateMa
 bool ShaderTextured3DBase::BindLightMapUvBuffer(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,bool &outShouldUseLightmaps)
 {
 	outShouldUseLightmaps = false;
-	if(umath::is_flag_set(m_stateFlags,StateFlags::ShouldUseLightMap) == false)
+	if(umath::is_flag_set(m_sceneFlags,SceneFlags::LightmapsEnabled) == false)
 		return true;
 	auto *pLightMapUvBuffer = c_engine->GetRenderContext().GetDummyBuffer().get();
 	if(m_boundEntity)
@@ -397,14 +400,14 @@ bool ShaderTextured3DBase::BindLightMapUvBuffer(CModelSubMesh &mesh,const std::o
 	// TODO: Restructure this function and clean this up!
 	return true;//RecordBindVertexBuffer(*pLightMapUvBuffer,umath::to_integral(VertexBinding::LightmapUv));
 }
-void ShaderTextured3DBase::UpdateRenderFlags(CModelSubMesh &mesh,RenderFlags &inOutFlags) {}
-bool ShaderTextured3DBase::BindRenderFlags(RenderFlags flags)
+void ShaderTextured3DBase::UpdateRenderFlags(CModelSubMesh &mesh,SceneFlags &inOutFlags) {}
+bool ShaderTextured3DBase::BindRenderFlags(SceneFlags flags)
 {
 	return RecordPushConstants(flags,offsetof(ShaderTextured3DBase::PushConstants,flags));
 }
 bool ShaderTextured3DBase::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount)
 {
-	if(umath::is_flag_set(m_stateFlags,StateFlags::ClipPlaneBound) == false && BindClipPlane({}) == false)
+	/*if(umath::is_flag_set(m_stateFlags,SceneFlags::ClipPlaneBound) == false && BindClipPlane({}) == false)
 		return false;
 	auto shouldUseLightmaps = false;
 	if(BindLightMapUvBuffer(mesh,meshIdx,shouldUseLightmaps) == false)
@@ -417,7 +420,8 @@ bool ShaderTextured3DBase::Draw(CModelSubMesh &mesh,const std::optional<pragma::
 	if(umath::is_flag_set(m_stateFlags,StateFlags::DisableShadows))
 		umath::set_flag(renderFlags,RenderFlags::DisableShadows);
 	UpdateRenderFlags(mesh,renderFlags);
-	return BindRenderFlags(renderFlags) && ShaderEntity::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount);
+	return BindRenderFlags(renderFlags) && ShaderEntity::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount);*/
+	return true; // TODO
 }
 bool ShaderTextured3DBase::GetRenderBufferTargets(
 	CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,

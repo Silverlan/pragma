@@ -36,7 +36,7 @@ pragma::rendering::DepthStageRenderProcessor::DepthStageRenderProcessor(const ut
 }
 uint32_t pragma::rendering::DepthStageRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue,RenderPassStats *optStats,std::optional<uint32_t> worldRenderQueueIndex)
 {
-	return BaseRenderProcessor::Render(renderQueue,false,optStats,worldRenderQueueIndex);
+	return BaseRenderProcessor::Render(renderQueue,true,optStats,worldRenderQueueIndex);
 }
 
 void RenderSystem::RenderPrepass(const util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode)

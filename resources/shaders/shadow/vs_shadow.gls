@@ -3,14 +3,8 @@
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shading_language_420pack : enable
 
-#define SHADER_UNIFORM_INSTANCE_SET 0
-#define SHADER_UNIFORM_INSTANCE_BINDING 0
-
-#define SHADER_UNIFORM_BONE_MATRIX_SET SHADER_UNIFORM_INSTANCE_SET
-#define SHADER_UNIFORM_BONE_MATRIX_BINDING (SHADER_UNIFORM_INSTANCE_BINDING +1)
-
-#define SHADER_UNIFORM_DEBUG_SET (SHADER_UNIFORM_BONE_MATRIX_SET +1)
-#define SHADER_UNIFORM_DEBUG_BINDING 0
+#define DESCRIPTOR_SET_INSTANCE 0
+#define DESCRIPTOR_SET_RENDER_SETTINGS (DESCRIPTOR_SET_INSTANCE +1)
 
 #include "../modules/vs_weighted.gls"
 #include "../modules/sh_entity_info.gls"

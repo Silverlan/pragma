@@ -1,42 +1,26 @@
 #ifndef F_SH_PREPASS_GLS
 #define F_SH_PREPASS_GLS
 
-#define SHADER_UNIFORM_INSTANCE_SET 0
-#define SHADER_UNIFORM_INSTANCE_BINDING 0
-
-#define SHADER_UNIFORM_BONE_MATRIX_SET SHADER_UNIFORM_INSTANCE_SET
-#define SHADER_UNIFORM_BONE_MATRIX_BINDING (SHADER_UNIFORM_INSTANCE_BINDING +1)
-
-#define SHADER_UNIFORM_CAMERA_SET (SHADER_UNIFORM_INSTANCE_SET +1)
-#define SHADER_UNIFORM_CAMERA_BINDING 0
-
-#define SHADER_UNIFORM_MATERIAL_SET (SHADER_UNIFORM_CAMERA_SET +1)
-#define SHADER_UNIFORM_MATERIAL_BINDING 0
-
-#define SHADER_UNIFORM_DEBUG_SET (SHADER_UNIFORM_MATERIAL_SET +1)
-#define SHADER_UNIFORM_DEBUG_BINDING 0
+#define DESCRIPTOR_SET_INSTANCE 0
+#define DESCRIPTOR_SET_MATERIAL (DESCRIPTOR_SET_INSTANCE +1)
+#define DESCRIPTOR_SET_SCENE (DESCRIPTOR_SET_MATERIAL +1)
+#define DESCRIPTOR_SET_RENDER_SETTINGS (DESCRIPTOR_SET_SCENE +1)
 
 #include "../../modules/sh_camera_info.gls"
 #include "../../modules/sh_entity_info.gls"
 #include "../../modules/sh_export.gls"
 #include "../../modules/sh_math.gls"
-
-#define FRENDER_USE_EXTENDED_VERTEX_WEIGHTS 1
-#define FRENDER_3D_SKY (FRENDER_USE_EXTENDED_VERTEX_WEIGHTS<<1)
-#define FRENDER_ALPHA_TEST (FRENDER_3D_SKY<<1)
+#include "../../modules/sh_scene_flags.gls"
 
 layout(LAYOUT_PUSH_CONSTANTS()) uniform PushConstants
 {
-	vec4 clipPlane;
-	vec4 drawOrigin; // w is scale
-	vec2 depthBias;
-	uint vertexAnimInfo;
-	uint flags;
+	ScenePushConstants scene;
+
 	float alphaCutoff;
 } u_pushConstants;
 
-bool is_weighted_ext() {return (u_pushConstants.flags &FRENDER_USE_EXTENDED_VERTEX_WEIGHTS) != 0;}
-bool is_3d_sky() {return (u_pushConstants.flags &FRENDER_3D_SKY) != 0;}
-bool is_alpha_test_enabled() {return (u_pushConstants.flags &FRENDER_ALPHA_TEST) != 0;}
+bool is_weighted_ext() {return (u_pushConstants.scene.flags &SCENE_FLAG_BIT_USE_EXTENDED_VERTEX_WEIGHTS) != 0;}
+bool is_3d_sky() {return (u_pushConstants.scene.flags &SCENE_FLAG_BIT_RENDER_AS_3D_SKY) != 0;}
+bool is_alpha_test_enabled() {return (u_pushConstants.scene.flags &SCENE_FLAG_BIT_ALPHA_TEST) != 0;}
 
 #endif

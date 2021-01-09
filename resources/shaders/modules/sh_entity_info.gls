@@ -5,7 +5,7 @@
 #include "sh_uniform_locations.gls"
 #include "sh_instance_flags.gls"
 
-layout(std140,LAYOUT_ID(SHADER_UNIFORM_INSTANCE_SET,SHADER_UNIFORM_INSTANCE_BINDING)) uniform Instance
+layout(std140,LAYOUT_ID(DESCRIPTOR_SET_INSTANCE,DESCRIPTOR_SET_INSTANCE_BINDING_INSTANCE)) uniform Instance
 {
 	EntityInstanceData data;
 } u_instance;

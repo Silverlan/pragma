@@ -301,7 +301,7 @@ void RenderSystem::Render(
 
 uint32_t pragma::rendering::LightingStageRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue,RenderPassStats *optStats,std::optional<uint32_t> worldRenderQueueIndex)
 {
-	return BaseRenderProcessor::Render(renderQueue,true,optStats,worldRenderQueueIndex);
+	return BaseRenderProcessor::Render(renderQueue,false,optStats,worldRenderQueueIndex);
 }
 
 static CVar cvDebugNormals = GetClientConVar("debug_render_normals");

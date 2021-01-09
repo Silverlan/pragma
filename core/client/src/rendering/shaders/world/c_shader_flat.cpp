@@ -119,8 +119,8 @@ void ShaderFlat::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipe
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_UV);
 
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_MATERIAL);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 }
 bool ShaderFlat::Draw(CModelSubMesh &mesh)
 {

@@ -176,11 +176,11 @@ bool ShaderTest::BindSceneCamera(pragma::CSceneComponent &scene,const rendering:
 			return BindReflectionProbeIntensity(iblStrength) && RecordBindDescriptorSet(*ds,DESCRIPTOR_SET_PBR.setIndex);
 	}*/
 	// No reflection probe and therefore no IBL available. Fallback to non-IBL rendering.
-	m_extRenderFlags |= RenderFlags::NoIBL;
+	m_extRenderFlags |= SceneFlags::NoIBL;
 	m_testMvp = hCam->GetProjectionMatrix() *hCam->GetViewMatrix();
 	return true;
 }
-void ShaderTest::UpdateRenderFlags(CModelSubMesh &mesh,RenderFlags &inOutFlags)
+void ShaderTest::UpdateRenderFlags(CModelSubMesh &mesh,SceneFlags &inOutFlags)
 {
 	ShaderTextured3DBase::UpdateRenderFlags(mesh,inOutFlags);
 	inOutFlags |= m_extRenderFlags;

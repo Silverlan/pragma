@@ -998,6 +998,23 @@ int Lua::game::Client::queue_scene_for_rendering(lua_State *l)
 #endif
 	return 0;
 }
+DLLCLIENT void debug_render_stats(bool enabled,bool full,bool print,bool continuous);
+int Lua::game::Client::set_render_stats_enabled(lua_State *l)
+{
+	auto enabled = Lua::CheckBool(l,1);
+	debug_render_stats(enabled,false,false,true);
+	return 0;
+}
+int Lua::game::Client::get_queued_render_scenes(lua_State *l)
+{
+	auto &renderScenes = c_game->GetQueuedRenderScenes();
+	auto t = luabind::newtable(l);
+	int32_t i = 1;
+	for(auto &renderScene : renderScenes)
+		t[i++] = const_cast<::util::DrawSceneInfo&>(renderScene);
+	t.push(l);
+	return 1;
+}
 int Lua::game::Client::create_scene(lua_State *l)
 {
 	auto argIdx = 1;

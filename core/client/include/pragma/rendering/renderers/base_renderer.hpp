@@ -30,7 +30,9 @@ namespace pragma::rendering
 		bool operator==(const BaseRenderer &other) const;
 		bool operator!=(const BaseRenderer &other) const;
 		virtual ~BaseRenderer()=default;
-		virtual bool RenderScene(const util::DrawSceneInfo &drawSceneInfo);
+		virtual bool RecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo);
+		virtual bool Render(const util::DrawSceneInfo &drawSceneInfo);
+
 		virtual bool ReloadRenderTarget(CSceneComponent &scene,uint32_t width,uint32_t height)=0;
 		virtual prosper::Texture *GetSceneTexture()=0;
 		virtual prosper::Texture *GetPresentationTexture();

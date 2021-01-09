@@ -9,18 +9,21 @@
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/debug/renderdebuginfo.hpp"
-#include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
+#include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/render_stats.hpp"
+#include "pragma/model/vk_mesh.h"
 #include "pragma/debug/debug_render_filter.hpp"
+#include <prosper_framebuffer.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 static bool g_collectRenderStats = false;
 static CallbackHandle g_cbPreRenderScene = {};
 static CallbackHandle g_cbPostRenderScene = {};
@@ -166,49 +169,58 @@ DLLCLIENT void print_debug_render_stats(const RenderStats &renderStats,bool full
 	Con::cout<<"\n----- Lighting translucent pass: -----"<<Con::endl;
 	print_pass_stats(renderStats.lightingPassTranslucent,full);
 }
-DLLCLIENT void debug_render_stats(bool full)
+DLLCLIENT void debug_render_stats(bool enabled,bool full,bool print,bool continuous)
 {
-	g_collectRenderStats = true;
+	if(g_cbPreRenderScene.IsValid())
+		g_cbPreRenderScene.Remove();
+	if(g_cbPostRenderScene.IsValid())
+		g_cbPostRenderScene.Remove();
+	g_collectRenderStats = enabled;
+	if(enabled == false)
+		return;
 	g_cbPreRenderScene = c_game->AddCallback("OnRenderScenes",FunctionCallback<void>::Create([]() {
 		for(auto &drawSceneInfo : c_game->GetQueuedRenderScenes())
 			drawSceneInfo.renderStats = std::make_unique<RenderStats>();
 	}));
-	g_cbPostRenderScene = c_game->AddCallback("PostRenderScenes",FunctionCallback<void>::Create([full]() {
-		auto &renderScenes = c_game->GetQueuedRenderScenes();
-		Con::cout<<renderScenes.size()<<" scenes have been rendered:"<<Con::endl;
-		RenderStats accumulated {};
-		for(auto &drawSceneInfo : renderScenes)
-		{
-			if(drawSceneInfo.renderStats == nullptr || drawSceneInfo.scene.expired())
-				continue;
-			util::set_console_color(util::ConsoleColorFlags::BackgroundGreen);
-			Con::cout<<"########### ";
-			const_cast<BaseEntity&>(drawSceneInfo.scene->GetEntity()).print(Con::cout);
-			Con::cout<<": ###########"<<Con::endl;
-			util::reset_console_color();
-			print_debug_render_stats(*drawSceneInfo.renderStats,full);
+	if(print)
+	{
+		g_cbPostRenderScene = c_game->AddCallback("PostRenderScenes",FunctionCallback<void>::Create([full]() {
+			auto &renderScenes = c_game->GetQueuedRenderScenes();
+			Con::cout<<renderScenes.size()<<" scenes have been rendered:"<<Con::endl;
+			RenderStats accumulated {};
+			for(auto &drawSceneInfo : renderScenes)
+			{
+				if(drawSceneInfo.renderStats == nullptr || drawSceneInfo.scene.expired())
+					continue;
+				util::set_console_color(util::ConsoleColorFlags::BackgroundGreen);
+				Con::cout<<"########### ";
+				const_cast<BaseEntity&>(drawSceneInfo.scene->GetEntity()).print(Con::cout);
+				Con::cout<<": ###########"<<Con::endl;
+				util::reset_console_color();
+				print_debug_render_stats(*drawSceneInfo.renderStats,full);
 
-			auto &stats = *drawSceneInfo.renderStats;
-			accumulated += stats;
-		}
+				auto &stats = *drawSceneInfo.renderStats;
+				accumulated += stats;
+			}
 
-		if(renderScenes.size() > 1)
-		{
-			util::set_console_color(util::ConsoleColorFlags::BackgroundGreen);
-			Con::cout<<"\n----- Accumulated: -----"<<Con::endl;
-			util::reset_console_color();
-			print_debug_render_stats(accumulated,full);
-		}
+			if(renderScenes.size() > 1)
+			{
+				util::set_console_color(util::ConsoleColorFlags::BackgroundGreen);
+				Con::cout<<"\n----- Accumulated: -----"<<Con::endl;
+				util::reset_console_color();
+				print_debug_render_stats(accumulated,full);
+			}
 
-		if(g_cbPreRenderScene.IsValid())
-			g_cbPreRenderScene.Remove();
-		if(g_cbPostRenderScene.IsValid())
-			g_cbPostRenderScene.Remove();
-	}));
+			if(g_cbPreRenderScene.IsValid())
+				g_cbPreRenderScene.Remove();
+			if(g_cbPostRenderScene.IsValid())
+				g_cbPostRenderScene.Remove();
+		}));
+	}
 }
 
 pragma::rendering::BaseRenderProcessor::BaseRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo,RenderFlags flags,const Vector4 &drawOrigin)
-	: m_drawSceneInfo{drawSceneInfo},m_drawOrigin{drawOrigin},m_renderFlags{flags}
+	: m_drawSceneInfo{drawSceneInfo},m_drawOrigin{drawOrigin},m_renderFlags{flags},m_shaderProcessor{*drawSceneInfo.commandBuffer}
 {
 	auto &scene = drawSceneInfo.drawSceneInfo.scene;
 	auto *renderer = scene->GetRenderer();
@@ -229,7 +241,8 @@ void pragma::rendering::BaseRenderProcessor::UnbindShader()
 {
 	if(umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false)
 		return;
-	m_shaderScene->EndDraw();
+	//m_shaderScene->EndDraw();
+	m_drawSceneInfo.commandBuffer->RecordUnbindShaderPipeline();
 	m_curShader = nullptr;
 	m_curShaderIndex = std::numeric_limits<decltype(m_curShaderIndex)>::max();
 	m_curInstanceSet = nullptr;
@@ -270,24 +283,15 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::Shader &shader)
 	UnbindMaterial();
 	UnbindEntity();
 	m_curShader = &shader;
-	auto *shaderScene = dynamic_cast<pragma::ShaderGameWorld*>(&shader);
-	if(shaderScene == nullptr || (g_debugRenderFilter && g_debugRenderFilter->shaderFilter && g_debugRenderFilter->shaderFilter(*shaderScene) == false))
+	if(shader.GetBaseTypeHashCode() != pragma::ShaderGameWorld::HASH_TYPE)
 		return false;
-	if(shaderScene->BeginDraw(
-		m_drawSceneInfo.commandBuffer,c_game->GetRenderClipPlane(),m_drawOrigin,
-		m_pipelineType
-	) == false)
+	auto *shaderScene = static_cast<pragma::ShaderGameWorld*>(&shader);
+	if((g_debugRenderFilter && g_debugRenderFilter->shaderFilter && g_debugRenderFilter->shaderFilter(*shaderScene) == false))
 		return false;
+	
 	auto &scene = *m_drawSceneInfo.drawSceneInfo.scene;
 	auto bView = (m_camType == CameraType::View) ? true : false;
-	if(shaderScene->BindScene(const_cast<pragma::CSceneComponent&>(scene),const_cast<pragma::rendering::RasterizationRenderer&>(*m_renderer),bView) == false)
-		return false;
-	if(m_depthBias.has_value())
-		shaderScene->SetDepthBias(*m_depthBias);
-	auto debugMode = scene.GetDebugMode();
-	if(debugMode != ::pragma::SceneDebugMode::None)
-		shaderScene->SetDebugMode(debugMode);
-	shaderScene->Set3DSky(umath::is_flag_set(m_renderFlags,RenderFlags::RenderAs3DSky));
+	m_shaderProcessor.RecordBindShader(scene,static_cast<const pragma::rendering::RasterizationRenderer&>(*scene.GetRenderer()),bView,*shaderScene,umath::to_integral(m_pipelineType));
 	
 	if(m_stats)
 	{
@@ -309,28 +313,28 @@ void pragma::rendering::BaseRenderProcessor::SetCameraType(CameraType camType)
 	auto *renderer = scene.GetRenderer();
 	if(renderer == nullptr)
 		return;
-	m_shaderScene->BindSceneCamera(scene,*static_cast<pragma::rendering::RasterizationRenderer*>(renderer),camType == CameraType::View);
+	//m_shaderScene->BindSceneCamera(scene,*static_cast<pragma::rendering::RasterizationRenderer*>(renderer),camType == CameraType::View);
 }
 void pragma::rendering::BaseRenderProcessor::Set3DSky(bool enabled)
 {
 	umath::set_flag(m_renderFlags,RenderFlags::RenderAs3DSky,enabled);
 	if(umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
 		return;
-	m_shaderScene->Set3DSky(enabled);
+	//m_shaderScene->Set3DSky(enabled);
 }
 void pragma::rendering::BaseRenderProcessor::SetDrawOrigin(const Vector4 &drawOrigin)
 {
 	m_drawOrigin = drawOrigin;
 	if(umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
 		return;
-	m_shaderScene->BindDrawOrigin(drawOrigin);
+	//m_shaderScene->BindDrawOrigin(drawOrigin);
 }
 void pragma::rendering::BaseRenderProcessor::SetDepthBias(float d,float delta)
 {
 	m_depthBias = (d > 0.f && delta > 0.f) ? Vector2{d,delta} : std::optional<Vector2>{};
 	if(umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
 		return;
-	m_shaderScene->SetDepthBias(m_depthBias.has_value() ? *m_depthBias : Vector2{});
+	//m_shaderScene->SetDepthBias(m_depthBias.has_value() ? *m_depthBias : Vector2{});
 }
 bool pragma::rendering::BaseRenderProcessor::BindMaterial(CMaterial &mat)
 {
@@ -338,7 +342,12 @@ bool pragma::rendering::BaseRenderProcessor::BindMaterial(CMaterial &mat)
 		return umath::is_flag_set(m_stateFlags,StateFlags::MaterialBound);
 	UnbindMaterial();
 	m_curMaterial = &mat;
-	if(umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false || mat.IsInitialized() == false || (g_debugRenderFilter && g_debugRenderFilter->materialFilter && g_debugRenderFilter->materialFilter(mat) == false) || m_shaderScene->BindMaterial(mat) == false)
+	if(
+		umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false || mat.IsInitialized() == false || 
+		(g_debugRenderFilter && g_debugRenderFilter->materialFilter && g_debugRenderFilter->materialFilter(mat) == false) || 
+		m_shaderProcessor.RecordBindMaterial(mat) == false
+		//m_shaderScene->BindMaterial(mat) == false
+	)
 		return false;
 
 	if(m_stats)
@@ -366,15 +375,17 @@ bool pragma::rendering::BaseRenderProcessor::BindEntity(CBaseEntity &ent)
 	// if(m_stats && umath::is_flag_set(renderC->GetStateFlags(),CRenderComponent::StateFlags::RenderBufferDirty))
 	// 	++m_stats->numEntityBufferUpdates;
 	// renderC->UpdateRenderBuffers(m_drawSceneInfo.commandBuffer);
-	if(m_shaderScene->BindEntity(ent) == false)
+	//if(m_shaderScene->BindEntity(ent) == false)
+	//	return false;
+	if(m_shaderProcessor.RecordBindEntity(ent) == false)
 		return false;
 	if(m_drawSceneInfo.drawSceneInfo.renderFilter && m_drawSceneInfo.drawSceneInfo.renderFilter(ent) == false)
 		return false;
 	
 	m_curRenderC = renderC;
 	m_curEntityMeshList = &renderC->GetRenderMeshes();
-	auto *entClipPlane = m_curRenderC->GetRenderClipPlane();
-	m_shaderScene->BindClipPlane(entClipPlane ? *entClipPlane : Vector4{});
+	//auto *entClipPlane = m_curRenderC->GetRenderClipPlane();
+	//m_shaderScene->BindClipPlane(entClipPlane ? *entClipPlane : Vector4{});
 
 	/*if(umath::is_flag_set(m_curRenderC->GetStateFlags(),pragma::CRenderComponent::StateFlags::HasDepthBias))
 	{
@@ -407,6 +418,8 @@ bool pragma::rendering::BaseRenderProcessor::Render(CModelSubMesh &mesh,pragma::
 		return false;
 	++m_numShaderInvocations;
 	
+	return m_shaderProcessor.RecordDraw(mesh,meshIdx,instanceSet);
+#if 0
 	auto bUseVertexAnim = false;
 	auto *mdlComponent = m_curRenderC->GetModelComponent();
 	if(mdlComponent)
@@ -445,21 +458,57 @@ bool pragma::rendering::BaseRenderProcessor::Render(CModelSubMesh &mesh,pragma::
 	auto instanceBuffer = m_curInstanceSet ? m_curInstanceSet->instanceBuffer : CSceneComponent::GetEntityInstanceIndexBuffer()->GetBuffer();
 	m_shaderScene->Draw(mesh,meshIdx,*instanceBuffer,instanceCount);
 	return true;
+#endif
 }
 
-uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue,bool bindShaders,RenderPassStats *optStats,std::optional<uint32_t> worldRenderQueueIndex)
+prosper::Extent2D pragma::rendering::BaseRenderProcessor::GetExtents() const
+{
+	prosper::Extent2D extents;
+	if(m_drawSceneInfo.commandBuffer->IsPrimary())
+	{
+		prosper::IImage *img;
+		if(m_drawSceneInfo.commandBuffer->GetPrimaryCommandBufferPtr()->GetActiveRenderPassTarget(nullptr,&img) == false || img == nullptr)
+			return false;
+		extents = img->GetExtents();
+	}
+	else
+	{
+		auto *fb = m_drawSceneInfo.commandBuffer->GetSecondaryCommandBufferPtr()->GetCurrentFramebuffer();
+		if(fb == nullptr)
+			return false;
+		extents = {fb->GetWidth(),fb->GetHeight()};
+	}
+	return extents;
+}
+
+void pragma::rendering::BaseRenderProcessor::RecordViewport()
+{
+	auto extents = GetExtents();
+	m_drawSceneInfo.commandBuffer->RecordSetViewport(extents.width,extents.height,0,0,0.f,1.f);
+	m_drawSceneInfo.commandBuffer->RecordSetScissor(extents.width,extents.height);
+}
+
+uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue,bool prepass,RenderPassStats *optStats,std::optional<uint32_t> worldRenderQueueIndex)
 {
 	std::chrono::steady_clock::time_point t;
 	if(optStats)
 		t = std::chrono::steady_clock::now();
 
 	renderQueue.WaitForCompletion(optStats);
-	if(m_renderer == nullptr || (bindShaders == false && umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false))
+	if(m_renderer == nullptr || (prepass && umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false))
 		return 0;
 	m_stats = optStats;
-	if(bindShaders)
+	m_shaderProcessor.SetStats(m_stats);
+	if(!prepass)
 		UnbindShader();
 
+	auto &scene = *m_drawSceneInfo.drawSceneInfo.scene;
+	auto &referenceShader = prepass ? c_game->GetGameShader(CGame::GameShader::Prepass) : c_game->GetGameShader(CGame::GameShader::Pbr);
+	auto view = (m_camType == CameraType::View) ? true : false;
+	if(referenceShader.expired())
+		return 0;
+	RecordViewport();
+	
 	auto &shaderManager = c_engine->GetShaderManager();
 	auto &matManager = client->GetMaterialManager();
 	auto &sceneRenderDesc = m_drawSceneInfo.drawSceneInfo.scene->GetSceneRenderDesc();
@@ -489,7 +538,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 		}
 		if(worldRenderQueueIndex.has_value() && sceneRenderDesc.IsWorldMeshVisible(*worldRenderQueueIndex,item.mesh) == false)
 			continue;
-		if(bindShaders)
+		if(!prepass)
 		{
 			if(item.shader != m_curShaderIndex)
 			{
@@ -574,4 +623,3 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 	}
 	return numShaderInvocations;
 }
-#pragma optimize("",on)

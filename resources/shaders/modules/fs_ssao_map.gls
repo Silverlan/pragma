@@ -7,7 +7,7 @@
 	#define ENABLE_SSAO 1
 #endif
 #if ENABLE_SSAO == 1
-	layout(LAYOUT_ID(SHADER_UNIFORM_SSAO_MAP_SET,SHADER_UNIFORM_SSAO_MAP_BINDING)) uniform sampler2D u_ssao;
+	layout(LAYOUT_ID(DESCRIPTOR_SET_RENDERER,DESCRIPTOR_SET_RENDERER_BINDING_SSAO_MAP)) uniform sampler2D u_ssao;
 #endif
 
 #endif

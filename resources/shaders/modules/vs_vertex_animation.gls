@@ -4,7 +4,7 @@
 #include "/math/half_float.gls"
 #include "vs_vertex_animation_frame_data.gls"
 
-layout(std430,LAYOUT_ID(SHADER_UNIFORM_VERTEX_ANIMATION_SET,SHADER_UNIFORM_VERTEX_ANIMATION_BINDING)) buffer VertexAnimation {
+layout(std430,LAYOUT_ID(DESCRIPTOR_SET_INSTANCE,DESCRIPTOR_SET_INSTANCE_BINDING_VERTEX_ANIMATIONS)) buffer VertexAnimation {
 	ivec4 verts[];
 } vertexAnimation;
 

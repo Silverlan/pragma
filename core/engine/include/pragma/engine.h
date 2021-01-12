@@ -172,6 +172,8 @@ public:
 	// Returns the steam id of the active listen server
 	std::optional<uint64_t> GetServerSteamId() const;
 
+	std::thread::id GetMainThreadId() const;
+
 	virtual void StartNewGame(const std::string &map,bool singlePlayer);
 
 	// When run in game-client: Starts a new single-player game, loads the specified map and connects the local client to the local server.
@@ -225,6 +227,7 @@ protected:
 	std::queue<ConsoleOutput> m_consoleOutput = {};
 	void ProcessConsoleInput(KeyState pressState=KeyState::Press);
 
+	std::thread::id m_mainThreadId;
 	unsigned int m_tickRate;
 	ChronoTime m_ctTick;
 	long long m_lastTick;

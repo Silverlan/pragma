@@ -173,7 +173,10 @@ void ShaderTextured3DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreate
 	if(pipelineIdx == umath::to_integral(ShaderGameWorldPipeline::Reflection))
 		prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::FrontBit);
 
-	pipelineInfo.ToggleDepthWrites(false);
+	// TODO: Technically we shouldn't have to write depth values, since
+	// they've already been written in the depth prepass, but that causes
+	// visual glitches for translucent objects. Find the cause!
+	pipelineInfo.ToggleDepthWrites(true);
 	pipelineInfo.ToggleDepthTest(true,prosper::CompareOp::LessOrEqual);
 
 	//pipelineInfo.ToggleDepthBias(true,0.f,0.f,0.f);

@@ -28,7 +28,7 @@ namespace pragma
 		{
 			Texture = 0u,
 			Bloom,
-			Glow
+			// Glow
 		};
 #pragma pack(push,1)
 		struct PushConstants

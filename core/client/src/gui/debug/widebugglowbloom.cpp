@@ -33,6 +33,7 @@ WIDebugGlowBloom::~WIDebugGlowBloom()
 
 void WIDebugGlowBloom::UpdateBloomImage()
 {
+#if 0
 	auto &drawCmd = c_engine->GetDrawCommandBuffer();
 	auto *scene = c_game->GetScene();
 	auto *renderer = scene ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer()) : nullptr;
@@ -47,6 +48,7 @@ void WIDebugGlowBloom::UpdateBloomImage()
 	drawCmd->RecordBlitImage({},imgSrc,imgDst);
 	drawCmd->RecordImageBarrier(imgSrc,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 	drawCmd->RecordImageBarrier(imgDst,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+#endif
 }
 
 void WIDebugGlowBloom::DoUpdate()

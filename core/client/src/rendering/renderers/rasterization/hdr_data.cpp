@@ -187,7 +187,7 @@ void HDRData::ReloadPresentationRenderTarget(uint32_t width,uint32_t height,pros
 	imgCreateInfo.height = height;
 	imgCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
 	imgCreateInfo.samples = sampleCount;
-	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
+	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 	
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	texCreateInfo.flags = prosper::util::TextureCreateInfo::Flags::Resolvable;
@@ -285,8 +285,8 @@ bool HDRData::Initialize(pragma::CSceneComponent &scene,RasterizationRenderer &r
 	imgCreateInfo.usage |= prosper::ImageUsageFlags::TransferSrcBit;
 	auto hdrImgStaging = context.CreateImage(imgCreateInfo);
 	auto hdrTexStaging = context.CreateTexture(texCreateInfo,*hdrImgStaging,hdrImgViewCreateInfo,hdrSamplerCreateInfo);
-	hdrPostProcessingRenderTarget = context.CreateRenderTarget({hdrTexStaging},prosper::ShaderGraphics::GetRenderPass<pragma::ShaderPPBase>(context));
-	hdrPostProcessingRenderTarget->SetDebugName("scene_staging_rt");
+	//hdrPostProcessingRenderTarget = context.CreateRenderTarget({hdrTexStaging},prosper::ShaderGraphics::GetRenderPass<pragma::ShaderPPBase>(context));
+	//hdrPostProcessingRenderTarget->SetDebugName("scene_staging_rt");
 
 	dsgBloomTonemapping = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPPHDR::DESCRIPTOR_SET_TEXTURE);
 	auto &descSetHdrResolve = *dsgBloomTonemapping->GetDescriptorSet();
@@ -358,13 +358,15 @@ bool HDRData::InitializeDescriptorSets()
 		return false;
 	dsgSceneDepth = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderParticle2DBase::DESCRIPTOR_SET_DEPTH_MAP);
 
-	auto &depthTex = prepass.textureDepthSampled;
-	dsgSceneDepth->GetDescriptorSet()->SetBindingTexture(*depthTex,0u);
+	// TODO
+	//auto &depthTex = prepass.textureDepthSampled;
+	//dsgSceneDepth->GetDescriptorSet()->SetBindingTexture(*depthTex,0u);
 	return true;
 }
 
 bool HDRData::BlitMainDepthBufferToSamplableDepthBuffer(const util::DrawSceneInfo &drawSceneInfo,std::function<void(prosper::ICommandBuffer&)> &fTransitionSampleImgToTransferDst)
 {
+#if 0
 	auto &srcDepthTex = *prepass.textureDepth;
 	auto &srcDepthImg = srcDepthTex.GetImage();
 
@@ -384,6 +386,8 @@ bool HDRData::BlitMainDepthBufferToSamplableDepthBuffer(const util::DrawSceneInf
 	//	.RecordImageBarrier(*cmdBuffer,ptrDstDepthImg->GetAnvilImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferDstOptimal);
 	//};
 	return r;
+#endif
+	return false;
 }
 
 prosper::RenderTarget &HDRData::GetRenderTarget(const util::DrawSceneInfo &drawSceneInfo)
@@ -391,7 +395,7 @@ prosper::RenderTarget &HDRData::GetRenderTarget(const util::DrawSceneInfo &drawS
 	return drawSceneInfo.renderTarget ? *drawSceneInfo.renderTarget : *sceneRenderTarget;
 }
 
-bool HDRData::BlitStagingRenderTargetToMainRenderTarget(const util::DrawSceneInfo &drawSceneInfo)
+/*bool HDRData::BlitStagingRenderTargetToMainRenderTarget(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &rt = GetRenderTarget(drawSceneInfo);
 	auto &hdrTex = rt.GetTexture();
@@ -411,7 +415,7 @@ bool HDRData::BlitStagingRenderTargetToMainRenderTarget(const util::DrawSceneInf
 	if(b == false)
 		return false;
 	return cmdBuffer.RecordImageBarrier(hdrPostProcessingRenderTarget->GetTexture().GetImage(),prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
-}
+}*/
 
 void HDRData::SwapIOTextures() {m_curTex = (m_curTex == 1u) ? 0u : 1u;}
 

@@ -25,10 +25,10 @@ decltype(ShaderPPHDR::DESCRIPTOR_SET_TEXTURE) ShaderPPHDR::DESCRIPTOR_SET_TEXTUR
 			prosper::DescriptorType::CombinedImageSampler,
 			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::DescriptorSetInfo::Binding { // Glow
+		/*prosper::DescriptorSetInfo::Binding { // Glow
 			prosper::DescriptorType::CombinedImageSampler,
 			prosper::ShaderStageFlags::FragmentBit
-		}
+		}*/
 	}
 };
 decltype(ShaderPPHDR::RENDER_PASS_FORMAT) ShaderPPHDR::RENDER_PASS_FORMAT = prosper::Format::R8G8B8A8_UNorm;

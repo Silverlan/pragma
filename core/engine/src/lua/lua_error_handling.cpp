@@ -194,6 +194,32 @@ static void transform_path(const lua_Debug &d,std::string &errPath,int32_t curre
 	}
 }
 
+bool Lua::get_callstack(lua_State *l,std::stringstream &ss)
+{
+	int32_t level = 1;
+	lua_Debug d {};
+	auto r = lua_getstack(l,level,&d);
+	if(r == 0)
+		return false;
+	while(r == 1)
+	{
+		if(lua_getinfo(l,"Sln",&d) != 0)
+		{
+			std::string t(level *4,' ');
+			if(level >= 10)
+			{
+				ss<<"\n"<<t<<"...";
+				break;
+			}
+			else
+				ss<<"\n"<<t<<level<<": "<<(d.name != nullptr ? d.name : "?")<<"["<<d.linedefined<<":"<<d.lastlinedefined<<"] ["<<d.what<<":"<<d.namewhat<<"] : "<<d.short_src<<":"<<d.currentline;
+		}
+		++level;
+		r = lua_getstack(l,level,&d);
+	}
+	return true;
+}
+
 int Lua::HandleTracebackError(lua_State *l)
 {
 	if(!Lua::IsString(l,-1))
@@ -257,21 +283,7 @@ int Lua::HandleTracebackError(lua_State *l)
 		else
 			ssMsg<<":\n";
 		ssMsg<<"    Callstack:";
-		while(lua_getstack(l,level,&d) == 1)
-		{
-			if(lua_getinfo(l,"Sln",&d) != 0)
-			{
-				std::string t(level *4,' ');
-				if(level >= 10)
-				{
-					ssMsg<<"\n"<<t<<"...";
-					break;
-				}
-				else
-					ssMsg<<"\n"<<t<<level<<": "<<(d.name != nullptr ? d.name : "?")<<"["<<d.linedefined<<":"<<d.lastlinedefined<<"] ["<<d.what<<":"<<d.namewhat<<"] : "<<d.short_src<<":"<<d.currentline;
-			}
-			++level;
-		}
+		get_callstack(l,ssMsg);
 	}
 	print_lua_error_message(l,ssMsg);
 

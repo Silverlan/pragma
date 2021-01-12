@@ -28,13 +28,13 @@ void RasterizationRenderer::RenderToneMapping(const util::DrawSceneInfo &drawSce
 	auto &hdrInfo = GetHDRInfo();
 	auto *srcImg = descSetHdrResolve.GetBoundImage(umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Texture));
 	auto *srcImgBloom = descSetHdrResolve.GetBoundImage(umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Bloom));
-	auto *srcImgGlow = descSetHdrResolve.GetBoundImage(umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Glow));
+	// auto *srcImgGlow = descSetHdrResolve.GetBoundImage(umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Glow));
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	if(IsMultiSampled() == false) // The resolved images already have the correct layout
 	{
 		drawCmd->RecordImageBarrier(*srcImg,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 		//.RecordImageBarrier(*(*drawCmd),**srcImgBloom,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
-		drawCmd->RecordImageBarrier(*srcImgGlow,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+		// drawCmd->RecordImageBarrier(*srcImgGlow,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 	}
 	auto &dstTexPostHdr = hdrInfo.toneMappedRenderTarget->GetTexture();
 	auto &dstImgPostHdr = dstTexPostHdr.GetImage();
@@ -45,7 +45,7 @@ void RasterizationRenderer::RenderToneMapping(const util::DrawSceneInfo &drawSce
 		if(shaderPPHdr.BeginDraw(drawCmd) == true)
 		{
 			const float bloomAdditiveScale = 0.5f;
-			auto glowScale = (GetGlowInfo().bGlowScheduled == true) ? 1.f : 0.f;
+			auto glowScale = 0.f;//(GetGlowInfo().bGlowScheduled == true) ? 1.f : 0.f;
 
 			rendering::ToneMapping toneMapping;
 			if(drawSceneInfo.toneMapping.has_value())
@@ -78,6 +78,6 @@ void RasterizationRenderer::RenderToneMapping(const util::DrawSceneInfo &drawSce
 	{
 		drawCmd->RecordImageBarrier(*srcImg,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 		//.RecordImageBarrier(*(*drawCmd),srcImgBloom,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
-		drawCmd->RecordImageBarrier(*srcImgGlow,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+		// drawCmd->RecordImageBarrier(*srcImgGlow,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 	}
 }

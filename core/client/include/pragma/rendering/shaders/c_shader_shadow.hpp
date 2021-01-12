@@ -36,20 +36,23 @@ namespace pragma
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_POSITION;
 
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
-
-		enum class Flags : uint32_t
-		{
-			None = 0u,
-			UseExtendedVertexWeights = 1u
-		};
 
 #pragma pack(push,1)
 		struct PushConstants
 		{
+			void Initialize()
+			{
+				depthMVP = umat::identity();
+				lightPos = {};
+				flags = SceneFlags::None;
+			}
 			Mat4 depthMVP;
 			Vector4 lightPos; // 4th component stores the distance
-			Flags flags;
+			SceneFlags flags;
+			float alphaCutoff;
 		};
 #pragma pack(pop)
 
@@ -70,11 +73,14 @@ namespace pragma
 			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},ShaderGameWorldPipeline pipelineIdx=ShaderGameWorldPipeline::Regular,
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		) override;
+		virtual PassType GetPassType() const {return PassType::ShadowPass;}
 	protected:
 		bool BindEntityDepthMatrix(const Mat4 &depthMVP);
+		virtual void OnPipelinesInitialized() override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 	private:
+		virtual uint32_t GetMaterialDescriptorSetIndex() const override;
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
 		virtual uint32_t GetLightDescriptorSetIndex() const override;
@@ -118,6 +124,5 @@ namespace pragma
 		//bool BindMaterial(CMaterial &mat);
 	};
 };
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderShadow::Flags)
 
 #endif

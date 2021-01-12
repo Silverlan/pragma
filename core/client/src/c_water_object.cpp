@@ -312,6 +312,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 
 			std::function<void(prosper::ICommandBuffer&)> fTransitionSampleImgToTransferDst = nullptr;
 			hdrInfo.BlitMainDepthBufferToSamplableDepthBuffer(drawSceneInfo.get(),fTransitionSampleImgToTransferDst);
+#if 0
 			if(drawCmd->RecordBeginRenderPass(*hdrInfo.hdrPostProcessingRenderTarget) == true)
 			{
 				auto &prepass = renderer->GetPrepass();
@@ -336,6 +337,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 			}
 			//fTransitionSampleImgToTransferDst(*drawCmd);
 			hdrInfo.BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo.get());
+#endif
 		}
 	}));
 	m_waterScene->hRenderScene = c_game->AddCallback("DrawScene",FunctionCallback<

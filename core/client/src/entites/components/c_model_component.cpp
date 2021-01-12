@@ -135,7 +135,7 @@ void CModelComponent::UpdateRenderBufferList()
 		auto *mat = GetRenderMaterial(mesh.GetSkinTextureIndex());
 		std::shared_ptr<prosper::IRenderBuffer> renderBuffer = nullptr;
 		auto *shader = mat ? dynamic_cast<pragma::ShaderEntity*>(mat->GetPrimaryShader()) : nullptr;
-		if(shader)
+		if(shader && shader->IsValid())
 			renderBuffer = mesh.GetRenderBuffer(*shader);
 		m_lodMeshRenderBuffers.push_back(renderBuffer);
 	}

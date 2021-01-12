@@ -13,6 +13,7 @@
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/render_queue_instancer.hpp"
+#include "pragma/rendering/render_queue_worker.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <prosper_render_pass.hpp>
 #include <prosper_framebuffer.hpp>
@@ -28,7 +29,7 @@ using namespace pragma;
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 CShadowComponent::CShadowComponent(BaseEntity &ent)
 	: BaseEntityComponent{ent}
 {}
@@ -377,6 +378,14 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 			}
 		}
 		
+		auto *stats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->renderQueueBuilderStats : nullptr;
+		std::chrono::steady_clock::time_point t;
+		if(stats)
+			t = std::chrono::steady_clock::now();
+		c_game->GetRenderQueueWorkerManager().WaitForCompletion();
+		if(stats)
+			stats->workerWaitTime += std::chrono::steady_clock::now() -t;
+		
 		// Sorting is technically not necessary, we only use it to lower the number of material state changes (for translucent meshes)
 		mainRenderQueue->Sort();
 		
@@ -505,12 +514,10 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 
 		if(shadowRenderProcessor.BindShader(*shader))
 		{
-			if(shader->BindLight(*m_hLight,layerId))
-			{
-				shadowRenderProcessor.Render(*m_renderQueues.at(layerId),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->shadowPass : nullptr);
+			shadowRenderProcessor.BindLight(*m_hLight,layerId);
+			shadowRenderProcessor.Render(*m_renderQueues.at(layerId),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->shadowPass : nullptr);
 		
-				// TODO: Translucent render pass ?
-			}
+			// TODO: Translucent render pass ?
 			shadowRenderProcessor.UnbindShader();
 		}
 
@@ -527,3 +534,4 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 		);
 	}
 }
+#pragma optimize("",on)

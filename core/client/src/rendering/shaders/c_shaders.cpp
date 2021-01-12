@@ -104,12 +104,13 @@ void CGame::InitShaders()
 
 	shaderManager.RegisterShader("raytracing",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderRayTracing(context,identifier);});
 	shaderManager.RegisterShader("pbr",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPBR(context,identifier);});
-	shaderManager.RegisterShader("pbr_blend",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPBRBlend(context,identifier);});
+	// shaderManager.RegisterShader("pbr_blend",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPBRBlend(context,identifier);}); // TODO: Fixme
+	shaderManager.RegisterShader("pbr_blend",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPBR(context,identifier);});
 	shaderManager.RegisterShader("eye",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderEye(context,identifier);});
 
 	shaderManager.RegisterShader("flat",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderFlat(context,identifier);});
 	shaderManager.RegisterShader("test",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderTest(context,identifier);});
-	shaderManager.RegisterShader("unlit",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderUnlit(context,identifier);});
+	// shaderManager.RegisterShader("unlit",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderUnlit(context,identifier);}); // TODO: Fixme
 	shaderManager.RegisterShader("wireframe",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderWireframe(context,identifier);});
 	shaderManager.RegisterShader("texturedalphatransition",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderTexturedAlphaTransition(context,identifier);});
 	shaderManager.RegisterShader("skybox",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderSkybox(context,identifier);});

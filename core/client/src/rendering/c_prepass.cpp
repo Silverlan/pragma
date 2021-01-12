@@ -48,7 +48,7 @@ bool pragma::rendering::Prepass::Initialize(prosper::IPrContext &context,uint32_
 	samplerCreateInfo.addressModeW = prosper::SamplerAddressMode::ClampToEdge;
 	textureDepth = context.CreateTexture(texCreateInfo,*imgDepth,imgViewCreateInfo,samplerCreateInfo);
 
-	if(textureDepth->IsMSAATexture())
+	/*if(textureDepth->IsMSAATexture())
 		textureDepthSampled = static_cast<prosper::MSAATexture&>(*textureDepth).GetResolvedTexture();
 	else
 	{
@@ -59,7 +59,7 @@ bool pragma::rendering::Prepass::Initialize(prosper::IPrContext &context,uint32_
 
 		texCreateInfo.flags = {};
 		textureDepthSampled = context.CreateTexture(texCreateInfo,*imgDepthSampled,imgViewCreateInfo,samplerCreateInfo);
-	}
+	}*/
 
 	SetUseExtendedPrepass(bExtended,true);
 	return true;

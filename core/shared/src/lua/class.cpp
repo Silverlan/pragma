@@ -467,6 +467,15 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 			return;
 		Lua::Push(l,tonemappedImg);
 	}));
+	defImageBuffer.def("ApplyGammaCorrection",static_cast<void(*)(lua_State*,uimg::ImageBuffer&)>([](lua_State *l,uimg::ImageBuffer &imgBuffer) {
+		imgBuffer.ApplyGammaCorrection();
+	}));
+	defImageBuffer.def("ApplyGammaCorrection",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,float)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,float gamma) {
+		imgBuffer.ApplyGammaCorrection(gamma);
+	}));
+	defImageBuffer.def("ApplyExposure",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,float)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,float exposure) {
+		imgBuffer.ApplyExposure(exposure);
+	}));
 
 	defImageBuffer.def("GetPixelOffset",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t,uint32_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t x,uint32_t y) {
 		Lua::PushInt(l,imgBuffer.GetPixelOffset(x,y));

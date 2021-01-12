@@ -23,7 +23,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 static bool g_collectRenderStats = false;
 static CallbackHandle g_cbPreRenderScene = {};
 static CallbackHandle g_cbPostRenderScene = {};
@@ -283,7 +283,7 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::Shader &shader)
 	UnbindMaterial();
 	UnbindEntity();
 	m_curShader = &shader;
-	if(shader.GetBaseTypeHashCode() != pragma::ShaderGameWorld::HASH_TYPE)
+	if(shader.GetBaseTypeHashCode() != pragma::ShaderGameWorld::HASH_TYPE || shader.IsValid() == false)
 		return false;
 	auto *shaderScene = static_cast<pragma::ShaderGameWorld*>(&shader);
 	if((g_debugRenderFilter && g_debugRenderFilter->shaderFilter && g_debugRenderFilter->shaderFilter(*shaderScene) == false))
@@ -623,3 +623,4 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 	}
 	return numShaderInvocations;
 }
+#pragma optimize("",on)

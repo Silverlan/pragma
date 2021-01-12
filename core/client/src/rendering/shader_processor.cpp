@@ -11,20 +11,22 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
+#include "pragma/rendering/shaders/world/c_shader_skybox.hpp"
+#include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/model/c_model.h"
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,const pragma::ShaderGameWorld &referenceShader,bool view)
 {
 	// Note: The reference shader is not the shader we're actually using for rendering, but a base shader that represents all shader types for the current render pass (e.g. prepass / pbr).
 	// We need this information to properly bind the descriptor sets with OpenGL (reference shader is ignored for Vulkan).
 	
-	auto prepass = referenceShader.IsPrepass();
-	m_prepassShader = prepass;
+	auto passType = referenceShader.GetPassType();
+	m_passType = passType;
 	auto *dsScene = view ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
 	auto *dsRenderer = renderer.GetRendererDescriptorSet();
 	auto &dsRenderSettings = c_game->GetGlobalRenderSettingsDescriptorSet();
@@ -38,18 +40,9 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneCom
 	m_sceneFlags = ShaderGameWorld::SceneFlags::None;
 	m_view = view;
 	std::vector<prosper::IDescriptorSet*> descSets {};
-	if(prepass)
+	switch(passType)
 	{
-		descSets.resize(3);
-		descSets[0] = &dsMat;
-		descSets[1] = dsScene;
-		descSets[2] = &dsRenderSettings;
-
-		ShaderPrepass::PushConstants pushConstants {};
-		pushConstants.Initialize();
-		m_cmdBuffer.RecordPushConstants(*m_currentPipelineLayout,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0u,sizeof(pushConstants),&pushConstants);
-	}
-	else
+	case pragma::ShaderGameWorld::PassType::LightingPass:
 	{
 		descSets.resize(7);
 		descSets[0] = &dsMat;
@@ -76,6 +69,40 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneCom
 		pushConstants.reflectionProbeIntensity = iblStrength;
 		pushConstants.flags = m_sceneFlags;
 		m_cmdBuffer.RecordPushConstants(*m_currentPipelineLayout,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0u,sizeof(pushConstants),&pushConstants);
+		break;
+	}
+	case pragma::ShaderGameWorld::PassType::DepthPrepass:
+	{
+		descSets.resize(3);
+		descSets[0] = &dsMat;
+		descSets[1] = dsScene;
+		descSets[2] = &dsRenderSettings;
+
+		ShaderPrepass::PushConstants pushConstants {};
+		pushConstants.Initialize();
+		m_cmdBuffer.RecordPushConstants(*m_currentPipelineLayout,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0u,sizeof(pushConstants),&pushConstants);
+		break;
+	}
+	case pragma::ShaderGameWorld::PassType::ShadowPass:
+	{
+		descSets.resize(3);
+		descSets[0] = &dsMat;
+		descSets[1] = dsScene;
+		descSets[2] = &dsRenderSettings;
+
+		ShaderShadow::PushConstants pushConstants {};
+		pushConstants.Initialize();
+		m_cmdBuffer.RecordPushConstants(*m_currentPipelineLayout,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0u,sizeof(pushConstants),&pushConstants);
+		break;
+	}
+	case pragma::ShaderGameWorld::PassType::SkyPass:
+	{
+		descSets.resize(3);
+		descSets[0] = &dsMat;
+		descSets[1] = dsScene;
+		descSets[2] = dsRenderer;
+		break;
+	}
 	}
 
 	// We can bind all of these in one go
@@ -105,12 +132,40 @@ void pragma::rendering::ShaderProcessor::UpdateSceneFlags(ShaderGameWorld::Scene
 	if(sceneFlags == m_sceneFlags)
 		return;
 	m_sceneFlags = sceneFlags;
-	m_cmdBuffer.RecordPushConstants(*m_currentPipelineLayout,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(ShaderGameWorld::ScenePushConstants,flags),sizeof(sceneFlags),&sceneFlags);
+	size_t offset = 0;
+	switch(m_passType)
+	{
+	case ShaderGameWorld::PassType::ShadowPass:
+		offset = offsetof(ShaderShadow::PushConstants,flags);
+		break;
+	case ShaderGameWorld::PassType::SkyPass:
+		return;
+	default:
+		offset = offsetof(ShaderGameWorld::ScenePushConstants,flags);
+		break;
+	}
+	m_cmdBuffer.RecordPushConstants(*m_currentPipelineLayout,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offset,sizeof(sceneFlags),&sceneFlags);
+}
+bool pragma::rendering::ShaderProcessor::RecordBindLight(CLightComponent &light,uint32_t layerId)
+{
+#pragma pack(push,1)
+	struct {
+		Mat4 depthMVP;
+		Vector4 lightPos;
+	} pushData;
+#pragma pack(pop)
+
+	auto pRadiusComponent = light.GetEntity().GetComponent<CRadiusComponent>();
+	auto &pos = light.GetEntity().GetPosition();
+	pushData.depthMVP = light.GetTransformationMatrix(layerId);
+	pushData.lightPos = Vector4{pos.x,pos.y,pos.z,static_cast<float>(pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f)};
+
+	return m_cmdBuffer.RecordPushConstants(*m_currentPipelineLayout,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(ShaderShadow::PushConstants,depthMVP),sizeof(pushData),&pushData);
 }
 bool pragma::rendering::ShaderProcessor::RecordBindMaterial(CMaterial &mat)
 {
 	auto alphaMode = mat.GetAlphaMode();
-	if(m_prepassShader && alphaMode == AlphaMode::Opaque)
+	if(m_passType != ShaderGameWorld::PassType::LightingPass && m_passType != ShaderGameWorld::PassType::SkyPass && alphaMode == AlphaMode::Opaque)
 		return true; // TODO: Notify shader?
 
 	auto flags = m_sceneFlags;
@@ -120,10 +175,20 @@ bool pragma::rendering::ShaderProcessor::RecordBindMaterial(CMaterial &mat)
 		if(alphaCutoff != m_alphaCutoff)
 		{
 			m_alphaCutoff = alphaCutoff;
-			if(m_prepassShader)
+			if(m_passType != ShaderGameWorld::PassType::LightingPass && m_passType != ShaderGameWorld::PassType::SkyPass)
 			{
 				static_assert(std::is_same_v<decltype(alphaCutoff),decltype(ShaderPrepass::PushConstants::alphaCutoff)>);
-				m_cmdBuffer.RecordPushConstants(*m_currentPipelineLayout,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(ShaderPrepass::PushConstants,alphaCutoff),sizeof(alphaCutoff),&alphaCutoff);
+				size_t offset = 0;
+				switch(m_passType)
+				{
+				case ShaderGameWorld::PassType::DepthPrepass:
+					offset = offsetof(ShaderPrepass::PushConstants,alphaCutoff);
+					break;
+				case ShaderGameWorld::PassType::ShadowPass:
+					offset = offsetof(ShaderShadow::PushConstants,alphaCutoff);
+					break;
+				}
+				m_cmdBuffer.RecordPushConstants(*m_currentPipelineLayout,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offset,sizeof(alphaCutoff),&alphaCutoff);
 			}
 		}
 		flags |= ShaderGameWorld::SceneFlags::AlphaTest;
@@ -154,9 +219,12 @@ bool pragma::rendering::ShaderProcessor::RecordBindEntity(CBaseEntity &ent)
 	auto *clipPlane = renderC->GetRenderClipPlane();
 	if(static_cast<bool>(clipPlane) != m_clipPlane.has_value() && (!clipPlane || *clipPlane != *m_clipPlane))
 	{
-		static_assert(sizeof(*clipPlane) == sizeof(ShaderGameWorld::ScenePushConstants::clipPlane));
-		auto vClipPlane = clipPlane ? *clipPlane : Vector4{};
-		m_cmdBuffer.RecordPushConstants(*m_currentPipelineLayout,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(ShaderGameWorld::ScenePushConstants,clipPlane),sizeof(*clipPlane),&vClipPlane);
+		if(m_passType != ShaderGameWorld::PassType::ShadowPass && m_passType != ShaderGameWorld::PassType::SkyPass)
+		{
+			static_assert(sizeof(*clipPlane) == sizeof(ShaderGameWorld::ScenePushConstants::clipPlane));
+			auto vClipPlane = clipPlane ? *clipPlane : Vector4{};
+			m_cmdBuffer.RecordPushConstants(*m_currentPipelineLayout,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(ShaderGameWorld::ScenePushConstants,clipPlane),sizeof(*clipPlane),&vClipPlane);
+		}
 		m_clipPlane = clipPlane ? *clipPlane : std::optional<Vector4>{};
 	}
 	
@@ -169,7 +237,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindEntity(CBaseEntity &ent)
 			m_vertexAnimC = ent.GetComponent<pragma::CVertexAnimatedComponent>().get();
 	}
 	
-	if(!m_prepassShader)
+	if(m_passType == ShaderGameWorld::PassType::LightingPass)
 	{
 		m_lightMapReceiverC = renderC->GetLightMapReceiverComponent();
 		if(m_lightMapReceiverC)
@@ -243,3 +311,4 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(CModelSubMesh &mesh,pragma::
 	}
 	return m_cmdBuffer.RecordDrawIndexed(mesh.GetTriangleVertexCount(),instanceCount);
 }
+#pragma optimize("",on)

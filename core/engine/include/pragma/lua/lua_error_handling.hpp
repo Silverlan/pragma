@@ -13,6 +13,7 @@
 namespace Lua
 {
 	DLLENGINE void initialize_error_handler();
+	DLLENGINE bool get_callstack(lua_State *l,std::stringstream &ss);
 	DLLENGINE int HandleTracebackError(lua_State *l);
 	// Note: This function will attempt to retrieve the file name from the error message.
 	// If the file name is truncated, this will not work! To be sure, define the third parameter as the actual file name.

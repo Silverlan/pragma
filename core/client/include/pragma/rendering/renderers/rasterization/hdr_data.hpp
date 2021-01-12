@@ -55,7 +55,7 @@ namespace pragma::rendering
 		void ReloadPresentationRenderTarget(uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount);
 
 		void ResetIOTextureIndex();
-		bool BlitStagingRenderTargetToMainRenderTarget(const util::DrawSceneInfo &drawSceneInfo);
+		// bool BlitStagingRenderTargetToMainRenderTarget(const util::DrawSceneInfo &drawSceneInfo);
 		bool BlitMainDepthBufferToSamplableDepthBuffer(const util::DrawSceneInfo &drawSceneInfo,std::function<void(prosper::ICommandBuffer&)> &fTransitionSampleImgToTransferDst);
 
 		SSAOInfo ssaoInfo;
@@ -82,7 +82,7 @@ namespace pragma::rendering
 		std::shared_ptr<prosper::IDescriptorSetGroup> dsgBloomTonemapping = nullptr;
 
 		// Render target for post-processing after the lighting pass with HDR colors
-		std::shared_ptr<prosper::RenderTarget> hdrPostProcessingRenderTarget = nullptr;
+		// std::shared_ptr<prosper::RenderTarget> hdrPostProcessingRenderTarget = nullptr;
 
 		// Render target containing image after tonemapping
 		std::shared_ptr<prosper::RenderTarget> toneMappedRenderTarget = nullptr;

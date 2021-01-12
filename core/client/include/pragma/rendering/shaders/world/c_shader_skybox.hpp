@@ -41,9 +41,16 @@ namespace pragma
 			CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
 			std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
 		) const override;
+		virtual PassType GetPassType() const {return PassType::SkyPass;}
 	protected:
 		ShaderSkybox(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader);
+		virtual void OnPipelinesInitialized() override;
 		virtual uint32_t GetMaterialDescriptorSetIndex() const override;
+		virtual uint32_t GetRendererDescriptorSetIndex() const override;
+		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override;
+		virtual uint32_t GetCameraDescriptorSetIndex() const override;
+		virtual uint32_t GetLightDescriptorSetIndex() const override;
+		virtual uint32_t GetInstanceDescriptorSetIndex() const override;
 		virtual bool BindMaterialParameters(CMaterial &mat) override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		EulerAngles m_skyAngles = {};

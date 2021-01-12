@@ -246,6 +246,13 @@ namespace pragma
 			NoIBL = LightmapsEnabled<<1u,
 			DisableShadows = NoIBL<<1u
 		};
+		enum class PassType : uint8_t
+		{
+			LightingPass = 0,
+			DepthPrepass,
+			ShadowPass,
+			SkyPass
+		};
 #pragma pack(push,1)
 		struct ScenePushConstants
 		{
@@ -277,7 +284,7 @@ namespace pragma
 		virtual void Set3DSky(bool is3dSky)=0;
 		virtual bool BindDrawOrigin(const Vector4 &drawOrigin)=0;
 		virtual bool SetDepthBias(const Vector2 &depthBias)=0;
-		virtual bool IsPrepass() const {return false;}
+		virtual PassType GetPassType() const {return PassType::LightingPass;}
 		virtual size_t GetBaseTypeHashCode() const override;
 		virtual uint32_t GetMaterialDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
 		prosper::IDescriptorSet &GetDefaultMaterialDescriptorSet() const;

@@ -42,6 +42,7 @@ namespace pragma::rendering
 		bool RecordBindShader(const pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,bool view,pragma::ShaderGameWorld &shader,uint32_t pipelineIdx=0u);
 		bool RecordBindEntity(CBaseEntity &ent);
 		bool RecordBindMaterial(CMaterial &mat);
+		bool RecordBindLight(CLightComponent &light,uint32_t layerId);
 		bool RecordDraw(CModelSubMesh &mesh,pragma::RenderMeshIndex meshIdx,const pragma::rendering::RenderQueue::InstanceSet *instanceSet=nullptr);
 
 		void SetStats(RenderPassStats *stats) {m_stats = stats;}
@@ -64,7 +65,7 @@ namespace pragma::rendering
 		const RenderQueue::InstanceSet *m_curInstanceSet = nullptr;
 
 		pragma::ShaderGameWorld *m_curShader = nullptr;
-		bool m_prepassShader = false;
+		pragma::ShaderGameWorld::PassType m_passType = pragma::ShaderGameWorld::PassType::LightingPass;
 		uint32_t m_curVertexAnimationOffset = 0;
 		RenderPassStats *m_stats = nullptr;
 
@@ -141,6 +142,7 @@ namespace pragma::rendering
 	public:
 		DepthStageRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo,RenderFlags flags,const Vector4 &drawOrigin);
 		uint32_t Render(const pragma::rendering::RenderQueue &renderQueue,RenderPassStats *optStats=nullptr,std::optional<uint32_t> worldRenderQueueIndex={});
+		void BindLight(CLightComponent &light,uint32_t layerId);
 	};
 
 	class DLLCLIENT LightingStageRenderProcessor

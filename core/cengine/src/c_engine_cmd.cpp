@@ -14,6 +14,11 @@
 #include <pragma/console/command_options.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
+#include <pragma/entities/entity_iterator.hpp>
+#include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/rendering/renderers/rasterization_renderer.hpp>
+#include <image/prosper_render_target.hpp>
+#include <shader/prosper_shader_blur.hpp>
 
 extern DLLCLIENT void debug_render_stats(bool enabled,bool full,bool print,bool continuous);
 void CEngine::RegisterConsoleCommands()
@@ -174,6 +179,14 @@ void CEngine::RegisterConsoleCommands()
 		std::vector<size_t> sortedIndices {};
 		textureSizes.reserve(textures.size());
 		sortedIndices.reserve(textures.size());
+
+		auto fGetImageSize = [](prosper::IImage &img) -> prosper::DeviceSize {
+			auto *buf = img.GetMemoryBuffer();
+			if(buf)
+				return buf->GetSize();
+			return 0;
+		};
+
 		for(auto &tex : textures)
 		{
 			prosper::DeviceSize size = 0;
@@ -181,9 +194,7 @@ void CEngine::RegisterConsoleCommands()
 			if(vkTex)
 			{
 				auto &img = vkTex->GetImage();
-				auto *buf = img.GetMemoryBuffer();
-				if(buf)
-					size = buf->GetSize();
+				size = fGetImageSize(img);
 			}
 			sortedIndices.push_back(textureSizes.size());
 			textureSizes.push_back(size);
@@ -191,51 +202,66 @@ void CEngine::RegisterConsoleCommands()
 		std::sort(sortedIndices.begin(),sortedIndices.end(),[&textureSizes](size_t idx0,size_t idx1) {
 			return textureSizes[idx0] > textureSizes[idx1];
 		});
-		prosper::DeviceSize totalSize = 0;
-		Con::cout<<textures.size()<<" textures are currently loaded:"<<Con::endl;
-		for(auto idx : sortedIndices)
-		{
-			auto &tex = textures[idx];
-			auto useCount = tex.use_count() -2;
-			Con::cout<<tex->GetName()<<":"<<Con::endl;
+
+		auto fPrintImageInfo = [&fGetImageSize](prosper::IImage &img,const std::string &prefix="",bool perfWarnings=true) {
+			auto &context = img.GetContext();
+			auto useCount = img.shared_from_this().use_count() -1;
+			Con::cout<<prefix<<"Name: "<<img.GetDebugName()<<":"<<Con::endl;
 
 			if(useCount == 0)
 				util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
-			Con::cout<<"\tUse count: "<<useCount<<Con::endl;
+			Con::cout<<prefix<<"Use count: "<<useCount<<Con::endl;
 			if(useCount == 0)
 				util::reset_console_color();
 
-			Con::cout<<"\tResolution: "<<tex->GetWidth()<<"x"<<tex->GetHeight()<<Con::endl;
-
-			auto &img = tex->GetVkTexture()->GetImage();
-			Con::cout<<"\tLayers: "<<img.GetLayerCount()<<Con::endl;
+			Con::cout<<prefix<<"Resolution: "<<img.GetWidth()<<"x"<<img.GetHeight()<<Con::endl;
+			Con::cout<<prefix<<"Layers: "<<img.GetLayerCount()<<Con::endl;
 			
 			auto numMipmaps = img.GetMipmapCount();
-			if(numMipmaps <= 1)
+			if(numMipmaps <= 1 && perfWarnings)
 				util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
-			Con::cout<<"\tMipmaps: "<<numMipmaps<<Con::endl;
-			if(numMipmaps <= 1)
+			Con::cout<<prefix<<"Mipmaps: "<<numMipmaps<<Con::endl;
+			if(numMipmaps <= 1 && perfWarnings)
 				util::reset_console_color();
 
 			auto tiling = img.GetTiling();
 			auto optimal = tiling == prosper::ImageTiling::Optimal;
 			if(!optimal)
 				util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
-			Con::cout<<"\tTiling: "<<prosper::util::to_string(tiling)<<Con::endl;
+			Con::cout<<prefix<<"Tiling: "<<prosper::util::to_string(tiling)<<Con::endl;
 			if(!optimal)
 				util::reset_console_color();
 
 			auto format = img.GetFormat();
 			auto isCompressed = prosper::util::is_compressed_format(format);
-			if(!isCompressed)
+			if(!isCompressed && perfWarnings)
 				util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
-			Con::cout<<"\tFormat: "<<prosper::util::to_string(format)<<Con::endl;
-			if(!isCompressed)
+			Con::cout<<prefix<<"Format: "<<prosper::util::to_string(format)<<Con::endl;
+			if(!isCompressed && perfWarnings)
 				util::reset_console_color();
+			
+			if(context.IsValidationEnabled() == false)
+				Con::cout<<prefix<<"Last time used: Enable validation mode to determine"<<Con::endl;
+			else
+			{
+				auto time = context.GetLastUsageTime(img);
+				if(time.has_value() == false)
+					util::set_console_color(util::ConsoleColorFlags::Intensity | util::ConsoleColorFlags::Red);
+				Con::cout<<prefix<<"Last time used: ";
+				if(time.has_value())
+				{
+					auto t = std::chrono::steady_clock::now();
+					auto dt = t -*time;
+					Con::cout<<util::get_pretty_duration(std::chrono::duration_cast<std::chrono::milliseconds>(dt).count())<<" ago";
+				}
+				else
+					Con::cout<<"Never";
+				Con::cout<<Con::endl;
+				if(time.has_value() == false)
+					util::reset_console_color();
+			}
 
-			auto size = textureSizes[idx];
-			Con::cout<<"\tSize: "<<util::get_pretty_bytes(size)<<Con::endl;
-			totalSize += size;
+			Con::cout<<prefix<<"Size: "<<util::get_pretty_bytes(fGetImageSize(img))<<Con::endl;
 
 			auto deviceLocal = umath::is_flag_set(img.GetCreateInfo().memoryFeatures,prosper::MemoryFeatureFlags::DeviceLocal);
 			if(!deviceLocal)
@@ -244,8 +270,97 @@ void CEngine::RegisterConsoleCommands()
 				Con::cout<<"\tPerformance Warning: Image memory is not device local!"<<Con::endl;
 				util::reset_console_color();
 			}
+		};
+
+		prosper::DeviceSize totalSize = 0;
+		Con::cout<<textures.size()<<" textures are currently loaded:"<<Con::endl;
+		for(auto idx : sortedIndices)
+		{
+			auto &tex = textures[idx];
+			Con::cout<<tex->GetName()<<":"<<Con::endl;
+
+			auto &vkTex = tex->GetVkTexture();
+			if(vkTex)
+				fPrintImageInfo(vkTex->GetImage(),"\t");
+			else
+				Con::cout<<"\tNULL"<<Con::endl;
+
+			auto size = textureSizes[idx];
+			Con::cout<<"\tSize: "<<util::get_pretty_bytes(size)<<Con::endl;
+			totalSize += size;
 		}
 		Con::cout<<"Total memory: "<<util::get_pretty_bytes(totalSize)<<Con::endl;
+
+		auto *client = GetClientState();
+		auto *game = client ? static_cast<CGame*>(client->GetGameState()) : nullptr;
+		if(game)
+		{
+			EntityIterator entItScene {*game};
+			entItScene.AttachFilter<TEntityIteratorFilterComponent<pragma::CSceneComponent>>();
+			Con::cout<<"\tNumber of scenes: "<<entItScene.GetCount()<<Con::endl;
+			for(auto *ent : entItScene)
+			{
+				auto sceneC = ent->GetComponent<pragma::CSceneComponent>();
+				auto *renderer = sceneC->GetRenderer();
+				if(renderer->IsRasterizationRenderer() == false)
+					continue;
+				Con::cout<<"Scene "<<ent->GetName()<<":"<<Con::endl;
+				auto *rast = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
+				auto &hdrInfo = rast->GetHDRInfo();
+				std::unordered_set<prosper::IImage*> images;
+				auto fAddTex = [&images](const std::shared_ptr<prosper::Texture> &tex) {
+					if(tex == nullptr)
+						return;
+					images.insert(&tex->GetImage());
+				};
+				auto fAddRt = [&fAddTex](const std::shared_ptr<prosper::RenderTarget> &rt) {
+					if(rt == nullptr)
+						return;
+					auto n = rt->GetAttachmentCount();
+					for(auto i=decltype(n){0u};i<n;++i)
+					{
+						auto *tex = rt->GetTexture(i);
+						if(tex == nullptr)
+							continue;
+						fAddTex(tex->shared_from_this());
+					}
+				};
+				fAddRt(hdrInfo.sceneRenderTarget);
+				fAddTex(hdrInfo.bloomTexture);
+				fAddRt(hdrInfo.bloomBlurRenderTarget);
+				if(hdrInfo.bloomBlurSet)
+				{
+					fAddRt(hdrInfo.bloomBlurSet->GetStagingRenderTarget());
+					fAddRt(hdrInfo.bloomBlurSet->GetFinalRenderTarget());
+				}
+				// fAddRt(hdrInfo.hdrPostProcessingRenderTarget);
+				fAddRt(hdrInfo.toneMappedRenderTarget);
+				fAddRt(hdrInfo.toneMappedPostProcessingRenderTarget);
+				fAddRt(hdrInfo.ssaoInfo.renderTarget);
+				fAddRt(hdrInfo.ssaoInfo.renderTargetBlur);
+				fAddTex(hdrInfo.prepass.textureNormals);
+				fAddTex(hdrInfo.prepass.textureDepth);
+				// fAddTex(hdrInfo.prepass.textureDepthSampled);
+				fAddRt(hdrInfo.prepass.renderTarget);
+				/*auto &glowInfo = rast->GetGlowInfo();
+				fAddRt(glowInfo.renderTarget);
+				if(glowInfo.blurSet)
+				{
+					fAddRt(glowInfo.blurSet->GetStagingRenderTarget());
+					fAddRt(glowInfo.blurSet->GetFinalRenderTarget());
+				}*/
+
+				Con::cout<<"\t"<<images.size()<<" images:"<<Con::endl;
+				prosper::DeviceSize totalSceneSize = 0;
+				for(auto &img : images)
+				{
+					fPrintImageInfo(*img,"\t\t",false);
+					Con::cout<<Con::endl;
+					totalSceneSize += fGetImageSize(*img);
+				}
+				Con::cout<<"\tTotal scene image size: "<<util::get_pretty_bytes(totalSceneSize)<<Con::endl;
+			}
+		}
 
 		auto &imgBufs = GetRenderContext().GetDeviceImageBuffers();
 		totalSize = 0;

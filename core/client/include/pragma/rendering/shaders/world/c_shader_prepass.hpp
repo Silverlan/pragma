@@ -59,7 +59,6 @@ namespace pragma
 		struct PushConstants
 			: public ScenePushConstants
 		{
-			ScenePushConstants scene;
 			float alphaCutoff;
 
 			void Initialize()
@@ -83,7 +82,7 @@ namespace pragma
 		virtual bool SetDepthBias(const Vector2 &depthBias) override;
 		virtual void Set3DSky(bool is3dSky) override;
 		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
-		virtual bool IsPrepass() const override {return true;}
+		virtual PassType GetPassType() const {return PassType::DepthPrepass;}
 	protected:
 		virtual void OnPipelinesInitialized() override;
 		virtual bool BindMaterial(CMaterial &mat) override;

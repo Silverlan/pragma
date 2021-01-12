@@ -85,6 +85,8 @@ Engine::Engine(int,char*[])
 	m_logFile(nullptr),
 	m_tickRate(Engine::DEFAULT_TICK_RATE)
 {
+	m_mainThreadId = std::this_thread::get_id();
+	
 	m_lastTick = static_cast<long long>(m_ctTick());
 	engine = this;
 
@@ -146,6 +148,7 @@ void Engine::SetReplicatedConVar(const std::string &cvar,const std::string &val)
 	client->SetConVar(cvar,val);
 }
 
+std::thread::id Engine::GetMainThreadId() const {return m_mainThreadId;}
 std::optional<Engine::ConsoleOutput> Engine::PollConsoleOutput()
 {
 	if(m_bRecordConsoleOutput == false)

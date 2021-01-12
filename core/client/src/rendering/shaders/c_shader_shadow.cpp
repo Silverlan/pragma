@@ -41,6 +41,8 @@ decltype(ShaderShadow::VERTEX_BINDING_VERTEX) ShaderShadow::VERTEX_BINDING_VERTE
 decltype(ShaderShadow::VERTEX_ATTRIBUTE_POSITION) ShaderShadow::VERTEX_ATTRIBUTE_POSITION = {ShaderGameWorld::VERTEX_ATTRIBUTE_POSITION,VERTEX_BINDING_VERTEX};
 
 decltype(ShaderShadow::DESCRIPTOR_SET_INSTANCE) ShaderShadow::DESCRIPTOR_SET_INSTANCE = {&ShaderGameWorld::DESCRIPTOR_SET_INSTANCE};
+decltype(ShaderShadow::DESCRIPTOR_SET_SCENE) ShaderShadow::DESCRIPTOR_SET_SCENE = {&ShaderScene::DESCRIPTOR_SET_SCENE};
+decltype(ShaderShadow::DESCRIPTOR_SET_MATERIAL) ShaderShadow::DESCRIPTOR_SET_MATERIAL = {&ShaderTextured3DBase::DESCRIPTOR_SET_MATERIAL};
 decltype(ShaderShadow::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderShadow::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderGameWorld::DESCRIPTOR_SET_RENDER_SETTINGS};
 ShaderShadow::ShaderShadow(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader)
 	: ShaderGameWorld(context,identifier,vsShader,fsShader)
@@ -49,6 +51,11 @@ ShaderShadow::ShaderShadow(prosper::IPrContext &context,const std::string &ident
 ShaderShadow::ShaderShadow(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderShadow(context,identifier,"shadow/vs_shadow","shadow/fs_shadow")
 {}
+void ShaderShadow::OnPipelinesInitialized()
+{
+	ShaderGameWorld::OnPipelinesInitialized();
+	m_defaultMatDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
+}
 bool ShaderShadow::BeginDraw(
 	const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,ShaderGameWorldPipeline pipelineIdx,
 	RecordFlags recordFlags
@@ -77,10 +84,11 @@ bool ShaderShadow::BindMaterial(CMaterial &mat)
 
 bool ShaderShadow::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount)
 {
-	auto flags = Flags::None;
+	return true;
+	/*auto flags = Flags::None;
 	if(mesh.GetExtendedVertexWeights().empty() == false)
 		flags |= Flags::UseExtendedVertexWeights;
-	return RecordPushConstants(flags,offsetof(PushConstants,flags)) && ShaderGameWorld::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount);
+	return RecordPushConstants(flags,offsetof(PushConstants,flags)) && ShaderGameWorld::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount);*/
 }
 
 bool ShaderShadow::BindLight(CLightComponent &light,uint32_t layerId)
@@ -106,6 +114,7 @@ uint32_t ShaderShadow::GetRenderSettingsDescriptorSetIndex() const {return DESCR
 uint32_t ShaderShadow::GetCameraDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
 uint32_t ShaderShadow::GetLightDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
 uint32_t ShaderShadow::GetInstanceDescriptorSetIndex() const{return DESCRIPTOR_SET_INSTANCE.setIndex;}
+uint32_t ShaderShadow::GetMaterialDescriptorSetIndex() const {return DESCRIPTOR_SET_MATERIAL.setIndex;}
 bool ShaderShadow::BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) {return BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());}
 void ShaderShadow::GetVertexAnimationPushConstantInfo(uint32_t &offset) const {}
 void ShaderShadow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
@@ -129,6 +138,8 @@ void ShaderShadow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pi
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit);
 
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_MATERIAL);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDER_SETTINGS);
 
 	pipelineInfo.ToggleDepthBias(true,SHADOW_DEPTH_BIAS_CONSTANT,0.f,SHADOW_DEPTH_BIAS_SLOPE);

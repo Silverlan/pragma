@@ -43,3 +43,8 @@ void RenderSystem::RenderPrepass(const util::DrawSceneInfo &drawSceneInfo,Render
 {
 	// TODO: Remove me
 }
+
+void pragma::rendering::DepthStageRenderProcessor::BindLight(CLightComponent &light,uint32_t layerId)
+{
+	m_shaderProcessor.RecordBindLight(light,layerId);
+}

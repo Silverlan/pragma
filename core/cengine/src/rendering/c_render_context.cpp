@@ -13,8 +13,11 @@
 #include <shader/prosper_shader.hpp>
 #include <sharedutils/util_library.hpp>
 #include <pragma/util/util_module.hpp>
+#include <pragma/lua/lua_error_handling.hpp>
 
 using namespace pragma;
+
+extern DLLCENGINE CEngine *c_engine;
 
 RenderContext::RenderContext()
 	: m_monitor(nullptr),m_aspectRatio(1.f),m_renderAPI{"opengl"}
@@ -111,8 +114,23 @@ void RenderContext::ValidationCallback(
 		// A VkImageStencilUsageCreateInfoEXT error is caused due to a bug in Anvil: https://github.com/GPUOpen-LibrariesAndSDKs/Anvil/issues/153
 		// We'll just ignore it for now, since it doesn't affect us in any way.
 		// TODO: Remove this condition once the Anvil bug has been dealt with.
-		if(ustring::compare(strMsg.c_str(),"VkImageStencilUsageCreateInfoEXT",true,strlen("VkImageStencilUsageCreateInfoEXT")) == false)
-			Con::cerr<<"[PR] "<<strMsg<<Con::endl;
+		if(strMsg.find("value of stencilUsage must not be 0. The Vulkan spec states: stencilUsage must not be 0") != std::string::npos)
+			return;
+		Con::cerr<<"[PR] "<<strMsg<<Con::endl;
+		if(std::this_thread::get_id() == c_engine->GetMainThreadId())
+		{
+			// In many cases the error may have been caused by a Lua script, so we'll print
+			// some information here about the current Lua call stack.
+			auto *cl = c_engine->GetClientState();
+			auto *game = cl ? static_cast<CGame*>(cl->GetGameState()) : nullptr;
+			auto *l = game ? game->GetLuaState() : nullptr;
+			if(l)
+			{
+				std::stringstream ss;
+				if(Lua::get_callstack(l,ss))
+					Con::cerr<<"Lua callstack: "<<ss.str()<<Con::endl;
+			}
+		}
 	}
 }
 

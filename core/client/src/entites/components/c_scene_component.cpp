@@ -215,7 +215,14 @@ void CSceneComponent::Link(const CSceneComponent &other)
 void CSceneComponent::InitializeShadowDescriptorSet()
 {
 	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS.IsValid())
-		m_shadowDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS);
+	{
+		auto &context = c_engine->GetRenderContext();
+		m_shadowDsg = context.CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS);
+		auto &cubeTex = context.GetDummyCubemapTexture();
+		auto n = umath::to_integral(GameLimits::MaxActiveShadowCubeMaps);
+		for(auto i=decltype(n){0u};i<n;++i)
+			m_shadowDsg->GetDescriptorSet()->SetBindingArrayTexture(*cubeTex,umath::to_integral(pragma::ShaderSceneLit::ShadowBinding::ShadowCubeMaps),i);
+	}
 }
 
 pragma::CSceneComponent *CSceneComponent::GetByIndex(SceneIndex sceneIndex)

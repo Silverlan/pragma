@@ -408,6 +408,7 @@ void CGame::RegisterLua()
 			return;
 		Lua::Push(l,dsg);
 	}));
+#if 0
 	classDefRasterizationRenderer.def("GetStagingRenderTarget",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
 		auto &rt = renderer.GetHDRInfo().hdrPostProcessingRenderTarget;
 		if(rt == nullptr)
@@ -417,18 +418,21 @@ void CGame::RegisterLua()
 	classDefRasterizationRenderer.def("BlitStagingRenderTargetToMainRenderTarget",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&,const util::DrawSceneInfo&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const util::DrawSceneInfo &drawSceneInfo) {
 		renderer.GetHDRInfo().BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo);
 	}));
+#endif
 	classDefRasterizationRenderer.def("GetBloomTexture",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
 		auto &rt = renderer.GetHDRInfo().bloomBlurRenderTarget;
 		if(rt == nullptr)
 			return;
 		Lua::Push(l,rt->GetTexture().shared_from_this());
 	}));
+#if 0
 	classDefRasterizationRenderer.def("GetGlowTexture",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
 		auto &rt = renderer.GetGlowInfo().renderTarget;
 		if(rt == nullptr)
 			return;
 		Lua::Push(l,rt->GetTexture().shared_from_this());
 	}));
+#endif
 	classDefRasterizationRenderer.def("GetPresentationTexture",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
 		auto *tex = renderer.GetPresentationTexture();
 		if(tex == nullptr)

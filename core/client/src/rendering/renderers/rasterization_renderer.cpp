@@ -182,16 +182,16 @@ bool RasterizationRenderer::ReloadRenderTarget(pragma::CSceneComponent &scene,ui
 	auto bSsao = IsSSAOEnabled();
 	if(
 		m_hdrInfo.Initialize(scene,*this,width,height,m_sampleCount,bSsao) == false || 
-		m_glowInfo.Initialize(width,height,m_hdrInfo) == false ||
+		//m_glowInfo.Initialize(width,height,m_hdrInfo) == false ||
 		m_hdrInfo.InitializeDescriptorSets() == false
 		)
 		return false;
 
 	auto &descSetHdrResolve = *m_hdrInfo.dsgBloomTonemapping->GetDescriptorSet();
-	auto *resolvedGlowTex = &GetGlowInfo().renderTarget->GetTexture();
-	if(resolvedGlowTex->IsMSAATexture())
-		resolvedGlowTex = static_cast<prosper::MSAATexture*>(resolvedGlowTex)->GetResolvedTexture().get();
-	descSetHdrResolve.SetBindingTexture(*resolvedGlowTex,umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Glow));
+	//auto *resolvedGlowTex = &GetGlowInfo().renderTarget->GetTexture();
+	//if(resolvedGlowTex->IsMSAATexture())
+	//	resolvedGlowTex = static_cast<prosper::MSAATexture*>(resolvedGlowTex)->GetResolvedTexture().get();
+	//descSetHdrResolve.SetBindingTexture(*resolvedGlowTex,umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Glow));
 
 	if(bSsao == true)
 	{
@@ -214,7 +214,10 @@ bool RasterizationRenderer::ReloadRenderTarget(pragma::CSceneComponent &scene,ui
 	UpdateRenderSettings();
 	return true;
 }
-void RasterizationRenderer::SetFrameDepthBufferSamplingRequired() {m_bFrameDepthBufferSamplingRequired = true;}
+void RasterizationRenderer::SetFrameDepthBufferSamplingRequired()
+{
+	m_bFrameDepthBufferSamplingRequired = true;
+}
 void RasterizationRenderer::EndRendering() {}
 void RasterizationRenderer::BeginRendering(const util::DrawSceneInfo &drawSceneInfo)
 {
@@ -318,7 +321,7 @@ pragma::ShaderPrepassBase &RasterizationRenderer::GetPrepassShader() const {retu
 
 HDRData &RasterizationRenderer::GetHDRInfo() {return m_hdrInfo;}
 const HDRData &RasterizationRenderer::GetHDRInfo() const {return const_cast<RasterizationRenderer*>(this)->GetHDRInfo();}
-GlowData &RasterizationRenderer::GetGlowInfo() {return m_glowInfo;}
+// GlowData &RasterizationRenderer::GetGlowInfo() {return m_glowInfo;}
 SSAOInfo &RasterizationRenderer::GetSSAOInfo() {return m_hdrInfo.ssaoInfo;}
 pragma::rendering::Prepass &RasterizationRenderer::GetPrepass() {return m_hdrInfo.prepass;}
 const pragma::rendering::ForwardPlusInstance &RasterizationRenderer::GetForwardPlusInstance() const {return const_cast<RasterizationRenderer*>(this)->GetForwardPlusInstance();}

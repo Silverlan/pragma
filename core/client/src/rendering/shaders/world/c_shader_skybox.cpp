@@ -45,6 +45,12 @@ ShaderSkybox::ShaderSkybox(prosper::IPrContext &context,const std::string &ident
 	// SetBaseShader<ShaderTextured3DBase>();
 }
 
+void ShaderSkybox::OnPipelinesInitialized()
+{
+	ShaderTextured3DBase::OnPipelinesInitialized();
+	m_defaultMatDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
+}
+
 bool ShaderSkybox::GetRenderBufferTargets(
 	CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
 	std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
@@ -87,6 +93,13 @@ void ShaderSkybox::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pi
 	ToggleDynamicScissorState(pipelineInfo,true);
 }
 
+uint32_t ShaderSkybox::GetRenderSettingsDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
+uint32_t ShaderSkybox::GetRendererDescriptorSetIndex() const {return DESCRIPTOR_SET_RENDERER.setIndex;}
+uint32_t ShaderSkybox::GetCameraDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
+uint32_t ShaderSkybox::GetLightDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
+uint32_t ShaderSkybox::GetInstanceDescriptorSetIndex() const{return DESCRIPTOR_SET_INSTANCE.setIndex;}
+uint32_t ShaderSkybox::GetMaterialDescriptorSetIndex() const {return DESCRIPTOR_SET_MATERIAL.setIndex;}
+
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderSkybox::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
 	auto *skyboxMap = mat.GetTextureInfo("skybox");
@@ -99,9 +112,9 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderSkybox::InitializeMaterialDe
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
 	descSet.SetBindingTexture(*skyboxTexture->GetVkTexture(),0u);
+	descSet.Update();
 	return descSetGroup;
 }
-uint32_t ShaderSkybox::GetMaterialDescriptorSetIndex() const {return DESCRIPTOR_SET_MATERIAL.setIndex;}
 bool ShaderSkybox::BeginDraw(
 	const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &drawOrigin,
 	const Vector4 &clipPlane,ShaderGameWorldPipeline pipelineIdx,RecordFlags recordFlags

@@ -41,7 +41,7 @@ void CGame::RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &
 		drawCmd->RecordBlitImage(blitInfo,texPostHdr.GetImage(),*optOutImage);
 		drawCmd->RecordImageBarrier(*optOutImage,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 	}
-	drawCmd->RecordImageBarrier(texPostHdr.GetImage(),prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+	drawCmd->RecordImageBarrier(texPostHdr.GetImage(),prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 }
 
 std::shared_ptr<prosper::IPrimaryCommandBuffer> CGame::GetCurrentDrawCommandBuffer() const {return m_currentDrawCmd.lock();}
@@ -69,15 +69,17 @@ void CGame::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 	auto *renderer = const_cast<pragma::rendering::BaseRenderer*>(scene->GetRenderer());
 	if(renderer)
 	{
-		renderer->Render(drawSceneInfo);
-		StartProfilingStage(CGame::GPUProfilingPhase::Present);
-		StartProfilingStage(CGame::CPUProfilingPhase::Present);
 
 		prosper::Texture *presentationTexture = nullptr;
 		if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::HDR))
 			presentationTexture = drawSceneInfo.renderTarget ? &drawSceneInfo.renderTarget->GetTexture() : renderer->GetHDRPresentationTexture();
 		else
 			presentationTexture = renderer->GetPresentationTexture();
+		drawSceneInfo.commandBuffer->RecordImageBarrier(presentationTexture->GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+
+		renderer->Render(drawSceneInfo);
+		StartProfilingStage(CGame::GPUProfilingPhase::Present);
+		StartProfilingStage(CGame::CPUProfilingPhase::Present);
 
 		RenderScenePresent(drawSceneInfo.commandBuffer,*presentationTexture,drawSceneInfo.outputImage.get(),drawSceneInfo.outputLayerId);
 		StopProfilingStage(CGame::CPUProfilingPhase::Present);

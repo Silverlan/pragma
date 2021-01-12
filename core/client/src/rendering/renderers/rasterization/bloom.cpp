@@ -57,6 +57,7 @@ void RasterizationRenderer::RenderBloom(const util::DrawSceneInfo &drawSceneInfo
 
 void RasterizationRenderer::RenderGlowObjects(const util::DrawSceneInfo &drawSceneInfo)
 {
+#if 0
 	auto &glowInfo = GetGlowInfo();
 	if(glowInfo.bGlowScheduled == false || drawSceneInfo.scene.expired())
 		return;
@@ -102,6 +103,7 @@ void RasterizationRenderer::RenderGlowObjects(const util::DrawSceneInfo &drawSce
 
 	drawCmd->RecordImageBarrier(glowInfo.renderTarget->GetTexture().GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingGlow);
+#endif
 }
 
 void RasterizationRenderer::RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::CSceneComponent &scene,RenderMode renderMode)

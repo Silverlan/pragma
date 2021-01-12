@@ -152,7 +152,7 @@ namespace pragma::rendering
 		void SetMaxHDRExposure(Float exposure);
 		const HDRData &GetHDRInfo() const;
 		HDRData &GetHDRInfo();
-		GlowData &GetGlowInfo();
+		// GlowData &GetGlowInfo();
 		SSAOInfo &GetSSAOInfo();
 
 		prosper::IDescriptorSet *GetDepthDescriptorSet() const;
@@ -236,7 +236,7 @@ namespace pragma::rendering
 
 		// HDR
 		HDRData m_hdrInfo;
-		GlowData m_glowInfo;
+		// GlowData m_glowInfo;
 
 		// Frustum planes (Required for culling)
 		std::vector<umath::Plane> m_frustumPlanes = {};

@@ -155,6 +155,8 @@ void RasterizationRenderer::ExecuteLightinPass(const util::DrawSceneInfo &drawSc
 	auto bShouldDrawParticles = (drawSceneInfo.renderFlags &FRender::Particles) == FRender::Particles && cvDrawParticles->GetBool() == true && culledParticles.empty() == false;
 	if(bShouldDrawParticles == true)
 		SetFrameDepthBufferSamplingRequired();
+#if 0
+	// TODO
 	if(m_bFrameDepthBufferSamplingRequired == true)
 	{
 		auto &prepass = GetPrepass();
@@ -172,6 +174,7 @@ void RasterizationRenderer::ExecuteLightinPass(const util::DrawSceneInfo &drawSc
 		//fTransitionSampleImgToTransferDst(*drawCmd);
 		//};
 	}
+#endif
 	m_bFrameDepthBufferSamplingRequired = false;
 
 	// Visible light tile index buffer
@@ -334,7 +337,7 @@ void RasterizationRenderer::RecordLightingPass(const util::DrawSceneInfo &drawSc
 			c_game->StartProfilingStage(CGame::GPUProfilingPhase::Particles);
 			// c_game->CallCallbacks("PreRenderParticles");
 
-			auto &glowInfo = GetGlowInfo();
+			//auto &glowInfo = GetGlowInfo();
 
 			// Vertex buffer barrier
 			for(auto *particle : culledParticles)
@@ -373,11 +376,11 @@ void RasterizationRenderer::RecordLightingPass(const util::DrawSceneInfo &drawSc
 				}
 			}
 
-			RenderParticleSystems(drawSceneInfo,culledParticles,RenderMode::World,false,&glowInfo.tmpBloomParticles);
-			if(bGlow == false)
-				glowInfo.tmpBloomParticles.clear();
-			if(!glowInfo.tmpBloomParticles.empty())
-				glowInfo.bGlowScheduled = true;
+			// RenderParticleSystems(drawSceneInfo,culledParticles,RenderMode::World,false,&glowInfo.tmpBloomParticles);
+			//if(bGlow == false)
+			//	glowInfo.tmpBloomParticles.clear();
+			//if(!glowInfo.tmpBloomParticles.empty())
+			//	glowInfo.bGlowScheduled = true;
 
 			// c_game->CallCallbacks("PostRenderParticles");
 			c_game->StopProfilingStage(CGame::GPUProfilingPhase::Particles);
@@ -529,12 +532,12 @@ void RasterizationRenderer::RecordLightingPass(const util::DrawSceneInfo &drawSc
 			if((drawSceneInfo.renderFlags &FRender::Particles) == FRender::Particles)
 			{
 				auto &culledParticles = scene.GetSceneRenderDesc().GetCulledParticles();
-				auto &glowInfo = GetGlowInfo();
-				RenderParticleSystems(drawSceneInfo,culledParticles,RenderMode::View,false,&glowInfo.tmpBloomParticles);
-				if(bGlow == false)
-					glowInfo.tmpBloomParticles.clear();
-				if(!glowInfo.tmpBloomParticles.empty())
-					glowInfo.bGlowScheduled = true;
+				//auto &glowInfo = GetGlowInfo();
+				//RenderParticleSystems(drawSceneInfo,culledParticles,RenderMode::View,false,&glowInfo.tmpBloomParticles);
+				//if(bGlow == false)
+				//	glowInfo.tmpBloomParticles.clear();
+				//if(!glowInfo.tmpBloomParticles.empty())
+				//	glowInfo.bGlowScheduled = true;
 			}
 			//RenderGlowMeshes(cam,true);
 

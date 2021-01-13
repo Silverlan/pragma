@@ -62,9 +62,13 @@ bool pragma::asset::WorldData::Write(const std::string &fileName,std::string *op
 
 void pragma::asset::WorldData::Write(VFilePtrReal &f)
 {
-	auto mapName = ufile::get_file_from_filename(f->GetPath());
-	ufile::remove_extension_from_filename(mapName);
-	ustring::to_lower(mapName);
+	auto mapName = util::Path::CreateFile(f->GetPath());
+	while(ustring::compare(mapName.GetFront(),"maps",false) == false)
+		mapName.PopFront();
+	mapName.PopFront(); // Prop "maps"
+	auto strMapName = mapName.GetString();
+	ufile::remove_extension_from_filename(strMapName);
+	ustring::to_lower(strMapName);
 
 	const std::array<char,3> header = {'W','L','D'};
 	f->Write(header.data(),header.size());
@@ -116,7 +120,7 @@ void pragma::asset::WorldData::Write(VFilePtrReal &f)
 	}
 
 	m_messageLogger("Saving lightmap atlas...");
-	SaveLightmapAtlas(mapName);
+	SaveLightmapAtlas(strMapName);
 	if(m_lightMapAtlasEnabled)
 		flags |= DataFlags::HasLightmapAtlas;
 	if(m_lightMapAtlasEnabled)

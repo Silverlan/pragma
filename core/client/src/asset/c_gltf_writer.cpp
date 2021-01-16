@@ -414,7 +414,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 			uint32_t meshIdx = 0;
 			for(auto &mesh : exportData.exportMeshes)
 			{
-				ScopeGuard sg {[&meshIdx]() {++meshIdx;}};
+				util::ScopeGuard sg {[&meshIdx]() {++meshIdx;}};
 				auto &indices = mesh->GetTriangles();
 				auto *gltfIndexData = indexData.data() +indexOffset *sizeof(uint32_t);
 				for(auto i=decltype(indices.size()){0u};i<indices.size();++i)

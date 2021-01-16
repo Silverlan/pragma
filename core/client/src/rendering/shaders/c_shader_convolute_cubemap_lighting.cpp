@@ -69,7 +69,7 @@ std::shared_ptr<prosper::Texture> ShaderConvoluteCubemapLighting::ConvoluteCubem
 		for(uint32_t i=0u;i<numVerts;i+=3)
 		{
 			auto &setupCmd = c_engine->GetSetupCommandBuffer();
-			ScopeGuard sgCmd {[this]() {
+			util::ScopeGuard sgCmd {[this]() {
 				GetContext().FlushSetupCommandBuffer();
 			}};
 			prosper::util::ImageSubresourceRange range {};

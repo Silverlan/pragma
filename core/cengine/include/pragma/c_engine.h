@@ -20,7 +20,7 @@
 class ClientState;
 namespace GLFW {class Joystick;};
 namespace al {class SoundSystem;class Effect;};
-namespace prosper {class RenderTarget; class ISwapCommandBufferGroup;};
+namespace prosper {class RenderTarget; class ISwapCommandBufferGroup; class TimerQuery; class IQueryPool;};
 #pragma warning(push)
 #pragma warning(disable : 4251)
 class DLLCENGINE CEngine
@@ -72,7 +72,17 @@ public:
 		UniformBlocksInitialized = FirstFrame<<1u,
 		VulkanValidationEnabled = UniformBlocksInitialized<<1u,
 		ConsoleOpen = VulkanValidationEnabled<<1u,
-		TickDeltaTimeTiedToFrameRate = ConsoleOpen<<1u
+		TickDeltaTimeTiedToFrameRate = ConsoleOpen<<1u,
+		EnableGpuPerformanceTimers = TickDeltaTimeTiedToFrameRate<<1u
+	};
+	enum class GPUTimer : uint32_t
+	{
+		GUI = 0,
+		Scene,
+		Frame,
+		Present,
+
+		Count
 	};
 
 	using pragma::RenderContext::DrawFrame;
@@ -197,11 +207,16 @@ public:
 	// will cause the game to slow down, a faster frame-rate to speed up. This should only be
 	// used for offline rendering (i.e. recording).
 	void SetTickDeltaTimeTiedToFrameRate(bool tieToFrameRate);
+
+	void SetGpuPerformanceTimersEnabled(bool enabled);
+	std::chrono::nanoseconds GetGpuExecutionTime(uint32_t swapchainIdx,GPUTimer timer) const;
 protected:
 	void DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt);
 	void WriteClientConfig(VFilePtrReal f);
 	void PreloadClientConfig();
 	void OnRenderResolutionChanged(uint32_t width,uint32_t height);
+	uint32_t GetPerformanceTimerIndex(uint32_t swapchainIdx,GPUTimer timer) const;
+	uint32_t GetPerformanceTimerIndex(GPUTimer timer) const;
 	virtual void RunLaunchCommands() override;
 	virtual void DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t swapchainImageIdx) override;
 	virtual void OnResolutionChanged(uint32_t w,uint32_t h) override;
@@ -245,6 +260,10 @@ private:
 	std::unordered_map<GLFW::Key,GLFW::KeyState> m_joystickKeyStates;
 	std::unordered_map<short,KeyBind> m_keyMappings;
 	std::unique_ptr<ConVarInfoList> m_preloadedConfig;
+	
+	std::shared_ptr<prosper::IQueryPool> m_gpuTimerPool = nullptr;
+	std::vector<std::shared_ptr<prosper::TimerQuery>> m_gpuTimers;
+	std::vector<std::chrono::nanoseconds> m_gpuExecTimes {};
 
 	virtual void Think() override;
 	virtual void Tick() override;
@@ -254,6 +273,12 @@ private:
 	void MapKey(short c,std::unordered_map<std::string,std::vector<std::string>> &binds);
 };
 REGISTER_BASIC_BITWISE_OPERATORS(CEngine::StateFlags)
+
+namespace pragma
+{
+	DLLCENGINE CEngine *get_cengine();
+	DLLCENGINE ClientState *get_client_state();
+};
 
 template<class TEfxProperties>
 	std::shared_ptr<al::Effect> CEngine::CreateAuxEffect(const std::string &name,const TEfxProperties &props)

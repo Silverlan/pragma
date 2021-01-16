@@ -58,7 +58,7 @@ void CGame::RecordSceneCommandBuffers(const util::DrawSceneInfo &drawSceneInfo)
 void CGame::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 {
 	m_currentDrawCmd = drawSceneInfo.commandBuffer;
-	ScopeGuard sgCurrentDrawCmd {[this]() {
+	util::ScopeGuard sgCurrentDrawCmd {[this]() {
 		m_currentDrawCmd = {};
 	}};
 

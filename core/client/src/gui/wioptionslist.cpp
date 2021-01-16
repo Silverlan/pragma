@@ -102,16 +102,25 @@ void WIOptionsList::SizeToContents(bool x,bool y)
 	}
 }
 
-WITableRow *WIOptionsList::AddRow()
+WITableRow *WIOptionsList::AddRow(const std::optional<std::string> &identifier)
 {
 	if(!m_hTable.IsValid())
 		return nullptr;
-	return m_hTable.get<WITable>()->AddRow();
+	auto *row = m_hTable.get<WITable>()->AddRow();
+	if(row && identifier.has_value() && !identifier->empty())
+		m_rows[*identifier] = row->GetHandle();
+	return row;
+}
+
+WITableRow *WIOptionsList::GetRow(const std::string &identifier) const
+{
+	auto it = m_rows.find(identifier);
+	return (it != m_rows.end()) ? dynamic_cast<WITableRow*>(it->second.get()) : nullptr;
 }
 
 WICheckbox *WIOptionsList::AddToggleChoice(const std::string &name,const std::string &cvarName,const std::function<std::string(bool)> &translator,const std::function<bool(std::string)> &translator2)
 {
-	auto *row = AddRow();
+	auto *row = AddRow(cvarName);
 	if(row == nullptr)
 		return nullptr;
 	row->SetValue(0,name);
@@ -133,9 +142,9 @@ WICheckbox *WIOptionsList::AddToggleChoice(const std::string &name,const std::st
 WICheckbox *WIOptionsList::AddToggleChoice(const std::string &name,const std::string &cvarName) {return AddToggleChoice(name,cvarName,nullptr);}
 
 template<class T>
-	WIChoiceList *WIOptionsList::AddChoiceList(const std::string &name,T list,const std::string &cvarName,const std::function<void(WIChoiceList*)> &initializer)
+	WIChoiceList *WIOptionsList::AddChoiceList(const std::string &name,T list,const std::string &cvarName,const std::function<void(WIChoiceList*)> &initializer,const std::optional<std::string> &optRowIdent)
 {
-	auto *row = AddRow();
+	auto *row = AddRow(optRowIdent.has_value() ? *optRowIdent : cvarName);
 	if(row == nullptr)
 		return nullptr;
 	auto hChoiceList = CreateChild<WIChoiceList>();
@@ -160,7 +169,7 @@ template<class T>
 	row->InsertElement(1,pChoiceList);
 	return pChoiceList;
 }
-WIChoiceList *WIOptionsList::AddChoiceList(const std::string &name,const std::vector<std::pair<std::string,std::string>> &list,const std::string &cvarName) {return AddChoiceList<const std::vector<std::pair<std::string,std::string>>&>(name,list,cvarName,nullptr);}
+WIChoiceList *WIOptionsList::AddChoiceList(const std::string &name,const std::vector<std::pair<std::string,std::string>> &list,const std::string &cvarName,const std::optional<std::string> &optRowIdent) {return AddChoiceList<const std::vector<std::pair<std::string,std::string>>&>(name,list,cvarName,nullptr,optRowIdent);}
 WIChoiceList *WIOptionsList::AddChoiceList(const std::string &name,const std::vector<std::string> &list,const std::string &cvarName) {return AddChoiceList<const std::vector<std::string>&>(name,list,cvarName,nullptr);}
 WIChoiceList *WIOptionsList::AddChoiceList(const std::string &name,const std::function<void(WIChoiceList*)> &initializer,const std::string &cvarName) {return AddChoiceList<const std::vector<std::string>&>(name,std::vector<std::string>({}),cvarName,initializer);}
 WIChoiceList *WIOptionsList::AddChoiceList(const std::string &name,const std::string &cvarName) {return AddChoiceList(name,nullptr,cvarName);}
@@ -168,7 +177,7 @@ WIChoiceList *WIOptionsList::AddChoiceList(const std::string &name,const std::st
 template<class T>
 	WIDropDownMenu *WIOptionsList::AddDropDownMenu(const std::string &name,T list,const std::string &cvarName,const std::function<void(WIDropDownMenu*)> &initializer)
 {
-	auto *row = AddRow();
+	auto *row = AddRow(cvarName);
 	if(row == nullptr)
 		return nullptr;
 	auto hDropDownMenu = CreateChild<WIDropDownMenu>();
@@ -227,7 +236,7 @@ void WIOptionsList::RunUpdateConVars(bool bClear)
 }
 WITextEntry *WIOptionsList::AddTextEntry(const std::string &name,const std::string &cvarName)
 {
-	auto *row = AddRow();
+	auto *row = AddRow(cvarName);
 	if(row == nullptr)
 		return nullptr;
 	auto hTextEntry = CreateChild<WITextEntry>();
@@ -251,7 +260,7 @@ WITextEntry *WIOptionsList::AddTextEntry(const std::string &name,const std::stri
 }
 WISlider *WIOptionsList::AddSlider(const std::string &name,const std::function<void(WISlider*)> &initializer,const std::string &cvarName)
 {
-	auto *row = AddRow();
+	auto *row = AddRow(cvarName);
 	if(row == nullptr)
 		return nullptr;
 	auto hSlider = CreateChild<WISlider>();
@@ -277,7 +286,7 @@ WISlider *WIOptionsList::AddSlider(const std::string &name,const std::function<v
 }
 void WIOptionsList::AddKeyBinding(const std::string &keyName,const std::string &cvarName)
 {
-	auto *row = AddRow();
+	auto *row = AddRow(cvarName);
 	if(row == nullptr)
 		return;
 	std::vector<GLFW::Key> mappedKeys {};

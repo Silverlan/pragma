@@ -128,7 +128,7 @@ std::shared_ptr<prosper::Texture> ShaderComputeIrradianceMapRoughness::ComputeRo
 			for(uint32_t i=0u;i<numVerts;i+=3)
 			{
 				auto &setupCmd = c_engine->GetSetupCommandBuffer();
-				ScopeGuard sgCmd {[this]() {
+				util::ScopeGuard sgCmd {[this]() {
 					GetContext().FlushSetupCommandBuffer();
 				}};
 				setupCmd->RecordUpdateBuffer(*buf,0,roughnessData);

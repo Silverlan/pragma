@@ -46,6 +46,8 @@
 #include <wgui/types/wicontextmenu.hpp>
 #include <wgui/types/witext.h>
 #include <wgui/types/witext_tags.hpp>
+#include <queries/prosper_query_pool.hpp>
+#include <queries/prosper_timer_query.hpp>
 
 extern "C"
 {
@@ -67,7 +69,7 @@ decltype(CEngine::AXIS_PRESS_THRESHOLD) CEngine::AXIS_PRESS_THRESHOLD = 0.5f;
 
 // If set to true, each joystick axes will be split into a positive and a negative axis, which
 // can be bound individually
-
+#pragma optimize("",off)
 static const auto SEPARATE_JOYSTICK_AXES = true;
 CEngine::CEngine(int argc,char* argv[])
 	: Engine(argc,argv),pragma::RenderContext(),
@@ -909,6 +911,9 @@ void CEngine::ReloadShaderPipelines()
 
 CEngine::~CEngine() {}
 
+CEngine *pragma::get_cengine() {return c_engine;}
+ClientState *pragma::get_client_state() {return client;}
+
 void CEngine::HandleLocalHostPlayerClientPacket(NetPacket &p)
 {
 	auto *client = GetClientState();
@@ -1052,6 +1057,19 @@ void CEngine::UpdateFPS(float t)
 static CVar cvProfiling = GetEngineConVar("debug_profiling_enabled");
 void CEngine::DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t n_current_swapchain_image)
 {
+	auto perfTimers = umath::is_flag_set(m_stateFlags,StateFlags::EnableGpuPerformanceTimers);
+	if(perfTimers)
+	{
+		auto n = umath::to_integral(GPUTimer::Count);
+		for(auto i=decltype(n){0u};i<n;++i)
+		{
+			auto idx = GetPerformanceTimerIndex(static_cast<GPUTimer>(i));
+			m_gpuTimers[idx]->QueryResult(m_gpuExecTimes[idx]);
+		}
+
+		auto idx = GetPerformanceTimerIndex(GPUTimer::Frame);
+		m_gpuTimers[idx]->Begin(drawCmd);
+	}
 	m_gpuProfiler->Reset();
 	StartProfilingStage(GPUProfilingPhase::Frame);
 
@@ -1084,14 +1102,30 @@ void CEngine::DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t n_curre
 		prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal
 	);
 
+	if(perfTimers)
+	{
+		auto idx = GetPerformanceTimerIndex(GPUTimer::Present);
+		m_gpuTimers[idx]->Begin(drawCmd);
+	}
 	drawCmd.RecordPresentImage(finalImg,n_current_swapchain_image);
+	if(perfTimers)
+	{
+		auto idx = GetPerformanceTimerIndex(GPUTimer::Present);
+		m_gpuTimers[idx]->End(drawCmd);
+	}
 
 	StopProfilingStage(GPUProfilingPhase::Frame);
+	if(perfTimers)
+	{
+		auto idx = GetPerformanceTimerIndex(GPUTimer::Frame);
+		m_gpuTimers[idx]->End(drawCmd);
+	}
 }
 
 static auto cvHideGui = GetClientConVar("debug_hide_gui");
 void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,std::shared_ptr<prosper::RenderTarget> &rt)
 {
+	auto perfTimers = umath::is_flag_set(m_stateFlags,StateFlags::EnableGpuPerformanceTimers);
 	auto drawGui = !cvHideGui->GetBool();
 	if(drawGui)
 	{
@@ -1111,9 +1145,19 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 	{
 		StartProfilingStage(GPUProfilingPhase::DrawScene);
 
+		if(perfTimers)
+		{
+			auto idx = GetPerformanceTimerIndex(GPUTimer::Scene);
+			m_gpuTimers[idx]->Begin(*drawCmd);
+		}
 		util::DrawSceneInfo drawSceneInfo {};
 		drawSceneInfo.commandBuffer = drawCmd;
 		cl->Render(drawSceneInfo,rt);
+		if(perfTimers)
+		{
+			auto idx = GetPerformanceTimerIndex(GPUTimer::Scene);
+			m_gpuTimers[idx]->End(*drawCmd);
+		}
 
 		StopProfilingStage(GPUProfilingPhase::DrawScene);
 	}
@@ -1124,14 +1168,65 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 		if(c_game != nullptr)
 			c_game->PreGUIDraw(drawCmd);
 
+		if(perfTimers)
+		{
+			auto idx = GetPerformanceTimerIndex(GPUTimer::GUI);
+			m_gpuTimers[idx]->Begin(*drawCmd);
+		}
 		drawCmd->RecordBeginRenderPass(*rt,prosper::IPrimaryCommandBuffer::RenderPassFlags::SecondaryCommandBuffers);
 		m_guiCommandBufferGroup->ExecuteCommands(*drawCmd);
 		drawCmd->RecordEndRenderPass();
+		if(perfTimers)
+		{
+			auto idx = GetPerformanceTimerIndex(GPUTimer::GUI);
+			m_gpuTimers[idx]->End(*drawCmd);
+		}
 		CallCallbacks<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("PostDrawGUI",std::ref(drawCmd));
 
 		if(c_game != nullptr)
 			c_game->PostGUIDraw(drawCmd);
 	}
+}
+
+uint32_t CEngine::GetPerformanceTimerIndex(uint32_t swapchainIdx,GPUTimer timer) const
+{
+	return swapchainIdx *umath::to_integral(GPUTimer::Count) +umath::to_integral(timer);
+}
+uint32_t CEngine::GetPerformanceTimerIndex(GPUTimer timer) const {return GetPerformanceTimerIndex(GetRenderContext().GetLastAcquiredSwapchainImageIndex(),timer);}
+
+void CEngine::SetGpuPerformanceTimersEnabled(bool enabled)
+{
+	if(umath::is_flag_set(m_stateFlags,StateFlags::EnableGpuPerformanceTimers) == enabled)
+		return;
+	umath::set_flag(m_stateFlags,StateFlags::EnableGpuPerformanceTimers,enabled);
+
+	if(enabled == false)
+	{
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_gpuTimerPool);
+		m_gpuTimerPool = nullptr;
+		for(auto &t : m_gpuTimers)
+		{
+			c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(t);
+			t = nullptr;
+		}
+		for(auto &t : m_gpuExecTimes)
+			t = std::chrono::nanoseconds{0};
+		return;
+	}
+	auto &context = GetRenderContext();
+	auto numSwapchainImages = context.GetSwapchainImageCount();
+	auto numTimers = umath::to_integral(GPUTimer::Count) *numSwapchainImages;
+	m_gpuTimerPool = context.CreateQueryPool(prosper::QueryType::Timestamp,numTimers *2);
+	m_gpuTimers.resize(numTimers);
+	m_gpuExecTimes.resize(numTimers);
+	for(auto &t : m_gpuTimers)
+		t = m_gpuTimerPool->CreateTimerQuery(prosper::PipelineStageFlags::TopOfPipeBit,prosper::PipelineStageFlags::BottomOfPipeBit);
+}
+std::chrono::nanoseconds CEngine::GetGpuExecutionTime(uint32_t swapchainIdx,GPUTimer timer) const
+{
+	if(umath::is_flag_set(m_stateFlags,StateFlags::EnableGpuPerformanceTimers) == false)
+		return std::chrono::nanoseconds{0};
+	return m_gpuExecTimes[GetPerformanceTimerIndex(swapchainIdx,timer)];
 }
 
 #include <prosper_util.hpp>
@@ -1176,6 +1271,7 @@ void CEngine::Think()
 		cl->Think(); // Draw?
 
 	StartProfilingStage(CPUProfilingPhase::DrawFrame);
+
 	pragma::RenderContext::DrawFrame();
 	CallCallbacks("Draw");
 	StopProfilingStage(CPUProfilingPhase::DrawFrame);
@@ -1311,3 +1407,4 @@ REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled,[](NetworkState*,ConVar
 		return;
 	c_engine->SetGPUProfilingEnabled(enabled);
 })
+#pragma optimize("",on)

@@ -54,7 +54,7 @@ vec4 apply_debug_mode(uint debugMode,vec4 outputColor,vec2 texCoords,vec3 diffus
 		if(is_light_map_enabled())
 		{
 			vec4 colLightMap = texture(u_lightMap,fs_in.vert_uv_lightmap.xy);
-			colLightMap.rgb /= 255.0;
+			//colLightMap.rgb /= 255.0;
 			finalColor = colLightMap.rgba;
 		}
 		else

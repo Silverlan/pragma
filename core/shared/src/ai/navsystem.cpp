@@ -92,7 +92,7 @@ static std::shared_ptr<dtNavMesh> initialize_detour_mesh(rcPolyMesh &polyMesh,rc
 			*err = "Could not create detour navigation mesh!";
 		return nullptr;
 	}
-	ScopeGuard sg([navData]() {
+	util::ScopeGuard sg([navData]() {
 		dtFree(navData);
 	});
 	auto dtNav = std::shared_ptr<dtNavMesh>(dtAllocNavMesh(),[](dtNavMesh *dtNavMesh) {
@@ -538,7 +538,7 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(Game &game,const Config &config
 			return nullptr;
 		}
 
-		ScopeGuard sg([navData]() {
+		util::ScopeGuard sg([navData]() {
 			dtFree(navData);
 		});
 		

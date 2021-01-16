@@ -114,6 +114,11 @@ DLLENGINE void LPARAM_console(const std::vector<std::string> &argv)
 	engine->OpenConsole();
 }
 
+DLLENGINE void LPARAM_dev(const std::vector<std::string> &argv)
+{
+	engine->SetDeveloperMode(true);
+}
+
 DLLENGINE void LPARAM_log(const std::vector<std::string> &argv)
 {
 	std::string log;
@@ -193,6 +198,7 @@ static void LPARAM_verbose(const std::vector<std::string> &argv)
 }
 
 REGISTER_LAUNCH_PARAMETER_HELP(-console,LPARAM_console,"","start with the console open");
+REGISTER_LAUNCH_PARAMETER_HELP(-dev,LPARAM_dev,"","enable developer mode");
 REGISTER_LAUNCH_PARAMETER_HELP(-log,LPARAM_log,"[<logfile>][<errorlevel>]","enable logging. Default log file is log.txt");
 REGISTER_LAUNCH_PARAMETER_HELP(-map,LPARAM_map,"<map>","load this map on start");
 REGISTER_LAUNCH_PARAMETER_HELP(-gamemode,LPARAM_gamemode,"<gamemode>","load this gamemode on start");

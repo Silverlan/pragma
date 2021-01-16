@@ -13,7 +13,7 @@
 #include "../modules/light_map/fs_lightmap.gls"
 #include "../modules/fs_ssao_map.gls"
 
-layout(LAYOUT_ID(SHADER_UNIFORM_SKYBOX_MAP_SET,SHADER_UNIFORM_SKYBOX_MAP_BINDING)) uniform samplerCube u_skyboxTexture;
+layout(LAYOUT_ID(DESCRIPTOR_SET_MATERIAL,DESCRIPTOR_SET_MATERIAL_BINDING_SKYBOX_MAP)) uniform samplerCube u_skyboxTexture;
 
 void main()
 {

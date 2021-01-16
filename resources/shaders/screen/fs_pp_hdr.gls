@@ -7,12 +7,11 @@ layout(location = 0) in vec2 vs_vert_uv;
 
 layout(LAYOUT_ID(0,0)) uniform sampler2D u_texture;
 layout(LAYOUT_ID(0,1)) uniform sampler2D u_bloom;
-layout(LAYOUT_ID(0,2)) uniform sampler2D u_glow;
 
 layout(LAYOUT_PUSH_CONSTANTS()) uniform RenderSettings {
 	float exposure;
 	float bloomScale;
-	float glowScale;
+	float glowScale; // Obsolete
 	uint toneMapping;
 	uint flipVertically;
 } u_renderSettings;
@@ -29,9 +28,6 @@ void main()
 	vec4 col = texture(u_texture,uv);
 	vec3 colBloom = texture(u_bloom,uv).rgb;
 	col.rgb += colBloom *u_renderSettings.bloomScale;
-
-	vec3 colGlow = texture(u_glow,uv).rgb;
-	col.rgb += colGlow *u_renderSettings.glowScale;
 	
 	fs_color = vec4(apply_tone_mapping(col.rgb,u_renderSettings.toneMapping,u_renderSettings.exposure),col.a);
 	fs_color.a = dot(fs_color.rgb,vec3(0.299,0.587,0.114)); // Compute luma (required for fxaa)

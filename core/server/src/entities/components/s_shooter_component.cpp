@@ -88,7 +88,7 @@ void SShooterComponent::FireBullets(const BulletInfo &bulletInfo,DamageInfo &dmg
 		m_nextBullet = std::unique_ptr<NextBulletInfo>(new NextBulletInfo);
 		m_nextBullet->destinations = GetBulletDestinations(origin,dir,bulletInfo);
 	}
-	ScopeGuard sg([this]() {
+	util::ScopeGuard sg([this]() {
 		m_nextBullet = nullptr; // We're done with this
 	});
 

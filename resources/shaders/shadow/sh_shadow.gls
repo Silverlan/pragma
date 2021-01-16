@@ -1,8 +1,15 @@
 #ifndef F_SH_SHADOW_GLS
 #define F_SH_SHADOW_GLS
 
+#define DESCRIPTOR_SET_INSTANCE 0
+#define DESCRIPTOR_SET_MATERIAL (DESCRIPTOR_SET_INSTANCE +1)
+#define DESCRIPTOR_SET_SCENE (DESCRIPTOR_SET_MATERIAL +1)
+#define DESCRIPTOR_SET_RENDER_SETTINGS (DESCRIPTOR_SET_SCENE +1)
+
+#include "../modules/sh_uniform_locations.gls"
 #include "../modules/sh_export.gls"
 #include "../modules/sh_vertex_data_locations.gls"
+#include "../modules/sh_scene_flags.gls"
 
 struct VertexData
 {
@@ -17,14 +24,13 @@ layout(location = SHADER_VERTEX_DATA_LOCATION) EXPORT_VS VertexData
 #endif
 ;
 
-#define FRENDER_USE_EXTENDED_VERTEX_WEIGHTS 1
-
 layout(LAYOUT_PUSH_CONSTANTS()) uniform pushConstants {
 	mat4 depthMVP;
 	vec4 lightPos; // 4th component stores the distance
 	uint flags;
+	float alphaCutoff;
 } u_pushConstants;
 
-bool is_weighted_ext() {return (u_pushConstants.flags &FRENDER_USE_EXTENDED_VERTEX_WEIGHTS) != 0;}
+bool is_weighted_ext() {return (u_pushConstants.flags &SCENE_FLAG_BIT_USE_EXTENDED_VERTEX_WEIGHTS) != 0;}
 
 #endif

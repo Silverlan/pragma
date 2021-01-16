@@ -13,7 +13,7 @@ float apply_alpha_mode(float a,uint alphaMode,float alphaCutoff)
 	a += (1.0 -a) *when_eq(alphaMode,ALPHA_MODE_OPAQUE);
 
 	// if(alphaMode == ALPHA_MODE_MASK) (a >= alphaCutoff) ? 1.0 : 0.0
-	a += (alphaCutoff -a) *and(when_eq(alphaMode,ALPHA_MODE_MASK),when_gt(a,alphaCutoff));
+	a -= a *and(when_eq(alphaMode,ALPHA_MODE_MASK),when_gt(alphaCutoff,a));
 	return a;
 }
 

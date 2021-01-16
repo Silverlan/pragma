@@ -27,7 +27,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
 	auto *pSoftBodyComponent = static_cast<pragma::BaseSoftBodyComponent*>(ent.AddComponent("softbody").get());
 	if(pSoftBodyComponent == nullptr)
 		return {};
-	ScopeGuard sgSoftBodyComponent([&ent]() {
+	util::ScopeGuard sgSoftBodyComponent([&ent]() {
 		ent.RemoveComponent("softbody");
 	});
 	if(pSoftBodyComponent->InitializeSoftBodyData() == false)

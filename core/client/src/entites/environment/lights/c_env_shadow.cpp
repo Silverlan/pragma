@@ -111,7 +111,7 @@ static CVar cvShadowQuality = GetClientConVar("cl_render_shadow_quality");
 void CShadowComponent::ReloadDepthTextures()
 {
 	//Scene::ClearLightCache();
-	volatile ScopeGuard sg {[this]() {
+	volatile util::ScopeGuard sg {[this]() {
 		if(m_onTexturesReloaded == nullptr)
 			return;
 		m_onTexturesReloaded();
@@ -384,7 +384,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 			t = std::chrono::steady_clock::now();
 		c_game->GetRenderQueueWorkerManager().WaitForCompletion();
 		if(stats)
-			stats->workerWaitTime += std::chrono::steady_clock::now() -t;
+			(*stats)->AddTime(RenderQueueBuilderStats::Timer::WorkerWait,std::chrono::steady_clock::now() -t);
 		
 		// Sorting is technically not necessary, we only use it to lower the number of material state changes (for translucent meshes)
 		mainRenderQueue->Sort();
@@ -515,7 +515,7 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 		if(shadowRenderProcessor.BindShader(*shader))
 		{
 			shadowRenderProcessor.BindLight(*m_hLight,layerId);
-			shadowRenderProcessor.Render(*m_renderQueues.at(layerId),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->shadowPass : nullptr);
+			shadowRenderProcessor.Render(*m_renderQueues.at(layerId),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::ShadowPass) : nullptr);
 		
 			// TODO: Translucent render pass ?
 			shadowRenderProcessor.UnbindShader();

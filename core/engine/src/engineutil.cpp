@@ -32,6 +32,6 @@ void Engine::SetTickRate(UInt32 tickRate)
 	}
 	m_tickRate = tickRate;
 }
-bool Engine::IsRunning() {return m_bRunning;}
+bool Engine::IsRunning() {return umath::is_flag_set(m_stateFlags,StateFlags::Running);}
 bool Engine::IsGameActive() {return GetServerState()->IsGameActive();}
 bool Engine::IsServerOnly() {return true;}

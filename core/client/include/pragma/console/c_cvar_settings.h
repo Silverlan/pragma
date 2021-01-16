@@ -22,7 +22,7 @@ REGISTER_CONVAR_CL(cl_render_monitor,"0",ConVarFlags::Archive,"Which monitor to 
 REGISTER_CONVAR_CL(cl_gpu_device,"",ConVarFlags::Archive,"The unique identifier for the GPU vendor and device to use. If empty (or invalid), the first detected device will be used. Usage: <vendorId,deviceId>");
 REGISTER_CONVAR_CL(cl_render_window_mode,"0",ConVarFlags::Archive,"0 = Fullscreen, 1 = Windowed, 2 = Windowed no-border.");
 REGISTER_CONVAR_CL(cl_render_texture_quality,"4",ConVarFlags::Archive,"0 = Minimal, 1 = Low, 2 = Medium, 3 = High, 4 = Very High.");
-REGISTER_CONVAR_CL(cl_render_anti_aliasing,"0",ConVarFlags::Archive,"0 = No Anti Aliasing, 1 = MSAA, 2 = FXAA.");
+REGISTER_CONVAR_CL(cl_render_anti_aliasing,"2",ConVarFlags::Archive,"0 = No Anti Aliasing, 1 = MSAA, 2 = FXAA.");
 REGISTER_CONVAR_CL(cl_render_msaa_samples,"1",ConVarFlags::Archive,"1 = MSAAx2, 2 = MSAAx4, 3 = MSAAx8, etc.");
 REGISTER_CONVAR_CL(cl_render_fxaa_sub_pixel_aliasing_removal_amount,"0.75",ConVarFlags::Archive,"The amount of sub-pixel aliasing removal.");
 REGISTER_CONVAR_CL(cl_render_fxaa_edge_threshold,"0.166",ConVarFlags::Archive,"The minimum amount of local contrast required to apply algorithm.");
@@ -33,7 +33,7 @@ REGISTER_CONVAR_CL(cl_render_fov,"90",ConVarFlags::Archive,"Specifies the horizo
 REGISTER_CONVAR_CL(cl_render_brightness,"1",ConVarFlags::Archive,"Scene brightness.");
 REGISTER_CONVAR_CL(cl_render_contrast,"1",ConVarFlags::Archive,"Scene contrast.");
 REGISTER_CONVAR_CL(cl_render_motion_blur,"0",ConVarFlags::Archive,"Amount of motion blur. 0 = disabled.");
-REGISTER_CONVAR_CL(cl_render_texture_filtering,"3",ConVarFlags::Archive,"0 = Nearest Neighbour, 1 = Bilinear Filtering, 2 = Trilinear Filtering, 3 = Antisotropic Filtering x2, 4 = Antisotropic Filtering x4, 5 = Antisotropic Filtering x8, 6 = Antisotropic Filtering x16");
+REGISTER_CONVAR_CL(cl_render_texture_filtering,"6",ConVarFlags::Archive,"0 = Nearest Neighbour, 1 = Bilinear Filtering, 2 = Trilinear Filtering, 3 = Antisotropic Filtering x2, 4 = Antisotropic Filtering x4, 5 = Antisotropic Filtering x8, 6 = Antisotropic Filtering x16");
 REGISTER_CONVAR_CL(cl_render_occlusion_culling,"4",ConVarFlags::Archive,"0 = Off, 1 = Brute-Force, 2 = CHC++, 3 = Octree, 4 = BSP +Octree");
 REGISTER_CONVAR_CL(cl_render_depth_of_field,"0",ConVarFlags::Archive,"Depth of field scale.");
 REGISTER_CONVAR_CL(cl_render_reflection_quality,"2",ConVarFlags::Archive,"Changes the quality of reflections. 0 = Only static reflections, 1 = Dynamic reflections, 2 = Reflections with particle effects.");

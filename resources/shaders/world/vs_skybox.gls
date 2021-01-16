@@ -10,6 +10,9 @@
 #include "../modules/vs_instanced_entity_data.gls"
 #include "../modules/sh_rendersettings.gls"
 
+// Unused, but required for correct binding points in OpenGL
+#include "../modules/vs_vertex_animation_frame_data.gls"
+
 layout(location = SHADER_VERTEX_BUFFER_LOCATION) in vec3 in_vert_pos;
 
 void main()

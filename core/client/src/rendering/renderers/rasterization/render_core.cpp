@@ -26,6 +26,7 @@
 #include <pragma/lua/luafunction_call.h>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#include <queries/prosper_timer_query.hpp>
 #include <shader/prosper_shader_blur.hpp>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_msaa_texture.hpp>
@@ -137,10 +138,10 @@ bool RasterizationRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 			t = std::chrono::steady_clock::now();
 		sceneRenderDesc.WaitForWorldRenderQueues();
 		if(drawSceneInfo.renderStats)
-			drawSceneInfo.renderStats->prepass.renderThreadWaitTime += std::chrono::steady_clock::now() -t;
+			drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass)->SetTime(RenderPassStats::Timer::RenderThreadWait,std::chrono::steady_clock::now() -t);
 
 		for(auto &renderQueue : worldRenderQueues)
-			CSceneComponent::UpdateRenderBuffers(drawCmd,*renderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
+			CSceneComponent::UpdateRenderBuffers(drawCmd,*renderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
 	}
 
 	// If we're lucky, the render queues for everything else have already been built
@@ -154,13 +155,13 @@ bool RasterizationRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 	{
 		if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
 		{
-			CSceneComponent::UpdateRenderBuffers(drawCmd,worldObjectsRenderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
+			CSceneComponent::UpdateRenderBuffers(drawCmd,worldObjectsRenderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
 			// CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
 
 		}
 
 		if((drawSceneInfo.renderFlags &FRender::View) != FRender::None)
-			CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
+			CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
 		c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*>("UpdateRenderBuffers",&drawSceneInfo);
 	}
 
@@ -168,10 +169,10 @@ bool RasterizationRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 	// In the meantime, we can make use of the wait time by updating the entity buffers
 	// for the entity we need for the prepass.
 	if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
-		CSceneComponent::UpdateRenderBuffers(drawCmd,worldObjectsRenderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
+		CSceneComponent::UpdateRenderBuffers(drawCmd,worldObjectsRenderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
 
 	if((drawSceneInfo.renderFlags &FRender::View) != FRender::None)
-		CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
+		CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
 
 	c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*>("UpdateRenderBuffers",&drawSceneInfo);
 	//
@@ -182,49 +183,70 @@ bool RasterizationRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 	if(runPrepass)
 	{
 		if(drawSceneInfo.renderStats)
+		{
+			drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass)->BeginGpuTimer(RenderPassStats::Timer::GpuExecution,*drawSceneInfo.commandBuffer);
 			t = std::chrono::steady_clock::now();
+		}
 		ExecutePrepass(drawSceneInfo);
 		if(drawSceneInfo.renderStats)
-			drawSceneInfo.renderStats->prepassExecutionTime = std::chrono::steady_clock::now() -t;
+		{
+			(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::PrepassExecutionCpu,std::chrono::steady_clock::now() -t);
+			drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass)->EndGpuTimer(RenderPassStats::Timer::GpuExecution,*drawSceneInfo.commandBuffer);
+		}
 	}
 
 	// SSAO (requires prepass)
 	RenderSSAO(drawSceneInfo);
 
 	// Cull light sources (requires prepass)
+	if(drawSceneInfo.renderStats)
+		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::LightCullingGpu,*drawSceneInfo.commandBuffer);
 	CullLightSources(drawSceneInfo);
+	if(drawSceneInfo.renderStats)
+		(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::LightCullingGpu,*drawSceneInfo.commandBuffer);
 	
 	// We still need to update the render buffers for some entities
 	// (All others have already been updated in the prepass)
 	if(drawSceneInfo.renderStats)
 		t = std::chrono::steady_clock::now();
 	// TODO: This would be a good spot to start recording the shadow command buffers
-	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
-	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
+	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass) : nullptr);
+	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass) : nullptr);
 	//CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
-	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
+	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass) : nullptr);
 	if(drawSceneInfo.renderStats)
-		drawSceneInfo.renderStats->updateRenderBufferTime = std::chrono::steady_clock::now() -t;
+		(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::UpdateRenderBuffersCpu,std::chrono::steady_clock::now() -t);
 	// TODO: Execute shadow command buffers here
 
 	// Lighting pass
 	if(drawSceneInfo.renderStats)
+	{
+		drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass)->BeginGpuTimer(RenderPassStats::Timer::GpuExecution,*drawSceneInfo.commandBuffer);
 		t = std::chrono::steady_clock::now();
+	}
 	ExecuteLightinPass(drawSceneInfo);
 	if(drawSceneInfo.renderStats)
-		drawSceneInfo.renderStats->lightingPassExecutionTime = std::chrono::steady_clock::now() -t;
+	{
+		(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::LightingPassExecutionCpu,std::chrono::steady_clock::now() -t);
+		drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass)->EndGpuTimer(RenderPassStats::Timer::GpuExecution,*drawSceneInfo.commandBuffer);
+	}
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::Scene);
 
 	// Post processing
 	if(drawSceneInfo.renderStats)
+	{
+		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpu,*drawSceneInfo.commandBuffer);
 		t = std::chrono::steady_clock::now();
+	}
 	c_game->StartProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
 
 	// Fog
+	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuFog,*drawSceneInfo.commandBuffer);
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingFog);
 	RenderSceneFog(drawSceneInfo);
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingFog);
+	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuFog,*drawSceneInfo.commandBuffer);
 	
 	// Glow
 	// RenderGlowObjects(drawSceneInfo);
@@ -232,7 +254,9 @@ bool RasterizationRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 	c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*>("RenderPostProcessing",&drawSceneInfo);
 
 	// Bloom
+	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuBloom,*drawSceneInfo.commandBuffer);
 	RenderBloom(drawSceneInfo);
+	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuBloom,*drawSceneInfo.commandBuffer);
 	
 	// Tone mapping
 	if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::HDR))
@@ -244,17 +268,24 @@ bool RasterizationRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 		);
 		return false;
 	}
+	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuToneMapping,*drawSceneInfo.commandBuffer);
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingHDR);
 	auto &dsgBloomTonemapping = GetHDRInfo().dsgBloomTonemapping;
 	RenderToneMapping(drawSceneInfo,*dsgBloomTonemapping->GetDescriptorSet());
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingHDR);
+	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuToneMapping,*drawSceneInfo.commandBuffer);
 	
 	// FXAA
+	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuFxaa,*drawSceneInfo.commandBuffer);
 	RenderFXAA(drawSceneInfo);
+	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuFxaa,*drawSceneInfo.commandBuffer);
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessing);
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::PostProcessing);
 	if(drawSceneInfo.renderStats)
-		drawSceneInfo.renderStats->postProcessingExecutionTime = std::chrono::steady_clock::now() -t;
+	{
+		(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::PostProcessingExecutionCpu,std::chrono::steady_clock::now() -t);
+		(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpu,*drawSceneInfo.commandBuffer);
+	}
 	return true;
 }
 #pragma optimize("",on)

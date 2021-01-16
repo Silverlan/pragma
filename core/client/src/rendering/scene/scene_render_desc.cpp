@@ -675,7 +675,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 		m_worldRenderQueuesReady = true;
 
 		if(stats)
-			stats->worldQueueUpdateTime += std::chrono::steady_clock::now() -t;
+			(*stats)->AddTime(RenderQueueBuilderStats::Timer::WorldQueueUpdate,std::chrono::steady_clock::now() -t);
 
 		if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Dynamic))
 		{
@@ -699,14 +699,14 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 			}
 
 			if(stats)
-				stats->octreeProcessingTime += std::chrono::steady_clock::now() -t;
+				(*stats)->AddTime(RenderQueueBuilderStats::Timer::OctreeProcessing,std::chrono::steady_clock::now() -t);
 		}
 
 		if(stats)
 			t = std::chrono::steady_clock::now();
 		c_game->GetRenderQueueWorkerManager().WaitForCompletion();
 		if(stats)
-			stats->workerWaitTime += std::chrono::steady_clock::now() -t;
+			(*stats)->AddTime(RenderQueueBuilderStats::Timer::WorkerWait,std::chrono::steady_clock::now() -t);
 
 		// All render queues (aside from world render queues) need to be sorted
 		for(auto &renderQueue : m_renderQueues)
@@ -715,19 +715,19 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 				t = std::chrono::steady_clock::now();
 			renderQueue->Sort();
 			if(stats)
-				stats->queueSortTime += std::chrono::steady_clock::now() -t;
+				(*stats)->AddTime(RenderQueueBuilderStats::Timer::QueueSort,std::chrono::steady_clock::now() -t);
 			
 			if(stats)
 				t = std::chrono::steady_clock::now();
 			BuildRenderQueueInstanceLists(*renderQueue);
 			if(stats)
-				stats->queueInstancingTime += std::chrono::steady_clock::now() -t;
+				(*stats)->AddTime(RenderQueueBuilderStats::Timer::QueueInstancing,std::chrono::steady_clock::now() -t);
 			renderQueue->Unlock();
 		}
 		// c_game->StopProfilingStage(CGame::CPUProfilingPhase::BuildRenderQueue);
 		if(stats)
 		{
-			stats->totalExecutionTime += std::chrono::steady_clock::now() -tStart;
+			(*stats)->AddTime(RenderQueueBuilderStats::Timer::TotalExecution,std::chrono::steady_clock::now() -tStart);
 			auto &queueWorkerManager = c_game->GetRenderQueueWorkerManager();
 			auto numWorkers = queueWorkerManager.GetWorkerCount();
 			for(auto i=decltype(numWorkers){0u};i<numWorkers;++i)

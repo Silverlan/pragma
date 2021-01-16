@@ -6,6 +6,9 @@
 #define DESCRIPTOR_SET_SCENE (DESCRIPTOR_SET_MATERIAL +1)
 #define DESCRIPTOR_SET_RENDER_SETTINGS (DESCRIPTOR_SET_SCENE +1)
 
+#define DESCRIPTOR_SET_MATERIAL_BINDING_MATERIAL_SETTINGS 0
+#define DESCRIPTOR_SET_MATERIAL_BINDING_ALBEDO_MAP 0
+
 #include "../../modules/sh_camera_info.gls"
 #include "../../modules/sh_entity_info.gls"
 #include "../../modules/sh_export.gls"

@@ -2107,7 +2107,7 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l,WIHandle &hPanel,const Vecto
 	auto &window = c_engine->GetWindow();
 	auto absPos = hPanel->GetAbsolutePos();
 	window.SetCursorPosOverride(Vector2{static_cast<float>(absPos.x +mousePos.x),static_cast<float>(absPos.y +mousePos.y)});
-	ScopeGuard sg {[&window]() {
+	::util::ScopeGuard sg {[&window]() {
 		window.ClearCursorPosOverride();
 	}};
 	hPanel->InjectMouseMoveInput(mousePos.x,mousePos.y);
@@ -2118,7 +2118,7 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l,WIHandle &hPanel,const Vecto
 	auto &window = c_engine->GetWindow();
 	auto absPos = hPanel->GetAbsolutePos();
 	window.SetCursorPosOverride(Vector2{static_cast<float>(absPos.x +mousePos.x),static_cast<float>(absPos.y +mousePos.y)});
-	ScopeGuard sg {[&window]() {
+	::util::ScopeGuard sg {[&window]() {
 		window.ClearCursorPosOverride();
 	}};
 	return hPanel->InjectMouseInput(GLFW::MouseButton(button),GLFW::KeyState(action),GLFW::Modifier(mods));

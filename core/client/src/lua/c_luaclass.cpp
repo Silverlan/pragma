@@ -66,7 +66,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 {
 	auto &modEngine = lua.RegisterLibrary("engine");
@@ -688,33 +688,82 @@ void CGame::RegisterLuaClasses()
 
 	auto &modGame = GetLuaInterface().RegisterLibrary("game");
 	auto defRenderPassStats = luabind::class_<RenderPassStats>("RenderPassStats");
-	defRenderPassStats.def_readwrite("numShaderStateChanges",&RenderPassStats::numShaderStateChanges);
-	defRenderPassStats.def_readwrite("numMaterialStateChanges",&RenderPassStats::numMaterialStateChanges);
-	defRenderPassStats.def_readwrite("numEntityStateChanges",&RenderPassStats::numEntityStateChanges);
-	defRenderPassStats.def_readwrite("numDrawCalls",&RenderPassStats::numDrawCalls);
-	defRenderPassStats.def_readwrite("numDrawnMeshes",&RenderPassStats::numDrawnMeshes);
-	defRenderPassStats.def_readwrite("numDrawnVertices",&RenderPassStats::numDrawnVertices);
-	defRenderPassStats.def_readwrite("numDrawnTrianges",&RenderPassStats::numDrawnTrianges);
-	defRenderPassStats.def_readwrite("numEntityBufferUpdates",&RenderPassStats::numEntityBufferUpdates);
-	defRenderPassStats.def_readwrite("numInstanceSets",&RenderPassStats::numInstanceSets);
-	defRenderPassStats.def_readwrite("numInstanceSetMeshes",&RenderPassStats::numInstanceSetMeshes);
-	defRenderPassStats.def_readwrite("numInstancedMeshes",&RenderPassStats::numInstancedMeshes);
-	defRenderPassStats.def_readwrite("numInstancedSkippedRenderItems",&RenderPassStats::numInstancedSkippedRenderItems);
-	defRenderPassStats.def_readwrite("numEntitiesWithoutInstancing",&RenderPassStats::numEntitiesWithoutInstancing);
+	defRenderPassStats.def(luabind::constructor<>());
+	defRenderPassStats.def(luabind::self +luabind::const_self);
+	defRenderPassStats.add_static_constant("COUNTER_SHADER_STATE_CHANGES",umath::to_integral(RenderPassStats::Counter::ShaderStateChanges));
+	defRenderPassStats.add_static_constant("COUNTER_MATERIAL_STATE_CHANGES",umath::to_integral(RenderPassStats::Counter::MaterialStateChanges));
+	defRenderPassStats.add_static_constant("COUNTER_ENTITY_STATE_CHANGES",umath::to_integral(RenderPassStats::Counter::EntityStateChanges));
+	defRenderPassStats.add_static_constant("COUNTER_DRAW_CALLS",umath::to_integral(RenderPassStats::Counter::DrawCalls));
+	defRenderPassStats.add_static_constant("COUNTER_DRAWN_MESHES",umath::to_integral(RenderPassStats::Counter::DrawnMeshes));
+	defRenderPassStats.add_static_constant("COUNTER_DRAWN_VERTICES",umath::to_integral(RenderPassStats::Counter::DrawnVertices));
+	defRenderPassStats.add_static_constant("COUNTER_DRAWN_TRIANGLES",umath::to_integral(RenderPassStats::Counter::DrawnTriangles));
+	defRenderPassStats.add_static_constant("COUNTER_ENTITY_BUFFER_UPDATES",umath::to_integral(RenderPassStats::Counter::EntityBufferUpdates));
+	defRenderPassStats.add_static_constant("COUNTER_INSTANCE_SETS",umath::to_integral(RenderPassStats::Counter::InstanceSets));
+	defRenderPassStats.add_static_constant("COUNTER_INSTANCE_SET_MESHES",umath::to_integral(RenderPassStats::Counter::InstanceSetMeshes));
+	defRenderPassStats.add_static_constant("COUNTER_INSTANCED_MESHES",umath::to_integral(RenderPassStats::Counter::InstancedMeshes));
+	defRenderPassStats.add_static_constant("COUNTER_INSTANCED_SKIPPED_RENDER_ITEMS",umath::to_integral(RenderPassStats::Counter::InstancedSkippedRenderItems));
+	defRenderPassStats.add_static_constant("COUNTER_ENTITIES_WITHOUT_INSTANCING",umath::to_integral(RenderPassStats::Counter::EntitiesWithoutInstancing));
+	defRenderPassStats.add_static_constant("COUNTER_COUNT",umath::to_integral(RenderPassStats::Counter::Count));
+	static_assert(umath::to_integral(RenderPassStats::Counter::Count) == 13);
+
+	defRenderPassStats.add_static_constant("TIMER_GPU_EXECUTION",umath::to_integral(RenderPassStats::Timer::GpuExecution));
+	defRenderPassStats.add_static_constant("TIMER_RENDER_THREAD_WAIT",umath::to_integral(RenderPassStats::Timer::RenderThreadWait));
+	defRenderPassStats.add_static_constant("TIMER_CPU_EXECUTION",umath::to_integral(RenderPassStats::Timer::CpuExecution));
+	defRenderPassStats.add_static_constant("TIMER_MATERIAL_BIND",umath::to_integral(RenderPassStats::Timer::MaterialBind));
+	defRenderPassStats.add_static_constant("TIMER_ENTITY_BIND",umath::to_integral(RenderPassStats::Timer::EntityBind));
+	defRenderPassStats.add_static_constant("TIMER_DRAW_CALL",umath::to_integral(RenderPassStats::Timer::DrawCall));
+	defRenderPassStats.add_static_constant("TIMER_SHADER_BIND",umath::to_integral(RenderPassStats::Timer::ShaderBind));
+	defRenderPassStats.add_static_constant("TIMER_COUNT",umath::to_integral(RenderPassStats::Timer::Count));
+	defRenderPassStats.add_static_constant("TIMER_GPU_START",umath::to_integral(RenderPassStats::Timer::GpuStart));
+	defRenderPassStats.add_static_constant("TIMER_GPU_END",umath::to_integral(RenderPassStats::Timer::GpuEnd));
+	defRenderPassStats.add_static_constant("TIMER_CPU_START",umath::to_integral(RenderPassStats::Timer::CpuStart));
+	defRenderPassStats.add_static_constant("TIMER_CPU_END",umath::to_integral(RenderPassStats::Timer::CpuEnd));
+	defRenderPassStats.add_static_constant("TIMER_GPU_COUNT",umath::to_integral(RenderPassStats::Timer::GpuCount));
+	defRenderPassStats.add_static_constant("TIMER_CPU_COUNT",umath::to_integral(RenderPassStats::Timer::CpuCount));
+	static_assert(umath::to_integral(RenderPassStats::Timer::Count) == 7);
+	defRenderPassStats.def("Copy",static_cast<RenderPassStats(*)(lua_State*,RenderPassStats&)>([](lua_State *l,RenderPassStats &renderStats) -> RenderPassStats {
+		return renderStats;
+	}));
+	defRenderPassStats.def("GetCount",static_cast<uint32_t(*)(lua_State*,RenderPassStats&,RenderPassStats::Counter)>([](lua_State *l,RenderPassStats &renderStats,RenderPassStats::Counter counter) -> uint32_t {
+		return renderStats->GetCount(counter);
+	}));
+	defRenderPassStats.def("GetTime",static_cast<long double(*)(lua_State*,RenderPassStats&,RenderPassStats::Timer)>([](lua_State *l,RenderPassStats &renderStats,RenderPassStats::Timer timer) -> long double {
+		return renderStats->GetTime(timer).count() /static_cast<long double>(1'000'000.0);
+	}));
 	modGame[defRenderPassStats];
 
+
 	auto defRenderStats = luabind::class_<RenderStats>("RenderStats");
-	defRenderStats.property("lightingPass",static_cast<RenderPassStats*(*)(::RenderStats&)>([](::RenderStats &renderStats) -> RenderPassStats* {
-		return &renderStats.lightingPass;
+	defRenderStats.def(luabind::constructor<>());
+	defRenderStats.def(luabind::self +luabind::const_self);
+    defRenderStats.add_static_constant("RENDER_PASS_LIGHTING_PASS",umath::to_integral(RenderStats::RenderPass::LightingPass));
+    defRenderStats.add_static_constant("RENDER_PASS_LIGHTING_PASS_TRANSLUCENT",umath::to_integral(RenderStats::RenderPass::LightingPassTranslucent));
+    defRenderStats.add_static_constant("RENDER_PASS_PREPASS",umath::to_integral(RenderStats::RenderPass::Prepass));
+    defRenderStats.add_static_constant("RENDER_PASS_SHADOW_PASS",umath::to_integral(RenderStats::RenderPass::ShadowPass));
+    defRenderStats.add_static_constant("RENDER_PASS_COUNT",umath::to_integral(RenderStats::RenderPass::Count));
+	static_assert(umath::to_integral(RenderStats::RenderPass::Count) == 4);
+	
+    defRenderStats.add_static_constant("TIMER_LIGHT_CULLING_GPU",umath::to_integral(RenderStats::RenderStage::LightCullingGpu));
+    defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU",umath::to_integral(RenderStats::RenderStage::PostProcessingGpu));
+    defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_FOG",umath::to_integral(RenderStats::RenderStage::PostProcessingGpuFog));
+    defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_BLOOM",umath::to_integral(RenderStats::RenderStage::PostProcessingGpuBloom));
+    defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_TONE_MAPPING",umath::to_integral(RenderStats::RenderStage::PostProcessingGpuToneMapping));
+    defRenderStats.add_static_constant("TIMER_POST_PROCESSING_GPU_FXAA",umath::to_integral(RenderStats::RenderStage::PostProcessingGpuFxaa));
+    defRenderStats.add_static_constant("TIMER_LIGHT_CULLING_CPU",umath::to_integral(RenderStats::RenderStage::LightCullingCpu));
+    defRenderStats.add_static_constant("TIMER_PREPASS_EXECUTION_CPU",umath::to_integral(RenderStats::RenderStage::PrepassExecutionCpu));
+    defRenderStats.add_static_constant("TIMER_LIGHTING_PASS_EXECUTION_CPU",umath::to_integral(RenderStats::RenderStage::LightingPassExecutionCpu));
+    defRenderStats.add_static_constant("TIMER_POST_PROCESSING_EXECUTION_CPU",umath::to_integral(RenderStats::RenderStage::PostProcessingExecutionCpu));
+    defRenderStats.add_static_constant("TIMER_UPDATE_RENDER_BUFFERS_CPU",umath::to_integral(RenderStats::RenderStage::UpdateRenderBuffersCpu));
+    defRenderStats.add_static_constant("TIMER_COUNT",umath::to_integral(RenderStats::RenderStage::Count));
+	static_assert(umath::to_integral(RenderStats::RenderStage::Count) == 11);
+	defRenderStats.def("Copy",static_cast<RenderStats(*)(lua_State*,RenderStats&)>([](lua_State *l,RenderStats &renderStats) -> RenderStats {
+		return renderStats;
 	}));
-	defRenderStats.property("lightingPassTranslucent",static_cast<RenderPassStats*(*)(::RenderStats&)>([](::RenderStats &renderStats) -> RenderPassStats* {
-		return &renderStats.lightingPassTranslucent;
+	defRenderStats.def("GetPassStats",static_cast<RenderPassStats*(*)(lua_State*,RenderStats&,RenderStats::RenderPass)>([](lua_State *l,RenderStats &renderStats,RenderStats::RenderPass pass) -> RenderPassStats* {
+		return &renderStats.GetPassStats(pass);
 	}));
-	defRenderStats.property("prepass",static_cast<RenderPassStats*(*)(::RenderStats&)>([](::RenderStats &renderStats) -> RenderPassStats* {
-		return &renderStats.prepass;
-	}));
-	defRenderStats.property("shadowPass",static_cast<RenderPassStats*(*)(::RenderStats&)>([](::RenderStats &renderStats) -> RenderPassStats* {
-		return &renderStats.shadowPass;
+	defRenderStats.def("GetTime",static_cast<long double(*)(lua_State*,RenderStats&,RenderStats::RenderStage)>([](lua_State *l,RenderStats &renderStats,RenderStats::RenderStage timer) -> long double {
+		return renderStats->GetTime(timer).count() /static_cast<long double>(1'000'000.0);
 	}));
 	modGame[defRenderStats];
 
@@ -1040,3 +1089,4 @@ void CGame::RegisterLuaClasses()
 	Lua::WorldEnvironment::register_class(worldEnvClassDef);
 	modGame[worldEnvClassDef];
 }
+#pragma optimize("",on)

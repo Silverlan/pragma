@@ -1002,6 +1002,7 @@ DLLCLIENT void debug_render_stats(bool enabled,bool full,bool print,bool continu
 int Lua::game::Client::set_render_stats_enabled(lua_State *l)
 {
 	auto enabled = Lua::CheckBool(l,1);
+	c_engine->SetGpuPerformanceTimersEnabled(enabled);
 	debug_render_stats(enabled,false,false,true);
 	return 0;
 }

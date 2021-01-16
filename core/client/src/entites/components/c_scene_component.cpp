@@ -29,7 +29,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
 LINK_ENTITY_TO_CLASS(scene,CScene);
-
+#pragma optimize("",off)
 CSceneComponent::CSMCascadeDescriptor::CSMCascadeDescriptor()
 {}
 
@@ -73,7 +73,7 @@ void CSceneComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimar
 		auto &ent = static_cast<CBaseEntity&>(*c_game->GetEntityByLocalIndex(item.entity));
 		auto &renderC = *ent.GetRenderComponent();
 		if(optStats && umath::is_flag_set(renderC.GetStateFlags(),CRenderComponent::StateFlags::RenderBufferDirty))
-			++optStats->numEntityBufferUpdates;
+			(*optStats)->Increment(RenderPassStats::Counter::EntityBufferUpdates);
 		auto *animC = renderC.GetAnimatedComponent();
 		if(animC && animC->AreSkeletonUpdateCallbacksEnabled())
 			animC->UpdateBoneMatricesMT();
@@ -112,7 +112,10 @@ CSceneComponent *CSceneComponent::Create(const CreateInfo &createInfo,CSceneComp
 	}
 	++g_sceneUseCount.at(sceneIndex);
 	sceneC->Setup(createInfo,sceneIndex);
-	g_scenes.at(sceneIndex) = sceneC.get();
+	if(optParent == nullptr)
+		g_scenes.at(sceneIndex) = sceneC.get();
+	else
+		umath::set_flag(sceneC->m_stateFlags,StateFlags::HasParentScene);
 
 	scene->Spawn();
 	return sceneC.get();
@@ -140,16 +143,19 @@ void CSceneComponent::OnRemove()
 		return;
 	assert(g_sceneUseCount > 0);
 	--g_sceneUseCount.at(sceneIndex);
-	g_scenes.at(sceneIndex) = nullptr;
-
-	// Clear all entities from this scene
-	std::vector<CBaseEntity*> *ents;
-	c_game->GetEntities(&ents);
-	for(auto *ent : *ents)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::HasParentScene) == false)
 	{
-		if(ent == nullptr)
-			continue;
-		ent->RemoveFromScene(*this);
+		g_scenes.at(sceneIndex) = nullptr;
+
+		// Clear all entities from this scene
+		std::vector<CBaseEntity*> *ents;
+		c_game->GetEntities(&ents);
+		for(auto *ent : *ents)
+		{
+			if(ent == nullptr)
+				continue;
+			ent->RemoveFromScene(*this);
+		}
 	}
 
 	if(--g_numScenes == 0)
@@ -595,7 +601,14 @@ const SceneRenderDesc &CSceneComponent::GetSceneRenderDesc() const {return const
 void CSceneComponent::SetParticleSystemColorFactor(const Vector4 &colorFactor) {m_particleSystemColorFactor = colorFactor;}
 const Vector4 &CSceneComponent::GetParticleSystemColorFactor() const {return m_particleSystemColorFactor;}
 
-bool CSceneComponent::IsValid() const {return m_bValid;}
+bool CSceneComponent::IsValid() const {return umath::is_flag_set(m_stateFlags,StateFlags::ValidRenderer);}
+
+CSceneComponent *CSceneComponent::GetParentScene()
+{
+	if(umath::is_flag_set(m_stateFlags,StateFlags::HasParentScene) == false)
+		return nullptr;
+	return GetByIndex(GetSceneIndex());
+}
 
 CSceneComponent::SceneIndex CSceneComponent::GetSceneIndex() const {return m_sceneIndex;}
 
@@ -606,12 +619,12 @@ uint32_t CSceneComponent::GetHeight() const {return m_renderer ? m_renderer->Get
 
 void CSceneComponent::ReloadRenderTarget(uint32_t width,uint32_t height)
 {
-	m_bValid = false;
+	umath::set_flag(m_stateFlags,StateFlags::ValidRenderer,false);
 
 	if(m_renderer == nullptr || m_renderer->ReloadRenderTarget(*this,width,height) == false)
 		return;
-
-	m_bValid = true;
+	
+	umath::set_flag(m_stateFlags,StateFlags::ValidRenderer,true);
 }
 
 const util::WeakHandle<pragma::CCameraComponent> &CSceneComponent::GetActiveCamera() const {return const_cast<CSceneComponent*>(this)->GetActiveCamera();}
@@ -648,3 +661,4 @@ void CScene::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CSceneComponent>();
 }
+#pragma optimize("",on)

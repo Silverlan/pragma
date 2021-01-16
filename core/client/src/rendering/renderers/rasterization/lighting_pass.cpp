@@ -52,7 +52,7 @@ void RasterizationRenderer::RecordPrepass(const util::DrawSceneInfo &drawSceneIn
 	auto &prepass = GetPrepass();
 
 	auto &shaderPrepass = GetPrepassShader();
-	auto *prepassStats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr;
+	auto *prepassStats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr;
 	auto &prepassRt = *prepass.renderTarget;
 	auto &worldRenderQueues = sceneRenderDesc.GetWorldRenderQueues();
 	m_prepassCommandBufferGroup->Draw(prepassRt.GetRenderPass(),prepassRt.GetFramebuffer(),[this,&drawSceneInfo,&shaderPrepass,&worldRenderQueues,&sceneRenderDesc,prepassStats](prosper::ISecondaryCommandBuffer &cmd) {
@@ -68,7 +68,7 @@ void RasterizationRenderer::RecordPrepass(const util::DrawSceneInfo &drawSceneIn
 					t = std::chrono::steady_clock::now();
 				sceneRenderDesc.WaitForWorldRenderQueues();
 				if(drawSceneInfo.renderStats)
-					drawSceneInfo.renderStats->prepass.renderThreadWaitTime += std::chrono::steady_clock::now() -t;
+					drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass)->SetTime(RenderPassStats::Timer::RenderThreadWait,std::chrono::steady_clock::now() -t);
 				for(auto i=decltype(worldRenderQueues.size()){0u};i<worldRenderQueues.size();++i)
 					rsys.Render(*worldRenderQueues.at(i),prepassStats,i);
 			}
@@ -274,8 +274,8 @@ void RasterizationRenderer::RecordLightingPass(const util::DrawSceneInfo &drawSc
 		if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Reflection))
 			rsFlags |= RenderFlags::Reflection;
 
-		auto *lightingStageStats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr;
-		auto *lightingStageTranslucentStats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPassTranslucent : nullptr;
+		auto *lightingStageStats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass) : nullptr;
+		auto *lightingStageTranslucentStats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPassTranslucent) : nullptr;
 		util::RenderPassDrawInfo rpDrawInfo {drawSceneInfo,cmd};
 		pragma::rendering::LightingStageRenderProcessor rsys {rpDrawInfo,rsFlags,{} /* drawOrigin */};
 		auto &sceneRenderDesc = drawSceneInfo.scene->GetSceneRenderDesc();
@@ -314,7 +314,7 @@ void RasterizationRenderer::RecordLightingPass(const util::DrawSceneInfo &drawSc
 				t = std::chrono::steady_clock::now();
 			sceneRenderDesc.WaitForWorldRenderQueues();
 			if(drawSceneInfo.renderStats)
-				drawSceneInfo.renderStats->lightingPass.renderThreadWaitTime += std::chrono::steady_clock::now() -t;
+				drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass)->SetTime(RenderPassStats::Timer::RenderThreadWait,std::chrono::steady_clock::now() -t);
 
 			auto &worldRenderQueues = sceneRenderDesc.GetWorldRenderQueues();
 			for(auto i=decltype(worldRenderQueues.size()){0u};i<worldRenderQueues.size();++i)

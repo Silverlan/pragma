@@ -598,7 +598,7 @@ luabind::object BaseLuaBaseEntityComponent::InitializeLuaObject(lua_State *l)
 CallbackHandle BaseLuaBaseEntityComponent::BindInitComponentEvent(lua_State *l,pragma::ComponentId componentId,luabind::object methodNameOrFunction)
 {
 	methodNameOrFunction.push(l);
-	ScopeGuard sg([l]() {
+	util::ScopeGuard sg([l]() {
 		Lua::Pop(l,1);
 	});
 
@@ -641,7 +641,7 @@ CallbackHandle BaseLuaBaseEntityComponent::BindNetEvent(pragma::NetEventId event
 CallbackHandle BaseLuaBaseEntityComponent::BindNetEvent(lua_State *l,pragma::NetEventId eventId,luabind::object methodNameOrFunction)
 {
 	methodNameOrFunction.push(l);
-	ScopeGuard sg([l]() {
+	util::ScopeGuard sg([l]() {
 		Lua::Pop(l,1);
 	});
 
@@ -673,7 +673,7 @@ CallbackHandle BaseLuaBaseEntityComponent::BindNetEvent(lua_State *l,pragma::Net
 CallbackHandle BaseLuaBaseEntityComponent::BindEvent(lua_State *l,pragma::ComponentId eventId,luabind::object methodNameOrFunction)
 {
 	methodNameOrFunction.push(l);
-	ScopeGuard sg([l]() {
+	util::ScopeGuard sg([l]() {
 		Lua::Pop(l,1);
 	});
 

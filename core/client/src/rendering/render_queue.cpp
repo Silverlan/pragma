@@ -161,7 +161,7 @@ void RenderQueue::WaitForCompletion(RenderPassStats *optStats) const
 	m_threadWaitCondition.wait(mlock,[this]() -> bool {return !m_locked;});
 
 	if(optStats)
-		optStats->renderThreadWaitTime += std::chrono::steady_clock::now() -t;
+		(*optStats)->AddTime(RenderPassStats::Timer::RenderThreadWait,std::chrono::steady_clock::now() -t);
 }
 
 //////////////////////

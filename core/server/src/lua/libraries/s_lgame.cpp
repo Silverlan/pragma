@@ -68,7 +68,7 @@ int Lua::game::Server::load_map(lua_State *l)
 	auto hCb = std::make_shared<CallbackHandle>(s_game->AddCallback("OnEntityCreated",FunctionCallback<void,BaseEntity*>::Create([&ents](BaseEntity *ent) {
 		ents.push_back(ent->GetHandle());
 	})));
-	ScopeGuard sg([hCb]() {
+	util::ScopeGuard sg([hCb]() {
 		if(hCb->IsValid() == true)
 			hCb->Remove();
 	});

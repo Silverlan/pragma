@@ -642,7 +642,7 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 			uint32_t targetIdx = 0;
 			for(auto &target : primitive.targets)
 			{
-				ScopeGuard sg {[&targetIdx]() {++targetIdx;}};
+				util::ScopeGuard sg {[&targetIdx]() {++targetIdx;}};
 				auto itPos = target.find("POSITION");
 				auto itNormal = target.find("NORMAL");
 				// auto itTangent = target.find("TANGENT");

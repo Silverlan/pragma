@@ -48,10 +48,10 @@ void ResourceWatcherManager::Unlock()
 	for(auto &dirWatcher : m_watchers)
 		dirWatcher->SetEnabled(true);
 }
-ScopeGuard ResourceWatcherManager::ScopeLock()
+util::ScopeGuard ResourceWatcherManager::ScopeLock()
 {
 	Lock();
-	return ScopeGuard{[this]() {
+	return util::ScopeGuard{[this]() {
 		Unlock();
 	}};
 }

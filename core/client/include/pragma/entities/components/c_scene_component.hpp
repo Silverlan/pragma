@@ -179,6 +179,14 @@ namespace pragma
 			Unlit = 1
 		};
 
+		enum class StateFlags : uint32_t
+		{
+			None = 0u,
+			ValidRenderer = 1u,
+			HasParentScene = ValidRenderer<<1u
+		};
+
+		// Note: Scene index is *not* unique, a child-scene will share its index with its parent!
 		using SceneIndex = uint8_t;
 		using SceneFlags = uint32_t;
 		struct DLLCLIENT CreateInfo
@@ -252,6 +260,8 @@ namespace pragma
 		const pragma::COcclusionCullerComponent *FindOcclusionCuller() const;
 		SceneIndex GetSceneIndex() const;
 		bool IsValid() const;
+		CSceneComponent *GetParentScene();
+		const CSceneComponent *GetParentScene() const {return const_cast<CSceneComponent*>(this)->GetParentScene();}
 
 		void BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo);
 
@@ -298,7 +308,7 @@ namespace pragma
 		CallbackHandle m_cbFogCallback = {};
 		CallbackHandle m_cbLink {};
 
-		bool m_bValid = false;
+		StateFlags m_stateFlags = StateFlags::None;
 		std::shared_ptr<pragma::rendering::BaseRenderer> m_renderer = nullptr;
 		SceneRenderDesc m_sceneRenderDesc;
 
@@ -324,6 +334,7 @@ namespace pragma
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::CSceneComponent::FRenderSetting);
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::CSceneComponent::StateFlags);
 
 class EntityHandle;
 class DLLCLIENT CScene

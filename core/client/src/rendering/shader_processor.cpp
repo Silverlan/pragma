@@ -302,12 +302,12 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(CModelSubMesh &mesh,pragma::
 	}
 	if(m_stats)
 	{
-		m_stats->numDrawnMeshes += instanceCount;
-		m_stats->numDrawnVertices += mesh.GetVertexCount() *instanceCount;
-		m_stats->numDrawnTrianges += mesh.GetTriangleCount() *instanceCount;
+		(*m_stats)->Increment(RenderPassStats::Counter::DrawnMeshes,instanceCount);
+		(*m_stats)->Increment(RenderPassStats::Counter::DrawnVertices,mesh.GetVertexCount() *instanceCount);
+		(*m_stats)->Increment(RenderPassStats::Counter::DrawnTriangles,mesh.GetTriangleCount() *instanceCount);
 		m_stats->meshes.push_back(std::static_pointer_cast<CModelSubMesh>(mesh.shared_from_this()));
 
-		++m_stats->numDrawCalls;
+		(*m_stats)->Increment(RenderPassStats::Counter::DrawCalls);
 	}
 	return m_cmdBuffer.RecordDrawIndexed(mesh.GetTriangleVertexCount(),instanceCount);
 }

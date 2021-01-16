@@ -1479,7 +1479,7 @@ void CParticleSystemComponent::Simulate(double tDelta)
 	auto *cam = c_game->GetPrimaryCamera();
 	if(!IsActiveOrPaused() || cam == nullptr)
 		return;
-	ScopeGuard sg {[this,tDelta]() {m_simulationTime += tDelta;}}; // Increment simulation time once this tick is complete
+	util::ScopeGuard sg {[this,tDelta]() {m_simulationTime += tDelta;}}; // Increment simulation time once this tick is complete
 
 	auto pTsComponent = GetEntity().GetTimeScaleComponent();
 	if(pTsComponent.valid())

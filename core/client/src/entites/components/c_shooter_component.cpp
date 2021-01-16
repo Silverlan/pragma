@@ -118,7 +118,7 @@ void CShooterComponent::FireBullets(const BulletInfo &bulletInfo,std::vector<Tra
 	Vector3 effectsOrigin {};
 	OnFireBullets(bulletInfo,origin,dir,&effectsOrigin);
 
-	ScopeGuard sg([this]() {
+	util::ScopeGuard sg([this]() {
 		m_nextBullet = nullptr;
 	});
 

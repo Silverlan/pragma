@@ -102,7 +102,8 @@ void GPUSwapchainTimer::InitializeQueries()
 	m_swapchainTimers.reserve(index +1);
 	for(auto i=decltype(m_swapchainTimers.size()){0u};i<=index;++i)
 	{
-		auto timerQuery = timerPool->CreateTimerQuery(static_cast<prosper::PipelineStageFlags>(m_stage));
+		// TODO: Using the same stage for both time queries makes no sense
+		auto timerQuery = timerPool->CreateTimerQuery(static_cast<prosper::PipelineStageFlags>(m_stage),static_cast<prosper::PipelineStageFlags>(m_stage));
 		auto statsQuery = statsPool->CreatePipelineStatisticsQuery();
 		m_swapchainTimers.push_back({timerQuery,statsQuery});
 	}

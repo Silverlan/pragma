@@ -15,22 +15,22 @@ pragma::networking::MessageTracker::MessageTracker()
 	SetMemoryCount(10);
 }
 
-std::pair<const std::deque<pragma::networking::MessageTracker::MessageInfo>&,std::unique_ptr<const ScopeGuard>> pragma::networking::MessageTracker::GetTrackedMessages(MessageType mt) const
+std::pair<const std::deque<pragma::networking::MessageTracker::MessageInfo>&,std::unique_ptr<const util::ScopeGuard>> pragma::networking::MessageTracker::GetTrackedMessages(MessageType mt) const
 {
 	m_trackedMessageMutex.lock();
 	return {
 		(mt == MessageType::Incoming) ? m_trackedMessagesIn : m_trackedMessagesOut,
-		std::make_unique<ScopeGuard>([this]() {
+		std::make_unique<util::ScopeGuard>([this]() {
 			m_trackedMessageMutex.unlock();
 		})
 	};
 }
-std::pair<std::deque<pragma::networking::MessageTracker::MessageInfo>&,std::unique_ptr<const ScopeGuard>> pragma::networking::MessageTracker::GetTrackedMessages(MessageType mt)
+std::pair<std::deque<pragma::networking::MessageTracker::MessageInfo>&,std::unique_ptr<const util::ScopeGuard>> pragma::networking::MessageTracker::GetTrackedMessages(MessageType mt)
 {
 	m_trackedMessageMutex.lock();
 	return {
 		(mt == MessageType::Incoming) ? m_trackedMessagesIn : m_trackedMessagesOut,
-		std::make_unique<ScopeGuard>([this]() {
+		std::make_unique<util::ScopeGuard>([this]() {
 			m_trackedMessageMutex.unlock();
 		})
 	};

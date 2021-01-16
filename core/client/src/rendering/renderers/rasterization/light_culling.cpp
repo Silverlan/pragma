@@ -131,7 +131,7 @@ void RasterizationRenderer::CullLightSources(const util::DrawSceneInfo &drawScen
 			}
 
 			if(drawSceneInfo.renderStats)
-				drawSceneInfo.renderStats->lightCullingTime += std::chrono::steady_clock::now() -t;
+				(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::LightCullingCpu,std::chrono::steady_clock::now() -t);
 		}
 
 		// Don't write to depth image until compute shader has completed reading from it

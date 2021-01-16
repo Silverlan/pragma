@@ -55,7 +55,7 @@ public:
 	// times to resume watching
 	void Lock();
 	void Unlock();
-	ScopeGuard ScopeLock();
+	util::ScopeGuard ScopeLock();
 	bool IsLocked() const;
 	CallbackHandle AddChangeCallback(EResourceWatcherCallbackType type,const std::function<void(std::reference_wrapper<const std::string>,std::reference_wrapper<const std::string>)> &fcallback);
 protected:

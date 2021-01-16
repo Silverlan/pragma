@@ -78,7 +78,7 @@ void CGame::OnFilesDropped(std::vector<std::string> &files)
 		if(FileManager::IsSystemFile(f) == true)
 			m_droppedFiles.push_back(DroppedFile{f});
 	}
-	ScopeGuard g {[this]() {
+	util::ScopeGuard g {[this]() {
 		m_droppedFiles.clear();
 		m_droppedFiles.shrink_to_fit();
 	}};

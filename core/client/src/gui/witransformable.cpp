@@ -473,7 +473,7 @@ void WITransformable::Think()
 		auto *pTriggerArea = static_cast<WISnapArea*>(hSnapTarget.get())->GetTriggerArea();
 		return pTriggerArea && pTriggerArea->MouseInBounds();
 	});
-	ScopeGuard sgSnapGhost = [this,bDragging]() {
+	util::ScopeGuard sgSnapGhost = [this,bDragging]() {
 		if(bDragging)
 			return;
 		umath::set_flag(m_stateFlags,StateFlags::WasDragged,false);

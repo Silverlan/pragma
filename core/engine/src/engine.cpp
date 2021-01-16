@@ -80,7 +80,7 @@ extern DLLSERVER ServerState *server;
 
 #include <sharedutils/util_path.hpp>
 Engine::Engine(int,char*[])
-	: CVarHandler(),m_bRunning(true),m_bInitialized(false),
+	: CVarHandler(),
 	m_console(nullptr),m_consoleThread(nullptr),
 	m_logFile(nullptr),
 	m_tickRate(Engine::DEFAULT_TICK_RATE)
@@ -216,7 +216,7 @@ void Engine::UnlockResourceWatchers()
 	if(cl)
 		cl->GetResourceWatcher().Unlock();
 }
-ScopeGuard Engine::ScopeLockResourceWatchers()
+util::ScopeGuard Engine::ScopeLockResourceWatchers()
 {
 	auto *sv = GetServerNetworkState();
 	auto *cl = GetClientState();
@@ -224,7 +224,7 @@ ScopeGuard Engine::ScopeLockResourceWatchers()
 		sv->GetResourceWatcher().Lock();
 	if(cl)
 		cl->GetResourceWatcher().Lock();
-	return ScopeGuard{[this,sv,cl]() {
+	return util::ScopeGuard{[this,sv,cl]() {
 		if(sv && GetServerNetworkState() == sv)
 			sv->GetResourceWatcher().Unlock();
 		if(cl && GetClientState() == cl)
@@ -253,7 +253,7 @@ void Engine::Close()
 		jobInfo.job->Wait();
 	m_parallelJobs.clear();
 
-	m_bRunning = false;
+	umath::set_flag(m_stateFlags,StateFlags::Running,false);
 	util::close_external_archive_manager();
 	CloseServerState();
 
@@ -396,8 +396,11 @@ ConVarMap *Engine::GetConVarMap() {return console_system::engine::get_convar_map
 
 Engine::StateInstance &Engine::GetServerStateInstance() {return *m_svInstance;}
 
-void Engine::SetVerbose(bool bVerbose) {m_bVerbose = bVerbose;}
-bool Engine::IsVerbose() const {return m_bVerbose;}
+void Engine::SetVerbose(bool bVerbose) {umath::set_flag(m_stateFlags,StateFlags::Verbose,bVerbose);}
+bool Engine::IsVerbose() const {return umath::is_flag_set(m_stateFlags,StateFlags::Verbose);}
+
+void Engine::SetDeveloperMode(bool devMode) {umath::set_flag(m_stateFlags,StateFlags::DeveloperMode,devMode);}
+bool Engine::IsDeveloperModeEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::DeveloperMode);}
 
 void Engine::Release()
 {
@@ -655,7 +658,7 @@ bool Engine::IsActiveState(NetworkState *state) {return state == GetActiveState(
 
 void Engine::AddLaunchConVar(std::string cvar,std::string val) {m_launchCommands.push_back({cvar,{val}});}
 
-void Engine::ShutDown() {m_bRunning = false;}
+void Engine::ShutDown() {umath::set_flag(m_stateFlags,StateFlags::Running,false);}
 
 void Engine::HandleLocalHostPlayerClientPacket(NetPacket &p) {}
 void Engine::HandleLocalHostPlayerServerPacket(NetPacket &p)
@@ -675,9 +678,12 @@ bool Engine::ConnectLocalHostPlayerClient()
 Engine::~Engine()
 {
 	engine = nullptr;
-	if(m_bRunning == true)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::Running))
 		throw std::runtime_error("Engine has to be closed before it can be destroyed!");
 }
+
+Engine *pragma::get_engine() {return engine;}
+ServerState *pragma::get_server_state() {return server;}
 
 REGISTER_ENGINE_CONVAR_CALLBACK(debug_profiling_enabled,[](NetworkState*,ConVar*,bool,bool enabled) {
 	if(engine == nullptr)

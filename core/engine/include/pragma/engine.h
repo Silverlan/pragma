@@ -77,6 +77,15 @@ public:
 	Engine(int argc,char* argv[]);
 	virtual ~Engine();
 
+	enum class StateFlags : uint32_t
+	{
+		None = 0u,
+		Verbose = 1u,
+		Running = Verbose<<1u,
+		Initialized = Running<<1u,
+		DeveloperMode = Initialized<<1u
+	};
+
 	enum class CPUProfilingPhase : uint32_t
 	{
 		Think = 0u,
@@ -108,6 +117,9 @@ public:
 
 	void SetVerbose(bool bVerbose);
 	bool IsVerbose() const;
+
+	void SetDeveloperMode(bool devMode);
+	bool IsDeveloperModeEnabled() const;
 
 	// Console
 	void ConsoleInput(const std::string_view &line);
@@ -197,7 +209,7 @@ public:
 
 	void LockResourceWatchers();
 	void UnlockResourceWatchers();
-	ScopeGuard ScopeLockResourceWatchers();
+	util::ScopeGuard ScopeLockResourceWatchers();
 
 	// For internal use only
 	void SetReplicatedConVar(const std::string &cvar,const std::string &val);
@@ -251,19 +263,22 @@ protected:
 	std::shared_ptr<pragma::debug::CPUProfiler> m_cpuProfiler;
 	std::vector<CallbackHandle> m_profileHandlers = {};
 	
-	bool m_bVerbose = false;
+	StateFlags m_stateFlags = StateFlags::Running;
 	mutable upad::PackageManager *m_padPackageManager = nullptr;
 	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_profilingStageManager = nullptr;
-
-	// Init
-	bool m_bRunning;
-	bool m_bInitialized;
 
 	std::unordered_map<std::string,std::function<void(int,char*[])>> m_launchOptions;
 
 	void InitLaunchOptions(int argc,char *argv[]);
 	virtual void Think();
 	virtual void Tick();
+};
+REGISTER_BASIC_BITWISE_OPERATORS(Engine::StateFlags)
+
+namespace pragma
+{
+	DLLENGINE Engine *get_engine();
+	DLLENGINE ServerState *get_server_state();
 };
 
 template<class T>
@@ -283,7 +298,7 @@ template<class T>
 	MiniDumper dmp(exe.c_str());
 #endif
 	auto en = std::make_shared<T>(argc,argv);
-	ScopeGuard sgEngine([en]() {
+	util::ScopeGuard sgEngine([en]() {
 		en->Release(); // Required in case of stack unwinding
 	});
 #ifdef __linux__
@@ -302,7 +317,7 @@ inline DLLENGINE std::shared_ptr<Engine> InitializeServer(int argc,char *argv[])
 	MiniDumper dmp(exe.c_str());
 #endif
 	auto en = std::make_shared<Engine>(argc,argv);
-	ScopeGuard sgEngine([en]() {
+	util::ScopeGuard sgEngine([en]() {
 		en->Release(); // Required in case of stack unwinding
 	});
 	en->OpenConsole();

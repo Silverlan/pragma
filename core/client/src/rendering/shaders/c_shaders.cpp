@@ -97,7 +97,6 @@ void CGame::InitShaders()
 	shaderManager.RegisterShader("clear_color",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderClearColor(context,identifier);});
 
 	shaderManager.RegisterShader("prepass",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPrepass(context,identifier);});
-	shaderManager.RegisterShader("prepass_depth",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPrepassDepth(context,identifier);});
 
 	shaderManager.RegisterShader("forwardp_light_indexing",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderForwardPLightIndexing(context,identifier);});
 	shaderManager.RegisterShader("forwardp_light_culling",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderForwardPLightCulling(context,identifier);});
@@ -187,7 +186,7 @@ void CGame::InitShaders()
 
 void CGame::UpdateShaderTimeData()
 {
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_globalRenderSettingsBufferData->timeBuffer,0ull,pragma::ShaderTextured3DBase::TimeData{
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_globalRenderSettingsBufferData->timeBuffer,0ull,pragma::ShaderGameWorldLightingPass::TimeData{
 		static_cast<float>(CurTime()),static_cast<float>(DeltaTime()),
 		static_cast<float>(RealTime()),static_cast<float>(DeltaRealTime())
 	});

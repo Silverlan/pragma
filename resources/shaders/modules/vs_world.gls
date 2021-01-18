@@ -28,81 +28,108 @@ layout(location = SHADER_NORMAL_BUFFER_LOCATION) in vec3 in_vert_normal;
 
 void export_world_fragment_data(mat4 mdlMatrix,vec3 vertPos)
 {
-	uint vertexAnimOffset = (u_pushConstants.scene.vertexAnimInfo<<16)>>16;
-	uint vertexAnimCount = u_pushConstants.scene.vertexAnimInfo>>16;
-	float wrinkleDelta = 0.0;
+	mat4 V = get_view_matrix();
+
 	vec3 vertNorm = in_vert_normal.xyz;
-	for(uint i=0;i<vertexAnimCount;++i)
+	vec4 weightedVertPos = vec4(vertPos,1.0);
+	vec3 normal = in_vert_normal.xyz;
+	mat4 mBone;
+	if(CSPEC_ENABLE_ANIMATION == 1)
 	{
-		uint offset = vertexAnimOffset +i;
-		VertexAnimationFrameData frameData = vaFrameData.data[offset];
+		if(CSPEC_ENABLE_MORPH_TARGET_ANIMATION == 1)
+		{
+			uint vertexAnimOffset = (u_pushConstants.scene.vertexAnimInfo<<16)>>16;
+			uint vertexAnimCount = u_pushConstants.scene.vertexAnimInfo>>16;
+			float wrinkleDelta = 0.0;
+			for(uint i=0;i<vertexAnimCount;++i)
+			{
+				uint offset = vertexAnimOffset +i;
+				VertexAnimationFrameData frameData = vaFrameData.data[offset];
 
-		vec3 vpos0;
-		vec3 vnorm0;
-		float vwrinkle0;
-		get_vertex_anim_vertex_position(frameData.srcFrameOffset,vpos0,vnorm0,vwrinkle0);
+				vec3 vpos0;
+				vec3 vnorm0;
+				float vwrinkle0;
+				get_vertex_anim_vertex_position(frameData.srcFrameOffset,vpos0,vnorm0,vwrinkle0);
 
-		vec3 vpos1;
-		vec3 vnorm1;
-		float vwrinkle1;
-		get_vertex_anim_vertex_position(frameData.srcFrameOffset,vpos1,vnorm1,vwrinkle1);
+				vec3 vpos1;
+				vec3 vnorm1;
+				float vwrinkle1;
+				get_vertex_anim_vertex_position(frameData.srcFrameOffset,vpos1,vnorm1,vwrinkle1);
 
-		wrinkleDelta += vwrinkle0 *frameData.blend;
-		vertPos += vpos0 *frameData.blend;//v0 +(v1 -v0) *frameData.blend;
-		vertNorm += vnorm0 *frameData.blend;
+				wrinkleDelta += vwrinkle0 *frameData.blend;
+				vertPos += vpos0 *frameData.blend;//v0 +(v1 -v0) *frameData.blend;
+				vertNorm += vnorm0 *frameData.blend;
+			}
+			vertNorm = normalize(vertNorm);
+			vs_out.wrinkleDelta = wrinkleDelta;
+		}
+		bool extendedWeights = false;
+		if(CSPEC_ENABLE_EXTENDED_VERTEX_WEIGHTS == 1)
+			extendedWeights = is_weighted_ext();
+		mBone = calc_bone_matrix(is_instanced_weighted(),extendedWeights);
+		weightedVertPos = mBone *weightedVertPos;
+		normal = normalize((mBone *vec4(normal.xyz,0.0)).xyz);
 	}
-	vertNorm = normalize(vertNorm);
-
-	vs_out.wrinkleDelta = wrinkleDelta;
 
 	//mat4 MV = V *mdlMatrix;
 	//mat4 MVP = u_camera.P *MV;
 
-	mat4 mBone = calc_bone_matrix(is_instanced_weighted(),is_weighted_ext());
-	vec4 weightedVertPos = mBone *vec4(vertPos,1.0);
-
-	vec4 vposWs = mdlMatrix *weightedVertPos;
-	if(is_3d_sky())
+	vec4 vposWs = vec4(vertPos,1.0);
+	if(CSPEC_ENABLE_3D_ORIGIN == 1)
 	{
-		vposWs.xyz -= u_pushConstants.scene.drawOrigin.xyz;
-		vposWs.xyz *= u_pushConstants.scene.drawOrigin.w;
+		if(is_3d_sky())
+		{
+			vposWs.xyz -= u_pushConstants.scene.drawOrigin.xyz;
+			vposWs.xyz *= u_pushConstants.scene.drawOrigin.w;
+		}
 	}
 
-	mat4 V = get_view_matrix();
 	mat4 P = u_camera.P;
-	if(u_pushConstants.scene.depthBias.x > 0.0)
-		apply_projection_depth_bias_offset(P,u_renderSettings.nearZ,u_renderSettings.farZ,u_pushConstants.scene.depthBias[0],u_pushConstants.scene.depthBias[1]);
+	if(CSPEC_ENABLE_DEPTH_BIAS == 1)
+	{
+		if(u_pushConstants.scene.depthBias.x > 0.0)
+			apply_projection_depth_bias_offset(P,u_renderSettings.nearZ,u_renderSettings.farZ,u_pushConstants.scene.depthBias[0],u_pushConstants.scene.depthBias[1]);
+	}
 	gl_Position = API_DEPTH_TRANSFORM(P) *V *vposWs;
 
 	vposWs.xyz /= vposWs.w;
 	vposWs.w = 1.0;
 
-	if(length_sqr(u_pushConstants.scene.clipPlane.xyz) > 0.0)
-		gl_ClipDistance[0] = dot(vec4(vposWs.xyz,1.0),u_pushConstants.scene.clipPlane);
+	if(CSPEC_ENABLE_CLIPPING == 1)
+	{
+		if(length_sqr(u_pushConstants.scene.clipPlane.xyz) > 0.0)
+			gl_ClipDistance[0] = dot(vec4(vposWs.xyz,1.0),u_pushConstants.scene.clipPlane);
+		else
+			gl_ClipDistance[0] = 1.0;
+	}
 	else
 		gl_ClipDistance[0] = 1.0;
-
-	vec3 normal = normalize((mBone *vec4(vertNorm.xyz,0.0)).xyz);
 	
 	vs_out.vert_pos_ws = vposWs.xyz;
-	vs_out.M = get_instanced_model_matrix();
+	vs_out.M = mdlMatrix;
 	vs_out.color = get_instanced_instance_color();
 	//vs_out.vert_pos = vertPos;
 	//vs_out.vert_pos_cs = (V *vposWs).xyz;
 
 	vs_out.vert_normal = normal;
-	vs_out.vert_normal_cs = (V *mdlMatrix *vec4(normal,0)).xyz;
-	
 	vs_out.vert_uv = in_vert_uv.xy;
 
-   vec3 T = normalize((mBone *vec4(in_vert_tangent,0.0)).xyz);
-   vec3 B = normalize((mBone *vec4(in_vert_bitangent,0.0)).xyz);
-   vec3 N = normal;
-   vs_out.TBN = mat3(T,B,N);
+	if(CSPEC_ENABLE_NORMAL_MAP == 1 || CSPEC_PARALLAX_ENABLED == 1)
+	{
+	   vec3 T = normalize((mBone *vec4(in_vert_tangent,0.0)).xyz);
+	   vec3 B = normalize((mBone *vec4(in_vert_bitangent,0.0)).xyz);
+	   vec3 N = normal;
+	   vs_out.TBN = mat3(T,B,N);
+
+		vs_out.vert_normal_cs = (V *mdlMatrix *vec4(normal,0)).xyz;
+	}
 
 #if ENABLE_LIGHTMAP == 1
-	if(is_light_map_enabled())
-		vs_out.vert_uv_lightmap.xy = in_uv_lightmap;
+	if(CSPEC_ENABLE_LIGHT_MAPS == 1)
+	{
+		if(is_light_map_enabled())
+			vs_out.vert_uv_lightmap.xy = in_uv_lightmap;
+	}
 #endif
 
 	// Parallax Mapping
@@ -122,8 +149,7 @@ void export_world_fragment_data(mat4 mdlMatrix,vec3 vertPos)
 	}*/
 	//
 
-	export_light_fragment_data(vposWs,mBone,normal,mdlMatrix);
-	//export_light_fragment_data(vposWs,mBone,normal,MV);
+	// export_light_fragment_data(vposWs,mBone,normal,mdlMatrix);
 }
 
 void export_world_fragment_data(vec3 vertPos) {export_world_fragment_data(get_instanced_model_matrix(),vertPos);}

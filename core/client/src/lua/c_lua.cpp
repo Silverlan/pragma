@@ -455,7 +455,7 @@ void CGame::RegisterLua()
 		renderer.ReloadPresentationRenderTarget();
 	}));
 	classDefRasterizationRenderer.def("ScheduleMeshForRendering",static_cast<void(*)(
-		lua_State*,pragma::rendering::RasterizationRenderer&,CSceneHandle&,uint32_t,pragma::ShaderTextured3DBase&,Material&,EntityHandle&,ModelSubMesh&
+		lua_State*,pragma::rendering::RasterizationRenderer&,CSceneHandle&,uint32_t,pragma::ShaderGameWorldLightingPass&,Material&,EntityHandle&,ModelSubMesh&
 	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));
 	classDefRasterizationRenderer.def("ScheduleMeshForRendering",static_cast<void(*)(
 		lua_State*,pragma::rendering::RasterizationRenderer&,CSceneHandle&,uint32_t,const std::string&,Material&,EntityHandle&,ModelSubMesh&

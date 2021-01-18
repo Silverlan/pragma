@@ -27,12 +27,15 @@ mat4 calc_bone_matrix(bool weighted,bool weightedExt)
 		if(in_boneWeightIDs[i] != -1)
 			mat += in_weights[i] *u_bones.matrices[in_boneWeightIDs[i]];
 	}
-	if(weightedExt)
+	if(CSPEC_ENABLE_EXTENDED_VERTEX_WEIGHTS == 1)
 	{
-		for(int i=4;i<8;i++)
+		if(weightedExt)
 		{
-			if(in_boneWeightExtIDs[i] != -1)
-				mat += in_weightsExt[i] *u_bones.matrices[in_boneWeightExtIDs[i]];
+			for(int i=4;i<8;i++)
+			{
+				if(in_boneWeightExtIDs[i] != -1)
+					mat += in_weightsExt[i] *u_bones.matrices[in_boneWeightExtIDs[i]];
+			}
 		}
 	}
 	return mat;

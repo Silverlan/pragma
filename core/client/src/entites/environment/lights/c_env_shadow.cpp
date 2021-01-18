@@ -370,7 +370,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 			{
 				auto &dynOctree = culler->GetOcclusionOctree();
 				SceneRenderDesc::CollectRenderMeshesFromOctree(
-					drawSceneInfo,dynOctree,scene,*hCam,vp,drawSceneInfo.renderFlags,fGetRenderQueue,fShouldCull,nullptr,lodBias,
+					drawSceneInfo,dynOctree,scene,*hCam,vp,drawSceneInfo.renderFlags,fGetRenderQueue,fShouldCull,nullptr,nullptr,lodBias,
 					[](CBaseEntity &ent,const pragma::CSceneComponent&,FRender) -> bool {
 						return ent.GetRenderComponent()->ShouldDrawShadow();
 					}

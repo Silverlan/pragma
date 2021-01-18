@@ -111,3 +111,12 @@ Bool CPhysicsComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &pa
 		return CBaseNetComponent::ReceiveNetEvent(eventId,packet);
 	return true;
 }
+
+void CPhysicsComponent::OnWake()
+{
+	BasePhysicsComponent::OnWake();
+}
+void CPhysicsComponent::OnSleep()
+{
+	BasePhysicsComponent::OnSleep();
+}

@@ -20,8 +20,6 @@ vec3 apply_lighting(LightSourceData light,uint lightIndex,MaterialInfo materialI
 
 vec3 calc_pbr_lighting(vec2 uv,MaterialInfo materialInfo,vec4 baseColor)
 {
-    if(is_unlit() == true)
-        return baseColor.rgb;
     vec3 color = vec3(0.0, 0.0, 0.0);
 
     vec3 normal = get_normal_from_map(uv);
@@ -29,20 +27,30 @@ vec3 calc_pbr_lighting(vec2 uv,MaterialInfo materialInfo,vec4 baseColor)
 
     vec3 view = normalize(u_renderSettings.posCam - fs_in.vert_pos_ws.xyz);
 
-    bool useLightmaps = is_light_map_enabled();
-    if(useLightmaps)
+    bool useLightmaps = false;
+    if(CSPEC_ENABLE_LIGHT_MAPS == 1)
     {
-        vec4 colLightMap = texture(u_lightMap,fs_in.vert_uv_lightmap.xy);
-        //baseColor.rgb *= colLightMap.rgb;
-        color = baseColor.rgb;
+        useLightmaps = is_light_map_enabled();
+        if(useLightmaps)
+        {
+            vec4 colLightMap = texture(u_lightMap,fs_in.vert_uv_lightmap.xy);
+            //baseColor.rgb *= colLightMap.rgb;
+            color = baseColor.rgb;
+        }
     }
-    /*else */if(is_ibl_enabled())
-       color += get_ibl_contribution(materialInfo, normal, view);
-
-    if(useLightmaps)
+    if(CSPEC_ENABLE_IBL == 1)
     {
-		vec4 colLightMap = texture(u_lightMap,fs_in.vert_uv_lightmap.xy);
-		color.rgb = color.rgb *(get_lightmap_exposure_pow() *colLightMap.rgb);
+        /*else */if(is_ibl_enabled())
+           color += get_ibl_contribution(materialInfo, normal, view);
+    }
+
+    if(CSPEC_ENABLE_LIGHT_MAPS == 1)
+    {
+        if(useLightmaps)
+        {
+    		vec4 colLightMap = texture(u_lightMap,fs_in.vert_uv_lightmap.xy);
+    		color.rgb = color.rgb *(get_lightmap_exposure_pow() *colLightMap.rgb);
+        }
     }
 
     ivec2 location = ivec2(gl_FragCoord.xy);
@@ -76,29 +84,42 @@ vec3 calc_pbr_lighting(vec2 uv,MaterialInfo materialInfo,vec4 baseColor)
         color += apply_directional_light(light,lightIndex,materialInfo,normal,view);
     }
 #else
-    for(uint i=SCENE_SPOT_LIGHT_BUFFER_START; i < SCENE_SPOT_LIGHT_BUFFER_END && visibleLightTileIndicesBuffer.data[tileStartOffset + i].index != -1; i++)
+
+    if(CSPEC_ENABLE_LIGHT_SOURCES == 1)
     {
-        uint lightIndex = visibleLightTileIndicesBuffer.data[tileStartOffset +i].index;
-        LightSourceData light = get_light_source(lightIndex);
-        //if(useLightmaps == true && (light.flags &FLIGHT_BAKED_LIGHT_SOURCE) != 0)
-        //    continue;
-        color += apply_spot_light(light,lightIndex,materialInfo,normal,view);
-    }
-    for(uint i=SCENE_POINT_LIGHT_BUFFER_START; i < SCENE_POINT_LIGHT_BUFFER_END && visibleLightTileIndicesBuffer.data[tileStartOffset + i].index != -1; i++)
-    {
-        uint lightIndex = visibleLightTileIndicesBuffer.data[tileStartOffset +i].index;
-        LightSourceData light = get_light_source(lightIndex);
-        //if(useLightmaps == true && (light.flags &FLIGHT_BAKED_LIGHT_SOURCE) != 0)
-        //    continue;
-        color += apply_point_light(light,lightIndex,materialInfo,normal,view);
-    }
-    for(uint i=SCENE_DIRECTIONAL_LIGHT_BUFFER_START; i < SCENE_DIRECTIONAL_LIGHT_BUFFER_END && visibleLightTileIndicesBuffer.data[tileStartOffset + i].index != -1; i++)
-    {
-        uint lightIndex = visibleLightTileIndicesBuffer.data[tileStartOffset +i].index;
-        LightSourceData light = get_light_source(lightIndex);
-        //if(useLightmaps == true && (light.flags &FLIGHT_BAKED_LIGHT_SOURCE) != 0)
-        //    continue;
-        color += apply_directional_light(light,lightIndex,materialInfo,normal,view);
+        if(CSPEC_ENABLE_LIGHT_SOURCES_SPOT == 1)
+        {
+            for(uint i=SCENE_SPOT_LIGHT_BUFFER_START; i < SCENE_SPOT_LIGHT_BUFFER_END && visibleLightTileIndicesBuffer.data[tileStartOffset + i].index != -1; i++)
+            {
+                uint lightIndex = visibleLightTileIndicesBuffer.data[tileStartOffset +i].index;
+                LightSourceData light = get_light_source(lightIndex);
+                //if(useLightmaps == true && (light.flags &FLIGHT_BAKED_LIGHT_SOURCE) != 0)
+                //    continue;
+                color += apply_spot_light(light,lightIndex,materialInfo,normal,view);
+            }
+        }
+        if(CSPEC_ENABLE_LIGHT_SOURCES_POINT == 1)
+        {
+            for(uint i=SCENE_POINT_LIGHT_BUFFER_START; i < SCENE_POINT_LIGHT_BUFFER_END && visibleLightTileIndicesBuffer.data[tileStartOffset + i].index != -1; i++)
+            {
+                uint lightIndex = visibleLightTileIndicesBuffer.data[tileStartOffset +i].index;
+                LightSourceData light = get_light_source(lightIndex);
+                //if(useLightmaps == true && (light.flags &FLIGHT_BAKED_LIGHT_SOURCE) != 0)
+                //    continue;
+                color += apply_point_light(light,lightIndex,materialInfo,normal,view);
+            }
+        }
+        if(CSPEC_ENABLE_LIGHT_SOURCES_DIRECTIONAL == 1)
+        {
+            for(uint i=SCENE_DIRECTIONAL_LIGHT_BUFFER_START; i < SCENE_DIRECTIONAL_LIGHT_BUFFER_END && visibleLightTileIndicesBuffer.data[tileStartOffset + i].index != -1; i++)
+            {
+                uint lightIndex = visibleLightTileIndicesBuffer.data[tileStartOffset +i].index;
+                LightSourceData light = get_light_source(lightIndex);
+                //if(useLightmaps == true && (light.flags &FLIGHT_BAKED_LIGHT_SOURCE) != 0)
+                //    continue;
+                color += apply_directional_light(light,lightIndex,materialInfo,normal,view);
+            }
+        }
     }
 #endif
     /*for(uint i=SCENE_SPOT_LIGHT_BUFFER_START; i < 10; i++)
@@ -239,18 +260,6 @@ vec3 calc_pbr_lighting(vec2 uv,MaterialInfo materialInfo,vec4 baseColor)
         //    continue;
         color += apply_directional_light(light,lightIndex,materialInfo,normal,view);
     }*/
-
-    // TODO
-    vec4 rma = texture(u_rmaMap,uv);
-    float ao = rma[RMA_CHANNEL_AO];
-
-    // TODO
-    if(is_ssao_enabled() == true)
-        ao *= get_ssao_occlusion(get_viewport_width(),get_viewport_height()); // TODO: Disable ssao if ao map exists?
-
-    // Apply optional PBR terms for additional (optional) shading
-    color = mix(color, color * ao, materialInfo.aoFactor *0.7 +0.3);
-
     return color;
 }
 

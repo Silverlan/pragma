@@ -17,7 +17,7 @@ extern DLLCENGINE CEngine *c_engine;
 using namespace pragma;
 
 // +1 for depth pass
-uint32_t ShaderParticleBase::PIPELINE_COUNT = umath::to_integral(ParticleAlphaMode::Count) *umath::to_integral(pragma::ShaderScene::Pipeline::Count) +1;
+//uint32_t ShaderParticleBase::PIPELINE_COUNT = umath::to_integral(ParticleAlphaMode::Count) *umath::to_integral(pragma::ShaderScene::Pipeline::Count) +1;
 decltype(ShaderParticleBase::DESCRIPTOR_SET_ANIMATION) ShaderParticleBase::DESCRIPTOR_SET_ANIMATION = {
 	{
 		prosper::DescriptorSetInfo::Binding {
@@ -258,5 +258,5 @@ pragma::ParticleAlphaMode ShaderParticleBase::GetRenderAlphaMode(const pragma::C
 
 uint32_t ShaderParticleBase::GetParticlePipelineCount()
 {
-	return PIPELINE_COUNT;
+	return 1;//PIPELINE_COUNT;
 }

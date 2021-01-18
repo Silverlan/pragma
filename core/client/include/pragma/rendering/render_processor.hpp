@@ -65,7 +65,7 @@ namespace pragma::rendering
 		const RenderQueue::InstanceSet *m_curInstanceSet = nullptr;
 
 		pragma::ShaderGameWorld *m_curShader = nullptr;
-		pragma::ShaderGameWorld::PassType m_passType = pragma::ShaderGameWorld::PassType::LightingPass;
+		pragma::ShaderGameWorld::GameShaderType m_passType = pragma::ShaderGameWorld::GameShaderType::LightingPass;
 		uint32_t m_curVertexAnimationOffset = 0;
 		RenderPassStats *m_stats = nullptr;
 
@@ -95,7 +95,8 @@ namespace pragma::rendering
 		void SetCameraType(CameraType camType);
 		void Set3DSky(bool enabled);
 		void SetDrawOrigin(const Vector4 &drawOrigin);
-		bool BindShader(prosper::Shader &shader);
+		bool BindShader(prosper::PipelineID pipelineId);
+		bool BindShader(prosper::Shader &shader,uint32_t pipelineIdx=0u);
 		bool BindMaterial(CMaterial &mat);
 		bool BindEntity(CBaseEntity &ent);
 		void SetDepthBias(float d,float delta);
@@ -110,13 +111,13 @@ namespace pragma::rendering
 		bool BindInstanceSet(pragma::ShaderGameWorld &shaderScene,const RenderQueue::InstanceSet *instanceSet=nullptr);
 		void UnbindMaterial();
 		void UnbindEntity();
-		prosper::ShaderIndex m_curShaderIndex = std::numeric_limits<prosper::ShaderIndex>::max();
 		MaterialIndex m_curMaterialIndex = std::numeric_limits<MaterialIndex>::max();
 		EntityIndex m_curEntityIndex = std::numeric_limits<EntityIndex>::max();
 
 		ShaderProcessor m_shaderProcessor;
 
 		prosper::Shader *m_curShader = nullptr;
+		prosper::PipelineID m_curPipeline = std::numeric_limits<prosper::PipelineID>::max();
 		pragma::ShaderGameWorld *m_shaderScene = nullptr;
 		CMaterial *m_curMaterial = nullptr;
 		CBaseEntity *m_curEntity = nullptr;
@@ -128,7 +129,6 @@ namespace pragma::rendering
 		const util::RenderPassDrawInfo &m_drawSceneInfo;
 		Vector4 m_drawOrigin;
 		std::optional<Vector2> m_depthBias {};
-		pragma::ShaderGameWorldPipeline m_pipelineType;
 		RenderPassStats *m_stats = nullptr;
 		const pragma::rendering::RasterizationRenderer *m_renderer = nullptr;
 		RenderFlags m_renderFlags;

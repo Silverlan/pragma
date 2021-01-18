@@ -179,9 +179,9 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 							prosper::Shader *shader = nullptr;
 							if(drawWorld == 2)
 								shader = renderer.GetWireframeShader();
-							else if(base != nullptr && base->GetBaseTypeHashCode() == pragma::ShaderTextured3DBase::HASH_TYPE)
-								shader = renderer.GetShaderOverride(static_cast<pragma::ShaderTextured3DBase*>(base));
-							if(shader != nullptr && shader->GetBaseTypeHashCode() == pragma::ShaderTextured3DBase::HASH_TYPE)
+							else if(base != nullptr && base->GetBaseTypeHashCode() == pragma::ShaderGameWorldLightingPass::HASH_TYPE)
+								shader = renderer.GetShaderOverride(static_cast<pragma::ShaderGameWorldLightingPass*>(base));
+							if(shader != nullptr && shader->GetBaseTypeHashCode() == pragma::ShaderGameWorldLightingPass::HASH_TYPE)
 							{
 								// Translucent?
 								if(mat->IsTranslucent() == true)
@@ -211,7 +211,7 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 								{
 									if(containers.size() == containers.capacity())
 										containers.reserve(containers.capacity() +10);
-									containers.push_back(std::make_unique<ShaderMeshContainer>(static_cast<pragma::ShaderTextured3DBase*>(shader)));
+									containers.push_back(std::make_unique<ShaderMeshContainer>(static_cast<pragma::ShaderGameWorldLightingPass*>(shader)));
 									shaderContainer = containers.back().get();
 								}
 								RenderSystem::MaterialMeshContainer *matContainer = nullptr;

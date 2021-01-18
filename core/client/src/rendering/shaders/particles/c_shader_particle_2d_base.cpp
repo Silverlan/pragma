@@ -122,7 +122,7 @@ void ShaderParticle2DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreate
 	RegisterDefaultGfxPipelineDescriptorSetGroups(pipelineInfo);
 }
 
-bool ShaderParticle2DBase::BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,pragma::CParticleSystemComponent &pSys,ParticleRenderFlags renderFlags,Pipeline pipeline,RecordFlags recordFlags)
+bool ShaderParticle2DBase::BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,pragma::CParticleSystemComponent &pSys,ParticleRenderFlags renderFlags,RecordFlags recordFlags)
 {
 	uint32_t pipelineIdx;
 	if(umath::is_flag_set(renderFlags,ParticleRenderFlags::DepthOnly))
@@ -130,7 +130,7 @@ bool ShaderParticle2DBase::BeginDraw(const std::shared_ptr<prosper::IPrimaryComm
 	else
 	{
 		auto alphaMode = GetRenderAlphaMode(pSys);
-		pipelineIdx = umath::to_integral(pipeline) *umath::to_integral(ParticleAlphaMode::Count) +umath::to_integral(alphaMode);
+		pipelineIdx = /*umath::to_integral(pipeline) **/umath::to_integral(ParticleAlphaMode::Count) +umath::to_integral(alphaMode);
 	}
 	return ShaderSceneLit::BeginDraw(cmdBuffer,pipelineIdx,recordFlags);
 }

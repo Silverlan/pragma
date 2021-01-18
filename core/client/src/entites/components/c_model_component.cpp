@@ -10,9 +10,12 @@
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_modelmanager.h"
+#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
 
+extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 
@@ -123,21 +126,33 @@ void CModelComponent::GetBaseModelMeshes(std::vector<std::shared_ptr<ModelMesh>>
 	mdl->GetBodyGroupMeshes(GetBodyGroups(),lod,outMeshes);
 }
 
-const std::shared_ptr<prosper::IRenderBuffer> &CModelComponent::GetRenderBuffer(uint32_t idx) const {return m_lodMeshRenderBuffers[idx];}
+const std::shared_ptr<prosper::IRenderBuffer> &CModelComponent::GetRenderBuffer(uint32_t idx) const {return m_lodMeshRenderBufferData[idx].renderBuffer;}
+pragma::GameShaderSpecializationConstantFlag CModelComponent::GetPipelineSpecializationFlags(uint32_t idx) const {return m_lodMeshRenderBufferData[idx].pipelineSpecializationFlags;}
 
 void CModelComponent::UpdateRenderBufferList()
 {
-	m_lodMeshRenderBuffers.reserve(m_lodRenderMeshes.size());
-	m_lodMeshRenderBuffers.clear();
+	if(std::this_thread::get_id() != c_engine->GetMainThreadId())
+	{
+		Con::cwar<<"WARNING: Attempted to update render meshes from non-main thread, this is illegal!"<<Con::endl;
+		return;
+	}
+	m_lodMeshRenderBufferData.clear();
+	m_lodMeshRenderBufferData.reserve(m_lodRenderMeshes.size());
 	for(auto i=decltype(m_lodRenderMeshes.size()){0u};i<m_lodRenderMeshes.size();++i)
 	{
 		auto &mesh = static_cast<CModelSubMesh&>(*m_lodRenderMeshes[i]);
 		auto *mat = GetRenderMaterial(mesh.GetSkinTextureIndex());
 		std::shared_ptr<prosper::IRenderBuffer> renderBuffer = nullptr;
-		auto *shader = mat ? dynamic_cast<pragma::ShaderEntity*>(mat->GetPrimaryShader()) : nullptr;
+		auto *shader = mat ? dynamic_cast<pragma::ShaderGameWorldLightingPass*>(mat->GetPrimaryShader()) : nullptr;
 		if(shader && shader->IsValid())
 			renderBuffer = mesh.GetRenderBuffer(*shader);
-		m_lodMeshRenderBuffers.push_back(renderBuffer);
+		m_lodMeshRenderBufferData.push_back({});
+		auto &renderBufferData = m_lodMeshRenderBufferData.back();
+		renderBufferData.renderBuffer = renderBuffer;
+		renderBufferData.material = mat ? mat->GetHandle() : MaterialHandle{};
+		if(mat == nullptr || shader == nullptr)
+			continue;
+		renderBufferData.pipelineSpecializationFlags = shader->GetMaterialPipelineSpecializationRequirements(*mat);
 	}
 }
 
@@ -145,6 +160,11 @@ void CModelComponent::UpdateRenderMeshes()
 {
 	if(umath::is_flag_set(m_stateFlags,StateFlags::RenderMeshUpdateRequired) == false)
 		return;
+	if(std::this_thread::get_id() != c_engine->GetMainThreadId())
+	{
+		Con::cwar<<"WARNING: Attempted to update render meshes from non-main thread, this is illegal!"<<Con::endl;
+		return;
+	}
 	umath::set_flag(m_stateFlags,StateFlags::RenderMeshUpdateRequired,false);
 	m_lodRenderMeshes.clear();
 	m_lodMeshes.clear();
@@ -306,8 +326,8 @@ bool CModelComponent::SetBodyGroup(UInt32 groupId,UInt32 id)
 	auto r = BaseModelComponent::SetBodyGroup(groupId,id);
 	if(r == false)
 		return r;
-	UpdateLOD(m_lod); // Update our active meshes
 	umath::set_flag(m_stateFlags,StateFlags::RenderMeshUpdateRequired);
+	UpdateLOD(m_lod); // Update our active meshes
 	return true;
 }
 

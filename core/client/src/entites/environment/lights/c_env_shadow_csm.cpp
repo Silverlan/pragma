@@ -125,8 +125,8 @@ void CShadowCSMComponent::SetSplitCount(unsigned int numSplits)
 	m_layerCount = numSplits;
 
 	auto &csmBuffer = c_game->GetGlobalRenderSettingsBufferData().csmBuffer;
-	auto splitCount = static_cast<decltype(pragma::ShaderTextured3DBase::CSMData::count)>(numSplits);
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderTextured3DBase::CSMData,count),splitCount);
+	auto splitCount = static_cast<decltype(pragma::ShaderGameWorldLightingPass::CSMData::count)>(numSplits);
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderGameWorldLightingPass::CSMData,count),splitCount);
 
 	m_frustums.resize(m_numSplits);
 	m_fard.resize(m_numSplits);
@@ -251,8 +251,8 @@ void CShadowCSMComponent::UpdateFrustum(uint32_t splitId,pragma::CCameraComponen
 	auto &splitDistance = m_pendingInfo.prevSplitDistances;
 
 	auto &csmBuffer = c_game->GetGlobalRenderSettingsBufferData().csmBuffer;
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderTextured3DBase::CSMData,VP),m_pendingInfo.prevVpMatrices.size() *sizeof(Mat4),m_pendingInfo.prevVpMatrices.data());
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderTextured3DBase::CSMData,fard),splitDistance);
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderGameWorldLightingPass::CSMData,VP),m_pendingInfo.prevVpMatrices.size() *sizeof(Mat4),m_pendingInfo.prevVpMatrices.data());
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderGameWorldLightingPass::CSMData,fard),splitDistance);
 
 	// Calculate new split distances
 	splitDistance[splitId] = 0.5f *(-frustumSplit.split.fard *camProj[2][2] +camProj[3][2]) /frustumSplit.split.fard +0.5f;

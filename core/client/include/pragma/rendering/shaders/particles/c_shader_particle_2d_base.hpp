@@ -78,7 +78,7 @@ namespace pragma
 		bool Draw(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const CParticleSystemComponent &ps,CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags renderFlags);
 		bool BeginDraw(
 			const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,
-			CParticleSystemComponent &pSys,ParticleRenderFlags renderFlags,Pipeline pipelineIdx=Pipeline::Regular,
+			CParticleSystemComponent &pSys,ParticleRenderFlags renderFlags,
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		);
 

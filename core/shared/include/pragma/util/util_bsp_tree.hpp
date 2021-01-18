@@ -59,6 +59,7 @@ namespace util
 		void SetClusterCount(uint64_t numClusters);
 		Node *FindLeafNode(const Vector3 &pos);
 		std::vector<Node*> FindLeafNodesInAABB(const Vector3 &min,const Vector3 &max);
+		bool IsAABBVisibleInCluster(const Vector3 &min,const Vector3 &max,ClusterIndex clusterIdx) const;
 
 		std::shared_ptr<Node> CreateNode();
 	protected:

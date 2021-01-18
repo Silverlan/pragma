@@ -5,12 +5,30 @@
 
 #define DEBUG_MODE DEBUG_MODE_NONE
 
+#include "sh_pbr.gls"
+
+layout(constant_id = SPECIALIZATION_CONSTANT_DEBUG_MODE_ENABLED) const uint CSPEC_DEBUG_MODE_ENABLED = 1;
+layout(constant_id = SPECIALIZATION_CONSTANT_EMISSION_ENABLED) const uint CSPEC_EMISSION_ENABLED = 1;
+layout(constant_id = SPECIALIZATION_CONSTANT_BLOOM_OUTPUT_ENABLED) const uint CSPEC_BLOOM_OUTPUT_ENABLED = 1;
+layout(constant_id = SPECIALIZATION_CONSTANT_WRINKLES_ENABLED) const uint CSPEC_WRINKLES_ENABLED = 1;
+layout(constant_id = SPECIALIZATION_CONSTANT_ENABLE_TRANSLUCENCY) const uint CSPEC_ENABLE_TRANSLUCENCY = 1;
+layout(constant_id = SPECIALIZATION_CONSTANT_ENABLE_IBL) const uint CSPEC_ENABLE_IBL = 1;
+layout(constant_id = SPECIALIZATION_CONSTANT_ENABLE_SSAO) const uint CSPEC_ENABLE_SSAO = 1;
+layout(constant_id = SPECIALIZATION_CONSTANT_ENABLE_LIGHT_SOURCES) const uint CSPEC_ENABLE_LIGHT_SOURCES = 1;
+layout(constant_id = SPECIALIZATION_CONSTANT_ENABLE_LIGHT_SOURCES_SPOT) const uint CSPEC_ENABLE_LIGHT_SOURCES_SPOT = 1;
+layout(constant_id = SPECIALIZATION_CONSTANT_ENABLE_LIGHT_SOURCES_POINT) const uint CSPEC_ENABLE_LIGHT_SOURCES_POINT = 1;
+layout(constant_id = SPECIALIZATION_CONSTANT_ENABLE_LIGHT_SOURCES_DIRECTIONAL) const uint CSPEC_ENABLE_LIGHT_SOURCES_DIRECTIONAL = 1;
+layout(constant_id = SPECIALIZATION_CONSTANT_ENABLE_RMA_MAP) const uint CSPEC_ENABLE_RMA_MAP = 1;
+
 #include "pbr.gls"
 
 void main()
 {
-	vec2 texCoords = apply_parallax(use_parallax_map(),fs_in.vert_uv);
+	vec2 texCoords = fs_in.vert_uv;
+	if(CSPEC_PARALLAX_ENABLED == 1)
+		texCoords = apply_parallax(use_parallax_map(),texCoords);
 	vec4 albedoColor = texture(u_albedoMap,texCoords);
 	fs_color = calc_pbr(albedoColor,texCoords,u_pushConstants.debugMode);
-	extract_bright_color(fs_color);
+	if(CSPEC_BLOOM_OUTPUT_ENABLED == 1)
+		extract_bright_color(fs_color);
 }

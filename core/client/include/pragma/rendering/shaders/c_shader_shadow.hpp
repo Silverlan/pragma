@@ -70,10 +70,10 @@ namespace pragma
 		virtual void Set3DSky(bool is3dSky) override {}
 		virtual bool BindDrawOrigin(const Vector4 &drawOrigin) override {return true;}
 		virtual bool BeginDraw(
-			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},ShaderGameWorldPipeline pipelineIdx=ShaderGameWorldPipeline::Regular,
+			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		) override;
-		virtual PassType GetPassType() const {return PassType::ShadowPass;}
+		virtual GameShaderType GetPassType() const {return GameShaderType::ShadowPass;}
 	protected:
 		bool BindEntityDepthMatrix(const Mat4 &depthMVP);
 		virtual void OnPipelinesInitialized() override;

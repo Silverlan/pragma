@@ -14,7 +14,7 @@ namespace pragma
 {
 	namespace rendering {class RasterizationRenderer;};
 	class DLLCLIENT ShaderLightCone
-		: public ShaderTextured3DBase
+		: public ShaderGameWorldLightingPass
 	{
 	public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_DEPTH_MAP;

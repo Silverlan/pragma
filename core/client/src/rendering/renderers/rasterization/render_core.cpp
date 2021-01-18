@@ -96,10 +96,34 @@ void RasterizationRenderer::RenderParticleSystems(const util::DrawSceneInfo &dra
 		}
 	}
 }
+
+static auto cvLockCommandBuffers = GetClientConVar("debug_render_lock_render_command_buffers");
 bool RasterizationRenderer::RecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(BaseRenderer::RecordCommandBuffers(drawSceneInfo) == false)
 		return false;
+	// Debug
+	static auto debugLockCmdBuffers = false;
+	if(cvLockCommandBuffers->GetBool())
+	{
+		if(debugLockCmdBuffers)
+		{
+			m_prepassCommandBufferGroup->Reuse();
+			m_lightingCommandBufferGroup->Reuse();
+			return true;
+		}
+		debugLockCmdBuffers = true;
+		m_prepassCommandBufferGroup->SetOneTimeSubmit(false);
+		m_lightingCommandBufferGroup->SetOneTimeSubmit(false);
+	}
+	else if(debugLockCmdBuffers)
+	{
+		debugLockCmdBuffers = false;
+		m_prepassCommandBufferGroup->SetOneTimeSubmit(true);
+		m_lightingCommandBufferGroup->SetOneTimeSubmit(true);
+	}
+	//
+
 	auto prepassMode = GetPrepassMode();
 	auto runPrepass = (drawSceneInfo.renderTarget == nullptr && prepassMode != PrepassMode::NoPrepass && drawSceneInfo.scene.valid());
 	if(runPrepass)

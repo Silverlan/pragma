@@ -45,9 +45,9 @@ namespace pragma::rendering
 		static auto constexpr INSTANCED = std::numeric_limits<uint16_t>::max();
 		static auto constexpr UNIQUE = std::numeric_limits<uint16_t>::max() -1;
 		RenderQueueItem()=default;
-		RenderQueueItem(CBaseEntity &ent,RenderMeshIndex meshIdx,CMaterial &mat,pragma::ShaderGameWorld &shader,const CCameraComponent *optCam=nullptr);
+		RenderQueueItem(CBaseEntity &ent,RenderMeshIndex meshIdx,CMaterial &mat,prosper::PipelineID pipelineId,const CCameraComponent *optCam=nullptr);
 		MaterialIndex material;
-		prosper::ShaderIndex shader;
+		prosper::PipelineID pipelineId = std::numeric_limits<prosper::PipelineID>::max();
 		EntityIndex entity;
 		pragma::RenderMeshIndex mesh;
 		SortingKey sortingKey;
@@ -78,7 +78,7 @@ namespace pragma::rendering
 		void Reserve();
 		void Add(const std::vector<RenderQueueItem> &items);
 		void Add(const RenderQueueItem &item);
-		void Add(CBaseEntity &ent,RenderMeshIndex meshIdx,CMaterial &mat,pragma::ShaderTextured3DBase &shader,const CCameraComponent *optCam=nullptr);
+		void Add(CBaseEntity &ent,RenderMeshIndex meshIdx,CMaterial &mat,prosper::PipelineID pipelineId,const CCameraComponent *optCam=nullptr);
 		void Sort();
 		void Merge(const RenderQueue &other);
 		std::vector<RenderQueueItem> queue;

@@ -11,8 +11,20 @@
 
 using namespace pragma::rendering;
 
+static std::vector<BaseRenderer*> g_renderers;
+const std::vector<BaseRenderer*> &BaseRenderer::GetRenderers() {return g_renderers;}
 BaseRenderer::BaseRenderer()
-{}
+{
+	g_renderers.push_back(this);
+}
+BaseRenderer::~BaseRenderer()
+{
+	auto it = std::find(g_renderers.begin(),g_renderers.end(),this);
+	assert(it != g_renderers.end());
+	if(it == g_renderers.end())
+		return;
+	g_renderers.erase(it);
+}
 bool BaseRenderer::operator==(const BaseRenderer &other) const {return &other == this;}
 bool BaseRenderer::operator!=(const BaseRenderer &other) const {return !operator==(other);}
 bool BaseRenderer::RecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo) {return true;}

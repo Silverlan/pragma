@@ -112,24 +112,24 @@ void RasterizationRenderer::InitializeCommandBufferGroups()
 
 void RasterizationRenderer::InitializeLightDescriptorSets()
 {
-	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS.IsValid())
+	if(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_LIGHTS.IsValid())
 	{
 		auto &bufLightSources = pragma::CLightComponent::GetGlobalRenderBuffer();
 		auto &bufShadowData = pragma::CLightComponent::GetGlobalShadowBuffer();
-		m_dsgLights = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS);
+		m_dsgLights = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_LIGHTS);
 #if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1
 		m_dsgLights->GetDescriptorSet()->SetBindingUniformBuffer(
-			const_cast<prosper::IUniformResizableBuffer&>(bufLightSources),umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::LightBuffers)
+			const_cast<prosper::IUniformResizableBuffer&>(bufLightSources),umath::to_integral(pragma::ShaderGameWorldLightingPass::LightBinding::LightBuffers)
 		);
 		m_dsgLights->GetDescriptorSet()->SetBindingUniformBuffer(
-			const_cast<prosper::IUniformResizableBuffer&>(bufShadowData),umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::ShadowData)
+			const_cast<prosper::IUniformResizableBuffer&>(bufShadowData),umath::to_integral(pragma::ShaderGameWorldLightingPass::LightBinding::ShadowData)
 		);
 #else
 		m_dsgLights->GetDescriptorSet()->SetBindingStorageBuffer(
-			const_cast<prosper::IUniformResizableBuffer&>(bufLightSources),umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::LightBuffers)
+			const_cast<prosper::IUniformResizableBuffer&>(bufLightSources),umath::to_integral(pragma::ShaderGameWorldLightingPass::LightBinding::LightBuffers)
 		);
 		m_dsgLights->GetDescriptorSet()->SetBindingStorageBuffer(
-			const_cast<prosper::IUniformResizableBuffer&>(bufShadowData),umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::ShadowData)
+			const_cast<prosper::IUniformResizableBuffer&>(bufShadowData),umath::to_integral(pragma::ShaderGameWorldLightingPass::LightBinding::ShadowData)
 		);
 #endif
 
@@ -225,6 +225,8 @@ void RasterizationRenderer::BeginRendering(const util::DrawSceneInfo &drawSceneI
 	umath::set_flag(m_stateFlags,StateFlags::DepthResolved | StateFlags::BloomResolved | StateFlags::RenderResolved,false);
 }
 
+bool RasterizationRenderer::ReloadBloomRenderTarget(uint32_t width) {return m_hdrInfo.ReloadBloomRenderTarget(width);}
+
 bool RasterizationRenderer::IsSSAOEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::SSAOEnabled);}
 void RasterizationRenderer::SetSSAOEnabled(pragma::CSceneComponent &scene,bool b)
 {
@@ -259,30 +261,30 @@ void RasterizationRenderer::UpdateRenderSettings()
 void RasterizationRenderer::SetShaderOverride(const std::string &srcShaderId,const std::string &shaderOverrideId)
 {
 	auto hSrcShader = c_engine->GetShader(srcShaderId);
-	if(hSrcShader.get()->GetBaseTypeHashCode() != pragma::ShaderGameWorld::HASH_TYPE)
+	if(hSrcShader.get()->GetBaseTypeHashCode() != pragma::ShaderGameWorldLightingPass::HASH_TYPE)
 		return;
-	auto *srcShader = dynamic_cast<pragma::ShaderGameWorld*>(hSrcShader.get());
+	auto *srcShader = dynamic_cast<pragma::ShaderGameWorldLightingPass*>(hSrcShader.get());
 	if(srcShader == nullptr)
 		return;
 	auto hDstShader = c_engine->GetShader(shaderOverrideId);
-	auto dstShader = dynamic_cast<pragma::ShaderGameWorld*>(hDstShader.get());
+	auto dstShader = dynamic_cast<pragma::ShaderGameWorldLightingPass*>(hDstShader.get());
 	if(dstShader == nullptr)
 		return;
 	m_shaderOverrides[typeid(*srcShader).hash_code()] = dstShader->GetHandle();
 }
-pragma::ShaderGameWorld *RasterizationRenderer::GetShaderOverride(pragma::ShaderGameWorld *srcShader) const
+pragma::ShaderGameWorldLightingPass *RasterizationRenderer::GetShaderOverride(pragma::ShaderGameWorldLightingPass *srcShader) const
 {
 	if(srcShader == nullptr)
 		return nullptr;
 	auto it = m_shaderOverrides.find(typeid(*srcShader).hash_code());
 	if(it == m_shaderOverrides.end())
 		return srcShader;
-	return static_cast<pragma::ShaderGameWorld*>(it->second.get());
+	return static_cast<pragma::ShaderGameWorldLightingPass*>(it->second.get());
 }
 void RasterizationRenderer::ClearShaderOverride(const std::string &srcShaderId)
 {
 	auto hSrcShader = c_engine->GetShader(srcShaderId);
-	auto *srcShader = dynamic_cast<pragma::ShaderGameWorld*>(hSrcShader.get());
+	auto *srcShader = dynamic_cast<pragma::ShaderGameWorldLightingPass*>(hSrcShader.get());
 	if(srcShader == nullptr)
 		return;
 	auto it = m_shaderOverrides.find(typeid(*srcShader).hash_code());
@@ -341,7 +343,8 @@ void RasterizationRenderer::UpdateFrustumPlanes(pragma::CSceneComponent &scene)
 	auto &cam = scene.GetActiveCamera();
 	if(cam.expired())
 		return;
-	cam->GetFrustumPlanes(m_frustumPlanes);
+	cam->UpdateFrustumPlanes();
+	m_frustumPlanes = cam->GetFrustumPlanes();
 	m_clippedFrustumPlanes = m_frustumPlanes;
 /*	auto forward = camera->GetForward();
 	auto up = camera->GetUp();

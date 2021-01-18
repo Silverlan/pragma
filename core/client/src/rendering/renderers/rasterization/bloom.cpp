@@ -10,6 +10,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_glow.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include "pragma/console/c_cvar.h"
 #include "pragma/game/c_game.h"
 #include <pragma/c_engine.h>
 #include <prosper_util.hpp>
@@ -23,11 +24,11 @@ using namespace pragma::rendering;
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
-
+static auto cvBloomEnabled = GetClientConVar("render_bloom_enabled");
+static auto cvBloomAmount = GetClientConVar("render_bloom_amount");
 void RasterizationRenderer::RenderBloom(const util::DrawSceneInfo &drawSceneInfo)
 {
-	static auto skipBloom = false;
-	if(skipBloom)
+	if(cvBloomEnabled->GetBool() == false)
 		return;
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingBloom);
 	auto &hdrInfo = GetHDRInfo();
@@ -40,7 +41,7 @@ void RasterizationRenderer::RenderBloom(const util::DrawSceneInfo &drawSceneInfo
 
 	static auto blurSize = 5.f;
 	static int32_t kernelSize = 9u;
-	static uint32_t blurAmount = 9u;
+	uint32_t blurAmount = umath::clamp(cvBloomAmount->GetInt(),0,20);
 
 	drawCmd->RecordImageBarrier(hdrInfo.bloomBlurRenderTarget->GetTexture().GetImage(),prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 	for(auto i=decltype(blurAmount){0};i<blurAmount;++i)

@@ -43,8 +43,8 @@ void SortingKey::SetDistance(const Vector3 &origin,const CCameraComponent &cam)
 	translucent.distance = glm::floatBitsToUint(static_cast<float>(distSqr));
 }
 
-RenderQueueItem::RenderQueueItem(CBaseEntity &ent,RenderMeshIndex meshIdx,CMaterial &mat,pragma::ShaderGameWorld &pshader,const CCameraComponent *optCam)
-	: material{mat.GetIndex()},shader{pshader.GetIndex()},entity{ent.GetLocalIndex()},mesh{meshIdx},translucentKey{optCam ? true : false}
+RenderQueueItem::RenderQueueItem(CBaseEntity &ent,RenderMeshIndex meshIdx,CMaterial &mat,prosper::PipelineID pipelineId,const CCameraComponent *optCam)
+	: material{mat.GetIndex()},pipelineId{pipelineId},entity{ent.GetLocalIndex()},mesh{meshIdx},translucentKey{optCam ? true : false}
 {
 	instanceSetIndex = RenderQueueItem::UNIQUE;
 	auto &renderC = *ent.GetRenderComponent();
@@ -61,14 +61,14 @@ RenderQueueItem::RenderQueueItem(CBaseEntity &ent,RenderMeshIndex meshIdx,CMater
 		}
 
 		sortingKey.translucent.material = material;
-		sortingKey.translucent.shader = shader;
+		sortingKey.translucent.shader = pipelineId;
 		sortingKey.translucent.instantiable = renderC.IsInstantiable();
 	}
 	else
 	{
 		sortingKey.opaque.distance = 0;
 		sortingKey.opaque.material = material;
-		sortingKey.opaque.shader = shader;
+		sortingKey.opaque.shader = pipelineId;
 		sortingKey.opaque.instantiable = renderC.IsInstantiable();
 	}
 }
@@ -91,9 +91,9 @@ void RenderQueue::Clear()
 	queue.clear();
 	sortedItemIndices.clear();
 }
-void RenderQueue::Add(CBaseEntity &ent,RenderMeshIndex meshIdx,CMaterial &mat,pragma::ShaderTextured3DBase &shader,const CCameraComponent *optCam)
+void RenderQueue::Add(CBaseEntity &ent,RenderMeshIndex meshIdx,CMaterial &mat,prosper::PipelineID pipelineId,const CCameraComponent *optCam)
 {
-	Add({ent,meshIdx,mat,shader,optCam});
+	Add({ent,meshIdx,mat,pipelineId,optCam});
 }
 void RenderQueue::Add(const RenderQueueItem &item)
 {

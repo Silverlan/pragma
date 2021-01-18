@@ -21,12 +21,7 @@ using namespace pragma;
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
-ShaderPrepassBase::Pipeline ShaderPrepassBase::GetPipelineIndex(prosper::SampleCountFlags sampleCount)
-{
-	return (sampleCount == prosper::SampleCountFlags::e1Bit) ? Pipeline::Regular : Pipeline::MultiSample;
-}
-
+#pragma optimize("",off)
 decltype(ShaderPrepassBase::VERTEX_BINDING_RENDER_BUFFER_INDEX) ShaderPrepassBase::VERTEX_BINDING_RENDER_BUFFER_INDEX = {prosper::VertexInputRate::Instance};
 decltype(ShaderPrepassBase::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX) ShaderPrepassBase::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX = {ShaderEntity::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX,VERTEX_BINDING_RENDER_BUFFER_INDEX};
 
@@ -57,7 +52,7 @@ decltype(ShaderPrepassBase::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderPrepassBase::D
 prosper::util::RenderPassCreateInfo::AttachmentInfo ShaderPrepassBase::get_depth_render_pass_attachment_info(prosper::SampleCountFlags sampleCount)
 {
 	return prosper::util::RenderPassCreateInfo::AttachmentInfo {
-		ShaderTextured3DBase::RENDER_PASS_DEPTH_FORMAT,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AttachmentLoadOp::Clear,
+		ShaderGameWorldLightingPass::RENDER_PASS_DEPTH_FORMAT,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AttachmentLoadOp::Clear,
 		prosper::AttachmentStoreOp::Store,sampleCount,prosper::ImageLayout::DepthStencilAttachmentOptimal
 	};
 }
@@ -65,12 +60,12 @@ prosper::util::RenderPassCreateInfo::AttachmentInfo ShaderPrepassBase::get_depth
 ShaderPrepassBase::ShaderPrepassBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader)
 	: ShaderGameWorld(context,identifier,vsShader,fsShader)
 {
-	SetPipelineCount(umath::to_integral(Pipeline::Count));
+	//SetPipelineCount(umath::to_integral(Pipeline::Count));
 }
 ShaderPrepassBase::ShaderPrepassBase(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderGameWorld(context,identifier,"world/prepass/vs_prepass_depth","")
 {
-	SetPipelineCount(umath::to_integral(Pipeline::Count));
+	//SetPipelineCount(umath::to_integral(Pipeline::Count));
 }
 
 void ShaderPrepassBase::OnPipelinesInitialized()
@@ -80,14 +75,14 @@ void ShaderPrepassBase::OnPipelinesInitialized()
 }
 
 bool ShaderPrepassBase::BeginDraw(
-	const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,ShaderGameWorldPipeline pipelineIdx,
+	const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,
 	RecordFlags recordFlags
 )
 {
 	if(m_dummyMaterialDsg == nullptr)
 		m_dummyMaterialDsg = CreateDescriptorSetGroup(GetMaterialDescriptorSetIndex());
 	Set3DSky(false);
-	return ShaderScene::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx),recordFlags) == true &&
+	return ShaderScene::BeginDraw(cmdBuffer,0u,recordFlags) == true &&
 		BindClipPlane(clipPlane) == true &&
 		RecordPushConstants(drawOrigin,offsetof(PushConstants,drawOrigin)) &&
 		RecordPushConstants(Vector2{},offsetof(PushConstants,depthBias)) &&
@@ -167,8 +162,8 @@ void ShaderPrepassBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInf
 {
 	ShaderEntity::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
-	if(pipelineIdx == umath::to_integral(Pipeline::Reflection))
-		prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::FrontBit);
+	//if(pipelineIdx == umath::to_integral(Pipeline::Reflection))
+	//	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::FrontBit);
 
 	pipelineInfo.ToggleDepthWrites(true);
 	pipelineInfo.ToggleDepthTest(true,prosper::CompareOp::Less);
@@ -206,7 +201,7 @@ void ShaderPrepassBase::GetVertexAnimationPushConstantInfo(uint32_t &offset) con
 
 //////////////////
 
-decltype(ShaderPrepass::VERTEX_ATTRIBUTE_NORMAL) ShaderPrepass::VERTEX_ATTRIBUTE_NORMAL = {ShaderTextured3DBase::VERTEX_ATTRIBUTE_NORMAL,VERTEX_BINDING_VERTEX};
+decltype(ShaderPrepass::VERTEX_ATTRIBUTE_NORMAL) ShaderPrepass::VERTEX_ATTRIBUTE_NORMAL = {ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_NORMAL,VERTEX_BINDING_VERTEX};
 
 decltype(ShaderPrepass::RENDER_PASS_NORMAL_FORMAT) ShaderPrepass::RENDER_PASS_NORMAL_FORMAT = prosper::Format::R16G16B16A16_SFloat;
 
@@ -222,6 +217,7 @@ ShaderPrepass::ShaderPrepass(prosper::IPrContext &context,const std::string &ide
 	: ShaderPrepassBase(context,identifier,"world/prepass/vs_prepass","world/prepass/fs_prepass")
 {
 	// SetBaseShader<ShaderTextured3DBase>();
+	SetPipelineCount(umath::to_integral(Pipeline::Count));
 }
 
 void ShaderPrepass::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
@@ -237,6 +233,38 @@ void ShaderPrepass::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &
 void ShaderPrepass::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderPrepassBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+	
+	auto enableAlphaTest = false;
+	auto enableNormalOutput = false;
+	auto enableAnimation = false;
+	auto enableMorphTargetAnimation = false;
+	switch(static_cast<Pipeline>(pipelineIdx))
+	{
+	case Pipeline::Opaque:
+		enableAnimation = true;
+		enableMorphTargetAnimation = true;
+		break;
+	case Pipeline::AlphaTest:
+		enableAlphaTest = true;
+		
+		enableAnimation = true;
+		enableMorphTargetAnimation = true;
+		break;
+	case Pipeline::AnimatedOpaque:
+		enableAnimation = true;
+		enableMorphTargetAnimation = true;
+		break;
+	case Pipeline::AnimatedAlphaTest:
+		enableAlphaTest = true;
+		enableAnimation = true;
+		enableMorphTargetAnimation = true;
+		break;
+	}
+	AddSpecializationConstant(pipelineInfo,prosper::ShaderStageFlags::FragmentBit,umath::to_integral(SpecializationConstant::EnableAlphaTest),static_cast<uint32_t>(enableAlphaTest));
+	AddSpecializationConstant(pipelineInfo,prosper::ShaderStageFlags::FragmentBit,umath::to_integral(SpecializationConstant::EnableNormalOutput),static_cast<uint32_t>(enableNormalOutput));
+	AddSpecializationConstant(pipelineInfo,prosper::ShaderStageFlags::VertexBit,umath::to_integral(SpecializationConstant::EnableAnimation),static_cast<uint32_t>(enableAnimation));
+	AddSpecializationConstant(pipelineInfo,prosper::ShaderStageFlags::VertexBit,umath::to_integral(SpecializationConstant::EnableMorphTargetAnimation),static_cast<uint32_t>(enableMorphTargetAnimation));
 
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_NORMAL);
 }
+#pragma optimize("",on)

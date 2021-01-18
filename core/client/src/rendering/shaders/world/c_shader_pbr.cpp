@@ -24,7 +24,7 @@ extern DLLCLIENT ClientState *client;
 extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
-
+#pragma optimize("",off)
 decltype(ShaderPBR::DESCRIPTOR_SET_MATERIAL) ShaderPBR::DESCRIPTOR_SET_MATERIAL = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Material settings
@@ -84,31 +84,29 @@ decltype(ShaderPBR::DESCRIPTOR_SET_PBR) ShaderPBR::DESCRIPTOR_SET_PBR = {
 	}
 };
 ShaderPBR::ShaderPBR(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
-	: ShaderTextured3DBase{context,identifier,vsShader,fsShader,gsShader}
-{
-	SetPipelineCount(umath::to_integral(Pipeline::Count));
-}
+	: ShaderGameWorldLightingPass{context,identifier,vsShader,fsShader,gsShader}
+{}
 ShaderPBR::ShaderPBR(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderPBR{context,identifier,"world/vs_textured","world/pbr/fs_pbr"}
 {
 }
 bool ShaderPBR::BindMaterialParameters(CMaterial &mat)
 {
-	return ShaderTextured3DBase::BindMaterialParameters(mat);
+	return ShaderGameWorldLightingPass::BindMaterialParameters(mat);
 }
 prosper::DescriptorSetInfo &ShaderPBR::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
 void ShaderPBR::SetForceNonIBLMode(bool b) {m_bNonIBLMode = b;}
 bool ShaderPBR::BeginDraw(
 	const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,
-	const Vector4 &drawOrigin,ShaderGameWorldPipeline pipelineIdx,RecordFlags recordFlags
+	const Vector4 &drawOrigin,RecordFlags recordFlags
 )
 {
 	m_extRenderFlags = SceneFlags::None;
-	return ShaderTextured3DBase::BeginDraw(cmdBuffer,clipPlane,drawOrigin,pipelineIdx,recordFlags);
+	return ShaderGameWorldLightingPass::BeginDraw(cmdBuffer,clipPlane,drawOrigin,recordFlags);
 }
 bool ShaderPBR::BindSceneCamera(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,bool bView)
 {
-	if(ShaderTextured3DBase::BindSceneCamera(scene,renderer,bView) == false)
+	if(ShaderGameWorldLightingPass::BindSceneCamera(scene,renderer,bView) == false)
 		return false;
 	auto hCam = scene.GetActiveCamera();
 	if(hCam.expired())
@@ -126,12 +124,12 @@ bool ShaderPBR::BindSceneCamera(pragma::CSceneComponent &scene,const rendering::
 }
 void ShaderPBR::UpdateRenderFlags(CModelSubMesh &mesh,SceneFlags &inOutFlags)
 {
-	ShaderTextured3DBase::UpdateRenderFlags(mesh,inOutFlags);
+	ShaderGameWorldLightingPass::UpdateRenderFlags(mesh,inOutFlags);
 	inOutFlags |= m_extRenderFlags;
 }
 void ShaderPBR::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	ShaderTextured3DBase::InitializeGfxPipelineDescriptorSets(pipelineInfo,pipelineIdx);
+	ShaderGameWorldLightingPass::InitializeGfxPipelineDescriptorSets(pipelineInfo,pipelineIdx);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_PBR);
 }
 
@@ -243,7 +241,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescr
 }
 void ShaderPBR::OnPipelinesInitialized()
 {
-	ShaderTextured3DBase::OnPipelinesInitialized();
+	ShaderGameWorldLightingPass::OnPipelinesInitialized();
 	m_defaultPbrDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_PBR);
 	m_defaultMatDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_MATERIAL);
 }
@@ -251,6 +249,37 @@ prosper::IDescriptorSet &ShaderPBR::GetDefaultPbrDescriptorSet() const {return *
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
 	return InitializeMaterialDescriptorSet(mat,DESCRIPTOR_SET_MATERIAL);
+}
+void ShaderPBR::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+{
+	ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+
+	// Fragment
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::DebugModeEnabledBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EmissionEnabledBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::BloomOutputEnabledBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::WrinklesEnabledBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableTranslucencyBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableIblBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableSsaoBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableLightSourcesBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableLightSourcesSpotBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableLightSourcesPointBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableLightSourcesDirectionalBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableRmaMapBit);
+
+	// Shared
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableNormalMapBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::ParallaxEnabledBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableLightMapsBit);
+	
+	// Vertex
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableAnimationBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableMorphTargetAnimationBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableClippingBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::Enable3dOriginBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableExtendedVertexWeights);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableDepthBias);
 }
 
 /////////////////
@@ -281,7 +310,7 @@ void ShaderPBRBlend::InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipe
 prosper::DescriptorSetInfo &ShaderPBRBlend::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
 void ShaderPBRBlend::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderTextured3DBase::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderGameWorldLightingPass::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBRBlend::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
@@ -338,3 +367,4 @@ bool ShaderPBRBlend::GetRenderBufferTargets(
 	outOffsets.push_back(0ull);
 	return true;
 }
+#pragma optimize("",on)

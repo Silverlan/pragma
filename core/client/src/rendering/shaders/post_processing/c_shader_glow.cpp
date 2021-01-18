@@ -19,8 +19,8 @@ using namespace pragma;
 extern DLLCENGINE CEngine *c_engine;
 
 
-decltype(ShaderGlow::DESCRIPTOR_SET_INSTANCE) ShaderGlow::DESCRIPTOR_SET_INSTANCE = {&ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE};
-decltype(ShaderGlow::DESCRIPTOR_SET_SCENE) ShaderGlow::DESCRIPTOR_SET_SCENE = {&ShaderTextured3DBase::DESCRIPTOR_SET_SCENE};
+decltype(ShaderGlow::DESCRIPTOR_SET_INSTANCE) ShaderGlow::DESCRIPTOR_SET_INSTANCE = {&ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE};
+decltype(ShaderGlow::DESCRIPTOR_SET_SCENE) ShaderGlow::DESCRIPTOR_SET_SCENE = {&ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE};
 decltype(ShaderGlow::DESCRIPTOR_SET_MATERIAL) ShaderGlow::DESCRIPTOR_SET_MATERIAL = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Glow Map
@@ -31,7 +31,7 @@ decltype(ShaderGlow::DESCRIPTOR_SET_MATERIAL) ShaderGlow::DESCRIPTOR_SET_MATERIA
 };
 decltype(ShaderGlow::RENDER_PASS_FORMAT) ShaderGlow::RENDER_PASS_FORMAT = prosper::Format::R8G8B8A8_UNorm;
 ShaderGlow::ShaderGlow(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderTextured3DBase(context,identifier,"world/vs_glow","world/fs_glow")
+	: ShaderGameWorldLightingPass(context,identifier,"world/vs_glow","world/fs_glow")
 {
 	// SetBaseShader<ShaderTextured3DBase>();
 }
@@ -48,12 +48,12 @@ void ShaderGlow::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCr
 }
 void ShaderGlow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	ShaderTextured3DBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+	ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	pipelineInfo.ToggleDepthBias(true,-180.f /* constant factor */,-180.f /* clamp */,0.f /* slope factor */);
 }
-bool ShaderGlow::BeginDraw(const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,Pipeline pipelineIdx)
+bool ShaderGlow::BeginDraw(const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer)
 {
-	return ShaderSceneLit::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx));
+	return ShaderSceneLit::BeginDraw(cmdBuffer);
 }
 uint32_t ShaderGlow::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_SCENE.setIndex;}
 uint32_t ShaderGlow::GetInstanceDescriptorSetIndex() const {return DESCRIPTOR_SET_INSTANCE.setIndex;}

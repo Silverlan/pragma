@@ -31,7 +31,7 @@ using namespace pragma;
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 void CWorldComponent::Initialize()
 {
 	BaseWorldComponent::Initialize();
@@ -164,6 +164,7 @@ const pragma::rendering::RenderQueue *CWorldComponent::GetClusterRenderQueue(uti
 	return (clusterIndex < queue.size()) ? queue.at(clusterIndex).get() : nullptr;
 }
 
+#include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 {
 	auto &clusterRenderQueues = m_clusterRenderQueues;
@@ -247,6 +248,7 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 
 	clusterRenderQueues.reserve(numClusters);
 	clusterRenderTranslucentQueues.reserve(numClusters);
+	auto &context = c_engine->GetRenderContext();
 	for(auto clusterIdx=decltype(meshesPerClusters.size()){0u};clusterIdx<meshesPerClusters.size();++clusterIdx)
 	{
 		clusterRenderQueues.push_back(pragma::rendering::RenderQueue::Create());
@@ -262,16 +264,23 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 			auto hShader = mat->GetPrimaryShader();
 			if(!hShader)
 				continue;
-			auto *shader = dynamic_cast<pragma::ShaderTextured3DBase*>(hShader);
+			auto *shader = dynamic_cast<pragma::ShaderGameWorldLightingPass*>(hShader);
 			if(shader == nullptr)
+				continue;
+			uint32_t pipelineIdx = 0;
+			auto t = shader->FindPipelineIndex(pragma::ShaderPBR::PassType::Generic,renderC->GetShaderPipelineSpecialization(),shader->GetMaterialPipelineSpecializationRequirements(*mat));
+			if(t.has_value())
+				pipelineIdx = *t;
+			prosper::PipelineID pipelineId;
+			if(shader->GetPipelineId(pipelineId,pipelineIdx) == false)
 				continue;
 			if(mat->GetAlphaMode() == AlphaMode::Blend)
 			{
 				clusterRenderTranslucentQueue = clusterRenderTranslucentQueue ? clusterRenderTranslucentQueue : pragma::rendering::RenderQueue::Create();
-				clusterRenderTranslucentQueue->Add(static_cast<CBaseEntity&>(GetEntity()),subMeshIdx,*mat,*shader);
+				clusterRenderTranslucentQueue->Add(static_cast<CBaseEntity&>(GetEntity()),subMeshIdx,*mat,pipelineId);
 				continue;
 			}
-			clusterRenderQueue->Add(static_cast<CBaseEntity&>(GetEntity()),subMeshIdx,*mat,*shader);
+			clusterRenderQueue->Add(static_cast<CBaseEntity&>(GetEntity()),subMeshIdx,*mat,pipelineId);
 		}
 		clusterRenderTranslucentQueues.push_back(clusterRenderTranslucentQueue);
 		clusterRenderQueue->Sort();
@@ -375,3 +384,4 @@ std::ostream& CWorld::print(std::ostream &os)
 	os<<"]";
 	return os;
 }
+#pragma optimize("",on)

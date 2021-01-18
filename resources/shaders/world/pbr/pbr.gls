@@ -62,7 +62,11 @@ vec4 calc_pbr(vec4 albedoColor,vec2 texCoords,uint debugMode)
 	float oneMinusSpecularStrength = 1.0 - max(max(f0.r, f0.g), f0.b);
 	diffuseColor = baseColor.rgb * oneMinusSpecularStrength;
 
-	vec4 rma = texture(u_rmaMap,texCoords);
+	vec4 rma;
+	if(CSPEC_ENABLE_RMA_MAP == 1)
+		rma = texture(u_rmaMap,texCoords);
+	else
+		rma = vec4(1 /* ao */,1 /* roughness */,1 /*metalness */,1);
 	perceptualRoughness = rma[RMA_CHANNEL_ROUGHNESS] * 1.0;
 
 	// Glossiness
@@ -76,19 +80,25 @@ vec4 calc_pbr(vec4 albedoColor,vec2 texCoords,uint debugMode)
 
 	vec4 colorMod = get_instance_color();
 	baseColor = albedoColor;
-	baseColor.a = apply_alpha_mode(baseColor.a *colorMod.a *u_material.color.a,u_material.alphaMode,u_material.alphaCutoff);
+	if(CSPEC_ENABLE_TRANSLUCENCY == 1)
+		baseColor.a = apply_alpha_mode(baseColor.a *colorMod.a *u_material.color.a,u_material.alphaMode,u_material.alphaCutoff);
+	else
+		baseColor.a = 1.0;
 	baseColor.rgb *= colorMod.rgb *u_material.color.rgb;
 
-	if(fs_in.wrinkleDelta != 0.0)
+	if(CSPEC_WRINKLES_ENABLED == 1)
 	{
-		float wrinkle = clamp(-fs_in.wrinkleDelta,0,1);
-		float stretch = clamp(fs_in.wrinkleDelta,0,1);
-		float baseColorFactor = 1.0 -wrinkle -stretch;
+		if(fs_in.wrinkleDelta != 0.0)
+		{
+			float wrinkle = clamp(-fs_in.wrinkleDelta,0,1);
+			float stretch = clamp(fs_in.wrinkleDelta,0,1);
+			float baseColorFactor = 1.0 -wrinkle -stretch;
 
-		vec4 wrinkleCol = texture(u_wrinkleCompressMap,texCoords);
-		vec4 stretchCol = texture(u_wrinkleStretchMap,texCoords);
+			vec4 wrinkleCol = texture(u_wrinkleCompressMap,texCoords);
+			vec4 stretchCol = texture(u_wrinkleStretchMap,texCoords);
 
-		baseColor.rgb = baseColorFactor *baseColor.rgb +wrinkle *wrinkleCol.rgb +stretch *stretchCol.rgb;
+			baseColor.rgb = baseColorFactor *baseColor.rgb +wrinkle *wrinkleCol.rgb +stretch *stretchCol.rgb;
+		}
 	}
 
 	if(true)//is_diffuse_srgb()) // TODO
@@ -123,27 +133,53 @@ vec4 calc_pbr(vec4 albedoColor,vec2 texCoords,uint debugMode)
 	);
 
 	// Lighting
-	vec3 color = calc_pbr_lighting(texCoords,materialInfo,baseColor);
-	if((u_debug.flags &DEBUG_FORWARD_PLUS_HEATMAP) != 0)
+	vec3 color;
+	if(CSPEC_DEBUG_MODE_ENABLED == 0)
+		color = calc_pbr_lighting(texCoords,materialInfo,baseColor);
+	else
 	{
-		apply_debug_heatmap_color(SCENE_SPOT_LIGHT_BUFFER_START,SCENE_SPOT_LIGHT_BUFFER_END,color);
-		apply_debug_heatmap_color(SCENE_POINT_LIGHT_BUFFER_START,SCENE_POINT_LIGHT_BUFFER_END,color);
-		apply_debug_heatmap_color(SCENE_DIRECTIONAL_LIGHT_BUFFER_START,SCENE_DIRECTIONAL_LIGHT_BUFFER_END,color);
+		if((u_debug.flags &DEBUG_UNLIT) != 0)
+			color = baseColor.rgb;
+		else
+			color = calc_pbr_lighting(texCoords,materialInfo,baseColor);
+		if((u_debug.flags &DEBUG_FORWARD_PLUS_HEATMAP) != 0)
+		{
+			apply_debug_heatmap_color(SCENE_SPOT_LIGHT_BUFFER_START,SCENE_SPOT_LIGHT_BUFFER_END,color);
+			apply_debug_heatmap_color(SCENE_POINT_LIGHT_BUFFER_START,SCENE_POINT_LIGHT_BUFFER_END,color);
+			apply_debug_heatmap_color(SCENE_DIRECTIONAL_LIGHT_BUFFER_START,SCENE_DIRECTIONAL_LIGHT_BUFFER_END,color);
+		}
 	}
+
+	// Ao
+    float ao = rma[RMA_CHANNEL_AO];
+
+    // TODO
+    if(CSPEC_ENABLE_SSAO == 1)
+    {
+        if(is_ssao_enabled() == true)
+            ao *= get_ssao_occlusion(get_viewport_width(),get_viewport_height()); // TODO: Disable ssao if ao map exists?
+    }
+
+    // Apply optional PBR terms for additional (optional) shading
+    color = mix(color, color * ao, materialInfo.aoFactor *0.7 +0.3);
 
 	// regular shading
 	vec4 result = vec4(color.rgb, baseColor.a); // TODO
 
-	if(use_glow_map())
+	if(CSPEC_EMISSION_ENABLED == 1)
 	{
-		vec4 emissiveColor = texture(u_glowMap,texCoords);
-		if(true)//is_glow_srgb()) // TODO
-			emissiveColor.rgb = srgb_to_linear(emissiveColor.rgb);
-		emissiveColor.rgb *= u_material.emissionFactor.rgb;
-		result = add_glow_color(result,texCoords,emissiveColor,baseColor);
+		if(use_glow_map())
+		{
+			vec4 emissiveColor = texture(u_glowMap,texCoords);
+			if(true)//is_glow_srgb()) // TODO
+				emissiveColor.rgb = srgb_to_linear(emissiveColor.rgb);
+			emissiveColor.rgb *= u_material.emissionFactor.rgb;
+			result = add_glow_color(result,texCoords,emissiveColor,baseColor);
+		}
 	}
 
-	result = apply_debug_mode(debugMode,result,texCoords,diffuseColor,metallic,perceptualRoughness,aoFactor,reflectance);
+	if(CSPEC_DEBUG_MODE_ENABLED == 1)
+		result = apply_debug_mode(debugMode,result,texCoords,diffuseColor,metallic,perceptualRoughness,aoFactor,reflectance);
 	return result;
 }
 

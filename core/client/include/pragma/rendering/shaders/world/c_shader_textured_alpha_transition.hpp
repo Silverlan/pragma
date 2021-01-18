@@ -13,7 +13,7 @@
 namespace pragma
 {
 	class DLLCLIENT ShaderTexturedAlphaTransition
-		: public ShaderTextured3DBase
+		: public ShaderGameWorldLightingPass
 	{
 	public:
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_ALPHA;
@@ -22,7 +22,7 @@ namespace pragma
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 		enum class MaterialBinding : uint32_t
 		{
-			DiffuseMap2 = umath::to_integral(ShaderTextured3DBase::MaterialBinding::Count),
+			DiffuseMap2 = umath::to_integral(ShaderGameWorldLightingPass::MaterialBinding::Count),
 			DiffuseMap3
 		};
 

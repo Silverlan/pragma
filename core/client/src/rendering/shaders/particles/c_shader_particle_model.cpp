@@ -49,13 +49,13 @@ decltype(ShaderParticleModel::DESCRIPTOR_SET_BONE_MATRICES) ShaderParticleModel:
 	}
 };
 ShaderParticleModel::ShaderParticleModel(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderTextured3DBase(context,identifier,"particles/model/vs_particle_model","particles/model/fs_particle_model")
+	: ShaderGameWorldLightingPass(context,identifier,"particles/model/vs_particle_model","particles/model/fs_particle_model")
 {
 	SetPipelineCount(GetParticlePipelineCount());
-	SetBaseShader<pragma::ShaderTextured3DBase>();
+	SetBaseShader<pragma::ShaderGameWorldLightingPass>();
 }
 prosper::DescriptorSetInfo &ShaderParticleModel::GetAnimationDescriptorSetInfo() const {return DESCRIPTOR_SET_ANIMATION;}
-bool ShaderParticleModel::ShouldInitializePipeline(uint32_t pipelineIdx) {return ShaderTextured3DBase::ShouldInitializePipeline(GetBasePipelineIndex(pipelineIdx));}
+bool ShaderParticleModel::ShouldInitializePipeline(uint32_t pipelineIdx) {return ShaderGameWorldLightingPass::ShouldInitializePipeline(GetBasePipelineIndex(pipelineIdx));}
 void ShaderParticleModel::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
 	auto sampleCount = GetSampleCount(GetBasePipelineIndex(pipelineIdx));
@@ -73,7 +73,7 @@ void ShaderParticleModel::InitializeRenderPass(std::shared_ptr<prosper::IRenderP
 void ShaderParticleModel::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	auto basePipelineIdx = GetBasePipelineIndex(pipelineIdx);
-	ShaderTextured3DBase::InitializeGfxPipeline(pipelineInfo,basePipelineIdx);
+	ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo,basePipelineIdx);
 
 	//pipelineInfo.ToggleDepthWrites(true);
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_POSITION);
@@ -91,7 +91,7 @@ void ShaderParticleModel::InitializeGfxPipeline(prosper::GraphicsPipelineCreateI
 }
 void ShaderParticleModel::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderTextured3DBase::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderGameWorldLightingPass::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
 bool ShaderParticleModel::BindParticleSystem(pragma::CParticleSystemComponent &pSys)
 {
@@ -103,7 +103,7 @@ bool ShaderParticleModel::BindParticleSystem(pragma::CParticleSystemComponent &p
 		umath::to_integral(GetRenderFlags(pSys,ParticleRenderFlags::None)), // TODO: Use correct particle render flags
 		umath::to_integral(pSys.GetAlphaMode())
 	};
-	return RecordPushConstants(sizeof(pushConstants),&pushConstants,sizeof(ShaderTextured3DBase::PushConstants));
+	return RecordPushConstants(sizeof(pushConstants),&pushConstants,sizeof(ShaderGameWorldLightingPass::PushConstants));
 }
 
 bool ShaderParticleModel::BindParticleBuffers(prosper::IBuffer &particleBuffer,prosper::IBuffer &rotBuffer,prosper::IBuffer &animStartBuffer)
@@ -113,19 +113,19 @@ bool ShaderParticleModel::BindParticleBuffers(prosper::IBuffer &particleBuffer,p
 
 bool ShaderParticleModel::Draw(CModelSubMesh &mesh,uint32_t numInstances,uint32_t firstInstance)
 {
-	return ShaderTextured3DBase::Draw(mesh,{},*CSceneComponent::GetEntityInstanceIndexBuffer()->GetZeroIndexBuffer(),[this,numInstances,firstInstance](CModelSubMesh &mesh) {
+	return ShaderGameWorldLightingPass::Draw(mesh,{},*CSceneComponent::GetEntityInstanceIndexBuffer()->GetZeroIndexBuffer(),[this,numInstances,firstInstance](CModelSubMesh &mesh) {
 		return RecordDrawIndexed(mesh.GetTriangleVertexCount(),numInstances,0u,firstInstance);
 	},true);
 }
 
 bool ShaderParticleModel::BeginDraw(
 	const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,pragma::CParticleSystemComponent &pSys,
-	const Vector4 &drawOrigin,ShaderGameWorldPipeline pipelineIdx,ShaderScene::RecordFlags recordFlags
+	const Vector4 &drawOrigin,ShaderScene::RecordFlags recordFlags
 )
 {
-	return ShaderTextured3DBase::BeginDraw(
+	return ShaderGameWorldLightingPass::BeginDraw(
 		cmdBuffer,clipPlane,drawOrigin,
-		static_cast<ShaderGameWorldPipeline>(umath::to_integral(pipelineIdx) *umath::to_integral(AlphaMode::Count) +umath::to_integral(GetRenderAlphaMode(pSys))),
+		//static_cast<ShaderGameWorldPipeline>(umath::to_integral(pipelineIdx) *umath::to_integral(AlphaMode::Count) +umath::to_integral(GetRenderAlphaMode(pSys))),
 		recordFlags
 	);
 }

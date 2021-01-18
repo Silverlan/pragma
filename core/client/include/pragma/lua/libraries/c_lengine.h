@@ -50,6 +50,7 @@ namespace Lua
 		DLLCLIENT void set_tick_delta_time_tied_to_frame_rate(bool tieToFrameRate);
 		DLLCLIENT Vector2i get_window_resolution();
 		DLLCLIENT Vector2i get_render_resolution();
+		DLLCLIENT uint32_t get_current_frame_index();
 
 		DLLCLIENT void register_library(lua_State *l);
 	};

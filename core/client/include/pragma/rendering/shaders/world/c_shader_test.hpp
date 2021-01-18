@@ -14,7 +14,7 @@
 namespace pragma
 {
 	class DLLCLIENT ShaderTest
-		: public ShaderTextured3DBase
+		: public ShaderGameWorldLightingPass
 	{
 	public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
@@ -22,7 +22,7 @@ namespace pragma
 
 		enum class MaterialBinding : uint32_t
 		{
-			MaterialSettings = umath::to_integral(ShaderTextured3DBase::MaterialBinding::MaterialSettings),
+			MaterialSettings = umath::to_integral(ShaderGameWorldLightingPass::MaterialBinding::MaterialSettings),
 			AlbedoMap,
 			NormalMap,
 			RMAMap,
@@ -51,7 +51,7 @@ namespace pragma
 		virtual bool BindSceneCamera(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,bool bView) override;
 		virtual bool BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) override;
 		virtual bool BeginDraw(
-			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},ShaderGameWorldPipeline pipelineIdx=ShaderGameWorldPipeline::Regular,
+			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		) override;
 		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
@@ -60,7 +60,7 @@ namespace pragma
 		virtual bool BindEntity(CBaseEntity &ent) override;
 		void SetForceNonIBLMode(bool b);
 	protected:
-		using ShaderTextured3DBase::Draw;
+		using ShaderGameWorldLightingPass::Draw;
 		virtual bool BindRenderFlags(SceneFlags flags) override {return true;}
 		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void UpdateRenderFlags(CModelSubMesh &mesh,SceneFlags &inOutFlags) override;

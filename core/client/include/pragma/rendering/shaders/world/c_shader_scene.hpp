@@ -27,14 +27,6 @@ namespace pragma
 		public ShaderTexturedBase
 	{
 	public:
-		enum class Pipeline : uint32_t
-		{
-			Regular = 0u,
-			MultiSample,
-			//LightMap,
-
-			Count
-		};
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDERER;
@@ -73,7 +65,8 @@ namespace pragma
 			LightShowShadowMapDepth = LightShowCascades<<1u,
 			LightShowFragmentDepthShadowSpace = LightShowShadowMapDepth<<1u,
 
-			ForwardPlusHeatmap = LightShowFragmentDepthShadowSpace<<1u
+			ForwardPlusHeatmap = LightShowFragmentDepthShadowSpace<<1u,
+			Unlit = ForwardPlusHeatmap<<1u
 		};
 
 #pragma pack(push,1)
@@ -221,15 +214,6 @@ namespace pragma
 		CBaseEntity *m_boundEntity = nullptr;
 	};
 
-	enum class ShaderGameWorldPipeline : uint32_t
-	{
-		Regular = umath::to_integral(ShaderScene::Pipeline::Regular),
-		MultiSample = umath::to_integral(ShaderScene::Pipeline::MultiSample),
-		//LightMap = umath::to_integral(ShaderScene::Pipeline::LightMap),
-
-		Reflection = umath::to_integral(ShaderScene::Pipeline::Count),
-		Count
-	};
 	class DLLCLIENT ShaderGameWorld
 		: public ShaderEntity
 	{
@@ -246,7 +230,7 @@ namespace pragma
 			NoIBL = LightmapsEnabled<<1u,
 			DisableShadows = NoIBL<<1u
 		};
-		enum class PassType : uint8_t
+		enum class GameShaderType : uint8_t
 		{
 			LightingPass = 0,
 			DepthPrepass,
@@ -277,14 +261,14 @@ namespace pragma
 		using ShaderEntity::ShaderEntity;
 		virtual bool BindClipPlane(const Vector4 &clipPlane)=0;
 		virtual bool BeginDraw(
-			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},ShaderGameWorldPipeline pipelineIdx=ShaderGameWorldPipeline::Regular,
+			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		)=0;
 		virtual bool SetDebugMode(pragma::SceneDebugMode debugMode) {return true;};
 		virtual void Set3DSky(bool is3dSky)=0;
 		virtual bool BindDrawOrigin(const Vector4 &drawOrigin)=0;
 		virtual bool SetDepthBias(const Vector2 &depthBias)=0;
-		virtual PassType GetPassType() const {return PassType::LightingPass;}
+		virtual GameShaderType GetPassType() const {return GameShaderType::LightingPass;}
 		virtual size_t GetBaseTypeHashCode() const override;
 		virtual uint32_t GetMaterialDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
 		prosper::IDescriptorSet &GetDefaultMaterialDescriptorSet() const;

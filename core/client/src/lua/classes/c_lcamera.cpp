@@ -221,7 +221,7 @@ void Lua::RasterizationRenderer::SetPrepassMode(lua_State *l,pragma::rendering::
 void Lua::RasterizationRenderer::GetPrepassMode(lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {Lua::PushInt(l,umath::to_integral(renderer.GetPrepassMode()));}
 
 void Lua::RasterizationRenderer::ScheduleMeshForRendering(
-	lua_State *l,pragma::rendering::RasterizationRenderer &renderer,CSceneHandle &scene,uint32_t renderMode,pragma::ShaderTextured3DBase &shader,Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh
+	lua_State *l,pragma::rendering::RasterizationRenderer &renderer,CSceneHandle &scene,uint32_t renderMode,pragma::ShaderGameWorldLightingPass &shader,Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh
 )
 {
 	pragma::Lua::check_component(l,scene);
@@ -265,7 +265,7 @@ void Lua::RasterizationRenderer::ScheduleMeshForRendering(
 	pragma::Lua::check_component(l,scene);
 	LUA_CHECK_ENTITY(l,hEnt);
 	auto hShader = c_engine->GetShader(shaderName);
-	auto *shader = hShader.valid() ? dynamic_cast<pragma::ShaderTextured3DBase*>(hShader.get()) : nullptr;
+	auto *shader = hShader.valid() ? dynamic_cast<pragma::ShaderGameWorldLightingPass*>(hShader.get()) : nullptr;
 	if(shader == nullptr)
 		return;
 	ScheduleMeshForRendering(l,renderer,scene,renderMode,*shader,mat,hEnt,mesh);
@@ -277,8 +277,8 @@ void Lua::RasterizationRenderer::ScheduleMeshForRendering(
 	pragma::Lua::check_component(l,scene);
 	auto *shaderInfo = mat.GetShaderInfo();
 	auto *shader = shaderInfo ? static_cast<::util::WeakHandle<prosper::Shader>*>(shaderInfo->GetShader().get()) : nullptr;
-	if(shader == nullptr || shader->expired() || (*shader)->GetBaseTypeHashCode() != pragma::ShaderTextured3DBase::HASH_TYPE)
+	if(shader == nullptr || shader->expired() || (*shader)->GetBaseTypeHashCode() != pragma::ShaderGameWorldLightingPass::HASH_TYPE)
 		return;
-	auto &shaderTex = static_cast<pragma::ShaderTextured3DBase&>(**shader);
+	auto &shaderTex = static_cast<pragma::ShaderGameWorldLightingPass&>(**shader);
 	ScheduleMeshForRendering(l,renderer,scene,renderMode,shaderTex,mat,hEnt,mesh);
 }

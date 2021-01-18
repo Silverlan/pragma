@@ -30,7 +30,7 @@ namespace prosper
 };
 namespace pragma
 {
-	class ShaderGameWorld;
+	class ShaderGameWorldLightingPass;
 	class ShaderPrepassBase;
 	class CLightComponent;
 	class CParticleSystemComponent;
@@ -129,6 +129,7 @@ namespace pragma::rendering
 		virtual prosper::Texture *GetHDRPresentationTexture() override;
 		virtual bool IsRasterizationRenderer() const override;
 		void ReloadPresentationRenderTarget();
+		virtual bool ReloadBloomRenderTarget(uint32_t width) override;
 
 		void SetPrepassMode(PrepassMode mode);
 		PrepassMode GetPrepassMode() const;
@@ -137,7 +138,7 @@ namespace pragma::rendering
 		const util::WeakHandle<pragma::CLightMapComponent> &GetLightMap() const;
 
 		void SetShaderOverride(const std::string &srcShader,const std::string &shaderOverride);
-		pragma::ShaderGameWorld *GetShaderOverride(pragma::ShaderGameWorld *srcShader) const;
+		pragma::ShaderGameWorldLightingPass *GetShaderOverride(pragma::ShaderGameWorldLightingPass *srcShader) const;
 		void ClearShaderOverride(const std::string &srcShader);
 
 		const std::vector<umath::Plane> &GetFrustumPlanes() const;

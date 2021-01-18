@@ -23,7 +23,7 @@ class Material;
 namespace pragma
 {
 	class BaseEntityComponent;
-	class ShaderTextured3DBase;
+	class ShaderGameWorldLightingPass;
 	class CRenderComponent;
 	class CPhysicsComponent;
 	class CSceneComponent;

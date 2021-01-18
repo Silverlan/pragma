@@ -397,14 +397,14 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	}));
 	modShader[defShaderGameWorld];
 
-	auto defShaderTextured3D = luabind::class_<pragma::ShaderTextured3DBase,luabind::bases<pragma::ShaderGameWorld,pragma::ShaderEntity,pragma::ShaderSceneLit,pragma::ShaderScene,prosper::ShaderGraphics,prosper::Shader>>("TexturedLit3D");
+	auto defShaderTextured3D = luabind::class_<pragma::ShaderGameWorldLightingPass,luabind::bases<pragma::ShaderGameWorld,pragma::ShaderEntity,pragma::ShaderSceneLit,pragma::ShaderScene,prosper::ShaderGraphics,prosper::Shader>>("TexturedLit3D");
 	defShaderTextured3D.def("RecordBindMaterial",&Lua::Shader::TexturedLit3D::BindMaterial);
 	defShaderTextured3D.def("RecordBindClipPlane",&Lua::Shader::TexturedLit3D::RecordBindClipPlane);
-	defShaderTextured3D.add_static_constant("PUSH_CONSTANTS_SIZE",sizeof(pragma::ShaderTextured3DBase::PushConstants));
-	defShaderTextured3D.add_static_constant("PUSH_CONSTANTS_USER_DATA_OFFSET",sizeof(pragma::ShaderTextured3DBase::PushConstants));
+	defShaderTextured3D.add_static_constant("PUSH_CONSTANTS_SIZE",sizeof(pragma::ShaderGameWorldLightingPass::PushConstants));
+	defShaderTextured3D.add_static_constant("PUSH_CONSTANTS_USER_DATA_OFFSET",sizeof(pragma::ShaderGameWorldLightingPass::PushConstants));
 	modShader[defShaderTextured3D];
 
-	auto defShaderGlow = luabind::class_<pragma::ShaderGlow,luabind::bases<pragma::ShaderTextured3DBase,pragma::ShaderEntity,pragma::ShaderSceneLit,pragma::ShaderScene,prosper::ShaderGraphics,prosper::Shader>>("Glow");
+	auto defShaderGlow = luabind::class_<pragma::ShaderGlow,luabind::bases<pragma::ShaderGameWorldLightingPass,pragma::ShaderEntity,pragma::ShaderSceneLit,pragma::ShaderScene,prosper::ShaderGraphics,prosper::Shader>>("Glow");
 	defShaderGlow.add_static_constant("RENDER_PASS_COLOR_FORMAT",umath::to_integral(pragma::ShaderGlow::RENDER_PASS_FORMAT));
 	modShader[defShaderGlow];
 
@@ -646,7 +646,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	}));
 	modShader[defShaderImageProcessing];
 
-	auto defShaderTextured3DBase = luabind::class_<pragma::LuaShaderTextured3D,luabind::bases<pragma::LuaShaderGraphicsBase,pragma::ShaderTextured3DBase,prosper::ShaderGraphics,prosper::Shader,pragma::LuaShaderBase>>("BaseTexturedLit3D");
+	auto defShaderTextured3DBase = luabind::class_<pragma::LuaShaderTextured3D,luabind::bases<pragma::LuaShaderGraphicsBase,pragma::ShaderGameWorldLightingPass,prosper::ShaderGraphics,prosper::Shader,pragma::LuaShaderBase>>("BaseTexturedLit3D");
 	defShaderTextured3DBase.def(luabind::constructor<>());
 	defShaderTextured3DBase.def("BindMaterialParameters",&pragma::LuaShaderTextured3D::Lua_BindMaterialParameters,&pragma::LuaShaderTextured3D::Lua_default_BindMaterialParameters);
 	defShaderTextured3DBase.def("InitializeGfxPipelineVertexAttributes",&pragma::LuaShaderTextured3D::Lua_InitializeGfxPipelineVertexAttributes,&pragma::LuaShaderTextured3D::Lua_default_InitializeGfxPipelineVertexAttributes);

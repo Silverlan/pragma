@@ -213,8 +213,8 @@ namespace pragma
 
 		void SetSleepReportEnabled(bool reportEnabled);
 		bool IsSleepReportEnabled() const;
-		void OnWake();
-		void OnSleep();
+		virtual void OnWake();
+		virtual void OnSleep();
 
 		// Should only be called from within an EVENT_INITIALIZE_PHYSICS event!
 		util::WeakHandle<PhysObj> InitializePhysics(const physics::PhysObjCreateInfo &physObjCreateInfo,PhysFlags flags,int32_t rootMeshBoneId=-1);

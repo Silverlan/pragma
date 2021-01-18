@@ -987,8 +987,6 @@ void CGame::Think()
 	Game::Think();
 	auto *scene = GetRenderScene();
 	auto *cam = GetPrimaryCamera();
-	if(cam)
-		cam->UpdateFrustumPlanes();
 
 	double tDelta = m_stateNetwork->DeltaTime();
 	m_tServer += DeltaTime();

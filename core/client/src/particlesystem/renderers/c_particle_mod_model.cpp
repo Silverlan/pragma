@@ -68,7 +68,7 @@ void CParticleRendererModel::Initialize(pragma::CParticleSystemComponent &pSyste
 		return pSystem.GetEntity().AddComponent<pragma::CAnimatedComponent>(true);
 	};
 
-	if(s_rendererCount++ == 0 && pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE.IsValid())
+	if(s_rendererCount++ == 0 && pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE.IsValid())
 	{
 		pragma::ShaderEntity::InstanceData instanceData {umat::identity(),Vector4(1.f,1.f,1.f,1.f),pragma::ShaderEntity::InstanceData::RenderFlags::None};
 		prosper::util::BufferCreateInfo createInfo {};
@@ -76,7 +76,7 @@ void CParticleRendererModel::Initialize(pragma::CParticleSystemComponent &pSyste
 		createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 
-		s_instanceDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
+		s_instanceDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
 		s_instanceBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,&instanceData);
 		s_instanceDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(
 			*s_instanceBuffer,0u
@@ -96,7 +96,7 @@ void CParticleRendererModel::Initialize(pragma::CParticleSystemComponent &pSyste
 		for(auto i=decltype(maxParticles){0u};i<maxParticles;++i)
 			m_particleComponents.push_back(ParticleModelComponent{fCreateAnimatedComponent(),nullptr});
 	}
-	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE.IsValid())
+	if(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE.IsValid())
 	{
 		for(auto &ptComponent : m_particleComponents)
 		{
@@ -104,12 +104,12 @@ void CParticleRendererModel::Initialize(pragma::CParticleSystemComponent &pSyste
 			if(wpBoneBuffer)
 			{
 				// If we are animated, we have to create a unique descriptor set
-				ptComponent.instanceDescSetGroupAnimated = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
+				ptComponent.instanceDescSetGroupAnimated = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
 				ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet()->SetBindingUniformBuffer(
 					*s_instanceBufferAnimated,0u
 				);
 				ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet()->SetBindingUniformBuffer(
-					const_cast<prosper::IBuffer&>(*wpBoneBuffer),umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::BoneMatrices)
+					const_cast<prosper::IBuffer&>(*wpBoneBuffer),umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices)
 				);
 			}
 		}

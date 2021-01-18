@@ -31,7 +31,7 @@ bool pragma::rendering::Prepass::Initialize(prosper::IPrContext &context,uint32_
 	m_shaderPrepassDepth = context.GetShader("prepass_depth");
 
 	prosper::util::ImageCreateInfo imgCreateInfo {};
-	imgCreateInfo.format = ShaderTextured3DBase::RENDER_PASS_DEPTH_FORMAT;
+	imgCreateInfo.format = ShaderGameWorldLightingPass::RENDER_PASS_DEPTH_FORMAT;
 	imgCreateInfo.width = width;
 	imgCreateInfo.height = height;
 	imgCreateInfo.samples = samples;
@@ -85,16 +85,14 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b,bool bForceReload)
 	auto width = extents.width;
 	auto height = extents.height;
 
-	auto whShaderPrepassDepth = c_engine->GetShader("prepass_depth");
 	auto whShaderPrepass = c_engine->GetShader("prepass");
-	if(whShaderPrepass.expired() || whShaderPrepassDepth.expired())
+	if(whShaderPrepass.expired())
 		return;
 
-	auto *shaderPrepassDepth = static_cast<pragma::ShaderPrepassDepth*>(whShaderPrepassDepth.get());
 	auto *shaderPrepass = static_cast<pragma::ShaderPrepass*>(whShaderPrepass.get());
 	auto sampleCount = imgDepth.GetSampleCount();
-	auto pipelineType = pragma::ShaderPrepassBase::GetPipelineIndex(sampleCount);
-	if(b == true)
+	//auto pipelineType = pragma::ShaderPrepassBase::GetPipelineIndex(sampleCount);
+	//if(b == true)
 	{
 		prosper::util::ImageCreateInfo imgCreateInfo {};
 		imgCreateInfo.samples = imgDepth.GetSampleCount();
@@ -114,14 +112,14 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b,bool bForceReload)
 		textureNormals = context.CreateTexture(texCreateInfo,*imgNormals,imgViewCreateInfo,samplerCreateInfo);
 
 		auto &imgDepth = textureDepth->GetImage();
-		renderTarget = context.CreateRenderTarget({textureNormals,textureDepth},shaderPrepass->GetRenderPass(umath::to_integral(pipelineType)));
+		renderTarget = context.CreateRenderTarget({textureNormals,textureDepth},shaderPrepass->GetRenderPass());//umath::to_integral(pipelineType)));
 		renderTarget->SetDebugName("prepass_depth_normal_rt");
 		m_clearValues = {
 			prosper::ClearValue{prosper::ClearColorValue{}}, // Unused, but required
 			prosper::ClearValue{prosper::ClearDepthStencilValue{1.f,0}} // Clear depth
 		};
 	}
-	else
+	/*else
 	{
 		textureNormals = nullptr;
 
@@ -130,7 +128,7 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b,bool bForceReload)
 		m_clearValues = {
 			prosper::ClearValue{prosper::ClearDepthStencilValue{1.f,0}} // Clear depth
 		};
-	}
+	}*/
 	prosper::util::RenderPassCreateInfo rpInfo {{
 		pragma::ShaderPrepass::get_normal_render_pass_attachment_info(sampleCount),
 		pragma::ShaderPrepass::get_depth_render_pass_attachment_info(sampleCount)

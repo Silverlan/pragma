@@ -350,6 +350,14 @@ CLightMapReceiverComponent *CRenderComponent::GetLightMapReceiverComponent() con
 void CRenderComponent::SetRenderOffsetTransform(const umath::ScaledTransform &t) {m_renderOffset = t; SetRenderBufferDirty();}
 void CRenderComponent::ClearRenderOffsetTransform() {m_renderOffset = {}; SetRenderBufferDirty();}
 const umath::ScaledTransform *CRenderComponent::GetRenderOffsetTransform() const {return m_renderOffset.has_value() ? &*m_renderOffset : nullptr;}
+GameShaderSpecialization CRenderComponent::GetShaderPipelineSpecialization() const
+{
+	if(GetAnimatedComponent())
+		return GameShaderSpecialization::Animated;
+	if(GetLightMapReceiverComponent())
+		return GameShaderSpecialization::Lightmapped;
+	return GameShaderSpecialization::Generic;
+}
 void CRenderComponent::UpdateMatrices()
 {
 	auto &ent = GetEntity();
@@ -595,13 +603,13 @@ void CRenderComponent::SetRenderMode(RenderMode mode)
 void CRenderComponent::InitializeRenderBuffers()
 {
 	// Initialize render buffer if it doesn't exist
-	if(m_renderBuffer != nullptr || pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE.IsValid() == false)
+	if(m_renderBuffer != nullptr || pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE.IsValid() == false)
 		return;
 
 	m_renderBuffer = prosper::SwapBuffer::Create(*s_instanceBuffer);
-	m_renderDescSetGroup = prosper::SwapDescriptorSet::Create(c_engine->GetRenderContext(),pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
+	m_renderDescSetGroup = prosper::SwapDescriptorSet::Create(c_engine->GetRenderContext(),pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
 	m_renderDescSetGroup->SetBindingUniformBuffer(
-		*m_renderBuffer,umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::Instance)
+		*m_renderBuffer,umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::Instance)
 	);
 	UpdateBoneBuffer();
 	m_renderDescSetGroup->Update();
@@ -621,7 +629,7 @@ void CRenderComponent::UpdateBoneBuffer()
 	if(!wpBoneBuffer)
 		return;
 	m_renderDescSetGroup->SetBindingUniformBuffer(
-		*wpBoneBuffer,umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::BoneMatrices)
+		*wpBoneBuffer,umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices)
 	);
 }
 void CRenderComponent::ClearRenderBuffers()
@@ -670,6 +678,16 @@ std::vector<std::shared_ptr<ModelSubMesh>> &CRenderComponent::GetRenderMeshes()
 	}
 	return static_cast<pragma::CModelComponent&>(*pMdlComponent).GetRenderMeshes();
 }
+std::vector<rendering::RenderBufferData> &CRenderComponent::GetRenderBufferData()
+{
+	auto *pMdlComponent = GetModelComponent();
+	if(!pMdlComponent)
+	{
+		static std::vector<rendering::RenderBufferData> renderBufferData {};
+		return renderBufferData;
+	}
+	return static_cast<pragma::CModelComponent&>(*pMdlComponent).GetRenderBufferData();
+}
 const std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes() const {return const_cast<CRenderComponent*>(this)->GetLODMeshes();}
 std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes()
 {
@@ -692,12 +710,12 @@ std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes()
 	}
 	return static_cast<pragma::CModelComponent&>(*pMdlComponent).GetLODMeshes();
 }
-bool CRenderComponent::RenderCallback(RenderObject *o,CBaseEntity *ent,pragma::CCameraComponent *cam,pragma::ShaderTextured3DBase *shader,Material *mat)
+bool CRenderComponent::RenderCallback(RenderObject *o,CBaseEntity *ent,pragma::CCameraComponent *cam,pragma::ShaderGameWorldLightingPass *shader,Material *mat)
 {
 	auto pRenderComponent = ent->GetRenderComponent();
 	return pRenderComponent && pRenderComponent->RenderCallback(o,cam,shader,mat);
 }
-bool CRenderComponent::RenderCallback(RenderObject*,pragma::CCameraComponent *cam,pragma::ShaderTextured3DBase*,Material*)
+bool CRenderComponent::RenderCallback(RenderObject*,pragma::CCameraComponent *cam,pragma::ShaderGameWorldLightingPass*,Material*)
 {
 	return ShouldDraw();
 }

@@ -99,8 +99,8 @@ void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 	}
 
 	auto &vertAnimBuffer = static_cast<CModel&>(*mdl).GetVertexAnimationBuffer();
-	pRenderDescSet->SetBindingStorageBuffer(*m_vertexAnimationBuffer,umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::VertexAnimationFrameData));
-	pRenderDescSet->SetBindingStorageBuffer(*vertAnimBuffer,umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::VertexAnimations));
+	pRenderDescSet->SetBindingStorageBuffer(*m_vertexAnimationBuffer,umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::VertexAnimationFrameData));
+	pRenderDescSet->SetBindingStorageBuffer(*vertAnimBuffer,umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::VertexAnimations));
 }
 
 void CVertexAnimatedComponent::DestroyVertexAnimationBuffer()

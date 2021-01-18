@@ -13,7 +13,7 @@
 namespace pragma
 {
 	class DLLCLIENT ShaderSkybox
-		: public ShaderTextured3DBase
+		: public ShaderGameWorldLightingPass
 	{
 	public:
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_VERTEX;
@@ -27,7 +27,7 @@ namespace pragma
 		ShaderSkybox(prosper::IPrContext &context,const std::string &identifier);
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
 		virtual bool BeginDraw(
-			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},ShaderGameWorldPipeline pipelineIdx=ShaderGameWorldPipeline::Regular,
+			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		) override;
 		virtual bool BindClipPlane(const Vector4 &clipPlane) override {return true;}
@@ -41,7 +41,7 @@ namespace pragma
 			CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
 			std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
 		) const override;
-		virtual PassType GetPassType() const {return PassType::SkyPass;}
+		virtual ShaderGameWorld::GameShaderType GetPassType() const {return ShaderGameWorld::GameShaderType::SkyPass;}
 	protected:
 		ShaderSkybox(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader);
 		virtual void OnPipelinesInitialized() override;

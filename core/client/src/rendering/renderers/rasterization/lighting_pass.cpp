@@ -58,33 +58,45 @@ void RasterizationRenderer::RecordPrepass(const util::DrawSceneInfo &drawSceneIn
 	m_prepassCommandBufferGroup->Draw(prepassRt.GetRenderPass(),prepassRt.GetFramebuffer(),[this,&drawSceneInfo,&shaderPrepass,&worldRenderQueues,&sceneRenderDesc,prepassStats](prosper::ISecondaryCommandBuffer &cmd) {
 		util::RenderPassDrawInfo renderPassDrawInfo {drawSceneInfo,cmd};
 		pragma::rendering::DepthStageRenderProcessor rsys {renderPassDrawInfo,RenderFlags::None,{} /* drawOrigin */,};
-		if(rsys.BindShader(shaderPrepass))
+
+		rsys.BindShader(shaderPrepass,umath::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
+		// Render static world geometry
+		if((renderPassDrawInfo.drawSceneInfo.renderFlags &FRender::World) != FRender::None)
 		{
-			// Render static world geometry
-			if((renderPassDrawInfo.drawSceneInfo.renderFlags &FRender::World) != FRender::None)
-			{
-				std::chrono::steady_clock::time_point t;
-				if(drawSceneInfo.renderStats)
-					t = std::chrono::steady_clock::now();
-				sceneRenderDesc.WaitForWorldRenderQueues();
-				if(drawSceneInfo.renderStats)
-					drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass)->SetTime(RenderPassStats::Timer::RenderThreadWait,std::chrono::steady_clock::now() -t);
-				for(auto i=decltype(worldRenderQueues.size()){0u};i<worldRenderQueues.size();++i)
-					rsys.Render(*worldRenderQueues.at(i),prepassStats,i);
-			}
+			std::chrono::steady_clock::time_point t;
+			if(drawSceneInfo.renderStats)
+				t = std::chrono::steady_clock::now();
+			sceneRenderDesc.WaitForWorldRenderQueues();
+			if(drawSceneInfo.renderStats)
+				drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass)->SetTime(RenderPassStats::Timer::RenderThreadWait,std::chrono::steady_clock::now() -t);
+			for(auto i=decltype(worldRenderQueues.size()){0u};i<worldRenderQueues.size();++i)
+				rsys.Render(*worldRenderQueues.at(i),prepassStats,i);
+		}
 
-			// Note: The non-translucent render queues also include transparent (alpha masked) objects.
-			// We don't care about translucent objects here.
-			if((renderPassDrawInfo.drawSceneInfo.renderFlags &FRender::World) != FRender::None)
-			{
-				rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::World,false /* translucent */),prepassStats);
-				rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),prepassStats);
-			}
+		// Note: The non-translucent render queues also include transparent (alpha masked) objects.
+		// We don't care about translucent objects here.
+		if((renderPassDrawInfo.drawSceneInfo.renderFlags &FRender::World) != FRender::None)
+		{
+			rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::World,false /* translucent */),prepassStats);
 
-			if((renderPassDrawInfo.drawSceneInfo.renderFlags &FRender::View) != FRender::None)
+			auto &queueTranslucent = *sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */);
+			queueTranslucent.WaitForCompletion(prepassStats);
+			if(queueTranslucent.queue.empty() == false)
 			{
+				rsys.BindShader(shaderPrepass,umath::to_integral(pragma::ShaderPrepass::Pipeline::AlphaTest));
+				rsys.Render(queueTranslucent,prepassStats);
+			}
+		}
+
+		if((renderPassDrawInfo.drawSceneInfo.renderFlags &FRender::View) != FRender::None)
+		{
+			auto &queue = *sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */);
+			queue.WaitForCompletion(prepassStats);
+			if(queue.queue.empty() == false)
+			{
+				rsys.BindShader(shaderPrepass,umath::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
 				rsys.SetCameraType(pragma::rendering::BaseRenderProcessor::CameraType::View);
-				rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),prepassStats);
+				rsys.Render(queue,prepassStats);
 			}
 		}
 		rsys.UnbindShader();

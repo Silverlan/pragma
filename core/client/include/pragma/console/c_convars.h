@@ -40,6 +40,8 @@ REGISTER_CONVAR_CL(cl_fps_decay_factor,"0.8",ConVarFlags::None,"How slowly to de
 
 REGISTER_CONVAR_CL(debug_particle_blob_show_neighbor_links,"0",ConVarFlags::Cheat,"Displays the links to adjacent neighbors for blob particles.");
 
+REGISTER_CONVAR_CL(debug_render_lock_render_queues,"0",ConVarFlags::None,"Locks the current render queues and effectively disables the render queue thread.");
+REGISTER_CONVAR_CL(debug_render_lock_render_command_buffers,"0",ConVarFlags::None,"Locks the current render command buffers and causes them to not be re-created every frame.");
 REGISTER_CONVAR_CL(debug_render_normals,"0",ConVarFlags::Cheat,"Displays all normals as lines in the world. 0 = Disabled, 1 = Display normals, 2 = Display normals, tangents and bitangents, 3 = Display face normals, 4 = Display tangents, 5 = Display bitangents.");
 REGISTER_CONVAR_CL(cl_show_fps,"0",ConVarFlags::None,"Displays the current fps at the top left of the screen if enabled.");
 
@@ -69,6 +71,10 @@ REGISTER_CONVAR_CL(render_pp_nightvision,"0",ConVarFlags::None,"Enables or disab
 REGISTER_CONVAR_CL(render_pp_nightvision_luminance_threshold,"0.2",ConVarFlags::Archive,"Changes the luminance threshold for the night vision post-processing effect.");
 REGISTER_CONVAR_CL(render_pp_nightvision_color_amplification,"4",ConVarFlags::Archive,"Amplification factor for pixels with low luminance.");
 REGISTER_CONVAR_CL(render_pp_nightvision_noise_texture,"effects/noise1",ConVarFlags::Archive,"Noise texture to use for the night vision post-processing effect.");
+
+REGISTER_CONVAR_CL(render_bloom_enabled,"1",ConVarFlags::Archive,"Enables or disables bloom and glow effects.");
+REGISTER_CONVAR_CL(render_bloom_amount,"9",ConVarFlags::Archive,"Number of render passes to use for bloom.");
+REGISTER_CONVAR_CL(render_bloom_resolution,"512",ConVarFlags::Archive,"The width for the bloom texture. The height will be calculated using the aspect ratio of the renderer.");
 
 REGISTER_CONVAR_CL(debug_occlusion_culling_freeze_camera,"0",ConVarFlags::None,"Freezes the current camera position in place for occlusion culling.");
 

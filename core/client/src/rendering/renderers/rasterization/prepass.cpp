@@ -42,9 +42,9 @@ void RasterizationRenderer::RenderPrepass(const util::DrawSceneInfo &drawSceneIn
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	auto &hCam = scene.GetActiveCamera();
 	auto bReflection = ((drawSceneInfo.renderFlags &FRender::Reflection) != FRender::None) ? true : false;
-	auto pipelineType = (bReflection == true) ? pragma::ShaderPrepassBase::Pipeline::Reflection :
-		(GetSampleCount() == prosper::SampleCountFlags::e1Bit) ? pragma::ShaderPrepassBase::Pipeline::Regular :
-		pragma::ShaderPrepassBase::Pipeline::MultiSample;
+	//auto pipelineType = (bReflection == true) ? pragma::ShaderPrepassBase::Pipeline::Reflection :
+	//	(GetSampleCount() == prosper::SampleCountFlags::e1Bit) ? pragma::ShaderPrepassBase::Pipeline::Regular :
+	//	pragma::ShaderPrepassBase::Pipeline::MultiSample;
 	//RenderSystem::RenderPrepass(drawSceneInfo,RenderMode::Skybox);
 	RenderSystem::RenderPrepass(drawSceneInfo,RenderMode::World);
 }

@@ -73,7 +73,7 @@ CLightComponent::~CLightComponent()
 luabind::object CLightComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CLightComponentHandleWrapper>(l);}
 void CLightComponent::InitializeRenderBuffer()
 {
-	if(m_renderBuffer != nullptr)
+	if(m_renderBuffer != nullptr || umath::is_flag_set(m_lightFlags,LightFlags::BakedLightSource))
 		return;
 	m_renderBuffer = LightDataBufferManager::GetInstance().Request(*this,m_bufferData);
 }

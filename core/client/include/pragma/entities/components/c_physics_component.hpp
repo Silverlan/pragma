@@ -33,6 +33,9 @@ namespace pragma
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual void OnEntitySpawn() override;
+
+		virtual void OnWake() override;
+		virtual void OnSleep() override;
 	protected:
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	};

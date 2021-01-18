@@ -80,17 +80,18 @@ void ShaderScene::SetRenderPassSampleCount(prosper::SampleCountFlags samples) {R
 ShaderScene::ShaderScene(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
 	: Shader3DBase(context,identifier,vsShader,fsShader,gsShader)
 {
-	SetPipelineCount(umath::to_integral(Pipeline::Count));
+	//SetPipelineCount(umath::to_integral(Pipeline::Count));
 }
 bool ShaderScene::ShouldInitializePipeline(uint32_t pipelineIdx)
 {
-	if(static_cast<Pipeline>(pipelineIdx) != Pipeline::MultiSample)
-		return true;
-	return RENDER_PASS_SAMPLES != prosper::SampleCountFlags::e1Bit;
+	//if(static_cast<Pipeline>(pipelineIdx) != Pipeline::MultiSample)
+	//	return true;
+	//return RENDER_PASS_SAMPLES != prosper::SampleCountFlags::e1Bit;
+	return true;
 }
 prosper::SampleCountFlags ShaderScene::GetSampleCount(uint32_t pipelineIdx) const
 {
-	return (static_cast<Pipeline>(pipelineIdx) == Pipeline::MultiSample) ? RENDER_PASS_SAMPLES : prosper::SampleCountFlags::e1Bit;
+	return prosper::SampleCountFlags::e1Bit;//(static_cast<Pipeline>(pipelineIdx) == Pipeline::MultiSample) ? RENDER_PASS_SAMPLES : prosper::SampleCountFlags::e1Bit;
 }
 void ShaderScene::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {

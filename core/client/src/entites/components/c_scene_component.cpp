@@ -35,7 +35,7 @@ CSceneComponent::CSMCascadeDescriptor::CSMCascadeDescriptor()
 
 ///////////////////////////
 
-ShaderMeshContainer::ShaderMeshContainer(pragma::ShaderTextured3DBase *shader)
+ShaderMeshContainer::ShaderMeshContainer(pragma::ShaderGameWorldLightingPass *shader)
 	: shader(shader->GetHandle())
 {}
 
@@ -220,10 +220,10 @@ void CSceneComponent::Link(const CSceneComponent &other)
 
 void CSceneComponent::InitializeShadowDescriptorSet()
 {
-	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS.IsValid())
+	if(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SHADOWS.IsValid())
 	{
 		auto &context = c_engine->GetRenderContext();
-		m_shadowDsg = context.CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS);
+		m_shadowDsg = context.CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SHADOWS);
 		auto &cubeTex = context.GetDummyCubemapTexture();
 		auto n = umath::to_integral(GameLimits::MaxActiveShadowCubeMaps);
 		for(auto i=decltype(n){0u};i<n;++i)
@@ -374,15 +374,15 @@ void CSceneComponent::InitializeDescriptorSetLayouts()
 }
 void CSceneComponent::InitializeSwapDescriptorBuffers()
 {
-	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SCENE.IsValid() == false || pragma::ShaderPPFog::DESCRIPTOR_SET_FOG.IsValid() == false)
+	if(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE.IsValid() == false || pragma::ShaderPPFog::DESCRIPTOR_SET_FOG.IsValid() == false)
 		return;
-	m_camDescSetGroupGraphics = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SCENE);
+	m_camDescSetGroupGraphics = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE);
 	auto &descSetGraphics = *m_camDescSetGroupGraphics->GetDescriptorSet();
 	descSetGraphics.SetBindingUniformBuffer(
-		*m_cameraBuffer,umath::to_integral(pragma::ShaderTextured3DBase::SceneBinding::Camera)
+		*m_cameraBuffer,umath::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::Camera)
 	);
 	descSetGraphics.SetBindingUniformBuffer(
-		*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderTextured3DBase::SceneBinding::RenderSettings)
+		*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::RenderSettings)
 	);
 
 	m_camDescSetGroupCompute = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_SCENE);
@@ -394,13 +394,13 @@ void CSceneComponent::InitializeSwapDescriptorBuffers()
 		*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderForwardPLightCulling::CameraBinding::RenderSettings)
 	);
 
-	m_camViewDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SCENE);
+	m_camViewDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE);
 	auto &descSetViewGraphics = *m_camViewDescSetGroup->GetDescriptorSet();
 	descSetViewGraphics.SetBindingUniformBuffer(
-		*m_cameraViewBuffer,umath::to_integral(pragma::ShaderTextured3DBase::SceneBinding::Camera)
+		*m_cameraViewBuffer,umath::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::Camera)
 	);
 	descSetViewGraphics.SetBindingUniformBuffer(
-		*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderTextured3DBase::SceneBinding::RenderSettings)
+		*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::RenderSettings)
 	);
 
 	m_fogDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPPFog::DESCRIPTOR_SET_FOG);

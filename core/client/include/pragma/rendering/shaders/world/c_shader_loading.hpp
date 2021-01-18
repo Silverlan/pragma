@@ -13,7 +13,7 @@
 namespace pragma
 {
 	class DLLCLIENT ShaderLoading
-		: public ShaderTextured3DBase
+		: public ShaderGameWorldLightingPass
 	{
 	public:
 		ShaderLoading(prosper::IPrContext &context,const std::string &identifier);

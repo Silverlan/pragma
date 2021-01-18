@@ -58,8 +58,8 @@ void Lua::shader::push_shader(lua_State *l,prosper::Shader &shader)
 				{
 					if(dynamic_cast<pragma::ShaderEntity*>(&shader) != nullptr)
 					{
-						if(dynamic_cast<pragma::ShaderTextured3DBase*>(&shader) != nullptr)
-							Lua::Push<pragma::ShaderTextured3DBase*>(l,static_cast<pragma::ShaderTextured3DBase*>(&shader));
+						if(dynamic_cast<pragma::ShaderGameWorldLightingPass*>(&shader) != nullptr)
+							Lua::Push<pragma::ShaderGameWorldLightingPass*>(l,static_cast<pragma::ShaderGameWorldLightingPass*>(&shader));
 						else
 							Lua::Push<pragma::ShaderEntity*>(l,static_cast<pragma::ShaderEntity*>(&shader));
 					}

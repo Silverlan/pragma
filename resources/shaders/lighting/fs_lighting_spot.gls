@@ -26,7 +26,7 @@ float get_spot_light_shadow_factor(uint lightIdx,bool dynamic)
 	vec4 depthCoord = get_light_vertex_position(lightIdx);
 	depthCoord.z *= light.position.w; // Undo transformation from get_light_vertex_position()
 	depthCoord = depthCoord /light.position.w;
-	uint shadowMapIndex = dynamic ? light.shadowMapIndexDynamic : light.shadowMapIndexStatic;
+	uint shadowMapIndex = light.shadowMapIndexDynamic;//dynamic ? light.shadowMapIndexDynamic : light.shadowMapIndexStatic;
 	return (shadowMapIndex > 0) ? calculate_shadow(
 		shadowMaps[shadowMapIndex -1],
 				depthCoord,

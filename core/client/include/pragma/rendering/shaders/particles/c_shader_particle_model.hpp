@@ -14,7 +14,7 @@
 namespace pragma
 {
 	class DLLCLIENT ShaderParticleModel
-		: public ShaderTextured3DBase,
+		: public ShaderGameWorldLightingPass,
 		public ShaderParticleBase
 	{
 	public:
@@ -49,7 +49,7 @@ namespace pragma
 
 		bool BeginDraw(
 			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,
-			pragma::CParticleSystemComponent &pSys,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},ShaderGameWorldPipeline pipelineIdx=ShaderGameWorldPipeline::Regular,
+			pragma::CParticleSystemComponent &pSys,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},
 			ShaderScene::RecordFlags recordFlags=ShaderScene::RecordFlags::RenderPassTargetAsViewportAndScissor
 		);
 	protected:

@@ -103,3 +103,44 @@ std::vector<BSPTree::Node*> BSPTree::FindLeafNodesInAABB(const Vector3 &min,cons
 	find_leaf_nodes_in_aabb(GetRootNode(),aabbPoints,nodes);
 	return nodes;
 }
+
+static bool is_aabb_visible_in_cluster(BSPTree &bspTree,BSPTree::Node &node,const std::array<Vector3,8> &aabbPoints,BSPTree::ClusterIndex clusterIdx)
+{
+	if(node.leaf)
+		return bspTree.IsClusterVisible(clusterIdx,node.cluster);
+	const auto &n = node.plane.GetNormal();
+	auto d = node.plane.GetDistance();
+	auto checkLeft = false;
+	auto checkRight = false;
+	for(auto &p : aabbPoints)
+	{
+		auto v = p -n *static_cast<float>(d);
+		auto dot = uvec::dot(v,n);
+		if(dot == 0.f)
+			continue;
+		if(dot > 0.f)
+			checkLeft = true;
+		else
+			checkRight = true;
+		if(checkLeft && checkRight)
+			break;
+	}
+	return (
+		(checkLeft && is_aabb_visible_in_cluster(bspTree,*node.children.at(0),aabbPoints,clusterIdx)) ||
+		(checkRight && is_aabb_visible_in_cluster(bspTree,*node.children.at(1),aabbPoints,clusterIdx))
+	);
+}
+bool BSPTree::IsAABBVisibleInCluster(const Vector3 &min,const Vector3 &max,ClusterIndex clusterIdx) const
+{
+	std::array<Vector3,8> aabbPoints = {
+		min,
+		Vector3{min.x,min.y,max.z},
+		Vector3{min.x,max.y,min.z},
+		Vector3{min.x,max.y,max.z},
+		Vector3{max.x,min.y,min.z},
+		Vector3{max.x,min.y,max.z},
+		Vector3{max.x,max.y,min.z},
+		max
+	};
+	return is_aabb_visible_in_cluster(*const_cast<BSPTree*>(this),const_cast<BSPTree*>(this)->GetRootNode(),aabbPoints,clusterIdx);
+}

@@ -14,6 +14,7 @@
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_indexing.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
 #include "pragma/console/c_cvar.h"
 #include <wgui/types/wirect.h>
 #include <prosper_util.hpp>
@@ -84,7 +85,7 @@ pragma::rendering::ForwardPlusInstance::ForwardPlusInstance(RasterizationRendere
 
 bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::IPrContext &context,uint32_t width,uint32_t height,prosper::Texture &depthTexture)
 {
-	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS.IsValid() == false)
+	if(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_LIGHTS.IsValid() == false)
 		return false;
 	auto workGroupCount = CalcWorkGroupCount(width,height);
 	m_workGroupCountX = workGroupCount.first;
@@ -112,7 +113,7 @@ bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::IPrContext &con
 	m_bufVisLightIndex->SetDebugName("vis_light_index_buf");
 	
 	m_rasterizer.GetLightSourceDescriptorSet()->SetBindingStorageBuffer(
-		*m_bufTileVisLightIndex,umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::TileVisLightIndexBuffer)
+		*m_bufTileVisLightIndex,umath::to_integral(pragma::ShaderGameWorldLightingPass::LightBinding::TileVisLightIndexBuffer)
 	);
 
 	auto &descSetCompute = *m_rasterizer.GetLightSourceDescriptorSetCompute();
@@ -167,8 +168,9 @@ void pragma::rendering::ForwardPlusInstance::Compute(prosper::IPrimaryCommandBuf
 	auto sceneIndex = scene.GetSceneIndex();
 	auto vpWidth = m_rasterizer.GetWidth();
 	auto vpHeight = m_rasterizer.GetHeight();
+	auto &instance = LightDataBufferManager::GetInstance();
 	if(
-		shaderLightCulling.Compute(*m_rasterizer.GetLightSourceDescriptorSetCompute(),descSetCam,vpWidth,vpHeight,workGroupCount.first,workGroupCount.second,pragma::CLightComponent::GetLightCount(),sceneIndex) == false
+		shaderLightCulling.Compute(*m_rasterizer.GetLightSourceDescriptorSetCompute(),descSetCam,vpWidth,vpHeight,workGroupCount.first,workGroupCount.second,instance.GetLightDataBufferCount(),sceneIndex) == false
 	)
 		return;
 

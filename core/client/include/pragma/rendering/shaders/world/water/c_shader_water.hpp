@@ -13,7 +13,7 @@
 namespace pragma
 {
 	class DLLCLIENT ShaderWater
-		: public ShaderTextured3DBase
+		: public ShaderGameWorldLightingPass
 	{
 	public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
@@ -49,7 +49,7 @@ namespace pragma
 		ShaderWater(prosper::IPrContext &context,const std::string &identifier);
 		void SetReflectionEnabled(bool b);
 		virtual bool BeginDraw(
-			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},ShaderGameWorldPipeline pipelineIdx=ShaderGameWorldPipeline::Regular,
+			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		) override;
 		virtual void EndDraw() override;

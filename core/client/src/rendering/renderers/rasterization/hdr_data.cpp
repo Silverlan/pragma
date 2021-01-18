@@ -202,6 +202,7 @@ void HDRData::ReloadPresentationRenderTarget(uint32_t width,uint32_t height,pros
 	dsgTonemappedPostProcessing->GetDescriptorSet()->SetBindingTexture(*postHdrTex,0u);
 }
 
+static auto cvBloomResolution = GetClientConVar("render_bloom_resolution");
 bool HDRData::Initialize(pragma::CSceneComponent &scene,RasterizationRenderer &renderer,uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount,bool bEnableSSAO)
 {
 	// Initialize depth prepass
@@ -219,7 +220,7 @@ bool HDRData::Initialize(pragma::CSceneComponent &scene,RasterizationRenderer &r
 		return false;
 
 	prosper::util::ImageCreateInfo imgCreateInfo {};
-	imgCreateInfo.format = pragma::ShaderTextured3DBase::RENDER_PASS_FORMAT;
+	imgCreateInfo.format = pragma::ShaderGameWorldLightingPass::RENDER_PASS_FORMAT;
 	imgCreateInfo.width = width;
 	imgCreateInfo.height = height;
 	imgCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
@@ -231,9 +232,6 @@ bool HDRData::Initialize(pragma::CSceneComponent &scene,RasterizationRenderer &r
 	if(sampleCount != prosper::SampleCountFlags::e1Bit)
 		imgCreateInfo.usage |= prosper::ImageUsageFlags::TransferSrcBit;
 
-	// The bloom image has to be blurred multiple times, which is expensive for larger resolutions.
-	// We don't really care about the quality of the blur image though, so using a smaller resolution
-	// here works just as well.
 	auto hdrBloomImg = context.CreateImage(imgCreateInfo);
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
@@ -251,7 +249,7 @@ bool HDRData::Initialize(pragma::CSceneComponent &scene,RasterizationRenderer &r
 	bloomTexture = context.CreateTexture(texCreateInfo,*hdrBloomImg,hdrImgViewCreateInfo,hdrSamplerCreateInfo);
 	sceneRenderTarget = c_engine->GetRenderContext().CreateRenderTarget(
 		{hdrTex,bloomTexture,prepass.textureDepth},
-		static_cast<prosper::ShaderGraphics*>(wpShader.get())->GetRenderPass(umath::to_integral(pragma::ShaderTextured3DBase::GetPipelineIndex(sampleCount)))
+		static_cast<prosper::ShaderGraphics*>(wpShader.get())->GetRenderPass()
 	);
 	sceneRenderTarget->SetDebugName("scene_hdr_rt");
 	auto resolvedBloomTex = bloomTexture;
@@ -266,22 +264,6 @@ bool HDRData::Initialize(pragma::CSceneComponent &scene,RasterizationRenderer &r
 	rpCreateInfo.attachments.push_back({imgDepth.GetFormat(),prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AttachmentLoadOp::Load,prosper::AttachmentStoreOp::Store,imgDepth.GetSampleCount(),prosper::ImageLayout::DepthStencilAttachmentOptimal});
 	rpPostParticle = context.CreateRenderPass(rpCreateInfo);
 
-	// The bloom image has to be blurred multiple times, which is expensive for larger resolutions.
-	// We don't really care about the quality of the blur image though, so we're using a smaller
-	// version of the bloom image for post-processing.
-	auto aspectRatio = width /static_cast<float>(height);
-	imgCreateInfo.width = 512;
-	imgCreateInfo.height = static_cast<uint32_t>(imgCreateInfo.width /aspectRatio);
-	if((imgCreateInfo.height %2) != 0)
-		++imgCreateInfo.height;
-	auto hdrBloomBlurImg = context.CreateImage(imgCreateInfo);
-	auto bloomBlurTexture = context.CreateTexture(texCreateInfo,*hdrBloomBlurImg,hdrImgViewCreateInfo,hdrSamplerCreateInfo);
-	imgCreateInfo.width = width;
-	imgCreateInfo.height = height;
-	bloomBlurRenderTarget = context.CreateRenderTarget({bloomBlurTexture},prosper::ShaderGraphics::GetRenderPass<prosper::ShaderBlurBase>(context,umath::to_integral(prosper::ShaderBlurBase::Pipeline::R16G16B16A16Sfloat)));
-	bloomBlurRenderTarget->SetDebugName("scene_bloom_rt");
-	bloomBlurSet = prosper::BlurSet::Create(c_engine->GetRenderContext(),bloomBlurRenderTarget);
-
 	imgCreateInfo.usage |= prosper::ImageUsageFlags::TransferSrcBit;
 	auto hdrImgStaging = context.CreateImage(imgCreateInfo);
 	auto hdrTexStaging = context.CreateTexture(texCreateInfo,*hdrImgStaging,hdrImgViewCreateInfo,hdrSamplerCreateInfo);
@@ -291,7 +273,8 @@ bool HDRData::Initialize(pragma::CSceneComponent &scene,RasterizationRenderer &r
 	dsgBloomTonemapping = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPPHDR::DESCRIPTOR_SET_TEXTURE);
 	auto &descSetHdrResolve = *dsgBloomTonemapping->GetDescriptorSet();
 	descSetHdrResolve.SetBindingTexture(*resolvedTex,umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Texture));
-	descSetHdrResolve.SetBindingTexture(*bloomBlurTexture,umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Bloom));
+	
+	ReloadBloomRenderTarget(cvBloomResolution->GetInt());
 
 	dsgHDRPostProcessing = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPPFog::DESCRIPTOR_SET_TEXTURE);
 	auto &descSetHdr = *dsgHDRPostProcessing->GetDescriptorSet();
@@ -344,6 +327,53 @@ bool HDRData::Initialize(pragma::CSceneComponent &scene,RasterizationRenderer &r
 
 	dsgDepthPostProcessing = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPPFog::DESCRIPTOR_SET_DEPTH_BUFFER);
 	dsgDepthPostProcessing->GetDescriptorSet()->SetBindingTexture(*resolvedTexture,0u);
+	return true;
+}
+
+bool HDRData::ReloadBloomRenderTarget(uint32_t width)
+{
+	auto &context = c_engine->GetRenderContext();
+	context.WaitIdle();
+
+	prosper::util::ImageCreateInfo imgCreateInfo {};
+	imgCreateInfo.format = pragma::ShaderGameWorldLightingPass::RENDER_PASS_FORMAT;
+	imgCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
+	// imgCreateInfo.samples = sampleCount;
+	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
+
+	imgCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::TransferSrcBit; // Note: Transfer flag required for debugging purposes only (See debug_glow_bloom console command)
+	//if(sampleCount != prosper::SampleCountFlags::e1Bit)
+	//	imgCreateInfo.usage |= prosper::ImageUsageFlags::TransferSrcBit;
+	imgCreateInfo.usage |= prosper::ImageUsageFlags::TransferSrcBit;
+
+	prosper::util::ImageViewCreateInfo hdrImgViewCreateInfo {};
+	// Note: We need the alpha channel for FXAA Luma
+	// hdrImgViewCreateInfo.swizzleAlpha = prosper::ComponentSwizzle::One;
+	auto hdrSamplerCreateInfo = GetSamplerCreateInfo();
+
+	prosper::util::TextureCreateInfo texCreateInfo {};
+	texCreateInfo.flags = prosper::util::TextureCreateInfo::Flags::Resolvable;
+
+	auto height = sceneRenderTarget->GetTexture().GetImage().GetHeight();
+	// The bloom image has to be blurred multiple times, which is expensive for larger resolutions.
+	// We don't really care about the quality of the blur image though, so we're using a smaller
+	// version of the bloom image for post-processing.
+	auto aspectRatio = width /static_cast<float>(height);
+	imgCreateInfo.width = cvBloomResolution->GetInt();
+	imgCreateInfo.height = static_cast<uint32_t>(imgCreateInfo.width /aspectRatio);
+
+	if((imgCreateInfo.height %2) != 0)
+		++imgCreateInfo.height;
+	auto hdrBloomBlurImg = context.CreateImage(imgCreateInfo);
+	auto bloomBlurTexture = context.CreateTexture(texCreateInfo,*hdrBloomBlurImg,hdrImgViewCreateInfo,hdrSamplerCreateInfo);
+	imgCreateInfo.width = width;
+	imgCreateInfo.height = height;
+	bloomBlurRenderTarget = context.CreateRenderTarget({bloomBlurTexture},prosper::ShaderGraphics::GetRenderPass<prosper::ShaderBlurBase>(context,umath::to_integral(prosper::ShaderBlurBase::Pipeline::R16G16B16A16Sfloat)));
+	bloomBlurRenderTarget->SetDebugName("scene_bloom_rt");
+	bloomBlurSet = prosper::BlurSet::Create(context,bloomBlurRenderTarget);
+
+	auto &descSetHdrResolve = *dsgBloomTonemapping->GetDescriptorSet();
+	descSetHdrResolve.SetBindingTexture(*bloomBlurTexture,umath::to_integral(pragma::ShaderPPHDR::TextureBinding::Bloom));
 	return true;
 }
 
@@ -469,6 +499,18 @@ static void CVAR_CALLBACK_render_msaa_enabled(NetworkState*,ConVar*,int,int)
 }
 REGISTER_CONVAR_CALLBACK_CL(cl_render_anti_aliasing,CVAR_CALLBACK_render_msaa_enabled);
 REGISTER_CONVAR_CALLBACK_CL(cl_render_msaa_samples,CVAR_CALLBACK_render_msaa_enabled);
+
+static void CVAR_CALLBACK_render_bloom_resolution(NetworkState*,ConVar*,int,int width)
+{
+	auto &renderers = pragma::rendering::BaseRenderer::GetRenderers();
+	for(auto *renderer : renderers)
+	{
+		if(renderer->IsRasterizationRenderer() == false)
+			continue;
+		static_cast<RasterizationRenderer*>(renderer)->ReloadBloomRenderTarget(width);
+	}
+}
+REGISTER_CONVAR_CALLBACK_CL(render_bloom_resolution,CVAR_CALLBACK_render_bloom_resolution);
 
 void Console::commands::debug_render_scene(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {

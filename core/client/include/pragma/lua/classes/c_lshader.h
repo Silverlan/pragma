@@ -202,8 +202,8 @@ namespace Lua
 
 		namespace TexturedLit3D
 		{
-			DLLCLIENT void BindMaterial(lua_State *l,pragma::ShaderTextured3DBase &shader,::Material &mat);
-			DLLCLIENT void RecordBindClipPlane(lua_State *l,pragma::ShaderTextured3DBase &shader,const Vector4 &clipPlane);
+			DLLCLIENT void BindMaterial(lua_State *l,pragma::ShaderGameWorldLightingPass &shader,::Material &mat);
+			DLLCLIENT void RecordBindClipPlane(lua_State *l,pragma::ShaderGameWorldLightingPass &shader,const Vector4 &clipPlane);
 		};
 
 		namespace Compute

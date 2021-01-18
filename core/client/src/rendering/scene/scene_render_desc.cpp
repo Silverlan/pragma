@@ -29,9 +29,10 @@
 #include <sharedutils/util_hash.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 
+extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 SceneRenderDesc::SceneRenderDesc(pragma::CSceneComponent &scene)
 	: m_scene{scene}
 {
@@ -163,12 +164,15 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 	auto *mdlC = renderC.GetModelComponent();
 	auto lod = umath::max(static_cast<int32_t>(mdlC->GetLOD()) +lodBias,0);
 	auto &renderMeshes = renderC.GetRenderMeshes();
+	auto &renderBufferData = renderC.GetRenderBufferData();
 	auto &lodGroup = renderC.GetLodRenderMeshGroup(lod);
 	renderC.UpdateRenderDataMT(drawSceneInfo.commandBuffer,scene,cam,vp);
 	auto renderMode = renderC.GetRenderMode();
 	auto *renderer = drawSceneInfo.scene->GetRenderer();
 	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 		return;
+	auto &context = c_engine->GetRenderContext();
+	auto renderTranslucent = umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Translucent);
 	auto *rasterizationRenderer = static_cast<const pragma::rendering::RasterizationRenderer*>(renderer);
 	for(auto meshIdx=lodGroup.first;meshIdx<lodGroup.first +lodGroup.second;++meshIdx)
 	{
@@ -178,24 +182,35 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 		auto *mat = mdlC->GetRenderMaterial(renderMesh->GetSkinTextureIndex());
 		if(mat == nullptr)
 			continue;
-		auto *shader = static_cast<pragma::ShaderGameWorld*>(mat->GetUserData2());
+		auto *shader = static_cast<pragma::ShaderGameWorldLightingPass*>(mat->GetUserData2());
 		if(shader == nullptr)
 		{
 			// TODO: Shaders are initialized lazily and calling GetPrimaryShader may invoke the load process.
 			// This is illegal here, since this function may be called from a thread other than the main thread!
-			shader = dynamic_cast<pragma::ShaderGameWorld*>(mat->GetPrimaryShader());
+			shader = dynamic_cast<pragma::ShaderGameWorldLightingPass*>(mat->GetPrimaryShader());
 			mat->SetUserData2(shader); // TODO: This is technically *not* thread safe and could be called from multiple threads!
 		}
 		shader = rasterizationRenderer->GetShaderOverride(shader);
 		if(shader == nullptr)
 			continue;
+		auto pipelineIdx = shader->FindPipelineIndex(
+			pragma::ShaderGameWorldLightingPass::PassType::Generic,
+			renderC.GetShaderPipelineSpecialization(),
+			renderBufferData[meshIdx].pipelineSpecializationFlags
+		);
+		prosper::PipelineID pipelineId;
+		if(pipelineIdx.has_value() == false || shader->GetPipelineId(pipelineId,*pipelineIdx) == false)
+			continue;
+		// shader = rasterizationRenderer->GetShaderOverride(shader);
+		// if(shader == nullptr)
+		// 	continue;
 		auto translucent = mat->GetAlphaMode() == AlphaMode::Blend;
-		if(translucent && umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Translucent) == false)
+		if(renderTranslucent == false && translucent)
 			continue;
 		auto *renderQueue = getRenderQueue(renderMode,translucent);
 		if(renderQueue == nullptr)
 			continue;
-		pragma::rendering::RenderQueueItem item {static_cast<CBaseEntity&>(renderC.GetEntity()),meshIdx,*mat,*shader,translucent ? &cam : nullptr};
+		pragma::rendering::RenderQueueItem item {static_cast<CBaseEntity&>(renderC.GetEntity()),meshIdx,*mat,pipelineId,translucent ? &cam : nullptr};
 		if(fOptInsertItemToQueue)
 			fOptInsertItemToQueue(*renderQueue,item);
 		else
@@ -242,22 +257,25 @@ static auto cvEntitiesPerJob = GetClientConVar("render_queue_entities_per_worker
 void SceneRenderDesc::CollectRenderMeshesFromOctree(
 	const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
 	const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
-	const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,const std::vector<util::BSPTree::Node*> *bspLeafNodes,
+	const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,const std::vector<util::BSPTree*> *bspTrees,const std::vector<util::BSPTree::Node*> *bspLeafNodes,
 	int32_t lodBias,const std::function<bool(CBaseEntity&,const pragma::CSceneComponent&,FRender)> &shouldConsiderEntity
 )
 {
 	auto numEntitiesPerWorkerJob = umath::max(cvEntitiesPerJob->GetInt(),1);
 	std::function<void(const OcclusionOctree<CBaseEntity*>::Node &node)> iterateTree = nullptr;
-	iterateTree = [&iterateTree,&shouldConsiderEntity,&scene,&cam,renderFlags,fShouldCull,&drawSceneInfo,&getRenderQueue,&vp,bspLeafNodes,lodBias,numEntitiesPerWorkerJob](const OcclusionOctree<CBaseEntity*>::Node &node) {
+	iterateTree = [&iterateTree,&shouldConsiderEntity,&scene,&cam,renderFlags,fShouldCull,&drawSceneInfo,&getRenderQueue,&vp,bspLeafNodes,bspTrees,lodBias,numEntitiesPerWorkerJob](const OcclusionOctree<CBaseEntity*>::Node &node) {
 		auto &nodeBounds = node.GetWorldBounds();
 		if(fShouldCull && fShouldCull(nodeBounds.first,nodeBounds.second))
 			return;
 		if(bspLeafNodes && bspLeafNodes->empty() == false)
 		{
 			auto hasIntersection = false;
-			for(auto *node : *bspLeafNodes)
+			for(auto i=decltype(bspLeafNodes->size()){0u};i<bspLeafNodes->size();++i)
 			{
+				auto *node = (*bspLeafNodes)[i];
 				if(umath::intersection::aabb_aabb(nodeBounds.first,nodeBounds.second,node->minVisible,node->maxVisible) == umath::intersection::Intersect::Outside)
+					continue;
+				if((*bspTrees)[i]->IsAABBVisibleInCluster(nodeBounds.first,nodeBounds.second,node->cluster) == false)
 					continue;
 				hasIntersection = true;
 				break;
@@ -293,7 +311,8 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 					auto *renderC = static_cast<CBaseEntity*>(ent)->GetRenderComponent();
 					if(
 						!renderC || renderC->IsExemptFromOcclusionCulling() || ShouldConsiderEntity(*static_cast<CBaseEntity*>(ent),scene,renderFlags) == false || 
-						(shouldConsiderEntity && shouldConsiderEntity(*static_cast<CBaseEntity*>(ent),scene,renderFlags) == false)
+						(shouldConsiderEntity && shouldConsiderEntity(*static_cast<CBaseEntity*>(ent),scene,renderFlags) == false) //||
+						//(camClusterIdx.has_value() && renderC->IsVisibleInCluster(*camClusterIdx) == false)
 					)
 						continue;
 					if(fShouldCull && ShouldCull(*renderC,fShouldCull))
@@ -323,13 +342,13 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 }
 void SceneRenderDesc::CollectRenderMeshesFromOctree(
 	const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
-	const std::vector<umath::Plane> &frustumPlanes,const std::vector<util::BSPTree::Node*> *bspLeafNodes
+	const std::vector<umath::Plane> &frustumPlanes,const std::vector<util::BSPTree*> *bspTrees,const std::vector<util::BSPTree::Node*> *bspLeafNodes
 )
 {
 	CollectRenderMeshesFromOctree(drawSceneInfo,tree,scene,cam,vp,renderFlags,[this](RenderMode renderMode,bool translucent) {return GetRenderQueue(renderMode,translucent);},
 	[&frustumPlanes](const Vector3 &min,const Vector3 &max) -> bool {
 		return umath::intersection::aabb_in_plane_mesh(min,max,frustumPlanes) == umath::intersection::Intersect::Outside;
-	},bspLeafNodes);
+	},bspTrees,bspLeafNodes,0,nullptr);
 }
 
 bool SceneRenderDesc::ShouldConsiderEntity(CBaseEntity &ent,const pragma::CSceneComponent &scene,FRender renderFlags)
@@ -552,8 +571,13 @@ bool SceneRenderDesc::AssertRenderQueueThreadInactive()
 	throw std::logic_error{msg};
 	return false;
 }
+static auto cvLockRenderQueues = GetClientConVar("debug_render_lock_render_queues");
 void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo)
 {
+	if(cvLockRenderQueues->GetBool())
+		return;
+	m_worldRenderQueuesReady = false;
+
 	for(auto &renderQueue : m_renderQueues)
 		renderQueue->Clear();
 	m_worldRenderQueues.clear();
@@ -569,7 +593,6 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 	// c_game->StartProfilingStage(CGame::CPUProfilingPhase::BuildRenderQueue);
 	auto &posCam = g_debugFreezeCamData.has_value() ? g_debugFreezeCamData->pos : cam.GetEntity().GetPosition();
 
-	m_worldRenderQueuesReady = false;
 	c_game->GetRenderQueueBuilder().Append([this,&cam,posCam,&drawSceneInfo]() {
 		++g_activeRenderQueueThreads;
 		auto *stats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->renderQueueBuilderStats : nullptr;
@@ -591,6 +614,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 		auto vp = cam.GetProjectionMatrix() *cam.GetViewMatrix();
 
 		std::vector<util::BSPTree::Node*> bspLeafNodes;
+		std::vector<util::BSPTree*> bspTrees;
 		// Note: World geometry is handled differently than other entities. World entities have their
 		// own pre-built render queues, which we only have to iterate for maximum efficiency. Whether or not a world mesh is culled from the
 		// camera frustum is stored in 'm_worldMeshVisibility', which is simply a boolean array so we don't have to copy any
@@ -605,6 +629,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 		EntityIterator entItWorld {*c_game};
 		entItWorld.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
 		bspLeafNodes.reserve(entItWorld.GetCount());
+		bspTrees.reserve(entItWorld.GetCount());
 		m_worldMeshVisibility.reserve(entItWorld.GetCount());
 		for(auto *entWorld : entItWorld)
 		{
@@ -616,6 +641,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 			if(node == nullptr)
 				continue;
 			bspLeafNodes.push_back(node);
+			bspTrees.push_back(bspTree.get());
 
 			if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Static) == false)
 				continue;
@@ -695,7 +721,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 			if(culler)
 			{
 				auto &dynOctree = culler->GetOcclusionOctree();
-				CollectRenderMeshesFromOctree(drawSceneInfo,dynOctree,m_scene,cam,vp,drawSceneInfo.renderFlags,frustumPlanes,&bspLeafNodes);
+				CollectRenderMeshesFromOctree(drawSceneInfo,dynOctree,m_scene,cam,vp,drawSceneInfo.renderFlags,frustumPlanes,&bspTrees,&bspLeafNodes);
 			}
 
 			if(stats)
@@ -736,3 +762,4 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 		--g_activeRenderQueueThreads;
 	});
 }
+#pragma optimize("",on)

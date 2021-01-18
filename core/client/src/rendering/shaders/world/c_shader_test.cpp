@@ -85,9 +85,9 @@ decltype(ShaderTest::DESCRIPTOR_SET_PBR) ShaderTest::DESCRIPTOR_SET_PBR = {
 	}
 };
 ShaderTest::ShaderTest(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
-	: ShaderTextured3DBase{context,identifier,vsShader,fsShader,gsShader}
+	: ShaderGameWorldLightingPass{context,identifier,vsShader,fsShader,gsShader}
 {
-	SetPipelineCount(umath::to_integral(Pipeline::Count));
+	//SetPipelineCount(umath::to_integral(Pipeline::Count));
 }
 ShaderTest::ShaderTest(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderTest{context,identifier,"world/vs_test","world/fs_test"}
@@ -95,7 +95,7 @@ ShaderTest::ShaderTest(prosper::IPrContext &context,const std::string &identifie
 }
 bool ShaderTest::BindMaterialParameters(CMaterial &mat)
 {
-	return ShaderTextured3DBase::BindMaterialParameters(mat);
+	return ShaderGameWorldLightingPass::BindMaterialParameters(mat);
 }
 bool ShaderTest::BindEntity(CBaseEntity &ent)
 {
@@ -141,16 +141,16 @@ bool ShaderTest::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMesh
 
 	/*if(ShaderScene::RecordPushConstants(sizeof(Mat4),&m_testMvp) == false)
 		return false;
-	return ShaderTextured3DBase::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount);*/
+	return ShaderGameWorldLightingPass::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount);*/
 }
 prosper::DescriptorSetInfo &ShaderTest::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
 void ShaderTest::SetForceNonIBLMode(bool b) {m_bNonIBLMode = b;}
 bool ShaderTest::BeginDraw(
 	const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,
-	const Vector4 &drawOrigin,ShaderGameWorldPipeline pipelineIdx,RecordFlags recordFlags
+	const Vector4 &drawOrigin,RecordFlags recordFlags
 )
 {
-	return ShaderGraphics::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx)) == true &&
+	return ShaderGraphics::BeginDraw(cmdBuffer) == true &&
 		cmdBuffer->RecordSetDepthBias(1.f,0.f,0.f);
 }
 void ShaderTest::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
@@ -163,7 +163,7 @@ bool ShaderTest::BindScene(pragma::CSceneComponent &scene,rendering::Rasterizati
 }
 bool ShaderTest::BindSceneCamera(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,bool bView)
 {
-	//if(ShaderTextured3DBase::BindSceneCamera(scene,renderer,bView) == false)
+	//if(ShaderGameWorldLightingPass::BindSceneCamera(scene,renderer,bView) == false)
 	//	return false;
 	auto hCam = scene.GetActiveCamera();
 	if(hCam.expired())
@@ -182,18 +182,18 @@ bool ShaderTest::BindSceneCamera(pragma::CSceneComponent &scene,const rendering:
 }
 void ShaderTest::UpdateRenderFlags(CModelSubMesh &mesh,SceneFlags &inOutFlags)
 {
-	ShaderTextured3DBase::UpdateRenderFlags(mesh,inOutFlags);
+	ShaderGameWorldLightingPass::UpdateRenderFlags(mesh,inOutFlags);
 	inOutFlags |= m_extRenderFlags;
 }
 void ShaderTest::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	//ShaderTextured3DBase::InitializeGfxPipelineDescriptorSets(pipelineInfo,pipelineIdx);
+	//ShaderGameWorldLightingPass::InitializeGfxPipelineDescriptorSets(pipelineInfo,pipelineIdx);
 	//AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_PBR);
 }
 void ShaderTest::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderScene::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
-	//ShaderTextured3DBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+	//ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	//ShaderEntity::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	//ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 

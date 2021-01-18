@@ -14,14 +14,14 @@
 namespace pragma
 {
 	class DLLCLIENT ShaderUnlit
-		: public ShaderTextured3DBase
+		: public ShaderGameWorldLightingPass
 	{
 	public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 
 		enum class MaterialBinding : uint32_t
 		{
-			MaterialSettings = umath::to_integral(ShaderTextured3DBase::MaterialBinding::MaterialSettings),
+			MaterialSettings = umath::to_integral(ShaderGameWorldLightingPass::MaterialBinding::MaterialSettings),
 			AlbedoMap,
 
 			Count

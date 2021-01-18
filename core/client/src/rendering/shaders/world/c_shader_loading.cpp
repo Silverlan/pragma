@@ -14,7 +14,7 @@ using namespace pragma;
 extern DLLCLIENT ClientState *client;
 
 ShaderLoading::ShaderLoading(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderTextured3DBase(context,identifier,"world/vs_textured","world/fs_loading")
+	: ShaderGameWorldLightingPass(context,identifier,"world/vs_textured","world/fs_loading")
 {
 	// SetBaseShader<ShaderTextured3DBase>();
 }
@@ -24,5 +24,5 @@ bool ShaderLoading::BindMaterial(CMaterial&)
 	auto *mat = client->GetMaterialManager().GetErrorMaterial();
 	if(mat == nullptr)
 		return false;
-	return ShaderTextured3DBase::BindMaterial(*static_cast<CMaterial*>(mat));
+	return ShaderGameWorldLightingPass::BindMaterial(*static_cast<CMaterial*>(mat));
 }

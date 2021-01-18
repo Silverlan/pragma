@@ -42,7 +42,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneCom
 	std::vector<prosper::IDescriptorSet*> descSets {};
 	switch(passType)
 	{
-	case pragma::ShaderGameWorld::PassType::LightingPass:
+	case pragma::ShaderGameWorld::GameShaderType::LightingPass:
 	{
 		descSets.resize(7);
 		descSets[0] = &dsMat;
@@ -52,7 +52,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneCom
 		descSets[4] = dsLights;
 		descSets[5] = dsShadows;
 		
-		ShaderTextured3DBase::PushConstants pushConstants {};
+		ShaderGameWorldLightingPass::PushConstants pushConstants {};
 		pushConstants.Initialize();
 		auto &hCam = scene.GetActiveCamera();
 		assert(hCam.valid());
@@ -71,7 +71,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneCom
 		m_cmdBuffer.RecordPushConstants(*m_currentPipelineLayout,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0u,sizeof(pushConstants),&pushConstants);
 		break;
 	}
-	case pragma::ShaderGameWorld::PassType::DepthPrepass:
+	case pragma::ShaderGameWorld::GameShaderType::DepthPrepass:
 	{
 		descSets.resize(3);
 		descSets[0] = &dsMat;
@@ -83,7 +83,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneCom
 		m_cmdBuffer.RecordPushConstants(*m_currentPipelineLayout,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0u,sizeof(pushConstants),&pushConstants);
 		break;
 	}
-	case pragma::ShaderGameWorld::PassType::ShadowPass:
+	case pragma::ShaderGameWorld::GameShaderType::ShadowPass:
 	{
 		descSets.resize(3);
 		descSets[0] = &dsMat;
@@ -95,7 +95,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneCom
 		m_cmdBuffer.RecordPushConstants(*m_currentPipelineLayout,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0u,sizeof(pushConstants),&pushConstants);
 		break;
 	}
-	case pragma::ShaderGameWorld::PassType::SkyPass:
+	case pragma::ShaderGameWorld::GameShaderType::SkyPass:
 	{
 		descSets.resize(3);
 		descSets[0] = &dsMat;
@@ -135,10 +135,10 @@ void pragma::rendering::ShaderProcessor::UpdateSceneFlags(ShaderGameWorld::Scene
 	size_t offset = 0;
 	switch(m_passType)
 	{
-	case ShaderGameWorld::PassType::ShadowPass:
+	case ShaderGameWorld::GameShaderType::ShadowPass:
 		offset = offsetof(ShaderShadow::PushConstants,flags);
 		break;
-	case ShaderGameWorld::PassType::SkyPass:
+	case ShaderGameWorld::GameShaderType::SkyPass:
 		return;
 	default:
 		offset = offsetof(ShaderGameWorld::ScenePushConstants,flags);
@@ -165,7 +165,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindLight(CLightComponent &light,
 bool pragma::rendering::ShaderProcessor::RecordBindMaterial(CMaterial &mat)
 {
 	auto alphaMode = mat.GetAlphaMode();
-	if(m_passType != ShaderGameWorld::PassType::LightingPass && m_passType != ShaderGameWorld::PassType::SkyPass && alphaMode == AlphaMode::Opaque)
+	if(m_passType != ShaderGameWorld::GameShaderType::LightingPass && m_passType != ShaderGameWorld::GameShaderType::SkyPass && alphaMode == AlphaMode::Opaque)
 		return true; // TODO: Notify shader?
 
 	auto flags = m_sceneFlags;
@@ -175,16 +175,16 @@ bool pragma::rendering::ShaderProcessor::RecordBindMaterial(CMaterial &mat)
 		if(alphaCutoff != m_alphaCutoff)
 		{
 			m_alphaCutoff = alphaCutoff;
-			if(m_passType != ShaderGameWorld::PassType::LightingPass && m_passType != ShaderGameWorld::PassType::SkyPass)
+			if(m_passType != ShaderGameWorld::GameShaderType::LightingPass && m_passType != ShaderGameWorld::GameShaderType::SkyPass)
 			{
 				static_assert(std::is_same_v<decltype(alphaCutoff),decltype(ShaderPrepass::PushConstants::alphaCutoff)>);
 				size_t offset = 0;
 				switch(m_passType)
 				{
-				case ShaderGameWorld::PassType::DepthPrepass:
+				case ShaderGameWorld::GameShaderType::DepthPrepass:
 					offset = offsetof(ShaderPrepass::PushConstants,alphaCutoff);
 					break;
-				case ShaderGameWorld::PassType::ShadowPass:
+				case ShaderGameWorld::GameShaderType::ShadowPass:
 					offset = offsetof(ShaderShadow::PushConstants,alphaCutoff);
 					break;
 				}
@@ -219,7 +219,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindEntity(CBaseEntity &ent)
 	auto *clipPlane = renderC->GetRenderClipPlane();
 	if(static_cast<bool>(clipPlane) != m_clipPlane.has_value() && (!clipPlane || *clipPlane != *m_clipPlane))
 	{
-		if(m_passType != ShaderGameWorld::PassType::ShadowPass && m_passType != ShaderGameWorld::PassType::SkyPass)
+		if(m_passType != ShaderGameWorld::GameShaderType::ShadowPass && m_passType != ShaderGameWorld::GameShaderType::SkyPass)
 		{
 			static_assert(sizeof(*clipPlane) == sizeof(ShaderGameWorld::ScenePushConstants::clipPlane));
 			auto vClipPlane = clipPlane ? *clipPlane : Vector4{};
@@ -237,7 +237,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindEntity(CBaseEntity &ent)
 			m_vertexAnimC = ent.GetComponent<pragma::CVertexAnimatedComponent>().get();
 	}
 	
-	if(m_passType == ShaderGameWorld::PassType::LightingPass)
+	if(m_passType == ShaderGameWorld::GameShaderType::LightingPass)
 	{
 		m_lightMapReceiverC = renderC->GetLightMapReceiverComponent();
 		if(m_lightMapReceiverC)

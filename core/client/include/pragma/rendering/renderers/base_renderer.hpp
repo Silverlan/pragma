@@ -25,15 +25,17 @@ namespace pragma::rendering
 		: public std::enable_shared_from_this<BaseRenderer>
 	{
 	public:
+		static const std::vector<BaseRenderer*> &GetRenderers();
 		template<class TRenderer>
 			static std::shared_ptr<TRenderer> Create(uint32_t w,uint32_t h);
 		bool operator==(const BaseRenderer &other) const;
 		bool operator!=(const BaseRenderer &other) const;
-		virtual ~BaseRenderer()=default;
+		virtual ~BaseRenderer();
 		virtual bool RecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo);
 		virtual bool Render(const util::DrawSceneInfo &drawSceneInfo);
 
 		virtual bool ReloadRenderTarget(CSceneComponent &scene,uint32_t width,uint32_t height)=0;
+		virtual bool ReloadBloomRenderTarget(uint32_t width) {return true;};
 		virtual prosper::Texture *GetSceneTexture()=0;
 		virtual prosper::Texture *GetPresentationTexture();
 		virtual prosper::Texture *GetHDRPresentationTexture()=0;

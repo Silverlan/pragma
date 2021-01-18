@@ -10,12 +10,15 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
+#include "pragma/rendering/c_model_render_buffer_data.hpp"
 #include <pragma/entities/components/base_model_component.hpp>
 #include <vector>
 #include <optional>
 
 namespace pragma
 {
+	enum class GameShaderSpecializationConstantFlag : uint32_t;
+	enum class GameShaderSpecialization : uint32_t;
 	class CCameraComponent;
 	class CSceneComponent;
 	class DLLCLIENT CModelComponent final
@@ -60,6 +63,9 @@ namespace pragma
 		std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes();
 		const std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes() const;
 		const std::shared_ptr<prosper::IRenderBuffer> &GetRenderBuffer(uint32_t idx) const;
+		pragma::GameShaderSpecializationConstantFlag GetPipelineSpecializationFlags(uint32_t idx) const;
+		const std::vector<rendering::RenderBufferData> &GetRenderBufferData() const {return const_cast<CModelComponent*>(this)->GetRenderBufferData();};
+		std::vector<rendering::RenderBufferData> &GetRenderBufferData() {return m_lodMeshRenderBufferData;};
 
 		RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod);
 		const RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod) const;
@@ -88,7 +94,7 @@ namespace pragma
 		float m_tNextLodUpdate = 0.f;
 		float m_lastLodCamDistance = 0.f;
 		StateFlags m_stateFlags = StateFlags::None;
-		std::vector<std::shared_ptr<prosper::IRenderBuffer>> m_lodMeshRenderBuffers;
+		std::vector<rendering::RenderBufferData> m_lodMeshRenderBufferData;
 		std::vector<std::shared_ptr<ModelMesh>> m_lodMeshes;
 		std::vector<std::shared_ptr<ModelSubMesh>> m_lodRenderMeshes;
 

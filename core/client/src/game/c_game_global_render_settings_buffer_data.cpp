@@ -19,32 +19,32 @@ CGame::GlobalRenderSettingsBufferData &CGame::GetGlobalRenderSettingsBufferData(
 
 CGame::GlobalRenderSettingsBufferData::GlobalRenderSettingsBufferData()
 {
-	pragma::ShaderTextured3DBase::DebugData debugData {0};
+	pragma::ShaderGameWorldLightingPass::DebugData debugData {0};
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit | prosper::BufferUsageFlags::TransferSrcBit;
-	createInfo.size = sizeof(pragma::ShaderTextured3DBase::DebugData);
+	createInfo.size = sizeof(pragma::ShaderGameWorldLightingPass::DebugData);
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	debugBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,&debugData);
 	debugBuffer->SetDebugName("render_settings_debug_buf");
 
-	pragma::ShaderTextured3DBase::CSMData csmData {
+	pragma::ShaderGameWorldLightingPass::CSMData csmData {
 		{umat::identity(),umat::identity(),umat::identity(),umat::identity()}, // View-projection matrices
 		Vector4(0.f,0.f,0.f,0.f), // Far distances
 		0 // Cascade Count
 	};
-	createInfo.size = sizeof(pragma::ShaderTextured3DBase::CSMData);
+	createInfo.size = sizeof(pragma::ShaderGameWorldLightingPass::CSMData);
 	csmBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,&csmData);
 	csmBuffer->SetDebugName("csm_data_buf");
 
-	pragma::ShaderTextured3DBase::TimeData timeData {0.f,0.f,0.f,0.f};
+	pragma::ShaderGameWorldLightingPass::TimeData timeData {0.f,0.f,0.f,0.f};
 	createInfo.size = sizeof(timeData);
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	timeBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,&timeData);
 	timeBuffer->SetDebugName("time_data_buf");
 
-	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_RENDER_SETTINGS.IsValid() == false)
+	if(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_RENDER_SETTINGS.IsValid() == false)
 		return;
-	descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_RENDER_SETTINGS);
+	descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_RENDER_SETTINGS);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
 	descSet.SetBindingUniformBuffer(
 		*debugBuffer,umath::to_integral(pragma::ShaderScene::RenderSettingsBinding::Debug)

@@ -53,6 +53,7 @@ namespace pragma::rendering
 		bool EndRenderPass(const util::DrawSceneInfo &drawSceneInfo);
 		bool ResolveRenderPass(const util::DrawSceneInfo &drawSceneInfo);
 		void ReloadPresentationRenderTarget(uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount);
+		bool ReloadBloomRenderTarget(uint32_t width);
 
 		void ResetIOTextureIndex();
 		// bool BlitStagingRenderTargetToMainRenderTarget(const util::DrawSceneInfo &drawSceneInfo);

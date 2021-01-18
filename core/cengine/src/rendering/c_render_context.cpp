@@ -20,7 +20,7 @@ using namespace pragma;
 extern DLLCENGINE CEngine *c_engine;
 
 RenderContext::RenderContext()
-	: m_monitor(nullptr),m_aspectRatio(1.f),m_renderAPI{"opengl"}
+	: m_monitor(nullptr),m_aspectRatio(1.f),m_renderAPI{"vulkan"}
 {
 	umath::set_flag(m_stateFlags,StateFlags::WindowedMode);
 }

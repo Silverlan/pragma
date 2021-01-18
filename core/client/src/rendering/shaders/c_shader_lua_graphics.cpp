@@ -688,11 +688,11 @@ void Lua::Shader::ShaderEntity::Draw(lua_State *l,pragma::ShaderEntity &shader,:
 {
 	Lua::PushBool(l,shader.Draw(static_cast<CModelSubMesh&>(mesh),{},*pragma::CSceneComponent::GetEntityInstanceIndexBuffer()->GetZeroIndexBuffer()));
 }
-void Lua::Shader::TexturedLit3D::BindMaterial(lua_State *l,pragma::ShaderTextured3DBase &shader,::Material &mat)
+void Lua::Shader::TexturedLit3D::BindMaterial(lua_State *l,pragma::ShaderGameWorldLightingPass &shader,::Material &mat)
 {
 	Lua::PushBool(l,shader.BindMaterial(static_cast<CMaterial&>(mat)));
 }
-void Lua::Shader::TexturedLit3D::RecordBindClipPlane(lua_State *l,pragma::ShaderTextured3DBase &shader,const Vector4 &clipPlane)
+void Lua::Shader::TexturedLit3D::RecordBindClipPlane(lua_State *l,pragma::ShaderGameWorldLightingPass &shader,const Vector4 &clipPlane)
 {
 	Lua::PushBool(l,shader.BindClipPlane(clipPlane));
 }

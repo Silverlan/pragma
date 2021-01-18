@@ -12,6 +12,7 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/rendering/c_rendermode.h"
+#include "pragma/rendering/c_model_render_buffer_data.hpp"
 #include <pragma/util/orientedpoint.h>
 #include <pragma/math/sphere.h>
 #include <pragma/entities/components/base_render_component.hpp>
@@ -28,6 +29,7 @@ namespace pragma
 	class CAnimatedComponent;
 	class CAttachableComponent;
 	class CLightMapReceiverComponent;
+	enum class GameShaderSpecialization : uint32_t;
 	using RenderMeshIndex = uint32_t;
 	using RenderBufferIndex = uint32_t;
 	class DLLCLIENT CRenderComponent final
@@ -78,6 +80,8 @@ namespace pragma
 
 		std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes();
 		const std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes() const;
+		std::vector<rendering::RenderBufferData> &GetRenderBufferData();
+		const std::vector<rendering::RenderBufferData> &GetRenderBufferData() const {return const_cast<CRenderComponent*>(this)->GetRenderBufferData();}
 		std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes();
 		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes() const;
 
@@ -156,6 +160,8 @@ namespace pragma
 		void SetRenderOffsetTransform(const umath::ScaledTransform &t);
 		void ClearRenderOffsetTransform();
 		const umath::ScaledTransform *GetRenderOffsetTransform() const;
+
+		GameShaderSpecialization GetShaderPipelineSpecialization() const;
 	protected:
 		void UpdateShouldDrawShadowState();
 		void UpdateRenderBuffer() const;
@@ -163,8 +169,8 @@ namespace pragma
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 		void ClearRenderObjects();
-		static bool RenderCallback(RenderObject *o,CBaseEntity *ent,pragma::CCameraComponent *cam,pragma::ShaderTextured3DBase *shader,Material *mat);
-		bool RenderCallback(RenderObject *o,pragma::CCameraComponent *cam,pragma::ShaderTextured3DBase *shader,Material *mat);
+		static bool RenderCallback(RenderObject *o,CBaseEntity *ent,pragma::CCameraComponent *cam,pragma::ShaderGameWorldLightingPass *shader,Material *mat);
+		bool RenderCallback(RenderObject *o,pragma::CCameraComponent *cam,pragma::ShaderGameWorldLightingPass *shader,Material *mat);
 		void UpdateRenderMeshes();
 
 		void ClearRenderBuffers();

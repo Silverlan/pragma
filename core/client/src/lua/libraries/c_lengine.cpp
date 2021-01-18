@@ -51,7 +51,8 @@ void Lua::engine::register_library(lua_State *l)
 		luabind::def("set_record_console_output",Lua::engine::set_record_console_output),
 		luabind::def("get_tick_count",&Lua::engine::GetTickCount),
 		luabind::def("shutdown",&Lua::engine::exit),
-		luabind::def("get_working_directory",Lua::engine::get_working_directory)
+		luabind::def("get_working_directory",Lua::engine::get_working_directory),
+		luabind::def("get_current_frame_index",&Lua::engine::get_current_frame_index)
 	];
 }
 
@@ -550,3 +551,4 @@ Vector2i Lua::engine::get_window_resolution()
 	return Vector2i{createInfo.width,createInfo.height};
 }
 Vector2i Lua::engine::get_render_resolution() {return c_engine->GetRenderResolution();}
+uint32_t Lua::engine::get_current_frame_index() {return c_engine->GetRenderContext().GetLastFrameId();}

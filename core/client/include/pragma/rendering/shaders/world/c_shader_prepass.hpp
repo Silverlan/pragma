@@ -18,21 +18,12 @@ namespace pragma
 		: public ShaderGameWorld
 	{
 	public:
-		enum class Pipeline : uint32_t
-		{
-			Regular = umath::to_integral(ShaderEntity::Pipeline::Regular),
-			MultiSample = umath::to_integral(ShaderEntity::Pipeline::MultiSample),
-
-			Reflection = umath::to_integral(ShaderEntity::Pipeline::Count),
-			Count
-		};
 		enum class MaterialBinding : uint32_t
 		{
 			AlbedoMap = 0u,
 
 			Count
 		};
-		static Pipeline GetPipelineIndex(prosper::SampleCountFlags sampleCount);
 		static prosper::util::RenderPassCreateInfo::AttachmentInfo get_depth_render_pass_attachment_info(prosper::SampleCountFlags sampleCount);
 
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_RENDER_BUFFER_INDEX;
@@ -73,7 +64,7 @@ namespace pragma
 		ShaderPrepassBase(prosper::IPrContext &context,const std::string &identifier);
 
 		virtual bool BeginDraw(
-			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},ShaderGameWorldPipeline pipelineIdx=ShaderGameWorldPipeline::Regular,
+			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		) override;
 		virtual bool BindClipPlane(const Vector4 &clipPlane) override;
@@ -82,7 +73,7 @@ namespace pragma
 		virtual bool SetDepthBias(const Vector2 &depthBias) override;
 		virtual void Set3DSky(bool is3dSky) override;
 		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
-		virtual PassType GetPassType() const {return PassType::DepthPrepass;}
+		virtual GameShaderType GetPassType() const {return GameShaderType::DepthPrepass;}
 	protected:
 		virtual void OnPipelinesInitialized() override;
 		virtual bool BindMaterial(CMaterial &mat) override;
@@ -102,7 +93,6 @@ namespace pragma
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_dummyMaterialDsg = nullptr;
 		std::optional<float> m_alphaCutoff {};
 	};
-	using ShaderPrepassDepth = ShaderPrepassBase;
 
 	//////////////////
 
@@ -114,6 +104,26 @@ namespace pragma
 
 		static prosper::Format RENDER_PASS_NORMAL_FORMAT;
 		static prosper::util::RenderPassCreateInfo::AttachmentInfo get_normal_render_pass_attachment_info(prosper::SampleCountFlags sampleCount);
+
+		enum class Pipeline : uint32_t
+		{
+			Opaque = 0u,
+			AlphaTest,
+			AnimatedOpaque,
+			AnimatedAlphaTest,
+
+			Count
+		};
+
+		enum class SpecializationConstant : uint32_t
+		{
+			EnableAlphaTest = 0u,
+			EnableNormalOutput,
+			EnableAnimation,
+			EnableMorphTargetAnimation,
+
+			Count
+		};
 
 		ShaderPrepass(prosper::IPrContext &context,const std::string &identifier);
 	protected:

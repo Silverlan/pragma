@@ -29,15 +29,15 @@ decltype(ShaderUnlit::DESCRIPTOR_SET_MATERIAL) ShaderUnlit::DESCRIPTOR_SET_MATER
 	}
 };
 ShaderUnlit::ShaderUnlit(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderTextured3DBase{context,identifier,"world/vs_textured","world/fs_unlit"}
+	: ShaderGameWorldLightingPass{context,identifier,"world/vs_textured","world/fs_unlit"}
 {
-	SetPipelineCount(umath::to_integral(Pipeline::Count));
+	// SetPipelineCount(umath::to_integral(Pipeline::Count));
 }
-prosper::DescriptorSetInfo &ShaderUnlit::GetMaterialDescriptorSetInfo() const {return ShaderTextured3DBase::DESCRIPTOR_SET_MATERIAL;}//DESCRIPTOR_SET_MATERIAL;}
+prosper::DescriptorSetInfo &ShaderUnlit::GetMaterialDescriptorSetInfo() const {return ShaderGameWorldLightingPass::DESCRIPTOR_SET_MATERIAL;}//DESCRIPTOR_SET_MATERIAL;}
 bool ShaderUnlit::BindLights(prosper::IDescriptorSet &dsLights) {return true;}
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderUnlit::InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo)
 {
-	return ShaderTextured3DBase::InitializeMaterialDescriptorSet(mat,descSetInfo);
+	return ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(mat,descSetInfo);
 	/*auto *albedoMap = mat.GetDiffuseMap();
 	if(albedoMap == nullptr || albedoMap->texture == nullptr)
 		return nullptr;
@@ -58,6 +58,6 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderUnlit::InitializeMaterialDes
 }
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderUnlit::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
-	return InitializeMaterialDescriptorSet(mat,ShaderTextured3DBase::DESCRIPTOR_SET_MATERIAL);
+	return InitializeMaterialDescriptorSet(mat,ShaderGameWorldLightingPass::DESCRIPTOR_SET_MATERIAL);
 	//return InitializeMaterialDescriptorSet(mat,DESCRIPTOR_SET_MATERIAL);
 }

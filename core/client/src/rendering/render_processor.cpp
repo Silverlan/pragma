@@ -308,9 +308,7 @@ pragma::rendering::BaseRenderProcessor::BaseRenderProcessor(const util::RenderPa
 	auto *renderer = scene->GetRenderer();
 	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
 		return;
-	auto bReflection = umath::is_flag_set(flags,RenderFlags::Reflection);
 	m_renderer = static_cast<const pragma::rendering::RasterizationRenderer*>(renderer);
-	m_pipelineType = pragma::ShaderTextured3DBase::GetPipelineIndex(m_renderer->GetSampleCount(),bReflection);
 }
 pragma::rendering::BaseRenderProcessor::~BaseRenderProcessor()
 {
@@ -326,7 +324,7 @@ void pragma::rendering::BaseRenderProcessor::UnbindShader()
 	//m_shaderScene->EndDraw();
 	m_drawSceneInfo.commandBuffer->RecordUnbindShaderPipeline();
 	m_curShader = nullptr;
-	m_curShaderIndex = std::numeric_limits<decltype(m_curShaderIndex)>::max();
+	m_curPipeline = std::numeric_limits<decltype(m_curPipeline)>::max();
 	m_curInstanceSet = nullptr;
 	umath::set_flag(m_stateFlags,StateFlags::ShaderBound,false);
 }
@@ -357,33 +355,43 @@ bool pragma::rendering::BaseRenderProcessor::BindInstanceSet(pragma::ShaderGameW
 	return true;
 }
 
-bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::Shader &shader)
+
+bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::Shader &shader,uint32_t pipelineIdx)
 {
-	if(&shader == m_curShader)
+	prosper::PipelineID pipelineId;
+	return shader.GetPipelineId(pipelineId,pipelineIdx) && pipelineId != std::numeric_limits<decltype(pipelineId)>::max() && BindShader(pipelineId);
+}
+
+bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::PipelineID pipelineId)
+{
+	if(pipelineId == m_curPipeline)
 		return umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound);
+	uint32_t pipelineIdx;
+	auto *shader = c_engine->GetRenderContext().GetShaderPipeline(pipelineId,pipelineIdx);
+	assert(shader);
 	UnbindShader();
 	UnbindMaterial();
 	UnbindEntity();
-	m_curShader = &shader;
-	if(shader.GetBaseTypeHashCode() != pragma::ShaderGameWorld::HASH_TYPE || shader.IsValid() == false)
+	m_curPipeline = pipelineId;
+	m_curShader = shader;
+	if(shader->GetBaseTypeHashCode() != pragma::ShaderGameWorld::HASH_TYPE || shader->IsValid() == false)
 		return false;
-	auto *shaderScene = static_cast<pragma::ShaderGameWorld*>(&shader);
+	auto *shaderScene = static_cast<pragma::ShaderGameWorld*>(shader);
 	if((g_debugRenderFilter && g_debugRenderFilter->shaderFilter && g_debugRenderFilter->shaderFilter(*shaderScene) == false))
 		return false;
 	
 	auto &scene = *m_drawSceneInfo.drawSceneInfo.scene;
 	auto bView = (m_camType == CameraType::View) ? true : false;
-	m_shaderProcessor.RecordBindShader(scene,static_cast<const pragma::rendering::RasterizationRenderer&>(*scene.GetRenderer()),bView,*shaderScene,umath::to_integral(m_pipelineType));
+	m_shaderProcessor.RecordBindShader(scene,static_cast<const pragma::rendering::RasterizationRenderer&>(*scene.GetRenderer()),bView,*shaderScene,pipelineIdx);
 	
 	if(m_stats)
 	{
 		(*m_stats)->Increment(RenderPassStats::Counter::ShaderStateChanges);
-		m_stats->shaders.push_back(shader.GetHandle());
+		m_stats->shaders.push_back(shader->GetHandle());
 	}
 	umath::set_flag(m_stateFlags,StateFlags::ShaderBound);
 
 	m_shaderScene = shaderScene;
-	m_curShaderIndex = shader.GetIndex();
 	return true;
 }
 void pragma::rendering::BaseRenderProcessor::SetCameraType(CameraType camType)
@@ -592,6 +600,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 	RecordViewport();
 	
 	auto &shaderManager = c_engine->GetShaderManager();
+	auto &context = c_engine->GetRenderContext();
 	auto &matManager = client->GetMaterialManager();
 	auto &sceneRenderDesc = m_drawSceneInfo.drawSceneInfo.scene->GetSceneRenderDesc();
 	uint32_t numShaderInvocations = 0;
@@ -622,13 +631,11 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 			continue;
 		if(!prepass)
 		{
-			if(item.shader != m_curShaderIndex)
+			if(item.pipelineId != m_curPipeline)
 			{
 				if(optStats)
 					ttmp = std::chrono::steady_clock::now();
-				auto *shader = shaderManager.GetShader(item.shader);
-				assert(shader);
-				BindShader(*shader);
+				BindShader(item.pipelineId);
 				if(optStats)
 					(*optStats)->AddTime(RenderPassStats::Timer::ShaderBind,std::chrono::steady_clock::now() -ttmp);
 			}

@@ -42,7 +42,7 @@ decltype(ShaderShadow::VERTEX_ATTRIBUTE_POSITION) ShaderShadow::VERTEX_ATTRIBUTE
 
 decltype(ShaderShadow::DESCRIPTOR_SET_INSTANCE) ShaderShadow::DESCRIPTOR_SET_INSTANCE = {&ShaderGameWorld::DESCRIPTOR_SET_INSTANCE};
 decltype(ShaderShadow::DESCRIPTOR_SET_SCENE) ShaderShadow::DESCRIPTOR_SET_SCENE = {&ShaderScene::DESCRIPTOR_SET_SCENE};
-decltype(ShaderShadow::DESCRIPTOR_SET_MATERIAL) ShaderShadow::DESCRIPTOR_SET_MATERIAL = {&ShaderTextured3DBase::DESCRIPTOR_SET_MATERIAL};
+decltype(ShaderShadow::DESCRIPTOR_SET_MATERIAL) ShaderShadow::DESCRIPTOR_SET_MATERIAL = {&ShaderGameWorldLightingPass::DESCRIPTOR_SET_MATERIAL};
 decltype(ShaderShadow::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderShadow::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderGameWorld::DESCRIPTOR_SET_RENDER_SETTINGS};
 ShaderShadow::ShaderShadow(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader)
 	: ShaderGameWorld(context,identifier,vsShader,fsShader)
@@ -57,11 +57,11 @@ void ShaderShadow::OnPipelinesInitialized()
 	m_defaultMatDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
 }
 bool ShaderShadow::BeginDraw(
-	const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,ShaderGameWorldPipeline pipelineIdx,
+	const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,
 	RecordFlags recordFlags
 )
 {
-	return ShaderScene::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx),recordFlags);
+	return ShaderScene::BeginDraw(cmdBuffer,0u,recordFlags);
 }
 bool ShaderShadow::BindEntityDepthMatrix(const Mat4 &depthMVP)
 {

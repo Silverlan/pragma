@@ -183,8 +183,8 @@ void RenderSystem::Render(
 	auto renderAs3dSky = umath::is_flag_set(flags,RenderFlags::RenderAs3DSky);
 	//auto &lights = scene->GetCulledLights();
 	auto &rasterizer = *static_cast<const pragma::rendering::RasterizationRenderer*>(renderer);
-	auto pipelineType = pragma::ShaderTextured3DBase::GetPipelineIndex(rasterizer.GetSampleCount(),bReflection);
-	pragma::ShaderTextured3DBase *shaderPrev = nullptr;
+	auto pipelineType = pragma::ShaderGameWorldLightingPass::GetPipelineIndex(rasterizer.GetSampleCount(),bReflection);
+	pragma::ShaderGameWorldLightingPass *shaderPrev = nullptr;
 	CBaseEntity *entPrev = nullptr;
 	pragma::CRenderComponent *renderC = nullptr;
 	std::optional<Vector4> clipPlane {};
@@ -197,7 +197,7 @@ void RenderSystem::Render(
 		auto &whShader = meshInfo->shader;
 		if(whShader.expired())
 			continue;
-		auto *shader = static_cast<pragma::ShaderTextured3DBase*>(whShader.get());
+		auto *shader = static_cast<pragma::ShaderGameWorldLightingPass*>(whShader.get());
 		if(shader != shaderPrev)
 		{
 			if(shaderPrev != nullptr)

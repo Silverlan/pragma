@@ -253,33 +253,6 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescr
 void ShaderPBR::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
-
-	// Fragment
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::DebugModeEnabledBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EmissionEnabledBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::BloomOutputEnabledBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::WrinklesEnabledBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableTranslucencyBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableIblBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableSsaoBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableLightSourcesBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableLightSourcesSpotBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableLightSourcesPointBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableLightSourcesDirectionalBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableRmaMapBit);
-
-	// Shared
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableNormalMapBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::ParallaxEnabledBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableLightMapsBit);
-	
-	// Vertex
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableAnimationBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableMorphTargetAnimationBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableClippingBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::Enable3dOriginBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableExtendedVertexWeights);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableDepthBias);
 }
 
 /////////////////

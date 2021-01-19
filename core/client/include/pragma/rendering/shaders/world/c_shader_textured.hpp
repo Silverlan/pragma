@@ -60,29 +60,36 @@ namespace pragma
 		None = 0u,
 
 		// Static
-		DebugModeEnabledBit = 1u,
-		BloomOutputEnabledBit = DebugModeEnabledBit<<1u,
-		EnableSsaoBit = BloomOutputEnabledBit<<1u,
-		EnableLightSourcesBit = EnableSsaoBit<<1u,
+		EnableLightSourcesBit = 1u,
 		EnableLightSourcesSpotBit = EnableLightSourcesBit<<1u,
 		EnableLightSourcesPointBit = EnableLightSourcesSpotBit<<1u,
 		EnableLightSourcesDirectionalBit = EnableLightSourcesPointBit<<1u,
 		EnableLightMapsBit = EnableLightSourcesDirectionalBit<<1u,
 		EnableAnimationBit = EnableLightMapsBit<<1u,
 		EnableMorphTargetAnimationBit = EnableAnimationBit<<1u,
+		EnableIblBit = EnableMorphTargetAnimationBit<<1u,
 
 		// Dynamic
-		EmissionEnabledBit = EnableMorphTargetAnimationBit<<1u,
+		EmissionEnabledBit = EnableIblBit<<1u,
 		WrinklesEnabledBit = EmissionEnabledBit<<1u,
 		EnableTranslucencyBit = WrinklesEnabledBit<<1u,
-		EnableIblBit = EnableTranslucencyBit<<1u,
 		EnableRmaMapBit = EnableIblBit<<1u,
 		EnableNormalMapBit = EnableRmaMapBit<<1u,
 		ParallaxEnabledBit = EnableNormalMapBit<<1u,
 		EnableClippingBit = ParallaxEnabledBit<<1u,
 		Enable3dOriginBit = EnableClippingBit<<1u,
 		EnableExtendedVertexWeights = Enable3dOriginBit<<1u,
-		EnableDepthBias = EnableExtendedVertexWeights<<1u
+		EnableDepthBias = EnableExtendedVertexWeights<<1u,
+
+		Last = EnableDepthBias
+	};
+	enum class GameShaderSpecializationPropertyIndex : uint32_t
+	{
+		Start = umath::get_least_significant_set_bit_index_c(umath::to_integral(GameShaderSpecializationConstantFlag::Last)) +1,
+		ShadowQuality = Start,
+		DebugModeEnabled,
+		BloomOutputEnabled,
+		EnableSsao
 	};
 	enum class GameShaderSpecialization : uint32_t
 	{

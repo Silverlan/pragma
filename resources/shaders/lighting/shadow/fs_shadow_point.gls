@@ -24,7 +24,7 @@ float exp_scale_factor(float v,float e) // Grows more quickly the closer it come
 	return 1.0 -pow((1.0 -v),e);
 }
 
-float calculate_point_shadow(vec3 fragPosWs,shadowCubeMapSamplerType shadowMap,float fragDepth,vec3 lightPosition,float bias,const float maxSampleOffset,const int samples)
+float calculate_point_shadow(vec3 fragPosWs,shadowCubeMapSamplerType shadowMap,float fragDepth,vec3 lightPosition,float bias,const float maxSampleOffset,const uint samples)
 {
 	vec3 lightVec = normalize(fragPosWs -lightPosition);
 
@@ -48,37 +48,19 @@ float calculate_point_shadow(vec3 fragPosWs,shadowCubeMapSamplerType shadowMap,f
 	return shadow;
 }
 
+const ShadowSettings g_cubeShadowSettings[5] = ShadowSettings[5](
+	ShadowSettings(0,0,0.0,0.0),
+	ShadowSettings(2,1,MIN_SHADOW_SAMPLE_OFFSET,0.0),
+	ShadowSettings(2,8,MIN_SHADOW_CUBE_SAMPLE_OFFSET,0.0),
+	ShadowSettings(2,27,MIN_SHADOW_CUBE_SAMPLE_OFFSET,0.0),
+	ShadowSettings(2,64,MIN_SHADOW_CUBE_SAMPLE_OFFSET,0.0)
+);
+
 float calculate_point_shadow(vec3 fragPosWs,shadowCubeMapSamplerType shadowMap,float fragDepth,vec3 lightPosition)
 {
+	ShadowSettings shadowSettings = g_cubeShadowSettings[CSPEC_SHADOW_QUALITY];
 	float bias = 0.01 *exp_scale_factor(fragDepth,0.9);
-	float maxSampleOffset = 0.0;
-	int samples = 0;
-	int numPoissonSamples = 0;
-
-	int quality = u_renderSettings.shaderQuality;
-	if(quality > 1)
-	{
-		numPoissonSamples = 2;
-		if(quality > 5)
-		{
-			maxSampleOffset = MIN_SHADOW_CUBE_SAMPLE_OFFSET;//0.004;
-			if(quality > 7)
-			{
-				if(quality == 10)
-					samples = pow3(4);
-				else
-					samples = pow3(3);
-			}
-			else
-				samples = pow3(2);
-		}
-		else
-		{
-			maxSampleOffset = MIN_SHADOW_SAMPLE_OFFSET;
-			samples = pow3(1);
-		}
-	}
-	return calculate_point_shadow(fragPosWs,shadowMap,fragDepth,lightPosition,bias,maxSampleOffset,samples);
+	return calculate_point_shadow(fragPosWs,shadowMap,fragDepth,lightPosition,bias,shadowSettings.maxSampleOffset,shadowSettings.samples);
 }
 
 #endif

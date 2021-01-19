@@ -66,7 +66,26 @@ namespace pragma
 {
 	namespace debug {class GPUProfilingStage;};
 	namespace physics {class IVisualDebugger;};
-	namespace rendering {class RenderQueueBuilder; class RenderQueueWorkerManager;};
+	namespace rendering
+	{
+		class RenderQueueBuilder;
+		class RenderQueueWorkerManager;
+		struct DLLCLIENT GameWorldShaderSettings
+		{
+			enum class ShadowQuality : uint32_t
+			{
+				VeryLow = 0,
+				Low,
+				Medium,
+				High,
+				VeryHigh
+			};
+			ShadowQuality shadowQuality = ShadowQuality::Medium;
+			bool ssaoEnabled = true;
+			bool bloomEnabled = true;
+			bool debugModeEnabled = false;
+		};
+	};
 	class LuaShaderManager;
 	class LuaParticleModifierManager;
 	class CPlayerComponent;
@@ -116,6 +135,13 @@ public:
 
 		BakeAll = BakeConvolution | BakeParametric,
 		All = BakeAll | SaveProbeBoxes
+	};
+
+	enum class StateFlags : uint32_t
+	{
+		None = 0u,
+		GameWorldShaderPipelineReloadRequired = 1u,
+		PrepassShaderPipelineReloadRequired = GameWorldShaderPipelineReloadRequired<<1u
 	};
 
 	// List of generic shaders used by the rendering pipeline for direct access to m_gameShaders
@@ -398,6 +424,10 @@ public:
 	pragma::rendering::RenderQueueWorkerManager &GetRenderQueueWorkerManager();
 	prosper::IDescriptorSet &GetGlobalRenderSettingsDescriptorSet();
 	GlobalRenderSettingsBufferData &GetGlobalRenderSettingsBufferData();
+	pragma::rendering::GameWorldShaderSettings &GetGameWorldShaderSettings() {return m_worldShaderSettings;}
+	const pragma::rendering::GameWorldShaderSettings &GetGameWorldShaderSettings() const {return const_cast<CGame*>(this)->GetGameWorldShaderSettings();}
+	void ReloadGameWorldShaderPipelines() const;
+	void ReloaPrepassShaderPipelines() const;
 
 	// For internal use only!
 	const std::vector<util::DrawSceneInfo> &GetQueuedRenderScenes() const;
@@ -479,8 +509,10 @@ private:
 	Vector4 m_colScale = {};
 	Material *m_matOverride = nullptr;
 	bool m_bMainRenderPass = true;
+	pragma::rendering::GameWorldShaderSettings m_worldShaderSettings {};
 	std::weak_ptr<prosper::IPrimaryCommandBuffer> m_currentDrawCmd = {};
 	std::array<util::WeakHandle<prosper::Shader>,umath::to_integral(GameShader::Count)> m_gameShaders = {};
+	StateFlags m_stateFlags = StateFlags::None;
 	void RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::Texture &texPostHdr,prosper::IImage *optOutImage,uint32_t layerId=0u);
 
 	std::unique_ptr<GlobalRenderSettingsBufferData> m_globalRenderSettingsBufferData = nullptr;
@@ -521,6 +553,7 @@ private:
 };
 REGISTER_BASIC_BITWISE_OPERATORS(CGame::SoundCacheFlags);
 REGISTER_BASIC_BITWISE_OPERATORS(CGame::GameShader);
+REGISTER_BASIC_BITWISE_OPERATORS(CGame::StateFlags)
 #pragma warning(pop)
 
 template<class T>

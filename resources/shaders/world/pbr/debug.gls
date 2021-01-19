@@ -15,6 +15,7 @@
 #define DEBUG_MODE_EMISSION_MAP (DEBUG_MODE_IBL_IRRADIANCE_MAP +1)
 #define DEBUG_MODE_LIGHTMAP (DEBUG_MODE_EMISSION_MAP +1)
 #define DEBUG_MODE_LIGHTMAP_UV (DEBUG_MODE_LIGHTMAP +1)
+#define DEBUG_MODE_UNLIT (DEBUG_MODE_LIGHTMAP_UV +1)
 
 vec4 apply_debug_mode(uint debugMode,vec4 outputColor,vec2 texCoords,vec3 diffuseColor,float metallic,float roughness,float aoFactor,float reflectance)
 {

@@ -28,7 +28,6 @@ extern DLLCLIENT CGame *c_game;
 bool pragma::rendering::Prepass::Initialize(prosper::IPrContext &context,uint32_t width,uint32_t height,prosper::SampleCountFlags samples,bool bExtended)
 {
 	m_shaderPrepass = context.GetShader("prepass");
-	m_shaderPrepassDepth = context.GetShader("prepass_depth");
 
 	prosper::util::ImageCreateInfo imgCreateInfo {};
 	imgCreateInfo.format = ShaderGameWorldLightingPass::RENDER_PASS_DEPTH_FORMAT;
@@ -67,7 +66,7 @@ bool pragma::rendering::Prepass::Initialize(prosper::IPrContext &context,uint32_
 
 pragma::ShaderPrepassBase &pragma::rendering::Prepass::GetShader() const
 {
-	return (m_bExtended == true) ? static_cast<pragma::ShaderPrepassBase&>(*m_shaderPrepass.get()) : static_cast<pragma::ShaderPrepassBase&>(*m_shaderPrepassDepth.get());
+	return static_cast<pragma::ShaderPrepassBase&>(*m_shaderPrepass.get());
 }
 
 bool pragma::rendering::Prepass::IsExtended() const {return m_bExtended;}

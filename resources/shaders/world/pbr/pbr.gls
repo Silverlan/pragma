@@ -138,7 +138,7 @@ vec4 calc_pbr(vec4 albedoColor,vec2 texCoords,uint debugMode)
 		color = calc_pbr_lighting(texCoords,materialInfo,baseColor);
 	else
 	{
-		if((u_debug.flags &DEBUG_UNLIT) != 0)
+		if((debugMode &DEBUG_MODE_UNLIT) != 0)
 			color = baseColor.rgb;
 		else
 			color = calc_pbr_lighting(texCoords,materialInfo,baseColor);

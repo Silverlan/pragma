@@ -29,7 +29,7 @@ using namespace pragma::rendering;
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 static auto cvDrawParticles = GetClientConVar("render_draw_particles");
 static auto cvDrawGlow = GetClientConVar("render_draw_glow");
 static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");
@@ -83,7 +83,7 @@ void RasterizationRenderer::RecordPrepass(const util::DrawSceneInfo &drawSceneIn
 			queueTranslucent.WaitForCompletion(prepassStats);
 			if(queueTranslucent.queue.empty() == false)
 			{
-				rsys.BindShader(shaderPrepass,umath::to_integral(pragma::ShaderPrepass::Pipeline::AlphaTest));
+				// rsys.BindShader(shaderPrepass,umath::to_integral(pragma::ShaderPrepass::Pipeline::AlphaTest));
 				rsys.Render(queueTranslucent,prepassStats);
 			}
 		}
@@ -94,7 +94,7 @@ void RasterizationRenderer::RecordPrepass(const util::DrawSceneInfo &drawSceneIn
 			queue.WaitForCompletion(prepassStats);
 			if(queue.queue.empty() == false)
 			{
-				rsys.BindShader(shaderPrepass,umath::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
+				// rsys.BindShader(shaderPrepass,umath::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
 				rsys.SetCameraType(pragma::rendering::BaseRenderProcessor::CameraType::View);
 				rsys.Render(queue,prepassStats);
 			}
@@ -558,3 +558,4 @@ void RasterizationRenderer::RecordLightingPass(const util::DrawSceneInfo &drawSc
 		}
 	});
 }
+#pragma optimize("",on)

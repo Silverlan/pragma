@@ -40,7 +40,7 @@ vec3 calc_pbr_lighting(vec2 uv,MaterialInfo materialInfo,vec4 baseColor)
     }
     if(CSPEC_ENABLE_IBL == 1)
     {
-        /*else */if(is_ibl_enabled())
+        /*else *///if(is_ibl_enabled())
            color += get_ibl_contribution(materialInfo, normal, view);
     }
 

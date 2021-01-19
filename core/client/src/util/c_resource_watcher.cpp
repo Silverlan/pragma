@@ -12,8 +12,10 @@
 #include <sharedutils/util_file.h>
 #include <cmaterialmanager.h>
 #include <textureinfo.h>
+#include <pragma/entities/entity_iterator.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CGame *c_game;
 
 decltype(ECResourceWatcherCallbackType::Shader) ECResourceWatcherCallbackType::Shader = ECResourceWatcherCallbackType{umath::to_integral(E::Shader)};
 decltype(ECResourceWatcherCallbackType::ParticleSystem) ECResourceWatcherCallbackType::ParticleSystem = ECResourceWatcherCallbackType{umath::to_integral(E::ParticleSystem)};
@@ -89,6 +91,27 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 		}
 	};
 	texManager.ReloadTexture(path,loadInfo);
+}
+
+void CResourceWatcherManager::OnMaterialReloaded(const std::string &path,const std::unordered_set<Model*> &modelMap)
+{
+	ResourceWatcherManager::OnMaterialReloaded(path,modelMap);
+	if(c_game == nullptr)
+		return;
+	EntityIterator entIt {*c_game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CModelComponent>>();
+	for(auto *ent : entIt)
+	{
+		auto &mdl = ent->GetModel();
+		if(mdl == nullptr)
+			continue;
+		auto it = modelMap.find(mdl.get());
+		if(it == modelMap.end())
+			continue;
+		auto mdlC = static_cast<pragma::CModelComponent*>(ent->GetModelComponent());
+		mdlC->SetRenderMeshesDirty();
+		mdlC->UpdateLOD(0);
+	}
 }
 
 void CResourceWatcherManager::GetWatchPaths(std::vector<std::string> &paths)

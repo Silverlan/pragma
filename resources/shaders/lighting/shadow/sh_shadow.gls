@@ -21,4 +21,12 @@
 	#define shadowCubeMapSamplerType samplerCube
 #endif
 
+struct ShadowSettings
+{
+	uint poissonSamples;
+	uint samples;
+	float maxSampleOffset;
+	float sampleSpread;
+};
+
 #endif

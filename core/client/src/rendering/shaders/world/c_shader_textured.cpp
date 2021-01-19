@@ -155,9 +155,9 @@ ShaderGameWorldLightingPass::~ShaderGameWorldLightingPass()
 GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetStaticSpecializationConstantFlags(GameShaderSpecialization specialization) const
 {
 	auto staticFlags = 
-		GameShaderSpecializationConstantFlag::BloomOutputEnabledBit | GameShaderSpecializationConstantFlag::EnableSsaoBit |
 		GameShaderSpecializationConstantFlag::EnableLightSourcesBit | GameShaderSpecializationConstantFlag::EnableLightSourcesDirectionalBit |
-		GameShaderSpecializationConstantFlag::EnableLightSourcesPointBit | GameShaderSpecializationConstantFlag::EnableLightSourcesSpotBit;
+		GameShaderSpecializationConstantFlag::EnableLightSourcesPointBit | GameShaderSpecializationConstantFlag::EnableLightSourcesSpotBit |
+		GameShaderSpecializationConstantFlag::EnableIblBit;
 	switch(specialization)
 	{
 	case GameShaderSpecialization::Generic:
@@ -258,10 +258,14 @@ void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelin
 	//if(pipelineIdx == umath::to_integral(ShaderGameWorldPipeline::Reflection))
 	//	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::FrontBit);
 
+#if 0
 	// TODO: Technically we shouldn't have to write depth values, since
 	// they've already been written in the depth prepass, but that causes
 	// visual glitches for translucent objects. Find the cause!
 	pipelineInfo.ToggleDepthWrites(true);
+#else
+	pipelineInfo.ToggleDepthWrites(false);
+#endif
 	pipelineInfo.ToggleDepthTest(true,prosper::CompareOp::LessOrEqual);
 
 	//pipelineInfo.ToggleDepthBias(true,0.f,0.f,0.f);
@@ -273,6 +277,42 @@ void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelin
 	InitializeGfxPipelineDescriptorSets(pipelineInfo,pipelineIdx);
 
 	ToggleDynamicScissorState(pipelineInfo,true);
+
+	// Fragment
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EmissionEnabledBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::WrinklesEnabledBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableTranslucencyBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableIblBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableLightSourcesBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableLightSourcesSpotBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableLightSourcesPointBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableLightSourcesDirectionalBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableRmaMapBit);
+
+	// Shared
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableNormalMapBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::ParallaxEnabledBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableLightMapsBit);
+	
+	// Vertex
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableAnimationBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableMorphTargetAnimationBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableClippingBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::Enable3dOriginBit);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableExtendedVertexWeights);
+	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::VertexBit,GameShaderSpecializationConstantFlag::EnableDepthBias);
+
+	// Properties
+	auto &shaderSettings = c_game->GetGameWorldShaderSettings();
+	auto fSetPropertyValue = [this,&pipelineInfo](GameShaderSpecializationPropertyIndex prop,auto value) {
+		ShaderGameWorld::AddSpecializationConstant(
+			pipelineInfo,prosper::ShaderStageFlags::FragmentBit,umath::to_integral(prop),sizeof(value),&value
+		);
+	};
+	fSetPropertyValue(GameShaderSpecializationPropertyIndex::ShadowQuality,shaderSettings.shadowQuality);
+	fSetPropertyValue(GameShaderSpecializationPropertyIndex::DebugModeEnabled,static_cast<uint32_t>(shaderSettings.debugModeEnabled));
+	fSetPropertyValue(GameShaderSpecializationPropertyIndex::BloomOutputEnabled,static_cast<uint32_t>(shaderSettings.bloomEnabled));
+	fSetPropertyValue(GameShaderSpecializationPropertyIndex::EnableSsao,static_cast<uint32_t>(shaderSettings.ssaoEnabled));
 }
 
 static auto cvNormalMappingEnabled = GetClientConVar("render_normalmapping_enabled");

@@ -107,7 +107,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneCom
 
 	// We can bind all of these in one go
 	static const std::vector<uint32_t> dynamicOffsets {};
-	return m_cmdBuffer.RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,const_cast<pragma::ShaderGameWorld&>(referenceShader),0u /* pipelineId */,pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX,descSets,dynamicOffsets);
+	return m_cmdBuffer.RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,*m_currentPipelineLayout,pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX,descSets,dynamicOffsets);
 }
 bool pragma::rendering::ShaderProcessor::RecordBindShader(const pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,bool view,pragma::ShaderGameWorld &shader,uint32_t pipelineIdx)
 {

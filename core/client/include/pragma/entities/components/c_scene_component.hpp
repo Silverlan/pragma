@@ -160,7 +160,10 @@ namespace pragma
 		Reflectance,
 		IBLPrefilter,
 		IBLIrradiance,
-		Emission
+		Emission,
+		Lightmap,
+		LightmapUv,
+		Unlit
 	};
 	class DLLCLIENT CSceneComponent final
 		: public BaseEntityComponent

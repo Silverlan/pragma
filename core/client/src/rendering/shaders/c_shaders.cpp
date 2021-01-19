@@ -71,14 +71,6 @@ REGISTER_CONVAR_CALLBACK_CL(cl_render_shader_quality,[](NetworkState*,ConVar*,in
 	c_game->GetWorldEnvironment().SetShaderQuality(val);
 });
 
-static void CVAR_CALLBACK_render_unlit(NetworkState*,ConVar*,bool,bool val)
-{
-	if(c_game == nullptr)
-		return;
-	c_game->GetWorldEnvironment().SetUnlit(val);
-}
-REGISTER_CONVAR_CALLBACK_CL(render_unlit,CVAR_CALLBACK_render_unlit);
-
 static void CVAR_CALLBACK_cl_render_shadow_resolution(NetworkState*,ConVar*,int,int val)
 {
 	if(c_game == nullptr)

@@ -43,26 +43,29 @@ vec3 calculate_directional_lighting(int lightIdx,vec3 fragLightColor,vec3 fragCo
 
 #if ENABLE_LIGHT_DEBUG == 1
 #if SHADOW_PCF_ENABLED == 0
-	vec4 lightVertPos = vec4(fs_in.vert_pos_ws.xyz,1.0);
-	if((u_debug.flags &DEBUG_LIGHT_SHOW_SHADOW_MAP_DEPTH) != 0)
+	if(CSPEC_DEBUG_MODE_ENABLED == 1)
 	{
-		int layer = get_csm_cascade_index();
-		vec4 shadowCoord = u_csm.VP[layer] *lightVertPos;
-		float shadow = 1.0;
-		if(layer != -1)
+		vec4 lightVertPos = vec4(fs_in.vert_pos_ws.xyz,1.0);
+		if((u_debug.flags &DEBUG_LIGHT_SHOW_SHADOW_MAP_DEPTH) != 0)
 		{
-			shadowCoord.w = shadowCoord.z *0.5 +0.5;
-			shadowCoord.x = shadowCoord.x *0.5 +0.5;
-			shadowCoord.y = shadowCoord.y *0.5 +0.5;
-			shadow = texture(csmTextures[layer],vec2(shadowCoord.x,shadowCoord.y)).r;
+			int layer = get_csm_cascade_index();
+			vec4 shadowCoord = u_csm.VP[layer] *lightVertPos;
+			float shadow = 1.0;
+			if(layer != -1)
+			{
+				shadowCoord.w = shadowCoord.z *0.5 +0.5;
+				shadowCoord.x = shadowCoord.x *0.5 +0.5;
+				shadowCoord.y = shadowCoord.y *0.5 +0.5;
+				shadow = texture(csmTextures[layer],vec2(shadowCoord.x,shadowCoord.y)).r;
+			}
+			fragLightColor += vec3(shadow,shadow,shadow);
 		}
-		fragLightColor += vec3(shadow,shadow,shadow);
-	}
-	else if((u_debug.flags &DEBUG_LIGHT_SHOW_FRAGMENT_DEPTH_SHADOW_SPACE) != 0)
-	{
-		vec4 shadowCoord = u_csm.VP[lightIdx] *lightVertPos;
-		float shadow = shadowCoord.z;
-		fragLightColor += vec3(shadow,shadow,shadow);
+		else if((u_debug.flags &DEBUG_LIGHT_SHOW_FRAGMENT_DEPTH_SHADOW_SPACE) != 0)
+		{
+			vec4 shadowCoord = u_csm.VP[lightIdx] *lightVertPos;
+			float shadow = shadowCoord.z;
+			fragLightColor += vec3(shadow,shadow,shadow);
+		}
 	}
 #endif
 

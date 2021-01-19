@@ -146,3 +146,11 @@ void Console::commands::debug_ssao(NetworkState *state,pragma::BasePlayerCompone
 
 	pEl->SizeToContents();
 }
+
+static void cl_render_ssao_callback(NetworkState*,ConVar*,bool,bool val)
+{
+	if(c_game == nullptr)
+		return;
+	c_game->ReloaPrepassShaderPipelines();
+}
+REGISTER_CONVAR_CALLBACK_CL(cl_render_ssao,cl_render_ssao_callback);

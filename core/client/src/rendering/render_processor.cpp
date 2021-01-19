@@ -648,6 +648,20 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 				ttmp = std::chrono::steady_clock::now();
 			auto *mat = matManager.GetMaterial(item.material);
 			assert(mat);
+			if(prepass)
+			{
+				// Hack: Transparent objects do not need to be depth-sorted, so they're part of
+				// the regular opaque pass. For the lighting pass this doesn't matter, but
+				// the regular depth prepass doesn't do any texture lookups, so we may have to
+				// switch the pipeline here.
+				// TODO: This isn't very pretty, find a better way to do this?
+				auto translucent = (mat->GetAlphaMode() != AlphaMode::Opaque);
+				auto pipeline = translucent ? ShaderPrepass::Pipeline::AlphaTest : ShaderPrepass::Pipeline::Opaque;
+
+				prosper::PipelineID pipelineId;
+				if(!static_cast<pragma::ShaderPrepass*>(m_shaderScene)->GetPipelineId(pipelineId,umath::to_integral(pipeline)) || !BindShader(pipelineId))
+					continue;
+			}
 			BindMaterial(static_cast<CMaterial&>(*mat));
 			if(optStats)
 				(*optStats)->AddTime(RenderPassStats::Timer::MaterialBind,std::chrono::steady_clock::now() -ttmp);

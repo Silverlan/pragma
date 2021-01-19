@@ -199,7 +199,7 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 			renderBufferData[meshIdx].pipelineSpecializationFlags
 		);
 		prosper::PipelineID pipelineId;
-		if(pipelineIdx.has_value() == false || shader->GetPipelineId(pipelineId,*pipelineIdx) == false)
+		if(pipelineIdx.has_value() == false || shader->GetPipelineId(pipelineId,*pipelineIdx) == false || pipelineId == std::numeric_limits<decltype(pipelineId)>::max())
 			continue;
 		// shader = rasterizationRenderer->GetShaderOverride(shader);
 		// if(shader == nullptr)

@@ -46,7 +46,6 @@ namespace pragma
 			bool m_bExtended = false;
 			std::vector<prosper::ClearValue> m_clearValues = {};
 			util::WeakHandle<prosper::Shader> m_shaderPrepass = {};
-			util::WeakHandle<prosper::Shader> m_shaderPrepassDepth = {};
 		};
 	};
 };

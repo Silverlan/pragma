@@ -238,6 +238,7 @@ void ShaderPrepass::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &p
 	auto enableNormalOutput = false;
 	auto enableAnimation = false;
 	auto enableMorphTargetAnimation = false;
+	auto extendedVertexWeights = false;
 	switch(static_cast<Pipeline>(pipelineIdx))
 	{
 	case Pipeline::Opaque:
@@ -260,10 +261,13 @@ void ShaderPrepass::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &p
 		enableMorphTargetAnimation = true;
 		break;
 	}
+	if(c_game->GetGameWorldShaderSettings().ssaoEnabled)
+		enableNormalOutput = true;
 	AddSpecializationConstant(pipelineInfo,prosper::ShaderStageFlags::FragmentBit,umath::to_integral(SpecializationConstant::EnableAlphaTest),static_cast<uint32_t>(enableAlphaTest));
 	AddSpecializationConstant(pipelineInfo,prosper::ShaderStageFlags::FragmentBit,umath::to_integral(SpecializationConstant::EnableNormalOutput),static_cast<uint32_t>(enableNormalOutput));
 	AddSpecializationConstant(pipelineInfo,prosper::ShaderStageFlags::VertexBit,umath::to_integral(SpecializationConstant::EnableAnimation),static_cast<uint32_t>(enableAnimation));
 	AddSpecializationConstant(pipelineInfo,prosper::ShaderStageFlags::VertexBit,umath::to_integral(SpecializationConstant::EnableMorphTargetAnimation),static_cast<uint32_t>(enableMorphTargetAnimation));
+	AddSpecializationConstant(pipelineInfo,prosper::ShaderStageFlags::VertexBit,umath::to_integral(SpecializationConstant::EnableExtendedVertexWeights),static_cast<uint32_t>(extendedVertexWeights));
 
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_NORMAL);
 }

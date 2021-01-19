@@ -121,6 +121,7 @@ namespace pragma
 			EnableNormalOutput,
 			EnableAnimation,
 			EnableMorphTargetAnimation,
+			EnableExtendedVertexWeights,
 
 			Count
 		};

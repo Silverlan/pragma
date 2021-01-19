@@ -12,6 +12,7 @@
 #include <sharedutils/util_extensible_enum.hpp>
 #include <sharedutils/scope_guard.h>
 #include <fsys/directory_watcher.h>
+#include <unordered_set>
 
 #define RESOURCE_WATCHER_VERBOSE 0
 
@@ -42,6 +43,7 @@ protected:
 };
 DEFINE_STD_HASH_SPECIALIZATION(EResourceWatcherCallbackType);
 
+class Model;
 class LuaDirectoryWatcherManager;
 class DLLNETWORK ResourceWatcherManager
 {
@@ -63,6 +65,7 @@ protected:
 	uint32_t m_lockedCount = 0;
 	void OnResourceChanged(const std::string &path);
 	void ReloadMaterial(const std::string &path);
+	virtual void OnMaterialReloaded(const std::string &path,const std::unordered_set<Model*> &modelMap) {}
 	virtual void OnResourceChanged(const std::string &path,const std::string &ext);
 	virtual void GetWatchPaths(std::vector<std::string> &paths);
 	virtual void ReloadTexture(const std::string &path);

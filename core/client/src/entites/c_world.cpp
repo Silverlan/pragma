@@ -272,7 +272,7 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 			if(t.has_value())
 				pipelineIdx = *t;
 			prosper::PipelineID pipelineId;
-			if(shader->GetPipelineId(pipelineId,pipelineIdx) == false)
+			if(shader->GetPipelineId(pipelineId,pipelineIdx) == false || pipelineId == std::numeric_limits<decltype(pipelineId)>::max())
 				continue;
 			if(mat->GetAlphaMode() == AlphaMode::Blend)
 			{

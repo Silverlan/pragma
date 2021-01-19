@@ -13,7 +13,6 @@
 #include "pragma/model/model.h"
 #include <sharedutils/util_file.h>
 
-
 decltype(EResourceWatcherCallbackType::Model) EResourceWatcherCallbackType::Model = EResourceWatcherCallbackType{umath::to_integral(E::Model)};
 decltype(EResourceWatcherCallbackType::Material) EResourceWatcherCallbackType::Material = EResourceWatcherCallbackType{umath::to_integral(E::Material)};
 decltype(EResourceWatcherCallbackType::Texture) EResourceWatcherCallbackType::Texture = EResourceWatcherCallbackType{umath::to_integral(E::Texture)};
@@ -76,6 +75,7 @@ void ResourceWatcherManager::ReloadMaterial(const std::string &path)
 			auto fname = ufile::get_file_from_filename(path);
 			ufile::remove_extension_from_filename(fname);
 			auto &models = m_networkState->GetCachedModels();
+			std::unordered_set<Model*> modelMap;
 			for(auto &pair : models)
 			{
 				auto &mdl = pair.second;
@@ -86,12 +86,15 @@ void ResourceWatcherManager::ReloadMaterial(const std::string &path)
 					ustring::to_lower(tex);
 					if(tex == fname)
 					{
+						modelMap.insert(mdl.get());
 						mdl->PrecacheTexture(it -textures.begin());
 						goto loopDone;
 					}
 				}
 			}
-			loopDone:;
+		loopDone:;
+
+			OnMaterialReloaded(path,modelMap);
 		}
 	}
 }

@@ -580,12 +580,26 @@ static void render_debug_mode(NetworkState*,ConVar*,int32_t,int32_t debugMode)
 {
 	if(c_game == nullptr)
 		return;
+	auto debugModeEnabled = (debugMode != 0);
+	auto &worldShaderSettings = c_game->GetGameWorldShaderSettings();
+	if(worldShaderSettings.debugModeEnabled != debugModeEnabled)
+	{
+		worldShaderSettings.debugModeEnabled = debugModeEnabled;
+		c_game->ReloadGameWorldShaderPipelines();
+	}
+
 	auto *scene = c_game->GetScene();
 	if(scene == nullptr)
 		return;
 	scene->SetDebugMode(static_cast<pragma::SceneDebugMode>(debugMode));
 }
 REGISTER_CONVAR_CALLBACK_CL(render_debug_mode,render_debug_mode);
+
+static void CVAR_CALLBACK_render_unlit(NetworkState *nw,ConVar *cv,bool prev,bool val)
+{
+	render_debug_mode(nw,cv,prev,umath::to_integral(pragma::SceneDebugMode::Unlit));
+}
+REGISTER_CONVAR_CALLBACK_CL(render_unlit,CVAR_CALLBACK_render_unlit);
 
 void CGame::SetViewModelFOV(float fov) {*m_viewFov = fov;}
 const util::PFloatProperty &CGame::GetViewModelFOVProperty() const {return m_viewFov;}
@@ -1019,6 +1033,46 @@ void CGame::Tick()
 	CallCallbacks<void>("Tick");
 	CallLuaCallbacks("Tick");
 	PostTick();
+}
+
+void CGame::ReloadGameWorldShaderPipelines() const
+{
+	if(umath::is_flag_set(m_stateFlags,StateFlags::GameWorldShaderPipelineReloadRequired))
+		return;
+	umath::set_flag(const_cast<CGame*>(this)->m_stateFlags,StateFlags::GameWorldShaderPipelineReloadRequired);
+
+	auto cb = FunctionCallback<void>::Create(nullptr);
+	static_cast<Callback<void>*>(cb.get())->SetFunction([this,cb]() mutable {
+		cb.Remove();
+
+		umath::set_flag(const_cast<CGame*>(this)->m_stateFlags,StateFlags::GameWorldShaderPipelineReloadRequired,false);
+		auto &shaderManager = c_engine->GetShaderManager();
+		for(auto &shader : shaderManager.GetShaders())
+		{
+			auto *gameWorldShader = dynamic_cast<pragma::ShaderGameWorldLightingPass*>(shader.get());
+			if(gameWorldShader == nullptr)
+				continue;
+			gameWorldShader->ReloadPipelines();
+		}
+	});
+	const_cast<CGame*>(this)->AddCallback("PreRenderScenes",cb);
+}
+void CGame::ReloaPrepassShaderPipelines() const
+{
+	if(umath::is_flag_set(m_stateFlags,StateFlags::PrepassShaderPipelineReloadRequired))
+		return;
+	umath::set_flag(const_cast<CGame*>(this)->m_stateFlags,StateFlags::PrepassShaderPipelineReloadRequired);
+
+	auto cb = FunctionCallback<void>::Create(nullptr);
+	static_cast<Callback<void>*>(cb.get())->SetFunction([this,cb]() mutable {
+		cb.Remove();
+
+		umath::set_flag(const_cast<CGame*>(this)->m_stateFlags,StateFlags::PrepassShaderPipelineReloadRequired,false);
+		auto &shader = GetGameShader(GameShader::Prepass);
+		if(shader.valid())
+			shader.get()->ReloadPipelines();
+	});
+	const_cast<CGame*>(this)->AddCallback("PreRenderScenes",cb);
 }
 
 static CVar cvSimEnabled = GetClientConVar("cl_physics_simulation_enabled");

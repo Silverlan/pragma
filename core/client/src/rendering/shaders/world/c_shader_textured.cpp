@@ -123,21 +123,18 @@ ShaderGameWorldLightingPass::ShaderGameWorldLightingPass(prosper::IPrContext &co
 	auto n = umath::to_integral(GameShaderSpecialization::Count);
 	for(auto i=decltype(n){0u};i<n;++i)
 	{
-		auto dynamicFlags = GameShaderSpecializationConstantFlag::None;
+		auto dynamicFlags = GameShaderSpecializationConstantFlag::EmissionEnabledBit | GameShaderSpecializationConstantFlag::EnableRmaMapBit |
+			GameShaderSpecializationConstantFlag::EnableNormalMapBit | GameShaderSpecializationConstantFlag::ParallaxEnabledBit |
+			GameShaderSpecializationConstantFlag::EnableDepthBias | GameShaderSpecializationConstantFlag::EnableTranslucencyBit;
 		switch(static_cast<GameShaderSpecialization>(i))
 		{
 		case GameShaderSpecialization::Generic:
-			dynamicFlags = GameShaderSpecializationConstantFlag::EmissionEnabledBit | GameShaderSpecializationConstantFlag::EnableRmaMapBit |
-				GameShaderSpecializationConstantFlag::EnableNormalMapBit | GameShaderSpecializationConstantFlag::ParallaxEnabledBit | GameShaderSpecializationConstantFlag::EnableDepthBias;
 			break;
 		case GameShaderSpecialization::Lightmapped:
-			dynamicFlags = GameShaderSpecializationConstantFlag::EmissionEnabledBit | GameShaderSpecializationConstantFlag::EnableRmaMapBit |
-				GameShaderSpecializationConstantFlag::EnableNormalMapBit | GameShaderSpecializationConstantFlag::ParallaxEnabledBit | GameShaderSpecializationConstantFlag::EnableDepthBias;
 			break;
 		case GameShaderSpecialization::Animated:
-			dynamicFlags = GameShaderSpecializationConstantFlag::EmissionEnabledBit | GameShaderSpecializationConstantFlag::EnableRmaMapBit |
-				GameShaderSpecializationConstantFlag::EnableNormalMapBit | GameShaderSpecializationConstantFlag::ParallaxEnabledBit | GameShaderSpecializationConstantFlag::WrinklesEnabledBit |
-				GameShaderSpecializationConstantFlag::EnableExtendedVertexWeights | GameShaderSpecializationConstantFlag::EnableDepthBias;
+			dynamicFlags |= GameShaderSpecializationConstantFlag::WrinklesEnabledBit |
+				GameShaderSpecializationConstantFlag::EnableExtendedVertexWeights;
 			break;
 		}
 		auto staticFlags = GetStaticSpecializationConstantFlags(static_cast<GameShaderSpecialization>(i));
@@ -678,52 +675,4 @@ std::optional<uint32_t> ShaderSpecializationManager::FindSpecializationPipelineI
 	auto itp = specToPipelineIdx.find(specializationFlags);
 	return (itp != specToPipelineIdx.end()) ? itp->second : std::optional<uint32_t>{};
 }
-
-////////
-
-static void set_debug_flag(pragma::ShaderScene::DebugFlags setFlags,pragma::ShaderScene::DebugFlags unsetFlags)
-{
-	auto &debugBuffer = c_game->GetGlobalRenderSettingsBufferData().debugBuffer;
-
-	auto debugFlags = decltype(pragma::ShaderGameWorldLightingPass::DebugData::flags){};
-	auto offset = offsetof(pragma::ShaderGameWorldLightingPass::DebugData,flags);
-	debugBuffer->Map(offset,sizeof(debugFlags),prosper::IBuffer::MapFlags::ReadBit | prosper::IBuffer::MapFlags::WriteBit);
-	debugBuffer->Read(offset,debugFlags);
-	debugFlags |= umath::to_integral(setFlags);
-	debugFlags &= ~umath::to_integral(unsetFlags);
-	debugBuffer->Write(offset,debugFlags);
-	debugBuffer->Unmap();
-}
-static void set_debug_flag(pragma::ShaderScene::DebugFlags flag,bool set)
-{
-	if(set)
-		set_debug_flag(flag,pragma::ShaderScene::DebugFlags::None);
-	else
-		set_debug_flag(pragma::ShaderScene::DebugFlags::None,flag);
-}
-
-static CVar cvShowCascades = GetClientConVar("debug_csm_show_cascades");
-REGISTER_CONVAR_CALLBACK_CL(debug_csm_show_cascades,[](NetworkState*,ConVar*,bool,bool val) {
-	set_debug_flag(pragma::ShaderScene::DebugFlags::LightShowCascades,val);
-});
-
-static CVar cvShowLightDepth = GetClientConVar("debug_light_depth");
-REGISTER_CONVAR_CALLBACK_CL(debug_light_depth,[](NetworkState*,ConVar*,int,int val) {
-	switch(val)
-	{
-		case 0:
-			set_debug_flag(pragma::ShaderScene::DebugFlags::None,pragma::ShaderScene::DebugFlags::LightShowShadowMapDepth | pragma::ShaderScene::DebugFlags::LightShowFragmentDepthShadowSpace);
-			break;
-		case 1:
-			set_debug_flag(pragma::ShaderScene::DebugFlags::LightShowShadowMapDepth,pragma::ShaderScene::DebugFlags::LightShowFragmentDepthShadowSpace);
-			break;
-		case 2:
-			set_debug_flag(pragma::ShaderScene::DebugFlags::LightShowFragmentDepthShadowSpace,pragma::ShaderScene::DebugFlags::LightShowShadowMapDepth);
-			break;
-	}
-});
-
-REGISTER_CONVAR_CALLBACK_CL(debug_forwardplus_heatmap,[](NetworkState*,ConVar*,bool,bool val) {
-	set_debug_flag(pragma::ShaderScene::DebugFlags::ForwardPlusHeatmap,val);
-});
 #pragma optimize("",on)

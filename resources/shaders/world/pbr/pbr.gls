@@ -142,7 +142,7 @@ vec4 calc_pbr(vec4 albedoColor,vec2 texCoords,uint debugMode)
 			color = baseColor.rgb;
 		else
 			color = calc_pbr_lighting(texCoords,materialInfo,baseColor);
-		if((u_debug.flags &DEBUG_FORWARD_PLUS_HEATMAP) != 0)
+		if((debugMode &DEBUG_MODE_FORWARD_PLUS_HEATMAP) != 0)
 		{
 			apply_debug_heatmap_color(SCENE_SPOT_LIGHT_BUFFER_START,SCENE_SPOT_LIGHT_BUFFER_END,color);
 			apply_debug_heatmap_color(SCENE_POINT_LIGHT_BUFFER_START,SCENE_POINT_LIGHT_BUFFER_END,color);

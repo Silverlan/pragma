@@ -16,6 +16,9 @@
 #define DEBUG_MODE_LIGHTMAP (DEBUG_MODE_EMISSION_MAP +1)
 #define DEBUG_MODE_LIGHTMAP_UV (DEBUG_MODE_LIGHTMAP +1)
 #define DEBUG_MODE_UNLIT (DEBUG_MODE_LIGHTMAP_UV +1)
+#define DEBUG_MODE_CSM_SHOW_CASCADES (DEBUG_MODE_UNLIT +1)
+#define DEBUG_MODE_SHADOW_MAP_DEPTH (DEBUG_MODE_CSM_SHOW_CASCADES +1)
+#define DEBUG_MODE_FORWARD_PLUS_HEATMAP (DEBUG_MODE_SHADOW_MAP_DEPTH +1)
 
 vec4 apply_debug_mode(uint debugMode,vec4 outputColor,vec2 texCoords,vec3 diffuseColor,float metallic,float roughness,float aoFactor,float reflectance)
 {
@@ -68,7 +71,8 @@ vec4 apply_debug_mode(uint debugMode,vec4 outputColor,vec2 texCoords,vec3 diffus
 		else
 			finalColor = vec4(0,0,0,1);
 	}
-	finalColor = debug_get_csm_cascade_color(finalColor);
+	else if(debugMode == DEBUG_MODE_CSM_SHOW_CASCADES)
+		finalColor = debug_get_csm_cascade_color(finalColor);
 	return finalColor;
 }
 

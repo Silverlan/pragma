@@ -73,7 +73,7 @@ namespace pragma
 		EmissionEnabledBit = EnableIblBit<<1u,
 		WrinklesEnabledBit = EmissionEnabledBit<<1u,
 		EnableTranslucencyBit = WrinklesEnabledBit<<1u,
-		EnableRmaMapBit = EnableIblBit<<1u,
+		EnableRmaMapBit = EnableTranslucencyBit<<1u,
 		EnableNormalMapBit = EnableRmaMapBit<<1u,
 		ParallaxEnabledBit = EnableNormalMapBit<<1u,
 		EnableClippingBit = ParallaxEnabledBit<<1u,

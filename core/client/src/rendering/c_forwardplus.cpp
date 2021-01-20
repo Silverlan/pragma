@@ -26,23 +26,26 @@
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 static void cmd_forwardplus_tile_size(NetworkState*,ConVar*,int32_t,int32_t val)
 {
 	if(c_game == NULL)
 		return;
-	auto *scene = c_game->GetScene();
-	auto *renderer = scene ? scene->GetRenderer() : nullptr;
-	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
-		return;
-	auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
-	auto &fp = rasterizer->GetForwardPlusInstance();
-	auto &prepass = rasterizer->GetPrepass();
-	c_engine->GetRenderContext().WaitIdle();
-	fp.Initialize(c_engine->GetRenderContext(),scene->GetWidth(),scene->GetHeight(),*prepass.textureDepth);
-
+	
 	pragma::ShaderForwardPLightCulling::TILE_SIZE = val;
-	rasterizer->UpdateRenderSettings();
+	auto &renderers = pragma::rendering::BaseRenderer::GetRenderers();
+	for(auto &renderer : renderers)
+	{
+		if(renderer->IsRasterizationRenderer() == false)
+			continue;
+		auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
+		auto &fp = rasterizer->GetForwardPlusInstance();
+		auto &prepass = rasterizer->GetPrepass();
+		c_engine->GetRenderContext().WaitIdle();
+		fp.Initialize(c_engine->GetRenderContext(),rasterizer->GetWidth(),rasterizer->GetHeight(),*prepass.textureDepth);
+		rasterizer->UpdateRenderSettings();
+	}
+
 	c_engine->ReloadShader("forwardp_light_culling");
 }
 REGISTER_CONVAR_CALLBACK_CL(render_forwardplus_tile_size,cmd_forwardplus_tile_size);
@@ -182,7 +185,6 @@ void pragma::rendering::ForwardPlusInstance::Compute(prosper::IPrimaryCommandBuf
 	);
 
 	shaderLightCulling.EndCompute();
-
 	const auto szRead = m_shadowLightBits.size() *sizeof(m_shadowLightBits.front());
 	m_bufVisLightIndex->Read(0ull,szRead,m_shadowLightBits.data());
 }
@@ -193,3 +195,4 @@ uint32_t pragma::rendering::ForwardPlusInstance::GetTileCount() const {return m_
 prosper::IDescriptorSet *pragma::rendering::ForwardPlusInstance::GetDepthDescriptorSetGraphics() const {return m_dsgSceneDepthBuffer->GetDescriptorSet();}
 const std::shared_ptr<prosper::IBuffer> &pragma::rendering::ForwardPlusInstance::GetTileVisLightIndexBuffer() const {return m_bufTileVisLightIndex;}
 const std::shared_ptr<prosper::IBuffer> &pragma::rendering::ForwardPlusInstance::GetVisLightIndexBuffer() const {return m_bufVisLightIndex;}
+#pragma optimize("",on)

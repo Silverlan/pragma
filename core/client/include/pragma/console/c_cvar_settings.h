@@ -28,7 +28,7 @@ REGISTER_CONVAR_CL(cl_render_fxaa_sub_pixel_aliasing_removal_amount,"0.75",ConVa
 REGISTER_CONVAR_CL(cl_render_fxaa_edge_threshold,"0.166",ConVarFlags::Archive,"The minimum amount of local contrast required to apply algorithm.");
 REGISTER_CONVAR_CL(cl_render_fxaa_min_edge_threshold,"0.0833",ConVarFlags::Archive,"Trims the algorithm from processing darks.");
 
-REGISTER_CONVAR_CL(cl_render_ssao,"1",ConVarFlags::Archive,"1 = Screen space ambient occlusion enabled, 0 = disabled.");
+REGISTER_CONVAR_CL(cl_render_ssao,"0",ConVarFlags::Archive,"1 = Screen space ambient occlusion enabled, 0 = disabled.");
 REGISTER_CONVAR_CL(cl_render_fov,"90",ConVarFlags::Archive,"Specifies the horizontal field of view.");
 REGISTER_CONVAR_CL(cl_render_brightness,"1",ConVarFlags::Archive,"Scene brightness.");
 REGISTER_CONVAR_CL(cl_render_contrast,"1",ConVarFlags::Archive,"Scene contrast.");

@@ -427,7 +427,7 @@ public:
 	pragma::rendering::GameWorldShaderSettings &GetGameWorldShaderSettings() {return m_worldShaderSettings;}
 	const pragma::rendering::GameWorldShaderSettings &GetGameWorldShaderSettings() const {return const_cast<CGame*>(this)->GetGameWorldShaderSettings();}
 	void ReloadGameWorldShaderPipelines() const;
-	void ReloaPrepassShaderPipelines() const;
+	void ReloadPrepassShaderPipelines() const;
 
 	// For internal use only!
 	const std::vector<util::DrawSceneInfo> &GetQueuedRenderScenes() const;

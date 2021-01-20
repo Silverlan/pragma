@@ -35,6 +35,7 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <shader/prosper_shader_blur.hpp>
 #include <image/prosper_sampler.hpp>
+#include <pragma/entities/entity_iterator.hpp>
 
 using namespace pragma::rendering;
 
@@ -495,7 +496,13 @@ static void CVAR_CALLBACK_render_msaa_enabled(NetworkState*,ConVar*,int,int)
 			continue;
 		shader->ReloadPipelines();
 	}
-	c_game->ReloadRenderFrameBuffer();
+	EntityIterator entIt {*c_game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CSceneComponent>>();
+	for(auto *ent : entIt)
+	{
+		auto sceneC = ent->GetComponent<pragma::CSceneComponent>();
+		sceneC->ReloadRenderTarget(sceneC->GetWidth(),sceneC->GetHeight());
+	}
 }
 REGISTER_CONVAR_CALLBACK_CL(cl_render_anti_aliasing,CVAR_CALLBACK_render_msaa_enabled);
 REGISTER_CONVAR_CALLBACK_CL(cl_render_msaa_samples,CVAR_CALLBACK_render_msaa_enabled);

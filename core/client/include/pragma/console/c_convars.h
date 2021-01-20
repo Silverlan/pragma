@@ -24,8 +24,6 @@ REGISTER_CONVAR_CL(cl_allowdownload,"1",ConVarFlags::Archive,"");
 REGISTER_CONVAR_CL(cl_allowupload,"1",ConVarFlags::Archive,"");
 REGISTER_CONVAR_CL(cl_fov,"75",ConVarFlags::Archive,"Horizontal world field of view.");
 REGISTER_CONVAR_CL(cl_fov_viewmodel,"70",ConVarFlags::Archive,"Horizontal view model field of view.");
-REGISTER_CONVAR_CL(debug_csm_show_cascades,"0",ConVarFlags::Cheat,"Displays the cascades in different colors.");
-REGISTER_CONVAR_CL(debug_light_depth,"0",ConVarFlags::Cheat,"1 = Display depth values from shadow maps in light sources, 2 = Display depth values in shadow space.");
 REGISTER_CONVAR_CL(debug_nav_show_meshes,"0",ConVarFlags::Cheat,"Shows the navigation mesh for this map.");
 REGISTER_CONVAR_CL(debug_physics_draw,"0",ConVarFlags::Cheat,"Draws various physics information as wireframe.");
 REGISTER_CONVAR_CL(sv_debug_physics_draw,"0",ConVarFlags::Cheat | ConVarFlags::Singleplayer,"Draws various serverside physics information as wireframe.");
@@ -33,7 +31,6 @@ REGISTER_CONVAR_CL(debug_bsp_nodes,"0",ConVarFlags::Cheat,"Prints and draws vari
 REGISTER_CONVAR_CL(debug_bsp_lock,"0",ConVarFlags::Cheat,"Locks BSP culling so it doesn't change when the camera moves.");
 REGISTER_CONVAR_CL(debug_render_octree_static_draw,"0",ConVarFlags::Cheat,"Draws the octree for static world geometry.");
 REGISTER_CONVAR_CL(debug_render_octree_dynamic_draw,"0",ConVarFlags::Cheat,"Draws the octree for dynamic objects.");
-REGISTER_CONVAR_CL(debug_forwardplus_heatmap,"0",ConVarFlags::Cheat,"Renders a heatmap of the visible lights for forward+ rendering.");
 REGISTER_CONVAR_CL(debug_ai_navigation,"0",ConVarFlags::Cheat,"Displays the current navigation path for all NPCs.");
 REGISTER_CONVAR_CL(debug_steam_audio_probe_boxes,"0",ConVarFlags::Cheat,"Displays the sound probe spheres for the current map.");
 REGISTER_CONVAR_CL(cl_fps_decay_factor,"0.8",ConVarFlags::None,"How slowly to decay the previous fps.");
@@ -45,7 +42,6 @@ REGISTER_CONVAR_CL(debug_render_lock_render_command_buffers,"0",ConVarFlags::Non
 REGISTER_CONVAR_CL(debug_render_normals,"0",ConVarFlags::Cheat,"Displays all normals as lines in the world. 0 = Disabled, 1 = Display normals, 2 = Display normals, tangents and bitangents, 3 = Display face normals, 4 = Display tangents, 5 = Display bitangents.");
 REGISTER_CONVAR_CL(cl_show_fps,"0",ConVarFlags::None,"Displays the current fps at the top left of the screen if enabled.");
 
-REGISTER_CONVAR_CL(render_unlit,"0",ConVarFlags::Cheat,"1 = World will be rendered fullbright, 0 = World will be rendered normally (With light effects).");
 REGISTER_CONVAR_CL(render_vsync_enabled,"1",ConVarFlags::Archive,"1 = Vertical sync enabled, 0 = disabled.");
 REGISTER_CONVAR_CL(render_normalmapping_enabled,"1",ConVarFlags::Archive,"1 = Normal mapping enabled, 0 = disabled.");
 REGISTER_CONVAR_CL(render_csm_max_distance,"8192",ConVarFlags::Archive,"The maximum distance at which csm shadows are casted. A larger distance means lower quality.");

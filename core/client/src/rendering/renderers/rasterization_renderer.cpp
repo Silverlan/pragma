@@ -34,21 +34,6 @@ using namespace pragma::rendering;
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
-
-static void cl_render_ssao_callback(NetworkState*,ConVar*,bool,bool val)
-{
-	if(c_game == nullptr)
-		return;
-	auto *scene = c_game->GetScene();
-	if(scene == nullptr)
-		return;
-	auto *renderer = dynamic_cast<RasterizationRenderer*>(scene->GetRenderer());
-	if(renderer == nullptr)
-		return;
-	renderer->SetSSAOEnabled(*scene,val);
-}
-REGISTER_CONVAR_CALLBACK_CL(cl_render_ssao,cl_render_ssao_callback);
-
 static std::vector<RasterizationRenderer*> g_renderers {};
 static util::WeakHandle<pragma::CLightMapComponent> g_lightmapC = {};
 void RasterizationRenderer::UpdateLightmap(CLightMapComponent &lightMapC)
@@ -227,7 +212,7 @@ void RasterizationRenderer::BeginRendering(const util::DrawSceneInfo &drawSceneI
 
 bool RasterizationRenderer::ReloadBloomRenderTarget(uint32_t width) {return m_hdrInfo.ReloadBloomRenderTarget(width);}
 
-bool RasterizationRenderer::IsSSAOEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::SSAOEnabled);}
+bool RasterizationRenderer::IsSSAOEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::SSAOEnabled) && c_game->GetGameWorldShaderSettings().ssaoEnabled;}
 void RasterizationRenderer::SetSSAOEnabled(pragma::CSceneComponent &scene,bool b)
 {
 	umath::set_flag(m_stateFlags,StateFlags::SSAOEnabled,b);
@@ -448,3 +433,23 @@ bool RasterizationRenderer::ResolveRenderPass(const util::DrawSceneInfo &drawSce
 }
 
 prosper::Shader *RasterizationRenderer::GetWireframeShader() const {return m_whShaderWireframe.get();}
+
+static void cl_render_ssao_callback(NetworkState*,ConVar*,bool,bool enabled)
+{
+	if(c_game == nullptr)
+		return;
+	auto &gameWorldShaderSettings = c_game->GetGameWorldShaderSettings();
+	if(gameWorldShaderSettings.ssaoEnabled == enabled)
+		return;
+	gameWorldShaderSettings.ssaoEnabled = enabled;
+	auto &context = c_engine->GetRenderContext();
+	context.WaitIdle();
+	auto *scene = c_game->GetScene();
+	if(scene == nullptr)
+		return;
+	auto *renderer = dynamic_cast<RasterizationRenderer*>(scene->GetRenderer());
+	if(renderer == nullptr)
+		return;
+	renderer->SetSSAOEnabled(*scene,enabled);
+}
+REGISTER_CONVAR_CALLBACK_CL(cl_render_ssao,cl_render_ssao_callback);

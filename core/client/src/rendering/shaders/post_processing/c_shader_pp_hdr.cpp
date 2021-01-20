@@ -13,6 +13,8 @@
 #include <prosper_util.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
 
+extern DLLCLIENT CGame *c_game;
+
 using namespace pragma;
 
 decltype(ShaderPPHDR::DESCRIPTOR_SET_TEXTURE) ShaderPPHDR::DESCRIPTOR_SET_TEXTURE = {
@@ -54,6 +56,9 @@ void ShaderPPHDR::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 	AddDefaultVertexAttributes(pipelineInfo);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_TEXTURE);
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
+
+	auto &settings = c_game->GetGameWorldShaderSettings();
+	AddSpecializationConstant(pipelineInfo,prosper::ShaderStageFlags::FragmentBit,0u /* constantId */,static_cast<uint32_t>(settings.bloomEnabled));
 }
 
 bool ShaderPPHDR::Draw(prosper::IDescriptorSet &descSetTexture,pragma::rendering::ToneMapping toneMapping,float exposure,float bloomScale,float glowScale,bool flipVertically)

@@ -7,8 +7,6 @@
 const float debugCSMColorScale = 1.f;
 vec4 debug_get_csm_cascade_color(vec4 col)
 {
-	if((u_debug.flags &DEBUG_LIGHT_SHOW_CASCADES) == 0)
-		return col;
 	// Note: Using a switch-case here messes with the LunaGLASS optimizer.
 	// Since these are only evaluated in debug mode, the overhead from the if-branches
 	// (if there is one) doesn't really matter

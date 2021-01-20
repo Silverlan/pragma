@@ -74,7 +74,7 @@ void export_world_fragment_data(mat4 mdlMatrix,vec3 vertPos)
 	//mat4 MV = V *mdlMatrix;
 	//mat4 MVP = u_camera.P *MV;
 
-	vec4 vposWs = mdlMatrix *vec4(vertPos,1.0);
+	vec4 vposWs = mdlMatrix *weightedVertPos;
 	if(CSPEC_ENABLE_3D_ORIGIN == 1)
 	{
 		if(is_3d_sky())

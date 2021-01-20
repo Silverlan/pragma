@@ -162,6 +162,11 @@ CGame::CGame(NetworkState *state)
 	m_luaShaderManager = std::make_shared<pragma::LuaShaderManager>();
 	m_luaParticleModifierManager = std::make_shared<pragma::LuaParticleModifierManager>();
 
+	m_worldShaderSettings.shadowQuality = static_cast<pragma::rendering::GameWorldShaderSettings::ShadowQuality>(GetConVarInt("cl_render_shadow_quality"));
+	m_worldShaderSettings.ssaoEnabled = GetConVarBool("cl_render_ssao");
+	m_worldShaderSettings.bloomEnabled = GetConVarBool("render_bloom_enabled");
+	m_worldShaderSettings.debugModeEnabled = GetConVarBool("render_debug_mode") || GetConVarBool("render_unlit");
+
 	RegisterCallback<void,CGame*>("OnGameEnd");
 	RegisterCallback<void,pragma::CLightDirectionalComponent*,pragma::CLightDirectionalComponent*>("OnEnvironmentLightSourceChanged");
 	RegisterCallback<void>("PreRenderSkybox");
@@ -587,11 +592,13 @@ static void render_debug_mode(NetworkState*,ConVar*,int32_t,int32_t debugMode)
 		worldShaderSettings.debugModeEnabled = debugModeEnabled;
 		c_game->ReloadGameWorldShaderPipelines();
 	}
-
-	auto *scene = c_game->GetScene();
-	if(scene == nullptr)
-		return;
-	scene->SetDebugMode(static_cast<pragma::SceneDebugMode>(debugMode));
+	EntityIterator entIt {*c_game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CSceneComponent>>();
+	for(auto *ent : entIt)
+	{
+		auto sceneC = ent->GetComponent<pragma::CSceneComponent>();
+		sceneC->SetDebugMode(static_cast<pragma::SceneDebugMode>(debugMode));
+	}
 }
 REGISTER_CONVAR_CALLBACK_CL(render_debug_mode,render_debug_mode);
 
@@ -1057,7 +1064,7 @@ void CGame::ReloadGameWorldShaderPipelines() const
 	});
 	const_cast<CGame*>(this)->AddCallback("PreRenderScenes",cb);
 }
-void CGame::ReloaPrepassShaderPipelines() const
+void CGame::ReloadPrepassShaderPipelines() const
 {
 	if(umath::is_flag_set(m_stateFlags,StateFlags::PrepassShaderPipelineReloadRequired))
 		return;

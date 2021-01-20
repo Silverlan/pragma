@@ -261,6 +261,7 @@ struct DLLCLIENT RenderStats
 		PostProcessingGpuBloom,
 		PostProcessingGpuToneMapping,
 		PostProcessingGpuFxaa,
+		PostProcessingGpuSsao,
 		
 		LightCullingCpu,
 		PrepassExecutionCpu,
@@ -270,7 +271,7 @@ struct DLLCLIENT RenderStats
 
 		Count,
 		GpuStart = LightCullingGpu,
-		GpuEnd = PostProcessingGpuFxaa,
+		GpuEnd = PostProcessingGpuSsao,
 		CpuStart = LightCullingCpu,
 		CpuEnd = UpdateRenderBuffersCpu,
 		GpuCount = (GpuEnd -GpuStart) +1,

@@ -163,7 +163,10 @@ namespace pragma
 		Emission,
 		Lightmap,
 		LightmapUv,
-		Unlit
+		Unlit,
+		CsmShowCascades,
+		ShadowMapDepth,
+		ForwardPlusHeatmap
 	};
 	class DLLCLIENT CSceneComponent final
 		: public BaseEntityComponent

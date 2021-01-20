@@ -34,7 +34,13 @@ void WIDebugSSAO::DoUpdate()
 		return;
 	auto &ssaoInfo = renderer->GetSSAOInfo();
 	if(m_bUseBlurVariant == false)
-		SetTexture(ssaoInfo.renderTarget->GetTexture());
+	{
+		if(ssaoInfo.renderTarget)
+			SetTexture(ssaoInfo.renderTarget->GetTexture());
+	}
 	else
-		SetTexture(ssaoInfo.renderTargetBlur->GetTexture());
+	{
+		if(ssaoInfo.renderTargetBlur)
+			SetTexture(ssaoInfo.renderTargetBlur->GetTexture());
+	}
 }

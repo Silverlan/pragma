@@ -220,14 +220,14 @@ bool RasterizationRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 	}
 
 	// SSAO (requires prepass)
+	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuSsao,*drawSceneInfo.commandBuffer);
 	RenderSSAO(drawSceneInfo);
+	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuSsao,*drawSceneInfo.commandBuffer);
 
 	// Cull light sources (requires prepass)
-	if(drawSceneInfo.renderStats)
-		(*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::LightCullingGpu,*drawSceneInfo.commandBuffer);
+	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::LightCullingGpu,*drawSceneInfo.commandBuffer);
 	CullLightSources(drawSceneInfo);
-	if(drawSceneInfo.renderStats)
-		(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::LightCullingGpu,*drawSceneInfo.commandBuffer);
+	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::LightCullingGpu,*drawSceneInfo.commandBuffer);
 	
 	// We still need to update the render buffers for some entities
 	// (All others have already been updated in the prepass)

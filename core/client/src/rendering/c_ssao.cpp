@@ -151,6 +151,7 @@ static void cl_render_ssao_callback(NetworkState*,ConVar*,bool,bool val)
 {
 	if(c_game == nullptr)
 		return;
-	c_game->ReloaPrepassShaderPipelines();
+	c_game->ReloadPrepassShaderPipelines();
+	c_game->ReloadGameWorldShaderPipelines();
 }
 REGISTER_CONVAR_CALLBACK_CL(cl_render_ssao,cl_render_ssao_callback);

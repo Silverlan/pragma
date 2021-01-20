@@ -21,7 +21,7 @@
 using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 void RasterizationRenderer::RenderSSAO(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &ssaoInfo = GetSSAOInfo();
@@ -81,7 +81,7 @@ void RasterizationRenderer::RenderSSAO(const util::DrawSceneInfo &drawSceneInfo)
 		// Blur SSAO
 		drawCmd->RecordImageBarrier(ssaoInfo.renderTargetBlur->GetTexture().GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 		drawCmd->RecordBeginRenderPass(*ssaoInfo.renderTargetBlur);
-
+		
 		if(shaderSSAOBlur->BeginDraw(drawCmd) == true)
 		{
 			shaderSSAOBlur->Draw(*ssaoInfo.descSetGroupOcclusion->GetDescriptorSet());
@@ -102,3 +102,4 @@ void RasterizationRenderer::RenderSSAO(const util::DrawSceneInfo &drawSceneInfo)
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::SSAO);
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::SSAO);
 }
+#pragma optimize("",on)

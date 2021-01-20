@@ -30,6 +30,7 @@ namespace pragma
 			Bloom,
 			// Glow
 		};
+
 #pragma pack(push,1)
 		struct PushConstants
 		{

@@ -67,7 +67,7 @@ vec3 calculate_spot_lighting(int lightIdx,int spotIdx,vec3 fragLightColor,vec3 f
 #if ENABLE_LIGHT_DEBUG == 1
 
 #if SHADOW_PCF_ENABLED == 0
-	if((u_debug.flags &DEBUG_LIGHT_SHOW_SHADOW_MAP_DEPTH) != 0)
+	/*if((u_debug.flags &DEBUG_LIGHT_SHOW_SHADOW_MAP_DEPTH) != 0)
 	{
 		float zFar = light.position.w;
 		vec4 depthCoord = get_light_vertex_position(lightIdx);
@@ -81,7 +81,7 @@ vec3 calculate_spot_lighting(int lightIdx,int spotIdx,vec3 fragLightColor,vec3 f
 		fragLightColor += vec3(shadowCoord.z,shadowCoord.z,shadowCoord.z);
 		float shadow = length(get_vertex_position_ws() -light.position.xyz) /light.position.w;
 		fragLightColor += vec3(shadow,shadow,shadow);
-	}
+	}*/
 #endif
 
 #endif

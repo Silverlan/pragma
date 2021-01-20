@@ -49,7 +49,7 @@ void WIFPS::Think()
 	if(!m_text.IsValid())
 		return;
 	auto &tCur = client->RealTime();
-	if(tCur -m_tLastUpdate > 0.5)
+	if(tCur -m_tLastUpdate > 0.75)
 	{
 		m_tLastUpdate = tCur;
 		auto fps = c_engine->GetFPS();

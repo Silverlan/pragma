@@ -125,32 +125,6 @@ vec3 calculate_lighting(vec3 diffuseColor,vec2 texCoords,mat4 mdlMatrix,vec3 fra
 		finalColor = test(int(lightIndex),diffuseColor,texCoords,mdlMatrix,fragPosWs,fragNormal,bUseNormal,fragNormalWs,finalColor);
 	}
 	finalColor += ambientColor;
-	
-#if ENABLE_LIGHT_DEBUG == 1
-	if((u_debug.flags &DEBUG_FORWARD_PLUS_HEATMAP) != 0)
-	{
-		ivec2 location = ivec2(gl_FragCoord.xy);
-		uint tileSize = get_tile_size();
-		ivec2 tileID = location /ivec2(tileSize,tileSize);
-		uint index = tileID.y *get_number_of_tiles_x() +tileID.x;
-		uint offset = index *MAX_SCENE_LIGHTS;
-		uint numLights = 0;
-		for (uint i = 0; i < MAX_SCENE_LIGHTS && visibleLightTileIndicesBuffer.data[offset + i].index != -1; i++)
-		{
-			uint lightIndex = visibleLightTileIndicesBuffer.data[offset + i].index;
-			LightSourceData light = get_light_source(int(lightIndex));
-			if((light.flags &FLIGHT_TYPE_DIRECTIONAL) == 0)
-				++numLights;
-		}
-		if(numLights > 0)
-		{
-			const float dbgIntensity = 0.95;
-			finalColor.rgb = (vec3(tileID.x /float(tileSize),tileID.y /float(tileSize),0) *(numLights /float(5))) *pow(1.0,dbgIntensity *1.0)
-					+finalColor.rgb *(1.0 -dbgIntensity);
-		}
-	}
-#endif
-	
 	return finalColor *ssaoFactor;
 }
 

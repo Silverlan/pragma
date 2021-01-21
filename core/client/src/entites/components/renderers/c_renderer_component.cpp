@@ -120,7 +120,6 @@ CEReloadRenderTarget::CEReloadRenderTarget(pragma::CSceneComponent &scene,uint32
 
 void CEReloadRenderTarget::PushArguments(lua_State *l)
 {
-	ComponentEvent::PushArguments(l);
 	scene.PushLuaObject(l);
 	Lua::PushInt(l,width);
 	Lua::PushInt(l,height);
@@ -139,7 +138,6 @@ CEBeginRendering::CEBeginRendering(const util::DrawSceneInfo &drawSceneInfo)
 {}
 void CEBeginRendering::PushArguments(lua_State *l)
 {
-	ComponentEvent::PushArguments(l);
 	Lua::Push<const util::DrawSceneInfo*>(l,&drawSceneInfo);
 }
 
@@ -150,7 +148,6 @@ CEReloadBloomRenderTarget::CEReloadBloomRenderTarget(uint32_t width)
 {}
 void CEReloadBloomRenderTarget::PushArguments(lua_State *l)
 {
-	ComponentEvent::PushArguments(l);
 	Lua::PushInt(l,width);
 }
 void CEReloadBloomRenderTarget::HandleReturnValues(lua_State *l)
@@ -180,7 +177,6 @@ CERecordCommandBuffers::CERecordCommandBuffers(const util::DrawSceneInfo &drawSc
 {}
 void CERecordCommandBuffers::PushArguments(lua_State *l)
 {
-	ComponentEvent::PushArguments(l);
 	Lua::Push<const util::DrawSceneInfo*>(l,&drawSceneInfo);
 }
 
@@ -191,7 +187,6 @@ CERender::CERender(const util::DrawSceneInfo &drawSceneInfo)
 {}
 void CERender::PushArguments(lua_State *l)
 {
-	ComponentEvent::PushArguments(l);
 	Lua::Push<const util::DrawSceneInfo*>(l,&drawSceneInfo);
 }
 
@@ -202,6 +197,5 @@ CEUpdateRendererBuffer::CEUpdateRendererBuffer(const std::shared_ptr<prosper::IP
 {}
 void CEUpdateRendererBuffer::PushArguments(lua_State *l)
 {
-	ComponentEvent::PushArguments(l);
 	Lua::Push<std::shared_ptr<Lua::Vulkan::CommandBuffer>>(l,std::static_pointer_cast<Lua::Vulkan::CommandBuffer>(drawCommandBuffer));
 }

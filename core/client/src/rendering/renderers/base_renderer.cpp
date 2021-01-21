@@ -5,6 +5,8 @@
  * Copyright (c) 2020 Florian Weischer
  */
 
+// TODO: Remove this file
+#if 0
 #include "stdafx_client.h"
 #include "pragma/rendering/renderers/base_renderer.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
@@ -59,3 +61,4 @@ uint32_t BaseRenderer::GetHeight() const
 	auto *tex = GetSceneTexture();
 	return tex ? tex->GetImage().GetHeight() : 0;
 }
+#endif

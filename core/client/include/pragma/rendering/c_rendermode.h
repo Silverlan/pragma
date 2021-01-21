@@ -8,6 +8,7 @@
 #ifndef __C_RENDERMODE_H__
 #define __C_RENDERMODE_H__
 #include "pragma/clientdefinitions.h"
+#include <cinttypes>
 
 enum class DLLCLIENT RenderMode : uint32_t
 {

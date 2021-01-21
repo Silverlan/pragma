@@ -10,6 +10,7 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/render_queue.hpp"
+#include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include <mathutil/uvec.h>
 
 class CMaterial;
@@ -23,6 +24,9 @@ namespace pragma
 {
 	class ShaderGameWorld;
 	class CRenderComponent;
+	class CVertexAnimatedComponent;
+	class CModelComponent;
+	class CLightMapReceiverComponent;
 	class ShaderTextured3DBase;
 	enum class ShaderGameWorldPipeline : uint32_t;
 };
@@ -39,7 +43,7 @@ namespace pragma::rendering
 		ShaderProcessor(prosper::ICommandBuffer &cmdBuffer)
 			: m_cmdBuffer{cmdBuffer}
 		{}
-		bool RecordBindShader(const pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,bool view,pragma::ShaderGameWorld &shader,uint32_t pipelineIdx=0u);
+		bool RecordBindShader(const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,bool view,pragma::ShaderGameWorld &shader,uint32_t pipelineIdx=0u);
 		bool RecordBindEntity(CBaseEntity &ent);
 		bool RecordBindMaterial(CMaterial &mat);
 		bool RecordBindLight(CLightComponent &light,uint32_t layerId);
@@ -47,7 +51,7 @@ namespace pragma::rendering
 
 		void SetStats(RenderPassStats *stats) {m_stats = stats;}
 	private:
-		bool RecordBindScene(const pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,const pragma::ShaderGameWorld &referenceShader,bool view);
+		bool RecordBindScene(const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,const pragma::ShaderGameWorld &referenceShader,bool view);
 		bool BindInstanceSet(pragma::ShaderGameWorld &shaderScene,const pragma::rendering::RenderQueue::InstanceSet *instanceSet=nullptr);
 		void UpdateSceneFlags(ShaderGameWorld::SceneFlags sceneFlags);
 
@@ -72,7 +76,7 @@ namespace pragma::rendering
 		float m_alphaCutoff = 0.5f;
 	};
 
-	class RasterizationRenderer;
+	class CRasterizationRendererComponent;
 	class DLLCLIENT BaseRenderProcessor
 	{
 	public:
@@ -130,7 +134,7 @@ namespace pragma::rendering
 		Vector4 m_drawOrigin;
 		std::optional<Vector2> m_depthBias {};
 		RenderPassStats *m_stats = nullptr;
-		const pragma::rendering::RasterizationRenderer *m_renderer = nullptr;
+		const pragma::CRasterizationRendererComponent *m_renderer = nullptr;
 		RenderFlags m_renderFlags;
 		uint32_t m_numShaderInvocations = 0;
 		StateFlags m_stateFlags = StateFlags::None;

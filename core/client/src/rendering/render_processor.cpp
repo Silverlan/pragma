@@ -20,6 +20,7 @@
 #include "pragma/debug/debug_render_filter.hpp"
 #include <sharedutils/magic_enum.hpp>
 #include <prosper_framebuffer.hpp>
+#include <prosper_command_buffer.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -306,9 +307,8 @@ pragma::rendering::BaseRenderProcessor::BaseRenderProcessor(const util::RenderPa
 {
 	auto &scene = drawSceneInfo.drawSceneInfo.scene;
 	auto *renderer = scene->GetRenderer();
-	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
-		return;
-	m_renderer = static_cast<const pragma::rendering::RasterizationRenderer*>(renderer);
+	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+	m_renderer = raster.get();
 }
 pragma::rendering::BaseRenderProcessor::~BaseRenderProcessor()
 {
@@ -382,7 +382,11 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::PipelineID pipe
 	
 	auto &scene = *m_drawSceneInfo.drawSceneInfo.scene;
 	auto bView = (m_camType == CameraType::View) ? true : false;
-	m_shaderProcessor.RecordBindShader(scene,static_cast<const pragma::rendering::RasterizationRenderer&>(*scene.GetRenderer()),bView,*shaderScene,pipelineIdx);
+	auto *renderer = scene.GetRenderer();
+	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+	if(raster.expired())
+		return false;
+	m_shaderProcessor.RecordBindShader(scene,*raster,bView,*shaderScene,pipelineIdx);
 	
 	if(m_stats)
 	{
@@ -403,7 +407,7 @@ void pragma::rendering::BaseRenderProcessor::SetCameraType(CameraType camType)
 	auto *renderer = scene.GetRenderer();
 	if(renderer == nullptr)
 		return;
-	//m_shaderScene->BindSceneCamera(scene,*static_cast<pragma::rendering::RasterizationRenderer*>(renderer),camType == CameraType::View);
+	//m_shaderScene->BindSceneCamera(scene,*static_cast<pragma::CRasterizationRendererComponent*>(renderer),camType == CameraType::View);
 }
 void pragma::rendering::BaseRenderProcessor::Set3DSky(bool enabled)
 {

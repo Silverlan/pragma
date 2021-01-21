@@ -408,62 +408,12 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		auto *renderer = scene->GetRenderer();
 		if(renderer == nullptr)
 			return;
-		Lua::Push<std::shared_ptr<pragma::rendering::BaseRenderer>>(l,renderer->shared_from_this());
+		renderer->PushLuaObject(l);
 	}));
-	defCScene.def("SetRenderer",static_cast<void(*)(lua_State*,CSceneHandle&,pragma::rendering::BaseRenderer&)>([](lua_State *l,CSceneHandle &scene,pragma::rendering::BaseRenderer &renderer) {
+	defCScene.def("SetRenderer",static_cast<void(*)(lua_State*,CSceneHandle&,CRendererHandle&)>([](lua_State *l,CSceneHandle &scene,CRendererHandle &renderer) {
 		pragma::Lua::check_component(l,scene);
-		scene->SetRenderer(renderer.shared_from_this());
-	}));
-	enum class RendererType : uint32_t
-	{
-		Rasterization = 0u,
-		Raytracing
-	};
-	defCScene.def("CreateRenderer",static_cast<void(*)(lua_State*,CSceneHandle&,uint32_t)>([](lua_State *l,CSceneHandle &scene,uint32_t type) {
-		pragma::Lua::check_component(l,scene);
-		switch(static_cast<RendererType>(type))
-		{
-		case RendererType::Rasterization:
-		{
-			auto renderer = pragma::rendering::BaseRenderer::Create<pragma::rendering::RasterizationRenderer>(scene->GetWidth(),scene->GetHeight());
-			if(renderer == nullptr)
-				return;
-			Lua::Push(l,renderer);
-			break;
-		}
-		case RendererType::Raytracing:
-		{
-			auto renderer = pragma::rendering::BaseRenderer::Create<pragma::rendering::RaytracingRenderer>(scene->GetWidth(),scene->GetHeight());
-			if(renderer == nullptr)
-				return;
-			Lua::Push(l,renderer);
-			break;
-		}
-		}
-	}));
-	defCScene.def("SetRenderer",static_cast<void(*)(lua_State*,CSceneHandle&,uint32_t)>([](lua_State *l,CSceneHandle &scene,uint32_t type) {
-		pragma::Lua::check_component(l,scene);
-		switch(static_cast<RendererType>(type))
-		{
-		case RendererType::Rasterization:
-		{
-			auto renderer = pragma::rendering::BaseRenderer::Create<pragma::rendering::RasterizationRenderer>(scene->GetWidth(),scene->GetHeight());
-			if(renderer == nullptr)
-				return;
-			scene->SetRenderer(renderer);
-			Lua::Push(l,renderer);
-			break;
-		}
-		case RendererType::Raytracing:
-		{
-			auto renderer = pragma::rendering::BaseRenderer::Create<pragma::rendering::RaytracingRenderer>(scene->GetWidth(),scene->GetHeight());
-			if(renderer == nullptr)
-				return;
-			scene->SetRenderer(renderer);
-			Lua::Push(l,renderer);
-			break;
-		}
-		}
+		pragma::Lua::check_component(l,renderer);
+		scene->SetRenderer(renderer.get());
 	}));
 	defCScene.def("GetSceneIndex",static_cast<void(*)(lua_State*,CSceneHandle&)>([](lua_State *l,CSceneHandle &scene) {
 		pragma::Lua::check_component(l,scene);
@@ -503,9 +453,6 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.add_static_constant("RENDER_TARGET_TEXTURE_COLOR",0u);
 	defCScene.add_static_constant("RENDER_TARGET_TEXTURE_BLOOM",1u);
 	defCScene.add_static_constant("RENDER_TARGET_TEXTURE_DEPTH",2u);
-
-	defCScene.add_static_constant("RENDERER_TYPE_RASTERIZATION",umath::to_integral(RendererType::Rasterization));
-	defCScene.add_static_constant("RENDERER_TYPE_RAYTRACING",umath::to_integral(RendererType::Raytracing));
 
 	auto defCreateInfo = luabind::class_<pragma::CSceneComponent::CreateInfo>("CreateInfo");
 	defCreateInfo.def(luabind::constructor<>());

@@ -188,13 +188,13 @@ void Console::commands::debug_render_depth_buffer(NetworkState *state,pragma::Ba
 		else
 			scene = c_game->GetScene();
 		auto *renderer = scene ? scene->GetRenderer() : nullptr;
-		if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+		auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+		if(raster.expired())
 			return WIHandle{};
-		auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
 		auto &wgui = WGUI::GetInstance();
 			
 		auto r = wgui.Create<WIDebugDepthTexture>();
-		r->SetTexture(*rasterizer->GetPrepass().textureDepth,{
+		r->SetTexture(*raster->GetPrepass().textureDepth,{
 			prosper::PipelineStageFlags::LateFragmentTestsBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit
 		},{
 			prosper::PipelineStageFlags::EarlyFragmentTestsBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit
@@ -326,7 +326,7 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 		auto &drawSceneInfo = const_cast<util::DrawSceneInfo&>(cdrawSceneInfo);
 		if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags,util::DrawSceneInfo::Flags::DisableRender))
 			continue;
-		RecordSceneCommandBuffers(drawSceneInfo);
+		drawSceneInfo.scene->RecordRenderCommandBuffers(drawSceneInfo);
 	}
 
 	// Render the scenes
@@ -354,12 +354,13 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 
 		// Update Exposure
 		auto *renderer = scene->GetRenderer();
-		if(renderer && renderer->IsRasterizationRenderer())
+		auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+		if(raster.valid())
 		{
 			//c_engine->StartGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
 			auto frame = c_engine->GetRenderContext().GetLastFrameId();
 			if(frame > 0)
-				static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetHDRInfo().UpdateExposure();
+				raster->GetHDRInfo().UpdateExposure();
 			//c_engine->StopGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
 		}
 		// TODO

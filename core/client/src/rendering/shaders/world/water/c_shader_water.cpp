@@ -114,7 +114,7 @@ void ShaderWater::EndDraw()
 	m_boundScene = {};
 }
 
-bool ShaderWater::BindSceneCamera(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,bool bView)
+bool ShaderWater::BindSceneCamera(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,bool bView)
 {
 	auto r = ShaderGameWorldLightingPass::BindSceneCamera(scene,renderer,bView);
 	if(r == false)

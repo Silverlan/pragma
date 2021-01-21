@@ -33,7 +33,7 @@ bool OcclusionCullingHandlerBSP::ShouldExamine(CModelMesh &mesh,const Vector3 &p
 {
 	return ShouldPass(mesh,pos) && OcclusionCullingHandlerOctTree::ShouldExamine(mesh,pos,bViewModel,numMeshes,optPlanes);
 }
-bool OcclusionCullingHandlerBSP::ShouldExamine(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,CBaseEntity &cent,bool &outViewModel,std::vector<umath::Plane> **outPlanes) const
+bool OcclusionCullingHandlerBSP::ShouldExamine(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,CBaseEntity &cent,bool &outViewModel,std::vector<umath::Plane> **outPlanes) const
 {
 	return ShouldPass(cent) && OcclusionCullingHandlerOctTree::ShouldExamine(scene,renderer,cent,outViewModel,outPlanes);
 }
@@ -78,7 +78,7 @@ bool OcclusionCullingHandlerBSP::ShouldPass(CModelSubMesh &subMesh,const Vector3
 const util::BSPTree::Node *OcclusionCullingHandlerBSP::FindLeafNode(const Vector3 &point) const {return m_bspTree->FindLeafNode(point);}
 const util::BSPTree::Node *OcclusionCullingHandlerBSP::GetCurrentNode() const {return m_pCurrentNode;}
 void OcclusionCullingHandlerBSP::PerformCulling(
-	pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+	pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const Vector3 &camPos,
 	std::vector<OcclusionMeshInfo> &culledMeshesOut,bool cullByViewFrustum
 )
 {

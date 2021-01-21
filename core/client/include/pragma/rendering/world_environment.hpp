@@ -9,6 +9,7 @@
 #define __WORLD_ENVIRONMENT_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include <mathutil/color.h>
 #include <mathutil/glmutil.h>
 #include <memory>
 

@@ -11,8 +11,10 @@
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader_base_image_processing.hpp>
 
+namespace prosper {class Texture; class IBuffer; class IDescriptorSetGroup;};
 namespace pragma
 {
+	class CSceneComponent;
 	class DLLCLIENT ShaderSSAO
 		: public prosper::ShaderBaseImageProcessing
 	{

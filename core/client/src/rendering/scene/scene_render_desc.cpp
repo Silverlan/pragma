@@ -16,7 +16,7 @@
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/renderers/base_renderer.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
-#include "pragma/rendering/renderers/rasterization/culled_mesh_data.hpp"
+#include "pragma/entities/components/renderers/rasterization/culled_mesh_data.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/render_queue_worker.hpp"
 #include "pragma/rendering/render_queue_instancer.hpp"
@@ -169,11 +169,13 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 	renderC.UpdateRenderDataMT(drawSceneInfo.commandBuffer,scene,cam,vp);
 	auto renderMode = renderC.GetRenderMode();
 	auto *renderer = drawSceneInfo.scene->GetRenderer();
-	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+	if(renderer == nullptr)
+		return;
+	auto rasterizer = renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>();
+	if(rasterizer.expired())
 		return;
 	auto &context = c_engine->GetRenderContext();
 	auto renderTranslucent = umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Translucent);
-	auto *rasterizationRenderer = static_cast<const pragma::rendering::RasterizationRenderer*>(renderer);
 	for(auto meshIdx=lodGroup.first;meshIdx<lodGroup.first +lodGroup.second;++meshIdx)
 	{
 		if(fShouldCull && ShouldCull(renderC,meshIdx,fShouldCull))
@@ -190,7 +192,7 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 			shader = dynamic_cast<pragma::ShaderGameWorldLightingPass*>(mat->GetPrimaryShader());
 			mat->SetUserData2(shader); // TODO: This is technically *not* thread safe and could be called from multiple threads!
 		}
-		shader = rasterizationRenderer->GetShaderOverride(shader);
+		shader = rasterizer->GetShaderOverride(shader);
 		if(shader == nullptr)
 			continue;
 		auto pipelineIdx = shader->FindPipelineIndex(

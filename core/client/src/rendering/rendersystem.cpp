@@ -19,7 +19,7 @@
 #include "pragma/rendering/shaders/world/c_shader_wireframe.hpp"
 #include "pragma/rendering/sortedrendermeshcontainer.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
-#include "pragma/rendering/renderers/rasterization/culled_mesh_data.hpp"
+#include "pragma/entities/components/renderers/rasterization/culled_mesh_data.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_stats.hpp"
 #include "pragma/debug/renderdebuginfo.hpp"
@@ -182,7 +182,7 @@ void RenderSystem::Render(
 	auto bReflection = umath::is_flag_set(flags,RenderFlags::Reflection);
 	auto renderAs3dSky = umath::is_flag_set(flags,RenderFlags::RenderAs3DSky);
 	//auto &lights = scene->GetCulledLights();
-	auto &rasterizer = *static_cast<const pragma::rendering::RasterizationRenderer*>(renderer);
+	auto &rasterizer = *static_cast<const pragma::CRasterizationRendererComponent*>(renderer);
 	auto pipelineType = pragma::ShaderGameWorldLightingPass::GetPipelineIndex(rasterizer.GetSampleCount(),bReflection);
 	pragma::ShaderGameWorldLightingPass *shaderPrev = nullptr;
 	CBaseEntity *entPrev = nullptr;
@@ -215,7 +215,7 @@ void RenderSystem::Render(
 				shader->SetDebugMode(debugMode);
 			shader->Set3DSky(renderAs3dSky);
 			shaderPrev = shader;
-			if(shader->BindScene(*scene.get(),const_cast<pragma::rendering::RasterizationRenderer&>(rasterizer),renderMode == RenderMode::View) == false)
+			if(shader->BindScene(*scene.get(),const_cast<pragma::CRasterizationRendererComponent&>(rasterizer),renderMode == RenderMode::View) == false)
 			{
 				shaderPrev = nullptr;
 				continue;

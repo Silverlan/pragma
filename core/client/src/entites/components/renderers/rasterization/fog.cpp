@@ -6,7 +6,8 @@
  */
 
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
-#include "pragma/rendering/renderers/rasterization/hdr_data.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
+#include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
 #include "pragma/rendering/world_environment.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
@@ -20,7 +21,7 @@ using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
 
-void RasterizationRenderer::RenderSceneFog(const util::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::RenderSceneFog(const util::DrawSceneInfo &drawSceneInfo)
 {
 #if 0
 	if(drawSceneInfo.scene.expired())

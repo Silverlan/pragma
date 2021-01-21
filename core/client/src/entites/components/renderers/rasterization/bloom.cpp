@@ -6,12 +6,14 @@
  */
 
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
-#include "pragma/rendering/renderers/rasterization/culled_mesh_data.hpp"
+#include "pragma/entities/components/renderers/rasterization/culled_mesh_data.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_glow.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/game/c_game.h"
+#include <pragma/console/convars.h>
 #include <pragma/c_engine.h>
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
@@ -26,7 +28,7 @@ extern DLLCLIENT CGame *c_game;
 
 static auto cvBloomEnabled = GetClientConVar("render_bloom_enabled");
 static auto cvBloomAmount = GetClientConVar("render_bloom_amount");
-void RasterizationRenderer::RenderBloom(const util::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::RenderBloom(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(cvBloomEnabled->GetBool() == false)
 		return;
@@ -56,7 +58,7 @@ void RasterizationRenderer::RenderBloom(const util::DrawSceneInfo &drawSceneInfo
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingBloom);
 }
 
-void RasterizationRenderer::RenderGlowObjects(const util::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::RenderGlowObjects(const util::DrawSceneInfo &drawSceneInfo)
 {
 #if 0
 	auto &glowInfo = GetGlowInfo();
@@ -107,7 +109,7 @@ void RasterizationRenderer::RenderGlowObjects(const util::DrawSceneInfo &drawSce
 #endif
 }
 
-void RasterizationRenderer::RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::CSceneComponent &scene,RenderMode renderMode)
+void pragma::CRasterizationRendererComponent::RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::CSceneComponent &scene,RenderMode renderMode)
 {
 	// TODO
 #if 0

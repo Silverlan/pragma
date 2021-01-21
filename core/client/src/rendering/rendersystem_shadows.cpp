@@ -18,7 +18,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
 
 
-void RenderSystem::RenderShadows(const util::DrawSceneInfo &drawSceneInfo,pragma::rendering::RasterizationRenderer &renderer,std::vector<pragma::CLightComponent*> &lights)
+void RenderSystem::RenderShadows(const util::DrawSceneInfo &drawSceneInfo,pragma::CRasterizationRendererComponent &renderer,std::vector<pragma::CLightComponent*> &lights)
 {
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CShadowManagerComponent>>();

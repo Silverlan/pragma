@@ -9,18 +9,21 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/game/c_game.h"
 #include "pragma/console/c_cvar.h"
+#include <pragma/console/convars.h>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_render_target.hpp>
+#include <prosper_command_buffer.hpp>
 
 using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
 
 static auto cvToneMapping = GetClientConVar("cl_render_tone_mapping");
-void RasterizationRenderer::RenderToneMapping(const util::DrawSceneInfo &drawSceneInfo,prosper::IDescriptorSet &descSetHdrResolve)
+void pragma::CRasterizationRendererComponent::RenderToneMapping(const util::DrawSceneInfo &drawSceneInfo,prosper::IDescriptorSet &descSetHdrResolve)
 {
 	auto hShaderTonemapping = c_game->GetGameShader(CGame::GameShader::PPTonemapping);
 	if(hShaderTonemapping.expired())

@@ -7,7 +7,8 @@
 
 #ifndef __BASE_RENDERER_HPP__
 #define __BASE_RENDERER_HPP__
-
+// TODO: Remove this file
+#if 0
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/c_renderflags.h"
 #include <prosper_command_buffer.hpp>
@@ -67,5 +68,6 @@ template<class TRenderer>
 		return nullptr;
 	return res;
 }
+#endif
 
 #endif

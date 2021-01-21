@@ -91,7 +91,7 @@ bool ShaderPrepassBase::BeginDraw(
 		cmdBuffer->RecordSetDepthBias() == true;
 }
 
-bool ShaderPrepassBase::BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView)
+bool ShaderPrepassBase::BindScene(pragma::CSceneComponent &scene,CRasterizationRendererComponent &renderer,bool bView)
 {
 	return BindSceneCamera(scene,renderer,bView) && BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 }

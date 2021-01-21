@@ -6,7 +6,7 @@
  */
 
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
-#include "pragma/rendering/renderers/rasterization/culled_mesh_data.hpp"
+#include "pragma/entities/components/renderers/rasterization/culled_mesh_data.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_processor.hpp"
@@ -15,6 +15,7 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/debug/c_debugoverlay.h"
 #include "pragma/game/c_game.h"
@@ -24,6 +25,7 @@
 #include <pragma/lua/luafunction_call.h>
 #include <pragma/console/convars.h>
 #include <prosper_util.hpp>
+#include <prosper_command_buffer.hpp>
 
 using namespace pragma::rendering;
 
@@ -45,7 +47,7 @@ static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");
 #include "pragma/entities/entity_component_system_t.hpp"
 int g_dbgMode = 5;
 #endif
-void RasterizationRenderer::RecordPrepass(const util::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::RecordPrepass(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &sceneRenderDesc = drawSceneInfo.scene->GetSceneRenderDesc();
 	auto &drawCmd = drawSceneInfo.commandBuffer;
@@ -105,7 +107,7 @@ void RasterizationRenderer::RecordPrepass(const util::DrawSceneInfo &drawSceneIn
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::Prepass);
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::Prepass);
 }
-void RasterizationRenderer::ExecutePrepass(const util::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::ExecutePrepass(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &scene = *drawSceneInfo.scene;
 	auto &hCam = scene.GetActiveCamera();
@@ -152,7 +154,7 @@ void RasterizationRenderer::ExecutePrepass(const util::DrawSceneInfo &drawSceneI
 	prepass.EndRenderPass(drawSceneInfo);
 }
 
-void RasterizationRenderer::ExecuteLightinPass(const util::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::ExecuteLightinPass(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.scene.expired())
 		return;
@@ -268,7 +270,7 @@ void RasterizationRenderer::ExecuteLightinPass(const util::DrawSceneInfo &drawSc
 
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::RenderWorld);
 }
-void RasterizationRenderer::RecordLightingPass(const util::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto *rt = GetLightingPassRenderTarget(drawSceneInfo);
 	if(rt == nullptr || drawSceneInfo.scene.expired())
@@ -462,7 +464,7 @@ void RasterizationRenderer::RecordLightingPass(const util::DrawSceneInfo &drawSc
 					auto *test = static_cast<pragma::ShaderTest*>(shader.get());
 					if(test->BeginDraw(pcmd,{}))// && test->BindEntity(static_cast<CBaseEntity&>(*ent)))
 					{
-						test->BindSceneCamera(scene,static_cast<pragma::rendering::RasterizationRenderer&>(*scene.GetRenderer()),false);
+						test->BindSceneCamera(scene,static_cast<pragma::CRasterizationRendererComponent&>(*scene.GetRenderer()),false);
 						auto instanceBuffer = CSceneComponent::GetEntityInstanceIndexBuffer()->GetBuffer();
 						//test->Draw(static_cast<CModelSubMesh&>(*mesh),0u,*instanceBuffer);
 						test->DrawTest(*dbgBuffer,*instBuffer,vertCount);
@@ -496,7 +498,7 @@ void RasterizationRenderer::RecordLightingPass(const util::DrawSceneInfo &drawSc
 					test->BindEntity();
 					test->BindLights();
 					test->BindMaterial();
-					test->BindSceneCamera(scene,static_cast<pragma::rendering::RasterizationRenderer&>(*scene.GetRenderer()),false);
+					test->BindSceneCamera(scene,static_cast<pragma::CRasterizationRendererComponent&>(*scene.GetRenderer()),false);
 					auto instanceBuffer = CSceneComponent::GetEntityInstanceIndexBuffer()->GetBuffer();
 					test->Draw(static_cast<CModelSubMesh&>(*subMesh),0u,*instanceBuffer);
 					//test->DrawTest(*dbgBuffer,vertCount);

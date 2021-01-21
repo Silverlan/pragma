@@ -23,6 +23,7 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <sharedutils/scope_guard.h>
+#include <pragma/entities/entity_iterator.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
@@ -33,17 +34,15 @@ static void cmd_forwardplus_tile_size(NetworkState*,ConVar*,int32_t,int32_t val)
 		return;
 	
 	pragma::ShaderForwardPLightCulling::TILE_SIZE = val;
-	auto &renderers = pragma::rendering::BaseRenderer::GetRenderers();
-	for(auto &renderer : renderers)
+	for(auto &c : EntityCIterator<pragma::CRasterizationRendererComponent>{*c_game})
 	{
-		if(renderer->IsRasterizationRenderer() == false)
-			continue;
-		auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
-		auto &fp = rasterizer->GetForwardPlusInstance();
-		auto &prepass = rasterizer->GetPrepass();
+		auto &fp = c.GetForwardPlusInstance();
+		auto &prepass = c.GetPrepass();
 		c_engine->GetRenderContext().WaitIdle();
-		fp.Initialize(c_engine->GetRenderContext(),rasterizer->GetWidth(),rasterizer->GetHeight(),*prepass.textureDepth);
-		rasterizer->UpdateRenderSettings();
+		fp.Initialize(c_engine->GetRenderContext(),c.GetWidth(),c.GetHeight(),*prepass.textureDepth);
+		auto cRenderer = c.GetRendererComponent();
+		if(cRenderer)
+			cRenderer->UpdateRenderSettings();
 	}
 
 	c_engine->ReloadShader("forwardp_light_culling");
@@ -77,7 +76,7 @@ static constexpr uint32_t get_shadow_integer_count()
 	return umath::to_integral(GameLimits::MaxAbsoluteShadowLights) /32u +1u;
 }
 
-pragma::rendering::ForwardPlusInstance::ForwardPlusInstance(RasterizationRenderer &rasterizer)
+pragma::rendering::ForwardPlusInstance::ForwardPlusInstance(CRasterizationRendererComponent &rasterizer)
 	: m_rasterizer{rasterizer}
 {
 	m_cmdBuffer = c_engine->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Compute,m_cmdBufferQueueFamilyIndex);

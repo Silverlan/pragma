@@ -172,11 +172,11 @@ void Console::commands::debug_prepass(NetworkState *state,pragma::BasePlayerComp
 
 	auto *scene = c_game->GetScene();
 	auto *renderer = scene ? scene->GetRenderer() : nullptr;
-	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+	if(raster.expired())
 		return;
-	auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
-	auto &ssaoInfo = rasterizer->GetSSAOInfo();
-	auto &prepass = rasterizer->GetPrepass();
+	auto &ssaoInfo = raster->GetSSAOInfo();
+	auto &prepass = raster->GetPrepass();
 
 	auto bExtended = prepass.IsExtended();
 	auto xOffset = 0u;

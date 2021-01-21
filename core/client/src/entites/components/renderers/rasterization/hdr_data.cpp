@@ -9,7 +9,7 @@
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/c_msaa.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
-#include "pragma/rendering/renderers/rasterization/hdr_data.hpp"
+#include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
 #include "pragma/rendering/shaders/image/c_shader_calc_image_color.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_hdr.hpp"
@@ -139,7 +139,7 @@ const Vector3 &HDRData::Exposure::UpdateColor()
 
 /////////////////////////////////
 
-HDRData::HDRData(RasterizationRenderer &rasterizer)
+HDRData::HDRData(CRasterizationRendererComponent &rasterizer)
 	: exposure(1.f),m_bMipmapInitialized(false),m_exposure{},m_cbReloadCommandBuffer{},
 	forwardPlusInstance{rasterizer}
 {
@@ -204,7 +204,7 @@ void HDRData::ReloadPresentationRenderTarget(uint32_t width,uint32_t height,pros
 }
 
 static auto cvBloomResolution = GetClientConVar("render_bloom_resolution");
-bool HDRData::Initialize(pragma::CSceneComponent &scene,RasterizationRenderer &renderer,uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount,bool bEnableSSAO)
+bool HDRData::Initialize(uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount,bool bEnableSSAO)
 {
 	// Initialize depth prepass
 	auto &context = c_engine->GetRenderContext();
@@ -509,13 +509,10 @@ REGISTER_CONVAR_CALLBACK_CL(cl_render_msaa_samples,CVAR_CALLBACK_render_msaa_ena
 
 static void CVAR_CALLBACK_render_bloom_resolution(NetworkState*,ConVar*,int,int width)
 {
-	auto &renderers = pragma::rendering::BaseRenderer::GetRenderers();
-	for(auto *renderer : renderers)
-	{
-		if(renderer->IsRasterizationRenderer() == false)
-			continue;
-		static_cast<RasterizationRenderer*>(renderer)->ReloadBloomRenderTarget(width);
-	}
+	if(c_game == nullptr)
+		return;
+	for(auto &c : EntityCIterator<pragma::CRendererComponent>{*c_game})
+		c.ReloadBloomRenderTarget(width);
 }
 REGISTER_CONVAR_CALLBACK_CL(render_bloom_resolution,CVAR_CALLBACK_render_bloom_resolution);
 
@@ -538,9 +535,11 @@ void Console::commands::debug_render_scene(NetworkState *state,pragma::BasePlaye
 	dbg = std::make_unique<DebugGameGUI>([size]() {
 		auto *scene = c_game->GetScene();
 		auto *renderer = scene ? scene->GetRenderer() : nullptr;
-		if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+		auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+
+		if(raster.expired())
 			return WIHandle{};
-		auto &hdrInfo = static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetHDRInfo();
+		auto &hdrInfo = raster->GetHDRInfo();
 
 		auto &wgui = WGUI::GetInstance();
 		auto *r = wgui.Create<WIBase>();

@@ -63,7 +63,7 @@ public:
 	static uint32_t Render(const util::DrawSceneInfo &drawSceneInfo,const pragma::rendering::CulledMeshData &renderMeshes,RenderMode renderMode=RenderMode::World,RenderFlags flags=RenderFlags::None,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f});
 
 	static void RenderPrepass(const util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode=RenderMode::World);
-	static void RenderShadows(const util::DrawSceneInfo &drawSceneInfo,pragma::rendering::RasterizationRenderer &renderer,std::vector<pragma::CLightComponent*> &lights);
+	static void RenderShadows(const util::DrawSceneInfo &drawSceneInfo,pragma::CRasterizationRendererComponent &renderer,std::vector<pragma::CLightComponent*> &lights);
 };
 REGISTER_BASIC_BITWISE_OPERATORS(RenderFlags)
 #pragma warning(pop)

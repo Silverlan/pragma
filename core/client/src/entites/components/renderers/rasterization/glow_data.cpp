@@ -6,8 +6,8 @@
  */
 
 #include "stdafx_client.h"
-#include "pragma/rendering/renderers/rasterization/glow_data.hpp"
-#include "pragma/rendering/renderers/rasterization/hdr_data.hpp"
+#include "pragma/entities/components/renderers/rasterization/glow_data.hpp"
+#include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_glow.hpp"
 #include <prosper_util.hpp>
 #include <shader/prosper_shader_blur.hpp>

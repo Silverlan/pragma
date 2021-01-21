@@ -659,12 +659,23 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 		m_scene = scene->GetHandle<pragma::CSceneComponent>();
 		m_scene->SetDebugMode(static_cast<pragma::SceneDebugMode>(GetConVarInt("render_debug_mode")));
 		SetViewModelFOV(GetConVarFloat("cl_fov_viewmodel"));
-		auto renderer = pragma::rendering::RasterizationRenderer::Create<pragma::rendering::RasterizationRenderer>(m_scene->GetWidth(),m_scene->GetHeight());
-		m_scene->SetRenderer(renderer);
-		m_scene->ReloadRenderTarget(static_cast<uint32_t>(resolution.x),static_cast<uint32_t>(resolution.y));
-		m_scene->SetWorldEnvironment(GetWorldEnvironment());
-		if(renderer && renderer->IsRasterizationRenderer())
-			renderer->SetSSAOEnabled(*scene,GetConVarBool("cl_render_ssao"));
+
+		auto *entRenderer = CreateEntity<CRasterizationRenderer>();
+		if(entRenderer)
+		{
+			auto rasterization = entRenderer->GetComponent<pragma::CRasterizationRendererComponent>();
+			if(rasterization.valid())
+			{
+				auto *renderer = rasterization->GetRendererComponent();
+				if(renderer)
+				{
+					m_scene->SetRenderer(renderer);
+					m_scene->ReloadRenderTarget(static_cast<uint32_t>(resolution.x),static_cast<uint32_t>(resolution.y));
+					m_scene->SetWorldEnvironment(GetWorldEnvironment());
+					rasterization->SetSSAOEnabled(GetConVarBool("cl_render_ssao"));
+				}
+			}
+		}
 
 		SetRenderScene(*scene);
 	}
@@ -1095,19 +1106,22 @@ std::shared_ptr<ModelSubMesh> CGame::CreateModelSubMesh() const {return std::mak
 Float CGame::GetHDRExposure() const
 {
 	auto *renderer = m_scene->GetRenderer();
-	return renderer && renderer->IsRasterizationRenderer() ? static_cast<const pragma::rendering::RasterizationRenderer*>(renderer)->GetHDRExposure() : 0.f;
+	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+	return raster.valid() ? raster->GetHDRExposure() : 0.f;
 }
 Float CGame::GetMaxHDRExposure() const
 {
 	auto *renderer = m_scene->GetRenderer();
-	return renderer && renderer->IsRasterizationRenderer() ? static_cast<const pragma::rendering::RasterizationRenderer*>(renderer)->GetMaxHDRExposure() : 0.f;
+	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+	return raster.valid() ? raster->GetMaxHDRExposure() : 0.f;
 }
 void CGame::SetMaxHDRExposure(Float exposure)
 {
 	auto *renderer = m_scene->GetRenderer();
-	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+	if(raster.expired())
 		return;
-	static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->SetMaxHDRExposure(exposure);
+	raster->SetMaxHDRExposure(exposure);
 }
 
 void CGame::OnMapLoaded()
@@ -1201,16 +1215,15 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 		//auto lightmapAtlas = pragma::CLightMapComponent::CreateLightmapTexture(img->GetWidth(),img->GetHeight(),static_cast<uint16_t*>(img->GetData()));
 		auto *scene = GetScene();
 		auto *renderer = scene ? scene->GetRenderer() : nullptr;
-		if(renderer != nullptr && renderer->IsRasterizationRenderer())
+		if(renderer != nullptr)
 		{
-			auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
 			scene->GetSceneRenderDesc().ReloadOcclusionCullingHandler(); // Required if BSP occlusion culling is specified
 			if(lightmapAtlas != nullptr)
 			{
 				auto *entWorld = c_game->GetWorld();
 				auto lightMapC = entWorld ? entWorld->GetEntity().GetComponent<pragma::CLightMapComponent>() : util::WeakHandle<pragma::CLightMapComponent>{};
 				if(lightMapC.valid())
-					pragma::rendering::RasterizationRenderer::UpdateLightmap(*lightMapC);
+					pragma::CRasterizationRendererComponent::UpdateLightmap(*lightMapC);
 			}
 		}
 

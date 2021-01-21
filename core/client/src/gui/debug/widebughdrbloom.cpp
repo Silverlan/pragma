@@ -35,7 +35,7 @@ void WIDebugHDRBloom::UpdateBloomImage()
 {
 	auto &drawCmd = c_engine->GetDrawCommandBuffer();
 	auto *scene = c_game->GetScene();
-	auto *renderer = scene ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer()) : nullptr;
+	auto *renderer = scene ? dynamic_cast<pragma::CRasterizationRendererComponent*>(scene->GetRenderer()) : nullptr;
 	if(renderer == nullptr)
 		return;
 	auto &bloomTexture = renderer->GetHDRInfo().bloomBlurRenderTarget->GetTexture();

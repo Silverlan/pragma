@@ -291,8 +291,9 @@ void ShadowRenderer::RenderShadows(
 	auto &tex = smRt->GetTexture();
 	auto *scene = c_game->GetScene();
 	auto *renderer = scene ? scene->GetRenderer() : nullptr;
-	if(renderer->IsRasterizationRenderer() == false)
-		renderer = nullptr;
+	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+	if(raster.expired())
+		return;
 
 	auto &img = tex.GetImage();
 	auto numLayers = hShadowMap->GetLayerCount();
@@ -320,7 +321,7 @@ void ShadowRenderer::RenderShadows(
 			{
 				auto p = ent->GetComponent<pragma::CParticleSystemComponent>();
 				if(p.valid() && p->GetCastShadows() == true)
-					p->RenderShadow(drawCmd,*scene,*static_cast<pragma::rendering::RasterizationRenderer*>(renderer),&light,layerId);
+					p->RenderShadow(drawCmd,*scene,*raster,&light,layerId);
 			}
 		}
 		drawCmd->RecordEndRenderPass();

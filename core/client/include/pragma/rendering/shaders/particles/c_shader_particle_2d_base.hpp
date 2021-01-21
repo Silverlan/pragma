@@ -14,7 +14,7 @@
 
 namespace pragma
 {
-	namespace rendering {class RasterizationRenderer;};
+	class CRasterizationRendererComponent;
 	class DLLCLIENT ShaderParticle2DBase
 		: public ShaderSceneLit,
 		public ShaderParticleBase
@@ -75,7 +75,7 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderParticle2DBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
-		bool Draw(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const CParticleSystemComponent &ps,CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags renderFlags);
+		bool Draw(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const CParticleSystemComponent &ps,CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags renderFlags);
 		bool BeginDraw(
 			const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,
 			CParticleSystemComponent &pSys,ParticleRenderFlags renderFlags,
@@ -100,7 +100,7 @@ namespace pragma
 		) const;
 
 		virtual prosper::DescriptorSetInfo &GetAnimationDescriptorSetInfo() const override;
-		bool BindParticleMaterial(const rendering::RasterizationRenderer &renderer,const CParticleSystemComponent &ps);
+		bool BindParticleMaterial(const CRasterizationRendererComponent &renderer,const CParticleSystemComponent &ps);
 
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override;
 		virtual uint32_t GetLightDescriptorSetIndex() const override;

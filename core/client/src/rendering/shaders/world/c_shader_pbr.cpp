@@ -104,7 +104,7 @@ bool ShaderPBR::BeginDraw(
 	m_extRenderFlags = SceneFlags::None;
 	return ShaderGameWorldLightingPass::BeginDraw(cmdBuffer,clipPlane,drawOrigin,recordFlags);
 }
-bool ShaderPBR::BindSceneCamera(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,bool bView)
+bool ShaderPBR::BindSceneCamera(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,bool bView)
 {
 	if(ShaderGameWorldLightingPass::BindSceneCamera(scene,renderer,bView) == false)
 		return false;

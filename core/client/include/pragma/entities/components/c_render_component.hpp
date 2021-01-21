@@ -10,6 +10,7 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
+#include "pragma/entities/c_world.h"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/rendering/c_model_render_buffer_data.hpp"
@@ -18,9 +19,12 @@
 #include <pragma/entities/components/base_render_component.hpp>
 #include <mathutil/uvec.h>
 #include <mathutil/boundingvolume.h>
+#include <mathutil/transform.hpp>
 
 #define ENTITY_RENDER_BUFFER_USE_STORAGE_BUFFER 1
 
+class ModelSubMesh;
+class ModelMesh;
 namespace prosper {class IUniformResizableBuffer; class IDescriptorSet; class SwapDescriptorSet; class SwapBuffer;};
 namespace Intersection {struct LineMeshResult;};
 namespace pragma

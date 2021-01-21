@@ -9,6 +9,7 @@
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
+#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
@@ -22,6 +23,7 @@
 #include "pragma/entities/c_entityfactories.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
+#include <prosper_command_buffer.hpp>
 
 using namespace pragma;
 
@@ -194,7 +196,7 @@ void CSceneComponent::Link(const CSceneComponent &other)
 		SetActiveCamera();
 
 	auto *renderer = const_cast<CSceneComponent&>(other).GetRenderer();
-	SetRenderer(renderer ? renderer->shared_from_this() : nullptr);
+	SetRenderer(renderer);
 
 	m_sceneRenderDesc.SetOcclusionCullingHandler(const_cast<pragma::OcclusionCullingHandler&>(other.m_sceneRenderDesc.GetOcclusionCullingHandler()).shared_from_this());
 
@@ -262,7 +264,7 @@ void CSceneComponent::InitializeRenderSettingsBuffer()
 	m_renderSettings.shadowRatioY = 1.f /szShadowMap;
 	m_renderSettings.shaderQuality = cvShaderQuality->GetInt();
 
-	if(m_renderer)
+	if(m_renderer.valid())
 		m_renderer->UpdateRenderSettings();
 
 	prosper::util::BufferCreateInfo createInfo {};
@@ -328,7 +330,7 @@ void CSceneComponent::UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryComman
 	m_cameraData.P = p;
 	m_cameraData.VP = p *v;
 
-	if(bView == false && m_renderer)
+	if(bView == false && m_renderer.valid())
 		m_renderer->UpdateCameraData(*this,m_cameraData);
 
 	drawCmd->RecordBufferBarrier(
@@ -356,8 +358,15 @@ void CSceneComponent::UpdateBuffers(std::shared_ptr<prosper::IPrimaryCommandBuff
 	drawCmd->RecordUpdateBuffer(*m_renderSettingsBuffer,0ull,m_renderSettings);
 	// prosper TODO: Move camPos to camera buffer, and don't update render settings buffer every frame (update when needed instead)
 
-	if(m_renderer && m_renderer->IsRasterizationRenderer())
-		static_cast<pragma::rendering::RasterizationRenderer*>(m_renderer.get())->UpdateRendererBuffer(drawCmd);
+	if(m_renderer.valid())
+		m_renderer->UpdateRendererBuffer(drawCmd);
+}
+void CSceneComponent::RecordRenderCommandBuffers(const util::DrawSceneInfo &drawSceneInfo)
+{
+	auto *renderer = GetRenderer();
+	if(renderer == nullptr)
+		return;
+	renderer->RecordCommandBuffers(drawSceneInfo);
 }
 void CSceneComponent::InitializeDescriptorSetLayouts()
 {
@@ -518,13 +527,15 @@ void CSceneComponent::SetLightMap(pragma::CLightMapComponent &lightMapC)
 }
 void CSceneComponent::UpdateRendererLightMap()
 {
-	if(m_renderer == nullptr || m_renderer->IsRasterizationRenderer() == false || m_lightMap.expired())
+	if(m_renderer.expired() || m_lightMap.expired())
 		return;
 	auto &texLightMap = m_lightMap->GetLightMap();
 	if(texLightMap == nullptr)
 		return;
 	// TODO: Not ideal to have this here; How to handle this in a better way?
-	static_cast<pragma::rendering::RasterizationRenderer*>(m_renderer.get())->SetLightMap(*m_lightMap);
+	auto raster = m_renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>();
+	if(raster.valid())
+		raster->SetLightMap(*m_lightMap);
 }
 void CSceneComponent::UpdateRenderSettings()
 {
@@ -535,7 +546,7 @@ void CSceneComponent::UpdateRenderSettings()
 	if(unlitProperty->GetValue() == true)
 		flags |= FRenderSetting::Unlit;
 	m_renderSettings.flags = umath::to_integral(flags);
-	if(m_renderer)
+	if(m_renderer.valid())
 		m_renderer->UpdateRenderSettings();
 }
 void CSceneComponent::ClearWorldEnvironment()
@@ -557,9 +568,7 @@ Vulkan::Texture &CSceneComponent::ResolveBloomTexture(Vulkan::CommandBufferObjec
 
 void CSceneComponent::Resize(uint32_t width,uint32_t height,bool reload)
 {
-	if(m_renderer == nullptr)
-		return;
-	if(reload == false && width == GetWidth() && height == GetHeight())
+	if(m_renderer.expired() || (reload == false && width == GetWidth() && height == GetHeight()))
 		return;
 	ReloadRenderTarget(width,height);
 }
@@ -583,14 +592,14 @@ void CSceneComponent::LinkWorldEnvironment(CSceneComponent &other)
 	fogSettings.GetTypeProperty()->Link(*fogSettingsOther.GetTypeProperty());
 }
 
-void CSceneComponent::SetRenderer(const std::shared_ptr<pragma::rendering::BaseRenderer> &renderer)
+void CSceneComponent::SetRenderer(CRendererComponent *renderer)
 {
-	m_renderer = renderer;
+	m_renderer = renderer ? renderer->GetHandle<CRendererComponent>() : util::WeakHandle<CRendererComponent>{};
 	UpdateRenderSettings();
 	UpdateRendererLightMap();
 }
-pragma::rendering::BaseRenderer *CSceneComponent::GetRenderer() {return m_renderer.get();}
-const pragma::rendering::BaseRenderer *CSceneComponent::GetRenderer() const {return const_cast<CSceneComponent*>(this)->GetRenderer();}
+pragma::CRendererComponent *CSceneComponent::GetRenderer() {return m_renderer.get();}
+const pragma::CRendererComponent *CSceneComponent::GetRenderer() const {return const_cast<CSceneComponent*>(this)->GetRenderer();}
 
 SceneDebugMode CSceneComponent::GetDebugMode() const {return m_debugMode;}
 void CSceneComponent::SetDebugMode(SceneDebugMode debugMode) {m_debugMode = debugMode;}
@@ -612,8 +621,8 @@ CSceneComponent *CSceneComponent::GetParentScene()
 
 CSceneComponent::SceneIndex CSceneComponent::GetSceneIndex() const {return m_sceneIndex;}
 
-uint32_t CSceneComponent::GetWidth() const {return m_renderer ? m_renderer->GetWidth() : 0;}
-uint32_t CSceneComponent::GetHeight() const {return m_renderer ? m_renderer->GetHeight() : 0;}
+uint32_t CSceneComponent::GetWidth() const {return m_renderer.valid() ? m_renderer->GetWidth() : 0;}
+uint32_t CSceneComponent::GetHeight() const {return m_renderer.valid() ? m_renderer->GetHeight() : 0;}
 
 //const Vulkan::DescriptorSet &CSceneComponent::GetBloomGlowDescriptorSet() const {return m_descSetBloomGlow;} // prosper TODO
 
@@ -621,7 +630,7 @@ void CSceneComponent::ReloadRenderTarget(uint32_t width,uint32_t height)
 {
 	umath::set_flag(m_stateFlags,StateFlags::ValidRenderer,false);
 
-	if(m_renderer == nullptr || m_renderer->ReloadRenderTarget(*this,width,height) == false)
+	if(m_renderer.expired() || m_renderer->ReloadRenderTarget(*this,width,height) == false)
 		return;
 	
 	umath::set_flag(m_stateFlags,StateFlags::ValidRenderer,true);

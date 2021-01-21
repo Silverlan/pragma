@@ -14,6 +14,7 @@
 #include <pragma/math/angle/wvangle.h>
 #include <mathutil/color.h>
 #include <mathutil/glmutil.h>
+#include <mathutil/transform.hpp>
 
 namespace prosper
 {

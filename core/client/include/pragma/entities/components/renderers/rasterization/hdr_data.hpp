@@ -34,16 +34,16 @@ namespace prosper
 	class IFence;
 };
 namespace util {struct DrawSceneInfo;};
+namespace pragma {class CRasterizationRendererComponent;};
 namespace pragma::rendering
 {
-	class RasterizationRenderer;
 	class DLLCLIENT HDRData
 	{
 	public:
-		HDRData(RasterizationRenderer &rasterizer);
+		HDRData(CRasterizationRendererComponent &rasterizer);
 		~HDRData();
 		void UpdateExposure();
-		bool Initialize(pragma::CSceneComponent &scene,RasterizationRenderer &renderer,uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount,bool bEnableSSAO);
+		bool Initialize(uint32_t width,uint32_t height,prosper::SampleCountFlags sampleCount,bool bEnableSSAO);
 		bool InitializeDescriptorSets();
 		prosper::RenderTarget &GetRenderTarget(const util::DrawSceneInfo &drawSceneInfo);
 

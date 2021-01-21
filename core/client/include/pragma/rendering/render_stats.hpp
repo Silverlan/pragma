@@ -3,6 +3,8 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/baseentity_handle.h"
+#include "pragma/c_engine.h"
+#include <pragma/entities/baseentity.h>
 #include <queries/prosper_timer_query.hpp>
 #include <material.h>
 #include <sharedutils/util_weak_handle.hpp>

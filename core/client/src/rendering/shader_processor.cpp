@@ -16,11 +16,12 @@
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/model/c_model.h"
+#include <prosper_command_buffer.hpp>
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 #pragma optimize("",off)
-bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,const pragma::ShaderGameWorld &referenceShader,bool view)
+bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,const pragma::ShaderGameWorld &referenceShader,bool view)
 {
 	// Note: The reference shader is not the shader we're actually using for rendering, but a base shader that represents all shader types for the current render pass (e.g. prepass / pbr).
 	// We need this information to properly bind the descriptor sets with OpenGL (reference shader is ignored for Vulkan).
@@ -109,7 +110,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneCom
 	static const std::vector<uint32_t> dynamicOffsets {};
 	return m_cmdBuffer.RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,*m_currentPipelineLayout,pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX,descSets,dynamicOffsets);
 }
-bool pragma::rendering::ShaderProcessor::RecordBindShader(const pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,bool view,pragma::ShaderGameWorld &shader,uint32_t pipelineIdx)
+bool pragma::rendering::ShaderProcessor::RecordBindShader(const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,bool view,pragma::ShaderGameWorld &shader,uint32_t pipelineIdx)
 {
 	auto &context = c_engine->GetRenderContext();
 	m_curShader = &shader;

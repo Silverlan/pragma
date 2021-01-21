@@ -37,7 +37,7 @@ ShaderLightCone::ShaderLightCone(prosper::IPrContext &context,const std::string 
 	umath::set_flag(m_sceneFlags,SceneFlags::LightmapsEnabled,false);
 }
 
-bool ShaderLightCone::BindSceneCamera(pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,bool bView)
+bool ShaderLightCone::BindSceneCamera(pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,bool bView)
 {
 	if(ShaderGameWorldLightingPass::BindSceneCamera(scene,renderer,bView) == false)
 		return false;

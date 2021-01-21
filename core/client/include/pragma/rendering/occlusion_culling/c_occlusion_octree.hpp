@@ -9,6 +9,7 @@
 #define __C_OCCLUSION_OCTREE_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include <sharedutils/functioncallback.h>
 #include <array>
 #include <vector>
 #include <cinttypes>

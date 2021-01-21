@@ -11,6 +11,7 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/shaders/c_shader_3d.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured_base.hpp"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include <shader/prosper_shader.hpp>
 
 class CModelSubMesh;
@@ -21,7 +22,7 @@ namespace pragma
 	class CSceneComponent;
 	class SceneMesh;
 	enum class SceneDebugMode : uint32_t;
-	namespace rendering {class RasterizationRenderer;};
+	class CRasterizationRendererComponent;
 	class DLLCLIENT ShaderScene
 		: public Shader3DBase,
 		public ShaderTexturedBase
@@ -83,7 +84,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		virtual bool BindSceneCamera(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,bool bView);
+		virtual bool BindSceneCamera(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,bool bView);
 		virtual bool BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings);
 	protected:
 		ShaderScene(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
@@ -128,7 +129,7 @@ namespace pragma
 #pragma pack(pop)
 
 		virtual bool BindLights(prosper::IDescriptorSet &dsLights);
-		virtual bool BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView);
+		virtual bool BindScene(pragma::CSceneComponent &scene,CRasterizationRendererComponent &renderer,bool bView);
 	protected:
 		ShaderSceneLit(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 		virtual uint32_t GetLightDescriptorSetIndex() const=0;
@@ -194,7 +195,7 @@ namespace pragma
 		virtual bool BindMaterial(CMaterial &mat)=0;
 		virtual bool BindEntity(CBaseEntity &ent);
 		virtual bool BindVertexAnimationOffset(uint32_t offset);
-		virtual bool BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) override;
+		virtual bool BindScene(pragma::CSceneComponent &scene,CRasterizationRendererComponent &renderer,bool bView) override;
 		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1);
 		virtual void EndDraw() override;
 		virtual bool GetRenderBufferTargets(

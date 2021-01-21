@@ -16,7 +16,7 @@
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/rendering/renderers/rasterization_renderer.hpp>
+#include <pragma/entities/components/renderers/c_rasterization_renderer_component.hpp>
 #include <image/prosper_render_target.hpp>
 #include <shader/prosper_shader_blur.hpp>
 
@@ -295,18 +295,12 @@ void CEngine::RegisterConsoleCommands()
 		auto *game = client ? static_cast<CGame*>(client->GetGameState()) : nullptr;
 		if(game)
 		{
-			EntityIterator entItScene {*game};
-			entItScene.AttachFilter<TEntityIteratorFilterComponent<pragma::CSceneComponent>>();
-			Con::cout<<"\tNumber of scenes: "<<entItScene.GetCount()<<Con::endl;
-			for(auto *ent : entItScene)
+			auto cIt = EntityCIterator<pragma::CRasterizationRendererComponent>{*game};
+			Con::cout<<"\tNumber of scenes: "<<cIt.GetCount()<<Con::endl;
+			for(auto &rast : cIt)
 			{
-				auto sceneC = ent->GetComponent<pragma::CSceneComponent>();
-				auto *renderer = sceneC->GetRenderer();
-				if(renderer->IsRasterizationRenderer() == false)
-					continue;
-				Con::cout<<"Scene "<<ent->GetName()<<":"<<Con::endl;
-				auto *rast = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
-				auto &hdrInfo = rast->GetHDRInfo();
+				Con::cout<<"Renderer "<<rast.GetEntity().GetName()<<":"<<Con::endl;
+				auto &hdrInfo = rast.GetHDRInfo();
 				std::unordered_set<prosper::IImage*> images;
 				auto fAddTex = [&images](const std::shared_ptr<prosper::Texture> &tex) {
 					if(tex == nullptr)

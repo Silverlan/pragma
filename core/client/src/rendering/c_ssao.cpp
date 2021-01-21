@@ -97,9 +97,9 @@ void Console::commands::debug_ssao(NetworkState *state,pragma::BasePlayerCompone
 
 	auto *scene = c_game->GetScene();
 	auto *renderer = scene ? scene->GetRenderer() : nullptr;
-	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+	auto rasterizer = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+	if(rasterizer.expired())
 		return;
-	auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
 	auto &ssaoInfo = rasterizer->GetSSAOInfo();
 	auto &prepass = rasterizer->GetPrepass();
 

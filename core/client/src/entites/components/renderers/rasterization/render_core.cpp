@@ -7,9 +7,10 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
-#include "pragma/rendering/renderers/rasterization/culled_mesh_data.hpp"
-#include "pragma/rendering/renderers/rasterization/hdr_data.hpp"
-#include "pragma/rendering/renderers/rasterization/glow_data.hpp"
+#include "pragma/entities/components/renderers/rasterization/culled_mesh_data.hpp"
+#include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
+#include "pragma/entities/components/renderers/rasterization/glow_data.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_glow.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fxaa.hpp"
@@ -38,7 +39,7 @@ extern DLLCLIENT CGame *c_game;
 
 using namespace pragma::rendering;
 #pragma optimize("",off)
-void RasterizationRenderer::RenderParticleSystems(const util::DrawSceneInfo &drawSceneInfo,std::vector<pragma::CParticleSystemComponent*> &particles,RenderMode renderMode,Bool bloom,std::vector<pragma::CParticleSystemComponent*> *bloomParticles)
+void pragma::CRasterizationRendererComponent::RenderParticleSystems(const util::DrawSceneInfo &drawSceneInfo,std::vector<pragma::CParticleSystemComponent*> &particles,RenderMode renderMode,Bool bloom,std::vector<pragma::CParticleSystemComponent*> *bloomParticles)
 {
 	auto depthOnly = umath::is_flag_set(drawSceneInfo.renderFlags,FRender::ParticleDepth);
 	if((depthOnly && bloom) || drawSceneInfo.scene.expired())
@@ -98,10 +99,8 @@ void RasterizationRenderer::RenderParticleSystems(const util::DrawSceneInfo &dra
 }
 
 static auto cvLockCommandBuffers = GetClientConVar("debug_render_lock_render_command_buffers");
-bool RasterizationRenderer::RecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::RecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo)
 {
-	if(BaseRenderer::RecordCommandBuffers(drawSceneInfo) == false)
-		return false;
 	// Debug
 	static auto debugLockCmdBuffers = false;
 	if(cvLockCommandBuffers->GetBool())
@@ -110,7 +109,7 @@ bool RasterizationRenderer::RecordCommandBuffers(const util::DrawSceneInfo &draw
 		{
 			m_prepassCommandBufferGroup->Reuse();
 			m_lightingCommandBufferGroup->Reuse();
-			return true;
+			return;
 		}
 		debugLockCmdBuffers = true;
 		m_prepassCommandBufferGroup->SetOneTimeSubmit(false);
@@ -131,16 +130,15 @@ bool RasterizationRenderer::RecordCommandBuffers(const util::DrawSceneInfo &draw
 	//drawSceneInfo.scene->InvokeEventCallbacks(CSceneComponent::EVENT_POST_RENDER_PREPASS,pragma::CEDrawSceneInfo{drawSceneInfo});
 
 	RecordLightingPass(drawSceneInfo);
-	return true;
 }
-bool RasterizationRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &drawSceneInfo)
 {
-	if(BaseRenderer::Render(drawSceneInfo) == false || drawSceneInfo.scene.expired())
-		return false;
+	if(drawSceneInfo.scene.expired())
+		return;
 	auto &scene = const_cast<pragma::CSceneComponent&>(*drawSceneInfo.scene);
 
 	c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("OnPreRender",drawSceneInfo);
-	c_game->CallLuaCallbacks<void,RasterizationRenderer*>("PrepareRendering",this);
+	// c_game->CallLuaCallbacks<void,RasterizationRenderer*>("PrepareRendering",this);
 
 	// scene.GetSceneRenderDesc().BuildRenderQueue(drawSceneInfo);
 
@@ -290,7 +288,7 @@ bool RasterizationRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 			GetHDRInfo().sceneRenderTarget->GetTexture().GetImage(),
 			prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal
 		);
-		return false;
+		return;
 	}
 	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::PostProcessingGpuToneMapping,*drawSceneInfo.commandBuffer);
 	c_game->StartProfilingStage(CGame::GPUProfilingPhase::PostProcessingHDR);
@@ -310,6 +308,5 @@ bool RasterizationRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 		(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::PostProcessingExecutionCpu,std::chrono::steady_clock::now() -t);
 		(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpu,*drawSceneInfo.commandBuffer);
 	}
-	return true;
 }
 #pragma optimize("",on)

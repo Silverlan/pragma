@@ -33,7 +33,7 @@ namespace pragma
 		virtual bool BindClipPlane(const Vector4 &clipPlane) override {return true;}
 		virtual bool BindEntity(CBaseEntity &ent) override;
 		virtual bool BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings) override;
-		virtual bool BindSceneCamera(pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,bool bView) override;
+		virtual bool BindSceneCamera(pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,bool bView) override;
 		virtual bool BindLights(prosper::IDescriptorSet &dsLights) override;
 		virtual bool BindVertexAnimationOffset(uint32_t offset) override;
 		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;

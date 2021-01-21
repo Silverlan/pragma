@@ -298,8 +298,8 @@ namespace pragma
 		void Lua_OnBindEntity(EntityHandle &hEnt);
 		static void Lua_default_OnBindEntity(lua_State *l,LuaShaderTextured3D &shader,EntityHandle &hEnt) {shader.Lua_OnBindEntity(hEnt);}
 
-		void Lua_OnBindScene(rendering::RasterizationRenderer &renderer,bool bView);
-		static void Lua_default_OnBindScene(lua_State *l,LuaShaderTextured3D &shader,rendering::RasterizationRenderer &renderer,bool bView) {shader.Lua_OnBindScene(renderer,bView);}
+		void Lua_OnBindScene(CRasterizationRendererComponent &renderer,bool bView);
+		static void Lua_default_OnBindScene(lua_State *l,LuaShaderTextured3D &shader,CRasterizationRendererComponent &renderer,bool bView) {shader.Lua_OnBindScene(renderer,bView);}
 
 		void Lua_OnBeginDraw(prosper::ICommandBuffer &drawCmd,const Vector4 &clipPlane,uint32_t pipelineIdx,uint32_t recordFlags);
 		static void Lua_default_OnBeginDraw(lua_State *l,LuaShaderTextured3D &shader,prosper::ICommandBuffer &drawCmd,const Vector4 &clipPlane,uint32_t pipelineIdx,uint32_t recordFlags) {shader.Lua_OnBeginDraw(drawCmd,clipPlane,pipelineIdx,recordFlags);}
@@ -311,7 +311,7 @@ namespace pragma
 		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
 		virtual bool BindEntity(CBaseEntity &ent) override;
 		virtual bool BindVertexAnimationOffset(uint32_t offset) override;
-		virtual bool BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) override;
+		virtual bool BindScene(pragma::CSceneComponent &scene,CRasterizationRendererComponent &renderer,bool bView) override;
 		virtual bool BeginDraw(
 			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor

@@ -985,7 +985,7 @@ int Lua::game::Client::queue_scene_for_rendering(lua_State *l)
 	if(clearColor != nullptr)
 	{
 		auto clearCol = clearColor->ToVector4();
-		auto &hdrInfo = static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetHDRInfo();
+		auto &hdrInfo = static_cast<pragma::CRasterizationRendererComponent*>(renderer)->GetHDRInfo();
 		auto &hdrImg = hdrInfo.sceneRenderTarget->GetTexture().GetImage();
 		cmdBuffer->RecordImageBarrier(hdrImg,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferDstOptimal);
 		cmdBuffer->RecordClearImage(hdrImg,prosper::ImageLayout::TransferDstOptimal,{{clearCol.r,clearCol.g,clearCol.b,clearCol.a}});

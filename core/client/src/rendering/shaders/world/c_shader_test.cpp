@@ -18,6 +18,7 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <image/prosper_sampler.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#include <prosper_command_buffer.hpp>
 #include <texture_type.h>
 
 extern DLLCLIENT CGame *c_game;
@@ -157,11 +158,11 @@ void ShaderTest::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipeli
 {
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(Mat4),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
-bool ShaderTest::BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView)
+bool ShaderTest::BindScene(pragma::CSceneComponent &scene,CRasterizationRendererComponent &renderer,bool bView)
 {
 	return BindSceneCamera(scene,renderer,bView);
 }
-bool ShaderTest::BindSceneCamera(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,bool bView)
+bool ShaderTest::BindSceneCamera(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,bool bView)
 {
 	//if(ShaderGameWorldLightingPass::BindSceneCamera(scene,renderer,bView) == false)
 	//	return false;

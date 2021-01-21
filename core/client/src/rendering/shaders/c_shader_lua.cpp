@@ -299,7 +299,7 @@ void pragma::LuaShaderTextured3D::Lua_InitializeGfxPipelineDescriptorSets(prospe
 void pragma::LuaShaderTextured3D::Lua_OnBindMaterial(Material &mat) {}
 int32_t pragma::LuaShaderTextured3D::Lua_OnDraw(ModelSubMesh &mesh) {return umath::to_integral(util::EventReply::Unhandled);}
 void pragma::LuaShaderTextured3D::Lua_OnBindEntity(EntityHandle &hEnt) {}
-void pragma::LuaShaderTextured3D::Lua_OnBindScene(rendering::RasterizationRenderer &renderer,bool bView) {}
+void pragma::LuaShaderTextured3D::Lua_OnBindScene(CRasterizationRendererComponent &renderer,bool bView) {}
 void pragma::LuaShaderTextured3D::Lua_OnBeginDraw(prosper::ICommandBuffer &drawCmd,const Vector4 &clipPlane,uint32_t pipelineIdx,uint32_t recordFlags) {}
 void pragma::LuaShaderTextured3D::Lua_OnEndDraw() {}
 bool pragma::LuaShaderTextured3D::BindMaterial(CMaterial &mat)
@@ -330,11 +330,11 @@ bool pragma::LuaShaderTextured3D::BindVertexAnimationOffset(uint32_t offset)
 {
 	return ShaderGameWorldLightingPass::BindVertexAnimationOffset(offset);
 }
-bool pragma::LuaShaderTextured3D::BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView)
+bool pragma::LuaShaderTextured3D::BindScene(pragma::CSceneComponent &scene,CRasterizationRendererComponent &renderer,bool bView)
 {
 	if(ShaderGameWorldLightingPass::BindScene(scene,renderer,bView) == false)
 		return false;
-	CallLuaMember<void,rendering::RasterizationRenderer*,bool>("OnBindScene",&renderer,bView);
+	CallLuaMember<void,CRasterizationRendererComponent*,bool>("OnBindScene",&renderer,bView);
 	return true;
 }
 bool pragma::LuaShaderTextured3D::BeginDraw(

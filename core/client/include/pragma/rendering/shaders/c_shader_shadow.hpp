@@ -61,7 +61,7 @@ namespace pragma
 
 		bool BindLight(CLightComponent &light,uint32_t layerId);
 		virtual bool BindMaterial(CMaterial &mat) override; // TODO: Transparent only
-		virtual bool BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) override;
+		virtual bool BindScene(pragma::CSceneComponent &scene,CRasterizationRendererComponent &renderer,bool bView) override;
 		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
 		virtual bool BindClipPlane(const Vector4 &clipPlane) override {return true;}
 		virtual bool SetDepthBias(const Vector2 &depthBias) override {return true;}

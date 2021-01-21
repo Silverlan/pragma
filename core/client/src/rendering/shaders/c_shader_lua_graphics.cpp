@@ -653,7 +653,7 @@ void Lua::Shader::Scene3D::GetRenderPass(lua_State *l,uint32_t pipelineIdx)
 		return;
 	Lua::Push(l,rp);
 }
-void Lua::Shader::Scene3D::BindSceneCamera(lua_State *l,pragma::ShaderScene &shader,CSceneHandle &scene,pragma::rendering::RasterizationRenderer &renderer,bool bView)
+void Lua::Shader::Scene3D::BindSceneCamera(lua_State *l,pragma::ShaderScene &shader,CSceneHandle &scene,pragma::CRasterizationRendererComponent &renderer,bool bView)
 {
 	pragma::Lua::check_component(l,scene);
 	Lua::PushBool(l,shader.BindSceneCamera(*scene,renderer,bView));
@@ -666,7 +666,7 @@ void Lua::Shader::SceneLit3D::BindLights(lua_State *l,pragma::ShaderSceneLit &sh
 {
 	Lua::PushBool(l,shader.BindLights(*dsLights->GetDescriptorSet()));
 }
-void Lua::Shader::SceneLit3D::BindScene(lua_State *l,pragma::ShaderSceneLit &shader,CSceneHandle &scene,pragma::rendering::RasterizationRenderer &renderer,bool bView)
+void Lua::Shader::SceneLit3D::BindScene(lua_State *l,pragma::ShaderSceneLit &shader,CSceneHandle &scene,pragma::CRasterizationRendererComponent &renderer,bool bView)
 {
 	pragma::Lua::check_component(l,scene);
 	Lua::PushBool(l,shader.BindScene(*scene,renderer,bView));

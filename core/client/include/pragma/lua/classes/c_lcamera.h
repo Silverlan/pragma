@@ -51,24 +51,24 @@ namespace Lua
 	};
 	namespace RasterizationRenderer
 	{
-		DLLCLIENT void GetPrepassDepthTexture(lua_State *l,pragma::rendering::RasterizationRenderer &renderer);
-		DLLCLIENT void GetPrepassNormalTexture(lua_State *l,pragma::rendering::RasterizationRenderer &renderer);
+		DLLCLIENT void GetPrepassDepthTexture(lua_State *l,pragma::CRasterizationRendererComponent &renderer);
+		DLLCLIENT void GetPrepassNormalTexture(lua_State *l,pragma::CRasterizationRendererComponent &renderer);
 
-		DLLCLIENT void GetRenderTarget(lua_State *l,pragma::rendering::RasterizationRenderer &renderer);
-		DLLCLIENT void BeginRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const ::util::DrawSceneInfo &drawSceneInfo);
-		DLLCLIENT void BeginRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const ::util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass &rp);
-		DLLCLIENT void EndRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const ::util::DrawSceneInfo &drawSceneInfo);
-		DLLCLIENT void GetPrepassShader(lua_State *l,pragma::rendering::RasterizationRenderer &renderer);
+		DLLCLIENT void GetRenderTarget(lua_State *l,pragma::CRasterizationRendererComponent &renderer);
+		DLLCLIENT void BeginRenderPass(lua_State *l,pragma::CRasterizationRendererComponent &renderer,const ::util::DrawSceneInfo &drawSceneInfo);
+		DLLCLIENT void BeginRenderPass(lua_State *l,pragma::CRasterizationRendererComponent &renderer,const ::util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass &rp);
+		DLLCLIENT void EndRenderPass(lua_State *l,pragma::CRasterizationRendererComponent &renderer,const ::util::DrawSceneInfo &drawSceneInfo);
+		DLLCLIENT void GetPrepassShader(lua_State *l,pragma::CRasterizationRendererComponent &renderer);
 
-		DLLCLIENT void SetShaderOverride(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const std::string &srcName,const std::string &dstName);
-		DLLCLIENT void ClearShaderOverride(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const std::string &srcName);
+		DLLCLIENT void SetShaderOverride(lua_State *l,pragma::CRasterizationRendererComponent &renderer,const std::string &srcName,const std::string &dstName);
+		DLLCLIENT void ClearShaderOverride(lua_State *l,pragma::CRasterizationRendererComponent &renderer,const std::string &srcName);
 
-		DLLCLIENT void SetPrepassMode(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,uint32_t mode);
-		DLLCLIENT void GetPrepassMode(lua_State *l,pragma::rendering::RasterizationRenderer &renderer);
+		DLLCLIENT void SetPrepassMode(lua_State *l,pragma::CRasterizationRendererComponent &renderer,uint32_t mode);
+		DLLCLIENT void GetPrepassMode(lua_State *l,pragma::CRasterizationRendererComponent &renderer);
 
-		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,CSceneHandle &scene,uint32_t renderMode,pragma::ShaderGameWorldLightingPass &shader,::Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh);
-		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,CSceneHandle &scene,uint32_t renderMode,const std::string &shaderName,::Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh);
-		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,CSceneHandle &scene,uint32_t renderMode,::Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh);
+		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,pragma::CRasterizationRendererComponent &renderer,CSceneHandle &scene,uint32_t renderMode,pragma::ShaderGameWorldLightingPass &shader,::Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh);
+		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,pragma::CRasterizationRendererComponent &renderer,CSceneHandle &scene,uint32_t renderMode,const std::string &shaderName,::Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh);
+		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,pragma::CRasterizationRendererComponent &renderer,CSceneHandle &scene,uint32_t renderMode,::Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh);
 	};
 };
 

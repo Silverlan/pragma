@@ -15,6 +15,7 @@
 #include <prosper_util.hpp>
 #include <image/prosper_msaa_texture.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#include <prosper_command_buffer.hpp>
 #include <datasystem_vector.h>
 
 extern DLLCENGINE CEngine *c_engine;
@@ -266,7 +267,7 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(
 }
 
 prosper::DescriptorSetInfo &ShaderParticle2DBase::GetAnimationDescriptorSetInfo() const {return DESCRIPTOR_SET_ANIMATION;}
-bool ShaderParticle2DBase::BindParticleMaterial(const rendering::RasterizationRenderer &renderer,const pragma::CParticleSystemComponent &ps)
+bool ShaderParticle2DBase::BindParticleMaterial(const CRasterizationRendererComponent &renderer,const pragma::CParticleSystemComponent &ps)
 {
 	auto *mat = static_cast<CMaterial*>(ps.GetMaterial());
 	if(mat == nullptr)
@@ -284,7 +285,7 @@ bool ShaderParticle2DBase::BindParticleMaterial(const rendering::RasterizationRe
 	return RecordBindDescriptorSets({&descSetTexture,descSetDepth,&animDescSet},DESCRIPTOR_SET_TEXTURE.setIndex);
 }
 
-bool ShaderParticle2DBase::Draw(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const pragma::CParticleSystemComponent &ps,pragma::CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags ptRenderFlags)
+bool ShaderParticle2DBase::Draw(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const pragma::CParticleSystemComponent &ps,pragma::CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags ptRenderFlags)
 {
 	if(BindParticleMaterial(renderer,ps) == false)
 		return false;

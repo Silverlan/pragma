@@ -9,6 +9,7 @@
 #define __C_SCENE_COMPONENT_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/entities/c_baseentity.h"
 #include "pragma/rendering/shaders/world/c_shader_textured_uniform_data.hpp"
 #include "pragma/rendering/c_renderflags.h"
 #include "pragma/rendering/render_mesh_collection_handler.hpp"
@@ -19,16 +20,21 @@
 namespace pragma
 {
 	class CSceneComponent;
+	class CRenderComponent;
 	class CLightMapComponent;
 	class EntityComponentManager;
 	class CCameraComponent;
 	class OcclusionCullingHandler;
 	class CParticleSystemComponent;
 	class COcclusionCullerComponent;
+	class CRendererComponent;
+	class ShaderGameWorldLightingPass;
 	struct OcclusionMeshInfo;
 	using RenderMeshIndex = uint32_t;
-	namespace rendering {class RenderQueue; class BaseRenderer; struct RenderQueueItem;};
+	namespace rendering {class RenderQueue; struct RenderQueueItem;};
 };
+template<class T>
+	class OcclusionOctree;
 class DLLCLIENT SceneRenderDesc
 {
 public:
@@ -249,9 +255,9 @@ namespace pragma
 		void LinkWorldEnvironment(CSceneComponent &other);
 		void SetLightMap(pragma::CLightMapComponent &lightMapC);
 
-		void SetRenderer(const std::shared_ptr<pragma::rendering::BaseRenderer> &renderer);
-		pragma::rendering::BaseRenderer *GetRenderer();
-		const pragma::rendering::BaseRenderer *GetRenderer() const;
+		void SetRenderer(CRendererComponent *renderer);
+		CRendererComponent *GetRenderer();
+		const CRendererComponent *GetRenderer() const;
 
 		SceneDebugMode GetDebugMode() const;
 		void SetDebugMode(SceneDebugMode debugMode);
@@ -273,6 +279,8 @@ namespace pragma
 
 		const std::vector<util::WeakHandle<pragma::CLightComponent>> &GetPreviouslyVisibleShadowedLights() const {return m_previouslyVisibleShadowedLights;}
 		void SwapPreviouslyVisibleLights(std::vector<util::WeakHandle<pragma::CLightComponent>> &&components) {std::swap(m_previouslyVisibleShadowedLights,components);}
+		
+		void RecordRenderCommandBuffers(const util::DrawSceneInfo &drawSceneInfo);
 	private:
 		static float CalcLightMapPowExposure(pragma::CLightMapComponent &lightMapC);
 		void InitializeShadowDescriptorSet();
@@ -315,7 +323,7 @@ namespace pragma
 		CallbackHandle m_cbLink {};
 
 		StateFlags m_stateFlags = StateFlags::None;
-		std::shared_ptr<pragma::rendering::BaseRenderer> m_renderer = nullptr;
+		util::WeakHandle<CRendererComponent> m_renderer {};
 		SceneRenderDesc m_sceneRenderDesc;
 
 		void UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bView=false);

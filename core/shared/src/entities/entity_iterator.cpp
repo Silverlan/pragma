@@ -147,4 +147,3 @@ void EntityIterator::SetBaseComponentType(const std::string &componentName)
 	componentManager.GetComponentTypeId(componentName,componentId);
 	SetBaseComponentType(componentId);
 }
-

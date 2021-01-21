@@ -5,6 +5,8 @@
  * Copyright (c) 2020 Florian Weischer
  */
 
+// TODO: Remove this file
+#if 0
 #include "stdafx_client.h"
 #include "pragma/rendering/renderers/raytracing_renderer.hpp"
 #include "pragma/rendering/shaders/world/raytracing/c_shader_raytracing.hpp"
@@ -193,3 +195,4 @@ prosper::Texture *RaytracingRenderer::GetHDRPresentationTexture()
 void RaytracingRenderer::EndRendering() {}
 prosper::IDescriptorSet &RaytracingRenderer::GetOutputImageDescriptorSet() {return *m_dsgOutputImage->GetDescriptorSet();}
 
+#endif

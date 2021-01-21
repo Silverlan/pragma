@@ -214,7 +214,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 					{
 						auto p = ent->GetComponent<pragma::CParticleSystemComponent>();
 						if(p.valid() && p->GetCastShadows() == true)
-							p->RenderShadow(drawCmd,*scene,*static_cast<pragma::rendering::RasterizationRenderer*>(renderer),pLightComponent.get(),layer);
+							p->RenderShadow(drawCmd,*scene,*static_cast<pragma::CRasterizationRendererComponent*>(renderer),pLightComponent.get(),layer);
 					}
 				}
 

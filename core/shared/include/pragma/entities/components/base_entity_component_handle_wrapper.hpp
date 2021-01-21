@@ -8,6 +8,7 @@
 #define __BASE_ENTITY_COMPONENT_HANDLE_WRAPPER_HPP__
 
 #include <sharedutils/util_weak_handle.hpp>
+#include "pragma/networkdefinitions.h"
 
 namespace pragma {class BaseEntityComponent;};
 struct DLLNETWORK BaseEntityComponentHandleWrapper

@@ -20,6 +20,7 @@
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/lproperty.hpp>
 #include <pragma/lua/lua_call.hpp>
+#include <prosper_command_buffer.hpp>
 #include <sharedutils/property/util_property_color.hpp>
 #include <util_formatted_text.hpp>
 
@@ -445,13 +446,14 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 		lua_checkgui_ret(l,hPanel,false);
 		return hPanel->IsUpdateScheduled();
 	}));
-#if 0
+
 	auto defDrawInfo = luabind::class_<::WIBase::DrawInfo>("DrawInfo");
-	defDrawInfo.def(luabind::constructor<>());
+	defDrawInfo.def(luabind::constructor<const std::shared_ptr<prosper::ICommandBuffer>&>());
 	defDrawInfo.def_readwrite("offset",&::WIBase::DrawInfo::offset);
 	defDrawInfo.def_readwrite("size",&::WIBase::DrawInfo::size);
 	defDrawInfo.def_readwrite("transform",&::WIBase::DrawInfo::transform);
 	defDrawInfo.def_readwrite("useScissor",&::WIBase::DrawInfo::useScissor);
+	defDrawInfo.def_readwrite("commandBuffer",&::WIBase::DrawInfo::commandBuffer);
 	defDrawInfo.def("SetColor",static_cast<void(*)(lua_State*,::WIBase::DrawInfo&,const Color&)>([](lua_State *l,::WIBase::DrawInfo &drawInfo,const Color &color) {
 		drawInfo.color = color.ToVector4();
 	}));
@@ -459,7 +461,6 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 		drawInfo.postTransform = t;
 	}));
 	classDef.scope[defDrawInfo];
-#endif
 }
 
 void Lua::WIButton::register_class(luabind::class_<WIButtonHandle,WIHandle> &classDef)

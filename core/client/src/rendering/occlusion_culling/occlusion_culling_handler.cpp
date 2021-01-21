@@ -33,7 +33,7 @@ bool OcclusionCullingHandler::ShouldExamine(CModelMesh &mesh,const Vector3 &pos,
 	max += pos;
 	return (umath::intersection::aabb_in_plane_mesh(min,max,*planes) != umath::intersection::Intersect::Outside) ? true : false;
 }
-bool OcclusionCullingHandler::ShouldExamine(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,CBaseEntity &ent,bool &outViewModel,std::vector<umath::Plane> **outPlanes) const
+bool OcclusionCullingHandler::ShouldExamine(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,CBaseEntity &ent,bool &outViewModel,std::vector<umath::Plane> **outPlanes) const
 {
 	if(ent.IsInScene(scene) == false)
 		return false;
@@ -56,20 +56,20 @@ bool OcclusionCullingHandler::ShouldExamine(pragma::CSceneComponent &scene,const
 	auto &aabb = pRenderComponent->GetAbsoluteRenderBounds();
 	return umath::intersection::aabb_in_plane_mesh(aabb.min,aabb.max,*(*outPlanes)) != umath::intersection::Intersect::Outside;
 }
-void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,std::vector<pragma::CParticleSystemComponent*> &particlesOut)
+void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,std::vector<pragma::CParticleSystemComponent*> &particlesOut)
 {
 	auto &cam = scene.GetActiveCamera();
 	auto &posCam = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	PerformCulling(scene,renderer,posCam,particlesOut);
 }
-void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut)
+void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,std::vector<OcclusionMeshInfo> &culledMeshesOut)
 {
 	auto &cam = scene.GetActiveCamera();
 	auto &posCam = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
 	PerformCulling(scene,renderer,posCam,culledMeshesOut);
 }
 void OcclusionCullingHandler::PerformCulling(
-	pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+	pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const Vector3 &camPos,
 	std::vector<pragma::CParticleSystemComponent*> &particlesOut
 )
 {
@@ -89,7 +89,7 @@ void OcclusionCullingHandler::PerformCulling(
 			particlesOut.push_back(hPt.get());
 	}
 }
-void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const std::vector<pragma::CLightComponent*> &lightsIn,std::vector<pragma::CLightComponent*> &lightsOut)
+void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const std::vector<pragma::CLightComponent*> &lightsIn,std::vector<pragma::CLightComponent*> &lightsOut)
 {
 	auto &cam = scene.GetActiveCamera();
 	auto &pos = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
@@ -176,7 +176,7 @@ void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,cons
 	if(lightsOut.size() > static_cast<uint32_t>(GameLimits::MaxAbsoluteLights))
 		lightsOut.resize(static_cast<uint32_t>(GameLimits::MaxAbsoluteLights));
 }
-void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &origin,float radius,std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut)
+void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const Vector3 &origin,float radius,std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut)
 {
 	auto radiusSqr = umath::pow(radius,2.f);
 	culledMeshesOut.clear();

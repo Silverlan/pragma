@@ -11,6 +11,7 @@
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/c_ssao.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/game/c_game.h"
 #include <prosper_command_buffer.hpp>
 #include <prosper_util.hpp>
@@ -22,7 +23,7 @@ using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
 #pragma optimize("",off)
-void RasterizationRenderer::RenderSSAO(const util::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::RenderSSAO(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &ssaoInfo = GetSSAOInfo();
 	auto *shaderSSAO = static_cast<pragma::ShaderSSAO*>(ssaoInfo.GetSSAOShader());

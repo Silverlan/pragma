@@ -6,7 +6,8 @@
  */
 
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
-#include "pragma/rendering/renderers/rasterization/hdr_data.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
+#include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/c_settings.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fxaa.hpp"
@@ -28,7 +29,7 @@ static auto cvFxaaSubPixelAliasingRemoval = GetClientConVar("cl_render_fxaa_sub_
 static auto cvFxaaEdgeThreshold = GetClientConVar("cl_render_fxaa_edge_threshold");
 static auto cvFxaaMinEdgeThreshold = GetClientConVar("cl_render_fxaa_min_edge_threshold");
 
-void RasterizationRenderer::RenderFXAA(const util::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::RenderFXAA(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(static_cast<AntiAliasing>(cvAntiAliasing->GetInt()) != AntiAliasing::FXAA)
 		return;

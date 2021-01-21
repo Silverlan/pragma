@@ -97,6 +97,9 @@
 #include "pragma/entities/c_listener.h"
 #include "pragma/entities/c_viewbody.h"
 #include "pragma/entities/c_viewmodel.h"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_raytracing_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/c_flex_component.hpp"
 #include "pragma/entities/components/c_softbody_component.hpp"
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
@@ -228,5 +231,8 @@ DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,COcclusionCuller);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CEye);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CSkyCamera);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CScene);
+DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CRenderer);
+DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CRasterizationRenderer);
+DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CRaytracingRenderer);
 
 #endif

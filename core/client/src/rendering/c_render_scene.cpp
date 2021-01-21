@@ -46,15 +46,6 @@ void CGame::RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &
 
 std::shared_ptr<prosper::IPrimaryCommandBuffer> CGame::GetCurrentDrawCommandBuffer() const {return m_currentDrawCmd.lock();}
 
-void CGame::RecordSceneCommandBuffers(const util::DrawSceneInfo &drawSceneInfo)
-{
-	auto &scene = drawSceneInfo.scene;
-	auto *renderer = const_cast<pragma::rendering::BaseRenderer*>(scene->GetRenderer());
-	if(renderer == nullptr)
-		return;
-	renderer->RecordCommandBuffers(drawSceneInfo);
-}
-
 void CGame::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 {
 	m_currentDrawCmd = drawSceneInfo.commandBuffer;
@@ -66,7 +57,7 @@ void CGame::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScene",drawSceneInfo);
 
 	auto &scene = drawSceneInfo.scene;
-	auto *renderer = const_cast<pragma::rendering::BaseRenderer*>(scene->GetRenderer());
+	auto *renderer = const_cast<pragma::CSceneComponent*>(scene.get())->GetRenderer();
 	if(renderer)
 	{
 

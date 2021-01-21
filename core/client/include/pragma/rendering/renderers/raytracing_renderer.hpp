@@ -5,6 +5,8 @@
  * Copyright (c) 2020 Florian Weischer
  */
 
+// TODO: Remove this file
+#if 0
 #ifndef __RAYTRACING_RENDERER_HPP__
 #define __RAYTRACING_RENDERER_HPP__
 
@@ -39,4 +41,5 @@ namespace pragma::rendering
 	};
 };
 
+#endif
 #endif

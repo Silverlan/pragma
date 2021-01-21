@@ -39,7 +39,7 @@ void CLightSpotVolComponent::Initialize()
 			auto *scene = c_game->GetScene();
 			auto *renderer = scene ? scene->GetRenderer() : nullptr;
 			if(renderer != nullptr && renderer->IsRasterizationRenderer())
-				static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->SetFrameDepthBufferSamplingRequired();
+				static_cast<pragma::CRasterizationRendererComponent*>(renderer)->SetFrameDepthBufferSamplingRequired();
 		}),CallbackType::Entity);*/
 	}
 }

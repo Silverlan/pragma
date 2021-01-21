@@ -577,7 +577,7 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->Simulate(tDelta);
 		}));
-	defCParticleSystem.def("Render",static_cast<void(*)(lua_State*,CParticleSystemHandle&,std::shared_ptr<prosper::ICommandBuffer>&,CSceneHandle&,pragma::rendering::RasterizationRenderer&,uint32_t)>([](lua_State *l,CParticleSystemHandle &hComponent,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,CSceneHandle &scene,pragma::rendering::RasterizationRenderer &renderer,uint32_t renderFlags) {
+	defCParticleSystem.def("Render",static_cast<void(*)(lua_State*,CParticleSystemHandle&,std::shared_ptr<prosper::ICommandBuffer>&,CSceneHandle&,pragma::CRasterizationRendererComponent&,uint32_t)>([](lua_State *l,CParticleSystemHandle &hComponent,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,CSceneHandle &scene,pragma::CRasterizationRendererComponent &renderer,uint32_t renderFlags) {
 		pragma::Lua::check_component(l,hComponent);
 		pragma::Lua::check_component(l,scene);
 		if(drawCmd->IsPrimary() == false)

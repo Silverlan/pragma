@@ -76,7 +76,7 @@ void CLightMapComponent::SetLightMapAtlas(const std::shared_ptr<prosper::Texture
 	m_lightMapAtlas = lightMap;
 
 	// TODO: This method only allows one lightmap atlas globally; Implement this in a way that allows multiple (maybe add to entity descriptor set?)!
-	pragma::rendering::RasterizationRenderer::UpdateLightmap(*this);
+	pragma::CRasterizationRendererComponent::UpdateLightmap(*this);
 }
 
 void CLightMapComponent::ReloadLightMapData()
@@ -481,9 +481,10 @@ void Console::commands::debug_lightmaps(NetworkState *state,pragma::BasePlayerCo
 
 	auto *scene = c_game->GetRenderScene();
 	auto *renderer = scene ? scene->GetRenderer() : nullptr;
-	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+	if(raster.expired())
 		return;
-	auto &lightmap = static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetLightMap();
+	auto &lightmap = raster->GetLightMap();
 	if(lightmap.expired())
 		return;
 	auto &tex = lightmap->GetLightMap();

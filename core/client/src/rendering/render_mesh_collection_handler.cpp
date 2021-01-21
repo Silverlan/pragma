@@ -31,7 +31,7 @@ extern DLLCLIENT CGame *c_game;
 
 
 static auto cvDrawWorld = GetClientConVar("render_draw_world");
-const std::vector<pragma::OcclusionMeshInfo> &rendering::RenderMeshCollectionHandler::PerformOcclusionCulling(pragma::CSceneComponent &scene,const RasterizationRenderer &renderer,const Vector3 &posCam,bool cullByViewFrustum)
+const std::vector<pragma::OcclusionMeshInfo> &rendering::RenderMeshCollectionHandler::PerformOcclusionCulling(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const Vector3 &posCam,bool cullByViewFrustum)
 {
 	m_culledMeshes.clear();
 	auto *world = static_cast<pragma::CWorldComponent*>(c_game->GetWorld());
@@ -58,7 +58,7 @@ std::shared_ptr<rendering::CulledMeshData> rendering::RenderMeshCollectionHandle
 	return it->second;
 }
 
-rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollectionHandler::GenerateOptimizedRenderObjectStructures(pragma::CSceneComponent &scene,const RasterizationRenderer &renderer,const Vector3 &posCam,FRender renderFlags,RenderMode renderMode,bool useGlowMeshes,bool useTranslucentMeshes)
+rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollectionHandler::GenerateOptimizedRenderObjectStructures(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const Vector3 &posCam,FRender renderFlags,RenderMode renderMode,bool useGlowMeshes,bool useTranslucentMeshes)
 {
 	auto it = m_culledMeshData.find(renderMode);
 	if(it == m_culledMeshData.end())

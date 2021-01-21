@@ -128,7 +128,7 @@ bool ShaderScene::BindRenderSettings(prosper::IDescriptorSet &descSetRenderSetti
 {
 	return RecordBindDescriptorSet(descSetRenderSettings,GetRenderSettingsDescriptorSetIndex());
 }
-bool ShaderScene::BindSceneCamera(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,bool bView)
+bool ShaderScene::BindSceneCamera(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,bool bView)
 {
 	auto *descSet = (bView == true) ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
 	return RecordBindDescriptorSet(*descSet,GetCameraDescriptorSetIndex());
@@ -178,7 +178,7 @@ bool ShaderSceneLit::BindLights(prosper::IDescriptorSet &dsLights)
 		return false;
 	return RecordBindDescriptorSets({&dsLights,descSetShadow},GetLightDescriptorSetIndex());
 }
-bool ShaderSceneLit::BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView)
+bool ShaderSceneLit::BindScene(pragma::CSceneComponent &scene,CRasterizationRendererComponent &renderer,bool bView)
 {
 	return BindSceneCamera(scene,renderer,bView) && RecordBindDescriptorSet(*renderer.GetRendererDescriptorSet(),GetRendererDescriptorSetIndex()) &&
 		BindLights(*renderer.GetLightSourceDescriptorSet());
@@ -325,7 +325,7 @@ bool ShaderEntity::BindVertexAnimationOffset(uint32_t offset)
 	return RecordPushConstants(sizeof(offset),&offset,pushConstantOffset);
 }
 
-bool ShaderEntity::BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView)
+bool ShaderEntity::BindScene(pragma::CSceneComponent &scene,CRasterizationRendererComponent &renderer,bool bView)
 {
 	return ShaderSceneLit::BindScene(scene,renderer,bView) &&
 		BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());

@@ -325,7 +325,7 @@ static void register_renderer_bindings(luabind::module_ &entsMod)
 	defRaster.add_static_constant("PREPASS_MODE_DISABLED",umath::to_integral(pragma::CRasterizationRendererComponent::PrepassMode::NoPrepass));
 	defRaster.add_static_constant("PREPASS_MODE_DEPTH_ONLY",umath::to_integral(pragma::CRasterizationRendererComponent::PrepassMode::DepthOnly));
 	defRaster.add_static_constant("PREPASS_MODE_EXTENDED",umath::to_integral(pragma::CRasterizationRendererComponent::PrepassMode::Extended));
-	entsMod[defRenderer];
+	entsMod[defRaster];
 
 	auto defRaytracing = luabind::class_<CRaytracingRendererHandle,BaseEntityComponentHandle>("RaytracingRendererComponent");
 	entsMod[defRaytracing];
@@ -502,6 +502,8 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	// defCEye.add_static_constant("EVENT_ON_EYEBALLS_UPDATED",pragma::CEyeComponent::EVENT_ON_EYEBALLS_UPDATED);
 	// defCEye.add_static_constant("EVENT_ON_BLINK",pragma::CEyeComponent::EVENT_ON_BLINK);
 	entsMod[defCEye];
+
+	register_renderer_bindings(entsMod);
 
 	auto defCScene = luabind::class_<CSceneHandle,BaseEntityComponentHandle>("SceneComponent");
 	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_BRUTE_FORCE",umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::BruteForce));

@@ -162,10 +162,9 @@ CGame::CGame(NetworkState *state)
 	m_luaShaderManager = std::make_shared<pragma::LuaShaderManager>();
 	m_luaParticleModifierManager = std::make_shared<pragma::LuaParticleModifierManager>();
 
-	m_worldShaderSettings.shadowQuality = static_cast<pragma::rendering::GameWorldShaderSettings::ShadowQuality>(GetConVarInt("cl_render_shadow_quality"));
-	m_worldShaderSettings.ssaoEnabled = GetConVarBool("cl_render_ssao");
-	m_worldShaderSettings.bloomEnabled = GetConVarBool("render_bloom_enabled");
-	m_worldShaderSettings.debugModeEnabled = GetConVarBool("render_debug_mode") || GetConVarBool("render_unlit");
+	UpdateGameWorldShaderSettings();
+	umath::set_flag(m_stateFlags,StateFlags::PrepassShaderPipelineReloadRequired,false);
+	umath::set_flag(m_stateFlags,StateFlags::GameWorldShaderPipelineReloadRequired,false);
 
 	RegisterCallback<void,CGame*>("OnGameEnd");
 	RegisterCallback<void,pragma::CLightDirectionalComponent*,pragma::CLightDirectionalComponent*>("OnEnvironmentLightSourceChanged");
@@ -360,6 +359,55 @@ void CGame::OnRemove()
 
 	Game::OnRemove();
 }
+
+void CGame::UpdateGameWorldShaderSettings()
+{
+	auto oldSettings = m_worldShaderSettings;
+	m_worldShaderSettings.shadowQuality = static_cast<pragma::rendering::GameWorldShaderSettings::ShadowQuality>(GetConVarInt("cl_render_shadow_quality"));
+	m_worldShaderSettings.ssaoEnabled = GetConVarBool("cl_render_ssao");
+	m_worldShaderSettings.bloomEnabled = GetConVarBool("render_bloom_enabled");
+	m_worldShaderSettings.debugModeEnabled = GetConVarBool("render_debug_mode") || GetConVarBool("render_unlit");
+	m_worldShaderSettings.fxaaEnabled = static_cast<pragma::rendering::AntiAliasing>(GetConVarInt("cl_render_anti_aliasing")) == pragma::rendering::AntiAliasing::FXAA;
+	m_worldShaderSettings.iblEnabled = GetConVarBool("render_ibl_enabled");
+	m_worldShaderSettings.dynamicLightingEnabled = GetConVarBool("render_dynamic_lighting_enabled");
+	m_worldShaderSettings.dynamicShadowsEnabled = GetConVarBool("render_dynamic_shadows_enabled");
+	if(m_worldShaderSettings == oldSettings)
+		return;
+	if(m_worldShaderSettings.fxaaEnabled != oldSettings.fxaaEnabled || m_worldShaderSettings.bloomEnabled != oldSettings.bloomEnabled)
+	{
+		auto shader = c_engine->GetShaderManager().GetShader("pp_hdr");
+		if(shader.valid())
+			shader->ReloadPipelines();
+	}
+	if(m_worldShaderSettings.ssaoEnabled != oldSettings.ssaoEnabled)
+		ReloadPrepassShaderPipelines();
+	if(
+		m_worldShaderSettings.shadowQuality != oldSettings.shadowQuality ||
+		m_worldShaderSettings.ssaoEnabled != oldSettings.ssaoEnabled ||
+		m_worldShaderSettings.bloomEnabled != oldSettings.bloomEnabled ||
+		m_worldShaderSettings.debugModeEnabled != oldSettings.debugModeEnabled ||
+		m_worldShaderSettings.iblEnabled != oldSettings.iblEnabled ||
+		m_worldShaderSettings.dynamicLightingEnabled != oldSettings.dynamicLightingEnabled ||
+		m_worldShaderSettings.dynamicShadowsEnabled != oldSettings.dynamicShadowsEnabled
+	)
+		ReloadGameWorldShaderPipelines();
+	if(m_worldShaderSettings.dynamicLightingEnabled != oldSettings.dynamicLightingEnabled)
+	{
+		auto shader = c_engine->GetShaderManager().GetShader("forwardp_light_culling");
+		if(shader.valid())
+			shader->ReloadPipelines();
+	}
+}
+
+static void cmd_render_ibl_enabled(NetworkState*,ConVar*,bool,bool enabled)
+{
+	if(c_game == nullptr)
+		return;
+	c_game->UpdateGameWorldShaderSettings();
+}
+REGISTER_CONVAR_CALLBACK_CL(render_ibl_enabled,cmd_render_ibl_enabled);
+REGISTER_CONVAR_CALLBACK_CL(render_dynamic_lighting_enabled,cmd_render_ibl_enabled);
+REGISTER_CONVAR_CALLBACK_CL(render_dynamic_shadows_enabled,cmd_render_ibl_enabled);
 
 static void cmd_render_queue_worker_thread_count(NetworkState*,ConVar*,int,int val)
 {
@@ -585,13 +633,7 @@ static void render_debug_mode(NetworkState*,ConVar*,int32_t,int32_t debugMode)
 {
 	if(c_game == nullptr)
 		return;
-	auto debugModeEnabled = (debugMode != 0);
-	auto &worldShaderSettings = c_game->GetGameWorldShaderSettings();
-	if(worldShaderSettings.debugModeEnabled != debugModeEnabled)
-	{
-		worldShaderSettings.debugModeEnabled = debugModeEnabled;
-		c_game->ReloadGameWorldShaderPipelines();
-	}
+	c_game->UpdateGameWorldShaderSettings();
 	EntityIterator entIt {*c_game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CSceneComponent>>();
 	for(auto *ent : entIt)

@@ -215,6 +215,7 @@ namespace pragma
 		CBaseEntity *m_boundEntity = nullptr;
 	};
 
+	namespace rendering {class ShaderProcessor;};
 	class DLLCLIENT ShaderGameWorld
 		: public ShaderEntity
 	{
@@ -260,6 +261,7 @@ namespace pragma
 
 		static uint32_t HASH_TYPE;
 		using ShaderEntity::ShaderEntity;
+		// TODO: Remove these, they're deprecated
 		virtual bool BindClipPlane(const Vector4 &clipPlane)=0;
 		virtual bool BeginDraw(
 			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},
@@ -269,10 +271,28 @@ namespace pragma
 		virtual void Set3DSky(bool is3dSky)=0;
 		virtual bool BindDrawOrigin(const Vector4 &drawOrigin)=0;
 		virtual bool SetDepthBias(const Vector2 &depthBias)=0;
+		//
+
 		virtual GameShaderType GetPassType() const {return GameShaderType::LightingPass;}
 		virtual size_t GetBaseTypeHashCode() const override;
 		virtual uint32_t GetMaterialDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
 		prosper::IDescriptorSet &GetDefaultMaterialDescriptorSet() const;
+
+		virtual void RecordBindScene(
+			rendering::ShaderProcessor &shaderProcessor,
+			const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
+			prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
+			prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
+			prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
+			SceneFlags &inOutSceneFlags
+		) const {}
+		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor,CMaterial &mat) const;
+		virtual void RecordSceneFlags(rendering::ShaderProcessor &shaderProcessor,SceneFlags sceneFlags) const;
+		virtual void RecordBindLight(rendering::ShaderProcessor &shaderProcessor,CLightComponent &light,uint32_t layerId) const {}
+		virtual void RecordAlphaCutoff(rendering::ShaderProcessor &shaderProcessor,float alphaCutoff) const {}
+		virtual void RecordClipPlane(rendering::ShaderProcessor &shaderProcessor,const Vector4 &clipPlane) const;
+		virtual void OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor,CModelSubMesh &mesh) const {}
+		virtual bool IsUsingLightmaps() const {return false;}
 	protected:
 		SceneFlags m_sceneFlags = SceneFlags::None;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_defaultMatDsg = nullptr;

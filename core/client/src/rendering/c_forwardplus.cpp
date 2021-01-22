@@ -82,7 +82,6 @@ pragma::rendering::ForwardPlusInstance::ForwardPlusInstance(CRasterizationRender
 	m_cmdBuffer = c_engine->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Compute,m_cmdBufferQueueFamilyIndex);
 
 	m_shaderLightCulling = c_engine->GetShader("forwardp_light_culling");
-	m_shaderLightIndexing = c_engine->GetShader("forwardp_light_indexing");
 }
 
 bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::IPrContext &context,uint32_t width,uint32_t height,prosper::Texture &depthTexture)
@@ -131,7 +130,7 @@ bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::IPrContext &con
 
 void pragma::rendering::ForwardPlusInstance::Compute(prosper::IPrimaryCommandBuffer &cmdBuffer,pragma::CSceneComponent &scene,prosper::IImage &imgDepth,prosper::IDescriptorSet &descSetCam)
 {
-	if(m_shaderLightCulling.expired() || m_shaderLightIndexing.expired() || m_shadowLightBits.empty() == true)
+	if(m_shaderLightCulling.expired() || m_shadowLightBits.empty() == true)
 		return;
 	auto &shaderLightCulling = static_cast<pragma::ShaderForwardPLightCulling&>(*m_shaderLightCulling.get());
 	if(shaderLightCulling.BeginCompute(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(cmdBuffer.shared_from_this())) == false)

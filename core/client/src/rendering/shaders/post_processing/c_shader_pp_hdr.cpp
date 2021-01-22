@@ -59,6 +59,7 @@ void ShaderPPHDR::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 
 	auto &settings = c_game->GetGameWorldShaderSettings();
 	AddSpecializationConstant(pipelineInfo,prosper::ShaderStageFlags::FragmentBit,0u /* constantId */,static_cast<uint32_t>(settings.bloomEnabled));
+	AddSpecializationConstant(pipelineInfo,prosper::ShaderStageFlags::FragmentBit,1u /* constantId */,static_cast<uint32_t>(settings.fxaaEnabled));
 }
 
 bool ShaderPPHDR::Draw(prosper::IDescriptorSet &descSetTexture,pragma::rendering::ToneMapping toneMapping,float exposure,float bloomScale,float glowScale,bool flipVertically)

@@ -21,94 +21,27 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 #pragma optimize("",off)
-bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,const pragma::ShaderGameWorld &referenceShader,bool view)
+bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,const pragma::ShaderGameWorld &shader,bool view)
 {
-	// Note: The reference shader is not the shader we're actually using for rendering, but a base shader that represents all shader types for the current render pass (e.g. prepass / pbr).
-	// We need this information to properly bind the descriptor sets with OpenGL (reference shader is ignored for Vulkan).
-	
-	auto passType = referenceShader.GetPassType();
-	m_passType = passType;
 	auto *dsScene = view ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
 	auto *dsRenderer = renderer.GetRendererDescriptorSet();
 	auto &dsRenderSettings = c_game->GetGlobalRenderSettingsDescriptorSet();
 	auto *dsLights = renderer.GetLightSourceDescriptorSet();
 	auto *dsShadows = pragma::CShadowComponent::GetDescriptorSet();
-	auto &dsMat = referenceShader.GetDefaultMaterialDescriptorSet();
 	assert(dsScene);
 	assert(dsRenderer);
 	assert(dsLights);
 	assert(dsShadows);
+	auto &dsMat = shader.GetDefaultMaterialDescriptorSet();
 	m_sceneFlags = ShaderGameWorld::SceneFlags::None;
 	m_view = view;
-	std::vector<prosper::IDescriptorSet*> descSets {};
-	switch(passType)
-	{
-	case pragma::ShaderGameWorld::GameShaderType::LightingPass:
-	{
-		descSets.resize(7);
-		descSets[0] = &dsMat;
-		descSets[1] = dsScene;
-		descSets[2] = dsRenderer;
-		descSets[3] = &dsRenderSettings;
-		descSets[4] = dsLights;
-		descSets[5] = dsShadows;
-		
-		ShaderGameWorldLightingPass::PushConstants pushConstants {};
-		pushConstants.Initialize();
-		auto &hCam = scene.GetActiveCamera();
-		assert(hCam.valid());
-		auto iblStrength = 1.f;
-		auto *dsPbr = CReflectionProbeComponent::FindDescriptorSetForClosestProbe(scene,hCam->GetEntity().GetPosition(),iblStrength);
-		if(dsPbr == nullptr) // No reflection probe and therefore no IBL available. Fallback to non-IBL rendering.
-		{
-			dsPbr = &static_cast<const pragma::ShaderPBR&>(referenceShader).GetDefaultPbrDescriptorSet();
-			m_sceneFlags |= ShaderGameWorld::SceneFlags::NoIBL;
-		}
-		descSets[6] = dsPbr;
-
-		pushConstants.debugMode = scene.GetDebugMode();
-		pushConstants.reflectionProbeIntensity = iblStrength;
-		pushConstants.flags = m_sceneFlags;
-		m_cmdBuffer.RecordPushConstants(*m_currentPipelineLayout,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0u,sizeof(pushConstants),&pushConstants);
-		break;
-	}
-	case pragma::ShaderGameWorld::GameShaderType::DepthPrepass:
-	{
-		descSets.resize(3);
-		descSets[0] = &dsMat;
-		descSets[1] = dsScene;
-		descSets[2] = &dsRenderSettings;
-
-		ShaderPrepass::PushConstants pushConstants {};
-		pushConstants.Initialize();
-		m_cmdBuffer.RecordPushConstants(*m_currentPipelineLayout,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0u,sizeof(pushConstants),&pushConstants);
-		break;
-	}
-	case pragma::ShaderGameWorld::GameShaderType::ShadowPass:
-	{
-		descSets.resize(3);
-		descSets[0] = &dsMat;
-		descSets[1] = dsScene;
-		descSets[2] = &dsRenderSettings;
-
-		ShaderShadow::PushConstants pushConstants {};
-		pushConstants.Initialize();
-		m_cmdBuffer.RecordPushConstants(*m_currentPipelineLayout,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0u,sizeof(pushConstants),&pushConstants);
-		break;
-	}
-	case pragma::ShaderGameWorld::GameShaderType::SkyPass:
-	{
-		descSets.resize(3);
-		descSets[0] = &dsMat;
-		descSets[1] = dsScene;
-		descSets[2] = dsRenderer;
-		break;
-	}
-	}
-
-	// We can bind all of these in one go
-	static const std::vector<uint32_t> dynamicOffsets {};
-	return m_cmdBuffer.RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,*m_currentPipelineLayout,pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX,descSets,dynamicOffsets);
+	shader.RecordBindScene(
+		*this,scene,renderer,
+		*dsScene,*dsRenderer,dsRenderSettings,
+		*dsLights,*dsShadows,dsMat,
+		m_sceneFlags
+	);
+	return true;
 }
 bool pragma::rendering::ShaderProcessor::RecordBindShader(const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,bool view,pragma::ShaderGameWorld &shader,uint32_t pipelineIdx)
 {
@@ -133,64 +66,26 @@ void pragma::rendering::ShaderProcessor::UpdateSceneFlags(ShaderGameWorld::Scene
 	if(sceneFlags == m_sceneFlags)
 		return;
 	m_sceneFlags = sceneFlags;
-	size_t offset = 0;
-	switch(m_passType)
-	{
-	case ShaderGameWorld::GameShaderType::ShadowPass:
-		offset = offsetof(ShaderShadow::PushConstants,flags);
-		break;
-	case ShaderGameWorld::GameShaderType::SkyPass:
-		return;
-	default:
-		offset = offsetof(ShaderGameWorld::ScenePushConstants,flags);
-		break;
-	}
-	m_cmdBuffer.RecordPushConstants(*m_currentPipelineLayout,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offset,sizeof(sceneFlags),&sceneFlags);
+	m_curShader->RecordSceneFlags(*this,sceneFlags);
 }
 bool pragma::rendering::ShaderProcessor::RecordBindLight(CLightComponent &light,uint32_t layerId)
 {
-#pragma pack(push,1)
-	struct {
-		Mat4 depthMVP;
-		Vector4 lightPos;
-	} pushData;
-#pragma pack(pop)
-
-	auto pRadiusComponent = light.GetEntity().GetComponent<CRadiusComponent>();
-	auto &pos = light.GetEntity().GetPosition();
-	pushData.depthMVP = light.GetTransformationMatrix(layerId);
-	pushData.lightPos = Vector4{pos.x,pos.y,pos.z,static_cast<float>(pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f)};
-
-	return m_cmdBuffer.RecordPushConstants(*m_currentPipelineLayout,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(ShaderShadow::PushConstants,depthMVP),sizeof(pushData),&pushData);
+	m_curShader->RecordBindLight(*this,light,layerId);
+	return true;
 }
 bool pragma::rendering::ShaderProcessor::RecordBindMaterial(CMaterial &mat)
 {
-	auto alphaMode = mat.GetAlphaMode();
-	if(m_passType != ShaderGameWorld::GameShaderType::LightingPass && m_passType != ShaderGameWorld::GameShaderType::SkyPass && alphaMode == AlphaMode::Opaque)
-		return true; // TODO: Notify shader?
-
+	if(m_curShader->RecordBindMaterial(*this,mat) == false)
+		return true;
 	auto flags = m_sceneFlags;
+	auto alphaMode = mat.GetAlphaMode();
 	if(alphaMode != AlphaMode::Opaque)
 	{
 		auto alphaCutoff = mat.GetAlphaCutoff();
 		if(alphaCutoff != m_alphaCutoff)
 		{
 			m_alphaCutoff = alphaCutoff;
-			if(m_passType != ShaderGameWorld::GameShaderType::LightingPass && m_passType != ShaderGameWorld::GameShaderType::SkyPass)
-			{
-				static_assert(std::is_same_v<decltype(alphaCutoff),decltype(ShaderPrepass::PushConstants::alphaCutoff)>);
-				size_t offset = 0;
-				switch(m_passType)
-				{
-				case ShaderGameWorld::GameShaderType::DepthPrepass:
-					offset = offsetof(ShaderPrepass::PushConstants,alphaCutoff);
-					break;
-				case ShaderGameWorld::GameShaderType::ShadowPass:
-					offset = offsetof(ShaderShadow::PushConstants,alphaCutoff);
-					break;
-				}
-				m_cmdBuffer.RecordPushConstants(*m_currentPipelineLayout,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offset,sizeof(alphaCutoff),&alphaCutoff);
-			}
+			m_curShader->RecordAlphaCutoff(*this,alphaCutoff);
 		}
 		flags |= ShaderGameWorld::SceneFlags::AlphaTest;
 	}
@@ -198,14 +93,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindMaterial(CMaterial &mat)
 	// TODO
 	//shaderScene->Set3DSky(umath::is_flag_set(m_renderFlags,RenderFlags::RenderAs3DSky));
 	UpdateSceneFlags(flags);
-
-	// TODO: GetDescriptorSetGroup requires a map lookup and is fairly expensive, optimize this!
-	auto descSetGroup = mat.GetDescriptorSetGroup(*m_curShader);
-	if(descSetGroup == nullptr)
-		descSetGroup = m_curShader->InitializeMaterialDescriptorSet(mat,false); // Attempt to initialize on the fly (TODO: Is this thread safe?)
-	if(descSetGroup == nullptr)
-		return false;
-	return m_cmdBuffer.RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,*m_currentPipelineLayout,m_materialDescriptorSetIndex,*descSetGroup->GetDescriptorSet(0));
+	return true;
 }
 bool pragma::rendering::ShaderProcessor::RecordBindEntity(CBaseEntity &ent)
 {
@@ -220,12 +108,9 @@ bool pragma::rendering::ShaderProcessor::RecordBindEntity(CBaseEntity &ent)
 	auto *clipPlane = renderC->GetRenderClipPlane();
 	if(static_cast<bool>(clipPlane) != m_clipPlane.has_value() && (!clipPlane || *clipPlane != *m_clipPlane))
 	{
-		if(m_passType != ShaderGameWorld::GameShaderType::ShadowPass && m_passType != ShaderGameWorld::GameShaderType::SkyPass)
-		{
-			static_assert(sizeof(*clipPlane) == sizeof(ShaderGameWorld::ScenePushConstants::clipPlane));
-			auto vClipPlane = clipPlane ? *clipPlane : Vector4{};
-			m_cmdBuffer.RecordPushConstants(*m_currentPipelineLayout,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(ShaderGameWorld::ScenePushConstants,clipPlane),sizeof(*clipPlane),&vClipPlane);
-		}
+		auto vClipPlane = clipPlane ? *clipPlane : Vector4{};
+		m_curShader->RecordClipPlane(*this,vClipPlane);
+
 		m_clipPlane = clipPlane ? *clipPlane : std::optional<Vector4>{};
 	}
 	
@@ -238,7 +123,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindEntity(CBaseEntity &ent)
 			m_vertexAnimC = ent.GetComponent<pragma::CVertexAnimatedComponent>().get();
 	}
 	
-	if(m_passType == ShaderGameWorld::GameShaderType::LightingPass)
+	if(m_curShader->IsUsingLightmaps())
 	{
 		m_lightMapReceiverC = renderC->GetLightMapReceiverComponent();
 		if(m_lightMapReceiverC)
@@ -310,6 +195,8 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(CModelSubMesh &mesh,pragma::
 
 		(*m_stats)->Increment(RenderPassStats::Counter::DrawCalls);
 	}
+	m_curShader->OnRecordDrawMesh(*this,mesh);
 	return m_cmdBuffer.RecordDrawIndexed(mesh.GetTriangleVertexCount(),instanceCount);
 }
+inline CBaseEntity &pragma::rendering::ShaderProcessor::GetCurrentEntity() const {return static_cast<CBaseEntity&>(m_modelC->GetEntity());}
 #pragma optimize("",on)

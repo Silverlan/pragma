@@ -9,11 +9,13 @@
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/rendering/render_processor.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
+#include <prosper_command_buffer.hpp>
 #include <pragma/model/vertex.h>
 
 using namespace pragma;
@@ -143,6 +145,67 @@ void ShaderShadow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pi
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDER_SETTINGS);
 
 	pipelineInfo.ToggleDepthBias(true,SHADOW_DEPTH_BIAS_CONSTANT,0.f,SHADOW_DEPTH_BIAS_SLOPE);
+}
+
+//
+
+void ShaderShadow::RecordBindScene(
+	rendering::ShaderProcessor &shaderProcessor,
+	const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
+	prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
+	prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
+	prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
+	ShaderGameWorld::SceneFlags &inOutSceneFlags
+) const
+{
+	std::array<prosper::IDescriptorSet*,3> descSets {
+		&dsMaterial,
+		&dsScene,
+		&dsRenderSettings
+	};
+		
+	ShaderShadow::PushConstants pushConstants {};
+	pushConstants.Initialize();
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0u,sizeof(pushConstants),&pushConstants);
+
+	static const std::vector<uint32_t> dynamicOffsets {};
+	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,shaderProcessor.GetCurrentPipelineLayout(),pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX,descSets,dynamicOffsets);
+}
+
+void pragma::ShaderShadow::RecordSceneFlags(rendering::ShaderProcessor &shaderProcessor,SceneFlags sceneFlags) const
+{
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(PushConstants,flags),sizeof(sceneFlags),&sceneFlags);
+}
+
+void pragma::ShaderShadow::RecordBindLight(rendering::ShaderProcessor &shaderProcessor,CLightComponent &light,uint32_t layerId) const
+{
+#pragma pack(push,1)
+	struct {
+		Mat4 depthMVP;
+		Vector4 lightPos;
+	} pushData;
+#pragma pack(pop)
+
+	auto pRadiusComponent = light.GetEntity().GetComponent<CRadiusComponent>();
+	auto &pos = light.GetEntity().GetPosition();
+	pushData.depthMVP = light.GetTransformationMatrix(layerId);
+	pushData.lightPos = Vector4{pos.x,pos.y,pos.z,static_cast<float>(pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f)};
+
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(PushConstants,depthMVP),sizeof(pushData),&pushData);
+}
+
+void ShaderShadow::RecordAlphaCutoff(rendering::ShaderProcessor &shaderProcessor,float alphaCutoff) const
+{
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(
+		shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(PushConstants,alphaCutoff),sizeof(alphaCutoff),&alphaCutoff
+	);
+}
+
+bool ShaderShadow::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor,CMaterial &mat) const
+{
+	if(mat.GetAlphaMode() == AlphaMode::Opaque)
+		return false;
+	return ShaderGameWorld::RecordBindMaterial(shaderProcessor,mat);
 }
 
 //////////////////

@@ -58,7 +58,6 @@ namespace pragma
 			std::shared_ptr<prosper::IBuffer> m_bufTileVisLightIndex = nullptr;
 			std::shared_ptr<prosper::IBuffer> m_bufVisLightIndex = nullptr;
 			util::WeakHandle<prosper::Shader> m_shaderLightCulling = {};
-			util::WeakHandle<prosper::Shader> m_shaderLightIndexing = {};
 			std::shared_ptr<prosper::IPrimaryCommandBuffer> m_cmdBuffer = nullptr;
 			uint32_t m_cmdBufferQueueFamilyIndex = std::numeric_limits<uint32_t>::max();
 

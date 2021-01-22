@@ -50,6 +50,10 @@ namespace pragma::rendering
 		bool RecordDraw(CModelSubMesh &mesh,pragma::RenderMeshIndex meshIdx,const pragma::rendering::RenderQueue::InstanceSet *instanceSet=nullptr);
 
 		void SetStats(RenderPassStats *stats) {m_stats = stats;}
+
+		inline prosper::ICommandBuffer &GetCommandBuffer() const {return m_cmdBuffer;}
+		inline prosper::IShaderPipelineLayout &GetCurrentPipelineLayout() const {return *m_currentPipelineLayout;}
+		inline CBaseEntity &GetCurrentEntity() const;
 	private:
 		bool RecordBindScene(const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,const pragma::ShaderGameWorld &referenceShader,bool view);
 		bool BindInstanceSet(pragma::ShaderGameWorld &shaderScene,const pragma::rendering::RenderQueue::InstanceSet *instanceSet=nullptr);
@@ -69,7 +73,6 @@ namespace pragma::rendering
 		const RenderQueue::InstanceSet *m_curInstanceSet = nullptr;
 
 		pragma::ShaderGameWorld *m_curShader = nullptr;
-		pragma::ShaderGameWorld::GameShaderType m_passType = pragma::ShaderGameWorld::GameShaderType::LightingPass;
 		uint32_t m_curVertexAnimationOffset = 0;
 		RenderPassStats *m_stats = nullptr;
 

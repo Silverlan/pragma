@@ -26,13 +26,12 @@ layout(location = SHADER_NORMAL_BUFFER_LOCATION) in vec3 in_vert_normal;
 
 #include "vs_light.gls"
 
-void export_world_fragment_data(mat4 mdlMatrix,vec3 vertPos)
+void export_world_fragment_data(mat4 mdlMatrix,vec3 vpos)
 {
 	mat4 V = get_view_matrix();
 
 	vec3 vertNorm = in_vert_normal.xyz;
-	vec4 weightedVertPos = vec4(vertPos,1.0);
-	vec3 normal = in_vert_normal.xyz;
+	vec4 vertPos = vec4(vpos,1.0);
 	mat4 mBone;
 	if(CSPEC_ENABLE_ANIMATION == 1)
 	{
@@ -57,7 +56,7 @@ void export_world_fragment_data(mat4 mdlMatrix,vec3 vertPos)
 				get_vertex_anim_vertex_position(frameData.srcFrameOffset,vpos1,vnorm1,vwrinkle1);
 
 				wrinkleDelta += vwrinkle0 *frameData.blend;
-				vertPos += vpos0 *frameData.blend;//v0 +(v1 -v0) *frameData.blend;
+				vertPos.xyz += vpos0 *frameData.blend;//v0 +(v1 -v0) *frameData.blend;
 				vertNorm += vnorm0 *frameData.blend;
 			}
 			vertNorm = normalize(vertNorm);
@@ -67,14 +66,14 @@ void export_world_fragment_data(mat4 mdlMatrix,vec3 vertPos)
 		if(CSPEC_ENABLE_EXTENDED_VERTEX_WEIGHTS == 1)
 			extendedWeights = is_weighted_ext();
 		mBone = calc_bone_matrix(is_instanced_weighted(),extendedWeights);
-		weightedVertPos = mBone *weightedVertPos;
-		normal = normalize((mBone *vec4(normal.xyz,0.0)).xyz);
+		vertPos = mBone *vertPos;
+		vertNorm = normalize((mBone *vec4(vertNorm.xyz,0.0)).xyz);
 	}
 
 	//mat4 MV = V *mdlMatrix;
 	//mat4 MVP = u_camera.P *MV;
 
-	vec4 vposWs = mdlMatrix *weightedVertPos;
+	vec4 vposWs = mdlMatrix *vertPos;
 	if(CSPEC_ENABLE_3D_ORIGIN == 1)
 	{
 		if(is_3d_sky())
@@ -111,17 +110,17 @@ void export_world_fragment_data(mat4 mdlMatrix,vec3 vertPos)
 	//vs_out.vert_pos = vertPos;
 	//vs_out.vert_pos_cs = (V *vposWs).xyz;
 
-	vs_out.vert_normal = normal;
+	vs_out.vert_normal = vertNorm;
 	vs_out.vert_uv = in_vert_uv.xy;
 
 	if(CSPEC_ENABLE_NORMAL_MAP == 1 || CSPEC_PARALLAX_ENABLED == 1)
 	{
 	   vec3 T = normalize((mBone *vec4(in_vert_tangent,0.0)).xyz);
 	   vec3 B = normalize((mBone *vec4(in_vert_bitangent,0.0)).xyz);
-	   vec3 N = normal;
+	   vec3 N = vertNorm;
 	   vs_out.TBN = mat3(T,B,N);
 
-		vs_out.vert_normal_cs = (V *mdlMatrix *vec4(normal,0)).xyz;
+		vs_out.vert_normal_cs = (V *mdlMatrix *vec4(vertNorm,0)).xyz;
 	}
 
 #if ENABLE_LIGHTMAP == 1

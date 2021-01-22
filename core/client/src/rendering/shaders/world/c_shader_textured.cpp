@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/rendering/render_processor.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"
@@ -153,8 +154,7 @@ GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetStaticSpeci
 {
 	auto staticFlags = 
 		GameShaderSpecializationConstantFlag::EnableLightSourcesBit | GameShaderSpecializationConstantFlag::EnableLightSourcesDirectionalBit |
-		GameShaderSpecializationConstantFlag::EnableLightSourcesPointBit | GameShaderSpecializationConstantFlag::EnableLightSourcesSpotBit |
-		GameShaderSpecializationConstantFlag::EnableIblBit;
+		GameShaderSpecializationConstantFlag::EnableLightSourcesPointBit | GameShaderSpecializationConstantFlag::EnableLightSourcesSpotBit;
 	switch(specialization)
 	{
 	case GameShaderSpecialization::Generic:
@@ -279,7 +279,6 @@ void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelin
 	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EmissionEnabledBit);
 	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::WrinklesEnabledBit);
 	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableTranslucencyBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableIblBit);
 	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableLightSourcesBit);
 	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableLightSourcesSpotBit);
 	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableLightSourcesPointBit);
@@ -310,6 +309,9 @@ void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelin
 	fSetPropertyValue(GameShaderSpecializationPropertyIndex::DebugModeEnabled,static_cast<uint32_t>(shaderSettings.debugModeEnabled));
 	fSetPropertyValue(GameShaderSpecializationPropertyIndex::BloomOutputEnabled,static_cast<uint32_t>(shaderSettings.bloomEnabled));
 	fSetPropertyValue(GameShaderSpecializationPropertyIndex::EnableSsao,static_cast<uint32_t>(shaderSettings.ssaoEnabled));
+	fSetPropertyValue(GameShaderSpecializationPropertyIndex::EnableIbl,static_cast<uint32_t>(shaderSettings.iblEnabled));
+	fSetPropertyValue(GameShaderSpecializationPropertyIndex::EnableDynamicLighting,static_cast<uint32_t>(shaderSettings.dynamicLightingEnabled));
+	fSetPropertyValue(GameShaderSpecializationPropertyIndex::EnableDynamicShadows,static_cast<uint32_t>(shaderSettings.dynamicShadowsEnabled));
 }
 
 static auto cvNormalMappingEnabled = GetClientConVar("render_normalmapping_enabled");
@@ -634,6 +636,38 @@ std::optional<ShaderGameWorldLightingPass::MaterialData> ShaderGameWorldLighting
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
 	return InitializeMaterialDescriptorSet(mat,DESCRIPTOR_SET_MATERIAL);
+}
+
+////////
+
+void ShaderGameWorldLightingPass::RecordBindScene(
+	rendering::ShaderProcessor &shaderProcessor,
+	const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
+	prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
+	prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
+	prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
+	ShaderGameWorld::SceneFlags &inOutSceneFlags
+) const
+{
+	std::array<prosper::IDescriptorSet*,6> descSets {
+		descSets[0] = &dsMaterial,
+		descSets[1] = &dsScene,
+		descSets[2] = &dsRenderer,
+		descSets[3] = &dsRenderSettings,
+		descSets[4] = &dsLights,
+		descSets[5] = &dsShadows
+	};
+		
+	ShaderGameWorldLightingPass::PushConstants pushConstants {};
+	pushConstants.Initialize();
+	auto &hCam = scene.GetActiveCamera();
+	assert(hCam.valid());
+	pushConstants.debugMode = scene.GetDebugMode();
+	pushConstants.flags = m_sceneFlags;
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0u,sizeof(pushConstants),&pushConstants);
+
+	static const std::vector<uint32_t> dynamicOffsets {};
+	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,shaderProcessor.GetCurrentPipelineLayout(),pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX,descSets,dynamicOffsets);
 }
 
 ////////

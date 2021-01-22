@@ -3,6 +3,8 @@
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shading_language_420pack : enable
 
+const uint CSPEC_SHADOW_QUALITY = 0;
+
 #include "sh_particle_mode.gls"
 #include "../modules/sh_export.gls"
 #include "../modules/sh_color.gls"

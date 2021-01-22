@@ -25,7 +25,8 @@ extern DLLCLIENT CGame *c_game;
 #pragma optimize("",off)
 void pragma::CRasterizationRendererComponent::CullLightSources(const util::DrawSceneInfo &drawSceneInfo)
 {
-	if(drawSceneInfo.scene.expired())
+	auto &shaderSettings = c_game->GetGameWorldShaderSettings();
+	if(drawSceneInfo.scene.expired() || shaderSettings.dynamicLightingEnabled == false)
 		return;
 	auto &scene = *drawSceneInfo.scene;
 	auto &prepass = GetPrepass();
@@ -51,10 +52,8 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const util::DrawS
 			{prosper::PipelineStageFlags::ComputeShaderBit,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::AccessFlags::ShaderReadBit}
 		);
 
-		static std::vector<pragma::CLightComponent*> visLightSources;
-		visLightSources.clear();
-		static std::vector<util::WeakHandle<pragma::CLightComponent>> visShadowedLights;
-		visShadowedLights.clear();
+		m_visLightSources.clear();
+		m_visShadowedLights.clear();
 
 		auto &fp = GetForwardPlusInstance();
 
@@ -93,7 +92,7 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const util::DrawS
 					auto *l = pragma::CLightComponent::GetLightByShadowBufferIndex(shadowIdx);
 					if(l == nullptr || static_cast<CBaseEntity&>(l->GetEntity()).IsInScene(scene) == false)
 						continue;
-					visLightSources.push_back(l);
+					m_visLightSources.push_back(l);
 
 					auto &renderBuffer = l->GetRenderBuffer();
 					if(renderBuffer)
@@ -126,7 +125,7 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const util::DrawS
 								hSm->RequestRenderTarget();
 							}
 							if(shadowC->GetRenderer().GetRenderState() != LightShadowRenderer::RenderState::NoRenderRequired)
-								visShadowedLights.push_back(l->GetHandle<CLightComponent>());
+								m_visShadowedLights.push_back(l->GetHandle<CLightComponent>());
 						}
 					}
 				}
@@ -168,13 +167,13 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const util::DrawS
 			prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 		);
 
-		if(worldEnv && worldEnv->IsUnlit() == false)
+		if(worldEnv && worldEnv->IsUnlit() == false && shaderSettings.dynamicShadowsEnabled)
 		{			
 			std::queue<uint32_t> lightSourcesReadyForShadowRendering;
 			std::queue<uint32_t> lightSourcesWaitingForRenderQueues;
-			for(auto i=decltype(visShadowedLights.size()){0u};i<visShadowedLights.size();++i)
+			for(auto i=decltype(m_visShadowedLights.size()){0u};i<m_visShadowedLights.size();++i)
 			{
-				auto *l = visShadowedLights[i].get();
+				auto *l = m_visShadowedLights[i].get();
 				auto hSm = l->GetShadowMap(pragma::CLightComponent::ShadowMapType::Dynamic);
 				if(hSm.valid() && hSm->HasRenderTarget() == false)
 					hSm->RequestRenderTarget();
@@ -210,7 +209,7 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const util::DrawS
 				// TODO: Compare render queue hash to determine if we need to re-render
 				// Note: Always have to re-render if render target has changed!!
 				// Also do the same below
-				auto &lightC = visShadowedLights.at(idx);
+				auto &lightC = m_visShadowedLights.at(idx);
 				auto &renderer = lightC->GetShadowComponent()->GetRenderer();
 				renderer.Render(drawSceneInfo);
 			}
@@ -222,12 +221,12 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const util::DrawS
 				
 				// Render remaining light sources. If their render queues are still not
 				// completed, we'll have no choice but to wait.
-				auto &lightC = visShadowedLights.at(idx);
+				auto &lightC = m_visShadowedLights.at(idx);
 				auto &renderer = lightC->GetShadowComponent()->GetRenderer();
 				renderer.Render(drawSceneInfo);
 			}
 
-			const_cast<CSceneComponent&>(*drawSceneInfo.scene).SwapPreviouslyVisibleLights(std::move(visShadowedLights));
+			const_cast<CSceneComponent&>(*drawSceneInfo.scene).SwapPreviouslyVisibleLights(std::move(m_visShadowedLights));
 		}
 		//c_engine->StopGPUTimer(GPUTimerEvent::Shadow); // prosper TODO
 		//drawCmd->SetViewport(w,h); // Reset the viewport

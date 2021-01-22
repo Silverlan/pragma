@@ -213,6 +213,15 @@ void CVertexAnimatedComponent::UpdateVertexAnimationDataMT()
 endLoop:
 	m_vertexAnimationMeshBufferOffsets = {};
 	m_bufferUpdateRequired = true;
+
+	auto bufferOffset = 0ull;
+	for(auto &pair : data)
+	{
+		m_vertexAnimationMeshBufferOffsets.insert(std::make_pair(pair.first,std::make_pair(bufferOffset,pair.second.size())));
+		memcpy(reinterpret_cast<uint8_t*>(m_vertexAnimationBufferData.data()) +bufferOffset *sizeof(pair.second.front()),pair.second.data(),pair.second.size() *sizeof(pair.second.front()));
+		bufferOffset += pair.second.size();
+	}
+	m_vertexAnimationBufferDataCount = bufferOffset;
 	//auto bufferData = std::vector<VertexAnimationData>{};
 	//bufferData.reserve(m_activeVertexAnimations);
 }
@@ -222,22 +231,8 @@ void CVertexAnimatedComponent::UpdateVertexAnimationBuffer(const std::shared_ptr
 	if(!m_vertexAnimationBuffer)
 		return;
 	auto &buf = *m_vertexAnimationBuffer;
-	auto flagAsDirty = m_bufferUpdateRequired;
-	if(m_bufferUpdateRequired)
-	{
-		m_bufferUpdateRequired = false;
-		auto bufferOffset = 0ull;
-		auto &data = m_vertexAnimationData;
-		for(auto &pair : data)
-		{
-			m_vertexAnimationMeshBufferOffsets.insert(std::make_pair(pair.first,std::make_pair(bufferOffset,pair.second.size())));
-			memcpy(reinterpret_cast<uint8_t*>(m_vertexAnimationBufferData.data()) +bufferOffset *sizeof(pair.second.front()),pair.second.data(),pair.second.size() *sizeof(pair.second.front()));
-			bufferOffset += pair.second.size();
-		}
-		m_vertexAnimationBufferDataCount = bufferOffset;
-	}
 	if(m_vertexAnimationBufferDataCount > 0)
-		buf.Update(0ull,m_vertexAnimationBufferDataCount *sizeof(m_vertexAnimationBufferData.front()),m_vertexAnimationBufferData.data(),flagAsDirty);
+		buf.Update(0ull,m_vertexAnimationBufferDataCount *sizeof(m_vertexAnimationBufferData.front()),m_vertexAnimationBufferData.data(),m_bufferUpdateRequired);
 }
 
 bool CVertexAnimatedComponent::GetVertexAnimationBufferMeshOffset(CModelSubMesh &mesh,uint32_t &offset,uint32_t &animCount) const

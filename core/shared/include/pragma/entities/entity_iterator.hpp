@@ -140,14 +140,13 @@ public:
 		void AttachFilter(TARGS ...args);
 protected:
 	EntityIterator()=default;
+	EntityIterator(Game &game,bool /* dummy */);
 	void SetBaseComponentType(pragma::ComponentId componentId);
 	void SetBaseComponentType(std::type_index typeIndex);
 	void SetBaseComponentType(const std::string &componentName);
 
 	std::shared_ptr<EntityIteratorData> m_iteratorData;
 private:
-	EntityIterator(Game &game,bool /* dummy */);
-
 	template <typename T, typename = int>
 		struct HasGetType : std::false_type { };
 
@@ -353,7 +352,7 @@ template<class TComponent>
 {
 public:
 	EntityCIterator(Game &game,FilterFlags filterFlags=FilterFlags::Default)
-		: EntityIterator{}
+		: EntityIterator{game,false}
 	{
 		SetBaseComponentType(std::type_index(typeid(TComponent)));
 	}

@@ -246,6 +246,9 @@ namespace pragma
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_dsgLights;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_dsgLightsCompute;
 
+		std::vector<pragma::CLightComponent*> m_visLightSources;
+		std::vector<util::WeakHandle<pragma::CLightComponent>> m_visShadowedLights;
+
 		// HDR
 		rendering::HDRData m_hdrInfo;
 		// GlowData m_glowInfo;

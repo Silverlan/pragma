@@ -55,6 +55,9 @@ void CEngine::RegisterConsoleCommands()
 			static_cast<CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).SetDownscaleImportedRMATextures(newVal);
 	}});
 	conVarMap.RegisterConVar("render_debug_mode","0",ConVarFlags::None,"0 = Disabled, 1 = Ambient Occlusion, 2 = Albedo Colors, 3 = Metalness, 4 = Roughness, 5 = Diffuse Lighting, 6 = Normals, 7 = Normal Map, 8 = Reflectance, 9 = IBL Prefilter, 10 = IBL Irradiance, 11 = Emission, 12 = Lightmaps, 13 = Lightmap Uvs, 14 = Unlit, 15 = Show CSM cascades, 16 = Shadow Map Depth, 17 = Forward+ Heatmap.");
+	conVarMap.RegisterConVar("render_ibl_enabled","1",ConVarFlags::Archive,"Enables or disables image-based lighting.");
+	conVarMap.RegisterConVar("render_dynamic_lighting_enabled","1",ConVarFlags::Archive,"Enables or disables dynamic lighting.");
+	conVarMap.RegisterConVar("render_dynamic_shadows_enabled","1",ConVarFlags::Archive,"Enables or disables dynamic shadows.");
 	conVarMap.RegisterConVar("render_api","vulkan",ConVarFlags::Archive | ConVarFlags::Replicated,"The underlying rendering API to use.",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
 		auto &renderAPIs = pragma::rendering::get_available_graphics_apis();
 		auto it = renderAPIs.begin();

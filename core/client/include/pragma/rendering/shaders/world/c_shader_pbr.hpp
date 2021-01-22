@@ -54,8 +54,26 @@ namespace pragma
 		) override;
 		prosper::IDescriptorSet &GetDefaultPbrDescriptorSet() const;
 		void SetForceNonIBLMode(bool b);
+
+		//
+		virtual void RecordBindScene(
+			rendering::ShaderProcessor &shaderProcessor,
+			const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
+			prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
+			prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
+			prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
+			ShaderGameWorld::SceneFlags &inOutSceneFlags
+		) const override;
 	protected:
 		using ShaderGameWorldLightingPass::Draw;
+		void RecordBindSceneDescriptorSets(
+			rendering::ShaderProcessor &shaderProcessor,
+			const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
+			prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
+			prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
+			prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
+			ShaderGameWorld::SceneFlags &inOutSceneFlags,float &outIblStrength
+		) const;
 		virtual void OnPipelinesInitialized() override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void UpdateRenderFlags(CModelSubMesh &mesh,SceneFlags &inOutFlags) override;

@@ -44,7 +44,7 @@ void CRendererComponent::RegisterEvents(pragma::EntityComponentManager &componen
 	EVENT_RENDER = componentManager.RegisterEvent("EVENT_RENDER",typeid(CRendererComponent));
 }
 
-luabind::object CRendererComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CRaytracingRendererComponentHandleWrapper>(l);}
+luabind::object CRendererComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CRendererComponentHandleWrapper>(l);}
 
 void CRendererComponent::UpdateRenderSettings() {InvokeEventCallbacks(EVENT_UPDATE_RENDER_SETTINGS);}
 
@@ -67,8 +67,10 @@ void CRendererComponent::RecordCommandBuffers(const util::DrawSceneInfo &drawSce
 }
 void CRendererComponent::Render(const util::DrawSceneInfo &drawSceneInfo)
 {
+	BeginRendering(drawSceneInfo);
 	pragma::CERender evData {drawSceneInfo};
 	InvokeEventCallbacks(EVENT_RENDER,evData);
+	EndRendering();
 }
 
 prosper::Texture *CRendererComponent::GetSceneTexture()
@@ -109,8 +111,12 @@ bool CRendererComponent::ReloadBloomRenderTarget(uint32_t width)
 	return evData.resultSuccess;
 }
 
-void CRendererComponent::EndRendering() {InvokeEventCallbacks(EVENT_BEGIN_RENDERING);}
-void CRendererComponent::BeginRendering(const util::DrawSceneInfo &drawSceneInfo) {InvokeEventCallbacks(EVENT_END_RENDERING);}
+void CRendererComponent::EndRendering() {InvokeEventCallbacks(EVENT_END_RENDERING);}
+void CRendererComponent::BeginRendering(const util::DrawSceneInfo &drawSceneInfo)
+{
+	drawSceneInfo.scene.get()->UpdateBuffers(drawSceneInfo.commandBuffer);
+	InvokeEventCallbacks(EVENT_BEGIN_RENDERING);
+}
 
 ////////////
 

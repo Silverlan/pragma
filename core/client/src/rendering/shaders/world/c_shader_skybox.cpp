@@ -8,12 +8,14 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_skybox.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/render_processor.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#include <prosper_command_buffer.hpp>
 #include <pragma/model/vertex.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
@@ -145,6 +147,27 @@ bool ShaderSkybox::BindRenderSettings(prosper::IDescriptorSet &descSetRenderSett
 bool ShaderSkybox::BindLights(prosper::IDescriptorSet &dsLights) {return true;}
 bool ShaderSkybox::BindVertexAnimationOffset(uint32_t offset) {return true;}
 bool ShaderSkybox::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount) {return ShaderGameWorldLightingPass::Draw(mesh,meshIdx,renderBufferIndexBuffer,false,instanceCount);}
+
+//
+
+void ShaderSkybox::RecordBindScene(
+	rendering::ShaderProcessor &shaderProcessor,
+	const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
+	prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
+	prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
+	prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
+	ShaderGameWorld::SceneFlags &inOutSceneFlags
+) const
+{
+	std::array<prosper::IDescriptorSet*,3> descSets {
+		&dsMaterial,
+		&dsScene,
+		&dsRenderer
+	};
+
+	static const std::vector<uint32_t> dynamicOffsets {};
+	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,shaderProcessor.GetCurrentPipelineLayout(),pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX,descSets,dynamicOffsets);
+}
 
 //////////////
 

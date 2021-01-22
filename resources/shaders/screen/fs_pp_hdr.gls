@@ -21,6 +21,7 @@ layout(location = 0) out vec4 fs_color;
 #include "/modules/fs_tonemapping.gls"
 
 layout(constant_id = 0) const uint CSPEC_BLOOM_ENABLED = 1;
+layout(constant_id = 1) const uint CSPEC_FXAA_ENABLED = 1;
 
 void main()
 {
@@ -35,5 +36,8 @@ void main()
 	}
 	
 	fs_color = vec4(apply_tone_mapping(col.rgb,u_renderSettings.toneMapping,u_renderSettings.exposure),col.a);
-	fs_color.a = dot(fs_color.rgb,vec3(0.299,0.587,0.114)); // Compute luma (required for fxaa)
+	if(CSPEC_FXAA_ENABLED == 1)
+		fs_color.a = dot(fs_color.rgb,vec3(0.299,0.587,0.114)); // Compute luma (required for fxaa)
+	else
+		fs_color.a = 1.0;
 }

@@ -53,40 +53,39 @@ vec3 calc_pbr_lighting(vec2 uv,MaterialInfo materialInfo,vec4 baseColor)
         }
     }
 
-    ivec2 location = ivec2(gl_FragCoord.xy);
-    uint tileSize = get_tile_size();
-    ivec2 tileID = location /ivec2(tileSize,tileSize);
-    uint index = tileID.y *get_number_of_tiles_x() +tileID.x;
-    uint tileStartOffset = index *MAX_SCENE_LIGHTS;
+    if(CSPEC_ENABLE_LIGHT_SOURCES == 1 && CSPEC_ENABLE_DYNAMIC_LIGHTING == 1)
+    {
+        ivec2 location = ivec2(gl_FragCoord.xy);
+        uint tileSize = get_tile_size();
+        ivec2 tileID = location /ivec2(tileSize,tileSize);
+        uint index = tileID.y *get_number_of_tiles_x() +tileID.x;
+        uint tileStartOffset = index *MAX_SCENE_LIGHTS;
 #if 0
-    for(uint i=0;i<visibleLightTileIndicesBuffer.data[tileStartOffset +SCENE_SPOT_LIGHT_BUFFER_START].index;++i)
-    {
-        uint lightIndex = visibleLightTileIndicesBuffer.data[tileStartOffset +SCENE_SPOT_LIGHT_BUFFER_START +i +1].index;
-        LightSourceData light = get_light_source(lightIndex);
-        //if(useLightmaps == true && (light.flags &FLIGHT_BAKED_LIGHT_SOURCE) != 0)
-        //    continue;
-        color += apply_spot_light(light,lightIndex,materialInfo,normal,view);
-    }
-    for(uint i=0;i<visibleLightTileIndicesBuffer.data[tileStartOffset +SCENE_POINT_LIGHT_BUFFER_START].index;++i)
-    {
-        uint lightIndex = visibleLightTileIndicesBuffer.data[tileStartOffset +SCENE_POINT_LIGHT_BUFFER_START +i +1].index;
-        LightSourceData light = get_light_source(lightIndex);
-        //if(useLightmaps == true && (light.flags &FLIGHT_BAKED_LIGHT_SOURCE) != 0)
-        //    continue;
-        color += apply_point_light(light,lightIndex,materialInfo,normal,view);
-    }
-    for(uint i=0;i<visibleLightTileIndicesBuffer.data[tileStartOffset +SCENE_DIRECTIONAL_LIGHT_BUFFER_START].index;++i)
-    {
-        uint lightIndex = visibleLightTileIndicesBuffer.data[tileStartOffset +SCENE_DIRECTIONAL_LIGHT_BUFFER_START +i +1].index;
-        LightSourceData light = get_light_source(lightIndex);
-        //if(useLightmaps == true && (light.flags &FLIGHT_BAKED_LIGHT_SOURCE) != 0)
-        //    continue;
-        color += apply_directional_light(light,lightIndex,materialInfo,normal,view);
-    }
+        for(uint i=0;i<visibleLightTileIndicesBuffer.data[tileStartOffset +SCENE_SPOT_LIGHT_BUFFER_START].index;++i)
+        {
+            uint lightIndex = visibleLightTileIndicesBuffer.data[tileStartOffset +SCENE_SPOT_LIGHT_BUFFER_START +i +1].index;
+            LightSourceData light = get_light_source(lightIndex);
+            //if(useLightmaps == true && (light.flags &FLIGHT_BAKED_LIGHT_SOURCE) != 0)
+            //    continue;
+            color += apply_spot_light(light,lightIndex,materialInfo,normal,view);
+        }
+        for(uint i=0;i<visibleLightTileIndicesBuffer.data[tileStartOffset +SCENE_POINT_LIGHT_BUFFER_START].index;++i)
+        {
+            uint lightIndex = visibleLightTileIndicesBuffer.data[tileStartOffset +SCENE_POINT_LIGHT_BUFFER_START +i +1].index;
+            LightSourceData light = get_light_source(lightIndex);
+            //if(useLightmaps == true && (light.flags &FLIGHT_BAKED_LIGHT_SOURCE) != 0)
+            //    continue;
+            color += apply_point_light(light,lightIndex,materialInfo,normal,view);
+        }
+        for(uint i=0;i<visibleLightTileIndicesBuffer.data[tileStartOffset +SCENE_DIRECTIONAL_LIGHT_BUFFER_START].index;++i)
+        {
+            uint lightIndex = visibleLightTileIndicesBuffer.data[tileStartOffset +SCENE_DIRECTIONAL_LIGHT_BUFFER_START +i +1].index;
+            LightSourceData light = get_light_source(lightIndex);
+            //if(useLightmaps == true && (light.flags &FLIGHT_BAKED_LIGHT_SOURCE) != 0)
+            //    continue;
+            color += apply_directional_light(light,lightIndex,materialInfo,normal,view);
+        }
 #else
-
-    if(CSPEC_ENABLE_LIGHT_SOURCES == 1)
-    {
         if(CSPEC_ENABLE_LIGHT_SOURCES_SPOT == 1)
         {
             for(uint i=SCENE_SPOT_LIGHT_BUFFER_START; i < SCENE_SPOT_LIGHT_BUFFER_END && visibleLightTileIndicesBuffer.data[tileStartOffset + i].index != -1; i++)

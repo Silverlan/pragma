@@ -210,7 +210,7 @@ void FrameRenderStats::Print(bool full)
 }
 struct RenderStatsQueue
 {
-	std::queue<FrameRenderStats> frameStats;
+	std::vector<std::queue<FrameRenderStats>> frameStats;
 };
 DLLCLIENT void debug_render_stats(bool enabled,bool full,bool print,bool continuous)
 {
@@ -225,45 +225,48 @@ DLLCLIENT void debug_render_stats(bool enabled,bool full,bool print,bool continu
 	auto first = true;
 	g_cbPreRenderScene = c_game->AddCallback("OnRenderScenes",FunctionCallback<void>::Create([stats,first,full,print]() mutable {
 		auto swapchainIdx = c_engine->GetRenderContext().GetLastAcquiredSwapchainImageIndex();
-		while(stats->frameStats.empty() == false)
+		if(swapchainIdx >= stats->frameStats.size())
+			return;
+		auto &fstats = stats->frameStats[swapchainIdx];
+		while(fstats.empty() == false)
 		{
-			auto &frameStats = stats->frameStats.front();
-			if(frameStats.Available() == false)
-				break;
-			if(print)
-				frameStats.Print(full);
-
-			auto *l = c_game->GetLuaState();
-			auto t = luabind::newtable(l);
-			auto tTimes = luabind::newtable(l);
-			tTimes["gui"] = c_engine->GetGpuExecutionTime(swapchainIdx,CEngine::GPUTimer::GUI).count() /static_cast<long double>(1'000'000.0);
-			tTimes["scene"] = c_engine->GetGpuExecutionTime(swapchainIdx,CEngine::GPUTimer::Scene).count() /static_cast<long double>(1'000'000.0);
-			tTimes["frame"] = c_engine->GetGpuExecutionTime(swapchainIdx,CEngine::GPUTimer::Frame).count() /static_cast<long double>(1'000'000.0);
-			tTimes["present"] = c_engine->GetGpuExecutionTime(swapchainIdx,CEngine::GPUTimer::Present).count() /static_cast<long double>(1'000'000.0);
-			t["numberOfScenes"] = frameStats.stats.size();
-			t["times"] = tTimes;
-			auto tStats = luabind::newtable(l);
-			t["stats"] = tStats;
-			int32_t i = 1;
-			for(auto &stats : frameStats.stats)
+			auto &frameStats = fstats.front();
+			if(frameStats.Available())
 			{
-				auto td = luabind::newtable(l);
-				td["stats"] = stats.stats.get();
-				td["scene"] = stats.sceneName;
-				tStats[i++] = td;
-			}
-			RenderStats accumulated;
-			if(frameStats.stats.size() > 1)
-			{
-				accumulated = frameStats.GetAccumulated();
-				auto td = luabind::newtable(l);
-				td["stats"] = &accumulated;
-				td["scene"] = "accumulated";
-				tStats[i++] = td;
-			}
-			c_game->CallLuaCallbacks<void,luabind::object>("OnFrameRenderStatsAvailable",t);
+				if(print)
+					frameStats.Print(full);
 
-			stats->frameStats.pop();
+				auto *l = c_game->GetLuaState();
+				auto t = luabind::newtable(l);
+				auto tTimes = luabind::newtable(l);
+				tTimes["gui"] = c_engine->GetGpuExecutionTime(swapchainIdx,CEngine::GPUTimer::GUI).count() /static_cast<long double>(1'000'000.0);
+				tTimes["scene"] = c_engine->GetGpuExecutionTime(swapchainIdx,CEngine::GPUTimer::Scene).count() /static_cast<long double>(1'000'000.0);
+				tTimes["frame"] = c_engine->GetGpuExecutionTime(swapchainIdx,CEngine::GPUTimer::Frame).count() /static_cast<long double>(1'000'000.0);
+				tTimes["present"] = c_engine->GetGpuExecutionTime(swapchainIdx,CEngine::GPUTimer::Present).count() /static_cast<long double>(1'000'000.0);
+				t["numberOfScenes"] = frameStats.stats.size();
+				t["times"] = tTimes;
+				auto tStats = luabind::newtable(l);
+				t["stats"] = tStats;
+				int32_t i = 1;
+				for(auto &stats : frameStats.stats)
+				{
+					auto td = luabind::newtable(l);
+					td["stats"] = stats.stats.get();
+					td["scene"] = stats.sceneName;
+					tStats[i++] = td;
+				}
+				RenderStats accumulated;
+				if(frameStats.stats.size() > 1)
+				{
+					accumulated = frameStats.GetAccumulated();
+					auto td = luabind::newtable(l);
+					td["stats"] = &accumulated;
+					td["scene"] = "accumulated";
+					tStats[i++] = td;
+				}
+				c_game->CallLuaCallbacks<void,luabind::object>("OnFrameRenderStatsAvailable",t);
+			}
+			fstats.pop();
 		}
 
 		if(print && !first)
@@ -285,6 +288,7 @@ DLLCLIENT void debug_render_stats(bool enabled,bool full,bool print,bool continu
 		}
 	}));
 	g_cbPostRenderScene = c_game->AddCallback("PostRenderScenes",FunctionCallback<void>::Create([full,stats]() {
+		auto swapchainIdx = c_engine->GetRenderContext().GetLastAcquiredSwapchainImageIndex();
 		auto &renderScenes = c_game->GetQueuedRenderScenes();
 		FrameRenderStats frameStats {};
 		for(auto &drawSceneInfo : renderScenes)
@@ -298,7 +302,9 @@ DLLCLIENT void debug_render_stats(bool enabled,bool full,bool print,bool continu
 			sceneStats.stats = std::move(drawSceneInfo.renderStats);
 			frameStats.stats.push_back(sceneStats);
 		}
-		stats->frameStats.push(frameStats);
+		if(swapchainIdx >= stats->frameStats.size())
+			stats->frameStats.resize(swapchainIdx +1);
+		stats->frameStats[swapchainIdx].push(frameStats);
 	}));
 }
 

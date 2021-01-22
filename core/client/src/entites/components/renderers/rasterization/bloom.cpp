@@ -145,14 +145,6 @@ static void cmd_render_bloom_enabled(NetworkState*,ConVar*,bool,bool enabled)
 {
 	if(c_game == nullptr)
 		return;
-	auto &gameWorldShaderSettings = c_game->GetGameWorldShaderSettings();
-	if(gameWorldShaderSettings.bloomEnabled == enabled)
-		return;
-	gameWorldShaderSettings.bloomEnabled = enabled;
-	c_game->ReloadGameWorldShaderPipelines();
-
-	auto shader = c_engine->GetShaderManager().GetShader("pp_hdr");
-	if(shader.valid())
-		shader->ReloadPipelines();
+	c_game->UpdateGameWorldShaderSettings();
 }
 REGISTER_CONVAR_CALLBACK_CL(render_bloom_enabled,cmd_render_bloom_enabled);

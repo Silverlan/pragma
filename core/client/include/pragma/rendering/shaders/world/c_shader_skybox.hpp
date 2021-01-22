@@ -42,6 +42,18 @@ namespace pragma
 			std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
 		) const override;
 		virtual ShaderGameWorld::GameShaderType GetPassType() const {return ShaderGameWorld::GameShaderType::SkyPass;}
+
+		//
+		virtual void RecordBindScene(
+			rendering::ShaderProcessor &shaderProcessor,
+			const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
+			prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
+			prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
+			prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
+			ShaderGameWorld::SceneFlags &inOutSceneFlags
+		) const override;
+		virtual void RecordSceneFlags(rendering::ShaderProcessor &shaderProcessor,SceneFlags sceneFlags) const override {}
+		virtual void RecordClipPlane(rendering::ShaderProcessor &shaderProcessor,const Vector4 &clipPlane) const override {}
 	protected:
 		ShaderSkybox(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader);
 		virtual void OnPipelinesInitialized() override;

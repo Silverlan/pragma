@@ -61,12 +61,7 @@ static void cmd_cl_render_shadow_quality(NetworkState*,ConVar*,int,int quality)
 	reload_all_shadow_maps();
 	if(c_game == nullptr)
 		return;
-	auto eQuality = static_cast<pragma::rendering::GameWorldShaderSettings::ShadowQuality>(quality);
-	auto &gameWorldShaderSettings = c_game->GetGameWorldShaderSettings();
-	if(gameWorldShaderSettings.shadowQuality == eQuality)
-		return;
-	gameWorldShaderSettings.shadowQuality = eQuality;
-	c_game->ReloadGameWorldShaderPipelines();
+	c_game->UpdateGameWorldShaderSettings();
 }
 REGISTER_CONVAR_CALLBACK_CL(cl_render_shadow_quality,cmd_cl_render_shadow_quality);
 

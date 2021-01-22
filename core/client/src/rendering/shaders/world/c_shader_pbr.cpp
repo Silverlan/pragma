@@ -10,6 +10,7 @@
 #include "cmaterialmanager.h"
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/render_processor.hpp"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -17,6 +18,7 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <image/prosper_sampler.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#include <prosper_command_buffer.hpp>
 #include <texture_type.h>
 
 extern DLLCLIENT CGame *c_game;
@@ -253,6 +255,65 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescr
 void ShaderPBR::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+}
+
+//
+
+void ShaderPBR::RecordBindSceneDescriptorSets(
+	rendering::ShaderProcessor &shaderProcessor,
+	const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
+	prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
+	prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
+	prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
+	ShaderGameWorld::SceneFlags &inOutSceneFlags,float &outIblStrength
+) const
+{
+	std::array<prosper::IDescriptorSet*,7> descSets {
+		descSets[0] = &dsMaterial,
+		descSets[1] = &dsScene,
+		descSets[2] = &dsRenderer,
+		descSets[3] = &dsRenderSettings,
+		descSets[4] = &dsLights,
+		descSets[5] = &dsShadows
+	};
+		
+	auto &hCam = scene.GetActiveCamera();
+	assert(hCam.valid());
+	outIblStrength = 1.f;
+	auto *dsPbr = CReflectionProbeComponent::FindDescriptorSetForClosestProbe(scene,hCam->GetEntity().GetPosition(),outIblStrength);
+	if(dsPbr == nullptr) // No reflection probe and therefore no IBL available. Fallback to non-IBL rendering.
+	{
+		dsPbr = &GetDefaultPbrDescriptorSet();
+		inOutSceneFlags |= ShaderGameWorld::SceneFlags::NoIBL;
+	}
+	descSets[6] = dsPbr;
+
+	static const std::vector<uint32_t> dynamicOffsets {};
+	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,shaderProcessor.GetCurrentPipelineLayout(),pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX,descSets,dynamicOffsets);
+}
+
+void ShaderPBR::RecordBindScene(
+	rendering::ShaderProcessor &shaderProcessor,
+	const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
+	prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
+	prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
+	prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
+	ShaderGameWorld::SceneFlags &inOutSceneFlags
+) const
+{
+	auto iblStrength = 1.f;
+	RecordBindSceneDescriptorSets(
+		shaderProcessor,scene,renderer,
+		dsScene,dsRenderer,dsRenderSettings,
+		dsLights,dsShadows,dsMaterial,inOutSceneFlags,iblStrength
+	);
+
+	ShaderGameWorldLightingPass::PushConstants pushConstants {};
+	pushConstants.Initialize();
+	pushConstants.debugMode = scene.GetDebugMode();
+	pushConstants.reflectionProbeIntensity = iblStrength;
+	pushConstants.flags = m_sceneFlags;
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0u,sizeof(pushConstants),&pushConstants);
 }
 
 /////////////////

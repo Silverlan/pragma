@@ -13,7 +13,9 @@ vec3 apply_point_light(LightSourceData light, uint lightIndex, MaterialInfo mate
 	attenuation = pow(attenuation,light.falloffExponent);
 	vec3 shade = get_point_shade(pointToLight, materialInfo, normal, view);
 
-	float shadowFactor = are_shadows_enabled() ? get_point_light_shadow_factor(lightIndex,true) : 1.0;
+	float shadowFactor = 1.0;
+	if(CSPEC_ENABLE_DYNAMIC_SHADOWS == 1)
+		shadowFactor = are_shadows_enabled() ? get_point_light_shadow_factor(lightIndex,true) : 1.0;
 	return attenuation * light.color.a * light.color.rgb * shade *shadowFactor;
 }
 

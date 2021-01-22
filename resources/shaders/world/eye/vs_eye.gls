@@ -3,26 +3,24 @@
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shading_language_420pack : enable
 
+#include "../pbr/vs_config.gls"
 #include "sh_eye.gls"
 #include "../../modules/vs_world.gls"
 
-vec3 Vec3WorldToTangent( vec3 iWorldVector, vec3 iWorldNormal, vec3 iWorldTangent, vec3 iWorldBinormal )
+vec3 world_to_tangent(vec3 vWorld,vec3 nWorld,vec3 tWorld,vec3 biWorld)
 {
-	vec3 vTangentVector;
-	vTangentVector.x = dot( iWorldVector.xyz, iWorldTangent.xyz );
-	vTangentVector.y = dot( iWorldVector.xyz, iWorldBinormal.xyz );
-	vTangentVector.z = dot( iWorldVector.xyz, iWorldNormal.xyz );
-	return vTangentVector.xyz; // Return without normalizing
+	return vec3(
+		dot(vWorld.xyz,tWorld.xyz),
+		dot(vWorld.xyz,biWorld.xyz),
+		dot(vWorld.xyz,nWorld.xyz)
+	);
 }
 
-vec3 Vec3WorldToTangentNormalized( vec3 iWorldVector, vec3 iWorldNormal, vec3 iWorldTangent, vec3 iWorldBinormal )
+vec3 world_to_tangent_normalized(vec3 vWorld,vec3 nWorld,vec3 tWorld,vec3 biWorld)
 {
-	return normalize( Vec3WorldToTangent( iWorldVector, iWorldNormal, iWorldTangent, iWorldBinormal ) );
+	return normalize(world_to_tangent(vWorld,nWorld,tWorld,biWorld));
 }
 
-
-//const float4 cEyePosWaterZ				: register(c2);
-//#define cEyePos			cEyePosWaterZ.xyz
 void main()
 {
 	export_world_fragment_data();

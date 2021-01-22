@@ -67,10 +67,9 @@ namespace pragma
 		EnableLightMapsBit = EnableLightSourcesDirectionalBit<<1u,
 		EnableAnimationBit = EnableLightMapsBit<<1u,
 		EnableMorphTargetAnimationBit = EnableAnimationBit<<1u,
-		EnableIblBit = EnableMorphTargetAnimationBit<<1u,
 
 		// Dynamic
-		EmissionEnabledBit = EnableIblBit<<1u,
+		EmissionEnabledBit = EnableMorphTargetAnimationBit<<1u,
 		WrinklesEnabledBit = EmissionEnabledBit<<1u,
 		EnableTranslucencyBit = WrinklesEnabledBit<<1u,
 		EnableRmaMapBit = EnableTranslucencyBit<<1u,
@@ -89,7 +88,10 @@ namespace pragma
 		ShadowQuality = Start,
 		DebugModeEnabled,
 		BloomOutputEnabled,
-		EnableSsao
+		EnableSsao,
+		EnableIbl,
+		EnableDynamicLighting,
+		EnableDynamicShadows
 	};
 	enum class GameShaderSpecialization : uint32_t
 	{
@@ -220,6 +222,7 @@ namespace pragma
 
 		ShaderGameWorldLightingPass(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 		virtual ~ShaderGameWorldLightingPass() override;
+		// TODO: Clean this up, most of these are deprecated!
 		virtual bool BindClipPlane(const Vector4 &clipPlane) override;
 		virtual bool BeginDraw(
 			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},
@@ -248,6 +251,17 @@ namespace pragma
 		virtual uint32_t GetLightDescriptorSetIndex() const override;
 		std::optional<uint32_t> FindPipelineIndex(PassType passType,GameShaderSpecialization specialization,GameShaderSpecializationConstantFlag specializationFlags) const;
 		virtual GameShaderSpecializationConstantFlag GetMaterialPipelineSpecializationRequirements(CMaterial &mat) const;
+
+		//
+		virtual void RecordBindScene(
+			rendering::ShaderProcessor &shaderProcessor,
+			const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
+			prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
+			prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
+			prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
+			ShaderGameWorld::SceneFlags &inOutSceneFlags
+		) const override;
+		virtual bool IsUsingLightmaps() const override {return true;}
 	protected:
 		using ShaderEntity::Draw;
 		GameShaderSpecializationConstantFlag GetStaticSpecializationConstantFlags(GameShaderSpecialization specialization) const;

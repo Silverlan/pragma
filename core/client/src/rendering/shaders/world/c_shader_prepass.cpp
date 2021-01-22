@@ -9,6 +9,7 @@
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
+#include "pragma/rendering/render_processor.hpp"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
@@ -197,6 +198,45 @@ uint32_t ShaderPrepassBase::GetRenderSettingsDescriptorSetIndex() const {return 
 void ShaderPrepassBase::GetVertexAnimationPushConstantInfo(uint32_t &offset) const
 {
 	offset = offsetof(PushConstants,vertexAnimInfo);
+}
+
+//
+
+void ShaderPrepassBase::RecordBindScene(
+	rendering::ShaderProcessor &shaderProcessor,
+	const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
+	prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
+	prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
+	prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
+	ShaderGameWorld::SceneFlags &inOutSceneFlags
+) const
+{
+	std::array<prosper::IDescriptorSet*,3> descSets {
+		&dsMaterial,
+		&dsScene,
+		&dsRenderSettings
+	};
+
+	ShaderPrepass::PushConstants pushConstants {};
+	pushConstants.Initialize();
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0u,sizeof(pushConstants),&pushConstants);
+
+	static const std::vector<uint32_t> dynamicOffsets {};
+	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,shaderProcessor.GetCurrentPipelineLayout(),pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX,descSets,dynamicOffsets);
+}
+
+void ShaderPrepassBase::RecordAlphaCutoff(rendering::ShaderProcessor &shaderProcessor,float alphaCutoff) const
+{
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(
+		shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(PushConstants,alphaCutoff),sizeof(alphaCutoff),&alphaCutoff
+	);
+}
+
+bool ShaderPrepassBase::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor,CMaterial &mat) const
+{
+	if(mat.GetAlphaMode() == AlphaMode::Opaque)
+		return false;
+	return ShaderGameWorld::RecordBindMaterial(shaderProcessor,mat);
 }
 
 //////////////////

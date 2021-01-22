@@ -9,6 +9,7 @@
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
+#include "pragma/rendering/render_processor.hpp"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
@@ -415,3 +416,28 @@ bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMe
 }
 
 bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount) {return Draw(mesh,meshIdx,renderBufferIndexBuffer,true,instanceCount);}
+
+/////////////
+
+void pragma::ShaderGameWorld::RecordSceneFlags(rendering::ShaderProcessor &shaderProcessor,SceneFlags sceneFlags) const
+{
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(ScenePushConstants,flags),sizeof(sceneFlags),&sceneFlags);
+}
+
+bool pragma::ShaderGameWorld::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor,CMaterial &mat) const
+{
+	auto descSetGroup = mat.GetDescriptorSetGroup(const_cast<pragma::ShaderGameWorld&>(*this));
+	if(descSetGroup == nullptr)
+		descSetGroup = const_cast<pragma::ShaderGameWorld*>(this)->InitializeMaterialDescriptorSet(mat,false); // Attempt to initialize on the fly (TODO: Is this thread safe?)
+	if(descSetGroup == nullptr)
+		return false;
+	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,shaderProcessor.GetCurrentPipelineLayout(),GetMaterialDescriptorSetIndex(),*descSetGroup->GetDescriptorSet(0));
+	return true;
+}
+
+void pragma::ShaderGameWorld::RecordClipPlane(rendering::ShaderProcessor &shaderProcessor,const Vector4 &clipPlane) const
+{
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(
+		shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(pragma::ShaderGameWorld::ScenePushConstants,clipPlane),sizeof(clipPlane),&clipPlane
+	);
+}

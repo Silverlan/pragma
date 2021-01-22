@@ -5,6 +5,7 @@
 
 #define DEBUG_MODE DEBUG_MODE_NONE
 
+#include "../pbr/fs_config.gls"
 #include "sh_eye.gls"
 #include "../pbr/pbr.gls"
 
@@ -13,28 +14,20 @@ void main()
 	vec2 uvBase = fs_in.vert_uv;
 	vec2 uv = uvBase;
 
-	vec4 g_vIrisProjectionU = vec4(0,1,0,0);
-	vec4 g_vIrisProjectionV = vec4(1,0,0,0);
-
-	g_vIrisProjectionU = u_pushConstants.irisProjectionU;
-	g_vIrisProjectionV = u_pushConstants.irisProjectionV;
+	vec4 irisProjectionU = u_pushConstants.irisProjectionU;
+	vec4 irisProjectionV = u_pushConstants.irisProjectionV;
 
 #if ENABLE_NOISE == 1
-	// Normal = (Pos - Eye origin)
-	vec3 g_cEyeOrigin = u_pushConstants.eyeOrigin.xyz;
-	vec3 cEyePos = g_cEyeOrigin;
-	vec3 vWorldNormal = normalize( fs_in.vert_pos_ws.xyz - g_cEyeOrigin.xyz );
+	vec3 eyeOrigin = u_pushConstants.eyeOrigin.xyz;
+	vec3 eyePos = eyeOrigin;
+	vec3 nWorld = normalize(fs_in.vert_pos_ws.xyz -eyeOrigin.xyz);
 
-	vec3 vWorldViewVector = normalize (fs_in.vert_pos_ws.xyz - cEyePos.xyz);
+	vec3 worldViewVector = normalize(fs_in.vert_pos_ws.xyz -eyePos.xyz);
 
-	vec3 vEyeSocketUpVector = normalize( -u_pushConstants.irisProjectionV.xyz );
-	vec3 vEyeSocketLeftVector = normalize( -u_pushConstants.irisProjectionU.xyz );
-
-	vec3 vWorldTangent = normalize( cross( vEyeSocketUpVector.xyz, vWorldNormal.xyz ) );
-
-	vec3 vWorldBinormal = normalize( cross( vWorldNormal.xyz, vWorldTangent.xyz ) );
-
-	//o.vWorldBinormal.xyz = vWorldBinormal.xyz * 0.5f + 0.5f;
+	vec3 eyeSocketUp = normalize(-u_pushConstants.irisProjectionV.xyz);
+	vec3 eyeSocketLeft = normalize(-u_pushConstants.irisProjectionU.xyz);
+	vec3 vWorldTangent = normalize(cross(eyeSocketUp.xyz,nWorld.xyz));
+	vec3 vWorldBinormal = normalize(cross(nWorld.xyz, vWorldTangent.xyz));
 
 	{
 		vec3 Q1 = dFdx(fs_in.vert_pos_ws.xyz);
@@ -45,87 +38,58 @@ void main()
 		vec3 N = normalize(fs_in.vert_normal);
 		vec3 T = normalize(Q1 *st2.t -Q2 *st1.t);
 		vec3 B = -normalize(cross(N,T));
-		//vWorldNormal = N;
+		//nWorld = N;
 		//vWorldTangent = T;
 		//vWorldBinormal = B;
 	}
-
-
-	//in_vert_normal
-	//in_vert_tangent
-	//in_vert_bitangent
-	vec3 vTangentViewVector = Vec3WorldToTangentNormalized(vWorldViewVector.xyz, vWorldNormal.xyz, vWorldTangent.xyz, vWorldBinormal.xyz);
+	vec3 viewVecTangent = world_to_tangent_normalized(worldViewVector.xyz, nWorld.xyz, vWorldTangent.xyz, vWorldBinormal.xyz);
 
 #endif
 
-	//g_vIrisProjectionU.w = 0.0;
-	//g_vIrisProjectionV.w = 0.0;
-
-	// Transform the position
-	//float3 vWorldPosition;
-	//SkinPosition( g_bSkinning, vPosition, v.vBoneWeights, v.vBoneIndices, vWorldPosition );
-	vec3 vWorldPosition = fs_in.vert_pos_ws.xyz;// -vec3(-1.30026, 65.202, 2.93309); // TODO: This needs to be unmodified (no matrix transform!)
-	vec4 vWorldPosition_ProjPosZ;
-	vWorldPosition_ProjPosZ.xyz = vWorldPosition.xyz;
+	vec3 worldPos = fs_in.vert_pos_ws.xyz; // TODO: This needs to be unmodified (no matrix transform!)
+	vec4 worldPosProjZ;
+	worldPosProjZ.xyz = worldPos.xyz;
 
 	// Transform into projection space
-	//vWorldPosition -= ( vWorldPosition - g_cEyeOrigin ) * 0.9; //Debug to visualize eye origin
 	mat4 cViewProj = get_view_projection_matrix();
-	vec4 vProjPos = cViewProj *vec4( vWorldPosition, 1.0f );
-	//o.projPos = vProjPos;
-	// TODO
-	// vProjPos.z = dot( vec4( vWorldPosition, 1.0f ), cViewProjZ );
+	vec4 vProjPos = cViewProj *vec4(worldPos,1.0);
 
-	
-	vWorldPosition_ProjPosZ.w = vProjPos.z;
-
-	vWorldPosition_ProjPosZ.xyz = fs_in.vert_pos_ws.xyz;// -u_pushConstants.eyeballOrigin;
+	worldPosProjZ.w = vProjPos.z;
+	worldPosProjZ.xyz = fs_in.vert_pos_ws.xyz;
 
 	vec2 vCorneaUv; // Note: Cornea texture is a cropped version of the iris texture
-	vCorneaUv.x = dot( g_vIrisProjectionU, vec4( vWorldPosition_ProjPosZ.xyz, 1.0 ) );
-	vCorneaUv.y = dot( g_vIrisProjectionV, vec4( vWorldPosition_ProjPosZ.xyz, 1.0 ) );
-	vec2 vSphereUv = vCorneaUv;//( vCorneaUv.xy * 0.5 ) + 0.25;
+	vCorneaUv.x = dot(irisProjectionU,vec4(worldPosProjZ.xyz,1.0));
+	vCorneaUv.y = dot(irisProjectionV,vec4(worldPosProjZ.xyz,1.0));
+	vec2 vSphereUv = vCorneaUv;
 
 	// Dilation
 	float maxDilationFactor = u_pushConstants.maxDilationFactor;
-	float g_flDilationFactor = u_pushConstants.dilationFactor;//sin(mod(real_time() /2,1.0) *M_PI) *maxDilationFactor;
+	float dilationFactor = u_pushConstants.dilationFactor;
 
 	float irisUvRadius = u_pushConstants.irisUvRadius;
-	//vSphereUv.xy -= 0.5; // Center around (0,0)
-	float fPupilCenterToBorder = clamp( length( vSphereUv.xy ) / irisUvRadius,0.0,1.0 ); //Note: 0.2 is the uv radius of the iris
-	float fPupilDilateFactor = g_flDilationFactor; // This value should be between 0-1
-	vSphereUv.xy *= mix (1.0, fPupilCenterToBorder, clamp( fPupilDilateFactor,0.0,maxDilationFactor ) * 2.5 - 1.25 );
-	//vSphereUv.xy += 0.5;
-
-	//vSphereUv *= 3.0;
+	float fPupilCenterToBorder = clamp(length(vSphereUv.xy) /irisUvRadius,0.0,1.0);
+	float fPupilDilateFactor = dilationFactor;
+	vSphereUv.xy *= mix(1.0,fPupilCenterToBorder,clamp(fPupilDilateFactor,0.0,maxDilationFactor) *2.5 -1.25);
 
 	vSphereUv += 1.0;
 	vSphereUv /= 2.0;
 
 #if ENABLE_NOISE == 1
-	//o.vTangentViewVector.xyz = Vec3WorldToTangentNormalized (vWorldViewVector.xyz, vWorldNormal.xyz, vWorldTangent.xyz, vWorldBinormal.xyz);
-	//vec3 vTangentViewVector = vec3(0,0,0);
-	float fIrisOffset = texture( u_parallaxMap, vSphereUv.xy ).b; // ??
-	float g_flParallaxStrength = 1.0;
-	vec2 vParallaxVector = ( ( vTangentViewVector.xz * fIrisOffset * g_flParallaxStrength ) / ( 1.0f - vTangentViewVector.y ) ); // Note: 0.25 is a magic number
-	vParallaxVector.x = -vParallaxVector.x; //Need to flip x...not sure why.
+	float irisOffset = texture(u_parallaxMap,vSphereUv.xy).b;
+	float parallaxStrength = 1.0;
+	vec2 vParallax = ((viewVecTangent.xz *irisOffset *parallaxStrength ) /( 1.0 -viewVecTangent.y)); // Note: 0.25 is a magic number
+	vParallax.x = -vParallax.x;
 
-	vec2 vCorneaNoiseUv = vSphereUv.xy + ( vParallaxVector.xy * 0.5 );
-	vec4 fCorneaNoiseCol = texture( u_glowMap, vCorneaNoiseUv.xy );
-	float fCorneaNoise = fCorneaNoiseCol.r *texture(u_albedoMap,vSphereUv).a;
+	vec2 uvCorneaNoise = vSphereUv.xy +(vParallax.xy *0.5);
+	vec4 colCorneaNoise = texture(u_glowMap,uvCorneaNoise.xy);
+	float corneaNoise = colCorneaNoise.r *texture(u_albedoMap,vSphereUv).a;
 #endif
-
-	//vSphereUv = vSphereUv *0.5 +0.25; // scale
-	//vSphereUv = ( vSphereUv.xy * 0.5 ) + 0.25;
-	// TODO: UV Range Vulkan: (0,0) to (1,1)
 
 	uv = vSphereUv;
 
-	//	SHADER_PARAM( IRISU, SHADER_PARAM_TYPE_VEC4, "[0 1 0 0 ]", "U projection vector for the iris" )
-	//	SHADER_PARAM( IRISV, SHADER_PARAM_TYPE_VEC4, "[0 0 1 0]", "V projection vector for the iris" )
-
-	vec2 texCoords = uv;//apply_parallax(use_parallax_map(),uv);
+	vec2 texCoords = uv; // TODO: apply_parallax(use_parallax_map(),uv);
 	vec4 albedoColor = texture(u_albedoMap,texCoords);
 	fs_color = calc_pbr(albedoColor,texCoords,u_pushConstants.debugMode);
-	extract_bright_color(fs_color);
+	if(CSPEC_BLOOM_OUTPUT_ENABLED == 1)
+		extract_bright_color(fs_color);
 }

@@ -13,6 +13,7 @@ link_external_library(cmaterialsystem)
 link_external_library(wms_shared)
 link_external_library(glslang)
 link_external_library(util_formatted_text)
+link_external_library(util_image)
 
 add_external_library(luajit)
 add_external_library(libzip)

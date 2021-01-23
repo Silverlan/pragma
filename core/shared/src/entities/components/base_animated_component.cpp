@@ -338,19 +338,25 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 		return false;
 	if(animInfo.animation == -1)
 		return false;
-	auto animSpeed = GetPlaybackRate();
 	auto animId = animInfo.animation;
 	auto anim = hModel->GetAnimation(animId);
-	if(anim == nullptr || animSpeed == 0.f)
+	if(anim == nullptr)
 		return false;
 	auto act = anim->GetActivity();
 	auto numFrames = anim->GetFrameCount();
+	auto animSpeed = GetPlaybackRate();
 	if(numFrames > 0)
 		animSpeed *= static_cast<float>(anim->GetFPS()) /static_cast<float>(numFrames);
 
 	auto &cycle = animInfo.cycle;
 	auto cycleLast = cycle;
 	auto cycleNew = cycle +static_cast<float>(dt) *animSpeed;
+	if(layeredSlot == -1)
+	{
+		if(umath::abs(cycleNew -cycleLast) < 0.001f || umath::is_flag_set(m_stateFlags,StateFlags::BaseAnimationDirty))
+			return false;
+		umath::set_flag(m_stateFlags,StateFlags::BaseAnimationDirty,false);
+	}
 	auto bLoop = anim->HasFlag(FAnim::Loop);
 	auto bComplete = (cycleNew >= 1.f) ? true : false;
 	if(bComplete == true)
@@ -369,7 +375,10 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 		if(cycleLast > 0.f) // If current cycle is 0 but we're also complete, that means the animation was started and finished within a single frame. Calling the block below may result in endless recursion, so we need to make sure the animation stays for this frame.
 		{
 			if(cycle != 1.f || animId != animInfo.animation)
+			{
+				SetBaseAnimationDirty();
 				return MaintainAnimation(animInfo,dt);
+			}
 			if(bLoop == true)
 			{
 				cycleNew -= floor(cycleNew);
@@ -377,6 +386,7 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 				{
 					animId = SelectWeightedAnimation(act,animId);
 					cycle = cycleNew;
+					SetBaseAnimationDirty();
 					return MaintainAnimation(animInfo,dt);
 				}
 			}
@@ -711,7 +721,13 @@ Activity BaseAnimatedComponent::TranslateActivity(Activity act)
 }
 
 float BaseAnimatedComponent::GetCycle() const {return m_baseAnim.cycle;}
-void BaseAnimatedComponent::SetCycle(float cycle) {m_baseAnim.cycle = cycle;}
+void BaseAnimatedComponent::SetCycle(float cycle)
+{
+	if(cycle == m_baseAnim.cycle)
+		return;
+	m_baseAnim.cycle = cycle;
+	SetBaseAnimationDirty();
+}
 
 int BaseAnimatedComponent::GetAnimation() const {return m_baseAnim.animation;}
 Animation *BaseAnimatedComponent::GetAnimationObject() const
@@ -812,6 +828,7 @@ void BaseAnimatedComponent::PlayAnimation(int animation,FPlayAnim flags)
 	m_baseAnim.cycle = 0;
 	m_baseAnim.flags = flags;
 	m_baseAnim.activity = Activity::Invalid;
+	SetBaseAnimationDirty();
 	auto &hModel = GetEntity().GetModel();
 	if(hModel != nullptr)
 	{
@@ -823,6 +840,8 @@ void BaseAnimatedComponent::PlayAnimation(int animation,FPlayAnim flags)
 	CEOnAnimationStart evAnimStartData {m_baseAnim.animation,m_baseAnim.activity,m_baseAnim.flags};
 	InvokeEventCallbacks(EVENT_ON_ANIMATION_START,evAnimStartData);
 }
+
+void BaseAnimatedComponent::SetBaseAnimationDirty() {umath::set_flag(m_stateFlags,StateFlags::BaseAnimationDirty,true);}
 
 int32_t BaseAnimatedComponent::SelectTranslatedAnimation(Activity &inOutActivity) const
 {

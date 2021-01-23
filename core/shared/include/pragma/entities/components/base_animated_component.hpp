@@ -54,7 +54,8 @@ namespace pragma
 		enum class StateFlags : uint8_t
 		{
 			None = 0u,
-			AbsolutePosesDirty = 1u
+			AbsolutePosesDirty = 1u,
+			BaseAnimationDirty = AbsolutePosesDirty<<1u
 		};
 
 		struct DLLNETWORK AnimationSlotInfo
@@ -202,6 +203,7 @@ namespace pragma
 		std::unordered_map<uint32_t,AnimationSlotInfo> &GetAnimationSlotInfos();
 
 		Activity TranslateActivity(Activity act);
+		void SetBaseAnimationDirty();
 
 		void BlendBonePoses(
 			const std::vector<umath::Transform> &srcBonePoses,const std::vector<Vector3> *optSrcBoneScales,

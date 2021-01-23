@@ -60,10 +60,10 @@ namespace pragma::asset
 	struct DLLCLIENT MapExportInfo
 	{
 		bool includeMapLightSources = true;
-		void AddCamera(CCameraComponent &cam) {m_cameras.push_back(cam.GetHandle<CCameraComponent>());}
+		void AddCamera(CCameraComponent &cam);
 		const std::vector<util::WeakHandle<CCameraComponent>> &GetCameras() const {return m_cameras;}
 
-		void AddLightSource(CLightComponent &light) {m_lightSources.push_back(light.GetHandle<CLightComponent>());}
+		void AddLightSource(CLightComponent &light);
 		const std::vector<util::WeakHandle<CLightComponent>> &GetLightSources() const {return m_lightSources;}
 	private:
 		std::vector<util::WeakHandle<CCameraComponent>> m_cameras {};

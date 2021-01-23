@@ -36,7 +36,9 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 			return nw->GetMaterialManager().ClearUnused();
 		})),
 		luabind::def("lock_asset_watchers",&Lua::asset::lock_asset_watchers),
-		luabind::def("unlock_asset_watchers",&Lua::asset::unlock_asset_watchers)
+		luabind::def("unlock_asset_watchers",&Lua::asset::unlock_asset_watchers),
+		luabind::def("get_supported_import_file_extensions",&Lua::asset::get_supported_import_file_extensions),
+		luabind::def("get_supported_export_file_extensions",&Lua::asset::get_supported_export_file_extensions)
 	];
 
 	if(extended)
@@ -84,4 +86,39 @@ void Lua::asset::lock_asset_watchers(lua_State *l)
 void Lua::asset::unlock_asset_watchers(lua_State *l)
 {
 	engine->UnlockResourceWatchers();
+}
+luabind::object Lua::asset::get_supported_import_file_extensions(lua_State *l,pragma::asset::Type type)
+{
+	auto t = luabind::newtable(l);
+	auto &assetManager = engine->GetAssetManager();
+	auto n = assetManager.GetImporterCount(type);
+	int32_t idx = 1;
+	for(auto i=decltype(n){0u};i<n;++i)
+	{
+		for(auto &ext : assetManager.GetImporterInfo(type,i)->fileExtensions)
+			t[idx++] = ext;
+	}
+	if(type == pragma::asset::Type::Model)
+	{
+		// These are implemented using the old importer system, so they're not included in the import information
+		// retrieved above. We'll add them to the list manually for now.
+		// TODO: Move these to the new importer system and remove these entries!
+		t[idx++] = "mdl";
+		t[idx++] = "vmdl_c";
+		t[idx++] = "nif";
+	}
+	return t;
+}
+luabind::object Lua::asset::get_supported_export_file_extensions(lua_State *l,pragma::asset::Type type)
+{
+	auto t = luabind::newtable(l);
+	auto &assetManager = engine->GetAssetManager();
+	auto n = assetManager.GetExporterCount(type);
+	int32_t idx = 1;
+	for(auto i=decltype(n){0u};i<n;++i)
+	{
+		for(auto &ext : assetManager.GetExporterInfo(type,i)->fileExtensions)
+			t[idx++] = ext;
+	}
+	return t;
 }

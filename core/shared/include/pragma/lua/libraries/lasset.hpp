@@ -23,6 +23,8 @@ namespace Lua
 		DLLNETWORK bool is_loaded(lua_State *l,const std::string &name,pragma::asset::Type type);
 		DLLNETWORK void lock_asset_watchers(lua_State *l);
 		DLLNETWORK void unlock_asset_watchers(lua_State *l);
+		DLLNETWORK luabind::object get_supported_import_file_extensions(lua_State *l,pragma::asset::Type type);
+		DLLNETWORK luabind::object get_supported_export_file_extensions(lua_State *l,pragma::asset::Type type);
 	};
 };
 

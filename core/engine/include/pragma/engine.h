@@ -42,6 +42,7 @@ struct Color;
 namespace Con {enum class MessageFlags : uint8_t;};
 namespace upad {class PackageManager;};
 namespace util {class ParallelJobWrapper;};
+namespace pragma::asset {class AssetManager;};
 class DLLENGINE Engine
 	: public CVarHandler,public CallbackHandler
 {
@@ -211,6 +212,9 @@ public:
 	void UnlockResourceWatchers();
 	util::ScopeGuard ScopeLockResourceWatchers();
 
+	pragma::asset::AssetManager &GetAssetManager();
+	const pragma::asset::AssetManager &GetAssetManager() const;
+
 	// For internal use only
 	void SetReplicatedConVar(const std::string &cvar,const std::string &val);
 protected:
@@ -245,6 +249,7 @@ protected:
 	long long m_lastTick;
 	uint64_t m_tickCount = 0;
 	std::shared_ptr<VFilePtrInternalReal> m_logFile;
+	std::unique_ptr<pragma::asset::AssetManager> m_assetManager = nullptr;
 
 	struct JobInfo
 	{

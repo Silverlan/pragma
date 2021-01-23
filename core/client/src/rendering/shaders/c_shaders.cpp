@@ -165,7 +165,7 @@ void CGame::InitShaders()
 
 	// Make sure these are always loaded
 	m_gameShaders.at(umath::to_integral(GameShader::Pbr)) = shaderManager.GetShader("pbr");
-	shaderManager.GetShader("test");
+	// shaderManager.GetShader("test");
 	shaderManager.GetShader("light_cone");
 	shaderManager.GetShader("forwardp_light_culling");
 	m_gameShaders.at(umath::to_integral(GameShader::Prepass)) = shaderManager.GetShader("prepass");

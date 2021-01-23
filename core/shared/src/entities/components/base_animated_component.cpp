@@ -338,12 +338,12 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 		return false;
 	if(animInfo.animation == -1)
 		return false;
+	auto animSpeed = GetPlaybackRate();
 	auto animId = animInfo.animation;
 	auto anim = hModel->GetAnimation(animId);
-	if(anim == nullptr)
+	if(anim == nullptr || animSpeed == 0.f)
 		return false;
 	auto act = anim->GetActivity();
-	auto animSpeed = GetPlaybackRate();
 	auto numFrames = anim->GetFrameCount();
 	if(numFrames > 0)
 		animSpeed *= static_cast<float>(anim->GetFPS()) /static_cast<float>(numFrames);

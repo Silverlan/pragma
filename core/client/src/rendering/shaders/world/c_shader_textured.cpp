@@ -150,6 +150,11 @@ ShaderGameWorldLightingPass::~ShaderGameWorldLightingPass()
 	if(--g_instanceCount == 0)
 		g_materialSettingsBuffer = nullptr;
 }
+void ShaderGameWorldLightingPass::OnPipelinesInitialized()
+{
+	ShaderGameWorld::OnPipelinesInitialized();
+	m_defaultMatDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(GetMaterialDescriptorSetInfo());
+}
 GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetStaticSpecializationConstantFlags(GameShaderSpecialization specialization) const
 {
 	auto staticFlags = 

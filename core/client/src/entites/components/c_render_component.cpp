@@ -38,7 +38,7 @@ namespace pragma
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCENGINE CEngine *c_engine;
-
+#pragma optimize("",off)
 static std::shared_ptr<prosper::IUniformResizableBuffer> s_instanceBuffer = nullptr;
 decltype(CRenderComponent::s_ocExemptEntities) CRenderComponent::s_ocExemptEntities = {};
 ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT = INVALID_COMPONENT_ID;
@@ -293,6 +293,7 @@ void CRenderComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	{
 		FlagCallbackForRemoval(static_cast<pragma::CTransformComponent&>(component).AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			SetRenderBufferDirty();
+			SetRenderBoundsDirty();
 			return util::EventReply::Unhandled;
 		}),CallbackType::Component,&component);
 	}
@@ -408,6 +409,7 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 		return {};
 	auto &pose = GetEntity().GetPose();
 	auto invPose = pose.GetInverse();
+	invPose.SetScale(Vector3{1.f,1.f,1.f});
 
 	// Move ray into entity space
 	auto lstart = invPose *start;
@@ -420,8 +422,6 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 
 	// Cheap line-aabb check
 	auto aabb = GetLocalRenderBounds();
-	aabb.min /= scale;
-	aabb.max /= scale;
 	auto n = ldir;
 	auto d = uvec::length(n);
 	n /= d;
@@ -807,3 +807,4 @@ void CEOnRenderBoundsChanged::PushArguments(lua_State *l)
 	Lua::Push<Vector3>(l,sphere.pos);
 	Lua::PushNumber(l,sphere.radius);
 }
+#pragma optimize("",on)

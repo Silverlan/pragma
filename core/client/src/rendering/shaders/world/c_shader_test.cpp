@@ -144,7 +144,7 @@ bool ShaderTest::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMesh
 		return false;
 	return ShaderGameWorldLightingPass::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount);*/
 }
-prosper::DescriptorSetInfo &ShaderTest::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
+prosper::DescriptorSetInfo &ShaderTest::GetMaterialDescriptorSetInfo() const {return ShaderGameWorldLightingPass::DESCRIPTOR_SET_MATERIAL;}
 void ShaderTest::SetForceNonIBLMode(bool b) {m_bNonIBLMode = b;}
 bool ShaderTest::BeginDraw(
 	const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,

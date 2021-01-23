@@ -14,6 +14,7 @@
 #include "pragma/game/game_resources.hpp"
 #include "pragma/physics/physsoftbodyinfo.hpp"
 #include "pragma/model/animation/vertex_animation.hpp"
+#include "pragma/asset/util_asset.hpp"
 #include <sharedutils/util_file.h>
 
 template<class TModel,class TModelMesh,class TModelSubMesh>
@@ -35,6 +36,17 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 		static auto bSkipPort = false;
 		if(bSkipPort == false)
 		{
+			auto pathNoExt = path;
+			ufile::remove_extension_from_filename(pathNoExt);
+			auto assetWrapper = pragma::get_engine()->GetAssetManager().ImportAsset(pragma::asset::Type::Model,nullptr,pathNoExt);
+			if(assetWrapper != nullptr)
+			{
+				bSkipPort = true; // Safety flag to make sure we never end up in an infinite recursion
+				auto r = Load<TModel,TModelMesh,TModelSubMesh>(game,model,loadMaterial,loadModel);
+				bSkipPort = false;
+				return r;
+			}
+
 			auto mdlName = model;
 			ufile::remove_extension_from_filename(mdlName);
 			auto *nw = game->GetNetworkState();

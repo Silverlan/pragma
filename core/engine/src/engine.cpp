@@ -40,6 +40,7 @@
 #include "pragma/engine_version.h"
 #include "pragma/console/cvar.h"
 #include "pragma/debug/debug_performance_profiler.hpp"
+#include <pragma/asset/util_asset.hpp>
 #include <sharedutils/util.h>
 #include <sharedutils/util_clock.hpp>
 #include <sharedutils/util_parallel_job.hpp>
@@ -98,6 +99,7 @@ Engine::Engine(int,char*[])
 
 	// Link package system to file system
 	m_padPackageManager = upad::link_to_file_system();
+	m_assetManager = std::make_unique<pragma::asset::AssetManager>();
 
 	pragma::register_engine_animation_events();
 	pragma::register_engine_activities();
@@ -129,6 +131,9 @@ Engine::Engine(int,char*[])
 		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 3u,"Added new profiling phase, but did not create associated profiling stage!");
 	});
 }
+
+pragma::asset::AssetManager &Engine::GetAssetManager() {return *m_assetManager;}
+const pragma::asset::AssetManager &Engine::GetAssetManager() const {return const_cast<Engine*>(this)->GetAssetManager();}
 
 void Engine::ClearConsole()
 {

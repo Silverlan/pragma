@@ -266,6 +266,7 @@ namespace pragma
 		using ShaderEntity::Draw;
 		GameShaderSpecializationConstantFlag GetStaticSpecializationConstantFlags(GameShaderSpecialization specialization) const;
 		bool BindLightMapUvBuffer(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,bool &outShouldUseLightmaps);
+		virtual void OnPipelinesInitialized() override;
 		virtual bool BindRenderFlags(SceneFlags flags);
 		virtual void OnBindEntity(CBaseEntity &ent,CRenderComponent &renderC) override;
 		virtual void ApplyMaterialFlags(CMaterial &mat,MaterialFlags &outFlags) const;

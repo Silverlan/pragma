@@ -16,6 +16,7 @@
 #include "pragma/gui/mainmenu/wimainmenu.h"
 #include "pragma/gui/wiconsole.hpp"
 #include "pragma/gui/wiframe.h"
+#include "pragma/asset/c_util_model.hpp"
 #include <pragma/console/convars.h>
 #include "pragma/console/engine_cvar.h"
 #include "pragma/networking/iclient.hpp"
@@ -48,6 +49,7 @@
 #include <wgui/types/witext_tags.hpp>
 #include <queries/prosper_query_pool.hpp>
 #include <queries/prosper_timer_query.hpp>
+#include <pragma/asset/util_asset.hpp>
 
 extern "C"
 {
@@ -108,6 +110,18 @@ CEngine::CEngine(int argc,char* argv[])
 			pragma::debug::ProfilingStage::Create(cpuProfiler,"ClientTick",&Engine::GetProfilingStageManager()->GetProfilerStage(Engine::CPUProfilingPhase::Tick))
 		});
 		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 3u,"Added new profiling phase, but did not create associated profiling stage!");
+	});
+
+	pragma::asset::AssetManager::ImporterInfo importerInfo {};
+	importerInfo.name = "glTF";
+	importerInfo.fileExtensions = {"gltf","glb"};
+	GetAssetManager().RegisterImporter(importerInfo,pragma::asset::Type::Model,[](VFilePtr f,const std::optional<std::string> &mdlPath,std::string &errMsg) -> std::unique_ptr<pragma::asset::IAssetWrapper> {
+		auto mdl = pragma::asset::import_model(f,errMsg);
+		if(mdl == nullptr)
+			return nullptr;
+		auto wrapper = std::make_unique<pragma::asset::ModelAssetWrapper>();
+		wrapper->SetModel(*mdl);
+		return wrapper;
 	});
 }
 

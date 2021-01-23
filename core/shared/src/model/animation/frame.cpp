@@ -122,6 +122,7 @@ Frame::Frame(const Frame &other)
 {
 	m_bones = other.m_bones;
 	m_scales = other.m_scales;
+	m_flexFrameData = other.m_flexFrameData;
 	if(other.m_move != nullptr)
 		m_move = std::make_unique<Vector2>(*other.m_move);
 }

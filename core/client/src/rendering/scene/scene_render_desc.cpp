@@ -245,6 +245,9 @@ bool SceneRenderDesc::ShouldCull(pragma::CRenderComponent &renderC,pragma::Rende
 	auto &renderMesh = renderMeshes[meshIdx];
 	Vector3 min,max;
 	renderMesh->GetBounds(min,max);
+	auto &scale = renderC.GetEntity().GetScale();
+	min *= scale;
+	max *= scale;
 	auto &pos = renderC.GetEntity().GetPosition();
 	min += pos;
 	max += pos;

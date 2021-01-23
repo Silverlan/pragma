@@ -245,7 +245,6 @@ void ShaderPBR::OnPipelinesInitialized()
 {
 	ShaderGameWorldLightingPass::OnPipelinesInitialized();
 	m_defaultPbrDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_PBR);
-	m_defaultMatDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_MATERIAL);
 }
 prosper::IDescriptorSet &ShaderPBR::GetDefaultPbrDescriptorSet() const {return *m_defaultPbrDsg->GetDescriptorSet();}
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescriptorSet(CMaterial &mat)

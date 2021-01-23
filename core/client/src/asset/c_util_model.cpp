@@ -29,7 +29,9 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
+void pragma::asset::MapExportInfo::AddCamera(CCameraComponent &cam) {m_cameras.push_back(cam.GetHandle<CCameraComponent>());}
+void pragma::asset::MapExportInfo::AddLightSource(CLightComponent &light) {m_lightSources.push_back(light.GetHandle<CLightComponent>());}
 void pragma::asset::ModelExportInfo::SetAnimationList(const std::vector<std::string> &animations)
 {
 	exportAnimations = true;
@@ -44,15 +46,108 @@ struct GLTFBufferData
 	tinygltf::BufferView &bufferView;
 	tinygltf::Buffer &buffer;
 	template<typename T>
-	T GetValue(uint32_t vertexIndex,const T &default={}) const
+		T GetValue(uint32_t offset,const T &default={}) const
+	{
+		offset += bufferView.byteOffset +accessor.byteOffset;
+		if(offset +sizeof(T) >= buffer.data.size())
+			return default;
+		return *reinterpret_cast<T*>(buffer.data.data() +offset);
+	}
+	template<typename T>
+		T GetIndexedValue(uint32_t index,const T &default={}) const
 	{
 		auto stride = bufferView.byteStride;
 		if(stride == 0)
 			stride = sizeof(T);
-		auto offset = bufferView.byteOffset +accessor.byteOffset +vertexIndex *stride;
-		if(offset +sizeof(T) >= buffer.data.size())
-			return default;
-		return *reinterpret_cast<T*>(buffer.data.data() +offset);
+		return GetValue(index *stride,default);
+	}
+	template<uint32_t C>
+		std::array<int64_t,C> GetIntArray(uint32_t index) const
+	{
+		auto stride = bufferView.byteStride;
+		auto componentSize = tinygltf::GetComponentSizeInBytes(accessor.componentType);
+		if(stride == 0)
+			stride = componentSize *C;
+		auto offset = index *stride;
+		std::array<int64_t,C> result {};
+		for(auto i=decltype(C){0u};i<C;++i)
+		{
+			int64_t value = 0;
+			switch(accessor.componentType)
+			{
+			case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+				value = GetValue<uint8_t>(offset);
+				break;
+			case TINYGLTF_COMPONENT_TYPE_BYTE:
+				value = GetValue<int8_t>(offset);
+				break;
+			case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+				value = GetValue<uint16_t>(offset);
+				break;
+			case TINYGLTF_COMPONENT_TYPE_SHORT:
+				value = GetValue<int16_t>(offset);
+				break;
+			case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
+				value = GetValue<uint32_t>(offset);
+				break;
+			case TINYGLTF_COMPONENT_TYPE_INT:
+				value = GetValue<int32_t>(offset);
+				break;
+			}
+			result[i] = value;
+			offset += componentSize;
+		}
+		return result;
+	}
+	template<uint32_t C>
+		std::array<float,C> GetFloatArray(uint32_t index) const
+	{
+		auto stride = bufferView.byteStride;
+		auto componentSize = tinygltf::GetComponentSizeInBytes(accessor.componentType);
+		if(stride == 0)
+			stride = componentSize *C;
+		auto offset = index *stride;
+		std::array<float,C> result {};
+		for(auto i=decltype(C){0u};i<C;++i)
+		{
+			float value = 0.f;
+			switch(accessor.componentType)
+			{
+			case TINYGLTF_COMPONENT_TYPE_FLOAT:
+				value = GetValue<float>(offset);
+				break;
+			case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+				value = GetValue<uint8_t>(offset) /static_cast<float>(std::numeric_limits<uint8_t>::max());
+				break;
+			case TINYGLTF_COMPONENT_TYPE_BYTE:
+				value = umath::max(GetValue<int8_t>(offset) /static_cast<float>(std::numeric_limits<int8_t>::max()),-1.f);
+				break;
+			case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+				value = GetValue<uint16_t>(offset) /static_cast<float>(std::numeric_limits<uint16_t>::max());
+				break;
+			case TINYGLTF_COMPONENT_TYPE_SHORT:
+				value = umath::max(GetValue<int16_t>(offset) /static_cast<float>(std::numeric_limits<int16_t>::max()),-1.f);
+				break;
+			}
+			result[i] = value;
+			offset += componentSize;
+		}
+		return result;
+	}
+	Vector3 GetVector(uint32_t offset) const
+	{
+		auto v = GetFloatArray<3>(offset);
+		return Vector3{v[0],v[1],v[2]};
+	}
+	Quat GetQuat(uint32_t offset) const
+	{
+		auto v = GetFloatArray<4>(offset);
+		return Quat{v[3],v[0],v[1],v[2]};
+	}
+	Vector4 GetVector4(uint32_t offset) const
+	{
+		auto v = GetFloatArray<4>(offset);
+		return Vector4{v[0],v[1],v[2],v[3]};
 	}
 };
 
@@ -533,6 +628,13 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 		++matIdx;
 	}
 
+	auto fGetBufferData = [&gltfMdl](int accessorIdx) -> GLTFBufferData {
+		auto &accessor = gltfMdl.accessors.at(accessorIdx);
+		auto &bufView = gltfMdl.bufferViews.at(accessor.bufferView);
+		auto &buf = gltfMdl.buffers.at(bufView.buffer);
+		return GLTFBufferData{accessor,bufView,buf};
+	};
+
 	auto &gltfMeshes = gltfMdl.meshes;
 	auto meshGroup = mdl->AddMeshGroup("reference");
 	uint32_t absUnnamedFcIdx = 0;
@@ -577,19 +679,18 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 			}
 			}
 
-			auto fGetBufferData = [&primitive,&gltfMdl](const std::string &identifier) -> std::optional<GLTFBufferData> {
+			auto fGetVertexBufferData = [&primitive,&gltfMdl,&fGetBufferData](const std::string &identifier) -> std::optional<GLTFBufferData> {
 				auto it = primitive.attributes.find(identifier);
 				if(it == primitive.attributes.end())
 					return {};
-				auto &accessor = gltfMdl.accessors.at(it->second);
-				auto &bufView = gltfMdl.bufferViews.at(accessor.bufferView);
-				auto &buf = gltfMdl.buffers.at(bufView.buffer);
-				return GLTFBufferData{accessor,bufView,buf};
+				return fGetBufferData(it->second);
 			};
-			auto &posBufData = fGetBufferData("POSITION");
-			auto &normBufData = fGetBufferData("NORMAL");
-			auto &texCoordBufData = fGetBufferData("TEXCOORD_0");
-			auto &texCoordBufData1 = fGetBufferData("TEXCOORD_1");
+			auto posBufData = fGetVertexBufferData("POSITION");
+			auto normBufData = fGetVertexBufferData("NORMAL");
+			auto texCoordBufData = fGetVertexBufferData("TEXCOORD_0");
+			auto texCoordBufData1 = fGetVertexBufferData("TEXCOORD_1");
+			auto jointsBufData = fGetVertexBufferData("JOINTS_0");
+			auto weightsBufData = fGetVertexBufferData("WEIGHTS_0");
 
 			auto &verts = subMesh->GetVertices();
 			auto numVerts = posBufData->accessor.count;
@@ -605,13 +706,33 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 			for(auto i=decltype(numVerts){0u};i<numVerts;++i)
 			{
 				auto &v = verts.at(i);
-				v.position = TransformPos(posBufData->GetValue<Vector3>(i));
+				v.position = TransformPos(posBufData->GetIndexedValue<Vector3>(i));
 				if(normBufData.has_value())
-					v.normal = normBufData->GetValue<Vector3>(i);
+					v.normal = normBufData->GetIndexedValue<Vector3>(i);
 				if(texCoordBufData.has_value())
-					v.uv = texCoordBufData->GetValue<Vector2>(i);
+					v.uv = texCoordBufData->GetIndexedValue<Vector2>(i);
 				if(lightmapUvs)
-					(*lightmapUvs).at(i) = texCoordBufData1->GetValue<Vector2>(i);
+					(*lightmapUvs).at(i) = texCoordBufData1->GetIndexedValue<Vector2>(i);
+			}
+
+			if(jointsBufData.has_value() && weightsBufData.has_value())
+			{
+				auto &vertWeights = subMesh->GetVertexWeights();
+				vertWeights.resize(numVerts);
+
+				for(auto i=decltype(numVerts){0u};i<numVerts;++i)
+				{
+					auto &vw = vertWeights.at(i);
+
+					auto weights = weightsBufData->GetFloatArray<4>(i);
+					auto boneIds = jointsBufData->GetIntArray<4>(i);
+					for(uint8_t j=0;j<4;++j)
+					{
+						vw.weights[j] = weights[j];
+						vw.boneIds[j] = boneIds[j];
+					}
+				}
+				// JOINTS_1  -> +4
 			}
 
 			for(auto i=decltype(idxAccessor.count){0u};i<idxAccessor.count;++i)
@@ -703,11 +824,11 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 					mva->SetFlagEnabled(MeshVertexFrame::Flags::HasNormals);
 				for(auto i=decltype(posAccessor.count){0u};i<posAccessor.count;++i)
 				{
-					auto pos = TransformPos(posBufData.GetValue<Vector3>(i));
+					auto pos = TransformPos(posBufData.GetIndexedValue<Vector3>(i));
 					mva->SetVertexPosition(i,pos);
 					if(normBufData)
 					{
-						auto n = normBufData->GetValue<Vector3>(i);
+						auto n = normBufData->GetIndexedValue<Vector3>(i);
 						mva->SetVertexNormal(i,n);
 					}
 				}
@@ -721,6 +842,289 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 			absUnnamedFcIdx += gltfMesh.primitives.front().targets.size(); // All primitives have same number of targets
 		meshGroup->AddMesh(mesh);
 	}
+
+	std::unordered_map<tinygltf::Node*,uint32_t> nodeToBoneIndex;
+	if(gltfMdl.skins.empty() == false)
+	{
+		auto &skeleton = mdl->GetSkeleton();
+		auto &skin = gltfMdl.skins.front();
+		skeleton.GetBones().reserve(skin.joints.size());
+		std::unordered_map<int,Bone*> nodeIdxToBone;
+		for(auto i=decltype(skin.joints.size()){0u};i<skin.joints.size();++i)
+		{
+			auto nodeIdx = skin.joints[i];
+			auto &node = gltfMdl.nodes[nodeIdx];
+			nodeToBoneIndex[&node] = i;
+
+			auto *bone = new Bone{};
+			bone->name = node.name;
+			skeleton.AddBone(bone);
+			nodeIdxToBone[nodeIdx] = bone;
+		}
+
+		auto bufferData = fGetBufferData(skin.inverseBindMatrices);
+
+		// Build hierarchy
+		std::vector<umath::ScaledTransform> bindPoses {};
+		bindPoses.reserve(skin.joints.size());
+		for(auto i=decltype(skin.joints.size()){0u};i<skin.joints.size();++i)
+		{
+			auto nodeIdx = skin.joints[i];
+			auto &node = gltfMdl.nodes[nodeIdx];
+			auto &bone = *nodeIdxToBone[nodeIdx];
+			for(auto childIdx : node.children)
+			{
+				auto &child = *nodeIdxToBone[childIdx];
+				bone.children.insert(std::make_pair(child.ID,child.shared_from_this()));
+				child.parent = bone.shared_from_this();
+			}
+
+			auto invBindMatrix = bufferData.GetIndexedValue<Mat4>(i);
+			umath::ScaledTransform bindPose {invBindMatrix};
+			bindPose = bindPose.GetInverse();
+			bindPose.SetOrigin(TransformPos(bindPose.GetOrigin()));
+			bindPoses.push_back(bindPose);
+		}
+
+		// Build reference pose
+		auto &reference = mdl->GetReference();
+		reference.SetBoneCount(skin.joints.size());
+		for(auto i=decltype(skin.joints.size()){0u};i<skin.joints.size();++i)
+		{
+			auto nodeIdx = skin.joints[i];
+			auto &node = gltfMdl.nodes[nodeIdx];
+			umath::ScaledTransform pose {};
+			if(!node.translation.empty())
+				pose.SetOrigin(TransformPos(Vector3{static_cast<float>(node.translation[0]),static_cast<float>(node.translation[1]),static_cast<float>(node.translation[2])}));
+			if(!node.rotation.empty())
+				pose.SetRotation(Quat{static_cast<float>(node.rotation[3]),static_cast<float>(node.rotation[0]),static_cast<float>(node.rotation[1]),static_cast<float>(node.rotation[2])});
+			if(!node.scale.empty())
+				pose.SetScale(Vector3{static_cast<float>(node.scale[0]),static_cast<float>(node.scale[1]),static_cast<float>(node.scale[2])});
+			reference.SetBonePose(i,pose);
+		}
+
+		for(auto &bone : skeleton.GetBones())
+		{
+			if(bone->parent.expired() == false)
+				continue;
+			skeleton.GetRootBones().insert(std::make_pair(bone->ID,bone));
+		}
+		
+		auto refAnim = Animation::Create();
+		refAnim->ReserveBoneIds(skin.joints.size());
+		for(auto i=decltype(skin.joints.size()){0u};i<skin.joints.size();++i)
+			refAnim->AddBoneId(i);
+
+		auto frame = Frame::Create(reference);
+		refAnim->AddFrame(frame);
+		reference.Globalize(skeleton);
+		mdl->AddAnimation("reference",refAnim);
+	}
+
+	auto &skeleton = mdl->GetSkeleton();
+	auto numBones = skeleton.GetBoneCount();
+	for(auto &gltfAnim : gltfMdl.animations)
+	{
+		auto &animName = gltfAnim.name;
+		auto anim = Animation::Create();
+		float fps = 24.f;
+		auto fGetFrame = [&](uint32_t frameIndex) -> Frame& {
+			auto &frames = anim->GetFrames();
+			if(frameIndex < frames.size())
+				return *frames[frameIndex];
+			frames.reserve(frameIndex +1);
+			for(auto i=frames.size();i<frameIndex +1;++i)
+			{
+				auto frame = Frame::Create(numBones);
+				frames.push_back(frame);
+			}
+			return *frames.back();
+		};
+		for(auto &channel : gltfAnim.channels)
+		{
+			auto &sampler = gltfAnim.samplers[channel.sampler];
+			auto &node = gltfMdl.nodes[channel.target_node];
+
+			auto it = nodeToBoneIndex.find(&node);
+			if(it == nodeToBoneIndex.end())
+				continue; // Not a bone
+			auto boneId = it->second;
+
+			auto bufTimes = fGetBufferData(sampler.input);
+			auto bufValues = fGetBufferData(sampler.output);
+
+			enum class Channel : uint8_t
+			{
+				Translation = 0,
+				Rotation,
+				Scale,
+				Weights,
+
+				Count
+			};
+			Channel eChannel;
+			if(channel.target_path == "translation")
+				eChannel = Channel::Translation;
+			else if(channel.target_path == "rotation")
+				eChannel = Channel::Rotation;
+			else if(channel.target_path == "scale")
+				eChannel = Channel::Scale;
+			else if(channel.target_path == "weights")
+				eChannel = Channel::Weights;
+
+			auto n = bufTimes.accessor.count;
+			std::vector<float> times;
+			struct Value
+			{
+				Value(const Vector3 &translation)
+					: translation{translation}
+				{}
+				Value(const Quat &rotation)
+					: rotation{rotation}
+				{}
+				Value(float weight)
+					: weight{weight}
+				{}
+				Value() {}
+				Value(const Value &other)
+				{
+					memcpy(this,&other,sizeof(*this));
+				}
+				union
+				{
+					Vector3 translation;
+					Quat rotation;
+					Vector3 scale;
+					float weight;
+				};
+			};
+			std::vector<Value> values;
+			times.reserve(n);
+			values.reserve(n);
+			for(auto i=decltype(n){0u};i<n;++i)
+			{
+				auto t = bufTimes.GetIndexedValue<float>(i);
+				times.push_back(t);
+				switch(eChannel)
+				{
+				case Channel::Translation:
+				{
+					auto translation = TransformPos(bufValues.GetVector(i));
+					values.push_back({translation});
+					break;
+				}
+				case Channel::Rotation:
+				{
+					auto rotation = bufValues.GetQuat(i);
+					values.push_back({rotation});
+					break;
+				}
+				case Channel::Scale:
+				{
+					auto scale = bufValues.GetVector(i);
+					values.push_back({scale});
+					break;
+				}
+				case Channel::Weights:
+				{
+					auto weight = bufValues.GetIndexedValue<float>(i);
+					values.push_back({weight});
+					break;
+				}
+				}
+			}
+
+			if(times.empty())
+				continue;
+
+			auto fGetInterpolatedValue = [&times,&values,eChannel](float tTgt) -> Value {
+				auto it = std::find_if(times.begin(),times.end(),[tTgt](float t) {
+					return t >= tTgt;
+				});
+				auto itNext = it;
+				if(it == times.end())
+				{
+					--it;
+					itNext = it;
+				}
+				else
+				{
+					++itNext;
+					if(itNext == times.end())
+						itNext = it;
+				}
+
+				auto t0 = *it;
+				auto t1 = *itNext;
+				auto interp = (t1 > t0) ? umath::clamp((tTgt -t0) /(t1 -t0),0.f,1.f) : 0.f;
+				auto &v0 = values[it -times.begin()];
+				auto &v1 = values[itNext -times.begin()];
+				Value interpValue {};
+				switch(eChannel)
+				{
+				case Channel::Translation:
+				{
+					interpValue.translation = uvec::lerp(v0.translation,v1.translation,interp);
+					break;
+				}
+				case Channel::Rotation:
+				{
+					interpValue.rotation = uquat::slerp(v0.rotation,v1.rotation,interp);
+					break;
+				}
+				case Channel::Scale:
+				{
+					interpValue.scale = uvec::lerp(v0.scale,v1.scale,interp);
+					break;
+				}
+				case Channel::Weights:
+				{
+					interpValue.weight = umath::lerp(v0.weight,v1.weight,interp);
+					break;
+				}
+				}
+				return interpValue;
+			};
+
+			auto numFrames = umath::max(umath::ceil(times.back() *24),1);
+			for(auto i=decltype(numFrames){0u};i<numFrames;++i)
+			{
+				auto &frame = fGetFrame(i);
+				auto t = static_cast<float>(i) /fps;
+				switch(eChannel)
+				{
+				case Channel::Translation:
+				{
+					frame.SetBonePosition(boneId,fGetInterpolatedValue(t).translation);
+					break;
+				}
+				case Channel::Rotation:
+				{
+					frame.SetBoneOrientation(boneId,fGetInterpolatedValue(t).rotation);
+					break;
+				}
+				case Channel::Scale:
+				{
+					frame.SetBoneScale(boneId,fGetInterpolatedValue(t).scale);
+					break;
+				}
+				case Channel::Weights:
+				{
+					// TODO
+					break;
+				}
+				}
+			}
+		}
+		if(anim->GetFrameCount() == 0)
+			continue;
+		auto numBones = mdl->GetSkeleton().GetBoneCount();
+		anim->ReserveBoneIds(numBones);
+		for(auto i=decltype(numBones){0u};i<numBones;++i)
+			anim->AddBoneId(i);
+		mdl->AddAnimation(animName,anim);
+	}
+
 	mdl->Update(ModelUpdateFlags::All);
 	mdl->Save(c_game,outputPath.GetString() +mdlName,"addons/converted/");
 	return mdl;
@@ -1365,3 +1769,4 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(
 	});
 	return AOResult::AOJobReady;
 }
+#pragma optimize("",on)

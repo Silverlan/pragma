@@ -9,6 +9,7 @@
 
 #include "pragma/networkdefinitions.h"
 
+class Game;
 namespace pragma::asset
 {
 	enum class Type : uint8_t
@@ -61,12 +62,12 @@ namespace pragma::asset
 			std::vector<std::string> fileExtensions;
 		};
 		using ExporterInfo = ImporterInfo;
-		using ImportHandler = std::function<std::unique_ptr<IAssetWrapper>(VFilePtr,const std::optional<std::string>&,std::string&)>;
-		using ExportHandler = std::function<bool(VFilePtrReal,const IAssetWrapper&,std::string&)>;
+		using ImportHandler = std::function<std::unique_ptr<IAssetWrapper>(Game &game,VFilePtr,const std::optional<std::string>&,std::string&)>;
+		using ExportHandler = std::function<bool(Game &game,VFilePtrReal,const IAssetWrapper&,std::string&)>;
 		void RegisterImporter(const ImporterInfo &importerInfo,Type type,const ImportHandler &importHandler);
 		void RegisterExporter(const ExporterInfo &importerInfo,Type type,const ExportHandler &exportHandler);
-		std::unique_ptr<IAssetWrapper> ImportAsset(Type type,VFilePtr f,const std::optional<std::string> &filePath={},std::string *optOutErr=nullptr) const;
-		bool ExportAsset(Type type,VFilePtrReal f,const IAssetWrapper &assetWrapper,std::string *optOutErr=nullptr) const;
+		std::unique_ptr<IAssetWrapper> ImportAsset(Game &game,Type type,VFilePtr f,const std::optional<std::string> &filePath={},std::string *optOutErr=nullptr) const;
+		bool ExportAsset(Game &game,Type type,VFilePtrReal f,const IAssetWrapper &assetWrapper,std::string *optOutErr=nullptr) const;
 
 		uint32_t GetImporterCount(Type type) const {return m_importers[umath::to_integral(type)].size();}
 		uint32_t GetExporterCount(Type type) const {return m_exporters[umath::to_integral(type)].size();}

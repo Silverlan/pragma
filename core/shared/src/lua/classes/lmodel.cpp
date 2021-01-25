@@ -1649,13 +1649,18 @@ void Lua::Model::SetMaterial(lua_State *l,::Model &mdl,uint32_t matId,::Material
 void Lua::Model::GetMaterials(lua_State *l,::Model &mdl)
 {
 	//Lua::CheckModel(l,1);
+	auto *nw = engine->GetNetworkState(l);
+	auto &matManager = nw->GetMaterialManager();
 	auto t = Lua::CreateTable(l);
 	uint32_t idx = 1;
 	auto &mats = mdl.GetMaterials();
 	for(auto &mat : mats)
 	{
+		auto *pmat = mat.get();
+		if(pmat == nullptr)
+			pmat = matManager.GetErrorMaterial();
 		Lua::PushInt(l,idx++);
-		Lua::Push<Material*>(l,mat.get());
+		Lua::Push<Material*>(l,pmat);
 		Lua::SetTableValue(l,t);
 	}
 }

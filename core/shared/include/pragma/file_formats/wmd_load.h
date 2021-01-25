@@ -38,7 +38,7 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 		{
 			auto pathNoExt = path;
 			ufile::remove_extension_from_filename(pathNoExt);
-			auto assetWrapper = pragma::get_engine()->GetAssetManager().ImportAsset(pragma::asset::Type::Model,nullptr,pathNoExt);
+			auto assetWrapper = pragma::get_engine()->GetAssetManager().ImportAsset(*game,pragma::asset::Type::Model,nullptr,pathNoExt);
 			if(assetWrapper != nullptr)
 			{
 				bSkipPort = true; // Safety flag to make sure we never end up in an infinite recursion

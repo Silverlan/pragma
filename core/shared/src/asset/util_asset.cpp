@@ -9,6 +9,7 @@
 #include "pragma/asset/util_asset.hpp"
 #include "pragma/networkstate/networkstate.h"
 #include "pragma/model/modelmanager.h"
+#include <sharedutils/util_path.hpp>
 
 extern DLLENGINE Engine *engine;
 
@@ -95,7 +96,7 @@ void pragma::asset::AssetManager::RegisterExporter(const ExporterInfo &importerI
 	exporter.handler = exportHandler;
 	m_exporters[umath::to_integral(type)].push_back(exporter);
 }
-std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::ImportAsset(Type type,VFilePtr f,const std::optional<std::string> &filePath,std::string *optOutErr) const
+std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::ImportAsset(Game &game,Type type,VFilePtr f,const std::optional<std::string> &filePath,std::string *optOutErr) const
 {
 	auto fpath = filePath;
 	if(f == nullptr && filePath.has_value())
@@ -113,9 +114,34 @@ std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::Impor
 				fpath = filePathWithExt;
 
 				std::string err;
-				auto aw = importer.handler(f,fpath,err);
+				auto aw = importer.handler(game,f,fpath,err);
 				if(aw && aw->GetType() == type)
+				{
+					if(filePath.has_value())
+					{
+						switch(type)
+						{
+						case Type::Model:
+						{
+							auto path = util::Path::CreateFile(*filePath);
+							path.PopFront();
+							auto *mdl = static_cast<pragma::asset::ModelAssetWrapper&>(*aw).GetModel();
+							if(mdl)
+								mdl->Save(&game,path.GetString(),"addons/converted/");
+							break;
+						}
+						case Type::Material:
+							break; // TODO
+						case Type::ParticleSystem:
+							break; // TODO
+						case Type::Sound:
+							break; // TODO
+						case Type::Texture:
+							break; // TODO
+						}
+					}
 					return aw;
+				}
 				if(optOutErr)
 					*optOutErr = err;
 			}
@@ -126,7 +152,7 @@ std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::Impor
 	for(auto &importer : m_importers[umath::to_integral(type)])
 	{
 		std::string err;
-		auto aw = importer.handler(f,fpath,err);
+		auto aw = importer.handler(game,f,fpath,err);
 		if(aw && aw->GetType() == type)
 			return aw;
 		if(optOutErr)
@@ -134,12 +160,12 @@ std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::Impor
 	}
 	return false;
 }
-bool pragma::asset::AssetManager::ExportAsset(Type type,VFilePtrReal f,const IAssetWrapper &assetWrapper,std::string *optOutErr) const
+bool pragma::asset::AssetManager::ExportAsset(Game &game,Type type,VFilePtrReal f,const IAssetWrapper &assetWrapper,std::string *optOutErr) const
 {
 	for(auto &exporter : m_exporters[umath::to_integral(type)])
 	{
 		std::string err;
-		if(exporter.handler(f,assetWrapper,err))
+		if(exporter.handler(game,f,assetWrapper,err))
 			return true;
 		if(optOutErr)
 			*optOutErr = err;

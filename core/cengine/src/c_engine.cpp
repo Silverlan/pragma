@@ -115,7 +115,7 @@ CEngine::CEngine(int argc,char* argv[])
 	pragma::asset::AssetManager::ImporterInfo importerInfo {};
 	importerInfo.name = "glTF";
 	importerInfo.fileExtensions = {"gltf","glb"};
-	GetAssetManager().RegisterImporter(importerInfo,pragma::asset::Type::Model,[](VFilePtr f,const std::optional<std::string> &mdlPath,std::string &errMsg) -> std::unique_ptr<pragma::asset::IAssetWrapper> {
+	GetAssetManager().RegisterImporter(importerInfo,pragma::asset::Type::Model,[](Game &game,VFilePtr f,const std::optional<std::string> &mdlPath,std::string &errMsg) -> std::unique_ptr<pragma::asset::IAssetWrapper> {
 		auto mdl = pragma::asset::import_model(f,errMsg);
 		if(mdl == nullptr)
 			return nullptr;

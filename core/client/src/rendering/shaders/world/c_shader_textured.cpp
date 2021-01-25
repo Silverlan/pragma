@@ -158,9 +158,7 @@ void ShaderGameWorldLightingPass::OnPipelinesInitialized()
 }
 GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetStaticSpecializationConstantFlags(GameShaderSpecialization specialization) const
 {
-	auto staticFlags = 
-		GameShaderSpecializationConstantFlag::EnableLightSourcesBit | GameShaderSpecializationConstantFlag::EnableLightSourcesDirectionalBit |
-		GameShaderSpecializationConstantFlag::EnableLightSourcesPointBit | GameShaderSpecializationConstantFlag::EnableLightSourcesSpotBit;
+	auto staticFlags = GameShaderSpecializationConstantFlag::None;
 	switch(specialization)
 	{
 	case GameShaderSpecialization::Generic:
@@ -285,10 +283,6 @@ void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelin
 	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EmissionEnabledBit);
 	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::WrinklesEnabledBit);
 	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableTranslucencyBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableLightSourcesBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableLightSourcesSpotBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableLightSourcesPointBit);
-	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableLightSourcesDirectionalBit);
 	ShaderSpecializationManager::AddSpecializationConstant(*this,pipelineInfo,pipelineIdx,prosper::ShaderStageFlags::FragmentBit,GameShaderSpecializationConstantFlag::EnableRmaMapBit);
 
 	// Shared
@@ -688,7 +682,12 @@ bool ShaderSpecializationManager::IsSpecializationConstantSet(uint32_t pipelineI
 void ShaderSpecializationManager::RegisterSpecializations(PassType passType,SpecializationFlags staticFlags,SpecializationFlags dynamicFlags)
 {
 	if(passType >= m_specializationToPipelineIdx.size())
+	{
+		auto n = m_specializationToPipelineIdx.size();
 		m_specializationToPipelineIdx.resize(passType +1);
+		for(auto i=n;i<m_specializationToPipelineIdx.size();++i)
+			std::fill(m_specializationToPipelineIdx[i].begin(),m_specializationToPipelineIdx[i].end(),std::numeric_limits<uint32_t>::max());
+	}
 	auto &specializationMap = m_specializationToPipelineIdx[passType];
 	auto dynamicFlagValues = umath::get_power_of_2_values(dynamicFlags);
 	auto &permutations = m_pipelineSpecializations;
@@ -712,6 +711,6 @@ std::optional<uint32_t> ShaderSpecializationManager::FindSpecializationPipelineI
 	if(passType >= m_specializationToPipelineIdx.size())
 		return {};
 	auto specToPipelineIdx = m_specializationToPipelineIdx[passType];
-	auto itp = specToPipelineIdx.find(specializationFlags);
-	return (itp != specToPipelineIdx.end()) ? itp->second : std::optional<uint32_t>{};
+	auto pipelineIdx = specToPipelineIdx[specializationFlags];
+	return (pipelineIdx != std::numeric_limits<uint32_t>::max()) ? pipelineIdx : std::optional<uint32_t>{};
 }

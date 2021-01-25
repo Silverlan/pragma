@@ -17,6 +17,31 @@ namespace pragma
 	const float DefaultParallaxHeightScale = 0.025f;
 	const float DefaultAlphaDiscardThreshold = 0.99f;
 
+	enum class GameShaderSpecializationConstantFlag : uint32_t
+	{
+		None = 0u,
+
+		// Static
+		EnableLightMapsBit = 1u,
+		EnableAnimationBit = EnableLightMapsBit<<1u,
+		EnableMorphTargetAnimationBit = EnableAnimationBit<<1u,
+
+		// Dynamic
+		EmissionEnabledBit = EnableMorphTargetAnimationBit<<1u,
+		WrinklesEnabledBit = EmissionEnabledBit<<1u,
+		EnableTranslucencyBit = WrinklesEnabledBit<<1u,
+		EnableRmaMapBit = EnableTranslucencyBit<<1u,
+		EnableNormalMapBit = EnableRmaMapBit<<1u,
+		ParallaxEnabledBit = EnableNormalMapBit<<1u,
+		EnableClippingBit = ParallaxEnabledBit<<1u,
+		Enable3dOriginBit = EnableClippingBit<<1u,
+		EnableExtendedVertexWeights = Enable3dOriginBit<<1u,
+		EnableDepthBias = EnableExtendedVertexWeights<<1u,
+
+		PermutationCount = (EnableDepthBias<<1u) -1,
+		Last = EnableDepthBias
+	};
+
 	class DLLCLIENT ShaderSpecializationManager
 	{
 	public:
@@ -52,36 +77,9 @@ namespace pragma
 	private:
 		std::vector<SpecializationFlags> m_pipelineSpecializations;
 		// Per pass-type
-		std::vector<std::unordered_map<SpecializationFlags,uint32_t>> m_specializationToPipelineIdx;
+		std::vector<std::array<uint32_t,umath::to_integral(GameShaderSpecializationConstantFlag::PermutationCount)>> m_specializationToPipelineIdx;
 	};
 
-	enum class GameShaderSpecializationConstantFlag : uint32_t
-	{
-		None = 0u,
-
-		// Static
-		EnableLightSourcesBit = 1u,
-		EnableLightSourcesSpotBit = EnableLightSourcesBit<<1u,
-		EnableLightSourcesPointBit = EnableLightSourcesSpotBit<<1u,
-		EnableLightSourcesDirectionalBit = EnableLightSourcesPointBit<<1u,
-		EnableLightMapsBit = EnableLightSourcesDirectionalBit<<1u,
-		EnableAnimationBit = EnableLightMapsBit<<1u,
-		EnableMorphTargetAnimationBit = EnableAnimationBit<<1u,
-
-		// Dynamic
-		EmissionEnabledBit = EnableMorphTargetAnimationBit<<1u,
-		WrinklesEnabledBit = EmissionEnabledBit<<1u,
-		EnableTranslucencyBit = WrinklesEnabledBit<<1u,
-		EnableRmaMapBit = EnableTranslucencyBit<<1u,
-		EnableNormalMapBit = EnableRmaMapBit<<1u,
-		ParallaxEnabledBit = EnableNormalMapBit<<1u,
-		EnableClippingBit = ParallaxEnabledBit<<1u,
-		Enable3dOriginBit = EnableClippingBit<<1u,
-		EnableExtendedVertexWeights = Enable3dOriginBit<<1u,
-		EnableDepthBias = EnableExtendedVertexWeights<<1u,
-
-		Last = EnableDepthBias
-	};
 	enum class GameShaderSpecializationPropertyIndex : uint32_t
 	{
 		Start = umath::get_least_significant_set_bit_index_c(umath::to_integral(GameShaderSpecializationConstantFlag::Last)) +1,

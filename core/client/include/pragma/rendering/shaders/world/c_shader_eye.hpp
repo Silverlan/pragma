@@ -46,6 +46,7 @@ namespace pragma
 		) const override;
 		virtual void RecordSceneFlags(rendering::ShaderProcessor &shaderProcessor,SceneFlags sceneFlags) const override {}
 		virtual void RecordClipPlane(rendering::ShaderProcessor &shaderProcessor,const Vector4 &clipPlane) const override {}
+		virtual void RecordDepthBias(rendering::ShaderProcessor &shaderProcessor,const Vector2 &depthBias) const override {}
 		virtual void OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor,CModelSubMesh &mesh) const override;
 	protected:
 		bool BindEyeball(rendering::ShaderProcessor &shaderProcessor,uint32_t skinMatIdx) const;

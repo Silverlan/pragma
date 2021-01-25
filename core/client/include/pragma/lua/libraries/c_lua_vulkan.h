@@ -29,6 +29,7 @@ namespace prosper
 	class ICommandBuffer;
 	class IDescriptorSetGroup;
 	class SwapBuffer;
+	class ISwapCommandBufferGroup;
 };
 
 namespace vk
@@ -74,6 +75,7 @@ namespace Lua
 		using RenderTarget = prosper::RenderTarget;
 		using TimestampQuery = prosper::TimestampQuery;
 		using TimerQuery = prosper::TimerQuery;
+		using CommandBufferRecorder = prosper::ISwapCommandBufferGroup;
 		struct DLLCLIENT RenderPassInfo
 		{
 			RenderPassInfo(const std::shared_ptr<RenderTarget> &renderTarget)

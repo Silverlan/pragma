@@ -453,7 +453,16 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 	defDrawInfo.def_readwrite("size",&::WIBase::DrawInfo::size);
 	defDrawInfo.def_readwrite("transform",&::WIBase::DrawInfo::transform);
 	defDrawInfo.def_readwrite("useScissor",&::WIBase::DrawInfo::useScissor);
-	defDrawInfo.def_readwrite("commandBuffer",&::WIBase::DrawInfo::commandBuffer);
+	defDrawInfo.property("commandBuffer",static_cast<luabind::object(*)(lua_State*,::WIBase::DrawInfo&)>([](lua_State *l,::WIBase::DrawInfo &drawInfo) -> luabind::object {
+		return drawInfo.commandBuffer ? luabind::object{l,drawInfo.commandBuffer} : luabind::object{};
+	}),static_cast<void(*)(lua_State*,::WIBase::DrawInfo&,luabind::object)>([](lua_State *l,::WIBase::DrawInfo &drawInfo,luabind::object o) {
+		if(Lua::IsSet(l,2) == false)
+		{
+			drawInfo.commandBuffer = nullptr;
+			return;
+		}
+		drawInfo.commandBuffer = Lua::Check<Lua::Vulkan::CommandBuffer>(l,2).shared_from_this();
+	}));
 	defDrawInfo.def("SetColor",static_cast<void(*)(lua_State*,::WIBase::DrawInfo&,const Color&)>([](lua_State *l,::WIBase::DrawInfo &drawInfo,const Color &color) {
 		drawInfo.color = color.ToVector4();
 	}));

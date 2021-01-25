@@ -37,7 +37,7 @@ namespace pragma
 
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
-		CModelComponent(BaseEntity &ent) : BaseModelComponent(ent) {}
+		CModelComponent(BaseEntity &ent);
 
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
@@ -82,9 +82,14 @@ namespace pragma
 		void GetBaseModelMeshes(std::vector<std::shared_ptr<ModelMesh>> &outMeshes,uint32_t lod=0) const;
 		void SetRenderMeshesDirty();
 
+		GameShaderSpecializationConstantFlag GetBaseShaderSpecializationFlags() const {return m_baseShaderSpecializationConstantFlags;}
+		void SetBaseShaderSpecializationFlags(pragma::GameShaderSpecializationConstantFlag flags) {m_baseShaderSpecializationConstantFlags = flags;}
+		void SetBaseShaderSpecializationFlag(pragma::GameShaderSpecializationConstantFlag flag,bool enabled=true);
+
 		// Only use if LOD is handled externally!
 		void SetLOD(uint32_t lod);
 	protected:
+		void UpdateBaseShaderSpecializationFlags();
 		virtual void OnModelChanged(const std::shared_ptr<Model> &model) override;
 		void UpdateRenderBufferList();
 		void UpdateRenderMeshes();
@@ -97,6 +102,7 @@ namespace pragma
 		std::vector<rendering::RenderBufferData> m_lodMeshRenderBufferData;
 		std::vector<std::shared_ptr<ModelMesh>> m_lodMeshes;
 		std::vector<std::shared_ptr<ModelSubMesh>> m_lodRenderMeshes;
+		pragma::GameShaderSpecializationConstantFlag m_baseShaderSpecializationConstantFlags;
 
 		std::vector<RenderMeshGroup> m_lodMeshGroups;
 		std::vector<RenderMeshGroup> m_lodRenderMeshGroups;

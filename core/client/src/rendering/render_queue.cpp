@@ -175,6 +175,7 @@ RenderQueueBuilder::~RenderQueueBuilder()
 {
 	m_threadRunning = false;
 	Flush();
+	m_threadWaitCondition.notify_one();
 	if(m_thread.joinable())
 		m_thread.join();
 }
@@ -186,7 +187,7 @@ void RenderQueueBuilder::Exec()
 		std::unique_lock<std::mutex> mlock(m_threadWaitMutex);
 		for(;;)
 		{
-			m_threadWaitCondition.wait(mlock,[this]() -> bool {return m_threadRunning || m_hasWork;});
+			m_threadWaitCondition.wait(mlock,[this]() -> bool {return !m_threadRunning || m_hasWork;});
 			m_workMutex.lock();
 				if(m_workQueue.empty())
 				{

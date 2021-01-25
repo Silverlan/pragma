@@ -25,6 +25,30 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(rasterization_renderer,CRasterizationRenderer);
 
+ComponentEventId CRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS = INVALID_COMPONENT_ID;
+ComponentEventId CRasterizationRendererComponent::EVENT_ON_RECORD_LIGHTING_PASS = INVALID_COMPONENT_ID;
+ComponentEventId CRasterizationRendererComponent::EVENT_PRE_EXECUTE_PREPASS = INVALID_COMPONENT_ID;
+ComponentEventId CRasterizationRendererComponent::EVENT_POST_EXECUTE_PREPASS = INVALID_COMPONENT_ID;
+ComponentEventId CRasterizationRendererComponent::EVENT_PRE_EXECUTE_LIGHTING_PASS = INVALID_COMPONENT_ID;
+ComponentEventId CRasterizationRendererComponent::EVENT_POST_EXECUTE_LIGHTING_PASS = INVALID_COMPONENT_ID;
+ComponentEventId CRasterizationRendererComponent::EVENT_PRE_PREPASS = INVALID_COMPONENT_ID;
+ComponentEventId CRasterizationRendererComponent::EVENT_POST_PREPASS = INVALID_COMPONENT_ID;
+ComponentEventId CRasterizationRendererComponent::EVENT_PRE_LIGHTING_PASS = INVALID_COMPONENT_ID;
+ComponentEventId CRasterizationRendererComponent::EVENT_POST_LIGHTING_PASS = INVALID_COMPONENT_ID;
+void CRasterizationRendererComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+{
+	EVENT_ON_RECORD_PREPASS = componentManager.RegisterEvent("ON_RECORD_PREPASS",typeid(CRasterizationRendererComponent));
+	EVENT_ON_RECORD_LIGHTING_PASS = componentManager.RegisterEvent("ON_RECORD_LIGHTING_PASS",typeid(CRasterizationRendererComponent));
+	EVENT_PRE_EXECUTE_PREPASS = componentManager.RegisterEvent("PRE_EXECUTE_PREPASS",typeid(CRasterizationRendererComponent));
+	EVENT_POST_EXECUTE_PREPASS = componentManager.RegisterEvent("POST_EXECUTE_PREPASS",typeid(CRasterizationRendererComponent));
+	EVENT_PRE_EXECUTE_LIGHTING_PASS = componentManager.RegisterEvent("PRE_EXECUTE_LIGHTING_PASS",typeid(CRasterizationRendererComponent));
+	EVENT_POST_EXECUTE_LIGHTING_PASS = componentManager.RegisterEvent("POST_EXECUTE_LIGHTING_PASS",typeid(CRasterizationRendererComponent));
+	EVENT_PRE_PREPASS = componentManager.RegisterEvent("PRE_PREPASS",typeid(CRasterizationRendererComponent));
+	EVENT_POST_PREPASS = componentManager.RegisterEvent("POST_PREPASS",typeid(CRasterizationRendererComponent));
+	EVENT_PRE_LIGHTING_PASS = componentManager.RegisterEvent("PRE_LIGHTING_PASS",typeid(CRasterizationRendererComponent));
+	EVENT_POST_LIGHTING_PASS = componentManager.RegisterEvent("POST_LIGHTING_PASS",typeid(CRasterizationRendererComponent));
+}
+
 luabind::object CRasterizationRendererComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CRasterizationRendererComponentHandleWrapper>(l);}
 
 static util::WeakHandle<pragma::CLightMapComponent> g_lightmapC = {};
@@ -94,7 +118,7 @@ void CRasterizationRendererComponent::Initialize()
 		return util::EventReply::Handled;
 	});
 	BindEventUnhandled(CRendererComponent::EVENT_RECORD_COMMAND_BUFFERS,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		RecordCommandBuffers(static_cast<CERecordCommandBuffers&>(evData.get()).drawSceneInfo);
+		RecordCommandBuffers(static_cast<CEDrawSceneInfo&>(evData.get()).drawSceneInfo);
 	});
 	BindEventUnhandled(CRendererComponent::EVENT_RENDER,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		Render(static_cast<CERender&>(evData.get()).drawSceneInfo);

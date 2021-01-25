@@ -65,6 +65,8 @@ namespace pragma
 		static ComponentEventId EVENT_ON_UPDATE_RENDER_BUFFERS;
 		static ComponentEventId EVENT_ON_UPDATE_RENDER_MATRICES;
 		static ComponentEventId EVENT_UPDATE_INSTANTIABILITY;
+		static ComponentEventId EVENT_ON_CLIP_PLANE_CHANGED;
+		static ComponentEventId EVENT_ON_DEPTH_BIAS_CHANGED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
 		CRenderComponent(BaseEntity &ent);
@@ -148,6 +150,10 @@ namespace pragma
 		void ClearRenderClipPlane();
 		const Vector4 *GetRenderClipPlane() const;
 
+		void SetDepthBias(float d,float delta);
+		void ClearDepthBias();
+		const Vector2 *GetDepthBias() const;
+
 		void SetReceiveShadows(bool enabled);
 		bool IsReceivingShadows() const;
 
@@ -198,6 +204,7 @@ namespace pragma
 		Sphere m_absoluteRenderSphere {};
 
 		std::optional<Vector4> m_renderClipPlane {};
+		std::optional<Vector2> m_depthBias {};
 
 		StateFlags m_stateFlags = static_cast<StateFlags>(umath::to_integral(StateFlags::RenderBufferDirty) | umath::to_integral(StateFlags::EnableDepthPass) | umath::to_integral(StateFlags::RenderBoundsDirty) |
 			 umath::to_integral(StateFlags::ShouldDraw) | umath::to_integral(StateFlags::ShouldDrawShadow));

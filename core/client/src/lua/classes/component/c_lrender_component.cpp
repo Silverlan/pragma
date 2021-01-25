@@ -97,6 +97,22 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->ClearRenderClipPlane();
 	}));
+	defCRender.def("GetDepthBias",static_cast<void(*)(lua_State*,CRenderHandle&)>([](lua_State *l,CRenderHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		auto *depthBias = hComponent->GetDepthBias();
+		if(depthBias == nullptr)
+			return;
+		Lua::PushNumber(l,depthBias->x);
+		Lua::PushNumber(l,depthBias->y);
+	}));
+	defCRender.def("SetDepthBias",static_cast<void(*)(lua_State*,CRenderHandle&,float,float)>([](lua_State *l,CRenderHandle &hComponent,float d,float delta) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->SetDepthBias(d,delta);
+	}));
+	defCRender.def("ClearDepthBias",static_cast<void(*)(lua_State*,CRenderHandle&)>([](lua_State *l,CRenderHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->ClearDepthBias();
+	}));
 	defCRender.def("GetRenderPose",static_cast<void(*)(lua_State*,CRenderHandle&)>([](lua_State *l,CRenderHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);
 		Lua::Push(l,hComponent->GetRenderPose());
@@ -136,6 +152,8 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCRender.add_static_constant("EVENT_SHOULD_DRAW_SHADOW",pragma::CRenderComponent::EVENT_SHOULD_DRAW_SHADOW);
 	defCRender.add_static_constant("EVENT_ON_UPDATE_RENDER_MATRICES",pragma::CRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES);
 	defCRender.add_static_constant("EVENT_UPDATE_INSTANTIABILITY",pragma::CRenderComponent::EVENT_UPDATE_INSTANTIABILITY);
+	defCRender.add_static_constant("EVENT_ON_CLIP_PLANE_CHANGED",pragma::CRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED);
+	defCRender.add_static_constant("EVENT_ON_DEPTH_BIAS_CHANGED",pragma::CRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED);
 
 	// Enums
 	defCRender.add_static_constant("RENDERMODE_NONE",umath::to_integral(RenderMode::None));

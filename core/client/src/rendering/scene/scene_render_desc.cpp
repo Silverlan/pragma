@@ -174,6 +174,7 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 	auto rasterizer = renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>();
 	if(rasterizer.expired())
 		return;
+	auto baseShaderSpecializationFlags = mdlC->GetBaseShaderSpecializationFlags();
 	auto &context = c_engine->GetRenderContext();
 	auto renderTranslucent = umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Translucent);
 	for(auto meshIdx=lodGroup.first;meshIdx<lodGroup.first +lodGroup.second;++meshIdx)
@@ -198,7 +199,7 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 		auto pipelineIdx = shader->FindPipelineIndex(
 			pragma::ShaderGameWorldLightingPass::PassType::Generic,
 			renderC.GetShaderPipelineSpecialization(),
-			renderBufferData[meshIdx].pipelineSpecializationFlags
+			baseShaderSpecializationFlags | renderBufferData[meshIdx].pipelineSpecializationFlags
 		);
 		prosper::PipelineID pipelineId;
 		if(pipelineIdx.has_value() == false || shader->GetPipelineId(pipelineId,*pipelineIdx) == false || pipelineId == std::numeric_limits<decltype(pipelineId)>::max())
@@ -589,7 +590,10 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 
 	auto &hCam = m_scene.GetActiveCamera();
 	if(hCam.expired())
+	{
+		m_worldRenderQueuesReady = true;
 		return;
+	}
 
 	for(auto &renderQueue : m_renderQueues)
 		renderQueue->Lock();

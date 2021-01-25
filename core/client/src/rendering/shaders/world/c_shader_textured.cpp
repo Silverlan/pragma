@@ -126,7 +126,8 @@ ShaderGameWorldLightingPass::ShaderGameWorldLightingPass(prosper::IPrContext &co
 	{
 		auto dynamicFlags = GameShaderSpecializationConstantFlag::EmissionEnabledBit | GameShaderSpecializationConstantFlag::EnableRmaMapBit |
 			GameShaderSpecializationConstantFlag::EnableNormalMapBit | GameShaderSpecializationConstantFlag::ParallaxEnabledBit |
-			GameShaderSpecializationConstantFlag::EnableDepthBias | GameShaderSpecializationConstantFlag::EnableTranslucencyBit;
+			GameShaderSpecializationConstantFlag::EnableDepthBias | GameShaderSpecializationConstantFlag::EnableTranslucencyBit |
+			GameShaderSpecializationConstantFlag::EnableClippingBit;
 		switch(static_cast<GameShaderSpecialization>(i))
 		{
 		case GameShaderSpecialization::Generic:
@@ -271,7 +272,7 @@ void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelin
 	pipelineInfo.ToggleDepthTest(true,prosper::CompareOp::LessOrEqual);
 
 	//pipelineInfo.ToggleDepthBias(true,0.f,0.f,0.f);
-	pipelineInfo.ToggleDynamicState(true,prosper::DynamicState::DepthBias); // Required for decals
+	//pipelineInfo.ToggleDynamicState(true,prosper::DynamicState::DepthBias); // Required for decals
 
 	SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
 	InitializeGfxPipelineVertexAttributes(pipelineInfo,pipelineIdx);

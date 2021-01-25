@@ -167,9 +167,11 @@ template<class T>
 	void OcclusionOctree<T>::InsertObject(const T &o,Node *optNode)
 {
 	auto it = m_objectNodes.find(o);
-	if(it != m_objectNodes.end())
+	if(it == m_objectNodes.end())
+		it = m_objectNodes.insert(typename decltype(m_objectNodes)::value_type(o,std::vector<std::weak_ptr<BaseOcclusionOctree::Node>>{})).first;
+	else if(it->second.size() > 0)
 		return; // Object already exists in tree
-	it = m_objectNodes.insert(typename decltype(m_objectNodes)::value_type(o,std::vector<std::weak_ptr<BaseOcclusionOctree::Node>>{})).first;
+	
 #if ENABLE_OCCLUSION_DEBUG_MODE == 1
 	m_dbgObjects.push_back(o);
 #endif

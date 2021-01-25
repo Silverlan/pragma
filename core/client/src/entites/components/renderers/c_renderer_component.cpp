@@ -62,7 +62,7 @@ void CRendererComponent::UpdateCameraData(pragma::CSceneComponent &scene,pragma:
 
 void CRendererComponent::RecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo)
 {
-	pragma::CERecordCommandBuffers evData {drawSceneInfo};
+	pragma::CEDrawSceneInfo evData {drawSceneInfo};
 	InvokeEventCallbacks(EVENT_RECORD_COMMAND_BUFFERS,evData);
 }
 void CRendererComponent::Render(const util::DrawSceneInfo &drawSceneInfo)
@@ -174,16 +174,6 @@ void CEGetSceneTexture::HandleReturnValues(lua_State *l)
 {
 	if(Lua::IsSet(l,-1))
 		resultTexture = &Lua::Check<prosper::Texture>(l,-1);
-}
-
-////////////
-
-CERecordCommandBuffers::CERecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo)
-	: drawSceneInfo{drawSceneInfo}
-{}
-void CERecordCommandBuffers::PushArguments(lua_State *l)
-{
-	Lua::Push<const util::DrawSceneInfo*>(l,&drawSceneInfo);
 }
 
 ////////////

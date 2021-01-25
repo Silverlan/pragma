@@ -126,17 +126,16 @@ void pragma::CRasterizationRendererComponent::RecordCommandBuffers(const util::D
 	auto prepassMode = GetPrepassMode();
 	auto runPrepass = (drawSceneInfo.renderTarget == nullptr && prepassMode != PrepassMode::NoPrepass && drawSceneInfo.scene.valid());
 	if(runPrepass)
-		RecordPrepass(drawSceneInfo);
+		StartPrepassRecording(drawSceneInfo);
 	//drawSceneInfo.scene->InvokeEventCallbacks(CSceneComponent::EVENT_POST_RENDER_PREPASS,pragma::CEDrawSceneInfo{drawSceneInfo});
 
-	RecordLightingPass(drawSceneInfo);
+	StartLightingPassRecording(drawSceneInfo);
 }
 void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.scene.expired())
 		return;
 	auto &scene = const_cast<pragma::CSceneComponent&>(*drawSceneInfo.scene);
-
 	c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("OnPreRender",drawSceneInfo);
 	// c_game->CallLuaCallbacks<void,RasterizationRenderer*>("PrepareRendering",this);
 
@@ -170,15 +169,16 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 	// as well, so we can update them right now and do everything in one render pass.
 	// Otherwise we have to split the pass into two and update the remaining render buffers
 	// inbetween both passes.
-	auto &worldObjectsRenderQueue = *sceneRenderDesc.GetRenderQueue(RenderMode::World,false /* translucent */);
+	// auto &worldObjectsRenderQueue = *sceneRenderDesc.GetRenderQueue(RenderMode::World,false /* translucent */);
 	// worldObjectsRenderQueue.WaitForCompletion();
+#if 0
 	auto worldObjectRenderQueueReady = worldObjectsRenderQueue.IsComplete();
 	if(worldObjectRenderQueueReady)
 	{
 		if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
 		{
 			CSceneComponent::UpdateRenderBuffers(drawCmd,worldObjectsRenderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
-			// CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
+			//CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->prepass : nullptr);
 
 		}
 
@@ -186,18 +186,9 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 			CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
 		c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*>("UpdateRenderBuffers",&drawSceneInfo);
 	}
+#endif
 
-	// Prepass and lighting pass are now being recorded in parallel on separate threads.
-	// In the meantime, we can make use of the wait time by updating the entity buffers
-	// for the entity we need for the prepass.
-	if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
-		CSceneComponent::UpdateRenderBuffers(drawCmd,worldObjectsRenderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
-
-	if((drawSceneInfo.renderFlags &FRender::View) != FRender::None)
-		CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
-
-	c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*>("UpdateRenderBuffers",&drawSceneInfo);
-	//
+	UpdatePrepassRenderBuffers(drawSceneInfo);
 	
 	std::chrono::steady_clock::time_point t;
 	// Start executing the prepass; This may require a waiting period of the recording
@@ -209,6 +200,7 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 			drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass)->BeginGpuTimer(RenderPassStats::Timer::GpuExecution,*drawSceneInfo.commandBuffer);
 			t = std::chrono::steady_clock::now();
 		}
+
 		ExecutePrepass(drawSceneInfo);
 		if(drawSceneInfo.renderStats)
 		{
@@ -226,16 +218,14 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->BeginGpuTimer(RenderStats::RenderStage::LightCullingGpu,*drawSceneInfo.commandBuffer);
 	CullLightSources(drawSceneInfo);
 	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::LightCullingGpu,*drawSceneInfo.commandBuffer);
+
+	RenderShadows(drawSceneInfo);
 	
 	// We still need to update the render buffers for some entities
 	// (All others have already been updated in the prepass)
 	if(drawSceneInfo.renderStats)
 		t = std::chrono::steady_clock::now();
 	// TODO: This would be a good spot to start recording the shadow command buffers
-	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass) : nullptr);
-	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass) : nullptr);
-	//CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
-	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass) : nullptr);
 	if(drawSceneInfo.renderStats)
 		(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::UpdateRenderBuffersCpu,std::chrono::steady_clock::now() -t);
 	// TODO: Execute shadow command buffers here
@@ -246,7 +236,8 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 		drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass)->BeginGpuTimer(RenderPassStats::Timer::GpuExecution,*drawSceneInfo.commandBuffer);
 		t = std::chrono::steady_clock::now();
 	}
-	ExecuteLightinPass(drawSceneInfo);
+	UpdateLightingPassRenderBuffers(drawSceneInfo);
+	ExecuteLightingPass(drawSceneInfo);
 	if(drawSceneInfo.renderStats)
 	{
 		(*drawSceneInfo.renderStats)->SetTime(RenderStats::RenderStage::LightingPassExecutionCpu,std::chrono::steady_clock::now() -t);

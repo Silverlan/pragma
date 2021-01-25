@@ -72,6 +72,18 @@ namespace pragma
 		: public BaseEntityComponent
 	{
 	public:
+		static ComponentEventId EVENT_ON_RECORD_PREPASS;
+		static ComponentEventId EVENT_ON_RECORD_LIGHTING_PASS;
+		static ComponentEventId EVENT_PRE_EXECUTE_PREPASS;
+		static ComponentEventId EVENT_POST_EXECUTE_PREPASS;
+		static ComponentEventId EVENT_PRE_EXECUTE_LIGHTING_PASS;
+		static ComponentEventId EVENT_POST_EXECUTE_LIGHTING_PASS;
+		static ComponentEventId EVENT_PRE_PREPASS;
+		static ComponentEventId EVENT_POST_PREPASS;
+		static ComponentEventId EVENT_PRE_LIGHTING_PASS;
+		static ComponentEventId EVENT_POST_LIGHTING_PASS;
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+
 		static void UpdateLightmap(CLightMapComponent &lightMapC);
 		enum class PrepassMode : uint32_t
 		{
@@ -195,6 +207,21 @@ namespace pragma
 		CRendererComponent *GetRendererComponent() {return m_rendererComponent;}
 		const CRendererComponent *GetRendererComponent() const {return const_cast<CRasterizationRendererComponent*>(this)->GetRendererComponent();}
 
+		void StartPrepassRecording(const util::DrawSceneInfo &drawSceneInfo);
+		void StartLightingPassRecording(const util::DrawSceneInfo &drawSceneInfo);
+
+		void RecordLightingPass(const util::DrawSceneInfo &drawSceneInfo);
+		void ExecuteLightingPass(const util::DrawSceneInfo &drawSceneInfo);
+
+		void UpdatePrepassRenderBuffers(const util::DrawSceneInfo &drawSceneInfo);
+		void UpdateLightingPassRenderBuffers(const util::DrawSceneInfo &drawSceneInfo);
+		void RecordPrepass(const util::DrawSceneInfo &drawSceneInfo);
+		void ExecutePrepass(const util::DrawSceneInfo &drawSceneInfo);
+
+		const std::shared_ptr<prosper::ISwapCommandBufferGroup> &GetPrepassCommandBufferRecorder() const {return m_prepassCommandBufferGroup;}
+		const std::shared_ptr<prosper::ISwapCommandBufferGroup> &GetShadowCommandBufferRecorder() const {return m_shadowCommandBufferGroup;}
+		const std::shared_ptr<prosper::ISwapCommandBufferGroup> &GetLightingPassCommandBufferRecorder() const {return m_lightingCommandBufferGroup;}
+
 		// For internal use only
 		void RenderPrepass(const util::DrawSceneInfo &drawSceneInfo);
 	private:
@@ -214,14 +241,9 @@ namespace pragma
 		prosper::RenderTarget *GetPrepassRenderTarget(const util::DrawSceneInfo &drawSceneInfo);
 		prosper::RenderTarget *GetLightingPassRenderTarget(const util::DrawSceneInfo &drawSceneInfo);
 
-		void RecordLightingPass(const util::DrawSceneInfo &drawSceneInfo);
-		void ExecuteLightinPass(const util::DrawSceneInfo &drawSceneInfo);
-
-		void RecordPrepass(const util::DrawSceneInfo &drawSceneInfo);
-		void ExecutePrepass(const util::DrawSceneInfo &drawSceneInfo);
-
 		void RenderSSAO(const util::DrawSceneInfo &drawSceneInfo);
 		void CullLightSources(const util::DrawSceneInfo &drawSceneInfo);
+		void RenderShadows(const util::DrawSceneInfo &drawSceneInfo);
 		void RenderGlowObjects(const util::DrawSceneInfo &drawSceneInfo);
 		void RenderBloom(const util::DrawSceneInfo &drawSceneInfo);
 		void RenderToneMapping(const util::DrawSceneInfo &drawSceneInfo,prosper::IDescriptorSet &descSetHdrResolve);

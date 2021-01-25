@@ -109,14 +109,6 @@ namespace pragma
 		prosper::Texture *resultTexture = nullptr;
 	};
 
-	struct DLLCLIENT CERecordCommandBuffers
-		: public ComponentEvent
-	{
-		CERecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo);
-		virtual void PushArguments(lua_State *l) override;
-		const util::DrawSceneInfo &drawSceneInfo;
-	};
-
 	struct DLLCLIENT CERender
 		: public ComponentEvent
 	{

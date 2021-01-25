@@ -507,6 +507,9 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 	auto numLayers = shadowC->GetLayerCount();
 	drawCmd->RecordImageBarrier(img,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::DepthStencilAttachmentOptimal);
 	
+	for(auto layerId=decltype(numLayers){0};layerId<numLayers;++layerId)
+		CSceneComponent::UpdateRenderBuffers(drawCmd,*m_renderQueues.at(layerId),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::ShadowPass) : nullptr);
+	
 	util::RenderPassDrawInfo rpDrawInfo {drawSceneInfo,*drawSceneInfo.commandBuffer};
 	rendering::DepthStageRenderProcessor shadowRenderProcessor {rpDrawInfo,RenderFlags::None,{}};
 	for(auto layerId=decltype(numLayers){0};layerId<numLayers;++layerId)

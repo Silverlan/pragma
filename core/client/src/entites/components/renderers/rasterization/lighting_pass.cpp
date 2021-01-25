@@ -55,9 +55,8 @@ void pragma::CRasterizationRendererComponent::RecordPrepass(const util::DrawScen
 
 	auto &shaderPrepass = GetPrepassShader();
 	auto *prepassStats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr;
-	auto &prepassRt = *prepass.renderTarget;
 	auto &worldRenderQueues = sceneRenderDesc.GetWorldRenderQueues();
-	m_prepassCommandBufferGroup->Draw(prepassRt.GetRenderPass(),prepassRt.GetFramebuffer(),[this,&drawSceneInfo,&shaderPrepass,&worldRenderQueues,&sceneRenderDesc,prepassStats](prosper::ISecondaryCommandBuffer &cmd) {
+	m_prepassCommandBufferGroup->Record([this,&drawSceneInfo,&shaderPrepass,&worldRenderQueues,&sceneRenderDesc,prepassStats](prosper::ISecondaryCommandBuffer &cmd) {
 		util::RenderPassDrawInfo renderPassDrawInfo {drawSceneInfo,cmd};
 		pragma::rendering::DepthStageRenderProcessor rsys {renderPassDrawInfo,RenderFlags::None,{} /* drawOrigin */,};
 
@@ -103,9 +102,37 @@ void pragma::CRasterizationRendererComponent::RecordPrepass(const util::DrawScen
 		}
 		rsys.UnbindShader();
 	});
+}
+void pragma::CRasterizationRendererComponent::UpdatePrepassRenderBuffers(const util::DrawSceneInfo &drawSceneInfo)
+{
+	auto &drawCmd = drawSceneInfo.commandBuffer;
+	auto &sceneRenderDesc = drawSceneInfo.scene->GetSceneRenderDesc();
+	// Prepass and lighting pass are now being recorded in parallel on separate threads.
+	// In the meantime, we can make use of the wait time by updating the entity buffers
+	// for the entity we need for the prepass.
+	if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
+	{
+		CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::World,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
+		CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
+	}
 
-	c_game->StopProfilingStage(CGame::GPUProfilingPhase::Prepass);
-	c_game->StopProfilingStage(CGame::CPUProfilingPhase::Prepass);
+	if((drawSceneInfo.renderFlags &FRender::View) != FRender::None)
+	{
+		CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
+		CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
+	}
+
+	c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*>("UpdateRenderBuffers",&drawSceneInfo);
+	//
+}
+void pragma::CRasterizationRendererComponent::UpdateLightingPassRenderBuffers(const util::DrawSceneInfo &drawSceneInfo)
+{
+	auto &drawCmd = drawSceneInfo.commandBuffer;
+	auto &sceneRenderDesc = drawSceneInfo.scene->GetSceneRenderDesc();
+	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,false /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass) : nullptr);
+	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass) : nullptr);
+	//CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->lightingPass : nullptr);
+	CSceneComponent::UpdateRenderBuffers(drawCmd,*sceneRenderDesc.GetRenderQueue(RenderMode::View,true /* translucent */),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::LightingPass) : nullptr);
 }
 void pragma::CRasterizationRendererComponent::ExecutePrepass(const util::DrawSceneInfo &drawSceneInfo)
 {
@@ -149,15 +176,25 @@ void pragma::CRasterizationRendererComponent::ExecutePrepass(const util::DrawSce
 		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 	);
 
+	CEDrawSceneInfo evData {drawSceneInfo};
+	InvokeEventCallbacks(EVENT_PRE_PREPASS,evData);
+
 	prepass.BeginRenderPass(drawSceneInfo,nullptr,true);
-	m_prepassCommandBufferGroup->ExecuteCommands(*drawCmd);
+
+		InvokeEventCallbacks(EVENT_PRE_EXECUTE_PREPASS,evData);
+		m_prepassCommandBufferGroup->ExecuteCommands(*drawCmd);
+		InvokeEventCallbacks(EVENT_POST_EXECUTE_PREPASS,evData);
+
 	prepass.EndRenderPass(drawSceneInfo);
+
+	InvokeEventCallbacks(EVENT_POST_PREPASS,evData);
+
+	c_game->StopProfilingStage(CGame::GPUProfilingPhase::Prepass);
+	c_game->StopProfilingStage(CGame::CPUProfilingPhase::Prepass);
 }
 
-void pragma::CRasterizationRendererComponent::ExecuteLightinPass(const util::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::ExecuteLightingPass(const util::DrawSceneInfo &drawSceneInfo)
 {
-	if(drawSceneInfo.scene.expired())
-		return;
 	auto &scene = const_cast<pragma::CSceneComponent&>(*drawSceneInfo.scene);
 	auto &cam = scene.GetActiveCamera();
 	bool bShadows = (drawSceneInfo.renderFlags &FRender::Shadows) == FRender::Shadows;
@@ -264,22 +301,53 @@ void pragma::CRasterizationRendererComponent::ExecuteLightinPass(const util::Dra
 		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 	);
 
+	CEDrawSceneInfo evData {drawSceneInfo};
+	InvokeEventCallbacks(EVENT_PRE_LIGHTING_PASS,evData);
+
 	BeginRenderPass(drawSceneInfo,nullptr,true);
+
+		InvokeEventCallbacks(EVENT_PRE_EXECUTE_LIGHTING_PASS,evData);
 		m_lightingCommandBufferGroup->ExecuteCommands(*drawCmd);
+		InvokeEventCallbacks(EVENT_POST_EXECUTE_LIGHTING_PASS,evData);
+
 	EndRenderPass(drawSceneInfo);
+	
+	InvokeEventCallbacks(EVENT_POST_LIGHTING_PASS,evData);
 
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::RenderWorld);
 }
-void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::DrawSceneInfo &drawSceneInfo)
+void pragma::CRasterizationRendererComponent::StartPrepassRecording(const util::DrawSceneInfo &drawSceneInfo)
+{
+	auto &prepass = GetPrepass();
+	auto &prepassRt = *prepass.renderTarget;
+	m_prepassCommandBufferGroup->StartRecording(prepassRt.GetRenderPass(),prepassRt.GetFramebuffer());
+	
+		RecordPrepass(drawSceneInfo);
+		CEDrawSceneInfo evData {drawSceneInfo};
+		InvokeEventCallbacks(EVENT_ON_RECORD_PREPASS,evData);
+
+	m_prepassCommandBufferGroup->EndRecording();
+}
+void pragma::CRasterizationRendererComponent::StartLightingPassRecording(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto *rt = GetLightingPassRenderTarget(drawSceneInfo);
 	if(rt == nullptr || drawSceneInfo.scene.expired())
 		return;
+	m_lightingCommandBufferGroup->StartRecording(rt->GetRenderPass(),rt->GetFramebuffer());
+
+		RecordLightingPass(drawSceneInfo);
+		CEDrawSceneInfo evData {drawSceneInfo};
+		InvokeEventCallbacks(EVENT_ON_RECORD_LIGHTING_PASS,evData);
+
+	m_lightingCommandBufferGroup->EndRecording();
+}
+void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::DrawSceneInfo &drawSceneInfo)
+{
 	auto &scene = const_cast<pragma::CSceneComponent&>(*drawSceneInfo.scene);
 	auto &cam = scene.GetActiveCamera();
 	auto &culledParticles = scene.GetSceneRenderDesc().GetCulledParticles();
 	auto bShouldDrawParticles = (drawSceneInfo.renderFlags &FRender::Particles) == FRender::Particles && cvDrawParticles->GetBool() == true && culledParticles.empty() == false;
-	m_lightingCommandBufferGroup->Draw(rt->GetRenderPass(),rt->GetFramebuffer(),[this,&scene,&cam,&drawSceneInfo,bShouldDrawParticles,&culledParticles](prosper::ISecondaryCommandBuffer &cmd) {
+	m_lightingCommandBufferGroup->Record([this,&scene,&cam,&drawSceneInfo,bShouldDrawParticles,&culledParticles](prosper::ISecondaryCommandBuffer &cmd) {
 		c_game->StartProfilingStage(CGame::CPUProfilingPhase::RenderWorld);
 		auto pcmd = cmd.shared_from_this();
 		auto bGlow = cvDrawGlow->GetBool();

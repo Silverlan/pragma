@@ -520,6 +520,14 @@ DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::TimerQue
 	return out;
 }
 
+DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::CommandBufferRecorder &hCmdBufferRecorder)
+{
+	out<<"VKCommandBufferRecorder[";
+	out<<hCmdBufferRecorder.IsPending();
+	out<<"]";
+	return out;
+}
+
 namespace luabind { // For some reason these need to be in the luabind namespace, otherwise luabind can't locate them
 static bool operator==(const Lua::Vulkan::Texture &a,const Lua::Vulkan::Texture &b) {return &a == &b;}
 static bool operator==(const Lua::Vulkan::Image &a,const Lua::Vulkan::Image &b) {return &a == &b;}
@@ -536,6 +544,7 @@ static bool operator==(const pragma::SceneMesh &a,const pragma::SceneMesh &b) {r
 static bool operator==(const Lua::Vulkan::RenderTarget &a,const Lua::Vulkan::RenderTarget &b) {return &a == &b;}
 static bool operator==(const Lua::Vulkan::TimestampQuery &a,const Lua::Vulkan::TimestampQuery &b) {return &a == &b;}
 static bool operator==(const Lua::Vulkan::TimerQuery &a,const Lua::Vulkan::TimerQuery &b) {return &a == &b;}
+static bool operator==(const Lua::Vulkan::CommandBufferRecorder &a,const Lua::Vulkan::CommandBufferRecorder &b) {return &a == &b;}
 };
 
 std::shared_ptr<prosper::IBuffer> Lua::Vulkan::create_buffer(prosper::util::BufferCreateInfo &bufCreateInfo,::DataStream &ds)
@@ -2631,6 +2640,20 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkTimerQuery.def(luabind::const_self ==luabind::const_self);
 	defVkTimerQuery.def("IsValid",&Lua::Vulkan::VKTimerQuery::IsValid);
 	prosperMod[defVkTimerQuery];
+	
+	auto defCommandBufferRecorder = luabind::class_<Lua::Vulkan::CommandBufferRecorder>("CommandBufferRecorder");
+	defCommandBufferRecorder.def(luabind::tostring(luabind::self));
+	defCommandBufferRecorder.def(luabind::const_self ==luabind::const_self);
+	defCommandBufferRecorder.def("IsValid",static_cast<bool(*)()>([]() -> bool {
+		return true;
+	}));
+	defCommandBufferRecorder.def("IsPending",static_cast<bool(*)(Lua::Vulkan::CommandBufferRecorder&)>([](Lua::Vulkan::CommandBufferRecorder &recorder) -> bool {
+		return recorder.IsPending();
+	}));
+	defCommandBufferRecorder.def("ExecuteCommands",static_cast<bool(*)(Lua::Vulkan::CommandBufferRecorder&,Lua::Vulkan::CommandBuffer&)>([](Lua::Vulkan::CommandBufferRecorder &recorder,Lua::Vulkan::CommandBuffer &drawCmd) -> bool {
+		return drawCmd.IsPrimary() && recorder.ExecuteCommands(dynamic_cast<prosper::IPrimaryCommandBuffer&>(drawCmd));
+	}));
+	prosperMod[defCommandBufferRecorder];
 
 	auto defClearValue = luabind::class_<Lua::Vulkan::ClearValue>("ClearValue");
 	defClearValue.def(luabind::constructor<>());

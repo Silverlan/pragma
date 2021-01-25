@@ -208,6 +208,13 @@ static void register_renderer_bindings(luabind::module_ &entsMod)
 			return;
 		renderer->ReloadRenderTarget(*scene.get(),width,height);
 	}));
+	defRenderer.def("GetSceneTexture",static_cast<void(*)(lua_State*,CRendererHandle&)>([](lua_State *l,CRendererHandle &renderer) {
+		pragma::Lua::check_component(l,renderer);
+		auto *tex = renderer->GetSceneTexture();
+		if(tex == nullptr)
+			return;
+		Lua::Push(l,tex->shared_from_this());
+	}));
 	defRenderer.def("GetPresentationTexture",static_cast<void(*)(lua_State*,CRendererHandle&)>([](lua_State *l,CRendererHandle &renderer) {
 		pragma::Lua::check_component(l,renderer);
 		auto *tex = renderer->GetPresentationTexture();
@@ -225,6 +232,16 @@ static void register_renderer_bindings(luabind::module_ &entsMod)
 	entsMod[defRenderer];
 
 	auto defRaster = luabind::class_<CRasterizationRendererHandle,BaseEntityComponentHandle>("RasterizationRendererComponent");
+	defRaster.add_static_constant("EVENT_ON_RECORD_PREPASS",pragma::CRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS);
+	defRaster.add_static_constant("EVENT_ON_RECORD_LIGHTING_PASS",pragma::CRasterizationRendererComponent::EVENT_ON_RECORD_LIGHTING_PASS);
+	defRaster.add_static_constant("EVENT_PRE_EXECUTE_PREPASS",pragma::CRasterizationRendererComponent::EVENT_PRE_EXECUTE_PREPASS);
+	defRaster.add_static_constant("EVENT_POST_EXECUTE_PREPASS",pragma::CRasterizationRendererComponent::EVENT_POST_EXECUTE_PREPASS);
+	defRaster.add_static_constant("EVENT_PRE_EXECUTE_LIGHTING_PASS",pragma::CRasterizationRendererComponent::EVENT_PRE_EXECUTE_LIGHTING_PASS);
+	defRaster.add_static_constant("EVENT_POST_EXECUTE_LIGHTING_PASS",pragma::CRasterizationRendererComponent::EVENT_POST_EXECUTE_LIGHTING_PASS);
+	defRaster.add_static_constant("EVENT_PRE_PREPASS",pragma::CRasterizationRendererComponent::EVENT_PRE_PREPASS);
+	defRaster.add_static_constant("EVENT_POST_PREPASS",pragma::CRasterizationRendererComponent::EVENT_POST_PREPASS);
+	defRaster.add_static_constant("EVENT_PRE_LIGHTING_PASS",pragma::CRasterizationRendererComponent::EVENT_PRE_LIGHTING_PASS);
+	defRaster.add_static_constant("EVENT_POST_LIGHTING_PASS",pragma::CRasterizationRendererComponent::EVENT_POST_LIGHTING_PASS);
 	defRaster.def("GetPrepassDepthTexture",&Lua::RasterizationRenderer::GetPrepassDepthTexture);
 	defRaster.def("GetPrepassNormalTexture",&Lua::RasterizationRenderer::GetPrepassNormalTexture);
 	defRaster.def("GetRenderTarget",&Lua::RasterizationRenderer::GetRenderTarget);
@@ -321,7 +338,42 @@ static void register_renderer_bindings(luabind::module_ &entsMod)
 	defRaster.def("ScheduleMeshForRendering",static_cast<void(*)(
 		lua_State*,CRasterizationRendererHandle&,CSceneHandle&,uint32_t,::Material&,EntityHandle&,ModelSubMesh&
 	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));
-	//lua_State*,CRasterizationRendererHandle&,uint32_t,const std::string&,Material&,EntityHandle&,ModelSubMesh&
+	defRaster.def("RecordPrepass",static_cast<void(*)(lua_State*,CRasterizationRendererHandle&,const util::DrawSceneInfo&)>([](lua_State *l,CRasterizationRendererHandle &renderer,const util::DrawSceneInfo &drawSceneInfo) {
+		pragma::Lua::check_component(l,renderer);
+		renderer->RecordPrepass(drawSceneInfo);
+	}));
+	defRaster.def("RecordLightingPass",static_cast<void(*)(lua_State*,CRasterizationRendererHandle&,const util::DrawSceneInfo&)>([](lua_State *l,CRasterizationRendererHandle &renderer,const util::DrawSceneInfo &drawSceneInfo) {
+		pragma::Lua::check_component(l,renderer);
+		renderer->RecordLightingPass(drawSceneInfo);
+	}));
+	defRaster.def("ExecutePrepass",static_cast<void(*)(lua_State*,CRasterizationRendererHandle&,const util::DrawSceneInfo&)>([](lua_State *l,CRasterizationRendererHandle &renderer,const util::DrawSceneInfo &drawSceneInfo) {
+		pragma::Lua::check_component(l,renderer);
+		renderer->ExecutePrepass(drawSceneInfo);
+	}));
+	defRaster.def("ExecuteLightingPass",static_cast<void(*)(lua_State*,CRasterizationRendererHandle&,const util::DrawSceneInfo&)>([](lua_State *l,CRasterizationRendererHandle &renderer,const util::DrawSceneInfo &drawSceneInfo) {
+		pragma::Lua::check_component(l,renderer);
+		renderer->ExecuteLightingPass(drawSceneInfo);
+	}));
+	defRaster.def("GetPrepassCommandBufferRecorder",static_cast<std::shared_ptr<prosper::ISwapCommandBufferGroup>(*)(lua_State*,CRasterizationRendererHandle&)>([](lua_State *l,CRasterizationRendererHandle &renderer) -> std::shared_ptr<prosper::ISwapCommandBufferGroup> {
+		pragma::Lua::check_component(l,renderer);
+		return renderer->GetPrepassCommandBufferRecorder();
+	}));
+	defRaster.def("GetShadowCommandBufferRecorder",static_cast<std::shared_ptr<prosper::ISwapCommandBufferGroup>(*)(lua_State*,CRasterizationRendererHandle&)>([](lua_State *l,CRasterizationRendererHandle &renderer) -> std::shared_ptr<prosper::ISwapCommandBufferGroup> {
+		pragma::Lua::check_component(l,renderer);
+		return renderer->GetShadowCommandBufferRecorder();
+	}));
+	defRaster.def("GetLightingPassCommandBufferRecorder",static_cast<std::shared_ptr<prosper::ISwapCommandBufferGroup>(*)(lua_State*,CRasterizationRendererHandle&)>([](lua_State *l,CRasterizationRendererHandle &renderer) -> std::shared_ptr<prosper::ISwapCommandBufferGroup> {
+		pragma::Lua::check_component(l,renderer);
+		return renderer->GetLightingPassCommandBufferRecorder();
+	}));
+	defRaster.def("UpdatePrepassRenderBuffers",static_cast<void(*)(lua_State*,CRasterizationRendererHandle&,const util::DrawSceneInfo&)>([](lua_State *l,CRasterizationRendererHandle &renderer,const util::DrawSceneInfo &drawSceneInfo) {
+		pragma::Lua::check_component(l,renderer);
+		renderer->UpdatePrepassRenderBuffers(drawSceneInfo);
+	}));
+	defRaster.def("UpdateLightingPassRenderBuffers",static_cast<void(*)(lua_State*,CRasterizationRendererHandle&,const util::DrawSceneInfo&)>([](lua_State *l,CRasterizationRendererHandle &renderer,const util::DrawSceneInfo &drawSceneInfo) {
+		pragma::Lua::check_component(l,renderer);
+		renderer->UpdateLightingPassRenderBuffers(drawSceneInfo);
+	}));
 	defRaster.add_static_constant("PREPASS_MODE_DISABLED",umath::to_integral(pragma::CRasterizationRendererComponent::PrepassMode::NoPrepass));
 	defRaster.add_static_constant("PREPASS_MODE_DEPTH_ONLY",umath::to_integral(pragma::CRasterizationRendererComponent::PrepassMode::DepthOnly));
 	defRaster.add_static_constant("PREPASS_MODE_EXTENDED",umath::to_integral(pragma::CRasterizationRendererComponent::PrepassMode::Extended));

@@ -62,6 +62,7 @@ namespace pragma::rendering
 		prosper::ICommandBuffer &m_cmdBuffer;
 		std::unique_ptr<prosper::IShaderPipelineLayout> m_currentPipelineLayout = nullptr;
 		std::optional<Vector4> m_clipPlane {};
+		std::optional<Vector2> m_depthBias {};
 		pragma::CVertexAnimatedComponent *m_vertexAnimC = nullptr;
 		pragma::CModelComponent *m_modelC = nullptr;
 		pragma::CLightMapReceiverComponent *m_lightMapReceiverC = nullptr;
@@ -76,7 +77,7 @@ namespace pragma::rendering
 		uint32_t m_curVertexAnimationOffset = 0;
 		RenderPassStats *m_stats = nullptr;
 
-		float m_alphaCutoff = 0.5f;
+		float m_alphaCutoff = std::numeric_limits<float>::max();
 	};
 
 	class CRasterizationRendererComponent;

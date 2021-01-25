@@ -18,7 +18,7 @@ using namespace pragma;
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
-
+#pragma optimize("",off)
 ComponentEventId CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED = INVALID_COMPONENT_ID;
 luabind::object CModelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CModelComponentHandleWrapper>(l);}
 void CModelComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
@@ -27,6 +27,10 @@ void CModelComponent::RegisterEvents(pragma::EntityComponentManager &componentMa
 	EVENT_ON_RENDER_MESHES_UPDATED = componentManager.RegisterEvent("EVENT_ON_RENDER_MESHES_UPDATED");
 }
 
+CModelComponent::CModelComponent(BaseEntity &ent)
+	: BaseModelComponent(ent),m_baseShaderSpecializationConstantFlags{pragma::GameShaderSpecializationConstantFlag::None}
+{}
+
 void CModelComponent::Initialize()
 {
 	BaseModelComponent::Initialize();
@@ -34,6 +38,28 @@ void CModelComponent::Initialize()
 	auto pRenderComponent = ent.GetComponent<CRenderComponent>();
 	if(pRenderComponent.valid())
 		pRenderComponent->SetRenderBufferDirty();
+	UpdateBaseShaderSpecializationFlags();
+
+	BindEventUnhandled(CRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		UpdateBaseShaderSpecializationFlags();
+	});
+	BindEventUnhandled(CRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		UpdateBaseShaderSpecializationFlags();
+	});
+}
+
+void CModelComponent::UpdateBaseShaderSpecializationFlags()
+{
+	auto clipPlane = false;
+	auto depthBias = false;
+	auto *renderC = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
+	if(renderC != nullptr)
+	{
+		clipPlane = renderC->GetRenderClipPlane();
+		depthBias = renderC->GetDepthBias();
+	}
+	umath::set_flag(m_baseShaderSpecializationConstantFlags,GameShaderSpecializationConstantFlag::EnableClippingBit,clipPlane);
+	umath::set_flag(m_baseShaderSpecializationConstantFlags,GameShaderSpecializationConstantFlag::EnableDepthBias,depthBias);
 }
 
 void CModelComponent::SetMaterialOverride(uint32_t idx,const std::string &matOverride)
@@ -155,6 +181,8 @@ void CModelComponent::UpdateRenderBufferList()
 		renderBufferData.pipelineSpecializationFlags = shader->GetMaterialPipelineSpecializationRequirements(*mat);
 	}
 }
+
+void CModelComponent::SetBaseShaderSpecializationFlag(pragma::GameShaderSpecializationConstantFlag flag,bool enabled) {umath::set_flag(m_baseShaderSpecializationConstantFlags,flag,enabled);}
 
 void CModelComponent::UpdateRenderMeshes()
 {
@@ -358,3 +386,4 @@ void CModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 	UpdateLOD(0);
 	BaseModelComponent::OnModelChanged(model);
 }
+#pragma optimize("",on)

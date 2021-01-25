@@ -89,6 +89,8 @@ namespace pragma
 		virtual void RecordAlphaCutoff(rendering::ShaderProcessor &shaderProcessor,float alphaCutoff) const override;
 		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor,CMaterial &mat) const override;
 		virtual void RecordClipPlane(rendering::ShaderProcessor &shaderProcessor,const Vector4 &clipPlane) const override {}
+		virtual void RecordDepthBias(rendering::ShaderProcessor &shaderProcessor,const Vector2 &depthBias) const override {}
+		virtual void RecordVertexAnimationOffset(rendering::ShaderProcessor &shaderProcessor,uint32_t vertexAnimationOffset) const override {}
 	protected:
 		bool BindEntityDepthMatrix(const Mat4 &depthMVP);
 		virtual void OnPipelinesInitialized() override;

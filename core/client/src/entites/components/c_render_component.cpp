@@ -50,6 +50,8 @@ ComponentEventId CRenderComponent::EVENT_SHOULD_DRAW_SHADOW = INVALID_COMPONENT_
 ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_UPDATE_INSTANTIABILITY = INVALID_COMPONENT_ID;
+ComponentEventId CRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId CRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED = INVALID_COMPONENT_ID;
 void CRenderComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	EVENT_ON_UPDATE_RENDER_DATA_MT = componentManager.RegisterEvent("ON_UPDATE_RENDER_DATA_MT",std::type_index(typeid(CRenderComponent)));
@@ -61,6 +63,8 @@ void CRenderComponent::RegisterEvents(pragma::EntityComponentManager &componentM
 	EVENT_ON_UPDATE_RENDER_BUFFERS = componentManager.RegisterEvent("ON_UPDATE_RENDER_BUFFERS",std::type_index(typeid(CRenderComponent)));
 	EVENT_ON_UPDATE_RENDER_MATRICES = componentManager.RegisterEvent("ON_UPDATE_RENDER_MATRICES",std::type_index(typeid(CRenderComponent)));
 	EVENT_UPDATE_INSTANTIABILITY = componentManager.RegisterEvent("UPDATE_INSTANTIABILITY");
+	EVENT_ON_CLIP_PLANE_CHANGED = componentManager.RegisterEvent("ON_CLIP_PLANE_CHANGED");
+	EVENT_ON_DEPTH_BIAS_CHANGED = componentManager.RegisterEvent("ON_DEPTH_BIAS_CHANGED");
 }
 CRenderComponent::CRenderComponent(BaseEntity &ent)
 	: BaseRenderComponent(ent)
@@ -117,9 +121,36 @@ void CRenderComponent::ClearRenderObjects()
 CRenderComponent::StateFlags CRenderComponent::GetStateFlags() const {return m_stateFlags;}
 void CRenderComponent::SetDepthPassEnabled(bool enabled) {umath::set_flag(m_stateFlags,StateFlags::EnableDepthPass,enabled);}
 bool CRenderComponent::IsDepthPassEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::EnableDepthPass);}
-void CRenderComponent::SetRenderClipPlane(const Vector4 &plane) {m_renderClipPlane = plane;}
-void CRenderComponent::ClearRenderClipPlane() {m_renderClipPlane = {};}
+void CRenderComponent::SetRenderClipPlane(const Vector4 &plane)
+{
+	if(plane == m_renderClipPlane)
+		return;
+	m_renderClipPlane = plane;
+	BroadcastEvent(EVENT_ON_CLIP_PLANE_CHANGED);
+}
+void CRenderComponent::ClearRenderClipPlane()
+{
+	if(!m_renderClipPlane.has_value())
+		return;
+	m_renderClipPlane = {};
+	BroadcastEvent(EVENT_ON_CLIP_PLANE_CHANGED);
+}
 const Vector4 *CRenderComponent::GetRenderClipPlane() const {return m_renderClipPlane.has_value() ? &*m_renderClipPlane : nullptr;}
+void CRenderComponent::SetDepthBias(float d,float delta)
+{
+	if(m_depthBias->x == d && m_depthBias->y == delta)
+		return;
+	m_depthBias = {d,delta};
+	BroadcastEvent(EVENT_ON_DEPTH_BIAS_CHANGED);
+}
+void CRenderComponent::ClearDepthBias()
+{
+	if(!m_depthBias.has_value())
+		return;
+	m_depthBias = {};
+	BroadcastEvent(EVENT_ON_DEPTH_BIAS_CHANGED);
+}
+const Vector2 *CRenderComponent::GetDepthBias() const {return m_depthBias.has_value() ? &*m_depthBias : nullptr;}
 void CRenderComponent::SetReceiveShadows(bool enabled) {umath::set_flag(m_stateFlags,StateFlags::DisableShadows,!enabled);}
 bool CRenderComponent::IsReceivingShadows() const {return !umath::is_flag_set(m_stateFlags,StateFlags::DisableShadows);}
 void CRenderComponent::Initialize()

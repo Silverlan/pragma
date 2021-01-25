@@ -1146,10 +1146,12 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 		auto &rp = rt->GetRenderPass();
 		auto &fb = rt->GetFramebuffer();
 		StartProfilingStage(GPUProfilingPhase::GUI);
-		m_guiCommandBufferGroup->Draw(rt->GetRenderPass(),rt->GetFramebuffer(),[&rp,&fb](prosper::ISecondaryCommandBuffer &drawCmd) {
-			auto &gui = WGUI::GetInstance();
-			gui.Draw(rp,fb,drawCmd);
-		});
+		m_guiCommandBufferGroup->StartRecording(rt->GetRenderPass(),rt->GetFramebuffer());
+			m_guiCommandBufferGroup->Record([&rp,&fb](prosper::ISecondaryCommandBuffer &drawCmd) {
+				auto &gui = WGUI::GetInstance();
+				gui.Draw(rp,fb,drawCmd);
+			});
+		m_guiCommandBufferGroup->EndRecording();
 		StopProfilingStage(GPUProfilingPhase::GUI);
 	}
 

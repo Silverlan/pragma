@@ -21,7 +21,7 @@
 #define DEBUG_VERBOSE_ANIMATION 0
 
 using namespace pragma;
-
+#pragma optimize("",off)
 ComponentEventId BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ANIMATION = pragma::INVALID_COMPONENT_ID;
@@ -353,7 +353,7 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 	auto cycleNew = cycle +static_cast<float>(dt) *animSpeed;
 	if(layeredSlot == -1)
 	{
-		if(umath::abs(cycleNew -cycleLast) < 0.001f || umath::is_flag_set(m_stateFlags,StateFlags::BaseAnimationDirty))
+		if(umath::abs(cycleNew -cycleLast) < 0.001f && umath::is_flag_set(m_stateFlags,StateFlags::BaseAnimationDirty) == false)
 			return false;
 		umath::set_flag(m_stateFlags,StateFlags::BaseAnimationDirty,false);
 	}
@@ -1409,3 +1409,4 @@ void CEMaintainAnimationMovement::PushArguments(lua_State *l)
 CEShouldUpdateBones::CEShouldUpdateBones()
 {}
 void CEShouldUpdateBones::PushArguments(lua_State *l) {}
+#pragma optimize("",on)

@@ -51,13 +51,18 @@ bool pragma::rendering::ShaderProcessor::RecordBindShader(const pragma::CSceneCo
 	m_materialDescriptorSetIndex = m_curShader->GetMaterialDescriptorSetIndex();
 	m_entityInstanceDescriptorSetIndex = m_curShader->GetInstanceDescriptorSetIndex();
 	m_curInstanceSet = nullptr;
+	m_clipPlane = {};
+	m_depthBias = {};
+	m_alphaCutoff = std::numeric_limits<float>::max();
 
 	if(m_cmdBuffer.RecordBindShaderPipeline(shader,pipelineIdx) == false)
 		return false;
 
+#if 0
 	// Reset depth bias
 	// TODO: This kind of depth bias isn't used anymore and should be removed from the shaders entirely!
 	m_cmdBuffer.RecordSetDepthBias();
+#endif
 	// m_cmdBuffer.RecordBindVertexBuffer(shader,*CSceneComponent::GetEntityInstanceIndexBuffer()->GetBuffer(),umath::to_integral(ShaderEntity::VertexBinding::RenderBufferIndex));
 	return RecordBindScene(scene,renderer,shader,m_view);
 }
@@ -105,13 +110,23 @@ bool pragma::rendering::ShaderProcessor::RecordBindEntity(CBaseEntity &ent)
 		return false;
 	auto sceneFlags = m_sceneFlags;
 	m_cmdBuffer.RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,*m_currentPipelineLayout,m_entityInstanceDescriptorSetIndex,*descSet);
+
 	auto *clipPlane = renderC->GetRenderClipPlane();
-	if(static_cast<bool>(clipPlane) != m_clipPlane.has_value() && (!clipPlane || *clipPlane != *m_clipPlane))
+	if(static_cast<bool>(clipPlane) != m_clipPlane.has_value() && (!clipPlane || !m_clipPlane.has_value() || *clipPlane != *m_clipPlane))
 	{
 		auto vClipPlane = clipPlane ? *clipPlane : Vector4{};
 		m_curShader->RecordClipPlane(*this,vClipPlane);
 
 		m_clipPlane = clipPlane ? *clipPlane : std::optional<Vector4>{};
+	}
+
+	auto *depthBias = renderC->GetDepthBias();
+	if(static_cast<bool>(depthBias) != m_depthBias.has_value() && (!depthBias || !m_depthBias.has_value() || *depthBias != *m_depthBias))
+	{
+		auto vDepthBias = depthBias ? *depthBias : Vector4{};
+		m_curShader->RecordDepthBias(*this,vDepthBias);
+
+		m_depthBias = depthBias ? *depthBias : std::optional<Vector2>{};
 	}
 	
 	m_vertexAnimC = nullptr;
@@ -142,6 +157,8 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(CModelSubMesh &mesh,pragma::
 	uint32_t vertexAnimationOffset = 0;
 	if(m_vertexAnimC)
 	{
+		// TODO: Skip this if shader doesn't support morph target animations
+		// (Check for specialization flag)
 		auto offset = 0u;
 		auto animCount = 0u;
 		if(m_vertexAnimC->GetVertexAnimationBufferMeshOffset(mesh,offset,animCount) == true)
@@ -153,9 +170,7 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(CModelSubMesh &mesh,pragma::
 	if(vertexAnimationOffset != m_curVertexAnimationOffset)
 	{
 		m_curVertexAnimationOffset = vertexAnimationOffset;
-		uint32_t pushConstantOffset;
-		m_curShader->GetVertexAnimationPushConstantInfo(pushConstantOffset);
-		m_cmdBuffer.RecordPushConstants(*m_currentPipelineLayout,prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,pushConstantOffset,sizeof(vertexAnimationOffset),&vertexAnimationOffset);
+		m_curShader->RecordVertexAnimationOffset(*this,vertexAnimationOffset);
 	}
 	// TODO
 	// umath::set_flag(renderFlags,RenderFlags::UseExtendedVertexWeights,mesh.GetExtendedVertexWeights().empty() == false);

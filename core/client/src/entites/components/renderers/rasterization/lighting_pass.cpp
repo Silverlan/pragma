@@ -31,7 +31,7 @@ using namespace pragma::rendering;
 
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 static auto cvDrawParticles = GetClientConVar("render_draw_particles");
 static auto cvDrawGlow = GetClientConVar("render_draw_glow");
 static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");
@@ -628,4 +628,3 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 		}
 	});
 }
-#pragma optimize("",on)

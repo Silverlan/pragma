@@ -25,7 +25,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 static bool g_collectRenderStats = false;
 static CallbackHandle g_cbPreRenderScene = {};
 static CallbackHandle g_cbPostRenderScene = {};
@@ -367,7 +367,7 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::Shader &shader,
 	prosper::PipelineID pipelineId;
 	return shader.GetPipelineId(pipelineId,pipelineIdx) && pipelineId != std::numeric_limits<decltype(pipelineId)>::max() && BindShader(pipelineId);
 }
-
+#include "pragma/rendering/shaders/world/c_shader_eye.hpp"
 bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::PipelineID pipelineId)
 {
 	if(pipelineId == m_curPipeline)
@@ -736,4 +736,3 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 	}
 	return numShaderInvocations;
 }
-#pragma optimize("",on)

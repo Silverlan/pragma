@@ -66,7 +66,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 {
 	auto &modEngine = lua.RegisterLibrary("engine");
@@ -1090,4 +1090,3 @@ void CGame::RegisterLuaClasses()
 	Lua::WorldEnvironment::register_class(worldEnvClassDef);
 	modGame[worldEnvClassDef];
 }
-#pragma optimize("",on)

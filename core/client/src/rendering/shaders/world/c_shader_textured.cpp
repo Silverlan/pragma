@@ -30,7 +30,7 @@ extern DLLCENGINE CEngine *c_engine;
 
 using namespace pragma;
 
-#pragma optimize("",off)
+
 /*ShaderGameWorldPipeline ShaderGameWorldLightingPass::GetPipelineIndex(prosper::SampleCountFlags sampleCount,bool bReflection)
 {
 	if(sampleCount == prosper::SampleCountFlags::e1Bit)
@@ -715,4 +715,3 @@ std::optional<uint32_t> ShaderSpecializationManager::FindSpecializationPipelineI
 	auto itp = specToPipelineIdx.find(specializationFlags);
 	return (itp != specToPipelineIdx.end()) ? itp->second : std::optional<uint32_t>{};
 }
-#pragma optimize("",on)

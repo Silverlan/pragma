@@ -6,6 +6,7 @@
 #define DESCRIPTOR_SET_SCENE (DESCRIPTOR_SET_MATERIAL +1)
 #define DESCRIPTOR_SET_RENDER_SETTINGS (DESCRIPTOR_SET_SCENE +1)
 
+#include "../world/pbr/sh_pbr.gls"
 #include "../modules/sh_uniform_locations.gls"
 #include "../modules/sh_export.gls"
 #include "../modules/sh_vertex_data_locations.gls"

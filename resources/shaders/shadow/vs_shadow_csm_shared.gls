@@ -22,6 +22,7 @@
 	#define USE_PUSH_CONSTANTS 0
 #endif
 
+#include "../world/pbr/sh_pbr.gls"
 #include "../modules/vs_weighted.gls"
 #include "../modules/sh_entity_info.gls"
 #include "sh_shadow_csm.gls"

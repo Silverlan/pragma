@@ -29,7 +29,7 @@ using namespace pragma;
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 CShadowComponent::CShadowComponent(BaseEntity &ent)
 	: BaseEntityComponent{ent}
 {}
@@ -542,4 +542,3 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 		);
 	}
 }
-#pragma optimize("",on)

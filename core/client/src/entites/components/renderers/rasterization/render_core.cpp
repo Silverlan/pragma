@@ -38,7 +38,7 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 using namespace pragma::rendering;
-#pragma optimize("",off)
+
 void pragma::CRasterizationRendererComponent::RenderParticleSystems(const util::DrawSceneInfo &drawSceneInfo,std::vector<pragma::CParticleSystemComponent*> &particles,RenderMode renderMode,Bool bloom,std::vector<pragma::CParticleSystemComponent*> *bloomParticles)
 {
 	auto depthOnly = umath::is_flag_set(drawSceneInfo.renderFlags,FRender::ParticleDepth);
@@ -300,4 +300,3 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 		(*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpu,*drawSceneInfo.commandBuffer);
 	}
 }
-#pragma optimize("",on)

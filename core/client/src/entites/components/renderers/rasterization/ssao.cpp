@@ -22,7 +22,7 @@
 using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 void pragma::CRasterizationRendererComponent::RenderSSAO(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &ssaoInfo = GetSSAOInfo();
@@ -103,4 +103,3 @@ void pragma::CRasterizationRendererComponent::RenderSSAO(const util::DrawSceneIn
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::SSAO);
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::SSAO);
 }
-#pragma optimize("",on)

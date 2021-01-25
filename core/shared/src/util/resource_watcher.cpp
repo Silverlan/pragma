@@ -12,7 +12,7 @@
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/model/model.h"
 #include <sharedutils/util_file.h>
-#pragma optimize("",off)
+
 decltype(EResourceWatcherCallbackType::Model) EResourceWatcherCallbackType::Model = EResourceWatcherCallbackType{umath::to_integral(E::Model)};
 decltype(EResourceWatcherCallbackType::Material) EResourceWatcherCallbackType::Material = EResourceWatcherCallbackType{umath::to_integral(E::Material)};
 decltype(EResourceWatcherCallbackType::Texture) EResourceWatcherCallbackType::Texture = EResourceWatcherCallbackType{umath::to_integral(E::Texture)};
@@ -336,4 +336,3 @@ bool ResourceWatcherManager::MountDirectory(const std::string &path,bool bAbsolu
 	}
 	return true;
 }
-#pragma optimize("",on)

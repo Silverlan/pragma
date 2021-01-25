@@ -22,7 +22,7 @@
 using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 void pragma::CRasterizationRendererComponent::CullLightSources(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &shaderSettings = c_game->GetGameWorldShaderSettings();
@@ -248,4 +248,3 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const util::DrawScen
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::Shadows);
 	c_game->StopProfilingStage(CGame::CPUProfilingPhase::Shadows);
 }
-#pragma optimize("",on)

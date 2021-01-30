@@ -874,7 +874,10 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 			auto &bone = *nodeIdxToBone[nodeIdx];
 			for(auto childIdx : node.children)
 			{
-				auto &child = *nodeIdxToBone[childIdx];
+				auto it = nodeIdxToBone.find(childIdx);
+				if(it == nodeIdxToBone.end())
+					continue; // Not a bone?
+				auto &child = *it->second;
 				bone.children.insert(std::make_pair(child.ID,child.shared_from_this()));
 				child.parent = bone.shared_from_this();
 			}

@@ -363,7 +363,7 @@ void CGame::OnRemove()
 void CGame::UpdateGameWorldShaderSettings()
 {
 	auto oldSettings = m_worldShaderSettings;
-	m_worldShaderSettings.shadowQuality = static_cast<pragma::rendering::GameWorldShaderSettings::ShadowQuality>(GetConVarInt("cl_render_shadow_quality"));
+	m_worldShaderSettings.shadowQuality = static_cast<pragma::rendering::GameWorldShaderSettings::ShadowQuality>(GetConVarInt("render_shadow_quality"));
 	m_worldShaderSettings.ssaoEnabled = GetConVarBool("cl_render_ssao");
 	m_worldShaderSettings.bloomEnabled = GetConVarBool("render_bloom_enabled");
 	m_worldShaderSettings.debugModeEnabled = GetConVarBool("render_debug_mode") || GetConVarBool("render_unlit");

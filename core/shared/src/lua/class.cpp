@@ -59,6 +59,8 @@
 #include <luainterface.hpp>
 #include <luabind/iterator_policy.hpp>
 #include <luabind/out_value_policy.hpp>
+#include <mathutil/inverse_kinematics/ik.hpp>
+#include <mathutil/inverse_kinematics/constraints.hpp>
 
 extern DLLENGINE Engine *engine;
 
@@ -115,6 +117,7 @@ std::ostream &operator<<(std::ostream &out,const ALSound &snd)
 }
 
 static void RegisterLuaMatrices(Lua::Interface &lua);
+static void RegisterIk(Lua::Interface &lua);
 
 static Quat QuaternionConstruct() {return uquat::identity();}
 static Quat QuaternionConstruct(float w,float x,float y,float z) {return Quat(w,x,y,z);}
@@ -1034,10 +1037,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		Lua::PushBool(l,umath::abs(a.x -b.x) <= epsilon && umath::abs(a.y -b.y) <= epsilon && umath::abs(a.z -b.z) <= epsilon);
 	}));
 	defVector.def("GetAngle",static_cast<float(*)(lua_State*,const Vector3&,const Vector3&)>([](lua_State *l,const Vector3 &a,const Vector3 &b) -> float {
-		auto dot = uvec::dot(a,b);
-		auto la = uvec::length(a);
-		auto lb = uvec::length(b);
-		return umath::acos(dot /(la *lb));
+		return umath::deg_to_rad(uvec::get_angle(a,b));
 	}));
 	defVector.def("Slerp",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,float)>([](lua_State *l,const Vector3 &a,const Vector3 &b,float factor) {
 		auto result = glm::slerp(a,b,factor);
@@ -1202,6 +1202,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat.def(-luabind::const_self);
 	defQuat.def(luabind::const_self /float());
 	defQuat.def(luabind::const_self *float());
+	defQuat.def(luabind::const_self *Vector3());
 	defQuat.def(luabind::const_self *luabind::const_self);
 	defQuat.def(luabind::const_self ==luabind::const_self);
 	//defQuat.def(luabind::const_self *umath::Transform());
@@ -1254,6 +1255,12 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat.def("ApproachDirection",static_cast<void(*)(lua_State*,const Quat&,const Vector3&,const Vector3&,const ::Vector2&,const ::Vector2*,const ::Vector2*)>(&Lua::Quaternion::ApproachDirection));
 	defQuat.def("ApproachDirection",static_cast<void(*)(lua_State*,const Quat&,const Vector3&,const Vector3&,const ::Vector2&,const ::Vector2*)>(&Lua::Quaternion::ApproachDirection));
 	defQuat.def("ApproachDirection",static_cast<void(*)(lua_State*,const Quat&,const Vector3&,const Vector3&,const ::Vector2&)>(&Lua::Quaternion::ApproachDirection));
+	defQuat.def("ClampRotation",static_cast<Quat(*)(lua_State*,Quat&,const EulerAngles&,const EulerAngles&)>([](lua_State *l,Quat &rot,const EulerAngles &minBounds,const EulerAngles &maxBounds) -> Quat {
+		return uquat::clamp_rotation(rot,minBounds,maxBounds);
+	}));
+	defQuat.def("ClampRotation",static_cast<Quat(*)(lua_State*,Quat&,const EulerAngles&)>([](lua_State *l,Quat &rot,const EulerAngles &bounds) -> Quat {
+		return uquat::clamp_rotation(rot,-bounds,bounds);
+	}));
 	defQuat.def("GetConjugate",&Lua::Quaternion::GetConjugate);
 	modMath[defQuat];
 	auto _G = luabind::globals(lua.GetState());
@@ -1265,6 +1272,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	_G["Quaternion"] = _G["math"]["Quaternion"];
 
 	RegisterLuaMatrices(lua);
+	RegisterIk(lua);
 	//modelMeshClassDef.scope[luabind::def("Create",&Lua::ModelMesh::Client::Create)];
 }
 
@@ -1855,4 +1863,94 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat4x3.def("Set",static_cast<void(*)(lua_State*,::Mat4x3&,float,float,float,float,float,float,float,float,float,float,float,float)>(&Lua::Mat4x3::Set));
 	defMat4x3.def("Set",static_cast<void(*)(lua_State*,::Mat4x3&,const ::Mat4x3&)>(&Lua::Mat4x3::Set));
 	modMath[defMat4x3];
+}
+
+class IkLuaConstraint
+	: public uvec::ik::IkConstraint
+{
+public:
+	IkLuaConstraint(uvec::ik::IkJoint &joint,luabind::object o)
+		: IkConstraint{joint},m_function{o}
+	{}
+	virtual void Apply(int i) override;
+private:
+	luabind::object m_function;
+};
+void IkLuaConstraint::Apply(int i)
+{
+	m_function(i);
+}
+
+static void RegisterIk(Lua::Interface &lua)
+{
+	auto defIkSolver = luabind::class_<uvec::ik::IkSolver>("IkSolver");
+	defIkSolver.def("GetGlobalTransform",static_cast<umath::ScaledTransform(*)(uvec::ik::IkSolver&,uint32_t)>([](uvec::ik::IkSolver &solver,uint32_t idx) -> umath::ScaledTransform {
+		auto t = solver.GetGlobalTransform(idx);
+		return t;
+	}));
+	defIkSolver.def("SetLocalTransform",static_cast<void(*)(uvec::ik::IkSolver&,uint32_t,umath::ScaledTransform&)>([](uvec::ik::IkSolver &solver,uint32_t idx,umath::ScaledTransform &pose) {
+		solver.SetLocalTransform(idx,pose);
+	}));
+	defIkSolver.def("GetLocalTransform",static_cast<umath::ScaledTransform(*)(uvec::ik::IkSolver&,uint32_t)>([](uvec::ik::IkSolver &solver,uint32_t idx) -> umath::ScaledTransform {
+		return solver.GetLocalTransform(idx);
+	}));
+	defIkSolver.def("Solve",static_cast<void(*)(uvec::ik::IkSolver&,const umath::ScaledTransform&)>([](uvec::ik::IkSolver &solver,const umath::ScaledTransform &pose) {
+		solver.Solve(pose);
+	}));
+	defIkSolver.def("Resize",static_cast<void(*)(uvec::ik::IkSolver&,uint32_t)>([](uvec::ik::IkSolver &solver,uint32_t n) {
+		solver.Resize(n);
+	}));
+	defIkSolver.def("Size",static_cast<uint32_t(*)(uvec::ik::IkSolver&)>([](uvec::ik::IkSolver &solver) -> uint32_t {
+		return solver.Size();
+	}));
+	defIkSolver.def("AddHingeConstraint",static_cast<uvec::ik::IkHingeConstraint*(*)(uvec::ik::IkSolver&,uint32_t,const Vector3&)>([](uvec::ik::IkSolver &solver,uint32_t idx,const Vector3 &axis) {
+		return &solver.GetJoint(idx).AddConstraint<uvec::ik::IkHingeConstraint>(axis);
+	}));
+	defIkSolver.def("AddBallSocketConstraint",static_cast<uvec::ik::IkBallSocketConstraint*(*)(uvec::ik::IkSolver&,uint32_t,float)>([](uvec::ik::IkSolver &solver,uint32_t idx,float limit) {
+		return &solver.GetJoint(idx).AddConstraint<uvec::ik::IkBallSocketConstraint>(limit);
+	}));
+	defIkSolver.def("AddCustomConstraint",static_cast<uvec::ik::IkConstraint*(*)(lua_State*,uvec::ik::IkSolver&,uint32_t,luabind::object)>([](lua_State *l,uvec::ik::IkSolver &solver,uint32_t idx,luabind::object f) -> uvec::ik::IkConstraint* {
+		Lua::CheckFunction(l,3);
+		return &solver.GetJoint(idx).AddConstraint<IkLuaConstraint>(f);
+	}));
+	
+	auto &modIk = lua.RegisterLibrary("ik");
+	auto defIkConstraint = luabind::class_<uvec::ik::IkConstraint>("IkConstraint");
+	defIkConstraint.def("GetJointIndex",static_cast<uint32_t(*)(lua_State*,uvec::ik::IkConstraint&)>([](lua_State *l,uvec::ik::IkConstraint &constraint) -> uint32_t {
+		return constraint.GetJoint().GetJointIndex();
+	}));
+	modIk[defIkConstraint];
+
+	auto defIkHingeConstraint = luabind::class_<uvec::ik::IkHingeConstraint,uvec::ik::IkConstraint>("IkHingeConstraint");
+	defIkHingeConstraint.def("SetLimits",static_cast<void(*)(lua_State*,uvec::ik::IkHingeConstraint&,const Vector2&)>([](lua_State *l,uvec::ik::IkHingeConstraint &constraint,const Vector2 &limits) {
+		constraint.SetLimits(limits);
+	}));
+	defIkHingeConstraint.def("ClearLimits",&uvec::ik::IkHingeConstraint::ClearLimits);
+	defIkHingeConstraint.def("GetLimits",static_cast<void(*)(lua_State*,uvec::ik::IkHingeConstraint&)>([](lua_State *l,uvec::ik::IkHingeConstraint &constraint) {
+		auto limits = constraint.GetLimits();
+		if(limits.has_value() == false)
+			return;
+		Lua::Push<Vector2>(l,*limits);
+	}));
+	modIk[defIkHingeConstraint];
+
+	auto defIkBallSocketConstraint = luabind::class_<uvec::ik::IkBallSocketConstraint,uvec::ik::IkConstraint>("IkBallSocketConstraint");
+	defIkBallSocketConstraint.def("SetLimit",&uvec::ik::IkBallSocketConstraint::SetLimit);
+	defIkBallSocketConstraint.def("GetLimit",static_cast<void(*)(lua_State*,uvec::ik::IkBallSocketConstraint&)>([](lua_State *l,uvec::ik::IkBallSocketConstraint &constraint) {
+		float limit;
+		if(constraint.GetLimit(limit) == false)
+			return;
+		Lua::PushNumber(l,limit);
+	}));
+	modIk[defIkBallSocketConstraint];
+
+	auto defCcdSolver = luabind::class_<uvec::ik::CCDSolver,uvec::ik::IkSolver>("CCDIkSolver");
+	defCcdSolver.def(luabind::constructor<>());
+		
+	auto defFABRIKSolver = luabind::class_<uvec::ik::FABRIKSolver,uvec::ik::IkSolver>("FABRIkSolver");
+	defFABRIKSolver.def(luabind::constructor<>());
+	
+	modIk[defIkSolver];
+	modIk[defCcdSolver];
+	modIk[defFABRIKSolver];
 }

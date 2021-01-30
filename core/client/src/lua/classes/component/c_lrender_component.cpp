@@ -40,6 +40,31 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 			Lua::SetTableValue(l,t);
 		}
 		}));
+	defCRender.def("GetRenderMeshes",static_cast<void(*)(lua_State*,CRenderHandle&)>([](lua_State *l,CRenderHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		auto &renderMeshes = hComponent->GetRenderMeshes();
+		auto t = Lua::CreateTable(l);
+		int32_t idx = 1;
+		for(auto &mesh : renderMeshes)
+		{
+			Lua::PushInt(l,idx++);
+			Lua::Push(l,mesh);
+			Lua::SetTableValue(l,t);
+		}
+		}));
+	defCRender.def("GetLodRenderMeshes",static_cast<void(*)(lua_State*,CRenderHandle&,uint32_t)>([](lua_State *l,CRenderHandle &hComponent,uint32_t lod) {
+		pragma::Lua::check_component(l,hComponent);
+		auto &renderMeshes = hComponent->GetRenderMeshes();
+		auto &renderMeshGroup = hComponent->GetLodRenderMeshGroup(lod);
+		auto t = Lua::CreateTable(l);
+		int32_t idx = 1;
+		for(auto i=renderMeshGroup.first;i<renderMeshGroup.second;++i)
+		{
+			Lua::PushInt(l,idx++);
+			Lua::Push(l,renderMeshes[i]);
+			Lua::SetTableValue(l,t);
+		}
+		}));
 	defCRender.def("SetExemptFromOcclusionCulling",static_cast<void(*)(lua_State*,CRenderHandle&,bool)>([](lua_State *l,CRenderHandle &hComponent,bool exempt) {
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->SetExemptFromOcclusionCulling(exempt);

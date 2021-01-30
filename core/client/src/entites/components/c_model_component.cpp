@@ -46,13 +46,17 @@ void CModelComponent::Initialize()
 	BindEventUnhandled(CRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		UpdateBaseShaderSpecializationFlags();
 	});
+	BindEventUnhandled(CColorComponent::EVENT_ON_COLOR_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		UpdateBaseShaderSpecializationFlags();
+	});
 }
 
 void CModelComponent::UpdateBaseShaderSpecializationFlags()
 {
 	auto clipPlane = false;
 	auto depthBias = false;
-	auto *renderC = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
+	auto &ent = static_cast<CBaseEntity&>(GetEntity());
+	auto *renderC = ent.GetRenderComponent();
 	if(renderC != nullptr)
 	{
 		clipPlane = renderC->GetRenderClipPlane();
@@ -60,6 +64,9 @@ void CModelComponent::UpdateBaseShaderSpecializationFlags()
 	}
 	umath::set_flag(m_baseShaderSpecializationConstantFlags,GameShaderSpecializationConstantFlag::EnableClippingBit,clipPlane);
 	umath::set_flag(m_baseShaderSpecializationConstantFlags,GameShaderSpecializationConstantFlag::EnableDepthBias,depthBias);
+
+	auto colorC = ent.GetComponent<CColorComponent>();
+	umath::set_flag(m_baseShaderSpecializationConstantFlags,GameShaderSpecializationConstantFlag::EnableTranslucencyBit,colorC.valid() && colorC->GetColor().a < 255);
 }
 
 void CModelComponent::SetMaterialOverride(uint32_t idx,const std::string &matOverride)

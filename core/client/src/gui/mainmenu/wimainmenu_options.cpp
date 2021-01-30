@@ -898,7 +898,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 		pList->AddChoice(Locale::GetText("medium"),"2");
 		pList->AddChoice(Locale::GetText("high"),"3");
 		pList->AddChoice(Locale::GetText("very_high"),"4");
-	},"cl_render_shadow_quality");
+	},"render_shadow_quality");
 	m_hShadowQuality = pShadowQuality->GetHandle();
 	//
 	// Dynamic Shadows
@@ -1007,6 +1007,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 		pList->GetRow("cl_render_shadow_pssm_update_frequency_offset")->SetVisible(false);
 		pList->GetRow("cl_render_shadow_pssm_split_count")->SetVisible(false);
 		pList->GetRow("cl_render_vr_enabled")->SetVisible(false);
+		pList->GetRow("render_shadow_quality")->SetVisible(false);
 	}
 }
 void WIMainMenuOptions::InitializeAudioSettings()

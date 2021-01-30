@@ -44,6 +44,7 @@ ComponentEventId BaseAnimatedComponent::EVENT_ON_BONE_TRANSFORM_CHANGED = pragma
 ComponentEventId BaseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_BLEND_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
+ComponentEventId BaseAnimatedComponent::EVENT_ON_ANIMATION_RESET = pragma::INVALID_COMPONENT_ID;
 void BaseAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	auto componentType = std::type_index(typeid(BaseAnimatedComponent));
@@ -69,6 +70,7 @@ void BaseAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &compo
 	EVENT_ON_ANIMATIONS_UPDATED = componentManager.RegisterEvent("ON_ANIMATIONS_UPDATED",componentType);
 	EVENT_ON_BLEND_ANIMATION = componentManager.RegisterEvent("ON_BLEND_ANIMATION",componentType);
 	EVENT_PLAY_ANIMATION = componentManager.RegisterEvent("PLAY_ANIMATION",componentType);
+	EVENT_ON_ANIMATION_RESET = componentManager.RegisterEvent("ON_ANIMATION_RESET");
 }
 
 BaseAnimatedComponent::BaseAnimatedComponent(BaseEntity &ent)
@@ -116,7 +118,7 @@ void BaseAnimatedComponent::Initialize()
 	ent.AddComponent<LogicComponent>(); // Required for animation updates
 }
 
-void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
+void BaseAnimatedComponent::ResetAnimation(const std::shared_ptr<Model> &mdl)
 {
 	m_animSlots.clear();
 	m_baseAnim = {};
@@ -165,6 +167,12 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		for(UInt32 i=0;i<anim->GetBoneCount();i++)
 			m_bones[i] = umath::ScaledTransform{*frame->GetBonePosition(i),*frame->GetBoneOrientation(i)};
 	}
+}
+
+void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
+{
+	ResetAnimation(mdl);
+	BroadcastEvent(EVENT_ON_ANIMATION_RESET);
 }
 
 CallbackHandle BaseAnimatedComponent::BindAnimationEvent(AnimationEvent::Type eventId,const std::function<void(std::reference_wrapper<const AnimationEvent>)> &fCallback)

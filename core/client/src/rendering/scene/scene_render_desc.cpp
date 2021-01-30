@@ -175,6 +175,7 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 	if(rasterizer.expired())
 		return;
 	auto baseShaderSpecializationFlags = mdlC->GetBaseShaderSpecializationFlags();
+	auto isBaseTranslucent = umath::is_flag_set(baseShaderSpecializationFlags,pragma::GameShaderSpecializationConstantFlag::EnableTranslucencyBit);
 	auto &context = c_engine->GetRenderContext();
 	auto renderTranslucent = umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Translucent);
 	for(auto meshIdx=lodGroup.first;meshIdx<lodGroup.first +lodGroup.second;++meshIdx)
@@ -207,7 +208,7 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 		// shader = rasterizationRenderer->GetShaderOverride(shader);
 		// if(shader == nullptr)
 		// 	continue;
-		auto translucent = mat->GetAlphaMode() == AlphaMode::Blend;
+		auto translucent = mat->GetAlphaMode() == AlphaMode::Blend || isBaseTranslucent;
 		if(renderTranslucent == false && translucent)
 			continue;
 		auto *renderQueue = getRenderQueue(renderMode,translucent);

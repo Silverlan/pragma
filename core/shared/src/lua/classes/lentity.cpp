@@ -76,10 +76,16 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	}));
 	classDef.def("SetPose",static_cast<void(*)(lua_State*,EntityHandle&,const umath::Transform&)>([](lua_State *l,EntityHandle &hEnt,const umath::Transform &t) {
 		LUA_CHECK_ENTITY(l,hEnt);
+		auto *trComponent = static_cast<pragma::BaseTransformComponent*>(hEnt->AddComponent("transform").get());
+		if(trComponent == nullptr)
+			return;
 		hEnt->SetPose(t);
 	}));
 	classDef.def("SetPose",static_cast<void(*)(lua_State*,EntityHandle&,const umath::ScaledTransform&)>([](lua_State *l,EntityHandle &hEnt,const umath::ScaledTransform &t) {
 		LUA_CHECK_ENTITY(l,hEnt);
+		auto *trComponent = static_cast<pragma::BaseTransformComponent*>(hEnt->AddComponent("transform").get());
+		if(trComponent == nullptr)
+			return;
 		hEnt->SetPose(t);
 	}));
 	classDef.def("GetPos",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
@@ -366,6 +372,10 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	classDef.def("SetModel",static_cast<void(*)(lua_State*,EntityHandle&,const std::shared_ptr<Model>&)>([](lua_State *l,EntityHandle &hEnt,const std::shared_ptr<Model> &mdl) {
 		LUA_CHECK_ENTITY(l,hEnt);
 		hEnt->SetModel(mdl);
+	}));
+	classDef.def("ClearModel",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->SetModel(std::shared_ptr<Model>{nullptr});
 	}));
 	classDef.def("GetModel",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);

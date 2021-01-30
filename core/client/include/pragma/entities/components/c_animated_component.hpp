@@ -63,7 +63,7 @@ namespace pragma
 		bool AreSkeletonUpdateCallbacksEnabled() const;
 		void SetBoneBufferDirty();
 	protected:
-		virtual void OnModelChanged(const std::shared_ptr<Model> &mdl) override;
+		virtual void ResetAnimation(const std::shared_ptr<Model> &mdl) override;
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	private:
 		std::shared_ptr<prosper::SwapBuffer> m_boneBuffer = nullptr;

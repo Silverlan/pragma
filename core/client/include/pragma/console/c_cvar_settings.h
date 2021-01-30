@@ -41,7 +41,7 @@ REGISTER_CONVAR_CL(cl_render_tone_mapping,"-1",ConVarFlags::Archive,"Changes the
 
 REGISTER_CONVAR_CL(cl_render_preset,"-1",ConVarFlags::Archive,"Selected preset in display options.");
 REGISTER_CONVAR_CL(cl_render_shadow_resolution,"1024",ConVarFlags::Archive,"Shadowmap Resolution. Higher resolution equals higher quality shadows, but is also more expensive to render.");
-REGISTER_CONVAR_CL(cl_render_shadow_quality,"2",ConVarFlags::Archive,"Shadowmap Quality. This affects the detail of the object shadows that are being rendered");
+REGISTER_CONVAR_CL(render_shadow_quality,"1",ConVarFlags::Archive,"Shadowmap Quality. This affects the detail of the object shadows that are being rendered");
 REGISTER_CONVAR_CL(cl_render_shadow_dynamic,"1",ConVarFlags::Archive,"Turns dynamic shadows on or off.");
 REGISTER_CONVAR_CL(cl_render_shadow_update_frequency,"0",ConVarFlags::Archive,"Update frequency in frames. 0 = Updates every frame, 1 = Updates every second frame, etc.");
 REGISTER_CONVAR_CL(cl_render_shadow_pssm_update_frequency_offset,"0",ConVarFlags::Archive,"Update frequency for PSSM shadows in frames, relative to 'cl_render_shadow_update_frequency'.");

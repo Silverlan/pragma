@@ -49,6 +49,7 @@ namespace pragma
 		static ComponentEventId EVENT_ON_ANIMATIONS_UPDATED;
 		static ComponentEventId EVENT_ON_BLEND_ANIMATION;
 		static ComponentEventId EVENT_PLAY_ANIMATION;
+		static ComponentEventId EVENT_ON_ANIMATION_RESET;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
 		enum class StateFlags : uint8_t
@@ -233,6 +234,7 @@ namespace pragma
 		BaseAnimatedComponent(BaseEntity &ent);
 		virtual void OnModelChanged(const std::shared_ptr<Model> &mdl);
 		virtual void Load(DataStream &ds,uint32_t version) override;
+		virtual void ResetAnimation(const std::shared_ptr<Model> &mdl);
 		
 		struct DLLNETWORK AnimationBlendInfo
 		{

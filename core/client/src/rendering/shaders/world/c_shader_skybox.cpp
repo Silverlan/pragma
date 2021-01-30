@@ -47,11 +47,7 @@ ShaderSkybox::ShaderSkybox(prosper::IPrContext &context,const std::string &ident
 	// SetBaseShader<ShaderTextured3DBase>();
 }
 
-void ShaderSkybox::OnPipelinesInitialized()
-{
-	ShaderGameWorldLightingPass::OnPipelinesInitialized();
-	m_defaultMatDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_MATERIAL);
-}
+prosper::DescriptorSetInfo &ShaderSkybox::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
 
 bool ShaderSkybox::GetRenderBufferTargets(
 	CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,

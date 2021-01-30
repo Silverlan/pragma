@@ -56,14 +56,14 @@ static void reload_all_shadow_maps()
 	}
 }
 
-static void cmd_cl_render_shadow_quality(NetworkState*,ConVar*,int,int quality)
+static void cmd_render_shadow_quality(NetworkState*,ConVar*,int,int quality)
 {
 	reload_all_shadow_maps();
 	if(c_game == nullptr)
 		return;
 	c_game->UpdateGameWorldShaderSettings();
 }
-REGISTER_CONVAR_CALLBACK_CL(cl_render_shadow_quality,cmd_cl_render_shadow_quality);
+REGISTER_CONVAR_CALLBACK_CL(render_shadow_quality,cmd_render_shadow_quality);
 
 REGISTER_CONVAR_CALLBACK_CL(cl_render_shadow_dynamic,[](NetworkState*,ConVar*,bool,bool) {
 	reload_all_shadow_maps();
@@ -112,7 +112,7 @@ LightShadowRenderer &CShadowComponent::GetRenderer() {return *m_lightShadowRende
 const LightShadowRenderer &CShadowComponent::GetRenderer() const {return const_cast<CShadowComponent*>(this)->GetRenderer();}
 
 static CVar cvShadowmapSize = GetClientConVar("cl_render_shadow_resolution");
-static CVar cvShadowQuality = GetClientConVar("cl_render_shadow_quality");
+static CVar cvShadowQuality = GetClientConVar("render_shadow_quality");
 void CShadowComponent::ReloadDepthTextures()
 {
 	//Scene::ClearLightCache();

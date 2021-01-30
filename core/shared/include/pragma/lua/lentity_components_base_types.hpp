@@ -3622,6 +3622,7 @@ namespace Lua
 		def.add_static_constant("EVENT_ON_ANIMATIONS_UPDATED",pragma::BaseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED);
 		def.add_static_constant("EVENT_ON_BLEND_ANIMATION",pragma::BaseAnimatedComponent::EVENT_ON_BLEND_ANIMATION);
 		def.add_static_constant("EVENT_PLAY_ANIMATION",pragma::BaseAnimatedComponent::EVENT_PLAY_ANIMATION);
+		def.add_static_constant("EVENT_ON_ANIMATION_RESET",pragma::BaseAnimatedComponent::EVENT_ON_ANIMATION_RESET);
 
 		def.add_static_constant("FPLAYANIM_NONE",umath::to_integral(pragma::FPlayAnim::None));
 		def.add_static_constant("FPLAYANIM_RESET",umath::to_integral(pragma::FPlayAnim::Reset));

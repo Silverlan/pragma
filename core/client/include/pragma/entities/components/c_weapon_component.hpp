@@ -25,6 +25,11 @@ namespace pragma
 		public CBaseNetComponent
 	{
 	public:
+		static ComponentEventId EVENT_TRANSLATE_VIEWMODEL_ACTIVITY;
+		static ComponentEventId EVENT_TRANSLATE_VIEWMODEL_ANIMATION;
+		static ComponentEventId EVENT_TRANSLATE_LAYERED_VIEWMODEL_ANIMATION;
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+
 		static unsigned int GetWeaponCount();
 		static const std::vector<CWeaponComponent*> &GetAll();
 
@@ -51,16 +56,21 @@ namespace pragma
 		bool GetHideWorldModelInFirstPerson() const;
 		void SetViewModelOffset(const Vector3 &offset);
 		const Vector3 &GetViewModelOffset() const;
-		void SetViewFOV(float fov);
-		float GetViewFOV() const;
+		void SetViewFOV(umath::Degree fov);
+		umath::Degree GetViewFOV() const;
 		virtual bool ShouldTransmitNetData() const override {return true;}
+
+		void SetViewModelComponent(pragma::ComponentId component) {m_viewModelComponent = component;}
+		pragma::ComponentId GetViewModelComponent() const {return m_viewModelComponent;}
 	protected:
 		// Either the view-model or the character that owns the weapon
 		EntityHandle m_hTarget;
 		bool m_bHideWorldModelInFirstPerson = false;
 		std::string m_viewModel = "weapons/v_soldier.wmd";
 		Vector3 m_viewModelOffset;
-		float m_viewFov = std::numeric_limits<float>::quiet_NaN();
+		pragma::ComponentId m_viewModelComponent = pragma::INVALID_COMPONENT_ID;
+
+		std::optional<umath::Degree> m_viewFov {};
 		CallbackHandle m_cbOnOwnerObserverModeChanged = {};
 		virtual Activity TranslateViewActivity(Activity act);
 		virtual void OnFireBullets(const BulletInfo &bulletInfo,Vector3 &bulletOrigin,Vector3 &bulletDir,Vector3 *effectsOrigin=nullptr) override;

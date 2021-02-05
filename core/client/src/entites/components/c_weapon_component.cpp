@@ -19,6 +19,17 @@
 
 using namespace pragma;
 
+ComponentEventId CWeaponComponent::EVENT_TRANSLATE_VIEWMODEL_ACTIVITY = INVALID_COMPONENT_ID;
+ComponentEventId CWeaponComponent::EVENT_TRANSLATE_VIEWMODEL_ANIMATION = INVALID_COMPONENT_ID;
+ComponentEventId CWeaponComponent::EVENT_TRANSLATE_LAYERED_VIEWMODEL_ANIMATION = INVALID_COMPONENT_ID;
+void CWeaponComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+{
+	BaseWeaponComponent::RegisterEvents(componentManager);
+	EVENT_TRANSLATE_VIEWMODEL_ACTIVITY = componentManager.RegisterEvent("TRANSLATE_VIEWMODEL_ACTIVITY",std::type_index(typeid(CWeaponComponent)));
+	EVENT_TRANSLATE_VIEWMODEL_ANIMATION = componentManager.RegisterEvent("TRANSLATE_VIEWMODEL_ANIMATION",std::type_index(typeid(CWeaponComponent)));
+	EVENT_TRANSLATE_LAYERED_VIEWMODEL_ANIMATION = componentManager.RegisterEvent("TRANSLATE_LAYERED_VIEWMODEL_ANIMATION",std::type_index(typeid(CWeaponComponent)));
+}
+
 std::vector<CWeaponComponent*> CWeaponComponent::s_weapons;
 const std::vector<CWeaponComponent*> &CWeaponComponent::GetAll() {return s_weapons;}
 unsigned int CWeaponComponent::GetWeaponCount() {return CUInt32(s_weapons.size());}
@@ -96,7 +107,7 @@ void CWeaponComponent::SetViewModelOffset(const Vector3 &offset)
 	vm->SetViewModelOffset(offset);
 }
 const Vector3 &CWeaponComponent::GetViewModelOffset() const {return m_viewModelOffset;}
-void CWeaponComponent::SetViewFOV(float fov)
+void CWeaponComponent::SetViewFOV(umath::Degree fov)
 {
 	m_viewFov = fov;
 	auto *vm = GetViewModel();
@@ -175,11 +186,11 @@ void CWeaponComponent::Initialize()
 			renderC->UpdateShouldDrawState();
 	});
 }
-float CWeaponComponent::GetViewFOV() const
+umath::Degree CWeaponComponent::GetViewFOV() const
 {
-	if(std::isnan(m_viewFov) == true)
+	if(m_viewFov.has_value() == false)
 		return cvViewFov->GetFloat();
-	return m_viewFov;
+	return *m_viewFov;
 }
 
 bool CWeaponComponent::IsInFirstPersonMode() const

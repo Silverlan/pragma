@@ -348,14 +348,14 @@ void SAIComponent::StartSchedule(std::shared_ptr<ai::Schedule> &sched)
 	}
 }
 
-void SAIComponent::Think(double tDelta)
+void SAIComponent::OnTick(double tDelta)
 {
 	auto &ent = GetEntity();
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
 	if(charComponent.valid() && pTrComponent != nullptr)
 		charComponent->SetViewOrientation(pTrComponent->GetRotation());
-	BaseAIComponent::Think(tDelta); // Has to be called AFTER Entity::Think, to make sure animations are updated (Required for animation movement)
+	BaseAIComponent::OnTick(tDelta); // Has to be called AFTER Entity::Think, to make sure animations are updated (Required for animation movement)
 	if(IsAIEnabled() == false)
 	{
 		auto *controller = GetController();

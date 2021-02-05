@@ -617,6 +617,8 @@ void BasePhysicsComponent::OnPhysicsWake(PhysObj*)
 }
 void BasePhysicsComponent::OnPhysicsSleep(PhysObj*)
 {
+	if(AreForcePhysicsAwakeCallbacksEnabled())
+		return;
 	auto &game = *GetEntity().GetNetworkState()->GetGameState();
 	auto &awakePhysC = game.GetAwakePhysicsComponents();
 	auto it = std::find_if(awakePhysC.begin(),awakePhysC.end(),[this](const util::WeakHandle<pragma::BasePhysicsComponent> &hPhysC) {
@@ -779,6 +781,8 @@ void BasePhysicsComponent::OnPhysicsInitialized()
 	// Note: We always need sleep reports enabled for optimization purposes.
 	// TODO: Remove IsSleepReportEnabled / SetSleepReportEnabled?
 	SetSleepReportEnabled(true);
+	if(AreForcePhysicsAwakeCallbacksEnabled())
+		OnPhysicsWake(m_physObject.get());
 	// SetSleepReportEnabled(IsSleepReportEnabled());
 }
 void BasePhysicsComponent::OnPhysicsDestroyed() {BroadcastEvent(EVENT_ON_PHYSICS_DESTROYED);}

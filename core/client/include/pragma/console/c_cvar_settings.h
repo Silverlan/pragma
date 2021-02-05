@@ -35,6 +35,7 @@ REGISTER_CONVAR_CL(cl_render_contrast,"1",ConVarFlags::Archive,"Scene contrast."
 REGISTER_CONVAR_CL(cl_render_motion_blur,"0",ConVarFlags::Archive,"Amount of motion blur. 0 = disabled.");
 REGISTER_CONVAR_CL(cl_render_texture_filtering,"6",ConVarFlags::Archive,"0 = Nearest Neighbour, 1 = Bilinear Filtering, 2 = Trilinear Filtering, 3 = Antisotropic Filtering x2, 4 = Antisotropic Filtering x4, 5 = Antisotropic Filtering x8, 6 = Antisotropic Filtering x16");
 REGISTER_CONVAR_CL(cl_render_occlusion_culling,"4",ConVarFlags::Archive,"0 = Off, 1 = Brute-Force, 2 = CHC++, 3 = Octree, 4 = BSP +Octree");
+REGISTER_CONVAR_CL(cl_render_frustum_culling_enabled,"1",ConVarFlags::None,"Enables or disables frustum culling.");
 REGISTER_CONVAR_CL(cl_render_depth_of_field,"0",ConVarFlags::Archive,"Depth of field scale.");
 REGISTER_CONVAR_CL(cl_render_reflection_quality,"2",ConVarFlags::Archive,"Changes the quality of reflections. 0 = Only static reflections, 1 = Dynamic reflections, 2 = Reflections with particle effects.");
 REGISTER_CONVAR_CL(cl_render_tone_mapping,"-1",ConVarFlags::Archive,"Changes the tone-mapping algorithm to use. -1 = Use the default, 0 = Gamma correction only, 1 = Reinhard, 2 = Hejil-Richard, 3 = Uncharted, 4 = Aces, 5 = Gran Turismo");

@@ -26,7 +26,7 @@ namespace pragma
 		void DropWeapon(BaseEntity *ent);
 		void SelectNextWeapon();
 		void SelectPreviousWeapon();
-		virtual void Think(double tDelta) override;
+		virtual void OnTick(double tDelta) override;
 		virtual void SetAmmoCount(UInt32 ammoType,UInt16 count) override;
 		using BaseCharacterComponent::SetAmmoCount;
 

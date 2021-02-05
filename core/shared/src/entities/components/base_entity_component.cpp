@@ -8,6 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/entities/entity_component_manager.hpp"
+#include "pragma/entities/components/basetoggle.h"
 #include <sharedutils/datastream.h>
 
 using namespace pragma;
@@ -72,6 +73,12 @@ void BaseEntityComponent::OnRemove()
 				continue;
 			hCb.Remove();
 		}
+	}
+	if(umath::is_flag_set(m_stateFlags,StateFlags::IsLogicEnabled))
+	{
+		auto &logicComponents = GetEntity().GetNetworkState()->GetGameState()->GetEntityTickComponents();
+		*std::find(logicComponents.begin(),logicComponents.end(),this) = nullptr;
+		umath::set_flag(m_stateFlags,StateFlags::IsLogicEnabled,false);
 	}
 }
 bool BaseEntityComponent::ShouldTransmitNetData() const {return false;}
@@ -309,11 +316,19 @@ void BaseEntityComponent::Save(DataStream &ds)
 {
 	auto ver = GetVersion();
 	ds->Write<decltype(ver)>(ver);
+
+	auto tCur = GetEntity().GetNetworkState()->GetGameState()->CurTime();
+	ds->Write<float>(m_tickData.lastTick -tCur);
+	ds->Write<float>(m_tickData.nextTick -tCur);
 }
 void BaseEntityComponent::Load(DataStream &ds)
 {
 	auto ver = ds->Read<decltype(GetVersion())>();
 	Load(ds,ver);
+
+	auto tCur = GetEntity().GetNetworkState()->GetGameState()->CurTime();
+	m_tickData.lastTick = tCur +ds->Read<float>();
+	m_tickData.nextTick = tCur +ds->Read<float>();
 }
 void BaseEntityComponent::Load(DataStream &ds,uint32_t version) {}
 void BaseEntityComponent::OnEntitySpawn() {}
@@ -335,3 +350,75 @@ void BaseEntityComponent::OnDetached(BaseEntity &ent)
 	}
 }
 pragma::NetEventId BaseEntityComponent::SetupNetEvent(const std::string &name) const {return GetEntity().GetNetworkState()->GetGameState()->SetupNetEvent(name);}
+
+//////////////////
+
+TickPolicy BaseEntityComponent::GetTickPolicy() const {return m_tickData.tickPolicy;}
+
+bool BaseEntityComponent::ShouldThink() const
+{
+	if(m_tickData.tickPolicy != TickPolicy::Always && m_tickData.tickPolicy != TickPolicy::WhenVisible)
+		return false;
+	//auto toggleC = static_cast<pragma::BaseToggleComponent*>(GetEntity().FindComponent("toggle").get());
+	//return toggleC ? toggleC->IsTurnedOn() : true;
+	return true;
+}
+void BaseEntityComponent::SetTickPolicy(TickPolicy policy)
+{
+	if(policy == m_tickData.tickPolicy)
+		return;
+	m_tickData.tickPolicy = policy;
+
+	if(umath::is_flag_set(m_stateFlags,StateFlags::IsThinking))
+		return; // Tick policy update will be handled by game
+	
+	auto &logicComponents = GetEntity().GetNetworkState()->GetGameState()->GetEntityTickComponents();
+	if(ShouldThink())
+	{
+		if(umath::is_flag_set(m_stateFlags,StateFlags::IsLogicEnabled))
+			return;
+		logicComponents.push_back(this);
+		umath::set_flag(m_stateFlags,StateFlags::IsLogicEnabled);
+		return;
+	}
+	if(!umath::is_flag_set(m_stateFlags,StateFlags::IsLogicEnabled))
+		return;
+	logicComponents.erase(std::find(logicComponents.begin(),logicComponents.end(),this));
+	umath::set_flag(m_stateFlags,StateFlags::IsLogicEnabled,false);
+}
+
+double BaseEntityComponent::GetNextTick() const {return m_tickData.nextTick;}
+void BaseEntityComponent::SetNextTick(double t) {m_tickData.nextTick = t;}
+
+double BaseEntityComponent::LastTick() const {return m_tickData.lastTick;}
+
+double BaseEntityComponent::DeltaTime() const
+{
+	Game *game = GetEntity().GetNetworkState()->GetGameState();
+	//auto r = game->CurTime() -m_lastThink; // This would be more accurate, but can be 0 if the engine had to catch up on the tick rate
+	auto r = game->DeltaTickTime();
+	//assert(r != 0.0); // Delta time mustn't ever be 0, otherwise there can be problems with animation events repeating (among other things)
+	return r;
+}
+
+bool BaseEntityComponent::Tick(double tDelta)
+{
+	m_stateFlags |= pragma::BaseEntityComponent::StateFlags::IsThinking;
+
+	auto hThis = GetHandle();
+	auto &ent = GetEntity();
+	OnTick(tDelta);
+	if(hThis.expired())
+		return true; // This component isn't valid anymore; Return immediately
+	Game *game = ent.GetNetworkState()->GetGameState();
+	m_tickData.lastTick = game->CurTime();
+
+	m_stateFlags &= ~pragma::BaseEntityComponent::StateFlags::IsThinking;
+
+	if(ShouldThink() == false)
+	{
+		m_stateFlags &= ~pragma::BaseEntityComponent::StateFlags::IsLogicEnabled;
+		return false; // Game will handle removal from tick componentlist
+	}
+	return true;
+}

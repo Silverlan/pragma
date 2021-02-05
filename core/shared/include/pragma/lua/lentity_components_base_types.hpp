@@ -2110,6 +2110,25 @@ namespace Lua
 			pragma::Lua::check_component(l,hComponent);
 			Lua::PushInt(l,umath::to_integral(hComponent->GetTriggerFlags()));
 		}));
+		def.def("GetTouchingEntities",static_cast<luabind::object(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) -> luabind::object {
+			pragma::Lua::check_component(l,hComponent);
+			auto t = luabind::newtable(l);
+			int32_t idx = 1;
+			for(auto &touchInfo : hComponent->GetTouchingInfo())
+			{
+				if(touchInfo.touch.entity.IsValid() == false || touchInfo.triggered == false)
+					continue;
+				t[idx++] = *touchInfo.touch.entity.get()->GetLuaObject();
+			}
+			return t;
+		}));
+		def.def("GetTouchingEntityCount",static_cast<uint32_t(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) -> uint32_t {
+			pragma::Lua::check_component(l,hComponent);
+			auto &touchingInfo = hComponent->GetTouchingInfo();
+			return std::count_if(touchingInfo.begin(),touchingInfo.end(),[](const pragma::BaseTouchComponent::TouchInfo &touchInfo) -> bool {
+				return touchInfo.triggered && touchInfo.touch.entity.IsValid();
+			});
+		}));
 
 		def.add_static_constant("EVENT_CAN_TRIGGER",pragma::BaseTouchComponent::EVENT_CAN_TRIGGER);
 		def.add_static_constant("EVENT_ON_START_TOUCH",pragma::BaseTouchComponent::EVENT_ON_START_TOUCH);
@@ -2972,6 +2991,41 @@ namespace Lua
 		def.add_static_constant("OBSERVERMODE_THIRDPERSON",umath::to_integral(OBSERVERMODE::THIRDPERSON));
 		def.add_static_constant("OBSERVERMODE_SHOULDER",umath::to_integral(OBSERVERMODE::SHOULDER));
 		def.add_static_constant("OBSERVERMODE_ROAMING",umath::to_integral(OBSERVERMODE::ROAMING));
+	}
+
+	template<class TLuaClass,class THandle>
+		void register_base_gamemode_component_methods(lua_State *l,TLuaClass &def)
+	{
+		def.def("GetName",static_cast<std::string(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hGm) {
+			pragma::Lua::check_component(l,hGm);
+			return hGm.get()->GetName();
+		}));
+		def.def("GetIdentifier",static_cast<std::string(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hGm) {
+			pragma::Lua::check_component(l,hGm);
+			return hGm.get()->GetIdentifier();
+		}));
+		def.def("GetComponentName",static_cast<std::string(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hGm) {
+			pragma::Lua::check_component(l,hGm);
+			return hGm.get()->GetComponentName();
+		}));
+		def.def("GetAuthor",static_cast<std::string(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hGm) {
+			pragma::Lua::check_component(l,hGm);
+			return hGm.get()->GetAuthor();
+		}));
+		def.def("GetGamemodeVersion",static_cast<::util::Version(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hGm) {
+			pragma::Lua::check_component(l,hGm);
+			return hGm.get()->GetGamemodeVersion();
+		}));
+
+		// Enums
+		def.add_static_constant("EVENT_ON_PLAYER_DEATH",pragma::BaseGamemodeComponent::EVENT_ON_PLAYER_DEATH);
+		def.add_static_constant("EVENT_ON_PLAYER_SPAWNED",pragma::BaseGamemodeComponent::EVENT_ON_PLAYER_SPAWNED);
+		def.add_static_constant("EVENT_ON_PLAYER_DROPPED",pragma::BaseGamemodeComponent::EVENT_ON_PLAYER_DROPPED);
+		def.add_static_constant("EVENT_ON_PLAYER_READY",pragma::BaseGamemodeComponent::EVENT_ON_PLAYER_READY);
+		def.add_static_constant("EVENT_ON_PLAYER_JOINED",pragma::BaseGamemodeComponent::EVENT_ON_PLAYER_JOINED);
+		def.add_static_constant("EVENT_ON_GAME_INITIALIZED",pragma::BaseGamemodeComponent::EVENT_ON_GAME_INITIALIZED);
+		def.add_static_constant("EVENT_ON_MAP_INITIALIZED",pragma::BaseGamemodeComponent::EVENT_ON_MAP_INITIALIZED);
+		def.add_static_constant("EVENT_ON_GAME_READY",pragma::BaseGamemodeComponent::EVENT_ON_GAME_READY);
 	}
 
 	template<class TLuaClass,class THandle>

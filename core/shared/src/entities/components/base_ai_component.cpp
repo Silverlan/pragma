@@ -27,7 +27,6 @@
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_observable_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/components/logic_component.hpp"
 #include "pragma/model/model.h"
 
 using namespace pragma;
@@ -231,9 +230,6 @@ void BaseAIComponent::Initialize()
 		if(&animInfo == &animComponent->GetBaseAnimationInfo()) // Only apply for base animation, not for gestures
 			BaseAIComponent::BlendAnimationMovement(evDataBlend.bonePoses,evDataBlend.boneScales);
 	});
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		Think(static_cast<CEOnTick&>(evData.get()).deltaTime);
-	});
 	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		OnPhysicsInitialized();
 	});
@@ -246,7 +242,8 @@ void BaseAIComponent::Initialize()
 	auto *pCharComponent = static_cast<BaseCharacterComponent*>(ent.AddComponent("character").get());
 	if(pCharComponent != nullptr)
 		pCharComponent->SetTurnSpeed(160.f);
-	ent.AddComponent<LogicComponent>();
+
+	SetTickPolicy(TickPolicy::Always);
 }
 
 void BaseAIComponent::OnEntitySpawn()
@@ -311,7 +308,7 @@ void BaseAIComponent::OnPhysicsInitialized()
 void BaseAIComponent::Spawn()
 {}
 
-void BaseAIComponent::Think(double tDelta)
+void BaseAIComponent::OnTick(double tDelta)
 {
 	UpdatePath();
 	LookAtStep(tDelta);

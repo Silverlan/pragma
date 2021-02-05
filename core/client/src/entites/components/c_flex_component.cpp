@@ -147,9 +147,6 @@ void CFlexComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 void CFlexComponent::Initialize()
 {
 	BaseFlexComponent::Initialize();
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		UpdateFlexControllers(static_cast<CEOnTick&>(evData.get()).deltaTime);
-	});
 	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		OnModelChanged(static_cast<pragma::CEOnModelChanged&>(evData.get()).model);
 	});
@@ -157,9 +154,12 @@ void CFlexComponent::Initialize()
 	//BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 	//	UpdateFlexWeightsMT();
 	//});
-	GetEntity().AddComponent<LogicComponent>();
 	OnModelChanged(GetEntity().GetModel());
+
+	SetTickPolicy(TickPolicy::Always); // TODO
 }
+
+void CFlexComponent::OnTick(double dt) {UpdateFlexControllers(dt);}
 
 void CFlexComponent::SetFlexController(uint32_t flexId,float val,float duration,bool clampToLimits)
 {

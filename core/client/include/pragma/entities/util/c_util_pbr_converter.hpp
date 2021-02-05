@@ -48,6 +48,7 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 		virtual void OnEntitySpawn() override;
+		virtual void OnTick(double dt) override;
 		void GenerateAmbientOcclusionMaps(Model &mdl,uint32_t w=512,uint32_t h=512,uint32_t samples=512,bool rebuild=false);
 		void GenerateAmbientOcclusionMaps(BaseEntity &ent,uint32_t w=512,uint32_t h=512,uint32_t samples=512,bool rebuild=false);
 

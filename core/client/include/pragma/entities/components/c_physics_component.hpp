@@ -26,7 +26,7 @@ namespace pragma
 		virtual void Initialize() override;
 
 		virtual void PrePhysicsSimulate() override;
-		virtual void PostPhysicsSimulate() override;
+		virtual bool PostPhysicsSimulate() override;
 
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;

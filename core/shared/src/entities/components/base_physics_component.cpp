@@ -706,6 +706,21 @@ void BasePhysicsComponent::OnSleep()
 
 bool BasePhysicsComponent::IsRagdoll() const {return umath::is_flag_set(m_stateFlags,StateFlags::Ragdoll);}
 
+void BasePhysicsComponent::SetForcePhysicsAwakeCallbacksEnabled(bool enabled,bool apply)
+{
+	umath::set_flag(m_stateFlags,StateFlags::ForcePhysicsAwakeCallbacksEnabled,enabled);
+	if(apply == false)
+		return;
+	if(enabled)
+		OnPhysicsWake(m_physObject.get());
+	else if(m_physObject->IsSleeping())
+		OnPhysicsSleep(m_physObject.get());
+}
+bool BasePhysicsComponent::AreForcePhysicsAwakeCallbacksEnabled() const
+{
+	return umath::is_flag_set(m_stateFlags,StateFlags::ForcePhysicsAwakeCallbacksEnabled);
+}
+
 void BasePhysicsComponent::UpdateRagdollPose()
 {
 	auto &ent = GetEntity();
@@ -741,14 +756,16 @@ void BasePhysicsComponent::UpdateRagdollPose()
 	PostPhysicsSimulate(reference,rootBones,moveOffset,invRot,physRootBoneId);
 }
 
-void BasePhysicsComponent::PostPhysicsSimulate()
+bool BasePhysicsComponent::PostPhysicsSimulate()
 {
 	PhysObj *phys = GetPhysicsObject();
-	InvokeEventCallbacks(EVENT_ON_POST_PHYSICS_SIMULATE);
+	CEPostPhysicsSimulate evData {};
+	InvokeEventCallbacks(EVENT_ON_POST_PHYSICS_SIMULATE,evData);
 	if(phys == NULL || phys->IsStatic())
-		return;
+		return evData.keepAwake;
 	dynamic_cast<PhysObjDynamic*>(phys)->PostSimulate();
 	UpdateRagdollPose();
+	return evData.keepAwake;
 }
 #if PHYS_KEEP_SIMULATION_TRANSFORM != 0
 Vector3 BasePhysicsComponent::GetPhysicsSimulationOffset()
@@ -946,3 +963,14 @@ void CEInitializePhysics::PushArguments(lua_State *l)
 	Lua::PushInt(l,umath::to_integral(flags));
 }
 
+///////////////
+
+CEPostPhysicsSimulate::CEPostPhysicsSimulate()
+{}
+void CEPostPhysicsSimulate::PushArguments(lua_State *l) {}
+uint32_t CEPostPhysicsSimulate::GetReturnCount() {return 1;}
+void CEPostPhysicsSimulate::HandleReturnValues(lua_State *l)
+{
+	if(Lua::IsSet(l,-1))
+		keepAwake = Lua::CheckBool(l,-1);
+}

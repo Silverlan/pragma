@@ -198,7 +198,7 @@ void CSceneComponent::Link(const CSceneComponent &other)
 	auto *renderer = const_cast<CSceneComponent&>(other).GetRenderer();
 	SetRenderer(renderer);
 
-	m_sceneRenderDesc.SetOcclusionCullingHandler(const_cast<pragma::OcclusionCullingHandler&>(other.m_sceneRenderDesc.GetOcclusionCullingHandler()).shared_from_this());
+	// m_sceneRenderDesc.SetOcclusionCullingHandler(const_cast<pragma::OcclusionCullingHandler&>(other.m_sceneRenderDesc.GetOcclusionCullingHandler()).shared_from_this());
 
 	auto *occlusionCuller = const_cast<CSceneComponent&>(other).FindOcclusionCuller();
 	if(occlusionCuller)

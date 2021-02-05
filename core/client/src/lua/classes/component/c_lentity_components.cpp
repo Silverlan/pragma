@@ -393,6 +393,10 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	Lua::register_cl_vehicle_component(l,entsMod);
 	Lua::register_cl_weapon_component(l,entsMod);
 
+	auto defCGamemode = luabind::class_<CGamemodeHandle,BaseEntityComponentHandle>("GamemodeComponent");
+	Lua::register_base_gamemode_component_methods<luabind::class_<CGamemodeHandle,BaseEntityComponentHandle>,CGamemodeHandle>(l,defCGamemode);
+	entsMod[defCGamemode];
+
 	auto defCColor = luabind::class_<CColorHandle,BaseEntityComponentHandle>("ColorComponent");
 	Lua::register_base_color_component_methods<luabind::class_<CColorHandle,BaseEntityComponentHandle>,CColorHandle>(l,defCColor);
 	entsMod[defCColor];
@@ -988,6 +992,20 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defCViewBody];
 
 	auto defCViewModel = luabind::class_<CViewModelHandle,BaseEntityComponentHandle>("ViewModelComponent");
+	defCViewModel.def("GetPlayer",static_cast<luabind::object(*)(lua_State*,CViewModelHandle&)>([](lua_State *l,CViewModelHandle &hVm) -> luabind::object {
+		pragma::Lua::check_component(l,hVm);
+		auto *pl = hVm->GetPlayer();
+		if(pl == nullptr)
+			return {};
+		return pl->GetLuaObject();
+	}));
+	defCViewModel.def("GetWeapon",static_cast<luabind::object(*)(lua_State*,CViewModelHandle&)>([](lua_State *l,CViewModelHandle &hVm) -> luabind::object {
+		pragma::Lua::check_component(l,hVm);
+		auto *wep = hVm->GetWeapon();
+		if(wep == nullptr)
+			return {};
+		return wep->GetLuaObject();
+	}));
 	entsMod[defCViewModel];
 
 	auto defCSoftBody = luabind::class_<CSoftBodyHandle,BaseEntityComponentHandle>("SoftBodyComponent");

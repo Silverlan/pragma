@@ -749,8 +749,10 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 		m_primaryCamera = cam->GetHandle<pragma::CCameraComponent>();
 	}
 
-	CallCallbacks<void,Game*>("OnGameInitialized",this);
 	m_flags |= GameFlags::GameInitialized;
+	CallCallbacks<void,Game*>("OnGameInitialized",this);
+	for(auto *gmC : GetGamemodeComponents())
+		gmC->OnGameInitialized();
 }
 
 void CGame::RequestResource(const std::string &fileName)
@@ -1302,12 +1304,14 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 bool CGame::LoadMap(const std::string &map,const Vector3 &origin,std::vector<EntityHandle> *entities)
 {
 	bool r = Game::LoadMap(map,origin,entities);
+	m_flags |= GameFlags::MapLoaded;
 	if(r == true)
 	{
 		CallCallbacks<void>("OnMapLoaded");
 		CallLuaCallbacks<void>("OnMapLoaded");
+		for(auto *gmC : GetGamemodeComponents())
+			gmC->OnMapInitialized();
 	}
-	m_flags |= GameFlags::MapLoaded;
 	OnMapLoaded();
 
 	std::string dsp = "fx_";

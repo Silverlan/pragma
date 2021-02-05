@@ -30,8 +30,14 @@ void BasePointAtTargetComponent::Initialize()
 		return util::EventReply::Handled;
 	});
 
-	GetEntity().AddComponent<LogicComponent>();
 	m_netEvSetPointAtTarget = SetupNetEvent("set_point_at_target");
+}
+void BasePointAtTargetComponent::OnRemove()
+{
+	if(m_cbOnPoseChanged.IsValid())
+		m_cbOnPoseChanged.Remove();
+	if(m_cbOnPoseChangedThis.IsValid())
+		m_cbOnPoseChangedThis.Remove();
 }
 void BasePointAtTargetComponent::OnEntitySpawn()
 {
@@ -44,6 +50,14 @@ void BasePointAtTargetComponent::OnEntitySpawn()
 		if(it != entIt.end())
 			SetPointAtTarget(**it);
 	}
+	auto *transformC = dynamic_cast<pragma::BaseTransformComponent*>(GetEntity().AddComponent("transform").get());
+	if(transformC)
+	{
+		m_cbOnPoseChangedThis = transformC->AddEventCallback(BaseTransformComponent::EVENT_ON_POSE_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			UpdatePose();
+			return util::EventReply::Unhandled;
+		});
+	}
 }
 const pragma::PEntityProperty &BasePointAtTargetComponent::GetPointAtTargetProperty() const {return m_pointAtTarget;}
 void BasePointAtTargetComponent::ClearPointAtTarget() {SetPointAtTarget(nullptr);}
@@ -51,24 +65,33 @@ void BasePointAtTargetComponent::SetPointAtTarget(BaseEntity &ent) {SetPointAtTa
 void BasePointAtTargetComponent::SetPointAtTarget(BaseEntity *ent)
 {
 	*m_pointAtTarget = (ent != nullptr) ? ent->GetHandle() : EntityHandle{};
-	if(m_cbTick.IsValid())
-		m_cbTick.Remove();
+	if(m_cbOnPoseChanged.IsValid())
+		m_cbOnPoseChanged.Remove();
 	if(ent == nullptr)
 		return;
-	m_cbTick = BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		auto *entPointAtTarget = GetPointAtTarget();
-		if(entPointAtTarget == nullptr)
-		{
-			if(m_cbTick.IsValid())
-				m_cbTick.Remove();
-			return;
-		}
-		auto pTransformComponent = GetEntity().GetTransformComponent();
-		if(!pTransformComponent)
-			return;
-		auto posTgt = entPointAtTarget->GetPosition();
-		auto pos = pTransformComponent->GetPosition();
-		pTransformComponent->SetAngles(uvec::to_angle(posTgt -pos));
+
+	auto transformC = static_cast<pragma::BaseTransformComponent*>(ent->AddComponent("transform").get());
+	if(transformC == nullptr)
+		return;
+	m_cbOnPoseChanged = transformC->AddEventCallback(BaseTransformComponent::EVENT_ON_POSE_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		UpdatePose();
+		return util::EventReply::Unhandled;
 	});
 }
 BaseEntity *BasePointAtTargetComponent::GetPointAtTarget() const {return m_pointAtTarget->GetValue().get();}
+void BasePointAtTargetComponent::UpdatePose()
+{
+	auto *entPointAtTarget = GetPointAtTarget();
+	if(entPointAtTarget == nullptr)
+	{
+		if(m_cbOnPoseChanged.IsValid())
+			m_cbOnPoseChanged.Remove();
+		return;
+	}
+	auto pTransformComponent = GetEntity().GetTransformComponent();
+	if(!pTransformComponent)
+		return;
+	auto posTgt = entPointAtTarget->GetPosition();
+	auto pos = pTransformComponent->GetPosition();
+	pTransformComponent->SetAngles(uvec::to_angle(posTgt -pos));
+}

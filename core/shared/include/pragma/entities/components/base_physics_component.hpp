@@ -89,7 +89,8 @@ namespace pragma
 			ApplyingAngularVelocity = ApplyingLinearVelocity<<1u,
 			ApplyingPhysicsPosition = ApplyingAngularVelocity<<1u,
 			ApplyingPhysicsRotation = ApplyingPhysicsPosition<<1u,
-			SleepReportEnabled = ApplyingPhysicsRotation<<1u
+			SleepReportEnabled = ApplyingPhysicsRotation<<1u,
+			ForcePhysicsAwakeCallbacksEnabled = SleepReportEnabled<<1u
 		};
 
 		enum class PhysFlags : uint32_t
@@ -137,13 +138,16 @@ namespace pragma
 		Quat GetPhysicsSimulationRotation();
 #endif
 		virtual void PrePhysicsSimulate();
-		virtual void PostPhysicsSimulate();
+		virtual bool PostPhysicsSimulate();
 		virtual void SetKinematic(bool b);
 		bool IsKinematic() const;
 		virtual void OnPhysicsWake(PhysObj *phys);
 		virtual void OnPhysicsSleep(PhysObj *phys);
 		bool IsOnGround() const;
 		bool IsGroundWalkable() const;
+
+		void SetForcePhysicsAwakeCallbacksEnabled(bool enabled,bool apply=true);
+		bool AreForcePhysicsAwakeCallbacksEnabled() const;
 
 		BaseEntity *GetGroundEntity() const;
 		PhysObj *GetPhysicsObject() const;
@@ -267,6 +271,15 @@ namespace pragma
 		virtual void PushArguments(lua_State *l) override;
 		PHYSICSTYPE physicsType;
 		BasePhysicsComponent::PhysFlags flags;
+	};
+	struct DLLNETWORK CEPostPhysicsSimulate
+		: public ComponentEvent
+	{
+		CEPostPhysicsSimulate();
+		virtual void PushArguments(lua_State *l) override;
+		virtual uint32_t GetReturnCount() override;
+		virtual void HandleReturnValues(lua_State *l) override;
+		bool keepAwake = true;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::BasePhysicsComponent::StateFlags);

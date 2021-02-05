@@ -38,7 +38,7 @@ namespace pragma
 		virtual void TertiaryAttack() override;
 		virtual void Attack4() override;
 		virtual void Reload() override;
-		virtual void Think(double tDelta);
+		virtual void OnTick(double tDelta) override;
 		virtual void OnRemove();
 		void Drop();
 		virtual void OnPickedUp(BaseEntity *ent);

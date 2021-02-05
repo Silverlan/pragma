@@ -58,7 +58,7 @@ namespace pragma
 		bool IsAutomaticSecondary() const;
 		bool IsDeployed() const;
 		virtual void Reload();
-		virtual void Think(double tDelta);
+		virtual void OnTick(double tDelta) override;
 		virtual void OnRemove() override;
 		// Ammo
 		UInt32 GetPrimaryAmmoType() const;
@@ -89,6 +89,7 @@ namespace pragma
 		virtual void OnEntitySpawn() override;
 	protected:
 		BaseWeaponComponent(BaseEntity &ent);
+		void UpdateTickPolicy();
 		bool CanPrimaryAttack() const;
 		bool CanSecondaryAttack() const;
 		virtual void OnFireBullets(const BulletInfo &bulletInfo,Vector3 &bulletOrigin,Vector3 &bulletDir,Vector3 *effectsOrigin=nullptr);

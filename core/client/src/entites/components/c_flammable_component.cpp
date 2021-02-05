@@ -74,9 +74,9 @@ Bool CFlammableComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &
 		return CBaseNetComponent::ReceiveNetEvent(eventId,packet);
 	return true;
 }
-void CFlammableComponent::OnThink(double dt)
+void CFlammableComponent::OnTick(double dt)
 {
-	BaseFlammableComponent::OnThink(dt);
+	BaseFlammableComponent::OnTick(dt);
 	UpdateFlameParticlePositions();
 }
 void CFlammableComponent::ReceiveData(NetPacket &packet)

@@ -99,6 +99,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CShadowManagerComponent>("shadow_manager");
 	componentManager.RegisterComponentType<pragma::COcclusionCullerComponent>("occlusion_culler");
 	componentManager.RegisterComponentType<pragma::CSceneComponent>("scene");
+	componentManager.RegisterComponentType<pragma::CGamemodeComponent>("gamemode");
 
 	componentManager.RegisterComponentType<pragma::CEnvSoundProbeComponent>("sound_probe");
 	componentManager.RegisterComponentType<pragma::CWeatherComponent>("weather");

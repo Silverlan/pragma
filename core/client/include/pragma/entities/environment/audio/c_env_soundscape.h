@@ -20,6 +20,7 @@ namespace pragma
 	public:
 		CSoundScapeComponent(BaseEntity &ent) : BaseEnvSoundScapeComponent(ent) {}
 		virtual void Initialize() override;
+		virtual void OnTick(double dt) override;
 		virtual ~CSoundScapeComponent() override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		void StartSoundScape();

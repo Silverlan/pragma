@@ -827,6 +827,12 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefTransform.def("SetIdentity",static_cast<void(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &t) {
 		t.SetIdentity();
 	}));
+	classDefTransform.def("IsIdentity",static_cast<bool(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &t) -> bool {
+		auto &origin = t.GetOrigin();
+		auto &rotation = t.GetRotation();
+		return umath::abs(origin.x) < 0.001f && umath::abs(origin.y) < 0.001f && umath::abs(origin.z) < 0.001f &&
+			umath::abs(1.f -rotation.w) < 0.001f && umath::abs(rotation.x) < 0.001f && umath::abs(rotation.y) < 0.001f && umath::abs(rotation.z) < 0.001f;
+	}));
 	classDefTransform.def("TranslateGlobal",static_cast<void(*)(lua_State*,umath::Transform&,const Vector3&)>([](lua_State *l,umath::Transform &t,const Vector3 &v) {
 		t.TranslateGlobal(v);
 	}));
@@ -872,6 +878,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefTransform.def(luabind::const_self *umath::ScaledTransform());
 	classDefTransform.def(luabind::const_self *Vector3());
 	classDefTransform.def(luabind::const_self *Quat());
+
 	physMod[classDefTransform];
 
 	auto classDefScaledTransform = luabind::class_<umath::ScaledTransform,umath::Transform>("ScaledTransform");

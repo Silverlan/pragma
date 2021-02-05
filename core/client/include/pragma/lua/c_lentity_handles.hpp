@@ -37,6 +37,7 @@
 #include "pragma/entities/components/c_generic_component.hpp"
 #include "pragma/entities/components/c_point_at_target_component.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
+#include "pragma/entities/components/c_gamemode_component.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/entities/c_filter_entity_class.h"
@@ -207,6 +208,7 @@ DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLCLIENT,CDebugPlane,BaseDebugPlaneComponentHa
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLCLIENT,CFilterClass,BaseFilterClassComponentHandleWrapper);
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLCLIENT,CFilterName,BaseFilterNameComponentHandleWrapper);
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLCLIENT,CPointAtTarget,BasePointAtTargetComponentHandleWrapper);
+DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLCLIENT,CGamemode,BaseGamemodeComponentHandleWrapper);
 
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CEnvSoundProbe);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CWeather);

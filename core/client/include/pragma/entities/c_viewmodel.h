@@ -12,6 +12,8 @@
 
 namespace pragma
 {
+	class CPlayerComponent;
+	class CWeaponComponent;
 	class DLLCLIENT CViewModelComponent final
 		: public BaseEntityComponent
 	{
@@ -23,6 +25,9 @@ namespace pragma
 		void SetViewFOV(float fov);
 		float GetViewFOV() const;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+
+		CPlayerComponent *GetPlayer();
+		CWeaponComponent *GetWeapon();
 	protected:
 		Vector3 m_viewModelOffset;
 		float m_viewFov = std::numeric_limits<float>::quiet_NaN();

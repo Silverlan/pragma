@@ -53,6 +53,8 @@ namespace pragma
 		std::optional<umath::Transform> GetLocalPose() const;
 		void SetLocalPose(const umath::Transform &pose);
 
+		virtual void OnTick(double dt) override;
+
 		void GetChildren(std::vector<BaseEntity*> &children) const;
 		const std::vector<BaseEntity*> &GetChildren() const;
 	protected:

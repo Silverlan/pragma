@@ -32,6 +32,7 @@
 #include "pragma/input/inkeys.h"
 #include "pragma/entities/trigger/base_trigger_touch.hpp"
 #include "pragma/entities/components/base_player_component.hpp"
+#include "pragma/entities/components/base_gamemode_component.hpp"
 #include "pragma/entities/entity_component_manager.hpp"
 #include "pragma/entities/prop/prop_base.h"
 #include "pragma/entities/components/base_physics_component.hpp"
@@ -339,7 +340,6 @@ void Game::OnRemove()
 	pragma::BaseAIComponent::ReleaseNavThread();
 	CallCallbacks<void>("OnLuaReleased",GetLuaState());
 	m_luaCallbacks.clear();
-	m_luaGameMode = nullptr;
 	m_luaEnts = nullptr;
 	m_componentManager = nullptr;
 	ClearTimers(); // Timers have to be removed before the lua state is closed
@@ -376,7 +376,7 @@ void Game::InitializeLuaScriptWatcher()
 	m_scriptWatcher = std::make_unique<LuaDirectoryWatcherManager>(this);
 }
 
-luabind::object *Game::GetGameModeLuaObject() {return m_luaGameMode.get();}
+BaseEntity *Game::GetGameModeEntity() {return m_entGamemode.get();}
 bool Game::IsGameInitialized() const {return (m_flags &GameFlags::GameInitialized) != GameFlags::None;}
 bool Game::IsMapLoaded() const {return (m_flags &GameFlags::MapLoaded) != GameFlags::None;}
 
@@ -384,18 +384,24 @@ void Game::OnPlayerReady(pragma::BasePlayerComponent &pl)
 {
 	CallCallbacks<void,pragma::BasePlayerComponent*>("OnPlayerReady",&pl);
 	CallLuaCallbacks<void,luabind::object>("OnPlayerReady",pl.GetLuaObject());
+	for(auto *gmC : GetGamemodeComponents())
+		gmC->OnPlayerReady(pl);
 }
 
 void Game::OnPlayerDropped(pragma::BasePlayerComponent &pl,pragma::networking::DropReason reason)
 {
 	CallCallbacks<void,pragma::BasePlayerComponent*,pragma::networking::DropReason>("OnPlayerDropped",&pl,reason);
 	CallLuaCallbacks<void,luabind::object,std::underlying_type_t<decltype(reason)>>("OnPlayerDropped",pl.GetLuaObject(),umath::to_integral(reason));
+	for(auto *gmC : GetGamemodeComponents())
+		gmC->OnPlayerDropped(pl,reason);
 }
 
 void Game::OnPlayerJoined(pragma::BasePlayerComponent &pl)
 {
 	CallCallbacks<void,pragma::BasePlayerComponent*>("OnPlayerJoined",&pl);
 	CallLuaCallbacks<void,luabind::object>("OnPlayerJoined",pl.GetLuaObject());
+	for(auto *gmC : GetGamemodeComponents())
+		gmC->OnPlayerJoined(pl);
 }
 
 unsigned char Game::GetPlayerCount() {return m_numPlayers;}
@@ -731,12 +737,20 @@ void Game::Tick()
 	CallCallbacks("PostPhysicsSimulate");
 	CallLuaCallbacks("PostPhysicsSimulate");
 
-	for(auto &hPhysC : awakePhysics)
+	for(auto it=awakePhysics.begin();it!=awakePhysics.end();)
 	{
+		auto &hPhysC = *it;
 		if(hPhysC.expired() || hPhysC->GetPhysicsType() == PHYSICSTYPE::NONE)
+		{
+			++it;
 			continue;
-		hPhysC->PostPhysicsSimulate();
+		}
+		auto keepAwake = hPhysC->PostPhysicsSimulate();
 		hPhysC->UpdatePhysicsData(); // Has to be before Think (Requires updated physics).
+		if(keepAwake == false)
+			it = awakePhysics.erase(it);
+		else
+			++it;
 	}
 
 	StopProfilingStage(CPUProfilingPhase::Physics);
@@ -751,26 +765,31 @@ void Game::Tick()
 	}
 
 	StartProfilingStage(CPUProfilingPhase::GameObjectLogic);
-	static std::vector<util::WeakHandle<pragma::LogicComponent>> logicComponents {};
-	logicComponents.clear();
-	EntityIterator entItLogic {*this};
-	entItLogic.AttachFilter<TEntityIteratorFilterComponent<pragma::LogicComponent>>();
 
-	for(auto *ent : entItLogic)
+	auto &logicComponents = GetEntityTickComponents();
+	// Note: During the loop, new items may be appended to the end of logicComponents, but no elements
+	// may be erased from outside sources. If an element is removed, it's set to nullptr.
+	for(auto i=decltype(logicComponents.size()){0u};i<logicComponents.size();)
 	{
-		auto pLogicComponent = ent->GetComponent<pragma::LogicComponent>();
-		if(m_tCur < pLogicComponent->GetNextThink())
+		auto *c = logicComponents[i];
+		if(c == nullptr)
+		{
+			logicComponents.erase(logicComponents.begin() +i);
 			continue;
-		pLogicComponent->Think(m_tDeltaTick);
-		logicComponents.push_back(pLogicComponent);
+		}
+		if(m_tCur < c->GetNextTick())
+		{
+			++i;
+			continue;
+		}
+		if(c->Tick(m_tDeltaTick) == false)
+		{
+			logicComponents.erase(logicComponents.begin() +i);
+			continue;
+		}
+		++i;
 	}
 
-	for(auto logicComponent : logicComponents)
-	{
-		if(logicComponent.expired())
-			continue;
-		logicComponent->PostThink();
-	}
 	StopProfilingStage(CPUProfilingPhase::GameObjectLogic);
 
 	StartProfilingStage(CPUProfilingPhase::Timers);
@@ -908,6 +927,8 @@ void Game::OnGameReady()
 	m_ctReal.Reset();
 	CallCallbacks<void>("OnGameReady");
 	CallLuaCallbacks("OnGameReady");
+	for(auto *gmC : GetGamemodeComponents())
+		gmC->OnGameReady();
 }
 
 void Game::SetWorld(pragma::BaseWorldComponent *entWorld) {m_worldComponent = (entWorld != nullptr) ? entWorld->GetHandle<pragma::BaseWorldComponent>() : util::WeakHandle<pragma::BaseWorldComponent>{};}

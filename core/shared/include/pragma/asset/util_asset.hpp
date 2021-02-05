@@ -23,6 +23,8 @@ namespace pragma::asset
 		Count
 	};
 	DLLNETWORK bool exists(NetworkState &nw,const std::string &name,Type type);
+	DLLNETWORK bool matches(const std::string &name0,const std::string &name1,Type type);
+	DLLNETWORK std::string get_normalized_path(const std::string &name,Type type);
 	DLLNETWORK std::optional<std::string> find_file(NetworkState &nw,const std::string &name,Type type);
 	DLLNETWORK bool is_loaded(NetworkState &nw,const std::string &name,Type type);
 

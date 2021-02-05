@@ -83,15 +83,20 @@ void CEyeComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 	m_eyeLeftRightFlexController = std::numeric_limits<uint32_t>::max();
 	m_eyeAttachmentIndex = std::numeric_limits<uint32_t>::max();
 	m_skinMaterialIndexToEyeballIndex.clear();
-	auto numEyeballs = mdl ? mdl->GetEyeballCount() : 0u;
-	if(mdl == nullptr || numEyeballs == 0)
+
+	if(mdl == nullptr)
 		return;
-	m_eyeballData.resize(mdl->GetEyeballCount());
+
 	mdl->GetFlexControllerId("blink",m_blinkFlexController);
 	mdl->GetFlexControllerId("eyes_updown",m_eyeUpDownFlexController);
 	mdl->GetFlexControllerId("eyes_rightleft",m_eyeLeftRightFlexController);
 	auto attEyeId = mdl->LookupAttachment("eyes");
 	m_eyeAttachmentIndex = (attEyeId != -1) ? attEyeId : std::numeric_limits<uint32_t>::max();
+
+	auto numEyeballs = mdl->GetEyeballCount();
+	if(numEyeballs == 0)
+		return;
+	m_eyeballData.resize(mdl->GetEyeballCount());
 
 	for(auto eyeballIndex=decltype(numEyeballs){0u};eyeballIndex<numEyeballs;++eyeballIndex)
 	{

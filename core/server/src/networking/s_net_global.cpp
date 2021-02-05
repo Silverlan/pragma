@@ -378,6 +378,19 @@ void NET_sv_give_weapon(pragma::networking::IServerClient &session,NetPacket pac
 	sCharComponent->DeployWeapon(*wep);
 }
 
+void NET_sv_strip_weapons(pragma::networking::IServerClient &session,NetPacket packet)
+{
+	if(!server->CheatsEnabled() || s_game == nullptr)
+		return;
+	auto *pl = server->GetPlayer(session);
+	if(pl == nullptr)
+		return;
+	auto sCharComponent = static_cast<pragma::SCharacterComponent*>(pl->GetEntity().GetCharacterComponent().get());
+	if(sCharComponent == nullptr)
+		return;
+	sCharComponent->RemoveWeapons();
+}
+
 void NET_sv_give_ammo(pragma::networking::IServerClient &session,NetPacket packet)
 {
 	if(!server->CheatsEnabled() || s_game == nullptr)

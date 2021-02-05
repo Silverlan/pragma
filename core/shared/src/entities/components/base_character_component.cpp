@@ -27,7 +27,6 @@
 #include "pragma/entities/components/base_time_scale_component.hpp"
 #include "pragma/entities/components/submergible_component.hpp"
 #include "pragma/entities/components/velocity_component.hpp"
-#include "pragma/entities/components/logic_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/model/model.h"
@@ -124,9 +123,6 @@ void BaseCharacterComponent::Initialize()
 	m_netEvSetActiveWeapon = SetupNetEvent("set_active_weapon");
 	m_netEvSetAmmoCount = SetupNetEvent("set_ammo_count");
 
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		Think(static_cast<CEOnTick&>(evData.get()).deltaTime);
-	});
 	BindEventUnhandled(BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		return HandleAnimationEvent(static_cast<CEHandleAnimationEvent&>(evData.get()).animationEvent) ? util::EventReply::Handled : util::EventReply::Unhandled;
 	});
@@ -166,7 +162,8 @@ void BaseCharacterComponent::Initialize()
 	auto &ent = GetEntity();
 	ent.AddComponent("sound_emitter");
 	ent.AddComponent("physics");
-	ent.AddComponent<LogicComponent>();
+
+	SetTickPolicy(TickPolicy::WhenVisible);
 }
 
 const Vector3 &BaseCharacterComponent::GetUpDirection() const {return *m_upDirection;}
@@ -793,7 +790,7 @@ Vector3 BaseCharacterComponent::CalcMovementDirection(const Vector3 &forward,con
 EulerAngles BaseCharacterComponent::GetViewAngles() const {return EulerAngles(m_angView);}
 void BaseCharacterComponent::SetViewAngles(const EulerAngles &ang) {SetViewOrientation(uquat::create(ang));}
 
-void BaseCharacterComponent::Think(double tDelta)
+void BaseCharacterComponent::OnTick(double tDelta)
 {
 	UpdateOrientation();
 	if(m_turnYaw != nullptr)

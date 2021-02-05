@@ -90,8 +90,8 @@ void SceneRenderDesc::SetOcclusionCullingMethod(OcclusionCullingMethod method)
 }
 void SceneRenderDesc::ReloadOcclusionCullingHandler()
 {
-	auto occlusionCullingMode = static_cast<OcclusionCullingMethod>(c_game->GetConVarInt("cl_render_occlusion_culling"));
-	SetOcclusionCullingMethod(occlusionCullingMode);
+	//auto occlusionCullingMode = static_cast<OcclusionCullingMethod>(c_game->GetConVarInt("cl_render_occlusion_culling"));
+	//SetOcclusionCullingMethod(occlusionCullingMode);
 }
 
 static auto cvDrawGlow = GetClientConVar("render_draw_glow");
@@ -579,6 +579,7 @@ bool SceneRenderDesc::AssertRenderQueueThreadInactive()
 	return false;
 }
 static auto cvLockRenderQueues = GetClientConVar("debug_render_lock_render_queues");
+static auto cvFrustumCullingEnabled = GetClientConVar("cl_render_frustum_culling_enabled");
 void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(cvLockRenderQueues->GetBool())
@@ -619,7 +620,21 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 
 		pragma::CSceneComponent::GetEntityInstanceIndexBuffer()->UpdateAndClearUnusedBuffers();
 
-		auto &frustumPlanes = g_debugFreezeCamData.has_value() ? g_debugFreezeCamData->frustumPlanes : cam.GetFrustumPlanes();
+		auto frustumCullingEnabled = cvFrustumCullingEnabled->GetBool();
+		static std::vector<umath::Plane> frustumPlanesCube {};
+		if(frustumCullingEnabled == false && frustumPlanesCube.empty())
+		{
+			double d = pragma::CCameraComponent::DEFAULT_FAR_Z;
+			frustumPlanesCube = {
+				umath::Plane{-uvec::RIGHT,d},
+				umath::Plane{uvec::RIGHT,d},
+				umath::Plane{uvec::UP,d},
+				umath::Plane{-uvec::UP,d},
+				umath::Plane{-uvec::FORWARD,d},
+				umath::Plane{uvec::FORWARD,d}
+			};
+		}
+		auto &frustumPlanes = frustumCullingEnabled ? (g_debugFreezeCamData.has_value() ? g_debugFreezeCamData->frustumPlanes : cam.GetFrustumPlanes()) : frustumPlanesCube;
 		auto fShouldCull = [&frustumPlanes](const Vector3 &min,const Vector3 &max) -> bool {return SceneRenderDesc::ShouldCull(min,max,frustumPlanes);};
 		auto vp = cam.GetProjectionMatrix() *cam.GetViewMatrix();
 

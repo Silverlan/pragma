@@ -64,6 +64,18 @@ namespace Lua
 			pragma::Lua::check_component(l,hComponent);
 			Lua::Push<CallbackHandle>(l,hComponent->BindEvent(l,eventId,methodNameOrFunction));
 		}));
+		classDef.def("GetEntityComponent",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,uint32_t)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,uint32_t componentId) {
+			pragma::Lua::check_component(l,hComponent);
+			auto c = hComponent->GetEntity().FindComponent(componentId);
+			if(c.valid())
+				c->PushLuaObject(l);
+		}));
+		classDef.def("GetEntityComponent",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,const std::string&)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,const std::string &componentName) {
+			pragma::Lua::check_component(l,hComponent);
+			auto c = hComponent->GetEntity().FindComponent(componentName);
+			if(c.valid())
+				c->PushLuaObject(l);
+		}));
 		classDef.def("AddEntityComponent",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,uint32_t)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,uint32_t componentId) {
 			pragma::Lua::check_component(l,hComponent);
 			auto c = hComponent->GetEntity().AddComponent(componentId);
@@ -128,6 +140,7 @@ namespace Lua
 		classDef.add_static_constant("MEMBER_FLAG_DEFAULT_SNAPSHOT",umath::to_integral(pragma::BaseLuaBaseEntityComponent::MemberFlags::DefaultSnapshot));
 
 		classDef.def("Initialize",&LuaBaseEntityComponentWrapper::Initialize,&LuaBaseEntityComponentWrapper::default_Initialize);
+		classDef.def("OnTick",&LuaBaseEntityComponentWrapper::OnTick,&LuaBaseEntityComponentWrapper::default_OnTick);
 		classDef.def("OnRemove",&LuaBaseEntityComponentWrapper::OnRemove,&LuaBaseEntityComponentWrapper::default_OnRemove);
 		classDef.def("OnEntitySpawn",&LuaBaseEntityComponentWrapper::OnEntitySpawn,&LuaBaseEntityComponentWrapper::default_OnEntitySpawn);
 		classDef.def("OnAttachedToEntity",&LuaBaseEntityComponentWrapper::OnAttachedToEntity,&LuaBaseEntityComponentWrapper::default_OnAttachedToEntity);

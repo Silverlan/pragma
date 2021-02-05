@@ -392,6 +392,11 @@ void BaseLuaBaseEntityComponent::InitializeMembers(const std::vector<BaseLuaBase
 	}
 }
 
+void BaseLuaBaseEntityComponent::OnTick(double dt)
+{
+	CallLuaMember<void,double>("OnTick",dt);
+}
+
 void BaseLuaBaseEntityComponent::InitializeMember(const MemberInfo &memberInfo) {}
 
 const luabind::object &BaseLuaBaseEntityComponent::GetLuaObject() const {return pragma::BaseEntityComponent::GetLuaObject();}

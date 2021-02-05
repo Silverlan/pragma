@@ -59,6 +59,7 @@
 #include "pragma/audio/s_alsound.h"
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/error.hpp>
+#include <pragma/entities/components/base_gamemode_component.hpp>
 #include <pragma/entities/components/global_component.hpp>
 #include <pragma/entities/components/base_name_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
@@ -230,8 +231,10 @@ void SGame::Initialize()
 	SetUp();
 	if(m_surfaceMaterialManager)
 		m_surfaceMaterialManager->Load("scripts\\physics\\materials.txt");
-	CallCallbacks<void,Game*>("OnGameInitialized",this);
 	m_flags |= GameFlags::GameInitialized;
+	CallCallbacks<void,Game*>("OnGameInitialized",this);
+	for(auto *gmC : GetGamemodeComponents())
+		gmC->OnGameInitialized();
 }
 
 void SGame::SetUp() {Game::SetUp();}
@@ -247,9 +250,11 @@ bool SGame::LoadMap(const std::string &map,const Vector3 &origin,std::vector<Ent
 	server->SendPacket("map_ready",pragma::networking::Protocol::SlowReliable);
 	LoadNavMesh();
 
+	m_flags |= GameFlags::MapLoaded;
 	CallCallbacks<void>("OnMapLoaded");
 	CallLuaCallbacks<void>("OnMapLoaded");
-	m_flags |= GameFlags::MapLoaded;
+	for(auto *gmC : GetGamemodeComponents())
+		gmC->OnMapInitialized();
 	OnMapLoaded();
 	return true;
 }

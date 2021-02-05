@@ -24,7 +24,7 @@ using namespace pragma;
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 decltype(CLightComponent::s_lightCount) CLightComponent::s_lightCount = 0u;
 prosper::IUniformResizableBuffer &CLightComponent::GetGlobalRenderBuffer() {return pragma::LightDataBufferManager::GetInstance().GetGlobalRenderBuffer();}
 prosper::IUniformResizableBuffer &CLightComponent::GetGlobalShadowBuffer() {return pragma::ShadowDataBufferManager::GetInstance().GetGlobalRenderBuffer();}
@@ -354,7 +354,6 @@ void CLightComponent::Initialize()
 	CBaseLightComponent::Initialize();
 
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
-	ent.AddComponent<LogicComponent>();
 	ent.AddComponent<CShadowComponent>();
 
 	BindEventUnhandled(BaseToggleComponent::EVENT_ON_TURN_ON,[this](std::reference_wrapper<ComponentEvent> evData) {
@@ -368,31 +367,24 @@ void CLightComponent::Initialize()
 		// data when turned on. Once the cause for this has been found and dealt with, this
 		// line can be removed!
 		UpdateBuffers();
+
+		(pragma::TickPolicy::Never);
 	});
 	BindEventUnhandled(BaseToggleComponent::EVENT_ON_TURN_OFF,[this](std::reference_wrapper<ComponentEvent> evData) {
 		umath::set_flag(m_bufferData.flags,LightBufferData::BufferFlags::TurnedOn,false);
 		if(m_renderBuffer != nullptr)
 			c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,flags),m_bufferData.flags);
 		m_tTurnedOff = c_game->RealTime();
-	});
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<ComponentEvent> evData) {
-		auto frameId = c_engine->GetRenderContext().GetLastFrameId();
-		if(m_lastThink == frameId)
-			return;
-		m_lastThink = frameId;
 
-		if(m_renderBuffer != nullptr && c_game->RealTime() -m_tTurnedOff > 30.0)
-		{
-			auto pToggleComponent = GetEntity().GetComponent<CToggleComponent>();
-			if(pToggleComponent.expired() || pToggleComponent->IsTurnedOn() == false)
-				DestroyRenderBuffer(); // Free buffer if light hasn't been on in 30 seconds
-		}
+		SetTickPolicy(pragma::TickPolicy::Always);
+		SetNextTick(c_game->CurTime() +30.f);
 	});
 	BindEventUnhandled(CBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED,[this](std::reference_wrapper<ComponentEvent> evData) {
 		m_bufferData.sceneFlags = static_cast<CBaseEntity&>(GetEntity()).GetSceneFlags();
 		if(m_renderBuffer != nullptr)
 			c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,sceneFlags),m_bufferData.sceneFlags);
 	});
+	SetTickPolicy(pragma::TickPolicy::Never);
 	auto pTrComponent = ent.GetTransformComponent();
 	if(pTrComponent != nullptr)
 		reinterpret_cast<Vector3&>(m_bufferData.position) = pTrComponent->GetPosition();
@@ -401,6 +393,24 @@ void CLightComponent::Initialize()
 	m_bufferData.sceneFlags = ent.GetSceneFlags();
 
 	++s_lightCount;
+}
+void CLightComponent::OnTick(double dt)
+{
+	auto frameId = c_engine->GetRenderContext().GetLastFrameId();
+	if(m_lastThink == frameId)
+		return;
+	m_lastThink = frameId;
+
+	if(c_game->CurTime() -m_tTurnedOff > 30.0)
+	{
+		if(m_renderBuffer != nullptr)
+		{
+			auto pToggleComponent = GetEntity().GetComponent<CToggleComponent>();
+			if(pToggleComponent.expired() || pToggleComponent->IsTurnedOn() == false)
+				DestroyRenderBuffer(); // Free buffer if light hasn't been on in 30 seconds
+		}
+		SetTickPolicy(pragma::TickPolicy::Never);
+	}
 }
 void CLightComponent::UpdateTransformationMatrix(const Mat4 &biasMatrix,const Mat4 &viewMatrix,const Mat4 &projectionMatrix)
 {
@@ -689,3 +699,4 @@ void CEOnShadowBufferInitialized::PushArguments(lua_State *l)
 {
 	Lua::Push<std::shared_ptr<Lua::Vulkan::Buffer>>(l,shadowBuffer.shared_from_this());
 }
+#pragma optimize("",on)

@@ -8,10 +8,10 @@
 #define __BASE_RENDER_COMPONENT_HPP__
 
 #include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/entities/components/render_component_flags.hpp"
 
 namespace pragma
 {
-	enum class FRenderFlags : uint32_t;
 	class DLLNETWORK BaseRenderComponent
 		: public BaseEntityComponent
 	{
@@ -26,7 +26,7 @@ namespace pragma
 		virtual void Save(DataStream &ds) override;
 		virtual void Load(DataStream &ds,uint32_t version) override;
 	protected:
-		FRenderFlags m_renderFlags = static_cast<FRenderFlags>(0u);
+		FRenderFlags m_renderFlags = FRenderFlags::CastShadows;
 	};
 };
 

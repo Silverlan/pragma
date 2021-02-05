@@ -190,7 +190,7 @@ namespace pragma
 		std::unordered_map<std::string,float> m_animMoveSpeed;
 		float m_lastMovementBlendScale = 0.f;
 
-		virtual void Think(double tDelta);
+		virtual void OnTick(double tDelta) override;
 
 		void SetPathNodeIndex(uint32_t nodeIdx,const Vector3 &prevPos);
 		void UpdatePath();

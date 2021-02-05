@@ -68,6 +68,24 @@ void CViewModelComponent::Initialize()
 		if(animComponent.valid())
 			animComponent->PlayActivity(Activity::VmIdle);
 	});
+	BindEvent(CAnimatedComponent::EVENT_TRANSLATE_ACTIVITY,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto *weapon = GetWeapon();
+		if(weapon == nullptr)
+			return util::EventReply::Unhandled;
+		return weapon->InvokeEventCallbacks(CWeaponComponent::EVENT_TRANSLATE_VIEWMODEL_ACTIVITY,evData);
+	});
+	BindEvent(CAnimatedComponent::EVENT_TRANSLATE_ANIMATION,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto *weapon = GetWeapon();
+		if(weapon == nullptr)
+			return util::EventReply::Unhandled;
+		return weapon->InvokeEventCallbacks(CWeaponComponent::EVENT_TRANSLATE_VIEWMODEL_ANIMATION,evData);
+	});
+	BindEvent(CAnimatedComponent::EVENT_TRANSLATE_LAYERED_ANIMATION,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto *weapon = GetWeapon();
+		if(weapon == nullptr)
+			return util::EventReply::Unhandled;
+		return weapon->InvokeEventCallbacks(CWeaponComponent::EVENT_TRANSLATE_LAYERED_VIEWMODEL_ANIMATION,evData);
+	});
 
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	ent.AddComponent<pragma::CTransformComponent>();
@@ -101,16 +119,35 @@ float CViewModelComponent::GetViewFOV() const
 		return cvViewFov->GetFloat();
 	return m_viewFov;
 }
-
-void CViewModelComponent::SetViewModelOffset(const Vector3 &offset)
+CPlayerComponent *CViewModelComponent::GetPlayer()
 {
-	m_viewModelOffset = offset;
 	auto &ent = GetEntity();
 	auto pAttComponent = ent.GetComponent<CAttachableComponent>();
 	auto *parent = pAttComponent.valid() ? pAttComponent->GetParent() : nullptr;
 	if(parent == nullptr || parent->GetEntity().IsPlayer() == false)
+		return nullptr;
+	return static_cast<pragma::CPlayerComponent*>(parent->GetEntity().GetPlayerComponent().get());
+}
+CWeaponComponent *CViewModelComponent::GetWeapon()
+{
+	auto *pl = GetPlayer();
+	if(pl == nullptr)
+		return nullptr;
+	auto charC = pl->GetEntity().GetComponent<CCharacterComponent>();
+	if(charC.expired())
+		return nullptr;
+	auto *weapon = charC->GetActiveWeapon();
+	auto weaponC = weapon ? weapon->GetComponent<CWeaponComponent>() : util::WeakHandle<CWeaponComponent>{};
+	return weaponC.get();
+}
+
+void CViewModelComponent::SetViewModelOffset(const Vector3 &offset)
+{
+	m_viewModelOffset = offset;
+	auto *pl = GetPlayer();
+	if(pl == nullptr)
 		return;
-	static_cast<pragma::CPlayerComponent*>(parent->GetEntity().GetPlayerComponent().get())->UpdateViewModelTransform();
+	pl->UpdateViewModelTransform();
 }
 const Vector3 &CViewModelComponent::GetViewModelOffset() const {return m_viewModelOffset;}
 luabind::object CViewModelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CViewModelComponentHandleWrapper>(l);}

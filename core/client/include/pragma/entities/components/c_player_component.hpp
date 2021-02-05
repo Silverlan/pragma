@@ -38,7 +38,7 @@ namespace pragma
 		std::ostream& print(std::ostream&);
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual void Think(double tDelta) override;
+		virtual void OnTick(double tDelta) override;
 		Vector3 &GetViewOffset();
 		void SetViewOffset(Vector3 offset);
 		virtual void OnCrouch() override;

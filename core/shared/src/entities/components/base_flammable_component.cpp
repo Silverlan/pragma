@@ -9,7 +9,6 @@
 #include "pragma/entities/components/base_flammable_component.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/components/submergible_component.hpp"
-#include "pragma/entities/components/logic_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include <sharedutils/datastream.h>
@@ -53,9 +52,6 @@ void BaseFlammableComponent::Initialize()
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		OnThink(static_cast<CEOnTick&>(evData.get()).deltaTime);
-	});
 
 	auto &ent = GetEntity();
 	ent.AddComponent("io");
@@ -63,7 +59,7 @@ void BaseFlammableComponent::Initialize()
 	m_netEvExtinguish = SetupNetEvent("extinguish");
 	m_netEvSetIgnitable = SetupNetEvent("set_ignitable");
 }
-void BaseFlammableComponent::OnThink(double dt)
+void BaseFlammableComponent::OnTick(double dt)
 {
 	if(IsOnFire() && m_tExtinguishTime > 0.f)
 	{
@@ -113,6 +109,7 @@ util::EventReply BaseFlammableComponent::Ignite(float duration,BaseEntity *attac
 	if(pSubmergibleComponent.valid() && pSubmergibleComponent->IsSubmerged() == true)
 		return util::EventReply::Handled;
 	*m_bIsOnFire = true;
+	SetTickPolicy(TickPolicy::Always);
 	if(duration == 0.f)
 		m_tExtinguishTime = 0.f;
 	else
@@ -130,6 +127,7 @@ void BaseFlammableComponent::Extinguish()
 	if(*m_bIsOnFire == false)
 		return;
 	*m_bIsOnFire = false;
+	SetTickPolicy(TickPolicy::Never);
 	m_tExtinguishTime = 0.f;
 	BroadcastEvent(EVENT_ON_EXTINGUISHED);
 }

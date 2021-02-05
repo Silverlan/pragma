@@ -21,6 +21,7 @@ namespace pragma
 		CListenerComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		CListenerComponent();
 		virtual void Initialize() override;
+		virtual void OnTick(double dt) override;
 		float GetGain();
 		void SetGain(float gain);
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;

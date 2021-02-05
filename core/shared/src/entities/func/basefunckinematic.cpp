@@ -22,7 +22,6 @@
 #include "pragma/entities/components/base_render_component.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/components/logic_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 
 using namespace pragma;
@@ -52,9 +51,6 @@ void BaseFuncKinematicComponent::Initialize()
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
-	});
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		OnThink(static_cast<CEOnTick&>(evData.get()).deltaTime);
 	});
 
 	auto &ent = GetEntity();
@@ -88,7 +84,10 @@ void BaseFuncKinematicComponent::OnEntitySpawn()
 		entIt.AttachFilter<EntityIteratorFilterEntity>(m_kvFirstNode);
 		auto it = entIt.begin();
 		if(it != entIt.end())
+		{
 			m_nextNode = (*it)->GetHandle();
+			UpdateTickPolicy();
+		}
 	}
 	if(!m_kvStartSound.empty())
 	{
@@ -100,12 +99,14 @@ void BaseFuncKinematicComponent::OnEntitySpawn()
 	}
 }
 
-void BaseFuncKinematicComponent::OnThink(double tDelta)
+void BaseFuncKinematicComponent::OnTick(double tDelta)
 {
 	if(m_bMoving == false || m_nextNode.IsValid() == false)
 		return;
 	MoveToTarget(m_nextNode.get(),m_speed); // Shouldnt be in think (PhysicsUpdate)
 }
+
+void BaseFuncKinematicComponent::UpdateTickPolicy() {SetTickPolicy((m_bMoving && m_nextNode.IsValid()) ? TickPolicy::Always : TickPolicy::Never);}
 
 void BaseFuncKinematicComponent::MoveToTarget(BaseEntity *node,float speed)
 {
@@ -129,6 +130,7 @@ void BaseFuncKinematicComponent::MoveToTarget(BaseEntity *node,float speed)
 	if(d <= speed)
 	{
 		m_nextNode = {};
+		UpdateTickPolicy();
 		auto *ptrPathNodeComponent = static_cast<pragma::BasePointPathNodeComponent*>(node->FindComponent("path_node").get());
 		if(ptrPathNodeComponent != nullptr)
 		{
@@ -137,6 +139,7 @@ void BaseFuncKinematicComponent::MoveToTarget(BaseEntity *node,float speed)
 				return;
 			auto &entNext = nodeNext->GetEntity();
 			m_nextNode = entNext.GetHandle();
+			UpdateTickPolicy();
 			MoveToTarget(&entNext,speed -d);
 		}
 	}
@@ -145,6 +148,7 @@ void BaseFuncKinematicComponent::MoveToTarget(BaseEntity *node,float speed)
 void BaseFuncKinematicComponent::StartForward()
 {
 	m_bMoving = true;
+	UpdateTickPolicy();
 	m_speed = m_kvMoveSpeed;
 
 	if(m_startSound != nullptr)

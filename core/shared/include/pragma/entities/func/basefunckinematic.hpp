@@ -19,6 +19,7 @@ namespace pragma
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
+		virtual void OnTick(double tDelta) override;
 	protected:
 		bool m_bMoving = false;
 		float m_kvMoveSpeed = 0.f;
@@ -31,7 +32,7 @@ namespace pragma
 		pragma::NetEventId m_netEvStartForward = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvStartBackward = pragma::INVALID_NET_EVENT;
 	protected:
-		void OnThink(double tDelta);
+		void UpdateTickPolicy();
 		virtual void StartForward();
 		virtual void StartBackward();
 	private:

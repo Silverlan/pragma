@@ -15,7 +15,7 @@
 
 #define MAX_CSM_CASCADES 4
 
-#define MAX_BONES 512
+#define MAX_BONES 1024
 
 
 // Internal

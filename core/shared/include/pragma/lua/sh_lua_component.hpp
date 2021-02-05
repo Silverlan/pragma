@@ -60,6 +60,7 @@ namespace pragma
 
 		virtual void Initialize() override;
 		virtual void InitializeMembers(const std::vector<BaseLuaBaseEntityComponent::MemberInfo> &members);
+		virtual void OnTick(double dt) override;
 		void SetNetworked(bool b);
 		bool IsNetworked() const;
 		void SetShouldTransmitSnapshotData(bool b);

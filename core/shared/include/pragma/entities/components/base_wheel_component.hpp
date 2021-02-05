@@ -30,7 +30,7 @@ namespace pragma
 		physics::WheelCreateInfo m_createInfo = {};
 		umath::Transform m_localTransform = {};
 
-		void Think();
+		virtual void OnTick(double dt) override;
 		void UpdateWheel();
 	private:
 		CallbackHandle m_cbOnSpawn = {};

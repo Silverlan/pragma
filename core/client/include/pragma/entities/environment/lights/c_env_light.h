@@ -149,6 +149,7 @@ namespace pragma
 		bool HasShadowsEnabled() const;
 		Mat4 &GetTransformationMatrix(unsigned int j);
 		virtual void Initialize() override;
+		virtual void OnTick(double dt) override;
 		bool ShouldUpdateRenderPass(ShadowMapType smType) const;
 		virtual bool ShouldPass(const CBaseEntity &ent,uint32_t &renderFlags);
 		virtual bool ShouldPass(const CBaseEntity &ent,const CModelMesh &mesh,uint32_t &renderFlags);

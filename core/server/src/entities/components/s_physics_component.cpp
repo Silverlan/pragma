@@ -117,11 +117,11 @@ void SPhysicsComponent::SetCollisionFilter(CollisionMask filterGroup,CollisionMa
 	}
 }
 
-void SPhysicsComponent::PostPhysicsSimulate()
+bool SPhysicsComponent::PostPhysicsSimulate()
 {
-	BasePhysicsComponent::PostPhysicsSimulate();
+	auto keepAwake = BasePhysicsComponent::PostPhysicsSimulate();
 	if(GetPhysicsType() != PHYSICSTYPE::SOFTBODY)
-		return;
+		return keepAwake;
 #ifdef ENABLE_DEPRECATED_PHYSICS
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	auto *phys = GetPhysicsObject();
@@ -159,4 +159,5 @@ void SPhysicsComponent::PostPhysicsSimulate()
 		}
 	}
 #endif
+	return keepAwake;
 }

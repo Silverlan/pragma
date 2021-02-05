@@ -114,13 +114,15 @@ Lua::StatusCode Game::ProtectedLuaCall(const std::function<Lua::StatusCode(lua_S
 	return r;
 }
 
-const std::array<std::string,4> &Game::GetLuaEntityDirectories() const
+const std::array<std::string,6> &Game::GetLuaEntityDirectories() const
 {
-	static std::array<std::string,4> dirs = {
+	static std::array<std::string,6> dirs = {
 		"entities",
 		"weapons",
 		"vehicles",
-		"npcs"
+		"npcs",
+		"gamemodes",
+		"players"
 	};
 	return dirs;
 }

@@ -38,7 +38,9 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 		luabind::def("lock_asset_watchers",&Lua::asset::lock_asset_watchers),
 		luabind::def("unlock_asset_watchers",&Lua::asset::unlock_asset_watchers),
 		luabind::def("get_supported_import_file_extensions",&Lua::asset::get_supported_import_file_extensions),
-		luabind::def("get_supported_export_file_extensions",&Lua::asset::get_supported_export_file_extensions)
+		luabind::def("get_supported_export_file_extensions",&Lua::asset::get_supported_export_file_extensions),
+		luabind::def("matches",&pragma::asset::matches),
+		luabind::def("get_normalized_path",&pragma::asset::get_normalized_path)
 	];
 
 	if(extended)

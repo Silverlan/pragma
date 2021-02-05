@@ -20,7 +20,6 @@
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_render_component.hpp"
 #include "pragma/entities/components/base_attachable_component.hpp"
-#include "pragma/entities/components/logic_component.hpp"
 #include "pragma/physics/raytraces.h"
 #include "pragma/util/util_game.hpp"
 
@@ -200,6 +199,7 @@ void BaseVehicleComponent::ClearDriver()
 		return;
 	BroadcastEvent(EVENT_ON_DRIVER_EXITED);
 	umath::set_flag(m_stateFlags,StateFlags::HasDriver,false);
+	SetTickPolicy(TickPolicy::Never);
 	m_driver = EntityHandle();
 	if(m_physVehicle.IsValid())
 		m_physVehicle->ResetControls();
@@ -211,6 +211,7 @@ void BaseVehicleComponent::SetDriver(BaseEntity *ent)
 		ClearDriver();
 	m_driver = ent->GetHandle();
 	umath::set_flag(m_stateFlags,StateFlags::HasDriver,true);
+	SetTickPolicy(TickPolicy::Always);
 	BroadcastEvent(EVENT_ON_DRIVER_ENTERED);
 }
 
@@ -265,7 +266,7 @@ void BaseVehicleComponent::SetupVehicle(const pragma::physics::VehicleCreateInfo
 	}
 }
 
-void BaseVehicleComponent::Think(double tDelta)
+void BaseVehicleComponent::OnTick(double tDelta)
 {
 	auto *driver = GetDriver();
 	if(m_physVehicle == nullptr || umath::is_flag_set(m_stateFlags,StateFlags::HasDriver) == false)
@@ -311,9 +312,6 @@ void BaseVehicleComponent::Initialize()
 	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		DestroyVehiclePhysics();
 	});
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		Think(static_cast<CEOnTick&>(evData.get()).deltaTime);
-	});
 
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
@@ -322,7 +320,6 @@ void BaseVehicleComponent::Initialize()
 	ent.AddComponent("model");
 	ent.AddComponent("physics");
 	ent.AddComponent("observable");
-	ent.AddComponent<LogicComponent>();
 	auto whRenderComponent = ent.AddComponent("render");
 	if(whRenderComponent.valid())
 		static_cast<BaseRenderComponent*>(whRenderComponent.get())->SetCastShadows(true);

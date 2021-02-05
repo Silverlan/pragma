@@ -24,6 +24,9 @@ public:
 	void Initialize() {}
 	static void default_Initialize(lua_State *l,LuaBaseEntityComponentWrapper &hComponent) {}
 
+	void OnTick(double dt) {}
+	static void default_OnTick(lua_State *l,LuaBaseEntityComponentWrapper &hComponent,double dt) {}
+
 	void OnRemove() {}
 	static void default_OnRemove(lua_State *l,LuaBaseEntityComponentWrapper &hComponent) {}
 

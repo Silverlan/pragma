@@ -11,7 +11,6 @@
 #include "pragma/entities/components/base_time_scale_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_sound_emitter_component.hpp"
-#include "pragma/entities/components/logic_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/model.h"
 #include "pragma/audio/alsound_type.h"
@@ -85,18 +84,6 @@ void BaseAnimatedComponent::Initialize()
 		OnModelChanged(static_cast<pragma::CEOnModelChanged&>(evData.get()).model);
 	});
 
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		auto &ent = GetEntity();
-		auto pLogicComponent = ent.GetComponent<pragma::LogicComponent>();
-		if(pLogicComponent.expired())
-			return;
-		if(ShouldUpdateBones() == true)
-		{
-			auto pTimeScaleComponent = ent.GetTimeScaleComponent();
-			MaintainAnimations(pLogicComponent->DeltaTime() *(pTimeScaleComponent.valid() ? pTimeScaleComponent->GetEffectiveTimeScale() : 1.f));
-		}
-	});
-
 	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		if(IsPlayingAnimation() == false)
 			return;
@@ -115,7 +102,17 @@ void BaseAnimatedComponent::Initialize()
 		auto &mdl = mdlComponent->GetModel();
 		OnModelChanged(mdl);
 	}
-	ent.AddComponent<LogicComponent>(); // Required for animation updates
+
+	SetTickPolicy(TickPolicy::WhenVisible);
+}
+
+void BaseAnimatedComponent::OnTick(double dt)
+{
+	if(ShouldUpdateBones() == false)
+		return;
+	auto &ent = GetEntity();
+	auto pTimeScaleComponent = ent.GetTimeScaleComponent();
+	MaintainAnimations(dt *(pTimeScaleComponent.valid() ? pTimeScaleComponent->GetEffectiveTimeScale() : 1.f));
 }
 
 void BaseAnimatedComponent::ResetAnimation(const std::shared_ptr<Model> &mdl)

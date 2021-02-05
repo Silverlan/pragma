@@ -563,9 +563,9 @@ bool CPlayerComponent::ShouldDrawShadow() const
 Vector3 &CPlayerComponent::GetViewOffset() {return m_viewOffset;}
 void CPlayerComponent::SetViewOffset(Vector3 offset) {m_viewOffset = offset;}
 
-void CPlayerComponent::Think(double tDelta)
+void CPlayerComponent::OnTick(double tDelta)
 {
-	BasePlayerComponent::Think(tDelta);
+	BasePlayerComponent::OnTick(tDelta);
 
 	if(m_crouchViewOffset != NULL)
 	{

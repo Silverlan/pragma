@@ -16,7 +16,6 @@
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/base_render_component.hpp"
 #include "pragma/entities/components/base_ownable_component.hpp"
-#include "pragma/entities/components/logic_component.hpp"
 #include "pragma/util/bulletinfo.h"
 
 using namespace pragma;
@@ -114,7 +113,14 @@ void BaseWeaponComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 		m_whOwnerComponent = pOwnerComponent->GetHandle<BaseOwnableComponent>();
 }
 
-void BaseWeaponComponent::Think(double)
+void BaseWeaponComponent::UpdateTickPolicy()
+{
+	auto *owner = m_whOwnerComponent.valid() ? m_whOwnerComponent->GetOwner() : nullptr;
+	auto shouldTick = (m_bInAttack1 == true || m_bInAttack2 == true) && owner != nullptr;
+	SetTickPolicy(shouldTick ? TickPolicy::Always : TickPolicy::Never);
+}
+
+void BaseWeaponComponent::OnTick(double)
 {
 	auto *owner = m_whOwnerComponent.valid() ? m_whOwnerComponent->GetOwner() : nullptr;
 	if((m_bInAttack1 == true || m_bInAttack2 == true) && owner != nullptr)
@@ -132,6 +138,7 @@ void BaseWeaponComponent::Think(double)
 				else
 				{
 					m_bInAttack1 = false;
+					UpdateTickPolicy();
 					EndPrimaryAttack();
 				}
 			}
@@ -145,6 +152,7 @@ void BaseWeaponComponent::Think(double)
 				else
 				{
 					m_bInAttack2 = true;
+					UpdateTickPolicy();
 					EndSecondaryAttack();
 				}
 			}
@@ -175,12 +183,14 @@ void BaseWeaponComponent::EndAttack()
 void BaseWeaponComponent::EndPrimaryAttack()
 {
 	m_bInAttack1 = false;
+	UpdateTickPolicy();
 
 	BroadcastEvent(EVENT_ON_END_PRIMARY_ATTACK);
 }
 void BaseWeaponComponent::EndSecondaryAttack()
 {
 	m_bInAttack2 = false;
+	UpdateTickPolicy();
 
 	BroadcastEvent(EVENT_ON_END_SECONDARY_ATTACK);
 }
@@ -189,13 +199,19 @@ void BaseWeaponComponent::SetAutomaticPrimary(bool b)
 {
 	m_bAutomaticPrimary = b;
 	if(b == false)
+	{
 		m_bInAttack1 = false;
+		UpdateTickPolicy();
+	}
 }
 void BaseWeaponComponent::SetAutomaticSecondary(bool b)
 {
 	m_bAutomaticSecondary = b;
 	if(b == false)
+	{
 		m_bInAttack2 = false;
+		UpdateTickPolicy();
+	}
 }
 bool BaseWeaponComponent::IsAutomaticPrimary() const {return m_bAutomaticPrimary;}
 bool BaseWeaponComponent::IsAutomaticSecondary() const {return m_bAutomaticSecondary;}
@@ -221,9 +237,6 @@ void BaseWeaponComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		Think(static_cast<pragma::CEOnTick&>(evData.get()).deltaTime);
-	});
 	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		OnPhysicsInitialized();
 	});
@@ -279,7 +292,10 @@ void BaseWeaponComponent::Holster()
 void BaseWeaponComponent::PrimaryAttack()
 {
 	if(IsAutomaticPrimary())
+	{
 		m_bInAttack1 = true;
+		UpdateTickPolicy();
+	}
 	
 	BroadcastEvent(EVENT_ON_PRIMARY_ATTACK);
 }
@@ -287,7 +303,10 @@ void BaseWeaponComponent::PrimaryAttack()
 void BaseWeaponComponent::SecondaryAttack()
 {
 	if(IsAutomaticSecondary())
+	{
 		m_bInAttack2 = true;
+		UpdateTickPolicy();
+	}
 
 	BroadcastEvent(EVENT_ON_SECONDARY_ATTACK);
 }

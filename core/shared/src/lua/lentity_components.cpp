@@ -40,11 +40,6 @@ namespace Lua
 		static void SetLocalVelocity(lua_State *l,VelocityHandle &hEnt,Vector3 &vel);
 		static void AddLocalVelocity(lua_State *l,VelocityHandle &hEnt,Vector3 &vel);
 	};
-	namespace Logic
-	{
-		static void GetNextThink(lua_State *l,LogicHandle &hEnt);
-		static void SetNextThink(lua_State *l,LogicHandle &hEnt,double t);
-	};
 	namespace Damageable
 	{
 		static void TakeDamage(lua_State *l,DamageableHandle &hEnt,DamageInfo &info);
@@ -152,8 +147,6 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	gameMod[defIK];
 
 	auto defLogic = luabind::class_<LogicHandle,BaseEntityComponentHandle>("LogicComponent");
-	defLogic.def("GetNextThink",&Lua::Logic::GetNextThink);
-	defLogic.def("SetNextThink",&Lua::Logic::SetNextThink);
 	defLogic.add_static_constant("EVENT_ON_TICK",pragma::LogicComponent::EVENT_ON_TICK);
 	gameMod[defLogic];
 
@@ -261,20 +254,6 @@ void Lua::Velocity::AddLocalVelocity(lua_State *l,VelocityHandle &hEnt,Vector3 &
 {
 	pragma::Lua::check_component(l,hEnt);
 	hEnt->AddLocalVelocity(vel);
-}
-
-//////////////
-
-void Lua::Logic::GetNextThink(lua_State *l,LogicHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	Lua::PushNumber(l,hEnt->GetNextThink());
-}
-
-void Lua::Logic::SetNextThink(lua_State *l,LogicHandle &hEnt,double t)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->SetNextThink(t);
 }
 
 //////////////

@@ -74,6 +74,7 @@ namespace pragma
 	class BasePhysicsComponent;
 	class EntityComponentManager;
 	class BasePlayerComponent;
+	class BaseGamemodeComponent;
 	namespace nav
 	{
 		class Mesh;
@@ -130,7 +131,7 @@ public:
 	bool IsGameModeInitialized() const;
 	bool IsGameInitialized() const;
 	bool IsMapLoaded() const;
-	const std::array<std::string,4> &GetLuaEntityDirectories() const;
+	const std::array<std::string,6> &GetLuaEntityDirectories() const;
 	virtual void InitializeGame();
 	virtual void InitializeLua();
 	virtual void SetupLua();
@@ -201,7 +202,7 @@ public:
 	const GameModeInfo *GetGameMode() const;
 	GameModeInfo *GetGameMode();
 	void SetGameMode(const std::string &gameMode);
-	luabind::object *GetGameModeLuaObject();
+	BaseEntity *GetGameModeEntity();
 	LuaEntityManager &GetLuaEntityManager();
 
 	void SetWorld(pragma::BaseWorldComponent *entWorld);
@@ -332,6 +333,8 @@ public:
 	virtual bool IsPhysicsSimulationEnabled() const=0;
 
 	std::vector<util::WeakHandle<pragma::BasePhysicsComponent>> &GetAwakePhysicsComponents();
+	std::vector<pragma::BaseEntityComponent*> &GetEntityTickComponents() {return m_entityTickComponents;}
+	std::vector<pragma::BaseGamemodeComponent*> &GetGamemodeComponents() {return m_gamemodeComponents;}
 
 	// Debug
 	virtual void DrawLine(const Vector3 &start,const Vector3 &end,const Color &color,float duration=0.f)=0;
@@ -347,6 +350,8 @@ protected:
 	std::vector<BaseEntity*> m_baseEnts;
 	std::queue<EntityHandle> m_entsScheduledForRemoval;
 	std::vector<util::WeakHandle<pragma::BasePhysicsComponent>> m_awakePhysicsEntities;
+	std::vector<pragma::BaseEntityComponent*> m_entityTickComponents;
+	std::vector<pragma::BaseGamemodeComponent*> m_gamemodeComponents;
 	std::shared_ptr<Lua::Interface> m_lua = nullptr;
 	std::unique_ptr<pragma::lua::ClassManager> m_luaClassManager = nullptr;
 	std::unique_ptr<LuaDirectoryWatcherManager> m_scriptWatcher = nullptr;
@@ -378,12 +383,12 @@ protected:
 	util::WeakHandle<pragma::BaseWorldComponent> m_worldComponent = {};
 	pragma::NetEventManager m_entNetEventManager = {};
 	GameModeInfo *m_gameMode = nullptr;
+	EntityHandle m_entGamemode;
 	CallbackHandle m_cbProfilingHandle = {};
 	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_profilingStageManager = nullptr;
 	std::shared_ptr<pragma::nav::Mesh> m_navMesh = nullptr;
 	std::unique_ptr<AmmoTypeManager> m_ammoTypes = nullptr;
 	std::unique_ptr<LuaEntityManager> m_luaEnts = nullptr;
-	std::unique_ptr<luabind::object> m_luaGameMode = nullptr;
 	std::shared_ptr<pragma::EntityComponentManager> m_componentManager = nullptr;
 
 	// Lua

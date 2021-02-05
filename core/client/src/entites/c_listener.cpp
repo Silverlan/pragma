@@ -26,28 +26,8 @@ void CListenerComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		if(m_listener == nullptr)
-			return;
-		auto &ent = GetEntity();
-		auto pTrComponent = ent.GetTransformComponent();
-		auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
-		if(pTrComponent != nullptr)
-			m_listener->SetPosition(pTrComponent->GetPosition());
-		if(pVelComponent.valid())
-			m_listener->SetVelocity(pVelComponent->GetVelocity());
-
-		if(pTrComponent != nullptr)
-		{
-			Vector3 forward,up;
-			pTrComponent->GetOrientation(&forward,nullptr,&up);
-			m_listener->SetOrientation(forward,up);
-		}
-	});
-
 	auto &ent = GetEntity();
 	ent.AddComponent<pragma::CTransformComponent>();
-	ent.AddComponent<LogicComponent>();
 	auto *soundSys = c_engine->GetSoundSystem();
 	if(soundSys == nullptr)
 	{
@@ -55,6 +35,28 @@ void CListenerComponent::Initialize()
 		return;
 	}
 	m_listener = &soundSys->GetListener();
+
+	SetTickPolicy(TickPolicy::Always);
+}
+
+void CListenerComponent::OnTick(double dt)
+{
+	if(m_listener == nullptr)
+		return;
+	auto &ent = GetEntity();
+	auto pTrComponent = ent.GetTransformComponent();
+	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
+	if(pTrComponent != nullptr)
+		m_listener->SetPosition(pTrComponent->GetPosition());
+	if(pVelComponent.valid())
+		m_listener->SetVelocity(pVelComponent->GetVelocity());
+
+	if(pTrComponent != nullptr)
+	{
+		Vector3 forward,up;
+		pTrComponent->GetOrientation(&forward,nullptr,&up);
+		m_listener->SetOrientation(forward,up);
+	}
 }
 
 float CListenerComponent::GetGain()

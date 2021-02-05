@@ -286,6 +286,15 @@ void Console::commands::give_weapon(NetworkState *state,pragma::BasePlayerCompon
 	client->SendPacket("give_weapon",p,pragma::networking::Protocol::SlowReliable);
 }
 
+void Console::commands::strip_weapons(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
+{
+	if(!client->IsGameActive())
+		return;
+	CHECK_CHEATS("strip_weapons",state,);
+	NetPacket p;
+	client->SendPacket("strip_weapons",p,pragma::networking::Protocol::SlowReliable);
+}
+
 void Console::commands::next_weapon(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &args)
 {
 	auto *client = static_cast<ClientState*>(state);

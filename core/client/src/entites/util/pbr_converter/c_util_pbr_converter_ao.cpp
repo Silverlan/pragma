@@ -116,6 +116,7 @@ void CPBRConverterComponent::UpdateAmbientOcclusion(Model &mdl,const AmbientOccl
 		job.hEntity = optEnt ? optEnt->GetHandle() : EntityHandle{};
 		m_workQueue.push(job);
 	}
+	SetTickPolicy(TickPolicy::Always);
 }
 void CPBRConverterComponent::WriteAOMap(Model &mdl,CMaterial &mat,uimg::ImageBuffer &imgBuffer,uint32_t w,uint32_t h) const
 {

@@ -28,54 +28,55 @@ CBaseSoundDspComponent::~CBaseSoundDspComponent()
 void CBaseSoundDspComponent::Initialize()
 {
 	BaseEnvSoundDspComponent::Initialize();
-
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		if(m_dsp == nullptr)
-			return;
-		auto &ent = GetEntity();
-		auto pTrComponent = ent.GetTransformComponent();
-		auto pToggleComponent = ent.GetComponent<CToggleComponent>();
-		if(pTrComponent == nullptr || (pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false))
-			return;
-		auto radiusInnerSqr = umath::pow2(m_kvInnerRadius);
-		auto radiusOuterSqr = umath::pow2(m_kvOuterRadius);
-		auto &pos = pTrComponent->GetPosition();
-		auto &sounds = client->GetSounds();
-		for(auto &rsnd : sounds)
+	SetTickPolicy(TickPolicy::Always); // TODO
+}
+void CBaseSoundDspComponent::OnTick(double dt)
+{
+	if(m_dsp == nullptr)
+		return;
+	auto &ent = GetEntity();
+	auto pTrComponent = ent.GetTransformComponent();
+	auto pToggleComponent = ent.GetComponent<CToggleComponent>();
+	if(pTrComponent == nullptr || (pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false))
+		return;
+	auto radiusInnerSqr = umath::pow2(m_kvInnerRadius);
+	auto radiusOuterSqr = umath::pow2(m_kvOuterRadius);
+	auto &pos = pTrComponent->GetPosition();
+	auto &sounds = client->GetSounds();
+	for(auto &rsnd : sounds)
+	{
+		auto &snd = rsnd.get();
+		if(snd.IsPlaying() == false)
+			continue;
+		auto &alSnd = *static_cast<al::SoundSource*>(static_cast<CALSound*>(&snd));
+		if(m_bAllSounds == false && (m_bAllWorldSounds == false || snd.IsRelative() == true) && (snd.GetType() &m_types) == ALSoundType::Generic)
 		{
-			auto &snd = rsnd.get();
-			if(snd.IsPlaying() == false)
+			DetachSoundSource(alSnd);
+			continue;
+		}
+		if(m_bApplyGlobal == false)
+		{
+			if(m_bAffectRelative == false && snd.IsRelative() == true)
 				continue;
-			auto &alSnd = *static_cast<al::SoundSource*>(static_cast<CALSound*>(&snd));
-			if(m_bAllSounds == false && (m_bAllWorldSounds == false || snd.IsRelative() == true) && (snd.GetType() &m_types) == ALSoundType::Generic)
-			{
-				DetachSoundSource(alSnd);
-				continue;
-			}
-			if(m_bApplyGlobal == false)
-			{
-				if(m_bAffectRelative == false && snd.IsRelative() == true)
-					continue;
-				auto posSnd = alSnd.GetWorldPosition();
+			auto posSnd = alSnd.GetWorldPosition();
 
-				auto d = uvec::length_sqr(posSnd -pos);
-				if(d > radiusOuterSqr)
-					DetachSoundSource(alSnd);
-				else
-				{
-					d = umath::sqrt(d);
-					auto intensity = umath::clamp(d /m_kvInnerRadius,0.f,1.f);
-					UpdateSoundSource(alSnd,intensity);
-				}
-			}
+			auto d = uvec::length_sqr(posSnd -pos);
+			if(d > radiusOuterSqr)
+				DetachSoundSource(alSnd);
 			else
 			{
-				if(m_bAffectRelative == false && snd.IsRelative() == true)
-					continue;
-				UpdateSoundSource(alSnd,1.f);
+				d = umath::sqrt(d);
+				auto intensity = umath::clamp(d /m_kvInnerRadius,0.f,1.f);
+				UpdateSoundSource(alSnd,intensity);
 			}
 		}
-	});
+		else
+		{
+			if(m_bAffectRelative == false && snd.IsRelative() == true)
+				continue;
+			UpdateSoundSource(alSnd,1.f);
+		}
+	}
 }
 void CBaseSoundDspComponent::ReceiveData(NetPacket &packet)
 {

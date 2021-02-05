@@ -41,7 +41,7 @@ void GameModeManager::Initialize()
 					{
 						auto &info = res.first->second;
 						info.id = id;
-						info.class_name = block->GetString("class");
+						info.component_name = block->GetString("component_name");
 						info.name = block->GetString("name");
 						info.author = block->GetString("author");
 						info.version = util::string_to_version(block->GetString("version"));

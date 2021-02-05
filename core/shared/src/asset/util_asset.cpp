@@ -17,6 +17,40 @@ bool pragma::asset::exists(NetworkState &nw,const std::string &name,Type type)
 {
 	return find_file(nw,name,type).has_value();
 }
+std::string pragma::asset::get_normalized_path(const std::string &name,Type type)
+{
+	switch(type)
+	{
+	case Type::Model:
+		return ModelManager::GetNormalizedModelName(name);
+	case Type::Material:
+	case Type::Sound:
+	case Type::Texture:
+	case Type::ParticleSystem:
+		// TODO
+		break;
+	}
+	return name;
+}
+bool pragma::asset::matches(const std::string &name0,const std::string &name1,Type type)
+{
+	switch(type)
+	{
+	case Type::Model:
+	{
+		auto normName0 = ModelManager::GetNormalizedModelName(name0);
+		auto normName1 = ModelManager::GetNormalizedModelName(name1);
+		return ustring::compare(normName0,normName1,false);
+	}
+	case Type::Material:
+	case Type::Sound:
+	case Type::Texture:
+	case Type::ParticleSystem:
+		// TODO
+		break;
+	}
+	return name0 == name1;
+}
 std::optional<std::string> pragma::asset::find_file(NetworkState &nw,const std::string &name,Type type)
 {
 	switch(type)
@@ -101,7 +135,7 @@ std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::Impor
 	auto fpath = filePath;
 	if(f == nullptr && filePath.has_value())
 	{
-		auto filePathNoExt = *filePath;
+		auto filePathNoExt = pragma::asset::get_normalized_path(*filePath,type);
 		ufile::remove_extension_from_filename(filePathNoExt);
 		for(auto &importer : m_importers[umath::to_integral(type)])
 		{

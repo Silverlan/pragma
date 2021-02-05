@@ -37,7 +37,7 @@ namespace pragma
 		virtual void SetDriver(BaseEntity *ent);
 		uint8_t GetWheelCount() const;
 
-		virtual void Think(double tDelta);
+		virtual void OnTick(double tDelta) override;
 
 		void SetupVehicle(const pragma::physics::VehicleCreateInfo &createInfo,const std::vector<std::string> &wheelModels);
 

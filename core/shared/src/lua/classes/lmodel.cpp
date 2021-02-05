@@ -729,6 +729,13 @@ void Lua::Model::register_class(
 		.def("GetFrame",&Lua::Animation::GetFrame)
 		.def("GetBoneList",&Lua::Animation::GetBoneList)
 		.def("GetActivity",&Lua::Animation::GetActivity)
+		.def("GetActivityName",static_cast<luabind::object(*)(lua_State*,::Animation&)>([](lua_State *l,::Animation &anim) -> luabind::object {
+			auto &reg = ::Animation::GetActivityEnumRegister();
+			auto *name = reg.GetEnumName(umath::to_integral(anim.GetActivity()));
+			if(name == nullptr)
+				return {};
+			return luabind::object{l,*name};
+		}))
 		.def("SetActivity",&Lua::Animation::SetActivity)
 		.def("GetActivityWeight",&Lua::Animation::GetActivityWeight)
 		.def("SetActivityWeight",&Lua::Animation::SetActivityWeight)

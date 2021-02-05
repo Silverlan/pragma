@@ -173,7 +173,7 @@ namespace pragma
 		virtual void OnActionInputChanged(Action action,bool b);
 		void OnKilled(DamageInfo *dmgInfo=nullptr);
 
-		virtual void Think(double tDelta);
+		virtual void OnTick(double tDelta) override;
 		std::shared_ptr<pragma::physics::IConvexShape> m_shapeStand = nullptr;
 	private:
 		unsigned short m_portUDP;

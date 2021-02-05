@@ -53,8 +53,12 @@ void CVertexAnimatedComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<ComponentEvent> evData) {
+		DestroyVertexAnimationBuffer();
 		if(static_cast<CEOnModelChanged&>(evData.get()).model == nullptr)
-			DestroyVertexAnimationBuffer();
+			return;
+		auto renderC = GetEntity().GetComponent<CRenderComponent>();
+		if(renderC.valid() && renderC->IsRenderBufferValid())
+			InitializeVertexAnimationBuffer();
 	});
 	BindEventUnhandled(CRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED,[this](std::reference_wrapper<ComponentEvent> evData) {
 		InitializeVertexAnimationBuffer();

@@ -20,6 +20,7 @@ namespace pragma
 		virtual ~BaseSoundEmitterComponent() override;
 		virtual void Initialize() override;
 
+		virtual void OnTick(double dt) override;
 		virtual void PrecacheSounds();
 		virtual std::shared_ptr<ALSound> CreateSound(std::string snd,ALSoundType type);
 		virtual std::shared_ptr<ALSound> EmitSound(std::string snd,ALSoundType type,float gain,float pitch=1.f);

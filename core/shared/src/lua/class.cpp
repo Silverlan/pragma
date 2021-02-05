@@ -1328,32 +1328,6 @@ void Game::RegisterLuaClasses()
 	}));
 	modUtil[defSplashDamageInfo];
 
-	auto &modGame = GetLuaInterface().RegisterLibrary("game");
-	auto defGmBase = luabind::class_<GameMode,luabind::no_bases,luabind::default_holder,GameModeWrapper>("Base");
-	defGmBase.def(luabind::constructor<>());
-	defGmBase.def("GetName",&Lua::GameMode::GetName);
-	defGmBase.def("GetIdentifier",&Lua::GameMode::GetIdentifier);
-	defGmBase.def("GetClassName",&Lua::GameMode::GetClassName);
-	defGmBase.def("GetAuthor",&Lua::GameMode::GetAuthor);
-	defGmBase.def("GetVersion",&Lua::GameMode::GetVersion);
-	defGmBase.def("Think",&GameModeWrapper::LThink,&GameModeWrapper::default_Think);
-	defGmBase.def("Tick",&GameModeWrapper::LTick,&GameModeWrapper::default_Tick);
-	defGmBase.def("OnEntityTakeDamage",&GameModeWrapper::LOnEntityTakeDamage,&GameModeWrapper::default_OnEntityTakeDamage);
-	defGmBase.def("OnEntityTakenDamage",&GameModeWrapper::LOnEntityTakenDamage,&GameModeWrapper::default_OnEntityTakenDamage);
-	defGmBase.def("OnEntityHealthChanged",&GameModeWrapper::LOnEntityHealthChanged,&GameModeWrapper::default_OnEntityHealthChanged);
-	defGmBase.def("OnPlayerDeath",&GameModeWrapper::LOnPlayerDeath,&GameModeWrapper::default_OnPlayerDeath);
-	defGmBase.def("OnPlayerSpawned",&GameModeWrapper::LOnPlayerSpawned,&GameModeWrapper::default_OnPlayerSpawned);
-	defGmBase.def("OnActionInput",&GameModeWrapper::LOnActionInput,&GameModeWrapper::default_OnActionInput);
-	defGmBase.def("OnPlayerDropped",&GameModeWrapper::LOnPlayerDropped,&GameModeWrapper::default_OnPlayerDropped);
-	defGmBase.def("OnPlayerReady",&GameModeWrapper::LOnPlayerReady,&GameModeWrapper::default_OnPlayerReady);
-	defGmBase.def("OnPlayerJoined",&GameModeWrapper::LOnPlayerJoined,&GameModeWrapper::default_OnPlayerJoined);
-	defGmBase.def("OnGameReady",&GameModeWrapper::LOnGameReady,&GameModeWrapper::default_OnGameReady);
-	defGmBase.def("OnGameInitialized",&GameModeWrapper::LOnGameInitialized,&GameModeWrapper::default_OnGameInitialized);
-	defGmBase.def("OnMapInitialized",&GameModeWrapper::LOnMapInitialized,&GameModeWrapper::default_OnMapInitialized);
-	modGame[defGmBase];
-	auto _G = luabind::globals(GetLuaState());
-	_G["GMBase"] = _G["game"]["Base"];
-
 	auto &modMath = m_lua->RegisterLibrary("math");
 	auto defPlane = luabind::class_<umath::Plane>("Plane");
 	defPlane.def(luabind::constructor<Vector3,Vector3,Vector3>());
@@ -1504,7 +1478,11 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 
 		{"ITERATOR_FILTER_ANY_TYPE",umath::to_integral(EntityIterator::FilterFlags::AnyType)},
 		{"ITERATOR_FILTER_ANY",umath::to_integral(EntityIterator::FilterFlags::Any)},
-		{"ITERATOR_FILTER_DEFAULT",umath::to_integral(EntityIterator::FilterFlags::Default)}
+		{"ITERATOR_FILTER_DEFAULT",umath::to_integral(EntityIterator::FilterFlags::Default)},
+
+		{"TICK_POLICY_ALWAYS",umath::to_integral(pragma::TickPolicy::Always)},
+		{"TICK_POLICY_NEVER",umath::to_integral(pragma::TickPolicy::Never)},
+		{"TICK_POLICY_WHEN_VISIBLE",umath::to_integral(pragma::TickPolicy::WhenVisible)}
 	});
 
 	auto surfaceMatDef = luabind::class_<SurfaceMaterial>("SurfaceMaterial");

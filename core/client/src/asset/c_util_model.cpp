@@ -29,7 +29,7 @@
 extern DLLCENGINE CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 void pragma::asset::MapExportInfo::AddCamera(CCameraComponent &cam) {m_cameras.push_back(cam.GetHandle<CCameraComponent>());}
 void pragma::asset::MapExportInfo::AddLightSource(CLightComponent &light) {m_lightSources.push_back(light.GetHandle<CLightComponent>());}
 void pragma::asset::ModelExportInfo::SetAnimationList(const std::vector<std::string> &animations)
@@ -692,6 +692,10 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 			auto jointsBufData = fGetVertexBufferData("JOINTS_0");
 			auto weightsBufData = fGetVertexBufferData("WEIGHTS_0");
 
+			uint32_t iWeightChannel = 1;
+			while(fGetVertexBufferData("JOINTS_" +std::to_string(iWeightChannel++)).has_value())
+				Con::cwar<<"WARNING: Model has more than 4 bone weights, this is not supported!"<<Con::endl;
+
 			auto &verts = subMesh->GetVertices();
 			auto numVerts = posBufData->accessor.count;
 			verts.resize(numVerts);
@@ -1127,6 +1131,30 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 			anim->AddBoneId(i);
 		mdl->AddAnimation(animName,anim);
 	}
+
+	if(numBones > umath::to_integral(GameLimits::MaxBones))
+		Con::cwar<<"Model has "<<numBones<<", but engine only supports "<<umath::to_integral(GameLimits::MaxBones)<<", this may cause rendering glitches!"<<Con::endl;
+#if 0
+	for(auto &meshGroup : mdl->GetMeshGroups())
+	{
+		for(auto &mesh : meshGroup->GetMeshes())
+		{
+			for(auto &subMesh : mesh->GetSubMeshes())
+			{
+				auto &vertWeights = subMesh->GetVertexWeights();
+				for(auto &vw : vertWeights)
+				{
+					for(uint8_t i=0;i<4;++i)
+					{
+						auto id = vw.boneIds[i];
+						if(id >= numBones)
+							Con::cwar<<"Bone weight id "<<id<<" out of range ("<<numBones<<")!"<<Con::endl;
+					}
+				}
+			}
+		}
+	}
+#endif
 
 	mdl->Update(ModelUpdateFlags::All);
 	mdl->Save(c_game,outputPath.GetString() +mdlName,"addons/converted/");
@@ -1772,3 +1800,4 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(
 	});
 	return AOResult::AOJobReady;
 }
+#pragma optimize("",on)

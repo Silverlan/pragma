@@ -49,6 +49,9 @@ void Lua::register_cl_weapon_component(lua_State *l,luabind::module_ &module)
 	def.def("GetViewModelOffset",&Lua::Weapon::Client::GetViewModelOffset);
 	def.def("SetViewFOV",&Lua::Weapon::Client::SetViewFOV);
 	def.def("GetViewFOV",&Lua::Weapon::Client::GetViewFOV);
+	def.add_static_constant("EVENT_TRANSLATE_VIEWMODEL_ACTIVITY",pragma::CWeaponComponent::EVENT_TRANSLATE_VIEWMODEL_ACTIVITY);
+	def.add_static_constant("EVENT_TRANSLATE_VIEWMODEL_ANIMATION",pragma::CWeaponComponent::EVENT_TRANSLATE_VIEWMODEL_ANIMATION);
+	def.add_static_constant("EVENT_TRANSLATE_LAYERED_VIEWMODEL_ANIMATION",pragma::CWeaponComponent::EVENT_TRANSLATE_LAYERED_VIEWMODEL_ANIMATION);
 	module[def];
 }
 void Lua::Weapon::Client::PlayViewActivity(lua_State *l,CWeaponHandle &hWep,int activity,uint32_t flags)

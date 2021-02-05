@@ -24,8 +24,8 @@ namespace pragma
 		};
 		BaseTriggerPushComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
+		virtual void OnTick(double dt) override;
 	protected:
-		void OnThink(double dt);
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 

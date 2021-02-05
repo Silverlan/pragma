@@ -15,6 +15,7 @@
 #include "luasystem.h"
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/entities/environment/lights/env_light.h"
+#include "pragma/entities/components/base_gamemode_component.hpp"
 #include "pragma/entities/baseworld.h"
 #include "pragma/model/modelmesh.h"
 #include "pragma/lua/classes/ldef_tracedata.h"
@@ -182,10 +183,13 @@ int Lua::game::get_game_mode(lua_State *l)
 {
 	auto *nw = engine->GetNetworkState(l);
 	auto *game = nw->GetGameState();
-	auto *o = game->GetGameModeLuaObject();
-	if(o == nullptr)
+	auto *ent = game->GetGameModeEntity();
+	if(ent == nullptr)
 		return 0;
-	Lua::Push<luabind::object>(l,*o);
+	auto gmC = static_cast<pragma::BaseGamemodeComponent*>(ent->FindComponent("gamemode").get());
+	if(gmC == nullptr)
+		return 0;
+	gmC->PushLuaObject(l);
 	return 1;
 }
 int Lua::game::get_light_color(lua_State *l)

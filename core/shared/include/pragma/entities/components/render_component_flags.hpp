@@ -17,7 +17,7 @@ namespace pragma
 		CastShadows = 1u,
 		Unlit = CastShadows<<1u
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(FRenderFlags);
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::FRenderFlags);
 
 #endif

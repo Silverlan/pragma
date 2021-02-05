@@ -82,7 +82,7 @@ void CPhysicsComponent::PrePhysicsSimulate()
 	}
 	BasePhysicsComponent::PrePhysicsSimulate();
 }
-void CPhysicsComponent::PostPhysicsSimulate()
+bool CPhysicsComponent::PostPhysicsSimulate()
 {
 	auto dt = c_game->DeltaTime();
 	if(dt > 0.0 && GetPhysicsType() != PHYSICSTYPE::SOFTBODY)
@@ -92,7 +92,7 @@ void CPhysicsComponent::PostPhysicsSimulate()
 			pVelComponent->SetVelocity(pVelComponent->GetVelocity() -GetLinearCorrectionVelocity() /static_cast<float>(dt));
 	}
 	ResetLinearCorrectionVelocity();
-	BasePhysicsComponent::PostPhysicsSimulate();
+	return BasePhysicsComponent::PostPhysicsSimulate();
 }
 
 void CPhysicsComponent::ReceiveData(NetPacket &packet)

@@ -45,11 +45,17 @@ void BaseTouchComponent::Initialize()
 	});
 	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		UpdateTouch();
+
+		// Note this *has* to be called before calling SetForcePhysicsAwakeCallbacksEnabled below!
+		static_cast<pragma::CEPostPhysicsSimulate&>(evData.get()).keepAwake = false;
+
+		auto pPhysComponent = GetEntity().GetPhysicsComponent();
+		if(pPhysComponent)
+			pPhysComponent->SetForcePhysicsAwakeCallbacksEnabled(false,false);
 	});
 
 	auto &ent = GetEntity();
 
-	ent.AddComponent("toggle");
 	auto whPhysComponent = ent.AddComponent("physics");
 	if(whPhysComponent.valid())
 		static_cast<BasePhysicsComponent&>(*whPhysComponent).SetCollisionCallbacksEnabled(true);
@@ -202,14 +208,26 @@ bool BaseTouchComponent::IsTouchEnabled() const {return true;}
 void BaseTouchComponent::StartTouch(BaseEntity &entOther,PhysObj &physOther,physics::ICollisionObject &objThis,physics::ICollisionObject &objOther)
 {
 	m_contactEventQueue.push({entOther.GetHandle(),ContactEvent::Event::StartTouch});
+	
+	auto pPhysComponent = GetEntity().GetPhysicsComponent();
+	if(pPhysComponent)
+		pPhysComponent->SetForcePhysicsAwakeCallbacksEnabled(true);
 }
 void BaseTouchComponent::EndTouch(BaseEntity &entOther,PhysObj &physOther,physics::ICollisionObject &objThis,physics::ICollisionObject &objOther)
 {
 	m_contactEventQueue.push({entOther.GetHandle(),ContactEvent::Event::EndTouch});
+	
+	auto pPhysComponent = GetEntity().GetPhysicsComponent();
+	if(pPhysComponent)
+		pPhysComponent->SetForcePhysicsAwakeCallbacksEnabled(true);
 }
 void BaseTouchComponent::Contact(const pragma::physics::ContactInfo &contactInfo)
 {
 	m_contactReport.push_back(contactInfo);
+	
+	auto pPhysComponent = GetEntity().GetPhysicsComponent();
+	if(pPhysComponent)
+		pPhysComponent->SetForcePhysicsAwakeCallbacksEnabled(true);
 }
 
 bool BaseTouchComponent::CanTrigger(BaseEntity &ent)

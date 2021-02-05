@@ -24,12 +24,12 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual util::EventReply Ignite(float duration,BaseEntity *attacker=nullptr,BaseEntity *inflictor=nullptr) override;
 		virtual void Extinguish() override;
+		virtual void OnTick(double dt) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 	protected:
-		virtual void OnThink(double dt) override;
 		void UpdateFlameParticlePositions();
 		struct DLLCLIENT IgniteInfo
 		{

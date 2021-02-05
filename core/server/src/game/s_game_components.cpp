@@ -115,6 +115,7 @@ void SGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::SDebugCylinderComponent>("debug_cylinder");
 	componentManager.RegisterComponentType<pragma::SDebugPlaneComponent>("debug_plane");
 	componentManager.RegisterComponentType<pragma::SPointAtTargetComponent>("point_at_target");
+	componentManager.RegisterComponentType<pragma::SGamemodeComponent>("gamemode");
 }
 
 pragma::BaseEntityComponent *SGame::CreateLuaEntityComponent(BaseEntity &ent,std::string classname)

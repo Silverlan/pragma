@@ -222,10 +222,10 @@ void OcclusionCullingHandler::PerformCulling(pragma::CSceneComponent &scene,cons
 
 static void cl_render_occlusion_culling_callback(NetworkState*,ConVar*,int,int val)
 {
-	if(c_game == nullptr)
+	/*if(c_game == nullptr)
 		return;
 	auto *scene = c_game->GetScene();
 	if(scene != nullptr)
-		scene->GetSceneRenderDesc().ReloadOcclusionCullingHandler();
+		scene->GetSceneRenderDesc().ReloadOcclusionCullingHandler();*/
 }
 REGISTER_CONVAR_CALLBACK_CL(cl_render_occlusion_culling,cl_render_occlusion_culling_callback);

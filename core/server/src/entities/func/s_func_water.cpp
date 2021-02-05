@@ -53,14 +53,6 @@ void SWaterComponent::Initialize()
 {
 	BaseFuncWaterComponent::Initialize();
 
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		if(m_bUsingClientsideSimulation == true || m_physSurfaceSim == nullptr)
-			return;
-		auto *sim = static_cast<PhysWaterSurfaceSimulator*>(m_physSurfaceSim.get());
-		if(sim == nullptr)
-			return;
-		sim->Simulate(0.01); // TODO
-	});
 	BindEventUnhandled(SModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		// TODO: Move this to shared
 		auto &ent = GetEntity();
@@ -76,9 +68,17 @@ void SWaterComponent::Initialize()
 		packet->Write<double>(m_waterPlane.GetDistance());
 		SendNetEventTCP(m_netEvSetWaterPlane,packet);*/
 	});
+	SetTickPolicy(TickPolicy::Always); // TODO
+}
 
-	auto &ent = GetEntity();
-	ent.AddComponent<LogicComponent>();
+void SWaterComponent::OnTick(double dt)
+{
+	if(m_bUsingClientsideSimulation == true || m_physSurfaceSim == nullptr)
+		return;
+	auto *sim = static_cast<PhysWaterSurfaceSimulator*>(m_physSurfaceSim.get());
+	if(sim == nullptr)
+		return;
+	sim->Simulate(0.01); // TODO
 }
 
 void SWaterComponent::OnEntitySpawn()

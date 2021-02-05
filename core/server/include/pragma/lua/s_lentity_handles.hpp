@@ -36,6 +36,7 @@
 #include "pragma/entities/components/s_parent_component.hpp"
 #include "pragma/entities/components/s_generic_component.hpp"
 #include "pragma/entities/components/s_point_at_target_component.hpp"
+#include "pragma/entities/components/s_gamemode_component.hpp"
 #include "pragma/entities/environment/audio/s_env_sound_dsp_chorus.h"
 #include "pragma/entities/environment/audio/s_env_sound_dsp_distortion.h"
 #include "pragma/entities/environment/audio/s_env_sound_dsp_eaxreverb.h"
@@ -197,5 +198,6 @@ DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLSERVER,SDebugCone,BaseDebugConeComponentHand
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLSERVER,SDebugCylinder,BaseDebugCylinderComponentHandleWrapper);
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLSERVER,SDebugPlane,BaseDebugPlaneComponentHandleWrapper);
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLSERVER,SPointAtTarget,BasePointAtTargetComponentHandleWrapper);
+DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLSERVER,SGamemode,BaseGamemodeComponentHandleWrapper);
 
 #endif

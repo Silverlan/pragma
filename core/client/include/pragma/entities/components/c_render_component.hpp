@@ -72,6 +72,7 @@ namespace pragma
 		CRenderComponent(BaseEntity &ent);
 		const std::shared_ptr<prosper::SwapBuffer> &GetSwapRenderBuffer() const;
 		const prosper::IBuffer &GetRenderBuffer() const;
+		bool IsRenderBufferValid() const {return m_renderBuffer != nullptr;}
 		std::optional<RenderBufferIndex> GetRenderBufferIndex() const;
 		prosper::IDescriptorSet *GetRenderDescriptorSet() const;
 		prosper::SwapDescriptorSet *GetSwapRenderDescriptorSet() const;

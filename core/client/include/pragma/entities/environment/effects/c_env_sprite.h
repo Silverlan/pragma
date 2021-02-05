@@ -25,6 +25,7 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual ~CSpriteComponent() override;
 		virtual void ReceiveData(NetPacket &packet) override;
+		virtual void OnTick(double dt) override;
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
 
 		void SetOrientationType(CParticleSystemComponent::OrientationType orientationType);

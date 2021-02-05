@@ -51,7 +51,7 @@ void BaseTriggerPushComponent::OnEntityComponentAdded(BaseEntityComponent &compo
 		m_toggleComponent = pToggleComponent->GetHandle<BaseToggleComponent>();
 }
 
-void BaseTriggerPushComponent::OnThink(double dt)
+void BaseTriggerPushComponent::OnTick(double dt)
 {
 	if(m_toggleComponent.valid() && m_toggleComponent->IsTurnedOn() == false)
 		return;

@@ -47,10 +47,6 @@ void CPBRConverterComponent::Initialize()
 
 	auto &ent = GetEntity();
 	ent.AddComponent<LogicComponent>();
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		PollEvents();
-	});
-
 	auto libGpl = client->InitializeLibrary("pr_gpl");
 	if(libGpl == nullptr)
 	{
@@ -64,6 +60,13 @@ void CPBRConverterComponent::Initialize()
 		return;
 	}
 	m_fCalcGeometryData = fCalcGeometryData;
+}
+
+void CPBRConverterComponent::OnTick(double dt)
+{
+	PollEvents();
+	if(m_workQueue.empty())
+		SetTickPolicy(TickPolicy::Never);
 }
 
 void CPBRConverterComponent::OnRemove()

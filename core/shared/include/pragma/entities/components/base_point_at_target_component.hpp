@@ -18,6 +18,7 @@ namespace pragma
 	{
 	public:
 		virtual void Initialize() override;
+		virtual void OnRemove() override;
 		
 		const pragma::PEntityProperty &GetPointAtTargetProperty() const;
 		void SetPointAtTarget(BaseEntity &ent);
@@ -25,13 +26,15 @@ namespace pragma
 		BaseEntity *GetPointAtTarget() const;
 	protected:
 		BasePointAtTargetComponent(BaseEntity &ent);
+		void UpdatePose();
 		virtual void OnEntitySpawn() override;
 		virtual void SetPointAtTarget(BaseEntity *ent);
 
 		std::string m_kvPointAtTargetName = "";
 		pragma::PEntityProperty m_pointAtTarget;
 		pragma::NetEventId m_netEvSetPointAtTarget = pragma::INVALID_NET_EVENT;
-		CallbackHandle m_cbTick = {};
+		CallbackHandle m_cbOnPoseChanged = {};
+		CallbackHandle m_cbOnPoseChangedThis = {};
 	};
 };
 

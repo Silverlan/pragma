@@ -9,6 +9,7 @@
 #include <pragma/definitions.h>
 #include <pragma/engine.h>
 #include "pragma/entities/components/base_player_component.hpp"
+#include "pragma/entities/components/base_gamemode_component.hpp"
 #include <pragma/math/angle/wvquaternion.h>
 #include <pragma/physics/movetypes.h>
 #include "pragma/physics/physobj.h"
@@ -41,7 +42,6 @@
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/velocity_component.hpp"
-#include "pragma/entities/components/logic_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/model.h"
 
@@ -78,7 +78,10 @@ void BasePlayerComponent::OnKilled(DamageInfo *dmgInfo)
 	auto &ent = GetEntity();
 	auto *nw = ent.GetNetworkState();
 	auto *game = nw->GetGameState();
+
 	game->CallCallbacks<void,BasePlayerComponent*,DamageInfo*>("OnPlayerDeath",this,dmgInfo);
+	for(auto *gmC : game->GetGamemodeComponents())
+		gmC->OnPlayerDeath(*this,dmgInfo);
 
 	auto charComponent = ent.GetCharacterComponent();
 	charComponent->RemoveWeapons();
@@ -123,7 +126,7 @@ bool BasePlayerComponent::CanUnCrouch() const
 	data.SetShape(*m_shapeStand);
 	return game->Sweep(data).hitType == RayCastHitType::None; // Overlap only works with collision objects, not with individual shapes, so we have to use Sweep instead
 }
-void BasePlayerComponent::Think(double tDelta)
+void BasePlayerComponent::OnTick(double tDelta)
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
@@ -284,6 +287,8 @@ void BasePlayerComponent::OnRespawn()
 	auto *nw = ent.GetNetworkState();
 	auto *game = nw->GetGameState();
 	game->CallCallbacks<void,BasePlayerComponent*>("OnPlayerSpawned",this);
+	for(auto *gmC : game->GetGamemodeComponents())
+		gmC->OnPlayerSpawned(*this);
 }
 
 BasePlayer *BasePlayerComponent::GetBasePlayer() const {return dynamic_cast<BasePlayer*>(m_hBasePlayer.get());}
@@ -356,10 +361,6 @@ void BasePlayerComponent::Initialize()
 		OnPhysicsInitialized();
 		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		Think(static_cast<CEOnTick&>(evData.get()).deltaTime);
-		return util::EventReply::Unhandled;
-	});
 	BindEvent(BaseCharacterComponent::EVENT_IS_MOVING,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		static_cast<CEIsMoving&>(evData.get()).moving = IsMoving();
 		return util::EventReply::Handled;
@@ -376,6 +377,8 @@ void BasePlayerComponent::Initialize()
 		pObservableComponent->SetCameraEnabled(BaseObservableComponent::CameraType::ThirdPerson,true);
 		pObservableComponent->SetLocalCameraOffset(BaseObservableComponent::CameraType::ThirdPerson,{0.f,10.f,-80.f});
 	}
+
+	SetTickPolicy(TickPolicy::Always);
 }
 
 void BasePlayerComponent::OnPhysicsInitialized()

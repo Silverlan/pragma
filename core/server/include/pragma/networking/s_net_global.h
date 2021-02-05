@@ -27,6 +27,7 @@ DECLARE_NETMESSAGE_SV(weapon_next);
 DECLARE_NETMESSAGE_SV(weapon_previous);
 DECLARE_NETMESSAGE_SV(ent_event);
 DECLARE_NETMESSAGE_SV(give_weapon);
+DECLARE_NETMESSAGE_SV(strip_weapons);
 DECLARE_NETMESSAGE_SV(give_ammo);
 DECLARE_NETMESSAGE_SV(debug_ai_navigation);
 DECLARE_NETMESSAGE_SV(debug_ai_schedule_print);

@@ -51,9 +51,9 @@ void SVehicleComponent::OnUse(BaseEntity *pl)
 	SetDriver(pl);
 }
 
-void SVehicleComponent::Think(double tDelta)
+void SVehicleComponent::OnTick(double tDelta)
 {
-	BaseVehicleComponent::Think(tDelta);
+	BaseVehicleComponent::OnTick(tDelta);
 	if(HasDriver())
 		GetEntity().MarkForSnapshot();
 }

@@ -14,6 +14,7 @@
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/model/animation/flex_animation.hpp"
 #include "pragma/file_formats/wmd.h"
+#include "pragma/asset/util_asset.hpp"
 #include <fsys/filesystem.h>
 #include <sharedutils/util_file.h>
 
@@ -177,9 +178,7 @@ std::shared_ptr<Model> Model::Copy(Game *game,CopyFlags copyFlags) const
 
 bool Model::Save(Game *game,const std::string &name,const std::string &rootPath) const
 {
-	auto fname = FileManager::GetCanonicalizedPath(name);
-	ufile::remove_extension_from_filename(fname);
-	fname += ".wmd";
+	auto fname = pragma::asset::get_normalized_path(name,pragma::asset::Type::Model);
 	fname = rootPath +"models\\" +fname;
 	FileManager::CreatePath(ufile::get_path_from_filename(fname).c_str());
 	auto f = FileManager::OpenFile<VFilePtrReal>(fname.c_str(),"wb");

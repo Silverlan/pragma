@@ -26,7 +26,7 @@ namespace pragma
 		virtual void SetDriver(BaseEntity *ent) override;
 		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual void Initialize() override;
-		virtual void Think(double tDelta) override;
+		virtual void OnTick(double tDelta) override;
 
 		virtual void SetupSteeringWheel(const std::string &mdl,umath::Degree maxSteeringAngle) override;
 

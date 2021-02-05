@@ -174,7 +174,7 @@ namespace pragma
 		DISPOSITION GetDisposition(Faction &faction,int *priority=nullptr);
 		std::shared_ptr<ai::Schedule> GetCurrentSchedule();
 		void StartSchedule(std::shared_ptr<ai::Schedule> &sched);
-		virtual void Think(double tDelta) override;
+		virtual void OnTick(double tDelta) override;
 		ai::Memory &GetMemory();
 		ai::Memory::Fragment *GetMemory(BaseEntity *ent);
 		ai::Memory::Fragment *Memorize(BaseEntity *ent,ai::Memory::MemoryType memType);

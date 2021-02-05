@@ -44,6 +44,20 @@ namespace pragma
 	struct ComponentEvent;
 	class BaseEntityComponentSystem;
 	class EntityComponentManager;
+
+	enum class TickPolicy : uint8_t
+	{
+		Never = 0u,
+		WhenVisible, // Not yet implemented!
+		Always
+	};
+	struct DLLNETWORK TickData
+	{
+		TickPolicy tickPolicy = TickPolicy::Never;
+		double lastTick = 0.0;
+		double nextTick = 0.0;
+	};
+
 	class DLLNETWORK BaseEntityComponent
 		: public std::enable_shared_from_this<BaseEntityComponent>
 	{
@@ -53,6 +67,12 @@ namespace pragma
 		static ComponentEventId EVENT_ON_ENTITY_COMPONENT_ADDED;
 		static ComponentEventId EVENT_ON_ENTITY_COMPONENT_REMOVED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		enum class StateFlags : uint32_t
+		{
+			None = 0u,
+			IsThinking = 1u,
+			IsLogicEnabled = IsThinking<<1u
+		};
 
 		BaseEntityComponent(const BaseEntityComponent&)=delete;
 		BaseEntityComponent &operator=(const BaseEntityComponent&)=delete;
@@ -138,6 +158,21 @@ namespace pragma
 		// Do not overwrite these unless the component is a descendant of SBaseNetComponent/SBaseSnapshotComponent respectively!
 		virtual bool ShouldTransmitNetData() const;
 		virtual bool ShouldTransmitSnapshotData() const;
+
+		// Tick updates
+		void SetTickPolicy(TickPolicy policy);
+		TickPolicy GetTickPolicy() const;
+		bool ShouldThink() const;
+		double LastTick() const;
+		double GetNextTick() const;
+		void SetNextTick(double t);
+		double DeltaTime() const;
+		bool Tick(double tDelta);
+		virtual void OnTick(double tDelta) {}
+		
+		// For internal use only!
+		StateFlags GetStateFlags() const {return m_stateFlags;}
+		void SetStateFlags(StateFlags stateFlags) {m_stateFlags = stateFlags;}
 	protected:
 		friend EntityComponentManager;
 		friend BaseEntityComponentSystem;
@@ -176,10 +211,14 @@ namespace pragma
 		void OnEntityComponentAdded(BaseEntityComponent &component,bool bSkipEventBinding);
 		luabind::object m_luaObj = {};
 		BaseEntity &m_entity;
+
+		StateFlags m_stateFlags = StateFlags::None;
+		TickData m_tickData {};
 	private:
 		friend BaseEntityComponentSystem;
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseEntityComponent::StateFlags)
 
 template<class THandleWrapper>
 	luabind::object pragma::BaseEntityComponent::InitializeLuaObject(lua_State *l)

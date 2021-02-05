@@ -68,6 +68,10 @@ void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	Lua::register_sv_vehicle_component(l,entsMod);
 	Lua::register_sv_weapon_component(l,entsMod);
 
+	auto defSGamemode = luabind::class_<SGamemodeHandle,BaseEntityComponentHandle>("GamemodeComponent");
+	Lua::register_base_gamemode_component_methods<luabind::class_<SGamemodeHandle,BaseEntityComponentHandle>,SGamemodeHandle>(l,defSGamemode);
+	entsMod[defSGamemode];
+
 	auto defSColor = luabind::class_<SColorHandle,BaseEntityComponentHandle>("ColorComponent");
 	Lua::register_base_color_component_methods<luabind::class_<SColorHandle,BaseEntityComponentHandle>,SColorHandle>(l,defSColor);
 	entsMod[defSColor];

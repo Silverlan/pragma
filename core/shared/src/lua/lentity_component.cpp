@@ -87,6 +87,22 @@ void Game::RegisterLuaEntityComponent(luabind::class_<BaseEntityComponentHandleW
 	}));
 	def.def("GetEntity",&Lua::BaseEntityComponent::GetEntity);
 	def.def("GetComponentId",&Lua::BaseEntityComponent::GetComponentId);
+	def.def("SetTickPolicy",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,pragma::TickPolicy)>([](lua_State *l,BaseEntityComponentHandle &hComponent,pragma::TickPolicy tickPolicy) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->SetTickPolicy(tickPolicy);
+	}));
+	def.def("GetTickPolicy",static_cast<pragma::TickPolicy(*)(lua_State*,BaseEntityComponentHandle&)>([](lua_State *l,BaseEntityComponentHandle &hComponent) -> pragma::TickPolicy {
+		pragma::Lua::check_component(l,hComponent);
+		return hComponent->GetTickPolicy();
+	}));
+	def.def("GetNextTick",static_cast<double(*)(lua_State*,BaseEntityComponentHandle&)>([](lua_State *l,BaseEntityComponentHandle &hComponent) -> double {
+		pragma::Lua::check_component(l,hComponent);
+		return hComponent->GetNextTick();
+	}));
+	def.def("SetNextTick",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,double)>([](lua_State *l,BaseEntityComponentHandle &hComponent,double dt) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->SetNextTick(dt);
+	}));
 	def.def("IsValid",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&)>([](lua_State *l,BaseEntityComponentHandle &hComponent) {
 		Lua::PushBool(l,hComponent.expired() == false);
 	}));

@@ -185,9 +185,9 @@ void SWeaponComponent::Holster()
 	}
 }
 
-void SWeaponComponent::Think(double tDelta)
+void SWeaponComponent::OnTick(double tDelta)
 {
-	BaseWeaponComponent::Think(tDelta);
+	BaseWeaponComponent::OnTick(tDelta);
 }
 void SWeaponComponent::OnRemove()
 {

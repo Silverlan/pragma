@@ -13,7 +13,6 @@
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/base_parent_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
-#include "pragma/entities/components/logic_component.hpp"
 #include "pragma/entities/parentinfo.h"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/model/model.h"
@@ -50,12 +49,8 @@ void BaseAttachableComponent::Initialize()
 		}
 		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		UpdateAttachmentOffset();
-	});
-
-	GetEntity().AddComponent<LogicComponent>();
 }
+void BaseAttachableComponent::OnTick(double dt) {UpdateAttachmentOffset();}
 void BaseAttachableComponent::OnRemove()
 {
 	BaseEntityComponent::OnRemove();
@@ -156,6 +151,7 @@ AttachmentData *BaseAttachableComponent::SetupAttachment(BaseEntity *ent,const A
 			entParent->RemoveChild(*this);
 		}
 		m_attachment = nullptr;
+		SetTickPolicy(TickPolicy::Never);
 		if(m_poseChangeCallback.IsValid())
 			m_poseChangeCallback.Remove();
 	}
@@ -165,9 +161,11 @@ AttachmentData *BaseAttachableComponent::SetupAttachment(BaseEntity *ent,const A
 		if(pParentComponent == nullptr)
 		{
 			m_attachment = nullptr;
+			SetTickPolicy(TickPolicy::Never);
 			return nullptr;
 		}
 		m_attachment = std::make_unique<AttachmentData>();
+		SetTickPolicy(TickPolicy::Always);
 		m_attachment->parent = pParentComponent->GetHandle<BaseParentComponent>();
 		m_attachment->offset = attInfo.offset.has_value() ? *attInfo.offset : Vector3{};
 		m_attachment->rotation = attInfo.rotation.has_value() ? *attInfo.rotation : uquat::identity();

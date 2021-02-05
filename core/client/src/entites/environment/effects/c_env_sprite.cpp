@@ -61,6 +61,12 @@ void CSpriteComponent::StopParticle()
 	m_hParticle->SetRemoveOnComplete(true);
 }
 
+void CSpriteComponent::OnTick(double dt)
+{
+	if(m_hParticle.expired())
+		GetEntity().RemoveSafely();
+}
+
 void CSpriteComponent::StopAndRemoveEntity()
 {
 	auto &ent = GetEntity();
@@ -70,16 +76,7 @@ void CSpriteComponent::StopAndRemoveEntity()
 		ent.RemoveSafely();
 		return;
 	}
-	auto whLogicComponent = GetEntity().AddComponent<LogicComponent>();
-	if(whLogicComponent.expired())
-	{
-		GetEntity().RemoveSafely();
-		return;
-	}
-	whLogicComponent->BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		if(m_hParticle.expired())
-			GetEntity().RemoveSafely();
-	});
+	SetTickPolicy(TickPolicy::Always);
 }
 
 void CSpriteComponent::StartParticle()

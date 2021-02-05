@@ -56,6 +56,7 @@ Vector3 pragma::CEyeComponent::GetViewTarget() const
 			auto attRot = uquat::identity();
 			if(mdlC->GetAttachment(m_eyeAttachmentIndex,&attPos,&attRot))
 			{
+				attRot = uquat::identity();
 				auto attPose = ent.GetPose();
 				attPose *= umath::Transform{attPos,attRot};
 				pos = attPose.GetOrigin() +uquat::forward(attPose.GetRotation()) *dist;

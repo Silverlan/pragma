@@ -21,12 +21,7 @@ void STriggerPushComponent::Initialize()
 {
 	BaseTriggerPushComponent::Initialize();
 
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		OnThink(static_cast<CEOnTick&>(evData.get()).deltaTime);
-	});
-
-	auto &ent = GetEntity();
-	ent.AddComponent<LogicComponent>();
+	SetTickPolicy(TickPolicy::Always); // TODO
 }
 
 ///////

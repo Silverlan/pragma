@@ -23,7 +23,7 @@ namespace pragma
 
 		virtual void OnPhysicsInitialized() override;
 		virtual void OnPhysicsDestroyed() override;
-		virtual void PostPhysicsSimulate() override;
+		virtual bool PostPhysicsSimulate() override;
 		
 		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 

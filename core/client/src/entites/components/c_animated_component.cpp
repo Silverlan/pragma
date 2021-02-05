@@ -94,7 +94,6 @@ void CAnimatedComponent::Initialize()
 		return util::EventReply::Handled;
 	});
 	auto &ent = GetEntity();
-	ent.AddComponent<LogicComponent>();
 	auto pRenderComponent = ent.GetComponent<CRenderComponent>();
 	if(pRenderComponent.valid())
 	{

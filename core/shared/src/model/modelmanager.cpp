@@ -7,14 +7,38 @@
 
 #include "stdafx_shared.h"
 #include "pragma/model/modelmanager.h"
+#include "pragma/asset/util_asset.hpp"
 #include <sharedutils/util_path.hpp>
 
+extern DLLENGINE Engine *engine;
 
+static const std::vector<std::string> &get_model_extensions()
+{
+	static std::vector<std::string> extensions {};
+	if(extensions.empty())
+	{
+		extensions.push_back("mdl");
+		extensions.push_back("wmd");
+		extensions.push_back("nif");
+		auto &assetManager = engine->GetAssetManager();
+		auto numImporters = assetManager.GetImporterCount(pragma::asset::Type::Model);
+		for(auto i=decltype(numImporters){0u};i<numImporters;++i)
+		{
+			auto *importerInfo = assetManager.GetImporterInfo(pragma::asset::Type::Model,i);
+			if(importerInfo == nullptr)
+				continue;
+			extensions.reserve(extensions.size() +importerInfo->fileExtensions.size());
+			for(auto &ext : importerInfo->fileExtensions)
+				extensions.push_back(ext);
+		}
+	}
+	return extensions;
+}
 std::string pragma::asset::ModelManager::GetNormalizedModelName(const std::string &mdlName)
 {
 	util::Path path {mdlName};
 	path.Canonicalize();
-	path.RemoveFileExtension();
+	path.RemoveFileExtension(get_model_extensions());
 	path += ".wmd";
 	return path.GetString();
 }
@@ -22,7 +46,7 @@ std::string pragma::asset::ModelManager::GetCacheName(const std::string &mdlName
 {
 	auto normalizedName = GetNormalizedModelName(mdlName);
 	util::Path path {normalizedName};
-	path.RemoveFileExtension();
+	path.RemoveFileExtension(get_model_extensions());
 	auto strPath = path.GetString();
 	ustring::to_lower(strPath);
 	return strPath;

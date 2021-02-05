@@ -35,9 +35,9 @@ void SCharacterComponent::Initialize()
 }
 void SCharacterComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BaseCharacterComponent));}
 luabind::object SCharacterComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SCharacterComponentHandleWrapper>(l);}
-void SCharacterComponent::Think(double tDelta)
+void SCharacterComponent::OnTick(double tDelta)
 {
-	BaseCharacterComponent::Think(tDelta);
+	BaseCharacterComponent::OnTick(tDelta);
 }
 
 void SCharacterComponent::OnFrozen(bool bFrozen)

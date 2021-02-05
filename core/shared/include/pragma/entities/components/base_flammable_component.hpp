@@ -30,12 +30,12 @@ namespace pragma
 		virtual util::EventReply Ignite(float duration,BaseEntity *attacker=nullptr,BaseEntity *inflictor=nullptr);
 		virtual void Extinguish();
 		virtual void SetIgnitable(bool b);
+		virtual void OnTick(double dt);
 
 		virtual void Save(DataStream &ds) override;
 		virtual void Load(DataStream &ds,uint32_t version) override;
 	protected:
 		BaseFlammableComponent(BaseEntity &ent);
-		virtual void OnThink(double dt);
 		pragma::NetEventId m_netEvIgnite = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvExtinguish = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvSetIgnitable = pragma::INVALID_NET_EVENT;

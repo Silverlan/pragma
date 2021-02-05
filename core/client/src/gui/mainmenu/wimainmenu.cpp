@@ -105,7 +105,7 @@ void WIMainMenu::PlayNextMenuTrack(bool newRound)
 		m_cbMenuTrack.Remove();
 	if(m_menuTracks.empty())
 	{
-		FileManager::FindFiles("sounds/ui/gamestartup_*.*",&m_menuTracks,nullptr);
+		FileManager::FindFiles("sounds/ui/gamestartup*.*",&m_menuTracks,nullptr);
 		newRound = true;
 	}
 	if(m_menuTracks.empty())

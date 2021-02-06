@@ -277,12 +277,16 @@ void ClientState::HandleReceiveGameInfo(NetPacket &packet)
 	for(unsigned int i=0;i<numMessages;i++)
 		msgs->push_back(packet->ReadString());
 
-	auto &netEventIds = c_game->GetNetEventIds();
-	netEventIds.clear();
+	auto &sharedNetEventIdToLocal = c_game->GetSharedNetEventIdToLocal();
+	sharedNetEventIdToLocal.clear();
+
 	auto numEventIds = packet->Read<uint32_t>();
-	netEventIds.reserve(numEventIds);
+	sharedNetEventIdToLocal.resize(numEventIds,std::numeric_limits<pragma::NetEventId>::max());
 	for(auto i=decltype(numEventIds){0u};i<numEventIds;++i)
-		netEventIds.push_back(packet->ReadString());
+	{
+		auto name = packet->ReadString();
+		sharedNetEventIdToLocal[i] = c_game->SetupNetEvent(name);
+	}
 
 	unsigned int numConCommands = packet->Read<unsigned int>();
 	for(unsigned int i=0;i<numConCommands;i++)

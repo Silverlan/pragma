@@ -689,6 +689,26 @@ int Lua::ents::register_class(lua_State *l)
 	return 0;
 }
 
+int Lua::ents::register_component_net_event(lua_State *l)
+{
+	auto componentId = Lua::CheckInt(l,1);
+	auto *name = Lua::CheckString(l,2);
+
+	auto *state = ::engine->GetNetworkState(l);
+	auto *game = state->GetGameState();
+	auto &componentManager = game->GetEntityComponentManager();
+	auto *componentInfo = componentManager.GetComponentInfo(componentId);
+	if(componentInfo == nullptr)
+	{
+		Con::cwar<<"WARNING: Attempted to register component net event '"<<name<<"' to unknown component type "<<componentId<<"!"<<Con::endl;
+		return 0;
+	}
+
+	auto netName = componentInfo->name +'_' +std::string{name};
+	Lua::PushInt(l,game->SetupNetEvent(netName));
+	return 1;
+}
+
 int Lua::ents::register_component_event(lua_State *l)
 {
 	auto componentId = Lua::CheckInt(l,1);

@@ -18,16 +18,12 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
-
-ComponentEventId CWeaponComponent::EVENT_TRANSLATE_VIEWMODEL_ACTIVITY = INVALID_COMPONENT_ID;
-ComponentEventId CWeaponComponent::EVENT_TRANSLATE_VIEWMODEL_ANIMATION = INVALID_COMPONENT_ID;
-ComponentEventId CWeaponComponent::EVENT_TRANSLATE_LAYERED_VIEWMODEL_ANIMATION = INVALID_COMPONENT_ID;
+#pragma optimize("",off)
+ComponentEventId CWeaponComponent::EVENT_ATTACH_TO_OWNER = INVALID_COMPONENT_ID;
 void CWeaponComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	BaseWeaponComponent::RegisterEvents(componentManager);
-	EVENT_TRANSLATE_VIEWMODEL_ACTIVITY = componentManager.RegisterEvent("TRANSLATE_VIEWMODEL_ACTIVITY",std::type_index(typeid(CWeaponComponent)));
-	EVENT_TRANSLATE_VIEWMODEL_ANIMATION = componentManager.RegisterEvent("TRANSLATE_VIEWMODEL_ANIMATION",std::type_index(typeid(CWeaponComponent)));
-	EVENT_TRANSLATE_LAYERED_VIEWMODEL_ANIMATION = componentManager.RegisterEvent("TRANSLATE_LAYERED_VIEWMODEL_ANIMATION",std::type_index(typeid(CWeaponComponent)));
+	EVENT_ATTACH_TO_OWNER = componentManager.RegisterEvent("ATTACH_TO_OWNER",std::type_index(typeid(CWeaponComponent)));
 }
 
 std::vector<CWeaponComponent*> CWeaponComponent::s_weapons;
@@ -81,16 +77,19 @@ void CWeaponComponent::UpdateViewModel()
 		return;
 	auto &vmEnt = static_cast<CBaseEntity&>(vm->GetEntity());
 	auto pRenderComponentVm = vmEnt.GetRenderComponent();
-	if(m_viewModel.empty() == true)
-	{
-		if(pRenderComponentVm)
-			pRenderComponentVm->SetRenderMode(RenderMode::None);
-		vm->SetViewModelOffset({});
-		return;
-	}
 	auto mdlComponentVm = vmEnt.GetModelComponent();
-	if(mdlComponentVm)
-		mdlComponentVm->SetModel(m_viewModel);
+	if(m_viewModel.has_value())
+	{
+		if(m_viewModel->empty() == true)
+		{
+			if(pRenderComponentVm)
+				pRenderComponentVm->SetRenderMode(RenderMode::None);
+			vm->SetViewModelOffset({});
+			return;
+		}
+		if(mdlComponentVm)
+			mdlComponentVm->SetModel(*m_viewModel);
+	}
 	if(pRenderComponentVm)
 		pRenderComponentVm->SetRenderMode(RenderMode::View);
 	vm->SetViewModelOffset(GetViewModelOffset());
@@ -218,7 +217,7 @@ void CWeaponComponent::SetViewModel(const std::string &mdl)
 	m_viewModel = mdl;
 	UpdateViewModel();
 }
-const std::string &CWeaponComponent::GetViewModelName() const {return m_viewModel;}
+const std::optional<std::string> &CWeaponComponent::GetViewModelName() const {return m_viewModel;}
 
 void CWeaponComponent::OnFireBullets(const BulletInfo &bulletInfo,Vector3 &bulletOrigin,Vector3 &bulletDir,Vector3 *effectsOrigin)
 {
@@ -273,7 +272,7 @@ void CWeaponComponent::UpdateOwnerAttachment()
 		return;
 	}
 	auto *game = client->GetGameState();
-	BaseEntity *parent = owner;
+	CViewModelComponent *cVm = nullptr;
 	if(owner->IsPlayer())
 	{
 		auto *plComponent = static_cast<CPlayerComponent*>(owner->GetPlayerComponent().get());
@@ -283,28 +282,41 @@ void CWeaponComponent::UpdateOwnerAttachment()
 			auto *vm = game->GetViewModel();
 			if(vm == nullptr)
 				return;
-			parent = &vm->GetEntity();
+			cVm = vm;
 		}
 	}
-	m_hTarget = parent->GetHandle();
-	auto pTransformComponent = ent.GetTransformComponent();
-	auto pTransformComponentParent = parent->GetTransformComponent();
-	if(pTransformComponent && pTransformComponentParent)
+	
+	CEAttachToOwner evData {*owner,cVm};
+	if(BroadcastEvent(EVENT_ATTACH_TO_OWNER,evData) == util::EventReply::Unhandled)
 	{
-		pTransformComponent->SetPosition(pTransformComponentParent->GetPosition());
-		pTransformComponent->SetRotation(pTransformComponentParent->GetRotation());
+		auto *parent = cVm ? &cVm->GetEntity() : owner;
+		auto pTransformComponent = ent.GetTransformComponent();
+		auto pTransformComponentParent = parent->GetTransformComponent();
+		if(pTransformComponent && pTransformComponentParent)
+		{
+			pTransformComponent->SetPosition(pTransformComponentParent->GetPosition());
+			pTransformComponent->SetRotation(pTransformComponentParent->GetRotation());
+		}
+
+		auto pAttComponent = ent.AddComponent<CAttachableComponent>();
+		if(pAttComponent.valid())
+		{
+			auto pMdlComponent = parent->GetModelComponent();
+			auto attId = pMdlComponent ? pMdlComponent->LookupAttachment("weapon") : -1;
+			AttachmentInfo attInfo {};
+			attInfo.flags |= FAttachmentMode::SnapToOrigin | FAttachmentMode::UpdateEachFrame;
+			if(attId != -1)
+				pAttComponent->AttachToAttachment(parent,"weapon",attInfo);
+			else
+				pAttComponent->AttachToEntity(parent,attInfo);
+		}
 	}
-	auto pAttComponent = ent.AddComponent<CAttachableComponent>();
-	if(pAttComponent.valid())
+
+	auto attC = GetEntity().GetComponent<CAttachableComponent>();
+	if(attC.valid())
 	{
-		auto pMdlComponent = parent->GetModelComponent();
-		auto attId = pMdlComponent ? pMdlComponent->LookupAttachment("weapon") : -1;
-		AttachmentInfo attInfo {};
-		attInfo.flags |= FAttachmentMode::SnapToOrigin | FAttachmentMode::UpdateEachFrame;
-		if(attId != -1)
-			pAttComponent->AttachToAttachment(parent,"weapon",attInfo);
-		else
-			pAttComponent->AttachToEntity(parent,attInfo);
+		auto *parent = attC->GetParent();
+		m_hTarget = parent ? parent->GetEntity().GetHandle() : EntityHandle{};
 	}
 	//SetParent(parent,FPARENT_BONEMERGE | FPARENT_UPDATE_EACH_FRAME);
 	//SetAnimated(true);
@@ -317,6 +329,18 @@ void CWeaponComponent::SetHideWorldModelInFirstPerson(bool b)
 }
 bool CWeaponComponent::GetHideWorldModelInFirstPerson() const {return m_bHideWorldModelInFirstPerson;}
 
+void CWeaponComponent::UpdateDeployState()
+{
+	if(IsDeployed() == false)
+		return;
+	UpdateOwnerAttachment();
+	UpdateViewModel();
+	auto *vm = GetViewModel();
+	if(vm == nullptr)
+		return;
+	PlayViewActivity(Activity::VmIdle);
+}
+
 void CWeaponComponent::Deploy()
 {
 	BaseWeaponComponent::Deploy();
@@ -325,7 +349,6 @@ void CWeaponComponent::Deploy()
 	auto *vm = GetViewModel();
 	if(vm == nullptr)
 		return;
-	CGame *game = client->GetGameState();
 	if(PlayViewActivity(Activity::VmDeploy) == false)
 		PlayViewActivity(Activity::VmIdle);
 }
@@ -391,3 +414,13 @@ void CWeaponComponent::Reload()
 	BaseWeaponComponent::Reload();
 }
 
+CEAttachToOwner::CEAttachToOwner(BaseEntity &owner,CViewModelComponent *optViewmodel)
+	: owner{owner},viewModel{optViewmodel}
+{}
+void CEAttachToOwner::PushArguments(lua_State *l)
+{
+	owner.GetLuaObject()->push(l);
+	if(viewModel)
+		viewModel->PushLuaObject(l);
+}
+#pragma optimize("",on)

@@ -12,6 +12,7 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_weapon_component.hpp>
 #include <pragma/model/animation/play_animation_flags.hpp>
+#include <optional>
 
 namespace nwm
 {
@@ -25,9 +26,7 @@ namespace pragma
 		public CBaseNetComponent
 	{
 	public:
-		static ComponentEventId EVENT_TRANSLATE_VIEWMODEL_ACTIVITY;
-		static ComponentEventId EVENT_TRANSLATE_VIEWMODEL_ANIMATION;
-		static ComponentEventId EVENT_TRANSLATE_LAYERED_VIEWMODEL_ANIMATION;
+		static ComponentEventId EVENT_ATTACH_TO_OWNER;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
 		static unsigned int GetWeaponCount();
@@ -51,7 +50,7 @@ namespace pragma
 		bool IsInFirstPersonMode() const;
 		void UpdateOwnerAttachment();
 		void SetViewModel(const std::string &mdl);
-		const std::string &GetViewModelName() const;
+		const std::optional<std::string> &GetViewModelName() const;
 		void SetHideWorldModelInFirstPerson(bool b);
 		bool GetHideWorldModelInFirstPerson() const;
 		void SetViewModelOffset(const Vector3 &offset);
@@ -62,11 +61,12 @@ namespace pragma
 
 		void SetViewModelComponent(pragma::ComponentId component) {m_viewModelComponent = component;}
 		pragma::ComponentId GetViewModelComponent() const {return m_viewModelComponent;}
+		void UpdateDeployState();
 	protected:
 		// Either the view-model or the character that owns the weapon
 		EntityHandle m_hTarget;
 		bool m_bHideWorldModelInFirstPerson = false;
-		std::string m_viewModel = "weapons/v_soldier.wmd";
+		std::optional<std::string> m_viewModel {};
 		Vector3 m_viewModelOffset;
 		pragma::ComponentId m_viewModelComponent = pragma::INVALID_COMPONENT_ID;
 
@@ -80,6 +80,14 @@ namespace pragma
 		void ClearOwnerCallbacks();
 	private:
 		static std::vector<CWeaponComponent*> s_weapons;
+	};
+	struct DLLCLIENT CEAttachToOwner
+		: public ComponentEvent
+	{
+		CEAttachToOwner(BaseEntity &owner,CViewModelComponent *optViewmodel);
+		virtual void PushArguments(lua_State *l) override;
+		BaseEntity &owner;
+		CViewModelComponent *viewModel = nullptr;
 	};
 };
 

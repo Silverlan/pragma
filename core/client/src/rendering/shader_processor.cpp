@@ -34,7 +34,6 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneCom
 	assert(dsShadows);
 	auto &dsMat = shader.GetDefaultMaterialDescriptorSet();
 	m_sceneFlags = ShaderGameWorld::SceneFlags::None;
-	m_view = view;
 	shader.RecordBindScene(
 		*this,scene,renderer,
 		*dsScene,*dsRenderer,dsRenderSettings,
@@ -69,7 +68,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindShader(const pragma::CSceneCo
 	m_cmdBuffer.RecordSetDepthBias();
 #endif
 	// m_cmdBuffer.RecordBindVertexBuffer(shader,*CSceneComponent::GetEntityInstanceIndexBuffer()->GetBuffer(),umath::to_integral(ShaderEntity::VertexBinding::RenderBufferIndex));
-	return RecordBindScene(scene,renderer,shader,m_view);
+	return RecordBindScene(scene,renderer,shader,view);
 }
 void pragma::rendering::ShaderProcessor::UpdateSceneFlags(ShaderGameWorld::SceneFlags sceneFlags)
 {

@@ -468,8 +468,14 @@ void NET_cl_ent_event(NetPacket packet)
 	if(ent == nullptr)
 		return;
 	auto eventId = packet->Read<UInt32>();
+	auto localId = c_game->SharedNetEventIdToLocal(eventId);
+	if(localId == std::numeric_limits<pragma::NetEventId>::max())
+	{
+		Con::cwar<<"WARNING: Unknown net event with shared id "<<eventId<<"!"<<Con::endl;
+		return;
+	}
 	packet->SetOffset(0);
-	ent->ReceiveNetEvent(eventId,packet);
+	ent->ReceiveNetEvent(localId,packet);
 }
 
 DLLCLIENT void NET_cl_ent_movetype(NetPacket packet)

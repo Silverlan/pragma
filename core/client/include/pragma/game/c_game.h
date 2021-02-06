@@ -336,7 +336,13 @@ public:
 	const std::vector<DroppedFile> &GetDroppedFiles() const;
 
 	void OnReceivedRegisterNetEvent(NetPacket &packet);
+	virtual pragma::NetEventId FindNetEvent(const std::string &name) const override;
 	virtual pragma::NetEventId SetupNetEvent(const std::string &name) override;
+	pragma::NetEventId SharedNetEventIdToLocal(pragma::NetEventId evId) const;
+	pragma::NetEventId LocalNetEventIdToShared(pragma::NetEventId evId) const;
+	std::unordered_map<std::string,pragma::NetEventId> &GetLocalNetEventIds() {return m_clientNetEventData.localNetEventIds;}
+	std::vector<pragma::NetEventId> &GetSharedNetEventIdToLocal() {return m_clientNetEventData.sharedNetEventIdToLocalId;}
+	std::vector<pragma::NetEventId> &GetLocalNetEventIdToShared() {return m_clientNetEventData.localNetEventIdToSharedId;}
 
 	void SetLODBias(int32_t bias);
 	int32_t GetLODBias() const;
@@ -477,6 +483,13 @@ private:
 	double m_tLastClientUpdate = 0.0;
 	std::array<bool,umath::to_integral(RenderMode::Count)> m_renderModesEnabled;
 	CallbackHandle m_hCbDrawFrame = {};
+
+	struct {
+		std::unordered_map<std::string,pragma::NetEventId> localNetEventIds {};
+		pragma::NetEventId nextLocalNetEventId = 0;
+		std::vector<pragma::NetEventId> sharedNetEventIdToLocalId {};
+		std::vector<pragma::NetEventId> localNetEventIdToSharedId {};
+	} m_clientNetEventData {};
 
 	CallbackHandle m_cbGPUProfilingHandle = {};
 	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage,GPUProfilingPhase>> m_gpuProfilingStageManager = nullptr;

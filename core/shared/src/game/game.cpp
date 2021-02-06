@@ -809,13 +809,6 @@ Game::GameFlags Game::GetGameFlags() const {return m_flags;}
 
 bool Game::IsMapInitialized() {return (m_flags &GameFlags::MapInitialized) != GameFlags::None;}
 
-const pragma::NetEventManager &Game::GetEntityNetEventManager() const {return const_cast<Game*>(this)->GetEntityNetEventManager();}
-pragma::NetEventManager &Game::GetEntityNetEventManager() {return m_entNetEventManager;}
-
-pragma::NetEventId Game::FindNetEvent(const std::string &name) const {return m_entNetEventManager.FindNetEvent(name);}
-const std::vector<std::string> &Game::GetNetEventIds() const {return const_cast<Game*>(this)->GetNetEventIds();}
-std::vector<std::string> &Game::GetNetEventIds() {return m_entNetEventManager.GetNetEventIds();}
-
 const MapInfo &Game::GetMapInfo() const {return m_mapInfo;}
 
 bool Game::LoadSoundScripts(const char *file) {return m_stateNetwork->LoadSoundScripts(file,true);}

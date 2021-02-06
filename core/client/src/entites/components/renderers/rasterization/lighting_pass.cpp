@@ -95,8 +95,10 @@ void pragma::CRasterizationRendererComponent::RecordPrepass(const util::DrawScen
 			queue.WaitForCompletion(prepassStats);
 			if(queue.queue.empty() == false)
 			{
-				// rsys.BindShader(shaderPrepass,umath::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
+				rsys.UnbindShader();
 				rsys.SetCameraType(pragma::rendering::BaseRenderProcessor::CameraType::View);
+				rsys.BindShader(shaderPrepass,umath::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
+				// rsys.BindShader(shaderPrepass,umath::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
 				rsys.Render(queue,prepassStats);
 			}
 		}

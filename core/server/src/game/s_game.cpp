@@ -748,13 +748,20 @@ void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session,NetPacket
 
 pragma::NetEventId SGame::RegisterNetEvent(const std::string &name)
 {
+	auto id = m_entNetEventManager.RegisterNetEvent(name);
 	NetPacket packet;
 	packet->WriteString(name);
+	packet->Write<pragma::NetEventId>(id);
 	server->SendPacket("register_net_event",packet,pragma::networking::Protocol::SlowReliable);
-	return m_entNetEventManager.RegisterNetEvent(name);
+	return id;
 }
 
+pragma::NetEventId SGame::FindNetEvent(const std::string &name) const {return m_entNetEventManager.FindNetEvent(name);}
 pragma::NetEventId SGame::SetupNetEvent(const std::string &name) {return RegisterNetEvent(name);}
+const pragma::NetEventManager &SGame::GetEntityNetEventManager() const {return const_cast<SGame*>(this)->GetEntityNetEventManager();}
+pragma::NetEventManager &SGame::GetEntityNetEventManager() {return m_entNetEventManager;}
+const std::vector<std::string> &SGame::GetNetEventIds() const {return const_cast<SGame*>(this)->GetNetEventIds();}
+std::vector<std::string> &SGame::GetNetEventIds() {return m_entNetEventManager.GetNetEventIds();}
 
 void SGame::SpawnPlayer(pragma::BasePlayerComponent &pl)
 {

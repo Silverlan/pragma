@@ -19,7 +19,7 @@
 
 using namespace pragma;
 
-
+#pragma optimize("",off)
 ComponentEventId BaseAttachableComponent::EVENT_ON_ATTACHMENT_UPDATE = INVALID_COMPONENT_ID;
 void BaseAttachableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
@@ -162,6 +162,7 @@ AttachmentData *BaseAttachableComponent::SetupAttachment(BaseEntity *ent,const A
 		{
 			m_attachment = nullptr;
 			SetTickPolicy(TickPolicy::Never);
+			OnAttachmentChanged();
 			return nullptr;
 		}
 		m_attachment = std::make_unique<AttachmentData>();
@@ -210,40 +211,49 @@ AttachmentData *BaseAttachableComponent::SetupAttachment(BaseEntity *ent,const A
 		{
 			// Update local pose (relative to parent) if absolute pose
 			// has been changed externally
-			m_poseChangeCallback = pTrComponent->AddEventCallback(pragma::BaseTransformComponent::EVENT_ON_POSE_CHANGED,[this,pTrComponent](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
-				auto changeFlags = static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags;
-				if(umath::is_flag_set(changeFlags,TransformChangeFlags::PositionChanged))
-				{
-					if(!umath::is_flag_set(m_stateFlags,StateFlags::UpdatingPosition))
+			if((m_attachment->flags &FAttachmentMode::ForceInPlace) == FAttachmentMode::ForceInPlace)
+			{
+				if(m_poseChangeCallback.IsValid())
+					m_poseChangeCallback.Remove();
+			}
+			else
+			{
+				m_poseChangeCallback = pTrComponent->AddEventCallback(pragma::BaseTransformComponent::EVENT_ON_POSE_CHANGED,[this,pTrComponent](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+					auto changeFlags = static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags;
+					if(umath::is_flag_set(changeFlags,TransformChangeFlags::PositionChanged) && umath::is_flag_set(m_attachment->flags,FAttachmentMode::ForceTranslationInPlace) == false)
 					{
-						auto parentPose = GetParentPose();
-						if(parentPose.has_value())
+						if(!umath::is_flag_set(m_stateFlags,StateFlags::UpdatingPosition))
 						{
-							auto localOffset = parentPose->GetInverse() *pTrComponent->GetPosition();
-							auto *attData = GetAttachmentData();
-							if(attData)
-								attData->offset = localOffset;
+							auto parentPose = GetParentPose();
+							if(parentPose.has_value())
+							{
+								auto localOffset = parentPose->GetInverse() *pTrComponent->GetPosition();
+								auto *attData = GetAttachmentData();
+								if(attData)
+									attData->offset = localOffset;
+							}
 						}
 					}
-				}
-				if(umath::is_flag_set(changeFlags,TransformChangeFlags::RotationChanged))
-				{
-					if(!umath::is_flag_set(m_stateFlags,StateFlags::UpdatingRotation))
+					if(umath::is_flag_set(changeFlags,TransformChangeFlags::RotationChanged) && umath::is_flag_set(m_attachment->flags,FAttachmentMode::ForceRotationInPlace) == false)
 					{
-						auto parentPose = GetParentPose();
-						if(parentPose.has_value())
+						if(!umath::is_flag_set(m_stateFlags,StateFlags::UpdatingRotation))
 						{
-							auto localRot = parentPose->GetInverse() *pTrComponent->GetRotation();
-							auto *attData = GetAttachmentData();
-							if(attData)
-								attData->rotation = localRot;
+							auto parentPose = GetParentPose();
+							if(parentPose.has_value())
+							{
+								auto localRot = parentPose->GetInverse() *pTrComponent->GetRotation();
+								auto *attData = GetAttachmentData();
+								if(attData)
+									attData->rotation = localRot;
+							}
 						}
 					}
-				}
-				return util::EventReply::Unhandled;
-			});
+					return util::EventReply::Unhandled;
+				});
+			}
 		}
 	}
+	OnAttachmentChanged();
 	return m_attachment.get();
 }
 AttachmentData *BaseAttachableComponent::AttachToEntity(BaseEntity *ent,const AttachmentInfo &attInfo)
@@ -562,3 +572,4 @@ void BaseAttachableComponent::UpdateAttachmentOffset(bool invokeUpdateEvents)
 	if(invokeUpdateEvents)
 		InvokeEventCallbacks(EVENT_ON_ATTACHMENT_UPDATE);
 }
+#pragma optimize("",on)

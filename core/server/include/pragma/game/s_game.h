@@ -74,13 +74,17 @@ protected:
 	virtual void RegisterLuaEntityComponent(luabind::class_<BaseEntityComponentHandleWrapper> &classDef) override;
 	virtual bool InitializeGameMode() override;
 
+	const pragma::NetEventManager &GetEntityNetEventManager() const;
+	pragma::NetEventManager &GetEntityNetEventManager();
+
 	virtual std::string GetLuaNetworkDirectoryName() const override;
 	virtual std::string GetLuaNetworkFileName() const override;
 	virtual bool LoadLuaComponent(const std::string &luaFilePath,const std::string &mainPath,const std::string &componentName) override;
 
 	// Resources which can be requested by clients, if they don't have them
 	std::vector<std::string> m_gameResources;
-
+	
+	pragma::NetEventManager m_entNetEventManager = {};
 	uint64_t m_nextUniqueEntityIndex;
 	CallbackHandle m_cbProfilingHandle = {};
 	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_profilingStageManager = nullptr;
@@ -110,6 +114,9 @@ public:
 	virtual void CreateGiblet(const GibletCreateInfo &info) override;
 	virtual pragma::BaseEntityComponent *CreateLuaEntityComponent(BaseEntity &ent,std::string classname) override;
 
+	std::vector<std::string> &GetNetEventIds();
+	const std::vector<std::string> &GetNetEventIds() const;
+
 	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase> *GetProfilingStageManager();
 	bool StartProfilingStage(CPUProfilingPhase stage);
 	bool StopProfilingStage(CPUProfilingPhase stage);
@@ -117,6 +124,7 @@ public:
 	void ChangeLevel(const std::string &mapName,const std::string &landmarkName="");
 
 	pragma::NetEventId RegisterNetEvent(const std::string &name);
+	virtual pragma::NetEventId FindNetEvent(const std::string &name) const override;
 	virtual pragma::NetEventId SetupNetEvent(const std::string &name) override;
 
 	virtual float GetTimeScale() override;

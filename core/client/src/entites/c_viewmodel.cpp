@@ -68,23 +68,10 @@ void CViewModelComponent::Initialize()
 		if(animComponent.valid())
 			animComponent->PlayActivity(Activity::VmIdle);
 	});
-	BindEvent(CAnimatedComponent::EVENT_TRANSLATE_ACTIVITY,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto *weapon = GetWeapon();
-		if(weapon == nullptr)
-			return util::EventReply::Unhandled;
-		return weapon->InvokeEventCallbacks(CWeaponComponent::EVENT_TRANSLATE_VIEWMODEL_ACTIVITY,evData);
-	});
-	BindEvent(CAnimatedComponent::EVENT_TRANSLATE_ANIMATION,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto *weapon = GetWeapon();
-		if(weapon == nullptr)
-			return util::EventReply::Unhandled;
-		return weapon->InvokeEventCallbacks(CWeaponComponent::EVENT_TRANSLATE_VIEWMODEL_ANIMATION,evData);
-	});
-	BindEvent(CAnimatedComponent::EVENT_TRANSLATE_LAYERED_ANIMATION,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto *weapon = GetWeapon();
-		if(weapon == nullptr)
-			return util::EventReply::Unhandled;
-		return weapon->InvokeEventCallbacks(CWeaponComponent::EVENT_TRANSLATE_LAYERED_VIEWMODEL_ANIMATION,evData);
+	BindEventUnhandled(CAnimatedComponent::EVENT_ON_ANIMATION_RESET,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		auto *wepC = GetWeapon();
+		if(wepC)
+			wepC->UpdateDeployState();
 	});
 
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());

@@ -59,6 +59,7 @@ namespace pragma
 		const std::vector<BaseEntity*> &GetChildren() const;
 	protected:
 		BaseAttachableComponent(BaseEntity &ent);
+		virtual void OnAttachmentChanged() {}
 		virtual AttachmentData *SetupAttachment(BaseEntity *ent,const AttachmentInfo &attInfo);
 		virtual void UpdateViewAttachmentOffset(BaseEntity *ent,pragma::BaseCharacterComponent &pl,Vector3 &pos,Quat &rot,Bool bYawOnly=false) const;
 		virtual void OnEntitySpawn() override;

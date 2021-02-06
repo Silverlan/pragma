@@ -285,6 +285,12 @@ void CBaseEntity::SendNetEventTCP(UInt32 eventId,NetPacket &data) const
 {
 	if(IsClientsideOnly() || !IsSpawned())
 		return;
+	eventId = c_game->LocalNetEventIdToShared(eventId);
+	if(eventId == std::numeric_limits<pragma::NetEventId>::max())
+	{
+		Con::cwar<<"WARNING: Attempted to send net event "<<eventId<<" which has no known serverside id associated!"<<Con::endl;
+		return;
+	}
 	nwm::write_entity(data,this);
 	data->Write<UInt32>(eventId);
 	client->SendPacket("ent_event",data,pragma::networking::Protocol::SlowReliable);
@@ -299,7 +305,13 @@ void CBaseEntity::SendNetEventUDP(UInt32 eventId) const
 void CBaseEntity::SendNetEventUDP(UInt32 eventId,NetPacket &data) const
 {
 	if(IsClientsideOnly() || !IsSpawned())
+		return;;
+	eventId = c_game->LocalNetEventIdToShared(eventId);
+	if(eventId == std::numeric_limits<pragma::NetEventId>::max())
+	{
+		Con::cwar<<"WARNING: Attempted to send net event "<<eventId<<" which has no known serverside id associated!"<<Con::endl;
 		return;
+	}
 	nwm::write_entity(data,this);
 	data->Write<UInt32>(eventId);
 	client->SendPacket("ent_event",data,pragma::networking::Protocol::FastUnreliable);

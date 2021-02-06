@@ -57,6 +57,7 @@ namespace Lua
 		DLLNETWORK int get_event_id(lua_State *l);
 		DLLNETWORK int register_class(lua_State *l);
 		DLLNETWORK int register_component_event(lua_State *l);
+		DLLNETWORK int register_component_net_event(lua_State *l);
 		template<class TComponent>
 			int register_component(lua_State *l)
 		{
@@ -179,6 +180,7 @@ namespace Lua
 	{"get_sorted_by_distance",Lua::ents::get_sorted_by_distance}, \
 	{"get_random",Lua::ents::get_random}, \
 	{"get_component_name",Lua::ents::get_component_name}, \
-	{"get_component_id",Lua::ents::get_component_id},
+	{"get_component_id",Lua::ents::get_component_id}, \
+	{"register_component_net_event",Lua::ents::register_component_net_event},
 
 #endif

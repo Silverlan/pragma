@@ -468,10 +468,43 @@ std::shared_ptr<pragma::EntityComponentManager> CGame::InitializeEntityComponent
 void CGame::OnReceivedRegisterNetEvent(NetPacket &packet)
 {
 	auto name = packet->ReadString();
-	Game::GetEntityNetEventManager().RegisterNetEvent(name);
+	auto localId = SetupNetEvent(name);
+	auto sharedId = packet->Read<pragma::NetEventId>();
+	if(sharedId >= m_clientNetEventData.sharedNetEventIdToLocalId.size())
+	{
+		if(m_clientNetEventData.sharedNetEventIdToLocalId.size() == m_clientNetEventData.sharedNetEventIdToLocalId.capacity())
+			m_clientNetEventData.sharedNetEventIdToLocalId.reserve(m_clientNetEventData.sharedNetEventIdToLocalId.size() *1.1f +100);
+		m_clientNetEventData.sharedNetEventIdToLocalId.resize(sharedId +1,std::numeric_limits<pragma::NetEventId>::max());
+	}
+	m_clientNetEventData.sharedNetEventIdToLocalId[sharedId] = localId;
 }
 
-pragma::NetEventId CGame::SetupNetEvent(const std::string &name) {return FindNetEvent(name);}
+pragma::NetEventId CGame::SharedNetEventIdToLocal(pragma::NetEventId evId) const
+{
+	return (evId < m_clientNetEventData.sharedNetEventIdToLocalId.size()) ? m_clientNetEventData.sharedNetEventIdToLocalId[evId] : std::numeric_limits<pragma::NetEventId>::max();
+}
+
+pragma::NetEventId CGame::LocalNetEventIdToShared(pragma::NetEventId evId) const
+{
+	return (evId < m_clientNetEventData.localNetEventIdToSharedId.size()) ? m_clientNetEventData.localNetEventIdToSharedId[evId] : std::numeric_limits<pragma::NetEventId>::max();
+}
+
+pragma::NetEventId CGame::FindNetEvent(const std::string &name) const
+{
+	auto it = m_clientNetEventData.localNetEventIds.find(name);
+	if(it == m_clientNetEventData.localNetEventIds.end())
+		return std::numeric_limits<pragma::NetEventId>::max();
+	return it->second;
+}
+
+pragma::NetEventId CGame::SetupNetEvent(const std::string &name)
+{
+	auto it = m_clientNetEventData.localNetEventIds.find(name);
+	if(it != m_clientNetEventData.localNetEventIds.end())
+		return it->second;
+	m_clientNetEventData.localNetEventIds.insert(std::make_pair(name,m_clientNetEventData.nextLocalNetEventId++));
+	return m_clientNetEventData.nextLocalNetEventId -1;
+}
 
 std::shared_ptr<pragma::nav::Mesh> CGame::LoadNavMesh(const std::string &fname) {return pragma::nav::CMesh::Load(*this,fname);}
 

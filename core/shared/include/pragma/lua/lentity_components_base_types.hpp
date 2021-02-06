@@ -3914,6 +3914,9 @@ namespace Lua
 		def.add_static_constant("FATTACHMENT_MODE_PLAYER_VIEW",umath::to_integral(FAttachmentMode::PlayerView));
 		def.add_static_constant("FATTACHMENT_MODE_PLAYER_VIEW_YAW",umath::to_integral(FAttachmentMode::PlayerViewYaw));
 		def.add_static_constant("FATTACHMENT_MODE_SNAP_TO_ORIGIN",umath::to_integral(FAttachmentMode::SnapToOrigin));
+		def.add_static_constant("FATTACHMENT_MODE_FORCE_TRANSLATION_IN_PLACE",umath::to_integral(FAttachmentMode::ForceTranslationInPlace));
+		def.add_static_constant("FATTACHMENT_MODE_FORCE_ROTATION_IN_PLACE",umath::to_integral(FAttachmentMode::ForceRotationInPlace));
+		def.add_static_constant("FATTACHMENT_MODE_FORCE_IN_PLACE",umath::to_integral(FAttachmentMode::ForceInPlace));
 	}
 };
 

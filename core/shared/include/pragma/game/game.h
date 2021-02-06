@@ -121,11 +121,8 @@ public:
 	virtual std::shared_ptr<ModelSubMesh> CreateModelSubMesh() const=0;
 
 	void ScheduleEntityForRemoval(BaseEntity &ent);
-
-	pragma::NetEventId FindNetEvent(const std::string &name) const;
-	std::vector<std::string> &GetNetEventIds();
-	const std::vector<std::string> &GetNetEventIds() const;
-
+	
+	virtual pragma::NetEventId FindNetEvent(const std::string &name) const=0;
 	virtual pragma::NetEventId SetupNetEvent(const std::string &name)=0;
 
 	bool IsGameModeInitialized() const;
@@ -381,7 +378,6 @@ protected:
 	float m_tPhysDeltaRemainder = 0.f;
 	Vector3 m_gravity = {0,-600,0};
 	util::WeakHandle<pragma::BaseWorldComponent> m_worldComponent = {};
-	pragma::NetEventManager m_entNetEventManager = {};
 	GameModeInfo *m_gameMode = nullptr;
 	EntityHandle m_entGamemode;
 	CallbackHandle m_cbProfilingHandle = {};
@@ -400,9 +396,6 @@ protected:
 	virtual bool InitializeGameMode();
 	template<class TComponent>
 		pragma::BaseEntityComponent *CreateLuaEntityComponent(BaseEntity &ent,std::string classname);
-
-	const pragma::NetEventManager &GetEntityNetEventManager() const;
-	pragma::NetEventManager &GetEntityNetEventManager();
 
 	virtual bool InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t eventId,int32_t argsIdx,bool bInject);
 	virtual void RegisterLuaEntityComponents(luabind::module_ &gameMod);

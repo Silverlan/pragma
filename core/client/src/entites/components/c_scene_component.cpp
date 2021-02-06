@@ -325,7 +325,7 @@ void CSceneComponent::UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryComman
 		return;
 	auto &bufCam = (bView == true) ? GetViewCameraBuffer() : GetCameraBuffer();
 	auto &v = cam->GetViewMatrix();
-	auto &p = (bView == true) ? pragma::CCameraComponent::CalcProjectionMatrix(c_game->GetViewModelFOV(),cam->GetAspectRatio(),cam->GetNearZ(),cam->GetFarZ()) : cam->GetProjectionMatrix();
+	auto &p = (bView == true) ? pragma::CCameraComponent::CalcProjectionMatrix(c_game->GetViewModelFOVRad(),cam->GetAspectRatio(),cam->GetNearZ(),cam->GetFarZ()) : cam->GetProjectionMatrix();
 	m_cameraData.V = v;
 	m_cameraData.P = p;
 	m_cameraData.VP = p *v;

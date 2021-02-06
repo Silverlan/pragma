@@ -67,7 +67,6 @@ namespace pragma::rendering
 		pragma::CModelComponent *m_modelC = nullptr;
 		pragma::CLightMapReceiverComponent *m_lightMapReceiverC = nullptr;
 		ShaderGameWorld::SceneFlags m_sceneFlags = ShaderGameWorld::SceneFlags::None;
-		bool m_view = false;
 
 		uint32_t m_materialDescriptorSetIndex = std::numeric_limits<uint32_t>::max();
 		uint32_t m_entityInstanceDescriptorSetIndex = std::numeric_limits<uint32_t>::max();

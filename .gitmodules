@@ -88,9 +88,6 @@
 [submodule "third_party_libs/rectangle_bin_pack"]
 	path = third_party_libs/rectangle_bin_pack
 	url = https://github.com/juj/RectangleBinPack.git
-[submodule "third_party_libs/miniball"]
-	path = third_party_libs/miniball
-	url = https://github.com/hbf/miniball.git
 [submodule "third_party_libs/openal-soft"]
 	path = third_party_libs/openal-soft
 	url = https://github.com/kcat/openal-soft.git
@@ -138,7 +135,7 @@
 	url = https://github.com/qknight/libnoise.git
 [submodule "third_party_libs/rapidxml"]
 	path = third_party_libs/rapidxml
-	url = https://github.com/discordapp/rapidxml.git
+	url = https://github.com/discord/rapidxml.git
 [submodule "third_party_libs/hllib"]
 	path = third_party_libs/hllib
 	url = https://github.com/Silverlan/hllib.git
@@ -196,3 +193,6 @@
 [submodule "external_libs/util_ocio"]
 	path = external_libs/util_ocio
 	url = https://github.com/Silverlan/util_ocio.git
+[submodule "third_party_libs/nvtt"]
+	path = third_party_libs/nvtt
+	url = https://github.com/castano/nvidia-texture-tools.git

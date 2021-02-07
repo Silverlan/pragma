@@ -25,7 +25,7 @@
 #include <pragma/console/sh_cmd.h>
 #include <pragma/networking/netmessages.h>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 extern ServerState *server;
 extern SGame *s_game;
 DLLSERVER void CMD_sv_send(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv)

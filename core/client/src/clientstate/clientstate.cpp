@@ -57,7 +57,7 @@ ConVarHandle ClientState::GetConVarHandle(std::string scvar)
 	return NetworkState::GetConVarHandle(*conVarPtrs,scvar);
 }
 
-DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 DLLCLIENT ClientState *client = NULL;
 extern CGame *c_game;
 

@@ -26,7 +26,7 @@
 #include <luabind/iterator_policy.hpp>
 #include <pragma/lua/lua_call.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 
 void Lua::ModelMeshGroup::register_class(luabind::class_<::ModelMeshGroup> &classDef)

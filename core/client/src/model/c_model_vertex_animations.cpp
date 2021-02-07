@@ -11,7 +11,7 @@
 #include <pragma/model/animation/vertex_animation.hpp>
 #include <prosper_util.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 void CModel::UpdateVertexAnimationBuffer()
 {

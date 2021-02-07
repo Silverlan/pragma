@@ -19,7 +19,7 @@
 #include <pragma/networking/error.hpp>
 #include <networkmanager/nwm_error_handle.h>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 extern DLLSERVER SGame *s_game;
 void ServerState::OnMasterServerRegistered(bool b,std::string reason)
 {

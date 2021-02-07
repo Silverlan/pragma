@@ -19,7 +19,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_quake,CEnvQuake);
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 CQuakeComponent::~CQuakeComponent()

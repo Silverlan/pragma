@@ -13,7 +13,7 @@
 #include "pragma/lua/libraries/lfile.h"
 #include <luainterface.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 lua_registercheck(NavConfig,pragma::nav::Config);
 

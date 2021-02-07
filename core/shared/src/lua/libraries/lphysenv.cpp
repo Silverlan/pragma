@@ -31,7 +31,7 @@
 #include <luabind/iterator_policy.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 // #define ENABLE_DEPRECATED_PHYSICS
 

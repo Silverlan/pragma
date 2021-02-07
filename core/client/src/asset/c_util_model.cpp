@@ -26,7 +26,7 @@
 #include <util_image.hpp>
 #include <cmaterialmanager.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 #pragma optimize("",off)

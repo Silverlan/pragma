@@ -11,7 +11,7 @@
 #include "pragma/asset/util_asset.hpp"
 #include <luainterface.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 
 void Lua::asset::register_library(Lua::Interface &lua,bool extended)

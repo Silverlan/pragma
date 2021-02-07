@@ -17,7 +17,7 @@
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/baseplayer.hpp"
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 void nwm::write_vector(NetPacket &packet,const Vector3 &v)
 {

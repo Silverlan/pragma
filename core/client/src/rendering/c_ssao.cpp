@@ -19,7 +19,7 @@
 #include <image/prosper_sampler.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 bool SSAOInfo::Initialize(

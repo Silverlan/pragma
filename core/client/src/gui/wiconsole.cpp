@@ -19,7 +19,7 @@
 #include <pragma/lua/lua_error_handling.hpp>
 #include <pragma/localization.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 
 extern DLLCLIENT ClientState *client;

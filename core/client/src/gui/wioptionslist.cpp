@@ -19,7 +19,7 @@
 
 LINK_WGUI_TO_CLASS(WIOptionsList,WIOptionsList);
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 
 WIOptionsList::WIOptionsList()

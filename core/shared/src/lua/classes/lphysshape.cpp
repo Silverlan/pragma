@@ -14,7 +14,7 @@
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/model/modelmesh.h"
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 namespace Lua
 {

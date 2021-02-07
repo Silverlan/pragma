@@ -32,14 +32,14 @@
 #include <pragma/util/util_module.hpp>
 
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
-#include <wv_steamworks.hpp>
+#include "pragma/game/isteamworks.hpp"
 
 ConVarHandle NetworkState::GetConVarHandle(std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &ptrs,std::string scvar) {return CVarHandler::GetConVarHandle(ptrs,scvar);}
 
 UInt8 NetworkState::STATE_COUNT = 0;
 
 decltype(NetworkState::s_loadedLibraries) NetworkState::s_loadedLibraries = {};
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 NetworkState::NetworkState()
 	: CallbackHandler(),CVarHandler()

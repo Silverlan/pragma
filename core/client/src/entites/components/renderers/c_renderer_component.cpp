@@ -11,7 +11,7 @@
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include <prosper_command_buffer.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 

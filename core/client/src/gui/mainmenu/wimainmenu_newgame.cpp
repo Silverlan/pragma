@@ -24,7 +24,7 @@
 #include <sharedutils/util_file.h>
 #include <wgui/types/witext.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 
 WIMainMenuNewGame::WIMainMenuNewGame()

@@ -10,7 +10,7 @@
 
 using namespace pragma;
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 rendering::EntityInstanceIndexBuffer::EntityInstanceIndexBuffer()
 {

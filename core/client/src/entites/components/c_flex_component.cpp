@@ -21,6 +21,14 @@ using namespace pragma;
 extern DLLCLIENT CGame *c_game;
 
 static auto cvFlexPhonemeDrag = GetClientConVar("cl_flex_phoneme_drag");
+
+ComponentEventId CFlexComponent::EVENT_ON_FLEX_CONTROLLERS_UPDATED = INVALID_COMPONENT_ID;
+void CFlexComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+{
+	BaseFlexComponent::RegisterEvents(componentManager);
+	EVENT_ON_FLEX_CONTROLLERS_UPDATED = componentManager.RegisterEvent("ON_FLEX_CONTROLLERS_UPDATED",std::type_index(typeid(CFlexComponent)));
+}
+
 luabind::object CFlexComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CFlexComponentHandleWrapper>(l);}
 void CFlexComponent::UpdateFlexControllers(float dt)
 {
@@ -35,6 +43,7 @@ void CFlexComponent::UpdateFlexControllers(float dt)
 			info.targetValue = 0.f;
 		info.value = umath::lerp(info.value,info.targetValue,umath::min(dt /flexDrag,1.f));
 	}
+	InvokeEventCallbacks(EVENT_ON_FLEX_CONTROLLERS_UPDATED);
 }
 
 void CFlexComponent::SetFlexWeight(uint32_t flexIdx,float weight)

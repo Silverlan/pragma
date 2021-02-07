@@ -1,0 +1,7 @@
+"pbr"
+{
+	$texture albedo_map "models/player/soldier/soldier_d"
+	$texture rma_map "models/player/soldier/soldier_rma"
+	$texture normal_map "models/player/soldier/soldier_n"
+	$float metalness_factor "1.000000"
+}

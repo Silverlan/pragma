@@ -8,7 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/networking/local_client.hpp"
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 std::string pragma::networking::LocalClient::GetIdentifier() const {return "localhost";}
 bool pragma::networking::LocalClient::Connect(const std::string &ip,Port port,Error &outErr)

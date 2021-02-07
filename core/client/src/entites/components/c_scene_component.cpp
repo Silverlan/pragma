@@ -28,7 +28,7 @@
 using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 LINK_ENTITY_TO_CLASS(scene,CScene);
 

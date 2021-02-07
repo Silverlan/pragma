@@ -9,7 +9,7 @@
 #include "pragma/gui/wisnaparea.hpp"
 #include <wgui/types/witext.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 
 LINK_WGUI_TO_CLASS(WISnapArea,WISnapArea);

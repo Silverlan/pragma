@@ -8,7 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/util/util_bsp_tree.hpp"
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 using namespace util;
 

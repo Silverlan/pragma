@@ -14,7 +14,7 @@
 #include "pragma/audio/alsound_type.h"
 #include <se_scene.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 void Lua::sound::register_enums(lua_State *l)
 {

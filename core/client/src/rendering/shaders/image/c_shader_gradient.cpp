@@ -17,7 +17,7 @@
 
 using namespace pragma;
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 static bool get_line_line_intersection(const Vector2 &p0,const Vector2 &p1,const Vector2 &p3,Vector2 &intersection)
 {

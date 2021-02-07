@@ -15,7 +15,7 @@
 #include <luasystem.h>
 
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 CParticleModifierLua *pragma::LuaParticleModifierManager::CreateModifier(std::string className) const
 {

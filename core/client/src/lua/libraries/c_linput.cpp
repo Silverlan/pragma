@@ -12,7 +12,7 @@
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/input/inputhelper.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 

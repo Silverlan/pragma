@@ -11,7 +11,7 @@
 #include "pragma/model/model.h"
 #include <util_image_buffer.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 
 pragma::asset::WorldData::WorldData(NetworkState &nw)

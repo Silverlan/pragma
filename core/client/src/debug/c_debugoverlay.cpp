@@ -19,7 +19,7 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <pragma/math/intersection.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 

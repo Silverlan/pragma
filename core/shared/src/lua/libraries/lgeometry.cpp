@@ -314,7 +314,7 @@ def splitViaDelaunay(points, maxLength):
 }
 
 #include "pragma/model/modelmesh.h"
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 /*#include "vhcl.h"
 #include <sb/SBScene.h>

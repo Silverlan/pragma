@@ -23,7 +23,7 @@
 
 using namespace pragma::rendering;
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 static auto cvBloomEnabled = GetClientConVar("render_bloom_enabled");

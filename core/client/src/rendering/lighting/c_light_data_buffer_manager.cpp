@@ -8,7 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 

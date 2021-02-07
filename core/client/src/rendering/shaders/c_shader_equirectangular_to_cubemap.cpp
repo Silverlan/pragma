@@ -15,7 +15,7 @@
 #include <util_image.hpp>
 #include <util_image_buffer.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 

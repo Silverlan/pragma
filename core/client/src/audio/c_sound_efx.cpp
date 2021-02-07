@@ -13,7 +13,7 @@
 #include <alsoundsystem.hpp>
 #include <datasystem.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 static uint32_t s_globalEffectId = std::numeric_limits<uint32_t>::max();
 void Console::commands::debug_audio_aux_effect(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)

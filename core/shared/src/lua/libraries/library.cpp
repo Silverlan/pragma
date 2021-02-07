@@ -63,7 +63,7 @@
 #include <luainterface.hpp>
 #include <luabind/out_value_policy.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 static std::ostream &operator<<(std::ostream &out,const CallbackHandle &hCallback)
 {

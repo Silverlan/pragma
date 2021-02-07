@@ -24,7 +24,7 @@
 #include <pragma/networking/netmessages.h>
 #include <pragma/entities/entity_iterator.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 extern DLLSERVER ServerState *server;
 extern DLLSERVER SGame *s_game;
 DLLSERVER void CMD_lua_run(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv)

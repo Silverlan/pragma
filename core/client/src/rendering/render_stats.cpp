@@ -10,7 +10,7 @@
 #include <queries/prosper_query_pool.hpp>
 #include <queries/prosper_timer_query.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 RenderStats::RenderStats()
 {

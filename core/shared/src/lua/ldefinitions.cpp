@@ -12,7 +12,7 @@
 #include <stack>
 #include <sharedutils/util_file.h>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 static void Lua::TypeError(const luabind::object &o,Type type)
 {

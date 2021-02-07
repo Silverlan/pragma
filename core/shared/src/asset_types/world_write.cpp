@@ -12,7 +12,7 @@
 #include <util_texture_info.hpp>
 #include <sharedutils/util_file.h>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 void pragma::asset::Output::Write(VFilePtrReal &f)
 {

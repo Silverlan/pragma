@@ -1,0 +1,7 @@
+"ibl"
+{
+	$texture prefilter "maps/default_ibl_prefilter"
+	$texture brdf "env/brdf"
+	$texture irradiance "maps/default_ibl_irradiance"
+	$float ibl_strength 4.0
+}

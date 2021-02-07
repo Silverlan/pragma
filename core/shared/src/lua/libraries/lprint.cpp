@@ -101,7 +101,7 @@ DLLNETWORK int Lua_PrintTable(lua_State *l,std::string tab,int idx)
 
 DLLNETWORK int Lua_PrintTable(lua_State *l) {return Lua_PrintTable(l,"");}
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 DLLNETWORK int Lua_Msg(lua_State *l,int st)
 {
 	int argc = lua_gettop(l);

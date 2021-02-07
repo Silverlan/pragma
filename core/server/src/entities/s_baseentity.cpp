@@ -47,7 +47,7 @@
 extern EntityClassMap<SBaseEntity> *g_ServerEntityFactories;
 extern ServerEntityNetworkMap *g_SvEntityNetworkMap;
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 extern ServerState *server;
 extern SGame *s_game;
 

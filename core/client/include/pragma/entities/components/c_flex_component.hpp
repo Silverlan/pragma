@@ -19,6 +19,9 @@ namespace pragma
 		: public BaseFlexComponent
 	{
 	public:
+		static ComponentEventId EVENT_ON_FLEX_CONTROLLERS_UPDATED;
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+
 		struct FlexAnimationData
 		{
 			uint32_t flexAnimationId = std::numeric_limits<uint32_t>::max();

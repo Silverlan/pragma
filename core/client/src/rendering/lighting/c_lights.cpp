@@ -12,7 +12,7 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 
 extern DLLCLIENT CGame *c_game;
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 pragma::CLightDirectionalComponent *CGame::GetEnvironmentLightSource() const {return m_hEnvLight.get();}
 void CGame::UpdateEnvironmentLightSource()

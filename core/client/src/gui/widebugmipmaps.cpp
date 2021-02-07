@@ -11,7 +11,7 @@
 #include <image/prosper_sampler.hpp>
 #include <prosper_command_buffer.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 LINK_WGUI_TO_CLASS(WIDebugMipMaps,WIDebugMipMaps);

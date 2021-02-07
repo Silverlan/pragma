@@ -12,7 +12,7 @@
 #include "pragma/gui/mainmenu/wimainmenu_loadgame.h"
 #include "pragma/localization.h"
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;
 WIMainMenuLoadGame::WIMainMenuLoadGame()
 	: WIMainMenuBase()

@@ -19,7 +19,7 @@
 
 #define PAD_ADDON_VERBOSE 1
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 
 /////////////////////////

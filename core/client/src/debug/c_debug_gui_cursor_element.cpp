@@ -10,7 +10,7 @@
 #include <wgui/types/witext.h>
 #include <wgui/types/wirect.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 
 class GUIDebugCursorManager

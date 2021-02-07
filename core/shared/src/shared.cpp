@@ -13,7 +13,6 @@
 #pragma comment(lib,"networkmanager.lib")
 #pragma comment(lib,"vfilesystem.lib")
 #pragma comment(lib,"datasystem.lib")
-#pragma comment(lib,"engine.lib")
 #ifdef USE_LUAJIT
 	#pragma comment(lib,"lua51.lib")
 #else
@@ -28,7 +27,6 @@
 #pragma comment(lib,"util_pad.lib")
 //#pragma comment(lib,"VTFLib.lib")
 #pragma comment(lib,"util_source_script.lib")
-#pragma comment(lib,"util_mmd.lib")
 #pragma comment(lib,"ogg.lib")
 //#pragma comment(lib,"RectangleBinPack.lib")
 

@@ -1,8 +1,101 @@
-# pragma
-Repository for the pragma game engine.
+What is this?
+------
+This is the repository for the Pragma Game Engine. For more information, visit the official website: https://pragma-engine.com/
 
-Instructions
+What platforms and hardware does it work on?
+------
+- 64-Bit Windows (7, 8.1, 10)
+- Graphics card: GTX 1050 Ti or newer
+- Memory: 4 GiB RAM or more
 
-TODO
+What are Pragma's requirements?
+------
+- Visual Studio with C++-17 support (Linux support will follow)
+- CMake 3.18.4 or newer: https://cmake.org/download/#latest
+- Boost 1.72: https://www.boost.org/users/history/version_1_72_0.html
+- Geometric Tools Engine: https://github.com/davideberly/GeometricTools
+- FMOD Studio: https://www.fmod.com/download
+- (Optional) Vulkan SDK 1.2.162.1 or newer (if you want to use Vulkan): https://vulkan.lunarg.com/sdk/home
 
-Currently not buildable out of the box without some manual steps, build instructions will come soon(ish).
+Build Instructions (Windows)
+------
+1) Build shared boost libraries (with zlib) for x64 architecture in release mode
+2) Build GTE (Geometric Tools Engine)
+3) Build third-party libraries
+There are two third-party libraries (aside from boost and GTE) that have to be built by hand for now: LuaJIT and NVTT.
+
+-- Building LuaJIT
+- Open Visual Studio command prompt (Available from the menu bar under "Tools -> Visual Studio Command Prompt")
+- Go to `%PROGRAMFILES(X86)%/Microsoft Visual Studio/2019/Community/VC/Auxiliary/Build` (or the equivalent directory for your Visual Studio version)
+- Run `vcvarsall.bat x64`
+- Go to `Pragma/third_party_libs/luajit/src`
+- Run `run msvcbuild.bat`
+
+-- Building NVTT
+- Go to `Pragma/third_party_libs/nvtt/project/vc2017` in the Windows file explorer
+- Open `nvtt.sln`
+- Build `bc6h`, `bc7`, `nvcore`, `nvimage`, `nvmath`, `nvthread`, `nvtt` in Release mode
+
+4) Run configure with CMake in the Pragma root directory
+5) Set the following variables:
+- `DEPENDENCY_BOOST_INCLUDE`: Boost include directory
+- `DEPENDENCY_GEOMETRIC_TOOLS_INCLUDE`: GTE include directory
+- `DEPENDENCY_GEOMETRIC_TOOLS_LIBRARY`: Path to GTE library (GTEngine.v15.lib)
+- `DEPENDENCY_BOOST_CHRONO_LIBRARY`: Path to boost chrono library (boost_chrono-vc142-mt-x64-1_72.lib)
+- `DEPENDENCY_BOOST_DATE_TIME_LIBRARY`: Path to boost date-time library (boost_date_time-vc142-mt-x64-1_72.lib)
+- `DEPENDENCY_BOOST_FILESYSTEM_LIBRARY`: Path to boost filesystem library (boost_filesystem-vc142-mt-x64-1_72.lib)
+- `DEPENDENCY_BOOST_IOSTREAMS_LIBRARY`: Path to boost iostreams library (boost_iostreams-vc142-mt-x64-1_72.lib)
+- `DEPENDENCY_BOOST_REGEX_LIBRARY`: Path to boost regex library (boost_regex-vc142-mt-x64-1_72.lib)
+- `DEPENDENCY_BOOST_SYSTEM_LIBRARY`: Path to boost system library (boost_system-vc142-mt-x64-1_72.lib)
+- `DEPENDENCY_BOOST_THREAD_LIBRARY`: Path to boost thread library (boost_thread-vc142-mt-x64-1_72.lib)
+- `DEPENDENCY_FMOD_INCLUDE`: Path to fmod include directory (fmod/api/lowlevel/inc)
+- `DEPENDENCY_FMOD_LIBRARY`: Path to fmod library (fmod/api/lowlevel/lib/fmod64_vc.lib)
+- `DEPENDENCY_FMOD_STUDIO_INCLUDE`: Path to fmod studio include directory (fmod/api/studio/inc)
+- `DEPENDENCY_FMOD_STUDIO_LIBRARY`: Path to fmod studio library (fmod/api/studio/lib/fmodstudio64_vc.lib)
+6) Run configure again, then generate and open the solution
+7) Build Pragma
+
+The first time you should build Pragma using the `core/pragma-install-full` target, which is equal to `core/pragma-install`, but also copies all of the base assets required to run Pragma to the install directory (default is `install`).
+For all subsequent builds, you can use `core/pragma-install` instead, which includes all of the core libraries, required dependencies and the OpenGL module for Pragma. All available module builds will automatically get installed every time you use the `core/pragma-install` target.
+
+Pragma uses OpenGL by default if the Vulkan module has not been built, however Pragma is optimized for Vulkan. To use the Vulkan renderer:
+- Make sure the VulkanSDK is installed
+- Build `modules/pr_prosper_vulkan`
+- Build `core/pragma-install`
+
+Vulkan will automatically be used by default if available. You can also force a particular renderer by adding `-graphics_api opengl` or `-graphics_api vulkan` to the launch options respectively.
+
+-- Modules
+There are various optional modules available for Pragma, some of which are already included with this repository, and some of which can be found online:
+- pr_chromium: https://github.com/Silverlan/pragma/tree/master/modules/pr_chromium
+- pr_curl: https://github.com/Silverlan/pr_curl
+- pr_mdleditor: https://github.com/Silverlan/pragma/tree/master/modules/pr_mdleditor
+- pr_mysql: https://github.com/Silverlan/pragma/tree/master/modules/pr_mysql
+- pr_pcl: https://github.com/Silverlan/pragma/tree/master/modules/pr_pcl
+- pr_prosper_opengl: https://github.com/Silverlan/pr_prosper_opengl
+- pr_prosper_vulkan: https://github.com/Silverlan/pr_prosper_vulkan
+- pr_socket: https://github.com/Silverlan/pragma/tree/master/modules/pr_socket
+- pr_video_recorder: https://github.com/Silverlan/pragma/tree/master/modules/pr_video_recorder
+- pr_xml: https://github.com/Silverlan/pragma/tree/master/modules/pr_xml
+
+- pr_cycles: https://github.com/Silverlan/pr_cycles
+- pr_source: https://github.com/Silverlan/pr_source
+- pr_xatlas: https://github.com/Silverlan/pr_xatlas
+- pr_openvr: https://github.com/Silverlan/pr_openvr
+- pr_truesky: https://github.com/Silverlan/pr_truesky
+- pr_opensubdiv: https://github.com/Silverlan/pr_opensubdiv
+- pr_open_color_io: https://github.com/Silverlan/pr_open_color_io
+- pr_sqlite: https://github.com/Silverlan/pr_sqlite
+- pr_xnalara: https://github.com/Silverlan/pr_xnalara
+- pr_mpv: https://github.com/Silverlan/pr_mpv
+- pr_dmx: https://github.com/Silverlan/pr_dmx
+- pr_steamworks: https://github.com/Silverlan/pr_steamworks
+- pr_luxcore: https://github.com/Silverlan/pr_luxcore
+- pr_mmd: https://github.com/Silverlan/pr_mmd
+- pr_uvatlas: https://github.com/Silverlan/pr_uvatlas
+- pr_gpl: https://github.com/Silverlan/pr_gpl
+- pr_steam_networking_sockets: https://github.com/Silverlan/pr_steam_networking_sockets
+- pr_physx: https://github.com/Silverlan/pr_physx
+- pr_bullet: https://github.com/Silverlan/pr_bullet
+
+To install a module, check it out into `Pragma/modules`, re-configure and re-generate the solution using CMake, then build the module and then build `core/pragma-install` to install it.

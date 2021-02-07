@@ -31,7 +31,7 @@
 
 using namespace pragma;
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 
 uint32_t pragma::physics::PhysObjCreateInfo::AddShape(pragma::physics::IShape &shape,const umath::Transform &localPose,BoneId boneId)

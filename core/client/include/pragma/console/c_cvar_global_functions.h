@@ -85,7 +85,7 @@ namespace Console
 		DLLCLIENT void debug_audio_sounds(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 		DLLCLIENT void cl_steam_audio_reload_scene(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 
-		DLLCENGINE void cl_gpu_timer_queries_dump(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
+		DLLCLIENT void cl_gpu_timer_queries_dump(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 
 		DLLCLIENT void map_build_reflection_probes(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 		DLLCLIENT void map_rebuild_lightmaps(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);

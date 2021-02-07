@@ -12,7 +12,7 @@
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/lua/class_manager.hpp"
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 class LuaEntityIterator;
 using LuaEntityObject = luabind::object;

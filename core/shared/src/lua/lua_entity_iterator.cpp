@@ -8,7 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/lua/lua_entity_iterator.hpp"
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 LuaBaseEntityIterator::LuaBaseEntityIterator(const BaseEntityIterator &iterator)
 	: m_iterator(iterator)

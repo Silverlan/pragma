@@ -16,7 +16,7 @@
 #include <pragma/audio/alsound_type.h>
 #include <pragma/entities/components/base_transform_component.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 DLLCLIENT void NET_cl_snd_precache(NetPacket packet)
 {

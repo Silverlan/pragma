@@ -81,7 +81,7 @@ extern "C" {
 
 
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 extern EntityClassMap<SBaseEntity> *g_ServerEntityFactories;
 extern ServerEntityNetworkMap *g_SvEntityNetworkMap;
 extern ServerState *server;

@@ -16,7 +16,7 @@
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/components/base_ai_component.hpp"
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 std::string Game::GetGameModeScriptDirectoryPath() const
 {

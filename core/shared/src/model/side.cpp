@@ -13,7 +13,7 @@
 #include <pragma/math/intersection.h>
 
 const double EPSILON = 4.9406564584125e-2;
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 Side::Side()
 {

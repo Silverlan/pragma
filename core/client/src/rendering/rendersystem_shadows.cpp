@@ -15,7 +15,7 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 
 extern DLLCLIENT CGame *c_game;
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 
 void RenderSystem::RenderShadows(const util::DrawSceneInfo &drawSceneInfo,pragma::CRasterizationRendererComponent &renderer,std::vector<pragma::CLightComponent*> &lights)

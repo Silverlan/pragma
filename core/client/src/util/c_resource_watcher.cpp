@@ -14,7 +14,7 @@
 #include <textureinfo.h>
 #include <pragma/entities/entity_iterator.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 decltype(ECResourceWatcherCallbackType::Shader) ECResourceWatcherCallbackType::Shader = ECResourceWatcherCallbackType{umath::to_integral(E::Shader)};

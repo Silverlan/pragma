@@ -11,7 +11,7 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_util.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 CPhysVisualDebugger::CPhysVisualDebugger()

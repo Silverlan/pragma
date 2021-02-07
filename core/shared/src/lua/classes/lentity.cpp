@@ -37,7 +37,7 @@
 #include <sharedutils/datastream.h>
 #include <pragma/physics/movetypes.h>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 {

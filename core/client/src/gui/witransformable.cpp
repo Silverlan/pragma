@@ -13,7 +13,7 @@
 #include <wgui/types/wirect.h>
 #include <mathutil/umath.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 LINK_WGUI_TO_CLASS(WITransformable,WITransformable);
 

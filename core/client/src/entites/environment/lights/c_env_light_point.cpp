@@ -21,7 +21,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_light_point,CEnvLightPoint);
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 static const std::array<Vector3,6> directions = {

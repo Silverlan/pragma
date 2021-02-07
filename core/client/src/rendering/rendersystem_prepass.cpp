@@ -23,7 +23,7 @@
 #include <pragma/model/c_vertex_buffer_data.hpp>
 #include <pragma/model/vk_mesh.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 

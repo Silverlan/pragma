@@ -22,7 +22,7 @@
 #include "pragma/lua/lua_component_event.hpp"
 #include <sharedutils/datastream.h>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 namespace Lua
 {

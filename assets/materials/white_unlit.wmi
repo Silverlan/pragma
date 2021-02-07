@@ -1,0 +1,4 @@
+"unlit"
+{
+	$texture albedo_map "white"
+}

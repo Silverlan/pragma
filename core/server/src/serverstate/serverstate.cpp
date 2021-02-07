@@ -43,7 +43,7 @@ ConVarHandle ServerState::GetConVarHandle(std::string scvar)
 	return NetworkState::GetConVarHandle(*conVarPtrs,scvar);
 }
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 DLLSERVER ServerState *server = nullptr;
 DLLSERVER SGame *s_game = nullptr;
 ServerState::ServerState()
@@ -462,3 +462,50 @@ REGISTER_CONVAR_CALLBACK_SV(sv_tickrate,[](NetworkState*,ConVar*,int,int val) {
 		val = 0;
 	engine->SetTickRate(val);
 });
+
+////////////////
+
+extern "C"
+{
+	DLLSERVER void pr_sv_create_server_state(std::unique_ptr<ServerState> &outState) {outState = std::make_unique<ServerState>();}
+	DLLSERVER void pr_sv_start_server(bool singlePlayer)
+	{
+		if(server == nullptr)
+			return;
+		server->StartServer(singlePlayer);
+	}
+	DLLSERVER void pr_sv_close_server()
+	{
+		if(server == nullptr)
+			return;
+		server->CloseServer();
+	}
+	DLLSERVER bool pr_sv_is_server_running()
+	{
+		if(server == nullptr)
+			return false;
+		return server->IsServerRunning();
+	}
+	DLLSERVER void pr_sv_get_server_steam_id(std::optional<uint64_t> &outSteamId)
+	{
+		outSteamId = {};
+		if(server == nullptr)
+			return;
+		auto *sv = server->GetServer();
+		outSteamId = sv ? sv->GetSteamId() : std::optional<uint64_t>{};
+	}
+	DLLSERVER ServerState *pr_sv_get_server_state() {return server;}
+	DLLSERVER void pr_sv_clear_server_state() {server = nullptr;}
+	DLLSERVER void pr_sv_handle_local_host_player_server_packet(NetPacket &packet)
+	{
+		if(server == nullptr)
+			return;
+		server->HandlePacket(*server->GetLocalClient(),packet);
+	}
+	DLLSERVER bool pr_sv_connect_local_host_player_client()
+	{
+		if(server == nullptr)
+			return false;
+		return server->ConnectLocalHostPlayerClient();
+	}
+}

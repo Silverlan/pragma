@@ -33,7 +33,7 @@
 #include <image/prosper_msaa_texture.hpp>
 #include <sharedutils/util_shaderinfo.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 

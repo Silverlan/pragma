@@ -14,7 +14,7 @@
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_path.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 static bool s_bModuleInitialized = false;
 

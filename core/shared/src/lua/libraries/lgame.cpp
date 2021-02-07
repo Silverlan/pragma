@@ -31,7 +31,7 @@
 #include "pragma/ai/navsystem.h"
 #include <pragma/math/intersection.h>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 int Lua::game::add_callback(lua_State *l)
 {
 	std::string identifier = luaL_checkstring(l,1);

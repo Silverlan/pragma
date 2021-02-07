@@ -12,7 +12,7 @@
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 prosper::IDescriptorSet &CGame::GetGlobalRenderSettingsDescriptorSet() {return *m_globalRenderSettingsBufferData->descSetGroup->GetDescriptorSet();}
 CGame::GlobalRenderSettingsBufferData &CGame::GetGlobalRenderSettingsBufferData() {return *m_globalRenderSettingsBufferData;}

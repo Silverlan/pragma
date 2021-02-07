@@ -12,7 +12,7 @@
 #include <alsoundsystem.hpp>
 #include <steam_audio/alsound_steam_audio.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 #if ALSYS_STEAM_AUDIO_SUPPORT_ENABLED == 1

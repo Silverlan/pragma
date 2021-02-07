@@ -18,7 +18,7 @@ using namespace Shader;
 
 LINK_SHADER_TO_CLASS(ParticleModelShadow,particlemodelshadow);
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 ParticleModelShadow::ParticleModelShadow()

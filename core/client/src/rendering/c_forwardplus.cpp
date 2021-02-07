@@ -25,7 +25,7 @@
 #include <sharedutils/scope_guard.h>
 #include <pragma/entities/entity_iterator.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 static void cmd_forwardplus_tile_size(NetworkState*,ConVar*,int32_t,int32_t val)

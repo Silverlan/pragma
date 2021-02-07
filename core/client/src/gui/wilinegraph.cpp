@@ -9,7 +9,7 @@
 #include "pragma/gui/wilinegraph.h"
 #include <wgui/types/wirect.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 

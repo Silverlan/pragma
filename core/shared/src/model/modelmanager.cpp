@@ -10,7 +10,7 @@
 #include "pragma/asset/util_asset.hpp"
 #include <sharedutils/util_path.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 static const std::vector<std::string> &get_model_extensions()
 {

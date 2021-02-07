@@ -37,7 +37,7 @@
 
 using namespace pragma;
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 //////////////////
 

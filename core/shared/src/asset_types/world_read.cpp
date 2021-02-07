@@ -9,7 +9,7 @@
 #include "pragma/asset_types/world.hpp"
 #include "pragma/level/level_info.hpp"
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 
 void pragma::asset::Output::Read(VFilePtr &f)

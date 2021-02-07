@@ -14,7 +14,7 @@
 #include <wgui/types/witext.h>
 #include "pragma/localization.h"
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;
 WILoadScreen::WILoadScreen()
 	: WIMainMenuBase()

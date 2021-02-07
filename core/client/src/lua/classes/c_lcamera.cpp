@@ -27,7 +27,7 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <sharedutils/util_shaderinfo.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 void Lua::Scene::GetCamera(lua_State *l,CSceneHandle &scene)
 {

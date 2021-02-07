@@ -18,7 +18,7 @@ LINK_WGUI_TO_CLASS(WITable,WITable);
 LINK_WGUI_TO_CLASS(WITableRow,WITableRow);
 LINK_WGUI_TO_CLASS(WITableCell,WITableCell);
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;
 WITable::WITable()
 	: WIContainer(),m_bSortAsc(true),m_sortColumn(CUInt32(-1)),m_rowHeight(-1),m_bSortable(false),m_bScrollable(false)

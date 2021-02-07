@@ -15,7 +15,7 @@
 #include <pragma/lua/luaapi.h>
 #include <any>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 class BaseEntity;
 namespace pragma

@@ -13,7 +13,7 @@
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/lua/classes/ldef_quaternion.h"
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 // TODO: Remove this file
 namespace Lua

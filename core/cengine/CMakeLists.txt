@@ -31,7 +31,7 @@ add_def(ALSYS_LIBRARY_TYPE)
 
 set(PRECOMPILED_HEADER "stdafx_cengine")
 
-def_project(cengine lib)
+# def_project(cengine lib)
 
 # link_boost_library(cengine DEPENDENCY_BOOST_DATE_TIME_LIBRARY date_time)
 # link_boost_library(cengine DEPENDENCY_BOOST_REGEX_LIBRARY regex)

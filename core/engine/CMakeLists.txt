@@ -24,13 +24,13 @@ add_def(DLLENGINE_EX)
 
 set(PRECOMPILED_HEADER "stdafx_engine")
 
-def_project(engine lib)
+# def_project(engine lib)
 
 # link_boost_library(engine DEPENDENCY_BOOST_DATE_TIME_LIBRARY date_time)
 # link_boost_library(engine DEPENDENCY_BOOST_REGEX_LIBRARY regex)
 # link_boost_library(engine DEPENDENCY_BOOST_THREAD_LIBRARY thread)
 # link_boost_library(engine DEPENDENCY_BOOST_CHRONO_LIBRARY chrono)
 
-if(UNIX)
-	target_link_libraries(engine "pthread")
-endif()
+# if(UNIX)
+# 	target_link_libraries(engine "pthread")
+# endif()

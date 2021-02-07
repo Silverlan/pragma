@@ -21,7 +21,7 @@
 #include <sharedutils/util_file.h>
 #include <unordered_set>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 bool util::port_source2_map(NetworkState *nw,const std::string &path)
 {

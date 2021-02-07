@@ -59,7 +59,7 @@
 	#define FILE_ATTRIBUTE_VIRTUAL 0x10000
 #endif
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 {

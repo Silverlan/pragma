@@ -16,7 +16,7 @@
 #include <sharedutils/util_link.hpp>
 #endif
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 decltype(AddonSystem::m_addons) AddonSystem::m_addons;
 decltype(AddonSystem::m_addonWatcher) AddonSystem::m_addonWatcher = nullptr;

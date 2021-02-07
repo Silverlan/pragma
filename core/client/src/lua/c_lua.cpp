@@ -67,7 +67,7 @@
 #undef NEAR
 #undef FAR
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 void CGame::RegisterLua()

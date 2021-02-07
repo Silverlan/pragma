@@ -18,7 +18,7 @@
 #include <pragma/entities/components/base_transform_component.hpp>
 
 extern DLLCLIENT CGame *c_game;
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 static CVar cvSpeed = GetClientConVar("cl_mouse_sensitivity");
 static CVar cvAcceleration = GetClientConVar("cl_mouse_acceleration");

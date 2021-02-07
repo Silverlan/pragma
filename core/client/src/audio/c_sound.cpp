@@ -28,7 +28,7 @@
 #include <steam_audio/alsound_steam_audio.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 #pragma message ("TODO: See DDSLoader; MAKE SURE TO RELEASE BUFFER ON ENGINE REMOVE")

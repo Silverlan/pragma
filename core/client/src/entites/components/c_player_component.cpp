@@ -45,7 +45,7 @@ std::vector<CPlayerComponent*> CPlayerComponent::s_players;
 const std::vector<CPlayerComponent*> &CPlayerComponent::GetAll() {return s_players;}
 unsigned int CPlayerComponent::GetPlayerCount() {return CUInt32(s_players.size());}
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;
 extern CGame *c_game;
 

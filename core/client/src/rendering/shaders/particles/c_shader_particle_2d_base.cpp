@@ -18,7 +18,7 @@
 #include <prosper_command_buffer.hpp>
 #include <datasystem_vector.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 

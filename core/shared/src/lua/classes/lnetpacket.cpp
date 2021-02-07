@@ -12,7 +12,7 @@
 #include "pragma/lua/classes/ldef_entity.h"
 #include "luasystem.h"
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 void Lua::NetPacket::register_class(luabind::class_<::NetPacket> &classDef)
 {

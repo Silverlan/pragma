@@ -12,7 +12,7 @@
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 

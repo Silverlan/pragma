@@ -255,7 +255,7 @@ std::ostream& BasePlayerComponent::print(std::ostream &os)
 	return os;
 }
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 BasePlayerComponent::BasePlayerComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),
 	m_portUDP(0),

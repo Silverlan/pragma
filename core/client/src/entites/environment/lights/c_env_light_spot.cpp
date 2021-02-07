@@ -20,7 +20,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_light_spot,CEnvLightSpot);
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 CLightSpotComponent::CLightSpotComponent(BaseEntity &ent)

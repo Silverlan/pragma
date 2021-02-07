@@ -77,9 +77,9 @@ static std::string get_last_system_error_string(DWORD errorMessageID)
 int main(int argc,char* argv[]) //try
 {
 	#ifdef __linux__
-		const char *library = "libcengine.so";
+		const char *library = "libclient.so";
 	#else
-		const char *library = "cengine.dll";
+		const char *library = "client.dll";
 	#endif
 	#ifdef _WIN32
 		// Check if Vulkan drivers are installed
@@ -100,7 +100,7 @@ int main(int argc,char* argv[]) //try
 		}
 		//
 #if ENABLE_GDEBUGGER_SUPPORT == 1
-		HINSTANCE hEngine = LoadLibrary("cengine.dll");
+		HINSTANCE hEngine = LoadLibrary("client.dll");
 #else
 		std::string path = GetAppPath();
 		path += "\\bin\\";

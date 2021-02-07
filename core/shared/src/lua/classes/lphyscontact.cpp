@@ -15,7 +15,7 @@
 #include "pragma/physics/phys_material.hpp"
 #include "pragma/physics/collision_object.hpp"
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 void Lua::PhysContact::register_class(lua_State *l,luabind::module_ &mod)
 {

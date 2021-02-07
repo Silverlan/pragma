@@ -15,7 +15,7 @@
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_sampler.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 using namespace pragma::rendering;

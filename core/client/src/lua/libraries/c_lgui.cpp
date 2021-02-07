@@ -20,7 +20,7 @@
 #include <pragma/lua/lua_call.hpp>
 #include <pragma/lua/classes/ldef_vector.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 int Lua::gui::create(lua_State *l)

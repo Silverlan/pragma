@@ -11,7 +11,7 @@
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include <image/prosper_render_target.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 

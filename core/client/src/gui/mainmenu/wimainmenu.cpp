@@ -29,9 +29,9 @@
 #include <pragma/engine_info.hpp>
 
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
-#include <wv_steamworks.hpp>
+#include <pragma/game/isteamworks.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;
 extern CGame *c_game;
 

@@ -17,7 +17,7 @@
 
 using namespace pragma;
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 LINK_ENTITY_TO_CLASS(env_sound_dsp_echo,CEnvSoundDspEcho);
 

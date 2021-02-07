@@ -35,7 +35,7 @@ decltype(CParticleSystemComponent::s_precached) CParticleSystemComponent::s_prec
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 struct SpriteSheetTextureAnimationFrame
 {

@@ -34,7 +34,7 @@
 #include "pragma/model/vk_mesh.h"
 #include <prosper_event.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 namespace Lua
 {
 	namespace Vulkan

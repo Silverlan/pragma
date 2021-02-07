@@ -11,7 +11,7 @@
 #include "pragma/model/modelmanager.h"
 #include <sharedutils/util_path.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 bool pragma::asset::exists(NetworkState &nw,const std::string &name,Type type)
 {

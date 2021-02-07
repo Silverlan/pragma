@@ -134,5 +134,6 @@ void Lua::Flex::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCFlex.def("SetFlexAnimationCycle",static_cast<void(*)(lua_State*,CFlexHandle&,const std::string&,float)>([](lua_State *l,CFlexHandle &hEnt,const std::string &id,float cycle) {pragma::Lua::check_component(l,hEnt); hEnt->SetFlexAnimationCycle(id,cycle);}));
 	defCFlex.def("SetFlexAnimationPlaybackRate",static_cast<void(*)(lua_State*,CFlexHandle&,uint32_t,float)>([](lua_State *l,CFlexHandle &hEnt,uint32_t id,float playbackRate) {pragma::Lua::check_component(l,hEnt); hEnt->SetFlexAnimationPlaybackRate(id,playbackRate);}));
 	defCFlex.def("SetFlexAnimationPlaybackRate",static_cast<void(*)(lua_State*,CFlexHandle&,const std::string&,float)>([](lua_State *l,CFlexHandle &hEnt,const std::string &id,float playbackRate) {pragma::Lua::check_component(l,hEnt); hEnt->SetFlexAnimationPlaybackRate(id,playbackRate);}));
+	defCFlex.add_static_constant("EVENT_ON_FLEX_CONTROLLERS_UPDATED",pragma::CFlexComponent::EVENT_ON_FLEX_CONTROLLERS_UPDATED);
 	entsMod[defCFlex];
 }

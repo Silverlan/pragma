@@ -9,7 +9,7 @@
 #include "pragma/rendering/c_msaa.h"
 #include <mathutil/umath.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 int GetMaxMSAASampleCount()
 {

@@ -11,7 +11,7 @@
 #include "pragma/model/model.h"
 #include "pragma/model/modelmesh.h"
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 void Lua::ModelMesh::register_class(luabind::class_<::ModelMesh> &classDef)
 {

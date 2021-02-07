@@ -36,7 +36,7 @@
 #include <fsys/fsys_package.hpp>
 #include <util_pad.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;
 
 WIMainMenuOptions::WIMainMenuOptions()

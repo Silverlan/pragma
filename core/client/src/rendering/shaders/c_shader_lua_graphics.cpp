@@ -18,7 +18,7 @@
 #include <prosper_render_pass.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 void Lua::GraphicsPipelineCreateInfo::SetBlendingProperties(lua_State *l,prosper::GraphicsPipelineCreateInfo &pipelineInfo,const Vector4 &blendingProperties)
 {

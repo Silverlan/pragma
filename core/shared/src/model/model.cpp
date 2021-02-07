@@ -24,7 +24,7 @@
 #include <sharedutils/util_library.hpp>
 #include <stack>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 std::shared_ptr<ModelMeshGroup> ModelMeshGroup::Create(const std::string &name)
 {

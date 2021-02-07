@@ -14,7 +14,7 @@
 
 // #define ENABLE_DEPRECATED_PHYSICS
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 namespace Lua
 {

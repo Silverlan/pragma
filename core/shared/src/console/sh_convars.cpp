@@ -22,9 +22,9 @@
 #include <map>
 
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
-#include <wv_steamworks.hpp>
+#include "pragma/game/isteamworks.hpp"
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 //////////////// LOGGING ////////////////
 REGISTER_ENGINE_CONCOMMAND(log,[](NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv) {

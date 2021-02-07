@@ -20,7 +20,7 @@
 #include <mathutil/umath_equation_solver.h>
 #include <mathutil/umath_frustum.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 int Lua::math::randomf(lua_State *l)
 {
 	float min,max;

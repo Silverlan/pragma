@@ -13,7 +13,7 @@
 #include <alsoundsystem.hpp>
 #include <algorithm>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;
 
 #undef CreateEvent

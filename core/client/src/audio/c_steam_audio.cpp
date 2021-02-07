@@ -12,7 +12,7 @@
 #include <pragma/console/convars.h>
 
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 static void reload_sound_cache()

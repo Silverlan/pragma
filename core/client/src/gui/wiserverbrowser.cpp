@@ -160,7 +160,7 @@ void pragma::networking::DefaultMasterServerQueryDispatcher::DoQueryServers(cons
 
 ///////////////
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 WIServerBrowser::WIServerBrowser()
 	: WIFrame(),m_bRefreshScheduled(false)

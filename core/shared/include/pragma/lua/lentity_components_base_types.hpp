@@ -20,7 +20,7 @@
 #include <sharedutils/util_weak_handle.hpp>
 #include <mathutil/plane.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &res);};
 namespace Lua

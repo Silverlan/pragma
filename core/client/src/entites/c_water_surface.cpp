@@ -21,7 +21,7 @@
 
 using namespace pragma;
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 LINK_ENTITY_TO_CLASS(c_water_surface,CWaterSurface);

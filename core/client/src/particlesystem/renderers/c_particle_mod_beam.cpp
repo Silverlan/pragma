@@ -18,7 +18,7 @@
 
 REGISTER_PARTICLE_RENDERER(beam,CParticleRendererBeam);
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 CParticleRendererBeam::Node::Node(const Vector3 &o,const Color&)

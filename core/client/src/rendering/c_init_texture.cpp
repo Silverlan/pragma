@@ -13,7 +13,7 @@
 #include <cmaterialmanager.h>
 #include <image/prosper_sampler.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 
 static void get_filter_mode(UInt32 filter,prosper::Filter &minFilter,prosper::Filter &magFilter,prosper::SamplerMipmapMode &mipmapMode,UInt32 &anisotropy)

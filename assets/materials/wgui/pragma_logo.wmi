@@ -1,0 +1,4 @@
+"wguitextured"
+{
+	$texture diffuse_map "wgui/pragma_logo"
+}

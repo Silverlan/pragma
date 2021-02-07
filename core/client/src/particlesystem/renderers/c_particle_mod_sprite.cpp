@@ -18,7 +18,7 @@
 
 REGISTER_PARTICLE_RENDERER(sprite,CParticleRendererSprite);
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 void CParticleRendererSprite::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)

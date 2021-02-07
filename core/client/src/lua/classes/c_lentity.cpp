@@ -17,7 +17,7 @@
 #include <sharedutils/netpacket.hpp>
 #include <networkmanager/interface/nwm_manager.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 
 void Lua::Entity::Client::register_class(luabind::class_<EntityHandle> &classDef)

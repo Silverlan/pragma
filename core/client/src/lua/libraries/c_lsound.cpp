@@ -12,7 +12,7 @@
 #include "luasystem.h"
 #include <alsoundsystem.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 lua_registercheck(ALEfxEaxReverbProperties,al::EfxEaxReverbProperties);
 lua_registercheck(ALEfxChorusProperties,al::EfxChorusProperties);

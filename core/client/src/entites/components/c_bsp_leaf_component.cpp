@@ -9,7 +9,7 @@
 #include "pragma/entities/components/c_bsp_leaf_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 

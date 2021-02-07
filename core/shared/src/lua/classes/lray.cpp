@@ -19,7 +19,7 @@
 #include "luasystem.h"
 #include "pragma/physics/shape.hpp"
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 void Lua::TraceData::SetSource(lua_State *l,::TraceData &data,const pragma::physics::IConvexShape &shape)
 {

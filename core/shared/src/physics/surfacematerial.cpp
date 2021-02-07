@@ -17,7 +17,7 @@
 #include "pragma/ai/navsystem.h"
 #include <algorithm>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 
 SurfaceMaterialManager::SurfaceMaterialManager(pragma::physics::IEnvironment &env)

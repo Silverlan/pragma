@@ -16,7 +16,7 @@
 #include <wgui/fontmanager.h>
 #include <cmaterialmanager.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 void Console::commands::debug_font(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
 {

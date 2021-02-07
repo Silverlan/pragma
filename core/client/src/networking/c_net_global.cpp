@@ -50,7 +50,7 @@
 #include <pragma/util/giblet_create_info.hpp>
 
 enum class CLIENT_DROPPED;
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 

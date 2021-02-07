@@ -2,12 +2,6 @@ cmake_minimum_required(VERSION 3.12)
 
 project(pragma_engine)
 
-message("Processing core library 'engine'...")
-add_subdirectory(engine)
-
-message("Processing core library 'cengine'...")
-add_subdirectory(cengine)
-
 message("Processing core library 'shared'...")
 add_subdirectory(shared)
 
@@ -26,8 +20,6 @@ add_subdirectory(pragma_server)
 message("Processing core library 'wms_shared'...")
 add_subdirectory(wms_shared)
 
-set_target_properties(engine PROPERTIES FOLDER core)
-set_target_properties(cengine PROPERTIES FOLDER core)
 set_target_properties(shared PROPERTIES FOLDER core)
 set_target_properties(server PROPERTIES FOLDER core)
 set_target_properties(client PROPERTIES FOLDER core)

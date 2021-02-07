@@ -18,7 +18,7 @@
 #include <pragma/networking/portinfo.h>
 #include <pragma/networking/netmessages.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 struct LastConnectionInfo
 {
 	std::optional<std::pair<std::string,uint16_t>> address = {};

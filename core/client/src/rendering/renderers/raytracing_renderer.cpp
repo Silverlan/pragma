@@ -20,7 +20,7 @@
 
 using namespace pragma::rendering;
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 bool RaytracingRenderer::Initialize(uint32_t w,uint32_t h)

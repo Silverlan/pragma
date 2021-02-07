@@ -50,7 +50,7 @@
 
 LINK_ENTITY_TO_CLASS(entity,CBaseEntity);
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 

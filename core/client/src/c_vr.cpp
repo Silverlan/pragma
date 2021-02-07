@@ -19,7 +19,7 @@
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 const std::string OPENVR_MODULE_PATH = "openvr/pr_openvr";

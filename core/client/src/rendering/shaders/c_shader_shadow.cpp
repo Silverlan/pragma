@@ -20,7 +20,7 @@
 
 using namespace pragma;
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 static auto SHADOW_DEPTH_BIAS_CONSTANT = 1.25f;

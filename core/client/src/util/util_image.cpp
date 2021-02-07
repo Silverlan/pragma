@@ -9,7 +9,7 @@
 #include "pragma/util/util_image.hpp"
 #include <prosper_command_buffer.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 
 bool util::to_image_buffer(

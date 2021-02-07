@@ -62,7 +62,7 @@
 #include <mathutil/inverse_kinematics/ik.hpp>
 #include <mathutil/inverse_kinematics/constraints.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 std::ostream &operator<<(std::ostream &out,const ALSound &snd)
 {

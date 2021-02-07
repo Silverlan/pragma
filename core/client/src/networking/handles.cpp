@@ -28,7 +28,7 @@ extern "C" {
 	#include "bzlib.h"
 }
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 void ClientState::HandlePacket(NetPacket &packet)

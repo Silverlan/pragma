@@ -15,7 +15,7 @@
 #include <shader/prosper_shader_blur.hpp>
 #include <prosper_command_buffer.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 LINK_WGUI_TO_CLASS(WIImageSlideShow,WIImageSlideShow);
 

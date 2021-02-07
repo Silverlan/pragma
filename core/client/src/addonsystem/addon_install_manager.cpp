@@ -18,7 +18,7 @@ extern "C" {
 	#include "bzlib.h"
 }
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 static const std::string &get_query_url()
 {

@@ -10,7 +10,7 @@
 #include "pragma/model/mesh.h"
 #include "materialmanager.h"
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 Con::c_cout &operator<<(Con::c_cout &os,const Mesh& mesh)
 {

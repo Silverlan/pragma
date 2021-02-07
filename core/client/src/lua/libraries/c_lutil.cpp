@@ -27,7 +27,7 @@
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 
 int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua_State *l)

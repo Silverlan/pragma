@@ -287,7 +287,7 @@ DLLNETWORK void Lua::TableDump(lua_State *lua,int n)
 
 ////////////////
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 Game::Game(NetworkState *state)
 {
 	m_stateNetwork = state;

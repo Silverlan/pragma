@@ -17,7 +17,7 @@
 #include <buffers/prosper_swap_buffer.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 

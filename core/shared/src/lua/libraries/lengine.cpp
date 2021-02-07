@@ -18,7 +18,7 @@
 #include <sharedutils/util_path.hpp>
 #include <mathutil/color.h>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 void Lua::engine::exit() {::engine->ShutDown();}
 

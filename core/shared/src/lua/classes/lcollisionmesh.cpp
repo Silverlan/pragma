@@ -14,7 +14,7 @@
 #include "pragma/physics/physsoftbodyinfo.hpp"
 #include <pragma/lua/luaapi.h>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 void Lua::CollisionMesh::register_class(luabind::class_<::CollisionMesh> &classDef)
 {

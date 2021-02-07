@@ -25,7 +25,7 @@
 #include <assimp/IOSystem.hpp>
 #include <assimp/IOStream.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 
 int Lua::import::import_wad(lua_State *l)

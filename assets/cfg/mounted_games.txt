@@ -1,0 +1,667 @@
+"hlvr"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_hla"
+	steam
+	{
+		$int app_id 546560
+		$string game_path "common/Half-Life Alyx/game/hlvr/"
+		$bool mount_workshop 0
+	}
+	engine
+	{
+		$string name "source2"
+		archives
+		{
+			"pak01_dir.vpk" {}
+		}
+	}
+}
+
+"sfm"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_sfm"
+	steam
+	{
+		$int app_id 1840
+		game_paths
+		{
+			"common/SourceFilmmaker/game/workshop/"
+			"common/SourceFilmmaker/game/tf_movies/"
+			"common/SourceFilmmaker/game/tf/"
+			"common/SourceFilmmaker/game/hl2/"
+			"common/SourceFilmmaker/game/left4dead2_movies/"
+			"common/SourceFilmmaker/game/platform/"
+			"common/SourceFilmmaker/game/usermod/"
+			"common/SourceFilmmaker/game/portal2/"
+		}
+		$bool mount_workshop 1
+	}
+	engine
+	{
+		$string name "source_engine"
+	}
+}
+
+"ep2"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_ep2"
+	steam
+	{
+		$int app_id 420
+		$string game_path "common/half-life 2/ep2/"
+		$bool mount_workshop 0
+	}
+	engine
+	{
+		$string name "source_engine"
+		archives
+		{
+			"ep2_pak_dir.vpk" {}
+		}
+	}
+}
+
+"episodic"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_episodic"
+	steam
+	{
+		$int app_id 380
+		$string game_path "common/half-life 2/episodic/"
+		$bool mount_workshop 0
+	}
+	engine
+	{
+		$string name "source_engine"
+		archives
+		{
+			"ep1_pak_dir.vpk" {}
+		}
+	}
+}
+
+"hl2"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_hl2"
+	steam
+	{
+		$int app_id 220
+		$string game_path "common/Half-Life 2/hl2/"
+		$bool mount_workshop 0
+	}
+	engine
+	{
+		$string name "source_engine"
+		archives
+		{
+			"hl2_misc_dir.vpk" {}
+			"hl2_pak_dir.vpk" {}
+			"hl2_sound_misc_dir.vpk" {}
+			"hl2_sound_vo_english_dir.vpk" {}
+			"hl2_textures_dir.vpk" {}
+		}
+	}
+}
+
+"csgo"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_cs_go"
+	steam
+	{
+		$int app_id 730
+		$string game_path "common/Counter-Strike Global Offensive/csgo/"
+		$bool mount_workshop 0
+	}
+	engine
+	{
+		$string name "source_engine"
+		archives
+		{
+			"pak01_dir.vpk" {}
+		}
+	}
+}
+
+"cstrike"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_cstrike"
+	steam
+	{
+		$int app_id 240
+		$string game_path "common/counter-strike source/cstrike/"
+		$bool mount_workshop 0
+	}
+	engine
+	{
+		$string name "source_engine"
+		archives
+		{
+			"cstrike_pak_dir.vpk" {}
+		}
+	}
+}
+
+"dod"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_dod"
+	steam
+	{
+		$int app_id 300
+		$string game_path "common/day of defeat source/dod/"
+		$bool mount_workshop 0
+	}
+	engine
+	{
+		$string name "source_engine"
+		archives
+		{
+			"dod_pak_dir.vpk" {}
+		}
+	}
+}
+
+"garrysmod"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_garrysmod"
+	steam
+	{
+		$int app_id 4000
+		game_paths
+		{
+			"common/GarrysMod/garrysmod/"
+			"common/GarrysMod/sourceengine/"
+		}
+		$bool mount_workshop 1
+	}
+	engine
+	{
+		$string name "source_engine"
+		archives
+		{
+			"fallbacks_dir.vpk" {}
+			"garrysmod_dir.vpk" {}
+			"hl2_misc_dir.vpk" {}
+			"hl2_sound_misc_dir.vpk" {}
+			"hl2_sound_vo_english_dir.vpk" {}
+			"hl2_textures_dir.vpk" {}
+		}
+	}
+}
+
+"hl1"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_hl1"
+	steam
+	{
+		$int app_id 280
+		game_paths
+		{
+			"common/half-life 2/hl1/"
+			"common/half-life 2/hl1_hd/"
+		}
+		$bool mount_workshop 0
+	}
+	engine
+	{
+		$string name "source_engine"
+		archives
+		{
+			"hl1_hd_pak_dir.vpk" {}
+			"hl1_pak_dir.vpk" {}
+		}
+	}
+}
+
+"lostcoast"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_lostcoast"
+	steam
+	{
+		$int app_id 340
+		$string game_path "common/half-life 2/lostcoast/"
+		$bool mount_workshop 0
+	}
+	engine
+	{
+		$string name "source_engine"
+		archives
+		{
+			"lostcoast_pak_dir.vpk" {}
+		}
+	}
+}
+
+"hl2mp"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_hl2mp"
+	steam
+	{
+		$int app_id 320
+		$string game_path "common/half-life 2 deathmatch/hl2mp/"
+		$bool mount_workshop 0
+	}
+	engine
+	{
+		$string name "source_engine"
+		archives
+		{
+			"hl2mp_pak_dir.vpk" {}
+		}
+	}
+}
+
+"hl1mp"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_hl1mp"
+	steam
+	{
+		$int app_id 360
+		game_paths
+		{
+			"common/Half-Life 1 Source Deathmatch/hl1/"
+			"common/Half-Life 1 Source Deathmatch/hl1mp/"
+			"common/Half-Life 1 Source Deathmatch/hl2/"
+			"common/Half-Life 1 Source Deathmatch/platform/"
+		}
+		$bool mount_workshop 0
+	}
+	engine
+	{
+		$string name "source_engine"
+		archives
+		{
+			"platform_misc_dir.vpk" {}
+		}
+	}
+}
+
+"portal2"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_portal2"
+	steam
+	{
+		$int app_id 620
+		game_paths
+		{
+			"common/Portal 2/portal2/"
+			"common/Portal 2/portal2_dlc1/"
+			"common/Portal 2/portal2_dlc2/"
+		}
+		$bool mount_workshop 1
+	}
+	engine
+	{
+		$string name "source_engine"
+		archives
+		{
+			"pak01_dir.vpk" {}
+		}
+	}
+}
+
+"dota2"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_dota2"
+	steam
+	{
+		$int app_id 570
+		$string game_path "common/dota 2 beta/game/dota/"
+		$bool mount_workshop 1
+	}
+	engine
+	{
+		$string name "source2"
+		archives
+		{
+			"pak01_dir.vpk" {}
+		}
+	}
+}
+
+"steamvr"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_steamvr"
+	steam
+	{
+		$int app_id 250820
+		$string game_path "common/SteamVR/tools/steamvr_environments/game/steamtours/"
+		$bool mount_workshop 1
+	}
+	engine
+	{
+		$string name "source2"
+		archives
+		{
+			"pak01_dir.vpk" {}
+			"pak02_dir.vpk" {}
+		}
+	}
+}
+
+"portal"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_portal"
+	steam
+	{
+		$int app_id 400
+		$string game_path "common/Portal/portal/"
+		$bool mount_workshop 0
+	}
+	engine
+	{
+		$string name "source_engine"
+		archives
+		{
+			"portal_pak_dir.vpk" {}
+		}
+	}
+}
+
+"tf2"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_tf2"
+	steam
+	{
+		$int app_id 440
+		game_paths
+		{
+			"common/team fortress 2/hl2/"
+			"common/team fortress 2/tf/"
+		}
+		$bool mount_workshop 1
+	}
+	engine
+	{
+		$string name "source_engine"
+		archives
+		{
+			"tf2_misc_dir.vpk" {}
+			"tf2_sound_misc_dir.vpk" {}
+			"tf2_sound_vo_english_dir.vpk" {}
+			"tf2_textures_dir.vpk" {}
+		}
+	}
+}
+
+"darkmessiah_sp"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_darkmessiah_sp"
+	steam
+	{
+		$int app_id 2100
+		$string game_path "common/Dark Messiah Might and Magic Single Player/vpks/"
+		$bool mount_workshop 0
+	}
+	engine
+	{
+		$string name "source_engine"
+		archives
+		{
+			"depot_2101_dir.vpk" {}
+			"depot_2102_dir.vpk" {}
+			"depot_2103_dir.vpk" {}
+			"depot_2104_dir.vpk" {}
+			"depot_2105_dir.vpk" {}
+			"depot_2106_dir.vpk" {}
+			"depot_2107_dir.vpk" {}
+			"depot_2108_dir.vpk" {}
+			"depot_2109_dir.vpk" {}
+		}
+	}
+}
+
+"darkmessiah_mp"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_darkmessiah_mp"
+	steam
+	{
+		$int app_id 2130
+		$string game_path "common/Dark Messiah Might and Magic Multi-Player/vpks/"
+		$bool mount_workshop 0
+	}
+	engine
+	{
+		$string name "source_engine"
+		archives
+		{
+			"depot_2131_dir.vpk" {}
+			"depot_2132_dir.vpk" {}
+			"depot_2133_dir.vpk" {}
+			"depot_2134_dir.vpk" {}
+			"depot_2135_dir.vpk" {}
+			"depot_2136_dir.vpk" {}
+		}
+	}
+}
+
+"sin"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_sin"
+	steam
+	{
+		$int app_id 1300
+		$string game_path "common/SinEpisodes Emergence/vpks/"
+		$bool mount_workshop 0
+	}
+	engine
+	{
+		$string name "source_engine"
+		archives
+		{
+			"depot_1301_dir.vpk"
+			{
+				$string root_dir "se1/"
+			}
+			"depot_1302_dir.vpk"
+			{
+				$string root_dir "se1/"
+			}
+			"depot_1303_dir.vpk"
+			{
+				$string root_dir "se1/"
+			}
+			"depot_1304_dir.vpk"
+			{
+				$string root_dir "se1/"
+			}
+			"depot_1305_dir.vpk"
+			{
+				$string root_dir "se1/"
+			}
+			"depot_1308_dir.vpk"
+			{
+				$string root_dir "se1/"
+			}
+		}
+	}
+}
+
+"bms"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_darkmessiah_bms"
+	steam
+	{
+		$int app_id 362890
+		$string game_path "common/Black Mesa/bms/"
+		$bool mount_workshop 1
+	}
+	engine
+	{
+		$string name "source_engine"
+		archives
+		{
+			"bms_maps_dir.vpk" {}
+			"bms_materials_dir.vpk" {}
+			"bms_misc_dir.vpk" {}
+			"bms_models_dir.vpk" {}
+			"bms_sound_vo_english_dir.vpk" {}
+			"bms_sounds_misc_dir.vpk" {}
+			"bms_textures_dir.vpk" {}
+		}
+	}
+}
+
+"oblivion"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_oblivion"
+	steam
+	{
+		$int app_id 22330
+		$string game_path "common/Oblivion/Data/"
+		$bool mount_workshop 0
+	}
+	engine
+	{
+		$string name "gamebryo"
+		archives
+		{
+			"DLCBattlehornCastle.bsa" {}
+			"DLCFrostcrag.bsa" {}
+			"DLCHorseArmor.bsa" {}
+			"DLCOrrery.bsa" {}
+			"DLCShiveringIsles - Meshes.bsa" {}
+			"DLCShiveringIsles - Sounds.bsa" {}
+			"DLCShiveringIsles - Textures.bsa" {}
+			"DLCShiveringIsles - Voices.bsa" {}
+			"DLCThievesDen.bsa" {}
+			"DLCVileLair.bsa" {}
+			"Knights.bsa" {}
+			"Oblivion - Meshes.bsa" {}
+			"Oblivion - Misc.bsa" {}
+			"Oblivion - Sounds.bsa" {}
+			"Oblivion - Textures - Compressed.bsa" {}
+			"Oblivion - Voices1.bsa" {}
+			"Oblivion - Voices2.bsa" {}
+		}
+	}
+}
+
+"fo_nv"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_fo_nv"
+	steam
+	{
+		$int app_id 22380
+		$string game_path "common/Fallout New Vegas/Data/"
+		$bool mount_workshop 0
+	}
+	engine
+	{
+		$string name "gamebryo"
+		archives
+		{
+			"DeadMoney - Main.bsa" {}
+			"DeadMoney - Sounds.bsa" {}
+			"Fallout - Meshes.bsa" {}
+			"Fallout - Misc.bsa" {}
+			"Fallout - Sound.bsa" {}
+			"Fallout - Textures.bsa" {}
+			"Fallout - Textures2.bsa" {}
+			"Fallout - Voices1.bsa" {}
+			"GunRunnersArsenal - Main.bsa" {}
+			"GunRunnersArsenal - Sounds.bsa" {}
+			"HonestHearts - Main.bsa" {}
+			"HonestHearts - Sounds.bsa" {}
+			"LonesomeRoad - Main.bsa" {}
+			"LonesomeRoad - Sounds.bsa" {}
+			"OldWorldBlues - Main.bsa" {}
+			"OldWorldBlues - Sounds.bsa" {}
+			"Update.bsa" {}
+		}
+	}
+}
+
+"skyrim"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_skyrim"
+	steam
+	{
+		$int app_id 72850
+		$string game_path "common/Skyrim/Data/"
+		$bool mount_workshop 0
+	}
+	engine
+	{
+		$string name "gamebryo"
+		archives
+		{
+			"Dawnguard.bsa" {}
+			"Dragonborn.bsa" {}
+			"portal2mod.bsa" {}
+			"Skyrim - Animations.bsa" {}
+			"Skyrim - Interface.bsa" {}
+			"Skyrim - Meshes.bsa" {}
+			"Skyrim - Misc.bsa" {}
+			"Skyrim - Shaders.bsa" {}
+			"Skyrim - Sounds.bsa" {}
+			"Skyrim - Textures.bsa" {}
+			"Skyrim - Voices.bsa" {}
+			"Skyrim - VoicesExtra.bsa" {}
+			"Update.bsa" {}
+		}
+	}
+}
+
+"fo4"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_fo4"
+	steam
+	{
+		$int app_id 377160
+		$string game_path "common/Fallout 4/Data/"
+		$bool mount_workshop 0
+	}
+	engine
+	{
+		$string name "creation_engine"
+		archives
+		{
+			"Fallout4 - Animations.ba2" {}
+			"Fallout4 - Interface.ba2" {}
+			"Fallout4 - Materials.ba2" {}
+			"Fallout4 - Meshes.ba2" {}
+			//"Fallout4 - MeshesExtra.ba2" {}
+			"Fallout4 - Misc.ba2" {}
+			"Fallout4 - Nvflex.ba2" {}
+			"Fallout4 - Shaders.ba2" {}
+			"Fallout4 - Sounds.ba2" {}
+			"Fallout4 - Startup.ba2" {}
+			"Fallout4 - Textures1.ba2" {}
+			"Fallout4 - Textures2.ba2" {}
+			"Fallout4 - Textures3.ba2" {}
+			"Fallout4 - Textures4.ba2" {}
+			"Fallout4 - Textures5.ba2" {}
+			"Fallout4 - Textures6.ba2" {}
+			"Fallout4 - Textures7.ba2" {}
+			"Fallout4 - Textures8.ba2" {}
+			"Fallout4 - Textures9.ba2" {}
+			"Fallout4 - Voices.ba2" {}
+		}
+	}
+}

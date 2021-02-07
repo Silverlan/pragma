@@ -9,7 +9,7 @@
 #include "pragma/lua/libraries/c_lglobal.h"
 #include "luasystem.h"
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 double Lua::ServerTime(lua_State *l)
 {

@@ -10,7 +10,7 @@
 #include <pragma/console/s_cvar.h>
 #include <pragma/math/intersection.h>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 // See http://www.randygaul.net/wp-content/uploads/2014/02/RigidBodies_WaterSurface.pdf for surface simulation algorithms
 

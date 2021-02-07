@@ -13,7 +13,7 @@
 
 #undef CreateEvent
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 SoundScriptEventContainer::~SoundScriptEventContainer()
 {

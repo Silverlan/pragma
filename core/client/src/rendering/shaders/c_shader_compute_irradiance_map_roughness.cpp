@@ -15,7 +15,7 @@
 #include <image/prosper_image_view.hpp>
 #include <prosper_framebuffer.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 

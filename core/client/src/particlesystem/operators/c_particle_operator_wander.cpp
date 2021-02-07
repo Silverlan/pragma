@@ -14,7 +14,7 @@
 #include <pragma/math/util_noise.hpp>
 #include <algorithm>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 REGISTER_PARTICLE_OPERATOR(wander,CParticleOperatorWander);
 

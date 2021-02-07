@@ -205,7 +205,7 @@ void TimerRandom::Reset()
 */
 /////////////////////////////
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 Timer *Game::CreateTimer(float delay,int reps,LuaFunctionObject luaFunction,TimerType timeType)
 {
 	m_timers.push_back(std::make_unique<Timer>(delay,reps,luaFunction,timeType));

@@ -9,7 +9,7 @@
 #include "pragma/networking/recipient_filter.hpp"
 #include <sharedutils/util_clock.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 bool pragma::networking::LocalServer::DoStart(Error &outErr,uint16_t port,bool useP2PIfAvailable) {return true;}
 bool pragma::networking::LocalServer::PollEvents(Error &outErr) {return true;}

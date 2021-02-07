@@ -14,7 +14,7 @@
 #include <mathutil/umath.h>
 #include <pragma/console/command_options.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 int Lua_cvar_CreateConVar(lua_State *l)
 {
 	auto cmd = Lua::CheckString(l,1);

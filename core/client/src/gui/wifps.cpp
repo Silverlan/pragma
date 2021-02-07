@@ -9,7 +9,7 @@
 #include "pragma/gui/wifps.h"
 #include <wgui/types/witext.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 
 LINK_WGUI_TO_CLASS(WIFPS,WIFPS);

@@ -10,7 +10,7 @@
 #include "pragma/networking/enums.hpp"
 #include <networkmanager/interface/nwm_manager.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 void Lua::net::RegisterLibraryEnums(lua_State *l)
 {

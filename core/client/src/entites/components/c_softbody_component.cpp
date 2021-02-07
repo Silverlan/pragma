@@ -12,7 +12,7 @@
 #include <pragma/physics/environment.hpp>
 #include <pragma/physics/collisionmesh.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 

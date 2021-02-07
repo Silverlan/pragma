@@ -196,3 +196,6 @@
 [submodule "third_party_libs/vtflib"]
 	path = third_party_libs/vtflib
 	url = https://github.com/Silverlan/VTFLib.git
+[submodule "third_party_libs/miniball"]
+	path = third_party_libs/miniball
+	url = https://github.com/Silverlan/miniball.git

@@ -10,7 +10,7 @@ What platforms and hardware does it work on?
 
 What are Pragma's requirements?
 ------
-- Visual Studio with C++-17 support (Linux support will follow)
+- Windows compiler with C++-17 support (Linux support will follow)
 - CMake 3.18.4 or newer: https://cmake.org/download/#latest
 - Boost 1.72: https://www.boost.org/users/history/version_1_72_0.html
 - Geometric Tools Engine: https://github.com/davideberly/GeometricTools
@@ -22,16 +22,17 @@ Build Instructions (Windows)
 1) Build shared boost libraries (with zlib) for x64 architecture in release mode
 2) Build GTE (Geometric Tools Engine)
 3) Build third-party libraries
+
 There are two third-party libraries (aside from boost and GTE) that have to be built by hand for now: LuaJIT and NVTT.
 
--- Building LuaJIT
+### Building LuaJIT
 - Open Visual Studio command prompt (Available from the menu bar under "Tools -> Visual Studio Command Prompt")
 - Go to `%PROGRAMFILES(X86)%/Microsoft Visual Studio/2019/Community/VC/Auxiliary/Build` (or the equivalent directory for your Visual Studio version)
 - Run `vcvarsall.bat x64`
 - Go to `Pragma/third_party_libs/luajit/src`
 - Run `run msvcbuild.bat`
 
--- Building NVTT
+### Building NVTT
 - Go to `Pragma/third_party_libs/nvtt/project/vc2017` in the Windows file explorer
 - Open `nvtt.sln`
 - Build `bc6h`, `bc7`, `nvcore`, `nvimage`, `nvmath`, `nvthread`, `nvtt` in Release mode
@@ -65,7 +66,12 @@ Pragma uses OpenGL by default if the Vulkan module has not been built, however P
 
 Vulkan will automatically be used by default if available. You can also force a particular renderer by adding `-graphics_api opengl` or `-graphics_api vulkan` to the launch options respectively.
 
--- Modules
+Build Instructions (Linux)
+------
+TODO
+
+Modules
+------
 There are various optional modules available for Pragma, some of which are already included with this repository, and some of which can be found online:
 - pr_chromium: https://github.com/Silverlan/pragma/tree/master/modules/pr_chromium
 - pr_curl: https://github.com/Silverlan/pr_curl

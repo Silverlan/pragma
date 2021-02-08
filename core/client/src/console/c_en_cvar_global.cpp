@@ -8,6 +8,7 @@
 #include "stdafx_cengine.h"
 #include <fsys/filesystem.h>
 #include "pragma/c_engine.h"
+#include "pragma/console/c_en_cvar_global.h"
 #include <sharedutils/util_string.h>
 #include <pragma/lua/libraries/lutil.h>
 #include <pragma/clientstate/clientstate.h>

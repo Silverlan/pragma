@@ -1,24 +1,32 @@
-util.register_class("game.Generic",game.Base)
+util.register_class("ents.GmGeneric",BaseEntityComponent)
+local Component = ents.GmGeneric
 
 game.load_sound_scripts("fx_footsteps.txt")
-function game.Generic:__init()
-	game.Base.__init(self)
+function Component:__init()
+	BaseEntityComponent.Initialize(self)
 end
 
-function game.Generic:OnPlayerReady(pl)
-  local ent = pl:GetEntity()
-  ent:AddComponent(ents.COMPONENT_DAMAGEABLE)
-  ent:AddComponent(ents.COMPONENT_RENDER)
-  ent:AddComponent(ents.COMPONENT_ANIMATED)
-  ent:AddComponent(ents.COMPONENT_MODEL)
-  ent:AddComponent(ents.COMPONENT_PHYSICS)
+function Component:Initialize()
+	BaseEntityComponent.Initialize(self)
+	
+	self:BindEvent(ents.GamemodeComponent.EVENT_ON_PLAYER_READY,"OnPlayerReady")
+	self:BindEvent(ents.GamemodeComponent.EVENT_ON_PLAYER_SPAWNED,"OnPlayerSpawned")
+end
+
+function Component:OnPlayerReady(pl)
+	local ent = pl:GetEntity()
+	ent:AddComponent(ents.COMPONENT_DAMAGEABLE)
+	ent:AddComponent(ents.COMPONENT_RENDER)
+	ent:AddComponent(ents.COMPONENT_ANIMATED)
+	ent:AddComponent(ents.COMPONENT_MODEL)
+	ent:AddComponent(ents.COMPONENT_PHYSICS)
 	ent:AddComponent(ents.COMPONENT_CHARACTER)
-  
+
 	self:InitializeDefaultPlayerDimensions(pl)
 	self:InitializePlayer(pl)
 end
 
-function game.Generic:InitializeDefaultPlayerDimensions(pl)
+function Component:InitializeDefaultPlayerDimensions(pl)
 	pl:SetStandHeight(72.0)
 	pl:SetStandEyeLevel(64.0)
 	pl:SetCrouchHeight(36.0)
@@ -31,7 +39,7 @@ function game.Generic:InitializeDefaultPlayerDimensions(pl)
 	if(charComponent ~= nil) then charComponent:SetJumpPower(240.0) end
 end
 
-function game.Generic:InitializePlayer(pl)
+function Component:InitializePlayer(pl)
 	local ent = pl:GetEntity()
 	local charComponent = ent:AddComponent(ents.COMPONENT_CHARACTER)
 	if(charComponent ~= nil) then
@@ -45,7 +53,7 @@ function game.Generic:InitializePlayer(pl)
 	self:InitializePlayerModel(pl)
 end
 
-function game.Generic:InitializePlayerModel(pl)
+function Component:InitializePlayerModel(pl)
 	local ent = pl:GetEntity()
 	local mdlComponent = ent:GetComponent(ents.COMPONENT_MODEL)
 	if(CLIENT == true) then
@@ -61,7 +69,7 @@ function game.Generic:InitializePlayerModel(pl)
 	if(mdlComponent ~= nil) then mdlComponent:SetModel("player/soldier.wmd") end
 end
 
-function game.Generic:OnPlayerSpawned(pl)
+function Component:OnPlayerSpawned(pl)
 	local ent = pl:GetEntity()
 	local healthComponent = ent:GetComponent(ents.COMPONENT_HEALTH)
 	if(healthComponent ~= nil) then healthComponent:SetMaxHealth(100) end
@@ -88,3 +96,4 @@ function game.Generic:OnPlayerSpawned(pl)
 		end
 	end
 end
+ents.COMPONENT_GM_GENERIC = ents.register_component("gm_generic",Component)

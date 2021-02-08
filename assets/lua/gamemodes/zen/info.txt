@@ -1,6 +1,6 @@
 "zen"
 {
-	$string class "game.Zen"
+	$string component_name "gm_zen"
 	$string name "Zen"
 	$string author "Silverlan"
 	$float version 0.1

@@ -5,8 +5,8 @@
  * Copyright (c) 2020 Florian Weischer
  */
 
-#ifndef __C_CVAR_GLOBAL_H__
-#define __C_CVAR_GLOBAL_H__
+#ifndef __C_EN_CVAR_GLOBAL_H__
+#define __C_EN_CVAR_GLOBAL_H__
 #include "pragma/c_enginedefinitions.h"
 #include "pragma/clientdefinitions.h"
 #include "pragma/networkdefinitions.h"

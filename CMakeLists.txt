@@ -1201,11 +1201,19 @@ function(pragma_install_lib_c INPUT_LIBRARY_FILENAME LIB_NAME DESTINATION_PATH)
 	else()
 		set(INPUT_LIBRARY_PATH_BIN "${INPUT_LIBRARY_PATH}/${LIB_NAME}.so")
 	endif()
-	add_custom_command(TARGET pragma-install POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-			${INPUT_LIBRARY_PATH_BIN}
-			${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}
+	set(IS_OPTIONAL 0)
+	if(${ARGC} GREATER 3)
+		if(${ARGN} STREQUAL "OPTIONAL")
+			set(IS_OPTIONAL 1)
+		endif()
+	endif()
+	if((IS_OPTIONAL EQUAL 0) OR (EXISTS "${INPUT_LIBRARY_PATH_BIN}"))
+		add_custom_command(TARGET pragma-install POST_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different
+				${INPUT_LIBRARY_PATH_BIN}
+				${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}
 		)
+	endif()
 endfunction(pragma_install_lib_c)
 
 function(pragma_install_lib INPUT_LIBRARY_PATH DESTINATION_PATH)

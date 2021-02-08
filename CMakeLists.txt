@@ -1226,10 +1226,18 @@ function(pragma_install_lib INPUT_LIBRARY_PATH DESTINATION_PATH)
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
 				${INPUT_LIBRARY_PATH_BIN}
 				${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_PREFIX}/${DESTINATION_PATH}
-			)
+		)
 	endif()
 endfunction(pragma_install_lib)
 
+function(pragma_install_create_directory DIR_NAME)
+	add_custom_command(TARGET pragma-install POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E make_directory
+			${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_PREFIX}/${DIR_NAME}
+	)
+endfunction(pragma_install_create_directory)
+
+pragma_install_create_directory(modules)
 pragma_install_lib("${DEPENDENCY_ASSIMP_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_BOOST_DATE_TIME_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_BOOST_SYSTEM_LIBRARY}" "${BINARY_OUTPUT_DIR}")
@@ -1256,10 +1264,11 @@ else()
 	set(OS_LIB_BIN_EXT ".so")
 endif()
 
-function(pragma_install_file FILE_PATH INSTALL_PATH ARGS)
+function(pragma_install_file FILE_PATH INSTALL_PATH)
+	set(extra_macro_args ${ARGN})
 	INSTALL(
 		FILES "${FILE_PATH}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_PREFIX}/${INSTALL_PATH}"
-		COMPONENT ${PRAGMA_INSTALL_COMPONENT} ${ARGS}
+		COMPONENT ${PRAGMA_INSTALL_COMPONENT} ${extra_macro_args}
 	)
 endfunction(pragma_install_file)
 
@@ -1278,7 +1287,7 @@ foreach(MODULE_PATH ${PR_MODULES})
 		# Default behavior
 		if(EXISTS "${PR_MODULE_PATH_WITH_EXT}")
 			INSTALL(
-				FILES "${PR_MODULE_PATH_WITH_EXT}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_PREFIX}/modules/${MODULE_NAME}/"
+				FILES "${PR_MODULE_PATH_WITH_EXT}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_PREFIX}/modules/"
 				COMPONENT ${PRAGMA_INSTALL_COMPONENT}
 			)
 		endif()

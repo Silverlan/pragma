@@ -1272,6 +1272,14 @@ function(pragma_install_file FILE_PATH INSTALL_PATH)
 	)
 endfunction(pragma_install_file)
 
+function(pragma_install_directory FILE_PATH INSTALL_PATH)
+	set(extra_macro_args ${ARGN})
+	INSTALL(
+		DIRECTORY "${FILE_PATH}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_PREFIX}/${INSTALL_PATH}"
+		COMPONENT ${PRAGMA_INSTALL_COMPONENT} ${extra_macro_args}
+	)
+endfunction(pragma_install_directory)
+
 # Modules
 file(GLOB PR_MODULES "modules/pr_*")
 foreach(MODULE_PATH ${PR_MODULES})

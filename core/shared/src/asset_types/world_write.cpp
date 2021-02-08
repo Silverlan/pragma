@@ -41,7 +41,7 @@ bool pragma::asset::WorldData::Write(const std::string &fileName,std::string *op
 	auto nFileName = fileName;
 	ufile::remove_extension_from_filename(nFileName);
 	nFileName += ".wld";
-	auto fullPath = util::IMPORT_PATH +nFileName;
+	auto fullPath = util::CONVERT_PATH +nFileName;
 	auto pathNoFile = ufile::get_path_from_filename(fullPath);
 	if(FileManager::CreatePath(pathNoFile.c_str()) == false)
 	{

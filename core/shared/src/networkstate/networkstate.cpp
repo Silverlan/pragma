@@ -158,6 +158,7 @@ bool NetworkState::PortMaterial(const std::string &path,const std::function<Mate
 	auto pathWithoutExt = path;
 	ufile::remove_extension_from_filename(pathWithoutExt);
 
+	// TODO: This doesn't belong here! Move it into the source module
 	auto matPath = pathWithoutExt +".vmat_c";
 	if(util::port_file(this,"materials\\" +matPath) == false)
 	{
@@ -168,7 +169,7 @@ bool NetworkState::PortMaterial(const std::string &path,const std::function<Mate
 	if(fLoadMaterial == nullptr)
 		return true;
 	auto *mat = fLoadMaterial(matPath,true);
-	if(mat)
+	if(mat && mat->GetDataBlock())
 	{
 		// Port textures as well
 		std::function<void(const std::shared_ptr<ds::Block>&)> fPortTextures = nullptr;

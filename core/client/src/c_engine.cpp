@@ -70,7 +70,7 @@ decltype(CEngine::AXIS_PRESS_THRESHOLD) CEngine::AXIS_PRESS_THRESHOLD = 0.5f;
 
 // If set to true, each joystick axes will be split into a positive and a negative axis, which
 // can be bound individually
-
+#pragma optimize("",off)
 static const auto SEPARATE_JOYSTICK_AXES = true;
 CEngine::CEngine(int argc,char* argv[])
 	: Engine(argc,argv),pragma::RenderContext(),
@@ -496,7 +496,6 @@ bool CEngine::IsWindowFocused() const {return umath::is_flag_set(m_stateFlags,St
 bool CEngine::Initialize(int argc,char *argv[])
 {
 	Engine::Initialize(argc,argv);
-
 	auto &cmds = *m_preloadedConfig.get();
 
 	auto *cviRenderAPI = cmds.find("render_api");
@@ -1422,3 +1421,4 @@ REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled,[](NetworkState*,ConVar
 		return;
 	c_engine->SetGPUProfilingEnabled(enabled);
 })
+#pragma optimize("",on)

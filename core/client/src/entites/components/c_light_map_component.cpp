@@ -188,17 +188,18 @@ std::shared_ptr<prosper::IDynamicResizableBuffer> CLightMapComponent::GenerateLi
 	return lightMapUvBuffer;
 }
 
-std::shared_ptr<prosper::Texture> CLightMapComponent::CreateLightmapTexture(uint32_t width,uint32_t height,const uint16_t *hdrPixelData)
+std::shared_ptr<prosper::Texture> CLightMapComponent::CreateLightmapTexture(uimg::ImageBuffer &imgBuf)
 {
+	imgBuf.Convert(uimg::ImageBuffer::Format::RGBA16);
 	prosper::util::ImageCreateInfo lightMapCreateInfo {};
-	lightMapCreateInfo.width = width;
-	lightMapCreateInfo.height = height;
+	lightMapCreateInfo.width = imgBuf.GetWidth();
+	lightMapCreateInfo.height = imgBuf.GetHeight();
 	lightMapCreateInfo.format = prosper::Format::R16G16B16A16_SFloat;
 	lightMapCreateInfo.postCreateLayout = prosper::ImageLayout::TransferSrcOptimal;
 	lightMapCreateInfo.usage = prosper::ImageUsageFlags::TransferSrcBit;
 	lightMapCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostCoherent | prosper::MemoryFeatureFlags::HostAccessable;
 	lightMapCreateInfo.tiling = prosper::ImageTiling::Linear;
-	auto imgStaging = c_engine->GetRenderContext().CreateImage(lightMapCreateInfo,reinterpret_cast<const uint8_t*>(hdrPixelData));
+	auto imgStaging = c_engine->GetRenderContext().CreateImage(lightMapCreateInfo,static_cast<const uint8_t*>(imgBuf.GetData()));
 
 	lightMapCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	lightMapCreateInfo.tiling = prosper::ImageTiling::Optimal;
@@ -322,7 +323,46 @@ static void generate_lightmap_uv_atlas(BaseEntity &ent,uint32_t width,uint32_t h
 	c_engine->AddParallelJob(job,"Lightmap UV Atlas");
 }
 
-static void generate_lightmaps(uint32_t width,uint32_t height,uint32_t sampleCount,bool denoise,bool renderJob,float exposure,const std::optional<pragma::rendering::cycles::SceneInfo::ColorTransform> &colorTransform)
+bool CLightMapComponent::ImportLightmapAtlas(uimg::ImageBuffer &imgBuffer)
+{
+	auto tex = CLightMapComponent::CreateLightmapTexture(imgBuffer);
+	/*{
+	TextureManager::LoadInfo loadInfo {};
+	loadInfo.flags = TextureLoadFlags::LoadInstantly;
+	std::shared_ptr<void> ptrTex;
+	static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(*c_engine,"lightmaps_medium.dds",loadInfo,&ptrTex);
+	tex = std::static_pointer_cast<Texture>(ptrTex)->texture;
+	}*/
+
+	uimg::TextureInfo texInfo {};
+	texInfo.containerFormat = uimg::TextureInfo::ContainerFormat::DDS;
+	texInfo.inputFormat = uimg::TextureInfo::InputFormat::R16G16B16A16_Float;
+	texInfo.outputFormat = uimg::TextureInfo::OutputFormat::BC6;
+	texInfo.flags = uimg::TextureInfo::Flags::GenerateMipmaps;
+//	auto f = FileManager::OpenFile<VFilePtrReal>("materials/maps/sfm_gtav_mp_apa_06/lightmap_atlas.dds","wb");
+//	if(f)
+	auto mapName = c_game->GetMapName();
+	Con::cout<<"Lightmap atlas save result: "<<uimg::save_texture("materials/maps/" +mapName +"/lightmap_atlas.dds",imgBuffer,texInfo,false)<<Con::endl;
+
+	EntityIterator entIt {*c_game};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightMapComponent>>();
+	auto it = entIt.begin();
+	if(it == entIt.end())
+		return false;
+	auto *ent = *it;
+	auto lightmapC = ent->GetComponent<pragma::CLightMapComponent>();
+
+	if(lightmapC.valid())
+		lightmapC->SetLightMapAtlas(tex);
+
+	Console::commands::debug_lightmaps(client,nullptr,std::vector<std::string>{});
+	return true;
+}
+
+static void generate_lightmaps(
+	uint32_t width,uint32_t height,uint32_t sampleCount,bool denoise,bool renderJob,float exposure,float skyStrength,
+	float globalLightIntensityFactor,const std::string &skyTex,const std::optional<pragma::rendering::cycles::SceneInfo::ColorTransform> &colorTransform
+)
 {
 	Con::cout<<"Baking lightmaps... This may take a few minutes!"<<Con::endl;
 	auto hdrOutput = true;
@@ -336,11 +376,13 @@ static void generate_lightmaps(uint32_t width,uint32_t height,uint32_t sampleCou
 	sceneInfo.exposure = exposure;
 	sceneInfo.colorTransform = colorTransform;
 	sceneInfo.device = pragma::rendering::cycles::SceneInfo::DeviceType::GPU;
+	sceneInfo.globalLightIntensityFactor = globalLightIntensityFactor;
 
 	// TODO: Replace these with command arguments?
-	sceneInfo.sky = "skies/dusk379.hdr";
+	sceneInfo.sky = skyTex;
 	sceneInfo.skyAngles = {0.f,0.f,0.f};
-	sceneInfo.skyStrength = 0.3f;
+	sceneInfo.skyStrength = skyStrength;
+	sceneInfo.renderer = "luxcorerender";
 
 	auto job = pragma::rendering::cycles::bake_lightmaps(*client,sceneInfo);
 	if(sceneInfo.renderJob)
@@ -364,45 +406,25 @@ static void generate_lightmaps(uint32_t width,uint32_t height,uint32_t sampleCou
 			imgBuffer->Convert(uimg::ImageBuffer::Format::RGBA16);
 		}
 
-		auto tex = CLightMapComponent::CreateLightmapTexture(imgBuffer->GetWidth(),imgBuffer->GetHeight(),reinterpret_cast<uint16_t*>(imgBuffer->GetData()));
-		/*{
-		TextureManager::LoadInfo loadInfo {};
-		loadInfo.flags = TextureLoadFlags::LoadInstantly;
-		std::shared_ptr<void> ptrTex;
-		static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().Load(*c_engine,"lightmaps_medium.dds",loadInfo,&ptrTex);
-		tex = std::static_pointer_cast<Texture>(ptrTex)->texture;
-		}*/
-
-		uimg::TextureInfo texInfo {};
-		texInfo.containerFormat = uimg::TextureInfo::ContainerFormat::DDS;
-		texInfo.inputFormat = uimg::TextureInfo::InputFormat::R16G16B16A16_Float;
-		texInfo.outputFormat = uimg::TextureInfo::OutputFormat::BC6;
-		texInfo.flags = uimg::TextureInfo::Flags::GenerateMipmaps;
-	//	auto f = FileManager::OpenFile<VFilePtrReal>("materials/maps/sfm_gtav_mp_apa_06/lightmap_atlas.dds","wb");
-	//	if(f)
-		auto mapName = c_game->GetMapName();
-		Con::cout<<"Lightmap atlas save result: "<<uimg::save_texture("materials/maps/" +mapName +"/lightmap_atlas.dds",*imgBuffer,texInfo,false)<<Con::endl;
-
-		EntityIterator entIt {*c_game};
-		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightMapComponent>>();
-		auto it = entIt.begin();
-		if(it == entIt.end())
-			return;
-		auto *ent = *it;
-		auto lightmapC = ent->GetComponent<pragma::CLightMapComponent>();
-
-		if(lightmapC.valid())
-			lightmapC->SetLightMapAtlas(tex);
-
-		{
-			auto &wgui = WGUI::GetInstance();
-			auto *pRect = wgui.Create<WITexturedRect>();
-			pRect->SetSize(512,512);
-			pRect->SetTexture(*tex);
-		}
+		CLightMapComponent::ImportLightmapAtlas(*imgBuffer);
 	});
 	job.Start();
 	c_engine->AddParallelJob(job,"Baked lightmaps");
+}
+
+bool CLightMapComponent::ImportLightmapAtlas(VFilePtr f)
+{
+	auto imgBuf = uimg::load_image(f,uimg::PixelFormat::Float);
+	if(imgBuf == nullptr)
+		return false;
+	return CLightMapComponent::ImportLightmapAtlas(*imgBuf);
+}
+bool CLightMapComponent::ImportLightmapAtlas(const std::string &path)
+{
+	auto f = FileManager::OpenSystemFile(path.c_str(),"rb");
+	if(f == nullptr)
+		return false;
+	return ImportLightmapAtlas(f);
 }
 
 bool CLightMapComponent::BakeLightmaps(const LightmapBakeSettings &bakeSettings)
@@ -436,11 +458,11 @@ bool CLightMapComponent::BakeLightmaps(const LightmapBakeSettings &bakeSettings)
 		generate_lightmap_uv_atlas(*ent,resolution.x,resolution.y,[hEnt,resolution,bakeSettings](bool success) {
 			if(success == false || hEnt.IsValid() == false)
 				return;
-			generate_lightmaps(resolution.x,resolution.y,bakeSettings.samples,bakeSettings.denoise,bakeSettings.createAsRenderJob,bakeSettings.exposure,bakeSettings.colorTransform);
+			generate_lightmaps(resolution.x,resolution.y,bakeSettings.samples,bakeSettings.denoise,bakeSettings.createAsRenderJob,bakeSettings.exposure,bakeSettings.skyStrength,bakeSettings.globalLightIntensityFactor,bakeSettings.sky,bakeSettings.colorTransform);
 		});
 		return true;
 	}
-	generate_lightmaps(resolution.x,resolution.y,bakeSettings.samples,bakeSettings.denoise,bakeSettings.createAsRenderJob,bakeSettings.exposure,bakeSettings.colorTransform);
+	generate_lightmaps(resolution.x,resolution.y,bakeSettings.samples,bakeSettings.denoise,bakeSettings.createAsRenderJob,bakeSettings.exposure,bakeSettings.skyStrength,bakeSettings.globalLightIntensityFactor,bakeSettings.sky,bakeSettings.colorTransform);
 	return true;
 }
 
@@ -456,11 +478,17 @@ void Console::commands::map_rebuild_lightmaps(NetworkState *state,pragma::BasePl
 		bakeSettings.width = util::to_uint(width);
 	if(height.empty() == false)
 		bakeSettings.height = util::to_uint(height);
+	bakeSettings.exposure = util::to_float(pragma::console::get_command_option_parameter_value(commandOptions,"exposure","50"));
+	bakeSettings.skyStrength = util::to_float(pragma::console::get_command_option_parameter_value(commandOptions,"sky_strength","0.3"));
 	bakeSettings.samples = util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions,"samples","1225"));
 	bakeSettings.denoise = util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions,"denoise","1"));
 	bakeSettings.createAsRenderJob = util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions,"render_job","0"));
+	bakeSettings.globalLightIntensityFactor = util::to_float(pragma::console::get_command_option_parameter_value(commandOptions,"light_intensity_factor","1"));
 	auto itRebuildUvAtlas = commandOptions.find("rebuild_uv_atlas");
 	bakeSettings.rebuildUvAtlas = (itRebuildUvAtlas != commandOptions.end());
+	bakeSettings.colorTransform = pragma::rendering::cycles::SceneInfo::ColorTransform {};
+	bakeSettings.colorTransform->config = "filmic-blender";
+	bakeSettings.colorTransform->look = "Medium Contrast";
 	CLightMapComponent::BakeLightmaps(bakeSettings);
 }
 

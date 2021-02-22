@@ -16,10 +16,7 @@ decltype(EntityComponentManager::s_componentEvents) EntityComponentManager::s_co
 
 std::shared_ptr<BaseEntityComponent> EntityComponentManager::CreateComponent(ComponentId componentId,BaseEntity &ent) const
 {
-	if(componentId >= m_componentInfos.size())
-		return nullptr;
-	auto &info = m_componentInfos.at(componentId);
-	if(info.id == INVALID_COMPONENT_ID)
+	if(componentId >= m_componentInfos.size() || m_componentInfos[componentId].id == INVALID_COMPONENT_ID)
 	{
 		// Component has been pre-registered, but its script has not yet been loaded!
 		// 'info'-members will not be valid, so we have to retrieve the component information
@@ -41,6 +38,7 @@ std::shared_ptr<BaseEntityComponent> EntityComponentManager::CreateComponent(Com
 		auto name = preRegInfo.name; // Name has to be copied, because pre-register information may be invalidated by the 'CreateComponent'-call
 		return CreateComponent(name,ent);
 	}
+	auto &info = m_componentInfos.at(componentId);
 	auto r = info.factory(ent);
 	if(r == nullptr)
 		return nullptr;

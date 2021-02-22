@@ -13,6 +13,7 @@
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/model/modelmesh.h"
 #include "pragma/file_formats/wad.h"
+#include <udm.hpp>
 
 void Lua::Animation::Create(lua_State *l)
 {
@@ -21,6 +22,32 @@ void Lua::Animation::Create(lua_State *l)
 }
 void Lua::Animation::Load(lua_State *l,LFile &f)
 {
+	auto fptr = f.GetHandle();
+	auto offset = fptr->Tell();
+	auto len = strlen(udm::HEADER_IDENTIFIER);
+	auto isUdmFormat = true;
+	for(auto i=decltype(len){0u};i<len;++i)
+	{
+		if(fptr->ReadChar() != udm::HEADER_IDENTIFIER[i])
+		{
+			isUdmFormat = false;
+			break;
+		}
+	}
+	fptr->Seek(offset);
+	if(isUdmFormat)
+	{
+		std::string err;
+		auto udmData = udm::Data::Load(fptr,err);
+		if(udmData == nullptr)
+			return;
+		auto anim = ::Animation::Load(udmData->GetAssetData(),err);
+		if(anim == nullptr)
+			return;
+		Lua::Push(l,anim);
+		return;
+	}
+
 	FWAD wad;
 	auto anim = std::shared_ptr<::Animation>(wad.ReadData(33,f.GetHandle())); // Animation version has been introduced at model version 33, after which the model version is no longer taken into account, so we'll always treat it as model version 33 here
 	if(anim == nullptr)

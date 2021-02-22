@@ -28,7 +28,7 @@ namespace pragma::rendering::cycles
 			CPU = 0,
 			GPU
 		};
-		enum class SceneFlags : uint8_t // Has to match Scene Flags defined in Cycles module!
+		enum class SceneFlags : uint8_t // Has to match struct defined in Cycles module!
 		{
 			None = 0u,
 			CullObjectsOutsidePvs = 1u,
@@ -45,6 +45,8 @@ namespace pragma::rendering::cycles
 		bool denoise = true;
 		bool hdrOutput = false;
 		bool renderJob = false;
+		float globalLightIntensityFactor = 1.f;
+		std::string renderer = "cycles";
 		SceneFlags sceneFlags = static_cast<SceneFlags>(umath::to_integral(SceneFlags::CullObjectsOutsidePvs) | umath::to_integral(SceneFlags::CullObjectsOutsideCameraFrustum));
 		DeviceType device = DeviceType::CPU;
 		std::string sky = "";
@@ -56,8 +58,7 @@ namespace pragma::rendering::cycles
 	};
 	struct DLLCLIENT RenderImageInfo
 	{
-		Vector3 cameraPosition = {};
-		Quat cameraRotation = {};
+		umath::Transform camPose {};
 		bool equirectPanorama = false;
 		Mat4 viewProjectionMatrix = {};
 		float nearZ = pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z;

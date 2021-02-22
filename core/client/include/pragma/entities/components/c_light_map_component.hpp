@@ -27,14 +27,20 @@ namespace pragma
 			std::optional<uint32_t> height {};
 			std::optional<pragma::rendering::cycles::SceneInfo::ColorTransform> colorTransform {};
 			float exposure = 1.f;
+			float skyStrength = 0.3f;
+			float globalLightIntensityFactor = 1.f;
+			std::string sky = "skies/dusk379.hdr";
 			uint32_t samples = 1'225;
 			bool denoise = true;
 			bool createAsRenderJob = false;
 			bool rebuildUvAtlas = false;
 		};
 		static std::shared_ptr<prosper::IDynamicResizableBuffer> GenerateLightmapUVBuffers(std::vector<std::shared_ptr<prosper::IBuffer>> &outMeshLightMapUvBuffers);
-		static std::shared_ptr<prosper::Texture> CreateLightmapTexture(uint32_t width,uint32_t height,const uint16_t *hdrPixelData);
+		static std::shared_ptr<prosper::Texture> CreateLightmapTexture(uimg::ImageBuffer &imgBuf);
 		static bool BakeLightmaps(const LightmapBakeSettings &bakeSettings);
+		static bool ImportLightmapAtlas(VFilePtr f);
+		static bool ImportLightmapAtlas(const std::string &path);
+		static bool ImportLightmapAtlas(uimg::ImageBuffer &imgBuf);
 
 		CLightMapComponent(BaseEntity &ent);
 		virtual void Initialize() override;

@@ -1010,6 +1010,26 @@ namespace Lua
 			pragma::Lua::check_component(l,hEntOther);
 			hEnt->SetCollisionsEnabled(&hEntOther->GetEntity(),b);
 		}));
+		def.def("EnableCollisions",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt->SetCollisionsEnabled(true);
+		}));
+		def.def("DisableCollisions",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt->SetCollisionsEnabled(false);
+		}));
+		def.def("SetCollisionsEnabled",static_cast<void(*)(lua_State*,THandle&,bool)>([](lua_State *l,THandle &hEnt,bool b) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt->SetCollisionsEnabled(b);
+		}));
+		def.def("SetSimulationEnabled",static_cast<void(*)(lua_State*,THandle&,bool)>([](lua_State *l,THandle &hEnt,bool b) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt->SetSimulationEnabled(b);
+		}));
+		def.def("IsSimulationEnabled",static_cast<bool(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) -> bool {
+			pragma::Lua::check_component(l,hEnt);
+			return hEnt->GetSimulationEnabled();
+		}));
 		def.def("ResetCollisions",static_cast<void(*)(lua_State*,THandle&,THandle&)>([](lua_State *l,THandle &hEnt,THandle &hEntOther) {
 			pragma::Lua::check_component(l,hEnt);
 			pragma::Lua::check_component(l,hEntOther);
@@ -2433,9 +2453,14 @@ namespace Lua
 			pragma::Lua::check_component(l,hEnt);
 			hEnt.get()->SetMoveController(moveController);
 		}));
+		def.def("SetMoveController",static_cast<void(*)(lua_State*,THandle&,const std::string&,const std::string&)>([](lua_State *l,THandle &hEnt,const std::string &moveController,const std::string &moveControllerY) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt.get()->SetMoveController(moveController,moveControllerY);
+		}));
 		def.def("GetMoveController",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);
 			Lua::PushInt(l,hEnt.get()->GetMoveController());
+			Lua::PushInt(l,hEnt.get()->GetMoveControllerY());
 		}));
 		def.def("GetMoveVelocity",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);

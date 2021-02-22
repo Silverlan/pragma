@@ -336,6 +336,10 @@ void BasePlayerComponent::Initialize()
 			PlaySharedActivity(Activity::Idle); // A non-looping animation has completed; Switch back to idle
 		return util::EventReply::Unhandled;
 	});
+	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_ANIMATION_RESET,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		PlaySharedActivity(Activity::Idle); // A non-looping animation has completed; Switch back to idle
+		return util::EventReply::Unhandled;
+	});
 	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_ANIMATION_START,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		m_movementActivity = Activity::Invalid;
 		return util::EventReply::Unhandled;

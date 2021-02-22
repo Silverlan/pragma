@@ -26,6 +26,13 @@ void Lua::Entity::Server::register_class(luabind::class_<EntityHandle> &classDef
 	classDef.def("IsSynchronized",&IsSynchronized);
 	classDef.def("SetSynchronized",&SetSynchronized);
 	classDef.def("SetSnapshotDirty",&SetSnapshotDirty);
+	classDef.def("AddNetworkedComponent",static_cast<luabind::object(*)(lua_State*,EntityHandle&,const std::string&)>([](lua_State *l,EntityHandle &hEnt,const std::string &component) -> luabind::object {
+		LUA_CHECK_ENTITY_RET(l,hEnt,{});
+		auto c = static_cast<SBaseEntity*>(hEnt.get())->AddNetworkedComponent(component);
+		if(c.expired())
+			return {};
+		return c->GetLuaObject();
+	}));
 }
 
 void Lua::Entity::Server::IsShared(lua_State *l,EntityHandle &hEnt)

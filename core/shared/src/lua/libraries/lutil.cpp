@@ -70,7 +70,8 @@ void Lua::util::register_library(lua_State *l)
 		luabind::def("variable_type_to_string",Lua::util::variable_type_to_string),
 		luabind::def("open_url_in_browser",Lua::util::open_url_in_browser),
 		luabind::def("get_addon_path",Lua::util::get_addon_path),
-		luabind::def("get_string_hash",Lua::util::get_string_hash)
+		luabind::def("get_string_hash",Lua::util::get_string_hash),
+		luabind::def("generate_uuid_v4",::util::generate_uuid_v4)
 	];
 }
 

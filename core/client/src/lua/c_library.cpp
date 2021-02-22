@@ -907,8 +907,7 @@ void CGame::RegisterLuaLibraries()
 			auto *pCam = c_game->GetRenderCamera();
 			if(pCam)
 			{
-				renderImgInfo.cameraPosition = pCam->GetEntity().GetPosition();
-				renderImgInfo.cameraRotation = pCam->GetEntity().GetRotation();
+				renderImgInfo.camPose = pCam->GetEntity().GetPose();
 				renderImgInfo.viewProjectionMatrix = pCam->GetProjectionMatrix() *pCam->GetViewMatrix();
 				renderImgInfo.nearZ = pCam->GetNearZ();
 				renderImgInfo.farZ = pCam->GetFarZ();

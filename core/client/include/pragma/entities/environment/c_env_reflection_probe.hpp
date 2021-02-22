@@ -72,7 +72,8 @@ namespace pragma
 
 		void InitializeDescriptorSet();
 		util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> CaptureRaytracedIBLReflectionsFromScene(
-			uint32_t width,uint32_t height,const Vector3 &camPos,const Quat &camRot,float nearZ,float farZ,umath::Degree fov
+			uint32_t width,uint32_t height,const Vector3 &camPos,const Quat &camRot,float nearZ,float farZ,umath::Degree fov,
+			float exposure
 		);
 		bool FinalizeCubemap(prosper::IImage &imgCubemap);
 		std::string GetCubemapIBLMaterialPath() const;

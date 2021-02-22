@@ -1052,6 +1052,8 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector.def("Get",static_cast<void(*)(lua_State*,const Vector3&,uint32_t)>([](lua_State *l,const Vector3 &v,uint32_t idx) {
 		Lua::PushNumber(l,v[idx]);
 	}));
+	defVector.def("GetYaw",&uvec::get_yaw);
+	defVector.def("GetPitch",&uvec::get_pitch);
 	defVector.def("ToMatrix",&Lua::Vector::ToMatrix);
 	defVector.def("SnapToGrid",static_cast<void(*)(lua_State*,Vector3&)>(&Lua::Vector::SnapToGrid));
 	defVector.def("SnapToGrid",static_cast<void(*)(lua_State*,Vector3&,UInt32)>(&Lua::Vector::SnapToGrid));

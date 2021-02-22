@@ -5,25 +5,18 @@
  * Copyright (c) 2020 Florian Weischer
  */
 
-#ifndef __FANIM_H__
-#define __FANIM_H__
+#ifndef __LUDM_HPP__
+#define __LUDM_HPP__
 
 #include "pragma/networkdefinitions.h"
-#include <mathutil/umath.h>
 
-enum class DLLNETWORK FAnim : uint32_t
+namespace Lua
 {
-	None = 0,
-	Loop = 1,
-	NoRepeat = 2,
-	MoveX = 32,
-	MoveZ = 64,
-	Autoplay = 128,
-	Gesture = 256,
-	NoMoveBlend = 512,
-
-	Count = 7
+	class Interface;
+	namespace udm
+	{
+		DLLNETWORK void register_library(Lua::Interface &lua);
+	};
 };
-REGISTER_BASIC_BITWISE_OPERATORS(FAnim)
 
 #endif

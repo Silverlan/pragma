@@ -110,7 +110,6 @@ void CResourceWatcherManager::OnMaterialReloaded(const std::string &path,const s
 			continue;
 		auto mdlC = static_cast<pragma::CModelComponent*>(ent->GetModelComponent());
 		mdlC->SetRenderMeshesDirty();
-		mdlC->UpdateLOD(0);
 	}
 }
 

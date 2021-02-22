@@ -68,6 +68,7 @@ void BasePhysicsComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	m_netEvSetCollisionsEnabled = SetupNetEvent("set_collisions_enabled");
+	m_netEvSetSimEnabled = SetupNetEvent("set_simulation_enabled");
 
 	BindEvent(BaseAnimatedComponent::EVENT_SHOULD_UPDATE_BONES,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		if(IsRagdoll())
@@ -345,6 +346,23 @@ void BasePhysicsComponent::SetCollisionsEnabled(bool b)
 	}
 }
 bool BasePhysicsComponent::GetCollisionsEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::CollisionsEnabled);}
+void BasePhysicsComponent::SetSimulationEnabled(bool b)
+{
+	if(b == GetSimulationEnabled())
+		return;
+	umath::set_flag(m_stateFlags,StateFlags::SimulationEnabled,b);
+	auto *phys = GetPhysicsObject();
+	if(phys == nullptr)
+		return;
+	auto &hColObjs = phys->GetCollisionObjects();
+	for(auto &hCol : hColObjs)
+	{
+		if(!hCol.IsValid())
+			continue;
+		hCol->SetSimulationEnabled(b);
+	}
+}
+bool BasePhysicsComponent::GetSimulationEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::SimulationEnabled);}
 bool BasePhysicsComponent::IsTrigger() const
 {
 	PhysObj *phys = GetPhysicsObject();

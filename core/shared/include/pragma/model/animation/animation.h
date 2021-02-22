@@ -37,12 +37,15 @@ struct DLLNETWORK AnimationBlendController
 };
 
 class VFilePtrInternalReal;
+namespace udm {struct AssetData;};
 class DLLNETWORK Animation
 	: public std::enable_shared_from_this<Animation>
 {
 public:
 	static util::EnumRegister &GetActivityEnumRegister();
 	static util::EnumRegister &GetEventEnumRegister();
+	static constexpr uint32_t PANIM_VERSION = 0;
+	static constexpr auto PANIM_IDENTIFIER = "PANI";
 	enum class DLLNETWORK ShareMode : uint32_t
 	{
 		None = 0,
@@ -51,6 +54,7 @@ public:
 	};
 	static std::shared_ptr<Animation> Create();
 	static std::shared_ptr<Animation> Create(const Animation &other,ShareMode share=ShareMode::None);
+	static std::shared_ptr<Animation> Load(const udm::AssetData &data,std::string &outErr);
 	const std::pair<Vector3,Vector3> &GetRenderBounds() const;
 	void SetRenderBounds(const Vector3 &min,const Vector3 &max);
 	void CalcRenderBounds(Model &mdl);
@@ -104,10 +108,12 @@ public:
 	const std::vector<float> &GetBoneWeights() const;
 	std::vector<float> &GetBoneWeights();
 
-	bool Save(std::shared_ptr<VFilePtrInternalReal> &f);
+	bool Save(udm::AssetData &outData,std::string &outErr);
+	bool SaveLegacy(VFilePtrReal &f);
 private:
 	static util::EnumRegister s_activityEnumRegister;
 	static util::EnumRegister s_eventEnumRegister;
+	bool LoadFromAssetData(const udm::AssetData &data,std::string &outErr);
 	Animation();
 	Animation(const Animation &other,ShareMode share=ShareMode::None);
 

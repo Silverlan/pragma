@@ -107,6 +107,8 @@ Bool CPhysicsComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &pa
 {
 	if(eventId == m_netEvSetCollisionsEnabled)
 		SetCollisionsEnabled(packet->Read<bool>());
+	else if(eventId == m_netEvSetSimEnabled)
+		SetSimulationEnabled(packet->Read<bool>());
 	else
 		return CBaseNetComponent::ReceiveNetEvent(eventId,packet);
 	return true;

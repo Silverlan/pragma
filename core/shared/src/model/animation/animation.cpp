@@ -8,6 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/model/animation/animation.h"
 #include "pragma/model/animation/activities.h"
+#include <udm.hpp>
 #include <mathutil/umath.h>
 
 decltype(Animation::s_activityEnumRegister) Animation::s_activityEnumRegister;
@@ -16,7 +17,243 @@ decltype(Animation::s_eventEnumRegister) Animation::s_eventEnumRegister;
 util::EnumRegister &Animation::GetActivityEnumRegister() {return s_activityEnumRegister;}
 util::EnumRegister &Animation::GetEventEnumRegister() {return s_eventEnumRegister;}
 
-bool Animation::Save(VFilePtrReal &f)
+#pragma optimize("",off)
+std::shared_ptr<Animation> Animation::Load(const udm::AssetData &data,std::string &outErr)
+{
+	auto anim = Animation::Create();
+	if(anim->LoadFromAssetData(data,outErr) == false)
+		return nullptr;
+	return anim;
+}
+
+bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr)
+{
+	if(data.GetAssetType() != PANIM_IDENTIFIER)
+	{
+		outErr = "Incorrect format!";
+		return false;
+	}
+
+	auto udm = *data;
+	auto version = data.GetAssetVersion();
+	auto activity = udm["activity"];
+	if(activity && activity->IsType(udm::Type::String))
+	{
+		auto id = Animation::GetActivityEnumRegister().RegisterEnum(activity->GetValue<udm::String>());
+		m_activity = (id != util::EnumRegister::InvalidEnum) ? static_cast<Activity>(id) : Activity::Invalid;
+	}
+
+	m_activityWeight = udm["activityWeight"](m_activityWeight);
+	m_fps = udm["fps"](m_fps);
+
+	m_renderBounds.first = udm["renderBounds.min"](Vector3{std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max()});
+	m_renderBounds.second = udm["renderBounds.max"](Vector3{std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest()});
+
+	auto fadeInTime = udm["fadeInTime"];
+	if(fadeInTime)
+		m_fadeIn = std::make_unique<float>(fadeInTime(0.f));
+
+	auto fadeOutTime = udm["fadeOutTime"];
+	if(fadeOutTime)
+		m_fadeOut = std::make_unique<float>(fadeOutTime(0.f));
+
+	m_boneIds = udm["bones"](m_boneIds);
+	auto numBones = m_boneIds.size();
+	m_boneIdMap.reserve(numBones);
+	for(auto i=decltype(numBones){0u};i<numBones;++i)
+		m_boneIdMap[m_boneIds[i]] = i;
+	
+	m_boneWeights = udm["boneWeights"](m_boneWeights);
+
+	auto udmBlendController = udm["blendController"];
+	if(udmBlendController)
+	{
+		m_blendController = AnimationBlendController{};
+		m_blendController->controller = udmBlendController["controller"](m_blendController->controller);
+		
+		auto udmTransitions = udmBlendController["transitions"];
+		m_blendController->transitions.resize(udmTransitions.GetSize());
+		uint32_t idxTransition = 0;
+		for(auto &udmTransition : udmTransitions)
+		{
+			m_blendController->transitions[idxTransition].animation = udmTransition["animation"](m_blendController->transitions[idxTransition].animation);
+			m_blendController->transitions[idxTransition].transition = udmTransition["transition"](m_blendController->transitions[idxTransition].transition);
+			++idxTransition;
+		}
+		m_blendController->animationPostBlendController = udmBlendController["animationPostBlendController"](m_blendController->animationPostBlendController);
+		m_blendController->animationPostBlendTarget = udmBlendController["animationPostBlendTarget"](m_blendController->animationPostBlendTarget);
+	}
+
+	m_flags = FAnim::None;
+	auto udmFlags = udm["flags"];
+	if(udmFlags)
+	{
+		auto readFlag = [this,&udmFlags](FAnim flag,const std::string &name) {
+			auto udmFlag = udmFlags[name];
+			if(udmFlag && udmFlag(false))
+				m_flags |= flag;
+		};
+		readFlag(FAnim::Loop,"loop");
+		readFlag(FAnim::NoRepeat,"noRepeat");
+		readFlag(FAnim::Autoplay,"autoplay");
+		readFlag(FAnim::Gesture,"gesture");
+		readFlag(FAnim::NoMoveBlend,"noMoveBlend");
+		static_assert(umath::to_integral(FAnim::Count) == 7,"Update this list when new flags have been added!");
+	}
+	
+	auto udmFrames = udm["frames"];
+	m_frames.resize(udmFrames.GetSize());
+	uint32_t nextFrameIdx = 0;
+	for(auto &udmFrame : udmFrames)
+	{
+		auto i = nextFrameIdx++;
+		m_frames[i] = Frame::Create(numBones);
+		auto udmTransforms = udmFrame["transforms"];
+		if(udmTransforms)
+			udmTransforms.GetBlobData(m_frames[i]->GetBoneTransforms());
+
+		auto udmScales = udmFrame["scales"];
+		if(udmScales)
+		{
+			auto &scales = m_frames[i]->GetBoneScales();
+			scales.resize(numBones);
+			udmScales.GetBlobData(scales);
+		}
+
+		auto udmEvents = udmFrame["events"];
+		auto &animEvents = m_events[i];
+		animEvents.reserve(udmEvents.GetSize());
+		for(auto &udmEvent : udmEvents)
+		{
+			auto name = udmEvent["name"](std::string{});
+			if(name.empty())
+				continue;
+			auto id = Animation::GetEventEnumRegister().RegisterEnum(name);
+			if(id == util::EnumRegister::InvalidEnum)
+				continue;
+			auto ev = std::make_shared<AnimationEvent>();
+			ev->eventID = static_cast<AnimationEvent::Type>(id);
+			ev->arguments = udmEvent["args"](ev->arguments);
+			animEvents.push_back(ev);
+		}
+
+		auto moveOffset = udmFrame["moveTranslation"](Vector2{});
+		if(moveOffset.x > 0.f || moveOffset.y > 0.f)
+			m_frames[i]->SetMoveOffset(moveOffset);
+	}
+	return true;
+}
+
+bool Animation::Save(udm::AssetData &outData,std::string &outErr)
+{
+	outData.SetAssetType(PANIM_IDENTIFIER);
+	outData.SetAssetVersion(PANIM_VERSION);
+	auto udm = *outData;
+
+	auto act = GetActivity();
+	auto *activityName = Animation::GetActivityEnumRegister().GetEnumName(umath::to_integral(act));
+	if(activityName)
+		udm["activity"] = *activityName;
+	else
+		udm.Add("activity",udm::Type::Nil);
+	udm["activityWeight"] = static_cast<uint8_t>(GetActivityWeight());
+	udm["fps"] = static_cast<float>(GetFPS());
+
+	auto &renderBounds = GetRenderBounds();
+	udm["renderBounds.min"] = renderBounds.first;
+	udm["renderBounds.max"] = renderBounds.second;
+
+	if(HasFadeInTime())
+		udm["fadeInTime"] = GetFadeInTime();
+	else
+		udm.Add("fadeInTime",udm::Type::Nil);
+	
+	if(HasFadeOutTime())
+		udm["fadeOutTime"] = GetFadeOutTime();
+	else
+		udm.Add("fadeOutTime",udm::Type::Nil);
+
+	auto &bones = GetBoneList();
+	auto numBones = bones.size();
+	udm["bones"] = bones;
+	
+	auto &weights = GetBoneWeights();
+	auto it = std::find_if(weights.begin(),weights.end(),[](const float weight){
+		return (weight != 1.f) ? true : false;
+	});
+	auto hasWeights = (it != weights.end());
+	if(hasWeights)
+		udm["boneWeights"] = weights;
+
+	auto *blendController = GetBlendController();
+	if(blendController)
+	{
+		udm["blendController.controller"] = blendController->controller;
+		auto &transitions = blendController->transitions;
+		auto udmTransitions = udm.AddArray("blendController.transitions",transitions.size());
+		for(auto i=decltype(transitions.size()){0u};i<transitions.size();++i)
+		{
+			auto &transition = transitions[i];
+			auto udmTransition = udmTransitions[i];
+			udmTransition["animation"] = transition.animation;
+			udmTransition["transition"] = transition.transition;
+		}
+		udm["blendController.animationPostBlendController"] = blendController->animationPostBlendController;
+		udm["blendController.animationPostBlendTarget"] = blendController->animationPostBlendTarget;
+	}
+
+	auto animFlags = GetFlags();
+	auto writeFlag = [&udm,animFlags](FAnim flag,const std::string &name) {
+		if(umath::is_flag_set(animFlags,flag) == false)
+			return;
+		udm["flags"][name] = true;
+	};
+	writeFlag(FAnim::Loop,"loop");
+	writeFlag(FAnim::NoRepeat,"noRepeat");
+	writeFlag(FAnim::Autoplay,"autoplay");
+	writeFlag(FAnim::Gesture,"gesture");
+	writeFlag(FAnim::NoMoveBlend,"noMoveBlend");
+	static_assert(umath::to_integral(FAnim::Count) == 7,"Update this list when new flags have been added!");
+	
+	auto numFrames = GetFrameCount();
+	auto udmFrames = udm.AddArray("frames",numFrames);
+	for(auto i=decltype(numFrames){0u};i<numFrames;++i)
+	{
+		auto &frame = *GetFrame(i);
+		auto udmFrame = udmFrames[i];
+		auto &transforms = frame.GetBoneTransforms();
+		assert(transforms.size() == numBones);
+		if(transforms.size() != numBones)
+			throw std::runtime_error{"Bone count mismatch!"};
+		udmFrame["transforms"] = udm::compress_lz4_blob(transforms);
+
+		if(frame.HasScaleTransforms())
+			udmFrame["scales"] = udm::compress_lz4_blob(frame.GetBoneScales());
+
+		auto *animEvents = GetEvents(i);
+		auto numEvents = (animEvents != nullptr) ? animEvents->size() : 0;
+		if(numEvents > 0)
+		{
+			auto udmEvents = udmFrame.AddArray("events",numEvents);
+			for(auto i=decltype(animEvents->size()){0u};i<animEvents->size();++i)
+			{
+				auto &ev = (*animEvents)[i];
+				auto *eventName = Animation::GetEventEnumRegister().GetEnumName(umath::to_integral(ev->eventID));
+				udmEvents[i]["name"] = (eventName != nullptr) ? *eventName : "";
+				udmEvents[i]["args"] = ev->arguments;
+			}
+		}
+
+		Vector2 moveOffset {};
+		if(frame.GetMoveOffset())
+			moveOffset = *frame.GetMoveOffset();
+		if(moveOffset.x != 0.f || moveOffset.y != 0.f)
+			udmFrame["moveTranslation"] = moveOffset;
+	}
+	return true;
+}
+
+bool Animation::SaveLegacy(VFilePtrReal &f)
 {
 	f->Write<uint32_t>(PRAGMA_ANIMATION_VERSION);
 	auto offsetToLen = f->Tell();
@@ -402,3 +639,4 @@ void Animation::SetBoneWeight(uint32_t boneId,float weight)
 		m_boneWeights.resize(m_boneIds.size(),1.f);
 	m_boneWeights.at(boneId) = weight;
 }
+#pragma optimize("",on)

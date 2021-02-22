@@ -13,6 +13,7 @@
 #include "pragma/lua/libraries/lutil.h"
 #include "pragma/lua/libraries/lmath.h"
 #include "pragma/lua/libraries/ldebug.h"
+#include "pragma/lua/libraries/ludm.hpp"
 #include <pragma/console/fcvar.h>
 #include "pragma/physics/raytraces.h"
 #include "pragma/lua/ldefinitions.h"
@@ -325,4 +326,6 @@ void Game::RegisterLuaGlobals()
 		{"SEARCH_ALL",umath::to_integral(fsys::SearchFlags::All)},
 		{"SEARCH_ADDON",FSYS_SEARCH_ADDON}
 	});
+
+	Lua::udm::register_library(GetLuaInterface());
 }

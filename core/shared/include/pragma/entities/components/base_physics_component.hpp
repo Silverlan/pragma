@@ -90,7 +90,8 @@ namespace pragma
 			ApplyingPhysicsPosition = ApplyingAngularVelocity<<1u,
 			ApplyingPhysicsRotation = ApplyingPhysicsPosition<<1u,
 			SleepReportEnabled = ApplyingPhysicsRotation<<1u,
-			ForcePhysicsAwakeCallbacksEnabled = SleepReportEnabled<<1u
+			ForcePhysicsAwakeCallbacksEnabled = SleepReportEnabled<<1u,
+			SimulationEnabled = ForcePhysicsAwakeCallbacksEnabled<<1u
 		};
 
 		enum class PhysFlags : uint32_t
@@ -194,6 +195,8 @@ namespace pragma
 		float GetMass() const;
 		virtual void SetCollisionsEnabled(bool b);
 		bool GetCollisionsEnabled() const;
+		virtual void SetSimulationEnabled(bool b);
+		bool GetSimulationEnabled() const;
 
 		void GetCollisionBounds(Vector3 *min,Vector3 *max) const;
 		float GetCollisionRadius(Vector3 *center=nullptr) const;
@@ -231,6 +234,7 @@ namespace pragma
 		void UpdateBoneCollisionObject(UInt32 boneId,Bool updatePos=true,Bool updateRot=false);
 		
 		pragma::NetEventId m_netEvSetCollisionsEnabled = pragma::INVALID_NET_EVENT;
+		pragma::NetEventId m_netEvSetSimEnabled = pragma::INVALID_NET_EVENT;
 
 		bool m_bRayResultCallbackEnabled = false;
 		PHYSICSTYPE m_physicsType = PHYSICSTYPE::NONE;

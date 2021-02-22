@@ -23,11 +23,11 @@ class DLLSERVER SBaseEntity
 {
 public:
 	SBaseEntity();
+	virtual util::WeakHandle<pragma::BaseEntityComponent> AddNetworkedComponent(const std::string &name) override;
 protected:
 	bool m_bShared;
 	Bool m_bSynchronized;
 	void EraseFunction(int function);
-	virtual util::WeakHandle<pragma::BaseEntityComponent> AddNetworkedComponent(const std::string &name) override;
 	virtual void OnComponentAdded(pragma::BaseEntityComponent &component) override;
 	virtual void OnComponentRemoved(pragma::BaseEntityComponent &component) override;
 public:

@@ -28,6 +28,7 @@ namespace pragma
 		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 
 		virtual void SetCollisionsEnabled(bool b) override;
+		virtual void SetSimulationEnabled(bool b) override;
 		using BasePhysicsComponent::SetCollisionsEnabled;
 		virtual void SetKinematic(bool b) override;
 

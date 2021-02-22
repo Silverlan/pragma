@@ -45,13 +45,17 @@ namespace pragma
 		const util::PBoolProperty &GetFrozenProperty() const;
 
 		void SetMoveController(const std::string &moveController);
+		void SetMoveController(const std::string &moveControllerX,const std::string &moveControllerY);
 		int32_t GetMoveController() const;
+		int32_t GetMoveControllerY() const;
 	protected:
 		BaseActorComponent(BaseEntity &ent);
 		bool m_bAlive;
 		util::PBoolProperty m_bFrozen = nullptr;
 		std::string m_moveControllerName = "move_yaw";
+		std::optional<std::string> m_moveControllerNameY;
 		int32_t m_moveController = -1;
+		int32_t m_moveControllerY = -1;
 		struct DLLNETWORK HitboxData
 		{
 			HitboxData(uint32_t boneId,const Vector3 &offset);

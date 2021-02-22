@@ -92,19 +92,21 @@ namespace pragma::asset
 		using BufferViewIndex = uint32_t;
 		struct BufferIndices
 		{
-			static constexpr uint32_t Count = 4;
+			static constexpr uint32_t Count = 5;
 			BufferIndex indices = std::numeric_limits<uint32_t>::max();
 			BufferIndex vertices = std::numeric_limits<uint32_t>::max();
+			BufferIndex uvSets = std::numeric_limits<uint32_t>::max();
 			BufferIndex skin = std::numeric_limits<uint32_t>::max();
 			BufferIndex inverseBindMatrices = std::numeric_limits<uint32_t>::max();
 		};
 		struct BufferViewIndices
 		{
-			static constexpr uint32_t Count = 7;
+			static constexpr uint32_t Count = 8;
 			BufferViewIndex indices = std::numeric_limits<uint32_t>::max();
 			BufferViewIndex positions = std::numeric_limits<uint32_t>::max();
 			BufferViewIndex normals = std::numeric_limits<uint32_t>::max();
 			BufferViewIndex texCoords = std::numeric_limits<uint32_t>::max();
+			BufferViewIndex uvSets = std::numeric_limits<uint32_t>::max();
 			BufferViewIndex joints = std::numeric_limits<uint32_t>::max();
 			BufferViewIndex weights = std::numeric_limits<uint32_t>::max();
 			BufferViewIndex inverseBindMatrices = std::numeric_limits<uint32_t>::max();

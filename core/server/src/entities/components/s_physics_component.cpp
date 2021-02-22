@@ -91,6 +91,16 @@ void SPhysicsComponent::SetCollisionsEnabled(bool b)
 	p->Write<bool>(b);
 	ent.SendNetEvent(m_netEvSetCollisionsEnabled,p,pragma::networking::Protocol::SlowReliable);
 }
+void SPhysicsComponent::SetSimulationEnabled(bool b)
+{
+	if(b == GetSimulationEnabled())
+		return;
+	BasePhysicsComponent::SetSimulationEnabled(b);
+	auto &ent = static_cast<SBaseEntity&>(GetEntity());
+	NetPacket p {};
+	p->Write<bool>(b);
+	ent.SendNetEvent(m_netEvSetSimEnabled,p,pragma::networking::Protocol::SlowReliable);
+}
 void SPhysicsComponent::SetCollisionType(COLLISIONTYPE collisiontype)
 {
 	BasePhysicsComponent::SetCollisionType(collisiontype);

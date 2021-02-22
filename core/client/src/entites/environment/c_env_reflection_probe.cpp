@@ -55,6 +55,14 @@ rendering::IBLData::IBLData(const std::shared_ptr<prosper::Texture> &irradianceM
 	: irradianceMap{irradianceMap},prefilterMap{prefilterMap},brdfMap{brdfMap}
 {}
 
+struct RenderSettings
+{
+	std::string renderer = "luxcorerender";
+	std::string sky = "skies/dusk379.hdr";
+	EulerAngles skyAngles = {0.f,160.f,0.f};
+	float skyStrength = 10.f;
+	float exposure = 300.f;
+} static g_renderSettings;
 void Console::commands::map_build_reflection_probes(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {
 	if(c_game == nullptr)
@@ -63,6 +71,12 @@ void Console::commands::map_build_reflection_probes(NetworkState *state,pragma::
 	pragma::console::parse_command_options(argv,commandOptions);
 	auto rebuild = (commandOptions.find("rebuild") != commandOptions.end());
 	auto closest = (commandOptions.find("closest") != commandOptions.end());
+	g_renderSettings.renderer = pragma::console::get_command_option_parameter_value(commandOptions,"renderer",util::declvalue(&::RenderSettings::renderer));
+	g_renderSettings.sky = pragma::console::get_command_option_parameter_value(commandOptions,"sky",util::declvalue(&::RenderSettings::sky));
+	g_renderSettings.skyStrength = util::to_float(pragma::console::get_command_option_parameter_value(commandOptions,"sky_strength",std::to_string(util::declvalue(&::RenderSettings::skyStrength))));
+	g_renderSettings.exposure = util::to_float(pragma::console::get_command_option_parameter_value(commandOptions,"exposure",std::to_string(util::declvalue(&::RenderSettings::exposure))));
+	auto defAngles = util::declvalue(&::RenderSettings::skyAngles);
+	g_renderSettings.skyAngles = EulerAngles{pragma::console::get_command_option_parameter_value(commandOptions,"sky_angles",std::to_string(defAngles.p) +' ' +std::to_string(defAngles.y) +' ' +std::to_string(defAngles.r))};
 	if(closest)
 	{
 		EntityIterator entIt {*c_game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
@@ -243,6 +257,7 @@ void CReflectionProbeComponent::BuildReflectionProbes(Game &game,std::vector<CRe
 		// Clear existing IBL files
 		for(auto *probe : probes)
 		{
+			probe->m_stateFlags |= StateFlags::RequiresRebuild;
 			if(probe->m_iblMat.empty() == false)
 				continue;
 			auto path = util::Path{probe->GetCubemapIBLMaterialFilePath()};
@@ -252,6 +267,7 @@ void CReflectionProbeComponent::BuildReflectionProbes(Game &game,std::vector<CRe
 				"_irradiance.ktx",
 				"_prefilter.ktx"
 			};
+			path.RemoveFileExtension(std::array<std::string,1>{"wmi"});
 			auto identifier = probe->GetCubemapIdentifier();
 			for(auto &postfix : filePostfixes)
 			{
@@ -260,7 +276,7 @@ void CReflectionProbeComponent::BuildReflectionProbes(Game &game,std::vector<CRe
 				if(fileName.has_value() == false)
 					continue;
 				Con::cout<<"Removing probe IBL file '"<<fpath<<"'..."<<Con::endl;
-				if(FileManager::RemoveFile(fileName->c_str()))
+				if(FileManager::RemoveFile(("materials/" +*fileName).c_str()))
 					continue;
 				Con::cwar<<"WARNING: Unable to remove IBL file '"<<fpath<<"'! This reflection probe may not be rebuilt!"<<Con::endl;
 			}
@@ -362,8 +378,8 @@ CReflectionProbeComponent::UpdateStatus CReflectionProbeComponent::UpdateIBLData
 		if(GenerateIBLReflectionsFromEnvMap("materials/" +m_srcEnvMap) == false)
 			return UpdateStatus::Failed;
 	}
-	else if(CaptureIBLReflectionsFromScene() == false)
-		return UpdateStatus::Pending;
+	else
+		return CaptureIBLReflectionsFromScene() ? UpdateStatus::Pending : UpdateStatus::Failed;
 	return UpdateStatus::Complete;
 }
 
@@ -428,26 +444,31 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 }
 
 util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> CReflectionProbeComponent::CaptureRaytracedIBLReflectionsFromScene(
-	uint32_t width,uint32_t height,const Vector3 &camPos,const Quat &camRot,float nearZ,float farZ,umath::Degree fov
+	uint32_t width,uint32_t height,const Vector3 &camPos,const Quat &camRot,float nearZ,float farZ,umath::Degree fov,
+	float exposure
 )
 {
 	rendering::cycles::SceneInfo sceneInfo {};
 	sceneInfo.width = width;
 	sceneInfo.height = height;
+	sceneInfo.exposure = exposure;
 	sceneInfo.device = pragma::rendering::cycles::SceneInfo::DeviceType::GPU;
+	sceneInfo.colorTransform = pragma::rendering::cycles::SceneInfo::ColorTransform {};
+	sceneInfo.colorTransform->config = "filmic-blender";
+	sceneInfo.colorTransform->look = "Medium Contrast";
 
 	rendering::cycles::RenderImageInfo renderImgInfo {};
-	renderImgInfo.cameraPosition = camPos;
-	renderImgInfo.cameraRotation = camRot;
+	renderImgInfo.camPose.SetOrigin(camPos);
+	renderImgInfo.camPose.SetRotation(camRot);
 	renderImgInfo.nearZ = nearZ;
 	renderImgInfo.farZ = farZ;
 	renderImgInfo.fov = fov;
 	renderImgInfo.equirectPanorama = true;
 
-	// TODO: Replace these with command arguments?
-	sceneInfo.sky = "skies/dusk379.hdr";
-	sceneInfo.skyAngles = {0.f,160.f,0.f};
-	sceneInfo.skyStrength = 10.f;
+	sceneInfo.sky = g_renderSettings.sky;
+	sceneInfo.skyAngles = g_renderSettings.skyAngles;
+	sceneInfo.skyStrength = g_renderSettings.skyStrength;
+	sceneInfo.renderer = g_renderSettings.renderer;
 
 	sceneInfo.samples = RAYTRACING_SAMPLE_COUNT;
 	sceneInfo.denoise = true;
@@ -513,7 +534,8 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene()
 	m_raytracingJobManager = std::unique_ptr<RaytracingJobManager>{new RaytracingJobManager{*this}};
 	uint32_t width = 512;
 	uint32_t height = 256;
-	auto job = CaptureRaytracedIBLReflectionsFromScene(width,height,pos,uquat::identity(),hCam->GetNearZ(),hCam->GetFarZ(),90.f /* fov */);
+	float exposure = g_renderSettings.exposure;
+	auto job = CaptureRaytracedIBLReflectionsFromScene(width,height,pos,uquat::identity(),hCam->GetNearZ(),hCam->GetFarZ(),90.f /* fov */,exposure);
 	if(job.IsValid() == false)
 	{
 		Con::cwar<<"WARNING: Unable to set scene up for reflection probe raytracing!"<<Con::endl;

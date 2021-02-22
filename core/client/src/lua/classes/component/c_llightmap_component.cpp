@@ -7,6 +7,8 @@
 
 #include "stdafx_client.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
+#include "pragma/lua/libraries/lfile.h"
+#include <util_image_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 
 void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
@@ -14,6 +16,15 @@ void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 	auto defCLightMap = luabind::class_<CLightMapHandle,BaseEntityComponentHandle>("LightMapComponent");
 	defCLightMap.scope[luabind::def("bake_lightmaps",static_cast<bool(*)(lua_State*,const pragma::CLightMapComponent::LightmapBakeSettings&)>([](lua_State *l,const pragma::CLightMapComponent::LightmapBakeSettings &bakeSettings) -> bool {
 		return pragma::CLightMapComponent::BakeLightmaps(bakeSettings);
+	}))];
+	defCLightMap.scope[luabind::def("import_lightmap_atlas",static_cast<bool(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &path) -> bool {
+		return pragma::CLightMapComponent::ImportLightmapAtlas(path);
+	}))];
+	defCLightMap.scope[luabind::def("import_lightmap_atlas",static_cast<bool(*)(lua_State*,uimg::ImageBuffer&)>([](lua_State *l,uimg::ImageBuffer &imgBuf) -> bool {
+		return pragma::CLightMapComponent::ImportLightmapAtlas(imgBuf);
+	}))];
+	defCLightMap.scope[luabind::def("import_lightmap_atlas",static_cast<bool(*)(lua_State*,LFile&)>([](lua_State *l,LFile &f) -> bool {
+		return pragma::CLightMapComponent::ImportLightmapAtlas(f.GetHandle());
 	}))];
 	defCLightMap.def("GetLightmapTexture",static_cast<void(*)(lua_State*,CLightMapHandle&)>([](lua_State *l,CLightMapHandle &hLightMapC) {
 		pragma::Lua::check_component(l,hLightMapC);
@@ -74,6 +85,7 @@ void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 		bakeSettings.height = Lua::CheckNumber(l,2);
 	}));
 	defLightmapBakeSettings.def_readwrite("samples",&pragma::CLightMapComponent::LightmapBakeSettings::samples);
+	defLightmapBakeSettings.def_readwrite("globalLightIntensityFactor",&pragma::CLightMapComponent::LightmapBakeSettings::globalLightIntensityFactor);
 	defLightmapBakeSettings.def_readwrite("denoise",&pragma::CLightMapComponent::LightmapBakeSettings::denoise);
 	defLightmapBakeSettings.def_readwrite("createAsRenderJob",&pragma::CLightMapComponent::LightmapBakeSettings::createAsRenderJob);
 	defLightmapBakeSettings.def_readwrite("rebuildUvAtlas",&pragma::CLightMapComponent::LightmapBakeSettings::rebuildUvAtlas);

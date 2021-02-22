@@ -370,9 +370,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		pragma::rendering::cycles::RenderImageInfo renderImgInfo {};
 		if(pCam)
 		{
-			renderImgInfo.cameraPosition = pCam->GetEntity().GetPosition();
-			renderImgInfo.cameraRotation = pCam->GetEntity().GetRotation();
-			renderImgInfo.nearZ = pCam->GetNearZ();
+			renderImgInfo.camPose = pCam->GetEntity().GetPose();
 			renderImgInfo.farZ = pCam->GetFarZ();
 			renderImgInfo.fov = pCam->GetFOV();
 		}

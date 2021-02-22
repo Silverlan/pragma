@@ -88,17 +88,28 @@ void BaseActorComponent::Initialize()
 void BaseActorComponent::SetMoveController(const std::string &moveController)
 {
 	m_moveControllerName = moveController;
+	m_moveControllerNameY = {};
+	InitializeMoveController();
+}
+void BaseActorComponent::SetMoveController(const std::string &moveControllerX,const std::string &moveControllerY)
+{
+	m_moveControllerName = moveControllerX;
+	m_moveControllerNameY = moveControllerY;
 	InitializeMoveController();
 }
 int32_t BaseActorComponent::GetMoveController() const {return m_moveController;}
+int32_t BaseActorComponent::GetMoveControllerY() const {return m_moveControllerY;}
 void BaseActorComponent::InitializeMoveController()
 {
 	m_moveController = -1;
+	m_moveControllerY = -1;
 	auto &ent = GetEntity();
 	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)
 		return;
 	m_moveController = mdl->LookupBlendController(m_moveControllerName);
+	if(m_moveControllerNameY.has_value())
+		m_moveControllerY = mdl->LookupBlendController(*m_moveControllerNameY);
 }
 
 void BaseActorComponent::UpdateMoveController()
@@ -113,17 +124,43 @@ void BaseActorComponent::UpdateMoveController()
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
 	auto vel = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3{};
 	auto l = uvec::length_sqr(vel);
-	if(l > 0.f)
+	if(m_moveControllerY == -1)
 	{
-		auto dirMove = uvec::get_normal(vel);
-		auto dir = pTrComponent ? pTrComponent->GetForward() : uvec::FORWARD;
-		float yawMove = uvec::get_yaw(dirMove);
-		float yawDir = uvec::get_yaw(dir);
-		float yawOffset = umath::get_angle_difference(yawDir,yawMove);
-		yawOffset = umath::normalize_angle(yawOffset,0);
-		//float moveYaw = GetBlendController(blendController);
-		//yawOffset = Math::ApproachAngle(moveYaw,yawOffset,1.f);
-		animComponent->SetBlendController(m_moveController,CInt32(yawOffset));
+		if(l > 0.f)
+		{
+			auto dirMove = uvec::get_normal(vel);
+			auto dir = pTrComponent ? pTrComponent->GetForward() : uvec::FORWARD;
+			float yawMove = uvec::get_yaw(dirMove);
+			float yawDir = uvec::get_yaw(dir);
+			float yawOffset = umath::get_angle_difference(yawDir,yawMove);
+			yawOffset = umath::normalize_angle(yawOffset,0);
+			//float moveYaw = GetBlendController(blendController);
+			//yawOffset = Math::ApproachAngle(moveYaw,yawOffset,1.f);
+			animComponent->SetBlendController(m_moveController,CInt32(yawOffset));
+		}
+		else
+			animComponent->SetBlendController(m_moveController,0.f);
+	}
+	else
+	{
+		if(l > 0.f)
+		{
+			auto dirMove = uvec::get_normal(vel);
+			auto dir = pTrComponent ? pTrComponent->GetForward() : uvec::FORWARD;
+			auto dirRight = pTrComponent ? pTrComponent->GetRight() : uvec::RIGHT;
+			auto rotInv = pTrComponent ? pTrComponent->GetRotation() : uquat::identity();
+			uquat::inverse(rotInv);
+			uvec::rotate(&dirMove,rotInv);
+			uvec::rotate(&dir,rotInv);
+			uvec::rotate(&dirRight,rotInv);
+			// animComponent->SetBlendController(m_moveController,1.0 -(uvec::dot(dirRight,dirMove) +1.0) /2.0); // TODO
+			animComponent->SetBlendController(m_moveControllerY,1.0 -(uvec::dot(dir,dirMove) +1.0) /2.0);
+		}
+		else
+		{
+			animComponent->SetBlendController(m_moveController,0.f);
+			animComponent->SetBlendController(m_moveControllerY,0.f);
+		}
 	}
 }
 

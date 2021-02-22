@@ -17,6 +17,7 @@
 #include "pragma/asset/util_asset.hpp"
 #include <fsys/filesystem.h>
 #include <sharedutils/util_file.h>
+#include <udm.hpp>
 
 #define INDEX_OFFSET_INDEX_SIZE sizeof(uint64_t)
 #define INDEX_OFFSET_MODEL_DATA 0
@@ -176,6 +177,8 @@ std::shared_ptr<Model> Model::Copy(Game *game,CopyFlags copyFlags) const
 	return mdl;
 }
 
+static constexpr udm::Version PMDL_VERSION = 1;
+
 bool Model::Save(Game *game,const std::string &name,const std::string &rootPath) const
 {
 	auto fname = pragma::asset::get_normalized_path(name,pragma::asset::Type::Model);
@@ -185,7 +188,266 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 	if(f == nullptr)
 		return false;
 	auto &mdl = const_cast<Model&>(*this);
-	//auto &texGroups = mdl.GetTextureGroups();
+
+#if 0
+	std::string err;
+	auto pudm = udm::UdmData::Create("PMDL",PMDL_VERSION,err);
+
+	auto &udm = *pudm;
+	udm["materialPaths"] = mdl.GetTexturePaths();
+	udm["includeModels"] = mdl.GetMetaInfo().includes;
+	udm["eyeOffset"] = mdl.GetEyeOffset();
+
+	Vector3 min,max;
+	mdl.GetRenderBounds(min,max);
+	udm["render.bounds.min"] = min;
+	udm["render.bounds.max"] = max;
+
+	auto flags = mdl.GetMetaInfo().flags;
+	auto bStatic = umath::is_flag_set(flags,Model::Flags::Static);
+	if(!bStatic)
+	{
+		auto &skeleton = mdl.GetSkeleton();
+		auto &ref = mdl.GetReference();
+		auto &bones = skeleton.GetBones();
+		auto udmSkeleton = udm->AddArray("skeleton",udm::Type::Element,bones.size());
+		for(auto i=decltype(bones.size()){0u};i<bones.size();++i)
+		{
+			auto &bone = bones[i];
+			auto udmBone = udmSkeleton[i];
+			std::vector<uint32_t> childIds {};
+			childIds.reserve(bone->children.size());
+			for(auto &pair : bone->children)
+				childIds.push_back(pair.first);
+			umath::ScaledTransform transform;
+			ref.GetBonePose(bone->ID,transform);
+			udmBone["name"] = bone->name;
+			udmBone["children"] = childIds;
+			udmBone["pose"] = transform;
+		}
+
+		auto &attachments = mdl.GetAttachments();
+		auto udmAttachments = udm->AddArray("attachments",udm::Type::Element,attachments.size());
+		for(auto i=decltype(bones.size()){0u};i<bones.size();++i)
+		{
+			auto &att = attachments[i];
+			auto udmAtt = udmAttachments[i];
+			umath::Transform transform {att.offset,uquat::create(att.angles)};
+			udmAtt["name"] = att.name;
+			udmAtt["bone"] = att.bone;
+			udmAtt["pose"] = transform;
+		}
+		
+		auto &objAttachments = mdl.GetObjectAttachments();
+		auto udmObjAttachments = udm->AddArray("objectAttachments",udm::Type::Element,objAttachments.size());
+		for(auto i=decltype(objAttachments.size()){0u};i<objAttachments.size();++i)
+		{
+			auto &objAtt = objAttachments[i];
+			auto udmObjAtt = udmObjAttachments[i];
+			udmObjAtt["name"] = objAtt.name;
+			udmObjAtt["attachment"] = objAtt.attachment;
+			// udmObjAtt["pose"] = transform;
+			// TODO
+		}
+
+		auto &hitboxes = mdl.GetHitboxes();
+		auto udmHitboxes = udm->AddArray("hitboxes",udm::Type::Element,hitboxes.size());
+		/*for(auto i=decltype(hitboxes.size()){0u};i<hitboxes.size();++i)
+		{
+			auto &hitbox = hitboxes[i];
+			auto udmHitbox = udmHitboxes[i];
+			udmHitbox["hitgroup"] = hitbox.group;*/
+			// TODO
+	//HitGroup group;
+	//Vector3 min;
+	//Vector3 max;
+		//}
+		// TODO
+	}
+	
+	auto &colMeshes = mdl.GetCollisionMeshes();
+	auto udmColMeshes = udm->AddArray("collisionMeshes",udm::Type::Element,colMeshes.size());
+	auto &surfaceMaterials = game->GetSurfaceMaterials();
+	for(auto i=decltype(colMeshes.size()){0u};i<colMeshes.size();++i)
+	{
+		auto &colMesh = colMeshes[i];
+		auto udmColMesh = udmColMeshes[i];
+		umath::Transform pose {};
+		pose.SetOrigin(colMesh->GetOrigin());
+		udmColMesh["boneParent"] = colMesh->GetBoneParent();
+		udmColMesh["pose"] = pose;
+		udmColMesh["surfaceMaterial"] = surfaceMaterials[colMesh->GetSurfaceMaterial()].GetIdentifier();
+
+		Vector3 min,max;
+		colMesh->GetAABB(&min,&max);
+		udmColMesh["bounds.min"] = min;
+		udmColMesh["bounds.max"] = max;
+
+		udmColMesh["vertices"] = udm::compress_lz4_blob(colMesh->GetVertices());
+		udmColMesh["triangles"] = udm::compress_lz4_blob(colMesh->GetTriangles());
+
+		udmColMesh["volume"] = colMesh->GetVolume();
+		udmColMesh["centerOfMass"] = colMesh->GetCenterOfMass();
+
+		udmColMesh["flags.convex"] = colMesh->IsConvex();
+
+		// Soft-body
+		auto softBody = colMesh->IsSoftBody();
+		auto *sbInfo = colMesh->GetSoftBodyInfo();
+		auto *sbMesh = colMesh->GetSoftBodyMesh();
+		auto *sbTriangles = colMesh->GetSoftBodyTriangles();
+		auto *sbAnchors = colMesh->GetSoftBodyAnchors();
+		softBody = (softBody && sbInfo != nullptr && sbMesh != nullptr && sbTriangles != nullptr && sbAnchors != nullptr) ? true : false;
+		auto meshGroupId = std::numeric_limits<uint32_t>::max();
+		auto meshId = std::numeric_limits<uint32_t>::max();
+		auto subMeshId = std::numeric_limits<uint32_t>::max();
+		ModelSubMesh *subMesh = nullptr;
+		auto foundSoftBodyMesh = false;
+		if(softBody)
+		{
+			for(auto i=decltype(meshGroups.size()){0};i<meshGroups.size();++i)
+			{
+				auto &group = meshGroups.at(i);
+				auto &meshes = group->GetMeshes();
+				for(auto j=decltype(meshes.size()){0};j<meshes.size();++j)
+				{
+					auto &mesh = meshes.at(j);
+					auto &subMeshes = mesh->GetSubMeshes();
+					for(auto k=decltype(subMeshes.size()){0};k<subMeshes.size();++k)
+					{
+						subMesh = subMeshes.at(k).get();
+						meshGroupId = i;
+						meshId = j;
+						subMeshId = k;
+						foundSoftBodyMesh = true;
+						goto endLoop;
+					}
+				}
+			}
+		}
+	endLoop:
+
+		if(foundSoftBodyMesh == false)
+			softBody = false;
+
+		if(softBody)
+		{
+			auto udmSoftBody = udmColMesh["softBody"];
+			udmSoftBody["meshGroup"] = meshGroupId;
+			udmSoftBody["mesh"] = meshId;
+			udmSoftBody["subMesh"] = subMeshId;
+
+			auto udmSettings = udmSoftBody["settings"];
+
+#if 0
+	struct MaterialStiffnessCoefficient
+	{
+		MaterialStiffnessCoefficient()=default;
+		MaterialStiffnessCoefficient(float a,float l,float v)
+			: MaterialStiffnessCoefficient()
+		{
+			angular = a;
+			linear = l;
+			volume = v;
+		}
+		float angular = 1.f;
+		float linear = 1.f;
+		float volume = 1.f;
+	};
+	float poseMatchingCoefficient = 0.5f;
+	float anchorsHardness = 0.6999f;
+	float dragCoefficient = 0.f;
+	float rigidContactsHardness = 1.f;
+	float softContactsHardness = 1.f;
+	float liftCoefficient = 0.f;
+	float kineticContactsHardness = 0.1f;
+	float dynamicFrictionCoefficient = 0.2f;
+	float dampingCoefficient = 0.f;
+	float volumeConversationCoefficient = 0.f;
+	float softVsRigidImpulseSplitK = 0.5f;
+	float softVsRigidImpulseSplitR = 0.5f;
+	float softVsRigidImpulseSplitS = 0.5f;
+	float softVsKineticHardness = 1.f;
+	float softVsRigidHardness = 0.1f;
+	float softVsSoftHardness = 0.5f;
+	float pressureCoefficient = 0.f;
+	float velocitiesCorrectionFactor = 1.f;
+
+	float bendingConstraintsDistance = 0.2f;
+	uint32_t clusterCount = 0u;
+	uint32_t maxClusterIterations = 8192u;
+	std::unordered_map<uint32_t,MaterialStiffnessCoefficient> materialStiffnessCoefficient;
+#endif
+				f->Write(sbInfo,sizeof(float) *19 +sizeof(uint32_t) *2);
+				f->Write<uint32_t>(sbInfo->materialStiffnessCoefficient.size());
+				for(auto &pair : sbInfo->materialStiffnessCoefficient)
+				{
+					f->Write<uint32_t>(pair.first);
+					f->Write<float>(pair.second.linear);
+					f->Write<float>(pair.second.angular);
+					f->Write<float>(pair.second.volume);
+				}
+
+				f->Write<uint32_t>(sbTriangles->size());
+				for(auto idx : *sbTriangles)
+					f->Write<uint32_t>(idx);
+
+				f->Write<uint32_t>(sbAnchors->size());
+				for(auto &anchor : *sbAnchors)
+					f->Write<CollisionMesh::SoftBodyAnchor>(anchor);
+		}
+	}
+
+
+#if 0
+	if(!bStatic)
+	{
+
+		f->Write<uint32_t>(static_cast<uint32_t>(objectAttachments.size()));
+		for(auto &objAtt : objectAttachments)
+		{
+			f->Write<ObjectAttachment::Type>(objAtt.type);
+			f->WriteString(objAtt.name);
+			f->WriteString(objAtt.attachment);
+			f->Write<uint32_t>(objAtt.keyValues.size());
+			for(auto &pair : objAtt.keyValues)
+			{
+				f->WriteString(pair.first);
+				f->WriteString(pair.second);
+			}
+		}
+
+		f->Write<uint32_t>(static_cast<uint32_t>(hitboxes.size()));
+		for(auto &pair : hitboxes)
+		{
+			auto &hb = pair.second;
+			f->Write<uint32_t>(pair.first);
+			f->Write<uint32_t>(umath::to_integral(hb.group));
+			f->Write<Vector3>(hb.min);
+			f->Write<Vector3>(hb.max);
+		}
+	}
+#endif
+	//f->Write<uint8_t>(static_cast<uint8_t>(texturePaths.size()));
+	//for(auto &path : texturePaths)
+	//	f->WriteString(path);
+
+#if 0
+	enum class Flags : uint32_t
+	{
+		None = 0u,
+		Static = 1u,
+		Inanimate = Static<<1u, // This flag has no effect and is merely a hint that the model doesn't have any animations or skeleton (except for the root bone)
+		Unused1 = Inanimate<<1u,
+		Unused2 = Unused1<<1u,
+		Unused3 = Unused2<<1u,
+		Unused4 = Unused3<<1u,
+		Unused5 = Unused4<<1u,
+		DontPrecacheTextureGroups = Unused5<<1u
+	};
+#endif
+#endif
+
 	auto &skeleton = mdl.GetSkeleton();
 	auto &bones = skeleton.GetBones();
 	auto &refPose = mdl.GetReference();
@@ -195,6 +457,7 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 	auto &hitboxes = mdl.GetHitboxes();
 	auto &meta = mdl.GetMetaInfo();
 	auto flags = meta.flags;
+	auto bStatic = umath::is_flag_set(flags,Model::Flags::Static);
 
 	auto &texturePaths = meta.texturePaths;
 	assert(texturePaths.size() <= std::numeric_limits<uint8_t>::max());
@@ -218,7 +481,7 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 	//
 
 	f->Write<uint64_t>(0); // Offset to collision mesh (0 if there is none)
-	auto bStatic = umath::is_flag_set(flags,Model::Flags::Static);
+	//auto bStatic = umath::is_flag_set(flags,Model::Flags::Static);
 	if(!bStatic)
 	{
 		f->Write<uint64_t>(0); // Offset to bones
@@ -649,7 +912,7 @@ bool Model::Save(Game *game,const std::string &name,const std::string &rootPath)
 		{
 			auto &anim = anims[i];
 			f->WriteString(mdl.GetAnimationName(static_cast<uint32_t>(i)));
-			anim->Save(f);
+			anim->SaveLegacy(f);
 		}
 
 		// Version 0x0015

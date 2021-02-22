@@ -25,6 +25,7 @@
 #include "pragma/model/modelmesh.h"
 #include <luabind/iterator_policy.hpp>
 #include <pragma/lua/lua_call.hpp>
+#include <udm.hpp>
 
 extern DLLNETWORK Engine *engine;
 
@@ -779,11 +780,13 @@ void Lua::Model::register_class(
 		.def("ClearFrames",static_cast<void(*)(lua_State*,::Animation&)>([](lua_State *l,::Animation &anim) {
 			anim.GetFrames().clear();
 		}))
-		.def("Save",static_cast<void(*)(lua_State*,::Animation&,LFile&)>([](lua_State *l,::Animation &anim,LFile &f) {
-			auto fptr = std::dynamic_pointer_cast<VFilePtrInternalReal>(f.GetHandle());
-			if(fptr == nullptr)
-				return;
-			anim.Save(fptr);
+		.def("Save",static_cast<void(*)(lua_State*,::Animation&,udm::AssetData&)>([](lua_State *l,::Animation &anim,udm::AssetData &assetData) {
+			std::string err;
+			auto result = anim.Save(assetData,err);
+			if(result == false)
+				Lua::PushString(l,err);
+			else
+				Lua::PushBool(l,result);
 		}));
 	classDefAnimation.scope[
 		luabind::def("Create",&Lua::Animation::Create),

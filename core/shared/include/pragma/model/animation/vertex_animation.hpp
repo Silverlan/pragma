@@ -20,7 +20,9 @@ public:
 	{
 		None = 0u,
 		HasDeltaValues = 1u,
-		HasNormals = HasDeltaValues<<1u
+		HasNormals = HasDeltaValues<<1u,
+
+		Count = 2
 	};
 
 	MeshVertexFrame()=default;

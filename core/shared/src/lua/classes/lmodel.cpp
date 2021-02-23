@@ -787,6 +787,12 @@ void Lua::Model::register_class(
 				Lua::PushString(l,err);
 			else
 				Lua::PushBool(l,result);
+		}))
+		.def("SaveLegacy",static_cast<void(*)(lua_State*,::Animation&,LFile&)>([](lua_State *l,::Animation &anim,LFile &f) {
+			auto fptr = std::dynamic_pointer_cast<VFilePtrInternalReal>(f.GetHandle());
+			if(fptr == nullptr)
+				return;
+			anim.SaveLegacy(fptr);
 		}));
 	classDefAnimation.scope[
 		luabind::def("Create",&Lua::Animation::Create),
@@ -1871,7 +1877,7 @@ void Lua::Model::Save(lua_State *l,::Model &mdl,const std::string &name)
 		Lua::PushBool(l,false);
 		return;
 	}
-	auto r = mdl.Save(engine->GetNetworkState(l)->GetGameState(),mdlName,rootPath);
+	auto r = mdl.SaveLegacy(engine->GetNetworkState(l)->GetGameState(),mdlName,rootPath);
 	Lua::PushBool(l,r);
 }
 

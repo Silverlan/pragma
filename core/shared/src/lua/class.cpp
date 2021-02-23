@@ -1263,6 +1263,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat.def("ClampRotation",static_cast<Quat(*)(lua_State*,Quat&,const EulerAngles&)>([](lua_State *l,Quat &rot,const EulerAngles &bounds) -> Quat {
 		return uquat::clamp_rotation(rot,-bounds,bounds);
 	}));
+	defQuat.def("Distance",&uquat::distance);
 	defQuat.def("GetConjugate",&Lua::Quaternion::GetConjugate);
 	modMath[defQuat];
 	auto _G = luabind::globals(lua.GetState());

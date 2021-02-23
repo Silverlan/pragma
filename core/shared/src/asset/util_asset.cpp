@@ -161,7 +161,7 @@ std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::Impor
 							path.PopFront();
 							auto *mdl = static_cast<pragma::asset::ModelAssetWrapper&>(*aw).GetModel();
 							if(mdl)
-								mdl->Save(&game,path.GetString(),"addons/converted/");
+								mdl->SaveLegacy(&game,path.GetString(),"addons/converted/");
 							break;
 						}
 						case Type::Material:

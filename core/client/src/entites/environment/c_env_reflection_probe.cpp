@@ -50,7 +50,7 @@ extern DLLCLIENT CGame *c_game;
 using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_reflection_probe,CEnvReflectionProbe);
-
+#pragma optimize("",off)
 rendering::IBLData::IBLData(const std::shared_ptr<prosper::Texture> &irradianceMap,const std::shared_ptr<prosper::Texture> &prefilterMap,const std::shared_ptr<prosper::Texture> &brdfMap)
 	: irradianceMap{irradianceMap},prefilterMap{prefilterMap},brdfMap{brdfMap}
 {}
@@ -60,8 +60,8 @@ struct RenderSettings
 	std::string renderer = "luxcorerender";
 	std::string sky = "skies/dusk379.hdr";
 	EulerAngles skyAngles = {0.f,160.f,0.f};
-	float skyStrength = 10.f;
-	float exposure = 300.f;
+	float skyStrength = 0.3f;
+	float exposure = 50.f;
 } static g_renderSettings;
 void Console::commands::map_build_reflection_probes(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {
@@ -445,7 +445,7 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 
 util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> CReflectionProbeComponent::CaptureRaytracedIBLReflectionsFromScene(
 	uint32_t width,uint32_t height,const Vector3 &camPos,const Quat &camRot,float nearZ,float farZ,umath::Degree fov,
-	float exposure
+	float exposure,const std::vector<BaseEntity*> *optEntityList,bool renderJob
 )
 {
 	rendering::cycles::SceneInfo sceneInfo {};
@@ -456,6 +456,7 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> CReflectionProbeComponent:
 	sceneInfo.colorTransform = pragma::rendering::cycles::SceneInfo::ColorTransform {};
 	sceneInfo.colorTransform->config = "filmic-blender";
 	sceneInfo.colorTransform->look = "Medium Contrast";
+	sceneInfo.renderJob = renderJob;
 
 	rendering::cycles::RenderImageInfo renderImgInfo {};
 	renderImgInfo.camPose.SetOrigin(camPos);
@@ -469,6 +470,11 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> CReflectionProbeComponent:
 	sceneInfo.skyAngles = g_renderSettings.skyAngles;
 	sceneInfo.skyStrength = g_renderSettings.skyStrength;
 	sceneInfo.renderer = g_renderSettings.renderer;
+	static auto useCycles = true;
+	if(useCycles)
+		sceneInfo.renderer = "cycles";
+	else
+		sceneInfo.renderer = "luxcorerender";
 
 	sceneInfo.samples = RAYTRACING_SAMPLE_COUNT;
 	sceneInfo.denoise = true;
@@ -476,9 +482,14 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> CReflectionProbeComponent:
 	umath::set_flag(sceneInfo.sceneFlags,rendering::cycles::SceneInfo::SceneFlags::CullObjectsOutsideCameraFrustum,false);
 
 	std::shared_ptr<uimg::ImageBuffer> imgBuffer = nullptr;
-	renderImgInfo.entityFilter = [](BaseEntity &ent) -> bool {
-		return ent.IsMapEntity();
-	};
+	if(optEntityList)
+		renderImgInfo.entityList = optEntityList;
+	else
+	{
+		renderImgInfo.entityFilter = [](BaseEntity &ent) -> bool {
+			return ent.IsMapEntity();
+		};
+	}
 	auto job = rendering::cycles::render_image(*client,sceneInfo,renderImgInfo);
 	if(job.IsValid() == false)
 		return {};
@@ -508,7 +519,7 @@ std::shared_ptr<prosper::IImage> CReflectionProbeComponent::CreateCubemapImage()
 	return c_engine->GetRenderContext().CreateImage(createInfo);
 }
 
-bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene()
+bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene(const std::vector<BaseEntity*> *optEntityList,bool renderJob)
 {
 	umath::set_flag(m_stateFlags,StateFlags::BakingFailed,true); // Mark as failed until complete
 	auto pos = GetEntity().GetPosition();
@@ -535,7 +546,7 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene()
 	uint32_t width = 512;
 	uint32_t height = 256;
 	float exposure = g_renderSettings.exposure;
-	auto job = CaptureRaytracedIBLReflectionsFromScene(width,height,pos,uquat::identity(),hCam->GetNearZ(),hCam->GetFarZ(),90.f /* fov */,exposure);
+	auto job = CaptureRaytracedIBLReflectionsFromScene(width,height,pos,uquat::identity(),hCam->GetNearZ(),hCam->GetFarZ(),90.f /* fov */,exposure,optEntityList,renderJob);
 	if(job.IsValid() == false)
 	{
 		Con::cwar<<"WARNING: Unable to set scene up for reflection probe raytracing!"<<Con::endl;
@@ -1010,3 +1021,4 @@ void Console::commands::debug_pbr_ibl(NetworkState *state,pragma::BasePlayerComp
 		pSlider->SetAnchor(0.f,0.f,1.f,0.f);
 	}
 }
+#pragma optimize("",on)

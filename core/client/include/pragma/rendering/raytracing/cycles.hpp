@@ -66,6 +66,7 @@ namespace pragma::rendering::cycles
 		umath::Degree fov = BaseEnvCameraComponent::DEFAULT_FOV;
 
 		std::function<bool(BaseEntity&)> entityFilter = nullptr;
+		const std::vector<BaseEntity*> *entityList = nullptr;
 	};
 	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> render_image(ClientState &client,const SceneInfo &sceneInfo,const RenderImageInfo &renderImageInfo);
 	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> bake_ambient_occlusion(ClientState &client,const SceneInfo &sceneInfo,Model &mdl,uint32_t materialIndex);

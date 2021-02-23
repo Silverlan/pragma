@@ -44,7 +44,7 @@ class DLLNETWORK Animation
 public:
 	static util::EnumRegister &GetActivityEnumRegister();
 	static util::EnumRegister &GetEventEnumRegister();
-	static constexpr uint32_t PANIM_VERSION = 0;
+	static constexpr uint32_t PANIM_VERSION = 1;
 	static constexpr auto PANIM_IDENTIFIER = "PANI";
 	enum class DLLNETWORK ShareMode : uint32_t
 	{
@@ -109,7 +109,7 @@ public:
 	std::vector<float> &GetBoneWeights();
 
 	bool Save(udm::AssetData &outData,std::string &outErr);
-	bool SaveLegacy(VFilePtrReal &f);
+	bool SaveLegacy(std::shared_ptr<VFilePtrInternalReal> &f);
 private:
 	static util::EnumRegister s_activityEnumRegister;
 	static util::EnumRegister s_eventEnumRegister;

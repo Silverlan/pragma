@@ -88,7 +88,7 @@ static bool port_model(
 		auto r = false;
 		try
 		{
-			r = mdl->Save(game,outPath,util::IMPORT_PATH);
+			r = mdl->SaveLegacy(game,outPath,util::IMPORT_PATH);
 		}
 		catch(const std::logic_error &err)
 		{

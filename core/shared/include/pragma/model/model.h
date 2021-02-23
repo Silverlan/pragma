@@ -75,7 +75,8 @@ struct DLLNETWORK ObjectAttachment
 	enum class Type : uint32_t
 	{
 		Model = 0u,
-		ParticleSystem
+		ParticleSystem,
+		Count
 	};
 	Type type = Type::Model;
 	std::string attachment;
@@ -150,7 +151,9 @@ public:
 		Unused3 = Unused2<<1u,
 		Unused4 = Unused3<<1u,
 		Unused5 = Unused4<<1u,
-		DontPrecacheTextureGroups = Unused5<<1u
+		DontPrecacheTextureGroups = Unused5<<1u,
+		
+		Count = 8
 	};
 
 	struct DLLNETWORK MetaInfo
@@ -195,7 +198,8 @@ public:
 	bool operator==(const Model &other) const;
 	bool operator!=(const Model &other) const;
 	virtual ~Model();
-	bool Save(Game *game,const std::string &name,const std::string &rootPath="") const;
+	bool Save(Game &game,udm::AssetData &outData,std::string &outErr);
+	bool SaveLegacy(Game *game,const std::string &name,const std::string &rootPath="") const;
 	std::shared_ptr<Model> Copy(Game *game,CopyFlags copyFlags=CopyFlags::ShallowCopy) const;
 	bool FindMaterial(const std::string &texture,std::string &matPath) const;
 	MetaInfo &GetMetaInfo() const;
@@ -312,6 +316,8 @@ public:
 	// Phonemes
 	const PhonemeMap &GetPhonemeMap() const;
 	PhonemeMap &GetPhonemeMap();
+
+	bool FindSubMeshIndex(const ModelMeshGroup *optMeshGroup,const ModelMesh *optMesh,const ModelSubMesh *optSubMesh,uint32_t &outGroupIdx,uint32_t &outMeshIdx,uint32_t &outSubMeshIdx) const;
 
 	const Skeleton &GetSkeleton() const;
 	Skeleton &GetSkeleton();

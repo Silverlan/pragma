@@ -183,6 +183,34 @@ namespace Lua
 	};
 };
 
+static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l,CReflectionProbeHandle &hRp,luabind::table<> tEnts,bool renderJob)
+{
+	pragma::Lua::check_component(l,hRp);
+	std::vector<BaseEntity*> ents {};
+	ents.reserve(Lua::GetObjectLength(l,2));
+	for(auto it=luabind::iterator{tEnts},end=luabind::iterator{};it!=end;++it)
+	{
+		auto val = luabind::object_cast_nothrow<EntityHandle>(*it,EntityHandle{});
+		LUA_CHECK_ENTITY_RET(l,val,false);
+		ents.push_back(val.get());
+	}
+	return hRp->CaptureIBLReflectionsFromScene(&ents,renderJob);
+}
+static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l,CReflectionProbeHandle &hRp,luabind::table<> tEnts)
+{
+	return reflection_probe_capture_ibl_reflections_from_scene(l,hRp,tEnts,false);
+}
+static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l,CReflectionProbeHandle &hRp,bool renderJob)
+{
+	pragma::Lua::check_component(l,hRp);
+	return hRp->CaptureIBLReflectionsFromScene(nullptr,renderJob);
+}
+static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l,CReflectionProbeHandle &hRp)
+{
+	pragma::Lua::check_component(l,hRp);
+	return hRp->CaptureIBLReflectionsFromScene();
+}
+
 static void register_renderer_bindings(luabind::module_ &entsMod)
 {
 	auto defRenderer = luabind::class_<CRendererHandle,BaseEntityComponentHandle>("RendererComponent");
@@ -956,6 +984,18 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCReflectionProbe.def("SetIBLStrength",static_cast<void(*)(lua_State*,CReflectionProbeHandle&,float)>([](lua_State *l,CReflectionProbeHandle &hRp,float strength) {
 		pragma::Lua::check_component(l,hRp);
 		hRp->SetIBLStrength(strength);
+	}));
+	defCReflectionProbe.def("GetIBLMaterialFilePath",static_cast<std::string(*)(lua_State*,CReflectionProbeHandle&)>([](lua_State *l,CReflectionProbeHandle &hRp) -> std::string {
+		pragma::Lua::check_component(l,hRp);
+		return hRp->GetCubemapIBLMaterialFilePath();
+	}));
+	defCReflectionProbe.def("CaptureIBLReflectionsFromScene",static_cast<bool(*)(lua_State*,CReflectionProbeHandle&,luabind::table<>,bool)>(&reflection_probe_capture_ibl_reflections_from_scene));
+	defCReflectionProbe.def("CaptureIBLReflectionsFromScene",static_cast<bool(*)(lua_State*,CReflectionProbeHandle&,luabind::table<>)>(&reflection_probe_capture_ibl_reflections_from_scene));
+	defCReflectionProbe.def("CaptureIBLReflectionsFromScene",static_cast<bool(*)(lua_State*,CReflectionProbeHandle&,bool)>(&reflection_probe_capture_ibl_reflections_from_scene));
+	defCReflectionProbe.def("CaptureIBLReflectionsFromScene",static_cast<bool(*)(lua_State*,CReflectionProbeHandle&)>(&reflection_probe_capture_ibl_reflections_from_scene));
+	defCReflectionProbe.def("RequiresRebuild",static_cast<bool(*)(lua_State*,CReflectionProbeHandle&)>([](lua_State *l,CReflectionProbeHandle &hRp) -> bool {
+		pragma::Lua::check_component(l,hRp);
+		return hRp->RequiresRebuild();
 	}));
 	entsMod[defCReflectionProbe];
 

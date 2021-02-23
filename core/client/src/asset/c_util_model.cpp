@@ -1157,7 +1157,7 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 #endif
 
 	mdl->Update(ModelUpdateFlags::All);
-	mdl->Save(c_game,outputPath.GetString() +mdlName,"addons/converted/");
+	mdl->SaveLegacy(c_game,outputPath.GetString() +mdlName,"addons/converted/");
 	return mdl;
 }
 std::shared_ptr<Model> pragma::asset::import_model(VFilePtr f,std::string &outErrMsg,const util::Path &outputPath)

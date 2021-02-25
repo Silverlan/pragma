@@ -17,7 +17,9 @@ IKController::IKController(const IKController &other)
 	: m_effectorName{other.m_effectorName},m_type{other.m_type},
 	m_chainLength{other.m_chainLength},m_method{other.m_method},
 	m_keyValues{other.m_keyValues}
-{}
+{
+	static_assert(sizeof(IKController) == 152,"Update this function when making changes to this class!");
+}
 const std::string &IKController::GetEffectorName() const {return m_effectorName;}
 uint32_t IKController::GetChainLength() const {return m_chainLength;}
 const std::string &IKController::GetType() const {return m_type;}

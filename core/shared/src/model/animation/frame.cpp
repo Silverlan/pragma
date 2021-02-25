@@ -125,6 +125,7 @@ Frame::Frame(const Frame &other)
 	m_flexFrameData = other.m_flexFrameData;
 	if(other.m_move != nullptr)
 		m_move = std::make_unique<Vector2>(*other.m_move);
+	static_assert(sizeof(Frame) == 120,"Update this function when making changes to this class!");
 }
 
 

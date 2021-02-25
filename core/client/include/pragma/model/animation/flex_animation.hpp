@@ -16,6 +16,7 @@ class DLLNETWORK FlexAnimationFrame
 {
 public:
 	FlexAnimationFrame()=default;
+	FlexAnimationFrame(const FlexAnimationFrame &frame);
 	std::vector<float> &GetValues() {return m_flexControllerValues;}
 	const std::vector<float> &GetValues() const {return const_cast<FlexAnimationFrame*>(this)->GetValues();}
 private:
@@ -29,6 +30,7 @@ public:
 	static constexpr uint32_t FORMAT_VERSION = 1u;
 	static std::shared_ptr<FlexAnimation> Load(std::shared_ptr<VFilePtrInternal> &f);
 	FlexAnimation()=default;
+	FlexAnimation(const FlexAnimation &other);
 	std::vector<std::shared_ptr<FlexAnimationFrame>> &GetFrames() {return m_frames;}
 	const std::vector<std::shared_ptr<FlexAnimationFrame>> &GetFrames() const {return const_cast<FlexAnimation*>(this)->GetFrames();}
 	std::vector<FlexControllerId> &GetFlexControllerIds() {return m_flexControllerIds;}

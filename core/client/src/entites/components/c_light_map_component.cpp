@@ -382,8 +382,8 @@ static void generate_lightmaps(
 	sceneInfo.sky = skyTex;
 	sceneInfo.skyAngles = {0.f,0.f,0.f};
 	sceneInfo.skyStrength = skyStrength;
-	//sceneInfo.renderer = "luxcorerender";
-	sceneInfo.renderer = "cycles";
+	sceneInfo.renderer = "luxcorerender";
+	//sceneInfo.renderer = "cycles";
 
 	auto job = pragma::rendering::cycles::bake_lightmaps(*client,sceneInfo);
 	if(sceneInfo.renderJob)

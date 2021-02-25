@@ -788,6 +788,14 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->SetStateFlag(pragma::CLightComponent::StateFlags::AddToGameScene,b);
 	}));
+	defCLight.def("SetMorphTargetsInShadowsEnabled",static_cast<void(*)(lua_State*,CLightHandle&,bool)>([](lua_State *l,CLightHandle &hComponent,bool enabled) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->SetMorphTargetsInShadowsEnabled(enabled);
+	}));
+	defCLight.def("AreMorphTargetsInShadowsEnabled",static_cast<bool(*)(lua_State*,CLightHandle&)>([](lua_State *l,CLightHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		return hComponent->AreMorphTargetsInShadowsEnabled();
+	}));
 	defCLight.add_static_constant("SHADOW_TYPE_NONE",umath::to_integral(ShadowType::None));
 	defCLight.add_static_constant("SHADOW_TYPE_STATIC_ONLY",umath::to_integral(ShadowType::StaticOnly));
 	defCLight.add_static_constant("SHADOW_TYPE_FULL",umath::to_integral(ShadowType::Full));

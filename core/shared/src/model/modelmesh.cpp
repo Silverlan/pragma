@@ -16,8 +16,10 @@ ModelMesh::ModelMesh()
 ModelMesh::ModelMesh(const ModelMesh &other)
 	: m_min(other.m_min),m_max(other.m_max),m_numVerts(other.m_numVerts),
 	m_numTriangleVerts(other.m_numTriangleVerts),m_center(other.m_center),
-	m_subMeshes(other.m_subMeshes)
-{}
+	m_subMeshes(other.m_subMeshes),m_referenceId{other.m_referenceId}
+{
+	static_assert(sizeof(ModelMesh) == 104,"Update this function when making changes to this class!");
+}
 bool ModelMesh::operator==(const ModelMesh &other) const {return this == &other;}
 bool ModelMesh::operator!=(const ModelMesh &other) const {return !operator==(other);}
 std::shared_ptr<ModelMesh> ModelMesh::Copy() const {return std::make_shared<ModelMesh>(*this);}
@@ -150,11 +152,30 @@ ModelSubMesh::ModelSubMesh(const ModelSubMesh &other)
 	: m_skinTextureIndex(other.m_skinTextureIndex),m_center(other.m_center),m_vertices(other.m_vertices),
 	m_alphas(other.m_alphas),m_numAlphas(other.m_numAlphas),m_triangles(other.m_triangles),
 	m_vertexWeights(other.m_vertexWeights),m_extendedVertexWeights(other.m_extendedVertexWeights),m_min(other.m_min),m_max(other.m_max),
-	m_pose{other.m_pose},m_uvSets{other.m_uvSets}
-{}
+	m_pose{other.m_pose},m_uvSets{other.m_uvSets},m_geometryType{other.m_geometryType},m_referenceId{other.m_referenceId}
+{
+	static_assert(sizeof(ModelSubMesh) == 216,"Update this function when making changes to this class!");
+}
 bool ModelSubMesh::operator==(const ModelSubMesh &other) const {return this == &other;}
 bool ModelSubMesh::operator!=(const ModelSubMesh &other) const {return !operator==(other);}
-std::shared_ptr<ModelSubMesh> ModelSubMesh::Copy() const {return std::make_shared<ModelSubMesh>(*this);}
+void ModelSubMesh::Copy(ModelSubMesh &cpy,bool fullCopy) const
+{
+	cpy.m_vertices = std::make_shared<std::vector<Vertex>>(*cpy.m_vertices);
+	cpy.m_alphas = std::make_shared<std::vector<Vector2>>(*cpy.m_alphas);
+	cpy.m_triangles = std::make_shared<std::vector<uint16_t>>(*cpy.m_triangles);
+	cpy.m_vertexWeights = std::make_shared<std::vector<VertexWeight>>(*cpy.m_vertexWeights);
+	cpy.m_extendedVertexWeights = std::make_shared<std::vector<VertexWeight>>(*cpy.m_extendedVertexWeights);
+	cpy.m_uvSets = std::make_shared<std::unordered_map<std::string,std::vector<Vector2>>>(*cpy.m_uvSets);
+	static_assert(sizeof(ModelSubMesh) == 216,"Update this function when making changes to this class!");
+}
+std::shared_ptr<ModelSubMesh> ModelSubMesh::Copy(bool fullCopy) const
+{
+	auto cpy = std::make_shared<ModelSubMesh>(*this);
+	if(fullCopy == false)
+		return cpy;
+	Copy(*cpy,fullCopy);
+	return cpy;
+}
 uint32_t ModelSubMesh::GetReferenceId() const {return m_referenceId;}
 void ModelSubMesh::SetReferenceId(uint32_t refId) {m_referenceId = refId;}
 const umath::ScaledTransform &ModelSubMesh::GetPose() const {return const_cast<ModelSubMesh*>(this)->GetPose();}

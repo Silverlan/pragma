@@ -20,7 +20,7 @@
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,const pragma::ShaderGameWorld &shader,bool view)
 {
 	auto *dsScene = view ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
@@ -218,3 +218,4 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(CModelSubMesh &mesh,pragma::
 	return m_cmdBuffer.RecordDrawIndexed(mesh.GetTriangleVertexCount(),instanceCount);
 }
 inline CBaseEntity &pragma::rendering::ShaderProcessor::GetCurrentEntity() const {return static_cast<CBaseEntity&>(m_modelC->GetEntity());}
+#pragma optimize("",on)

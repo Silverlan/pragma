@@ -26,6 +26,7 @@ namespace pragma
 	public:
 		SceneMesh();
 		SceneMesh(const SceneMesh &other);
+		~SceneMesh();
 		SceneMesh &operator=(const SceneMesh &other);
 		const std::shared_ptr<prosper::IBuffer> &GetVertexBuffer() const;
 		const std::shared_ptr<prosper::IBuffer> &GetVertexWeightBuffer() const;
@@ -37,6 +38,7 @@ namespace pragma
 		void SetAlphaBuffer(const std::shared_ptr<prosper::IBuffer> &buffer);
 		void SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer);
 		void SetLightmapUvBuffer(const std::shared_ptr<prosper::IBuffer> &lightmapUvBuffer);
+		void ClearBuffers();
 
 		const std::shared_ptr<prosper::IRenderBuffer> &GetRenderBuffer(CModelSubMesh &mesh,pragma::ShaderEntity &shader,uint32_t pipelineIdx=0u);
 	private:

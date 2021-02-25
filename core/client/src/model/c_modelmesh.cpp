@@ -53,7 +53,12 @@ const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGloba
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalVertexWeightBuffer() {return s_vertexWeightBuffer;}
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalAlphaBuffer() {return s_alphaBuffer;}
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalIndexBuffer() {return s_indexBuffer;}
-std::shared_ptr<ModelSubMesh> CModelSubMesh::Copy() const {return std::make_shared<CModelSubMesh>(*this);}
+std::shared_ptr<ModelSubMesh> CModelSubMesh::Copy(bool fullCopy) const
+{
+	auto cpy = std::make_shared<CModelSubMesh>(*this);
+	ModelSubMesh::Copy(*cpy,fullCopy);
+	return cpy;
+}
 
 void CModelSubMesh::InitializeBuffers()
 {

@@ -23,7 +23,7 @@ public:
 	const std::shared_ptr<pragma::SceneMesh> &GetSceneMesh() const;
 	virtual void Update(ModelUpdateFlags flags=ModelUpdateFlags::AllData) override;
 	virtual void Centralize(const Vector3 &origin) override;
-	virtual std::shared_ptr<ModelSubMesh> Copy() const override;
+	virtual std::shared_ptr<ModelSubMesh> Copy(bool fullCopy=false) const override;
 	static void InitializeBuffers();
 	static void ClearBuffers();
 

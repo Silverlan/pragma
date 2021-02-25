@@ -39,7 +39,7 @@ std::string pragma::asset::ModelManager::GetNormalizedModelName(const std::strin
 	util::Path path {mdlName};
 	path.Canonicalize();
 	path.RemoveFileExtension(get_model_extensions());
-	// path += ".wmd";
+	path += ".wmd"; // TODO: Remove this extension!
 	return path.GetString();
 }
 std::string pragma::asset::ModelManager::GetCacheName(const std::string &mdlName)

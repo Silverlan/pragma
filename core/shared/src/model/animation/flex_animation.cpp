@@ -8,6 +8,11 @@
 #include "stdafx_shared.h"
 #include "pragma/model/animation/flex_animation.hpp"
 
+FlexAnimationFrame::FlexAnimationFrame(const FlexAnimationFrame &frame)
+	: m_flexControllerValues{frame.m_flexControllerValues}
+{
+	static_assert(sizeof(FlexAnimationFrame) == 40,"Update this function when making changes to this class!");
+}
 std::shared_ptr<FlexAnimation> FlexAnimation::Load(std::shared_ptr<VFilePtrInternal> &f)
 {
 	auto version = f->Read<uint32_t>();
@@ -51,6 +56,14 @@ bool FlexAnimation::Save(std::shared_ptr<VFilePtrInternalReal> &f)
 		f->Write(values.data(),flexControllerIds.size() *sizeof(values.front()));
 	}
 	return true;
+}
+FlexAnimation::FlexAnimation(const FlexAnimation &other)
+	: m_flexControllerIds{other.m_flexControllerIds},m_fps{other.m_fps},
+	m_frames{other.m_frames}
+{
+	for(auto &frame : m_frames)
+		frame = std::make_shared<FlexAnimationFrame>(*frame);
+	static_assert(sizeof(FlexAnimation) == 72,"Update this function when making changes to this class!");
 }
 uint32_t FlexAnimation::AddFlexControllerId(FlexControllerId id)
 {

@@ -24,6 +24,7 @@ SceneMesh::SceneMesh(const SceneMesh &other)
 	m_vertexWeightBuffer{other.m_vertexWeightBuffer},m_alphaBuffer{other.m_alphaBuffer},
 	m_indexBuffer{other.m_indexBuffer},m_lightmapUvBuffer{other.m_lightmapUvBuffer}
 {}
+SceneMesh::~SceneMesh() {}
 SceneMesh &SceneMesh::operator=(const SceneMesh &other)
 {
 	m_renderBuffers = other.m_renderBuffers;
@@ -45,6 +46,15 @@ void SceneMesh::SetVertexWeightBuffer(const std::shared_ptr<prosper::IBuffer> &b
 void SceneMesh::SetAlphaBuffer(const std::shared_ptr<prosper::IBuffer> &buffer) {m_alphaBuffer = buffer; SetDirty();}
 void SceneMesh::SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer) {m_indexBuffer = buffer; SetDirty();}
 void SceneMesh::SetLightmapUvBuffer(const std::shared_ptr<prosper::IBuffer> &lightmapUvBuffer) {m_lightmapUvBuffer = lightmapUvBuffer; SetDirty();}
+void SceneMesh::ClearBuffers()
+{
+	m_vertexBuffer = nullptr;
+	m_vertexWeightBuffer = nullptr;
+	m_alphaBuffer = nullptr;
+	m_indexBuffer = nullptr;
+	m_lightmapUvBuffer = nullptr;
+	m_renderBuffers.clear();
+}
 
 void SceneMesh::SetDirty() {m_renderBuffers.clear();}
 const std::shared_ptr<prosper::IRenderBuffer> &SceneMesh::GetRenderBuffer(CModelSubMesh &mesh,pragma::ShaderEntity &shader,uint32_t pipelineIdx)

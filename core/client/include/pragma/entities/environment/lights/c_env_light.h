@@ -134,7 +134,8 @@ namespace pragma
 			StaticUpdateRequired = 1u,
 			DynamicUpdateRequired = StaticUpdateRequired<<1u,
 			FullUpdateRequired = StaticUpdateRequired<<1u,
-			AddToGameScene = FullUpdateRequired<<1u
+			AddToGameScene = FullUpdateRequired<<1u,
+			EnableMorphTargetsInShadows = AddToGameScene<<1u
 		};
 		enum class ShadowMapType : uint8_t
 		{
@@ -160,6 +161,9 @@ namespace pragma
 		virtual void OnEntitySpawn() override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		void SetStateFlag(StateFlags flag,bool enabled);
+
+		void SetMorphTargetsInShadowsEnabled(bool enabled);
+		bool AreMorphTargetsInShadowsEnabled() const;
 
 		bool ShouldCastShadows() const;
 		bool ShouldCastDynamicShadows() const;

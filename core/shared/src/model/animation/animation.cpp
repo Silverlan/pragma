@@ -422,6 +422,7 @@ Animation::Animation(const Animation &other,ShareMode share)
 				events.push_back(std::make_unique<AnimationEvent>(*ev));
 		}
 	}
+	static_assert(sizeof(Animation) == 312,"Update this function when making changes to this class!");
 }
 
 void Animation::Reverse()

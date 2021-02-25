@@ -29,7 +29,7 @@ using namespace pragma;
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 CShadowComponent::CShadowComponent(BaseEntity &ent)
 	: BaseEntityComponent{ent}
 {}
@@ -509,6 +509,8 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 	
 	for(auto layerId=decltype(numLayers){0};layerId<numLayers;++layerId)
 		CSceneComponent::UpdateRenderBuffers(drawCmd,*m_renderQueues.at(layerId),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::ShadowPass) : nullptr);
+
+	auto pipeline = m_hLight->AreMorphTargetsInShadowsEnabled() ? ShaderShadow::Pipeline::WithMorphTargetAnimations : ShaderShadow::Pipeline::Default;
 	
 	util::RenderPassDrawInfo rpDrawInfo {drawSceneInfo,*drawSceneInfo.commandBuffer};
 	rendering::DepthStageRenderProcessor shadowRenderProcessor {rpDrawInfo,RenderFlags::None,{}};
@@ -520,7 +522,7 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 		if(drawCmd->RecordBeginRenderPass(*smRt,layerId,prosper::IPrimaryCommandBuffer::RenderPassFlags::None,&clearVal) == false)
 			continue;
 
-		if(shadowRenderProcessor.BindShader(*shader))
+		if(shadowRenderProcessor.BindShader(*shader,umath::to_integral(pipeline)))
 		{
 			shadowRenderProcessor.BindLight(*m_hLight,layerId);
 			shadowRenderProcessor.Render(*m_renderQueues.at(layerId),drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::ShadowPass) : nullptr);
@@ -542,3 +544,4 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 		);
 	}
 }
+#pragma optimize("",on)

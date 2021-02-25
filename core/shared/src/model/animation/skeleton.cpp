@@ -13,10 +13,11 @@ Bone::Bone()
 {}
 
 Bone::Bone(const Bone &other)
-	: ID(other.ID),parent{}
+	: ID(other.ID),name{other.name},parent{}
 {
 	for(auto &pair : other.children)
 		children[pair.first] = std::make_shared<Bone>(*pair.second);
+	static_assert(sizeof(Bone) == 136,"Update this function when making changes to this class!");
 }
 
 bool Bone::IsAncestorOf(const Bone &other) const
@@ -70,6 +71,7 @@ Skeleton::Skeleton(const Skeleton &other)
 		}
 	};
 	fUpdateHierarchy(m_rootBones,nullptr);
+	static_assert(sizeof(Skeleton) == 88,"Update this function when making changes to this class!");
 }
 
 bool Skeleton::IsRootBone(uint32_t boneId) const

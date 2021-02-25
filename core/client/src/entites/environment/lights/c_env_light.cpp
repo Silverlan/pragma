@@ -349,6 +349,9 @@ void CLightComponent::InitializeShadowMap()
 
 void CLightComponent::SetStateFlag(StateFlags flag,bool enabled) {umath::set_flag(m_stateFlags,flag,enabled);}
 
+void CLightComponent::SetMorphTargetsInShadowsEnabled(bool enabled) {SetStateFlag(StateFlags::EnableMorphTargetsInShadows,enabled);}
+bool CLightComponent::AreMorphTargetsInShadowsEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::EnableMorphTargetsInShadows);}
+
 void CLightComponent::Initialize()
 {
 	CBaseLightComponent::Initialize();

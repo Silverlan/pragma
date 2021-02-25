@@ -172,9 +172,10 @@ public:
 		CopyMeshesBit = 1u,
 		CopyAnimationsBit = CopyMeshesBit<<1u,
 		CopyVertexAnimationsBit = CopyAnimationsBit<<1u,
-		CopyCollisionMeshes = CopyVertexAnimationsBit<<1u,
+		CopyCollisionMeshesBit = CopyVertexAnimationsBit<<1u,
+		CopyFlexAnimationsBit = CopyCollisionMeshesBit<<1u,
 
-		DeepCopy = CopyMeshesBit | CopyAnimationsBit | CopyVertexAnimationsBit | CopyCollisionMeshes
+		DeepCopy = CopyMeshesBit | CopyAnimationsBit | CopyVertexAnimationsBit | CopyCollisionMeshesBit | CopyFlexAnimationsBit
 	};
 public:
 	template<class TModel>

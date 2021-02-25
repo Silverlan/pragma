@@ -486,7 +486,7 @@ DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Descript
 
 DLLCLIENT std::ostream &operator<<(std::ostream &out,const pragma::SceneMesh&)
 {
-	out<<"VKMesh";
+	out<<"SceneMesh";
 	return out;
 }
 
@@ -2607,6 +2607,9 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkMesh.def("SetVertexWeightBuffer",&Lua::Vulkan::VKMesh::SetVertexWeightBuffer);
 	defVkMesh.def("SetAlphaBuffer",&Lua::Vulkan::VKMesh::SetAlphaBuffer);
 	defVkMesh.def("SetIndexBuffer",&Lua::Vulkan::VKMesh::SetIndexBuffer);
+	defVkMesh.def("ClearBuffers",static_cast<void(*)(lua_State*,pragma::SceneMesh&)>([](lua_State *l,pragma::SceneMesh &mesh) {
+		mesh.ClearBuffers();
+	}));
 	prosperMod[defVkMesh];
 	
 	auto defVkRenderTarget = luabind::class_<Lua::Vulkan::RenderTarget>("RenderTarget");

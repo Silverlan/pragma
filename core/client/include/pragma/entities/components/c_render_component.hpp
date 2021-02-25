@@ -173,6 +173,7 @@ namespace pragma
 		const umath::ScaledTransform *GetRenderOffsetTransform() const;
 
 		GameShaderSpecialization GetShaderPipelineSpecialization() const;
+		void ClearRenderBuffers();
 	protected:
 		void UpdateShouldDrawShadowState();
 		void UpdateRenderBuffer() const;
@@ -184,7 +185,6 @@ namespace pragma
 		bool RenderCallback(RenderObject *o,pragma::CCameraComponent *cam,pragma::ShaderGameWorldLightingPass *shader,Material *mat);
 		void UpdateRenderMeshes();
 
-		void ClearRenderBuffers();
 		void InitializeRenderBuffers();
 		void UpdateBoneBuffer();
 

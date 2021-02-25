@@ -25,7 +25,7 @@ extern DLLCLIENT CGame *c_game;
 
 static auto SHADOW_DEPTH_BIAS_CONSTANT = 1.25f;
 static auto SHADOW_DEPTH_BIAS_SLOPE = 1.75f;
-
+#pragma optimize("",off)
 decltype(ShaderShadow::RENDER_PASS_DEPTH_FORMAT) ShaderShadow::RENDER_PASS_DEPTH_FORMAT = prosper::Format::D32_SFloat;
 
 decltype(ShaderShadow::VERTEX_BINDING_RENDER_BUFFER_INDEX) ShaderShadow::VERTEX_BINDING_RENDER_BUFFER_INDEX = {prosper::VertexInputRate::Instance};
@@ -48,7 +48,9 @@ decltype(ShaderShadow::DESCRIPTOR_SET_MATERIAL) ShaderShadow::DESCRIPTOR_SET_MAT
 decltype(ShaderShadow::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderShadow::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderGameWorld::DESCRIPTOR_SET_RENDER_SETTINGS};
 ShaderShadow::ShaderShadow(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader)
 	: ShaderGameWorld(context,identifier,vsShader,fsShader)
-{}
+{
+	SetPipelineCount(umath::to_integral(Pipeline::Count));
+}
 
 ShaderShadow::ShaderShadow(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderShadow(context,identifier,"shadow/vs_shadow","shadow/fs_shadow")
@@ -118,7 +120,7 @@ uint32_t ShaderShadow::GetLightDescriptorSetIndex() const {return std::numeric_l
 uint32_t ShaderShadow::GetInstanceDescriptorSetIndex() const{return DESCRIPTOR_SET_INSTANCE.setIndex;}
 uint32_t ShaderShadow::GetMaterialDescriptorSetIndex() const {return DESCRIPTOR_SET_MATERIAL.setIndex;}
 bool ShaderShadow::BindScene(pragma::CSceneComponent &scene,CRasterizationRendererComponent &renderer,bool bView) {return BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());}
-void ShaderShadow::GetVertexAnimationPushConstantInfo(uint32_t &offset) const {}
+void ShaderShadow::GetVertexAnimationPushConstantInfo(uint32_t &offset) const {offset = offsetof(PushConstants,vertexAnimInfo);}
 void ShaderShadow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	prosper::ShaderGraphics::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
@@ -145,6 +147,11 @@ void ShaderShadow::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pi
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDER_SETTINGS);
 
 	pipelineInfo.ToggleDepthBias(true,SHADOW_DEPTH_BIAS_CONSTANT,0.f,SHADOW_DEPTH_BIAS_SLOPE);
+	uint32_t enableMorphTagetAnimations = (pipelineIdx == umath::to_integral(Pipeline::WithMorphTargetAnimations));
+	AddSpecializationConstant(
+		pipelineInfo,prosper::ShaderStageFlags::VertexBit,umath::get_least_significant_set_bit_index(umath::to_integral(GameShaderSpecializationConstantFlag::EnableMorphTargetAnimationBit)),
+		sizeof(enableMorphTagetAnimations),&enableMorphTagetAnimations
+	);
 }
 
 //
@@ -208,6 +215,14 @@ bool ShaderShadow::RecordBindMaterial(rendering::ShaderProcessor &shaderProcesso
 	return ShaderGameWorld::RecordBindMaterial(shaderProcessor,mat);
 }
 
+void ShaderShadow::RecordVertexAnimationOffset(rendering::ShaderProcessor &shaderProcessor,uint32_t vertexAnimationOffset) const
+{
+	// TODO: Only if pipeline 1
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(
+		shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(PushConstants,vertexAnimInfo),sizeof(vertexAnimationOffset),&vertexAnimationOffset
+	);
+}
+
 //////////////////
 
 ShaderShadowSpot::ShaderShadowSpot(prosper::IPrContext &context,const std::string &identifier)
@@ -232,3 +247,4 @@ void ShaderShadowCSM::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass>
 		}
 	}}},outRenderPass,pipelineIdx);
 }
+#pragma optimize("",on)

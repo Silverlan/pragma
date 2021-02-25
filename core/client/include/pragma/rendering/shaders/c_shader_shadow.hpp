@@ -40,6 +40,14 @@ namespace pragma
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
 
+		enum class Pipeline : uint32_t
+		{
+			Default = 0,
+			WithMorphTargetAnimations,
+
+			Count
+		};
+
 #pragma pack(push,1)
 		struct PushConstants
 		{
@@ -53,6 +61,7 @@ namespace pragma
 			Vector4 lightPos; // 4th component stores the distance
 			SceneFlags flags;
 			float alphaCutoff;
+			uint32_t vertexAnimInfo;
 		};
 #pragma pack(pop)
 
@@ -66,7 +75,6 @@ namespace pragma
 		virtual bool BindClipPlane(const Vector4 &clipPlane) override {return true;}
 		virtual bool SetDepthBias(const Vector2 &depthBias) override {return true;}
 		virtual bool SetDebugMode(pragma::SceneDebugMode debugMode) override {return true;}
-		virtual bool BindVertexAnimationOffset(uint32_t offset) {return true;}
 		virtual void Set3DSky(bool is3dSky) override {}
 		virtual bool BindDrawOrigin(const Vector4 &drawOrigin) override {return true;}
 		virtual bool BeginDraw(
@@ -90,7 +98,7 @@ namespace pragma
 		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor,CMaterial &mat) const override;
 		virtual void RecordClipPlane(rendering::ShaderProcessor &shaderProcessor,const Vector4 &clipPlane) const override {}
 		virtual void RecordDepthBias(rendering::ShaderProcessor &shaderProcessor,const Vector2 &depthBias) const override {}
-		virtual void RecordVertexAnimationOffset(rendering::ShaderProcessor &shaderProcessor,uint32_t vertexAnimationOffset) const override {}
+		virtual void RecordVertexAnimationOffset(rendering::ShaderProcessor &shaderProcessor,uint32_t vertexAnimationOffset) const override;
 	protected:
 		bool BindEntityDepthMatrix(const Mat4 &depthMVP);
 		virtual void OnPipelinesInitialized() override;

@@ -114,6 +114,9 @@ std::shared_ptr<Model> Model::Copy(Game *game,CopyFlags copyFlags) const
 	mdl->m_subMeshCount = m_subMeshCount;
 	mdl->m_vertexCount = m_vertexCount;
 	mdl->m_triangleCount = m_triangleCount;
+	mdl->m_maxEyeDeflection = m_maxEyeDeflection;
+	mdl->m_eyeballs = m_eyeballs;
+	mdl->m_flexAnimationNames = m_flexAnimationNames;
 	mdl->m_blendControllers = m_blendControllers;
 	mdl->m_meshGroups = m_meshGroups;
 	mdl->m_bodyGroups = m_bodyGroups;
@@ -122,6 +125,7 @@ std::shared_ptr<Model> Model::Copy(Game *game,CopyFlags copyFlags) const
 	mdl->m_name = m_name;
 	mdl->m_bAllMaterialsLoaded = true;
 	mdl->m_animations = m_animations;
+	mdl->m_flexAnimations = m_flexAnimations;
 	mdl->m_animationIDs = m_animationIDs;
 	mdl->m_skeleton = std::make_unique<Skeleton>(*m_skeleton);
 	mdl->m_bindPose = m_bindPose;
@@ -143,17 +147,25 @@ std::shared_ptr<Model> Model::Copy(Game *game,CopyFlags copyFlags) const
 	mdl->m_flexes = m_flexes;
 	for(auto &ikController : mdl->m_ikControllers)
 		ikController = std::make_shared<IKController>(*ikController);
+	std::unordered_map<ModelMesh*,ModelMesh*> oldMeshToNewMesh;
+	std::unordered_map<ModelSubMesh*,ModelSubMesh*> oldSubMeshToNewSubMesh;
 	if((copyFlags &CopyFlags::CopyMeshesBit) != CopyFlags::None)
 	{
 		for(auto &meshGroup : mdl->m_meshGroups)
 		{
 			auto newMeshGroup = ModelMeshGroup::Create(meshGroup->GetName());
+			static_assert(sizeof(ModelMeshGroup) == 72,"Update this function when making changes to this class!");
 			newMeshGroup->GetMeshes() = meshGroup->GetMeshes();
 			for(auto &mesh : newMeshGroup->GetMeshes())
 			{
 				auto newMesh = mesh->Copy();
+				oldMeshToNewMesh[mesh.get()] = newMesh.get();
 				for(auto &subMesh : newMesh->GetSubMeshes())
-					subMesh = subMesh->Copy();
+				{
+					auto newSubMesh = subMesh->Copy(true);
+					oldSubMeshToNewSubMesh[subMesh.get()] = newSubMesh.get();
+					subMesh = newSubMesh;
+				}
 				mesh = newMesh;
 			}
 			meshGroup = newMeshGroup;
@@ -167,14 +179,37 @@ std::shared_ptr<Model> Model::Copy(Game *game,CopyFlags copyFlags) const
 	if((copyFlags &CopyFlags::CopyVertexAnimationsBit) != CopyFlags::None)
 	{
 		for(auto &vertexAnim : mdl->m_vertexAnimations)
+		{
 			vertexAnim = VertexAnimation::Create(*vertexAnim);
+			for(auto &meshAnim : vertexAnim->GetMeshAnimations())
+			{
+				auto *mesh = meshAnim->GetMesh();
+				auto *subMesh = meshAnim->GetSubMesh();
+				if(mesh == nullptr || subMesh == nullptr)
+					continue;
+				auto itMesh = oldMeshToNewMesh.find(mesh);
+				auto itSubMesh = oldSubMeshToNewSubMesh.find(subMesh);
+				if(itMesh == oldMeshToNewMesh.end() || itSubMesh == oldSubMeshToNewSubMesh.end())
+					continue;
+				meshAnim->SetMesh(*itMesh->second,*itSubMesh->second);
+			}
+		}
 	}
-	if((copyFlags &CopyFlags::CopyCollisionMeshes) != CopyFlags::None)
+	if((copyFlags &CopyFlags::CopyCollisionMeshesBit) != CopyFlags::None)
 	{
 		for(auto &colMesh : mdl->m_collisionMeshes)
-			colMesh = std::make_shared<CollisionMesh>(*colMesh);
+		{
+			colMesh = CollisionMesh::Create(*colMesh);
+			// TODO: Update shape?
+		}
+	}
+	if((copyFlags &CopyFlags::CopyFlexAnimationsBit) != CopyFlags::None)
+	{
+		for(auto &flexAnim : mdl->m_flexAnimations)
+			flexAnim = std::make_shared<FlexAnimation>(*flexAnim);
 	}
 	// TODO: Copy collision mesh soft body sub mesh reference
+	static_assert(sizeof(Model) == 992,"Update this function when making changes to this class!");
 	return mdl;
 }
 

@@ -39,7 +39,9 @@ CollisionMesh::CollisionMesh(const CollisionMesh &other)
 	m_surfaceMaterialId = other.m_surfaceMaterialId;
 	m_centerOfMass = other.m_centerOfMass;
 	m_volume = other.m_volume;
+	m_mass = other.m_mass;
 	m_softBodyInfo = (m_softBodyInfo != nullptr) ? std::make_shared<SoftBodyInfo>(*other.m_softBodyInfo) : nullptr;
+	static_assert(sizeof(CollisionMesh) == 200,"Update this function when making changes to this class!");
 }
 void CollisionMesh::SetMass(float mass) {m_mass = mass;}
 float CollisionMesh::GetMass() const {return m_mass;}

@@ -3145,9 +3145,20 @@ namespace Lua
 			auto val = hModel->GetBodyGroup(groupId);
 			Lua::PushInt(l,val);
 		}));
+		def.def("GetBodyGroups",static_cast<luabind::object(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hModel) -> luabind::object {
+			pragma::Lua::check_component(l,hModel);
+			auto &bodyGroups = hModel->GetBodyGroups();
+			return Lua::vector_to_table(l,bodyGroups);
+		}));
 		def.def("SetBodyGroup",static_cast<void(*)(lua_State*,THandle&,UInt32,UInt32)>([](lua_State *l,THandle &hModel,UInt32 groupId,UInt32 val) {
 			pragma::Lua::check_component(l,hModel);
 			hModel->SetBodyGroup(groupId,val);
+		}));
+		def.def("SetBodyGroups",static_cast<void(*)(lua_State*,THandle&,luabind::table<>)>([](lua_State *l,THandle &hModel,luabind::table<> t) {
+			pragma::Lua::check_component(l,hModel);
+			auto bodyGroups = Lua::table_to_vector<uint32_t>(l,t,2);
+			for(auto i=decltype(bodyGroups.size()){0u};i<bodyGroups.size();++i)
+				hModel->SetBodyGroup(i,bodyGroups[i]);
 		}));
 		def.def("LookupAnimation",static_cast<void(*)(lua_State*,THandle&,const char*)>([](lua_State *l,THandle &hEnt,const char *anim) {
 			pragma::Lua::check_component(l,hEnt);

@@ -13,7 +13,9 @@ MeshVertexFrame::MeshVertexFrame(const MeshVertexFrame &other)
 	: std::enable_shared_from_this<MeshVertexFrame>(),
 	m_vertices(other.m_vertices),m_normals{other.m_normals},
 	m_flags{other.m_flags}
-{}
+{
+	static_assert(sizeof(MeshVertexFrame) == 72,"Update this function when making changes to this class!");
+}
 
 const std::vector<std::array<uint16_t,4>> &MeshVertexFrame::GetVertices() const {return const_cast<MeshVertexFrame*>(this)->GetVertices();}
 std::vector<std::array<uint16_t,4>> &MeshVertexFrame::GetVertices() {return m_vertices;}
@@ -139,6 +141,7 @@ MeshVertexAnimation::MeshVertexAnimation(const MeshVertexAnimation &other)
 	m_frames.reserve(other.m_frames.size());
 	for(auto &frame : m_frames)
 		m_frames.push_back(std::make_shared<MeshVertexFrame>(*frame));
+	static_assert(sizeof(MeshVertexAnimation) == 72,"Update this function when making changes to this class!");
 }
 ModelMesh *MeshVertexAnimation::GetMesh() const {return m_wpMesh.lock().get();}
 ModelSubMesh *MeshVertexAnimation::GetSubMesh() const {return m_wpSubMesh.lock().get();}
@@ -194,6 +197,7 @@ VertexAnimation::VertexAnimation(const VertexAnimation &other)
 	m_meshAnims.reserve(other.m_meshAnims.size());
 	for(auto &anim : m_meshAnims)
 		m_meshAnims.push_back(std::make_shared<MeshVertexAnimation>(*anim));
+	static_assert(sizeof(VertexAnimation) == 80,"Update this function when making changes to this class!");
 }
 
 bool VertexAnimation::GetMeshAnimationId(ModelSubMesh &subMesh,uint32_t &id) const

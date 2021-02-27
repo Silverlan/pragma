@@ -3677,6 +3677,14 @@ namespace Lua
 			pragma::Lua::check_component(l,hEnt);
 			hEnt->UpdateSkeleton();
 		}));
+		def.def("SetRootPoseBoneId",static_cast<void(*)(lua_State*,THandle&,BoneId)>([](lua_State *l,THandle &hEnt,BoneId boneId) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt->SetRootPoseBoneId(boneId);
+		}));
+		def.def("GetRootPoseBoneId",static_cast<BoneId(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+			pragma::Lua::check_component(l,hEnt);
+			return hEnt->GetRootPoseBoneId();
+		}));
 
 		def.add_static_constant("EVENT_HANDLE_ANIMATION_EVENT",pragma::BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT);
 		def.add_static_constant("EVENT_ON_PLAY_ANIMATION",pragma::BaseAnimatedComponent::EVENT_ON_PLAY_ANIMATION);

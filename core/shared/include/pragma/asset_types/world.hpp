@@ -19,6 +19,7 @@
 #undef GetClassName
 
 namespace uimg {class ImageBuffer;};
+namespace udm {struct AssetData;};
 namespace pragma::asset
 {
 	struct DLLNETWORK Output
@@ -93,6 +94,8 @@ namespace pragma::asset
 	class DLLNETWORK WorldData
 	{
 	public:
+		static constexpr uint32_t PMAP_VERSION = 1;
+		static constexpr auto PMAP_IDENTIFIER = "PMAP";
 		enum class DataFlags : uint64_t
 		{
 			None = 0u,
@@ -129,6 +132,9 @@ namespace pragma::asset
 		const std::vector<std::string> &GetMaterialTable() const;
 		std::vector<std::string> &GetMaterialTable();
 		void SetMessageLogger(const std::function<void(const std::string&)> &msgLogger);
+
+		bool Save(udm::AssetData &outData,std::string &outErr);
+		bool LoadFromAssetData(const udm::AssetData &data,std::string &outErr);
 	private:
 		WorldData(NetworkState &nw);
 		void WriteDataOffset(VFilePtrReal &f,uint64_t offsetToOffset);

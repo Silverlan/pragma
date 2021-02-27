@@ -11,6 +11,7 @@
 #include <util_image.hpp>
 #include <util_texture_info.hpp>
 #include <sharedutils/util_file.h>
+#include <udm.hpp>
 
 extern DLLNETWORK Engine *engine;
 
@@ -57,6 +58,144 @@ bool pragma::asset::WorldData::Write(const std::string &fileName,std::string *op
 		return false;
 	}
 	Write(fOut);
+	return true;
+}
+
+bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data,std::string &outErr)
+{
+	if(data.GetAssetType() != PMAP_IDENTIFIER)
+	{
+		outErr = "Incorrect format!";
+		return false;
+	}
+
+	auto udm = *data;
+	auto version = data.GetAssetVersion();
+	if(version < 1)
+	{
+		outErr = "Invalid version!";
+		return false;
+	}
+
+	m_materialTable = udm["materials"](m_materialTable);
+	std::vector<MaterialHandle> materials {};
+	materials.reserve(m_materialTable.size());
+	for(auto &str : m_materialTable)
+	{
+		auto *mat = m_nw.LoadMaterial(str);
+		materials.push_back(mat ? mat->GetHandle() : MaterialHandle{});
+	}
+
+	auto udmLightmap = udm["lightmap"];
+	if(udmLightmap)
+	{
+		m_lightMapIntensity = udm["lightmap.intensity"](m_lightMapIntensity);
+		m_lightMapExposure = udm["lightmap.exposure"](m_lightMapExposure);
+	}
+
+	// TODO
+
+	return true;
+}
+
+bool pragma::asset::WorldData::Save(udm::AssetData &outData,std::string &outErr)
+{
+	outData.SetAssetType(PMAP_IDENTIFIER);
+	outData.SetAssetVersion(PMAP_VERSION);
+	auto udm = *outData;
+	
+	// Materials
+	std::vector<std::string> normalizedMaterials;
+	normalizedMaterials.reserve(m_materialTable.size());
+	for(auto &str : m_materialTable)
+	{
+		util::Path path{str};
+		if(ustring::compare(path.GetFront(),"materials",false))
+			path.PopFront();
+
+		auto strPath = path.GetString();
+		ustring::to_lower(strPath);
+		normalizedMaterials.push_back(strPath);
+	}
+	udm["materials"] = normalizedMaterials;
+
+	// Entities
+	auto udmEntities = udm.AddArray("entities",m_entities.size());
+	uint32_t entIdx = 0;
+	for(auto &entData : m_entities)
+	{
+		auto udmEnt = udmEntities[entIdx++];
+		udmEnt["className"] = entData->GetClassName();
+
+		if(umath::is_flag_set(entData->GetFlags(),EntityData::Flags::ClientsideOnly))
+			udmEnt["flags.clientsideOnly"] = true;
+
+		umath::ScaledTransform pose {};
+		pose.SetOrigin(entData->GetOrigin());
+		udmEnt["pose"] = pose;
+		// udmEnt["keyValues"] = entData->GetKeyValues(); // TODO
+
+		auto &outputs = entData->GetOutputs();
+		auto udmOutputs = udmEnt.AddArray("outputs",outputs.size());
+		uint32_t outputIdx = 0;
+		for(auto &output : outputs)
+		{
+			auto udmOutput = udmOutputs[outputIdx++];
+			udmOutput["name"] = output.name;
+			udmOutput["target"] = output.target;
+			udmOutput["input"] = output.input;
+			udmOutput["param"] = output.param;
+			udmOutput["delay"] = output.delay;
+			udmOutput["times"] = output.times;
+		}
+
+		udmEnt["components"] = entData->GetComponents();
+
+		uint32_t firstLeaf,numLeaves;
+		entData->GetLeafData(firstLeaf,numLeaves);
+		if(numLeaves > 0)
+		{
+			std::vector<uint16_t> leaves {};
+			leaves.resize(numLeaves);
+			if(numLeaves > 0u)
+				memcpy(leaves.data(),GetStaticPropLeaves().data() +firstLeaf,leaves.size() *sizeof(leaves.front()));
+			udmEnt["bspLeaves"] = leaves;
+		}
+	}
+
+	if(m_lightMapAtlasEnabled)
+	{
+		udm["lightmap.intensity"] = m_lightMapIntensity;
+		udm["lightmap.exposure"] = m_lightMapExposure;
+	}
+
+	/*if(m_bspTree && m_bspTree->GetNodes().empty() == false && m_bspTree->GetClusterCount() > 0)
+	{
+		// TODO
+		WriteDataOffset(f,offsetBSPTree);
+		flags |= DataFlags::HasBSPTree;
+		WriteBSPTree(f);
+
+		auto &clusterMeshIndices = GetClusterMeshIndices();
+		f->Write<bool>(!clusterMeshIndices.empty());
+		if(clusterMeshIndices.empty() == false)
+		{
+			assert(clusterMeshIndices.size() == m_bspTree->GetClusterCount());
+			if(clusterMeshIndices.size() != m_bspTree->GetClusterCount())
+			{
+				m_messageLogger("Error: Number of items in cluster mesh list mismatches number of BSP tree clusters!");
+				return;
+			}
+
+			auto numClusters = m_bspTree->GetClusterCount();
+			for(auto i=decltype(numClusters){0u};i<numClusters;++i)
+			{
+				auto &meshIndices = clusterMeshIndices.at(i);
+				f->Write<uint32_t>(meshIndices.size());
+				f->Write(meshIndices.data(),meshIndices.size() *sizeof(meshIndices.front()));
+			}
+		}
+	}*/
 	return true;
 }
 

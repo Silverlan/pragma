@@ -21,5 +21,4 @@ void main()
 	vec3 color = texture(u_equirectangularTexture,uv).rgb;
 
 	fs_color = vec4(color,1.0);
-	fs_color = vec4(1,1,0,1);
 }

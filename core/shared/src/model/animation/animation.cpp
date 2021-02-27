@@ -26,6 +26,35 @@ std::shared_ptr<Animation> Animation::Load(const udm::AssetData &data,std::strin
 	return anim;
 }
 
+template<class T0,class T1>
+	static void copy_safe(const T0 &src,T1 &dst,uint32_t srcStartIndex,uint32_t dstStartIndex,uint32_t count)
+{
+	auto *memPtr0 = reinterpret_cast<const uint8_t*>(src.data());
+	auto *memPtr1 = reinterpret_cast<uint8_t*>(dst.data());
+	memPtr0 += srcStartIndex *sizeof(T0::value_type);
+	memPtr1 += dstStartIndex *sizeof(T1::value_type);
+
+	auto *memPtr0End = memPtr0 +sizeof(T0::value_type) *src.size();
+	auto *memPtr1End = memPtr1 +sizeof(T1::value_type) *dst.size();
+
+	if(memPtr0 > memPtr0End)
+		throw std::runtime_error{"Memory out of bounds!"};
+
+	if(memPtr1 > memPtr1End)
+		throw std::runtime_error{"Memory out of bounds!"};
+
+	auto *memPtr0Write = memPtr0 +count *sizeof(T0::value_type);
+	auto *memPtr1WriteEnd = memPtr1 +count *sizeof(T0::value_type);
+
+	if(memPtr0Write > memPtr0End)
+		throw std::runtime_error{"Memory out of bounds!"};
+
+	if(memPtr1WriteEnd > memPtr1End)
+		throw std::runtime_error{"Memory out of bounds!"};
+
+	memcpy(memPtr1,memPtr0,count *sizeof(T0::value_type));
+}
+
 bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr)
 {
 	if(data.GetAssetType() != PANIM_IDENTIFIER)
@@ -36,6 +65,13 @@ bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr
 
 	auto udm = *data;
 	auto version = data.GetAssetVersion();
+	if(version < 1)
+	{
+		outErr = "Invalid version!";
+		return false;
+	}
+	// if(version > PANIM_VERSION)
+	// 	return false;
 	auto activity = udm["activity"];
 	if(activity && activity->IsType(udm::Type::String))
 	{
@@ -100,31 +136,73 @@ bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr
 		readFlag(FAnim::NoMoveBlend,"noMoveBlend");
 		static_assert(umath::to_integral(FAnim::Count) == 7,"Update this list when new flags have been added!");
 	}
-	
-	auto udmFrames = udm["frames"];
-	m_frames.resize(udmFrames.GetSize());
-	uint32_t nextFrameIdx = 0;
-	for(auto &udmFrame : udmFrames)
+
+	auto udmFrameData = udm["frameTransforms"];
+	if(udmFrameData)
 	{
-		auto i = nextFrameIdx++;
-		m_frames[i] = Frame::Create(numBones);
-		auto udmTransforms = udmFrame["transforms"];
-		if(udmTransforms)
-			udmTransforms.GetBlobData(m_frames[i]->GetBoneTransforms());
-
-		auto udmScales = udmFrame["scales"];
-		if(udmScales)
+		std::vector<umath::Transform> transforms;
+		if(udmFrameData.GetBlobData(transforms) == udm::BlobResult::Success)
 		{
-			auto &scales = m_frames[i]->GetBoneScales();
-			scales.resize(numBones);
-			udmScales.GetBlobData(scales);
+			auto numFrames = transforms.size() /m_boneIds.size();
+			m_frames.resize(numFrames);
+			uint32_t offset = 0;
+			for(auto &frame : m_frames)
+			{
+				frame = Frame::Create(numBones);
+				auto &frameTransforms = frame->GetBoneTransforms();
+				copy_safe(transforms,frameTransforms,offset,0,frameTransforms.size());
+				offset += frameTransforms.size();
+			}
 		}
+	}
 
-		auto udmEvents = udmFrame["events"];
-		auto &animEvents = m_events[i];
-		animEvents.reserve(udmEvents.GetSize());
+	auto udmFrameScales = udm["frameScales"];
+	if(udmFrameScales)
+	{
+		std::vector<Vector3> scales;
+		if(udmFrameScales.GetBlobData(scales) == udm::BlobResult::Success)
+		{
+			uint32_t offset = 0;
+			for(auto &frame : m_frames)
+			{
+				auto &frameScales = frame->GetBoneScales();
+				frameScales.resize(numBones);
+				copy_safe(scales,frameScales,offset,0,frameScales.size());
+				offset += frameScales.size();
+			}
+		}
+	}
+
+	auto udmFrameMoveTranslations = udm["frameMoveTranslations"];
+	if(udmFrameMoveTranslations)
+	{
+		std::vector<Vector2> moveTranslations;
+		if(udmFrameMoveTranslations.GetBlobData(moveTranslations) == udm::BlobResult::Success)
+		{
+			for(auto i=decltype(m_frames.size()){0u};i<m_frames.size();++i)
+			{
+				auto &frame = m_frames[i];
+				frame->SetMoveOffset(moveTranslations[i]);
+			}
+		}
+	}
+
+	auto udmEvents = udm["events"];
+	if(udmEvents)
+	{
 		for(auto &udmEvent : udmEvents)
 		{
+			auto frameIndex = udmEvent["frame"].ToValue<uint32_t>();
+			if(frameIndex.has_value() == false)
+				continue;
+			auto it = m_events.find(*frameIndex);
+			if(it == m_events.end())
+				it = m_events.insert(std::make_pair(*frameIndex,std::vector<std::shared_ptr<AnimationEvent>>{})).first;
+
+			auto &frameEvents = it->second;
+			if(frameEvents.size() == frameEvents.capacity())
+				frameEvents.reserve(frameEvents.size() *1.1);
+
 			auto name = udmEvent["name"](std::string{});
 			if(name.empty())
 				continue;
@@ -134,12 +212,8 @@ bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr
 			auto ev = std::make_shared<AnimationEvent>();
 			ev->eventID = static_cast<AnimationEvent::Type>(id);
 			ev->arguments = udmEvent["args"](ev->arguments);
-			animEvents.push_back(ev);
+			frameEvents.push_back(ev);
 		}
-
-		auto moveOffset = udmFrame["moveTranslation"](Vector2{});
-		if(moveOffset.x > 0.f || moveOffset.y > 0.f)
-			m_frames[i]->SetMoveOffset(moveOffset);
 	}
 	return true;
 }
@@ -215,40 +289,70 @@ bool Animation::Save(udm::AssetData &outData,std::string &outErr)
 	writeFlag(FAnim::NoMoveBlend,"noMoveBlend");
 	static_assert(umath::to_integral(FAnim::Count) == 7,"Update this list when new flags have been added!");
 	
-	auto numFrames = GetFrameCount();
-	auto udmFrames = udm.AddArray("frames",numFrames);
-	for(auto i=decltype(numFrames){0u};i<numFrames;++i)
+	std::vector<umath::Transform> transforms;
+	transforms.resize(m_frames.size() *numBones);
+	std::vector<Vector3> scales;
+	std::vector<Vector2> moveTranslations;
+	uint32_t offset = 0;
+	uint32_t frameIdx = 0;
+	for(auto &frame : m_frames)
 	{
-		auto &frame = *GetFrame(i);
-		auto udmFrame = udmFrames[i];
-		auto &transforms = frame.GetBoneTransforms();
-		assert(transforms.size() == numBones);
-		if(transforms.size() != numBones)
-			throw std::runtime_error{"Bone count mismatch!"};
-		udmFrame["transforms"] = udm::compress_lz4_blob(transforms);
-
-		if(frame.HasScaleTransforms())
-			udmFrame["scales"] = udm::compress_lz4_blob(frame.GetBoneScales());
-
-		auto *animEvents = GetEvents(i);
-		auto numEvents = (animEvents != nullptr) ? animEvents->size() : 0;
-		if(numEvents > 0)
+		auto &frameTransforms = frame->GetBoneTransforms();
+		if(frameTransforms.size() != numBones)
 		{
-			auto udmEvents = udmFrame.AddArray("events",numEvents);
-			for(auto i=decltype(animEvents->size()){0u};i<animEvents->size();++i)
+			outErr = "Number of transforms (" +std::to_string(frameTransforms.size()) +" in frame does not match number of bones (" +std::to_string(numBones) +")!";
+			return false;
+		}
+		copy_safe(frameTransforms,transforms,0,offset,frameTransforms.size());
+
+		if(frame->HasScaleTransforms())
+		{
+			if(scales.empty())
+				scales.resize(m_frames.size() *numBones,Vector3{1.f,1.f,1.f});
+			auto &frameScales = frame->GetBoneScales();
+			if(frameScales.size() != numBones)
 			{
-				auto &ev = (*animEvents)[i];
-				auto *eventName = Animation::GetEventEnumRegister().GetEnumName(umath::to_integral(ev->eventID));
-				udmEvents[i]["name"] = (eventName != nullptr) ? *eventName : "";
-				udmEvents[i]["args"] = ev->arguments;
+				outErr = "Number of scales (" +std::to_string(frameTransforms.size()) +" in frame does not match number of bones (" +std::to_string(numBones) +")!";
+				return false;
 			}
+			copy_safe(frameScales,scales,0,offset,frameScales.size());
 		}
 
-		Vector2 moveOffset {};
-		if(frame.GetMoveOffset())
-			moveOffset = *frame.GetMoveOffset();
-		if(moveOffset.x != 0.f || moveOffset.y != 0.f)
-			udmFrame["moveTranslation"] = moveOffset;
+		if(frame->GetMoveOffset())
+		{
+			auto &moveOffset = *frame->GetMoveOffset();
+			if(moveOffset.x != 0.f || moveOffset.y != 0.f)
+			{
+				if(moveTranslations.empty())
+					moveTranslations.resize(m_frames.size(),Vector2{0.f,0.f});
+				moveTranslations.at(frameIdx) = moveOffset;
+			}
+		}
+		offset += frameTransforms.size();
+		++frameIdx;
+	}
+	udm["frameTransforms"] = udm::compress_lz4_blob(transforms);
+	if(!scales.empty())
+		udm["frameScales"] = udm::compress_lz4_blob(scales);
+	if(!moveTranslations.empty())
+		udm["frameMoveTranslations"] = udm::compress_lz4_blob(moveTranslations);
+
+	uint32_t numEvents = 0;
+	for(auto &pair : m_events)
+		numEvents += pair.second.size();
+	auto udmEvents = udm.AddArray("events",numEvents);
+	uint32_t evIdx = 0;
+	for(auto &pair : m_events)
+	{
+		for(auto &ev : pair.second)
+		{
+			auto udmEvent = udmEvents[evIdx++];
+			udmEvent["frame"] = pair.first;
+
+			auto *eventName = Animation::GetEventEnumRegister().GetEnumName(umath::to_integral(ev->eventID));
+			udmEvent["name"] = (eventName != nullptr) ? *eventName : "";
+			udmEvent["args"] = ev->arguments;
+		}
 	}
 	return true;
 }

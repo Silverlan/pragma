@@ -7,7 +7,8 @@
 
 #include "stdafx_shared.h"
 #include "pragma/model/animation/flex_animation.hpp"
-
+#include <udm.hpp>
+#pragma optimize("",off)
 FlexAnimationFrame::FlexAnimationFrame(const FlexAnimationFrame &frame)
 	: m_flexControllerValues{frame.m_flexControllerValues}
 {
@@ -37,7 +38,73 @@ std::shared_ptr<FlexAnimation> FlexAnimation::Load(std::shared_ptr<VFilePtrInter
 	}
 	return flexAnim;
 }
-bool FlexAnimation::Save(std::shared_ptr<VFilePtrInternalReal> &f)
+std::shared_ptr<FlexAnimation> FlexAnimation::Load(const udm::AssetData &data,std::string &outErr)
+{
+	auto flexAnim = std::make_shared<FlexAnimation>();
+	if(flexAnim->LoadFromAssetData(data,outErr) == false)
+		return nullptr;
+	return flexAnim;
+}
+bool FlexAnimation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr)
+{
+	if(data.GetAssetType() != PFLEXANIM_IDENTIFIER)
+	{
+		outErr = "Incorrect format!";
+		return false;
+	}
+
+	auto udm = *data;
+	auto version = data.GetAssetVersion();
+	if(version < 1)
+	{
+		outErr = "Invalid version!";
+		return false;
+	}
+	// if(version > FORMAT_VERSION)
+	// 	return false;
+	m_fps = udm["fps"](m_fps);
+	m_flexControllerIds = udm["flexControllers"](m_flexControllerIds);
+	std::vector<float> blobData;
+	if(udm["frameData"].GetBlobData(blobData) != udm::BlobResult::Success)
+		return false;
+	auto numFrames = !m_flexControllerIds.empty() ? (blobData.size() /m_flexControllerIds.size()) : 0;
+	m_frames.resize(numFrames);
+	uint32_t offset = 0;
+	for(auto &frame : m_frames)
+	{
+		frame = std::make_shared<FlexAnimationFrame>();
+		auto &frameValues = frame->GetValues();
+		frameValues.resize(m_flexControllerIds.size());
+		memcpy(frameValues.data(),&blobData[offset],frameValues.size() *sizeof(frameValues[0]));
+		offset += frameValues.size();
+	}
+	return true;
+}
+bool FlexAnimation::Save(udm::AssetData &outData,std::string &outErr)
+{
+	outData.SetAssetType(PFLEXANIM_IDENTIFIER);
+	outData.SetAssetVersion(FORMAT_VERSION);
+	auto udm = *outData;
+
+	udm["fps"] = GetFps();
+	auto &flexControllerIds = GetFlexControllerIds();
+	udm["flexControllers"] = flexControllerIds;
+
+	auto &frames = GetFrames();
+	std::vector<float> frameData;
+	frameData.resize(frames.size() *flexControllerIds.size());
+	uint32_t offset = 0;
+	for(auto &frame : frames)
+	{
+		auto &frameValues = frame->GetValues();
+		assert(frameValues.size() == flexControllerIds.size());
+		memcpy(&frameData[offset],frameValues.data(),frameValues.size() *sizeof(frameValues[0]));
+		offset += frameValues.size();
+	}
+	udm["frameData"] = udm::compress_lz4_blob(frameData);
+	return true;
+}
+bool FlexAnimation::SaveLegacy(std::shared_ptr<VFilePtrInternalReal> &f)
 {
 	f->Write<uint32_t>(FORMAT_VERSION);
 	f->Write<float>(GetFps());
@@ -92,3 +159,4 @@ void FlexAnimation::SetFlexControllerIds(std::vector<FlexControllerId> &&ids)
 	for(auto &frame : m_frames)
 		frame->GetValues().resize(m_flexControllerIds.size());
 }
+#pragma optimize("",on)

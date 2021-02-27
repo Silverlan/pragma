@@ -42,8 +42,8 @@ namespace pragma
 
 		enum class Pipeline : uint32_t
 		{
-			Default = 0,
 			WithMorphTargetAnimations,
+			Default = WithMorphTargetAnimations,
 
 			Count
 		};

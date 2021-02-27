@@ -10,6 +10,10 @@
 #include "pragma/lua/libraries/lfile.h"
 #include <util_image_buffer.hpp>
 #include <prosper_command_buffer.hpp>
+#include <texturemanager/texturemanager.h>
+#include <cmaterialmanager.h>
+
+extern DLLCLIENT CEngine *c_engine;
 
 void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 {
@@ -48,6 +52,26 @@ void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCLightMap.def("SetLightmapAtlas",static_cast<void(*)(lua_State*,CLightMapHandle&,prosper::Texture&)>([](lua_State *l,CLightMapHandle &hLightMapC,prosper::Texture &texture) {
 		pragma::Lua::check_component(l,hLightMapC);
 		hLightMapC->SetLightMapAtlas(texture.shared_from_this());
+	}));
+	defCLightMap.def("SetLightmapAtlas",static_cast<void(*)(lua_State*,CLightMapHandle&,const std::string &path)>([](lua_State *l,CLightMapHandle &hLightMapC,const std::string &path) {
+		pragma::Lua::check_component(l,hLightMapC);
+		auto *nw = c_engine->GetNetworkState(l);
+
+		TextureManager::LoadInfo loadInfo {};
+		loadInfo.flags = TextureLoadFlags::LoadInstantly;
+
+		prosper::util::SamplerCreateInfo samplerCreateInfo {};
+		loadInfo.sampler = c_engine->GetRenderContext().CreateSampler(samplerCreateInfo);
+		std::shared_ptr<void> texture = nullptr;
+		static_cast<CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).GetTextureManager().Load(
+			c_engine->GetRenderContext(),path,loadInfo,&texture
+		);
+		if(texture == nullptr)
+			return;
+		auto &vkTex = std::static_pointer_cast<Texture>(texture)->GetVkTexture();
+		if(vkTex == nullptr)
+			return;
+		hLightMapC->SetLightMapAtlas(vkTex);
 	}));
 	defCLightMap.def("SetExposure",static_cast<void(*)(lua_State*,CLightMapHandle&,float)>([](lua_State *l,CLightMapHandle &hLightMapC,float exposure) {
 		pragma::Lua::check_component(l,hLightMapC);

@@ -1485,7 +1485,7 @@ bool Model::SaveLegacy(Game *game,const std::string &name,const std::string &roo
 			auto &anim = flexAnims[i];
 			auto &animName = flexAnimNames[i];
 			f->WriteString(animName);
-			anim->Save(f);
+			anim->SaveLegacy(f);
 		}
 		//
 	}

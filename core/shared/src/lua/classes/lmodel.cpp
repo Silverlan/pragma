@@ -808,6 +808,17 @@ void Lua::Model::register_class(
 		luabind::def("FindEventId",&Lua::Animation::FindEventId),
 		classDefFrame
 	];
+	classDefAnimation.scope[luabind::def("Load",static_cast<void(*)(lua_State*,udm::AssetData&)>([](lua_State *l,udm::AssetData &assetData) {
+		std::string err;
+		auto anim = ::Animation::Load(assetData,err);
+		if(anim == nullptr)
+		{
+			Lua::PushBool(l,false);
+			Lua::PushString(l,err);
+			return;
+		}
+		Lua::Push(l,anim);
+	}))];
 	//for(auto &pair : ANIMATION_EVENT_NAMES)
 	//	classDefAnimation.add_static_constant(pair.second.c_str(),pair.first);
 
@@ -883,17 +894,36 @@ void Lua::Model::register_class(
 			return;
 		frames.erase(frames.begin() +idx);
 	}));
-	classDefFlexAnim.def("Save",static_cast<bool(*)(lua_State*,FlexAnimation&,LFile&)>([](lua_State *l,FlexAnimation &flexAnim,LFile &f) -> bool {
+	classDefFlexAnim.def("Save",static_cast<void(*)(lua_State*,FlexAnimation&,udm::AssetData&)>([](lua_State *l,FlexAnimation &flexAnim,udm::AssetData &assetData) {
+		std::string err;
+		auto result = flexAnim.Save(assetData,err);
+		if(result == false)
+			Lua::PushString(l,err);
+		else
+			Lua::PushBool(l,result);
+	}));
+	classDefFlexAnim.def("SaveLegacy",static_cast<bool(*)(lua_State*,FlexAnimation&,LFile&)>([](lua_State *l,FlexAnimation &flexAnim,LFile &f) -> bool {
 		auto fptr = std::dynamic_pointer_cast<VFilePtrInternalReal>(f.GetHandle());
 		if(fptr == nullptr)
 			return false;
-		return flexAnim.Save(fptr);
+		return flexAnim.SaveLegacy(fptr);
 	}));
 	classDefFlexAnim.scope[luabind::def("Load",static_cast<luabind::object(*)(lua_State*,LFile&)>([](lua_State *l,LFile &f) -> luabind::object {
 		auto fptr = std::dynamic_pointer_cast<VFilePtrInternal>(f.GetHandle());
 		if(fptr == nullptr)
 			return {};
 		return luabind::object{l,FlexAnimation::Load(fptr)};
+	}))];
+	classDefFlexAnim.scope[luabind::def("Load",static_cast<void(*)(lua_State*,udm::AssetData&)>([](lua_State *l,udm::AssetData &assetData) {
+		std::string err;
+		auto anim = FlexAnimation::Load(assetData,err);
+		if(anim == nullptr)
+		{
+			Lua::PushBool(l,false);
+			Lua::PushString(l,err);
+			return;
+		}
+		Lua::Push(l,anim);
 	}))];
 
 	auto classDefFlexAnimFrame = luabind::class_<FlexAnimationFrame>("Frame");

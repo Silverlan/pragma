@@ -37,28 +37,13 @@ void export_world_fragment_data(mat4 mdlMatrix,vec3 vpos)
 	{
 		if(CSPEC_ENABLE_MORPH_TARGET_ANIMATION == 1)
 		{
-			uint vertexAnimOffset = (u_pushConstants.scene.vertexAnimInfo<<16)>>16;
-			uint vertexAnimCount = u_pushConstants.scene.vertexAnimInfo>>16;
-			float wrinkleDelta = 0.0;
-			for(uint i=0;i<vertexAnimCount;++i)
-			{
-				uint offset = vertexAnimOffset +i;
-				VertexAnimationFrameData frameData = vaFrameData.data[offset];
-
-				vec3 vpos0;
-				vec3 vnorm0;
-				float vwrinkle0;
-				get_vertex_anim_vertex_position(frameData.srcFrameOffset,vpos0,vnorm0,vwrinkle0);
-
-				vec3 vpos1;
-				vec3 vnorm1;
-				float vwrinkle1;
-				get_vertex_anim_vertex_position(frameData.srcFrameOffset,vpos1,vnorm1,vwrinkle1);
-
-				wrinkleDelta += vwrinkle0 *frameData.blend;
-				vertPos.xyz += vpos0 *frameData.blend;//v0 +(v1 -v0) *frameData.blend;
-				vertNorm += vnorm0 *frameData.blend;
-			}
+			vec3 morphTargetPos;
+			vec3 morphTargetNorm;
+			float wrinkleDelta;
+			get_vertex_anim_data(u_pushConstants.scene.vertexAnimInfo,morphTargetPos,morphTargetNorm,wrinkleDelta);
+			vertPos.xyz += morphTargetPos;
+			vertNorm += morphTargetNorm;
+			
 			vertNorm = normalize(vertNorm);
 			vs_out.wrinkleDelta = wrinkleDelta;
 		}

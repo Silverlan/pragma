@@ -20,6 +20,7 @@ class Animation;
 class Frame;
 class ModelSubMesh;
 struct AnimationEvent;
+using BoneId = uint32_t;
 enum class ALSoundType : int32_t;
 namespace pragma
 {
@@ -50,6 +51,7 @@ namespace pragma
 		static ComponentEventId EVENT_ON_BLEND_ANIMATION;
 		static ComponentEventId EVENT_PLAY_ANIMATION;
 		static ComponentEventId EVENT_ON_ANIMATION_RESET;
+		static constexpr auto *ROOT_POSE_BONE_NAME = "%rootPose%";
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
 		enum class StateFlags : uint8_t
@@ -159,6 +161,9 @@ namespace pragma
 		int SelectWeightedAnimation(Activity activity,int animAvoid=-1) const;
 		// Returns the time left until the current animation has finished playing
 		float GetAnimationDuration() const;
+
+		void SetRootPoseBoneId(BoneId boneId) {m_rootPoseBoneId = boneId;}
+		BoneId GetRootPoseBoneId() const {return m_rootPoseBoneId;}
 
 		void SetBlendController(unsigned int controller,float val);
 		void SetBlendController(const std::string &controller,float val);
@@ -292,7 +297,7 @@ namespace pragma
 		Vector3 m_animDisplacement = {};
 		std::vector<umath::ScaledTransform> m_bones = {};
 		std::vector<umath::ScaledTransform> m_processedBones = {}; // Bone positions / rotations in entity space
-	private:
+	protected:
 		// We have to collect the animation events for the current frame and execute them after ALL animations have been completed (In case some events need to access animation data)
 		std::queue<AnimationEventQueueItem> m_animEventQueue = std::queue<AnimationEventQueueItem>{};
 
@@ -305,6 +310,7 @@ namespace pragma
 		std::vector<TemplateAnimationEvent> m_animEventTemplates;
 		std::unordered_map<uint32_t,std::unordered_map<uint32_t,std::vector<CustomAnimationEvent>>> m_animEvents;
 		
+		BoneId m_rootPoseBoneId = std::numeric_limits<BoneId>::max();
 		StateFlags m_stateFlags = StateFlags::AbsolutePosesDirty;
 		std::shared_ptr<const Frame> m_bindPose = nullptr;
 		std::unordered_map<unsigned int,float> m_blendControllers = {};

@@ -30,6 +30,7 @@ layout(LAYOUT_PUSH_CONSTANTS()) uniform pushConstants {
 	vec4 lightPos; // 4th component stores the distance
 	uint flags;
 	float alphaCutoff;
+	uint vertexAnimInfo;
 } u_pushConstants;
 
 bool is_weighted_ext() {return (u_pushConstants.flags &SCENE_FLAG_BIT_USE_EXTENDED_VERTEX_WEIGHTS) != 0;}

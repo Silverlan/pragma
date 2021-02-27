@@ -23,12 +23,15 @@ private:
 	std::vector<float> m_flexControllerValues;
 };
 
+namespace udm {struct AssetData;};
 class DLLNETWORK FlexAnimation
 	: public std::enable_shared_from_this<FlexAnimation>
 {
 public:
 	static constexpr uint32_t FORMAT_VERSION = 1u;
+	static constexpr auto PFLEXANIM_IDENTIFIER = "PFLEXANI";
 	static std::shared_ptr<FlexAnimation> Load(std::shared_ptr<VFilePtrInternal> &f);
+	static std::shared_ptr<FlexAnimation> Load(const udm::AssetData &data,std::string &outErr);
 	FlexAnimation()=default;
 	FlexAnimation(const FlexAnimation &other);
 	std::vector<std::shared_ptr<FlexAnimationFrame>> &GetFrames() {return m_frames;}
@@ -40,9 +43,11 @@ public:
 	void SetFlexControllerIds(std::vector<FlexControllerId> &&ids);
 	void SetFps(float fps) {m_fps = fps;}
 	float GetFps() const {return m_fps;}
-
-	bool Save(std::shared_ptr<VFilePtrInternalReal> &f);
+	
+	bool Save(udm::AssetData &outData,std::string &outErr);
+	bool SaveLegacy(std::shared_ptr<VFilePtrInternalReal> &f);
 private:
+	bool LoadFromAssetData(const udm::AssetData &data,std::string &outErr);
 	std::vector<std::shared_ptr<FlexAnimationFrame>> m_frames;
 	std::vector<FlexControllerId> m_flexControllerIds;
 	float m_fps = 24.f;

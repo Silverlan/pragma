@@ -20,7 +20,7 @@
 #define DEBUG_VERBOSE_ANIMATION 0
 
 using namespace pragma;
-
+#pragma optimize("",off)
 ComponentEventId BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ANIMATION = pragma::INVALID_COMPONENT_ID;
@@ -123,6 +123,7 @@ void BaseAnimatedComponent::ResetAnimation(const std::shared_ptr<Model> &mdl)
 	m_bones.clear();
 	m_processedBones.clear();
 	m_bindPose = nullptr;
+	m_rootPoseBoneId = std::numeric_limits<decltype(m_rootPoseBoneId)>::max();
 	umath::set_flag(m_stateFlags,StateFlags::AbsolutePosesDirty);
 	ApplyAnimationEventTemplates();
 	if(mdl == nullptr || mdl->HasVertexWeights() == false)
@@ -139,6 +140,9 @@ void BaseAnimatedComponent::ResetAnimation(const std::shared_ptr<Model> &mdl)
 			val = 0;
 		m_blendControllers.insert(std::unordered_map<unsigned int,int>::value_type(i,val));
 	}
+	auto rootPoseBoneId = mdl->LookupBone(ROOT_POSE_BONE_NAME);
+	if(rootPoseBoneId != -1)
+		m_rootPoseBoneId = rootPoseBoneId;
 	Skeleton &skeleton = mdl->GetSkeleton();
 	for(unsigned int i=0;i<skeleton.GetBoneCount();i++)
 		m_bones.push_back({});
@@ -665,6 +669,13 @@ bool BaseAnimatedComponent::MaintainAnimations(double dt)
 			if(boneScales.empty() == false)
 				SetBoneScale(boneId,boneScales.at(i));
 		}
+	}
+
+	if(m_rootPoseBoneId != std::numeric_limits<decltype(m_rootPoseBoneId)>::max() && m_rootPoseBoneId < m_bones.size())
+	{
+		auto &pose = m_bones[m_rootPoseBoneId];
+		auto &ent = GetEntity();
+		ent.SetPose(pose);
 	}
 
 	InvokeEventCallbacks(EVENT_ON_ANIMATIONS_UPDATED);
@@ -1414,3 +1425,4 @@ void CEMaintainAnimationMovement::PushArguments(lua_State *l)
 CEShouldUpdateBones::CEShouldUpdateBones()
 {}
 void CEShouldUpdateBones::PushArguments(lua_State *l) {}
+#pragma optimize("",on)

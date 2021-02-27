@@ -32,11 +32,7 @@ vec3 calc_pbr_lighting(vec2 uv,MaterialInfo materialInfo,vec4 baseColor)
     {
         useLightmaps = is_light_map_enabled();
         if(useLightmaps)
-        {
-            vec4 colLightMap = texture(u_lightMap,fs_in.vert_uv_lightmap.xy);
-            //baseColor.rgb *= colLightMap.rgb;
             color = baseColor.rgb;
-        }
     }
     if(CSPEC_ENABLE_IBL == 1)
     {

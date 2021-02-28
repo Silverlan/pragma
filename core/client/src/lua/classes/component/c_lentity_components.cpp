@@ -635,7 +635,16 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.def("GetViewCameraDescriptorSet",&Lua::Scene::GetViewCameraDescriptorSet);
 	defCScene.def("GetDebugMode",&Lua::Scene::GetDebugMode);
 	defCScene.def("SetDebugMode",&Lua::Scene::SetDebugMode);
-	defCScene.def("Link",&Lua::Scene::Link);
+	defCScene.def("Link",static_cast<void(*)(lua_State*,CSceneHandle&,CSceneHandle&)>([](lua_State *l,CSceneHandle &scene,CSceneHandle &sceneOther) {
+		pragma::Lua::check_component(l,scene);
+		pragma::Lua::check_component(l,sceneOther);
+		scene->Link(*sceneOther);
+	}));
+	defCScene.def("Link",static_cast<void(*)(lua_State*,CSceneHandle&,CSceneHandle&,bool)>([](lua_State *l,CSceneHandle &scene,CSceneHandle &sceneOther,bool linkCamera) {
+		pragma::Lua::check_component(l,scene);
+		pragma::Lua::check_component(l,sceneOther);
+		scene->Link(*sceneOther,linkCamera);
+	}));
 	defCScene.def("BuildRenderQueue",&Lua::Scene::BuildRenderQueue);
 	defCScene.def("RenderPrepass",&Lua::Scene::RenderPrepass);
 	defCScene.def("Render",static_cast<void(*)(lua_State*,CSceneHandle&,::util::DrawSceneInfo&,RenderMode,RenderFlags)>(Lua::Scene::Render));

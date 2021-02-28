@@ -43,7 +43,6 @@ namespace Lua
 		DLLCLIENT void GetDebugMode(lua_State *l,CSceneHandle &scene);
 		DLLCLIENT void SetDebugMode(lua_State *l,CSceneHandle &scene,uint32_t debugMode);
 		
-		DLLCLIENT void Link(lua_State *l,CSceneHandle &scene,CSceneHandle &sceneOther);
 		DLLCLIENT void BuildRenderQueue(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo);
 		DLLCLIENT void RenderPrepass(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode);
 		DLLCLIENT void Render(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode,RenderFlags renderFlags);

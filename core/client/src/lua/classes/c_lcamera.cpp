@@ -129,12 +129,6 @@ void Lua::Scene::SetDebugMode(lua_State *l,CSceneHandle &scene,uint32_t debugMod
 	pragma::Lua::check_component(l,scene);
 	scene->SetDebugMode(static_cast<::pragma::SceneDebugMode>(debugMode));
 }
-void Lua::Scene::Link(lua_State *l,CSceneHandle &scene,CSceneHandle &sceneOther)
-{
-	pragma::Lua::check_component(l,scene);
-	pragma::Lua::check_component(l,sceneOther);
-	scene->Link(*sceneOther);
-}
 void Lua::Scene::BuildRenderQueue(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo)
 {
 	pragma::Lua::check_component(l,scene);

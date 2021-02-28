@@ -10,6 +10,7 @@
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/entities/environment/env_camera.h>
+#include <mathutil/transform.hpp>
 #include <sharedutils/util_weak_handle.hpp>
 #include <sharedutils/util_parallel_job.hpp>
 #include <sharedutils/functioncallback.h>

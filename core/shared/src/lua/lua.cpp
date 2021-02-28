@@ -169,14 +169,21 @@ bool Game::LoadLuaComponent(const std::string &mainPath,const std::string &compo
 {
 	auto nwStateDirName = GetLuaNetworkDirectoryName();
 	auto luaFileName = GetLuaNetworkFileName();
+	ufile::remove_extension_from_filename(luaFileName,std::array<std::string,2>{"lua","clua"});
 	auto nComponentName = FileManager::GetCanonicalizedPath(componentName);
 	auto filePath = "lua\\" +mainPath +"\\components\\" +nComponentName +'\\';
 	auto filePathLuaFile = filePath +luaFileName;
-	if(FileManager::Exists(filePathLuaFile) == false)
+	if(FileManager::Exists(filePathLuaFile +".lua"))
+		filePathLuaFile += ".lua";
+	else if(FileManager::Exists(filePathLuaFile +".clua"))
+		filePathLuaFile += ".clua";
+	else
 	{
 		auto filePathLuaFileNw = filePath +nwStateDirName +'\\' +luaFileName;
-		if(FileManager::Exists(filePathLuaFileNw))
-			filePathLuaFile = filePathLuaFileNw;
+		if(FileManager::Exists(filePathLuaFileNw +".lua"))
+			filePathLuaFile = filePathLuaFileNw +".lua";
+		else if(FileManager::Exists(filePathLuaFileNw +".clua"))
+			filePathLuaFile = filePathLuaFileNw +".clua";
 	}
 	return LoadLuaComponent(filePathLuaFile,mainPath,componentName);
 }
@@ -270,8 +277,7 @@ bool Game::LoadLuaComponentByName(const std::string &componentName)
 		auto luaFilePath = "lua\\" +typePath +"\\components\\" +componentName;
 		if(FileManager::IsDir(luaFilePath))
 			return LoadLuaComponent(typePath,componentName);
-		luaFilePath += ".lua";
-		if(FileManager::Exists(luaFilePath))
+		if(FileManager::Exists(luaFilePath +".lua") || FileManager::Exists(luaFilePath +".clua"))
 			return LoadLuaComponent(typePath,componentName);
 	}
 	return false;

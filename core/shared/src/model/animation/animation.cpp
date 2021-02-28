@@ -17,7 +17,7 @@ decltype(Animation::s_eventEnumRegister) Animation::s_eventEnumRegister;
 util::EnumRegister &Animation::GetActivityEnumRegister() {return s_activityEnumRegister;}
 util::EnumRegister &Animation::GetEventEnumRegister() {return s_eventEnumRegister;}
 
-#pragma optimize("",off)
+
 std::shared_ptr<Animation> Animation::Load(const udm::AssetData &data,std::string &outErr)
 {
 	auto anim = Animation::Create();
@@ -331,6 +331,7 @@ bool Animation::Save(udm::AssetData &outData,std::string &outErr)
 		offset += frameTransforms.size();
 		++frameIdx;
 	}
+	udm["frames"] = static_cast<uint32_t>(m_frames.size());
 	udm["frameTransforms"] = udm::compress_lz4_blob(transforms);
 	if(!scales.empty())
 		udm["frameScales"] = udm::compress_lz4_blob(scales);
@@ -744,4 +745,3 @@ void Animation::SetBoneWeight(uint32_t boneId,float weight)
 		m_boneWeights.resize(m_boneIds.size(),1.f);
 	m_boneWeights.at(boneId) = weight;
 }
-#pragma optimize("",on)

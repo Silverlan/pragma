@@ -293,15 +293,16 @@ int Lua::ents::get_all(lua_State *l)
 			std::vector<BaseEntity*> ents {};
 			iterate_entities(l,[&ents](BaseEntity *ent) {ents.push_back(ent);});
 			if(ents.empty())
-				return 0;
-			auto t = Lua::CreateTable(l);
+			{
+				auto t = luabind::newtable(l);
+				t.push(l);
+				return 1;
+			}
+			auto t = luabind::newtable(l);
 			auto idx = 1;
 			for(auto *ent : ents)
-			{
-				Lua::PushInt(l,idx++);
-				ent->GetLuaObject()->push(l);
-				Lua::SetTableValue(l,t);
-			}
+				t[idx++] = *ent->GetLuaObject();
+			t.push(l);
 			return 1;
 		}
 		if(Lua::IsSet(l,2) == false)

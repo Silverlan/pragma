@@ -324,11 +324,11 @@ void BaseEntityComponent::Save(DataStream &ds)
 void BaseEntityComponent::Load(DataStream &ds)
 {
 	auto ver = ds->Read<decltype(GetVersion())>();
-	Load(ds,ver);
 
 	auto tCur = GetEntity().GetNetworkState()->GetGameState()->CurTime();
 	m_tickData.lastTick = tCur +ds->Read<float>();
 	m_tickData.nextTick = tCur +ds->Read<float>();
+	Load(ds,ver);
 }
 void BaseEntityComponent::Load(DataStream &ds,uint32_t version) {}
 void BaseEntityComponent::OnEntitySpawn() {}

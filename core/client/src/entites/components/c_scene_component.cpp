@@ -187,7 +187,7 @@ void CSceneComponent::Setup(const CreateInfo &createInfo,SceneIndex sceneIndex)
 		g_entityInstanceIndexBuffer = std::make_shared<rendering::EntityInstanceIndexBuffer>();
 }
 
-void CSceneComponent::Link(const CSceneComponent &other)
+void CSceneComponent::Link(const CSceneComponent &other,bool linkCamera)
 {
 	auto &hCam = other.GetActiveCamera();
 	if(hCam.valid())
@@ -210,6 +210,8 @@ void CSceneComponent::Link(const CSceneComponent &other)
 
 	if(m_cbLink.IsValid())
 		m_cbLink.Remove();
+	if(linkCamera == false)
+		return;
 	m_cbLink = const_cast<CSceneComponent&>(other).AddEventCallback(EVENT_ON_ACTIVE_CAMERA_CHANGED,[this,&other](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &hCam = other.GetActiveCamera();
 		if(hCam.valid())

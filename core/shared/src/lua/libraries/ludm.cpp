@@ -13,7 +13,7 @@
 #include <udm.hpp>
 
 extern DLLNETWORK Engine *engine;
-#pragma optimize("",off)
+
 
 template<typename T>
 	void element_set_basic_type(lua_State *l,::udm::Element &el,const std::string &key,const T &v)
@@ -697,4 +697,3 @@ void Lua::udm::register_library(Lua::Interface &lua)
 	}));
 	modUdm[cdProp];
 }
-#pragma optimize("",on)

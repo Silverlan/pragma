@@ -227,7 +227,7 @@ namespace pragma
 		void SetActiveCamera(pragma::CCameraComponent &cam);
 		void SetActiveCamera();
 
-		void Link(const CSceneComponent &other);
+		void Link(const CSceneComponent &other,bool linkCamera=true);
 		uint32_t GetWidth() const;
 		uint32_t GetHeight() const;
 		void Resize(uint32_t width,uint32_t height,bool reload=false);

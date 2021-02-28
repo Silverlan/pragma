@@ -25,7 +25,7 @@ extern DLLCLIENT CGame *c_game;
 
 static auto SHADOW_DEPTH_BIAS_CONSTANT = 1.25f;
 static auto SHADOW_DEPTH_BIAS_SLOPE = 1.75f;
-#pragma optimize("",off)
+
 decltype(ShaderShadow::RENDER_PASS_DEPTH_FORMAT) ShaderShadow::RENDER_PASS_DEPTH_FORMAT = prosper::Format::D32_SFloat;
 
 decltype(ShaderShadow::VERTEX_BINDING_RENDER_BUFFER_INDEX) ShaderShadow::VERTEX_BINDING_RENDER_BUFFER_INDEX = {prosper::VertexInputRate::Instance};
@@ -247,4 +247,3 @@ void ShaderShadowCSM::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass>
 		}
 	}}},outRenderPass,pipelineIdx);
 }
-#pragma optimize("",on)

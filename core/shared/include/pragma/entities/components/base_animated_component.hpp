@@ -58,7 +58,8 @@ namespace pragma
 		{
 			None = 0u,
 			AbsolutePosesDirty = 1u,
-			BaseAnimationDirty = AbsolutePosesDirty<<1u
+			BaseAnimationDirty = AbsolutePosesDirty<<1u,
+			RootPoseTransformEnabled = BaseAnimationDirty<<1u
 		};
 
 		struct DLLNETWORK AnimationSlotInfo
@@ -162,8 +163,12 @@ namespace pragma
 		// Returns the time left until the current animation has finished playing
 		float GetAnimationDuration() const;
 
-		void SetRootPoseBoneId(BoneId boneId) {m_rootPoseBoneId = boneId;}
+		BoneId AddRootPoseBone();
+		void SetRootPoseBoneId(BoneId boneId);
 		BoneId GetRootPoseBoneId() const {return m_rootPoseBoneId;}
+
+		void SetAnimatedRootPoseTransformEnabled(bool enabled);
+		bool IsAnimatedRootPoseTransformEnabled() const;
 
 		void SetBlendController(unsigned int controller,float val);
 		void SetBlendController(const std::string &controller,float val);

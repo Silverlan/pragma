@@ -8,7 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/model/animation/flex_animation.hpp"
 #include <udm.hpp>
-#pragma optimize("",off)
+
 FlexAnimationFrame::FlexAnimationFrame(const FlexAnimationFrame &frame)
 	: m_flexControllerValues{frame.m_flexControllerValues}
 {
@@ -101,6 +101,7 @@ bool FlexAnimation::Save(udm::AssetData &outData,std::string &outErr)
 		memcpy(&frameData[offset],frameValues.data(),frameValues.size() *sizeof(frameValues[0]));
 		offset += frameValues.size();
 	}
+	udm["frames"] = static_cast<uint32_t>(frames.size());
 	udm["frameData"] = udm::compress_lz4_blob(frameData);
 	return true;
 }
@@ -159,4 +160,3 @@ void FlexAnimation::SetFlexControllerIds(std::vector<FlexControllerId> &&ids)
 	for(auto &frame : m_frames)
 		frame->GetValues().resize(m_flexControllerIds.size());
 }
-#pragma optimize("",on)

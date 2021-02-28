@@ -61,7 +61,45 @@ bool pragma::asset::WorldData::Write(const std::string &fileName,std::string *op
 	return true;
 }
 
-bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data,std::string &outErr)
+static void preprocess_bsp_data(util::BSPTree &bspTree,std::vector<std::vector<size_t>> &outClusterNodes,std::vector<std::vector<uint16_t>> &outClusterToClusterVisibility)
+{
+	auto numClusters = bspTree.GetClusterCount();
+	auto &bspNodes = bspTree.GetNodes();
+
+	// Pre-processing to speed up some calculations
+	{
+		// Nodes per cluster
+		outClusterNodes.resize(numClusters);
+		for(auto i=decltype(bspNodes.size()){0u};i<bspNodes.size();++i)
+		{
+			auto &bspNode = bspNodes.at(i);
+			if(bspNode->cluster >= outClusterNodes.size())
+				continue;
+			auto &nodeList = outClusterNodes.at(bspNode->cluster);
+			if(nodeList.size() == nodeList.capacity())
+				nodeList.reserve(nodeList.size() *1.5f +100);
+			nodeList.push_back(i);
+		}
+
+		// List of clusters visible from every other cluster
+		outClusterToClusterVisibility.resize(numClusters);
+		for(auto cluster0=decltype(numClusters){0u};cluster0<numClusters;++cluster0)
+		{
+			auto &visibleClusters = outClusterToClusterVisibility.at(cluster0);
+			for(auto cluster1=decltype(numClusters){0u};cluster1<numClusters;++cluster1)
+			{
+				if(bspTree.IsClusterVisible(cluster0,cluster1) == false)
+					continue;
+				if(visibleClusters.size() == visibleClusters.capacity())
+					visibleClusters.reserve(visibleClusters.size() *1.5f +50);
+				visibleClusters.push_back(cluster1);
+			}
+		}
+	}
+	//
+}
+
+bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data,EntityData::Flags entMask,std::string &outErr)
 {
 	if(data.GetAssetType() != PMAP_IDENTIFIER)
 	{
@@ -93,12 +131,206 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data,std:
 		m_lightMapExposure = udm["lightmap.exposure"](m_lightMapExposure);
 	}
 
-	// TODO
+	uint32_t nextEntIdx = 0;
+	for(auto udmEnt : udm["entities"])
+	{
+		auto entIdx = nextEntIdx++;
+		auto entData = EntityData::Create();
+
+		auto udmClientsideOnly = udmEnt["flags.clientsideOnly"];
+		if(udmClientsideOnly.ToValue<bool>(false))
+			entData->SetFlags(EntityData::Flags::ClientsideOnly);
+
+		if(entMask != EntityData::Flags::None && (entData->GetFlags() &entMask) == EntityData::Flags::None)
+			continue;
+
+		m_entities.push_back(entData);
+		entData->m_mapIndex = entIdx +1; // Map indices always start at 1!
+		entData->SetClassName(udmEnt["className"].ToValue<std::string>(""));
+
+		auto pose = udmEnt["pose"].ToValue<umath::Transform>(umath::Transform{});
+		entData->SetOrigin(pose.GetOrigin());
+
+		auto &keyValues = entData->GetKeyValues();
+		keyValues = udmEnt["keyValues"](keyValues);
+		
+		auto &outputs = entData->GetOutputs();
+		auto udmOutputs = udmEnt["outputs"];
+		outputs.reserve(udmOutputs.GetSize());
+		for(auto udmOutput : udmOutputs)
+		{
+			outputs.push_back({});
+			auto &output = outputs.back();
+			output.name = udmOutput["name"](output.name);
+			output.target = udmOutput["target"](output.target);
+			output.input = udmOutput["input"](output.input);
+			output.param = udmOutput["param"](output.param);
+			output.delay = udmOutput["delay"](output.delay);
+			output.times = udmOutput["times"](output.times);
+		}
+		
+		auto &components = entData->GetComponents();
+		components = udmEnt["components"](components);
+		
+		auto &leaves = entData->GetLeaves();
+		udmEnt["bspLeaves"].GetBlobData(leaves);
+	}
+
+	auto udmBsp = udm["bsp"];
+	if(udmBsp)
+	{
+		auto udmRootNode = udmBsp["rootNode"];
+		if(udmRootNode)
+		{
+			std::function<void(util::BSPTree::Node&,udm::LinkedPropertyWrapper&)> fReadNode = nullptr;
+			fReadNode = [this,&fReadNode](util::BSPTree::Node &node,udm::LinkedPropertyWrapper &udm) {
+				node.leaf = udm["leaf"](node.leaf);
+				node.min = udm["bounds.min"](node.min);
+				node.max = udm["bounds.max"](node.max);
+				node.firstFace = udm["firstFace"](node.firstFace);
+				node.numFaces = udm["numFaces"](node.numFaces);
+				node.originalNodeIndex = udm["originalNodeIndex"](node.originalNodeIndex);
+
+				if(node.leaf)
+				{
+					node.cluster = udm["cluster"](node.cluster);
+					node.minVisible = udm["clusterBounds.min"](node.minVisible);
+					node.maxVisible = udm["clusterBounds.max"](node.maxVisible);
+					return;
+				}
+
+				node.plane = umath::Plane{udm["plane.normal"](uvec::FORWARD),udm["plane.distance"](0.f)};
+				
+				node.children.at(0) = m_bspTree->CreateNode();
+				node.children.at(1) = m_bspTree->CreateNode();
+				auto udmLeft = udm["leftChild"];
+				if(udmLeft)
+					fReadNode(*node.children.at(0),udmLeft);
+				auto udmRight = udm["rightChild"];
+				if(udmRight)
+					fReadNode(*node.children.at(1),udmRight);
+			};
+			fReadNode(m_bspTree->GetRootNode(),udmRootNode);
+		}
+
+		auto &clusterVisibility = m_bspTree->GetClusterVisibility();
+		udmBsp["clusterVisibility"].GetBlobData(clusterVisibility);
+
+		auto numClusters = udmBsp["clusters"].ToValue<uint32_t>(0);
+		std::vector<uint8_t> clusterMeshIndexData;
+		udmBsp["clusterMeshIndexData"].GetBlobData(clusterMeshIndexData);
+		auto &clusterMeshIndices = GetClusterMeshIndices();
+		clusterMeshIndices.resize(numClusters);
+		if(!clusterMeshIndexData.empty())
+		{
+			auto *ptr = clusterMeshIndexData.data();
+			uint32_t idx = 0;
+			do
+			{
+				auto &numIndices = *reinterpret_cast<uint32_t*>(ptr);
+				ptr += sizeof(numIndices);
+				auto &meshIndices = clusterMeshIndices[idx++];
+				meshIndices.resize(numIndices);
+				memcpy(meshIndices.data(),ptr,numIndices *sizeof(meshIndices.front()));
+				ptr += numIndices *sizeof(meshIndices.front());
+			}
+			while(ptr < &clusterMeshIndexData.back());
+		}
+	}
+
+	if(m_bspTree && m_bspTree->GetNodes().empty() == false && m_bspTree->GetClusterCount() > 0)
+	{
+		auto udmBspTree = udm["bsp"];
+		auto &bspTree = *m_bspTree;
+		std::vector<std::vector<size_t>> clusterNodes;
+		std::vector<std::vector<uint16_t>> clusterToClusterVisibility;
+		preprocess_bsp_data(bspTree,clusterNodes,clusterToClusterVisibility);
+	
+		auto &bspNodes = bspTree.GetNodes();
+		auto numClusters = bspTree.GetClusterCount();
+		auto &clusterVisibility = bspTree.GetClusterVisibility();
+		std::function<void(const util::BSPTree::Node&,udm::LinkedPropertyWrapper&)> fWriteNode = nullptr;
+		fWriteNode = [&fWriteNode,&clusterVisibility,&clusterToClusterVisibility,&bspNodes,&clusterNodes,&bspTree,numClusters](const util::BSPTree::Node &node,udm::LinkedPropertyWrapper &udm) {
+			udm["leaf"] = node.leaf;
+			udm["bounds.min"] = node.min;
+			udm["bounds.max"] = node.max;
+			udm["firstFace"] = node.firstFace;
+			udm["numFaces"] = node.numFaces;
+			udm["originalNodeIndex"] = node.originalNodeIndex;
+
+			if(node.leaf)
+			{
+				udm["cluster"] = node.cluster;
+				auto itNode = std::find_if(bspNodes.begin(),bspNodes.end(),[&node](const std::shared_ptr<util::BSPTree::Node> &nodeOther) {
+					return nodeOther.get() == &node;
+				});
+				// Calculate AABB encompassing all nodes visible by this node
+				auto min = node.min;
+				auto max = node.max;
+				if(itNode != bspNodes.end() && node.cluster != std::numeric_limits<uint16_t>::max())
+				{
+					for(auto clusterDst : clusterToClusterVisibility.at(node.cluster))
+					{
+						for(auto nodeOtherIdx : clusterNodes.at(clusterDst))
+						{
+							auto &nodeOther = bspNodes.at(nodeOtherIdx);
+							uvec::to_min_max(min,max,nodeOther->min,nodeOther->max);
+						}
+					}
+				}
+				uvec::to_min_max(min,max); // Vertex conversion rotates the vectors, which will change the signs, so we have to re-order the vector components
+				udm["clusterBounds.min"] = min;
+				udm["clusterBounds.max"] = max;
+				return;
+			}
+
+			udm["plane.normal"] = node.plane.GetNormal();
+			udm["plane.distance"] = node.plane.GetDistance();
+
+			auto udmLeft = udm["leftChild"];
+			auto udmRight = udm["rightChild"];
+			fWriteNode(*node.children.at(0),udmLeft);
+			fWriteNode(*node.children.at(1),udmRight);
+		};
+		auto udmRootNode = udmBspTree["rootNode"];
+		fWriteNode(bspTree.GetRootNode(),udmRootNode);
+
+		udmBspTree["clusterVisibility"] = udm::compress_lz4_blob(clusterVisibility);
+
+		auto &clusterMeshIndices = GetClusterMeshIndices();
+		if(clusterMeshIndices.empty() == false)
+		{
+			assert(clusterMeshIndices.size() == m_bspTree->GetClusterCount());
+			if(clusterMeshIndices.size() != m_bspTree->GetClusterCount())
+			{
+				m_messageLogger("Error: Number of items in cluster mesh list mismatches number of BSP tree clusters!");
+				return false;
+			}
+
+			auto numClusters = m_bspTree->GetClusterCount();
+			uint32_t numIndices = 0;
+			for(auto &meshIndices : clusterMeshIndices)
+				numIndices += meshIndices.size();
+			std::vector<uint8_t> clusterData {};
+			clusterData.resize(numClusters *sizeof(uint32_t) +numIndices *sizeof(WorldModelMeshIndex));
+			auto *ptr = clusterData.data();
+			for(auto &meshIndices : clusterMeshIndices)
+			{
+				uint32_t numIndices = meshIndices.size();
+				memcpy(ptr,&numIndices,sizeof(numIndices));
+				ptr += sizeof(numIndices);
+				memcpy(ptr,meshIndices.data(),meshIndices.size() *sizeof(meshIndices.front()));
+				ptr += meshIndices.size() *sizeof(meshIndices.front());
+			}
+			udmBspTree["clusters"] = numClusters;
+			udmBspTree["clusterMeshIndexData"] = udm::compress_lz4_blob(clusterData);
+		}
+	}
 
 	return true;
 }
 
-bool pragma::asset::WorldData::Save(udm::AssetData &outData,std::string &outErr)
+bool pragma::asset::WorldData::Save(udm::AssetData &outData,const std::string &mapName,std::string &outErr)
 {
 	outData.SetAssetType(PMAP_IDENTIFIER);
 	outData.SetAssetVersion(PMAP_VERSION);
@@ -133,7 +365,7 @@ bool pragma::asset::WorldData::Save(udm::AssetData &outData,std::string &outErr)
 		umath::ScaledTransform pose {};
 		pose.SetOrigin(entData->GetOrigin());
 		udmEnt["pose"] = pose;
-		// udmEnt["keyValues"] = entData->GetKeyValues(); // TODO
+		udmEnt["keyValues"] = entData->GetKeyValues();
 
 		auto &outputs = entData->GetOutputs();
 		auto udmOutputs = udmEnt.AddArray("outputs",outputs.size());
@@ -165,37 +397,164 @@ bool pragma::asset::WorldData::Save(udm::AssetData &outData,std::string &outErr)
 
 	if(m_lightMapAtlasEnabled)
 	{
+		auto strMapName = mapName;
+		ufile::remove_extension_from_filename(strMapName); // TODO: Specify extensions
+		ustring::to_lower(strMapName);
+		SaveLightmapAtlas(strMapName);
 		udm["lightmap.intensity"] = m_lightMapIntensity;
 		udm["lightmap.exposure"] = m_lightMapExposure;
 	}
 
-	/*if(m_bspTree && m_bspTree->GetNodes().empty() == false && m_bspTree->GetClusterCount() > 0)
+	if(m_bspTree && m_bspTree->GetNodes().empty() == false && m_bspTree->GetClusterCount() > 0)
 	{
+		auto udmBspTree = udm["bsp"];
+		auto &bspTree = *m_bspTree;
+		std::vector<std::vector<size_t>> clusterNodes;
+		std::vector<std::vector<uint16_t>> clusterToClusterVisibility;
+		preprocess_bsp_data(bspTree,clusterNodes,clusterToClusterVisibility);
+	
+		// TODO: This wastes a lot of space due to the large amount of nodes that most maps have;
+		// Store the data as LZ4 compressed data streams instead!
+		// TODO: Store key string table for keyvalues?
+
 		// TODO
-		WriteDataOffset(f,offsetBSPTree);
-		flags |= DataFlags::HasBSPTree;
-		WriteBSPTree(f);
+#if 0
+		struct BaseNode
+		{
+			Vector3 min = {};
+			Vector3 max = {};
+			int32_t originalNodeIndex = -1;
+			int32_t firstFace = 0u;
+			int32_t numFaces = 0u;
+		};
+
+		struct LeafNode
+			: public BaseNode
+		{
+			util::BSPTree::ClusterIndex cluster = std::numeric_limits<util::BSPTree::ClusterIndex>::max();
+			Vector3 minVisible = {};
+			Vector3 maxVisible = {};
+		};
+
+		struct ParentNode
+			: public BaseNode
+		{
+			std::array<LeafNode,2> children;
+			umath::Plane plane = {};
+		};
+
+		std::vector<LeafNode> leafNodes;
+		std::vector<ParentNode> parentNodes;
+
+		auto &bspNodes = bspTree.GetNodes();
+		leafNodes.reserve(bspNodes.size());
+		parentNodes.reserve(bspNodes.size());
+		for(auto &node : bspNodes)
+		{
+			BaseNode *dnode = nullptr;
+			if(node->leaf)
+			{
+				leafNodes.push_back({});
+				auto &leafNode = leafNodes.back();
+				leafNode.cluster = node->cluster;
+				leafNode.minVisible = node->minVisible;
+				leafNode.maxVisible = node->maxVisible;
+				dnode = &leafNode;
+			}
+			else
+			{
+				parentNodes.push_back({});
+				auto &parentNode = parentNodes.back();
+				parentNode.plane = node->plane;
+				parentNode.children = node->children; // ??
+				dnode = &parentNode;
+			}
+			dnode->min = node->min;
+			dnode->max = node->max;
+			dnode->originalNodeIndex = node->originalNodeIndex;
+			dnode->numFaces = node->numFaces;
+		}
+
+		auto numClusters = bspTree.GetClusterCount();
+		auto &clusterVisibility = bspTree.GetClusterVisibility();
+		std::function<void(const util::BSPTree::Node&,udm::LinkedPropertyWrapper&)> fWriteNode = nullptr;
+		fWriteNode = [&fWriteNode,&clusterVisibility,&clusterToClusterVisibility,&bspNodes,&clusterNodes,&bspTree,numClusters](const util::BSPTree::Node &node,udm::LinkedPropertyWrapper &udm) {
+			udm["leaf"] = node.leaf;
+			udm["bounds.min"] = node.min;
+			udm["bounds.max"] = node.max;
+			udm["firstFace"] = node.firstFace;
+			udm["numFaces"] = node.numFaces;
+			udm["originalNodeIndex"] = node.originalNodeIndex;
+
+			if(node.leaf)
+			{
+				udm["cluster"] = node.cluster;
+				auto itNode = std::find_if(bspNodes.begin(),bspNodes.end(),[&node](const std::shared_ptr<util::BSPTree::Node> &nodeOther) {
+					return nodeOther.get() == &node;
+				});
+				// Calculate AABB encompassing all nodes visible by this node
+				auto min = node.min;
+				auto max = node.max;
+				if(itNode != bspNodes.end() && node.cluster != std::numeric_limits<uint16_t>::max())
+				{
+					for(auto clusterDst : clusterToClusterVisibility.at(node.cluster))
+					{
+						for(auto nodeOtherIdx : clusterNodes.at(clusterDst))
+						{
+							auto &nodeOther = bspNodes.at(nodeOtherIdx);
+							uvec::to_min_max(min,max,nodeOther->min,nodeOther->max);
+						}
+					}
+				}
+				uvec::to_min_max(min,max); // Vertex conversion rotates the vectors, which will change the signs, so we have to re-order the vector components
+				udm["clusterBounds.min"] = min;
+				udm["clusterBounds.max"] = max;
+				return;
+			}
+
+			udm["plane.normal"] = node.plane.GetNormal();
+			udm["plane.distance"] = node.plane.GetDistance();
+
+			auto udmLeft = udm["leftChild"];
+			auto udmRight = udm["rightChild"];
+			fWriteNode(*node.children.at(0),udmLeft);
+			fWriteNode(*node.children.at(1),udmRight);
+		};
+		auto udmRootNode = udmBspTree["rootNode"];
+		fWriteNode(bspTree.GetRootNode(),udmRootNode);
+
+		udmBspTree["clusterVisibility"] = udm::compress_lz4_blob(clusterVisibility);
+#endif
 
 		auto &clusterMeshIndices = GetClusterMeshIndices();
-		f->Write<bool>(!clusterMeshIndices.empty());
 		if(clusterMeshIndices.empty() == false)
 		{
 			assert(clusterMeshIndices.size() == m_bspTree->GetClusterCount());
 			if(clusterMeshIndices.size() != m_bspTree->GetClusterCount())
 			{
 				m_messageLogger("Error: Number of items in cluster mesh list mismatches number of BSP tree clusters!");
-				return;
+				return false;
 			}
 
 			auto numClusters = m_bspTree->GetClusterCount();
-			for(auto i=decltype(numClusters){0u};i<numClusters;++i)
+			uint32_t numIndices = 0;
+			for(auto &meshIndices : clusterMeshIndices)
+				numIndices += meshIndices.size();
+			std::vector<uint8_t> clusterData {};
+			clusterData.resize(numClusters *sizeof(uint32_t) +numIndices *sizeof(WorldModelMeshIndex));
+			auto *ptr = clusterData.data();
+			for(auto &meshIndices : clusterMeshIndices)
 			{
-				auto &meshIndices = clusterMeshIndices.at(i);
-				f->Write<uint32_t>(meshIndices.size());
-				f->Write(meshIndices.data(),meshIndices.size() *sizeof(meshIndices.front()));
+				uint32_t numIndices = meshIndices.size();
+				memcpy(ptr,&numIndices,sizeof(numIndices));
+				ptr += sizeof(numIndices);
+				memcpy(ptr,meshIndices.data(),meshIndices.size() *sizeof(meshIndices.front()));
+				ptr += meshIndices.size() *sizeof(meshIndices.front());
 			}
+			udmBspTree["clusters"] = numClusters;
+			udmBspTree["clusterMeshIndexData"] = udm::compress_lz4_blob(clusterData);
 		}
-	}*/
+	}
 	return true;
 }
 
@@ -204,7 +563,7 @@ void pragma::asset::WorldData::Write(VFilePtrReal &f)
 	auto mapName = util::Path::CreateFile(f->GetPath());
 	while(ustring::compare(mapName.GetFront(),"maps",false) == false)
 		mapName.PopFront();
-	mapName.PopFront(); // Prop "maps"
+	mapName.PopFront(); // Pop "maps"
 	auto strMapName = mapName.GetString();
 	ufile::remove_extension_from_filename(strMapName);
 	ustring::to_lower(strMapName);
@@ -301,43 +660,12 @@ void pragma::asset::WorldData::WriteMaterials(VFilePtrReal &f)
 void pragma::asset::WorldData::WriteBSPTree(VFilePtrReal &f)
 {
 	auto &bspTree = *m_bspTree;
-	auto numClusters = bspTree.GetClusterCount();
+	std::vector<std::vector<size_t>> clusterNodes;
+	std::vector<std::vector<uint16_t>> clusterToClusterVisibility;
+	preprocess_bsp_data(bspTree,clusterNodes,clusterToClusterVisibility);
+	
 	auto &bspNodes = bspTree.GetNodes();
-
-	// Pre-processing to speed up some calculations
-	std::vector<std::vector<size_t>> clusterNodes {};
-	std::vector<std::vector<uint16_t>> clusterToClusterVisibility {};
-	{
-		// Nodes per cluster
-		clusterNodes.resize(numClusters);
-		for(auto i=decltype(bspNodes.size()){0u};i<bspNodes.size();++i)
-		{
-			auto &bspNode = bspNodes.at(i);
-			if(bspNode->cluster >= clusterNodes.size())
-				continue;
-			auto &nodeList = clusterNodes.at(bspNode->cluster);
-			if(nodeList.size() == nodeList.capacity())
-				nodeList.reserve(nodeList.size() *1.5f +100);
-			nodeList.push_back(i);
-		}
-
-		// List of clusters visible from every other cluster
-		clusterToClusterVisibility.resize(numClusters);
-		for(auto cluster0=decltype(numClusters){0u};cluster0<numClusters;++cluster0)
-		{
-			auto &visibleClusters = clusterToClusterVisibility.at(cluster0);
-			for(auto cluster1=decltype(numClusters){0u};cluster1<numClusters;++cluster1)
-			{
-				if(bspTree.IsClusterVisible(cluster0,cluster1) == false)
-					continue;
-				if(visibleClusters.size() == visibleClusters.capacity())
-					visibleClusters.reserve(visibleClusters.size() *1.5f +50);
-				visibleClusters.push_back(cluster1);
-			}
-		}
-	}
-	//
-
+	auto numClusters = bspTree.GetClusterCount();
 	auto &clusterVisibility = bspTree.GetClusterVisibility();
 	std::function<void(const util::BSPTree::Node&)> fWriteNode = nullptr;
 	fWriteNode = [&f,&fWriteNode,&clusterVisibility,&clusterToClusterVisibility,&bspNodes,&clusterNodes,&bspTree,numClusters](const util::BSPTree::Node &node) {

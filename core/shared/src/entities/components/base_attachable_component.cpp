@@ -19,7 +19,7 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
+
 ComponentEventId BaseAttachableComponent::EVENT_ON_ATTACHMENT_UPDATE = INVALID_COMPONENT_ID;
 void BaseAttachableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
@@ -572,4 +572,3 @@ void BaseAttachableComponent::UpdateAttachmentOffset(bool invokeUpdateEvents)
 	if(invokeUpdateEvents)
 		InvokeEventCallbacks(EVENT_ON_ATTACHMENT_UPDATE);
 }
-#pragma optimize("",on)

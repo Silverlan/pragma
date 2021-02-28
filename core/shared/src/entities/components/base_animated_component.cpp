@@ -20,7 +20,7 @@
 #define DEBUG_VERBOSE_ANIMATION 0
 
 using namespace pragma;
-#pragma optimize("",off)
+
 ComponentEventId BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ANIMATION = pragma::INVALID_COMPONENT_ID;
@@ -622,6 +622,34 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 void BaseAnimatedComponent::SetBindPose(const Frame &frame) {m_bindPose = frame.shared_from_this();}
 const Frame *BaseAnimatedComponent::GetBindPose() const {return m_bindPose.get();}
 
+void BaseAnimatedComponent::SetAnimatedRootPoseTransformEnabled(bool enabled) {umath::set_flag(m_stateFlags,StateFlags::RootPoseTransformEnabled,enabled);}
+bool BaseAnimatedComponent::IsAnimatedRootPoseTransformEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::RootPoseTransformEnabled);}
+
+BoneId BaseAnimatedComponent::AddRootPoseBone()
+{
+	auto &ent = GetEntity();
+	auto &mdl = ent.GetModel();
+	if(mdl == nullptr)
+		return std::numeric_limits<BoneId>::max();
+	auto &skeleton = mdl->GetSkeleton();
+	auto boneId = skeleton.LookupBone(ROOT_POSE_BONE_NAME);
+	if(boneId == -1)
+	{
+		auto *bone = new Bone {};
+		bone->name = ROOT_POSE_BONE_NAME;
+		boneId = skeleton.AddBone(bone);
+		skeleton.GetRootBones()[boneId] = bone->shared_from_this();
+		if(boneId >= m_bones.size())
+		{
+			m_bones.resize(boneId +1,umath::ScaledTransform{});
+			m_processedBones.resize(boneId +1,umath::ScaledTransform{});
+		}
+	}
+	SetRootPoseBoneId(boneId);
+	return boneId;
+}
+void BaseAnimatedComponent::SetRootPoseBoneId(BoneId boneId) {m_rootPoseBoneId = boneId;}
+
 bool BaseAnimatedComponent::MaintainAnimations(double dt)
 {
 	auto &hModel = GetEntity().GetModel();
@@ -671,11 +699,12 @@ bool BaseAnimatedComponent::MaintainAnimations(double dt)
 		}
 	}
 
-	if(m_rootPoseBoneId != std::numeric_limits<decltype(m_rootPoseBoneId)>::max() && m_rootPoseBoneId < m_bones.size())
+	if(IsAnimatedRootPoseTransformEnabled() && m_rootPoseBoneId != std::numeric_limits<decltype(m_rootPoseBoneId)>::max() && m_rootPoseBoneId < m_bones.size())
 	{
 		auto &pose = m_bones[m_rootPoseBoneId];
 		auto &ent = GetEntity();
-		ent.SetPose(pose);
+		umath::Transform poseWithoutScale {pose};
+		ent.SetPose(poseWithoutScale);
 	}
 
 	InvokeEventCallbacks(EVENT_ON_ANIMATIONS_UPDATED);
@@ -1425,4 +1454,3 @@ void CEMaintainAnimationMovement::PushArguments(lua_State *l)
 CEShouldUpdateBones::CEShouldUpdateBones()
 {}
 void CEShouldUpdateBones::PushArguments(lua_State *l) {}
-#pragma optimize("",on)

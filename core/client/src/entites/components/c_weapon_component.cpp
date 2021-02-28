@@ -18,7 +18,7 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;
-#pragma optimize("",off)
+
 ComponentEventId CWeaponComponent::EVENT_ATTACH_TO_OWNER = INVALID_COMPONENT_ID;
 void CWeaponComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
@@ -423,4 +423,3 @@ void CEAttachToOwner::PushArguments(lua_State *l)
 	if(viewModel)
 		viewModel->PushLuaObject(l);
 }
-#pragma optimize("",on)

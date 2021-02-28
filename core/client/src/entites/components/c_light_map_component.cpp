@@ -34,7 +34,7 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 CLightMapComponent::CLightMapComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_lightMapExposure{util::FloatProperty::Create(0.f)}
 {}
@@ -535,4 +535,3 @@ void Console::commands::debug_lightmaps(NetworkState *state,pragma::BasePlayerCo
 	pFrame->SizeToContents();
 	pLightmaps->SetAnchor(0.f,0.f,1.f,1.f);
 }
-#pragma optimize("",on)

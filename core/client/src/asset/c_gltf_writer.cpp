@@ -37,7 +37,7 @@
 	}
 
 extern DLLCLIENT ClientState *client;
-#pragma optimize("",off)
+
 bool pragma::asset::GLTFWriter::Export(const SceneDesc &sceneDesc,const std::string &outputFileName,const pragma::asset::ModelExportInfo &exportInfo,std::string &outErrMsg)
 {
 	GLTFWriter writer {sceneDesc,exportInfo,std::optional<std::string>{}};
@@ -1603,4 +1603,3 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 		m_materialToGltfIndex[mat] = m_gltfMdl.materials.size() -1;
 	}
 }
-#pragma optimize("",on)

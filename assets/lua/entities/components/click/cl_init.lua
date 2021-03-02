@@ -106,7 +106,8 @@ function ents.ClickComponent.raycast(pos,dir)
 		if(mdl ~= nil and ent ~= entPl and renderC ~= nil and renderC:GetRenderMode() ~= ents.RenderComponent.RENDERMODE_VIEW and renderC:GetRenderMode() ~= ents.RenderComponent.RENDERMODE_NONE) then
 			local r,hitData = renderC:CalcRayIntersection(pos,dir *32768,false)
 			-- print("Intersection with ",ent,": ",r)
-			if(r == intersect.RESULT_INTERSECT and hitData.distance < distClosest) then
+			-- Note: Distance of 0 usually means we're inside the object, in which case we probably don't intend to select it
+			if(r == intersect.RESULT_INTERSECT and hitData.distance < distClosest) then -- and hitData.distance > 0.0) then
 				-- print("Clicked actor: ",ent)
 				distClosest = hitData.distance
 				hitPos = hitData.position

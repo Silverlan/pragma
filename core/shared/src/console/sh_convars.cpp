@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -264,7 +264,7 @@ REGISTER_ENGINE_CONCOMMAND(clear,[](NetworkState*,pragma::BasePlayerComponent*,s
 },ConVarFlags::None,"Clears everything in the console.");
 
 REGISTER_ENGINE_CONCOMMAND(credits,[](NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&) {
-	Con::cout<<"Florian Weischer aka Silverlan"<<Con::endl;
+	Con::cout<<"Silverlan"<<Con::endl;
 	Con::cout<<"Contact: "<<engine_info::get_author_mail_address()<<Con::endl;
 	Con::cout<<"Website: "<<engine_info::get_website_url()<<Con::endl;
 },ConVarFlags::None,"Prints a list of developers.");

@@ -1,5 +1,5 @@
 --[[
-    Copyright (C) 2019  Florian Weischer
+    Copyright (C) 2021 Silverlan
 
     This Source Code Form is subject to the terms of the Mozilla Public
     License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -9,66 +9,84 @@
 local LIGHTMAP_CACHE_VERSION = 1
 
 function util.load_lightmap_uv_cache(fileName)
-	fileName = file.remove_file_extension(fileName) .. ".lmc"
-	local f = file.open(fileName,bit.bor(file.OPEN_MODE_READ,file.OPEN_MODE_BINARY))
-	if(f == nil) then return false end
-	local size = f:Size()
-	local ds = f:Read(size)
-	f:Close()
+	fileName = file.remove_file_extension(fileName) .. ".lmdb"
 
-	local header = ds:ReadString(5)
-	if(header ~= "PRLMC") then return false end
-	local version = ds:ReadUInt32()
-	if(version < 1 or version > LIGHTMAP_CACHE_VERSION) then return false end
-
-	local dictionary = {}
-	local numModels = ds:ReadUInt32()
-	for i=1,numModels do
-		local mdlName = ds:ReadString()
-		local dataOffset = ds:ReadUInt64()
-		dictionary[i] = {mdlName,dataOffset}
+	local udmData,err = udm.create("PLMD",LIGHTMAP_CACHE_VERSION)
+	if(udmData == false) then
+		console.print_warning(err)
+		return
 	end
-	local tModels = {}
-	for i,data in ipairs(dictionary) do
-		local mdl = game.load_model(data[1])
+
+	local udmData,err = udm.load(fileName,LIGHTMAP_CACHE_VERSION)
+	if(udmData == false) then
+		console.print_warning(err)
+		return
+	end
+
+	local lightmapData = {}
+	local assetData = udmData:GetAssetData()
+	local udmEntities = assetData:Get("entities")
+	for udmEntity in udmEntities:It() do
+		local pose = udmEntity:GetValue("pose")
+		local model = udmEntity:GetValue("model")
+		local udmMeshes = udmEntity:Get("meshes")
+		local meshData = {}
+		for udmMesh in udmMeshes:It() do
+			local meshGroup = udmMesh:GetValue("meshGroup")
+			local mesh = udmMesh:GetValue("mesh")
+			local subMesh = udmMesh:GetValue("subMesh")
+			local dsVertexData = udmMesh:Get("vertexData"):GetBlobData()
+			local dsIndexData = udmMesh:Get("indexData"):GetBlobData()
+			local dsLightmapUvData = udmMesh:Get("lightmapUvData"):GetBlobData()
+			table.insert(meshData,{
+				meshGroup = meshGroup,
+				mesh = mesh,
+				subMesh = subMesh,
+				dsVertexData = dsVertexData,
+				dsIndexData = dsIndexData,
+				dsLightmapUvData = dsLightmapUvData
+			})
+		end
+		lightmapData[model] = {
+			pose = pose,
+			meshData = meshData
+		}
+	end
+
+	local tEnts = {}
+	for ent in ents.iterator({ents.IteratorFilterComponent(ents.COMPONENT_MODEL),ents.IteratorFilterComponent(ents.COMPONENT_RENDER),ents.IteratorFilterComponent(ents.COMPONENT_TRANSFORM)}) do
+		local mdl = ent:GetModel()
 		if(mdl ~= nil) then
-			table.insert(tModels,mdl)
-			ds:Seek(data[2])
-			local numGroups = ds:ReadUInt32()
-			for j=1,numGroups do
-				local meshGroup = (mdl ~= nil) and mdl:GetMeshGroup(j -1) or nil
-				local numMeshes = ds:ReadUInt32()
-				for k=1,numMeshes do
-					local mesh = (meshGroup ~= nil) and meshGroup:GetMesh(k -1) or nil
-					local numSubMeshes = ds:ReadUInt32()
-					for l=1,numSubMeshes do
-						local subMesh = (mesh ~= nil) and mesh:GetSubMesh(l -1) or nil
-						local hasLightmapSet = ds:ReadBool()
-						if(hasLightmapSet) then
+			local mdlName = asset.get_normalized_path(mdl:GetName(),asset.TYPE_MODEL)
+			local lmData = lightmapData[mdlName]
+			if(lmData ~= nil) then
+				local pose = ent:GetPose()
+				if(pose:GetOrigin():DistanceSqr(lmData.pose:GetOrigin()) < 0.001 and math.abs(pose:GetRotation():Distance(lmData.pose:GetRotation())) < 0.001) then
+					table.insert(tEnts,ent)
+					for _,meshData in ipairs(lmData.meshData) do
+						local meshGroup = mdl:GetMeshGroup(meshData.meshGroup)
+						local mesh = (meshGroup ~= nil) and meshGroup:GetMesh(meshData.mesh) or nil
+						local subMesh = (mesh ~= nil) and mesh:GetSubMesh(meshData.subMesh) or nil
+						if(subMesh ~= nil) then
 							subMesh:AddUVSet("lightmap")
-							local numVerts = ds:ReadUInt32()
+
+							local dsVertexData = meshData.dsVertexData
+							local dsIndexData = meshData.dsIndexData
+							local dsLightmapUvData = meshData.dsLightmapUvData
+							local numVerts = dsVertexData:GetSize() /util.SIZEOF_VERTEX
+							local numIndices = dsIndexData:GetSize() /util.SIZEOF_SHORT
+
 							subMesh:SetVertexCount(numVerts)
-							for m=1,numVerts do
-								local pos = ds:ReadVector()
-								local uv = ds:ReadVector2()
-								local normal = ds:ReadVector()
-								local tangent = ds:ReadVector4()
-								local uvLightmap = ds:ReadVector2()
-
-								subMesh:SetVertexPosition(m -1,pos)
-								subMesh:SetVertexNormal(m -1,normal)
-								subMesh:SetVertexUV(m -1,uv)
-								subMesh:SetVertexTangent(m -1,tangent)
-
-								subMesh:SetVertexUV("lightmap",m -1,uvLightmap)
+							for i=1,numVerts do
+								subMesh:SetVertex(i -1,dsVertexData:ReadVertex())
+								subMesh:SetVertexUV("lightmap",i -1,dsLightmapUvData:ReadVector2())
 							end
 
 							subMesh:ClearTriangles()
-							local numIndices = ds:ReadUInt32()
 							for i=1,numIndices,3 do
-								local idx0 = ds:ReadUInt32()
-								local idx1 = ds:ReadUInt32()
-								local idx2 = ds:ReadUInt32()
+								local idx0 = dsIndexData:ReadUInt16()
+								local idx1 = dsIndexData:ReadUInt16()
+								local idx2 = dsIndexData:ReadUInt16()
 								subMesh:AddTriangle(idx0,idx1,idx2)
 							end
 						end
@@ -78,64 +96,83 @@ function util.load_lightmap_uv_cache(fileName)
 			end
 		end
 	end
-	return tModels
+	return tEnts
 end
 
-function util.save_lightmap_uv_cache(fileName,models)
-	fileName = file.remove_file_extension(fileName) .. ".lmc"
-	local ds = util.DataStream()
-	ds:WriteString("PRLMC",false)
-	ds:WriteUInt32(LIGHTMAP_CACHE_VERSION)
-	ds:WriteUInt32(#models)
-	local tOffsets = {}
-	for i,mdl in ipairs(models) do
-		ds:WriteString(mdl:GetName())
-		tOffsets[i] = ds:Tell()
-		ds:WriteUInt64(0)
-	end
-	for i,mdl in ipairs(models) do
-		local offset = ds:Tell()
-		ds:Seek(tOffsets[i])
-		ds:WriteUInt64(offset)
-		ds:Seek(offset)
+function util.save_lightmap_uv_cache(fileName,entities)
+	file.create_path(file.get_file_path(fileName))
+	fileName = file.remove_file_extension(fileName) .. ".lmdb"
 
+	local udmData,err = udm.create("PLMD",LIGHTMAP_CACHE_VERSION)
+	if(udmData == false) then
+		console.print_warning(err)
+		return
+	end
+
+	local assetData = udmData:GetAssetData()
+	local udmEntities = assetData:AddArray("entities",#entities)
+	local entIdx = 0
+	for _,ent in ipairs(entities) do
+		local mdl = ent:GetModel()
 		local meshGroups = mdl:GetMeshGroups()
-		ds:WriteUInt32(#meshGroups)
-		for _,meshGroup in ipairs(meshGroups) do
+		local lightmappedMeshes = {}
+		for i,meshGroup in ipairs(meshGroups) do
 			local meshes = meshGroup:GetMeshes()
-			ds:WriteUInt32(#meshes)
-			for _,mesh in ipairs(meshes) do
+			for j,mesh in ipairs(meshes) do
 				local subMeshes = mesh:GetSubMeshes()
-				ds:WriteUInt32(#subMeshes)
-				for _,subMesh in ipairs(subMeshes) do
+				for k,subMesh in ipairs(subMeshes) do
 					local hasLightmapSet = subMesh:HasUVSet("lightmap")
-					ds:WriteBool(hasLightmapSet)
 					if(hasLightmapSet) then
 						local numVerts = subMesh:GetVertexCount()
-						ds:WriteUInt32(numVerts)
-						for i=1,numVerts do
-							local v = subMesh:GetVertex(i -1)
-							ds:WriteVector(v.position)
-							ds:WriteVector2(v.uv)
-							ds:WriteVector(v.normal)
-							ds:WriteVector4(v.tangent)
-							ds:WriteVector2(subMesh:GetVertexUV("lightmap",i -1))
-						end
+						local dsVertexData = util.DataStream(numVerts *util.SIZEOF_VERTEX)
+						for i=0,numVerts -1 do dsVertexData:WriteVertex(subMesh:GetVertex(i)) end
 
 						local indices = subMesh:GetTriangles()
-						ds:WriteUInt32(#indices)
-						for i=1,#indices do
-							ds:WriteUInt32(indices[i])
-						end
+						local numIndices = #indices
+						local dsIndexData = util.DataStream(numVerts *util.SIZEOF_SHORT)
+						for _,idx in ipairs(indices) do dsIndexData:WriteUInt16(idx) end
+
+						local dsLightmapUvs = util.DataStream(numVerts *util.SIZEOF_VECTOR2)
+						for i=0,numVerts -1 do dsLightmapUvs:WriteVector2(subMesh:GetVertexUV("lightmap",i)) end
+						
+						table.insert(lightmappedMeshes,{
+							meshGroup = i -1,
+							mesh = j -1,
+							subMesh = k -1,
+							vertexData = dsVertexData,
+							indexData = dsIndexData,
+							lightmapUvData = dsLightmapUvs
+						})
 					end
 				end
 			end
 		end
+
+		if(#lightmappedMeshes > 0) then
+			local pose = ent:GetPose()
+			local model = asset.get_normalized_path(ent:GetModel():GetName(),asset.TYPE_MODEL)
+
+			-- We'll identify lightmapped entities by their position and model
+			local origin = pose:GetOrigin()
+			local udmEntity = udmEntities:Get(entIdx)
+			entIdx = entIdx +1
+			udmEntity:Set("pose",phys.Transform(pose:GetOrigin(),pose:GetRotation()))
+			udmEntity:Set("model",model)
+
+			local udmMeshes = udmEntity:AddArray("meshes",#lightmappedMeshes)
+			for i,meshInfo in ipairs(lightmappedMeshes) do
+				local udmMesh = udmMeshes:Get(i -1)
+				udmMesh:SetValue("meshGroup",udm.TYPE_UINT32,meshInfo.meshGroup)
+				udmMesh:SetValue("mesh",udm.TYPE_UINT32,meshInfo.mesh)
+				udmMesh:SetValue("subMesh",udm.TYPE_UINT32,meshInfo.subMesh)
+
+				udmMesh:SetValue("vertexData",udm.TYPE_BLOB_LZ4,udm.compress_lz4(meshInfo.vertexData))
+				udmMesh:SetValue("indexData",udm.TYPE_BLOB_LZ4,udm.compress_lz4(meshInfo.indexData))
+				udmMesh:SetValue("lightmapUvData",udm.TYPE_BLOB_LZ4,udm.compress_lz4(meshInfo.lightmapUvData))
+			end
+		end
 	end
-	ds:Seek(0)
-	local f = file.open(fileName,bit.bor(file.OPEN_MODE_WRITE,file.OPEN_MODE_BINARY))
-	if(f == nil) then return false end
-	f:Write(ds)
-	f:Close()
-	return true
+	udmEntities:Resize(entIdx)
+
+	udmData:Save(fileName)
 end

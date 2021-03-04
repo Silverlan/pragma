@@ -649,6 +649,16 @@ void Engine::DumpDebugInformation(ZIPFile &zip) const
 		}
 	}
 	zip.AddFile("engine.txt",engineInfo.str());
+
+	std::stringstream convars;
+	for(auto &pair : m_conVars)
+	{
+		if(pair.second->GetType() != ConType::Variable)
+			continue;
+		auto *cv = static_cast<ConVar*>(pair.second.get());
+		convars<<pair.first<<" = "<<cv->GetString()<<"\n";
+	}
+	zip.AddFile("convars.txt",convars.str());
 }
 
 const long long &Engine::GetLastTick() const {return m_lastTick;}

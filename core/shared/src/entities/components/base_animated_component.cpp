@@ -639,11 +639,11 @@ BoneId BaseAnimatedComponent::AddRootPoseBone()
 		bone->name = ROOT_POSE_BONE_NAME;
 		boneId = skeleton.AddBone(bone);
 		skeleton.GetRootBones()[boneId] = bone->shared_from_this();
-		if(boneId >= m_bones.size())
-		{
-			m_bones.resize(boneId +1,umath::ScaledTransform{});
-			m_processedBones.resize(boneId +1,umath::ScaledTransform{});
-		}
+	}
+	if(boneId >= m_bones.size())
+	{
+		m_bones.resize(boneId +1,umath::ScaledTransform{});
+		m_processedBones.resize(boneId +1,umath::ScaledTransform{});
 	}
 	SetRootPoseBoneId(boneId);
 	return boneId;

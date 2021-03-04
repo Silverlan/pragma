@@ -94,6 +94,24 @@ void CEngine::RegisterConsoleCommands()
 		NetworkState *nw,ConVar *cv,bool,bool enabled) -> void {
 			GetRenderContext().SetMultiThreadedRenderingEnabled(enabled);
 	}});
+	conVarMap.RegisterConCommand("debug_render_memory_budget",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		auto budget = GetRenderContext().DumpMemoryBudget();
+		if(!budget.has_value())
+		{
+			Con::cout<<"No memory budget information available!"<<Con::endl;
+			return;
+		}
+		Con::cout<<*budget<<Con::endl;
+	},ConVarFlags::None,"Prints information about the current GPU memory budget.");
+	conVarMap.RegisterConCommand("debug_render_memory_stats",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		auto stats = GetRenderContext().DumpMemoryStats();
+		if(!stats.has_value())
+		{
+			Con::cout<<"No memory stats information available!"<<Con::endl;
+			return;
+		}
+		Con::cout<<*stats<<Con::endl;
+	},ConVarFlags::None,"Prints statistics about the current GPU memory usage.");
 	conVarMap.RegisterConCommand("debug_dump_shader_code",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		if(argv.empty())
 		{

@@ -14,7 +14,7 @@
 #include <udm.hpp>
 
 extern DLLNETWORK Engine *engine;
-
+#pragma optimize("",off)
 void pragma::asset::Output::Write(VFilePtrReal &f)
 {
 	auto lname = name;
@@ -115,7 +115,7 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data,Enti
 		return false;
 	}
 
-	m_materialTable = udm["materials"](m_materialTable);
+	udm["materials"](m_materialTable);
 	std::vector<MaterialHandle> materials {};
 	materials.reserve(m_materialTable.size());
 	for(auto &str : m_materialTable)
@@ -127,8 +127,8 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data,Enti
 	auto udmLightmap = udm["lightmap"];
 	if(udmLightmap)
 	{
-		m_lightMapIntensity = udm["lightmap.intensity"](m_lightMapIntensity);
-		m_lightMapExposure = udm["lightmap.exposure"](m_lightMapExposure);
+		udm["lightmap.intensity"](m_lightMapIntensity);
+		udm["lightmap.exposure"](m_lightMapExposure);
 	}
 
 	uint32_t nextEntIdx = 0;
@@ -151,8 +151,7 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data,Enti
 		auto pose = udmEnt["pose"].ToValue<umath::Transform>(umath::Transform{});
 		entData->SetOrigin(pose.GetOrigin());
 
-		auto &keyValues = entData->GetKeyValues();
-		keyValues = udmEnt["keyValues"](keyValues);
+		udmEnt["keyValues"](entData->GetKeyValues());
 		
 		auto &outputs = entData->GetOutputs();
 		auto udmOutputs = udmEnt["outputs"];
@@ -161,16 +160,16 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data,Enti
 		{
 			outputs.push_back({});
 			auto &output = outputs.back();
-			output.name = udmOutput["name"](output.name);
-			output.target = udmOutput["target"](output.target);
-			output.input = udmOutput["input"](output.input);
-			output.param = udmOutput["param"](output.param);
-			output.delay = udmOutput["delay"](output.delay);
-			output.times = udmOutput["times"](output.times);
+			udmOutput["name"](output.name);
+			udmOutput["target"](output.target);
+			udmOutput["input"](output.input);
+			udmOutput["param"](output.param);
+			udmOutput["delay"](output.delay);
+			udmOutput["times"](output.times);
 		}
 		
 		auto &components = entData->GetComponents();
-		components = udmEnt["components"](components);
+		udmEnt["components"](components);
 		
 		auto &leaves = entData->GetLeaves();
 		udmEnt["bspLeaves"].GetBlobData(leaves);
@@ -179,23 +178,24 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data,Enti
 	auto udmBsp = udm["bsp"];
 	if(udmBsp)
 	{
+		m_bspTree = util::BSPTree::Create();
 		auto udmRootNode = udmBsp["rootNode"];
 		if(udmRootNode)
 		{
 			std::function<void(util::BSPTree::Node&,udm::LinkedPropertyWrapper&)> fReadNode = nullptr;
 			fReadNode = [this,&fReadNode](util::BSPTree::Node &node,udm::LinkedPropertyWrapper &udm) {
-				node.leaf = udm["leaf"](node.leaf);
-				node.min = udm["bounds.min"](node.min);
-				node.max = udm["bounds.max"](node.max);
-				node.firstFace = udm["firstFace"](node.firstFace);
-				node.numFaces = udm["numFaces"](node.numFaces);
-				node.originalNodeIndex = udm["originalNodeIndex"](node.originalNodeIndex);
+				udm["leaf"](node.leaf);
+				udm["bounds.min"](node.min);
+				udm["bounds.max"](node.max);
+				udm["firstFace"](node.firstFace);
+				udm["numFaces"](node.numFaces);
+				udm["originalNodeIndex"](node.originalNodeIndex);
 
 				if(node.leaf)
 				{
-					node.cluster = udm["cluster"](node.cluster);
-					node.minVisible = udm["clusterBounds.min"](node.minVisible);
-					node.maxVisible = udm["clusterBounds.max"](node.maxVisible);
+					udm["cluster"](node.cluster);
+					udm["clusterBounds.min"](node.minVisible);
+					udm["clusterBounds.max"](node.maxVisible);
 					return;
 				}
 
@@ -409,16 +409,15 @@ bool pragma::asset::WorldData::Save(udm::AssetData &outData,const std::string &m
 	{
 		auto udmBspTree = udm["bsp"];
 		auto &bspTree = *m_bspTree;
+
 		std::vector<std::vector<size_t>> clusterNodes;
 		std::vector<std::vector<uint16_t>> clusterToClusterVisibility;
 		preprocess_bsp_data(bspTree,clusterNodes,clusterToClusterVisibility);
 	
+
 		// TODO: This wastes a lot of space due to the large amount of nodes that most maps have;
 		// Store the data as LZ4 compressed data streams instead!
 		// TODO: Store key string table for keyvalues?
-
-		// TODO
-#if 0
 		struct BaseNode
 		{
 			Vector3 min = {};
@@ -449,6 +448,8 @@ bool pragma::asset::WorldData::Save(udm::AssetData &outData,const std::string &m
 		auto &bspNodes = bspTree.GetNodes();
 		leafNodes.reserve(bspNodes.size());
 		parentNodes.reserve(bspNodes.size());
+		std::unordered_map<util::BSPTree::Node*,size_t> nodeToIndex {};
+		uint32_t nodeIdx = 0;
 		for(auto &node : bspNodes)
 		{
 			BaseNode *dnode = nullptr;
@@ -474,6 +475,9 @@ bool pragma::asset::WorldData::Save(udm::AssetData &outData,const std::string &m
 			dnode->originalNodeIndex = node->originalNodeIndex;
 			dnode->numFaces = node->numFaces;
 		}
+
+		udmBspTree["leafNodes"] = udm::compress_lz4_blob(leafNodes);
+		udmBspTree["parentNodes"] = udm::compress_lz4_blob(parentNodes);
 
 		auto numClusters = bspTree.GetClusterCount();
 		auto &clusterVisibility = bspTree.GetClusterVisibility();
@@ -524,7 +528,6 @@ bool pragma::asset::WorldData::Save(udm::AssetData &outData,const std::string &m
 		fWriteNode(bspTree.GetRootNode(),udmRootNode);
 
 		udmBspTree["clusterVisibility"] = udm::compress_lz4_blob(clusterVisibility);
-#endif
 
 		auto &clusterMeshIndices = GetClusterMeshIndices();
 		if(clusterMeshIndices.empty() == false)
@@ -798,3 +801,4 @@ bool pragma::asset::WorldData::SaveLightmapAtlas(const std::string &mapName)
 		m_messageLogger("Lightmap atlas could not be saved as '" +filePath +"'! Lightmaps will not be available.");
 	return result;
 }
+#pragma optimize("",on)

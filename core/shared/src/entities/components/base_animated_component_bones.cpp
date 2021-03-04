@@ -12,7 +12,7 @@
 #include "pragma/model/model.h"
 
 using namespace pragma;
-
+#pragma optimize("",off)
 static void get_local_bone_position(std::vector<umath::ScaledTransform> &transforms,std::shared_ptr<Bone> &bone,const Vector3 &fscale={1.f,1.f,1.f},Vector3 *pos=nullptr,Quat *rot=nullptr,Vector3 *scale=nullptr)
 {
 	std::function<void(std::shared_ptr<Bone>&,Vector3*,Quat*,Vector3*)> apply;
@@ -423,6 +423,8 @@ static void get_global_bone_transforms(std::vector<umath::ScaledTransform> &tran
 	{
 		auto boneId = pair.first;
 		auto &bone = pair.second;
+		if(boneId >= transforms.size())
+			continue;
 		auto &t = transforms.at(boneId);
 		t.SetOrigin(t.GetOrigin() *tParent.GetScale());
 		t = tParent *t;
@@ -441,3 +443,4 @@ void BaseAnimatedComponent::UpdateSkeleton()
 	m_processedBones = m_bones;
 	get_global_bone_transforms(m_processedBones,skeleton.GetRootBones());
 }
+#pragma optimize("",on)

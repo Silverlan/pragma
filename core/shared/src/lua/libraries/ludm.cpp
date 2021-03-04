@@ -680,10 +680,10 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		return static_cast<bool>(prop);
 	}));
 	cdProp.def("GetValue",static_cast<luabind::object(*)(lua_State*,::udm::Property&)>([](lua_State *l,::udm::Property &prop) -> luabind::object {
-		return get_property_value(l,prop);
+		return get_property_value(l,::udm::LinkedPropertyWrapper{prop});
 	}));
 	cdProp.def("SetValue",static_cast<void(*)(lua_State*,::udm::Property&,::udm::Type,luabind::object)>([](lua_State *l,::udm::Property &prop,::udm::Type type,luabind::object o) {
-		set_property_value(l,prop,type,o);
+		set_property_value(l,::udm::LinkedPropertyWrapper{prop},type,o);
 	}));
 	cdProp.def("ToAscii",static_cast<std::string(*)(lua_State*,::udm::Property&,const std::string&,const std::string&)>([](lua_State *l,::udm::Property &prop,const std::string &propName,const std::string &prefix) -> std::string {
 		std::stringstream ss;

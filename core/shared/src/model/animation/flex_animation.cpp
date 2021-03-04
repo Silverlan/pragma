@@ -62,8 +62,8 @@ bool FlexAnimation::LoadFromAssetData(const udm::AssetData &data,std::string &ou
 	}
 	// if(version > FORMAT_VERSION)
 	// 	return false;
-	m_fps = udm["fps"](m_fps);
-	m_flexControllerIds = udm["flexControllers"](m_flexControllerIds);
+	udm["fps"](m_fps);
+	udm["flexControllers"](m_flexControllerIds);
 	std::vector<float> blobData;
 	if(udm["frameData"].GetBlobData(blobData) != udm::BlobResult::Success)
 		return false;

@@ -17,12 +17,87 @@ bool pragma::asset::exists(NetworkState &nw,const std::string &name,Type type)
 {
 	return find_file(nw,name,type).has_value();
 }
+std::optional<std::string> pragma::asset::determine_format_from_data(VFilePtr &f,Type type)
+{
+	auto offset = f->Tell();
+	std::array<char,4> header {};
+	f->Read(header.data(),header.size());
+	f->Seek(offset);
+	if(ustring::compare(header.data(),"PMDL"))
+		return FORMAT_MAP_BINARY;
+	else if(ustring::compare(header.data(),"WLD"))
+		return FORMAT_MAP_LEGACY;
+	return FORMAT_MAP_ASCII; // Assume it's the ASCII map format
+}
+std::optional<std::string> pragma::asset::determine_format_from_filename(const std::string_view &fileName,Type type)
+{
+	std::string ext;
+	if(ufile::get_extension(std::string{fileName},&ext) == false)
+		return {};
+	ustring::to_lower(ext);
+	auto supportedExtensions = get_supported_extensions(type);
+	auto it = std::find(supportedExtensions.begin(),supportedExtensions.end(),ext);
+	return (it != supportedExtensions.end()) ? *it : std::optional<std::string>{};
+}
+bool pragma::asset::matches_format(const std::string_view &format0,const std::string_view &format1)
+{
+	return ustring::compare(format0.data(),format1.data(),false,umath::min(format0.length(),format1.length()));
+}
+util::Path pragma::asset::relative_path_to_absolute_path(const util::Path &relPath,Type type)
+{
+	return (get_asset_root_directory(type) +std::string{'/'}) +relPath;
+}
+util::Path pragma::asset::absolute_path_to_relative_path(const util::Path &absPath,Type type)
+{
+	auto path = absPath;
+	path.PopFront();
+	return path;
+}
+std::optional<std::string> pragma::asset::get_udm_format_extension(Type type,bool binary)
+{
+	switch(type)
+	{
+	case Type::Model:
+		return binary ? FORMAT_MODEL_BINARY : FORMAT_MODEL_ASCII;
+	case Type::Map:
+		return binary ? FORMAT_MAP_BINARY : FORMAT_MAP_ASCII;
+	case Type::Material:
+		return binary ? FORMAT_MATERIAL_BINARY : FORMAT_MATERIAL_ASCII;
+	}
+	return {};
+}
+std::vector<std::string> pragma::asset::get_supported_extensions(Type type)
+{
+	// Note: When attempting to find an asset, the Engine will take the order of these into account (i.e. extensions that come first will be prioritized)
+	switch(type)
+	{
+	case Type::Model:
+		return {/*FORMAT_MODEL_BINARY,FORMAT_MODEL_ASCII,*/FORMAT_MAP_LEGACY};
+	case Type::Map:
+		return {FORMAT_MAP_BINARY,FORMAT_MAP_ASCII,FORMAT_MAP_LEGACY};
+	case Type::Material:
+		return {/*FORMAT_MATERIAL_BINARY,FORMAT_MATERIAL_ASCII,*/FORMAT_MAP_LEGACY};
+	case Type::Sound:
+	case Type::Texture:
+	case Type::ParticleSystem:
+		// TODO
+		break;
+	}
+	return {};
+}
 std::string pragma::asset::get_normalized_path(const std::string &name,Type type)
 {
 	switch(type)
 	{
 	case Type::Model:
 		return ModelManager::GetNormalizedModelName(name);
+	case Type::Map:
+	{
+		auto path = util::Path::CreateFile(name);
+		path.Canonicalize();
+		path.RemoveFileExtension(get_supported_extensions(type));
+		return path.GetString();
+	}
 	case Type::Material:
 	case Type::Sound:
 	case Type::Texture:
@@ -34,32 +109,35 @@ std::string pragma::asset::get_normalized_path(const std::string &name,Type type
 }
 bool pragma::asset::matches(const std::string &name0,const std::string &name1,Type type)
 {
-	switch(type)
-	{
-	case Type::Model:
-	{
-		auto normName0 = ModelManager::GetNormalizedModelName(name0);
-		auto normName1 = ModelManager::GetNormalizedModelName(name1);
-		return ustring::compare(normName0,normName1,false);
-	}
-	case Type::Material:
-	case Type::Sound:
-	case Type::Texture:
-	case Type::ParticleSystem:
-		// TODO
-		break;
-	}
-	return name0 == name1;
+	return ustring::compare(get_normalized_path(name0,type),get_normalized_path(name1,type),false);
 }
-std::optional<std::string> pragma::asset::find_file(NetworkState &nw,const std::string &name,Type type)
+std::optional<std::string> pragma::asset::find_file(NetworkState &nw,const std::string &name,Type type,std::string *optOutFormat)
 {
+	auto normalizedName = get_normalized_path(name,type);
 	switch(type)
 	{
 	case Type::Model:
 	{
-		auto normName = ModelManager::GetNormalizedModelName(name);
-		if(FileManager::Exists("models/" +normName))
-			return normName;
+		if(FileManager::Exists("models/" +normalizedName))
+		{
+			if(optOutFormat)
+				*optOutFormat = "wmd"; // TODO
+			return normalizedName;
+		}
+		return {};
+	}
+	case Type::Map:
+	{
+		for(auto &ext : get_supported_extensions(type))
+		{
+			auto nameWithExt = normalizedName +'.' +ext;
+			if(FileManager::Exists("maps/" +nameWithExt))
+			{
+				if(optOutFormat)
+					*optOutFormat = ext;
+				return nameWithExt;
+			}
+		}
 		return {};
 	}
 	case Type::Material:
@@ -72,7 +150,11 @@ std::optional<std::string> pragma::asset::find_file(NetworkState &nw,const std::
 		{
 			auto extFileName = name +'.' +format.extension;
 			if(FileManager::Exists("materials/" +extFileName))
+			{
+				if(optOutFormat)
+					*optOutFormat = format.extension;
 				return extFileName;
+			}
 		}
 		return {};
 	}
@@ -81,7 +163,11 @@ std::optional<std::string> pragma::asset::find_file(NetworkState &nw,const std::
 		auto normName = name;
 		std::string ext;
 		if(ufile::get_extension(normName,&ext) == false)
+		{
+			if(optOutFormat)
+				*optOutFormat = "wpt";
 			normName += ".wpt";
+		}
 		if(FileManager::Exists("particles/" +normName) == false)
 			return {};
 		return normName;
@@ -98,6 +184,8 @@ bool pragma::asset::is_loaded(NetworkState &nw,const std::string &name,Type type
 		auto &mdlManager = nw.GetModelManager();
 		return mdlManager.FindCachedModel(name);
 	}
+	case Type::Map:
+		return false; // TODO
 	case Type::Material:
 		return nw.GetMaterialManager().FindMaterial(name);
 	case Type::Sound:
@@ -164,6 +252,8 @@ std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::Impor
 								mdl->SaveLegacy(&game,path.GetString(),"addons/converted/");
 							break;
 						}
+						case Type::Map:
+							break; // TODO
 						case Type::Material:
 							break; // TODO
 						case Type::ParticleSystem:

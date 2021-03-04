@@ -8,13 +8,27 @@
 #define __PRAGMA_UTIL_ASSET_HPP__
 
 #include "pragma/networkdefinitions.h"
+#include <sharedutils/util_path.hpp>
 
 class Game;
 namespace pragma::asset
 {
+	static constexpr auto FORMAT_MAP_BINARY = "pmap_b";
+	static constexpr auto FORMAT_MAP_ASCII = "pmap";
+	static constexpr auto FORMAT_MAP_LEGACY = "wld";
+	
+	static constexpr auto FORMAT_MODEL_BINARY = "pmdl_b";
+	static constexpr auto FORMAT_MODEL_ASCII = "pmdl";
+	static constexpr auto FORMAT_MODEL_LEGACY = "wmd";
+	
+	static constexpr auto FORMAT_MATERIAL_BINARY = "pmat_b";
+	static constexpr auto FORMAT_MATERIAL_ASCII = "pmat";
+	static constexpr auto FORMAT_MATERIAL_LEGACY = "wmi";
+
 	enum class Type : uint8_t
 	{
 		Model = 0,
+		Map,
 		Material,
 		Texture,
 		Sound,
@@ -22,11 +36,42 @@ namespace pragma::asset
 
 		Count
 	};
+	enum class UDMFormat : uint8_t
+	{
+		Binary = 0,
+		Ascii,
+		NotAUdmFormat
+	};
 	DLLNETWORK bool exists(NetworkState &nw,const std::string &name,Type type);
 	DLLNETWORK bool matches(const std::string &name0,const std::string &name1,Type type);
 	DLLNETWORK std::string get_normalized_path(const std::string &name,Type type);
-	DLLNETWORK std::optional<std::string> find_file(NetworkState &nw,const std::string &name,Type type);
+	DLLNETWORK std::optional<std::string> find_file(NetworkState &nw,const std::string &name,Type type,std::string *optOutFormat=nullptr);
 	DLLNETWORK bool is_loaded(NetworkState &nw,const std::string &name,Type type);
+	DLLNETWORK std::vector<std::string> get_supported_extensions(Type type);
+	DLLNETWORK std::optional<std::string> determine_format_from_data(VFilePtr &f,Type type);
+	DLLNETWORK std::optional<std::string> determine_format_from_filename(const std::string_view &fileName,Type type);
+	DLLNETWORK bool matches_format(const std::string_view &format0,const std::string_view &format1);
+	DLLNETWORK util::Path relative_path_to_absolute_path(const util::Path &relPath,Type type);
+	DLLNETWORK util::Path absolute_path_to_relative_path(const util::Path &absPath,Type type);
+	DLLNETWORK std::optional<std::string> get_udm_format_extension(Type type,bool binary);
+	constexpr const char *get_asset_root_directory(Type type)
+	{
+		switch(type)
+		{
+		case Type::Model:
+			return "models";
+		case Type::Map:
+			return "maps";
+		case Type::Material:
+		case Type::Texture:
+			return "materials";
+		case Type::Sound:
+			return "sounds";
+		case Type::ParticleSystem:
+			return "particles";
+		}
+		return "";
+	}
 
 	struct DLLNETWORK IAssetWrapper
 	{

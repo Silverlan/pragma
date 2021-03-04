@@ -49,9 +49,11 @@
 #include "pragma/model/model.h"
 #include "pragma/model/modelmanager.h"
 #include "pragma/physics/collisionmesh.h"
+#include "pragma/asset/util_asset.hpp"
 #include <sharedutils/util_library.hpp>
 #include <luainterface.hpp>
-
+#include <udm.hpp>
+#pragma optimize("",off)
 DLLNETWORK void BuildDisplacementTriangles(std::vector<Vector3> &sideVerts,unsigned int start,
 	Vector3 &nu,Vector3 &nv,float sw,float sh,float ou,float ov,float su,float sv,
 	unsigned char power,std::vector<std::vector<Vector3>> &normals,std::vector<std::vector<Vector3>> &offsets,std::vector<std::vector<float>> &distances,unsigned char numAlpha,std::vector<std::vector<Vector2>> &alphas,
@@ -814,25 +816,22 @@ const MapInfo &Game::GetMapInfo() const {return m_mapInfo;}
 bool Game::LoadSoundScripts(const char *file) {return m_stateNetwork->LoadSoundScripts(file,true);}
 bool Game::LoadMap(const std::string &map,const Vector3 &origin,std::vector<EntityHandle> *entities)
 {
-	std::string smap = "maps\\";
-	smap += map;
-	smap += ".wld";
-
-	m_mapInfo.name = map;
-	m_mapInfo.fileName = smap;
-	auto f = FileManager::OpenFile(smap.c_str(),"rb");
-	if(f == nullptr)
+	auto normPath = pragma::asset::get_normalized_path(map,pragma::asset::Type::Map);
+	std::string format;
+	auto filePath = pragma::asset::find_file(*GetNetworkState(),normPath,pragma::asset::Type::Map,&format);
+	if(filePath.has_value() == false)
 	{
 		static auto bPort = true;
 		if(bPort == true)
 		{
 			Con::cwar<<"WARNING: Map '"<<map<<"' not found."<<Con::endl;
-			if(util::port_source2_map(GetNetworkState(),smap) == false && util::port_hl2_map(GetNetworkState(),smap) == false)
+			auto path = pragma::asset::relative_path_to_absolute_path(normPath,pragma::asset::Type::Map);
+			if(util::port_source2_map(GetNetworkState(),path.GetString()) == false && util::port_hl2_map(GetNetworkState(),path.GetString()) == false)
 				Con::cwar<<" Loading empty map..."<<Con::endl;
 			else
 			{
 				Con::cwar<<Con::endl;
-				Con::cout<<"Successfully ported HL2 map "<<smap<<"!"<<Con::endl;
+				Con::cout<<"Successfully ported HL2 map "<<path.GetString()<<"!"<<Con::endl;
 				bPort = false;
 				auto r = LoadMap(map);
 				bPort = true;
@@ -842,42 +841,75 @@ bool Game::LoadMap(const std::string &map,const Vector3 &origin,std::vector<Enti
 		m_flags |= GameFlags::MapInitialized;
 		return false;
 	}
-	auto worldData = pragma::asset::WorldData::Create(*GetNetworkState());
-	std::string errMsg;
-	auto success = worldData->Read(f,pragma::asset::EntityData::Flags::None,&errMsg);
+	m_mapInfo.name = map;
+	m_mapInfo.fileName = pragma::asset::relative_path_to_absolute_path(*filePath,pragma::asset::Type::Map).GetString();
+	util::ScopeGuard sg {[this]() {
+		m_flags |= GameFlags::MapInitialized;
+	}};
 
-	if(success)
+	auto error = [this,&map](const std::string_view &msg) {
+		Con::cwar<<"WARNING: Unable to load map '"<<map<<"': "<<msg<<Con::endl;
+	};
+
+	auto f = FileManager::OpenFile(m_mapInfo.fileName.c_str(),"rb");
+	if(f == nullptr)
 	{
-		// Load sound scripts
-		std::string soundScript = "soundscapes_";
-		soundScript += map;
-		soundScript += ".txt";
-		LoadSoundScripts(soundScript.c_str());
-
-		// Load entities
-		Con::cout<<"Loading entities..."<<Con::endl;
-
-		std::vector<EntityHandle> ents {};
-		InitializeMapEntities(*worldData,ents);
-		for(auto &hEnt : ents)
-		{
-			if(hEnt.IsValid() == false)
-				continue;
-			hEnt->Spawn();
-		}
-		for(auto &hEnt : ents)
-		{
-			if(hEnt.IsValid() == false || hEnt->IsSpawned() == false)
-				continue;
-			hEnt->OnSpawn();
-		}
-		InitializeWorldData(*worldData);
+		error("Unable to open file '" +m_mapInfo.fileName +"'!");
+		return false;
 	}
 
-	m_flags |= GameFlags::MapInitialized;
-	if(success == false)
-		Con::cwar<<"WARNING: Unable to load map '"<<map<<"': "<<errMsg<<Con::endl;
-	return success;
+	auto worldData = pragma::asset::WorldData::Create(*GetNetworkState());
+	if(pragma::asset::matches_format(format,pragma::asset::FORMAT_MAP_BINARY) || pragma::asset::matches_format(format,pragma::asset::FORMAT_MAP_ASCII))
+	{
+		std::string err;
+		auto udmData = udm::Data::Load(f,err);
+		if(udmData == nullptr || worldData->LoadFromAssetData(udmData->GetAssetData(),pragma::asset::EntityData::Flags::None,err) == false)
+		{
+			error(err);
+			return false;
+		}
+	}
+	else if(pragma::asset::matches_format(format,pragma::asset::FORMAT_MAP_LEGACY))
+	{
+		std::string err;
+		auto success = worldData->Read(f,pragma::asset::EntityData::Flags::None,&err);
+		if(success == false)
+		{
+			error(err);
+			return false;
+		}
+	}
+	else
+	{
+		error("Unknown error");
+		return false;
+	}
+
+	// Load sound scripts
+	std::string soundScript = "soundscapes_";
+	soundScript += map;
+	soundScript += ".txt";
+	LoadSoundScripts(soundScript.c_str());
+
+	// Load entities
+	Con::cout<<"Loading entities..."<<Con::endl;
+
+	std::vector<EntityHandle> ents {};
+	InitializeMapEntities(*worldData,ents);
+	for(auto &hEnt : ents)
+	{
+		if(hEnt.IsValid() == false)
+			continue;
+		hEnt->Spawn();
+	}
+	for(auto &hEnt : ents)
+	{
+		if(hEnt.IsValid() == false || hEnt->IsSpawned() == false)
+			continue;
+		hEnt->OnSpawn();
+	}
+	InitializeWorldData(*worldData);
+	return true;
 }
 
 void Game::InitializeWorldData(pragma::asset::WorldData &worldData) {}
@@ -971,3 +1003,4 @@ std::string Game::GetConVarString(const std::string &scmd) {return m_stateNetwor
 float Game::GetConVarFloat(const std::string &scmd) {return m_stateNetwork->GetConVarFloat(scmd);}
 bool Game::GetConVarBool(const std::string &scmd) {return m_stateNetwork->GetConVarBool(scmd);}
 ConVarFlags Game::GetConVarFlags(const std::string &scmd) {return m_stateNetwork->GetConVarFlags(scmd);}
+#pragma optimize("",on)

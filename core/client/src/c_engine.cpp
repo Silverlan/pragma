@@ -144,21 +144,30 @@ bool CEngine::IsGPUProfilingEnabled() const
 void CEngine::DumpDebugInformation(ZIPFile &zip) const
 {
 	Engine::DumpDebugInformation(zip);
-	std::stringstream ss;
-	// TODO
-#if 0
-	auto deviceInfo = prosper::util::get_vendor_device_info(GetRenderContext());
-	ss<<"Vulkan API Version: "<<deviceInfo.apiVersion<<"\n";
-	ss<<"Device Name: "<<deviceInfo.deviceName<<"\n";
-	ss<<"Device Type: "<<prosper::util::to_string(deviceInfo.deviceType)<<"\n";
-	ss<<"Driver Version: "<<deviceInfo.driverVersion<<"\n";
-	ss<<"Vendor: "<<prosper::util::to_string(deviceInfo.vendor)<<"\n";
-	ss<<"Vendor ID: "<<umath::to_integral(deviceInfo.vendor);
-	zip.AddFile("gpu.txt",ss.str());
-#endif
+
+	auto &renderContext = GetRenderContext();
+	auto budget = renderContext.DumpMemoryBudget();
+	if(budget.has_value())
+		zip.AddFile("mem_budget.txt",*budget);
+	auto stats = renderContext.DumpMemoryStats();
+	if(stats.has_value())
+		zip.AddFile("mem_stats.txt",*stats);
+
+	auto deviceInfo = renderContext.GetVendorDeviceInfo();
+	if(deviceInfo.has_value())
+	{
+		std::stringstream ss;
+		ss<<"Vulkan API Version: "<<deviceInfo->apiVersion<<"\n";
+		ss<<"Device Name: "<<deviceInfo->deviceName<<"\n";
+		ss<<"Device Type: "<<prosper::util::to_string(deviceInfo->deviceType)<<"\n";
+		ss<<"Driver Version: "<<deviceInfo->driverVersion<<"\n";
+		ss<<"Vendor: "<<prosper::util::to_string(deviceInfo->vendor)<<"\n";
+		ss<<"Vendor ID: "<<umath::to_integral(deviceInfo->vendor);
+		zip.AddFile("gpu.txt",ss.str());
+		ss.str(std::string());
+		ss.clear();
+	}
 	
-	ss.str(std::string());
-	ss.clear();
 #if 0
 	prosper::debug::dump_layers(c_engine->GetRenderContext(),ss);
 	zip.AddFile("vk_layers.txt",ss.str());

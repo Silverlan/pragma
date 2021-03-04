@@ -54,11 +54,14 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 
 	Lua::RegisterLibraryEnums(lua.GetState(),"asset",{
 		{"TYPE_MODEL",umath::to_integral(pragma::asset::Type::Model)},
+		{"TYPE_MAP",umath::to_integral(pragma::asset::Type::Map)},
 		{"TYPE_MATERIAL",umath::to_integral(pragma::asset::Type::Material)},
 		{"TYPE_TEXTURE",umath::to_integral(pragma::asset::Type::Texture)},
 		{"TYPE_AUDIO",umath::to_integral(pragma::asset::Type::Sound)},
 		{"TYPE_PARTICLE_SYSTEM",umath::to_integral(pragma::asset::Type::ParticleSystem)}
 	});
+	static_assert(umath::to_integral(pragma::asset::Type::Count) == 6,"Update this list!");
+
 	Lua::RegisterLibraryValue<std::string>(lua.GetState(),"asset","MODEL_FILE_EXTENSION","wmd");
 	Lua::RegisterLibraryValue<std::string>(lua.GetState(),"asset","MATERIAL_FILE_EXTENSION","wmi");
 	Lua::RegisterLibraryValue<std::string>(lua.GetState(),"asset","PARTICLE_SYSTEM_FILE_EXTENSION","wpt");

@@ -79,8 +79,8 @@ bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr
 		m_activity = (id != util::EnumRegister::InvalidEnum) ? static_cast<Activity>(id) : Activity::Invalid;
 	}
 
-	m_activityWeight = udm["activityWeight"](m_activityWeight);
-	m_fps = udm["fps"](m_fps);
+	udm["activityWeight"](m_activityWeight);
+	udm["fps"](m_fps);
 
 	m_renderBounds.first = udm["renderBounds.min"](Vector3{std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max()});
 	m_renderBounds.second = udm["renderBounds.max"](Vector3{std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest()});
@@ -93,31 +93,31 @@ bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr
 	if(fadeOutTime)
 		m_fadeOut = std::make_unique<float>(fadeOutTime(0.f));
 
-	m_boneIds = udm["bones"](m_boneIds);
+	udm["bones"](m_boneIds);
 	auto numBones = m_boneIds.size();
 	m_boneIdMap.reserve(numBones);
 	for(auto i=decltype(numBones){0u};i<numBones;++i)
 		m_boneIdMap[m_boneIds[i]] = i;
 	
-	m_boneWeights = udm["boneWeights"](m_boneWeights);
+	udm["boneWeights"](m_boneWeights);
 
 	auto udmBlendController = udm["blendController"];
 	if(udmBlendController)
 	{
 		m_blendController = AnimationBlendController{};
-		m_blendController->controller = udmBlendController["controller"](m_blendController->controller);
+		udmBlendController["controller"](m_blendController->controller);
 		
 		auto udmTransitions = udmBlendController["transitions"];
 		m_blendController->transitions.resize(udmTransitions.GetSize());
 		uint32_t idxTransition = 0;
 		for(auto &udmTransition : udmTransitions)
 		{
-			m_blendController->transitions[idxTransition].animation = udmTransition["animation"](m_blendController->transitions[idxTransition].animation);
-			m_blendController->transitions[idxTransition].transition = udmTransition["transition"](m_blendController->transitions[idxTransition].transition);
+			udmTransition["animation"](m_blendController->transitions[idxTransition].animation);
+			udmTransition["transition"](m_blendController->transitions[idxTransition].transition);
 			++idxTransition;
 		}
-		m_blendController->animationPostBlendController = udmBlendController["animationPostBlendController"](m_blendController->animationPostBlendController);
-		m_blendController->animationPostBlendTarget = udmBlendController["animationPostBlendTarget"](m_blendController->animationPostBlendTarget);
+		udmBlendController["animationPostBlendController"](m_blendController->animationPostBlendController);
+		udmBlendController["animationPostBlendTarget"](m_blendController->animationPostBlendTarget);
 	}
 
 	m_flags = FAnim::None;
@@ -211,7 +211,7 @@ bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr
 				continue;
 			auto ev = std::make_shared<AnimationEvent>();
 			ev->eventID = static_cast<AnimationEvent::Type>(id);
-			ev->arguments = udmEvent["args"](ev->arguments);
+			udmEvent["args"](ev->arguments);
 			frameEvents.push_back(ev);
 		}
 	}

@@ -282,7 +282,7 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 				auto *node = (*bspLeafNodes)[i];
 				if(umath::intersection::aabb_aabb(nodeBounds.first,nodeBounds.second,node->minVisible,node->maxVisible) == umath::intersection::Intersect::Outside)
 					continue;
-				if((*bspTrees)[i]->IsAABBVisibleInCluster(nodeBounds.first,nodeBounds.second,node->cluster) == false)
+				if((*bspTrees)[i]->IsAabbVisibleInCluster(nodeBounds.first,nodeBounds.second,node->cluster) == false)
 					continue;
 				hasIntersection = true;
 				break;

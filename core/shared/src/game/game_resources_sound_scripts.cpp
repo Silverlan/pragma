@@ -13,11 +13,11 @@
 
 bool util::port_sound_script(NetworkState *nw,const std::string &path)
 {
-	static auto *ptrOpenArchiveFile = reinterpret_cast<void(*)(const std::string&,VFilePtr&)>(util::impl::get_module_func(nw,"open_archive_file"));
+	static auto *ptrOpenArchiveFile = reinterpret_cast<void(*)(const std::string&,VFilePtr&,const std::optional<std::string>&)>(util::impl::get_module_func(nw,"open_archive_file"));
 	if(ptrOpenArchiveFile == nullptr)
 		return false;
 	VFilePtr f = nullptr;
-	ptrOpenArchiveFile(path,f);
+	ptrOpenArchiveFile(path,f,{});
 	if(f == nullptr)
 		return false;
 	se::ScriptBlock root {};

@@ -217,7 +217,7 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 				// We'll have to determine which clusters they belong to manually.
 				Vector3 min,max;
 				mesh->GetBounds(min,max);
-				auto leafNodes = m_bspTree->FindLeafNodesInAABB(min,max);
+				auto leafNodes = m_bspTree->FindLeafNodesInAabb(min,max);
 				std::unordered_set<util::BSPTree::ClusterIndex> clusters;
 				for(auto *node : leafNodes)
 				{

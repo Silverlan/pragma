@@ -164,6 +164,7 @@ void Lua::engine::clear_unused_materials() {client->GetMaterialManager().ClearUn
 
 Material *Lua::engine::create_material(const std::string &identifier,const std::string &shader) {return client->CreateMaterial(identifier,shader);;}
 Material *Lua::engine::create_material(const std::string &shader) {return client->CreateMaterial(shader);}
+Material *Lua::engine::get_material(const std::string &identifier) {return client->GetMaterialManager().FindMaterial(identifier);}
 
 int Lua::engine::create_particle_system(lua_State *l)
 {

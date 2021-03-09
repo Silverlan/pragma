@@ -438,7 +438,7 @@ bool CDecalComponent::ApplyDecal()
 			if(bspTree)
 			{
 				// Filter out meshes outside the projector AABB
-				auto leafNodes = bspTree->FindLeafNodesInAABB(projectorAABB.first,projectorAABB.second);
+				auto leafNodes = bspTree->FindLeafNodesInAabb(projectorAABB.first,projectorAABB.second);
 				for(auto it=targetMeshes.begin();it!=targetMeshes.end();)
 				{
 					auto &mesh = *it;

@@ -20,6 +20,7 @@
 #include <sharedutils/alpha_mode.hpp>
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_parallel_job.hpp>
+#include <sharedutils/util_library.hpp>
 #include <pragma/asset_types/world.hpp>
 #include <pragma/engine_version.h>
 #include <image/prosper_sampler.hpp>
@@ -29,7 +30,7 @@
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 void pragma::asset::MapExportInfo::AddCamera(CCameraComponent &cam) {m_cameras.push_back(cam.GetHandle<CCameraComponent>());}
 void pragma::asset::MapExportInfo::AddLightSource(CLightComponent &light) {m_lightSources.push_back(light.GetHandle<CLightComponent>());}
 void pragma::asset::ModelExportInfo::SetAnimationList(const std::vector<std::string> &animations)
@@ -1800,3 +1801,120 @@ pragma::asset::AOResult pragma::asset::generate_ambient_occlusion(
 	});
 	return AOResult::AOJobReady;
 }
+
+bool pragma::asset::export_texture_as_vtf(
+	const std::string &fileName,const std::function<const uint8_t*(uint32_t,uint32_t)> &fGetImgData,uint32_t width,uint32_t height,uint32_t szPerPixel,
+	uint32_t numLayers,uint32_t numMipmaps,bool cubemap,const VtfInfo &texInfo,const std::function<void(const std::string&)> &errorHandler,
+	bool absoluteFileName
+)
+{
+	auto dllHandle = util::initialize_external_archive_manager(client);
+	if(!dllHandle)
+		return false;
+	auto *fExportVtf = dllHandle->FindSymbolAddress<bool(*)(
+		const std::string&,const std::function<const uint8_t*(uint32_t,uint32_t)>&,uint32_t,uint32_t,uint32_t,
+		uint32_t,uint32_t,bool,const VtfInfo&,const std::function<void(const std::string&)>&,
+		bool
+	)>("export_vtf");
+	if(fExportVtf == nullptr)
+		return false;
+	return fExportVtf(fileName,fGetImgData,width,height,szPerPixel,numLayers,numMipmaps,cubemap,texInfo,errorHandler,absoluteFileName);
+}
+
+#include <image/prosper_image.hpp>
+
+std::optional<prosper::Format> pragma::asset::vtf_format_to_prosper(VtfInfo::Format format)
+{
+	switch(format)
+	{
+	case VtfInfo::Format::Bc1:
+		return prosper::Format::BC1_RGB_UNorm_Block;
+	case VtfInfo::Format::Bc1a:
+		return prosper::Format::BC1_RGBA_UNorm_Block;
+	case VtfInfo::Format::Bc2:
+		return prosper::Format::BC2_UNorm_Block;
+	case VtfInfo::Format::Bc3:
+		return prosper::Format::BC3_UNorm_Block;
+	case VtfInfo::Format::R8G8B8A8_UNorm:
+		return prosper::Format::R8G8B8A8_UNorm;
+	case VtfInfo::Format::B8G8R8A8_UNorm:
+		// vkImgData.swizzle = {prosper::ComponentSwizzle::B,prosper::ComponentSwizzle::G,prosper::ComponentSwizzle::R,prosper::ComponentSwizzle::A};
+		return prosper::Format::B8G8R8A8_UNorm;
+	case VtfInfo::Format::R8G8_UNorm:
+		return prosper::Format::R8G8_UNorm;
+	case VtfInfo::Format::R16G16B16A16_SFloat:
+		return prosper::Format::R16G16B16A16_SFloat;
+	case VtfInfo::Format::R32G32B32A32_SFloat:
+		return prosper::Format::R32G32B32A32_SFloat;
+	case VtfInfo::Format::A8B8G8R8_UNorm_Pack32:
+		// vkImgData.swizzle = {prosper::ComponentSwizzle::A,prosper::ComponentSwizzle::B,prosper::ComponentSwizzle::G,prosper::ComponentSwizzle::R};
+		return prosper::Format::A8B8G8R8_UNorm_Pack32;
+	}
+	static_assert(umath::to_integral(pragma::asset::VtfInfo::Format::Count) == 10,"Update this implementation when new format types have been added!");
+	return {};
+}
+std::optional<pragma::asset::VtfInfo::Format> pragma::asset::prosper_format_to_vtf(prosper::Format format)
+{
+	switch(format)
+	{
+	case prosper::Format::BC1_RGB_UNorm_Block:
+		return VtfInfo::Format::Bc1;
+	case prosper::Format::BC1_RGBA_UNorm_Block:
+		return VtfInfo::Format::Bc1a;
+	case prosper::Format::BC2_UNorm_Block:
+		return VtfInfo::Format::Bc2;
+	case prosper::Format::BC3_UNorm_Block:
+		return VtfInfo::Format::Bc3;
+	case prosper::Format::R8G8B8A8_UNorm:
+		return VtfInfo::Format::R8G8B8A8_UNorm;
+	case prosper::Format::B8G8R8A8_UNorm:
+		// vkImgData.swizzle = {prosper::ComponentSwizzle::B,prosper::ComponentSwizzle::G,prosper::ComponentSwizzle::R,prosper::ComponentSwizzle::A};
+		return VtfInfo::Format::B8G8R8A8_UNorm;
+	case prosper::Format::R8G8_UNorm:
+		return VtfInfo::Format::R8G8_UNorm;
+	case prosper::Format::R16G16B16A16_SFloat:
+		return VtfInfo::Format::R16G16B16A16_SFloat;
+	case prosper::Format::R32G32B32A32_SFloat:
+		return VtfInfo::Format::R32G32B32A32_SFloat;
+	case prosper::Format::A8B8G8R8_UNorm_Pack32:
+		// vkImgData.swizzle = {prosper::ComponentSwizzle::A,prosper::ComponentSwizzle::B,prosper::ComponentSwizzle::G,prosper::ComponentSwizzle::R};
+		return VtfInfo::Format::A8B8G8R8_UNorm_Pack32;
+	}
+	static_assert(umath::to_integral(pragma::asset::VtfInfo::Format::Count) == 10,"Update this implementation when new format types have been added!");
+	return {};
+}
+
+bool pragma::asset::export_texture_as_vtf(
+	const std::string &fileName,const prosper::IImage &img,const VtfInfo &texInfo,const std::function<void(const std::string&)> &errorHandler,
+	bool absoluteFileName
+)
+{
+	auto inputFormat = prosper_format_to_vtf(img.GetFormat());
+	if(inputFormat.has_value() == false)
+		return false; // TODO: Convert into a compatible format
+	auto fGetImgData = prosper::util::image_to_data(const_cast<prosper::IImage&>(img),img.GetFormat());
+	if(fGetImgData == nullptr)
+		return false;
+	auto width = img.GetWidth();
+	auto height = img.GetHeight();
+	auto numLayers = img.GetLayerCount();
+	auto numMipmaps = img.GetMipmapCount();
+	auto cubemap = img.IsCubemap();
+	auto format = img.GetFormat();
+	auto sizePerPixel = prosper::util::is_compressed_format(format) ? prosper::util::get_block_size(format) : prosper::util::get_byte_size(format);
+	std::function<void(void)> deleter = nullptr;
+	auto nTexInfo = texInfo;
+	nTexInfo.inputFormat = *inputFormat;
+	auto result = export_texture_as_vtf(
+		fileName,[&fGetImgData,&deleter](uint32_t layerId,uint32_t mipmapIdx) -> const uint8_t* {
+			return fGetImgData(layerId,mipmapIdx,deleter);
+		},width,height,sizePerPixel,
+		numLayers,numMipmaps,cubemap,
+		nTexInfo,errorHandler,
+		absoluteFileName
+	);
+	if(deleter)
+		deleter();
+	return result;
+}
+#pragma optimize("",on)

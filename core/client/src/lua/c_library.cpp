@@ -1038,6 +1038,51 @@ void CGame::RegisterLuaLibraries()
 		{"import_model",Lua::util::Client::import_model},
 		{"export_texture",Lua::util::Client::export_texture},
 		{"export_material",Lua::util::Client::export_material},
+		{"export_texture_as_vtf",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			std::string fileName = Lua::CheckString(l,1);
+			if(Lua::file::validate_write_operation(l,fileName) == false || FileManager::CreatePath(ufile::get_path_from_filename(fileName).c_str()) == false)
+			{
+				Lua::PushBool(l,false);
+				return 1;
+			}
+			
+			auto &img = Lua::Check<prosper::IImage>(l,2);
+			auto vtfOutputFormat = pragma::asset::prosper_format_to_vtf(img.GetFormat());
+			auto srgb = true;
+			auto normalMap = false;
+			auto generateMipmaps = false;
+			int32_t arg = 3;
+
+			if(Lua::IsSet(l,arg))
+				srgb = Lua::CheckBool(l,arg);
+			++arg;
+
+			if(Lua::IsSet(l,arg))
+				normalMap = Lua::CheckBool(l,arg);
+			++arg;
+
+			if(Lua::IsSet(l,arg))
+				generateMipmaps = Lua::CheckBool(l,arg);
+			++arg;
+
+			if(Lua::IsSet(l,arg))
+				vtfOutputFormat = pragma::asset::prosper_format_to_vtf(static_cast<prosper::Format>(Lua::CheckInt(l,arg)));
+			++arg;
+			if(vtfOutputFormat.has_value() == false)
+			{
+				Lua::PushBool(l,false);
+				return 1;
+			}
+
+			pragma::asset::VtfInfo vtfInfo {};
+			vtfInfo.outputFormat = *vtfOutputFormat;
+			umath::set_flag(vtfInfo.flags,pragma::asset::VtfInfo::Flags::Srgb,srgb);
+			umath::set_flag(vtfInfo.flags,pragma::asset::VtfInfo::Flags::NormalMap,normalMap);
+			umath::set_flag(vtfInfo.flags,pragma::asset::VtfInfo::Flags::GenerateMipmaps,generateMipmaps);
+			auto result = pragma::asset::export_texture_as_vtf(fileName,img,vtfInfo,nullptr,false);
+			Lua::PushBool(l,result);
+			return 1;
+		})},
 		{"exists",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			std::string name = Lua::CheckString(l,1);
 			auto type = static_cast<pragma::asset::Type>(Lua::CheckInt(l,2));

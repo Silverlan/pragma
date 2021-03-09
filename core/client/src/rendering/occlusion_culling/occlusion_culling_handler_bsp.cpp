@@ -230,10 +230,10 @@ static void debug_bsp_nodes(NetworkState*,ConVar*,int32_t,int32_t val)
 			clusterNodes.reserve(visClusters.size());
 			for(auto clusterId : visClusters)
 			{
-				auto itNode = std::find_if(nodes.begin(),nodes.end(),[clusterId](const std::shared_ptr<util::BSPTree::Node> &node) {
-					return node->cluster == clusterId;
+				auto itNode = std::find_if(nodes.begin(),nodes.end(),[clusterId](const util::BSPTree::Node &node) {
+					return node.cluster == clusterId;
 				});
-				clusterNodes.push_back((itNode != nodes.end()) ? itNode->get() : nullptr);
+				clusterNodes.push_back((itNode != nodes.end()) ? &*itNode : nullptr);
 			}
 			for(auto clusterId : visClusters)
 			{

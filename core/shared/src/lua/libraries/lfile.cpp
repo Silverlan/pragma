@@ -404,16 +404,16 @@ bool Lua::file::Delete(lua_State *l,std::string path)
 	return FileManager::RemoveFile(path.c_str());
 }
 
-std::shared_ptr<LFile> Lua::file::open_external_asset_file(lua_State *l,const std::string &path)
+std::shared_ptr<LFile> Lua::file::open_external_asset_file(lua_State *l,const std::string &path,const std::optional<std::string> &game)
 {
 	auto dllHandle = util::initialize_external_archive_manager(engine->GetNetworkState(l));
 	if(dllHandle == nullptr)
 		return nullptr;
-	auto *fOpenFile = dllHandle->FindSymbolAddress<void(*)(const std::string&,VFilePtr&)>("open_archive_file");
+	auto *fOpenFile = dllHandle->FindSymbolAddress<void(*)(const std::string&,VFilePtr&,const std::optional<std::string>&)>("open_archive_file");
 	if(fOpenFile == nullptr)
 		return nullptr;
 	VFilePtr f = nullptr;
-	fOpenFile(path,f);
+	fOpenFile(path,f,game);
 	if(f == nullptr)
 		return nullptr;
 	auto lf = std::make_shared<LFile>();

@@ -1207,7 +1207,12 @@ void Game::RegisterLuaLibraries()
 		})),
 		luabind::def("delete",Lua::file::Delete),
 		luabind::def("find_external_game_asset_files",Lua::file::find_external_game_resource_files,luabind::meta::join<luabind::pure_out_value<3>,luabind::pure_out_value<4>>::type{}),
-		luabind::def("open_external_asset_file",Lua::file::open_external_asset_file),
+		luabind::def("open_external_asset_file",static_cast<std::shared_ptr<LFile>(*)(lua_State*,const std::string&,const std::string&)>([](lua_State *l,const std::string &path,const std::string &game) -> std::shared_ptr<LFile> {
+			return Lua::file::open_external_asset_file(l,path,game);
+		})),
+		luabind::def("open_external_asset_file",static_cast<std::shared_ptr<LFile>(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &path) -> std::shared_ptr<LFile> {
+			return Lua::file::open_external_asset_file(l,path);
+		})),
 		luabind::def("to_relative_path",Lua::file::to_relative_path),
 		luabind::def("is_directory",FileManager::IsDir),
 		luabind::def("is_directory",static_cast<bool(*)(std::string)>([](std::string path) {return FileManager::IsDir(path);})),

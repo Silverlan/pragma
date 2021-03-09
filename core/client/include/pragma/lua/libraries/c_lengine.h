@@ -35,6 +35,7 @@ namespace Lua
 		DLLCLIENT void clear_unused_materials();
 		DLLCLIENT Material *create_material(const std::string &identifier,const std::string &shader);
 		DLLCLIENT Material *create_material(const std::string &shader);
+		DLLCLIENT Material *get_material(const std::string &identifier);
 		DLLCLIENT int create_particle_system(lua_State *l);
 		DLLCLIENT bool precache_particle_system(lua_State *l,const std::string &particle,bool reload);
 		DLLCLIENT bool precache_particle_system(lua_State *l,const std::string &particle);

@@ -32,7 +32,7 @@ MiniDumper::MiniDumper( LPCSTR szAppName )
 	::SetUnhandledExceptionFilter( TopLevelFilter );
 	// Note: set_terminate handler is called before SetUnhandledExceptionFilter.
 	// set_terminate allows us to retrieve the underlying message from the exception (if there was one)
-	set_terminate([]() {
+	/*set_terminate([]() {
 		auto eptr = std::current_exception();
 		if(!eptr)
 		{
@@ -53,7 +53,7 @@ MiniDumper::MiniDumper( LPCSTR szAppName )
 		}
 		// Relay exception to SetUnhandledExceptionFilter
 		std::rethrow_exception(eptr);
-	});
+	});*/
 }
 
 LONG MiniDumper::TopLevelFilter( struct _EXCEPTION_POINTERS *pExceptionInfo )

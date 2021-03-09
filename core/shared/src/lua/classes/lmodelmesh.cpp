@@ -179,6 +179,12 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("ApplyUVMapping",static_cast<void(*)(lua_State*,::ModelSubMesh&,::Model&,const Vector3&,const Vector3&,float,float,float,float)>(&Lua::ModelSubMesh::ApplyUVMapping));
 	classDef.def("ApplyUVMapping",static_cast<void(*)(lua_State*,::ModelSubMesh&,const Vector3&,const Vector3&,uint32_t,uint32_t,float,float,float,float)>(&Lua::ModelSubMesh::ApplyUVMapping));
 	classDef.def("Scale",&Lua::ModelSubMesh::Scale);
+	classDef.def("Copy",static_cast<std::shared_ptr<::ModelSubMesh>(*)(lua_State*,::ModelSubMesh&,bool)>([](lua_State *l,::ModelSubMesh &mesh,bool fullCopy) -> std::shared_ptr<::ModelSubMesh> {
+		return mesh.Copy(fullCopy);
+	}));
+	classDef.def("Copy",static_cast<std::shared_ptr<::ModelSubMesh>(*)(lua_State*,::ModelSubMesh&)>([](lua_State *l,::ModelSubMesh &mesh) -> std::shared_ptr<::ModelSubMesh> {
+		return mesh.Copy();
+	}));
 	classDef.def("SetVertexTangent",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t,const Vector4&)>([](lua_State *l,::ModelSubMesh &mesh,uint32_t idx,const Vector4 &t) {
 		if(idx >= mesh.GetVertexCount())
 			return;

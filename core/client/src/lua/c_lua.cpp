@@ -158,6 +158,7 @@ void CGame::RegisterLua()
 		luabind::def("load_texture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,const LFile&)>(Lua::engine::load_texture)),
 		luabind::def("create_material",static_cast<Material*(*)(const std::string&,const std::string&)>(Lua::engine::create_material)),
 		luabind::def("create_material",static_cast<Material*(*)(const std::string&)>(Lua::engine::create_material)),
+		luabind::def("get_material",static_cast<Material*(*)(const std::string&)>(Lua::engine::get_material)),
 		luabind::def("precache_model",static_cast<void(*)(lua_State*,const std::string&)>(Lua::engine::precache_model)),
 		luabind::def("precache_material",static_cast<void(*)(lua_State*,const std::string&)>(Lua::engine::precache_material)),
 		luabind::def("get_error_material",Lua::engine::get_error_material),

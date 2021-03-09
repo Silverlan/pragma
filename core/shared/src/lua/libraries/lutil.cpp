@@ -1061,7 +1061,8 @@ int Lua::util::pack_zip_archive(lua_State *l)
 	int32_t t = 2;
 	Lua::CheckTable(l,t);
 	std::unordered_map<std::string,std::string> files {};
-	std::unordered_map<std::string,std::string> customFiles {};
+	std::unordered_map<std::string,std::string> customTextFiles {};
+	std::unordered_map<std::string,DataStream> customBinaryFiles {};
 	auto numFiles = Lua::GetObjectLength(l,t);
 	if(numFiles > 0)
 	{
@@ -1085,7 +1086,13 @@ int Lua::util::pack_zip_archive(lua_State *l)
 			auto zipFileName = luabind::object_cast<std::string>(i.key());
 			auto value = *i;
 			if(luabind::type(value) == LUA_TTABLE)
-				customFiles[zipFileName] = luabind::object_cast<std::string>(value["contents"]);
+			{
+				auto *ds = luabind::object_cast<DataStream*>(value["contents"]);
+				if(ds)
+					customBinaryFiles[zipFileName] = *ds;
+				else
+					customTextFiles[zipFileName] = luabind::object_cast<std::string>(value["contents"]);
+			}
 			else
 			{
 				auto diskFileName = luabind::object_cast<std::string>(*i);
@@ -1111,8 +1118,13 @@ int Lua::util::pack_zip_archive(lua_State *l)
 		f->Read(data.data(),sz);
 		zip->AddFile(pair.first,data.data(),sz);
 	}
-	for(auto &pair : customFiles)
+	for(auto &pair : customTextFiles)
 		zip->AddFile(pair.first,pair.second);
+	for(auto &pair : customBinaryFiles)
+	{
+		auto &ds = pair.second;
+		zip->AddFile(pair.first,ds->GetData(),ds->GetInternalSize());
+	}
 	zip = nullptr;
 	Lua::PushBool(l,true);
 	return 1;

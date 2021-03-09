@@ -14,6 +14,7 @@
 #include "luasystem.h"
 #include "pragma/lua/ldefinitions.h"
 #include <sharedutils/datastream.h>
+#include <optional>
 
 enum class FileOpenMode : uint32_t
 {
@@ -133,7 +134,7 @@ namespace Lua
 		DLLNETWORK void Find(lua_State *l,const std::string &path,fsys::SearchFlags searchFlags,luabind::object &outFiles,luabind::object &outDirs);
 		DLLNETWORK luabind::object FindLuaFiles(lua_State *l,const std::string &path,fsys::SearchFlags searchFlags=fsys::SearchFlags::All);
 		DLLNETWORK void find_external_game_resource_files(lua_State *l,const std::string &path,luabind::object &outFiles,luabind::object &outDirs);
-		DLLNETWORK std::shared_ptr<LFile> open_external_asset_file(lua_State *l,const std::string &path);
+		DLLNETWORK std::shared_ptr<LFile> open_external_asset_file(lua_State *l,const std::string &path,const std::optional<std::string> &game={});
 		DLLNETWORK luabind::object Read(lua_State *l,const std::string &path);
 		DLLNETWORK bool Write(lua_State *l,std::string path,const std::string &content);
 		DLLNETWORK std::string GetCanonicalizedPath(const std::string &path);

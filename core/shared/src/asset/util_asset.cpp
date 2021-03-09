@@ -79,6 +79,14 @@ std::vector<std::string> pragma::asset::get_supported_extensions(Type type)
 		return {/*FORMAT_MATERIAL_BINARY,FORMAT_MATERIAL_ASCII,*/FORMAT_MAP_LEGACY};
 	case Type::Sound:
 	case Type::Texture:
+	{
+		auto &supportedFormats = MaterialManager::get_supported_image_formats();
+		std::vector<std::string> extensions;
+		extensions.reserve(supportedFormats.size());
+		for(auto &format : supportedFormats)
+			extensions.push_back(format.extension);
+		return extensions;
+	}
 	case Type::ParticleSystem:
 		// TODO
 		break;
@@ -87,25 +95,23 @@ std::vector<std::string> pragma::asset::get_supported_extensions(Type type)
 }
 std::string pragma::asset::get_normalized_path(const std::string &name,Type type)
 {
+	auto path = util::Path::CreateFile(name);
+	path.Canonicalize();
 	switch(type)
 	{
 	case Type::Model:
-		return ModelManager::GetNormalizedModelName(name);
+		return ModelManager::GetNormalizedModelName(path.GetString());
 	case Type::Map:
-	{
-		auto path = util::Path::CreateFile(name);
-		path.Canonicalize();
-		path.RemoveFileExtension(get_supported_extensions(type));
-		return path.GetString();
-	}
 	case Type::Material:
-	case Type::Sound:
 	case Type::Texture:
+		path.RemoveFileExtension(get_supported_extensions(type));
+		break;
+	case Type::Sound:
 	case Type::ParticleSystem:
 		// TODO
 		break;
 	}
-	return name;
+	return path.GetString();
 }
 bool pragma::asset::matches(const std::string &name0,const std::string &name1,Type type)
 {

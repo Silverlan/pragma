@@ -82,8 +82,9 @@ std::vector<MaterialHandle> pragma::asset::WorldData::ReadMaterials(VFilePtr &f)
 void pragma::asset::WorldData::ReadBSPTree(VFilePtr &f,uint32_t version)
 {
 	m_bspTree = util::BSPTree::Create();
+	auto &nodes = m_bspTree->GetNodes();
 	std::function<void(util::BSPTree::Node&)> fReadNode = nullptr;
-	fReadNode = [this,&fReadNode,&f](util::BSPTree::Node &node) {
+	fReadNode = [this,&fReadNode,&nodes,&f](util::BSPTree::Node &node) {
 		node.leaf = f->Read<bool>();
 		node.min = f->Read<Vector3>();
 		node.max = f->Read<Vector3>();
@@ -100,10 +101,15 @@ void pragma::asset::WorldData::ReadBSPTree(VFilePtr &f,uint32_t version)
 		auto normal = f->Read<Vector3>();
 		auto d = f->Read<float>();
 		node.plane = umath::Plane{normal,static_cast<double>(d)};
-		node.children.at(0) = m_bspTree->CreateNode();
-		node.children.at(1) = m_bspTree->CreateNode();
-		fReadNode(*node.children.at(0));
-		fReadNode(*node.children.at(1));
+
+		m_bspTree->GetNodes().reserve(m_bspTree->GetNodes().size() +2); // Note: This may invalidate 'node'!
+		auto idx = node.index;
+		auto idx0 = m_bspTree->CreateNode().index;
+		auto idx1 = m_bspTree->CreateNode().index;
+		nodes[idx].children.at(0) = idx0;
+		nodes[idx].children.at(1) = idx1;
+		fReadNode(nodes[idx0]);
+		fReadNode(nodes[idx1]);
 	};
 	fReadNode(m_bspTree->GetRootNode());
 

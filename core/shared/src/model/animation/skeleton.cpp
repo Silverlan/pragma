@@ -7,7 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/model/animation/skeleton.h"
-
+#pragma optimize("",off)
 Bone::Bone()
 	: parent(),ID(0)
 {}
@@ -63,9 +63,11 @@ Skeleton::Skeleton(const Skeleton &other)
 		pair.second = m_bones[pair.first];
 	
 	std::function<void(std::unordered_map<uint32_t,std::shared_ptr<Bone>>&,std::shared_ptr<Bone>)> fUpdateHierarchy;
-	fUpdateHierarchy = [&fUpdateHierarchy](std::unordered_map<uint32_t,std::shared_ptr<Bone>> &bones,std::shared_ptr<Bone> parent) {
+	fUpdateHierarchy = [this,&fUpdateHierarchy](std::unordered_map<uint32_t,std::shared_ptr<Bone>> &bones,std::shared_ptr<Bone> parent) {
 		for(auto &pair : bones)
 		{
+			for(auto &pair : pair.second->children)
+				pair.second = m_bones[pair.first];
 			fUpdateHierarchy(pair.second->children,pair.second);
 			pair.second->parent = parent;
 		}
@@ -148,3 +150,4 @@ void Skeleton::Merge(Skeleton &other)
 	auto &otherRootBones = other.GetRootBones();
 	mergeHierarchy(otherRootBones,nullptr);
 }
+#pragma optimize("",on)

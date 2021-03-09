@@ -1997,6 +1997,11 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defImageCreateInfo.add_static_constant("FLAG_FULL_MIPMAP_CHAIN_BIT",umath::to_integral(prosper::util::ImageCreateInfo::Flags::FullMipmapChain));
 	defImageCreateInfo.add_static_constant("FLAG_SPARSE_BIT",umath::to_integral(prosper::util::ImageCreateInfo::Flags::Sparse));
 	defImageCreateInfo.add_static_constant("FLAG_SPARSE_ALIASED_RESIDENCY_BIT",umath::to_integral(prosper::util::ImageCreateInfo::Flags::SparseAliasedResidency));
+
+	defImageCreateInfo.add_static_constant("FLAG_ALLOCATE_DISCRETE_MEMORY_BIT",umath::to_integral(prosper::util::ImageCreateInfo::Flags::AllocateDiscreteMemory));
+	defImageCreateInfo.add_static_constant("FLAG_DONT_ALLOCATE_MEMORY_BIT",umath::to_integral(prosper::util::ImageCreateInfo::Flags::DontAllocateMemory));
+	defImageCreateInfo.add_static_constant("FLAG_SRGB_BIT",umath::to_integral(prosper::util::ImageCreateInfo::Flags::Srgb));
+	defImageCreateInfo.add_static_constant("FLAG_NORMAL_MAP_BIT",umath::to_integral(prosper::util::ImageCreateInfo::Flags::NormalMap));
 	prosperMod[defImageCreateInfo];
 
 	auto defImageViewCreateInfo = luabind::class_<prosper::util::ImageViewCreateInfo>("ImageViewCreateInfo");
@@ -2168,6 +2173,18 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkImage.def("GetAspectSubresourceLayout",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&)>([](lua_State *l,Lua::Vulkan::Image &img) {
 		Lua::Vulkan::VKImage::GetAspectSubresourceLayout(l,img);
 	}));
+	defVkImage.def("IsSrgb",static_cast<bool(*)(lua_State*,Lua::Vulkan::Image&)>([](lua_State *l,Lua::Vulkan::Image &img) -> bool {
+		return img.IsSrgb();
+	}));
+	defVkImage.def("IsNormalMap",static_cast<bool(*)(lua_State*,Lua::Vulkan::Image&)>([](lua_State *l,Lua::Vulkan::Image &img) -> bool {
+		return img.IsNormalMap();
+	}));
+	defVkImage.def("SetSrgb",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,bool)>([](lua_State *l,Lua::Vulkan::Image &img,bool srgb) {
+		img.SetSrgb(srgb);
+	}));
+	defVkImage.def("SetNormalMap",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,bool)>([](lua_State *l,Lua::Vulkan::Image &img,bool normalMap) {
+		img.SetNormalMap(normalMap);
+	}));
 	defVkImage.def("GetAlignment",&Lua::Vulkan::VKImage::GetAlignment);
 	defVkImage.def("GetExtent2D",&Lua::Vulkan::VKImage::GetExtent2D);
 	defVkImage.def("GetFormat",&Lua::Vulkan::VKImage::GetFormat);
@@ -2197,6 +2214,12 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	}));
 	defVkImage.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&)>([](lua_State *l,Lua::Vulkan::Image &img) {
 		Lua::Vulkan::VKContextObject::GetDebugName<Lua::Vulkan::Image>(l,img,&Lua::Check<Lua::Vulkan::Image>);
+	}));
+	defVkImage.def("Convert",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,Lua::Vulkan::CommandBuffer&,prosper::Format)>([](lua_State *l,Lua::Vulkan::Image &img,Lua::Vulkan::CommandBuffer &cmd,prosper::Format format) {
+		auto cpy = img.Convert(cmd,format);
+		if(cpy == nullptr)
+			return;
+		Lua::Push(l,cpy);
 	}));
 	defVkImage.def("Copy",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,Lua::Vulkan::CommandBuffer&,prosper::util::ImageCreateInfo&)>([](lua_State *l,Lua::Vulkan::Image &img,Lua::Vulkan::CommandBuffer &cmd,prosper::util::ImageCreateInfo &imgCreateInfo) {
 		auto cpy = img.Copy(cmd,imgCreateInfo);

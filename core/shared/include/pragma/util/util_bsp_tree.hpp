@@ -13,17 +13,24 @@
 #include <mathutil/uvec.h>
 #include <mathutil/plane.hpp>
 
+namespace udm {struct AssetData;};
 namespace util
 {
+#pragma pack(push,1)
 	class DLLNETWORK BSPTree
 		: public std::enable_shared_from_this<BSPTree>
 	{
 	public:
+		static constexpr uint32_t PBSP_VERSION = 1;
+		static constexpr auto PBSP_IDENTIFIER = "PBSP";
 		using ClusterIndex = uint16_t;
-		struct Node
-			: public std::enable_shared_from_this<Node>
+		using ChildIndex = uint32_t;
+		struct DLLNETWORK Node
 		{
-			std::array<std::shared_ptr<Node>,2u> children = {};
+			const Node *GetChild(BSPTree &tree,uint8_t idx);
+
+			ChildIndex index = 0;
+			std::array<ChildIndex,2u> children = {};
 			bool leaf = true;
 			Vector3 min = {};
 			Vector3 max = {};
@@ -44,31 +51,38 @@ namespace util
 
 			// Only valid if this is a non-leaf node
 			umath::Plane plane = {};
-
-			friend BSPTree;
 		};
 		static std::shared_ptr<BSPTree> Create();
+		static std::shared_ptr<BSPTree> Load(const udm::AssetData &data,std::string &outErr);
+		
 		bool IsValid() const;
 		bool IsClusterVisible(ClusterIndex clusterSrc,ClusterIndex clusterDst) const;
 		const Node &GetRootNode() const;
 		Node &GetRootNode();
-		const std::vector<std::shared_ptr<Node>> &GetNodes() const;
+		const std::vector<Node> &GetNodes() const;
+		std::vector<Node> &GetNodes();
 		const std::vector<uint8_t> &GetClusterVisibility() const;
 		std::vector<uint8_t> &GetClusterVisibility();
 		uint64_t GetClusterCount() const;
 		void SetClusterCount(uint64_t numClusters);
 		Node *FindLeafNode(const Vector3 &pos);
-		std::vector<Node*> FindLeafNodesInAABB(const Vector3 &min,const Vector3 &max);
-		bool IsAABBVisibleInCluster(const Vector3 &min,const Vector3 &max,ClusterIndex clusterIdx) const;
+		std::vector<Node*> FindLeafNodesInAabb(const Vector3 &min,const Vector3 &max);
+		bool IsAabbVisibleInCluster(const Vector3 &min,const Vector3 &max,ClusterIndex clusterIdx) const;
 
-		std::shared_ptr<Node> CreateNode();
+		bool Save(udm::AssetData &outData,std::string &outErr);
+		Node &CreateNode();
 	protected:
 		BSPTree()=default;
-		std::shared_ptr<Node> m_rootNode = nullptr;
-		std::vector<std::shared_ptr<Node>> m_nodes = {};
+		BSPTree::Node *FindLeafNode(BSPTree::Node &node,const Vector3 &point);
+		void FindLeafNodesInAabb(BSPTree::Node &node,const std::array<Vector3,8> &aabbPoints,std::vector<BSPTree::Node*> &outNodes);
+		bool IsAabbVisibleInCluster(const BSPTree::Node &node,const std::array<Vector3,8> &aabbPoints,BSPTree::ClusterIndex clusterIdx) const;
+		ChildIndex m_rootNode = std::numeric_limits<ChildIndex>::max();
+		std::vector<Node> m_nodes = {};
 		std::vector<uint8_t> m_clusterVisibility = {};
 		uint64_t m_clusterCount = 0ull;
+		friend Node;
 	};
+#pragma pack(pop)
 };
 
 #endif

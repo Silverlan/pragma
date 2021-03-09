@@ -16,6 +16,7 @@
 #include <sharedutils/util_path.hpp>
 
 class Model;
+namespace prosper {class IImage; enum class Format : uint32_t;};
 namespace pragma::asset
 {
 	static std::string EXPORT_PATH = "export/";
@@ -121,6 +122,18 @@ namespace pragma::asset
 	DLLCLIENT AOResult generate_ambient_occlusion(
 		Model &mdl,Material &mat,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> &outJob,std::string &outErrMsg,bool forceRebuild=false,uint32_t aoResolution=512,
 		uint32_t aoSamples=40,pragma::rendering::cycles::SceneInfo::DeviceType aoDevice=pragma::rendering::cycles::SceneInfo::DeviceType::CPU
+	);
+
+	DLLCLIENT std::optional<prosper::Format> vtf_format_to_prosper(VtfInfo::Format format);
+	DLLCLIENT std::optional<VtfInfo::Format> prosper_format_to_vtf(prosper::Format format);
+	DLLCLIENT bool export_texture_as_vtf(
+		const std::string &fileName,const std::function<const uint8_t*(uint32_t,uint32_t)> &fGetImgData,uint32_t width,uint32_t height,uint32_t szPerPixel,
+		uint32_t numLayers,uint32_t numMipmaps,bool cubemap,const VtfInfo &texInfo,const std::function<void(const std::string&)> &errorHandler,
+		bool absoluteFileName
+	);
+	DLLCLIENT bool export_texture_as_vtf(
+		const std::string &fileName,const prosper::IImage &img,const VtfInfo &texInfo,const std::function<void(const std::string&)> &errorHandler,
+		bool absoluteFileName
 	);
 };
 

@@ -19,6 +19,8 @@ add_include_dir(bzip2)
 add_external_library(servermanager)
 add_external_library(clientmanager)
 add_external_library(libvorbisfile)
+add_external_library(lz4)
+link_external_library(util_udm)
 
 add_def(DLLSERVER_EX)
 add_def(WMS_STATIC)

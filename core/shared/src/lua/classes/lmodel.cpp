@@ -781,6 +781,12 @@ void Lua::Model::register_class(
 		.def("ClearFrames",static_cast<void(*)(lua_State*,::Animation&)>([](lua_State *l,::Animation &anim) {
 			anim.GetFrames().clear();
 		}))
+		.def("GetBoneId",static_cast<void(*)(lua_State*,::Animation&,uint32_t)>([](lua_State *l,::Animation &anim,uint32_t idx) {
+			auto &boneList = anim.GetBoneList();
+			if(idx >= boneList.size())
+				return;
+			Lua::PushInt(l,boneList[idx]);
+		}))
 		.def("Save",static_cast<void(*)(lua_State*,::Animation&,udm::AssetData&)>([](lua_State *l,::Animation &anim,udm::AssetData &assetData) {
 			std::string err;
 			auto result = anim.Save(assetData,err);

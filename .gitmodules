@@ -187,9 +187,6 @@
 [submodule "external_libs/util_udm"]
 	path = external_libs/util_udm
 	url = https://github.com/Silverlan/util_udm.git
-[submodule "external_libs/util_ocio"]
-	path = external_libs/util_ocio
-	url = https://github.com/Silverlan/util_ocio.git
 [submodule "third_party_libs/nvtt"]
 	path = third_party_libs/nvtt
 	url = https://github.com/castano/nvidia-texture-tools.git

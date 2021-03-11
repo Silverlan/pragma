@@ -11,7 +11,7 @@
 
 extern DLLNETWORK Engine *engine;
 
-
+#pragma optimize("",off)
 void pragma::asset::Output::Read(VFilePtr &f)
 {
 	name = f->ReadString();
@@ -101,9 +101,9 @@ void pragma::asset::WorldData::ReadBSPTree(VFilePtr &f,uint32_t version)
 		auto normal = f->Read<Vector3>();
 		auto d = f->Read<float>();
 		node.plane = umath::Plane{normal,static_cast<double>(d)};
-
-		m_bspTree->GetNodes().reserve(m_bspTree->GetNodes().size() +2); // Note: This may invalidate 'node'!
+		
 		auto idx = node.index;
+		m_bspTree->GetNodes().reserve(m_bspTree->GetNodes().size() +2); // Note: This may invalidate 'node'!
 		auto idx0 = m_bspTree->CreateNode().index;
 		auto idx1 = m_bspTree->CreateNode().index;
 		nodes[idx].children.at(0) = idx0;
@@ -199,3 +199,4 @@ void pragma::asset::WorldData::ReadEntities(VFilePtr &f,const std::vector<Materi
 		f->Seek(offsetToEndOfEntity);
 	}
 }
+#pragma optimize("",on)

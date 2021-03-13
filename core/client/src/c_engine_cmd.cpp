@@ -18,6 +18,7 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/components/renderers/c_rasterization_renderer_component.hpp>
+#include <pragma/util/util_game.hpp>
 #include <image/prosper_render_target.hpp>
 #include <shader/prosper_shader_blur.hpp>
 #include <udm.hpp>
@@ -108,7 +109,13 @@ void CEngine::RegisterConsoleCommands()
 		}
 		auto &fileName = argv.front();
 		std::string err;
-		auto udmData = udm::Data::Load(fileName,err);
+		auto formatType = udm::Data::GetFormatType(fileName,err);
+		if(formatType.has_value() == false)
+		{
+			Con::cwar<<"WARNING: Unable to load UDM data: "<<err<<Con::endl;
+			return;
+		}
+		auto udmData = util::load_udm_asset(fileName,&err);
 		if(udmData == nullptr)
 		{
 			Con::cwar<<"WARNING: Unable to load UDM data: "<<err<<Con::endl;
@@ -124,11 +131,29 @@ void CEngine::RegisterConsoleCommands()
 		path.MakeRelative(util::get_program_path());
 		auto outFileName = path.GetString();
 		ufile::remove_extension_from_filename(outFileName);
-		outFileName += ".udm_a";
-		if(udmData->SaveAscii(outFileName,err) == false)
+		if(*formatType == udm::FormatType::Binary)
 		{
-			Con::cwar<<"WARNING: Unable to save UDM data: "<<err<<Con::endl;
-			return;
+			outFileName += ".udm_a";
+			try
+			{
+				udmData->SaveAscii(outFileName);
+			}
+			catch(const udm::Exception &e)
+			{
+				Con::cwar<<"WARNING: Unable to save UDM data: "<<e.what()<<Con::endl;
+			}
+		}
+		else
+		{
+			outFileName += ".udm_b";
+			try
+			{
+				udmData->Save(outFileName);
+			}
+			catch(const udm::Exception &e)
+			{
+				Con::cwar<<"WARNING: Unable to save UDM data: "<<e.what()<<Con::endl;
+			}
 		}
 		auto absPath = util::get_program_path() +'/' +outFileName;
 		util::open_path_in_explorer(ufile::get_path_from_filename(absPath),ufile::get_file_from_filename(absPath));

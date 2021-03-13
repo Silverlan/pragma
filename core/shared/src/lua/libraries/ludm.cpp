@@ -8,6 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/lua/libraries/ludm.hpp"
 #include "pragma/lua/libraries/lfile.h"
+#include "pragma/util/util_game.hpp"
 #include <luabind/iterator_policy.hpp>
 #include <luainterface.hpp>
 #include <udm.hpp>
@@ -278,7 +279,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			{
 				std::string fileName = Lua::CheckString(l,1);
 				std::string err;
-				auto udmData = ::udm::Data::Load(fileName,err);
+				auto udmData = ::util::load_udm_asset(fileName,&err);
 				if(udmData == nullptr)
 				{
 					Lua::PushBool(l,false);
@@ -290,7 +291,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			}
 			auto &f = Lua::Check<LFile>(l,1);
 			std::string err;
-			auto udmData = ::udm::Data::Load(f.GetHandle(),err);
+			auto udmData = ::util::load_udm_asset(f.GetHandle(),&err);
 			if(udmData == nullptr)
 			{
 				Lua::PushBool(l,false);
@@ -304,41 +305,48 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			if(Lua::IsString(l,1))
 			{
 				std::string fileName = Lua::CheckString(l,1);
-				std::string err;
-				auto udmData = ::udm::Data::Open(fileName,err);
-				if(udmData == nullptr)
+				try
+				{
+					auto udmData = ::udm::Data::Open(fileName);
+					Lua::Push(l,udmData);
+				}
+				catch(const ::udm::Exception &e)
 				{
 					Lua::PushBool(l,false);
-					Lua::PushString(l,err);
+					Lua::PushString(l,e.what());
 					return 2;
 				}
-				Lua::Push(l,udmData);
 				return 1;
 			}
 			auto &f = Lua::Check<LFile>(l,1);
-			std::string err;
-			auto udmData = ::udm::Data::Open(f.GetHandle(),err);
-			if(udmData == nullptr)
+			try
+			{
+				auto udmData = ::udm::Data::Open(f.GetHandle());
+				Lua::Push(l,udmData);
+			}
+			catch(const ::udm::Exception &e)
 			{
 				Lua::PushBool(l,false);
-				Lua::PushString(l,err);
+				Lua::PushString(l,e.what());
 				return 2;
 			}
-			Lua::Push(l,udmData);
 			return 1;
 		})},
 		{"create",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) {
 			std::string assetType = Lua::CheckString(l,1);
 			auto assetVersion = Lua::CheckInt(l,2);
-			std::string err;
-			auto udmData = ::udm::Data::Create(assetType,assetVersion,err);
-			if(udmData == nullptr)
+
+			try
+			{
+				auto udmData = ::udm::Data::Create(assetType,assetVersion);
+				Lua::Push(l,udmData);
+			}
+			catch(const ::udm::Exception &e)
 			{
 				Lua::PushBool(l,false);
-				Lua::PushString(l,err);
+				Lua::PushString(l,e.what());
 				return 2;
 			}
-			Lua::Push(l,udmData);
 			return 1;
 		})},
 		{"compress_lz4",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) {
@@ -450,38 +458,58 @@ void Lua::udm::register_library(Lua::Interface &lua)
 
 	auto cdData = luabind::class_<::udm::Data>("Data");
 	cdData.def("Save",static_cast<void(*)(lua_State*,::udm::Data&,const std::string&)>([](lua_State *l,::udm::Data &udmData,const std::string &fileName) {
-		std::string err;
-		auto result = udmData.Save(fileName,err);
-		Lua::PushBool(l,result);
-		if(result == false)
-			Lua::PushString(l,err);
+		try
+		{
+			udmData.Save(fileName);
+			Lua::PushBool(l,true);
+		}
+		catch(const ::udm::Exception &e)
+		{
+			Lua::PushBool(l,false);
+			Lua::PushString(l,e.what());
+		}
 	}));
 	cdData.def("SaveAscii",static_cast<void(*)(lua_State*,::udm::Data&,const std::string&)>([](lua_State *l,::udm::Data &udmData,const std::string &fileName) {
-		std::string err;
-		auto result = udmData.SaveAscii(fileName,err);
-		Lua::PushBool(l,result);
-		if(result == false)
-			Lua::PushString(l,err);
+		try
+		{
+			udmData.SaveAscii(fileName);
+			Lua::PushBool(l,true);
+		}
+		catch(const ::udm::Exception &e)
+		{
+			Lua::PushBool(l,false);
+			Lua::PushString(l,e.what());
+		}
 	}));
 	cdData.def("Save",static_cast<void(*)(lua_State*,::udm::Data&,LFile&)>([](lua_State *l,::udm::Data &udmData,LFile &f) {
-		std::string err;
 		auto fptr = std::dynamic_pointer_cast<VFilePtrInternalReal>(f.GetHandle());
 		if(fptr == nullptr)
 			return;
-		auto result = udmData.Save(fptr,err);
-		Lua::PushBool(l,result);
-		if(result == false)
-			Lua::PushString(l,err);
+		try
+		{
+			udmData.Save(fptr);
+			Lua::PushBool(l,true);
+		}
+		catch(const ::udm::Exception &e)
+		{
+			Lua::PushBool(l,false);
+			Lua::PushString(l,e.what());
+		}
 	}));
 	cdData.def("SaveAscii",static_cast<void(*)(lua_State*,::udm::Data&,LFile&)>([](lua_State *l,::udm::Data &udmData,LFile &f) {
-		std::string err;
 		auto fptr = std::dynamic_pointer_cast<VFilePtrInternalReal>(f.GetHandle());
 		if(fptr == nullptr)
 			return;
-		auto result = udmData.SaveAscii(fptr,err);
-		Lua::PushBool(l,result);
-		if(result == false)
-			Lua::PushString(l,err);
+		try
+		{
+			udmData.SaveAscii(fptr);
+			Lua::PushBool(l,true);
+		}
+		catch(const ::udm::Exception &e)
+		{
+			Lua::PushBool(l,false);
+			Lua::PushString(l,e.what());
+		}
 	}));
 	cdData.def("ToAscii",static_cast<std::string(*)(lua_State*,::udm::Data&)>([](lua_State *l,::udm::Data &udmData) -> std::string {
 		std::stringstream ss;
@@ -490,15 +518,16 @@ void Lua::udm::register_library(Lua::Interface &lua)
 	}));
 	cdData.def("GetAssetData",static_cast<::udm::AssetData(*)(lua_State*,::udm::Data&)>([](lua_State *l,::udm::Data &udmData) -> ::udm::AssetData {return udmData.GetAssetData();}));
 	cdData.def("LoadProperty",static_cast<void(*)(lua_State*,::udm::Data&,const std::string&)>([](lua_State *l,::udm::Data &udmData,const std::string &path) {
-		std::string err;
-		auto prop = udmData.LoadProperty(path,err);
-		if(prop == nullptr)
+		try
+		{
+			auto prop = udmData.LoadProperty(path);
+			Lua::Push(l,prop);
+		}
+		catch(const ::udm::Exception &e)
 		{
 			Lua::PushBool(l,false);
-			Lua::PushString(l,err);
-			return;
+			Lua::PushString(l,e.what());
 		}
-		Lua::Push(l,prop);
 	}));
 	cdData.def("GetRootElement",static_cast<::udm::Element*(*)(lua_State*,::udm::Data&)>([](lua_State *l,::udm::Data &udmData) -> ::udm::Element* {
 		return &udmData.GetRootElement();

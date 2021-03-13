@@ -13,6 +13,7 @@
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/model/modelmesh.h"
 #include "pragma/file_formats/wad.h"
+#include "pragma/util/util_game.hpp"
 #include <udm.hpp>
 
 void Lua::Animation::Create(lua_State *l)
@@ -37,10 +38,10 @@ void Lua::Animation::Load(lua_State *l,LFile &f)
 	fptr->Seek(offset);
 	if(isUdmFormat)
 	{
-		std::string err;
-		auto udmData = udm::Data::Load(fptr,err);
+		auto udmData = util::load_udm_asset(fptr);
 		if(udmData == nullptr)
 			return;
+		std::string err;
 		auto anim = ::Animation::Load(udmData->GetAssetData(),err);
 		if(anim == nullptr)
 			return;

@@ -50,6 +50,7 @@
 #include "pragma/model/modelmanager.h"
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/asset/util_asset.hpp"
+#include "pragma/util/util_game.hpp"
 #include <sharedutils/util_library.hpp>
 #include <luainterface.hpp>
 #include <udm.hpp>
@@ -861,8 +862,8 @@ bool Game::LoadMap(const std::string &map,const Vector3 &origin,std::vector<Enti
 	auto worldData = pragma::asset::WorldData::Create(*GetNetworkState());
 	if(pragma::asset::matches_format(format,pragma::asset::FORMAT_MAP_BINARY) || pragma::asset::matches_format(format,pragma::asset::FORMAT_MAP_ASCII))
 	{
+		auto udmData = util::load_udm_asset(f);
 		std::string err;
-		auto udmData = udm::Data::Load(f,err);
 		if(udmData == nullptr || worldData->LoadFromAssetData(udmData->GetAssetData(),pragma::asset::EntityData::Flags::None,err) == false)
 		{
 			error(err);

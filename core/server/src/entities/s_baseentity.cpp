@@ -131,6 +131,7 @@ void SBaseEntity::SendData(NetPacket &packet,pragma::networking::ClientRecipient
 {
 	packet->Write<uint64_t>(GetUniqueIndex());
 	packet->Write<uint32_t>(GetSpawnFlags());
+	packet->Write(GetUuid());
 
 	auto &componentManager = s_game->GetEntityComponentManager();
 	auto &components = GetComponents();

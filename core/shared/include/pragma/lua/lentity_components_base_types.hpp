@@ -3697,6 +3697,25 @@ namespace Lua
 			pragma::Lua::check_component(l,hEnt);
 			return hEnt->AddRootPoseBone();
 		}));
+		def.def("GetBaseAnimationFlags",static_cast<pragma::FPlayAnim(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) -> pragma::FPlayAnim {
+			pragma::Lua::check_component(l,hEnt);
+			return hEnt->GetBaseAnimationFlags();
+		}));
+		def.def("SetBaseAnimationFlags",static_cast<void(*)(lua_State*,THandle&,pragma::FPlayAnim)>([](lua_State *l,THandle &hEnt,pragma::FPlayAnim flags) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt->SetBaseAnimationFlags(flags);
+		}));
+		def.def("GetLayeredAnimationFlags",static_cast<luabind::object(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t layerIdx) -> luabind::object {
+			pragma::Lua::check_component(l,hEnt);
+			auto flags = hEnt->GetLayeredAnimationFlags(layerIdx);
+			if(flags.has_value() == false)
+				return {};
+			return luabind::object{l,*flags};
+		}));
+		def.def("SetLayeredAnimationFlags",static_cast<void(*)(lua_State*,THandle&,uint32_t,pragma::FPlayAnim)>([](lua_State *l,THandle &hEnt,uint32_t layerIdx,pragma::FPlayAnim flags) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt->SetLayeredAnimationFlags(layerIdx,flags);
+		}));
 
 		def.add_static_constant("EVENT_HANDLE_ANIMATION_EVENT",pragma::BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT);
 		def.add_static_constant("EVENT_ON_PLAY_ANIMATION",pragma::BaseAnimatedComponent::EVENT_ON_PLAY_ANIMATION);
@@ -3739,6 +3758,7 @@ namespace Lua
 		def.add_static_constant("FPLAYANIM_TRANSMIT",umath::to_integral(pragma::FPlayAnim::Transmit));
 		def.add_static_constant("FPLAYANIM_SNAP_TO",umath::to_integral(pragma::FPlayAnim::SnapTo));
 		def.add_static_constant("FPLAYANIM_DEFAULT",umath::to_integral(pragma::FPlayAnim::Default));
+		def.add_static_constant("FPLAYANIM_LOOP",umath::to_integral(pragma::FPlayAnim::Loop));
 	}
 
 	template<class TLuaClass,class THandle>

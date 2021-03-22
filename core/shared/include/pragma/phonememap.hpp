@@ -15,11 +15,28 @@
 struct DLLNETWORK PhonemeInfo
 {
 	std::unordered_map<std::string,float> flexControllers;
+	bool operator==(const PhonemeInfo &other) const
+	{
+		if(flexControllers.size() != other.flexControllers.size())
+			return false;
+		for(auto &pair : flexControllers)
+		{
+			auto it = other.flexControllers.find(pair.first);
+			if(it == other.flexControllers.end())
+				return false;
+			if(umath::abs(pair.second -it->second) > 0.001f)
+				return false;
+		}
+		return true;
+	}
+	bool operator!=(const PhonemeInfo &other) const {return !operator==(other);}
 };
 
 struct DLLNETWORK PhonemeMap
 {
 	std::unordered_map<std::string,PhonemeInfo> phonemes;
+	bool operator==(const PhonemeMap &other) const {return phonemes == other.phonemes;}
+	bool operator!=(const PhonemeMap &other) const {return !operator==(other);}
 };
 
 #endif

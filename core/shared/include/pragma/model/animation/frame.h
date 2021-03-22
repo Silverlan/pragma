@@ -22,6 +22,12 @@ struct DLLNETWORK FlexFrameData
 {
 	std::vector<float> flexControllerWeights;
 	std::vector<uint32_t> flexControllerIds;
+
+	bool operator==(const FlexFrameData &other) const
+	{
+		return flexControllerWeights == other.flexControllerWeights && flexControllerIds == other.flexControllerIds;
+	}
+	bool operator!=(const FlexFrameData &other) const {return !operator==(other);}
 };
 
 class DLLNETWORK Frame
@@ -77,6 +83,9 @@ public:
 	std::vector<Vector3> &GetBoneScales();
 	umath::Transform *GetBoneTransform(uint32_t idx);
 	const umath::Transform *GetBoneTransform(uint32_t idx) const;
+
+	bool operator==(const Frame &other) const;
+	bool operator!=(const Frame &other) const {return !operator==(other);}
 private:
 	Frame(unsigned int numBones);
 	Frame(const Frame &other);

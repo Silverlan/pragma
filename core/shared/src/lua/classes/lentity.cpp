@@ -36,6 +36,7 @@
 #include "pragma/lua/lua_entity_component.hpp"
 #include <sharedutils/datastream.h>
 #include <pragma/physics/movetypes.h>
+#include <udm.hpp>
 
 extern DLLNETWORK Engine *engine;
 
@@ -317,6 +318,10 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 		if(pAnimComponent.expired())
 			return;
 		pAnimComponent->PushLuaObject(l);
+	}));
+	classDef.def("GetUuid",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::PushString(l,util::uuid_to_string(hEnt->GetUuid()));
 	}));
 
 	classDef.def("Save",&Save);
@@ -850,15 +855,15 @@ void Lua::Entity::SetColor(lua_State *l,EntityHandle &hEnt,const Color &color)
 	colorC->SetColor(color);
 }
 
-void Lua::Entity::Save(lua_State *l,EntityHandle &hEnt,::DataStream &ds)
+void Lua::Entity::Save(lua_State *l,EntityHandle &hEnt,udm::LinkedPropertyWrapper &udm)
 {
 	LUA_CHECK_ENTITY(l,hEnt);
-	hEnt->Save(ds);
+	hEnt->Save(udm);
 }
-void Lua::Entity::Load(lua_State *l,EntityHandle &hEnt,::DataStream &ds)
+void Lua::Entity::Load(lua_State *l,EntityHandle &hEnt,udm::LinkedPropertyWrapper &udm)
 {
 	LUA_CHECK_ENTITY(l,hEnt);
-	hEnt->Load(ds);
+	hEnt->Load(udm);
 }
 void Lua::Entity::Copy(lua_State *l,EntityHandle &hEnt)
 {

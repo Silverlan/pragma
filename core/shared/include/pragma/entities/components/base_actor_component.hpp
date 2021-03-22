@@ -48,7 +48,10 @@ namespace pragma
 		void SetMoveController(const std::string &moveControllerX,const std::string &moveControllerY);
 		int32_t GetMoveController() const;
 		int32_t GetMoveControllerY() const;
+
+		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
 	protected:
+		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
 		BaseActorComponent(BaseEntity &ent);
 		bool m_bAlive;
 		util::PBoolProperty m_bFrozen = nullptr;
@@ -59,6 +62,7 @@ namespace pragma
 		struct DLLNETWORK HitboxData
 		{
 			HitboxData(uint32_t boneId,const Vector3 &offset);
+			HitboxData()=default;
 			uint32_t boneId;
 			Vector3 offset;
 		};

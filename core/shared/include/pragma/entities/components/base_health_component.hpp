@@ -29,8 +29,8 @@ namespace pragma
 		virtual void SetHealth(uint16_t health);
 		virtual void SetMaxHealth(uint16_t maxHealth);
 
-		virtual void Save(DataStream &ds) override;
-		virtual void Load(DataStream &ds,uint32_t version) override;
+		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
+		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
 
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
 	protected:

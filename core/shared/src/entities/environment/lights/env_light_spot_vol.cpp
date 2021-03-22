@@ -8,11 +8,13 @@
 #include "stdafx_shared.h"
 #include "pragma/entities/environment/lights/env_light_spot_vol.h"
 #include "pragma/util/util_handled.hpp"
+#include "pragma/util/util_game.hpp"
 #include "pragma/entities/components/base_render_component.hpp"
 #include "pragma/entities/components/base_radius_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/entities/entity_iterator.hpp"
 #include <algorithm>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -46,6 +48,23 @@ void BaseEnvLightSpotVolComponent::Initialize()
 	if(pRadiusComponent != nullptr)
 		pRadiusComponent->SetRadius(100.f);
 	m_netEvSetSpotlightTarget = SetupNetEvent("set_spotlight_target");
+}
+
+void BaseEnvLightSpotVolComponent::Save(udm::LinkedPropertyWrapper &udm)
+{
+	BaseEntityComponent::Save(udm);
+	udm["coneAngle"] = m_coneAngle;
+	udm["coneStartOffset"] = m_coneStartOffset;
+	udm["spotlightTargetName"] = m_kvSpotlightTargetName;
+	util::write_udm_entity(udm["spotlightTarget"],m_hSpotlightTarget);
+}
+void BaseEnvLightSpotVolComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+{
+	BaseEntityComponent::Load(udm,version);
+	udm["coneAngle"](m_coneAngle);
+	udm["coneStartOffset"](m_coneStartOffset);
+	udm["spotlightTargetName"](m_kvSpotlightTargetName);
+	m_hSpotlightTarget = util::read_udm_entity(*this,udm["spotlightTarget"]);
 }
 
 BaseEntity *BaseEnvLightSpotVolComponent::GetSpotlightTarget() const {return m_hSpotlightTarget.get();}

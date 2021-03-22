@@ -10,7 +10,7 @@
 #include "pragma/model/animation/activities.h"
 #include <udm.hpp>
 #include <mathutil/umath.h>
-
+#pragma optimize("",off)
 decltype(Animation::s_activityEnumRegister) Animation::s_activityEnumRegister;
 decltype(Animation::s_eventEnumRegister) Animation::s_eventEnumRegister;
 
@@ -745,3 +745,32 @@ void Animation::SetBoneWeight(uint32_t boneId,float weight)
 		m_boneWeights.resize(m_boneIds.size(),1.f);
 	m_boneWeights.at(boneId) = weight;
 }
+
+bool Animation::operator==(const Animation &other) const
+{
+	if(m_frames.size() != other.m_frames.size() || m_boneWeights.size() != other.m_boneWeights.size() || static_cast<bool>(m_fadeIn) != static_cast<bool>(other.m_fadeIn) || static_cast<bool>(m_fadeOut) != static_cast<bool>(other.m_fadeOut) || m_events.size() != other.m_events.size())
+		return false;
+	if(m_fadeIn && umath::abs(*m_fadeIn -*other.m_fadeIn) > 0.001f)
+		return false;
+	if(m_fadeOut && umath::abs(*m_fadeOut -*other.m_fadeOut) > 0.001f)
+		return false;
+	for(auto i=decltype(m_frames.size()){0u};i<m_frames.size();++i)
+	{
+		if(*m_frames[i] != *other.m_frames[i])
+			return false;
+	}
+	for(auto &pair : m_events)
+	{
+		if(other.m_events.find(pair.first) == other.m_events.end())
+			return false;
+	}
+	for(auto i=decltype(m_boneWeights.size()){0u};i<m_boneWeights.size();++i)
+	{
+		if(umath::abs(m_boneWeights[i] -other.m_boneWeights[i]) > 0.001f)
+			return false;
+	}
+	static_assert(sizeof(Animation) == 312,"Update this function when making changes to this class!");
+	return m_boneIds == other.m_boneIds && m_boneIdMap == other.m_boneIdMap && m_flags == other.m_flags && m_activity == other.m_activity &&
+		m_activityWeight == other.m_activityWeight && uvec::cmp(m_renderBounds.first,other.m_renderBounds.first) && uvec::cmp(m_renderBounds.second,other.m_renderBounds.second) && m_blendController == other.m_blendController;
+}
+#pragma optimize("",on)

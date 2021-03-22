@@ -32,8 +32,8 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 
-		virtual void Save(DataStream &ds) override;
-		virtual void Load(DataStream &ds,uint32_t version) override;
+		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
+		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
 
 		virtual void OnPlayerDeath(BasePlayerComponent &pl,DamageInfo *dmgInfo);
 		virtual void OnPlayerSpawned(BasePlayerComponent &pl);

@@ -28,6 +28,7 @@
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/game/game_lua_entity.hpp>
+#include <udm.hpp>
 
 extern ServerState *server;
 extern EntityClassMap<SBaseEntity> *g_ServerEntityFactories;
@@ -119,8 +120,8 @@ void SGame::SpawnEntity(BaseEntity *ent) // Don't call directly
 		auto it = m_preTransitionWorldState.find(globalName);
 		if(it != m_preTransitionWorldState.end())
 		{
-			auto &dsEntity = it->second;
-			ent->Load(dsEntity);
+			udm::LinkedPropertyWrapper udm{*it->second};
+			ent->Load(udm);
 			if(hEnt.IsValid())
 			{
 				// Move global entities by landmark offset between this level and the previous one.

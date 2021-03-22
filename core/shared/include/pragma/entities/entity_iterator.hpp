@@ -183,6 +183,15 @@ private:
 	bool m_bExactMatch = true;
 };
 
+struct DLLNETWORK EntityIteratorFilterUuid
+	: public IEntityIteratorFilter
+{
+	EntityIteratorFilterUuid(Game &game,const util::Uuid &uuid);
+	virtual bool ShouldPass(BaseEntity &ent) override;
+private:
+	util::Uuid m_uuid;
+};
+
 struct DLLNETWORK EntityIteratorFilterClass
 	: public IEntityIteratorFilter
 {

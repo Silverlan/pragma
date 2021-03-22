@@ -191,6 +191,7 @@ void CBaseEntity::ReceiveData(NetPacket &packet)
 {
 	m_uniqueIndex = packet->Read<uint64_t>();
 	m_spawnFlags = packet->Read<uint32_t>();
+	m_uuid = packet->Read<util::Uuid>();
 
 	auto &componentManager = static_cast<pragma::CEntityComponentManager&>(c_game->GetEntityComponentManager());
 	auto &componentTypes = componentManager.GetRegisteredComponentTypes();

@@ -16,11 +16,12 @@
 #include "pragma/audio/alsound_type.h"
 #include "pragma/lua/luafunction_call.h"
 #include <sharedutils/datastream.h>
+#include <udm.hpp>
 
 #define DEBUG_VERBOSE_ANIMATION 0
 
 using namespace pragma;
-
+#pragma optimize("",off)
 ComponentEventId BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ANIMATION = pragma::INVALID_COMPONENT_ID;
@@ -366,7 +367,7 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 			return false;
 		umath::set_flag(m_stateFlags,StateFlags::BaseAnimationDirty,false);
 	}
-	auto bLoop = anim->HasFlag(FAnim::Loop);
+	auto bLoop = anim->HasFlag(FAnim::Loop) || umath::is_flag_set(animInfo.flags,FPlayAnim::Loop);
 	auto bComplete = (cycleNew >= 1.f) ? true : false;
 	if(bComplete == true)
 	{
@@ -1074,115 +1075,131 @@ bool BaseAnimatedComponent::CalcAnimationMovementSpeed(float *x,float *z,int32_t
 	return true;
 }
 
-static void write_animation_slot_info(DataStream &ds,const BaseAnimatedComponent::AnimationSlotInfo &slotInfo)
+static void write_anim_flags(udm::LinkedPropertyWrapper &udm,FPlayAnim flags)
 {
-	ds->Write<Activity>(slotInfo.activity);
-	ds->Write<int32_t>(slotInfo.animation);
-	ds->Write<float>(slotInfo.cycle);
-	ds->Write<FPlayAnim>(slotInfo.flags);
-
-	ds->Write<uint32_t>(slotInfo.bonePoses.size());
-	ds->Write(reinterpret_cast<const uint8_t*>(slotInfo.bonePoses.data()),slotInfo.bonePoses.size() *sizeof(slotInfo.bonePoses.front()));
-		
-	ds->Write<uint32_t>(slotInfo.boneScales.size());
-	ds->Write(reinterpret_cast<const uint8_t*>(slotInfo.boneScales.data()),slotInfo.boneScales.size() *sizeof(slotInfo.boneScales.front()));
-		
-	ds->Write<uint32_t>(slotInfo.bonePosesBc.size());
-	ds->Write(reinterpret_cast<const uint8_t*>(slotInfo.bonePosesBc.data()),slotInfo.bonePosesBc.size() *sizeof(slotInfo.bonePosesBc.front()));
-		
-	ds->Write<uint32_t>(slotInfo.boneScalesBc.size());
-	ds->Write(reinterpret_cast<const uint8_t*>(slotInfo.boneScalesBc.data()),slotInfo.boneScalesBc.size() *sizeof(slotInfo.boneScalesBc.front()));
-		
-	ds->Write<int32_t>(slotInfo.lastAnim.animation);
-	ds->Write<float>(slotInfo.lastAnim.cycle);
-	ds->Write<FPlayAnim>(slotInfo.lastAnim.flags);
-	ds->Write<std::pair<float,float>>(slotInfo.lastAnim.blendTimeScale);
-	ds->Write<float>(slotInfo.lastAnim.blendScale);
+	udm::write_flag(udm["flags"],flags,FPlayAnim::Reset,"reset");
+	udm::write_flag(udm["flags"],flags,FPlayAnim::Transmit,"transmit");
+	udm::write_flag(udm["flags"],flags,FPlayAnim::SnapTo,"snapTo");
+	udm::write_flag(udm["flags"],flags,FPlayAnim::Loop,"loop");
+	static_assert(magic_enum::flags::enum_count<FPlayAnim>() == 4);
 }
-void BaseAnimatedComponent::Save(DataStream &ds)
+
+static FPlayAnim read_anim_flags(udm::LinkedPropertyWrapper &udm)
 {
-	BaseEntityComponent::Save(ds);
-	ds->Write<float>(GetPlaybackRate());
+	auto flags = FPlayAnim::None;
+	udm::read_flag(udm["flags"],flags,FPlayAnim::Reset,"reset");
+	udm::read_flag(udm["flags"],flags,FPlayAnim::Transmit,"transmit");
+	udm::read_flag(udm["flags"],flags,FPlayAnim::SnapTo,"snapTo");
+	udm::read_flag(udm["flags"],flags,FPlayAnim::Loop,"loop");
+	static_assert(magic_enum::flags::enum_count<FPlayAnim>() == 4);
+	return flags;
+}
+
+static void write_animation_slot_info(udm::LinkedPropertyWrapper &udm,const BaseAnimatedComponent::AnimationSlotInfo &slotInfo)
+{
+	udm["activity"] = slotInfo.activity;
+	udm["animation"] = slotInfo.animation;
+	udm["cycle"] = slotInfo.cycle;
+	write_anim_flags(udm["flags"],slotInfo.flags);
+
+	udm["bonePoses"] = udm::compress_lz4_blob(slotInfo.bonePoses);
+	udm["boneScales"] = udm::compress_lz4_blob(slotInfo.boneScales);
+	udm["bonePosesBc"] = udm::compress_lz4_blob(slotInfo.bonePosesBc);
+	udm["boneScalesBc"] = udm::compress_lz4_blob(slotInfo.boneScalesBc);
+		
+	udm["lastAnimation.animation"] = slotInfo.lastAnim.animation;
+	udm["lastAnimation.cycle"] = slotInfo.lastAnim.cycle;
+	write_anim_flags(udm["lastAnimation.flags"],slotInfo.lastAnim.flags);
+	udm["lastAnimation.blendFadeIn"] = slotInfo.lastAnim.blendTimeScale.first;
+	udm["lastAnimation.blendFadeOut"] = slotInfo.lastAnim.blendTimeScale.second;
+	udm["lastAnimation.blendScale"] = slotInfo.lastAnim.blendScale;
+}
+void BaseAnimatedComponent::Save(udm::LinkedPropertyWrapper &udm)
+{
+	BaseEntityComponent::Save(udm);
+	udm["playbackRate"] = GetPlaybackRate();
 
 	// Write blend controllers
 	auto &blendControllers = GetBlendControllers();
-	ds->Write<std::size_t>(blendControllers.size());
+	auto udmBlendControllers = udm.AddArray("blendControllers",blendControllers.size());
+	uint32_t idx = 0;
 	for(auto &pair : blendControllers)
 	{
-		ds->Write<uint32_t>(pair.first);
-		ds->Write<float>(pair.second);
+		auto udmBlendController = udmBlendControllers[idx++];
+		udmBlendController["slot"] = pair.first;
+		udmBlendController["value"] = pair.second;
 	}
 
 	// Write animations
-	write_animation_slot_info(ds,GetBaseAnimationInfo());
+	write_animation_slot_info(udm,GetBaseAnimationInfo());
 	auto &animSlotInfos = GetAnimationSlotInfos();
-	ds->Write<std::size_t>(animSlotInfos.size());
+	auto udmAnimations = udm.AddArray("animations",animSlotInfos.size());
+	idx = 0;
 	for(auto &pair : animSlotInfos)
 	{
-		ds->Write<uint32_t>(pair.first);
-		write_animation_slot_info(ds,pair.second);
+		auto udmAnimation = udmAnimations[idx++];
+		udmAnimation["slot"] = pair.first;
+		write_animation_slot_info(udmAnimation,pair.second);
 	}
 
-	ds->Write<Vector3>(m_animDisplacement);
+	udm["animDisplacement"] = m_animDisplacement;
 }
-static void read_animation_slot_info(DataStream &ds,BaseAnimatedComponent::AnimationSlotInfo &slotInfo)
+static void read_animation_slot_info(udm::LinkedPropertyWrapper &udm,BaseAnimatedComponent::AnimationSlotInfo &slotInfo)
 {
-	slotInfo.activity = ds->Read<Activity>();
-	slotInfo.animation = ds->Read<int32_t>();
-	slotInfo.cycle = ds->Read<float>();
-	slotInfo.flags = ds->Read<FPlayAnim>();
+	udm["activity"](slotInfo.activity);
+	udm["animation"](slotInfo.animation);
+	udm["cycle"](slotInfo.cycle);
+	slotInfo.flags = read_anim_flags(udm["flags"]);
 
-	auto numBoneOrientations = ds->Read<uint32_t>();
-	slotInfo.bonePoses.resize(numBoneOrientations);
-	ds->Read(reinterpret_cast<uint8_t*>(slotInfo.bonePoses.data()),slotInfo.bonePoses.size() *sizeof(slotInfo.bonePoses.front()));
-		
-	auto numBoneScales = ds->Read<uint32_t>();
-	slotInfo.boneScales.resize(numBoneScales);
-	ds->Read(reinterpret_cast<uint8_t*>(slotInfo.boneScales.data()),slotInfo.boneScales.size() *sizeof(slotInfo.boneScales.front()));
-		
-	auto numBoneOrientationsBc = ds->Read<uint32_t>();
-	slotInfo.bonePosesBc.resize(numBoneOrientationsBc);
-	ds->Read(reinterpret_cast<uint8_t*>(slotInfo.bonePosesBc.data()),slotInfo.bonePosesBc.size() *sizeof(slotInfo.bonePosesBc.front()));
+	udm["bonePoses"].GetBlobData(slotInfo.bonePoses);
+	udm["boneScales"].GetBlobData(slotInfo.boneScales);
+	udm["bonePosesBc"].GetBlobData(slotInfo.bonePosesBc);
+	udm["boneScalesBc"].GetBlobData(slotInfo.boneScalesBc);
 
-	auto numBoneScalesBc = ds->Read<uint32_t>();
-	slotInfo.boneScalesBc.resize(numBoneScalesBc);
-	ds->Read(reinterpret_cast<uint8_t*>(slotInfo.boneScalesBc.data()),slotInfo.boneScalesBc.size() *sizeof(slotInfo.boneScalesBc.front()));
-		
-	slotInfo.lastAnim.animation = ds->Read<int32_t>();
-	slotInfo.lastAnim.cycle = ds->Read<float>();
-	slotInfo.lastAnim.flags = ds->Read<FPlayAnim>();
-	slotInfo.lastAnim.blendTimeScale = ds->Read<std::pair<float,float>>();
-	slotInfo.lastAnim.blendScale = ds->Read<float>();
+	udm["lastAnimation.animation"](slotInfo.lastAnim.animation);
+	udm["lastAnimation.cycle"](slotInfo.lastAnim.cycle);
+	udm["lastAnimation.blendFadeIn"](slotInfo.lastAnim.blendTimeScale.first);
+	udm["lastAnimation.blendFadeOut"](slotInfo.lastAnim.blendTimeScale.second);
+	slotInfo.lastAnim.flags = read_anim_flags(udm["lastAnimation.flags"]);
+	udm["lastAnimation.blendScale"](slotInfo.lastAnim.blendScale);
 }
-void BaseAnimatedComponent::Load(DataStream &ds,uint32_t version)
+void BaseAnimatedComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {
-	BaseEntityComponent::Load(ds,version);
-	auto playbackRate = ds->Read<float>();
+	BaseEntityComponent::Load(udm,version);
+	auto playbackRate = GetPlaybackRate();;
+	udm["playbackRate"](playbackRate);
 	SetPlaybackRate(playbackRate);
 
 	// Read blend controllers
-	auto numBlendControllers = ds->Read<std::size_t>();
-	for(auto i=decltype(numBlendControllers){0};i<numBlendControllers;++i)
+	auto udmBlendControllers = udm["blendControllers"];
+	auto numBlendControllers = udmBlendControllers.GetSize();
+	m_blendControllers.reserve(numBlendControllers);
+	for(auto i=decltype(numBlendControllers){0u};i<numBlendControllers;++i)
 	{
-		auto id = ds->Read<uint32_t>();
-		auto val = ds->Read<float>();
-		SetBlendController(id,val);
+		auto udmBlendController = udmBlendControllers[i];
+		uint32_t slot = 0;
+		udmBlendController["slot"](slot);
+		auto value = 0.f;
+		udmBlendController["value"](value);
+		m_blendControllers[slot] = value;
 	}
 
 	// Read animations
-	read_animation_slot_info(ds,GetBaseAnimationInfo());
+	read_animation_slot_info(udm,GetBaseAnimationInfo());
 	auto &animSlots = GetAnimationSlotInfos();
-	auto numAnims = ds->Read<std::size_t>();
+	auto udmAnimations = udm["animations"];
+	auto numAnims = udmAnimations.GetSize();
 	animSlots.reserve(numAnims);
-	for(auto i=decltype(numAnims){0};i<numAnims;++i)
+	for(auto i=decltype(numAnims){0u};i<numAnims;++i)
 	{
-		auto id = ds->Read<uint32_t>();
-		auto it = animSlots.insert(std::make_pair(id,AnimationSlotInfo{})).first;
-		read_animation_slot_info(ds,it->second);
+		auto udmAnimation = udmAnimations[i];
+		uint32_t slot = 0;
+		udmAnimation["slot"](slot);
+		auto it = animSlots.insert(std::make_pair(slot,AnimationSlotInfo{})).first;
+		read_animation_slot_info(udmAnimation,it->second);
 	}
 
-	auto animDisp = ds->Read<Vector3>();
-	m_animDisplacement = animDisp;
+	udm["animDisplacement"](m_animDisplacement);
 }
 
 /////////////////
@@ -1454,3 +1471,4 @@ void CEMaintainAnimationMovement::PushArguments(lua_State *l)
 CEShouldUpdateBones::CEShouldUpdateBones()
 {}
 void CEShouldUpdateBones::PushArguments(lua_State *l) {}
+#pragma optimize("",on)

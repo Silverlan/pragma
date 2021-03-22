@@ -9,10 +9,12 @@
 #include "pragma/networkstate/networkstate.h"
 #include "pragma/game/game_resources.hpp"
 #include "pragma/model/model.h"
+#include <pragma/asset/util_asset.hpp>
 #include <pragma/util/resource_watcher.h>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_path.hpp>
+#include <udm.hpp>
 
 extern DLLNETWORK Engine *engine;
 
@@ -82,22 +84,24 @@ static bool port_model(
 		return mdl;
 	},[game,formatName](const std::shared_ptr<Model> &mdl,const std::string &path,const std::string &mdlName) {
 		auto outPath = ustring::substr(path,7) // Remove "models/"-prefix
-			+mdlName +".wmd";
-		if(FileManager::CreatePath((ufile::get_path_from_filename(util::IMPORT_PATH +"models\\" +outPath)).c_str()) == false)
+			+mdlName +'.' +pragma::asset::FORMAT_MODEL_BINARY;
+		if(FileManager::CreatePath((ufile::get_path_from_filename(util::CONVERT_PATH +"models\\" +outPath)).c_str()) == false)
 			return false;
-		auto r = false;
-		try
+		auto f = FileManager::OpenFile<VFilePtrReal>((util::CONVERT_PATH +"models\\" +outPath).c_str(),"wb");
+		if(f == nullptr)
 		{
-			r = mdl->SaveLegacy(game,outPath,util::IMPORT_PATH);
-		}
-		catch(const std::logic_error &err)
-		{
-			Con::cwar<<"WARNING: Unable to save model '"<<outPath<<"': "<<err.what()<<Con::endl;
+			Con::cwar<<"WARNING: Unable to save model '"<<outPath<<"': Unable to open file!"<<Con::endl;
 			return false;
 		}
-		if(r == false)
+		auto udmData = udm::Data::Create();
+		std::string err;
+		if(mdl->Save(*game,udmData->GetAssetData(),err) == false)
+		{
+			Con::cwar<<"WARNING: Unable to save model '"<<outPath<<"': "<<err<<Con::endl;
 			return false;
-		r = FileManager::Exists(util::IMPORT_PATH +"models\\" +outPath);
+		}
+		auto r = udmData->Save(f);
+		r = r ? FileManager::Exists(util::CONVERT_PATH +"models\\" +outPath) : false;
 		if(r == true)
 			Con::cout<<"Successfully ported "<<formatName<<" Model '"<<(path +mdlName)<<"' and saved it as '"<<outPath<<"'!"<<Con::endl;
 		return r;

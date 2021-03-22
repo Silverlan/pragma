@@ -26,7 +26,10 @@ namespace pragma
 		virtual void SetAmbientColor(const Color &color);
 		const Color &GetAmbientColor() const;
 		const util::PColorProperty &GetAmbientColorProperty() const;
+
+		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
 	protected:
+		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
 		util::PColorProperty m_ambientColor = nullptr;
 		Float m_maxExposure = 8.f;
 		pragma::NetEventId m_netEvSetAmbientColor = pragma::INVALID_NET_EVENT;

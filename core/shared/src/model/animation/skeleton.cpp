@@ -7,6 +7,8 @@
 
 #include "stdafx_shared.h"
 #include "pragma/model/animation/skeleton.h"
+#include "pragma/model/animation/frame.h"
+#include <udm.hpp>
 #pragma optimize("",off)
 Bone::Bone()
 	: parent(),ID(0)
@@ -28,6 +30,18 @@ bool Bone::IsAncestorOf(const Bone &other) const
 	return (parent == this) ? true : IsAncestorOf(*parent);
 }
 bool Bone::IsDescendantOf(const Bone &other) const {return other.IsAncestorOf(*this);}
+bool Bone::operator==(const Bone &other) const
+{
+	static_assert(sizeof(Bone) == 136,"Update this function when making changes to this class!");
+	if(!(name == other.name && ID == other.ID && children.size() == other.children.size() && parent.expired() == other.parent.expired()))
+		return false;
+	for(auto &pair : children)
+	{
+		if(other.children.find(pair.first) == other.children.end())
+			return false;
+	}
+	return true;
+}
 
 ////////////////////////////////////////
 
@@ -53,6 +67,13 @@ int32_t BoneList::GetBoneID(const std::string &name) const
 
 ////////////////////////////////////////
 
+std::shared_ptr<Skeleton> Skeleton::Load(Frame &reference,const udm::AssetData &data,std::string &outErr)
+{
+	auto skeleton = std::make_shared<Skeleton>();
+	if(skeleton->LoadFromAssetData(reference,data,outErr) == false)
+		return nullptr;
+	return skeleton;
+}
 Skeleton::Skeleton(const Skeleton &other)
 {
 	m_bones.reserve(other.m_bones.size());
@@ -113,6 +134,139 @@ std::weak_ptr<Bone> Skeleton::GetBone(uint32_t id) const
 	if(id >= m_bones.size())
 		return {};
 	return m_bones[id];
+}
+
+bool Skeleton::operator==(const Skeleton &other) const
+{
+	static_assert(sizeof(Skeleton) == 88,"Update this function when making changes to this class!");
+	if(!(m_bones.size() == other.m_bones.size() && m_rootBones.size() == other.m_rootBones.size()))
+		return false;
+	for(auto i=decltype(m_bones.size()){0u};i<m_bones.size();++i)
+	{
+		if(*m_bones[i] != *other.m_bones[i])
+			return false;
+	}
+	for(auto &pair : m_rootBones)
+	{
+		if(other.m_rootBones.find(pair.first) == other.m_rootBones.end())
+			return false;
+	}
+	return true;
+}
+
+bool Skeleton::LoadFromAssetData(Frame &reference,const udm::AssetData &data,std::string &outErr)
+{
+	if(data.GetAssetType() != PSKEL_IDENTIFIER)
+	{
+		outErr = "Incorrect format!";
+		return false;
+	}
+
+	auto udm = *data;
+	auto version = data.GetAssetVersion();
+	if(version < 1)
+	{
+		outErr = "Invalid version!";
+		return false;
+	}
+
+	struct BoneInfo
+	{
+		udm::LinkedPropertyWrapper udmBone;
+		std::string_view name;
+		std::vector<BoneId> childIds;
+		BoneId index;
+	};
+
+	std::vector<BoneInfo> udmBoneList {};
+	std::function<BoneId(udm::LinkedPropertyWrapper &prop,const std::string_view &name)> readBone = nullptr;
+	readBone = [this,&reference,&readBone,&udmBoneList](udm::LinkedPropertyWrapper &udmBone,const std::string_view &name) -> BoneId {
+		if(udmBoneList.size() == udmBoneList.capacity())
+			udmBoneList.reserve(udmBoneList.size() *1.5 +50);
+
+		auto i = udmBoneList.size();
+		udmBoneList.push_back({});
+		auto &boneInfo = udmBoneList.back();
+		boneInfo.udmBone = udmBone;
+		boneInfo.name = name;
+		uint32_t idx = 0;
+		udmBone["index"](idx);
+		boneInfo.index = idx;
+
+		auto udmChildren = udmBone["children"];
+		boneInfo.childIds.reserve(udmChildren.GetChildCount());
+		for(auto udmChild : udmChildren.ElIt())
+		{
+			auto childBoneIdx = readBone(udmChild.property,udmChild.key);
+			udmBoneList[i].childIds.push_back(childBoneIdx);
+		}
+		return idx;
+	};
+	auto udmBones = udm["bones"];
+	std::vector<BoneId> rootBoneIndices {};
+	rootBoneIndices.reserve(udmBones.GetChildCount());
+	for(auto udmBone : udmBones.ElIt())
+		rootBoneIndices.push_back(readBone(udmBone.property,udmBone.key));
+
+	auto &bones = GetBones();
+	auto numBones = udmBoneList.size();
+	bones.resize(numBones);
+	reference.SetBoneCount(numBones);
+	for(auto i=decltype(udmBoneList.size()){0u};i<udmBoneList.size();++i)
+	{
+		auto &boneInfo = udmBoneList[i];
+		bones[boneInfo.index] = std::make_shared<Bone>();
+		bones[boneInfo.index]->ID = boneInfo.index;
+	}
+
+	for(auto i=decltype(udmBoneList.size()){0u};i<udmBoneList.size();++i)
+	{
+		auto &boneInfo = udmBoneList[i];
+		auto &bone = bones[boneInfo.index];
+		bone->name = boneInfo.name;
+
+		umath::ScaledTransform pose {};
+		boneInfo.udmBone["pose"](pose);
+		auto &scale = pose.GetScale();
+		if(reference.GetBoneScales().empty() && scale != Vector3{1.f,1.f,1.f})
+			reference.GetBoneScales().resize(numBones,Vector3{1.f,1.f,1.f});
+		reference.SetBonePose(boneInfo.index,pose);
+
+		bone->children.reserve(boneInfo.childIds.size());
+		for(auto id : boneInfo.childIds)
+		{
+			bone->children.insert(std::make_pair(id,bones[id]));
+			bones[id]->parent = bone;
+		}
+	}
+
+	auto &rootBones = GetRootBones();
+	for(auto idx : rootBoneIndices)
+		rootBones[idx] = bones[idx];
+	return true;
+}
+
+bool Skeleton::Save(Frame &reference,udm::AssetData &outData,std::string &outErr)
+{
+	outData.SetAssetType(PSKEL_IDENTIFIER);
+	outData.SetAssetVersion(FORMAT_VERSION);
+	auto udm = *outData;
+
+	std::function<void(udm::LinkedPropertyWrapper &prop,const Bone &bone)> writeBone = nullptr;
+	writeBone = [this,&reference,&writeBone](udm::LinkedPropertyWrapper &prop,const Bone &bone) {
+		auto udmBone = prop[bone.name];
+		udmBone["index"] = static_cast<uint32_t>(bone.ID);
+		umath::ScaledTransform transform;
+		reference.GetBonePose(bone.ID,transform);
+		udmBone["pose"] = transform;
+
+		for(auto &pair : bone.children)
+			writeBone(udmBone["children"],*pair.second);
+	};
+	auto udmBones = udm["bones"];
+	for(auto &pair : m_rootBones)
+		writeBone(udmBones,*pair.second);
+	return true;
 }
 
 void Skeleton::Merge(Skeleton &other)

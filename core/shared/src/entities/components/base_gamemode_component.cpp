@@ -54,14 +54,14 @@ void BaseGamemodeComponent::OnRemove()
 	gmComponents.erase(it);
 }
 
-void BaseGamemodeComponent::Save(DataStream &ds)
+void BaseGamemodeComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
-	BaseEntityComponent::Save(ds);
+	BaseEntityComponent::Save(udm);
 }
 
-void BaseGamemodeComponent::Load(DataStream &ds,uint32_t version)
+void BaseGamemodeComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {
-	BaseEntityComponent::Load(ds,version);
+	BaseEntityComponent::Load(udm,version);
 }
 
 void BaseGamemodeComponent::OnPlayerDeath(BasePlayerComponent &pl,DamageInfo *dmgInfo)

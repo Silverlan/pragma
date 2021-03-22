@@ -54,8 +54,8 @@ namespace pragma
 		const util::PBoolProperty &GetCameraEnabledProperty(CameraType type) const;
 		const util::PVector3Property &GetCameraOffsetProperty(CameraType type) const;
 
-		virtual void Save(DataStream &ds) override;
-		virtual void Load(DataStream &ds,uint32_t version) override;
+		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
+		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
 	protected:
 		BaseObservableComponent(BaseEntity &ent);
 

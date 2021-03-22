@@ -33,6 +33,9 @@ public:
 
 	const std::unordered_map<std::string,std::string> &GetKeyValues() const;
 	std::unordered_map<std::string,std::string> &GetKeyValues();
+
+	bool operator==(const IKController &other) const;
+	bool operator!=(const IKController &other) const {return !operator==(other);}
 protected:
 	std::string m_effectorName;
 	std::string m_type;

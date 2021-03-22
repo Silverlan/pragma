@@ -18,6 +18,7 @@
 #include <sharedutils/datastream.h>
 #include "pragma/physics/raytraces.h"
 #include "pragma/entities/baseentity_trace.hpp"
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -192,22 +193,22 @@ void BaseTransformComponent::SetRotation(const Quat &q)
 	ent.MarkForSnapshot();
 }
 
-void BaseTransformComponent::Save(DataStream &ds)
+void BaseTransformComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
-	BaseEntityComponent::Save(ds);
-	ds->Write<umath::ScaledTransform>(m_pose);
-	ds->Write<Vector3>(m_eyeOffset);
+	BaseEntityComponent::Save(udm);
+	udm["pose"] = m_pose;
+	udm["eyeOffset"] = m_eyeOffset;
 }
 
-void BaseTransformComponent::Load(DataStream &ds,uint32_t version)
+void BaseTransformComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {
-	BaseEntityComponent::Load(ds,version);
-	auto pos = ds->Read<Vector3>();
-	auto rot = ds->Read<Quat>();
-	auto scale = ds->Read<Vector3>();
-	SetPose(umath::ScaledTransform(pos,rot,scale));
+	BaseEntityComponent::Load(udm,version);
+	auto pose = m_pose;
+	udm["pose"](pose);
+	SetPose(pose);
 
-	auto eyeOffset = ds->Read<Vector3>();
+	auto eyeOffset = m_eyeOffset;
+	udm["eyeOffset"](eyeOffset);
 	SetEyeOffset(eyeOffset);
 }
 

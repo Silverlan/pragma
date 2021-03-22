@@ -1433,6 +1433,10 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	defItFilterName.def(luabind::constructor<const std::string&,bool,bool>());
 	modEnts[defItFilterName];
 
+	auto defItFilterUuid = luabind::class_<LuaEntityIteratorFilterUuid,LuaEntityIteratorFilterBase>("IteratorFilterUuid");
+	defItFilterUuid.def(luabind::constructor<const std::string&>());
+	modEnts[defItFilterUuid];
+
 	auto defItFilterNameOrClass = luabind::class_<LuaEntityIteratorFilterNameOrClass,LuaEntityIteratorFilterBase>("IteratorFilterNameOrClass");
 	defItFilterNameOrClass.def(luabind::constructor<const std::string&>());
 	defItFilterNameOrClass.def(luabind::constructor<const std::string&,bool>());

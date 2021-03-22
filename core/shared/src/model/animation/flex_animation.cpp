@@ -14,6 +14,11 @@ FlexAnimationFrame::FlexAnimationFrame(const FlexAnimationFrame &frame)
 {
 	static_assert(sizeof(FlexAnimationFrame) == 40,"Update this function when making changes to this class!");
 }
+bool FlexAnimationFrame::operator==(const FlexAnimationFrame &other) const
+{
+	static_assert(sizeof(FlexAnimationFrame) == 40,"Update this function when making changes to this class!");
+	return m_flexControllerValues == other.m_flexControllerValues;
+}
 std::shared_ptr<FlexAnimation> FlexAnimation::Load(std::shared_ptr<VFilePtrInternal> &f)
 {
 	auto version = f->Read<uint32_t>();
@@ -153,6 +158,18 @@ FlexAnimationFrame &FlexAnimation::AddFrame()
 	auto &values = frame->GetValues();
 	values.resize(m_flexControllerIds.size());
 	return *frame;
+}
+bool FlexAnimation::operator==(const FlexAnimation &other) const
+{
+	static_assert(sizeof(FlexAnimation) == 72,"Update this function when making changes to this class!");
+	if(!(m_frames.size() == other.m_frames.size() && m_flexControllerIds == other.m_flexControllerIds && umath::abs(m_fps -other.m_fps) < 0.001f))
+		return false;
+	for(auto i=decltype(m_frames.size()){0u};i<m_frames.size();++i)
+	{
+		if(*m_frames[i] != *other.m_frames[i])
+			return false;
+	}
+	return true;
 }
 void FlexAnimation::SetFlexControllerIds(std::vector<FlexControllerId> &&ids)
 {

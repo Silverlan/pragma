@@ -55,6 +55,7 @@
 #include <luainterface.hpp>
 #include <udm.hpp>
 #pragma optimize("",off)
+extern DLLNETWORK Engine *engine;
 DLLNETWORK void BuildDisplacementTriangles(std::vector<Vector3> &sideVerts,unsigned int start,
 	Vector3 &nu,Vector3 &nv,float sw,float sh,float ou,float ov,float su,float sv,
 	unsigned char power,std::vector<std::vector<Vector3>> &normals,std::vector<std::vector<Vector3>> &offsets,std::vector<std::vector<float>> &distances,unsigned char numAlpha,std::vector<std::vector<Vector2>> &alphas,
@@ -931,6 +932,8 @@ std::shared_ptr<Model> Game::CreateModel(const std::string &mdl) const {return m
 std::shared_ptr<Model> Game::CreateModel(bool bAddReference) const {return m_stateNetwork->GetModelManager().CreateModel("",bAddReference);}
 std::shared_ptr<Model> Game::LoadModel(const std::string &mdl,bool bReload)
 {
+	if(engine->IsVerbose())
+		Con::cout<<"Loading model '"<<mdl<<"'..."<<Con::endl;
 	auto bNewModel = false;
 	auto r = GetNetworkState()->GetModelManager().LoadModel(mdl,bReload,&bNewModel);
 	if(bNewModel == true && r != nullptr)

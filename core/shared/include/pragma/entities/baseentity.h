@@ -36,6 +36,8 @@ enum class Activity : uint16_t;
 enum class CollisionMask : uint32_t;
 enum class PHYSICSTYPE : int;
 
+namespace util {using Uuid = std::array<uint64_t,2>;};
+
 namespace pragma
 {
 	class BaseEntityComponent;
@@ -61,6 +63,7 @@ const double ENT_EPSILON = 0.000'01;
 class EntityHandle;
 class DataStream;
 using EntityIndex = uint32_t;
+namespace udm {struct LinkedPropertyWrapper;};
 #pragma warning(push)
 #pragma warning(disable : 4251)
 class DLLNETWORK BaseEntity
@@ -72,6 +75,8 @@ public:
 	static pragma::ComponentEventId EVENT_ON_SPAWN;
 	static pragma::ComponentEventId EVENT_ON_POST_SPAWN;
 	static pragma::ComponentEventId EVENT_ON_REMOVE;
+	static constexpr auto PSAVE_IDENTIFIER = "PSAVE";
+	static constexpr uint32_t PSAVE_VERSION = 1;
 
 	enum class StateFlags : uint8_t
 	{
@@ -92,6 +97,8 @@ public:
 	virtual std::string GetClass() const;
 	BaseEntity();
 	void Construct(unsigned int idx);
+
+	const util::Uuid GetUuid() const {return m_uuid;}
 
 	friend EntityHandle;
 	friend Engine;
@@ -250,8 +257,8 @@ public:
 
 	lua_State *GetLuaState() const;
 
-	virtual void Load(DataStream &ds);
-	virtual void Save(DataStream &ds);
+	virtual void Load(udm::LinkedPropertyWrapper &udm);
+	virtual void Save(udm::LinkedPropertyWrapper &udm);
 	virtual BaseEntity *Copy();
 protected:
 	StateFlags m_stateFlags = StateFlags::None;
@@ -270,6 +277,7 @@ protected:
 
 	std::vector<EntityHandle> m_entsRemove; // List of entities that should be removed when this entity is removed
 	std::string m_class = "BaseEntity";
+	util::Uuid m_uuid {};
 	EntityIndex m_index = 0u;
 	uint64_t m_uniqueIndex = 0ull;
 	virtual void EraseFunction(int function);

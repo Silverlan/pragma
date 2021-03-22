@@ -23,6 +23,12 @@ struct DLLNETWORK AnimationBlendControllerTransition
 {
 	uint32_t animation = std::numeric_limits<uint32_t>::max();
 	float transition = 0.f;
+
+	bool operator==(const AnimationBlendControllerTransition &other) const
+	{
+		return animation == other.animation && umath::abs(transition -other.transition) < 0.001f;
+	}
+	bool operator!=(const AnimationBlendControllerTransition &other) const {return !operator==(other);}
 };
 
 struct DLLNETWORK AnimationBlendController
@@ -34,6 +40,13 @@ struct DLLNETWORK AnimationBlendController
 	// Primary used for directional movement animations with several cardinal animations and one center animation.
 	uint32_t animationPostBlendTarget = std::numeric_limits<uint32_t>::max();
 	uint32_t animationPostBlendController = std::numeric_limits<uint32_t>::max();
+
+	bool operator==(const AnimationBlendController &other) const
+	{
+		return controller == other.controller && transitions == other.transitions && animationPostBlendTarget == other.animationPostBlendTarget &&
+			animationPostBlendController == other.animationPostBlendController;
+	}
+	bool operator!=(const AnimationBlendController &other) const {return !operator==(other);}
 };
 
 class VFilePtrInternalReal;
@@ -110,6 +123,9 @@ public:
 
 	bool Save(udm::AssetData &outData,std::string &outErr);
 	bool SaveLegacy(std::shared_ptr<VFilePtrInternalReal> &f);
+
+	bool operator==(const Animation &other) const;
+	bool operator!=(const Animation &other) const {return !operator==(other);}
 private:
 	static util::EnumRegister s_activityEnumRegister;
 	static util::EnumRegister s_eventEnumRegister;

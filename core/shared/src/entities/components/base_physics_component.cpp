@@ -23,6 +23,7 @@
 #include <sharedutils/netpacket.hpp>
 #include <pragma/physics/movetypes.h>
 #include <pragma/physics/collisiontypes.h>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -683,19 +684,21 @@ float BasePhysicsComponent::GetPhysicsMass() const
 	return (hMdl != nullptr) ? hMdl->GetMass() : 0.f;
 }
 
-void BasePhysicsComponent::Save(DataStream &ds)
+void BasePhysicsComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
-	BaseEntityComponent::Save(ds);
-	ds->Write<uint32_t>(umath::to_integral(m_moveType));
-	ds->Write<uint32_t>(umath::to_integral(m_collisionType));
+	BaseEntityComponent::Save(udm);
+	udm["moveType"] = m_moveType;
+	udm["collisionType"] = m_collisionType;
 }
-void BasePhysicsComponent::Load(DataStream &ds,uint32_t version)
+void BasePhysicsComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {
-	BaseEntityComponent::Load(ds,version);
-	auto moveType = static_cast<MOVETYPE>(ds->Read<uint32_t>());
+	BaseEntityComponent::Load(udm,version);
+	auto moveType = GetMoveType();
+	udm["moveType"](moveType);
 	SetMoveType(moveType);
 
-	auto collisionType = static_cast<COLLISIONTYPE>(ds->Read<uint32_t>());
+	auto collisionType = GetCollisionType();
+	udm["collisionType"](collisionType);
 	SetCollisionType(collisionType);
 }
 

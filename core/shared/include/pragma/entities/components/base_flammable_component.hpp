@@ -32,8 +32,8 @@ namespace pragma
 		virtual void SetIgnitable(bool b);
 		virtual void OnTick(double dt);
 
-		virtual void Save(DataStream &ds) override;
-		virtual void Load(DataStream &ds,uint32_t version) override;
+		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
+		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
 	protected:
 		BaseFlammableComponent(BaseEntity &ent);
 		pragma::NetEventId m_netEvIgnite = pragma::INVALID_NET_EVENT;

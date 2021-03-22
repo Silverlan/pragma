@@ -12,6 +12,7 @@
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include <sharedutils/datastream.h>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -76,27 +77,33 @@ util::EventReply BaseFlammableComponent::HandleEvent(ComponentEventId eventId,Co
 		Extinguish();
 	return util::EventReply::Unhandled;
 }
-void BaseFlammableComponent::Save(DataStream &ds)
+void BaseFlammableComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
-	BaseEntityComponent::Save(ds);
-	ds->Write<bool>(*m_bIgnitable);
-	ds->Write<bool>(*m_bIsOnFire);
+	BaseEntityComponent::Save(udm);
+	udm["ignitable"] = **m_bIgnitable;
+	udm["isOnFire"] = **m_bIsOnFire;
 	auto tCur = GetEntity().GetNetworkState()->GetGameState()->CurTime();
 	auto tExtinguish = m_tExtinguishTime;
 	if(tExtinguish != 0.f)
 		tExtinguish -= tCur;
-	ds->Write<float>(tExtinguish);
+	udm["timeUntilExtinguish"] = tExtinguish;
 }
-void BaseFlammableComponent::Load(DataStream &ds,uint32_t version)
+void BaseFlammableComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {
-	BaseEntityComponent::Load(ds,version);
-	auto bIgnitable = ds->Read<bool>();
-	SetIgnitable(bIgnitable);
+	BaseEntityComponent::Load(udm,version);
+	auto ignitable = IsIgnitable();
+	udm["ignitable"](ignitable);
+	SetIgnitable(ignitable);
 
-	auto bOnFire = ds->Read<bool>();
-	auto tIgnite = ds->Read<float>();
-	if(bOnFire == true)
-		Ignite(tIgnite); // TODO: Attacker, inflictor?
+	auto isOnFire = IsOnFire();
+	udm["isOnFire"](isOnFire);
+
+	auto tExtinguish = 0.f;
+	if(isOnFire == true)
+	{
+		udm["timeUntilExtinguish"](tExtinguish);
+		Ignite(tExtinguish); // TODO: Attacker, inflictor?
+	}
 }
 const util::PBoolProperty &BaseFlammableComponent::GetOnFireProperty() const {return m_bIsOnFire;}
 const util::PBoolProperty &BaseFlammableComponent::GetIgnitableProperty() const {return m_bIgnitable;}

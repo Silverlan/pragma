@@ -17,7 +17,6 @@
 #include "pragma/asset/util_asset.hpp"
 #include <fsys/filesystem.h>
 #include <sharedutils/util_file.h>
-#include <sharedutils/magic_enum.hpp>
 #include <udm.hpp>
 
 #define INDEX_OFFSET_INDEX_SIZE sizeof(uint64_t)
@@ -36,7 +35,7 @@
 #define INDEX_OFFSET_IK_CONTROLLERS (INDEX_OFFSET_PHONEMES +1)
 #define INDEX_OFFSET_EYEBALLS (INDEX_OFFSET_IK_CONTROLLERS +1)
 #define INDEX_OFFSET_FLEX_ANIMATIONS (INDEX_OFFSET_EYEBALLS +1)
-
+#pragma optimize("",off)
 static void write_offset(VFilePtrReal f,uint64_t offIndex)
 {
 	auto cur = f->Tell();
@@ -209,7 +208,7 @@ std::shared_ptr<Model> Model::Copy(Game *game,CopyFlags copyFlags) const
 			flexAnim = std::make_shared<FlexAnimation>(*flexAnim);
 	}
 	// TODO: Copy collision mesh soft body sub mesh reference
-	static_assert(sizeof(Model) == 992,"Update this function when making changes to this class!");
+	static_assert(sizeof(Model) == 1'000,"Update this function when making changes to this class!");
 	return mdl;
 }
 
@@ -270,21 +269,439 @@ bool Model::FindSubMeshIndex(const ModelMeshGroup *optMeshGroup,const ModelMesh 
 	return false;
 }
 
-static constexpr auto PMDL_IDENTIFIER = "PMDL";
-static constexpr udm::Version PMDL_VERSION = 1;
+bool Model::LoadFromAssetData(Game &game,const udm::AssetData &data,std::string &outErr)
+{
+	if(data.GetAssetType() != PMDL_IDENTIFIER)
+	{
+		outErr = "Incorrect format!";
+		return false;
+	}
+
+	const auto udm = *data;
+	auto version = data.GetAssetVersion();
+	if(version < 1)
+	{
+		outErr = "Invalid version!";
+		return false;
+	}
+	// if(version > PMDL_VERSION)
+	// 	return false;
+	auto activity = udm["activity"];
+
+	udm["materialPaths"].GetBlobData(GetTexturePaths());
+	udm["materials"].GetBlobData(GetTextures());
+	m_materials.resize(m_metaInfo.textures.size());
+	udm["includeModels"].GetBlobData(GetMetaInfo().includes);
+	udm["eyeOffset"](m_eyeOffset);
+	udm["maxEyeDeflection"](m_maxEyeDeflection);
+	udm["mass"](m_mass);
+	
+	udm["render.bounds.min"](m_renderMin);
+	udm["render.bounds.max"](m_renderMax);
+
+	auto readFlag = [this](auto udm,auto flag,const std::string &name,auto &outFlags) {
+		auto udmFlags = udm["flags"];
+		if(!udmFlags)
+			return;
+		umath::set_flag(outFlags,flag,udmFlags[name](false));
+	};
+	auto &flags = GetMetaInfo().flags;
+	readFlag(udm,Model::Flags::Static,"static",flags);
+	readFlag(udm,Model::Flags::Inanimate,"inanimate",flags);
+	readFlag(udm,Model::Flags::DontPrecacheTextureGroups,"dontPrecacheSkins",flags);
+	static_assert(umath::to_integral(Model::Flags::Count) == 8,"Update this list when new flags have been added!");
+
+	auto isStatic = umath::is_flag_set(flags,Model::Flags::Static);
+	if(!isStatic)
+	{
+		auto &ref = GetReference();
+		auto udmSkeleton = udm["skeleton"];
+		m_skeleton = Skeleton::Load(ref,udm::AssetData{udmSkeleton},outErr);
+		if(m_skeleton == nullptr)
+			return false;
+
+		auto &attachments = GetAttachments();
+		auto udmAttachments = udm["attachments"];
+		auto numAttachments = udmAttachments.GetSize();
+		attachments.resize(numAttachments);
+		for(auto i=decltype(numAttachments){0u};i<numAttachments;++i)
+		{
+			auto &att = attachments[i];
+			umath::Transform pose {};
+			auto udmAttachment = udmAttachments[i];
+			udmAttachment["name"](att.name);
+			udmAttachment["bone"](att.bone);
+			udmAttachment["pose"](pose);
+			att.offset = pose.GetOrigin();
+			att.angles = pose.GetRotation();
+		}
+
+		auto &objAttachments = GetObjectAttachments();
+		auto udmObjAttachments = udm["objectAttachments"];
+		auto numObjAttachments = udmObjAttachments.GetSize();
+		objAttachments.resize(numObjAttachments);
+		for(auto i=decltype(numObjAttachments){0u};i<numObjAttachments;++i)
+		{
+			auto &objAtt = objAttachments[i];
+			auto udmObjAttachment = udmObjAttachments[i];
+			udmObjAttachment["name"](objAtt.name);
+
+			int32_t attId = -1;
+			udmObjAttachment["attachment"](attId);
+			if(attId >= 0 && attId < attachments.size())
+				objAtt.attachment = attachments[attId].name;
+			udm::to_enum_value<ObjectAttachment::Type>(udmObjAttachment["type"],objAtt.type);
+
+			udmObjAttachment["keyValues"](objAtt.keyValues);
+		}
+
+		auto &hitboxes = GetHitboxes();
+		auto udmHitboxes = udm["hitboxes"];
+		auto numHitboxes = udmHitboxes.GetSize();
+		hitboxes.reserve(numHitboxes);
+		for(auto i=decltype(numHitboxes){0u};i<numHitboxes;++i)
+		{
+			auto udmHb = udmHitboxes[i];
+			Hitbox hb {};
+
+			udm::to_enum_value<HitGroup>(udmHb["hitGroup"],hb.group);
+			udmHb["bounds.min"](hb.min);
+			udmHb["bounds.max"](hb.max);
+
+			auto boneId = std::numeric_limits<uint32_t>::max();
+			udmHb["bone"](boneId);
+			if(boneId != std::numeric_limits<uint32_t>::max())
+				hitboxes[boneId] = hb;
+		}
+	}
+
+	// Bodygroups
+	auto &bodyGroups = GetBodyGroups();
+	auto udmBodyGroups = udm["bodyGroups"];
+	auto numBodyGroups = udmBodyGroups.GetChildCount();
+	bodyGroups.resize(numBodyGroups);
+	uint32_t idx = 0;
+	for(auto udmBodyGroup : udmBodyGroups.ElIt())
+	{
+		auto &bg = bodyGroups[idx++];
+		bg.name = udmBodyGroup.key;
+		udmBodyGroup.property["meshGroups"](bg.meshGroups);
+	}
+
+	udm["baseMeshGroups"].GetBlobData(m_baseMeshes);
+
+	// Material groups
+	auto &texGroups = GetTextureGroups();
+	auto udmTexGroups = udm["skins"];
+	auto numTexGroups = udmTexGroups.GetSize();
+	texGroups.resize(numTexGroups);
+	for(auto i=decltype(texGroups.size()){0u};i<texGroups.size();++i)
+	{
+		auto &texGroup = texGroups[i];
+		auto udmMaterials = udmTexGroups[i]["materials"];
+		udmMaterials.GetBlobData(texGroup.textures);
+	}
+
+	// Collision meshes
+	auto &colMeshes = GetCollisionMeshes();
+	auto udmColMeshes = udm["collisionMeshes"];
+	auto numColMeshes = udmColMeshes.GetSize();
+	colMeshes.resize(numColMeshes);
+	for(auto i=decltype(numColMeshes){0u};i<numColMeshes;++i)
+	{
+		auto &colMesh = colMeshes[i];
+		colMesh = CollisionMesh::Load(game,*this,udm::AssetData{udmColMeshes[i]},outErr);
+		if(colMesh == nullptr)
+			return false;
+	}
+
+	// Joints
+	auto &joints = GetJoints();
+	auto udmJoints = udm["joints"];
+	auto numJoints = udmJoints.GetSize();
+	joints.resize(numJoints);
+	for(auto i=decltype(numJoints){0u};i<numJoints;++i)
+	{
+		auto &joint = joints[i];
+		auto udmJoint = udmJoints[i];
+
+		udm::to_enum_value<JointType>(udmJoint["type"],joint.type);
+		udmJoint["parentBone"](joint.parent);
+		udmJoint["childBone"](joint.child);
+		udmJoint["enableCollisions"](joint.collide);
+		udmJoint["args"](joint.args);
+	}
+
+	auto &meshGroups = GetMeshGroups();
+	auto udmMeshGroups = udm["meshGroups"];
+	meshGroups.resize(udmMeshGroups.GetChildCount());
+	for(auto udmMeshGroup : udmMeshGroups.ElIt())
+	{
+		auto meshGroup = ModelMeshGroup::Create(std::string{udmMeshGroup.key});
+		uint32_t groupIdx = 0;
+		udmMeshGroup.property["index"](groupIdx);
+		meshGroups[groupIdx] = meshGroup;
+		auto udmMeshes = udmMeshGroup.property["meshes"];
+		auto numMeshes = udmMeshes.GetSize();
+		auto &meshes = meshGroup->GetMeshes();
+		meshes.resize(numMeshes);
+		for(auto meshIdx=decltype(numMeshes){0u};meshIdx<numMeshes;++meshIdx)
+		{
+			auto &mesh = meshes[meshIdx];
+			auto udmMesh = udmMeshes[meshIdx];
+			mesh = std::make_shared<ModelMesh>();
+			auto referenceId = std::numeric_limits<uint32_t>::max();
+			udmMesh["referenceId"](referenceId);
+			mesh->SetReferenceId(referenceId);
+			auto udmSubMeshes = udmMesh["subMeshes"];
+			auto numSubMeshes = udmSubMeshes.GetSize();
+			auto &subMeshes = mesh->GetSubMeshes();
+			subMeshes.resize(numSubMeshes);
+			for(auto subMeshIdx=decltype(numSubMeshes){0u};subMeshIdx<numSubMeshes;++subMeshIdx)
+			{
+				auto &subMesh = subMeshes[subMeshIdx];
+				auto udmSubMesh = udmSubMeshes[subMeshIdx];
+				subMesh = CreateSubMesh();
+				subMesh->LoadFromAssetData(udm::AssetData{udmSubMesh},outErr);
+				if(subMesh == nullptr)
+					return false;
+				subMesh->Update(ModelUpdateFlags::UpdateBuffers);
+			}
+		}
+	}
+	
+	if(!isStatic)
+	{
+		auto &animations = GetAnimations();
+		auto udmAnimations = udm["animations"];
+		animations.resize(udmAnimations.GetChildCount());
+		for(auto udmAnimation : udmAnimations.ElIt())
+		{
+			auto anim = Animation::Load(udm::AssetData{udmAnimation.property},outErr);
+			if(anim == nullptr)
+				return false;
+			uint32_t index = 0;
+			udmAnimation.property["index"](index);
+			m_animationIDs[std::string{udmAnimation.key}] = index;
+			animations[index] = anim;
+		}
+
+		auto &blendControllers = GetBlendControllers();
+		auto udmBlendControllers = udm["blendControllers"];
+		auto numBlendControllers = udmBlendControllers.GetSize();
+		blendControllers.resize(numBlendControllers);
+		for(auto i=decltype(numBlendControllers){0u};i<numBlendControllers;++i)
+		{
+			auto &bc = blendControllers[i];
+			auto udmBc = udmBlendControllers[i];
+			udmBc["name"](bc.name);
+			udmBc["min"](bc.min);
+			udmBc["max"](bc.max);
+			udmBc["loop"](bc.loop);
+		}
+
+		auto &ikControllers = GetIKControllers();
+		auto udmIkControllers = udm["ikControllers"];
+		auto numIkControllers = udmIkControllers.GetSize();
+		ikControllers.resize(numIkControllers);
+		for(auto i=decltype(numIkControllers){0u};i<numIkControllers;++i)
+		{
+			auto &ikc = ikControllers[i];
+			auto udmIkController = udmIkControllers[i];
+
+			std::string effectorName;
+			std::string type;
+			udmIkController["effectorName"](effectorName);
+			udmIkController["type"](type);
+
+			ikc->SetEffectorName(effectorName);
+			ikc->SetType(type);
+			uint32_t chainLength = 0;
+			udmIkController["chainLength"](chainLength);
+			ikc->SetChainLength(chainLength);
+			auto method = ikc->GetMethod();
+			udm::to_enum_value<util::ik::Method>(udmIkController["method"],method);
+			ikc->SetMethod(method);
+
+			udmIkController["keyValues"](ikc->GetKeyValues());
+		}
+
+		auto &morphAnims = GetVertexAnimations();
+		auto udmMorphTargetAnims = udm["morphTargetAnimations"];
+		auto numMorphTargetAnims = udmMorphTargetAnims.GetChildCount();
+		morphAnims.resize(numMorphTargetAnims);
+		for(auto udmMorphTargetAnim : udmMorphTargetAnims.ElIt())
+		{
+			udmMorphTargetAnim.property["index"](idx);
+			morphAnims[idx] = VertexAnimation::Load(*this,udm::AssetData{udmMorphTargetAnim.property},outErr);
+			if(morphAnims[idx] == nullptr)
+				return false;
+			++idx;
+		}
+
+		auto &flexes = GetFlexes();
+		auto udmFlexes = udm["flexes"];
+		flexes.resize(udmFlexes.GetChildCount());
+		for(auto udmFlex : udmFlexes.ElIt())
+		{
+			udmFlex.property["index"](idx);
+			auto &flex = flexes[idx];
+			flex.GetName() = udmFlex.key;
+
+			auto morphTargetAnimation = std::numeric_limits<uint32_t>::max();
+			udmFlex.property["morphTargetAnimation"](morphTargetAnimation);
+			if(morphTargetAnimation < morphAnims.size())
+			{
+				uint32_t frameIndex = 0;
+				flex.SetVertexAnimation(*morphAnims[morphTargetAnimation],frameIndex);
+			}
+				
+			auto &ops = flex.GetOperations();
+			auto udmOps = udmFlex.property["operations"];
+			auto numOps = udmOps.GetSize();
+			ops.resize(numOps);
+			for(auto i=decltype(numOps){0u};i<numOps;++i)
+			{
+				auto &op = ops[i];
+				auto udmOp = udmOps[i];
+				udm::to_enum_value<Flex::Operation::Type>(udmOp["type"],op.type);
+				if(udmOp["value"])
+					udmOp["value"](op.d.value);
+				else if(udmOp["index"])
+					udmOp["index"](op.d.index);
+			}
+		}
+
+		auto &flexControllers = GetFlexControllers();
+		auto udmFlexControllers = udm["flexControllers"];
+		auto numFlexControllers = udmFlexControllers.GetChildCount();
+		flexControllers.resize(numFlexControllers);
+		for(auto udmFlexController : udmFlexControllers.ElIt())
+		{
+			udmFlexController.property["index"](idx);
+			auto &flexC = flexControllers[idx];
+			flexC.name = udmFlexController.key;
+			udmFlexController.property["min"](flexC.min);
+			udmFlexController.property["max"](flexC.max);
+		}
+
+		auto &eyeballs = GetEyeballs();
+		auto udmEyeballs = udm["eyeballs"];
+		auto numEyeballs = udmEyeballs.GetChildCount();
+		eyeballs.resize(numEyeballs);
+		for(auto udmEyeball : udmEyeballs.ElIt())
+		{
+			udmEyeball.property["index"](idx);
+			auto &eyeball = eyeballs[idx];
+			eyeball.name = udmEyeball.key;
+			udmEyeball.property["bone"](eyeball.boneIndex);
+			udmEyeball.property["origin"](eyeball.origin);
+			udmEyeball.property["zOffset"](eyeball.zOffset);
+			udmEyeball.property["radius"](eyeball.radius);
+			udmEyeball.property["up"](eyeball.up);
+			udmEyeball.property["forward"](eyeball.forward);
+			udmEyeball.property["maxDilationFactor"](eyeball.maxDilationFactor);
+
+			udmEyeball.property["iris.material"](eyeball.irisMaterialIndex);
+			udmEyeball.property["iris.uvRadius"](eyeball.irisUvRadius);
+			udmEyeball.property["iris.scale"](eyeball.irisScale);
+
+			auto writeLid = [](udm::LinkedPropertyWrapper &prop,const Eyeball::LidFlexDesc &lid) {
+				prop["raiser.lidFlexIndex"] = lid.lidFlexIndex;
+
+				prop["raiser.raiserFlexIndex"] = lid.raiserFlexIndex;
+				prop["raiser.targetAngle"] = umath::rad_to_deg(lid.raiserValue);
+
+				prop["neutral.neutralFlexIndex"] = lid.neutralFlexIndex;
+				prop["neutral.targetAngle"] = umath::rad_to_deg(lid.neutralValue);
+
+				prop["lowerer.lowererFlexIndex"] = lid.lowererFlexIndex;
+				prop["lowerer.targetAngle"] = umath::rad_to_deg(lid.lowererValue);
+			};
+			writeLid(udmEyeball.property["eyelids.upperLid"],eyeball.upperLid);
+			writeLid(udmEyeball.property["eyelids.lowerLid"],eyeball.lowerLid);
+		}
+			
+		auto &phonemeMap = GetPhonemeMap();
+		auto udmPhonemes = udm["phonemes"];
+		phonemeMap.phonemes.reserve(udmPhonemes.GetChildCount());
+		for(auto udmPhoneme : udmPhonemes.ElIt())
+		{
+			auto &phonemeInfo = phonemeMap.phonemes[std::string{udmPhoneme.key}] = {};
+			udmPhoneme.property(phonemeInfo.flexControllers);
+		}
+			
+		auto &flexAnims = GetFlexAnimations();
+		auto &flexAnimNames = GetFlexAnimationNames();
+		auto udmFlexAnims = udm["flexAnimations"];
+		auto numFlexAnims = udmFlexAnims.GetChildCount();
+		flexAnims.resize(numFlexAnims);
+		flexAnimNames.resize(numFlexAnims);
+		for(auto udmFlexAnim : udmFlexAnims.ElIt())
+		{
+			udmFlexAnim.property["index"](idx);
+			flexAnimNames[idx] = udmFlexAnim.key;
+			flexAnims[idx] = FlexAnimation::Load(udm::AssetData{udmFlexAnim.property},outErr);
+			if(flexAnims[idx] == nullptr)
+				return false;
+		}
+	}
+	return true;
+}
+
+bool Model::Save(Game &game,const std::string &fileName,std::string &outErr)
+{
+	auto udmData = udm::Data::Create();
+	std::string err;
+	auto result = Save(game,udmData->GetAssetData(),err);
+	if(result == false)
+		return false;
+	FileManager::CreatePath(ufile::get_path_from_filename(fileName).c_str());
+	auto writeFileName = fileName;
+	ufile::remove_extension_from_filename(writeFileName,pragma::asset::get_supported_extensions(pragma::asset::Type::Model));
+	writeFileName += '.' +std::string{pragma::asset::FORMAT_MODEL_BINARY};
+	auto f = FileManager::OpenFile<VFilePtrReal>(writeFileName.c_str(),"wb");
+	if(f == nullptr)
+	{
+		outErr = "Unable to open file '" +writeFileName +"'!";
+		return false;
+	}
+	result = udmData->Save(f);
+	if(result == false)
+	{
+		outErr = "Unable to save UDM data!";
+		return false;
+	}
+	return true;
+}
+bool Model::Save(Game &game,std::string &outErr)
+{
+	auto mdlName = GetName();
+	std::string absFileName;
+	auto result = FileManager::FindAbsolutePath("models/" +mdlName,absFileName);
+	if(result == false)
+		absFileName = "models/" +mdlName;
+	else
+	{
+		auto path = util::Path::CreateFile(absFileName);
+		path.MakeRelative(util::get_program_path());
+		absFileName = path.GetString();
+	}
+	return Save(game,absFileName,outErr);
+}
 
 bool Model::Save(Game &game,udm::AssetData &outData,std::string &outErr)
 {
-	return false;
-	// WIP
-#if 0
 	outData.SetAssetType(PMDL_IDENTIFIER);
 	outData.SetAssetVersion(PMDL_VERSION);
 	auto udm = *outData;
 
 	udm["materialPaths"] = GetTexturePaths();
+	udm["materials"] = m_metaInfo.textures;
 	udm["includeModels"] = GetMetaInfo().includes;
 	udm["eyeOffset"] = GetEyeOffset();
+	udm["maxEyeDeflection"] = m_maxEyeDeflection;
+	udm["mass"] = m_mass;
 
 	Vector3 min,max;
 	GetRenderBounds(min,max);
@@ -306,28 +723,15 @@ bool Model::Save(Game &game,udm::AssetData &outData,std::string &outErr)
 	auto isStatic = umath::is_flag_set(flags,Model::Flags::Static);
 	if(!isStatic)
 	{
+		auto udmSkeleton = udm["skeleton"];
 		auto &skeleton = GetSkeleton();
-		auto &ref = GetReference();
-		auto &bones = skeleton.GetBones();
-		auto udmSkeleton = udm.AddArray("skeleton",bones.size());
-		for(auto i=decltype(bones.size()){0u};i<bones.size();++i)
-		{
-			auto &bone = bones[i];
-			auto udmBone = udmSkeleton[i];
-			std::vector<uint32_t> childIds {};
-			childIds.reserve(bone->children.size());
-			for(auto &pair : bone->children)
-				childIds.push_back(pair.first);
-			umath::ScaledTransform transform;
-			ref.GetBonePose(bone->ID,transform);
-			udmBone["name"] = bone->name;
-			udmBone["children"] = childIds;
-			udmBone["pose"] = transform;
-		}
+		auto &reference = GetReference();
+		if(skeleton.Save(reference,udm::AssetData{udmSkeleton},outErr) == false)
+			return false;
 
 		auto &attachments = GetAttachments();
 		auto udmAttachments = udm.AddArray("attachments",attachments.size());
-		for(auto i=decltype(bones.size()){0u};i<bones.size();++i)
+		for(auto i=decltype(attachments.size()){0u};i<attachments.size();++i)
 		{
 			auto &att = attachments[i];
 			auto udmAtt = udmAttachments[i];
@@ -345,7 +749,7 @@ bool Model::Save(Game &game,udm::AssetData &outData,std::string &outErr)
 			auto udmObjAtt = udmObjAttachments[i];
 			udmObjAtt["name"] = objAtt.name;
 			udmObjAtt["attachment"] = LookupAttachment(objAtt.attachment);
-			udmObjAtt["type"] = magic_enum::enum_name(objAtt.type);
+			udmObjAtt["type"] = udm::enum_to_string(objAtt.type);
 			udmObjAtt["keyValues"] = objAtt.keyValues;
 		}
 
@@ -356,11 +760,29 @@ bool Model::Save(Game &game,udm::AssetData &outData,std::string &outErr)
 		{
 			auto &hb = pair.second;
 			auto udmHb = udmHitboxes[hbIdx++];
-			udmHb["hitGroup"] = magic_enum::enum_name(hb.group);
+			udmHb["hitGroup"] = udm::enum_to_string(hb.group);
 			udmHb["bounds.min"] = hb.min;
 			udmHb["bounds.max"] = hb.max;
 			udmHb["bone"] = pair.first;
 		}
+	}
+
+	auto &bodyGroups = GetBodyGroups();
+	auto udmBodyGroups = udm["bodyGroups"];
+	for(auto &bg : bodyGroups)
+	{
+		auto udmBodyGroup = udmBodyGroups[bg.name];
+		udmBodyGroup["meshGroups"] = bg.meshGroups;
+	}
+
+	udm["baseMeshGroups"] = m_baseMeshes;
+	
+	auto &texGroups = GetTextureGroups();
+	auto udmTexGroups = udm.AddArray("skins",texGroups.size());
+	for(auto i=decltype(texGroups.size()){0u};i<texGroups.size();++i)
+	{
+		auto &texGroup = texGroups[i];
+		udmTexGroups[i]["materials"] = texGroup.textures;
 	}
 	
 	auto &colMeshes = GetCollisionMeshes();
@@ -369,131 +791,8 @@ bool Model::Save(Game &game,udm::AssetData &outData,std::string &outErr)
 	for(auto i=decltype(colMeshes.size()){0u};i<colMeshes.size();++i)
 	{
 		auto &colMesh = colMeshes[i];
-		auto udmColMesh = udmColMeshes[i];
-		umath::Transform pose {};
-		pose.SetOrigin(colMesh->GetOrigin());
-		udmColMesh["bone"] = colMesh->GetBoneParent();
-		udmColMesh["pose"] = pose;
-		udmColMesh["surfaceMaterial"] = surfaceMaterials[colMesh->GetSurfaceMaterial()].GetIdentifier();
-
-		Vector3 min,max;
-		colMesh->GetAABB(&min,&max);
-		udmColMesh["bounds.min"] = min;
-		udmColMesh["bounds.max"] = max;
-
-		udmColMesh["vertices"] = udm::compress_lz4_blob(colMesh->GetVertices());
-		udmColMesh["triangles"] = udm::compress_lz4_blob(colMesh->GetTriangles());
-
-		udmColMesh["volume"] = colMesh->GetVolume();
-		udmColMesh["centerOfMass"] = colMesh->GetCenterOfMass();
-
-		udmColMesh["flags.convex"] = colMesh->IsConvex();
-
-		// Soft-body
-		auto softBody = colMesh->IsSoftBody();
-		auto *sbInfo = colMesh->GetSoftBodyInfo();
-		auto *sbMesh = colMesh->GetSoftBodyMesh();
-		auto *sbTriangles = colMesh->GetSoftBodyTriangles();
-		auto *sbAnchors = colMesh->GetSoftBodyAnchors();
-		softBody = (softBody && sbInfo != nullptr && sbMesh != nullptr && sbTriangles != nullptr && sbAnchors != nullptr) ? true : false;
-		auto meshGroupId = std::numeric_limits<uint32_t>::max();
-		auto meshId = std::numeric_limits<uint32_t>::max();
-		auto subMeshId = std::numeric_limits<uint32_t>::max();
-		ModelSubMesh *subMesh = nullptr;
-		auto foundSoftBodyMesh = false;
-		if(softBody)
-		{
-			for(auto i=decltype(meshGroups.size()){0};i<meshGroups.size();++i)
-			{
-				auto &group = meshGroups.at(i);
-				auto &meshes = group->GetMeshes();
-				for(auto j=decltype(meshes.size()){0};j<meshes.size();++j)
-				{
-					auto &mesh = meshes.at(j);
-					auto &subMeshes = mesh->GetSubMeshes();
-					for(auto k=decltype(subMeshes.size()){0};k<subMeshes.size();++k)
-					{
-						subMesh = subMeshes.at(k).get();
-						meshGroupId = i;
-						meshId = j;
-						subMeshId = k;
-						foundSoftBodyMesh = true;
-						goto endLoop;
-					}
-				}
-			}
-		}
-	endLoop:
-
-		if(foundSoftBodyMesh == false)
-			softBody = false;
-
-		if(softBody)
-		{
-			auto udmSoftBody = udmColMesh["softBody"];
-			udmSoftBody["meshGroup"] = meshGroupId;
-			udmSoftBody["mesh"] = meshId;
-			udmSoftBody["subMesh"] = subMeshId;
-
-			auto udmSettings = udmSoftBody["settings"];
-
-#if 0
-	struct MaterialStiffnessCoefficient
-	{
-		MaterialStiffnessCoefficient()=default;
-		MaterialStiffnessCoefficient(float a,float l,float v)
-			: MaterialStiffnessCoefficient()
-		{
-			angular = a;
-			linear = l;
-			volume = v;
-		}
-		float angular = 1.f;
-		float linear = 1.f;
-		float volume = 1.f;
-	};
-	float poseMatchingCoefficient = 0.5f;
-	float anchorsHardness = 0.6999f;
-	float dragCoefficient = 0.f;
-	float rigidContactsHardness = 1.f;
-	float softContactsHardness = 1.f;
-	float liftCoefficient = 0.f;
-	float kineticContactsHardness = 0.1f;
-	float dynamicFrictionCoefficient = 0.2f;
-	float dampingCoefficient = 0.f;
-	float volumeConversationCoefficient = 0.f;
-	float softVsRigidImpulseSplitK = 0.5f;
-	float softVsRigidImpulseSplitR = 0.5f;
-	float softVsRigidImpulseSplitS = 0.5f;
-	float softVsKineticHardness = 1.f;
-	float softVsRigidHardness = 0.1f;
-	float softVsSoftHardness = 0.5f;
-	float pressureCoefficient = 0.f;
-	float velocitiesCorrectionFactor = 1.f;
-
-	float bendingConstraintsDistance = 0.2f;
-	uint32_t clusterCount = 0u;
-	uint32_t maxClusterIterations = 8192u;
-	std::unordered_map<uint32_t,MaterialStiffnessCoefficient> materialStiffnessCoefficient;
-#endif
-				/*f->Write(sbInfo,sizeof(float) *19 +sizeof(uint32_t) *2);
-				f->Write<uint32_t>(sbInfo->materialStiffnessCoefficient.size());
-				for(auto &pair : sbInfo->materialStiffnessCoefficient)
-				{
-					f->Write<uint32_t>(pair.first);
-					f->Write<float>(pair.second.linear);
-					f->Write<float>(pair.second.angular);
-					f->Write<float>(pair.second.volume);
-				}
-
-				f->Write<uint32_t>(sbTriangles->size());
-				for(auto idx : *sbTriangles)
-					f->Write<uint32_t>(idx);
-
-				f->Write<uint32_t>(sbAnchors->size());
-				for(auto &anchor : *sbAnchors)
-					f->Write<CollisionMesh::SoftBodyAnchor>(anchor);*/
-		}
+		if(colMesh->Save(game,*this,udm::AssetData{udmColMeshes[i]},outErr) == false)
+			return false;
 	}
 
 	// Joints
@@ -505,7 +804,7 @@ bool Model::Save(Game &game,udm::AssetData &outData,std::string &outErr)
 		for(auto &joint : joints)
 		{
 			auto udmJoint = udmJoints[jointIdx++];
-			udmJoint["type"] = magic_enum::enum_name(joint.type);
+			udmJoint["type"] = udm::enum_to_string(joint.type);
 			udmJoint["parentBone"] = joint.parent;
 			udmJoint["childBone"] = joint.child;
 			udmJoint["enableCollisions"] = joint.collide;
@@ -518,12 +817,14 @@ bool Model::Save(Game &game,udm::AssetData &outData,std::string &outErr)
 		auto &animations = GetAnimations();
 		if(!animations.empty())
 		{
-			auto udmAnimations = udm.AddArray("animations",animations.size());
-			uint32_t animIdx = 0;
-			for(auto &anim : animations)
+			auto udmAnimations = udm["animations"];
+			for(auto i=decltype(animations.size()){0u};i<animations.size();++i)
 			{
-				auto udmAnim = udmAnimations[animIdx++];
-				if(anim->Save(udm::AssetData{*udmAnim},outErr) == false)
+				auto &anim = animations[i];
+				auto animName = GetAnimationName(i);
+				auto udmAnim = udmAnimations[animName];
+				udmAnim["index"] = static_cast<uint32_t>(i);
+				if(anim->Save(udm::AssetData{udmAnim},outErr) == false)
 					return false;
 			}
 		}
@@ -554,7 +855,7 @@ bool Model::Save(Game &game,udm::AssetData &outData,std::string &outErr)
 				udmIkController["effectorName"] = ikc->GetEffectorName();
 				udmIkController["type"] = ikc->GetType();
 				udmIkController["chainLength"] = ikc->GetChainLength();
-				udmIkController["method"] = magic_enum::enum_name(ikc->GetMethod());
+				udmIkController["method"] = udm::enum_to_string(ikc->GetMethod());
 				udmIkController["keyValues"] = ikc->GetKeyValues();
 			}
 		}
@@ -562,94 +863,23 @@ bool Model::Save(Game &game,udm::AssetData &outData,std::string &outErr)
 		auto &morphAnims = GetVertexAnimations();
 		if(!morphAnims.empty())
 		{
-			auto udmMorphAnims = udm.AddArray("morphTargetAnimations",morphAnims.size());
-			uint32_t morphAnimIdx = 0;
-			for(auto &va : morphAnims)
+			auto udmMorphAnims = udm["morphTargetAnimations"];
+			for(auto i=decltype(morphAnims.size()){0u};i<morphAnims.size();++i)
 			{
-				auto udmMa = udmMorphAnims[morphAnimIdx++];
-				udmMa["name"] = va->GetName();
-				
-				auto &meshAnims = va->GetMeshAnimations();
-				auto udmMeshAnims = udmMa.AddArray("meshAnimations",meshAnims.size());
-				uint32_t meshAnimIdx = 0;
-				for(auto &ma : meshAnims)
-				{
-					auto *mesh = ma->GetMesh();
-					auto *subMesh = ma->GetSubMesh();
-					if(mesh == nullptr || subMesh == nullptr)
-						continue;
-					auto udmMa = udmMeshAnims[meshAnimIdx++];
-					uint32_t groupIdx,meshIdx,subMeshIdx;
-					if(FindSubMeshIndex(nullptr,mesh,subMesh,groupIdx,meshIdx,subMeshIdx) == false)
-						continue;
-					udmMa["meshGroup"] = groupIdx;
-					udmMa["mesh"] = meshIdx;
-					udmMa["subMesh"] = subMeshIdx;
-
-					auto &frames = ma->GetFrames();
-					auto udmFrames = udmMa.AddArray("frames",frames.size());
-					uint32_t frameIdx = 0;
-					for(auto &frame : frames)
-					{
-						auto udmFrame = udmFrames[frameIdx++];
-						writeFlag(udmFrame,MeshVertexFrame::Flags::HasDeltaValues,"hasDeltaValues",frame->GetFlags());
-						static_assert(umath::to_integral(MeshVertexFrame::Flags::Count) == 2,"Update this list when new flags have been added!");
-
-						udmFrame["positions"] = udm::compress_lz4_blob(frame->GetVertices());
-						if(umath::is_flag_set(frame->GetFlags(),MeshVertexFrame::Flags::HasNormals))
-							udmFrame["normals"] = udm::compress_lz4_blob(frame->GetNormals());
-						//frame->GetDeltaValue();
-
-						// TODO??
-						/*
-						struct Attribute
-						{
-							Attribute(const std::string &name,const std::vector<std::array<uint16_t,4>> &vertexData)
-								: name{name},vertexData{vertexData}
-							{}
-							std::string name;
-							const std::vector<std::array<uint16_t,4>> &vertexData;
-						};
-						std::vector<Attribute> attributes {};
-						attributes.push_back({"position",frame->GetVertices()});
-						if(umath::is_flag_set(flags,MeshVertexFrame::Flags::HasNormals))
-							attributes.push_back({"normal",frame->GetNormals()});
-						std::set<uint16_t> usedVertIndices {};
-						for(auto &attr : attributes)
-						{
-							auto vertIdx = 0u;
-							auto &vdata = attr.vertexData.at(vertIdx);
-							for(auto &vdata : attr.vertexData)
-							{
-								auto itUsed = std::find_if(vdata.begin(),vdata.end(),[](const uint16_t &v) {return v != 0;});
-								if(itUsed != vdata.end())
-									usedVertIndices.insert(vertIdx);
-								++vertIdx;
-							}
-						}
-
-						f->Write<uint16_t>(usedVertIndices.size());
-						for(auto idx : usedVertIndices)
-							f->Write<uint16_t>(idx);
-						f->Write<uint16_t>(attributes.size());
-						for(auto &attr : attributes)
-						{
-							f->WriteString(attr.name);
-							for(auto idx : usedVertIndices)
-								f->Write<std::array<uint16_t,4>>(attr.vertexData.at(idx));
-						}
-						write_offset(f,offsetToEndOfFrameOffset);*/
-					}
-				}
+				auto &va = morphAnims[i];
+				auto udmMa = udmMorphAnims[va->GetName()];
+				udmMa["index"] = static_cast<uint32_t>(i);
+				if(va->Save(*this,udm::AssetData{udmMa},outErr) == false)
+					return false;
 			}
 
 			auto &flexes = GetFlexes();
-			auto udmFlexes = udm.AddArray("flexes",flexes.size());
-			uint32_t flexIdx = 0;
-			for(auto &flex : flexes)
+			auto udmFlexes = udm["flexes"];
+			for(uint32_t flexIdx=0u;flexIdx<flexes.size();++flexIdx)
 			{
-				auto udmFlex = udmFlexes[flexIdx++];
-				udmFlex["name"] = flex.GetName();
+				auto &flex = flexes[flexIdx];
+				auto udmFlex = udmFlexes[flex.GetName()];
+				udmFlex["index"] = flexIdx;
 
 				auto *va = flex.GetVertexAnimation();
 				if(va != nullptr)
@@ -657,7 +887,7 @@ bool Model::Save(Game &game,udm::AssetData &outData,std::string &outErr)
 					auto &vertAnims = GetVertexAnimations();
 					auto itVa = std::find(vertAnims.begin(),vertAnims.end(),va->shared_from_this());
 					if(itVa != vertAnims.end())
-						udmFlex["morphTargetAnimation"] = (itVa -vertAnims.begin());
+						udmFlex["morphTargetAnimation"] = static_cast<uint32_t>(itVa -vertAnims.begin());
 				}
 				if(!udmFlex["morphTargetAnimation"])
 					udmFlex.Add("morphTargetAnimation",udm::Type::Nil);
@@ -669,29 +899,40 @@ bool Model::Save(Game &game,udm::AssetData &outData,std::string &outErr)
 				for(auto &op : ops)
 				{
 					auto udmOp = udmOps[opIdx++];
-					udmOp["type"] = magic_enum::enum_name(op.type);
-					udmOp["value"] = op.d.value;
+					udmOp["type"] = udm::enum_to_string(op.type);
+					auto valueType = Flex::Operation::GetOperationValueType(op.type);
+					switch(valueType)
+					{
+					case Flex::Operation::ValueType::Index:
+						udmOp["index"] = op.d.index;
+						break;
+					case Flex::Operation::ValueType::Value:
+						udmOp["value"] = op.d.value;
+						break;
+					case Flex::Operation::ValueType::None:
+						break;
+					}
 				}
 			}
 
 			auto &flexControllers = GetFlexControllers();
-			auto udmFlexControllers = udm.AddArray("flexControllers",flexControllers.size());
+			auto udmFlexControllers = udm["flexControllers"];
 			uint32_t flexCIdx = 0;
 			for(auto &flexC : flexControllers)
 			{
-				auto udmFlexC = udmFlexControllers[flexCIdx++];
-				udmFlexC["name"] = flexC.name;
+				auto udmFlexC = udmFlexControllers[flexC.name];
+				udmFlexC["index"] = flexCIdx++;
 				udmFlexC["min"] = flexC.min;
 				udmFlexC["max"] = flexC.max;
 			}
 
 			auto &eyeballs = GetEyeballs();
-			auto udmEyeballs = udm.AddArray("eyeballs",eyeballs.size());
+			auto udmEyeballs = udm["eyeballs"];
 			uint32_t eyeballIdx = 0;
 			for(auto &eyeball : eyeballs)
 			{
-				auto udmEyeball = udmFlexControllers[eyeballIdx++];
-				udmEyeball["name"] = eyeball.name;
+				auto udmEyeball = udmFlexControllers[eyeball.name];
+				udmEyeball["index"] = eyeballIdx++;
 				udmEyeball["bone"] = eyeball.boneIndex;
 				udmEyeball["origin"] = eyeball.origin;
 				udmEyeball["zOffset"] = eyeball.zOffset;
@@ -704,59 +945,39 @@ bool Model::Save(Game &game,udm::AssetData &outData,std::string &outErr)
 				udmEyeball["iris.uvRadius"] = eyeball.irisUvRadius;
 				udmEyeball["iris.scale"] = eyeball.irisScale;
 
-				udmEyeball["eyelids.upper.raised.flex"] = eyeball.upperFlexDesc[0];
-				udmEyeball["eyelids.upper.raised.targetAngle"] = umath::rad_to_deg(eyeball.upperTarget[0]);
+				auto readLid = [](udm::LinkedPropertyWrapper &prop,Eyeball::LidFlexDesc &lid) {
+					prop["raiser.lidFlexIndex"](lid.lidFlexIndex);
 
-				udmEyeball["eyelids.upper.neutral.flex"] = eyeball.upperFlexDesc[1];
-				udmEyeball["eyelids.upper.neutral.targetAngle"] = umath::rad_to_deg(eyeball.upperTarget[1]);
+					prop["raiser.raiserFlexIndex"](lid.raiserFlexIndex);
+					prop["raiser.targetAngle"](lid.raiserValue);
+					lid.raiserValue = umath::deg_to_rad(lid.raiserValue);
 
-				udmEyeball["eyelids.upper.lowered.flex"] = eyeball.upperFlexDesc[2];
-				udmEyeball["eyelids.upper.lowered.targetAngle"] = umath::rad_to_deg(eyeball.upperTarget[2]);
+					prop["neutral.neutralFlexIndex"](lid.neutralFlexIndex);
+					prop["neutral.targetAngle"](lid.neutralValue);
+					lid.neutralValue = umath::deg_to_rad(lid.neutralValue);
 
-				udmEyeball["eyelids.lower.raised.flex"] = eyeball.lowerFlexDesc[0];
-				udmEyeball["eyelids.lower.raised.targetAngle"] = umath::rad_to_deg(eyeball.lowerTarget[0]);
-
-				udmEyeball["eyelids.lower.neutral.flex"] = eyeball.lowerFlexDesc[1];
-				udmEyeball["eyelids.lower.neutral.targetAngle"] = umath::rad_to_deg(eyeball.lowerTarget[1]);
-
-				udmEyeball["eyelids.lower.lowered.flex"] = eyeball.lowerFlexDesc[2];
-				udmEyeball["eyelids.lower.lowered.targetAngle"] = umath::rad_to_deg(eyeball.lowerTarget[2]);
-
-				// TODO
-				udmEyeball["upperFlexDesc"] = eyeball.upperFlexDesc; // ??
-				udmEyeball["lowerFlexDesc"] = eyeball.lowerFlexDesc; // ??
-				udmEyeball["upperTarget"] = eyeball.upperTarget; // ??  // Angle in radians of raised, neutral, and lowered lid positions
-				udmEyeball["lowerTarget"] = eyeball.lowerTarget; // ??
-
-				udmEyeball["upperLidFlexDesc"] = eyeball.upperLidFlexDesc; // Index of flex desc that actual lid flexes look to
-				udmEyeball["lowerLidFlexDesc"] = eyeball.lowerLidFlexDesc; // ??
+					prop["lowerer.lowererFlexIndex"](lid.lowererFlexIndex);
+					prop["lowerer.targetAngle"](lid.lowererValue);
+					lid.lowererValue = umath::deg_to_rad(lid.lowererValue);
+				};
+				readLid(udmEyeball["eyelids.upperLid"],eyeball.upperLid);
+				readLid(udmEyeball["eyelids.lowerLid"],eyeball.lowerLid);
 			}
-#if 0
-struct DLLNETWORK Eyeball
-{
-	std::array<int32_t,3> upperFlexDesc = {};
-	std::array<int32_t,3> lowerFlexDesc = {};
-	std::array<float,3> upperTarget; // Angle in radians of raised, neutral, and lowered lid positions
-	std::array<float,3> lowerTarget;
-
-	int32_t upperLidFlexDesc = -1; // Index of flex desc that actual lid flexes look to
-	int32_t lowerLidFlexDesc = -1;
-};
-#endif
 			
 			auto &phonemeMap = GetPhonemeMap();
-			auto udmPhonemes = udm.AddArray("phonemes",eyeballs.size());
+			auto udmPhonemes = udm["phonemes"];
 			for(auto &pairPhoneme : phonemeMap.phonemes)
 				udmPhonemes[pairPhoneme.first] = pairPhoneme.second.flexControllers;
 			
 			auto &flexAnims = GetFlexAnimations();
 			auto &flexAnimNames = GetFlexAnimationNames();
-			auto udmFlexAnims = udm.AddArray("flexAnimation",flexAnims.size());
-			for(auto i=decltype(flexAnims.size()){0u};i<flexAnims.size();++i)
+			auto udmFlexAnims = udm["flexAnimations"];
+			for(uint32_t i=decltype(flexAnims.size()){0u};i<flexAnims.size();++i)
 			{
 				auto &flexAnim = flexAnims[i];
-				auto udmFlexAnim = udmFlexAnims.Add(flexAnimNames[i]);
-				if(flexAnim->Save(udm::AssetData{*udmFlexAnim},outErr) == false)
+				auto udmFlexAnim = udmFlexAnims[flexAnimNames[i]];
+				udmFlexAnim["index"] = i;
+				if(flexAnim->Save(udm::AssetData{udmFlexAnim},outErr) == false)
 					return false;
 			}
 		}
@@ -764,11 +985,12 @@ struct DLLNETWORK Eyeball
 
 
 	auto &meshGroups = GetMeshGroups();
-	auto udmMeshGroups = udm.AddArray("meshGroups",meshGroups.size());
-	uint32_t meshGroupIdx = 0;
-	for(auto &meshGroup : meshGroups)
+	auto udmMeshGroups = udm.Add("meshGroups");
+	for(auto i=decltype(meshGroups.size()){0u};i<meshGroups.size();++i)
 	{
-		auto udmMeshGroup = udmMeshGroups[meshGroupIdx++];
+		auto &meshGroup = meshGroups[i];
+		auto udmMeshGroup = udmMeshGroups[meshGroup->GetName()];
+		udmMeshGroup["index"] = static_cast<uint32_t>(i);
 		auto &meshes = meshGroup->GetMeshes();
 		auto udmMeshes = udmMeshGroup.AddArray("meshes",meshes.size());
 		uint32_t meshIdx = 0;
@@ -781,38 +1003,17 @@ struct DLLNETWORK Eyeball
 			uint32_t subMeshIdx = 0;
 			for(auto &subMesh : subMeshes)
 			{
-				auto udmSubMesh = udmSubMeshes[subMeshIdx++];
-				udmSubMesh["referenceId"] = subMesh->GetReferenceId();
-				udmSubMesh["pose"] = subMesh->GetPose();
-				udmSubMesh["geometryType"] = magic_enum::enum_name(subMesh->GetGeometryType());
-				udmSubMesh["vertexData"] = udm::compress_lz4_blob(subMesh->GetVertices());
-				udmSubMesh["indexData"] = udm::compress_lz4_blob(subMesh->GetTriangles());
-
-				auto udmUvSets = udmSubMesh["uvSets"];
-				for(auto &pair : subMesh->GetUVSets())
-					udmUvSets[pair.first] = udm::compress_lz4_blob(pair.second);
-
-				auto &vertexWeights = subMesh->GetVertexWeights();
-				if(!vertexWeights.empty())
-					udmSubMesh["vertexWeights"] = udm::compress_lz4_blob(vertexWeights);
-				
-				auto &extBoneWeights = subMesh->GetExtendedVertexWeights();
-				if(!extBoneWeights.empty())
-					udmSubMesh["extendedVertexWeights"] = udm::compress_lz4_blob(extBoneWeights);
-
-				auto &alphas = subMesh->GetAlphas();
-				udmSubMesh["alphaCount"] = subMesh->GetAlphaCount();
-				if(!alphas.empty())
-					udmSubMesh["alphas"] = udm::compress_lz4_blob(alphas);
+				if(subMesh->Save(udm::AssetData{udmSubMeshes[subMeshIdx++]},outErr) == false)
+					return false;
 			}
 		}
 	}
-#endif
+	return true;
 }
 
 bool Model::SaveLegacy(Game *game,const std::string &name,const std::string &rootPath) const
 {
-	auto fname = pragma::asset::get_normalized_path(name,pragma::asset::Type::Model);
+	auto fname = pragma::asset::get_normalized_path(name,pragma::asset::Type::Model) +'.' +pragma::asset::FORMAT_MODEL_LEGACY;
 	fname = rootPath +"models\\" +fname;
 	FileManager::CreatePath(ufile::get_path_from_filename(fname).c_str());
 	auto f = FileManager::OpenFile<VFilePtrReal>(fname.c_str(),"wb");
@@ -1496,3 +1697,4 @@ bool Model::SaveLegacy(Game *game,const std::string &name,const std::string &roo
 		f->WriteString(inc);
 	return true;
 }
+#pragma optimize("",on)

@@ -15,6 +15,7 @@
 #include <sharedutils/datastream.h>
 #include <pragma/util/transform.h>
 #include <pragma/entities/baseentity_events.hpp>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -370,37 +371,35 @@ bool BaseModelComponent::LookupFlexController(const std::string &name,uint32_t &
 		return false;
 	return hMdl->GetFlexControllerId(name,flexId);
 }
-void BaseModelComponent::Save(DataStream &ds)
+void BaseModelComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
-	BaseEntityComponent::Save(ds);
+	BaseEntityComponent::Save(udm);
 
-	ds->WriteString(GetModelName());
-	ds->Write<uint32_t>(GetSkin());
+	udm["modelName"] = GetModelName();
+	udm["skin"] = GetSkin();
 
 	// Write body groups
 	auto &bodyGroups = GetBodyGroups();
-	ds->Write<std::size_t>(bodyGroups.size());
-	for(auto &bodyGroup : bodyGroups)
-		ds->Write<uint32_t>(bodyGroup);
+	udm["bodyGroups"] = bodyGroups;
 }
-void BaseModelComponent::Load(DataStream &ds,uint32_t version)
+void BaseModelComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {
-	BaseEntityComponent::Load(ds,version);
+	BaseEntityComponent::Load(udm,version);
 
-	auto modelName = ds->ReadString();
+	std::string modelName;
+	udm["modelName"](modelName);
 	if(modelName.empty() == false)
 		SetModel(modelName);
 
-	auto skin = ds->Read<uint32_t>();
+	uint32_t skin = 0;
+	udm["skin"](skin);
 	SetSkin(skin);
 
 	// Read body groups
-	auto numBodyGroups = ds->Read<std::size_t>();
-	for(auto i=decltype(numBodyGroups){0};i<numBodyGroups;++i)
-	{
-		auto id = ds->Read<uint32_t>();
-		SetBodyGroup(i,id);
-	}
+	std::vector<uint32_t> bodyGroups;
+	udm["bodyGroups"](bodyGroups);
+	for(auto i=decltype(bodyGroups.size()){0u};i<bodyGroups.size();++i)
+		SetBodyGroup(i,bodyGroups[i]);
 }
 
 ///////////////

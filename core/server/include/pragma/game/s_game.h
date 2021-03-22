@@ -26,6 +26,10 @@ namespace pragma {
 	namespace ai {class TaskManager;};
 	namespace networking {class IServerClient; class ClientRecipientFilter;};
 };
+namespace udm {
+	struct Property;
+	using PProperty = std::shared_ptr<Property>;
+};
 enum class CLIENT_DROPPED;
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -43,7 +47,7 @@ private:
 	std::optional<ChangeLevelInfo> m_changeLevelInfo = {};
 	mutable std::unique_ptr<pragma::ai::TaskManager> m_taskManager;
 	// The state of the world before the level transition (if there was one). Each key is a global entity name, and the value is the data stream object for that entity.
-	std::unordered_map<std::string,DataStream> m_preTransitionWorldState {};
+	std::unordered_map<std::string,udm::PProperty> m_preTransitionWorldState {};
 	// Delta landmark offset between this level and the previous level (in case there was a level change)
 	Vector3 m_deltaTransitionLandmarkOffset {};
 public:

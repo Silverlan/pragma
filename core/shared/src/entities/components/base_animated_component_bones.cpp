@@ -321,6 +321,24 @@ bool BaseAnimatedComponent::ShouldUpdateBones() const
 	return InvokeEventCallbacks(EVENT_SHOULD_UPDATE_BONES,evData) == util::EventReply::Handled && evData.shouldUpdate;
 }
 
+FPlayAnim BaseAnimatedComponent::GetBaseAnimationFlags() const {return m_baseAnim.flags;}
+void BaseAnimatedComponent::SetBaseAnimationFlags(FPlayAnim flags) {m_baseAnim.flags = flags;}
+
+std::optional<FPlayAnim> BaseAnimatedComponent::GetLayeredAnimationFlags(uint32_t layerIdx) const
+{
+	auto it = m_animSlots.find(layerIdx);
+	if(it == m_animSlots.end())
+		return {};
+	return it->second.flags;
+}
+void BaseAnimatedComponent::SetLayeredAnimationFlags(uint32_t layerIdx,FPlayAnim flags)
+{
+	auto it = m_animSlots.find(layerIdx);
+	if(it == m_animSlots.end())
+		return;
+	it->second.flags = flags;
+}
+
 void BaseAnimatedComponent::TransformBoneFrames(std::vector<umath::Transform> &bonePoses,std::vector<Vector3> *boneScales,Animation &anim,Frame *frameBlend,bool bAdd)
 {
 	for(unsigned int i=0;i<bonePoses.size();i++)

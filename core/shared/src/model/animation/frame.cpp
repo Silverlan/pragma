@@ -195,6 +195,24 @@ void Frame::Scale(const Vector3 &scale)
 		t.SetOrigin(t.GetOrigin() *scale);
 }
 
+bool Frame::operator==(const Frame &other) const
+{
+	static_assert(sizeof(Frame) == 120,"Update this function when making changes to this class!");
+	if(!(m_bones.size() == other.m_bones.size() && m_scales.size() == other.m_scales.size() && m_move == other.m_move && (!m_move || *m_move == *other.m_move) && m_flexFrameData == other.m_flexFrameData))
+		return false;
+	for(auto i=decltype(m_bones.size()){0u};i<m_bones.size();++i)
+	{
+		if(uvec::cmp(m_bones[i].GetOrigin(),other.m_bones[i].GetOrigin()) == false || uquat::cmp(m_bones[i].GetRotation(),other.m_bones[i].GetRotation()) == false)
+			return false;
+	}
+	for(auto i=decltype(m_scales.size()){0u};i<m_scales.size();++i)
+	{
+		if(uvec::cmp(m_scales[i],other.m_scales[i]) == false)
+			return false;
+	}
+	return true;
+}
+
 const std::vector<umath::Transform> &Frame::GetBoneTransforms() const {return const_cast<Frame*>(this)->GetBoneTransforms();}
 const std::vector<Vector3> &Frame::GetBoneScales() const {return const_cast<Frame*>(this)->GetBoneScales();}
 std::vector<umath::Transform> &Frame::GetBoneTransforms() {return m_bones;}

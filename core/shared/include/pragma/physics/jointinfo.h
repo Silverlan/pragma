@@ -35,6 +35,12 @@ struct DLLNETWORK JointInfo
 	BoneId child;
 	bool collide;
 	std::unordered_map<std::string,std::string> args;
+
+	bool operator==(const JointInfo &other) const
+	{
+		return type == other.type && parent == other.parent && child == other.child && collide == other.collide && args == other.args;
+	}
+	bool operator!=(const JointInfo &other) const {return !operator==(other);}
 };
 
 #endif

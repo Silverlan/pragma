@@ -59,6 +59,15 @@ private:
 	bool m_bExactMatch = true;
 };
 
+struct LuaEntityIteratorFilterUuid
+	: public LuaEntityIteratorFilterBase
+{
+	LuaEntityIteratorFilterUuid(const std::string &uuid);
+	virtual void Attach(EntityIterator &iterator) override;
+private:
+	std::string m_uuid;
+};
+
 struct LuaEntityIteratorFilterClass
 	: public LuaEntityIteratorFilterBase
 {

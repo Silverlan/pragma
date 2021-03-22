@@ -277,3 +277,30 @@ pragma::physics::IEnvironment::RemainingDeltaTime pragma::physics::IEnvironment:
 	}
 	return DoStepSimulation(timeStep,maxSubSteps,fixedTimeStep);
 }
+
+bool PhysSoftBodyInfo::operator==(const PhysSoftBodyInfo &other) const
+{
+	return poseMatchingCoefficient == other.poseMatchingCoefficient &&
+		anchorsHardness == other.anchorsHardness &&
+		dragCoefficient == other.dragCoefficient &&
+		rigidContactsHardness == other.rigidContactsHardness &&
+		softContactsHardness == other.softContactsHardness &&
+		liftCoefficient == other.liftCoefficient &&
+		kineticContactsHardness == other.kineticContactsHardness &&
+		dynamicFrictionCoefficient == other.dynamicFrictionCoefficient &&
+		dampingCoefficient == other.dampingCoefficient &&
+		volumeConversationCoefficient == other.volumeConversationCoefficient &&
+		softVsRigidImpulseSplitK == other.softVsRigidImpulseSplitK &&
+		softVsRigidImpulseSplitR == other.softVsRigidImpulseSplitR &&
+		softVsRigidImpulseSplitS == other.softVsRigidImpulseSplitS &&
+		softVsKineticHardness == other.softVsKineticHardness &&
+		softVsRigidHardness == other.softVsRigidHardness &&
+		softVsSoftHardness == other.softVsSoftHardness &&
+		pressureCoefficient == other.pressureCoefficient &&
+		velocitiesCorrectionFactor == other.velocitiesCorrectionFactor &&
+
+		bendingConstraintsDistance == other.bendingConstraintsDistance &&
+		clusterCount == other.clusterCount &&
+		maxClusterIterations == other.maxClusterIterations &&
+		materialStiffnessCoefficient == other.materialStiffnessCoefficient;
+}

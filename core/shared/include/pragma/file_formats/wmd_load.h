@@ -15,18 +15,64 @@
 #include "pragma/physics/physsoftbodyinfo.hpp"
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/asset/util_asset.hpp"
+#include "pragma/util/util_game.hpp"
+#include <udm.hpp>
 #include <sharedutils/util_file.h>
 
 template<class TModel,class TModelMesh,class TModelSubMesh>
-	std::shared_ptr<Model> FWMD::Load(Game *game,const std::string &model,const std::function<Material*(const std::string&,bool)> &loadMaterial,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel)
+	std::shared_ptr<Model> FWMD::Load(Game *game,const std::string &pmodel,const std::function<Material*(const std::string&,bool)> &loadMaterial,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel)
 {
-	std::string pathCache(model);
+	auto &nw = *game->GetNetworkState();
+	std::string pathCache(pmodel);
 	// std::transform(pathCache.begin(),pathCache.end(),pathCache.begin(),::tolower);
+
+	auto model = pmodel;
+	std::string ext;
+	if(ufile::get_extension(pathCache,&ext) == false)
+	{
+		auto tmpPath = pathCache +'.' +pragma::asset::FORMAT_MODEL_BINARY;
+		if(pragma::asset::exists(nw,tmpPath,pragma::asset::Type::Model))
+			return Load<TModel,TModelMesh,TModelSubMesh>(game,tmpPath,loadMaterial,loadModel);
+		tmpPath = pathCache +'.' +pragma::asset::FORMAT_MODEL_ASCII;
+		if(pragma::asset::exists(nw,tmpPath,pragma::asset::Type::Model))
+			return Load<TModel,TModelMesh,TModelSubMesh>(game,tmpPath,loadMaterial,loadModel);
+		tmpPath = pathCache +'.' +pragma::asset::FORMAT_MODEL_LEGACY;
+		model = tmpPath;
+	}
 
 	std::string path = "models\\";
 	path += model;
+
+	ustring::to_lower(ext);
+	if(ext == pragma::asset::FORMAT_MODEL_BINARY || ext == pragma::asset::FORMAT_MODEL_ASCII)
+	{
+		auto udm = util::load_udm_asset(path);
+		if(udm == nullptr)
+			return nullptr;
+		std::string err;
+		auto mdl = Model::Load<TModel>(*game,udm->GetAssetData(),err);
+		if(mdl == nullptr)
+			Con::cwar<<"WARNING: Unable to load model '"<<model<<"': "<<err<<"!"<<Con::endl;
+		if(mdl)
+		{
+			mdl->SetName(model);
+			mdl->LoadMaterials(loadMaterial);
+
+			for(auto &inc : mdl->GetMetaInfo().includes)
+			{
+				auto mdlOther = loadModel(inc);
+				if(mdlOther == nullptr)
+					Con::cwar<<"WARNING: Model '"<<model<<"' has include reference to model '"<<inc<<"', but that model is invalid! Ignoring..."<<Con::endl;
+				else
+					mdl->Merge(*mdlOther);
+			}
+			mdl->Update(ModelUpdateFlags::UpdateVertexAnimationBuffer);
+		}
+		return mdl;
+	}
+
+	// Deprecated format
 	const char *cPath = path.c_str();
-	
 	m_file = FileManager::OpenFile(cPath,"rb");
 	if(m_file == NULL)
 	{

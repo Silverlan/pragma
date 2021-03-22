@@ -11,13 +11,15 @@
 #include <memory>
 
 class Game;
+namespace udm {struct AssetData;};
 namespace pragma
 {
 	namespace savegame
 	{
-		const uint32_t VERSION = 1u;
-		static bool save(Game &game,const std::string &fileName);
-		static bool load(Game &game,const std::string &fileName);
+		static constexpr uint32_t FORMAT_VERSION = 1u;
+		static constexpr auto PSAV_IDENTIFIER = "PSAV";
+		bool save(Game &game,const std::string &fileName,std::string &outErr);
+		bool load(Game &game,const std::string &fileName,std::string &outErr);
 	};
 };
 

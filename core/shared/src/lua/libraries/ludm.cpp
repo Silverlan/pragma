@@ -333,8 +333,12 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			return 1;
 		})},
 		{"create",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) {
-			std::string assetType = Lua::CheckString(l,1);
-			auto assetVersion = Lua::CheckInt(l,2);
+			std::string assetType = "";
+			uint32_t assetVersion = 1;
+			if(Lua::IsSet(l,1))
+				assetType = Lua::CheckString(l,1);
+			if(Lua::IsSet(l,2))
+				assetVersion = Lua::CheckInt(l,2);
 
 			try
 			{

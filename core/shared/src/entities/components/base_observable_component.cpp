@@ -9,6 +9,7 @@
 #include "pragma/entities/components/base_observable_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include <sharedutils/datastream.h>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -58,45 +59,43 @@ bool BaseObservableComponent::IsCameraEnabled(CameraType type) const {return *Ge
 const util::PBoolProperty &BaseObservableComponent::GetCameraEnabledProperty(CameraType type) const {return GetCameraData(type).enabled;}
 const util::PVector3Property &BaseObservableComponent::GetCameraOffsetProperty(CameraType type) const {return GetCameraData(type).offset;}
 
-void BaseObservableComponent::Save(DataStream &ds)
+void BaseObservableComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
-	BaseEntityComponent::Save(ds);
+	BaseEntityComponent::Save(udm);
 	constexpr auto numTypes = umath::to_integral(CameraType::Count);
-	for(auto i=0u;i<numTypes;++i)
-	{
-		auto &data = GetCameraData(static_cast<CameraType>(i));
-		ds->Write<bool>(*data.enabled);
-		ds->Write<Vector3>(*data.localOrigin);
-		ds->Write<Vector3>(*data.offset);
-		ds->Write<bool>(data.rotateWithObservee);
-		auto hasLimits = data.angleLimits.has_value();
-		ds->Write<bool>(hasLimits);
-		if(hasLimits)
+	auto fWriteCameraData = [](udm::LinkedPropertyWrapper &udm,ObserverCameraData &camData) {
+		udm["enabled"] = **camData.enabled;
+		if(camData.localOrigin.has_value())
+			udm["localOrigin"] = *camData.localOrigin;
+		udm["offset"] = **camData.offset;
+		udm["rotateWithObservee"] = camData.rotateWithObservee;
+		if(camData.angleLimits.has_value())
 		{
-			ds->Write<EulerAngles>(data.angleLimits->first);
-			ds->Write<EulerAngles>(data.angleLimits->second);
+			udm["limits.min"] = camData.angleLimits->first;
+			udm["limits.max"] = camData.angleLimits->second;
 		}
-	}
+	};
+	auto &dataFp = GetCameraData(CameraType::FirstPerson);
+	auto &dataTp = GetCameraData(CameraType::ThirdPerson);
+	fWriteCameraData(udm["firstPerson"],dataFp);
+	fWriteCameraData(udm["thirdPerson"],dataTp);
 }
 
-void BaseObservableComponent::Load(DataStream &ds,uint32_t version)
+void BaseObservableComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {
-	BaseEntityComponent::Load(ds,version);
+	BaseEntityComponent::Load(udm,version);
+	
 	constexpr auto numTypes = umath::to_integral(CameraType::Count);
-	for(auto i=0u;i<numTypes;++i)
-	{
-		auto &data = GetCameraData(static_cast<CameraType>(i));
-		*data.enabled = ds->Read<bool>();
-		*data.localOrigin = ds->Read<Vector3>();
-		*data.offset = ds->Read<Vector3>();
-		data.rotateWithObservee = ds->Read<bool>();
-		auto hasLimits = ds->Read<bool>();
-		if(hasLimits)
-		{
-			auto minLimits = ds->Read<EulerAngles>();
-			auto maxLimits = ds->Read<EulerAngles>();
-			data.angleLimits = {minLimits,maxLimits};
-		}
-	}
+	auto fReadCameraData = [](udm::LinkedPropertyWrapper &udm,ObserverCameraData &camData) {
+		udm["enabled"](**camData.enabled);
+		camData.localOrigin = udm["localOrigin"].ToValue<Vector3>();
+		udm["offset"](**camData.offset);
+		udm["rotateWithObservee"](camData.rotateWithObservee);
+		udm["limits.min"](camData.angleLimits->first);
+		udm["limits.max"](camData.angleLimits->second);
+	};
+	auto &dataFp = GetCameraData(CameraType::FirstPerson);
+	auto &dataTp = GetCameraData(CameraType::ThirdPerson);
+	fReadCameraData(udm["firstPerson"],dataFp);
+	fReadCameraData(udm["thirdPerson"],dataTp);
 }
-

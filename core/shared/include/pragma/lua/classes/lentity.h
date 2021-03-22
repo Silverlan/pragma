@@ -40,8 +40,8 @@ namespace Lua
 		DLLNETWORK void RemoveEntityOnRemoval(lua_State *l,EntityHandle &hEnt,EntityHandle &hEntOther,Bool bRemove);
 		DLLNETWORK void GetSpawnFlags(lua_State *l,EntityHandle &hEnt);
 
-		DLLNETWORK void Save(lua_State *l,EntityHandle &hEnt,::DataStream &ds);
-		DLLNETWORK void Load(lua_State *l,EntityHandle &hEnt,::DataStream &ds);
+		DLLNETWORK void Save(lua_State *l,EntityHandle &hEnt,udm::LinkedPropertyWrapper &udm);
+		DLLNETWORK void Load(lua_State *l,EntityHandle &hEnt,udm::LinkedPropertyWrapper &udm);
 		DLLNETWORK void Copy(lua_State *l,EntityHandle &hEnt);
 
 		DLLNETWORK void GetAirDensity(lua_State *l,EntityHandle &hEnt);

@@ -19,8 +19,8 @@ namespace pragma
 		GlobalNameComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 
-		virtual void Save(DataStream &ds) override;
-		virtual void Load(DataStream &ds,uint32_t version) override;
+		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
+		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
 
 		const std::string &GetGlobalName() const;
 		void SetGlobalName(const std::string &name);

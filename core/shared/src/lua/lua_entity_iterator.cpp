@@ -75,6 +75,16 @@ void LuaEntityIteratorFilterName::Attach(EntityIterator &iterator)
 
 ////////////
 
+LuaEntityIteratorFilterUuid::LuaEntityIteratorFilterUuid(const std::string &uuid)
+	: m_uuid{uuid}
+{}
+void LuaEntityIteratorFilterUuid::Attach(EntityIterator &iterator)
+{
+	iterator.AttachFilter<EntityIteratorFilterUuid>(util::uuid_string_to_bytes(m_uuid));
+}
+
+////////////
+
 LuaEntityIteratorFilterClass::LuaEntityIteratorFilterClass(const std::string &className,bool caseSensitive,bool exactMatch)
 	: m_className(className),m_bCaseSensitive(caseSensitive),m_bExactMatch(exactMatch)
 {}

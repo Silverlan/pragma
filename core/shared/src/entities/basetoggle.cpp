@@ -13,6 +13,7 @@
 #include "pragma/entities/components/base_io_component.hpp"
 #include <sharedutils/datastream.h>
 #include <algorithm>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -61,18 +62,20 @@ void BaseToggleComponent::OnEntitySpawn()
 		TurnOn();
 }
 
-void BaseToggleComponent::Save(DataStream &ds)
+void BaseToggleComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
-	BaseEntityComponent::Save(ds);
-	ds->Write<bool>(m_bStartDisabled);
-	ds->Write<bool>(*m_bTurnedOn);
+	BaseEntityComponent::Save(udm);
+	udm["startDisabled"] = m_bStartDisabled;
+	udm["isTurnedOn"] = **m_bTurnedOn;
 }
 
-void BaseToggleComponent::Load(DataStream &ds,uint32_t version)
+void BaseToggleComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {
-	BaseEntityComponent::Load(ds,version);
-	m_bStartDisabled = ds->Read<bool>();
-	SetTurnedOn(ds->Read<bool>());
+	BaseEntityComponent::Load(udm,version);
+	udm["startDisabled"](m_bStartDisabled);
+	auto isTurnedOn = IsTurnedOn();
+	udm["isTurnedOn"](isTurnedOn);
+	SetTurnedOn(isTurnedOn);
 }
 
 bool BaseToggleComponent::ToggleInput(std::string input,BaseEntity*,BaseEntity*,std::string data)

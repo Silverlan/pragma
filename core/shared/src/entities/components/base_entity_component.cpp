@@ -10,6 +10,7 @@
 #include "pragma/entities/entity_component_manager.hpp"
 #include "pragma/entities/components/basetoggle.h"
 #include <sharedutils/datastream.h>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -312,25 +313,30 @@ void BaseEntityComponent::OnEntityComponentRemoved(BaseEntityComponent &componen
 	pragma::CEOnEntityComponentRemoved evData{*this};
 	BroadcastEvent(EVENT_ON_ENTITY_COMPONENT_REMOVED,evData);
 }
-void BaseEntityComponent::Save(DataStream &ds)
+void BaseEntityComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
-	auto ver = GetVersion();
-	ds->Write<decltype(ver)>(ver);
+	udm["version"] = GetVersion();
 
 	auto tCur = GetEntity().GetNetworkState()->GetGameState()->CurTime();
-	ds->Write<float>(m_tickData.lastTick -tCur);
-	ds->Write<float>(m_tickData.nextTick -tCur);
+	udm["lastTick"] = m_tickData.lastTick -tCur;
+	udm["nextTick"] = m_tickData.nextTick -tCur;
 }
-void BaseEntityComponent::Load(DataStream &ds)
+void BaseEntityComponent::Load(udm::LinkedPropertyWrapper &udm)
 {
-	auto ver = ds->Read<decltype(GetVersion())>();
+	uint32_t version = 0;
+	udm["version"](version);
+
+	float lastTick = 0.f;
+	float nextTick = 0.f;
+	udm["lastTick"](lastTick);
+	udm["nextTick"](nextTick);
 
 	auto tCur = GetEntity().GetNetworkState()->GetGameState()->CurTime();
-	m_tickData.lastTick = tCur +ds->Read<float>();
-	m_tickData.nextTick = tCur +ds->Read<float>();
-	Load(ds,ver);
+	m_tickData.lastTick += tCur;
+	m_tickData.nextTick += tCur;
+	Load(udm,version);
 }
-void BaseEntityComponent::Load(DataStream &ds,uint32_t version) {}
+void BaseEntityComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version) {}
 void BaseEntityComponent::OnEntitySpawn() {}
 void BaseEntityComponent::OnEntityPostSpawn() {}
 void BaseEntityComponent::OnAttached(BaseEntity &ent) {}

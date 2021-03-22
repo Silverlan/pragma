@@ -19,6 +19,8 @@ namespace pragma
 		Reset = 1u,
 		Transmit = Reset<<1u, // Only used for entities
 		SnapTo = Transmit<<1u, // Unused
+		Loop = SnapTo<<1u,
+
 		Default = Transmit
 	};
 };

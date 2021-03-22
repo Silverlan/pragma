@@ -28,6 +28,12 @@ struct DLLNETWORK PhysSoftBodyInfo
 		float angular = 1.f;
 		float linear = 1.f;
 		float volume = 1.f;
+
+		bool operator==(const MaterialStiffnessCoefficient &other) const
+		{
+			return angular == other.angular && linear == other.linear && volume == other.volume;
+		}
+		bool operator!=(const MaterialStiffnessCoefficient &other) const {return !operator==(other);}
 	};
 	float poseMatchingCoefficient = 0.5f;
 	float anchorsHardness = 0.6999f;
@@ -52,6 +58,9 @@ struct DLLNETWORK PhysSoftBodyInfo
 	uint32_t clusterCount = 0u;
 	uint32_t maxClusterIterations = 8192u;
 	std::unordered_map<uint32_t,MaterialStiffnessCoefficient> materialStiffnessCoefficient;
+
+	bool operator==(const PhysSoftBodyInfo &other) const;
+	bool operator!=(const PhysSoftBodyInfo &other) const {return !operator==(other);}
 };
 #pragma pack(pop)
 

@@ -9,6 +9,7 @@
 #include "pragma/engine.h"
 #include "pragma/lua/lua_doc.hpp"
 #include "pragma/console/conout.h"
+#include "pragma/game/savegame.hpp"
 #include <pragma/console/convars.h>
 #include <pragma/lua/libraries/lutil.h>
 #include <pragma/physics/environment.hpp>
@@ -131,6 +132,43 @@ void Engine::RegisterConsoleCommands()
 			autoCompleteOptions.push_back(fullPath);
 		}
 	});
+	conVarMap.RegisterConCommand("save",[](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		auto *game = state ? state->GetGameState() : nullptr;
+		if(game == nullptr)
+		{
+			Con::cwar<<"WARNING: Cannot create savegame: No active game!"<<Con::endl;
+			return;
+		}
+		auto path = "savegames/" +util::get_date_time("%Y-%m-%d_%H-%M-%S") +".psav_b";
+		FileManager::CreatePath(ufile::get_path_from_filename(path).c_str());
+		std::string err;
+		auto result = pragma::savegame::save(*game,path,err);
+		if(result == false)
+			Con::cwar<<"WARNING: Cannot create savegame: "<<err<<Con::endl;
+		else
+			Con::cout<<"Created savegame as '"<<path<<"'!"<<Con::endl;
+	},ConVarFlags::None);
+	conVarMap.RegisterConCommand("load",[](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		if(argv.empty())
+		{
+			Con::cwar<<"WARNING: Cannot load savegame: No savegame specified!"<<Con::endl;
+			return;
+		}
+		state->EndGame();
+		state->StartGame(true);
+		auto *game = state ? state->GetGameState() : nullptr;
+		if(game == nullptr)
+		{
+			Con::cwar<<"WARNING: Cannot load savegame: No active game!"<<Con::endl;
+			return;
+		}
+		auto path = "savegames/" +util::get_date_time() +".psav";
+		FileManager::CreatePath(ufile::get_path_from_filename(path).c_str());
+		std::string err;
+		auto result = pragma::savegame::load(*game,path,err);
+		if(result == false)
+			Con::cwar<<"WARNING: Cannot load savegame: "<<err<<Con::endl;
+	},ConVarFlags::None);
 
 	conVarMap.RegisterConCommand("lua_help",[](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		if(argv.empty())

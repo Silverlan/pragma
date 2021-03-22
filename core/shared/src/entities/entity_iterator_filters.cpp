@@ -27,6 +27,13 @@ bool EntityIteratorFilterName::ShouldPass(BaseEntity &ent)
 
 /////////////////
 
+EntityIteratorFilterUuid::EntityIteratorFilterUuid(Game &game,const util::Uuid &uuid)
+	: m_uuid{uuid}
+{}
+bool EntityIteratorFilterUuid::ShouldPass(BaseEntity &ent) {return ent.GetUuid() == m_uuid;}
+
+/////////////////
+
 EntityIteratorFilterClass::EntityIteratorFilterClass(Game &game,const std::string &name,bool caseSensitive,bool exactMatch)
 	: m_name(name),m_bCaseSensitive(caseSensitive),m_bExactMatch(exactMatch)
 {}

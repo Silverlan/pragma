@@ -19,6 +19,9 @@ public:
 	FlexAnimationFrame(const FlexAnimationFrame &frame);
 	std::vector<float> &GetValues() {return m_flexControllerValues;}
 	const std::vector<float> &GetValues() const {return const_cast<FlexAnimationFrame*>(this)->GetValues();}
+
+	bool operator==(const FlexAnimationFrame &other) const;
+	bool operator!=(const FlexAnimationFrame &other) const {return !operator==(other);}
 private:
 	std::vector<float> m_flexControllerValues;
 };
@@ -46,6 +49,9 @@ public:
 	
 	bool Save(udm::AssetData &outData,std::string &outErr);
 	bool SaveLegacy(std::shared_ptr<VFilePtrInternalReal> &f);
+
+	bool operator==(const FlexAnimation &other) const;
+	bool operator!=(const FlexAnimation &other) const {return !operator==(other);}
 private:
 	bool LoadFromAssetData(const udm::AssetData &data,std::string &outErr);
 	std::vector<std::shared_ptr<FlexAnimationFrame>> m_frames;

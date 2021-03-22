@@ -10,6 +10,7 @@
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include <sharedutils/datastream.h>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -59,16 +60,17 @@ void BaseNameComponent::SetName(std::string name)
 }
 const util::PStringProperty &BaseNameComponent::GetNameProperty() const {return m_name;}
 
-void BaseNameComponent::Save(DataStream &ds)
+void BaseNameComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
-	BaseEntityComponent::Save(ds);
-	ds->WriteString(*m_name);
+	BaseEntityComponent::Save(udm);
+	udm["name"] = **m_name;
 }
 
-void BaseNameComponent::Load(DataStream &ds,uint32_t version)
+void BaseNameComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {
-	BaseEntityComponent::Load(ds,version);
-	auto name = ds->ReadString();
+	BaseEntityComponent::Load(udm,version);
+	std::string name;
+	udm["name"](name);
 	SetName(name);
 }
 

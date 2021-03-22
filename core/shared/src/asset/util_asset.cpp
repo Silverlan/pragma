@@ -72,7 +72,7 @@ std::vector<std::string> pragma::asset::get_supported_extensions(Type type)
 	switch(type)
 	{
 	case Type::Model:
-		return {/*FORMAT_MODEL_BINARY,FORMAT_MODEL_ASCII,*/FORMAT_MAP_LEGACY};
+		return {FORMAT_MODEL_BINARY,FORMAT_MODEL_ASCII,FORMAT_MODEL_LEGACY};
 	case Type::Map:
 		return {FORMAT_MAP_BINARY,FORMAT_MAP_ASCII,FORMAT_MAP_LEGACY};
 	case Type::Material:

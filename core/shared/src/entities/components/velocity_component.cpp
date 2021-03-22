@@ -12,6 +12,7 @@
 #include "pragma/entities/components/damageable_component.hpp"
 #include "pragma/lua/l_entity_handles.hpp"
 #include <sharedutils/datastream.h>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -55,20 +56,22 @@ void VelocityComponent::SetVelocity(const Vector3 &vel)
 void VelocityComponent::AddVelocity(const Vector3 &vel) {SetVelocity(GetVelocity() +vel);}
 
 const Vector3 &VelocityComponent::GetVelocity() const {return *m_velocity;}
-void VelocityComponent::Save(DataStream &ds)
+void VelocityComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
-	BaseEntityComponent::Save(ds);
-	ds->Write<Vector3>(*m_velocity);
-	ds->Write<Vector3>(*m_angVelocity);
+	BaseEntityComponent::Save(udm);
+	udm["velocity"] = **m_velocity;
+	udm["angularVelocity"] = **m_angVelocity;
 }
 
-void VelocityComponent::Load(DataStream &ds,uint32_t version)
+void VelocityComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {
-	BaseEntityComponent::Load(ds,version);
-	auto vel = ds->Read<Vector3>();
+	BaseEntityComponent::Load(udm,version);
+	Vector3 vel {};
+	udm["velocity"](vel);
 	SetVelocity(vel);
 
-	auto angVel = ds->Read<Vector3>();
+	Vector3 angVel {};
+	udm["angularVelocity"](angVel);
 	SetAngularVelocity(angVel);
 }
 void VelocityComponent::SetAngularVelocity(const Vector3 &vel)

@@ -20,6 +20,7 @@
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/model.h"
 #include <pragma/physics/movetypes.h>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -83,6 +84,45 @@ void BaseActorComponent::Initialize()
 		static_cast<BaseRenderComponent*>(whRenderComponent.get())->SetCastShadows(true);
 
 	m_netEvSetFrozen = SetupNetEvent("set_frozen");
+}
+
+void BaseActorComponent::Save(udm::LinkedPropertyWrapper &udm)
+{
+	BaseEntityComponent::Save(udm);
+	udm["alive"] = m_bAlive;
+	udm["frozen"] = **m_bFrozen;
+	udm["moveControllerName"] = m_moveControllerName;
+	udm["moveControllerNameY"] = *m_moveControllerNameY;
+	udm["moveControllerIndex"] = m_moveController;
+	udm["moveControllerIndexY"] = m_moveControllerY;
+	auto udmHitboxData = udm.AddArray("hitboxData",m_hitboxData.size());
+	for(auto i=decltype(m_hitboxData.size()){0u};i<m_hitboxData.size();++i)
+	{
+		auto &hitboxData = m_hitboxData[i];
+		auto udmHitbox = udmHitboxData[i];
+		udmHitbox["boneId"] = hitboxData.boneId;
+		udmHitbox["offset"] = hitboxData.offset;
+	}
+}
+void BaseActorComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+{
+	BaseEntityComponent::Load(udm,version);
+	udm["alive"](m_bAlive);
+	udm["frozen"](**m_bFrozen);
+	udm["moveControllerName"](m_moveControllerName);
+	udm["moveControllerNameY"](*m_moveControllerNameY);
+	udm["moveControllerIndex"](m_moveController);
+	udm["moveControllerIndexY"](m_moveControllerY);
+	auto udmHitboxData = udm["hitboxData"];
+	auto numHitboxData = udmHitboxData.GetSize();
+	m_hitboxData.resize(numHitboxData);
+	for(auto i=decltype(numHitboxData){0u};i<numHitboxData;++i)
+	{
+		auto &hitboxData = m_hitboxData[i];
+		auto udmHitbox = udmHitboxData[i];
+		udmHitbox["boneId"](hitboxData.boneId);
+		udmHitbox["offset"](hitboxData.offset);
+	}
 }
 
 void BaseActorComponent::SetMoveController(const std::string &moveController)

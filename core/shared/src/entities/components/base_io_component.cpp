@@ -11,6 +11,7 @@
 #include "pragma/entities/components/base_name_component.hpp"
 #include "pragma/lua/libraries/ltimer.h"
 #include <pragma/game/game.h>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -32,6 +33,49 @@ void BaseIOComponent::Initialize()
 	BindEventUnhandled(BaseEntity::EVENT_ON_SPAWN,[this](std::reference_wrapper<ComponentEvent> evData) {
 		TriggerOutput("OnSpawn",&GetEntity());
 	});
+}
+
+void BaseIOComponent::Save(udm::LinkedPropertyWrapper &udm)
+{
+	BaseEntityComponent::Save(udm);
+	auto udmOutputs = udm["outputs"];
+	for(auto &pair : m_outputs)
+	{
+		auto &outputs = pair.second;
+		auto udmOutputList = udmOutputs.AddArray(pair.first,outputs.size());
+		for(auto i=decltype(outputs.size()){0u};i<outputs.size();++i)
+		{
+			auto &output = outputs[i];
+			auto udmOutput = udmOutputList[i];
+			udmOutput["entities"] = output.entities;
+			udmOutput["input"] = output.input;
+			udmOutput["param"] = output.param;
+			udmOutput["delay"] = output.delay;
+			udmOutput["times"] = output.times;
+		}
+	}
+}
+void BaseIOComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+{
+	BaseEntityComponent::Load(udm,version);
+	auto udmOutputs = udm["outputs"];
+	auto numOutputs = udmOutputs.GetChildCount();
+	for(auto udmOutputList : udmOutputs.ElIt())
+	{
+		auto &outputs = m_outputs[std::string{udmOutputList.key}] = {};
+		auto udmOutputs = udmOutputList.property;
+		outputs.resize(udmOutputs.GetSize());
+		for(auto i=decltype(outputs.size()){0u};i<outputs.size();++i)
+		{
+			auto &output = outputs[i];
+			auto udmOutput = udmOutputs[i];
+			udmOutput["entities"](output.entities);
+			udmOutput["input"](output.input);
+			udmOutput["param"](output.param);
+			udmOutput["delay"](output.delay);
+			udmOutput["times"](output.times);
+		}
+	}
 }
 
 void BaseIOComponent::Input(const std::string input,BaseEntity *activator,BaseEntity *caller) {Input(input,activator,caller,"");}

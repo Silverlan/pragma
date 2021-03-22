@@ -11,6 +11,7 @@
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include <sharedutils/datastream.h>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -55,14 +56,15 @@ void BaseTimeScaleComponent::OnEntityComponentAdded(BaseEntityComponent &compone
 		}),CallbackType::Component,&component);
 	}
 }
-void BaseTimeScaleComponent::Save(DataStream &ds)
+void BaseTimeScaleComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
-	BaseEntityComponent::Save(ds);
-	ds->Write<float>(*m_timeScale);
+	BaseEntityComponent::Save(udm);
+	udm["timeScale"] = **m_timeScale;
 }
-void BaseTimeScaleComponent::Load(DataStream &ds,uint32_t version)
+void BaseTimeScaleComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {
-	BaseEntityComponent::Load(ds,version);
-	auto timeScale = ds->Read<float>();
+	BaseEntityComponent::Load(udm,version);
+	auto timeScale = GetTimeScale();
+	udm["timeScale"](timeScale);
 	SetTimeScale(timeScale);
 }

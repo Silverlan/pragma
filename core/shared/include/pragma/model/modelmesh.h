@@ -21,10 +21,13 @@ namespace umath
 	DLLNETWORK void compute_tangent_basis(std::vector<Vertex> &verts,const std::vector<uint16_t> &triangles);
 };
 
+namespace udm {struct AssetData; using Version = uint32_t;};
 class DLLNETWORK ModelSubMesh
 	: public std::enable_shared_from_this<ModelSubMesh>
 {
 public:
+	static constexpr auto PMESH_IDENTIFIER = "PMESH";
+	static constexpr udm::Version PMESH_VERSION = 1;
 	enum class ShareMode : uint32_t
 	{
 		None = 0,
@@ -42,8 +45,10 @@ public:
 	};
 	ModelSubMesh();
 	ModelSubMesh(const ModelSubMesh &other);
+	static std::shared_ptr<ModelSubMesh> Load(const udm::AssetData &data,std::string &outErr);
 	bool operator==(const ModelSubMesh &other) const;
 	bool operator!=(const ModelSubMesh &other) const;
+	bool IsEqual(const ModelSubMesh &other) const;
 	void SetShared(const ModelSubMesh &other,ShareMode mode=ShareMode::All);
 	void ClearTriangles();
 	virtual void Centralize(const Vector3 &origin);
@@ -116,6 +121,9 @@ public:
 
 	uint32_t GetReferenceId() const;
 	void SetReferenceId(uint32_t refId);
+
+	bool Save(udm::AssetData &outData,std::string &outErr);
+	bool LoadFromAssetData(const udm::AssetData &data,std::string &outErr);
 protected:
 	void Copy(ModelSubMesh &other,bool fullCopy) const;
 	std::vector<VertexWeight> &GetVertexWeightSet(uint32_t idx);
@@ -150,6 +158,7 @@ public:
 	ModelMesh &operator=(const ModelMesh&)=delete;
 	bool operator==(const ModelMesh &other) const;
 	bool operator!=(const ModelMesh &other) const;
+	bool IsEqual(const ModelMesh &other) const;
 	void Centralize();
 	const Vector3 &GetCenter() const;
 	void SetCenter(const Vector3 &center);

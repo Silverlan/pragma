@@ -73,6 +73,7 @@
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/entities/components/velocity_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <udm.hpp>
 
 extern "C" {
 	#include "bzlib.h"
@@ -304,7 +305,7 @@ void SGame::Tick()
 		EntityIterator entIt {*this};
 		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::GlobalNameComponent>>();
 
-		std::unordered_map<std::string,DataStream> worldState {};
+		std::unordered_map<std::string,udm::PProperty> worldState {};
 		for(auto *ent : entIt)
 		{
 			auto globalComponent = ent->GetComponent<pragma::GlobalNameComponent>();
@@ -315,11 +316,11 @@ void SGame::Tick()
 				Con::cwar<<"WARNING: More than one entity found with global name '"<<globalName<<"'! This may cause issues."<<Con::endl;
 				continue;
 			}
-			DataStream dsEntity {};
-			worldState.insert(std::make_pair(globalName,dsEntity));
+			auto prop = udm::Property::Create<udm::Element>();
+			worldState.insert(std::make_pair(globalName,prop));
 
-			ent->Save(dsEntity);
-			dsEntity->SetOffset(0u);
+			udm::LinkedPropertyWrapper udm {*prop};
+			ent->Save(udm);
 		}
 
 		auto landmarkName = m_changeLevelInfo->landmarkName;

@@ -75,8 +75,8 @@ namespace pragma
 		const luabind::object &GetLuaObject() const;
 		luabind::object &GetLuaObject();
 
-		virtual void Save(DataStream &ds) override;
-		virtual void Load(DataStream &ds,uint32_t version) override;
+		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
+		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
 		virtual uint32_t GetVersion() const override;
 
 		CallbackHandle BindInitComponentEvent(ComponentId componentId,const std::function<void(std::reference_wrapper<pragma::BaseEntityComponent>)> &callback);

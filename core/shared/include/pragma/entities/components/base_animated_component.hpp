@@ -108,6 +108,12 @@ namespace pragma
 		const Vector3 *GetBoneScale(uint32_t boneId) const;
 		std::optional<Mat4> GetBoneMatrix(unsigned int boneID) const;
 
+		FPlayAnim GetBaseAnimationFlags() const;
+		void SetBaseAnimationFlags(FPlayAnim flags);
+
+		std::optional<FPlayAnim> GetLayeredAnimationFlags(uint32_t layerIdx) const;
+		void SetLayeredAnimationFlags(uint32_t layerIdx,FPlayAnim flags);
+
 		// Returns the bone position / rotation in world space. Very expensive.
 		Bool GetGlobalBonePosition(UInt32 boneId,Vector3 &pos,Quat &rot,Vector3 *scale=nullptr) const;
 		Bool GetGlobalBonePosition(UInt32 boneId,Vector3 &pos) const;
@@ -239,12 +245,12 @@ namespace pragma
 
 		CallbackHandle BindAnimationEvent(AnimationEvent::Type eventId,const std::function<void(std::reference_wrapper<const AnimationEvent>)> &fCallback);
 
-		virtual void Save(DataStream &ds) override;
+		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
 		using BaseEntityComponent::Load;
 	protected:
 		BaseAnimatedComponent(BaseEntity &ent);
 		virtual void OnModelChanged(const std::shared_ptr<Model> &mdl);
-		virtual void Load(DataStream &ds,uint32_t version) override;
+		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
 		virtual void ResetAnimation(const std::shared_ptr<Model> &mdl);
 		
 		struct DLLNETWORK AnimationBlendInfo

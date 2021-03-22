@@ -69,7 +69,7 @@
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 void CGame::RegisterLua()
 {
 	GetLuaInterface().SetIdentifier("cl");
@@ -591,3 +591,4 @@ void ClientState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 {
 
 }
+#pragma optimize("",on)

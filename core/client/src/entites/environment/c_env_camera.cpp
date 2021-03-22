@@ -28,13 +28,13 @@ CCameraComponent::~CCameraComponent()
 	if(m_cbCameraUpdate.IsValid())
 		m_cbCameraUpdate.Remove();
 }
-void CCameraComponent::Save(DataStream &ds)
+void CCameraComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
-	BaseEnvCameraComponent::Save(ds);
+	BaseEnvCameraComponent::Save(udm);
 }
-void CCameraComponent::Load(DataStream &ds,uint32_t version)
+void CCameraComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {
-	BaseEnvCameraComponent::Load(ds,version);
+	BaseEnvCameraComponent::Load(udm,version);
 }
 void CCameraComponent::OnEntitySpawn()
 {

@@ -40,6 +40,8 @@ public:
 	const std::string &GetName() const;
 	std::vector<std::shared_ptr<ModelMesh>> &GetMeshes();
 	void AddMesh(const std::shared_ptr<ModelMesh> &mesh);
+
+	bool IsEqual(const ModelMeshGroup &other) const;
 private:
 	ModelMeshGroup(const std::string &name);
 	std::string m_name;
@@ -51,6 +53,12 @@ struct DLLNETWORK LODInfo
 	unsigned int lod;
 	std::unordered_map<unsigned int,unsigned int> meshReplacements;
 	float distance = 0.f;
+
+	bool operator==(const LODInfo &other) const
+	{
+		return lod == other.lod && meshReplacements == other.meshReplacements && umath::abs(distance -other.distance) < 0.001f;
+	}
+	bool operator!=(const LODInfo &other) const {return !operator==(other);}
 };
 
 struct DLLNETWORK BlendController
@@ -59,6 +67,12 @@ struct DLLNETWORK BlendController
 	int min;
 	int max;
 	bool loop;
+
+	bool operator==(const BlendController &other) const
+	{
+		return name == other.name && min == other.min && max == other.max && loop == other.loop;
+	}
+	bool operator!=(const BlendController &other) const {return !operator==(other);}
 };
 
 struct DLLNETWORK Attachment
@@ -68,6 +82,14 @@ struct DLLNETWORK Attachment
 	unsigned int bone = 0u;
 	Vector3 offset = {};
 	EulerAngles angles = {};
+
+	bool operator==(const Attachment &other) const
+	{
+		return name == other.name && bone == other.bone &&
+			uvec::distance_sqr(offset,other.offset) < 0.001f &&
+			uvec::distance_sqr(Vector3{angles.p,angles.y,angles.r},Vector3{other.angles.p,other.angles.y,other.angles.r}) < 0.001f;
+	}
+	bool operator!=(const Attachment &other) const {return !operator==(other);}
 };
 
 struct DLLNETWORK ObjectAttachment
@@ -82,11 +104,23 @@ struct DLLNETWORK ObjectAttachment
 	std::string attachment;
 	std::string name;
 	std::unordered_map<std::string,std::string> keyValues;
+
+	bool operator==(const ObjectAttachment &other) const
+	{
+		return type == other.type && attachment == other.attachment && name == other.name && keyValues == other.keyValues;
+	}
+	bool operator!=(const ObjectAttachment &other) const {return !operator==(other);}
 };
 
 struct DLLNETWORK TextureGroup
 {
 	std::vector<unsigned int> textures;
+
+	bool operator==(const TextureGroup &other) const
+	{
+		return textures == other.textures;
+	}
+	bool operator!=(const TextureGroup &other) const {return !operator==(other);}
 };
 
 struct DLLNETWORK BodyGroup
@@ -98,8 +132,15 @@ struct DLLNETWORK BodyGroup
 	{}
 	std::string name;
 	std::vector<unsigned int> meshGroups;
+
+	bool operator==(const BodyGroup &other) const
+	{
+		return name == other.name && meshGroups == other.meshGroups;
+	}
+	bool operator!=(const BodyGroup &other) const {return !operator==(other);}
 };
 
+#pragma pack(push,1)
 struct DLLNETWORK Eyeball
 {
 	std::string name = "";
@@ -114,14 +155,27 @@ struct DLLNETWORK Eyeball
 	float irisUvRadius = 0.2f;
 
 	float irisScale = 0.f;
-	std::array<int32_t,3> upperFlexDesc = {};
-	std::array<int32_t,3> lowerFlexDesc = {};
-	std::array<float,3> upperTarget; // Angle in radians of raised, neutral, and lowered lid positions
-	std::array<float,3> lowerTarget;
+	struct LidFlexDesc
+	{
+		int32_t lidFlexIndex = -1;
+		int32_t raiserFlexIndex = -1;
+		int32_t neutralFlexIndex = -1;
+		int32_t lowererFlexIndex = -1;
 
-	int32_t upperLidFlexDesc = -1; // Index of flex desc that actual lid flexes look to
-	int32_t lowerLidFlexDesc = -1;
+		umath::Radian raiserValue = 0.f;
+		umath::Radian neutralValue = 0.f;
+		umath::Radian lowererValue = 0.f;
+
+		bool operator==(const LidFlexDesc &other) const;
+		bool operator!=(const LidFlexDesc &other) const {return !operator==(other);}
+	};
+	LidFlexDesc upperLid {};
+	LidFlexDesc lowerLid {};
+
+	bool operator==(const Eyeball &other) const;
+	bool operator!=(const Eyeball &other) const {return !operator==(other);}
 };
+#pragma pack(pop)
 
 #define MODEL_NO_MESH (unsigned int)(-1)
 
@@ -134,6 +188,7 @@ using FlexControllerId = uint32_t;
 using BoneId = uint32_t;
 enum class JointType : uint8_t;
 namespace umath {class ScaledTransform;};
+namespace udm {using Version = uint32_t;};
 class DLLNETWORK Model
 	: public std::enable_shared_from_this<Model>
 {
@@ -163,6 +218,9 @@ public:
 		std::vector<std::string> texturePaths;
 		std::vector<std::string> textures;
 		Flags flags = Flags::None;
+
+		bool operator==(const MetaInfo &other) const;
+		bool operator!=(const MetaInfo &other) const {return !operator==(other);}
 	};
 	enum class CopyFlags : uint32_t
 	{
@@ -178,10 +236,20 @@ public:
 		DeepCopy = CopyMeshesBit | CopyAnimationsBit | CopyVertexAnimationsBit | CopyCollisionMeshesBit | CopyFlexAnimationsBit
 	};
 public:
+	static constexpr auto PMDL_IDENTIFIER = "PMDL";
+	static constexpr udm::Version PMDL_VERSION = 1;
 	template<class TModel>
 		static std::shared_ptr<Model> Create(NetworkState *nw,uint32_t numBones,const std::string &name="");
 	template<class TModel>
 		static std::shared_ptr<Model> Create(const Model &other);
+	template<class TModel>
+		static std::shared_ptr<Model> Load(Game &game,const udm::AssetData &data,std::string &outErr)
+	{
+		auto mdl = Create<TModel>(game.GetNetworkState(),0u);
+		if(mdl->LoadFromAssetData(game,data,outErr) == false)
+			return nullptr;
+		return mdl;
+	}
 	enum class DLLNETWORK MergeFlags : uint32_t
 	{
 		None = 0,
@@ -196,10 +264,14 @@ public:
 		All = (Meshes<<1) -1
 	};
 
+	bool IsEqual(const Model &other) const;
 	bool operator==(const Model &other) const;
 	bool operator!=(const Model &other) const;
+	Model &operator=(const Model &other);
 	virtual ~Model();
 	bool Save(Game &game,udm::AssetData &outData,std::string &outErr);
+	bool Save(Game &game,const std::string &fileName,std::string &outErr);
+	bool Save(Game &game,std::string &outErr);
 	bool SaveLegacy(Game *game,const std::string &name,const std::string &rootPath="") const;
 	std::shared_ptr<Model> Copy(Game *game,CopyFlags copyFlags=CopyFlags::ShallowCopy) const;
 	bool FindMaterial(const std::string &texture,std::string &matPath) const;
@@ -236,11 +308,16 @@ public:
 	bool TranslateLODMeshes(uint32_t lod,std::vector<uint32_t> &meshIds);
 	// Returns true if the bodygroup exists and sets 'outMeshId' to the mesh Id. If the bodygroup mesh is none/blank, 'outMeshId' will be (unsigned int)(-1)
 	bool GetMesh(uint32_t bodyGroupId,uint32_t groupId,uint32_t &outMeshId);
+	ModelMesh *GetMesh(uint32_t meshGroupIdx,uint32_t meshIdx);
+	const ModelMesh *GetMesh(uint32_t meshGroupIdx,uint32_t meshIdx) const {return const_cast<Model*>(this)->GetMesh(meshGroupIdx,meshIdx);}
+	ModelSubMesh *GetSubMesh(uint32_t meshGroupIdx,uint32_t meshIdx,uint32_t subMeshIdx);
+	const ModelSubMesh *GetSubMesh(uint32_t meshGroupIdx,uint32_t meshIdx,uint32_t subMeshIdx) const {return const_cast<Model*>(this)->GetSubMesh(meshGroupIdx,meshIdx,subMeshIdx);}
 	void GetMeshes(const std::vector<uint32_t> &meshIds,std::vector<std::shared_ptr<ModelMesh>> &outMeshes);
 	void GetSubMeshes(const std::vector<uint32_t> &meshIds,std::vector<std::shared_ptr<ModelSubMesh>> &outMeshes);
 	//void GetWeights(std::vector<VertexWeight*> **weights);
 	static void ClearCache();
 	const std::string &GetName() const;
+	void SetName(const std::string &name) {m_name = name;}
 	uint32_t AddAnimation(const std::string &name,const std::shared_ptr<Animation> &anim);
 	int LookupAnimation(const std::string &name) const;
 	int SelectWeightedAnimation(Activity activity,int32_t animIgnore=-1);
@@ -262,6 +339,8 @@ public:
 		const std::function<std::optional<float>(uint32_t)> &fFetchFlexControllerWeight,
 		const std::function<std::optional<float>(uint32_t)> &fFetchFlexWeight
 	) const;
+	virtual std::shared_ptr<ModelMesh> CreateMesh() const;
+	virtual std::shared_ptr<ModelSubMesh> CreateSubMesh() const;
 
 	// Vertex animations
 	const std::vector<std::shared_ptr<VertexAnimation>> &GetVertexAnimations() const;
@@ -468,6 +547,7 @@ public:
 protected:
 	Model(NetworkState *nw,uint32_t numBones,const std::string &name="");
 	Model(const Model &other);
+	bool LoadFromAssetData(Game &game,const udm::AssetData &data,std::string &outErr);
 	virtual void OnMaterialMissing(const std::string &matName);
 	void AddLoadingMaterial(Material &mat,std::optional<uint32_t> index={});
 	void PrecacheTextureGroup(const std::function<Material*(const std::string&,bool)> &loadMaterial,unsigned int i);
@@ -511,7 +591,7 @@ private:
 	std::vector<std::shared_ptr<Animation>> m_animations;
 	std::vector<std::shared_ptr<VertexAnimation>> m_vertexAnimations;
 	std::unordered_map<std::string,unsigned int> m_animationIDs;
-	std::unique_ptr<Skeleton> m_skeleton = nullptr;
+	std::shared_ptr<Skeleton> m_skeleton = nullptr;
 
 	std::vector<FlexController> m_flexControllers;
 	std::vector<Flex> m_flexes;

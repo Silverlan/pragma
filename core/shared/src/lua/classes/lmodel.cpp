@@ -17,6 +17,7 @@
 #include "pragma/lua/classes/lcollisionmesh.h"
 #include "luasystem.h"
 #include "pragma/model/model.h"
+#include "pragma/asset/util_asset.hpp"
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/model/vertex.h"
 #include "pragma/physics/physsoftbodyinfo.hpp"
@@ -25,6 +26,8 @@
 #include "pragma/model/modelmesh.h"
 #include <luabind/iterator_policy.hpp>
 #include <pragma/lua/lua_call.hpp>
+#include <sharedutils/util_path.hpp>
+#include <sharedutils/util_file.h>
 #include <udm.hpp>
 
 extern DLLNETWORK Engine *engine;
@@ -262,7 +265,43 @@ void Lua::Model::register_class(
 	classDef.def("GetTextureGroupCount",&Lua::Model::GetTextureGroupCount);
 	classDef.def("GetTextureGroups",&Lua::Model::GetTextureGroups);
 	classDef.def("GetTextureGroup",&Lua::Model::GetTextureGroup);
-	classDef.def("Save",&Lua::Model::Save);
+	classDef.def("SaveLegacy",&Lua::Model::Save);
+	classDef.def("Save",static_cast<void(*)(lua_State*,::Model&,udm::AssetData&)>([](lua_State *l,::Model &mdl,udm::AssetData &assetData) {
+		auto *nw = engine->GetNetworkState(l);
+		auto *game = nw ? nw->GetGameState() : nullptr;
+		if(game == nullptr)
+			return;
+		std::string err;
+		auto result = mdl.Save(*game,assetData,err);
+		if(result == false)
+			Lua::PushString(l,err);
+		else
+			Lua::PushBool(l,result);
+	}));
+	classDef.def("Save",static_cast<void(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) {
+		auto *nw = engine->GetNetworkState(l);
+		auto *game = nw ? nw->GetGameState() : nullptr;
+		if(game == nullptr)
+			return;
+		std::string err;
+		auto result = mdl.Save(*game,err);
+		if(result == false)
+			Lua::PushString(l,err);
+		else
+			Lua::PushBool(l,result);
+	}));
+	classDef.def("Save",static_cast<void(*)(lua_State*,::Model&,const std::string&)>([](lua_State *l,::Model &mdl,const std::string &fname) {
+		auto *nw = engine->GetNetworkState(l);
+		auto *game = nw ? nw->GetGameState() : nullptr;
+		if(game == nullptr)
+			return;
+		std::string err;
+		auto result = mdl.Save(*game,fname,err);
+		if(result == false)
+			Lua::PushString(l,err);
+		else
+			Lua::PushBool(l,result);
+	}));
 	classDef.def("Copy",static_cast<void(*)(lua_State*,::Model&)>(&Lua::Model::Copy));
 	classDef.def("Copy",static_cast<void(*)(lua_State*,::Model&,uint32_t)>(&Lua::Model::Copy));
 	classDef.def("GetVertexCount",&Lua::Model::GetVertexCount);
@@ -542,44 +581,40 @@ void Lua::Model::register_class(
 	classDefEyeball.def_readwrite("maxDilationFactor",&::Eyeball::maxDilationFactor);
 	classDefEyeball.def_readwrite("irisUvRadius",&::Eyeball::irisUvRadius);
 	classDefEyeball.def_readwrite("irisScale",&::Eyeball::irisScale);
-	classDefEyeball.def("GetUpperFlexDesc",static_cast<void(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) {
-		auto t = Lua::CreateTable(l);
-		for(auto i=decltype(eyeball.upperFlexDesc.size()){0u};i<eyeball.upperFlexDesc.size();++i)
-		{
-			Lua::PushInt(l,i +1);
-			Lua::PushInt(l,eyeball.upperFlexDesc.at(i));
-			Lua::SetTableValue(l,t);
-		}
+	classDefEyeball.def("GetUpperLidFlexIndices",static_cast<luabind::object(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) -> luabind::object {
+		auto t = luabind::newtable(l);
+		t[1] = eyeball.upperLid.raiserFlexIndex;
+		t[2] = eyeball.upperLid.neutralFlexIndex;
+		t[3] = eyeball.upperLid.lowererFlexIndex;
+		return t;
 	}));
-	classDefEyeball.def("GetLowerFlexDesc",static_cast<void(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) {
-		auto t = Lua::CreateTable(l);
-		for(auto i=decltype(eyeball.lowerFlexDesc.size()){0u};i<eyeball.lowerFlexDesc.size();++i)
-		{
-			Lua::PushInt(l,i +1);
-			Lua::PushInt(l,eyeball.lowerFlexDesc.at(i));
-			Lua::SetTableValue(l,t);
-		}
+	classDefEyeball.def("GetUpperLidFlexAngles",static_cast<luabind::object(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) -> luabind::object {
+		auto t = luabind::newtable(l);
+		t[1] = eyeball.upperLid.raiserValue;
+		t[2] = eyeball.upperLid.neutralValue;
+		t[3] = eyeball.upperLid.lowererValue;
+		return t;
 	}));
-	classDefEyeball.def("GetUpperTarget",static_cast<void(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) {
-		auto t = Lua::CreateTable(l);
-		for(auto i=decltype(eyeball.upperTarget.size()){0u};i<eyeball.upperTarget.size();++i)
-		{
-			Lua::PushInt(l,i +1);
-			Lua::PushNumber(l,eyeball.upperTarget.at(i));
-			Lua::SetTableValue(l,t);
-		}
+	classDefEyeball.def("GetLowerLidFlexIndices",static_cast<luabind::object(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) -> luabind::object {
+		auto t = luabind::newtable(l);
+		t[1] = eyeball.lowerLid.raiserFlexIndex;
+		t[2] = eyeball.lowerLid.neutralFlexIndex;
+		t[3] = eyeball.lowerLid.lowererFlexIndex;
+		return t;
 	}));
-	classDefEyeball.def("GetLowerTarget",static_cast<void(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) {
-		auto t = Lua::CreateTable(l);
-		for(auto i=decltype(eyeball.lowerTarget.size()){0u};i<eyeball.lowerTarget.size();++i)
-		{
-			Lua::PushInt(l,i +1);
-			Lua::PushNumber(l,eyeball.lowerTarget.at(i));
-			Lua::SetTableValue(l,t);
-		}
+	classDefEyeball.def("GetLowerLidFlexAngles",static_cast<luabind::object(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) -> luabind::object {
+		auto t = luabind::newtable(l);
+		t[1] = eyeball.lowerLid.raiserValue;
+		t[2] = eyeball.lowerLid.neutralValue;
+		t[3] = eyeball.lowerLid.lowererValue;
+		return t;
 	}));
-	classDefEyeball.def_readwrite("lowerLidFlexDesc",&::Eyeball::lowerLidFlexDesc);
-	classDefEyeball.def_readwrite("upperLidFlexDesc",&::Eyeball::upperLidFlexDesc);
+	classDefEyeball.def("GetUpperLidFlexIndex",static_cast<int32_t(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) -> int32_t {
+		return eyeball.upperLid.lidFlexIndex;
+	}));
+	classDefEyeball.def("GetLowerLidFlexIndex",static_cast<int32_t(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) -> int32_t {
+		return eyeball.lowerLid.lidFlexIndex;
+	}));
 	classDef.scope[classDefEyeball];
 
 	// Flex

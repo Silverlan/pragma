@@ -13,13 +13,34 @@
 #include "pragma/physics/physsoftbodyinfo.hpp"
 #include "pragma/physics/environment.hpp"
 #include "pragma/model/modelmesh.h"
-
+#include "pragma/model/model.h"
+#include <udm.hpp>
 
 std::shared_ptr<CollisionMesh> CollisionMesh::Create(Game *game) {return std::shared_ptr<CollisionMesh>(new CollisionMesh(game));}
 std::shared_ptr<CollisionMesh> CollisionMesh::Create(const CollisionMesh &other) {return std::shared_ptr<CollisionMesh>(new CollisionMesh(other));}
+std::shared_ptr<CollisionMesh> CollisionMesh::Load(Game &game,Model &mdl,const udm::AssetData &data,std::string &outErr)
+{
+	auto mesh = Create(&game);
+	auto result = mesh->LoadFromAssetData(game,mdl,data,outErr);
+	return result ? mesh : nullptr;
+}
 CollisionMesh::SoftBodyInfo::SoftBodyInfo()
 {
 	info = std::make_shared<PhysSoftBodyInfo>();
+}
+bool CollisionMesh::SoftBodyInfo::operator==(const SoftBodyInfo &other) const
+{
+	static_assert(sizeof(SoftBodyInfo) == 80,"Update this function when making changes to this class!");
+	if(!(triangles == other.triangles && anchors == other.anchors && static_cast<bool>(info) == static_cast<bool>(other.info)))
+		return false;
+	if(info && *info != *other.info)
+		return false;
+	return true;
+}
+bool CollisionMesh::SoftBodyAnchor::operator==(const SoftBodyAnchor &other) const
+{
+	static_assert(sizeof(SoftBodyAnchor) == 11,"Update this function when making changes to this class!");
+	return vertexIndex == other.vertexIndex && boneId == other.boneId && influence == other.influence && flags == other.flags;
 }
 CollisionMesh::CollisionMesh(Game *game)
 	: std::enable_shared_from_this<CollisionMesh>(),m_game(game)
@@ -42,6 +63,35 @@ CollisionMesh::CollisionMesh(const CollisionMesh &other)
 	m_mass = other.m_mass;
 	m_softBodyInfo = (m_softBodyInfo != nullptr) ? std::make_shared<SoftBodyInfo>(*other.m_softBodyInfo) : nullptr;
 	static_assert(sizeof(CollisionMesh) == 200,"Update this function when making changes to this class!");
+}
+bool CollisionMesh::operator==(const CollisionMesh &other) const
+{
+	if(m_vertices.size() != other.m_vertices.size())
+		return false;
+	if(!(m_vertices == other.m_vertices &&
+		m_triangles == other.m_triangles &&
+		m_surfaceMaterials == other.m_surfaceMaterials &&
+		uvec::cmp(m_min,other.m_min) &&
+		uvec::cmp(m_max,other.m_max) &&
+		uvec::cmp(m_origin,other.m_origin) &&
+		// m_shape == other.m_shape &&
+		m_bConvex == other.m_bConvex &&
+		m_boneID == other.m_boneID &&
+		m_surfaceMaterialId == other.m_surfaceMaterialId &&
+		uvec::cmp(m_centerOfMass,other.m_centerOfMass) &&
+		m_volume == other.m_volume &&
+		m_mass == other.m_mass &&
+		((m_softBodyInfo == nullptr && other.m_softBodyInfo == nullptr) ||
+			*m_softBodyInfo == *other.m_softBodyInfo
+		)))
+		return false;
+	for(auto i=decltype(m_vertices.size()){0u};i<m_vertices.size();++i)
+	{
+		if(uvec::cmp(m_vertices[i],other.m_vertices[i]) == false)
+			return false;
+	}
+	static_assert(sizeof(CollisionMesh) == 200,"Update this function when making changes to this class!");
+	return true;
 }
 void CollisionMesh::SetMass(float mass) {m_mass = mass;}
 float CollisionMesh::GetMass() const {return m_mass;}
@@ -329,4 +379,202 @@ std::vector<CollisionMesh::SoftBodyAnchor> *CollisionMesh::GetSoftBodyAnchors()
 		return nullptr;
 	return &m_softBodyInfo->anchors;
 }
+bool CollisionMesh::Save(Game &game,Model &mdl,udm::AssetData &outData,std::string &outErr)
+{
+	outData.SetAssetType(PCOL_IDENTIFIER);
+	outData.SetAssetVersion(PCOL_VERSION);
+	
+	auto &surfaceMaterials = game.GetSurfaceMaterials();
+	auto surfMatIdx = GetSurfaceMaterial();
+	auto udm = *outData;
+	umath::Transform pose {};
+	pose.SetOrigin(GetOrigin());
+	udm["bone"] = GetBoneParent();
+	udm["pose"] = pose;
+	if(surfMatIdx >= 0 && surfMatIdx < surfaceMaterials.size())
+		udm["surfaceMaterial"] = surfaceMaterials[surfMatIdx].GetIdentifier();
 
+	udm["bounds.min"] = m_min;
+	udm["bounds.max"] = m_max;
+
+	udm["vertices"] = udm::compress_lz4_blob(GetVertices());
+	udm["triangles"] = udm::compress_lz4_blob(GetTriangles());
+
+	udm["volume"] = GetVolume();
+	udm["centerOfMass"] = GetCenterOfMass();
+	udm["mass"] = GetMass();
+
+	udm["flags.convex"] = IsConvex();
+
+	// Soft-body
+	auto softBody = IsSoftBody();
+	auto *sbInfo = GetSoftBodyInfo();
+	auto *sbMesh = GetSoftBodyMesh();
+	auto *sbTriangles = GetSoftBodyTriangles();
+	auto *sbAnchors = GetSoftBodyAnchors();
+	softBody = (softBody && sbInfo != nullptr && sbMesh != nullptr && sbTriangles != nullptr && sbAnchors != nullptr) ? true : false;
+	auto meshGroupId = std::numeric_limits<uint32_t>::max();
+	auto meshId = std::numeric_limits<uint32_t>::max();
+	auto subMeshId = std::numeric_limits<uint32_t>::max();
+	ModelSubMesh *subMesh = nullptr;
+	auto foundSoftBodyMesh = false;
+	if(softBody)
+		softBody = mdl.FindSubMeshIndex(nullptr,nullptr,sbMesh,meshGroupId,meshId,subMeshId);
+
+	if(softBody)
+	{
+		auto udmSoftBody = udm["softBody"];
+		udmSoftBody["meshGroup"] = meshGroupId;
+		udmSoftBody["mesh"] = meshId;
+		udmSoftBody["subMesh"] = subMeshId;
+
+		auto udmSettings = udmSoftBody["settings"];
+		udmSettings["poseMatchingCoefficient"] = sbInfo->poseMatchingCoefficient;
+		udmSettings["anchorsHardness"] = sbInfo->anchorsHardness;
+		udmSettings["dragCoefficient"] = sbInfo->dragCoefficient;
+		udmSettings["rigidContactsHardness"] = sbInfo->rigidContactsHardness;
+		udmSettings["softContactsHardness"] = sbInfo->softContactsHardness;
+		udmSettings["liftCoefficient"] = sbInfo->liftCoefficient;
+		udmSettings["kineticContactsHardness"] = sbInfo->kineticContactsHardness;
+		udmSettings["dynamicFrictionCoefficient"] = sbInfo->dynamicFrictionCoefficient;
+		udmSettings["dampingCoefficient"] = sbInfo->dampingCoefficient;
+		udmSettings["volumeConversationCoefficient"] = sbInfo->volumeConversationCoefficient;
+		udmSettings["softVsRigidImpulseSplitK"] = sbInfo->softVsRigidImpulseSplitK;
+		udmSettings["softVsRigidImpulseSplitR"] = sbInfo->softVsRigidImpulseSplitR;
+		udmSettings["softVsRigidImpulseSplitS"] = sbInfo->softVsRigidImpulseSplitS;
+		udmSettings["softVsKineticHardness"] = sbInfo->softVsKineticHardness;
+		udmSettings["softVsRigidHardness"] = sbInfo->softVsRigidHardness;
+		udmSettings["softVsSoftHardness"] = sbInfo->softVsSoftHardness;
+		udmSettings["pressureCoefficient"] = sbInfo->pressureCoefficient;
+		udmSettings["velocitiesCorrectionFactor"] = sbInfo->velocitiesCorrectionFactor;
+		udmSettings["bendingConstraintsDistance"] = sbInfo->bendingConstraintsDistance;
+		udmSettings["clusterCount"] = sbInfo->clusterCount;
+		udmSettings["maxClusterIterations"] = sbInfo->maxClusterIterations;
+
+		auto udmMaterialStiffnessCoefficient = udmSettings.AddArray("materialStiffnessCoefficients",sbInfo->materialStiffnessCoefficient.size());
+		uint32_t idx = 0;
+		for(auto &pair : sbInfo->materialStiffnessCoefficient)
+		{
+			auto udmData = udmMaterialStiffnessCoefficient[idx++];
+
+			udmData["materialIndex"] = pair.first;
+			udmData["angular"] = pair.second.angular;
+			udmData["linear"] = pair.second.linear;
+			udmData["volume"] = pair.second.volume;
+		}
+
+		if(sbTriangles)
+			udmSettings["triangles"] = udm::compress_lz4_blob(*sbTriangles);
+		if(sbAnchors)
+			udmSettings["anchors"] = udm::compress_lz4_blob(*sbAnchors);
+	}
+	return true;
+}
+bool CollisionMesh::LoadFromAssetData(Game &game,Model &mdl,const udm::AssetData &data,std::string &outErr)
+{
+	if(data.GetAssetType() != PCOL_IDENTIFIER)
+	{
+		outErr = "Incorrect format!";
+		return false;
+	}
+
+	auto udm = *data;
+	auto version = data.GetAssetVersion();
+	if(version < 1)
+	{
+		outErr = "Invalid version!";
+		return false;
+	}
+
+	umath::Transform pose {};
+	pose.SetOrigin(GetOrigin());
+	auto &surfaceMaterials = game.GetSurfaceMaterials();
+	udm["bone"](m_boneID);
+	udm["pose"](pose);
+	std::string surfaceMaterial;
+	udm["surfaceMaterial"](surfaceMaterial);
+
+	auto *surfMat = game.GetSurfaceMaterial(surfaceMaterial);
+	if(surfMat)
+		m_surfaceMaterialId = surfMat->GetIndex();
+
+	m_origin = pose.GetOrigin();
+
+	udm["bounds.min"](m_min);
+	udm["bounds.max"](m_max);
+
+	udm["vertices"].GetBlobData(GetVertices());
+	udm["triangles"].GetBlobData(GetTriangles());
+
+	udm["volume"](m_volume);
+	udm["centerOfMass"](m_centerOfMass);
+	udm["mass"](m_mass);
+
+	udm["flags.convex"](m_bConvex);
+
+	// Soft-body
+	auto udmSoftBody = udm["softBody"];
+	if(udmSoftBody)
+	{
+		SetSoftBody(true);
+		auto meshGroupId = std::numeric_limits<uint32_t>::max();
+		auto meshId = std::numeric_limits<uint32_t>::max();
+		auto subMeshId = std::numeric_limits<uint32_t>::max();
+		udmSoftBody["meshGroup"](meshGroupId);
+		udmSoftBody["mesh"](meshId);
+		udmSoftBody["subMesh"](subMeshId);
+
+		auto *subMesh = mdl.GetSubMesh(meshGroupId,meshId,subMeshId);
+		if(subMesh)
+			m_softBodyInfo->subMesh = subMesh->shared_from_this();
+		
+		auto *sbInfo = m_softBodyInfo->info.get();
+		auto udmSettings = udmSoftBody["settings"];
+		udmSettings["poseMatchingCoefficient"](sbInfo->poseMatchingCoefficient);
+		udmSettings["anchorsHardness"](sbInfo->anchorsHardness);
+		udmSettings["dragCoefficient"](sbInfo->dragCoefficient);
+		udmSettings["rigidContactsHardness"](sbInfo->rigidContactsHardness);
+		udmSettings["softContactsHardness"](sbInfo->softContactsHardness);
+		udmSettings["liftCoefficient"](sbInfo->liftCoefficient);
+		udmSettings["kineticContactsHardness"](sbInfo->kineticContactsHardness);
+		udmSettings["dynamicFrictionCoefficient"](sbInfo->dynamicFrictionCoefficient);
+		udmSettings["dampingCoefficient"](sbInfo->dampingCoefficient);
+		udmSettings["volumeConversationCoefficient"](sbInfo->volumeConversationCoefficient);
+		udmSettings["softVsRigidImpulseSplitK"](sbInfo->softVsRigidImpulseSplitK);
+		udmSettings["softVsRigidImpulseSplitR"](sbInfo->softVsRigidImpulseSplitR);
+		udmSettings["softVsRigidImpulseSplitS"](sbInfo->softVsRigidImpulseSplitS);
+		udmSettings["softVsKineticHardness"](sbInfo->softVsKineticHardness);
+		udmSettings["softVsRigidHardness"](sbInfo->softVsRigidHardness);
+		udmSettings["softVsSoftHardness"](sbInfo->softVsSoftHardness);
+		udmSettings["pressureCoefficient"](sbInfo->pressureCoefficient);
+		udmSettings["velocitiesCorrectionFactor"](sbInfo->velocitiesCorrectionFactor);
+		udmSettings["bendingConstraintsDistance"](sbInfo->bendingConstraintsDistance);
+		udmSettings["clusterCount"](sbInfo->clusterCount);
+		udmSettings["maxClusterIterations"](sbInfo->maxClusterIterations);
+
+		auto udmMaterialStiffnessCoefficients = udmSettings["materialStiffnessCoefficients"];
+		auto numMaterialStiffnessCoefficients = udmMaterialStiffnessCoefficients.GetSize();
+		sbInfo->materialStiffnessCoefficient.reserve(numMaterialStiffnessCoefficients);
+		for(auto i=decltype(numMaterialStiffnessCoefficients){0u};i<numMaterialStiffnessCoefficients;++i)
+		{
+			auto udmData = udmMaterialStiffnessCoefficients[i];
+			uint32_t materialIndex = std::numeric_limits<uint32_t>::max();
+			udmData["materialIndex"](materialIndex);
+			if(materialIndex == std::numeric_limits<uint32_t>::max())
+				continue;
+			PhysSoftBodyInfo::MaterialStiffnessCoefficient data {};
+			udmData["angular"](data.angular);
+			udmData["linear"](data.linear);
+			udmData["volume"](data.volume);
+
+			sbInfo->materialStiffnessCoefficient[materialIndex] = data;
+		}
+		
+		auto *sbTriangles = GetSoftBodyTriangles();
+		auto *sbAnchors = GetSoftBodyAnchors();
+		udmSettings["triangles"].GetBlobData(*sbTriangles);
+		udmSettings["anchors"].GetBlobData(*sbAnchors);
+	}
+
+	return true;
+}

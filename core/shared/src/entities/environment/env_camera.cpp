@@ -14,6 +14,7 @@
 #include <mathutil/umat.h>
 #include <sharedutils/datastream.h>
 #include <glm/gtx/matrix_decompose.hpp>
+#include <udm.hpp>
 
 #define EPSILON 0.001f
 
@@ -36,25 +37,25 @@ void BaseEnvCameraComponent::Initialize()
 	ent.AddComponent("transform");
 }
 
-void BaseEnvCameraComponent::Save(DataStream &ds)
+void BaseEnvCameraComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
-	BaseEntityComponent::Save(ds);
-	ds->Write<Mat4>(*m_projectionMatrix);
-	ds->Write<Mat4>(*m_viewMatrix);
-	ds->Write<float>(*m_fov);
-	ds->Write<float>(*m_aspectRatio);
-	ds->Write<float>(*m_nearZ);
-	ds->Write<float>(*m_farZ);
+	BaseEntityComponent::Save(udm);
+	udm["projectionMatrix"] = **m_projectionMatrix;
+	udm["viewMatrix"] = **m_viewMatrix;
+	udm["fov"] = **m_fov;
+	udm["aspectRatio"] = **m_aspectRatio;
+	udm["nearZ"] = **m_nearZ;
+	udm["farZ"] = **m_farZ;
 }
-void BaseEnvCameraComponent::Load(DataStream &ds,uint32_t version)
+void BaseEnvCameraComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {
-	BaseEntityComponent::Load(ds,version);
-	*m_projectionMatrix = ds->Read<Mat4>();
-	*m_viewMatrix = ds->Read<Mat4>();
-	*m_fov = ds->Read<float>();
-	*m_aspectRatio = ds->Read<float>();
-	*m_nearZ = ds->Read<float>();
-	*m_farZ = ds->Read<float>();
+	BaseEntityComponent::Load(udm,version);
+	udm["projectionMatrix"](**m_projectionMatrix);
+	udm["viewMatrix"](**m_viewMatrix);
+	udm["fov"](**m_fov);
+	udm["aspectRatio"](**m_aspectRatio);
+	udm["nearZ"](**m_nearZ);
+	udm["farZ"](**m_farZ);
 }
 
 void BaseEnvCameraComponent::SetOrientation(const Vector3 &forward,const Vector3 &up)

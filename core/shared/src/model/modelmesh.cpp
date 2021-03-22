@@ -9,7 +9,8 @@
 #include "pragma/model/modelmesh.h"
 #include <mathutil/uvec.h>
 #include <pragma/math/intersection.h>
-
+#include <udm.hpp>
+#pragma optimize("",off)
 ModelMesh::ModelMesh()
 	: std::enable_shared_from_this<ModelMesh>(),m_numVerts(0),m_numTriangleVerts(0)
 {}
@@ -22,6 +23,19 @@ ModelMesh::ModelMesh(const ModelMesh &other)
 }
 bool ModelMesh::operator==(const ModelMesh &other) const {return this == &other;}
 bool ModelMesh::operator!=(const ModelMesh &other) const {return !operator==(other);}
+bool ModelMesh::IsEqual(const ModelMesh &other) const
+{
+	static_assert(sizeof(ModelMesh) == 104,"Update this function when making changes to this class!");
+	if(!(uvec::cmp(m_min,other.m_min) && uvec::cmp(m_max,other.m_max) && m_numVerts == other.m_numVerts && m_numTriangleVerts == other.m_numTriangleVerts &&
+		uvec::cmp(m_center,other.m_center) && m_referenceId == other.m_referenceId && m_subMeshes.size() == other.m_subMeshes.size()))
+		return false;
+	for(auto i=decltype(m_subMeshes.size()){0u};i<m_subMeshes.size();++i)
+	{
+		if(m_subMeshes[i]->IsEqual(*other.m_subMeshes[i]) == false)
+			return false;
+	}
+	return true;
+}
 std::shared_ptr<ModelMesh> ModelMesh::Copy() const {return std::make_shared<ModelMesh>(*this);}
 void ModelMesh::Rotate(const Quat &rot)
 {
@@ -156,8 +170,90 @@ ModelSubMesh::ModelSubMesh(const ModelSubMesh &other)
 {
 	static_assert(sizeof(ModelSubMesh) == 216,"Update this function when making changes to this class!");
 }
+std::shared_ptr<ModelSubMesh> ModelSubMesh::Load(const udm::AssetData &data,std::string &outErr)
+{
+	auto mesh = std::make_shared<ModelSubMesh>();
+	auto result = mesh->LoadFromAssetData(data,outErr);
+	return result ? mesh : nullptr;
+}
 bool ModelSubMesh::operator==(const ModelSubMesh &other) const {return this == &other;}
 bool ModelSubMesh::operator!=(const ModelSubMesh &other) const {return !operator==(other);}
+bool ModelSubMesh::IsEqual(const ModelSubMesh &other) const
+{
+	static_assert(sizeof(ModelSubMesh) == 216,"Update this function when making changes to this class!");
+	if(!(m_skinTextureIndex == other.m_skinTextureIndex && uvec::cmp(m_center,other.m_center) && m_numAlphas == other.m_numAlphas && uvec::cmp(m_min,other.m_min) &&
+		uvec::cmp(m_max,other.m_max) && m_geometryType == other.m_geometryType && m_referenceId == other.m_referenceId &&
+		static_cast<bool>(m_vertices) == static_cast<bool>(other.m_vertices) && static_cast<bool>(m_alphas) == static_cast<bool>(other.m_alphas) &&
+		static_cast<bool>(m_uvSets) == static_cast<bool>(other.m_uvSets) && static_cast<bool>(m_triangles) == static_cast<bool>(other.m_triangles) &&
+		static_cast<bool>(m_vertexWeights) == static_cast<bool>(other.m_vertexWeights) && static_cast<bool>(m_extendedVertexWeights) == static_cast<bool>(other.m_extendedVertexWeights)))
+		return false;
+	if(uvec::cmp(m_pose.GetOrigin(),other.m_pose.GetOrigin()) == false || uquat::cmp(m_pose.GetRotation(),other.m_pose.GetRotation()) == false || uvec::cmp(m_pose.GetScale(),other.m_pose.GetScale()) == false)
+		return false;
+	if(m_vertices)
+	{
+		for(auto i=decltype(m_vertices->size()){0u};i<m_vertices->size();++i)
+		{
+			if(
+				uvec::cmp((*m_vertices)[i].position,(*other.m_vertices)[i].position) == false ||
+				uvec::cmp((*m_vertices)[i].normal,(*other.m_vertices)[i].normal) == false ||
+				uvec::cmp((*m_vertices)[i].tangent,(*other.m_vertices)[i].tangent) == false ||
+				uvec::cmp((*m_vertices)[i].uv,(*other.m_vertices)[i].uv) == false
+			)
+				return false;
+		}
+	}
+	if(m_alphas)
+	{
+		for(auto i=decltype(m_alphas->size()){0u};i<m_alphas->size();++i)
+		{
+			if(uvec::cmp((*m_alphas)[i],(*other.m_alphas)[i]) == false)
+				return false;
+		}
+	}
+	if(m_uvSets)
+	{
+		if(m_uvSets->size() != other.m_uvSets->size())
+			return false;
+		for(auto &pair : *m_uvSets)
+		{
+			auto it = other.m_uvSets->find(pair.first);
+			if(it == other.m_uvSets->end())
+				return false;
+			for(auto i=decltype(pair.second.size()){0u};i<pair.second.size();++i)
+			{
+				if(uvec::cmp(pair.second[i],it->second[i]) == false)
+					return false;
+			}
+		}
+	}
+	if(m_uvSets && *m_uvSets != *other.m_uvSets)
+		return false;
+	if(m_triangles)
+	{
+		for(auto i=decltype(m_triangles->size()){0u};i<m_triangles->size();++i)
+		{
+			if((*m_triangles)[i] != (*other.m_triangles)[i])
+				return false;
+		}
+	}
+	if(m_vertexWeights)
+	{
+		for(auto i=decltype(m_vertexWeights->size()){0u};i<m_vertexWeights->size();++i)
+		{
+			if((*m_vertexWeights)[i] != (*other.m_vertexWeights)[i])
+				return false;
+		}
+	}
+	if(m_extendedVertexWeights)
+	{
+		for(auto i=decltype(m_extendedVertexWeights->size()){0u};i<m_extendedVertexWeights->size();++i)
+		{
+			if((*m_extendedVertexWeights)[i] != (*other.m_extendedVertexWeights)[i])
+				return false;
+		}
+	}
+	return true;
+}
 void ModelSubMesh::Copy(ModelSubMesh &cpy,bool fullCopy) const
 {
 	cpy.m_vertices = std::make_shared<std::vector<Vertex>>(*cpy.m_vertices);
@@ -658,3 +754,75 @@ void ModelSubMesh::RemoveVertex(uint64_t idx)
 	if(idx < m_extendedVertexWeights->size())
 		m_extendedVertexWeights->erase(m_extendedVertexWeights->begin() +idx);
 }
+
+bool ModelSubMesh::Save(udm::AssetData &outData,std::string &outErr)
+{
+	outData.SetAssetType(PMESH_IDENTIFIER);
+	outData.SetAssetVersion(PMESH_VERSION);
+	
+	auto udm = *outData;
+	udm["referenceId"] = GetReferenceId();
+	udm["pose"] = GetPose();
+	udm["geometryType"] = udm::enum_to_string(GetGeometryType());
+	udm["vertexData"] = udm::compress_lz4_blob(GetVertices());
+	udm["indexData"] = udm::compress_lz4_blob(GetTriangles());
+	udm["materialIndex"] = m_skinTextureIndex;
+
+	auto udmUvSets = udm["uvSets"];
+	for(auto &pair : GetUVSets())
+		udmUvSets[pair.first] = udm::compress_lz4_blob(pair.second);
+
+	auto &vertexWeights = GetVertexWeights();
+	if(!vertexWeights.empty())
+		udm["vertexWeights"] = udm::compress_lz4_blob(vertexWeights);
+				
+	auto &extBoneWeights = GetExtendedVertexWeights();
+	if(!extBoneWeights.empty())
+		udm["extendedVertexWeights"] = udm::compress_lz4_blob(extBoneWeights);
+
+	auto &alphas = GetAlphas();
+	udm["alphaCount"] = GetAlphaCount();
+	if(!alphas.empty())
+		udm["alphas"] = udm::compress_lz4_blob(alphas);
+	return true;
+}
+bool ModelSubMesh::LoadFromAssetData(const udm::AssetData &data,std::string &outErr)
+{
+	if(data.GetAssetType() != PMESH_IDENTIFIER)
+	{
+		outErr = "Incorrect format!";
+		return false;
+	}
+
+	auto udm = *data;
+	auto version = data.GetAssetVersion();
+	if(version < 1)
+	{
+		outErr = "Invalid version!";
+		return false;
+	}
+
+	udm["referenceId"](m_referenceId);
+	udm["pose"](m_pose);
+	udm::to_enum_value<GeometryType>(udm["geometryType"],m_geometryType);
+	udm["vertexData"].GetBlobData(GetVertices());
+	udm["indexData"].GetBlobData(GetTriangles());
+	udm["materialIndex"](m_skinTextureIndex);
+
+	auto udmUvSets = udm["uvSets"];
+	auto &uvSets = GetUVSets();
+	uvSets.reserve(udmUvSets.GetSize());
+	for(auto udmUvSet : udmUvSets.ElIt())
+	{
+		std::vector<Vector2> uvData {};
+		udmUvSet.property.GetBlobData(uvData);
+		uvSets[std::string{udmUvSet.key}] = std::move(uvData);
+	}
+
+	udm["vertexWeights"].GetBlobData(GetVertexWeights());
+	udm["extendedVertexWeights"].GetBlobData(GetExtendedVertexWeights());
+	udm["alphaCount"](m_numAlphas);
+	udm["alphas"].GetBlobData(GetAlphas());
+	return true;
+}
+#pragma optimize("",on)

@@ -29,6 +29,9 @@ struct DLLNETWORK Bone
 
 	bool IsAncestorOf(const Bone &other) const;
 	bool IsDescendantOf(const Bone &other) const;
+
+	bool operator==(const Bone &other) const;
+	bool operator!=(const Bone &other) const {return !operator==(other);}
 };
 
 struct DLLNETWORK BoneList // Simplified Skeleton without an hierarchy
@@ -42,12 +45,14 @@ public:
 	uint32_t GetBoneCount() const;
 };
 
+namespace udm {struct AssetData;};
+class Frame;
 class DLLNETWORK Skeleton
 {
-private:
-	std::vector<std::shared_ptr<Bone>> m_bones;
-	std::unordered_map<uint32_t,std::shared_ptr<Bone>> m_rootBones;
 public:
+	static constexpr uint32_t FORMAT_VERSION = 1u;
+	static constexpr auto PSKEL_IDENTIFIER = "PSKEL";
+	static std::shared_ptr<Skeleton> Load(Frame &reference,const udm::AssetData &data,std::string &outErr);
 	Skeleton()=default;
 	Skeleton(const Skeleton &other);
 	uint32_t AddBone(Bone *bone);
@@ -61,5 +66,13 @@ public:
 	std::vector<std::shared_ptr<Bone>> &GetBones();
 
 	void Merge(Skeleton &other);
+	bool Save(Frame &reference,udm::AssetData &outData,std::string &outErr);
+
+	bool operator==(const Skeleton &other) const;
+	bool operator!=(const Skeleton &other) const {return !operator==(other);}
+private:
+	bool LoadFromAssetData(Frame &reference,const udm::AssetData &data,std::string &outErr);
+	std::vector<std::shared_ptr<Bone>> m_bones;
+	std::unordered_map<uint32_t,std::shared_ptr<Bone>> m_rootBones;
 };
 #endif

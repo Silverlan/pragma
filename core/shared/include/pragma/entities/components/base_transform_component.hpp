@@ -89,8 +89,8 @@ namespace pragma
 		
 		void SetPosition(const Vector3 &pos,Bool bForceUpdate);
 
-		virtual void Save(DataStream &ds) override;
-		virtual void Load(DataStream &ds,uint32_t version) override;
+		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
+		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
 
 		// Same as SetPosition / SetRotation / SetScale, but don't invoke callbacks
 		void SetRawPosition(const Vector3 &pos);

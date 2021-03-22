@@ -65,7 +65,7 @@ pragma::ComponentEventId BaseEntity::EVENT_ON_SPAWN = pragma::INVALID_COMPONENT_
 pragma::ComponentEventId BaseEntity::EVENT_ON_POST_SPAWN = pragma::INVALID_COMPONENT_ID;
 pragma::ComponentEventId BaseEntity::EVENT_ON_REMOVE = pragma::INVALID_COMPONENT_ID;
 BaseEntity::BaseEntity()
-	: pragma::BaseEntityComponentSystem(),LuaObj<EntityHandle>()
+	: pragma::BaseEntityComponentSystem(),LuaObj<EntityHandle>(),m_uuid{util::generate_uuid_v4()}
 {}
 pragma::NetEventId BaseEntity::FindNetEvent(const std::string &name) const
 {
@@ -137,6 +137,8 @@ void BaseEntity::SetKeyValue(std::string key,std::string val)
 		return;
 	if(key == "spawnflags")
 		m_spawnFlags = util::to_int(val);
+	else if(key == "uuid")
+		m_uuid = util::uuid_string_to_bytes(val);
 }
 void BaseEntity::SetSpawnFlags(uint32_t spawnFlags) {m_spawnFlags = spawnFlags;}
 unsigned int BaseEntity::GetSpawnFlags() const {return m_spawnFlags;}

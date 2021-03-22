@@ -100,14 +100,16 @@ void CFlexComponent::UpdateEyeFlexes(Eyeball &eyeball,uint32_t eyeballIdx)
 	Vector3 pos {};
 
 	// Get weighted position of eyeball angles based on the "raiser", "neutral", and "lowerer" controls
-
 	auto upperLid = 0.f;
 	auto lowerLid = 0.f;
-	for(auto i=decltype(eyeball.upperFlexDesc.size()){0u};i<eyeball.upperFlexDesc.size();++i)
-	{
-		upperLid += GetFlexWeight(eyeball.upperFlexDesc.at(i)) *umath::asin(eyeball.upperTarget.at(i) /eyeball.radius);
-		lowerLid += GetFlexWeight(eyeball.lowerFlexDesc.at(i)) *umath::asin(eyeball.lowerTarget.at(i) /eyeball.radius);
-	}	
+	std::array<int32_t,3> upperIndices = {eyeball.upperLid.lowererFlexIndex,eyeball.upperLid.neutralFlexIndex,eyeball.upperLid.raiserFlexIndex};
+	std::array<float,3> upperValues = {eyeball.upperLid.lowererValue,eyeball.upperLid.neutralValue,eyeball.upperLid.raiserValue};
+	std::array<int32_t,3> lowererIndices = {eyeball.lowerLid.lowererFlexIndex,eyeball.lowerLid.neutralFlexIndex,eyeball.lowerLid.raiserFlexIndex};
+	std::array<float,3> lowererValues = {eyeball.lowerLid.lowererValue,eyeball.lowerLid.neutralValue,eyeball.lowerLid.raiserValue};
+	for(auto i=decltype(upperIndices.size()){0u};i<upperIndices.size();++i)
+		upperLid += GetFlexWeight(upperIndices[i]) *umath::asin(upperValues[i] /eyeball.radius);
+	for(auto i=decltype(lowererIndices.size()){0u};i<lowererIndices.size();++i)
+		lowerLid += GetFlexWeight(lowererIndices[i]) *umath::asin(lowererValues[i] /eyeball.radius);
 
 	float sinupper, cosupper, sinlower, coslower;
 	sinupper = umath::sin(upperLid);
@@ -123,12 +125,12 @@ void CFlexComponent::UpdateEyeFlexes(Eyeball &eyeball,uint32_t eyeballIdx)
 	// Upper lid
 	pos = headup *(sinupper *eyeball.radius);
 	pos = pos +(cosupper *eyeball.radius) *headforward;
-	SetFlexWeight(eyeball.upperLidFlexDesc,uvec::dot(pos,eyeball.up));
+	SetFlexWeight(eyeball.upperLid.lidFlexIndex,uvec::dot(pos,eyeball.up));
 
 	// Lower lid
 	pos = headup *(sinlower *eyeball.radius);
 	pos = pos +(coslower *eyeball.radius) *headforward;
-	SetFlexWeight(eyeball.lowerLidFlexDesc,uvec::dot(pos,eyeball.up));
+	SetFlexWeight(eyeball.lowerLid.lidFlexIndex,uvec::dot(pos,eyeball.up));
 }
 
 void CFlexComponent::UpdateEyeFlexes()

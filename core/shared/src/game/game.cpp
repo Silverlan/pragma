@@ -333,8 +333,8 @@ Game::Game(NetworkState *state)
 
 	RegisterCallback<void>("EndGame");
 
-	LoadSoundScripts("game_sounds_generic.txt");
-	LoadSoundScripts("fx_physics_impact.txt");
+	LoadSoundScripts("game_sounds_generic.udm");
+	LoadSoundScripts("fx_physics_impact.udm");
 }
 
 Game::~Game() {}
@@ -479,7 +479,7 @@ void Game::Initialize()
 	for(auto &info : addons)
 		m_scriptWatcher->MountDirectory(info.GetAbsolutePath() +"/lua",true);
 
-	LoadSoundScripts("fx.txt");
+	LoadSoundScripts("fx.udm");
 }
 void Game::SetUp() {}
 

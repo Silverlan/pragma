@@ -38,6 +38,7 @@
 #include "pragma/entities/c_viewbody.h"
 #include "pragma/entities/c_player.hpp"
 #include <pragma/physics/physobj.h>
+#include <pragma/util/util_game.hpp>
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_hdr.hpp"
@@ -99,6 +100,7 @@
 #include <sharedutils/util_library.hpp>
 #include <util_image.hpp>
 #include <util_image_buffer.hpp>
+#include <udm.hpp>
 
 extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;
 extern ClientEntityNetworkMap *g_ClEntityNetworkMap;
@@ -212,7 +214,7 @@ CGame::CGame(NetworkState *state)
 		AddCallback(name,hCallback);
 	}
 
-	LoadAuxEffects("fx_generic.txt");
+	LoadAuxEffects("fx_generic.udm");
 	for(auto &rsnd : client->GetSounds())
 	{
 		auto &snd = static_cast<CALSound&>(rsnd.get());
@@ -1349,7 +1351,7 @@ bool CGame::LoadMap(const std::string &map,const Vector3 &origin,std::vector<Ent
 
 	std::string dsp = "fx_";
 	dsp += map;
-	dsp += ".txt";
+	dsp += ".udm";
 	LoadAuxEffects(dsp.c_str());
 	return r;
 }
@@ -1718,31 +1720,24 @@ void CGame::RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd
 
 bool CGame::LoadAuxEffects(const std::string &fname)
 {
-	std::string path = "scripts\\soundfx\\";
+	std::string path = "scripts/soundfx/";
 	path += fname;
-	auto f = FileManager::OpenFile(path.c_str(),"r");
-	std::shared_ptr<ds::Block> root = nullptr;
-	if(f != NULL)
-		root = std::shared_ptr<ds::Block>(ds::System::ReadData(f));
-	if(root == NULL)
+
+	std::string err;
+	auto udmData = util::load_udm_asset(fname,&err);
+	if(udmData == nullptr)
 		return false;
-	auto *data = root->GetData();
-	if(data == NULL)
+	auto &data = *udmData;
+	auto udm = data.GetAssetData().GetData();
+	if(!udm)
 		return false;
-	for(auto it=data->begin();it!=data->end();it++)
+	for(auto pair : udm.ElIt())
 	{
-		std::shared_ptr<ds::Block> block = nullptr;
-		if(it->second->IsBlock())
-			block = std::static_pointer_cast<ds::Block>(it->second);
-		else if(it->second->IsContainer())
-			block = it->second->GetBlock(0);
-		if(block != NULL)
-		{
-			std::string name = it->first;
-			StringToLower(name);
-			std::string type = block->GetString("type");
-			al::create_aux_effect(name,type,*block);
-		}
+		std::string name = std::string{pair.key};
+		StringToLower(name);
+		std::string type;
+		pair.property["type"](type);
+		al::create_aux_effect(name,type,pair.property);
 	}
 	return true;
 }

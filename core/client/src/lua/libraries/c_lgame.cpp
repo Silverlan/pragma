@@ -616,7 +616,7 @@ int Lua::game::Client::test(lua_State *l)
 
 	if(true)
 	{
-		client->LoadSoundScripts("level_sounds_trainyard.txt",false);
+		client->LoadSoundScripts("level_sounds_trainyard.udm",false);
 		auto scene = choreography::Scene::Create<choreography::Scene>();
 		auto channel = scene->AddChannel<choreography::Channel>("Test");
 

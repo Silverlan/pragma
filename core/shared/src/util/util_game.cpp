@@ -69,17 +69,17 @@ static bool print_code_snippet(VFilePtr &f,uint32_t lineIdx,uint32_t charIdx)
 			++pos;
 		}
 		if(it == lines.end() -1)
-			Con::cout<<"  > ";
+			Con::cwar<<"  > ";
 		else
-			Con::cout<<"    ";
-		Con::cout<<line<<'\n';
+			Con::cwar<<"    ";
+		Con::cwar<<line<<'\n';
 
 		if(it == lines.end() -1)
 			lineOffset = line.length() -len;
 	}
-	Con::cout<<std::string(static_cast<size_t>(charIdx) +4 +lineOffset,' ')<<'^'<<Con::endl;
+	Con::cwar<<std::string(static_cast<size_t>(charIdx) +4 +lineOffset,' ')<<'^'<<Con::endl;
 
-	Con::cout<<Con::endl;
+	Con::cwar<<Con::endl;
 	return true;
 }
 template<typename T>
@@ -93,7 +93,7 @@ template<typename T>
 		{
 			if(optOutErr)
 				*optOutErr = e.what();
-			Con::cout<<"[UDM] Failed to load UDM asset";
+			Con::cwar<<"[UDM] Failed to load UDM asset";
 			if constexpr(std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>,std::string>)
 				Con::cout<<" '"<<f<<"'";
 			else
@@ -103,10 +103,10 @@ template<typename T>
 				{
 					auto path = util::Path::CreateFile(ptr->GetPath());
 					path.MakeRelative(util::get_program_path());
-					Con::cout<<" '"<<path.GetString()<<"'";
+					Con::cwar<<" '"<<path.GetString()<<"'";
 				}
 			}
-			Con::cout<<": "<<e.what()<<":\n";
+			Con::cwar<<": "<<e.what()<<":\n";
 			if constexpr(std::is_same_v<std::remove_const_t<std::remove_reference_t<T>>,std::string>)
 			{
 				auto fptr = FileManager::OpenFile(f.c_str(),"r");

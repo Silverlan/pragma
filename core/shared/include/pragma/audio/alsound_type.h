@@ -24,6 +24,7 @@ enum class DLLNETWORK ALSoundType : Int32
 	Environment = Physics<<1,
 	GUI = Environment<<1,
 
+	Count,
 	All = Effect | Music | Voice | Weapon | NPC | Player | Vehicle | Physics | Environment | GUI
 };
 REGISTER_BASIC_BITWISE_OPERATORS(ALSoundType)

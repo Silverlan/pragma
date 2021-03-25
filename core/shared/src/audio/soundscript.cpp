@@ -10,12 +10,14 @@
 #include "datasystem.h"
 #include "pragma/audio/soundscript.h"
 #include "pragma/audio/soundscript_events.h"
+#include "pragma/util/util_game.hpp"
 #include "datasystem.h"
 #include <mathutil/umath.h>
 #include <sharedutils/util_string.h>
+#include <udm.hpp>
 
 #undef CreateEvent
-
+#pragma optimize("",off)
 SoundScript::SoundScript(SoundScriptManager *manager,const std::string &identifier)
 	: SoundScriptEventContainer(manager),m_identifier(identifier)
 {}
@@ -64,6 +66,40 @@ SoundScript *SoundScriptManager::FindScript(const char *name)
 	return NULL;
 }
 
+bool SoundScriptManager::Load(const char *fname,const std::function<std::shared_ptr<SoundScript>(const std::string&)> fCreateSoundScript,std::vector<std::shared_ptr<SoundScript>> *scripts)
+{
+	std::string err;
+	auto udmData = util::load_udm_asset(fname,&err);
+	if(udmData == nullptr)
+		return false;
+	auto &data = *udmData;
+	auto udm = data.GetAssetData().GetData();
+	for(auto pair : udm.ElIt())
+	{
+		std::string name {pair.key};
+		StringToLower(name);
+		// Note: std::shared_ptr<TSoundScript>(new TSoundScript{this,it->first}); causes weird compiler errors for CSoundScript (clientside), but this works
+		// auto script = std::static_pointer_cast<TSoundScript>(std::shared_ptr<void>(static_cast<void*>(new TSoundScript{this,it->first}))); // Does not work with gcc
+		auto script = fCreateSoundScript(name);
+
+		script->InitializeEvents(pair.property);
+		auto it = m_soundScripts.find(name);
+		if(it == m_soundScripts.end())
+		{
+			m_soundScripts.insert(std::make_pair(name,script));
+			if(scripts != NULL)
+				scripts->push_back(script);
+		}
+		else
+		{
+			script = nullptr;
+			if(scripts != NULL)
+				scripts->push_back(it->second);
+		}
+	}
+	return true;
+}
+
 SoundScriptEvent *SoundScriptManager::CreateEvent(std::string name)
 {
 	if(name == "playsound")
@@ -73,3 +109,4 @@ SoundScriptEvent *SoundScriptManager::CreateEvent(std::string name)
 	return new SoundScriptEvent(this);
 }
 SoundScriptEvent *SoundScriptManager::CreateEvent() {return CreateEvent("");}
+#pragma optimize("",on)

@@ -26,7 +26,7 @@ void CExplosionComponent::Initialize()
 {
 	BaseEnvExplosionComponent::Initialize();
 	pragma::CParticleSystemComponent::Precache("explosion");
-	client->LoadSoundScripts("fx.txt");
+	client->LoadSoundScripts("fx.udm");
 }
 
 void CExplosionComponent::Explode()

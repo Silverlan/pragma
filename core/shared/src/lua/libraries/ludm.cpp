@@ -141,6 +141,15 @@ static luabind::object get_array_values(lua_State *l,::udm::PropertyWrapper &p,:
 		std::visit(vs,::udm::get_numeric_tag(type));
 	else if(::udm::is_generic_type(type))
 		std::visit(vs,::udm::get_generic_tag(type));
+	else if(::udm::is_non_trivial_type(type))
+	{
+		std::visit([&vs](auto tag) {
+			using T = decltype(tag)::type;
+			// TODO: Add support for other non-trivial types
+			if constexpr(std::is_same_v<T,udm::String>)
+				vs(tag);
+		},::udm::get_non_trivial_tag(type));
+	}
 	return t;
 }
 
@@ -265,8 +274,8 @@ class LuaUdmArrayIterator
 public:
 	LuaUdmArrayIterator(::udm::PropertyWrapper &prop);
 
-	udm::ArrayIterator<udm::Element> begin() {return m_property->begin();}
-	udm::ArrayIterator<udm::Element> end() {return m_property->end();}
+	udm::ArrayIterator<udm::LinkedPropertyWrapper> begin() {return m_property->begin();}
+	udm::ArrayIterator<udm::LinkedPropertyWrapper> end() {return m_property->end();}
 private:
 	::udm::PropertyWrapper *m_property = nullptr;
 };

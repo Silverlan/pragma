@@ -10,6 +10,7 @@
 #include "pragma/audio/alsound_type.h"
 #include <se_script.hpp>
 #include <sharedutils/util_file.h>
+#include <udm.hpp>
 
 bool util::port_sound_script(NetworkState *nw,const std::string &path)
 {
@@ -26,17 +27,22 @@ bool util::port_sound_script(NetworkState *nw,const std::string &path)
 	auto outPath = util::IMPORT_PATH +FileManager::GetCanonicalizedPath(path);
 	if(ustring::substr(outPath,0,8) == std::string("scripts") +FileManager::GetDirectorySeparator())
 		outPath = "scripts/sounds/" +outPath.substr(8);
+	ufile::remove_extension_from_filename(outPath,std::array<std::string,1>{"txt"});
+	outPath += ".udm";
 	FileManager::CreatePath(ufile::get_path_from_filename(outPath).c_str());
-	auto fOut = FileManager::OpenFile<VFilePtrReal>(outPath.c_str(),"w");
-	if(fOut == nullptr)
-		return false;
+
+	auto udmData = udm::Data::Create();
+	auto outData = udmData->GetAssetData();
+	auto udm = *outData;
 	for(auto &data : root.data)
 	{
 		if(data->IsBlock() == false)
 			continue;
 		auto &block = static_cast<se::ScriptBlock&>(*data);
-		fOut->WriteString("\"" +block.identifier +"\"\n{\n");
-		fOut->WriteString("\tplaysound\n\t{\n");
+		auto udmBlock = udm[block.identifier];
+		auto udmEvents = udmBlock.AddArray("events",1);
+		auto udmEvent = udmEvents[0];
+		udmEvent["type"] = "playsound";
 
 		auto bPlayGlobally = false;
 		std::vector<std::string> sources;
@@ -61,7 +67,7 @@ bool util::port_sound_script(NetworkState *nw,const std::string &path)
 			if(val.identifier == "volume")
 			{
 				auto outVal = (val.value != "VOL_NORM") ? val.value : "1.0";
-				fOut->WriteString("\t\t$float gain " +outVal +"\n");
+				udmEvent["gain"] = outVal;
 			}
 			else if(val.identifier == "pitch")
 			{
@@ -74,7 +80,7 @@ bool util::port_sound_script(NetworkState *nw,const std::string &path)
 					outVal = "1.2";
 				else
 					outVal = std::to_string(util::to_float(outVal) /100.f);
-				fOut->WriteString("\t\t$float pitch " +outVal +"\n");
+				udmEvent["pitch"] = outVal;
 			}
 			else if(val.identifier == "soundlevel")
 			{
@@ -83,7 +89,7 @@ bool util::port_sound_script(NetworkState *nw,const std::string &path)
 				if(val.identifier == "0")
 				{
 					bPlayGlobally = true;
-					fOut->WriteString("\t\t$bool global 1\n");
+					udmEvent["global"] = true;
 				}
 			}
 			else if(val.identifier == "channel")
@@ -99,7 +105,7 @@ bool util::port_sound_script(NetworkState *nw,const std::string &path)
 				};
 				auto it = channelToType.find(val.value);
 				if(it != channelToType.end())
-					fOut->WriteString("\t\t$int type " +std::to_string(umath::to_integral(it->second)) +"\n");
+					udmEvent["type"] = udm::enum_to_string(it->second);
 			}
 			else if(val.identifier == "wave")
 				sources.push_back(val.value);
@@ -112,7 +118,7 @@ bool util::port_sound_script(NetworkState *nw,const std::string &path)
 			for(auto &src : sources)
 			{
 				if(ustring::match(src,"*loop*") == true)
-					fOut->WriteString("\t\t$bool loop 1\n");
+					udmEvent["loop"] = true;
 
 				const std::string removePrefixes = "*#@><^()}$!?"; // Special prefixes that need to be removed
 				while(src.empty() == false && removePrefixes.find(src.front()) != std::string::npos)
@@ -125,20 +131,18 @@ bool util::port_sound_script(NetworkState *nw,const std::string &path)
 				}
 			}
 			if(sources.size() == 1)
-				fOut->WriteString("\t\t$string source \"" +sources.front() +"\"\n");
+				udmEvent["source"] = sources.front();
 			else
-			{
-				fOut->WriteString("\t\tsource\n\t\t{\n");
-				for(auto &src : sources)
-					fOut->WriteString("\t\t\t\"" +src +"\"\n");
-				fOut->WriteString("\t\t}\n");
-			}
+				udmEvent["source"] = sources;
 		}
 		if(bStream == true)
-			fOut->WriteString("\t\t$bool stream 1\n");
-		fOut->WriteString("\t\t$string mode " +mode +"\n");
-		fOut->WriteString("\t}\n}\n");
+			udmEvent["stream"] = true;
+		udmEvent["mode"] = mode;
 	}
-	return true;
+
+	auto fOut = FileManager::OpenFile<VFilePtrReal>(outPath.c_str(),"w");
+	if(fOut == nullptr)
+		return false;
+	return udmData->SaveAscii(fOut,false);
 }
 

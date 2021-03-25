@@ -25,7 +25,7 @@ protected:
 public:
 	CSSEPlaySound(SoundScriptManager *manager);
 	std::vector<std::shared_ptr<al::Effect>> effects;
-	virtual void Initialize(const std::shared_ptr<ds::Block> &data) override;
+	virtual void Initialize(udm::LinkedPropertyWrapper &prop) override;
 	virtual SSESound *CreateSound(double tStart,const std::function<std::shared_ptr<ALSound>(const std::string&,ALChannel,ALCreateFlags)> &createSound) override;
 };
 

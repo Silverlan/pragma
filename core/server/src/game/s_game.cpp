@@ -231,7 +231,7 @@ void SGame::Initialize()
 	//server->SendPacket("game_start",p,pragma::networking::Protocol::SlowReliable);
 	SetUp();
 	if(m_surfaceMaterialManager)
-		m_surfaceMaterialManager->Load("scripts\\physics\\materials.txt");
+		m_surfaceMaterialManager->Load("scripts/physics/materials.udm");
 	m_flags |= GameFlags::GameInitialized;
 	CallCallbacks<void,Game*>("OnGameInitialized",this);
 	for(auto *gmC : GetGamemodeComponents())

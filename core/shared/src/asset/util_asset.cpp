@@ -43,9 +43,12 @@ bool pragma::asset::matches_format(const std::string_view &format0,const std::st
 {
 	return ustring::compare(format0.data(),format1.data(),false,umath::min(format0.length(),format1.length()));
 }
-util::Path pragma::asset::relative_path_to_absolute_path(const util::Path &relPath,Type type)
+util::Path pragma::asset::relative_path_to_absolute_path(const util::Path &relPath,Type type,const std::optional<std::string> &rootPath)
 {
-	return (get_asset_root_directory(type) +std::string{'/'}) +relPath;
+	auto r = (get_asset_root_directory(type) +std::string{'/'}) +relPath;
+	if(rootPath.has_value())
+		r = *rootPath +r;
+	return r;
 }
 util::Path pragma::asset::absolute_path_to_relative_path(const util::Path &absPath,Type type)
 {

@@ -128,8 +128,8 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data,Enti
 	auto udmLightmap = udm["lightmap"];
 	if(udmLightmap)
 	{
-		udm["lightmap.intensity"](m_lightMapIntensity);
-		udm["lightmap.exposure"](m_lightMapExposure);
+		udm["lightmap"]["intensity"](m_lightMapIntensity);
+		udm["lightmap"]["exposure"](m_lightMapExposure);
 	}
 
 	uint32_t nextEntIdx = 0;
@@ -140,7 +140,7 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data,Enti
 
 		if(udmEnt["flags"])
 		{
-			auto udmClientsideOnly = udmEnt["flags.clientsideOnly"];
+			auto udmClientsideOnly = udmEnt["flags"]["clientsideOnly"];
 			if(udmClientsideOnly.ToValue<bool>(false))
 				entData->SetFlags(EntityData::Flags::ClientsideOnly);
 		}
@@ -240,7 +240,7 @@ bool pragma::asset::WorldData::Save(udm::AssetData &outData,const std::string &m
 		udmEnt["className"] = entData->GetClassName();
 
 		if(umath::is_flag_set(entData->GetFlags(),EntityData::Flags::ClientsideOnly))
-			udmEnt["flags.clientsideOnly"] = true;
+			udmEnt["flags"]["clientsideOnly"] = true;
 
 		umath::ScaledTransform pose {};
 		pose.SetOrigin(entData->GetOrigin());
@@ -281,8 +281,8 @@ bool pragma::asset::WorldData::Save(udm::AssetData &outData,const std::string &m
 		ufile::remove_extension_from_filename(strMapName); // TODO: Specify extensions
 		ustring::to_lower(strMapName);
 		SaveLightmapAtlas(strMapName);
-		udm["lightmap.intensity"] = m_lightMapIntensity;
-		udm["lightmap.exposure"] = m_lightMapExposure;
+		udm["lightmap"]["intensity"] = m_lightMapIntensity;
+		udm["lightmap"]["exposure"] = m_lightMapExposure;
 	}
 
 	if(m_bspTree && m_bspTree->GetNodes().empty() == false && m_bspTree->GetClusterCount() > 0)

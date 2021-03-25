@@ -766,7 +766,7 @@ bool ModelSubMesh::Save(udm::AssetData &outData,std::string &outErr)
 	udm["geometryType"] = udm::enum_to_string(GetGeometryType());
 	udm["vertexData"] = udm::compress_lz4_blob(GetVertices());
 	udm["indexData"] = udm::compress_lz4_blob(GetTriangles());
-	udm["materialIndex"] = m_skinTextureIndex;
+	udm["skinMaterialIndex"] = m_skinTextureIndex;
 
 	auto udmUvSets = udm["uvSets"];
 	for(auto &pair : GetUVSets())
@@ -807,7 +807,7 @@ bool ModelSubMesh::LoadFromAssetData(const udm::AssetData &data,std::string &out
 	udm::to_enum_value<GeometryType>(udm["geometryType"],m_geometryType);
 	udm["vertexData"].GetBlobData(GetVertices());
 	udm["indexData"].GetBlobData(GetTriangles());
-	udm["materialIndex"](m_skinTextureIndex);
+	udm["skinMaterialIndex"](m_skinTextureIndex);
 
 	auto udmUvSets = udm["uvSets"];
 	auto &uvSets = GetUVSets();

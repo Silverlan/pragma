@@ -394,8 +394,8 @@ bool CollisionMesh::Save(Game &game,Model &mdl,udm::AssetData &outData,std::stri
 	if(surfMatIdx >= 0 && surfMatIdx < surfaceMaterials.size())
 		udm["surfaceMaterial"] = surfaceMaterials[surfMatIdx].GetIdentifier();
 
-	udm["bounds.min"] = m_min;
-	udm["bounds.max"] = m_max;
+	udm["bounds"]["min"] = m_min;
+	udm["bounds"]["max"] = m_max;
 
 	udm["vertices"] = udm::compress_lz4_blob(GetVertices());
 	udm["triangles"] = udm::compress_lz4_blob(GetTriangles());
@@ -404,7 +404,7 @@ bool CollisionMesh::Save(Game &game,Model &mdl,udm::AssetData &outData,std::stri
 	udm["centerOfMass"] = GetCenterOfMass();
 	udm["mass"] = GetMass();
 
-	udm["flags.convex"] = IsConvex();
+	udm["flags"]["convex"] = IsConvex();
 
 	// Soft-body
 	auto softBody = IsSoftBody();
@@ -500,8 +500,8 @@ bool CollisionMesh::LoadFromAssetData(Game &game,Model &mdl,const udm::AssetData
 
 	m_origin = pose.GetOrigin();
 
-	udm["bounds.min"](m_min);
-	udm["bounds.max"](m_max);
+	udm["bounds"]["min"](m_min);
+	udm["bounds"]["max"](m_max);
 
 	udm["vertices"].GetBlobData(GetVertices());
 	udm["triangles"].GetBlobData(GetTriangles());
@@ -510,7 +510,7 @@ bool CollisionMesh::LoadFromAssetData(Game &game,Model &mdl,const udm::AssetData
 	udm["centerOfMass"](m_centerOfMass);
 	udm["mass"](m_mass);
 
-	udm["flags.convex"](m_bConvex);
+	udm["flags"]["convex"](m_bConvex);
 
 	// Soft-body
 	auto udmSoftBody = udm["softBody"];

@@ -21,7 +21,7 @@ class DLLNETWORK SurfaceMaterialManager
 {
 public:
 	SurfaceMaterialManager(pragma::physics::IEnvironment &env);
-	void Load(const std::string &path);
+	bool Load(const std::string &path);
 	SurfaceMaterial &Create(const std::string &identifier,Float staticFriction,Float dynamicFriction,Float restitution);
 	SurfaceMaterial &Create(const std::string &identifier,Float friction=0.5f,Float restitution=0.5f);
 	// The returned pointer is NOT guaranteed to stay alive; Don't store it.
@@ -41,6 +41,8 @@ namespace pragma
 		enum class PolyFlags : uint16_t;
 	};
 };
+
+namespace udm {struct LinkedPropertyWrapper;};
 
 struct PhysLiquid;
 class DLLNETWORK SurfaceMaterial
@@ -72,6 +74,7 @@ public:
 	SurfaceMaterial(pragma::physics::IEnvironment &env,const std::string &identifier,UInt idx,pragma::physics::IMaterial &physMat);
 	SurfaceMaterial(const SurfaceMaterial &other);
 	void Reset();
+	void Load(udm::LinkedPropertyWrapper &prop);
 
 	const std::string &GetIdentifier() const;
 	UInt GetIndex() const;

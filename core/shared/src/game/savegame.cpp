@@ -72,12 +72,6 @@ bool savegame::load(Game &game,const std::string &fileName,std::string &outErr)
 	// if(version > FORMAT_VERSION)
 	// 	return false;
 
-	auto f = FileManager::OpenFile(fileName.c_str(),"rb");
-	if(f == nullptr)
-	{
-		outErr = "Unable to open file '" +fileName +"'!";
-		return false;
-	}
 	std::string map;
 	data["map"](map);
 

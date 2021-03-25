@@ -9,8 +9,14 @@
 
 #include "pragma/networkdefinitions.h"
 #include <sharedutils/util_path.hpp>
+#include <material.h>
+#include <memory>
 
 class Game;
+class VFilePtrInternal;
+class VFilePtrInternalReal;
+using VFilePtr = std::shared_ptr<VFilePtrInternal>;
+using VFilePtrReal = std::shared_ptr<VFilePtrInternalReal>;
 namespace pragma::asset
 {
 	static constexpr auto FORMAT_MAP_BINARY = "pmap_b";
@@ -21,9 +27,9 @@ namespace pragma::asset
 	static constexpr auto FORMAT_MODEL_ASCII = "pmdl";
 	static constexpr auto FORMAT_MODEL_LEGACY = "wmd";
 	
-	static constexpr auto FORMAT_MATERIAL_BINARY = "pmat_b";
-	static constexpr auto FORMAT_MATERIAL_ASCII = "pmat";
-	static constexpr auto FORMAT_MATERIAL_LEGACY = "wmi";
+	static constexpr auto FORMAT_MATERIAL_BINARY = Material::FORMAT_MATERIAL_BINARY;
+	static constexpr auto FORMAT_MATERIAL_ASCII = Material::FORMAT_MATERIAL_ASCII;
+	static constexpr auto FORMAT_MATERIAL_LEGACY = Material::FORMAT_MATERIAL_LEGACY;
 
 	enum class Type : uint8_t
 	{
@@ -51,7 +57,7 @@ namespace pragma::asset
 	DLLNETWORK std::optional<std::string> determine_format_from_data(VFilePtr &f,Type type);
 	DLLNETWORK std::optional<std::string> determine_format_from_filename(const std::string_view &fileName,Type type);
 	DLLNETWORK bool matches_format(const std::string_view &format0,const std::string_view &format1);
-	DLLNETWORK util::Path relative_path_to_absolute_path(const util::Path &relPath,Type type);
+	DLLNETWORK util::Path relative_path_to_absolute_path(const util::Path &relPath,Type type,const std::optional<std::string> &rootPath={});
 	DLLNETWORK util::Path absolute_path_to_relative_path(const util::Path &absPath,Type type);
 	DLLNETWORK std::optional<std::string> get_udm_format_extension(Type type,bool binary);
 	constexpr const char *get_asset_root_directory(Type type)
@@ -109,8 +115,8 @@ namespace pragma::asset
 			std::vector<std::string> fileExtensions;
 		};
 		using ExporterInfo = ImporterInfo;
-		using ImportHandler = std::function<std::unique_ptr<IAssetWrapper>(Game &game,VFilePtr,const std::optional<std::string>&,std::string&)>;
-		using ExportHandler = std::function<bool(Game &game,VFilePtrReal,const IAssetWrapper&,std::string&)>;
+		using ImportHandler = std::function<std::unique_ptr<IAssetWrapper>(Game&,VFilePtr,const std::optional<std::string>&,std::string&)>;
+		using ExportHandler = std::function<bool(Game&,VFilePtrReal,const IAssetWrapper&,std::string&)>;
 		void RegisterImporter(const ImporterInfo &importerInfo,Type type,const ImportHandler &importHandler);
 		void RegisterExporter(const ExporterInfo &importerInfo,Type type,const ExportHandler &exportHandler);
 		std::unique_ptr<IAssetWrapper> ImportAsset(Game &game,Type type,VFilePtr f,const std::optional<std::string> &filePath={},std::string *optOutErr=nullptr) const;

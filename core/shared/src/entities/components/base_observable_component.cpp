@@ -71,8 +71,8 @@ void BaseObservableComponent::Save(udm::LinkedPropertyWrapper &udm)
 		udm["rotateWithObservee"] = camData.rotateWithObservee;
 		if(camData.angleLimits.has_value())
 		{
-			udm["limits.min"] = camData.angleLimits->first;
-			udm["limits.max"] = camData.angleLimits->second;
+			udm["limits"]["min"] = camData.angleLimits->first;
+			udm["limits"]["max"] = camData.angleLimits->second;
 		}
 	};
 	auto &dataFp = GetCameraData(CameraType::FirstPerson);
@@ -91,8 +91,8 @@ void BaseObservableComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t vers
 		camData.localOrigin = udm["localOrigin"].ToValue<Vector3>();
 		udm["offset"](**camData.offset);
 		udm["rotateWithObservee"](camData.rotateWithObservee);
-		udm["limits.min"](camData.angleLimits->first);
-		udm["limits.max"](camData.angleLimits->second);
+		udm["limits"]["min"](camData.angleLimits->first);
+		udm["limits"]["max"](camData.angleLimits->second);
 	};
 	auto &dataFp = GetCameraData(CameraType::FirstPerson);
 	auto &dataTp = GetCameraData(CameraType::ThirdPerson);

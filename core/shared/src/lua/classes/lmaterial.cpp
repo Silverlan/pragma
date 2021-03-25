@@ -13,7 +13,7 @@
 #include <detail_mode.hpp>
 #include <sharedutils/alpha_mode.hpp>
 #include <sharedutils/util_shaderinfo.hpp>
-
+#include <udm.hpp>
 
 void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 {
@@ -51,18 +51,29 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 	classDef.def("UpdateTextures",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
 		mat.UpdateTextures();
 	}));
-	classDef.def("Save",static_cast<void(*)(lua_State*,::Material&,const std::string&)>([](lua_State *l,::Material &mat,const std::string &fileName) {
-		auto matFileName = fileName;
-		std::string rootPath;
-		if(Lua::file::validate_write_operation(l,matFileName,rootPath) == false)
-		{
-			Lua::PushBool(l,false);
-			return;
-		}
-		Lua::PushBool(l,mat.Save(matFileName,rootPath));
+	classDef.def("Save",static_cast<void(*)(lua_State*,::Material&,udm::AssetData&)>([](lua_State *l,::Material &mat,udm::AssetData &assetData) {
+		std::string err;
+		auto result = mat.Save(assetData,err);
+		if(result == false)
+			Lua::PushString(l,err);
+		else
+			Lua::PushBool(l,result);
 	}));
 	classDef.def("Save",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
-		Lua::PushBool(l,mat.Save());
+		std::string err;
+		auto result = mat.Save(err);
+		if(result == false)
+			Lua::PushString(l,err);
+		else
+			Lua::PushBool(l,result);
+	}));
+	classDef.def("Save",static_cast<void(*)(lua_State*,::Material&,const std::string&)>([](lua_State *l,::Material &mat,const std::string &fname) {
+		std::string err;
+		auto result = mat.Save(fname,err);
+		if(result == false)
+			Lua::PushString(l,err);
+		else
+			Lua::PushBool(l,result);
 	}));
 	classDef.def("IsError",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
 		Lua::PushBool(l,mat.IsError());

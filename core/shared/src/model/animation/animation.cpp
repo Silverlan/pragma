@@ -82,8 +82,8 @@ bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr
 	udm["activityWeight"](m_activityWeight);
 	udm["fps"](m_fps);
 
-	m_renderBounds.first = udm["renderBounds.min"](Vector3{std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max()});
-	m_renderBounds.second = udm["renderBounds.max"](Vector3{std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest()});
+	m_renderBounds.first = udm["renderBounds"]["min"](Vector3{std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max()});
+	m_renderBounds.second = udm["renderBounds"]["max"](Vector3{std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest()});
 
 	auto fadeInTime = udm["fadeInTime"];
 	if(fadeInTime)
@@ -234,8 +234,8 @@ bool Animation::Save(udm::AssetData &outData,std::string &outErr)
 	udm["fps"] = static_cast<float>(GetFPS());
 
 	auto &renderBounds = GetRenderBounds();
-	udm["renderBounds.min"] = renderBounds.first;
-	udm["renderBounds.max"] = renderBounds.second;
+	udm["renderBounds"]["min"] = renderBounds.first;
+	udm["renderBounds"]["max"] = renderBounds.second;
 
 	if(HasFadeInTime())
 		udm["fadeInTime"] = GetFadeInTime();
@@ -262,9 +262,9 @@ bool Animation::Save(udm::AssetData &outData,std::string &outErr)
 	auto *blendController = GetBlendController();
 	if(blendController)
 	{
-		udm["blendController.controller"] = blendController->controller;
+		udm["blendController"]["controller"] = blendController->controller;
 		auto &transitions = blendController->transitions;
-		auto udmTransitions = udm.AddArray("blendController.transitions",transitions.size());
+		auto udmTransitions = udm["blendController"].AddArray("transitions",transitions.size());
 		for(auto i=decltype(transitions.size()){0u};i<transitions.size();++i)
 		{
 			auto &transition = transitions[i];
@@ -272,8 +272,8 @@ bool Animation::Save(udm::AssetData &outData,std::string &outErr)
 			udmTransition["animation"] = transition.animation;
 			udmTransition["transition"] = transition.transition;
 		}
-		udm["blendController.animationPostBlendController"] = blendController->animationPostBlendController;
-		udm["blendController.animationPostBlendTarget"] = blendController->animationPostBlendTarget;
+		udm["blendController"]["animationPostBlendController"] = blendController->animationPostBlendController;
+		udm["blendController"]["animationPostBlendTarget"] = blendController->animationPostBlendTarget;
 	}
 
 	auto animFlags = GetFlags();

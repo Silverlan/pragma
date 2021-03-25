@@ -149,6 +149,7 @@ void CPBRConverterComponent::WriteAOMap(Model &mdl,CMaterial &mat,uimg::ImageBuf
 	if(requiresSave)
 	{
 		mat.UpdateTextures();
-		mat.Save();
+		std::string err;
+		mat.Save(err);
 	}
 }

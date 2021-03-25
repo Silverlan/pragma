@@ -88,18 +88,18 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 			if(assetWrapper != nullptr)
 			{
 				bSkipPort = true; // Safety flag to make sure we never end up in an infinite recursion
-				auto r = Load<TModel,TModelMesh,TModelSubMesh>(game,model,loadMaterial,loadModel);
+				auto r = Load<TModel,TModelMesh,TModelSubMesh>(game,pmodel,loadMaterial,loadModel);
 				bSkipPort = false;
 				return r;
 			}
 
-			auto mdlName = model;
+			auto mdlName = pmodel;
 			ufile::remove_extension_from_filename(mdlName);
 			auto *nw = game->GetNetworkState();
 			if(util::port_hl2_model(nw,"models\\",mdlName +".mdl") == true || util::port_source2_model(nw,"models\\",mdlName +".vmdl_c") == true || util::port_nif_model(nw,"models\\",mdlName +".nif"))
 			{
 				bSkipPort = true; // Safety flag to make sure we never end up in an infinite recursion
-				auto r = Load<TModel,TModelMesh,TModelSubMesh>(game,model,loadMaterial,loadModel);
+				auto r = Load<TModel,TModelMesh,TModelSubMesh>(game,pmodel,loadMaterial,loadModel);
 				bSkipPort = false;
 				return r;
 			}

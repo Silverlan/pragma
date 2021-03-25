@@ -14,6 +14,8 @@
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/model/c_model.h"
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/asset/util_asset.hpp>
+#include <pragma/game/game_resources.hpp>
 #include <sharedutils/util_file.h>
 #include <util_image_buffer.hpp>
 #include <util_texture_info.hpp>
@@ -234,14 +236,16 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 		Con::cout<<"Skybox cubemap texture saved as '"<<fullPath<<"'! Generating material..."<<Con::endl;
 		auto *mat = client->CreateMaterial("skybox");
 		mat->GetDataBlock()->AddValue("texture","skybox",matName);
-		if(mat->Save(matName,"addons/converted/"))
+		auto savePath = pragma::asset::relative_path_to_absolute_path(matName,pragma::asset::Type::Material,util::CONVERT_PATH);
+		std::string err;
+		if(mat->Save(savePath.GetString(),err))
 		{
 			client->LoadMaterial(matName,true);
 			Con::cout<<"Skybox material saved as '"<<(matName +".wmi")<<"'"<<Con::endl;
 			return true;
 		}
 		else
-			Con::cwar<<"WARNING: Unable to save skybox material as '"<<(matName +".wmi")<<"'!"<<Con::endl;
+			Con::cwar<<"WARNING: Unable to save skybox material as '"<<(matName +".wmi")<<"': "<<err<<"!"<<Con::endl;
 	}
 	else
 		Con::cwar<<"WARNING: Unable to save skybox cubemap texture as '"<<fullPath<<"'!"<<Con::endl;

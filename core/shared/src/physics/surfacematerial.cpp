@@ -10,16 +10,18 @@
 #include "pragma/math/surfacematerial.h"
 #include "pragma/physics/environment.hpp"
 #include "pragma/physics/phys_material.hpp"
+#include "pragma/util/util_game.hpp"
 #include <fsys/filesystem.h>
 #include "datasystem.h"
 #include <datasystem_color.h>
 #include <datasystem_vector.h>
 #include "pragma/ai/navsystem.h"
 #include <algorithm>
+#include <udm.hpp>
 
 extern DLLNETWORK Engine *engine;
 
-
+#pragma optimize("",off)
 SurfaceMaterialManager::SurfaceMaterialManager(pragma::physics::IEnvironment &env)
 	: m_physEnv{env}
 {
@@ -34,119 +36,21 @@ SurfaceMaterialManager::SurfaceMaterialManager(pragma::physics::IEnvironment &en
 	genericPhysMat.SetSurfaceMaterial(surfMat);
 }
 
-void SurfaceMaterialManager::Load(const std::string &path)
+bool SurfaceMaterialManager::Load(const std::string &path)
 {
-	auto data = ds::System::LoadData(path.c_str(),{
-		{"NAV_FLAG_NONE",std::to_string(umath::to_integral(pragma::nav::PolyFlags::None))},
-		{"NAV_FLAG_WALK",std::to_string(umath::to_integral(pragma::nav::PolyFlags::Walk))},
-		{"NAV_FLAG_SWIM",std::to_string(umath::to_integral(pragma::nav::PolyFlags::Swim))},
-		{"NAV_FLAG_DOOR",std::to_string(umath::to_integral(pragma::nav::PolyFlags::Door))},
-		{"NAV_FLAG_JUMP",std::to_string(umath::to_integral(pragma::nav::PolyFlags::Jump))},
-		{"NAV_FLAG_DISABLED",std::to_string(umath::to_integral(pragma::nav::PolyFlags::Disabled))},
-		{"NAV_FLAG_ALL",std::to_string(umath::to_integral(pragma::nav::PolyFlags::All))}
-	});
-	if(data == nullptr)
-		return;
-	auto *values = data->GetData();
-	for(auto it=values->begin();it!=values->end();it++)
+	std::string err;
+	auto udmData = util::load_udm_asset(path,&err);
+	if(udmData == nullptr)
+		return false;
+	auto &data = *udmData;
+	auto udm = data.GetAssetData().GetData();
+	for(auto pair : udm.ElIt())
 	{
-		auto &val = it->second;
-		if(val->IsBlock())
-		{
-			auto &identifier = it->first;
-			if(!identifier.empty())
-			{
-				auto &physMat = Create(identifier);
-				auto *mat = static_cast<ds::Block*>(val.get());
-
-				std::string strVal;
-				Float val = 0.f;
-				Int32 ival = 0;
-				if(mat->GetInt("navigation_flags",&ival))
-					physMat.SetNavigationFlags(static_cast<pragma::nav::PolyFlags>(ival));
-				if(mat->GetString("footsteps",&strVal))
-					physMat.SetFootstepType(strVal);
-				if(mat->GetString("impact_bullet",&strVal))
-					physMat.SetBulletImpactSound(strVal);
-				if(mat->GetString("impact_effect",&strVal))
-					physMat.SetImpactParticleEffect(strVal);
-				if(mat->GetString("impact_soft",&strVal))
-					physMat.SetSoftImpactSound(strVal);
-				if(mat->GetString("impact_hard",&strVal))
-					physMat.SetHardImpactSound(strVal);
-				if(mat->GetString("surface_type",&strVal))
-					physMat.SetSurfaceType(strVal);
-
-				if(mat->GetFloat("density",&val))
-					physMat.SetDensity(val);
-				if(mat->GetFloat("linear_drag_coefficient",&val))
-					physMat.SetLinearDragCoefficient(val);
-				if(mat->GetFloat("torque_drag_coefficient",&val))
-					physMat.SetTorqueDragCoefficient(val);
-				if(mat->GetFloat("wave_stiffness",&val))
-					physMat.SetWaveStiffness(val);
-				if(mat->GetFloat("wave_propagation",&val))
-					physMat.SetWavePropagation(val);
-				if(mat->GetFloat("friction",&val))
-					physMat.SetFriction(val);
-				if(mat->GetFloat("static_friction",&val))
-					physMat.SetStaticFriction(val);
-				if(mat->GetFloat("dynamic_friction",&val))
-					physMat.SetDynamicFriction(val);
-				if(mat->GetFloat("restitution",&val))
-					physMat.SetRestitution(val);
-				auto audio = mat->GetBlock("audio",0u);
-				if(audio != nullptr)
-				{
-					if(audio->GetFloat("low_frequency_absorption",&val))
-						physMat.SetAudioLowFrequencyAbsorption(val);
-					if(audio->GetFloat("mid_frequency_absorption",&val))
-						physMat.SetAudioMidFrequencyAbsorption(val);
-					if(audio->GetFloat("high_frequency_absorption",&val))
-						physMat.SetAudioHighFrequencyAbsorption(val);
-					if(audio->GetFloat("scattering",&val))
-						physMat.SetAudioScattering(val);
-					if(audio->GetFloat("low_frequency_transmission",&val))
-						physMat.SetAudioLowFrequencyTransmission(val);
-					if(audio->GetFloat("mid_frequency_transmission",&val))
-						physMat.SetAudioMidFrequencyTransmission(val);
-					if(audio->GetFloat("high_frequency_transmission",&val))
-						physMat.SetAudioHighFrequencyTransmission(val);
-				}
-
-				float ior;
-				if(mat->GetFloat("ior",&ior))
-					physMat.SetIOR(ior);
-
-				auto pbr = mat->GetBlock("pbr",0u);
-				if(pbr)
-				{
-					if(pbr->GetFloat("metalness",&val))
-						physMat.GetPBRInfo().metalness = val;
-					if(pbr->GetFloat("roughness",&val))
-						physMat.GetPBRInfo().roughness = val;
-					auto sss = pbr->GetBlock("subsurface_scattering");
-					if(sss)
-					{
-						if(sss->GetFloat("factor",&val))
-							physMat.GetPBRInfo().subsurface.factor = val;
-
-						auto &color = sss->GetValue("color");
-						if(color != nullptr && typeid(*color) == typeid(ds::Color))
-							physMat.GetPBRInfo().subsurface.color = static_cast<ds::Color&>(*color).GetValue();
-
-						auto &scatterColor = sss->GetValue("scatter_color");
-						if(scatterColor != nullptr && typeid(*scatterColor) == typeid(ds::Vector))
-							physMat.GetPBRInfo().subsurface.scatterColor = static_cast<ds::Vector&>(*scatterColor).GetValue();
-
-						auto &radiusMM = sss->GetValue("radius_mm");
-						if(radiusMM != nullptr && typeid(*radiusMM) == typeid(ds::Vector))
-							physMat.GetPBRInfo().subsurface.radiusMM = static_cast<ds::Vector&>(*radiusMM).GetValue();
-					}
-				}
-			}
-		}
+		auto &identifier = pair.key;
+		auto &physMat = Create(std::string{identifier});
+		physMat.Load(pair.property);
 	}
+	return true;
 }
 SurfaceMaterial &SurfaceMaterialManager::Create(const std::string &identifier,Float staticFriction,Float dynamicFriction,Float restitution)
 {
@@ -278,6 +182,104 @@ float SurfaceMaterial::GetAudioMidFrequencyTransmission() const {return m_audioI
 void SurfaceMaterial::SetAudioHighFrequencyTransmission(float transmission) {m_audioInfo.highFreqTransmission = transmission;}
 float SurfaceMaterial::GetAudioHighFrequencyTransmission() const {return m_audioInfo.highFreqTransmission;}
 
+void SurfaceMaterial::Load(udm::LinkedPropertyWrapper &prop)
+{
+	if(prop["navigation_flags"])
+	{
+		auto flags = pragma::nav::PolyFlags::None;
+		udm::read_flag(prop["navigation_flags"],flags,pragma::nav::PolyFlags::Walk,"walk");
+		udm::read_flag(prop["navigation_flags"],flags,pragma::nav::PolyFlags::Swim,"swim");
+		udm::read_flag(prop["navigation_flags"],flags,pragma::nav::PolyFlags::Door,"door");
+		udm::read_flag(prop["navigation_flags"],flags,pragma::nav::PolyFlags::Jump,"jump");
+		udm::read_flag(prop["navigation_flags"],flags,pragma::nav::PolyFlags::Disabled,"disabled");
+		udm::read_flag(prop["navigation_flags"],flags,pragma::nav::PolyFlags::All,"all");
+		SetNavigationFlags(flags);
+	}
+	prop["footsteps"](m_footstepType);
+	prop["impact_bullet"](m_bulletImpactSound);
+	prop["impact_effect"](m_impactParticle);
+	prop["impact_soft"](m_softImpactSound);
+	prop["impact_hard"](m_hardImpactSound);
+	std::string surfType;
+	prop["surface_type"](surfType);
+	SetSurfaceType(surfType);
+	
+	if(prop["density"])
+		prop["density"](InitializeLiquid().density);
+	if(prop["linear_drag_coefficient"])
+		prop["linear_drag_coefficient"](InitializeLiquid().linearDragCoefficient);
+	if(prop["torque_drag_coefficient"])
+		prop["torque_drag_coefficient"](InitializeLiquid().torqueDragCoefficient);
+	if(prop["wave_stiffness"])
+		prop["wave_stiffness"](InitializeLiquid().stiffness);
+	if(prop["wave_propagation"])
+		prop["wave_propagation"](InitializeLiquid().propagation);
+	if(prop["friction"])
+	{
+		auto friction = 0.f;
+		prop["friction"](friction);
+		SetStaticFriction(friction);
+		SetDynamicFriction(friction);
+	}
+	if(prop["static_friction"])
+	{
+		auto friction = 0.f;
+		prop["static_friction"](friction);
+		SetStaticFriction(friction);
+	}
+	if(prop["dynamic_friction"])
+	{
+		auto friction = 0.f;
+		prop["dynamic_friction"](friction);
+		SetDynamicFriction(friction);
+	}
+	if(prop["restitution"])
+	{
+		auto restitution = 0.f;
+		prop["restitution"](restitution);
+		SetRestitution(restitution);
+	}
+	
+	auto udmAudio = prop["audio"];
+	if(udmAudio)
+	{
+		udmAudio["low_frequency_absorption"](m_audioInfo.lowFreqAbsorption);
+		udmAudio["mid_frequency_absorption"](m_audioInfo.midFreqAbsorption);
+		udmAudio["high_frequency_absorption"](m_audioInfo.highFreqAbsorption);
+		udmAudio["scattering"](m_audioInfo.scattering);
+		udmAudio["low_frequency_transmission"](m_audioInfo.lowFreqTransmission);
+		udmAudio["mid_frequency_transmission"](m_audioInfo.midFreqTransmission);
+		udmAudio["high_frequency_transmission"](m_audioInfo.highFreqTransmission);
+	}
+
+	if(prop["ior"])
+	{
+		m_ior = float{};
+		prop["ior"](*m_ior);
+	}
+
+	auto udmPbr = prop["pbr"];
+	if(udmPbr)
+	{
+		udmPbr["metalness"](GetPBRInfo().metalness);
+		udmPbr["roughness"](GetPBRInfo().roughness);
+
+		auto udmSss = udmPbr["subsurface_scattering"];
+		if(udmSss)
+		{
+			udmSss["factor"](GetPBRInfo().subsurface.factor);
+			if(udmSss["color"])
+			{
+				udm::Srgba col {};
+				udmSss["color"](col);
+				GetPBRInfo().subsurface.color = {col[0],col[1],col[2],col[3]};
+			}
+			udmSss["scatter_color"](GetPBRInfo().subsurface.scatterColor);
+			udmSss["radius_mm"](GetPBRInfo().subsurface.radiusMM);
+		}
+	}
+}
+
 void SurfaceMaterial::Reset()
 {
 	m_footstepType = "generic";
@@ -320,4 +322,4 @@ std::ostream &operator<<(std::ostream &out,const SurfaceMaterial &surfaceMateria
 	out<<"SurfaceMaterial["<<surfaceMaterial.GetIndex()<<"]["<<surfaceMaterial.GetIdentifier()<<"]";
 	return out;
 }
-
+#pragma optimize("",on)

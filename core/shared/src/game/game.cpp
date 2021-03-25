@@ -585,31 +585,26 @@ void Game::InitializeGame()
 
 		auto &tireTypeManager = m_physEnvironment->GetTireTypeManager();
 		auto &surfTypeManager = m_physEnvironment->GetSurfaceTypeManager();
-		auto data = ds::System::LoadData("scripts/physics/tire_types.txt");
-		if(data)
+
+		std::string err;
+		auto udmData = util::load_udm_asset("scripts/physics/tire_types.udm",&err);
+		if(udmData)
 		{
-			auto *values = data->GetData();
-			for(auto it=values->begin();it!=values->end();it++)
+			auto &data = *udmData;
+			auto udm = data.GetAssetData().GetData();
+			for(auto pair : udm.ElIt())
 			{
-				auto &val = it->second;
-				if(val->IsBlock() == false || it->first.empty())
-					continue;
-				auto hTireType = tireTypeManager.RegisterType(it->first);
+				auto &identifier = pair.key;
+				auto hTireType = tireTypeManager.RegisterType(std::string{identifier});
 				if(hTireType.IsExpired())
 					continue;
-				auto *blockData = static_cast<ds::Block*>(val.get());
-				auto frictionMods = blockData->GetBlock("friction_modifiers",0);
-				auto *frictionModsData = frictionMods ? frictionMods->GetData() : nullptr;
-				if(frictionModsData == nullptr || frictionMods->IsBlock() == false)
-					continue;
-				auto *frictionBlock = static_cast<ds::Block*>(frictionMods.get());
-				for(auto &pair : *frictionModsData)
+				auto udmFrictionModifiers = pair.property["friction_modifiers"];
+				for(auto pair : udmFrictionModifiers.ElIt())
 				{
-					auto &surfaceType = pair.first;
-					auto surfType = surfTypeManager.RegisterType(surfaceType);
+					auto &surfaceType = pair.key;
+					auto surfType = surfTypeManager.RegisterType(std::string{surfaceType});
 					auto friction = 1.f;
-					if(surfType.IsExpired() || frictionBlock->GetFloat(surfaceType,&friction) == false)
-						continue;
+					pair.property(friction);
 					hTireType->SetFrictionModifier(*surfType,friction);
 				}
 			}

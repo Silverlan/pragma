@@ -10,7 +10,6 @@
 #include <pragma/rendering/render_apis.hpp>
 #include <pragma/console/convars.h>
 #include <sharedutils/util_file.h>
-#include <sharedutils/util_path.hpp>
 #include <cmaterialmanager.h>
 #include <pragma/console/command_options.hpp>
 #include <buffers/prosper_buffer.hpp>
@@ -18,10 +17,8 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/components/renderers/c_rasterization_renderer_component.hpp>
-#include <pragma/util/util_game.hpp>
 #include <image/prosper_render_target.hpp>
 #include <shader/prosper_shader_blur.hpp>
-#include <udm.hpp>
 
 extern DLLCLIENT void debug_render_stats(bool enabled,bool full,bool print,bool continuous);
 void CEngine::RegisterConsoleCommands()
@@ -101,63 +98,6 @@ void CEngine::RegisterConsoleCommands()
 		volatile int* a = reinterpret_cast<volatile int*>(NULL);
 		*a = 1;
 	},ConVarFlags::None,"Forces the engine to crash.");
-	conVarMap.RegisterConCommand("udm_convert",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
-		if(argv.empty())
-		{
-			Con::cwar<<"WARNING: No file specified to convert!"<<Con::endl;
-			return;
-		}
-		auto &fileName = argv.front();
-		std::string err;
-		auto formatType = udm::Data::GetFormatType(fileName,err);
-		if(formatType.has_value() == false)
-		{
-			Con::cwar<<"WARNING: Unable to load UDM data: "<<err<<Con::endl;
-			return;
-		}
-		auto udmData = util::load_udm_asset(fileName,&err);
-		if(udmData == nullptr)
-		{
-			Con::cwar<<"WARNING: Unable to load UDM data: "<<err<<Con::endl;
-			return;
-		}
-		std::string rpath;
-		if(FileManager::FindAbsolutePath(fileName,rpath) == false)
-		{
-			Con::cwar<<"WARNING: Unable to locate UDM file on disk!"<<Con::endl;
-			return;
-		}
-		auto path = util::Path::CreateFile(rpath);
-		path.MakeRelative(util::get_program_path());
-		auto outFileName = path.GetString();
-		ufile::remove_extension_from_filename(outFileName);
-		if(*formatType == udm::FormatType::Binary)
-		{
-			outFileName += ".udm_a";
-			try
-			{
-				udmData->SaveAscii(outFileName);
-			}
-			catch(const udm::Exception &e)
-			{
-				Con::cwar<<"WARNING: Unable to save UDM data: "<<e.what()<<Con::endl;
-			}
-		}
-		else
-		{
-			outFileName += ".udm_b";
-			try
-			{
-				udmData->Save(outFileName);
-			}
-			catch(const udm::Exception &e)
-			{
-				Con::cwar<<"WARNING: Unable to save UDM data: "<<e.what()<<Con::endl;
-			}
-		}
-		auto absPath = util::get_program_path() +'/' +outFileName;
-		util::open_path_in_explorer(ufile::get_path_from_filename(absPath),ufile::get_file_from_filename(absPath));
-	},ConVarFlags::None,"Converts a UDM file from binary to ASCII or the other way around.");
 	conVarMap.RegisterConCommand("debug_render_memory_budget",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		auto budget = GetRenderContext().DumpMemoryBudget();
 		if(!budget.has_value())

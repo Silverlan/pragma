@@ -14,9 +14,14 @@
 #include <pragma/lua/libraries/lutil.h>
 #include <pragma/physics/environment.hpp>
 #include <pragma/networking/networking_modules.hpp>
+#include <pragma/util/util_game.hpp>
 #include <sharedutils/util_file.h>
+#include <sharedutils/util_path.hpp>
 #include <util_pragma_doc.hpp>
 #include <unordered_set>
+#include <udm.hpp>
+
+#undef CreateFile
 
 void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 {
@@ -34,6 +39,76 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 			autoCompleteOptions.push_back(mapName);
 		}
 	});
+	map.RegisterConCommand("udm_convert",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		if(argv.empty())
+		{
+			Con::cwar<<"WARNING: No file specified to convert!"<<Con::endl;
+			return;
+		}
+		auto &fileName = argv.front();
+		std::string err;
+		auto formatType = udm::Data::GetFormatType(fileName,err);
+		if(formatType.has_value() == false)
+		{
+			Con::cwar<<"WARNING: Unable to load UDM data: "<<err<<Con::endl;
+			return;
+		}
+		auto udmData = util::load_udm_asset(fileName,&err);
+		if(udmData == nullptr)
+		{
+			Con::cwar<<"WARNING: Unable to load UDM data: "<<err<<Con::endl;
+			return;
+		}
+		std::string rpath;
+		if(FileManager::FindAbsolutePath(fileName,rpath) == false)
+		{
+			Con::cwar<<"WARNING: Unable to locate UDM file on disk!"<<Con::endl;
+			return;
+		}
+		auto path = util::Path::CreateFile(rpath);
+		path.MakeRelative(util::get_program_path());
+		auto outFileName = path.GetString();
+		std::string ext;
+		ufile::get_extension(outFileName,&ext);
+		ufile::remove_extension_from_filename(outFileName);
+		if(*formatType == udm::FormatType::Binary)
+		{
+			if(ext.empty())
+				ext = "udm_b";
+			else if(ext.length() > 2)
+			{
+				if(ext.at(ext.length() -1) == 'b' && ext.at(ext.length() -2) == '_')
+					ext = ext.substr(0,ext.length() -2);
+			}
+			outFileName += '.' +ext;
+			try
+			{
+				udmData->SaveAscii(outFileName);
+			}
+			catch(const udm::Exception &e)
+			{
+				Con::cwar<<"WARNING: Unable to save UDM data: "<<e.what()<<Con::endl;
+			}
+		}
+		else
+		{
+			if(ext.empty())
+				ext = "udm_a";
+			else
+				ext += "_b";
+			outFileName += '.' +ext;
+			try
+			{
+				udmData->Save(outFileName);
+			}
+			catch(const udm::Exception &e)
+			{
+				Con::cwar<<"WARNING: Unable to save UDM data: "<<e.what()<<Con::endl;
+			}
+		}
+		auto absPath = util::get_program_path() +'/' +outFileName;
+		util::open_path_in_explorer(ufile::get_path_from_filename(absPath),ufile::get_file_from_filename(absPath));
+	},ConVarFlags::None,"Converts a UDM file from binary to ASCII or the other way around.");
 	map.RegisterConVar("phys_engine","physx",ConVarFlags::Archive | ConVarFlags::Replicated,"The underlying physics engine to use.",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
 		auto &physEngines = pragma::physics::IEnvironment::GetAvailablePhysicsEngines();
 		auto it = physEngines.begin();

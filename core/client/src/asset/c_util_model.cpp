@@ -622,7 +622,9 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 		}
 
 		mat->UpdateTextures();
-		mat->Save(matPathRelative.GetString(),"addons/converted/");
+		auto savePath = pragma::asset::relative_path_to_absolute_path(matPathRelative,pragma::asset::Type::Material,util::CONVERT_PATH);
+		std::string err;
+		mat->Save(savePath.GetString(),err);
 
 		mdl->AddMaterial(0,mat);
 
@@ -1708,7 +1710,8 @@ template<class T>
 	if(requiresSave)
 	{
 		mat.UpdateTextures();
-		mat.Save();
+		std::string err;
+		mat.Save(err);
 	}
 	return true;
 }

@@ -11,6 +11,8 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/math/intersection.h>
 #include <pragma/physics/collisionmesh.h>
+#include <pragma/asset/util_asset.hpp>
+#include <pragma/game/game_resources.hpp>
 #include <sharedutils/util_file.h>
 #include <image/prosper_image.hpp>
 #include <image/prosper_render_target.hpp>
@@ -335,7 +337,9 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	matTraditional.UpdateTextures();
 
 	// Overwrite old material with new PBR settings
-	if(matTraditional.Save())
+	std::string err;
+	auto savePath = pragma::asset::relative_path_to_absolute_path(matTraditional.GetName(),pragma::asset::Type::Material,util::CONVERT_PATH);
+	if(matTraditional.Save(savePath.GetString(),err))
 		client->LoadMaterial(matName,true,true); // Reload material immediately
 	static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().ClearUnused();
 	// Con::cout<<"Conversion complete!"<<Con::endl;

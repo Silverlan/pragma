@@ -27,6 +27,8 @@
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/gui/wifps.h"
+#include <pragma/asset/util_asset.hpp>
+#include <pragma/game/game_resources.hpp>
 #include <pragma/lua/libraries/lengine.h>
 #include <texturemanager/texturemanager.h>
 #include "pragma/lua/classes/c_lwibase.h"
@@ -44,6 +46,7 @@
 #include <sharedutils/util_library.hpp>
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
+
 
 static std::unordered_map<std::string,std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &ClientState::GetConVarPtrs() {return *conVarPtrs;}
@@ -714,7 +717,9 @@ Material *ClientState::LoadMaterial(const std::string &path,const std::function<
 			// This is a bit of a hack, but it'll do for now. TODO: Do this in a better way!
 			auto matName = mat->GetName();
 			ufile::remove_extension_from_filename(matName);
-			mat->Save(matName,"addons/converted/");
+			auto savePath = pragma::asset::relative_path_to_absolute_path(matName,pragma::asset::Type::Material,util::CONVERT_PATH);
+			std::string err;
+			mat->Save(savePath.GetString(),err);
 		}
 	},nullptr,bReload,&bFirstTimeError,bLoadInstantly);
 	if(bFirstTimeError == true)

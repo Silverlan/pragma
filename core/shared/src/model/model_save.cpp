@@ -296,8 +296,8 @@ bool Model::LoadFromAssetData(Game &game,const udm::AssetData &data,std::string 
 	udm["maxEyeDeflection"](m_maxEyeDeflection);
 	udm["mass"](m_mass);
 	
-	udm["render.bounds.min"](m_renderMin);
-	udm["render.bounds.max"](m_renderMax);
+	udm["render"]["bounds"]["min"](m_renderMin);
+	udm["render"]["bounds"]["max"](m_renderMax);
 
 	auto readFlag = [this](auto udm,auto flag,const std::string &name,auto &outFlags) {
 		auto udmFlags = udm["flags"];
@@ -365,8 +365,8 @@ bool Model::LoadFromAssetData(Game &game,const udm::AssetData &data,std::string 
 			Hitbox hb {};
 
 			udm::to_enum_value<HitGroup>(udmHb["hitGroup"],hb.group);
-			udmHb["bounds.min"](hb.min);
-			udmHb["bounds.max"](hb.max);
+			udmHb["bounds"]["min"](hb.min);
+			udmHb["bounds"]["max"](hb.max);
 
 			auto boneId = std::numeric_limits<uint32_t>::max();
 			udmHb["bone"](boneId);
@@ -602,24 +602,24 @@ bool Model::LoadFromAssetData(Game &game,const udm::AssetData &data,std::string 
 			udmEyeball.property["forward"](eyeball.forward);
 			udmEyeball.property["maxDilationFactor"](eyeball.maxDilationFactor);
 
-			udmEyeball.property["iris.material"](eyeball.irisMaterialIndex);
-			udmEyeball.property["iris.uvRadius"](eyeball.irisUvRadius);
-			udmEyeball.property["iris.scale"](eyeball.irisScale);
+			udmEyeball.property["iris"]["material"](eyeball.irisMaterialIndex);
+			udmEyeball.property["iris"]["uvRadius"](eyeball.irisUvRadius);
+			udmEyeball.property["iris"]["scale"](eyeball.irisScale);
 
 			auto writeLid = [](udm::LinkedPropertyWrapper &prop,const Eyeball::LidFlexDesc &lid) {
-				prop["raiser.lidFlexIndex"] = lid.lidFlexIndex;
+				prop["raiser"]["lidFlexIndex"] = lid.lidFlexIndex;
 
-				prop["raiser.raiserFlexIndex"] = lid.raiserFlexIndex;
-				prop["raiser.targetAngle"] = umath::rad_to_deg(lid.raiserValue);
+				prop["raiser"]["raiserFlexIndex"] = lid.raiserFlexIndex;
+				prop["raiser"]["targetAngle"] = umath::rad_to_deg(lid.raiserValue);
 
-				prop["neutral.neutralFlexIndex"] = lid.neutralFlexIndex;
-				prop["neutral.targetAngle"] = umath::rad_to_deg(lid.neutralValue);
+				prop["neutral"]["neutralFlexIndex"] = lid.neutralFlexIndex;
+				prop["neutral"]["targetAngle"] = umath::rad_to_deg(lid.neutralValue);
 
-				prop["lowerer.lowererFlexIndex"] = lid.lowererFlexIndex;
-				prop["lowerer.targetAngle"] = umath::rad_to_deg(lid.lowererValue);
+				prop["lowerer"]["lowererFlexIndex"] = lid.lowererFlexIndex;
+				prop["lowerer"]["targetAngle"] = umath::rad_to_deg(lid.lowererValue);
 			};
-			writeLid(udmEyeball.property["eyelids.upperLid"],eyeball.upperLid);
-			writeLid(udmEyeball.property["eyelids.lowerLid"],eyeball.lowerLid);
+			writeLid(udmEyeball.property["eyelids"]["upperLid"],eyeball.upperLid);
+			writeLid(udmEyeball.property["eyelids"]["lowerLid"],eyeball.lowerLid);
 		}
 			
 		auto &phonemeMap = GetPhonemeMap();
@@ -705,8 +705,8 @@ bool Model::Save(Game &game,udm::AssetData &outData,std::string &outErr)
 
 	Vector3 min,max;
 	GetRenderBounds(min,max);
-	udm["render.bounds.min"] = min;
-	udm["render.bounds.max"] = max;
+	udm["render"]["bounds"]["min"] = min;
+	udm["render"]["bounds"]["max"] = max;
 
 	auto flags = GetMetaInfo().flags;
 	auto writeFlag = [](auto udm,auto flag,const std::string &name,auto flags) {
@@ -761,8 +761,8 @@ bool Model::Save(Game &game,udm::AssetData &outData,std::string &outErr)
 			auto &hb = pair.second;
 			auto udmHb = udmHitboxes[hbIdx++];
 			udmHb["hitGroup"] = udm::enum_to_string(hb.group);
-			udmHb["bounds.min"] = hb.min;
-			udmHb["bounds.max"] = hb.max;
+			udmHb["bounds"]["min"] = hb.min;
+			udmHb["bounds"]["max"] = hb.max;
 			udmHb["bone"] = pair.first;
 		}
 	}
@@ -941,27 +941,27 @@ bool Model::Save(Game &game,udm::AssetData &outData,std::string &outErr)
 				udmEyeball["forward"] = eyeball.forward;
 				udmEyeball["maxDilationFactor"] = eyeball.maxDilationFactor;
 
-				udmEyeball["iris.material"] = eyeball.irisMaterialIndex;
-				udmEyeball["iris.uvRadius"] = eyeball.irisUvRadius;
-				udmEyeball["iris.scale"] = eyeball.irisScale;
+				udmEyeball["iris"]["material"] = eyeball.irisMaterialIndex;
+				udmEyeball["iris"]["uvRadius"] = eyeball.irisUvRadius;
+				udmEyeball["iris"]["scale"] = eyeball.irisScale;
 
 				auto readLid = [](udm::LinkedPropertyWrapper &prop,Eyeball::LidFlexDesc &lid) {
-					prop["raiser.lidFlexIndex"](lid.lidFlexIndex);
+					prop["raiser"]["lidFlexIndex"](lid.lidFlexIndex);
 
-					prop["raiser.raiserFlexIndex"](lid.raiserFlexIndex);
-					prop["raiser.targetAngle"](lid.raiserValue);
+					prop["raiser"]["raiserFlexIndex"](lid.raiserFlexIndex);
+					prop["raiser"]["targetAngle"](lid.raiserValue);
 					lid.raiserValue = umath::deg_to_rad(lid.raiserValue);
 
-					prop["neutral.neutralFlexIndex"](lid.neutralFlexIndex);
-					prop["neutral.targetAngle"](lid.neutralValue);
+					prop["neutral"]["neutralFlexIndex"](lid.neutralFlexIndex);
+					prop["neutral"]["targetAngle"](lid.neutralValue);
 					lid.neutralValue = umath::deg_to_rad(lid.neutralValue);
 
-					prop["lowerer.lowererFlexIndex"](lid.lowererFlexIndex);
-					prop["lowerer.targetAngle"](lid.lowererValue);
+					prop["lowerer"]["lowererFlexIndex"](lid.lowererFlexIndex);
+					prop["lowerer"]["targetAngle"](lid.lowererValue);
 					lid.lowererValue = umath::deg_to_rad(lid.lowererValue);
 				};
-				readLid(udmEyeball["eyelids.upperLid"],eyeball.upperLid);
-				readLid(udmEyeball["eyelids.lowerLid"],eyeball.lowerLid);
+				readLid(udmEyeball["eyelids"]["upperLid"],eyeball.upperLid);
+				readLid(udmEyeball["eyelids"]["lowerLid"],eyeball.lowerLid);
 			}
 			
 			auto &phonemeMap = GetPhonemeMap();

@@ -195,7 +195,8 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl,CMaterial &mat)
 		mat.GetDataBlock()->RemoveValue("rma_info");
 
 	mat.UpdateTextures();
-	if(mat.Save())
+	std::string err;
+	if(mat.Save(err))
 		client->LoadMaterial(mat.GetName(),true,true); // Reload material immediately
 }
 

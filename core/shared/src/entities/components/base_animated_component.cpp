@@ -1107,12 +1107,12 @@ static void write_animation_slot_info(udm::LinkedPropertyWrapper &udm,const Base
 	udm["bonePosesBc"] = udm::compress_lz4_blob(slotInfo.bonePosesBc);
 	udm["boneScalesBc"] = udm::compress_lz4_blob(slotInfo.boneScalesBc);
 		
-	udm["lastAnimation.animation"] = slotInfo.lastAnim.animation;
-	udm["lastAnimation.cycle"] = slotInfo.lastAnim.cycle;
-	write_anim_flags(udm["lastAnimation.flags"],slotInfo.lastAnim.flags);
-	udm["lastAnimation.blendFadeIn"] = slotInfo.lastAnim.blendTimeScale.first;
-	udm["lastAnimation.blendFadeOut"] = slotInfo.lastAnim.blendTimeScale.second;
-	udm["lastAnimation.blendScale"] = slotInfo.lastAnim.blendScale;
+	udm["lastAnimation"]["animation"] = slotInfo.lastAnim.animation;
+	udm["lastAnimation"]["cycle"] = slotInfo.lastAnim.cycle;
+	write_anim_flags(udm["lastAnimation"]["flags"],slotInfo.lastAnim.flags);
+	udm["lastAnimation"]["blendFadeIn"] = slotInfo.lastAnim.blendTimeScale.first;
+	udm["lastAnimation"]["blendFadeOut"] = slotInfo.lastAnim.blendTimeScale.second;
+	udm["lastAnimation"]["blendScale"] = slotInfo.lastAnim.blendScale;
 }
 void BaseAnimatedComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
@@ -1156,12 +1156,12 @@ static void read_animation_slot_info(udm::LinkedPropertyWrapper &udm,BaseAnimate
 	udm["bonePosesBc"].GetBlobData(slotInfo.bonePosesBc);
 	udm["boneScalesBc"].GetBlobData(slotInfo.boneScalesBc);
 
-	udm["lastAnimation.animation"](slotInfo.lastAnim.animation);
-	udm["lastAnimation.cycle"](slotInfo.lastAnim.cycle);
-	udm["lastAnimation.blendFadeIn"](slotInfo.lastAnim.blendTimeScale.first);
-	udm["lastAnimation.blendFadeOut"](slotInfo.lastAnim.blendTimeScale.second);
-	slotInfo.lastAnim.flags = read_anim_flags(udm["lastAnimation.flags"]);
-	udm["lastAnimation.blendScale"](slotInfo.lastAnim.blendScale);
+	udm["lastAnimation"]["animation"](slotInfo.lastAnim.animation);
+	udm["lastAnimation"]["cycle"](slotInfo.lastAnim.cycle);
+	udm["lastAnimation"]["blendFadeIn"](slotInfo.lastAnim.blendTimeScale.first);
+	udm["lastAnimation"]["blendFadeOut"](slotInfo.lastAnim.blendTimeScale.second);
+	slotInfo.lastAnim.flags = read_anim_flags(udm["lastAnimation"]["flags"]);
+	udm["lastAnimation"]["blendScale"](slotInfo.lastAnim.blendScale);
 }
 void BaseAnimatedComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {

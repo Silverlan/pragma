@@ -9,13 +9,17 @@
 #include "pragma/lua/libraries/ludm.hpp"
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/util/util_game.hpp"
+#include <sharedutils/util_path.hpp>
 #include <luabind/iterator_policy.hpp>
 #include <luainterface.hpp>
 #include <udm.hpp>
+#include <datasystem_vector.h>
+#include <datasystem_color.h>
+#include <sharedutils/util_file.h>
 
 extern DLLNETWORK Engine *engine;
 
-
+#pragma optimize("",off)
 template<typename T>
 	void element_set_basic_type(lua_State *l,::udm::Element &el,const std::string &key,const T &v)
 {
@@ -271,6 +275,115 @@ LuaUdmArrayIterator::LuaUdmArrayIterator(::udm::PropertyWrapper &prop)
 	: m_property{&prop}
 {}
 
+static void data_block_to_udm(ds::Block &dataBlock,udm::LinkedPropertyWrapper &udm)
+{
+	std::function<void(udm::LinkedPropertyWrapper&,ds::Block&)> dataBlockToUdm = nullptr;
+	dataBlockToUdm = [&dataBlockToUdm,&udm](udm::LinkedPropertyWrapper &prop,ds::Block &block) {
+		prop.InitializeProperty();
+
+		for(auto &pair : *block.GetData())
+		{
+			auto &key = pair.first;
+			auto &val = pair.second;
+			if(val->IsBlock())
+			{
+				auto &block = static_cast<ds::Block&>(*pair.second);
+
+				auto &children = *block.GetData();
+				auto n = children.size();
+				uint32_t i = 0;
+				auto isArray = true;
+				while(i < n)
+				{
+					if(children.find(std::to_string(i)) == children.end())
+					{
+						isArray = false;
+						break;
+					}
+					++i;
+				}
+
+				if(isArray)
+				{
+					auto a = prop.AddArray(key,n,udm::Type::String);
+					for(auto i=decltype(n){0u};i<n;++i)
+					{
+						auto it = children.find(std::to_string(i));
+						if(it == children.end())
+							throw std::runtime_error{"Unknown error"};
+						auto &val = it->second;
+						if(val->IsBlock() || val->IsContainer())
+							throw std::runtime_error{"Unknown error"};
+						a[i] = static_cast<const ds::Value&>(*val).GetString();
+					}
+					continue;
+				}
+
+				dataBlockToUdm(prop[key],block);
+				continue;
+			}
+			if(val->IsContainer())
+			{
+				auto &container = static_cast<ds::Container&>(*pair.second);
+				auto &children = container.GetBlocks();
+				auto udmChildren = prop.AddArray(key,children.size());
+				uint32_t idx = 0;
+				for(auto &child : children)
+				{
+					if(child->IsContainer() || child->IsBlock())
+						continue;
+					auto *dsValue = dynamic_cast<ds::Value*>(pair.second.get());
+					if(dsValue == nullptr)
+						continue;
+					udmChildren[idx++] = dsValue->GetString();
+				}
+				udmChildren.Resize(idx);
+				continue;
+			}
+			auto *dsValue = dynamic_cast<ds::Value*>(val.get());
+			assert(dsValue);
+			if(dsValue)
+			{
+				auto *dsStr = dynamic_cast<ds::String*>(dsValue);
+				if(dsStr)
+					prop[key] = dsStr->GetString();
+				auto *dsInt = dynamic_cast<ds::Int*>(dsValue);
+				if(dsInt)
+					prop[key] = dsInt->GetInt();
+				auto *dsFloat = dynamic_cast<ds::Float*>(dsValue);
+				if(dsFloat)
+					prop[key] = dsFloat->GetFloat();
+				auto *dsBool = dynamic_cast<ds::Bool*>(dsValue);
+				if(dsBool)
+					prop[key] = dsBool->GetBool();
+				auto *dsVec = dynamic_cast<ds::Vector*>(dsValue);
+				if(dsVec)
+					prop[key] = dsVec->GetVector();
+				auto *dsVec4 = dynamic_cast<ds::Vector4*>(dsValue);
+				if(dsVec4)
+					prop[key] = dsVec4->GetVector4();
+				auto *dsVec2 = dynamic_cast<ds::Vector2*>(dsValue);
+				if(dsVec2)
+					prop[key] = dsVec2->GetVector2();
+				auto *dsTex = dynamic_cast<ds::Texture*>(dsValue);
+				if(dsTex)
+					udm["textures"][key] = dsTex->GetString();
+				auto *dsCol = dynamic_cast<ds::Color*>(dsValue);
+				if(dsCol)
+				{
+					auto col = dsCol->GetColor();
+					auto max = std::numeric_limits<udm::Srgba::value_type>::max();
+					if(col.r <= max && col.g <= max && col.b <= max && col.a <= max)
+						prop[key] = udm::Srgba{static_cast<uint8_t>(col.r),static_cast<uint8_t>(col.g),static_cast<uint8_t>(col.b),static_cast<uint8_t>(col.a)};
+					else
+						prop[key] = col.ToVector4();
+				}
+			}
+		}
+	};
+	dataBlockToUdm(udm,dataBlock);
+}
+
 void Lua::udm::register_library(Lua::Interface &lua)
 {
 	auto &modUdm = lua.RegisterLibrary("udm",std::unordered_map<std::string,int(*)(lua_State*)>{
@@ -382,6 +495,48 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			DataStream dsDecompressed {static_cast<uint32_t>(blob.data.size())};
 			dsDecompressed->Write(blob.data.data(),blob.data.size());
 			Lua::Push(l,dsDecompressed);
+			return 1;
+		})},
+		{"data_block_to_udm",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) {
+			auto &dataBlock = Lua::Check<ds::Block>(l,1);
+			auto &udm = Lua::Check<::udm::LinkedPropertyWrapper>(l,2);
+			data_block_to_udm(dataBlock,udm);
+			return 0;
+		})},
+		{"data_file_to_udm",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) {
+			std::string fileName = Lua::CheckString(l,1);
+			std::string rpath;
+			if(FileManager::FindAbsolutePath(fileName,rpath) == false)
+			{
+				Lua::PushBool(l,false);
+				return 1;
+			}
+			auto f = FileManager::OpenFile(fileName.c_str(),"r");
+			if(f == nullptr)
+			{
+				Lua::PushBool(l,false);
+				return 1;
+			}
+			auto root = ds::System::ReadData(f);
+			if(root == nullptr)
+			{
+				Lua::PushBool(l,false);
+				return 1;
+			}
+			ufile::remove_extension_from_filename(rpath);
+			rpath += ".udm";
+			auto p = util::Path::CreateFile(rpath);
+			p.MakeRelative(util::get_program_path());
+			rpath = p.GetString();
+			auto fout = FileManager::OpenFile<VFilePtrReal>(rpath.c_str(),"w");
+			if(fout == nullptr)
+			{
+				Lua::PushBool(l,false);
+				return 1;
+			}
+			auto udmData = ::udm::Data::Create();
+			data_block_to_udm(*root,udmData->GetAssetData().GetData());
+			Lua::PushBool(l,udmData->SaveAscii(fout,false));
 			return 1;
 		})}
 	});
@@ -730,3 +885,4 @@ void Lua::udm::register_library(Lua::Interface &lua)
 	}));
 	modUdm[cdProp];
 }
+#pragma optimize("",on)

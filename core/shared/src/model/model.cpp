@@ -19,6 +19,7 @@
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/model/animation/flex_animation.hpp"
 #include "pragma/file_formats/wmd.h"
+#include "pragma/asset/util_asset.hpp"
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
@@ -1350,7 +1351,9 @@ std::optional<uint32_t> Model::AssignDistinctMaterial(const ModelMeshGroup &grou
 
 	if(FileManager::Exists(mpath) == false)
 	{
-		if(hMat->Save(path.GetString(),rootPath.GetString()) == false)
+		auto savePath = pragma::asset::relative_path_to_absolute_path(path,pragma::asset::Type::Material,rootPath.GetString());
+		std::string err;
+		if(hMat->Save(savePath.GetString(),err) == false)
 			return {};
 	}
 	auto *matNew = m_networkState->LoadMaterial(path.GetString());

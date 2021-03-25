@@ -764,7 +764,7 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 
 	auto &materialManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
 	if(m_surfaceMaterialManager)
-		m_surfaceMaterialManager->Load("scripts\\physics\\materials.txt");
+		m_surfaceMaterialManager->Load("scripts/physics/materials.udm");
 
 	c_engine->GetRenderContext().SavePipelineCache();
 

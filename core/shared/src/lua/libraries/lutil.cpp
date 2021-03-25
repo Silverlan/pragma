@@ -71,7 +71,9 @@ void Lua::util::register_library(lua_State *l)
 		luabind::def("open_url_in_browser",Lua::util::open_url_in_browser),
 		luabind::def("get_addon_path",Lua::util::get_addon_path),
 		luabind::def("get_string_hash",Lua::util::get_string_hash),
-		luabind::def("generate_uuid_v4",::util::generate_uuid_v4)
+		luabind::def("generate_uuid_v4",static_cast<std::string(*)()>([]() -> std::string {
+			return ::util::uuid_to_string(::util::generate_uuid_v4());
+		}))
 	];
 }
 

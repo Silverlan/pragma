@@ -62,7 +62,7 @@ bool savegame::load(Game &game,const std::string &fileName,std::string &outErr)
 		return false;
 	}
 
-	auto udm = *data;
+	auto &udm = *data;
 	auto version = data.GetAssetVersion();
 	if(version < 1)
 	{

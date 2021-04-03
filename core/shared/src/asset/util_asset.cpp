@@ -127,11 +127,15 @@ std::optional<std::string> pragma::asset::find_file(NetworkState &nw,const std::
 	{
 	case Type::Model:
 	{
-		if(FileManager::Exists("models/" +normalizedName))
+		for(auto &ext : get_supported_extensions(type))
 		{
-			if(optOutFormat)
-				*optOutFormat = "wmd"; // TODO
-			return normalizedName;
+			auto nameWithExt = normalizedName +'.' +ext;
+			if(FileManager::Exists("models/" +nameWithExt))
+			{
+				if(optOutFormat)
+					*optOutFormat = ext;
+				return nameWithExt;
+			}
 		}
 		return {};
 	}

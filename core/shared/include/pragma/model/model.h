@@ -185,7 +185,7 @@ class VertexAnimation;
 class FlexAnimation;
 class NetworkState;
 using FlexControllerId = uint32_t;
-using BoneId = uint32_t;
+using BoneId = uint16_t;
 enum class JointType : uint8_t;
 namespace umath {class ScaledTransform;};
 namespace udm {using Version = uint32_t;};

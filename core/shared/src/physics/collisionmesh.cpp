@@ -397,8 +397,8 @@ bool CollisionMesh::Save(Game &game,Model &mdl,udm::AssetData &outData,std::stri
 	udm["bounds"]["min"] = m_min;
 	udm["bounds"]["max"] = m_max;
 
-	udm["vertices"] = udm::compress_lz4_blob(GetVertices());
-	udm["triangles"] = udm::compress_lz4_blob(GetTriangles());
+	udm.AddArray("vertices",GetVertices(),udm::ArrayType::Compressed);
+	udm.AddArray("triangles",GetTriangles(),udm::ArrayType::Compressed);
 
 	udm["volume"] = GetVolume();
 	udm["centerOfMass"] = GetCenterOfMass();
@@ -464,9 +464,13 @@ bool CollisionMesh::Save(Game &game,Model &mdl,udm::AssetData &outData,std::stri
 		}
 
 		if(sbTriangles)
-			udmSettings["triangles"] = udm::compress_lz4_blob(*sbTriangles);
+			udmSettings.AddArray("triangles",*sbTriangles,udm::ArrayType::Compressed);
 		if(sbAnchors)
-			udmSettings["anchors"] = udm::compress_lz4_blob(*sbAnchors);
+		{
+			static_assert(sizeof(SoftBodyAnchor) == 11);
+			auto strctAnchor = ::udm::StructDescription::Define<uint16_t,uint32_t,float,uint8_t>({"vert","bone","influence","flags"});
+			udmSettings.AddArray("anchors",strctAnchor,*sbAnchors,udm::ArrayType::Compressed);
+		}
 	}
 	return true;
 }
@@ -503,8 +507,8 @@ bool CollisionMesh::LoadFromAssetData(Game &game,Model &mdl,const udm::AssetData
 	udm["bounds"]["min"](m_min);
 	udm["bounds"]["max"](m_max);
 
-	udm["vertices"].GetBlobData(GetVertices());
-	udm["triangles"].GetBlobData(GetTriangles());
+	udm["vertices"](GetVertices());
+	udm["triangles"](GetTriangles());
 
 	udm["volume"](m_volume);
 	udm["centerOfMass"](m_centerOfMass);
@@ -572,8 +576,8 @@ bool CollisionMesh::LoadFromAssetData(Game &game,Model &mdl,const udm::AssetData
 		
 		auto *sbTriangles = GetSoftBodyTriangles();
 		auto *sbAnchors = GetSoftBodyAnchors();
-		udmSettings["triangles"].GetBlobData(*sbTriangles);
-		udmSettings["anchors"].GetBlobData(*sbAnchors);
+		udmSettings["triangles"](*sbTriangles);
+		udmSettings["anchors"](*sbAnchors);
 	}
 
 	return true;

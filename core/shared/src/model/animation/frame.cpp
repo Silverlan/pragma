@@ -10,7 +10,7 @@
 #include "pragma/model/modelmesh.h"
 #include "pragma/model/model.h"
 
-static unsigned int get_bone_index(const std::vector<unsigned int> *optBoneList,unsigned int id)
+static uint16_t get_bone_index(const std::vector<uint16_t> *optBoneList,unsigned int id)
 {
 	if(optBoneList == nullptr)
 		return id;

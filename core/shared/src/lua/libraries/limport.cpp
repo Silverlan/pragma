@@ -43,7 +43,7 @@ int Lua::import::import_wad(lua_State *l)
 	auto version = f.Read<uint16_t>();
 	auto flags = f.Read<uint32_t>();
 	auto numBones = f.Read<uint32_t>();
-	std::vector<uint32_t> boneList;
+	std::vector<uint16_t> boneList;
 	boneList.reserve(numBones);
 	for(auto i=decltype(numBones){0};i<numBones;++i)
 	{

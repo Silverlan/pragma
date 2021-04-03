@@ -266,6 +266,7 @@ bool VertexAnimation::Save(Model &mdl,udm::AssetData &outData,std::string &outEr
 		udm["flags"][name] = true;
 	};
 	
+	auto strctHalfVector4 = ::udm::StructDescription::Define<udm::Half,udm::Half,udm::Half,udm::Half>({"x","y","z","w"});
 	auto &meshAnims = GetMeshAnimations();
 	auto udmMeshAnims = udm.AddArray("meshAnimations",meshAnims.size());
 	uint32_t meshAnimIdx = 0;
@@ -318,24 +319,28 @@ bool VertexAnimation::Save(Model &mdl,udm::AssetData &outData,std::string &outEr
 					auto itUsed = std::find_if(vdata.begin(),vdata.end(),[](const uint16_t &v) {return v != 0;});
 					if(itUsed != vdata.end())
 					{
-						usedVertIndicesSet.insert(vertIdx);
-						usedVertIndices.push_back(vertIdx);
-
+						if(usedVertIndicesSet.find(vertIdx) == usedVertIndicesSet.end())
+						{
+							usedVertIndicesSet.insert(vertIdx);
+							usedVertIndices.push_back(vertIdx);
+						}
 					}
 					++vertIdx;
 				}
 			}
 
-			udmFrame["vertexIndices"] = udm::compress_lz4_blob(usedVertIndices);
-			auto udmAttributes = udmFrame["attributes"];
+			udmFrame.AddArray("vertexIndices",usedVertIndices,udm::ArrayType::Compressed);
+			auto udmAttributes = udmFrame.AddArray("attributes",attributes.size());
 			for(auto i=decltype(attributes.size()){0u};i<attributes.size();++i)
 			{
 				auto &attr = attributes[i];
+				auto udmAttribute = udmAttributes[i];
 				std::vector<std::array<uint16_t,4>> usedVertexData;
 				usedVertexData.reserve(attr.vertexData.size());
 				for(auto idx : usedVertIndices)
 					usedVertexData.push_back(attr.vertexData[idx]);
-				udmAttributes[attr.name] = udm::compress_lz4_blob(usedVertexData);
+				static_assert(sizeof(udm::Half) == sizeof(uint16_t));
+				udmAttribute.AddArray(attr.name,strctHalfVector4,usedVertexData,udm::ArrayType::Compressed);
 			}
 		}
 	}
@@ -407,14 +412,14 @@ bool VertexAnimation::LoadFromAssetData(Model &mdl,const udm::AssetData &data,st
 				meshFrame->SetVertexCount(subMesh->GetVertexCount());
 
 			std::vector<uint16_t> usedVertIndices {};
-			udmFrame["vertexIndices"].GetBlobData(usedVertIndices);
+			udmFrame["vertexIndices"](usedVertIndices);
 
 			auto udmAttributes = udmFrame["attributes"];
 			auto attrPos = udmAttributes["position"];
 			if(attrPos)
 			{
 				std::vector<std::array<uint16_t,4>> positionData;
-				attrPos.GetBlobData(positionData);
+				attrPos(positionData);
 				if(positionData.size() == usedVertIndices.size())
 				{
 					for(auto i=decltype(usedVertIndices.size()){0u};i<usedVertIndices.size();++i)
@@ -428,7 +433,7 @@ bool VertexAnimation::LoadFromAssetData(Model &mdl,const udm::AssetData &data,st
 			if(attrNorm)
 			{
 				std::vector<std::array<uint16_t,4>> normalData;
-				attrNorm.GetBlobData(normalData);
+				attrNorm(normalData);
 				if(normalData.size() == usedVertIndices.size())
 				{
 					for(auto i=decltype(usedVertIndices.size()){0u};i<usedVertIndices.size();++i)

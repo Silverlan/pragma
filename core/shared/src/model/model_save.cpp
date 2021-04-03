@@ -472,12 +472,14 @@ bool Model::LoadFromAssetData(Game &game,const udm::AssetData &data,std::string 
 	
 	if(!isStatic)
 	{
+		auto &skeleton = GetSkeleton();
+		auto &reference = GetReference();
 		auto &animations = GetAnimations();
 		auto udmAnimations = udm["animations"];
 		animations.resize(udmAnimations.GetChildCount());
 		for(auto udmAnimation : udmAnimations.ElIt())
 		{
-			auto anim = Animation::Load(udm::AssetData{udmAnimation.property},outErr);
+			auto anim = Animation::Load(udm::AssetData{udmAnimation.property},outErr,&skeleton,&reference);
 			if(anim == nullptr)
 				return false;
 			uint32_t index = 0;
@@ -817,6 +819,7 @@ bool Model::Save(Game &game,udm::AssetData &outData,std::string &outErr)
 		auto &animations = GetAnimations();
 		if(!animations.empty())
 		{
+			auto &ref = GetReference();
 			auto udmAnimations = udm["animations"];
 			for(auto i=decltype(animations.size()){0u};i<animations.size();++i)
 			{
@@ -824,7 +827,7 @@ bool Model::Save(Game &game,udm::AssetData &outData,std::string &outErr)
 				auto animName = GetAnimationName(i);
 				auto udmAnim = udmAnimations[animName];
 				udmAnim["index"] = static_cast<uint32_t>(i);
-				if(anim->Save(udm::AssetData{udmAnim},outErr) == false)
+				if(anim->Save(udm::AssetData{udmAnim},outErr,&ref) == false)
 					return false;
 			}
 		}
@@ -931,7 +934,13 @@ bool Model::Save(Game &game,udm::AssetData &outData,std::string &outErr)
 			uint32_t eyeballIdx = 0;
 			for(auto &eyeball : eyeballs)
 			{
-				auto udmEyeball = udmFlexControllers[eyeball.name];
+				std::string name = eyeball.name;
+				if(name.empty())
+				{
+					name = "eyeball" +std::to_string(eyeballIdx);
+					Con::cwar<<"WARNING: Eyeball with no name found, assigning name '"<<name<<"'"<<Con::endl;
+				}
+				auto udmEyeball = udmEyeballs[name];
 				udmEyeball["index"] = eyeballIdx++;
 				udmEyeball["bone"] = eyeball.boneIndex;
 				udmEyeball["origin"] = eyeball.origin;

@@ -16,7 +16,7 @@
 #include "pragma/math/orientation.h"
 #include "pragma/physics/jointinfo.h"
 
-using BoneId = uint32_t;
+using BoneId = uint16_t;
 struct DLLNETWORK Bone
 	: public std::enable_shared_from_this<Bone>
 {

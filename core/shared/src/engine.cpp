@@ -106,14 +106,14 @@ ConVarHandle Engine::GetConVarHandle(std::string scvar)
 }
 
 DLLNETWORK Engine *engine = NULL;
-
-#include <sharedutils/util_path.hpp>
 Engine::Engine(int,char*[])
 	: CVarHandler(),
 	m_console(nullptr),m_consoleThread(nullptr),
 	m_logFile(nullptr),
 	m_tickRate(Engine::DEFAULT_TICK_RATE)
 {
+	OpenConsole();
+
 	m_mainThreadId = std::this_thread::get_id();
 	
 	m_lastTick = static_cast<long long>(m_ctTick());

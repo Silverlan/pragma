@@ -67,7 +67,7 @@ public:
 	};
 	static std::shared_ptr<Animation> Create();
 	static std::shared_ptr<Animation> Create(const Animation &other,ShareMode share=ShareMode::None);
-	static std::shared_ptr<Animation> Load(const udm::AssetData &data,std::string &outErr);
+	static std::shared_ptr<Animation> Load(const udm::AssetData &data,std::string &outErr,const Skeleton *optSkeleton=nullptr,const Frame *optReference=nullptr);
 	const std::pair<Vector3,Vector3> &GetRenderBounds() const;
 	void SetRenderBounds(const Vector3 &min,const Vector3 &max);
 	void CalcRenderBounds(Model &mdl);
@@ -85,11 +85,11 @@ public:
 	void AddFrame(std::shared_ptr<Frame> frame);
 	float GetDuration();
 	std::shared_ptr<Frame> GetFrame(unsigned int ID);
-	const std::vector<unsigned int> &GetBoneList() const;
+	const std::vector<uint16_t> &GetBoneList() const;
 	const std::unordered_map<uint32_t,uint32_t> &GetBoneMap() const;
 	uint32_t AddBoneId(uint32_t id);
 	void SetBoneId(uint32_t localIdx,uint32_t id);
-	void SetBoneList(const std::vector<uint32_t> &list);
+	void SetBoneList(const std::vector<uint16_t> &list);
 	void ReserveBoneIds(uint32_t count);
 	unsigned int GetBoneCount();
 	unsigned int GetFrameCount();
@@ -121,7 +121,8 @@ public:
 	const std::vector<float> &GetBoneWeights() const;
 	std::vector<float> &GetBoneWeights();
 
-	bool Save(udm::AssetData &outData,std::string &outErr);
+	// If reference frame is specified, it will be used to optimize frame data and reduce the file size
+	bool Save(udm::AssetData &outData,std::string &outErr,const Frame *optReference=nullptr);
 	bool SaveLegacy(std::shared_ptr<VFilePtrInternalReal> &f);
 
 	bool operator==(const Animation &other) const;
@@ -129,13 +130,13 @@ public:
 private:
 	static util::EnumRegister s_activityEnumRegister;
 	static util::EnumRegister s_eventEnumRegister;
-	bool LoadFromAssetData(const udm::AssetData &data,std::string &outErr);
+	bool LoadFromAssetData(const udm::AssetData &data,std::string &outErr,const Skeleton *optSkeleton=nullptr,const Frame *optReference=nullptr);
 	Animation();
 	Animation(const Animation &other,ShareMode share=ShareMode::None);
 
 	std::vector<std::shared_ptr<Frame>> m_frames;
 	// Contains a list of model bone Ids which are used by this animation
-	std::vector<uint32_t> m_boneIds;
+	std::vector<BoneId> m_boneIds;
 	std::vector<float> m_boneWeights;
 	// Maps a model bone id to a local bone id (m_boneIds index)
 	std::unordered_map<uint32_t,uint32_t> m_boneIdMap;

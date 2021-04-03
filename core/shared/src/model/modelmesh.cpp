@@ -764,26 +764,34 @@ bool ModelSubMesh::Save(udm::AssetData &outData,std::string &outErr)
 	udm["referenceId"] = GetReferenceId();
 	udm["pose"] = GetPose();
 	udm["geometryType"] = udm::enum_to_string(GetGeometryType());
-	udm["vertexData"] = udm::compress_lz4_blob(GetVertices());
-	udm["indexData"] = udm::compress_lz4_blob(GetTriangles());
+
+	static_assert(sizeof(Vertex) == 48);
+	auto strctVertex = ::udm::StructDescription::Define<Vector3,Vector2,Vector3,Vector4>({"pos","uv","n","t"});
+	udm.AddArray("vertexData",strctVertex,GetVertices(),udm::ArrayType::Compressed);
+	udm.AddArray("indexData",GetTriangles(),udm::ArrayType::Compressed);
 	udm["skinMaterialIndex"] = m_skinTextureIndex;
 
 	auto udmUvSets = udm["uvSets"];
 	for(auto &pair : GetUVSets())
-		udmUvSets[pair.first] = udm::compress_lz4_blob(pair.second);
+		udmUvSets.AddArray(pair.first,pair.second,udm::ArrayType::Compressed);
 
 	auto &vertexWeights = GetVertexWeights();
 	if(!vertexWeights.empty())
-		udm["vertexWeights"] = udm::compress_lz4_blob(vertexWeights);
-				
-	auto &extBoneWeights = GetExtendedVertexWeights();
-	if(!extBoneWeights.empty())
-		udm["extendedVertexWeights"] = udm::compress_lz4_blob(extBoneWeights);
+	{
+		static_assert(sizeof(VertexWeight) == 32);
+		auto strctVertexWeight = ::udm::StructDescription::Define<Vector4i,Vector4>({"id","w"});
+		udm.AddArray("vertexWeights",strctVertexWeight,vertexWeights,udm::ArrayType::Compressed);
+
+		auto &extBoneWeights = GetExtendedVertexWeights();
+		if(!extBoneWeights.empty())
+			udm.AddArray("extendedVertexWeights",strctVertexWeight,extBoneWeights,udm::ArrayType::Compressed);
+	}
+
 
 	auto &alphas = GetAlphas();
 	udm["alphaCount"] = GetAlphaCount();
 	if(!alphas.empty())
-		udm["alphas"] = udm::compress_lz4_blob(alphas);
+		udm.AddArray("alphas",alphas,udm::ArrayType::Compressed);
 	return true;
 }
 bool ModelSubMesh::LoadFromAssetData(const udm::AssetData &data,std::string &outErr)
@@ -805,8 +813,9 @@ bool ModelSubMesh::LoadFromAssetData(const udm::AssetData &data,std::string &out
 	udm["referenceId"](m_referenceId);
 	udm["pose"](m_pose);
 	udm::to_enum_value<GeometryType>(udm["geometryType"],m_geometryType);
-	udm["vertexData"].GetBlobData(GetVertices());
-	udm["indexData"].GetBlobData(GetTriangles());
+	
+	udm["vertexData"](GetVertices());
+	udm["indexData"](GetTriangles());
 	udm["skinMaterialIndex"](m_skinTextureIndex);
 
 	auto udmUvSets = udm["uvSets"];
@@ -815,14 +824,14 @@ bool ModelSubMesh::LoadFromAssetData(const udm::AssetData &data,std::string &out
 	for(auto udmUvSet : udmUvSets.ElIt())
 	{
 		std::vector<Vector2> uvData {};
-		udmUvSet.property.GetBlobData(uvData);
+		udmUvSet.property(uvData);
 		uvSets[std::string{udmUvSet.key}] = std::move(uvData);
 	}
 
-	udm["vertexWeights"].GetBlobData(GetVertexWeights());
-	udm["extendedVertexWeights"].GetBlobData(GetExtendedVertexWeights());
+	udm["vertexWeights"](GetVertexWeights());
+	udm["extendedVertexWeights"](GetExtendedVertexWeights());
 	udm["alphaCount"](m_numAlphas);
-	udm["alphas"].GetBlobData(GetAlphas());
+	udm["alphas"](GetAlphas());
 	return true;
 }
 #pragma optimize("",on)

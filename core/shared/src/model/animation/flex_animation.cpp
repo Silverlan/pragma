@@ -67,21 +67,43 @@ bool FlexAnimation::LoadFromAssetData(const udm::AssetData &data,std::string &ou
 	}
 	// if(version > FORMAT_VERSION)
 	// 	return false;
+	//udm["fps"](m_fps);
+
+
+	auto udmNodes = udm["nodes"];
+	auto udmNode = udmNodes[0];
+	std::string type;
+	udmNode["type"](type);
+	if(type == "flexController")
+		udmNode["set"](m_flexControllerIds);
+
 	udm["fps"](m_fps);
-	udm["flexControllers"](m_flexControllerIds);
-	std::vector<float> blobData;
-	if(udm["frameData"].GetBlobData(blobData) != udm::BlobResult::Success)
-		return false;
-	auto numFrames = !m_flexControllerIds.empty() ? (blobData.size() /m_flexControllerIds.size()) : 0;
-	m_frames.resize(numFrames);
-	uint32_t offset = 0;
-	for(auto &frame : m_frames)
+	std::vector<float> times {};
+	auto udmChannels = udm["channels"];
+	auto numChannels = udmChannels.GetSize();
+	for(auto i=decltype(numChannels){0u};i<numChannels;++i)
 	{
-		frame = std::make_shared<FlexAnimationFrame>();
-		auto &frameValues = frame->GetValues();
-		frameValues.resize(m_flexControllerIds.size());
-		memcpy(frameValues.data(),&blobData[offset],frameValues.size() *sizeof(frameValues[0]));
-		offset += frameValues.size();
+		auto udmChannel = udmChannels[i];
+		if(i == 0)
+		{
+			udmChannel["times"](times);
+			m_frames.resize(times.size());
+			for(auto &frame : m_frames)
+			{
+				frame = std::make_shared<FlexAnimationFrame>();
+				frame->GetValues().resize(m_flexControllerIds.size());
+			}
+		}
+
+		uint16_t nodeIdx = 0;
+		udmChannel["node"](nodeIdx);
+		std::string property;
+		udmChannel["property"](property);
+		std::vector<float> values;
+		udmChannel["values"](values);
+
+		for(auto j=decltype(values.size()){0u};j<values.size();++j)
+			m_frames[j]->GetValues()[nodeIdx] = values[j];
 	}
 	return true;
 }
@@ -91,23 +113,39 @@ bool FlexAnimation::Save(udm::AssetData &outData,std::string &outErr)
 	outData.SetAssetVersion(FORMAT_VERSION);
 	auto udm = *outData;
 
-	udm["fps"] = GetFps();
-	auto &flexControllerIds = GetFlexControllerIds();
-	udm["flexControllers"] = flexControllerIds;
+	auto udmNodes = udm.AddArray("nodes",1);
+	auto udmNode = udmNodes[0];
+	udmNode["type"] = "flexController";
+	udmNode["set"] = m_flexControllerIds;
 
-	auto &frames = GetFrames();
-	std::vector<float> frameData;
-	frameData.resize(frames.size() *flexControllerIds.size());
-	uint32_t offset = 0;
-	for(auto &frame : frames)
+	std::vector<float> times {};
+	std::vector<std::vector<float>> values;
+	times.resize(m_frames.size());
+	values.resize(m_flexControllerIds.size());
+	for(auto &v : values)
+		v.resize(m_frames.size());
+	for(auto i=decltype(m_frames.size()){0u};i<m_frames.size();++i)
 	{
-		auto &frameValues = frame->GetValues();
-		assert(frameValues.size() == flexControllerIds.size());
-		memcpy(&frameData[offset],frameValues.data(),frameValues.size() *sizeof(frameValues[0]));
-		offset += frameValues.size();
+		times[i] = i /m_fps;
+
+		auto &frame = *m_frames[i];
+		auto &frameValues = frame.GetValues();
+		for(auto j=decltype(frameValues.size()){0u};j<frameValues.size();++j)
+			values[j][i] = frameValues[j];
 	}
-	udm["frames"] = static_cast<uint32_t>(frames.size());
-	udm["frameData"] = udm::compress_lz4_blob(frameData);
+	
+	udm["fps"] = GetFps();
+	auto udmChannels = udm.AddArray("channels",m_flexControllerIds.size());
+	for(auto i=decltype(m_flexControllerIds.size()){0u};i<m_flexControllerIds.size();++i)
+	{
+		auto udmChannel = udmChannels[i];
+		auto flexControllerId = m_flexControllerIds[i];
+		udmChannel["node"] = static_cast<uint16_t>(i);
+
+		udmChannel["times"] = times;
+		udmChannel["property"] = "value";
+		udmChannel.AddArray("values",values[i],udm::ArrayType::Compressed);
+	}
 	return true;
 }
 bool FlexAnimation::SaveLegacy(std::shared_ptr<VFilePtrInternalReal> &f)

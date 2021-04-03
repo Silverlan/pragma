@@ -21,7 +21,7 @@ enum class JointType : uint8_t
 	DOF
 };
 
-using BoneId = uint32_t;
+using BoneId = uint16_t;
 struct DLLNETWORK JointInfo
 {
 	JointInfo(JointType type,BoneId child,BoneId parent)

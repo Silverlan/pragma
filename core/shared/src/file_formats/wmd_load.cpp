@@ -495,7 +495,7 @@ void FWMD::LoadCollisionMeshes(Game *game,unsigned short version,Model &mdl,Surf
 			{
 				auto type = Read<JointType>();
 				auto idTgt = Read<unsigned int>();
-				oldJointSystemJoints.push_back(JointInfo{type,i,idTgt});
+				oldJointSystemJoints.push_back(JointInfo{type,static_cast<uint16_t>(i),static_cast<uint16_t>(idTgt)});
 				auto &joint = oldJointSystemJoints.back();
 				joint.collide = Read<bool>();
 				auto numArgs = Read<unsigned char>();

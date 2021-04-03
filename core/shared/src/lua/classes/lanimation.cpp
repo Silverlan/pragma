@@ -401,7 +401,7 @@ void Lua::Animation::SetBoneList(lua_State *l,::Animation &anim,luabind::object 
 {
 	int32_t t = 2;
 	auto numBones = Lua::GetObjectLength(l,t);
-	std::vector<uint32_t> list;
+	std::vector<uint16_t> list;
 	list.reserve(numBones);
 	for(auto i=decltype(numBones){0};i<numBones;++i)
 	{

@@ -17,8 +17,8 @@ static const std::vector<std::string> &get_model_extensions()
 	static std::vector<std::string> extensions {};
 	if(extensions.empty())
 	{
+		extensions = pragma::asset::get_supported_extensions(pragma::asset::Type::Model);
 		extensions.push_back("mdl");
-		extensions.push_back("wmd");
 		extensions.push_back("nif");
 		auto &assetManager = engine->GetAssetManager();
 		auto numImporters = assetManager.GetImporterCount(pragma::asset::Type::Model);

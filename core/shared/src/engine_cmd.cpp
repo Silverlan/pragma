@@ -83,7 +83,7 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 			outFileName += '.' +ext;
 			try
 			{
-				udmData->SaveAscii(outFileName);
+				udmData->SaveAscii(outFileName,udm::AsciiSaveFlags::IncludeHeader | udm::AsciiSaveFlags::DontCompressLz4Arrays);
 			}
 			catch(const udm::Exception &e)
 			{

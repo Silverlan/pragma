@@ -18,10 +18,10 @@ util::EnumRegister &Animation::GetActivityEnumRegister() {return s_activityEnumR
 util::EnumRegister &Animation::GetEventEnumRegister() {return s_eventEnumRegister;}
 
 
-std::shared_ptr<Animation> Animation::Load(const udm::AssetData &data,std::string &outErr)
+std::shared_ptr<Animation> Animation::Load(const udm::AssetData &data,std::string &outErr,const Skeleton *optSkeleton,const Frame *optReference)
 {
 	auto anim = Animation::Create();
-	if(anim->LoadFromAssetData(data,outErr) == false)
+	if(anim->LoadFromAssetData(data,outErr,optSkeleton,optReference) == false)
 		return nullptr;
 	return anim;
 }
@@ -55,7 +55,40 @@ template<class T0,class T1>
 	memcpy(memPtr1,memPtr0,count *sizeof(T0::value_type));
 }
 
-bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr)
+template<typename T>
+	static void apply_channel_animation_values(
+		BoneId boneId,udm::LinkedPropertyWrapper &udmProp,float fps,const std::vector<float> &times,const std::vector<std::shared_ptr<Frame>> &frames,
+		const std::function<void(Frame&,const T&)> &applyValue
+)
+{
+	std::vector<T> values;
+	udmProp(values);
+	auto stepTime = 1.f /fps;
+	for(auto i=decltype(times.size()){0u};i<times.size();++i)
+	{
+		auto t = times[i];
+		auto frameEnd = umath::round(t *fps);
+		auto frameStart = frameEnd;
+		if(i > 0)
+		{
+			auto tPrev = times[i -1];
+			auto dt = t -tPrev;
+			auto nFrames = umath::round(dt /stepTime);
+			assert(nFrames > 0);
+			if(nFrames > 0)
+				frameStart = frameEnd -(nFrames -1);
+		}
+		else if(i == 0 && times.size() == 1)
+			frameEnd = frames.size() -1;
+		for(auto frameIdx=frameStart;frameIdx<=frameEnd;++frameIdx)
+		{
+			auto &frame = frames[frameIdx];
+			applyValue(*frame,values[i]);
+		}
+	}
+}
+
+bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr,const Skeleton *optSkeleton,const Frame *optReference)
 {
 	if(data.GetAssetType() != PANIM_IDENTIFIER)
 	{
@@ -82,6 +115,9 @@ bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr
 	udm["activityWeight"](m_activityWeight);
 	udm["fps"](m_fps);
 
+	float duration = 0.f;
+	udm["duration"](duration);
+
 	m_renderBounds.first = udm["renderBounds"]["min"](Vector3{std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max()});
 	m_renderBounds.second = udm["renderBounds"]["max"](Vector3{std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest()});
 
@@ -92,14 +128,6 @@ bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr
 	auto fadeOutTime = udm["fadeOutTime"];
 	if(fadeOutTime)
 		m_fadeOut = std::make_unique<float>(fadeOutTime(0.f));
-
-	udm["bones"](m_boneIds);
-	auto numBones = m_boneIds.size();
-	m_boneIdMap.reserve(numBones);
-	for(auto i=decltype(numBones){0u};i<numBones;++i)
-		m_boneIdMap[m_boneIds[i]] = i;
-	
-	udm["boneWeights"](m_boneWeights);
 
 	auto udmBlendController = udm["blendController"];
 	if(udmBlendController)
@@ -137,11 +165,92 @@ bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr
 		static_assert(umath::to_integral(FAnim::Count) == 7,"Update this list when new flags have been added!");
 	}
 
+	std::vector<BoneId> nodeToBone;
+	if(udm["bones"])
+	{
+		// Backwards compatibility
+		udm["bones"](m_boneIds);
+		auto numBones = m_boneIds.size();
+		m_boneIdMap.reserve(numBones);
+		for(auto i=decltype(numBones){0u};i<numBones;++i)
+			m_boneIdMap[m_boneIds[i]] = i;
+	
+		udm["boneWeights"](m_boneWeights);
+	}
+	else
+	{
+		auto udmNodes = udm["nodes"];
+		m_boneIds.reserve(udmNodes.GetSize());
+		uint32_t nodeIdx = 0;
+		for(auto udmNode : udmNodes)
+		{
+			std::string type;
+			udmNode["type"](type);
+			if(type == "bone")
+			{
+				if(udmNode["bone"])
+				{
+					uint32_t boneIdx = 0;
+					udmNode["bone"](boneIdx);
+					nodeToBone[nodeIdx] = boneIdx;
+					m_boneIds.push_back(boneIdx);
+
+					if(udmNode["weight"])
+					{
+						auto weight = 0.f;
+						udmNode["weight"](weight);
+						m_boneWeights.push_back(weight);
+					}
+				}
+				else
+				{
+					auto offset = m_boneIds.size();
+					auto udmSet = udmNode["set"];
+					if(m_boneIds.empty())
+						udmSet(m_boneIds);
+					else
+					{
+						auto n = udmSet.GetSize();
+						m_boneIds.resize(offset +n);
+						udmSet.GetBlobData(m_boneIds.data() +offset,n *sizeof(BoneId),udm::Type::UInt16);
+					}
+					nodeToBone.resize(m_boneIds.size(),std::numeric_limits<BoneId>::max());
+					for(auto i=offset;i<m_boneIds.size();++i)
+						nodeToBone[nodeIdx +(i -offset)] = m_boneIds[i];
+
+					auto udmWeights = udmNode["weights"];
+					if(udmWeights)
+					{
+						if(m_boneWeights.empty())
+							udmSet(m_boneWeights);
+						else
+						{
+							auto n = udmSet.GetSize();
+							auto offset = m_boneWeights.size();
+							m_boneWeights.resize(offset +n);
+							udmSet.GetBlobData(m_boneWeights.data() +offset,n *sizeof(float),udm::Type::Float);
+						}
+					}
+				}
+			}
+			auto udmSet = udmNode["set"];
+			nodeIdx += udmSet ? udmSet.GetSize() : 1;
+		}
+
+		auto numBones = m_boneIds.size();
+		m_boneIdMap.reserve(numBones);
+		for(auto i=decltype(numBones){0u};i<numBones;++i)
+			m_boneIdMap[m_boneIds[i]] = i;
+	}
+
 	auto udmFrameData = udm["frameTransforms"];
 	if(udmFrameData)
 	{
+		// Backwards compatibility
+		auto numBones = m_boneIds.size();
 		std::vector<umath::Transform> transforms;
-		if(udmFrameData.GetBlobData(transforms) == udm::BlobResult::Success)
+		udmFrameData(transforms);
+		if(!transforms.empty())
 		{
 			auto numFrames = transforms.size() /m_boneIds.size();
 			m_frames.resize(numFrames);
@@ -154,35 +263,117 @@ bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr
 				offset += frameTransforms.size();
 			}
 		}
-	}
 
-	auto udmFrameScales = udm["frameScales"];
-	if(udmFrameScales)
-	{
-		std::vector<Vector3> scales;
-		if(udmFrameScales.GetBlobData(scales) == udm::BlobResult::Success)
+		auto udmFrameScales = udm["frameScales"];
+		if(udmFrameScales)
 		{
-			uint32_t offset = 0;
-			for(auto &frame : m_frames)
+			std::vector<Vector3> scales;
+			udmFrameScales(scales);
+			if(!scales.empty())
 			{
-				auto &frameScales = frame->GetBoneScales();
-				frameScales.resize(numBones);
-				copy_safe(scales,frameScales,offset,0,frameScales.size());
-				offset += frameScales.size();
+				uint32_t offset = 0;
+				for(auto &frame : m_frames)
+				{
+					auto &frameScales = frame->GetBoneScales();
+					frameScales.resize(numBones);
+					copy_safe(scales,frameScales,offset,0,frameScales.size());
+					offset += frameScales.size();
+				}
+			}
+		}
+
+		auto udmFrameMoveTranslations = udm["frameMoveTranslations"];
+		if(udmFrameMoveTranslations)
+		{
+			std::vector<Vector2> moveTranslations;
+			udmFrameMoveTranslations(moveTranslations);
+			if(!moveTranslations.empty())
+			{
+				for(auto i=decltype(m_frames.size()){0u};i<m_frames.size();++i)
+				{
+					auto &frame = m_frames[i];
+					frame->SetMoveOffset(moveTranslations[i]);
+				}
 			}
 		}
 	}
-
-	auto udmFrameMoveTranslations = udm["frameMoveTranslations"];
-	if(udmFrameMoveTranslations)
+	else
 	{
-		std::vector<Vector2> moveTranslations;
-		if(udmFrameMoveTranslations.GetBlobData(moveTranslations) == udm::BlobResult::Success)
+		auto numFrames = umath::round(duration *m_fps);
+		m_frames.resize(numFrames);
+		auto isGesture = umath::is_flag_set(m_flags,FAnim::Gesture);
+		for(auto &frame : m_frames)
 		{
-			for(auto i=decltype(m_frames.size()){0u};i<m_frames.size();++i)
+			frame = Frame::Create(m_boneIds.size());
+			if(isGesture || !optReference || !optSkeleton)
+				continue;
+			auto &refBones = optSkeleton->GetBones();
+			for(auto i=decltype(refBones.size()){0u};i<refBones.size();++i)
 			{
-				auto &frame = m_frames[i];
-				frame->SetMoveOffset(moveTranslations[i]);
+				auto it = m_boneIdMap.find(i);
+				if(it == m_boneIdMap.end())
+					continue;
+
+				auto *pos = optReference->GetBonePosition(i);
+				if(pos)
+					frame->SetBonePosition(it->second,*pos);
+
+				auto *rot = optReference->GetBoneOrientation(i);
+				if(rot)
+					frame->SetBoneOrientation(it->second,*rot);
+
+				auto *scale = optReference->GetBoneScale(i);
+				if(scale)
+					frame->SetBoneScale(it->second,*scale);
+			}
+		}
+		auto udmChannels = udm["channels"];
+		for(auto udmChannel : udmChannels)
+		{
+			uint16_t nodeId = 0;
+			udmChannel["node"](nodeId);
+			auto boneId = nodeToBone[nodeId];
+
+			std::vector<float> times;
+			udmChannel["times"](times);
+
+			std::string property;
+			udmChannel["property"](property);
+
+			auto udmValues = udmChannel["values"];
+			if(property == "position")
+			{
+				apply_channel_animation_values<Vector3>(
+					boneId,udmValues,m_fps,times,m_frames,
+					[boneId](Frame &frame,const Vector3 &val) {frame.SetBonePosition(boneId,val);
+				});
+			}
+			else if(property == "rotation")
+			{
+				apply_channel_animation_values<Quat>(
+					boneId,udmValues,m_fps,times,m_frames,
+					[boneId](Frame &frame,const Quat &val) {frame.SetBoneOrientation(boneId,val);
+				});
+			}
+			else if(property == "scale")
+			{
+				apply_channel_animation_values<Vector3>(
+					boneId,udmValues,m_fps,times,m_frames,
+					[boneId](Frame &frame,const Vector3 &val) {frame.SetBoneScale(boneId,val);
+				});
+			}
+			else if(property == "move")
+			{
+				// TODO
+				std::vector<Vector2> moveOffsets;
+				udmValues(moveOffsets);
+				for(auto i=decltype(times.size()){0u};i<times.size();++i)
+				{
+					auto t = times[i];
+					auto frameIdx = umath::round(t *m_fps);
+					auto &frame = m_frames[frameIdx];
+					frame->SetMoveOffset(moveOffsets[i]);
+				}
 			}
 		}
 	}
@@ -218,7 +409,132 @@ bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr
 	return true;
 }
 
-bool Animation::Save(udm::AssetData &outData,std::string &outErr)
+struct Channel
+{
+	std::vector<float> times;
+	virtual bool CompareValues(const void *v0,const void *v1) const=0;
+	virtual bool CompareWithDefault(const void *v) const=0;
+	virtual const void *GetValue(size_t idx) const=0;
+	virtual size_t GetValueCount() const=0;
+	virtual void AddValue(const void *v)=0;
+	virtual void PopBack() {times.pop_back();}
+	virtual const void *GetReferenceValue(const Frame &reference,uint32_t boneId) const=0;
+};
+
+struct PositionChannel : public Channel
+{
+	std::vector<Vector3> values;
+	static const Vector3 &Cast(const void *v) {return *static_cast<const Vector3*>(v);}
+	virtual bool CompareValues(const void *v0,const void *v1) const override
+	{
+		return uvec::distance_sqr(Cast(v0),Cast(v1)) < 0.001f;
+	}
+	virtual bool CompareWithDefault(const void *v) const override
+	{
+		return uvec::distance_sqr(Cast(v),uvec::ORIGIN) < 0.001f;
+	}
+	virtual const void *GetValue(size_t idx) const override {return &values[idx];}
+	virtual size_t GetValueCount() const override {return values.size();}
+	virtual void AddValue(const void *v) override {values.push_back(Cast(v));}
+	virtual void PopBack() override {values.pop_back(); Channel::PopBack();}
+	virtual const void *GetReferenceValue(const Frame &reference,uint32_t boneId) const override {return reference.GetBonePosition(boneId);}
+};
+
+struct RotationChannel : public Channel
+{
+	std::vector<Quat> values;
+	static const Quat &Cast(const void *v) {return *static_cast<const Quat*>(v);}
+	virtual bool CompareValues(const void *v0,const void *v1) const override
+	{
+		return uquat::distance(Cast(v0),Cast(v1)) < 0.001f;
+	}
+	virtual bool CompareWithDefault(const void *v) const override
+	{
+		constexpr Quat identity {1.f,0.f,0.f,0.f};
+		return uquat::distance(Cast(v),identity) < 0.001f;
+	}
+	virtual const void *GetValue(size_t idx) const override {return &values[idx];}
+	virtual size_t GetValueCount() const override {return values.size();}
+	virtual void AddValue(const void *v) override {values.push_back(Cast(v));}
+	virtual void PopBack() override {values.pop_back(); Channel::PopBack();}
+	virtual const void *GetReferenceValue(const Frame &reference,uint32_t boneId) const override {return reference.GetBoneOrientation(boneId);}
+};
+
+struct ScaleChannel : public Channel
+{
+	std::vector<Vector3> values;
+	static const Vector3 &Cast(const void *v) {return *static_cast<const Vector3*>(v);}
+	virtual bool CompareValues(const void *v0,const void *v1) const override
+	{
+		return uvec::distance_sqr(Cast(v0),Cast(v1)) < 0.001f;
+	}
+	virtual bool CompareWithDefault(const void *v) const override
+	{
+		constexpr Vector3 identity {1.f,1.f,1.f};
+		return uvec::distance_sqr(Cast(v),identity) < 0.001f;
+	}
+	virtual const void *GetValue(size_t idx) const override {return &values[idx];}
+	virtual size_t GetValueCount() const override {return values.size();}
+	virtual void AddValue(const void *v) override {values.push_back(Cast(v));}
+	virtual void PopBack() override {values.pop_back(); Channel::PopBack();}
+	virtual const void *GetReferenceValue(const Frame &reference,uint32_t boneId) const override {return reference.GetBoneScale(boneId);}
+};
+
+struct MoveChannel : public Channel
+{
+	std::vector<Vector2> values;
+	static const Vector2 &Cast(const void *v) {return *static_cast<const Vector2*>(v);}
+	virtual bool CompareValues(const void *v0,const void *v1) const override
+	{
+		return glm::length2(Cast(v0) -Cast(v1)) < 0.001f;
+	}
+	virtual bool CompareWithDefault(const void *v) const override
+	{
+		return glm::length2(Cast(v)) < 0.001f;
+	}
+	virtual const void *GetValue(size_t idx) const override {return &values[idx];}
+	virtual size_t GetValueCount() const override {return values.size();}
+	virtual void AddValue(const void *v) override {values.push_back(Cast(v));}
+	virtual void PopBack() override {values.pop_back(); Channel::PopBack();}
+	virtual const void *GetReferenceValue(const Frame &reference,uint32_t boneId) const override {return nullptr;}
+};
+
+static constexpr auto ENABLE_ANIMATION_SAVE_OPTIMIZATION = true;
+template<class TChannel>
+	static void write_channel_value(
+	std::shared_ptr<Channel> &channel,uint32_t numFrames,uint32_t frameIdx,float t,
+	const std::function<const void*()> &fGetValue
+)
+{
+	if(!channel)
+	{
+		channel = std::make_shared<TChannel>();
+		channel->times.reserve(numFrames);
+		static_cast<TChannel*>(channel.get())->values.reserve(numFrames);
+	}
+	auto *curVal = fGetValue();
+	if constexpr(ENABLE_ANIMATION_SAVE_OPTIMIZATION)
+	{
+		auto &values = static_cast<TChannel*>(channel.get())->values;
+		if(values.size() > 1)
+		{
+			auto &prevPrevVal = values[values.size() -2];
+			auto &prevVal = values.back();
+			if(channel->CompareValues(&prevVal,&prevPrevVal) && channel->CompareValues(curVal,&prevVal))
+			{
+				// We got a pair of three matching values, so we
+				// can just change the time-value for the last value to
+				// our new time
+				channel->times.back() = t;
+				return;
+			}
+		}
+	}
+	channel->times.push_back(t);
+	channel->AddValue(curVal);
+};
+
+bool Animation::Save(udm::AssetData &outData,std::string &outErr,const Frame *optReference)
 {
 	outData.SetAssetType(PANIM_IDENTIFIER);
 	outData.SetAssetVersion(PANIM_VERSION);
@@ -231,11 +547,13 @@ bool Animation::Save(udm::AssetData &outData,std::string &outErr)
 	else
 		udm.Add("activity",udm::Type::Nil);
 	udm["activityWeight"] = static_cast<uint8_t>(GetActivityWeight());
-	udm["fps"] = static_cast<float>(GetFPS());
 
 	auto &renderBounds = GetRenderBounds();
 	udm["renderBounds"]["min"] = renderBounds.first;
 	udm["renderBounds"]["max"] = renderBounds.second;
+
+	udm["fps"] = GetFPS();
+	udm["duration"] = GetDuration();
 
 	if(HasFadeInTime())
 		udm["fadeInTime"] = GetFadeInTime();
@@ -247,17 +565,18 @@ bool Animation::Save(udm::AssetData &outData,std::string &outErr)
 	else
 		udm.Add("fadeOutTime",udm::Type::Nil);
 
-	auto &bones = GetBoneList();
+	auto bones = GetBoneList();
 	auto numBones = bones.size();
-	udm["bones"] = bones;
-	
-	auto &weights = GetBoneWeights();
-	auto it = std::find_if(weights.begin(),weights.end(),[](const float weight){
-		return (weight != 1.f) ? true : false;
-	});
-	auto hasWeights = (it != weights.end());
-	if(hasWeights)
-		udm["boneWeights"] = weights;
+	auto hasMove = false;
+	for(auto &frame : m_frames)
+	{
+		if(frame->GetMoveOffset())
+		{
+			hasMove = true;
+			break;
+		}
+	}
+	auto numNodes = numBones +(hasMove ? 1u : 0u);
 
 	auto *blendController = GetBlendController();
 	if(blendController)
@@ -288,55 +607,177 @@ bool Animation::Save(udm::AssetData &outData,std::string &outErr)
 	writeFlag(FAnim::Gesture,"gesture");
 	writeFlag(FAnim::NoMoveBlend,"noMoveBlend");
 	static_assert(umath::to_integral(FAnim::Count) == 7,"Update this list when new flags have been added!");
-	
-	std::vector<umath::Transform> transforms;
-	transforms.resize(m_frames.size() *numBones);
-	std::vector<Vector3> scales;
-	std::vector<Vector2> moveTranslations;
-	uint32_t offset = 0;
-	uint32_t frameIdx = 0;
-	for(auto &frame : m_frames)
+
+	std::vector<std::unordered_map<std::string,std::shared_ptr<Channel>>> nodeChannels {};
+	nodeChannels.resize(numNodes);
+
+	auto numFrames = m_frames.size();
+	const auto defaultRotation = uquat::identity();
+	const Vector3 defaultScale {1.f,1.f,1.f};
+	// Note: Pragma currently uses a frame-based animation system, but the UDM format is
+	// channel-based. Pragma will be transitioned to a channel-based system in the future, but
+	// until then we'll have to convert it when saving or loading an animation.
+	// The saving process also automatically does several optimizations, such as erasing redundant
+	// positions/rotations/scales from the animation data.
+	for(auto frameIdx=decltype(numFrames){0u};frameIdx<numFrames;++frameIdx)
 	{
+		auto &frame = m_frames[frameIdx];
 		auto &frameTransforms = frame->GetBoneTransforms();
-		if(frameTransforms.size() != numBones)
+		auto &scales = frame->GetBoneScales();
+		if(frameTransforms.size() != numBones || (!scales.empty() && scales.size() != numBones))
 		{
 			outErr = "Number of transforms (" +std::to_string(frameTransforms.size()) +" in frame does not match number of bones (" +std::to_string(numBones) +")!";
 			return false;
 		}
-		copy_safe(frameTransforms,transforms,0,offset,frameTransforms.size());
-
-		if(frame->HasScaleTransforms())
+		auto t = frameIdx /static_cast<float>(m_fps);
+		auto hasScales = frame->HasScaleTransforms();
+		for(auto i=decltype(numBones){0u};i<numBones;++i)
 		{
-			if(scales.empty())
-				scales.resize(m_frames.size() *numBones,Vector3{1.f,1.f,1.f});
-			auto &frameScales = frame->GetBoneScales();
-			if(frameScales.size() != numBones)
-			{
-				outErr = "Number of scales (" +std::to_string(frameTransforms.size()) +" in frame does not match number of bones (" +std::to_string(numBones) +")!";
-				return false;
-			}
-			copy_safe(frameScales,scales,0,offset,frameScales.size());
-		}
+			auto &channels = nodeChannels[i];
 
-		if(frame->GetMoveOffset())
-		{
-			auto &moveOffset = *frame->GetMoveOffset();
-			if(moveOffset.x != 0.f || moveOffset.y != 0.f)
+			write_channel_value<PositionChannel>(channels["position"],numFrames,frameIdx,t,[&frameTransforms,i]() -> const void* {
+				return &frameTransforms[i].GetOrigin();
+			});
+			write_channel_value<RotationChannel>(channels["rotation"],numFrames,frameIdx,t,[&frameTransforms,i]() -> const void* {
+				return &frameTransforms[i].GetRotation();
+			});
+			if(hasScales)
 			{
-				if(moveTranslations.empty())
-					moveTranslations.resize(m_frames.size(),Vector2{0.f,0.f});
-				moveTranslations.at(frameIdx) = moveOffset;
+				write_channel_value<ScaleChannel>(channels["scale"],numFrames,frameIdx,t,[&scales,i]() -> const void* {
+					return &scales[i];
+				});
 			}
 		}
-		offset += frameTransforms.size();
-		++frameIdx;
 	}
-	udm["frames"] = static_cast<uint32_t>(m_frames.size());
-	udm["frameTransforms"] = udm::compress_lz4_blob(transforms);
-	if(!scales.empty())
-		udm["frameScales"] = udm::compress_lz4_blob(scales);
-	if(!moveTranslations.empty())
-		udm["frameMoveTranslations"] = udm::compress_lz4_blob(moveTranslations);
+	
+	auto weights = GetBoneWeights();
+	if constexpr(ENABLE_ANIMATION_SAVE_OPTIMIZATION)
+	{
+		// We may be able to remove some channels altogether if they're empty,
+		// or are equivalent to the reference pose (or identity value if the animation
+		// is a gesture)
+		auto isGesture = HasFlag(FAnim::Gesture);
+		for(auto it=nodeChannels.begin();it!=nodeChannels.begin() +numBones;)
+		{
+			auto boneId = bones[it -nodeChannels.begin()];
+			auto &channels = *it;
+			for(auto &pair : channels)
+			{
+				// If channel only has two values and they're both the same, we can get rid of the second one
+				auto &channel = pair.second;
+				auto n = channel->GetValueCount();
+				if(n == 2)
+				{
+					auto *v0 = channel->GetValue(0);
+					auto *v1 = channel->GetValue(1);
+					if(channel->CompareValues(v0,v1) == false)
+						continue;
+					channel->PopBack();
+				}
+
+				n = channel->GetValueCount();
+				if(n != 1)
+					continue;
+				if(isGesture)
+				{
+					if(channel->CompareWithDefault(channel->GetValue(0)))
+						channel->PopBack();
+					continue;
+				}
+				if(!optReference)
+					continue;
+				auto *ref = channel->GetReferenceValue(*optReference,boneId);
+				if(!ref || !channel->CompareValues(channel->GetValue(0),ref))
+					continue;
+				channel->PopBack();
+			}
+			for(auto itChannel=channels.begin();itChannel!=channels.end();)
+			{
+				auto &channel = itChannel->second;
+				if(channel->times.empty())
+					itChannel = channels.erase(itChannel);
+				else
+					++itChannel;
+			}
+			if(channels.empty())
+			{
+				auto i = (it -nodeChannels.begin());
+				bones.erase(bones.begin() +i);
+				if(!weights.empty())
+					weights.erase(weights.begin() +i);
+				--numBones;
+				it = nodeChannels.erase(it);
+			}
+			else
+				++it;
+		}
+	}
+
+	auto it = std::find_if(weights.begin(),weights.end(),[](const float weight){
+		return (weight != 1.f) ? true : false;
+	});
+	auto hasWeights = (it != weights.end());
+
+	auto udmNodes = udm.AddArray("nodes",1u +(hasMove ? 1u : 0u));
+	auto udmNodeBones = udmNodes[0];
+	udmNodeBones["type"] = "bone";
+	udmNodeBones["set"] = bones;
+	if(hasWeights)
+		udmNodeBones["weights"] = weights;
+	std::optional<uint32_t> nodeMove {};
+	if(hasMove)
+	{
+		auto udmNodeMove = udmNodes[1];
+		udmNodeMove["type"] = "move";
+		nodeMove = numBones;
+	}
+
+	if(nodeMove.has_value())
+	{
+		for(auto frameIdx=decltype(numFrames){0u};frameIdx<numFrames;++frameIdx)
+		{
+			auto &frame = m_frames[frameIdx];
+			if(!frame->GetMoveOffset())
+				continue;
+			auto &moveOffset = *frame->GetMoveOffset();
+			auto &channels = nodeChannels[*nodeMove];
+			auto &moveChannel = channels["offset"];
+			if(!moveChannel)
+			{
+				moveChannel = std::make_shared<MoveChannel>();
+				moveChannel->times.reserve(numFrames);
+				static_cast<MoveChannel*>(moveChannel.get())->values.reserve(numFrames);
+			}
+			auto t = frameIdx /static_cast<float>(m_fps);
+			moveChannel->times.push_back(t);
+			static_cast<MoveChannel*>(moveChannel.get())->values.push_back(*frame->GetMoveOffset());
+		}
+	}
+
+	uint32_t numChannels = 0;
+	for(auto &nodeChannel : nodeChannels)
+		numChannels += nodeChannel.size();
+	auto udmChannels = udm.AddArray("channels",numChannels,udm::Type::Element,udm::ArrayType::Compressed);
+	uint32_t channelIdx = 0;
+	for(auto nodeIdx=decltype(nodeChannels.size()){0u};nodeIdx<nodeChannels.size();++nodeIdx)
+	{
+		for(auto &pair : nodeChannels[nodeIdx])
+		{
+			auto &channel = pair.second;
+			auto udmChannel = udmChannels[channelIdx++];
+			udmChannel["node"] = static_cast<uint16_t>(nodeIdx);
+			udmChannel["property"] = pair.first;
+			udmChannel.AddArray("times",channel->times);
+			if(pair.first == "offset")
+				udmChannel.AddArray("values",static_cast<MoveChannel&>(*channel).values);
+			else if(pair.first == "position")
+				udmChannel.AddArray("values",static_cast<PositionChannel&>(*channel).values);
+			else if(pair.first == "rotation")
+				udmChannel.AddArray("values",static_cast<RotationChannel&>(*channel).values);
+			else if(pair.first == "scale")
+				udmChannel.AddArray("values",static_cast<ScaleChannel&>(*channel).values);
+		}
+	}
 
 	uint32_t numEvents = 0;
 	for(auto &pair : m_events)
@@ -348,7 +789,7 @@ bool Animation::Save(udm::AssetData &outData,std::string &outErr)
 		for(auto &ev : pair.second)
 		{
 			auto udmEvent = udmEvents[evIdx++];
-			udmEvent["frame"] = pair.first;
+			udmEvent["time"] = pair.first /static_cast<float>(m_fps);
 
 			auto *eventName = Animation::GetEventEnumRegister().GetEnumName(umath::to_integral(ev->eventID));
 			udmEvent["name"] = (eventName != nullptr) ? *eventName : "";
@@ -656,7 +1097,7 @@ bool Animation::HasFlag(FAnim flag) const {return ((m_flags &flag) == flag) ? tr
 void Animation::AddFlags(FAnim flags) {m_flags |= flags;}
 void Animation::RemoveFlags(FAnim flags) {m_flags &= ~flags;}
 
-const std::vector<unsigned int> &Animation::GetBoneList() const {return m_boneIds;}
+const std::vector<uint16_t> &Animation::GetBoneList() const {return m_boneIds;}
 const std::unordered_map<uint32_t,uint32_t> &Animation::GetBoneMap() const {return m_boneIdMap;}
 uint32_t Animation::AddBoneId(uint32_t id)
 {
@@ -679,7 +1120,7 @@ void Animation::SetBoneId(uint32_t localIdx,uint32_t id)
 	oldId = id;
 	m_boneIdMap.insert(std::make_pair(id,localIdx));
 }
-void Animation::SetBoneList(const std::vector<uint32_t> &list)
+void Animation::SetBoneList(const std::vector<uint16_t> &list)
 {
 	m_boneIds = list;
 	m_boneIdMap.clear();

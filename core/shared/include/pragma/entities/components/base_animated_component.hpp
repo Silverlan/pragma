@@ -20,7 +20,7 @@ class Animation;
 class Frame;
 class ModelSubMesh;
 struct AnimationEvent;
-using BoneId = uint32_t;
+using BoneId = uint16_t;
 enum class ALSoundType : int32_t;
 namespace pragma
 {

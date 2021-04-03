@@ -27,18 +27,11 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 	// std::transform(pathCache.begin(),pathCache.end(),pathCache.begin(),::tolower);
 
 	auto model = pmodel;
+	
 	std::string ext;
-	if(ufile::get_extension(pathCache,&ext) == false)
-	{
-		auto tmpPath = pathCache +'.' +pragma::asset::FORMAT_MODEL_BINARY;
-		if(pragma::asset::exists(nw,tmpPath,pragma::asset::Type::Model))
-			return Load<TModel,TModelMesh,TModelSubMesh>(game,tmpPath,loadMaterial,loadModel);
-		tmpPath = pathCache +'.' +pragma::asset::FORMAT_MODEL_ASCII;
-		if(pragma::asset::exists(nw,tmpPath,pragma::asset::Type::Model))
-			return Load<TModel,TModelMesh,TModelSubMesh>(game,tmpPath,loadMaterial,loadModel);
-		tmpPath = pathCache +'.' +pragma::asset::FORMAT_MODEL_LEGACY;
-		model = tmpPath;
-	}
+	auto mdlPath = pragma::asset::find_file(nw,pathCache,pragma::asset::Type::Model,&ext);
+	if(mdlPath.has_value())
+		model = *mdlPath;
 
 	std::string path = "models\\";
 	path += model;

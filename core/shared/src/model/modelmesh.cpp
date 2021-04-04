@@ -767,8 +767,8 @@ bool ModelSubMesh::Save(udm::AssetData &outData,std::string &outErr)
 
 	static_assert(sizeof(Vertex) == 48);
 	auto strctVertex = ::udm::StructDescription::Define<Vector3,Vector2,Vector3,Vector4>({"pos","uv","n","t"});
-	udm.AddArray("vertexData",strctVertex,GetVertices(),udm::ArrayType::Compressed);
-	udm.AddArray("indexData",GetTriangles(),udm::ArrayType::Compressed);
+	udm.AddArray("vertices",strctVertex,GetVertices(),udm::ArrayType::Compressed);
+	udm.AddArray("indices",GetTriangles(),udm::ArrayType::Compressed);
 	udm["skinMaterialIndex"] = m_skinTextureIndex;
 
 	auto udmUvSets = udm["uvSets"];
@@ -814,8 +814,12 @@ bool ModelSubMesh::LoadFromAssetData(const udm::AssetData &data,std::string &out
 	udm["pose"](m_pose);
 	udm::to_enum_value<GeometryType>(udm["geometryType"],m_geometryType);
 	
+	// Backwards compatibility
 	udm["vertexData"](GetVertices());
 	udm["indexData"](GetTriangles());
+
+	udm["vertices"](GetVertices());
+	udm["indices"](GetTriangles());
 	udm["skinMaterialIndex"](m_skinTextureIndex);
 
 	auto udmUvSets = udm["uvSets"];

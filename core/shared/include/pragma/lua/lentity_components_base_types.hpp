@@ -3955,6 +3955,14 @@ namespace Lua
 			ent->PushLuaObject(l);
 		}));
 
+		def.def("GetBone",static_cast<luabind::object(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) -> luabind::object {
+			pragma::Lua::check_component(l,hEnt);
+			auto *data = hEnt->GetAttachmentData();
+			if(data == nullptr)
+				return luabind::object{};
+			return luabind::object{l,data->bone};
+		}));
+
 		def.def("SetAttachmentFlags",static_cast<void(*)(lua_State*,THandle&,int)>([](lua_State *l,THandle &hEnt,int flags) {
 			pragma::Lua::check_component(l,hEnt);
 			hEnt->SetAttachmentFlags(static_cast<FAttachmentMode>(flags));

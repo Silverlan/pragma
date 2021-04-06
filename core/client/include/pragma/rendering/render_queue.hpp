@@ -124,7 +124,6 @@ namespace pragma::rendering
 		std::mutex m_workMutex;
 		std::queue<std::function<void()>> m_workQueue;
 		std::condition_variable m_threadWaitCondition {};
-		std::mutex m_threadWaitMutex {};
 		std::atomic<bool> m_threadRunning = false;
 		std::atomic<bool> m_hasWork = false;
 	};

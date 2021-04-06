@@ -40,7 +40,10 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 		luabind::def("get_supported_import_file_extensions",&Lua::asset::get_supported_import_file_extensions),
 		luabind::def("get_supported_export_file_extensions",&Lua::asset::get_supported_export_file_extensions),
 		luabind::def("matches",&pragma::asset::matches),
-		luabind::def("get_normalized_path",&pragma::asset::get_normalized_path)
+		luabind::def("get_normalized_path",&pragma::asset::get_normalized_path),
+		luabind::def("get_supported_extensions",static_cast<luabind::object(*)(lua_State*,pragma::asset::Type)>([](lua_State *l,pragma::asset::Type type) -> luabind::object {
+			return Lua::vector_to_table(l,pragma::asset::get_supported_extensions(type));
+		}))
 	];
 
 	if(extended)

@@ -549,6 +549,12 @@ void Lua::udm::register_library(Lua::Interface &lua)
 				return 1;
 			}
 			auto &f = Lua::Check<LFile>(l,1);
+			if(!f.GetHandle())
+			{
+				Lua::PushBool(l,false);
+				Lua::PushString(l,"Invalid file handle!");
+				return 2;
+			}
 			std::string err;
 			auto udmData = ::util::load_udm_asset(f.GetHandle(),&err);
 			if(udmData == nullptr)
@@ -703,6 +709,17 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			}
 			Lua::Push(l,structDesc);
 			return 1;
+		})},
+		{"enum_type_to_ascii",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) {
+			auto type = Lua::CheckInt(l,1);
+			Lua::PushString(l,::udm::enum_type_to_ascii(static_cast<::udm::Type>(type)));
+			return 1;
+		})},
+		{"ascii_type_to_enum",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) {
+			std::string stype = Lua::CheckString(l,1);
+			auto type = ::udm::ascii_type_to_enum(stype);
+			Lua::PushInt(l,umath::to_integral(type));
+			return 1;
 		})}
 	});
 
@@ -743,7 +760,13 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		{"TYPE_REFERENCE",umath::to_integral(::udm::Type::Reference)},
 		{"TYPE_STRUCT",umath::to_integral(::udm::Type::Struct)},
 		{"TYPE_HALF",umath::to_integral(::udm::Type::Half)},
-        {"TYPE_COUNT",umath::to_integral(::udm::Type::Count)}
+        {"TYPE_COUNT",umath::to_integral(::udm::Type::Count)},
+
+        {"ARRAY_TYPE_COMPRESSED",umath::to_integral(::udm::ArrayType::Compressed)},
+        {"ARRAY_TYPE_RAW",umath::to_integral(::udm::ArrayType::Raw)},
+		
+        {"ASCII_SAVE_FLAG_BIT_INCLUDE_HEADER",umath::to_integral(::udm::AsciiSaveFlags::IncludeHeader)},
+        {"ASCII_SAVE_FLAG_BIT_DONT_COMPRESS_LZ4_ARRAYS",umath::to_integral(::udm::AsciiSaveFlags::DontCompressLz4Arrays)}
 	});
 	static_assert(umath::to_integral(::udm::Type::Count) == 36,"Update this list when types have been added or removed!");
 
@@ -1067,6 +1090,18 @@ void Lua::udm::register_library(Lua::Interface &lua)
 	cdPropWrap.def("GetSize",static_cast<uint32_t(*)(lua_State*,::udm::PropertyWrapper&)>([](lua_State *l,::udm::PropertyWrapper &p) -> uint32_t {
 		return p.GetSize();
 	}));
+	cdPropWrap.def("GetArrayValues",static_cast<luabind::object(*)(lua_State*,::udm::PropertyWrapper&)>([](lua_State *l,::udm::PropertyWrapper &p) -> luabind::object {
+		auto *lp = p.GetLinked();
+		if(lp)
+			return get_array_values(l,*lp,{});
+		return get_array_values(l,::udm::LinkedPropertyWrapper{p},{});
+	}));
+	cdPropWrap.def("GetValueType",static_cast<luabind::object(*)(lua_State*,::udm::PropertyWrapper&)>([](lua_State *l,::udm::PropertyWrapper &p) -> luabind::object {
+		auto *a = p.GetValuePtr<::udm::Array>();
+		if(!a)
+			return luabind::object{};
+		return luabind::object{l,umath::to_integral(a->GetValueType())};
+	}));
 	cdPropWrap.def("GetArrayValues",static_cast<luabind::object(*)(lua_State*,::udm::PropertyWrapper&,::udm::Type)>([](lua_State *l,::udm::PropertyWrapper &p,::udm::Type type) -> luabind::object {
 		auto *lp = p.GetLinked();
 		if(lp)
@@ -1194,6 +1229,10 @@ void Lua::udm::register_library(Lua::Interface &lua)
 	}));
 	cdPropWrap.def("AddArray",static_cast<::udm::LinkedPropertyWrapper(*)(lua_State*,::udm::PropertyWrapper&,const std::string&,uint32_t,::udm::Type)>([](lua_State *l,::udm::PropertyWrapper &p,const std::string &name,uint32_t size,::udm::Type type) -> ::udm::LinkedPropertyWrapper {
 		return p.AddArray(name,size,type);
+	}));
+	cdPropWrap.def("AddArray",static_cast<::udm::LinkedPropertyWrapper(*)(lua_State*,::udm::PropertyWrapper&,const std::string&,uint32_t,::udm::Type,::udm::ArrayType)>(
+		[](lua_State *l,::udm::PropertyWrapper &p,const std::string &name,uint32_t size,::udm::Type type,::udm::ArrayType arrayType) -> ::udm::LinkedPropertyWrapper {
+		return p.AddArray(name,size,type,arrayType);
 	}));
 	cdPropWrap.def("GetFromPath",static_cast<::udm::LinkedPropertyWrapper(*)(lua_State*,::udm::PropertyWrapper&,const std::string&)>([](lua_State *l,::udm::PropertyWrapper &p,const std::string &path) -> ::udm::LinkedPropertyWrapper {
 		return p.GetFromPath(path);

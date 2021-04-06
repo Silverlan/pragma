@@ -184,23 +184,22 @@ void RenderQueueBuilder::Exec()
 {
 	m_threadRunning = true;
 	m_thread = std::thread{[this]() {
-		std::unique_lock<std::mutex> mlock(m_threadWaitMutex);
 		for(;;)
 		{
+			std::unique_lock<std::mutex> mlock {m_workMutex};
 			m_threadWaitCondition.wait(mlock,[this]() -> bool {return !m_threadRunning || m_hasWork;});
-			m_workMutex.lock();
-				if(m_workQueue.empty())
-				{
-					m_hasWork = false;
-					m_workMutex.unlock();
-					if(m_threadRunning == false)
-						return;
-					continue;
-				}
-				auto worker = m_workQueue.front();
-				m_workQueue.pop();
-			m_workMutex.unlock();
+			
+			if(m_workQueue.empty())
+			{
+				m_hasWork = false;
+				if(m_threadRunning == false)
+					return;
+				continue;
+			}
+			auto worker = m_workQueue.front();
+			m_workQueue.pop();
 
+			mlock.unlock();
 			worker();
 		}
 	}};
@@ -211,8 +210,8 @@ void RenderQueueBuilder::Append(const std::function<void()> &worker)
 	m_workMutex.lock();
 		m_workQueue.push(worker);
 		m_hasWork = true;
+		m_threadWaitCondition.notify_one();
 	m_workMutex.unlock();
-	m_threadWaitCondition.notify_one();
 }
 
 void RenderQueueBuilder::Flush()

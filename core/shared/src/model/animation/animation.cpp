@@ -57,10 +57,12 @@ template<class T0,class T1>
 
 template<typename T>
 	static void apply_channel_animation_values(
-		BoneId boneId,udm::LinkedPropertyWrapper &udmProp,float fps,const std::vector<float> &times,const std::vector<std::shared_ptr<Frame>> &frames,
+		udm::LinkedPropertyWrapper &udmProp,float fps,const std::vector<float> &times,const std::vector<std::shared_ptr<Frame>> &frames,
 		const std::function<void(Frame&,const T&)> &applyValue
 )
 {
+	if(fps == 0.f)
+		return;
 	std::vector<T> values;
 	udmProp(values);
 	auto stepTime = 1.f /fps;
@@ -165,7 +167,7 @@ bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr
 		static_assert(umath::to_integral(FAnim::Count) == 7,"Update this list when new flags have been added!");
 	}
 
-	std::vector<BoneId> nodeToBone;
+	std::vector<BoneId> nodeToLocalBoneId;
 	if(udm["bones"])
 	{
 		// Backwards compatibility
@@ -192,7 +194,7 @@ bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr
 				{
 					uint32_t boneIdx = 0;
 					udmNode["bone"](boneIdx);
-					nodeToBone[nodeIdx] = boneIdx;
+					nodeToLocalBoneId[nodeIdx] = m_boneIds.size();
 					m_boneIds.push_back(boneIdx);
 
 					if(udmNode["weight"])
@@ -214,9 +216,9 @@ bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr
 						m_boneIds.resize(offset +n);
 						udmSet.GetBlobData(m_boneIds.data() +offset,n *sizeof(BoneId),udm::Type::UInt16);
 					}
-					nodeToBone.resize(m_boneIds.size(),std::numeric_limits<BoneId>::max());
+					nodeToLocalBoneId.resize(m_boneIds.size(),std::numeric_limits<BoneId>::max());
 					for(auto i=offset;i<m_boneIds.size();++i)
-						nodeToBone[nodeIdx +(i -offset)] = m_boneIds[i];
+						nodeToLocalBoneId[nodeIdx +(i -offset)] = i;
 
 					auto udmWeights = udmNode["weights"];
 					if(udmWeights)
@@ -308,23 +310,23 @@ bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr
 			if(isGesture || !optReference || !optSkeleton)
 				continue;
 			auto &refBones = optSkeleton->GetBones();
-			for(auto i=decltype(refBones.size()){0u};i<refBones.size();++i)
+			for(auto boneIdx=decltype(refBones.size()){0u};boneIdx<refBones.size();++boneIdx)
 			{
-				auto it = m_boneIdMap.find(i);
+				auto it = m_boneIdMap.find(boneIdx);
 				if(it == m_boneIdMap.end())
 					continue;
-
-				auto *pos = optReference->GetBonePosition(i);
+				auto localBoneId = it->second;
+				auto *pos = optReference->GetBonePosition(boneIdx);
 				if(pos)
-					frame->SetBonePosition(it->second,*pos);
+					frame->SetBonePosition(localBoneId,*pos);
 
-				auto *rot = optReference->GetBoneOrientation(i);
+				auto *rot = optReference->GetBoneOrientation(boneIdx);
 				if(rot)
-					frame->SetBoneOrientation(it->second,*rot);
+					frame->SetBoneOrientation(localBoneId,*rot);
 
-				auto *scale = optReference->GetBoneScale(i);
+				auto *scale = optReference->GetBoneScale(boneIdx);
 				if(scale)
-					frame->SetBoneScale(it->second,*scale);
+					frame->SetBoneScale(localBoneId,*scale);
 			}
 		}
 		auto udmChannels = udm["channels"];
@@ -332,7 +334,7 @@ bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr
 		{
 			uint16_t nodeId = 0;
 			udmChannel["node"](nodeId);
-			auto boneId = nodeToBone[nodeId];
+			auto localBoneId = nodeToLocalBoneId[nodeId];
 
 			std::vector<float> times;
 			udmChannel["times"](times);
@@ -344,22 +346,22 @@ bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr
 			if(property == "position")
 			{
 				apply_channel_animation_values<Vector3>(
-					boneId,udmValues,m_fps,times,m_frames,
-					[boneId](Frame &frame,const Vector3 &val) {frame.SetBonePosition(boneId,val);
+					udmValues,m_fps,times,m_frames,
+					[localBoneId](Frame &frame,const Vector3 &val) {frame.SetBonePosition(localBoneId,val);
 				});
 			}
 			else if(property == "rotation")
 			{
 				apply_channel_animation_values<Quat>(
-					boneId,udmValues,m_fps,times,m_frames,
-					[boneId](Frame &frame,const Quat &val) {frame.SetBoneOrientation(boneId,val);
+					udmValues,m_fps,times,m_frames,
+					[localBoneId](Frame &frame,const Quat &val) {frame.SetBoneOrientation(localBoneId,val);
 				});
 			}
 			else if(property == "scale")
 			{
 				apply_channel_animation_values<Vector3>(
-					boneId,udmValues,m_fps,times,m_frames,
-					[boneId](Frame &frame,const Vector3 &val) {frame.SetBoneScale(boneId,val);
+					udmValues,m_fps,times,m_frames,
+					[localBoneId](Frame &frame,const Vector3 &val) {frame.SetBoneScale(localBoneId,val);
 				});
 			}
 			else if(property == "move")

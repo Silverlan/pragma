@@ -30,6 +30,7 @@ util::ParallelJob<std::vector<Vector2>&> util::generate_lightmap_uvs(NetworkStat
 
 static bool print_code_snippet(VFilePtr &f,uint32_t lineIdx,uint32_t charIdx)
 {
+	f->Seek(0);
 	uint32_t numLinesPrint = 3;
 	if(lineIdx < 2)
 		numLinesPrint = lineIdx +1;

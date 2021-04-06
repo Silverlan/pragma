@@ -880,7 +880,48 @@ void BaseAnimatedComponent::PlayAnimation(int animation,FPlayAnim flags)
 	{
 		auto anim = hModel->GetAnimation(animation);
 		if(anim != nullptr)
+		{
 			m_baseAnim.activity = anim->GetActivity();
+
+			// We'll set all bones that are unused by the animation to
+			// their respective reference pose
+			auto &ref = hModel->GetReference();
+			auto &boneMap = anim->GetBoneMap();
+			auto &skeleton = hModel->GetSkeleton();
+			auto numBones = skeleton.GetBoneCount();
+			for(auto i=decltype(numBones){0u};i<numBones;++i)
+			{
+				auto bone = skeleton.GetBone(i);
+				auto it = boneMap.find(i);
+				if(it != boneMap.end() || bone.expired())
+					continue;
+				auto parent = bone.lock()->parent;
+				umath::ScaledTransform pose {};
+				if(!parent.expired())
+					ref.GetBonePose(parent.lock()->ID,pose);
+
+				auto *pos = ref.GetBonePosition(i);
+				if(pos)
+				{
+					pose.TranslateLocal(*pos);
+					SetBonePosition(i,pose.GetOrigin());
+				}
+
+				auto *rot = ref.GetBoneOrientation(i);
+				if(rot)
+				{
+					pose.RotateLocal(*rot);
+					SetBoneRotation(i,pose.GetRotation());
+				}
+
+				auto *scale = ref.GetBoneScale(i);
+				if(scale)
+				{
+					pose.Scale(*scale);
+					SetBoneScale(i,pose.GetScale());
+				}
+			}
+		}
 	}
 
 	CEOnAnimationStart evAnimStartData {m_baseAnim.animation,m_baseAnim.activity,m_baseAnim.flags};

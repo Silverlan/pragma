@@ -47,12 +47,14 @@ namespace pragma
 		static const uint32_t VERTEX_COUNT;
 		static bool Save(const std::string &fileName,const std::vector<pragma::CParticleSystemComponent*> &particleSystems);
 		static bool Save(VFilePtrReal &f,const std::vector<pragma::CParticleSystemComponent*> &particleSystems);
+		static bool Save(const std::vector<pragma::CParticleSystemComponent*> &particleSystems,udm::AssetData &outData,std::string &outErr);
 		static bool IsParticleFilePrecached(const std::string &fname);
 		static void InitializeBuffers();
 		static void ClearBuffers();
 		static std::optional<ParticleSystemFileHeader> ReadHeader(NetworkState &nw,const std::string &fileName);
 		static std::optional<ParticleSystemFileHeader> ReadHeader(VFilePtr &f);
 		static bool Precache(std::string fname,bool bReload=false);
+		static bool PrecacheLegacy(std::string fname,bool bReload=false);
 		static const std::vector<std::string> &GetPrecachedParticleSystemFiles();
 		static std::optional<std::string> FindParticleSystemFile(const std::string ptName);
 		static const std::unordered_map<std::string,std::unique_ptr<CParticleSystemData>> &GetCachedParticleSystemData();
@@ -141,6 +143,8 @@ namespace pragma
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual void OnEntitySpawn() override;
 		virtual void SetParticleFile(const std::string &fileName) override;
+		void ToParticleSystemData(CParticleSystemData &outData);
+		static bool LoadFromAssetData(CParticleSystemData &ptData,const udm::AssetData &data,std::string &outErr);
 
 		// Particle
 		// Returns the buffer index for the specified particle. Only particles which are alive have a valid buffer index!

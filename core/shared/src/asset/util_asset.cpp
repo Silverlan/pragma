@@ -11,6 +11,7 @@
 #include "pragma/model/modelmanager.h"
 #include "pragma/game/game_resources.hpp"
 #include <sharedutils/util_path.hpp>
+#include <udm.hpp>
 
 extern DLLNETWORK Engine *engine;
 
@@ -24,11 +25,16 @@ std::optional<std::string> pragma::asset::determine_format_from_data(VFilePtr &f
 	std::array<char,4> header {};
 	f->Read(header.data(),header.size());
 	f->Seek(offset);
-	if(ustring::compare(header.data(),"PMDL"))
-		return FORMAT_MAP_BINARY;
+
+	if(ustring::compare(header.data(),udm::HEADER_IDENTIFIER))
+		return get_binary_udm_extension(type);
 	else if(ustring::compare(header.data(),"WLD"))
 		return FORMAT_MAP_LEGACY;
-	return FORMAT_MAP_ASCII; // Assume it's the ASCII map format
+	else if(ustring::compare(header.data(),"WMD"))
+		return FORMAT_MODEL_LEGACY;
+	else if(ustring::compare(header.data(),"WPD"))
+		return FORMAT_PARTICLE_SYSTEM_LEGACY;
+	return get_ascii_udm_extension(type); // Assume it's the ASCII map format
 }
 std::optional<std::string> pragma::asset::determine_format_from_filename(const std::string_view &fileName,Type type)
 {
@@ -67,6 +73,53 @@ std::optional<std::string> pragma::asset::get_udm_format_extension(Type type,boo
 		return binary ? FORMAT_MAP_BINARY : FORMAT_MAP_ASCII;
 	case Type::Material:
 		return binary ? FORMAT_MATERIAL_BINARY : FORMAT_MATERIAL_ASCII;
+	case Type::ParticleSystem:
+		return binary ? FORMAT_PARTICLE_SYSTEM_BINARY : FORMAT_PARTICLE_SYSTEM_ASCII;
+	}
+	return {};
+}
+std::optional<std::string> pragma::asset::get_legacy_extension(Type type)
+{
+	switch(type)
+	{
+	case Type::Model:
+		return FORMAT_MODEL_LEGACY;
+	case Type::Map:
+		return FORMAT_MAP_LEGACY;
+	case Type::Material:
+		return FORMAT_MATERIAL_LEGACY;
+	case Type::ParticleSystem:
+		return FORMAT_PARTICLE_SYSTEM_LEGACY;
+	}
+	return {};
+}
+std::optional<std::string> pragma::asset::get_binary_udm_extension(Type type)
+{
+	switch(type)
+	{
+	case Type::Model:
+		return FORMAT_MODEL_BINARY;
+	case Type::Map:
+		return FORMAT_MAP_BINARY;
+	case Type::Material:
+		return FORMAT_MATERIAL_BINARY;
+	case Type::ParticleSystem:
+		return FORMAT_PARTICLE_SYSTEM_BINARY;
+	}
+	return {};
+}
+std::optional<std::string> pragma::asset::get_ascii_udm_extension(Type type)
+{
+	switch(type)
+	{
+	case Type::Model:
+		return FORMAT_MODEL_ASCII;
+	case Type::Map:
+		return FORMAT_MAP_ASCII;
+	case Type::Material:
+		return FORMAT_MATERIAL_ASCII;
+	case Type::ParticleSystem:
+		return FORMAT_PARTICLE_SYSTEM_ASCII;
 	}
 	return {};
 }
@@ -80,7 +133,9 @@ std::vector<std::string> pragma::asset::get_supported_extensions(Type type)
 	case Type::Map:
 		return {FORMAT_MAP_BINARY,FORMAT_MAP_ASCII,FORMAT_MAP_LEGACY};
 	case Type::Material:
-		return {/*FORMAT_MATERIAL_BINARY,FORMAT_MATERIAL_ASCII,*/FORMAT_MAP_LEGACY};
+		return {FORMAT_MATERIAL_BINARY,FORMAT_MATERIAL_ASCII,FORMAT_MAP_LEGACY};
+	case Type::ParticleSystem:
+		return {FORMAT_PARTICLE_SYSTEM_BINARY,FORMAT_PARTICLE_SYSTEM_ASCII,FORMAT_PARTICLE_SYSTEM_LEGACY};
 	case Type::Sound:
 	case Type::Texture:
 	{
@@ -91,9 +146,6 @@ std::vector<std::string> pragma::asset::get_supported_extensions(Type type)
 			extensions.push_back(format.extension);
 		return extensions;
 	}
-	case Type::ParticleSystem:
-		// TODO
-		break;
 	}
 	return {};
 }
@@ -108,10 +160,10 @@ std::string pragma::asset::get_normalized_path(const std::string &name,Type type
 	case Type::Map:
 	case Type::Material:
 	case Type::Texture:
+	case Type::ParticleSystem:
 		path.RemoveFileExtension(get_supported_extensions(type));
 		break;
 	case Type::Sound:
-	case Type::ParticleSystem:
 		// TODO
 		break;
 	}
@@ -174,17 +226,17 @@ std::optional<std::string> pragma::asset::find_file(NetworkState &nw,const std::
 	}
 	case Type::ParticleSystem:
 	{
-		auto normName = name;
-		std::string ext;
-		if(ufile::get_extension(normName,&ext) == false)
+		for(auto &ext : get_supported_extensions(type))
 		{
-			if(optOutFormat)
-				*optOutFormat = "wpt";
-			normName += ".wpt";
+			auto nameWithExt = normalizedName +'.' +ext;
+			if(FileManager::Exists("particles/" +nameWithExt))
+			{
+				if(optOutFormat)
+					*optOutFormat = ext;
+				return nameWithExt;
+			}
 		}
-		if(FileManager::Exists("particles/" +normName) == false)
-			return {};
-		return normName;
+		return {};
 	}
 	}
 	return {};
@@ -203,6 +255,7 @@ bool pragma::asset::is_loaded(NetworkState &nw,const std::string &name,Type type
 	case Type::Material:
 		return nw.GetMaterialManager().FindMaterial(name);
 	case Type::Sound:
+	case Type::ParticleSystem:
 		return false; // TODO
 	case Type::Texture:
 		return false; // Only client knows about textures

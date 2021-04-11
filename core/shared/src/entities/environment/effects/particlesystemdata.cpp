@@ -6,105 +6,68 @@
  */
 
 #include "pragma/entities/environment/effects/particlesystemdata.h"
+#include "pragma/asset/util_asset.hpp"
 #include <fsys/filesystem.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
+#include <udm.hpp>
 
-#define WPT_VERSION 2
-void pragma::asset::get_particle_system_file_path(std::string &path)
-{
-	path = FileManager::GetCanonicalizedPath(path);
-	ustring::to_lower(path);
-	if(ustring::compare(path.c_str(),(std::string{"particles"} +FileManager::GetDirectorySeparator()).c_str(),false,10) == false)
-		path = "particles\\" +path;
-	ufile::remove_extension_from_filename(path);
-	path += ".wpt";
-}
 // See c_particlesystem_save.cpp as well
+bool pragma::asset::save_particle_system(VFilePtrReal &f,const std::unordered_map<std::string,CParticleSystemData> &particles,const std::string &rootPath)
+{
+	auto udmData = udm::Data::Create(PPTSYS_COLLECTION_IDENTIFIER,PPTSYS_FORMAT_VERSION);
+	auto &udm = *udmData;
+	auto udmParticleSystemDefinitions = udm["particleSystemDefinitions"];
+	for(auto &pair : particles)
+	{
+		auto &name = pair.first;
+		auto udmParticleSystemDefinition = udmParticleSystemDefinitions[name];
+		std::string err;
+		if(save_particle_system(pair.second,udm::AssetData{udmParticleSystemDefinition},err) == false)
+			return false;
+	}
+	return udmData->SaveAscii(f);
+}
 bool pragma::asset::save_particle_system(const std::string &name,const std::unordered_map<std::string,CParticleSystemData> &particles,const std::string &rootPath)
 {
-	auto ptPath = name;
-	get_particle_system_file_path(ptPath);
-	ptPath = (util::Path{rootPath} +ptPath).GetString();
-	FileManager::CreatePath(ufile::get_path_from_filename(ptPath).c_str());
-	auto f = FileManager::OpenFile<VFilePtrReal>(ptPath.c_str(),"wb");
-	if(f == NULL)
+	auto fpath = util::Path::CreatePath(rootPath) +(pragma::asset::get_normalized_path(name,pragma::asset::Type::ParticleSystem) +'.' +std::string{pragma::asset::FORMAT_PARTICLE_SYSTEM_ASCII});
+	auto f = FileManager::OpenFile<VFilePtrReal>(fpath.GetString().c_str(),"w");
+	if(!f)
 		return false;
-	f->Write<char>('W');
-	f->Write<char>('P');
-	f->Write<char>('T');
-	f->Write<unsigned int>(WPT_VERSION);
-	f->Write<unsigned int>(CUInt32(particles.size()));
-	std::vector<unsigned long long> offsets;
-	for(auto &pair : particles)
-	{
-		f->WriteString(pair.first);
-		offsets.push_back(f->Tell());
-		f->Write<unsigned long long>((unsigned long long)(0));
-	}
-	unsigned int i = 0;
-	for(auto &pair : particles)
-	{
-		unsigned long long offset = f->Tell();
-		f->Seek(offsets[i]);
-		f->Write<unsigned long long>(offset);
-		f->Seek(offset);
+	return save_particle_system(f,particles,rootPath);
+}
+bool pragma::asset::save_particle_system(const CParticleSystemData &data,udm::AssetData &outData,std::string &outErr)
+{
+	outData.SetAssetType(PPTSYS_IDENTIFIER);
+	outData.SetAssetVersion(PPTSYS_FORMAT_VERSION);
+	
+	auto udm = *outData;
+	udm["keyValues"] = data.settings;
 
-		auto &data = pair.second;
-		f->Write<unsigned int>(CUInt32(data.settings.size()));
-		for(auto &pair : data.settings)
+	auto addModifiers = [&udm](const std::string &name,const auto &modifiers) {
+		auto udmModifiers = udm.AddArray(name,modifiers.size());
+		for(auto i=decltype(modifiers.size()){0u};i<modifiers.size();++i)
 		{
-			f->WriteString(pair.first);
-			f->WriteString(pair.second);
+			auto &modifier = modifiers[i];
+			auto udmInitializer = udmModifiers[i];
+			udmInitializer["name"] = modifier.name;
+			udmInitializer["keyValues"] = modifier.settings;
 		}
-		f->Write<unsigned int>(CUInt32(data.initializers.size()));
-		for(unsigned int k=0;k<data.initializers.size();k++)
-		{
-			auto &modData = data.initializers[k];
-			f->WriteString(modData.name);
-			f->Write<unsigned int>(CUInt32(modData.settings.size()));
-			for(auto &pair : modData.settings)
-			{
-				f->WriteString(pair.first);
-				f->WriteString(pair.second);
-			}
-		}
-		f->Write<unsigned int>(CUInt32(data.operators.size()));
-		for(unsigned int k=0;k<data.operators.size();k++)
-		{
-			auto &modData = data.operators[k];
-			f->WriteString(modData.name);
-			f->Write<unsigned int>(CUInt32(modData.settings.size()));
-			std::unordered_map<std::string,std::string>::iterator l;
-			for(auto &pair : modData.settings)
-			{
-				f->WriteString(pair.first);
-				f->WriteString(pair.second);
-			}
-		}
-		f->Write<unsigned int>(CUInt32(data.renderers.size()));
-		for(unsigned int k=0;k<data.renderers.size();k++)
-		{
-			auto &modData = data.renderers[k];
-			f->WriteString(modData.name);
-			f->Write<unsigned int>(CUInt32(modData.settings.size()));
-			for(auto &pair : modData.settings)
-			{
-				f->WriteString(pair.first);
-				f->WriteString(pair.second);
-			}
-		}
-		auto &children = pair.second.children;
-		f->Write<unsigned char>(CUInt8(children.size()));
-		for(unsigned char j=0;j<children.size();j++)
-		{
-			auto &child = children.at(j);
-			f->WriteString(child.childName);
-			f->Write<float>(child.delay);
-		}
-		i++;
+	};
+	addModifiers("initializers",data.initializers);
+	addModifiers("operators",data.operators);
+	addModifiers("renderers",data.renderers);
+
+	auto &children = data.children;
+	auto numChildren = children.size();
+	auto udmChildren = udm.AddArray("children",numChildren);
+	uint32_t idx = 0;
+	for(auto &child : children)
+	{
+		auto udmChild = udmChildren[idx++];
+		udmChild["type"] = child.childName;
+		udmChild["delay"] = child.delay;
 	}
 	return true;
 }
-

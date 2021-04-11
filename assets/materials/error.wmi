@@ -1,5 +1,0 @@
-"pbr"
-{
-	$texture albedo_map "error"
-	$texture rma_map "pbr/rma_default"
-}

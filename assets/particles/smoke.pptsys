@@ -1,0 +1,999 @@
+"particleSystemDefinitions"
+{
+	"candle_smoke_002"
+	{
+		"assetData"
+		{
+			$array children [element;0][]
+			$array operators [element;8][
+				{
+					$string name "source_movement_basic"
+					"keyValues"
+					{
+						$string functionname "Movement Basic"
+						$string gravity "0 5 0"
+						$string operatorType "source_movement_basic"
+						$string drag "0.00999999884516"
+					}
+				},
+				{
+					$string name "source_radius_scale"
+					"keyValues"
+					{
+						$string radius_end_scale "0.20000001788139"
+						$string functionname "Radius Scale"
+						$string radius_start_scale "0.059999994933605"
+						$string operatorType "source_radius_scale"
+						$string ease_in_and_out "true"
+					}
+				},
+				{
+					$string name "rotation spin roll"
+					"keyValues"
+					{
+						$string functionname "Rotation Spin Roll"
+						$string spin_rate_degrees "25"
+						$string operatorType "rotation spin roll"
+					}
+				},
+				{
+					$string name "lifespan decay"
+					"keyValues"
+					{
+						$string functionname "Lifespan Decay"
+						$string operatorType "lifespan decay"
+					}
+				},
+				{
+					$string name "alpha fade out simple"
+					"keyValues"
+					{
+						$string functionname "Alpha Fade Out Simple"
+						$string operatorType "alpha fade out simple"
+						$string "proportional fade out time" "1.2000000476837"
+					}
+				},
+				{
+					$string name "source_color_fade"
+					"keyValues"
+					{
+						$string functionname "Color Fade"
+						$string color_fade "62 27 27 255"
+						$string operatorType "source_color_fade"
+					}
+				},
+				{
+					$string name "source_pull_towards_control_point"
+					"keyValues"
+					{
+						$string functionname "Pull towards control point"
+						$string amount_of_force "6"
+						$string "falloff power" "0"
+						$string operatorType "source_pull_towards_control_point"
+					}
+				},
+				{
+					$string name "source_animation"
+					"keyValues"
+					{
+						$string animation_rate "5"
+						$string operatorType "source_animation"
+					}
+				}
+			]
+			"keyValues"
+			{
+				$string bloom_color_factor "0 0 0"
+				$string cull_replacement_definition ""
+				$string bounding_box_max "1 1 1"
+				$string sort_particles "0"
+				$string "maximum draw distance" "400"
+				$string loop "1"
+				$string preventnamebasedlookup "false"
+				$string emission_rate "20"
+				$string lifetime "inf"
+				$string bounding_box_min "-1 -1 -1"
+				$string maxparticles "250"
+				$string material "esther/particles/ash_002"
+				$string "time to sleep when not drawn" "1"
+				$string "fallback replacement definition" ""
+				$string radius "7"
+			}
+			$array initializers [element;7][
+				{
+					$string name "source_position_random_sphere"
+					"keyValues"
+					{
+						$string functionname "Position Within Sphere Random"
+						$string distance_max "0.0099999997764826"
+						$string distance_min "0.0099999997764826"
+						$string operatorType "source_position_random_sphere"
+					}
+				},
+				{
+					$string name "source_lifetime_random"
+					"keyValues"
+					{
+						$string functionname "Lifetime Random"
+						$string lifetime_min "3"
+						$string operatorType "source_lifetime_random"
+						$string lifetime_max "4"
+					}
+				},
+				{
+					$string name "source_alpha_random"
+					"keyValues"
+					{
+						$string alpha_max "17"
+						$string functionname "Alpha Random"
+						$string operatorType "source_alpha_random"
+						$string alpha_min "17"
+					}
+				},
+				{
+					$string name "source_velocity_random_noise"
+					"keyValues"
+					{
+						$string output_minimum "-3 -2 -3"
+						$string time_noise_coordinate_scale "3"
+						$string "run for killed parent particles" "false"
+						$string spatial_noise_coordinate_scale "0.012999999336898"
+						$string apply_velocity_in_local_space "true"
+						$string functionname "Velocity Noise"
+						$string output_maximum "3 7 3"
+						$string operatorType "source_velocity_random_noise"
+						$string time_coordinate_offset "1"
+					}
+				},
+				{
+					$string name "source_color_random"
+					"keyValues"
+					{
+						$string functionname "Color Random"
+						$string color1 "255 102 0 255"
+						$string operatorType "source_color_random"
+						$string color2 "255 212 161 255"
+					}
+				},
+				{
+					$string name "source_rotation_random"
+					"keyValues"
+					{
+						$string rotation_offset_max "0"
+						$string functionname "Rotation Random"
+						$string operatorType "source_rotation_random"
+					}
+				},
+				{
+					$string name "velocity random"
+					"keyValues"
+					{
+						$string functionname "Velocity Random"
+						$string speed_in_local_coordinate_system_max "0 0 6"
+						$string speed_in_local_coordinate_system_min "0 0 6"
+						$string operatorType "velocity random"
+						$string random_speed_min "1"
+						$string random_speed_max "1"
+					}
+				}
+			]
+			$array renderers [element;1][
+				{
+					$string name "source_render_animated_sprites"
+					"keyValues"
+					{
+						$string functionname "render_animated_sprites"
+						$string operatorType "source_render_animated_sprites"
+					}
+				}
+			]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+	"candle_glow_001b"
+	{
+		"assetData"
+		{
+			$array children [element;1][
+				{
+					$string type "candle_glow_002"
+					$float delay 0
+				}
+			]
+			$array operators [element;5][
+				{
+					$string name "source_movement_basic"
+					"keyValues"
+					{
+						$string functionname "Movement Basic"
+						$string gravity "0 2 0"
+						$string operatorType "source_movement_basic"
+						$string drag "0.00999999884516"
+					}
+				},
+				{
+					$string name "lifespan decay"
+					"keyValues"
+					{
+						$string functionname "Lifespan Decay"
+						$string operatorType "lifespan decay"
+					}
+				},
+				{
+					$string name "alpha fade out simple"
+					"keyValues"
+					{
+						$string functionname "Alpha Fade Out Simple"
+						$string operatorType "alpha fade out simple"
+						$string "proportional fade out time" "0.34999999403954"
+					}
+				},
+				{
+					$string name "alpha fade in simple"
+					"keyValues"
+					{
+						$string functionname "Alpha Fade In Simple"
+						$string operatorType "alpha fade in simple"
+						$string "proportional fade in time" "0.34999999403954"
+					}
+				},
+				{
+					$string name "source_animation"
+					"keyValues"
+					{
+						$string animation_rate "5"
+						$string operatorType "source_animation"
+					}
+				}
+			]
+			"keyValues"
+			{
+				$string bloom_color_factor "0 0 0"
+				$string cull_replacement_definition ""
+				$string bounding_box_max "1 1 1"
+				$string sort_particles "0"
+				$string "maximum draw distance" "3500"
+				$string loop "1"
+				$string preventnamebasedlookup "false"
+				$string emission_rate "5"
+				$string lifetime "inf"
+				$string bounding_box_min "-1 -1 -1"
+				$string maxparticles "5"
+				$string material "esther/particles/glow_generic_001b"
+				$string "time to sleep when not drawn" "1"
+				$string "fallback replacement definition" ""
+				$string radius "7"
+			}
+			$array initializers [element;5][
+				{
+					$string name "source_position_random_sphere"
+					"keyValues"
+					{
+						$string functionname "Position Within Sphere Random"
+						$string distance_max "0.0099999997764826"
+						$string distance_min "0.0099999997764826"
+						$string operatorType "source_position_random_sphere"
+					}
+				},
+				{
+					$string name "source_lifetime_random"
+					"keyValues"
+					{
+						$string functionname "Lifetime Random"
+						$string lifetime_min "0.80000001192093"
+						$string operatorType "source_lifetime_random"
+						$string lifetime_max "1"
+					}
+				},
+				{
+					$string name "source_alpha_random"
+					"keyValues"
+					{
+						$string alpha_max "100"
+						$string functionname "Alpha Random"
+						$string operatorType "source_alpha_random"
+						$string alpha_min "100"
+					}
+				},
+				{
+					$string name "source_color_random"
+					"keyValues"
+					{
+						$string functionname "Color Random"
+						$string color1 "255 212 171 255"
+						$string operatorType "source_color_random"
+						$string color2 "255 240 222 255"
+					}
+				},
+				{
+					$string name "source_rotation_random"
+					"keyValues"
+					{
+						$string rotation_offset_max "0"
+						$string functionname "Rotation Random"
+						$string operatorType "source_rotation_random"
+					}
+				}
+			]
+			$array renderers [element;1][
+				{
+					$string name "source_render_animated_sprites"
+					"keyValues"
+					{
+						$string functionname "render_animated_sprites"
+						$string operatorType "source_render_animated_sprites"
+					}
+				}
+			]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+	"candle_smoke_001"
+	{
+		"assetData"
+		{
+			$array children [element;0][]
+			$array operators [element;8][
+				{
+					$string name "source_movement_basic"
+					"keyValues"
+					{
+						$string functionname "Movement Basic"
+						$string gravity "0 2 0"
+						$string operatorType "source_movement_basic"
+						$string drag "0.00999999884516"
+					}
+				},
+				{
+					$string name "source_radius_scale"
+					"keyValues"
+					{
+						$string radius_end_scale "0.20000001788139"
+						$string functionname "Radius Scale"
+						$string radius_start_scale "0.059999994933605"
+						$string operatorType "source_radius_scale"
+						$string ease_in_and_out "true"
+					}
+				},
+				{
+					$string name "rotation spin roll"
+					"keyValues"
+					{
+						$string functionname "Rotation Spin Roll"
+						$string spin_rate_degrees "25"
+						$string operatorType "rotation spin roll"
+					}
+				},
+				{
+					$string name "lifespan decay"
+					"keyValues"
+					{
+						$string functionname "Lifespan Decay"
+						$string operatorType "lifespan decay"
+					}
+				},
+				{
+					$string name "alpha fade out simple"
+					"keyValues"
+					{
+						$string functionname "Alpha Fade Out Simple"
+						$string operatorType "alpha fade out simple"
+						$string "proportional fade out time" "1.2000000476837"
+					}
+				},
+				{
+					$string name "source_color_fade"
+					"keyValues"
+					{
+						$string functionname "Color Fade"
+						$string color_fade "61 25 25 255"
+						$string operatorType "source_color_fade"
+					}
+				},
+				{
+					$string name "source_pull_towards_control_point"
+					"keyValues"
+					{
+						$string functionname "Pull towards control point"
+						$string amount_of_force "6"
+						$string "falloff power" "0"
+						$string operatorType "source_pull_towards_control_point"
+					}
+				},
+				{
+					$string name "source_animation"
+					"keyValues"
+					{
+						$string animation_rate "5"
+						$string operatorType "source_animation"
+					}
+				}
+			]
+			"keyValues"
+			{
+				$string bloom_color_factor "0 0 0"
+				$string cull_replacement_definition ""
+				$string bounding_box_max "1 1 1"
+				$string sort_particles "0"
+				$string "maximum draw distance" "400"
+				$string loop "1"
+				$string preventnamebasedlookup "false"
+				$string emission_rate "20"
+				$string lifetime "inf"
+				$string bounding_box_min "-1 -1 -1"
+				$string maxparticles "250"
+				$string material "esther/particles/ash_002"
+				$string "time to sleep when not drawn" "1"
+				$string "fallback replacement definition" ""
+				$string radius "7"
+			}
+			$array initializers [element;7][
+				{
+					$string name "source_position_random_sphere"
+					"keyValues"
+					{
+						$string functionname "Position Within Sphere Random"
+						$string distance_max "0.0099999997764826"
+						$string distance_min "0.0099999997764826"
+						$string operatorType "source_position_random_sphere"
+					}
+				},
+				{
+					$string name "source_lifetime_random"
+					"keyValues"
+					{
+						$string functionname "Lifetime Random"
+						$string lifetime_min "2"
+						$string operatorType "source_lifetime_random"
+						$string lifetime_max "3"
+					}
+				},
+				{
+					$string name "source_alpha_random"
+					"keyValues"
+					{
+						$string alpha_max "17"
+						$string functionname "Alpha Random"
+						$string operatorType "source_alpha_random"
+						$string alpha_min "17"
+					}
+				},
+				{
+					$string name "source_velocity_random_noise"
+					"keyValues"
+					{
+						$string output_minimum "-3 -2 -3"
+						$string "Time Coordinate Offset" "1"
+						$string time_noise_coordinate_scale "3"
+						$string "run for killed parent particles" "false"
+						$string apply_velocity_in_local_space "true"
+						$string functionname "Velocity Noise"
+						$string operatorType "source_velocity_random_noise"
+						$string output_maximum "3 7 3"
+					}
+				},
+				{
+					$string name "source_color_random"
+					"keyValues"
+					{
+						$string functionname "Color Random"
+						$string color1 "255 102 0 255"
+						$string operatorType "source_color_random"
+						$string color2 "183 151 113 255"
+					}
+				},
+				{
+					$string name "source_rotation_random"
+					"keyValues"
+					{
+						$string rotation_offset_max "0"
+						$string functionname "Rotation Random"
+						$string operatorType "source_rotation_random"
+					}
+				},
+				{
+					$string name "velocity random"
+					"keyValues"
+					{
+						$string functionname "Velocity Random"
+						$string speed_in_local_coordinate_system_max "0 0 6"
+						$string speed_in_local_coordinate_system_min "0 0 6"
+						$string operatorType "velocity random"
+						$string random_speed_min "1"
+						$string random_speed_max "1"
+					}
+				}
+			]
+			$array renderers [element;1][
+				{
+					$string name "source_render_animated_sprites"
+					"keyValues"
+					{
+						$string functionname "render_animated_sprites"
+						$string operatorType "source_render_animated_sprites"
+					}
+				}
+			]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+	"candle_glow_002"
+	{
+		"assetData"
+		{
+			$array children [element;0][]
+			$array operators [element;6][
+				{
+					$string name "source_movement_basic"
+					"keyValues"
+					{
+						$string functionname "Movement Basic"
+						$string gravity "0 2 0"
+						$string operatorType "source_movement_basic"
+						$string drag "0.00999999884516"
+					}
+				},
+				{
+					$string name "source_radius_scale"
+					"keyValues"
+					{
+						$string radius_end_scale "3"
+						$string operatorType "source_radius_scale"
+						$string functionname "Radius Scale"
+						$string scale_bias "1"
+						$string radius_start_scale "3"
+						$string ease_in_and_out "true"
+					}
+				},
+				{
+					$string name "lifespan decay"
+					"keyValues"
+					{
+						$string functionname "Lifespan Decay"
+						$string operatorType "lifespan decay"
+					}
+				},
+				{
+					$string name "alpha fade out simple"
+					"keyValues"
+					{
+						$string functionname "Alpha Fade Out Simple"
+						$string operatorType "alpha fade out simple"
+						$string "proportional fade out time" "0.5"
+					}
+				},
+				{
+					$string name "alpha fade in simple"
+					"keyValues"
+					{
+						$string functionname "Alpha Fade In Simple"
+						$string operatorType "alpha fade in simple"
+						$string "proportional fade in time" "0.5"
+					}
+				},
+				{
+					$string name "source_animation"
+					"keyValues"
+					{
+						$string animation_rate "5"
+						$string operatorType "source_animation"
+					}
+				}
+			]
+			"keyValues"
+			{
+				$string bloom_color_factor "0 0 0"
+				$string cull_replacement_definition ""
+				$string bounding_box_max "1 1 1"
+				$string sort_particles "0"
+				$string "maximum draw distance" "3500"
+				$string loop "1"
+				$string preventnamebasedlookup "false"
+				$string emission_rate "5"
+				$string lifetime "inf"
+				$string bounding_box_min "-1 -1 -1"
+				$string maxparticles "5"
+				$string material "esther/particles/glow_generic_002"
+				$string "time to sleep when not drawn" "1"
+				$string "fallback replacement definition" ""
+				$string radius "7"
+			}
+			$array initializers [element;5][
+				{
+					$string name "source_lifetime_random"
+					"keyValues"
+					{
+						$string functionname "Lifetime Random"
+						$string lifetime_min "0.80000001192093"
+						$string operatorType "source_lifetime_random"
+						$string lifetime_max "1"
+					}
+				},
+				{
+					$string name "source_alpha_random"
+					"keyValues"
+					{
+						$string alpha_max "80"
+						$string functionname "Alpha Random"
+						$string operatorType "source_alpha_random"
+						$string alpha_min "80"
+					}
+				},
+				{
+					$string name "source_color_random"
+					"keyValues"
+					{
+						$string functionname "Color Random"
+						$string color1 "255 195 156 255"
+						$string operatorType "source_color_random"
+						$string color2 "234 200 160 255"
+					}
+				},
+				{
+					$string name "source_rotation_random"
+					"keyValues"
+					{
+						$string rotation_offset_max "0"
+						$string functionname "Rotation Random"
+						$string operatorType "source_rotation_random"
+					}
+				},
+				{
+					$string name "source_position_random_box"
+					"keyValues"
+					{
+						$string functionname "Position Within Box Random"
+						$string max "0 -3 0"
+						$string min "0 -3 0"
+						$string operatorType "source_position_random_box"
+					}
+				}
+			]
+			$array renderers [element;1][
+				{
+					$string name "source_render_animated_sprites"
+					"keyValues"
+					{
+						$string functionname "render_animated_sprites"
+						$string operatorType "source_render_animated_sprites"
+					}
+				}
+			]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+	"candle_glow_001"
+	{
+		"assetData"
+		{
+			$array children [element;1][
+				{
+					$string type "candle_glow_002"
+					$float delay 0
+				}
+			]
+			$array operators [element;5][
+				{
+					$string name "source_movement_basic"
+					"keyValues"
+					{
+						$string functionname "Movement Basic"
+						$string gravity "0 2 0"
+						$string operatorType "source_movement_basic"
+						$string drag "0.00999999884516"
+					}
+				},
+				{
+					$string name "lifespan decay"
+					"keyValues"
+					{
+						$string functionname "Lifespan Decay"
+						$string operatorType "lifespan decay"
+					}
+				},
+				{
+					$string name "alpha fade out simple"
+					"keyValues"
+					{
+						$string functionname "Alpha Fade Out Simple"
+						$string operatorType "alpha fade out simple"
+						$string "proportional fade out time" "0.34999999403954"
+					}
+				},
+				{
+					$string name "alpha fade in simple"
+					"keyValues"
+					{
+						$string functionname "Alpha Fade In Simple"
+						$string operatorType "alpha fade in simple"
+						$string "proportional fade in time" "0.34999999403954"
+					}
+				},
+				{
+					$string name "source_animation"
+					"keyValues"
+					{
+						$string animation_rate "5"
+						$string operatorType "source_animation"
+					}
+				}
+			]
+			"keyValues"
+			{
+				$string bloom_color_factor "0 0 0"
+				$string cull_replacement_definition ""
+				$string bounding_box_max "1 1 1"
+				$string sort_particles "0"
+				$string "maximum draw distance" "3500"
+				$string loop "1"
+				$string preventnamebasedlookup "false"
+				$string emission_rate "5"
+				$string lifetime "inf"
+				$string bounding_box_min "-1 -1 -1"
+				$string maxparticles "5"
+				$string material "esther/particles/glow_generic_001"
+				$string "time to sleep when not drawn" "1"
+				$string "fallback replacement definition" ""
+				$string radius "7"
+			}
+			$array initializers [element;5][
+				{
+					$string name "source_position_random_sphere"
+					"keyValues"
+					{
+						$string functionname "Position Within Sphere Random"
+						$string distance_max "0.0099999997764826"
+						$string distance_min "0.0099999997764826"
+						$string operatorType "source_position_random_sphere"
+					}
+				},
+				{
+					$string name "source_lifetime_random"
+					"keyValues"
+					{
+						$string functionname "Lifetime Random"
+						$string lifetime_min "0.80000001192093"
+						$string operatorType "source_lifetime_random"
+						$string lifetime_max "1"
+					}
+				},
+				{
+					$string name "source_alpha_random"
+					"keyValues"
+					{
+						$string alpha_max "100"
+						$string functionname "Alpha Random"
+						$string operatorType "source_alpha_random"
+						$string alpha_min "100"
+					}
+				},
+				{
+					$string name "source_color_random"
+					"keyValues"
+					{
+						$string functionname "Color Random"
+						$string color1 "255 212 171 255"
+						$string operatorType "source_color_random"
+						$string color2 "255 240 222 255"
+					}
+				},
+				{
+					$string name "source_rotation_random"
+					"keyValues"
+					{
+						$string rotation_offset_max "0"
+						$string functionname "Rotation Random"
+						$string operatorType "source_rotation_random"
+					}
+				}
+			]
+			$array renderers [element;1][
+				{
+					$string name "source_render_animated_sprites"
+					"keyValues"
+					{
+						$string functionname "render_animated_sprites"
+						$string operatorType "source_render_animated_sprites"
+					}
+				}
+			]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+	"candle_smoke_003"
+	{
+		"assetData"
+		{
+			$array children [element;0][]
+			$array operators [element;8][
+				{
+					$string name "source_movement_basic"
+					"keyValues"
+					{
+						$string functionname "Movement Basic"
+						$string gravity "0 3 0"
+						$string operatorType "source_movement_basic"
+						$string drag "0.00999999884516"
+					}
+				},
+				{
+					$string name "source_radius_scale"
+					"keyValues"
+					{
+						$string radius_end_scale "0.20000001788139"
+						$string functionname "Radius Scale"
+						$string radius_start_scale "0.059999994933605"
+						$string operatorType "source_radius_scale"
+						$string ease_in_and_out "true"
+					}
+				},
+				{
+					$string name "rotation spin roll"
+					"keyValues"
+					{
+						$string functionname "Rotation Spin Roll"
+						$string spin_rate_degrees "25"
+						$string operatorType "rotation spin roll"
+					}
+				},
+				{
+					$string name "lifespan decay"
+					"keyValues"
+					{
+						$string functionname "Lifespan Decay"
+						$string operatorType "lifespan decay"
+					}
+				},
+				{
+					$string name "alpha fade out simple"
+					"keyValues"
+					{
+						$string functionname "Alpha Fade Out Simple"
+						$string operatorType "alpha fade out simple"
+						$string "proportional fade out time" "1.2000000476837"
+					}
+				},
+				{
+					$string name "source_color_fade"
+					"keyValues"
+					{
+						$string functionname "Color Fade"
+						$string color_fade "61 27 27 255"
+						$string operatorType "source_color_fade"
+					}
+				},
+				{
+					$string name "source_pull_towards_control_point"
+					"keyValues"
+					{
+						$string functionname "Pull towards control point"
+						$string amount_of_force "6"
+						$string "falloff power" "0"
+						$string operatorType "source_pull_towards_control_point"
+					}
+				},
+				{
+					$string name "source_animation"
+					"keyValues"
+					{
+						$string animation_rate "5"
+						$string operatorType "source_animation"
+					}
+				}
+			]
+			"keyValues"
+			{
+				$string bloom_color_factor "0 0 0"
+				$string cull_replacement_definition ""
+				$string bounding_box_max "1 1 1"
+				$string sort_particles "0"
+				$string "maximum draw distance" "400"
+				$string loop "1"
+				$string preventnamebasedlookup "false"
+				$string emission_rate "18"
+				$string lifetime "inf"
+				$string bounding_box_min "-1 -1 -1"
+				$string maxparticles "250"
+				$string material "esther/particles/ash_002"
+				$string "time to sleep when not drawn" "1"
+				$string "fallback replacement definition" ""
+				$string radius "7"
+			}
+			$array initializers [element;7][
+				{
+					$string name "source_position_random_sphere"
+					"keyValues"
+					{
+						$string functionname "Position Within Sphere Random"
+						$string distance_max "0.0099999997764826"
+						$string distance_min "0.0099999997764826"
+						$string operatorType "source_position_random_sphere"
+					}
+				},
+				{
+					$string name "source_lifetime_random"
+					"keyValues"
+					{
+						$string functionname "Lifetime Random"
+						$string lifetime_min "1"
+						$string operatorType "source_lifetime_random"
+						$string lifetime_max "2"
+					}
+				},
+				{
+					$string name "source_alpha_random"
+					"keyValues"
+					{
+						$string alpha_max "17"
+						$string functionname "Alpha Random"
+						$string operatorType "source_alpha_random"
+						$string alpha_min "17"
+					}
+				},
+				{
+					$string name "source_velocity_random_noise"
+					"keyValues"
+					{
+						$string output_minimum "-3 -2 -3"
+						$string time_noise_coordinate_scale "3"
+						$string "run for killed parent particles" "false"
+						$string spatial_noise_coordinate_scale "0.0089999996125698"
+						$string apply_velocity_in_local_space "true"
+						$string functionname "Velocity Noise"
+						$string output_maximum "3 7 3"
+						$string operatorType "source_velocity_random_noise"
+						$string time_coordinate_offset "1"
+					}
+				},
+				{
+					$string name "source_rotation_random"
+					"keyValues"
+					{
+						$string rotation_offset_max "0"
+						$string functionname "Rotation Random"
+						$string operatorType "source_rotation_random"
+					}
+				},
+				{
+					$string name "velocity random"
+					"keyValues"
+					{
+						$string functionname "Velocity Random"
+						$string speed_in_local_coordinate_system_max "0 0 6"
+						$string random_speed_min "1"
+						$string operatorType "velocity random"
+						$string speed_in_local_coordinate_system_min "0 0 6"
+						$string random_speed_max "1"
+					}
+				},
+				{
+					$string name "source_color_random"
+					"keyValues"
+					{
+						$string functionname "Color Random"
+						$string color1 "255 102 0 255"
+						$string operatorType "source_color_random"
+						$string color2 "255 212 161 255"
+					}
+				}
+			]
+			$array renderers [element;1][
+				{
+					$string name "source_render_animated_sprites"
+					"keyValues"
+					{
+						$string functionname "render_animated_sprites"
+						$string operatorType "source_render_animated_sprites"
+					}
+				}
+			]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+}

@@ -1,0 +1,15 @@
+"pbr"
+{
+	"textures"
+	{
+		$string albedo_map "models/player/soldier/soldier_d"
+		$string rma_map "pbr/rma_neutral"
+		$string normal_map "models/player/soldier/soldier_n"
+	}
+
+	"properties"
+	{
+		$float metalness_factor "1.000000"
+		$float roughness_factor "0.0"
+	}
+}

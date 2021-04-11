@@ -1,0 +1,7 @@
+"particlepolyboard"
+{
+	"textures"
+	{
+		$string diffusemap "particles/beam_tracer"
+	}
+}

@@ -14,6 +14,7 @@
 #define USE_PARALLAX_MAP 0
 #define USE_GLOW_MAP 0
 
+#include "pbr/fs_config.gls"
 #include "../debug/fs_debug_info.gls"
 #include "../modules/sh_vertex_data.gls"
 #include "../modules/sh_time.gls"

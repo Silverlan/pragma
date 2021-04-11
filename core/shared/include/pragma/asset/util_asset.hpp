@@ -27,6 +27,10 @@ namespace pragma::asset
 	static constexpr auto FORMAT_MODEL_ASCII = "pmdl";
 	static constexpr auto FORMAT_MODEL_LEGACY = "wmd";
 	
+	static constexpr auto FORMAT_PARTICLE_SYSTEM_BINARY = "pptsys_b";
+	static constexpr auto FORMAT_PARTICLE_SYSTEM_ASCII = "pptsys";
+	static constexpr auto FORMAT_PARTICLE_SYSTEM_LEGACY = "wpt";
+	
 	static constexpr auto FORMAT_MATERIAL_BINARY = Material::FORMAT_MATERIAL_BINARY;
 	static constexpr auto FORMAT_MATERIAL_ASCII = Material::FORMAT_MATERIAL_ASCII;
 	static constexpr auto FORMAT_MATERIAL_LEGACY = Material::FORMAT_MATERIAL_LEGACY;
@@ -54,6 +58,9 @@ namespace pragma::asset
 	DLLNETWORK std::optional<std::string> find_file(NetworkState &nw,const std::string &name,Type type,std::string *optOutFormat=nullptr);
 	DLLNETWORK bool is_loaded(NetworkState &nw,const std::string &name,Type type);
 	DLLNETWORK std::vector<std::string> get_supported_extensions(Type type);
+	DLLNETWORK std::optional<std::string> get_legacy_extension(Type type);
+	DLLNETWORK std::optional<std::string> get_binary_udm_extension(Type type);
+	DLLNETWORK std::optional<std::string> get_ascii_udm_extension(Type type);
 	DLLNETWORK std::optional<std::string> determine_format_from_data(VFilePtr &f,Type type);
 	DLLNETWORK std::optional<std::string> determine_format_from_filename(const std::string_view &fileName,Type type);
 	DLLNETWORK bool matches_format(const std::string_view &format0,const std::string_view &format1);

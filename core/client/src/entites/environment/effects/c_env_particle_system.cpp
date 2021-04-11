@@ -14,6 +14,8 @@
 #include <pragma/entities/baseentity_events.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/entities/environment/effects/particlesystemdata.h>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -232,6 +234,69 @@ std::shared_ptr<Model> CParticleSystemComponent::GenerateModel() const
 }
 
 luabind::object CParticleSystemComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CParticleSystemComponentHandleWrapper>(l);}
+
+bool CParticleSystemComponent::LoadFromAssetData(CParticleSystemData &ptData,const udm::AssetData &data,std::string &outErr)
+{
+	if(data.GetAssetType() != pragma::asset::PPTSYS_IDENTIFIER)
+	{
+		outErr = "Incorrect format!";
+		return false;
+	}
+
+	auto version = data.GetAssetVersion();
+	if(version < 1)
+	{
+		outErr = "Invalid version!";
+		return false;
+	}
+	// if(version > FORMAT_VERSION)
+	// 	return false;
+	
+	auto udm = *data;
+	udm["keyValues"](ptData.settings);
+
+	auto itMat = ptData.settings.find("material");
+	if(itMat != ptData.settings.end())
+		client->LoadMaterial(itMat->second);
+
+	auto readModifier = [&udm](const std::string &name,std::vector<CParticleModifierData> &modifiers) {
+		auto udmModifiers = udm[name];
+		auto numModifiers = udmModifiers.GetSize();
+		modifiers.reserve(numModifiers);
+		for(auto i=decltype(numModifiers){0u};i<numModifiers;++i)
+		{
+			auto &modifier = modifiers.back();
+			auto &udmModifier = udmModifiers[i];
+			std::string name;
+			udmModifier["name"](name);
+			if(name.empty())
+				continue;
+			modifiers.push_back(CParticleModifierData{name});
+			udmModifier["keyValues"](modifiers.back().settings);
+		}
+	};
+	readModifier("initializers",ptData.initializers);
+	readModifier("operators",ptData.operators);
+	readModifier("renderers",ptData.renderers);
+
+	auto udmChildren = udm["children"];
+	auto &children = ptData.children;
+	auto numChildren = udmChildren.GetSize();
+	children.reserve(numChildren);
+	for(auto i=decltype(numChildren){0u};i<numChildren;++i)
+	{
+		auto udmChild = udmChildren[i];
+		std::string type;
+		udmChild["type"](type);
+		if(type.empty())
+			continue;
+		children.push_back({});
+		auto &childData = children.back();
+		childData.childName = type;
+		udmChild["delay"](childData.delay);
+	}
+	return true;
+}
 
 ///////////////
 

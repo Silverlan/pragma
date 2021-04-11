@@ -23,7 +23,9 @@
 #include <glm/gtx/norm.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/environment/effects/particlesystemdata.h>
+#include <pragma/util/util_game.hpp>
 #include <datasystem_vector.h>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -160,8 +162,7 @@ static void to_cache_name(std::string &fname)
 {
 	fname = FileManager::GetCanonicalizedPath(fname);
 	ustring::to_lower(fname);
-	if(fname.length() >= 4 && fname.substr(fname.length() -4) == ".wpt")
-		fname = fname.substr(0,fname.length() -4);
+	ufile::remove_extension_from_filename(fname,pragma::asset::get_supported_extensions(pragma::asset::Type::ParticleSystem));
 }
 static std::unordered_map<std::string,std::vector<std::string>> s_particleFileToSystems {};
 const std::vector<std::string> &CParticleSystemComponent::GetPrecachedParticleSystemFiles() {return s_precached;}
@@ -184,6 +185,75 @@ bool CParticleSystemComponent::Precache(std::string fname,bool bReload)
 {
 	to_cache_name(fname);
 	auto it = std::find(s_precached.begin(),s_precached.end(),fname);
+	util::ScopeGuard sgCache;
+	if(it != s_precached.end())
+	{
+		if(bReload == false)
+			return true;
+	}
+	else
+	{
+		sgCache = [&fname]() {
+			s_precached.push_back(fname);
+		};
+	}
+
+	std::string format;
+	auto ptFname = pragma::asset::find_file(*client,fname,pragma::asset::Type::ParticleSystem,&format);
+	if(!ptFname.has_value())
+		return false;
+	if(format == pragma::asset::FORMAT_PARTICLE_SYSTEM_LEGACY)
+	{
+		sgCache.dismiss();
+		return PrecacheLegacy(fname,bReload);
+	}
+	std::string err;
+	auto udmData = util::load_udm_asset(*ptFname,&err);
+	if(udmData == nullptr)
+		return false;
+	auto &ptSystemNames = s_particleFileToSystems.insert(std::make_pair(fname,std::vector<std::string>{})).first->second;
+	ptSystemNames.clear();
+
+	auto &data = *udmData;
+	if(data.GetAssetType() != pragma::asset::PPTSYS_COLLECTION_IDENTIFIER)
+	{
+		err = "Incorrect format!";
+		return false;
+	}
+
+	auto version = data.GetAssetVersion();
+	if(version < 1)
+	{
+		err = "Invalid version!";
+		return false;
+	}
+	// if(version > FORMAT_VERSION)
+	// 	return false;
+	
+	auto udm = *data.GetAssetData();
+	auto udmParticleSystemDefinitions = udm["particleSystemDefinitions"];
+	auto numParticles = udmParticleSystemDefinitions.GetChildCount();
+	ptSystemNames.reserve(numParticles);
+	s_particleData.reserve(s_particleData.size() +numParticles);
+	uint32_t idx = 0;
+	for(auto udmDef : udmParticleSystemDefinitions.ElIt())
+	{
+		auto name = std::string{udmDef.key};
+		ptSystemNames.push_back(name);
+		auto data = std::make_unique<CParticleSystemData>();
+		auto result = CParticleSystemComponent::LoadFromAssetData(*data,udm::AssetData{udmDef.property},err);
+		if(result == false)
+			return false;
+		s_particleData[name] = std::move(data);
+		++idx;
+	}
+	return true;
+}
+
+bool CParticleSystemComponent::PrecacheLegacy(std::string fname,bool bReload)
+{
+	to_cache_name(fname);
+	auto it = std::find(s_precached.begin(),s_precached.end(),fname);
 	if(it != s_precached.end())
 	{
 		if(bReload == false)
@@ -191,6 +261,7 @@ bool CParticleSystemComponent::Precache(std::string fname,bool bReload)
 	}
 	else
 		s_precached.push_back(fname);
+
 	auto path = "particles\\" +fname +".wpt";
 	auto f = FileManager::OpenFile(path.c_str(),"rb");
 	if(f == nullptr)

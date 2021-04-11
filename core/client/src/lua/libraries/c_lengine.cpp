@@ -314,7 +314,7 @@ int Lua::engine::save_particle_system(lua_State *l)
 {
 	std::string name = luaL_checkstring(l,1);
 	Lua::CheckTable(l,2);
-	pragma::asset::get_particle_system_file_path(name);
+	name = pragma::asset::get_normalized_path(name,pragma::asset::Type::ParticleSystem);
 	std::string rootPath;
 	if(Lua::file::validate_write_operation(l,name,rootPath) == false)
 	{

@@ -5,14 +5,21 @@
 
 #define PUSH_USER_CONSTANTS \
 	float coneLength; \
-	uint boundLightIndex;
+	uint boundLightIndex; \
+	uint resolution;
+
 
 #include "sh_light_cone.gls"
 #include "../../modules/sh_poisson_disk.gls"
 #include "../modules/fs_scene.gls"
 #include "../debug/fs_debug_info.gls"
-#include "../modules/fs_world.gls"
 #include "../modules/fs_scene_depth.gls"
+#include "../modules/sh_vertex_data.gls"
+#include "../modules/sh_instance_info.gls"
+#include "../modules/sh_camera_info.gls"
+#include "../modules/sh_light_data.gls"
+#include "../world/pbr/fs_config.gls"
+#include "../lighting/fs_lighting_spot.gls"
 
 void main()
 {
@@ -31,7 +38,9 @@ void main()
 
 	dt = pow(dt,4);
 	fs_color.a *= dt;
-	fs_color.a *= get_depth_smooth_factor(u_renderSettings.nearZ,u_renderSettings.farZ,get_scene_depth(u_renderSettings.viewportW,u_renderSettings.viewportH));
+	uint viewportW = u_pushConstants.resolution>>16;
+	uint viewportH = (u_pushConstants.resolution<<16)>>16;
+	fs_color.a *= get_depth_smooth_factor(u_renderSettings.nearZ,u_renderSettings.farZ,get_scene_depth(viewportW,viewportH));
 
 	int lightIndex = int(u_pushConstants.boundLightIndex);
 	if(lightIndex != -1)

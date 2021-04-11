@@ -1,0 +1,9 @@
+"ibl"
+{
+	"textures"
+	{
+		$string prefilter "test_ibl/prefilter"
+		$string brdf "env/brdf"
+		$string irradiance "test_ibl/irradiance"
+	}
+}

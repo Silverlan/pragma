@@ -1,0 +1,40 @@
+"particleSystemDefinitions"
+{
+	"impact_dust"
+	{
+		"assetData"
+		{
+			$array children [element;0][]
+			$array operators [element;0][]
+			"keyValues"
+			{
+				$string emission_rate "1000"
+				$string material "particles/dust01"
+				$string maxparticles "1"
+				$string orientation_type "1"
+				$string sort_particles "0"
+			}
+			$array initializers [element;2][
+				{
+					$string name "lifetime_random"
+					"keyValues"
+					{
+						$string lifetime_min "0.25"
+						$string lifetime_max "0.25"
+					}
+				},
+				{
+					$string name "radius_random"
+					"keyValues"
+					{
+						$string radius_max "50"
+						$string radius_min "50"
+					}
+				}
+			]
+			$array renderers [element;0][]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+}

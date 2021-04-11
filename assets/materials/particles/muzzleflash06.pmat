@@ -1,0 +1,15 @@
+"particle"
+{
+	"textures"
+	{
+		$string diffusemap "particles/muzzleflash06"
+	}
+	"animation"
+	{
+		$uint32 offset 0
+		$uint32 frames 8
+		$uint32 fps 80
+		$uint32 columns 4
+		$uint32 rows 2
+	}
+}

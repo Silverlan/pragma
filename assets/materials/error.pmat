@@ -1,0 +1,8 @@
+"pbr"
+{
+	"textures"
+	{
+		$string albedo_map "error"
+		$string rma_map "pbr/rma_default"
+	}
+}

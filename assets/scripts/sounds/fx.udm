@@ -1,0 +1,59 @@
+"fx.explosion"
+{
+	$array events [element][
+		{
+			$string type "playsound"
+			$float gain 1
+			$float pitch 1
+			$string mode "mono"
+			$array source [string][
+				"fx/explosions/explosion_04.wav",
+				"fx/explosions/explosion_15.wav",
+				"fx/explosions/explosion_17.wav",
+				"fx/explosions/explosion_18.wav"
+			]
+		}
+	]
+}
+"fx.fire_small"
+{
+	$array events [element][
+		{
+			$string type "playsound"
+			$float gain 1
+			$float pitch 1
+			$string mode "mono"
+			$string source "fx/fire_small_loop.ogg"
+		}
+	]
+}
+"fx.underwater"
+{
+	$array events [element][
+		{
+			$string type "playsound"
+			$float gain 1
+			$float pitch 1
+			$bool loop 1
+			$string mode "mono"
+			$string source "ambient/water/underwater.wav"
+		}
+	]
+}
+"fx.water_slosh"
+{
+	$array events [element][
+		{
+			$string type "playsound"
+			$float gain 1
+			$float pitch 1
+			$string mode "mono"
+			$array source [string][
+				"player/footsteps/slosh1.wav",
+				"player/footsteps/slosh2.wav",
+				"player/footsteps/slosh3.wav",
+				"player/footsteps/slosh4.wav"
+			]
+		}
+	]
+}

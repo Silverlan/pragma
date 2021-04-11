@@ -9,6 +9,7 @@
 #include "pragma/asset/util_asset.hpp"
 #include "pragma/networkstate/networkstate.h"
 #include "pragma/model/modelmanager.h"
+#include "pragma/game/game_resources.hpp"
 #include <sharedutils/util_path.hpp>
 
 extern DLLNETWORK Engine *engine;
@@ -261,8 +262,8 @@ std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::Impor
 							auto path = util::Path::CreateFile(*filePath);
 							path.PopFront();
 							auto *mdl = static_cast<pragma::asset::ModelAssetWrapper&>(*aw).GetModel();
-							if(mdl)
-								mdl->SaveLegacy(&game,path.GetString(),"addons/converted/");
+							if(mdl && mdl->Save(game,::util::CONVERT_PATH +"models/" +path.GetString(),err) == false)
+								return nullptr;
 							break;
 						}
 						case Type::Map:

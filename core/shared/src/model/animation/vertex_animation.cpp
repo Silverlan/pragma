@@ -340,7 +340,8 @@ bool VertexAnimation::Save(Model &mdl,udm::AssetData &outData,std::string &outEr
 				for(auto idx : usedVertIndices)
 					usedVertexData.push_back(attr.vertexData[idx]);
 				static_assert(sizeof(udm::Half) == sizeof(uint16_t));
-				udmAttribute.AddArray(attr.name,strctHalfVector4,usedVertexData,udm::ArrayType::Compressed);
+				udmAttribute["property"] = attr.name;
+				udmAttribute.AddArray("values",strctHalfVector4,usedVertexData,udm::ArrayType::Compressed);
 			}
 		}
 	}
@@ -415,31 +416,34 @@ bool VertexAnimation::LoadFromAssetData(Model &mdl,const udm::AssetData &data,st
 			udmFrame["vertexIndices"](usedVertIndices);
 
 			auto udmAttributes = udmFrame["attributes"];
-			auto attrPos = udmAttributes["position"];
-			if(attrPos)
+			for(auto udmAttr : udmAttributes)
 			{
-				std::vector<std::array<uint16_t,4>> positionData;
-				attrPos(positionData);
-				if(positionData.size() == usedVertIndices.size())
+				std::string property;
+				udmAttr["property"](property);
+				if(property == "position")
 				{
-					for(auto i=decltype(usedVertIndices.size()){0u};i<usedVertIndices.size();++i)
+					std::vector<std::array<uint16_t,4>> positionData;
+					udmAttr["values"](positionData);
+					if(positionData.size() == usedVertIndices.size())
 					{
-						auto idx = usedVertIndices[i];
-						meshFrame->SetVertexPosition(idx,positionData[i]);
+						for(auto i=decltype(usedVertIndices.size()){0u};i<usedVertIndices.size();++i)
+						{
+							auto idx = usedVertIndices[i];
+							meshFrame->SetVertexPosition(idx,positionData[i]);
+						}
 					}
 				}
-			}
-			auto attrNorm = udmAttributes["normal"];
-			if(attrNorm)
-			{
-				std::vector<std::array<uint16_t,4>> normalData;
-				attrNorm(normalData);
-				if(normalData.size() == usedVertIndices.size())
+				else if(property == "normal")
 				{
-					for(auto i=decltype(usedVertIndices.size()){0u};i<usedVertIndices.size();++i)
+					std::vector<std::array<uint16_t,4>> normalData;
+					udmAttr["values"](normalData);
+					if(normalData.size() == usedVertIndices.size())
 					{
-						auto idx = usedVertIndices[i];
-						meshFrame->SetVertexNormal(idx,normalData[i]);
+						for(auto i=decltype(usedVertIndices.size()){0u};i<usedVertIndices.size();++i)
+						{
+							auto idx = usedVertIndices[i];
+							meshFrame->SetVertexNormal(idx,normalData[i]);
+						}
 					}
 				}
 			}

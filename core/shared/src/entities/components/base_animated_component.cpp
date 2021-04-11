@@ -896,30 +896,31 @@ void BaseAnimatedComponent::PlayAnimation(int animation,FPlayAnim flags)
 				if(it != boneMap.end() || bone.expired())
 					continue;
 				auto parent = bone.lock()->parent;
-				umath::ScaledTransform pose {};
+				umath::ScaledTransform poseParent {};
 				if(!parent.expired())
-					ref.GetBonePose(parent.lock()->ID,pose);
+				{
+					ref.GetBonePose(parent.lock()->ID,poseParent);
+					poseParent = poseParent.GetInverse();
+				}
 
+				umath::ScaledTransform pose {};
 				auto *pos = ref.GetBonePosition(i);
 				if(pos)
-				{
-					pose.TranslateLocal(*pos);
-					SetBonePosition(i,pose.GetOrigin());
-				}
-
+					pose.SetOrigin(*pos);
 				auto *rot = ref.GetBoneOrientation(i);
 				if(rot)
-				{
-					pose.RotateLocal(*rot);
-					SetBoneRotation(i,pose.GetRotation());
-				}
-
+					pose.SetRotation(*rot);
 				auto *scale = ref.GetBoneScale(i);
 				if(scale)
-				{
-					pose.Scale(*scale);
+					pose.SetScale(*scale);
+
+				pose = poseParent *pose;
+				if(pos)
+					SetBonePosition(i,pose.GetOrigin());
+				if(rot)
+					SetBoneRotation(i,pose.GetRotation());
+				if(scale)
 					SetBoneScale(i,pose.GetScale());
-				}
 			}
 		}
 	}

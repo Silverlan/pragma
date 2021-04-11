@@ -44,7 +44,9 @@ bool ShaderLightCone::BindSceneCamera(pragma::CSceneComponent &scene,const pragm
 	auto *descSetDepth = renderer.GetDepthDescriptorSet();
 	if(descSetDepth == nullptr)
 		return false;
-	return RecordBindDescriptorSet(*descSetDepth,DESCRIPTOR_SET_DEPTH_MAP.setIndex);
+	uint32_t resolution = 0;
+	resolution = renderer.GetWidth()<<16 | static_cast<uint16_t>(renderer.GetHeight());
+	return RecordBindDescriptorSet(*descSetDepth,DESCRIPTOR_SET_DEPTH_MAP.setIndex) && RecordPushConstants(resolution,offsetof(PushConstants,resolution));
 }
 
 bool ShaderLightCone::BindEntity(CBaseEntity &ent)
@@ -91,11 +93,11 @@ bool ShaderLightCone::BindMaterialParameters(CMaterial &mat)
 	if(ShaderGameWorldLightingPass::BindMaterialParameters(mat) == false)
 		return false;
 	auto &data = mat.GetDataBlock();
-	auto coneLength = 100.f;
+	float coneLength = 100.f;
 	if(data != nullptr)
 		coneLength = data->GetFloat("cone_height");
 	return RecordPushConstants(
-		PushConstants{coneLength},
+		coneLength,
 		sizeof(ShaderGameWorldLightingPass::PushConstants) +offsetof(PushConstants,coneLength)
 	);
 }

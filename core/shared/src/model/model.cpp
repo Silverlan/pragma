@@ -856,12 +856,13 @@ void Model::AddTexturePath(const std::string &path)
 	npath = FileManager::GetCanonicalizedPath(npath);
 	if(npath.empty() == false && npath.back() != '/' && npath.back() != '\\')
 		npath += '/';
+	npath = util::Path::CreatePath(npath).GetString();
 	auto it = std::find_if(m_metaInfo.texturePaths.begin(),m_metaInfo.texturePaths.end(),[&npath](const std::string &pathOther) {
 		return ustring::compare(npath,pathOther,false);
 	});
 	if(it != m_metaInfo.texturePaths.end())
 		return;
-	m_metaInfo.texturePaths.push_back(util::Path::CreatePath(npath).GetString());
+	m_metaInfo.texturePaths.push_back(npath);
 }
 void Model::RemoveTexturePath(uint32_t idx)
 {

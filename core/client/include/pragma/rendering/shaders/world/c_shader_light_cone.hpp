@@ -24,6 +24,7 @@ namespace pragma
 		{
 			float coneLength;
 			uint32_t boundLightIndex;
+			uint32_t resolution;
 		};
 #pragma pack(pop)
 

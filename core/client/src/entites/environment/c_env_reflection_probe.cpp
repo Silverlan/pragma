@@ -50,7 +50,7 @@ extern DLLCLIENT CGame *c_game;
 using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_reflection_probe,CEnvReflectionProbe);
-
+#pragma optimize("",off)
 rendering::IBLData::IBLData(const std::shared_ptr<prosper::Texture> &irradianceMap,const std::shared_ptr<prosper::Texture> &prefilterMap,const std::shared_ptr<prosper::Texture> &brdfMap)
 	: irradianceMap{irradianceMap},prefilterMap{prefilterMap},brdfMap{brdfMap}
 {}
@@ -254,6 +254,11 @@ void CReflectionProbeComponent::BuildReflectionProbes(Game &game,std::vector<CRe
 	g_reflectionProbeQueue = {};
 	if(rebuild)
 	{
+		auto filePostfixes = pragma::asset::get_supported_extensions(pragma::asset::Type::Material);
+		for(auto &ext : filePostfixes)
+			ext = '.' +ext;
+		filePostfixes.push_back("_irradiance.ktx");
+		filePostfixes.push_back("_prefilter.ktx");
 		// Clear existing IBL files
 		for(auto *probe : probes)
 		{
@@ -262,12 +267,7 @@ void CReflectionProbeComponent::BuildReflectionProbes(Game &game,std::vector<CRe
 				continue;
 			auto path = util::Path{probe->GetCubemapIBLMaterialFilePath()};
 			path.PopFront();
-			std::array<std::string,3> filePostfixes = {
-				".wmi",
-				"_irradiance.ktx",
-				"_prefilter.ktx"
-			};
-			path.RemoveFileExtension(std::array<std::string,1>{"wmi"});
+			path.RemoveFileExtension(pragma::asset::get_supported_extensions(pragma::asset::Type::Material));
 			auto identifier = probe->GetCubemapIdentifier();
 			for(auto &postfix : filePostfixes)
 			{
@@ -359,7 +359,7 @@ std::string CReflectionProbeComponent::GetCubemapIBLMaterialFilePath() const
 {
 	if(m_iblMat.empty() == false)
 		return "materials/" +m_iblMat;
-	return "materials/" +GetCubemapIBLMaterialPath() +GetCubemapIdentifier() +".wmi";
+	return "materials/" +GetCubemapIBLMaterialPath() +GetCubemapIdentifier() +"." +pragma::asset::FORMAT_MATERIAL_ASCII;
 }
 
 bool CReflectionProbeComponent::RequiresRebuild() const
@@ -436,10 +436,12 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 	dataBlock->AddValue("texture","prefilter",relPath +prefix +"prefilter");
 	dataBlock->AddValue("texture","irradiance",relPath +prefix +"irradiance");
 	dataBlock->AddValue("texture","brdf","env/brdf");
-	auto matPath = relPath +identifier +".wmi";
-	auto result = mat->Save(matPath);
+	auto rpath = util::Path::CreateFile(relPath +identifier +"." +pragma::asset::FORMAT_MATERIAL_ASCII);
+	auto apath = pragma::asset::relative_path_to_absolute_path(rpath,pragma::asset::Type::Material);
+	std::string err;
+	auto result = mat->Save(apath.GetString(),err);
 	if(result)
-		client->LoadMaterial(matPath,true);
+		client->LoadMaterial(rpath.GetString(),true);
 	return result;
 }
 
@@ -768,7 +770,7 @@ Material *CReflectionProbeComponent::LoadMaterial(bool &outIsDefault)
 	if(pragma::asset::exists(*client,matPath.GetString(),pragma::asset::Type::Material) == false)
 	{
 		outIsDefault = true;
-		matPath = "maps/default_ibl.wmi";
+		matPath = "maps/default_ibl." +std::string{pragma::asset::FORMAT_MATERIAL_ASCII};
 	}
 	auto *mat = client->LoadMaterial(matPath.GetString(),true,false);
 	return (mat && mat->IsError() == false) ? mat : nullptr;
@@ -1021,3 +1023,4 @@ void Console::commands::debug_pbr_ibl(NetworkState *state,pragma::BasePlayerComp
 		pSlider->SetAnchor(0.f,0.f,1.f,0.f);
 	}
 }
+#pragma optimize("",on)

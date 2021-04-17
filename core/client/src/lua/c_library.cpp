@@ -42,6 +42,7 @@
 #include <luainterface.hpp>
 #include <cmaterialmanager.h>
 #include <impl_texture_formats.h>
+#include <prosper_window.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
@@ -57,7 +58,6 @@ static void register_gui(Lua::Interface &lua)
 		{"create_checkbox",Lua::gui::create_checkbox},
 		{"register",Lua::gui::register_element},
 		{"get_base_element",Lua::gui::get_base_element},
-		{"get_element_under_cursor",Lua::gui::get_element_under_cursor},
 		{"get_element_at_position",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			return Lua::gui::get_element_at_position(l);
 		})},
@@ -65,6 +65,25 @@ static void register_gui(Lua::Interface &lua)
 			int32_t x,y;
 			WGUI::GetInstance().GetMousePos(x,y);
 			return Lua::gui::get_element_at_position(l,&x,&y);
+		})},
+		{"find_focused_window",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto *window = WGUI::GetInstance().FindFocusedWindow();
+			if(!window)
+				return 0;
+			Lua::Push(l,window);
+			return 1;
+		})},
+		{"get_primary_window",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto &window = c_engine->GetRenderContext().GetWindow();
+			Lua::Push(l,&window);
+			return 1;
+		})},
+		{"find_window_under_cursor",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto *window = WGUI::GetInstance().FindWindowUnderCursor();
+			if(!window)
+				return 0;
+			Lua::Push(l,window);
+			return 1;
 		})},
 		{"get_focused_element",Lua::gui::get_focused_element},
 		{"register_skin",Lua::gui::register_skin},
@@ -179,6 +198,32 @@ static void register_gui(Lua::Interface &lua)
 		})},
 		{"get_delta_time",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			Lua::PushNumber(l,WGUI::GetInstance().GetDeltaTime());
+			return 1;
+		})},
+		{"get_base_elements",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto &els = WGUI::GetInstance().GetBaseElements();
+			auto t = luabind::newtable(l);
+			int32_t idx = 1;
+			for(auto &hEl : els)
+			{
+				if(hEl.IsValid() == false)
+					continue;
+				auto o = WGUILuaInterface::GetLuaObject(l,*hEl.get());
+				t[idx++] = o;
+			}
+			return 1;
+		})},
+		{"add_base_element",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			WIBase *el = nullptr;
+			if(Lua::IsSet(l,1))
+			{
+				auto &window = Lua::Check<prosper::Window>(l,1);
+				el = WGUI::GetInstance().AddBaseElement(&window);
+			}
+			else
+				el = WGUI::GetInstance().AddBaseElement();
+			auto o = WGUILuaInterface::GetLuaObject(l,*el);
+			o.push(l);
 			return 1;
 		})}
 	});
@@ -513,9 +558,13 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua,bool bGUI)
 		{"get_cursor_pos",Lua::input::get_cursor_pos},
 		{"set_cursor_pos",Lua::input::set_cursor_pos},
 		{"center_cursor",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-			auto &window = c_engine->GetWindow();
-			auto windowSize = window.GetSize();
-			window.SetCursorPos(windowSize /2);
+			auto *window = WGUI::GetInstance().FindFocusedWindow();
+			if(!window)
+				window = &c_engine->GetWindow();
+			if(!window || !window->IsValid())
+				return 0;
+			auto windowSize = (*window)->GetSize();
+			(*window)->SetCursorPos(windowSize /2);
 			return 0;
 		})},
 		{"get_controller_count",Lua::input::get_controller_count},

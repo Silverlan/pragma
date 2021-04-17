@@ -49,6 +49,7 @@
 #include <util_image.hpp>
 #include <util_image_buffer.hpp>
 #include <sharedutils/util_file.h>
+#include <prosper_window.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -545,7 +546,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 			rt = renderer->GetHDRInfo().toneMappedRenderTarget;
 			break;
 		case ImageStage::ScreenOutput:
-			rt = c_engine->GetStagingRenderTarget();
+			rt = c_engine->GetRenderContext().GetWindow().GetStagingRenderTarget();
 			break;
 		}
 		if(rt == nullptr)
@@ -1154,7 +1155,7 @@ static void cvar_net_graph(bool val)
 			return;
 		dbg = std::make_unique<DebugGameGUI>([]() {
 			auto &wgui = WGUI::GetInstance();
-			auto sz = wgui.GetContext().GetWindow().GetSize();
+			auto sz = wgui.GetContext().GetWindow()->GetSize();
 			auto el = wgui.Create<WINetGraph>();
 			el->SetSize(540,180);
 			el->SetPos(sz.x -el->GetWidth(),0);

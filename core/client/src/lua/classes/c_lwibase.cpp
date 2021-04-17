@@ -23,6 +23,7 @@
 #include <prosper_command_buffer.hpp>
 #include <sharedutils/property/util_property_color.hpp>
 #include <util_formatted_text.hpp>
+#include <prosper_window.hpp>
 
 DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WI,WIShape,WIShape);
 DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WI,WIText,WIText);
@@ -445,6 +446,18 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 	classDef.def("IsUpdateScheduled",static_cast<bool(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) -> bool {
 		lua_checkgui_ret(l,hPanel,false);
 		return hPanel->IsUpdateScheduled();
+	}));
+	classDef.def("GetRootElement",static_cast<luabind::object(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) -> luabind::object {
+		lua_checkgui_ret(l,hPanel,{});
+		auto *el = hPanel->GetRootElement();
+		if(!el)
+			return {};
+		return WGUILuaInterface::GetLuaObject(l,*el);
+	}));
+	classDef.def("GetRootWindow",static_cast<luabind::object(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) -> luabind::object {
+		lua_checkgui_ret(l,hPanel,{});
+		auto *window = hPanel->GetRootWindow();
+		return luabind::object{l,window};
 	}));
 
 	auto defDrawInfo = luabind::class_<::WIBase::DrawInfo>("DrawInfo");
@@ -2116,9 +2129,9 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l,WIHandle &hPanel,const Vecto
 	lua_checkgui(l,hPanel);
 	auto &window = c_engine->GetWindow();
 	auto absPos = hPanel->GetAbsolutePos();
-	window.SetCursorPosOverride(Vector2{static_cast<float>(absPos.x +mousePos.x),static_cast<float>(absPos.y +mousePos.y)});
+	window->SetCursorPosOverride(Vector2{static_cast<float>(absPos.x +mousePos.x),static_cast<float>(absPos.y +mousePos.y)});
 	::util::ScopeGuard sg {[&window]() {
-		window.ClearCursorPosOverride();
+		window->ClearCursorPosOverride();
 	}};
 	hPanel->InjectMouseMoveInput(mousePos.x,mousePos.y);
 }
@@ -2127,9 +2140,9 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l,WIHandle &hPanel,const Vecto
 	lua_checkgui_ret(l,hPanel,::util::EventReply::Unhandled);
 	auto &window = c_engine->GetWindow();
 	auto absPos = hPanel->GetAbsolutePos();
-	window.SetCursorPosOverride(Vector2{static_cast<float>(absPos.x +mousePos.x),static_cast<float>(absPos.y +mousePos.y)});
+	window->SetCursorPosOverride(Vector2{static_cast<float>(absPos.x +mousePos.x),static_cast<float>(absPos.y +mousePos.y)});
 	::util::ScopeGuard sg {[&window]() {
-		window.ClearCursorPosOverride();
+		window->ClearCursorPosOverride();
 	}};
 	return hPanel->InjectMouseInput(GLFW::MouseButton(button),GLFW::KeyState(action),GLFW::Modifier(mods));
 }
@@ -2179,11 +2192,11 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l,WIHandle &hPanel,const Vecto
 {
 	lua_checkgui_ret(l,hPanel,::util::EventReply::Unhandled);
 	auto &window = c_engine->GetWindow();
-	auto cursorPos = window.GetCursorPos();
+	auto cursorPos = window->GetCursorPos();
 	auto absPos = hPanel->GetAbsolutePos();
-	window.SetCursorPosOverride(Vector2{static_cast<float>(absPos.x +mousePos.x),static_cast<float>(absPos.y +mousePos.y)});
+	window->SetCursorPosOverride(Vector2{static_cast<float>(absPos.x +mousePos.x),static_cast<float>(absPos.y +mousePos.y)});
 	auto result = hPanel->InjectScrollInput(offset);
-	window.ClearCursorPosOverride();
+	window->ClearCursorPosOverride();
 	return result;
 }
 void Lua::WIBase::IsDescendant(lua_State *l,WIHandle &hPanel,WIHandle &hOther)

@@ -563,10 +563,12 @@ void Model::AddLoadingMaterial(Material &mat,std::optional<uint32_t> index)
 uint32_t Model::AddTexture(const std::string &tex,Material *mat)
 {
 	auto &meta = GetMetaInfo();
-	auto it = std::find(meta.textures.begin(),meta.textures.end(),tex);
+	auto ntex = tex;
+	ufile::remove_extension_from_filename(ntex,pragma::asset::get_supported_extensions(pragma::asset::Type::Material));
+	auto it = std::find(meta.textures.begin(),meta.textures.end(),ntex);
 	if(it != meta.textures.end())
 		return it -meta.textures.begin();
-	meta.textures.push_back(tex);
+	meta.textures.push_back(ntex);
 	if(mat == nullptr)
 		m_materials.push_back(MaterialHandle{});
 	else
@@ -577,7 +579,11 @@ bool Model::SetTexture(uint32_t texIdx,const std::string &tex,Material *mat)
 {
 	auto &meta = GetMetaInfo();
 	if(texIdx < meta.textures.size())
-		meta.textures.at(texIdx) = tex;
+	{
+		auto ntex = tex;
+		ufile::remove_extension_from_filename(ntex,pragma::asset::get_supported_extensions(pragma::asset::Type::Material));
+		meta.textures.at(texIdx) = ntex;
+	}
 	if(mat == nullptr)
 		m_materials.at(texIdx) = {};
 	else if(texIdx < m_materials.size())
@@ -665,7 +671,8 @@ bool Model::FindMaterial(const std::string &texture,std::string &matPath,const s
 	for(auto &path : texturePaths)
 	{
 		auto texPath = path +texture;
-		if(FileManager::Exists("materials\\" +texPath +".wmi") || FileManager::Exists("materials\\" +texPath +".vmt") || FileManager::Exists("materials\\" +texPath +".vmat_c"))
+		auto foundPath = pragma::asset::find_file(*m_networkState,texPath,pragma::asset::Type::Material);
+		if(foundPath.has_value() || FileManager::Exists("materials\\" +texPath +".vmt") || FileManager::Exists("materials\\" +texPath +".vmat_c"))
 		{
 			matPath = texPath;
 			return true;
@@ -678,7 +685,7 @@ bool Model::FindMaterial(const std::string &texture,std::string &matPath,const s
 	for(auto &path : texturePaths)
 	{
 		auto texPath = path +texture;
-		if(m_networkState->PortMaterial(texPath +".wmi",loadMaterial) == true)
+		if(m_networkState->PortMaterial(texPath,loadMaterial) == true)
 		{
 			bSkipPort = true;
 			auto r = FindMaterial(texture,matPath,loadMaterial);

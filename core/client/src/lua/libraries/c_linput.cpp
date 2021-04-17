@@ -11,6 +11,7 @@
 #include "pragma/localization.h"
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/input/inputhelper.h>
+#include <prosper_window.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -20,14 +21,14 @@ int Lua::input::get_mouse_button_state(lua_State *l)
 {
 	auto mouseButton = Lua::CheckInt(l,1);
 	auto &window = c_engine->GetWindow();
-	Lua::PushInt(l,window.GetMouseButtonState(static_cast<GLFW::MouseButton>(mouseButton)));
+	Lua::PushInt(l,window->GetMouseButtonState(static_cast<GLFW::MouseButton>(mouseButton)));
 	return 1;
 }
 int Lua::input::get_key_state(lua_State *l)
 {
 	auto key = Lua::CheckInt(l,1);
 	auto &window = c_engine->GetWindow();
-	Lua::PushInt(l,window.GetKeyState(static_cast<GLFW::Key>(key)));
+	Lua::PushInt(l,window->GetKeyState(static_cast<GLFW::Key>(key)));
 	return 1;
 }
 int Lua::input::add_callback(lua_State *l)
@@ -43,7 +44,7 @@ int Lua::input::add_callback(lua_State *l)
 int Lua::input::get_cursor_pos(lua_State *l)
 {
 	auto &window = c_engine->GetWindow();
-	auto pos = window.GetCursorPos();
+	auto pos = window->GetCursorPos();
 	Lua::Push<Vector2>(l,pos);
 	return 1;
 }
@@ -91,7 +92,7 @@ int Lua::input::set_cursor_pos(lua_State *l)
 {
 	auto &cursorPos = *Lua::CheckVector2(l,1);
 	auto &window = c_engine->GetWindow();
-	window.SetCursorPos(cursorPos);
+	window->SetCursorPos(cursorPos);
 	return 0;
 }
 

@@ -101,6 +101,7 @@
 #include <util_image.hpp>
 #include <util_image_buffer.hpp>
 #include <udm.hpp>
+#include <prosper_window.hpp>
 
 extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;
 extern ClientEntityNetworkMap *g_ClEntityNetworkMap;
@@ -810,7 +811,7 @@ void CGame::Resize()
 	auto *cam = GetPrimaryCamera();
 	if(cam == nullptr)
 		return;
-	cam->SetAspectRatio(c_engine->GetAspectRatio());
+	cam->SetAspectRatio(c_engine->GetWindow().GetAspectRatio());
 	cam->UpdateMatrices();
 }
 

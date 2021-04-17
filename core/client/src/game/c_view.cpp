@@ -16,6 +16,7 @@
 #include <pragma/lua/luafunction_call.h>
 #include <wgui/wgui.h>
 #include <pragma/entities/components/base_transform_component.hpp>
+#include <prosper_window.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
@@ -45,11 +46,11 @@ void CGame::CalcLocalPlayerOrientation()
 	auto w = c_engine->GetRenderContext().GetWindowWidth();
 	auto h = c_engine->GetRenderContext().GetWindowHeight();
 	float wDelta,hDelta;
-	auto &window = c_engine->GetWindow();
-	if(window.IsFocused() && WGUI::GetInstance().GetFocusedElement() == nullptr)
+	auto *window = WGUI::GetInstance().FindFocusedWindow();
+	if(window && window->IsValid() && WGUI::GetInstance().GetFocusedElement(window) == nullptr)
 	{
-		auto pos = window.GetCursorPos();
-		window.SetCursorPos(Vector2i(umath::round(w /2.f),umath::round(h /2.f)));
+		auto pos = (*window)->GetCursorPos();
+		(*window)->SetCursorPos(Vector2i(umath::round(w /2.f),umath::round(h /2.f)));
 		wDelta = pos.x -w /2.f;
 		hDelta = pos.y -h /2.f;
 		if((h %2) != 0)

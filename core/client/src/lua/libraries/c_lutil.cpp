@@ -24,6 +24,7 @@
 #include <pragma/asset_types/world.hpp>
 #include <pragma/model/model.h>
 #include <util_image_buffer.hpp>
+#include <prosper_window.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
@@ -275,5 +276,5 @@ int Lua::util::Client::export_material(lua_State *l)
 	return 2;
 }
 
-std::string Lua::util::Client::get_clipboard_string() {return c_engine->GetWindow().GetClipboardString();}
-void Lua::util::Client::set_clipboard_string(const std::string &str) {c_engine->GetWindow().SetClipboardString(str);}
+std::string Lua::util::Client::get_clipboard_string() {return c_engine->GetWindow()->GetClipboardString();}
+void Lua::util::Client::set_clipboard_string(const std::string &str) {c_engine->GetWindow()->SetClipboardString(str);}

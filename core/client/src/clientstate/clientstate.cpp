@@ -46,7 +46,7 @@
 #include <sharedutils/util_library.hpp>
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
-
+#include <prosper_window.hpp>
 
 static std::unordered_map<std::string,std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &ClientState::GetConVarPtrs() {return *conVarPtrs;}
@@ -293,8 +293,8 @@ void ClientState::CloseMainMenu()
 	auto w = c_engine->GetRenderContext().GetWindowWidth();
 	auto h = c_engine->GetRenderContext().GetWindowHeight();
 	auto &window = c_engine->GetWindow();
-	window.SetCursorPos(Vector2i(w /2,h /2));
-	window.SetCursorInputMode(GLFW::CursorMode::Disabled);
+	window->SetCursorPos(Vector2i(w /2,h /2));
+	window->SetCursorInputMode(GLFW::CursorMode::Disabled);
 }
 void ClientState::OpenMainMenu()
 {
@@ -302,7 +302,7 @@ void ClientState::OpenMainMenu()
 	if(menu == NULL)
 		return;
 	auto &window = c_engine->GetWindow();
-	window.SetCursorInputMode(GLFW::CursorMode::Normal);
+	window->SetCursorInputMode(GLFW::CursorMode::Normal);
 	menu->SetVisible(true);
 }
 void ClientState::ToggleMainMenu()

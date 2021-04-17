@@ -150,7 +150,27 @@ private:
 	std::unique_ptr<float> m_fadeIn;
 	std::unique_ptr<float> m_fadeOut;
 };
-
 REGISTER_BASIC_ARITHMETIC_OPERATORS(Animation::ShareMode)
+
+#include <udm.hpp>
+class AnimationChannel
+{
+	enum class Interpolation : uint8_t
+	{
+		Linear = 0,
+		Step,
+		CubicSpline
+	};
+	udm::Type valueType;
+	std::vector<float> times;
+	std::vector<uint8_t> values;
+	Interpolation interpolation = Interpolation::Linear;
+	std::string path = ""; // TODO: How to identify what this channel represents? (position / rotation / light intensity / etc)
+};
+
+class AnimTest
+{
+	std::vector<AnimationChannel> channels;
+};
 
 #endif

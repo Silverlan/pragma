@@ -49,6 +49,7 @@
 #include <queries/prosper_query_pool.hpp>
 #include <queries/prosper_timer_query.hpp>
 #include <pragma/asset/util_asset.hpp>
+#include <prosper_window.hpp>
 
 extern "C"
 {
@@ -87,12 +88,12 @@ CEngine::CEngine(int argc,char* argv[])
 	RegisterCallback<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("PostDrawGUI");
 	RegisterCallback<void>("Draw");
 
-	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>("OnMouseInput");
-	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,GLFW::Key,int,GLFW::KeyState,GLFW::Modifier,float>("OnKeyboardInput");
-	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,unsigned int>("OnCharInput");
-	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,Vector2>("OnScrollInput");
-	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,std::reference_wrapper<const GLFW::Joystick>,uint32_t,GLFW::KeyState>("OnJoystickButtonInput");
-	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,std::reference_wrapper<const GLFW::Joystick>,uint32_t,GLFW::Modifier,float,float>("OnJoystickAxisInput");
+	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<prosper::Window>,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>("OnMouseInput");
+	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<prosper::Window>,GLFW::Key,int,GLFW::KeyState,GLFW::Modifier,float>("OnKeyboardInput");
+	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<prosper::Window>,unsigned int>("OnCharInput");
+	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<prosper::Window>,Vector2>("OnScrollInput");
+	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<prosper::Window>,std::reference_wrapper<const GLFW::Joystick>,uint32_t,GLFW::KeyState>("OnJoystickButtonInput");
+	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<prosper::Window>,std::reference_wrapper<const GLFW::Joystick>,uint32_t,GLFW::Modifier,float,float>("OnJoystickAxisInput");
 
 	AddProfilingHandler([this](bool profilingEnabled) {
 		if(profilingEnabled == false)
@@ -199,34 +200,6 @@ void CEngine::DumpDebugInformation(ZIPFile &zip) const
 #endif
 }
 
-void CEngine::InitializeStagingTarget()
-{
-	c_engine->GetRenderContext().WaitIdle();
-	auto resolution = GetRenderResolution();
-	prosper::util::ImageCreateInfo createInfo {};
-	createInfo.usage = prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::ColorAttachmentBit;
-	createInfo.format = prosper::Format::R8G8B8A8_UNorm;
-	createInfo.width = resolution.x;
-	createInfo.height = resolution.y;
-	createInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
-	auto stagingImg = GetRenderContext().CreateImage(createInfo);
-	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
-	auto stagingTex = GetRenderContext().CreateTexture({},*stagingImg,imgViewCreateInfo);
-
-	auto rp = GetRenderContext().CreateRenderPass(
-		prosper::util::RenderPassCreateInfo{{{prosper::Format::R8G8B8A8_UNorm,prosper::ImageLayout::ColorAttachmentOptimal,prosper::AttachmentLoadOp::DontCare,
-			prosper::AttachmentStoreOp::Store,prosper::SampleCountFlags::e1Bit,prosper::ImageLayout::ColorAttachmentOptimal
-		}}}
-		//prosper::util::RenderPassCreateInfo{vk::Format::eD32Sfloat,vk::ImageLayout::eDepthStencilAttachmentOptimal,vk::AttachmentLoadOp::eClear}
-	);
-	umath::set_flag(m_stateFlags,StateFlags::FirstFrame);
-	m_stagingRenderTarget = GetRenderContext().CreateRenderTarget({stagingTex},rp);//,finalDepthTex},rp);
-	m_stagingRenderTarget->SetDebugName("engine_staging_rt");
-	// Vulkan TODO: Resize when window resolution was changed
-}
-
-const std::shared_ptr<prosper::RenderTarget> &CEngine::GetStagingRenderTarget() const {return m_stagingRenderTarget;}
-
 void CEngine::SetRenderResolution(std::optional<Vector2i> resolution)
 {
 	if(m_renderResolution == resolution)
@@ -240,8 +213,7 @@ Vector2i CEngine::GetRenderResolution() const
 {
 	if(m_renderResolution.has_value())
 		return *m_renderResolution;
-	auto &windowCreateInfo = GetRenderContext().GetWindowCreationInfo();
-	return Vector2i{windowCreateInfo.width,windowCreateInfo.height};
+	return GetRenderContext().GetWindow()->GetSize();
 }
 
 double CEngine::GetFPS() const {return m_fps;}
@@ -294,10 +266,10 @@ void CEngine::Input(int key,GLFW::KeyState inputState,GLFW::KeyState pressState,
 	}
 }
 void CEngine::Input(int key,GLFW::KeyState state,GLFW::Modifier mods,float magnitude) {Input(key,state,state,mods,magnitude);}
-void CEngine::MouseInput(GLFW::Window &window,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
+void CEngine::MouseInput(prosper::Window &window,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
 {
 	auto handled = false;
-	if(CallCallbacksWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>("OnMouseInput",handled,window,button,state,mods) == CallbackReturnType::HasReturnValue && handled == true)
+	if(CallCallbacksWithOptionalReturn<bool,std::reference_wrapper<prosper::Window>,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>("OnMouseInput",handled,window,button,state,mods) == CallbackReturnType::HasReturnValue && handled == true)
 		return;
 	if(client != nullptr && client->RawMouseInput(button,state,mods) == false)
 		return;
@@ -352,17 +324,17 @@ void CEngine::GetMappedKeys(const std::string &cvarName,std::vector<GLFW::Key> &
 		}
 	}
 }
-void CEngine::JoystickButtonInput(GLFW::Window &window,const GLFW::Joystick &joystick,uint32_t key,GLFW::KeyState state)
+void CEngine::JoystickButtonInput(prosper::Window &window,const GLFW::Joystick &joystick,uint32_t key,GLFW::KeyState state)
 {
 	auto handled = false;
-	if(CallCallbacksWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,std::reference_wrapper<const GLFW::Joystick>,uint32_t,GLFW::KeyState>("OnJoystickButtonInput",handled,window,joystick,key,state) == CallbackReturnType::HasReturnValue && handled == true)
+	if(CallCallbacksWithOptionalReturn<bool,std::reference_wrapper<prosper::Window>,std::reference_wrapper<const GLFW::Joystick>,uint32_t,GLFW::KeyState>("OnJoystickButtonInput",handled,window,joystick,key,state) == CallbackReturnType::HasReturnValue && handled == true)
 		return;
 	KeyboardInput(window,static_cast<GLFW::Key>(key),-1,state,{});
 }
-void CEngine::JoystickAxisInput(GLFW::Window &window,const GLFW::Joystick &joystick,uint32_t axis,GLFW::Modifier mods,float newVal,float deltaVal)
+void CEngine::JoystickAxisInput(prosper::Window &window,const GLFW::Joystick &joystick,uint32_t axis,GLFW::Modifier mods,float newVal,float deltaVal)
 {
 	auto handled = false;
-	if(CallCallbacksWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,std::reference_wrapper<const GLFW::Joystick>,uint32_t,GLFW::Modifier,float,float>("OnJoystickAxisInput",handled,window,joystick,axis,mods,newVal,deltaVal) == CallbackReturnType::HasReturnValue && handled == true)
+	if(CallCallbacksWithOptionalReturn<bool,std::reference_wrapper<prosper::Window>,std::reference_wrapper<const GLFW::Joystick>,uint32_t,GLFW::Modifier,float,float>("OnJoystickAxisInput",handled,window,joystick,axis,mods,newVal,deltaVal) == CallbackReturnType::HasReturnValue && handled == true)
 		return;
 	auto oldVal = newVal -deltaVal;
 	auto key = static_cast<GLFW::Key>(axis);
@@ -417,10 +389,10 @@ bool CEngine::GetInputButtonState(float axisInput,GLFW::Modifier mods,GLFW::KeyS
 	}
 	return true;
 }
-void CEngine::KeyboardInput(GLFW::Window &window,GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods,float magnitude)
+void CEngine::KeyboardInput(prosper::Window &window,GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods,float magnitude)
 {
 	auto handled = false;
-	if(CallCallbacksWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,GLFW::Key,int,GLFW::KeyState,GLFW::Modifier,float>("OnKeyboardInput",handled,window,key,scanCode,state,mods,magnitude) == CallbackReturnType::HasReturnValue && handled == true)
+	if(CallCallbacksWithOptionalReturn<bool,std::reference_wrapper<prosper::Window>,GLFW::Key,int,GLFW::KeyState,GLFW::Modifier,float>("OnKeyboardInput",handled,window,key,scanCode,state,mods,magnitude) == CallbackReturnType::HasReturnValue && handled == true)
 		return;
 	if(client != nullptr && client->RawKeyboardInput(key,scanCode,state,mods,magnitude) == false)
 		return;
@@ -445,10 +417,10 @@ void CEngine::KeyboardInput(GLFW::Window &window,GLFW::Key key,int scanCode,GLFW
 	key = static_cast<GLFW::Key>(std::tolower(static_cast<int>(key)));
 	Input(static_cast<int>(key),state,buttonState,mods,magnitude);
 }
-void CEngine::CharInput(GLFW::Window &window,unsigned int c)
+void CEngine::CharInput(prosper::Window &window,unsigned int c)
 {
 	auto handled = false;
-	if(CallCallbacksWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,unsigned int>("OnCharInput",handled,window,c) == CallbackReturnType::HasReturnValue && handled == true)
+	if(CallCallbacksWithOptionalReturn<bool,std::reference_wrapper<prosper::Window>,unsigned int>("OnCharInput",handled,window,c) == CallbackReturnType::HasReturnValue && handled == true)
 		return;
 	if(client != nullptr && client->RawCharInput(c) == false)
 		return;
@@ -465,10 +437,10 @@ void CEngine::CharInput(GLFW::Window &window,unsigned int c)
 	if(client != nullptr && client->CharInput(c) == false)
 		return;
 }
-void CEngine::ScrollInput(GLFW::Window &window,Vector2 offset)
+void CEngine::ScrollInput(prosper::Window &window,Vector2 offset)
 {
 	auto handled = false;
-	if(CallCallbacksWithOptionalReturn<bool,std::reference_wrapper<GLFW::Window>,Vector2>("OnScrollInput",handled,window,offset) == CallbackReturnType::HasReturnValue && handled == true)
+	if(CallCallbacksWithOptionalReturn<bool,std::reference_wrapper<prosper::Window>,Vector2>("OnScrollInput",handled,window,offset) == CallbackReturnType::HasReturnValue && handled == true)
 		return;
 	if(client != nullptr && client->RawScrollInput(offset) == false)
 		return;
@@ -488,13 +460,13 @@ void CEngine::ScrollInput(GLFW::Window &window,Vector2 offset)
 	}
 }
 
-void CEngine::OnWindowFocusChanged(GLFW::Window &window,bool bFocused)
+void CEngine::OnWindowFocusChanged(prosper::Window &window,bool bFocused)
 {
 	umath::set_flag(m_stateFlags,StateFlags::WindowFocused,bFocused);
 	if(client != nullptr)
 		client->UpdateSoundVolume();
 }
-void CEngine::OnFilesDropped(GLFW::Window &window,std::vector<std::string> &files)
+void CEngine::OnFilesDropped(prosper::Window &window,std::vector<std::string> &files)
 {
 	if(client == nullptr)
 		return;
@@ -559,11 +531,9 @@ bool CEngine::Initialize(int argc,char *argv[])
 	int mode = 0;
 	if(res != nullptr && !res->argv.empty())
 		mode = util::to_int(res->argv[0]);
-	if(mode == 0)
-		SetWindowedMode(false);
-	else
-		SetWindowedMode(true);
-	GetRenderContext().GetWindowCreationInfo().decorated = ((mode == 2) ? false : true);
+	auto &initialWindowSettings = GetRenderContext().GetInitialWindowSettings();
+	initialWindowSettings.windowedMode = (mode == 0);
+	initialWindowSettings.decorated = ((mode == 2) ? false : true);
 
 	res = cmds.find("cl_render_monitor");
 	if(res != nullptr && !res->argv.empty())
@@ -571,7 +541,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 		auto monitor = util::to_int(res->argv[0]);
 		auto monitors = GLFW::get_monitors();
 		if(monitor < monitors.size() && monitor > 0)
-			SetMonitor(monitors[monitor]);
+			initialWindowSettings.monitor = monitors[monitor];
 	}
 
 	res = cmds.find("cl_gpu_device");
@@ -707,7 +677,8 @@ bool CEngine::Initialize(int argc,char *argv[])
 	m_speedCam = 1600.0f;
 	m_speedCamMouse = 0.2f;
 	
-	InitializeStagingTarget();
+	GetRenderContext().GetWindow().ReloadStagingRenderTarget();
+	umath::set_flag(m_stateFlags,StateFlags::FirstFrame);
 
 	m_gpuProfiler = pragma::debug::GPUProfiler::Create<pragma::debug::GPUProfiler>();
 	AddGPUProfilingHandler([this](bool profilingEnabled) {
@@ -731,7 +702,6 @@ bool CEngine::Initialize(int argc,char *argv[])
 	InitializeSoundEngine();
 
 	OpenClientState();
-	m_guiCommandBufferGroup = c_engine->GetRenderContext().CreateSwapCommandBufferGroup();
 
 	if(umath::is_flag_set(m_stateFlags,StateFlags::ConsoleOpen))
 		OpenConsole(); // GUI Console mustn't be opened before client has been created!
@@ -806,17 +776,31 @@ void CEngine::SetGPUProfilingEnabled(bool bEnabled)
 		++it;
 	}
 }
+void CEngine::InitializeWindowInputCallbacks(prosper::Window &window)
+{
+	window->SetKeyCallback([this,&window](GLFW::Window &glfwWindow,GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods) mutable {
+		KeyboardInput(window,key,scanCode,state,mods);
+	});
+	window->SetMouseButtonCallback([this,&window](GLFW::Window &glfwWindow,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) mutable {
+		MouseInput(window,button,state,mods);
+	});
+	window->SetCharCallback([this,&window](GLFW::Window &glfwWindow,unsigned int c) mutable {
+		CharInput(window,c);
+	});
+	window->SetScrollCallback([this,&window](GLFW::Window &glfwWindow,Vector2 offset) mutable {
+		ScrollInput(window,offset);
+	});
+	window->SetFocusCallback([this,&window](GLFW::Window &glfwWindow,bool bFocused) mutable {
+		OnWindowFocusChanged(window,bFocused);
+	});
+	window->SetDropCallback([this,&window](GLFW::Window &glfwWindow,std::vector<std::string> &files) mutable {
+		OnFilesDropped(window,files);
+	});
+}
 void CEngine::OnWindowInitialized()
 {
 	pragma::RenderContext::OnWindowInitialized();
-
-	auto &window = GetWindow();
-	window.SetKeyCallback(std::bind(&CEngine::KeyboardInput,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3,std::placeholders::_4,std::placeholders::_5,1.f));
-	window.SetMouseButtonCallback(std::bind(&CEngine::MouseInput,this,std::placeholders::_1,std::placeholders::_2,std::placeholders::_3,std::placeholders::_4));
-	window.SetCharCallback(std::bind(&CEngine::CharInput,this,std::placeholders::_1,std::placeholders::_2));
-	window.SetScrollCallback(std::bind(&CEngine::ScrollInput,this,std::placeholders::_1,std::placeholders::_2));
-	window.SetFocusCallback(std::bind(&CEngine::OnWindowFocusChanged,this,std::placeholders::_1,std::placeholders::_2));
-	window.SetDropCallback(std::bind(&CEngine::OnFilesDropped,this,std::placeholders::_1,std::placeholders::_2));
+	InitializeWindowInputCallbacks(GetRenderContext().GetWindow());
 }
 void CEngine::InitializeExternalArchiveManager() {util::initialize_external_archive_manager(GetClientState());}
 bool CEngine::StartProfilingStage(CPUProfilingPhase stage)
@@ -1047,7 +1031,6 @@ void CEngine::Close()
 	m_clInstance = nullptr;
 	WGUI::Close(); // Has to be closed after client state
 	c_engine = nullptr;
-	m_guiCommandBufferGroup = nullptr;
 	pragma::RenderContext::Release();
 
 	Engine::Close();
@@ -1057,7 +1040,6 @@ void CEngine::OnClose()
 {
 	pragma::RenderContext::OnClose();
 	// Clear all Vulkan resources before closing the context
-	m_stagingRenderTarget = nullptr;
 	m_gpuProfiler = {};
 
 	pragma::CRenderComponent::ClearBuffers();
@@ -1104,7 +1086,7 @@ void CEngine::DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t n_curre
 	gui.Think();
 	StopProfilingStage(CPUProfilingPhase::GUI);
 
-	auto &stagingRt = m_stagingRenderTarget;
+	auto &stagingRt = GetRenderContext().GetWindow().GetStagingRenderTarget();
 	if(umath::is_flag_set(m_stateFlags,StateFlags::FirstFrame))
 		umath::set_flag(m_stateFlags,StateFlags::FirstFrame,false);
 	else
@@ -1117,18 +1099,27 @@ void CEngine::DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t n_curre
 
 	DrawScene(ptrDrawCmd,stagingRt);
 
-	auto &finalImg = stagingRt->GetTexture().GetImage();
-	drawCmd.RecordImageBarrier(
-		finalImg,
-		prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal
-	);
-
 	if(perfTimers)
 	{
 		auto idx = GetPerformanceTimerIndex(GPUTimer::Present);
 		m_gpuTimers[idx]->Begin(drawCmd);
 	}
-	drawCmd.RecordPresentImage(finalImg,n_current_swapchain_image);
+	for(auto &wpWindow : GetRenderContext().GetWindows())
+	{
+		if(wpWindow.expired())
+			continue;
+		auto window = wpWindow.lock();
+		if(window->IsValid() == false)
+			continue;
+		auto &finalImg = window->GetStagingRenderTarget()->GetTexture().GetImage();
+		drawCmd.RecordImageBarrier(
+			finalImg,
+			prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal
+		);
+
+		drawCmd.RecordPresentImage(finalImg,*window);
+	}
+
 	if(perfTimers)
 	{
 		auto idx = GetPerformanceTimerIndex(GPUTimer::Present);
@@ -1153,12 +1144,19 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 		auto &rp = rt->GetRenderPass();
 		auto &fb = rt->GetFramebuffer();
 		StartProfilingStage(GPUProfilingPhase::GUI);
-		m_guiCommandBufferGroup->StartRecording(rt->GetRenderPass(),rt->GetFramebuffer());
-			m_guiCommandBufferGroup->Record([&rp,&fb](prosper::ISecondaryCommandBuffer &drawCmd) {
-				auto &gui = WGUI::GetInstance();
-				gui.Draw(rp,fb,drawCmd);
-			});
-		m_guiCommandBufferGroup->EndRecording();
+		for(auto &wpWindow : GetRenderContext().GetWindows())
+		{
+			auto window = wpWindow.lock();
+			if(!window || window->IsValid() == false)
+				continue;
+			auto &swapCmdGroup = window->GetSwapCommandBufferGroup();
+			swapCmdGroup.StartRecording(rt->GetRenderPass(),rt->GetFramebuffer());
+				swapCmdGroup.Record([&rp,&fb,window](prosper::ISecondaryCommandBuffer &drawCmd) {
+					auto &gui = WGUI::GetInstance();
+					gui.Draw(*window,drawCmd);
+				});
+			swapCmdGroup.EndRecording();
+		}
 		StopProfilingStage(GPUProfilingPhase::GUI);
 	}
 
@@ -1196,9 +1194,16 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 			auto idx = GetPerformanceTimerIndex(GPUTimer::GUI);
 			m_gpuTimers[idx]->Begin(*drawCmd);
 		}
-		drawCmd->RecordBeginRenderPass(*rt,prosper::IPrimaryCommandBuffer::RenderPassFlags::SecondaryCommandBuffers);
-		m_guiCommandBufferGroup->ExecuteCommands(*drawCmd);
-		drawCmd->RecordEndRenderPass();
+		for(auto &wpWindow : GetRenderContext().GetWindows())
+		{
+			auto window = wpWindow.lock();
+			if(!window || !window->IsValid())
+				continue;
+			auto &rt = window->GetStagingRenderTarget();
+			drawCmd->RecordBeginRenderPass(*rt,prosper::IPrimaryCommandBuffer::RenderPassFlags::SecondaryCommandBuffers);
+			window->GetSwapCommandBufferGroup().ExecuteCommands(*drawCmd);
+			drawCmd->RecordEndRenderPass();
+		}
 		if(perfTimers)
 		{
 			auto idx = GetPerformanceTimerIndex(GPUTimer::GUI);
@@ -1299,8 +1304,23 @@ void CEngine::Think()
 	CallCallbacks("Draw");
 	StopProfilingStage(CPUProfilingPhase::DrawFrame);
 	GLFW::poll_events(); // Needs to be called AFTER rendering!
-	if(GetWindow().ShouldClose())
-		ShutDown();
+	for(auto &wpWindow : GetRenderContext().GetWindows())
+	{
+		if(wpWindow.expired())
+			continue;
+		auto window = wpWindow.lock();
+		if((*window)->ShouldClose() == false)
+		{
+			window->UpdateWindow();
+			continue;
+		}
+		if(window.get() == &GetRenderContext().GetWindow())
+		{
+			ShutDown();
+			return;
+		}
+		window->Close();
+	}
 }
 
 void CEngine::SetFixedFrameDeltaTimeInterpretation(std::optional<std::chrono::nanoseconds> frameDeltaTime)
@@ -1361,7 +1381,7 @@ void CEngine::OnResolutionChanged(uint32_t width,uint32_t height)
 
 void CEngine::OnRenderResolutionChanged(uint32_t width,uint32_t height)
 {
-	InitializeStagingTarget();
+	GetRenderContext().GetWindow().ReloadStagingRenderTarget();
 
 	auto &wgui = WGUI::GetInstance();
 	auto *baseEl = wgui.GetBaseElement();
@@ -1380,12 +1400,12 @@ void CEngine::OnRenderResolutionChanged(uint32_t width,uint32_t height)
 REGISTER_CONVAR_CALLBACK_CL(cl_render_monitor,[](NetworkState*,ConVar*,int32_t,int32_t monitor) {
 	auto monitors = GLFW::get_monitors();
 	if(monitor < monitors.size() && monitor >= 0)
-		c_engine->SetMonitor(monitors[monitor]);
+		c_engine->GetWindow().SetMonitor(monitors[monitor]);
 })
 
 REGISTER_CONVAR_CALLBACK_CL(cl_render_window_mode,[](NetworkState*,ConVar*,int32_t,int32_t val) {
-	c_engine->SetWindowedMode(val != 0);
-	c_engine->SetNoBorder(val == 2);
+	c_engine->GetWindow().SetWindowedMode(val != 0);
+	c_engine->GetWindow().SetNoBorder(val == 2);
 })
 
 REGISTER_CONVAR_CALLBACK_CL(cl_window_resolution,[](NetworkState*,ConVar*,std::string,std::string val) {
@@ -1396,7 +1416,7 @@ REGISTER_CONVAR_CALLBACK_CL(cl_window_resolution,[](NetworkState*,ConVar*,std::s
 	auto x = util::to_int(vals[0]);
 	auto y = util::to_int(vals[1]);
 	Vector2i resolution(x,y);
-	c_engine->SetResolution(resolution);
+	c_engine->GetWindow().SetResolution(resolution);
 	auto *client = static_cast<ClientState*>(c_engine->GetClientState());
 	if(client == nullptr)
 		return;

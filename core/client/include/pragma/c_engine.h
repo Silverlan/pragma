@@ -119,8 +119,6 @@ public:
 	// If the input is an axis input, inOutState may change to represent actual button state
 	bool GetInputButtonState(float axisInput,GLFW::Modifier mods,GLFW::KeyState &inOutState) const;
 
-	const std::shared_ptr<prosper::RenderTarget> &GetStagingRenderTarget() const;
-
 	void SetRenderResolution(std::optional<Vector2i> resolution);
 	Vector2i GetRenderResolution() const;
 
@@ -155,14 +153,14 @@ public:
 	float GetNearZ();
 	float GetFarZ();
 	// Input
-	void MouseInput(GLFW::Window &window,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods);
-	void KeyboardInput(GLFW::Window &window,GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods,float magnitude=1.f);
-	void CharInput(GLFW::Window &window,unsigned int c);
-	void ScrollInput(GLFW::Window &window,Vector2 offset);
-	void OnWindowFocusChanged(GLFW::Window &window,bool bFocus);
-	void OnFilesDropped(GLFW::Window &window,std::vector<std::string> &files);
-	void JoystickButtonInput(GLFW::Window &window,const GLFW::Joystick &joystick,uint32_t key,GLFW::KeyState state);
-	void JoystickAxisInput(GLFW::Window &window,const GLFW::Joystick &joystick,uint32_t axis,GLFW::Modifier mods,float newVal,float deltaVal);
+	void MouseInput(prosper::Window &window,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods);
+	void KeyboardInput(prosper::Window &window,GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods,float magnitude=1.f);
+	void CharInput(prosper::Window &window,unsigned int c);
+	void ScrollInput(prosper::Window &window,Vector2 offset);
+	void OnWindowFocusChanged(prosper::Window &window,bool bFocus);
+	void OnFilesDropped(prosper::Window &window,std::vector<std::string> &files);
+	void JoystickButtonInput(prosper::Window &window,const GLFW::Joystick &joystick,uint32_t key,GLFW::KeyState state);
+	void JoystickAxisInput(prosper::Window &window,const GLFW::Joystick &joystick,uint32_t axis,GLFW::Modifier mods,float newVal,float deltaVal);
 	float GetRawJoystickAxisMagnitude() const;
 	// Util
 	virtual bool IsServerOnly() override;
@@ -208,6 +206,8 @@ public:
 	// used for offline rendering (i.e. recording).
 	void SetTickDeltaTimeTiedToFrameRate(bool tieToFrameRate);
 
+	void InitializeWindowInputCallbacks(prosper::Window &window);
+
 	void SetGpuPerformanceTimersEnabled(bool enabled);
 	std::chrono::nanoseconds GetGpuExecutionTime(uint32_t swapchainIdx,GPUTimer timer) const;
 protected:
@@ -227,7 +227,6 @@ protected:
 	virtual void InitializeExternalArchiveManager() override;
 
 	virtual void RegisterConsoleCommands() override;
-	void InitializeStagingTarget();
 private:
 	// Sound
 	std::shared_ptr<al::SoundSystem> m_soundSystem = nullptr;
@@ -249,8 +248,6 @@ private:
 	float m_speedCamMouse;
 	float m_nearZ,m_farZ;
 	std::unique_ptr<StateInstance> m_clInstance;
-	std::shared_ptr<prosper::RenderTarget> m_stagingRenderTarget = nullptr;
-	std::shared_ptr<prosper::ISwapCommandBufferGroup> m_guiCommandBufferGroup = nullptr;
 	std::optional<Vector2i> m_renderResolution = {};
 
 	std::shared_ptr<pragma::debug::GPUProfiler> m_gpuProfiler;

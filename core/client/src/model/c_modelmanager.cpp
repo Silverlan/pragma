@@ -17,7 +17,7 @@ std::shared_ptr<Model> pragma::asset::CModelManager::LoadModel(const std::string
 {
 	auto mdl = ModelManager::LoadModel(mdlName,bReload,outIsNewModel);
 	if(mdl == nullptr)
-		static_cast<CGame&>(*m_nw.GetGameState()).RequestResource("models/" +GetNormalizedModelName(mdlName));
+		static_cast<CGame&>(*m_nw.GetGameState()).RequestResource("models/" +GetNormalizedModelName(mdlName) +"." +std::string{pragma::asset::FORMAT_MODEL_BINARY});
 	return mdl;
 }
 

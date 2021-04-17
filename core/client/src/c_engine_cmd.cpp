@@ -19,6 +19,7 @@
 #include <pragma/entities/components/renderers/c_rasterization_renderer_component.hpp>
 #include <image/prosper_render_target.hpp>
 #include <shader/prosper_shader_blur.hpp>
+#include <prosper_window.hpp>
 
 extern DLLCLIENT void debug_render_stats(bool enabled,bool full,bool print,bool continuous);
 void CEngine::RegisterConsoleCommands()
@@ -188,7 +189,7 @@ void CEngine::RegisterConsoleCommands()
 	conVarMap.RegisterConVar("render_vsync_enabled","1",ConVarFlags::Archive,"Enables or disables vsync. OpenGL only.");
 	conVarMap.RegisterConVarCallback("render_vsync_enabled",std::function<void(NetworkState*,ConVar*,bool,bool)>{[this](
 		NetworkState *nw,ConVar *cv,bool oldVal,bool newVal) -> void {
-			GetRenderContext().GetWindow().SetVSyncEnabled(newVal);
+			GetRenderContext().GetWindow()->SetVSyncEnabled(newVal);
 	}});
 	
 	conVarMap.RegisterConVar("render_instancing_threshold","2",ConVarFlags::Archive,"The threshold at which to start instancing entities if instanced rendering is enabled (render_instancing_threshold). Must not be lower than 2!");

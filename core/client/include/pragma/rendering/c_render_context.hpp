@@ -19,6 +19,7 @@
 #pragma warning(push)
 #pragma warning(disable : 4251)
 namespace util {class Library;};
+namespace prosper {class Window; struct WindowSettings;};
 namespace pragma
 {
 	class DLLCLIENT RenderContext
@@ -27,8 +28,7 @@ namespace pragma
 		enum class StateFlags : uint8_t
 		{
 			None = 0u,
-			WindowedMode = 1u,
-			GfxAPIValidationEnabled = WindowedMode<<1u
+			GfxAPIValidationEnabled = 1u
 		};
 		RenderContext();
 		virtual ~RenderContext();
@@ -41,27 +41,21 @@ namespace pragma
 		void RegisterShader(const std::string &identifier,const std::function<prosper::Shader*(prosper::IPrContext&,const std::string&)> &fFactory);
 		::util::WeakHandle<prosper::Shader> GetShader(const std::string &identifier) const;
 
-		GLFW::Window &GetWindow();
+		prosper::Window &GetWindow();
+		GLFW::Window &GetGlfwWindow();
 		const std::shared_ptr<prosper::IPrimaryCommandBuffer> &GetSetupCommandBuffer();
 		const std::shared_ptr<prosper::IPrimaryCommandBuffer> &GetDrawCommandBuffer() const;
 		const std::shared_ptr<prosper::IPrimaryCommandBuffer> &GetDrawCommandBuffer(uint32_t swapchainIdx) const;
 		void FlushSetupCommandBuffer();
+
+		prosper::WindowSettings &GetInitialWindowSettings();
+		const prosper::WindowSettings &GetInitialWindowSettings() const {return const_cast<RenderContext*>(this)->GetInitialWindowSettings();}
 		
 		void InitializeRenderAPI();
 		void SetGfxAPIValidationEnabled(bool b);
-		void SetWindowedMode(bool b);
-		void SetRefreshRate(uint32_t rate);
-		void SetNoBorder(bool b);
-		void SetResolution(const Vector2i &sz);
-		void SetResolutionWidth(uint32_t w);
-		void SetResolutionHeight(uint32_t h);
-		void SetMonitor(GLFW::Monitor &monitor);
-		void SetPresentMode(prosper::PresentModeKHR presentMode);
-		float GetAspectRatio() const;
 		void SetRenderAPI(const std::string &renderAPI);
 		const std::string &GetRenderAPI() const;
 	protected:
-		void UpdateWindow();
 		virtual void OnClose();
 		virtual void DrawFrame();
 		virtual void OnWindowInitialized();
@@ -72,21 +66,8 @@ namespace pragma
 			const std::string &message
 		);
 	private:
-		struct WindowChangeInfo
-		{
-			std::optional<bool> windowedMode = {};
-			std::optional<uint32_t> refreshRate = {};
-			std::optional<bool> decorated = {};
-			std::optional<uint32_t> width = {};
-			std::optional<uint32_t> height = {};
-			std::optional<std::unique_ptr<GLFW::Monitor>> monitor = {};
-			std::optional<prosper::PresentModeKHR> presentMode = {};
-		};
-		WindowChangeInfo &ScheduleWindowReload();
 		std::shared_ptr<prosper::IPrContext> m_renderContext = nullptr;
-		std::unique_ptr<WindowChangeInfo> m_scheduledWindowReloadInfo = nullptr;
 		StateFlags m_stateFlags = StateFlags::None;
-		float m_aspectRatio = 1.f;
 		std::shared_ptr<util::Library> m_graphicsAPILib = nullptr;
 		std::unique_ptr<GLFW::Monitor> m_monitor = nullptr;
 		std::string m_renderAPI;

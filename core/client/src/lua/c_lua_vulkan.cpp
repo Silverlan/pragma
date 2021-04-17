@@ -33,6 +33,8 @@
 #include "pragma/util/util_image.hpp"
 #include "pragma/model/vk_mesh.h"
 #include <prosper_event.hpp>
+#include <prosper_window.hpp>
+#include <wgui/wgui.h>
 
 extern DLLCLIENT CEngine *c_engine;
 namespace Lua
@@ -1188,8 +1190,29 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 				return 0;
 			Lua::Push(l,std::static_pointer_cast<prosper::ICommandBuffer>(buf));
 			return 1;
+		})},
+		{"create_window",static_cast<int(*)(lua_State*)>([](lua_State *l) -> int {
+			auto &context = c_engine->GetRenderContext();
+			auto &mainWindowCreateInfo = c_engine->GetRenderContext().GetWindow().GetWindowSettings();
+			auto cpy = Lua::Check<prosper::WindowSettings>(l,1);
+			cpy.flags = mainWindowCreateInfo.flags;
+			cpy.api = mainWindowCreateInfo.api;
+			auto window = context.CreateWindow(cpy);
+			if(!window)
+				return 0;
+			auto *pWindow = window.get();
+			(*window)->SetWindowSizeCallback([pWindow](GLFW::Window &window,Vector2i size) {
+				pWindow->ReloadStagingRenderTarget();
+				auto *el = ::WGUI::GetInstance().GetBaseElement(pWindow);
+				if(el)
+					el->SetSize(size);
+			});
+			c_engine->InitializeWindowInputCallbacks(*window);
+			Lua::Push(l,window);
+			return 1;
 		})}
 	});
+
 	auto prosperMod = luabind::module_(lua.GetState(),"prosper");
 	prosperMod[
 		luabind::def("create_buffer",static_cast<std::shared_ptr<prosper::IBuffer>(*)(prosper::util::BufferCreateInfo&,::DataStream&)>([](prosper::util::BufferCreateInfo &bufCreateInfo,::DataStream &ds) {return Lua::Vulkan::create_buffer(bufCreateInfo,ds);})),
@@ -2730,6 +2753,156 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		rpInfo.renderPass = rp.shared_from_this();
 	}));
 	prosperMod[defRenderPassInfo];
+
+	auto defWindowCreateInfo = luabind::class_<prosper::WindowSettings>("WindowCreateInfo");
+	defWindowCreateInfo.def(luabind::constructor<>());
+	defWindowCreateInfo.def_readwrite("resizable",&prosper::WindowSettings::resizable);
+	defWindowCreateInfo.def_readwrite("visible",&prosper::WindowSettings::visible);
+	defWindowCreateInfo.def_readwrite("decorated",&prosper::WindowSettings::decorated);
+	defWindowCreateInfo.def_readwrite("focused",&prosper::WindowSettings::focused);
+	defWindowCreateInfo.def_readwrite("autoIconify",&prosper::WindowSettings::autoIconify);
+	defWindowCreateInfo.def_readwrite("floating",&prosper::WindowSettings::floating);
+	defWindowCreateInfo.def_readwrite("stereo",&prosper::WindowSettings::stereo);
+	defWindowCreateInfo.def_readwrite("srgbCapable",&prosper::WindowSettings::srgbCapable);
+	defWindowCreateInfo.def_readwrite("doublebuffer",&prosper::WindowSettings::doublebuffer);
+	defWindowCreateInfo.def_readwrite("refreshRate",&prosper::WindowSettings::refreshRate);
+	defWindowCreateInfo.def_readwrite("samples",&prosper::WindowSettings::samples);
+	defWindowCreateInfo.def_readwrite("redBits",&prosper::WindowSettings::redBits);
+	defWindowCreateInfo.def_readwrite("greenBits",&prosper::WindowSettings::greenBits);
+	defWindowCreateInfo.def_readwrite("blueBits",&prosper::WindowSettings::blueBits);
+	defWindowCreateInfo.def_readwrite("alphaBits",&prosper::WindowSettings::alphaBits);
+	defWindowCreateInfo.def_readwrite("depthBits",&prosper::WindowSettings::depthBits);
+	defWindowCreateInfo.def_readwrite("stencilBits",&prosper::WindowSettings::stencilBits);
+	defWindowCreateInfo.def_readwrite("title",&prosper::WindowSettings::title);
+	defWindowCreateInfo.def_readwrite("width",&prosper::WindowSettings::width);
+	defWindowCreateInfo.def_readwrite("height",&prosper::WindowSettings::height);
+	prosperMod[defWindowCreateInfo];
+
+	auto defWindow = luabind::class_<prosper::Window>("Window");
+	defWindow.def("SetWindowTitle",static_cast<void(*)(prosper::Window&,const std::string&)>([](prosper::Window &window,const std::string &title) {
+		window->SetWindowTitle(title);
+	}));
+	defWindow.def("ShouldClose",static_cast<bool(*)(prosper::Window&)>([](prosper::Window &window) -> bool {
+		return window->ShouldClose();
+	}));
+	defWindow.def("SetShouldClose",static_cast<void(*)(prosper::Window&,bool)>([](prosper::Window &window,bool shouldClose) {
+		window->SetShouldClose(shouldClose);
+	}));
+	defWindow.def("GetClipboardString",static_cast<std::string(*)(prosper::Window&)>([](prosper::Window &window) -> std::string {
+		return window->GetClipboardString();
+	}));
+	defWindow.def("SetClipboardString",static_cast<void(*)(prosper::Window&,const std::string&)>([](prosper::Window &window,const std::string &str) {
+		window->SetClipboardString(str);
+	}));
+	defWindow.def("SetCursorPos",static_cast<void(*)(prosper::Window&,const Vector2&)>([](prosper::Window &window,const Vector2 &pos) {
+		window->SetCursorPos(pos);
+	}));
+	defWindow.def("SetStickyKeysEnabled",static_cast<void(*)(prosper::Window&,bool)>([](prosper::Window &window,bool enabled) {
+		window->SetStickyKeysEnabled(enabled);
+	}));
+	defWindow.def("GetStickyKeysEnabled",static_cast<bool(*)(prosper::Window&)>([](prosper::Window &window) -> bool {
+		return window->GetStickyKeysEnabled();
+	}));
+	defWindow.def("SetStickyMouseButtonsEnabled",static_cast<void(*)(prosper::Window&,bool)>([](prosper::Window &window,bool enabled) {
+		window->SetStickyMouseButtonsEnabled(enabled);
+	}));
+	defWindow.def("GetStickyMouseButtonsEnabled",static_cast<bool(*)(prosper::Window&)>([](prosper::Window &window) -> bool {
+		return window->GetStickyMouseButtonsEnabled();
+	}));
+	defWindow.def("SwapBuffers",static_cast<void(*)(prosper::Window&)>([](prosper::Window &window) {
+		window->SwapBuffers();
+	}));
+	defWindow.def("GetPos",static_cast<Vector2i(*)(prosper::Window&)>([](prosper::Window &window) -> Vector2i {
+		return window->GetPos();
+	}));
+	defWindow.def("SetPos",static_cast<void(*)(prosper::Window&,const Vector2i&)>([](prosper::Window &window,const Vector2i &pos) {
+		window->SetPos(pos);
+	}));
+	defWindow.def("GetSize",static_cast<Vector2i(*)(prosper::Window&)>([](prosper::Window &window) -> Vector2i {
+		return window->GetSize();
+	}));
+	defWindow.def("SetSize",static_cast<void(*)(prosper::Window&,const Vector2i&)>([](prosper::Window &window,const Vector2i &size) {
+		window->SetSize(size);
+	}));
+	defWindow.def("GetFramebufferSize",static_cast<Vector2i(*)(prosper::Window&)>([](prosper::Window &window) -> Vector2i {
+		return window->GetFramebufferSize();
+	}));
+	defWindow.def("GetFrameSize",static_cast<Vector4i(*)(prosper::Window&)>([](prosper::Window &window) -> Vector4i {
+		return window->GetFrameSize();
+	}));
+	defWindow.def("Iconify",static_cast<void(*)(prosper::Window&)>([](prosper::Window &window) {
+		window->Iconify();
+	}));
+	defWindow.def("Restore",static_cast<void(*)(prosper::Window&)>([](prosper::Window &window) {
+		window->Restore();
+	}));
+	defWindow.def("Show",static_cast<void(*)(prosper::Window&)>([](prosper::Window &window) {
+		window->Show();
+	}));
+	defWindow.def("Hide",static_cast<void(*)(prosper::Window&)>([](prosper::Window &window) {
+		window->Hide();
+	}));
+	defWindow.def("GetCursorPos",static_cast<Vector2(*)(prosper::Window&)>([](prosper::Window &window) -> Vector2 {
+		return window->GetCursorPos();
+	}));
+	defWindow.def("ClearCursorPosOverride",static_cast<void(*)(prosper::Window&)>([](prosper::Window &window) {
+		window->ClearCursorPosOverride();
+	}));
+	defWindow.def("SetCursorPosOverride",static_cast<void(*)(prosper::Window&,const Vector2&)>([](prosper::Window &window,const Vector2 &pos) {
+		window->SetCursorPosOverride(pos);
+	}));
+	defWindow.def("MakeContextCurrent",static_cast<void(*)(prosper::Window&)>([](prosper::Window &window) {
+		window->MakeContextCurrent();
+	}));
+	defWindow.def("IsFocused",static_cast<bool(*)(prosper::Window&)>([](prosper::Window &window) -> bool {
+		return window->IsFocused();
+	}));
+	defWindow.def("IsIconified",static_cast<bool(*)(prosper::Window&)>([](prosper::Window &window) -> bool {
+		return window->IsIconified();
+	}));
+	defWindow.def("IsVisible",static_cast<bool(*)(prosper::Window&)>([](prosper::Window &window) -> bool {
+		return window->IsVisible();
+	}));
+	defWindow.def("IsResizable",static_cast<bool(*)(prosper::Window&)>([](prosper::Window &window) -> bool {
+		return window->IsResizable();
+	}));
+	defWindow.def("IsDecorated",static_cast<bool(*)(prosper::Window&)>([](prosper::Window &window) -> bool {
+		return window->IsDecorated();
+	}));
+	defWindow.def("IsFloating",static_cast<bool(*)(prosper::Window&)>([](prosper::Window &window) -> bool {
+		return window->IsFloating();
+	}));
+	defWindow.def("ClearCursor",static_cast<void(*)(prosper::Window&)>([](prosper::Window &window) {
+		window->ClearCursor();
+	}));
+	defWindow.def("GetKeyState",static_cast<GLFW::KeyState(*)(prosper::Window&,GLFW::Key)>([](prosper::Window &window,GLFW::Key key) -> GLFW::KeyState {
+		return window->GetKeyState(key);
+	}));
+	defWindow.def("GetMouseButtonState",static_cast<GLFW::KeyState(*)(prosper::Window&,GLFW::MouseButton)>([](prosper::Window &window,GLFW::MouseButton mouseButton) -> GLFW::KeyState {
+		return window->GetMouseButtonState(mouseButton);
+	}));
+	defWindow.def("SetCursorInputMode",static_cast<void(*)(prosper::Window&,GLFW::CursorMode)>([](prosper::Window &window,GLFW::CursorMode cursorMode) {
+		window->SetCursorInputMode(cursorMode);
+	}));
+	defWindow.def("GetCursorInputMode",static_cast<GLFW::CursorMode(*)(prosper::Window&)>([](prosper::Window &window) -> GLFW::CursorMode {
+		return window->GetCursorInputMode();
+	}));
+	defWindow.def("SetCursor",static_cast<void(*)(prosper::Window&,GLFW::Cursor&)>([](prosper::Window &window,GLFW::Cursor &cursor) {
+		window->SetCursor(cursor);
+	}));
+	defWindow.def("Close",static_cast<void(*)(prosper::Window&)>([](prosper::Window &window) {
+		window.Close();
+	}));
+	defWindow.def("IsValid",static_cast<bool(*)(prosper::Window&)>([](prosper::Window &window) -> bool {
+		return window.IsValid();
+	}));
+	defWindow.def("SetCloseCallback",static_cast<void(*)(lua_State*,prosper::Window&,luabind::object)>([](lua_State *l,prosper::Window &window,luabind::object oOnClose) {
+		Lua::CheckFunction(l,2);
+		window.SetCloseCallback([oOnClose]() mutable {
+			oOnClose();
+		});
+	}));
+	prosperMod[defWindow];
 }
 
 /////////////////////////////////

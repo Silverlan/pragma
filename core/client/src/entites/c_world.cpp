@@ -31,7 +31,7 @@ using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 void CWorldComponent::Initialize()
 {
 	BaseWorldComponent::Initialize();
@@ -257,6 +257,13 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 		auto &meshes = meshesPerClusters.at(clusterIdx);
 		for(auto subMeshIdx : meshes)
 		{
+			if(subMeshIdx >= renderMeshes.size())
+			{
+				// Something went wrong (Maybe world model is missing?)
+				clusterRenderQueues.clear();
+				clusterRenderTranslucentQueues.clear();
+				return;
+			}
 			auto subMesh = renderMeshes.at(subMeshIdx);
 			auto *mat = mdlC->GetRenderMaterial(subMesh->GetSkinTextureIndex());
 			if(mat == nullptr)
@@ -384,3 +391,4 @@ std::ostream& CWorld::print(std::ostream &os)
 	os<<"]";
 	return os;
 }
+#pragma optimize("",on)

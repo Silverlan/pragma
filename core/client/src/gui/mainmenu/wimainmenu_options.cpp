@@ -35,6 +35,7 @@
 #include <sharedutils/util_clock.hpp>
 #include <fsys/fsys_package.hpp>
 #include <util_pad.hpp>
+#include <prosper_window.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;
@@ -60,7 +61,7 @@ void WIMainMenuOptions::ApplyWindowSize()
 	int w = atoi(res[0].c_str());
 	int h = atoi(res[1].c_str());
 
-	c_engine->SetResolution(Vector2i(w,h));
+	c_engine->GetWindow().SetResolution(Vector2i(w,h));
 }
 
 void WIMainMenuOptions::ApplyOptions()
@@ -590,7 +591,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	auto *resMenu = pList->AddDropDownMenu(Locale::GetText("resolution"),[](WIDropDownMenu *pMenu) {
 		auto &context = WGUI::GetInstance().GetContext();
 		auto &window = context.GetWindow();
-		auto *monitor = window.GetMonitor();
+		auto *monitor = window->GetMonitor();
 		auto primaryMonitor = GLFW::get_primary_monitor();
 		if(monitor == nullptr)
 			monitor = &primaryMonitor;

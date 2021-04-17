@@ -26,6 +26,7 @@
 #include <pragma/lua/lua_entity_component.hpp>
 #include <image/prosper_render_target.hpp>
 #include <pragma/entities/environment/effects/particlesystemdata.h>
+#include <prosper_window.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -542,14 +543,14 @@ int Lua::engine::save_particle_system(lua_State *l)
 	Lua::PushBool(l,pragma::asset::save_particle_system(name,particles,rootPath));
 	return 1;
 }
-std::shared_ptr<prosper::RenderTarget> Lua::engine::get_staging_render_target() {return c_engine->GetStagingRenderTarget();;}
+std::shared_ptr<prosper::RenderTarget> Lua::engine::get_staging_render_target() {return c_engine->GetRenderContext().GetWindow().GetStagingRenderTarget();}
 void Lua::engine::set_fixed_frame_delta_time_interpretation(uint16_t fps) {c_engine->SetFixedFrameDeltaTimeInterpretationByFPS(fps);}
 void Lua::engine::clear_fixed_frame_delta_time_interpretation() {c_engine->SetFixedFrameDeltaTimeInterpretation({});}
 void Lua::engine::set_tick_delta_time_tied_to_frame_rate(bool tieToFrameRate) {c_engine->SetTickDeltaTimeTiedToFrameRate(tieToFrameRate);}
 Vector2i Lua::engine::get_window_resolution()
 {
-	auto &createInfo = c_engine->GetRenderContext().GetWindowCreationInfo();
-	return Vector2i{createInfo.width,createInfo.height};
+	auto &window = c_engine->GetRenderContext().GetWindow();
+	return window.IsValid() ? window->GetSize() : Vector2i{};
 }
 Vector2i Lua::engine::get_render_resolution() {return c_engine->GetRenderResolution();}
 uint32_t Lua::engine::get_current_frame_index() {return c_engine->GetRenderContext().GetLastFrameId();}

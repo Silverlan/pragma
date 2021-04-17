@@ -12,7 +12,7 @@
 extern DLLCLIENT CEngine *c_engine;
 static void LPARAM_windowed(const std::vector<std::string> &argv)
 {
-	c_engine->SetWindowedMode(true);
+	c_engine->GetInitialWindowSettings().windowedMode = true;
 }
 
 static void LPARAM_refresh(const std::vector<std::string> &argv)
@@ -21,26 +21,26 @@ static void LPARAM_refresh(const std::vector<std::string> &argv)
 		return;
 	int freq = atoi(argv[0].c_str());
 	if(freq > 0)
-		c_engine->SetRefreshRate(freq);
+		c_engine->GetInitialWindowSettings().refreshRate = freq;
 }
 
 static void LPARAM_noborder(const std::vector<std::string> &argv)
 {
-	c_engine->SetNoBorder(true);
+	c_engine->GetInitialWindowSettings().decorated = false;
 }
 
 static void LPARAM_w(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	c_engine->SetResolutionWidth(atoi(argv[0].c_str()));
+	c_engine->GetInitialWindowSettings().width = atoi(argv[0].c_str());
 }
 
 static void LPARAM_h(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	c_engine->SetResolutionHeight(atoi(argv[0].c_str()));
+	c_engine->GetInitialWindowSettings().height = atoi(argv[0].c_str());
 }
 
 static void LPARAM_fullbright(const std::vector<std::string> &argv) {c_engine->UseFullbrightShader(true);}

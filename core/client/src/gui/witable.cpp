@@ -13,6 +13,7 @@
 #include <wgui/types/wirect.h>
 #include <wgui/types/wiscrollbar.h>
 #include "pragma/gui/wiscrollcontainer.h"
+#include <prosper_window.hpp>
 
 LINK_WGUI_TO_CLASS(WITable,WITable);
 LINK_WGUI_TO_CLASS(WITableRow,WITableRow);
@@ -345,8 +346,8 @@ void WITable::SelectRow(WITableRow &row)
 	if(m_selectableMode == SelectableMode::Multi)
 	{
 		auto &window = WGUI::GetInstance().GetContext().GetWindow();
-		auto lctrl = window.GetKeyState(GLFW::Key::LeftControl);
-		auto rctrl = window.GetKeyState(GLFW::Key::RightControl);
+		auto lctrl = window->GetKeyState(GLFW::Key::LeftControl);
+		auto rctrl = window->GetKeyState(GLFW::Key::RightControl);
 		deselect = !(lctrl == GLFW::KeyState::Press || lctrl == GLFW::KeyState::Held || rctrl == GLFW::KeyState::Press || rctrl == GLFW::KeyState::Held);
 	}
 	if(deselect)

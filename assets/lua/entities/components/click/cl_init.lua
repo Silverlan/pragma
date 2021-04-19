@@ -44,8 +44,11 @@ local function get_viewport_data()
 		end
 		if(viewport ~= nil) then
 			-- Found viewport! Using viewport as base for click input
+			local absPos = viewport:GetAbsolutePos()
 			vpData.width = viewport:GetWidth()
 			vpData.height = viewport:GetHeight()
+			vpData.x = absPos.x
+			vpData.y = absPos.y
 			vpData.cursorPos = viewport:GetCursorPos()
 			vpData.camera = viewport:GetCamera()
 			return vpData
@@ -57,12 +60,14 @@ local function get_viewport_data()
 	local res = engine.get_window_resolution()
 	vpData.width = res.x
 	vpData.height = res.y
+	vpData.x = 0
+	vpData.y = 0
 	vpData.cursorPos = input.get_cursor_pos()
 	vpData.camera = cam
 	return vpData
 end
 local lastActorsClicked = {}
-function ents.ClickComponent.inject_click_input(action,pressed)
+function ents.ClickComponent.inject_click_input(action,pressed,filter)
 	if(action ~= input.ACTION_ATTACK and action ~= input.ACTION_ATTACK2) then return util.EVENT_REPLY_UNHANDLED end
 	if(util.is_valid(lastActorsClicked[action])) then
 		local actor = lastActorsClicked[action]
@@ -71,7 +76,7 @@ function ents.ClickComponent.inject_click_input(action,pressed)
 		if(pressed == false and handled == util.EVENT_REPLY_HANDLED) then return handled end
 	end
 	if(pressed == false) then return util.EVENT_REPLY_UNHANDLED end
-	local clickActor,hitPos,startPos = ents.ClickComponent.find_actor_under_cursor()
+	local clickActor,hitPos,startPos = ents.ClickComponent.find_actor_under_cursor(filter)
 	local clickC = (clickActor ~= nil) and clickActor:GetComponent(ents.COMPONENT_CLICK) or nil
 	if(clickC ~= nil) then
 		lastActorsClicked[action] = clickC
@@ -91,7 +96,8 @@ function ents.ClickComponent.get_camera()
 	local vpData = get_viewport_data()
 	return vpData.camera
 end
-function ents.ClickComponent.raycast(pos,dir)
+function ents.ClickComponent.get_viewport_data() return get_viewport_data() end
+function ents.ClickComponent.raycast(pos,dir,filter)
 	local pl = ents.get_local_player()
 	if(pl == nil) then return end
 	local entPl = pl:GetEntity()
@@ -103,7 +109,7 @@ function ents.ClickComponent.raycast(pos,dir)
 	for ent in ents.iterator({ents.IteratorFilterComponent(ents.COMPONENT_CLICK),ents.IteratorFilterComponent(ents.COMPONENT_MODEL),ents.IteratorFilterComponent(ents.COMPONENT_RENDER)}) do
 		local mdl = ent:GetModel()
 		local renderC = ent:GetComponent(ents.COMPONENT_RENDER)
-		if(mdl ~= nil and ent ~= entPl and renderC ~= nil and renderC:GetRenderMode() ~= ents.RenderComponent.RENDERMODE_VIEW and renderC:GetRenderMode() ~= ents.RenderComponent.RENDERMODE_NONE) then
+		if(mdl ~= nil and ent ~= entPl and renderC ~= nil and renderC:GetRenderMode() ~= ents.RenderComponent.RENDERMODE_VIEW and renderC:GetRenderMode() ~= ents.RenderComponent.RENDERMODE_NONE and (filter == nil or filter(ent,renderC) == true)) then
 			local r,hitData = renderC:CalcRayIntersection(pos,dir *32768,false)
 			-- print("Intersection with ",ent,": ",r)
 			-- Note: Distance of 0 usually means we're inside the object, in which case we probably don't intend to select it
@@ -117,10 +123,10 @@ function ents.ClickComponent.raycast(pos,dir)
 	end
 	return actorClosest,hitPos,pos
 end
-function ents.ClickComponent.find_actor_under_cursor()
+function ents.ClickComponent.find_actor_under_cursor(filter)
 	local pos,dir = ents.ClickComponent.get_ray_data()
 	if(pos == nil) then return end
-	return ents.ClickComponent.raycast(pos,dir)
+	return ents.ClickComponent.raycast(pos,dir,filter)
 end
 function ents.ClickComponent:OnRemove()
 	numClickComponents = numClickComponents -1

@@ -46,7 +46,7 @@ function gui.WIContextMenu:OnInitialize()
 	if(util.is_valid(gui.impl.cbMouseInput) == false) then
 		gui.impl.cbMouseInput = input.add_callback("OnMouseInput",function(button,action,mods)
 			if(action == input.STATE_PRESS) then
-				local el = gui.get_element_under_cursor()
+				local el = gui.get_element_under_cursor(gui.find_focused_window())
 				while(util.is_valid(el) and el:GetClass() ~= "wicontextmenu") do el = el:GetParent() end
 				if(util.is_valid(el)) then return end
 				gui.close_context_menu()
@@ -162,7 +162,7 @@ function gui.WIContextMenu:AddSubMenu(name)
 			end
 		end
 	end)
-	pSubMenu = gui.create("WIContextMenu")
+	pSubMenu = gui.create("WIContextMenu",self:GetParent())
 	pSubMenu:AddCallback("OnCursorExited",function()
 		pSubMenu:KillFocus()
 		pSubMenu:SetVisible(false)
@@ -185,12 +185,19 @@ gui.close_context_menu = function()
 	gui.impl.contextMenu.menu:RemoveSafely()
 	gui.impl.contextMenu.menu = nil
 end
-gui.open_context_menu = function()
+gui.open_context_menu = function(window)
 	gui.close_context_menu()
-	gui.impl.contextMenu.menu = gui.create("WIContextMenu")
+	if(util.is_valid(window) == false) then
+		window = gui.find_focused_window()
+		if(util.is_valid(window) == false) then window = gui.get_primary_window() end
+	end
+	if(util.is_valid(window) == false) then return end
+	local elBase = gui.get_base_element(window)
+	if(util.is_valid(elBase) == false) then return end
+	gui.impl.contextMenu.menu = gui.create("WIContextMenu",elBase)
 	if(gui.impl.contextMenu.menu ~= nil) then
 		gui.impl.contextMenu.menu:RequestFocus()
-		gui.impl.contextMenu.menu:SetPos(input.get_cursor_pos())
+		gui.impl.contextMenu.menu:SetPos(elBase:GetCursorPos())
 	end
 	return gui.impl.contextMenu.menu
 end

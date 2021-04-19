@@ -30,6 +30,7 @@
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
 #include <pragma/util/util_module.hpp>
+#include "pragma/asset/util_asset.hpp"
 
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
 #include "pragma/game/isteamworks.hpp"
@@ -156,7 +157,10 @@ void NetworkState::UpdateSounds(std::vector<std::shared_ptr<ALSound>> &sounds)
 bool NetworkState::PortMaterial(const std::string &path,const std::function<Material*(const std::string&,bool)> &fLoadMaterial)
 {
 	auto pathWithoutExt = path;
-	ufile::remove_extension_from_filename(pathWithoutExt);
+	auto extensions = pragma::asset::get_supported_extensions(pragma::asset::Type::Material);
+	extensions.push_back("vmt");
+	extensions.push_back("vmat_c");
+	ufile::remove_extension_from_filename(pathWithoutExt,extensions);
 
 	// TODO: This doesn't belong here! Move it into the source module
 	auto matPath = pathWithoutExt +".vmat_c";

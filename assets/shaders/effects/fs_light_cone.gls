@@ -61,5 +61,6 @@ void main()
 		}
 	}
 	fs_color.a *= intensity;
+	fs_color.a = 1;
 	extract_bright_color(vec4(fs_color.rgb *intensity,1.0));
 }

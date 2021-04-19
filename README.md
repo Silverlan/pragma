@@ -52,7 +52,7 @@ b2 toolset=msvc-14.2 address-model=64 stage variant=release link=static runtime-
 - Go to `%PROGRAMFILES(X86)%/Microsoft Visual Studio/2019/Community/VC/Auxiliary/Build` (or the equivalent directory for your Visual Studio version)
 - Run `vcvarsall.bat x64`
 - Go to `Pragma/third_party_libs/luajit/src`
-- Run `run msvcbuild.bat`
+- Run `msvcbuild.bat`
 
 ### Building NVTT
 - Go to `Pragma/third_party_libs/nvtt/project/vc2017` in the Windows file explorer

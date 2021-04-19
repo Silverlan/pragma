@@ -1,7 +1,7 @@
 util.register_class("ents.GmGeneric",BaseEntityComponent)
 local Component = ents.GmGeneric
 
-game.load_sound_scripts("fx_footsteps.txt")
+game.load_sound_scripts("fx_footsteps.udm")
 function Component:__init()
 	BaseEntityComponent.Initialize(self)
 end

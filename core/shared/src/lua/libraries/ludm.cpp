@@ -1326,6 +1326,9 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		prop.ToAscii(::udm::AsciiSaveFlags::None,ss,propName);
 		return ss.str();
 	}));
+	cdProp.def("Get",static_cast<::udm::LinkedPropertyWrapper(*)(lua_State*,::udm::Property&)>([](lua_State *l,::udm::Property &prop) -> ::udm::LinkedPropertyWrapper {
+		return ::udm::LinkedPropertyWrapper{prop};
+	}));
 	modUdm[cdProp];
 	
 	// TODO: Register "Get" method as subscript operator for the Lua classes

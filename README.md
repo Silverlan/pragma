@@ -13,17 +13,39 @@ What are Pragma's requirements?
 - Windows compiler with C++-17 support (Linux support will follow)
 - CMake 3.18.4 or newer: https://cmake.org/download/#latest
 - Boost 1.72: https://www.boost.org/users/history/version_1_72_0.html
+- zlib 1.2.8: https://github.com/fmrico/zlib-1.2.8
 - Geometric Tools Engine: https://github.com/davideberly/GeometricTools
 - FMOD Studio: https://www.fmod.com/download
-- (Optional) Vulkan SDK 1.2.162.1 or newer (if you want to use Vulkan): https://vulkan.lunarg.com/sdk/home
+- Python 3.8 or newer: https://www.python.org/downloads/
+
+If you want to use Vulkan, you'll also need these:
+- Vulkan SDK 1.2.162.1 or newer: https://vulkan.lunarg.com/sdk/home
+- SPIRV-Tools: https://github.com/KhronosGroup/SPIRV-Tools
+- SPIRV-Headers: https://github.com/KhronosGroup/SPIRV-Headers
+`SPIRV-Tools` has to be located in `%VULKAN_SDK%/spirv-tools`, and `SPIRV-Headers` in `%VULKAN_SDK%/spirv-tools/external/spirv-headers`.
 
 Build Instructions (Windows)
 ------
-1) Build shared boost libraries (with zlib) for x64 architecture in release mode
-2) Build GTE (Geometric Tools Engine)
-3) Build third-party libraries
+Before building Pragma, you have to build several third-party libraries by hand first:
 
-There are two third-party libraries (aside from boost and GTE) that have to be built by hand for now: LuaJIT and NVTT.
+### Building Boost
+Build zlib 1.2.8, then open the Windows command line and navigate to the boost directory, then execute the following commands:
+```
+bootstrap.bat
+b2 toolset=msvc-14.2 address-model=64 stage variant=release link=shared runtime-link=shared -j3 > build.log
+b2 toolset=msvc-14.2 address-model=64 stage variant=release link=static runtime-link=shared -j3 > build.log
+
+set ZLIB_SOURCE="E:/zlib-1.2.8"
+set ZLIB_INCLUDE="E:/zlib-1.2.8"
+set ZLIB_LIBPATH="E:/zlib-1.2.8/build/RelWithDebInfo"
+b2 toolset=msvc-14.2 address-model=64 stage variant=release link=shared runtime-link=shared --with-iostreams -sZLIB_SOURCE=%ZLIB_SOURCE% -sZLIB_INCLUDE=%ZLIB_INCLUDE% -sZLIB_LIBPATH=%ZLIB_LIBPATH%
+b2 toolset=msvc-14.2 address-model=64 stage variant=release link=static runtime-link=shared --with-iostreams -sZLIB_SOURCE=%ZLIB_SOURCE% -sZLIB_INCLUDE=%ZLIB_INCLUDE% -sZLIB_LIBPATH=%ZLIB_LIBPATH%
+```
+(Change `ZLIB_SOURCE`, `ZLIB_INCLUDE` and `ZLIB_LIBPATH` to your zlib path.)
+
+### Building nvtt
+- Navigate to `Pragma/third_party_libs/nvtt/project/vc2017` and open `nvtt.sln`
+- Build the solution with the Release x64 configuration
 
 ### Building LuaJIT
 - Open Visual Studio command prompt (Available from the menu bar under "Tools -> Visual Studio Command Prompt")
@@ -41,7 +63,6 @@ There are two third-party libraries (aside from boost and GTE) that have to be b
 5) Set the following variables:
 - `DEPENDENCY_BOOST_INCLUDE`: Boost include directory
 - `DEPENDENCY_GEOMETRIC_TOOLS_INCLUDE`: GTE include directory
-- `DEPENDENCY_GEOMETRIC_TOOLS_LIBRARY`: Path to GTE library (GTEngine.v15.lib)
 - `DEPENDENCY_BOOST_CHRONO_LIBRARY`: Path to boost chrono library (boost_chrono-vc142-mt-x64-1_72.lib)
 - `DEPENDENCY_BOOST_DATE_TIME_LIBRARY`: Path to boost date-time library (boost_date_time-vc142-mt-x64-1_72.lib)
 - `DEPENDENCY_BOOST_FILESYSTEM_LIBRARY`: Path to boost filesystem library (boost_filesystem-vc142-mt-x64-1_72.lib)

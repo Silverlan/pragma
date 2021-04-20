@@ -35,7 +35,7 @@
 		#define ENABLE_PARTICLE_TEXTURE 1
 	#endif
 	#if ENABLE_PARTICLE_TEXTURE == 1
-		layout(LAYOUT_ID(SHADER_UNIFORM_PARTICLE_MAP_SET,SHADER_UNIFORM_PARTICLE_MAP_BINDING)) uniform sampler2D u_smpParticle;
+		layout(LAYOUT_ID(DESCRIPTOR_SET_PARTICLE_MAP,DESCRIPTOR_SET_PARTICLE_MAP_BINDING_MAP)) uniform sampler2D u_smpParticle;
 
 		vec4 get_animated_texture_color(vec2 uv)
 		{

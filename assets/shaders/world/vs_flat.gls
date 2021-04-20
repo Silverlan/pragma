@@ -10,10 +10,10 @@ layout(std140,LAYOUT_ID(0,0)) uniform Instance
 {
 	mat4 M;
 	vec4 color;
-	uint flags;
+	ivec4 flags; // flags.x = flags, rest is padding
 } u_instance;
 
-layout(std140,LAYOUT_ID(1,0)) uniform Camera
+layout(std140,LAYOUT_ID(2,0)) uniform Camera
 {
 	mat4 V;
 	mat4 P;

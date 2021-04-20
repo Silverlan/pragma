@@ -46,6 +46,8 @@ layout(LAYOUT_PUSH_CONSTANTS()) uniform PushConstants
 
 void main()
 {
+	error(); // TODO: Shader is currently broken, uniform definitions above have to be
+			// changed to new system. Until then we purposefully cause an error.
 	float d = texture(u_depthBuffer,vs_vert_uv).r;
 	
 	mat4 invVp = inverse(get_view_projection_matrix());

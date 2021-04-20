@@ -13,6 +13,8 @@
 
 #define DESCRIPTOR_SET_MATERIAL_BINDING_SKYBOX_MAP 0
 
+#define ENABLE_INSTANCED_ENTITIES 0
+
 struct VertexData
 {
 	vec4 color;

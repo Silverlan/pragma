@@ -9,7 +9,7 @@ struct TextureAnimationFrame
 	vec2 uvEnd;
 };
 
-layout(std430,LAYOUT_ID(SHADER_UNIFORM_TEXTURE_ANIMATION_SET,SHADER_UNIFORM_TEXTURE_ANIMATION_BINDING)) buffer TextureAnimation
+layout(std430,LAYOUT_ID(DESCRIPTOR_SET_TEXTURE_ANIMATION,DESCRIPTOR_SET_TEXTURE_ANIMATION_BINDING_ANMATION)) buffer TextureAnimation
 {
 	TextureAnimationFrame frames[];
 } u_animation;

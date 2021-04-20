@@ -29,11 +29,11 @@ decltype(ShaderFlat::VERTEX_ATTRIBUTE_UV) ShaderFlat::VERTEX_ATTRIBUTE_UV = {VER
 decltype(ShaderFlat::DESCRIPTOR_SET_INSTANCE) ShaderFlat::DESCRIPTOR_SET_INSTANCE = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Instance
-			prosper::DescriptorType::UniformBufferDynamic,
+			prosper::DescriptorType::UniformBuffer,
 			prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit
 		},
 		prosper::DescriptorSetInfo::Binding { // Bone Matrices
-			prosper::DescriptorType::UniformBufferDynamic,
+			prosper::DescriptorType::UniformBuffer,
 			prosper::ShaderStageFlags::VertexBit
 		},
 		prosper::DescriptorSetInfo::Binding { // Vertex Animations
@@ -50,21 +50,21 @@ decltype(ShaderFlat::DESCRIPTOR_SET_SCENE) ShaderFlat::DESCRIPTOR_SET_SCENE = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Camera
 			prosper::DescriptorType::UniformBuffer,
-			prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit
+			prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::GeometryBit
 		},
 		prosper::DescriptorSetInfo::Binding { // Render Settings
 			prosper::DescriptorType::UniformBuffer,
-			prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit
-		},
-		prosper::DescriptorSetInfo::Binding { // SSAO Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
+			prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::GeometryBit
 		}
 	}
 };
 decltype(ShaderFlat::DESCRIPTOR_SET_MATERIAL) ShaderFlat::DESCRIPTOR_SET_MATERIAL = {
 	{
-		prosper::DescriptorSetInfo::Binding { // Diffuse Map
+		prosper::DescriptorSetInfo::Binding { // Material settings
+			prosper::DescriptorType::UniformBuffer,
+			prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit
+		},
+		prosper::DescriptorSetInfo::Binding { // Albedo Map
 			prosper::DescriptorType::CombinedImageSampler,
 			prosper::ShaderStageFlags::FragmentBit
 		},
@@ -72,7 +72,11 @@ decltype(ShaderFlat::DESCRIPTOR_SET_MATERIAL) ShaderFlat::DESCRIPTOR_SET_MATERIA
 			prosper::DescriptorType::CombinedImageSampler,
 			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::DescriptorSetInfo::Binding { // Specular Map
+		prosper::DescriptorSetInfo::Binding { // RMA Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
+		},
+		prosper::DescriptorSetInfo::Binding { // Emission Map
 			prosper::DescriptorType::CombinedImageSampler,
 			prosper::ShaderStageFlags::FragmentBit
 		},
@@ -80,7 +84,15 @@ decltype(ShaderFlat::DESCRIPTOR_SET_MATERIAL) ShaderFlat::DESCRIPTOR_SET_MATERIA
 			prosper::DescriptorType::CombinedImageSampler,
 			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::DescriptorSetInfo::Binding { // Glow Map
+		prosper::DescriptorSetInfo::Binding { // Wrinkle Stretch Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
+		},
+		prosper::DescriptorSetInfo::Binding { // Wrinkle Compress Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
+		},
+		prosper::DescriptorSetInfo::Binding { // Exponent Map
 			prosper::DescriptorType::CombinedImageSampler,
 			prosper::ShaderStageFlags::FragmentBit
 		}

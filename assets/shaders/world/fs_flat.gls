@@ -8,7 +8,7 @@ layout(location = 0) in vec2 fs_vert_uv;
 layout(location = 0) out vec4 fs_color;
 layout(location = 1) out vec4 fs_brightColor;
 
-layout(LAYOUT_ID(2,0)) uniform sampler2D u_diffuseMap;
+layout(LAYOUT_ID(1,1)) uniform sampler2D u_diffuseMap;
 
 void main()
 {

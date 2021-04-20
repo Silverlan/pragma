@@ -660,8 +660,22 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defShaderTextured3DBase.def("OnBindScene",&pragma::LuaShaderTextured3D::Lua_OnBindScene,&pragma::LuaShaderTextured3D::Lua_default_OnBindScene);
 	defShaderTextured3DBase.def("OnBeginDraw",&pragma::LuaShaderTextured3D::Lua_OnBeginDraw,&pragma::LuaShaderTextured3D::Lua_default_OnBeginDraw);
 	defShaderTextured3DBase.def("OnEndDraw",&pragma::LuaShaderTextured3D::Lua_OnEndDraw,&pragma::LuaShaderTextured3D::Lua_default_OnEndDraw);
-	
 	modShader[defShaderTextured3DBase];
+
+	auto defShaderPbr = luabind::class_<pragma::LuaShaderPbr,luabind::bases<pragma::LuaShaderGraphicsBase,pragma::ShaderGameWorldLightingPass,prosper::ShaderGraphics,prosper::Shader,pragma::LuaShaderBase>>("BasePbr");
+	defShaderPbr.def(luabind::constructor<>());
+	defShaderPbr.def("BindMaterialParameters",&pragma::LuaShaderPbr::Lua_BindMaterialParameters,&pragma::LuaShaderPbr::Lua_default_BindMaterialParameters);
+	defShaderPbr.def("InitializeGfxPipelineVertexAttributes",&pragma::LuaShaderPbr::Lua_InitializeGfxPipelineVertexAttributes,&pragma::LuaShaderPbr::Lua_default_InitializeGfxPipelineVertexAttributes);
+	defShaderPbr.def("InitializeGfxPipelinePushConstantRanges",&pragma::LuaShaderPbr::Lua_InitializeGfxPipelinePushConstantRanges,&pragma::LuaShaderPbr::Lua_default_InitializeGfxPipelinePushConstantRanges);
+	defShaderPbr.def("InitializeGfxPipelineDescriptorSets",&pragma::LuaShaderPbr::Lua_InitializeGfxPipelineDescriptorSets,&pragma::LuaShaderPbr::Lua_default_InitializeGfxPipelineDescriptorSets);
+
+	defShaderPbr.def("OnBindMaterial",&pragma::LuaShaderPbr::Lua_OnBindMaterial,&pragma::LuaShaderPbr::Lua_default_OnBindMaterial);
+	defShaderPbr.def("OnDraw",&pragma::LuaShaderPbr::Lua_OnDraw,&pragma::LuaShaderPbr::Lua_default_OnDraw);
+	defShaderPbr.def("OnBindEntity",&pragma::LuaShaderPbr::Lua_OnBindEntity,&pragma::LuaShaderPbr::Lua_default_OnBindEntity);
+	defShaderPbr.def("OnBindScene",&pragma::LuaShaderPbr::Lua_OnBindScene,&pragma::LuaShaderPbr::Lua_default_OnBindScene);
+	defShaderPbr.def("OnBeginDraw",&pragma::LuaShaderPbr::Lua_OnBeginDraw,&pragma::LuaShaderPbr::Lua_default_OnBeginDraw);
+	defShaderPbr.def("OnEndDraw",&pragma::LuaShaderPbr::Lua_OnEndDraw,&pragma::LuaShaderPbr::Lua_default_OnEndDraw);
+	modShader[defShaderPbr];
 }
 
 void CGame::RegisterLuaClasses()

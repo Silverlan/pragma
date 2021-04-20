@@ -375,6 +375,110 @@ void pragma::LuaShaderTextured3D::InitializeDefaultRenderPass(std::shared_ptr<pr
 
 /////////////////
 
+pragma::LuaShaderPbr::LuaShaderPbr()
+	: TLuaShaderBase(c_engine->GetRenderContext(),"","","")
+{
+	// SetBaseShader<ShaderTextured3DBase>();
+}
+void pragma::LuaShaderPbr::Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+{
+	ShaderPBR::InitializeGfxPipeline(static_cast<prosper::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
+}
+bool pragma::LuaShaderPbr::Lua_BindMaterialParameters(Material &mat)
+{
+	return ShaderPBR::BindMaterialParameters(static_cast<CMaterial&>(mat));
+}
+void pragma::LuaShaderPbr::Lua_InitializeGfxPipelineVertexAttributes(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+{
+	ShaderPBR::InitializeGfxPipelineVertexAttributes(static_cast<prosper::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
+}
+void pragma::LuaShaderPbr::Lua_InitializeGfxPipelinePushConstantRanges(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+{
+	ShaderPBR::InitializeGfxPipelinePushConstantRanges(static_cast<prosper::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
+}
+void pragma::LuaShaderPbr::Lua_InitializeGfxPipelineDescriptorSets(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+{
+	ShaderPBR::InitializeGfxPipelineDescriptorSets(static_cast<prosper::GraphicsPipelineCreateInfo&>(pipelineInfo),pipelineIdx);
+}
+void pragma::LuaShaderPbr::Lua_OnBindMaterial(Material &mat) {}
+int32_t pragma::LuaShaderPbr::Lua_OnDraw(ModelSubMesh &mesh) {return umath::to_integral(util::EventReply::Unhandled);}
+void pragma::LuaShaderPbr::Lua_OnBindEntity(EntityHandle &hEnt) {}
+void pragma::LuaShaderPbr::Lua_OnBindScene(CRasterizationRendererComponent &renderer,bool bView) {}
+void pragma::LuaShaderPbr::Lua_OnBeginDraw(prosper::ICommandBuffer &drawCmd,const Vector4 &clipPlane,uint32_t pipelineIdx,uint32_t recordFlags) {}
+void pragma::LuaShaderPbr::Lua_OnEndDraw() {}
+bool pragma::LuaShaderPbr::BindMaterial(CMaterial &mat)
+{
+	if(ShaderPBR::BindMaterial(mat) == false)
+		return false;
+	CallLuaMember<void,Material*>("OnBindMaterial",&mat);
+	return true;
+}
+bool pragma::LuaShaderPbr::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount)
+{
+	CallLuaMember<void,ModelSubMesh*>("OnDraw",&mesh);
+
+	int32_t result = -1;
+	if(CallLuaMember<int32_t,ModelSubMesh*>("OnDraw",&result,&mesh) == CallbackReturnType::HasReturnValue && static_cast<util::EventReply>(result) == util::EventReply::Handled)
+		return true; // Skip default drawing
+	return ShaderPBR::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount);
+}
+bool pragma::LuaShaderPbr::BindEntity(CBaseEntity &ent)
+{
+	if(ShaderPBR::BindEntity(ent) == false)
+		return false;
+	auto &o = *ent.GetLuaObject();
+	CallLuaMember<void,luabind::object>("OnBindEntity",o);
+	return true;
+}
+bool pragma::LuaShaderPbr::BindVertexAnimationOffset(uint32_t offset)
+{
+	return ShaderPBR::BindVertexAnimationOffset(offset);
+}
+bool pragma::LuaShaderPbr::BindScene(pragma::CSceneComponent &scene,CRasterizationRendererComponent &renderer,bool bView)
+{
+	if(ShaderPBR::BindScene(scene,renderer,bView) == false)
+		return false;
+	CallLuaMember<void,CRasterizationRendererComponent*,bool>("OnBindScene",&renderer,bView);
+	return true;
+}
+bool pragma::LuaShaderPbr::BeginDraw(
+	const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,
+	const Vector4 &drawOrigin,RecordFlags recordFlags
+)
+{
+	if(ShaderPBR::BeginDraw(cmdBuffer,clipPlane,drawOrigin,recordFlags) == false)
+		return false;
+	CallLuaMember<void,prosper::ICommandBuffer*,const Vector4&,uint32_t>("OnBeginDraw",const_cast<prosper::ICommandBuffer*>(cmdBuffer.get()),clipPlane,umath::to_integral(recordFlags));
+	return true;
+}
+void pragma::LuaShaderPbr::EndDraw()
+{
+	CallLuaMember<void>("OnEndDraw");
+	ShaderPBR::EndDraw();
+}
+bool pragma::LuaShaderPbr::BindMaterialParameters(CMaterial &mat)
+{
+	auto ret = false;
+	return CallLuaMember<bool,std::reference_wrapper<Material>>("BindMaterialParameters",&ret,std::ref(static_cast<Material&>(mat))) == CallbackReturnType::HasReturnValue || ret;
+}
+void pragma::LuaShaderPbr::InitializeGfxPipelineVertexAttributes(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+{
+	CallLuaMember<void,std::reference_wrapper<prosper::BasePipelineCreateInfo>,uint32_t>("InitializeGfxPipelineVertexAttributes",std::ref(static_cast<prosper::BasePipelineCreateInfo&>(pipelineInfo)),pipelineIdx);
+}
+void pragma::LuaShaderPbr::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+{
+	CallLuaMember<void,std::reference_wrapper<prosper::BasePipelineCreateInfo>,uint32_t>("InitializeGfxPipelinePushConstantRanges",std::ref(static_cast<prosper::BasePipelineCreateInfo&>(pipelineInfo)),pipelineIdx);
+}
+void pragma::LuaShaderPbr::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
+{
+	CallLuaMember<void,std::reference_wrapper<prosper::BasePipelineCreateInfo>,uint32_t>("InitializeGfxPipelineDescriptorSets",std::ref(static_cast<prosper::BasePipelineCreateInfo&>(pipelineInfo)),pipelineIdx);
+}
+void pragma::LuaShaderPbr::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) {pragma::LuaShaderGraphicsBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);}
+void pragma::LuaShaderPbr::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) {pragma::LuaShaderGraphicsBase::InitializeRenderPass(outRenderPass,pipelineIdx);}
+void pragma::LuaShaderPbr::InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) {ShaderPBR::InitializeRenderPass(outRenderPass,pipelineIdx);}
+
+/////////////////
+
 static void get_descriptor_set_layout_bindings(lua_State *l,std::vector<prosper::DescriptorSetInfo::Binding> &bindings,int32_t tBindings)
 {
 	auto numBindings = ::Lua::GetObjectLength(l,tBindings);

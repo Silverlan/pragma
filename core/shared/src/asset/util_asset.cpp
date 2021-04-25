@@ -137,6 +137,7 @@ std::vector<std::string> pragma::asset::get_supported_extensions(Type type)
 	case Type::ParticleSystem:
 		return {FORMAT_PARTICLE_SYSTEM_BINARY,FORMAT_PARTICLE_SYSTEM_ASCII,FORMAT_PARTICLE_SYSTEM_LEGACY};
 	case Type::Sound:
+		return {"ogg","wav","mp3"};
 	case Type::Texture:
 	{
 		auto &supportedFormats = MaterialManager::get_supported_image_formats();
@@ -161,10 +162,8 @@ std::string pragma::asset::get_normalized_path(const std::string &name,Type type
 	case Type::Material:
 	case Type::Texture:
 	case Type::ParticleSystem:
-		path.RemoveFileExtension(get_supported_extensions(type));
-		break;
 	case Type::Sound:
-		// TODO
+		path.RemoveFileExtension(get_supported_extensions(type));
 		break;
 	}
 	return path.GetString();
@@ -179,25 +178,15 @@ std::optional<std::string> pragma::asset::find_file(NetworkState &nw,const std::
 	switch(type)
 	{
 	case Type::Model:
-	{
-		for(auto &ext : get_supported_extensions(type))
-		{
-			auto nameWithExt = normalizedName +'.' +ext;
-			if(FileManager::Exists("models/" +nameWithExt))
-			{
-				if(optOutFormat)
-					*optOutFormat = ext;
-				return nameWithExt;
-			}
-		}
-		return {};
-	}
 	case Type::Map:
+	case Type::Texture:
+	case Type::ParticleSystem:
+	case Type::Sound:
 	{
 		for(auto &ext : get_supported_extensions(type))
 		{
 			auto nameWithExt = normalizedName +'.' +ext;
-			if(FileManager::Exists("maps/" +nameWithExt))
+			if(FileManager::Exists(std::string{get_asset_root_directory(type)} +"/" +nameWithExt))
 			{
 				if(optOutFormat)
 					*optOutFormat = ext;
@@ -208,36 +197,6 @@ std::optional<std::string> pragma::asset::find_file(NetworkState &nw,const std::
 	}
 	case Type::Material:
 		return nw.GetMaterialManager().FindMaterialPath(name);
-	case Type::Sound:
-		return {}; // TODO
-	case Type::Texture:
-	{
-		for(auto &format : MaterialManager::get_supported_image_formats())
-		{
-			auto extFileName = name +'.' +format.extension;
-			if(FileManager::Exists("materials/" +extFileName))
-			{
-				if(optOutFormat)
-					*optOutFormat = format.extension;
-				return extFileName;
-			}
-		}
-		return {};
-	}
-	case Type::ParticleSystem:
-	{
-		for(auto &ext : get_supported_extensions(type))
-		{
-			auto nameWithExt = normalizedName +'.' +ext;
-			if(FileManager::Exists("particles/" +nameWithExt))
-			{
-				if(optOutFormat)
-					*optOutFormat = ext;
-				return nameWithExt;
-			}
-		}
-		return {};
-	}
 	}
 	return {};
 }

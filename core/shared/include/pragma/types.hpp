@@ -14,6 +14,7 @@ namespace util {class EnumRegister;};
 
 enum class Activity : uint16_t;
 using BoneId = uint16_t;
+class Skeleton;
 namespace pragma::animation
 {
 	using AnimationId = uint32_t;

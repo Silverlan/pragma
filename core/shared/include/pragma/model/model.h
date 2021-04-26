@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "pragma/model/side.h"
-#include "pragma/model/animation/animation.h"
+#include "pragma/model/animation/animation.hpp"
 #include <mathutil/uvec.h>
 #include <pragma/math/intersection.h>
 #include <pragma/console/conout.h>
@@ -318,18 +318,18 @@ public:
 	static void ClearCache();
 	const std::string &GetName() const;
 	void SetName(const std::string &name) {m_name = name;}
-	uint32_t AddAnimation(const std::string &name,const std::shared_ptr<Animation> &anim);
+	uint32_t AddAnimation(const std::string &name,const std::shared_ptr<pragma::animation::Animation> &anim);
 	int LookupAnimation(const std::string &name) const;
 	int SelectWeightedAnimation(Activity activity,int32_t animIgnore=-1);
 	int SelectFirstAnimation(Activity activity) const;
 	unsigned char GetAnimationActivityWeight(uint32_t animation) const;
 	Activity GetAnimationActivity(uint32_t animation) const;
 	float GetAnimationDuration(uint32_t animation);
-	std::shared_ptr<Animation> GetAnimation(uint32_t ID);
+	std::shared_ptr<pragma::animation::Animation> GetAnimation(uint32_t ID) const;
 	void GetAnimations(Activity activity,std::vector<uint32_t> &animations);
 	void GetAnimations(std::unordered_map<std::string,uint32_t> **anims);
-	const std::vector<std::shared_ptr<Animation>> &GetAnimations() const;
-	std::vector<std::shared_ptr<Animation>> &GetAnimations();
+	const std::vector<std::shared_ptr<pragma::animation::Animation>> &GetAnimations() const;
+	std::vector<std::shared_ptr<pragma::animation::Animation>> &GetAnimations();
 	bool GetAnimationName(uint32_t animId,std::string &name) const;
 	std::string GetAnimationName(uint32_t animId) const;
 	uint32_t GetAnimationCount() const;
@@ -588,7 +588,7 @@ private:
 	std::shared_ptr<Frame> m_reference = nullptr;
 	std::string m_name;
 	bool m_bAllMaterialsLoaded = false;
-	std::vector<std::shared_ptr<Animation>> m_animations;
+	std::vector<std::shared_ptr<pragma::animation::Animation>> m_animations;
 	std::vector<std::shared_ptr<VertexAnimation>> m_vertexAnimations;
 	std::unordered_map<std::string,unsigned int> m_animationIDs;
 	std::shared_ptr<Skeleton> m_skeleton = nullptr;

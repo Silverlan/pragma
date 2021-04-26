@@ -39,7 +39,7 @@ int Lua::import::import_wad(lua_State *l)
 		Lua::PushBool(l,false);
 		return 1;
 	}
-	auto anim = Animation::Create();
+	auto anim = pragma::animation::Animation::Create();
 	auto version = f.Read<uint16_t>();
 	auto flags = f.Read<uint32_t>();
 	auto numBones = f.Read<uint32_t>();
@@ -66,7 +66,7 @@ int Lua::import::import_wad(lua_State *l)
 		anim->AddFrame(frame);
 	}
 	anim->Localize(skeleton);
-	Lua::Push<std::shared_ptr<Animation>>(l,anim);
+	Lua::Push<std::shared_ptr<pragma::animation::Animation>>(l,anim);
 	return 1;
 }
 int Lua::import::import_wrci(lua_State *l)

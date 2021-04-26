@@ -920,7 +920,7 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 			skeleton.GetRootBones().insert(std::make_pair(bone->ID,bone));
 		}
 		
-		auto refAnim = Animation::Create();
+		auto refAnim = pragma::animation::Animation::Create();
 		refAnim->ReserveBoneIds(skin.joints.size());
 		for(auto i=decltype(skin.joints.size()){0u};i<skin.joints.size();++i)
 			refAnim->AddBoneId(i);
@@ -936,7 +936,7 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 	for(auto &gltfAnim : gltfMdl.animations)
 	{
 		auto &animName = gltfAnim.name;
-		auto anim = Animation::Create();
+		auto anim = pragma::animation::Animation::Create();
 		float fps = 24.f;
 		auto fGetFrame = [&](uint32_t frameIndex) -> Frame& {
 			auto &frames = anim->GetFrames();
@@ -1160,7 +1160,7 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 #endif
 
 	mdl->Update(ModelUpdateFlags::All);
-	mdl->SaveLegacy(c_game,outputPath.GetString() +mdlName,"addons/converted/");
+	mdl->Save(*c_game,::util::CONVERT_PATH +pragma::asset::get_asset_root_directory(pragma::asset::Type::Model) +std::string{"/"} +outputPath.GetString() +mdlName,err);
 	return mdl;
 }
 std::shared_ptr<Model> pragma::asset::import_model(VFilePtr f,std::string &outErrMsg,const util::Path &outputPath)

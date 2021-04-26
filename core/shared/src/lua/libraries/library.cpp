@@ -43,7 +43,7 @@
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/util/util_handled.hpp"
 #include "pragma/util/util_rgbcsv.hpp"
-#include "pragma/model/animation/animation.h"
+#include "pragma/model/animation/animation.hpp"
 #include "pragma/model/modelmesh.h"
 #include "pragma/model/model.h"
 #include "pragma/util/util_ballistic.h"
@@ -1158,11 +1158,11 @@ void Game::RegisterLuaLibraries()
 		{"export_model_asset",Lua::import::export_model_asset}
 	});
 
-	auto activityEnums = ::Animation::GetActivityEnumRegister().GetEnums();
+	auto activityEnums = pragma::animation::Animation::GetActivityEnumRegister().GetEnums();
 	auto _G = luabind::globals(l);
 	for(auto i=decltype(activityEnums.size()){0};i<activityEnums.size();++i)
 		_G["Animation"][activityEnums.at(i)] = i;
-	auto eventEnums = ::Animation::GetEventEnumRegister().GetEnums();
+	auto eventEnums = pragma::animation::Animation::GetEventEnumRegister().GetEnums();
 	for(auto i=decltype(eventEnums.size()){0};i<eventEnums.size();++i)
 		_G["Animation"][eventEnums.at(i)] = i;
 
@@ -1171,8 +1171,8 @@ void Game::RegisterLuaLibraries()
 		auto _G = luabind::globals(l);
 		_G["Animation"][name.get()] = id;
 	};
-	auto cbAct = ::Animation::GetActivityEnumRegister().CallOnRegister(fAddEnum);
-	auto cbEv = ::Animation::GetEventEnumRegister().CallOnRegister(fAddEnum);
+	auto cbAct = pragma::animation::Animation::GetActivityEnumRegister().CallOnRegister(fAddEnum);
+	auto cbEv = pragma::animation::Animation::GetEventEnumRegister().CallOnRegister(fAddEnum);
 	nw->GetLuaEnumRegisterCallbacks().push_back(cbAct);
 	nw->GetLuaEnumRegisterCallbacks().push_back(cbEv);
 	AddCallback("OnLuaReleased",FunctionCallback<void>::Create([cbAct,cbEv]() mutable {

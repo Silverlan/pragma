@@ -16,7 +16,7 @@
 void FWMD::LoadBones(unsigned short version,unsigned int numBones,Model &mdl)
 {
 	auto &skeleton = mdl.GetSkeleton();
-	auto reference = Animation::Create();
+	auto reference = pragma::animation::Animation::Create();
 	if(!m_bStatic)
 	{
 		reference->ReserveBoneIds(reference->GetBoneCount() +numBones);
@@ -587,7 +587,7 @@ void FWMD::LoadAnimations(unsigned short version,Model &mdl)
 	{
 		std::string name = ReadString();
 		FWAD wad;
-		auto anim = std::shared_ptr<Animation>(wad.ReadData(version,m_file));
+		auto anim = std::shared_ptr<pragma::animation::Animation>(wad.ReadData(version,m_file));
 		if(anim)
 		{
 			if(version < 0x0007)

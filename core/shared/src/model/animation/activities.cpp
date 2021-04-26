@@ -7,7 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/model/animation/activities.h"
-#include "pragma/model/animation/animation.h"
+#include "pragma/model/animation/animation.hpp"
 
 DLLNETWORK std::unordered_map<int32_t,std::string> ACTIVITY_NAMES = {
 	{umath::to_integral(Activity::Invalid),"ACT_INVALID"},
@@ -83,7 +83,7 @@ DLLNETWORK std::unordered_map<int32_t,std::string> ACTIVITY_NAMES = {
 
 void pragma::register_engine_activities()
 {
-	auto &reg = Animation::GetActivityEnumRegister();
+	auto &reg = pragma::animation::Animation::GetActivityEnumRegister();
 	for(auto i=std::underlying_type_t<Activity>{0};i<umath::to_integral(Activity::Count);++i)
 	{
 		auto it = ACTIVITY_NAMES.find(i);

@@ -279,11 +279,11 @@ float BaseAnimatedComponent::GetBlendController(unsigned int controller) const
 		return 0;
 	return it->second;
 }
-static Frame *get_frame_from_cycle(Animation &anim,float cycle,uint32_t frameOffset=0)
+static Frame *get_frame_from_cycle(pragma::animation::Animation &anim,float cycle,uint32_t frameOffset=0)
 {
 	return anim.GetFrame(static_cast<uint32_t>((anim.GetFrameCount() -1) *cycle) +frameOffset).get();
 }
-bool BaseAnimatedComponent::GetBlendFramesFromCycle(Animation &anim,float cycle,Frame **outFrameSrc,Frame **outFrameDst,float &outInterpFactor,int32_t frameOffset)
+bool BaseAnimatedComponent::GetBlendFramesFromCycle(pragma::animation::Animation &anim,float cycle,Frame **outFrameSrc,Frame **outFrameDst,float &outInterpFactor,int32_t frameOffset)
 {
 	auto frameVal = (anim.GetFrameCount() -1) *cycle;
 	outInterpFactor = frameVal -static_cast<float>(umath::floor(frameVal));
@@ -300,7 +300,7 @@ bool BaseAnimatedComponent::GetBlendFramesFromCycle(Animation &anim,float cycle,
 		*outFrameDst = f;
 	return true;
 }
-void BaseAnimatedComponent::GetAnimationBlendController(Animation *anim,float cycle,std::array<AnimationBlendInfo,2> &bcFrames,float *blendScale) const
+void BaseAnimatedComponent::GetAnimationBlendController(pragma::animation::Animation *anim,float cycle,std::array<AnimationBlendInfo,2> &bcFrames,float *blendScale) const
 {
 	// Obsolete; TODO: Remove this!
 }
@@ -711,7 +711,7 @@ bool BaseAnimatedComponent::MaintainAnimations(double dt)
 	InvokeEventCallbacks(EVENT_ON_ANIMATIONS_UPDATED);
 
 	// It's now safe to execute animation events
-	const auto fHandleAnimationEvents = [this](uint32_t animId,const std::shared_ptr<Animation> &anim,int32_t frameId) {
+	const auto fHandleAnimationEvents = [this](uint32_t animId,const std::shared_ptr<pragma::animation::Animation> &anim,int32_t frameId) {
 		auto *events = anim->GetEvents(frameId);
 		if(events)
 		{
@@ -776,7 +776,7 @@ void BaseAnimatedComponent::SetCycle(float cycle)
 }
 
 int BaseAnimatedComponent::GetAnimation() const {return m_baseAnim.animation;}
-Animation *BaseAnimatedComponent::GetAnimationObject() const
+pragma::animation::Animation *BaseAnimatedComponent::GetAnimationObject() const
 {
 	auto animId = GetAnimation();
 	if(animId == -1)

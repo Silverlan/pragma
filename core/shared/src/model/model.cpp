@@ -127,7 +127,7 @@ Model::Model(const Model &other)
 		m_meshGroups.push_back(ModelMeshGroup::Create(*meshGroup));
 	m_animations.reserve(other.m_animations.size());
 	for(auto &anim : other.m_animations)
-		m_animations.push_back(Animation::Create(*anim));
+		m_animations.push_back(pragma::animation::Animation::Create(*anim));
 
 	m_vertexAnimations.reserve(other.m_vertexAnimations.size());
 	for(auto &anim : other.m_vertexAnimations)
@@ -1642,7 +1642,7 @@ std::optional<float> Model::CalcFlexWeight(
 	return opStack.top();
 }
 
-uint32_t Model::AddAnimation(const std::string &name,const std::shared_ptr<Animation> &anim)
+uint32_t Model::AddAnimation(const std::string &name,const std::shared_ptr<pragma::animation::Animation> &anim)
 {
 	auto lname = name;
 	ustring::to_lower(lname);
@@ -1669,7 +1669,7 @@ void Model::GetAnimations(std::unordered_map<std::string,uint32_t> **anims) {*an
 const Skeleton &Model::GetSkeleton() const {return *m_skeleton;}
 Skeleton &Model::GetSkeleton() {return *m_skeleton;}
 
-std::shared_ptr<Animation> Model::GetAnimation(uint32_t ID)
+std::shared_ptr<pragma::animation::Animation> Model::GetAnimation(uint32_t ID) const
 {
 	if(ID >= m_animations.size())
 		return nullptr;
@@ -1693,8 +1693,8 @@ bool Model::HasVertexWeights() const
 	}
 	return false;
 }
-const std::vector<std::shared_ptr<Animation>> &Model::GetAnimations() const {return const_cast<Model*>(this)->GetAnimations();}
-std::vector<std::shared_ptr<Animation>> &Model::GetAnimations() {return m_animations;}
+const std::vector<std::shared_ptr<pragma::animation::Animation>> &Model::GetAnimations() const {return const_cast<Model*>(this)->GetAnimations();}
+std::vector<std::shared_ptr<pragma::animation::Animation>> &Model::GetAnimations() {return m_animations;}
 bool Model::GetAnimationName(uint32_t animId,std::string &name) const
 {
 	auto it = std::find_if(m_animationIDs.begin(),m_animationIDs.end(),[animId](const std::pair<std::string,uint32_t> &pair) {
@@ -1873,7 +1873,7 @@ float Model::GetAnimationDuration(uint32_t animation)
 }
 int Model::SelectFirstAnimation(Activity activity) const
 {
-	auto it = std::find_if(m_animations.begin(),m_animations.end(),[activity](const std::shared_ptr<Animation> &anim) {
+	auto it = std::find_if(m_animations.begin(),m_animations.end(),[activity](const std::shared_ptr<pragma::animation::Animation> &anim) {
 		return anim->GetActivity() == activity;
 	});
 	if(it == m_animations.end())

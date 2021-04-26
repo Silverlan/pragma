@@ -16,7 +16,6 @@
 #include <mathutil/transform.hpp>
 #include <mathutil/uvec.h>
 
-class Animation;
 class Frame;
 class ModelSubMesh;
 struct AnimationEvent;
@@ -24,6 +23,7 @@ using BoneId = uint16_t;
 enum class ALSoundType : int32_t;
 namespace pragma
 {
+	namespace animation {class Animation;};
 	class DLLNETWORK BaseAnimatedComponent
 		: public BaseEntityComponent
 	{
@@ -90,7 +90,7 @@ namespace pragma
 				float blendScale = 1.f;
 			} lastAnim;
 		};
-		static bool GetBlendFramesFromCycle(Animation &anim,float cycle,Frame **outFrameSrc,Frame **outFrameDst,float &outInterpFactor,int32_t frameOffset=0);
+		static bool GetBlendFramesFromCycle(pragma::animation::Animation &anim,float cycle,Frame **outFrameSrc,Frame **outFrameDst,float &outInterpFactor,int32_t frameOffset=0);
 
 		virtual void Initialize() override;
 
@@ -147,7 +147,7 @@ namespace pragma
 
 		float GetCycle() const;
 		void SetCycle(float cycle);
-		Animation *GetAnimationObject() const;
+		pragma::animation::Animation *GetAnimationObject() const;
 		int32_t GetAnimation() const;
 
 		Activity GetActivity() const;
@@ -226,7 +226,7 @@ namespace pragma
 			const std::vector<umath::Transform> &srcBonePoses,const std::vector<Vector3> *optSrcBoneScales,
 			const std::vector<umath::Transform> &dstBonePoses,const std::vector<Vector3> *optDstBoneScales,
 			std::vector<umath::Transform> &outBonePoses,std::vector<Vector3> *optOutBoneScales,
-			Animation &anim,float interpFactor
+			pragma::animation::Animation &anim,float interpFactor
 		) const;
 		void BlendBoneFrames(
 			std::vector<umath::Transform> &tgt,std::vector<Vector3> *tgtScales,std::vector<umath::Transform> &add,std::vector<Vector3> *addScales,float blendScale
@@ -256,7 +256,7 @@ namespace pragma
 		struct DLLNETWORK AnimationBlendInfo
 		{
 			float scale = 0.f;
-			Animation *animation = nullptr;
+			pragma::animation::Animation *animation = nullptr;
 			Frame *frameSrc = nullptr; // Frame to blend from
 			Frame *frameDst = nullptr; // Frame to blend to
 		};
@@ -264,7 +264,7 @@ namespace pragma
 		struct AnimationEventQueueItem
 		{
 			int32_t animId = -1;
-			std::shared_ptr<Animation> animation = nullptr;
+			std::shared_ptr<pragma::animation::Animation> animation = nullptr;
 			int32_t lastFrame = -1;
 			uint32_t frameId = 0;
 		};
@@ -294,12 +294,12 @@ namespace pragma
 		virtual void ApplyAnimationBlending(AnimationSlotInfo &animInfo,double tDelta);
 		void HandleAnimationEvent(const AnimationEvent &ev);
 		void PlayLayeredAnimation(int slot,int animation,FPlayAnim flags,AnimationSlotInfo **animInfo);
-		void GetAnimationBlendController(Animation *anim,float cycle,std::array<AnimationBlendInfo,2> &bcFrames,float *blendScale) const;
+		void GetAnimationBlendController(pragma::animation::Animation *anim,float cycle,std::array<AnimationBlendInfo,2> &bcFrames,float *blendScale) const;
 		Frame *GetPreviousAnimationBlendFrame(AnimationSlotInfo &animInfo,double tDelta,float &blendScale);
 
 		// Animations
-		void TransformBoneFrames(std::vector<umath::Transform> &bonePoses,std::vector<Vector3> *boneScales,Animation &anim,Frame *frameBlend,bool bAdd=true);
-		void TransformBoneFrames(std::vector<umath::Transform> &tgt,std::vector<Vector3> *boneScales,const std::shared_ptr<Animation> &anim,std::vector<umath::Transform> &add,std::vector<Vector3> *addScales,bool bAdd=true);
+		void TransformBoneFrames(std::vector<umath::Transform> &bonePoses,std::vector<Vector3> *boneScales,pragma::animation::Animation &anim,Frame *frameBlend,bool bAdd=true);
+		void TransformBoneFrames(std::vector<umath::Transform> &tgt,std::vector<Vector3> *boneScales,const std::shared_ptr<pragma::animation::Animation> &anim,std::vector<umath::Transform> &add,std::vector<Vector3> *addScales,bool bAdd=true);
 		//
 
 		std::unordered_map<uint32_t,AnimationSlotInfo> m_animSlots = {};

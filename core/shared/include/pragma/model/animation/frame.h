@@ -14,7 +14,7 @@
 #include <vector>
 #include <unordered_map>
 
-class Animation;
+namespace pragma::animation {class Animation;};
 class Model;
 namespace umath {class Transform; class ScaledTransform;};
 
@@ -54,8 +54,8 @@ public:
 	void GetMoveOffset(float *x,float *z);
 	void SetMoveOffset(float x,float z=0);
 	void SetMoveOffset(Vector2 move);
-	void Localize(const Animation &anim,const Skeleton &skeleton);
-	void Globalize(const Animation &anim,const Skeleton &skeleton);
+	void Localize(const pragma::animation::Animation &anim,const Skeleton &skeleton);
+	void Globalize(const pragma::animation::Animation &anim,const Skeleton &skeleton);
 
 	// These assume that the bones of the frame match the skeleton exactly
 	void Localize(const Skeleton &skeleton);
@@ -63,13 +63,13 @@ public:
 
 	uint32_t GetBoneCount() const;
 	void SetBoneCount(uint32_t numBones);
-	std::pair<Vector3,Vector3> CalcRenderBounds(const Animation &anim,const Model &mdl) const;
+	std::pair<Vector3,Vector3> CalcRenderBounds(const pragma::animation::Animation &anim,const Model &mdl) const;
 	void Rotate(const Quat &rot);
 	void Translate(const Vector3 &t);
 	void Rotate(const Skeleton &skeleton,const Quat &rot);
 	void Translate(const Skeleton &skeleton,const Vector3 &t);
-	void Rotate(const Animation &anim,const Skeleton &skeleton,const Quat &rot);
-	void Translate(const Animation &anim,const Skeleton &skeleton,const Vector3 &t);
+	void Rotate(const pragma::animation::Animation &anim,const Skeleton &skeleton,const Quat &rot);
+	void Translate(const pragma::animation::Animation &anim,const Skeleton &skeleton,const Vector3 &t);
 	void Scale(const Vector3 &scale);
 
 	const FlexFrameData &GetFlexFrameData() const;
@@ -93,7 +93,7 @@ private:
 	std::vector<Vector3> m_scales;
 	std::unique_ptr<Vector2> m_move;
 	FlexFrameData m_flexFrameData {};
-	std::vector<uint32_t> GetLocalRootBoneIds(const Animation &anim,const Skeleton &skeleton) const;
+	std::vector<uint32_t> GetLocalRootBoneIds(const pragma::animation::Animation &anim,const Skeleton &skeleton) const;
 
 	void UpdateScales();
 };

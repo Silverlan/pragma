@@ -11,7 +11,7 @@
 #include <mathutil/uquat.h>
 #include "pragma/model/animation/fanim.h"
 
-std::shared_ptr<Animation> FWAD::ReadData(unsigned short mdlVersion,VFilePtr f)
+std::shared_ptr<pragma::animation::Animation> FWAD::ReadData(unsigned short mdlVersion,VFilePtr f)
 {
 	m_file = f;
 	uint32_t animVersion = 0;
@@ -26,7 +26,7 @@ std::shared_ptr<Animation> FWAD::ReadData(unsigned short mdlVersion,VFilePtr f)
 			return nullptr;
 		}
 	}
-	auto anim = Animation::Create();
+	auto anim = pragma::animation::Animation::Create();
 	//unsigned short ver = Read<unsigned short>();
 	//Con::cout<<"Animation Version: "<<ver<<Con::endl;
 
@@ -34,7 +34,7 @@ std::shared_ptr<Animation> FWAD::ReadData(unsigned short mdlVersion,VFilePtr f)
 	if(mdlVersion >= 0x0013)
 	{
 		auto activityName = ReadString();
-		auto id = Animation::GetActivityEnumRegister().RegisterEnum(activityName);
+		auto id = pragma::animation::Animation::GetActivityEnumRegister().RegisterEnum(activityName);
 		activity = (id != util::EnumRegister::InvalidEnum) ? static_cast<Activity>(id) : Activity::Invalid;
 	}
 	else
@@ -156,7 +156,7 @@ std::shared_ptr<Animation> FWAD::ReadData(unsigned short mdlVersion,VFilePtr f)
 			if(mdlVersion >= 0x0013)
 			{
 				auto name = ReadString();
-				auto id = Animation::GetEventEnumRegister().RegisterEnum(name);
+				auto id = pragma::animation::Animation::GetEventEnumRegister().RegisterEnum(name);
 				ev->eventID = (id != util::EnumRegister::InvalidEnum) ? static_cast<AnimationEvent::Type>(id) : AnimationEvent::Type::Invalid;
 			}
 			else
@@ -186,7 +186,7 @@ std::shared_ptr<Animation> FWAD::ReadData(unsigned short mdlVersion,VFilePtr f)
 	return anim;
 }
 
-std::shared_ptr<Animation> FWAD::Load(unsigned short version,const char *animation)
+std::shared_ptr<pragma::animation::Animation> FWAD::Load(unsigned short version,const char *animation)
 {
 	std::string pathCache(animation);
 	std::transform(pathCache.begin(),pathCache.end(),pathCache.begin(),::tolower);

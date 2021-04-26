@@ -131,7 +131,7 @@ std::shared_ptr<Model> pragma::asset::ModelManager::CreateModel(const std::strin
 	uint32_t boneCount = (bAddReference == true) ? 1 : 0;
 	auto mdl = CreateModel(boneCount,name);
 	auto &skeleton = mdl->GetSkeleton();
-	auto reference = Animation::Create();
+	auto reference = pragma::animation::Animation::Create();
 
 	if(bAddReference == true)
 	{

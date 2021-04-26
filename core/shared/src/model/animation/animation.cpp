@@ -6,21 +6,20 @@
  */
 
 #include "stdafx_shared.h"
-#include "pragma/model/animation/animation.h"
+#include "pragma/model/animation/animation.hpp"
 #include "pragma/model/animation/activities.h"
 #include <udm.hpp>
 #include <mathutil/umath.h>
 #pragma optimize("",off)
-decltype(Animation::s_activityEnumRegister) Animation::s_activityEnumRegister;
-decltype(Animation::s_eventEnumRegister) Animation::s_eventEnumRegister;
+decltype(pragma::animation::Animation::s_activityEnumRegister) pragma::animation::Animation::s_activityEnumRegister;
+decltype(pragma::animation::Animation::s_eventEnumRegister) pragma::animation::Animation::s_eventEnumRegister;
 
-util::EnumRegister &Animation::GetActivityEnumRegister() {return s_activityEnumRegister;}
-util::EnumRegister &Animation::GetEventEnumRegister() {return s_eventEnumRegister;}
+util::EnumRegister &pragma::animation::Animation::GetActivityEnumRegister() {return s_activityEnumRegister;}
+util::EnumRegister &pragma::animation::Animation::GetEventEnumRegister() {return s_eventEnumRegister;}
 
-
-std::shared_ptr<Animation> Animation::Load(const udm::AssetData &data,std::string &outErr,const Skeleton *optSkeleton,const Frame *optReference)
+std::shared_ptr<pragma::animation::Animation> pragma::animation::Animation::Load(const udm::AssetData &data,std::string &outErr,const Skeleton *optSkeleton,const Frame *optReference)
 {
-	auto anim = Animation::Create();
+	auto anim = pragma::animation::Animation::Create();
 	if(anim->LoadFromAssetData(data,outErr,optSkeleton,optReference) == false)
 		return nullptr;
 	return anim;
@@ -90,7 +89,7 @@ template<typename T>
 	}
 }
 
-bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr,const Skeleton *optSkeleton,const Frame *optReference)
+bool pragma::animation::Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr,const Skeleton *optSkeleton,const Frame *optReference)
 {
 	if(data.GetAssetType() != PANIM_IDENTIFIER)
 	{
@@ -110,7 +109,7 @@ bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr
 	auto activity = udm["activity"];
 	if(activity && activity->IsType(udm::Type::String))
 	{
-		auto id = Animation::GetActivityEnumRegister().RegisterEnum(activity->GetValue<udm::String>());
+		auto id = pragma::animation::Animation::GetActivityEnumRegister().RegisterEnum(activity->GetValue<udm::String>());
 		m_activity = (id != util::EnumRegister::InvalidEnum) ? static_cast<Activity>(id) : Activity::Invalid;
 	}
 
@@ -399,7 +398,7 @@ bool Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr
 			auto name = udmEvent["name"](std::string{});
 			if(name.empty())
 				continue;
-			auto id = Animation::GetEventEnumRegister().RegisterEnum(name);
+			auto id = pragma::animation::Animation::GetEventEnumRegister().RegisterEnum(name);
 			if(id == util::EnumRegister::InvalidEnum)
 				continue;
 			auto ev = std::make_shared<AnimationEvent>();
@@ -536,14 +535,14 @@ template<class TChannel>
 	channel->AddValue(curVal);
 };
 
-bool Animation::Save(udm::AssetData &outData,std::string &outErr,const Frame *optReference)
+bool pragma::animation::Animation::Save(udm::AssetData &outData,std::string &outErr,const Frame *optReference)
 {
 	outData.SetAssetType(PANIM_IDENTIFIER);
 	outData.SetAssetVersion(PANIM_VERSION);
 	auto udm = *outData;
 
 	auto act = GetActivity();
-	auto *activityName = Animation::GetActivityEnumRegister().GetEnumName(umath::to_integral(act));
+	auto *activityName = pragma::animation::Animation::GetActivityEnumRegister().GetEnumName(umath::to_integral(act));
 	if(activityName)
 		udm["activity"] = *activityName;
 	else
@@ -793,7 +792,7 @@ bool Animation::Save(udm::AssetData &outData,std::string &outErr,const Frame *op
 			auto udmEvent = udmEvents[evIdx++];
 			udmEvent["time"] = pair.first /static_cast<float>(m_fps);
 
-			auto *eventName = Animation::GetEventEnumRegister().GetEnumName(umath::to_integral(ev->eventID));
+			auto *eventName = pragma::animation::Animation::GetEventEnumRegister().GetEnumName(umath::to_integral(ev->eventID));
 			udmEvent["name"] = (eventName != nullptr) ? *eventName : "";
 			udmEvent["args"] = ev->arguments;
 		}
@@ -801,7 +800,7 @@ bool Animation::Save(udm::AssetData &outData,std::string &outErr,const Frame *op
 	return true;
 }
 
-bool Animation::SaveLegacy(VFilePtrReal &f)
+bool pragma::animation::Animation::SaveLegacy(VFilePtrReal &f)
 {
 	f->Write<uint32_t>(PRAGMA_ANIMATION_VERSION);
 	auto offsetToLen = f->Tell();
@@ -812,7 +811,7 @@ bool Animation::SaveLegacy(VFilePtrReal &f)
 	auto bHasMovement = (bMoveX || bMoveZ) ? true : false;
 
 	auto act = GetActivity();
-	auto *activityName = Animation::GetActivityEnumRegister().GetEnumName(umath::to_integral(act));
+	auto *activityName = pragma::animation::Animation::GetActivityEnumRegister().GetEnumName(umath::to_integral(act));
 	f->WriteString((activityName != nullptr) ? *activityName : "");
 
 	f->Write<uint8_t>(GetActivityWeight());
@@ -900,7 +899,7 @@ bool Animation::SaveLegacy(VFilePtrReal &f)
 		{
 			for(auto &ev : *animEvents)
 			{
-				auto *eventName = Animation::GetEventEnumRegister().GetEnumName(umath::to_integral(ev->eventID));
+				auto *eventName = pragma::animation::Animation::GetEventEnumRegister().GetEnumName(umath::to_integral(ev->eventID));
 				f->WriteString((eventName != nullptr) ? *eventName : "");
 				f->Write<uint8_t>(static_cast<uint8_t>(ev->arguments.size()));
 				for(auto &arg : ev->arguments)
@@ -926,21 +925,21 @@ bool Animation::SaveLegacy(VFilePtrReal &f)
 	return true;
 }
 
-std::shared_ptr<Animation> Animation::Create()
+std::shared_ptr<pragma::animation::Animation> pragma::animation::Animation::Create()
 {
 	return std::shared_ptr<Animation>(new Animation{});
 }
-std::shared_ptr<Animation> Animation::Create(const Animation &other,ShareMode share)
+std::shared_ptr<pragma::animation::Animation> pragma::animation::Animation::Create(const Animation &other,ShareMode share)
 {
 	return std::shared_ptr<Animation>(new Animation{other,share});
 }
 
-Animation::Animation()
+pragma::animation::Animation::Animation()
 	: m_flags(FAnim::None),m_activity(Activity::Invalid),m_activityWeight(1),m_fps(24),
 	m_fadeIn(nullptr),m_fadeOut(nullptr)
 {}
 
-Animation::Animation(const Animation &other,ShareMode share)
+pragma::animation::Animation::Animation(const Animation &other,ShareMode share)
 	: m_boneIds(other.m_boneIds),m_boneIdMap(other.m_boneIdMap),m_flags(other.m_flags),m_activity(other.m_activity),
 	m_activityWeight(other.m_activityWeight),m_fps(other.m_fps),m_boneWeights(other.m_boneWeights),
 	m_renderBounds(other.m_renderBounds),m_blendController{other.m_blendController}
@@ -973,19 +972,19 @@ Animation::Animation(const Animation &other,ShareMode share)
 	static_assert(sizeof(Animation) == 312,"Update this function when making changes to this class!");
 }
 
-void Animation::Reverse()
+void pragma::animation::Animation::Reverse()
 {
 	std::reverse(m_frames.begin(),m_frames.end());
 }
 
-void Animation::Rotate(const Skeleton &skeleton,const Quat &rot)
+void pragma::animation::Animation::Rotate(const Skeleton &skeleton,const Quat &rot)
 {
 	uvec::rotate(&m_renderBounds.first,rot);
 	uvec::rotate(&m_renderBounds.second,rot);
 	for(auto &frame : m_frames)
 		frame->Rotate(*this,skeleton,rot);
 }
-void Animation::Translate(const Skeleton &skeleton,const Vector3 &t)
+void pragma::animation::Animation::Translate(const Skeleton &skeleton,const Vector3 &t)
 {
 	m_renderBounds.first += t;
 	m_renderBounds.second += t;
@@ -993,7 +992,7 @@ void Animation::Translate(const Skeleton &skeleton,const Vector3 &t)
 		frame->Translate(*this,skeleton,t);
 }
 
-void Animation::Scale(const Vector3 &scale)
+void pragma::animation::Animation::Scale(const Vector3 &scale)
 {
 	m_renderBounds.first *= scale;
 	m_renderBounds.second *= scale;
@@ -1001,7 +1000,7 @@ void Animation::Scale(const Vector3 &scale)
 		frame->Scale(scale);
 }
 
-int32_t Animation::LookupBone(uint32_t boneId) const
+int32_t pragma::animation::Animation::LookupBone(uint32_t boneId) const
 {
 	if(boneId < m_boneIds.size() && m_boneIds.at(boneId) == boneId) // Faster than map lookup and this statement is true for most cases
 		return boneId;
@@ -1011,7 +1010,7 @@ int32_t Animation::LookupBone(uint32_t boneId) const
 	return it->second;
 }
 
-void Animation::CalcRenderBounds(Model &mdl)
+void pragma::animation::Animation::CalcRenderBounds(Model &mdl)
 {
 	m_renderBounds = {
 		{std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max()},
@@ -1035,73 +1034,73 @@ void Animation::CalcRenderBounds(Model &mdl)
 	}
 }
 
-const std::pair<Vector3,Vector3> &Animation::GetRenderBounds() const {return m_renderBounds;}
-void Animation::SetRenderBounds(const Vector3 &min,const Vector3 &max) {m_renderBounds = {min,max};}
+const std::pair<Vector3,Vector3> &pragma::animation::Animation::GetRenderBounds() const {return m_renderBounds;}
+void pragma::animation::Animation::SetRenderBounds(const Vector3 &min,const Vector3 &max) {m_renderBounds = {min,max};}
 
-std::vector<std::shared_ptr<Frame>> &Animation::GetFrames() {return m_frames;}
+std::vector<std::shared_ptr<Frame>> &pragma::animation::Animation::GetFrames() {return m_frames;}
 
-void Animation::Localize(const Skeleton &skeleton)
+void pragma::animation::Animation::Localize(const Skeleton &skeleton)
 {
 	for(auto it=m_frames.begin();it!=m_frames.end();++it)
 		(*it)->Localize(*this,skeleton);
 }
-AnimationBlendController &Animation::SetBlendController(uint32_t controller)
+AnimationBlendController &pragma::animation::Animation::SetBlendController(uint32_t controller)
 {
 	m_blendController = AnimationBlendController{};
 	m_blendController->controller = controller;
 	return *m_blendController;
 }
-AnimationBlendController *Animation::GetBlendController() {return m_blendController.has_value() ? &*m_blendController : nullptr;}
-const AnimationBlendController *Animation::GetBlendController() const {return const_cast<Animation*>(this)->GetBlendController();}
-void Animation::ClearBlendController() {m_blendController = {};}
-float Animation::GetFadeInTime()
+AnimationBlendController *pragma::animation::Animation::GetBlendController() {return m_blendController.has_value() ? &*m_blendController : nullptr;}
+const AnimationBlendController *pragma::animation::Animation::GetBlendController() const {return const_cast<Animation*>(this)->GetBlendController();}
+void pragma::animation::Animation::ClearBlendController() {m_blendController = {};}
+float pragma::animation::Animation::GetFadeInTime()
 {
 	if(m_fadeIn == nullptr)
 		return 0.f;
 	return *m_fadeIn;
 }
-float Animation::GetFadeOutTime()
+float pragma::animation::Animation::GetFadeOutTime()
 {
 	if(m_fadeOut == nullptr)
 		return 0.f;
 	return *m_fadeOut;
 }
-void Animation::SetFadeInTime(float t)
+void pragma::animation::Animation::SetFadeInTime(float t)
 {
 	if(m_fadeIn == nullptr)
 		m_fadeIn = std::make_unique<float>();
 	*m_fadeIn = t;
 }
-void Animation::SetFadeOutTime(float t)
+void pragma::animation::Animation::SetFadeOutTime(float t)
 {
 	if(m_fadeOut == nullptr)
 		m_fadeOut = std::make_unique<float>();
 	*m_fadeOut = t;
 }
-bool Animation::HasFadeInTime() {return (m_fadeIn != nullptr) ? true : false;}
-bool Animation::HasFadeOutTime() {return (m_fadeOut != nullptr) ? true : false;}
-Activity Animation::GetActivity() const {return m_activity;}
-void Animation::SetActivity(Activity activity) {m_activity = activity;}
-unsigned char Animation::GetActivityWeight() const {return m_activityWeight;}
-void Animation::SetActivityWeight(unsigned char weight) {m_activityWeight = weight;}
-unsigned char Animation::GetFPS() {return m_fps;}
-void Animation::SetFPS(unsigned char fps) {m_fps = fps;}
-float Animation::GetDuration()
+bool pragma::animation::Animation::HasFadeInTime() {return (m_fadeIn != nullptr) ? true : false;}
+bool pragma::animation::Animation::HasFadeOutTime() {return (m_fadeOut != nullptr) ? true : false;}
+Activity pragma::animation::Animation::GetActivity() const {return m_activity;}
+void pragma::animation::Animation::SetActivity(Activity activity) {m_activity = activity;}
+unsigned char pragma::animation::Animation::GetActivityWeight() const {return m_activityWeight;}
+void pragma::animation::Animation::SetActivityWeight(unsigned char weight) {m_activityWeight = weight;}
+unsigned char pragma::animation::Animation::GetFPS() {return m_fps;}
+void pragma::animation::Animation::SetFPS(unsigned char fps) {m_fps = fps;}
+float pragma::animation::Animation::GetDuration()
 {
 	if(m_fps == 0)
 		return 0.f;
 	return float(m_frames.size()) /float(m_fps);
 }
 
-FAnim Animation::GetFlags() const {return m_flags;}
-void Animation::SetFlags(FAnim flags) {m_flags = flags;}
-bool Animation::HasFlag(FAnim flag) const {return ((m_flags &flag) == flag) ? true : false;}
-void Animation::AddFlags(FAnim flags) {m_flags |= flags;}
-void Animation::RemoveFlags(FAnim flags) {m_flags &= ~flags;}
+FAnim pragma::animation::Animation::GetFlags() const {return m_flags;}
+void pragma::animation::Animation::SetFlags(FAnim flags) {m_flags = flags;}
+bool pragma::animation::Animation::HasFlag(FAnim flag) const {return ((m_flags &flag) == flag) ? true : false;}
+void pragma::animation::Animation::AddFlags(FAnim flags) {m_flags |= flags;}
+void pragma::animation::Animation::RemoveFlags(FAnim flags) {m_flags &= ~flags;}
 
-const std::vector<uint16_t> &Animation::GetBoneList() const {return m_boneIds;}
-const std::unordered_map<uint32_t,uint32_t> &Animation::GetBoneMap() const {return m_boneIdMap;}
-uint32_t Animation::AddBoneId(uint32_t id)
+const std::vector<uint16_t> &pragma::animation::Animation::GetBoneList() const {return m_boneIds;}
+const std::unordered_map<uint32_t,uint32_t> &pragma::animation::Animation::GetBoneMap() const {return m_boneIdMap;}
+uint32_t pragma::animation::Animation::AddBoneId(uint32_t id)
 {
 	auto it = m_boneIdMap.find(id);
 	if(it != m_boneIdMap.end())
@@ -1110,7 +1109,7 @@ uint32_t Animation::AddBoneId(uint32_t id)
 	m_boneIdMap.insert(std::make_pair(id,m_boneIds.size() -1));
 	return m_boneIds.size() -1;
 }
-void Animation::SetBoneId(uint32_t localIdx,uint32_t id)
+void pragma::animation::Animation::SetBoneId(uint32_t localIdx,uint32_t id)
 {
 	if(localIdx >= m_boneIds.size())
 		return;
@@ -1122,7 +1121,7 @@ void Animation::SetBoneId(uint32_t localIdx,uint32_t id)
 	oldId = id;
 	m_boneIdMap.insert(std::make_pair(id,localIdx));
 }
-void Animation::SetBoneList(const std::vector<uint16_t> &list)
+void pragma::animation::Animation::SetBoneList(const std::vector<uint16_t> &list)
 {
 	m_boneIds = list;
 	m_boneIdMap.clear();
@@ -1130,26 +1129,26 @@ void Animation::SetBoneList(const std::vector<uint16_t> &list)
 	for(auto i=decltype(list.size()){0};i<list.size();++i)
 		m_boneIdMap.insert(std::make_pair(list.at(i),i));
 }
-void Animation::ReserveBoneIds(uint32_t count)
+void pragma::animation::Animation::ReserveBoneIds(uint32_t count)
 {
 	m_boneIds.reserve(count);
 	m_boneIdMap.reserve(count);
 }
 
-void Animation::AddFrame(std::shared_ptr<Frame> frame) {m_frames.push_back(frame);}
+void pragma::animation::Animation::AddFrame(std::shared_ptr<Frame> frame) {m_frames.push_back(frame);}
 
-std::shared_ptr<Frame> Animation::GetFrame(unsigned int ID)
+std::shared_ptr<Frame> pragma::animation::Animation::GetFrame(unsigned int ID)
 {
 	if(ID >= m_frames.size())
 		return nullptr;
 	return m_frames[ID];
 }
 
-unsigned int Animation::GetFrameCount() {return CUInt32(m_frames.size());}
+unsigned int pragma::animation::Animation::GetFrameCount() {return CUInt32(m_frames.size());}
 
-unsigned int Animation::GetBoneCount() {return CUInt32(m_boneIds.size());}
+unsigned int pragma::animation::Animation::GetBoneCount() {return CUInt32(m_boneIds.size());}
 
-void Animation::AddEvent(unsigned int frame,AnimationEvent *ev)
+void pragma::animation::Animation::AddEvent(unsigned int frame,AnimationEvent *ev)
 {
 	auto it = m_events.find(frame);
 	if(it == m_events.end())
@@ -1157,7 +1156,7 @@ void Animation::AddEvent(unsigned int frame,AnimationEvent *ev)
 	m_events[frame].push_back(std::shared_ptr<AnimationEvent>(ev));
 }
 
-std::vector<std::shared_ptr<AnimationEvent>> *Animation::GetEvents(unsigned int frame)
+std::vector<std::shared_ptr<AnimationEvent>> *pragma::animation::Animation::GetEvents(unsigned int frame)
 {
 	auto it = m_events.find(frame);
 	if(it == m_events.end())
@@ -1165,22 +1164,22 @@ std::vector<std::shared_ptr<AnimationEvent>> *Animation::GetEvents(unsigned int 
 	return &it->second;
 }
 
-float Animation::GetBoneWeight(uint32_t boneId) const
+float pragma::animation::Animation::GetBoneWeight(uint32_t boneId) const
 {
 	auto weight = 1.f;
 	GetBoneWeight(boneId,weight);
 	return weight;
 }
-bool Animation::GetBoneWeight(uint32_t boneId,float &weight) const
+bool pragma::animation::Animation::GetBoneWeight(uint32_t boneId,float &weight) const
 {
 	if(boneId >= m_boneWeights.size())
 		return false;
 	weight = m_boneWeights.at(boneId);
 	return true;
 }
-const std::vector<float> &Animation::GetBoneWeights() const {return const_cast<Animation*>(this)->GetBoneWeights();}
-std::vector<float> &Animation::GetBoneWeights() {return m_boneWeights;}
-void Animation::SetBoneWeight(uint32_t boneId,float weight)
+const std::vector<float> &pragma::animation::Animation::GetBoneWeights() const {return const_cast<Animation*>(this)->GetBoneWeights();}
+std::vector<float> &pragma::animation::Animation::GetBoneWeights() {return m_boneWeights;}
+void pragma::animation::Animation::SetBoneWeight(uint32_t boneId,float weight)
 {
 	if(boneId >= m_boneIds.size())
 		return;
@@ -1189,7 +1188,7 @@ void Animation::SetBoneWeight(uint32_t boneId,float weight)
 	m_boneWeights.at(boneId) = weight;
 }
 
-bool Animation::operator==(const Animation &other) const
+bool pragma::animation::Animation::operator==(const Animation &other) const
 {
 	if(m_frames.size() != other.m_frames.size() || m_boneWeights.size() != other.m_boneWeights.size() || static_cast<bool>(m_fadeIn) != static_cast<bool>(other.m_fadeIn) || static_cast<bool>(m_fadeOut) != static_cast<bool>(other.m_fadeOut) || m_events.size() != other.m_events.size())
 		return false;

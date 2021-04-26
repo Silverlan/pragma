@@ -173,7 +173,7 @@ std::shared_ptr<Model> Model::Copy(Game *game,CopyFlags copyFlags) const
 	if((copyFlags &CopyFlags::CopyAnimationsBit) != CopyFlags::None)
 	{
 		for(auto &anim : mdl->m_animations)
-			anim = Animation::Create(*anim,Animation::ShareMode::None);
+			anim = pragma::animation::Animation::Create(*anim,pragma::animation::Animation::ShareMode::None);
 	}
 	if((copyFlags &CopyFlags::CopyVertexAnimationsBit) != CopyFlags::None)
 	{
@@ -479,7 +479,7 @@ bool Model::LoadFromAssetData(Game &game,const udm::AssetData &data,std::string 
 		animations.resize(udmAnimations.GetChildCount());
 		for(auto udmAnimation : udmAnimations.ElIt())
 		{
-			auto anim = Animation::Load(udm::AssetData{udmAnimation.property},outErr,&skeleton,&reference);
+			auto anim = pragma::animation::Animation::Load(udm::AssetData{udmAnimation.property},outErr,&skeleton,&reference);
 			if(anim == nullptr)
 				return false;
 			uint32_t index = 0;

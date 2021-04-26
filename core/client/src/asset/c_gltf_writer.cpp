@@ -17,7 +17,7 @@
 #include <pragma/model/model.h>
 #include <pragma/model/modelmesh.h>
 #include <pragma/model/animation/vertex_animation.hpp>
-#include <pragma/model/animation/animation.h>
+#include <pragma/model/animation/animation.hpp>
 #include <sharedutils/alpha_mode.hpp>
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_file.h>

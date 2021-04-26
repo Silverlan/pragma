@@ -22,7 +22,7 @@ static uint16_t get_bone_index(const std::vector<uint16_t> *optBoneList,unsigned
 	return 0;
 }
 
-static void get_global_bone_transforms(const Animation *optAnim,const Skeleton &skeleton,Frame &frame)
+static void get_global_bone_transforms(const pragma::animation::Animation *optAnim,const Skeleton &skeleton,Frame &frame)
 {
 	auto *boneList = optAnim ? &optAnim->GetBoneList() : nullptr;
 	std::function<void(Frame&,const std::unordered_map<uint32_t,std::shared_ptr<Bone>>&,const Vector3&,const Quat&)> fGetGlobalBoneTransforms;
@@ -46,10 +46,10 @@ static void get_global_bone_transforms(const Animation *optAnim,const Skeleton &
 	fGetGlobalBoneTransforms(frame,skeleton.GetRootBones(),{},uquat::identity());
 }
 
-static void get_local_bone_transforms(const Animation *optAnim,const Skeleton &skeleton,Frame &frame)
+static void get_local_bone_transforms(const pragma::animation::Animation *optAnim,const Skeleton &skeleton,Frame &frame)
 {
-	std::function<void(const Animation*,Frame&,const std::unordered_map<uint32_t,std::shared_ptr<Bone>>&)> fGetLocalBoneTransforms;
-	fGetLocalBoneTransforms = [&fGetLocalBoneTransforms](const Animation *optAnim,Frame &frame,const std::unordered_map<uint32_t,std::shared_ptr<Bone>> &bones) {
+	std::function<void(const pragma::animation::Animation*,Frame&,const std::unordered_map<uint32_t,std::shared_ptr<Bone>>&)> fGetLocalBoneTransforms;
+	fGetLocalBoneTransforms = [&fGetLocalBoneTransforms](const pragma::animation::Animation *optAnim,Frame &frame,const std::unordered_map<uint32_t,std::shared_ptr<Bone>> &bones) {
 		auto *boneList = optAnim ? &optAnim->GetBoneList() : nullptr;
 		for(auto it=bones.begin();it!=bones.end();++it)
 		{
@@ -132,7 +132,7 @@ Frame::Frame(const Frame &other)
 const FlexFrameData &Frame::GetFlexFrameData() const {return const_cast<Frame*>(this)->GetFlexFrameData();}
 FlexFrameData &Frame::GetFlexFrameData() {return m_flexFrameData;}
 
-std::vector<uint32_t> Frame::GetLocalRootBoneIds(const Animation &anim,const Skeleton &skeleton) const
+std::vector<uint32_t> Frame::GetLocalRootBoneIds(const pragma::animation::Animation &anim,const Skeleton &skeleton) const
 {
 	auto &boneIds = anim.GetBoneList();
 	auto &rootBones = skeleton.GetRootBones();
@@ -177,13 +177,13 @@ void Frame::Translate(const Skeleton &skeleton,const Vector3 &t)
 	}
 }
 
-void Frame::Rotate(const Animation &anim,const Skeleton &skeleton,const Quat &rot)
+void Frame::Rotate(const pragma::animation::Animation &anim,const Skeleton &skeleton,const Quat &rot)
 {
 	auto localRootBoneIds = GetLocalRootBoneIds(anim,skeleton);
 	for(auto id : localRootBoneIds)
 		m_bones.at(id).RotateGlobal(rot);
 }
-void Frame::Translate(const Animation &anim,const Skeleton &skeleton,const Vector3 &t)
+void Frame::Translate(const pragma::animation::Animation &anim,const Skeleton &skeleton,const Vector3 &t)
 {
 	auto localRootBoneIds = GetLocalRootBoneIds(anim,skeleton);
 	for(auto id : localRootBoneIds)
@@ -247,12 +247,12 @@ void Frame::SetBonePose(uint32_t boneId,const umath::Transform &pose)
 	All animations are usually localized by the model compiler, except for the bind/reference pose, which is created on the fly when loading the model.
 	This is the only case where ::Localize is called here.
 */
-void Frame::Localize(const Animation &anim,const Skeleton &skeleton)
+void Frame::Localize(const pragma::animation::Animation &anim,const Skeleton &skeleton)
 {
 	get_local_bone_transforms(&anim,skeleton,*this);
 }
 
-void Frame::Globalize(const Animation &anim,const Skeleton &skeleton)
+void Frame::Globalize(const pragma::animation::Animation &anim,const Skeleton &skeleton)
 {
 	get_global_bone_transforms(&anim,skeleton,*this);
 }
@@ -344,7 +344,7 @@ bool Frame::GetBoneMatrix(unsigned int boneID,Mat4 *mat)
 	return true;
 }
 bool Frame::HasScaleTransforms() const {return !m_scales.empty();}
-std::pair<Vector3,Vector3> Frame::CalcRenderBounds(const Animation &anim,const Model &mdl) const
+std::pair<Vector3,Vector3> Frame::CalcRenderBounds(const pragma::animation::Animation &anim,const Model &mdl) const
 {
 	auto *t = const_cast<Frame*>(this);
 	auto transforms = m_bones;

@@ -339,7 +339,7 @@ void BaseAnimatedComponent::SetLayeredAnimationFlags(uint32_t layerIdx,FPlayAnim
 	it->second.flags = flags;
 }
 
-void BaseAnimatedComponent::TransformBoneFrames(std::vector<umath::Transform> &bonePoses,std::vector<Vector3> *boneScales,Animation &anim,Frame *frameBlend,bool bAdd)
+void BaseAnimatedComponent::TransformBoneFrames(std::vector<umath::Transform> &bonePoses,std::vector<Vector3> *boneScales,pragma::animation::Animation &anim,Frame *frameBlend,bool bAdd)
 {
 	for(unsigned int i=0;i<bonePoses.size();i++)
 	{
@@ -371,7 +371,7 @@ void BaseAnimatedComponent::TransformBoneFrames(std::vector<umath::Transform> &b
 		}
 	}
 }
-void BaseAnimatedComponent::TransformBoneFrames(std::vector<umath::Transform> &tgt,std::vector<Vector3> *boneScales,const std::shared_ptr<Animation> &anim,std::vector<umath::Transform> &add,std::vector<Vector3> *addScales,bool bAdd)
+void BaseAnimatedComponent::TransformBoneFrames(std::vector<umath::Transform> &tgt,std::vector<Vector3> *boneScales,const std::shared_ptr<pragma::animation::Animation> &anim,std::vector<umath::Transform> &add,std::vector<Vector3> *addScales,bool bAdd)
 {
 	for(auto i=decltype(tgt.size()){0};i<tgt.size();++i)
 	{
@@ -402,7 +402,7 @@ void BaseAnimatedComponent::BlendBonePoses(
 	const std::vector<umath::Transform> &srcBonePoses,const std::vector<Vector3> *optSrcBoneScales,
 	const std::vector<umath::Transform> &dstBonePoses,const std::vector<Vector3> *optDstBoneScales,
 	std::vector<umath::Transform> &outBonePoses,std::vector<Vector3> *optOutBoneScales,
-	Animation &anim,float interpFactor
+	pragma::animation::Animation &anim,float interpFactor
 ) const
 {
 	auto numBones = umath::min(srcBonePoses.size(),dstBonePoses.size(),outBonePoses.size());

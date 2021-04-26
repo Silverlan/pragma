@@ -160,14 +160,14 @@ void Model::Merge(const Model &other,MergeFlags flags)
 			auto &animOther = animsOther.at(i);
 			auto animName = other.GetAnimationName(i);
 			
-			auto shareMode = Animation::ShareMode::Events;
+			auto shareMode = pragma::animation::Animation::ShareMode::Events;
 			if(other.GetSkeleton().GetBoneCount() >= skeleton.GetBoneCount()) // TODO: Check this properly! The included model has to have all bones of this model (it may also have more, but not fewer!)
 			{
 				// If the number of bones of the included model is less than this model, we have to make a copy of all animation frames and fill up the missing bones - Otherwise there may be animation issues!
 				// TODO: Make missing bones always use transformations of reference animation, then this won't be necessary anymore!
-				shareMode |= Animation::ShareMode::Frames;
+				shareMode |= pragma::animation::Animation::ShareMode::Frames;
 			}
-			auto anim = Animation::Create(*animOther,shareMode);
+			auto anim = pragma::animation::Animation::Create(*animOther,shareMode);
 			auto &boneList = anim->GetBoneList();
 			for(auto idx=decltype(boneList.size()){0};idx<boneList.size();++idx)
 				anim->SetBoneId(idx,boneTranslations.at(boneList.at(idx)));

@@ -138,6 +138,9 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 		hComponent->SetGlobalName(globalName);
 	}));
 	gameMod[defGlobal];
+	
+	auto defAnimated2 = luabind::class_<Animated2Handle,BaseEntityComponentHandle>("Animated2Component");
+	gameMod[defAnimated2];
 
 	auto defIK = luabind::class_<IKHandle,BaseEntityComponentHandle>("IKComponent");
 	defIK.def("SetIKControllerEnabled",&Lua::IK::SetIKControllerEnabled);

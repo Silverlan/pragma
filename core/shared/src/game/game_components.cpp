@@ -16,6 +16,7 @@
 #include "pragma/entities/components/submergible_component.hpp"
 #include "pragma/entities/components/velocity_component.hpp"
 #include "pragma/entities/components/usable_component.hpp"
+#include "pragma/entities/components/animated_2_component.hpp"
 #include "pragma/entities/components/basegravity.h"
 
 void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
@@ -29,6 +30,7 @@ void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentM
 	componentManager.RegisterComponentType<pragma::VelocityComponent>("velocity");
 	componentManager.RegisterComponentType<pragma::UsableComponent>("usable");
 	componentManager.RegisterComponentType<pragma::GlobalNameComponent>("global");
+	componentManager.RegisterComponentType<pragma::Animated2Component>("animated2");
 
 	pragma::BaseEntityComponent::RegisterEvents(componentManager);
 	BaseEntity::RegisterEvents(componentManager);

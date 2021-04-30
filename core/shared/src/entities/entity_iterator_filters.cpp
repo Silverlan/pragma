@@ -11,7 +11,9 @@
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_name_component.hpp"
+#include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/basefilterentity.h"
+#include "pragma/asset/util_asset.hpp"
 #include <pragma/math/intersection.h>
 
 EntityIteratorFilterName::EntityIteratorFilterName(Game &game,const std::string &name,bool caseSensitive,bool exactMatch)
@@ -23,6 +25,19 @@ bool EntityIteratorFilterName::ShouldPass(BaseEntity &ent)
 	if(pNameComponent == nullptr)
 		return false;
 	return m_bExactMatch ? ustring::match(pNameComponent->GetName(),m_name,m_bCaseSensitive) : ustring::compare(pNameComponent->GetName(),m_name,m_bCaseSensitive);
+}
+
+/////////////////
+
+EntityIteratorFilterModel::EntityIteratorFilterModel(Game &game,const std::string &mdlName)
+	: m_modelName{mdlName}
+{}
+bool EntityIteratorFilterModel::ShouldPass(BaseEntity &ent)
+{
+	auto pMdlComponent = static_cast<pragma::BaseModelComponent*>(ent.FindComponent("model").get());
+	if(pMdlComponent == nullptr)
+		return false;
+	return pragma::asset::matches(m_modelName,pMdlComponent->GetModelName(),pragma::asset::Type::Model);
 }
 
 /////////////////

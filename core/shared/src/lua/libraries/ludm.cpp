@@ -1300,6 +1300,9 @@ void Lua::udm::register_library(Lua::Interface &lua)
 	cdAssetData.def("SetAssetType",&::udm::AssetData::SetAssetType);
 	cdAssetData.def("SetAssetVersion",&::udm::AssetData::SetAssetVersion);
 	cdAssetData.def("GetData",static_cast<::udm::LinkedPropertyWrapper(*)(lua_State*,::udm::AssetData&)>([](lua_State *l,::udm::AssetData &a) -> ::udm::LinkedPropertyWrapper {return a.GetData();}));
+	cdAssetData.def("SetData",static_cast<void(*)(lua_State*,::udm::AssetData&,::udm::PProperty&)>([](lua_State *l,::udm::AssetData &a,::udm::PProperty &prop) {
+		a.GetData() = prop;
+	}));
 	modUdm[cdAssetData];
 
 	auto cdArray = luabind::class_<::udm::Array>("Array");

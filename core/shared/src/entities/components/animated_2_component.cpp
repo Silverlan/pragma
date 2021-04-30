@@ -25,14 +25,14 @@ ComponentEventId Animated2Component::EVENT_PLAY_ANIMATION = pragma::INVALID_COMP
 ComponentEventId Animated2Component::EVENT_TRANSLATE_ANIMATION = pragma::INVALID_COMPONENT_ID;
 void Animated2Component::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
-	EVENT_HANDLE_ANIMATION_EVENT = componentManager.RegisterEvent("HANDLE_ANIMATION_EVENT");
-	EVENT_ON_PLAY_ANIMATION = componentManager.RegisterEvent("ON_PLAY_ANIMATION");
-	EVENT_ON_ANIMATION_COMPLETE = componentManager.RegisterEvent("ON_ANIMATION_COMPLETE");
-	EVENT_ON_ANIMATION_START = componentManager.RegisterEvent("ON_ANIMATION_START");
-	EVENT_MAINTAIN_ANIMATIONS = componentManager.RegisterEvent("MAINTAIN_ANIMATIONS");
-	EVENT_ON_ANIMATIONS_UPDATED = componentManager.RegisterEvent("ON_ANIMATIONS_UPDATED");
-	EVENT_PLAY_ANIMATION = componentManager.RegisterEvent("PLAY_ANIMATION");
-	EVENT_TRANSLATE_ANIMATION = componentManager.RegisterEvent("TRANSLATE_ANIMATION");
+	EVENT_HANDLE_ANIMATION_EVENT = componentManager.RegisterEvent("A2_HANDLE_ANIMATION_EVENT");
+	EVENT_ON_PLAY_ANIMATION = componentManager.RegisterEvent("A2_ON_PLAY_ANIMATION");
+	EVENT_ON_ANIMATION_COMPLETE = componentManager.RegisterEvent("A2_ON_ANIMATION_COMPLETE");
+	EVENT_ON_ANIMATION_START = componentManager.RegisterEvent("A2_ON_ANIMATION_START");
+	EVENT_MAINTAIN_ANIMATIONS = componentManager.RegisterEvent("A2_MAINTAIN_ANIMATIONS");
+	EVENT_ON_ANIMATIONS_UPDATED = componentManager.RegisterEvent("A2_ON_ANIMATIONS_UPDATED");
+	EVENT_PLAY_ANIMATION = componentManager.RegisterEvent("A2_PLAY_ANIMATION");
+	EVENT_TRANSLATE_ANIMATION = componentManager.RegisterEvent("A2_TRANSLATE_ANIMATION");
 }
 Animated2Component::Animated2Component(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_playbackRate(util::FloatProperty::Create(1.f))

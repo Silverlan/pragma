@@ -49,31 +49,37 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 			auto ext = pragma::asset::get_legacy_extension(type);
 			if(!ext.has_value())
 				return {};
-			Lua::PushString(l,*ext);
+			return luabind::object{l,*ext};
 		})),
 		luabind::def("get_binary_udm_extension",static_cast<luabind::object(*)(lua_State*,pragma::asset::Type)>([](lua_State *l,pragma::asset::Type type) -> luabind::object {
 			auto ext = pragma::asset::get_binary_udm_extension(type);
 			if(!ext.has_value())
 				return {};
-			Lua::PushString(l,*ext);
+			return luabind::object{l,*ext};
 		})),
 		luabind::def("get_ascii_udm_extension",static_cast<luabind::object(*)(lua_State*,pragma::asset::Type)>([](lua_State *l,pragma::asset::Type type) -> luabind::object {
 			auto ext = pragma::asset::get_ascii_udm_extension(type);
 			if(!ext.has_value())
 				return {};
-			Lua::PushString(l,*ext);
+			return luabind::object{l,*ext};
 		})),
 		luabind::def("determine_format_from_data",static_cast<luabind::object(*)(lua_State*,LFile&,pragma::asset::Type)>([](lua_State *l,LFile &f,pragma::asset::Type type) -> luabind::object {
 			auto ext = pragma::asset::determine_format_from_data(f.GetHandle(),type);
 			if(!ext.has_value())
 				return {};
-			Lua::PushString(l,*ext);
+			return luabind::object{l,*ext};
 		})),
 		luabind::def("determine_format_from_filename",static_cast<luabind::object(*)(lua_State*,const std::string&,pragma::asset::Type)>([](lua_State *l,const std::string &fileName,pragma::asset::Type type) -> luabind::object {
 			auto ext = pragma::asset::determine_format_from_filename(fileName,type);
 			if(!ext.has_value())
 				return {};
-			Lua::PushString(l,*ext);
+			return luabind::object{l,*ext};
+		})),
+		luabind::def("determine_type_from_extension",static_cast<luabind::object(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &ext) -> luabind::object {
+			auto type = pragma::asset::determine_type_from_extension(ext);
+			if(!type.has_value())
+				return {};
+			return luabind::object{l,umath::to_integral(*type)};
 		})),
 		luabind::def("matches_format",static_cast<bool(*)(lua_State*,const std::string&,const std::string&)>([](lua_State *l,const std::string &format0,const std::string &format1) -> bool {
 			return pragma::asset::matches_format(format0,format1);
@@ -91,14 +97,17 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 			auto ext = pragma::asset::get_udm_format_extension(type,binary);
 			if(!ext.has_value())
 				return {};
-			Lua::PushString(l,*ext);
+			return luabind::object{l,*ext};
 		})),
 		luabind::def("get_asset_root_directory",static_cast<std::string(*)(lua_State*,pragma::asset::Type)>([](lua_State *l,pragma::asset::Type type) -> std::string {
 			return pragma::asset::get_asset_root_directory(type);
 		})),
 		luabind::def("exists",Lua::asset::exists),
 		luabind::def("find_file",Lua::asset::find_file),
-		luabind::def("is_loaded",Lua::asset::is_loaded)
+		luabind::def("is_loaded",Lua::asset::is_loaded),
+		luabind::def("delete",static_cast<bool(*)(lua_State*,const std::string&,pragma::asset::Type)>([](lua_State *l,const std::string &name,pragma::asset::Type type) -> bool {
+			return pragma::asset::remove_asset(*engine->GetNetworkState(l),name,type);
+		}))
 	];
 
 	Lua::RegisterLibraryEnums(lua.GetState(),"asset",{

@@ -517,12 +517,6 @@ luabind::object Lua::file::GetFileExtension(lua_State *l,const std::string &path
 		return {};
 	return luabind::object{l,ext};
 }
-std::string Lua::file::RemoveFileExtension(const std::string &path)
-{
-	auto fpath = path;
-	ufile::remove_extension_from_filename(fpath);
-	return fpath;
-}
 bool Lua::file::ComparePath(const std::string &path0,const std::string &path1)
 {
 	return FileManager::GetCanonicalizedPath(path0) == FileManager::GetCanonicalizedPath(path1);

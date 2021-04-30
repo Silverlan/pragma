@@ -52,6 +52,7 @@
 #include "pragma/game/game_coordinate_system.hpp"
 #include "pragma/util/util_variable_type.hpp"
 #include <sharedutils/util_file.h>
+#include <sharedutils/util_path.hpp>
 #include <pragma/math/intersection.h>
 #include <mathutil/camera.hpp>
 #include <mathutil/umath_frustum.hpp>
@@ -1235,6 +1236,15 @@ void Game::RegisterLuaLibraries()
 		luabind::def("get_flags",static_cast<uint64_t(*)(std::string)>([](std::string path) {
 			return FileManager::GetFileFlags(path);
 		})),
+		luabind::def("find_absolute_path",static_cast<luabind::object(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &path) -> luabind::object {
+			std::string rpath;
+			auto res = FileManager::FindAbsolutePath(path,rpath);
+			if(res == false)
+				return {};
+			auto absPath = ::util::Path::CreatePath(rpath);
+			absPath.MakeRelative(util::get_program_path());
+			return luabind::object{l,absPath.GetString()};
+		})),
 		luabind::def("read",Lua::file::Read),
 		luabind::def("write",Lua::file::Write),
 		luabind::def("get_canonicalized_path",Lua::file::GetCanonicalizedPath),
@@ -1246,7 +1256,15 @@ void Game::RegisterLuaLibraries()
 			return FileManager::GetFileSize(path);
 		})),
 		luabind::def("compare_path",Lua::file::ComparePath),
-		luabind::def("remove_file_extension",Lua::file::RemoveFileExtension),
+		luabind::def("remove_file_extension",static_cast<std::string(*)(std::string)>([](std::string path) {
+			ufile::remove_extension_from_filename(path);
+			return path;
+		})),
+		luabind::def("remove_file_extension",static_cast<std::string(*)(lua_State*,std::string,luabind::table<>)>([](lua_State *l,std::string path,luabind::table<> t) {
+			auto exts = Lua::table_to_vector<std::string>(l,t,2);
+			ufile::remove_extension_from_filename(path,exts);
+			return path;
+		})),
 		luabind::def("strip_illegal_filename_characters",static_cast<std::string(*)(std::string)>([](std::string path) {
 			// See https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
 			std::string illegalCharacters = "/\\?%*:|\"<>";

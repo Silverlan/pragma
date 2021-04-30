@@ -36,6 +36,22 @@ std::optional<std::string> pragma::asset::determine_format_from_data(VFilePtr &f
 		return FORMAT_PARTICLE_SYSTEM_LEGACY;
 	return get_ascii_udm_extension(type); // Assume it's the ASCII map format
 }
+std::optional<pragma::asset::Type> pragma::asset::determine_type_from_extension(const std::string_view &ext)
+{
+	std::string lext {ext};
+	ustring::to_lower(lext);
+	auto n = umath::to_integral(Type::Count);
+	for(auto i=decltype(n){0u};i<n;++i)
+	{
+		auto type = static_cast<Type>(i);
+		auto supportedExtensions = get_supported_extensions(type);
+		auto it = std::find(supportedExtensions.begin(),supportedExtensions.end(),lext);
+		if(it == supportedExtensions.end())
+			continue;
+		return type;
+	}
+	return {};
+}
 std::optional<std::string> pragma::asset::determine_format_from_filename(const std::string_view &fileName,Type type)
 {
 	std::string ext;
@@ -171,6 +187,22 @@ std::string pragma::asset::get_normalized_path(const std::string &name,Type type
 bool pragma::asset::matches(const std::string &name0,const std::string &name1,Type type)
 {
 	return ustring::compare(get_normalized_path(name0,type),get_normalized_path(name1,type),false);
+}
+bool pragma::asset::remove_asset(NetworkState &nw,const std::string &name,Type type)
+{
+	auto f = find_file(nw,name,type);
+	std::vector<std::string> deleted;
+	while(f.has_value())
+	{
+		auto it = std::find(deleted.begin(),deleted.end(),*f);
+		if(it != deleted.end())
+			return false;
+		if(FileManager::RemoveFile(f->c_str()) == false)
+			return false;
+		deleted.push_back(*f);
+		f = find_file(nw,name,type);
+	}
+	return true;
 }
 std::optional<std::string> pragma::asset::find_file(NetworkState &nw,const std::string &name,Type type,std::string *optOutFormat)
 {

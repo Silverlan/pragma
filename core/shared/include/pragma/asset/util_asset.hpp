@@ -56,6 +56,7 @@ namespace pragma::asset
 	DLLNETWORK bool matches(const std::string &name0,const std::string &name1,Type type);
 	DLLNETWORK std::string get_normalized_path(const std::string &name,Type type);
 	DLLNETWORK std::optional<std::string> find_file(NetworkState &nw,const std::string &name,Type type,std::string *optOutFormat=nullptr);
+	DLLNETWORK bool remove_asset(NetworkState &nw,const std::string &name,Type type);
 	DLLNETWORK bool is_loaded(NetworkState &nw,const std::string &name,Type type);
 	DLLNETWORK std::vector<std::string> get_supported_extensions(Type type);
 	DLLNETWORK std::optional<std::string> get_legacy_extension(Type type);
@@ -63,6 +64,7 @@ namespace pragma::asset
 	DLLNETWORK std::optional<std::string> get_ascii_udm_extension(Type type);
 	DLLNETWORK std::optional<std::string> determine_format_from_data(VFilePtr &f,Type type);
 	DLLNETWORK std::optional<std::string> determine_format_from_filename(const std::string_view &fileName,Type type);
+	DLLNETWORK std::optional<Type> determine_type_from_extension(const std::string_view &ext);
 	DLLNETWORK bool matches_format(const std::string_view &format0,const std::string_view &format1);
 	DLLNETWORK util::Path relative_path_to_absolute_path(const util::Path &relPath,Type type,const std::optional<std::string> &rootPath={});
 	DLLNETWORK util::Path absolute_path_to_relative_path(const util::Path &absPath,Type type);

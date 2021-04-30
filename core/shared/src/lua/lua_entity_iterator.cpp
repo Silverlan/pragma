@@ -75,6 +75,16 @@ void LuaEntityIteratorFilterName::Attach(EntityIterator &iterator)
 
 ////////////
 
+LuaEntityIteratorFilterModel::LuaEntityIteratorFilterModel(const std::string &mdlName)
+	: m_modelName{mdlName}
+{}
+void LuaEntityIteratorFilterModel::Attach(EntityIterator &iterator)
+{
+	iterator.AttachFilter<EntityIteratorFilterModel>(m_modelName);
+}
+
+////////////
+
 LuaEntityIteratorFilterUuid::LuaEntityIteratorFilterUuid(const std::string &uuid)
 	: m_uuid{uuid}
 {}

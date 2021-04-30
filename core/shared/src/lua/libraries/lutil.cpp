@@ -1089,7 +1089,7 @@ int Lua::util::pack_zip_archive(lua_State *l)
 			auto value = *i;
 			if(luabind::type(value) == LUA_TTABLE)
 			{
-				auto *ds = luabind::object_cast<DataStream*>(value["contents"]);
+				auto *ds = luabind::object_cast_nothrow<DataStream*>(value["contents"],static_cast<DataStream*>(nullptr));
 				if(ds)
 					customBinaryFiles[zipFileName] = *ds;
 				else

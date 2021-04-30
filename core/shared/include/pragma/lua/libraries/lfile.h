@@ -140,7 +140,6 @@ namespace Lua
 		DLLNETWORK std::string GetCanonicalizedPath(const std::string &path);
 		DLLNETWORK luabind::object GetFileExtension(lua_State *l,const std::string &path);
 		DLLNETWORK bool ComparePath(const std::string &path0,const std::string &path1);
-		DLLNETWORK std::string RemoveFileExtension(const std::string &path);
 	};
 };
 

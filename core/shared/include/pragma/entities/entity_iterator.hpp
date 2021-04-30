@@ -183,6 +183,15 @@ private:
 	bool m_bExactMatch = true;
 };
 
+struct DLLNETWORK EntityIteratorFilterModel
+	: public IEntityIteratorFilter
+{
+	EntityIteratorFilterModel(Game &game,const std::string &mdlName);
+	virtual bool ShouldPass(BaseEntity &ent) override;
+private:
+	std::string m_modelName;
+};
+
 struct DLLNETWORK EntityIteratorFilterUuid
 	: public IEntityIteratorFilter
 {

@@ -101,7 +101,7 @@ LONG MiniDumper::TopLevelFilter( struct _EXCEPTION_POINTERS *pExceptionInfo )
 			if (::MessageBox( NULL, "A terminal error has occurred in the program. Would you like to save a diagnostic file? This file contains information about your system and the state of the game at the time of the crash and can be utilized by a developer to fix the underlying problem.", m_szAppName, MB_YESNO )==IDYES)
 			{
 				// create the file
-				HANDLE hFile = ::CreateFile( szDumpPath.c_str(), GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS,
+				HANDLE hFile = ::CreateFileA( szDumpPath.c_str(), GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS,
 											FILE_ATTRIBUTE_NORMAL, NULL );
 
 				if (hFile!=INVALID_HANDLE_VALUE)

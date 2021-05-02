@@ -562,6 +562,26 @@ static std::ostream &operator<<(std::ostream& os,const ::udm::HdrColor &hdr) {
 	return os<<hdr[0]<<" "<<hdr[1]<<" "<<hdr[2]<<" "<<hdr[3];
 }
 
+static luabind::object get_children(lua_State *l,::udm::PropertyWrapper &p)
+{
+	auto t = luabind::newtable(l);
+	auto *el = p.GetValuePtr<::udm::Element>();
+	if(el == nullptr)
+		return t;
+	auto *linked = p.GetLinked();
+	if(linked)
+	{
+		for(auto pair : p.ElIt())
+			t[std::string{pair.key}] = (*linked)[pair.key];
+	}
+	else
+	{
+		for(auto pair : p.ElIt())
+			t[std::string{pair.key}] = p[pair.key];
+	}
+	return t;
+}
+
 template<class T,class TPropertyWrapper,class TClassDef>
 	void register_property_methods(TClassDef &classDef)
 {
@@ -671,23 +691,10 @@ template<class T,class TPropertyWrapper,class TClassDef>
 			std::visit(vs,::udm::get_generic_tag(type));
 	}))
 	.def("GetChildren",static_cast<luabind::object(*)(lua_State*,T&)>([](lua_State *l,T &p) -> luabind::object {
-		auto t = luabind::newtable(l);
-		TPropertyWrapper tp = static_cast<TPropertyWrapper>(p);
-		auto *el = tp.GetValuePtr<::udm::Element>();
-		if(el == nullptr)
-			return t;
-		auto *linked = tp.GetLinked();
-		if(linked)
-		{
-			for(auto pair : tp.ElIt())
-				t[std::string{pair.key}] = (*linked)[pair.key];
-		}
-		else
-		{
-			for(auto pair : tp.ElIt())
-				t[std::string{pair.key}] = tp[pair.key];
-		}
-		return t;
+		return get_children(l,static_cast<TPropertyWrapper>(p));
+	}))
+	.def("GetChildren",static_cast<luabind::object(*)(lua_State*,T&,const std::string&)>([](lua_State *l,T &p,const std::string &key) -> luabind::object {
+		return get_children(l,static_cast<TPropertyWrapper>(p)[key]);
 	}))
 	.def("Resize",static_cast<void(*)(lua_State*,T&,uint32_t)>([](lua_State *l,T &p,uint32_t size) {
 		static_cast<TPropertyWrapper>(p).Resize(size);
@@ -706,6 +713,9 @@ template<class T,class TPropertyWrapper,class TClassDef>
 	.def("SetValue",static_cast<void(*)(lua_State*,T&,const std::string&,luabind::object)>([](lua_State *l,T &el,const std::string &key,luabind::object o) {
 		set_property_value(l,static_cast<TPropertyWrapper>(el)[key],o);
 	}))
+	.def("HasValue",static_cast<bool(*)(lua_State*,T&,const std::string&)>([](lua_State *l,T &p,const std::string &key) -> bool {
+		return static_cast<bool>(static_cast<TPropertyWrapper>(p)[key]);
+	}))
 	.def("GetValue",static_cast<luabind::object(*)(lua_State*,T&,const std::string&)>([](lua_State *l,T &p,const std::string &key) -> luabind::object {
 		return get_property_value(l,static_cast<TPropertyWrapper>(p)[key]);
 	}))
@@ -723,6 +733,14 @@ template<class T,class TPropertyWrapper,class TClassDef>
 	}))
 	.def("Merge",static_cast<void(*)(lua_State*,T&,::udm::PropertyWrapper&)>([](lua_State *l,T &prop,::udm::PropertyWrapper &propOther) {
 		static_cast<TPropertyWrapper>(prop).Merge(propOther);
+	}))
+	.def("ToAscii",static_cast<luabind::object(*)(lua_State*,T&)>([](lua_State *l,T &prop) -> luabind::object {
+		auto *el = static_cast<TPropertyWrapper>(prop).GetValuePtr<::udm::Element>();
+		if(!el)
+			return {};
+		std::stringstream ss;
+		el->ToAscii(::udm::AsciiSaveFlags::DontCompressLz4Arrays,ss);
+		return luabind::object{l,ss.str()};
 	}))
 	.def("Set",&prop_set_basic_type_indexed<TPropertyWrapper,T,bool>)
 	.def("Set",&prop_set_basic_type_indexed<TPropertyWrapper,T,float>)

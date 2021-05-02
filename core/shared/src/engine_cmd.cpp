@@ -109,6 +109,18 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 		auto absPath = util::get_program_path() +'/' +outFileName;
 		util::open_path_in_explorer(ufile::get_path_from_filename(absPath),ufile::get_file_from_filename(absPath));
 	},ConVarFlags::None,"Converts a UDM file from binary to ASCII or the other way around.");
+	map.RegisterConCommand("udm_validate",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		if(argv.empty())
+		{
+			Con::cwar<<"WARNING: No file specified to convert!"<<Con::endl;
+			return;
+		}
+		auto &fileName = argv.front();
+		std::string err;
+		auto udmData = util::load_udm_asset(fileName,&err);
+		if(udmData)
+			Con::cout<<"No validation errors found, file is a valid UDM file!"<<err<<Con::endl;
+	},ConVarFlags::None,"Validates the specified UDM file.");
 	map.RegisterConVar("phys_engine","physx",ConVarFlags::Archive | ConVarFlags::Replicated,"The underlying physics engine to use.",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
 		auto &physEngines = pragma::physics::IEnvironment::GetAvailablePhysicsEngines();
 		auto it = physEngines.begin();

@@ -33,6 +33,7 @@
 #include "pragma/entities/components/submergible_component.hpp"
 #include "pragma/entities/components/usable_component.hpp"
 #include "pragma/entities/components/global_component.hpp"
+#include "pragma/entities/components/composite_component.hpp"
 #include "pragma/entities/components/animated_2_component.hpp"
 #include "pragma/entities/components/base_flammable_component.hpp"
 #include "pragma/entities/components/base_flex_component.hpp"
@@ -175,6 +176,7 @@ DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,Usable);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,Submergible);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,Damageable);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,GlobalName);
+DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,Composite);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,Animated2);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BaseFlammable);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BaseFlex);

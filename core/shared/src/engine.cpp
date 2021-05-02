@@ -451,6 +451,12 @@ bool Engine::Initialize(int argc,char *argv[])
 	m_svInstance = std::unique_ptr<StateInstance>(new StateInstance{matManager,matErr});
 	//
 	InitLaunchOptions(argc,argv);
+	if(Lua::get_extended_lua_modules_enabled())
+	{
+		RegisterConCommand("l",[this](NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+			RunConsoleCommand("lua_run",argv);
+		});
+	}
 	if(!IsServerOnly())
 		LoadConfig();
 

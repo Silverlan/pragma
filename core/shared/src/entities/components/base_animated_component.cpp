@@ -145,7 +145,9 @@ void BaseAnimatedComponent::ResetAnimation(const std::shared_ptr<Model> &mdl)
 	if(rootPoseBoneId != -1)
 		m_rootPoseBoneId = rootPoseBoneId;
 	Skeleton &skeleton = mdl->GetSkeleton();
-	for(unsigned int i=0;i<skeleton.GetBoneCount();i++)
+	auto numBones = skeleton.GetBoneCount();
+	m_bones.reserve(numBones);
+	for(unsigned int i=0;i<numBones;i++)
 		m_bones.push_back({});
 	std::unordered_map<std::string,unsigned int> *animations;
 	mdl->GetAnimations(&animations);
@@ -162,12 +164,24 @@ void BaseAnimatedComponent::ResetAnimation(const std::shared_ptr<Model> &mdl)
 		}
 	}
 
-	auto anim = mdl->GetAnimation(0);
-	auto frame = (anim != nullptr) ? anim->GetFrame(0) : nullptr;
-	if(frame != nullptr)
+	m_processedBones.resize(numBones);
+	for(auto i=decltype(numBones){0u};i<numBones;++i)
 	{
-		for(UInt32 i=0;i<anim->GetBoneCount();i++)
-			m_bones[i] = umath::ScaledTransform{*frame->GetBonePosition(i),*frame->GetBoneOrientation(i)};
+		umath::ScaledTransform pose {};
+		m_bindPose->GetBonePose(i,pose);
+		m_processedBones[i] = pose;
+	}
+
+	for(auto i=decltype(numBones){0u};i<numBones;++i)
+	{
+		auto bone = skeleton.GetBone(i);
+		if(bone.expired())
+			continue;
+		auto pose = m_processedBones[i];
+		auto parent = bone.lock();
+		if(parent)
+			pose = m_processedBones[parent->ID].GetInverse() *pose;
+		m_bones[i] = pose;
 	}
 }
 

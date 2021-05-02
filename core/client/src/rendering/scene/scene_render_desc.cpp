@@ -314,7 +314,11 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 					}
 
 					if(ent->IsWorld())
-						continue; // World entities are handled separately
+					{
+						auto worldC = ent->GetComponent<pragma::CWorldComponent>();
+						if(worldC.valid() && worldC->GetBSPTree())
+							continue; // World entities with BSP trees are handled separately
+					}
 					auto *renderC = static_cast<CBaseEntity*>(ent)->GetRenderComponent();
 					if(
 						!renderC || renderC->IsExemptFromOcclusionCulling() || ShouldConsiderEntity(*static_cast<CBaseEntity*>(ent),scene,renderFlags) == false || 

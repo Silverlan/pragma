@@ -477,6 +477,12 @@ bool CEngine::IsWindowFocused() const {return umath::is_flag_set(m_stateFlags,St
 bool CEngine::Initialize(int argc,char *argv[])
 {
 	Engine::Initialize(argc,argv);
+	if(Lua::get_extended_lua_modules_enabled())
+	{
+		RegisterConCommand("lc",[this](NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+			RunConsoleCommand("lua_run_cl",argv);
+		});
+	}
 	auto &cmds = *m_preloadedConfig.get();
 
 	auto *cviRenderAPI = cmds.find("render_api");

@@ -339,7 +339,7 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	// Overwrite old material with new PBR settings
 	std::string err;
 	auto savePath = pragma::asset::relative_path_to_absolute_path(matTraditional.GetName(),pragma::asset::Type::Material,util::CONVERT_PATH);
-	if(matTraditional.Save(savePath.GetString(),err))
+	if(matTraditional.Save(savePath.GetString(),err,true))
 		client->LoadMaterial(matName,true,true); // Reload material immediately
 	static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().ClearUnused();
 	// Con::cout<<"Conversion complete!"<<Con::endl;

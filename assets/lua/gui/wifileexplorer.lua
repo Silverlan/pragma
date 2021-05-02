@@ -86,7 +86,6 @@ function gui.WIFileExplorer:ListFiles()
 		end)
 	end
 	local path = self:GetPath()
-	local numExts = #self.m_tExtensions
 	if(self.m_isDirExplorer ~= true) then
 		for _,fName in ipairs(tFiles) do
 			local pIcon = create_icon("page")

@@ -67,7 +67,7 @@ bool EntityIteratorFilterNameOrClass::ShouldPass(BaseEntity &ent)
 	if(m_bExactMatch ? ustring::match(ent.GetClass(),m_name,m_bCaseSensitive) : ustring::compare(ent.GetClass(),m_name,m_bCaseSensitive))
 		return true;
 	auto pNameComponent = static_cast<pragma::BaseNameComponent*>(ent.FindComponent("name").get());
-	return pNameComponent != nullptr && m_bExactMatch ? ustring::match(pNameComponent->GetName(),m_name,m_bCaseSensitive) : ustring::compare(pNameComponent->GetName(),m_name,m_bCaseSensitive);
+	return pNameComponent != nullptr && (m_bExactMatch ? ustring::match(pNameComponent->GetName(),m_name,m_bCaseSensitive) : ustring::compare(pNameComponent->GetName(),m_name,m_bCaseSensitive));
 }
 
 /////////////////

@@ -22,6 +22,7 @@ If you want to use Vulkan, you'll also need these:
 - Vulkan SDK 1.2.162.1 or newer: https://vulkan.lunarg.com/sdk/home
 - SPIRV-Tools: https://github.com/KhronosGroup/SPIRV-Tools
 - SPIRV-Headers: https://github.com/KhronosGroup/SPIRV-Headers
+
 `SPIRV-Tools` has to be located in `%VULKAN_SDK%/spirv-tools`, and `SPIRV-Headers` in `%VULKAN_SDK%/spirv-tools/external/spirv-headers`.
 
 Build Instructions (Windows)

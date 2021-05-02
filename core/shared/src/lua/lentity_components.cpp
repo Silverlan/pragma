@@ -138,6 +138,32 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 		hComponent->SetGlobalName(globalName);
 	}));
 	gameMod[defGlobal];
+
+	auto defComposite = luabind::class_<CompositeHandle,BaseEntityComponentHandle>("CompositeComponent");
+	defComposite.def("AddEntity",static_cast<void(*)(lua_State*,CompositeHandle&,EntityHandle&)>([](lua_State *l,CompositeHandle &hComponent,EntityHandle &hEnt) {
+		pragma::Lua::check_component(l,hComponent);
+		LUA_CHECK_ENTITY(l,hEnt);
+		hComponent->AddEntity(*hEnt.get());
+	}));
+	defComposite.def("RemoveEntity",static_cast<void(*)(lua_State*,CompositeHandle&,EntityHandle&)>([](lua_State *l,CompositeHandle &hComponent,EntityHandle &hEnt) {
+		pragma::Lua::check_component(l,hComponent);
+		LUA_CHECK_ENTITY(l,hEnt);
+		hComponent->RemoveEntity(*hEnt.get());
+	}));
+	defComposite.def("GetEntities",static_cast<luabind::object(*)(lua_State*,CompositeHandle&)>([](lua_State *l,CompositeHandle &hComponent) -> luabind::object {
+		pragma::Lua::check_component(l,hComponent);
+		auto &ents = hComponent->GetEntities();
+		auto tEnts = luabind::newtable(l);
+		int32_t idx = 1;
+		for(auto &hEnt : ents)
+		{
+			if(!hEnt.IsValid())
+				continue;
+			tEnts[idx++] = *hEnt.get()->GetLuaObject();
+		}
+		return tEnts;
+	}));
+	gameMod[defComposite];
 	
 	auto defAnimated2 = luabind::class_<Animated2Handle,BaseEntityComponentHandle>("Animated2Component");
 	gameMod[defAnimated2];

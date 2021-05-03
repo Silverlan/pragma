@@ -234,6 +234,7 @@ namespace pragma
 
 		virtual bool MaintainAnimations(double dt);
 		virtual void OnTick(double dt) override;
+		bool MaintainGestures(double dt);
 
 		virtual std::optional<Mat4> GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId) const;
 		virtual bool GetLocalVertexPosition(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 &pos,const std::optional<Vector3> &vertexOffset={}) const;
@@ -299,7 +300,12 @@ namespace pragma
 
 		// Animations
 		void TransformBoneFrames(std::vector<umath::Transform> &bonePoses,std::vector<Vector3> *boneScales,pragma::animation::Animation &anim,Frame *frameBlend,bool bAdd=true);
-		void TransformBoneFrames(std::vector<umath::Transform> &tgt,std::vector<Vector3> *boneScales,const std::shared_ptr<pragma::animation::Animation> &anim,std::vector<umath::Transform> &add,std::vector<Vector3> *addScales,bool bAdd=true);
+		void TransformBoneFrames(
+			std::vector<umath::Transform> &tgt,std::vector<Vector3> *boneScales,
+			const std::shared_ptr<pragma::animation::Animation> &baseAnim,
+			const std::shared_ptr<pragma::animation::Animation> &anim,
+			std::vector<umath::Transform> &add,std::vector<Vector3> *addScales,bool bAdd=true
+		);
 		//
 
 		std::unordered_map<uint32_t,AnimationSlotInfo> m_animSlots = {};

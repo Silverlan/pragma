@@ -665,6 +665,41 @@ BoneId BaseAnimatedComponent::AddRootPoseBone()
 }
 void BaseAnimatedComponent::SetRootPoseBoneId(BoneId boneId) {m_rootPoseBoneId = boneId;}
 
+bool BaseAnimatedComponent::MaintainGestures(double dt)
+{
+	auto &hModel = GetEntity().GetModel();
+	if(hModel == nullptr)
+		return false;
+	auto &baseAnimInfo = m_baseAnim;
+	auto anim = hModel->GetAnimation(baseAnimInfo.animation);
+	auto &bones = anim->GetBoneList();
+	auto &bonePoses = baseAnimInfo.bonePoses;
+	auto &boneScales = baseAnimInfo.boneScales;
+
+	// Update gestures
+	for(auto it=m_animSlots.begin();it!=m_animSlots.end();)
+	{
+		auto &animInfo = it->second;
+		if(MaintainAnimation(animInfo,dt,it->first) == true)
+		{
+			auto anim = hModel->GetAnimation(animInfo.animation);
+			auto baseAnim = hModel->GetAnimation(baseAnimInfo.animation);
+			TransformBoneFrames(
+				bonePoses,!boneScales.empty() ? &boneScales : nullptr,baseAnim,anim,animInfo.bonePoses,!animInfo.boneScales.empty() ? &animInfo.boneScales : nullptr,anim->HasFlag(FAnim::Gesture)
+			);
+			if(animInfo.cycle >= 1.f)
+			{
+				if(anim->HasFlag(FAnim::Loop) == false)
+				{
+					it = m_animSlots.erase(it); // No need to keep the gesture information around anymore
+					continue;
+				}
+			}
+		}
+		++it;
+	}
+	return true;
+}
 bool BaseAnimatedComponent::MaintainAnimations(double dt)
 {
 	auto &hModel = GetEntity().GetModel();
@@ -676,42 +711,21 @@ bool BaseAnimatedComponent::MaintainAnimations(double dt)
 
 	auto r = MaintainAnimation(m_baseAnim,dt);
 	if(r == true)
+		MaintainGestures(dt);
+
+	auto &baseAnimInfo = m_baseAnim;
+	auto anim = hModel->GetAnimation(baseAnimInfo.animation);
+	auto &bones = anim->GetBoneList();
+	auto &bonePoses = baseAnimInfo.bonePoses;
+	auto &boneScales = baseAnimInfo.boneScales;
+	// Apply animation to skeleton
+	for(auto i=decltype(bonePoses.size()){0};i<bonePoses.size();++i)
 	{
-		auto &animInfo = m_baseAnim;
-		auto anim = hModel->GetAnimation(animInfo.animation);
-		auto &bones = anim->GetBoneList();
-		auto &bonePoses = animInfo.bonePoses;
-		auto &boneScales = animInfo.boneScales;
-
-		// Update gestures
-		for(auto it=m_animSlots.begin();it!=m_animSlots.end();)
-		{
-			auto &animInfo = it->second;
-			if(MaintainAnimation(animInfo,dt,it->first) == true)
-			{
-				auto anim = hModel->GetAnimation(animInfo.animation);
-				TransformBoneFrames(bonePoses,!boneScales.empty() ? &boneScales : nullptr,anim,animInfo.bonePoses,!animInfo.boneScales.empty() ? &animInfo.boneScales : nullptr,anim->HasFlag(FAnim::Gesture));
-				if(animInfo.cycle >= 1.f)
-				{
-					if(anim->HasFlag(FAnim::Loop) == false)
-					{
-						it = m_animSlots.erase(it); // No need to keep the gesture information around anymore
-						continue;
-					}
-				}
-			}
-			++it;
-		}
-
-		// Apply animation to skeleton
-		for(auto i=decltype(bonePoses.size()){0};i<bonePoses.size();++i)
-		{
-			auto boneId = bones[i];
-			auto &orientation = bonePoses.at(i);
-			SetBonePosition(boneId,orientation.GetOrigin(),orientation.GetRotation(),nullptr,false);
-			if(boneScales.empty() == false)
-				SetBoneScale(boneId,boneScales.at(i));
-		}
+		auto boneId = bones[i];
+		auto &orientation = bonePoses.at(i);
+		SetBonePosition(boneId,orientation.GetOrigin(),orientation.GetRotation(),nullptr,false);
+		if(boneScales.empty() == false)
+			SetBoneScale(boneId,boneScales.at(i));
 	}
 
 	if(IsAnimatedRootPoseTransformEnabled() && m_rootPoseBoneId != std::numeric_limits<decltype(m_rootPoseBoneId)>::max() && m_rootPoseBoneId < m_bones.size())

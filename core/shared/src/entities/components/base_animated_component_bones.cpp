@@ -371,15 +371,21 @@ void BaseAnimatedComponent::TransformBoneFrames(std::vector<umath::Transform> &b
 		}
 	}
 }
-void BaseAnimatedComponent::TransformBoneFrames(std::vector<umath::Transform> &tgt,std::vector<Vector3> *boneScales,const std::shared_ptr<pragma::animation::Animation> &anim,std::vector<umath::Transform> &add,std::vector<Vector3> *addScales,bool bAdd)
+void BaseAnimatedComponent::TransformBoneFrames(
+	std::vector<umath::Transform> &tgt,std::vector<Vector3> *boneScales,
+	const std::shared_ptr<pragma::animation::Animation> &baseAnim,
+	const std::shared_ptr<pragma::animation::Animation> &anim,
+	std::vector<umath::Transform> &add,std::vector<Vector3> *addScales,bool bAdd
+)
 {
 	for(auto i=decltype(tgt.size()){0};i<tgt.size();++i)
 	{
-		auto animBoneIdx = anim->LookupBone(i);
+		auto boneId = baseAnim->GetBoneList()[i];
+		auto animBoneIdx = anim->LookupBone(boneId);
 		if(animBoneIdx == -1 || animBoneIdx >= add.size())
 			continue;
 		auto &pose = tgt.at(i);
-		auto weight = anim->GetBoneWeight(i);
+		auto weight = anim->GetBoneWeight(animBoneIdx);
 		if(bAdd == true)
 			pose *= add.at(animBoneIdx) *weight;
 		else

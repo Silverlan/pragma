@@ -773,6 +773,10 @@ void Lua::Model::register_class(
 				return {};
 			return luabind::object{l,*name};
 		}))
+		.def("GetBoneId",static_cast<int32_t(*)(lua_State*,pragma::animation::Animation&,uint32_t)>([](lua_State *l,pragma::animation::Animation &anim,uint32_t idx) -> int32_t {
+			auto boneList = anim.GetBoneList();
+			return (idx < boneList.size()) ? boneList[idx] : -1;
+		}))
 		.def("SetActivity",&Lua::Animation::SetActivity)
 		.def("GetActivityWeight",&Lua::Animation::GetActivityWeight)
 		.def("SetActivityWeight",&Lua::Animation::SetActivityWeight)
@@ -816,12 +820,12 @@ void Lua::Model::register_class(
 		.def("ClearFrames",static_cast<void(*)(lua_State*,pragma::animation::Animation&)>([](lua_State *l,pragma::animation::Animation &anim) {
 			anim.GetFrames().clear();
 		}))
-		.def("GetBoneId",static_cast<void(*)(lua_State*,pragma::animation::Animation&,uint32_t)>([](lua_State *l,pragma::animation::Animation &anim,uint32_t idx) {
+		/*.def("GetBoneId",static_cast<void(*)(lua_State*,pragma::animation::Animation&,uint32_t)>([](lua_State *l,pragma::animation::Animation &anim,uint32_t idx) {
 			auto &boneList = anim.GetBoneList();
 			if(idx >= boneList.size())
 				return;
 			Lua::PushInt(l,boneList[idx]);
-		}))
+		}))*/
 		.def("Save",static_cast<void(*)(lua_State*,pragma::animation::Animation&,udm::AssetData&)>([](lua_State *l,pragma::animation::Animation &anim,udm::AssetData &assetData) {
 			std::string err;
 			auto result = anim.Save(assetData,err);

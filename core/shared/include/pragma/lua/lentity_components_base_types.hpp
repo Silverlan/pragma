@@ -3286,6 +3286,17 @@ namespace Lua
 			pragma::Lua::check_component(l,hAnim);
 			Lua::PushInt(l,umath::to_integral(hAnim->GetLayeredActivity(slot)));
 		}));
+		def.def("GetLayeredAnimations",static_cast<luabind::object(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hAnim) -> luabind::object {
+			pragma::Lua::check_component(l,hAnim);
+			auto t = luabind::newtable(l);
+			for(auto &pair : hAnim->GetAnimationSlotInfos())
+				t[pair.first] = pair.second.animation;
+			return t;
+		}));
+		def.def("ApplyLayeredAnimations",static_cast<bool(*)(lua_State*,THandle&,double)>([](lua_State *l,THandle &hAnim,double dt) -> bool {
+			pragma::Lua::check_component(l,hAnim);
+			return hAnim->MaintainGestures(dt);
+		}));
 		def.def("SetPlaybackRate",static_cast<void(*)(lua_State*,THandle&,float)>([](lua_State *l,THandle &hAnim,float rate) {
 			pragma::Lua::check_component(l,hAnim);
 			hAnim->SetPlaybackRate(rate);

@@ -217,6 +217,7 @@ protected:
 	void OnRenderResolutionChanged(uint32_t width,uint32_t height);
 	uint32_t GetPerformanceTimerIndex(uint32_t swapchainIdx,GPUTimer timer) const;
 	uint32_t GetPerformanceTimerIndex(GPUTimer timer) const;
+	virtual uint32_t DoClearUnusedAssets(pragma::asset::Type type) const override;
 	virtual void RunLaunchCommands() override;
 	virtual void DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t swapchainImageIdx) override;
 	virtual void OnResolutionChanged(uint32_t w,uint32_t h) override;

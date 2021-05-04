@@ -1403,6 +1403,22 @@ void CEngine::OnRenderResolutionChanged(uint32_t width,uint32_t height)
 	game->Resize();
 }
 
+uint32_t CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
+{
+	auto n = Engine::DoClearUnusedAssets(type);
+	switch(type)
+	{
+	case pragma::asset::Type::Texture:
+	{
+		auto *cl = GetClientState();
+		if(cl)
+			n += static_cast<CMaterialManager&>(cl->GetMaterialManager()).GetTextureManager().ClearUnused();
+		break;
+	}
+	}
+	return n;
+}
+
 REGISTER_CONVAR_CALLBACK_CL(cl_render_monitor,[](NetworkState*,ConVar*,int32_t,int32_t monitor) {
 	auto monitors = GLFW::get_monitors();
 	if(monitor < monitors.size() && monitor >= 0)

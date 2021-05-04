@@ -29,12 +29,14 @@
 //
 
 #include "pragma/engine.h"
+#include "pragma/lua/libraries/ldebug.h"
 #include <pragma/serverstate/serverstate.h>
 #include <pragma/console/convarhandle.h>
 #include "luasystem.h"
 #include <sharedutils/netpacket.hpp>
 #include <pragma/console/convars.h>
 #include "pragma/console/engine_cvar.h"
+#include "pragma/model/modelmanager.h"
 #include "pragma/engine_version.h"
 #include "pragma/console/cvar.h"
 #include "pragma/debug/debug_performance_profiler.hpp"
@@ -294,6 +296,46 @@ void Engine::Close()
 	EndLogging();
 
 	Con::set_output_callback(nullptr);
+}
+
+static uint32_t clear_assets(NetworkState *state,pragma::asset::Type type)
+{
+	if(!state)
+		return 0;
+	auto *l = state->GetLuaState();
+	if(l)
+		Lua::debug::collectgarbage(l); // Make sure any potential Lua references to asset files that can be cleared are cleared
+	switch(type)
+	{
+	case pragma::asset::Type::Model:
+		return state->GetModelManager().ClearUnused();
+	case pragma::asset::Type::Material:
+		return state->GetMaterialManager().ClearUnused();
+	}
+	return 0;
+}
+uint32_t Engine::DoClearUnusedAssets(pragma::asset::Type type) const
+{
+	uint32_t n = 0;
+	n += clear_assets(GetServerNetworkState(),type);
+	n += clear_assets(GetClientState(),type);
+	return n;
+}
+uint32_t Engine::ClearUnusedAssets(pragma::asset::Type type,bool verbose) const
+{
+	auto n = DoClearUnusedAssets(type);
+	if(verbose)
+		Con::cout<<n<<" assets have been cleared!"<<Con::endl;
+	return n;
+}
+uint32_t Engine::ClearUnusedAssets(const std::vector<pragma::asset::Type> &types,bool verbose) const
+{
+	uint32_t n = 0;
+	for(auto type : types)
+		n += ClearUnusedAssets(type,false);
+	if(verbose)
+		Con::cout<<n<<" assets have been cleared!"<<Con::endl;
+	return n;
 }
 
 void Engine::ClearCache()

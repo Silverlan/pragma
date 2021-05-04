@@ -232,6 +232,8 @@ void Frame::SetBonePose(uint32_t boneId,const umath::ScaledTransform &pose)
 	if(boneId >= m_bones.size())
 		return;
 	m_bones.at(boneId) = pose;
+	if(boneId >= m_scales.size() && pose.GetScale() != Vector3{1.f,1.f,1.f})
+		UpdateScales();
 	if(boneId < m_scales.size())
 		m_scales.at(boneId) = pose.GetScale();
 }

@@ -9,6 +9,13 @@
 #include "pragma/lua/libraries/ldebug.h"
 #include <pragma/console/conout.h>
 
+int Lua::debug::collectgarbage(lua_State *l)
+{
+	// Calling twice on purpose: https://stackoverflow.com/a/28320364/2482983
+	Lua::RunString(l,"collectgarbage()","internal");
+	Lua::RunString(l,"collectgarbage()","internal");
+	return 0;
+}
 void Lua::debug::stackdump(lua_State *l)
 {
 	int top = lua_gettop(l);

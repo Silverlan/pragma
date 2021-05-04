@@ -10,6 +10,7 @@
 #include "pragma/lua/lua_doc.hpp"
 #include "pragma/console/conout.h"
 #include "pragma/game/savegame.hpp"
+#include "pragma/asset/util_asset.hpp"
 #include <pragma/console/convars.h>
 #include <pragma/lua/libraries/lutil.h>
 #include <pragma/physics/environment.hpp>
@@ -324,4 +325,19 @@ void Engine::RegisterConsoleCommands()
 	conVarMap.RegisterConCommand("clear_cache",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		ClearCache();
 	},ConVarFlags::None,"Clears all of the cached engine files.");
+
+	conVarMap.RegisterConCommand("asset_clear_unused_models",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		ClearUnusedAssets(pragma::asset::Type::Model,true);
+	},ConVarFlags::None,"Clears all unused models from memory.");
+	conVarMap.RegisterConCommand("asset_clear_unused_materials",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		ClearUnusedAssets(pragma::asset::Type::Material,true);
+	},ConVarFlags::None,"Clears all unused materials from memory.");
+	conVarMap.RegisterConCommand("asset_clear_unused",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		std::vector<pragma::asset::Type> types;
+		auto n = umath::to_integral(pragma::asset::Type::Count);
+		types.reserve(n);
+		for(auto i=decltype(n){0u};i<n;++i)
+			types.push_back(static_cast<pragma::asset::Type>(i));
+		ClearUnusedAssets(types,true);
+	},ConVarFlags::None,"Clears all unused assets from memory.");
 }

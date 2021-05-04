@@ -7,6 +7,8 @@
 
 #include "stdafx_cengine.h"
 #include "pragma/c_engine.h"
+#include <pragma/asset/util_asset.hpp>
+#include <pragma/lua/libraries/ldebug.h>
 #include <pragma/rendering/render_apis.hpp>
 #include <pragma/console/convars.h>
 #include <sharedutils/util_file.h>
@@ -408,4 +410,7 @@ void CEngine::RegisterConsoleCommands()
 		}
 	});
 #endif
+	conVarMap.RegisterConCommand("asset_clear_unused_textures",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		ClearUnusedAssets(pragma::asset::Type::Texture,true);
+	},ConVarFlags::None,"Clears all unused textures from memory.");
 }

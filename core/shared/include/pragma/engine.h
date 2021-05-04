@@ -18,6 +18,7 @@
 #include "pragma/engine_info.hpp"
 #include "pragma/debug/debug_performance_profiler.hpp"
 #include "pragma/iserverstate.hpp"
+#include "pragma/types.hpp"
 #include <materialmanager.h>
 #include <thread>
 #include <atomic>
@@ -110,6 +111,9 @@ public:
 	virtual void Release();
 	virtual void ClearConsole();
 	void ClearCache();
+
+	uint32_t ClearUnusedAssets(pragma::asset::Type type,bool verbose=false) const;
+	uint32_t ClearUnusedAssets(const std::vector<pragma::asset::Type> &types,bool verbose=false) const;
 
 	// Debug
 	pragma::debug::CPUProfiler &GetProfiler() const;
@@ -230,6 +234,7 @@ protected:
 	void WriteServerConfig(VFilePtrReal f);
 	void WriteEngineConfig(VFilePtrReal f);
 	void RegisterSharedConsoleCommands(ConVarMap &map);
+	virtual uint32_t DoClearUnusedAssets(pragma::asset::Type type) const;
 	virtual void RegisterConsoleCommands();
 	virtual void UpdateTickCount();
 	struct DLLNETWORK LaunchCommand

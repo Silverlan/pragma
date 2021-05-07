@@ -138,7 +138,7 @@ Bool BaseAnimatedComponent::GetLocalBonePosition(UInt32 boneId,Vector3 &pos,Quat
 		t = boneTransform *t;
 		bone = bone->parent.lock();
 	}
-	pos = t.GetOrigin();
+	pos = t.GetOrigin() *GetEntity().GetScale();
 	rot = t.GetRotation();
 	if(scale)
 		*scale = t.GetScale();

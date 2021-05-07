@@ -178,7 +178,7 @@ void BaseAnimatedComponent::ResetAnimation(const std::shared_ptr<Model> &mdl)
 		if(bone.expired())
 			continue;
 		auto pose = m_processedBones[i];
-		auto parent = bone.lock();
+		auto parent = bone.lock()->parent.lock();
 		if(parent)
 			pose = m_processedBones[parent->ID].GetInverse() *pose;
 		m_bones[i] = pose;

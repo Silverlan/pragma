@@ -342,7 +342,8 @@ bool BaseModelComponent::GetHitboxBounds(uint32_t boneId,Vector3 &min,Vector3 &m
 	min *= scale;
 	max *= scale;
 	auto animComponent = ent.GetAnimatedComponent();
-	if(animComponent.valid() && animComponent->GetGlobalBonePosition(boneId,origin,rot) == false)
+	Vector3 boneScale {1.f,1.f,1.f};
+	if(animComponent.valid() && animComponent->GetGlobalBonePosition(boneId,origin,rot,&boneScale) == false)
 	{
 		auto pPhysComponent = ent.GetPhysicsComponent();
 		if(pPhysComponent)
@@ -350,6 +351,8 @@ bool BaseModelComponent::GetHitboxBounds(uint32_t boneId,Vector3 &min,Vector3 &m
 		if(pTrComponent)
 			rot = pTrComponent->GetRotation();
 	}
+	min *= boneScale;
+	max *= boneScale;
 	return true;
 }
 uint32_t BaseModelComponent::GetFlexControllerCount() const

@@ -475,7 +475,7 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 			{
 				Vector3 min,max,origin;
 				Quat rot;
-				if(mdlC->GetHitboxBounds(hb.first,min,max,origin,rot) == false)
+				if(mdlC->GetHitboxBounds(hb.first,min,max,origin,rot) == false || uvec::length_sqr(min) < 0.001f || uvec::length_sqr(max) < 0.001f)
 					continue;
 				float dist;
 				if(umath::intersection::line_obb(start,dir,min,max,&dist,origin,rot) == false || dist >= closestHitboxDistance)

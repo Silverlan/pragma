@@ -1405,6 +1405,8 @@ void CEngine::OnRenderResolutionChanged(uint32_t width,uint32_t height)
 
 uint32_t CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
 {
+	if(type == pragma::asset::Type::Texture || type == pragma::asset::Type::Material || type == pragma::asset::Type::Model)
+		const_cast<CEngine*>(this)->GetRenderContext().WaitIdle();
 	auto n = Engine::DoClearUnusedAssets(type);
 	switch(type)
 	{

@@ -602,9 +602,10 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 #endif
 
 	auto modDebug = luabind::module_(lua.GetState(),"debug");
-	modVec[
+	modDebug[
 		luabind::def("move_state_to_string",Lua::debug::move_state_to_string)
 	];
+	lua_pushtablecfunction(lua.GetState(),"debug","print",Lua::debug::print);
 	auto isBreakDefined = false;
 	if(Lua::get_extended_lua_modules_enabled())
 	{
@@ -632,16 +633,16 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	}
 	//lua_pushtablecfunction(lua.GetState(),"debug","enable_remote_debugging",Lua::debug::enable_remote_debugging);
 
-	lua_register(lua.GetState(),"print",Lua_print);
+	lua_register(lua.GetState(),"print",Lua::console::print);
 	Lua::RegisterLibrary(lua.GetState(),"console",{
-		{"print",Lua_print},
-		{"printc",Lua_MsgC},
-		{"print_table",Lua_PrintTable},
-		{"print_message",Lua_Msg},
-		{"print_messageln",Lua_MsgN},
-		{"print_color",Lua_MsgC},
-		{"print_warning",Lua_MsgW},
-		{"print_error",Lua_MsgE},
+		{"print",Lua::console::print},
+		{"printc",Lua::console::msgc},
+		{"print_table",static_cast<int(*)(lua_State*)>(Lua::console::print_table)},
+		{"print_message",static_cast<int(*)(lua_State*)>(Lua::console::msg)},
+		{"print_messageln",Lua::console::msgn},
+		{"print_color",Lua::console::msgc},
+		{"print_warning",Lua::console::msgw},
+		{"print_error",Lua::console::msge},
 
 		{"register_variable",Lua_cvar_CreateConVar},
 		{"register_command",Lua_cvar_CreateConCommand},

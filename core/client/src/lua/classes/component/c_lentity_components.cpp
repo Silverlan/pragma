@@ -546,9 +546,11 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		}));
 	defCEye.def("CalcEyeballPose",static_cast<void(*)(lua_State*,CEyeHandle&,uint32_t)>([](lua_State *l,CEyeHandle &hEye,uint32_t eyeIndex) {
 		pragma::Lua::check_component(l,hEye);
-		auto pose = hEye->CalcEyeballPose(eyeIndex);
+		umath::Transform bonePose;
+		auto pose = hEye->CalcEyeballPose(eyeIndex,&bonePose);
 		Lua::Push(l,pose);
-		}));
+		Lua::Push(l,bonePose);
+	}));
 	defCEye.def("GetEyeballState",static_cast<void(*)(lua_State*,CEyeHandle&,uint32_t)>([](lua_State *l,CEyeHandle &hEye,uint32_t eyeIndex) {
 		pragma::Lua::check_component(l,hEye);
 		auto *eyeballData = hEye->GetEyeballData(eyeIndex);

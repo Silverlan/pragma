@@ -37,7 +37,7 @@ static bool lua_value_to_string(lua_State *L,int arg,int *r,std::string *val)
 	return true;
 }
 
-DLLNETWORK int Lua_print(lua_State *L)
+int Lua::console::print(lua_State *L)
 {
 	/*int argc = lua_gettop(l);
 	for(int i=1;i<=argc;i++)
@@ -63,7 +63,7 @@ DLLNETWORK int Lua_print(lua_State *L)
 }
 
 // TODO: Prevent infinite loops (e.g. printing _G)
-DLLNETWORK int Lua_PrintTable(lua_State *l,std::string tab,int idx)
+int Lua::console::print_table(lua_State *l,std::string tab,int idx)
 {
 	Lua::CheckTable(l,idx);
 	Lua::PushNil(l);
@@ -79,7 +79,7 @@ DLLNETWORK int Lua_PrintTable(lua_State *l,std::string tab,int idx)
 
 			std::string tabSub = tab;
 			tabSub += "\t";
-			Lua_PrintTable(l,tabSub,Lua::GetStackTop(l));
+			print_table(l,tabSub,Lua::GetStackTop(l));
 		}
 		else
 		{
@@ -99,10 +99,10 @@ DLLNETWORK int Lua_PrintTable(lua_State *l,std::string tab,int idx)
 	return 0;
 }
 
-DLLNETWORK int Lua_PrintTable(lua_State *l) {return Lua_PrintTable(l,"");}
+int Lua::console::print_table(lua_State *l) {return print_table(l,"");}
 
 extern DLLNETWORK Engine *engine;
-DLLNETWORK int Lua_Msg(lua_State *l,int st)
+int Lua::console::msg(lua_State *l,int st)
 {
 	int argc = lua_gettop(l);
 	if(argc > 0)
@@ -126,16 +126,33 @@ DLLNETWORK int Lua_Msg(lua_State *l,int st)
 	return 0;
 }
 
-DLLNETWORK int Lua_Msg(lua_State *l) {return Lua_Msg(l,1);}
-
-DLLNETWORK int Lua_MsgN(lua_State *l)
+int Lua::debug::print(lua_State *l)
 {
-	Lua_Msg(l);
+	util::set_console_color(util::ConsoleColorFlags::BackgroundRed | util::ConsoleColorFlags::BackgroundIntensity | util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	int n = lua_gettop(l);  /* number of arguments */
+	int i;
+	for (i=1; i<=n; i++) {
+		auto status = -1;
+		std::string val;
+		if(lua_value_to_string(l,i,&status,&val) == false)
+			return status;
+		if (i>1) Con::cout<<"\t";
+		Con::cout<<val;
+	}
 	Con::cout<<Con::endl;
 	return 0;
 }
 
-DLLNETWORK int Lua_MsgC(lua_State *l)
+int Lua::console::msg(lua_State *l) {return msg(l,1);}
+
+int Lua::console::msgn(lua_State *l)
+{
+	msg(l);
+	Con::cout<<Con::endl;
+	return 0;
+}
+
+int Lua::console::msgc(lua_State *l)
 {
 	if(Lua::IsType<Color>(l,1))
 	{
@@ -157,12 +174,12 @@ DLLNETWORK int Lua_MsgC(lua_State *l)
 	}
 	int flags = Lua::CheckInt<int>(l,1);
 	Con::attr(flags);
-	Lua_Msg(l,2);
+	msg(l,2);
 	Con::cout<<Con::endl;
 	return 0;
 }
 
-DLLNETWORK int Lua_MsgW(lua_State *l)
+int Lua::console::msgw(lua_State *l)
 {
 	int argc = lua_gettop(l);
 	if(argc == 0)
@@ -180,7 +197,7 @@ DLLNETWORK int Lua_MsgW(lua_State *l)
 	return 0;
 }
 
-DLLNETWORK int Lua_MsgE(lua_State *l)
+int Lua::console::msge(lua_State *l)
 {
 	int argc = lua_gettop(l);
 	if(argc == 0)

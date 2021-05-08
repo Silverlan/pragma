@@ -122,6 +122,7 @@ bool BaseModelComponent::GetAttachment(unsigned int attID,Vector3 *pos,Quat *rot
 		if(attPose.has_value())
 			pose *= *attPose;
 	}
+	pose.SetOrigin(pose.GetOrigin() *ent.GetScale());
 	if(pos)
 		*pos = pose.GetOrigin();
 	if(rot)

@@ -138,7 +138,7 @@ Bool BaseAnimatedComponent::GetLocalBonePosition(UInt32 boneId,Vector3 &pos,Quat
 		t = boneTransform *t;
 		bone = bone->parent.lock();
 	}
-	pos = t.GetOrigin() *GetEntity().GetScale();
+	pos = t.GetOrigin();
 	rot = t.GetRotation();
 	if(scale)
 		*scale = t.GetScale();
@@ -165,6 +165,7 @@ Bool BaseAnimatedComponent::GetGlobalBonePosition(UInt32 boneId,Vector3 &pos,Qua
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(!pTrComponent)
 		return true;
+	pos *= pTrComponent->GetScale();
 	uvec::local_to_world(pTrComponent->GetOrigin(),pTrComponent->GetRotation(),pos,rot);//uvec::local_to_world(GetOrigin(),GetOrientation(),pos,rot);
 	return true;
 }
@@ -175,6 +176,7 @@ Bool BaseAnimatedComponent::GetGlobalBonePosition(UInt32 boneId,Vector3 &pos) co
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(!pTrComponent)
 		return true;
+	pos *= pTrComponent->GetScale();
 	uvec::local_to_world(pTrComponent->GetOrigin(),pTrComponent->GetRotation(),pos);//uvec::local_to_world(GetOrigin(),GetOrientation(),pos);
 	return true;
 }

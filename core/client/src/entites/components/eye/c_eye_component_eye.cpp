@@ -183,6 +183,7 @@ umath::Transform pragma::CEyeComponent::CalcEyeballPose(uint32_t eyeballIndex,um
 	tmp.x = tmp.x +config.eyeShift.x *umath::sign(tmp.x);
 	tmp.y = tmp.y +config.eyeShift.y *umath::sign(tmp.y);
 	tmp.z = tmp.z +config.eyeShift.z *umath::sign(tmp.z);
+	tmp *= GetEntity().GetScale();
 
 	Vector3 bonePos;
 	Quat boneRot;
@@ -245,20 +246,24 @@ void pragma::CEyeComponent::UpdateEyeballMT(const Eyeball &eyeball,uint32_t eyeb
 		
 	state.up = uvec::cross(state.right,state.forward);
 	uvec::normalize(&state.up);
-
-	auto scale = (1.0 /eyeball.irisScale) +config.eyeSize;
-	if(scale > 0.0)
-		scale = 1.0 /scale;
+	
+	auto &vScale = GetEntity().GetScale();
+	auto scale = static_cast<float>((1.0 /eyeball.irisScale) +config.eyeSize) *vScale;
+	for(uint8_t i=0;i<3;++i)
+	{
+		if(scale[i] > 0.0)
+			scale[i] = 1.0 /scale[i];
+	}
 
 	auto org = state.origin;
 
-	auto u = state.right *-static_cast<float>(scale);
+	auto u = state.right *-scale;
 	state.irisProjectionU.x = u.x;
 	state.irisProjectionU.y = u.y;
 	state.irisProjectionU.z = u.z;
 	state.irisProjectionU.w = -uvec::dot(org,u);
 
-	auto v = state.up *-static_cast<float>(scale);
+	auto v = state.up *-scale;
 	state.irisProjectionV.x = v.x;
 	state.irisProjectionV.y = v.y;
 	state.irisProjectionV.z = v.z;

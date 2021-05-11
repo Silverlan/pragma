@@ -19,6 +19,10 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCRender.def("GetTransformationMatrix",&Lua::Render::GetTransformationMatrix);
 	defCRender.def("SetRenderMode",&Lua::Render::SetRenderMode);
 	defCRender.def("GetRenderMode",&Lua::Render::GetRenderMode);
+	defCRender.def("GetRenderModeProperty",static_cast<void(*)(lua_State*,CRenderHandle&)>([](lua_State *l,CRenderHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		Lua::Property::push(l,*hComponent->GetRenderModeProperty());
+	}));
 	defCRender.def("GetLocalRenderBounds",&Lua::Render::GetLocalRenderBounds);
 	defCRender.def("GetLocalRenderSphereBounds",&Lua::Render::GetLocalRenderSphereBounds);
 	defCRender.def("GetAbsoluteRenderBounds",&Lua::Render::GetAbsoluteRenderBounds);

@@ -117,6 +117,7 @@ namespace pragma
 
 		void SetRenderMode(RenderMode mode);
 		RenderMode GetRenderMode() const;
+		const util::PEnumProperty<RenderMode> &GetRenderModeProperty() const;
 
 		Mat4 &GetTransformationMatrix();
 		const umath::ScaledTransform &GetRenderPose() const;
@@ -191,7 +192,7 @@ namespace pragma
 		std::optional<umath::ScaledTransform> m_renderOffset {};
 		umath::ScaledTransform m_renderPose {};
 		Mat4 m_matTransformation = umat::identity();
-		RenderMode m_renderMode = RenderMode::World;
+		util::PEnumProperty<RenderMode> m_renderMode = nullptr;
 
 		// Used for quick access to avoid having to do a lookup on the entity's components
 		mutable CAttachableComponent *m_attachableComponent = nullptr;

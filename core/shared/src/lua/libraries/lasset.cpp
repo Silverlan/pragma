@@ -182,6 +182,14 @@ luabind::object Lua::asset::get_supported_import_file_extensions(lua_State *l,pr
 		t[idx++] = "vmdl_c";
 		t[idx++] = "nif";
 	}
+	else if(type == pragma::asset::Type::Material)
+	{
+		// These are implemented using the old importer system, so they're not included in the import information
+		// retrieved above. We'll add them to the list manually for now.
+		// TODO: Move these to the new importer system and remove these entries!
+		t[idx++] = "vmt";
+		t[idx++] = "vmat_c";
+	}
 	return t;
 }
 luabind::object Lua::asset::get_supported_export_file_extensions(lua_State *l,pragma::asset::Type type)

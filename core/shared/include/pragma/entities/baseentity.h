@@ -99,6 +99,7 @@ public:
 	void Construct(unsigned int idx);
 
 	const util::Uuid GetUuid() const {return m_uuid;}
+	void SetUuid(const util::Uuid &uuid) {m_uuid = uuid;}
 
 	friend EntityHandle;
 	friend Engine;

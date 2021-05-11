@@ -67,7 +67,7 @@ void CRenderComponent::RegisterEvents(pragma::EntityComponentManager &componentM
 	EVENT_ON_DEPTH_BIAS_CHANGED = componentManager.RegisterEvent("ON_DEPTH_BIAS_CHANGED");
 }
 CRenderComponent::CRenderComponent(BaseEntity &ent)
-	: BaseRenderComponent(ent)
+	: BaseRenderComponent(ent),m_renderMode{util::TEnumProperty<RenderMode>::Create(RenderMode::World)}
 {}
 luabind::object CRenderComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CRenderComponentHandleWrapper>(l);}
 void CRenderComponent::InitializeBuffers()
@@ -612,9 +612,9 @@ void CRenderComponent::UpdateRenderDataMT(const std::shared_ptr<prosper::IPrimar
 
 void CRenderComponent::SetRenderMode(RenderMode mode)
 {
-	if(mode == m_renderMode)
+	if(mode == *m_renderMode)
 		return;
-	m_renderMode = mode;
+	*m_renderMode = mode;
 
 	auto it = std::find(s_ocExemptEntities.begin(),s_ocExemptEntities.end(),this);
 	if(mode == RenderMode::View)
@@ -668,7 +668,8 @@ void CRenderComponent::ClearRenderBuffers()
 	m_renderBuffer = nullptr;
 	m_renderDescSetGroup = nullptr;
 }
-RenderMode CRenderComponent::GetRenderMode() const {return m_renderMode;}
+RenderMode CRenderComponent::GetRenderMode() const {return *m_renderMode;}
+const util::PEnumProperty<RenderMode> &CRenderComponent::GetRenderModeProperty() const {return m_renderMode;}
 bool CRenderComponent::ShouldDraw() const {return umath::is_flag_set(m_stateFlags,StateFlags::ShouldDraw);}
 bool CRenderComponent::ShouldDrawShadow() const
 {

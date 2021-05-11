@@ -724,6 +724,12 @@ template<class T,class TPropertyWrapper,class TClassDef>
 	.def("GetChildren",static_cast<luabind::object(*)(lua_State*,T&,const std::string&)>([](lua_State *l,T &p,const std::string &key) -> luabind::object {
 		return get_children(l,static_cast<TPropertyWrapper>(p)[key]);
 	}))
+	.def("GetChildCount",static_cast<uint32_t(*)(lua_State*,T&)>([](lua_State *l,T &p) -> uint32_t {
+		return static_cast<TPropertyWrapper>(p).GetChildCount();
+	}))
+	.def("GetChildCount",static_cast<uint32_t(*)(lua_State*,T&,const std::string&)>([](lua_State *l,T &p,const std::string &key) -> uint32_t {
+		return static_cast<TPropertyWrapper>(p)[key].GetChildCount();
+	}))
 	.def("Resize",static_cast<void(*)(lua_State*,T&,uint32_t)>([](lua_State *l,T &p,uint32_t size) {
 		static_cast<TPropertyWrapper>(p).Resize(size);
 	}))

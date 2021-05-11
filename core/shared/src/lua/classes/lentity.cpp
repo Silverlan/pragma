@@ -323,6 +323,10 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 		LUA_CHECK_ENTITY(l,hEnt);
 		Lua::PushString(l,util::uuid_to_string(hEnt->GetUuid()));
 	}));
+	classDef.def("SetUuid",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&)>([](lua_State *l,EntityHandle &hEnt,const std::string &uuid) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hEnt->SetUuid(util::uuid_string_to_bytes(uuid));
+	}));
 
 	classDef.def("Save",&Save);
 	classDef.def("Load",&Load);
@@ -809,7 +813,7 @@ void Lua::Entity::SetEnabled(lua_State *l,EntityHandle &hEnt,bool enabled)
 {
 	LUA_CHECK_ENTITY(l,hEnt);
 	auto *toggleC = dynamic_cast<pragma::BaseToggleComponent*>(hEnt->FindComponent("toggle").get());
-	if(toggleC == nullptr && enabled == false)
+	if(toggleC == nullptr && enabled == true)
 		return;
 	if(toggleC == nullptr)
 		toggleC = dynamic_cast<pragma::BaseToggleComponent*>(hEnt->AddComponent("toggle").get());

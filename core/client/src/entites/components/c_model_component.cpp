@@ -73,7 +73,8 @@ void CModelComponent::SetMaterialOverride(uint32_t idx,const std::string &matOve
 {
 	if(idx >= m_materialOverrides.size())
 		m_materialOverrides.resize(idx +1);
-	m_materialOverrides.at(idx) = client->LoadMaterial(matOverride);
+	auto *mat = client->LoadMaterial(matOverride);
+	m_materialOverrides.at(idx) = mat ? mat->GetHandle() : MaterialHandle{};
 }
 void CModelComponent::SetMaterialOverride(uint32_t idx,CMaterial &mat)
 {

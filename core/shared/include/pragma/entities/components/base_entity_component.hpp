@@ -72,7 +72,8 @@ namespace pragma
 		{
 			None = 0u,
 			IsThinking = 1u,
-			IsLogicEnabled = IsThinking<<1u
+			IsLogicEnabled = IsThinking<<1u,
+			Removed = IsLogicEnabled<<1u
 		};
 
 		BaseEntityComponent(const BaseEntityComponent&)=delete;

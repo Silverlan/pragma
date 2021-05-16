@@ -118,6 +118,9 @@ util::WeakHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::AddComp
 }
 void BaseEntityComponentSystem::RemoveComponent(pragma::BaseEntityComponent &component)
 {
+	if(umath::is_flag_set(component.m_stateFlags,BaseEntityComponent::StateFlags::Removed))
+		return;
+	umath::set_flag(component.m_stateFlags,BaseEntityComponent::StateFlags::Removed);
 	auto it = std::find_if(m_components.begin(),m_components.end(),[&component](const std::shared_ptr<BaseEntityComponent> &componentOther) {
 		return componentOther.get() == &component;
 	});

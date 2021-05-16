@@ -22,6 +22,7 @@ namespace pragma
 
 		CompositeComponent(BaseEntity &ent);
 		virtual void Initialize() override;
+		virtual void OnRemove() override;
 
 		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
 		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;

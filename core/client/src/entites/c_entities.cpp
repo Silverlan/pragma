@@ -56,6 +56,8 @@ CBaseEntity *CGame::CreateEntity(std::string classname)
 
 void CGame::RemoveEntity(BaseEntity *ent)
 {
+	if(umath::is_flag_set(ent->GetStateFlags(),BaseEntity::StateFlags::Removed))
+		return;
 	if(ent->IsPlayer())
 		m_numPlayers--;
 	unsigned int cIdx = static_cast<CBaseEntity*>(ent)->GetClientIndex();

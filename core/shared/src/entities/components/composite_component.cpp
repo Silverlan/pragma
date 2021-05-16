@@ -32,6 +32,17 @@ void CompositeComponent::Initialize()
 	BaseEntityComponent::Initialize();
 }
 
+void CompositeComponent::OnRemove()
+{
+	BaseEntityComponent::OnRemove();
+	for(auto &hEnt : m_ents)
+	{
+		if(!hEnt.IsValid())
+			continue;
+		hEnt->Remove();
+	}
+}
+
 std::vector<EntityHandle>::const_iterator CompositeComponent::FindEntity(BaseEntity &ent) const
 {
 	return std::find_if(m_ents.begin(),m_ents.end(),[&ent](const EntityHandle &hEnt) {

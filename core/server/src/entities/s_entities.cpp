@@ -60,6 +60,8 @@ SBaseEntity *SGame::CreateEntity(std::string classname)
 
 void SGame::RemoveEntity(BaseEntity *ent)
 {
+	if(umath::is_flag_set(ent->GetStateFlags(),BaseEntity::StateFlags::Removed))
+		return;
 	auto *s_ent = static_cast<SBaseEntity*>(ent);
 	if(s_ent->IsShared())
 	{

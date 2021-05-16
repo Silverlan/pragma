@@ -266,8 +266,10 @@ void CBaseEntity::OnRemove()
 
 void CBaseEntity::Remove()
 {
+	if(umath::is_flag_set(GetStateFlags(),BaseEntity::StateFlags::Removed))
+		return;
+	BaseEntity::Remove(); // Has to be called first!
 	SceneRenderDesc::AssertRenderQueueThreadInactive();
-	BaseEntity::Remove();
 	Game *game = client->GetGameState();
 	game->RemoveEntity(this);
 }

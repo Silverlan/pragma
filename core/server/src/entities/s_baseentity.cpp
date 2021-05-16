@@ -178,7 +178,9 @@ pragma::NetEventId SBaseEntity::RegisterNetEvent(const std::string &name) const
 
 void SBaseEntity::Remove()
 {
-	BaseEntity::Remove();
+	if(umath::is_flag_set(GetStateFlags(),BaseEntity::StateFlags::Removed))
+		return;
+	BaseEntity::Remove(); // Has to be called first!
 	Game *game = server->GetGameState();
 	game->RemoveEntity(this);
 }

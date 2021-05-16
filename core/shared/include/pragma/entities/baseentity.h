@@ -90,7 +90,8 @@ public:
 		CollisionBoundsChanged = RotationChanged<<1u,
 		RenderBoundsChanged = CollisionBoundsChanged<<1u,
 
-		HasWorldComponent = RenderBoundsChanged<<1u
+		HasWorldComponent = RenderBoundsChanged<<1u,
+		Removed = HasWorldComponent<<1u
 	};
 
 	static void RegisterEvents(pragma::EntityComponentManager &componentManager);

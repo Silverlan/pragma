@@ -42,6 +42,7 @@ namespace pragma
 {
 	class BaseEntityComponent;
 	class BaseModelComponent;
+	class BaseGenericComponent;
 	class BaseAnimatedComponent;
 	class BaseWeaponComponent;
 	class BaseVehicleComponent;
@@ -144,6 +145,7 @@ public:
 	pragma::BaseModelComponent *GetModelComponent() const;
 	pragma::BaseTransformComponent *GetTransformComponent() const;
 	pragma::BasePhysicsComponent *GetPhysicsComponent() const;
+	pragma::BaseGenericComponent *GetGenericComponent() const;
 
 	// These are quick-access functions for commonly used component functions.
 	// In some cases these may create the component, if it doesn't exist, and transmit
@@ -234,8 +236,6 @@ public:
 	virtual void Initialize();
 	EntityIndex GetIndex() const;
 	virtual uint32_t GetLocalIndex() const;
-	uint64_t GetUniqueIndex() const;
-	void SetUniqueIndex(uint64_t idx);
 
 	virtual bool IsCharacter() const=0;
 	virtual bool IsPlayer() const=0;
@@ -268,6 +268,7 @@ protected:
 	pragma::BaseTransformComponent *m_transformComponent = nullptr;
 	pragma::BasePhysicsComponent *m_physicsComponent = nullptr;
 	pragma::BaseModelComponent *m_modelComponent = nullptr;
+	pragma::BaseGenericComponent *m_genericComponent = nullptr;
 
 	// Should only be used by quick-access methods!
 	// Adds the component and trasmits the information
@@ -280,7 +281,6 @@ protected:
 	std::string m_class = "BaseEntity";
 	util::Uuid m_uuid {};
 	EntityIndex m_index = 0u;
-	uint64_t m_uniqueIndex = 0ull;
 	virtual void EraseFunction(int function);
 	virtual void DoSpawn();
 	pragma::NetEventId SetupNetEvent(const std::string &name) const;

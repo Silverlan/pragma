@@ -68,6 +68,8 @@ void CBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 		umath::set_flag(m_stateFlags,StateFlags::HasWorldComponent);
 	else if(typeid(component) == typeid(pragma::CModelComponent))
 		m_modelComponent = &static_cast<pragma::CModelComponent&>(component);
+	else if(typeid(component) == typeid(pragma::CGenericComponent))
+		m_genericComponent = &static_cast<pragma::CGenericComponent&>(component);
 }
 void CBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
 {
@@ -82,6 +84,8 @@ void CBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
 		m_physicsComponent = nullptr;
 	else if(typeid(component) == typeid(pragma::CModelComponent))
 		m_modelComponent = nullptr;
+	else if(typeid(component) == typeid(pragma::CGenericComponent))
+		m_genericComponent = nullptr;
 }
 pragma::CRenderComponent *CBaseEntity::GetRenderComponent() const {return m_renderComponent;}
 
@@ -189,7 +193,6 @@ Bool CBaseEntity::ReceiveNetEvent(UInt32 eventId,NetPacket &p)
 
 void CBaseEntity::ReceiveData(NetPacket &packet)
 {
-	m_uniqueIndex = packet->Read<uint64_t>();
 	m_spawnFlags = packet->Read<uint32_t>();
 	m_uuid = packet->Read<util::Uuid>();
 

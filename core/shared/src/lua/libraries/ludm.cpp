@@ -768,6 +768,9 @@ template<class T,class TPropertyWrapper,class TClassDef>
 	.def("Merge",static_cast<void(*)(lua_State*,T&,::udm::PropertyWrapper&)>([](lua_State *l,T &prop,::udm::PropertyWrapper &propOther) {
 		static_cast<TPropertyWrapper>(prop).Merge(propOther);
 	}))
+	.def("Merge",static_cast<void(*)(lua_State*,T&,::udm::PropertyWrapper&,::udm::MergeFlags)>([](lua_State *l,T &prop,::udm::PropertyWrapper &propOther,::udm::MergeFlags mergeFlags) {
+		static_cast<TPropertyWrapper>(prop).Merge(propOther,mergeFlags);
+	}))
 	.def("ToAscii",static_cast<luabind::object(*)(lua_State*,T&)>([](lua_State *l,T &prop) -> luabind::object {
 		auto *el = static_cast<TPropertyWrapper>(prop).GetValuePtr<::udm::Element>();
 		if(!el)
@@ -1099,6 +1102,9 @@ void Lua::udm::register_library(Lua::Interface &lua)
 
         {"ARRAY_TYPE_COMPRESSED",umath::to_integral(::udm::ArrayType::Compressed)},
         {"ARRAY_TYPE_RAW",umath::to_integral(::udm::ArrayType::Raw)},
+
+		{"MERGE_FLAG_NONE",umath::to_integral(::udm::MergeFlags::None)},
+		{"MERGE_FLAG_BIT_OVERWRITE_EXISTING",umath::to_integral(::udm::MergeFlags::OverwriteExisting)},
 		
         {"ASCII_SAVE_FLAG_BIT_INCLUDE_HEADER",umath::to_integral(::udm::AsciiSaveFlags::IncludeHeader)},
         {"ASCII_SAVE_FLAG_BIT_DONT_COMPRESS_LZ4_ARRAYS",umath::to_integral(::udm::AsciiSaveFlags::DontCompressLz4Arrays)}

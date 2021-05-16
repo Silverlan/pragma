@@ -89,7 +89,6 @@ protected:
 	std::vector<std::string> m_gameResources;
 	
 	pragma::NetEventManager m_entNetEventManager = {};
-	uint64_t m_nextUniqueEntityIndex;
 	CallbackHandle m_cbProfilingHandle = {};
 	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_profilingStageManager = nullptr;
 public:

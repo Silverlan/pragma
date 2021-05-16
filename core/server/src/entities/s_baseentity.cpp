@@ -29,6 +29,7 @@
 #include "pragma/entities/components/s_time_scale_component.hpp"
 #include "pragma/entities/components/s_name_component.hpp"
 #include "pragma/entities/components/s_transform_component.hpp"
+#include "pragma/entities/components/s_generic_component.hpp"
 #include <servermanager/sv_nwm_recipientfilter.h>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
@@ -77,6 +78,8 @@ void SBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 		umath::set_flag(m_stateFlags,StateFlags::HasWorldComponent);
 	else if(typeid(component) == typeid(pragma::SModelComponent))
 		m_modelComponent = &static_cast<pragma::SModelComponent&>(component);
+	else if(typeid(component) == typeid(pragma::SGenericComponent))
+		m_genericComponent = &static_cast<pragma::SGenericComponent&>(component);
 }
 void SBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
 {
@@ -89,6 +92,8 @@ void SBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
 		m_physicsComponent = nullptr;
 	else if(typeid(component) == typeid(pragma::SModelComponent))
 		m_modelComponent = nullptr;
+	else if(typeid(component) == typeid(pragma::SGenericComponent))
+		m_genericComponent = nullptr;
 }
 
 BaseEntity *SBaseEntity::GetClientsideEntity() const
@@ -129,7 +134,6 @@ bool SBaseEntity::IsNetworkLocal() const {return IsServersideOnly();}
 
 void SBaseEntity::SendData(NetPacket &packet,pragma::networking::ClientRecipientFilter &rp)
 {
-	packet->Write<uint64_t>(GetUniqueIndex());
 	packet->Write<uint32_t>(GetSpawnFlags());
 	packet->Write(GetUuid());
 

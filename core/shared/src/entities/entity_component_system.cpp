@@ -9,6 +9,7 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/entities/entity_component_manager.hpp"
 #include "pragma/entities/entity_component_system.hpp"
+#include "pragma/entities/components/base_generic_component.hpp"
 #include <unordered_set>
 
 using namespace pragma;
@@ -85,7 +86,9 @@ util::WeakHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::AddComp
 	OnComponentAdded(*ptrComponent);
 
 	pragma::CEOnEntityComponentAdded evData{*ptrComponent};
-	BroadcastEvent(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED,evData,ptrComponent.get());
+	auto *genericC = m_entity->GetGenericComponent();
+	if(BroadcastEvent(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED,evData,ptrComponent.get()) != util::EventReply::Handled && genericC)
+		genericC->InvokeEventCallbacks(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED,evData);
 
 	for(auto &ptrComponentOther : components)
 	{

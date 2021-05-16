@@ -15,14 +15,14 @@ static CBaseEntity *read_unique_entity(NetPacket &packet,const std::function<voi
 {
 	if(c_game == nullptr)
 		return nullptr;
-	auto idx = packet->Read<uint64_t>();
-	if(idx == 0)
+	auto uuid = packet->Read<util::Uuid>();
+	if(uuid == util::Uuid{})
 		return nullptr;
 	std::vector<BaseEntity*> *ents;
 	c_game->GetEntities(&ents);
 	for(auto *ent : *ents)
 	{
-		if(ent != nullptr && ent->IsSpawned() == true && ent->GetUniqueIndex() == idx)
+		if(ent != nullptr && ent->IsSpawned() == true && ent->GetUuid() == uuid)
 		{
 			if(onCreated != nullptr)
 				onCreated(ent);
@@ -32,8 +32,8 @@ static CBaseEntity *read_unique_entity(NetPacket &packet,const std::function<voi
 	if(onCreated == nullptr)
 		return nullptr;
 	auto cb = FunctionCallback<void,BaseEntity*>::Create(nullptr);
-	cb.get<Callback<void,BaseEntity*>>()->SetFunction(std::bind([onCreated,idx](CallbackHandle hCb,BaseEntity *ent) {
-		if(ent->GetUniqueIndex() != idx)
+	cb.get<Callback<void,BaseEntity*>>()->SetFunction(std::bind([onCreated,uuid](CallbackHandle hCb,BaseEntity *ent) {
+		if(ent->GetUuid() != uuid)
 			return;
 		onCreated(ent);
 		if(hCb.IsValid())

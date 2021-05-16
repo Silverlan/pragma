@@ -169,7 +169,6 @@ void SGame::SetupEntity(BaseEntity *ent,unsigned int idx)
 		m_baseEnts.push_back(nullptr);
 	}
 	auto *sEnt = static_cast<SBaseEntity*>(ent);
-	sEnt->SetUniqueIndex(m_nextUniqueEntityIndex++);
 	sEnt->Construct(idx);
 	sEnt->PrecacheModels();
 	auto pSoundEmitterComponent = sEnt->GetComponent<pragma::SSoundEmitterComponent>();

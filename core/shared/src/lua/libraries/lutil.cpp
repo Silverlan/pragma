@@ -477,8 +477,7 @@ int Lua::util::register_class(lua_State *l)
 			if(Lua::IsSet(l,-1) == false)
 			{
 				Lua::Pop(l,1); /* 0 */
-				Lua::PushBool(l,false);
-				return 1;
+				return 0;
 			}
 
 			auto numPop = 0u;
@@ -495,8 +494,7 @@ int Lua::util::register_class(lua_State *l)
 					if(bLast == true)
 						break;
 					Lua::Pop(l,numPop +1); /* 0 */
-					Lua::PushBool(l,false);
-					return 1;
+					return 0;
 				}
 				if(bLast == true)
 				{
@@ -508,13 +506,15 @@ int Lua::util::register_class(lua_State *l)
 					if(classInfo)
 					{
 						// Re-register base classes for this class, in case they have been changed
-						classInfo->classObject.push(l); /* 1 */
+						classInfo->regFunc.push(l); /* 1 */
 						fRegisterBaseClasses();
 						Lua::Pop(l,1); /* 0 */
+
+						classInfo->classObject.push(l);
+						return 1;
 					}
 
-					Lua::PushBool(l,false);
-					return 1;
+					return 0;
 				}
 			}
 			Lua::Pop(l,numPop +1); /* 0 */
@@ -535,13 +535,15 @@ int Lua::util::register_class(lua_State *l)
 			if(classInfo)
 			{
 				// Re-register base classes for this class, in case they have been changed
-				classInfo->classObject.push(l); /* 1 */
+				classInfo->regFunc.push(l); /* 1 */
 				fRegisterBaseClasses();
 				Lua::Pop(l,1); /* 0 */
+
+				classInfo->classObject.push(l);
+				return 1;
 			}
 
-			Lua::PushBool(l,false);
-			return 1;
+			return 0;
 		}
 		Lua::Pop(l,1); /* 0 */
 	}
@@ -552,12 +554,14 @@ int Lua::util::register_class(lua_State *l)
 	std::stringstream ss;
 	ss<<"return class '"<<className<<"'";
 	auto r = Lua::RunString(l,ss.str(),1,"internal"); /* 1 */
+	luabind::object oClass {};
 	if(r == Lua::StatusCode::Ok)
 	{
 		auto *nw = engine->GetNetworkState(l);
 		auto *game = nw->GetGameState();
-		luabind::object oClass {luabind::from_stack(l,-1)};
-		game->GetLuaClassManager().RegisterClass(fullClassName,oClass);
+		oClass = luabind::globals(l)[className];
+		luabind::object regFc {luabind::from_stack(l,-1)};
+		game->GetLuaClassManager().RegisterClass(fullClassName,oClass,regFc);
 
 		fRegisterBaseClasses();
 		Lua::Pop(l,1); /* 0 */
@@ -578,8 +582,9 @@ int Lua::util::register_class(lua_State *l)
 
 	if(restorePreviousGlobalValue)
 		Lua::SetGlobal(l,className); /* -1 */
-
-	Lua::PushBool(l,true);
+	if(!oClass)
+		return 0;
+	oClass.push(l);
 	return 1;
 }
 

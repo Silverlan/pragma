@@ -9,6 +9,7 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/entities/entity_component_manager.hpp"
 #include "pragma/entities/components/basetoggle.h"
+#include "pragma/entities/components/base_generic_component.hpp"
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 
@@ -311,7 +312,9 @@ void BaseEntityComponent::OnEntityComponentRemoved(BaseEntityComponent &componen
 		it = m_callbackInfos.erase(it);
 	}
 	pragma::CEOnEntityComponentRemoved evData{*this};
-	BroadcastEvent(EVENT_ON_ENTITY_COMPONENT_REMOVED,evData);
+	auto *genericC = GetEntity().GetGenericComponent();
+	if(BroadcastEvent(EVENT_ON_ENTITY_COMPONENT_REMOVED,evData) != util::EventReply::Handled && genericC)
+		genericC->InvokeEventCallbacks(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED,evData);
 }
 void BaseEntityComponent::Save(udm::LinkedPropertyWrapper &udm)
 {

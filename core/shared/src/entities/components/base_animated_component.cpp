@@ -707,7 +707,10 @@ bool BaseAnimatedComponent::MaintainAnimations(double dt)
 		return false;
 	CEMaintainAnimations evData{dt};
 	if(InvokeEventCallbacks(EVENT_MAINTAIN_ANIMATIONS,evData) == util::EventReply::Handled)
+	{
+		InvokeEventCallbacks(EVENT_ON_ANIMATIONS_UPDATED);
 		return true;
+	}
 
 	auto r = MaintainAnimation(m_baseAnim,dt);
 	if(r == true)

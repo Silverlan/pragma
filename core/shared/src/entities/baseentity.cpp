@@ -107,8 +107,6 @@ bool BaseEntity::IsMapEntity() const
 	auto *mapComponent = static_cast<pragma::MapComponent*>(FindComponent("map").get());
 	return mapComponent != nullptr && mapComponent->GetMapIndex() != 0;
 }
-uint64_t BaseEntity::GetUniqueIndex() const {return m_uniqueIndex;}
-void BaseEntity::SetUniqueIndex(uint64_t idx) {m_uniqueIndex = idx;}
 
 void BaseEntity::RemoveEntityOnRemoval(BaseEntity *ent,Bool bRemove) {RemoveEntityOnRemoval(ent->GetHandle(),bRemove);}
 void BaseEntity::RemoveEntityOnRemoval(const EntityHandle &hEnt,Bool bRemove)
@@ -300,6 +298,7 @@ void BaseEntity::PrecacheModels() {}
 pragma::BaseTransformComponent *BaseEntity::GetTransformComponent() const {return m_transformComponent;}
 pragma::BasePhysicsComponent *BaseEntity::GetPhysicsComponent() const {return m_physicsComponent;}
 pragma::BaseModelComponent *BaseEntity::GetModelComponent() const {return m_modelComponent;}
+pragma::BaseGenericComponent *BaseEntity::GetGenericComponent() const {return m_genericComponent;}
 
 void BaseEntity::Remove() {}
 void BaseEntity::RemoveSafely() {GetNetworkState()->GetGameState()->ScheduleEntityForRemoval(*this);}

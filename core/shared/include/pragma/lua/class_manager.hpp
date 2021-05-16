@@ -36,11 +36,12 @@ namespace pragma::lua
 		struct DLLNETWORK ClassInfo
 		{
 			luabind::object classObject;
+			luabind::object regFunc;
 			std::string className;
 		};
 
 		ClassManager(lua_State &l);
-		void RegisterClass(const std::string &className,luabind::object oClass);
+		void RegisterClass(const std::string &className,luabind::object oClass,luabind::object regFc);
 		bool IsClassRegistered(const ClassRef &classRef) const;
 		bool IsClassMethodDefined(const ClassRef &classRef,const std::string &methodName) const;
 		ClassInfo *FindClassInfo(const ClassRef &classRef);

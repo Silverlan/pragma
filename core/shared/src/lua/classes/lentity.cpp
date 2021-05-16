@@ -230,6 +230,10 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 		LUA_CHECK_ENTITY(l,hEnt);
 		Lua::PushBool(l,hEnt->HasComponent(componentId));
 	}));
+	classDef.def("HasComponent",static_cast<void(*)(lua_State*,EntityHandle&,luabind::object)>([](lua_State *l,EntityHandle &hEnt,luabind::object) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		Lua::PushBool(l,false);
+	}));
 	classDef.def("GetComponent",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&)>([](lua_State *l,EntityHandle &hEnt,const std::string &name) {
 		LUA_CHECK_ENTITY(l,hEnt);
 		auto pComponent = hEnt->FindComponent(name);
@@ -244,6 +248,30 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 			return;
 		pComponent->PushLuaObject(l);
 	}));
+	classDef.def("GetComponent",static_cast<void(*)(lua_State*,EntityHandle&,luabind::object)>([](lua_State *l,EntityHandle &hEnt,luabind::object) {
+		LUA_CHECK_ENTITY(l,hEnt);
+	}));
+	if(Lua::get_extended_lua_modules_enabled())
+	{
+		// Shorthand functions
+		classDef.def("C",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&)>([](lua_State *l,EntityHandle &hEnt,const std::string &name) {
+			LUA_CHECK_ENTITY(l,hEnt);
+			auto pComponent = hEnt->FindComponent(name);
+			if(pComponent.expired())
+				return;
+			pComponent->PushLuaObject(l);
+		}));
+		classDef.def("C",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t componentId) {
+			LUA_CHECK_ENTITY(l,hEnt);
+			auto pComponent = hEnt->FindComponent(componentId);
+			if(pComponent.expired())
+				return;
+			pComponent->PushLuaObject(l);
+		}));
+		classDef.def("C",static_cast<void(*)(lua_State*,EntityHandle&,luabind::object)>([](lua_State *l,EntityHandle &hEnt,luabind::object) {
+			LUA_CHECK_ENTITY(l,hEnt);
+		}));
+	}
 	classDef.def("GetComponents",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);
 		auto &components = hEnt->GetComponents();
@@ -269,6 +297,13 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 		if(pPhysComponent == nullptr)
 			return;
 		pPhysComponent->PushLuaObject(l);
+	}));
+	classDef.def("GetGenericComponent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		auto pGenc = hEnt->GetGenericComponent();
+		if(pGenc == nullptr)
+			return;
+		pGenc->PushLuaObject(l);
 	}));
 	classDef.def("GetCharacterComponent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);
@@ -297,6 +332,20 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 		if(pPlComponent.expired())
 			return;
 		pPlComponent->PushLuaObject(l);
+	}));
+	classDef.def("GetTimeScaleComponent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		auto pTc = hEnt->GetTimeScaleComponent();
+		if(pTc.expired())
+			return;
+		pTc->PushLuaObject(l);
+	}));
+	classDef.def("GetNameComponent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		auto pnc = hEnt->GetNameComponent();
+		if(pnc.expired())
+			return;
+		pnc->PushLuaObject(l);
 	}));
 	classDef.def("GetAIComponent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
 		LUA_CHECK_ENTITY(l,hEnt);

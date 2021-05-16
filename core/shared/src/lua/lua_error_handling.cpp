@@ -220,10 +220,8 @@ bool Lua::get_callstack(lua_State *l,std::stringstream &ss)
 	return true;
 }
 
-int Lua::HandleTracebackError(lua_State *l)
+void Lua::PrintTraceback(lua_State *l,std::string *pOptErrMsg)
 {
-	if(!Lua::IsString(l,-1))
-		return 1;
 	std::stringstream ssMsg;
 	lua_Debug d {};
 	int32_t level = 1;
@@ -238,8 +236,8 @@ int Lua::HandleTracebackError(lua_State *l)
 		}
 		++level;
 	}
-	std::string errMsg = Lua::ToString(l,-1);
 
+	auto errMsg = pOptErrMsg ? *pOptErrMsg : "";
 	ssMsg<<"[LUA] ";
 	if(bFoundSrc == true)
 	{
@@ -311,6 +309,14 @@ int Lua::HandleTracebackError(lua_State *l)
 	util::reset_console_color();
 	Con::cout<<"You can use the console command 'lua_help <name>' to get more information about a specific function/library/etc."<<Con::endl;
 	Con::cout<<Con::endl;
+}
+
+int Lua::HandleTracebackError(lua_State *l)
+{
+	if(!Lua::IsString(l,-1))
+		return 1;
+	std::string msg = Lua::ToString(l,-1);
+	Lua::PrintTraceback(l,&msg);
 	return 1;
 }
 

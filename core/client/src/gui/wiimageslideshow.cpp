@@ -195,13 +195,13 @@ void WIImageSlideShow::PreloadNextImage(Int32 img)
 	auto &textureManager = matManager.GetTextureManager();
 	auto hSlideShow = GetHandle();
 	TextureManager::LoadInfo loadInfo {};
-	loadInfo.onLoadCallback = [this,f,hSlideShow](std::shared_ptr<Texture> texture) {
+	loadInfo.onLoadCallback = FunctionCallback<void,std::shared_ptr<Texture>>::Create([this,f,hSlideShow](std::shared_ptr<Texture> texture) {
 		if(!hSlideShow.IsValid())
 			return;
 		m_imgPreload.texture = texture;
 		m_imgPreload.ready = true;
 		m_imgPreload.loading = false;
-	};
+	});
 	textureManager.Load(wgui.GetContext(),f,loadInfo,nullptr,true);
 }
 

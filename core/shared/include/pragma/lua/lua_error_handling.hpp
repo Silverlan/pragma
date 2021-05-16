@@ -15,6 +15,7 @@ namespace Lua
 	DLLNETWORK void initialize_error_handler();
 	DLLNETWORK bool get_callstack(lua_State *l,std::stringstream &ss);
 	DLLNETWORK int HandleTracebackError(lua_State *l);
+	DLLNETWORK void PrintTraceback(lua_State *l,std::string *pOptErrMsg=nullptr);
 	// Note: This function will attempt to retrieve the file name from the error message.
 	// If the file name is truncated, this will not work! To be sure, define the third parameter as the actual file name.
 	DLLNETWORK void HandleSyntaxError(lua_State *l,Lua::StatusCode r);

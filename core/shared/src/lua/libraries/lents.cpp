@@ -453,12 +453,12 @@ int Lua::ents::get_by_local_index(lua_State *l)
 
 int Lua::ents::find_by_unique_index(lua_State *l)
 {
-	auto uniqueIndex = Lua::CheckInt(l,1);
+	auto uniqueIndex = util::uuid_string_to_bytes(Lua::CheckString(l,1));
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	EntityIterator entIt {*game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
 	auto it = std::find_if(entIt.begin(),entIt.end(),[uniqueIndex](const BaseEntity *ent) {
-		return ent->GetUniqueIndex() == uniqueIndex;
+		return ent->GetUuid() == uniqueIndex;
 	});
 	if(it == entIt.end())
 		return 0;

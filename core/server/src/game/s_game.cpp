@@ -90,7 +90,7 @@ extern SGame *s_game;
 DLLSERVER pragma::physics::IEnvironment *s_physEnv = nullptr;
 
 SGame::SGame(NetworkState *state)
-	: Game(state),m_nextUniqueEntityIndex(1)
+	: Game(state)
 {
 	RegisterCallback<void,SGame*>("OnGameEnd");
 

@@ -698,15 +698,22 @@ void Engine::DumpDebugInformation(ZIPFile &zip) const
 	}
 	zip.AddFile("engine.txt",engineInfo.str());
 
-	std::stringstream convars;
-	for(auto &pair : m_conVars)
-	{
-		if(pair.second->GetType() != ConType::Variable)
-			continue;
-		auto *cv = static_cast<ConVar*>(pair.second.get());
-		convars<<pair.first<<" = "<<cv->GetString()<<"\n";
-	}
-	zip.AddFile("convars.txt",convars.str());
+	auto fWriteConvars = [&zip](const std::map<std::string,std::shared_ptr<ConConf>> &cvarMap,const std::string &fileName) {
+		std::stringstream convars;
+		for(auto &pair : cvarMap)
+		{
+			if(pair.second->GetType() != ConType::Variable)
+				continue;
+			auto *cv = static_cast<ConVar*>(pair.second.get());
+			convars<<pair.first<<" \""<<cv->GetString()<<"\"\n";
+		}
+		zip.AddFile(fileName,convars.str());
+	};
+	fWriteConvars(GetConVars(),"cvars_en.txt");
+	if(GetClientState())
+		fWriteConvars(GetClientState()->GetConVars(),"cvars_cl.txt");
+	if(GetServerNetworkState())
+		fWriteConvars(GetServerNetworkState()->GetConVars(),"cvars_sv.txt");
 }
 
 const long long &Engine::GetLastTick() const {return m_lastTick;}

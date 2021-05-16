@@ -33,7 +33,7 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 	if(cvMatStreaming->GetBool() == false)
 		loadInfo.flags |= TextureLoadFlags::LoadInstantly;
 	loadInfo.flags |= TextureLoadFlags::Reload;
-	loadInfo.onLoadCallback = [path,nw](std::shared_ptr<Texture> tex) {
+	loadInfo.onLoadCallback = FunctionCallback<void,std::shared_ptr<Texture>>::Create([path,nw](std::shared_ptr<Texture> tex) {
 		if(nw == nullptr)
 			return;
 		auto &matManager = static_cast<CMaterialManager&>(nw->GetMaterialManager());
@@ -89,7 +89,7 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 			if(data != nullptr)
 				fLookForTextureAndUpdate(*data,static_cast<CMaterial&>(*hMat.get()));
 		}
-	};
+	});
 	texManager.ReloadTexture(path,loadInfo);
 }
 

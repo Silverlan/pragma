@@ -98,6 +98,8 @@ namespace pragma
 		std::any GetMemberValue(const MemberInfo &memberInfo) const;
 		void SetMemberValue(const MemberInfo &memberInfo,const std::any &value) const;
 		const std::vector<MemberInfo> &GetMembers() const;
+		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
+		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 		std::unordered_map<pragma::NetEventId,CallbackHandle> m_boundNetEvents;
 
 		struct NetworkedMemberInfo

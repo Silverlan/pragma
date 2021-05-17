@@ -61,6 +61,8 @@
 #include <luabind/out_value_policy.hpp>
 #include <mathutil/inverse_kinematics/ik.hpp>
 #include <mathutil/inverse_kinematics/constraints.hpp>
+#include <sharedutils/magic_enum.hpp>
+#include <fsys/directory_watcher.h>
 
 extern DLLNETWORK Engine *engine;
 
@@ -118,6 +120,39 @@ std::ostream &operator<<(std::ostream &out,const ALSound &snd)
 
 static void RegisterLuaMatrices(Lua::Interface &lua);
 static void RegisterIk(Lua::Interface &lua);
+
+static void register_directory_watcher(luabind::module_ &modUtil)
+{
+	auto defListener = luabind::class_<DirectoryWatcherCallback>("DirectoryChangeListener");
+	defListener.add_static_constant("LISTENER_FLAG_NONE",umath::to_integral(DirectoryWatcherCallback::WatchFlags::None));
+	defListener.add_static_constant("LISTENER_FLAG_BIT_WATCH_SUB_DIRECTORIES",umath::to_integral(DirectoryWatcherCallback::WatchFlags::WatchSubDirectories));
+	defListener.add_static_constant("LISTENER_FLAG_ABSOLUTE_PATH",umath::to_integral(DirectoryWatcherCallback::WatchFlags::AbsolutePath));
+	defListener.add_static_constant("LISTENER_FLAG_START_DISABLED",umath::to_integral(DirectoryWatcherCallback::WatchFlags::StartDisabled));
+	defListener.add_static_constant("LISTENER_FLAG_WATCH_DIRECTORY_CHANGES",umath::to_integral(DirectoryWatcherCallback::WatchFlags::WatchDirectoryChanges));
+	static_assert(magic_enum::flags::enum_count<DirectoryWatcherCallback::WatchFlags>() == 4);
+	defListener.scope[luabind::def("create",static_cast<std::shared_ptr<DirectoryWatcherCallback>(*)(lua_State*,const std::string&,luabind::object)>([](lua_State *l,const std::string &path,luabind::object callback) {
+		Lua::CheckFunction(l,2);
+		return std::make_shared<DirectoryWatcherCallback>(path,[callback](const std::string &fileName) mutable {
+			callback(fileName);
+		},DirectoryWatcherCallback::WatchFlags::None);
+	}))];
+	defListener.scope[luabind::def("create",static_cast<std::shared_ptr<DirectoryWatcherCallback>(*)(lua_State*,const std::string&,luabind::object,DirectoryWatcherCallback::WatchFlags)>([](lua_State *l,const std::string &path,luabind::object callback,DirectoryWatcherCallback::WatchFlags flags) {
+		Lua::CheckFunction(l,2);
+		return std::make_shared<DirectoryWatcherCallback>(path,[callback](const std::string &fileName) mutable {
+			callback(fileName);
+		},flags);
+	}))];
+	defListener.def("Poll",static_cast<uint32_t(*)(lua_State*,DirectoryWatcherCallback&)>([](lua_State *l,DirectoryWatcherCallback &listener) {
+		return listener.Poll();
+	}));
+	defListener.def("SetEnabled",static_cast<void(*)(lua_State*,DirectoryWatcherCallback&,bool)>([](lua_State *l,DirectoryWatcherCallback &listener,bool enabled) {
+		listener.SetEnabled(enabled);
+	}));
+	defListener.def("IsEnabled",static_cast<bool(*)(lua_State*,DirectoryWatcherCallback&)>([](lua_State *l,DirectoryWatcherCallback &listener) {
+		return listener.IsEnabled();
+	}));
+	modUtil[defListener];
+}
 
 static Quat QuaternionConstruct() {return uquat::identity();}
 static Quat QuaternionConstruct(float w,float x,float y,float z) {return Quat(w,x,y,z);}
@@ -252,6 +287,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	});
 
 	auto &modUtil = lua.RegisterLibrary("util");
+	register_directory_watcher(modUtil);
 
 	auto defParallelJob = luabind::class_<util::BaseParallelJob>("ParallelJob");
 	defParallelJob.add_static_constant("JOB_STATUS_FAILED",umath::to_integral(util::JobStatus::Failed));

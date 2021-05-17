@@ -754,6 +754,17 @@ static void read_value(Game &game,udm::LinkedPropertyWrapper &udm,std::any &valu
 	}
 }
 
+void BaseLuaBaseEntityComponent::OnEntityComponentAdded(BaseEntityComponent &component)
+{
+	BaseEntityComponent::OnEntityComponentAdded(component);
+	// CallLuaMember<void,luabind::object>("OnEntityComponentAdded",component.GetLuaObject()); // Unused: Already covered by EVENT_ON_COMPONENT_ADDED
+}
+void BaseLuaBaseEntityComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
+{
+	BaseEntityComponent::OnEntityComponentRemoved(component);
+	// CallLuaMember<void,luabind::object>("OnEntityComponentRemoved",component.GetLuaObject()); // Unused: Already covered by EVENT_ON_COMPONENT_REMOVED
+}
+
 const std::vector<BaseLuaBaseEntityComponent::MemberInfo> &BaseLuaBaseEntityComponent::GetMembers() const {return m_members;}
 void BaseLuaBaseEntityComponent::Save(udm::LinkedPropertyWrapper &udm)
 {

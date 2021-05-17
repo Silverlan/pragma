@@ -47,6 +47,12 @@ public:
 
 	void Load(DataStream ds,uint32_t version) {}
 	static void default_Load(lua_State *l,LuaBaseEntityComponentWrapper &hComponent,DataStream ds,uint32_t version) {}
+
+	void OnEntityComponentAdded(LuaBaseEntityComponentWrapper &hComponent) {}
+	static void default_OnEntityComponentAdded(lua_State *l,LuaBaseEntityComponentWrapper &hComponent) {}
+
+	void OnEntityComponentRemoved(LuaBaseEntityComponentWrapper &hComponent) {}
+	static void default_OnEntityComponentRemoved(lua_State *l,LuaBaseEntityComponentWrapper &hComponent) {}
 };
 
 #endif

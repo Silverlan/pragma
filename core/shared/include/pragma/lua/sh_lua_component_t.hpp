@@ -145,6 +145,8 @@ namespace Lua
 		classDef.def("OnEntitySpawn",&LuaBaseEntityComponentWrapper::OnEntitySpawn,&LuaBaseEntityComponentWrapper::default_OnEntitySpawn);
 		classDef.def("OnAttachedToEntity",&LuaBaseEntityComponentWrapper::OnAttachedToEntity,&LuaBaseEntityComponentWrapper::default_OnAttachedToEntity);
 		classDef.def("OnDetachedFromEntity",&LuaBaseEntityComponentWrapper::OnDetachedToEntity,&LuaBaseEntityComponentWrapper::default_OnDetachedToEntity);
+		// classDef.def("OnEntityComponentAdded",&LuaBaseEntityComponentWrapper::OnEntityComponentAdded,&LuaBaseEntityComponentWrapper::default_OnEntityComponentAdded);
+		// classDef.def("OnEntityComponentRemoved",&LuaBaseEntityComponentWrapper::OnEntityComponentRemoved,&LuaBaseEntityComponentWrapper::default_OnEntityComponentRemoved);
 		// HandleEvent is variadic and can't be defined like this in luabind!
 		//classDef.def("HandleEvent",&LuaBaseEntityComponentWrapper::HandleEvent,&LuaBaseEntityComponentWrapper::default_HandleEvent);
 		classDef.def("Save",&LuaBaseEntityComponentWrapper::Save,&LuaBaseEntityComponentWrapper::default_Save);

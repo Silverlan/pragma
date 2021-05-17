@@ -39,7 +39,7 @@ void CompositeComponent::OnRemove()
 	{
 		if(!hEnt.IsValid())
 			continue;
-		hEnt->Remove();
+		hEnt->RemoveSafely();
 	}
 }
 

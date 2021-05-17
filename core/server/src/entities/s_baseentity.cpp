@@ -180,7 +180,7 @@ void SBaseEntity::Remove()
 {
 	if(umath::is_flag_set(GetStateFlags(),BaseEntity::StateFlags::Removed))
 		return;
-	BaseEntity::Remove(); // Has to be called first!
+	BaseEntity::Remove();
 	Game *game = server->GetGameState();
 	game->RemoveEntity(this);
 }

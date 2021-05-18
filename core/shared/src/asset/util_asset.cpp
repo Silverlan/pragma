@@ -197,7 +197,8 @@ bool pragma::asset::remove_asset(NetworkState &nw,const std::string &name,Type t
 		auto it = std::find(deleted.begin(),deleted.end(),*f);
 		if(it != deleted.end())
 			return false;
-		if(FileManager::RemoveFile(f->c_str()) == false)
+		auto fullPath = std::string{get_asset_root_directory(type)} +'/' +*f;
+		if(FileManager::RemoveFile(fullPath.c_str()) == false)
 			return false;
 		deleted.push_back(*f);
 		f = find_file(nw,name,type);

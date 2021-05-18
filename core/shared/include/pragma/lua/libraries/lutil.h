@@ -76,6 +76,7 @@ namespace Lua
 		DLLNETWORK int get_type_name(lua_State *l);
 		DLLNETWORK std::string variable_type_to_string(::util::VarType varType);
 		DLLNETWORK std::string get_addon_path(lua_State *l);
+		DLLNETWORK std::string get_addon_path(lua_State *l,const std::string &relPath);
 		DLLNETWORK std::string get_string_hash(const std::string &str);
 		DLLNETWORK int get_class_value(lua_State *l);
 		DLLNETWORK int pack_zip_archive(lua_State *l);

@@ -368,6 +368,14 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		luabind::def("calc_average_rotation",static_cast<Quat(*)(lua_State*,luabind::table<>)>([](lua_State *l,luabind::table<> t) -> Quat {
 			auto rotations = Lua::table_to_vector<Quat>(l,t,1);
 			return uquat::calc_average(rotations);
+		})),
+		luabind::def("map_value_to_fraction",static_cast<float(*)(lua_State*,float,float,float)>([](lua_State *l,float v,float c,float i) -> float {
+			auto pivot = 1 /(c -1) *i;
+			auto range = 1 /c;
+			return umath::clamp(1 -umath::abs((v -pivot) /range),0.f,1.f);
+		})),
+		luabind::def("map_value_to_range",static_cast<float(*)(lua_State*,float,float,float)>([](lua_State *l,float value,float lower,float upper) -> float {
+			return umath::clamp((value -lower) /(upper -lower),0.f,1.f);
 		}))
 	];
 	lua_pushtablecfunction(lua.GetState(),"math","randomf",Lua::math::randomf);
@@ -1242,7 +1250,7 @@ void Game::RegisterLuaLibraries()
 			auto res = FileManager::FindAbsolutePath(path,rpath);
 			if(res == false)
 				return {};
-			auto absPath = ::util::Path::CreatePath(rpath);
+			auto absPath = ::util::Path {rpath};
 			absPath.MakeRelative(util::get_program_path());
 			return luabind::object{l,absPath.GetString()};
 		})),

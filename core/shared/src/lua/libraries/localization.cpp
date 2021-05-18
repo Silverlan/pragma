@@ -92,6 +92,13 @@ std::unordered_map<std::string,std::string> Locale::GetLanguages()
 	}
 	return lanOptions;
 }
+bool Locale::SetLocalization(const std::string &id,const std::string &text,bool overwriteIfExists)
+{
+	if(!overwriteIfExists && m_localization.texts.find(id) != m_localization.texts.end())
+		return false;
+	m_localization.texts[id] = text;
+	return true;
+}
 bool Locale::GetText(const std::string &id,std::string &outText) {return GetText(id,{},outText);}
 static void insert_arguments(const std::vector<std::string> &args,std::string &inOutText)
 {

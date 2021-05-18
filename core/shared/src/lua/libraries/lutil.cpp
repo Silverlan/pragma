@@ -69,7 +69,7 @@ void Lua::util::register_library(lua_State *l)
 		luabind::def("metres_to_units",Lua::util::metres_to_units),
 		luabind::def("variable_type_to_string",Lua::util::variable_type_to_string),
 		luabind::def("open_url_in_browser",Lua::util::open_url_in_browser),
-		luabind::def("get_addon_path",Lua::util::get_addon_path),
+		luabind::def("get_addon_path",static_cast<std::string(*)(lua_State*)>(Lua::util::get_addon_path)),
 		luabind::def("get_string_hash",Lua::util::get_string_hash),
 		luabind::def("generate_uuid_v4",static_cast<std::string(*)()>([]() -> std::string {
 			return ::util::uuid_to_string(::util::generate_uuid_v4());
@@ -1135,6 +1135,16 @@ int Lua::util::pack_zip_archive(lua_State *l)
 	zip = nullptr;
 	Lua::PushBool(l,true);
 	return 1;
+}
+
+std::string Lua::util::get_addon_path(lua_State *l,const std::string &relPath)
+{
+	std::string rpath;
+	if(FileManager::FindAbsolutePath(relPath,rpath) == false)
+		return relPath;
+	::util::Path path{relPath};
+	path.MakeRelative(::util::get_program_path());
+	return path.GetString();
 }
 
 std::string Lua::util::get_addon_path(lua_State *l)

@@ -121,6 +121,26 @@ std::ostream &operator<<(std::ostream &out,const ALSound &snd)
 static void RegisterLuaMatrices(Lua::Interface &lua);
 static void RegisterIk(Lua::Interface &lua);
 
+static void create_directory_change_listener(lua_State *l,const std::string &path,luabind::object callback,DirectoryWatcherCallback::WatchFlags flags)
+{
+	Lua::CheckFunction(l,2);
+	try
+	{
+		auto listener = std::make_shared<DirectoryWatcherCallback>(path,[callback](const std::string &fileName) mutable {
+			callback(fileName);
+		},flags);
+		Lua::Push(l,listener);
+	}
+	catch(const std::runtime_error &err)
+	{
+		Lua::PushBool(l,false);
+		Lua::PushString(l,err.what());
+		return;
+	}
+	Lua::PushBool(l,false);
+	Lua::PushString(l,"Unknown error!");
+}
+
 static void register_directory_watcher(luabind::module_ &modUtil)
 {
 	auto defListener = luabind::class_<DirectoryWatcherCallback>("DirectoryChangeListener");
@@ -130,17 +150,11 @@ static void register_directory_watcher(luabind::module_ &modUtil)
 	defListener.add_static_constant("LISTENER_FLAG_START_DISABLED",umath::to_integral(DirectoryWatcherCallback::WatchFlags::StartDisabled));
 	defListener.add_static_constant("LISTENER_FLAG_WATCH_DIRECTORY_CHANGES",umath::to_integral(DirectoryWatcherCallback::WatchFlags::WatchDirectoryChanges));
 	static_assert(magic_enum::flags::enum_count<DirectoryWatcherCallback::WatchFlags>() == 4);
-	defListener.scope[luabind::def("create",static_cast<std::shared_ptr<DirectoryWatcherCallback>(*)(lua_State*,const std::string&,luabind::object)>([](lua_State *l,const std::string &path,luabind::object callback) {
-		Lua::CheckFunction(l,2);
-		return std::make_shared<DirectoryWatcherCallback>(path,[callback](const std::string &fileName) mutable {
-			callback(fileName);
-		},DirectoryWatcherCallback::WatchFlags::None);
+	defListener.scope[luabind::def("create",static_cast<void(*)(lua_State*,const std::string&,luabind::object)>([](lua_State *l,const std::string &path,luabind::object callback) {
+		create_directory_change_listener(l,path,callback,DirectoryWatcherCallback::WatchFlags::None);
 	}))];
-	defListener.scope[luabind::def("create",static_cast<std::shared_ptr<DirectoryWatcherCallback>(*)(lua_State*,const std::string&,luabind::object,DirectoryWatcherCallback::WatchFlags)>([](lua_State *l,const std::string &path,luabind::object callback,DirectoryWatcherCallback::WatchFlags flags) {
-		Lua::CheckFunction(l,2);
-		return std::make_shared<DirectoryWatcherCallback>(path,[callback](const std::string &fileName) mutable {
-			callback(fileName);
-		},flags);
+	defListener.scope[luabind::def("create",static_cast<void(*)(lua_State*,const std::string&,luabind::object,DirectoryWatcherCallback::WatchFlags)>([](lua_State *l,const std::string &path,luabind::object callback,DirectoryWatcherCallback::WatchFlags flags) {
+		create_directory_change_listener(l,path,callback,flags);
 	}))];
 	defListener.def("Poll",static_cast<uint32_t(*)(lua_State*,DirectoryWatcherCallback&)>([](lua_State *l,DirectoryWatcherCallback &listener) {
 		return listener.Poll();
@@ -1500,6 +1514,7 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	modEnts[defItFilterCone];
 
 	auto defItFilterComponent = luabind::class_<LuaEntityIteratorFilterComponent,LuaEntityIteratorFilterBase>("IteratorFilterComponent");
+	defItFilterComponent.def(luabind::constructor<luabind::object>());
 	defItFilterComponent.def(luabind::constructor<pragma::ComponentId>());
 	defItFilterComponent.def(luabind::constructor<lua_State*,const std::string&>());
 	modEnts[defItFilterComponent];

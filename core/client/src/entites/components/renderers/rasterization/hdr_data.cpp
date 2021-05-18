@@ -150,6 +150,34 @@ HDRData::~HDRData()
 {
 	if(m_cbReloadCommandBuffer.IsValid())
 		m_cbReloadCommandBuffer.Remove();
+
+	auto &context = c_engine->GetRenderContext();
+	context.KeepResourceAliveUntilPresentationComplete(sceneRenderTarget);
+	context.KeepResourceAliveUntilPresentationComplete(dsgHDRPostProcessing);
+	context.KeepResourceAliveUntilPresentationComplete(bloomTexture);
+	context.KeepResourceAliveUntilPresentationComplete(bloomBlurRenderTarget);
+	context.KeepResourceAliveUntilPresentationComplete(bloomBlurSet);
+	context.KeepResourceAliveUntilPresentationComplete(dsgBloomTonemapping);
+	context.KeepResourceAliveUntilPresentationComplete(toneMappedRenderTarget);
+	context.KeepResourceAliveUntilPresentationComplete(dsgTonemappedPostProcessing);
+	context.KeepResourceAliveUntilPresentationComplete(toneMappedPostProcessingRenderTarget);
+	context.KeepResourceAliveUntilPresentationComplete(dsgToneMappedPostProcessing);
+	context.KeepResourceAliveUntilPresentationComplete(dsgSceneDepth);
+	context.KeepResourceAliveUntilPresentationComplete(dsgDepthPostProcessing);
+	context.KeepResourceAliveUntilPresentationComplete(rpPostParticle);
+	context.KeepResourceAliveUntilPresentationComplete(m_exposure.descSetGroupAverageColorBuffer);
+	context.KeepResourceAliveUntilPresentationComplete(m_exposure.descSetGroupAverageColorTexture);
+	context.KeepResourceAliveUntilPresentationComplete(m_exposure.avgColorBuffer);
+	context.KeepResourceAliveUntilPresentationComplete(ssaoInfo.renderTarget);
+	context.KeepResourceAliveUntilPresentationComplete(ssaoInfo.renderTargetBlur);
+	context.KeepResourceAliveUntilPresentationComplete(ssaoInfo.descSetGroupPrepass);
+	context.KeepResourceAliveUntilPresentationComplete(ssaoInfo.descSetGroupOcclusion);
+	context.KeepResourceAliveUntilPresentationComplete(prepass.textureNormals);
+	context.KeepResourceAliveUntilPresentationComplete(prepass.textureDepth);
+	context.KeepResourceAliveUntilPresentationComplete(prepass.renderTarget);
+	context.KeepResourceAliveUntilPresentationComplete(prepass.subsequentRenderPass);
+	context.KeepResourceAliveUntilPresentationComplete(forwardPlusInstance.GetTileVisLightIndexBuffer());
+	context.KeepResourceAliveUntilPresentationComplete(forwardPlusInstance.GetVisLightIndexBuffer());
 }
 
 bool HDRData::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *customRenderPass,bool secondaryCommandBuffers)

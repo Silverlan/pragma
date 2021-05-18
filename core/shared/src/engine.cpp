@@ -298,27 +298,90 @@ void Engine::Close()
 	Con::set_output_callback(nullptr);
 }
 
-static uint32_t clear_assets(NetworkState *state,pragma::asset::Type type)
+static uint32_t clear_assets(NetworkState *state,pragma::asset::Type type,bool verbose)
 {
 	if(!state)
 		return 0;
 	auto *l = state->GetLuaState();
 	if(l)
 		Lua::debug::collectgarbage(l); // Make sure any potential Lua references to asset files that can be cleared are cleared
+	uint32_t n = 0;
 	switch(type)
 	{
 	case pragma::asset::Type::Model:
-		return state->GetModelManager().ClearUnused();
-	case pragma::asset::Type::Material:
-		return state->GetMaterialManager().ClearUnused();
+	{
+		auto &mdlManager = state->GetModelManager();
+		if(!verbose)
+			n = mdlManager.ClearUnused();
+		else
+		{
+			auto &cache = mdlManager.GetCache();
+
+			std::unordered_map<Model*,std::string> oldCache;
+			for(auto &pair : cache)
+				oldCache[pair.second.get()] = pair.first;
+
+			n = mdlManager.ClearUnused();
+
+			std::unordered_map<Model*,std::string> newCache;
+			for(auto &pair : cache)
+				newCache[pair.second.get()] = pair.first;
+
+			for(auto &pair : oldCache)
+			{
+				auto it = newCache.find(pair.first);
+				if(it != newCache.end())
+					continue;
+				Con::cout<<"Model "<<pair.second<<" was cleared from cache!"<<Con::endl;
+			}
+		}
+		break;
 	}
-	return 0;
+	case pragma::asset::Type::Material:
+	{
+		auto &matManager = state->GetMaterialManager();
+		if(!verbose)
+			n = matManager.ClearUnused();
+		else
+		{
+			auto &cache = matManager.GetMaterials();
+
+			std::unordered_map<Material*,std::string> oldCache;
+			for(auto &hMat : cache)
+			{
+				if(!hMat.IsValid())
+					continue;
+				oldCache[hMat.get()] = hMat.get()->GetName();
+			}
+
+			n = matManager.ClearUnused();
+
+			std::unordered_map<Material*,std::string> newCache;
+			for(auto &hMat : cache)
+			{
+				if(!hMat.IsValid())
+					continue;
+				newCache[hMat.get()] = hMat.get()->GetName();
+			}
+
+			for(auto &pair : oldCache)
+			{
+				auto it = newCache.find(pair.first);
+				if(it != newCache.end())
+					continue;
+				Con::cout<<"Material "<<pair.second<<" was cleared from cache!"<<Con::endl;
+			}
+		}
+		break;
+	}
+	}
+	return n;
 }
 uint32_t Engine::DoClearUnusedAssets(pragma::asset::Type type) const
 {
 	uint32_t n = 0;
-	n += clear_assets(GetServerNetworkState(),type);
-	n += clear_assets(GetClientState(),type);
+	n += clear_assets(GetServerNetworkState(),type,IsVerbose());
+	n += clear_assets(GetClientState(),type,IsVerbose());
 	return n;
 }
 uint32_t Engine::ClearUnusedAssets(pragma::asset::Type type,bool verbose) const

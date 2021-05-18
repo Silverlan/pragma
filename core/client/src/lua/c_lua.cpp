@@ -237,7 +237,8 @@ void CGame::RegisterLua()
 	modLocale[
 		luabind::def("load",Lua::Locale::load),
 		luabind::def("get_language",Lua::Locale::get_language),
-		luabind::def("change_language",Lua::Locale::change_language)
+		luabind::def("change_language",Lua::Locale::change_language),
+		luabind::def("set_text",Lua::Locale::set_localization)
 	];
 
 	Game::RegisterLua();

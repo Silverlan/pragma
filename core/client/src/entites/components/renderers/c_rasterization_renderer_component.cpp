@@ -83,7 +83,17 @@ CRasterizationRendererComponent::CRasterizationRendererComponent(BaseEntity &ent
 }
 
 CRasterizationRendererComponent::~CRasterizationRendererComponent()
-{}
+{
+	auto &renderContext = c_engine->GetRenderContext();
+	renderContext.KeepResourceAliveUntilPresentationComplete(m_prepassCommandBufferGroup);
+	renderContext.KeepResourceAliveUntilPresentationComplete(m_shadowCommandBufferGroup);
+	renderContext.KeepResourceAliveUntilPresentationComplete(m_lightingCommandBufferGroup);
+	renderContext.KeepResourceAliveUntilPresentationComplete(m_descSetGroupFogOverride);
+	renderContext.KeepResourceAliveUntilPresentationComplete(m_dsgLights);
+	renderContext.KeepResourceAliveUntilPresentationComplete(m_dsgLightsCompute);
+	renderContext.KeepResourceAliveUntilPresentationComplete(m_rendererBuffer);
+	renderContext.KeepResourceAliveUntilPresentationComplete(m_descSetGroupRenderer);
+}
 
 void CRasterizationRendererComponent::Initialize()
 {

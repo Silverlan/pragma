@@ -155,6 +155,9 @@ void LuaEntityIteratorFilterCone::Attach(EntityIterator &iterator)
 
 ////////////
 
+LuaEntityIteratorFilterComponent::LuaEntityIteratorFilterComponent(luabind::object)
+	: m_componentId(pragma::INVALID_COMPONENT_ID)
+{}
 LuaEntityIteratorFilterComponent::LuaEntityIteratorFilterComponent(pragma::ComponentId componentId)
 	: m_componentId(componentId)
 {}

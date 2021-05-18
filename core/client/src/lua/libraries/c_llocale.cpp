@@ -18,6 +18,11 @@ void Lua::Locale::change_language(const std::string &lan)
 	::Locale::SetLanguage(lan);
 }
 
+void Lua::Locale::set_localization(const std::string &id,const std::string &text)
+{
+	::Locale::SetLocalization(id,text);
+}
+
 int Lua::Locale::get_text(lua_State *l)
 {
 	auto id = Lua::CheckString(l,1);

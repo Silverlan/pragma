@@ -1414,7 +1414,41 @@ uint32_t CEngine::DoClearUnusedAssets(pragma::asset::Type type) const
 	{
 		auto *cl = GetClientState();
 		if(cl)
-			n += static_cast<CMaterialManager&>(cl->GetMaterialManager()).GetTextureManager().ClearUnused();
+		{
+			auto &texManager = static_cast<CMaterialManager&>(cl->GetMaterialManager()).GetTextureManager();
+			if(!IsVerbose())
+				n += texManager.ClearUnused();
+			else
+			{
+				auto &cache = texManager.GetTextures();
+
+				std::unordered_map<Texture*,std::string> oldCache;
+				for(auto &tex : cache)
+				{
+					if(!tex)
+						continue;
+					oldCache[tex.get()] = tex->GetName();
+				}
+
+				n += texManager.ClearUnused();
+
+				std::unordered_map<Texture*,std::string> newCache;
+				for(auto &tex : cache)
+				{
+					if(!tex)
+						continue;
+					newCache[tex.get()] = tex->GetName();
+				}
+
+				for(auto &pair : oldCache)
+				{
+					auto it = newCache.find(pair.first);
+					if(it != newCache.end())
+						continue;
+					Con::cout<<"Texture "<<pair.second<<" was cleared from cache!"<<Con::endl;
+				}
+			}
+		}
 		break;
 	}
 	}

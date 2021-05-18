@@ -143,6 +143,7 @@ private:
 struct LuaEntityIteratorFilterComponent
 	: public LuaEntityIteratorFilterBase
 {
+	LuaEntityIteratorFilterComponent(luabind::object);
 	LuaEntityIteratorFilterComponent(pragma::ComponentId componentId);
 	LuaEntityIteratorFilterComponent(lua_State *l,const std::string &componentName);
 	virtual void Attach(EntityIterator &iterator) override;

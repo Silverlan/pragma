@@ -74,7 +74,7 @@ static bool port_model(
 	//if(FileManager::Exists(path +mdlName) == false) // Could be in bsa archive
 	//	return false;
 	//Con::cout<<"Found "<<formatName<<" Model '"<<(path +mdlName)<<"', attempting to port..."<<Con::endl;
-	ufile::remove_extension_from_filename(mdlName);
+	ufile::remove_extension_from_filename(mdlName,pragma::asset::get_supported_extensions(pragma::asset::Type::Model,true));
 	auto *game = nw->GetGameState();
 	auto fcreateModel = static_cast<std::shared_ptr<Model>(Game::*)(bool) const>(&Game::CreateModel);
 	std::vector<std::shared_ptr<Model>> models;

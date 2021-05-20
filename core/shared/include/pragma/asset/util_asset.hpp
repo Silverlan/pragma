@@ -58,7 +58,7 @@ namespace pragma::asset
 	DLLNETWORK std::optional<std::string> find_file(NetworkState &nw,const std::string &name,Type type,std::string *optOutFormat=nullptr);
 	DLLNETWORK bool remove_asset(NetworkState &nw,const std::string &name,Type type);
 	DLLNETWORK bool is_loaded(NetworkState &nw,const std::string &name,Type type);
-	DLLNETWORK std::vector<std::string> get_supported_extensions(Type type);
+	DLLNETWORK std::vector<std::string> get_supported_extensions(Type type,bool includeImportTypes=false);
 	DLLNETWORK std::optional<std::string> get_legacy_extension(Type type);
 	DLLNETWORK std::optional<std::string> get_binary_udm_extension(Type type);
 	DLLNETWORK std::optional<std::string> get_ascii_udm_extension(Type type);

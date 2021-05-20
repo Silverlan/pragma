@@ -718,6 +718,8 @@ bool BaseAnimatedComponent::MaintainAnimations(double dt)
 
 	auto &baseAnimInfo = m_baseAnim;
 	auto anim = hModel->GetAnimation(baseAnimInfo.animation);
+	if(!anim)
+		return false;
 	auto &bones = anim->GetBoneList();
 	auto &bonePoses = baseAnimInfo.bonePoses;
 	auto &boneScales = baseAnimInfo.boneScales;

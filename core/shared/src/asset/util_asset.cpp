@@ -139,16 +139,20 @@ std::optional<std::string> pragma::asset::get_ascii_udm_extension(Type type)
 	}
 	return {};
 }
-std::vector<std::string> pragma::asset::get_supported_extensions(Type type)
+std::vector<std::string> pragma::asset::get_supported_extensions(Type type,bool includeImportTypes)
 {
 	// Note: When attempting to find an asset, the Engine will take the order of these into account (i.e. extensions that come first will be prioritized)
 	switch(type)
 	{
 	case Type::Model:
+		if(includeImportTypes)
+			return {FORMAT_MODEL_BINARY,FORMAT_MODEL_ASCII,FORMAT_MODEL_LEGACY,"mdl","vmdl_c","nif"}; // TODO: Grab import types from import manager
 		return {FORMAT_MODEL_BINARY,FORMAT_MODEL_ASCII,FORMAT_MODEL_LEGACY};
 	case Type::Map:
 		return {FORMAT_MAP_BINARY,FORMAT_MAP_ASCII,FORMAT_MAP_LEGACY};
 	case Type::Material:
+		if(includeImportTypes)
+			return {FORMAT_MATERIAL_BINARY,FORMAT_MATERIAL_ASCII,FORMAT_MAP_LEGACY,"vmt","vmat_c"}; // TODO: Grab import types from import manager
 		return {FORMAT_MATERIAL_BINARY,FORMAT_MATERIAL_ASCII,FORMAT_MAP_LEGACY};
 	case Type::ParticleSystem:
 		return {FORMAT_PARTICLE_SYSTEM_BINARY,FORMAT_PARTICLE_SYSTEM_ASCII,FORMAT_PARTICLE_SYSTEM_LEGACY};

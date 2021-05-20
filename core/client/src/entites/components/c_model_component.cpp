@@ -147,7 +147,7 @@ void CModelComponent::ReceiveData(NetPacket &packet)
 bool CModelComponent::IsWeighted() const
 {
 	auto animComponent = GetEntity().GetAnimatedComponent();
-	return animComponent.valid() && animComponent->GetBoneCount() > 0u;
+	return animComponent.valid() && animComponent->GetBoneCount() > 0u && animComponent->GetBindPose();
 }
 
 uint32_t CModelComponent::GetLOD() const {return m_lod;}

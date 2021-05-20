@@ -76,7 +76,7 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 		if(bSkipPort == false)
 		{
 			auto pathNoExt = path;
-			ufile::remove_extension_from_filename(pathNoExt);
+			ufile::remove_extension_from_filename(pathNoExt,pragma::asset::get_supported_extensions(pragma::asset::Type::Model,true));
 			auto assetWrapper = pragma::get_engine()->GetAssetManager().ImportAsset(*game,pragma::asset::Type::Model,nullptr,pathNoExt);
 			if(assetWrapper != nullptr)
 			{
@@ -87,7 +87,7 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 			}
 
 			auto mdlName = pmodel;
-			ufile::remove_extension_from_filename(mdlName);
+			ufile::remove_extension_from_filename(mdlName,pragma::asset::get_supported_extensions(pragma::asset::Type::Model,true));
 			auto *nw = game->GetNetworkState();
 			if(util::port_hl2_model(nw,"models\\",mdlName +".mdl") == true || util::port_source2_model(nw,"models\\",mdlName +".vmdl_c") == true || util::port_nif_model(nw,"models\\",mdlName +".nif"))
 			{

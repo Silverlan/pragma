@@ -825,6 +825,13 @@ bool Model::Save(Game &game,udm::AssetData &outData,std::string &outErr)
 			{
 				auto &anim = animations[i];
 				auto animName = GetAnimationName(i);
+				if(animName.empty())
+				{
+					uint32_t j = 0;
+					do
+						animName = "unnamed" +std::to_string(j++);
+					while(udmAnimations[animName] || m_animationIDs.find(animName) != m_animationIDs.end());
+				}
 				auto udmAnim = udmAnimations[animName];
 				udmAnim["index"] = static_cast<uint32_t>(i);
 				if(anim->Save(udm::AssetData{udmAnim},outErr,&ref) == false)

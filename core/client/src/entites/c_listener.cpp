@@ -11,6 +11,7 @@
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <alsoundsystem.hpp>
+#include <alsound_listener.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/components/velocity_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>

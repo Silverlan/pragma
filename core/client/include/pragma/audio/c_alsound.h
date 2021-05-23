@@ -31,8 +31,7 @@ public:
 	static ALSound *FindByServerIndex(uint32_t idx);
 	static void SetIndex(ALSound *snd,uint32_t idx);
 
-	CALSound(NetworkState *nw,al::SoundSystem &system,al::SoundBuffer &buffer,al::InternalSource *source);
-	CALSound(NetworkState *nw,al::SoundSystem &system,al::Decoder &decoder,al::InternalSource *source);
+	CALSound(NetworkState *nw,const al::PSoundChannel &channel);
 	virtual ~CALSound() override;
 	float GetMaxAudibleDistance() const;
 	void SetPitchModifier(float mod);
@@ -116,10 +115,12 @@ public:
 	virtual bool IsIdle() const override;
 	void Terminate();
 
-	using al::SoundSource::AddEffect;
-	using al::SoundSource::RemoveEffect;
-	using al::SoundSource::SetEffectParameters;
-	using al::SoundSource::SetEffectGain;
+	bool AddEffect(al::IEffect &effect,const EffectParams &params=EffectParams());
+	bool AddEffect(al::IEffect &effect,uint32_t &slotId,const EffectParams &params=EffectParams());
+	bool AddEffect(al::IEffect &effect,float gain);
+	bool AddEffect(al::IEffect &effect,uint32_t &slotId,float gain);
+	void RemoveEffect(al::IEffect &effect);
+	void RemoveEffect(uint32_t slotId);
 protected:
 	friend ClientState;
 protected:

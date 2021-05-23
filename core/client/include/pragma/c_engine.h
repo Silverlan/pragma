@@ -19,7 +19,7 @@
 
 class ClientState;
 namespace GLFW {class Joystick;};
-namespace al {class SoundSystem;class Effect;};
+namespace al {class ISoundSystem;class IEffect;};
 namespace prosper {class RenderTarget; class ISwapCommandBufferGroup; class TimerQuery; class IQueryPool;};
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -135,17 +135,19 @@ public:
 	bool GetControllersEnabled() const;
 
 	// Sound
-	const al::SoundSystem *GetSoundSystem() const;
-	al::SoundSystem *GetSoundSystem();
-	al::SoundSystem *InitializeSoundEngine();
+	void SetAudioAPI(const std::string &audioAPI) {m_audioAPI = audioAPI;}
+	const std::string &GetAudioAPI() const {return m_audioAPI;}
+	const al::ISoundSystem *GetSoundSystem() const;
+	al::ISoundSystem *GetSoundSystem();
+	al::ISoundSystem *InitializeSoundEngine();
 	void CloseSoundEngine();
 	void SetHRTFEnabled(bool b);
 	unsigned int GetStereoSourceCount();
 	unsigned int GetMonoSourceCount();
 	unsigned int GetStereoSource(unsigned int idx);
 	template<class TEfxProperties>
-		std::shared_ptr<al::Effect> CreateAuxEffect(const std::string &name,const TEfxProperties &props);
-	std::shared_ptr<al::Effect> GetAuxEffect(const std::string &name);
+		std::shared_ptr<al::IEffect> CreateAuxEffect(const std::string &name,const TEfxProperties &props);
+	std::shared_ptr<al::IEffect> GetAuxEffect(const std::string &name);
 	// Lua
 	virtual NetworkState *GetNetworkState(lua_State *l) override;
 	virtual Lua::Interface *GetLuaInterface(lua_State *l) override;
@@ -230,7 +232,9 @@ protected:
 	virtual void RegisterConsoleCommands() override;
 private:
 	// Sound
-	std::shared_ptr<al::SoundSystem> m_soundSystem = nullptr;
+	std::shared_ptr<util::Library> m_audioAPILib = nullptr;
+	std::shared_ptr<al::ISoundSystem> m_soundSystem = nullptr;
+	std::string m_audioAPI;
 
 	// FPS
 	double m_fps;
@@ -239,7 +243,7 @@ private:
 	util::Clock::duration m_tDeltaFrameTime;
 	std::optional<std::chrono::nanoseconds> m_fixedFrameDeltaTimeInterpretation = {};
 
-	std::unordered_map<std::string,std::shared_ptr<al::Effect>> m_auxEffects;
+	std::unordered_map<std::string,std::shared_ptr<al::IEffect>> m_auxEffects;
 
 	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage,GPUProfilingPhase>> m_gpuProfilingStageManager = nullptr;
 	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_cpuProfilingStageManager = nullptr;
@@ -279,7 +283,7 @@ namespace pragma
 };
 
 template<class TEfxProperties>
-	std::shared_ptr<al::Effect> CEngine::CreateAuxEffect(const std::string &name,const TEfxProperties &props)
+	std::shared_ptr<al::IEffect> CEngine::CreateAuxEffect(const std::string &name,const TEfxProperties &props)
 {
 	auto lname = name;
 	ustring::to_lower(lname);

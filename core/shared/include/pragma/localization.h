@@ -28,14 +28,19 @@ public:
 class DLLNETWORK Locale
 {
 public:
+	static void Init();
+	static void Clear();
+
 	static bool Load(const std::string &file,bool bReload=false);
 	static void SetLanguage(std::string lan);
+	static void ReloadFiles();
 	static bool GetText(const std::string &id,std::string &outText);
 	static bool GetText(const std::string &id,const std::vector<std::string> &args,std::string &outText);
 	static std::string GetText(const std::string &id,const std::vector<std::string> &args={});
 	static bool SetLocalization(const std::string &id,const std::string &text,bool overwriteIfExists=true);
 	static const std::string &GetLanguage();
 	static std::unordered_map<std::string,std::string> GetLanguages();
+	static void Poll();
 private:
 	static Localization m_localization;
 	static std::vector<std::string> m_loadedFiles;

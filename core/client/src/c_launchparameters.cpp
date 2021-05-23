@@ -57,6 +57,13 @@ static void LPARAM_render_api(const std::vector<std::string> &argv)
 	c_engine->SetRenderAPI(argv.front());
 }
 
+static void LPARAM_audio_api(const std::vector<std::string> &argv)
+{
+	if(argv.empty())
+		return;
+	c_engine->SetAudioAPI(argv.front());
+}
+
 REGISTER_LAUNCH_PARAMETER_HELP(-windowed,LPARAM_windowed,"-window -startwindowed -sw","start in windowed mode");
 REGISTER_LAUNCH_PARAMETER(-window,LPARAM_windowed);
 REGISTER_LAUNCH_PARAMETER(-startwindowed,LPARAM_windowed);
@@ -75,3 +82,4 @@ REGISTER_LAUNCH_PARAMETER_HELP(-fullbright,LPARAM_fullbright,"","start in fullbr
 
 REGISTER_LAUNCH_PARAMETER_HELP(-enable_gfx_validation,LPARAM_vk_enable_validation,"<1/0>","Enables or disables graphics API validation.");
 REGISTER_LAUNCH_PARAMETER_HELP(-graphics_api,LPARAM_render_api,"<moduleName>","Changes the graphics API to use for rendering.");
+REGISTER_LAUNCH_PARAMETER_HELP(-audio_api,LPARAM_audio_api,"<moduleName>","Changes the audio API to use for audio playback.");

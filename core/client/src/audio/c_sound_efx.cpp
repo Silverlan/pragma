@@ -70,10 +70,10 @@ const std::vector<std::string> &al::get_aux_types()
 
 namespace al
 {
-	static std::shared_ptr<al::Effect> create_aux_effect(const std::string *name,const std::string &type,udm::LinkedPropertyWrapper &prop);
+	static std::shared_ptr<al::IEffect> create_aux_effect(const std::string *name,const std::string &type,udm::LinkedPropertyWrapper &prop);
 };
 
-std::shared_ptr<al::Effect> al::create_aux_effect(const std::string *name,const std::string &type,udm::LinkedPropertyWrapper &prop)
+std::shared_ptr<al::IEffect> al::create_aux_effect(const std::string *name,const std::string &type,udm::LinkedPropertyWrapper &prop)
 {
 	auto *soundSys = c_engine->GetSoundSystem();
 	if(soundSys == nullptr)
@@ -301,5 +301,5 @@ std::shared_ptr<al::Effect> al::create_aux_effect(const std::string *name,const 
 	return nullptr;
 }
 
-std::shared_ptr<al::Effect> al::create_aux_effect(const std::string &type,udm::LinkedPropertyWrapper &prop) {return create_aux_effect(nullptr,type,prop);}
-std::shared_ptr<al::Effect> al::create_aux_effect(const std::string &name,const std::string &type,udm::LinkedPropertyWrapper &prop) {return create_aux_effect(&name,type,prop);}
+std::shared_ptr<al::IEffect> al::create_aux_effect(const std::string &type,udm::LinkedPropertyWrapper &prop) {return create_aux_effect(nullptr,type,prop);}
+std::shared_ptr<al::IEffect> al::create_aux_effect(const std::string &name,const std::string &type,udm::LinkedPropertyWrapper &prop) {return create_aux_effect(&name,type,prop);}

@@ -724,7 +724,8 @@ bool BaseAnimatedComponent::MaintainAnimations(double dt)
 	auto &bonePoses = baseAnimInfo.bonePoses;
 	auto &boneScales = baseAnimInfo.boneScales;
 	// Apply animation to skeleton
-	for(auto i=decltype(bonePoses.size()){0};i<bonePoses.size();++i)
+	auto n = umath::min(bones.size(),bonePoses.size());
+	for(auto i=decltype(n){0};i<n;++i)
 	{
 		auto boneId = bones[i];
 		auto &orientation = bonePoses.at(i);

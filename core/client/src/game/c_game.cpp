@@ -1742,7 +1742,7 @@ bool CGame::LoadAuxEffects(const std::string &fname)
 	}
 	return true;
 }
-std::shared_ptr<al::Effect> CGame::GetAuxEffect(const std::string &name) {return c_engine->GetAuxEffect(name);}
+std::shared_ptr<al::IEffect> CGame::GetAuxEffect(const std::string &name) {return c_engine->GetAuxEffect(name);}
 
 bool CGame::SaveImage(prosper::IImage &image,const std::string &fileName,const uimg::TextureInfo &imageWriteInfo) const
 {

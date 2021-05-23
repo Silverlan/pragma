@@ -596,10 +596,10 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua,bool bGUI)
 		{"set_global_effect_parameters",&Lua::sound::set_global_effect_parameters}
 	});
 	Lua::RegisterLibraryEnums(lua.GetState(),"sound",{
-		{"GLOBAL_EFFECT_FLAG_NONE",umath::to_integral(al::SoundSystem::GlobalEffectFlag::None)},
-		{"GLOBAL_EFFECT_FLAG_BIT_RELATIVE",umath::to_integral(al::SoundSystem::GlobalEffectFlag::RelativeSounds)},
-		{"GLOBAL_EFFECT_FLAG_BIT_WORLD",umath::to_integral(al::SoundSystem::GlobalEffectFlag::WorldSounds)},
-		{"GLOBAL_EFFECT_FLAG_ALL",umath::to_integral(al::SoundSystem::GlobalEffectFlag::All)},
+		{"GLOBAL_EFFECT_FLAG_NONE",umath::to_integral(al::ISoundSystem::GlobalEffectFlag::None)},
+		{"GLOBAL_EFFECT_FLAG_BIT_RELATIVE",umath::to_integral(al::ISoundSystem::GlobalEffectFlag::RelativeSounds)},
+		{"GLOBAL_EFFECT_FLAG_BIT_WORLD",umath::to_integral(al::ISoundSystem::GlobalEffectFlag::WorldSounds)},
+		{"GLOBAL_EFFECT_FLAG_ALL",umath::to_integral(al::ISoundSystem::GlobalEffectFlag::All)},
 		
 		{"DISTANCE_MODEL_NONE",umath::to_integral(al::DistanceModel::None)},
 		{"DISTANCE_MODEL_INVERSE_CLAMPED",umath::to_integral(al::DistanceModel::InverseClamped)},
@@ -750,7 +750,7 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua,bool bGUI)
 	auto alSoundClassDef = luabind::class_<ALSound>("Source");
 	Lua::ALSound::Client::register_class(alSoundClassDef);
 
-	auto alBufferClassDef = luabind::class_<al::SoundBuffer>("Source");
+	auto alBufferClassDef = luabind::class_<al::ISoundBuffer>("Source");
 	Lua::ALSound::Client::register_buffer(alBufferClassDef);
 
 	auto soundMod = luabind::module(lua.GetState(),"sound");

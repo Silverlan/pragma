@@ -11,7 +11,7 @@
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/lua/c_listener_handle.hpp"
 
-namespace al {class Listener;};
+namespace al {class IListener;};
 namespace pragma
 {
 	class DLLCLIENT CListenerComponent final
@@ -26,7 +26,7 @@ namespace pragma
 		void SetGain(float gain);
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 	private:
-		al::Listener *m_listener = nullptr;
+		al::IListener *m_listener = nullptr;
 	};
 };
 

@@ -15,16 +15,16 @@
 
 class CSoundScriptManager;
 
-namespace al {class Effect;};
+namespace al {class IEffect;};
 class DLLCLIENT CSSEPlaySound
 	: public SSEPlaySound
 {
 protected:
-	std::shared_ptr<al::Effect> m_dspEffect = nullptr;
+	std::shared_ptr<al::IEffect> m_dspEffect = nullptr;
 	void PrecacheSound(const char *name);
 public:
 	CSSEPlaySound(SoundScriptManager *manager);
-	std::vector<std::shared_ptr<al::Effect>> effects;
+	std::vector<std::shared_ptr<al::IEffect>> effects;
 	virtual void Initialize(udm::LinkedPropertyWrapper &prop) override;
 	virtual SSESound *CreateSound(double tStart,const std::function<std::shared_ptr<ALSound>(const std::string&,ALChannel,ALCreateFlags)> &createSound) override;
 };

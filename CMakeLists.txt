@@ -405,8 +405,6 @@ else()
 	search_lib_recursive(DEPENDENCY_LUA_LIBRARY third_party_libs/luajit/src luajit DYNAMIC ${CMAKE_CURRENT_LIST_DIR})
 endif()
 
-set(DEPENDENCY_ALURE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/alure/include CACHE PATH "Path to include directory.")
-
 set(DEPENDENCY_LIBSAMPLERATE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libsamplerate/src CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_LIBSAMPLERATE_LIBRARY third_party_libs/libsamplerate/${BINARY_PRAGMA_DIR} samplerate STATIC)
 
@@ -486,8 +484,6 @@ if(UNIX)
 	resolve_links(DEPENDENCY_DETOUR_LIBRARY)
 	resolve_links(DEPENDENCY_FBXSDK_LIBRARY)
 	resolve_links(DEPENDENCY_FLANN_LIBRARY)
-	resolve_links(DEPENDENCY_FMOD_LIBRARY)
-	resolve_links(DEPENDENCY_FMOD_STUDIO_LIBRARY)
 	resolve_links(DEPENDENCY_FREETYPE_LIBRARY)
 	resolve_links(DEPENDENCY_GLFW_LIBRARY)
 	resolve_links(DEPENDENCY_GLSLANG_LIBRARY)
@@ -664,12 +660,6 @@ set_target_properties(common PROPERTIES FOLDER third_party_libs/openal-soft)
 set_target_properties(native-tools PROPERTIES FOLDER third_party_libs/openal-soft)
 set_target_properties(openal-info PROPERTIES FOLDER third_party_libs/openal-soft)
 #
-
-# Alure
-# set(OPENAL_INCLUDE_DIR "${DEPENDENCY_OPENAL_SOFT_INCLUDE}" CACHE STRING "${DEPENDENCY_OPENAL_SOFT_INCLUDE}" FORCE)
-# set(OPENAL_LIBRARY "${DEPENDENCY_OPENAL_SOFT_LIBRARY}" CACHE STRING "${DEPENDENCY_OPENAL_SOFT_LIBRARY}" FORCE)
-
-# register_third_party_library(alure)
 
 # Assimp
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL ".." FORCE)
@@ -1110,9 +1100,6 @@ add_dependencies(prosper vfilesystem iglfw util_image muparserx)
 add_dependencies(cmaterialsystem materialsystem util_image prosper VTFLib13)
 add_dependencies(wgui cmaterialsystem freetype util_formatted_text)
 
-if(${CONFIG_UNDERLYING_LIBRARY} MATCHES Alure)
-	add_dependencies(alsoundsystem OpenAL)
-endif()
 add_dependencies(alsoundsystem vorbis vfilesystem util_sound samplerate)
 
 add_dependencies(servermanager networkmanager)
@@ -1266,8 +1253,6 @@ pragma_install_lib("${DEPENDENCY_LIBZIP_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_LPNG_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 
 pragma_install_lib_c("${DEPENDENCY_ZLIB_LIBRARY}" zlib1 "${BINARY_OUTPUT_DIR}")
-pragma_install_lib_c("${DEPENDENCY_FMOD_LIBRARY}" fmod64 "${BINARY_OUTPUT_DIR}")
-pragma_install_lib_c("${DEPENDENCY_FMOD_STUDIO_LIBRARY}" fmodstudio64 "${BINARY_OUTPUT_DIR}")
 pragma_install_lib_c("${DEPENDENCY_NVIDIA_TEXTURE_TOOLS_LIBRARY}" ../bin/nvtt "${BINARY_OUTPUT_DIR}")
 
 if(WIN32)

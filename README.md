@@ -15,7 +15,6 @@ What are Pragma's requirements?
 - Boost 1.72: https://www.boost.org/users/history/version_1_72_0.html
 - zlib 1.2.8: https://github.com/fmrico/zlib-1.2.8
 - Geometric Tools Engine: https://github.com/davideberly/GeometricTools
-- FMOD Studio: https://www.fmod.com/download
 - Python 3.8 or newer: https://www.python.org/downloads/
 
 If you want to use Vulkan, you'll also need these:
@@ -71,10 +70,6 @@ b2 toolset=msvc-14.2 address-model=64 stage variant=release link=static runtime-
 - `DEPENDENCY_BOOST_REGEX_LIBRARY`: Path to boost regex library (boost_regex-vc142-mt-x64-1_72.lib)
 - `DEPENDENCY_BOOST_SYSTEM_LIBRARY`: Path to boost system library (boost_system-vc142-mt-x64-1_72.lib)
 - `DEPENDENCY_BOOST_THREAD_LIBRARY`: Path to boost thread library (boost_thread-vc142-mt-x64-1_72.lib)
-- `DEPENDENCY_FMOD_INCLUDE`: Path to fmod include directory (fmod/api/lowlevel/inc)
-- `DEPENDENCY_FMOD_LIBRARY`: Path to fmod library (fmod/api/lowlevel/lib/fmod64_vc.lib)
-- `DEPENDENCY_FMOD_STUDIO_INCLUDE`: Path to fmod studio include directory (fmod/api/studio/inc)
-- `DEPENDENCY_FMOD_STUDIO_LIBRARY`: Path to fmod studio library (fmod/api/studio/lib/fmodstudio64_vc.lib)
 6) Run configure again, then generate and open the solution
 7) Build Pragma
 
@@ -105,6 +100,7 @@ There are various optional modules available for Pragma, some of which are alrea
 - pr_socket: https://github.com/Silverlan/pragma/tree/master/modules/pr_socket
 - pr_video_recorder: https://github.com/Silverlan/pragma/tree/master/modules/pr_video_recorder
 - pr_xml: https://github.com/Silverlan/pragma/tree/master/modules/pr_xml
+- pr_audio_dummy: https://github.com/Silverlan/pragma/tree/master/modules/pr_audio_dummy
 
 - pr_cycles: https://github.com/Silverlan/pr_cycles
 - pr_source: https://github.com/Silverlan/pr_source
@@ -125,5 +121,7 @@ There are various optional modules available for Pragma, some of which are alrea
 - pr_steam_networking_sockets: https://github.com/Silverlan/pr_steam_networking_sockets
 - pr_physx: https://github.com/Silverlan/pr_physx
 - pr_bullet: https://github.com/Silverlan/pr_bullet
+- pr_audio_fmod: https://github.com/Silverlan/pragma/tree/master/modules/pr_audio_fmod
+- pr_audio_alure: https://github.com/Silverlan/pragma/tree/master/modules/pr_audio_alure
 
 To install a module, check it out into `Pragma/modules`, re-configure and re-generate the solution using CMake, then build the module and then build `core/pragma-install` to install it.

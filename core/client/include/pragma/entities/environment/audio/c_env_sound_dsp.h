@@ -36,7 +36,7 @@ namespace pragma
 		bool m_bApplyGlobal = false;
 		bool m_bAllWorldSounds = false;
 		bool m_bAllSounds = false;
-		std::shared_ptr<al::Effect> m_dsp = nullptr;
+		std::shared_ptr<al::IEffect> m_dsp = nullptr;
 		std::vector<std::pair<al::SoundSourceHandle,uint32_t>> m_affectedSounds;
 		ALSoundType m_types = ALSoundType::All &~ALSoundType::GUI;
 

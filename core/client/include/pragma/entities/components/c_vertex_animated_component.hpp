@@ -32,6 +32,7 @@ namespace pragma
 #pragma pack(pop)
 
 		CVertexAnimatedComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
+		virtual ~CVertexAnimatedComponent() override;
 		virtual void Initialize() override;
 		void UpdateVertexAnimationDataMT();
 		void UpdateVertexAnimationBuffer(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);

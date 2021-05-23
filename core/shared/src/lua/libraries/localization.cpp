@@ -7,6 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/localization.h"
+#include <fsys/directory_watcher.h>
 #include <fsys/filesystem.h>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_path.hpp>
@@ -22,6 +23,17 @@ Localization::Localization()
 
 //////////////////////////
 
+static constexpr auto LOCALIZATION_ROOT_PATH = "scripts/localization/";
+
+static std::unique_ptr<DirectoryWatcherCallback> g_locFileWatcher = nullptr;
+void Locale::Init() {}
+void Locale::Clear()
+{
+	g_locFileWatcher = nullptr;
+	m_loadedFiles.clear();
+	m_localization.texts.clear();
+	m_language.clear();
+}
 bool Locale::Load(const std::string &file,const std::string &lan,bool bReload)
 {
 	auto filePath = util::Path::CreateFile(file);
@@ -37,7 +49,7 @@ bool Locale::Load(const std::string &file,const std::string &lan,bool bReload)
 
 bool Locale::LoadFile(const std::string &file,const std::string &lan)
 {
-	auto filePath = "scripts/localization/" +lan +'/' +file;
+	auto filePath = LOCALIZATION_ROOT_PATH +lan +'/' +file;
 	auto f = FileManager::OpenFile(filePath.c_str(),"r");
 	if(f != nullptr)
 	{
@@ -64,6 +76,19 @@ bool Locale::Load(const std::string &file,bool bReload)
 	return r;
 }
 
+void Locale::Poll()
+{
+	if(g_locFileWatcher)
+		g_locFileWatcher->Poll();
+}
+
+void Locale::ReloadFiles()
+{
+	auto files = m_loadedFiles;
+	for(auto &f : files)
+		Load(f,true);
+}
+
 void Locale::SetLanguage(std::string lan)
 {
 	ustring::to_lower(lan);
@@ -73,6 +98,20 @@ void Locale::SetLanguage(std::string lan)
 	m_loadedFiles.clear();
 	for(auto &fpath : loadedFiles)
 		LoadFile(fpath,lan);
+
+	try
+	{
+		g_locFileWatcher = std::make_unique<DirectoryWatcherCallback>(LOCALIZATION_ROOT_PATH +lan +'/',[](const std::string &str) {
+			auto filePath = util::Path::CreateFile(str);
+			auto it = std::find(m_loadedFiles.begin(),m_loadedFiles.end(),filePath.GetString());
+			if(it == m_loadedFiles.end())
+				return;
+			Con::cout<<"Reloading localization file '"<<str<<"'..."<<Con::endl;
+			Load(str,true);
+		});
+	}
+	catch(const std::runtime_error &err)
+	{}
 }
 const std::string &Locale::GetLanguage() {return m_language;}
 std::unordered_map<std::string,std::string> Locale::GetLanguages()

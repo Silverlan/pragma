@@ -43,6 +43,7 @@
 #include <pragma/entities/environment/effects/c_env_particle_system.h>
 #include <pragma/rendering/shaders/image/c_shader_clear_color.hpp>
 #include <pragma/rendering/shaders/image/c_shader_gradient.hpp>
+#include <pragma/localization.h>
 #include <wgui/types/wicontextmenu.hpp>
 #include <wgui/types/witext.h>
 #include <wgui/types/witext_tags.hpp>
@@ -78,7 +79,7 @@ CEngine::CEngine(int argc,char* argv[])
 	m_nearZ(pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z),//10.0f), //0.1f
 	m_farZ(pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z),
 	m_fps(0),m_tFPSTime(0.f),
-	m_tLastFrame(util::Clock::now()),m_tDeltaFrameTime(0)
+	m_tLastFrame(util::Clock::now()),m_tDeltaFrameTime(0),m_audioAPI{"fmod"}
 {
 	c_engine = this;
 
@@ -920,7 +921,7 @@ void CEngine::ReloadShaderPipelines()
 	}
 }
 
-CEngine::~CEngine() {}
+CEngine::~CEngine() {m_audioAPILib = nullptr;}
 
 CEngine *pragma::get_cengine() {return c_engine;}
 ClientState *pragma::get_client_state() {return client;}
@@ -1354,6 +1355,7 @@ void CEngine::UpdateTickCount()
 
 void CEngine::Tick()
 {
+	Locale::Poll();
 	ProcessConsoleInput();
 	Engine::StartProfilingStage(Engine::CPUProfilingPhase::Tick);
 	// The client tick has to run BEFORE the server tick!!!

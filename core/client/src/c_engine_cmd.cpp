@@ -7,6 +7,7 @@
 
 #include "stdafx_cengine.h"
 #include "pragma/c_engine.h"
+#include "pragma/audio/c_audio.hpp"
 #include <pragma/asset/util_asset.hpp>
 #include <pragma/lua/libraries/ldebug.h>
 #include <pragma/rendering/render_apis.hpp>
@@ -193,6 +194,27 @@ void CEngine::RegisterConsoleCommands()
 		NetworkState *nw,ConVar *cv,bool oldVal,bool newVal) -> void {
 			GetRenderContext().GetWindow()->SetVSyncEnabled(newVal);
 	}});
+
+	conVarMap.RegisterConVar("audio_api","fmod",ConVarFlags::Archive | ConVarFlags::Replicated,"The underlying audio API to use.",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
+		auto &audioAPIs = pragma::audio::get_available_audio_apis();
+		auto it = audioAPIs.begin();
+		std::vector<std::string_view> similarCandidates {};
+		ustring::gather_similar_elements(arg,[&it,&audioAPIs]() -> std::optional<std::string_view> {
+			if(it == audioAPIs.end())
+				return {};
+			auto &name = *it;
+			++it;
+			return name;
+		},similarCandidates,15);
+
+		autoCompleteOptions.reserve(similarCandidates.size());
+		for(auto &candidate : similarCandidates)
+		{
+			auto strOption = std::string{candidate};
+			ufile::remove_extension_from_filename(strOption);
+			autoCompleteOptions.push_back(strOption);
+		}
+	});
 	
 	conVarMap.RegisterConVar("render_instancing_threshold","2",ConVarFlags::Archive,"The threshold at which to start instancing entities if instanced rendering is enabled (render_instancing_threshold). Must not be lower than 2!");
 	conVarMap.RegisterConVar("render_instancing_enabled","0",ConVarFlags::Archive,"Enables or disables instanced rendering.");

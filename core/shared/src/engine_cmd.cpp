@@ -11,6 +11,7 @@
 #include "pragma/console/conout.h"
 #include "pragma/game/savegame.hpp"
 #include "pragma/asset/util_asset.hpp"
+#include "pragma/localization.h"
 #include <pragma/console/convars.h>
 #include <pragma/lua/libraries/lutil.h>
 #include <pragma/physics/environment.hpp>
@@ -325,6 +326,10 @@ void Engine::RegisterConsoleCommands()
 	conVarMap.RegisterConCommand("clear_cache",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		ClearCache();
 	},ConVarFlags::None,"Clears all of the cached engine files.");
+
+	conVarMap.RegisterConCommand("loc_reload",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		Locale::ReloadFiles();
+	},ConVarFlags::None,"Reloads all localization files.");
 
 	conVarMap.RegisterConCommand("asset_clear_unused_models",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		ClearUnusedAssets(pragma::asset::Type::Model,true);

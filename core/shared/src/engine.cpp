@@ -40,6 +40,7 @@
 #include "pragma/engine_version.h"
 #include "pragma/console/cvar.h"
 #include "pragma/debug/debug_performance_profiler.hpp"
+#include "pragma/localization.h"
 #include <pragma/asset/util_asset.hpp>
 #include <sharedutils/util.h>
 #include <sharedutils/util_clock.hpp>
@@ -114,6 +115,7 @@ Engine::Engine(int,char*[])
 	m_logFile(nullptr),
 	m_tickRate(Engine::DEFAULT_TICK_RATE)
 {
+	Locale::Init();
 	OpenConsole();
 
 	m_mainThreadId = std::this_thread::get_id();
@@ -296,6 +298,7 @@ void Engine::Close()
 	EndLogging();
 
 	Con::set_output_callback(nullptr);
+	Locale::Clear();
 }
 
 static uint32_t clear_assets(NetworkState *state,pragma::asset::Type type,bool verbose)
@@ -478,6 +481,7 @@ bool Engine::StopProfilingStage(CPUProfilingPhase stage)
 
 void Engine::Tick()
 {
+	Locale::Poll();
 	m_ctTick.Update();
 	ProcessConsoleInput();
 

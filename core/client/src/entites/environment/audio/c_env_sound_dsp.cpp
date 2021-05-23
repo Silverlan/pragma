@@ -58,7 +58,7 @@ void CBaseSoundDspComponent::OnTick(double dt)
 		{
 			if(m_bAffectRelative == false && snd.IsRelative() == true)
 				continue;
-			auto posSnd = alSnd.GetWorldPosition();
+			auto posSnd = alSnd->GetWorldPosition();
 
 			auto d = uvec::length_sqr(posSnd -pos);
 			if(d > radiusOuterSqr)
@@ -165,11 +165,11 @@ void CBaseSoundDspComponent::UpdateSoundSource(al::SoundSource &src,float gain)
 	auto it = FindSoundSource(src);
 	if(it != m_affectedSounds.end())
 	{
-		src.SetEffectGain(it->second,gain);
+		src->SetEffectGain(it->second,gain);
 		return;
 	}
 	uint32_t slotId;
-	if(src.AddEffect(*m_dsp,slotId,gain) == false)
+	if(src->AddEffect(*m_dsp,slotId,gain) == false)
 		return;
 	m_affectedSounds.push_back({src.GetHandle(),slotId});
 }
@@ -178,7 +178,7 @@ void CBaseSoundDspComponent::DetachSoundSource(al::SoundSource &src)
 	auto it = FindSoundSource(src);
 	if(it == m_affectedSounds.end())
 		return;
-	src.RemoveEffect(it->second);
+	src->RemoveEffect(it->second);
 	m_affectedSounds.erase(it);
 }
 void CBaseSoundDspComponent::DetachAllSoundSources()
@@ -188,7 +188,7 @@ void CBaseSoundDspComponent::DetachAllSoundSources()
 		if(pair.first.IsValid() == false)
 			continue;
 		auto &src = *static_cast<al::SoundSource*>(static_cast<CALSound*>(pair.first.get()));
-		src.RemoveEffect(pair.second);
+		src->RemoveEffect(pair.second);
 	}
 	m_affectedSounds.clear();
 }

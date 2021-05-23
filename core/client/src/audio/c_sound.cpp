@@ -20,6 +20,7 @@
 #include "pragma/console/c_cvar.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include <alsoundsystem.hpp>
+#include <alsound_buffer.hpp>
 #include <pragma/game/game_resources.hpp>
 #include <pragma/audio/sound_util.hpp>
 #include <util_sound.hpp>
@@ -73,7 +74,7 @@ void Console::commands::debug_audio_sounds(NetworkState *state,pragma::BasePlaye
 			Con::cout<<" - "<<&snd;
 			if(state->IsClient())
 			{
-				auto *buf = static_cast<CALSound&>(snd).GetBuffer();
+				auto *buf = static_cast<CALSound&>(snd)->GetBuffer();
 				Con::cout<<" (File: "<<((buf != nullptr) ? buf->GetFilePath() : "Unknown")<<")";
 			}
 			auto *src = snd.GetSource();
@@ -105,7 +106,7 @@ void Console::commands::debug_audio_sounds(NetworkState *state,pragma::BasePlaye
 }
 
 static auto cvAudioStreaming = GetClientConVar("cl_audio_streaming_enabled");
-bool ClientState::PrecacheSound(std::string snd,std::pair<al::SoundBuffer*,al::SoundBuffer*> *buffers,ALChannel mode,bool bLoadInstantly)
+bool ClientState::PrecacheSound(std::string snd,std::pair<al::ISoundBuffer*,al::ISoundBuffer*> *buffers,ALChannel mode,bool bLoadInstantly)
 {
 	auto *soundSys = c_engine->GetSoundSystem();
 	if(soundSys == nullptr)
@@ -156,8 +157,8 @@ bool ClientState::PrecacheSound(std::string snd,std::pair<al::SoundBuffer*,al::S
 		bLoadInstantly = true;
 	auto bMono = (mode == ALChannel::Mono || mode == ALChannel::Both) ? true : false;
 	auto bStereo = (mode == ALChannel::Auto || mode == ALChannel::Both) ? true : false;
-	al::SoundBuffer *buf = nullptr;
-	std::pair<al::SoundBuffer*,al::SoundBuffer*> tmpBuffers = {nullptr,nullptr};
+	al::ISoundBuffer *buf = nullptr;
+	std::pair<al::ISoundBuffer*,al::ISoundBuffer*> tmpBuffers = {nullptr,nullptr};
 	auto *tgtBuffers = (buffers != nullptr) ? buffers : &tmpBuffers;
 	try
 	{
@@ -204,7 +205,7 @@ bool ClientState::PrecacheSound(std::string snd,std::pair<al::SoundBuffer*,al::S
 }
 bool ClientState::PrecacheSound(std::string snd,ALChannel mode)
 {
-	std::pair<al::SoundBuffer*,al::SoundBuffer*> buffers = {nullptr,nullptr};
+	std::pair<al::ISoundBuffer*,al::ISoundBuffer*> buffers = {nullptr,nullptr};
 	return PrecacheSound(snd,&buffers,mode);
 }
 
@@ -305,7 +306,7 @@ void ClientState::InitializeSound(CALSound &snd)
 	}
 }
 
-std::shared_ptr<ALSound> ClientState::CreateSound(al::SoundBuffer &buffer,ALSoundType type)
+std::shared_ptr<ALSound> ClientState::CreateSound(al::ISoundBuffer &buffer,ALSoundType type)
 {
 	auto *soundSys = c_engine->GetSoundSystem();
 	if(soundSys == nullptr)
@@ -348,7 +349,7 @@ std::shared_ptr<ALSound> ClientState::PlaySound(std::string snd,ALSoundType type
 	return pAl;
 }
 
-std::shared_ptr<ALSound> ClientState::PlaySound(al::SoundBuffer &buffer,ALSoundType type)
+std::shared_ptr<ALSound> ClientState::PlaySound(al::ISoundBuffer &buffer,ALSoundType type)
 {
 	auto pAl = CreateSound(buffer,type);
 	if(pAl == nullptr)
@@ -370,7 +371,7 @@ std::shared_ptr<ALSound> ClientState::PlaySound(al::Decoder &decoder,ALSoundType
 	return pAl;
 }
 
-std::shared_ptr<ALSound> ClientState::PlayWorldSound(al::SoundBuffer &buffer,ALSoundType type,const Vector3 &pos)
+std::shared_ptr<ALSound> ClientState::PlayWorldSound(al::ISoundBuffer &buffer,ALSoundType type,const Vector3 &pos)
 {
 	auto ptr = PlaySound(buffer,type);
 	auto *alSnd = ptr.get();
@@ -404,9 +405,9 @@ void ClientState::UpdateSounds()
 				continue;
 			auto pTrComponent = source->GetTransformComponent();
 			auto srcPos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
-			auto sndPos = snd->GetPosition();
+			auto sndPos = (*snd)->GetPosition();
 			if(uvec::cmp(srcPos,sndPos) == false)
-				snd->SetPosition(srcPos);
+				(*snd)->SetPosition(srcPos);
 		}
 		soundSys->Update();
 		for(auto &snd : soundSys->GetSources())

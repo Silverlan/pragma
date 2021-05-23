@@ -13,8 +13,8 @@
 
 namespace al
 {
-	class Effect;
-	using PEffect = std::shared_ptr<Effect>;
+	class IEffect;
+	using PEffect = std::shared_ptr<IEffect>;
 	struct EfxEaxReverbProperties;
 	struct EfxChorusProperties;
 	struct EfxDistortionProperties;

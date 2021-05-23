@@ -53,7 +53,7 @@ class WorldEnvironment;
 template<class T>
 	class OcclusionOctree;
 enum class UniformBinding : uint32_t;
-namespace al {class Effect;};
+namespace al {class IEffect;};
 namespace GLFW
 {
 	enum class MouseButton : uint32_t;
@@ -261,8 +261,8 @@ public:
 	pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage,GPUProfilingPhase> *GetGPUProfilingStageManager();
 
 	template<class TEfxProperties>
-		std::shared_ptr<al::Effect> CreateAuxEffect(const std::string &name,const TEfxProperties &props);
-	std::shared_ptr<al::Effect> GetAuxEffect(const std::string &name);
+		std::shared_ptr<al::IEffect> CreateAuxEffect(const std::string &name,const TEfxProperties &props);
+	std::shared_ptr<al::IEffect> GetAuxEffect(const std::string &name);
 
 	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase> *GetProfilingStageManager();
 	bool StartProfilingStage(CPUProfilingPhase stage);

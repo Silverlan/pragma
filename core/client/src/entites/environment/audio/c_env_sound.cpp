@@ -24,7 +24,7 @@ static void apply_sound_identifier(ALSound &snd,const std::string &name)
 {
 	if(snd.IsSoundScript() == false)
 	{
-		static_cast<CALSound&>(snd).SetIdentifier(name);
+		static_cast<CALSound&>(snd)->SetIdentifier(name);
 		return;
 	}
 	auto *sndScript = dynamic_cast<ALSoundScript*>(&snd);

@@ -799,8 +799,24 @@ int Lua::util::depth_to_distance(lua_State *l)
 	return 1;
 }
 void Lua::util::open_url_in_browser(const std::string &url) {return ::util::open_url_in_browser(url);}
-void Lua::util::open_path_in_explorer(const std::string &path,const std::string &selectFile) {::util::open_path_in_explorer(::util::get_program_path() +'/' +path,selectFile);}
-void Lua::util::open_path_in_explorer(const std::string &path) {::util::open_path_in_explorer(::util::get_program_path() +'/' +path);}
+void Lua::util::open_path_in_explorer(const std::string &spath,const std::string &selectFile)
+{
+	auto path = ::util::Path::CreatePath(spath) +::util::Path::CreateFile(selectFile);
+	std::string strAbsPath;
+	if(FileManager::FindAbsolutePath(path.GetString(),strAbsPath) == false)
+		return;
+	auto absPath = ::util::Path::CreateFile(strAbsPath);
+	::util::open_path_in_explorer(absPath.GetPath(),absPath.GetFileName());
+}
+void Lua::util::open_path_in_explorer(const std::string &spath)
+{
+	auto path = ::util::Path::CreatePath(spath);
+	std::string strAbsPath;
+	if(FileManager::FindAbsolutePath(path.GetString(),strAbsPath) == false)
+		return;
+	auto absPath = ::util::Path::CreatePath(strAbsPath);
+	::util::open_path_in_explorer(absPath.GetPath());
+}
 int Lua::util::clamp_resolution_to_aspect_ratio(lua_State *l)
 {
 	auto w = Lua::CheckInt(l,1);

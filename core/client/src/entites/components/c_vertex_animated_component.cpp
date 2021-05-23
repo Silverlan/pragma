@@ -48,6 +48,10 @@ void pragma::initialize_vertex_animation_buffer()
 		throw std::logic_error{"Invalid morph target animation buffer alignment!"};
 }
 void pragma::clear_vertex_animation_buffer() {g_vertexAnimationBuffer = nullptr;}
+CVertexAnimatedComponent::~CVertexAnimatedComponent()
+{
+	DestroyVertexAnimationBuffer();
+}
 luabind::object CVertexAnimatedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CVertexAnimatedComponentHandleWrapper>(l);}
 void CVertexAnimatedComponent::Initialize()
 {
@@ -113,6 +117,12 @@ void CVertexAnimatedComponent::DestroyVertexAnimationBuffer()
 	m_maxVertexAnimations = 0u;
 	m_activeVertexAnimations = 0u;
 	m_vertexAnimationMeshBufferOffsets.clear();
+
+	auto &ent = GetEntity();
+	auto whRenderComponent = ent.GetComponent<CRenderComponent>();
+	auto *pRenderDescSet = whRenderComponent.valid() ? whRenderComponent->GetSwapRenderDescriptorSet() : nullptr;
+	if(pRenderDescSet)
+		pRenderDescSet->SetBindingStorageBuffer(*c_engine->GetRenderContext().GetDummyBuffer(),umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::VertexAnimationFrameData)); // Reset buffer
 }
 
 const std::shared_ptr<prosper::SwapBuffer> &CVertexAnimatedComponent::GetVertexAnimationBuffer() const {return m_vertexAnimationBuffer;}

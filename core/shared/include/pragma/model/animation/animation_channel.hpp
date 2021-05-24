@@ -62,16 +62,23 @@ namespace pragma::animation
 			std::vector<uint8_t> &m_values;
 		};
 
-		AnimationChannel()=default;
+		AnimationChannel();
 		AnimationChannel(const AnimationChannel &other)=default;
 		AnimationChannel(AnimationChannel &&other)=default;
 		AnimationChannel &operator=(const AnimationChannel&)=default;
 		AnimationChannel &operator=(AnimationChannel&&)=default;
-		udm::Type valueType = udm::Type::Float;
-		std::vector<float> times;
-		std::vector<uint8_t> values;
 		AnimationChannelInterpolation interpolation = AnimationChannelInterpolation::Linear;
 		util::Path targetPath;
+
+		template<typename T>
+			uint32_t AddValue(float t,const T &value);
+
+		udm::Array &GetTimesArray();
+		const udm::Array &GetTimesArray() const {return const_cast<AnimationChannel*>(this)->GetTimesArray();}
+		udm::Array &GetValueArray();
+		const udm::Array &GetValueArray() const {return const_cast<AnimationChannel*>(this)->GetValueArray();}
+		udm::Type GetValueType() const;
+		void SetValueType(udm::Type type);
 
 		bool Save(udm::LinkedPropertyWrapper &prop) const;
 		bool Load(udm::LinkedPropertyWrapper &prop);
@@ -95,9 +102,20 @@ namespace pragma::animation
 		template<typename T>
 			T GetInterpolatedValue(float t) const;
 	private:
+		uint32_t AddValue(float t,const void *value);
 		std::pair<uint32_t,uint32_t> FindInterpolationIndices(float t,float &outInterpFactor,uint32_t pivotIndex,uint32_t recursionDepth) const;
+		udm::PProperty m_times = nullptr;
+		udm::PProperty m_values = nullptr;
 	};
 };
+
+template<typename T>
+	uint32_t pragma::animation::AnimationChannel::AddValue(float t,const T &value)
+{
+	if(udm::type_to_enum<T>() != values.GetValueType())
+		throw std::invalid_argument{"Value type mismatch!"};
+	return AddValue(t,&value);
+}
 
 /////////////////////
 

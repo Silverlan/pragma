@@ -8,14 +8,16 @@
 #include "stdafx_shared.h"
 #include "pragma/model/animation/animation_channel.hpp"
 #pragma optimize("",off)
+pragma::animation::AnimationChannel::AnimationChannel()
+	: m_times{::udm::Property::Create(udm::Type::Float)},m_values{::udm::Property::Create(udm::Type::Array)}
+{}
 bool pragma::animation::AnimationChannel::Save(udm::LinkedPropertyWrapper &prop) const
 {
 	prop["interpolation"] = interpolation;
 	prop["targetPath"] = targetPath.GetString();
 
-	prop["times"] = times;
-	auto udmValues = prop.AddArray("values",values.size(),valueType);
-	memcpy(udmValues.GetValue<udm::Array>().GetValuePtr(0),values.data(),util::size_of_container(values));
+	prop["times"] = m_times;
+	prop["values"] = m_values;
 	return true;
 }
 bool pragma::animation::AnimationChannel::Load(udm::LinkedPropertyWrapper &prop)
@@ -25,30 +27,29 @@ bool pragma::animation::AnimationChannel::Load(udm::LinkedPropertyWrapper &prop)
 	prop["targetPath"](targetPath);
 	this->targetPath = std::move(targetPath);
 
-	prop["times"](times);
-	auto udmValues = prop["values"];
-	auto *aValues = udmValues.GetValuePtr<udm::Array>();
-	if(aValues)
-	{
-		valueType = aValues->GetValueType();
-		uint64_t reqSize = 0;
-		udmValues.GetBlobData(nullptr,0,&reqSize);
-		values.resize(reqSize);
-		udmValues.GetBlobData(values.data(),values.size());
-	}
-	else
-	{
-		valueType = udm::Type::Float;
-		values.resize(sizeof(float) *times.size());
-		for(auto i=decltype(times.size()){0u};i<times.size();++i)
-			reinterpret_cast<float*>(values.data())[i] = 0.f;
-	}
+	prop["times"](m_times);
+	prop["values"](m_values);
 	return true;
 }
+uint32_t pragma::animation::AnimationChannel::AddValue(float t,const void *value)
+{
+	// This is a stub
+	throw std::runtime_error{"Not yet implemented"};
+	return 0;
+	//float interpFactor;
+	//auto indices = FindInterpolationIndices(t,interpFactor);
+	//values.insert(values.begin() +indices.first);
+	//values.
+}
+udm::Array &pragma::animation::AnimationChannel::GetTimesArray() {return m_times->GetValue<udm::Array>();}
+udm::Array &pragma::animation::AnimationChannel::GetValueArray() {return m_values->GetValue<udm::Array>();}
+udm::Type pragma::animation::AnimationChannel::GetValueType() const {return GetValueArray().GetValueType();}
+void pragma::animation::AnimationChannel::SetValueType(udm::Type type) {GetValueArray().SetValueType(type);}
 std::pair<uint32_t,uint32_t> pragma::animation::AnimationChannel::FindInterpolationIndices(float t,float &interpFactor,uint32_t pivotIndex,uint32_t recursionDepth) const
 {
 	constexpr uint32_t MAX_RECURSION_DEPTH = 2;
-	if(pivotIndex >= times.size() || times.size() < 2 || recursionDepth == MAX_RECURSION_DEPTH)
+	auto &times = GetTimesArray();
+	if(pivotIndex >= times.GetSize() || times.GetSize() < 2 || recursionDepth == MAX_RECURSION_DEPTH)
 		return FindInterpolationIndices(t,interpFactor);
 	// We'll use the pivot index as the starting point of our search and check out the times immediately surrounding it.
 	// If we have a match, we can return immediately. If not, we'll slightly broaden the search until we've reached the max recursion depth or found a match.
@@ -56,10 +57,10 @@ std::pair<uint32_t,uint32_t> pragma::animation::AnimationChannel::FindInterpolat
 	auto tPivot = times[pivotIndex];
 	if(t >= tPivot)
 	{
-		if(pivotIndex == times.size() -1)
+		if(pivotIndex == times.GetSize() -1)
 		{
 			interpFactor = 0.f;
-			return {static_cast<uint32_t>(values.size() -1),static_cast<uint32_t>(values.size() -1)};
+			return {static_cast<uint32_t>(GetValueArray().GetSize() -1),static_cast<uint32_t>(GetValueArray().GetSize() -1)};
 		}
 		if(t < times[pivotIndex +1])
 		{
@@ -80,27 +81,76 @@ std::pair<uint32_t,uint32_t> pragma::animation::AnimationChannel::FindInterpolat
 {
 	return FindInterpolationIndices(t,interpFactor,pivotIndex,0u);
 }
+
+// TODO: Move this to UDM library
+class ArrayFloatIterator
+{
+public:
+	using iterator_category = std::forward_iterator_tag;
+	using value_type = float;
+	using difference_type = std::ptrdiff_t;
+	using pointer = float*;
+	using reference = float&;
+	
+	ArrayFloatIterator(float *data)
+		: m_data{data}
+	{}
+	ArrayFloatIterator &operator++()
+	{
+		m_data++;
+		return *this;
+	}
+	ArrayFloatIterator operator++(int)
+	{
+		++m_data;
+		return *this;
+	}
+	ArrayFloatIterator operator+(uint32_t n)
+	{
+		m_data += n;
+		return *this;
+	}
+	int32_t operator-(const ArrayFloatIterator &other) const {return (m_data -other.m_data) /sizeof(float);}
+	ArrayFloatIterator operator-(int32_t idx) const {return ArrayFloatIterator{m_data -idx};}
+	reference operator*() {return *m_data;}
+	const reference operator*() const {return const_cast<ArrayFloatIterator*>(this)->operator*();}
+	pointer operator->() {return m_data;}
+	const pointer operator->() const {return const_cast<ArrayFloatIterator*>(this)->operator->();}
+	bool operator==(const ArrayFloatIterator &other) const {return m_data == other.m_data;}
+	bool operator!=(const ArrayFloatIterator &other) const {return !operator==(other);}
+private:
+	float *m_data = nullptr;
+};
+static ArrayFloatIterator begin(const udm::Array &a)
+{
+	return ArrayFloatIterator{static_cast<float*>(&const_cast<udm::Array&>(a).GetValue<float>(0))};
+}
+static ArrayFloatIterator end(const udm::Array &a)
+{
+	return ArrayFloatIterator{static_cast<float*>(&const_cast<udm::Array&>(a).GetValue<float>(0)) +a.GetSize()};
+}
 std::pair<uint32_t,uint32_t> pragma::animation::AnimationChannel::FindInterpolationIndices(float t,float &interpFactor) const
 {
-	if(times.empty())
+	auto &times = GetTimesArray();
+	if(times.GetSize() == 0)
 	{
 		interpFactor = 0.f;
 		return {std::numeric_limits<uint32_t>::max(),std::numeric_limits<uint32_t>::max()};
 	}
 	// Binary search
-	auto it = std::upper_bound(times.begin(),times.end(),t);
-	if(it == times.end())
+	auto it = std::upper_bound(begin(times),end(times),t);
+	if(it == end(times))
 	{
 		interpFactor = 0.f;
-		return {static_cast<uint32_t>(times.size() -1),static_cast<uint32_t>(times.size() -1)};
+		return {static_cast<uint32_t>(times.GetSize() -1),static_cast<uint32_t>(times.GetSize() -1)};
 	}
-	if(it == times.begin())
+	if(it == begin(times))
 	{
 		interpFactor = 0.f;
 		return {0u,0u};
 	}
 	auto itPrev = it -1;
 	interpFactor = (t -*itPrev) /(*it -*itPrev);
-	return {static_cast<uint32_t>(itPrev -times.begin()),static_cast<uint32_t>(it -times.begin())};
+	return {static_cast<uint32_t>(itPrev -begin(times)),static_cast<uint32_t>(it -begin(times))};
 }
 #pragma optimize("",on)

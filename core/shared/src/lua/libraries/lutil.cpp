@@ -77,13 +77,13 @@ void Lua::util::register_library(lua_State *l)
 	];
 }
 
-luabind::object Lua::global::include(lua_State *l,const std::string &f) {return include(l,f,s_bIgnoreIncludeCache);}
+luabind::object Lua::global::include(lua_State *l,const std::string &f) {return include(l,f,s_bIgnoreIncludeCache,false);}
 
-luabind::object Lua::global::include(lua_State *l,const std::string &f,bool ignoreCache)
+luabind::object Lua::global::include(lua_State *l,const std::string &f,bool ignoreCache,bool reload)
 {
 	auto *lInterface = engine->GetLuaInterface(l);
 	std::vector<std::string> *includeCache = (lInterface != nullptr) ? &lInterface->GetIncludeCache() : nullptr;
-	auto fShouldInclude = [includeCache,ignoreCache](std::string fpath) -> bool {
+	auto fShouldInclude = [includeCache,ignoreCache,reload](std::string fpath) -> bool {
 		if(includeCache == nullptr)
 			return true;
 		if(fpath.empty() == false)
@@ -97,9 +97,10 @@ luabind::object Lua::global::include(lua_State *l,const std::string &f,bool igno
 		auto it = std::find_if(includeCache->begin(),includeCache->end(),[fpath](const std::string &other) {
 			return ustring::compare(fpath,other,false);
 		});
-		if(it != includeCache->end())
+		if(!reload && it != includeCache->end())
 			return ignoreCache;
-		includeCache->push_back(fpath);
+		if(it == includeCache->end())
+			includeCache->push_back(fpath);
 		return true;
 	};
 	auto *nw = engine->GetNetworkState(l);

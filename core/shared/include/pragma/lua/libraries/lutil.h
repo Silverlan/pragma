@@ -17,7 +17,7 @@ namespace Lua
 	DLLNETWORK void set_ignore_include_cache(bool b);
 	namespace global
 	{
-		DLLNETWORK luabind::object include(lua_State *l,const std::string &f,bool ignoreCache);
+		DLLNETWORK luabind::object include(lua_State *l,const std::string &f,bool ignoreCache,bool reload);
 		DLLNETWORK luabind::object include(lua_State *l,const std::string &f);
 		DLLNETWORK luabind::object exec(lua_State *l,const std::string &f);
 		DLLNETWORK std::string get_script_path();

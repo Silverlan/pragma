@@ -121,7 +121,7 @@ There are various optional modules available for Pragma, some of which are alrea
 - pr_steam_networking_sockets: https://github.com/Silverlan/pr_steam_networking_sockets
 - pr_physx: https://github.com/Silverlan/pr_physx
 - pr_bullet: https://github.com/Silverlan/pr_bullet
-- pr_audio_fmod: https://github.com/Silverlan/pragma/tree/master/modules/pr_audio_fmod
-- pr_audio_alure: https://github.com/Silverlan/pragma/tree/master/modules/pr_audio_alure
+- pr_audio_fmod: https://github.com/Silverlan/pr_audio_fmod
+- pr_audio_alure: https://github.com/Silverlan/pr_audio_alure
 
 To install a module, check it out into `Pragma/modules`, re-configure and re-generate the solution using CMake, then build the module and then build `core/pragma-install` to install it.

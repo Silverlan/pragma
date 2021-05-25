@@ -205,9 +205,15 @@ void Engine::RegisterConsoleCommands()
 		Game *game = state->GetGameState();
 		if(game == NULL)
 			return;
-		Lua::set_ignore_include_cache(true);
-			game->ExecuteLuaFile(argv[0]);
-		Lua::set_ignore_include_cache(false);
+		auto fname = argv.at(0);
+		if(argv.size() > 1 && argv[1] == "nocache")
+		{
+			Lua::set_ignore_include_cache(true);
+				game->ExecuteLuaFile(fname);
+			Lua::set_ignore_include_cache(false);
+			return;
+		}
+		Lua::global::include(state->GetLuaState(),fname,false,true);
 	},ConVarFlags::None,"Opens and executes a lua-file on the server.",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
 		std::vector<std::string> resFiles;
 		auto path = "lua\\" +arg;

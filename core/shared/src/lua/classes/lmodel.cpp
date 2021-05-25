@@ -152,6 +152,12 @@ void Lua::Joint::RemoveKeyValue(lua_State *l,JointInfo &joint,const std::string 
 
 //////////////////////////
 
+static std::ostream &operator<<(std::ostream &out,const Model &mdl)
+{
+	out<<"Model["<<mdl.GetName()<<"]";
+	return out;
+}
+
 void Lua::Model::register_class(
 	lua_State *l,
 	luabind::class_<::Model> &classDef,
@@ -159,6 +165,7 @@ void Lua::Model::register_class(
 	luabind::class_<::ModelSubMesh> &classDefModelSubMesh
 )
 {
+	classDef.def(luabind::tostring(luabind::self));
 	classDef.def(luabind::const_self == luabind::const_self);
 	classDef.def("GetCollisionMeshes",&GetCollisionMeshes);
 	classDef.def("ClearCollisionMeshes",&ClearCollisionMeshes);

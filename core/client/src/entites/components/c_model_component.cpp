@@ -353,6 +353,11 @@ RenderMeshGroup &CModelComponent::GetLodRenderMeshGroup(uint32_t lod)
 	UpdateRenderMeshes();
 	lod = umath::min(lod,static_cast<uint32_t>(m_lodRenderMeshGroups.size() -1));
 	assert(lod < m_lodRenderMeshGroups.size());
+	if(lod >= m_lodRenderMeshGroups.size())
+	{
+		static RenderMeshGroup emptyGroup {};
+		return emptyGroup; // TODO: This should only be returned as const!
+	}
 	return m_lodRenderMeshGroups[lod];
 }
 const RenderMeshGroup &CModelComponent::GetLodRenderMeshGroup(uint32_t lod) const {return const_cast<CModelComponent*>(this)->GetLodRenderMeshGroup(lod);}

@@ -734,14 +734,6 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 
 		if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Dynamic))
 		{
-			// Some entities are exempt from occlusion culling altogether, we'll handle them here
-			for(auto *pRenderComponent : pragma::CRenderComponent::GetEntitiesExemptFromOcclusionCulling())
-			{
-				if(ShouldConsiderEntity(static_cast<CBaseEntity&>(pRenderComponent->GetEntity()),m_scene,drawSceneInfo.renderFlags) == false)
-					continue;
-				AddRenderMeshesToRenderQueue(drawSceneInfo,*pRenderComponent,m_scene,cam,vp,nullptr);
-			}
-
 			if(stats)
 				t = std::chrono::steady_clock::now();
 
@@ -749,8 +741,28 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 			auto *culler = m_scene.FindOcclusionCuller();
 			if(culler)
 			{
+				// Some entities are exempt from occlusion culling altogether, we'll handle them here
+				for(auto *pRenderComponent : pragma::CRenderComponent::GetEntitiesExemptFromOcclusionCulling())
+				{
+					if(ShouldConsiderEntity(static_cast<CBaseEntity&>(pRenderComponent->GetEntity()),m_scene,drawSceneInfo.renderFlags) == false)
+						continue;
+					AddRenderMeshesToRenderQueue(drawSceneInfo,*pRenderComponent,m_scene,cam,vp,nullptr);
+				}
+
 				auto &dynOctree = culler->GetOcclusionOctree();
 				CollectRenderMeshesFromOctree(drawSceneInfo,dynOctree,m_scene,cam,vp,drawSceneInfo.renderFlags,frustumPlanes,&bspTrees,&bspLeafNodes);
+			}
+			else
+			{
+				// No occlusion culler available; We'll have to iterate ALL renderable entities
+				EntityIterator entIt {*c_game};
+				entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
+				for(auto *ent : entIt)
+				{
+					if(ShouldConsiderEntity(*static_cast<CBaseEntity*>(ent),m_scene,drawSceneInfo.renderFlags) == false)
+						continue;
+					AddRenderMeshesToRenderQueue(drawSceneInfo,*static_cast<CBaseEntity*>(ent)->GetRenderComponent(),m_scene,cam,vp,nullptr);
+				}
 			}
 
 			if(stats)

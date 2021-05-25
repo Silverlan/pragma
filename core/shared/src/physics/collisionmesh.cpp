@@ -247,7 +247,7 @@ void CollisionMesh::UpdateShape()
 	m_shape = CreateShape();
 }
 void CollisionMesh::SetBoneParent(int boneID) {m_boneID = boneID;}
-int CollisionMesh::GetBoneParent() {return m_boneID;}
+int CollisionMesh::GetBoneParent() const {return m_boneID;}
 void CollisionMesh::SetOrigin(const Vector3 &origin) {m_origin = origin;}
 const Vector3 &CollisionMesh::GetOrigin() const {return const_cast<CollisionMesh*>(this)->GetOrigin();}
 Vector3 &CollisionMesh::GetOrigin() {return m_origin;}
@@ -283,7 +283,7 @@ void CollisionMesh::Centralize()
 	for(auto &v : m_vertices)
 		v -= center;
 }
-void CollisionMesh::GetAABB(Vector3 *min,Vector3 *max)
+void CollisionMesh::GetAABB(Vector3 *min,Vector3 *max) const
 {
 	*min = m_min;
 	*max = m_max;
@@ -581,4 +581,22 @@ bool CollisionMesh::LoadFromAssetData(Game &game,Model &mdl,const udm::AssetData
 	}
 
 	return true;
+}
+
+std::ostream &operator<<(std::ostream &out,const CollisionMesh &o)
+{
+	out<<"CollisionMesh";
+	out<<"[Tris:"<<o.GetTriangles().size()<<"]";
+	out<<"[Mass:"<<o.GetMass()<<"]";
+	out<<"[Convex:"<<o.IsConvex()<<"]";
+	out<<"[CenterOfMass:"<<o.GetCenterOfMass()<<"]";
+	out<<"[Volume:"<<o.GetVolume()<<"]";
+	out<<"[SoftBody:"<<o.IsSoftBody()<<"]";
+	out<<"[Bone:"<<o.GetBoneParent()<<"]";
+	Vector3 min,max;
+	o.GetAABB(&min,&max);
+	out<<"[GetAABB:("<<min<<"),("<<max<<")]";
+	out<<"[Origin:"<<o.GetOrigin()<<"]";
+	out<<"[SurfMats:"<<const_cast<CollisionMesh&>(o).GetSurfaceMaterials().size()<<"]";
+	return out;
 }

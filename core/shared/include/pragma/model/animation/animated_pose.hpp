@@ -50,5 +50,6 @@ namespace pragma::animation
 		Skeleton *m_skeleton;
 	};
 };
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const pragma::animation::AnimatedPose &o);
 
 #endif

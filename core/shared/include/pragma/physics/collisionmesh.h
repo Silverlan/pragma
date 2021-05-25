@@ -86,9 +86,9 @@ public:
 	static std::shared_ptr<CollisionMesh> Load(Game &game,Model &mdl,const udm::AssetData &data,std::string &outErr);
 	std::shared_ptr<pragma::physics::IShape> CreateShape(const Vector3 &scale={1.f,1.f,1.f}) const;
 	void SetBoneParent(int boneID);
-	int GetBoneParent();
+	int GetBoneParent() const;
 	void CalculateBounds();
-	void GetAABB(Vector3 *min,Vector3 *max);
+	void GetAABB(Vector3 *min,Vector3 *max) const;
 	void SetAABB(Vector3 &min,Vector3 &max);
 	void SetOrigin(const Vector3 &origin);
 	const Vector3 &GetOrigin() const;
@@ -140,5 +140,7 @@ public:
 	bool Save(Game &game,Model &mdl,udm::AssetData &outData,std::string &outErr);
 };
 REGISTER_BASIC_BITWISE_OPERATORS(CollisionMesh::SoftBodyAnchor::Flags);
+
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const CollisionMesh &o);
 
 #endif

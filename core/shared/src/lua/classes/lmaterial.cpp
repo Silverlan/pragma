@@ -17,6 +17,7 @@
 
 void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 {
+	classDef.def(luabind::tostring(luabind::self));
 	classDef.add_static_constant("ALPHA_MODE_OPAQUE",umath::to_integral(::AlphaMode::Opaque));
 	classDef.add_static_constant("ALPHA_MODE_MASK",umath::to_integral(::AlphaMode::Mask));
 	classDef.add_static_constant("ALPHA_MODE_BLEND",umath::to_integral(::AlphaMode::Blend));

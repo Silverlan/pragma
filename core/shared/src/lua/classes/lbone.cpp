@@ -12,6 +12,7 @@
 void Lua::Bone::register_class(lua_State *l,luabind::class_<::Skeleton> &classDef)
 {
 	auto classDefBone = luabind::class_<::Bone>("Bone");
+	classDefBone.def(luabind::tostring(luabind::self));
 	classDefBone.def("GetName",&Lua::Bone::GetName);
 	classDefBone.def("GetID",&Lua::Bone::GetID);
 	classDefBone.def("GetChildren",&Lua::Bone::GetChildren);

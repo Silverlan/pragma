@@ -43,6 +43,21 @@ bool Bone::operator==(const Bone &other) const
 	return true;
 }
 
+std::ostream &operator<<(std::ostream &out,const Bone &o)
+{
+	out<<"Bone";
+	out<<"[Name:"<<o.name<<"]";
+	out<<"[Id:"<<o.name<<"]";
+	out<<"[Children:"<<o.children.size()<<"]";
+	out<<"[Parent:";
+	if(o.parent.expired())
+		out<<"NULL";
+	else
+		out<<o.parent.lock()->name;
+	out<<"]";
+	return out;
+}
+
 ////////////////////////////////////////
 
 uint32_t BoneList::AddBone(const std::string &name)

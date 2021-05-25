@@ -16,6 +16,7 @@ extern DLLNETWORK Engine *engine;
 void Lua::ModelMesh::register_class(luabind::class_<::ModelMesh> &classDef)
 {
 	classDef.def(luabind::const_self == luabind::const_self);
+	classDef.def(luabind::tostring(luabind::self));
 	classDef.def("GetVertexCount",&Lua::ModelMesh::GetVertexCount);
 	classDef.def("GetTriangleVertexCount",&Lua::ModelMesh::GetTriangleVertexCount);
 	classDef.def("GetTriangleCount",&Lua::ModelMesh::GetTriangleCount);
@@ -133,6 +134,7 @@ void Lua::ModelMesh::Scale(lua_State *l,::ModelMesh &mdl,const Vector3 &scale) {
 void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef)
 {
 	classDef.def(luabind::const_self == luabind::const_self);
+	classDef.def(luabind::tostring(luabind::self));
 	classDef.def("GetSkinTextureIndex",&Lua::ModelSubMesh::GetSkinTextureIndex);
 	classDef.def("FlipTriangleWindingOrder",&Lua::ModelSubMesh::FlipTriangleWindingOrder);
 	classDef.def("GetVertexCount",&Lua::ModelSubMesh::GetVertexCount);

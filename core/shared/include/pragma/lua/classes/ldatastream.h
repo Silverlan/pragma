@@ -161,6 +161,7 @@ namespace Lua
 			void register_class(luabind::class_<TClass> &classDef)
 		{
 			classDef.def(luabind::constructor<>());
+			classDef.def(luabind::tostring(luabind::self));
 			classDef.def("GetSize",&Lua::DataStream::GetSize<TClass>);
 			classDef.def("Seek",&Lua::DataStream::Seek<TClass>);
 			classDef.def("Tell",&Lua::DataStream::Tell<TClass>);

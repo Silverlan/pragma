@@ -154,7 +154,25 @@ void Lua::Joint::RemoveKeyValue(lua_State *l,JointInfo &joint,const std::string 
 
 static std::ostream &operator<<(std::ostream &out,const Model &mdl)
 {
-	out<<"Model["<<mdl.GetName()<<"]";
+	out<<"Model";
+
+	out<<"[Name:"<<mdl.GetName()<<"]";
+	out<<"[MeshGroups:"<<mdl.GetMeshGroups().size()<<"]";
+	out<<"[SubMeshes:"<<mdl.GetSubMeshCount()<<"]";
+	out<<"[Verts:"<<mdl.GetVertexCount()<<"]";
+	out<<"[Tris:"<<mdl.GetTriangleCount()<<"]";
+	out<<"[Materials:"<<mdl.GetMetaInfo().textures.size()<<"]";
+	out<<"[CollisionMeshes:"<<mdl.GetCollisionMeshes().size()<<"]";
+	out<<"[Anims:"<<mdl.GetAnimations().size()<<"]";
+	out<<"[Flexes:"<<mdl.GetFlexes().size()<<"]";
+	out<<"[FlexControllers:"<<mdl.GetFlexControllers().size()<<"]";
+	out<<"[MorphTargetAnims:"<<mdl.GetVertexAnimations().size()<<"]";
+	out<<"[IkControllers:"<<mdl.GetIKControllers().size()<<"]";
+	out<<"[Bones:"<<mdl.GetSkeleton().GetBones().size()<<"]";
+	out<<"[Mass:"<<mdl.GetMass()<<"]";
+	out<<"[Attachments:"<<mdl.GetAttachments().size()<<"]";
+	out<<"[Hitboxes:"<<mdl.GetHitboxCount()<<"]";
+	out<<"[Eyeballs:"<<mdl.GetEyeballs().size()<<"]";
 	return out;
 }
 

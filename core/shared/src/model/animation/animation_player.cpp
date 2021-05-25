@@ -234,4 +234,20 @@ void pragma::animation::AnimationPlayer::ApplySliceInterpolation(const Animation
 		dstVal = interp(srcVal.GetValue<Vector3>(),dstVal.GetValue<Vector3>(),f);
 	}*/
 }
+
+std::ostream &operator<<(std::ostream &out,const pragma::animation::AnimationPlayer &o)
+{
+	out<<"AnimationPlayer";
+	out<<"[Time:"<<o.GetCurrentTime()<<"/"<<o.GetDuration()<<"]";
+	out<<"[PlaybackRate:"<<o.GetPlaybackRate()<<"]";
+	out<<"[AnimId:"<<o.GetCurrentAnimationId()<<"]";
+	return out;
+}
+
+std::ostream &operator<<(std::ostream &out,const pragma::animation::AnimationSlice &o)
+{
+	out<<"AnimationSlice";
+	out<<"[Values:"<<o.channelValues.size()<<"]";
+	return out;
+}
 #pragma optimize("",on)

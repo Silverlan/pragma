@@ -49,4 +49,13 @@ pragma::animation::AnimationChannel *pragma::animation::Animation2::FindChannel(
 		return nullptr;
 	return it->get();
 }
+
+std::ostream &operator<<(std::ostream &out,const pragma::animation::Animation2 &o)
+{
+	out<<"Animation2";
+	out<<"[Dur:"<<o.GetDuration()<<"]";
+	out<<"[Channels:"<<o.GetChannelCount()<<"]";
+	out<<"[AnimSpeedFactor:"<<o.GetAnimationSpeedFactor()<<"]";
+	return out;
+}
 #pragma optimize("",on)

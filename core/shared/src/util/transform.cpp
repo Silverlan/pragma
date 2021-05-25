@@ -39,3 +39,13 @@ void Transform::SetOrientation(const Quat &orientation)
 {
 	m_orientation = orientation;
 }
+
+std::ostream &operator<<(std::ostream &out,const Transform &o)
+{
+	auto &rot = o.GetOrientation();
+	out<<"Transform";
+	out<<"[Pos:"<<o.GetPosition()<<"]";
+	out<<"[Rot:"<<rot.w<<" "<<rot.x<<" "<<rot.y<<" "<<rot.z<<"]";
+	out<<"[Scale:"<<o.GetScale()<<"]";
+	return out;
+}

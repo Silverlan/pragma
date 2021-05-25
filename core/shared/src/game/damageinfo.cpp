@@ -8,6 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/game/damageinfo.h"
 #include "pragma/lua/classes/ldef_entity.h"
+#include <sharedutils/magic_enum.hpp>
 
 HitGroup DamageInfo::GetHitGroup() const {return m_hitGroup;}
 void DamageInfo::SetHitGroup(HitGroup hitGroup) {m_hitGroup = hitGroup;}
@@ -99,4 +100,34 @@ void DamageInfo::SetForce(const Vector3 &force)
 Vector3 &DamageInfo::GetForce()
 {
 	return m_force;
+}
+
+std::ostream &operator<<(std::ostream &out,const DamageInfo &po)
+{
+	auto &o = const_cast<DamageInfo&>(po);
+	out<<"DamageInfo";
+	out<<"[Dmg:"<<o.GetDamage()<<"]";
+
+	auto *attacker = o.GetAttacker();
+	out<<"[Attacker:";
+	if(attacker)
+		attacker->print(out);
+	else
+		out<<"NULL";
+	out<<"]";
+
+	auto *inflictor = o.GetInflictor();
+	out<<"[Inflictor:";
+	if(inflictor)
+		inflictor->print(out);
+	else
+		out<<"NULL";
+	out<<"]";
+	
+	out<<"[DmgTypes:"<<o.GetDamageTypes()<<"]";
+	out<<"[Src:"<<o.GetSource()<<"]";
+	out<<"[HitPos:"<<o.GetHitPosition()<<"]";
+	out<<"[Force:"<<o.GetForce()<<"]";
+	out<<"[HitGroup:"<<magic_enum::enum_name(o.GetHitGroup())<<"]";
+	return out;
 }

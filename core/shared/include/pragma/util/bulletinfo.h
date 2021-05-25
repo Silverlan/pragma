@@ -45,5 +45,6 @@ struct DLLNETWORK BulletInfo
 	// TODO Additional Filter
 };
 lua_registercheck(BulletInfo,BulletInfo);
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const BulletInfo &o);
 
 #endif

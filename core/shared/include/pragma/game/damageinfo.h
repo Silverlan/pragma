@@ -54,4 +54,6 @@ public:
 	void SetHitGroup(HitGroup hitGroup);
 };
 
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const DamageInfo &o);
+
 #endif

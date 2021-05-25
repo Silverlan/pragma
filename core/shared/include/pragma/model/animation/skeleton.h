@@ -34,6 +34,8 @@ struct DLLNETWORK Bone
 	bool operator!=(const Bone &other) const {return !operator==(other);}
 };
 
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const Bone &o);
+
 struct DLLNETWORK BoneList // Simplified Skeleton without an hierarchy
 {
 private:

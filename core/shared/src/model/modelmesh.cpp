@@ -838,4 +838,30 @@ bool ModelSubMesh::LoadFromAssetData(const udm::AssetData &data,std::string &out
 	udm["alphas"](GetAlphas());
 	return true;
 }
+
+std::ostream &operator<<(std::ostream &out,const ModelMesh &o)
+{
+	out<<"ModelMesh";
+	out<<"[Verts:"<<o.GetVertexCount()<<"]";
+	out<<"[Indices:"<<o.GetTriangleVertexCount()<<"]";
+	out<<"[SubMeshes:"<<o.GetSubMeshCount()<<"]";
+	out<<"[Center:"<<o.GetCenter()<<"]";
+	return out;
+}
+
+std::ostream &operator<<(std::ostream &out,const ModelSubMesh &o)
+{
+	out<<"ModelSubMesh";
+	out<<"[Verts:"<<o.GetVertexCount()<<"]";
+	out<<"[Indices:"<<o.GetTriangleVertexCount()<<"]";
+	out<<"[MatIdx:"<<o.GetSkinTextureIndex()<<"]";
+	out<<"[Center:"<<o.GetCenter()<<"]";
+	out<<"[Type:"<<magic_enum::enum_name(o.GetGeometryType())<<"]";
+
+	Vector3 min,max;
+	o.GetBounds(min,max);
+	out<<"[Bounds:("<<min<<")("<<max<<")]";
+	return out;
+}
+
 #pragma optimize("",on)

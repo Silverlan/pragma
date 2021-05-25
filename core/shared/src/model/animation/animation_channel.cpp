@@ -153,4 +153,27 @@ std::pair<uint32_t,uint32_t> pragma::animation::AnimationChannel::FindInterpolat
 	interpFactor = (t -*itPrev) /(*it -*itPrev);
 	return {static_cast<uint32_t>(itPrev -begin(times)),static_cast<uint32_t>(it -begin(times))};
 }
+
+uint32_t pragma::animation::AnimationChannel::GetTimeCount() const {return GetTimesArray().GetSize();}
+uint32_t pragma::animation::AnimationChannel::GetValueCount() const {return GetValueArray().GetSize();}
+std::optional<float> pragma::animation::AnimationChannel::GetTime(uint32_t idx) const
+{
+	auto &times = GetTimesArray();
+	auto n = times.GetSize();
+	return (idx < n) ? times.GetValue<float>(idx) : std::optional<float>{};
+}
+
+std::ostream &operator<<(std::ostream &out,const pragma::animation::AnimationChannel &o)
+{
+	out<<"AnimationChannel";
+	out<<"[Path:"<<o.targetPath<<"]";
+	out<<"[Interp:"<<magic_enum::enum_name(o.interpolation)<<"]";
+	out<<"[Values:"<<o.GetValueArray().GetSize()<<"]";
+	
+	std::pair<float,float> timeRange {0.f,0.f};
+	auto n = o.GetTimeCount();
+	if(n > 0)
+		out<<"[TimeRange:"<<*o.GetTime(0)<<","<<*o.GetTime(n -1)<<"]";
+	return out;
+}
 #pragma optimize("",on)

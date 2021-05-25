@@ -77,7 +77,7 @@ void Lua::util::register_library(lua_State *l)
 	];
 }
 
-luabind::object Lua::global::include(lua_State *l,const std::string &f) {return include(l,f,s_bIgnoreIncludeCache,false);}
+luabind::object Lua::global::include(lua_State *l,const std::string &f) {return include(l,f,s_bIgnoreIncludeCache);}
 luabind::object Lua::global::include(lua_State *l,const std::string &f,bool ignoreCache) {return include(l,f,ignoreCache,false);}
 
 luabind::object Lua::global::include(lua_State *l,const std::string &f,bool ignoreCache,bool reload)
@@ -564,6 +564,12 @@ int Lua::util::register_class(lua_State *l)
 		oClass = luabind::globals(l)[className];
 		luabind::object regFc {luabind::from_stack(l,-1)};
 		game->GetLuaClassManager().RegisterClass(fullClassName,oClass,regFc);
+
+		// Init default constructor and print methods; They can still be overwritten by the Lua script
+		oClass["__init"] = luabind::make_function(l,static_cast<void(*)(const luabind::object&)>([](const luabind::object&) {}));
+		oClass["__tostring"] = luabind::make_function(l,static_cast<std::string(*)(lua_State*,const luabind::object&)>([](lua_State *l,const luabind::object &o) -> std::string {
+			return luabind::get_class_info(luabind::from_stack(l,1)).name;
+		}));
 
 		fRegisterBaseClasses();
 		Lua::Pop(l,1); /* 0 */

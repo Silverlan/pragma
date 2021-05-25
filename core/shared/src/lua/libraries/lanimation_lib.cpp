@@ -24,6 +24,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	auto animMod = luabind::module(lua.GetState(),"animation");
 
 	auto cdPose = luabind::class_<pragma::animation::AnimatedPose>("Pose");
+	cdPose.def(luabind::tostring(luabind::self));
 	cdPose.def(luabind::constructor<>());
 	cdPose.def("SetTransformCount",static_cast<void(*)(lua_State*,pragma::animation::AnimatedPose&,uint32_t)>([](lua_State *l,pragma::animation::AnimatedPose &pose,uint32_t count) {
 		pose.SetTransformCount(count);
@@ -61,6 +62,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	animMod[cdPose];
 
 	auto cdChannel = luabind::class_<pragma::animation::AnimationChannel>("Channel");
+	cdChannel.def(luabind::tostring(luabind::self));
 	cdChannel.def("GetValueType",static_cast<udm::Type(*)(lua_State*,pragma::animation::AnimationChannel&)>([](lua_State *l,pragma::animation::AnimationChannel &channel) -> udm::Type {
 		return channel.GetValueType();
 	}));
@@ -90,6 +92,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	animMod[cdChannel];
 
 	auto cdPlayer = luabind::class_<pragma::animation::AnimationPlayer>("Player");
+	cdPlayer.def(luabind::tostring(luabind::self));
 	cdPlayer.scope[luabind::def("create",static_cast<std::shared_ptr<pragma::animation::AnimationPlayer>(*)(lua_State*,Model&)>([](lua_State *l,Model &mdl) {
 		return pragma::animation::AnimationPlayer::Create(mdl);
 	}))];
@@ -141,9 +144,11 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	animMod[cdPlayer];
 
 	auto cdSlice = luabind::class_<pragma::animation::AnimationSlice>("Slice");
+	cdSlice.def(luabind::tostring(luabind::self));
 	animMod[cdSlice];
 
 	auto cdAnim2 = luabind::class_<pragma::animation::Animation2>("Animation2");
+	cdAnim2.def(luabind::tostring(luabind::self));
 	cdAnim2.scope[luabind::def("create",static_cast<std::shared_ptr<pragma::animation::Animation2>(*)(lua_State*)>([](lua_State *l) {
 		return std::make_shared<pragma::animation::Animation2>();
 	}))];

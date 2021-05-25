@@ -188,4 +188,7 @@ protected:
 	uint32_t m_referenceId = std::numeric_limits<uint32_t>::max();
 };
 
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const ModelSubMesh &o);
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const ModelMesh &o);
+
 #endif

@@ -80,6 +80,10 @@ namespace pragma::animation
 		udm::Type GetValueType() const;
 		void SetValueType(udm::Type type);
 
+		uint32_t GetTimeCount() const;
+		uint32_t GetValueCount() const;
+		std::optional<float> GetTime(uint32_t idx) const;
+
 		bool Save(udm::LinkedPropertyWrapper &prop) const;
 		bool Load(udm::LinkedPropertyWrapper &prop);
 		
@@ -108,6 +112,8 @@ namespace pragma::animation
 		udm::PProperty m_values = nullptr;
 	};
 };
+
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const pragma::animation::AnimationChannel &o);
 
 template<typename T>
 	uint32_t pragma::animation::AnimationChannel::AddValue(float t,const T &value)

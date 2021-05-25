@@ -144,6 +144,7 @@ static void create_directory_change_listener(lua_State *l,const std::string &pat
 static void register_directory_watcher(luabind::module_ &modUtil)
 {
 	auto defListener = luabind::class_<DirectoryWatcherCallback>("DirectoryChangeListener");
+	defListener.def(luabind::tostring(luabind::self));
 	defListener.add_static_constant("LISTENER_FLAG_NONE",umath::to_integral(DirectoryWatcherCallback::WatchFlags::None));
 	defListener.add_static_constant("LISTENER_FLAG_BIT_WATCH_SUB_DIRECTORIES",umath::to_integral(DirectoryWatcherCallback::WatchFlags::WatchSubDirectories));
 	defListener.add_static_constant("LISTENER_FLAG_ABSOLUTE_PATH",umath::to_integral(DirectoryWatcherCallback::WatchFlags::AbsolutePath));
@@ -304,6 +305,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	register_directory_watcher(modUtil);
 
 	auto defParallelJob = luabind::class_<util::BaseParallelJob>("ParallelJob");
+	defParallelJob.def(luabind::tostring(luabind::self));
 	defParallelJob.add_static_constant("JOB_STATUS_FAILED",umath::to_integral(util::JobStatus::Failed));
 	defParallelJob.add_static_constant("JOB_STATUS_SUCCESSFUL",umath::to_integral(util::JobStatus::Successful));
 	defParallelJob.add_static_constant("JOB_STATUS_INITIAL",umath::to_integral(util::JobStatus::Initial));
@@ -352,6 +354,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	modUtil[defParallelJob];
 
 	auto defImageBuffer = luabind::class_<uimg::ImageBuffer>("ImageBuffer");
+	defImageBuffer.def(luabind::tostring(luabind::self));
 	defImageBuffer.add_static_constant("FORMAT_NONE",umath::to_integral(uimg::ImageBuffer::Format::None));
 	defImageBuffer.add_static_constant("FORMAT_RGB8",umath::to_integral(uimg::ImageBuffer::Format::RGB8));
 	defImageBuffer.add_static_constant("FORMAT_RGBA8",umath::to_integral(uimg::ImageBuffer::Format::RGBA8));
@@ -765,6 +768,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 
 	// Transform
 	auto classDefTransform = luabind::class_<Transform>("Transform");
+	classDefTransform.def(luabind::tostring(luabind::self));
 	classDefTransform.def(luabind::constructor<>());
 	classDefTransform.def(luabind::constructor<const Vector3&>());
 	classDefTransform.def(luabind::constructor<const Quat&>());
@@ -1686,6 +1690,7 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 
 	auto bulletInfo = luabind::class_<BulletInfo>("BulletInfo");
 	bulletInfo.def(luabind::constructor<>());
+	bulletInfo.def(luabind::tostring(luabind::self));
 	bulletInfo.def_readwrite("spread",&BulletInfo::spread);
 	bulletInfo.def_readwrite("force",&BulletInfo::force);
 	bulletInfo.def_readwrite("distance",&BulletInfo::distance);
@@ -1708,6 +1713,7 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 
 	auto classDefDamageInfo = luabind::class_<DamageInfo>("DamageInfo");
 	classDefDamageInfo.def(luabind::constructor<>());
+	classDefDamageInfo.def(luabind::tostring(luabind::self));
 	classDefDamageInfo.def("SetDamage",&Lua::DamageInfo::SetDamage);
 	classDefDamageInfo.def("AddDamage",&Lua::DamageInfo::AddDamage);
 	classDefDamageInfo.def("ScaleDamage",&Lua::DamageInfo::ScaleDamage);

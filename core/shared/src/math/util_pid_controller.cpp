@@ -64,3 +64,14 @@ float util::PIDController::Calculate(float processFeedback,float setPoint,float 
 	m_previousError = err;
 	return output;
 }
+
+std::ostream &operator<<(std::ostream &out,const util::PIDController &o)
+{
+	out<<"PIDController";
+	out<<"[PropTerm:"<<o.GetProportionalTerm()<<"]";
+	out<<"[IntTerm:"<<o.GetIntegralTerm()<<"]";
+	out<<"[DerivTerm:"<<o.GetDerivativeTerm()<<"]";
+	auto range = o.GetRange();
+	out<<"[Range:"<<range.first<<","<<range.second<<"]";
+	return out;
+}

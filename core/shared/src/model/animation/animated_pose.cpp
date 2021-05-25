@@ -126,4 +126,11 @@ void pragma::animation::AnimatedPose::Globalize(const Skeleton &skeleton)
 {
 	get_global_bone_transforms(skeleton,*this);
 }
+
+std::ostream &operator<<(std::ostream &out,const pragma::animation::AnimatedPose &o)
+{
+	out<<"AnimatedPose";
+	out<<"[Transforms:"<<o.GetTransforms().size()<<"]";
+	return out;
+}
 #pragma optimize("",on)

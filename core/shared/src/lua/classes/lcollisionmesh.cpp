@@ -18,6 +18,7 @@ extern DLLNETWORK Engine *engine;
 
 void Lua::CollisionMesh::register_class(luabind::class_<::CollisionMesh> &classDef)
 {
+	classDef.def(luabind::tostring(luabind::self));
 	classDef.scope[luabind::def("Create",static_cast<void(*)(lua_State*)>(&Create))];
 	classDef.scope[luabind::def("CreateBox",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&)>(&CreateBox))];
 	classDef.def("GetVertices",&GetVertices);

@@ -86,4 +86,7 @@ namespace pragma::animation
 	using PAnimationPlayer = std::shared_ptr<AnimationPlayer>;
 };
 
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const pragma::animation::AnimationPlayer &o);
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const pragma::animation::AnimationSlice &o);
+
 #endif

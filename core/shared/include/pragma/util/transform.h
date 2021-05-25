@@ -33,4 +33,6 @@ public:
 	void UpdateMatrix();
 };
 
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const Transform &o);
+
 #endif

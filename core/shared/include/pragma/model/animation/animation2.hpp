@@ -41,4 +41,6 @@ namespace pragma::animation
 	};
 };
 
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const pragma::animation::Animation2 &o);
+
 #endif

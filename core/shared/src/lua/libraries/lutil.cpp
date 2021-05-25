@@ -78,6 +78,7 @@ void Lua::util::register_library(lua_State *l)
 }
 
 luabind::object Lua::global::include(lua_State *l,const std::string &f) {return include(l,f,s_bIgnoreIncludeCache,false);}
+luabind::object Lua::global::include(lua_State *l,const std::string &f,bool ignoreCache) {return include(l,f,ignoreCache,false);}
 
 luabind::object Lua::global::include(lua_State *l,const std::string &f,bool ignoreCache,bool reload)
 {

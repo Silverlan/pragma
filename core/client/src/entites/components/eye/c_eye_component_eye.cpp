@@ -39,31 +39,36 @@ pragma::CEyeComponent::EyeballData *pragma::CEyeComponent::GetEyeballData(uint32
 	return (eyeballIndex < m_eyeballData.size()) ? &m_eyeballData.at(eyeballIndex) : nullptr;
 }
 
+std::optional<umath::Transform> pragma::CEyeComponent::GetEyePose() const
+{
+	auto &ent = GetEntity();
+	if(m_eyeAttachmentIndex == std::numeric_limits<uint32_t>::max())
+		return {};
+	auto mdlC = ent.GetModelComponent();
+	if(!mdlC)
+		return {};
+	Vector3 attPos {};
+	auto attRot = uquat::identity();
+	if(mdlC->GetAttachment(m_eyeAttachmentIndex,&attPos,&attRot) == false)
+		return {};
+	// attRot = uquat::identity();
+	auto attPose = ent.GetPose();
+	attPose *= umath::Transform{attPos,attRot};
+	return attPose;
+}
+
 Vector3 pragma::CEyeComponent::GetViewTarget() const
 {
 	if(m_viewTarget.has_value())
 		return *m_viewTarget;
 	constexpr auto dist = 500.f; // Arbitrary distance; just has to be far enough
-	auto &ent = GetEntity();
-	auto forward = ent.GetForward();
-	auto pos = ent.GetPosition() +forward *dist;
-	if(m_eyeAttachmentIndex != std::numeric_limits<uint32_t>::max())
-	{
-		auto mdlC = ent.GetModelComponent();
-		if(mdlC)
-		{
-			Vector3 attPos {};
-			auto attRot = uquat::identity();
-			if(mdlC->GetAttachment(m_eyeAttachmentIndex,&attPos,&attRot))
-			{
-				// attRot = uquat::identity();
-				auto attPose = ent.GetPose();
-				attPose *= umath::Transform{attPos,attRot};
-				pos = attPose.GetOrigin() +uquat::forward(attPose.GetRotation()) *dist;
-			}
-		}
-	}
-	return ClampViewTarget(pos);
+	auto eyePose = GetEyePose();
+	Vector3 viewTarget {};
+	if(eyePose.has_value())
+		viewTarget = eyePose->GetOrigin() +uquat::forward(eyePose->GetRotation()) *dist;
+	else
+		viewTarget = GetEntity().GetPosition() +GetEntity().GetForward() *dist;
+	return ClampViewTarget(viewTarget);
 }
 
 void pragma::CEyeComponent::ClearViewTarget() {m_viewTarget = {};}

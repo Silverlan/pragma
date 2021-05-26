@@ -75,6 +75,7 @@ namespace pragma
 		void ClearViewTarget();
 		Vector3 GetViewTarget() const;
 		void SetViewTarget(const Vector3 &viewTarget);
+		std::optional<umath::Transform> GetEyePose() const;
 
 		void SetBlinkDuration(float dur);
 		float GetBlinkDuration() const;

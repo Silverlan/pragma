@@ -397,10 +397,13 @@ bool Lua::file::CreatePath(lua_State *l,std::string path)
 	return FileManager::CreatePath(path.c_str());
 }
 
-bool Lua::file::Delete(lua_State *l,std::string path)
+bool Lua::file::Delete(lua_State *l,std::string ppath)
 {
+	auto path = ppath;
 	if(validate_write_operation(l,path) == false)
 		return false;
+	if(Lua::get_extended_lua_modules_enabled() && FileManager::Exists(path) == false && FileManager::Exists(ppath))
+		return FileManager::RemoveFile(ppath.c_str());
 	return FileManager::RemoveFile(path.c_str());
 }
 

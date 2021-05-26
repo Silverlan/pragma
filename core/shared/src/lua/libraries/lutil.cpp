@@ -1138,11 +1138,16 @@ int Lua::util::pack_zip_archive(lua_State *l)
 		Lua::PushBool(l,false);
 		return 1;
 	}
+	auto tNotFound = luabind::newtable(l);
+	uint32_t notFoundIdx = 1;
 	for(auto &pair : files)
 	{
 		auto f = FileManager::OpenFile(pair.second.c_str(),"rb");
 		if(f == nullptr)
+		{
+			tNotFound[notFoundIdx++] = pair.second;
 			continue;
+		}
 		auto sz = f->GetSize();
 		std::vector<uint8_t> data {};
 		data.resize(sz);
@@ -1158,7 +1163,8 @@ int Lua::util::pack_zip_archive(lua_State *l)
 	}
 	zip = nullptr;
 	Lua::PushBool(l,true);
-	return 1;
+	tNotFound.push(l);
+	return 2;
 }
 
 std::string Lua::util::get_addon_path(lua_State *l,const std::string &relPath)

@@ -476,6 +476,13 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	}));
 
 	auto defCEye = luabind::class_<CEyeHandle,BaseEntityComponentHandle>("EyeComponent");
+	defCEye.def("GetEyePose",static_cast<void(*)(lua_State*,CEyeHandle&)>([](lua_State *l,CEyeHandle &hEye) {
+		pragma::Lua::check_component(l,hEye);
+		auto eyePose = hEye->GetEyePose();
+		if(!eyePose.has_value())
+			return;
+		Lua::Push<umath::Transform>(l,*eyePose);
+	}));
 	defCEye.def("GetViewTarget",static_cast<void(*)(lua_State*,CEyeHandle&)>([](lua_State *l,CEyeHandle &hEye) {
 		pragma::Lua::check_component(l,hEye);
 		Lua::Push<Vector3>(l,hEye->GetViewTarget());

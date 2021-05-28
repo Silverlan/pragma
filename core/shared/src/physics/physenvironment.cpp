@@ -72,7 +72,11 @@ double pragma::physics::IEnvironment::GetTimeScale() const
 }
 pragma::physics::IMaterial &pragma::physics::IEnvironment::GetGenericMaterial() const {return *m_genericMaterial;}
 float pragma::physics::IEnvironment::GetWorldScale() const {return 1.f;}
-void pragma::physics::IEnvironment::SetVisualDebugger(std::unique_ptr<pragma::physics::IVisualDebugger> debugger) {m_visualDebugger = std::move(debugger);}
+void pragma::physics::IEnvironment::SetVisualDebugger(std::unique_ptr<pragma::physics::IVisualDebugger> debugger)
+{
+	m_visualDebugger = std::move(debugger);
+	OnVisualDebuggerChanged(m_visualDebugger.get());
+}
 pragma::physics::IVisualDebugger *pragma::physics::IEnvironment::GetVisualDebugger() const {return m_visualDebugger.get();}
 void pragma::physics::IEnvironment::AddEventCallback(Event eventid,const CallbackHandle &hCb)
 {

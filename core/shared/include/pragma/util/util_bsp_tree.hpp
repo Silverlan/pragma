@@ -68,11 +68,13 @@ namespace util
 		Node *FindLeafNode(const Vector3 &pos);
 		std::vector<Node*> FindLeafNodesInAabb(const Vector3 &min,const Vector3 &max);
 		bool IsAabbVisibleInCluster(const Vector3 &min,const Vector3 &max,ClusterIndex clusterIdx) const;
+		void UpdateVisibilityBounds();
 
 		bool Save(udm::AssetData &outData,std::string &outErr);
 		Node &CreateNode();
 	protected:
 		BSPTree()=default;
+		void UpdateVisibilityBounds(BSPTree::Node &node);
 		BSPTree::Node *FindLeafNode(BSPTree::Node &node,const Vector3 &point);
 		void FindLeafNodesInAabb(BSPTree::Node &node,const std::array<Vector3,8> &aabbPoints,std::vector<BSPTree::Node*> &outNodes);
 		bool IsAabbVisibleInCluster(const BSPTree::Node &node,const std::array<Vector3,8> &aabbPoints,BSPTree::ClusterIndex clusterIdx) const;

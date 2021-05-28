@@ -338,4 +338,9 @@ namespace pragma::physics
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::physics::ICollisionObject::StateFlags)
 
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const pragma::physics::ICollisionObject &o);
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const pragma::physics::IGhostObject &o);
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const pragma::physics::IRigidBody &o);
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const pragma::physics::ISoftBody &o);
+
 #endif

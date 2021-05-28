@@ -638,7 +638,7 @@ Vector3 BaseAIComponent::CalcMovementDirection(const Vector3&,const Vector3&) co
 			if(anim != nullptr)
 			{
 				auto *bc = anim->GetBlendController();
-				if(ent.IsCharacter() && bc->controller == ent.GetCharacterComponent()->GetMoveController())
+				if(ent.IsCharacter() && bc && bc->controller == ent.GetCharacterComponent()->GetMoveController())
 					bMoveForward = false; // Animation has a move blend-controller, which means it probably allows sideways or backwards movement
 			}
 		}

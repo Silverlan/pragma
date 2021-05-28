@@ -7,6 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/lua/libraries/lprint.h"
+#include "pragma/lua/libraries/ldebug.h"
 #include <pragma/console/conout.h>
 #include "pragma/lua/ldefinitions.h"
 #include <pragma/engine.h>
@@ -128,7 +129,12 @@ int Lua::console::msg(lua_State *l,int st)
 
 int Lua::debug::print(lua_State *l)
 {
-	util::set_console_color(util::ConsoleColorFlags::BackgroundRed | util::ConsoleColorFlags::BackgroundIntensity | util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
+	auto flags = util::ConsoleColorFlags::None;
+	if(engine->GetNetworkState(l)->IsClient())
+		flags |= util::ConsoleColorFlags::BackgroundMagenta;
+	else
+		flags |= util::ConsoleColorFlags::BackgroundCyan;
+	util::set_console_color(flags | util::ConsoleColorFlags::BackgroundIntensity | util::ConsoleColorFlags::Black | util::ConsoleColorFlags::Intensity);
 	int n = lua_gettop(l);  /* number of arguments */
 	int i;
 	for (i=1; i<=n; i++) {
@@ -140,6 +146,7 @@ int Lua::debug::print(lua_State *l)
 		Con::cout<<val;
 	}
 	Con::cout<<Con::endl;
+	beep(l);
 	return 0;
 }
 

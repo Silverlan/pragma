@@ -196,6 +196,7 @@ namespace Lua
 void Lua::PhysCollisionObj::register_class(lua_State *l,luabind::module_ &mod)
 {
 	auto classDef = luabind::class_<pragma::physics::ICollisionObject,pragma::physics::IBase>("CollisionObj");
+	classDef.def(luabind::tostring(luabind::self));
 	classDef.def("IsValid",&IsValid);
 	classDef.def("Remove",&Remove);
 	classDef.def("SetPos",&SetPos);
@@ -242,6 +243,16 @@ void Lua::PhysCollisionObj::register_class(lua_State *l,luabind::module_ &mod)
 		if(Lua::CheckHandle<pragma::physics::ICollisionObject>(l,hPhys) == false)
 			return;
 		Lua::PushBool(l,hPhys->IsAsleep());
+	}));
+	classDef.def("SetAlwaysAwake",static_cast<void(*)(lua_State*,pragma::physics::ICollisionObject*,bool)>([](lua_State *l,pragma::physics::ICollisionObject *hPhys,bool alwaysAwake) {
+		if(Lua::CheckHandle<pragma::physics::ICollisionObject>(l,hPhys) == false)
+			return;
+		hPhys->SetAlwaysAwake(alwaysAwake);
+	}));
+	classDef.def("IsAlwaysAwake",static_cast<bool(*)(lua_State*,pragma::physics::ICollisionObject*)>([](lua_State *l,pragma::physics::ICollisionObject *hPhys) -> bool {
+		if(Lua::CheckHandle<pragma::physics::ICollisionObject>(l,hPhys) == false)
+			return false;
+		return hPhys->IsAlwaysAwake();
 	}));
 
 	mod[classDef];

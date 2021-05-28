@@ -249,3 +249,38 @@ void pragma::physics::ISoftBody::InitializeLuaObject(lua_State *lua)
 {
 	IBase::InitializeLuaObject<ISoftBody>(lua);
 }
+
+//////////////////////////
+
+std::ostream &operator<<(std::ostream &out,const pragma::physics::ICollisionObject &o)
+{
+	out<<"PhysColObj";
+	out<<"[Pos:"<<o.GetPos()<<"]";
+	out<<"[Ang:"<<EulerAngles{o.GetRotation()}<<"]";
+	out<<"[Awake:"<<o.IsAwake()<<"]";
+	Vector3 min,max;
+	o.GetAABB(min,max);
+	out<<"[Bounds:("<<min<<")("<<max<<")]";
+	return out;
+}
+std::ostream &operator<<(std::ostream &out,const pragma::physics::IGhostObject &o)
+{
+	operator<<(out,static_cast<const pragma::physics::ICollisionObject&>(o));
+	return out;
+}
+std::ostream &operator<<(std::ostream &out,const pragma::physics::IRigidBody &o)
+{
+	operator<<(out,static_cast<const pragma::physics::ICollisionObject&>(o));
+	out<<"PhysColObj";
+	out<<"[Pos:"<<o.GetPos()<<"]";
+	out<<"[Ang:"<<EulerAngles{o.GetRotation()}<<"]";
+	out<<"[Vel:"<<o.GetLinearVelocity()<<"]";
+	out<<"[AngVel:"<<o.GetAngularVelocity()<<"]";
+	out<<"[Awake:"<<o.IsAwake()<<"]";
+	return out;
+}
+std::ostream &operator<<(std::ostream &out,const pragma::physics::ISoftBody &o)
+{
+	operator<<(out,static_cast<const pragma::physics::ICollisionObject&>(o));
+	return out;
+}

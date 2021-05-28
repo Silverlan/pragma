@@ -450,42 +450,11 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 	if(GetBlendFramesFromCycle(*anim,cycle,&srcFrame,&dstFrame,interpFactor) == false)
 		return false; // This shouldn't happen unless the animation has no frames
 
-	if(dstFrame)
+	//if(dstFrame)
 	{
 		bonePoses.resize(numBones);
 		boneScales.resize(numBones,Vector3{1.f,1.f,1.f});
-		BlendBonePoses(
-			srcFrame->GetBoneTransforms(),&srcFrame->GetBoneScales(),
-			dstFrame->GetBoneTransforms(),&dstFrame->GetBoneScales(),
-			bonePoses,&boneScales,
-			*anim,interpFactor
-		);
 	}
-	else
-	{
-		// Destination frame can be nullptr if no interpolation is required.
-		bonePoses = srcFrame->GetBoneTransforms();
-		boneScales = srcFrame->GetBoneScales();
-	}
-	//
-
-	// Blend between previous animation and this animation
-	float interpFactorLastAnim;
-	auto *lastPlayedFrameOfPreviousAnim = GetPreviousAnimationBlendFrame(animInfo,dt,interpFactorLastAnim);
-	if(lastPlayedFrameOfPreviousAnim)
-	{
-		auto lastAnim = hModel->GetAnimation(animInfo.lastAnim.animation);
-		if(lastAnim)
-		{
-			BlendBonePoses(
-				lastPlayedFrameOfPreviousAnim->GetBoneTransforms(),&lastPlayedFrameOfPreviousAnim->GetBoneScales(),
-				bonePoses,&boneScales,
-				bonePoses,&boneScales,
-				*lastAnim,interpFactorLastAnim
-			);
-		}
-	}
-	//
 
 	// Blend Controllers
 	auto *animBcData = anim->GetBlendController();
@@ -609,6 +578,43 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 			}
 		}
 	}
+	else
+	{
+		if(dstFrame)
+		{
+			BlendBonePoses(
+				srcFrame->GetBoneTransforms(),&srcFrame->GetBoneScales(),
+				dstFrame->GetBoneTransforms(),&dstFrame->GetBoneScales(),
+				bonePoses,&boneScales,
+				*anim,interpFactor
+			);
+		}
+		else
+		{
+			// Destination frame can be nullptr if no interpolation is required.
+			bonePoses = srcFrame->GetBoneTransforms();
+			boneScales = srcFrame->GetBoneScales();
+		}
+		//
+
+		// Blend between previous animation and this animation
+		float interpFactorLastAnim;
+		auto *lastPlayedFrameOfPreviousAnim = GetPreviousAnimationBlendFrame(animInfo,dt,interpFactorLastAnim);
+		if(lastPlayedFrameOfPreviousAnim)
+		{
+			auto lastAnim = hModel->GetAnimation(animInfo.lastAnim.animation);
+			if(lastAnim)
+			{
+				BlendBonePoses(
+					lastPlayedFrameOfPreviousAnim->GetBoneTransforms(),&lastPlayedFrameOfPreviousAnim->GetBoneScales(),
+					bonePoses,&boneScales,
+					bonePoses,&boneScales,
+					*lastAnim,interpFactorLastAnim
+				);
+			}
+		}
+		//
+	}
 	//
 
 	animInfo.bonePoses = std::move(bonePoses);
@@ -619,7 +625,7 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 
 	// Animation events
 	auto frameLast = (cycleLast != 0.f) ? static_cast<int32_t>((numFrames -1) *cycleLast) : -1;
-	auto frameCycle = (numFrames -1) *cycle;
+	auto frameCycle = (numFrames > 0) ? ((numFrames -1) *cycle) : 0.f;
 	auto frameID = umath::floor(frameCycle);
 
 	if(frameID < frameLast)

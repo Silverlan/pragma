@@ -26,7 +26,7 @@
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
-
+#pragma optimize("",off)
 WIMainMenuNewGame::WIMainMenuNewGame()
 	: WIMainMenuBase()
 {}
@@ -230,6 +230,16 @@ void WIMainMenuNewGame::InitializeGameSettings()
 		gameModeOptions[info.name] = it->first;
 	}
 	auto *pGameMode = pList->AddDropDownMenu(Locale::GetText("gamemode"),gameModeOptions,"sv_gamemode");
+	pGameMode->AddCallback("OnValueChanged",FunctionCallback<void>::Create([pGameMode,pMap]() {
+		auto val = pGameMode->GetOptionValue(pGameMode->GetSelectedOption());
+		auto &gameModes = GameModeManager::GetGameModes();
+		auto it = gameModes.find(val);
+		if(it == gameModes.end())
+			return;
+		auto &gmInfo = it->second;
+		if(!gmInfo.initial_map.empty())
+			pMap->SelectOption(gmInfo.initial_map);
+	}));
 	m_hGameMode = pGameMode->GetHandle();
 	//
 	// Server Name
@@ -249,3 +259,4 @@ void WIMainMenuNewGame::InitializeGameSettings()
 	//
 	InitializeOptionsList(pList);
 }
+#pragma optimize("",on)

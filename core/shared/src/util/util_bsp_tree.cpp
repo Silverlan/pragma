@@ -126,6 +126,32 @@ bool BSPTree::IsClusterVisible(uint16_t clusterSrc,uint16_t clusterDst) const
 	bit %= 8u;
 	return offset < m_clusterVisibility.size() && (m_clusterVisibility.at(offset) &(1<<bit)) > 0u;
 }
+void BSPTree::UpdateVisibilityBounds()
+{
+	for(auto &node : m_nodes)
+	{
+		if(node.leaf == false)
+			continue;
+		UpdateVisibilityBounds(node);
+	}
+}
+void BSPTree::UpdateVisibilityBounds(BSPTree::Node &node)
+{
+	auto minInit = Vector3{std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max()};
+	auto maxInit = Vector3{std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest()};
+	node.minVisible = minInit;
+	node.maxVisible = maxInit;
+	for(auto &nodeOther : m_nodes)
+	{
+		if(!nodeOther.leaf || &nodeOther == &node || !IsClusterVisible(node.cluster,nodeOther.cluster))
+			continue;
+		uvec::to_min_max(node.minVisible,node.maxVisible,nodeOther.min,nodeOther.max);
+	}
+	if(node.minVisible == minInit)
+		node.minVisible = {};
+	if(node.maxVisible == maxInit)
+		node.maxVisible = {};
+}
 const BSPTree::Node &BSPTree::GetRootNode() const {return const_cast<BSPTree*>(this)->GetRootNode();}
 BSPTree::Node &BSPTree::GetRootNode() {return m_nodes[m_rootNode];}
 const std::vector<BSPTree::Node> &BSPTree::GetNodes() const {return const_cast<BSPTree*>(this)->GetNodes();}

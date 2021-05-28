@@ -116,7 +116,7 @@ void CPhysVisualDebugger::DrawTriangle(const Vector3 &v0,const Vector3 &v1,const
 }
 void CPhysVisualDebugger::ReportErrorWarning(const std::string &str)
 {
-	Con::cwar<<"[PhysX] WARNING: "<<str<<Con::endl;
+	Con::cwar<<"[Phys] WARNING: "<<str<<Con::endl;
 }
 void CPhysVisualDebugger::DrawText(const std::string &str,const Vector3 &location,const Color &color,float size)
 {

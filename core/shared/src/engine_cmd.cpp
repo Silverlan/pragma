@@ -123,7 +123,7 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 		if(udmData)
 			Con::cout<<"No validation errors found, file is a valid UDM file!"<<err<<Con::endl;
 	},ConVarFlags::None,"Validates the specified UDM file.");
-	map.RegisterConVar("phys_engine","physx",ConVarFlags::Archive | ConVarFlags::Replicated,"The underlying physics engine to use.",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
+	map.RegisterConVar("phys_engine","bullet",ConVarFlags::Archive | ConVarFlags::Replicated,"The underlying physics engine to use.",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
 		auto &physEngines = pragma::physics::IEnvironment::GetAvailablePhysicsEngines();
 		auto it = physEngines.begin();
 		std::vector<std::string_view> similarCandidates {};

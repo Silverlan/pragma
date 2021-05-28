@@ -15,6 +15,7 @@
 #include "pragma/physics/shape.hpp"
 #include "pragma/physics/collisionmasks.h"
 #include "pragma/entities/components/base_physics_component.hpp"
+#include <sharedutils/magic_enum.hpp>
 
 DEFINE_BASE_HANDLE(DLLNETWORK,PhysObj,PhysObj);
 
@@ -134,6 +135,7 @@ void PhysObj::Spawn()
 }
 const pragma::physics::ICollisionObject *PhysObj::GetCollisionObject() const {return const_cast<PhysObj*>(this)->GetCollisionObject();}
 std::vector<util::TSharedHandle<pragma::physics::ICollisionObject>> &PhysObj::GetCollisionObjects() {return m_collisionObjects;}
+const std::vector<util::TSharedHandle<pragma::physics::ICollisionObject>> &PhysObj::GetCollisionObjects() const {return const_cast<PhysObj*>(this)->GetCollisionObjects();}
 pragma::physics::ICollisionObject *PhysObj::GetCollisionObject()
 {
 	if(m_collisionObjects.empty())
@@ -353,3 +355,15 @@ void PhysObj::ApplyTorqueImpulse(const Vector3&) {}
 void PhysObj::ClearForces() {}
 Vector3 PhysObj::GetTotalForce() const {return Vector3(0.f,0.f,0.f);}
 Vector3 PhysObj::GetTotalTorque() const {return Vector3(0.f,0.f,0.f);}
+
+std::ostream &operator<<(std::ostream &out,const PhysObj &o)
+{
+	out<<"PhysObj";
+	out<<"[FilterGroup:"<<magic_enum::flags::enum_name(o.GetCollisionFilter())<<"]";
+	out<<"[FilterMask:"<<magic_enum::flags::enum_name(o.GetCollisionFilterMask())<<"]";
+	out<<"[ColObjs:"<<o.GetCollisionObjects().size()<<"]";
+	out<<"[ColObjsAwake:"<<o.GetNumberOfCollisionObjectsAwake()<<"]";
+	out<<"[Vel:"<<o.GetLinearVelocity()<<"]";
+	out<<"[AngVel:"<<o.GetAngularVelocity()<<"]";
+	return out;
+}

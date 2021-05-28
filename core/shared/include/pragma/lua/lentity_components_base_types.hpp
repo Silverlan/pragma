@@ -2417,6 +2417,7 @@ namespace Lua
 		def.add_static_constant("EVENT_ON_START_TOUCH",pragma::BaseTouchComponent::EVENT_ON_START_TOUCH);
 		def.add_static_constant("EVENT_ON_END_TOUCH",pragma::BaseTouchComponent::EVENT_ON_END_TOUCH);
 		def.add_static_constant("EVENT_ON_TRIGGER",pragma::BaseTouchComponent::EVENT_ON_TRIGGER);
+		def.add_static_constant("EVENT_ON_TRIGGER_INITIALIZED",pragma::BaseTouchComponent::EVENT_ON_TRIGGER_INITIALIZED);
 		
 		def.add_static_constant("TRIGGER_FLAG_NONE",umath::to_integral(pragma::BaseTouchComponent::TriggerFlags::None));
 		def.add_static_constant("TRIGGER_FLAG_BIT_PLAYERS",umath::to_integral(pragma::BaseTouchComponent::TriggerFlags::Players));

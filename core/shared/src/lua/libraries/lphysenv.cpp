@@ -172,11 +172,11 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	});
 
 	Lua::RegisterLibraryEnums(l,libName,{
-		{"ACTIVATION_STATE_ACTIVE_TAG",ACTIVE_TAG},
-		{"ACTIVATION_STATE_DISABLE_DEACTIVATION",DISABLE_DEACTIVATION},
-		{"ACTIVATION_STATE_DISABLE_SIMULATION",DISABLE_SIMULATION},
-		{"ACTIVATION_STATE_ISLAND_SLEEPING",ISLAND_SLEEPING},
-		{"ACTIVATION_STATE_WANTS_DEACTIVATION",WANTS_DEACTIVATION}
+		{"ACTIVATION_STATE_ACTIVE",umath::to_integral(pragma::physics::ICollisionObject::ActivationState::Active)},
+		{"ACTIVATION_STATE_ALWAYS_ACTIVE",umath::to_integral(pragma::physics::ICollisionObject::ActivationState::AlwaysActive)},
+		{"ACTIVATION_STATE_ALWAYS_INACTIVE",umath::to_integral(pragma::physics::ICollisionObject::ActivationState::AlwaysInactive)},
+		{"ACTIVATION_STATE_WAIT_FOR_DEACTIVATION",umath::to_integral(pragma::physics::ICollisionObject::ActivationState::WaitForDeactivation)},
+		{"ACTIVATION_STATE_COUNT",umath::to_integral(pragma::physics::ICollisionObject::ActivationState::Count)}
 	});
 
 	Lua::RegisterLibraryEnums(l,libName,{

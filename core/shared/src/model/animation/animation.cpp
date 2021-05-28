@@ -153,17 +153,28 @@ bool pragma::animation::Animation::LoadFromAssetData(const udm::AssetData &data,
 	auto udmFlags = udm["flags"];
 	if(udmFlags)
 	{
-		auto readFlag = [this,&udmFlags](FAnim flag,const std::string &name) {
-			auto udmFlag = udmFlags[name];
-			if(udmFlag && udmFlag(false))
-				m_flags |= flag;
-		};
-		readFlag(FAnim::Loop,"loop");
-		readFlag(FAnim::NoRepeat,"noRepeat");
-		readFlag(FAnim::Autoplay,"autoplay");
-		readFlag(FAnim::Gesture,"gesture");
-		readFlag(FAnim::NoMoveBlend,"noMoveBlend");
-		static_assert(umath::to_integral(FAnim::Count) == 7,"Update this list when new flags have been added!");
+		if(udmFlags.IsType(udm::Type::String))
+		{
+			auto flags = magic_enum::flags::enum_cast<FAnim>(udmFlags.GetValue<udm::String>());
+			if(flags.has_value())
+				m_flags = *flags;
+		}
+		else
+		{
+			auto readFlag = [this,&udmFlags](FAnim flag,const std::string &name) {
+				auto udmFlag = udmFlags[name];
+				if(udmFlag && udmFlag(false))
+					m_flags |= flag;
+			};
+			readFlag(FAnim::Loop,"loop");
+			readFlag(FAnim::MoveX,"moveX");
+			readFlag(FAnim::MoveZ,"moveZ");
+			readFlag(FAnim::NoRepeat,"noRepeat");
+			readFlag(FAnim::Autoplay,"autoplay");
+			readFlag(FAnim::Gesture,"gesture");
+			readFlag(FAnim::NoMoveBlend,"noMoveBlend");
+			static_assert(umath::to_integral(FAnim::Count) == 7,"Update this list when new flags have been added!");
+		}
 	}
 
 	std::vector<BoneId> nodeToLocalBoneId;
@@ -363,7 +374,7 @@ bool pragma::animation::Animation::LoadFromAssetData(const udm::AssetData &data,
 					[localBoneId](Frame &frame,const Vector3 &val) {frame.SetBoneScale(localBoneId,val);
 				});
 			}
-			else if(property == "move")
+			else if(property == "offset")
 			{
 				// TODO
 				std::vector<Vector2> moveOffsets;
@@ -597,7 +608,7 @@ bool pragma::animation::Animation::Save(udm::AssetData &outData,std::string &out
 	}
 
 	auto animFlags = GetFlags();
-	auto writeFlag = [&udm,animFlags](FAnim flag,const std::string &name) {
+	/*auto writeFlag = [&udm,animFlags](FAnim flag,const std::string &name) {
 		if(umath::is_flag_set(animFlags,flag) == false)
 			return;
 		udm["flags"][name] = true;
@@ -607,7 +618,8 @@ bool pragma::animation::Animation::Save(udm::AssetData &outData,std::string &out
 	writeFlag(FAnim::Autoplay,"autoplay");
 	writeFlag(FAnim::Gesture,"gesture");
 	writeFlag(FAnim::NoMoveBlend,"noMoveBlend");
-	static_assert(umath::to_integral(FAnim::Count) == 7,"Update this list when new flags have been added!");
+	static_assert(umath::to_integral(FAnim::Count) == 7,"Update this list when new flags have been added!");*/
+	udm["flags"] = magic_enum::flags::enum_name(animFlags);
 
 	std::vector<std::unordered_map<std::string,std::shared_ptr<Channel>>> nodeChannels {};
 	nodeChannels.resize(numNodes);
@@ -652,65 +664,68 @@ bool pragma::animation::Animation::Save(udm::AssetData &outData,std::string &out
 	}
 	
 	auto weights = GetBoneWeights();
-	if constexpr(ENABLE_ANIMATION_SAVE_OPTIMIZATION)
+	auto isGesture = HasFlag(FAnim::Gesture);
+	if(!isGesture)
 	{
-		// We may be able to remove some channels altogether if they're empty,
-		// or are equivalent to the reference pose (or identity value if the animation
-		// is a gesture)
-		auto isGesture = HasFlag(FAnim::Gesture);
-		for(auto it=nodeChannels.begin();it!=nodeChannels.begin() +numBones;)
+		if constexpr(ENABLE_ANIMATION_SAVE_OPTIMIZATION)
 		{
-			auto boneId = bones[it -nodeChannels.begin()];
-			auto &channels = *it;
-			for(auto &pair : channels)
+			// We may be able to remove some channels altogether if they're empty,
+			// or are equivalent to the reference pose (or identity value if the animation
+			// is a gesture)
+			for(auto it=nodeChannels.begin();it!=nodeChannels.begin() +numBones;)
 			{
-				// If channel only has two values and they're both the same, we can get rid of the second one
-				auto &channel = pair.second;
-				auto n = channel->GetValueCount();
-				if(n == 2)
+				auto boneId = bones[it -nodeChannels.begin()];
+				auto &channels = *it;
+				for(auto &pair : channels)
 				{
-					auto *v0 = channel->GetValue(0);
-					auto *v1 = channel->GetValue(1);
-					if(channel->CompareValues(v0,v1) == false)
+					// If channel only has two values and they're both the same, we can get rid of the second one
+					auto &channel = pair.second;
+					auto n = channel->GetValueCount();
+					if(n == 2)
+					{
+						auto *v0 = channel->GetValue(0);
+						auto *v1 = channel->GetValue(1);
+						if(channel->CompareValues(v0,v1) == false)
+							continue;
+						channel->PopBack();
+					}
+
+					n = channel->GetValueCount();
+					if(n != 1)
+						continue;
+					if(isGesture)
+					{
+						if(channel->CompareWithDefault(channel->GetValue(0)))
+							channel->PopBack();
+						continue;
+					}
+					if(!optReference)
+						continue;
+					auto *ref = channel->GetReferenceValue(*optReference,boneId);
+					if(!ref || !channel->CompareValues(channel->GetValue(0),ref))
 						continue;
 					channel->PopBack();
 				}
-
-				n = channel->GetValueCount();
-				if(n != 1)
-					continue;
-				if(isGesture)
+				for(auto itChannel=channels.begin();itChannel!=channels.end();)
 				{
-					if(channel->CompareWithDefault(channel->GetValue(0)))
-						channel->PopBack();
-					continue;
+					auto &channel = itChannel->second;
+					if(channel->times.empty())
+						itChannel = channels.erase(itChannel);
+					else
+						++itChannel;
 				}
-				if(!optReference)
-					continue;
-				auto *ref = channel->GetReferenceValue(*optReference,boneId);
-				if(!ref || !channel->CompareValues(channel->GetValue(0),ref))
-					continue;
-				channel->PopBack();
-			}
-			for(auto itChannel=channels.begin();itChannel!=channels.end();)
-			{
-				auto &channel = itChannel->second;
-				if(channel->times.empty())
-					itChannel = channels.erase(itChannel);
+				if(channels.empty())
+				{
+					auto i = (it -nodeChannels.begin());
+					bones.erase(bones.begin() +i);
+					if(!weights.empty())
+						weights.erase(weights.begin() +i);
+					--numBones;
+					it = nodeChannels.erase(it);
+				}
 				else
-					++itChannel;
+					++it;
 			}
-			if(channels.empty())
-			{
-				auto i = (it -nodeChannels.begin());
-				bones.erase(bones.begin() +i);
-				if(!weights.empty())
-					weights.erase(weights.begin() +i);
-				--numBones;
-				it = nodeChannels.erase(it);
-			}
-			else
-				++it;
 		}
 	}
 

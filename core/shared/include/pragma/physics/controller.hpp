@@ -38,6 +38,12 @@ namespace pragma::physics
 			Up = Sides<<1u
 		};
 
+		enum class ShapeType : uint8_t
+		{
+			Capsule = 0,
+			Box
+		};
+
 		virtual void OnRemove() override;
 
 		void Move(Vector3 &disp);
@@ -71,6 +77,9 @@ namespace pragma::physics
 		virtual Vector3 GetLinearVelocity() const=0;
 		virtual void SetLinearVelocity(const Vector3 &vel)=0;
 
+		const Vector3 &GetHalfExtents() const {return m_halfExtents;}
+		ShapeType GetShapeType() const {return m_shapeType;}
+
 		ICollisionObject *GetCollisionObject();
 		const ICollisionObject *GetCollisionObject() const;
 
@@ -80,9 +89,11 @@ namespace pragma::physics
 		virtual void InitializeLuaObject(lua_State *lua) override;
 	protected:
 		virtual void DoMove(Vector3 &disp)=0;
-		IController(IEnvironment &env,const util::TSharedHandle<ICollisionObject> &collisionObject);
+		IController(IEnvironment &env,const util::TSharedHandle<ICollisionObject> &collisionObject,const Vector3 &halfExtents,ShapeType shapeType);
 		util::TSharedHandle<ICollisionObject> m_collisionObject = nullptr;
 		Vector3 m_moveVelocity = {};
+		Vector3 m_halfExtents {};
+		ShapeType m_shapeType = ShapeType::Capsule;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::physics::IController::CollisionFlags)

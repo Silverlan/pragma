@@ -17,6 +17,7 @@ struct DLLNETWORK GameModeInfo
 	std::string name;
 	std::string component_name;
 	std::string author;
+	std::string initial_map;
 	util::Version version;
 };
 

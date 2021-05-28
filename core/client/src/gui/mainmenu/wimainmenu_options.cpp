@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/gui/mainmenu/wimainmenu_options.h"
+#include "pragma/audio/c_audio.hpp"
 #include <wgui/types/widropdownmenu.h>
 #include "pragma/gui/wicheckbox.h"
 #include <wgui/types/wibutton.h>
@@ -297,6 +298,13 @@ void WIMainMenuOptions::InitializeGeneralSettings()
 	for(auto &engine : pragma::physics::IEnvironment::GetAvailablePhysicsEngines())
 		physEngines.insert(std::make_pair(Locale::GetText("physics_engine_" +engine),engine));
 	auto *pPhysEngineList = pList->AddDropDownMenu(Locale::GetText("physics_engine"),physEngines,"phys_engine");
+	//
+
+	// Audio Engine
+	std::unordered_map<std::string,std::string> audioEngines {};
+	for(auto &engine : pragma::audio::get_available_audio_apis())
+		audioEngines.insert(std::make_pair(Locale::GetText("audio_engine_" +engine),engine));
+	auto *pAudioEngineList = pList->AddDropDownMenu(Locale::GetText("audio_engine"),audioEngines,"audio_engine");
 	//
 
 	// Networking library

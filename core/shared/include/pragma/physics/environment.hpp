@@ -222,6 +222,7 @@ namespace pragma::physics
 		void OnWake(ICollisionObject &o);
 		void OnSleep(ICollisionObject &o);
 		void OnConstraintBroken(IConstraint &constraint);
+		virtual void OnVisualDebuggerChanged(pragma::physics::IVisualDebugger *debugger) {}
 		virtual RemainingDeltaTime DoStepSimulation(float timeStep,int maxSubSteps=1,float fixedTimeStep=(1.f /60.f))=0;
 		virtual void UpdateSurfaceTypes()=0;
 

@@ -242,11 +242,19 @@ bool SoundScriptValue::Load(udm::LinkedPropertyWrapper &prop)
 		m_bIsSet = true;
 		return true;
 	}
-	auto val = udmVal.ToValue<float>();
+	auto val = udmVal.ToValue<udm::Float>();
 	if(val.has_value())
 	{
 		Initialize(*val);
 		m_bIsSet = true;
+		return true;
+	}
+	auto valVec = udmVal.ToValue<udm::Vector2>();
+	if(valVec.has_value())
+	{
+		Initialize(valVec->x,valVec->y);
+		m_bIsSet = true;
+		return true;
 	}
 	return false;
 }

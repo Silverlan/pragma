@@ -23,12 +23,14 @@ ComponentEventId BaseTouchComponent::EVENT_CAN_TRIGGER = INVALID_COMPONENT_ID;
 ComponentEventId BaseTouchComponent::EVENT_ON_START_TOUCH = INVALID_COMPONENT_ID;
 ComponentEventId BaseTouchComponent::EVENT_ON_END_TOUCH = INVALID_COMPONENT_ID;
 ComponentEventId BaseTouchComponent::EVENT_ON_TRIGGER = INVALID_COMPONENT_ID;
+ComponentEventId BaseTouchComponent::EVENT_ON_TRIGGER_INITIALIZED = INVALID_COMPONENT_ID;
 void BaseTouchComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	EVENT_CAN_TRIGGER = componentManager.RegisterEvent("CAN_TRIGGER");
 	EVENT_ON_START_TOUCH = componentManager.RegisterEvent("ON_START_TOUCH");
 	EVENT_ON_END_TOUCH = componentManager.RegisterEvent("ON_END_TOUCH");
 	EVENT_ON_TRIGGER = componentManager.RegisterEvent("ON_TRIGGER");
+	EVENT_ON_TRIGGER_INITIALIZED = componentManager.RegisterEvent("ON_TRIGGER_INITIALIZED");
 }
 BaseTouchComponent::BaseTouchComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)
@@ -99,6 +101,7 @@ void BaseTouchComponent::OnPhysicsInitialized()
 				Con::cwar<<"WARNING: Trigger entity has non-trigger physics shapes!"<<Con::endl;
 		}
 	}
+	BroadcastEvent(EVENT_ON_TRIGGER_INITIALIZED);
 }
 void BaseTouchComponent::OnEntitySpawn()
 {

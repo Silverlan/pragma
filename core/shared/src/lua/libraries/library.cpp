@@ -611,7 +611,8 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 
 	auto modDebug = luabind::module_(lua.GetState(),"debug");
 	modDebug[
-		luabind::def("move_state_to_string",Lua::debug::move_state_to_string)
+		luabind::def("move_state_to_string",Lua::debug::move_state_to_string),
+		luabind::def("beep",Lua::debug::beep)
 	];
 	lua_pushtablecfunction(lua.GetState(),"debug","print",Lua::debug::print);
 	auto isBreakDefined = false;

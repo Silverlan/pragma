@@ -476,6 +476,7 @@ bool Model::LoadFromAssetData(Game &game,const udm::AssetData &data,std::string 
 		auto &reference = GetReference();
 		auto &animations = GetAnimations();
 		auto udmAnimations = udm["animations"];
+		auto numExpected = udmAnimations.GetChildCount();
 		animations.resize(udmAnimations.GetChildCount());
 		for(auto udmAnimation : udmAnimations.ElIt())
 		{
@@ -485,7 +486,18 @@ bool Model::LoadFromAssetData(Game &game,const udm::AssetData &data,std::string 
 			uint32_t index = 0;
 			udmAnimation.property["index"](index);
 			m_animationIDs[std::string{udmAnimation.key}] = index;
+			if(index >= animations.size())
+				animations.resize(index +1);
 			animations[index] = anim;
+		}
+		if(animations.size() != numExpected)
+		{
+			for(auto &anim : animations)
+			{
+				if(anim)
+					continue;
+				anim = pragma::animation::Animation::Create(); // Create a dummy animation
+			}
 		}
 
 		auto &blendControllers = GetBlendControllers();

@@ -161,6 +161,8 @@ protected:
 };
 REGISTER_BASIC_BITWISE_OPERATORS(PhysObj::StateFlags)
 
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const PhysObj &o);
+
 template<class TPhysObj,typename... TARGS>
 	std::unique_ptr<TPhysObj> PhysObj::Create(pragma::BaseEntityComponent &owner,TARGS ...args)
 {

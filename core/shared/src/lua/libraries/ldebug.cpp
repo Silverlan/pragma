@@ -43,6 +43,17 @@ void Lua::debug::stackdump(lua_State *l)
 		Con::cout<<Con::endl;
 }
 
+void Lua::debug::beep(lua_State *l)
+{
+	int ms = 500;
+	int freq = 523;
+#ifdef _WIN32
+	Beep(freq,ms);
+#else
+	ioctl(fd,KDMKTONE,(ms<<16 | 1193180 /freq));
+#endif
+}
+
 std::string Lua::debug::move_state_to_string(lua_State *l,pragma::BaseAIComponent::MoveResult v)
 {
 	switch(v)

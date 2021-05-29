@@ -47,6 +47,8 @@ void GameModeManager::Initialize()
 			udmGm["name"](gmInfo.name);
 			udmGm["author"](gmInfo.author);
 			udmGm["initial_map"](gmInfo.initial_map);
+			for(auto &pair : udmGm["mount_priorities"].ElIt())
+				gmInfo.gameMountPriorities[std::string{pair.key}] = pair.property.ToValue<udm::Int32>(0);
 			
 			std::string version {};
 			udmGm["version"](version);

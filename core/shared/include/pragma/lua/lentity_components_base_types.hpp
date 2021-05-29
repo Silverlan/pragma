@@ -3360,7 +3360,7 @@ namespace Lua
 			LUA_CHECK_ENTITY(l,hEnt);
 			hIo->TriggerOutput(name,hEnt.get());
 		}));
-		def.def("FireOutput",static_cast<void(*)(lua_State*,THandle&,const std::string&,EntityHandle&,BaseIOComponent::IoFlags)>([](lua_State *l,THandle &hIo,const std::string &name,EntityHandle &hEnt,BaseIOComponent::IoFlags flags) {
+		def.def("FireOutput",static_cast<void(*)(lua_State*,THandle&,const std::string&,EntityHandle&,pragma::BaseIOComponent::IoFlags)>([](lua_State *l,THandle &hIo,const std::string &name,EntityHandle &hEnt,pragma::BaseIOComponent::IoFlags flags) {
 			pragma::Lua::check_component(l,hIo);
 			LUA_CHECK_ENTITY(l,hEnt);
 			hIo->TriggerOutput(name,hEnt.get(),flags);

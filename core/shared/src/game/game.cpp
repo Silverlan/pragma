@@ -418,6 +418,12 @@ void Game::SetGameMode(const std::string &gameMode)
 {
 	auto *info = GameModeManager::GetGameModeInfo(gameMode);
 	m_gameMode = info;
+
+	if(info)
+	{
+		for(auto &pair : info->gameMountPriorities)
+			util::set_mounted_game_priority(pair.first,pair.second);
+	}
 }
 
 void Game::SetupEntity(BaseEntity*)

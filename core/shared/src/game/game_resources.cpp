@@ -58,6 +58,29 @@ void util::close_external_archive_manager()
 	if(fClose != nullptr)
 		fClose();
 }
+std::optional<int32_t> util::get_mounted_game_priority(const std::string &game)
+{
+	if(s_bModuleInitialized == false)
+		return {};
+	auto dllHandle = load_module(nullptr);
+	auto *fGetMountedGamePriority = dllHandle->FindSymbolAddress<bool(*)(const std::string&,int32_t&)>("get_mounted_game_priority");
+	if(fGetMountedGamePriority)
+	{
+		int32_t priority;
+		auto r = fGetMountedGamePriority(game,priority);
+		return r ? priority : std::optional<int32_t>{};
+	}
+	return {};
+}
+void util::set_mounted_game_priority(const std::string &game,int32_t priority)
+{
+	if(s_bModuleInitialized == false)
+		return;
+	auto dllHandle = load_module(nullptr);
+	auto *fSetMountedGamePriority = dllHandle->FindSymbolAddress<void(*)(const std::string&,int32_t)>("set_mounted_game_priority");
+	if(fSetMountedGamePriority != nullptr)
+		fSetMountedGamePriority(game,priority);
+}
 
 static bool port_model(
 	NetworkState *nw,const std::string &path,std::string mdlName,const std::string &formatName,

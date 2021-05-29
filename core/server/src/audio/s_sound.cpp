@@ -98,7 +98,9 @@ void ServerState::SendSoundSourceToClient(SALSound &sound,bool sendFullUpdate,co
 std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd,ALSoundType type,ALCreateFlags flags)
 {
 	std::transform(snd.begin(),snd.end(),snd.begin(),::tolower);
-	snd = FileManager::GetCanonicalizedPath(snd);
+	snd = FileManager::GetNormalizedPath(snd);
+	if(m_missingSoundCache.find(snd) != m_missingSoundCache.end())
+		return nullptr;
 	SoundScript *script = m_soundScriptManager->FindScript(snd.c_str());
 	float duration = 0.f;
 	if(script == NULL)
@@ -120,6 +122,7 @@ std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd,ALSoundType ty
 					return r;
 				}
 			}
+			m_missingSoundCache.insert(snd);
 			return std::shared_ptr<ALSound>();
 		}
 		else
@@ -140,6 +143,7 @@ std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd,ALSoundType ty
 						return r;
 					}
 				}
+				m_missingSoundCache.insert(snd);
 				return std::shared_ptr<ALSound>();
 			}
 		}

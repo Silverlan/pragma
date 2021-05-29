@@ -19,6 +19,7 @@ struct DLLNETWORK GameModeInfo
 	std::string author;
 	std::string initial_map;
 	util::Version version;
+	std::unordered_map<std::string,int32_t> gameMountPriorities;
 };
 
 class DLLNETWORK GameModeManager

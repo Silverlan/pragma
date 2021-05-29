@@ -235,6 +235,8 @@ std::shared_ptr<ALSound> ClientState::CreateSound(std::string snd,ALSoundType ty
 	if(soundSys == nullptr)
 		return nullptr;
 	auto normPath = FileManager::GetNormalizedPath(snd);
+	if(m_missingSoundCache.find(normPath) != m_missingSoundCache.end())
+		return nullptr;
 	auto *script = m_soundScriptManager->FindScript(normPath.c_str());
 	if(script == nullptr)
 	{
@@ -258,6 +260,7 @@ std::shared_ptr<ALSound> ClientState::CreateSound(std::string snd,ALSoundType ty
 						return r;
 					}
 				}
+				m_missingSoundCache.insert(normPath);
 				return nullptr;
 			}
 			return CreateSound(*buf,type);
@@ -268,6 +271,7 @@ std::shared_ptr<ALSound> ClientState::CreateSound(std::string snd,ALSoundType ty
 			if(decoder == nullptr)
 			{
 				Con::cwar<<"WARNING: Unable to create streaming decoder for sound '"<<snd<<"'!"<<Con::endl;
+				m_missingSoundCache.insert(normPath);
 				return nullptr;
 			}
 			return CreateSound(*decoder,type);

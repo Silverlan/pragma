@@ -134,7 +134,7 @@ int Lua::debug::print(lua_State *l)
 		flags |= util::ConsoleColorFlags::BackgroundMagenta;
 	else
 		flags |= util::ConsoleColorFlags::BackgroundCyan;
-	util::set_console_color(flags | util::ConsoleColorFlags::BackgroundIntensity | util::ConsoleColorFlags::Black | util::ConsoleColorFlags::Intensity);
+	util::set_console_color(flags | util::ConsoleColorFlags::BackgroundIntensity | util::ConsoleColorFlags::Black);
 	int n = lua_gettop(l);  /* number of arguments */
 	int i;
 	for (i=1; i<=n; i++) {

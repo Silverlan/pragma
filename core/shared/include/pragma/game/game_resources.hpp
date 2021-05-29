@@ -27,6 +27,8 @@ namespace util
 	};
 	DLLNETWORK std::shared_ptr<util::Library> initialize_external_archive_manager(NetworkState *nw);
 	DLLNETWORK void close_external_archive_manager();
+	DLLNETWORK std::optional<int32_t> get_mounted_game_priority(const std::string &game);
+	DLLNETWORK void set_mounted_game_priority(const std::string &game,int32_t priority);
 
 	DLLNETWORK bool port_nif_model(NetworkState *nw,const std::string &path,std::string mdlName);
 	DLLNETWORK bool port_hl2_smd(NetworkState &nw,Model &mdl,VFilePtr &f,const std::string &animName,bool isCollisionMesh,std::vector<std::string> &outTextures);

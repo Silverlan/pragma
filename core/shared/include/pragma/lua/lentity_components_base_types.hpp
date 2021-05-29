@@ -3360,7 +3360,15 @@ namespace Lua
 			LUA_CHECK_ENTITY(l,hEnt);
 			hIo->TriggerOutput(name,hEnt.get());
 		}));
+		def.def("FireOutput",static_cast<void(*)(lua_State*,THandle&,const std::string&,EntityHandle&,BaseIOComponent::IoFlags)>([](lua_State *l,THandle &hIo,const std::string &name,EntityHandle &hEnt,BaseIOComponent::IoFlags flags) {
+			pragma::Lua::check_component(l,hIo);
+			LUA_CHECK_ENTITY(l,hEnt);
+			hIo->TriggerOutput(name,hEnt.get(),flags);
+		}));
 		def.add_static_constant("EVENT_HANDLE_INPUT",pragma::BaseIOComponent::EVENT_HANDLE_INPUT);
+		
+		def.add_static_constant("IO_FLAG_NONE",umath::to_integral(pragma::BaseIOComponent::IoFlags::None));
+		def.add_static_constant("IO_FLAG_BIT_FORCE_DELAYED_FIRE",umath::to_integral(pragma::BaseIOComponent::IoFlags::ForceDelayedFire));
 	}
 
 	template<class TLuaClass,class THandle>

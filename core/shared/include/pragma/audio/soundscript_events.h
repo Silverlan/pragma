@@ -120,7 +120,7 @@ public:
 	virtual ~SSEPlaySound() override
 	{}
 	std::vector<std::string> sources;
-	bool loop;
+	bool loop = false;
 	bool global = false;
 	bool stream = false;
 	SoundScriptValue type;
@@ -138,9 +138,9 @@ public:
 	SoundScriptValue endTime;
 	SoundScriptValue fadeInTime;
 	SoundScriptValue fadeOutTime;
-	double maxDistance;
-	int position;
-	ALChannel mode;
+	double maxDistance = ALSOUND_DEFAULT_MAX_DISTANCE;
+	int position = 0;
+	ALChannel mode = ALChannel::Mono;
 	virtual void Initialize(udm::LinkedPropertyWrapper &prop) override;
 	virtual SSESound *CreateSound(double tStart,const std::function<std::shared_ptr<ALSound>(const std::string&,ALChannel,ALCreateFlags)> &createSound);
 	virtual void Precache() override;

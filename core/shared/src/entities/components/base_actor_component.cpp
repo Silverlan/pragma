@@ -92,7 +92,8 @@ void BaseActorComponent::Save(udm::LinkedPropertyWrapper &udm)
 	udm["alive"] = m_bAlive;
 	udm["frozen"] = **m_bFrozen;
 	udm["moveControllerName"] = m_moveControllerName;
-	udm["moveControllerNameY"] = *m_moveControllerNameY;
+	if(m_moveControllerNameY.has_value())
+		udm["moveControllerNameY"] = *m_moveControllerNameY;
 	udm["moveControllerIndex"] = m_moveController;
 	udm["moveControllerIndexY"] = m_moveControllerY;
 	auto udmHitboxData = udm.AddArray("hitboxData",m_hitboxData.size());
@@ -110,7 +111,13 @@ void BaseActorComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 	udm["alive"](m_bAlive);
 	udm["frozen"](**m_bFrozen);
 	udm["moveControllerName"](m_moveControllerName);
-	udm["moveControllerNameY"](*m_moveControllerNameY);
+	auto udmMoveControllerNameY = udm["moveControllerNameY"];
+	if(udmMoveControllerNameY)
+	{
+		std::string name;
+		udmMoveControllerNameY(name);
+		m_moveControllerNameY = name;
+	}
 	udm["moveControllerIndex"](m_moveController);
 	udm["moveControllerIndexY"](m_moveControllerY);
 	auto udmHitboxData = udm["hitboxData"];

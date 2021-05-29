@@ -61,7 +61,7 @@ void BaseSoundEmitterComponent::GetSounds(std::vector<std::shared_ptr<ALSound>> 
 bool BaseSoundEmitterComponent::ShouldRemoveSound(ALSound &snd) const
 {
 	// Index 0 = shared sound
-	return (snd.GetIndex() == 0 && snd.IsPlaying() == false) ? true : false;
+	return (/*snd.GetIndex() == 0 && */snd.IsPlaying() == false) ? true : false;
 }
 
 void BaseSoundEmitterComponent::OnTick(double dt) {MaintainSounds();}

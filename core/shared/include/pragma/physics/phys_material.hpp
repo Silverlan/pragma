@@ -32,7 +32,7 @@ namespace pragma::physics
 		SurfaceMaterial *GetSurfaceMaterial() const;
 		virtual void InitializeLuaObject(lua_State *lua) override;
 	private:
-		mutable SurfaceMaterial *m_surfaceMaterial = nullptr;
+		uint32_t m_surfMatIdx = std::numeric_limits<uint32_t>::max();
 	};
 };
 

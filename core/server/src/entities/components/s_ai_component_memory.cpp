@@ -59,15 +59,7 @@ void SAIComponent::OnTargetVisibilityReacquired(const ai::Memory::Fragment &frag
 	BroadcastEvent(EVENT_ON_TARGET_VISIBILITY_REACQUIRED,evData);
 }
 
-bool SAIComponent::IsInMemory(BaseEntity *ent)
-{
-	for(auto &fragment : m_memory.fragments)
-	{
-		if(fragment.occupied == true && fragment.hEntity.get() == ent)
-			return true;
-	}
-	return false;
-}
+bool SAIComponent::IsInMemory(BaseEntity *ent) {return GetMemory(ent);}
 
 void SAIComponent::OnPrimaryTargetChanged(const ai::Memory::Fragment *fragment)
 {

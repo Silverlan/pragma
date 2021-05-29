@@ -61,9 +61,13 @@ DLLCLIENT void NET_cl_snd_create(NetPacket packet)
 	as->SetOuterConeGainHF(packet->Read<float>());
 	as->SetFlags(packet->Read<uint32_t>());
 
-	auto start = packet->Read<float>();
-	auto end = packet->Read<float>();
-	as->SetRange(start,end);
+	auto hasRange = packet->Read<bool>();
+	if(hasRange)
+	{
+		auto start = packet->Read<float>();
+		auto end = packet->Read<float>();
+		as->SetRange(start,end);
+	}
 
 	as->SetFadeInDuration(packet->Read<float>());
 	as->SetFadeOutDuration(packet->Read<float>());

@@ -116,7 +116,7 @@ void BaseIOComponent::StoreOutput(std::string name,std::string entities,std::str
 	it->second.push_back(Output(entities,input,param,delay,times));
 }
 
-bool BaseIOComponent::FireSingleOutput(Output &output,BaseEntity *activator)
+bool BaseIOComponent::FireSingleOutput(Output &output,BaseEntity *activator,IoFlags flags)
 {
 	if(output.times == 0)
 		return false;
@@ -150,7 +150,7 @@ bool BaseIOComponent::FireSingleOutput(Output &output,BaseEntity *activator)
 		auto *pIoComponent = static_cast<BaseIOComponent*>(ent->FindComponent("io").get());
 		if(pIoComponent == nullptr)
 			continue;
-		if(output.delay <= 0.f)
+		if(output.delay <= 0.f && !umath::is_flag_set(flags,IoFlags::ForceDelayedFire))
 		{
 			pIoComponent->Input(output.input,activator,&entThis,output.param);
 			if(!hThis.IsValid())
@@ -209,7 +209,7 @@ void BaseIOComponent::Input(std::string input,BaseEntity *activator,BaseEntity *
 		Con::cout<<"WARNING: Unhandled input '"<<input<<"' for entity '"<<entThis.GetClass()<<"'!"<<Con::endl;
 }
 
-void BaseIOComponent::TriggerOutput(std::string name,BaseEntity *activator)
+void BaseIOComponent::TriggerOutput(std::string name,BaseEntity *activator,IoFlags flags)
 {
 	StringToLower(name);
 	std::unordered_map<std::string,std::vector<Output>>::iterator it = m_outputs.find(name);
@@ -220,7 +220,7 @@ void BaseIOComponent::TriggerOutput(std::string name,BaseEntity *activator)
 	for(auto i=outputs.size() -1;i!=size_t(-1);i--)
 	{
 		Output &output = outputs[i];
-		if(!FireSingleOutput(output,activator))
+		if(!FireSingleOutput(output,activator,flags))
 		{
 			if(!hActivator.IsValid())
 				return;

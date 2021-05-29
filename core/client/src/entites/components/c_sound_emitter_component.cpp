@@ -19,7 +19,7 @@ using namespace pragma;
 extern DLLCLIENT ClientState *client;
 
 luabind::object CSoundEmitterComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CSoundEmitterComponentHandleWrapper>(l);}
-bool CSoundEmitterComponent::ShouldRemoveSound(ALSound &snd) const {return (BaseSoundEmitterComponent::ShouldRemoveSound(snd) && snd.GetIndex() == 0) ? true : false;}
+bool CSoundEmitterComponent::ShouldRemoveSound(ALSound &snd) const {return (BaseSoundEmitterComponent::ShouldRemoveSound(snd)/* && snd.GetIndex() == 0*/) ? true : false;}
 
 void CSoundEmitterComponent::AddSound(std::shared_ptr<ALSound> snd) {InitializeSound(snd);}
 

@@ -42,11 +42,11 @@ public:
 	void HandleEvent(uint32_t eventId) {}
 	static void default_HandleEvent(lua_State *l,LuaBaseEntityComponentWrapper &hComponent,uint32_t eventId) {}
 
-	void Save(DataStream ds) {}
-	static void default_Save(lua_State *l,LuaBaseEntityComponentWrapper &hComponent,DataStream ds) {}
+	void Save(udm::LinkedPropertyWrapper &udm) {}
+	static void default_Save(lua_State *l,LuaBaseEntityComponentWrapper &hComponent,udm::LinkedPropertyWrapper &udm) {}
 
-	void Load(DataStream ds,uint32_t version) {}
-	static void default_Load(lua_State *l,LuaBaseEntityComponentWrapper &hComponent,DataStream ds,uint32_t version) {}
+	void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) {}
+	static void default_Load(lua_State *l,LuaBaseEntityComponentWrapper &hComponent,udm::LinkedPropertyWrapper &udm,uint32_t version) {}
 
 	void OnEntityComponentAdded(LuaBaseEntityComponentWrapper &hComponent) {}
 	static void default_OnEntityComponentAdded(lua_State *l,LuaBaseEntityComponentWrapper &hComponent) {}

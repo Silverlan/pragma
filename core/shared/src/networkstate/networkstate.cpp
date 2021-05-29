@@ -139,7 +139,7 @@ void NetworkState::UpdateSounds(std::vector<std::shared_ptr<ALSound>> &sounds)
 		{
 			auto &snd = *psnd;
 			snd.Update();
-			if(psnd.use_count() == 2 && ShouldRemoveSound(snd))
+			if(psnd.use_count() <= 2 && ShouldRemoveSound(snd))
 			{
 				psnd = nullptr; // Cleanup occurs in "OnDestroyed" callback
 				continue;

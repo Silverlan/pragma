@@ -302,6 +302,8 @@ void ALSoundScript::PostUpdate()
 				InitializeEvent(ev);
 		}
 	}
+	if(numSounds == 0 && GetState() == ALState::Playing)
+		SetState(ALState::Stopped);
 	auto numEvents = m_events.size();
 	for(size_t i=0;i<numEvents;i++)
 	{

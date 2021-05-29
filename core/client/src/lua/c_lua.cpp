@@ -59,6 +59,7 @@
 #include <image/prosper_render_target.hpp>
 #include <pragma/lua/libraries/lfile.h>
 #include <wgui/fontmanager.h>
+#include <udm.hpp>
 
 #undef LEFT
 #undef RIGHT

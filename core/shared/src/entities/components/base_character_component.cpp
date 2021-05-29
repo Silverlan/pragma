@@ -123,7 +123,7 @@ void BaseCharacterComponent::Initialize()
 	m_netEvSetActiveWeapon = SetupNetEvent("set_active_weapon");
 	m_netEvSetAmmoCount = SetupNetEvent("set_ammo_count");
 
-	BindEventUnhandled(BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEvent(BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		return HandleAnimationEvent(static_cast<CEHandleAnimationEvent&>(evData.get()).animationEvent) ? util::EventReply::Handled : util::EventReply::Unhandled;
 	});
 	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {

@@ -395,12 +395,13 @@ bool pragma::animation::Animation::LoadFromAssetData(const udm::AssetData &data,
 	{
 		for(auto &udmEvent : udmEvents)
 		{
-			auto frameIndex = udmEvent["frame"].ToValue<uint32_t>();
-			if(frameIndex.has_value() == false)
+			auto udmTime = udmEvent["time"];
+			if(!udmTime)
 				continue;
-			auto it = m_events.find(*frameIndex);
+			auto frameIndex = umath::round(udmTime.ToValue<float>(0.f) *m_fps);
+			auto it = m_events.find(frameIndex);
 			if(it == m_events.end())
-				it = m_events.insert(std::make_pair(*frameIndex,std::vector<std::shared_ptr<AnimationEvent>>{})).first;
+				it = m_events.insert(std::make_pair(frameIndex,std::vector<std::shared_ptr<AnimationEvent>>{})).first;
 
 			auto &frameEvents = it->second;
 			if(frameEvents.size() == frameEvents.capacity())

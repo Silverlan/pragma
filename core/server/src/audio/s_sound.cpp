@@ -55,9 +55,14 @@ void ServerState::SendSoundSourceToClient(SALSound &sound,bool sendFullUpdate,co
 		p->Write<float>(sound.GetOuterConeGainHF());
 		p->Write<uint32_t>(sound.GetFlags());
 		
-		auto range = sound.GetRange();
-		p->Write<float>(range.first);
-		p->Write<float>(range.second);
+		auto hasRange = sound.HasRange();
+		p->Write<bool>(hasRange);
+		if(hasRange)
+		{
+			auto range = sound.GetRange();
+			p->Write<float>(range.first);
+			p->Write<float>(range.second);
+		}
 
 		p->Write<float>(sound.GetFadeInDuration());
 		p->Write<float>(sound.GetFadeOutDuration());

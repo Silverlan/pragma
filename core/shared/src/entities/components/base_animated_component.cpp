@@ -377,7 +377,7 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 	auto cycleNew = cycle +static_cast<float>(dt) *animSpeed;
 	if(layeredSlot == -1)
 	{
-		if(umath::abs(cycleNew -cycleLast) < 0.001f && umath::is_flag_set(m_stateFlags,StateFlags::BaseAnimationDirty) == false)
+		if(umath::abs(cycleNew -cycleLast) < 0.00001f && umath::is_flag_set(m_stateFlags,StateFlags::BaseAnimationDirty) == false)
 			return false;
 		umath::set_flag(m_stateFlags,StateFlags::BaseAnimationDirty,false);
 	}
@@ -609,7 +609,7 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 					lastPlayedFrameOfPreviousAnim->GetBoneTransforms(),&lastPlayedFrameOfPreviousAnim->GetBoneScales(),
 					bonePoses,&boneScales,
 					bonePoses,&boneScales,
-					*lastAnim,interpFactorLastAnim
+					*lastAnim,1.f -interpFactorLastAnim
 				);
 			}
 		}

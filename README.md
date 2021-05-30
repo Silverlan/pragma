@@ -43,10 +43,6 @@ b2 toolset=msvc-14.2 address-model=64 stage variant=release link=static runtime-
 ```
 (Change `ZLIB_SOURCE`, `ZLIB_INCLUDE` and `ZLIB_LIBPATH` to your zlib path.)
 
-### Building nvtt
-- Navigate to `Pragma/third_party_libs/nvtt/project/vc2017` and open `nvtt.sln`
-- Build the solution with the Release x64 configuration
-
 ### Building LuaJIT
 - Open Visual Studio command prompt (Available from the menu bar under "Tools -> Visual Studio Command Prompt")
 - Go to `%PROGRAMFILES(X86)%/Microsoft Visual Studio/2019/Community/VC/Auxiliary/Build` (or the equivalent directory for your Visual Studio version)

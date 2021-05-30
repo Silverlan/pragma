@@ -54,7 +54,7 @@
 #include <sharedutils/util_library.hpp>
 #include <luainterface.hpp>
 #include <udm.hpp>
-#pragma optimize("",off)
+
 extern DLLNETWORK Engine *engine;
 void Lua::VarDump(lua_State *lua,int n)
 {
@@ -859,4 +859,3 @@ std::string Game::GetConVarString(const std::string &scmd) {return m_stateNetwor
 float Game::GetConVarFloat(const std::string &scmd) {return m_stateNetwork->GetConVarFloat(scmd);}
 bool Game::GetConVarBool(const std::string &scmd) {return m_stateNetwork->GetConVarBool(scmd);}
 ConVarFlags Game::GetConVarFlags(const std::string &scmd) {return m_stateNetwork->GetConVarFlags(scmd);}
-#pragma optimize("",on)

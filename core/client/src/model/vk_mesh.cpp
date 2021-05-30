@@ -14,7 +14,7 @@
 using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
-#pragma optimize("",off)
+
 SceneMesh::SceneMesh()
 	: m_vertexBuffer(nullptr),m_vertexWeightBuffer(nullptr),
 	m_alphaBuffer(nullptr),m_indexBuffer(nullptr)
@@ -78,4 +78,3 @@ const std::shared_ptr<prosper::IRenderBuffer> &SceneMesh::GetRenderBuffer(CModel
 	m_renderBuffers.push_back(std::make_pair(pipelineId,renderBuffer));
 	return m_renderBuffers.back().second;
 }
-#pragma optimize("",on)

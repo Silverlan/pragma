@@ -15,7 +15,7 @@
 #include <udm.hpp>
 
 extern DLLNETWORK Engine *engine;
-#pragma optimize("",off)
+
 void pragma::asset::Output::Write(VFilePtrReal &f)
 {
 	auto lname = name;
@@ -568,4 +568,3 @@ bool pragma::asset::WorldData::SaveLightmapAtlas(const std::string &mapName)
 		m_messageLogger("Lightmap atlas could not be saved as '" +filePath +"'! Lightmaps will not be available.");
 	return result;
 }
-#pragma optimize("",on)

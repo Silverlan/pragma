@@ -17,7 +17,7 @@
 #include <udm.hpp>
 
 #undef CreateEvent
-#pragma optimize("",off)
+
 SoundScript::SoundScript(SoundScriptManager *manager,const std::string &identifier)
 	: SoundScriptEventContainer(manager),m_identifier(identifier)
 {}
@@ -109,4 +109,3 @@ SoundScriptEvent *SoundScriptManager::CreateEvent(std::string name)
 	return new SoundScriptEvent(this);
 }
 SoundScriptEvent *SoundScriptManager::CreateEvent() {return CreateEvent("");}
-#pragma optimize("",on)

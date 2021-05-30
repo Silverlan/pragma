@@ -7,7 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/model/animation/animation_channel.hpp"
-#pragma optimize("",off)
+
 pragma::animation::AnimationChannel::AnimationChannel()
 	: m_times{::udm::Property::Create(udm::Type::Float)},m_values{::udm::Property::Create(udm::Type::Array)}
 {}
@@ -176,4 +176,3 @@ std::ostream &operator<<(std::ostream &out,const pragma::animation::AnimationCha
 		out<<"[TimeRange:"<<*o.GetTime(0)<<","<<*o.GetTime(n -1)<<"]";
 	return out;
 }
-#pragma optimize("",on)

@@ -14,7 +14,7 @@
 #include "pragma/model/model.h"
 #include <udm.hpp>
 #include <mathutil/umath.h>
-#pragma optimize("",off)
+
 pragma::animation::AnimationChannel *pragma::animation::Animation2::AddChannel(const util::Path &path,udm::Type valueType)
 {
 	auto *channel = FindChannel(path);
@@ -58,4 +58,3 @@ std::ostream &operator<<(std::ostream &out,const pragma::animation::Animation2 &
 	out<<"[AnimSpeedFactor:"<<o.GetAnimationSpeedFactor()<<"]";
 	return out;
 }
-#pragma optimize("",on)

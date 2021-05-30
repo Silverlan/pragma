@@ -50,7 +50,7 @@ private:
 #endif
 
 #undef GetClassInfo
-#pragma optimize("",off)
+
 struct LuaOverloadInfo
 {
 	std::vector<std::string> parameters {};
@@ -1182,4 +1182,3 @@ void Lua::doc::register_library(Lua::Interface &lua)
 	}));
 	docLib[cdefCollection];
 }
-#pragma optimize("",on)

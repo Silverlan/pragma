@@ -16,7 +16,7 @@
 #undef CreateEvent
 
 extern DLLNETWORK Engine *engine;
-#pragma optimize("",off)
+
 SoundScriptEventContainer::~SoundScriptEventContainer()
 {
 	m_events.clear();
@@ -270,4 +270,3 @@ void SoundScriptValue::Initialize(float min,float max)
 }
 float SoundScriptValue::GetValue() const {return umath::random(m_min,m_max);}
 bool SoundScriptValue::IsSet() const {return m_bIsSet;}
-#pragma optimize("",on)

@@ -31,7 +31,7 @@ using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 void CWorldComponent::Initialize()
 {
 	BaseWorldComponent::Initialize();
@@ -391,4 +391,3 @@ std::ostream& CWorld::print(std::ostream &os)
 	os<<"]";
 	return os;
 }
-#pragma optimize("",on)

@@ -14,7 +14,7 @@
 #include "pragma/lua/l_entity_handles.hpp"
 
 using namespace pragma;
-#pragma optimize("",off)
+
 ComponentEventId Animated2Component::EVENT_HANDLE_ANIMATION_EVENT = pragma::INVALID_COMPONENT_ID;
 ComponentEventId Animated2Component::EVENT_ON_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId Animated2Component::EVENT_ON_ANIMATION_COMPLETE = pragma::INVALID_COMPONENT_ID;
@@ -175,4 +175,3 @@ void CEAnim2OnPlayAnimation::PushArguments(lua_State *l)
 	Lua::PushInt(l,animation);
 	Lua::PushInt(l,umath::to_integral(flags));
 }
-#pragma optimize("",on)

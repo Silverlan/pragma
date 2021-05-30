@@ -12,7 +12,7 @@
 #include "pragma/model/animation/animation_player.hpp"
 #include "pragma/model/animation/animated_pose.hpp"
 #include <udm.hpp>
-#pragma optimize("",off)
+
 Activity pragma::animation::skeletal::get_activity(const Animation &anim)
 {
 #ifdef PRAGMA_ENABLE_ANIMATION_SYSTEM_2
@@ -221,4 +221,3 @@ void pragma::animation::skeletal::scale(Animation &anim,const Vector3 &scale)
 	}
 #endif
 }
-#pragma optimize("",on)

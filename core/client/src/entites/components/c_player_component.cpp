@@ -265,8 +265,23 @@ void CPlayerComponent::UpdateObserverCallback()
 		auto pose = obsC->GetEntity().GetPose();
 		if(obsCamData && obsCamData->localOrigin.has_value())
 			pose.TranslateLocal(*obsCamData->localOrigin);
-		else if(pTrComponentObs)
-			pose.SetOrigin(pTrComponentObs->GetEyePosition());
+		else
+		{
+			// Note: GetEyePosition is not always reliable, since it's derived from the Source Engine $eyeposition parameter,
+			// which is only valid for NPC models.
+			// Instead, we'll use the "eyes" attachment as reference if available.
+			auto &mdl = obsC->GetEntity().GetModel();
+			auto eyeAtt = mdl ? mdl->LookupAttachment("eyes") : -1; // TODO: Cache the lookup
+			auto eyePose = (eyeAtt != -1) ? obsC->GetEntity().GetAttachmentPose(eyeAtt) : std::optional<umath::Transform>{};
+			if(eyePose.has_value())
+			{
+				eyePose->GetOrigin().x = 0;
+				eyePose->GetOrigin().z = 0;
+				pose.TranslateLocal(eyePose->GetOrigin());
+			}
+			else if(pTrComponentObs)
+				pose.SetOrigin(pTrComponentObs->GetEyePosition());
+		}
 
 		auto &entThis = GetEntity();
 		auto charComponent = entThis.GetCharacterComponent();

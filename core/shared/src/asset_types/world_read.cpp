@@ -11,7 +11,7 @@
 
 extern DLLNETWORK Engine *engine;
 
-#pragma optimize("",off)
+
 void pragma::asset::Output::Read(VFilePtr &f)
 {
 	name = f->ReadString();
@@ -199,4 +199,3 @@ void pragma::asset::WorldData::ReadEntities(VFilePtr &f,const std::vector<Materi
 		f->Seek(offsetToEndOfEntity);
 	}
 }
-#pragma optimize("",on)

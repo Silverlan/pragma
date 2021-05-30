@@ -19,7 +19,7 @@
 
 extern DLLNETWORK Engine *engine;
 
-#pragma optimize("",off)
+
 template<class TPropertyWrapper,class TClass,typename T>
 	void prop_set_basic_type_indexed(lua_State *l,TClass &p,uint32_t idx,const T &v)
 {
@@ -1430,4 +1430,3 @@ void Lua::udm::register_library(Lua::Interface &lua)
 	if(r != Lua::StatusCode::Ok)
 		Lua::HandleLuaError(lua.GetState());*/
 }
-#pragma optimize("",on)

@@ -12,7 +12,7 @@
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_path.hpp>
 #include <udm.hpp>
-#pragma optimize("",off)
+
 util::ParallelJob<std::vector<Vector2>&> util::generate_lightmap_uvs(NetworkState &nwState,uint32_t atlastWidth,uint32_t atlasHeight,const std::vector<Vertex> &verts,const std::vector<uint32_t> &tris)
 {
 	auto lib = nwState.InitializeLibrary("pr_uvatlas");
@@ -224,4 +224,3 @@ bool util::HairFile::LoadFromAssetData(const udm::AssetData &data,std::string &o
 	udmData["barycentricCoords"].GetBlobData(m_hairData.hairPointBarycentric);
 	return true;
 }
-#pragma optimize("",on)

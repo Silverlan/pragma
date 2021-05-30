@@ -10,7 +10,7 @@
 #include "pragma/model/animation/activities.h"
 #include <udm.hpp>
 #include <mathutil/umath.h>
-#pragma optimize("",off)
+
 decltype(pragma::animation::Animation::s_activityEnumRegister) pragma::animation::Animation::s_activityEnumRegister;
 decltype(pragma::animation::Animation::s_eventEnumRegister) pragma::animation::Animation::s_eventEnumRegister;
 
@@ -1231,4 +1231,3 @@ bool pragma::animation::Animation::operator==(const Animation &other) const
 	return m_boneIds == other.m_boneIds && m_boneIdMap == other.m_boneIdMap && m_flags == other.m_flags && m_activity == other.m_activity &&
 		m_activityWeight == other.m_activityWeight && uvec::cmp(m_renderBounds.first,other.m_renderBounds.first) && uvec::cmp(m_renderBounds.second,other.m_renderBounds.second) && m_blendController == other.m_blendController;
 }
-#pragma optimize("",on)

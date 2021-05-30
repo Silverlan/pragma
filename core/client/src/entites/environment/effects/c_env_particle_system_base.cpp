@@ -44,7 +44,7 @@ struct SpriteSheetTextureAnimationFrame
 	Vector2 uvStart;
 	Vector2 uvEnd;
 };
-#pragma optimize("",off)
+
 Color CParticleSystemComponent::ParticleData::GetColor() const
 {
 	return Color{static_cast<int16_t>(color.at(0)),static_cast<int16_t>(color.at(1)),static_cast<int16_t>(color.at(2)),static_cast<int16_t>(color.at(3))};
@@ -1892,4 +1892,3 @@ void CParticleSystemComponent::OnParticleDestroyed(CParticle &particle)
 	for(auto &r : m_renderers)
 		r->OnParticleDestroyed(particle);
 }
-#pragma optimize("",on)

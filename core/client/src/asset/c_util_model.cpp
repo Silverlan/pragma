@@ -30,7 +30,7 @@
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 void pragma::asset::MapExportInfo::AddCamera(CCameraComponent &cam) {m_cameras.push_back(cam.GetHandle<CCameraComponent>());}
 void pragma::asset::MapExportInfo::AddLightSource(CLightComponent &light) {m_lightSources.push_back(light.GetHandle<CLightComponent>());}
 void pragma::asset::ModelExportInfo::SetAnimationList(const std::vector<std::string> &animations)
@@ -1920,4 +1920,3 @@ bool pragma::asset::export_texture_as_vtf(
 		deleter();
 	return result;
 }
-#pragma optimize("",on)

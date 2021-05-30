@@ -26,7 +26,7 @@
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
-#pragma optimize("",off)
+
 WIMainMenuNewGame::WIMainMenuNewGame()
 	: WIMainMenuBase()
 {}
@@ -259,4 +259,3 @@ void WIMainMenuNewGame::InitializeGameSettings()
 	//
 	InitializeOptionsList(pList);
 }
-#pragma optimize("",on)

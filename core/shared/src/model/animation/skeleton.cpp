@@ -9,7 +9,7 @@
 #include "pragma/model/animation/skeleton.h"
 #include "pragma/model/animation/frame.h"
 #include <udm.hpp>
-#pragma optimize("",off)
+
 Bone::Bone()
 	: parent(),ID(0)
 {}
@@ -319,4 +319,3 @@ void Skeleton::Merge(Skeleton &other)
 	auto &otherRootBones = other.GetRootBones();
 	mergeHierarchy(otherRootBones,nullptr);
 }
-#pragma optimize("",on)

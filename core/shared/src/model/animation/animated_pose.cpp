@@ -9,7 +9,7 @@
 #include "pragma/model/animation/animated_pose.hpp"
 #include "pragma/model/animation/skeleton.h"
 
-#pragma optimize("",off)
+
 pragma::animation::AnimatedPose::AnimatedPose(const std::vector<umath::ScaledTransform> &transforms)
 	: m_transforms{transforms}
 {}
@@ -133,4 +133,3 @@ std::ostream &operator<<(std::ostream &out,const pragma::animation::AnimatedPose
 	out<<"[Transforms:"<<o.GetTransforms().size()<<"]";
 	return out;
 }
-#pragma optimize("",on)

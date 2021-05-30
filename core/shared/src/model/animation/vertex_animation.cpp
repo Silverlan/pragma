@@ -10,7 +10,7 @@
 #include "pragma/model/modelmesh.h"
 #include "pragma/model/model.h"
 #include <udm.hpp>
-#pragma optimize("",off)
+
 MeshVertexFrame::MeshVertexFrame(const MeshVertexFrame &other)
 	: std::enable_shared_from_this<MeshVertexFrame>(),
 	m_vertices(other.m_vertices),m_normals{other.m_normals},
@@ -511,4 +511,3 @@ void VertexAnimation::Scale(const Vector3 &scale)
 	for(auto &meshAnim : m_meshAnims)
 		meshAnim->Scale(scale);
 }
-#pragma optimize("",on)

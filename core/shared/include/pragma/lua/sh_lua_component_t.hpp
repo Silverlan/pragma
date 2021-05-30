@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __SH_LUA_COMPONENT_T_HPP__
@@ -63,6 +63,18 @@ namespace Lua
 		classDef.def("BindEvent",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,uint32_t,luabind::object)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,uint32_t eventId,luabind::object methodNameOrFunction) {
 			pragma::Lua::check_component(l,hComponent);
 			Lua::Push<CallbackHandle>(l,hComponent->BindEvent(l,eventId,methodNameOrFunction));
+		}));
+		classDef.def("GetEntityComponent",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,uint32_t)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,uint32_t componentId) {
+			pragma::Lua::check_component(l,hComponent);
+			auto c = hComponent->GetEntity().FindComponent(componentId);
+			if(c.valid())
+				c->PushLuaObject(l);
+		}));
+		classDef.def("GetEntityComponent",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,const std::string&)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,const std::string &componentName) {
+			pragma::Lua::check_component(l,hComponent);
+			auto c = hComponent->GetEntity().FindComponent(componentName);
+			if(c.valid())
+				c->PushLuaObject(l);
 		}));
 		classDef.def("AddEntityComponent",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,uint32_t)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,uint32_t componentId) {
 			pragma::Lua::check_component(l,hComponent);
@@ -128,10 +140,13 @@ namespace Lua
 		classDef.add_static_constant("MEMBER_FLAG_DEFAULT_SNAPSHOT",umath::to_integral(pragma::BaseLuaBaseEntityComponent::MemberFlags::DefaultSnapshot));
 
 		classDef.def("Initialize",&LuaBaseEntityComponentWrapper::Initialize,&LuaBaseEntityComponentWrapper::default_Initialize);
+		classDef.def("OnTick",&LuaBaseEntityComponentWrapper::OnTick,&LuaBaseEntityComponentWrapper::default_OnTick);
 		classDef.def("OnRemove",&LuaBaseEntityComponentWrapper::OnRemove,&LuaBaseEntityComponentWrapper::default_OnRemove);
 		classDef.def("OnEntitySpawn",&LuaBaseEntityComponentWrapper::OnEntitySpawn,&LuaBaseEntityComponentWrapper::default_OnEntitySpawn);
 		classDef.def("OnAttachedToEntity",&LuaBaseEntityComponentWrapper::OnAttachedToEntity,&LuaBaseEntityComponentWrapper::default_OnAttachedToEntity);
 		classDef.def("OnDetachedFromEntity",&LuaBaseEntityComponentWrapper::OnDetachedToEntity,&LuaBaseEntityComponentWrapper::default_OnDetachedToEntity);
+		// classDef.def("OnEntityComponentAdded",&LuaBaseEntityComponentWrapper::OnEntityComponentAdded,&LuaBaseEntityComponentWrapper::default_OnEntityComponentAdded);
+		// classDef.def("OnEntityComponentRemoved",&LuaBaseEntityComponentWrapper::OnEntityComponentRemoved,&LuaBaseEntityComponentWrapper::default_OnEntityComponentRemoved);
 		// HandleEvent is variadic and can't be defined like this in luabind!
 		//classDef.def("HandleEvent",&LuaBaseEntityComponentWrapper::HandleEvent,&LuaBaseEntityComponentWrapper::default_HandleEvent);
 		classDef.def("Save",&LuaBaseEntityComponentWrapper::Save,&LuaBaseEntityComponentWrapper::default_Save);

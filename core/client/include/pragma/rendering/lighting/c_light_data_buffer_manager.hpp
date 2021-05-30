@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_LIGHT_DATA_BUFFER_MANAGER_HPP__
@@ -15,10 +15,20 @@
 #include <cinttypes>
 #include <memory>
 
+#define USE_LIGHT_SOURCE_UNIFORM_BUFFER 1
+
+#if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1
+#define LIGHT_SOURCE_BUFFER_TYPE prosper::DescriptorType::UniformBuffer
+#else
+#define LIGHT_SOURCE_BUFFER_TYPE prosper::DescriptorType::StorageBuffer
+#endif
+
 namespace pragma
 {
 	class CLightComponent;
-
+	
+	using LightBufferIndex = uint32_t;
+	using ShadowBufferIndex = uint32_t;
 	class BaseLightBufferManager
 	{
 	public:
@@ -29,7 +39,7 @@ namespace pragma
 
 		void Initialize();
 		virtual void Reset();
-		CLightComponent *GetLightByBufferIndex(uint32_t idx);
+		CLightComponent *GetLightByBufferIndex(LightBufferIndex idx);
 		std::size_t GetMaxCount() const;
 		prosper::IUniformResizableBuffer &GetGlobalRenderBuffer();
 	protected:
@@ -52,7 +62,8 @@ namespace pragma
 		ShadowDataBufferManager &operator=(const ShadowDataBufferManager&)=delete;
 		ShadowDataBufferManager &operator=(ShadowDataBufferManager&&)=delete;
 		static ShadowDataBufferManager &GetInstance();
-
+		
+		CLightComponent *GetLightByBufferIndex(ShadowBufferIndex idx) {return BaseLightBufferManager::GetLightByBufferIndex(idx);}
 		std::shared_ptr<prosper::IBuffer> Request(CLightComponent &lightSource,const ShadowBufferData &bufferData);
 		void Free(const std::shared_ptr<prosper::IBuffer> &renderBuffer);
 	private:
@@ -75,6 +86,7 @@ namespace pragma
 		std::shared_ptr<prosper::IBuffer> Request(CLightComponent &lightSource,const LightBufferData &bufferData);
 		void Free(const std::shared_ptr<prosper::IBuffer> &renderBuffer);
 		virtual void Reset() override;
+		uint32_t GetLightDataBufferCount() const {return m_lightDataBuffers.size();}
 	private:
 		LightDataBufferManager()=default;
 		virtual void DoInitialize() override;

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __GLOBAL_COMPONENT_HPP__
 #define __GLOBAL_COMPONENT_HPP__
@@ -19,8 +19,8 @@ namespace pragma
 		GlobalNameComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 
-		virtual void Save(DataStream &ds) override;
-		virtual void Load(DataStream &ds,uint32_t version) override;
+		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
+		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
 
 		const std::string &GetGlobalName() const;
 		void SetGlobalName(const std::string &name);

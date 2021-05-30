@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -203,8 +203,8 @@ template<class TIterator>
 void pragma::physics::WaterBuoyancySimulator::Simulate(BaseEntity &entWater,const PhysLiquid &liquid,BaseEntity &ent,Vector3 waterPlane,double waterPlaneDist,const Vector3 &waterVelocity,const PhysWaterSurfaceSimulator *surfaceSim) const
 {
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto physType = pPhysComponent.valid() ? pPhysComponent->GetPhysicsType() : PHYSICSTYPE::NONE;
-	auto *physObj = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	auto physType = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsType() : PHYSICSTYPE::NONE;
+	auto *physObj = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(physObj == nullptr)
 		return;
 	auto pGravityComponent = ent.GetComponent<pragma::GravityComponent>();
@@ -225,7 +225,7 @@ void pragma::physics::WaterBuoyancySimulator::Simulate(BaseEntity &entWater,cons
 		auto volume = bounds.x *bounds.y *bounds.z;
 
 		auto pTrComponent = ent.GetTransformComponent();
-		auto rot = pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
+		auto rot = pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity();
 		std::array<Vector3,8> verts = {
 			min,
 			{min.x,min.y,max.z},
@@ -257,7 +257,7 @@ void pragma::physics::WaterBuoyancySimulator::Simulate(BaseEntity &entWater,cons
 		// Move water plane to collision object coordinate system
 		auto waterPlaneRelObj = waterPlane;
 		auto waterPlaneDistRelObj = waterPlaneDist;
-		auto posEnt = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+		auto posEnt = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 		waterPlaneDistRelObj = uvec::dot(waterPlaneRelObj,waterPlaneRelObj *static_cast<float>(waterPlaneDistRelObj) -posEnt);
 		//uvec::rotate(&waterPlaneRelObj,uquat::get_inverse(rot)); // No rotation
 

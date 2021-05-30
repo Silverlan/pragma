@@ -2,13 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
 #include "pragma/lua/lua_entity_iterator.hpp"
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 LuaBaseEntityIterator::LuaBaseEntityIterator(const BaseEntityIterator &iterator)
 	: m_iterator(iterator)
@@ -75,6 +75,26 @@ void LuaEntityIteratorFilterName::Attach(EntityIterator &iterator)
 
 ////////////
 
+LuaEntityIteratorFilterModel::LuaEntityIteratorFilterModel(const std::string &mdlName)
+	: m_modelName{mdlName}
+{}
+void LuaEntityIteratorFilterModel::Attach(EntityIterator &iterator)
+{
+	iterator.AttachFilter<EntityIteratorFilterModel>(m_modelName);
+}
+
+////////////
+
+LuaEntityIteratorFilterUuid::LuaEntityIteratorFilterUuid(const std::string &uuid)
+	: m_uuid{uuid}
+{}
+void LuaEntityIteratorFilterUuid::Attach(EntityIterator &iterator)
+{
+	iterator.AttachFilter<EntityIteratorFilterUuid>(util::uuid_string_to_bytes(m_uuid));
+}
+
+////////////
+
 LuaEntityIteratorFilterClass::LuaEntityIteratorFilterClass(const std::string &className,bool caseSensitive,bool exactMatch)
 	: m_className(className),m_bCaseSensitive(caseSensitive),m_bExactMatch(exactMatch)
 {}
@@ -135,6 +155,9 @@ void LuaEntityIteratorFilterCone::Attach(EntityIterator &iterator)
 
 ////////////
 
+LuaEntityIteratorFilterComponent::LuaEntityIteratorFilterComponent(luabind::object)
+	: m_componentId(pragma::INVALID_COMPONENT_ID)
+{}
 LuaEntityIteratorFilterComponent::LuaEntityIteratorFilterComponent(pragma::ComponentId componentId)
 	: m_componentId(componentId)
 {}

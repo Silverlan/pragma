@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __RENDER_COMPONENT_FLAGS_HPP__
 #define __RENDER_COMPONENT_FLAGS_HPP__
@@ -17,7 +17,7 @@ namespace pragma
 		CastShadows = 1u,
 		Unlit = CastShadows<<1u
 	};
-	REGISTER_BASIC_BITWISE_OPERATORS(FRenderFlags);
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::FRenderFlags);
 
 #endif

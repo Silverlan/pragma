@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_WEAPON_COMPONENT_HPP__
@@ -12,6 +12,7 @@
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/components/base_weapon_component.hpp>
 #include <pragma/model/animation/play_animation_flags.hpp>
+#include <optional>
 
 namespace nwm
 {
@@ -25,6 +26,9 @@ namespace pragma
 		public CBaseNetComponent
 	{
 	public:
+		static ComponentEventId EVENT_ATTACH_TO_OWNER;
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+
 		static unsigned int GetWeaponCount();
 		static const std::vector<CWeaponComponent*> &GetAll();
 
@@ -46,21 +50,27 @@ namespace pragma
 		bool IsInFirstPersonMode() const;
 		void UpdateOwnerAttachment();
 		void SetViewModel(const std::string &mdl);
-		const std::string &GetViewModelName() const;
+		const std::optional<std::string> &GetViewModelName() const;
 		void SetHideWorldModelInFirstPerson(bool b);
 		bool GetHideWorldModelInFirstPerson() const;
 		void SetViewModelOffset(const Vector3 &offset);
 		const Vector3 &GetViewModelOffset() const;
-		void SetViewFOV(float fov);
-		float GetViewFOV() const;
+		void SetViewFOV(umath::Degree fov);
+		umath::Degree GetViewFOV() const;
 		virtual bool ShouldTransmitNetData() const override {return true;}
+
+		void SetViewModelComponent(pragma::ComponentId component) {m_viewModelComponent = component;}
+		pragma::ComponentId GetViewModelComponent() const {return m_viewModelComponent;}
+		void UpdateDeployState();
 	protected:
 		// Either the view-model or the character that owns the weapon
 		EntityHandle m_hTarget;
 		bool m_bHideWorldModelInFirstPerson = false;
-		std::string m_viewModel = "weapons/v_soldier.wmd";
+		std::optional<std::string> m_viewModel {};
 		Vector3 m_viewModelOffset;
-		float m_viewFov = std::numeric_limits<float>::quiet_NaN();
+		pragma::ComponentId m_viewModelComponent = pragma::INVALID_COMPONENT_ID;
+
+		std::optional<umath::Degree> m_viewFov {};
 		CallbackHandle m_cbOnOwnerObserverModeChanged = {};
 		virtual Activity TranslateViewActivity(Activity act);
 		virtual void OnFireBullets(const BulletInfo &bulletInfo,Vector3 &bulletOrigin,Vector3 &bulletDir,Vector3 *effectsOrigin=nullptr) override;
@@ -70,6 +80,14 @@ namespace pragma
 		void ClearOwnerCallbacks();
 	private:
 		static std::vector<CWeaponComponent*> s_weapons;
+	};
+	struct DLLCLIENT CEAttachToOwner
+		: public ComponentEvent
+	{
+		CEAttachToOwner(BaseEntity &owner,CViewModelComponent *optViewmodel);
+		virtual void PushArguments(lua_State *l) override;
+		BaseEntity &owner;
+		CViewModelComponent *viewModel = nullptr;
 	};
 };
 

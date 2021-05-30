@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -13,7 +13,7 @@
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_path.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 LFile::LFile()
 {}
@@ -297,6 +297,17 @@ void Lua_LFile_GetPath(lua_State *l,LFile &f)
 
 ////////////////////////////////////
 
+std::string Lua::file::to_relative_path(lua_State *l,const std::string &path)
+{
+	auto opath = util::Path::CreateFile(path);
+	opath.Canonicalize();
+	if(ustring::compare(opath.GetFront(),"addons",false))
+	{
+		opath.PopFront();
+		opath.PopFront();
+	}
+	return opath.GetString();
+}
 bool Lua::file::validate_write_operation(lua_State *l,std::string &path,std::string &outRootPath)
 {
 	if(path.length() >= 7 && ustring::compare(path.c_str(),"addons",false,6) && (path.at(6) == '/' || path.at(6) == '\\'))
@@ -321,6 +332,11 @@ bool Lua::file::validate_write_operation(lua_State *l,std::string &path,std::str
 	auto fname = FileManager::GetCanonicalizedPath(Lua::get_current_file(l));
 	if(fname.length() < 8 || ustring::compare(fname.c_str(),"addons\\",false,7) == false)
 	{
+		if(Lua::get_extended_lua_modules_enabled())
+		{
+			outRootPath = "";
+			return true;
+		}
 		Con::cwar<<"WARNING: File write-operations can only be performed by Lua-scripts inside an addon!"<<Con::endl;
 		return false;
 	}
@@ -381,23 +397,26 @@ bool Lua::file::CreatePath(lua_State *l,std::string path)
 	return FileManager::CreatePath(path.c_str());
 }
 
-bool Lua::file::Delete(lua_State *l,std::string path)
+bool Lua::file::Delete(lua_State *l,std::string ppath)
 {
+	auto path = ppath;
 	if(validate_write_operation(l,path) == false)
 		return false;
+	if(Lua::get_extended_lua_modules_enabled() && FileManager::Exists(path) == false && FileManager::Exists(ppath))
+		return FileManager::RemoveFile(ppath.c_str());
 	return FileManager::RemoveFile(path.c_str());
 }
 
-std::shared_ptr<LFile> Lua::file::open_external_asset_file(lua_State *l,const std::string &path)
+std::shared_ptr<LFile> Lua::file::open_external_asset_file(lua_State *l,const std::string &path,const std::optional<std::string> &game)
 {
 	auto dllHandle = util::initialize_external_archive_manager(engine->GetNetworkState(l));
 	if(dllHandle == nullptr)
 		return nullptr;
-	auto *fOpenFile = dllHandle->FindSymbolAddress<void(*)(const std::string&,VFilePtr&)>("open_archive_file");
+	auto *fOpenFile = dllHandle->FindSymbolAddress<void(*)(const std::string&,VFilePtr&,const std::optional<std::string>&)>("open_archive_file");
 	if(fOpenFile == nullptr)
 		return nullptr;
 	VFilePtr f = nullptr;
-	fOpenFile(path,f);
+	fOpenFile(path,f,game);
 	if(f == nullptr)
 		return nullptr;
 	auto lf = std::make_shared<LFile>();
@@ -500,12 +519,6 @@ luabind::object Lua::file::GetFileExtension(lua_State *l,const std::string &path
 	if(r == false)
 		return {};
 	return luabind::object{l,ext};
-}
-std::string Lua::file::RemoveFileExtension(const std::string &path)
-{
-	auto fpath = path;
-	ufile::remove_extension_from_filename(fpath);
-	return fpath;
 }
 bool Lua::file::ComparePath(const std::string &path0,const std::string &path1)
 {

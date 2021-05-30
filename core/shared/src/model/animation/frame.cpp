@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -10,7 +10,7 @@
 #include "pragma/model/modelmesh.h"
 #include "pragma/model/model.h"
 
-static unsigned int get_bone_index(const std::vector<unsigned int> *optBoneList,unsigned int id)
+static uint16_t get_bone_index(const std::vector<uint16_t> *optBoneList,unsigned int id)
 {
 	if(optBoneList == nullptr)
 		return id;
@@ -22,7 +22,7 @@ static unsigned int get_bone_index(const std::vector<unsigned int> *optBoneList,
 	return 0;
 }
 
-static void get_global_bone_transforms(const Animation *optAnim,const Skeleton &skeleton,Frame &frame)
+static void get_global_bone_transforms(const pragma::animation::Animation *optAnim,const Skeleton &skeleton,Frame &frame)
 {
 	auto *boneList = optAnim ? &optAnim->GetBoneList() : nullptr;
 	std::function<void(Frame&,const std::unordered_map<uint32_t,std::shared_ptr<Bone>>&,const Vector3&,const Quat&)> fGetGlobalBoneTransforms;
@@ -46,10 +46,10 @@ static void get_global_bone_transforms(const Animation *optAnim,const Skeleton &
 	fGetGlobalBoneTransforms(frame,skeleton.GetRootBones(),{},uquat::identity());
 }
 
-static void get_local_bone_transforms(const Animation *optAnim,const Skeleton &skeleton,Frame &frame)
+static void get_local_bone_transforms(const pragma::animation::Animation *optAnim,const Skeleton &skeleton,Frame &frame)
 {
-	std::function<void(const Animation*,Frame&,const std::unordered_map<uint32_t,std::shared_ptr<Bone>>&)> fGetLocalBoneTransforms;
-	fGetLocalBoneTransforms = [&fGetLocalBoneTransforms](const Animation *optAnim,Frame &frame,const std::unordered_map<uint32_t,std::shared_ptr<Bone>> &bones) {
+	std::function<void(const pragma::animation::Animation*,Frame&,const std::unordered_map<uint32_t,std::shared_ptr<Bone>>&)> fGetLocalBoneTransforms;
+	fGetLocalBoneTransforms = [&fGetLocalBoneTransforms](const pragma::animation::Animation *optAnim,Frame &frame,const std::unordered_map<uint32_t,std::shared_ptr<Bone>> &bones) {
 		auto *boneList = optAnim ? &optAnim->GetBoneList() : nullptr;
 		for(auto it=bones.begin();it!=bones.end();++it)
 		{
@@ -122,15 +122,17 @@ Frame::Frame(const Frame &other)
 {
 	m_bones = other.m_bones;
 	m_scales = other.m_scales;
+	m_flexFrameData = other.m_flexFrameData;
 	if(other.m_move != nullptr)
 		m_move = std::make_unique<Vector2>(*other.m_move);
+	static_assert(sizeof(Frame) == 120,"Update this function when making changes to this class!");
 }
 
 
 const FlexFrameData &Frame::GetFlexFrameData() const {return const_cast<Frame*>(this)->GetFlexFrameData();}
 FlexFrameData &Frame::GetFlexFrameData() {return m_flexFrameData;}
 
-std::vector<uint32_t> Frame::GetLocalRootBoneIds(const Animation &anim,const Skeleton &skeleton) const
+std::vector<uint32_t> Frame::GetLocalRootBoneIds(const pragma::animation::Animation &anim,const Skeleton &skeleton) const
 {
 	auto &boneIds = anim.GetBoneList();
 	auto &rootBones = skeleton.GetRootBones();
@@ -175,13 +177,13 @@ void Frame::Translate(const Skeleton &skeleton,const Vector3 &t)
 	}
 }
 
-void Frame::Rotate(const Animation &anim,const Skeleton &skeleton,const Quat &rot)
+void Frame::Rotate(const pragma::animation::Animation &anim,const Skeleton &skeleton,const Quat &rot)
 {
 	auto localRootBoneIds = GetLocalRootBoneIds(anim,skeleton);
 	for(auto id : localRootBoneIds)
 		m_bones.at(id).RotateGlobal(rot);
 }
-void Frame::Translate(const Animation &anim,const Skeleton &skeleton,const Vector3 &t)
+void Frame::Translate(const pragma::animation::Animation &anim,const Skeleton &skeleton,const Vector3 &t)
 {
 	auto localRootBoneIds = GetLocalRootBoneIds(anim,skeleton);
 	for(auto id : localRootBoneIds)
@@ -191,6 +193,24 @@ void Frame::Scale(const Vector3 &scale)
 {
 	for(auto &t : m_bones)
 		t.SetOrigin(t.GetOrigin() *scale);
+}
+
+bool Frame::operator==(const Frame &other) const
+{
+	static_assert(sizeof(Frame) == 120,"Update this function when making changes to this class!");
+	if(!(m_bones.size() == other.m_bones.size() && m_scales.size() == other.m_scales.size() && m_move == other.m_move && (!m_move || *m_move == *other.m_move) && m_flexFrameData == other.m_flexFrameData))
+		return false;
+	for(auto i=decltype(m_bones.size()){0u};i<m_bones.size();++i)
+	{
+		if(uvec::cmp(m_bones[i].GetOrigin(),other.m_bones[i].GetOrigin()) == false || uquat::cmp(m_bones[i].GetRotation(),other.m_bones[i].GetRotation()) == false)
+			return false;
+	}
+	for(auto i=decltype(m_scales.size()){0u};i<m_scales.size();++i)
+	{
+		if(uvec::cmp(m_scales[i],other.m_scales[i]) == false)
+			return false;
+	}
+	return true;
 }
 
 const std::vector<umath::Transform> &Frame::GetBoneTransforms() const {return const_cast<Frame*>(this)->GetBoneTransforms();}
@@ -212,6 +232,8 @@ void Frame::SetBonePose(uint32_t boneId,const umath::ScaledTransform &pose)
 	if(boneId >= m_bones.size())
 		return;
 	m_bones.at(boneId) = pose;
+	if(boneId >= m_scales.size() && pose.GetScale() != Vector3{1.f,1.f,1.f})
+		UpdateScales();
 	if(boneId < m_scales.size())
 		m_scales.at(boneId) = pose.GetScale();
 }
@@ -227,12 +249,12 @@ void Frame::SetBonePose(uint32_t boneId,const umath::Transform &pose)
 	All animations are usually localized by the model compiler, except for the bind/reference pose, which is created on the fly when loading the model.
 	This is the only case where ::Localize is called here.
 */
-void Frame::Localize(const Animation &anim,const Skeleton &skeleton)
+void Frame::Localize(const pragma::animation::Animation &anim,const Skeleton &skeleton)
 {
 	get_local_bone_transforms(&anim,skeleton,*this);
 }
 
-void Frame::Globalize(const Animation &anim,const Skeleton &skeleton)
+void Frame::Globalize(const pragma::animation::Animation &anim,const Skeleton &skeleton)
 {
 	get_global_bone_transforms(&anim,skeleton,*this);
 }
@@ -324,7 +346,7 @@ bool Frame::GetBoneMatrix(unsigned int boneID,Mat4 *mat)
 	return true;
 }
 bool Frame::HasScaleTransforms() const {return !m_scales.empty();}
-std::pair<Vector3,Vector3> Frame::CalcRenderBounds(const Animation &anim,const Model &mdl) const
+std::pair<Vector3,Vector3> Frame::CalcRenderBounds(const pragma::animation::Animation &anim,const Model &mdl) const
 {
 	auto *t = const_cast<Frame*>(this);
 	auto transforms = m_bones;

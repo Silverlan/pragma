@@ -2,16 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
 #include "pragma/asset_types/world.hpp"
 #include "pragma/level/level_info.hpp"
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
-
+#pragma optimize("",off)
 void pragma::asset::Output::Read(VFilePtr &f)
 {
 	name = f->ReadString();
@@ -24,6 +24,7 @@ void pragma::asset::Output::Read(VFilePtr &f)
 
 /////////
 
+#include <udm.hpp>
 bool pragma::asset::WorldData::Read(VFilePtr &f,EntityData::Flags entMask,std::string *errMsg)
 {
 	auto header = f->Read<std::array<char,3>>();
@@ -55,7 +56,7 @@ bool pragma::asset::WorldData::Read(VFilePtr &f,EntityData::Flags entMask,std::s
 
 	auto materials = ReadMaterials(f);
 	if(umath::is_flag_set(headerData.flags,DataFlags::HasBSPTree))
-		ReadBSPTree(f);
+		ReadBSPTree(f,version);
 	if(umath::is_flag_set(headerData.flags,DataFlags::HasLightmapAtlas))
 	{
 		m_lightMapIntensity = f->Read<float>();
@@ -78,11 +79,12 @@ std::vector<MaterialHandle> pragma::asset::WorldData::ReadMaterials(VFilePtr &f)
 	}
 	return materials;
 }
-void pragma::asset::WorldData::ReadBSPTree(VFilePtr &f)
+void pragma::asset::WorldData::ReadBSPTree(VFilePtr &f,uint32_t version)
 {
 	m_bspTree = util::BSPTree::Create();
+	auto &nodes = m_bspTree->GetNodes();
 	std::function<void(util::BSPTree::Node&)> fReadNode = nullptr;
-	fReadNode = [this,&fReadNode,&f](util::BSPTree::Node &node) {
+	fReadNode = [this,&fReadNode,&nodes,&f](util::BSPTree::Node &node) {
 		node.leaf = f->Read<bool>();
 		node.min = f->Read<Vector3>();
 		node.max = f->Read<Vector3>();
@@ -98,11 +100,16 @@ void pragma::asset::WorldData::ReadBSPTree(VFilePtr &f)
 		}
 		auto normal = f->Read<Vector3>();
 		auto d = f->Read<float>();
-		node.plane = Plane{normal,static_cast<double>(d)};
-		node.children.at(0) = m_bspTree->CreateNode();
-		node.children.at(1) = m_bspTree->CreateNode();
-		fReadNode(*node.children.at(0));
-		fReadNode(*node.children.at(1));
+		node.plane = umath::Plane{normal,static_cast<double>(d)};
+		
+		auto idx = node.index;
+		m_bspTree->GetNodes().reserve(m_bspTree->GetNodes().size() +2); // Note: This may invalidate 'node'!
+		auto idx0 = m_bspTree->CreateNode().index;
+		auto idx1 = m_bspTree->CreateNode().index;
+		nodes[idx].children.at(0) = idx0;
+		nodes[idx].children.at(1) = idx1;
+		fReadNode(nodes[idx0]);
+		fReadNode(nodes[idx1]);
 	};
 	fReadNode(m_bspTree->GetRootNode());
 
@@ -113,6 +120,20 @@ void pragma::asset::WorldData::ReadBSPTree(VFilePtr &f)
 	compressedClusterData.resize(numCompressedClusters);
 	f->Read(compressedClusterData.data(),compressedClusterData.size() *sizeof(compressedClusterData.front()));
 	m_bspTree->SetClusterCount(numClusters);
+
+	if(version <= 11)
+		return;
+	auto hasClusterMeshList = f->Read<bool>();
+	if(hasClusterMeshList == false)
+		return;
+	m_meshesPerCluster.resize(numClusters);
+	for(auto i=decltype(numClusters){0u};i<numClusters;++i)
+	{
+		auto &meshIndices = m_meshesPerCluster.at(i);
+		auto n = f->Read<uint32_t>();
+		meshIndices.resize(n);
+		f->Read(meshIndices.data(),meshIndices.size() *sizeof(meshIndices.front()));
+	}
 }
 void pragma::asset::WorldData::ReadEntities(VFilePtr &f,const std::vector<MaterialHandle> &materials,EntityData::Flags entMask)
 {
@@ -178,4 +199,4 @@ void pragma::asset::WorldData::ReadEntities(VFilePtr &f,const std::vector<Materi
 		f->Seek(offsetToEndOfEntity);
 	}
 }
-
+#pragma optimize("",on)

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -15,7 +15,7 @@
 
 using namespace pragma;
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 decltype(ShaderWater::DESCRIPTOR_SET_MATERIAL) ShaderWater::DESCRIPTOR_SET_MATERIAL = {
 	{
@@ -54,7 +54,7 @@ decltype(ShaderWater::DESCRIPTOR_SET_WATER) ShaderWater::DESCRIPTOR_SET_WATER = 
 	}
 };
 ShaderWater::ShaderWater(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderTextured3DBase(context,identifier,"world/vs_water","world/fs_water")
+	: ShaderGameWorldLightingPass(context,identifier,"world/vs_water","world/fs_water")
 {
 	// SetBaseShader<ShaderTextured3DBase>();
 }
@@ -82,12 +82,12 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderWater::InitializeMaterialDes
 	}
 	return descSetGroup;
 }
-bool ShaderWater::BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,Pipeline pipelineIdx,RecordFlags recordFlags)
+bool ShaderWater::BeginDraw(const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,RecordFlags recordFlags)
 {
-	if(ShaderTextured3DBase::BeginDraw(cmdBuffer,clipPlane,drawOrigin,pipelineIdx,recordFlags) == false)
+	if(ShaderGameWorldLightingPass::BeginDraw(cmdBuffer,clipPlane,drawOrigin,recordFlags) == false)
 		return false;
 	decltype(PushConstants::enableReflection) enableReflection = {m_bReflectionEnabled == true ? 1u : 0u};
-	return RecordPushConstants(enableReflection,sizeof(ShaderTextured3DBase::PushConstants) +offsetof(PushConstants,enableReflection));
+	return RecordPushConstants(enableReflection,sizeof(ShaderGameWorldLightingPass::PushConstants) +offsetof(PushConstants,enableReflection));
 }
 void ShaderWater::SetReflectionEnabled(bool b) {m_bReflectionEnabled = b;}
 bool ShaderWater::UpdateBindFogDensity()
@@ -105,7 +105,7 @@ bool ShaderWater::UpdateBindFogDensity()
 	auto &pos = cam->GetEntity().GetPosition();
 	if(whWaterComponent->IsPointBelowWaterPlane(pos) == true)
 		fogIntensity = 0.f;
-	return RecordPushConstants(fogIntensity,sizeof(ShaderTextured3DBase::PushConstants) +offsetof(PushConstants,waterFogIntensity));
+	return RecordPushConstants(fogIntensity,sizeof(ShaderGameWorldLightingPass::PushConstants) +offsetof(PushConstants,waterFogIntensity));
 }
 
 void ShaderWater::EndDraw()
@@ -114,9 +114,9 @@ void ShaderWater::EndDraw()
 	m_boundScene = {};
 }
 
-bool ShaderWater::BindSceneCamera(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,bool bView)
+bool ShaderWater::BindSceneCamera(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,bool bView)
 {
-	auto r = ShaderTextured3DBase::BindSceneCamera(scene,renderer,bView);
+	auto r = ShaderGameWorldLightingPass::BindSceneCamera(scene,renderer,bView);
 	if(r == false)
 		return false;
 	auto &cam = scene.GetActiveCamera();
@@ -125,7 +125,7 @@ bool ShaderWater::BindSceneCamera(pragma::CSceneComponent &scene,const rendering
 	auto m = cam->GetProjectionMatrix() *cam->GetViewMatrix();
 	m_boundScene = scene.GetHandle<pragma::CSceneComponent>();
 	return UpdateBindFogDensity() &&
-		RecordPushConstants(m,sizeof(ShaderTextured3DBase::PushConstants) +offsetof(PushConstants,reflectionVp));
+		RecordPushConstants(m,sizeof(ShaderGameWorldLightingPass::PushConstants) +offsetof(PushConstants,reflectionVp));
 }
 
 bool ShaderWater::BindEntity(CBaseEntity &ent)
@@ -133,7 +133,7 @@ bool ShaderWater::BindEntity(CBaseEntity &ent)
 	auto whWaterComponent = ent.GetComponent<CWaterComponent>();
 	if(whWaterComponent.expired())
 		return false;
-	if(ShaderTextured3DBase::BindEntity(ent) == false)
+	if(ShaderGameWorldLightingPass::BindEntity(ent) == false)
 		return false;
 	auto *descSetEffect = whWaterComponent->GetEffectDescriptorSet();
 	if(descSetEffect == nullptr || whWaterComponent->IsWaterSceneValid() == false)
@@ -154,20 +154,20 @@ bool ShaderWater::BindEntity(CBaseEntity &ent)
 
 void ShaderWater::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	ShaderTextured3DBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+	ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::None);
 	pipelineInfo.ToggleDepthWrites(true); // Water is not part of render pre-pass, but we need the depth for post-processing
 }
 
 void ShaderWater::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	ShaderTextured3DBase::InitializeGfxPipelineDescriptorSets(pipelineInfo,pipelineIdx);
+	ShaderGameWorldLightingPass::InitializeGfxPipelineDescriptorSets(pipelineInfo,pipelineIdx);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_WATER);
 }
 
 void ShaderWater::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderTextured3DBase::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderGameWorldLightingPass::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
 
 prosper::DescriptorSetInfo &ShaderWater::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}

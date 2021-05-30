@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __BASE_MODEL_COMPONENT_HPP__
 #define __BASE_MODEL_COMPONENT_HPP__
@@ -72,6 +72,9 @@ namespace pragma
 		void SetBodyGroup(const std::string &name,UInt32 id);
 		virtual bool SetBodyGroup(UInt32 groupId,UInt32 id);
 
+		virtual void SetMaxDrawDistance(float maxDist);
+		float GetMaxDrawDistance() const;
+
 		bool GetAttachment(unsigned int attID,Vector3 *pos,EulerAngles *angles) const;
 		bool GetAttachment(const std::string &name,Vector3 *pos,EulerAngles *angles) const;
 		bool GetAttachment(unsigned int attID,Vector3 *pos,Quat *rot) const;
@@ -80,7 +83,7 @@ namespace pragma
 		uint32_t GetFlexControllerCount() const;
 		bool LookupFlexController(const std::string &name,uint32_t &flexId) const;
 
-		virtual void Save(DataStream &ds) override;
+		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
 		using BaseEntityComponent::Load;
 
 		uint32_t GetHitboxCount() const;
@@ -88,14 +91,16 @@ namespace pragma
 	protected:
 		BaseModelComponent(BaseEntity &ent);
 		virtual void OnModelChanged(const std::shared_ptr<Model> &model);
-		virtual void Load(DataStream &ds,uint32_t version) override;
+		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
 		std::shared_ptr<Model> m_model = nullptr;
 
 		std::vector<unsigned int> m_bodyGroups;
 		std::unique_ptr<std::string> m_modelName = nullptr;
 		std::shared_ptr<util::UInt32Property> m_skin = nullptr;
 		pragma::NetEventId m_netEvSetBodyGroup = pragma::INVALID_NET_EVENT;
+		pragma::NetEventId m_netEvMaxDrawDist = pragma::INVALID_NET_EVENT;
 		CallbackHandle m_onModelMaterialsLoaded = {};
+		float m_maxDrawDistance = 0.f;
 
 		std::string m_kvModel = "";
 		uint32_t m_kvSkin = std::numeric_limits<uint32_t>::max();

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __CLIENTSTATE_H__
@@ -64,7 +64,7 @@ struct ALAudio;
 class WIMainMenu;
 class WILuaHandleWrapper;
 enum class ALSoundType : Int32;
-namespace al {class SoundBuffer;class Decoder;};
+namespace al {class ISoundBuffer;class Decoder;};
 namespace pragma::networking
 {
 	class IClient;
@@ -165,17 +165,17 @@ public:
 	// Sound
 	virtual void StopSounds() override;
 	virtual void StopSound(std::shared_ptr<ALSound> pSnd) override;
-	bool PrecacheSound(std::string snd,std::pair<al::SoundBuffer*,al::SoundBuffer*> *buffers,ALChannel mode=ALChannel::Auto,bool bLoadInstantly=false);
+	bool PrecacheSound(std::string snd,std::pair<al::ISoundBuffer*,al::ISoundBuffer*> *buffers,ALChannel mode=ALChannel::Auto,bool bLoadInstantly=false);
 	virtual bool PrecacheSound(std::string snd,ALChannel mode=ALChannel::Auto) override;
 	virtual bool LoadSoundScripts(const char *file,bool bPrecache=false) override;
 	virtual std::shared_ptr<ALSound> CreateSound(std::string snd,ALSoundType type,ALCreateFlags flags=ALCreateFlags::None) override;
-	std::shared_ptr<ALSound> CreateSound(al::SoundBuffer &buffer,ALSoundType type);
+	std::shared_ptr<ALSound> CreateSound(al::ISoundBuffer &buffer,ALSoundType type);
 	std::shared_ptr<ALSound> CreateSound(al::Decoder &decoder,ALSoundType type);
 	void IndexSound(std::shared_ptr<ALSound> snd,unsigned int idx);
 	std::shared_ptr<ALSound> PlaySound(std::string snd,ALSoundType type,ALCreateFlags flags=ALCreateFlags::None);
-	std::shared_ptr<ALSound> PlaySound(al::SoundBuffer &buffer,ALSoundType type);
+	std::shared_ptr<ALSound> PlaySound(al::ISoundBuffer &buffer,ALSoundType type);
 	std::shared_ptr<ALSound> PlaySound(al::Decoder &buffer,ALSoundType type);
-	std::shared_ptr<ALSound> PlayWorldSound(al::SoundBuffer &buffer,ALSoundType type,const Vector3 &pos);
+	std::shared_ptr<ALSound> PlayWorldSound(al::ISoundBuffer &buffer,ALSoundType type,const Vector3 &pos);
 	std::shared_ptr<ALSound> PlayWorldSound(al::Decoder &buffer,ALSoundType type,const Vector3 &pos);
 	std::shared_ptr<ALSound> PlayWorldSound(std::string snd,ALSoundType type,const Vector3 &pos);
 	virtual std::shared_ptr<ALSound> GetSoundByIndex(unsigned int idx) override;

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_ENV_SOUND_DSP_H__
@@ -23,6 +23,7 @@ namespace pragma
 	public:
 		virtual ~CBaseSoundDspComponent() override;
 		virtual void Initialize() override;
+		virtual void OnTick(double dt) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
 		virtual Bool ReceiveNetEvent(UInt32 eventId,NetPacket &p) override;
@@ -35,7 +36,7 @@ namespace pragma
 		bool m_bApplyGlobal = false;
 		bool m_bAllWorldSounds = false;
 		bool m_bAllSounds = false;
-		std::shared_ptr<al::Effect> m_dsp = nullptr;
+		std::shared_ptr<al::IEffect> m_dsp = nullptr;
 		std::vector<std::pair<al::SoundSourceHandle,uint32_t>> m_affectedSounds;
 		ALSoundType m_types = ALSoundType::All &~ALSoundType::GUI;
 

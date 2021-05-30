@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -175,8 +175,8 @@ static int64_t ffmpeg_seek(void *userData,int64_t offset,int whence)
 }
 */
 #ifdef WEAVE_MP3_SUPPORT_ENABLED
-extern DLLCENGINE LPALBUFFERSAMPLESSOFT alBufferSamplesSOFT;
-extern DLLCENGINE LPALISBUFFERFORMATSUPPORTEDSOFT alIsBufferFormatSupportedSOFT;
+extern DLLCLIENT LPALBUFFERSAMPLESSOFT alBufferSamplesSOFT;
+extern DLLCLIENT LPALISBUFFERFORMATSUPPORTEDSOFT alIsBufferFormatSupportedSOFT;
 bool openal::load_ffmpeg(std::string &path,VFilePtr f,ALChannel mode,ALAudio *audio)
 {
 	int err = alGetError();

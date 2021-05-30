@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -13,7 +13,7 @@
 #include <pragma/math/intersection.h>
 
 const double EPSILON = 4.9406564584125e-2;
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 Side::Side()
 {
@@ -79,7 +79,7 @@ void Side::SetDisplacementAlpha(unsigned char numAlpha)
 
 bool Side::IsPointInside(Vector3 &p,double epsilon) const
 {
-	if(!Intersection::VectorInBounds(p,m_min,m_max,static_cast<float>(EPSILON)))
+	if(!umath::intersection::vector_in_bounds(p,m_min,m_max,static_cast<float>(EPSILON)))
 		return false;
 	auto numVerts = m_vertices.size();
 	if(numVerts < 3)

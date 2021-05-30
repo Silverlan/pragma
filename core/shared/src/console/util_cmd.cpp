@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -24,7 +24,7 @@ std::vector<std::pair<BaseEntity*,float>> util::cmd::get_sorted_entities(Game &g
 			continue;
 		auto d = std::numeric_limits<float>::max();
 		auto trComponent = ent->GetTransformComponent();
-		if(trComponent.valid() && charComponent.valid())
+		if(trComponent && charComponent.valid())
 			d = uvec::distance(charComponent->GetEyePosition(),ent->GetCenter());
 		sortedEntities.push_back(std::make_pair(ent,d));
 	}

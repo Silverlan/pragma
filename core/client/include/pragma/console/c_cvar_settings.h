@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_CVAR_SETTINGS_H__
@@ -14,6 +14,7 @@
 REGISTER_CONVAR_CL(cl_language,"en",ConVarFlags::Archive,"Game language.");
 
 REGISTER_CONVAR_CL(cl_render_lod_bias,"0",ConVarFlags::Archive,"Model LOD-bias. Higher values means higher LOD-Models will be used at lower distance (=Lower quality).");
+REGISTER_CONVAR_CL(cl_render_shadow_lod_bias,"10",ConVarFlags::Archive,"Model LOD-bias for shadows. Higher values means higher LOD-Models will be used at lower distance (=Lower quality). This value is added on top of cl_render_lod_bias!");
 REGISTER_CONVAR_CL(cl_render_vsync_enabled,"1",ConVarFlags::Archive,"Turns vertical sync on or off.");
 REGISTER_CONVAR_CL(cl_window_resolution,"1280x1024",ConVarFlags::Archive,"Changes the window resolution.");
 REGISTER_CONVAR_CL(cl_render_resolution,"",ConVarFlags::Archive,"Changes the internal rendering resolution. If left empty, the resolution will be the same as the window resolution!");
@@ -21,26 +22,27 @@ REGISTER_CONVAR_CL(cl_render_monitor,"0",ConVarFlags::Archive,"Which monitor to 
 REGISTER_CONVAR_CL(cl_gpu_device,"",ConVarFlags::Archive,"The unique identifier for the GPU vendor and device to use. If empty (or invalid), the first detected device will be used. Usage: <vendorId,deviceId>");
 REGISTER_CONVAR_CL(cl_render_window_mode,"0",ConVarFlags::Archive,"0 = Fullscreen, 1 = Windowed, 2 = Windowed no-border.");
 REGISTER_CONVAR_CL(cl_render_texture_quality,"4",ConVarFlags::Archive,"0 = Minimal, 1 = Low, 2 = Medium, 3 = High, 4 = Very High.");
-REGISTER_CONVAR_CL(cl_render_anti_aliasing,"0",ConVarFlags::Archive,"0 = No Anti Aliasing, 1 = MSAA, 2 = FXAA.");
+REGISTER_CONVAR_CL(cl_render_anti_aliasing,"2",ConVarFlags::Archive,"0 = No Anti Aliasing, 1 = MSAA, 2 = FXAA.");
 REGISTER_CONVAR_CL(cl_render_msaa_samples,"1",ConVarFlags::Archive,"1 = MSAAx2, 2 = MSAAx4, 3 = MSAAx8, etc.");
 REGISTER_CONVAR_CL(cl_render_fxaa_sub_pixel_aliasing_removal_amount,"0.75",ConVarFlags::Archive,"The amount of sub-pixel aliasing removal.");
 REGISTER_CONVAR_CL(cl_render_fxaa_edge_threshold,"0.166",ConVarFlags::Archive,"The minimum amount of local contrast required to apply algorithm.");
 REGISTER_CONVAR_CL(cl_render_fxaa_min_edge_threshold,"0.0833",ConVarFlags::Archive,"Trims the algorithm from processing darks.");
 
-REGISTER_CONVAR_CL(cl_render_ssao,"1",ConVarFlags::Archive,"1 = Screen space ambient occlusion enabled, 0 = disabled.");
+REGISTER_CONVAR_CL(cl_render_ssao,"0",ConVarFlags::Archive,"1 = Screen space ambient occlusion enabled, 0 = disabled.");
 REGISTER_CONVAR_CL(cl_render_fov,"90",ConVarFlags::Archive,"Specifies the horizontal field of view.");
 REGISTER_CONVAR_CL(cl_render_brightness,"1",ConVarFlags::Archive,"Scene brightness.");
 REGISTER_CONVAR_CL(cl_render_contrast,"1",ConVarFlags::Archive,"Scene contrast.");
 REGISTER_CONVAR_CL(cl_render_motion_blur,"0",ConVarFlags::Archive,"Amount of motion blur. 0 = disabled.");
-REGISTER_CONVAR_CL(cl_render_texture_filtering,"3",ConVarFlags::Archive,"0 = Nearest Neighbour, 1 = Bilinear Filtering, 2 = Trilinear Filtering, 3 = Antisotropic Filtering x2, 4 = Antisotropic Filtering x4, 5 = Antisotropic Filtering x8, 6 = Antisotropic Filtering x16");
+REGISTER_CONVAR_CL(cl_render_texture_filtering,"6",ConVarFlags::Archive,"0 = Nearest Neighbour, 1 = Bilinear Filtering, 2 = Trilinear Filtering, 3 = Antisotropic Filtering x2, 4 = Antisotropic Filtering x4, 5 = Antisotropic Filtering x8, 6 = Antisotropic Filtering x16");
 REGISTER_CONVAR_CL(cl_render_occlusion_culling,"4",ConVarFlags::Archive,"0 = Off, 1 = Brute-Force, 2 = CHC++, 3 = Octree, 4 = BSP +Octree");
+REGISTER_CONVAR_CL(cl_render_frustum_culling_enabled,"1",ConVarFlags::None,"Enables or disables frustum culling.");
 REGISTER_CONVAR_CL(cl_render_depth_of_field,"0",ConVarFlags::Archive,"Depth of field scale.");
 REGISTER_CONVAR_CL(cl_render_reflection_quality,"2",ConVarFlags::Archive,"Changes the quality of reflections. 0 = Only static reflections, 1 = Dynamic reflections, 2 = Reflections with particle effects.");
 REGISTER_CONVAR_CL(cl_render_tone_mapping,"-1",ConVarFlags::Archive,"Changes the tone-mapping algorithm to use. -1 = Use the default, 0 = Gamma correction only, 1 = Reinhard, 2 = Hejil-Richard, 3 = Uncharted, 4 = Aces, 5 = Gran Turismo");
 
 REGISTER_CONVAR_CL(cl_render_preset,"-1",ConVarFlags::Archive,"Selected preset in display options.");
 REGISTER_CONVAR_CL(cl_render_shadow_resolution,"1024",ConVarFlags::Archive,"Shadowmap Resolution. Higher resolution equals higher quality shadows, but is also more expensive to render.");
-REGISTER_CONVAR_CL(cl_render_shadow_quality,"2",ConVarFlags::Archive,"Shadowmap Quality. This affects the detail of the object shadows that are being rendered");
+REGISTER_CONVAR_CL(render_shadow_quality,"1",ConVarFlags::Archive,"Shadowmap Quality. This affects the detail of the object shadows that are being rendered");
 REGISTER_CONVAR_CL(cl_render_shadow_dynamic,"1",ConVarFlags::Archive,"Turns dynamic shadows on or off.");
 REGISTER_CONVAR_CL(cl_render_shadow_update_frequency,"0",ConVarFlags::Archive,"Update frequency in frames. 0 = Updates every frame, 1 = Updates every second frame, etc.");
 REGISTER_CONVAR_CL(cl_render_shadow_pssm_update_frequency_offset,"0",ConVarFlags::Archive,"Update frequency for PSSM shadows in frames, relative to 'cl_render_shadow_update_frequency'.");

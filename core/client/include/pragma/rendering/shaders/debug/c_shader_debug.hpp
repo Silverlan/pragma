@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_SHADER_DEBUG_HPP__
@@ -41,7 +41,7 @@ namespace pragma
 
 		ShaderDebug(prosper::IPrContext &context,const std::string &identifier);
 
-		bool BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx=Pipeline::Triangle);
+		bool BeginDraw(const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,Pipeline pipelineIdx=Pipeline::Triangle);
 		bool Draw(prosper::IBuffer &vertexBuffer,uint32_t vertexCount,const Mat4 &mvp=umat::identity(),const Vector4 &color=Vector4(1.f,1.f,1.f,1.f));
 	protected:
 		ShaderDebug(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader);
@@ -50,7 +50,7 @@ namespace pragma
 		virtual bool ShouldInitializePipeline(uint32_t pipelineIdx) override;
 	private:
 		// These are unused
-		virtual bool BindSceneCamera(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,bool bView) override {return false;}
+		virtual bool BindSceneCamera(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,bool bView) override {return false;}
 		virtual bool BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings) override {return false;}
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override {return std::numeric_limits<uint32_t>::max();}
 		virtual uint32_t GetCameraDescriptorSetIndex() const override {return std::numeric_limits<uint32_t>::max();}

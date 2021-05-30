@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -22,9 +22,9 @@
 #include <map>
 
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
-#include <wv_steamworks.hpp>
+#include "pragma/game/isteamworks.hpp"
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 //////////////// LOGGING ////////////////
 REGISTER_ENGINE_CONCOMMAND(log,[](NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv) {
@@ -37,6 +37,7 @@ REGISTER_ENGINE_CONCOMMAND(clear_cache,[](NetworkState*,pragma::BasePlayerCompon
 	engine->ClearCache();
 },ConVarFlags::None,"Deletes all cache files.");
 REGISTER_ENGINE_CONVAR(cache_version,"",ConVarFlags::Archive,"The engine version that the cache files are associated with. If this version doesn't match the current engine version, the cache will be cleared.");
+REGISTER_ENGINE_CONVAR(cache_version_target,"1",ConVarFlags::None,"If cache_version does not match this value, the cache files will be cleared and it will be set to it.");
 REGISTER_ENGINE_CONVAR(log_enabled,"0",ConVarFlags::Archive,"0 = Log disabled; 1 = Log errors only; 2 = Log errors and warnings; 3 = Log all console output");
 REGISTER_ENGINE_CONVAR(log_file,"log.txt",ConVarFlags::Archive,"The log-file the console output will be logged to.");
 REGISTER_ENGINE_CONVAR(debug_profiling_enabled,"0",ConVarFlags::None,"Enables profiling timers.");
@@ -264,7 +265,7 @@ REGISTER_ENGINE_CONCOMMAND(clear,[](NetworkState*,pragma::BasePlayerComponent*,s
 },ConVarFlags::None,"Clears everything in the console.");
 
 REGISTER_ENGINE_CONCOMMAND(credits,[](NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&) {
-	Con::cout<<"Florian Weischer aka Silverlan"<<Con::endl;
+	Con::cout<<"Silverlan"<<Con::endl;
 	Con::cout<<"Contact: "<<engine_info::get_author_mail_address()<<Con::endl;
 	Con::cout<<"Website: "<<engine_info::get_website_url()<<Con::endl;
 },ConVarFlags::None,"Prints a list of developers.");

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_CVAR_GLOBAL_H__
@@ -26,10 +26,12 @@ REGISTER_CONCOMMAND_CL(screenshot,CMD_screenshot,ConVarFlags::None,"Writes the c
 REGISTER_CONCOMMAND_CL(thirdperson,CMD_thirdperson,ConVarFlags::None,"Toggles between first- and third-person mode.");
 REGISTER_CONCOMMAND_CL(shader_reload,CMD_shader_reload,ConVarFlags::None,"Reloads a specific shader, or all registered shaders if no arguments are given. Usage: shader_reload <shaderName>");
 REGISTER_CONCOMMAND_CL(shader_list,CMD_shader_list,ConVarFlags::None,"Prints a list of all currently loaded shaders");
+REGISTER_CONCOMMAND_CL(shader_optimize,CMD_shader_optimize,ConVarFlags::None,"Uses LunarGLASS to optimize the specified shader.");
 REGISTER_CONCOMMAND_CL(debug_light_shadowmap,CMD_debug_light_shadowmap,ConVarFlags::None,"Displays the depth map for the given light on screen. Call without arguments to turn the display off. Usage: debug_light_shadowmap <lightEntityIndex>");
 REGISTER_CONCOMMAND_CL(debug_glow_bloom,CMD_debug_glow_bloom,ConVarFlags::None,"Displays the scene glow texture on screen. Usage: debug_glow_bloom <1/0>");
 REGISTER_CONCOMMAND_CL(debug_hdr_bloom,CMD_debug_hdr_bloom,ConVarFlags::None,"Displays the scene bloom texture on screen. Usage: debug_hdr_bloom <1/0>");
 REGISTER_CONCOMMAND_CL(debug_render_octree_dynamic_print,CMD_debug_render_octree_dynamic_print,ConVarFlags::None,"Prints the octree for dynamic objects to the console, or a file if a file name is specified.");
+REGISTER_CONCOMMAND_CL(debug_render_octree_dynamic_find,CMD_debug_render_octree_dynamic_find,ConVarFlags::None,"Finds the specified entity in the octree for dynamic objects.");
 REGISTER_CONCOMMAND_CL(debug_render_octree_static_print,CMD_debug_render_octree_static_print,ConVarFlags::None,"Prints the octree for static world geometry to the console, or a file if a file name is specified.");
 REGISTER_CONCOMMAND_CL(debug_ai_schedule_print,CMD_debug_ai_schedule_print,ConVarFlags::None,"Prints the current schedule behavior tree for the specified NPC.");
 REGISTER_CONCOMMAND_CL(debug_ai_schedule,CMD_debug_ai_schedule,ConVarFlags::None,"Prints the current schedule behavior tree for the specified NPC on screen.");
@@ -37,6 +39,7 @@ REGISTER_CONCOMMAND_CL(debug_aim_info,CMD_debug_aim_info,ConVarFlags::None,"Prin
 REGISTER_CONCOMMAND_CL(debug_light_sources,Console::commands::debug_light_sources,ConVarFlags::None,"Prints debug information about all light sources in the scene.");
 REGISTER_CONCOMMAND_CL(debug_gui_cursor,Console::commands::debug_gui_cursor,ConVarFlags::None,"Prints information about the GUI element currently hovered over by the cursor.");
 REGISTER_CONCOMMAND_CL(debug_font_glyph_map,Console::commands::debug_font_glyph_map,ConVarFlags::None,"Displays the glyph map for the specified font.");
+REGISTER_CONCOMMAND_CL(debug_render_depth_buffer,Console::commands::debug_render_depth_buffer,ConVarFlags::None,"Draws the scene depth buffer to screen.");
 
 REGISTER_CONCOMMAND_CL(debug_render_info,Console::commands::debug_render_info,ConVarFlags::None,"Prints some timing information to the console.");
 

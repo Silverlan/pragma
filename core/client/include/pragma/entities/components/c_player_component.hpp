@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_PLAYER_COMPONENT_HPP__
@@ -38,7 +38,7 @@ namespace pragma
 		std::ostream& print(std::ostream&);
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual void Think(double tDelta) override;
+		virtual void OnTick(double tDelta) override;
 		Vector3 &GetViewOffset();
 		void SetViewOffset(Vector3 offset);
 		virtual void OnCrouch() override;
@@ -47,6 +47,7 @@ namespace pragma
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
 
 		void UpdateObserverOffset();
+		virtual void SetObserverMode(OBSERVERMODE mode) override;
 		virtual void SetObserverTarget(BaseObservableComponent *ent) override;
 		virtual void DoSetObserverMode(OBSERVERMODE mode) override;
 		virtual void ApplyViewRotationOffset(const EulerAngles &ang,float dur=0.5f) override;
@@ -74,8 +75,8 @@ namespace pragma
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
 		void UpdateObserverCallback();
 		void OnSetCharacterOrientation(const Vector3 &up);
-		bool ShouldDraw(const Vector3 &camOrigin) const;
-		bool ShouldDrawShadow(const Vector3 &camOrigin) const;
+		bool ShouldDraw() const;
+		bool ShouldDrawShadow() const;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	};

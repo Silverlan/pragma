@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -61,6 +61,12 @@ void CSpriteComponent::StopParticle()
 	m_hParticle->SetRemoveOnComplete(true);
 }
 
+void CSpriteComponent::OnTick(double dt)
+{
+	if(m_hParticle.expired())
+		GetEntity().RemoveSafely();
+}
+
 void CSpriteComponent::StopAndRemoveEntity()
 {
 	auto &ent = GetEntity();
@@ -70,16 +76,7 @@ void CSpriteComponent::StopAndRemoveEntity()
 		ent.RemoveSafely();
 		return;
 	}
-	auto whLogicComponent = GetEntity().AddComponent<LogicComponent>();
-	if(whLogicComponent.expired())
-	{
-		GetEntity().RemoveSafely();
-		return;
-	}
-	whLogicComponent->BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		if(m_hParticle.expired())
-			GetEntity().RemoveSafely();
-	});
+	SetTickPolicy(TickPolicy::Always);
 }
 
 void CSpriteComponent::StartParticle()
@@ -157,10 +154,10 @@ void CSpriteComponent::StartParticle()
 	pt->SetContinuous(true);
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pTrComponentPt = pt->GetEntity().GetTransformComponent();
-	if(pTrComponent.valid() && pTrComponentPt.valid())
+	if(pTrComponent != nullptr && pTrComponentPt)
 	{
 		pTrComponentPt->SetPosition(pTrComponent->GetPosition());
-		pTrComponentPt->SetOrientation(pTrComponent->GetOrientation());
+		pTrComponentPt->SetRotation(pTrComponent->GetRotation());
 	}
 	pt->Start();
 	m_hParticle = pt->GetHandle<pragma::CParticleSystemComponent>();

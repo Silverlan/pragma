@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -14,6 +14,9 @@
 #include "pragma/lua/classes/c_lcamera.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/render_queue.hpp"
+#include "pragma/rendering/shaders/world/c_shader_scene.hpp"
+#include "pragma/debug/debug_render_filter.hpp"
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include <pragma/util/transform.h>
 #include <pragma/lua/libraries/lgame.h>
@@ -27,7 +30,7 @@
 #include <prosper_util.hpp>
 #include <util_timeline_impl.hpp>
 #include <pragma/entities/entity_iterator.hpp>
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
@@ -613,7 +616,7 @@ int Lua::game::Client::test(lua_State *l)
 
 	if(true)
 	{
-		client->LoadSoundScripts("level_sounds_trainyard.txt",false);
+		client->LoadSoundScripts("level_sounds_trainyard.udm",false);
 		auto scene = choreography::Scene::Create<choreography::Scene>();
 		auto channel = scene->AddChannel<choreography::Channel>("Test");
 
@@ -893,9 +896,82 @@ int Lua::game::Client::set_action_input(lua_State *l)
 	c_game->SetActionInput(static_cast<Action>(input),pressed);
 	return 0;
 }
-int Lua::game::Client::draw_scene(lua_State *l)
+int Lua::game::Client::update_render_buffers(lua_State *l)
+{
+	auto &drawSceneInfo = Lua::Check<const ::util::DrawSceneInfo>(l,1);
+	auto &renderQueue = Lua::Check<const pragma::rendering::RenderQueue>(l,2);
+	pragma::CSceneComponent::UpdateRenderBuffers(drawSceneInfo.commandBuffer,renderQueue);
+	return 0;
+}
+int Lua::game::Client::render_scenes(lua_State *l)
+{
+	std::vector<::util::DrawSceneInfo> scenes {};
+	auto n = Lua::GetObjectLength(l,1);
+	scenes.reserve(n);
+
+	auto t = luabind::object{luabind::from_stack(l,1)};
+	for(luabind::iterator i{t},end;i!=end;++i)
+	{
+		auto val = *i;
+		auto *drawSceneInfo = luabind::object_cast<::util::DrawSceneInfo*>(val);
+		scenes.push_back(*drawSceneInfo);
+	}
+	c_game->RenderScenes(scenes);
+	return 0;
+}
+extern void set_debug_render_filter(std::unique_ptr<DebugRenderFilter> filter);
+int Lua::game::Client::set_debug_render_filter(lua_State *l)
+{
+	if(Lua::IsSet(l,1) == false)
+	{
+		::set_debug_render_filter(nullptr);
+		return 0;
+	}
+	Lua::CheckTable(l,1);
+	auto t = luabind::object{luabind::from_stack{l,1}};
+	auto filter = std::make_unique<DebugRenderFilter>();
+	if(t["shaderFilter"])
+	{
+		auto shaderFilter = luabind::object{t["shaderFilter"]};
+		filter->shaderFilter = [shaderFilter](pragma::ShaderGameWorld &shader) mutable -> bool {
+			auto r = shaderFilter(&shader);
+			return luabind::object_cast<bool>(r);
+		};
+	}
+	if(t["materialFilter"])
+	{
+		auto materialFilter = luabind::object{t["materialFilter"]};
+		filter->materialFilter = [materialFilter](CMaterial &mat) mutable -> bool {
+			auto r = materialFilter(static_cast<Material*>(&mat));
+			return luabind::object_cast<bool>(r);
+		};
+	}
+	if(t["entityFilter"])
+	{
+		auto entityFilter = luabind::object{t["entityFilter"]};
+		filter->entityFilter = [entityFilter](CBaseEntity &ent,CMaterial &mat) mutable -> bool {
+			auto &oEnt = *ent.GetLuaObject();
+			auto r = entityFilter(oEnt,static_cast<Material*>(&mat));
+			return luabind::object_cast<bool>(r);
+		};
+	}
+	if(t["meshFilter"])
+	{
+		auto meshFilter = luabind::object{t["meshFilter"]};
+		filter->meshFilter = [meshFilter](CBaseEntity &ent,CMaterial *mat,CModelSubMesh &mesh,pragma::RenderMeshIndex meshIdx) mutable -> bool {
+			auto &oEnt = *ent.GetLuaObject();
+			auto r = meshFilter(oEnt,mat ? static_cast<Material*>(mat) : nullptr,mesh.shared_from_this(),meshIdx);
+			return luabind::object_cast<bool>(r);
+		};
+	}
+	set_debug_render_filter(std::move(filter));
+	return 0;
+}
+int Lua::game::Client::queue_scene_for_rendering(lua_State *l)
 {
 	auto &drawSceneInfo = Lua::Check<::util::DrawSceneInfo>(l,1);
+	c_game->QueueForRendering(drawSceneInfo);
+#if 0
 	auto scene = drawSceneInfo.scene.valid() ? drawSceneInfo.scene.get() : c_game->GetRenderScene();
 	auto *renderer = scene ? scene->GetRenderer() : nullptr;
 	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
@@ -909,7 +985,7 @@ int Lua::game::Client::draw_scene(lua_State *l)
 	if(clearColor != nullptr)
 	{
 		auto clearCol = clearColor->ToVector4();
-		auto &hdrInfo = static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetHDRInfo();
+		auto &hdrInfo = static_cast<pragma::CRasterizationRendererComponent*>(renderer)->GetHDRInfo();
 		auto &hdrImg = hdrInfo.sceneRenderTarget->GetTexture().GetImage();
 		cmdBuffer->RecordImageBarrier(hdrImg,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferDstOptimal);
 		cmdBuffer->RecordClearImage(hdrImg,prosper::ImageLayout::TransferDstOptimal,{{clearCol.r,clearCol.g,clearCol.b,clearCol.a}});
@@ -919,14 +995,33 @@ int Lua::game::Client::draw_scene(lua_State *l)
 	auto primCmdBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(cmdBuffer);
 	c_game->RenderScene(drawSceneInfo);
 	c_game->ResetRenderScene();
+#endif
 	return 0;
+}
+DLLCLIENT void debug_render_stats(bool enabled,bool full,bool print,bool continuous);
+int Lua::game::Client::set_render_stats_enabled(lua_State *l)
+{
+	auto enabled = Lua::CheckBool(l,1);
+	c_engine->SetGpuPerformanceTimersEnabled(enabled);
+	debug_render_stats(enabled,false,false,true);
+	return 0;
+}
+int Lua::game::Client::get_queued_render_scenes(lua_State *l)
+{
+	auto &renderScenes = c_game->GetQueuedRenderScenes();
+	auto t = luabind::newtable(l);
+	int32_t i = 1;
+	for(auto &renderScene : renderScenes)
+		t[i++] = const_cast<::util::DrawSceneInfo&>(renderScene);
+	t.push(l);
+	return 1;
 }
 int Lua::game::Client::create_scene(lua_State *l)
 {
 	auto argIdx = 1;
 	pragma::CSceneComponent::CreateInfo createInfo {};
 	if(Lua::IsSet(l,argIdx))
-		createInfo.sampleCount = static_cast<prosper::SampleCountFlags>(Lua::CheckInt(l,argIdx++));
+		createInfo = Lua::Check<pragma::CSceneComponent::CreateInfo>(l,argIdx++);
 	::pragma::CSceneComponent *parent = nullptr;
 	if(Lua::IsSet(l,argIdx))
 		parent = Lua::Check<::CSceneHandle>(l,argIdx++).get();

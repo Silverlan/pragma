@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -46,24 +46,62 @@
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/util/util_handled.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
+#include <pragma/entities/components/composite_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
 LINK_ENTITY_TO_CLASS(entity,CBaseEntity);
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 void CBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
 {
 	BaseEntity::OnComponentAdded(component);
+	auto typeIndex = std::type_index(typeid(component));
 	if(typeid(component) == typeid(pragma::CRenderComponent))
-		m_renderComponent = std::static_pointer_cast<pragma::CRenderComponent>(component.shared_from_this());
+		m_renderComponent = &static_cast<pragma::CRenderComponent&>(component);
+	else if(typeid(component) == typeid(pragma::CTransformComponent))
+		m_transformComponent = &static_cast<pragma::CTransformComponent&>(component);
 	else if(typeid(component) == typeid(pragma::CPhysicsComponent))
-		m_physComponent = std::static_pointer_cast<pragma::CPhysicsComponent>(component.shared_from_this());
+		m_physicsComponent = &static_cast<pragma::CPhysicsComponent&>(component);
+	else if(typeid(component) == typeid(pragma::CWorldComponent))
+		umath::set_flag(m_stateFlags,StateFlags::HasWorldComponent);
+	else if(typeid(component) == typeid(pragma::CModelComponent))
+		m_modelComponent = &static_cast<pragma::CModelComponent&>(component);
+	else if(typeid(component) == typeid(pragma::CGenericComponent))
+		m_genericComponent = &static_cast<pragma::CGenericComponent&>(component);
+	else if(typeid(component) == typeid(pragma::CompositeComponent))
+	{
+		static_cast<pragma::CompositeComponent&>(component).AddEventCallback(pragma::CompositeComponent::EVENT_ON_ENTITY_ADDED,[this](std::reference_wrapper<pragma::ComponentEvent> e) -> util::EventReply {
+			auto &evData = static_cast<pragma::CECompositeEntityChanged&>(e.get());
+			static_cast<CBaseEntity&>(evData.ent).GetSceneFlagsProperty()->Link(*GetSceneFlagsProperty()); // TODO: This skips the EVENT_ON_SCENE_FLAGS_CHANGED event
+			return util::EventReply::Unhandled;
+		});
+		static_cast<pragma::CompositeComponent&>(component).AddEventCallback(pragma::CompositeComponent::EVENT_ON_ENTITY_REMOVED,[this](std::reference_wrapper<pragma::ComponentEvent> e) -> util::EventReply {
+			auto &evData = static_cast<pragma::CECompositeEntityChanged&>(e.get());
+			static_cast<CBaseEntity&>(evData.ent).GetSceneFlagsProperty()->Unlink(); // TODO: This skips the EVENT_ON_SCENE_FLAGS_CHANGED event
+			return util::EventReply::Unhandled;
+		});
+	}
 }
-util::WeakHandle<pragma::CRenderComponent> &CBaseEntity::GetRenderComponent() const {return m_renderComponent;}
-util::WeakHandle<pragma::CPhysicsComponent> &CBaseEntity::GetCPhysicsComponent() const {return m_physComponent;}
+void CBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
+{
+	BaseEntity::OnComponentRemoved(component);
+	if(typeid(component) == typeid(pragma::CWorldComponent))
+		umath::set_flag(m_stateFlags,StateFlags::HasWorldComponent,false);
+	else if(typeid(component) == typeid(pragma::CRenderComponent))
+		m_renderComponent = nullptr;
+	else if(typeid(component) == typeid(pragma::CTransformComponent))
+		m_transformComponent = nullptr;
+	else if(typeid(component) == typeid(pragma::CPhysicsComponent))
+		m_physicsComponent = nullptr;
+	else if(typeid(component) == typeid(pragma::CModelComponent))
+		m_modelComponent = nullptr;
+	else if(typeid(component) == typeid(pragma::CGenericComponent))
+		m_genericComponent = nullptr;
+}
+pragma::CRenderComponent *CBaseEntity::GetRenderComponent() const {return m_renderComponent;}
 
 //////////////////////////////////
 
@@ -114,6 +152,20 @@ void CBaseEntity::RemoveFromAllScenes()
 	BroadcastEvent(EVENT_ON_SCENE_FLAGS_CHANGED);
 }
 bool CBaseEntity::IsInScene(const pragma::CSceneComponent &scene) const {return (**m_sceneFlags &get_scene_flag(scene)) != 0;}
+std::vector<pragma::CSceneComponent*> CBaseEntity::GetScenes() const
+{
+	std::vector<pragma::CSceneComponent*> scenes {};
+	auto numScenes = sizeof(pragma::CSceneComponent::SceneFlags) *8;
+	scenes.reserve(numScenes);
+	for(auto i=decltype(numScenes){0u};i<numScenes;++i)
+	{
+		auto *scene = pragma::CSceneComponent::GetByIndex(pragma::CSceneComponent::GetSceneIndex(static_cast<pragma::CSceneComponent::SceneFlags>(i)));
+		if(scene == nullptr)
+			continue;
+		scenes.push_back(scene);
+	}
+	return scenes;
+}
 
 void CBaseEntity::Construct(unsigned int idx,unsigned int clientIdx)
 {
@@ -155,8 +207,8 @@ Bool CBaseEntity::ReceiveNetEvent(UInt32 eventId,NetPacket &p)
 
 void CBaseEntity::ReceiveData(NetPacket &packet)
 {
-	m_uniqueIndex = packet->Read<uint64_t>();
 	m_spawnFlags = packet->Read<uint32_t>();
+	m_uuid = packet->Read<util::Uuid>();
 
 	auto &componentManager = static_cast<pragma::CEntityComponentManager&>(c_game->GetEntityComponentManager());
 	auto &componentTypes = componentManager.GetRegisteredComponentTypes();
@@ -221,14 +273,17 @@ void CBaseEntity::EraseFunction(int function)
 void CBaseEntity::OnRemove()
 {
 	auto mdlComponent = GetModelComponent();
-	if(mdlComponent.valid())
+	if(mdlComponent)
 		mdlComponent->SetModel(std::shared_ptr<Model>(nullptr)); // Make sure to clear all clientside model mesh references
 	BaseEntity::OnRemove();
 }
 
 void CBaseEntity::Remove()
 {
+	if(umath::is_flag_set(GetStateFlags(),BaseEntity::StateFlags::Removed))
+		return;
 	BaseEntity::Remove();
+	SceneRenderDesc::AssertRenderQueueThreadInactive();
 	Game *game = client->GetGameState();
 	game->RemoveEntity(this);
 }
@@ -250,6 +305,12 @@ void CBaseEntity::SendNetEventTCP(UInt32 eventId,NetPacket &data) const
 {
 	if(IsClientsideOnly() || !IsSpawned())
 		return;
+	eventId = c_game->LocalNetEventIdToShared(eventId);
+	if(eventId == std::numeric_limits<pragma::NetEventId>::max())
+	{
+		Con::cwar<<"WARNING: Attempted to send net event "<<eventId<<" which has no known serverside id associated!"<<Con::endl;
+		return;
+	}
 	nwm::write_entity(data,this);
 	data->Write<UInt32>(eventId);
 	client->SendPacket("ent_event",data,pragma::networking::Protocol::SlowReliable);
@@ -264,15 +325,16 @@ void CBaseEntity::SendNetEventUDP(UInt32 eventId) const
 void CBaseEntity::SendNetEventUDP(UInt32 eventId,NetPacket &data) const
 {
 	if(IsClientsideOnly() || !IsSpawned())
+		return;;
+	eventId = c_game->LocalNetEventIdToShared(eventId);
+	if(eventId == std::numeric_limits<pragma::NetEventId>::max())
+	{
+		Con::cwar<<"WARNING: Attempted to send net event "<<eventId<<" which has no known serverside id associated!"<<Con::endl;
 		return;
+	}
 	nwm::write_entity(data,this);
 	data->Write<UInt32>(eventId);
 	client->SendPacket("ent_event",data,pragma::networking::Protocol::FastUnreliable);
-}
-util::WeakHandle<pragma::BaseModelComponent> CBaseEntity::GetModelComponent() const
-{
-	auto pComponent = GetComponent<pragma::CModelComponent>();
-	return pComponent.valid() ? std::static_pointer_cast<pragma::BaseModelComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BaseModelComponent>{};
 }
 util::WeakHandle<pragma::BaseAnimatedComponent> CBaseEntity::GetAnimatedComponent() const
 {
@@ -304,11 +366,6 @@ util::WeakHandle<pragma::BasePlayerComponent> CBaseEntity::GetPlayerComponent() 
 	auto pComponent = GetComponent<pragma::CPlayerComponent>();
 	return pComponent.valid() ? std::static_pointer_cast<pragma::BasePlayerComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BasePlayerComponent>{};
 }
-util::WeakHandle<pragma::BasePhysicsComponent> CBaseEntity::GetPhysicsComponent() const
-{
-	auto pComponent = GetComponent<pragma::CPhysicsComponent>();
-	return pComponent.valid() ? std::static_pointer_cast<pragma::BasePhysicsComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BasePhysicsComponent>{};
-}
 util::WeakHandle<pragma::BaseTimeScaleComponent> CBaseEntity::GetTimeScaleComponent() const
 {
 	auto pComponent = GetComponent<pragma::CTimeScaleComponent>();
@@ -325,14 +382,25 @@ bool CBaseEntity::IsWeapon() const {return HasComponent<pragma::CWeaponComponent
 bool CBaseEntity::IsVehicle() const {return HasComponent<pragma::CVehicleComponent>();}
 bool CBaseEntity::IsNPC() const {return HasComponent<pragma::CAIComponent>();}
 
-std::pair<Vector3,Vector3> CBaseEntity::GetRenderBounds() const
+const bounding_volume::AABB &CBaseEntity::GetLocalRenderBounds() const
 {
-	auto renderC = GetRenderComponent();
-	if(renderC.expired())
-		return {Vector3{},Vector3{}};
-	Vector3 min,max;
-	renderC->GetRenderBounds(&min,&max);
-	return {min,max};
+	auto *renderC = GetRenderComponent();
+	if(renderC == nullptr)
+	{
+		static bounding_volume::AABB bounds {};
+		return bounds;
+	}
+	return renderC->GetLocalRenderBounds();
+}
+const bounding_volume::AABB &CBaseEntity::GetAbsoluteRenderBounds(bool updateBounds) const
+{
+	auto *renderC = GetRenderComponent();
+	if(renderC == nullptr)
+	{
+		static bounding_volume::AABB bounds {};
+		return bounds;
+	}
+	return updateBounds ? renderC->GetUpdatedAbsoluteRenderBounds() : renderC->GetAbsoluteRenderBounds();
 }
 
 void CBaseEntity::AddChild(CBaseEntity &ent)

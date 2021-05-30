@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -12,6 +12,7 @@
 #include "pragma/entities/components/damageable_component.hpp"
 #include "pragma/lua/l_entity_handles.hpp"
 #include <sharedutils/datastream.h>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -55,20 +56,22 @@ void VelocityComponent::SetVelocity(const Vector3 &vel)
 void VelocityComponent::AddVelocity(const Vector3 &vel) {SetVelocity(GetVelocity() +vel);}
 
 const Vector3 &VelocityComponent::GetVelocity() const {return *m_velocity;}
-void VelocityComponent::Save(DataStream &ds)
+void VelocityComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
-	BaseEntityComponent::Save(ds);
-	ds->Write<Vector3>(*m_velocity);
-	ds->Write<Vector3>(*m_angVelocity);
+	BaseEntityComponent::Save(udm);
+	udm["velocity"] = **m_velocity;
+	udm["angularVelocity"] = **m_angVelocity;
 }
 
-void VelocityComponent::Load(DataStream &ds,uint32_t version)
+void VelocityComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {
-	BaseEntityComponent::Load(ds,version);
-	auto vel = ds->Read<Vector3>();
+	BaseEntityComponent::Load(udm,version);
+	Vector3 vel {};
+	udm["velocity"](vel);
 	SetVelocity(vel);
 
-	auto angVel = ds->Read<Vector3>();
+	Vector3 angVel {};
+	udm["angularVelocity"](angVel);
 	SetAngularVelocity(angVel);
 }
 void VelocityComponent::SetAngularVelocity(const Vector3 &vel)
@@ -83,24 +86,24 @@ const Vector3 &VelocityComponent::GetAngularVelocity() const {return *m_angVeloc
 void VelocityComponent::SetLocalAngularVelocity(Vector3 vel)
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
-		uvec::rotate(&vel,pTrComponent->GetOrientation());
+	if(pTrComponent != nullptr)
+		uvec::rotate(&vel,pTrComponent->GetRotation());
 	SetAngularVelocity(vel);
 }
 void VelocityComponent::AddLocalAngularVelocity(Vector3 vel)
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
-		uvec::rotate(&vel,pTrComponent->GetOrientation());
+	if(pTrComponent != nullptr)
+		uvec::rotate(&vel,pTrComponent->GetRotation());
 	AddAngularVelocity(vel);
 }
 Vector3 VelocityComponent::GetLocalAngularVelocity() const
 {
 	auto vel = GetAngularVelocity();
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 	{
-		auto rot = pTrComponent->GetOrientation();
+		auto rot = pTrComponent->GetRotation();
 		uquat::inverse(rot);
 		uvec::rotate(&vel,rot);
 	}
@@ -109,24 +112,24 @@ Vector3 VelocityComponent::GetLocalAngularVelocity() const
 void VelocityComponent::SetLocalVelocity(Vector3 vel)
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
-		uvec::rotate(&vel,pTrComponent->GetOrientation());
+	if(pTrComponent != nullptr)
+		uvec::rotate(&vel,pTrComponent->GetRotation());
 	SetVelocity(vel);
 }
 void VelocityComponent::AddLocalVelocity(Vector3 vel)
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
-		uvec::rotate(&vel,pTrComponent->GetOrientation());
+	if(pTrComponent != nullptr)
+		uvec::rotate(&vel,pTrComponent->GetRotation());
 	AddVelocity(vel);
 }
 Vector3 VelocityComponent::GetLocalVelocity() const
 {
 	auto vel = GetVelocity();
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 	{
-		auto rot = pTrComponent->GetOrientation();
+		auto rot = pTrComponent->GetRotation();
 		uquat::inverse(rot);
 		uvec::rotate(&vel,rot);
 	}

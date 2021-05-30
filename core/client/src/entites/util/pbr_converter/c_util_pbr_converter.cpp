@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -11,6 +11,8 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/math/intersection.h>
 #include <pragma/physics/collisionmesh.h>
+#include <pragma/asset/util_asset.hpp>
+#include <pragma/game/game_resources.hpp>
 #include <sharedutils/util_file.h>
 #include <image/prosper_image.hpp>
 #include <image/prosper_render_target.hpp>
@@ -31,7 +33,7 @@
 #include <pragma/model/modelmanager.h>
 #include <cmaterialmanager.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
@@ -47,10 +49,6 @@ void CPBRConverterComponent::Initialize()
 
 	auto &ent = GetEntity();
 	ent.AddComponent<LogicComponent>();
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		PollEvents();
-	});
-
 	auto libGpl = client->InitializeLibrary("pr_gpl");
 	if(libGpl == nullptr)
 	{
@@ -64,6 +62,13 @@ void CPBRConverterComponent::Initialize()
 		return;
 	}
 	m_fCalcGeometryData = fCalcGeometryData;
+}
+
+void CPBRConverterComponent::OnTick(double dt)
+{
+	PollEvents();
+	if(m_workQueue.empty())
+		SetTickPolicy(TickPolicy::Never);
 }
 
 void CPBRConverterComponent::OnRemove()
@@ -159,9 +164,8 @@ void CPBRConverterComponent::OnEntitySpawn()
 		ConvertToPBR(*mat);
 	}));
 
-	for(auto &pair : client->GetMaterialManager().GetMaterials())
+	for(auto &hMat : client->GetMaterialManager().GetMaterials())
 	{
-		auto &hMat = pair.second;
 		if(hMat.IsValid() == false || hMat.get()->IsLoaded() == false || ShouldConvertMaterial(static_cast<CMaterial&>(*hMat.get())) == false)
 			continue;
 		ConvertToPBR(static_cast<CMaterial&>(*hMat.get()));
@@ -333,7 +337,9 @@ bool CPBRConverterComponent::ConvertToPBR(CMaterial &matTraditional)
 	matTraditional.UpdateTextures();
 
 	// Overwrite old material with new PBR settings
-	if(matTraditional.Save())
+	std::string err;
+	auto savePath = pragma::asset::relative_path_to_absolute_path(matTraditional.GetName(),pragma::asset::Type::Material,util::CONVERT_PATH);
+	if(matTraditional.Save(savePath.GetString(),err,true))
 		client->LoadMaterial(matName,true,true); // Reload material immediately
 	static_cast<CMaterialManager&>(client->GetMaterialManager()).GetTextureManager().ClearUnused();
 	// Con::cout<<"Conversion complete!"<<Con::endl;

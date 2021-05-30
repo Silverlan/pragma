@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -60,7 +60,7 @@ void Console::commands::debug_water(NetworkState *state,pragma::BasePlayerCompon
 				if(pWaterComponent.valid() == false || pWaterComponent->IsWaterSceneValid() == false)
 					return WIHandle{};
 				auto &waterScene = pWaterComponent->GetWaterScene();
-				auto *renderer = waterScene.sceneReflection.valid() ? dynamic_cast<const pragma::rendering::RasterizationRenderer*>(waterScene.sceneReflection->GetRenderer()) : nullptr;
+				auto *renderer = waterScene.sceneReflection.valid() ? dynamic_cast<const pragma::CRasterizationRendererComponent*>(waterScene.sceneReflection->GetRenderer()) : nullptr;
 				if(renderer == nullptr)
 					return WIHandle{};
 				// Debug GUI

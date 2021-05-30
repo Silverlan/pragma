@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __PARTICLESYSTEMDATA_H__
 #define __PARTICLESYSTEMDATA_H__
@@ -41,8 +41,12 @@ namespace pragma
 {
 	namespace asset
 	{
-		DLLNETWORK void get_particle_system_file_path(std::string &path);
+		static constexpr uint32_t PPTSYS_FORMAT_VERSION = 1u;
+		static constexpr auto PPTSYS_COLLECTION_IDENTIFIER = "PPTSYSCOLLECTION";
+		static constexpr auto PPTSYS_IDENTIFIER = "PPTSYS";
+		DLLNETWORK bool save_particle_system(const CParticleSystemData &data,udm::AssetData &outData,std::string &outErr);
 		DLLNETWORK bool save_particle_system(const std::string &name,const std::unordered_map<std::string,CParticleSystemData> &particles,const std::string &rootPath="");
+		DLLNETWORK bool save_particle_system(VFilePtrReal &f,const std::unordered_map<std::string,CParticleSystemData> &particles,const std::string &rootPath="");
 	};
 };
 

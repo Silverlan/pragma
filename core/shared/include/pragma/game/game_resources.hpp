@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __GAME_RESOURCES_HP__
 #define __GAME_RESOURCES_HP__
@@ -20,12 +20,15 @@ namespace util
 {
 	class Library;
 	static const std::string IMPORT_PATH = "addons\\imported\\";
+	static const std::string CONVERT_PATH = "addons\\converted\\";
 	namespace impl
 	{
-		void *get_module_func(NetworkState *nw,const std::string &name);
+		DLLNETWORK void *get_module_func(NetworkState *nw,const std::string &name);
 	};
 	DLLNETWORK std::shared_ptr<util::Library> initialize_external_archive_manager(NetworkState *nw);
 	DLLNETWORK void close_external_archive_manager();
+	DLLNETWORK std::optional<int32_t> get_mounted_game_priority(const std::string &game);
+	DLLNETWORK void set_mounted_game_priority(const std::string &game,int32_t priority);
 
 	DLLNETWORK bool port_nif_model(NetworkState *nw,const std::string &path,std::string mdlName);
 	DLLNETWORK bool port_hl2_smd(NetworkState &nw,Model &mdl,VFilePtr &f,const std::string &animName,bool isCollisionMesh,std::vector<std::string> &outTextures);

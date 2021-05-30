@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -17,14 +17,16 @@
 #include <sharedutils/util_string.h>
 #include "pragma/physics/physsoftbodyinfo.hpp"
 #include "pragma/model/animation/vertex_animation.hpp"
+#include "pragma/model/animation/flex_animation.hpp"
 #include "pragma/file_formats/wmd.h"
+#include "pragma/asset/util_asset.hpp"
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
 #include <stack>
 
-extern DLLENGINE Engine *engine;
-
+extern DLLNETWORK Engine *engine;
+#pragma optimize("",off)
 std::shared_ptr<ModelMeshGroup> ModelMeshGroup::Create(const std::string &name)
 {
 	return std::shared_ptr<ModelMeshGroup>(new ModelMeshGroup{name});
@@ -46,8 +48,43 @@ const std::string &ModelMeshGroup::GetName() const {return m_name;}
 std::vector<std::shared_ptr<ModelMesh>> &ModelMeshGroup::GetMeshes() {return m_meshes;}
 void ModelMeshGroup::AddMesh(const std::shared_ptr<ModelMesh> &mesh) {m_meshes.push_back(mesh);}
 uint32_t ModelMeshGroup::GetMeshCount() const {return static_cast<uint32_t>(m_meshes.size());}
+bool ModelMeshGroup::IsEqual(const ModelMeshGroup &other) const
+{
+	static_assert(sizeof(ModelMeshGroup) == 72,"Update this function when making changes to this class!");
+	if(!(m_name == other.m_name && m_meshes.size() == other.m_meshes.size()))
+		return false;
+	for(auto i=decltype(m_meshes.size()){0u};i<m_meshes.size();++i)
+	{
+		if(m_meshes[i]->IsEqual(*other.m_meshes[i]) == false)
+			return false;
+	}
+	return true;
+}
 
 /////////////////////////////////////
+
+bool Eyeball::LidFlexDesc::operator==(const LidFlexDesc &other) const
+{
+	static_assert(sizeof(LidFlexDesc) == 28,"Update this function when making changes to this class!");
+	return lidFlexIndex == other.lidFlexIndex && raiserFlexIndex == other.raiserFlexIndex && neutralFlexIndex == other.neutralFlexIndex &&
+		lowererFlexIndex == other.lowererFlexIndex && umath::abs(raiserValue -other.raiserValue) < 0.001f && umath::abs(neutralValue -other.neutralValue) < 0.001f && umath::abs(lowererValue -other.lowererValue) < 0.001f;
+}
+
+bool Eyeball::operator==(const Eyeball &other) const
+{
+	static_assert(sizeof(Eyeball) == 152,"Update this function when making changes to this class!");
+	return name == other.name && boneIndex == other.boneIndex && uvec::cmp(origin,other.origin) && umath::abs(zOffset -other.zOffset) < 0.001f && umath::abs(radius -other.radius) < 0.001f &&
+		uvec::cmp(up,other.up) && uvec::cmp(forward,other.forward) && irisMaterialIndex == other.irisMaterialIndex && umath::abs(maxDilationFactor -other.maxDilationFactor) < 0.001f &&
+		umath::abs(irisUvRadius -other.irisUvRadius) < 0.001f && umath::abs(irisScale -other.irisScale) < 0.001f && upperLid == other.upperLid && lowerLid == other.lowerLid;
+}
+
+/////////////////////////////////////
+
+bool Model::MetaInfo::operator==(const MetaInfo &other) const
+{
+	static_assert(sizeof(MetaInfo) == 80,"Update this function when making changes to this class!");
+	return includes == other.includes && texturePaths == other.texturePaths && textures == other.textures && flags == other.flags;
+}
 
 std::unordered_map<std::string,std::shared_ptr<Model>> Model::m_models;
 
@@ -90,7 +127,7 @@ Model::Model(const Model &other)
 		m_meshGroups.push_back(ModelMeshGroup::Create(*meshGroup));
 	m_animations.reserve(other.m_animations.size());
 	for(auto &anim : other.m_animations)
-		m_animations.push_back(Animation::Create(*anim));
+		m_animations.push_back(pragma::animation::Animation::Create(*anim));
 
 	m_vertexAnimations.reserve(other.m_vertexAnimations.size());
 	for(auto &anim : other.m_vertexAnimations)
@@ -116,6 +153,71 @@ Model::~Model()
 	m_joints.clear();
 }
 
+bool Model::IsEqual(const Model &other) const
+{
+	if(!(m_metaInfo == other.m_metaInfo && m_mass == other.m_mass && m_meshCount == other.m_meshCount &&
+		m_subMeshCount == other.m_subMeshCount && m_vertexCount == other.m_vertexCount && m_triangleCount == other.m_triangleCount && umath::abs(m_maxEyeDeflection -other.m_maxEyeDeflection) < 0.0001f))
+		return false;
+	if(!(m_phonemeMap == other.m_phonemeMap && m_blendControllers == other.m_blendControllers &&
+		m_bodyGroups == other.m_bodyGroups && m_hitboxes == other.m_hitboxes && m_eyeballs == other.m_eyeballs/* && m_name == other.m_name*/))
+		return false;
+	if(!(m_animationIDs.size() == other.m_animationIDs.size() && m_flexAnimationNames == other.m_flexAnimationNames &&
+		/*m_bindPose == other.m_bindPose && */uvec::cmp(m_eyeOffset,other.m_eyeOffset) && uvec::cmp(m_collisionMin,other.m_collisionMin) && uvec::cmp(m_collisionMax,other.m_collisionMax)))
+		return false;
+	if(!(m_flexControllers == other.m_flexControllers))
+		return false;
+	if(!(m_flexes == other.m_flexes))
+		return false;
+	if(!(
+		uvec::cmp(m_renderMin,other.m_renderMin) && uvec::cmp(m_renderMax,other.m_renderMax) && m_joints == other.m_joints && m_baseMeshes == other.m_baseMeshes &&
+		m_lods == other.m_lods && m_attachments == other.m_attachments && m_objectAttachments == other.m_objectAttachments))
+		return false;
+	if(!(m_textureGroups == other.m_textureGroups && m_collisionMeshes.size() == other.m_collisionMeshes.size() && m_flexAnimations.size() == other.m_flexAnimations.size() &&
+		m_ikControllers.size() == other.m_ikControllers.size() && m_animations.size() == other.m_animations.size() &&
+		m_meshGroups.size() == other.m_meshGroups.size() && static_cast<bool>(m_reference) == static_cast<bool>(other.m_reference) && static_cast<bool>(m_skeleton) == static_cast<bool>(other.m_skeleton)))
+		return false;
+	for(auto &pair : m_animationIDs)
+	{
+		if(other.m_animationIDs.find(pair.first) == other.m_animationIDs.end())
+			return false;
+	}
+	for(auto i=decltype(m_meshGroups.size()){0u};i<m_meshGroups.size();++i)
+	{
+		if(m_meshGroups[i]->IsEqual(*other.m_meshGroups[i]) == false)
+			return false;
+	}
+	for(auto i=decltype(m_animations.size()){0u};i<m_animations.size();++i)
+	{
+		if(*m_animations[i] != *other.m_animations[i])
+			return false;
+	}
+	for(auto i=decltype(m_vertexAnimations.size()){0u};i<m_vertexAnimations.size();++i)
+	{
+		if(*m_vertexAnimations[i] != *other.m_vertexAnimations[i])
+			return false;
+	}
+	for(auto i=decltype(m_ikControllers.size()){0u};i<m_ikControllers.size();++i)
+	{
+		if(*m_ikControllers[i] != *other.m_ikControllers[i])
+			return false;
+	}
+	for(auto i=decltype(m_flexAnimations.size()){0u};i<m_flexAnimations.size();++i)
+	{
+		if(*m_flexAnimations[i] != *other.m_flexAnimations[i])
+			return false;
+	}
+	for(auto i=decltype(m_collisionMeshes.size()){0u};i<m_collisionMeshes.size();++i)
+	{
+		if(*m_collisionMeshes[i] != *other.m_collisionMeshes[i])
+			return false;
+	}
+	if(m_reference && *m_reference != *other.m_reference)
+		return false;
+	if(m_skeleton && *m_skeleton != *other.m_skeleton)
+		return false;
+	static_assert(sizeof(Model) == 1'000,"Update this function when making changes to this class!");
+	return true;
+}
 bool Model::operator==(const Model &other) const
 {
 	return this == &other;
@@ -123,6 +225,57 @@ bool Model::operator==(const Model &other) const
 bool Model::operator!=(const Model &other) const
 {
 	return !operator==(other);
+}
+Model &Model::operator=(const Model &other)
+{
+	m_networkState = other.m_networkState;
+	m_metaInfo = other.m_metaInfo;
+	m_bValid = other.m_bValid;
+	m_mass = other.m_mass;
+	m_meshCount = other.m_meshCount;
+	m_subMeshCount = other.m_subMeshCount;
+	m_vertexCount = other.m_vertexCount;
+	m_triangleCount = other.m_triangleCount;
+	m_maxEyeDeflection = other.m_maxEyeDeflection;
+	m_phonemeMap = other.m_phonemeMap;
+	m_blendControllers = other.m_blendControllers;
+	m_meshGroups = other.m_meshGroups;
+	m_bodyGroups = other.m_bodyGroups;
+	m_hitboxes = other.m_hitboxes;
+	m_eyeballs = other.m_eyeballs;
+	m_reference = other.m_reference;
+	m_name = other.m_name;
+	m_bAllMaterialsLoaded = other.m_bAllMaterialsLoaded;
+	m_animations = other.m_animations;
+	m_vertexAnimations = other.m_vertexAnimations;
+	m_animationIDs = other.m_animationIDs;
+	m_skeleton = other.m_skeleton;
+
+	m_flexControllers = other.m_flexControllers;
+	m_flexes = other.m_flexes;
+
+	m_ikControllers = other.m_ikControllers;
+
+	m_flexAnimations = other.m_flexAnimations;
+	m_flexAnimationNames = other.m_flexAnimationNames;
+
+	m_bindPose = other.m_bindPose;
+	m_eyeOffset = other.m_eyeOffset;
+	m_collisionMin = other.m_collisionMin;
+	m_collisionMax = other.m_collisionMax;
+	m_renderMin = other.m_renderMin;
+	m_renderMax = other.m_renderMax;
+	m_collisionMeshes = other.m_collisionMeshes;
+	m_joints = other.m_joints;
+	m_baseMeshes = other.m_baseMeshes;
+	m_lods = other.m_lods;
+	m_attachments = other.m_attachments;
+	m_objectAttachments = other.m_objectAttachments;
+	m_materials = other.m_materials;
+	m_textureGroups = other.m_textureGroups;
+	m_matLoadCallbacks = other.m_matLoadCallbacks;
+	m_onAllMatsLoadedCallbacks = other.m_onAllMatsLoadedCallbacks;
+	return *this;
 }
 
 const PhonemeMap &Model::GetPhonemeMap() const {return const_cast<Model*>(this)->GetPhonemeMap();}
@@ -228,8 +381,23 @@ void Model::GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups,uint32_t l
 		if(const_cast<Model*>(this)->GetMesh(static_cast<uint32_t>(i),bg,meshGroupId) == true && meshGroupId != std::numeric_limits<uint32_t>::max())
 			meshIds.push_back(meshGroupId);
 	}
-	//const_cast<Model*>(this)->TranslateLODMeshes(lod,meshIds);
+	const_cast<Model*>(this)->TranslateLODMeshes(lod,meshIds);
 	const_cast<Model*>(this)->GetMeshes(meshIds,outMeshes);
+}
+void Model::GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups,std::vector<std::shared_ptr<ModelSubMesh>> &outMeshes) const {return GetBodyGroupMeshes(bodyGroups,0,outMeshes);}
+void Model::GetBodyGroupMeshes(const std::vector<uint32_t> bodyGroups,uint32_t lod,std::vector<std::shared_ptr<ModelSubMesh>> &outMeshes) const
+{
+	auto meshIds = const_cast<Model*>(this)->GetBaseMeshes();
+	meshIds.reserve(meshIds.size() +m_bodyGroups.size());
+	for(auto i=decltype(bodyGroups.size()){0};i<bodyGroups.size();++i)
+	{
+		auto bg = bodyGroups[i];
+		auto meshGroupId = std::numeric_limits<uint32_t>::max();
+		if(const_cast<Model*>(this)->GetMesh(static_cast<uint32_t>(i),bg,meshGroupId) == true && meshGroupId != std::numeric_limits<uint32_t>::max())
+			meshIds.push_back(meshGroupId);
+	}
+	const_cast<Model*>(this)->TranslateLODMeshes(lod,meshIds);
+	const_cast<Model*>(this)->GetSubMeshes(meshIds,outMeshes);
 }
 BodyGroup &Model::AddBodyGroup(const std::string &name)
 {
@@ -315,9 +483,9 @@ const Frame &Model::GetReference() const {return *m_reference;}
 void Model::SetReference(std::shared_ptr<Frame> frame) {m_reference = frame;}
 const std::vector<JointInfo> &Model::GetJoints() const {return const_cast<Model*>(this)->GetJoints();}
 std::vector<JointInfo> &Model::GetJoints() {return m_joints;}
-JointInfo &Model::AddJoint(uint8_t type,uint32_t src,uint32_t tgt)
+JointInfo &Model::AddJoint(JointType type,BoneId child,BoneId parent)
 {
-	m_joints.push_back(JointInfo(type,src,tgt));
+	m_joints.push_back(JointInfo(type,child,parent));
 	return m_joints.back();
 }
 
@@ -395,10 +563,12 @@ void Model::AddLoadingMaterial(Material &mat,std::optional<uint32_t> index)
 uint32_t Model::AddTexture(const std::string &tex,Material *mat)
 {
 	auto &meta = GetMetaInfo();
-	auto it = std::find(meta.textures.begin(),meta.textures.end(),tex);
+	auto ntex = tex;
+	ufile::remove_extension_from_filename(ntex,pragma::asset::get_supported_extensions(pragma::asset::Type::Material));
+	auto it = std::find(meta.textures.begin(),meta.textures.end(),ntex);
 	if(it != meta.textures.end())
 		return it -meta.textures.begin();
-	meta.textures.push_back(tex);
+	meta.textures.push_back(ntex);
 	if(mat == nullptr)
 		m_materials.push_back(MaterialHandle{});
 	else
@@ -409,7 +579,11 @@ bool Model::SetTexture(uint32_t texIdx,const std::string &tex,Material *mat)
 {
 	auto &meta = GetMetaInfo();
 	if(texIdx < meta.textures.size())
-		meta.textures.at(texIdx) = tex;
+	{
+		auto ntex = tex;
+		ufile::remove_extension_from_filename(ntex,pragma::asset::get_supported_extensions(pragma::asset::Type::Material));
+		meta.textures.at(texIdx) = ntex;
+	}
 	if(mat == nullptr)
 		m_materials.at(texIdx) = {};
 	else if(texIdx < m_materials.size())
@@ -497,7 +671,8 @@ bool Model::FindMaterial(const std::string &texture,std::string &matPath,const s
 	for(auto &path : texturePaths)
 	{
 		auto texPath = path +texture;
-		if(FileManager::Exists("materials\\" +texPath +".wmi") || FileManager::Exists("materials\\" +texPath +".vmt") || FileManager::Exists("materials\\" +texPath +".vmat_c"))
+		auto foundPath = pragma::asset::find_file(*m_networkState,texPath,pragma::asset::Type::Material);
+		if(foundPath.has_value() || FileManager::Exists("materials\\" +texPath +".vmt") || FileManager::Exists("materials\\" +texPath +".vmat_c"))
 		{
 			matPath = texPath;
 			return true;
@@ -510,7 +685,7 @@ bool Model::FindMaterial(const std::string &texture,std::string &matPath,const s
 	for(auto &path : texturePaths)
 	{
 		auto texPath = path +texture;
-		if(m_networkState->PortMaterial(texPath +".wmi",loadMaterial) == true)
+		if(m_networkState->PortMaterial(texPath,loadMaterial) == true)
 		{
 			bSkipPort = true;
 			auto r = FindMaterial(texture,matPath,loadMaterial);
@@ -687,7 +862,8 @@ void Model::AddTexturePath(const std::string &path)
 	auto npath = path;
 	npath = FileManager::GetCanonicalizedPath(npath);
 	if(npath.empty() == false && npath.back() != '/' && npath.back() != '\\')
-		npath += '\\';
+		npath += '/';
+	npath = util::Path::CreatePath(npath).GetString();
 	auto it = std::find_if(m_metaInfo.texturePaths.begin(),m_metaInfo.texturePaths.end(),[&npath](const std::string &pathOther) {
 		return ustring::compare(npath,pathOther,false);
 	});
@@ -760,7 +936,7 @@ uint32_t Model::GetLOD(uint32_t id) const
 	return m_lods[id].lod;
 }
 
-LODInfo *Model::AddLODInfo(uint32_t lod,std::unordered_map<uint32_t,uint32_t> &replaceIds)
+LODInfo *Model::AddLODInfo(uint32_t lod,float distance,std::unordered_map<uint32_t,uint32_t> &replaceIds)
 {
 	LODInfo *info = nullptr;
 	auto itLod = std::find_if(m_lods.begin(),m_lods.end(),[lod](const LODInfo &lodInfo) {
@@ -777,6 +953,7 @@ LODInfo *Model::AddLODInfo(uint32_t lod,std::unordered_map<uint32_t,uint32_t> &r
 		info = &(*itLod);
 	}
 	info->lod = lod;
+	info->distance = distance;
 	for(auto &pair : replaceIds)
 		info->meshReplacements.insert(pair);
 	if(m_lods.size() > 1)
@@ -862,6 +1039,22 @@ uint32_t Model::GetMeshGroupCount() const {return static_cast<uint32_t>(m_meshGr
 uint32_t Model::GetMeshCount() const {return m_meshCount;}
 uint32_t Model::GetSubMeshCount() const {return m_subMeshCount;}
 uint32_t Model::GetCollisionMeshCount() const {return static_cast<uint32_t>(m_collisionMeshes.size());}
+ModelMesh *Model::GetMesh(uint32_t meshGroupIdx,uint32_t meshIdx)
+{
+	auto meshGroup = GetMeshGroup(meshGroupIdx);
+	if(meshGroup == nullptr)
+		return nullptr;
+	auto &meshes = meshGroup->GetMeshes();
+	return (meshIdx < meshes.size()) ? meshes[meshIdx].get() : nullptr;
+}
+ModelSubMesh *Model::GetSubMesh(uint32_t meshGroupIdx,uint32_t meshIdx,uint32_t subMeshIdx)
+{
+	auto *mesh = GetMesh(meshGroupIdx,meshIdx);
+	if(mesh == nullptr)
+		return nullptr;
+	auto &subMesh = mesh->GetSubMeshes();
+	return (subMeshIdx < subMesh.size()) ? subMesh[subMeshIdx].get() : nullptr;
+}
 Bool Model::GetMesh(uint32_t bodyGroupId,uint32_t groupId,uint32_t &outMeshId)
 {
 	auto *bodyGroup = GetBodyGroup(bodyGroupId);
@@ -884,6 +1077,26 @@ void Model::GetMeshes(const std::vector<uint32_t> &meshIds,std::vector<std::shar
 			outMeshes.reserve(outMeshes.size() +groupMeshes.size());
 			for(auto it=groupMeshes.begin();it!=groupMeshes.end();++it)
 				outMeshes.push_back(*it);
+		}
+	}
+}
+void Model::GetSubMeshes(const std::vector<uint32_t> &meshIds,std::vector<std::shared_ptr<ModelSubMesh>> &outMeshes)
+{
+	auto numGroups = m_meshGroups.size();
+	for(auto meshId : meshIds)
+	{
+		if(meshId < numGroups)
+		{
+			auto &group = m_meshGroups[meshId];
+			auto &groupMeshes = group->GetMeshes();
+			outMeshes.reserve(outMeshes.size() +groupMeshes.size());
+			for(auto it=groupMeshes.begin();it!=groupMeshes.end();++it)
+			{
+				auto &mesh = *it;
+				outMeshes.reserve(outMeshes.size() +mesh->GetSubMeshCount());
+				for(auto &subMesh : outMeshes)
+					outMeshes.push_back(subMesh);
+			}
 		}
 	}
 }
@@ -1014,7 +1227,7 @@ void Model::GetRenderBounds(Vector3 &min,Vector3 &max)
 
 bool Model::IntersectAABB(Vector3 &min,Vector3 &max)
 {
-	if(!Intersection::AABBAABB(m_collisionMin,m_collisionMax,min,max))
+	if(umath::intersection::aabb_aabb(m_collisionMin,m_collisionMax,min,max) == umath::intersection::Intersect::Outside)
 		return false;
 	for(int i=0;i<m_collisionMeshes.size();i++)
 		if(m_collisionMeshes[i]->IntersectAABB(&min,&max))
@@ -1146,7 +1359,9 @@ std::optional<uint32_t> Model::AssignDistinctMaterial(const ModelMeshGroup &grou
 
 	if(FileManager::Exists(mpath) == false)
 	{
-		if(hMat->Save(path.GetString(),rootPath.GetString()) == false)
+		auto savePath = pragma::asset::relative_path_to_absolute_path(path,pragma::asset::Type::Material,rootPath.GetString());
+		std::string err;
+		if(hMat->Save(savePath.GetString(),err) == false)
 			return {};
 	}
 	auto *matNew = m_networkState->LoadMaterial(path.GetString());
@@ -1427,7 +1642,7 @@ std::optional<float> Model::CalcFlexWeight(
 	return opStack.top();
 }
 
-uint32_t Model::AddAnimation(const std::string &name,const std::shared_ptr<Animation> &anim)
+uint32_t Model::AddAnimation(const std::string &name,const std::shared_ptr<pragma::animation::Animation> &anim)
 {
 	auto lname = name;
 	ustring::to_lower(lname);
@@ -1454,13 +1669,15 @@ void Model::GetAnimations(std::unordered_map<std::string,uint32_t> **anims) {*an
 const Skeleton &Model::GetSkeleton() const {return *m_skeleton;}
 Skeleton &Model::GetSkeleton() {return *m_skeleton;}
 
-std::shared_ptr<Animation> Model::GetAnimation(uint32_t ID)
+std::shared_ptr<pragma::animation::Animation> Model::GetAnimation(uint32_t ID) const
 {
 	if(ID >= m_animations.size())
 		return nullptr;
 	return m_animations[ID];
 }
 uint32_t Model::GetAnimationCount() const {return static_cast<uint32_t>(m_animations.size());}
+std::shared_ptr<ModelMesh> Model::CreateMesh() const {return std::make_shared<ModelMesh>();}
+std::shared_ptr<ModelSubMesh> Model::CreateSubMesh() const {return std::make_shared<ModelSubMesh>();}
 bool Model::HasVertexWeights() const
 {
 	for(auto &meshGroup : GetMeshGroups())
@@ -1476,8 +1693,8 @@ bool Model::HasVertexWeights() const
 	}
 	return false;
 }
-const std::vector<std::shared_ptr<Animation>> &Model::GetAnimations() const {return const_cast<Model*>(this)->GetAnimations();}
-std::vector<std::shared_ptr<Animation>> &Model::GetAnimations() {return m_animations;}
+const std::vector<std::shared_ptr<pragma::animation::Animation>> &Model::GetAnimations() const {return const_cast<Model*>(this)->GetAnimations();}
+std::vector<std::shared_ptr<pragma::animation::Animation>> &Model::GetAnimations() {return m_animations;}
 bool Model::GetAnimationName(uint32_t animId,std::string &name) const
 {
 	auto it = std::find_if(m_animationIDs.begin(),m_animationIDs.end(),[animId](const std::pair<std::string,uint32_t> &pair) {
@@ -1540,6 +1757,33 @@ int32_t Model::LookupBone(const std::string &name) const
 {
 	auto &skeleton = GetSkeleton();
 	return skeleton.LookupBone(name);
+}
+std::optional<uint32_t> Model::LookupFlexAnimation(const std::string &name) const
+{
+	auto it = std::find(m_flexAnimationNames.begin(),m_flexAnimationNames.end(),name);
+	if(it == m_flexAnimationNames.end())
+		return {};
+	return it -m_flexAnimationNames.begin();
+}
+uint32_t Model::AddFlexAnimation(const std::string &name,FlexAnimation &anim)
+{
+	auto id = LookupFlexAnimation(name);
+	if(id.has_value())
+	{
+		m_flexAnimations[*id] = anim.shared_from_this();
+		return *id;
+	}
+	m_flexAnimationNames.push_back(name);
+	m_flexAnimations.push_back(anim.shared_from_this());
+	return m_flexAnimationNames.size() -1;
+}
+FlexAnimation *Model::GetFlexAnimation(uint32_t idx)
+{
+	return (idx < m_flexAnimations.size()) ? m_flexAnimations[idx].get() : nullptr;
+}
+const std::string *Model::GetFlexAnimationName(uint32_t idx) const
+{
+	return (idx < m_flexAnimationNames.size()) ? &m_flexAnimationNames[idx] : nullptr;
 }
 int32_t Model::LookupAttachment(const std::string &name)
 {
@@ -1629,7 +1873,7 @@ float Model::GetAnimationDuration(uint32_t animation)
 }
 int Model::SelectFirstAnimation(Activity activity) const
 {
-	auto it = std::find_if(m_animations.begin(),m_animations.end(),[activity](const std::shared_ptr<Animation> &anim) {
+	auto it = std::find_if(m_animations.begin(),m_animations.end(),[activity](const std::shared_ptr<pragma::animation::Animation> &anim) {
 		return anim->GetActivity() == activity;
 	});
 	if(it == m_animations.end())
@@ -1731,3 +1975,4 @@ void Model::UpdateShape(const std::vector<SurfaceMaterial>*)
 		cmesh->UpdateShape();
 }
 //void Model::GetWeights(std::vector<VertexWeight*> **weights) {*weights = &m_weights;}
+#pragma optimize("",on)

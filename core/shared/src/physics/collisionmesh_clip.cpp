@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -153,7 +153,7 @@ void CollisionMesh::ClipAgainstPlane(const Vector3 &n,double d,CollisionMesh &cl
 		auto bAllProjected = true;
 		for(auto &v : clippedMesh.m_vertices)
 		{
-			if(Geometry::get_side_of_point_to_plane(n,d,v) != Geometry::PlaneSide::Back)
+			if(umath::geometry::get_side_of_point_to_plane(n,d,v) != umath::geometry::PlaneSide::Back)
 				v = uvec::project_to_plane(v,n,d);
 			else
 				bAllProjected = false;

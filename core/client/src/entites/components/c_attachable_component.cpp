@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -72,8 +72,8 @@ void CAttachableComponent::UpdateViewAttachmentOffset(BaseEntity *ent,pragma::Ba
 	if(cam.expired())
 		return;
 	auto trComponent = cam->GetEntity().GetTransformComponent();
-	auto &forward = trComponent.valid() ? trComponent->GetForward() : uvec::FORWARD;
-	auto &up = trComponent.valid() ? trComponent->GetUp() : uvec::UP;
+	auto forward = trComponent ? trComponent->GetForward() : uvec::FORWARD;
+	auto up = trComponent ? trComponent->GetUp() : uvec::UP;
 	if(bYawOnly == false)
 	{
 		pos = cam->GetEntity().GetPosition();
@@ -88,10 +88,10 @@ void CAttachableComponent::UpdateViewAttachmentOffset(BaseEntity *ent,pragma::Ba
 		pos.z = posCam.z;*/
 
 		auto pTrComponentEnt = ent->GetTransformComponent();
-		if(pTrComponentEnt.valid())
+		if(pTrComponentEnt)
 		{
 			pos = pTrComponentEnt->GetPosition();//cam->GetPos();
-			rot = pTrComponentEnt->GetOrientation();//cam->GetRotation();
+			rot = pTrComponentEnt->GetRotation();//cam->GetRotation();
 		}
 
 		auto &rotRef = pl.GetOrientationAxesRotation();

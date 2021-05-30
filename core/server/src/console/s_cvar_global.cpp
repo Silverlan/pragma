@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/serverstate/serverutil.h"
@@ -24,7 +24,7 @@
 #include <pragma/networking/netmessages.h>
 #include <pragma/entities/entity_iterator.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 extern DLLSERVER ServerState *server;
 extern DLLSERVER SGame *s_game;
 DLLSERVER void CMD_lua_run(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
@@ -120,9 +120,14 @@ DLLSERVER void CMD_entities_sv(NetworkState *state,pragma::BasePlayerComponent *
 	std::optional<std::string> className = {};
 	if(argv.empty() == false)
 		className = '*' +argv.front() +'*';
+	std::optional<std::string> modelName {};
+	if(argv.size() > 1)
+		modelName = '*' +argv[1] +'*';
 	for(auto &pair : sortedEnts)
 	{
 		if(className.has_value() && ustring::match(pair.first->GetClass(),*className) == false)
+			continue;
+		if(modelName.has_value() && ustring::match(pair.first->GetModelName(),*modelName) == false)
 			continue;
 		Con::cout<<*pair.first<<Con::endl;
 	}

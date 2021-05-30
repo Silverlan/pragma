@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "pragma/lua/libraries/lfile.h"
@@ -10,6 +10,7 @@
 #include <luasystem.h>
 #include <luainterface.hpp>
 #include <unordered_set>
+#include <udm.hpp>
 
 #include <luabind/detail/class_rep.hpp>
 #include <luabind/detail/call.hpp>
@@ -49,7 +50,7 @@ private:
 #endif
 
 #undef GetClassInfo
-
+#pragma optimize("",off)
 struct LuaOverloadInfo
 {
 	std::vector<std::string> parameters {};
@@ -330,11 +331,11 @@ namespace luabind {
 
 static std::unordered_map<std::string,std::string> g_typeTranslationTable {
 	{"std::string","string"},
-{"short","int"},
-{"unsigned char","int"},
-{"unsigned int","int"},
-{"QuaternionInternal","Quaternion"},
-{"double","float"},
+	{"short","int"},
+	{"unsigned char","int"},
+	{"unsigned int","int"},
+	{"QuaternionInternal","Quaternion"},
+	{"double","float"}
 };
 
 static void normalize_param_name(std::string &paramName)
@@ -399,6 +400,38 @@ static std::optional<LuaOverloadInfo> parse_function_overload(std::string &metho
 	return info;
 }
 
+static void parse_lua_property(lua_State *L,const std::string &name,const luabind::object &o,LuaClassInfo &result)
+{
+	if(lua_tocfunction(L, -1) == &luabind::detail::property_tag)
+		result.attributes.push_back(name);
+	else
+	{
+		result.methods.push_back({});
+		auto &method = result.methods.back();
+		method.name = name;
+
+		auto &omethod = o;
+		luabind::detail::function_object * fobj = luabind::get_function_object(omethod);
+		if(fobj) {
+			luabind::object overloadTable(luabind::newtable(L));
+			const char* function_name = fobj->name.c_str();
+			for(luabind::detail::function_object const* f = fobj; f != 0; f = f->next)
+			{
+				f->format_signature(L, function_name);
+				luabind::detail::stack_pop pop(L, 1);
+
+				if(Lua::IsString(L,-1))
+				{
+					std::string def = Lua::CheckString(L,-1);
+					auto overloadInfo = parse_function_overload(def);
+					if(overloadInfo.has_value())
+						method.overloads.push_back(*overloadInfo);
+				}
+			}
+		}
+	}
+};
+
 static LuaClassInfo get_class_info(lua_State *L,luabind::detail::class_rep *crep)
 {
 	crep->get_table(L);
@@ -423,45 +456,14 @@ static LuaClassInfo get_class_info(lua_State *L,luabind::detail::class_rep *crep
 		luabind::object member(*i);
 		member.push(L);
 		luabind::detail::stack_pop pop(L, 1);
-
-		if(lua_tocfunction(L, -1) == &luabind::detail::property_tag)
+		
+		auto attr = i.key();
+		attr.push(L);
+		if(Lua::IsString(L,-1))
 		{
-			auto attr = i.key();
-			attr.push(L);
-			if(Lua::IsString(L,-1))
-				result.attributes.push_back(Lua::CheckString(L,-1));
+			std::string name = Lua::CheckString(L,-1);
 			Lua::Pop(L,1);
-		} else
-		{
-			auto method = i.key();
-			method.push(L);
-			if(Lua::IsString(L,-1))
-			{
-				result.methods.push_back({});
-				auto &method = result.methods.back();
-				method.name = Lua::CheckString(L,-1);
-
-				auto &omethod = *i;
-				luabind::detail::function_object * fobj = luabind::get_function_object(omethod);
-				if(fobj) {
-					luabind::object overloadTable(luabind::newtable(L));
-					const char* function_name = fobj->name.c_str();
-					for(luabind::detail::function_object const* f = fobj; f != 0; f = f->next)
-					{
-						f->format_signature(L, function_name);
-						luabind::detail::stack_pop pop(L, 1);
-
-						if(Lua::IsString(L,-1))
-						{
-							std::string def = Lua::CheckString(L,-1);
-							auto overloadInfo = parse_function_overload(def);
-							if(overloadInfo.has_value())
-								method.overloads.push_back(*overloadInfo);
-						}
-					}
-				}
-				Lua::Pop(L,1);
-			}
+			parse_lua_property(L,name,*i,result);
 		}
 	}
 	return result;
@@ -507,10 +509,34 @@ static void strip_base_class_methods(std::unordered_map<luabind::detail::class_r
 	}
 }
 
-static void iterate_libraries(luabind::object o,std::vector<luabind::object> &traversed)
+static void add_function(pragma::doc::Collection &collection,const LuaMethodInfo &method)
+{
+	auto fc = pragma::doc::Function::Create(collection,method.name);
+	for(auto &overloadInfo : method.overloads)
+	{
+		auto overload = pragma::doc::Overload::Create();
+		uint32_t argIdx = 1;
+		for(auto &type : overloadInfo.parameters)
+		{
+			auto param = pragma::doc::Parameter::Create("arg" +std::to_string(argIdx++));
+			param.SetType(type);
+			overload.AddParameter(param);
+		}
+		if(overloadInfo.returnValue != "void")
+		{
+			auto param = pragma::doc::Parameter::Create("ret1");
+			param.SetType(overloadInfo.returnValue);
+			overload.AddReturnValue(param);
+		}
+		fc.AddOverload(overload);
+	}
+	collection.AddFunction(fc);
+}
+static void iterate_libraries(luabind::object o,std::vector<luabind::object> &traversed,pragma::doc::Collection &collection)
 {
 	if(std::find(traversed.begin(),traversed.end(),o) != traversed.end())
 		return; // Prevent infinite recursion
+	LuaClassInfo classInfo {};
 	traversed.push_back(o);
 	for(luabind::iterator it{o},end;it!=end;++it)
 	{
@@ -519,23 +545,171 @@ static void iterate_libraries(luabind::object o,std::vector<luabind::object> &tr
 		if(type == LUA_TTABLE)
 		{
 			auto libName = luabind::object_cast_nothrow<std::string>(it.key(),std::string{});
-			//std::cout<<"LIBRARY: "<<libName<<std::endl;
-			iterate_libraries(val,traversed);
+			std::cout<<"LIB: "<<libName<<std::endl;
+			if(libName.empty())
+				std::cout<<"";
+			else
+			{
+				auto subCollection = pragma::doc::Collection::Create();
+				subCollection->SetName(libName);
+				iterate_libraries(val,traversed,*subCollection);
+				collection.AddChild(subCollection);
+			}
 		}
 		else if(type == LUA_TFUNCTION)
 		{
 			auto fcName = luabind::object_cast_nothrow<std::string>(it.key(),std::string{});
 			luabind::detail::function_object * fobj = luabind::get_function_object(val);
 			if(fobj)
+			{
 				std::cout<<"FUN: "<<fcName<<std::endl;
+				parse_lua_property(o.interpreter(),fcName,val,classInfo);
+			}
 		}
 	}
+
+	for(auto &methodInfo : classInfo.methods)
+		add_function(collection,methodInfo);
 }
 
-static void iterate_libraries(luabind::object o)
+static void iterate_libraries(luabind::object o,pragma::doc::Collection &collection)
 {
 	std::vector<luabind::object> traversed {};
-	iterate_libraries(o,traversed);
+	iterate_libraries(o,traversed,collection);
+}
+
+static void save_parameter(udm::LinkedPropertyWrapper &udmParam,const pragma::doc::Parameter &param)
+{
+	udmParam["type"] = param.GetType();
+	udmParam["flags"] = magic_enum::flags::enum_name(param.GetFlags());
+	udmParam["gameStateFlags"] = magic_enum::flags::enum_name(param.GetGameStateFlags());
+
+	auto &def = param.GetDefault();
+	if(def.has_value())
+		udmParam["default"] = *def;
+
+	auto &subType = param.GetSubType();
+	if(subType.has_value())
+		udmParam["subType"] = *subType;
+
+	auto &subSubType = param.GetSubSubType();
+	if(subSubType.has_value())
+		udmParam["subSubType"] = *subSubType;
+}
+
+static void save_collection(udm::LinkedPropertyWrapper &udmCollection,const pragma::doc::PCollection &collection)
+{
+	udmCollection["desc"] = collection->GetDescription();
+	udmCollection["url"] = collection->GetURL();
+	udmCollection["flags"] = magic_enum::flags::enum_name(collection->GetFlags());
+	udmCollection["manualInputRequired"] = true;
+
+	auto udmFunctions = udmCollection["functions"];
+	for(auto &f : collection->GetFunctions())
+	{
+		auto udmFunction = udmFunctions[f.GetName()];
+		udmFunction["desc"] = f.GetDescription();
+		udmFunction["url"] = f.GetURL();
+		udmFunction["type"] = f.GetType();
+		udmFunction["flags"] = magic_enum::flags::enum_name(f.GetFlags());
+		udmFunction["gameStateFlags"] = magic_enum::flags::enum_name(f.GetGameStateFlags());
+		udmFunction["related"] = f.GetRelated();
+		udmFunction["manualInputRequired"] = true;
+
+		auto exampleCode = f.GetExampleCode();
+		if(exampleCode.has_value())
+		{
+			auto udmExampleCode = udmFunction["exampleCode"];
+			udmExampleCode["code"] = exampleCode->code;
+			udmExampleCode["desc"] = exampleCode->description;
+		}
+
+		auto &overloads = f.GetOverloads();
+		if(!overloads.empty())
+		{
+			auto udmOverloads = udmFunction.AddArray("overloads",overloads.size());
+			uint32_t idx = 0;
+			for(auto &overload : overloads)
+			{
+				auto udmOverload = udmOverloads[idx++];
+
+				auto udmParams = udmOverload["params"];
+				for(auto &param : overload.GetParameters())
+				{
+					auto udmParam = udmParams[param.GetName()];
+					save_parameter(udmParam,param);
+				}
+
+				auto udmReturnValues = udmOverload["returnValues"];
+				for(auto &param : overload.GetReturnValues())
+				{
+					auto udmReturnValue = udmReturnValues[param.GetName()];
+					save_parameter(udmReturnValue,param);
+				}
+			}
+		}
+
+		auto &groups = f.GetGroups();
+		if(!groups.empty())
+		{
+			auto udmGroups = udmFunction.AddArray("groups",groups.size());
+			uint32_t idx = 0;
+			for(auto &group : groups)
+			{
+				auto udmGroup = udmGroups[idx++];
+				udmGroup["name"] = group.GetName();
+			}
+		}
+	}
+		
+	auto udmMembers = udmCollection["members"];
+	for(auto &m : collection->GetMembers())
+	{
+		auto udmMember = udmMembers[m.GetName()];
+		udmMember["type"] = m.GetType();
+		udmMember["desc"] = m.GetDescription();
+		udmMember["gameStateFlags"] = magic_enum::flags::enum_name(m.GetGameStateFlags());
+		auto &def = m.GetDefault();
+		if(def.has_value())
+			udmMember["default"] = *def;
+		udmMember["mode"] = m.GetMode();
+	}
+		
+	auto udmEnumSets = udmCollection["enumSets"];
+	for(auto &es : collection->GetEnumSets())
+	{
+		auto udmEnumSet = udmEnumSets[es->GetName()];
+		udmEnumSet["underlyingType"] = es->GetUnderlyingType();
+
+		auto udmEnums = udmEnumSet["enums"];
+		for(auto &e : es->GetEnums())
+		{
+			auto udmEnum = udmEnums[e.GetName()];
+			udmEnum["value"] = e.GetValue();
+			udmEnum["desc"] = e.GetDescription();
+			udmEnum["type"] = e.GetType();
+			udmEnum["gameStateFlags"] = magic_enum::flags::enum_name(e.GetGameStateFlags());
+		}
+	}
+
+	std::vector<std::string> derivedFromNames;
+	auto &derivedFrom = collection->GetDerivedFrom();
+	derivedFromNames.reserve(derivedFrom.size());
+	for(auto &df : derivedFrom)
+		derivedFromNames.push_back(df->GetName());
+
+	udmCollection["derivedFrom"] = derivedFromNames;
+
+	auto &children = collection->GetChildren();
+	auto udmChildren = udmCollection["children"];
+	for(auto &child : children)
+		save_collection(udmChildren[child->GetName()],child);
+}
+static void save_collections(udm::LinkedPropertyWrapper &udm,const std::vector<pragma::doc::PCollection> &collections)
+{
+	auto udmCollections = udm["collections"];
+	for(auto &collection : collections)
+		save_collection(udmCollections[collection->GetName()],collection);
 }
 
 static void autogenerate(lua_State *L)
@@ -545,7 +719,34 @@ static void autogenerate(lua_State *L)
 
 	std::unordered_map<luabind::detail::class_rep*,LuaClassInfo> classInfo {};
 	for(const auto &cl : classes)
+	{
+		std::cout<<"CL: "<<cl.second->name()<<std::endl;
 		classInfo[cl.second] = get_class_info(L,cl.second);
+	}
+
+	{
+		/*auto x = luabind::globals(L)["vector"]["to_min_max"];
+
+		//lua_State * L = fn.interpreter();
+		{
+			x.push(L);
+			luabind::detail::stack_pop pop(L, 1);
+			if(!luabind::detail::is_luabind_function(L, -1)) {
+				return;
+			}
+		}
+		auto *f = luabind::object_cast<luabind::detail::function_object*>(x);
+		std::cout<<f;*/
+		/*luabind::detail::function_object * fobj = luabind::get_function_object(x);
+		if(fobj) {
+			luabind::object overloadTable(luabind::newtable(L));
+			const char* function_name = fobj->name.c_str();
+			std::cout<<"function_name: "<<function_name<<std::endl;
+		}*/
+	}
+
+	//luabind::detail::reg
+	//luabind::detail::get
 
 	for(auto &pair : classInfo)
 		strip_base_class_methods(classInfo,pair.second,pair.second);
@@ -557,6 +758,7 @@ static void autogenerate(lua_State *L)
 	{
 		auto &classInfo = pair.second;
 		auto collection = pragma::doc::Collection::Create();
+		collection->SetName(pair.second.name);
 		collection->SetFlags(pragma::doc::Collection::Flags::Class);
 
 		for(auto *base : classInfo.bases)
@@ -573,27 +775,23 @@ static void autogenerate(lua_State *L)
 		}
 
 		for(auto &method : classInfo.methods)
-		{
-			auto fc = pragma::doc::Function::Create(*collection,method.name);
-			for(auto &overloadInfo : method.overloads)
-			{
-				auto overload = pragma::doc::Overload::Create();
-				for(auto &paramInfo : overloadInfo.parameters)
-				{
-					auto param = pragma::doc::Parameter::Create(paramInfo);
-					overload.AddParameter(param);
-				}
-				if(overloadInfo.returnValue != "void")
-				{
-					auto param = pragma::doc::Parameter::Create(overloadInfo.returnValue);
-					overload.AddReturnValue(param);
-				}
-				fc.AddOverload(overload);
-			}
-		}
+			add_function(*collection,method);
 		collections.push_back(collection);
 	}
-	iterate_libraries(luabind::globals(L));
+	collections.push_back(pragma::doc::Collection::Create());
+	collections.back()->SetName("_G");
+	iterate_libraries(luabind::globals(L),*collections.back());
+
+	auto udmData = udm::Data::Create("PDOC",1);
+	try
+	{
+	save_collections(udmData->GetAssetData().GetData(),collections);
+	}
+	catch(const std::exception &e)
+	{
+		std::cout<<"E: "<<e.what()<<std::endl;
+	}
+	udmData->SaveAscii("test_doc.udm");
 #if 0
 	std::stringstream ss;
 	for(auto &pair : classInfo)
@@ -984,3 +1182,4 @@ void Lua::doc::register_library(Lua::Interface &lua)
 	}));
 	docLib[cdefCollection];
 }
+#pragma optimize("",on)

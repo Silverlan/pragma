@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_RESOURCE_WATCHER_HPP__
@@ -33,6 +33,7 @@ class DLLCLIENT CResourceWatcherManager
 	: public ResourceWatcherManager
 {
 protected:
+	virtual void OnMaterialReloaded(const std::string &path,const std::unordered_set<Model*> &modelMap) override;
 	virtual void OnResourceChanged(const std::string &path,const std::string &ext) override;
 	virtual void ReloadTexture(const std::string &path) override;
 	virtual void GetWatchPaths(std::vector<std::string> &paths) override;

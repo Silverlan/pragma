@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_SHADER_TEXTURED_HPP__
@@ -16,21 +16,96 @@ namespace pragma
 {
 	const float DefaultParallaxHeightScale = 0.025f;
 	const float DefaultAlphaDiscardThreshold = 0.99f;
-	class DLLCLIENT ShaderTextured3DBase
-		: public ShaderEntity
+
+	enum class GameShaderSpecializationConstantFlag : uint32_t
+	{
+		None = 0u,
+
+		// Static
+		EnableLightMapsBit = 1u,
+		EnableAnimationBit = EnableLightMapsBit<<1u,
+		EnableMorphTargetAnimationBit = EnableAnimationBit<<1u,
+
+		// Dynamic
+		EmissionEnabledBit = EnableMorphTargetAnimationBit<<1u,
+		WrinklesEnabledBit = EmissionEnabledBit<<1u,
+		EnableTranslucencyBit = WrinklesEnabledBit<<1u,
+		EnableRmaMapBit = EnableTranslucencyBit<<1u,
+		EnableNormalMapBit = EnableRmaMapBit<<1u,
+		ParallaxEnabledBit = EnableNormalMapBit<<1u,
+		EnableClippingBit = ParallaxEnabledBit<<1u,
+		Enable3dOriginBit = EnableClippingBit<<1u,
+		EnableExtendedVertexWeights = Enable3dOriginBit<<1u,
+		EnableDepthBias = EnableExtendedVertexWeights<<1u,
+
+		PermutationCount = (EnableDepthBias<<1u) -1,
+		Last = EnableDepthBias
+	};
+
+	class DLLCLIENT ShaderSpecializationManager
 	{
 	public:
-		enum class Pipeline : uint32_t
+		using PassType = uint32_t;
+		using SpecializationFlags = uint64_t;
+		using ConstantId = uint32_t;
+		uint32_t GetPipelineCount() const {return m_pipelineSpecializations.size();}
+		std::optional<uint32_t> FindSpecializationPipelineIndex(PassType passType,SpecializationFlags specializationFlags) const;
+		template<typename TPassType,typename TSpecializationFlags>
+			std::optional<uint32_t> FindSpecializationPipelineIndex(TPassType passType,TSpecializationFlags specializationFlags) const
+			{
+				return FindSpecializationPipelineIndex(static_cast<PassType>(passType),static_cast<SpecializationFlags>(specializationFlags));
+			}
+	protected:
+		bool IsSpecializationConstantSet(uint32_t pipelineIdx,SpecializationFlags flag) const;
+		template<typename TSpecializationConstantFlag>
+			bool IsSpecializationConstantSet(uint32_t pipelineIdx,TSpecializationConstantFlag flag) const
+			{
+				return IsSpecializationConstantSet(pipelineIdx,static_cast<SpecializationFlags>(flag));
+			}
+		void RegisterSpecializations(PassType passType,SpecializationFlags staticFlags,SpecializationFlags dynamicFlags);
+		template<typename TPassType,typename TSpecializationConstantFlag>
+			void RegisterSpecializations(TPassType passType,TSpecializationConstantFlag staticFlags,TSpecializationConstantFlag dynamicFlags)
+			{
+				RegisterSpecializations(static_cast<PassType>(passType),static_cast<SpecializationFlags>(staticFlags),static_cast<SpecializationFlags>(dynamicFlags));
+			}
+		template<typename TSpecializationConstantFlag>
+			bool AddSpecializationConstant(prosper::ShaderGraphics &shader,prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx,prosper::ShaderStageFlags stageFlags,TSpecializationConstantFlag flag)
 		{
-			Regular = umath::to_integral(ShaderScene::Pipeline::Regular),
-			MultiSample = umath::to_integral(ShaderScene::Pipeline::MultiSample),
-			//LightMap = umath::to_integral(ShaderScene::Pipeline::LightMap),
+			uint32_t isSet = static_cast<uint32_t>(IsSpecializationConstantSet(pipelineIdx,flag));
+			return shader.AddSpecializationConstant(pipelineInfo,stageFlags,umath::get_least_significant_set_bit_index(umath::to_integral(flag)),sizeof(uint32_t),&isSet);
+		}
+	private:
+		std::vector<SpecializationFlags> m_pipelineSpecializations;
+		// Per pass-type
+		std::vector<std::array<uint32_t,umath::to_integral(GameShaderSpecializationConstantFlag::PermutationCount)>> m_specializationToPipelineIdx;
+	};
 
-			Reflection = umath::to_integral(ShaderScene::Pipeline::Count),
-			Count
-		};
-		static Pipeline GetPipelineIndex(prosper::SampleCountFlags sampleCount,bool bReflection=false);
-		static uint32_t HASH_TYPE;
+	enum class GameShaderSpecializationPropertyIndex : uint32_t
+	{
+		Start = umath::get_least_significant_set_bit_index_c(umath::to_integral(GameShaderSpecializationConstantFlag::Last)) +1,
+		ShadowQuality = Start,
+		DebugModeEnabled,
+		BloomOutputEnabled,
+		EnableSsao,
+		EnableIbl,
+		EnableDynamicLighting,
+		EnableDynamicShadows
+	};
+	enum class GameShaderSpecialization : uint32_t
+	{
+		Generic = 0,
+		Lightmapped,
+		Animated,
+		Count
+	};
+
+	class DLLCLIENT ShaderGameWorldLightingPass
+		: public ShaderGameWorld,
+		public ShaderSpecializationManager
+	{
+	public:
+		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_RENDER_BUFFER_INDEX;
+		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX;
 
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_ID;
@@ -53,11 +128,17 @@ namespace pragma
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDERER;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SHADOWS;
+		
+		enum class PassType : uint32_t
+		{
+			Generic = 0u,
+			Reflection
+		};
 
 		enum class VertexBinding : uint32_t
 		{
@@ -89,7 +170,7 @@ namespace pragma
 			None = 0,
 			Diffuse = 0,
 			Normal = 1,
-			Parallax = Normal<<2,
+			Parallax = Normal<<1,
 			Glow = Parallax<<1,
 			Translucent = Glow<<1,
 			BlackToAlpha = Translucent<<1,
@@ -103,39 +184,21 @@ namespace pragma
 			GlowSRGB = DiffuseSRGB<<1u
 		};
 
-		enum class StateFlags : uint32_t
-		{
-			None = 0u,
-			ClipPlaneBound = 1u,
-			ShouldUseLightMap = ClipPlaneBound<<1u,
-			RenderAs3DSky = ShouldUseLightMap<<1u,
-			DisableShadows = RenderAs3DSky<<1u
-		};
-
 #pragma pack(push,1)
-		enum class RenderFlags : uint32_t
-		{
-			None = 0u,
-			LightmapsEnabled = 1u,
-
-			// PBR only
-			NoIBL = LightmapsEnabled<<1u,
-
-			TranslucencyEnabled = NoIBL<<1u,
-			UseExtendedVertexWeights = TranslucencyEnabled<<1u,
-			Is3DSky = UseExtendedVertexWeights<<1u,
-			DisableShadows = Is3DSky<<1u
-		};
-
 		struct PushConstants
+			: public ScenePushConstants
 		{
-			Vector4 clipPlane;
-			Vector4 drawOrigin; // w is scale
-			uint32_t vertexAnimInfo;
-			RenderFlags flags;
-			static_assert(sizeof(pragma::CSceneComponent::DebugMode) == sizeof(uint32_t));
-			pragma::CSceneComponent::DebugMode debugMode;
+			static_assert(sizeof(pragma::SceneDebugMode) == sizeof(uint32_t));
+			pragma::SceneDebugMode debugMode;
 			float reflectionProbeIntensity;
+			Vector2 padding;
+
+			void Initialize()
+			{
+				ScenePushConstants::Initialize();
+				debugMode = pragma::SceneDebugMode::None;
+				reflectionProbeIntensity = 1.f;
+			}
 		};
 
 		struct MaterialData
@@ -155,32 +218,57 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		ShaderTextured3DBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
-		virtual ~ShaderTextured3DBase() override;
-		virtual bool BindClipPlane(const Vector4 &clipPlane);
+		ShaderGameWorldLightingPass(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
+		virtual ~ShaderGameWorldLightingPass() override;
+		// TODO: Clean this up, most of these are deprecated!
+		virtual bool BindClipPlane(const Vector4 &clipPlane) override;
 		virtual bool BeginDraw(
-			const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},Pipeline pipelineIdx=Pipeline::Regular,
+			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
-		);
-		virtual size_t GetBaseTypeHashCode() const override;
+		) override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
-		virtual bool BindMaterial(CMaterial &mat);
-		virtual bool Draw(CModelSubMesh &mesh) override;
+		virtual bool BindMaterial(CMaterial &mat) override;
+		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
+		virtual bool BindDrawOrigin(const Vector4 &drawOrigin) override;
+		virtual bool SetDepthBias(const Vector2 &depthBias) override;
 		virtual bool GetRenderBufferTargets(
 			CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
 			std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
 		) const override;
 		bool BindReflectionProbeIntensity(float intensity);
 		std::optional<MaterialData> UpdateMaterialBuffer(CMaterial &mat) const;
-		bool SetDebugMode(pragma::CSceneComponent::DebugMode debugMode);
-		void Set3DSky(bool is3dSky);
+		virtual bool SetDebugMode(pragma::SceneDebugMode debugMode) override;
+		virtual void Set3DSky(bool is3dSky) override;
 		void SetShadowsEnabled(bool enabled);
+
+		virtual uint32_t GetMaterialDescriptorSetIndex() const override;
+		virtual uint32_t GetCameraDescriptorSetIndex() const override;
+		virtual uint32_t GetRendererDescriptorSetIndex() const override;
+		virtual uint32_t GetInstanceDescriptorSetIndex() const override;
+		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override;
+		virtual uint32_t GetLightDescriptorSetIndex() const override;
+		std::optional<uint32_t> FindPipelineIndex(PassType passType,GameShaderSpecialization specialization,GameShaderSpecializationConstantFlag specializationFlags) const;
+		virtual GameShaderSpecializationConstantFlag GetMaterialPipelineSpecializationRequirements(CMaterial &mat) const;
+
+		//
+		virtual void RecordBindScene(
+			rendering::ShaderProcessor &shaderProcessor,
+			const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
+			prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
+			prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
+			prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
+			ShaderGameWorld::SceneFlags &inOutSceneFlags
+		) const override;
+		virtual bool IsUsingLightmaps() const override {return true;}
 	protected:
 		using ShaderEntity::Draw;
-		bool BindLightMapUvBuffer(CModelSubMesh &mesh,bool &outShouldUseLightmaps);
+		GameShaderSpecializationConstantFlag GetStaticSpecializationConstantFlags(GameShaderSpecialization specialization) const;
+		bool BindLightMapUvBuffer(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,bool &outShouldUseLightmaps);
+		virtual void OnPipelinesInitialized() override;
+		virtual bool BindRenderFlags(SceneFlags flags);
 		virtual void OnBindEntity(CBaseEntity &ent,CRenderComponent &renderC) override;
 		virtual void ApplyMaterialFlags(CMaterial &mat,MaterialFlags &outFlags) const;
-		virtual void UpdateRenderFlags(CModelSubMesh &mesh,RenderFlags &inOutFlags);
+		virtual void UpdateRenderFlags(CModelSubMesh &mesh,SceneFlags &inOutFlags);
 		virtual void OnPipelineBound() override;
 		virtual void OnPipelineUnbound() override;
 		virtual bool BindMaterialParameters(CMaterial &mat);
@@ -190,19 +278,11 @@ namespace pragma
 		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 		virtual void InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx);
 		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const;
-		virtual uint32_t GetMaterialDescriptorSetIndex() const;
-		virtual uint32_t GetCameraDescriptorSetIndex() const override;
-		virtual uint32_t GetRendererDescriptorSetIndex() const override;
-		virtual uint32_t GetInstanceDescriptorSetIndex() const override;
-		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override;
-		virtual uint32_t GetLightDescriptorSetIndex() const override;
 		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
-		StateFlags m_stateFlags = StateFlags::ShouldUseLightMap;
 	};
 };
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderTextured3DBase::MaterialFlags)
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderTextured3DBase::RenderFlags)
-REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderTextured3DBase::StateFlags)
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderGameWorldLightingPass::MaterialFlags)
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::GameShaderSpecializationConstantFlag)
 
 #endif

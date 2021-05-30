@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __PROP_BASE_H__
 #define __PROP_BASE_H__
@@ -34,7 +34,6 @@ namespace pragma
 		virtual void OnEntitySpawn() override;
 	protected:
 		void InitializePhysics();
-		float m_kvMaxVisibleDist = 0.f;
 		float m_kvScale;
 		float m_kvMass = std::numeric_limits<float>::quiet_NaN();
 		BasePropComponent(BaseEntity &ent);

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -21,7 +21,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_light_point,CEnvLightPoint);
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 static const std::array<Vector3,6> directions = {
@@ -50,17 +50,17 @@ void CLightPointComponent::Initialize()
 		auto pRenderComponent = ent.GetRenderComponent();
 		auto pTrComponent = ent.GetTransformComponent();
 		auto pTrComponentThis = GetEntity().GetTransformComponent();
-		if(pRenderComponent.expired() || pTrComponent.expired() || pTrComponentThis.expired())
+		if(!pRenderComponent || pTrComponent == nullptr || !pTrComponentThis)
 		{
 			shouldPassData.shouldPass = false;
 			return util::EventReply::Handled;
 		}
 		//auto &start = pTrComponentThis->GetPosition();
-		auto sphere = pRenderComponent->GetRenderSphereBounds();
+		auto &sphere = pRenderComponent->GetUpdatedAbsoluteRenderSphere();
 		for(auto i=decltype(directions.size()){0};i<directions.size();++i)
 		{
 			//auto &dir = directions[i];
-			if(Intersection::SphereInPlaneMesh(pTrComponent->GetPosition() +sphere.pos -this->GetEntity().GetPosition(),sphere.radius,m_frustumPlanes.at(i),true) != INTERSECT_OUTSIDE)
+			if(umath::intersection::sphere_in_plane_mesh(sphere.pos -this->GetEntity().GetPosition(),sphere.radius,m_frustumPlanes.at(i),true) != umath::intersection::Intersect::Outside)
 				shouldPassData.renderFlags |= 1<<i;
 			//if(pLightComponent->IsInCone(shouldPassData.entity,dir,ang) == true)
 			//	shouldPassData.renderFlags |= 1<<i;
@@ -167,15 +167,22 @@ void CLightPointComponent::OnEntityComponentAdded(BaseEntityComponent &component
 	}
 	else if(typeid(component) == typeid(CTransformComponent))
 	{
-		FlagCallbackForRemoval(static_cast<CTransformComponent&>(component).GetPosProperty()->AddCallback([this](std::reference_wrapper<const Vector3> oldPos,std::reference_wrapper<const Vector3> pos) {
+		auto &trC = static_cast<CTransformComponent&>(component);
+		FlagCallbackForRemoval(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,&trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags,pragma::TransformChangeFlags::PositionChanged) == false)
+				return util::EventReply::Unhandled;
 			SetShadowDirty();
 			UpdateViewMatrices();
+			return util::EventReply::Unhandled;
 		}),CallbackType::Component,&component);
 	}
 	else if(typeid(component) == typeid(CLightComponent))
 		static_cast<CLightComponent&>(component).SetLight(*this);
 }
 luabind::object CLightPointComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CLightPointComponentHandleWrapper>(l);}
+
+const std::array<std::vector<umath::Plane>,6u> &CLightPointComponent::GetFrustumPlanes() const {return m_frustumPlanes;}
+const std::vector<umath::Plane> &CLightPointComponent::GetFrustumPlanes(CubeMapSide side) const {return m_frustumPlanes.at(umath::to_integral(side));}
 
 /////////////
 
@@ -193,7 +200,7 @@ void CLightPointComponent::UpdateViewMatrices()
 	auto b = m_bSkipMatrixUpdate;
 	m_bSkipMatrixUpdate = true;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 	SetViewMatrix(glm::lookAtRH(pos,pos +directions[umath::to_integral(CubeMapSide::Left)],Vector3(0,1,0)),umath::to_integral(CubeMapSide::Left));//umat::look_at(pos,pos +Vector3(1,0,0),Vector3(0,1,0)),1); // Vulkan TODO
 	SetViewMatrix(glm::lookAtRH(pos,pos +directions[umath::to_integral(CubeMapSide::Right)],Vector3(0,1,0)),umath::to_integral(CubeMapSide::Right));
 	SetViewMatrix(glm::lookAtRH(pos,pos +directions[umath::to_integral(CubeMapSide::Top)],Vector3(0,0,-1)),umath::to_integral(CubeMapSide::Top));

@@ -2,13 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
+// TODO: Remove this file
+#if 0
 #include "stdafx_client.h"
 #include "pragma/rendering/renderers/raytracing_renderer.hpp"
 #include "pragma/rendering/shaders/world/raytracing/c_shader_raytracing.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
 #include <prosper_descriptor_set_group.hpp>
 #include <image/prosper_sampler.hpp>
 #include <prosper_command_buffer.hpp>
@@ -17,7 +20,7 @@
 
 using namespace pragma::rendering;
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 bool RaytracingRenderer::Initialize(uint32_t w,uint32_t h)
@@ -39,9 +42,15 @@ bool RaytracingRenderer::Initialize(uint32_t w,uint32_t h)
 	m_dsgOutputImage = descSetImage;
 
 	m_dsgLights = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderRayTracing::DESCRIPTOR_SET_LIGHTS);
+#if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1
+	m_dsgLights->GetDescriptorSet()->SetBindingUniformBuffer(
+		const_cast<prosper::IUniformResizableBuffer&>(pragma::CLightComponent::GetGlobalRenderBuffer()),0
+	);
+#else
 	m_dsgLights->GetDescriptorSet()->SetBindingStorageBuffer(
 		const_cast<prosper::IUniformResizableBuffer&>(pragma::CLightComponent::GetGlobalRenderBuffer()),0
 	);
+#endif
 
 	m_whShader = c_engine->GetShader("raytracing");
 	return m_whShader.valid() && CRaytracingComponent::InitializeBuffers();
@@ -50,9 +59,13 @@ bool RaytracingRenderer::IsRayTracingRenderer() const {return true;}
 // TODO
 // void RaytracingRenderer::OnEntityAddedToScene(CBaseEntity &ent) {ent.AddComponent<CRaytracingComponent>();}
 //#include <wgui/types/wirect.h>
-bool RaytracingRenderer::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
+bool RaytracingRenderer::RecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo)
 {
-	if(m_whShader.expired() || BaseRenderer::RenderScene(drawSceneInfo) == false)
+	return BaseRenderer::RecordCommandBuffers(drawSceneInfo);
+}
+bool RaytracingRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
+{
+	if(m_whShader.expired() || BaseRenderer::Render(drawSceneInfo) == false)
 		return false;
 	auto &imgOutput = GetSceneTexture()->GetImage();
 	auto &drawCmd = drawSceneInfo.commandBuffer;
@@ -97,7 +110,7 @@ bool RaytracingRenderer::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 	for(auto *ent : entIt)
 	{
 		auto renderC = ent->GetComponent<CRenderComponent>();
-		renderC->UpdateRenderData(drawCmd);
+		//renderC->UpdateRenderData(drawCmd); // TODO: Camera pos
 	}
 
 	constexpr uint8_t localWorkGroupSize = 4;
@@ -182,3 +195,4 @@ prosper::Texture *RaytracingRenderer::GetHDRPresentationTexture()
 void RaytracingRenderer::EndRendering() {}
 prosper::IDescriptorSet &RaytracingRenderer::GetOutputImageDescriptorSet() {return *m_dsgOutputImage->GetDescriptorSet();}
 
+#endif

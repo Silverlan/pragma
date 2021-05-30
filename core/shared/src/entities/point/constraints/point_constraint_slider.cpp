@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -43,11 +43,11 @@ void BasePointConstraintSliderComponent::Initialize()
 void BasePointConstraintSliderComponent::InitializeConstraint(BaseEntity *src,BaseEntity *tgt)
 {
 	auto pPhysComponentTgt = tgt->GetPhysicsComponent();
-	auto *physTgt = pPhysComponentTgt.valid() ? dynamic_cast<RigidPhysObj*>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;
+	auto *physTgt = pPhysComponentTgt ? dynamic_cast<RigidPhysObj*>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;
 	if(physTgt == nullptr)
 		return;
 	auto pPhysComponentSrc = src->GetPhysicsComponent();
-	auto *physSrc = pPhysComponentSrc.valid() ? dynamic_cast<RigidPhysObj*>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
+	auto *physSrc = pPhysComponentSrc ? dynamic_cast<RigidPhysObj*>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
 	if(physSrc == nullptr)
 		return;
 	auto *bodySrc = physSrc->GetRigidBody();
@@ -58,7 +58,7 @@ void BasePointConstraintSliderComponent::InitializeConstraint(BaseEntity *src,Ba
 	auto *game = state->GetGameState();
 	auto *physEnv = game->GetPhysicsEnvironment();
 	auto pTrComponent = entThis.GetTransformComponent();
-	auto posThis = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto posThis = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 
 	auto dir = m_posTarget -posThis;
 	auto l = uvec::length(dir);
@@ -82,7 +82,7 @@ void BasePointConstraintSliderComponent::InitializeConstraint(BaseEntity *src,Ba
 		auto pivot1 = rigidBody0->GetPos();
 		auto rotation0 = -rot *uquat::create(EulerAngles(0,90,0));
 		auto rotation1 = rotation0;
-		rotation0 = tgt->GetTransformComponent()->GetOrientation() *rotation0;
+		rotation0 = tgt->GetTransformComponent()->GetRotation() *rotation0;
 
 		auto slider = physEnv->CreateSliderConstraint(*rigidBody0,pivot0,rotation0,*rigidBody1,pivot1,rotation1);
 		if(slider != nullptr)

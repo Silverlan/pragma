@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __LUTIL_H__
 #define __LUTIL_H__
@@ -14,9 +14,11 @@ struct TraceResult;
 namespace util {struct SplashDamageInfo; enum class VarType : uint8_t;};
 namespace Lua
 {
+	DLLNETWORK luabind::detail::class_rep *get_crep(luabind::object o);
 	DLLNETWORK void set_ignore_include_cache(bool b);
 	namespace global
 	{
+		DLLNETWORK luabind::object include(lua_State *l,const std::string &f,bool ignoreCache,bool reload);
 		DLLNETWORK luabind::object include(lua_State *l,const std::string &f,bool ignoreCache);
 		DLLNETWORK luabind::object include(lua_State *l,const std::string &f);
 		DLLNETWORK luabind::object exec(lua_State *l,const std::string &f);
@@ -76,6 +78,7 @@ namespace Lua
 		DLLNETWORK int get_type_name(lua_State *l);
 		DLLNETWORK std::string variable_type_to_string(::util::VarType varType);
 		DLLNETWORK std::string get_addon_path(lua_State *l);
+		DLLNETWORK std::string get_addon_path(lua_State *l,const std::string &relPath);
 		DLLNETWORK std::string get_string_hash(const std::string &str);
 		DLLNETWORK int get_class_value(lua_State *l);
 		DLLNETWORK int pack_zip_archive(lua_State *l);

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -21,7 +21,7 @@
 
 using namespace pragma;
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 LINK_ENTITY_TO_CLASS(c_water_surface,CWaterSurface);
@@ -33,20 +33,21 @@ void CWaterSurfaceComponent::Initialize()
 	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &ent = GetEntity();
 		auto pTrComponent = ent.GetTransformComponent();
-		auto scale = pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
+		auto scale = pTrComponent != nullptr ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
 		auto &matData = static_cast<CEOnUpdateRenderMatrices&>(evData.get());
 		matData.pose = {};
 		matData.transformation = glm::scale(umat::identity(),scale);
 		//matData.transformation = matData.translation *matData.rotation *glm::scale(umat::identity(),scale);
 	});
-	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		if(static_cast<CEOnUpdateRenderData&>(evData.get()).bufferUpdateRequired)
-			UpdateSurfaceMesh();
-	});
+	// TODO
+	//BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	//	if(static_cast<CEOnUpdateRenderData&>(evData.get()).bufferUpdateRequired)
+	//		UpdateSurfaceMesh();
+	//});
 
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(pRenderComponent.valid())
+	if(pRenderComponent)
 	{
 		pRenderComponent->SetRenderMode(RenderMode::Water);
 		pRenderComponent->SetCastShadows(false);
@@ -158,7 +159,7 @@ void CWaterSurfaceComponent::InitializeSurface()
 	meshGroup->AddMesh(mesh);
 	mdl->Update(ModelUpdateFlags::All); // TODO: Don't update vertex and index buffers
 	auto mdlComponent = GetEntity().GetModelComponent();
-	if(mdlComponent.valid())
+	if(mdlComponent)
 		mdlComponent->SetModel(mdl);
 
 	prosper::util::BufferCreateInfo bufCreateInfo {};
@@ -198,13 +199,13 @@ luabind::object CWaterSurfaceComponent::InitializeLuaObject(lua_State *l) {retur
 const Vector3 &CWaterSurfaceComponent::GetPosition() const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	return pTrComponent.valid() ? pTrComponent->GetPosition() : uvec::ORIGIN;
+	return pTrComponent != nullptr ? pTrComponent->GetPosition() : uvec::ORIGIN;
 }
 const Quat &CWaterSurfaceComponent::GetOrientation() const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	static auto identity = uquat::identity();
-	return pTrComponent.valid() ? pTrComponent->GetOrientation() : identity;
+	return pTrComponent != nullptr ? pTrComponent->GetRotation() : identity;
 }
 
 ////////////

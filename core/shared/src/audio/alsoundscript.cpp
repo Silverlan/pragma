@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -302,6 +302,8 @@ void ALSoundScript::PostUpdate()
 				InitializeEvent(ev);
 		}
 	}
+	if(numSounds == 0 && GetState() == ALState::Playing)
+		SetState(ALState::Stopped);
 	auto numEvents = m_events.size();
 	for(size_t i=0;i<numEvents;i++)
 	{

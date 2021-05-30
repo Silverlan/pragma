@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -17,15 +17,20 @@
 #include "pragma/lua/classes/lcollisionmesh.h"
 #include "luasystem.h"
 #include "pragma/model/model.h"
+#include "pragma/asset/util_asset.hpp"
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/model/vertex.h"
 #include "pragma/physics/physsoftbodyinfo.hpp"
 #include "pragma/model/animation/vertex_animation.hpp"
+#include "pragma/model/animation/flex_animation.hpp"
 #include "pragma/model/modelmesh.h"
 #include <luabind/iterator_policy.hpp>
 #include <pragma/lua/lua_call.hpp>
+#include <sharedutils/util_path.hpp>
+#include <sharedutils/util_file.h>
+#include <udm.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 
 void Lua::ModelMeshGroup::register_class(luabind::class_<::ModelMeshGroup> &classDef)
@@ -96,13 +101,13 @@ void Lua::Joint::GetType(lua_State *l,JointInfo &joint)
 {
 	Lua::PushInt(l,joint.type);
 }
-void Lua::Joint::GetCollisionMeshId(lua_State *l,JointInfo &joint)
+void Lua::Joint::GetChildBoneId(lua_State *l,JointInfo &joint)
 {
-	Lua::PushInt(l,joint.src);
+	Lua::PushInt(l,joint.child);
 }
-void Lua::Joint::GetParentCollisionMeshId(lua_State *l,JointInfo &joint)
+void Lua::Joint::GetParentBoneId(lua_State *l,JointInfo &joint)
 {
-	Lua::PushInt(l,joint.dest);
+	Lua::PushInt(l,joint.parent);
 }
 void Lua::Joint::GetCollisionsEnabled(lua_State *l,JointInfo &joint)
 {
@@ -118,9 +123,9 @@ void Lua::Joint::GetKeyValues(lua_State *l,JointInfo &joint)
 		Lua::SetTableValue(l,t);
 	}
 }
-void Lua::Joint::SetType(lua_State *l,JointInfo &joint,uint32_t type) {joint.type = type;}
-void Lua::Joint::SetCollisionMeshId(lua_State *l,JointInfo &joint,uint32_t meshId) {joint.src = meshId;}
-void Lua::Joint::SetParentCollisionMeshId(lua_State *l,JointInfo &joint,uint32_t meshId) {joint.dest = meshId;}
+void Lua::Joint::SetType(lua_State *l,JointInfo &joint,uint32_t type) {joint.type = static_cast<JointType>(type);}
+void Lua::Joint::SetCollisionMeshId(lua_State *l,JointInfo &joint,uint32_t meshId) {joint.child = meshId;}
+void Lua::Joint::SetParentCollisionMeshId(lua_State *l,JointInfo &joint,uint32_t meshId) {joint.parent = meshId;}
 void Lua::Joint::SetCollisionsEnabled(lua_State *l,JointInfo &joint,bool bEnabled) {joint.collide = bEnabled;}
 void Lua::Joint::SetKeyValues(lua_State *l,JointInfo &joint,luabind::object keyValues)
 {
@@ -147,6 +152,30 @@ void Lua::Joint::RemoveKeyValue(lua_State *l,JointInfo &joint,const std::string 
 
 //////////////////////////
 
+static std::ostream &operator<<(std::ostream &out,const Model &mdl)
+{
+	out<<"Model";
+
+	out<<"[Name:"<<mdl.GetName()<<"]";
+	out<<"[MeshGroups:"<<mdl.GetMeshGroups().size()<<"]";
+	out<<"[SubMeshes:"<<mdl.GetSubMeshCount()<<"]";
+	out<<"[Verts:"<<mdl.GetVertexCount()<<"]";
+	out<<"[Tris:"<<mdl.GetTriangleCount()<<"]";
+	out<<"[Materials:"<<mdl.GetMetaInfo().textures.size()<<"]";
+	out<<"[CollisionMeshes:"<<mdl.GetCollisionMeshes().size()<<"]";
+	out<<"[Anims:"<<mdl.GetAnimations().size()<<"]";
+	out<<"[Flexes:"<<mdl.GetFlexes().size()<<"]";
+	out<<"[FlexControllers:"<<mdl.GetFlexControllers().size()<<"]";
+	out<<"[MorphTargetAnims:"<<mdl.GetVertexAnimations().size()<<"]";
+	out<<"[IkControllers:"<<mdl.GetIKControllers().size()<<"]";
+	out<<"[Bones:"<<mdl.GetSkeleton().GetBones().size()<<"]";
+	out<<"[Mass:"<<mdl.GetMass()<<"]";
+	out<<"[Attachments:"<<mdl.GetAttachments().size()<<"]";
+	out<<"[Hitboxes:"<<mdl.GetHitboxCount()<<"]";
+	out<<"[Eyeballs:"<<mdl.GetEyeballs().size()<<"]";
+	return out;
+}
+
 void Lua::Model::register_class(
 	lua_State *l,
 	luabind::class_<::Model> &classDef,
@@ -154,6 +183,7 @@ void Lua::Model::register_class(
 	luabind::class_<::ModelSubMesh> &classDefModelSubMesh
 )
 {
+	classDef.def(luabind::tostring(luabind::self));
 	classDef.def(luabind::const_self == luabind::const_self);
 	classDef.def("GetCollisionMeshes",&GetCollisionMeshes);
 	classDef.def("ClearCollisionMeshes",&ClearCollisionMeshes);
@@ -260,7 +290,43 @@ void Lua::Model::register_class(
 	classDef.def("GetTextureGroupCount",&Lua::Model::GetTextureGroupCount);
 	classDef.def("GetTextureGroups",&Lua::Model::GetTextureGroups);
 	classDef.def("GetTextureGroup",&Lua::Model::GetTextureGroup);
-	classDef.def("Save",&Lua::Model::Save);
+	classDef.def("SaveLegacy",&Lua::Model::Save);
+	classDef.def("Save",static_cast<void(*)(lua_State*,::Model&,udm::AssetData&)>([](lua_State *l,::Model &mdl,udm::AssetData &assetData) {
+		auto *nw = engine->GetNetworkState(l);
+		auto *game = nw ? nw->GetGameState() : nullptr;
+		if(game == nullptr)
+			return;
+		std::string err;
+		auto result = mdl.Save(*game,assetData,err);
+		if(result == false)
+			Lua::PushString(l,err);
+		else
+			Lua::PushBool(l,result);
+	}));
+	classDef.def("Save",static_cast<void(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) {
+		auto *nw = engine->GetNetworkState(l);
+		auto *game = nw ? nw->GetGameState() : nullptr;
+		if(game == nullptr)
+			return;
+		std::string err;
+		auto result = mdl.Save(*game,err);
+		if(result == false)
+			Lua::PushString(l,err);
+		else
+			Lua::PushBool(l,result);
+	}));
+	classDef.def("Save",static_cast<void(*)(lua_State*,::Model&,const std::string&)>([](lua_State *l,::Model &mdl,const std::string &fname) {
+		auto *nw = engine->GetNetworkState(l);
+		auto *game = nw ? nw->GetGameState() : nullptr;
+		if(game == nullptr)
+			return;
+		std::string err;
+		auto result = mdl.Save(*game,fname,err);
+		if(result == false)
+			Lua::PushString(l,err);
+		else
+			Lua::PushBool(l,result);
+	}));
 	classDef.def("Copy",static_cast<void(*)(lua_State*,::Model&)>(&Lua::Model::Copy));
 	classDef.def("Copy",static_cast<void(*)(lua_State*,::Model&,uint32_t)>(&Lua::Model::Copy));
 	classDef.def("GetVertexCount",&Lua::Model::GetVertexCount);
@@ -296,6 +362,11 @@ void Lua::Model::register_class(
 	classDef.def("TranslateLODMeshes",static_cast<void(*)(lua_State*,::Model&,uint32_t,luabind::object)>(&Lua::Model::TranslateLODMeshes));
 	classDef.def("TranslateLODMeshes",static_cast<void(*)(lua_State*,::Model&,uint32_t)>(&Lua::Model::TranslateLODMeshes));
 	classDef.def("GetJoints",&Lua::Model::GetJoints);
+	classDef.def("AddJoint",static_cast<JointInfo*(*)(lua_State*,::Model&,JointType,BoneId,BoneId)>([](lua_State *l,::Model &mdl,JointType type,BoneId child,BoneId parent) -> JointInfo* {
+		auto &joint = mdl.AddJoint(type,child,parent);
+		return &joint;
+	}));
+	classDef.def("ClearJoints",static_cast<void(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) {mdl.GetJoints().clear();}));
 	classDef.def("GetVertexAnimations",&Lua::Model::GetVertexAnimations);
 	classDef.def("GetVertexAnimation",&Lua::Model::GetVertexAnimation);
 	classDef.def("AddVertexAnimation",&Lua::Model::AddVertexAnimation);
@@ -433,6 +504,52 @@ void Lua::Model::register_class(
 		Lua::PushBool(l,mdl.HasVertexWeights());
 	}));
 
+	// Flex animations
+	classDef.def("GetFlexAnimations",static_cast<luabind::object(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) -> luabind::object {
+		return Lua::vector_to_table(l,mdl.GetFlexAnimations());
+	}));
+	classDef.def("GetFlexAnimationNames",static_cast<luabind::object(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) -> luabind::object {
+		return Lua::vector_to_table(l,mdl.GetFlexAnimationNames());
+	}));
+	classDef.def("GetFlexAnimationCount",static_cast<uint32_t(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) -> uint32_t {
+		return mdl.GetFlexAnimations().size();
+	}));
+	classDef.def("AddFlexAnimation",static_cast<std::shared_ptr<FlexAnimation>(*)(lua_State*,::Model&,const std::string&)>([](lua_State *l,::Model &mdl,const std::string &name) -> std::shared_ptr<FlexAnimation> {
+		auto anim = std::make_shared<FlexAnimation>();
+		mdl.AddFlexAnimation(name,*anim);
+		return anim;
+	}));
+	classDef.def("AddFlexAnimation",static_cast<void(*)(lua_State*,::Model&,const std::string&,FlexAnimation&)>([](lua_State *l,::Model &mdl,const std::string &name,FlexAnimation &flexAnim) {
+		mdl.AddFlexAnimation(name,flexAnim);
+	}));
+	classDef.def("LookupFlexAnimation",static_cast<luabind::object(*)(lua_State*,::Model&,const std::string&)>([](lua_State *l,::Model &mdl,const std::string &name) -> luabind::object {
+		auto id = mdl.LookupFlexAnimation(name);
+		if(id.has_value() == false)
+			return {};
+		return luabind::object{l,*id};
+	}));
+	classDef.def("GetFlexAnimation",static_cast<luabind::object(*)(lua_State*,::Model&,uint32_t)>([](lua_State *l,::Model &mdl,uint32_t idx) -> luabind::object {
+		auto *flexAnim = mdl.GetFlexAnimation(idx);
+		if(flexAnim == nullptr)
+			return {};
+		return luabind::object{l,flexAnim->shared_from_this()};
+	}));
+	classDef.def("GetFlexAnimationName",static_cast<luabind::object(*)(lua_State*,::Model&,uint32_t)>([](lua_State *l,::Model &mdl,uint32_t idx) -> luabind::object {
+		auto *name = mdl.GetFlexAnimationName(idx);
+		if(name == nullptr)
+			return {};
+		return luabind::object{l,*name};
+	}));
+	classDef.def("ClearFlexAnimations",static_cast<void(*)(lua_State*,::Model&)>([](lua_State *l,::Model &mdl) {
+		mdl.GetFlexAnimations().clear();
+	}));
+	classDef.def("RemoveFlexAnimation",static_cast<void(*)(lua_State*,::Model&,uint32_t)>([](lua_State *l,::Model &mdl,uint32_t idx) {
+		auto &flexAnims = mdl.GetFlexAnimations();
+		if(idx >= flexAnims.size())
+			return;
+		flexAnims.erase(flexAnims.begin() +idx);
+	}));
+
 	classDef.add_static_constant("FLAG_NONE",umath::to_integral(::Model::Flags::None));
 	classDef.add_static_constant("FLAG_BIT_STATIC",umath::to_integral(::Model::Flags::Static));
 	classDef.add_static_constant("FLAG_BIT_INANIMATE",umath::to_integral(::Model::Flags::Inanimate));
@@ -453,7 +570,8 @@ void Lua::Model::register_class(
 	classDef.add_static_constant("FCOPY_BIT_MESHES",umath::to_integral(::Model::CopyFlags::CopyMeshesBit));
 	classDef.add_static_constant("FCOPY_BIT_ANIMATIONS",umath::to_integral(::Model::CopyFlags::CopyAnimationsBit));
 	classDef.add_static_constant("FCOPY_BIT_VERTEX_ANIMATIONS",umath::to_integral(::Model::CopyFlags::CopyVertexAnimationsBit));
-	classDef.add_static_constant("FCOPY_BIT_COLLISION_MESHES",umath::to_integral(::Model::CopyFlags::CopyCollisionMeshes));
+	classDef.add_static_constant("FCOPY_BIT_COLLISION_MESHES",umath::to_integral(::Model::CopyFlags::CopyCollisionMeshesBit));
+	classDef.add_static_constant("FCOPY_BIT_FLEX_ANIMATIONS",umath::to_integral(::Model::CopyFlags::CopyFlexAnimationsBit));
 	classDef.add_static_constant("FCOPY_DEEP",umath::to_integral(::Model::CopyFlags::DeepCopy));
 
 	classDef.add_static_constant("FUPDATE_NONE",umath::to_integral(ModelUpdateFlags::None));
@@ -488,44 +606,40 @@ void Lua::Model::register_class(
 	classDefEyeball.def_readwrite("maxDilationFactor",&::Eyeball::maxDilationFactor);
 	classDefEyeball.def_readwrite("irisUvRadius",&::Eyeball::irisUvRadius);
 	classDefEyeball.def_readwrite("irisScale",&::Eyeball::irisScale);
-	classDefEyeball.def("GetUpperFlexDesc",static_cast<void(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) {
-		auto t = Lua::CreateTable(l);
-		for(auto i=decltype(eyeball.upperFlexDesc.size()){0u};i<eyeball.upperFlexDesc.size();++i)
-		{
-			Lua::PushInt(l,i +1);
-			Lua::PushInt(l,eyeball.upperFlexDesc.at(i));
-			Lua::SetTableValue(l,t);
-		}
+	classDefEyeball.def("GetUpperLidFlexIndices",static_cast<luabind::object(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) -> luabind::object {
+		auto t = luabind::newtable(l);
+		t[1] = eyeball.upperLid.raiserFlexIndex;
+		t[2] = eyeball.upperLid.neutralFlexIndex;
+		t[3] = eyeball.upperLid.lowererFlexIndex;
+		return t;
 	}));
-	classDefEyeball.def("GetLowerFlexDesc",static_cast<void(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) {
-		auto t = Lua::CreateTable(l);
-		for(auto i=decltype(eyeball.lowerFlexDesc.size()){0u};i<eyeball.lowerFlexDesc.size();++i)
-		{
-			Lua::PushInt(l,i +1);
-			Lua::PushInt(l,eyeball.lowerFlexDesc.at(i));
-			Lua::SetTableValue(l,t);
-		}
+	classDefEyeball.def("GetUpperLidFlexAngles",static_cast<luabind::object(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) -> luabind::object {
+		auto t = luabind::newtable(l);
+		t[1] = eyeball.upperLid.raiserValue;
+		t[2] = eyeball.upperLid.neutralValue;
+		t[3] = eyeball.upperLid.lowererValue;
+		return t;
 	}));
-	classDefEyeball.def("GetUpperTarget",static_cast<void(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) {
-		auto t = Lua::CreateTable(l);
-		for(auto i=decltype(eyeball.upperTarget.size()){0u};i<eyeball.upperTarget.size();++i)
-		{
-			Lua::PushInt(l,i +1);
-			Lua::PushNumber(l,eyeball.upperTarget.at(i));
-			Lua::SetTableValue(l,t);
-		}
+	classDefEyeball.def("GetLowerLidFlexIndices",static_cast<luabind::object(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) -> luabind::object {
+		auto t = luabind::newtable(l);
+		t[1] = eyeball.lowerLid.raiserFlexIndex;
+		t[2] = eyeball.lowerLid.neutralFlexIndex;
+		t[3] = eyeball.lowerLid.lowererFlexIndex;
+		return t;
 	}));
-	classDefEyeball.def("GetLowerTarget",static_cast<void(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) {
-		auto t = Lua::CreateTable(l);
-		for(auto i=decltype(eyeball.lowerTarget.size()){0u};i<eyeball.lowerTarget.size();++i)
-		{
-			Lua::PushInt(l,i +1);
-			Lua::PushNumber(l,eyeball.lowerTarget.at(i));
-			Lua::SetTableValue(l,t);
-		}
+	classDefEyeball.def("GetLowerLidFlexAngles",static_cast<luabind::object(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) -> luabind::object {
+		auto t = luabind::newtable(l);
+		t[1] = eyeball.lowerLid.raiserValue;
+		t[2] = eyeball.lowerLid.neutralValue;
+		t[3] = eyeball.lowerLid.lowererValue;
+		return t;
 	}));
-	classDefEyeball.def_readwrite("lowerLidFlexDesc",&::Eyeball::lowerLidFlexDesc);
-	classDefEyeball.def_readwrite("upperLidFlexDesc",&::Eyeball::upperLidFlexDesc);
+	classDefEyeball.def("GetUpperLidFlexIndex",static_cast<int32_t(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) -> int32_t {
+		return eyeball.upperLid.lidFlexIndex;
+	}));
+	classDefEyeball.def("GetLowerLidFlexIndex",static_cast<int32_t(*)(lua_State*,Eyeball&)>([](lua_State *l,Eyeball &eyeball) -> int32_t {
+		return eyeball.lowerLid.lidFlexIndex;
+	}));
 	classDef.scope[classDefEyeball];
 
 	// Flex
@@ -600,9 +714,9 @@ void Lua::Model::register_class(
 		.def("GetBoneRotation",&Lua::Frame::GetBoneOrientation)
 		.def("SetBonePosition",&Lua::Frame::SetBonePosition)
 		.def("SetBoneRotation",&Lua::Frame::SetBoneOrientation)
-		.def("Localize",static_cast<void(*)(lua_State*,::Frame&,::Animation&,::Skeleton*)>(&Lua::Frame::Localize))
+		.def("Localize",static_cast<void(*)(lua_State*,::Frame&,pragma::animation::Animation&,::Skeleton*)>(&Lua::Frame::Localize))
 		.def("Localize",static_cast<void(*)(lua_State*,::Frame&,::Skeleton*)>(&Lua::Frame::Localize))
-		.def("Globalize",static_cast<void(*)(lua_State*,::Frame&,::Animation&,::Skeleton*)>(&Lua::Frame::Globalize))
+		.def("Globalize",static_cast<void(*)(lua_State*,::Frame&,pragma::animation::Animation&,::Skeleton*)>(&Lua::Frame::Globalize))
 		.def("Globalize",static_cast<void(*)(lua_State*,::Frame&,::Skeleton*)>(&Lua::Frame::Globalize))
 		.def("CalcRenderBounds",&Lua::Frame::CalcRenderBounds)
 		.def("Rotate",&Lua::Frame::Rotate)
@@ -673,10 +787,21 @@ void Lua::Model::register_class(
 	classDefFrame.scope[luabind::def("Create",&Lua::Frame::Create)];
 
 	// Animation
-	auto classDefAnimation = luabind::class_<::Animation>("Animation")
+	auto classDefAnimation = luabind::class_<pragma::animation::Animation>("Animation")
 		.def("GetFrame",&Lua::Animation::GetFrame)
 		.def("GetBoneList",&Lua::Animation::GetBoneList)
 		.def("GetActivity",&Lua::Animation::GetActivity)
+		.def("GetActivityName",static_cast<luabind::object(*)(lua_State*,pragma::animation::Animation&)>([](lua_State *l,pragma::animation::Animation &anim) -> luabind::object {
+			auto &reg = pragma::animation::Animation::GetActivityEnumRegister();
+			auto *name = reg.GetEnumName(umath::to_integral(anim.GetActivity()));
+			if(name == nullptr)
+				return {};
+			return luabind::object{l,*name};
+		}))
+		.def("GetBoneId",static_cast<int32_t(*)(lua_State*,pragma::animation::Animation&,uint32_t)>([](lua_State *l,pragma::animation::Animation &anim,uint32_t idx) -> int32_t {
+			auto boneList = anim.GetBoneList();
+			return (idx < boneList.size()) ? boneList[idx] : -1;
+		}))
 		.def("SetActivity",&Lua::Animation::SetActivity)
 		.def("GetActivityWeight",&Lua::Animation::GetActivityWeight)
 		.def("SetActivityWeight",&Lua::Animation::SetActivityWeight)
@@ -692,10 +817,10 @@ void Lua::Model::register_class(
 		.def("GetBoneCount",&Lua::Animation::GetBoneCount)
 		.def("GetFrameCount",&Lua::Animation::GetFrameCount)
 		.def("AddEvent",&Lua::Animation::AddEvent)
-		.def("GetEvents",static_cast<void(*)(lua_State*,::Animation&,uint32_t)>(&Lua::Animation::GetEvents))
-		.def("GetEvents",static_cast<void(*)(lua_State*,::Animation&)>(&Lua::Animation::GetEvents))
-		.def("GetEventCount",static_cast<void(*)(lua_State*,::Animation&,uint32_t)>(&Lua::Animation::GetEventCount))
-		.def("GetEventCount",static_cast<void(*)(lua_State*,::Animation&)>(&Lua::Animation::GetEventCount))
+		.def("GetEvents",static_cast<void(*)(lua_State*,pragma::animation::Animation&,uint32_t)>(&Lua::Animation::GetEvents))
+		.def("GetEvents",static_cast<void(*)(lua_State*,pragma::animation::Animation&)>(&Lua::Animation::GetEvents))
+		.def("GetEventCount",static_cast<void(*)(lua_State*,pragma::animation::Animation&,uint32_t)>(&Lua::Animation::GetEventCount))
+		.def("GetEventCount",static_cast<void(*)(lua_State*,pragma::animation::Animation&)>(&Lua::Animation::GetEventCount))
 		.def("GetFadeInTime",&Lua::Animation::GetFadeInTime)
 		.def("GetFadeOutTime",&Lua::Animation::GetFadeOutTime)
 		.def("GetBlendController",&Lua::Animation::GetBlendController)
@@ -717,14 +842,28 @@ void Lua::Model::register_class(
 		.def("SetBoneWeight",&Lua::Animation::SetBoneWeight)
 		.def("GetBoneWeight",&Lua::Animation::GetBoneWeight)
 		.def("GetBoneWeights",&Lua::Animation::GetBoneWeights)
-		.def("ClearFrames",static_cast<void(*)(lua_State*,::Animation&)>([](lua_State *l,::Animation &anim) {
+		.def("ClearFrames",static_cast<void(*)(lua_State*,pragma::animation::Animation&)>([](lua_State *l,pragma::animation::Animation &anim) {
 			anim.GetFrames().clear();
 		}))
-		.def("Save",static_cast<void(*)(lua_State*,::Animation&,LFile&)>([](lua_State *l,::Animation &anim,LFile &f) {
+		/*.def("GetBoneId",static_cast<void(*)(lua_State*,pragma::animation::Animation&,uint32_t)>([](lua_State *l,pragma::animation::Animation &anim,uint32_t idx) {
+			auto &boneList = anim.GetBoneList();
+			if(idx >= boneList.size())
+				return;
+			Lua::PushInt(l,boneList[idx]);
+		}))*/
+		.def("Save",static_cast<void(*)(lua_State*,pragma::animation::Animation&,udm::AssetData&)>([](lua_State *l,pragma::animation::Animation &anim,udm::AssetData &assetData) {
+			std::string err;
+			auto result = anim.Save(assetData,err);
+			if(result == false)
+				Lua::PushString(l,err);
+			else
+				Lua::PushBool(l,result);
+		}))
+		.def("SaveLegacy",static_cast<void(*)(lua_State*,pragma::animation::Animation&,LFile&)>([](lua_State *l,pragma::animation::Animation &anim,LFile &f) {
 			auto fptr = std::dynamic_pointer_cast<VFilePtrInternalReal>(f.GetHandle());
 			if(fptr == nullptr)
 				return;
-			anim.Save(fptr);
+			anim.SaveLegacy(fptr);
 		}));
 	classDefAnimation.scope[
 		luabind::def("Create",&Lua::Animation::Create),
@@ -739,6 +878,17 @@ void Lua::Model::register_class(
 		luabind::def("FindEventId",&Lua::Animation::FindEventId),
 		classDefFrame
 	];
+	classDefAnimation.scope[luabind::def("Load",static_cast<void(*)(lua_State*,udm::AssetData&)>([](lua_State *l,udm::AssetData &assetData) {
+		std::string err;
+		auto anim = pragma::animation::Animation::Load(assetData,err);
+		if(anim == nullptr)
+		{
+			Lua::PushBool(l,false);
+			Lua::PushString(l,err);
+			return;
+		}
+		Lua::Push(l,anim);
+	}))];
 	//for(auto &pair : ANIMATION_EVENT_NAMES)
 	//	classDefAnimation.add_static_constant(pair.second.c_str(),pair.first);
 
@@ -751,6 +901,128 @@ void Lua::Model::register_class(
 
 	//for(auto &pair : ACTIVITY_NAMES)
 	//	classDefAnimation.add_static_constant(pair.second.c_str(),pair.first);
+	
+	// Flex Animation
+	auto classDefFlexAnim = luabind::class_<FlexAnimation>("FlexAnimation");
+	classDefFlexAnim.def("GetFps",static_cast<float(*)(lua_State*,FlexAnimation&)>([](lua_State *l,FlexAnimation &flexAnim) -> float {
+		return flexAnim.GetFps();
+	}));
+	classDefFlexAnim.def("SetFps",static_cast<void(*)(lua_State*,FlexAnimation&,float)>([](lua_State *l,FlexAnimation &flexAnim,float fps) {
+		return flexAnim.SetFps(fps);
+	}));
+	classDefFlexAnim.def("GetFrames",static_cast<luabind::object(*)(lua_State*,FlexAnimation&)>([](lua_State *l,FlexAnimation &flexAnim) -> luabind::object {
+		return Lua::vector_to_table(l,flexAnim.GetFrames());
+	}));
+	classDefFlexAnim.def("GetFrame",static_cast<std::shared_ptr<FlexAnimationFrame>(*)(lua_State*,FlexAnimation&,uint32_t)>([](lua_State *l,FlexAnimation &flexAnim,uint32_t frameId) -> std::shared_ptr<FlexAnimationFrame> {
+		auto &frames = flexAnim.GetFrames();
+		if(frameId >= frames.size())
+			return nullptr;
+		return frames[frameId];
+	}));
+	classDefFlexAnim.def("GetFrameCount",static_cast<uint32_t(*)(lua_State*,FlexAnimation&)>([](lua_State *l,FlexAnimation &flexAnim) -> uint32_t {
+		return flexAnim.GetFrames().size();
+	}));
+	classDefFlexAnim.def("GetFlexControllerIds",static_cast<luabind::object(*)(lua_State*,FlexAnimation&)>([](lua_State *l,FlexAnimation &flexAnim) -> luabind::object {
+		return Lua::vector_to_table(l,flexAnim.GetFlexControllerIds());
+	}));
+	classDefFlexAnim.def("SetFlexControllerIds",static_cast<void(*)(lua_State*,FlexAnimation&,luabind::table<>)>([](lua_State *l,FlexAnimation &flexAnim,luabind::table<> tIds) {
+		flexAnim.SetFlexControllerIds(Lua::table_to_vector<FlexControllerId>(l,tIds,2));
+	}));
+	classDefFlexAnim.def("AddFlexControllerId",static_cast<uint32_t(*)(lua_State*,FlexAnimation&,FlexControllerId)>([](lua_State *l,FlexAnimation &flexAnim,FlexControllerId id) -> uint32_t {
+		return flexAnim.AddFlexControllerId(id);
+	}));
+	classDefFlexAnim.def("SetFlexControllerValue",static_cast<void(*)(lua_State*,FlexAnimation&,uint32_t,FlexControllerId,float)>([](lua_State *l,FlexAnimation &flexAnim,uint32_t frameId,FlexControllerId id,float val) {
+		auto &frames = flexAnim.GetFrames();
+		frames.reserve(frameId +1);
+		while(frames.size() <= frameId)
+			flexAnim.AddFrame();
+
+		auto &frame = frames[frameId];
+		auto idx = flexAnim.AddFlexControllerId(id);
+		frame->GetValues()[idx] = val;
+	}));
+	classDefFlexAnim.def("GetFlexControllerCount",static_cast<uint32_t(*)(lua_State*,FlexAnimation&)>([](lua_State *l,FlexAnimation &flexAnim) -> uint32_t {
+		auto &flexControllerIds = flexAnim.GetFlexControllerIds();
+		return flexControllerIds.size();
+	}));
+	classDefFlexAnim.def("LookupLocalFlexControllerIndex",static_cast<luabind::object(*)(lua_State*,FlexAnimation&,FlexControllerId)>([](lua_State *l,FlexAnimation &flexAnim,FlexControllerId id) -> luabind::object {
+		auto &ids = flexAnim.GetFlexControllerIds();
+		auto it = std::find(ids.begin(),ids.end(),id);
+		if(it == ids.end())
+			return {};
+		return luabind::object{l,it -ids.begin()};
+	}));
+	classDefFlexAnim.def("AddFrame",static_cast<std::shared_ptr<FlexAnimationFrame>(*)(lua_State*,FlexAnimation&)>([](lua_State *l,FlexAnimation &flexAnim) -> std::shared_ptr<FlexAnimationFrame> {
+		return flexAnim.AddFrame().shared_from_this();
+	}));
+	classDefFlexAnim.def("ClearFrames",static_cast<void(*)(lua_State*,FlexAnimation&)>([](lua_State *l,FlexAnimation &flexAnim) {
+		flexAnim.GetFrames().clear();
+	}));
+	classDefFlexAnim.def("RemoveFrame",static_cast<void(*)(lua_State*,FlexAnimation&,uint32_t)>([](lua_State *l,FlexAnimation &flexAnim,uint32_t idx) {
+		auto &frames = flexAnim.GetFrames();
+		if(idx >= frames.size())
+			return;
+		frames.erase(frames.begin() +idx);
+	}));
+	classDefFlexAnim.def("Save",static_cast<void(*)(lua_State*,FlexAnimation&,udm::AssetData&)>([](lua_State *l,FlexAnimation &flexAnim,udm::AssetData &assetData) {
+		std::string err;
+		auto result = flexAnim.Save(assetData,err);
+		if(result == false)
+			Lua::PushString(l,err);
+		else
+			Lua::PushBool(l,result);
+	}));
+	classDefFlexAnim.def("SaveLegacy",static_cast<bool(*)(lua_State*,FlexAnimation&,LFile&)>([](lua_State *l,FlexAnimation &flexAnim,LFile &f) -> bool {
+		auto fptr = std::dynamic_pointer_cast<VFilePtrInternalReal>(f.GetHandle());
+		if(fptr == nullptr)
+			return false;
+		return flexAnim.SaveLegacy(fptr);
+	}));
+	classDefFlexAnim.scope[luabind::def("Load",static_cast<luabind::object(*)(lua_State*,LFile&)>([](lua_State *l,LFile &f) -> luabind::object {
+		auto fptr = std::dynamic_pointer_cast<VFilePtrInternal>(f.GetHandle());
+		if(fptr == nullptr)
+			return {};
+		return luabind::object{l,FlexAnimation::Load(fptr)};
+	}))];
+	classDefFlexAnim.scope[luabind::def("Load",static_cast<void(*)(lua_State*,udm::AssetData&)>([](lua_State *l,udm::AssetData &assetData) {
+		std::string err;
+		auto anim = FlexAnimation::Load(assetData,err);
+		if(anim == nullptr)
+		{
+			Lua::PushBool(l,false);
+			Lua::PushString(l,err);
+			return;
+		}
+		Lua::Push(l,anim);
+	}))];
+
+	auto classDefFlexAnimFrame = luabind::class_<FlexAnimationFrame>("Frame");
+	classDefFlexAnimFrame.def("GetFlexControllerValues",static_cast<luabind::object(*)(lua_State*,FlexAnimationFrame&)>([](lua_State *l,FlexAnimationFrame &flexAnimFrame) -> luabind::object {
+		return Lua::vector_to_table(l,flexAnimFrame.GetValues());
+	}));
+	classDefFlexAnimFrame.def("SetFlexControllerValues",static_cast<void(*)(lua_State*,FlexAnimationFrame&,luabind::table<>)>([](lua_State *l,FlexAnimationFrame &flexAnimFrame,luabind::table<> t) {
+		flexAnimFrame.GetValues() = Lua::table_to_vector<float>(l,t,2);
+	}));
+	classDefFlexAnimFrame.def("GetFlexControllerValue",static_cast<void(*)(lua_State*,FlexAnimationFrame&,uint32_t)>([](lua_State *l,FlexAnimationFrame &flexAnimFrame,uint32_t id) {
+		auto &values = flexAnimFrame.GetValues();
+		if(id >= values.size())
+			return;
+		Lua::PushNumber(l,values[id]);
+	}));
+	classDefFlexAnimFrame.def("GetFlexControllerValueCount",static_cast<uint32_t(*)(lua_State*,FlexAnimationFrame&)>([](lua_State *l,FlexAnimationFrame &flexAnimFrame) -> uint32_t {
+		auto &values = flexAnimFrame.GetValues();
+		return values.size();
+	}));
+	classDefFlexAnimFrame.def("SetFlexControllerValue",static_cast<void(*)(lua_State*,FlexAnimationFrame&,uint32_t,float)>([](lua_State *l,FlexAnimationFrame &flexAnimFrame,uint32_t id,float val) {
+		auto &values = flexAnimFrame.GetValues();
+		if(id >= values.size())
+			return;
+		values[id] = val;
+	}));
+	classDefFlexAnim.scope[classDefFlexAnimFrame];
+
+	classDef.scope[classDefFlexAnim];
+
 
 	// Vertex Animation
 	auto classDefVertexAnimation = luabind::class_<::VertexAnimation>("VertexAnimation")
@@ -854,9 +1126,11 @@ void Lua::Model::register_class(
 
 	// Joint
 	auto defJoint = luabind::class_<JointInfo>("Joint");
+	defJoint.def_readwrite("collide",&JointInfo::collide);
+
 	defJoint.def("GetType",&Lua::Joint::GetType);
-	defJoint.def("GetCollisionMeshId",&Lua::Joint::GetCollisionMeshId);
-	defJoint.def("GetParentCollisionMeshId",&Lua::Joint::GetParentCollisionMeshId);
+	defJoint.def("GetChildBoneId",&Lua::Joint::GetChildBoneId);
+	defJoint.def("GetParentBoneId",&Lua::Joint::GetParentBoneId);
 	defJoint.def("GetCollisionsEnabled",&Lua::Joint::GetCollisionsEnabled);
 	defJoint.def("GetKeyValues",&Lua::Joint::GetKeyValues);
 
@@ -867,14 +1141,20 @@ void Lua::Model::register_class(
 	defJoint.def("SetKeyValues",&Lua::Joint::SetKeyValues);
 	defJoint.def("SetKeyValue",&Lua::Joint::SetKeyValue);
 	defJoint.def("RemoveKeyValue",&Lua::Joint::RemoveKeyValue);
+	defJoint.def("GetArgs",static_cast<luabind::object(*)(lua_State*,JointInfo&)>([](lua_State *l,JointInfo &jointInfo) -> luabind::object {
+		return Lua::map_to_table(l,jointInfo.args);
+	}));
+	defJoint.def("SetArgs",static_cast<void(*)(lua_State*,JointInfo&,luabind::table<>)>([](lua_State *l,JointInfo &jointInfo,luabind::table<> t) {
+		jointInfo.args = Lua::table_to_map<std::string,std::string>(l,t,2);
+	}));
 
-	defJoint.add_static_constant("TYPE_NONE",JOINT_TYPE_NONE);
-	defJoint.add_static_constant("TYPE_FIXED",JOINT_TYPE_FIXED);
-	defJoint.add_static_constant("TYPE_BALLSOCKET",JOINT_TYPE_BALLSOCKET);
-	defJoint.add_static_constant("TYPE_HINGE",JOINT_TYPE_HINGE);
-	defJoint.add_static_constant("TYPE_SLIDER",JOINT_TYPE_SLIDER);
-	defJoint.add_static_constant("TYPE_CONETWIST",JOINT_TYPE_CONETWIST);
-	defJoint.add_static_constant("TYPE_DOF",JOINT_TYPE_DOF);
+	defJoint.add_static_constant("TYPE_NONE",umath::to_integral(JointType::None));
+	defJoint.add_static_constant("TYPE_FIXED",umath::to_integral(JointType::Fixed));
+	defJoint.add_static_constant("TYPE_BALLSOCKET",umath::to_integral(JointType::BallSocket));
+	defJoint.add_static_constant("TYPE_HINGE",umath::to_integral(JointType::Hinge));
+	defJoint.add_static_constant("TYPE_SLIDER",umath::to_integral(JointType::Slider));
+	defJoint.add_static_constant("TYPE_CONETWIST",umath::to_integral(JointType::ConeTwist));
+	defJoint.add_static_constant("TYPE_DOF",umath::to_integral(JointType::DOF));
 	classDef.scope[defJoint];
 
 	// Assign definitions
@@ -1174,7 +1454,7 @@ void Lua::Model::GetAnimations(lua_State *l,::Model &mdl)
 	for(auto &anim : anims)
 	{
 		Lua::PushInt(l,idx++);
-		Lua::Push<std::shared_ptr<::Animation>>(l,anim);
+		Lua::Push<std::shared_ptr<pragma::animation::Animation>>(l,anim);
 		Lua::SetTableValue(l,t);
 	}
 }
@@ -1194,7 +1474,7 @@ void Lua::Model::GetAnimation(lua_State *l,::Model &mdl,unsigned int animID)
 	auto anim = mdl.GetAnimation(animID);
 	if(anim == nullptr)
 		return;
-	Lua::Push<std::shared_ptr<::Animation>>(l,anim);
+	Lua::Push<std::shared_ptr<pragma::animation::Animation>>(l,anim);
 }
 
 void Lua::Model::GetAnimation(lua_State *l,::Model &mdl,const char *name)
@@ -1486,13 +1766,18 @@ void Lua::Model::SetMaterial(lua_State *l,::Model &mdl,uint32_t matId,::Material
 void Lua::Model::GetMaterials(lua_State *l,::Model &mdl)
 {
 	//Lua::CheckModel(l,1);
+	auto *nw = engine->GetNetworkState(l);
+	auto &matManager = nw->GetMaterialManager();
 	auto t = Lua::CreateTable(l);
 	uint32_t idx = 1;
 	auto &mats = mdl.GetMaterials();
 	for(auto &mat : mats)
 	{
+		auto *pmat = mat.get();
+		if(pmat == nullptr)
+			pmat = matManager.GetErrorMaterial();
 		Lua::PushInt(l,idx++);
-		Lua::Push<Material*>(l,mat.get());
+		Lua::Push<Material*>(l,pmat);
 		Lua::SetTableValue(l,t);
 	}
 }
@@ -1693,7 +1978,7 @@ void Lua::Model::Save(lua_State *l,::Model &mdl,const std::string &name)
 		Lua::PushBool(l,false);
 		return;
 	}
-	auto r = mdl.Save(engine->GetNetworkState(l)->GetGameState(),mdlName,rootPath);
+	auto r = mdl.SaveLegacy(engine->GetNetworkState(l)->GetGameState(),mdlName,rootPath);
 	Lua::PushBool(l,r);
 }
 
@@ -1816,7 +2101,7 @@ void Lua::Model::SetEyeOffset(lua_State *l,::Model &mdl,const Vector3 &offset)
 	//Lua::CheckModel(l,1);
 	mdl.SetEyeOffset(offset);
 }
-void Lua::Model::AddAnimation(lua_State *l,::Model &mdl,const std::string &name,::Animation &anim)
+void Lua::Model::AddAnimation(lua_State *l,::Model &mdl,const std::string &name,pragma::animation::Animation &anim)
 {
 	//Lua::CheckModel(l,1);
 	Lua::PushInt(l,mdl.AddAnimation(name,anim.shared_from_this()));
@@ -2359,4 +2644,3 @@ void Lua::Model::RemoveObjectAttachment(lua_State *l,::Model &mdl,uint32_t idx)
 	//Lua::CheckModel(l,1);
 	mdl.RemoveObjectAttachment(idx);
 }
-

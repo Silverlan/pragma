@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __LUA_CLASS_MANAGER_HPP__
@@ -36,11 +36,12 @@ namespace pragma::lua
 		struct DLLNETWORK ClassInfo
 		{
 			luabind::object classObject;
+			luabind::object regFunc;
 			std::string className;
 		};
 
 		ClassManager(lua_State &l);
-		void RegisterClass(const std::string &className,luabind::object oClass);
+		void RegisterClass(const std::string &className,luabind::object oClass,luabind::object regFc);
 		bool IsClassRegistered(const ClassRef &classRef) const;
 		bool IsClassMethodDefined(const ClassRef &classRef,const std::string &methodName) const;
 		ClassInfo *FindClassInfo(const ClassRef &classRef);

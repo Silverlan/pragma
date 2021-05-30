@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -14,6 +14,7 @@
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_indexing.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
 #include "pragma/console/c_cvar.h"
 #include <wgui/types/wirect.h>
 #include <prosper_util.hpp>
@@ -22,26 +23,28 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <sharedutils/scope_guard.h>
+#include <pragma/entities/entity_iterator.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 static void cmd_forwardplus_tile_size(NetworkState*,ConVar*,int32_t,int32_t val)
 {
 	if(c_game == NULL)
 		return;
-	auto *scene = c_game->GetScene();
-	auto *renderer = scene ? scene->GetRenderer() : nullptr;
-	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
-		return;
-	auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
-	auto &fp = rasterizer->GetForwardPlusInstance();
-	auto &prepass = rasterizer->GetPrepass();
-	c_engine->GetRenderContext().WaitIdle();
-	fp.Initialize(c_engine->GetRenderContext(),scene->GetWidth(),scene->GetHeight(),*prepass.textureDepth);
-
+	
 	pragma::ShaderForwardPLightCulling::TILE_SIZE = val;
-	rasterizer->UpdateRenderSettings();
+	for(auto &c : EntityCIterator<pragma::CRasterizationRendererComponent>{*c_game})
+	{
+		auto &fp = c.GetForwardPlusInstance();
+		auto &prepass = c.GetPrepass();
+		c_engine->GetRenderContext().WaitIdle();
+		fp.Initialize(c_engine->GetRenderContext(),c.GetWidth(),c.GetHeight(),*prepass.textureDepth);
+		auto cRenderer = c.GetRendererComponent();
+		if(cRenderer)
+			cRenderer->UpdateRenderSettings();
+	}
+
 	c_engine->ReloadShader("forwardp_light_culling");
 }
 REGISTER_CONVAR_CALLBACK_CL(render_forwardplus_tile_size,cmd_forwardplus_tile_size);
@@ -73,18 +76,17 @@ static constexpr uint32_t get_shadow_integer_count()
 	return umath::to_integral(GameLimits::MaxAbsoluteShadowLights) /32u +1u;
 }
 
-pragma::rendering::ForwardPlusInstance::ForwardPlusInstance(RasterizationRenderer &rasterizer)
+pragma::rendering::ForwardPlusInstance::ForwardPlusInstance(CRasterizationRendererComponent &rasterizer)
 	: m_rasterizer{rasterizer}
 {
 	m_cmdBuffer = c_engine->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Compute,m_cmdBufferQueueFamilyIndex);
 
 	m_shaderLightCulling = c_engine->GetShader("forwardp_light_culling");
-	m_shaderLightIndexing = c_engine->GetShader("forwardp_light_indexing");
 }
 
 bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::IPrContext &context,uint32_t width,uint32_t height,prosper::Texture &depthTexture)
 {
-	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_LIGHTS.IsValid() == false)
+	if(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_LIGHTS.IsValid() == false)
 		return false;
 	auto workGroupCount = CalcWorkGroupCount(width,height);
 	m_workGroupCountX = workGroupCount.first;
@@ -108,11 +110,11 @@ bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::IPrContext &con
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUToCPU;
 	createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
 	m_bufVisLightIndex = context.CreateBuffer(createInfo,m_shadowLightBits.data());
-	m_bufVisLightIndex->SetPermanentlyMapped(true);
+	m_bufVisLightIndex->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::ReadBit);
 	m_bufVisLightIndex->SetDebugName("vis_light_index_buf");
 	
 	m_rasterizer.GetLightSourceDescriptorSet()->SetBindingStorageBuffer(
-		*m_bufTileVisLightIndex,umath::to_integral(pragma::ShaderTextured3DBase::LightBinding::TileVisLightIndexBuffer)
+		*m_bufTileVisLightIndex,umath::to_integral(pragma::ShaderGameWorldLightingPass::LightBinding::TileVisLightIndexBuffer)
 	);
 
 	auto &descSetCompute = *m_rasterizer.GetLightSourceDescriptorSetCompute();
@@ -128,7 +130,7 @@ bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::IPrContext &con
 
 void pragma::rendering::ForwardPlusInstance::Compute(prosper::IPrimaryCommandBuffer &cmdBuffer,pragma::CSceneComponent &scene,prosper::IImage &imgDepth,prosper::IDescriptorSet &descSetCam)
 {
-	if(m_shaderLightCulling.expired() || m_shaderLightIndexing.expired() || m_shadowLightBits.empty() == true)
+	if(m_shaderLightCulling.expired() || m_shadowLightBits.empty() == true)
 		return;
 	auto &shaderLightCulling = static_cast<pragma::ShaderForwardPLightCulling&>(*m_shaderLightCulling.get());
 	if(shaderLightCulling.BeginCompute(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(cmdBuffer.shared_from_this())) == false)
@@ -167,8 +169,9 @@ void pragma::rendering::ForwardPlusInstance::Compute(prosper::IPrimaryCommandBuf
 	auto sceneIndex = scene.GetSceneIndex();
 	auto vpWidth = m_rasterizer.GetWidth();
 	auto vpHeight = m_rasterizer.GetHeight();
+	auto &instance = LightDataBufferManager::GetInstance();
 	if(
-		shaderLightCulling.Compute(*m_rasterizer.GetLightSourceDescriptorSetCompute(),descSetCam,vpWidth,vpHeight,workGroupCount.first,workGroupCount.second,pragma::CLightComponent::GetLightCount(),sceneIndex) == false
+		shaderLightCulling.Compute(*m_rasterizer.GetLightSourceDescriptorSetCompute(),descSetCam,vpWidth,vpHeight,workGroupCount.first,workGroupCount.second,instance.GetLightDataBufferCount(),sceneIndex) == false
 	)
 		return;
 
@@ -180,7 +183,6 @@ void pragma::rendering::ForwardPlusInstance::Compute(prosper::IPrimaryCommandBuf
 	);
 
 	shaderLightCulling.EndCompute();
-
 	const auto szRead = m_shadowLightBits.size() *sizeof(m_shadowLightBits.front());
 	m_bufVisLightIndex->Read(0ull,szRead,m_shadowLightBits.data());
 }

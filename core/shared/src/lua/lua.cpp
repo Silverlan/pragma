@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -22,7 +22,7 @@
 #include <sharedutils/util_string.h>
 #include <sharedutils/util_file.h>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 Lua::Interface &Game::GetLuaInterface() {return *m_lua;}
 lua_State *Game::GetLuaState() {return (m_lua != nullptr) ? m_lua->GetState() : nullptr;}
@@ -114,13 +114,15 @@ Lua::StatusCode Game::ProtectedLuaCall(const std::function<Lua::StatusCode(lua_S
 	return r;
 }
 
-const std::array<std::string,4> &Game::GetLuaEntityDirectories() const
+const std::array<std::string,6> &Game::GetLuaEntityDirectories() const
 {
-	static std::array<std::string,4> dirs = {
+	static std::array<std::string,6> dirs = {
 		"entities",
 		"weapons",
 		"vehicles",
-		"npcs"
+		"npcs",
+		"gamemodes",
+		"players"
 	};
 	return dirs;
 }
@@ -167,14 +169,21 @@ bool Game::LoadLuaComponent(const std::string &mainPath,const std::string &compo
 {
 	auto nwStateDirName = GetLuaNetworkDirectoryName();
 	auto luaFileName = GetLuaNetworkFileName();
+	ufile::remove_extension_from_filename(luaFileName,std::array<std::string,2>{"lua","clua"});
 	auto nComponentName = FileManager::GetCanonicalizedPath(componentName);
 	auto filePath = "lua\\" +mainPath +"\\components\\" +nComponentName +'\\';
 	auto filePathLuaFile = filePath +luaFileName;
-	if(FileManager::Exists(filePathLuaFile) == false)
+	if(FileManager::Exists(filePathLuaFile +".lua"))
+		filePathLuaFile += ".lua";
+	else if(FileManager::Exists(filePathLuaFile +".clua"))
+		filePathLuaFile += ".clua";
+	else
 	{
 		auto filePathLuaFileNw = filePath +nwStateDirName +'\\' +luaFileName;
-		if(FileManager::Exists(filePathLuaFileNw))
-			filePathLuaFile = filePathLuaFileNw;
+		if(FileManager::Exists(filePathLuaFileNw +".lua"))
+			filePathLuaFile = filePathLuaFileNw +".lua";
+		else if(FileManager::Exists(filePathLuaFileNw +".clua"))
+			filePathLuaFile = filePathLuaFileNw +".clua";
 	}
 	return LoadLuaComponent(filePathLuaFile,mainPath,componentName);
 }
@@ -268,8 +277,7 @@ bool Game::LoadLuaComponentByName(const std::string &componentName)
 		auto luaFilePath = "lua\\" +typePath +"\\components\\" +componentName;
 		if(FileManager::IsDir(luaFilePath))
 			return LoadLuaComponent(typePath,componentName);
-		luaFilePath += ".lua";
-		if(FileManager::Exists(luaFilePath))
+		if(FileManager::Exists(luaFilePath +".lua") || FileManager::Exists(luaFilePath +".clua"))
 			return LoadLuaComponent(typePath,componentName);
 	}
 	return false;

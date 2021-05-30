@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -116,7 +116,7 @@ void BaseAIComponent::ResetPath()
 	auto &ent = GetEntity();
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
-	if((charComponent.valid() && charComponent->CanMove() == false) || m_moveInfo.moveOnPath == false || pTrComponent.expired())
+	if((charComponent.valid() && charComponent->CanMove() == false) || m_moveInfo.moveOnPath == false || !pTrComponent)
 		return;
 	m_navInfo.bPathUpdateRequired = true;
 	m_navInfo.bTargetReached = false;
@@ -227,8 +227,7 @@ void BaseAIComponent::SetMoveSpeed(int32_t animId,float speed)
 void BaseAIComponent::SetMoveSpeed(const std::string &name,float speed)
 {
 	m_animMoveSpeed[name] = speed;
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = GetEntity().GetModel();
 	if(hMdl == nullptr)
 		return;
 	auto animId = hMdl->LookupAnimation(name);
@@ -252,7 +251,7 @@ bool BaseAIComponent::GetMoveSpeed(int32_t animId,float &speed) const
 	}
 	speed = it->second;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 	{
 		auto &scale = pTrComponent->GetScale();
 		speed *= umath::abs_max(scale.x,scale.y,scale.z);
@@ -268,8 +267,7 @@ void BaseAIComponent::ClearMoveSpeed(int32_t animId)
 }
 void BaseAIComponent::ClearMoveSpeed(const std::string &name)
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = GetEntity().GetModel();
 	if(hMdl == nullptr)
 		return;
 	auto it = m_animMoveSpeed.find(name);
@@ -291,8 +289,7 @@ void BaseAIComponent::BlendAnimationMovement(std::vector<umath::Transform> &bone
 	//	return;
 	auto &ent = GetEntity();
 	auto animComponent = ent.GetAnimatedComponent();
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = GetEntity().GetModel();
 	if(animComponent.expired() || hMdl == nullptr/* || animComponent->GetActivity() != m_moveInfo.moveActivity*/)
 		return;
 	auto *anim = animComponent->GetAnimationObject();
@@ -344,7 +341,7 @@ bool BaseAIComponent::HasReachedDestination() const {return m_navInfo.bTargetRea
 float BaseAIComponent::GetDistanceToMoveTarget() const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.expired())
+	if(!pTrComponent)
 		return 0.f;
 	return uvec::distance(pTrComponent->GetPosition(),GetMoveTarget());
 }
@@ -377,7 +374,7 @@ void BaseAIComponent::PathStep(float)
 	auto &ent = GetEntity();
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
-	if((charComponent.valid() && charComponent->CanMove() == false) || pTrComponent.expired())
+	if((charComponent.valid() && charComponent->CanMove() == false) || !pTrComponent)
 		return;
 	auto &pos = pTrComponent->GetPosition();
 	const auto destReachDist = m_moveInfo.destinationTolerance;
@@ -486,7 +483,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 		return;
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(!pTrComponent)
 		return;
 	auto *game = ent.GetNetworkState()->GetGameState();
 	auto &t = game->CurTime();
@@ -499,7 +496,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 	auto pos = ent.GetCenter();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 
-	auto dstPos = pos +dir *(pPhysComponent.valid() ? (pPhysComponent->GetCollisionRadius() *1.1f) : 0.f);
+	auto dstPos = pos +dir *(pPhysComponent ? (pPhysComponent->GetCollisionRadius() *1.1f) : 0.f);
 
 	const auto fCheckForObstruction = [this,&pTrComponent,&dir,t](TraceResult &r) -> bool {
 		if(r.hitType != RayCastHitType::None && (r.entity.IsValid() == false || IsObstruction(*r.entity.get()))) // Obstructed
@@ -521,7 +518,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 	TraceData data {};
 	data.SetFilter(m_obstruction.sweepFilter);
 	data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 	{
 		data.SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter());
 		data.SetCollisionFilterMask(pPhysComponent->GetCollisionFilterMask());
@@ -531,7 +528,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 	auto charComponent = ent.GetCharacterComponent();
 	auto upDir = charComponent.valid() ? charComponent->GetUpDirection() : uvec::UP;
 	auto height = 0.f;
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 	{
 		Vector3 min,max;
 		pPhysComponent->GetCollisionBounds(&min,&max);
@@ -552,7 +549,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 			return;
 	}
 #else
-	auto *physObj = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	auto *physObj = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(physObj == nullptr || physObj->IsController() == false)
 		return;
 	auto *physController = static_cast<ControllerPhysObj*>(physObj);
@@ -578,7 +575,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 	data.SetTarget(dstPos);
 	data.SetFilter(m_obstruction.sweepFilter);
 	data.SetFlags(RayCastFlags::Default | RayCastFlags::InvertFilter);
-	if(pPhysComponent.valid())
+	if(pPhysComponent)
 	{
 		data.SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter());
 		data.SetCollisionFilterMask(pPhysComponent->GetCollisionFilterMask());
@@ -601,7 +598,7 @@ Vector2 BaseAIComponent::CalcMovementSpeed() const
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
-	if(pPhysComponent.valid() && (pPhysComponent->GetMoveType() != MOVETYPE::WALK || pPhysComponent->IsOnGround() == false))
+	if(pPhysComponent && (pPhysComponent->GetMoveType() != MOVETYPE::WALK || pPhysComponent->IsOnGround() == false))
 		return {pVelComponent.valid() ? uvec::length(pVelComponent->GetVelocity()) : 0.f,0.f};
 	auto speed = 0.f;
 	auto animComponent = ent.GetAnimatedComponent();
@@ -624,7 +621,7 @@ Vector3 BaseAIComponent::CalcMovementDirection(const Vector3&,const Vector3&) co
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
-	if(pPhysComponent.valid() && (pPhysComponent->GetMoveType() != MOVETYPE::WALK || pPhysComponent->IsOnGround() == false))
+	if(pPhysComponent && (pPhysComponent->GetMoveType() != MOVETYPE::WALK || pPhysComponent->IsOnGround() == false))
 	{
 		auto vel = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3{};
 		uvec::normalize(&vel);
@@ -634,22 +631,21 @@ Vector3 BaseAIComponent::CalcMovementDirection(const Vector3&,const Vector3&) co
 	{
 		auto bMoveForward = true;
 		auto animComponent = ent.GetAnimatedComponent();
-		auto mdlComponent = ent.GetModelComponent();
-		auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+		auto &hMdl = GetEntity().GetModel();
 		if(hMdl != nullptr && animComponent.valid())
 		{
 			auto anim = hMdl->GetAnimation(animComponent->GetAnimation());
 			if(anim != nullptr)
 			{
 				auto *bc = anim->GetBlendController();
-				if(ent.IsCharacter() && bc->controller == ent.GetCharacterComponent()->GetMoveController())
+				if(ent.IsCharacter() && bc && bc->controller == ent.GetCharacterComponent()->GetMoveController())
 					bMoveForward = false; // Animation has a move blend-controller, which means it probably allows sideways or backwards movement
 			}
 		}
 		if(bMoveForward == true)
 		{
 			auto pTrComponent = ent.GetTransformComponent();
-			return pTrComponent.valid() ? pTrComponent->GetForward() : uvec::FORWARD;
+			return pTrComponent ? pTrComponent->GetForward() : uvec::FORWARD;
 		}
 	}
 	return (m_moveInfo.moving == true) ? m_moveInfo.moveDir : Vector3{};

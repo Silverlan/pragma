@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -22,16 +22,15 @@
 #include <image/prosper_sampler.hpp>
 #include <prosper_command_buffer.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 bool pragma::rendering::Prepass::Initialize(prosper::IPrContext &context,uint32_t width,uint32_t height,prosper::SampleCountFlags samples,bool bExtended)
 {
 	m_shaderPrepass = context.GetShader("prepass");
-	m_shaderPrepassDepth = context.GetShader("prepass_depth");
 
 	prosper::util::ImageCreateInfo imgCreateInfo {};
-	imgCreateInfo.format = ShaderTextured3DBase::RENDER_PASS_DEPTH_FORMAT;
+	imgCreateInfo.format = ShaderGameWorldLightingPass::RENDER_PASS_DEPTH_FORMAT;
 	imgCreateInfo.width = width;
 	imgCreateInfo.height = height;
 	imgCreateInfo.samples = samples;
@@ -48,7 +47,7 @@ bool pragma::rendering::Prepass::Initialize(prosper::IPrContext &context,uint32_
 	samplerCreateInfo.addressModeW = prosper::SamplerAddressMode::ClampToEdge;
 	textureDepth = context.CreateTexture(texCreateInfo,*imgDepth,imgViewCreateInfo,samplerCreateInfo);
 
-	if(textureDepth->IsMSAATexture())
+	/*if(textureDepth->IsMSAATexture())
 		textureDepthSampled = static_cast<prosper::MSAATexture&>(*textureDepth).GetResolvedTexture();
 	else
 	{
@@ -59,7 +58,7 @@ bool pragma::rendering::Prepass::Initialize(prosper::IPrContext &context,uint32_
 
 		texCreateInfo.flags = {};
 		textureDepthSampled = context.CreateTexture(texCreateInfo,*imgDepthSampled,imgViewCreateInfo,samplerCreateInfo);
-	}
+	}*/
 
 	SetUseExtendedPrepass(bExtended,true);
 	return true;
@@ -67,7 +66,7 @@ bool pragma::rendering::Prepass::Initialize(prosper::IPrContext &context,uint32_
 
 pragma::ShaderPrepassBase &pragma::rendering::Prepass::GetShader() const
 {
-	return (m_bExtended == true) ? static_cast<pragma::ShaderPrepassBase&>(*m_shaderPrepass.get()) : static_cast<pragma::ShaderPrepassBase&>(*m_shaderPrepassDepth.get());
+	return static_cast<pragma::ShaderPrepassBase&>(*m_shaderPrepass.get());
 }
 
 bool pragma::rendering::Prepass::IsExtended() const {return m_bExtended;}
@@ -85,16 +84,14 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b,bool bForceReload)
 	auto width = extents.width;
 	auto height = extents.height;
 
-	auto whShaderPrepassDepth = c_engine->GetShader("prepass_depth");
 	auto whShaderPrepass = c_engine->GetShader("prepass");
-	if(whShaderPrepass.expired() || whShaderPrepassDepth.expired())
+	if(whShaderPrepass.expired())
 		return;
 
-	auto *shaderPrepassDepth = static_cast<pragma::ShaderPrepassDepth*>(whShaderPrepassDepth.get());
 	auto *shaderPrepass = static_cast<pragma::ShaderPrepass*>(whShaderPrepass.get());
 	auto sampleCount = imgDepth.GetSampleCount();
-	auto pipelineType = pragma::ShaderPrepassBase::GetPipelineIndex(sampleCount);
-	if(b == true)
+	//auto pipelineType = pragma::ShaderPrepassBase::GetPipelineIndex(sampleCount);
+	//if(b == true)
 	{
 		prosper::util::ImageCreateInfo imgCreateInfo {};
 		imgCreateInfo.samples = imgDepth.GetSampleCount();
@@ -114,14 +111,14 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b,bool bForceReload)
 		textureNormals = context.CreateTexture(texCreateInfo,*imgNormals,imgViewCreateInfo,samplerCreateInfo);
 
 		auto &imgDepth = textureDepth->GetImage();
-		renderTarget = context.CreateRenderTarget({textureNormals,textureDepth},shaderPrepass->GetRenderPass(umath::to_integral(pipelineType)));
+		renderTarget = context.CreateRenderTarget({textureNormals,textureDepth},shaderPrepass->GetRenderPass());//umath::to_integral(pipelineType)));
 		renderTarget->SetDebugName("prepass_depth_normal_rt");
 		m_clearValues = {
 			prosper::ClearValue{prosper::ClearColorValue{}}, // Unused, but required
 			prosper::ClearValue{prosper::ClearDepthStencilValue{1.f,0}} // Clear depth
 		};
 	}
-	else
+	/*else
 	{
 		textureNormals = nullptr;
 
@@ -130,13 +127,21 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b,bool bForceReload)
 		m_clearValues = {
 			prosper::ClearValue{prosper::ClearDepthStencilValue{1.f,0}} // Clear depth
 		};
-	}
+	}*/
+	prosper::util::RenderPassCreateInfo rpInfo {{
+		pragma::ShaderPrepass::get_normal_render_pass_attachment_info(sampleCount),
+		pragma::ShaderPrepass::get_depth_render_pass_attachment_info(sampleCount)
+	}};
+	for(auto &att : rpInfo.attachments)
+		att.loadOp = prosper::AttachmentLoadOp::Load;
+	subsequentRenderPass = c_engine->GetRenderContext().CreateRenderPass(rpInfo);
 }
 
-void pragma::rendering::Prepass::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo)
+prosper::RenderTarget &pragma::rendering::Prepass::BeginRenderPass(const util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass *optRenderPass,bool secondaryCommandBuffers)
 {
 	// prosper TODO: Barriers for imgDepth and imgNormals
-	drawSceneInfo.commandBuffer->RecordBeginRenderPass(*renderTarget,m_clearValues);
+	drawSceneInfo.commandBuffer->RecordBeginRenderPass(*renderTarget,m_clearValues,secondaryCommandBuffers ? prosper::IPrimaryCommandBuffer::RenderPassFlags::SecondaryCommandBuffers : prosper::IPrimaryCommandBuffer::RenderPassFlags::None,optRenderPass);
+	return *renderTarget;
 }
 void pragma::rendering::Prepass::EndRenderPass(const util::DrawSceneInfo &drawSceneInfo)
 {
@@ -167,11 +172,11 @@ void Console::commands::debug_prepass(NetworkState *state,pragma::BasePlayerComp
 
 	auto *scene = c_game->GetScene();
 	auto *renderer = scene ? scene->GetRenderer() : nullptr;
-	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+	if(raster.expired())
 		return;
-	auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
-	auto &ssaoInfo = rasterizer->GetSSAOInfo();
-	auto &prepass = rasterizer->GetPrepass();
+	auto &ssaoInfo = raster->GetSSAOInfo();
+	auto &prepass = raster->GetPrepass();
 
 	auto bExtended = prepass.IsExtended();
 	auto xOffset = 0u;

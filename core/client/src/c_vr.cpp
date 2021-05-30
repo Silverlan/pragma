@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -19,7 +19,7 @@
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 const std::string OPENVR_MODULE_PATH = "openvr/pr_openvr";
@@ -127,6 +127,7 @@ REGISTER_CONVAR_CALLBACK_CL(cl_render_vr_enabled,[](NetworkState*,ConVar*,bool,b
 	
 })*/
 
+#if 0
 static auto cvHmdViewEnabled = GetClientConVar("cl_vr_hmd_view_enabled");
 static void draw_vr(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::RenderTarget &rt)
 {
@@ -213,6 +214,7 @@ static void cl_vr_hmd_view_enabled(bool val)
 REGISTER_CONVAR_CALLBACK_CL(cl_vr_hmd_view_enabled,[](NetworkState*,ConVar*,bool,bool val) {
 	cl_vr_hmd_view_enabled(val);
 })
+#endif
 
 static void cl_vr_mirror_window_enabled(bool val)
 {

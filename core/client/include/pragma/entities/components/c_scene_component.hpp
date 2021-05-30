@@ -2,31 +2,39 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_SCENE_COMPONENT_HPP__
 #define __C_SCENE_COMPONENT_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/entities/c_baseentity.h"
 #include "pragma/rendering/shaders/world/c_shader_textured_uniform_data.hpp"
 #include "pragma/rendering/c_renderflags.h"
 #include "pragma/rendering/render_mesh_collection_handler.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <shader/prosper_descriptor_array_manager.hpp>
+#include <mathutil/plane.hpp>
 
 namespace pragma
 {
 	class CSceneComponent;
+	class CRenderComponent;
 	class CLightMapComponent;
 	class EntityComponentManager;
 	class CCameraComponent;
 	class OcclusionCullingHandler;
 	class CParticleSystemComponent;
 	class COcclusionCullerComponent;
+	class CRendererComponent;
+	class ShaderGameWorldLightingPass;
 	struct OcclusionMeshInfo;
-	namespace rendering {class BaseRenderer;};
+	using RenderMeshIndex = uint32_t;
+	namespace rendering {class RenderQueue; struct RenderQueueItem;};
 };
+template<class T>
+	class OcclusionOctree;
 class DLLCLIENT SceneRenderDesc
 {
 public:
@@ -38,6 +46,44 @@ public:
 		Octree,
 		Inert
 	};
+	enum class RenderQueueId : uint8_t
+	{
+		// Note: The order should match the actual render order for performance reasons!
+		Skybox = 0u,
+		SkyboxTranslucent,
+		World,
+		WorldTranslucent,
+		View,
+		ViewTranslucent,
+		Water,
+
+		Count,
+		Invalid = std::numeric_limits<uint8_t>::max()
+	};
+	using WorldMeshVisibility = std::vector<bool>;
+	// Note: All arguments have to be thread safe for the duration of the render (except vp)
+	static void AddRenderMeshesToRenderQueue(
+		const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,
+		const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
+		const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,
+		int32_t lodBias=0,const std::function<void(pragma::rendering::RenderQueue&,const pragma::rendering::RenderQueueItem&)> &fOptInsertItemToQueue=nullptr
+	);
+	// Note: All arguments have to be thread safe for the duration of the render (except vp)
+	static void CollectRenderMeshesFromOctree(
+		const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
+		const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
+		const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,const std::vector<util::BSPTree*> *bspTrees=nullptr,const std::vector<util::BSPTree::Node*> *bspLeafNodes=nullptr,
+		int32_t lodBias=0,
+		const std::function<bool(CBaseEntity&,const pragma::CSceneComponent&,FRender)> &shouldConsiderEntity=nullptr
+	);
+	static bool ShouldConsiderEntity(CBaseEntity &ent,const pragma::CSceneComponent &scene,FRender renderFlags);
+	static bool ShouldCull(CBaseEntity &ent,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);
+	static bool ShouldCull(pragma::CRenderComponent &renderC,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);
+	static bool ShouldCull(pragma::CRenderComponent &renderC,pragma::RenderMeshIndex meshIdx,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);
+	static bool ShouldCull(const Vector3 &min,const Vector3 &max,const std::vector<umath::Plane> &frustumPlanes);
+	static uint32_t GetActiveRenderQueueThreadCount();
+	static bool AssertRenderQueueThreadInactive();
+
 	SceneRenderDesc(pragma::CSceneComponent &scene);
 	~SceneRenderDesc();
 	const pragma::OcclusionCullingHandler &GetOcclusionCullingHandler() const;
@@ -45,7 +91,11 @@ public:
 	void SetOcclusionCullingHandler(const std::shared_ptr<pragma::OcclusionCullingHandler> &handler);
 	void SetOcclusionCullingMethod(OcclusionCullingMethod method);
 	void ReloadOcclusionCullingHandler();
-	void PrepareRendering(pragma::CSceneComponent &scene,RenderMode mode,FRender renderFlags,bool bUpdateTranslucentMeshes=false,bool bUpdateGlowMeshes=false);
+
+	void BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo);
+	void BuildRenderQueueInstanceLists(pragma::rendering::RenderQueue &renderQueue);
+
+	bool IsWorldMeshVisible(uint32_t worldRenderQueueIndex,pragma::RenderMeshIndex meshIdx) const;
 
 	// Culled objects
 	const std::vector<pragma::OcclusionMeshInfo> &GetCulledMeshes() const;
@@ -55,13 +105,33 @@ public:
 
 	pragma::rendering::RenderMeshCollectionHandler &GetRenderMeshCollectionHandler();
 	const pragma::rendering::RenderMeshCollectionHandler &GetRenderMeshCollectionHandler() const;
+	
+	void WaitForWorldRenderQueues() const;
 
-	void PerformOcclusionCulling();
-	void CollectRenderObjects(FRender renderFlags);
+	RenderQueueId GetRenderQueueId(RenderMode renderMode,bool translucent) const;
+	pragma::rendering::RenderQueue *GetRenderQueue(RenderMode renderMode,bool translucent);
+	const pragma::rendering::RenderQueue *GetRenderQueue(RenderMode renderMode,bool translucent) const;
+	const std::vector<std::shared_ptr<const pragma::rendering::RenderQueue>> &GetWorldRenderQueues() const;
 	pragma::rendering::CulledMeshData *GetRenderInfo(RenderMode mode) const;
 private:
+	void AddRenderMeshesToRenderQueue(
+		const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,
+		const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull
+	);
+	void CollectRenderMeshesFromOctree(
+		const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
+		const std::vector<umath::Plane> &frustumPlanes,const std::vector<util::BSPTree*> *bspTrees=nullptr,const std::vector<util::BSPTree::Node*> *bspLeafNodes=nullptr
+	);
+
+	// TODO: Remove these, they're obsolete
 	std::shared_ptr<pragma::OcclusionCullingHandler> m_occlusionCullingHandler = nullptr;
 	pragma::rendering::RenderMeshCollectionHandler m_renderMeshCollectionHandler = {};
+
+	std::vector<WorldMeshVisibility> m_worldMeshVisibility;
+	std::array<std::shared_ptr<pragma::rendering::RenderQueue>,umath::to_integral(RenderQueueId::Count)> m_renderQueues;
+	std::vector<std::shared_ptr<const pragma::rendering::RenderQueue>> m_worldRenderQueues;
+	std::atomic<bool> m_worldRenderQueuesReady = false;
+
 	pragma::CSceneComponent &m_scene;
 };
 
@@ -69,7 +139,7 @@ private:
 #pragma warning(disable : 4251)
 struct DLLCLIENT ShaderMeshContainer
 {
-	ShaderMeshContainer(pragma::ShaderTextured3DBase *shader);
+	ShaderMeshContainer(pragma::ShaderGameWorldLightingPass *shader);
 	ShaderMeshContainer(ShaderMeshContainer&)=delete;
 	ShaderMeshContainer &operator=(const ShaderMeshContainer &other)=delete;
 	::util::WeakHandle<prosper::Shader> shader = {};
@@ -78,8 +148,32 @@ struct DLLCLIENT ShaderMeshContainer
 #pragma warning(pop)
 
 class WorldEnvironment;
+struct RenderPassStats;
 namespace pragma
 {
+	namespace rendering {class EntityInstanceIndexBuffer;};
+	class CLightComponent;
+	enum class SceneDebugMode : uint32_t
+	{
+		None = 0,
+		AmbientOcclusion,
+		Albedo,
+		Metalness,
+		Roughness,
+		DiffuseLighting,
+		Normal,
+		NormalMap,
+		Reflectance,
+		IBLPrefilter,
+		IBLIrradiance,
+		Emission,
+		Lightmap,
+		LightmapUv,
+		Unlit,
+		CsmShowCascades,
+		ShadowMapDepth,
+		ForwardPlusHeatmap
+	};
 	class DLLCLIENT CSceneComponent final
 		: public BaseEntityComponent
 	{
@@ -87,6 +181,8 @@ namespace pragma
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
 		static ComponentEventId EVENT_ON_ACTIVE_CAMERA_CHANGED;
+		static ComponentEventId EVENT_ON_BUILD_RENDER_QUEUES;
+		static ComponentEventId EVENT_POST_RENDER_PREPASS;
 
 		friend SceneRenderDesc;
 		enum class FRenderSetting : uint32_t
@@ -95,23 +191,16 @@ namespace pragma
 			Unlit = 1
 		};
 
-		enum class DebugMode : uint32_t
+		enum class StateFlags : uint32_t
 		{
-			None = 0,
-			AmbientOcclusion,
-			Albedo,
-			Metalness,
-			Roughness,
-			DiffuseLighting,
-			Normal,
-			NormalMap,
-			Reflectance,
-			IBLPrefilter,
-			IBLIrradiance,
-			Emission
+			None = 0u,
+			ValidRenderer = 1u,
+			HasParentScene = ValidRenderer<<1u
 		};
 
+		// Note: Scene index is *not* unique, a child-scene will share its index with its parent!
 		using SceneIndex = uint8_t;
+		using SceneFlags = uint32_t;
 		struct DLLCLIENT CreateInfo
 		{
 			CreateInfo();
@@ -120,8 +209,10 @@ namespace pragma
 
 		static CSceneComponent *Create(const CreateInfo &createInfo,CSceneComponent *optParent=nullptr);
 		static CSceneComponent *GetByIndex(SceneIndex sceneIndex);
-		static uint32_t GetSceneFlag(SceneIndex sceneIndex);
-		static SceneIndex GetSceneIndex(uint32_t flag);
+		static SceneFlags GetSceneFlag(SceneIndex sceneIndex);
+		static SceneIndex GetSceneIndex(SceneFlags flag);
+		static const std::shared_ptr<rendering::EntityInstanceIndexBuffer> &GetEntityInstanceIndexBuffer();
+		static void UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const rendering::RenderQueue &renderQueue,RenderPassStats *optStats=nullptr);
 
 		CSceneComponent(BaseEntity &ent);
 		virtual void Initialize() override;
@@ -136,7 +227,7 @@ namespace pragma
 		void SetActiveCamera(pragma::CCameraComponent &cam);
 		void SetActiveCamera();
 
-		void Link(const CSceneComponent &other);
+		void Link(const CSceneComponent &other,bool linkCamera=true);
 		uint32_t GetWidth() const;
 		uint32_t GetHeight() const;
 		void Resize(uint32_t width,uint32_t height,bool reload=false);
@@ -164,12 +255,12 @@ namespace pragma
 		void LinkWorldEnvironment(CSceneComponent &other);
 		void SetLightMap(pragma::CLightMapComponent &lightMapC);
 
-		void SetRenderer(const std::shared_ptr<pragma::rendering::BaseRenderer> &renderer);
-		pragma::rendering::BaseRenderer *GetRenderer();
-		const pragma::rendering::BaseRenderer *GetRenderer() const;
+		void SetRenderer(CRendererComponent *renderer);
+		CRendererComponent *GetRenderer();
+		const CRendererComponent *GetRenderer() const;
 
-		DebugMode GetDebugMode() const;
-		void SetDebugMode(DebugMode debugMode);
+		SceneDebugMode GetDebugMode() const;
+		void SetDebugMode(SceneDebugMode debugMode);
 
 		SceneRenderDesc &GetSceneRenderDesc();
 		const SceneRenderDesc &GetSceneRenderDesc() const;
@@ -178,9 +269,20 @@ namespace pragma
 		const Vector4 &GetParticleSystemColorFactor() const;
 
 		pragma::COcclusionCullerComponent *FindOcclusionCuller();
+		const pragma::COcclusionCullerComponent *FindOcclusionCuller() const;
 		SceneIndex GetSceneIndex() const;
 		bool IsValid() const;
+		CSceneComponent *GetParentScene();
+		const CSceneComponent *GetParentScene() const {return const_cast<CSceneComponent*>(this)->GetParentScene();}
+
+		void BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo);
+
+		const std::vector<util::WeakHandle<pragma::CLightComponent>> &GetPreviouslyVisibleShadowedLights() const {return m_previouslyVisibleShadowedLights;}
+		void SwapPreviouslyVisibleLights(std::vector<util::WeakHandle<pragma::CLightComponent>> &&components) {std::swap(m_previouslyVisibleShadowedLights,components);}
+		
+		void RecordRenderCommandBuffers(const util::DrawSceneInfo &drawSceneInfo);
 	private:
+		static float CalcLightMapPowExposure(pragma::CLightMapComponent &lightMapC);
 		void InitializeShadowDescriptorSet();
 		void UpdateRendererLightMap();
 		// CSM Data
@@ -198,6 +300,7 @@ namespace pragma
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_camViewDescSetGroup = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_shadowDsg = nullptr;
 
+		std::vector<util::WeakHandle<pragma::CLightComponent>> m_previouslyVisibleShadowedLights;
 		util::WeakHandle<pragma::CLightMapComponent> m_lightMap = {};
 		util::WeakHandle<pragma::CCameraComponent> m_camera = {};
 		std::shared_ptr<prosper::IBuffer> m_cameraBuffer = nullptr;
@@ -206,7 +309,7 @@ namespace pragma
 		std::shared_ptr<prosper::IBuffer> m_renderSettingsBuffer = nullptr;
 		pragma::RenderSettings m_renderSettings = {};
 		pragma::CameraData m_cameraData = {};
-		DebugMode m_debugMode = DebugMode::None;
+		SceneDebugMode m_debugMode = SceneDebugMode::None;
 		Vector4 m_particleSystemColorFactor {1.f,1.f,1.f,1.f};
 
 		// Fog
@@ -219,8 +322,8 @@ namespace pragma
 		CallbackHandle m_cbFogCallback = {};
 		CallbackHandle m_cbLink {};
 
-		bool m_bValid = false;
-		std::shared_ptr<pragma::rendering::BaseRenderer> m_renderer = nullptr;
+		StateFlags m_stateFlags = StateFlags::None;
+		util::WeakHandle<CRendererComponent> m_renderer {};
 		SceneRenderDesc m_sceneRenderDesc;
 
 		void UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bView=false);
@@ -233,8 +336,19 @@ namespace pragma
 		void InitializeDescriptorSetLayouts();
 		void InitializeSwapDescriptorBuffers();
 	};
+
+	// Events
+
+	struct DLLCLIENT CEDrawSceneInfo
+		: public ComponentEvent
+	{
+		CEDrawSceneInfo(const util::DrawSceneInfo &drawSceneInfo);
+		virtual void PushArguments(lua_State *l) override;
+		const util::DrawSceneInfo &drawSceneInfo;
+	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::CSceneComponent::FRenderSetting);
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::CSceneComponent::StateFlags);
 
 class EntityHandle;
 class DLLCLIENT CScene

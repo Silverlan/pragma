@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -10,6 +10,7 @@
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/lua/l_entity_handles.hpp"
 #include <sharedutils/datastream.h>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -34,14 +35,16 @@ const std::string &GlobalNameComponent::GetGlobalName() const {return m_globalNa
 void GlobalNameComponent::SetGlobalName(const std::string &name) {m_globalName = name;}
 luabind::object GlobalNameComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<GlobalNameComponentHandleWrapper>(l);}
 
-void GlobalNameComponent::Save(DataStream &ds)
+void GlobalNameComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
-	BaseEntityComponent::Save(ds);
-	ds->WriteString(GetGlobalName());
+	BaseEntityComponent::Save(udm);
+	udm["name"] = GetGlobalName();
 }
 
-void GlobalNameComponent::Load(DataStream &ds,uint32_t version)
+void GlobalNameComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {
-	BaseEntityComponent::Load(ds,version);
-	SetGlobalName(ds->ReadString());
+	BaseEntityComponent::Load(udm,version);
+	auto name = m_globalName;
+	udm["name"](name);
+	SetGlobalName(name);
 }

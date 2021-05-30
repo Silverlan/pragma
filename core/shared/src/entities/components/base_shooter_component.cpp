@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -66,7 +66,7 @@ std::vector<Vector3> BaseShooterComponent::GetBulletDestinations(const Vector3 &
 void BaseShooterComponent::OnFireBullets(const BulletInfo &bulletInfo,Vector3 &bulletOrigin,Vector3 &bulletDir,Vector3 *effectsOrigin)
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 	{
 		bulletOrigin = pTrComponent->GetEyePosition();
 		bulletDir = pTrComponent->GetForward();
@@ -93,13 +93,13 @@ void BaseShooterComponent::GetBulletTraceData(const BulletInfo &bulletInfo,Trace
 			return RayCastHitType::None;
 		auto filterGroup = phys->GetCollisionFilter();
 		auto mdlComponent = ent->GetEntity().GetModelComponent();
-		if(mdlComponent.valid() && mdlComponent->GetHitboxCount() > 0 && (filterGroup &CollisionMask::NPC) != CollisionMask::None || (filterGroup &CollisionMask::Player) != CollisionMask::None) // Filter out player and NPC collision objects, since we only want to check their hitboxes
+		if(mdlComponent && mdlComponent->GetHitboxCount() > 0 && (filterGroup &CollisionMask::NPC) != CollisionMask::None || (filterGroup &CollisionMask::Player) != CollisionMask::None) // Filter out player and NPC collision objects, since we only want to check their hitboxes
 			return RayCastHitType::None;
 		return const_cast<BaseShooterComponent*>(this)->OnBulletHit(bulletInfo,data,*phys,body);
 	});
 	auto physComponent = GetEntity().GetPhysicsComponent();
 	auto filterGroup = CollisionMask::None;
-	if(physComponent.valid())
+	if(physComponent)
 		filterGroup = physComponent->GetCollisionFilter();
 	filterGroup |= CollisionMask::Water | CollisionMask::WaterSurface | CollisionMask::PlayerHitbox | CollisionMask::NPCHitbox;
 	data.SetCollisionFilterGroup(filterGroup);

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -24,7 +24,7 @@ static void apply_sound_identifier(ALSound &snd,const std::string &name)
 {
 	if(snd.IsSoundScript() == false)
 	{
-		static_cast<CALSound&>(snd).SetIdentifier(name);
+		static_cast<CALSound&>(snd)->SetIdentifier(name);
 		return;
 	}
 	auto *sndScript = dynamic_cast<ALSoundScript*>(&snd);

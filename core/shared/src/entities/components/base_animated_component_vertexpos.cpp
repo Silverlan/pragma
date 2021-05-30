@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -16,8 +16,7 @@ using namespace pragma;
 
 bool BaseAnimatedComponent::GetVertexPosition(uint32_t meshGroupId,uint32_t meshId,uint32_t subMeshId,uint32_t vertexId,Vector3 &pos) const
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = GetEntity().GetModel();
 	if(hMdl == nullptr)
 		return false;
 	auto meshGroup = hMdl->GetMeshGroup(meshGroupId);
@@ -95,16 +94,10 @@ bool BaseAnimatedComponent::GetLocalVertexPosition(const ModelSubMesh &subMesh,u
 bool BaseAnimatedComponent::GetVertexPosition(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 &pos) const
 {
 	auto &ent = GetEntity();
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr || GetLocalVertexPosition(subMesh,vertexId,pos) == false)
 		return false;
-	auto pTrComponent = ent.GetTransformComponent();
-	auto scale = pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
-	umath::Transform t;
-	ent.GetPose(t);
-	umath::ScaledTransform st {t};
-	st.SetScale(scale);
-	pos *= st;
+	auto &pose = ent.GetPose();
+	pos *= pose;
 	return true;
 }

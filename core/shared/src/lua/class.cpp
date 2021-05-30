@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -59,8 +59,12 @@
 #include <luainterface.hpp>
 #include <luabind/iterator_policy.hpp>
 #include <luabind/out_value_policy.hpp>
+#include <mathutil/inverse_kinematics/ik.hpp>
+#include <mathutil/inverse_kinematics/constraints.hpp>
+#include <sharedutils/magic_enum.hpp>
+#include <fsys/directory_watcher.h>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 std::ostream &operator<<(std::ostream &out,const ALSound &snd)
 {
@@ -115,6 +119,55 @@ std::ostream &operator<<(std::ostream &out,const ALSound &snd)
 }
 
 static void RegisterLuaMatrices(Lua::Interface &lua);
+static void RegisterIk(Lua::Interface &lua);
+
+static void create_directory_change_listener(lua_State *l,const std::string &path,luabind::object callback,DirectoryWatcherCallback::WatchFlags flags)
+{
+	Lua::CheckFunction(l,2);
+	try
+	{
+		auto listener = std::make_shared<DirectoryWatcherCallback>(path,[callback](const std::string &fileName) mutable {
+			callback(fileName);
+		},flags);
+		Lua::Push(l,listener);
+	}
+	catch(const std::runtime_error &err)
+	{
+		Lua::PushBool(l,false);
+		Lua::PushString(l,err.what());
+		return;
+	}
+	Lua::PushBool(l,false);
+	Lua::PushString(l,"Unknown error!");
+}
+
+static void register_directory_watcher(luabind::module_ &modUtil)
+{
+	auto defListener = luabind::class_<DirectoryWatcherCallback>("DirectoryChangeListener");
+	defListener.def(luabind::tostring(luabind::self));
+	defListener.add_static_constant("LISTENER_FLAG_NONE",umath::to_integral(DirectoryWatcherCallback::WatchFlags::None));
+	defListener.add_static_constant("LISTENER_FLAG_BIT_WATCH_SUB_DIRECTORIES",umath::to_integral(DirectoryWatcherCallback::WatchFlags::WatchSubDirectories));
+	defListener.add_static_constant("LISTENER_FLAG_ABSOLUTE_PATH",umath::to_integral(DirectoryWatcherCallback::WatchFlags::AbsolutePath));
+	defListener.add_static_constant("LISTENER_FLAG_START_DISABLED",umath::to_integral(DirectoryWatcherCallback::WatchFlags::StartDisabled));
+	defListener.add_static_constant("LISTENER_FLAG_WATCH_DIRECTORY_CHANGES",umath::to_integral(DirectoryWatcherCallback::WatchFlags::WatchDirectoryChanges));
+	static_assert(magic_enum::flags::enum_count<DirectoryWatcherCallback::WatchFlags>() == 4);
+	defListener.scope[luabind::def("create",static_cast<void(*)(lua_State*,const std::string&,luabind::object)>([](lua_State *l,const std::string &path,luabind::object callback) {
+		create_directory_change_listener(l,path,callback,DirectoryWatcherCallback::WatchFlags::None);
+	}))];
+	defListener.scope[luabind::def("create",static_cast<void(*)(lua_State*,const std::string&,luabind::object,DirectoryWatcherCallback::WatchFlags)>([](lua_State *l,const std::string &path,luabind::object callback,DirectoryWatcherCallback::WatchFlags flags) {
+		create_directory_change_listener(l,path,callback,flags);
+	}))];
+	defListener.def("Poll",static_cast<uint32_t(*)(lua_State*,DirectoryWatcherCallback&)>([](lua_State *l,DirectoryWatcherCallback &listener) {
+		return listener.Poll();
+	}));
+	defListener.def("SetEnabled",static_cast<void(*)(lua_State*,DirectoryWatcherCallback&,bool)>([](lua_State *l,DirectoryWatcherCallback &listener,bool enabled) {
+		listener.SetEnabled(enabled);
+	}));
+	defListener.def("IsEnabled",static_cast<bool(*)(lua_State*,DirectoryWatcherCallback&)>([](lua_State *l,DirectoryWatcherCallback &listener) {
+		return listener.IsEnabled();
+	}));
+	modUtil[defListener];
+}
 
 static Quat QuaternionConstruct() {return uquat::identity();}
 static Quat QuaternionConstruct(float w,float x,float y,float z) {return Quat(w,x,y,z);}
@@ -249,8 +302,10 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	});
 
 	auto &modUtil = lua.RegisterLibrary("util");
+	register_directory_watcher(modUtil);
 
 	auto defParallelJob = luabind::class_<util::BaseParallelJob>("ParallelJob");
+	defParallelJob.def(luabind::tostring(luabind::self));
 	defParallelJob.add_static_constant("JOB_STATUS_FAILED",umath::to_integral(util::JobStatus::Failed));
 	defParallelJob.add_static_constant("JOB_STATUS_SUCCESSFUL",umath::to_integral(util::JobStatus::Successful));
 	defParallelJob.add_static_constant("JOB_STATUS_INITIAL",umath::to_integral(util::JobStatus::Initial));
@@ -299,6 +354,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	modUtil[defParallelJob];
 
 	auto defImageBuffer = luabind::class_<uimg::ImageBuffer>("ImageBuffer");
+	defImageBuffer.def(luabind::tostring(luabind::self));
 	defImageBuffer.add_static_constant("FORMAT_NONE",umath::to_integral(uimg::ImageBuffer::Format::None));
 	defImageBuffer.add_static_constant("FORMAT_RGB8",umath::to_integral(uimg::ImageBuffer::Format::RGB8));
 	defImageBuffer.add_static_constant("FORMAT_RGBA8",umath::to_integral(uimg::ImageBuffer::Format::RGBA8));
@@ -458,11 +514,23 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defImageBuffer.def("Flip",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,bool,bool)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,bool flipH,bool flipV) {
 		imgBuffer.Flip(flipH,flipV);
 	}));
+	defImageBuffer.def("SwapChannels",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uimg::ImageBuffer::Channel,uimg::ImageBuffer::Channel)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uimg::ImageBuffer::Channel channel0,uimg::ImageBuffer::Channel channel1) {
+		imgBuffer.SwapChannels(channel0,channel1);
+	}));
 	defImageBuffer.def("ApplyToneMapping",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t toneMapping) {
 		auto tonemappedImg = imgBuffer.ApplyToneMapping(static_cast<uimg::ImageBuffer::ToneMapping>(toneMapping));
 		if(tonemappedImg == nullptr)
 			return;
 		Lua::Push(l,tonemappedImg);
+	}));
+	defImageBuffer.def("ApplyGammaCorrection",static_cast<void(*)(lua_State*,uimg::ImageBuffer&)>([](lua_State *l,uimg::ImageBuffer &imgBuffer) {
+		imgBuffer.ApplyGammaCorrection();
+	}));
+	defImageBuffer.def("ApplyGammaCorrection",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,float)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,float gamma) {
+		imgBuffer.ApplyGammaCorrection(gamma);
+	}));
+	defImageBuffer.def("ApplyExposure",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,float)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,float exposure) {
+		imgBuffer.ApplyExposure(exposure);
 	}));
 
 	defImageBuffer.def("GetPixelOffset",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t,uint32_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t x,uint32_t y) {
@@ -518,6 +586,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defDataBlock.def("GetString",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::GetString));
 	defDataBlock.def("GetColor",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::GetColor));
 	defDataBlock.def("GetVector",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::GetVector));
+	defDataBlock.def("GetVector2",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::GetVector2));
 	defDataBlock.def("GetVector4",static_cast<void(*)(lua_State*,ds::Block&,const std::string&)>(&Lua::DataBlock::GetVector4));
 
 	defDataBlock.def("GetInt",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,int32_t)>(&Lua::DataBlock::GetInt));
@@ -526,6 +595,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defDataBlock.def("GetString",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,const std::string&)>(&Lua::DataBlock::GetString));
 	defDataBlock.def("GetColor",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,const Color&)>(&Lua::DataBlock::GetColor));
 	defDataBlock.def("GetVector",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,const Vector3&)>(&Lua::DataBlock::GetVector));
+	defDataBlock.def("GetVector2",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,const ::Vector2&)>(&Lua::DataBlock::GetVector2));
 	defDataBlock.def("GetVector4",static_cast<void(*)(lua_State*,ds::Block&,const std::string&,const Vector4&)>(&Lua::DataBlock::GetVector4));
 
 	defDataBlock.def("GetData",&Lua::DataBlock::GetData);
@@ -698,6 +768,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 
 	// Transform
 	auto classDefTransform = luabind::class_<Transform>("Transform");
+	classDefTransform.def(luabind::tostring(luabind::self));
 	classDefTransform.def(luabind::constructor<>());
 	classDefTransform.def(luabind::constructor<const Vector3&>());
 	classDefTransform.def(luabind::constructor<const Quat&>());
@@ -1020,10 +1091,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		Lua::PushBool(l,umath::abs(a.x -b.x) <= epsilon && umath::abs(a.y -b.y) <= epsilon && umath::abs(a.z -b.z) <= epsilon);
 	}));
 	defVector.def("GetAngle",static_cast<float(*)(lua_State*,const Vector3&,const Vector3&)>([](lua_State *l,const Vector3 &a,const Vector3 &b) -> float {
-		auto dot = uvec::dot(a,b);
-		auto la = uvec::length(a);
-		auto lb = uvec::length(b);
-		return umath::acos(dot /(la *lb));
+		return umath::deg_to_rad(uvec::get_angle(a,b));
 	}));
 	defVector.def("Slerp",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,float)>([](lua_State *l,const Vector3 &a,const Vector3 &b,float factor) {
 		auto result = glm::slerp(a,b,factor);
@@ -1038,6 +1106,8 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector.def("Get",static_cast<void(*)(lua_State*,const Vector3&,uint32_t)>([](lua_State *l,const Vector3 &v,uint32_t idx) {
 		Lua::PushNumber(l,v[idx]);
 	}));
+	defVector.def("GetYaw",&uvec::get_yaw);
+	defVector.def("GetPitch",&uvec::get_pitch);
 	defVector.def("ToMatrix",&Lua::Vector::ToMatrix);
 	defVector.def("SnapToGrid",static_cast<void(*)(lua_State*,Vector3&)>(&Lua::Vector::SnapToGrid));
 	defVector.def("SnapToGrid",static_cast<void(*)(lua_State*,Vector3&,UInt32)>(&Lua::Vector::SnapToGrid));
@@ -1045,6 +1115,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector.def("ProjectToPlane",uvec::project_to_plane);
 	defVector.def("GetPerpendicular",uvec::get_perpendicular);
 	defVector.def("OuterProduct",&uvec::calc_outer_product);
+	defVector.def("ToScreenUv",&umat::to_screen_uv);
 	modMath[defVector];
 
 	auto defVector2 = luabind::class_<Vector2>("Vector2");
@@ -1187,6 +1258,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat.def(-luabind::const_self);
 	defQuat.def(luabind::const_self /float());
 	defQuat.def(luabind::const_self *float());
+	defQuat.def(luabind::const_self *Vector3());
 	defQuat.def(luabind::const_self *luabind::const_self);
 	defQuat.def(luabind::const_self ==luabind::const_self);
 	//defQuat.def(luabind::const_self *umath::Transform());
@@ -1239,6 +1311,13 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat.def("ApproachDirection",static_cast<void(*)(lua_State*,const Quat&,const Vector3&,const Vector3&,const ::Vector2&,const ::Vector2*,const ::Vector2*)>(&Lua::Quaternion::ApproachDirection));
 	defQuat.def("ApproachDirection",static_cast<void(*)(lua_State*,const Quat&,const Vector3&,const Vector3&,const ::Vector2&,const ::Vector2*)>(&Lua::Quaternion::ApproachDirection));
 	defQuat.def("ApproachDirection",static_cast<void(*)(lua_State*,const Quat&,const Vector3&,const Vector3&,const ::Vector2&)>(&Lua::Quaternion::ApproachDirection));
+	defQuat.def("ClampRotation",static_cast<Quat(*)(lua_State*,Quat&,const EulerAngles&,const EulerAngles&)>([](lua_State *l,Quat &rot,const EulerAngles &minBounds,const EulerAngles &maxBounds) -> Quat {
+		return uquat::clamp_rotation(rot,minBounds,maxBounds);
+	}));
+	defQuat.def("ClampRotation",static_cast<Quat(*)(lua_State*,Quat&,const EulerAngles&)>([](lua_State *l,Quat &rot,const EulerAngles &bounds) -> Quat {
+		return uquat::clamp_rotation(rot,-bounds,bounds);
+	}));
+	defQuat.def("Distance",&uquat::distance);
 	defQuat.def("GetConjugate",&Lua::Quaternion::GetConjugate);
 	modMath[defQuat];
 	auto _G = luabind::globals(lua.GetState());
@@ -1250,6 +1329,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	_G["Quaternion"] = _G["math"]["Quaternion"];
 
 	RegisterLuaMatrices(lua);
+	RegisterIk(lua);
 	//modelMeshClassDef.scope[luabind::def("Create",&Lua::ModelMesh::Client::Create)];
 }
 
@@ -1305,48 +1385,22 @@ void Game::RegisterLuaClasses()
 	}));
 	modUtil[defSplashDamageInfo];
 
-	auto &modGame = GetLuaInterface().RegisterLibrary("game");
-	auto defGmBase = luabind::class_<GameMode,luabind::no_bases,luabind::default_holder,GameModeWrapper>("Base");
-	defGmBase.def(luabind::constructor<>());
-	defGmBase.def("GetName",&Lua::GameMode::GetName);
-	defGmBase.def("GetIdentifier",&Lua::GameMode::GetIdentifier);
-	defGmBase.def("GetClassName",&Lua::GameMode::GetClassName);
-	defGmBase.def("GetAuthor",&Lua::GameMode::GetAuthor);
-	defGmBase.def("GetVersion",&Lua::GameMode::GetVersion);
-	defGmBase.def("Think",&GameModeWrapper::LThink,&GameModeWrapper::default_Think);
-	defGmBase.def("Tick",&GameModeWrapper::LTick,&GameModeWrapper::default_Tick);
-	defGmBase.def("OnEntityTakeDamage",&GameModeWrapper::LOnEntityTakeDamage,&GameModeWrapper::default_OnEntityTakeDamage);
-	defGmBase.def("OnEntityTakenDamage",&GameModeWrapper::LOnEntityTakenDamage,&GameModeWrapper::default_OnEntityTakenDamage);
-	defGmBase.def("OnEntityHealthChanged",&GameModeWrapper::LOnEntityHealthChanged,&GameModeWrapper::default_OnEntityHealthChanged);
-	defGmBase.def("OnPlayerDeath",&GameModeWrapper::LOnPlayerDeath,&GameModeWrapper::default_OnPlayerDeath);
-	defGmBase.def("OnPlayerSpawned",&GameModeWrapper::LOnPlayerSpawned,&GameModeWrapper::default_OnPlayerSpawned);
-	defGmBase.def("OnActionInput",&GameModeWrapper::LOnActionInput,&GameModeWrapper::default_OnActionInput);
-	defGmBase.def("OnPlayerDropped",&GameModeWrapper::LOnPlayerDropped,&GameModeWrapper::default_OnPlayerDropped);
-	defGmBase.def("OnPlayerReady",&GameModeWrapper::LOnPlayerReady,&GameModeWrapper::default_OnPlayerReady);
-	defGmBase.def("OnPlayerJoined",&GameModeWrapper::LOnPlayerJoined,&GameModeWrapper::default_OnPlayerJoined);
-	defGmBase.def("OnGameReady",&GameModeWrapper::LOnGameReady,&GameModeWrapper::default_OnGameReady);
-	defGmBase.def("OnGameInitialized",&GameModeWrapper::LOnGameInitialized,&GameModeWrapper::default_OnGameInitialized);
-	defGmBase.def("OnMapInitialized",&GameModeWrapper::LOnMapInitialized,&GameModeWrapper::default_OnMapInitialized);
-	modGame[defGmBase];
-	auto _G = luabind::globals(GetLuaState());
-	_G["GMBase"] = _G["game"]["Base"];
-
 	auto &modMath = m_lua->RegisterLibrary("math");
-	auto defPlane = luabind::class_<Plane>("Plane");
+	auto defPlane = luabind::class_<umath::Plane>("Plane");
 	defPlane.def(luabind::constructor<Vector3,Vector3,Vector3>());
 	defPlane.def(luabind::constructor<Vector3,Vector3>());
 	defPlane.def(luabind::constructor<Vector3,double>());
-	defPlane.def("Copy",static_cast<void(*)(lua_State*,Plane&)>([](lua_State *l,Plane &plane) {
-		Lua::Push<Plane>(l,Plane{plane});
+	defPlane.def("Copy",static_cast<void(*)(lua_State*,umath::Plane&)>([](lua_State *l,umath::Plane &plane) {
+		Lua::Push<umath::Plane>(l,umath::Plane{plane});
 	}));
 	defPlane.def("GetNormal",&Lua_Plane_GetNormal);
 	defPlane.def("GetPos",&Lua_Plane_GetPos);
-	defPlane.def("GetDistance",static_cast<void(*)(lua_State*,Plane&)>(&Lua_Plane_GetDistance));
-	defPlane.def("GetDistance",static_cast<void(*)(lua_State*,Plane&,const Vector3&)>(&Lua_Plane_GetDistance));
+	defPlane.def("GetDistance",static_cast<void(*)(lua_State*,umath::Plane&)>(&Lua_Plane_GetDistance));
+	defPlane.def("GetDistance",static_cast<void(*)(lua_State*,umath::Plane&,const Vector3&)>(&Lua_Plane_GetDistance));
 	defPlane.def("MoveToPos",&Lua_Plane_MoveToPos);
 	defPlane.def("Rotate",&Lua_Plane_Rotate);
 	defPlane.def("GetCenterPos",&Lua_Plane_GetCenterPos);
-	defPlane.def("Transform",static_cast<void(*)(lua_State*,Plane&,const Mat4&)>([](lua_State *l,Plane &plane,const Mat4 &transform) {
+	defPlane.def("Transform",static_cast<void(*)(lua_State*,umath::Plane&,const Mat4&)>([](lua_State *l,umath::Plane &plane,const Mat4 &transform) {
 		const auto &n = plane.GetNormal();
 		auto p = n *static_cast<float>(plane.GetDistance());
 		auto n0 = uvec::get_perpendicular(n);
@@ -1358,7 +1412,7 @@ void Game::RegisterLuaClasses()
 		auto p14 = transform *Vector4{p1.x,p1.y,p1.z,1.f};
 		auto p2 = p +n1 *10.f;
 		auto p24 = transform *Vector4{p2.x,p2.y,p2.z,1.f};
-		plane = Plane{Vector3{p04.x,p04.y,p04.z},Vector3{p14.x,p14.y,p14.z},Vector3{p24.x,p24.y,p24.z}};
+		plane = umath::Plane{Vector3{p04.x,p04.y,p04.z},Vector3{p14.x,p14.y,p14.z},Vector3{p24.x,p24.y,p24.z}};
 	}));
 	modMath[defPlane];
 }
@@ -1433,6 +1487,10 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	defItFilterName.def(luabind::constructor<const std::string&,bool,bool>());
 	modEnts[defItFilterName];
 
+	auto defItFilterUuid = luabind::class_<LuaEntityIteratorFilterUuid,LuaEntityIteratorFilterBase>("IteratorFilterUuid");
+	defItFilterUuid.def(luabind::constructor<const std::string&>());
+	modEnts[defItFilterUuid];
+
 	auto defItFilterNameOrClass = luabind::class_<LuaEntityIteratorFilterNameOrClass,LuaEntityIteratorFilterBase>("IteratorFilterNameOrClass");
 	defItFilterNameOrClass.def(luabind::constructor<const std::string&>());
 	defItFilterNameOrClass.def(luabind::constructor<const std::string&,bool>());
@@ -1442,6 +1500,10 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	auto defItFilterEntity = luabind::class_<LuaEntityIteratorFilterEntity,LuaEntityIteratorFilterBase>("IteratorFilterEntity");
 	defItFilterEntity.def(luabind::constructor<const std::string&>());
 	modEnts[defItFilterEntity];
+
+	auto defItFilterModel = luabind::class_<LuaEntityIteratorFilterModel,LuaEntityIteratorFilterBase>("IteratorFilterModel");
+	defItFilterModel.def(luabind::constructor<const std::string&>());
+	modEnts[defItFilterModel];
 
 	auto defItFilterSphere = luabind::class_<LuaEntityIteratorFilterSphere,LuaEntityIteratorFilterBase>("IteratorFilterSphere");
 	defItFilterSphere.def(luabind::constructor<const Vector3&,float>());
@@ -1456,6 +1518,7 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	modEnts[defItFilterCone];
 
 	auto defItFilterComponent = luabind::class_<LuaEntityIteratorFilterComponent,LuaEntityIteratorFilterBase>("IteratorFilterComponent");
+	defItFilterComponent.def(luabind::constructor<luabind::object>());
 	defItFilterComponent.def(luabind::constructor<pragma::ComponentId>());
 	defItFilterComponent.def(luabind::constructor<lua_State*,const std::string&>());
 	modEnts[defItFilterComponent];
@@ -1481,7 +1544,11 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 
 		{"ITERATOR_FILTER_ANY_TYPE",umath::to_integral(EntityIterator::FilterFlags::AnyType)},
 		{"ITERATOR_FILTER_ANY",umath::to_integral(EntityIterator::FilterFlags::Any)},
-		{"ITERATOR_FILTER_DEFAULT",umath::to_integral(EntityIterator::FilterFlags::Default)}
+		{"ITERATOR_FILTER_DEFAULT",umath::to_integral(EntityIterator::FilterFlags::Default)},
+
+		{"TICK_POLICY_ALWAYS",umath::to_integral(pragma::TickPolicy::Always)},
+		{"TICK_POLICY_NEVER",umath::to_integral(pragma::TickPolicy::Never)},
+		{"TICK_POLICY_WHEN_VISIBLE",umath::to_integral(pragma::TickPolicy::WhenVisible)}
 	});
 
 	auto surfaceMatDef = luabind::class_<SurfaceMaterial>("SurfaceMaterial");
@@ -1623,6 +1690,7 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 
 	auto bulletInfo = luabind::class_<BulletInfo>("BulletInfo");
 	bulletInfo.def(luabind::constructor<>());
+	bulletInfo.def(luabind::tostring(luabind::self));
 	bulletInfo.def_readwrite("spread",&BulletInfo::spread);
 	bulletInfo.def_readwrite("force",&BulletInfo::force);
 	bulletInfo.def_readwrite("distance",&BulletInfo::distance);
@@ -1645,6 +1713,7 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 
 	auto classDefDamageInfo = luabind::class_<DamageInfo>("DamageInfo");
 	classDefDamageInfo.def(luabind::constructor<>());
+	classDefDamageInfo.def(luabind::tostring(luabind::self));
 	classDefDamageInfo.def("SetDamage",&Lua::DamageInfo::SetDamage);
 	classDefDamageInfo.def("AddDamage",&Lua::DamageInfo::AddDamage);
 	classDefDamageInfo.def("ScaleDamage",&Lua::DamageInfo::ScaleDamage);
@@ -1840,4 +1909,94 @@ static void RegisterLuaMatrices(Lua::Interface &lua)
 	defMat4x3.def("Set",static_cast<void(*)(lua_State*,::Mat4x3&,float,float,float,float,float,float,float,float,float,float,float,float)>(&Lua::Mat4x3::Set));
 	defMat4x3.def("Set",static_cast<void(*)(lua_State*,::Mat4x3&,const ::Mat4x3&)>(&Lua::Mat4x3::Set));
 	modMath[defMat4x3];
+}
+
+class IkLuaConstraint
+	: public uvec::ik::IkConstraint
+{
+public:
+	IkLuaConstraint(uvec::ik::IkJoint &joint,luabind::object o)
+		: IkConstraint{joint},m_function{o}
+	{}
+	virtual void Apply(int i) override;
+private:
+	luabind::object m_function;
+};
+void IkLuaConstraint::Apply(int i)
+{
+	m_function(i);
+}
+
+static void RegisterIk(Lua::Interface &lua)
+{
+	auto defIkSolver = luabind::class_<uvec::ik::IkSolver>("IkSolver");
+	defIkSolver.def("GetGlobalTransform",static_cast<umath::ScaledTransform(*)(uvec::ik::IkSolver&,uint32_t)>([](uvec::ik::IkSolver &solver,uint32_t idx) -> umath::ScaledTransform {
+		auto t = solver.GetGlobalTransform(idx);
+		return t;
+	}));
+	defIkSolver.def("SetLocalTransform",static_cast<void(*)(uvec::ik::IkSolver&,uint32_t,umath::ScaledTransform&)>([](uvec::ik::IkSolver &solver,uint32_t idx,umath::ScaledTransform &pose) {
+		solver.SetLocalTransform(idx,pose);
+	}));
+	defIkSolver.def("GetLocalTransform",static_cast<umath::ScaledTransform(*)(uvec::ik::IkSolver&,uint32_t)>([](uvec::ik::IkSolver &solver,uint32_t idx) -> umath::ScaledTransform {
+		return solver.GetLocalTransform(idx);
+	}));
+	defIkSolver.def("Solve",static_cast<void(*)(uvec::ik::IkSolver&,const umath::ScaledTransform&)>([](uvec::ik::IkSolver &solver,const umath::ScaledTransform &pose) {
+		solver.Solve(pose);
+	}));
+	defIkSolver.def("Resize",static_cast<void(*)(uvec::ik::IkSolver&,uint32_t)>([](uvec::ik::IkSolver &solver,uint32_t n) {
+		solver.Resize(n);
+	}));
+	defIkSolver.def("Size",static_cast<uint32_t(*)(uvec::ik::IkSolver&)>([](uvec::ik::IkSolver &solver) -> uint32_t {
+		return solver.Size();
+	}));
+	defIkSolver.def("AddHingeConstraint",static_cast<uvec::ik::IkHingeConstraint*(*)(uvec::ik::IkSolver&,uint32_t,const Vector3&)>([](uvec::ik::IkSolver &solver,uint32_t idx,const Vector3 &axis) {
+		return &solver.GetJoint(idx).AddConstraint<uvec::ik::IkHingeConstraint>(axis);
+	}));
+	defIkSolver.def("AddBallSocketConstraint",static_cast<uvec::ik::IkBallSocketConstraint*(*)(uvec::ik::IkSolver&,uint32_t,float)>([](uvec::ik::IkSolver &solver,uint32_t idx,float limit) {
+		return &solver.GetJoint(idx).AddConstraint<uvec::ik::IkBallSocketConstraint>(limit);
+	}));
+	defIkSolver.def("AddCustomConstraint",static_cast<uvec::ik::IkConstraint*(*)(lua_State*,uvec::ik::IkSolver&,uint32_t,luabind::object)>([](lua_State *l,uvec::ik::IkSolver &solver,uint32_t idx,luabind::object f) -> uvec::ik::IkConstraint* {
+		Lua::CheckFunction(l,3);
+		return &solver.GetJoint(idx).AddConstraint<IkLuaConstraint>(f);
+	}));
+	
+	auto &modIk = lua.RegisterLibrary("ik");
+	auto defIkConstraint = luabind::class_<uvec::ik::IkConstraint>("IkConstraint");
+	defIkConstraint.def("GetJointIndex",static_cast<uint32_t(*)(lua_State*,uvec::ik::IkConstraint&)>([](lua_State *l,uvec::ik::IkConstraint &constraint) -> uint32_t {
+		return constraint.GetJoint().GetJointIndex();
+	}));
+	modIk[defIkConstraint];
+
+	auto defIkHingeConstraint = luabind::class_<uvec::ik::IkHingeConstraint,uvec::ik::IkConstraint>("IkHingeConstraint");
+	defIkHingeConstraint.def("SetLimits",static_cast<void(*)(lua_State*,uvec::ik::IkHingeConstraint&,const Vector2&)>([](lua_State *l,uvec::ik::IkHingeConstraint &constraint,const Vector2 &limits) {
+		constraint.SetLimits(limits);
+	}));
+	defIkHingeConstraint.def("ClearLimits",&uvec::ik::IkHingeConstraint::ClearLimits);
+	defIkHingeConstraint.def("GetLimits",static_cast<void(*)(lua_State*,uvec::ik::IkHingeConstraint&)>([](lua_State *l,uvec::ik::IkHingeConstraint &constraint) {
+		auto limits = constraint.GetLimits();
+		if(limits.has_value() == false)
+			return;
+		Lua::Push<Vector2>(l,*limits);
+	}));
+	modIk[defIkHingeConstraint];
+
+	auto defIkBallSocketConstraint = luabind::class_<uvec::ik::IkBallSocketConstraint,uvec::ik::IkConstraint>("IkBallSocketConstraint");
+	defIkBallSocketConstraint.def("SetLimit",&uvec::ik::IkBallSocketConstraint::SetLimit);
+	defIkBallSocketConstraint.def("GetLimit",static_cast<void(*)(lua_State*,uvec::ik::IkBallSocketConstraint&)>([](lua_State *l,uvec::ik::IkBallSocketConstraint &constraint) {
+		float limit;
+		if(constraint.GetLimit(limit) == false)
+			return;
+		Lua::PushNumber(l,limit);
+	}));
+	modIk[defIkBallSocketConstraint];
+
+	auto defCcdSolver = luabind::class_<uvec::ik::CCDSolver,uvec::ik::IkSolver>("CCDIkSolver");
+	defCcdSolver.def(luabind::constructor<>());
+		
+	auto defFABRIKSolver = luabind::class_<uvec::ik::FABRIKSolver,uvec::ik::IkSolver>("FABRIkSolver");
+	defFABRIKSolver.def(luabind::constructor<>());
+	
+	modIk[defIkSolver];
+	modIk[defCcdSolver];
+	modIk[defFABRIKSolver];
 }

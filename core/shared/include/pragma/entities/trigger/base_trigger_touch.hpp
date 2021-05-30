@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __BASETRIGGERTOUCH_H__
 #define __BASETRIGGERTOUCH_H__
@@ -68,6 +68,7 @@ namespace pragma
 		static ComponentEventId EVENT_ON_START_TOUCH;
 		static ComponentEventId EVENT_ON_END_TOUCH;
 		static ComponentEventId EVENT_ON_TRIGGER;
+		static ComponentEventId EVENT_ON_TRIGGER_INITIALIZED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 		using BaseEntityComponent::BaseEntityComponent;
 		// Only called if collision callbacks are enabled (Entity::SetCollisionCallbacksEnabled(true))

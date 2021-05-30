@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __S_FUNC_WATER_H__
 #define __S_FUNC_WATER_H__
@@ -23,6 +23,7 @@ namespace pragma
 		virtual ~SWaterComponent() override;
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
+		virtual void OnTick(double dt) override;
 		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual void CreateSplash(const Vector3 &origin,float radius,float force) override;
 		void UpdateSurfaceSimulator();

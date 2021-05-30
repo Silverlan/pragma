@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/ai/ai_task_play_animation.h"
@@ -44,7 +44,7 @@ int32_t ai::TaskPlayAnimationBase::SelectAnimation(const Schedule *sched,pragma:
 		{
 			auto &animName = *param->GetString();
 			auto mdlComponent = ent.GetEntity().GetModelComponent();
-			if(mdlComponent.valid())
+			if(mdlComponent)
 				animId = mdlComponent->LookupAnimation(animName);
 			break;
 		}
@@ -142,7 +142,7 @@ bool ai::TaskPlayAnimation::GetFaceTarget(const Schedule *sched,pragma::SAICompo
 		if(ent != nullptr)
 		{
 			auto pTrComponentEnt = ent->GetTransformComponent();
-			if(pTrComponentEnt.expired())
+			if(!pTrComponentEnt)
 				return false;
 			tgt = pTrComponentEnt->GetPosition();
 			return true;
@@ -154,7 +154,7 @@ bool ai::TaskPlayAnimation::GetFaceTarget(const Schedule *sched,pragma::SAICompo
 		if(fragment == nullptr || !fragment->hEntity.IsValid())
 			return false;
 		auto pTrComponentTgt = fragment->hEntity.get()->GetTransformComponent();
-		if(pTrComponentTgt.expired())
+		if(!pTrComponentTgt)
 			return false;
 		tgt = pTrComponentTgt->GetPosition();
 		return true;

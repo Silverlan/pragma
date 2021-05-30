@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -16,7 +16,7 @@
 
 using namespace pragma;
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 decltype(ShaderPPWater::DESCRIPTOR_SET_TEXTURE) ShaderPPWater::DESCRIPTOR_SET_TEXTURE = {&ShaderPPFog::DESCRIPTOR_SET_TEXTURE};
 decltype(ShaderPPWater::DESCRIPTOR_SET_DEPTH_BUFFER) ShaderPPWater::DESCRIPTOR_SET_DEPTH_BUFFER = {&ShaderPPFog::DESCRIPTOR_SET_DEPTH_BUFFER};
@@ -28,7 +28,7 @@ decltype(ShaderPPWater::DESCRIPTOR_SET_REFRACTION_MAP) ShaderPPWater::DESCRIPTOR
 		}
 	}
 };
-decltype(ShaderPPWater::DESCRIPTOR_SET_CAMERA) ShaderPPWater::DESCRIPTOR_SET_CAMERA = {&ShaderScene::DESCRIPTOR_SET_CAMERA};
+decltype(ShaderPPWater::DESCRIPTOR_SET_SCENE) ShaderPPWater::DESCRIPTOR_SET_SCENE = {&ShaderScene::DESCRIPTOR_SET_SCENE};
 decltype(ShaderPPWater::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderPPWater::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderScene::DESCRIPTOR_SET_RENDER_SETTINGS};
 decltype(ShaderPPWater::DESCRIPTOR_SET_FOG) ShaderPPWater::DESCRIPTOR_SET_FOG = {&ShaderPPFog::DESCRIPTOR_SET_FOG};
 ShaderPPWater::ShaderPPWater(prosper::IPrContext &context,const std::string &identifier)
@@ -43,7 +43,7 @@ void ShaderPPWater::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &p
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_TEXTURE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_DEPTH_BUFFER);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_REFRACTION_MAP);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDER_SETTINGS);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_FOG);
 	AddDefaultVertexAttributes(pipelineInfo);
@@ -81,7 +81,7 @@ bool ShaderPPWater::Draw(
 )
 {
 	return RecordBindDescriptorSet(descSetDepth,DESCRIPTOR_SET_DEPTH_BUFFER.setIndex) &&
-		RecordBindDescriptorSets({&descSetCamera,&descSetTime,&descSetFog},DESCRIPTOR_SET_CAMERA.setIndex) &&
+		RecordBindDescriptorSets({&descSetCamera,&descSetTime,&descSetFog},DESCRIPTOR_SET_SCENE.setIndex) &&
 		RecordPushConstants(clipPlane) &&
 		ShaderPPBase::Draw(descSetTexture);
 }

@@ -2,7 +2,7 @@
 * License, v. 2.0. If a copy of the MPL was not distributed with this
 * file, You can obtain one at http://mozilla.org/MPL/2.0/.
 *
-* Copyright (c) 2020 Florian Weischer */
+* Copyright (c) 2021 Silverlan */
 
 #include "stdafx_shared.h"
 #include "pragma/networkstate/networkstate.h"
@@ -22,7 +22,6 @@
 #include "pragma/entities/components/base_render_component.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/entity_iterator.hpp"
-#include "pragma/entities/components/logic_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 
 using namespace pragma;
@@ -53,9 +52,6 @@ void BaseFuncKinematicComponent::Initialize()
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		OnThink(static_cast<CEOnTick&>(evData.get()).deltaTime);
-	});
 
 	auto &ent = GetEntity();
 	ent.AddComponent("physics");
@@ -74,7 +70,7 @@ void BaseFuncKinematicComponent::OnEntitySpawn()
 	BaseEntityComponent::OnEntitySpawn();
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 	{
 		pPhysComponent->InitializePhysics(PHYSICSTYPE::DYNAMIC);
 		pPhysComponent->SetKinematic(true);
@@ -88,7 +84,10 @@ void BaseFuncKinematicComponent::OnEntitySpawn()
 		entIt.AttachFilter<EntityIteratorFilterEntity>(m_kvFirstNode);
 		auto it = entIt.begin();
 		if(it != entIt.end())
+		{
 			m_nextNode = (*it)->GetHandle();
+			UpdateTickPolicy();
+		}
 	}
 	if(!m_kvStartSound.empty())
 	{
@@ -100,25 +99,27 @@ void BaseFuncKinematicComponent::OnEntitySpawn()
 	}
 }
 
-void BaseFuncKinematicComponent::OnThink(double tDelta)
+void BaseFuncKinematicComponent::OnTick(double tDelta)
 {
 	if(m_bMoving == false || m_nextNode.IsValid() == false)
 		return;
 	MoveToTarget(m_nextNode.get(),m_speed); // Shouldnt be in think (PhysicsUpdate)
 }
 
+void BaseFuncKinematicComponent::UpdateTickPolicy() {SetTickPolicy((m_bMoving && m_nextNode.IsValid()) ? TickPolicy::Always : TickPolicy::Never);}
+
 void BaseFuncKinematicComponent::MoveToTarget(BaseEntity *node,float speed)
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	auto *phys = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(phys == nullptr || phys->IsStatic())
 		return;
 	auto pTrComponent = ent.GetTransformComponent();
 	auto *kinematic = dynamic_cast<PhysObjKinematic*>(phys);
-	auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 	auto pTrComponentNode = node->GetTransformComponent();
-	auto posTarget = pTrComponentNode.valid() ? pTrComponentNode->GetPosition() : Vector3{};
+	auto posTarget = pTrComponentNode ? pTrComponentNode->GetPosition() : Vector3{};
 	auto dir = posTarget -pos;
 	uvec::normalize(&dir);
 	float d = glm::distance(pos,posTarget);
@@ -129,6 +130,7 @@ void BaseFuncKinematicComponent::MoveToTarget(BaseEntity *node,float speed)
 	if(d <= speed)
 	{
 		m_nextNode = {};
+		UpdateTickPolicy();
 		auto *ptrPathNodeComponent = static_cast<pragma::BasePointPathNodeComponent*>(node->FindComponent("path_node").get());
 		if(ptrPathNodeComponent != nullptr)
 		{
@@ -137,6 +139,7 @@ void BaseFuncKinematicComponent::MoveToTarget(BaseEntity *node,float speed)
 				return;
 			auto &entNext = nodeNext->GetEntity();
 			m_nextNode = entNext.GetHandle();
+			UpdateTickPolicy();
 			MoveToTarget(&entNext,speed -d);
 		}
 	}
@@ -145,6 +148,7 @@ void BaseFuncKinematicComponent::MoveToTarget(BaseEntity *node,float speed)
 void BaseFuncKinematicComponent::StartForward()
 {
 	m_bMoving = true;
+	UpdateTickPolicy();
 	m_speed = m_kvMoveSpeed;
 
 	if(m_startSound != nullptr)

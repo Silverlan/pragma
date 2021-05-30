@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __CHC_HPP__
@@ -107,7 +107,7 @@ private:
 	std::queue<std::shared_ptr<CHCQuery>> m_queryQueue;
 	std::queue<CHCNodeHandle> m_visQueue;
 	std::queue<CHCNodeHandle> m_invisQueue;
-	std::vector<Plane> m_frustumPlanes;
+	std::vector<umath::Plane> m_frustumPlanes;
 	std::vector<pragma::OcclusionMeshInfo> m_renderMeshes;
 	std::vector<std::shared_ptr<CHCNode>> m_nodes;
 	CallbackHandle m_cbOnNodeCreated;

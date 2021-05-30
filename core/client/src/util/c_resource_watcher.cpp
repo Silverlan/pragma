@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -12,8 +12,10 @@
 #include <sharedutils/util_file.h>
 #include <cmaterialmanager.h>
 #include <textureinfo.h>
+#include <pragma/entities/entity_iterator.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
+extern DLLCLIENT CGame *c_game;
 
 decltype(ECResourceWatcherCallbackType::Shader) ECResourceWatcherCallbackType::Shader = ECResourceWatcherCallbackType{umath::to_integral(E::Shader)};
 decltype(ECResourceWatcherCallbackType::ParticleSystem) ECResourceWatcherCallbackType::ParticleSystem = ECResourceWatcherCallbackType{umath::to_integral(E::ParticleSystem)};
@@ -31,7 +33,7 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 	if(cvMatStreaming->GetBool() == false)
 		loadInfo.flags |= TextureLoadFlags::LoadInstantly;
 	loadInfo.flags |= TextureLoadFlags::Reload;
-	loadInfo.onLoadCallback = [path,nw](std::shared_ptr<Texture> tex) {
+	loadInfo.onLoadCallback = FunctionCallback<void,std::shared_ptr<Texture>>::Create([path,nw](std::shared_ptr<Texture> tex) {
 		if(nw == nullptr)
 			return;
 		auto &matManager = static_cast<CMaterialManager&>(nw->GetMaterialManager());
@@ -79,16 +81,36 @@ void CResourceWatcherManager::ReloadTexture(const std::string &path)
 		};
 
 		// Iterate all materials and update the ones that use this texture
-		for(auto &pair : matManager.GetMaterials())
+		for(auto &hMat : matManager.GetMaterials())
 		{
-			if(pair.second.IsValid() == false)
+			if(hMat.IsValid() == false)
 				continue;
-			auto &data = pair.second.get()->GetDataBlock();
+			auto &data = hMat.get()->GetDataBlock();
 			if(data != nullptr)
-				fLookForTextureAndUpdate(*data,static_cast<CMaterial&>(*pair.second.get()));
+				fLookForTextureAndUpdate(*data,static_cast<CMaterial&>(*hMat.get()));
 		}
-	};
+	});
 	texManager.ReloadTexture(path,loadInfo);
+}
+
+void CResourceWatcherManager::OnMaterialReloaded(const std::string &path,const std::unordered_set<Model*> &modelMap)
+{
+	ResourceWatcherManager::OnMaterialReloaded(path,modelMap);
+	if(c_game == nullptr)
+		return;
+	EntityIterator entIt {*c_game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CModelComponent>>();
+	for(auto *ent : entIt)
+	{
+		auto &mdl = ent->GetModel();
+		if(mdl == nullptr)
+			continue;
+		auto it = modelMap.find(mdl.get());
+		if(it == modelMap.end())
+			continue;
+		auto mdlC = static_cast<pragma::CModelComponent*>(ent->GetModelComponent());
+		mdlC->SetRenderMeshesDirty();
+	}
 }
 
 void CResourceWatcherManager::GetWatchPaths(std::vector<std::string> &paths)
@@ -113,9 +135,12 @@ void CResourceWatcherManager::OnResourceChanged(const std::string &path,const st
 		ustring::to_lower(canonShader);
 		auto &shaderManager = c_engine->GetShaderManager();
 		std::vector<std::string> reloadShaders;
-		for(auto &pair : shaderManager.GetShaders())
+		for(auto &pair : shaderManager.GetShaderNameToIndexTable())
 		{
-			for(auto &src : pair.second->GetSourceFilePaths())
+			auto *shader = shaderManager.GetShader(pair.second);
+			if(shader == nullptr)
+				continue;
+			for(auto &src : shader->GetSourceFilePaths())
 			{
 				auto fname = FileManager::GetCanonicalizedPath(src);
 				ufile::remove_extension_from_filename(fname);

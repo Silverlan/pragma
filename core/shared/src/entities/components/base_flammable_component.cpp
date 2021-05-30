@@ -2,17 +2,17 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
 #include "pragma/entities/components/base_flammable_component.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/components/submergible_component.hpp"
-#include "pragma/entities/components/logic_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include <sharedutils/datastream.h>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -53,9 +53,6 @@ void BaseFlammableComponent::Initialize()
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		OnThink(static_cast<CEOnTick&>(evData.get()).deltaTime);
-	});
 
 	auto &ent = GetEntity();
 	ent.AddComponent("io");
@@ -63,7 +60,7 @@ void BaseFlammableComponent::Initialize()
 	m_netEvExtinguish = SetupNetEvent("extinguish");
 	m_netEvSetIgnitable = SetupNetEvent("set_ignitable");
 }
-void BaseFlammableComponent::OnThink(double dt)
+void BaseFlammableComponent::OnTick(double dt)
 {
 	if(IsOnFire() && m_tExtinguishTime > 0.f)
 	{
@@ -80,27 +77,33 @@ util::EventReply BaseFlammableComponent::HandleEvent(ComponentEventId eventId,Co
 		Extinguish();
 	return util::EventReply::Unhandled;
 }
-void BaseFlammableComponent::Save(DataStream &ds)
+void BaseFlammableComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
-	BaseEntityComponent::Save(ds);
-	ds->Write<bool>(*m_bIgnitable);
-	ds->Write<bool>(*m_bIsOnFire);
+	BaseEntityComponent::Save(udm);
+	udm["ignitable"] = **m_bIgnitable;
+	udm["isOnFire"] = **m_bIsOnFire;
 	auto tCur = GetEntity().GetNetworkState()->GetGameState()->CurTime();
 	auto tExtinguish = m_tExtinguishTime;
 	if(tExtinguish != 0.f)
 		tExtinguish -= tCur;
-	ds->Write<float>(tExtinguish);
+	udm["timeUntilExtinguish"] = tExtinguish;
 }
-void BaseFlammableComponent::Load(DataStream &ds,uint32_t version)
+void BaseFlammableComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {
-	BaseEntityComponent::Load(ds,version);
-	auto bIgnitable = ds->Read<bool>();
-	SetIgnitable(bIgnitable);
+	BaseEntityComponent::Load(udm,version);
+	auto ignitable = IsIgnitable();
+	udm["ignitable"](ignitable);
+	SetIgnitable(ignitable);
 
-	auto bOnFire = ds->Read<bool>();
-	auto tIgnite = ds->Read<float>();
-	if(bOnFire == true)
-		Ignite(tIgnite); // TODO: Attacker, inflictor?
+	auto isOnFire = IsOnFire();
+	udm["isOnFire"](isOnFire);
+
+	auto tExtinguish = 0.f;
+	if(isOnFire == true)
+	{
+		udm["timeUntilExtinguish"](tExtinguish);
+		Ignite(tExtinguish); // TODO: Attacker, inflictor?
+	}
 }
 const util::PBoolProperty &BaseFlammableComponent::GetOnFireProperty() const {return m_bIsOnFire;}
 const util::PBoolProperty &BaseFlammableComponent::GetIgnitableProperty() const {return m_bIgnitable;}
@@ -113,6 +116,7 @@ util::EventReply BaseFlammableComponent::Ignite(float duration,BaseEntity *attac
 	if(pSubmergibleComponent.valid() && pSubmergibleComponent->IsSubmerged() == true)
 		return util::EventReply::Handled;
 	*m_bIsOnFire = true;
+	SetTickPolicy(TickPolicy::Always);
 	if(duration == 0.f)
 		m_tExtinguishTime = 0.f;
 	else
@@ -130,6 +134,7 @@ void BaseFlammableComponent::Extinguish()
 	if(*m_bIsOnFire == false)
 		return;
 	*m_bIsOnFire = false;
+	SetTickPolicy(TickPolicy::Never);
 	m_tExtinguishTime = 0.f;
 	BroadcastEvent(EVENT_ON_EXTINGUISHED);
 }

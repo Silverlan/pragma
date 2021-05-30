@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __CBASEENTITY_H__
@@ -23,11 +23,12 @@ class Material;
 namespace pragma
 {
 	class BaseEntityComponent;
-	class ShaderTextured3DBase;
+	class ShaderGameWorldLightingPass;
 	class CRenderComponent;
 	class CPhysicsComponent;
 	class CSceneComponent;
 };
+namespace bounding_volume {class AABB;};
 #pragma warning(push)
 #pragma warning(disable : 4251)
 class DLLCLIENT CBaseEntity
@@ -40,14 +41,12 @@ public:
 	CBaseEntity();
 	void Construct(unsigned int idx,unsigned int clientIdx);
 
-	virtual util::WeakHandle<pragma::BaseModelComponent> GetModelComponent() const override;
 	virtual util::WeakHandle<pragma::BaseAnimatedComponent> GetAnimatedComponent() const override;
 	virtual util::WeakHandle<pragma::BaseWeaponComponent> GetWeaponComponent() const override;
 	virtual util::WeakHandle<pragma::BaseVehicleComponent> GetVehicleComponent() const override;
 	virtual util::WeakHandle<pragma::BaseAIComponent> GetAIComponent() const override;
 	virtual util::WeakHandle<pragma::BaseCharacterComponent> GetCharacterComponent() const override;
 	virtual util::WeakHandle<pragma::BasePlayerComponent> GetPlayerComponent() const override;
-	virtual util::WeakHandle<pragma::BasePhysicsComponent> GetPhysicsComponent() const override;
 	virtual util::WeakHandle<pragma::BaseTimeScaleComponent> GetTimeScaleComponent() const override;
 	virtual util::WeakHandle<pragma::BaseNameComponent> GetNameComponent() const override;
 	virtual bool IsCharacter() const override;
@@ -60,8 +59,7 @@ public:
 	// This only works for single-player / listen servers!
 	BaseEntity *GetServersideEntity() const;
 
-	util::WeakHandle<pragma::CRenderComponent> &GetRenderComponent() const;
-	util::WeakHandle<pragma::CPhysicsComponent> &GetCPhysicsComponent() const;
+	pragma::CRenderComponent *GetRenderComponent() const;
 
 	virtual void Initialize() override;
 	virtual void ReceiveData(NetPacket &packet);
@@ -83,11 +81,13 @@ public:
 	void RemoveFromScene(pragma::CSceneComponent &scene);
 	void RemoveFromAllScenes();
 	bool IsInScene(const pragma::CSceneComponent &scene) const;
+	std::vector<pragma::CSceneComponent*> GetScenes() const;
 
 	void AddChild(CBaseEntity &ent);
 
 	// Quick-access
-	std::pair<Vector3,Vector3> GetRenderBounds() const;
+	const bounding_volume::AABB &GetLocalRenderBounds() const;
+	const bounding_volume::AABB &GetAbsoluteRenderBounds(bool updateBounds=true) const;
 	//
 
 	void SendNetEventTCP(UInt32 eventId,NetPacket &data) const;
@@ -99,16 +99,14 @@ public:
 protected:
 	virtual void DoSpawn() override;
 	virtual void OnComponentAdded(pragma::BaseEntityComponent &component) override;
+	virtual void OnComponentRemoved(pragma::BaseEntityComponent &component) override;
 	// TODO: Obsolete? (Also remove from BaseEntity and SBaseEntity)
 	void EraseFunction(int function);
 
 	friend pragma::BaseEntityComponent;
 	uint32_t m_clientIdx = 0u;
 	util::PUInt32Property m_sceneFlags = nullptr;
-	mutable util::WeakHandle<pragma::CRenderComponent> m_renderComponent = {};
-	mutable util::WeakHandle<pragma::CPhysicsComponent> m_physComponent = {};
-
-	//std::unique_ptr<std::shared_ptr<prosper::IBuffer>> m_softBodyBuffers = nullptr; // prosper TODO
+	pragma::CRenderComponent *m_renderComponent = nullptr;
 };
 #pragma warning(pop)
 

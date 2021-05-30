@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/entities/func/s_func_water.h"
@@ -53,14 +53,6 @@ void SWaterComponent::Initialize()
 {
 	BaseFuncWaterComponent::Initialize();
 
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		if(m_bUsingClientsideSimulation == true || m_physSurfaceSim == nullptr)
-			return;
-		auto *sim = static_cast<PhysWaterSurfaceSimulator*>(m_physSurfaceSim.get());
-		if(sim == nullptr)
-			return;
-		sim->Simulate(0.01); // TODO
-	});
 	BindEventUnhandled(SModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		// TODO: Move this to shared
 		auto &ent = GetEntity();
@@ -76,9 +68,17 @@ void SWaterComponent::Initialize()
 		packet->Write<double>(m_waterPlane.GetDistance());
 		SendNetEventTCP(m_netEvSetWaterPlane,packet);*/
 	});
+	SetTickPolicy(TickPolicy::Always); // TODO
+}
 
-	auto &ent = GetEntity();
-	ent.AddComponent<LogicComponent>();
+void SWaterComponent::OnTick(double dt)
+{
+	if(m_bUsingClientsideSimulation == true || m_physSurfaceSim == nullptr)
+		return;
+	auto *sim = static_cast<PhysWaterSurfaceSimulator*>(m_physSurfaceSim.get());
+	if(sim == nullptr)
+		return;
+	sim->Simulate(0.01); // TODO
 }
 
 void SWaterComponent::OnEntitySpawn()
@@ -96,8 +96,7 @@ void SWaterComponent::OnEntitySpawn()
 		}));
 		return;
 	}
-	auto mdlComponent = ent.GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)
 		return;
 	InitializeWaterSurface();
@@ -150,7 +149,7 @@ void SWaterComponent::CreateSplash(const Vector3 &origin,float radius,float forc
 {
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired() || pPhysComponent->GetPhysicsObject() == nullptr)
+	if(pPhysComponent == nullptr || pPhysComponent->GetPhysicsObject() == nullptr)
 		return;
 	BaseFuncWaterComponent::CreateSplash(origin,radius,force);
 	if(ent.IsShared() == false)
@@ -164,13 +163,13 @@ void SWaterComponent::CreateSplash(const Vector3 &origin,float radius,float forc
 const Vector3 &SWaterComponent::GetPosition() const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	return pTrComponent.valid() ? pTrComponent->GetPosition() : uvec::ORIGIN;
+	return pTrComponent != nullptr ? pTrComponent->GetPosition() : uvec::ORIGIN;
 }
 const Quat &SWaterComponent::GetOrientation() const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	static auto identity = uquat::identity();
-	return pTrComponent.valid() ? pTrComponent->GetOrientation() : identity;
+	return pTrComponent != nullptr ? pTrComponent->GetRotation() : identity;
 }
 
 ///////////////

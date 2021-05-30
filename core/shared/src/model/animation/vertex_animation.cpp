@@ -2,18 +2,22 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/model/modelmesh.h"
-
+#include "pragma/model/model.h"
+#include <udm.hpp>
+#pragma optimize("",off)
 MeshVertexFrame::MeshVertexFrame(const MeshVertexFrame &other)
 	: std::enable_shared_from_this<MeshVertexFrame>(),
 	m_vertices(other.m_vertices),m_normals{other.m_normals},
 	m_flags{other.m_flags}
-{}
+{
+	static_assert(sizeof(MeshVertexFrame) == 72,"Update this function when making changes to this class!");
+}
 
 const std::vector<std::array<uint16_t,4>> &MeshVertexFrame::GetVertices() const {return const_cast<MeshVertexFrame*>(this)->GetVertices();}
 std::vector<std::array<uint16_t,4>> &MeshVertexFrame::GetVertices() {return m_vertices;}
@@ -111,6 +115,25 @@ void MeshVertexFrame::Scale(const Vector3 &scale)
 		SetVertexPosition(i,pos);
 	}
 }
+bool MeshVertexFrame::operator==(const MeshVertexFrame &other) const
+{
+	if(m_vertices.size() != other.m_vertices.size() || m_normals.size() != other.m_normals.size())
+		return false;
+	for(auto i=decltype(m_vertices.size()){0u};i<m_vertices.size();++i)
+	{
+		Vector3 p0,p1;
+		if(GetVertexPosition(i,p0) != GetVertexPosition(i,p1) || uvec::cmp(p0,p1) == false)
+			return false;
+	}
+	for(auto i=decltype(m_normals.size()){0u};i<m_normals.size();++i)
+	{
+		Vector3 p0,p1;
+		if(GetVertexNormal(i,p0) != GetVertexNormal(i,p1) || uvec::cmp(p0,p1) == false)
+			return false;
+	}
+	static_assert(sizeof(MeshVertexFrame) == 72,"Update this function when making changes to this class!");
+	return m_flags == other.m_flags;
+}
 void MeshVertexFrame::SetFlags(Flags flags)
 {
 	m_flags = flags;
@@ -139,6 +162,7 @@ MeshVertexAnimation::MeshVertexAnimation(const MeshVertexAnimation &other)
 	m_frames.reserve(other.m_frames.size());
 	for(auto &frame : m_frames)
 		m_frames.push_back(std::make_shared<MeshVertexFrame>(*frame));
+	static_assert(sizeof(MeshVertexAnimation) == 72,"Update this function when making changes to this class!");
 }
 ModelMesh *MeshVertexAnimation::GetMesh() const {return m_wpMesh.lock().get();}
 ModelSubMesh *MeshVertexAnimation::GetSubMesh() const {return m_wpSubMesh.lock().get();}
@@ -169,6 +193,18 @@ void MeshVertexAnimation::Scale(const Vector3 &scale)
 	for(auto &frame : m_frames)
 		frame->Scale(scale);
 }
+bool MeshVertexAnimation::operator==(const MeshVertexAnimation &other) const
+{
+	if(m_frames.size() != other.m_frames.size() || m_wpMesh.expired() != other.m_wpMesh.expired() || m_wpSubMesh.expired() != other.m_wpSubMesh.expired())
+		return false;
+	for(auto i=decltype(m_frames.size()){0u};i<other.m_frames.size();++i)
+	{
+		if(*m_frames[i] != *other.m_frames[i])
+			return false;
+	}
+	static_assert(sizeof(MeshVertexAnimation) == 72,"Update this function when making changes to this class!");
+	return true;
+}
 
 /////////////////////
 
@@ -194,6 +230,226 @@ VertexAnimation::VertexAnimation(const VertexAnimation &other)
 	m_meshAnims.reserve(other.m_meshAnims.size());
 	for(auto &anim : m_meshAnims)
 		m_meshAnims.push_back(std::make_shared<MeshVertexAnimation>(*anim));
+	static_assert(sizeof(VertexAnimation) == 80,"Update this function when making changes to this class!");
+}
+
+bool VertexAnimation::operator==(const VertexAnimation &other) const
+{
+	if(m_name != other.m_name || m_meshAnims.size() != other.m_meshAnims.size())
+		return false;
+	for(auto i=decltype(m_meshAnims.size()){0u};i<m_meshAnims.size();++i)
+	{
+		if(*m_meshAnims[i] != *other.m_meshAnims[i])
+			return false;
+	}
+	static_assert(sizeof(VertexAnimation) == 80,"Update this function when making changes to this class!");
+	return true;
+}
+
+std::shared_ptr<VertexAnimation> VertexAnimation::Load(Model &mdl,const udm::AssetData &data,std::string &outErr)
+{
+	auto morphAnim = VertexAnimation::Create();
+	if(morphAnim->LoadFromAssetData(mdl,data,outErr) == false)
+		return nullptr;
+	return morphAnim;
+}
+bool VertexAnimation::Save(Model &mdl,udm::AssetData &outData,std::string &outErr)
+{
+	outData.SetAssetType(PMORPHANI_IDENTIFIER);
+	outData.SetAssetVersion(FORMAT_VERSION);
+	auto udm = *outData;
+	udm["name"] = GetName();
+
+	auto writeFlag = [](auto udm,auto flag,const std::string &name,auto flags) {
+		if(umath::is_flag_set(flags,flag) == false)
+			return;
+		udm["flags"][name] = true;
+	};
+	
+	auto strctHalfVector4 = ::udm::StructDescription::Define<udm::Half,udm::Half,udm::Half,udm::Half>({"x","y","z","w"});
+	auto &meshAnims = GetMeshAnimations();
+	auto udmMeshAnims = udm.AddArray("meshAnimations",meshAnims.size());
+	uint32_t meshAnimIdx = 0;
+	for(auto &ma : meshAnims)
+	{
+		auto *mesh = ma->GetMesh();
+		auto *subMesh = ma->GetSubMesh();
+		if(mesh == nullptr || subMesh == nullptr)
+			continue;
+		auto udmMa = udmMeshAnims[meshAnimIdx++];
+		uint32_t groupIdx,meshIdx,subMeshIdx;
+		if(mdl.FindSubMeshIndex(nullptr,mesh,subMesh,groupIdx,meshIdx,subMeshIdx) == false)
+			continue;
+		udmMa["meshGroup"] = groupIdx;
+		udmMa["mesh"] = meshIdx;
+		udmMa["subMesh"] = subMeshIdx;
+
+		auto &frames = ma->GetFrames();
+		auto udmFrames = udmMa.AddArray("frames",frames.size());
+		uint32_t frameIdx = 0;
+		for(auto &frame : frames)
+		{
+			auto udmFrame = udmFrames[frameIdx++];
+			writeFlag(udmFrame,MeshVertexFrame::Flags::HasDeltaValues,"hasDeltaValues",frame->GetFlags());
+			writeFlag(udmFrame,MeshVertexFrame::Flags::HasNormals,"hasNormals",frame->GetFlags());
+			static_assert(umath::to_integral(MeshVertexFrame::Flags::Count) == 2,"Update this list when new flags have been added!");
+						
+			auto flags = frame->GetFlags();
+			struct Attribute
+			{
+				Attribute(const std::string &name,const std::vector<std::array<uint16_t,4>> &vertexData)
+					: name{name},vertexData{vertexData}
+				{}
+				std::string name;
+				const std::vector<std::array<uint16_t,4>> &vertexData;
+			};
+			std::vector<Attribute> attributes {};
+			attributes.push_back(Attribute{"position",frame->GetVertices()});
+			if(umath::is_flag_set(flags,MeshVertexFrame::Flags::HasNormals))
+				attributes.push_back(Attribute{"normal",frame->GetNormals()});
+			std::set<uint16_t> usedVertIndicesSet {};
+			std::vector<uint16_t> usedVertIndices {};
+			for(auto &attr : attributes)
+			{
+				auto vertIdx = 0u;
+				auto &vdata = attr.vertexData.at(vertIdx);
+				usedVertIndices.reserve(vdata.size());
+				for(auto &vdata : attr.vertexData)
+				{
+					auto itUsed = std::find_if(vdata.begin(),vdata.end(),[](const uint16_t &v) {return v != 0;});
+					if(itUsed != vdata.end())
+					{
+						if(usedVertIndicesSet.find(vertIdx) == usedVertIndicesSet.end())
+						{
+							usedVertIndicesSet.insert(vertIdx);
+							usedVertIndices.push_back(vertIdx);
+						}
+					}
+					++vertIdx;
+				}
+			}
+
+			udmFrame.AddArray("vertexIndices",usedVertIndices,udm::ArrayType::Compressed);
+			auto udmAttributes = udmFrame.AddArray("attributes",attributes.size());
+			for(auto i=decltype(attributes.size()){0u};i<attributes.size();++i)
+			{
+				auto &attr = attributes[i];
+				auto udmAttribute = udmAttributes[i];
+				std::vector<std::array<uint16_t,4>> usedVertexData;
+				usedVertexData.reserve(attr.vertexData.size());
+				for(auto idx : usedVertIndices)
+					usedVertexData.push_back(attr.vertexData[idx]);
+				static_assert(sizeof(udm::Half) == sizeof(uint16_t));
+				udmAttribute["property"] = attr.name;
+				udmAttribute.AddArray("values",strctHalfVector4,usedVertexData,udm::ArrayType::Compressed);
+			}
+		}
+	}
+	return true;
+}
+bool VertexAnimation::LoadFromAssetData(Model &mdl,const udm::AssetData &data,std::string &outErr)
+{
+	if(data.GetAssetType() != PMORPHANI_IDENTIFIER)
+	{
+		outErr = "Incorrect format!";
+		return false;
+	}
+
+	auto version = data.GetAssetVersion();
+	if(version < 1)
+	{
+		outErr = "Invalid version!";
+		return false;
+	}
+	// if(version > FORMAT_VERSION)
+	// 	return false;
+	
+	auto udm = *data;
+	udm["name"](m_name);
+
+	auto readFlag = [this](auto udm,auto flag,const std::string &name,auto &outFlags) {
+		auto udmFlags = udm["flags"];
+		if(!udmFlags)
+			return;
+		umath::set_flag(outFlags,flag,udmFlags[name](false));
+	};
+	
+	auto &meshAnims = GetMeshAnimations();
+	auto udmMeshAnims = udm["meshAnimations"];
+	auto numMeshAnims = udmMeshAnims.GetSize();
+	meshAnims.resize(numMeshAnims);
+	for(auto i=decltype(numMeshAnims){0u};i<numMeshAnims;++i)
+	{
+		auto &ma = meshAnims[i];
+		ma = std::make_shared<MeshVertexAnimation>();
+		auto udmMa = udmMeshAnims[i];
+		auto groupIdx = std::numeric_limits<uint32_t>::max();
+		auto meshIdx = std::numeric_limits<uint32_t>::max();
+		auto subMeshIdx = std::numeric_limits<uint32_t>::max();
+		udmMa["meshGroup"](groupIdx);
+		udmMa["mesh"](meshIdx);
+		udmMa["subMesh"](subMeshIdx);
+		
+		auto *mesh = mdl.GetMesh(groupIdx,meshIdx);
+		auto *subMesh = mdl.GetSubMesh(groupIdx,meshIdx,subMeshIdx);
+		if(mesh && subMesh)
+			ma->SetMesh(*mesh,*subMesh);
+
+		auto &frames = ma->GetFrames();
+		auto udmFrames = udmMa["frames"];
+		auto numFrames = udmFrames.GetSize();
+		frames.resize(numFrames);
+		for(auto frameIdx=decltype(numFrames){0u};frameIdx<numFrames;++frameIdx)
+		{
+			auto &meshFrame = frames[frameIdx];
+			meshFrame = std::make_shared<MeshVertexFrame>();
+			auto udmFrame = udmFrames[frameIdx];
+			auto flags = meshFrame->GetFlags();
+			readFlag(udmFrame,MeshVertexFrame::Flags::HasDeltaValues,"hasDeltaValues",flags);
+			readFlag(udmFrame,MeshVertexFrame::Flags::HasNormals,"hasNormals",flags);
+			static_assert(umath::to_integral(MeshVertexFrame::Flags::Count) == 2,"Update this list when new flags have been added!");
+			meshFrame->SetFlags(flags);
+			if(subMesh)
+				meshFrame->SetVertexCount(subMesh->GetVertexCount());
+
+			std::vector<uint16_t> usedVertIndices {};
+			udmFrame["vertexIndices"](usedVertIndices);
+
+			auto udmAttributes = udmFrame["attributes"];
+			for(auto udmAttr : udmAttributes)
+			{
+				std::string property;
+				udmAttr["property"](property);
+				if(property == "position")
+				{
+					std::vector<std::array<uint16_t,4>> positionData;
+					udmAttr["values"](positionData);
+					if(positionData.size() == usedVertIndices.size())
+					{
+						for(auto i=decltype(usedVertIndices.size()){0u};i<usedVertIndices.size();++i)
+						{
+							auto idx = usedVertIndices[i];
+							meshFrame->SetVertexPosition(idx,positionData[i]);
+						}
+					}
+				}
+				else if(property == "normal")
+				{
+					std::vector<std::array<uint16_t,4>> normalData;
+					udmAttr["values"](normalData);
+					if(normalData.size() == usedVertIndices.size())
+					{
+						for(auto i=decltype(usedVertIndices.size()){0u};i<usedVertIndices.size();++i)
+						{
+							auto idx = usedVertIndices[i];
+							meshFrame->SetVertexNormal(idx,normalData[i]);
+						}
+					}
+				}
+			}
+		}
+	}
+	return true;
 }
 
 bool VertexAnimation::GetMeshAnimationId(ModelSubMesh &subMesh,uint32_t &id) const
@@ -255,3 +511,4 @@ void VertexAnimation::Scale(const Vector3 &scale)
 	for(auto &meshAnim : m_meshAnims)
 		meshAnim->Scale(scale);
 }
+#pragma optimize("",on)

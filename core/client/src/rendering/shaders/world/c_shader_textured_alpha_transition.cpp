@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -16,12 +16,12 @@
 
 using namespace pragma;
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 decltype(ShaderTexturedAlphaTransition::VERTEX_BINDING_ALPHA) ShaderTexturedAlphaTransition::VERTEX_BINDING_ALPHA = {prosper::VertexInputRate::Vertex};
 decltype(ShaderTexturedAlphaTransition::VERTEX_ATTRIBUTE_ALPHA) ShaderTexturedAlphaTransition::VERTEX_ATTRIBUTE_ALPHA = {VERTEX_BINDING_ALPHA,prosper::Format::R32G32_SFloat};
 decltype(ShaderTexturedAlphaTransition::DESCRIPTOR_SET_MATERIAL) ShaderTexturedAlphaTransition::DESCRIPTOR_SET_MATERIAL = {
-	&ShaderTextured3DBase::DESCRIPTOR_SET_MATERIAL,
+	&ShaderGameWorldLightingPass::DESCRIPTOR_SET_MATERIAL,
 	{
 		prosper::DescriptorSetInfo::Binding { // Diffuse Map 2
 			prosper::DescriptorType::CombinedImageSampler,
@@ -34,14 +34,14 @@ decltype(ShaderTexturedAlphaTransition::DESCRIPTOR_SET_MATERIAL) ShaderTexturedA
 	}
 };
 ShaderTexturedAlphaTransition::ShaderTexturedAlphaTransition(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderTextured3DBase(context,identifier,"world/vs_textured_alpha_transition","world/fs_textured_alpha_transition")
+	: ShaderGameWorldLightingPass(context,identifier,"world/vs_textured_alpha_transition","world/fs_textured_alpha_transition")
 {
 	// SetBaseShader<ShaderTextured3DBase>();
 }
 
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderTexturedAlphaTransition::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
-	auto descSetGroup = ShaderTextured3DBase::InitializeMaterialDescriptorSet(mat,DESCRIPTOR_SET_MATERIAL);
+	auto descSetGroup = ShaderGameWorldLightingPass::InitializeMaterialDescriptorSet(mat,DESCRIPTOR_SET_MATERIAL);
 	if(descSetGroup == nullptr)
 		return nullptr;
 	auto &descSet = *descSetGroup->GetDescriptorSet();
@@ -66,16 +66,16 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderTexturedAlphaTransition::Ini
 prosper::DescriptorSetInfo &ShaderTexturedAlphaTransition::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
 void ShaderTexturedAlphaTransition::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderTextured3DBase::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
+	AttachPushConstantRange(pipelineInfo,0u,sizeof(ShaderGameWorldLightingPass::PushConstants) +sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit);
 }
 void ShaderTexturedAlphaTransition::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
-	ShaderTextured3DBase::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+	ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_ALPHA);
 }
 
-bool ShaderTexturedAlphaTransition::Draw(CModelSubMesh &mesh)
+bool ShaderTexturedAlphaTransition::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount)
 {
 	auto numAlpha = 0;
 	auto alphaBuffer = c_engine->GetRenderContext().GetDummyBuffer();
@@ -89,7 +89,7 @@ bool ShaderTexturedAlphaTransition::Draw(CModelSubMesh &mesh)
 			numAlpha = mesh.GetAlphaCount();
 		}
 	}
-	return RecordPushConstants(PushConstants{numAlpha},sizeof(ShaderTextured3DBase::PushConstants)) == true &&
+	return RecordPushConstants(PushConstants{numAlpha},sizeof(ShaderGameWorldLightingPass::PushConstants)) == true &&
 		RecordBindVertexBuffer(*alphaBuffer,VERTEX_BINDING_VERTEX.GetBindingIndex() +2u) == true &&
-		ShaderTextured3DBase::Draw(mesh) == true;
+		ShaderGameWorldLightingPass::Draw(mesh,meshIdx,renderBufferIndexBuffer,instanceCount) == true;
 }

@@ -2,13 +2,20 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
 #include "pragma/lua/libraries/ldebug.h"
 #include <pragma/console/conout.h>
 
+int Lua::debug::collectgarbage(lua_State *l)
+{
+	// Calling twice on purpose: https://stackoverflow.com/a/28320364/2482983
+	Lua::RunString(l,"collectgarbage()","internal");
+	Lua::RunString(l,"collectgarbage()","internal");
+	return 0;
+}
 void Lua::debug::stackdump(lua_State *l)
 {
 	int top = lua_gettop(l);
@@ -34,6 +41,17 @@ void Lua::debug::stackdump(lua_State *l)
 	}
 	if(top > 0)
 		Con::cout<<Con::endl;
+}
+
+void Lua::debug::beep(lua_State *l)
+{
+	int ms = 500;
+	int freq = 523;
+#ifdef _WIN32
+	Beep(freq,ms);
+#else
+	ioctl(fd,KDMKTONE,(ms<<16 | 1193180 /freq));
+#endif
 }
 
 std::string Lua::debug::move_state_to_string(lua_State *l,pragma::BaseAIComponent::MoveResult v)

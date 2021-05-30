@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -23,12 +23,14 @@ ComponentEventId BaseTouchComponent::EVENT_CAN_TRIGGER = INVALID_COMPONENT_ID;
 ComponentEventId BaseTouchComponent::EVENT_ON_START_TOUCH = INVALID_COMPONENT_ID;
 ComponentEventId BaseTouchComponent::EVENT_ON_END_TOUCH = INVALID_COMPONENT_ID;
 ComponentEventId BaseTouchComponent::EVENT_ON_TRIGGER = INVALID_COMPONENT_ID;
+ComponentEventId BaseTouchComponent::EVENT_ON_TRIGGER_INITIALIZED = INVALID_COMPONENT_ID;
 void BaseTouchComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	EVENT_CAN_TRIGGER = componentManager.RegisterEvent("CAN_TRIGGER");
 	EVENT_ON_START_TOUCH = componentManager.RegisterEvent("ON_START_TOUCH");
 	EVENT_ON_END_TOUCH = componentManager.RegisterEvent("ON_END_TOUCH");
 	EVENT_ON_TRIGGER = componentManager.RegisterEvent("ON_TRIGGER");
+	EVENT_ON_TRIGGER_INITIALIZED = componentManager.RegisterEvent("ON_TRIGGER_INITIALIZED");
 }
 BaseTouchComponent::BaseTouchComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)
@@ -45,11 +47,17 @@ void BaseTouchComponent::Initialize()
 	});
 	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		UpdateTouch();
+
+		// Note this *has* to be called before calling SetForcePhysicsAwakeCallbacksEnabled below!
+		static_cast<pragma::CEPostPhysicsSimulate&>(evData.get()).keepAwake = false;
+
+		auto pPhysComponent = GetEntity().GetPhysicsComponent();
+		if(pPhysComponent)
+			pPhysComponent->SetForcePhysicsAwakeCallbacksEnabled(false,false);
 	});
 
 	auto &ent = GetEntity();
 
-	ent.AddComponent("toggle");
 	auto whPhysComponent = ent.AddComponent("physics");
 	if(whPhysComponent.valid())
 		static_cast<BasePhysicsComponent&>(*whPhysComponent).SetCollisionCallbacksEnabled(true);
@@ -77,7 +85,7 @@ void BaseTouchComponent::OnPhysicsInitialized()
 		if((m_triggerFlags &TriggerFlags::Everything) != TriggerFlags::Physics)
 			masks |= CollisionMask::Dynamic;
 	}
-	if(physComponent.valid())
+	if(physComponent)
 	{
 		physComponent->SetCollisionFilterMask(masks);
 		physComponent->SetCollisionFilterGroup(CollisionMask::Trigger);
@@ -93,6 +101,7 @@ void BaseTouchComponent::OnPhysicsInitialized()
 				Con::cwar<<"WARNING: Trigger entity has non-trigger physics shapes!"<<Con::endl;
 		}
 	}
+	BroadcastEvent(EVENT_ON_TRIGGER_INITIALIZED);
 }
 void BaseTouchComponent::OnEntitySpawn()
 {
@@ -109,7 +118,7 @@ void BaseTouchComponent::OnEntitySpawn()
 		m_triggerFlags |= TriggerFlags::Physics;
 
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 	{
 		auto *physObj = pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
 		if(physObj)
@@ -202,14 +211,26 @@ bool BaseTouchComponent::IsTouchEnabled() const {return true;}
 void BaseTouchComponent::StartTouch(BaseEntity &entOther,PhysObj &physOther,physics::ICollisionObject &objThis,physics::ICollisionObject &objOther)
 {
 	m_contactEventQueue.push({entOther.GetHandle(),ContactEvent::Event::StartTouch});
+	
+	auto pPhysComponent = GetEntity().GetPhysicsComponent();
+	if(pPhysComponent)
+		pPhysComponent->SetForcePhysicsAwakeCallbacksEnabled(true);
 }
 void BaseTouchComponent::EndTouch(BaseEntity &entOther,PhysObj &physOther,physics::ICollisionObject &objThis,physics::ICollisionObject &objOther)
 {
 	m_contactEventQueue.push({entOther.GetHandle(),ContactEvent::Event::EndTouch});
+	
+	auto pPhysComponent = GetEntity().GetPhysicsComponent();
+	if(pPhysComponent)
+		pPhysComponent->SetForcePhysicsAwakeCallbacksEnabled(true);
 }
 void BaseTouchComponent::Contact(const pragma::physics::ContactInfo &contactInfo)
 {
 	m_contactReport.push_back(contactInfo);
+	
+	auto pPhysComponent = GetEntity().GetPhysicsComponent();
+	if(pPhysComponent)
+		pPhysComponent->SetForcePhysicsAwakeCallbacksEnabled(true);
 }
 
 bool BaseTouchComponent::CanTrigger(BaseEntity &ent)
@@ -222,7 +243,7 @@ bool BaseTouchComponent::CanTrigger(BaseEntity &ent)
 	return (m_triggerFlags &TriggerFlags::Everything) == TriggerFlags::Everything ||
 		((m_triggerFlags &TriggerFlags::NPCs) != TriggerFlags::None && ent.IsNPC()) ||
 		((m_triggerFlags &TriggerFlags::Players) != TriggerFlags::None && ent.IsPlayer()) ||
-		((m_triggerFlags &TriggerFlags::Physics) != TriggerFlags::None && ent.IsNPC() == false && ent.IsPlayer() == false && ent.GetPhysicsComponent().expired() == false && ent.GetPhysicsComponent()->GetPhysicsObject() != nullptr);
+		((m_triggerFlags &TriggerFlags::Physics) != TriggerFlags::None && ent.IsNPC() == false && ent.IsPlayer() == false && ent.GetPhysicsComponent() && ent.GetPhysicsComponent()->GetPhysicsObject() != nullptr);
 }
 void BaseTouchComponent::OnStartTouch(BaseEntity &ent)
 {
@@ -264,7 +285,7 @@ void BaseTouchComponent::FireStartTouchEvents(TouchInfo &touch,bool isFirstTouch
 		return;
 	auto &entThis = GetEntity();
 	auto pPhysComponent = ent->GetPhysicsComponent();
-	PhysObj *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	PhysObj *phys = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
 	auto hEnt = entThis.GetHandle();
 	OnStartTouch(*ent);
 	if(isFirstTouch)
@@ -275,7 +296,7 @@ void BaseTouchComponent::FireStartTouchEvents(TouchInfo &touch,bool isFirstTouch
 	}
 	if(!hEnt.IsValid())
 		return;
-	if(pPhysComponent.valid() && pPhysComponent->IsTrigger())
+	if(pPhysComponent != nullptr && pPhysComponent->IsTrigger())
 		Trigger(*ent);
 }
 

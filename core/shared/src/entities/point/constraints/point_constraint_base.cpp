@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -97,7 +97,7 @@ void BasePointConstraintComponent::InitializeConstraint()
 	std::vector<BaseEntity*> entsTgt;
 	GetTargetEntities(entsTgt);
 	auto pPhysComponentSrc = entSrc->GetPhysicsComponent();
-	RigidPhysObj *physSrc = pPhysComponentSrc.valid() ? dynamic_cast<RigidPhysObj*>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
+	RigidPhysObj *physSrc = pPhysComponentSrc ? dynamic_cast<RigidPhysObj*>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
 	if(physSrc == NULL)
 		return;
 	auto *bodySrc = physSrc->GetRigidBody();

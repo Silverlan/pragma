@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -24,7 +24,7 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <pragma/math/intersection.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 CWaterObject::WaterScene::~WaterScene()
@@ -76,7 +76,7 @@ static void is_camera_submerged(const pragma::CCameraComponent &cam,const Vector
 	auto isPointInAabb = false;
 	for(auto &p : nearPlaneBounds)
 	{
-		if(isPointInAabb == false && Intersection::VectorInBounds(p,waterAabbMin,waterAabbMax))
+		if(isPointInAabb == false && umath::intersection::vector_in_bounds(p,waterAabbMin,waterAabbMax))
 			isPointInAabb = true;
 
 		auto dot = glm::dot(Vector4(p.x,p.y,p.z,1.f),Vector4(-n.x,-n.y,-n.z,-planeDist));
@@ -111,10 +111,10 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 	auto *scene = c_game->GetScene();
 	if(scene == nullptr)
 		return;
-	auto renderer = dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer());
-	if(whShader.expired() || renderer == nullptr)
+	auto renderer = dynamic_cast<pragma::CRasterizationRendererComponent*>(scene->GetRenderer());
+	if(!whShader || renderer == nullptr)
 		return;
-	auto *shader = dynamic_cast<pragma::ShaderWater*>(whShader.get());
+	auto *shader = dynamic_cast<pragma::ShaderWater*>(whShader);
 	auto whShaderPPWater = c_engine->GetShader("pp_water");
 	if(shader == nullptr || whShaderPPWater.expired())
 		return;
@@ -228,7 +228,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		auto *scene = c_game->GetRenderScene();
 		if(scene == nullptr || scene != c_game->GetScene())
 			return;
-		auto *renderer = scene ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer()) : nullptr;
+		auto *renderer = scene ? dynamic_cast<pragma::CRasterizationRendererComponent*>(scene->GetRenderer()) : nullptr;
 		if(renderer == nullptr)
 			return;
 		auto drawCmd = drawSceneInfo.get().commandBuffer;
@@ -287,7 +287,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		if(c_game->GetRenderScene() != c_game->GetScene())
 			return;
 		auto *scene = c_game->GetRenderScene();
-		auto *renderer = scene ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer()) : nullptr;
+		auto *renderer = scene ? dynamic_cast<pragma::CRasterizationRendererComponent*>(scene->GetRenderer()) : nullptr;
 		auto camScene = scene ? scene->GetActiveCamera() : util::WeakHandle<pragma::CCameraComponent>{};
 		if(renderer == nullptr || camScene.expired())
 			return;
@@ -312,6 +312,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 
 			std::function<void(prosper::ICommandBuffer&)> fTransitionSampleImgToTransferDst = nullptr;
 			hdrInfo.BlitMainDepthBufferToSamplableDepthBuffer(drawSceneInfo.get(),fTransitionSampleImgToTransferDst);
+#if 0
 			if(drawCmd->RecordBeginRenderPass(*hdrInfo.hdrPostProcessingRenderTarget) == true)
 			{
 				auto &prepass = renderer->GetPrepass();
@@ -336,6 +337,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 			}
 			//fTransitionSampleImgToTransferDst(*drawCmd);
 			hdrInfo.BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo.get());
+#endif
 		}
 	}));
 	m_waterScene->hRenderScene = c_game->AddCallback("DrawScene",FunctionCallback<
@@ -396,7 +398,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 			if(bRenderReflection == true)
 			{
 				auto &sceneReflection = m_waterScene->sceneReflection;
-				auto *renderer = sceneReflection.valid() ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(sceneReflection->GetRenderer()) : nullptr;
+				auto *renderer = sceneReflection.valid() ? dynamic_cast<pragma::CRasterizationRendererComponent*>(sceneReflection->GetRenderer()) : nullptr;
 				if(renderer)
 				{
 					auto &rtReflection = renderer->GetHDRInfo().sceneRenderTarget;

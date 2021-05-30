@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -22,7 +22,7 @@ void CPropComponent::Initialize()
 		auto &shouldDrawData = static_cast<CEShouldDraw&>(evData.get());
 		auto &ent = GetEntity();
 		auto pTrComponent = ent.GetTransformComponent();
-		auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+		auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 		if((m_sqrMaxVisibleDist == 0.0 || static_cast<double>(uvec::length_sqr(shouldDrawData.camOrigin -pos)) <= m_sqrMaxVisibleDist) == false)
 		{
 			shouldDrawData.shouldDraw = CEShouldDraw::ShouldDraw::No;
@@ -42,7 +42,6 @@ void CPropComponent::Initialize()
 luabind::object CPropComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CPropComponentHandleWrapper>(l);}
 void CPropComponent::ReceiveData(NetPacket &packet)
 {
-	m_sqrMaxVisibleDist = umath::pow2(static_cast<double>(packet->Read<float>()));
 	m_kvMass = packet->Read<float>();
 }
 

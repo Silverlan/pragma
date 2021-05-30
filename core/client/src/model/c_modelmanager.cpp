@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -17,7 +17,7 @@ std::shared_ptr<Model> pragma::asset::CModelManager::LoadModel(const std::string
 {
 	auto mdl = ModelManager::LoadModel(mdlName,bReload,outIsNewModel);
 	if(mdl == nullptr)
-		static_cast<CGame&>(*m_nw.GetGameState()).RequestResource("models/" +GetNormalizedModelName(mdlName));
+		static_cast<CGame&>(*m_nw.GetGameState()).RequestResource("models/" +GetNormalizedModelName(mdlName) +"." +std::string{pragma::asset::FORMAT_MODEL_BINARY});
 	return mdl;
 }
 

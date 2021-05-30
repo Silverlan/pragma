@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "pragma/game/c_game.h"
@@ -15,7 +15,7 @@
 
 using namespace pragma;
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
@@ -195,7 +195,8 @@ void CPBRConverterComponent::UpdateMetalness(Model &mdl,CMaterial &mat)
 		mat.GetDataBlock()->RemoveValue("rma_info");
 
 	mat.UpdateTextures();
-	if(mat.Save())
+	std::string err;
+	if(mat.Save(err))
 		client->LoadMaterial(mat.GetName(),true,true); // Reload material immediately
 }
 

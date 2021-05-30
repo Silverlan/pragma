@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __BASE_TRANSFORM_COMPONENT_HPP__
 #define __BASE_TRANSFORM_COMPONENT_HPP__
@@ -13,16 +13,35 @@
 
 namespace pragma
 {
+	enum class TransformChangeFlags : uint8_t
+	{
+		None = 0,
+		PositionChanged = 1u,
+		RotationChanged = PositionChanged<<1u,
+		ScaleChanged = RotationChanged<<1u
+	};
+	struct DLLNETWORK CEOnPoseChanged
+		: public ComponentEvent
+	{
+		CEOnPoseChanged(TransformChangeFlags changeFlags);
+		virtual void PushArguments(lua_State *l) override;
+		TransformChangeFlags changeFlags;
+	};
 	class DLLNETWORK BaseTransformComponent
 		: public BaseEntityComponent
 	{
 	public:
+		static pragma::ComponentEventId EVENT_ON_POSE_CHANGED;
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 		virtual void Initialize() override;
 
-		virtual void SetPosition(const Vector3 &pos);
-		virtual const Vector3 &GetPosition() const;
-		virtual void SetOrientation(const Quat &q);
-		virtual const Quat &GetOrientation() const;
+		void SetPosition(const Vector3 &pos);
+		const Vector3 &GetPosition() const;
+		void SetRotation(const Quat &q);
+		const Quat &GetRotation() const;
+		void SetPose(const umath::ScaledTransform &pose);
+		void SetPose(const umath::Transform &pose);
+		const umath::ScaledTransform &GetPose() const;
 		void SetAngles(const EulerAngles &ang);
 		void SetPitch(float pitch);
 		void SetYaw(float yaw);
@@ -56,10 +75,6 @@ namespace pragma
 		EulerAngles GetAngles(const Vector3 &pos,bool bIgnoreYAxis=false) const;
 		float GetDotProduct(const Vector3 &pos,bool bIgnoreYAxis=false) const;
 
-		const util::PVector3Property &GetPosProperty() const;
-		const util::PQuatProperty &GetOrientationProperty() const;
-		const util::PVector3Property &GetScaleProperty() const;
-
 		float GetMaxAxisScale() const;
 		float GetAbsMaxAxisScale() const;
 		const Vector3 &GetScale() const;
@@ -74,24 +89,24 @@ namespace pragma
 		
 		void SetPosition(const Vector3 &pos,Bool bForceUpdate);
 
-		virtual void Save(DataStream &ds) override;
-		virtual void Load(DataStream &ds,uint32_t version) override;
+		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
+		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
+
+		// Same as SetPosition / SetRotation / SetScale, but don't invoke callbacks
+		void SetRawPosition(const Vector3 &pos);
+		void SetRawRotation(const Quat &rot);
+		void SetRawScale(const Vector3 &scale);
 
 		void UpdateLastMovedTime();
-
-		// Set member variables directly, without influencing physics
-		void SetRawPosition(const Vector3 &pos);
-		void SetRawOrientation(const Quat &rot);
-		void SetRawScale(const Vector3 &scale);
+		void OnPoseChanged(TransformChangeFlags changeFlags,bool updatePhysics=true);
 	protected:
 		BaseTransformComponent(BaseEntity &ent);
 		pragma::NetEventId m_netEvSetScale = pragma::INVALID_NET_EVENT;
 		double m_tLastMoved = 0.0; // Last time the entity moved or changed rotation
 		Vector3 m_eyeOffset = {};
-		util::PVector3Property m_pos;
-		util::PQuatProperty m_orientation;
-		util::PVector3Property m_scale;
+		umath::ScaledTransform m_pose {};
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::TransformChangeFlags)
 
 #endif

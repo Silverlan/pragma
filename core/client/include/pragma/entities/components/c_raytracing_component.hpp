@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_RAYTRACING_COMPONENT_HPP__
@@ -51,7 +51,7 @@ namespace pragma
 
 				UseNormalMap = RenderModeWater<<1u
 			};
-			static_assert(umath::to_integral(RenderMode::Count) == 6);
+			static_assert(umath::to_integral(RenderMode::Count) == 5);
 			// Bounds for the sub-mesh. w-component is unused.
 			Vector4 aabbMin = {};
 			Vector4 aabbMax = {};

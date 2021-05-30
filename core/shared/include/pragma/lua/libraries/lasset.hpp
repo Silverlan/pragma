@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __LASSET_HPP__
 #define __LASSET_HPP__
@@ -23,6 +23,8 @@ namespace Lua
 		DLLNETWORK bool is_loaded(lua_State *l,const std::string &name,pragma::asset::Type type);
 		DLLNETWORK void lock_asset_watchers(lua_State *l);
 		DLLNETWORK void unlock_asset_watchers(lua_State *l);
+		DLLNETWORK luabind::object get_supported_import_file_extensions(lua_State *l,pragma::asset::Type type);
+		DLLNETWORK luabind::object get_supported_export_file_extensions(lua_State *l,pragma::asset::Type type);
 	};
 };
 

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __PHYS_MATERIAL_HPP__
@@ -32,7 +32,7 @@ namespace pragma::physics
 		SurfaceMaterial *GetSurfaceMaterial() const;
 		virtual void InitializeLuaObject(lua_State *lua) override;
 	private:
-		mutable SurfaceMaterial *m_surfaceMaterial = nullptr;
+		uint32_t m_surfMatIdx = std::numeric_limits<uint32_t>::max();
 	};
 };
 

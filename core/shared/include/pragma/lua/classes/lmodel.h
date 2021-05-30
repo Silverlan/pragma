@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __LMODEL_H__
 #define __LMODEL_H__
@@ -25,8 +25,8 @@ namespace Lua
 	namespace Joint
 	{
 		DLLNETWORK void GetType(lua_State *l,JointInfo &joint);
-		DLLNETWORK void GetCollisionMeshId(lua_State *l,JointInfo &joint);
-		DLLNETWORK void GetParentCollisionMeshId(lua_State *l,JointInfo &joint);
+		DLLNETWORK void GetChildBoneId(lua_State *l,JointInfo &joint);
+		DLLNETWORK void GetParentBoneId(lua_State *l,JointInfo &joint);
 		DLLNETWORK void GetCollisionsEnabled(lua_State *l,JointInfo &joint);
 		DLLNETWORK void GetKeyValues(lua_State *l,JointInfo &joint);
 
@@ -161,7 +161,7 @@ namespace Lua
 		DLLNETWORK void Scale(lua_State *l,::Model &mdl,const Vector3 &scale);
 		DLLNETWORK void GetEyeOffset(lua_State *l,::Model &mdl);
 		DLLNETWORK void SetEyeOffset(lua_State *l,::Model &mdl,const Vector3 &offset);
-		DLLNETWORK void AddAnimation(lua_State *l,::Model &mdl,const std::string &name,::Animation &anim);
+		DLLNETWORK void AddAnimation(lua_State *l,::Model &mdl,const std::string &name,pragma::animation::Animation &anim);
 		DLLNETWORK void RemoveAnimation(lua_State *l,::Model &mdl,uint32_t idx);
 		DLLNETWORK void ClearAnimations(lua_State *l,::Model &mdl);
 		DLLNETWORK void ClipAgainstPlane(lua_State *l,::Model &mdl,const Vector3 &n,double d,::Model &clippedMdlA,::Model &clippedMdlB);

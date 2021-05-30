@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -19,7 +19,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_quake,CEnvQuake);
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 CQuakeComponent::~CQuakeComponent()
@@ -53,7 +53,7 @@ void CQuakeComponent::StartShake()
 		
 		auto &entThis = GetEntity();
 		auto pTrComponent = entThis.GetTransformComponent();
-		if(pTrComponent.expired())
+		if(pTrComponent == nullptr)
 			return;
 		auto &origin = pTrComponent->GetPosition();
 		auto &radius = m_radius;
@@ -79,7 +79,7 @@ void CQuakeComponent::StartShake()
 		auto &ent = pl->GetEntity();
 		auto pPhysComponent = ent.GetPhysicsComponent();
 		auto pTrComponentEnt = ent.GetTransformComponent();
-		if((InAir() == false && (pPhysComponent.expired() || pPhysComponent->IsOnGround() == false)) || pTrComponentEnt.expired())
+		if((InAir() == false && (pPhysComponent == nullptr || pPhysComponent->IsOnGround() == false)) || !pTrComponentEnt)
 			return;
 		auto dist = uvec::distance(origin,pos);//pTrComponentEnt->GetPosition());
 		auto scale = (bGlobal == true) ? 1.f : (1.f -umath::clamp(dist /radius,0.f,1.f));

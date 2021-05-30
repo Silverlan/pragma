@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -13,35 +13,63 @@
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/model/modelmesh.h"
 #include "pragma/file_formats/wad.h"
+#include "pragma/util/util_game.hpp"
+#include <udm.hpp>
 
 void Lua::Animation::Create(lua_State *l)
 {
-	auto anim = ::Animation::Create();
-	Lua::Push<std::shared_ptr<::Animation>>(l,anim);
+	auto anim = pragma::animation::Animation::Create();
+	Lua::Push<std::shared_ptr<pragma::animation::Animation>>(l,anim);
 }
 void Lua::Animation::Load(lua_State *l,LFile &f)
 {
+	auto fptr = f.GetHandle();
+	auto offset = fptr->Tell();
+	auto len = strlen(udm::HEADER_IDENTIFIER);
+	auto isUdmFormat = true;
+	for(auto i=decltype(len){0u};i<len;++i)
+	{
+		if(fptr->ReadChar() != udm::HEADER_IDENTIFIER[i])
+		{
+			isUdmFormat = false;
+			break;
+		}
+	}
+	fptr->Seek(offset);
+	if(isUdmFormat)
+	{
+		auto udmData = util::load_udm_asset(fptr);
+		if(udmData == nullptr)
+			return;
+		std::string err;
+		auto anim = pragma::animation::Animation::Load(udmData->GetAssetData(),err);
+		if(anim == nullptr)
+			return;
+		Lua::Push(l,anim);
+		return;
+	}
+
 	FWAD wad;
-	auto anim = std::shared_ptr<::Animation>(wad.ReadData(33,f.GetHandle())); // Animation version has been introduced at model version 33, after which the model version is no longer taken into account, so we'll always treat it as model version 33 here
+	auto anim = std::shared_ptr<pragma::animation::Animation>(wad.ReadData(33,f.GetHandle())); // Animation version has been introduced at model version 33, after which the model version is no longer taken into account, so we'll always treat it as model version 33 here
 	if(anim == nullptr)
 		return;
-	Lua::Push<std::shared_ptr<::Animation>>(l,anim);
+	Lua::Push<std::shared_ptr<pragma::animation::Animation>>(l,anim);
 }
 void Lua::Animation::RegisterActivityEnum(lua_State *l,const std::string &name)
 {
-	auto &reg = ::Animation::GetActivityEnumRegister();
+	auto &reg = pragma::animation::Animation::GetActivityEnumRegister();
 	auto id = reg.RegisterEnum(name);
 	Lua::PushInt(l,id);
 }
 void Lua::Animation::RegisterEventEnum(lua_State *l,const std::string &name)
 {
-	auto &reg = ::Animation::GetEventEnumRegister();
+	auto &reg = pragma::animation::Animation::GetEventEnumRegister();
 	auto id = reg.RegisterEnum(name);
 	Lua::PushInt(l,id);
 }
 void Lua::Animation::GetActivityEnums(lua_State *l)
 {
-	auto &reg = ::Animation::GetActivityEnumRegister();
+	auto &reg = pragma::animation::Animation::GetActivityEnumRegister();
 	auto t = Lua::CreateTable(l);
 	uint32_t idx = 1;
 	for(auto &name : reg.GetEnums())
@@ -53,7 +81,7 @@ void Lua::Animation::GetActivityEnums(lua_State *l)
 }
 void Lua::Animation::GetEventEnums(lua_State *l)
 {
-	auto &reg = ::Animation::GetEventEnumRegister();
+	auto &reg = pragma::animation::Animation::GetEventEnumRegister();
 	auto t = Lua::CreateTable(l);
 	uint32_t idx = 1;
 	for(auto &name : reg.GetEnums())
@@ -65,7 +93,7 @@ void Lua::Animation::GetEventEnums(lua_State *l)
 }
 void Lua::Animation::GetActivityEnumName(lua_State *l,uint32_t id)
 {
-	auto &reg = ::Animation::GetActivityEnumRegister();
+	auto &reg = pragma::animation::Animation::GetActivityEnumRegister();
 	auto *name = reg.GetEnumName(id);
 	if(name == nullptr)
 		return;
@@ -73,7 +101,7 @@ void Lua::Animation::GetActivityEnumName(lua_State *l,uint32_t id)
 }
 void Lua::Animation::GetEventEnumName(lua_State *l,uint32_t id)
 {
-	auto &reg = ::Animation::GetEventEnumRegister();
+	auto &reg = pragma::animation::Animation::GetEventEnumRegister();
 	auto *name = reg.GetEnumName(id);
 	if(name == nullptr)
 		return;
@@ -81,7 +109,7 @@ void Lua::Animation::GetEventEnumName(lua_State *l,uint32_t id)
 }
 void Lua::Animation::FindActivityId(lua_State *l,const std::string &name)
 {
-	auto &reg = ::Animation::GetActivityEnumRegister();
+	auto &reg = pragma::animation::Animation::GetActivityEnumRegister();
 	uint32_t id;
 	if(reg.GetEnumValue(name,id) == false)
 		return;
@@ -89,13 +117,13 @@ void Lua::Animation::FindActivityId(lua_State *l,const std::string &name)
 }
 void Lua::Animation::FindEventId(lua_State *l,const std::string &name)
 {
-	auto &reg = ::Animation::GetEventEnumRegister();
+	auto &reg = pragma::animation::Animation::GetEventEnumRegister();
 	uint32_t id;
 	if(reg.GetEnumValue(name,id) == false)
 		return;
 	Lua::PushInt(l,id);
 }
-void Lua::Animation::GetBoneList(lua_State *l,::Animation &anim)
+void Lua::Animation::GetBoneList(lua_State *l,pragma::animation::Animation &anim)
 {
 	auto &list = anim.GetBoneList();
 	auto table = Lua::CreateTable(l); /* 1 */
@@ -107,28 +135,28 @@ void Lua::Animation::GetBoneList(lua_State *l,::Animation &anim)
 		n++;
 	}
 }
-void Lua::Animation::GetActivity(lua_State *l,::Animation &anim) {Lua::PushInt(l,anim.GetActivity());}
-void Lua::Animation::SetActivity(lua_State*,::Animation &anim,uint16_t act) {anim.SetActivity(static_cast<Activity>(act));}
-void Lua::Animation::GetActivityWeight(lua_State *l,::Animation &anim) {Lua::PushInt(l,anim.GetActivityWeight());}
-void Lua::Animation::SetActivityWeight(lua_State*,::Animation &anim,uint8_t weight) {anim.SetActivityWeight(weight);}
-void Lua::Animation::GetFPS(lua_State *l,::Animation &anim) {Lua::PushInt(l,anim.GetFPS());}
-void Lua::Animation::SetFPS(lua_State*,::Animation &anim,uint8_t fps) {anim.SetFPS(fps);}
-void Lua::Animation::GetFlags(lua_State *l,::Animation &anim) {Lua::PushInt(l,umath::to_integral(anim.GetFlags()));}
-void Lua::Animation::SetFlags(lua_State*,::Animation &anim,uint32_t flags) {anim.SetFlags(static_cast<FAnim>(flags));}
-void Lua::Animation::AddFlags(lua_State*,::Animation &anim,uint32_t flags) {anim.AddFlags(static_cast<FAnim>(flags));}
-void Lua::Animation::RemoveFlags(lua_State*,::Animation &anim,uint32_t flags) {anim.RemoveFlags(static_cast<FAnim>(flags));}
-void Lua::Animation::GetFrame(lua_State *l,::Animation &anim,unsigned int ID)
+void Lua::Animation::GetActivity(lua_State *l,pragma::animation::Animation &anim) {Lua::PushInt(l,anim.GetActivity());}
+void Lua::Animation::SetActivity(lua_State*,pragma::animation::Animation &anim,uint16_t act) {anim.SetActivity(static_cast<Activity>(act));}
+void Lua::Animation::GetActivityWeight(lua_State *l,pragma::animation::Animation &anim) {Lua::PushInt(l,anim.GetActivityWeight());}
+void Lua::Animation::SetActivityWeight(lua_State*,pragma::animation::Animation &anim,uint8_t weight) {anim.SetActivityWeight(weight);}
+void Lua::Animation::GetFPS(lua_State *l,pragma::animation::Animation &anim) {Lua::PushInt(l,anim.GetFPS());}
+void Lua::Animation::SetFPS(lua_State*,pragma::animation::Animation &anim,uint8_t fps) {anim.SetFPS(fps);}
+void Lua::Animation::GetFlags(lua_State *l,pragma::animation::Animation &anim) {Lua::PushInt(l,umath::to_integral(anim.GetFlags()));}
+void Lua::Animation::SetFlags(lua_State*,pragma::animation::Animation &anim,uint32_t flags) {anim.SetFlags(static_cast<FAnim>(flags));}
+void Lua::Animation::AddFlags(lua_State*,pragma::animation::Animation &anim,uint32_t flags) {anim.AddFlags(static_cast<FAnim>(flags));}
+void Lua::Animation::RemoveFlags(lua_State*,pragma::animation::Animation &anim,uint32_t flags) {anim.RemoveFlags(static_cast<FAnim>(flags));}
+void Lua::Animation::GetFrame(lua_State *l,pragma::animation::Animation &anim,unsigned int ID)
 {
 	auto frame = anim.GetFrame(ID);
 	if(frame == nullptr)
 		return;
 	luabind::object(l,frame).push(l);
 }
-void Lua::Animation::AddFrame(lua_State*,::Animation &anim,::Frame &frame)
+void Lua::Animation::AddFrame(lua_State*,pragma::animation::Animation &anim,::Frame &frame)
 {
 	anim.AddFrame(frame.shared_from_this());
 }
-void Lua::Animation::GetFrames(lua_State *l,::Animation &anim)
+void Lua::Animation::GetFrames(lua_State *l,pragma::animation::Animation &anim)
 {
 	auto numFrames = anim.GetFrameCount();
 	auto t = Lua::CreateTable(l);
@@ -140,9 +168,9 @@ void Lua::Animation::GetFrames(lua_State *l,::Animation &anim)
 		Lua::SetTableValue(l,t);
 	}
 }
-void Lua::Animation::GetDuration(lua_State *l,::Animation &anim) {Lua::PushNumber(l,anim.GetDuration());}
-void Lua::Animation::GetBoneCount(lua_State *l,::Animation &anim) {Lua::PushInt(l,anim.GetBoneCount());}
-void Lua::Animation::GetFrameCount(lua_State *l,::Animation &anim) {Lua::PushInt(l,anim.GetFrameCount());}
+void Lua::Animation::GetDuration(lua_State *l,pragma::animation::Animation &anim) {Lua::PushNumber(l,anim.GetDuration());}
+void Lua::Animation::GetBoneCount(lua_State *l,pragma::animation::Animation &anim) {Lua::PushInt(l,anim.GetBoneCount());}
+void Lua::Animation::GetFrameCount(lua_State *l,pragma::animation::Animation &anim) {Lua::PushInt(l,anim.GetFrameCount());}
 void Lua::Animation::GetAnimationEventArguments(lua_State *l,int32_t tArgs,std::vector<std::string> &args)
 {
 	auto numArgs = Lua::GetObjectLength(l,tArgs);
@@ -157,7 +185,7 @@ void Lua::Animation::GetAnimationEventArguments(lua_State *l,int32_t tArgs,std::
 		Lua::Pop(l,1);
 	}
 }
-void Lua::Animation::AddEvent(lua_State *l,::Animation &anim,uint32_t frameId,uint32_t eventId,luabind::object args)
+void Lua::Animation::AddEvent(lua_State *l,pragma::animation::Animation &anim,uint32_t frameId,uint32_t eventId,luabind::object args)
 {
 	int32_t tArgs = 4;
 	Lua::CheckTable(l,tArgs);
@@ -189,7 +217,7 @@ void Lua::Animation::PushAnimationEvent(lua_State *l,const AnimationEvent &ev)
 	}
 	Lua::SetTableValue(l,tEvent);
 }
-void Lua::Animation::GetEvents(lua_State *l,::Animation &anim,uint32_t frameId)
+void Lua::Animation::GetEvents(lua_State *l,pragma::animation::Animation &anim,uint32_t frameId)
 {
 	auto *events = anim.GetEvents(frameId);
 
@@ -204,7 +232,7 @@ void Lua::Animation::GetEvents(lua_State *l,::Animation &anim,uint32_t frameId)
 		Lua::SetTableValue(l,t);
 	}
 }
-void Lua::Animation::GetEvents(lua_State *l,::Animation &anim)
+void Lua::Animation::GetEvents(lua_State *l,pragma::animation::Animation &anim)
 {
 	auto numFrames = anim.GetFrameCount();
 	auto t = Lua::CreateTable(l);
@@ -225,12 +253,12 @@ void Lua::Animation::GetEvents(lua_State *l,::Animation &anim)
 		Lua::SetTableValue(l,t);
 	}
 }
-void Lua::Animation::GetEventCount(lua_State *l,::Animation &anim,uint32_t frameId)
+void Lua::Animation::GetEventCount(lua_State *l,pragma::animation::Animation &anim,uint32_t frameId)
 {
 	auto *events = anim.GetEvents(frameId);
 	Lua::PushInt(l,(events != nullptr) ? events->size() : 0);
 }
-void Lua::Animation::GetEventCount(lua_State *l,::Animation &anim)
+void Lua::Animation::GetEventCount(lua_State *l,pragma::animation::Animation &anim)
 {
 	auto numFrames = anim.GetFrameCount();
 	uint32_t numEvents = 0;
@@ -243,8 +271,8 @@ void Lua::Animation::GetEventCount(lua_State *l,::Animation &anim)
 	}
 	Lua::PushInt(l,numEvents);
 }
-void Lua::Animation::GetFadeInTime(lua_State *l,::Animation &anim) {Lua::PushNumber(l,anim.GetFadeInTime());}
-void Lua::Animation::GetFadeOutTime(lua_State *l,::Animation &anim) {Lua::PushNumber(l,anim.GetFadeOutTime());}
+void Lua::Animation::GetFadeInTime(lua_State *l,pragma::animation::Animation &anim) {Lua::PushNumber(l,anim.GetFadeInTime());}
+void Lua::Animation::GetFadeOutTime(lua_State *l,pragma::animation::Animation &anim) {Lua::PushNumber(l,anim.GetFadeOutTime());}
 static void push_blend_controller(lua_State *l,AnimationBlendController &bc)
 {
 	auto t = Lua::CreateTable(l); /* 1 */
@@ -284,48 +312,48 @@ static void push_blend_controller(lua_State *l,AnimationBlendController &bc)
 
 	Lua::SetTableValue(l,t); /* 1 */
 }
-void Lua::Animation::GetBlendController(lua_State *l,::Animation &anim)
+void Lua::Animation::GetBlendController(lua_State *l,pragma::animation::Animation &anim)
 {
 	auto *bc = anim.GetBlendController();
 	if(bc == nullptr)
 		return;
 	push_blend_controller(l,*bc);
 }
-void Lua::Animation::CalcRenderBounds(lua_State *l,::Animation &anim,const std::shared_ptr<::Model> &mdl)
+void Lua::Animation::CalcRenderBounds(lua_State *l,pragma::animation::Animation &anim,const std::shared_ptr<::Model> &mdl)
 {
 	anim.CalcRenderBounds(*mdl);
 	GetRenderBounds(l,anim,mdl);
 }
-void Lua::Animation::GetRenderBounds(lua_State *l,::Animation &anim,const std::shared_ptr<::Model>&)
+void Lua::Animation::GetRenderBounds(lua_State *l,pragma::animation::Animation &anim,const std::shared_ptr<::Model>&)
 {
 	auto &bounds = anim.GetRenderBounds();
 	Lua::Push<Vector3>(l,bounds.first);
 	Lua::Push<Vector3>(l,bounds.second);
 }
-void Lua::Animation::Rotate(lua_State*,::Animation &anim,::Skeleton *skeleton,const Quat &rot)
+void Lua::Animation::Rotate(lua_State*,pragma::animation::Animation &anim,::Skeleton *skeleton,const Quat &rot)
 {
 	anim.Rotate(*skeleton,rot);
 }
-void Lua::Animation::Translate(lua_State*,::Animation &anim,::Skeleton *skeleton,const Vector3 &t)
+void Lua::Animation::Translate(lua_State*,pragma::animation::Animation &anim,::Skeleton *skeleton,const Vector3 &t)
 {
 	anim.Translate(*skeleton,t);
 }
-void Lua::Animation::Scale(lua_State *l,::Animation &anim,const Vector3 &scale)
+void Lua::Animation::Scale(lua_State *l,pragma::animation::Animation &anim,const Vector3 &scale)
 {
 	anim.Scale(scale);
 }
-void Lua::Animation::Reverse(lua_State *l,::Animation &anim)
+void Lua::Animation::Reverse(lua_State *l,pragma::animation::Animation &anim)
 {
 	anim.Reverse();
 }
-void Lua::Animation::RemoveEvent(lua_State *l,::Animation &anim,uint32_t frameId,uint32_t idx)
+void Lua::Animation::RemoveEvent(lua_State *l,pragma::animation::Animation &anim,uint32_t frameId,uint32_t idx)
 {
 	auto *events = anim.GetEvents(frameId);
 	if(events == nullptr || idx >= events->size())
 		return;
 	events->erase(events->begin() +idx);
 }
-void Lua::Animation::SetEventData(lua_State *l,::Animation &anim,uint32_t frameId,uint32_t idx,uint32_t type,luabind::object oArgs)
+void Lua::Animation::SetEventData(lua_State *l,pragma::animation::Animation &anim,uint32_t frameId,uint32_t idx,uint32_t type,luabind::object oArgs)
 {
 	auto *events = anim.GetEvents(frameId);
 	if(events == nullptr || idx >= events->size())
@@ -339,7 +367,7 @@ void Lua::Animation::SetEventData(lua_State *l,::Animation &anim,uint32_t frameI
 	ev->arguments.clear();
 	GetAnimationEventArguments(l,tArgs,ev->arguments);
 }
-void Lua::Animation::SetEventType(lua_State *l,::Animation &anim,uint32_t frameId,uint32_t idx,uint32_t type)
+void Lua::Animation::SetEventType(lua_State *l,pragma::animation::Animation &anim,uint32_t frameId,uint32_t idx,uint32_t type)
 {
 	auto *events = anim.GetEvents(frameId);
 	if(events == nullptr || idx >= events->size())
@@ -348,7 +376,7 @@ void Lua::Animation::SetEventType(lua_State *l,::Animation &anim,uint32_t frameI
 
 	ev->eventID = static_cast<AnimationEvent::Type>(type);
 }
-void Lua::Animation::SetEventArgs(lua_State *l,::Animation &anim,uint32_t frameId,uint32_t idx,luabind::object oArgs)
+void Lua::Animation::SetEventArgs(lua_State *l,pragma::animation::Animation &anim,uint32_t frameId,uint32_t idx,luabind::object oArgs)
 {
 	auto *events = anim.GetEvents(frameId);
 	if(events == nullptr || idx >= events->size())
@@ -361,7 +389,7 @@ void Lua::Animation::SetEventArgs(lua_State *l,::Animation &anim,uint32_t frameI
 	ev->arguments.clear();
 	GetAnimationEventArguments(l,tArgs,ev->arguments);
 }
-void Lua::Animation::LookupBone(lua_State *l,::Animation &anim,uint32_t boneId)
+void Lua::Animation::LookupBone(lua_State *l,pragma::animation::Animation &anim,uint32_t boneId)
 {
 	auto &list = anim.GetBoneList();
 	auto it = std::find(list.begin(),list.end(),boneId);
@@ -369,11 +397,11 @@ void Lua::Animation::LookupBone(lua_State *l,::Animation &anim,uint32_t boneId)
 		return;
 	Lua::PushInt(l,it -list.begin());
 }
-void Lua::Animation::SetBoneList(lua_State *l,::Animation &anim,luabind::object o)
+void Lua::Animation::SetBoneList(lua_State *l,pragma::animation::Animation &anim,luabind::object o)
 {
 	int32_t t = 2;
 	auto numBones = Lua::GetObjectLength(l,t);
-	std::vector<uint32_t> list;
+	std::vector<uint16_t> list;
 	list.reserve(numBones);
 	for(auto i=decltype(numBones){0};i<numBones;++i)
 	{
@@ -385,16 +413,16 @@ void Lua::Animation::SetBoneList(lua_State *l,::Animation &anim,luabind::object 
 	}
 	anim.SetBoneList(list);
 }
-void Lua::Animation::AddBoneId(lua_State *l,::Animation &anim,uint32_t boneId) {Lua::PushInt(l,anim.AddBoneId(boneId));}
-void Lua::Animation::SetFadeInTime(lua_State *l,::Animation &anim,float t) {anim.SetFadeInTime(t);}
-void Lua::Animation::SetFadeOutTime(lua_State *l,::Animation &anim,float t) {anim.SetFadeOutTime(t);}
-void Lua::Animation::SetBoneWeight(lua_State *l,::Animation &anim,uint32_t boneId,float t) {anim.SetBoneWeight(boneId,t);}
-void Lua::Animation::GetBoneWeight(lua_State *l,::Animation &anim,uint32_t boneId)
+void Lua::Animation::AddBoneId(lua_State *l,pragma::animation::Animation &anim,uint32_t boneId) {Lua::PushInt(l,anim.AddBoneId(boneId));}
+void Lua::Animation::SetFadeInTime(lua_State *l,pragma::animation::Animation &anim,float t) {anim.SetFadeInTime(t);}
+void Lua::Animation::SetFadeOutTime(lua_State *l,pragma::animation::Animation &anim,float t) {anim.SetFadeOutTime(t);}
+void Lua::Animation::SetBoneWeight(lua_State *l,pragma::animation::Animation &anim,uint32_t boneId,float t) {anim.SetBoneWeight(boneId,t);}
+void Lua::Animation::GetBoneWeight(lua_State *l,pragma::animation::Animation &anim,uint32_t boneId)
 {
 	auto weight = anim.GetBoneWeight(boneId);
 	Lua::PushNumber(l,weight);
 }
-void Lua::Animation::GetBoneWeights(lua_State *l,::Animation &anim)
+void Lua::Animation::GetBoneWeights(lua_State *l,pragma::animation::Animation &anim)
 {
 	auto &weights = anim.GetBoneWeights();
 	auto t = Lua::CreateTable(l);
@@ -454,11 +482,11 @@ void Lua::Frame::SetBoneTransform(lua_State *l,::Frame &frame,unsigned int boneI
 	SetBoneTransform(l,frame,boneID,pos,rot);
 	frame.SetBoneScale(boneID,scale);
 }
-void Lua::Frame::Localize(lua_State*,::Frame &frame,::Animation &anim,::Skeleton *skeleton)
+void Lua::Frame::Localize(lua_State*,::Frame &frame,pragma::animation::Animation &anim,::Skeleton *skeleton)
 {
 	frame.Localize(anim,*skeleton);
 }
-void Lua::Frame::Globalize(lua_State*,::Frame &frame,::Animation &anim,::Skeleton *skeleton)
+void Lua::Frame::Globalize(lua_State*,::Frame &frame,pragma::animation::Animation &anim,::Skeleton *skeleton)
 {
 	frame.Globalize(anim,*skeleton);
 }
@@ -470,17 +498,17 @@ void Lua::Frame::Globalize(lua_State*,::Frame &frame,::Skeleton *skeleton)
 {
 	frame.Globalize(*skeleton);
 }
-void Lua::Frame::CalcRenderBounds(lua_State *l,::Frame &frame,::Animation &anim,const std::shared_ptr<::Model> &mdl)
+void Lua::Frame::CalcRenderBounds(lua_State *l,::Frame &frame,pragma::animation::Animation &anim,const std::shared_ptr<::Model> &mdl)
 {
 	auto renderBounds = frame.CalcRenderBounds(anim,*mdl);
 	Lua::Push<Vector3>(l,renderBounds.first);
 	Lua::Push<Vector3>(l,renderBounds.second);
 }
-void Lua::Frame::Rotate(lua_State*,::Frame &frame,::Animation &anim,::Skeleton *skeleton,const Quat &rot)
+void Lua::Frame::Rotate(lua_State*,::Frame &frame,pragma::animation::Animation &anim,::Skeleton *skeleton,const Quat &rot)
 {
 	frame.Rotate(anim,*skeleton,rot);
 }
-void Lua::Frame::Translate(lua_State*,::Frame &frame,::Animation &anim,::Skeleton *skeleton,const Vector3 &t)
+void Lua::Frame::Translate(lua_State*,::Frame &frame,pragma::animation::Animation &anim,::Skeleton *skeleton,const Vector3 &t)
 {
 	frame.Translate(anim,*skeleton,t);
 }

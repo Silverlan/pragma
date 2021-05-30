@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -16,9 +16,10 @@
 #include <pragma/lua/luafunction_call.h>
 #include <wgui/wgui.h>
 #include <pragma/entities/components/base_transform_component.hpp>
+#include <prosper_window.hpp>
 
 extern DLLCLIENT CGame *c_game;
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 static CVar cvSpeed = GetClientConVar("cl_mouse_sensitivity");
 static CVar cvAcceleration = GetClientConVar("cl_mouse_acceleration");
@@ -33,10 +34,10 @@ void CGame::CalcLocalPlayerOrientation()
 	auto &ent = pl->GetEntity();
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(charComponent.expired() && pTrComponent.expired())
+	if(charComponent.expired() && pTrComponent == nullptr)
 		return;
 	//Vector3 pos = pl->GetPosition();
-	auto orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetOrientation();
+	auto orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetRotation();
 	uquat::inverse(m_curFrameRotationModifier);
 	orientation = m_curFrameRotationModifier *orientation;
 	m_curFrameRotationModifier = uquat::identity();
@@ -45,13 +46,15 @@ void CGame::CalcLocalPlayerOrientation()
 	auto w = c_engine->GetRenderContext().GetWindowWidth();
 	auto h = c_engine->GetRenderContext().GetWindowHeight();
 	float wDelta,hDelta;
-	auto &window = c_engine->GetWindow();
-	if(window.IsFocused() && WGUI::GetInstance().GetFocusedElement() == nullptr)
+	auto *window = WGUI::GetInstance().FindFocusedWindow();
+	if(window && window->IsValid() && WGUI::GetInstance().GetFocusedElement(window) == nullptr)
 	{
-		auto pos = window.GetCursorPos();
-		window.SetCursorPos(Vector2i(w /2,h /2));
+		auto pos = (*window)->GetCursorPos();
+		(*window)->SetCursorPos(Vector2i(umath::round(w /2.f),umath::round(h /2.f)));
 		wDelta = pos.x -w /2.f;
 		hDelta = pos.y -h /2.f;
+		if((h %2) != 0)
+			hDelta -= 0.5f;
 	}
 	else
 	{
@@ -124,7 +127,7 @@ void CGame::CalcLocalPlayerOrientation()
 		if(charComponent.valid())
 			charComponent->SetViewOrientation(orientation);
 		else
-			pTrComponent->SetOrientation(orientation);
+			pTrComponent->SetRotation(orientation);
 		return;
 	//}
 }
@@ -137,17 +140,17 @@ void CGame::CalcView()
 	auto &ent = pl->GetEntity();
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(charComponent.expired() && pTrComponent.expired())
+	if(charComponent.expired() && pTrComponent == nullptr)
 		return;
 	Vector3 pos;
 	Quat orientation = uquat::identity();
-	pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 	Vector3 offset = pl->GetViewOffset();
 	Vector3 upDir = charComponent.valid() ? charComponent->GetUpDirection() : uvec::UP;
 	offset = Vector3(offset.x,0,offset.z) +upDir *offset.y;
 	pos += offset;
 
-	orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetOrientation();
+	orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetRotation();
 
 	auto rotModifier = uquat::identity();
 	CallCallbacks<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>,std::reference_wrapper<Quat>>("CalcView",std::ref(pos),std::ref(orientation),std::ref(rotModifier));
@@ -159,7 +162,7 @@ void CGame::CalcView()
 	if(charComponent.valid())
 		charComponent->SetViewOrientation(orientation);
 	else
-		pTrComponent->SetOrientation(orientation);
+		pTrComponent->SetRotation(orientation);
 	pl->SetViewPos(pos);
 
 	// Update entities attached to player camera

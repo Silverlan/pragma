@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -17,7 +17,7 @@
 #include <pragma/model/model.h>
 #include <pragma/model/modelmesh.h>
 #include <pragma/model/animation/vertex_animation.hpp>
-#include <pragma/model/animation/animation.h>
+#include <pragma/model/animation/animation.hpp>
 #include <sharedutils/alpha_mode.hpp>
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_file.h>
@@ -401,6 +401,31 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 		//indexBuffer.uri = "indices.bin";
 		//vertexBuffer.uri = "vertices.bin";
 
+		std::vector<Vector2> uvSetsData {};
+		for(auto &exportData : m_uniqueModelExportList)
+		{
+			for(auto &mesh : exportData.exportMeshes)
+			{
+				auto &uvSets = mesh->GetUVSets();
+				if(uvSets.empty())
+					continue;
+				uvSetsData.reserve(uvSetsData.size() +uvSets.size() *mesh->GetVertexCount());
+				for(auto &pair : uvSets)
+				{
+					assert(pair.second.size() == mesh->GetVertexCount());
+					for(auto uv : pair.second)
+					{
+						for(uint8_t i=0;i<uv.length();++i)
+						{
+							if((std::isnan(uv[i]) || std::isinf(uv[i])))
+								uv[i] = 0.f;
+						}
+						uvSetsData.push_back(uv);
+					}
+				}
+			}
+		}
+
 		uint64_t indexOffset = 0;
 		uint64_t vertOffset = 0;
 		//std::vector<uint8_t> indexData {};
@@ -414,7 +439,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 			uint32_t meshIdx = 0;
 			for(auto &mesh : exportData.exportMeshes)
 			{
-				ScopeGuard sg {[&meshIdx]() {++meshIdx;}};
+				util::ScopeGuard sg {[&meshIdx]() {++meshIdx;}};
 				auto &indices = mesh->GetTriangles();
 				auto *gltfIndexData = indexData.data() +indexOffset *sizeof(uint32_t);
 				for(auto i=decltype(indices.size()){0u};i<indices.size();++i)
@@ -481,6 +506,14 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 		m_bufferViewIndices.positions = AddBufferView("positions",m_bufferIndices.vertices,0,vertexBuffer.data.size(),szVertex);
 		m_bufferViewIndices.normals = AddBufferView("normals",m_bufferIndices.vertices,sizeof(Vector3),vertexBuffer.data.size() -sizeof(Vector3),szVertex);
 		m_bufferViewIndices.texCoords = AddBufferView("texcoords",m_bufferIndices.vertices,sizeof(Vector3) *2,vertexBuffer.data.size() -sizeof(Vector3) *2,szVertex);
+		if(uvSetsData.size() > 0)
+		{
+			auto &uvSetsBuffer = AddBuffer("uvsets",&m_bufferIndices.uvSets);
+			auto size = uvSetsData.size() *sizeof(uvSetsData.front());
+			m_bufferViewIndices.uvSets = AddBufferView("uvsets",m_bufferIndices.uvSets,0,size,sizeof(Vector2));
+			uvSetsBuffer.data.resize(size);
+			memcpy(uvSetsBuffer.data.data(),uvSetsData.data(),size);
+		}
 	}
 
 	gltfMdl.accessors.reserve(numSubMeshes *BufferViewIndices::Count);
@@ -499,6 +532,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 	uint64_t indexOffset = 0;
 	uint64_t vertOffset = 0;
 	uint64_t vertexWeightOffset = 0;
+	uint32_t uvSetOffset = 0;
 	uint32_t meshIdx = 0;
 	for(auto &exportData : m_uniqueModelExportList)
 	{
@@ -533,6 +567,25 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 			auto posAccessor = AddAccessor("mesh" +std::to_string(meshIdx) +"_positions",TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC3,vertOffset *szVertex,verts.size(),m_bufferViewIndices.positions);
 			auto normalAccessor = AddAccessor("mesh" +std::to_string(meshIdx) +"_normals",TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC3,vertOffset *szVertex,verts.size(),m_bufferViewIndices.normals);
 			auto uvAccessor = AddAccessor("mesh" +std::to_string(meshIdx) +"_uvs",TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC2,vertOffset *szVertex,verts.size(),m_bufferViewIndices.texCoords);
+
+			std::vector<uint32_t> uvSetsAccessors;
+			auto &uvSets = mesh->GetUVSets();
+			if(!uvSets.empty())
+			{
+				uvSetsAccessors.reserve(uvSets.size());
+				uint32_t uvSetIdx = 0;
+				for(auto &pair : uvSets)
+				{
+					auto &uvSet = pair.second;
+					auto uvAccessor = AddAccessor(
+						"mesh" +std::to_string(meshIdx) +"_uvset" +std::to_string(uvSetIdx++),TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC2,
+						uvSetOffset *sizeof(Vector2),verts.size(),m_bufferViewIndices.uvSets
+					);
+					uvSetsAccessors.push_back(uvAccessor);
+
+					uvSetOffset += verts.size();
+				}
+			}
 
 			// Calculate bounds
 			Vector3 min {std::numeric_limits<float>::max(),std::numeric_limits<float>::max(),std::numeric_limits<float>::max()};
@@ -592,6 +645,8 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg,const std::string 
 			primitive.attributes["POSITION"] = posAccessor;
 			primitive.attributes["NORMAL"] = normalAccessor;
 			primitive.attributes["TEXCOORD_0"] = uvAccessor;
+			for(auto i=decltype(uvSets.size()){0u};i<uvSets.size();++i)
+				primitive.attributes["TEXCOORD_" +std::to_string(i +1)] = uvSetsAccessors[i];
 
 			if(IsSkinned(exportData.model) && mesh->GetVertexWeights().empty() == false)
 			{

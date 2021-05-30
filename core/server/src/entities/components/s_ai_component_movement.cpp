@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_ai_component.hpp"
@@ -52,7 +52,7 @@ void SAIComponent::OnPrePhysicsSimulate()
 
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
-	if(pTrComponent.valid() && pVelComponent.valid())
+	if(pTrComponent != nullptr && pVelComponent.valid())
 	{
 		auto &vel = pVelComponent->GetVelocity();
 		if(uvec::length_sqr(vel) > 1.f)

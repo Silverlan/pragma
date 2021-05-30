@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -13,7 +13,6 @@
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/base_parent_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
-#include "pragma/entities/components/logic_component.hpp"
 #include "pragma/entities/parentinfo.h"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/model/model.h"
@@ -50,12 +49,8 @@ void BaseAttachableComponent::Initialize()
 		}
 		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		UpdateAttachmentOffset();
-	});
-
-	GetEntity().AddComponent<LogicComponent>();
 }
+void BaseAttachableComponent::OnTick(double dt) {UpdateAttachmentOffset();}
 void BaseAttachableComponent::OnRemove()
 {
 	BaseEntityComponent::OnRemove();
@@ -109,13 +104,11 @@ void BaseAttachableComponent::UpdateAttachmentData(bool bForceReload)
 			else
 				return;
 		}
-		auto mdlComponent = GetEntity().GetModelComponent();
-		auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+		auto &hMdl = GetEntity().GetModel();
 		if(hMdl != nullptr)
 		{
 			Skeleton &skel = hMdl->GetSkeleton();
-			auto mdlComponentParent = entParent.GetModelComponent();
-			auto hMdlParent = mdlComponentParent.valid() ? mdlComponentParent->GetModel() : nullptr;
+			auto &hMdlParent = entParent.GetModel();
 			if(hMdlParent != nullptr)
 			{
 				auto *mdlParent = hMdlParent.get();
@@ -158,10 +151,9 @@ AttachmentData *BaseAttachableComponent::SetupAttachment(BaseEntity *ent,const A
 			entParent->RemoveChild(*this);
 		}
 		m_attachment = nullptr;
-		if(m_posChangeCallback.IsValid())
-			m_posChangeCallback.Remove();
-		if(m_rotChangeCallback.IsValid())
-			m_rotChangeCallback.Remove();
+		SetTickPolicy(TickPolicy::Never);
+		if(m_poseChangeCallback.IsValid())
+			m_poseChangeCallback.Remove();
 	}
 	if(ent != nullptr)
 	{
@@ -169,9 +161,12 @@ AttachmentData *BaseAttachableComponent::SetupAttachment(BaseEntity *ent,const A
 		if(pParentComponent == nullptr)
 		{
 			m_attachment = nullptr;
+			SetTickPolicy(TickPolicy::Never);
+			OnAttachmentChanged();
 			return nullptr;
 		}
 		m_attachment = std::make_unique<AttachmentData>();
+		SetTickPolicy(TickPolicy::Always);
 		m_attachment->parent = pParentComponent->GetHandle<BaseParentComponent>();
 		m_attachment->offset = attInfo.offset.has_value() ? *attInfo.offset : Vector3{};
 		m_attachment->rotation = attInfo.rotation.has_value() ? *attInfo.rotation : uquat::identity();
@@ -187,63 +182,78 @@ AttachmentData *BaseAttachableComponent::SetupAttachment(BaseEntity *ent,const A
 		else
 		{
 			auto pTrComponentEnt = ent->GetTransformComponent();
-			pos = pTrComponentEnt.valid() ? pTrComponentEnt->GetPosition() : Vector3{};
-			orientation = pTrComponentEnt.valid() ? pTrComponentEnt->GetOrientation() : uquat::identity();
+			pos = pTrComponentEnt ? pTrComponentEnt->GetPosition() : Vector3{};
+			orientation = pTrComponentEnt ? pTrComponentEnt->GetRotation() : uquat::identity();
 		}
 		auto pTrComponent = GetEntity().GetTransformComponent();
 		if((attInfo.flags &FAttachmentMode::SnapToOrigin) != FAttachmentMode::None)
 		{
-			if(pTrComponent.valid())
+			if(pTrComponent)
 			{
 				pTrComponent->SetPosition(pos);
-				pTrComponent->SetOrientation(orientation);
+				pTrComponent->SetRotation(orientation);
 			}
 		}
 		else
 		{
 			auto invRot = uquat::get_inverse(orientation);
-			auto offset = (pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{}) -pos;
+			auto offset = (pTrComponent ? pTrComponent->GetPosition() : Vector3{}) -pos;
 			uvec::rotate(&offset,invRot);
 			if(attInfo.offset.has_value() == false)
 				m_attachment->offset = offset;
 			if(attInfo.rotation.has_value() == false)
-				m_attachment->rotation = uquat::get_inverse(orientation) *(pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity());
+				m_attachment->rotation = uquat::get_inverse(orientation) *(pTrComponent ? pTrComponent->GetRotation() : uquat::identity());
 		}
 		UpdateAttachmentData();
 		pParentComponent->AddChild(*this);
 
-		if(pTrComponent.valid())
+		if(pTrComponent)
 		{
 			// Update local pose (relative to parent) if absolute pose
 			// has been changed externally
-			auto &posProp = pTrComponent->GetPosProperty();
-			m_posChangeCallback = posProp->AddCallback([this](std::reference_wrapper<const Vector3> oldPos,std::reference_wrapper<const Vector3> newPos) {
-				if(umath::is_flag_set(m_stateFlags,StateFlags::UpdatingPosition))
-					return;
-				auto parentPose = GetParentPose();
-				if(parentPose.has_value() == false)
-					return;
-				auto localOffset = parentPose->GetInverse() *newPos.get();
-				auto *attData = GetAttachmentData();
-				if(attData == nullptr)
-					return;
-				attData->offset = localOffset;
-			});
-			auto &rotProp = pTrComponent->GetOrientationProperty();
-			m_rotChangeCallback = rotProp->AddCallback([this](std::reference_wrapper<const Quat> oldRot,std::reference_wrapper<const Quat> newRot) {
-				if(umath::is_flag_set(m_stateFlags,StateFlags::UpdatingRotation))
-					return;
-				auto parentPose = GetParentPose();
-				if(parentPose.has_value() == false)
-					return;
-				auto localRot = parentPose->GetInverse() *newRot.get();
-				auto *attData = GetAttachmentData();
-				if(attData == nullptr)
-					return;
-				attData->rotation = localRot;
-			});
+			if((m_attachment->flags &FAttachmentMode::ForceInPlace) == FAttachmentMode::ForceInPlace)
+			{
+				if(m_poseChangeCallback.IsValid())
+					m_poseChangeCallback.Remove();
+			}
+			else
+			{
+				m_poseChangeCallback = pTrComponent->AddEventCallback(pragma::BaseTransformComponent::EVENT_ON_POSE_CHANGED,[this,pTrComponent](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
+					auto changeFlags = static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags;
+					if(umath::is_flag_set(changeFlags,TransformChangeFlags::PositionChanged) && umath::is_flag_set(m_attachment->flags,FAttachmentMode::ForceTranslationInPlace) == false)
+					{
+						if(!umath::is_flag_set(m_stateFlags,StateFlags::UpdatingPosition))
+						{
+							auto parentPose = GetParentPose();
+							if(parentPose.has_value())
+							{
+								auto localOffset = parentPose->GetInverse() *pTrComponent->GetPosition();
+								auto *attData = GetAttachmentData();
+								if(attData)
+									attData->offset = localOffset;
+							}
+						}
+					}
+					if(umath::is_flag_set(changeFlags,TransformChangeFlags::RotationChanged) && umath::is_flag_set(m_attachment->flags,FAttachmentMode::ForceRotationInPlace) == false)
+					{
+						if(!umath::is_flag_set(m_stateFlags,StateFlags::UpdatingRotation))
+						{
+							auto parentPose = GetParentPose();
+							if(parentPose.has_value())
+							{
+								auto localRot = parentPose->GetInverse() *pTrComponent->GetRotation();
+								auto *attData = GetAttachmentData();
+								if(attData)
+									attData->rotation = localRot;
+							}
+						}
+					}
+					return util::EventReply::Unhandled;
+				});
+			}
 		}
 	}
+	OnAttachmentChanged();
 	return m_attachment.get();
 }
 AttachmentData *BaseAttachableComponent::AttachToEntity(BaseEntity *ent,const AttachmentInfo &attInfo)
@@ -269,14 +279,14 @@ AttachmentData *BaseAttachableComponent::AttachToBone(BaseEntity *ent,uint32_t b
 		auto rot = uquat::identity();
 		animComponentParent->GetBonePosition(m_attachment->bone,pos,rot);
 		auto pTrComponentParent = entParent.GetTransformComponent();
-		if(pTrComponentParent.valid())
+		if(pTrComponentParent)
 			pTrComponentParent->LocalToWorld(&pos,&rot);
 
 		auto pTrComponent = GetEntity().GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent)
 		{
 			pTrComponent->SetPosition(pos);
-			pTrComponent->SetOrientation(rot);
+			pTrComponent->SetRotation(rot);
 		}
 	}
 	UpdateAttachmentOffset();
@@ -289,8 +299,7 @@ AttachmentData *BaseAttachableComponent::AttachToBone(BaseEntity *ent,std::strin
 		ClearAttachment();
 		return nullptr;
 	}
-	auto mdlComponent = ent->GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent->GetModel();
 	if(hMdl == nullptr)
 	{
 		SetupAttachment(ent,attInfo);
@@ -317,17 +326,17 @@ AttachmentData *BaseAttachableComponent::AttachToAttachment(BaseEntity *ent,uint
 		Vector3 pos {};
 		auto rot = uquat::identity();
 		auto mdlCParent = entParent.GetModelComponent();
-		if(mdlCParent.valid())
+		if(mdlCParent)
 			mdlCParent->GetAttachment(m_attachment->attachment,&pos,&rot);
 		auto pTrComponentParent = entParent.GetTransformComponent();
-		if(pTrComponentParent.valid())
+		if(pTrComponentParent)
 			pTrComponentParent->LocalToWorld(&pos,&rot);
 
 		auto pTrComponent = GetEntity().GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent)
 		{
 			pTrComponent->SetPosition(pos);
-			pTrComponent->SetOrientation(rot);
+			pTrComponent->SetRotation(rot);
 		}
 	}
 	UpdateAttachmentOffset();
@@ -341,7 +350,7 @@ AttachmentData *BaseAttachableComponent::AttachToAttachment(BaseEntity *ent,std:
 		return nullptr;
 	}
 	auto pMdlComponent = ent->GetModelComponent();
-	if(pMdlComponent.expired())
+	if(!pMdlComponent)
 		return nullptr;
 	int attachmentID = pMdlComponent->LookupAttachment(attachment);
 	if(attachmentID == -1)
@@ -402,8 +411,8 @@ void BaseAttachableComponent::UpdateViewAttachmentOffset(BaseEntity *ent,pragma:
 	else
 	{
 		auto pTrComponentEnt = ent->GetTransformComponent();
-		pos = pTrComponentEnt.valid() ? pTrComponentEnt->GetPosition() : Vector3{};
-		rot = pTrComponentEnt.valid() ? pTrComponentEnt->GetOrientation() : uquat::identity();
+		pos = pTrComponentEnt ? pTrComponentEnt->GetPosition() : Vector3{};
+		rot = pTrComponentEnt ? pTrComponentEnt->GetRotation() : uquat::identity();
 
 		auto &rotRef = pl.GetOrientationAxesRotation();
 		auto viewRot = rotRef *pl.GetViewOrientation();
@@ -477,17 +486,17 @@ std::optional<umath::Transform> BaseAttachableComponent::GetParentPose() const
 		else if(m_attachment->attachment != -1)
 		{
 			auto pMdlCParent = entParent.GetModelComponent();
-			if(pMdlCParent.valid())
+			if(pMdlCParent)
 				pMdlCParent->GetAttachment(m_attachment->attachment,&pos,&rot);
 		}
 		auto pTrComponentParent = entParent.GetTransformComponent();
-		if(pTrComponentParent.valid())
+		if(pTrComponentParent)
 			pTrComponentParent->LocalToWorld(&pos,&rot);
 		pose = {pos,rot};
 	}
 	return pose;
 }
-void BaseAttachableComponent::UpdateAttachmentOffset()
+void BaseAttachableComponent::UpdateAttachmentOffset(bool invokeUpdateEvents)
 {
 	auto &entThis = GetEntity();
 	NetworkState *state = entThis.GetNetworkState();
@@ -507,7 +516,7 @@ void BaseAttachableComponent::UpdateAttachmentOffset()
 
 		pose->TranslateLocal(m_attachment->offset);
 		auto pTrComponent = entThis.GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent)
 		{
 			umath::set_flag(m_stateFlags,StateFlags::UpdatingPosition);
 			pTrComponent->SetPosition(pose->GetOrigin());
@@ -515,19 +524,19 @@ void BaseAttachableComponent::UpdateAttachmentOffset()
 		}
 		if((m_attachment->flags &FAttachmentMode::PositionOnly) == FAttachmentMode::None)
 		{
-			if(pTrComponent.valid())
+			if(pTrComponent)
 			{
 				pose->RotateLocal(m_attachment->rotation);
 
 				umath::set_flag(m_stateFlags,StateFlags::UpdatingRotation);
-				pTrComponent->SetOrientation(pose->GetRotation());
+				pTrComponent->SetRotation(pose->GetRotation());
 				umath::set_flag(m_stateFlags,StateFlags::UpdatingRotation,false);
 			}
 			if((m_attachment->flags &FAttachmentMode::BoneMerge) != FAttachmentMode::None && !m_attachment->boneMapping.empty())
 			{
 				auto mdlComponent = entThis.GetModelComponent();
 				auto animComponent = entThis.GetAnimatedComponent();
-				auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+				auto hMdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 				if(hMdl != nullptr && animComponent.valid())
 				{
 					auto *parent = m_attachment->parent.get();
@@ -536,7 +545,7 @@ void BaseAttachableComponent::UpdateAttachmentOffset()
 					Skeleton &skel = hMdl->GetSkeleton();
 					auto mdlComponentParent = entParent.GetModelComponent();
 					auto animComponentParent = entParent.GetAnimatedComponent();
-					auto hMdlParent = mdlComponentParent.valid() ? mdlComponentParent->GetModel() : nullptr;
+					auto hMdlParent = mdlComponentParent ? mdlComponentParent->GetModel() : nullptr;
 					if(hMdlParent != nullptr && animComponentParent.valid())
 					{
 						Skeleton &skelParent = hMdlParent->GetSkeleton();
@@ -560,7 +569,6 @@ void BaseAttachableComponent::UpdateAttachmentOffset()
 			}
 		}
 	}
-
-	InvokeEventCallbacks(EVENT_ON_ATTACHMENT_UPDATE);
+	if(invokeUpdateEvents)
+		InvokeEventCallbacks(EVENT_ON_ATTACHMENT_UPDATE);
 }
-

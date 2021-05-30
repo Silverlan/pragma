@@ -1,0 +1,6 @@
+key_vr = "VR Ctrl {0} Botão {1}"
+key_vr_axis = "VR Ctrl {0} Eixo {1}"
+vr_hmd = Modo de Oculos de Realidade Virtual
+vr_msg_switch_display = "Por favor, mude para a exibição montada na cabeça"
+vr_msg_error_init = "ERRO: Não foi possível inicializar o OpenVR: {0}"
+vr_msg_error_load = "ERRO: Não foi possível carregar o OpenVR: {0}"

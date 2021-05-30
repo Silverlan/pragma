@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -42,8 +42,8 @@ const std::array<std::shared_ptr<BaseOcclusionOctree::Node>,8> *BaseOcclusionOct
 bool BaseOcclusionOctree::Node::IsContained(const Vector3 &min,const Vector3 &max) const
 {
 	if(m_tree->IsSingleReferenceMode() == true)
-		return Intersection::AABBInAABB(min,max,m_worldBounds.first,m_worldBounds.second);
-	return (Intersection::AABBAABB(min,max,m_worldBounds.first,m_worldBounds.second) != INTERSECT_OUTSIDE) ? true : false;
+		return umath::intersection::aabb_in_aabb(min,max,m_worldBounds.first,m_worldBounds.second);
+	return (umath::intersection::aabb_aabb(min,max,m_worldBounds.first,m_worldBounds.second) != umath::intersection::Intersect::Outside) ? true : false;
 }
 
 bool BaseOcclusionOctree::Node::UpdateState(bool bForceUpdateParents)

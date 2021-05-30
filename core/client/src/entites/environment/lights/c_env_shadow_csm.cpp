@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -23,7 +23,7 @@
 
 using namespace pragma;
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
@@ -125,8 +125,8 @@ void CShadowCSMComponent::SetSplitCount(unsigned int numSplits)
 	m_layerCount = numSplits;
 
 	auto &csmBuffer = c_game->GetGlobalRenderSettingsBufferData().csmBuffer;
-	auto splitCount = static_cast<decltype(pragma::ShaderTextured3DBase::CSMData::count)>(numSplits);
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderTextured3DBase::CSMData,count),splitCount);
+	auto splitCount = static_cast<decltype(pragma::ShaderGameWorldLightingPass::CSMData::count)>(numSplits);
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderGameWorldLightingPass::CSMData,count),splitCount);
 
 	m_frustums.resize(m_numSplits);
 	m_fard.resize(m_numSplits);
@@ -195,8 +195,8 @@ void CShadowCSMComponent::UpdateFrustum(uint32_t splitId,pragma::CCameraComponen
 		split.neard,split.fard,
 		cam.GetFOVRad(),cam.GetAspectRatio(),
 		entCam.GetPosition(),
-		trCam.valid() ? trCam->GetForward() : uvec::FORWARD,
-		trCam.valid() ? trCam->GetUp() : uvec::UP
+		trCam ? trCam->GetForward() : uvec::FORWARD,
+		trCam ? trCam->GetUp() : uvec::UP
 	);
 
 	cam.SetNearZ(zNear);
@@ -238,7 +238,7 @@ void CShadowCSMComponent::UpdateFrustum(uint32_t splitId,pragma::CCameraComponen
 	obb.rotation = uquat::create_look_rotation(dir,perp);
 
 	auto &aabb = frustumSplit.aabb;
-	AABB::GetRotatedBounds(obb.min,obb.max,umat::create(obb.rotation),&aabb.min,&aabb.max);
+	bounding_volume::AABB::GetRotatedBounds(obb.min,obb.max,umat::create(obb.rotation),&aabb.min,&aabb.max);
 	//
 
 	m_vpMatrices.at(splitId) = m_frustums.at(splitId).viewProjection;
@@ -251,8 +251,8 @@ void CShadowCSMComponent::UpdateFrustum(uint32_t splitId,pragma::CCameraComponen
 	auto &splitDistance = m_pendingInfo.prevSplitDistances;
 
 	auto &csmBuffer = c_game->GetGlobalRenderSettingsBufferData().csmBuffer;
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderTextured3DBase::CSMData,VP),m_pendingInfo.prevVpMatrices.size() *sizeof(Mat4),m_pendingInfo.prevVpMatrices.data());
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderTextured3DBase::CSMData,fard),splitDistance);
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderGameWorldLightingPass::CSMData,VP),m_pendingInfo.prevVpMatrices.size() *sizeof(Mat4),m_pendingInfo.prevVpMatrices.data());
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(csmBuffer,offsetof(pragma::ShaderGameWorldLightingPass::CSMData,fard),splitDistance);
 
 	// Calculate new split distances
 	splitDistance[splitId] = 0.5f *(-frustumSplit.split.fard *camProj[2][2] +camProj[3][2]) /frustumSplit.split.fard +0.5f;
@@ -306,6 +306,8 @@ void CShadowCSMComponent::UpdateFrustum(pragma::CCameraComponent &cam,const Mat4
 
 void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightDirectionalComponent &light)
 {
+	// TODO
+#if 0
 	auto pLightComponent = light.GetEntity().GetComponent<pragma::CLightComponent>();
 	auto *shadowScene = pLightComponent.valid() ? pLightComponent->FindShadowScene() : nullptr;
 	auto &rt = GetStaticPendingRenderTarget();
@@ -536,4 +538,5 @@ void CShadowCSMComponent::RenderBatch(std::shared_ptr<prosper::IPrimaryCommandBu
 
 		drawCmd->RecordImageBarrier(img,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal,layer);
 	}
+#endif
 }

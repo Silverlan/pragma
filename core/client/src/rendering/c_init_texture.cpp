@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -13,7 +13,7 @@
 #include <cmaterialmanager.h>
 #include <image/prosper_sampler.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 
 static void get_filter_mode(UInt32 filter,prosper::Filter &minFilter,prosper::Filter &magFilter,prosper::SamplerMipmapMode &mipmapMode,UInt32 &anisotropy)

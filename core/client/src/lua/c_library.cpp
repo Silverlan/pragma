@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -42,10 +42,11 @@
 #include <luainterface.hpp>
 #include <cmaterialmanager.h>
 #include <impl_texture_formats.h>
+#include <prosper_window.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 static void register_gui(Lua::Interface &lua)
 {
@@ -57,7 +58,6 @@ static void register_gui(Lua::Interface &lua)
 		{"create_checkbox",Lua::gui::create_checkbox},
 		{"register",Lua::gui::register_element},
 		{"get_base_element",Lua::gui::get_base_element},
-		{"get_element_under_cursor",Lua::gui::get_element_under_cursor},
 		{"get_element_at_position",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			return Lua::gui::get_element_at_position(l);
 		})},
@@ -65,6 +65,25 @@ static void register_gui(Lua::Interface &lua)
 			int32_t x,y;
 			WGUI::GetInstance().GetMousePos(x,y);
 			return Lua::gui::get_element_at_position(l,&x,&y);
+		})},
+		{"find_focused_window",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto *window = WGUI::GetInstance().FindFocusedWindow();
+			if(!window)
+				return 0;
+			Lua::Push(l,window);
+			return 1;
+		})},
+		{"get_primary_window",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto &window = c_engine->GetRenderContext().GetWindow();
+			Lua::Push(l,&window);
+			return 1;
+		})},
+		{"find_window_under_cursor",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto *window = WGUI::GetInstance().FindWindowUnderCursor();
+			if(!window)
+				return 0;
+			Lua::Push(l,window);
+			return 1;
 		})},
 		{"get_focused_element",Lua::gui::get_focused_element},
 		{"register_skin",Lua::gui::register_skin},
@@ -179,6 +198,32 @@ static void register_gui(Lua::Interface &lua)
 		})},
 		{"get_delta_time",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			Lua::PushNumber(l,WGUI::GetInstance().GetDeltaTime());
+			return 1;
+		})},
+		{"get_base_elements",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto &els = WGUI::GetInstance().GetBaseElements();
+			auto t = luabind::newtable(l);
+			int32_t idx = 1;
+			for(auto &hEl : els)
+			{
+				if(hEl.IsValid() == false)
+					continue;
+				auto o = WGUILuaInterface::GetLuaObject(l,*hEl.get());
+				t[idx++] = o;
+			}
+			return 1;
+		})},
+		{"add_base_element",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			WIBase *el = nullptr;
+			if(Lua::IsSet(l,1))
+			{
+				auto &window = Lua::Check<prosper::Window>(l,1);
+				el = WGUI::GetInstance().AddBaseElement(&window);
+			}
+			else
+				el = WGUI::GetInstance().AddBaseElement();
+			auto o = WGUILuaInterface::GetLuaObject(l,*el);
+			o.push(l);
 			return 1;
 		})}
 	});
@@ -513,9 +558,13 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua,bool bGUI)
 		{"get_cursor_pos",Lua::input::get_cursor_pos},
 		{"set_cursor_pos",Lua::input::set_cursor_pos},
 		{"center_cursor",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-			auto &window = c_engine->GetWindow();
-			auto windowSize = window.GetSize();
-			window.SetCursorPos(windowSize /2);
+			auto *window = WGUI::GetInstance().FindFocusedWindow();
+			if(!window)
+				window = &c_engine->GetWindow();
+			if(!window || !window->IsValid())
+				return 0;
+			auto windowSize = (*window)->GetSize();
+			(*window)->SetCursorPos(windowSize /2);
 			return 0;
 		})},
 		{"get_controller_count",Lua::input::get_controller_count},
@@ -547,10 +596,10 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua,bool bGUI)
 		{"set_global_effect_parameters",&Lua::sound::set_global_effect_parameters}
 	});
 	Lua::RegisterLibraryEnums(lua.GetState(),"sound",{
-		{"GLOBAL_EFFECT_FLAG_NONE",umath::to_integral(al::SoundSystem::GlobalEffectFlag::None)},
-		{"GLOBAL_EFFECT_FLAG_BIT_RELATIVE",umath::to_integral(al::SoundSystem::GlobalEffectFlag::RelativeSounds)},
-		{"GLOBAL_EFFECT_FLAG_BIT_WORLD",umath::to_integral(al::SoundSystem::GlobalEffectFlag::WorldSounds)},
-		{"GLOBAL_EFFECT_FLAG_ALL",umath::to_integral(al::SoundSystem::GlobalEffectFlag::All)},
+		{"GLOBAL_EFFECT_FLAG_NONE",umath::to_integral(al::ISoundSystem::GlobalEffectFlag::None)},
+		{"GLOBAL_EFFECT_FLAG_BIT_RELATIVE",umath::to_integral(al::ISoundSystem::GlobalEffectFlag::RelativeSounds)},
+		{"GLOBAL_EFFECT_FLAG_BIT_WORLD",umath::to_integral(al::ISoundSystem::GlobalEffectFlag::WorldSounds)},
+		{"GLOBAL_EFFECT_FLAG_ALL",umath::to_integral(al::ISoundSystem::GlobalEffectFlag::All)},
 		
 		{"DISTANCE_MODEL_NONE",umath::to_integral(al::DistanceModel::None)},
 		{"DISTANCE_MODEL_INVERSE_CLAMPED",umath::to_integral(al::DistanceModel::InverseClamped)},
@@ -701,7 +750,7 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua,bool bGUI)
 	auto alSoundClassDef = luabind::class_<ALSound>("Source");
 	Lua::ALSound::Client::register_class(alSoundClassDef);
 
-	auto alBufferClassDef = luabind::class_<al::SoundBuffer>("Source");
+	auto alBufferClassDef = luabind::class_<al::ISoundBuffer>("Source");
 	Lua::ALSound::Client::register_buffer(alBufferClassDef);
 
 	auto soundMod = luabind::module(lua.GetState(),"sound");
@@ -752,15 +801,15 @@ void CGame::RegisterLuaLibraries()
 		{"create_muzzle_flash",Lua::util::Client::create_muzzle_flash},
 		{"fire_bullets",static_cast<int(*)(lua_State*)>(Lua::util::fire_bullets)},
 		{"save_image",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			std::string fileName = Lua::CheckString(l,2);
+			if(Lua::file::validate_write_operation(l,fileName) == false)
+			{
+				Lua::PushBool(l,false);
+				return 1;
+			}
 			if(Lua::IsType<uimg::ImageBuffer>(l,1))
 			{
 				auto &imgBuffer = Lua::Check<uimg::ImageBuffer>(l,1);
-				std::string fileName = Lua::CheckString(l,2);
-				if(Lua::file::validate_write_operation(l,fileName) == false)
-				{
-					Lua::PushBool(l,false);
-					return 1;
-				}
 				if(Lua::IsType<uimg::TextureInfo>(l,3))
 				{
 					auto &imgWriteInfo = Lua::Check<uimg::TextureInfo>(l,3);
@@ -784,8 +833,40 @@ void CGame::RegisterLuaLibraries()
 					Lua::PushBool(l,uimg::save_image(f,imgBuffer,format,quality));
 				return 1;
 			}
+			if(Lua::IsTable(l,1))
+			{
+				auto n = Lua::GetObjectLength(l,1);
+				std::vector<std::shared_ptr<uimg::ImageBuffer>> imgBufs;
+				imgBufs.reserve(n);
+				auto o = luabind::object{luabind::from_stack(l,1)};
+				uint32_t maxWidth = 0;
+				uint32_t maxHeight = 0;
+				for(luabind::iterator it{o},end;it!=end;++it)
+				{
+					auto val = *it;
+					auto *imgBuf = luabind::object_cast<uimg::ImageBuffer*>(val);
+					imgBufs.push_back(imgBuf->shared_from_this());
+					maxWidth = umath::max(maxWidth,imgBuf->GetWidth());
+					maxHeight = umath::max(maxHeight,imgBuf->GetHeight());
+				}
+				for(auto &imgBuf : imgBufs)
+					imgBuf->Resize(maxWidth,maxHeight);
+				if(imgBufs.empty())
+					return 0;
+				auto &imgBuf = imgBufs.front();
+				auto &texInfo = Lua::Check<uimg::TextureInfo>(l,3);
+				auto cubemap = false;
+				if(Lua::IsSet(l,4))
+					cubemap = Lua::CheckBool(l,4);
+				auto res = uimg::save_texture(fileName,[&imgBufs](uint32_t iLayer,uint32_t iMipmap,std::function<void(void)> &outDeleter) -> const uint8_t* {
+					if(iMipmap > 0)
+						return nullptr;
+					return static_cast<uint8_t*>(imgBufs.at(iLayer)->GetData());
+				},imgBuf->GetWidth(),imgBuf->GetHeight(),imgBuf->GetPixelSize(),imgBufs.size(),0,cubemap,texInfo);
+				Lua::PushBool(l,res);
+				return 1;
+			}
 			auto &img = Lua::Check<prosper::IImage>(l,1);
-			std::string fileName = Lua::CheckString(l,2);
 			if(Lua::file::validate_write_operation(l,fileName) == false)
 			{
 				Lua::PushBool(l,false);
@@ -875,8 +956,7 @@ void CGame::RegisterLuaLibraries()
 			auto *pCam = c_game->GetRenderCamera();
 			if(pCam)
 			{
-				renderImgInfo.cameraPosition = pCam->GetEntity().GetPosition();
-				renderImgInfo.cameraRotation = pCam->GetEntity().GetRotation();
+				renderImgInfo.camPose = pCam->GetEntity().GetPose();
 				renderImgInfo.viewProjectionMatrix = pCam->GetProjectionMatrix() *pCam->GetViewMatrix();
 				renderImgInfo.nearZ = pCam->GetNearZ();
 				renderImgInfo.farZ = pCam->GetFarZ();
@@ -1007,6 +1087,51 @@ void CGame::RegisterLuaLibraries()
 		{"import_model",Lua::util::Client::import_model},
 		{"export_texture",Lua::util::Client::export_texture},
 		{"export_material",Lua::util::Client::export_material},
+		{"export_texture_as_vtf",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			std::string fileName = Lua::CheckString(l,1);
+			if(Lua::file::validate_write_operation(l,fileName) == false || FileManager::CreatePath(ufile::get_path_from_filename(fileName).c_str()) == false)
+			{
+				Lua::PushBool(l,false);
+				return 1;
+			}
+			
+			auto &img = Lua::Check<prosper::IImage>(l,2);
+			auto vtfOutputFormat = pragma::asset::prosper_format_to_vtf(img.GetFormat());
+			auto srgb = true;
+			auto normalMap = false;
+			auto generateMipmaps = false;
+			int32_t arg = 3;
+
+			if(Lua::IsSet(l,arg))
+				srgb = Lua::CheckBool(l,arg);
+			++arg;
+
+			if(Lua::IsSet(l,arg))
+				normalMap = Lua::CheckBool(l,arg);
+			++arg;
+
+			if(Lua::IsSet(l,arg))
+				generateMipmaps = Lua::CheckBool(l,arg);
+			++arg;
+
+			if(Lua::IsSet(l,arg))
+				vtfOutputFormat = pragma::asset::prosper_format_to_vtf(static_cast<prosper::Format>(Lua::CheckInt(l,arg)));
+			++arg;
+			if(vtfOutputFormat.has_value() == false)
+			{
+				Lua::PushBool(l,false);
+				return 1;
+			}
+
+			pragma::asset::VtfInfo vtfInfo {};
+			vtfInfo.outputFormat = *vtfOutputFormat;
+			umath::set_flag(vtfInfo.flags,pragma::asset::VtfInfo::Flags::Srgb,srgb);
+			umath::set_flag(vtfInfo.flags,pragma::asset::VtfInfo::Flags::NormalMap,normalMap);
+			umath::set_flag(vtfInfo.flags,pragma::asset::VtfInfo::Flags::GenerateMipmaps,generateMipmaps);
+			auto result = pragma::asset::export_texture_as_vtf(fileName,img,vtfInfo,nullptr,false);
+			Lua::PushBool(l,result);
+			return 1;
+		})},
 		{"exists",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			std::string name = Lua::CheckString(l,1);
 			auto type = static_cast<pragma::asset::Type>(Lua::CheckInt(l,2));

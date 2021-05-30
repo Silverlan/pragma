@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -63,4 +63,15 @@ float util::PIDController::Calculate(float processFeedback,float setPoint,float 
 	m_previousIntegral = integral;
 	m_previousError = err;
 	return output;
+}
+
+std::ostream &operator<<(std::ostream &out,const util::PIDController &o)
+{
+	out<<"PIDController";
+	out<<"[PropTerm:"<<o.GetProportionalTerm()<<"]";
+	out<<"[IntTerm:"<<o.GetIntegralTerm()<<"]";
+	out<<"[DerivTerm:"<<o.GetDerivativeTerm()<<"]";
+	auto range = o.GetRange();
+	out<<"[Range:"<<range.first<<","<<range.second<<"]";
+	return out;
 }

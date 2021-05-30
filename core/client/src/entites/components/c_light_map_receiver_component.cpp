@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -14,7 +14,7 @@
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
@@ -47,19 +47,22 @@ endLoop:
 }
 void CLightMapReceiverComponent::UpdateLightMapUvData()
 {
+	auto mdlC = GetEntity().GetComponent<CModelComponent>();
 	auto mdl = GetEntity().GetModel();
-	auto meshGroup = mdl ? mdl->GetMeshGroup(0u) : nullptr;
-	if(meshGroup == nullptr)
+	if(mdlC.expired() || mdl == nullptr)
 		return;
 	m_modelName = GetEntity().GetModelName();
-	m_isModelBakedWithLightMaps = true;
+	umath::set_flag(m_stateFlags,StateFlags::IsModelBakedWithLightMaps,true);
 	m_uvDataPerMesh.clear();
 	m_meshes.clear();
 	m_meshToMeshIdx.clear();
 	m_meshToBufIdx.clear();
+	umath::set_flag(m_stateFlags,StateFlags::RenderMeshBufferIndexTableDirty);
 	uint32_t subMeshIdx = 0u;
 	auto wasInitialized = false;
-	for(auto &mesh : meshGroup->GetMeshes())
+	std::vector<std::shared_ptr<ModelMesh>> meshes;
+	mdlC->GetBaseModelMeshes(meshes);
+	for(auto &mesh : meshes)
 	{
 		for(auto &subMesh : mesh->GetSubMeshes())
 		{
@@ -75,6 +78,7 @@ void CLightMapReceiverComponent::UpdateLightMapUvData()
 			++subMeshIdx;
 		}
 	}
+	UpdateRenderMeshBufferList();
 }
 luabind::object CLightMapReceiverComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CLightMapReceiverComponentHandleWrapper>(l);}
 void CLightMapReceiverComponent::Initialize()
@@ -83,7 +87,11 @@ void CLightMapReceiverComponent::Initialize()
 	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<ComponentEvent> evData) {
 		//m_isModelBakedWithLightMaps = (GetEntity().GetModelName() == m_modelName); // TODO
 		//if(m_isModelBakedWithLightMaps)
-			UpdateModelMeshes();
+		m_meshBufferIndices.clear();
+		UpdateModelMeshes();
+	});
+	BindEventUnhandled(CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED,[this](std::reference_wrapper<ComponentEvent> evData) {
+		UpdateRenderMeshBufferList();
 	});
 	BindEventUnhandled(CBaseEntity::EVENT_ON_SPAWN,[this](std::reference_wrapper<ComponentEvent> evData) {
 		//m_isModelBakedWithLightMaps = (GetEntity().GetModelName() == m_modelName); // TODO
@@ -91,16 +99,35 @@ void CLightMapReceiverComponent::Initialize()
 			UpdateModelMeshes();
 	});
 	if(GetEntity().IsSpawned())
+	{
 		UpdateModelMeshes();
+		UpdateRenderMeshBufferList();
+	}
+}
+void CLightMapReceiverComponent::UpdateRenderMeshBufferList()
+{
+	m_meshBufferIndices.clear();
+	auto mdlC = GetEntity().GetModelComponent();
+	if(!mdlC)
+		return;
+	umath::set_flag(m_stateFlags,StateFlags::RenderMeshBufferIndexTableDirty,false);
+	auto &renderMeshes = static_cast<CModelComponent*>(mdlC)->GetRenderMeshes();
+	m_meshBufferIndices.resize(renderMeshes.size());
+	for(auto i=decltype(renderMeshes.size()){0u};i<renderMeshes.size();++i)
+	{
+		auto bufIdx = FindBufferIndex(static_cast<CModelSubMesh&>(*renderMeshes[i]));
+		m_meshBufferIndices[i] = bufIdx.has_value() ? *bufIdx : std::numeric_limits<BufferIdx>::max();
+	}
 }
 void CLightMapReceiverComponent::UpdateModelMeshes()
 {
-	auto mdl = GetEntity().GetModel();
-	if(mdl == nullptr)
-		return;
 	m_meshes.clear();
-	auto meshGroup = mdl ? mdl->GetMeshGroup(0u) : nullptr;
-	if(meshGroup == nullptr)
+	auto mdlC = GetEntity().GetComponent<CModelComponent>();
+	auto mdl = GetEntity().GetModel();
+	if(mdlC.expired() || mdl == nullptr)
+		return;
+	auto renderC = GetEntity().GetComponent<CRenderComponent>();
+	if(renderC.expired())
 		return;
 	std::unordered_map<MeshIdx,BufferIdx> meshIdxToBufIdx {};
 	for(auto &pair : m_meshToMeshIdx)
@@ -111,10 +138,13 @@ void CLightMapReceiverComponent::UpdateModelMeshes()
 			continue;
 		meshIdxToBufIdx.insert(std::make_pair(pair.second,it->second));
 	}
+	umath::set_flag(m_stateFlags,StateFlags::RenderMeshBufferIndexTableDirty);
 	m_meshToBufIdx.clear();
 	m_meshToMeshIdx.clear();
 	uint32_t subMeshIdx = 0u;
-	for(auto &mesh : meshGroup->GetMeshes())
+	std::vector<std::shared_ptr<ModelMesh>> meshes;
+	mdlC->GetBaseModelMeshes(meshes);
+	for(auto &mesh : meshes)
 	{
 		for(auto &subMesh : mesh->GetSubMeshes())
 		{
@@ -142,10 +172,17 @@ void CLightMapReceiverComponent::AssignBufferIndex(MeshIdx meshIdx,BufferIdx buf
 	if(itMesh == m_meshes.end())
 		return;
 	m_meshToBufIdx.insert(std::make_pair(static_cast<CModelSubMesh*>(itMesh->second.get()),bufIdx));
+	umath::set_flag(m_stateFlags,StateFlags::RenderMeshBufferIndexTableDirty);
+}
+std::optional<pragma::CLightMapReceiverComponent::BufferIdx> CLightMapReceiverComponent::GetBufferIndex(RenderMeshIndex meshIdx) const
+{
+	if(umath::is_flag_set(m_stateFlags,StateFlags::RenderMeshBufferIndexTableDirty))
+		const_cast<CLightMapReceiverComponent*>(this)->UpdateRenderMeshBufferList();
+	return (meshIdx < m_meshBufferIndices.size() && m_meshBufferIndices[meshIdx] != std::numeric_limits<BufferIdx>::max()) ? m_meshBufferIndices[meshIdx] : std::optional<pragma::CLightMapReceiverComponent::BufferIdx>{};
 }
 std::optional<CLightMapReceiverComponent::BufferIdx> CLightMapReceiverComponent::FindBufferIndex(CModelSubMesh &mesh) const
 {
-	if(m_isModelBakedWithLightMaps == false)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::IsModelBakedWithLightMaps) == false)
 		return {};
 	auto it = m_meshToBufIdx.find(&mesh);
 	if(it == m_meshToBufIdx.end())
@@ -154,11 +191,14 @@ std::optional<CLightMapReceiverComponent::BufferIdx> CLightMapReceiverComponent:
 }
 void CLightMapReceiverComponent::UpdateMeshLightmapUvBuffers(CLightMapComponent &lightMapC)
 {
+	auto mdlC = GetEntity().GetComponent<CModelComponent>();
 	auto mdl = GetEntity().GetModel();
-	auto meshGroup = mdl ? mdl->GetMeshGroup(0u) : nullptr;
-	if(meshGroup == nullptr)
+	if(mdlC.expired() || mdl == nullptr)
 		return;
-	for(auto &mesh : meshGroup->GetMeshes())
+	uint32_t subMeshIdx = 0u;
+	std::vector<std::shared_ptr<ModelMesh>> meshes;
+	mdlC->GetBaseModelMeshes(meshes);
+	for(auto &mesh : meshes)
 	{
 		for(auto &subMesh : mesh->GetSubMeshes())
 		{

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __VERTEX_ANIMATION_HPP__
@@ -20,7 +20,9 @@ public:
 	{
 		None = 0u,
 		HasDeltaValues = 1u,
-		HasNormals = HasDeltaValues<<1u
+		HasNormals = HasDeltaValues<<1u,
+
+		Count = 2
 	};
 
 	MeshVertexFrame()=default;
@@ -54,6 +56,9 @@ public:
 
 	void Rotate(const Quat &rot);
 	void Scale(const Vector3 &scale);
+
+	bool operator==(const MeshVertexFrame &other) const;
+	bool operator!=(const MeshVertexFrame &other) const {return !operator==(other);}
 private:
 	// Each uint16_t is a half-float
 	std::vector<std::array<uint16_t,4>> m_vertices = {}; // Fourth component is wrinkle data
@@ -83,19 +88,26 @@ public:
 
 	void Rotate(const Quat &rot);
 	void Scale(const Vector3 &scale);
+
+	bool operator==(const MeshVertexAnimation &other) const;
+	bool operator!=(const MeshVertexAnimation &other) const {return !operator==(other);}
 private:
 	mutable std::weak_ptr<ModelMesh> m_wpMesh = {};
 	mutable std::weak_ptr<ModelSubMesh> m_wpSubMesh = {};
 	std::vector<std::shared_ptr<MeshVertexFrame>> m_frames;
 };
 
+namespace udm {struct AssetData;};
 class DLLNETWORK VertexAnimation
 	: public std::enable_shared_from_this<VertexAnimation>
 {
 public:
+	static constexpr uint32_t FORMAT_VERSION = 1u;
+	static constexpr auto PMORPHANI_IDENTIFIER = "PMORPHANI";
 	static std::shared_ptr<VertexAnimation> Create();
 	static std::shared_ptr<VertexAnimation> Create(const VertexAnimation &other);
 	static std::shared_ptr<VertexAnimation> Create(const std::string &name);
+	static std::shared_ptr<VertexAnimation> Load(Model &mdl,const udm::AssetData &data,std::string &outErr);
 
 	virtual std::shared_ptr<VertexAnimation> Copy() const;
 	virtual ~VertexAnimation()=default;
@@ -116,10 +128,15 @@ public:
 
 	void Rotate(const Quat &rot);
 	void Scale(const Vector3 &scale);
+	bool Save(Model &mdl,udm::AssetData &outData,std::string &outErr);
+
+	bool operator==(const VertexAnimation &other) const;
+	bool operator!=(const VertexAnimation &other) const {return !operator==(other);}
 protected:
 	VertexAnimation()=default;
 	VertexAnimation(const VertexAnimation &other);
 	VertexAnimation(const std::string &name);
+	bool LoadFromAssetData(Model &mdl,const udm::AssetData &data,std::string &outErr);
 	std::string m_name;
 	std::vector<std::shared_ptr<MeshVertexAnimation>> m_meshAnims;
 };

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __BASEFUNCKINEMATIC_HPP__
 #define __BASEFUNCKINEMATIC_HPP__
@@ -19,6 +19,7 @@ namespace pragma
 		using BaseEntityComponent::BaseEntityComponent;
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
+		virtual void OnTick(double tDelta) override;
 	protected:
 		bool m_bMoving = false;
 		float m_kvMoveSpeed = 0.f;
@@ -31,7 +32,7 @@ namespace pragma
 		pragma::NetEventId m_netEvStartForward = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvStartBackward = pragma::INVALID_NET_EVENT;
 	protected:
-		void OnThink(double tDelta);
+		void UpdateTickPolicy();
 		virtual void StartForward();
 		virtual void StartBackward();
 	private:

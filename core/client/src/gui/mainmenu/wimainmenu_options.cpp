@@ -2,12 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/gui/mainmenu/wimainmenu_options.h"
+#include "pragma/audio/c_audio.hpp"
 #include <wgui/types/widropdownmenu.h>
 #include "pragma/gui/wicheckbox.h"
 #include <wgui/types/wibutton.h>
@@ -35,8 +36,9 @@
 #include <sharedutils/util_clock.hpp>
 #include <fsys/fsys_package.hpp>
 #include <util_pad.hpp>
+#include <prosper_window.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;
 
 WIMainMenuOptions::WIMainMenuOptions()
@@ -60,7 +62,7 @@ void WIMainMenuOptions::ApplyWindowSize()
 	int w = atoi(res[0].c_str());
 	int h = atoi(res[1].c_str());
 
-	c_engine->SetResolution(Vector2i(w,h));
+	c_engine->GetWindow().SetResolution(Vector2i(w,h));
 }
 
 void WIMainMenuOptions::ApplyOptions()
@@ -298,6 +300,13 @@ void WIMainMenuOptions::InitializeGeneralSettings()
 	auto *pPhysEngineList = pList->AddDropDownMenu(Locale::GetText("physics_engine"),physEngines,"phys_engine");
 	//
 
+	// Audio Engine
+	std::unordered_map<std::string,std::string> audioEngines {};
+	for(auto &engine : pragma::audio::get_available_audio_apis())
+		audioEngines.insert(std::make_pair(Locale::GetText("audio_engine_" +engine),engine));
+	auto *pAudioEngineList = pList->AddDropDownMenu(Locale::GetText("audio_engine"),audioEngines,"audio_engine");
+	//
+
 	// Networking library
 	std::unordered_map<std::string,std::string> netLibs {};
 	for(auto &lib : pragma::networking::GetAvailableNetworkingModules())
@@ -403,118 +412,119 @@ void WIMainMenuOptions::InitializeVideoSettings()
 		auto *el = static_cast<WIMainMenuOptions*>(hThis.get());
 		auto val = util::to_int(value.get());
 
-		uint32_t textureQuality = 0;
-		int32_t antiAliasing = 0;
-		auto bSsao = false;
-		auto bHdrr = false;
-		auto bBloom = false;
+		// Defaults; should match the convar values
+		uint32_t textureQuality = 4;
+		int32_t antiAliasing = 2;
+		auto bSsao = true;
+		auto bHdrr = true;
+		auto bBloom = true;
 		auto motionBlur = 0.f;
 		uint32_t occlusionCulling = 4;
 		auto bDoF = false;
-		uint32_t presentMode = 1;
-		uint32_t particleQuality = 0;
+		uint32_t presentMode = 2;
+		uint32_t particleQuality = 3;
 		uint32_t shaderQuality = 1;
-		uint32_t shadowQuality = 0;
-		uint32_t reflectionQuality = 0;
-		auto bDynamicShadows = false;
+		uint32_t shadowQuality = 8;
+		uint32_t reflectionQuality = 2;
+		auto bDynamicShadows = true;
 		uint32_t shadowUpdateFrequency = 0;
 		uint32_t pssmShadowUpdateFrequencyOffset = 0;
-		uint32_t pssmSplitCount = 0;
+		uint32_t pssmSplitCount = 3;
 		uint32_t mdlQuality = 0;
-		uint32_t textureFiltering = 0;
-		std::string shadowResolution = "256";
+		uint32_t textureFiltering = 6;
+		std::string shadowResolution = "1024";
 		switch(val)
 		{
 			case 0:
 				textureQuality = 0;
-				antiAliasing = 0; // off
-				bSsao = false;
-				bHdrr = false;
-				bBloom = false;
-				motionBlur = 0.f;
-				occlusionCulling = 4;
-				bDoF = false;
-				presentMode = umath::min(static_cast<uint32_t>(1),static_cast<WIChoiceList*>(el->m_hPresentMode.get())->GetChoiceCount() -1);
-				particleQuality = 0;
+				//antiAliasing = 0; // off
+				//bSsao = false;
+				//bHdrr = false;
+				//bBloom = false;
+				//motionBlur = 0.f;
+				//occlusionCulling = 4;
+				//bDoF = false;
+				//presentMode = umath::min(static_cast<uint32_t>(1),static_cast<WIChoiceList*>(el->m_hPresentMode.get())->GetChoiceCount() -1);
+				//particleQuality = 0;
 				shaderQuality = 0;
 				shadowQuality = 0;
-				reflectionQuality = 0;
-				bDynamicShadows = false;
-				shadowUpdateFrequency = 10;
-				pssmShadowUpdateFrequencyOffset = 10;
-				pssmSplitCount = 1;
+				//reflectionQuality = 0;
+				//bDynamicShadows = false;
+				//shadowUpdateFrequency = 10;
+				//pssmShadowUpdateFrequencyOffset = 10;
+				//pssmSplitCount = 1;
 				mdlQuality = 0;
 				textureFiltering = 0;
 				shadowResolution = "256";
 				break;
 			case 1:
 				textureQuality = 1;
-				antiAliasing = 0; // off
-				bSsao = false;
-				bHdrr = true;
-				bBloom = true;
-				motionBlur = 0.f;
-				occlusionCulling = 4;
-				bDoF = false;
-				presentMode = umath::min(static_cast<uint32_t>(1),static_cast<WIChoiceList*>(el->m_hPresentMode.get())->GetChoiceCount() -1);
-				particleQuality = 1;
+				//antiAliasing = 0; // off
+				//bSsao = false;
+				//bHdrr = true;
+				//bBloom = true;
+				//motionBlur = 0.f;
+				//occlusionCulling = 4;
+				//bDoF = false;
+				//presentMode = umath::min(static_cast<uint32_t>(1),static_cast<WIChoiceList*>(el->m_hPresentMode.get())->GetChoiceCount() -1);
+				//particleQuality = 1;
 				shaderQuality = 1;
 				shadowQuality = 1;
-				reflectionQuality = 0;
-				bDynamicShadows = false;
-				shadowUpdateFrequency = 10;
-				pssmShadowUpdateFrequencyOffset = 6;
-				pssmSplitCount = 1;
+				//reflectionQuality = 0;
+				//bDynamicShadows = false;
+				//shadowUpdateFrequency = 10;
+				//pssmShadowUpdateFrequencyOffset = 6;
+				//pssmSplitCount = 1;
 				mdlQuality = 1;
 				textureFiltering = 1;
 				shadowResolution = "512";
 				break;
 			case 2:
 				textureQuality = 3;
-				antiAliasing = 1; // fxaa
-				bSsao = false;
-				bHdrr = true;
-				bBloom = true;
-				motionBlur = 0.f;
-				occlusionCulling = 4;
-				bDoF = false;
-				presentMode = umath::min(static_cast<uint32_t>(2),static_cast<WIChoiceList*>(el->m_hPresentMode.get())->GetChoiceCount() -1);
-				particleQuality = 1;
+				//antiAliasing = 1; // fxaa
+				//bSsao = false;
+				//bHdrr = true;
+				//bBloom = true;
+				//motionBlur = 0.f;
+				//occlusionCulling = 4;
+				//bDoF = false;
+				//presentMode = umath::min(static_cast<uint32_t>(2),static_cast<WIChoiceList*>(el->m_hPresentMode.get())->GetChoiceCount() -1);
+				//particleQuality = 1;
 				shaderQuality = 2;
 				shadowQuality = 2;
-				reflectionQuality = 1;
-				bDynamicShadows = true;
-				shadowUpdateFrequency = 5;
-				pssmShadowUpdateFrequencyOffset = 2;
-				pssmSplitCount = umath::max(pragma::CShadowCSMComponent::MAX_CASCADE_COUNT -2,static_cast<uint32_t>(1));
+				//reflectionQuality = 1;
+				//bDynamicShadows = true;
+				//shadowUpdateFrequency = 5;
+				//pssmShadowUpdateFrequencyOffset = 2;
+				//pssmSplitCount = umath::max(pragma::CShadowCSMComponent::MAX_CASCADE_COUNT -2,static_cast<uint32_t>(1));
 				mdlQuality = 2;
 				textureFiltering = 2;
 				shadowResolution = "1024";
 				break;
 			case 3:
 				textureQuality = 4;
-				antiAliasing = 1; //2;// msaa x2
-				bSsao = true;
-				bHdrr = true;
-				bBloom = true;
-				motionBlur = 1.f;
-				occlusionCulling = 4;
-				bDoF = true;
-				presentMode = static_cast<WIChoiceList*>(el->m_hPresentMode.get())->GetChoiceCount() -1;
-				particleQuality = 2;
+				//antiAliasing = 1; //2;// msaa x2
+				//bSsao = true;
+				//bHdrr = true;
+				//bBloom = true;
+				//motionBlur = 1.f;
+				//occlusionCulling = 4;
+				//bDoF = true;
+				//presentMode = static_cast<WIChoiceList*>(el->m_hPresentMode.get())->GetChoiceCount() -1;
+				//particleQuality = 2;
 				shaderQuality = 2;
 				shadowQuality = 4;
-				reflectionQuality = 2;
-				bDynamicShadows = true;
-				shadowUpdateFrequency = 1;
-				pssmShadowUpdateFrequencyOffset = 2;
-				pssmSplitCount = umath::max(pragma::CShadowCSMComponent::MAX_CASCADE_COUNT -1,static_cast<uint32_t>(1));
+				//reflectionQuality = 2;
+				//bDynamicShadows = true;
+				//shadowUpdateFrequency = 1;
+				//pssmShadowUpdateFrequencyOffset = 2;
+				//pssmSplitCount = umath::max(pragma::CShadowCSMComponent::MAX_CASCADE_COUNT -1,static_cast<uint32_t>(1));
 				mdlQuality = static_cast<WIChoiceList*>(el->m_hMdlQuality.get())->GetChoiceCount() -1;
 				textureFiltering = static_cast<WIChoiceList*>(el->m_hTextureFiltering.get())->GetChoiceCount() -1;
 				shadowResolution = "2048";
 				break;
 			default:
-				textureQuality = static_cast<WIChoiceList*>(el->m_hTexQuality.get())->GetChoiceCount() -1;
+				/*textureQuality = static_cast<WIChoiceList*>(el->m_hTexQuality.get())->GetChoiceCount() -1;
 				antiAliasing = static_cast<WIChoiceList*>(el->m_hAntiAliasing.get())->GetChoiceCount() -1; // max msaa
 				bSsao = true;
 				bHdrr = true;
@@ -533,7 +543,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 				pssmSplitCount = pragma::CShadowCSMComponent::MAX_CASCADE_COUNT;
 				mdlQuality = static_cast<WIChoiceList*>(el->m_hMdlQuality.get())->GetChoiceCount() -1;
 				textureFiltering = static_cast<WIChoiceList*>(el->m_hTextureFiltering.get())->GetChoiceCount() -1;
-				shadowResolution = "2048";
+				shadowResolution = "2048";*/
 				break;
 		}
 		
@@ -582,14 +592,14 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	}));
 	//
 	// Vertical Sync
-	pList->AddToggleChoice(Locale::GetText("vertical_sync"),"cl_render_vsync_enabled");
+	auto *vSync = pList->AddToggleChoice(Locale::GetText("vertical_sync"),"cl_render_vsync_enabled");
 	//
 	// Resolution Menu
 	// TODO Aspect Ratio
 	auto *resMenu = pList->AddDropDownMenu(Locale::GetText("resolution"),[](WIDropDownMenu *pMenu) {
 		auto &context = WGUI::GetInstance().GetContext();
 		auto &window = context.GetWindow();
-		auto *monitor = window.GetMonitor();
+		auto *monitor = window->GetMonitor();
 		auto primaryMonitor = GLFW::get_primary_monitor();
 		if(monitor == nullptr)
 			monitor = &primaryMonitor;
@@ -706,7 +716,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 	m_hTexQuality = texList->GetHandle();
 	//
 	// Texture Streaming
-	pList->AddToggleChoice(Locale::GetText("texture_streaming"),"cl_material_streaming_enabled");
+	auto *texStreaming = pList->AddToggleChoice(Locale::GetText("texture_streaming"),"cl_material_streaming_enabled");
 	//
 	// Model Quality
 	auto *mdlQualityList = pList->AddChoiceList(Locale::GetText("model_quality"),[](WIChoiceList *pList) {
@@ -731,7 +741,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 		aaChoices.push_back(std::make_pair("msaa" +std::to_string(samples),o));
 		samples *= 2;
 	}*/
-	auto *antiAlias = pList->AddChoiceList(Locale::GetText("anti_aliasing"),aaChoices);
+	auto *antiAlias = pList->AddChoiceList(Locale::GetText("anti_aliasing"),aaChoices,"","cl_render_anti_aliasing");
 	m_hAntiAliasing = antiAlias->GetHandle();
 	if(antiAlias != nullptr)
 	{
@@ -897,7 +907,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 		pList->AddChoice(Locale::GetText("medium"),"2");
 		pList->AddChoice(Locale::GetText("high"),"3");
 		pList->AddChoice(Locale::GetText("very_high"),"4");
-	},"cl_render_shadow_quality");
+	},"render_shadow_quality");
 	m_hShadowQuality = pShadowQuality->GetHandle();
 	//
 	// Dynamic Shadows
@@ -922,8 +932,9 @@ void WIMainMenuOptions::InitializeVideoSettings()
 
 	pRow = pList->AddHeaderRow();
 	pRow->SetValue(0,Locale::GetText("virtual_reality"));
+	auto *pRowVr = pRow;
 	// Virtual Reality
-	pList->AddToggleChoice(Locale::GetText("vr_support_enable"),"cl_render_vr_enabled");
+	auto *vrSupport = pList->AddToggleChoice(Locale::GetText("vr_support_enable"),"cl_render_vr_enabled");
 	/*auto *vrResMenu = pList->AddDropDownMenu(Locale::GetText("vr_resolution"),[](WIDropDownMenu *pMenu) {
 		std::vector<std::string> resolutions = {
 			"128x128",
@@ -982,6 +993,30 @@ void WIMainMenuOptions::InitializeVideoSettings()
 			WIHandle hMenu {};
 			SetActiveMenu(hMenu);
 		}
+	}
+
+	auto showAdvancedOptions = c_engine->IsDeveloperModeEnabled();
+	if(showAdvancedOptions == false)
+	{
+		pList->GetRow("cl_render_vsync_enabled")->SetVisible(false);
+		pList->GetRow("cl_material_streaming_enabled")->SetVisible(false);
+		pList->GetRow("cl_render_anti_aliasing")->SetVisible(false);
+		pList->GetRow("cl_render_ssao")->SetVisible(false);
+		pList->GetRow("cl_render_hdrr")->SetVisible(false);
+		pList->GetRow("cl_render_bloom")->SetVisible(false);
+		pList->GetRow("cl_render_motion_blur")->SetVisible(false);
+		pList->GetRow("cl_render_occlusion_culling")->SetVisible(false);
+		pList->GetRow("cl_render_depth_of_field")->SetVisible(false);
+		pList->GetRow("cl_render_present_mode")->SetVisible(false);
+		pList->GetRow("cl_render_particle_quality")->SetVisible(false);
+		pList->GetRow("cl_render_reflection_quality")->SetVisible(false);
+		pList->GetRow("cl_render_shadow_resolution")->SetVisible(false);
+		pList->GetRow("cl_render_shadow_dynamic")->SetVisible(false);
+		pList->GetRow("cl_render_shadow_update_frequency")->SetVisible(false);
+		pList->GetRow("cl_render_shadow_pssm_update_frequency_offset")->SetVisible(false);
+		pList->GetRow("cl_render_shadow_pssm_split_count")->SetVisible(false);
+		pList->GetRow("cl_render_vr_enabled")->SetVisible(false);
+		pList->GetRow("render_shadow_quality")->SetVisible(false);
 	}
 }
 void WIMainMenuOptions::InitializeAudioSettings()

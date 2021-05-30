@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -35,7 +35,7 @@ void BaseFuncPhysicsComponent::Initialize()
 	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &ent = GetEntity();
 		auto pPhysComponent = ent.GetPhysicsComponent();
-		auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+		auto *phys = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
 		if(phys != nullptr)
 			phys->SetMass(m_kvMass);
 	});
@@ -54,7 +54,7 @@ void BaseFuncPhysicsComponent::OnEntitySpawn()
 	BaseFuncSurfaceMaterialComponent::OnEntitySpawn();
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 	{
 		pPhysComponent->DestroyPhysicsObject();
 		pPhysComponent->SetMoveType(MOVETYPE::PHYSICS);
@@ -71,7 +71,7 @@ PhysObj *BaseFuncPhysicsComponent::InitializePhysics()
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return nullptr;
 	return pPhysComponent->InitializePhysics((m_kvMass > 0) ? PHYSICSTYPE::DYNAMIC : PHYSICSTYPE::STATIC);
 }

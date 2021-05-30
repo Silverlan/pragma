@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -19,7 +19,7 @@ using namespace pragma;
 extern DLLCLIENT ClientState *client;
 
 luabind::object CSoundEmitterComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CSoundEmitterComponentHandleWrapper>(l);}
-bool CSoundEmitterComponent::ShouldRemoveSound(ALSound &snd) const {return (BaseSoundEmitterComponent::ShouldRemoveSound(snd) && snd.GetIndex() == 0) ? true : false;}
+bool CSoundEmitterComponent::ShouldRemoveSound(ALSound &snd) const {return (BaseSoundEmitterComponent::ShouldRemoveSound(snd)/* && snd.GetIndex() == 0*/) ? true : false;}
 
 void CSoundEmitterComponent::AddSound(std::shared_ptr<ALSound> snd) {InitializeSound(snd);}
 
@@ -61,7 +61,7 @@ std::shared_ptr<ALSound> CSoundEmitterComponent::EmitSound(std::string sndname,A
 	ALSound *al = snd.get();
 	al->SetGain(gain);
 	al->SetPitch(pitch);
-	al->SetPosition(pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{});
+	al->SetPosition(pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{});
 	//al->SetVelocity(*GetVelocity());
 	// TODO: Orientation
 	al->Play();

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/entities/func/s_func_brush.h"
@@ -30,7 +30,7 @@ void SBrushComponent::OnEntitySpawn()
 		return;
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
 	UpdateSurfaceMaterial(s_game);
 }

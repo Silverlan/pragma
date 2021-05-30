@@ -2,12 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
+#include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/lua/lua_entity_component.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -17,7 +18,7 @@
 #include <prosper_render_pass.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 void Lua::GraphicsPipelineCreateInfo::SetBlendingProperties(lua_State *l,prosper::GraphicsPipelineCreateInfo &pipelineInfo,const Vector4 &blendingProperties)
 {
@@ -652,7 +653,7 @@ void Lua::Shader::Scene3D::GetRenderPass(lua_State *l,uint32_t pipelineIdx)
 		return;
 	Lua::Push(l,rp);
 }
-void Lua::Shader::Scene3D::BindSceneCamera(lua_State *l,pragma::ShaderScene &shader,CSceneHandle &scene,pragma::rendering::RasterizationRenderer &renderer,bool bView)
+void Lua::Shader::Scene3D::BindSceneCamera(lua_State *l,pragma::ShaderScene &shader,CSceneHandle &scene,pragma::CRasterizationRendererComponent &renderer,bool bView)
 {
 	pragma::Lua::check_component(l,scene);
 	Lua::PushBool(l,shader.BindSceneCamera(*scene,renderer,bView));
@@ -665,7 +666,7 @@ void Lua::Shader::SceneLit3D::BindLights(lua_State *l,pragma::ShaderSceneLit &sh
 {
 	Lua::PushBool(l,shader.BindLights(*dsLights->GetDescriptorSet()));
 }
-void Lua::Shader::SceneLit3D::BindScene(lua_State *l,pragma::ShaderSceneLit &shader,CSceneHandle &scene,pragma::rendering::RasterizationRenderer &renderer,bool bView)
+void Lua::Shader::SceneLit3D::BindScene(lua_State *l,pragma::ShaderSceneLit &shader,CSceneHandle &scene,pragma::CRasterizationRendererComponent &renderer,bool bView)
 {
 	pragma::Lua::check_component(l,scene);
 	Lua::PushBool(l,shader.BindScene(*scene,renderer,bView));
@@ -685,13 +686,13 @@ void Lua::Shader::ShaderEntity::BindVertexAnimationOffset(lua_State *l,pragma::S
 }
 void Lua::Shader::ShaderEntity::Draw(lua_State *l,pragma::ShaderEntity &shader,::ModelSubMesh &mesh)
 {
-	Lua::PushBool(l,shader.Draw(static_cast<CModelSubMesh&>(mesh)));
+	Lua::PushBool(l,shader.Draw(static_cast<CModelSubMesh&>(mesh),{},*pragma::CSceneComponent::GetEntityInstanceIndexBuffer()->GetZeroIndexBuffer()));
 }
-void Lua::Shader::TexturedLit3D::BindMaterial(lua_State *l,pragma::ShaderTextured3DBase &shader,::Material &mat)
+void Lua::Shader::TexturedLit3D::BindMaterial(lua_State *l,pragma::ShaderGameWorldLightingPass &shader,::Material &mat)
 {
 	Lua::PushBool(l,shader.BindMaterial(static_cast<CMaterial&>(mat)));
 }
-void Lua::Shader::TexturedLit3D::RecordBindClipPlane(lua_State *l,pragma::ShaderTextured3DBase &shader,const Vector4 &clipPlane)
+void Lua::Shader::TexturedLit3D::RecordBindClipPlane(lua_State *l,pragma::ShaderGameWorldLightingPass &shader,const Vector4 &clipPlane)
 {
 	Lua::PushBool(l,shader.BindClipPlane(clipPlane));
 }

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -11,17 +11,17 @@
 #include "pragma/entities/components/base_time_scale_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_sound_emitter_component.hpp"
-#include "pragma/entities/components/logic_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/model.h"
 #include "pragma/audio/alsound_type.h"
 #include "pragma/lua/luafunction_call.h"
 #include <sharedutils/datastream.h>
+#include <udm.hpp>
 
 #define DEBUG_VERBOSE_ANIMATION 0
 
 using namespace pragma;
-
+#pragma optimize("",off)
 ComponentEventId BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ANIMATION = pragma::INVALID_COMPONENT_ID;
@@ -44,6 +44,7 @@ ComponentEventId BaseAnimatedComponent::EVENT_ON_BONE_TRANSFORM_CHANGED = pragma
 ComponentEventId BaseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_BLEND_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
+ComponentEventId BaseAnimatedComponent::EVENT_ON_ANIMATION_RESET = pragma::INVALID_COMPONENT_ID;
 void BaseAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	auto componentType = std::type_index(typeid(BaseAnimatedComponent));
@@ -69,6 +70,7 @@ void BaseAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &compo
 	EVENT_ON_ANIMATIONS_UPDATED = componentManager.RegisterEvent("ON_ANIMATIONS_UPDATED",componentType);
 	EVENT_ON_BLEND_ANIMATION = componentManager.RegisterEvent("ON_BLEND_ANIMATION",componentType);
 	EVENT_PLAY_ANIMATION = componentManager.RegisterEvent("PLAY_ANIMATION",componentType);
+	EVENT_ON_ANIMATION_RESET = componentManager.RegisterEvent("ON_ANIMATION_RESET");
 }
 
 BaseAnimatedComponent::BaseAnimatedComponent(BaseEntity &ent)
@@ -83,23 +85,11 @@ void BaseAnimatedComponent::Initialize()
 		OnModelChanged(static_cast<pragma::CEOnModelChanged&>(evData.get()).model);
 	});
 
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		auto &ent = GetEntity();
-		auto pLogicComponent = ent.GetComponent<pragma::LogicComponent>();
-		if(pLogicComponent.expired())
-			return;
-		if(ShouldUpdateBones() == true)
-		{
-			auto pTimeScaleComponent = ent.GetTimeScaleComponent();
-			MaintainAnimations(pLogicComponent->DeltaTime() *(pTimeScaleComponent.valid() ? pTimeScaleComponent->GetEffectiveTimeScale() : 1.f));
-		}
-	});
-
 	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		if(IsPlayingAnimation() == false)
 			return;
 		auto pPhysComponent = GetEntity().GetPhysicsComponent();
-		if(pPhysComponent.expired())
+		if(!pPhysComponent)
 			return;
 		auto *phys = pPhysComponent->GetPhysicsObject();
 		if(phys != nullptr && phys->IsController() == true)
@@ -113,10 +103,20 @@ void BaseAnimatedComponent::Initialize()
 		auto &mdl = mdlComponent->GetModel();
 		OnModelChanged(mdl);
 	}
-	ent.AddComponent<LogicComponent>(); // Required for animation updates
+
+	SetTickPolicy(TickPolicy::WhenVisible);
 }
 
-void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
+void BaseAnimatedComponent::OnTick(double dt)
+{
+	if(ShouldUpdateBones() == false)
+		return;
+	auto &ent = GetEntity();
+	auto pTimeScaleComponent = ent.GetTimeScaleComponent();
+	MaintainAnimations(dt *(pTimeScaleComponent.valid() ? pTimeScaleComponent->GetEffectiveTimeScale() : 1.f));
+}
+
+void BaseAnimatedComponent::ResetAnimation(const std::shared_ptr<Model> &mdl)
 {
 	m_animSlots.clear();
 	m_baseAnim = {};
@@ -124,6 +124,8 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 	m_bones.clear();
 	m_processedBones.clear();
 	m_bindPose = nullptr;
+	m_rootPoseBoneId = std::numeric_limits<decltype(m_rootPoseBoneId)>::max();
+	umath::set_flag(m_stateFlags,StateFlags::AbsolutePosesDirty);
 	ApplyAnimationEventTemplates();
 	if(mdl == nullptr || mdl->HasVertexWeights() == false)
 		return;
@@ -139,8 +141,13 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 			val = 0;
 		m_blendControllers.insert(std::unordered_map<unsigned int,int>::value_type(i,val));
 	}
+	auto rootPoseBoneId = mdl->LookupBone(ROOT_POSE_BONE_NAME);
+	if(rootPoseBoneId != -1)
+		m_rootPoseBoneId = rootPoseBoneId;
 	Skeleton &skeleton = mdl->GetSkeleton();
-	for(unsigned int i=0;i<skeleton.GetBoneCount();i++)
+	auto numBones = skeleton.GetBoneCount();
+	m_bones.reserve(numBones);
+	for(unsigned int i=0;i<numBones;i++)
 		m_bones.push_back({});
 	std::unordered_map<std::string,unsigned int> *animations;
 	mdl->GetAnimations(&animations);
@@ -157,15 +164,31 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		}
 	}
 
-	auto anim = mdl->GetAnimation(0);
-	auto frame = (anim != nullptr) ? anim->GetFrame(0) : nullptr;
-	if(frame != nullptr)
+	m_processedBones.resize(numBones);
+	for(auto i=decltype(numBones){0u};i<numBones;++i)
 	{
-		for(UInt32 i=0;i<anim->GetBoneCount();i++)
-		{
-			m_bones[i] = umath::ScaledTransform{*frame->GetBonePosition(i),*frame->GetBoneOrientation(i)};
-		}
+		umath::ScaledTransform pose {};
+		m_bindPose->GetBonePose(i,pose);
+		m_processedBones[i] = pose;
 	}
+
+	for(auto i=decltype(numBones){0u};i<numBones;++i)
+	{
+		auto bone = skeleton.GetBone(i);
+		if(bone.expired())
+			continue;
+		auto pose = m_processedBones[i];
+		auto parent = bone.lock()->parent.lock();
+		if(parent)
+			pose = m_processedBones[parent->ID].GetInverse() *pose;
+		m_bones[i] = pose;
+	}
+}
+
+void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
+{
+	ResetAnimation(mdl);
+	BroadcastEvent(EVENT_ON_ANIMATION_RESET);
 }
 
 CallbackHandle BaseAnimatedComponent::BindAnimationEvent(AnimationEvent::Type eventId,const std::function<void(std::reference_wrapper<const AnimationEvent>)> &fCallback)
@@ -189,8 +212,7 @@ float BaseAnimatedComponent::GetAnimationDuration() const
 	int seq = GetAnimation();
 	if(seq == -1)
 		return 0.f;
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return 0.f;
 	auto anim = hModel->GetAnimation(seq);
@@ -201,8 +223,7 @@ float BaseAnimatedComponent::GetAnimationDuration() const
 
 int BaseAnimatedComponent::SelectWeightedAnimation(Activity activity,int animAvoid) const
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return -1;
 	return hModel->SelectWeightedAnimation(activity,animAvoid);
@@ -215,8 +236,7 @@ void BaseAnimatedComponent::SetLastAnimationBlendScale(float scale)
 
 void BaseAnimatedComponent::SetBlendController(unsigned int controller,float val)
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return;
 	auto it = m_blendControllers.find(controller);
@@ -248,7 +268,7 @@ void BaseAnimatedComponent::SetBlendController(unsigned int controller,float val
 void BaseAnimatedComponent::SetBlendController(const std::string &controller,float val)
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
-	if(mdlComponent.expired())
+	if(!mdlComponent)
 		return;
 	int id = mdlComponent->LookupBlendController(controller);
 	if(id == -1)
@@ -259,7 +279,7 @@ const std::unordered_map<unsigned int,float> &BaseAnimatedComponent::GetBlendCon
 float BaseAnimatedComponent::GetBlendController(const std::string &controller) const
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
-	if(mdlComponent.expired())
+	if(!mdlComponent)
 		return 0.f;
 	int id = mdlComponent->LookupBlendController(controller);
 	if(id == -1)
@@ -273,11 +293,11 @@ float BaseAnimatedComponent::GetBlendController(unsigned int controller) const
 		return 0;
 	return it->second;
 }
-static Frame *get_frame_from_cycle(Animation &anim,float cycle,uint32_t frameOffset=0)
+static Frame *get_frame_from_cycle(pragma::animation::Animation &anim,float cycle,uint32_t frameOffset=0)
 {
 	return anim.GetFrame(static_cast<uint32_t>((anim.GetFrameCount() -1) *cycle) +frameOffset).get();
 }
-bool BaseAnimatedComponent::GetBlendFramesFromCycle(Animation &anim,float cycle,Frame **outFrameSrc,Frame **outFrameDst,float &outInterpFactor,int32_t frameOffset)
+bool BaseAnimatedComponent::GetBlendFramesFromCycle(pragma::animation::Animation &anim,float cycle,Frame **outFrameSrc,Frame **outFrameDst,float &outInterpFactor,int32_t frameOffset)
 {
 	auto frameVal = (anim.GetFrameCount() -1) *cycle;
 	outInterpFactor = frameVal -static_cast<float>(umath::floor(frameVal));
@@ -294,14 +314,14 @@ bool BaseAnimatedComponent::GetBlendFramesFromCycle(Animation &anim,float cycle,
 		*outFrameDst = f;
 	return true;
 }
-void BaseAnimatedComponent::GetAnimationBlendController(Animation *anim,float cycle,std::array<AnimationBlendInfo,2> &bcFrames,float *blendScale) const
+void BaseAnimatedComponent::GetAnimationBlendController(pragma::animation::Animation *anim,float cycle,std::array<AnimationBlendInfo,2> &bcFrames,float *blendScale) const
 {
 	// Obsolete; TODO: Remove this!
 }
 Frame *BaseAnimatedComponent::GetPreviousAnimationBlendFrame(AnimationSlotInfo &animInfo,double tDelta,float &blendScale)
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return nullptr;
 	Frame *frameLastAnim = nullptr;
@@ -334,8 +354,7 @@ void BaseAnimatedComponent::ApplyAnimationBlending(AnimationSlotInfo &animInfo,d
 
 bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double dt,int32_t layeredSlot)
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return false;
 	CEMaintainAnimation evData{animInfo,dt};
@@ -348,15 +367,21 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 	if(anim == nullptr)
 		return false;
 	auto act = anim->GetActivity();
-	auto animSpeed = GetPlaybackRate();
 	auto numFrames = anim->GetFrameCount();
+	auto animSpeed = GetPlaybackRate();
 	if(numFrames > 0)
 		animSpeed *= static_cast<float>(anim->GetFPS()) /static_cast<float>(numFrames);
 
 	auto &cycle = animInfo.cycle;
 	auto cycleLast = cycle;
 	auto cycleNew = cycle +static_cast<float>(dt) *animSpeed;
-	auto bLoop = anim->HasFlag(FAnim::Loop);
+	if(layeredSlot == -1)
+	{
+		if(umath::abs(cycleNew -cycleLast) < 0.00001f && umath::is_flag_set(m_stateFlags,StateFlags::BaseAnimationDirty) == false)
+			return false;
+		umath::set_flag(m_stateFlags,StateFlags::BaseAnimationDirty,false);
+	}
+	auto bLoop = anim->HasFlag(FAnim::Loop) || umath::is_flag_set(animInfo.flags,FPlayAnim::Loop);
 	auto bComplete = (cycleNew >= 1.f) ? true : false;
 	if(bComplete == true)
 	{
@@ -374,7 +399,10 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 		if(cycleLast > 0.f) // If current cycle is 0 but we're also complete, that means the animation was started and finished within a single frame. Calling the block below may result in endless recursion, so we need to make sure the animation stays for this frame.
 		{
 			if(cycle != 1.f || animId != animInfo.animation)
+			{
+				SetBaseAnimationDirty();
 				return MaintainAnimation(animInfo,dt);
+			}
 			if(bLoop == true)
 			{
 				cycleNew -= floor(cycleNew);
@@ -382,6 +410,7 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 				{
 					animId = SelectWeightedAnimation(act,animId);
 					cycle = cycleNew;
+					SetBaseAnimationDirty();
 					return MaintainAnimation(animInfo,dt);
 				}
 			}
@@ -421,42 +450,11 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 	if(GetBlendFramesFromCycle(*anim,cycle,&srcFrame,&dstFrame,interpFactor) == false)
 		return false; // This shouldn't happen unless the animation has no frames
 
-	if(dstFrame)
+	//if(dstFrame)
 	{
 		bonePoses.resize(numBones);
 		boneScales.resize(numBones,Vector3{1.f,1.f,1.f});
-		BlendBonePoses(
-			srcFrame->GetBoneTransforms(),&srcFrame->GetBoneScales(),
-			dstFrame->GetBoneTransforms(),&dstFrame->GetBoneScales(),
-			bonePoses,&boneScales,
-			*anim,interpFactor
-		);
 	}
-	else
-	{
-		// Destination frame can be nullptr if no interpolation is required.
-		bonePoses = srcFrame->GetBoneTransforms();
-		boneScales = srcFrame->GetBoneScales();
-	}
-	//
-
-	// Blend between previous animation and this animation
-	float interpFactorLastAnim;
-	auto *lastPlayedFrameOfPreviousAnim = GetPreviousAnimationBlendFrame(animInfo,dt,interpFactorLastAnim);
-	if(lastPlayedFrameOfPreviousAnim)
-	{
-		auto lastAnim = hModel->GetAnimation(animInfo.lastAnim.animation);
-		if(lastAnim)
-		{
-			BlendBonePoses(
-				lastPlayedFrameOfPreviousAnim->GetBoneTransforms(),&lastPlayedFrameOfPreviousAnim->GetBoneScales(),
-				bonePoses,&boneScales,
-				bonePoses,&boneScales,
-				*lastAnim,interpFactorLastAnim
-			);
-		}
-	}
-	//
 
 	// Blend Controllers
 	auto *animBcData = anim->GetBlendController();
@@ -580,6 +578,43 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 			}
 		}
 	}
+	else
+	{
+		if(dstFrame)
+		{
+			BlendBonePoses(
+				srcFrame->GetBoneTransforms(),&srcFrame->GetBoneScales(),
+				dstFrame->GetBoneTransforms(),&dstFrame->GetBoneScales(),
+				bonePoses,&boneScales,
+				*anim,interpFactor
+			);
+		}
+		else
+		{
+			// Destination frame can be nullptr if no interpolation is required.
+			bonePoses = srcFrame->GetBoneTransforms();
+			boneScales = srcFrame->GetBoneScales();
+		}
+		//
+
+		// Blend between previous animation and this animation
+		float interpFactorLastAnim;
+		auto *lastPlayedFrameOfPreviousAnim = GetPreviousAnimationBlendFrame(animInfo,dt,interpFactorLastAnim);
+		if(lastPlayedFrameOfPreviousAnim)
+		{
+			auto lastAnim = hModel->GetAnimation(animInfo.lastAnim.animation);
+			if(lastAnim)
+			{
+				BlendBonePoses(
+					lastPlayedFrameOfPreviousAnim->GetBoneTransforms(),&lastPlayedFrameOfPreviousAnim->GetBoneScales(),
+					bonePoses,&boneScales,
+					bonePoses,&boneScales,
+					*lastAnim,1.f -interpFactorLastAnim
+				);
+			}
+		}
+		//
+	}
 	//
 
 	animInfo.bonePoses = std::move(bonePoses);
@@ -590,7 +625,7 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 
 	// Animation events
 	auto frameLast = (cycleLast != 0.f) ? static_cast<int32_t>((numFrames -1) *cycleLast) : -1;
-	auto frameCycle = (numFrames -1) *cycle;
+	auto frameCycle = (numFrames > 0) ? ((numFrames -1) *cycle) : 0.f;
 	auto frameID = umath::floor(frameCycle);
 
 	if(frameID < frameLast)
@@ -608,60 +643,115 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 void BaseAnimatedComponent::SetBindPose(const Frame &frame) {m_bindPose = frame.shared_from_this();}
 const Frame *BaseAnimatedComponent::GetBindPose() const {return m_bindPose.get();}
 
+void BaseAnimatedComponent::SetAnimatedRootPoseTransformEnabled(bool enabled) {umath::set_flag(m_stateFlags,StateFlags::RootPoseTransformEnabled,enabled);}
+bool BaseAnimatedComponent::IsAnimatedRootPoseTransformEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::RootPoseTransformEnabled);}
+
+BoneId BaseAnimatedComponent::AddRootPoseBone()
+{
+	auto &ent = GetEntity();
+	auto &mdl = ent.GetModel();
+	if(mdl == nullptr)
+		return std::numeric_limits<BoneId>::max();
+	auto &skeleton = mdl->GetSkeleton();
+	auto boneId = skeleton.LookupBone(ROOT_POSE_BONE_NAME);
+	if(boneId == -1)
+	{
+		auto *bone = new Bone {};
+		bone->name = ROOT_POSE_BONE_NAME;
+		boneId = skeleton.AddBone(bone);
+		skeleton.GetRootBones()[boneId] = bone->shared_from_this();
+	}
+	if(boneId >= m_bones.size())
+	{
+		m_bones.resize(boneId +1,umath::ScaledTransform{});
+		m_processedBones.resize(boneId +1,umath::ScaledTransform{});
+	}
+	SetRootPoseBoneId(boneId);
+	return boneId;
+}
+void BaseAnimatedComponent::SetRootPoseBoneId(BoneId boneId) {m_rootPoseBoneId = boneId;}
+
+bool BaseAnimatedComponent::MaintainGestures(double dt)
+{
+	auto &hModel = GetEntity().GetModel();
+	if(hModel == nullptr)
+		return false;
+	auto &baseAnimInfo = m_baseAnim;
+	auto anim = hModel->GetAnimation(baseAnimInfo.animation);
+	auto &bones = anim->GetBoneList();
+	auto &bonePoses = baseAnimInfo.bonePoses;
+	auto &boneScales = baseAnimInfo.boneScales;
+
+	// Update gestures
+	for(auto it=m_animSlots.begin();it!=m_animSlots.end();)
+	{
+		auto &animInfo = it->second;
+		if(MaintainAnimation(animInfo,dt,it->first) == true)
+		{
+			auto anim = hModel->GetAnimation(animInfo.animation);
+			auto baseAnim = hModel->GetAnimation(baseAnimInfo.animation);
+			TransformBoneFrames(
+				bonePoses,!boneScales.empty() ? &boneScales : nullptr,baseAnim,anim,animInfo.bonePoses,!animInfo.boneScales.empty() ? &animInfo.boneScales : nullptr,anim->HasFlag(FAnim::Gesture)
+			);
+			if(animInfo.cycle >= 1.f)
+			{
+				if(anim->HasFlag(FAnim::Loop) == false)
+				{
+					it = m_animSlots.erase(it); // No need to keep the gesture information around anymore
+					continue;
+				}
+			}
+		}
+		++it;
+	}
+	return true;
+}
 bool BaseAnimatedComponent::MaintainAnimations(double dt)
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return false;
 	CEMaintainAnimations evData{dt};
 	if(InvokeEventCallbacks(EVENT_MAINTAIN_ANIMATIONS,evData) == util::EventReply::Handled)
+	{
+		InvokeEventCallbacks(EVENT_ON_ANIMATIONS_UPDATED);
 		return true;
+	}
 
 	auto r = MaintainAnimation(m_baseAnim,dt);
 	if(r == true)
+		MaintainGestures(dt);
+
+	auto &baseAnimInfo = m_baseAnim;
+	auto anim = hModel->GetAnimation(baseAnimInfo.animation);
+	if(!anim)
+		return false;
+	auto &bones = anim->GetBoneList();
+	auto &bonePoses = baseAnimInfo.bonePoses;
+	auto &boneScales = baseAnimInfo.boneScales;
+	// Apply animation to skeleton
+	auto n = umath::min(bones.size(),bonePoses.size());
+	for(auto i=decltype(n){0};i<n;++i)
 	{
-		auto &animInfo = m_baseAnim;
-		auto anim = hModel->GetAnimation(animInfo.animation);
-		auto &bones = anim->GetBoneList();
-		auto &bonePoses = animInfo.bonePoses;
-		auto &boneScales = animInfo.boneScales;
+		auto boneId = bones[i];
+		auto &orientation = bonePoses.at(i);
+		SetBonePosition(boneId,orientation.GetOrigin(),orientation.GetRotation(),nullptr,false);
+		if(boneScales.empty() == false)
+			SetBoneScale(boneId,boneScales.at(i));
+	}
 
-		// Update gestures
-		for(auto it=m_animSlots.begin();it!=m_animSlots.end();)
-		{
-			auto &animInfo = it->second;
-			if(MaintainAnimation(animInfo,dt,it->first) == true)
-			{
-				auto anim = hModel->GetAnimation(animInfo.animation);
-				TransformBoneFrames(bonePoses,!boneScales.empty() ? &boneScales : nullptr,anim,animInfo.bonePoses,!animInfo.boneScales.empty() ? &animInfo.boneScales : nullptr,anim->HasFlag(FAnim::Gesture));
-				if(animInfo.cycle >= 1.f)
-				{
-					if(anim->HasFlag(FAnim::Loop) == false)
-					{
-						it = m_animSlots.erase(it); // No need to keep the gesture information around anymore
-						continue;
-					}
-				}
-			}
-			++it;
-		}
-
-		// Apply animation to skeleton
-		for(auto i=decltype(bonePoses.size()){0};i<bonePoses.size();++i)
-		{
-			auto boneId = bones[i];
-			auto &orientation = bonePoses.at(i);
-			SetBonePosition(boneId,orientation.GetOrigin(),orientation.GetRotation(),nullptr,false);
-			if(boneScales.empty() == false)
-				SetBoneScale(boneId,boneScales.at(i));
-		}
+	if(IsAnimatedRootPoseTransformEnabled() && m_rootPoseBoneId != std::numeric_limits<decltype(m_rootPoseBoneId)>::max() && m_rootPoseBoneId < m_bones.size())
+	{
+		auto &pose = m_bones[m_rootPoseBoneId];
+		auto &ent = GetEntity();
+		umath::Transform poseWithoutScale {pose};
+		ent.SetPose(poseWithoutScale);
 	}
 
 	InvokeEventCallbacks(EVENT_ON_ANIMATIONS_UPDATED);
 
 	// It's now safe to execute animation events
-	const auto fHandleAnimationEvents = [this](uint32_t animId,const std::shared_ptr<Animation> &anim,int32_t frameId) {
+	const auto fHandleAnimationEvents = [this](uint32_t animId,const std::shared_ptr<pragma::animation::Animation> &anim,int32_t frameId) {
 		auto *events = anim->GetEvents(frameId);
 		if(events)
 		{
@@ -717,16 +807,21 @@ Activity BaseAnimatedComponent::TranslateActivity(Activity act)
 }
 
 float BaseAnimatedComponent::GetCycle() const {return m_baseAnim.cycle;}
-void BaseAnimatedComponent::SetCycle(float cycle) {m_baseAnim.cycle = cycle;}
+void BaseAnimatedComponent::SetCycle(float cycle)
+{
+	if(cycle == m_baseAnim.cycle)
+		return;
+	m_baseAnim.cycle = cycle;
+	SetBaseAnimationDirty();
+}
 
 int BaseAnimatedComponent::GetAnimation() const {return m_baseAnim.animation;}
-Animation *BaseAnimatedComponent::GetAnimationObject() const
+pragma::animation::Animation *BaseAnimatedComponent::GetAnimationObject() const
 {
 	auto animId = GetAnimation();
 	if(animId == -1)
 		return nullptr;
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return nullptr;
 	auto anim = hModel->GetAnimation(animId);
@@ -757,8 +852,7 @@ void BaseAnimatedComponent::PlayAnimation(int animation,FPlayAnim flags)
 		return;
 	if(m_baseAnim.animation == animation && (flags &FPlayAnim::Reset) == FPlayAnim::None)
 	{
-		auto mdlComponent = GetEntity().GetModelComponent();
-		auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+		auto &hModel = GetEntity().GetModel();
 		if(hModel != nullptr)
 		{
 			auto anim = hModel->GetAnimation(animation);
@@ -784,8 +878,7 @@ void BaseAnimatedComponent::PlayAnimation(int animation,FPlayAnim flags)
 		lastAnim.blendScale = 1.f;
 
 		// Update animation fade time
-		auto mdlComponent = GetEntity().GetModelComponent();
-		auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+		auto &hModel = GetEntity().GetModel();
 		if(hModel != nullptr)
 		{
 			auto anim = hModel->GetAnimation(animation);
@@ -821,18 +914,62 @@ void BaseAnimatedComponent::PlayAnimation(int animation,FPlayAnim flags)
 	m_baseAnim.cycle = 0;
 	m_baseAnim.flags = flags;
 	m_baseAnim.activity = Activity::Invalid;
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	SetBaseAnimationDirty();
+	auto &hModel = GetEntity().GetModel();
 	if(hModel != nullptr)
 	{
 		auto anim = hModel->GetAnimation(animation);
 		if(anim != nullptr)
+		{
 			m_baseAnim.activity = anim->GetActivity();
+
+			// We'll set all bones that are unused by the animation to
+			// their respective reference pose
+			auto &ref = hModel->GetReference();
+			auto &boneMap = anim->GetBoneMap();
+			auto &skeleton = hModel->GetSkeleton();
+			auto numBones = skeleton.GetBoneCount();
+			for(auto i=decltype(numBones){0u};i<numBones;++i)
+			{
+				auto bone = skeleton.GetBone(i);
+				auto it = boneMap.find(i);
+				if(it != boneMap.end() || bone.expired())
+					continue;
+				auto parent = bone.lock()->parent;
+				umath::ScaledTransform poseParent {};
+				if(!parent.expired())
+				{
+					ref.GetBonePose(parent.lock()->ID,poseParent);
+					poseParent = poseParent.GetInverse();
+				}
+
+				umath::ScaledTransform pose {};
+				auto *pos = ref.GetBonePosition(i);
+				if(pos)
+					pose.SetOrigin(*pos);
+				auto *rot = ref.GetBoneOrientation(i);
+				if(rot)
+					pose.SetRotation(*rot);
+				auto *scale = ref.GetBoneScale(i);
+				if(scale)
+					pose.SetScale(*scale);
+
+				pose = poseParent *pose;
+				if(pos)
+					SetBonePosition(i,pose.GetOrigin());
+				if(rot)
+					SetBoneRotation(i,pose.GetRotation());
+				if(scale)
+					SetBoneScale(i,pose.GetScale());
+			}
+		}
 	}
 
 	CEOnAnimationStart evAnimStartData {m_baseAnim.animation,m_baseAnim.activity,m_baseAnim.flags};
 	InvokeEventCallbacks(EVENT_ON_ANIMATION_START,evAnimStartData);
 }
+
+void BaseAnimatedComponent::SetBaseAnimationDirty() {umath::set_flag(m_stateFlags,StateFlags::BaseAnimationDirty,true);}
 
 int32_t BaseAnimatedComponent::SelectTranslatedAnimation(Activity &inOutActivity) const
 {
@@ -860,8 +997,7 @@ Activity BaseAnimatedComponent::GetActivity() const
 		return Activity::Invalid;
 	if(m_baseAnim.activity != Activity::Invalid)
 		return m_baseAnim.activity;
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return Activity::Invalid;
 	auto anim = hModel->GetAnimation(m_baseAnim.animation);
@@ -911,7 +1047,7 @@ std::unordered_map<uint32_t,BaseAnimatedComponent::AnimationSlotInfo> &BaseAnima
 bool BaseAnimatedComponent::PlayAnimation(const std::string &name,FPlayAnim flags)
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
-	if(mdlComponent.expired())
+	if(!mdlComponent)
 		return false;
 	auto prevAnim = GetAnimation();
 	int anim = mdlComponent->LookupAnimation(name);
@@ -949,7 +1085,7 @@ void BaseAnimatedComponent::PlayLayeredAnimation(int slot,int animation,FPlayAni
 bool BaseAnimatedComponent::PlayLayeredAnimation(int slot,std::string animation,FPlayAnim flags)
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
-	if(mdlComponent.expired())
+	if(!mdlComponent)
 		return false;
 	auto anim = mdlComponent->LookupAnimation(animation);
 	if(anim == -1)
@@ -989,8 +1125,7 @@ std::vector<umath::ScaledTransform> &BaseAnimatedComponent::GetProcessedBones() 
 bool BaseAnimatedComponent::CalcAnimationMovementSpeed(float *x,float *z,int32_t frameOffset) const
 {
 	auto &ent = GetEntity();
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	auto animId = GetAnimation();
 	if(hMdl == nullptr || animId == -1)
 		return false;
@@ -1022,115 +1157,131 @@ bool BaseAnimatedComponent::CalcAnimationMovementSpeed(float *x,float *z,int32_t
 	return true;
 }
 
-static void write_animation_slot_info(DataStream &ds,const BaseAnimatedComponent::AnimationSlotInfo &slotInfo)
+static void write_anim_flags(udm::LinkedPropertyWrapper &udm,FPlayAnim flags)
 {
-	ds->Write<Activity>(slotInfo.activity);
-	ds->Write<int32_t>(slotInfo.animation);
-	ds->Write<float>(slotInfo.cycle);
-	ds->Write<FPlayAnim>(slotInfo.flags);
-
-	ds->Write<uint32_t>(slotInfo.bonePoses.size());
-	ds->Write(reinterpret_cast<const uint8_t*>(slotInfo.bonePoses.data()),slotInfo.bonePoses.size() *sizeof(slotInfo.bonePoses.front()));
-		
-	ds->Write<uint32_t>(slotInfo.boneScales.size());
-	ds->Write(reinterpret_cast<const uint8_t*>(slotInfo.boneScales.data()),slotInfo.boneScales.size() *sizeof(slotInfo.boneScales.front()));
-		
-	ds->Write<uint32_t>(slotInfo.bonePosesBc.size());
-	ds->Write(reinterpret_cast<const uint8_t*>(slotInfo.bonePosesBc.data()),slotInfo.bonePosesBc.size() *sizeof(slotInfo.bonePosesBc.front()));
-		
-	ds->Write<uint32_t>(slotInfo.boneScalesBc.size());
-	ds->Write(reinterpret_cast<const uint8_t*>(slotInfo.boneScalesBc.data()),slotInfo.boneScalesBc.size() *sizeof(slotInfo.boneScalesBc.front()));
-		
-	ds->Write<int32_t>(slotInfo.lastAnim.animation);
-	ds->Write<float>(slotInfo.lastAnim.cycle);
-	ds->Write<FPlayAnim>(slotInfo.lastAnim.flags);
-	ds->Write<std::pair<float,float>>(slotInfo.lastAnim.blendTimeScale);
-	ds->Write<float>(slotInfo.lastAnim.blendScale);
+	udm::write_flag(udm["flags"],flags,FPlayAnim::Reset,"reset");
+	udm::write_flag(udm["flags"],flags,FPlayAnim::Transmit,"transmit");
+	udm::write_flag(udm["flags"],flags,FPlayAnim::SnapTo,"snapTo");
+	udm::write_flag(udm["flags"],flags,FPlayAnim::Loop,"loop");
+	static_assert(magic_enum::flags::enum_count<FPlayAnim>() == 4);
 }
-void BaseAnimatedComponent::Save(DataStream &ds)
+
+static FPlayAnim read_anim_flags(udm::LinkedPropertyWrapper &udm)
 {
-	BaseEntityComponent::Save(ds);
-	ds->Write<float>(GetPlaybackRate());
+	auto flags = FPlayAnim::None;
+	udm::read_flag(udm["flags"],flags,FPlayAnim::Reset,"reset");
+	udm::read_flag(udm["flags"],flags,FPlayAnim::Transmit,"transmit");
+	udm::read_flag(udm["flags"],flags,FPlayAnim::SnapTo,"snapTo");
+	udm::read_flag(udm["flags"],flags,FPlayAnim::Loop,"loop");
+	static_assert(magic_enum::flags::enum_count<FPlayAnim>() == 4);
+	return flags;
+}
+
+static void write_animation_slot_info(udm::LinkedPropertyWrapper &udm,const BaseAnimatedComponent::AnimationSlotInfo &slotInfo)
+{
+	udm["activity"] = slotInfo.activity;
+	udm["animation"] = slotInfo.animation;
+	udm["cycle"] = slotInfo.cycle;
+	write_anim_flags(udm["flags"],slotInfo.flags);
+
+	udm["bonePoses"] = udm::compress_lz4_blob(slotInfo.bonePoses);
+	udm["boneScales"] = udm::compress_lz4_blob(slotInfo.boneScales);
+	udm["bonePosesBc"] = udm::compress_lz4_blob(slotInfo.bonePosesBc);
+	udm["boneScalesBc"] = udm::compress_lz4_blob(slotInfo.boneScalesBc);
+		
+	udm["lastAnimation"]["animation"] = slotInfo.lastAnim.animation;
+	udm["lastAnimation"]["cycle"] = slotInfo.lastAnim.cycle;
+	write_anim_flags(udm["lastAnimation"]["flags"],slotInfo.lastAnim.flags);
+	udm["lastAnimation"]["blendFadeIn"] = slotInfo.lastAnim.blendTimeScale.first;
+	udm["lastAnimation"]["blendFadeOut"] = slotInfo.lastAnim.blendTimeScale.second;
+	udm["lastAnimation"]["blendScale"] = slotInfo.lastAnim.blendScale;
+}
+void BaseAnimatedComponent::Save(udm::LinkedPropertyWrapper &udm)
+{
+	BaseEntityComponent::Save(udm);
+	udm["playbackRate"] = GetPlaybackRate();
 
 	// Write blend controllers
 	auto &blendControllers = GetBlendControllers();
-	ds->Write<std::size_t>(blendControllers.size());
+	auto udmBlendControllers = udm.AddArray("blendControllers",blendControllers.size());
+	uint32_t idx = 0;
 	for(auto &pair : blendControllers)
 	{
-		ds->Write<uint32_t>(pair.first);
-		ds->Write<float>(pair.second);
+		auto udmBlendController = udmBlendControllers[idx++];
+		udmBlendController["slot"] = pair.first;
+		udmBlendController["value"] = pair.second;
 	}
 
 	// Write animations
-	write_animation_slot_info(ds,GetBaseAnimationInfo());
+	write_animation_slot_info(udm,GetBaseAnimationInfo());
 	auto &animSlotInfos = GetAnimationSlotInfos();
-	ds->Write<std::size_t>(animSlotInfos.size());
+	auto udmAnimations = udm.AddArray("animations",animSlotInfos.size());
+	idx = 0;
 	for(auto &pair : animSlotInfos)
 	{
-		ds->Write<uint32_t>(pair.first);
-		write_animation_slot_info(ds,pair.second);
+		auto udmAnimation = udmAnimations[idx++];
+		udmAnimation["slot"] = pair.first;
+		write_animation_slot_info(udmAnimation,pair.second);
 	}
 
-	ds->Write<Vector3>(m_animDisplacement);
+	udm["animDisplacement"] = m_animDisplacement;
 }
-static void read_animation_slot_info(DataStream &ds,BaseAnimatedComponent::AnimationSlotInfo &slotInfo)
+static void read_animation_slot_info(udm::LinkedPropertyWrapper &udm,BaseAnimatedComponent::AnimationSlotInfo &slotInfo)
 {
-	slotInfo.activity = ds->Read<Activity>();
-	slotInfo.animation = ds->Read<int32_t>();
-	slotInfo.cycle = ds->Read<float>();
-	slotInfo.flags = ds->Read<FPlayAnim>();
+	udm["activity"](slotInfo.activity);
+	udm["animation"](slotInfo.animation);
+	udm["cycle"](slotInfo.cycle);
+	slotInfo.flags = read_anim_flags(udm["flags"]);
 
-	auto numBoneOrientations = ds->Read<uint32_t>();
-	slotInfo.bonePoses.resize(numBoneOrientations);
-	ds->Read(reinterpret_cast<uint8_t*>(slotInfo.bonePoses.data()),slotInfo.bonePoses.size() *sizeof(slotInfo.bonePoses.front()));
-		
-	auto numBoneScales = ds->Read<uint32_t>();
-	slotInfo.boneScales.resize(numBoneScales);
-	ds->Read(reinterpret_cast<uint8_t*>(slotInfo.boneScales.data()),slotInfo.boneScales.size() *sizeof(slotInfo.boneScales.front()));
-		
-	auto numBoneOrientationsBc = ds->Read<uint32_t>();
-	slotInfo.bonePosesBc.resize(numBoneOrientationsBc);
-	ds->Read(reinterpret_cast<uint8_t*>(slotInfo.bonePosesBc.data()),slotInfo.bonePosesBc.size() *sizeof(slotInfo.bonePosesBc.front()));
+	udm["bonePoses"].GetBlobData(slotInfo.bonePoses);
+	udm["boneScales"].GetBlobData(slotInfo.boneScales);
+	udm["bonePosesBc"].GetBlobData(slotInfo.bonePosesBc);
+	udm["boneScalesBc"].GetBlobData(slotInfo.boneScalesBc);
 
-	auto numBoneScalesBc = ds->Read<uint32_t>();
-	slotInfo.boneScalesBc.resize(numBoneScalesBc);
-	ds->Read(reinterpret_cast<uint8_t*>(slotInfo.boneScalesBc.data()),slotInfo.boneScalesBc.size() *sizeof(slotInfo.boneScalesBc.front()));
-		
-	slotInfo.lastAnim.animation = ds->Read<int32_t>();
-	slotInfo.lastAnim.cycle = ds->Read<float>();
-	slotInfo.lastAnim.flags = ds->Read<FPlayAnim>();
-	slotInfo.lastAnim.blendTimeScale = ds->Read<std::pair<float,float>>();
-	slotInfo.lastAnim.blendScale = ds->Read<float>();
+	udm["lastAnimation"]["animation"](slotInfo.lastAnim.animation);
+	udm["lastAnimation"]["cycle"](slotInfo.lastAnim.cycle);
+	udm["lastAnimation"]["blendFadeIn"](slotInfo.lastAnim.blendTimeScale.first);
+	udm["lastAnimation"]["blendFadeOut"](slotInfo.lastAnim.blendTimeScale.second);
+	slotInfo.lastAnim.flags = read_anim_flags(udm["lastAnimation"]["flags"]);
+	udm["lastAnimation"]["blendScale"](slotInfo.lastAnim.blendScale);
 }
-void BaseAnimatedComponent::Load(DataStream &ds,uint32_t version)
+void BaseAnimatedComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {
-	BaseEntityComponent::Load(ds,version);
-	auto playbackRate = ds->Read<float>();
+	BaseEntityComponent::Load(udm,version);
+	auto playbackRate = GetPlaybackRate();;
+	udm["playbackRate"](playbackRate);
 	SetPlaybackRate(playbackRate);
 
 	// Read blend controllers
-	auto numBlendControllers = ds->Read<std::size_t>();
-	for(auto i=decltype(numBlendControllers){0};i<numBlendControllers;++i)
+	auto udmBlendControllers = udm["blendControllers"];
+	auto numBlendControllers = udmBlendControllers.GetSize();
+	m_blendControllers.reserve(numBlendControllers);
+	for(auto i=decltype(numBlendControllers){0u};i<numBlendControllers;++i)
 	{
-		auto id = ds->Read<uint32_t>();
-		auto val = ds->Read<float>();
-		SetBlendController(id,val);
+		auto udmBlendController = udmBlendControllers[i];
+		uint32_t slot = 0;
+		udmBlendController["slot"](slot);
+		auto value = 0.f;
+		udmBlendController["value"](value);
+		m_blendControllers[slot] = value;
 	}
 
 	// Read animations
-	read_animation_slot_info(ds,GetBaseAnimationInfo());
+	read_animation_slot_info(udm,GetBaseAnimationInfo());
 	auto &animSlots = GetAnimationSlotInfos();
-	auto numAnims = ds->Read<std::size_t>();
+	auto udmAnimations = udm["animations"];
+	auto numAnims = udmAnimations.GetSize();
 	animSlots.reserve(numAnims);
-	for(auto i=decltype(numAnims){0};i<numAnims;++i)
+	for(auto i=decltype(numAnims){0u};i<numAnims;++i)
 	{
-		auto id = ds->Read<uint32_t>();
-		auto it = animSlots.insert(std::make_pair(id,AnimationSlotInfo{})).first;
-		read_animation_slot_info(ds,it->second);
+		auto udmAnimation = udmAnimations[i];
+		uint32_t slot = 0;
+		udmAnimation["slot"](slot);
+		auto it = animSlots.insert(std::make_pair(slot,AnimationSlotInfo{})).first;
+		read_animation_slot_info(udmAnimation,it->second);
 	}
 
-	auto animDisp = ds->Read<Vector3>();
-	m_animDisplacement = animDisp;
+	udm["animDisplacement"](m_animDisplacement);
 }
 
 /////////////////
@@ -1402,3 +1553,4 @@ void CEMaintainAnimationMovement::PushArguments(lua_State *l)
 CEShouldUpdateBones::CEShouldUpdateBones()
 {}
 void CEShouldUpdateBones::PushArguments(lua_State *l) {}
+#pragma optimize("",on)

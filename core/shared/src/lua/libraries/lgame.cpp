@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -15,6 +15,7 @@
 #include "luasystem.h"
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/entities/environment/lights/env_light.h"
+#include "pragma/entities/components/base_gamemode_component.hpp"
 #include "pragma/entities/baseworld.h"
 #include "pragma/model/modelmesh.h"
 #include "pragma/lua/classes/ldef_tracedata.h"
@@ -30,7 +31,7 @@
 #include "pragma/ai/navsystem.h"
 #include <pragma/math/intersection.h>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 int Lua::game::add_callback(lua_State *l)
 {
 	std::string identifier = luaL_checkstring(l,1);
@@ -182,10 +183,13 @@ int Lua::game::get_game_mode(lua_State *l)
 {
 	auto *nw = engine->GetNetworkState(l);
 	auto *game = nw->GetGameState();
-	auto *o = game->GetGameModeLuaObject();
-	if(o == nullptr)
+	auto *ent = game->GetGameModeEntity();
+	if(ent == nullptr)
 		return 0;
-	Lua::Push<luabind::object>(l,*o);
+	auto gmC = static_cast<pragma::BaseGamemodeComponent*>(ent->FindComponent("gamemode").get());
+	if(gmC == nullptr)
+		return 0;
+	gmC->PushLuaObject(l);
 	return 1;
 }
 int Lua::game::get_light_color(lua_State *l)
@@ -207,7 +211,7 @@ int Lua::game::get_light_color(lua_State *l)
 		if(pLightComponent == nullptr || (pToggleComponent != nullptr && pToggleComponent->IsTurnedOn() == false))
 			continue;
 		auto pTrComponent = ent->GetTransformComponent();
-		auto lightPos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+		auto lightPos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 		auto pRadiusComponent = static_cast<pragma::BaseRadiusComponent*>(ent->FindComponent("radius").get());
 		auto lightDist = (pRadiusComponent != nullptr) ? pRadiusComponent->GetRadius() : 0.f;
 		auto dist = uvec::distance(pos,lightPos);
@@ -380,15 +384,14 @@ int Lua::game::raycast(lua_State *l)
 		if(ent == nullptr || ent->IsSpawned() == false)
 			continue;
 		auto pTrComponent = ent->GetTransformComponent();
-		auto mdlComponent = ent->GetModelComponent();
-		auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
-		if(hMdl == nullptr || pTrComponent.expired())
+		auto &hMdl = ent->GetModel();
+		if(hMdl == nullptr || pTrComponent == nullptr)
 			continue;
 #ifdef ENABLE_DEPRECATED_PHYSICS
 		if(dataFilter != nullptr && filter->ShouldPass(ent,nullptr,nullptr) == false)
 			continue;
 #endif
-		Intersection::LineMesh(start,end -start,*hMdl,meshResult,true,pTrComponent->GetPosition(),pTrComponent->GetOrientation());
+		Intersection::LineMesh(start,end -start,*hMdl,meshResult,true,pTrComponent->GetPosition(),pTrComponent->GetRotation());
 	}
 	if(entClosest != nullptr)
 	{

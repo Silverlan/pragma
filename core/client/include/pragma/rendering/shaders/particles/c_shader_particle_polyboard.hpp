@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_SHADER_PARTICLE_POLYBOARD_HPP__
@@ -12,7 +12,7 @@
 
 namespace pragma
 {
-	namespace rendering {class RasterizationRenderer;};
+	class CRasterizationRendererComponent;
 	class DLLCLIENT ShaderParticlePolyboard
 		: public ShaderParticle2DBase
 	{
@@ -37,7 +37,7 @@ namespace pragma
 			float viewportH;
 		};
 #pragma pack(pop)
-		bool Draw(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const pragma::CParticleSystemComponent &ps,prosper::IBuffer &vertexBuffer,prosper::IBuffer &indexBuffer,uint32_t numIndices,float radius,float curvature);
+		bool Draw(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const pragma::CParticleSystemComponent &ps,prosper::IBuffer &vertexBuffer,prosper::IBuffer &indexBuffer,uint32_t numIndices,float radius,float curvature);
 	protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 	private:

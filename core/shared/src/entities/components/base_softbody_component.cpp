@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -30,7 +30,7 @@ bool BaseSoftBodyComponent::InitializeSoftBodyData()
 	ReleaseSoftBodyData();
 	auto &ent = GetEntity();
 	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr)
 		return false;
 	m_softBodyData = std::unique_ptr<SoftBodyData>(new SoftBodyData);

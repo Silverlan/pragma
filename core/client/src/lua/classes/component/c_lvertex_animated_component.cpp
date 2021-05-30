@@ -2,13 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <prosper_command_buffer.hpp>
+#include <buffers/prosper_swap_buffer.hpp>
 
 void Lua::VertexAnimated::register_class(lua_State *l,luabind::module_ &entsMod)
 {
@@ -24,7 +25,7 @@ void Lua::VertexAnimated::register_class(lua_State *l,luabind::module_ &entsMod)
 		auto &buffer = hAnim->GetVertexAnimationBuffer();
 		if(buffer == nullptr)
 			return;
-		Lua::Push<std::shared_ptr<prosper::IBuffer>>(l,buffer);
+		Lua::Push<std::shared_ptr<prosper::SwapBuffer>>(l,buffer);
 		}));
 	defCVertexAnimated.def("GetVertexAnimationBufferMeshOffset",static_cast<void(*)(lua_State*,CVertexAnimatedHandle&,std::shared_ptr<::ModelSubMesh>&)>([](lua_State *l,CVertexAnimatedHandle &hAnim,std::shared_ptr<::ModelSubMesh> &subMesh) {
 		pragma::Lua::check_component(l,hAnim);

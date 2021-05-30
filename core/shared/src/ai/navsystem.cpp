@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -92,7 +92,7 @@ static std::shared_ptr<dtNavMesh> initialize_detour_mesh(rcPolyMesh &polyMesh,rc
 			*err = "Could not create detour navigation mesh!";
 		return nullptr;
 	}
-	ScopeGuard sg([navData]() {
+	util::ScopeGuard sg([navData]() {
 		dtFree(navData);
 	});
 	auto dtNav = std::shared_ptr<dtNavMesh>(dtAllocNavMesh(),[](dtNavMesh *dtNavMesh) {
@@ -117,8 +117,7 @@ static std::shared_ptr<dtNavMesh> initialize_detour_mesh(rcPolyMesh &polyMesh,rc
 
 std::shared_ptr<RcNavMesh> pragma::nav::generate(Game &game,const Config &config,const BaseEntity &ent,std::string *err)
 {
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr)
 		return nullptr;
 	auto numTris = hMdl->GetTriangleCount();
@@ -539,7 +538,7 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(Game &game,const Config &config
 			return nullptr;
 		}
 
-		ScopeGuard sg([navData]() {
+		util::ScopeGuard sg([navData]() {
 			dtFree(navData);
 		});
 		

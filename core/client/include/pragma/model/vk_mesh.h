@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __VK_MESH_H__
@@ -10,6 +10,7 @@
 
 #include "pragma/clientdefinitions.h"
 #include <memory>
+#include <mutex>
 
 namespace prosper
 {
@@ -24,6 +25,9 @@ namespace pragma
 	{
 	public:
 		SceneMesh();
+		SceneMesh(const SceneMesh &other);
+		~SceneMesh();
+		SceneMesh &operator=(const SceneMesh &other);
 		const std::shared_ptr<prosper::IBuffer> &GetVertexBuffer() const;
 		const std::shared_ptr<prosper::IBuffer> &GetVertexWeightBuffer() const;
 		const std::shared_ptr<prosper::IBuffer> &GetAlphaBuffer() const;
@@ -34,17 +38,19 @@ namespace pragma
 		void SetAlphaBuffer(const std::shared_ptr<prosper::IBuffer> &buffer);
 		void SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer);
 		void SetLightmapUvBuffer(const std::shared_ptr<prosper::IBuffer> &lightmapUvBuffer);
+		void ClearBuffers();
 
 		const std::shared_ptr<prosper::IRenderBuffer> &GetRenderBuffer(CModelSubMesh &mesh,pragma::ShaderEntity &shader,uint32_t pipelineIdx=0u);
 	private:
 		void SetDirty();
-		std::unordered_map<prosper::PipelineID,std::shared_ptr<prosper::IRenderBuffer>> m_renderBuffers;
+		std::vector<std::pair<prosper::PipelineID,std::shared_ptr<prosper::IRenderBuffer>>> m_renderBuffers;
 
 		std::shared_ptr<prosper::IBuffer> m_vertexBuffer = nullptr;
 		std::shared_ptr<prosper::IBuffer> m_vertexWeightBuffer = nullptr;
 		std::shared_ptr<prosper::IBuffer> m_alphaBuffer = nullptr;
 		std::shared_ptr<prosper::IBuffer> m_indexBuffer = nullptr;
 		std::shared_ptr<prosper::IBuffer> m_lightmapUvBuffer = nullptr;
+		std::mutex m_renderBufferMutex;
 	};
 };
 #endif

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -21,34 +21,49 @@ using namespace pragma;
 extern DLLCLIENT CGame *c_game;
 
 static auto cvFlexPhonemeDrag = GetClientConVar("cl_flex_phoneme_drag");
-luabind::object CFlexComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CFlexComponentHandleWrapper>(l);}
-void CFlexComponent::UpdateFlexControllers()
+
+ComponentEventId CFlexComponent::EVENT_ON_FLEX_CONTROLLERS_UPDATED = INVALID_COMPONENT_ID;
+void CFlexComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
+	BaseFlexComponent::RegisterEvents(componentManager);
+	EVENT_ON_FLEX_CONTROLLERS_UPDATED = componentManager.RegisterEvent("ON_FLEX_CONTROLLERS_UPDATED",std::type_index(typeid(CFlexComponent)));
+}
+
+luabind::object CFlexComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CFlexComponentHandleWrapper>(l);}
+void CFlexComponent::UpdateFlexControllers(float dt)
+{
+	// TODO: Update every frame!
 	auto t = c_game->CurTime();
-	auto dt = c_game->DeltaTime();
+	MaintainFlexAnimations(dt);
 	auto flexDrag = cvFlexPhonemeDrag->GetFloat();
 	for(auto &pair : m_flexControllers)
 	{
 		auto &info = pair.second;
 		if(info.endTime != 0.f && t >= info.endTime && info.targetValue != 0.f)
 			info.targetValue = 0.f;
-		info.value = umath::lerp(info.value,info.targetValue,umath::min(dt /flexDrag,1.0));
+		info.value = umath::lerp(info.value,info.targetValue,umath::min(dt /flexDrag,1.f));
 	}
+	InvokeEventCallbacks(EVENT_ON_FLEX_CONTROLLERS_UPDATED);
 }
 
 void CFlexComponent::SetFlexWeight(uint32_t flexIdx,float weight)
 {
-	if(flexIdx >= m_flexWeights.size())
+	if(flexIdx >= m_flexWeights.size() || m_flexWeights.at(flexIdx) == weight)
 		return;
 	m_flexWeights.at(flexIdx) = weight;
 	m_updatedFlexWeights.at(flexIdx) = true;
+	m_flexDataUpdateRequired = true;
 }
 
 void CFlexComponent::SetFlexWeightOverride(uint32_t flexId,float weight)
 {
 	if(flexId < m_flexOverrides.size())
 	{
-		m_flexOverrides.at(flexId) = weight;
+		if(m_flexOverrides.at(flexId) != weight)
+		{
+			m_flexOverrides.at(flexId) = weight;
+			m_flexDataUpdateRequired = true;
+		}
 		return;
 	}
 	auto mdl = GetEntity().GetModel();
@@ -56,12 +71,14 @@ void CFlexComponent::SetFlexWeightOverride(uint32_t flexId,float weight)
 		return;
 	m_flexOverrides.resize(flexId +1);
 	m_flexOverrides.at(flexId) = weight;
+	m_flexDataUpdateRequired = true;
 }
 void CFlexComponent::ClearFlexWeightOverride(uint32_t flexId)
 {
-	if(flexId >= m_flexOverrides.size())
+	if(flexId >= m_flexOverrides.size() || m_flexOverrides.at(flexId).has_value() == false)
 		return;
 	m_flexOverrides.at(flexId) = {};
+	m_flexDataUpdateRequired = true;
 }
 bool CFlexComponent::HasFlexWeightOverride(uint32_t flexId) const
 {
@@ -83,14 +100,16 @@ void CFlexComponent::UpdateEyeFlexes(Eyeball &eyeball,uint32_t eyeballIdx)
 	Vector3 pos {};
 
 	// Get weighted position of eyeball angles based on the "raiser", "neutral", and "lowerer" controls
-
 	auto upperLid = 0.f;
 	auto lowerLid = 0.f;
-	for(auto i=decltype(eyeball.upperFlexDesc.size()){0u};i<eyeball.upperFlexDesc.size();++i)
-	{
-		upperLid += GetFlexWeight(eyeball.upperFlexDesc.at(i)) *umath::asin(eyeball.upperTarget.at(i) /eyeball.radius);
-		lowerLid += GetFlexWeight(eyeball.lowerFlexDesc.at(i)) *umath::asin(eyeball.lowerTarget.at(i) /eyeball.radius);
-	}	
+	std::array<int32_t,3> upperIndices = {eyeball.upperLid.lowererFlexIndex,eyeball.upperLid.neutralFlexIndex,eyeball.upperLid.raiserFlexIndex};
+	std::array<float,3> upperValues = {eyeball.upperLid.lowererValue,eyeball.upperLid.neutralValue,eyeball.upperLid.raiserValue};
+	std::array<int32_t,3> lowererIndices = {eyeball.lowerLid.lowererFlexIndex,eyeball.lowerLid.neutralFlexIndex,eyeball.lowerLid.raiserFlexIndex};
+	std::array<float,3> lowererValues = {eyeball.lowerLid.lowererValue,eyeball.lowerLid.neutralValue,eyeball.lowerLid.raiserValue};
+	for(auto i=decltype(upperIndices.size()){0u};i<upperIndices.size();++i)
+		upperLid += GetFlexWeight(upperIndices[i]) *umath::asin(upperValues[i] /eyeball.radius);
+	for(auto i=decltype(lowererIndices.size()){0u};i<lowererIndices.size();++i)
+		lowerLid += GetFlexWeight(lowererIndices[i]) *umath::asin(lowererValues[i] /eyeball.radius);
 
 	float sinupper, cosupper, sinlower, coslower;
 	sinupper = umath::sin(upperLid);
@@ -106,12 +125,12 @@ void CFlexComponent::UpdateEyeFlexes(Eyeball &eyeball,uint32_t eyeballIdx)
 	// Upper lid
 	pos = headup *(sinupper *eyeball.radius);
 	pos = pos +(cosupper *eyeball.radius) *headforward;
-	SetFlexWeight(eyeball.upperLidFlexDesc,uvec::dot(pos,eyeball.up));
+	SetFlexWeight(eyeball.upperLid.lidFlexIndex,uvec::dot(pos,eyeball.up));
 
 	// Lower lid
 	pos = headup *(sinlower *eyeball.radius);
 	pos = pos +(coslower *eyeball.radius) *headforward;
-	SetFlexWeight(eyeball.lowerLidFlexDesc,uvec::dot(pos,eyeball.up));
+	SetFlexWeight(eyeball.lowerLid.lidFlexIndex,uvec::dot(pos,eyeball.up));
 }
 
 void CFlexComponent::UpdateEyeFlexes()
@@ -139,20 +158,23 @@ void CFlexComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 void CFlexComponent::Initialize()
 {
 	BaseFlexComponent::Initialize();
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		UpdateFlexControllers();
-	});
 	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		OnModelChanged(static_cast<pragma::CEOnModelChanged&>(evData.get()).model);
 	});
-	GetEntity().AddComponent<LogicComponent>();
+	// This has been moved to vertex animated component
+	//BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	//	UpdateFlexWeightsMT();
+	//});
 	OnModelChanged(GetEntity().GetModel());
+
+	SetTickPolicy(TickPolicy::Always); // TODO
 }
+
+void CFlexComponent::OnTick(double dt) {UpdateFlexControllers(dt);}
 
 void CFlexComponent::SetFlexController(uint32_t flexId,float val,float duration,bool clampToLimits)
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = GetEntity().GetModel();
 	if(mdl == nullptr)
 		return;
 	auto *flexC = mdl->GetFlexController(flexId);
@@ -166,7 +188,7 @@ void CFlexComponent::SetFlexController(uint32_t flexId,float val,float duration,
 	auto &flexInfo = it->second;
 	flexInfo.targetValue = val;
 	flexInfo.endTime = (duration > 0.f) ? c_game->CurTime() +duration : 0.f;
-	
+	m_flexDataUpdateRequired = true;
 	//InitializeVertexAnimationBuffer();
 
 	//if(m_vertexAnimationBuffer == nullptr) // prosper TODO
@@ -174,8 +196,7 @@ void CFlexComponent::SetFlexController(uint32_t flexId,float val,float duration,
 }
 bool CFlexComponent::GetFlexController(uint32_t flexId,float &val) const
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = GetEntity().GetModel();
 	if(mdl == nullptr || mdl->GetFlexController(flexId) == nullptr)
 		return false;
 	auto it = m_flexControllers.find(flexId);
@@ -186,9 +207,14 @@ bool CFlexComponent::GetFlexController(uint32_t flexId,float &val) const
 	return true;
 }
 
-void CFlexComponent::UpdateFlexWeights()
+void CFlexComponent::UpdateFlexWeightsMT()
 {
-	auto mdl = GetEntity().GetModel();
+	if(m_flexDataUpdateRequired == false)
+		return;
+	auto mdlC = static_cast<CModelComponent*>(GetEntity().GetModelComponent());
+	if(mdlC == nullptr || mdlC->GetLOD() > 0)
+		return;
+	auto &mdl = mdlC->GetModel();
 	if(mdl == nullptr)
 		return;
 	auto &flexes = mdl->GetFlexes();
@@ -204,6 +230,7 @@ void CFlexComponent::UpdateFlexWeights()
 
 	// Clear for next update
 	std::fill(m_updatedFlexWeights.begin(),m_updatedFlexWeights.end(),false);
+	m_flexDataUpdateRequired = false;
 }
 
 const std::vector<float> &CFlexComponent::GetFlexWeights() const {return m_flexWeights;}
@@ -226,8 +253,7 @@ bool CFlexComponent::CalcFlexValue(uint32_t flexId,float &val) const {return con
 
 bool CFlexComponent::UpdateFlexWeight(uint32_t flexId,float &val,bool storeInCache)
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = GetEntity().GetModel();
 	if(mdl == nullptr || flexId >= m_updatedFlexWeights.size())
 		return false;
 	if(m_updatedFlexWeights.at(flexId))
@@ -264,14 +290,13 @@ bool CFlexComponent::UpdateFlexWeight(uint32_t flexId,float &val,bool storeInCac
 }
 void CFlexComponent::UpdateSoundPhonemes(CALSound &snd)
 {
-	al::impl::BufferBase *buf = snd.GetBuffer();
+	al::impl::BufferBase *buf = snd->GetBuffer();
 	if(buf == nullptr)
-		buf = snd.GetDecoder();
+		buf = snd->GetDecoder();
 	auto userData = (buf != nullptr) ? buf->GetUserData() : nullptr;
 	if(userData == nullptr)
 		return;
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = GetEntity().GetModel();
 	if(mdl == nullptr)
 		return;
 	auto &phonemeMap = mdl->GetPhonemeMap();

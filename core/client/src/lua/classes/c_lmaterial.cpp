@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -30,13 +30,21 @@ void Lua::Material::Client::SetTexture(lua_State *l,::Material *mat,const std::s
 	cmat->UpdateTextures();
 	c_game->ReloadMaterialShader(static_cast<CMaterial*>(mat));
 }
-void Lua::Material::Client::SetTexture(lua_State *l,::Material *mat,const std::string &textureID,Lua::Vulkan::Texture &hTex)
+void Lua::Material::Client::SetTexture(lua_State *l,::Material *mat,const std::string &textureID,Lua::Vulkan::Texture &hTex,const std::string &name)
 {
 	auto *cmat = static_cast<CMaterial*>(mat);
 	cmat->SetTexture(textureID,hTex);
+	auto *texInfo = cmat->GetTextureInfo(textureID);
+	if(texInfo)
+	{
+		texInfo->name = name;
+		if(texInfo->texture)
+			static_cast<Texture*>(texInfo->texture.get())->SetName(name);
+	}
 	cmat->UpdateTextures();
 	c_game->ReloadMaterialShader(static_cast<CMaterial*>(mat));
 }
+void Lua::Material::Client::SetTexture(lua_State *l,::Material *mat,const std::string &textureID,Lua::Vulkan::Texture &hTex) {SetTexture(l,mat,textureID,hTex,"");}
 
 void Lua::Material::Client::GetTexture(lua_State *l,::Material *mat,const std::string &textureID)
 {

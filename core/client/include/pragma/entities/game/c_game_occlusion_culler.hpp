@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_GAME_OCCLUSION_CULLER_HPP__
@@ -32,7 +32,7 @@ namespace pragma
 		void AddEntity(CBaseEntity &ent);
 	private:
 		std::shared_ptr<OcclusionOctree<CBaseEntity*>> m_occlusionOctree = nullptr;
-		std::vector<CallbackHandle> m_callbacks {};
+		std::unordered_map<CBaseEntity*,std::vector<CallbackHandle>> m_callbacks {};
 	};
 };
 

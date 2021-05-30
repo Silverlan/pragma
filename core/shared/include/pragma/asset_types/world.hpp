@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __PRAGMA_ASSET_TYPES_WORLD_HPP__
 #define __PRAGMA_ASSET_TYPES_WORLD_HPP__
@@ -19,6 +19,7 @@
 #undef GetClassName
 
 namespace uimg {class ImageBuffer;};
+namespace udm {struct AssetData;};
 namespace pragma::asset
 {
 	struct DLLNETWORK Output
@@ -88,10 +89,13 @@ namespace pragma::asset
 		uint32_t m_firstLeaf = 0u;
 		uint32_t m_numLeaves = 0u;
 	};
-
+	
+	using WorldModelMeshIndex = uint32_t;
 	class DLLNETWORK WorldData
 	{
 	public:
+		static constexpr uint32_t PMAP_VERSION = 1;
+		static constexpr auto PMAP_IDENTIFIER = "PMAP";
 		enum class DataFlags : uint64_t
 		{
 			None = 0u,
@@ -111,6 +115,7 @@ namespace pragma::asset
 		EntityData *FindWorld();
 		void SetBSPTree(util::BSPTree &bspTree);
 		util::BSPTree *GetBSPTree();
+		std::vector<std::vector<WorldModelMeshIndex>> &GetClusterMeshIndices() {return m_meshesPerCluster;}
 		std::vector<uint16_t> &GetStaticPropLeaves();
 		NetworkState &GetNetworkState() const;
 
@@ -127,6 +132,9 @@ namespace pragma::asset
 		const std::vector<std::string> &GetMaterialTable() const;
 		std::vector<std::string> &GetMaterialTable();
 		void SetMessageLogger(const std::function<void(const std::string&)> &msgLogger);
+
+		bool Save(udm::AssetData &outData,const std::string &mapName,std::string &outErr);
+		bool LoadFromAssetData(const udm::AssetData &data,EntityData::Flags entMask,std::string &outErr);
 	private:
 		WorldData(NetworkState &nw);
 		void WriteDataOffset(VFilePtrReal &f,uint64_t offsetToOffset);
@@ -136,10 +144,11 @@ namespace pragma::asset
 		void WriteEntities(VFilePtrReal &f);
 
 		std::vector<MaterialHandle> ReadMaterials(VFilePtr &f);
-		void ReadBSPTree(VFilePtr &f);
+		void ReadBSPTree(VFilePtr &f,uint32_t version);
 		void ReadEntities(VFilePtr &f,const std::vector<MaterialHandle> &materials,EntityData::Flags entMask);
 
 		NetworkState &m_nw;
+		std::vector<std::vector<WorldModelMeshIndex>> m_meshesPerCluster;
 		std::shared_ptr<uimg::ImageBuffer> m_lightMapAtlas = nullptr;
 		bool m_lightMapAtlasEnabled = false;
 		float m_lightMapIntensity = 1.f;

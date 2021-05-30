@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include <pragma/serverstate/serverstate.h>
@@ -19,7 +19,7 @@
 #include <pragma/networking/error.hpp>
 #include <networkmanager/nwm_error_handle.h>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 extern DLLSERVER SGame *s_game;
 void ServerState::OnMasterServerRegistered(bool b,std::string reason)
 {

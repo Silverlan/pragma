@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_FLAMMABLE_EMITTER_COMPONENT_HPP__
@@ -24,12 +24,12 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual util::EventReply Ignite(float duration,BaseEntity *attacker=nullptr,BaseEntity *inflictor=nullptr) override;
 		virtual void Extinguish() override;
+		virtual void OnTick(double dt) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 	protected:
-		virtual void OnThink(double dt) override;
 		void UpdateFlameParticlePositions();
 		struct DLLCLIENT IgniteInfo
 		{

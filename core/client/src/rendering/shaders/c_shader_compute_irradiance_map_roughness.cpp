@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -15,7 +15,7 @@
 #include <image/prosper_image_view.hpp>
 #include <prosper_framebuffer.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
@@ -108,7 +108,7 @@ std::shared_ptr<prosper::Texture> ShaderComputeIrradianceMapRoughness::ComputeRo
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
 	bufCreateInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
 	auto buf = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo);
-	buf->SetPermanentlyMapped(true);
+	buf->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::WriteBit);
 
 	auto dsgRoughness = c_engine->GetRenderContext().CreateDescriptorSetGroup(DESCRIPTOR_SET_ROUGHNESS);
 	dsgRoughness->GetDescriptorSet()->SetBindingUniformBuffer(*buf,0);
@@ -128,7 +128,7 @@ std::shared_ptr<prosper::Texture> ShaderComputeIrradianceMapRoughness::ComputeRo
 			for(uint32_t i=0u;i<numVerts;i+=3)
 			{
 				auto &setupCmd = c_engine->GetSetupCommandBuffer();
-				ScopeGuard sgCmd {[this]() {
+				util::ScopeGuard sgCmd {[this]() {
 					GetContext().FlushSetupCommandBuffer();
 				}};
 				setupCmd->RecordUpdateBuffer(*buf,0,roughnessData);

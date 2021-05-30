@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/lua/libraries/s_ldebugoverlay.h"
@@ -91,5 +91,5 @@ void Lua::DebugRenderer::Server::DrawSpline(lua_State *l,luabind::table<> points
 }
 void Lua::DebugRenderer::Server::DrawPlane(const DebugRenderInfo &renderInfo)
 {
-	::SDebugRenderer::DrawPlane(Plane{uquat::forward(renderInfo.pose.GetRotation()),renderInfo.pose.GetOrigin()},renderInfo.color,renderInfo.duration);
+	::SDebugRenderer::DrawPlane(umath::Plane{uquat::forward(renderInfo.pose.GetRotation()),renderInfo.pose.GetOrigin()},renderInfo.color,renderInfo.duration);
 }

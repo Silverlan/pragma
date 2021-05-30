@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_ai_component.hpp"
@@ -59,15 +59,7 @@ void SAIComponent::OnTargetVisibilityReacquired(const ai::Memory::Fragment &frag
 	BroadcastEvent(EVENT_ON_TARGET_VISIBILITY_REACQUIRED,evData);
 }
 
-bool SAIComponent::IsInMemory(BaseEntity *ent)
-{
-	for(auto &fragment : m_memory.fragments)
-	{
-		if(fragment.occupied == true && fragment.hEntity.get() == ent)
-			return true;
-	}
-	return false;
-}
+bool SAIComponent::IsInMemory(BaseEntity *ent) {return GetMemory(ent);}
 
 void SAIComponent::OnPrimaryTargetChanged(const ai::Memory::Fragment *fragment)
 {
@@ -125,7 +117,7 @@ ai::Memory::Fragment *SAIComponent::Memorize(BaseEntity *ent,ai::Memory::MemoryT
 	if(&GetEntity() == ent || HasCharacterNoTargetEnabled(*ent) == true)
 		return nullptr;
 	auto pTrComponent = ent->GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return nullptr;
 	ai::Memory::Fragment *fragment = nullptr;
 	if(m_memory.Memorize(*ent,memType,pos,uvec::distance(pTrComponent->GetEyePosition(),pos),vel,&fragment) == true)
@@ -135,7 +127,7 @@ ai::Memory::Fragment *SAIComponent::Memorize(BaseEntity *ent,ai::Memory::MemoryT
 ai::Memory::Fragment *SAIComponent::Memorize(BaseEntity *ent,ai::Memory::MemoryType memType)
 {
 	auto pTrComponent = ent->GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return nullptr;
 	auto pVelComponent = ent->GetComponent<pragma::VelocityComponent>();
 	return Memorize(ent,memType,pTrComponent->GetEyePosition(),pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3{});

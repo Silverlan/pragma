@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_DEBUGOVERLAY_H__
@@ -14,6 +14,7 @@
 #include <pragma/math/angle/wvangle.h>
 #include <mathutil/color.h>
 #include <mathutil/glmutil.h>
+#include <mathutil/transform.hpp>
 
 namespace prosper
 {
@@ -115,8 +116,8 @@ namespace DebugRenderer
 		void AddVertex(const Vector3 &v);
 		std::vector<Vector3> &GetVertices();
 		std::vector<Vector4> &GetColors();
-		void InitializeBuffers(const std::shared_ptr<prosper::IBuffer> &vertexBuffer,uint32_t vertexCount);
-		void InitializeBuffers();
+		bool InitializeBuffers(const std::shared_ptr<prosper::IBuffer> &vertexBuffer,uint32_t vertexCount);
+		bool InitializeBuffers();
 		void UpdateVertexBuffer();
 		void UpdateColorBuffer();
 		bool HasOutline() const;
@@ -174,13 +175,13 @@ namespace DebugRenderer
 	std::shared_ptr<DebugRenderer::BaseObject> DrawPath(const std::vector<Vector3> &path,const Color &color,float duration=0.f);
 	std::shared_ptr<DebugRenderer::BaseObject> DrawSpline(const std::vector<Vector3> &path,const Color &color,uint32_t segmentCount,float curvature=1.f,float duration=0.f);
 	std::shared_ptr<DebugRenderer::BaseObject> DrawPlane(const Vector3 &n,float dist,const Color &color,float duration=0.f);
-	std::shared_ptr<DebugRenderer::BaseObject> DrawPlane(const Plane &plane,const Color &color,float duration=0.f);
+	std::shared_ptr<DebugRenderer::BaseObject> DrawPlane(const umath::Plane &plane,const Color &color,float duration=0.f);
 	std::shared_ptr<DebugRenderer::BaseObject> DrawFrustum(const std::vector<Vector3> &points,float duration=0.f);
 	std::array<std::shared_ptr<DebugRenderer::BaseObject>,3> DrawAxis(const Vector3 &origin,const Vector3 &x,const Vector3 &y,const Vector3 &z,float duration=0.f);
 	std::array<std::shared_ptr<DebugRenderer::BaseObject>,3> DrawAxis(const Vector3 &origin,const EulerAngles &ang,float duration=0.f);
 	std::array<std::shared_ptr<DebugRenderer::BaseObject>,3> DrawAxis(const Vector3 &origin,float duration=0.f);
 	void ClearObjects();
-	void Render(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam);
+	void Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pragma::CCameraComponent &cam);
 };
 
 #endif

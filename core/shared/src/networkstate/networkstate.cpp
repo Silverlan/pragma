@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -30,16 +30,17 @@
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
 #include <pragma/util/util_module.hpp>
+#include "pragma/asset/util_asset.hpp"
 
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
-#include <wv_steamworks.hpp>
+#include "pragma/game/isteamworks.hpp"
 
 ConVarHandle NetworkState::GetConVarHandle(std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &ptrs,std::string scvar) {return CVarHandler::GetConVarHandle(ptrs,scvar);}
 
 UInt8 NetworkState::STATE_COUNT = 0;
 
 decltype(NetworkState::s_loadedLibraries) NetworkState::s_loadedLibraries = {};
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 NetworkState::NetworkState()
 	: CallbackHandler(),CVarHandler()
@@ -138,7 +139,7 @@ void NetworkState::UpdateSounds(std::vector<std::shared_ptr<ALSound>> &sounds)
 		{
 			auto &snd = *psnd;
 			snd.Update();
-			if(psnd.use_count() == 2 && ShouldRemoveSound(snd))
+			if(psnd.use_count() <= 2 && ShouldRemoveSound(snd))
 			{
 				psnd = nullptr; // Cleanup occurs in "OnDestroyed" callback
 				continue;
@@ -156,8 +157,12 @@ void NetworkState::UpdateSounds(std::vector<std::shared_ptr<ALSound>> &sounds)
 bool NetworkState::PortMaterial(const std::string &path,const std::function<Material*(const std::string&,bool)> &fLoadMaterial)
 {
 	auto pathWithoutExt = path;
-	ufile::remove_extension_from_filename(pathWithoutExt);
+	auto extensions = pragma::asset::get_supported_extensions(pragma::asset::Type::Material);
+	extensions.push_back("vmt");
+	extensions.push_back("vmat_c");
+	ufile::remove_extension_from_filename(pathWithoutExt,extensions);
 
+	// TODO: This doesn't belong here! Move it into the source module
 	auto matPath = pathWithoutExt +".vmat_c";
 	if(util::port_file(this,"materials\\" +matPath) == false)
 	{
@@ -168,7 +173,7 @@ bool NetworkState::PortMaterial(const std::string &path,const std::function<Mate
 	if(fLoadMaterial == nullptr)
 		return true;
 	auto *mat = fLoadMaterial(matPath,true);
-	if(mat)
+	if(mat && mat->GetDataBlock())
 	{
 		// Port textures as well
 		std::function<void(const std::shared_ptr<ds::Block>&)> fPortTextures = nullptr;

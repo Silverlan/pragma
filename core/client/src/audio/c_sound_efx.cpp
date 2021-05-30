@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -11,9 +11,9 @@
 #include <pragma/c_engine.h>
 #include <alsound_effect.hpp>
 #include <alsoundsystem.hpp>
-#include <datasystem.h>
+#include <udm.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 static uint32_t s_globalEffectId = std::numeric_limits<uint32_t>::max();
 void Console::commands::debug_audio_aux_effect(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
@@ -70,10 +70,10 @@ const std::vector<std::string> &al::get_aux_types()
 
 namespace al
 {
-	static std::shared_ptr<al::Effect> create_aux_effect(const std::string *name,const std::string &type,ds::Block &block);
+	static std::shared_ptr<al::IEffect> create_aux_effect(const std::string *name,const std::string &type,udm::LinkedPropertyWrapper &prop);
 };
 
-std::shared_ptr<al::Effect> al::create_aux_effect(const std::string *name,const std::string &type,ds::Block &block)
+std::shared_ptr<al::IEffect> al::create_aux_effect(const std::string *name,const std::string &type,udm::LinkedPropertyWrapper &prop)
 {
 	auto *soundSys = c_engine->GetSoundSystem();
 	if(soundSys == nullptr)
@@ -81,83 +81,83 @@ std::shared_ptr<al::Effect> al::create_aux_effect(const std::string *name,const 
 	if(type == "reverb")
 	{
 		al::EfxEaxReverbProperties props {};
-		block.GetFloat("density",&props.flDensity);
-		block.GetFloat("diffusion",&props.flDiffusion);
-		block.GetFloat("gain",&props.flGain);
-		block.GetFloat("gainhf",&props.flGainHF);
-		block.GetFloat("gainlf",&props.flGainLF);
-		block.GetFloat("decay_time",&props.flDecayTime);
-		block.GetFloat("decay_hfratio",&props.flDecayHFRatio);
-		block.GetFloat("reflections_gain",&props.flReflectionsGain);
-		block.GetFloat("reflections_delay",&props.flReflectionsDelay);
-		block.GetFloat("late_reverb_gain",&props.flLateReverbGain);
-		block.GetFloat("late_reverb_delay",&props.flLateReverbDelay);
-		block.GetFloat("air_absorption_gainhf",&props.flAirAbsorptionGainHF);
-		block.GetFloat("room_rolloff_factor",&props.flRoomRolloffFactor);
-		block.GetInt("decay_hflimit",&props.iDecayHFLimit);
+		prop["density"](props.flDensity);
+		prop["diffusion"](props.flDiffusion);
+		prop["gain"](props.flGain);
+		prop["gainhf"](props.flGainHF);
+		prop["gainlf"](props.flGainLF);
+		prop["decay_time"](props.flDecayTime);
+		prop["decay_hfratio"](props.flDecayHFRatio);
+		prop["reflections_gain"](props.flReflectionsGain);
+		prop["reflections_delay"](props.flReflectionsDelay);
+		prop["late_reverb_gain"](props.flLateReverbGain);
+		prop["late_reverb_delay"](props.flLateReverbDelay);
+		prop["air_absorption_gainhf"](props.flAirAbsorptionGainHF);
+		prop["room_rolloff_factor"](props.flRoomRolloffFactor);
+		prop["decay_hflimit"](props.iDecayHFLimit);
 		return (name != nullptr) ? c_engine->CreateAuxEffect(*name,props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "chorus")
 	{
 		al::EfxChorusProperties props {};
-		block.GetFloat("rate",&props.flRate);
-		block.GetFloat("depth",&props.flDepth);
-		block.GetFloat("feedback",&props.flFeedback);
-		block.GetFloat("delay",&props.flDelay);
+		prop["rate"](props.flRate);
+		prop["depth"](props.flDepth);
+		prop["feedback"](props.flFeedback);
+		prop["delay"](props.flDelay);
 
-		block.GetInt("waveform",&props.iWaveform);
-		block.GetInt("phase",&props.iPhase);
+		prop["waveform"](props.iWaveform);
+		prop["phase"](props.iPhase);
 		return (name != nullptr) ? c_engine->CreateAuxEffect(*name,props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "distortion")
 	{
 		al::EfxDistortionProperties props {};
-		block.GetFloat("edge",&props.flEdge);
-		block.GetFloat("gain",&props.flGain);
-		block.GetFloat("lowpass_cutoff",&props.flLowpassCutoff);
-		block.GetFloat("eqcenter",&props.flEQCenter);
-		block.GetFloat("eqbandwidth",&props.flEQBandwidth);
+		prop["edge"](props.flEdge);
+		prop["gain"](props.flGain);
+		prop["lowpass_cutoff"](props.flLowpassCutoff);
+		prop["eqcenter"](props.flEQCenter);
+		prop["eqbandwidth"](props.flEQBandwidth);
 		return (name != nullptr) ? c_engine->CreateAuxEffect(*name,props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "echo")
 	{
 		al::EfxEchoProperties props {};
-		block.GetFloat("delay",&props.flDelay);
-		block.GetFloat("lrdelay",&props.flLRDelay);
-		block.GetFloat("damping",&props.flDamping);
-		block.GetFloat("feedback",&props.flFeedback);
-		block.GetFloat("spread",&props.flSpread);
+		prop["delay"](props.flDelay);
+		prop["lrdelay"](props.flLRDelay);
+		prop["damping"](props.flDamping);
+		prop["feedback"](props.flFeedback);
+		prop["spread"](props.flSpread);
 		return (name != nullptr) ? c_engine->CreateAuxEffect(*name,props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "flanger")
 	{
 		al::EfxFlangerProperties props {};
-		block.GetFloat("rate",&props.flRate);
-		block.GetFloat("depth",&props.flDepth);
-		block.GetFloat("feedback",&props.flFeedback);
-		block.GetFloat("delay",&props.flDelay);
+		prop["rate"](props.flRate);
+		prop["depth"](props.flDepth);
+		prop["feedback"](props.flFeedback);
+		prop["delay"](props.flDelay);
 
-		block.GetInt("waveform",&props.iWaveform);
-		block.GetInt("phase",&props.iPhase);
+		prop["waveform"](props.iWaveform);
+		prop["phase"](props.iPhase);
 		return (name != nullptr) ? c_engine->CreateAuxEffect(*name,props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "frequency_shifter")
 	{
 		al::EfxFrequencyShifterProperties props {};
-		block.GetFloat("frequency",&props.flFrequency);
+		prop["frequency"](props.flFrequency);
 
-		block.GetInt("left_direction",&props.iLeftDirection);
-		block.GetInt("right_direction",&props.iRightDirection);
+		prop["left_direction"](props.iLeftDirection);
+		prop["right_direction"](props.iRightDirection);
 		return (name != nullptr) ? c_engine->CreateAuxEffect(*name,props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "vocal_morpher")
 	{
 		al::EfxVocalMorpherProperties props {};
-		block.GetFloat("rate",&props.flRate);
+		prop["rate"](props.flRate);
 
-		block.GetInt("phonemea_coarse_tuning",&props.iPhonemeACoarseTuning);
-		block.GetInt("phonemeb_coarse_tuning",&props.iPhonemeBCoarseTuning);
-		block.GetInt("waveform",&props.iWaveform);
+		prop["phonemea_coarse_tuning"](props.iPhonemeACoarseTuning);
+		prop["phonemeb_coarse_tuning"](props.iPhonemeBCoarseTuning);
+		prop["waveform"](props.iWaveform);
 
 		const std::unordered_map<std::string,int32_t> phonemes = {
 			{"a",umath::to_integral(al::VocalMorpherPhoneme::A)},
@@ -200,7 +200,8 @@ std::shared_ptr<al::Effect> al::create_aux_effect(const std::string *name,const 
 		{
 			auto &key = pair.first;
 			std::string val;
-			if(block.GetString(key,&val) == true)
+			prop[key](val);
+			if(!val.empty())
 			{
 				ustring::to_lower(val);
 				auto itPhoneme = phonemes.find(val);
@@ -208,81 +209,81 @@ std::shared_ptr<al::Effect> al::create_aux_effect(const std::string *name,const 
 					*pair.second = itPhoneme->second;
 			}
 			else
-				block.GetInt(key,pair.second);
+				prop[key](*pair.second);
 		}
 		return (name != nullptr) ? c_engine->CreateAuxEffect(*name,props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "pitch_shifter")
 	{
 		al::EfxPitchShifterProperties props {};
-		block.GetInt("coarse_tune",&props.iCoarseTune);
-		block.GetInt("fine_tune",&props.iFineTune);
+		prop["coarse_tune"](props.iCoarseTune);
+		prop["fine_tune"](props.iFineTune);
 		return (name != nullptr) ? c_engine->CreateAuxEffect(*name,props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "ring_modulator")
 	{
 		al::EfxRingModulatorProperties props {};
-		block.GetFloat("frequency",&props.flFrequency);
-		block.GetFloat("highpass_cutoff",&props.flHighpassCutoff);
+		prop["frequency"](props.flFrequency);
+		prop["highpass_cutoff"](props.flHighpassCutoff);
 
-		block.GetInt("waveform",&props.iWaveform);
+		prop["waveform"](props.iWaveform);
 		return (name != nullptr) ? c_engine->CreateAuxEffect(*name,props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "autowah")
 	{
 		al::EfxAutoWahProperties props {};
-		block.GetFloat("attack_time",&props.flAttackTime);
-		block.GetFloat("release_time",&props.flReleaseTime);
-		block.GetFloat("resonance",&props.flResonance);
-		block.GetFloat("peak_gain",&props.flPeakGain);
+		prop["attack_time"](props.flAttackTime);
+		prop["release_time"](props.flReleaseTime);
+		prop["resonance"](props.flResonance);
+		prop["peak_gain"](props.flPeakGain);
 		return (name != nullptr) ? c_engine->CreateAuxEffect(*name,props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "compressor")
 	{
 		al::EfxCompressor props {};
-		block.GetInt("onoff",&props.iOnOff);
+		prop["onoff"](props.iOnOff);
 		return (name != nullptr) ? c_engine->CreateAuxEffect(*name,props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "equalizer")
 	{
 		al::EfxEqualizer props {};
-		block.GetFloat("low_gain",&props.flLowGain);
-		block.GetFloat("low_cutoff",&props.flLowCutoff);
-		block.GetFloat("mid1_gain",&props.flMid1Gain);
-		block.GetFloat("mid1_center",&props.flMid1Center);
-		block.GetFloat("mid1_width",&props.flMid1Width);
-		block.GetFloat("mid2_gain",&props.flMid2Gain);
-		block.GetFloat("mid2_center",&props.flMid2Center);
-		block.GetFloat("mid2_width",&props.flMid2Width);
-		block.GetFloat("high_gain",&props.flHighGain);
-		block.GetFloat("high_cutoff",&props.flHighCutoff);
+		prop["low_gain"](props.flLowGain);
+		prop["low_cutoff"](props.flLowCutoff);
+		prop["mid1_gain"](props.flMid1Gain);
+		prop["mid1_center"](props.flMid1Center);
+		prop["mid1_width"](props.flMid1Width);
+		prop["mid2_gain"](props.flMid2Gain);
+		prop["mid2_center"](props.flMid2Center);
+		prop["mid2_width"](props.flMid2Width);
+		prop["high_gain"](props.flHighGain);
+		prop["high_cutoff"](props.flHighCutoff);
 		return (name != nullptr) ? c_engine->CreateAuxEffect(*name,props) : soundSys->CreateEffect(props);
 	}
 	else if(type == "eaxreverb")
 	{
 		al::EfxEaxReverbProperties props {};
-		block.GetFloat("density",&props.flDensity);
-		block.GetFloat("diffusion",&props.flDiffusion);
-		block.GetFloat("gain",&props.flGain);
-		block.GetFloat("gainhf",&props.flGainHF);
-		block.GetFloat("gainlf",&props.flGainLF);
-		block.GetFloat("decay_time",&props.flDecayTime);
-		block.GetFloat("decay_hfratio",&props.flDecayHFRatio);
-		block.GetFloat("decay_lfratio",&props.flDecayLFRatio);
-		block.GetFloat("reflections_gain",&props.flReflectionsGain);
-		block.GetFloat("reflections_delay",&props.flReflectionsDelay);
-		block.GetFloat("late_reverb_gain",&props.flLateReverbGain);
-		block.GetFloat("late_reverb_delay",&props.flLateReverbDelay);
-		block.GetFloat("echo_time",&props.flEchoTime);
-		block.GetFloat("echo_depth",&props.flEchoDepth);
-		block.GetFloat("modulation_time",&props.flModulationTime);
-		block.GetFloat("modulation_depth",&props.flModulationDepth);
-		block.GetFloat("air_absorption_gainhf",&props.flAirAbsorptionGainHF);
-		block.GetFloat("hfreference",&props.flHFReference);
-		block.GetFloat("lfreference",&props.flLFReference);
-		block.GetFloat("room_rolloff_factor",&props.flRoomRolloffFactor);
+		prop["density"](props.flDensity);
+		prop["diffusion"](props.flDiffusion);
+		prop["gain"](props.flGain);
+		prop["gainhf"](props.flGainHF);
+		prop["gainlf"](props.flGainLF);
+		prop["decay_time"](props.flDecayTime);
+		prop["decay_hfratio"](props.flDecayHFRatio);
+		prop["decay_lfratio"](props.flDecayLFRatio);
+		prop["reflections_gain"](props.flReflectionsGain);
+		prop["reflections_delay"](props.flReflectionsDelay);
+		prop["late_reverb_gain"](props.flLateReverbGain);
+		prop["late_reverb_delay"](props.flLateReverbDelay);
+		prop["echo_time"](props.flEchoTime);
+		prop["echo_depth"](props.flEchoDepth);
+		prop["modulation_time"](props.flModulationTime);
+		prop["modulation_depth"](props.flModulationDepth);
+		prop["air_absorption_gainhf"](props.flAirAbsorptionGainHF);
+		prop["hfreference"](props.flHFReference);
+		prop["lfreference"](props.flLFReference);
+		prop["room_rolloff_factor"](props.flRoomRolloffFactor);
 
-		block.GetInt("decay_hflimit",&props.iDecayHFLimit);
+		prop["decay_hflimit"](props.iDecayHFLimit);
 
 		const std::unordered_map<std::string,float*> vectorKeys = {
 			{"reflections_pan",props.flReflectionsPan.data()},
@@ -291,7 +292,8 @@ std::shared_ptr<al::Effect> al::create_aux_effect(const std::string *name,const 
 		for(auto &pair : vectorKeys)
 		{
 			std::string val;
-			if(block.GetString(pair.first,&val) == true)
+			prop[pair.first](val);
+			if(!val.empty())
 				ustring::string_to_array<float>(val,pair.second,atof,3);
 		}
 		return (name != nullptr) ? c_engine->CreateAuxEffect(*name,props) : soundSys->CreateEffect(props);
@@ -299,5 +301,5 @@ std::shared_ptr<al::Effect> al::create_aux_effect(const std::string *name,const 
 	return nullptr;
 }
 
-std::shared_ptr<al::Effect> al::create_aux_effect(const std::string &type,ds::Block &block) {return create_aux_effect(nullptr,type,block);}
-std::shared_ptr<al::Effect> al::create_aux_effect(const std::string &name,const std::string &type,ds::Block &block) {return create_aux_effect(&name,type,block);}
+std::shared_ptr<al::IEffect> al::create_aux_effect(const std::string &type,udm::LinkedPropertyWrapper &prop) {return create_aux_effect(nullptr,type,prop);}
+std::shared_ptr<al::IEffect> al::create_aux_effect(const std::string &name,const std::string &type,udm::LinkedPropertyWrapper &prop) {return create_aux_effect(&name,type,prop);}

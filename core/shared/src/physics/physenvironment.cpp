@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -72,7 +72,11 @@ double pragma::physics::IEnvironment::GetTimeScale() const
 }
 pragma::physics::IMaterial &pragma::physics::IEnvironment::GetGenericMaterial() const {return *m_genericMaterial;}
 float pragma::physics::IEnvironment::GetWorldScale() const {return 1.f;}
-void pragma::physics::IEnvironment::SetVisualDebugger(std::unique_ptr<pragma::physics::IVisualDebugger> debugger) {m_visualDebugger = std::move(debugger);}
+void pragma::physics::IEnvironment::SetVisualDebugger(std::unique_ptr<pragma::physics::IVisualDebugger> debugger)
+{
+	m_visualDebugger = std::move(debugger);
+	OnVisualDebuggerChanged(m_visualDebugger.get());
+}
 pragma::physics::IVisualDebugger *pragma::physics::IEnvironment::GetVisualDebugger() const {return m_visualDebugger.get();}
 void pragma::physics::IEnvironment::AddEventCallback(Event eventid,const CallbackHandle &hCb)
 {
@@ -276,4 +280,31 @@ pragma::physics::IEnvironment::RemainingDeltaTime pragma::physics::IEnvironment:
 		UpdateSurfaceTypes();
 	}
 	return DoStepSimulation(timeStep,maxSubSteps,fixedTimeStep);
+}
+
+bool PhysSoftBodyInfo::operator==(const PhysSoftBodyInfo &other) const
+{
+	return poseMatchingCoefficient == other.poseMatchingCoefficient &&
+		anchorsHardness == other.anchorsHardness &&
+		dragCoefficient == other.dragCoefficient &&
+		rigidContactsHardness == other.rigidContactsHardness &&
+		softContactsHardness == other.softContactsHardness &&
+		liftCoefficient == other.liftCoefficient &&
+		kineticContactsHardness == other.kineticContactsHardness &&
+		dynamicFrictionCoefficient == other.dynamicFrictionCoefficient &&
+		dampingCoefficient == other.dampingCoefficient &&
+		volumeConversationCoefficient == other.volumeConversationCoefficient &&
+		softVsRigidImpulseSplitK == other.softVsRigidImpulseSplitK &&
+		softVsRigidImpulseSplitR == other.softVsRigidImpulseSplitR &&
+		softVsRigidImpulseSplitS == other.softVsRigidImpulseSplitS &&
+		softVsKineticHardness == other.softVsKineticHardness &&
+		softVsRigidHardness == other.softVsRigidHardness &&
+		softVsSoftHardness == other.softVsSoftHardness &&
+		pressureCoefficient == other.pressureCoefficient &&
+		velocitiesCorrectionFactor == other.velocitiesCorrectionFactor &&
+
+		bendingConstraintsDistance == other.bendingConstraintsDistance &&
+		clusterCount == other.clusterCount &&
+		maxClusterIterations == other.maxClusterIterations &&
+		materialStiffnessCoefficient == other.materialStiffnessCoefficient;
 }

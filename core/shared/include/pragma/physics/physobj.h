@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __PHYSOBJ_H__
@@ -160,6 +160,8 @@ protected:
 	PhysObjHandle m_handle = {};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(PhysObj::StateFlags)
+
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const PhysObj &o);
 
 template<class TPhysObj,typename... TARGS>
 	std::unique_ptr<TPhysObj> PhysObj::Create(pragma::BaseEntityComponent &owner,TARGS ...args)

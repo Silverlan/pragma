@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __PHYS_COLLISION_OBJECT_HPP__
@@ -337,5 +337,10 @@ namespace pragma::physics
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::physics::ICollisionObject::StateFlags)
+
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const pragma::physics::ICollisionObject &o);
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const pragma::physics::IGhostObject &o);
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const pragma::physics::IRigidBody &o);
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const pragma::physics::ISoftBody &o);
 
 #endif

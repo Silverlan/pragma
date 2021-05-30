@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -12,7 +12,7 @@
 #include "luasystem.h"
 #include <alsoundsystem.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 lua_registercheck(ALEfxEaxReverbProperties,al::EfxEaxReverbProperties);
 lua_registercheck(ALEfxChorusProperties,al::EfxChorusProperties);
@@ -150,11 +150,11 @@ int Lua::sound::add_global_effect(lua_State *l)
 			Lua::PushBool(l,false);
 		else
 		{
-			auto flags = al::SoundSystem::GlobalEffectFlag::All;
+			auto flags = al::ISoundSystem::GlobalEffectFlag::All;
 			if(Lua::IsSet(l,argId))
-				flags = static_cast<al::SoundSystem::GlobalEffectFlag>(Lua::CheckInt(l,argId++));
+				flags = static_cast<al::ISoundSystem::GlobalEffectFlag>(Lua::CheckInt(l,argId++));
 
-			al::Effect::Params params {};
+			al::EffectParams params {};
 			if(Lua::IsSet(l,argId))
 				params.gain = Lua::CheckNumber(l,argId++);
 			if(Lua::IsSet(l,argId))
@@ -189,7 +189,7 @@ int Lua::sound::set_global_effect_parameters(lua_State *l)
 	auto effect = c_engine->GetAuxEffect(name);
 	if(effect == nullptr)
 		return 0;
-	al::Effect::Params params {};
+	al::EffectParams params {};
 	if(Lua::IsSet(l,argId))
 		params.gain = Lua::CheckNumber(l,argId++);
 	if(Lua::IsSet(l,argId))

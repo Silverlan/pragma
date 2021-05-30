@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_LGAME_H__
@@ -24,7 +24,10 @@ namespace Lua
 			DLLCLIENT int create_model(lua_State *l);
 			DLLCLIENT int get_action_input(lua_State *l);
 			DLLCLIENT int set_action_input(lua_State *l);
-			DLLCLIENT int draw_scene(lua_State *l);
+			DLLCLIENT int queue_scene_for_rendering(lua_State *l);
+			DLLCLIENT int render_scenes(lua_State *l);
+			DLLCLIENT int set_debug_render_filter(lua_State *l);
+			DLLCLIENT int update_render_buffers(lua_State *l);
 			DLLCLIENT int create_scene(lua_State *l);
 			DLLCLIENT int get_render_scene(lua_State *l);
 			DLLCLIENT int get_render_scene_camera(lua_State *l);
@@ -47,6 +50,8 @@ namespace Lua
 			DLLCLIENT int build_reflection_probes(lua_State *l);
 
 			DLLCLIENT int test(lua_State *l);
+			DLLCLIENT int set_render_stats_enabled(lua_State *l);
+			DLLCLIENT int get_queued_render_scenes(lua_State *l);
 		};
 	};
 };

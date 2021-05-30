@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -37,7 +37,7 @@ void CParticleInitializerPositionRandomBox::OnParticleCreated(CParticle &particl
 		// Find a random position on one of the sides of the box
 		auto dir = uvec::create_random_unit_vector();
 		float tMinRes,tMaxRes;
-		if(Intersection::LineAABB({},dir,m_min,m_max,&tMinRes,&tMaxRes) != Intersection::Result::Intersect)
+		if(umath::intersection::line_aabb({},dir,m_min,m_max,&tMinRes,&tMaxRes) != umath::intersection::Result::Intersect)
 			return;
 		particle.SetPosition(m_origin +dir *tMaxRes);
 		return;

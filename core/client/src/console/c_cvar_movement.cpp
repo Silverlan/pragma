@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -284,6 +284,15 @@ void Console::commands::give_weapon(NetworkState *state,pragma::BasePlayerCompon
 	NetPacket p;
 	p->WriteString(argv.front());
 	client->SendPacket("give_weapon",p,pragma::networking::Protocol::SlowReliable);
+}
+
+void Console::commands::strip_weapons(NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
+{
+	if(!client->IsGameActive())
+		return;
+	CHECK_CHEATS("strip_weapons",state,);
+	NetPacket p;
+	client->SendPacket("strip_weapons",p,pragma::networking::Protocol::SlowReliable);
 }
 
 void Console::commands::next_weapon(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &args)

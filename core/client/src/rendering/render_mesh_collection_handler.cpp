@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "pragma/clientstate/clientstate.h"
@@ -31,7 +31,7 @@ extern DLLCLIENT CGame *c_game;
 
 
 static auto cvDrawWorld = GetClientConVar("render_draw_world");
-const std::vector<pragma::OcclusionMeshInfo> &rendering::RenderMeshCollectionHandler::PerformOcclusionCulling(pragma::CSceneComponent &scene,const RasterizationRenderer &renderer,const Vector3 &posCam,bool cullByViewFrustum)
+const std::vector<pragma::OcclusionMeshInfo> &rendering::RenderMeshCollectionHandler::PerformOcclusionCulling(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const Vector3 &posCam,bool cullByViewFrustum)
 {
 	m_culledMeshes.clear();
 	auto *world = static_cast<pragma::CWorldComponent*>(c_game->GetWorld());
@@ -58,7 +58,7 @@ std::shared_ptr<rendering::CulledMeshData> rendering::RenderMeshCollectionHandle
 	return it->second;
 }
 
-rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollectionHandler::GenerateOptimizedRenderObjectStructures(pragma::CSceneComponent &scene,const RasterizationRenderer &renderer,const Vector3 &posCam,FRender renderFlags,RenderMode renderMode,bool useGlowMeshes,bool useTranslucentMeshes)
+rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollectionHandler::GenerateOptimizedRenderObjectStructures(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const Vector3 &posCam,FRender renderFlags,RenderMode renderMode,bool useGlowMeshes,bool useTranslucentMeshes)
 {
 	auto it = m_culledMeshData.find(renderMode);
 	if(it == m_culledMeshData.end())
@@ -88,7 +88,7 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 			)
 			continue;
 		auto pRenderComponent = ent->GetRenderComponent();
-		if(pRenderComponent.expired())
+		if(!pRenderComponent)
 			continue;
 		auto rm = pRenderComponent->GetRenderMode();
 		if(renderMode == rm)
@@ -97,14 +97,13 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 			if(itProcessed == renderInfo->processed.end())
 			{
 				auto drawCmd = c_game->GetCurrentDrawCommandBuffer();
-				pRenderComponent->UpdateRenderData(drawCmd);//,true);
-				pRenderComponent->Render(renderMode);
+				//pRenderComponent->UpdateRenderData(drawCmd);//,true); // TODO
 
-				auto wpRenderBuffer = pRenderComponent->GetRenderBuffer();
-				if(wpRenderBuffer.expired() == false)
+				/*auto &wpRenderBuffer = pRenderComponent->GetRenderBuffer();
+				if(wpRenderBuffer)
 				{
 					drawCmd->RecordBufferBarrier(
-						*wpRenderBuffer.lock(),
+						*wpRenderBuffer,
 						prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::FragmentShaderBit,
 						prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
 					);
@@ -121,12 +120,12 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 							);
 						}
 					}
-				}
+				}*/
 				processed.insert(std::remove_reference_t<decltype(processed)>::value_type(ent,true));
 			}
 
-			auto &mdlComponent = pRenderComponent->GetModelComponent();
-			auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+			auto *mdlComponent = pRenderComponent->GetModelComponent();
+			auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 			assert(mdl != nullptr);
 			auto *mesh = static_cast<CModelMesh*>(info.mesh);
 			auto &meshes = mesh->GetSubMeshes();
@@ -134,7 +133,7 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 			{
 				auto *subMesh = static_cast<CModelSubMesh*>(it->get());
 				auto idxTexture = mdl->GetMaterialIndex(*subMesh,mdlComponent->GetSkin());
-				auto *mat = (idxTexture.has_value() && mdlComponent.valid()) ? mdlComponent->GetRenderMaterial(*idxTexture) : nullptr;
+				auto *mat = (idxTexture.has_value() && mdlComponent) ? mdlComponent->GetRenderMaterial(*idxTexture) : nullptr;
 				if(mat == nullptr)
 					mat = static_cast<CMaterial*>(client->GetMaterialManager().GetErrorMaterial());
 				/*else
@@ -180,9 +179,9 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 							prosper::Shader *shader = nullptr;
 							if(drawWorld == 2)
 								shader = renderer.GetWireframeShader();
-							else if(base != nullptr && base->GetBaseTypeHashCode() == pragma::ShaderTextured3DBase::HASH_TYPE)
-								shader = renderer.GetShaderOverride(static_cast<pragma::ShaderTextured3DBase*>(base));
-							if(shader != nullptr && shader->GetBaseTypeHashCode() == pragma::ShaderTextured3DBase::HASH_TYPE)
+							else if(base != nullptr && base->GetBaseTypeHashCode() == pragma::ShaderGameWorldLightingPass::HASH_TYPE)
+								shader = renderer.GetShaderOverride(static_cast<pragma::ShaderGameWorldLightingPass*>(base));
+							if(shader != nullptr && shader->GetBaseTypeHashCode() == pragma::ShaderGameWorldLightingPass::HASH_TYPE)
 							{
 								// Translucent?
 								if(mat->IsTranslucent() == true)
@@ -191,9 +190,9 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 									{
 										auto pTrComponent = ent->GetTransformComponent();
 										auto pos = subMesh->GetCenter();
-										if(pTrComponent.valid())
+										if(pTrComponent != nullptr)
 										{
-											uvec::rotate(&pos,pTrComponent->GetOrientation());
+											uvec::rotate(&pos,pTrComponent->GetRotation());
 											pos += pTrComponent->GetPosition();
 										}
 										auto distance = uvec::length_sqr(pos -posCam);
@@ -212,7 +211,7 @@ rendering::RenderMeshCollectionHandler::ResultFlags rendering::RenderMeshCollect
 								{
 									if(containers.size() == containers.capacity())
 										containers.reserve(containers.capacity() +10);
-									containers.push_back(std::make_unique<ShaderMeshContainer>(static_cast<pragma::ShaderTextured3DBase*>(shader)));
+									containers.push_back(std::make_unique<ShaderMeshContainer>(static_cast<pragma::ShaderGameWorldLightingPass*>(shader)));
 									shaderContainer = containers.back().get();
 								}
 								RenderSystem::MaterialMeshContainer *matContainer = nullptr;

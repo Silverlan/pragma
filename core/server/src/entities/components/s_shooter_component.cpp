@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_shooter_component.hpp"
@@ -88,7 +88,7 @@ void SShooterComponent::FireBullets(const BulletInfo &bulletInfo,DamageInfo &dmg
 		m_nextBullet = std::unique_ptr<NextBulletInfo>(new NextBulletInfo);
 		m_nextBullet->destinations = GetBulletDestinations(origin,dir,bulletInfo);
 	}
-	ScopeGuard sg([this]() {
+	util::ScopeGuard sg([this]() {
 		m_nextBullet = nullptr; // We're done with this
 	});
 

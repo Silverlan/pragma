@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -23,7 +23,9 @@
 #include <glm/gtx/norm.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/environment/effects/particlesystemdata.h>
+#include <pragma/util/util_game.hpp>
 #include <datasystem_vector.h>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -35,14 +37,14 @@ decltype(CParticleSystemComponent::s_precached) CParticleSystemComponent::s_prec
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 struct SpriteSheetTextureAnimationFrame
 {
 	Vector2 uvStart;
 	Vector2 uvEnd;
 };
-
+#pragma optimize("",off)
 Color CParticleSystemComponent::ParticleData::GetColor() const
 {
 	return Color{static_cast<int16_t>(color.at(0)),static_cast<int16_t>(color.at(1)),static_cast<int16_t>(color.at(2)),static_cast<int16_t>(color.at(3))};
@@ -160,8 +162,7 @@ static void to_cache_name(std::string &fname)
 {
 	fname = FileManager::GetCanonicalizedPath(fname);
 	ustring::to_lower(fname);
-	if(fname.length() >= 4 && fname.substr(fname.length() -4) == ".wpt")
-		fname = fname.substr(0,fname.length() -4);
+	ufile::remove_extension_from_filename(fname,pragma::asset::get_supported_extensions(pragma::asset::Type::ParticleSystem));
 }
 static std::unordered_map<std::string,std::vector<std::string>> s_particleFileToSystems {};
 const std::vector<std::string> &CParticleSystemComponent::GetPrecachedParticleSystemFiles() {return s_precached;}
@@ -184,6 +185,75 @@ bool CParticleSystemComponent::Precache(std::string fname,bool bReload)
 {
 	to_cache_name(fname);
 	auto it = std::find(s_precached.begin(),s_precached.end(),fname);
+	util::ScopeGuard sgCache;
+	if(it != s_precached.end())
+	{
+		if(bReload == false)
+			return true;
+	}
+	else
+	{
+		sgCache = [&fname]() {
+			s_precached.push_back(fname);
+		};
+	}
+
+	std::string format;
+	auto ptFname = pragma::asset::find_file(*client,fname,pragma::asset::Type::ParticleSystem,&format);
+	if(!ptFname.has_value())
+		return false;
+	if(format == pragma::asset::FORMAT_PARTICLE_SYSTEM_LEGACY)
+	{
+		sgCache.dismiss();
+		return PrecacheLegacy(fname,bReload);
+	}
+	std::string err;
+	auto udmData = util::load_udm_asset(*ptFname,&err);
+	if(udmData == nullptr)
+		return false;
+	auto &ptSystemNames = s_particleFileToSystems.insert(std::make_pair(fname,std::vector<std::string>{})).first->second;
+	ptSystemNames.clear();
+
+	auto &data = *udmData;
+	if(data.GetAssetType() != pragma::asset::PPTSYS_COLLECTION_IDENTIFIER)
+	{
+		err = "Incorrect format!";
+		return false;
+	}
+
+	auto version = data.GetAssetVersion();
+	if(version < 1)
+	{
+		err = "Invalid version!";
+		return false;
+	}
+	// if(version > FORMAT_VERSION)
+	// 	return false;
+	
+	auto udm = *data.GetAssetData();
+	auto udmParticleSystemDefinitions = udm["particleSystemDefinitions"];
+	auto numParticles = udmParticleSystemDefinitions.GetChildCount();
+	ptSystemNames.reserve(numParticles);
+	s_particleData.reserve(s_particleData.size() +numParticles);
+	uint32_t idx = 0;
+	for(auto udmDef : udmParticleSystemDefinitions.ElIt())
+	{
+		auto name = std::string{udmDef.key};
+		ptSystemNames.push_back(name);
+		auto data = std::make_unique<CParticleSystemData>();
+		auto result = CParticleSystemComponent::LoadFromAssetData(*data,udm::AssetData{udmDef.property},err);
+		if(result == false)
+			return false;
+		s_particleData[name] = std::move(data);
+		++idx;
+	}
+	return true;
+}
+
+bool CParticleSystemComponent::PrecacheLegacy(std::string fname,bool bReload)
+{
+	to_cache_name(fname);
+	auto it = std::find(s_precached.begin(),s_precached.end(),fname);
 	if(it != s_precached.end())
 	{
 		if(bReload == false)
@@ -191,6 +261,7 @@ bool CParticleSystemComponent::Precache(std::string fname,bool bReload)
 	}
 	else
 		s_precached.push_back(fname);
+
 	auto path = "particles\\" +fname +".wpt";
 	auto f = FileManager::OpenFile(path.c_str(),"rb");
 	if(f == nullptr)
@@ -533,8 +604,7 @@ std::optional<umath::Transform> CParticleSystemComponent::GetControlPointPose(Co
 	auto *ent = GetControlPointEntity(idx);
 	if(ent)
 	{
-		umath::Transform entPose;
-		ent->GetPose(entPose);
+		auto &entPose = ent->GetPose();
 		pose = entPose *pose;
 	}
 	if(optOutTimestamp)
@@ -549,8 +619,7 @@ std::optional<umath::Transform> CParticleSystemComponent::GetPrevControlPointPos
 	auto *ent = GetControlPointEntity(idx);
 	if(ent)
 	{
-		umath::Transform entPose;
-		ent->GetPose(entPose);
+		auto &entPose = ent->GetPose();
 		pose = entPose *pose;
 	}
 	if(optOutTimestamp)
@@ -601,13 +670,13 @@ Vector3 CParticleSystemComponent::PointToParticleSpace(const Vector3 &p,bool bRo
 	if(bRotateWithEmitter == true)
 	{
 		auto pTrComponent = GetEntity().GetTransformComponent();
-		if(pTrComponent.valid())
-			uvec::rotate(&r,pTrComponent->GetOrientation());
+		if(pTrComponent != nullptr)
+			uvec::rotate(&r,pTrComponent->GetRotation());
 	}
 	if(ShouldParticlesMoveWithEmitter())
 	{
 		auto pTrComponent = GetEntity().GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent != nullptr)
 			r += pTrComponent->GetPosition();
 	}
 	return r;
@@ -619,8 +688,8 @@ Vector3 CParticleSystemComponent::DirectionToParticleSpace(const Vector3 &p,bool
 	if(bRotateWithEmitter == true)
 	{
 		auto pTrComponent = GetEntity().GetTransformComponent();
-		if(pTrComponent.valid())
-			uvec::rotate(&r,pTrComponent->GetOrientation());
+		if(pTrComponent != nullptr)
+			uvec::rotate(&r,pTrComponent->GetRotation());
 	}
 	return r;
 }
@@ -750,9 +819,9 @@ void CParticleSystemComponent::SetExtent(float ext)
 float CParticleSystemComponent::GetRadius() const {return m_radius;}
 float CParticleSystemComponent::GetExtent() const {return m_extent;}
 
-void CParticleSystemComponent::SetMaterial(Material *mat) {m_material = mat;}
+void CParticleSystemComponent::SetMaterial(Material *mat) {m_material = mat ? mat->GetHandle() : MaterialHandle{};}
 void CParticleSystemComponent::SetMaterial(const char *mat) {SetMaterial(client->LoadMaterial(mat));}
-Material *CParticleSystemComponent::GetMaterial() const {return m_material;}
+Material *CParticleSystemComponent::GetMaterial() const {return m_material.get();}
 
 CParticleInitializer *CParticleSystemComponent::AddInitializer(std::string identifier,const std::unordered_map<std::string,std::string> &values)
 {
@@ -904,10 +973,10 @@ void CParticleSystemComponent::SetParent(CParticleSystemComponent *particle)
 	particle->AddChild(*this);
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	auto pTrComponentPt = particle->GetEntity().GetTransformComponent();
-	if(pTrComponent.valid() && pTrComponentPt.valid())
+	if(pTrComponent != nullptr && pTrComponentPt)
 	{
 		pTrComponent->SetPosition(pTrComponentPt->GetPosition());
-		pTrComponent->SetOrientation(pTrComponentPt->GetOrientation());
+		pTrComponent->SetRotation(pTrComponentPt->GetRotation());
 	}
 }
 
@@ -1017,7 +1086,7 @@ void CParticleSystemComponent::Start()
 	{
 		m_bufParticleAnimData = nullptr;
 		m_descSetGroupAnimation = nullptr;
-		if(m_material != nullptr)
+		if(m_material.IsValid())
 		{
 			if(IsTextureScrollingEnabled())
 			{
@@ -1025,7 +1094,7 @@ void CParticleSystemComponent::Start()
 			}
 			else if(pragma::ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION.IsValid())
 			{
-				auto *spriteSheetAnim = static_cast<CMaterial*>(m_material)->GetSpriteSheetAnimation();
+				auto *spriteSheetAnim = static_cast<CMaterial*>(m_material.get())->GetSpriteSheetAnimation();
 				m_spriteSheetAnimationData = spriteSheetAnim ? std::make_unique<SpriteSheetAnimation>(*spriteSheetAnim) : nullptr;
 
 				if(m_spriteSheetAnimationData)
@@ -1255,7 +1324,7 @@ Vector3 CParticleSystemComponent::GetNodePosition(uint32_t node) const
 	if(node == 0)
 	{
 		auto pTrComponent = GetEntity().GetTransformComponent();
-		return pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+		return pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 	}
 	--node;
 	if(node >= m_nodes.size() || (m_nodes[node].bEntity == true && !m_nodes[node].hEntity.IsValid()))
@@ -1263,7 +1332,7 @@ Vector3 CParticleSystemComponent::GetNodePosition(uint32_t node) const
 	if(m_nodes[node].bEntity == false)
 		return m_nodes[node].position;
 	auto pTrComponent = m_nodes[node].hEntity.get()->GetTransformComponent();
-	return pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	return pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 }
 CBaseEntity *CParticleSystemComponent::GetNodeTarget(uint32_t node) const
 {
@@ -1315,7 +1384,7 @@ void CParticleSystemComponent::ResumeEmission()
 }
 void CParticleSystemComponent::SetAlwaysSimulate(bool b) {umath::set_flag(m_flags,Flags::AlwaysSimulate,b);}
 
-void CParticleSystemComponent::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,ParticleRenderFlags renderFlags)
+void CParticleSystemComponent::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,ParticleRenderFlags renderFlags)
 {
 	if(umath::is_flag_set(renderFlags,ParticleRenderFlags::Bloom) && IsBloomEnabled() == false)
 		return;
@@ -1349,7 +1418,7 @@ void CParticleSystemComponent::Render(const std::shared_ptr<prosper::IPrimaryCom
 	umath::set_flag(m_flags,Flags::RendererBufferUpdateRequired,false);
 }
 
-void CParticleSystemComponent::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent *light,uint32_t layerId)
+void CParticleSystemComponent::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent *light,uint32_t layerId)
 {
 	if(!IsActiveOrPaused() || m_numRenderParticles == 0)
 		return;
@@ -1378,7 +1447,7 @@ CParticle &CParticleSystemComponent::CreateParticle(uint32_t idx,float timeCreat
 	if(umath::is_flag_set(m_flags,Flags::MoveWithEmitter) == false) // If the particle is moving with the emitter, the position is added elsewhere!
 	{
 		auto pTrComponent = GetEntity().GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent != nullptr)
 			pos += pTrComponent->GetPosition();
 	}
 	particle.SetPosition(pos);
@@ -1386,7 +1455,7 @@ CParticle &CParticleSystemComponent::CreateParticle(uint32_t idx,float timeCreat
 	if(umath::is_flag_set(m_flags,Flags::RotateWithEmitter) == false)
 	{
 		auto pTrComponent = GetEntity().GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent != nullptr)
 			rot = pTrComponent->GetOrientation() *rot;
 	}
 	particle.SetWorldRotation(rot);
@@ -1481,7 +1550,7 @@ void CParticleSystemComponent::Simulate(double tDelta)
 	auto *cam = c_game->GetPrimaryCamera();
 	if(!IsActiveOrPaused() || cam == nullptr)
 		return;
-	ScopeGuard sg {[this,tDelta]() {m_simulationTime += tDelta;}}; // Increment simulation time once this tick is complete
+	util::ScopeGuard sg {[this,tDelta]() {m_simulationTime += tDelta;}}; // Increment simulation time once this tick is complete
 
 	auto pTsComponent = GetEntity().GetTimeScaleComponent();
 	if(pTsComponent.valid())
@@ -1527,8 +1596,7 @@ void CParticleSystemComponent::Simulate(double tDelta)
 	auto bMoving = (umath::is_flag_set(m_flags,Flags::MoveWithEmitter) && GetEntity().HasStateFlag(BaseEntity::StateFlags::PositionChanged))
 		|| (umath::is_flag_set(m_flags,Flags::RotateWithEmitter) && GetEntity().HasStateFlag(BaseEntity::StateFlags::RotationChanged));
 	umath::set_flag(m_flags,Flags::HasMovingParticles,bMoving);
-	umath::Transform pose;
-	GetEntity().GetPose(pose);
+	auto &pose = GetEntity().GetPose();
 	auto &posCam = cam->GetEntity().GetPosition();
 	for(auto i=decltype(m_maxParticlesCur){0};i<m_maxParticlesCur;++i)
 	{
@@ -1693,7 +1761,7 @@ void CParticleSystemComponent::Simulate(double tDelta)
 		}
 	}
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	auto psPos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto psPos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 	auto alphaMode = GetEffectiveAlphaMode();
 	for(auto i=decltype(m_maxParticlesCur){0};i<m_maxParticlesCur;++i)
 	{
@@ -1824,3 +1892,4 @@ void CParticleSystemComponent::OnParticleDestroyed(CParticle &particle)
 	for(auto &r : m_renderers)
 		r->OnParticleDestroyed(particle);
 }
+#pragma optimize("",on)

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_SOUNDSCRIPT_H__
@@ -15,17 +15,17 @@
 
 class CSoundScriptManager;
 
-namespace al {class Effect;};
+namespace al {class IEffect;};
 class DLLCLIENT CSSEPlaySound
 	: public SSEPlaySound
 {
 protected:
-	std::shared_ptr<al::Effect> m_dspEffect = nullptr;
+	std::shared_ptr<al::IEffect> m_dspEffect = nullptr;
 	void PrecacheSound(const char *name);
 public:
 	CSSEPlaySound(SoundScriptManager *manager);
-	std::vector<std::shared_ptr<al::Effect>> effects;
-	virtual void Initialize(const std::shared_ptr<ds::Block> &data) override;
+	std::vector<std::shared_ptr<al::IEffect>> effects;
+	virtual void Initialize(udm::LinkedPropertyWrapper &prop) override;
 	virtual SSESound *CreateSound(double tStart,const std::function<std::shared_ptr<ALSound>(const std::string&,ALChannel,ALCreateFlags)> &createSound) override;
 };
 

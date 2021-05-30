@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -59,6 +59,7 @@
 #include <image/prosper_render_target.hpp>
 #include <pragma/lua/libraries/lfile.h>
 #include <wgui/fontmanager.h>
+#include <udm.hpp>
 
 #undef LEFT
 #undef RIGHT
@@ -67,9 +68,9 @@
 #undef NEAR
 #undef FAR
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 void CGame::RegisterLua()
 {
 	GetLuaInterface().SetIdentifier("cl");
@@ -106,7 +107,10 @@ void CGame::RegisterLua()
 		{"create_model",Lua::game::Client::create_model},
 		{"get_action_input",Lua::game::Client::get_action_input},
 		{"set_action_input",Lua::game::Client::set_action_input},
-		{"draw_scene",Lua::game::Client::draw_scene},
+		{"queue_scene_for_rendering",Lua::game::Client::queue_scene_for_rendering},
+		{"render_scenes",Lua::game::Client::render_scenes},
+		{"set_debug_render_filter",Lua::game::Client::set_debug_render_filter},
+		{"update_render_buffers",Lua::game::Client::update_render_buffers},
 		{"get_render_scene",Lua::game::Client::get_render_scene},
 		{"get_render_scene_camera",Lua::game::Client::get_render_scene_camera},
 		{"get_scene",Lua::game::Client::get_scene},
@@ -120,10 +124,21 @@ void CGame::RegisterLua()
 		{"set_render_clip_plane",Lua::game::Client::set_render_clip_plane},
 		{"build_reflection_probes",Lua::game::Client::build_reflection_probes},
 
+		{"set_render_stats_enabled",Lua::game::Client::set_render_stats_enabled},
+		{"get_queued_render_scenes",Lua::game::Client::get_queued_render_scenes},
+
 		{"get_debug_buffer",Lua::game::Client::get_debug_buffer},
 		{"get_time_buffer",Lua::game::Client::get_time_buffer},
 		{"get_csm_buffer",Lua::game::Client::get_csm_buffer},
-		{"get_render_settings_descriptor_set",Lua::game::Client::get_render_settings_descriptor_set}
+		{"get_render_settings_descriptor_set",Lua::game::Client::get_render_settings_descriptor_set},
+		{"set_default_game_render_enabled",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			c_game->SetDefaultGameRenderEnabled(Lua::CheckBool(l,1));
+			return 0;
+		})},
+		{"is_default_game_render_enabled",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			Lua::PushBool(l,c_game->IsDefaultGameRenderEnabled());
+			return 1;
+		})}
 		
 		/*{"debug_vehicle",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			Con::cout<<"Creating vehicle..."<<Con::endl;
@@ -144,6 +159,7 @@ void CGame::RegisterLua()
 		luabind::def("load_texture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,const LFile&)>(Lua::engine::load_texture)),
 		luabind::def("create_material",static_cast<Material*(*)(const std::string&,const std::string&)>(Lua::engine::create_material)),
 		luabind::def("create_material",static_cast<Material*(*)(const std::string&)>(Lua::engine::create_material)),
+		luabind::def("get_material",static_cast<Material*(*)(const std::string&)>(Lua::engine::get_material)),
 		luabind::def("precache_model",static_cast<void(*)(lua_State*,const std::string&)>(Lua::engine::precache_model)),
 		luabind::def("precache_material",static_cast<void(*)(lua_State*,const std::string&)>(Lua::engine::precache_material)),
 		luabind::def("get_error_material",Lua::engine::get_error_material),
@@ -222,7 +238,8 @@ void CGame::RegisterLua()
 	modLocale[
 		luabind::def("load",Lua::Locale::load),
 		luabind::def("get_language",Lua::Locale::get_language),
-		luabind::def("change_language",Lua::Locale::change_language)
+		luabind::def("change_language",Lua::Locale::change_language),
+		luabind::def("set_text",Lua::Locale::set_localization)
 	];
 
 	Game::RegisterLua();
@@ -317,6 +334,7 @@ void CGame::RegisterLua()
 		{"RENDER_FLAG_WATER_BIT",umath::to_integral(FRender::Water)},
 		{"RENDER_FLAG_STATIC_BIT",umath::to_integral(FRender::Static)},
 		{"RENDER_FLAG_DYNAMIC_BIT",umath::to_integral(FRender::Dynamic)},
+		{"RENDER_FLAG_TRANSLUCENT_BIT",umath::to_integral(FRender::Translucent)},
 		{"RENDER_FLAG_HDR_BIT",umath::to_integral(FRender::HDR)},
 		{"RENDER_FLAG_PARTICLE_DEPTH_BIT",umath::to_integral(FRender::ParticleDepth)},
 
@@ -327,129 +345,6 @@ void CGame::RegisterLua()
 	});
 
 	auto gameMod = luabind::module(GetLuaState(),"game");
-
-	auto classDefBaseRenderer = luabind::class_<pragma::rendering::BaseRenderer>("BaseRenderer");
-	classDefBaseRenderer.def(luabind::const_self == luabind::const_self);
-	classDefBaseRenderer.def("GetWidth",static_cast<void(*)(lua_State*,pragma::rendering::BaseRenderer&)>([](lua_State *l,pragma::rendering::BaseRenderer &renderer) {
-		Lua::PushInt(l,renderer.GetWidth());
-	}));
-	classDefBaseRenderer.def("GetHeight",static_cast<void(*)(lua_State*,pragma::rendering::BaseRenderer&)>([](lua_State *l,pragma::rendering::BaseRenderer &renderer) {
-		Lua::PushInt(l,renderer.GetHeight());
-	}));
-	gameMod[classDefBaseRenderer];
-
-	auto classDefRasterizationRenderer = luabind::class_<pragma::rendering::RasterizationRenderer,pragma::rendering::BaseRenderer>("RasterizationRenderer");
-	classDefRasterizationRenderer.def("GetPrepassDepthTexture",&Lua::RasterizationRenderer::GetPrepassDepthTexture);
-	classDefRasterizationRenderer.def("GetPrepassNormalTexture",&Lua::RasterizationRenderer::GetPrepassNormalTexture);
-	classDefRasterizationRenderer.def("GetRenderTarget",&Lua::RasterizationRenderer::GetRenderTarget);
-	classDefRasterizationRenderer.def("BeginRenderPass",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&,const ::util::DrawSceneInfo&,prosper::IRenderPass&)>(&Lua::RasterizationRenderer::BeginRenderPass));
-	classDefRasterizationRenderer.def("BeginRenderPass",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&,const ::util::DrawSceneInfo&)>(&Lua::RasterizationRenderer::BeginRenderPass));
-	classDefRasterizationRenderer.def("EndRenderPass",&Lua::RasterizationRenderer::EndRenderPass);
-	classDefRasterizationRenderer.def("GetPrepassShader",&Lua::RasterizationRenderer::GetPrepassShader);
-	classDefRasterizationRenderer.def("SetShaderOverride",&Lua::RasterizationRenderer::SetShaderOverride);
-	classDefRasterizationRenderer.def("ClearShaderOverride",&Lua::RasterizationRenderer::ClearShaderOverride);
-	classDefRasterizationRenderer.def("SetPrepassMode",&Lua::RasterizationRenderer::SetPrepassMode);
-	classDefRasterizationRenderer.def("GetPrepassMode",&Lua::RasterizationRenderer::GetPrepassMode);
-	classDefRasterizationRenderer.def("InitializeRenderTarget", static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&,CSceneHandle&,uint32_t,uint32_t,bool)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer,CSceneHandle &scene,uint32_t width,uint32_t height,bool reload) {
-		pragma::Lua::check_component(l,scene);
-		if(reload == false && width == renderer.GetWidth() && height == renderer.GetHeight())
-			return;
-		renderer.ReloadRenderTarget(*scene.get(),width,height);
-	}));
-	classDefRasterizationRenderer.def("InitializeRenderTarget", static_cast<void(*)(lua_State*, pragma::rendering::RasterizationRenderer&,CSceneHandle&,uint32_t,uint32_t)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer,CSceneHandle &scene,uint32_t width,uint32_t height) {
-		pragma::Lua::check_component(l,scene);
-		if(width == renderer.GetWidth() && height == renderer.GetHeight())
-			return;
-		renderer.ReloadRenderTarget(*scene.get(),width,height);
-	}));
-	classDefRasterizationRenderer.def("SetSSAOEnabled", static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&,CSceneHandle&,bool)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer,CSceneHandle &scene,bool ssaoEnabled) {
-		pragma::Lua::check_component(l,scene);
-		renderer.SetSSAOEnabled(*scene.get(),ssaoEnabled);
-	}));
-	classDefRasterizationRenderer.def("IsSSAOEnabled", static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
-		Lua::PushBool(l,renderer.IsSSAOEnabled());
-	}));
-	classDefRasterizationRenderer.def("GetLightSourceDescriptorSet", static_cast<void(*)(lua_State*, pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
-		auto *ds = pragma::CShadowManagerComponent::GetShadowManager()->GetDescriptorSet();
-		if(ds == nullptr)
-			return;
-		Lua::Push(l,ds->GetDescriptorSetGroup().shared_from_this());
-	}));
-	classDefRasterizationRenderer.def("GetPostPrepassDepthTexture", static_cast<void(*)(lua_State*, pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
-		auto &depthTex = renderer.GetPrepass().textureDepth;
-		if (depthTex == nullptr)
-			return;
-		Lua::Push(l,depthTex);
-	}));
-	classDefRasterizationRenderer.def("GetPostProcessingDepthDescriptorSet", static_cast<void(*)(lua_State*, pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
-		auto &depthTex = renderer.GetHDRInfo().dsgDepthPostProcessing;
-		if (depthTex == nullptr)
-			return;
-		Lua::Push(l,depthTex);
-	}));
-	classDefRasterizationRenderer.def("GetPostProcessingHDRColorDescriptorSet",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
-		auto &dsg = renderer.GetHDRInfo().dsgHDRPostProcessing;
-		if(dsg == nullptr)
-			return;
-		Lua::Push(l,dsg);
-	}));
-	classDefRasterizationRenderer.def("GetStagingRenderTarget",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
-		auto &rt = renderer.GetHDRInfo().hdrPostProcessingRenderTarget;
-		if(rt == nullptr)
-			return;
-		Lua::Push(l,rt);
-		}));
-	classDefRasterizationRenderer.def("BlitStagingRenderTargetToMainRenderTarget",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&,const util::DrawSceneInfo&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const util::DrawSceneInfo &drawSceneInfo) {
-		renderer.GetHDRInfo().BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo);
-	}));
-	classDefRasterizationRenderer.def("GetBloomTexture",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
-		auto &rt = renderer.GetHDRInfo().bloomBlurRenderTarget;
-		if(rt == nullptr)
-			return;
-		Lua::Push(l,rt->GetTexture().shared_from_this());
-	}));
-	classDefRasterizationRenderer.def("GetGlowTexture",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
-		auto &rt = renderer.GetGlowInfo().renderTarget;
-		if(rt == nullptr)
-			return;
-		Lua::Push(l,rt->GetTexture().shared_from_this());
-	}));
-	classDefRasterizationRenderer.def("GetPresentationTexture",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
-		auto *tex = renderer.GetPresentationTexture();
-		if(tex == nullptr)
-			return;
-		Lua::Push(l,tex->shared_from_this());
-	}));
-	classDefRasterizationRenderer.def("GetHDRPresentationTexture",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
-		auto *tex = renderer.GetHDRPresentationTexture();
-		if(tex == nullptr)
-			return;
-		Lua::Push(l,tex->shared_from_this());
-	}));
-	classDefRasterizationRenderer.def("GetRenderTargetTextureDescriptorSet",static_cast<void(*)(lua_State*,pragma::rendering::RasterizationRenderer&)>([](lua_State *l,pragma::rendering::RasterizationRenderer &renderer) {
-		auto &dsg = renderer.GetHDRInfo().dsgHDRPostProcessing;
-		if(dsg == nullptr)
-			return;
-		Lua::Push(l,dsg);
-	}));
-	classDefRasterizationRenderer.def("ScheduleMeshForRendering",static_cast<void(*)(
-		lua_State*,pragma::rendering::RasterizationRenderer&,CSceneHandle&,uint32_t,pragma::ShaderTextured3DBase&,Material&,EntityHandle&,ModelSubMesh&
-	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));
-	classDefRasterizationRenderer.def("ScheduleMeshForRendering",static_cast<void(*)(
-		lua_State*,pragma::rendering::RasterizationRenderer&,CSceneHandle&,uint32_t,const std::string&,Material&,EntityHandle&,ModelSubMesh&
-	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));
-	classDefRasterizationRenderer.def("ScheduleMeshForRendering",static_cast<void(*)(
-		lua_State*,pragma::rendering::RasterizationRenderer&,CSceneHandle&,uint32_t,::Material&,EntityHandle&,ModelSubMesh&
-	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));
-	//lua_State*,pragma::rendering::RasterizationRenderer&,uint32_t,const std::string&,Material&,EntityHandle&,ModelSubMesh&
-	classDefRasterizationRenderer.add_static_constant("PREPASS_MODE_DISABLED",umath::to_integral(pragma::rendering::RasterizationRenderer::PrepassMode::NoPrepass));
-	classDefRasterizationRenderer.add_static_constant("PREPASS_MODE_DEPTH_ONLY",umath::to_integral(pragma::rendering::RasterizationRenderer::PrepassMode::DepthOnly));
-	classDefRasterizationRenderer.add_static_constant("PREPASS_MODE_EXTENDED",umath::to_integral(pragma::rendering::RasterizationRenderer::PrepassMode::Extended));
-	gameMod[classDefRasterizationRenderer];
-
-	auto classDefRaytracingRenderer = luabind::class_<pragma::rendering::RaytracingRenderer,pragma::rendering::BaseRenderer>("RaytracingRenderer");
-	gameMod[classDefRaytracingRenderer];
-
 	RegisterLuaGameClasses(gameMod);
 
 	// Needs to be registered AFTER RegisterLuaGameClasses has been called!
@@ -698,3 +593,4 @@ void ClientState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 {
 
 }
+#pragma optimize("",on)

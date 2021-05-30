@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -59,9 +59,10 @@ void CWaterComponent::Initialize()
 	BaseFuncWaterComponent::Initialize();
 
 	BindEvent(CRenderComponent::EVENT_SHOULD_DRAW,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		// TODO: Run CRenderComponent::UpdateShouldDrawState when any of these change
 		if(!(m_hWaterSurface.IsValid() == false && (m_waterScene == nullptr || m_waterScene->descSetGroupTexEffects != nullptr)))
 		{
-			static_cast<CEShouldDraw&>(evData.get()).shouldDraw = CEShouldDraw::ShouldDraw::No;
+			static_cast<CEShouldDraw&>(evData.get()).shouldDraw = false;
 			return util::EventReply::Handled;
 		}
 		return util::EventReply::Unhandled;
@@ -77,30 +78,29 @@ void CWaterComponent::Initialize()
 const Vector3 &CWaterComponent::GetPosition() const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	return pTrComponent.valid() ? pTrComponent->GetPosition() : uvec::ORIGIN;
+	return pTrComponent != nullptr ? pTrComponent->GetPosition() : uvec::ORIGIN;
 }
 const Quat &CWaterComponent::GetOrientation() const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	static auto identity = uquat::identity();
-	return pTrComponent.valid() ? pTrComponent->GetOrientation() : identity;
+	return pTrComponent != nullptr ? pTrComponent->GetRotation() : identity;
 }
 void CWaterComponent::OnEntitySpawn()
 {
 	BaseFuncWaterComponent::OnEntitySpawn();
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	//auto pPhysComponent = ent.GetPhysicsComponent();
-	//if(pPhysComponent.valid())
+	//if(pPhysComponent != nullptr)
 	//	pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(pRenderComponent.valid())
+	if(pRenderComponent)
 	{
 		pRenderComponent->SetRenderMode(RenderMode::Water);
-		pRenderComponent->GetRenderModeProperty()->SetLocked(true);
+		// pRenderComponent->GetRenderModeProperty()->SetLocked(true);
 	}
 
-	auto mdlComponent = ent.GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)
 		return;
 	BaseFuncWaterComponent::InitializeWaterSurface();
@@ -119,7 +119,7 @@ CWaterSurface *CWaterComponent::GetSurfaceEntity() const {return static_cast<CWa
 void CWaterComponent::CreateSplash(const Vector3 &origin,float radius,float force)
 {
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
-	if(pPhysComponent.expired() || pPhysComponent->GetPhysicsObject() == nullptr)
+	if(pPhysComponent == nullptr || pPhysComponent->GetPhysicsObject() == nullptr)
 		return;
 	BaseFuncWaterComponent::CreateSplash(origin,radius,force); // TODO
 	if(m_physSurfaceSim != nullptr)
@@ -163,14 +163,14 @@ bool CWaterComponent::OnBulletHit(const BulletInfo &bulletInfo,const TraceData &
 			if(pt != nullptr)
 			{
 				auto pTrComponent = pt->GetEntity().GetTransformComponent();
-				if(pTrComponent.valid())
+				if(pTrComponent != nullptr)
 				{
 					pTrComponent->SetPosition(hitPos);
 
 					auto up = result.hitNormalLocal;
 					uvec::normalize(&up);
 					const auto rot = Quat{0.5f,-0.5f,-0.5f,-0.5f};
-					pTrComponent->SetOrientation(uquat::create_look_rotation(uvec::get_perpendicular(up),up) *rot);
+					pTrComponent->SetRotation(uquat::create_look_rotation(uvec::get_perpendicular(up),up) *rot);
 				}
 				pt->SetRemoveOnComplete(true);
 				pt->Start();
@@ -197,8 +197,7 @@ CMaterial *CWaterComponent::GetWaterMaterial() const
 	if(m_waterMesh.expired() == true)
 		return nullptr;
 	auto &ent = GetEntity();
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)
 		return nullptr;
 	auto matIdx = mdl->GetMaterialIndex(*m_waterMesh.lock());
@@ -252,8 +251,7 @@ void CWaterComponent::SetupWater()
 		return;
 	auto *meshSurface = waterSurfaces.front(); // TODO: All surfaces?
 	*/
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = GetEntity().GetModel();
 	if(mdl == nullptr)
 		return;
 	auto &mats = mdl->GetMaterials();

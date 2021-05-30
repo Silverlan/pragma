@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -22,7 +22,7 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 
 void CGame::ClearSoundCache()
@@ -123,17 +123,16 @@ void CGame::ReloadSoundCache(bool bReloadBakedCache,SoundCacheFlags cacheFlags,f
 			{
 				std::unordered_map<uint32_t,uint32_t> surfMatToIplMat {};
 				auto fAddEntityMeshes = [this,iplScene,&surfMatToIplMat](CBaseEntity *ent) {
-					auto mdlComponent = ent->GetModelComponent();
-					auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+					auto &mdl = ent->GetModel();
 					if(mdl == nullptr)
 						return;
 					auto pPhysComponent = ent->GetPhysicsComponent();
 					auto pTrComponent = ent->GetTransformComponent();
-					auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
-					if(phys == nullptr || pTrComponent.expired())
+					auto *phys = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
+					if(phys == nullptr || pTrComponent == nullptr)
 						return;
 					auto &pos = pTrComponent->GetPosition();
-					auto &rot = pTrComponent->GetOrientation();
+					auto &rot = pTrComponent->GetRotation();
 					auto &hColObjs = phys->GetCollisionObjects();
 					for(auto &hColObj : hColObjs)
 					{
@@ -270,7 +269,7 @@ void CGame::ReloadSoundCache(bool bReloadBakedCache,SoundCacheFlags cacheFlags,f
 					auto pTrComponent = ent->GetTransformComponent();
 
 					auto *pSoundComponent = (ent != nullptr) ? static_cast<pragma::CSoundComponent*>(ent->FindComponent("sound").get()) : nullptr;
-					if(pTrComponent.expired() || pSoundComponent == nullptr)
+					if(pTrComponent == nullptr || pSoundComponent == nullptr)
 						continue;
 					auto pAttComponent = ent->GetComponent<pragma::CAttachableComponent>();
 					if(pAttComponent.valid() && pAttComponent->GetParent() != nullptr)

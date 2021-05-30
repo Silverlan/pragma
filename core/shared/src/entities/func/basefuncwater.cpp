@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -106,7 +106,7 @@ util::EventReply BaseFuncWaterComponent::HandleEvent(ComponentEventId eventId,Co
 		if(triggerData.entity != nullptr)
 		{
 			auto pPhysComponent = triggerData.entity->GetPhysicsComponent();
-			if(pPhysComponent.valid() && (pPhysComponent->GetCollisionFilterMask() &CollisionMask::Water) == CollisionMask::None)
+			if(pPhysComponent != nullptr && (pPhysComponent->GetCollisionFilterMask() &CollisionMask::Water) == CollisionMask::None)
 				triggerData.canTrigger = false;
 		}
 		return util::EventReply::Handled;
@@ -118,7 +118,7 @@ void BaseFuncWaterComponent::OnPhysicsInitialized()
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	pPhysComponent->SetCollisionFilterMask(CollisionMask::Dynamic | CollisionMask::Generic);
 	pPhysComponent->SetCollisionFilterGroup(CollisionMask::Water | CollisionMask::WaterSurface);
@@ -195,8 +195,7 @@ void BaseFuncWaterComponent::InitializeWaterSurface()
 {
 	ClearWaterSurface();
 	auto &ent = GetEntity();
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr)
 		return;
 	Material *mat = nullptr;
@@ -233,7 +232,7 @@ void BaseFuncWaterComponent::InitializeWaterSurface()
 			auto &v1 = verts.at(1);
 			auto &v2 = verts.at(2);
 
-			Plane p {v0.position,v1.position,v2.position};
+			umath::Plane p {v0.position,v1.position,v2.position};
 			auto dot = umath::abs(uvec::dot(dir,p.GetNormal()) -1.f);
 			if(dot >= minDot)
 				continue;
@@ -293,7 +292,7 @@ void BaseFuncWaterComponent::ReloadSurfaceSimulator()
 	auto mesh = m_waterMesh.lock();
 	Vector3 min,max;
 	mesh->GetBounds(min,max);
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 	{
 		pTrComponent->LocalToWorld(&min);
 		pTrComponent->LocalToWorld(&max);
@@ -410,8 +409,8 @@ bool BaseFuncWaterComponent::CalcLineSurfaceIntersection(const Vector3 &lineOrig
 				auto ptIdx3 = m_physSurfaceSim->GetParticleIndex(i +1,j +1);
 				auto v3 = m_physSurfaceSim->CalcParticlePosition(ptIdx3);
 				if(
-					Intersection::LineTriangle(lineOrigin,lineDir,v0,v1,v2,t,u,v,bCull) == true ||
-					Intersection::LineTriangle(lineOrigin,lineDir,v3,v2,v1,t,u,v,bCull) == true
+					umath::intersection::line_triangle(lineOrigin,lineDir,v0,v1,v2,t,u,v,bCull) == true ||
+					umath::intersection::line_triangle(lineOrigin,lineDir,v3,v2,v1,t,u,v,bCull) == true
 				)
 				{
 					if(outT != nullptr)
@@ -434,10 +433,10 @@ bool BaseFuncWaterComponent::CalcLineSurfaceIntersection(const Vector3 &lineOrig
 		double d;
 		GetWaterPlaneWs(n,d);
 		auto t = 0.f;
-		auto r = Intersection::LinePlane(lineOrigin,lineDir,n,d,&t);
+		auto r = umath::intersection::line_plane(lineOrigin,lineDir,n,d,&t);
 		if(outT != nullptr)
 			*outT = t;
-		return r == Intersection::Result::Intersect;
+		return r == umath::intersection::Result::Intersect;
 	}
 	return false;
 }

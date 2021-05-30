@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -12,7 +12,6 @@
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/model/model.h"
 #include <sharedutils/util_file.h>
-
 
 decltype(EResourceWatcherCallbackType::Model) EResourceWatcherCallbackType::Model = EResourceWatcherCallbackType{umath::to_integral(E::Model)};
 decltype(EResourceWatcherCallbackType::Material) EResourceWatcherCallbackType::Material = EResourceWatcherCallbackType{umath::to_integral(E::Material)};
@@ -48,10 +47,10 @@ void ResourceWatcherManager::Unlock()
 	for(auto &dirWatcher : m_watchers)
 		dirWatcher->SetEnabled(true);
 }
-ScopeGuard ResourceWatcherManager::ScopeLock()
+util::ScopeGuard ResourceWatcherManager::ScopeLock()
 {
 	Lock();
-	return ScopeGuard{[this]() {
+	return util::ScopeGuard{[this]() {
 		Unlock();
 	}};
 }
@@ -76,6 +75,7 @@ void ResourceWatcherManager::ReloadMaterial(const std::string &path)
 			auto fname = ufile::get_file_from_filename(path);
 			ufile::remove_extension_from_filename(fname);
 			auto &models = m_networkState->GetCachedModels();
+			std::unordered_set<Model*> modelMap;
 			for(auto &pair : models)
 			{
 				auto &mdl = pair.second;
@@ -86,12 +86,15 @@ void ResourceWatcherManager::ReloadMaterial(const std::string &path)
 					ustring::to_lower(tex);
 					if(tex == fname)
 					{
+						modelMap.insert(mdl.get());
 						mdl->PrecacheTexture(it -textures.begin());
 						goto loopDone;
 					}
 				}
 			}
-			loopDone:;
+		loopDone:;
+
+			OnMaterialReloaded(path,modelMap);
 		}
 	}
 }
@@ -162,7 +165,7 @@ void ResourceWatcherManager::OnResourceChanged(const std::string &path,const std
 					for(auto *ent : entIt)
 					{
 						auto mdlComponent = ent->GetModelComponent();
-						if(mdlComponent.expired() || FileManager::ComparePath(mdlComponent->GetModelName(),path) == false)
+						if(!mdlComponent || FileManager::ComparePath(mdlComponent->GetModelName(),path) == false)
 							continue;
 #if RESOURCE_WATCHER_VERBOSE > 0
 						Con::cout<<"[ResourceWatcher] Reloading model for entity "<<ent->GetClass()<<"..."<<Con::endl;
@@ -192,9 +195,8 @@ void ResourceWatcherManager::OnResourceChanged(const std::string &path,const std
 #endif
 		ReloadTexture(path);
 		auto &matManager = nw->GetMaterialManager();
-		for(auto &pair : matManager.GetMaterials()) // Find all materials which use this texture
+		for(auto &hMat : matManager.GetMaterials()) // Find all materials which use this texture
 		{
-			auto &hMat = pair.second;
 			if(hMat.IsValid() == false)
 				continue;
 			auto *mat = hMat.get();
@@ -334,4 +336,3 @@ bool ResourceWatcherManager::MountDirectory(const std::string &path,bool bAbsolu
 	}
 	return true;
 }
-

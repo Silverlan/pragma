@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __ENTITY_ITERATOR_HPP__
 #define __ENTITY_ITERATOR_HPP__
@@ -52,17 +52,6 @@ struct EntityContainer
 private:
 	std::vector<BaseEntity*> &ents;
 };
-struct ComponentContainer
-	: public BaseEntityContainer
-{
-	ComponentContainer(const std::vector<pragma::BaseEntityComponent*> &components,std::size_t count)
-		: BaseEntityContainer(count),components{components}
-	{}
-	virtual std::size_t Size() const override;
-	virtual BaseEntity *At(std::size_t index) override;
-private:
-	const std::vector<pragma::BaseEntityComponent*> &components;
-};
 struct EntityIteratorData
 {
 	EntityIteratorData(Game &game);
@@ -96,11 +85,11 @@ public:
 	bool operator!=(const BaseEntityIterator &other);
 
 	std::size_t GetCount() const;
-private:
-	bool ShouldPass(BaseEntity &ent) const;
-
+protected:
 	std::shared_ptr<EntityIteratorData> m_iteratorData;
 	std::size_t m_currentIndex = 0ull;
+private:
+	bool ShouldPass(BaseEntity &ent) const;
 };
 
 class DLLNETWORK EntityIterator
@@ -149,9 +138,15 @@ public:
 
 	template<class TFilter,typename... TARGS>
 		void AttachFilter(TARGS ...args);
-private:
+protected:
+	EntityIterator()=default;
 	EntityIterator(Game &game,bool /* dummy */);
+	void SetBaseComponentType(pragma::ComponentId componentId);
+	void SetBaseComponentType(std::type_index typeIndex);
+	void SetBaseComponentType(const std::string &componentName);
 
+	std::shared_ptr<EntityIteratorData> m_iteratorData;
+private:
 	template <typename T, typename = int>
 		struct HasGetType : std::false_type { };
 
@@ -169,12 +164,6 @@ private:
 		typename std::enable_if<!HasGetType<T>::value>::type
 			GetIteratorFilterComponentType(std::optional<std::type_index> &typeIndex)
 	{}
-
-	void SetBaseComponentType(pragma::ComponentId componentId);
-	void SetBaseComponentType(std::type_index typeIndex);
-	void SetBaseComponentType(const std::string &componentName);
-
-	std::shared_ptr<EntityIteratorData> m_iteratorData;
 };
 REGISTER_BASIC_BITWISE_OPERATORS(EntityIterator::FilterFlags)
 #pragma warning(pop)
@@ -192,6 +181,24 @@ private:
 	std::string m_name;
 	bool m_bCaseSensitive = false;
 	bool m_bExactMatch = true;
+};
+
+struct DLLNETWORK EntityIteratorFilterModel
+	: public IEntityIteratorFilter
+{
+	EntityIteratorFilterModel(Game &game,const std::string &mdlName);
+	virtual bool ShouldPass(BaseEntity &ent) override;
+private:
+	std::string m_modelName;
+};
+
+struct DLLNETWORK EntityIteratorFilterUuid
+	: public IEntityIteratorFilter
+{
+	EntityIteratorFilterUuid(Game &game,const util::Uuid &uuid);
+	virtual bool ShouldPass(BaseEntity &ent) override;
+private:
+	util::Uuid m_uuid;
 };
 
 struct DLLNETWORK EntityIteratorFilterClass
@@ -306,6 +313,77 @@ template<class TComponent>
 	}
 };
 
+struct ComponentContainer
+	: public BaseEntityContainer
+{
+	ComponentContainer(const std::vector<pragma::BaseEntityComponent*> &components,std::size_t count)
+		: BaseEntityContainer(count),components{components}
+	{}
+	virtual std::size_t Size() const override;
+	virtual BaseEntity *At(std::size_t index) override;
+
+	// For internal use only!
+	const std::vector<pragma::BaseEntityComponent*> &components;
+};
+
+template<class TComponent>
+	class BaseEntityComponentIterator
+		: public BaseEntityIterator
+{
+public:
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = BaseEntity;
+    using difference_type = BaseEntity;
+    using pointer = BaseEntity*;
+    using reference = BaseEntity&;
+	
+	BaseEntityComponentIterator(const std::shared_ptr<EntityIteratorData> &itData,bool bEndIterator)
+		: BaseEntityIterator{itData,bEndIterator},m_components{&static_cast<ComponentContainer*>(m_iteratorData->entities.get())->components}
+	{}
+	BaseEntityComponentIterator(const BaseEntityIterator &other)
+		: BaseEntityIterator{other},m_components{other.m_components}
+	{}
+	BaseEntityComponentIterator<TComponent> &operator=(const BaseEntityIterator &other)
+	{
+		BaseEntityIterator::operator=(other);
+		m_components = other.m_components;
+		return *this;
+	}
+
+	TComponent &operator*()
+	{
+		return static_cast<TComponent&>(*(*m_components)[m_currentIndex]);
+	}
+	TComponent *operator->()
+	{
+		return static_cast<TComponent*>((*m_components)[m_currentIndex]);
+	}
+	bool operator==(const BaseEntityComponentIterator<TComponent> &other) {return BaseEntityIterator::operator==(other);}
+	bool operator!=(const BaseEntityComponentIterator<TComponent> &other) {return BaseEntityIterator::operator!=(other);}
+private:
+	const std::vector<pragma::BaseEntityComponent*> *m_components = nullptr;
+};
+
+template<class TComponent>
+	class EntityCIterator
+		: public EntityIterator
+{
+public:
+	EntityCIterator(Game &game,FilterFlags filterFlags=FilterFlags::Default)
+		: EntityIterator{game,false}
+	{
+		SetBaseComponentType(std::type_index(typeid(TComponent)));
+	}
+	BaseEntityComponentIterator<TComponent> begin() const
+	{
+		return BaseEntityComponentIterator<TComponent>{m_iteratorData,false};
+	}
+	BaseEntityComponentIterator<TComponent> end() const
+	{
+		return BaseEntityComponentIterator<TComponent>{m_iteratorData,true};
+	}
+};
+
 ///////////////
 
 template<class TComponent>
@@ -336,7 +414,7 @@ public:
 	TComponent *operator->() {return m_ents->at(m_currentIndex)->GetComponent<TComponent>().get();}
 	bool operator==(const EntityComponentIterator &other) {return m_ents == other.m_ents && m_currentIndex == other.m_currentIndex;}
 	bool operator!=(const EntityComponentIterator &other) {return !operator==(other);}
-private:
+protected:
 	std::size_t m_currentIndex = std::numeric_limits<std::size_t>::max(); // Note: Intentional overflow at first iteration
 	std::vector<BaseEntity*> *m_ents = nullptr;
 };

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -48,8 +48,10 @@
 #include <pragma/console/command_options.hpp>
 #include <util_image.hpp>
 #include <util_image_buffer.hpp>
+#include <sharedutils/util_file.h>
+#include <prosper_window.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
@@ -61,9 +63,14 @@ DLLCLIENT void CMD_entities_cl(NetworkState *state,pragma::BasePlayerComponent *
 	std::optional<std::string> className = {};
 	if(argv.empty() == false)
 		className = '*' +argv.front() +'*';
+	std::optional<std::string> modelName {};
+	if(argv.size() > 1)
+		modelName = '*' +argv[1] +'*';
 	for(auto &pair : sortedEnts)
 	{
 		if(className.has_value() && ustring::match(pair.first->GetClass(),*className) == false)
+			continue;
+		if(modelName.has_value() && ustring::match(pair.first->GetModelName(),*modelName) == false)
 			continue;
 		Con::cout<<*pair.first<<Con::endl;
 	}
@@ -116,7 +123,7 @@ DLLCLIENT void CMD_getpos(NetworkState *state,pragma::BasePlayerComponent *pl,st
 	}
 	auto *cPl = game->GetLocalPlayer();
 	auto pTrComponent = cPl->GetEntity().GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 	{
 		Con::cout<<"0 0 0"<<Con::endl;
 		return;
@@ -364,9 +371,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		pragma::rendering::cycles::RenderImageInfo renderImgInfo {};
 		if(pCam)
 		{
-			renderImgInfo.cameraPosition = pCam->GetEntity().GetPosition();
-			renderImgInfo.cameraRotation = pCam->GetEntity().GetRotation();
-			renderImgInfo.nearZ = pCam->GetNearZ();
+			renderImgInfo.camPose = pCam->GetEntity().GetPose();
 			renderImgInfo.farZ = pCam->GetFarZ();
 			renderImgInfo.fov = pCam->GetFOV();
 		}
@@ -524,7 +529,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 #endif
 	{
 		// Just use the last rendered image
-		auto *renderer = scene ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer()) : nullptr;
+		auto *renderer = scene ? dynamic_cast<pragma::CRasterizationRendererComponent*>(scene->GetRenderer()) : nullptr;
 		if(renderer == nullptr)
 			return;
 
@@ -541,7 +546,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 			rt = renderer->GetHDRInfo().toneMappedRenderTarget;
 			break;
 		case ImageStage::ScreenOutput:
-			rt = c_engine->GetStagingRenderTarget();
+			rt = c_engine->GetRenderContext().GetWindow().GetStagingRenderTarget();
 			break;
 		}
 		if(rt == nullptr)
@@ -685,8 +690,7 @@ DLLCLIENT void CMD_shader_reload(NetworkState*,pragma::BasePlayerComponent*,std:
 	if(argv.empty())
 	{
 		auto &shaderManager = c_engine->GetShaderManager();
-		auto &shaders = shaderManager.GetShaders();
-		for(auto &pair : shaders)
+		for(auto &pair : shaderManager.GetShaderNameToIndexTable())
 		{
 			Con::cout<<"Reloading shader '"<<pair.first<<"'..."<<Con::endl;
 			c_engine->ReloadShader(pair.first);
@@ -697,14 +701,92 @@ DLLCLIENT void CMD_shader_reload(NetworkState*,pragma::BasePlayerComponent*,std:
 	c_engine->ReloadShader(argv.front());
 }
 
+void CMD_shader_optimize(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+{
+	std::unordered_map<std::string,pragma::console::CommandOption> commandOptions {};
+	pragma::console::parse_command_options(argv,commandOptions);
+	if(argv.empty())
+	{
+		Con::cwar<<"WARNING: No shader specified!"<<Con::endl;
+		return;
+	}
+	auto &shaderName = argv.front();
+	auto &renderContext = c_engine->GetRenderContext();
+	if(renderContext.GetAPIAbbreviation() != "VK")
+	{
+		Con::cwar<<"WARNING: Shader optimization only supported for Vulkan!"<<Con::endl;
+		return;
+	}
+	auto shader = renderContext.GetShader(shaderName);
+	if(shader.expired())
+	{
+		Con::cwar<<"WARNING: Shader '"<<shaderName<<"' not found!"<<Con::endl;
+		return;
+	}
+	if(shader->IsValid() == false)
+	{
+		Con::cwar<<"WARNING: Shader '"<<shaderName<<"' is invalid!"<<Con::endl;
+		return;
+	}
+	std::unordered_map<prosper::ShaderStage,std::string> shaderStages;
+	for(auto &stageData : shader->GetStages())
+	{
+		if(stageData == nullptr)
+			continue;
+		shaderStages[stageData->stage] = stageData->path;
+	}
+	std::string infoLog;
+	auto optimizedShaders = renderContext.OptimizeShader(shaderStages,infoLog);
+	if(optimizedShaders.has_value() == false)
+	{
+		Con::cwar<<"WARNING: Unable to optimize shader: "<<infoLog<<Con::endl;
+		return;
+	}
+	auto validate = pragma::console::get_command_option_parameter_value(commandOptions,"validate","0");
+	if(util::to_boolean(validate))
+	{
+		Con::cout<<"Optimization complete!"<<Con::endl;
+		return; // Don't save shaders
+	}
+	Con::cout<<"Optimization complete! Saving optimized shader files..."<<Con::endl;
+	std::string outputPath = "addons/vulkan/";
+	auto reload = util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions,"reload","0"));
+	for(auto &pair : *optimizedShaders)
+	{
+		auto itSrc = shaderStages.find(pair.first);
+		if(itSrc == shaderStages.end())
+			continue;
+		auto shaderFile = renderContext.FindShaderFile("shaders/" +itSrc->second);
+		if(shaderFile.has_value() == false)
+		{
+			Con::cwar<<"WARNING: Unable to find shader file for '"<<pair.second<<"'!"<<Con::endl;
+			return;
+		}
+		auto fileName = outputPath +*shaderFile;
+		ufile::remove_extension_from_filename(fileName);
+		fileName += "_vk.gls";
+		if(reload == false && FileManager::Exists(fileName))
+			continue;
+		FileManager::CreatePath(ufile::get_path_from_filename(fileName).c_str());
+		auto f = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(),"w");
+		if(f == nullptr)
+		{
+			Con::cwar<<"WARNING: Unable to open file '"<<fileName<<"' for writing!"<<Con::endl;
+			return;
+		}
+		f->WriteString(pair.second);
+		f = nullptr;
+	}
+}
+
 void CMD_shader_list(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
 {
 	auto &shaderManager = c_engine->GetShaderManager();
 	std::vector<std::shared_ptr<prosper::Shader>> shaderList;
 	auto shaders = shaderManager.GetShaders();
 	shaderList.reserve(shaders.size());
-	for(auto &pair : shaders)
-		shaderList.push_back(pair.second);
+	for(auto &hShader : shaders)
+		shaderList.push_back(hShader);
 	std::sort(shaderList.begin(),shaderList.end(),[](const std::shared_ptr<prosper::Shader> &a,const std::shared_ptr<prosper::Shader> &b) {
 		return (a->GetIdentifier() < b->GetIdentifier()) ? true : false;
 	});
@@ -814,7 +896,7 @@ void Console::commands::cl_find(NetworkState *state,pragma::BasePlayerComponent*
 
 void CMD_fps(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
 {
-	Con::cout<<"FPS: "<<c_engine->GetFPS()<<Con::endl<<"Frame Time: "<<c_engine->GetFrameTime()<<"ms"<<Con::endl;
+	Con::cout<<"FPS: "<<util::round_string(c_engine->GetFPS(),0)<<Con::endl<<"Frame Time: "<<util::round_string(c_engine->GetFrameTime(),2)<<"ms"<<Con::endl;
 }
 
 void Console::commands::vk_dump_limits(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&)
@@ -1073,7 +1155,7 @@ static void cvar_net_graph(bool val)
 			return;
 		dbg = std::make_unique<DebugGameGUI>([]() {
 			auto &wgui = WGUI::GetInstance();
-			auto sz = wgui.GetContext().GetWindow().GetSize();
+			auto sz = wgui.GetContext().GetWindow()->GetSize();
 			auto el = wgui.Create<WINetGraph>();
 			el->SetSize(540,180);
 			el->SetPos(sz.x -el->GetWidth(),0);

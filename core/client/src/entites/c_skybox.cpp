@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -14,12 +14,15 @@
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/model/c_model.h"
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/asset/util_asset.hpp>
+#include <pragma/game/game_resources.hpp>
 #include <sharedutils/util_file.h>
 #include <util_image_buffer.hpp>
 #include <util_texture_info.hpp>
 #include <prosper_command_buffer.hpp>
+#include <pragma/entities/entity_iterator.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
@@ -233,14 +236,16 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 		Con::cout<<"Skybox cubemap texture saved as '"<<fullPath<<"'! Generating material..."<<Con::endl;
 		auto *mat = client->CreateMaterial("skybox");
 		mat->GetDataBlock()->AddValue("texture","skybox",matName);
-		if(mat->Save(matName,"addons/converted/"))
+		auto savePath = pragma::asset::relative_path_to_absolute_path(matName,pragma::asset::Type::Material,util::CONVERT_PATH);
+		std::string err;
+		if(mat->Save(savePath.GetString(),err))
 		{
 			client->LoadMaterial(matName,true);
 			Con::cout<<"Skybox material saved as '"<<(matName +".wmi")<<"'"<<Con::endl;
 			return true;
 		}
 		else
-			Con::cwar<<"WARNING: Unable to save skybox material as '"<<(matName +".wmi")<<"'!"<<Con::endl;
+			Con::cwar<<"WARNING: Unable to save skybox material as '"<<(matName +".wmi")<<"': "<<err<<"!"<<Con::endl;
 	}
 	else
 		Con::cwar<<"WARNING: Unable to save skybox cubemap texture as '"<<fullPath<<"'!"<<Con::endl;
@@ -276,3 +281,24 @@ void CSkybox::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CSkyboxComponent>();
 }
+
+static void sky_override(NetworkState*,ConVar*,std::string,std::string skyMat)
+{
+	if(c_game == nullptr)
+		return;
+	CMaterial *matSky = nullptr;
+	if(skyMat.empty() == false)
+		matSky = static_cast<CMaterial*>(client->LoadMaterial(skyMat,true,false));
+	EntityIterator entIt {*c_game};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CSkyboxComponent>>();
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CModelComponent>>();
+	for(auto *ent : entIt)
+	{
+		auto mdlC = ent->GetComponent<CModelComponent>();
+		if(matSky)
+			mdlC->SetMaterialOverride(0,*matSky);
+		else
+			mdlC->ClearMaterialOverride(0);
+	}
+}
+REGISTER_CONVAR_CALLBACK_CL(sky_override,sky_override);

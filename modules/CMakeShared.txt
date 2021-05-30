@@ -50,7 +50,6 @@ macro(link_generic_module_libraries)
 	link_external_library(sharedutils)
 	link_external_library(mathutil)
 	link_external_library(vfilesystem)
-	link_external_library(engine)
 	link_external_library(shared)
 	link_external_library(luasystem)
 	link_external_library(LuaJIT)
@@ -68,8 +67,6 @@ set(ENABLE_STATIC_LIBRARY_FLAG 0)
 set(DEFINITIONS
 	USE_LUAJIT
 	GLM_FORCE_DEPTH_ZERO_TO_ONE
-	PHYS_ENGINE_BULLET
-	BT_USE_DOUBLE_PRECISION
 	LUABIND_DYNAMIC_LINK
 	ENABLE_MESH_FUNCTIONS
 )

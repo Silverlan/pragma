@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_ai_component.hpp"
@@ -233,7 +233,7 @@ void SAIComponent::OnEntitySpawn()
 	PlayActivity(Activity::Idle,info);
 
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->DropToFloor();
 }
 
@@ -242,8 +242,8 @@ bool SAIComponent::OnInput(std::string input,BaseEntity *activator,BaseEntity *c
 #if DEBUG_AI_MOVEMENT == 1
 	if(ustring::compare(input,"dbg_move",false))
 	{
-		auto pTrComponentActivator = (activator != nullptr) ? activator->GetTransformComponent() : util::WeakHandle<BaseTransformComponent>{};
-		if(pTrComponentActivator.valid())
+		auto pTrComponentActivator = (activator != nullptr) ? activator->GetTransformComponent() : nullptr;
+		if(pTrComponentActivator)
 		{
 			pragma::SAIComponent::AIAnimationInfo info {};
 			info.SetPlayAsSchedule(false);
@@ -254,7 +254,7 @@ bool SAIComponent::OnInput(std::string input,BaseEntity *activator,BaseEntity *c
 			if(data == "1")
 			{
 				auto pTrComponent = ent.GetTransformComponent();
-				if(pTrComponent.valid())
+				if(pTrComponent != nullptr)
 					mvInfo.faceTarget = pTrComponent->GetPosition() +pTrComponent->GetForward() *10'000.f;
 			}
 			auto r = MoveTo(pTrComponentActivator->GetPosition(),mvInfo);
@@ -348,14 +348,14 @@ void SAIComponent::StartSchedule(std::shared_ptr<ai::Schedule> &sched)
 	}
 }
 
-void SAIComponent::Think(double tDelta)
+void SAIComponent::OnTick(double tDelta)
 {
 	auto &ent = GetEntity();
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(charComponent.valid() && pTrComponent.valid())
-		charComponent->SetViewOrientation(pTrComponent->GetOrientation());
-	BaseAIComponent::Think(tDelta); // Has to be called AFTER Entity::Think, to make sure animations are updated (Required for animation movement)
+	if(charComponent.valid() && pTrComponent != nullptr)
+		charComponent->SetViewOrientation(pTrComponent->GetRotation());
+	BaseAIComponent::OnTick(tDelta); // Has to be called AFTER Entity::Think, to make sure animations are updated (Required for animation movement)
 	if(IsAIEnabled() == false)
 	{
 		auto *controller = GetController();

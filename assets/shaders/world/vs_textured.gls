@@ -1,0 +1,12 @@
+#version 440
+
+#extension GL_ARB_separate_shader_objects : enable
+#extension GL_ARB_shading_language_420pack : enable
+
+#include "pbr/vs_config.gls"
+#include "../modules/vs_world.gls"
+
+void main()
+{
+	export_world_fragment_data();
+}

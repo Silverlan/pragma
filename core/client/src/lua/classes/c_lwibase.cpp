@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -20,8 +20,10 @@
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/lproperty.hpp>
 #include <pragma/lua/lua_call.hpp>
+#include <prosper_command_buffer.hpp>
 #include <sharedutils/property/util_property_color.hpp>
 #include <util_formatted_text.hpp>
+#include <prosper_window.hpp>
 
 DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WI,WIShape,WIShape);
 DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WI,WIText,WIText);
@@ -60,7 +62,7 @@ DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WITexturedShape,WIRoundedTexture
 DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WIIcon,WISilkIcon,WISilkIcon);
 DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WITexturedShape,WIDebugSSAO,WIDebugSSAO);
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 DLLCLIENT Con::c_cout & operator<<(Con::c_cout &os,const WIHandle &handle)
@@ -445,13 +447,35 @@ void Lua::WIBase::register_class(luabind::class_<WIHandle> &classDef)
 		lua_checkgui_ret(l,hPanel,false);
 		return hPanel->IsUpdateScheduled();
 	}));
+	classDef.def("GetRootElement",static_cast<luabind::object(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) -> luabind::object {
+		lua_checkgui_ret(l,hPanel,{});
+		auto *el = hPanel->GetRootElement();
+		if(!el)
+			return {};
+		return WGUILuaInterface::GetLuaObject(l,*el);
+	}));
+	classDef.def("GetRootWindow",static_cast<luabind::object(*)(lua_State*,WIHandle&)>([](lua_State *l,WIHandle &hPanel) -> luabind::object {
+		lua_checkgui_ret(l,hPanel,{});
+		auto *window = hPanel->GetRootWindow();
+		return luabind::object{l,window};
+	}));
 
 	auto defDrawInfo = luabind::class_<::WIBase::DrawInfo>("DrawInfo");
-	defDrawInfo.def(luabind::constructor<>());
+	defDrawInfo.def(luabind::constructor<const std::shared_ptr<prosper::ICommandBuffer>&>());
 	defDrawInfo.def_readwrite("offset",&::WIBase::DrawInfo::offset);
 	defDrawInfo.def_readwrite("size",&::WIBase::DrawInfo::size);
 	defDrawInfo.def_readwrite("transform",&::WIBase::DrawInfo::transform);
 	defDrawInfo.def_readwrite("useScissor",&::WIBase::DrawInfo::useScissor);
+	defDrawInfo.property("commandBuffer",static_cast<luabind::object(*)(lua_State*,::WIBase::DrawInfo&)>([](lua_State *l,::WIBase::DrawInfo &drawInfo) -> luabind::object {
+		return drawInfo.commandBuffer ? luabind::object{l,drawInfo.commandBuffer} : luabind::object{};
+	}),static_cast<void(*)(lua_State*,::WIBase::DrawInfo&,luabind::object)>([](lua_State *l,::WIBase::DrawInfo &drawInfo,luabind::object o) {
+		if(Lua::IsSet(l,2) == false)
+		{
+			drawInfo.commandBuffer = nullptr;
+			return;
+		}
+		drawInfo.commandBuffer = Lua::Check<Lua::Vulkan::CommandBuffer>(l,2).shared_from_this();
+	}));
 	defDrawInfo.def("SetColor",static_cast<void(*)(lua_State*,::WIBase::DrawInfo&,const Color&)>([](lua_State *l,::WIBase::DrawInfo &drawInfo,const Color &color) {
 		drawInfo.color = color.ToVector4();
 	}));
@@ -818,6 +842,14 @@ void Lua::WIDropDownMenu::register_class(luabind::class_<WIDropDownMenuHandle,lu
 	classDef.def("SetListItemCount",static_cast<void(*)(lua_State*,WIDropDownMenuHandle&,uint32_t)>([](lua_State *l,WIDropDownMenuHandle &hPanel,uint32_t n) {
 		lua_checkgui(l,hPanel);
 		static_cast<::WIDropDownMenu*>(hPanel.get())->SetListItemCount(n);
+	}));
+	classDef.def("ScrollToOption",static_cast<void(*)(lua_State*,WIDropDownMenuHandle&,uint32_t)>([](lua_State *l,WIDropDownMenuHandle &hPanel,uint32_t idx) {
+		lua_checkgui(l,hPanel);
+		static_cast<::WIDropDownMenu*>(hPanel.get())->ScrollToOption(idx);
+	}));
+	classDef.def("ScrollToOption",static_cast<void(*)(lua_State*,WIDropDownMenuHandle&,uint32_t,bool)>([](lua_State *l,WIDropDownMenuHandle &hPanel,uint32_t idx,bool center) {
+		lua_checkgui(l,hPanel);
+		static_cast<::WIDropDownMenu*>(hPanel.get())->ScrollToOption(idx,center);
 	}));
 }
 
@@ -2097,9 +2129,9 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l,WIHandle &hPanel,const Vecto
 	lua_checkgui(l,hPanel);
 	auto &window = c_engine->GetWindow();
 	auto absPos = hPanel->GetAbsolutePos();
-	window.SetCursorPosOverride(Vector2{static_cast<float>(absPos.x +mousePos.x),static_cast<float>(absPos.y +mousePos.y)});
-	ScopeGuard sg {[&window]() {
-		window.ClearCursorPosOverride();
+	window->SetCursorPosOverride(Vector2{static_cast<float>(absPos.x +mousePos.x),static_cast<float>(absPos.y +mousePos.y)});
+	::util::ScopeGuard sg {[&window]() {
+		window->ClearCursorPosOverride();
 	}};
 	hPanel->InjectMouseMoveInput(mousePos.x,mousePos.y);
 }
@@ -2108,9 +2140,9 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l,WIHandle &hPanel,const Vecto
 	lua_checkgui_ret(l,hPanel,::util::EventReply::Unhandled);
 	auto &window = c_engine->GetWindow();
 	auto absPos = hPanel->GetAbsolutePos();
-	window.SetCursorPosOverride(Vector2{static_cast<float>(absPos.x +mousePos.x),static_cast<float>(absPos.y +mousePos.y)});
-	ScopeGuard sg {[&window]() {
-		window.ClearCursorPosOverride();
+	window->SetCursorPosOverride(Vector2{static_cast<float>(absPos.x +mousePos.x),static_cast<float>(absPos.y +mousePos.y)});
+	::util::ScopeGuard sg {[&window]() {
+		window->ClearCursorPosOverride();
 	}};
 	return hPanel->InjectMouseInput(GLFW::MouseButton(button),GLFW::KeyState(action),GLFW::Modifier(mods));
 }
@@ -2160,11 +2192,11 @@ void Lua::WIBase::InjectMouseMoveInput(lua_State *l,WIHandle &hPanel,const Vecto
 {
 	lua_checkgui_ret(l,hPanel,::util::EventReply::Unhandled);
 	auto &window = c_engine->GetWindow();
-	auto cursorPos = window.GetCursorPos();
+	auto cursorPos = window->GetCursorPos();
 	auto absPos = hPanel->GetAbsolutePos();
-	window.SetCursorPosOverride(Vector2{static_cast<float>(absPos.x +mousePos.x),static_cast<float>(absPos.y +mousePos.y)});
+	window->SetCursorPosOverride(Vector2{static_cast<float>(absPos.x +mousePos.x),static_cast<float>(absPos.y +mousePos.y)});
 	auto result = hPanel->InjectScrollInput(offset);
-	window.ClearCursorPosOverride();
+	window->ClearCursorPosOverride();
 	return result;
 }
 void Lua::WIBase::IsDescendant(lua_State *l,WIHandle &hPanel,WIHandle &hOther)

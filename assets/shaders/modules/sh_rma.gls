@@ -1,0 +1,8 @@
+#ifndef F_SH_RMA_GLS
+#define F_SH_RMA_GLS
+
+#define RMA_CHANNEL_AO 0
+#define RMA_CHANNEL_ROUGHNESS 1
+#define RMA_CHANNEL_METALNESS 2
+
+#endif

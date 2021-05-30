@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -13,6 +13,7 @@
 #include "pragma/entities/components/damageable_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include <sharedutils/datastream.h>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -100,17 +101,19 @@ void BaseHealthComponent::SetHealth(uint16_t health)
 }
 void BaseHealthComponent::SetMaxHealth(uint16_t maxHealth) {*m_maxHealth = maxHealth;}
 
-void BaseHealthComponent::Save(DataStream &ds)
+void BaseHealthComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
-	BaseEntityComponent::Save(ds);
-	ds->Write<uint16_t>(*m_health);
-	ds->Write<uint16_t>(*m_maxHealth);
+	BaseEntityComponent::Save(udm);
+	udm["health"] = **m_health;
+	udm["maxHealth"] = **m_maxHealth;
 }
-void BaseHealthComponent::Load(DataStream &ds,uint32_t version)
+void BaseHealthComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {
-	BaseEntityComponent::Load(ds,version);
-	auto health = ds->Read<uint16_t>();
-	auto maxHealth = ds->Read<uint16_t>();
+	BaseEntityComponent::Load(udm,version);
+	uint16_t health = 0;
+	udm["health"](health);
+	uint16_t maxHealth = 0;
+	udm["maxHealth"](maxHealth);
 	SetMaxHealth(maxHealth);
 	SetHealth(health);
 }

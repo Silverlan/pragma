@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -14,7 +14,7 @@
 #include <image/prosper_render_target.hpp>
 #include <prosper_command_buffer.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
@@ -33,9 +33,10 @@ WIDebugGlowBloom::~WIDebugGlowBloom()
 
 void WIDebugGlowBloom::UpdateBloomImage()
 {
+#if 0
 	auto &drawCmd = c_engine->GetDrawCommandBuffer();
 	auto *scene = c_game->GetScene();
-	auto *renderer = scene ? dynamic_cast<pragma::rendering::RasterizationRenderer*>(scene->GetRenderer()) : nullptr;
+	auto *renderer = scene ? dynamic_cast<pragma::CRasterizationRendererComponent*>(scene->GetRenderer()) : nullptr;
 	if(renderer == nullptr)
 		return;
 	auto &glowTexture = renderer->GetGlowInfo().renderTarget->GetTexture();
@@ -47,6 +48,7 @@ void WIDebugGlowBloom::UpdateBloomImage()
 	drawCmd->RecordBlitImage({},imgSrc,imgDst);
 	drawCmd->RecordImageBarrier(imgSrc,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 	drawCmd->RecordImageBarrier(imgDst,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+#endif
 }
 
 void WIDebugGlowBloom::DoUpdate()

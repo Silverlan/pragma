@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -67,9 +67,10 @@ void CMD_debug_light_shadowmap(NetworkState *nw,pragma::BasePlayerComponent*,std
 	if(pEl != nullptr)
 		pEl->Remove();
 
-	auto smType = pragma::CLightComponent::ShadowMapType::Static;
-	if(argv.size() > 1 && util::to_boolean(argv.at(1)))
-		smType = pragma::CLightComponent::ShadowMapType::Dynamic;
+	//auto smType = pragma::CLightComponent::ShadowMapType::Static;
+	//if(argv.size() > 1 && util::to_boolean(argv.at(1)))
+	//	smType = pragma::CLightComponent::ShadowMapType::Dynamic;
+	auto smType = pragma::CLightComponent::ShadowMapType::Dynamic;
 
 	pragma::CLightComponent *light;
 	if(get_shadow_map(nw,argv,&light,smType) == false)

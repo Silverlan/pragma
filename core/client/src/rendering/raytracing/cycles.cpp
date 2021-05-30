@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "pragma/rendering/raytracing/cycles.hpp"
@@ -10,7 +10,6 @@
 #include <sharedutils/util_library.hpp>
 
 using namespace pragma::rendering;
-
 
 struct CyclesModuleInterface
 {
@@ -22,15 +21,12 @@ struct CyclesModuleInterface
 		bake_lightmaps = FindSymbolAddress<decltype(bake_lightmaps)>(lib,"pr_cycles_bake_lightmaps");
 	}
 	void(*render_image)(
-		uint32_t,uint32_t,uint32_t,bool,bool,
-		const Vector3&,const Quat&,bool,const Mat4&,float,float,umath::Degree,
-		pragma::rendering::cycles::SceneInfo::SceneFlags,std::string,EulerAngles,float,uint32_t,
-		const std::function<bool(BaseEntity&)>&,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>&
+		const pragma::rendering::cycles::SceneInfo &sceneInfo,const pragma::rendering::cycles::RenderImageInfo &renderImageInfo,const std::function<bool(BaseEntity&)> &entFilter,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> &outJob
 	) = nullptr;
 
-	void(*bake_ao)(Model&,uint32_t,uint32_t,uint32_t,uint32_t,bool,bool,const std::string&,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>&) = nullptr;
-	void(*bake_ao_ent)(BaseEntity&,uint32_t,uint32_t,uint32_t,uint32_t,bool,bool,const std::string&,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>&) = nullptr;
-	void(*bake_lightmaps)(uint32_t,uint32_t,uint32_t,bool,bool,std::string,EulerAngles,float,bool,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>&) = nullptr;
+	void(*bake_ao)(const pragma::rendering::cycles::SceneInfo &sceneInfo,Model &mdl,uint32_t materialIndex,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> &outJob) = nullptr;
+	void(*bake_ao_ent)(const pragma::rendering::cycles::SceneInfo &sceneInfo,BaseEntity &ent,uint32_t materialIndex,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> &outJob) = nullptr;
+	void(*bake_lightmaps)(const pragma::rendering::cycles::SceneInfo &sceneInfo,util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> &outJob) = nullptr;
 
 	bool IsValid() const {return m_bValid;}
 private:
@@ -68,9 +64,7 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> cycles::render_image(Clien
 	};
 	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> job = {};
 	cyclesInterface->render_image(
-		sceneInfo.width,sceneInfo.height,sceneInfo.samples,sceneInfo.hdrOutput,sceneInfo.denoise,
-		renderImageInfo.cameraPosition,renderImageInfo.cameraRotation,renderImageInfo.equirectPanorama,renderImageInfo.viewProjectionMatrix,renderImageInfo.nearZ,renderImageInfo.farZ,renderImageInfo.fov,
-		sceneInfo.sceneFlags,sceneInfo.sky,sceneInfo.skyAngles,sceneInfo.skyStrength,sceneInfo.maxTransparencyBounces,
+		sceneInfo,renderImageInfo,
 		fEntityFilter,job
 	);
 	if(job.IsValid() == false)
@@ -83,9 +77,8 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> cycles::bake_ambient_occlu
 	if(cyclesInterface.has_value() == false)
 		return {};
 	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> job = {};
-	auto sDeviceType = (sceneInfo.device == SceneInfo::DeviceType::GPU) ? "gpu" : "cpu";
 	cyclesInterface->bake_ao_ent(
-		ent,materialIndex,sceneInfo.width,sceneInfo.height,sceneInfo.samples,sceneInfo.hdrOutput,sceneInfo.denoise,sDeviceType,job
+		sceneInfo,ent,materialIndex,job
 	);
 	if(job.IsValid() == false)
 		return {};
@@ -97,9 +90,8 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> cycles::bake_ambient_occlu
 	if(cyclesInterface.has_value() == false)
 		return {};
 	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> job = {};
-	auto sDeviceType = (sceneInfo.device == SceneInfo::DeviceType::GPU) ? "gpu" : "cpu";
 	cyclesInterface->bake_ao(
-		mdl,materialIndex,sceneInfo.width,sceneInfo.height,sceneInfo.samples,sceneInfo.hdrOutput,sceneInfo.denoise,sDeviceType,job
+		sceneInfo,mdl,materialIndex,job
 	);
 	if(job.IsValid() == false)
 		return {};
@@ -112,8 +104,7 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> cycles::bake_lightmaps(Cli
 		return {};
 	util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> job = {};
 	cyclesInterface->bake_lightmaps(
-		sceneInfo.width,sceneInfo.height,sceneInfo.samples,sceneInfo.hdrOutput,sceneInfo.denoise,
-		sceneInfo.sky,sceneInfo.skyAngles,sceneInfo.skyStrength,sceneInfo.renderJob,
+		sceneInfo,
 		job
 	);
 	if(job.IsValid() == false)

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __BASE_TRIGGER_PUSH_HPP__
 #define __BASE_TRIGGER_PUSH_HPP__
@@ -24,8 +24,8 @@ namespace pragma
 		};
 		BaseTriggerPushComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
+		virtual void OnTick(double dt) override;
 	protected:
-		void OnThink(double dt);
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -13,9 +13,12 @@
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include "pragma/rendering/render_queue.hpp"
+#include "pragma/rendering/render_processor.hpp"
+#include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include <pragma/entities/baseentity_events.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
@@ -37,41 +40,103 @@ void CSkyCameraComponent::Initialize()
 		return util::EventReply::Handled;
 	});
 
-	m_renderMeshCollectionHandler.GetRenderMeshData().insert(std::make_pair(RenderMode::World,std::make_shared<rendering::CulledMeshData>()));
-	m_cbOnPreRender = c_game->AddCallback("OnPreRender",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([this](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
-		auto *renderer = drawSceneInfo.get().scene->GetRenderer();
-		if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
-			return;
-		auto &posCam = GetEntity().GetPosition();
-		m_renderMeshCollectionHandler.PerformOcclusionCulling(*drawSceneInfo.get().scene.get(),*static_cast<const pragma::rendering::RasterizationRenderer*>(renderer),posCam,false);
+	m_renderQueue = pragma::rendering::RenderQueue::Create();
+	m_renderQueueTranslucent = pragma::rendering::RenderQueue::Create();
 
-		//umath::set_flag(renderFlags,FRender::View | FRender::Skybox,false);
-		auto renderFlags = FRender::World | FRender::Static | FRender::Dynamic;
-		// TODO: No glow or translucent meshes are supported in 3D skybox for now
-		auto resultFlags = m_renderMeshCollectionHandler.GenerateOptimizedRenderObjectStructures(*drawSceneInfo.get().scene.get(),*static_cast<const pragma::rendering::RasterizationRenderer*>(renderer),posCam,renderFlags,RenderMode::World,false,false);
+#if 0
+	m_cbOnBuildRenderQueue = c_game->AddCallback("BuildRenderQueues",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([this](std::reference_wrapper<const util::DrawSceneInfo> refDrawSceneInfo) {
+		if(refDrawSceneInfo.get().scene.expired())
+			return;
+		m_renderQueue->Clear();
+		m_renderQueueTranslucent->Clear();
+		m_renderQueue->Lock();
+		m_renderQueueTranslucent->Lock();
+		
+		auto &drawSceneInfo = refDrawSceneInfo.get();
+		c_game->GetRenderQueueBuilder().Append([this,&drawSceneInfo]() {
+			auto &scene = *drawSceneInfo.scene.get();
+
+			auto &pos = GetEntity().GetPosition();
+
+			EntityIterator entItWorld {*c_game};
+			entItWorld.AttachFilter<TEntityIteratorFilterComponent<pragma::CWorldComponent>>();
+			std::vector<util::BSPTree::Node*> bspLeafNodes;
+			bspLeafNodes.reserve(entItWorld.GetCount());
+			for(auto *entWorld : entItWorld)
+			{
+				if(SceneRenderDesc::ShouldConsiderEntity(*static_cast<CBaseEntity*>(entWorld),scene,pos,drawSceneInfo.renderFlags) == false)
+					continue;
+				auto worldC = entWorld->GetComponent<pragma::CWorldComponent>();
+				auto &bspTree = worldC->GetBSPTree();
+				auto *node = bspTree ? bspTree->FindLeafNode(pos) : nullptr;
+				if(node == nullptr)
+					continue;
+				bspLeafNodes.push_back(node);
+			
+				auto *renderQueue = worldC->GetClusterRenderQueue(node->cluster,false /* translucent */);
+				auto *renderQueueTranslucent = worldC->GetClusterRenderQueue(node->cluster,true /* translucent */);
+				if(renderQueue)
+					m_renderQueue->Merge(*renderQueue);
+				if(renderQueueTranslucent)
+					m_renderQueueTranslucent->Merge(*renderQueueTranslucent);
+			}
+		
+			auto &hCam = scene.GetActiveCamera();
+			auto *culler = scene.FindOcclusionCuller();
+			if(culler && hCam.valid())
+			{
+				auto vp = hCam->GetProjectionMatrix() *hCam->GetViewMatrix();
+				auto &dynOctree = culler->GetOcclusionOctree();
+				SceneRenderDesc::CollectRenderMeshesFromOctree(
+					drawSceneInfo,dynOctree,scene,*hCam,vp,drawSceneInfo.renderFlags,
+					[this](RenderMode renderMode,bool translucent) -> pragma::rendering::RenderQueue* {
+						return (renderMode != RenderMode::World) ? nullptr : (translucent ? m_renderQueueTranslucent.get() : m_renderQueue.get());
+					},
+					nullptr,&bspLeafNodes
+				);
+			}
+
+			m_renderQueue->Sort();
+			m_renderQueueTranslucent->Sort();
+
+			m_renderQueue->Unlock();
+			m_renderQueueTranslucent->Unlock();
+		});
 	}));
+	m_cbPostRenderSkybox = c_game->AddCallback("PostRenderSkybox",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>,std::reference_wrapper<pragma::rendering::LightingStageRenderProcessor>>::Create(
+		[this](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo,std::reference_wrapper<pragma::rendering::LightingStageRenderProcessor> rsys) {
+		BindToShader(rsys.get());
+			rsys.get().Render(*m_renderQueue);
+			rsys.get().Render(*m_renderQueueTranslucent);
+		UnbindFromShader(rsys.get());
+	}));
+#endif
+}
+
+void CSkyCameraComponent::BindToShader(pragma::rendering::BaseRenderProcessor &processor)
+{
+	processor.Set3DSky(true);
+	auto &ent = GetEntity();
+	auto &pos = ent.GetPosition();
+	Vector4 drawOrigin {pos.x,pos.y,pos.z,GetSkyboxScale()};
+	processor.SetDrawOrigin(drawOrigin);
+}
+void CSkyCameraComponent::UnbindFromShader(pragma::rendering::BaseRenderProcessor &processor)
+{
+	processor.Set3DSky(false);
+	processor.SetDrawOrigin({});
 }
 
 void CSkyCameraComponent::OnRemove()
 {
 	BaseEntityComponent::OnRemove();
-	if(m_cbOnPreRender.IsValid())
-		m_cbOnPreRender.Remove();
+	if(m_cbOnBuildRenderQueue.IsValid())
+		m_cbOnBuildRenderQueue.Remove();
+	if(m_cbPostRenderSkybox.IsValid())
+		m_cbPostRenderSkybox.Remove();
 }
 
 float CSkyCameraComponent::GetSkyboxScale() const {return m_skyboxScale;}
-
-rendering::RenderMeshCollectionHandler &CSkyCameraComponent::GetRenderMeshCollectionHandler() {return m_renderMeshCollectionHandler;}
-const rendering::RenderMeshCollectionHandler &CSkyCameraComponent::GetRenderMeshCollectionHandler() const {return const_cast<CSkyCameraComponent*>(this)->GetRenderMeshCollectionHandler();}
-
-const rendering::CulledMeshData &CSkyCameraComponent::UpdateRenderMeshes(rendering::RasterizationRenderer &renderer,FRender renderFlags)
-{
-	auto &renderMeshData = m_renderMeshCollectionHandler.GetRenderMeshData();
-	auto it = renderMeshData.find(RenderMode::World);
-	if(it == renderMeshData.end())
-		throw std::logic_error{"Invalid world mesh data!"};
-	return *it->second;
-}
 
 void CSkyCameraComponent::OnEntitySpawn()
 {

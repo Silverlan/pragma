@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -15,7 +15,6 @@
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/audio/alsound_type.h>
-#include <pragma/entities/components/logic_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -43,41 +42,38 @@ CSoundScapeComponent::~CSoundScapeComponent()
 void CSoundScapeComponent::Initialize()
 {
 	BaseEnvSoundScapeComponent::Initialize();
+	SetTickPolicy(TickPolicy::Always); // TODO
+}
 
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		if(m_sound.get() == NULL)
-			return;
-		auto &entThis = GetEntity();
-		auto pTrComponent = entThis.GetTransformComponent();
-		auto pLogicComponent = entThis.GetComponent<pragma::LogicComponent>();
-		if(pLogicComponent.valid())
-			pLogicComponent->SetNextThink(c_game->CurTime() +0.25f);
-		if(pTrComponent.valid() && IsPlayerInRange())
+void CSoundScapeComponent::OnTick(double dt)
+{
+	if(m_sound.get() == NULL)
+		return;
+	auto &entThis = GetEntity();
+	auto pTrComponent = entThis.GetTransformComponent();
+	SetNextTick(c_game->CurTime() +0.25f);
+	if(pTrComponent != nullptr && IsPlayerInRange())
+	{
+		if(s_active != this)
 		{
-			if(s_active != this)
+			auto *pl = c_game->GetLocalPlayer();
+			auto &ent = pl->GetEntity();
+			auto charComponentEnt = ent.GetCharacterComponent();
+			auto pTrComponentEnt = ent.GetTransformComponent();
+			if(charComponentEnt.valid() || pTrComponentEnt)
 			{
-				auto *pl = c_game->GetLocalPlayer();
-				auto &ent = pl->GetEntity();
-				auto charComponentEnt = ent.GetCharacterComponent();
-				auto pTrComponentEnt = ent.GetTransformComponent();
-				if(charComponentEnt.valid() || pTrComponentEnt.valid())
-				{
-					TraceData tr;
-					tr.SetSource(charComponentEnt.valid() ? charComponentEnt->GetEyePosition() : pTrComponentEnt->GetPosition());
-					tr.SetTarget(pTrComponent->GetPosition());
-					tr.SetFlags(RayCastFlags::Default | RayCastFlags::IgnoreDynamic);
-					auto result = c_game->RayCast(tr);
-					if(result.hitType == RayCastHitType::None)
-						StartSoundScape();
-				}
+				TraceData tr;
+				tr.SetSource(charComponentEnt.valid() ? charComponentEnt->GetEyePosition() : pTrComponentEnt->GetPosition());
+				tr.SetTarget(pTrComponent->GetPosition());
+				tr.SetFlags(RayCastFlags::Default | RayCastFlags::IgnoreDynamic);
+				auto result = c_game->RayCast(tr);
+				if(result.hitType == RayCastHitType::None)
+					StartSoundScape();
 			}
 		}
-		if(s_active == this)
-			UpdateTargetPositions();
-	});
-
-	auto &ent = GetEntity();
-	ent.AddComponent<pragma::LogicComponent>();
+	}
+	if(s_active == this)
+		UpdateTargetPositions();
 }
 
 void CSoundScapeComponent::OnEntitySpawn()
@@ -111,9 +107,7 @@ void CSoundScapeComponent::OnEntitySpawn()
 		snd->SetRelative(true);
 		m_sound = snd;
 	}
-	auto pLogicComponent = ent.GetComponent<pragma::LogicComponent>();
-	if(pLogicComponent.valid())
-		pLogicComponent->SetNextThink(c_game->CurTime() +umath::random(0.f,0.25f)); // Spread out think time between entities
+	SetNextTick(c_game->CurTime() +umath::random(0.f,0.25f)); // Spread out think time between entities
 }
 
 void CSoundScapeComponent::ReceiveData(NetPacket &packet)
@@ -141,7 +135,7 @@ void CSoundScapeComponent::UpdateTargetPositions()
 		if(hEnt.IsValid())
 		{
 			auto pTrComponent = hEnt->GetTransformComponent();
-			if(pTrComponent.valid())
+			if(pTrComponent != nullptr)
 				al->SetTargetPosition(it->first,pTrComponent->GetPosition());
 		}
 	}
@@ -178,7 +172,7 @@ bool CSoundScapeComponent::IsPlayerInRange()
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pTrComponentPl = pl->GetEntity().GetTransformComponent();
-	if(pTrComponent.expired() || pTrComponentPl.expired())
+	if(pTrComponent == nullptr || !pTrComponentPl)
 		return false;
 	auto &origin = pTrComponent->GetPosition();
 	auto &pos = pTrComponentPl->GetPosition();

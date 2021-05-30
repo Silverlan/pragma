@@ -1,0 +1,228 @@
+"particleSystemDefinitions"
+{
+	"watersplash_2"
+	{
+		"assetData"
+		{
+			$array children [element;0][]
+			$array operators [element;0][]
+			"keyValues"
+			{
+				$string cast_shadows "0"
+				$string maxparticles "5"
+				$string material "particles/water/water_splash_v2"
+				$string emission_rate "100000"
+				$string orientation_type "1"
+				$string sort_particles "0"
+			}
+			$array initializers [element;4][
+				{
+					$string name "lifetime_random"
+					"keyValues"
+					{
+						$string lifetime_max "0.72"
+						$string lifetime_min "0.72"
+					}
+				},
+				{
+					$string name "rotation_random"
+					"keyValues"
+					{
+						$string rotation_min "-20"
+						$string rotation_max "20"
+					}
+				},
+				{
+					$string name "initial_velocity"
+					"keyValues"
+					{
+						$string velocity "0 20 0"
+						$string spread_min "-0.3 0 -0.3"
+						$string spread_max "0.3 0 0.3"
+					}
+				},
+				{
+					$string name "radius_random"
+					"keyValues"
+					{
+						$string radius_max "100"
+						$string radius_min "50"
+					}
+				}
+			]
+			$array renderers [element;0][]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+	"watersplash_1"
+	{
+		"assetData"
+		{
+			$array children [element;0][]
+			$array operators [element;0][]
+			"keyValues"
+			{
+				$string cast_shadows "0"
+				$string maxparticles "5"
+				$string material "particles/water/water_splash_v1"
+				$string emission_rate "100000"
+				$string orientation_type "1"
+				$string sort_particles "0"
+			}
+			$array initializers [element;4][
+				{
+					$string name "lifetime_random"
+					"keyValues"
+					{
+						$string lifetime_max "0.72"
+						$string lifetime_min "0.72"
+					}
+				},
+				{
+					$string name "rotation_random"
+					"keyValues"
+					{
+						$string rotation_min "-20"
+						$string rotation_max "20"
+					}
+				},
+				{
+					$string name "initial_velocity"
+					"keyValues"
+					{
+						$string velocity "0 20 0"
+						$string spread_min "-0.3 0 -0.3"
+						$string spread_max "0.3 0 0.3"
+					}
+				},
+				{
+					$string name "radius_random"
+					"keyValues"
+					{
+						$string radius_max "100"
+						$string radius_min "50"
+					}
+				}
+			]
+			$array renderers [element;0][]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+	"watersplash_3"
+	{
+		"assetData"
+		{
+			$array children [element;0][]
+			$array operators [element;0][]
+			"keyValues"
+			{
+				$string cast_shadows "0"
+				$string maxparticles "5"
+				$string material "particles/water/water_splash_v3"
+				$string emission_rate "100000"
+				$string orientation_type "1"
+				$string sort_particles "0"
+			}
+			$array initializers [element;4][
+				{
+					$string name "lifetime_random"
+					"keyValues"
+					{
+						$string lifetime_max "0.72"
+						$string lifetime_min "0.72"
+					}
+				},
+				{
+					$string name "rotation_random"
+					"keyValues"
+					{
+						$string rotation_min "-20"
+						$string rotation_max "20"
+					}
+				},
+				{
+					$string name "initial_velocity"
+					"keyValues"
+					{
+						$string velocity "0 20 0"
+						$string spread_min "-0.3 0 -0.3"
+						$string spread_max "0.3 0 0.3"
+					}
+				},
+				{
+					$string name "radius_random"
+					"keyValues"
+					{
+						$string radius_max "100"
+						$string radius_min "50"
+					}
+				}
+			]
+			$array renderers [element;0][]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+	"watersplash"
+	{
+		"assetData"
+		{
+			$array children [element;1][
+				{
+					$string type "watersplash_1"
+					$float delay 0
+				}
+			]
+			$array operators [element;0][]
+			"keyValues"
+			{
+				$string cast_shadows "0"
+				$string maxparticles "5"
+				$string material "particles/water/water_splash_v2"
+				$string emission_rate "100000"
+				$string orientation_type "1"
+				$string sort_particles "0"
+			}
+			$array initializers [element;4][
+				{
+					$string name "lifetime_random"
+					"keyValues"
+					{
+						$string lifetime_max "0.72"
+						$string lifetime_min "0.72"
+					}
+				},
+				{
+					$string name "rotation_random"
+					"keyValues"
+					{
+						$string rotation_min "-20"
+						$string rotation_max "20"
+					}
+				},
+				{
+					$string name "initial_velocity"
+					"keyValues"
+					{
+						$string velocity "0 20 0"
+						$string spread_min "-0.3 0 -0.3"
+						$string spread_max "0.3 0 0.3"
+					}
+				},
+				{
+					$string name "radius_random"
+					"keyValues"
+					{
+						$string radius_max "100"
+						$string radius_min "50"
+					}
+				}
+			]
+			$array renderers [element;0][]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+}

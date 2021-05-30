@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __DEBUGOVERLAY_H__
 #define __DEBUGOVERLAY_H__
@@ -14,7 +14,7 @@
 
 #undef DrawText
 
-class Plane;
+namespace umath {class Plane;};
 namespace SDebugRenderer
 {
 	void DrawPoint(const Vector3 &pos,const Color &color,float duration=0.f);
@@ -42,7 +42,7 @@ namespace SDebugRenderer
 	void DrawPath(const std::vector<Vector3> &path,const Color &color,float duration=0.f);
 	void DrawSpline(const std::vector<Vector3> &path,const Color &color,uint32_t segmentCount,float curvature=1.f,float duration=0.f);
 	void DrawPlane(const Vector3 &n,float dist,const Color &color,float duration=0.f);
-	void DrawPlane(const Plane &plane,const Color &color,float duration=0.f);
+	void DrawPlane(const umath::Plane &plane,const Color &color,float duration=0.f);
 };
 
 #endif

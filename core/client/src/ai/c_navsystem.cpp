@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -242,7 +242,7 @@ void CMD_debug_nav_path_start(NetworkState *state,pragma::BasePlayerComponent *p
 	auto &ent = pl->GetEntity();
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(charComponent.expired() && pTrComponent.expired())
+	if(charComponent.expired() && pTrComponent == nullptr)
 		return;
 	auto origin = charComponent.valid() ? charComponent->GetEyePosition() : pTrComponent->GetPosition();
 	auto dir = charComponent.valid() ? charComponent->GetViewForward() : pTrComponent->GetForward();
@@ -269,7 +269,7 @@ void CMD_debug_nav_path_end(NetworkState *state,pragma::BasePlayerComponent *pl,
 	auto &ent = pl->GetEntity();
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(charComponent.expired() && pTrComponent.expired())
+	if(charComponent.expired() && pTrComponent == nullptr)
 		return;
 	auto origin = charComponent.valid() ? charComponent->GetEyePosition() : pTrComponent->GetPosition();
 	auto dir = charComponent.valid() ? charComponent->GetViewForward() : pTrComponent->GetForward();

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -34,12 +34,13 @@ void CLightSpotVolComponent::Initialize()
 	auto pRenderComponent = ent.AddComponent<CRenderComponent>();
 	if(pRenderComponent.valid())
 	{
-		FlagCallbackForRemoval(pRenderComponent->BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		// TODO
+		/*FlagCallbackForRemoval(pRenderComponent->BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 			auto *scene = c_game->GetScene();
 			auto *renderer = scene ? scene->GetRenderer() : nullptr;
 			if(renderer != nullptr && renderer->IsRasterizationRenderer())
-				static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->SetFrameDepthBufferSamplingRequired();
-		}),CallbackType::Entity);
+				static_cast<pragma::CRasterizationRendererComponent*>(renderer)->SetFrameDepthBufferSamplingRequired();
+		}),CallbackType::Entity);*/
 	}
 }
 
@@ -80,13 +81,13 @@ util::EventReply CLightSpotVolComponent::HandleEvent(ComponentEventId eventId,Co
 	if(eventId == BaseToggleComponent::EVENT_ON_TURN_ON)
 	{
 		auto pRenderComponent = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
-		if(pRenderComponent.valid())
+		if(pRenderComponent)
 			pRenderComponent->SetRenderMode(RenderMode::World);
 	}
 	else if(eventId == BaseToggleComponent::EVENT_ON_TURN_OFF)
 	{
 		auto pRenderComponent = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
-		if(pRenderComponent.valid())
+		if(pRenderComponent)
 			pRenderComponent->SetRenderMode(RenderMode::None);
 	}
 	return util::EventReply::Unhandled;
@@ -95,7 +96,7 @@ util::EventReply CLightSpotVolComponent::HandleEvent(ComponentEventId eventId,Co
 void CLightSpotVolComponent::InitializeVolumetricLight()
 {
 	auto mdlComponent = GetEntity().GetModelComponent();
-	if(mdlComponent.expired())
+	if(!mdlComponent)
 		return;
 	auto mdl = c_game->CreateModel();
 	auto group = mdl->AddMeshGroup("reference");
@@ -134,7 +135,7 @@ void CLightSpotVolComponent::InitializeVolumetricLight()
 		auto subMesh = std::make_shared<CModelSubMesh>();
 		std::vector<Vector3> verts;
 		std::vector<Vector3> normals;
-		Geometry::GenerateTruncatedConeMesh(startPos,static_cast<float>(segStartRadius),dir,uvec::distance(startPos,endPos),static_cast<float>(segEndRadius),verts,&subMesh->GetTriangles(),&normals,coneDetail,false);
+		umath::geometry::generate_truncated_cone_mesh(startPos,static_cast<float>(segStartRadius),dir,uvec::distance(startPos,endPos),static_cast<float>(segEndRadius),verts,&subMesh->GetTriangles(),&normals,coneDetail,false);
 
 		auto &meshVerts = subMesh->GetVertices();
 		meshVerts.reserve(verts.size());

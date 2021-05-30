@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_PHYSICS_COMPONENT_HPP__
@@ -26,13 +26,16 @@ namespace pragma
 		virtual void Initialize() override;
 
 		virtual void PrePhysicsSimulate() override;
-		virtual void PostPhysicsSimulate() override;
+		virtual bool PostPhysicsSimulate() override;
 
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual void OnEntitySpawn() override;
+
+		virtual void OnWake() override;
+		virtual void OnSleep() override;
 	protected:
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	};

@@ -1,0 +1,44 @@
+#ifndef F_GAUSSIANBLUR_GLS
+#define F_GAUSSIANBLUR_GLS
+
+layout(LAYOUT_PUSH_CONSTANTS()) uniform pushConstants {
+	vec4 colorScale;
+	float blurSize;
+	int kernelSize;
+} u_pushConstants;
+
+float get_blur_size() {return u_pushConstants.blurSize;}
+
+// See http://rastergrid.com/blog/2010/09/efficient-gaussian-blur-with-linear-sampling/
+const float offset[3] = float[](0.0,1.3846153846,3.2307692308);
+const float weight[3] = float[](0.2270270270,0.3162162162,0.0702702703);
+
+vec4 get_gaussian_blur_horizontal(sampler2D tex,vec2 UV)
+{
+	ivec2 itexSize = textureSize(tex,0);
+	vec2 texSize = vec2(itexSize.x,itexSize.y);
+	vec2 fragCoord = UV *vec2(texSize.x,texSize.y);
+	vec4 FragmentColor = texture(tex,fragCoord /texSize) *weight[0];
+	for(int i=1; i<3; i++)
+	{
+		FragmentColor += texture(tex,(fragCoord +vec2(offset[i],0.0)) /texSize) *weight[i];
+		FragmentColor += texture(tex,(fragCoord -vec2(offset[i],0.0)) /texSize) *weight[i];
+	}
+	return FragmentColor;
+}
+
+vec4 get_gaussian_blur_vertical(sampler2D tex,vec2 UV)
+{
+	ivec2 itexSize = textureSize(tex,0);
+	vec2 texSize = vec2(itexSize.x,itexSize.y);
+	vec2 fragCoord = UV *vec2(texSize.x,texSize.y);
+	vec4 FragmentColor = texture(tex,fragCoord /texSize) *weight[0];
+	for(int i=1; i<3; i++)
+	{
+		FragmentColor += texture(tex,(fragCoord +vec2(0.0,offset[i])) /texSize) *weight[i];
+		FragmentColor += texture(tex,(fragCoord -vec2(0.0,offset[i])) /texSize) *weight[i];
+	}
+	return FragmentColor;
+}
+
+#endif

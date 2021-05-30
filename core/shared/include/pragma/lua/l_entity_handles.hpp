@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __LENTITY_HANDLES_HPP__
@@ -33,6 +33,8 @@
 #include "pragma/entities/components/submergible_component.hpp"
 #include "pragma/entities/components/usable_component.hpp"
 #include "pragma/entities/components/global_component.hpp"
+#include "pragma/entities/components/composite_component.hpp"
+#include "pragma/entities/components/animated_2_component.hpp"
 #include "pragma/entities/components/base_flammable_component.hpp"
 #include "pragma/entities/components/base_flex_component.hpp"
 #include "pragma/entities/components/base_health_component.hpp"
@@ -51,6 +53,7 @@
 #include "pragma/entities/components/base_shooter_component.hpp"
 #include "pragma/entities/components/base_ownable_component.hpp"
 #include "pragma/entities/components/base_point_at_target_component.hpp"
+#include "pragma/entities/components/base_gamemode_component.hpp"
 #include "pragma/entities/components/basegravity.h"
 #include "pragma/entities/func/basefuncwater.h"
 #include "pragma/entities/info/info_landmark.hpp"
@@ -173,6 +176,8 @@ DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,Usable);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,Submergible);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,Damageable);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,GlobalName);
+DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,Composite);
+DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,Animated2);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BaseFlammable);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BaseFlex);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BaseHealth);
@@ -256,6 +261,7 @@ DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BaseDebugCone);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BaseDebugCylinder);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BaseDebugPlane);
 DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BasePointAtTarget);
+DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BaseGamemode);
 
 struct lua_State;
 namespace Lua

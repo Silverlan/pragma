@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -37,7 +37,7 @@ void BaseEnvExplosionComponent::Explode()
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	auto &origin = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto &origin = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 	float radius = 512.f;
 	unsigned short damage = 12;
 	Vector3 force(0.f,0.f,0.f);
@@ -52,10 +52,10 @@ void BaseEnvExplosionComponent::Explode()
 		auto &pos = pTrComponentOther->GetPosition();
 		Vector3 min {};
 		Vector3 max {};
-		if(pPhysComponentOther.valid())
+		if(pPhysComponentOther)
 			pPhysComponentOther->GetCollisionBounds(&min,&max);
 		Vector3 r;
-		Geometry::ClosestPointOnAABBToPoint((min +pos),(max +pos),origin,&r);
+		umath::geometry::closest_point_on_aabb_to_point((min +pos),(max +pos),origin,&r);
 		float d = glm::distance(origin,r);
 		if(d <= radius)
 		{

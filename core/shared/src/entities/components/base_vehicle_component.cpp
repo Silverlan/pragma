@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -20,7 +20,6 @@
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_render_component.hpp"
 #include "pragma/entities/components/base_attachable_component.hpp"
-#include "pragma/entities/components/logic_component.hpp"
 #include "pragma/physics/raytraces.h"
 #include "pragma/util/util_game.hpp"
 
@@ -60,10 +59,9 @@ void BaseVehicleComponent::InitializeVehiclePhysics(PHYSICSTYPE type,BasePhysics
 	auto *physEnv = game->GetPhysicsEnvironment();
 	if(physEnv == nullptr)
 		return;
-	auto mdlComponent = ent.GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = ent.GetModel();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(mdl == nullptr || pPhysComponent.expired())
+	if(mdl == nullptr || !pPhysComponent)
 		return;
 	auto &colMeshes = mdl->GetCollisionMeshes();
 	if(colMeshes.empty())
@@ -161,13 +159,13 @@ void BaseVehicleComponent::InitializeSteeringWheel()
 
 	m_cbSteeringWheel = pAttachableComponent->AddEventCallback(BaseAttachableComponent::EVENT_ON_ATTACHMENT_UPDATE,[this,pAttachableComponent](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto pTrComponentSteeringWheel = pAttachableComponent->GetEntity().GetTransformComponent();
-		if(pTrComponentSteeringWheel.expired())
+		if(!pTrComponentSteeringWheel)
 			return util::EventReply::Unhandled;
 		auto ang = EulerAngles(-GetSteeringFactor() *m_maxSteeringWheelAngle,0.f,0.f);
 		auto rot = uquat::create(ang);
-		auto rotEnt = pTrComponentSteeringWheel->GetOrientation();
+		auto rotEnt = pTrComponentSteeringWheel->GetRotation();
 		rotEnt = rotEnt *rot;
-		pTrComponentSteeringWheel->SetOrientation(rotEnt);
+		pTrComponentSteeringWheel->SetRotation(rotEnt);
 		return util::EventReply::Unhandled;
 	});
 }
@@ -189,7 +187,7 @@ void BaseVehicleComponent::SetupSteeringWheel(const std::string &mdl,umath::Degr
 		entThis.RemoveEntityOnRemoval(ent);
 	}
 	auto mdlComponent = m_steeringWheel->GetModelComponent();
-	if(mdlComponent.expired())
+	if(!mdlComponent)
 		return;
 	mdlComponent->SetModel(mdl.c_str());
 	InitializeSteeringWheel();
@@ -201,6 +199,7 @@ void BaseVehicleComponent::ClearDriver()
 		return;
 	BroadcastEvent(EVENT_ON_DRIVER_EXITED);
 	umath::set_flag(m_stateFlags,StateFlags::HasDriver,false);
+	SetTickPolicy(TickPolicy::Never);
 	m_driver = EntityHandle();
 	if(m_physVehicle.IsValid())
 		m_physVehicle->ResetControls();
@@ -212,6 +211,7 @@ void BaseVehicleComponent::SetDriver(BaseEntity *ent)
 		ClearDriver();
 	m_driver = ent->GetHandle();
 	umath::set_flag(m_stateFlags,StateFlags::HasDriver,true);
+	SetTickPolicy(TickPolicy::Always);
 	BroadcastEvent(EVENT_ON_DRIVER_ENTERED);
 }
 
@@ -243,7 +243,7 @@ void BaseVehicleComponent::InitializeWheelEntities()
 		if(wheel == nullptr)
 			continue;
 		auto mdlComponent = wheel->GetEntity().GetModelComponent();
-		if(mdlComponent.valid())
+		if(mdlComponent)
 			mdlComponent->SetModel(wheelData.model);
 		wheel->SetupWheel(*this,wheelDesc,i);
 		wheel->GetEntity().Spawn();
@@ -266,7 +266,7 @@ void BaseVehicleComponent::SetupVehicle(const pragma::physics::VehicleCreateInfo
 	}
 }
 
-void BaseVehicleComponent::Think(double tDelta)
+void BaseVehicleComponent::OnTick(double tDelta)
 {
 	auto *driver = GetDriver();
 	if(m_physVehicle == nullptr || umath::is_flag_set(m_stateFlags,StateFlags::HasDriver) == false)
@@ -301,7 +301,7 @@ void BaseVehicleComponent::Initialize()
 
 	BindEvent(BasePhysicsComponent::EVENT_INITIALIZE_PHYSICS,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto pPhysComponent = GetEntity().GetPhysicsComponent();
-		if(pPhysComponent.expired())
+		if(!pPhysComponent)
 			return util::EventReply::Unhandled;
 		auto &physInitData = static_cast<CEInitializePhysics&>(evData.get());
 		if(physInitData.physicsType != PHYSICSTYPE::DYNAMIC)
@@ -312,18 +312,14 @@ void BaseVehicleComponent::Initialize()
 	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		DestroyVehiclePhysics();
 	});
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		Think(static_cast<CEOnTick&>(evData.get()).deltaTime);
-	});
 
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent)
 		pPhysComponent->SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter() | CollisionMask::Vehicle);
 	ent.AddComponent("model");
 	ent.AddComponent("physics");
 	ent.AddComponent("observable");
-	ent.AddComponent<LogicComponent>();
 	auto whRenderComponent = ent.AddComponent("render");
 	if(whRenderComponent.valid())
 		static_cast<BaseRenderComponent*>(whRenderComponent.get())->SetCastShadows(true);

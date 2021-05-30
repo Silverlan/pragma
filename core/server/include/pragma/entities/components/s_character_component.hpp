@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __S_CHARACTER_COMPONENT_HPP__
 #define __S_CHARACTER_COMPONENT_HPP__
@@ -26,7 +26,7 @@ namespace pragma
 		void DropWeapon(BaseEntity *ent);
 		void SelectNextWeapon();
 		void SelectPreviousWeapon();
-		virtual void Think(double tDelta) override;
+		virtual void OnTick(double tDelta) override;
 		virtual void SetAmmoCount(UInt32 ammoType,UInt16 count) override;
 		using BaseCharacterComponent::SetAmmoCount;
 

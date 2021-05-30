@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __CHC_NEW_HPP__
@@ -69,7 +69,7 @@ namespace pragma
 		std::queue<PCHCQuery> m_queryQueue;
 		std::queue<WPCHCNode> m_visQueue;
 		std::queue<WPCHCNode> m_invisQueue;
-		std::vector<Plane> m_frustumPlanes;
+		std::vector<umath::Plane> m_frustumPlanes;
 		std::vector<PCHCNode> m_nodes;
 		util::WeakHandle<pragma::CCameraComponent> m_cam = {};
 		void TraverseNode(CHCNode &cNode);

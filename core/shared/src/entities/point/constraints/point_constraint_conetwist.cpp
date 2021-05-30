@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -53,9 +53,9 @@ void BasePointConstraintConeTwistComponent::InitializeConstraint(BaseEntity *src
 	auto *physEnv = game->GetPhysicsEnvironment();
 
 	auto pPhysComponentSrc = src->GetPhysicsComponent();
-	auto *physSrc = pPhysComponentSrc.valid() ? dynamic_cast<RigidPhysObj*>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
+	auto *physSrc = pPhysComponentSrc ? dynamic_cast<RigidPhysObj*>(pPhysComponentSrc->GetPhysicsObject()) : nullptr;
 	auto pPhysComponentTgt = tgt->GetPhysicsComponent();
-	auto *physTgt = pPhysComponentTgt.valid() ? dynamic_cast<RigidPhysObj*>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;
+	auto *physTgt = pPhysComponentTgt ? dynamic_cast<RigidPhysObj*>(pPhysComponentTgt->GetPhysicsObject()) : nullptr;
 	if(physSrc == nullptr || physTgt == nullptr || !physSrc->IsRigid() || !physTgt->IsRigid())
 		return;
 	auto *rigidSrc = static_cast<RigidPhysObj*>(physSrc)->GetRigidBody();
@@ -65,15 +65,15 @@ void BasePointConstraintConeTwistComponent::InitializeConstraint(BaseEntity *src
 
 	auto pTrComponent = entThis.GetTransformComponent();
 	auto pTrComponentTgt = tgt->GetTransformComponent();
-	auto originConstraint = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
-	auto originTgt = pTrComponentTgt.valid() ? pTrComponentTgt->GetPosition() : Vector3{};
+	auto originConstraint = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
+	auto originTgt = pTrComponentTgt ? pTrComponentTgt->GetPosition() : Vector3{};
 
-	auto rotConstraint = pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
-	auto rotTgt = pTrComponentTgt.valid() ? pTrComponentTgt->GetOrientation() : uquat::identity();
+	auto rotConstraint = pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity();
+	auto rotTgt = pTrComponentTgt ? pTrComponentTgt->GetRotation() : uquat::identity();
 
 	auto pTrComponentSrc = src->GetTransformComponent();
 	originTgt = originConstraint -originTgt;
-	originConstraint -= pTrComponentSrc.valid() ? pTrComponentSrc->GetPosition() : Vector3{};
+	originConstraint -= pTrComponentSrc ? pTrComponentSrc->GetPosition() : Vector3{};
 	
 	auto swingSpan1 = CFloat(umath::deg_to_rad(m_kvSwingSpan1));
 	auto swingSpan2 = CFloat(umath::deg_to_rad(m_kvSwingSpan2));

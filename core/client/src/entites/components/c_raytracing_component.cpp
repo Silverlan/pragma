@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -23,7 +23,8 @@
 using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
+
 
 static std::shared_ptr<prosper::IUniformResizableBuffer> s_entityMeshInfoBuffer = nullptr;
 static uint32_t m_entityMeshCount = 0;
@@ -92,9 +93,10 @@ void CRaytracingComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(CAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		SetBoneBufferDirty();
-	});
+	// TODO
+	//BindEventUnhandled(CAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	//	SetBoneBufferDirty();
+	//});
 	BindEventUnhandled(CRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		SetRenderBufferDirty();
 	});
@@ -108,8 +110,7 @@ void CRaytracingComponent::InitializeModelRaytracingBuffers()
 	if(s_entityMeshInfoBuffer == nullptr || s_materialDescriptorArrayManager == nullptr)
 		return;
 	auto &ent = GetEntity();
-	auto wpMdlComponent = ent.GetModelComponent();
-	auto mdl = wpMdlComponent.valid() ? wpMdlComponent->GetModel() : nullptr;
+	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)
 	{
 		m_subMeshBuffers.clear();
@@ -199,8 +200,8 @@ void CRaytracingComponent::UpdateBuffers(prosper::IPrimaryCommandBuffer &cmd)
 	{
 		umath::set_flag(m_stateFlags,StateFlags::RenderBufferDirty,false);
 		auto &renderComponent = *whRenderComponent;
-		auto wpRenderBuffer = renderComponent.GetRenderBuffer();
-		auto index = wpRenderBuffer.expired() == false ? static_cast<prosper::IBuffer::SmallOffset>(wpRenderBuffer.lock()->GetBaseIndex()) : prosper::IBuffer::INVALID_SMALL_OFFSET;
+		auto &wpRenderBuffer = renderComponent.GetRenderBuffer();
+		auto index = wpRenderBuffer.GetBaseIndex();//wpRenderBuffer ? static_cast<prosper::IBuffer::SmallOffset>(wpRenderBuffer->GetBaseIndex()) : prosper::IBuffer::INVALID_SMALL_OFFSET;
 		for(auto &buf : m_subMeshBuffers)
 			cmd.RecordUpdateGenericShaderReadBuffer(*buf,offsetof(SubMeshRenderInfoBufferData,entityBufferIndex),sizeof(index),&index);
 	}
@@ -208,8 +209,8 @@ void CRaytracingComponent::UpdateBuffers(prosper::IPrimaryCommandBuffer &cmd)
 	{
 		auto whAnimatedComponent = GetEntity().GetComponent<CAnimatedComponent>();
 		umath::set_flag(m_stateFlags,StateFlags::BoneBufferDirty,false);
-		auto wpBoneBuffer = whAnimatedComponent.valid() ? whAnimatedComponent->GetBoneBuffer() : std::weak_ptr<prosper::IBuffer>{};
-		auto index = wpBoneBuffer.expired() == false ? static_cast<prosper::IBuffer::SmallOffset>(wpBoneBuffer.lock()->GetBaseIndex()) : prosper::IBuffer::INVALID_SMALL_OFFSET;
+		auto wpBoneBuffer = whAnimatedComponent->GetBoneBuffer();//whAnimatedComponent.valid() ? whAnimatedComponent->GetBoneBuffer() : std::weak_ptr<prosper::IBuffer>{};
+		auto index = wpBoneBuffer ? static_cast<prosper::IBuffer::SmallOffset>(wpBoneBuffer->GetBaseIndex()) : prosper::IBuffer::INVALID_SMALL_OFFSET;
 		for(auto &buf : m_subMeshBuffers)
 			cmd.RecordUpdateGenericShaderReadBuffer(*buf,offsetof(SubMeshRenderInfoBufferData,boneBufferStartIndex),sizeof(index),&index);
 	}
@@ -233,9 +234,10 @@ void CRaytracingComponent::InitializeBufferUpdateCallback()
 	auto renderC = GetEntity().GetComponent<CRenderComponent>();
 	if(renderC.valid())
 		renderC->SetRenderBufferDirty();
-	m_cbUpdateBuffers = BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		UpdateBuffers(*static_cast<CEOnUpdateRenderData&>(evData.get()).commandBuffer);
-	});
+	// TODO
+	//m_cbUpdateBuffers = BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	//	UpdateBuffers(*static_cast<CEOnUpdateRenderData&>(evData.get()).commandBuffer);
+	//});
 }
 
 static void cmd_render_technique(NetworkState*,ConVar*,int32_t,int32_t val)

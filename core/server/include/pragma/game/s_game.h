@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __S_GAME_H__
 #define __S_GAME_H__
@@ -26,6 +26,10 @@ namespace pragma {
 	namespace ai {class TaskManager;};
 	namespace networking {class IServerClient; class ClientRecipientFilter;};
 };
+namespace udm {
+	struct Property;
+	using PProperty = std::shared_ptr<Property>;
+};
 enum class CLIENT_DROPPED;
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -43,7 +47,7 @@ private:
 	std::optional<ChangeLevelInfo> m_changeLevelInfo = {};
 	mutable std::unique_ptr<pragma::ai::TaskManager> m_taskManager;
 	// The state of the world before the level transition (if there was one). Each key is a global entity name, and the value is the data stream object for that entity.
-	std::unordered_map<std::string,DataStream> m_preTransitionWorldState {};
+	std::unordered_map<std::string,udm::PProperty> m_preTransitionWorldState {};
 	// Delta landmark offset between this level and the previous level (in case there was a level change)
 	Vector3 m_deltaTransitionLandmarkOffset {};
 public:
@@ -74,14 +78,17 @@ protected:
 	virtual void RegisterLuaEntityComponent(luabind::class_<BaseEntityComponentHandleWrapper> &classDef) override;
 	virtual bool InitializeGameMode() override;
 
+	const pragma::NetEventManager &GetEntityNetEventManager() const;
+	pragma::NetEventManager &GetEntityNetEventManager();
+
 	virtual std::string GetLuaNetworkDirectoryName() const override;
 	virtual std::string GetLuaNetworkFileName() const override;
 	virtual bool LoadLuaComponent(const std::string &luaFilePath,const std::string &mainPath,const std::string &componentName) override;
 
 	// Resources which can be requested by clients, if they don't have them
 	std::vector<std::string> m_gameResources;
-
-	uint64_t m_nextUniqueEntityIndex;
+	
+	pragma::NetEventManager m_entNetEventManager = {};
 	CallbackHandle m_cbProfilingHandle = {};
 	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_profilingStageManager = nullptr;
 public:
@@ -110,6 +117,9 @@ public:
 	virtual void CreateGiblet(const GibletCreateInfo &info) override;
 	virtual pragma::BaseEntityComponent *CreateLuaEntityComponent(BaseEntity &ent,std::string classname) override;
 
+	std::vector<std::string> &GetNetEventIds();
+	const std::vector<std::string> &GetNetEventIds() const;
+
 	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase> *GetProfilingStageManager();
 	bool StartProfilingStage(CPUProfilingPhase stage);
 	bool StopProfilingStage(CPUProfilingPhase stage);
@@ -117,6 +127,7 @@ public:
 	void ChangeLevel(const std::string &mapName,const std::string &landmarkName="");
 
 	pragma::NetEventId RegisterNetEvent(const std::string &name);
+	virtual pragma::NetEventId FindNetEvent(const std::string &name) const override;
 	virtual pragma::NetEventId SetupNetEvent(const std::string &name) override;
 
 	virtual float GetTimeScale() override;

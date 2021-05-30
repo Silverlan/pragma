@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -31,8 +31,7 @@ PHYSICSTYPE BasePropComponent::UpdatePhysicsType(BaseEntity *ent)
 		m_kvMass = 0.f;
 		return PHYSICSTYPE::STATIC;
 	}
-	auto mdlComponent = ent->GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent->GetModel();
 	if(hMdl != nullptr)
 	{
 		// TODO: Do this in a better way
@@ -49,8 +48,6 @@ bool BasePropComponent::SetKeyValue(std::string key,std::string val)
 {
 	if(key == "scale")
 		m_kvScale = ustring::to_float(val);
-	else if(key == "maxvisibledist")
-		m_kvMaxVisibleDist = ustring::to_float(val);
 	else if(key == "mass")
 	{
 		ustring::remove_whitespace(val);
@@ -65,14 +62,13 @@ bool BasePropComponent::SetKeyValue(std::string key,std::string val)
 void BasePropComponent::InitializePhysics(PHYSICSTYPE physType)
 {
 	auto &ent = GetEntity();
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr)
 		return;
 	if((ent.GetSpawnFlags() &umath::to_integral(SpawnFlags::DisableCollisions)) != 0 || physType == PHYSICSTYPE::NONE)
 		return;
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	auto *phys = pPhysComponent->InitializePhysics(physType);
 	if(phys != nullptr)
@@ -93,7 +89,7 @@ void BasePropComponent::Initialize()
 	});
 	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto physComponent = GetEntity().GetPhysicsComponent();
-		if(physComponent.expired() || physComponent->GetJoints().empty() == true)
+		if(!physComponent || physComponent->GetJoints().empty() == true)
 			return;
 		// We only need an animated component if this is a ragdoll (i.e. the physics component has joints)
 		GetEntity().AddComponent("animated");
@@ -119,10 +115,9 @@ void BasePropComponent::InitializePhysics()
 	if(ent.IsSpawned() == false)
 		return;
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
-	auto mdlC = ent.GetModelComponent();
-	auto hMdl = mdlC.valid() ? mdlC->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(hMdl != nullptr && m_physicsType != PHYSICSTYPE::NONE && m_physicsType != pPhysComponent->GetPhysicsType())
 		InitializePhysics(m_physicsType);
 	if(m_moveType != MOVETYPE::NONE)
@@ -143,7 +138,7 @@ void BasePropComponent::OnEntitySpawn()
 	if(m_kvScale != 1.f)
 	{
 		auto pTrComponent = ent.GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent != nullptr)
 			pTrComponent->SetScale(m_kvScale);
 	}
 	InitializePhysics();

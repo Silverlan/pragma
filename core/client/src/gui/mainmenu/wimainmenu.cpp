@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -29,9 +29,9 @@
 #include <pragma/engine_info.hpp>
 
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
-#include <wv_steamworks.hpp>
+#include <pragma/game/isteamworks.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;
 extern CGame *c_game;
 
@@ -105,7 +105,7 @@ void WIMainMenu::PlayNextMenuTrack(bool newRound)
 		m_cbMenuTrack.Remove();
 	if(m_menuTracks.empty())
 	{
-		FileManager::FindFiles("sounds/ui/gamestartup_*.*",&m_menuTracks,nullptr);
+		FileManager::FindFiles("sounds/ui/gamestartup*.*",&m_menuTracks,nullptr);
 		newRound = true;
 	}
 	if(m_menuTracks.empty())

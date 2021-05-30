@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "pragma/entities/baseentity.h"
@@ -72,21 +72,22 @@ void BaseEntity::SetModel(const std::shared_ptr<Model> &mdl)
 		return;
 	mdlC->SetModel(mdl);
 }
-std::shared_ptr<Model> BaseEntity::GetModel() const
+const std::shared_ptr<Model> &BaseEntity::GetModel() const
 {
 	auto mdlC = GetModelComponent();
-	return mdlC.valid() ? mdlC->GetModel() : nullptr;
+	static std::shared_ptr<Model> nptr = nullptr;
+	return mdlC ? mdlC->GetModel() : nptr;
 }
 std::string BaseEntity::GetModelName() const
 {
 	auto mdlC = GetModelComponent();
-	return mdlC.valid() ? mdlC->GetModelName() : "";
+	return mdlC ? mdlC->GetModelName() : "";
 }
 std::optional<umath::Transform> BaseEntity::GetAttachmentPose(uint32_t attId) const
 {
 	auto mdlC = GetModelComponent();
 	umath::Transform t {};
-	if(mdlC.valid())
+	if(mdlC)
 	{
 		Vector3 pos;
 		Quat rot;
@@ -98,19 +99,19 @@ std::optional<umath::Transform> BaseEntity::GetAttachmentPose(uint32_t attId) co
 uint32_t BaseEntity::GetSkin() const
 {
 	auto mdlC = GetModelComponent();
-	return mdlC.valid() ? mdlC->GetSkin() : 0;
+	return mdlC ? mdlC->GetSkin() : 0;
 }
 void BaseEntity::SetSkin(uint32_t skin)
 {
 	auto mdlC = GetModelComponent();
-	if(mdlC.expired())
+	if(!mdlC)
 		return;
 	mdlC->SetSkin(skin);
 }
 uint32_t BaseEntity::GetBodyGroup(const std::string &name) const
 {
 	auto mdlC = GetModelComponent();
-	if(mdlC.expired())
+	if(!mdlC)
 		return 0;
 	auto &mdl = mdlC->GetModel();
 	auto id = mdl ? mdl->GetBodyGroupId(name) : -1;
@@ -119,7 +120,7 @@ uint32_t BaseEntity::GetBodyGroup(const std::string &name) const
 void BaseEntity::SetBodyGroup(const std::string &name,uint32_t id)
 {
 	auto mdlC = GetModelComponent();
-	if(mdlC.expired())
+	if(!mdlC)
 		return;
 	mdlC->SetBodyGroup(name,id);
 }
@@ -145,7 +146,7 @@ pragma::BaseParentComponent *BaseEntity::GetParent() const
 PhysObj *BaseEntity::GetPhysicsObject() const
 {
 	auto physC = GetPhysicsComponent();
-	return physC.valid() ? physC->GetPhysicsObject() : nullptr;
+	return physC ? physC->GetPhysicsObject() : nullptr;
 }
 PhysObj *BaseEntity::InitializePhysics(PHYSICSTYPE type)
 {
@@ -157,21 +158,21 @@ PhysObj *BaseEntity::InitializePhysics(PHYSICSTYPE type)
 void BaseEntity::DestroyPhysicsObject()
 {
 	auto physC = GetPhysicsComponent();
-	if(physC.expired())
+	if(!physC)
 		return;
 	physC->DestroyPhysicsObject();
 }
 void BaseEntity::DropToFloor()
 {
 	auto physC = GetPhysicsComponent();
-	if(physC.expired())
+	if(!physC)
 		return;
 	physC->DropToFloor();
 }
 std::pair<Vector3,Vector3> BaseEntity::GetCollisionBounds() const
 {
 	auto physC = GetPhysicsComponent();
-	if(physC.expired())
+	if(!physC)
 		return {Vector3{},Vector3{}};
 	Vector3 min,max;
 	physC->GetCollisionBounds(&min,&max);
@@ -180,28 +181,28 @@ std::pair<Vector3,Vector3> BaseEntity::GetCollisionBounds() const
 void BaseEntity::SetCollisionFilterMask(CollisionMask filterMask)
 {
 	auto physC = GetPhysicsComponent();
-	if(physC.expired())
+	if(!physC)
 		return;
 	physC->SetCollisionFilterMask(filterMask);
 }
 void BaseEntity::SetCollisionFilterGroup(CollisionMask filterGroup)
 {
 	auto physC = GetPhysicsComponent();
-	if(physC.expired())
+	if(!physC)
 		return;
 	physC->SetCollisionFilter(filterGroup);
 }
 CollisionMask BaseEntity::GetCollisionFilterGroup() const
 {
 	auto physC = GetPhysicsComponent();
-	if(physC.expired())
+	if(!physC)
 		return CollisionMask::None;
 	return physC->GetCollisionFilter();
 }
 CollisionMask BaseEntity::GetCollisionFilterMask() const
 {
 	auto physC = GetPhysicsComponent();
-	if(physC.expired())
+	if(!physC)
 		return CollisionMask::None;
 	return physC->GetCollisionFilterMask();
 }
@@ -209,17 +210,17 @@ CollisionMask BaseEntity::GetCollisionFilterMask() const
 Vector3 BaseEntity::GetForward() const
 {
 	auto trC = GetTransformComponent();
-	return trC.valid() ? trC->GetForward() : uvec::FORWARD;
+	return trC ? trC->GetForward() : uvec::FORWARD;
 }
 Vector3 BaseEntity::GetUp() const
 {
 	auto trC = GetTransformComponent();
-	return trC.valid() ? trC->GetUp() : uvec::UP;
+	return trC ? trC->GetUp() : uvec::UP;
 }
 Vector3 BaseEntity::GetRight() const
 {
 	auto trC = GetTransformComponent();
-	return trC.valid() ? trC->GetRight() : uvec::RIGHT;
+	return trC ? trC->GetRight() : uvec::RIGHT;
 }
 
 void BaseEntity::Input(const std::string &input,BaseEntity *activator,BaseEntity *caller,const std::string &data)

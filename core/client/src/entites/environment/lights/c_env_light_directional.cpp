@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -42,17 +42,12 @@ void CLightDirectionalComponent::Initialize()
 		auto &ent = shouldPassData.entity;
 		auto pTrComponent = ent.GetTransformComponent();
 		auto pRenderComponent = ent.GetRenderComponent();
-		if(pTrComponent.expired() || pRenderComponent.expired())
+		if(pTrComponent == nullptr || !pRenderComponent)
 		{
 			shouldPassData.shouldPass = false;
 			return util::EventReply::Handled;
 		}
-		auto &pos = pTrComponent->GetPosition();
-		Vector3 min;
-		Vector3 max;
-		pRenderComponent->GetRenderBounds(&min,&max);
-		min += pos;
-		max += pos;
+		auto &aabb = pRenderComponent->GetUpdatedAbsoluteRenderBounds();
 
 		auto hShadow = GetEntity().GetComponent<CShadowCSMComponent>();
 		if(hShadow.expired())
@@ -61,7 +56,7 @@ void CLightDirectionalComponent::Initialize()
 		for(auto i=decltype(numLayers){0};i<numLayers;++i)
 		{
 			auto &frustum = *hShadow->GetFrustumSplit(i);
-			if(Intersection::AABBAABB(min,max,frustum.aabb.min +frustum.obbCenter,frustum.aabb.max +frustum.obbCenter) != INTERSECT_OUTSIDE)
+			if(umath::intersection::aabb_aabb(aabb.min,aabb.max,frustum.aabb.min +frustum.obbCenter,frustum.aabb.max +frustum.obbCenter) != umath::intersection::Intersect::Outside)
 				shouldPassData.renderFlags |= 1<<i;
 		}
 		if(shouldPassData.renderFlags == 0)
@@ -78,7 +73,7 @@ void CLightDirectionalComponent::Initialize()
 		{
 			auto &entTgt = shouldPassData.entity;
 			auto pTrComponent = entTgt.GetTransformComponent();
-			if(pTrComponent.expired())
+			if(pTrComponent == nullptr)
 			{
 				shouldPassData.shouldPass = false;
 				return util::EventReply::Handled;
@@ -94,7 +89,7 @@ void CLightDirectionalComponent::Initialize()
 			for(auto i=decltype(numLayers){0};i<numLayers;++i)
 			{
 				auto &frustum = *hShadow->GetFrustumSplit(i);
-				if(Intersection::AABBAABB(min,max,frustum.aabb.min +frustum.obbCenter,frustum.aabb.max +frustum.obbCenter) != INTERSECT_OUTSIDE)
+				if(umath::intersection::aabb_aabb(min,max,frustum.aabb.min +frustum.obbCenter,frustum.aabb.max +frustum.obbCenter) != umath::intersection::Intersect::Outside)
 					shouldPassData.renderFlags |= 1<<i;
 			}
 		}
@@ -119,21 +114,25 @@ void CLightDirectionalComponent::Initialize()
 
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 	{
 		Vector3 pos = pTrComponent->GetPosition();
 		auto dir = pTrComponent->GetForward();
 		SetViewMatrix(glm::lookAtRH(pos,pos +dir,uvec::get_perpendicular(dir)));
-		FlagCallbackForRemoval(pTrComponent->GetOrientationProperty()->AddCallback([this](std::reference_wrapper<const Quat> oldRot,std::reference_wrapper<const Quat> rot) {
+		auto &trC = static_cast<CTransformComponent&>(*pTrComponent);
+		FlagCallbackForRemoval(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,&trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags,pragma::TransformChangeFlags::RotationChanged) == false)
+				return util::EventReply::Unhandled;
 			auto &ent = GetEntity();
 			auto pLightComponent = ent.GetComponent<CLightComponent>();
 			auto type = util::pragma::LightType::Undefined;
 			auto *pLight = pLightComponent.valid() ? pLightComponent->GetLight(type) : nullptr;
 			if(pLight == nullptr || type != util::pragma::LightType::Directional)
-				return;
+				return util::EventReply::Unhandled;
 			auto pTrComponent = pLight->GetEntity().GetTransformComponent();
-			if(pTrComponent.valid())
-				pTrComponent->SetOrientation(rot);
+			if(pTrComponent != nullptr)
+				pTrComponent->SetRotation(trC.GetRotation());
+			return util::EventReply::Unhandled;
 		}),CallbackType::Entity);
 	}
 
@@ -287,7 +286,7 @@ bool CLightDirectionalComponent::ShouldPass(uint32_t layer,const Vector3 &min,co
 		return false;
 	auto numLayers = hShadow->GetLayerCount();
 	auto &frustum = *hShadow->GetFrustumSplit(layer);
-	return (Intersection::AABBAABB(min,max,frustum.aabb.min +frustum.obbCenter,frustum.aabb.max +frustum.obbCenter) != INTERSECT_OUTSIDE) ? true : false;
+	return (umath::intersection::aabb_aabb(min,max,frustum.aabb.min +frustum.obbCenter,frustum.aabb.max +frustum.obbCenter) != umath::intersection::Intersect::Outside) ? true : false;
 }
 
 void CLightDirectionalComponent::OnEntityComponentAdded(BaseEntityComponent &component)
@@ -295,14 +294,17 @@ void CLightDirectionalComponent::OnEntityComponentAdded(BaseEntityComponent &com
 	BaseEnvLightDirectionalComponent::OnEntityComponentAdded(component);
 	if(typeid(component) == typeid(CTransformComponent))
 	{
-		FlagCallbackForRemoval(static_cast<CTransformComponent&>(component).GetOrientationProperty()->AddCallback([this,&component](std::reference_wrapper<const Quat> oldRot,std::reference_wrapper<const Quat> rot) {
-			auto dir = uquat::forward(rot);
-			auto &trComponent = static_cast<CTransformComponent&>(component);
-			SetViewMatrix(glm::lookAtRH(trComponent.GetPosition(),trComponent.GetPosition() +dir,uvec::get_perpendicular(dir)));
+		auto &trC = static_cast<CTransformComponent&>(component);
+		FlagCallbackForRemoval(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,&trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags,pragma::TransformChangeFlags::RotationChanged) == false)
+				return util::EventReply::Unhandled;
+			auto dir = uquat::forward(trC.GetRotation());
+			SetViewMatrix(glm::lookAtRH(trC.GetPosition(),trC.GetPosition() +dir,uvec::get_perpendicular(dir)));
 
 			//auto pLightComponent = GetEntity().GetComponent<CLightComponent>();
 			//if(pLightComponent.valid())
 			//	pLightComponent->SetStaticResolved(false);
+			return util::EventReply::Unhandled;
 		}),CallbackType::Component,&component);
 	}
 	else if(typeid(component) == typeid(CLightComponent))
@@ -315,7 +317,7 @@ void CLightDirectionalComponent::UpdateFrustum(uint32_t frustumId)
 	auto pLightComponent = ent.GetComponent<CLightComponent>();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pToggleComponent = ent.GetComponent<CToggleComponent>();
-	if((pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false) || pLightComponent.expired() || pTrComponent.expired())
+	if((pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false) || pLightComponent.expired() || pTrComponent == nullptr)
 		return;
 	auto hShadow = GetEntity().GetComponent<CShadowCSMComponent>();
 	if(hShadow.expired())
@@ -330,7 +332,7 @@ void CLightDirectionalComponent::UpdateFrustum()
 	auto pLightComponent = ent.GetComponent<CLightComponent>();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pToggleComponent = ent.GetComponent<CToggleComponent>();
-	if((pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false) || pLightComponent.expired() || pTrComponent.expired())
+	if((pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false) || pLightComponent.expired() || pTrComponent == nullptr)
 		return;
 	auto hShadow = GetEntity().GetComponent<CShadowCSMComponent>();
 	if(hShadow.expired())

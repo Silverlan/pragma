@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -52,8 +52,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 	if(it != m_ikTrees.end())
 		return true;
 	auto &ent = GetEntity();
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr)
 		return false;
 	auto *ikController = hMdl->GetIKController(ikControllerId);
@@ -82,11 +81,10 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 	auto &reference = hMdl->GetReference();
 	struct IKJointInfo
 	{
-		IKJointInfo(uint32_t _boneId,uint32_t cmId)
-			: boneId(_boneId),colMeshId(cmId)
+		IKJointInfo(uint32_t boneId)
+			: boneId(boneId)
 		{}
 		uint32_t boneId = std::numeric_limits<uint32_t>::max();
-		uint32_t colMeshId = std::numeric_limits<uint32_t>::max();
 		uint32_t jointId = std::numeric_limits<uint32_t>::max();
 		OrientedPoint referenceTransform = {};
 
@@ -96,17 +94,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 	auto ikTreeInfo = std::make_shared<IKTreeInfo>();
 	std::vector<IKJointInfo> ikJoints;
 	ikJoints.reserve(chainLen);
-
-	auto &colMeshes = hMdl->GetCollisionMeshes();
-	auto itColMesh = std::find_if(colMeshes.begin(),colMeshes.end(),[boneId](const std::shared_ptr<CollisionMesh> &colMesh) {
-		return colMesh->GetBoneParent() == boneId;
-	});
-	if(itColMesh == colMeshes.end())
-	{
-		Con::cwar<<"WARNING: Unable to initialize ik controller for "<<ikController->GetEffectorName()<<": Effector doesn't have collision mesh assigned to it!"<<Con::endl;
-		return false;
-	}
-	ikJoints.push_back({static_cast<uint32_t>(boneId),static_cast<uint32_t>(itColMesh -colMeshes.begin())});
+	ikJoints.push_back({static_cast<uint32_t>(boneId)});
 
 	auto bone = wpBone.lock();
 	for(auto i=decltype(chainLen){0};i<(chainLen -1);++i)
@@ -118,12 +106,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 			return false;
 		}
 		bone = parent.lock();
-		auto itColMesh = std::find_if(colMeshes.begin(),colMeshes.end(),[&bone](const std::shared_ptr<CollisionMesh> &colMesh) {
-			return colMesh->GetBoneParent() == bone->ID;
-		});
-		if(itColMesh == colMeshes.end())
-			continue; // Skip this bone if it doesn't have a valid collision mesh assigned to it
-		ikJoints.push_back({bone->ID,static_cast<uint32_t>(itColMesh -colMeshes.begin())});
+		ikJoints.push_back({bone->ID});
 	}
 	
 	for(auto &ikJoint : ikJoints)
@@ -139,13 +122,13 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 	auto &joints = hMdl->GetJoints();
 	for(auto &ikJoint : ikJoints)
 	{
-		auto colMeshId = ikJoint.colMeshId;
-		auto itJoint = std::find_if(joints.begin(),joints.end(),[colMeshId](const JointInfo &joint) {
-			return joint.src == colMeshId && (joint.type == JOINT_TYPE_DOF || joint.type == JOINT_TYPE_CONETWIST);
+		auto boneId = ikJoint.boneId;
+		auto itJoint = std::find_if(joints.begin(),joints.end(),[boneId](const JointInfo &joint) {
+			return joint.child == boneId && (joint.type == JointType::DOF || joint.type == JointType::ConeTwist);
 		});
 		if(itJoint == joints.end())
 		{
-			Con::cwar<<"WARNING: Unable to initialize ik controller for "<<ikController->GetEffectorName()<<": Collision mesh for bone "<<ikJoint.boneId<<" in chain does not have joint assigned to it!"<<Con::endl;
+			Con::cwar<<"WARNING: Unable to initialize ik controller for "<<ikController->GetEffectorName()<<": Joint for bone "<<ikJoint.boneId<<" in chain does not have joint assigned to it!"<<Con::endl;
 			return false; // All bones in chain need to have a valid joint assigned to them
 		}
 		ikJoint.jointId = itJoint -joints.begin();
@@ -166,7 +149,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 		auto max = EulerAngles{};
 		switch(joint.type)
 		{
-			case JOINT_TYPE_DOF:
+		case JointType::DOF:
 			{
 				auto itMin = joint.args.find("ang_limit_l");
 				if(itMin != joint.args.end())
@@ -176,7 +159,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 					max = EulerAngles(itMax->second);
 				break;
 			}
-			case JOINT_TYPE_CONETWIST:
+		case JointType::ConeTwist:
 			{
 				auto itSp1l = joint.args.find("sp1l");
 				if(itSp1l != joint.args.end())
@@ -249,7 +232,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 	{
 		auto &ent = GetEntity();
 		auto mdlComponent = ent.GetModelComponent();
-		if(mdlComponent.valid())
+		if(mdlComponent)
 		{
 			auto boneId = mdlComponent->LookupBone(ikController->GetEffectorName());
 			if(boneId != -1)
@@ -370,7 +353,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 	auto &ent = GetEntity();
 	auto mdlComponent = ent.GetModelComponent();
 	auto animComponent = ent.GetAnimatedComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr || animComponent.expired())
 		return;
 
@@ -384,8 +367,8 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 	};
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	const auto up = pTrComponent.valid() ? pTrComponent->GetUp() : uvec::UP;
-	auto yExtent = pPhysComponent.valid() ? pPhysComponent->GetCollisionExtents().y : 0.f;
+	const auto up = pTrComponent ? pTrComponent->GetUp() : uvec::UP;
+	auto yExtent = pPhysComponent ? pPhysComponent->GetCollisionExtents().y : 0.f;
 	std::unordered_map<uint32_t,FootData> feetData {};
 	auto &reference = hMdl->GetReference();
 	for(auto &pair : m_ikTrees)
@@ -403,7 +386,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 
 		auto srcPos = pos +up *yExtent;
 		auto dstPos = pos -up *yExtent;
-		if(pTrComponent.valid())
+		if(pTrComponent)
 			pTrComponent->WorldToLocal(&pos,&rot);
 
 		auto &footData = feetData.insert(std::make_pair(pair.first,FootData{})).first->second;
@@ -420,7 +403,7 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 		}
 
 		auto bIkPlaced = false;
-		if(pTrComponent.valid())
+		if(pTrComponent)
 		{
 			auto traceData = ::util::get_entity_trace_data(*pTrComponent);
 			traceData.SetSource(srcPos);
@@ -431,13 +414,13 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 			if(rayResult.hitType != RayCastHitType::None)
 			{
 				auto posRay = rayResult.position +rayResult.normal *footInfo.yOffset;
-				if(pTrComponent.valid())
+				if(pTrComponent)
 					pTrComponent->WorldToLocal(&posRay);
 				SetIKEffectorPos(pair.first,0u,posRay);
 				footData.upNormal = rayResult.normal;
 				footData.boneId = boneId;
 				footData.rotation = rot;
-				uvec::rotate(&footData.upNormal,pTrComponent.valid() ? uquat::get_inverse(pTrComponent->GetOrientation()) : uquat::identity());
+				uvec::rotate(&footData.upNormal,pTrComponent ? uquat::get_inverse(pTrComponent->GetRotation()) : uquat::identity());
 				bIkPlaced = true;
 			}
 		}
@@ -657,8 +640,8 @@ void IKComponent::UpdateInverseKinematics(double tDelta)
 	}
 
 	// Update feet rotations (Has to be done AFTER inverse kinematics have been applied)
-	const auto forward = pTrComponent.valid() ? pTrComponent->GetForward() : uvec::FORWARD;
-	const auto right = pTrComponent.valid() ? pTrComponent->GetRight() : uvec::RIGHT;
+	const auto forward = pTrComponent ? pTrComponent->GetForward() : uvec::FORWARD;
+	const auto right = pTrComponent ? pTrComponent->GetRight() : uvec::RIGHT;
 	const auto rot = uquat::create(forward,right,up);
 	for(auto &pair : feetData)
 	{

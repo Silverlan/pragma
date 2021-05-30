@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_SHADER_LIGHT_CONE_HPP__
@@ -12,9 +12,9 @@
 
 namespace pragma
 {
-	namespace rendering {class RasterizationRenderer;};
+	class CRasterizationRendererComponent;
 	class DLLCLIENT ShaderLightCone
-		: public ShaderTextured3DBase
+		: public ShaderGameWorldLightingPass
 	{
 	public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_DEPTH_MAP;
@@ -24,14 +24,15 @@ namespace pragma
 		{
 			float coneLength;
 			uint32_t boundLightIndex;
+			uint32_t resolution;
 		};
 #pragma pack(pop)
 
 		ShaderLightCone(prosper::IPrContext &context,const std::string &identifier);
-		virtual bool BindSceneCamera(pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,bool bView) override;
+		virtual bool BindSceneCamera(pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,bool bView) override;
 		virtual bool BindEntity(CBaseEntity &ent) override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
-		virtual bool Draw(CModelSubMesh &mesh) override;
+		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
 	protected:
 		virtual bool BindMaterialParameters(CMaterial &mat) override;
 		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;

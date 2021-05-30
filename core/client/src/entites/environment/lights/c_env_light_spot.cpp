@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -20,7 +20,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_light_spot,CEnvLightSpot);
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 CLightSpotComponent::CLightSpotComponent(BaseEntity &ent)
@@ -94,13 +94,13 @@ void CLightSpotComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 		static_cast<CLightComponent&>(component).SetLight(*this);
 	else if(typeid(component) == typeid(CTransformComponent))
 	{
-		FlagCallbackForRemoval(static_cast<CTransformComponent&>(component).GetPosProperty()->AddCallback([this](std::reference_wrapper<const Vector3> oldPos,std::reference_wrapper<const Vector3> pos) {
+		auto &trC = static_cast<CTransformComponent&>(component);
+		FlagCallbackForRemoval(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,&trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags,pragma::TransformChangeFlags::PositionChanged | pragma::TransformChangeFlags::RotationChanged) == false)
+				return util::EventReply::Unhandled;
 			SetShadowDirty();
 			UpdateViewMatrices();
-		}),CallbackType::Component,&component);
-		FlagCallbackForRemoval(static_cast<CTransformComponent&>(component).GetOrientationProperty()->AddCallback([this](std::reference_wrapper<const Quat> oldRot,std::reference_wrapper<const Quat> rot) {
-			SetShadowDirty();
-			UpdateViewMatrices();
+			return util::EventReply::Unhandled;
 		}),CallbackType::Component,&component);
 	}
 }
@@ -115,11 +115,8 @@ void CLightSpotComponent::SetShadowDirty()
 }
 void CLightSpotComponent::UpdateViewMatrices()
 {
-	//SetViewMatrix(glm::lookAtLH(GetPosition(),GetPosition() +m_dir,Vector3(0,1,0)));
-	//SetViewMatrix(umat::look_at(GetPosition(),GetPosition() +m_dir,Vector3(0,1,0))); // Vulkan TODO
-	//SetViewMatrix(umat::look_at(GetPosition(),GetPosition() +m_dir,Vector3(0,1,0)));
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return;
 	auto dir = pTrComponent->GetForward();
 	SetViewMatrix(glm::lookAtRH(pTrComponent->GetPosition(),pTrComponent->GetPosition() +dir,uvec::get_perpendicular(dir)));

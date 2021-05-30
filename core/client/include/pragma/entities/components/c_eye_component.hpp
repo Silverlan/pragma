@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_EYE_COMPONENT_HPP__
@@ -54,8 +54,8 @@ namespace pragma
 			EyeballConfig config = {};
 		};
 
-		static ComponentEventId EVENT_ON_EYEBALLS_UPDATED;
-		static ComponentEventId EVENT_ON_BLINK;
+		// static ComponentEventId EVENT_ON_EYEBALLS_UPDATED;
+		// static ComponentEventId EVENT_ON_BLINK;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
 		CEyeComponent(BaseEntity &ent);
@@ -75,6 +75,7 @@ namespace pragma
 		void ClearViewTarget();
 		Vector3 GetViewTarget() const;
 		void SetViewTarget(const Vector3 &viewTarget);
+		std::optional<umath::Transform> GetEyePose() const;
 
 		void SetBlinkDuration(float dur);
 		float GetBlinkDuration() const;
@@ -86,12 +87,12 @@ namespace pragma
 
 		umath::Transform CalcEyeballPose(uint32_t eyeballIndex,umath::Transform *optOutBonePose=nullptr) const;
 		
-		void UpdateEyeballs();
+		void UpdateEyeballsMT();
 	protected:
-		void UpdateBlink();
+		void UpdateBlinkMT();
 		void OnModelChanged(const std::shared_ptr<Model> &mdl);
 		Vector3 ClampViewTarget(const Vector3 &viewTarget) const;
-		void UpdateEyeball(const Eyeball &eyeball,uint32_t eyeballIndex);
+		void UpdateEyeballMT(const Eyeball &eyeball,uint32_t eyeballIndex);
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 	private:
 		EyeballConfig m_eyeballConfig = {};

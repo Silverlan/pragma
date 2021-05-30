@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __LENTITY_COMPONENTS_BASE_TYPES_HPP__
@@ -15,11 +15,12 @@
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/lua/lua_entity_component.hpp"
 #include "pragma/model/animation/animation_event.h"
-#include "pragma/model/animation/animation.h"
+#include "pragma/model/animation/animation.hpp"
 #include "pragma/lua/l_entity_handles.hpp"
 #include <sharedutils/util_weak_handle.hpp>
+#include <mathutil/plane.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &res);};
 namespace Lua
@@ -211,6 +212,269 @@ namespace Lua
 			pragma::Lua::check_component(l,hEnt);
 			LUA_CHECK_ENTITY(l,hOther);
 			Lua::PushNumber(l,hEnt->GetDotProduct(*hOther.get(),bIgnoreYAxis));
+		}
+	};
+	namespace Animated
+	{
+		template<class THandle>
+			static BoneId get_bone_id(lua_State *l,THandle &hAnim,uint32_t boneId)
+		{
+			pragma::Lua::check_component(l,hAnim);
+			return boneId;
+		}
+		template<class THandle>
+			static BoneId get_bone_id(lua_State *l,THandle &hAnim,const std::string &boneId)
+		{
+			pragma::Lua::check_component(l,hAnim);
+			auto &ent = hAnim->GetEntity();
+			auto &mdl = ent.GetModel();
+			if(!mdl)
+				return std::numeric_limits<BoneId>::max();
+			return mdl->LookupBone(boneId);
+		}
+		template<class THandle,typename TBoneId>
+			static void GetBoneMatrix(lua_State *l,THandle &hAnim,const TBoneId &boneIdentifier)
+		{
+			auto boneId = get_bone_id(l,hAnim,boneIdentifier);
+			auto mat = hAnim->GetBoneMatrix(boneId);
+			if(mat.has_value() == false)
+				return;
+			luabind::object(l,*mat).push(l);
+		}
+		template<class THandle,typename TBoneId>
+			static void GetBoneTransform(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			Vector3 pos = {};
+			auto rot = uquat::identity();
+			Vector3 scale = {1.f,1.f,1.f};
+			auto r = hEnt->GetBonePosition(boneId,pos,rot,scale);
+			if(r == false)
+				return;
+			Lua::Push<Vector3>(l,pos);
+			Lua::Push<Quat>(l,rot);
+			Lua::Push<Vector3>(l,scale);
+		}
+		template<class THandle,typename TBoneId>
+			static void GetBonePose(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			Vector3 pos = {};
+			auto rot = uquat::identity();
+			Vector3 scale = {1.f,1.f,1.f};
+			auto r = hEnt->GetBonePosition(boneId,pos,rot,scale);
+			if(r == false)
+				return;
+			Lua::Push<umath::ScaledTransform>(l,umath::ScaledTransform{pos,rot,scale});
+		}
+		template<class THandle,typename TBoneId>
+			static void GetBoneBindPose(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			auto &ent = hEnt->GetEntity();
+			auto mdl = ent.GetModel();
+			if(mdl == nullptr)
+				return;
+			auto &ref = mdl->GetReference();
+			umath::ScaledTransform transform;
+			if(ref.GetBonePose(boneId,transform) == false)
+				return;
+			Lua::Push<umath::ScaledTransform>(l,transform);
+		}
+		template<class THandle,typename TBoneId>
+			static void GetBonePos(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			auto *pos = hEnt->GetBonePosition(boneId);
+			if(pos == nullptr)
+				return;
+			Lua::Push<Vector3>(l,*pos);
+		}
+		template<class THandle,typename TBoneId>
+			static void GetBoneRot(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			auto *rot = hEnt->GetBoneRotation(boneId);
+			if(rot == nullptr)
+				return;
+			Lua::Push<Quat>(l,*rot);
+		}
+		template<class THandle,typename TBoneId>
+			static void GetLocalBoneTransform(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			Vector3 pos = {};
+			auto rot = uquat::identity();
+			Vector3 scale(1.f,1.f,1.f);
+			auto r = hEnt->GetLocalBonePosition(boneId,pos,rot,&scale);
+			if(r == false)
+				return;
+			Lua::Push<Vector3>(l,pos);
+			Lua::Push<Quat>(l,rot);
+			Lua::Push<Vector3>(l,scale);
+		}
+		template<class THandle,typename TBoneId>
+			static void GetLocalBonePose(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			Vector3 pos = {};
+			auto rot = uquat::identity();
+			Vector3 scale(1.f,1.f,1.f);
+			auto r = hEnt->GetLocalBonePosition(boneId,pos,rot,&scale);
+			if(r == false)
+				return;
+			Lua::Push<umath::ScaledTransform>(l,{pos,rot,scale});
+		}
+		template<class THandle,typename TBoneId>
+			static void GetGlobalBoneTransform(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			Vector3 pos = {};
+			auto rot = uquat::identity();
+			Vector3 scale(1.f,1.f,1.f);
+			auto r = hEnt->GetGlobalBonePosition(boneId,pos,rot,&scale);
+			if(r == false)
+				return;
+			Lua::Push<Vector3>(l,pos);
+			Lua::Push<Quat>(l,rot);
+			Lua::Push<Vector3>(l,scale);
+		}
+		template<class THandle,typename TBoneId>
+			static void GetGlobalBonePose(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			Vector3 pos = {};
+			auto rot = uquat::identity();
+			Vector3 scale(1.f,1.f,1.f);
+			auto r = hEnt->GetGlobalBonePosition(boneId,pos,rot,&scale);
+			if(r == false)
+				return;
+			Lua::Push<umath::ScaledTransform>(l,{pos,rot,scale});
+		}
+		template<class THandle,typename TBoneId>
+			static void GetBoneRotation(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			auto *rot = hEnt->GetBoneRotation(boneId);
+			if(rot == nullptr)
+				return;
+			Lua::Push<Quat>(l,*rot);
+		}
+		template<class THandle,typename TBoneId>
+			static void GetBoneAngles(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			EulerAngles ang;
+			auto r = hEnt->GetBoneAngles(boneId,ang);
+			if(r == false)
+				return;
+			Lua::Push<EulerAngles>(l,ang);
+		}
+		template<class THandle,typename TBoneId>
+			static void SetBoneTransform(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier,const Vector3 &pos,const Quat &rot,const Vector3 &scale) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			hEnt->SetBonePosition(boneId,pos,rot,scale);
+		}
+		template<class THandle,typename TBoneId>
+			static void SetBoneTransform(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier,const Vector3 &pos,const Quat &rot) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			hEnt->SetBonePosition(boneId,pos,rot);
+		}
+		template<class THandle,typename TBoneId>
+			static void SetBoneTransform(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier,const Vector3 &pos,const EulerAngles &ang,const Vector3 &scale) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			hEnt->SetBonePosition(boneId,pos,uquat::create(ang),scale);
+		}
+		template<class THandle,typename TBoneId>
+			static void SetBoneTransform(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier,const Vector3 &pos,const EulerAngles &ang) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			hEnt->SetBonePosition(boneId,pos,ang);
+		}
+		template<class THandle,typename TBoneId>
+			static void SetBonePose(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier,const umath::ScaledTransform &pose) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			hEnt->SetBonePosition(boneId,pose.GetOrigin(),pose.GetRotation(),pose.GetScale());
+		}
+		template<class THandle,typename TBoneId>
+			static void SetBonePose(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier,const umath::Transform &pose) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			hEnt->SetBonePosition(boneId,pose.GetOrigin(),pose.GetRotation());
+		}
+
+		template<class THandle,typename TBoneId>
+			static void SetBonePos(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier,const Vector3 &pos) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			hEnt->SetBonePosition(boneId,pos);
+		}
+		template<class THandle,typename TBoneId>
+			static void SetBoneRot(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier,const Quat &rot) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			hEnt->SetBoneRotation(boneId,rot);
+		}
+		template<class THandle,typename TBoneId>
+			static void SetBoneAngles(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier,const EulerAngles &ang) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			hEnt->SetBoneRotation(boneId,uquat::create(ang));
+		}
+		template<class THandle,typename TBoneId>
+			static void SetBoneScale(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier,const Vector3 &scale) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			hEnt->SetBoneScale(boneId,scale);
+		}
+		template<class THandle,typename TBoneId>
+			static void GetBoneScale(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			auto *scale = hEnt->GetBoneScale(boneId);
+			if(scale == nullptr)
+				return;
+			Lua::Push<Vector3>(l,*scale);
+		}
+
+		template<class THandle,typename TBoneId>
+			static void SetLocalBoneTransform(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier,const Vector3 &pos,const Quat &rot,const Vector3 &scale) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			hEnt->SetLocalBonePosition(boneId,pos,rot,scale);
+		}
+		template<class THandle,typename TBoneId>
+			static void SetLocalBonePose(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier,const umath::ScaledTransform &pose) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			hEnt->SetLocalBonePosition(boneId,pose.GetOrigin(),pose.GetRotation(),pose.GetScale());
+		}
+		template<class THandle,typename TBoneId>
+			static void SetLocalBonePos(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier,const Vector3 &pos) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			hEnt->SetLocalBonePosition(boneId,pos);
+		}
+		template<class THandle,typename TBoneId>
+			static void SetLocalBoneRot(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier,const Quat &rot) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			hEnt->SetLocalBoneRotation(boneId,rot);
+		}
+
+		template<class THandle,typename TBoneId>
+			static void SetGlobalBoneTransform(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier,const Vector3 &pos,const Quat &rot,const Vector3 &scale) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			hEnt->SetGlobalBonePosition(boneId,pos,rot,scale);
+		}
+		template<class THandle,typename TBoneId>
+			static void SetGlobalBonePose(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier,const umath::ScaledTransform &pose) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			hEnt->SetGlobalBonePosition(boneId,pose.GetOrigin(),pose.GetRotation(),pose.GetScale());
+		}
+		template<class THandle,typename TBoneId>
+			static void SetGlobalBonePos(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier,const Vector3 &pos) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			hEnt->SetGlobalBonePosition(boneId,pos);
+		}
+		template<class THandle,typename TBoneId>
+			static void SetGlobalBoneRot(lua_State *l,THandle &hEnt,const TBoneId &boneIdentifier,const Quat &rot) {
+			auto boneId = get_bone_id(l,hEnt,boneIdentifier);
+			hEnt->SetGlobalBoneRotation(boneId,rot);
+		}
+		template<class THandle,typename TBoneId>
+			static void GetEffectiveBoneTransform(lua_State *l,THandle &hAnim,const TBoneId &boneIdentifier) {
+			auto boneId = get_bone_id(l,hAnim,boneIdentifier);
+			auto &transforms = hAnim->GetProcessedBones();
+			if(boneId >= transforms.size())
+				return;
+			Lua::Push<umath::ScaledTransform*>(l,&transforms.at(boneId));
+		}
+		template<class THandle,typename TBoneId>
+			static void SetEffectiveBoneTransform(lua_State *l,THandle &hAnim,const TBoneId &boneIdentifier,const umath::ScaledTransform &t) {
+			auto boneId = get_bone_id(l,hAnim,boneIdentifier);
+			auto &transforms = hAnim->GetProcessedBones();
+			if(boneId >= transforms.size())
+				return;
+			transforms.at(boneId) = t;
 		}
 	};
 	template<class TLuaClass,class THandle>
@@ -1009,6 +1273,26 @@ namespace Lua
 			pragma::Lua::check_component(l,hEntOther);
 			hEnt->SetCollisionsEnabled(&hEntOther->GetEntity(),b);
 		}));
+		def.def("EnableCollisions",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt->SetCollisionsEnabled(true);
+		}));
+		def.def("DisableCollisions",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt->SetCollisionsEnabled(false);
+		}));
+		def.def("SetCollisionsEnabled",static_cast<void(*)(lua_State*,THandle&,bool)>([](lua_State *l,THandle &hEnt,bool b) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt->SetCollisionsEnabled(b);
+		}));
+		def.def("SetSimulationEnabled",static_cast<void(*)(lua_State*,THandle&,bool)>([](lua_State *l,THandle &hEnt,bool b) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt->SetSimulationEnabled(b);
+		}));
+		def.def("IsSimulationEnabled",static_cast<bool(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) -> bool {
+			pragma::Lua::check_component(l,hEnt);
+			return hEnt->GetSimulationEnabled();
+		}));
 		def.def("ResetCollisions",static_cast<void(*)(lua_State*,THandle&,THandle&)>([](lua_State *l,THandle &hEnt,THandle &hEntOther) {
 			pragma::Lua::check_component(l,hEnt);
 			pragma::Lua::check_component(l,hEntOther);
@@ -1209,11 +1493,11 @@ namespace Lua
 		}));
 		def.def("GetRotation",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);
-			luabind::object(l,hEnt->GetOrientation()).push(l);
+			luabind::object(l,hEnt->GetRotation()).push(l);
 		}));
 		def.def("SetRotation",static_cast<void(*)(lua_State*,THandle&,Quat)>([](lua_State *l,THandle &hEnt,Quat q) {
 			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetOrientation(q);
+			hEnt->SetRotation(q);
 		}));
 		def.def("GetAngles",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);
@@ -1418,19 +1702,6 @@ namespace Lua
 		def.def("GetDotProduct",static_cast<void(*)(lua_State*,THandle&,EntityHandle&)>([](lua_State *l,THandle &hEnt,EntityHandle &hOther) {
 			Lua::Transform::GetDotProduct<THandle>(l,hEnt,hOther,false);
 		}));
-
-		def.def("GetPosProperty",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
-			pragma::Lua::check_component(l,hComponent);
-			Lua::Property::push(l,*hComponent->GetPosProperty());
-		}));
-		def.def("GetRotationProperty",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
-			pragma::Lua::check_component(l,hComponent);
-			Lua::Property::push(l,*hComponent->GetOrientationProperty());
-		}));
-		def.def("GetScaleProperty",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
-			pragma::Lua::check_component(l,hComponent);
-			Lua::Property::push(l,*hComponent->GetScaleProperty());
-		}));
 	}
 
 	template<class TLuaClass,class THandle>
@@ -1524,13 +1795,13 @@ namespace Lua
 		}));
 		def.def("LookAt",static_cast<void(*)(lua_State*,THandle&,const Vector3&)>([](lua_State *l,THandle &hComponent,const Vector3 &lookAtPos) {
 			pragma::Lua::check_component(l,hComponent);
-			auto &trComponent = hComponent->GetEntity().GetTransformComponent();
-			if(trComponent.expired())
+			auto *trComponent = hComponent->GetEntity().GetTransformComponent();
+			if(!trComponent)
 				return;
 			auto &camPos = trComponent->GetPosition();
 			auto dir = lookAtPos -camPos;
 			uvec::normalize(&dir);
-			trComponent->SetOrientation(uquat::create_look_rotation(dir,trComponent->GetUp()));
+			trComponent->SetRotation(uquat::create_look_rotation(dir,trComponent->GetUp()));
 		}));
 		def.def("UpdateMatrices",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
 			pragma::Lua::check_component(l,hComponent);
@@ -1606,14 +1877,14 @@ namespace Lua
 		}));
 		def.def("GetFrustumPlanes",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) {
 			pragma::Lua::check_component(l,hComponent);
-			std::vector<Plane> planes;
+			std::vector<umath::Plane> planes;
 			hComponent->GetFrustumPlanes(planes);
 
 			lua_newtable(l);
 			int top = lua_gettop(l);
 			for(unsigned int i=0;i<planes.size();i++)
 			{
-				Lua::Push<Plane>(l,planes[i]);
+				Lua::Push<umath::Plane>(l,planes[i]);
 				lua_rawseti(l,top,i +1);
 			}
 		}));
@@ -1773,7 +2044,7 @@ namespace Lua
 		}));
 		def.def("CreateFrustumKDop",static_cast<void(*)(lua_State*,THandle&,const Vector2&,const Vector2&)>([](lua_State *l,THandle &hComponent,const Vector2 &uvStart,const Vector2 &uvEnd) {
 			pragma::Lua::check_component(l,hComponent);
-			std::vector<Plane> kDop;
+			std::vector<umath::Plane> kDop;
 			hComponent->CreateFrustumKDop(uvStart,uvEnd,kDop);
 
 			auto table = Lua::CreateTable(l);
@@ -1781,7 +2052,7 @@ namespace Lua
 			for(auto &plane : kDop)
 			{
 				Lua::PushInt(l,idx++);
-				Lua::Push<Plane>(l,plane);
+				Lua::Push<umath::Plane>(l,plane);
 				Lua::SetTableValue(l,table);
 			}
 		}));
@@ -2122,11 +2393,31 @@ namespace Lua
 			pragma::Lua::check_component(l,hComponent);
 			Lua::PushInt(l,umath::to_integral(hComponent->GetTriggerFlags()));
 		}));
+		def.def("GetTouchingEntities",static_cast<luabind::object(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) -> luabind::object {
+			pragma::Lua::check_component(l,hComponent);
+			auto t = luabind::newtable(l);
+			int32_t idx = 1;
+			for(auto &touchInfo : hComponent->GetTouchingInfo())
+			{
+				if(touchInfo.touch.entity.IsValid() == false || touchInfo.triggered == false)
+					continue;
+				t[idx++] = *touchInfo.touch.entity.get()->GetLuaObject();
+			}
+			return t;
+		}));
+		def.def("GetTouchingEntityCount",static_cast<uint32_t(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hComponent) -> uint32_t {
+			pragma::Lua::check_component(l,hComponent);
+			auto &touchingInfo = hComponent->GetTouchingInfo();
+			return std::count_if(touchingInfo.begin(),touchingInfo.end(),[](const pragma::BaseTouchComponent::TouchInfo &touchInfo) -> bool {
+				return touchInfo.triggered && touchInfo.touch.entity.IsValid();
+			});
+		}));
 
 		def.add_static_constant("EVENT_CAN_TRIGGER",pragma::BaseTouchComponent::EVENT_CAN_TRIGGER);
 		def.add_static_constant("EVENT_ON_START_TOUCH",pragma::BaseTouchComponent::EVENT_ON_START_TOUCH);
 		def.add_static_constant("EVENT_ON_END_TOUCH",pragma::BaseTouchComponent::EVENT_ON_END_TOUCH);
 		def.add_static_constant("EVENT_ON_TRIGGER",pragma::BaseTouchComponent::EVENT_ON_TRIGGER);
+		def.add_static_constant("EVENT_ON_TRIGGER_INITIALIZED",pragma::BaseTouchComponent::EVENT_ON_TRIGGER_INITIALIZED);
 		
 		def.add_static_constant("TRIGGER_FLAG_NONE",umath::to_integral(pragma::BaseTouchComponent::TriggerFlags::None));
 		def.add_static_constant("TRIGGER_FLAG_BIT_PLAYERS",umath::to_integral(pragma::BaseTouchComponent::TriggerFlags::Players));
@@ -2173,8 +2464,7 @@ namespace Lua
 		}));
 		def.def("GetMoveSpeed",static_cast<void(*)(lua_State*,THandle&,const std::string&)>([](lua_State *l,THandle &hNPC,const std::string &anim) {
 			pragma::Lua::check_component(l,hNPC);
-			auto mdlComponent = hNPC->GetEntity().GetModelComponent();
-			auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+			auto &mdl = hNPC->GetEntity().GetModel();
 			if(mdl == nullptr)
 				return;
 			auto animId = mdl->LookupAnimation(anim);
@@ -2427,9 +2717,14 @@ namespace Lua
 			pragma::Lua::check_component(l,hEnt);
 			hEnt.get()->SetMoveController(moveController);
 		}));
+		def.def("SetMoveController",static_cast<void(*)(lua_State*,THandle&,const std::string&,const std::string&)>([](lua_State *l,THandle &hEnt,const std::string &moveController,const std::string &moveControllerY) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt.get()->SetMoveController(moveController,moveControllerY);
+		}));
 		def.def("GetMoveController",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);
 			Lua::PushInt(l,hEnt.get()->GetMoveController());
+			Lua::PushInt(l,hEnt.get()->GetMoveControllerY());
 		}));
 		def.def("GetMoveVelocity",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);
@@ -2988,6 +3283,41 @@ namespace Lua
 	}
 
 	template<class TLuaClass,class THandle>
+		void register_base_gamemode_component_methods(lua_State *l,TLuaClass &def)
+	{
+		def.def("GetName",static_cast<std::string(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hGm) {
+			pragma::Lua::check_component(l,hGm);
+			return hGm.get()->GetName();
+		}));
+		def.def("GetIdentifier",static_cast<std::string(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hGm) {
+			pragma::Lua::check_component(l,hGm);
+			return hGm.get()->GetIdentifier();
+		}));
+		def.def("GetComponentName",static_cast<std::string(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hGm) {
+			pragma::Lua::check_component(l,hGm);
+			return hGm.get()->GetComponentName();
+		}));
+		def.def("GetAuthor",static_cast<std::string(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hGm) {
+			pragma::Lua::check_component(l,hGm);
+			return hGm.get()->GetAuthor();
+		}));
+		def.def("GetGamemodeVersion",static_cast<::util::Version(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hGm) {
+			pragma::Lua::check_component(l,hGm);
+			return hGm.get()->GetGamemodeVersion();
+		}));
+
+		// Enums
+		def.add_static_constant("EVENT_ON_PLAYER_DEATH",pragma::BaseGamemodeComponent::EVENT_ON_PLAYER_DEATH);
+		def.add_static_constant("EVENT_ON_PLAYER_SPAWNED",pragma::BaseGamemodeComponent::EVENT_ON_PLAYER_SPAWNED);
+		def.add_static_constant("EVENT_ON_PLAYER_DROPPED",pragma::BaseGamemodeComponent::EVENT_ON_PLAYER_DROPPED);
+		def.add_static_constant("EVENT_ON_PLAYER_READY",pragma::BaseGamemodeComponent::EVENT_ON_PLAYER_READY);
+		def.add_static_constant("EVENT_ON_PLAYER_JOINED",pragma::BaseGamemodeComponent::EVENT_ON_PLAYER_JOINED);
+		def.add_static_constant("EVENT_ON_GAME_INITIALIZED",pragma::BaseGamemodeComponent::EVENT_ON_GAME_INITIALIZED);
+		def.add_static_constant("EVENT_ON_MAP_INITIALIZED",pragma::BaseGamemodeComponent::EVENT_ON_MAP_INITIALIZED);
+		def.add_static_constant("EVENT_ON_GAME_READY",pragma::BaseGamemodeComponent::EVENT_ON_GAME_READY);
+	}
+
+	template<class TLuaClass,class THandle>
 		void register_base_io_component_methods(lua_State *l,TLuaClass &def)
 	{
 		def.def("Input",static_cast<void(*)(lua_State*,THandle&,std::string,EntityHandle&,EntityHandle&,std::string)>([](lua_State *l,THandle &hIo,std::string input,EntityHandle &hActivator,EntityHandle &hCaller,std::string data) {
@@ -3030,7 +3360,15 @@ namespace Lua
 			LUA_CHECK_ENTITY(l,hEnt);
 			hIo->TriggerOutput(name,hEnt.get());
 		}));
+		def.def("FireOutput",static_cast<void(*)(lua_State*,THandle&,const std::string&,EntityHandle&,pragma::BaseIOComponent::IoFlags)>([](lua_State *l,THandle &hIo,const std::string &name,EntityHandle &hEnt,pragma::BaseIOComponent::IoFlags flags) {
+			pragma::Lua::check_component(l,hIo);
+			LUA_CHECK_ENTITY(l,hEnt);
+			hIo->TriggerOutput(name,hEnt.get(),flags);
+		}));
 		def.add_static_constant("EVENT_HANDLE_INPUT",pragma::BaseIOComponent::EVENT_HANDLE_INPUT);
+		
+		def.add_static_constant("IO_FLAG_NONE",umath::to_integral(pragma::BaseIOComponent::IoFlags::None));
+		def.add_static_constant("IO_FLAG_BIT_FORCE_DELAYED_FIRE",umath::to_integral(pragma::BaseIOComponent::IoFlags::ForceDelayedFire));
 	}
 
 	template<class TLuaClass,class THandle>
@@ -3079,9 +3417,20 @@ namespace Lua
 			auto val = hModel->GetBodyGroup(groupId);
 			Lua::PushInt(l,val);
 		}));
+		def.def("GetBodyGroups",static_cast<luabind::object(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hModel) -> luabind::object {
+			pragma::Lua::check_component(l,hModel);
+			auto &bodyGroups = hModel->GetBodyGroups();
+			return Lua::vector_to_table(l,bodyGroups);
+		}));
 		def.def("SetBodyGroup",static_cast<void(*)(lua_State*,THandle&,UInt32,UInt32)>([](lua_State *l,THandle &hModel,UInt32 groupId,UInt32 val) {
 			pragma::Lua::check_component(l,hModel);
 			hModel->SetBodyGroup(groupId,val);
+		}));
+		def.def("SetBodyGroups",static_cast<void(*)(lua_State*,THandle&,luabind::table<>)>([](lua_State *l,THandle &hModel,luabind::table<> t) {
+			pragma::Lua::check_component(l,hModel);
+			auto bodyGroups = Lua::table_to_vector<uint32_t>(l,t,2);
+			for(auto i=decltype(bodyGroups.size()){0u};i<bodyGroups.size();++i)
+				hModel->SetBodyGroup(i,bodyGroups[i]);
 		}));
 		def.def("LookupAnimation",static_cast<void(*)(lua_State*,THandle&,const char*)>([](lua_State *l,THandle &hEnt,const char *anim) {
 			pragma::Lua::check_component(l,hEnt);
@@ -3143,6 +3492,49 @@ namespace Lua
 		def.add_static_constant("EVENT_ON_MODEL_MATERIALS_LOADED",pragma::BaseModelComponent::EVENT_ON_MODEL_MATERIALS_LOADED);
 	}
 
+	template<class TLuaClass,class THandle,typename TBoneId>
+		void register_base_animated_component_bone_methods(lua_State *l,TLuaClass &def)
+	{
+		def.def("GetBoneMatrix",&Lua::Animated::GetBoneMatrix<THandle,TBoneId>);
+		def.def("GetBoneTransform",&Lua::Animated::GetBoneTransform<THandle,TBoneId>);
+		def.def("GetBonePose",&Lua::Animated::GetBonePose<THandle,TBoneId>);
+		def.def("GetBoneBindPose",&Lua::Animated::GetBoneBindPose<THandle,TBoneId>);
+		def.def("GetBonePos",&Lua::Animated::GetBonePos<THandle,TBoneId>);
+		def.def("GetBoneRot",&Lua::Animated::GetBoneRot<THandle,TBoneId>);
+		def.def("GetLocalBoneTransform",&Lua::Animated::GetLocalBoneTransform<THandle,TBoneId>);
+		def.def("GetLocalBonePose",&Lua::Animated::GetLocalBonePose<THandle,TBoneId>);
+		def.def("GetGlobalBoneTransform",&Lua::Animated::GetGlobalBoneTransform<THandle,TBoneId>);
+		def.def("GetGlobalBonePose",&Lua::Animated::GetGlobalBonePose<THandle,TBoneId>);
+		def.def("GetBoneRotation",&Lua::Animated::GetBoneRotation<THandle,TBoneId>);
+		def.def("GetBoneAngles",&Lua::Animated::GetBoneAngles<THandle,TBoneId>);
+		def.def("SetBoneTransform",static_cast<void(*)(lua_State*,THandle&,const TBoneId&,const Vector3&,const Quat&,const Vector3&)>(&Lua::Animated::SetBoneTransform<THandle,TBoneId>));
+		def.def("SetBoneTransform",static_cast<void(*)(lua_State*,THandle&,const TBoneId&,const Vector3&,const Quat&)>(&Lua::Animated::SetBoneTransform<THandle,TBoneId>));
+		def.def("SetBoneTransform",static_cast<void(*)(lua_State*,THandle&,const TBoneId&,const Vector3&,const EulerAngles&,const Vector3&)>(&Lua::Animated::SetBoneTransform<THandle,TBoneId>));
+		def.def("SetBoneTransform",static_cast<void(*)(lua_State*,THandle&,const TBoneId&,const Vector3&,const EulerAngles&)>(&Lua::Animated::SetBoneTransform<THandle,TBoneId>));
+
+		def.def("SetBonePose",static_cast<void(*)(lua_State*,THandle&,const TBoneId&,const umath::ScaledTransform&)>(&Lua::Animated::SetBonePose<THandle,TBoneId>));
+		def.def("SetBonePose",static_cast<void(*)(lua_State*,THandle&,const TBoneId&,const umath::Transform&)>(&Lua::Animated::SetBonePose<THandle,TBoneId>));
+
+		def.def("SetBonePos",&Lua::Animated::SetBonePos<THandle,TBoneId>);
+		def.def("SetBoneRot",&Lua::Animated::SetBoneRot<THandle,TBoneId>);
+		def.def("SetBoneAngles",&Lua::Animated::SetBoneAngles<THandle,TBoneId>);
+		def.def("SetBoneScale",&Lua::Animated::SetBoneScale<THandle,TBoneId>);
+		def.def("GetBoneScale",&Lua::Animated::GetBoneScale<THandle,TBoneId>);
+
+		def.def("SetLocalBoneTransform",&Lua::Animated::SetLocalBoneTransform<THandle,TBoneId>);
+		def.def("SetLocalBonePose",&Lua::Animated::SetLocalBonePose<THandle,TBoneId>);
+		def.def("SetLocalBonePos",&Lua::Animated::SetLocalBonePos<THandle,TBoneId>);
+		def.def("SetLocalBoneRot",&Lua::Animated::SetLocalBoneRot<THandle,TBoneId>);
+
+		def.def("SetGlobalBoneTransform",&Lua::Animated::SetGlobalBoneTransform<THandle,TBoneId>);
+		def.def("SetGlobalBonePose",&Lua::Animated::SetGlobalBonePose<THandle,TBoneId>);
+		def.def("SetGlobalBonePos",&Lua::Animated::SetGlobalBonePos<THandle,TBoneId>);
+		def.def("SetGlobalBoneRot",&Lua::Animated::SetGlobalBoneRot<THandle,TBoneId>);
+		
+		def.def("GetEffectiveBoneTransform",&Lua::Animated::GetEffectiveBoneTransform<THandle,TBoneId>);
+		def.def("SetEffectiveBoneTransform",&Lua::Animated::SetEffectiveBoneTransform<THandle,TBoneId>);
+	}
+
 	template<class TLuaClass,class THandle>
 		void register_base_animated_component_methods(lua_State *l,TLuaClass &def)
 	{
@@ -3171,7 +3563,7 @@ namespace Lua
 			auto *anim = hAnim->GetAnimationObject();
 			if(anim == nullptr)
 				return;
-			Lua::Push<std::shared_ptr<::Animation>>(l,anim->shared_from_this());
+			Lua::Push<std::shared_ptr<pragma::animation::Animation>>(l,anim->shared_from_this());
 		}));
 		def.def("PlayActivity",static_cast<void(*)(lua_State*,THandle&,int,uint32_t)>([](lua_State *l,THandle &hAnim,int activity,uint32_t flags) {
 			pragma::Lua::check_component(l,hAnim);
@@ -3209,6 +3601,17 @@ namespace Lua
 			pragma::Lua::check_component(l,hAnim);
 			Lua::PushInt(l,umath::to_integral(hAnim->GetLayeredActivity(slot)));
 		}));
+		def.def("GetLayeredAnimations",static_cast<luabind::object(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hAnim) -> luabind::object {
+			pragma::Lua::check_component(l,hAnim);
+			auto t = luabind::newtable(l);
+			for(auto &pair : hAnim->GetAnimationSlotInfos())
+				t[pair.first] = pair.second.animation;
+			return t;
+		}));
+		def.def("ApplyLayeredAnimations",static_cast<bool(*)(lua_State*,THandle&,double)>([](lua_State *l,THandle &hAnim,double dt) -> bool {
+			pragma::Lua::check_component(l,hAnim);
+			return hAnim->MaintainGestures(dt);
+		}));
 		def.def("SetPlaybackRate",static_cast<void(*)(lua_State*,THandle&,float)>([](lua_State *l,THandle &hAnim,float rate) {
 			pragma::Lua::check_component(l,hAnim);
 			hAnim->SetPlaybackRate(rate);
@@ -3221,46 +3624,11 @@ namespace Lua
 			pragma::Lua::check_component(l,hAnim);
 			Lua::Property::push(l,*hAnim->GetPlaybackRateProperty());
 		}));
-		def.def("GetBoneMatrix",static_cast<void(*)(lua_State*,THandle&,unsigned int)>([](lua_State *l,THandle &hAnim,unsigned int boneID) {
-			pragma::Lua::check_component(l,hAnim);
-			auto mat = hAnim->GetBoneMatrix(boneID);
-			if(mat.has_value() == false)
-				return;
-			luabind::object(l,*mat).push(l);
-		}));
-		def.def("GetBoneTransform",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t boneId) {
+		register_base_animated_component_bone_methods<TLuaClass,THandle,BoneId>(l,def);
+		register_base_animated_component_bone_methods<TLuaClass,THandle,std::string>(l,def);
+		def.def("UpdateEffectiveBoneTransforms",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);
-			Vector3 pos = {};
-			auto rot = uquat::identity();
-			Vector3 scale = {1.f,1.f,1.f};
-			auto r = hEnt->GetBonePosition(boneId,pos,rot,scale);
-			if(r == false)
-				return;
-			Lua::Push<Vector3>(l,pos);
-			Lua::Push<Quat>(l,rot);
-			Lua::Push<Vector3>(l,scale);
-		}));
-		def.def("GetBonePose",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t boneId) {
-			pragma::Lua::check_component(l,hEnt);
-			Vector3 pos = {};
-			auto rot = uquat::identity();
-			Vector3 scale = {1.f,1.f,1.f};
-			auto r = hEnt->GetBonePosition(boneId,pos,rot,scale);
-			if(r == false)
-				return;
-			Lua::Push<umath::ScaledTransform>(l,umath::ScaledTransform{pos,rot,scale});
-		}));
-		def.def("GetBoneBindPose",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t boneId) {
-			pragma::Lua::check_component(l,hEnt);
-			auto &ent = hEnt->GetEntity();
-			auto mdl = ent.GetModel();
-			if(mdl == nullptr)
-				return;
-			auto &ref = mdl->GetReference();
-			umath::ScaledTransform transform;
-			if(ref.GetBonePose(boneId,transform) == false)
-				return;
-			Lua::Push<umath::ScaledTransform>(l,transform);
+			hEnt->UpdateSkeleton();
 		}));
 		def.def("GetBindPose",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hAnim) {
 			pragma::Lua::check_component(l,hAnim);
@@ -3272,161 +3640,6 @@ namespace Lua
 		def.def("SetBindPose",static_cast<void(*)(lua_State*,THandle&,const Frame&)>([](lua_State *l,THandle &hAnim,const Frame &frame) {
 			pragma::Lua::check_component(l,hAnim);
 			hAnim->SetBindPose(frame);
-		}));
-		def.def("GetBonePos",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t boneId) {
-			pragma::Lua::check_component(l,hEnt);
-			auto *pos = hEnt->GetBonePosition(boneId);
-			if(pos == nullptr)
-				return;
-			Lua::Push<Vector3>(l,*pos);
-		}));
-		def.def("GetBoneRot",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t boneId) {
-			pragma::Lua::check_component(l,hEnt);
-			auto *rot = hEnt->GetBoneRotation(boneId);
-			if(rot == nullptr)
-				return;
-			Lua::Push<Quat>(l,*rot);
-		}));
-		def.def("GetLocalBoneTransform",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t boneId) {
-			pragma::Lua::check_component(l,hEnt);
-			Vector3 pos = {};
-			auto rot = uquat::identity();
-			Vector3 scale(1.f,1.f,1.f);
-			auto r = hEnt->GetLocalBonePosition(boneId,pos,rot,&scale);
-			if(r == false)
-				return;
-			Lua::Push<Vector3>(l,pos);
-			Lua::Push<Quat>(l,rot);
-			Lua::Push<Vector3>(l,scale);
-		}));
-		def.def("GetLocalBonePose",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t boneId) {
-			pragma::Lua::check_component(l,hEnt);
-			Vector3 pos = {};
-			auto rot = uquat::identity();
-			Vector3 scale(1.f,1.f,1.f);
-			auto r = hEnt->GetLocalBonePosition(boneId,pos,rot,&scale);
-			if(r == false)
-				return;
-			Lua::Push<umath::ScaledTransform>(l,{pos,rot,scale});
-		}));
-		def.def("GetGlobalBoneTransform",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t boneId) {
-			pragma::Lua::check_component(l,hEnt);
-			Vector3 pos = {};
-			auto rot = uquat::identity();
-			Vector3 scale(1.f,1.f,1.f);
-			auto r = hEnt->GetGlobalBonePosition(boneId,pos,rot,&scale);
-			if(r == false)
-				return;
-			Lua::Push<Vector3>(l,pos);
-			Lua::Push<Quat>(l,rot);
-			Lua::Push<Vector3>(l,scale);
-		}));
-		def.def("GetGlobalBonePose",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t boneId) {
-			pragma::Lua::check_component(l,hEnt);
-			Vector3 pos = {};
-			auto rot = uquat::identity();
-			Vector3 scale(1.f,1.f,1.f);
-			auto r = hEnt->GetGlobalBonePosition(boneId,pos,rot,&scale);
-			if(r == false)
-				return;
-			Lua::Push<umath::ScaledTransform>(l,{pos,rot,scale});
-		}));
-		def.def("GetBoneRotation",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t boneId) {
-			pragma::Lua::check_component(l,hEnt);
-			auto *rot = hEnt->GetBoneRotation(boneId);
-			if(rot == nullptr)
-				return;
-			Lua::Push<Quat>(l,*rot);
-		}));
-		def.def("GetBoneAngles",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t boneId) {
-			pragma::Lua::check_component(l,hEnt);
-			EulerAngles ang;
-			auto r = hEnt->GetBoneAngles(boneId,ang);
-			if(r == false)
-				return;
-			Lua::Push<EulerAngles>(l,ang);
-		}));
-		def.def("SetBoneTransform",static_cast<void(*)(lua_State*,THandle&,uint32_t,const Vector3&,const Quat&,const Vector3&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const Vector3 &pos,const Quat &rot,const Vector3 &scale) {
-			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetBonePosition(boneId,pos,rot,scale);
-		}));
-		def.def("SetBoneTransform",static_cast<void(*)(lua_State*,THandle&,uint32_t,const Vector3&,const Quat&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const Vector3 &pos,const Quat &rot) {
-			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetBonePosition(boneId,pos,rot);
-		}));
-		def.def("SetBoneTransform",static_cast<void(*)(lua_State*,THandle&,uint32_t,const Vector3&,const EulerAngles&,const Vector3&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const Vector3 &pos,const EulerAngles &ang,const Vector3 &scale) {
-			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetBonePosition(boneId,pos,uquat::create(ang),scale);
-		}));
-		def.def("SetBoneTransform",static_cast<void(*)(lua_State*,THandle&,uint32_t,const Vector3&,const EulerAngles&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const Vector3 &pos,const EulerAngles &ang) {
-			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetBonePosition(boneId,pos,ang);
-		}));
-		def.def("SetBonePose",static_cast<void(*)(lua_State*,THandle&,uint32_t,const umath::ScaledTransform&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const umath::ScaledTransform &pose) {
-			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetBonePosition(boneId,pose.GetOrigin(),pose.GetRotation(),pose.GetScale());
-		}));
-		def.def("SetBonePose",static_cast<void(*)(lua_State*,THandle&,uint32_t,const umath::Transform&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const umath::Transform &pose) {
-			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetBonePosition(boneId,pose.GetOrigin(),pose.GetRotation());
-		}));
-
-		def.def("SetBonePos",static_cast<void(*)(lua_State*,THandle&,uint32_t,const Vector3&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const Vector3 &pos) {
-			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetBonePosition(boneId,pos);
-		}));
-		def.def("SetBoneRot",static_cast<void(*)(lua_State*,THandle&,uint32_t,const Quat&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const Quat &rot) {
-			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetBoneRotation(boneId,rot);
-		}));
-		def.def("SetBoneAngles",static_cast<void(*)(lua_State*,THandle&,uint32_t,const EulerAngles&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const EulerAngles &ang) {
-			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetBoneRotation(boneId,uquat::create(ang));
-		}));
-		def.def("SetBoneScale",static_cast<void(*)(lua_State*,THandle&,uint32_t,const Vector3&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const Vector3 &scale) {
-			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetBoneScale(boneId,scale);
-		}));
-		def.def("GetBoneScale",static_cast<void(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t boneId) {
-			pragma::Lua::check_component(l,hEnt);
-			auto *scale = hEnt->GetBoneScale(boneId);
-			if(scale == nullptr)
-				return;
-			Lua::Push<Vector3>(l,*scale);
-		}));
-
-		def.def("SetLocalBoneTransform",static_cast<void(*)(lua_State*,THandle&,uint32_t,const Vector3&,const Quat&,const Vector3&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const Vector3 &pos,const Quat &rot,const Vector3 &scale) {
-			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetLocalBonePosition(boneId,pos,rot,scale);
-		}));
-		def.def("SetLocalBonePose",static_cast<void(*)(lua_State*,THandle&,uint32_t,const umath::ScaledTransform&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const umath::ScaledTransform &pose) {
-			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetLocalBonePosition(boneId,pose.GetOrigin(),pose.GetRotation(),pose.GetScale());
-		}));
-		def.def("SetLocalBonePos",static_cast<void(*)(lua_State*,THandle&,uint32_t,const Vector3&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const Vector3 &pos) {
-			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetLocalBonePosition(boneId,pos);
-		}));
-		def.def("SetLocalBoneRot",static_cast<void(*)(lua_State*,THandle&,uint32_t,const Quat&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const Quat &rot) {
-			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetLocalBoneRotation(boneId,rot);
-		}));
-
-		def.def("SetGlobalBoneTransform",static_cast<void(*)(lua_State*,THandle&,uint32_t,const Vector3&,const Quat&,const Vector3&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const Vector3 &pos,const Quat &rot,const Vector3 &scale) {
-			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetGlobalBonePosition(boneId,pos,rot,scale);
-		}));
-		def.def("SetGlobalBonePose",static_cast<void(*)(lua_State*,THandle&,uint32_t,const umath::ScaledTransform&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const umath::ScaledTransform &pose) {
-			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetGlobalBonePosition(boneId,pose.GetOrigin(),pose.GetRotation(),pose.GetScale());
-		}));
-		def.def("SetGlobalBonePos",static_cast<void(*)(lua_State*,THandle&,uint32_t,const Vector3&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const Vector3 &pos) {
-			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetGlobalBonePosition(boneId,pos);
-		}));
-		def.def("SetGlobalBoneRot",static_cast<void(*)(lua_State*,THandle&,uint32_t,const Quat&)>([](lua_State *l,THandle &hEnt,uint32_t boneId,const Quat &rot) {
-			pragma::Lua::check_component(l,hEnt);
-			hEnt->SetGlobalBoneRotation(boneId,rot);
 		}));
 
 		def.def("SetCycle",static_cast<void(*)(lua_State*,THandle&,float)>([](lua_State *l,THandle &hEnt,float cycle) {
@@ -3582,6 +3795,45 @@ namespace Lua
 			pragma::Lua::check_component(l,hEnt);
 			Lua::PushInt(l,hEnt->GetBoneCount());
 		}));
+		def.def("SetRootPoseBoneId",static_cast<void(*)(lua_State*,THandle&,BoneId)>([](lua_State *l,THandle &hEnt,BoneId boneId) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt->SetRootPoseBoneId(boneId);
+		}));
+		def.def("GetRootPoseBoneId",static_cast<BoneId(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+			pragma::Lua::check_component(l,hEnt);
+			return hEnt->GetRootPoseBoneId();
+		}));
+		def.def("SetAnimatedRootPoseTransformEnabled",static_cast<void(*)(lua_State*,THandle&,bool)>([](lua_State *l,THandle &hEnt,bool enabled) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt->SetAnimatedRootPoseTransformEnabled(enabled);
+		}));
+		def.def("IsAnimatedRootPoseTransformEnabled",static_cast<bool(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+			pragma::Lua::check_component(l,hEnt);
+			return hEnt->IsAnimatedRootPoseTransformEnabled();
+		}));
+		def.def("AddRootPoseBone",static_cast<BoneId(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
+			pragma::Lua::check_component(l,hEnt);
+			return hEnt->AddRootPoseBone();
+		}));
+		def.def("GetBaseAnimationFlags",static_cast<pragma::FPlayAnim(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) -> pragma::FPlayAnim {
+			pragma::Lua::check_component(l,hEnt);
+			return hEnt->GetBaseAnimationFlags();
+		}));
+		def.def("SetBaseAnimationFlags",static_cast<void(*)(lua_State*,THandle&,pragma::FPlayAnim)>([](lua_State *l,THandle &hEnt,pragma::FPlayAnim flags) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt->SetBaseAnimationFlags(flags);
+		}));
+		def.def("GetLayeredAnimationFlags",static_cast<luabind::object(*)(lua_State*,THandle&,uint32_t)>([](lua_State *l,THandle &hEnt,uint32_t layerIdx) -> luabind::object {
+			pragma::Lua::check_component(l,hEnt);
+			auto flags = hEnt->GetLayeredAnimationFlags(layerIdx);
+			if(flags.has_value() == false)
+				return {};
+			return luabind::object{l,*flags};
+		}));
+		def.def("SetLayeredAnimationFlags",static_cast<void(*)(lua_State*,THandle&,uint32_t,pragma::FPlayAnim)>([](lua_State *l,THandle &hEnt,uint32_t layerIdx,pragma::FPlayAnim flags) {
+			pragma::Lua::check_component(l,hEnt);
+			hEnt->SetLayeredAnimationFlags(layerIdx,flags);
+		}));
 
 		def.add_static_constant("EVENT_HANDLE_ANIMATION_EVENT",pragma::BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT);
 		def.add_static_constant("EVENT_ON_PLAY_ANIMATION",pragma::BaseAnimatedComponent::EVENT_ON_PLAY_ANIMATION);
@@ -3617,12 +3869,14 @@ namespace Lua
 		def.add_static_constant("EVENT_ON_ANIMATIONS_UPDATED",pragma::BaseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED);
 		def.add_static_constant("EVENT_ON_BLEND_ANIMATION",pragma::BaseAnimatedComponent::EVENT_ON_BLEND_ANIMATION);
 		def.add_static_constant("EVENT_PLAY_ANIMATION",pragma::BaseAnimatedComponent::EVENT_PLAY_ANIMATION);
+		def.add_static_constant("EVENT_ON_ANIMATION_RESET",pragma::BaseAnimatedComponent::EVENT_ON_ANIMATION_RESET);
 
 		def.add_static_constant("FPLAYANIM_NONE",umath::to_integral(pragma::FPlayAnim::None));
 		def.add_static_constant("FPLAYANIM_RESET",umath::to_integral(pragma::FPlayAnim::Reset));
 		def.add_static_constant("FPLAYANIM_TRANSMIT",umath::to_integral(pragma::FPlayAnim::Transmit));
 		def.add_static_constant("FPLAYANIM_SNAP_TO",umath::to_integral(pragma::FPlayAnim::SnapTo));
 		def.add_static_constant("FPLAYANIM_DEFAULT",umath::to_integral(pragma::FPlayAnim::Default));
+		def.add_static_constant("FPLAYANIM_LOOP",umath::to_integral(pragma::FPlayAnim::Loop));
 	}
 
 	template<class TLuaClass,class THandle>
@@ -3819,6 +4073,14 @@ namespace Lua
 			ent->PushLuaObject(l);
 		}));
 
+		def.def("GetBone",static_cast<luabind::object(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) -> luabind::object {
+			pragma::Lua::check_component(l,hEnt);
+			auto *data = hEnt->GetAttachmentData();
+			if(data == nullptr)
+				return luabind::object{};
+			return luabind::object{l,data->bone};
+		}));
+
 		def.def("SetAttachmentFlags",static_cast<void(*)(lua_State*,THandle&,int)>([](lua_State *l,THandle &hEnt,int flags) {
 			pragma::Lua::check_component(l,hEnt);
 			hEnt->SetAttachmentFlags(static_cast<FAttachmentMode>(flags));
@@ -3854,6 +4116,9 @@ namespace Lua
 		def.add_static_constant("FATTACHMENT_MODE_PLAYER_VIEW",umath::to_integral(FAttachmentMode::PlayerView));
 		def.add_static_constant("FATTACHMENT_MODE_PLAYER_VIEW_YAW",umath::to_integral(FAttachmentMode::PlayerViewYaw));
 		def.add_static_constant("FATTACHMENT_MODE_SNAP_TO_ORIGIN",umath::to_integral(FAttachmentMode::SnapToOrigin));
+		def.add_static_constant("FATTACHMENT_MODE_FORCE_TRANSLATION_IN_PLACE",umath::to_integral(FAttachmentMode::ForceTranslationInPlace));
+		def.add_static_constant("FATTACHMENT_MODE_FORCE_ROTATION_IN_PLACE",umath::to_integral(FAttachmentMode::ForceRotationInPlace));
+		def.add_static_constant("FATTACHMENT_MODE_FORCE_IN_PLACE",umath::to_integral(FAttachmentMode::ForceInPlace));
 	}
 };
 

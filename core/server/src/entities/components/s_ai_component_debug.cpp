@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_ai_component.hpp"
@@ -29,7 +29,7 @@ void SAIComponent::_debugSendNavInfo(pragma::SPlayerComponent &pl)
 
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return;
 	auto nodePrev = pTrComponent->GetPosition();
 	NetPacket p {};

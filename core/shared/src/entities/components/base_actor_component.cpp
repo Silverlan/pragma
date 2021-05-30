@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -20,6 +20,7 @@
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/model.h"
 #include <pragma/physics/movetypes.h>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -85,21 +86,77 @@ void BaseActorComponent::Initialize()
 	m_netEvSetFrozen = SetupNetEvent("set_frozen");
 }
 
+void BaseActorComponent::Save(udm::LinkedPropertyWrapper &udm)
+{
+	BaseEntityComponent::Save(udm);
+	udm["alive"] = m_bAlive;
+	udm["frozen"] = **m_bFrozen;
+	udm["moveControllerName"] = m_moveControllerName;
+	if(m_moveControllerNameY.has_value())
+		udm["moveControllerNameY"] = *m_moveControllerNameY;
+	udm["moveControllerIndex"] = m_moveController;
+	udm["moveControllerIndexY"] = m_moveControllerY;
+	auto udmHitboxData = udm.AddArray("hitboxData",m_hitboxData.size());
+	for(auto i=decltype(m_hitboxData.size()){0u};i<m_hitboxData.size();++i)
+	{
+		auto &hitboxData = m_hitboxData[i];
+		auto udmHitbox = udmHitboxData[i];
+		udmHitbox["boneId"] = hitboxData.boneId;
+		udmHitbox["offset"] = hitboxData.offset;
+	}
+}
+void BaseActorComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+{
+	BaseEntityComponent::Load(udm,version);
+	udm["alive"](m_bAlive);
+	udm["frozen"](**m_bFrozen);
+	udm["moveControllerName"](m_moveControllerName);
+	auto udmMoveControllerNameY = udm["moveControllerNameY"];
+	if(udmMoveControllerNameY)
+	{
+		std::string name;
+		udmMoveControllerNameY(name);
+		m_moveControllerNameY = name;
+	}
+	udm["moveControllerIndex"](m_moveController);
+	udm["moveControllerIndexY"](m_moveControllerY);
+	auto udmHitboxData = udm["hitboxData"];
+	auto numHitboxData = udmHitboxData.GetSize();
+	m_hitboxData.resize(numHitboxData);
+	for(auto i=decltype(numHitboxData){0u};i<numHitboxData;++i)
+	{
+		auto &hitboxData = m_hitboxData[i];
+		auto udmHitbox = udmHitboxData[i];
+		udmHitbox["boneId"](hitboxData.boneId);
+		udmHitbox["offset"](hitboxData.offset);
+	}
+}
+
 void BaseActorComponent::SetMoveController(const std::string &moveController)
 {
 	m_moveControllerName = moveController;
+	m_moveControllerNameY = {};
+	InitializeMoveController();
+}
+void BaseActorComponent::SetMoveController(const std::string &moveControllerX,const std::string &moveControllerY)
+{
+	m_moveControllerName = moveControllerX;
+	m_moveControllerNameY = moveControllerY;
 	InitializeMoveController();
 }
 int32_t BaseActorComponent::GetMoveController() const {return m_moveController;}
+int32_t BaseActorComponent::GetMoveControllerY() const {return m_moveControllerY;}
 void BaseActorComponent::InitializeMoveController()
 {
 	m_moveController = -1;
+	m_moveControllerY = -1;
 	auto &ent = GetEntity();
-	auto mdlComponent = ent.GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = ent.GetModel();
 	if(mdl == nullptr)
 		return;
 	m_moveController = mdl->LookupBlendController(m_moveControllerName);
+	if(m_moveControllerNameY.has_value())
+		m_moveControllerY = mdl->LookupBlendController(*m_moveControllerNameY);
 }
 
 void BaseActorComponent::UpdateMoveController()
@@ -114,17 +171,43 @@ void BaseActorComponent::UpdateMoveController()
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
 	auto vel = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3{};
 	auto l = uvec::length_sqr(vel);
-	if(l > 0.f)
+	if(m_moveControllerY == -1)
 	{
-		auto dirMove = uvec::get_normal(vel);
-		auto dir = pTrComponent.valid() ? pTrComponent->GetForward() : uvec::FORWARD;
-		float yawMove = uvec::get_yaw(dirMove);
-		float yawDir = uvec::get_yaw(dir);
-		float yawOffset = umath::get_angle_difference(yawDir,yawMove);
-		yawOffset = umath::normalize_angle(yawOffset,0);
-		//float moveYaw = GetBlendController(blendController);
-		//yawOffset = Math::ApproachAngle(moveYaw,yawOffset,1.f);
-		animComponent->SetBlendController(m_moveController,CInt32(yawOffset));
+		if(l > 0.f)
+		{
+			auto dirMove = uvec::get_normal(vel);
+			auto dir = pTrComponent ? pTrComponent->GetForward() : uvec::FORWARD;
+			float yawMove = uvec::get_yaw(dirMove);
+			float yawDir = uvec::get_yaw(dir);
+			float yawOffset = umath::get_angle_difference(yawDir,yawMove);
+			yawOffset = umath::normalize_angle(yawOffset,0);
+			//float moveYaw = GetBlendController(blendController);
+			//yawOffset = Math::ApproachAngle(moveYaw,yawOffset,1.f);
+			animComponent->SetBlendController(m_moveController,CInt32(yawOffset));
+		}
+		else
+			animComponent->SetBlendController(m_moveController,0.f);
+	}
+	else
+	{
+		if(l > 0.f)
+		{
+			auto dirMove = uvec::get_normal(vel);
+			auto dir = pTrComponent ? pTrComponent->GetForward() : uvec::FORWARD;
+			auto dirRight = pTrComponent ? pTrComponent->GetRight() : uvec::RIGHT;
+			auto rotInv = pTrComponent ? pTrComponent->GetRotation() : uquat::identity();
+			uquat::inverse(rotInv);
+			uvec::rotate(&dirMove,rotInv);
+			uvec::rotate(&dir,rotInv);
+			uvec::rotate(&dirRight,rotInv);
+			// animComponent->SetBlendController(m_moveController,1.0 -(uvec::dot(dirRight,dirMove) +1.0) /2.0); // TODO
+			animComponent->SetBlendController(m_moveControllerY,1.0 -(uvec::dot(dir,dirMove) +1.0) /2.0);
+		}
+		else
+		{
+			animComponent->SetBlendController(m_moveController,0.f);
+			animComponent->SetBlendController(m_moveControllerY,0.f);
+		}
 	}
 }
 
@@ -138,7 +221,7 @@ void BaseActorComponent::Ragdolize()
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(!pPhysComponent)
 		return;
 	auto *phys = pPhysComponent->GetPhysicsObject();
 	if(phys != nullptr && pPhysComponent->GetPhysicsType() == PHYSICSTYPE::DYNAMIC)
@@ -174,11 +257,11 @@ void BaseActorComponent::Respawn()
 	m_bAlive = true;
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent)
 		pPhysComponent->SetMoveType(MOVETYPE::WALK);
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.valid())
-		pTrComponent->SetOrientation(uquat::identity());
+	if(pTrComponent)
+		pTrComponent->SetRotation(uquat::identity());
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
 	if(pVelComponent.valid())
 	{
@@ -197,13 +280,12 @@ void BaseActorComponent::OnPhysicsInitialized()
 	if(physEnv == nullptr)
 		return;
 	m_hitboxData.clear();
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr)
 		return;
 	auto hitboxBones = hMdl->GetHitboxBones();
 	auto pTrComponent = ent.GetTransformComponent();
-	auto scale = pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
+	auto scale = pTrComponent ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
 
 	auto &hitboxes = hMdl->GetHitboxes();
 	std::vector<pragma::physics::ICollisionObject*> physHitboxes;
@@ -248,8 +330,7 @@ bool BaseActorComponent::FindHitgroup(const pragma::physics::ICollisionObject &p
 		return false;
 	auto &hitboxData = m_hitboxData[idx];
 	auto &ent = GetEntity();
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr)
 		return false;
 	auto &hitboxes = hMdl->GetHitboxes();
@@ -270,7 +351,7 @@ void BaseActorComponent::UpdateHitboxPhysics()
 		return;
 	auto &ent = GetEntity();
 	auto mdlComponent = ent.GetModelComponent();
-	if(mdlComponent.expired())
+	if(!mdlComponent)
 		return;
 	auto &colObjs = m_physHitboxes->GetCollisionObjects();
 	auto numColObjs = colObjs.size();

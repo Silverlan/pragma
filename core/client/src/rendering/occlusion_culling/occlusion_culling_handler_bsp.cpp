@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -29,32 +29,26 @@ void OcclusionCullingHandlerBSP::Update(const Vector3 &camPos)
 		return;
 	m_pCurrentNode = FindLeafNode(camPos);
 }
-bool OcclusionCullingHandlerBSP::ShouldExamine(CModelMesh &mesh,const Vector3 &pos,bool bViewModel,std::size_t numMeshes,const std::vector<Plane> *optPlanes) const
+bool OcclusionCullingHandlerBSP::ShouldExamine(CModelMesh &mesh,const Vector3 &pos,bool bViewModel,std::size_t numMeshes,const std::vector<umath::Plane> *optPlanes) const
 {
 	return ShouldPass(mesh,pos) && OcclusionCullingHandlerOctTree::ShouldExamine(mesh,pos,bViewModel,numMeshes,optPlanes);
 }
-bool OcclusionCullingHandlerBSP::ShouldExamine(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,CBaseEntity &cent,bool &outViewModel,std::vector<Plane> **outPlanes) const
+bool OcclusionCullingHandlerBSP::ShouldExamine(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,CBaseEntity &cent,bool &outViewModel,std::vector<umath::Plane> **outPlanes) const
 {
 	return ShouldPass(cent) && OcclusionCullingHandlerOctTree::ShouldExamine(scene,renderer,cent,outViewModel,outPlanes);
 }
 bool OcclusionCullingHandlerBSP::ShouldPass(CBaseEntity &ent) const
 {
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(m_pCurrentNode == nullptr || pRenderComponent.expired())
+	if(m_pCurrentNode == nullptr || !pRenderComponent)
 		return false;
 	if(pRenderComponent->IsExemptFromOcclusionCulling())
 		return true;
 	auto pBspLeafComponent = ent.GetComponent<CBSPLeafComponent>();
 	//if(pBspLeafComponent.valid())
 		//return false;//pBspLeafComponent->GetLeafVisibility(m_pCurrentNode->cluster); // TODO
-	auto pTrComponent = ent.GetTransformComponent();
-	auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
-	Vector3 min;
-	Vector3 max;
-	pRenderComponent->GetRenderBounds(&min,&max);
-	min += pos;
-	max += pos;
-	return Intersection::AABBAABB(min,max,m_pCurrentNode->minVisible,m_pCurrentNode->maxVisible);
+	auto &aabb = ent.GetAbsoluteRenderBounds();
+	return umath::intersection::aabb_aabb(aabb.min,aabb.max,m_pCurrentNode->minVisible,m_pCurrentNode->maxVisible) != umath::intersection::Intersect::Outside;
 }
 bool OcclusionCullingHandlerBSP::ShouldPass(CModelMesh &modelMesh,const Vector3 &entityPos) const
 {
@@ -71,7 +65,7 @@ bool OcclusionCullingHandlerBSP::ShouldPass(CModelMesh &modelMesh,const Vector3 
 	modelMesh.GetBounds(min,max);
 	min += entityPos;
 	max += entityPos;
-	return Intersection::AABBAABB(min,max,m_pCurrentNode->min,m_pCurrentNode->max);*/
+	return umath::intersection::aabb_aabb(min,max,m_pCurrentNode->min,m_pCurrentNode->max);*/
 }
 bool OcclusionCullingHandlerBSP::ShouldPass(CModelSubMesh &subMesh,const Vector3 &entityPos) const
 {
@@ -79,12 +73,12 @@ bool OcclusionCullingHandlerBSP::ShouldPass(CModelSubMesh &subMesh,const Vector3
 	subMesh.GetBounds(min,max);
 	min += entityPos;
 	max += entityPos;
-	return Intersection::AABBAABB(min,max,m_pCurrentNode->minVisible,m_pCurrentNode->maxVisible);
+	return umath::intersection::aabb_aabb(min,max,m_pCurrentNode->minVisible,m_pCurrentNode->maxVisible) != umath::intersection::Intersect::Outside;
 }
 const util::BSPTree::Node *OcclusionCullingHandlerBSP::FindLeafNode(const Vector3 &point) const {return m_bspTree->FindLeafNode(point);}
 const util::BSPTree::Node *OcclusionCullingHandlerBSP::GetCurrentNode() const {return m_pCurrentNode;}
 void OcclusionCullingHandlerBSP::PerformCulling(
-	pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+	pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const Vector3 &camPos,
 	std::vector<OcclusionMeshInfo> &culledMeshesOut,bool cullByViewFrustum
 )
 {
@@ -99,29 +93,31 @@ static void debug_bsp_nodes(NetworkState*,ConVar*,int32_t,int32_t val)
 	if(c_game == nullptr)
 		return;
 	auto *scene = c_game->GetScene();
-	auto *pHandler = scene ? dynamic_cast<OcclusionCullingHandlerBSP*>(&scene->GetSceneRenderDesc().GetOcclusionCullingHandler()) : nullptr;
-	if(pHandler == nullptr)
+	auto *world = c_game->GetWorld();
+	auto bspTree = world ? static_cast<CWorldComponent*>(world)->GetBSPTree() : nullptr;
+	if(bspTree == nullptr)
 	{
-		Con::cwar<<"WARNING: Scene does not have BSP occlusion culling handler!"<<Con::endl;
+		Con::cwar<<"WARNING: Scene does not have BSP tree!"<<Con::endl;
 		return;
 	}
-	auto *pCurrentNode = pHandler->GetCurrentNode();
+	auto *cam = c_game->GetRenderCamera();
+	auto &camPos = cam ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
+	auto *pCurrentNode = bspTree->FindLeafNode(camPos);
 	if(pCurrentNode == nullptr)
 	{
 		Con::cwar<<"WARNING: Camera not located in any leaf node!"<<Con::endl;
 		return;
 	}
-	auto &bspTree = pHandler->GetBSPTree();
-	auto &clusterVisibility = bspTree.GetClusterVisibility();
-	auto &cam = scene->GetActiveCamera();
-	auto &camPos = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
+	auto &clusterVisibility = bspTree->GetClusterVisibility();
 	Con::cout<<"Camera position: ("<<camPos.x<<" "<<camPos.y<<" "<<camPos.z<<")"<<Con::endl;
 	Con::cout<<"Leaf cluster id: "<<pCurrentNode->cluster<<Con::endl;
+	Con::cout<<"Leaf bounds: ("<<pCurrentNode->min.x<<","<<pCurrentNode->min.y<<","<<pCurrentNode->min.z<<") ("<<pCurrentNode->max.x<<","<<pCurrentNode->max.y<<","<<pCurrentNode->max.z<<")"<<Con::endl;
+	Con::cout<<"Absolute leaf bounds: ("<<pCurrentNode->minVisible.x<<","<<pCurrentNode->minVisible.y<<","<<pCurrentNode->minVisible.z<<") ("<<pCurrentNode->maxVisible.x<<","<<pCurrentNode->maxVisible.y<<","<<pCurrentNode->maxVisible.z<<")"<<Con::endl;
 	if(pCurrentNode->cluster >= clusterVisibility.size() || pCurrentNode->cluster == std::numeric_limits<uint16_t>::max())
 		Con::cwar<<"WARNING: Invalid cluster id "<<pCurrentNode->cluster<<"!"<<Con::endl;
 	else
 	{
-		auto numClusters = bspTree.GetClusterCount();
+		auto numClusters = bspTree->GetClusterCount();
 		std::vector<std::vector<uint8_t>> decompressedClusters(numClusters,std::vector<uint8_t>(numClusters,0u));
 		auto cluster0 = 0ull;
 		auto cluster1 = 0ull;
@@ -163,7 +159,7 @@ static void debug_bsp_nodes(NetworkState*,ConVar*,int32_t,int32_t val)
 		{
 			auto &entWorld = pWorld->GetEntity();
 			auto mdlComponent = entWorld.GetModelComponent();
-			auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+			auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 			auto meshGroup = (mdl != nullptr) ? mdl->GetMeshGroup(0u) : nullptr;
 			if(meshGroup != nullptr)
 			{
@@ -210,7 +206,7 @@ static void debug_bsp_nodes(NetworkState*,ConVar*,int32_t,int32_t val)
 				{
 					auto &posWorld = entWorld.GetPosition();
 					auto pTrComponent = entWorld.GetTransformComponent();
-					auto rotWorld = pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
+					auto rotWorld = pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity();
 					auto clusterCenter = (pCurrentNode->min +pCurrentNode->max) *0.5f;
 					for(auto &mesh : meshes)
 					{
@@ -229,15 +225,15 @@ static void debug_bsp_nodes(NetworkState*,ConVar*,int32_t,int32_t val)
 		{
 			// Draw vis leafs
 			dbgObjects.push_back(DebugRenderer::DrawBox(pCurrentNode->min,pCurrentNode->max,EulerAngles{},Color{255,0,0,255},Color::Aqua));
-			auto &nodes = bspTree.GetNodes();
+			auto &nodes = bspTree->GetNodes();
 			std::vector<util::BSPTree::Node*> clusterNodes {};
 			clusterNodes.reserve(visClusters.size());
 			for(auto clusterId : visClusters)
 			{
-				auto itNode = std::find_if(nodes.begin(),nodes.end(),[clusterId](const std::shared_ptr<util::BSPTree::Node> &node) {
-					return node->cluster == clusterId;
+				auto itNode = std::find_if(nodes.begin(),nodes.end(),[clusterId](const util::BSPTree::Node &node) {
+					return node.cluster == clusterId;
 				});
-				clusterNodes.push_back((itNode != nodes.end()) ? itNode->get() : nullptr);
+				clusterNodes.push_back((itNode != nodes.end()) ? &*itNode : nullptr);
 			}
 			for(auto clusterId : visClusters)
 			{
@@ -260,12 +256,13 @@ static void debug_bsp_lock_callback(NetworkState*,ConVar*,int32_t,int32_t val)
 	if(c_game == nullptr)
 		return;
 	auto *scene = c_game->GetScene();
-	auto *pHandler = scene ? dynamic_cast<OcclusionCullingHandlerBSP*>(&scene->GetSceneRenderDesc().GetOcclusionCullingHandler()) : nullptr;
-	if(pHandler == nullptr)
+	auto *world = c_game->GetWorld();
+	auto bspTree = world ? static_cast<CWorldComponent*>(world)->GetBSPTree() : nullptr;
+	if(true)//bspTree == nullptr)
 	{
-		Con::cwar<<"WARNING: Scene does not have BSP occlusion culling handler!"<<Con::endl;
+		Con::cwar<<"WARNING: Scene does not have BSP tree!"<<Con::endl;
 		return;
 	}
-	pHandler->SetCurrentNodeLocked(val != 0);
+	//bspTree->SetCurrentNodeLocked(val != 0);
 }
 REGISTER_CONVAR_CALLBACK_CL(debug_bsp_lock,debug_bsp_lock_callback);

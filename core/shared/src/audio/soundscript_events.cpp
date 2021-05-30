@@ -2,19 +2,21 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
 #include "pragma/networkstate/networkstate.h"
 #include "pragma/audio/soundscript.h"
 #include "pragma/audio/soundscript_events.h"
+#include "pragma/audio/alsound_type.h"
 #include <sharedutils/util_string.h>
+#include <udm.hpp>
 
 #undef CreateEvent
 
-extern DLLENGINE Engine *engine;
-
+extern DLLNETWORK Engine *engine;
+#pragma optimize("",off)
 SoundScriptEventContainer::~SoundScriptEventContainer()
 {
 	m_events.clear();
@@ -35,62 +37,19 @@ SoundScriptEvent *SoundScriptEventContainer::CreateEvent()
 	return ev;
 }
 std::vector<std::shared_ptr<SoundScriptEvent>> &SoundScriptEventContainer::GetEvents() {return m_events;}
-void SoundScriptEventContainer::InitializeEvents(const std::shared_ptr<ds::Block> &data)
+void SoundScriptEventContainer::InitializeEvents(udm::LinkedPropertyWrapper &prop)
 {
-	auto &playSound = data->GetValue("playsound");
-	if(playSound != NULL)
+	for(auto udmEvent : prop["events"])
 	{
-		auto it = ds::Iterator(*playSound);
-		while(it.IsValid())
-		{
-			auto *block = it.get();
-			if(block->IsBlock())
-			{
-				bool repeat = block->GetBool("repeat");
-				SoundScriptEvent *ev = CreateEvent("playsound");
-				ev->eventOffset = SoundScriptValue(std::static_pointer_cast<ds::Block>(block->shared_from_this()),"time");
-				ev->repeat = repeat;
-				ev->Initialize(std::static_pointer_cast<ds::Block>(block->shared_from_this()));
-			}
-			it++;
-		}
-	}
-	auto &lua = data->GetValue("lua");
-	if(lua != NULL)
-	{
-		auto it = ds::Iterator(*lua);
-		while(it.IsValid())
-		{
-			auto *block = it.get();
-			if(block->IsBlock())
-			{
-				std::string name = block->GetString("name");
-				bool repeat = block->GetBool("repeat");
-				SoundScriptEvent *ev = CreateEvent("lua");
-				ev->eventOffset = SoundScriptValue(std::static_pointer_cast<ds::Block>(block->shared_from_this()),"time");
-				ev->repeat = repeat;
-				ev->Initialize(std::static_pointer_cast<ds::Block>(block->shared_from_this()));
-			}
-			it++;
-		}
-	}
-	auto &ev = data->GetValue("event");
-	if(ev != NULL)
-	{
-		auto it = ds::Iterator(*ev);
-		while(it.IsValid())
-		{
-			auto *block = it.get();
-			if(block->IsBlock())
-			{
-				bool repeat = block->GetBool("repeat");
-				SoundScriptEvent *ev = CreateEvent();
-				ev->eventOffset = SoundScriptValue(std::static_pointer_cast<ds::Block>(block->shared_from_this()),"time");
-				ev->repeat = repeat;
-				ev->Initialize(std::static_pointer_cast<ds::Block>(block->shared_from_this()));
-			}
-			it++;
-		}
+		std::string type;
+		udmEvent["type"](type);
+		auto *ev = CreateEvent(type);
+		if(ev == nullptr)
+			continue;
+		udmEvent["repeat"](ev->repeat);
+		auto propTime = udmEvent["time"];
+		ev->eventOffset = SoundScriptValue{propTime};
+		ev->Initialize(udmEvent);
 	}
 }
 void SoundScriptEventContainer::PrecacheSounds()
@@ -117,9 +76,9 @@ SoundScriptEvent::SoundScriptEvent(SoundScriptManager *manager,float off,bool bR
 	: SoundScriptEventContainer(manager),eventOffset(off),repeat(bRepeat)
 {}
 SoundScriptEvent::~SoundScriptEvent() {}
-void SoundScriptEvent::Initialize(const std::shared_ptr<ds::Block> &data)
+void SoundScriptEvent::Initialize(udm::LinkedPropertyWrapper &prop)
 {
-	InitializeEvents(data);
+	InitializeEvents(prop);
 }
 void SoundScriptEvent::Precache()
 {
@@ -191,130 +150,111 @@ void SSEPlaySound::Precache()
 }
 
 void SSEPlaySound::PrecacheSound(const char *name) {engine->GetServerNetworkState()->PrecacheSound(name,GetChannel());}
-void SSEPlaySound::Initialize(const std::shared_ptr<ds::Block> &data)
+void SSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 {
-	SoundScriptEvent::Initialize(data);
-	auto &source = data->GetValue("source");
-	if(source != NULL)
+	SoundScriptEvent::Initialize(prop);
+	auto udmSources = prop["source"];
+	if(udmSources)
 	{
-		if(source->IsBlock())
-		{
-			std::string src;
-			int id = 0;
-			auto srcBlock = std::static_pointer_cast<ds::Block>(source);
-			while(srcBlock->GetString(std::to_string(id),&src))
-			{
-				sources.push_back(src);
-				id++;
-			}
-		}
-		else if(!source->IsContainer())
-			sources.push_back(static_cast<ds::Value*>(source.get())->GetString());
+		udmSources.GetBlobData(sources);
+
+		std::string source;
+		udmSources(source);
+		if(!source.empty())
+			sources.push_back(source);
 	}
-	loop = data->GetBool("loop");
-	global = data->GetBool("global");
-	stream = data->GetBool("stream");
+	prop["loop"](loop);
+	prop["global"](global);
+	prop["stream"](stream);
 
 	mode = ALChannel::Auto;
-	if(data->IsString("mode"))
-	{
-		auto val = data->GetString("mode");
-		ustring::to_lower(val);
-		if(val == "mono")
-			mode = ALChannel::Mono;
-		else if(val == "both")
-			mode = ALChannel::Both;
-	}
+	std::string strMode;
+	prop["mode"](strMode);
+	if(strMode == "mono")
+		mode = ALChannel::Mono;
+	else if(strMode == "both")
+		mode = ALChannel::Both;
 
 	position = -1;
-	if(data->IsString("position"))
+	std::string strPos;
+	prop["position"](strPos);
+	if(strPos == "random")
+	{
+		position = -2;
+		if(mode == ALChannel::Auto)
+			mode = ALChannel::Mono;
+	}
+	if(position == -1 && prop["position"])
 	{
 		if(mode == ALChannel::Auto)
 			mode = ALChannel::Mono;
-		std::string pos = data->GetString("position");
-		StringToLower(pos);
-		if(pos == "random")
-			position = -2;
+		prop["position"](position);
+		if(position < 0)
+			position = -1;
 	}
-	if(position == -1 && data->GetInt("position",&position) && position < 0)
-		position = -1;
 	if(mode == ALChannel::Mono)
 	{
 		maxDistance = 2'048.f;
 		referenceDistance = 64.f;
 	}
-	auto fMaxDistance = 0.f;
-	if(data->GetFloat("max_distance",&fMaxDistance) == true)
-		maxDistance = fMaxDistance;
-	gain.Load(data,"gain");
-	pitch.Load(data,"pitch");
-	offset.Load(data,"offset");
-	referenceDistance.Load(data,"reference_distance");
-	rolloffFactor.Load(data,"rolloff_factor");
-	minGain.Load(data,"mingain");
-	maxGain.Load(data,"maxgain");
-	coneInnerAngle.Load(data,"cone_inner_angle");
-	coneOuterAngle.Load(data,"cone_outer_angle");
-	coneOuterGain.Load(data,"cone_outer_gain");
-	type.Load(data,"type");
+	prop["max_distance"](maxDistance);
+	gain.Load(prop["gain"]);
+	pitch.Load(prop["pitch"]);
+	offset.Load(prop["offset"]);
+	referenceDistance.Load(prop["reference_distance"]);
+	rolloffFactor.Load(prop["rolloff_factor"]);
+	minGain.Load(prop["mingain"]);
+	maxGain.Load(prop["maxgain"]);
+	coneInnerAngle.Load(prop["cone_inner_angle"]);
+	coneOuterAngle.Load(prop["cone_outer_angle"]);
+	coneOuterGain.Load(prop["cone_outer_gain"]);
+	auto udmType = prop["type"];
+	if(udmType.IsType(udm::Type::String))
+		type = umath::to_integral(udm::string_to_enum<ALSoundType>(udmType,ALSoundType::Generic));
+	else
+		type.Load(prop["type"]);
 
-	startTime.Load(data,"start");
-	endTime.Load(data,"end");
-	fadeInTime.Load(data,"fadein");
-	fadeOutTime.Load(data,"fadeout");
+	startTime.Load(prop["start"]);
+	endTime.Load(prop["end"]);
+	fadeInTime.Load(prop["fadein"]);
+	fadeOutTime.Load(prop["fadeout"]);
 }
 
 //////////////////////////////
 
 SoundScriptValue::SoundScriptValue(float f) {Initialize(f);}
-SoundScriptValue::SoundScriptValue(std::string s) {Initialize(s);}
-SoundScriptValue::SoundScriptValue(const std::shared_ptr<ds::Block> &data,const char *name)
+SoundScriptValue::SoundScriptValue(float min,float max) {Initialize(min,max);}
+SoundScriptValue::SoundScriptValue(udm::LinkedPropertyWrapper &prop)
 {
 	Initialize(0.f);
-	Load(data,name);
+	Load(prop);
 }
-bool SoundScriptValue::Load(const std::shared_ptr<ds::Block> &data,const char *name)
+bool SoundScriptValue::Load(udm::LinkedPropertyWrapper &prop)
 {
-	if(data->IsString(name))
+	auto &udmVal = prop;
+	if(udmVal["min"] && udmVal["max"])
 	{
-		Initialize(data->GetString(name));
+		auto min = 0.f;
+		auto max = 0.f;
+		udmVal["min"](min);
+		udmVal["max"](max);
+		Initialize(min,max);
 		m_bIsSet = true;
 		return true;
 	}
-	else
+	auto val = udmVal.ToValue<udm::Float>();
+	if(val.has_value())
 	{
-		auto &dataVal = data->GetValue(name);
-		if(dataVal != NULL && dataVal->IsBlock())
-		{
-			auto block = std::static_pointer_cast<ds::Block>(dataVal);
-			std::string vMin;
-			if(block->GetString("0",&vMin))
-			{
-				std::string vMax;
-				if(block->GetString("1",&vMax))
-				{
-					std::string blockVal = vMin;
-					blockVal += ",";
-					blockVal += vMax;
-					Initialize(blockVal);
-					m_bIsSet = true;
-					return true;
-				}
-				Initialize(static_cast<float>(atof(vMin.c_str())));
-				m_bIsSet = true;
-				return true;
-			}
-			Initialize(0.f);
-			m_bIsSet = true;
-			return true;
-		}
-		float f;
-		if(data->GetFloat(name,&f))
-		{
-			Initialize(f);
-			m_bIsSet = true;
-			return true;
-		}
+		Initialize(*val);
+		m_bIsSet = true;
+		return true;
+	}
+	auto valVec = udmVal.ToValue<udm::Vector2>();
+	if(valVec.has_value())
+	{
+		Initialize(valVec->x,valVec->y);
+		m_bIsSet = true;
+		return true;
 	}
 	return false;
 }
@@ -323,23 +263,11 @@ void SoundScriptValue::Initialize(float f)
 	m_min = f;
 	m_max = f;
 }
-void SoundScriptValue::Initialize(std::string s)
+void SoundScriptValue::Initialize(float min,float max)
 {
-	Initialize(0.f);
-	std::vector<std::string> exp;
-	ustring::explode(s,",",exp);
-	if(exp.empty())
-		return;
-	ustring::remove_whitespace(exp[0]);
-	if(exp.size() == 1)
-	{
-		m_min = static_cast<float>(atof(exp[0].c_str()));
-		m_max = m_min;
-		return;
-	}
-	ustring::remove_whitespace(exp[1]);
-	m_min = static_cast<float>(atof(exp[0].c_str()));
-	m_max = static_cast<float>(atof(exp[1].c_str()));
+	m_min = min;
+	m_max = max;
 }
 float SoundScriptValue::GetValue() const {return umath::random(m_min,m_max);}
 bool SoundScriptValue::IsSet() const {return m_bIsSet;}
+#pragma optimize("",on)

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_LSHADER_H__
@@ -22,7 +22,7 @@ namespace pragma
 	struct LuaVertexBinding;
 	struct LuaVertexAttribute;
 	struct LuaDescriptorSetInfo;
-	namespace rendering {class RasterizationRenderer;};
+	class CRasterizationRendererComponent;
 };
 
 namespace Lua
@@ -182,14 +182,14 @@ namespace Lua
 		namespace Scene3D
 		{
 			DLLCLIENT void GetRenderPass(lua_State *l,uint32_t pipelineIdx);
-			DLLCLIENT void BindSceneCamera(lua_State *l,pragma::ShaderScene &shader,CSceneHandle &scene,pragma::rendering::RasterizationRenderer &renderer,bool bView);
+			DLLCLIENT void BindSceneCamera(lua_State *l,pragma::ShaderScene &shader,CSceneHandle &scene,pragma::CRasterizationRendererComponent &renderer,bool bView);
 			DLLCLIENT void BindRenderSettings(lua_State *l,pragma::ShaderScene &shader,std::shared_ptr<prosper::IDescriptorSetGroup> &descSet);
 		};
 
 		namespace SceneLit3D
 		{
 			DLLCLIENT void BindLights(lua_State *l,pragma::ShaderSceneLit &shader,std::shared_ptr<prosper::IDescriptorSetGroup> &dsLights);
-			DLLCLIENT void BindScene(lua_State *l,pragma::ShaderSceneLit &shader,CSceneHandle &scene,pragma::rendering::RasterizationRenderer &renderer,bool bView);
+			DLLCLIENT void BindScene(lua_State *l,pragma::ShaderSceneLit &shader,CSceneHandle &scene,pragma::CRasterizationRendererComponent &renderer,bool bView);
 		};
 
 		namespace ShaderEntity
@@ -202,8 +202,8 @@ namespace Lua
 
 		namespace TexturedLit3D
 		{
-			DLLCLIENT void BindMaterial(lua_State *l,pragma::ShaderTextured3DBase &shader,::Material &mat);
-			DLLCLIENT void RecordBindClipPlane(lua_State *l,pragma::ShaderTextured3DBase &shader,const Vector4 &clipPlane);
+			DLLCLIENT void BindMaterial(lua_State *l,pragma::ShaderGameWorldLightingPass &shader,::Material &mat);
+			DLLCLIENT void RecordBindClipPlane(lua_State *l,pragma::ShaderGameWorldLightingPass &shader,const Vector4 &clipPlane);
 		};
 
 		namespace Compute

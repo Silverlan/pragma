@@ -2,12 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
+#include "pragma/rendering/render_processor.hpp"
+#include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/entities/components/c_render_component.hpp"
@@ -19,10 +22,10 @@
 #include <prosper_descriptor_set_group.hpp>
 
 extern DLLCLIENT CGame *c_game;
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 decltype(ShaderScene::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderScene::DESCRIPTOR_SET_RENDER_SETTINGS = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Debug
@@ -36,10 +39,14 @@ decltype(ShaderScene::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderScene::DESCRIPTOR_SE
 		prosper::DescriptorSetInfo::Binding { // CSM Data
 			prosper::DescriptorType::UniformBuffer,
 			prosper::ShaderStageFlags::FragmentBit
+		},
+		prosper::DescriptorSetInfo::Binding { // Global Entity Instance Data
+			prosper::DescriptorType::StorageBuffer,
+			prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit
 		}
 	}
 };
-decltype(ShaderScene::DESCRIPTOR_SET_CAMERA) ShaderScene::DESCRIPTOR_SET_CAMERA = {
+decltype(ShaderScene::DESCRIPTOR_SET_SCENE) ShaderScene::DESCRIPTOR_SET_SCENE = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Camera
 			prosper::DescriptorType::UniformBuffer,
@@ -74,17 +81,18 @@ void ShaderScene::SetRenderPassSampleCount(prosper::SampleCountFlags samples) {R
 ShaderScene::ShaderScene(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader)
 	: Shader3DBase(context,identifier,vsShader,fsShader,gsShader)
 {
-	SetPipelineCount(umath::to_integral(Pipeline::Count));
+	//SetPipelineCount(umath::to_integral(Pipeline::Count));
 }
 bool ShaderScene::ShouldInitializePipeline(uint32_t pipelineIdx)
 {
-	if(static_cast<Pipeline>(pipelineIdx) != Pipeline::MultiSample)
-		return true;
-	return RENDER_PASS_SAMPLES != prosper::SampleCountFlags::e1Bit;
+	//if(static_cast<Pipeline>(pipelineIdx) != Pipeline::MultiSample)
+	//	return true;
+	//return RENDER_PASS_SAMPLES != prosper::SampleCountFlags::e1Bit;
+	return true;
 }
 prosper::SampleCountFlags ShaderScene::GetSampleCount(uint32_t pipelineIdx) const
 {
-	return (static_cast<Pipeline>(pipelineIdx) == Pipeline::MultiSample) ? RENDER_PASS_SAMPLES : prosper::SampleCountFlags::e1Bit;
+	return prosper::SampleCountFlags::e1Bit;//(static_cast<Pipeline>(pipelineIdx) == Pipeline::MultiSample) ? RENDER_PASS_SAMPLES : prosper::SampleCountFlags::e1Bit;
 }
 void ShaderScene::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
@@ -121,7 +129,7 @@ bool ShaderScene::BindRenderSettings(prosper::IDescriptorSet &descSetRenderSetti
 {
 	return RecordBindDescriptorSet(descSetRenderSettings,GetRenderSettingsDescriptorSetIndex());
 }
-bool ShaderScene::BindSceneCamera(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,bool bView)
+bool ShaderScene::BindSceneCamera(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,bool bView)
 {
 	auto *descSet = (bView == true) ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
 	return RecordBindDescriptorSet(*descSet,GetCameraDescriptorSetIndex());
@@ -132,7 +140,7 @@ bool ShaderScene::BindSceneCamera(pragma::CSceneComponent &scene,const rendering
 decltype(ShaderSceneLit::DESCRIPTOR_SET_LIGHTS) ShaderSceneLit::DESCRIPTOR_SET_LIGHTS = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Light sources
-			prosper::DescriptorType::StorageBuffer,
+			LIGHT_SOURCE_BUFFER_TYPE,
 			prosper::ShaderStageFlags::FragmentBit
 		},
 		prosper::DescriptorSetInfo::Binding { // Visible light index buffer
@@ -140,7 +148,7 @@ decltype(ShaderSceneLit::DESCRIPTOR_SET_LIGHTS) ShaderSceneLit::DESCRIPTOR_SET_L
 			prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit
 		},
 		prosper::DescriptorSetInfo::Binding { // Shadow buffers
-			prosper::DescriptorType::StorageBuffer,
+			LIGHT_SOURCE_BUFFER_TYPE,
 			prosper::ShaderStageFlags::FragmentBit
 		},
 		prosper::DescriptorSetInfo::Binding { // Cascade Maps
@@ -171,13 +179,22 @@ bool ShaderSceneLit::BindLights(prosper::IDescriptorSet &dsLights)
 		return false;
 	return RecordBindDescriptorSets({&dsLights,descSetShadow},GetLightDescriptorSetIndex());
 }
-bool ShaderSceneLit::BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView)
+bool ShaderSceneLit::BindScene(pragma::CSceneComponent &scene,CRasterizationRendererComponent &renderer,bool bView)
 {
 	return BindSceneCamera(scene,renderer,bView) && RecordBindDescriptorSet(*renderer.GetRendererDescriptorSet(),GetRendererDescriptorSetIndex()) &&
 		BindLights(*renderer.GetLightSourceDescriptorSet());
 }
 
 /////////////////////
+
+decltype(ShaderGameWorld::HASH_TYPE) ShaderGameWorld::HASH_TYPE = typeid(ShaderGameWorld).hash_code();
+size_t ShaderGameWorld::GetBaseTypeHashCode() const {return HASH_TYPE;}
+prosper::IDescriptorSet &ShaderGameWorld::GetDefaultMaterialDescriptorSet() const {return *m_defaultMatDsg->GetDescriptorSet();}
+
+/////////////////////
+
+decltype(ShaderEntity::VERTEX_BINDING_RENDER_BUFFER_INDEX) ShaderEntity::VERTEX_BINDING_RENDER_BUFFER_INDEX = {prosper::VertexInputRate::Instance};
+decltype(ShaderEntity::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX) ShaderEntity::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX = {VERTEX_BINDING_LIGHTMAP,prosper::Format::R32_UInt};
 
 decltype(ShaderEntity::VERTEX_BINDING_BONE_WEIGHT) ShaderEntity::VERTEX_BINDING_BONE_WEIGHT = {prosper::VertexInputRate::Vertex};
 decltype(ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID) ShaderEntity::VERTEX_ATTRIBUTE_BONE_WEIGHT_ID = {VERTEX_BINDING_BONE_WEIGHT,prosper::Format::R32G32B32A32_SInt};
@@ -196,14 +213,15 @@ decltype(ShaderEntity::VERTEX_ATTRIBUTE_BI_TANGENT) ShaderEntity::VERTEX_ATTRIBU
 
 decltype(ShaderEntity::VERTEX_BINDING_LIGHTMAP) ShaderEntity::VERTEX_BINDING_LIGHTMAP = {prosper::VertexInputRate::Vertex};
 decltype(ShaderEntity::VERTEX_ATTRIBUTE_LIGHTMAP_UV) ShaderEntity::VERTEX_ATTRIBUTE_LIGHTMAP_UV = {VERTEX_BINDING_LIGHTMAP,prosper::Format::R32G32_SFloat};
+
 decltype(ShaderEntity::DESCRIPTOR_SET_INSTANCE) ShaderEntity::DESCRIPTOR_SET_INSTANCE = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Instance
-			prosper::DescriptorType::UniformBufferDynamic,
+			prosper::DescriptorType::UniformBuffer,
 			prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit
 		},
 		prosper::DescriptorSetInfo::Binding { // Bone Matrices
-			prosper::DescriptorType::UniformBufferDynamic,
+			prosper::DescriptorType::UniformBuffer,
 			prosper::ShaderStageFlags::VertexBit
 		},
 		prosper::DescriptorSetInfo::Binding { // Vertex Animations
@@ -225,7 +243,7 @@ void ShaderEntity::OnBindEntity(CBaseEntity &ent,CRenderComponent &renderC) {}
 bool ShaderEntity::BindEntity(CBaseEntity &ent)
 {
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(pRenderComponent.expired())
+	if(!pRenderComponent)
 		return false;
 	m_boundEntity = &ent;
 	auto *descSet = pRenderComponent->GetRenderDescriptorSet();
@@ -283,6 +301,8 @@ std::shared_ptr<prosper::IRenderBuffer> ShaderEntity::CreateRenderBuffer(CModelS
 	std::optional<prosper::IndexBufferInfo> indexBufferInfo {};
 	if(GetRenderBufferTargets(mesh,pipelineIdx,buffers,offsets,indexBufferInfo) == false)
 		return nullptr;
+	buffers.insert(buffers.begin(),CSceneComponent::GetEntityInstanceIndexBuffer()->GetBuffer().get()); // Instance buffer
+	offsets.insert(offsets.begin(),0);
 	auto *dummyBuffer = c_engine->GetRenderContext().GetDummyBuffer().get();
 	for(auto it=buffers.begin();it!=buffers.end();++it)
 	{
@@ -296,7 +316,7 @@ CBaseEntity *ShaderEntity::GetBoundEntity() {return m_boundEntity;}
 
 bool ShaderEntity::BindInstanceDescriptorSet(prosper::IDescriptorSet &descSet)
 {
-	return RecordBindDescriptorSet(descSet,GetInstanceDescriptorSetIndex(),{0u,0u});
+	return RecordBindDescriptorSet(descSet,GetInstanceDescriptorSetIndex());//,{0u,0u});
 }
 
 bool ShaderEntity::BindVertexAnimationOffset(uint32_t offset)
@@ -306,12 +326,12 @@ bool ShaderEntity::BindVertexAnimationOffset(uint32_t offset)
 	return RecordPushConstants(sizeof(offset),&offset,pushConstantOffset);
 }
 
-bool ShaderEntity::BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView)
+bool ShaderEntity::BindScene(pragma::CSceneComponent &scene,CRasterizationRendererComponent &renderer,bool bView)
 {
 	return ShaderSceneLit::BindScene(scene,renderer,bView) &&
 		BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 }
-bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::function<bool(CModelSubMesh&)> &fDraw,bool bUseVertexWeightBuffer)
+bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,const std::function<bool(CModelSubMesh&)> &fDraw,bool bUseVertexWeightBuffer)
 {
 	auto numTriangleVertices = mesh.GetTriangleVertexCount();
 	if(numTriangleVertices > umath::to_integral(GameLimits::MaxMeshVertices))
@@ -320,8 +340,10 @@ bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::function<bool(CModelSubMe
 		return false;
 	}
 	auto &vkMesh = mesh.GetSceneMesh();
-	auto renderBuffer = vkMesh->GetRenderBuffer(mesh,*this,m_currentPipelineIdx);
-	return RecordBindRenderBuffer(*renderBuffer) && fDraw(mesh);
+	auto &renderBuffer = vkMesh->GetRenderBuffer(mesh,*this,m_currentPipelineIdx);
+	if(renderBuffer == nullptr || RecordBindRenderBuffer(*renderBuffer) == false)
+		return false;
+	return RecordBindVertexBuffer(renderBufferIndexBuffer,umath::to_integral(VertexBinding::RenderBufferIndex)) && fDraw(mesh);
 #if 0
 	auto &vertexBuffer = vkMesh->GetVertexBuffer();
 	auto &indexBuffer = vkMesh->GetIndexBuffer();
@@ -366,9 +388,9 @@ bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::function<bool(CModelSubMe
 #endif
 }
 
-bool ShaderEntity::Draw(CModelSubMesh &mesh,bool bUseVertexWeightBuffer)
+bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,bool bUseVertexWeightBuffer,uint32_t instanceCount)
 {
-	return Draw(mesh,[this](CModelSubMesh &mesh) {
+	return Draw(mesh,meshIdx,renderBufferIndexBuffer,[this,instanceCount](CModelSubMesh &mesh) {
 #if 0
 		static std::shared_ptr<prosper::IBuffer> vertexBuffer = nullptr;
 		if(vertexBuffer == nullptr)
@@ -389,9 +411,47 @@ bool ShaderEntity::Draw(CModelSubMesh &mesh,bool bUseVertexWeightBuffer)
 		RecordDraw(9);
 		return true;
 #endif
-		return RecordDrawIndexed(mesh.GetTriangleVertexCount());
+		return RecordDrawIndexed(mesh.GetTriangleVertexCount(),instanceCount);
 	},bUseVertexWeightBuffer);
 }
 
-bool ShaderEntity::Draw(CModelSubMesh &mesh) {return Draw(mesh,true);}
-#pragma optimize("",on)
+bool ShaderEntity::Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount) {return Draw(mesh,meshIdx,renderBufferIndexBuffer,true,instanceCount);}
+
+/////////////
+
+void pragma::ShaderGameWorld::RecordSceneFlags(rendering::ShaderProcessor &shaderProcessor,SceneFlags sceneFlags) const
+{
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(ScenePushConstants,flags),sizeof(sceneFlags),&sceneFlags);
+}
+
+bool pragma::ShaderGameWorld::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor,CMaterial &mat) const
+{
+	auto descSetGroup = mat.GetDescriptorSetGroup(const_cast<pragma::ShaderGameWorld&>(*this));
+	if(descSetGroup == nullptr)
+		descSetGroup = const_cast<pragma::ShaderGameWorld*>(this)->InitializeMaterialDescriptorSet(mat,false); // Attempt to initialize on the fly (TODO: Is this thread safe?)
+	if(descSetGroup == nullptr)
+		return false;
+	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,shaderProcessor.GetCurrentPipelineLayout(),GetMaterialDescriptorSetIndex(),*descSetGroup->GetDescriptorSet(0));
+	return true;
+}
+
+void pragma::ShaderGameWorld::RecordClipPlane(rendering::ShaderProcessor &shaderProcessor,const Vector4 &clipPlane) const
+{
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(
+		shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(pragma::ShaderGameWorld::ScenePushConstants,clipPlane),sizeof(clipPlane),&clipPlane
+	);
+}
+
+void pragma::ShaderGameWorld::RecordDepthBias(rendering::ShaderProcessor &shaderProcessor,const Vector2 &depthBias) const
+{
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(
+		shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(pragma::ShaderGameWorld::ScenePushConstants,depthBias),sizeof(depthBias),&depthBias
+	);
+}
+
+void pragma::ShaderGameWorld::RecordVertexAnimationOffset(rendering::ShaderProcessor &shaderProcessor,uint32_t vertexAnimationOffset) const
+{
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(
+		shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(pragma::ShaderGameWorld::ScenePushConstants,vertexAnimInfo),sizeof(vertexAnimationOffset),&vertexAnimationOffset
+	);
+}

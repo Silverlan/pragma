@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -15,7 +15,7 @@
 #include <shader/prosper_shader_blur.hpp>
 #include <prosper_command_buffer.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 LINK_WGUI_TO_CLASS(WIImageSlideShow,WIImageSlideShow);
 
@@ -195,13 +195,13 @@ void WIImageSlideShow::PreloadNextImage(Int32 img)
 	auto &textureManager = matManager.GetTextureManager();
 	auto hSlideShow = GetHandle();
 	TextureManager::LoadInfo loadInfo {};
-	loadInfo.onLoadCallback = [this,f,hSlideShow](std::shared_ptr<Texture> texture) {
+	loadInfo.onLoadCallback = FunctionCallback<void,std::shared_ptr<Texture>>::Create([this,f,hSlideShow](std::shared_ptr<Texture> texture) {
 		if(!hSlideShow.IsValid())
 			return;
 		m_imgPreload.texture = texture;
 		m_imgPreload.ready = true;
 		m_imgPreload.loading = false;
-	};
+	});
 	textureManager.Load(wgui.GetContext(),f,loadInfo,nullptr,true);
 }
 

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_MODELMESH_H__
@@ -23,7 +23,7 @@ public:
 	const std::shared_ptr<pragma::SceneMesh> &GetSceneMesh() const;
 	virtual void Update(ModelUpdateFlags flags=ModelUpdateFlags::AllData) override;
 	virtual void Centralize(const Vector3 &origin) override;
-	virtual std::shared_ptr<ModelSubMesh> Copy() const override;
+	virtual std::shared_ptr<ModelSubMesh> Copy(bool fullCopy=false) const override;
 	static void InitializeBuffers();
 	static void ClearBuffers();
 

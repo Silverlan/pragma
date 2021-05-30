@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __BASE_SOUND_EMITTER_COMPONENT_HPP__
 #define __BASE_SOUND_EMITTER_COMPONENT_HPP__
@@ -20,6 +20,7 @@ namespace pragma
 		virtual ~BaseSoundEmitterComponent() override;
 		virtual void Initialize() override;
 
+		virtual void OnTick(double dt) override;
 		virtual void PrecacheSounds();
 		virtual std::shared_ptr<ALSound> CreateSound(std::string snd,ALSoundType type);
 		virtual std::shared_ptr<ALSound> EmitSound(std::string snd,ALSoundType type,float gain,float pitch=1.f);

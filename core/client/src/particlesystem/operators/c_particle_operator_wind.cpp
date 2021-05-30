@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -37,8 +37,8 @@ void CParticleOperatorWind::Simulate(double tDelta)
 	if(m_bRotateWithEmitter)
 	{
 		auto pTrComponent = GetParticleSystem().GetEntity().GetTransformComponent();
-		if(pTrComponent.valid())
-			uvec::rotate(&m_vDelta,pTrComponent->GetOrientation());
+		if(pTrComponent != nullptr)
+			uvec::rotate(&m_vDelta,pTrComponent->GetRotation());
 	}
 }
 void CParticleOperatorWind::Simulate(CParticle &particle,double tDelta,float strength)

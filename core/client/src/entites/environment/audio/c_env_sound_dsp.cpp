@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -28,54 +28,55 @@ CBaseSoundDspComponent::~CBaseSoundDspComponent()
 void CBaseSoundDspComponent::Initialize()
 {
 	BaseEnvSoundDspComponent::Initialize();
-
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		if(m_dsp == nullptr)
-			return;
-		auto &ent = GetEntity();
-		auto pTrComponent = ent.GetTransformComponent();
-		auto pToggleComponent = ent.GetComponent<CToggleComponent>();
-		if(pTrComponent.expired() || (pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false))
-			return;
-		auto radiusInnerSqr = umath::pow2(m_kvInnerRadius);
-		auto radiusOuterSqr = umath::pow2(m_kvOuterRadius);
-		auto &pos = pTrComponent->GetPosition();
-		auto &sounds = client->GetSounds();
-		for(auto &rsnd : sounds)
+	SetTickPolicy(TickPolicy::Always); // TODO
+}
+void CBaseSoundDspComponent::OnTick(double dt)
+{
+	if(m_dsp == nullptr)
+		return;
+	auto &ent = GetEntity();
+	auto pTrComponent = ent.GetTransformComponent();
+	auto pToggleComponent = ent.GetComponent<CToggleComponent>();
+	if(pTrComponent == nullptr || (pToggleComponent.valid() && pToggleComponent->IsTurnedOn() == false))
+		return;
+	auto radiusInnerSqr = umath::pow2(m_kvInnerRadius);
+	auto radiusOuterSqr = umath::pow2(m_kvOuterRadius);
+	auto &pos = pTrComponent->GetPosition();
+	auto &sounds = client->GetSounds();
+	for(auto &rsnd : sounds)
+	{
+		auto &snd = rsnd.get();
+		if(snd.IsPlaying() == false)
+			continue;
+		auto &alSnd = *static_cast<al::SoundSource*>(static_cast<CALSound*>(&snd));
+		if(m_bAllSounds == false && (m_bAllWorldSounds == false || snd.IsRelative() == true) && (snd.GetType() &m_types) == ALSoundType::Generic)
 		{
-			auto &snd = rsnd.get();
-			if(snd.IsPlaying() == false)
+			DetachSoundSource(alSnd);
+			continue;
+		}
+		if(m_bApplyGlobal == false)
+		{
+			if(m_bAffectRelative == false && snd.IsRelative() == true)
 				continue;
-			auto &alSnd = *static_cast<al::SoundSource*>(static_cast<CALSound*>(&snd));
-			if(m_bAllSounds == false && (m_bAllWorldSounds == false || snd.IsRelative() == true) && (snd.GetType() &m_types) == ALSoundType::Generic)
-			{
-				DetachSoundSource(alSnd);
-				continue;
-			}
-			if(m_bApplyGlobal == false)
-			{
-				if(m_bAffectRelative == false && snd.IsRelative() == true)
-					continue;
-				auto posSnd = alSnd.GetWorldPosition();
+			auto posSnd = alSnd->GetWorldPosition();
 
-				auto d = uvec::length_sqr(posSnd -pos);
-				if(d > radiusOuterSqr)
-					DetachSoundSource(alSnd);
-				else
-				{
-					d = umath::sqrt(d);
-					auto intensity = umath::clamp(d /m_kvInnerRadius,0.f,1.f);
-					UpdateSoundSource(alSnd,intensity);
-				}
-			}
+			auto d = uvec::length_sqr(posSnd -pos);
+			if(d > radiusOuterSqr)
+				DetachSoundSource(alSnd);
 			else
 			{
-				if(m_bAffectRelative == false && snd.IsRelative() == true)
-					continue;
-				UpdateSoundSource(alSnd,1.f);
+				d = umath::sqrt(d);
+				auto intensity = umath::clamp(d /m_kvInnerRadius,0.f,1.f);
+				UpdateSoundSource(alSnd,intensity);
 			}
 		}
-	});
+		else
+		{
+			if(m_bAffectRelative == false && snd.IsRelative() == true)
+				continue;
+			UpdateSoundSource(alSnd,1.f);
+		}
+	}
 }
 void CBaseSoundDspComponent::ReceiveData(NetPacket &packet)
 {
@@ -164,11 +165,11 @@ void CBaseSoundDspComponent::UpdateSoundSource(al::SoundSource &src,float gain)
 	auto it = FindSoundSource(src);
 	if(it != m_affectedSounds.end())
 	{
-		src.SetEffectGain(it->second,gain);
+		src->SetEffectGain(it->second,gain);
 		return;
 	}
 	uint32_t slotId;
-	if(src.AddEffect(*m_dsp,slotId,gain) == false)
+	if(src->AddEffect(*m_dsp,slotId,gain) == false)
 		return;
 	m_affectedSounds.push_back({src.GetHandle(),slotId});
 }
@@ -177,7 +178,7 @@ void CBaseSoundDspComponent::DetachSoundSource(al::SoundSource &src)
 	auto it = FindSoundSource(src);
 	if(it == m_affectedSounds.end())
 		return;
-	src.RemoveEffect(it->second);
+	src->RemoveEffect(it->second);
 	m_affectedSounds.erase(it);
 }
 void CBaseSoundDspComponent::DetachAllSoundSources()
@@ -187,7 +188,7 @@ void CBaseSoundDspComponent::DetachAllSoundSources()
 		if(pair.first.IsValid() == false)
 			continue;
 		auto &src = *static_cast<al::SoundSource*>(static_cast<CALSound*>(pair.first.get()));
-		src.RemoveEffect(pair.second);
+		src->RemoveEffect(pair.second);
 	}
 	m_affectedSounds.clear();
 }

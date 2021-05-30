@@ -1,0 +1,22 @@
+#ifndef F_SH_RENDERSETTINGS_GLS
+#define F_SH_RENDERSETTINGS_GLS
+
+#include "sh_uniform_locations.gls"
+
+#define FRENDER_UNLIT 1
+
+layout(std140,LAYOUT_ID(DESCRIPTOR_SET_SCENE,DESCRIPTOR_SET_SCENE_BINDING_RENDER_SETTINGS)) uniform RenderSettings
+{
+	vec4 ambientColor;
+	vec3 posCam;
+	int flags;
+	float shadowRatioX;
+	float shadowRatioY;
+	float nearZ;
+	float farZ;
+	int shaderQuality; // 1 = lowest, 10 = highest
+} u_renderSettings;
+
+bool is_unlit() {return (u_renderSettings.flags &FRENDER_UNLIT) != 0;}
+
+#endif

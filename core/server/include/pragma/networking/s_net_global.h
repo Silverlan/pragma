@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __S_NET_GLOBAL_H__
 #define __S_NET_GLOBAL_H__
@@ -27,6 +27,7 @@ DECLARE_NETMESSAGE_SV(weapon_next);
 DECLARE_NETMESSAGE_SV(weapon_previous);
 DECLARE_NETMESSAGE_SV(ent_event);
 DECLARE_NETMESSAGE_SV(give_weapon);
+DECLARE_NETMESSAGE_SV(strip_weapons);
 DECLARE_NETMESSAGE_SV(give_ammo);
 DECLARE_NETMESSAGE_SV(debug_ai_navigation);
 DECLARE_NETMESSAGE_SV(debug_ai_schedule_print);

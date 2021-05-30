@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __BASE_WEAPON_COMPONENT_HPP__
 #define __BASE_WEAPON_COMPONENT_HPP__
@@ -58,7 +58,7 @@ namespace pragma
 		bool IsAutomaticSecondary() const;
 		bool IsDeployed() const;
 		virtual void Reload();
-		virtual void Think(double tDelta);
+		virtual void OnTick(double tDelta) override;
 		virtual void OnRemove() override;
 		// Ammo
 		UInt32 GetPrimaryAmmoType() const;
@@ -89,6 +89,7 @@ namespace pragma
 		virtual void OnEntitySpawn() override;
 	protected:
 		BaseWeaponComponent(BaseEntity &ent);
+		void UpdateTickPolicy();
 		bool CanPrimaryAttack() const;
 		bool CanSecondaryAttack() const;
 		virtual void OnFireBullets(const BulletInfo &bulletInfo,Vector3 &bulletOrigin,Vector3 &bulletDir,Vector3 *effectsOrigin=nullptr);

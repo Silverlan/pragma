@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __SKELETON_H__
@@ -16,6 +16,7 @@
 #include "pragma/math/orientation.h"
 #include "pragma/physics/jointinfo.h"
 
+using BoneId = uint16_t;
 struct DLLNETWORK Bone
 	: public std::enable_shared_from_this<Bone>
 {
@@ -24,11 +25,16 @@ struct DLLNETWORK Bone
 	std::string name;
 	std::unordered_map<uint32_t,std::shared_ptr<Bone>> children;
 	std::weak_ptr<Bone> parent;
-	uint32_t ID;
+	BoneId ID;
 
 	bool IsAncestorOf(const Bone &other) const;
 	bool IsDescendantOf(const Bone &other) const;
+
+	bool operator==(const Bone &other) const;
+	bool operator!=(const Bone &other) const {return !operator==(other);}
 };
+
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const Bone &o);
 
 struct DLLNETWORK BoneList // Simplified Skeleton without an hierarchy
 {
@@ -41,12 +47,14 @@ public:
 	uint32_t GetBoneCount() const;
 };
 
+namespace udm {struct AssetData;};
+class Frame;
 class DLLNETWORK Skeleton
 {
-private:
-	std::vector<std::shared_ptr<Bone>> m_bones;
-	std::unordered_map<uint32_t,std::shared_ptr<Bone>> m_rootBones;
 public:
+	static constexpr uint32_t FORMAT_VERSION = 1u;
+	static constexpr auto PSKEL_IDENTIFIER = "PSKEL";
+	static std::shared_ptr<Skeleton> Load(Frame &reference,const udm::AssetData &data,std::string &outErr);
 	Skeleton()=default;
 	Skeleton(const Skeleton &other);
 	uint32_t AddBone(Bone *bone);
@@ -60,5 +68,13 @@ public:
 	std::vector<std::shared_ptr<Bone>> &GetBones();
 
 	void Merge(Skeleton &other);
+	bool Save(Frame &reference,udm::AssetData &outData,std::string &outErr);
+
+	bool operator==(const Skeleton &other) const;
+	bool operator!=(const Skeleton &other) const {return !operator==(other);}
+private:
+	bool LoadFromAssetData(Frame &reference,const udm::AssetData &data,std::string &outErr);
+	std::vector<std::shared_ptr<Bone>> m_bones;
+	std::unordered_map<uint32_t,std::shared_ptr<Bone>> m_rootBones;
 };
 #endif

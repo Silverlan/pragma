@@ -88,9 +88,6 @@
 [submodule "third_party_libs/rectangle_bin_pack"]
 	path = third_party_libs/rectangle_bin_pack
 	url = https://github.com/juj/RectangleBinPack.git
-[submodule "third_party_libs/miniball"]
-	path = third_party_libs/miniball
-	url = https://github.com/hbf/miniball.git
 [submodule "third_party_libs/openal-soft"]
 	path = third_party_libs/openal-soft
 	url = https://github.com/kcat/openal-soft.git
@@ -135,13 +132,10 @@
 	url = https://github.com/qknight/libnoise.git
 [submodule "third_party_libs/rapidxml"]
 	path = third_party_libs/rapidxml
-	url = https://github.com/discordapp/rapidxml.git
+	url = https://github.com/discord/rapidxml.git
 [submodule "third_party_libs/hllib"]
 	path = third_party_libs/hllib
 	url = https://github.com/Silverlan/hllib.git
-[submodule "third_party_libs/vtflib"]
-	path = third_party_libs/vtflib
-	url = https://github.com/panzi/VTFLib.git
 [submodule "third_party_libs/libpng"]
 	path = third_party_libs/libpng
 	url = https://github.com/glennrp/libpng.git
@@ -190,6 +184,15 @@
 [submodule "external_libs/util_udm"]
 	path = external_libs/util_udm
 	url = https://github.com/Silverlan/util_udm.git
-[submodule "external_libs/util_ocio"]
-	path = external_libs/util_ocio
-	url = https://github.com/Silverlan/util_ocio.git
+[submodule "third_party_libs/nvtt"]
+	path = third_party_libs/nvtt
+	url = https://github.com/castano/nvidia-texture-tools.git
+[submodule "third_party_libs/vtflib"]
+	path = third_party_libs/vtflib
+	url = https://github.com/Silverlan/VTFLib.git
+[submodule "third_party_libs/miniball"]
+	path = third_party_libs/miniball
+	url = https://github.com/Silverlan/miniball.git
+[submodule "modules/pr_audio_dummy"]
+	path = modules/pr_audio_dummy
+	url = https://github.com/Silverlan/pr_audio_dummy.git

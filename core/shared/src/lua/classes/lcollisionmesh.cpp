@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -14,10 +14,11 @@
 #include "pragma/physics/physsoftbodyinfo.hpp"
 #include <pragma/lua/luaapi.h>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 void Lua::CollisionMesh::register_class(luabind::class_<::CollisionMesh> &classDef)
 {
+	classDef.def(luabind::tostring(luabind::self));
 	classDef.scope[luabind::def("Create",static_cast<void(*)(lua_State*)>(&Create))];
 	classDef.scope[luabind::def("CreateBox",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&)>(&CreateBox))];
 	classDef.def("GetVertices",&GetVertices);

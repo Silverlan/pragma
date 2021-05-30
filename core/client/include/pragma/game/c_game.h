@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_GAME_H__
@@ -26,7 +26,8 @@
 #include <wgui/wihandle.h>
 #include <sharedutils/property/util_property.hpp>
 
-#define LOD_SWAP_DISTANCE 500.f
+static constexpr auto LOD_SWAP_DISTANCE = 500.f;
+static constexpr auto LOD_SWAP_DISTANCE_SQR = umath::pow2(LOD_SWAP_DISTANCE);
 
 struct DLLCLIENT KeyAction
 {
@@ -52,7 +53,7 @@ class WorldEnvironment;
 template<class T>
 	class OcclusionOctree;
 enum class UniformBinding : uint32_t;
-namespace al {class Effect;};
+namespace al {class IEffect;};
 namespace GLFW
 {
 	enum class MouseButton : uint32_t;
@@ -65,6 +66,46 @@ namespace pragma
 {
 	namespace debug {class GPUProfilingStage;};
 	namespace physics {class IVisualDebugger;};
+	namespace rendering
+	{
+		class RenderQueueBuilder;
+		class RenderQueueWorkerManager;
+		struct DLLCLIENT GameWorldShaderSettings
+		{
+			enum class ShadowQuality : uint32_t
+			{
+				VeryLow = 0,
+				Low,
+				Medium,
+				High,
+				VeryHigh
+			};
+			// TODO: Enable these once C++20 is available
+			//bool operator==(const GameWorldShaderSettings&) const=default;
+			//bool operator!=(const GameWorldShaderSettings&) const=default;
+			bool operator==(const GameWorldShaderSettings &other) const
+			{
+				return other.shadowQuality == shadowQuality &&
+					other.ssaoEnabled == ssaoEnabled &&
+					other.bloomEnabled == bloomEnabled &&
+					other.fxaaEnabled == fxaaEnabled &&
+					other.debugModeEnabled == debugModeEnabled &&
+					other.iblEnabled == iblEnabled &&
+					other.dynamicLightingEnabled == dynamicLightingEnabled &&
+					other.dynamicShadowsEnabled == dynamicShadowsEnabled;
+				static_assert(sizeof(GameWorldShaderSettings) == 12);
+			}
+			bool operator!=(const GameWorldShaderSettings &other) const {return !operator==(other);}
+			ShadowQuality shadowQuality = ShadowQuality::Medium;
+			bool ssaoEnabled = true;
+			bool bloomEnabled = true;
+			bool fxaaEnabled = true;
+			bool debugModeEnabled = false;
+			bool iblEnabled = true;
+			bool dynamicLightingEnabled = true;
+			bool dynamicShadowsEnabled = true;
+		};
+	};
 	class LuaShaderManager;
 	class LuaParticleModifierManager;
 	class CPlayerComponent;
@@ -78,7 +119,7 @@ namespace pragma
 	class CSceneComponent;
 };
 namespace uimg {class ImageBuffer; struct TextureInfo;};
-namespace prosper {class DescriptorSetGroup; class IImage; class IDescriptorSet;};
+namespace prosper {class DescriptorSetGroup; class IImage; class IDescriptorSet; class ICommandBuffer;};
 namespace util {struct DrawSceneInfo;};
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -116,6 +157,13 @@ public:
 		All = BakeAll | SaveProbeBoxes
 	};
 
+	enum class StateFlags : uint32_t
+	{
+		None = 0u,
+		GameWorldShaderPipelineReloadRequired = 1u,
+		PrepassShaderPipelineReloadRequired = GameWorldShaderPipelineReloadRequired<<1u
+	};
+
 	// List of generic shaders used by the rendering pipeline for direct access to m_gameShaders
 	enum class GameShader
 	{
@@ -134,13 +182,15 @@ public:
 		DebugTexture,
 		DebugVertex,
 
+		Prepass,
+		Pbr,
+
 		Count
 	};
 	enum class CPUProfilingPhase : uint32_t
 	{
 		Present = 0u,
-		OcclusionCulling,
-		PrepareRendering,
+		BuildRenderQueue,
 		Prepass,
 		SSAO,
 		CullLightSources,
@@ -154,9 +204,6 @@ public:
 	{
 		Scene = 0u,
 		Prepass,
-		PrepassSkybox,
-		PrepassWorld,
-		PrepassView,
 		SSAO,
 		PostProcessing,
 		Present,
@@ -214,8 +261,8 @@ public:
 	pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage,GPUProfilingPhase> *GetGPUProfilingStageManager();
 
 	template<class TEfxProperties>
-		std::shared_ptr<al::Effect> CreateAuxEffect(const std::string &name,const TEfxProperties &props);
-	std::shared_ptr<al::Effect> GetAuxEffect(const std::string &name);
+		std::shared_ptr<al::IEffect> CreateAuxEffect(const std::string &name,const TEfxProperties &props);
+	std::shared_ptr<al::IEffect> GetAuxEffect(const std::string &name);
 
 	pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase> *GetProfilingStageManager();
 	bool StartProfilingStage(CPUProfilingPhase stage);
@@ -283,13 +330,19 @@ public:
 	virtual void DrawLine(const Vector3 &start,const Vector3 &end,const Color &color,float duration=0.f) override;
 	virtual void DrawBox(const Vector3 &start,const Vector3 &end,const EulerAngles &ang,const Color &color,float duration=0.f) override;
 	virtual void DrawPlane(const Vector3 &n,float dist,const Color &color,float duration=0.f) override;
-	void RenderDebugPhysics(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam);
+	void RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pragma::CCameraComponent &cam);
 
 	using Game::LoadNavMesh;
 	const std::vector<DroppedFile> &GetDroppedFiles() const;
 
 	void OnReceivedRegisterNetEvent(NetPacket &packet);
+	virtual pragma::NetEventId FindNetEvent(const std::string &name) const override;
 	virtual pragma::NetEventId SetupNetEvent(const std::string &name) override;
+	pragma::NetEventId SharedNetEventIdToLocal(pragma::NetEventId evId) const;
+	pragma::NetEventId LocalNetEventIdToShared(pragma::NetEventId evId) const;
+	std::unordered_map<std::string,pragma::NetEventId> &GetLocalNetEventIds() {return m_clientNetEventData.localNetEventIds;}
+	std::vector<pragma::NetEventId> &GetSharedNetEventIdToLocal() {return m_clientNetEventData.sharedNetEventIdToLocalId;}
+	std::vector<pragma::NetEventId> &GetLocalNetEventIdToShared() {return m_clientNetEventData.localNetEventIdToSharedId;}
 
 	void SetLODBias(int32_t bias);
 	int32_t GetLODBias() const;
@@ -381,14 +434,30 @@ public:
 	virtual std::string GetLuaNetworkDirectoryName() const override;
 	virtual std::string GetLuaNetworkFileName() const override;
 
+	void SetDefaultGameRenderEnabled(bool enabled);
+	bool IsDefaultGameRenderEnabled() const;
+
+	void QueueForRendering(const util::DrawSceneInfo &drawSceneInfo);
+	void RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos);
 	void SetRenderScene(pragma::CSceneComponent &scene);
 	void ResetRenderScene();
 	pragma::CSceneComponent *GetRenderScene();
 	const pragma::CSceneComponent *GetRenderScene() const;
 	pragma::CCameraComponent *GetRenderCamera() const;
 
+	pragma::rendering::RenderQueueBuilder &GetRenderQueueBuilder();
+	pragma::rendering::RenderQueueWorkerManager &GetRenderQueueWorkerManager();
 	prosper::IDescriptorSet &GetGlobalRenderSettingsDescriptorSet();
 	GlobalRenderSettingsBufferData &GetGlobalRenderSettingsBufferData();
+	pragma::rendering::GameWorldShaderSettings &GetGameWorldShaderSettings() {return m_worldShaderSettings;}
+	const pragma::rendering::GameWorldShaderSettings &GetGameWorldShaderSettings() const {return const_cast<CGame*>(this)->GetGameWorldShaderSettings();}
+	void ReloadGameWorldShaderPipelines() const;
+	void ReloadPrepassShaderPipelines() const;
+
+	void UpdateGameWorldShaderSettings();
+
+	// For internal use only!
+	const std::vector<util::DrawSceneInfo> &GetQueuedRenderScenes() const;
 protected:
 	virtual void RegisterLuaEntityComponents(luabind::module_ &gameMod) override;
 	virtual void OnMapLoaded() override;
@@ -414,6 +483,13 @@ private:
 	double m_tLastClientUpdate = 0.0;
 	std::array<bool,umath::to_integral(RenderMode::Count)> m_renderModesEnabled;
 	CallbackHandle m_hCbDrawFrame = {};
+
+	struct {
+		std::unordered_map<std::string,pragma::NetEventId> localNetEventIds {};
+		pragma::NetEventId nextLocalNetEventId = 0;
+		std::vector<pragma::NetEventId> sharedNetEventIdToLocalId {};
+		std::vector<pragma::NetEventId> localNetEventIdToSharedId {};
+	} m_clientNetEventData {};
 
 	CallbackHandle m_cbGPUProfilingHandle = {};
 	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::GPUProfilingStage,GPUProfilingPhase>> m_gpuProfilingStageManager = nullptr;
@@ -459,12 +535,18 @@ private:
 	bool LoadAuxEffects(const std::string &fname);
 
 	// Render
+	bool m_defaultGameRenderEnabled = true;
+	std::vector<util::DrawSceneInfo> m_sceneRenderQueue {};
+	std::shared_ptr<pragma::rendering::RenderQueueBuilder> m_renderQueueBuilder = nullptr;
+	std::shared_ptr<pragma::rendering::RenderQueueWorkerManager> m_renderQueueWorkerManager = nullptr;
 	Vector4 m_clipPlane = {};
 	Vector4 m_colScale = {};
 	Material *m_matOverride = nullptr;
 	bool m_bMainRenderPass = true;
+	pragma::rendering::GameWorldShaderSettings m_worldShaderSettings {};
 	std::weak_ptr<prosper::IPrimaryCommandBuffer> m_currentDrawCmd = {};
 	std::array<util::WeakHandle<prosper::Shader>,umath::to_integral(GameShader::Count)> m_gameShaders = {};
+	StateFlags m_stateFlags = StateFlags::None;
 	void RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::Texture &texPostHdr,prosper::IImage *optOutImage,uint32_t layerId=0u);
 
 	std::unique_ptr<GlobalRenderSettingsBufferData> m_globalRenderSettingsBufferData = nullptr;
@@ -505,6 +587,7 @@ private:
 };
 REGISTER_BASIC_BITWISE_OPERATORS(CGame::SoundCacheFlags);
 REGISTER_BASIC_BITWISE_OPERATORS(CGame::GameShader);
+REGISTER_BASIC_BITWISE_OPERATORS(CGame::StateFlags)
 #pragma warning(pop)
 
 template<class T>

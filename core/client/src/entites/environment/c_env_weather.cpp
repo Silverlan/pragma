@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -43,7 +43,7 @@ void CWeatherComponent::OnEntitySpawn()
 			auto &ent = pt->GetEntity();
 			auto pTrComponent = ent.GetTransformComponent();
 			auto pTrComponentPl = plEnt.GetTransformComponent();
-			if(pTrComponent.valid() && pTrComponentPl.valid())
+			if(pTrComponent != nullptr && pTrComponentPl)
 				pTrComponent->SetPosition(pTrComponentPl->GetPosition());
 			auto pAttComponent = ent.AddComponent<CAttachableComponent>();
 			if(pAttComponent.valid())

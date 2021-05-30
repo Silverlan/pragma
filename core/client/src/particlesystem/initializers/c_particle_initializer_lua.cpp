@@ -2,12 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
 #include "pragma/particlesystem/initializers/c_particle_initializer_lua.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include <prosper_command_buffer.hpp>
 
 void CParticleModifierLua::Initialize(const luabind::object &o)
 {
@@ -39,11 +40,13 @@ void CParticleOperatorLua::Simulate(double tDelta)
 
 //////////////
 
-void CParticleRendererLua::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags)
+void CParticleRendererLua::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::ParticleRenderFlags renderFlags)
 {
-	CallLuaMember<void,std::reference_wrapper<prosper::ICommandBuffer>,luabind::object,std::reference_wrapper<pragma::rendering::RasterizationRenderer>,uint32_t>("Render",std::ref(*drawCmd),scene.GetLuaObject(),std::ref(const_cast<pragma::rendering::RasterizationRenderer&>(renderer)),umath::to_integral(renderFlags));
+	CallLuaMember<void,std::reference_wrapper<prosper::ICommandBuffer>,luabind::object,luabind::object,uint32_t>(
+		"Render",std::ref(*drawCmd),scene.GetLuaObject(),renderer.GetLuaObject(),umath::to_integral(renderFlags)
+	);
 }
-void CParticleRendererLua::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
+void CParticleRendererLua::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent &light,uint32_t layerId)
 {
 	// TODO
 }

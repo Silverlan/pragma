@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -27,6 +27,8 @@
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/gui/wifps.h"
+#include <pragma/asset/util_asset.hpp>
+#include <pragma/game/game_resources.hpp>
 #include <pragma/lua/libraries/lengine.h>
 #include <texturemanager/texturemanager.h>
 #include "pragma/lua/classes/c_lwibase.h"
@@ -44,6 +46,7 @@
 #include <sharedutils/util_library.hpp>
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
+#include <prosper_window.hpp>
 
 static std::unordered_map<std::string,std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &ClientState::GetConVarPtrs() {return *conVarPtrs;}
@@ -57,7 +60,7 @@ ConVarHandle ClientState::GetConVarHandle(std::string scvar)
 	return NetworkState::GetConVarHandle(*conVarPtrs,scvar);
 }
 
-DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 DLLCLIENT ClientState *client = NULL;
 extern CGame *c_game;
 
@@ -290,8 +293,8 @@ void ClientState::CloseMainMenu()
 	auto w = c_engine->GetRenderContext().GetWindowWidth();
 	auto h = c_engine->GetRenderContext().GetWindowHeight();
 	auto &window = c_engine->GetWindow();
-	window.SetCursorPos(Vector2i(w /2,h /2));
-	window.SetCursorInputMode(GLFW::CursorMode::Disabled);
+	window->SetCursorPos(Vector2i(w /2,h /2));
+	window->SetCursorInputMode(GLFW::CursorMode::Disabled);
 }
 void ClientState::OpenMainMenu()
 {
@@ -299,7 +302,7 @@ void ClientState::OpenMainMenu()
 	if(menu == NULL)
 		return;
 	auto &window = c_engine->GetWindow();
-	window.SetCursorInputMode(GLFW::CursorMode::Normal);
+	window->SetCursorInputMode(GLFW::CursorMode::Normal);
 	menu->SetVisible(true);
 }
 void ClientState::ToggleMainMenu()
@@ -655,6 +658,8 @@ ModelMesh *ClientState::CreateMesh() const {return new CModelMesh;}
 static auto cvMatStreaming = GetClientConVar("cl_material_streaming_enabled");
 Material *ClientState::LoadMaterial(const std::string &path,bool bReload)
 {
+	if(c_engine->IsVerbose())
+		Con::cout<<"Loading material '"<<path<<"'..."<<Con::endl;
 	return LoadMaterial(path,nullptr,bReload,!cvMatStreaming->GetBool());
 }
 
@@ -712,7 +717,9 @@ Material *ClientState::LoadMaterial(const std::string &path,const std::function<
 			// This is a bit of a hack, but it'll do for now. TODO: Do this in a better way!
 			auto matName = mat->GetName();
 			ufile::remove_extension_from_filename(matName);
-			mat->Save(matName,"addons/converted/");
+			auto savePath = pragma::asset::relative_path_to_absolute_path(matName,pragma::asset::Type::Material,util::CONVERT_PATH);
+			std::string err;
+			mat->Save(savePath.GetString(),err);
 		}
 	},nullptr,bReload,&bFirstTimeError,bLoadInstantly);
 	if(bFirstTimeError == true)

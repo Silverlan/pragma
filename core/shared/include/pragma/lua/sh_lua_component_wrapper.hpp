@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __SH_LUA_COMPONENT_WRAPPER_HPP__
@@ -24,6 +24,9 @@ public:
 	void Initialize() {}
 	static void default_Initialize(lua_State *l,LuaBaseEntityComponentWrapper &hComponent) {}
 
+	void OnTick(double dt) {}
+	static void default_OnTick(lua_State *l,LuaBaseEntityComponentWrapper &hComponent,double dt) {}
+
 	void OnRemove() {}
 	static void default_OnRemove(lua_State *l,LuaBaseEntityComponentWrapper &hComponent) {}
 
@@ -39,11 +42,17 @@ public:
 	void HandleEvent(uint32_t eventId) {}
 	static void default_HandleEvent(lua_State *l,LuaBaseEntityComponentWrapper &hComponent,uint32_t eventId) {}
 
-	void Save(DataStream ds) {}
-	static void default_Save(lua_State *l,LuaBaseEntityComponentWrapper &hComponent,DataStream ds) {}
+	void Save(udm::LinkedPropertyWrapper &udm) {}
+	static void default_Save(lua_State *l,LuaBaseEntityComponentWrapper &hComponent,udm::LinkedPropertyWrapper &udm) {}
 
-	void Load(DataStream ds,uint32_t version) {}
-	static void default_Load(lua_State *l,LuaBaseEntityComponentWrapper &hComponent,DataStream ds,uint32_t version) {}
+	void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) {}
+	static void default_Load(lua_State *l,LuaBaseEntityComponentWrapper &hComponent,udm::LinkedPropertyWrapper &udm,uint32_t version) {}
+
+	void OnEntityComponentAdded(LuaBaseEntityComponentWrapper &hComponent) {}
+	static void default_OnEntityComponentAdded(lua_State *l,LuaBaseEntityComponentWrapper &hComponent) {}
+
+	void OnEntityComponentRemoved(LuaBaseEntityComponentWrapper &hComponent) {}
+	static void default_OnEntityComponentRemoved(lua_State *l,LuaBaseEntityComponentWrapper &hComponent) {}
 };
 
 #endif

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -43,18 +43,26 @@
 #include "pragma/math/c_util_math.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_reflection_probe,CEnvReflectionProbe);
-
+#pragma optimize("",off)
 rendering::IBLData::IBLData(const std::shared_ptr<prosper::Texture> &irradianceMap,const std::shared_ptr<prosper::Texture> &prefilterMap,const std::shared_ptr<prosper::Texture> &brdfMap)
 	: irradianceMap{irradianceMap},prefilterMap{prefilterMap},brdfMap{brdfMap}
 {}
 
+struct RenderSettings
+{
+	std::string renderer = "luxcorerender";
+	std::string sky = "skies/dusk379.hdr";
+	EulerAngles skyAngles = {0.f,160.f,0.f};
+	float skyStrength = 0.3f;
+	float exposure = 50.f;
+} static g_renderSettings;
 void Console::commands::map_build_reflection_probes(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {
 	if(c_game == nullptr)
@@ -63,6 +71,12 @@ void Console::commands::map_build_reflection_probes(NetworkState *state,pragma::
 	pragma::console::parse_command_options(argv,commandOptions);
 	auto rebuild = (commandOptions.find("rebuild") != commandOptions.end());
 	auto closest = (commandOptions.find("closest") != commandOptions.end());
+	g_renderSettings.renderer = pragma::console::get_command_option_parameter_value(commandOptions,"renderer",util::declvalue(&::RenderSettings::renderer));
+	g_renderSettings.sky = pragma::console::get_command_option_parameter_value(commandOptions,"sky",util::declvalue(&::RenderSettings::sky));
+	g_renderSettings.skyStrength = util::to_float(pragma::console::get_command_option_parameter_value(commandOptions,"sky_strength",std::to_string(util::declvalue(&::RenderSettings::skyStrength))));
+	g_renderSettings.exposure = util::to_float(pragma::console::get_command_option_parameter_value(commandOptions,"exposure",std::to_string(util::declvalue(&::RenderSettings::exposure))));
+	auto defAngles = util::declvalue(&::RenderSettings::skyAngles);
+	g_renderSettings.skyAngles = EulerAngles{pragma::console::get_command_option_parameter_value(commandOptions,"sky_angles",std::to_string(defAngles.p) +' ' +std::to_string(defAngles.y) +' ' +std::to_string(defAngles.r))};
 	if(closest)
 	{
 		EntityIterator entIt {*c_game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
@@ -240,18 +254,20 @@ void CReflectionProbeComponent::BuildReflectionProbes(Game &game,std::vector<CRe
 	g_reflectionProbeQueue = {};
 	if(rebuild)
 	{
+		auto filePostfixes = pragma::asset::get_supported_extensions(pragma::asset::Type::Material);
+		for(auto &ext : filePostfixes)
+			ext = '.' +ext;
+		filePostfixes.push_back("_irradiance.ktx");
+		filePostfixes.push_back("_prefilter.ktx");
 		// Clear existing IBL files
 		for(auto *probe : probes)
 		{
+			probe->m_stateFlags |= StateFlags::RequiresRebuild;
 			if(probe->m_iblMat.empty() == false)
 				continue;
 			auto path = util::Path{probe->GetCubemapIBLMaterialFilePath()};
 			path.PopFront();
-			std::array<std::string,3> filePostfixes = {
-				".wmi",
-				"_irradiance.ktx",
-				"_prefilter.ktx"
-			};
+			path.RemoveFileExtension(pragma::asset::get_supported_extensions(pragma::asset::Type::Material));
 			auto identifier = probe->GetCubemapIdentifier();
 			for(auto &postfix : filePostfixes)
 			{
@@ -260,7 +276,7 @@ void CReflectionProbeComponent::BuildReflectionProbes(Game &game,std::vector<CRe
 				if(fileName.has_value() == false)
 					continue;
 				Con::cout<<"Removing probe IBL file '"<<fpath<<"'..."<<Con::endl;
-				if(FileManager::RemoveFile(fileName->c_str()))
+				if(FileManager::RemoveFile(("materials/" +*fileName).c_str()))
 					continue;
 				Con::cwar<<"WARNING: Unable to remove IBL file '"<<fpath<<"'! This reflection probe may not be rebuilt!"<<Con::endl;
 			}
@@ -343,7 +359,7 @@ std::string CReflectionProbeComponent::GetCubemapIBLMaterialFilePath() const
 {
 	if(m_iblMat.empty() == false)
 		return "materials/" +m_iblMat;
-	return "materials/" +GetCubemapIBLMaterialPath() +GetCubemapIdentifier() +".wmi";
+	return "materials/" +GetCubemapIBLMaterialPath() +GetCubemapIdentifier() +"." +pragma::asset::FORMAT_MATERIAL_ASCII;
 }
 
 bool CReflectionProbeComponent::RequiresRebuild() const
@@ -362,8 +378,8 @@ CReflectionProbeComponent::UpdateStatus CReflectionProbeComponent::UpdateIBLData
 		if(GenerateIBLReflectionsFromEnvMap("materials/" +m_srcEnvMap) == false)
 			return UpdateStatus::Failed;
 	}
-	else if(CaptureIBLReflectionsFromScene() == false)
-		return UpdateStatus::Pending;
+	else
+		return CaptureIBLReflectionsFromScene() ? UpdateStatus::Pending : UpdateStatus::Failed;
 	return UpdateStatus::Complete;
 }
 
@@ -420,34 +436,47 @@ bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 	dataBlock->AddValue("texture","prefilter",relPath +prefix +"prefilter");
 	dataBlock->AddValue("texture","irradiance",relPath +prefix +"irradiance");
 	dataBlock->AddValue("texture","brdf","env/brdf");
-	auto matPath = relPath +identifier +".wmi";
-	auto result = mat->Save(matPath);
+	auto rpath = util::Path::CreateFile(relPath +identifier +"." +pragma::asset::FORMAT_MATERIAL_ASCII);
+	auto apath = pragma::asset::relative_path_to_absolute_path(rpath,pragma::asset::Type::Material);
+	std::string err;
+	auto result = mat->Save(apath.GetString(),err);
 	if(result)
-		client->LoadMaterial(matPath,true);
+		client->LoadMaterial(rpath.GetString(),true);
 	return result;
 }
 
 util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> CReflectionProbeComponent::CaptureRaytracedIBLReflectionsFromScene(
-	uint32_t width,uint32_t height,const Vector3 &camPos,const Quat &camRot,float nearZ,float farZ,umath::Degree fov
+	uint32_t width,uint32_t height,const Vector3 &camPos,const Quat &camRot,float nearZ,float farZ,umath::Degree fov,
+	float exposure,const std::vector<BaseEntity*> *optEntityList,bool renderJob
 )
 {
 	rendering::cycles::SceneInfo sceneInfo {};
 	sceneInfo.width = width;
 	sceneInfo.height = height;
+	sceneInfo.exposure = exposure;
 	sceneInfo.device = pragma::rendering::cycles::SceneInfo::DeviceType::GPU;
+	sceneInfo.colorTransform = pragma::rendering::cycles::SceneInfo::ColorTransform {};
+	sceneInfo.colorTransform->config = "filmic-blender";
+	sceneInfo.colorTransform->look = "Medium Contrast";
+	sceneInfo.renderJob = renderJob;
 
 	rendering::cycles::RenderImageInfo renderImgInfo {};
-	renderImgInfo.cameraPosition = camPos;
-	renderImgInfo.cameraRotation = camRot;
+	renderImgInfo.camPose.SetOrigin(camPos);
+	renderImgInfo.camPose.SetRotation(camRot);
 	renderImgInfo.nearZ = nearZ;
 	renderImgInfo.farZ = farZ;
 	renderImgInfo.fov = fov;
 	renderImgInfo.equirectPanorama = true;
 
-	// TODO: Replace these with command arguments?
-	sceneInfo.sky = "skies/dusk379.hdr";
-	sceneInfo.skyAngles = {0.f,160.f,0.f};
-	sceneInfo.skyStrength = 10.f;
+	sceneInfo.sky = g_renderSettings.sky;
+	sceneInfo.skyAngles = g_renderSettings.skyAngles;
+	sceneInfo.skyStrength = g_renderSettings.skyStrength;
+	sceneInfo.renderer = g_renderSettings.renderer;
+	static auto useCycles = true;
+	if(useCycles)
+		sceneInfo.renderer = "cycles";
+	else
+		sceneInfo.renderer = "luxcorerender";
 
 	sceneInfo.samples = RAYTRACING_SAMPLE_COUNT;
 	sceneInfo.denoise = true;
@@ -455,9 +484,14 @@ util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> CReflectionProbeComponent:
 	umath::set_flag(sceneInfo.sceneFlags,rendering::cycles::SceneInfo::SceneFlags::CullObjectsOutsideCameraFrustum,false);
 
 	std::shared_ptr<uimg::ImageBuffer> imgBuffer = nullptr;
-	renderImgInfo.entityFilter = [](BaseEntity &ent) -> bool {
-		return ent.IsMapEntity();
-	};
+	if(optEntityList)
+		renderImgInfo.entityList = optEntityList;
+	else
+	{
+		renderImgInfo.entityFilter = [](BaseEntity &ent) -> bool {
+			return ent.IsMapEntity();
+		};
+	}
 	auto job = rendering::cycles::render_image(*client,sceneInfo,renderImgInfo);
 	if(job.IsValid() == false)
 		return {};
@@ -487,7 +521,7 @@ std::shared_ptr<prosper::IImage> CReflectionProbeComponent::CreateCubemapImage()
 	return c_engine->GetRenderContext().CreateImage(createInfo);
 }
 
-bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene()
+bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene(const std::vector<BaseEntity*> *optEntityList,bool renderJob)
 {
 	umath::set_flag(m_stateFlags,StateFlags::BakingFailed,true); // Mark as failed until complete
 	auto pos = GetEntity().GetPosition();
@@ -513,7 +547,8 @@ bool CReflectionProbeComponent::CaptureIBLReflectionsFromScene()
 	m_raytracingJobManager = std::unique_ptr<RaytracingJobManager>{new RaytracingJobManager{*this}};
 	uint32_t width = 512;
 	uint32_t height = 256;
-	auto job = CaptureRaytracedIBLReflectionsFromScene(width,height,pos,uquat::identity(),hCam->GetNearZ(),hCam->GetFarZ(),90.f /* fov */);
+	float exposure = g_renderSettings.exposure;
+	auto job = CaptureRaytracedIBLReflectionsFromScene(width,height,pos,uquat::identity(),hCam->GetNearZ(),hCam->GetFarZ(),90.f /* fov */,exposure,optEntityList,renderJob);
 	if(job.IsValid() == false)
 	{
 		Con::cwar<<"WARNING: Unable to set scene up for reflection probe raytracing!"<<Con::endl;
@@ -735,7 +770,7 @@ Material *CReflectionProbeComponent::LoadMaterial(bool &outIsDefault)
 	if(pragma::asset::exists(*client,matPath.GetString(),pragma::asset::Type::Material) == false)
 	{
 		outIsDefault = true;
-		matPath = "maps/default_ibl.wmi";
+		matPath = "maps/default_ibl." +std::string{pragma::asset::FORMAT_MATERIAL_ASCII};
 	}
 	auto *mat = client->LoadMaterial(matPath.GetString(),true,false);
 	return (mat && mat->IsError() == false) ? mat : nullptr;
@@ -871,7 +906,7 @@ void Console::commands::debug_pbr_ibl(NetworkState *state,pragma::BasePlayerComp
 	for(auto *ent : entIt)
 	{
 		auto trC = ent->GetTransformComponent();
-		if(trC.expired())
+		if(!trC)
 			continue;
 		auto d = uvec::distance_sqr(origin,trC->GetOrigin());
 		if(d > dClosest)
@@ -988,3 +1023,4 @@ void Console::commands::debug_pbr_ibl(NetworkState *state,pragma::BasePlayerComp
 		pSlider->SetAnchor(0.f,0.f,1.f,0.f);
 	}
 }
+#pragma optimize("",on)

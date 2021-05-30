@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __S_PHYSICS_COMPONENT_HPP__
 #define __S_PHYSICS_COMPONENT_HPP__
@@ -23,11 +23,12 @@ namespace pragma
 
 		virtual void OnPhysicsInitialized() override;
 		virtual void OnPhysicsDestroyed() override;
-		virtual void PostPhysicsSimulate() override;
+		virtual bool PostPhysicsSimulate() override;
 		
 		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 
 		virtual void SetCollisionsEnabled(bool b) override;
+		virtual void SetSimulationEnabled(bool b) override;
 		using BasePhysicsComponent::SetCollisionsEnabled;
 		virtual void SetKinematic(bool b) override;
 

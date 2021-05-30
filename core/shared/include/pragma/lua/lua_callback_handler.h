@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __LUA_CALLBACK_HANDLER_H__
@@ -37,7 +37,7 @@ template<class T,typename... TARGS>
 	T LuaCallbackHandler::CallLuaCallbacks(std::string name,TARGS ...args)
 {
 	++m_callDepth;
-	ScopeGuard sg([this]() {
+	util::ScopeGuard sg([this]() {
 		if(--m_callDepth == 0u)
 		{
 			while(m_addQueue.empty() == false)
@@ -78,7 +78,7 @@ template<class T,typename... TARGS>
 	CallbackReturnType LuaCallbackHandler::CallLuaCallbacks(std::string name,T *ret,TARGS ...args)
 {
 	++m_callDepth;
-	ScopeGuard sg([this]() {
+	util::ScopeGuard sg([this]() {
 		if(--m_callDepth == 0u)
 		{
 			while(m_addQueue.empty() == false)
@@ -118,7 +118,7 @@ template<typename... TARGS>
 	util::EventReply LuaCallbackHandler::CallLuaEvents(std::string name,TARGS ...args)
 {
 	++m_callDepth;
-	ScopeGuard sg([this]() {
+	util::ScopeGuard sg([this]() {
 		if(--m_callDepth == 0u)
 		{
 			while(m_addQueue.empty() == false)

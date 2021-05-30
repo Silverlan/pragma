@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/serverstate/serverutil.h"
@@ -28,6 +28,7 @@
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/game/game_lua_entity.hpp>
+#include <udm.hpp>
 
 extern ServerState *server;
 extern EntityClassMap<SBaseEntity> *g_ServerEntityFactories;
@@ -59,6 +60,9 @@ SBaseEntity *SGame::CreateEntity(std::string classname)
 
 void SGame::RemoveEntity(BaseEntity *ent)
 {
+	if(umath::is_flag_set(ent->GetStateFlags(),BaseEntity::StateFlags::Removed))
+		return;
+	ent->SetStateFlag(BaseEntity::StateFlags::Removed);
 	auto *s_ent = static_cast<SBaseEntity*>(ent);
 	if(s_ent->IsShared())
 	{
@@ -119,8 +123,8 @@ void SGame::SpawnEntity(BaseEntity *ent) // Don't call directly
 		auto it = m_preTransitionWorldState.find(globalName);
 		if(it != m_preTransitionWorldState.end())
 		{
-			auto &dsEntity = it->second;
-			ent->Load(dsEntity);
+			udm::LinkedPropertyWrapper udm{*it->second};
+			ent->Load(udm);
 			if(hEnt.IsValid())
 			{
 				// Move global entities by landmark offset between this level and the previous one.
@@ -168,7 +172,6 @@ void SGame::SetupEntity(BaseEntity *ent,unsigned int idx)
 		m_baseEnts.push_back(nullptr);
 	}
 	auto *sEnt = static_cast<SBaseEntity*>(ent);
-	sEnt->SetUniqueIndex(m_nextUniqueEntityIndex++);
 	sEnt->Construct(idx);
 	sEnt->PrecacheModels();
 	auto pSoundEmitterComponent = sEnt->GetComponent<pragma::SSoundEmitterComponent>();

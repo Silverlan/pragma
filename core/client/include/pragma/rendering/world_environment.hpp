@@ -2,13 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __WORLD_ENVIRONMENT_HPP__
 #define __WORLD_ENVIRONMENT_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include <mathutil/color.h>
 #include <mathutil/glmutil.h>
 #include <memory>
 

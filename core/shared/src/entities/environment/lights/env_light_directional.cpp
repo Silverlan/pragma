@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -11,6 +11,7 @@
 #include "pragma/entities/baseentity_events.hpp"
 #include <sharedutils/util.h>
 #include <algorithm>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -35,6 +36,21 @@ void BaseEnvLightDirectionalComponent::Initialize()
 	auto &ent = GetEntity();
 	ent.AddComponent("light");
 	m_netEvSetAmbientColor = SetupNetEvent("set_ambient_color");
+}
+
+void BaseEnvLightDirectionalComponent::Save(udm::LinkedPropertyWrapper &udm)
+{
+	BaseEntityComponent::Save(udm);
+	udm["maxExposure"] = m_maxExposure;
+	udm["ambientColor"] = (*m_ambientColor)->ToVector4();
+}
+void BaseEnvLightDirectionalComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+{
+	BaseEntityComponent::Load(udm,version);
+	udm["maxExposure"](m_maxExposure);
+	Vector4 color;
+	udm["ambientColor"](color);
+	*m_ambientColor = Color{color};
 }
 
 void BaseEnvLightDirectionalComponent::SetAmbientColor(const Color &color) {*m_ambientColor = color;}

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -10,7 +10,7 @@
 #include <pragma/console/s_cvar.h>
 #include <pragma/math/intersection.h>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 // See http://www.randygaul.net/wp-content/uploads/2014/02/RigidBodies_WaterSurface.pdf for surface simulation algorithms
 
@@ -250,8 +250,8 @@ bool PhysWaterSurfaceSimulator::CalcPointSurfaceIntersection(const Vector3 &orig
 	const auto n = Vector3(0,1,0); // TODO
 	double t,u,v;
 	if(
-		Intersection::LineTriangle(origin,n,particlePositions.at(0),particlePositions.at(1),particlePositions.at(2),t,u,v) == true ||
-		Intersection::LineTriangle(origin,n,particlePositions.at(3),particlePositions.at(2),particlePositions.at(1),t,u,v) == true
+		umath::intersection::line_triangle(origin,n,particlePositions.at(0),particlePositions.at(1),particlePositions.at(2),t,u,v) == true ||
+		umath::intersection::line_triangle(origin,n,particlePositions.at(3),particlePositions.at(2),particlePositions.at(1),t,u,v) == true
 	)
 	{
 		intersection = origin +n *static_cast<float>(t);

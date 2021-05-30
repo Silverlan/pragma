@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -11,20 +11,19 @@
 
 extern DLLCLIENT CGame *c_game;
 
-#pragma optimize("",off)
 static auto g_debugPrint = false;
-void pragma::CEyeComponent::UpdateEyeballs()
+void pragma::CEyeComponent::UpdateEyeballsMT()
 {
 	auto mdlC = GetEntity().GetModelComponent();
-	if(mdlC.expired())
+	if(!mdlC)
 		return;
 	auto &mdl = mdlC->GetModel();
 	if(mdl == nullptr)
 		return;
 	auto &eyeballs = mdl->GetEyeballs();
 	for(auto eyeballIndex=decltype(eyeballs.size()){0u};eyeballIndex<eyeballs.size();++eyeballIndex)
-		UpdateEyeball(eyeballs.at(eyeballIndex),eyeballIndex);
-	InvokeEventCallbacks(EVENT_ON_EYEBALLS_UPDATED);
+		UpdateEyeballMT(eyeballs.at(eyeballIndex),eyeballIndex);
+	// InvokeEventCallbacks(EVENT_ON_EYEBALLS_UPDATED);
 }
 
 const pragma::CEyeComponent::EyeballConfig *pragma::CEyeComponent::GetEyeballConfig(uint32_t eyeballIndex) const {return const_cast<CEyeComponent*>(this)->GetEyeballConfig(eyeballIndex);}
@@ -40,31 +39,36 @@ pragma::CEyeComponent::EyeballData *pragma::CEyeComponent::GetEyeballData(uint32
 	return (eyeballIndex < m_eyeballData.size()) ? &m_eyeballData.at(eyeballIndex) : nullptr;
 }
 
+std::optional<umath::Transform> pragma::CEyeComponent::GetEyePose() const
+{
+	auto &ent = GetEntity();
+	if(m_eyeAttachmentIndex == std::numeric_limits<uint32_t>::max())
+		return {};
+	auto mdlC = ent.GetModelComponent();
+	if(!mdlC)
+		return {};
+	Vector3 attPos {};
+	auto attRot = uquat::identity();
+	if(mdlC->GetAttachment(m_eyeAttachmentIndex,&attPos,&attRot) == false)
+		return {};
+	// attRot = uquat::identity();
+	auto attPose = ent.GetPose();
+	attPose *= umath::Transform{attPos,attRot};
+	return attPose;
+}
+
 Vector3 pragma::CEyeComponent::GetViewTarget() const
 {
 	if(m_viewTarget.has_value())
 		return *m_viewTarget;
 	constexpr auto dist = 500.f; // Arbitrary distance; just has to be far enough
-	auto &ent = GetEntity();
-	auto forward = ent.GetForward();
-	auto pos = ent.GetPosition() +forward *dist;
-	if(m_eyeAttachmentIndex != std::numeric_limits<uint32_t>::max())
-	{
-		auto mdlC = ent.GetModelComponent();
-		if(mdlC.valid())
-		{
-			Vector3 attPos {};
-			auto attRot = uquat::identity();
-			if(mdlC->GetAttachment(m_eyeAttachmentIndex,&attPos,&attRot))
-			{
-				umath::Transform attPose;
-				ent.GetPose(attPose);
-				attPose *= umath::Transform{attPos,attRot};
-				pos = attPose.GetOrigin() +uquat::forward(attPose.GetRotation()) *dist;
-			}
-		}
-	}
-	return ClampViewTarget(pos);
+	auto eyePose = GetEyePose();
+	Vector3 viewTarget {};
+	if(eyePose.has_value())
+		viewTarget = eyePose->GetOrigin() +uquat::forward(eyePose->GetRotation()) *dist;
+	else
+		viewTarget = GetEntity().GetPosition() +GetEntity().GetForward() *dist;
+	return ClampViewTarget(viewTarget);
 }
 
 void pragma::CEyeComponent::ClearViewTarget() {m_viewTarget = {};}
@@ -105,8 +109,7 @@ Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 		auto rot = uquat::identity();
 		mdlC->GetAttachment(m_eyeAttachmentIndex,&pos,&rot);
 
-		umath::Transform attPose;
-		GetEntity().GetPose(attPose);
+		auto attPose = GetEntity().GetPose();
 		attPose *= umath::Transform{pos,rot};
 		auto localPos = attPose.GetInverse() *tmp;
 		
@@ -185,6 +188,7 @@ umath::Transform pragma::CEyeComponent::CalcEyeballPose(uint32_t eyeballIndex,um
 	tmp.x = tmp.x +config.eyeShift.x *umath::sign(tmp.x);
 	tmp.y = tmp.y +config.eyeShift.y *umath::sign(tmp.y);
 	tmp.z = tmp.z +config.eyeShift.z *umath::sign(tmp.z);
+	tmp *= GetEntity().GetScale();
 
 	Vector3 bonePos;
 	Quat boneRot;
@@ -203,7 +207,7 @@ bool pragma::CEyeComponent::GetEyeballProjectionVectors(uint32_t eyeballIndex,Ve
 	outProjV = eyeballData->state.irisProjectionV;
 	return true;
 }
-void pragma::CEyeComponent::UpdateEyeball(const Eyeball &eyeball,uint32_t eyeballIndex)
+void pragma::CEyeComponent::UpdateEyeballMT(const Eyeball &eyeball,uint32_t eyeballIndex)
 {
 	if(eyeballIndex >= m_eyeballData.size() || m_animC.expired())
 		return;
@@ -247,20 +251,24 @@ void pragma::CEyeComponent::UpdateEyeball(const Eyeball &eyeball,uint32_t eyebal
 		
 	state.up = uvec::cross(state.right,state.forward);
 	uvec::normalize(&state.up);
-
-	auto scale = (1.0 /eyeball.irisScale) +config.eyeSize;
-	if(scale > 0.0)
-		scale = 1.0 /scale;
+	
+	auto &vScale = GetEntity().GetScale();
+	auto scale = static_cast<float>((1.0 /eyeball.irisScale) +config.eyeSize) *vScale;
+	for(uint8_t i=0;i<3;++i)
+	{
+		if(scale[i] > 0.0)
+			scale[i] = 1.0 /scale[i];
+	}
 
 	auto org = state.origin;
 
-	auto u = state.right *-static_cast<float>(scale);
+	auto u = state.right *-scale;
 	state.irisProjectionU.x = u.x;
 	state.irisProjectionU.y = u.y;
 	state.irisProjectionU.z = u.z;
 	state.irisProjectionU.w = -uvec::dot(org,u);
 
-	auto v = state.up *-static_cast<float>(scale);
+	auto v = state.up *-scale;
 	state.irisProjectionV.x = v.x;
 	state.irisProjectionV.y = v.y;
 	state.irisProjectionV.z = v.z;
@@ -284,4 +292,3 @@ void pragma::CEyeComponent::UpdateEyeball(const Eyeball &eyeball,uint32_t eyebal
 		Con::cout<<"Up: "<<state.up<<Con::endl;
 	}
 }
-#pragma optimize("",on)

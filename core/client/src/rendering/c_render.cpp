@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -19,6 +19,7 @@
 #include <wgui/wgui.h>
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/console/c_cvar.h"
+#include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/entities/components/c_vehicle_component.hpp"
 //#include "shader_gaussianblur.h" // prosper TODO
 #include "pragma/rendering/world_environment.hpp"
@@ -28,6 +29,7 @@
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_hdr.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/rendering/rendersystem.h"
+#include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/lua/luacallback.h>
 #include "pragma/entities/components/c_scene_component.hpp"
@@ -43,6 +45,8 @@
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include "pragma/physics/c_phys_visual_debugger.hpp"
+#include <pragma/console/sh_cmd.h>
+#include <pragma/entities/entity_component_system_t.hpp>
 #include <image/prosper_msaa_texture.hpp>
 #include <image/prosper_render_target.hpp>
 #include <prosper_util.hpp>
@@ -55,7 +59,7 @@
 #include <pragma/physics/visual_debugger.hpp>
 #include <pragma/physics/environment.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
@@ -153,66 +157,75 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState*,ConVar*,int,int val,b
 REGISTER_CONVAR_CALLBACK_CL(debug_physics_draw,[](NetworkState *nw,ConVar *cv,int oldVal,int val) {CVAR_CALLBACK_debug_physics_draw(nw,cv,oldVal,val,false);});
 REGISTER_CONVAR_CALLBACK_CL(sv_debug_physics_draw,[](NetworkState *nw,ConVar *cv,int oldVal,int val) {CVAR_CALLBACK_debug_physics_draw(nw,cv,oldVal,val,true);});
 
-static void CVAR_CALLBACK_debug_render_depth_buffer(NetworkState*,ConVar*,bool,bool val)
+void Console::commands::debug_render_depth_buffer(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;
-	if(dbg == nullptr)
+	if(dbg)
 	{
-		if(val == false)
-			return;
-		dbg = std::make_unique<DebugGameGUI>([]() {
-			auto *scene = c_game->GetScene();
-			auto *renderer = scene ? scene->GetRenderer() : nullptr;
-			if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
-				return WIHandle{};
-			auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
-			auto &wgui = WGUI::GetInstance();
-			
-			auto r = wgui.Create<WIDebugDepthTexture>();
-			r->SetTexture(*rasterizer->GetPrepass().textureDepth,{
-				prosper::PipelineStageFlags::LateFragmentTestsBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit
-			},{
-				prosper::PipelineStageFlags::EarlyFragmentTestsBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit
-			});
-			r->SetShouldResolveImage(true);
-			r->SetSize(1024,1024);
-			r->Update();
-			return r->GetHandle();
-		});
-		auto *d = dbg.get();
-		dbg->AddCallback("PostRenderScene",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([d](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
-			auto *el = d->GetGUIElement();
-			if(el == nullptr)
-				return;
-			static_cast<WIDebugDepthTexture*>(el)->Update();
-		}));
+		dbg = nullptr;
 		return;
 	}
-	else if(val == true)
+	auto &ent = pl->GetEntity();
+	if(ent.IsCharacter() == false)
 		return;
-	dbg = nullptr;
+	auto charComponent = ent.GetCharacterComponent();
+	auto ents = command::find_target_entity(state,*charComponent,argv);
+	EntityHandle hEnt {};
+	if(ents.empty() == false)
+		hEnt = ents.front()->GetHandle();
+	dbg = std::make_unique<DebugGameGUI>([hEnt]() {
+		pragma::CSceneComponent *scene = nullptr;
+		if(hEnt.IsValid())
+		{
+			auto sceneC = hEnt.get()->GetComponent<pragma::CSceneComponent>();
+			if(sceneC.expired())
+			{
+				Con::cwar<<"WARNING: Scene not found!"<<Con::endl;
+				return WIHandle{};
+			}
+			scene = sceneC.get();
+		}
+		else
+			scene = c_game->GetScene();
+		auto *renderer = scene ? scene->GetRenderer() : nullptr;
+		auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+		if(raster.expired())
+			return WIHandle{};
+		auto &wgui = WGUI::GetInstance();
+			
+		auto r = wgui.Create<WIDebugDepthTexture>();
+		r->SetTexture(*raster->GetPrepass().textureDepth,{
+			prosper::PipelineStageFlags::LateFragmentTestsBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit
+		},{
+			prosper::PipelineStageFlags::EarlyFragmentTestsBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit
+		});
+		r->SetShouldResolveImage(true);
+		r->SetSize(1024,1024);
+		r->Update();
+		return r->GetHandle();
+	});
+	auto *d = dbg.get();
+	dbg->AddCallback("PostRenderScene",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([d](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
+		auto *el = d->GetGUIElement();
+		if(el == nullptr)
+			return;
+		static_cast<WIDebugDepthTexture*>(el)->Update();
+	}));
 }
-REGISTER_CONVAR_CALLBACK_CL(debug_render_depth_buffer,CVAR_CALLBACK_debug_render_depth_buffer);
 
 static CVar cvDrawScene = GetClientConVar("render_draw_scene");
 static CVar cvDrawWorld = GetClientConVar("render_draw_world");
+static CVar cvDrawStatic = GetClientConVar("render_draw_static");
+static CVar cvDrawDynamic = GetClientConVar("render_draw_dynamic");
+static CVar cvDrawTranslucent = GetClientConVar("render_draw_translucent");
 static CVar cvClearScene = GetClientConVar("render_clear_scene");
 static CVar cvClearSceneColor = GetClientConVar("render_clear_scene_color");
 static CVar cvParticleQuality = GetClientConVar("cl_render_particle_quality");
 void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 {
-	if(cvDrawScene->GetBool() == false)
-		return;
-	auto drawWorld = cvDrawWorld->GetInt();
-	if(drawWorld == 2)
-		drawSceneInfo.renderFlags &= ~(FRender::Shadows | FRender::Glow);
-	else if(drawWorld == 0)
-		drawSceneInfo.renderFlags &= ~(FRender::Shadows | FRender::Glow | FRender::View | FRender::World | FRender::Skybox);
-
-	if(cvParticleQuality->GetInt() <= 0)
-		drawSceneInfo.renderFlags &= ~FRender::Particles;
-
 	// Update particle systems
+	// TODO: This isn't a good place for this and particle systems should
+	// only be updated if visible (?)
 	EntityIterator itParticles {*this};
 	itParticles.AttachFilter<TEntityIteratorFilterComponent<pragma::CParticleSystemComponent>>();
 	for(auto *ent : itParticles)
@@ -228,11 +241,6 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 		auto *sceneC = GetRenderScene();
 		drawSceneInfo.scene = sceneC ? sceneC->GetHandle<pragma::CSceneComponent>() : util::WeakHandle<pragma::CSceneComponent>{};
 	}
-	if(drawSceneInfo.scene.expired())
-	{
-		auto *sceneC = GetScene();
-		drawSceneInfo.scene = sceneC ? sceneC->GetHandle<pragma::CSceneComponent>() : util::WeakHandle<pragma::CSceneComponent>{};
-	}
 	auto &scene = drawSceneInfo.scene;
 	if(scene.expired())
 	{
@@ -244,40 +252,119 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 		Con::cwar<<"WARNING: Attempted to render invalid scene!"<<Con::endl;
 		return;
 	}
-	auto &drawCmd = drawSceneInfo.commandBuffer;
-	if(cvClearScene->GetBool() == true || drawWorld == 2 || drawSceneInfo.clearColor.has_value())
-	{
-		auto clearCol = drawSceneInfo.clearColor.has_value() ? drawSceneInfo.clearColor->ToVector4() : Color(cvClearSceneColor->GetString()).ToVector4();
-		auto &hdrImg = scene->GetRenderer()->GetSceneTexture()->GetImage();
-		drawCmd->RecordImageBarrier(hdrImg,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferDstOptimal);
-		drawCmd->RecordClearImage(hdrImg,prosper::ImageLayout::TransferDstOptimal,{{clearCol.r,clearCol.g,clearCol.b,clearCol.a}});
-		drawCmd->RecordImageBarrier(hdrImg,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
-	}
+	CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes",std::ref(drawSceneInfo));
+	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes",std::ref(drawSceneInfo));
+	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderScenes",std::ref(drawSceneInfo));
 
-	// Update Exposure
-	auto *renderer = scene->GetRenderer();
-	if(renderer && renderer->IsRasterizationRenderer())
+	if(IsDefaultGameRenderEnabled())
+		QueueForRendering(drawSceneInfo);
+
+	// Note: At this point no changes must be done to the scene whatsoever!
+	// Any change in the scene will result in undefined behavior until this function
+	// has completed execution!
+
+	// We'll queue up building the render queues before we start rendering, so
+	// most of it can be done in the background
+	CallCallbacks("OnRenderScenes");
+	RenderScenes(m_sceneRenderQueue);
+
+	CallCallbacks("PostRenderScenes");
+	CallLuaCallbacks("PostRenderScenes");
+
+	m_sceneRenderQueue.clear();
+}
+
+void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
+{
+	if(cvDrawScene->GetBool() == false)
+		return;
+	auto drawWorld = cvDrawWorld->GetInt();
+	for(auto &cdrawSceneInfo : drawSceneInfos)
 	{
-		//c_engine->StartGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
-		auto frame = c_engine->GetRenderContext().GetLastFrameId();
-		if(frame > 0)
-			static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->GetHDRInfo().UpdateExposure();
-		//c_engine->StopGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
+		auto &drawSceneInfo = const_cast<util::DrawSceneInfo&>(cdrawSceneInfo);
+		if(drawSceneInfo.scene.expired())
+			continue;
+
+		if(drawWorld == 2)
+			drawSceneInfo.renderFlags &= ~(FRender::Shadows | FRender::Glow);
+		else if(drawWorld == 0)
+			drawSceneInfo.renderFlags &= ~(FRender::Shadows | FRender::Glow | FRender::View | FRender::World | FRender::Skybox);
+
+		if(cvDrawStatic->GetBool() == false)
+			drawSceneInfo.renderFlags &= ~FRender::Static;
+		if(cvDrawDynamic->GetBool() == false)
+			drawSceneInfo.renderFlags &= ~FRender::Dynamic;
+		if(cvDrawTranslucent->GetBool() == false)
+			drawSceneInfo.renderFlags &= ~FRender::Translucent;
+
+		if(cvParticleQuality->GetInt() <= 0)
+			drawSceneInfo.renderFlags &= ~FRender::Particles;
+
+		if(drawSceneInfo.commandBuffer == nullptr)
+			drawSceneInfo.commandBuffer = c_engine->GetRenderContext().GetDrawCommandBuffer();
+		// Modify render flags depending on console variables
+		auto &renderFlags = drawSceneInfo.renderFlags;
+		auto drawWorld = cvDrawWorld->GetBool();
+		if(drawWorld == false)
+			umath::set_flag(renderFlags,FRender::World,false);
+
+		auto *pl = c_game->GetLocalPlayer();
+		if(pl == nullptr || pl->IsInFirstPersonMode() == false)
+			umath::set_flag(renderFlags,FRender::View,false);
+
+		drawSceneInfo.scene->BuildRenderQueues(drawSceneInfo);
 	}
 
 	// Update time
 	UpdateShaderTimeData();
 
-	CallCallbacks("PreRenderScenes");
-	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes",std::ref(drawSceneInfo));
-
-	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderScenes",std::ref(drawSceneInfo));
-
-	static auto bSkipCallbacks = false;
-	if(bSkipCallbacks == false)
+	// Initiate the command buffer build threads for all queued scenes.
+	// If we have multiple scenes to render (e.g. left eye and right eye for VR),
+	// the command buffers can all be built in parallel.
+	for(auto &cdrawSceneInfo : drawSceneInfos)
 	{
-		bSkipCallbacks = true;
-		ScopeGuard guard([]() {bSkipCallbacks = false;});
+		auto &drawSceneInfo = const_cast<util::DrawSceneInfo&>(cdrawSceneInfo);
+		if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags,util::DrawSceneInfo::Flags::DisableRender))
+			continue;
+		drawSceneInfo.scene->RecordRenderCommandBuffers(drawSceneInfo);
+	}
+
+	// Render the scenes
+	for(auto &cdrawSceneInfo : drawSceneInfos)
+	{
+		auto &drawSceneInfo = const_cast<util::DrawSceneInfo&>(cdrawSceneInfo);
+		if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags,util::DrawSceneInfo::Flags::DisableRender))
+			continue;
+		auto &scene = drawSceneInfo.scene;
+		auto &drawCmd = drawSceneInfo.commandBuffer;
+		if(drawCmd == nullptr || drawCmd->IsPrimary() == false)
+			continue;
+		auto *primCmd = static_cast<prosper::IPrimaryCommandBuffer*>(drawCmd.get());
+		auto newRecording = !primCmd->IsRecording();
+		if(newRecording)
+			static_cast<prosper::IPrimaryCommandBuffer*>(drawCmd.get())->StartRecording();
+		if(cvClearScene->GetBool() == true || drawWorld == 2 || drawSceneInfo.clearColor.has_value())
+		{
+			auto clearCol = drawSceneInfo.clearColor.has_value() ? drawSceneInfo.clearColor->ToVector4() : Color(cvClearSceneColor->GetString()).ToVector4();
+			auto &hdrImg = scene->GetRenderer()->GetSceneTexture()->GetImage();
+			drawCmd->RecordImageBarrier(hdrImg,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferDstOptimal);
+			drawCmd->RecordClearImage(hdrImg,prosper::ImageLayout::TransferDstOptimal,{{clearCol.r,clearCol.g,clearCol.b,clearCol.a}});
+			drawCmd->RecordImageBarrier(hdrImg,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+		}
+
+		// Update Exposure
+		auto *renderer = scene->GetRenderer();
+		auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+		if(raster.valid())
+		{
+			//c_engine->StartGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
+			auto frame = c_engine->GetRenderContext().GetLastFrameId();
+			if(frame > 0)
+				raster->GetHDRInfo().UpdateExposure();
+			//c_engine->StopGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
+		}
+		// TODO
+#if 0
 		auto ret = false;
 		m_bMainRenderPass = false;
 
@@ -298,10 +385,15 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 		}
 		else
 			m_bMainRenderPass = true;
+#endif
+		RenderScene(drawSceneInfo);
+		if(newRecording)
+			static_cast<prosper::IPrimaryCommandBuffer*>(drawCmd.get())->StopRecording();
 	}
-	RenderScene(drawSceneInfo);
-	CallCallbacks("PostRenderScenes");
-	CallLuaCallbacks("PostRenderScenes");
+	m_renderQueueBuilder->Flush();
+
+	// At this point all render threads (render queue and command buffer builders) are guaranteed
+	// to have completed their work for this frame. The scene is now safe for writing again.
 }
 
 bool CGame::IsInMainRenderPass() const {return m_bMainRenderPass;}

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -19,10 +19,11 @@
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#include <prosper_command_buffer.hpp>
 
 REGISTER_PARTICLE_RENDERER(model,CParticleRendererModel);
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
@@ -68,7 +69,7 @@ void CParticleRendererModel::Initialize(pragma::CParticleSystemComponent &pSyste
 		return pSystem.GetEntity().AddComponent<pragma::CAnimatedComponent>(true);
 	};
 
-	if(s_rendererCount++ == 0 && pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE.IsValid())
+	if(s_rendererCount++ == 0 && pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE.IsValid())
 	{
 		pragma::ShaderEntity::InstanceData instanceData {umat::identity(),Vector4(1.f,1.f,1.f,1.f),pragma::ShaderEntity::InstanceData::RenderFlags::None};
 		prosper::util::BufferCreateInfo createInfo {};
@@ -76,7 +77,7 @@ void CParticleRendererModel::Initialize(pragma::CParticleSystemComponent &pSyste
 		createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 
-		s_instanceDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
+		s_instanceDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
 		s_instanceBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,&instanceData);
 		s_instanceDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(
 			*s_instanceBuffer,0u
@@ -96,20 +97,20 @@ void CParticleRendererModel::Initialize(pragma::CParticleSystemComponent &pSyste
 		for(auto i=decltype(maxParticles){0u};i<maxParticles;++i)
 			m_particleComponents.push_back(ParticleModelComponent{fCreateAnimatedComponent(),nullptr});
 	}
-	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE.IsValid())
+	if(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE.IsValid())
 	{
 		for(auto &ptComponent : m_particleComponents)
 		{
 			auto wpBoneBuffer = ptComponent.animatedComponent->GetBoneBuffer();
-			if(wpBoneBuffer.expired() == false)
+			if(wpBoneBuffer)
 			{
 				// If we are animated, we have to create a unique descriptor set
-				ptComponent.instanceDescSetGroupAnimated = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
+				ptComponent.instanceDescSetGroupAnimated = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
 				ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet()->SetBindingUniformBuffer(
 					*s_instanceBufferAnimated,0u
 				);
 				ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet()->SetBindingUniformBuffer(
-					*wpBoneBuffer.lock(),umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::BoneMatrices)
+					const_cast<prosper::IBuffer&>(*wpBoneBuffer),umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices)
 				);
 			}
 		}
@@ -182,12 +183,12 @@ bool CParticleRendererModel::Update()
 	auto &posCam = cam->GetEntity().GetPosition();
 	auto &renderBounds = GetParticleSystem().GetRenderBounds();
 	Vector3 p;
-	Geometry::ClosestPointOnAABBToPoint(renderBounds.first,renderBounds.second,posCam,&p);
+	umath::geometry::closest_point_on_aabb_to_point(renderBounds.first,renderBounds.second,posCam,&p);
 	auto dist = uvec::distance(posCam,p);
 
 	auto bSuccessful = true;
 	auto mdlComponent = GetParticleSystem().GetEntity().GetModelComponent();
-	if(mdlComponent.valid() && mdlComponent->HasModel())
+	if(mdlComponent && mdlComponent->HasModel())
 	{
 		auto &mdl = mdlComponent->GetModel();
 		auto lod = c_game->GetLOD(dist,mdl->GetLODCount());
@@ -198,7 +199,7 @@ bool CParticleRendererModel::Update()
 	return bSuccessful;
 }
 
-void CParticleRendererModel::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags)
+void CParticleRendererModel::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::ParticleRenderFlags renderFlags)
 {
 	if(m_shader.expired())
 		return;
@@ -217,7 +218,7 @@ void CParticleRendererModel::Render(const std::shared_ptr<prosper::IPrimaryComma
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 
 	auto mdlComponent = GetParticleSystem().GetEntity().GetModelComponent();
-	if(mdlComponent.valid() && mdlComponent->HasModel())
+	if(mdlComponent && mdlComponent->HasModel())
 	{
 		auto &mdl = *mdlComponent->GetModel();
 		auto &materials = mdl.GetMaterials();
@@ -260,7 +261,7 @@ void CParticleRendererModel::Render(const std::shared_ptr<prosper::IPrimaryComma
 	shader->EndDraw();
 }
 
-void CParticleRendererModel::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
+void CParticleRendererModel::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent &light,uint32_t layerId)
 {
 	/*if(s_instanceDescSet == nullptr)
 		return;

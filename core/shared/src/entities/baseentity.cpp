@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -24,20 +24,20 @@ bool BaseEntity::IsStatic() const
 {
 	if(GetAnimatedComponent().valid())
 		return false;
-	auto physComponent = GetPhysicsComponent();
-	auto type = physComponent.valid() ? physComponent->GetPhysicsType() : PHYSICSTYPE::NONE;
+	auto *physComponent = GetPhysicsComponent();
+	auto type = physComponent ? physComponent->GetPhysicsType() : PHYSICSTYPE::NONE;
 	return (type == PHYSICSTYPE::NONE || type == PHYSICSTYPE::STATIC) ? true : false;
 }
 bool BaseEntity::IsDynamic() const {return !IsStatic();}
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 Con::c_cout& BaseEntity::print(Con::c_cout &os)
 {
 	auto *componentManager = GetComponentManager();
 	auto pNameComponent = componentManager ? static_cast<pragma::BaseNameComponent*>(FindComponent("name").get()) : nullptr;
 	os<<"Entity["<<m_index<<"]["<<GetLocalIndex()<<"]["<<GetClass()<<"]["<<(pNameComponent != nullptr ? pNameComponent->GetName() : "")<<"][";
-	auto mdlComponent = componentManager ? GetModelComponent() : util::WeakHandle<pragma::BaseModelComponent>{};
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto mdlComponent = componentManager ? GetModelComponent() : nullptr;
+	auto hMdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 	if(hMdl == nullptr)
 		os<<"NULL";
 	else
@@ -51,7 +51,7 @@ std::ostream& BaseEntity::print(std::ostream &os)
 	auto pNameComponent = static_cast<pragma::BaseNameComponent*>(FindComponent("name").get());
 	os<<"Entity["<<m_index<<"]["<<GetLocalIndex()<<"]["<<GetClass()<<"]["<<(pNameComponent != nullptr ? pNameComponent->GetName() : "")<<"][";
 	auto mdlComponent = GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto hMdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 	if(hMdl == nullptr)
 		os<<"NULL";
 	else
@@ -65,7 +65,7 @@ pragma::ComponentEventId BaseEntity::EVENT_ON_SPAWN = pragma::INVALID_COMPONENT_
 pragma::ComponentEventId BaseEntity::EVENT_ON_POST_SPAWN = pragma::INVALID_COMPONENT_ID;
 pragma::ComponentEventId BaseEntity::EVENT_ON_REMOVE = pragma::INVALID_COMPONENT_ID;
 BaseEntity::BaseEntity()
-	: pragma::BaseEntityComponentSystem(),LuaObj<EntityHandle>()
+	: pragma::BaseEntityComponentSystem(),LuaObj<EntityHandle>(),m_uuid{util::generate_uuid_v4()}
 {}
 pragma::NetEventId BaseEntity::FindNetEvent(const std::string &name) const
 {
@@ -107,8 +107,6 @@ bool BaseEntity::IsMapEntity() const
 	auto *mapComponent = static_cast<pragma::MapComponent*>(FindComponent("map").get());
 	return mapComponent != nullptr && mapComponent->GetMapIndex() != 0;
 }
-uint64_t BaseEntity::GetUniqueIndex() const {return m_uniqueIndex;}
-void BaseEntity::SetUniqueIndex(uint64_t idx) {m_uniqueIndex = idx;}
 
 void BaseEntity::RemoveEntityOnRemoval(BaseEntity *ent,Bool bRemove) {RemoveEntityOnRemoval(ent->GetHandle(),bRemove);}
 void BaseEntity::RemoveEntityOnRemoval(const EntityHandle &hEnt,Bool bRemove)
@@ -137,6 +135,8 @@ void BaseEntity::SetKeyValue(std::string key,std::string val)
 		return;
 	if(key == "spawnflags")
 		m_spawnFlags = util::to_int(val);
+	else if(key == "uuid")
+		m_uuid = util::uuid_string_to_bytes(val);
 }
 void BaseEntity::SetSpawnFlags(uint32_t spawnFlags) {m_spawnFlags = spawnFlags;}
 unsigned int BaseEntity::GetSpawnFlags() const {return m_spawnFlags;}
@@ -178,18 +178,13 @@ void BaseEntity::Initialize()
 
 std::string BaseEntity::GetClass() const {return m_class;}
 
-void BaseEntity::GetPose(umath::Transform &outTransform) const
-{
-	outTransform = {GetPosition(),GetRotation()};
-}
 void BaseEntity::SetPose(const umath::Transform &outTransform)
 {
+	auto trComponent = GetTransformComponent();
+	if(!trComponent)
+		return;
 	SetPosition(outTransform.GetOrigin());
 	SetRotation(outTransform.GetRotation());
-}
-void BaseEntity::GetPose(umath::ScaledTransform &outTransform) const
-{
-	outTransform = {GetPosition(),GetRotation(),GetScale()};
 }
 void BaseEntity::SetPose(const umath::ScaledTransform &outTransform)
 {
@@ -197,45 +192,54 @@ void BaseEntity::SetPose(const umath::ScaledTransform &outTransform)
 	SetRotation(outTransform.GetRotation());
 	SetScale(outTransform.GetScale());
 }
+const umath::ScaledTransform &BaseEntity::GetPose() const
+{
+	if(!m_transformComponent)
+	{
+		static umath::ScaledTransform defaultPose {};
+		return defaultPose;
+	}
+	return m_transformComponent->GetPose();
+}
 const Vector3 &BaseEntity::GetPosition() const
 {
 	auto trComponent = GetTransformComponent();
-	if(trComponent.expired())
+	if(!trComponent)
 		return uvec::ORIGIN;
 	return trComponent->GetPosition();
 }
 void BaseEntity::SetPosition(const Vector3 &pos)
 {
 	auto trComponent = GetTransformComponent();
-	if(trComponent.expired())
+	if(!trComponent)
 		return;
 	trComponent->SetPosition(pos);
 }
 Vector3 BaseEntity::GetCenter() const
 {
 	auto physComponent = GetPhysicsComponent();
-	if(physComponent.expired())
+	if(!physComponent)
 		return GetPosition();
 	return physComponent->GetCenter();
 }
 const Quat &BaseEntity::GetRotation() const
 {
 	auto trComponent = GetTransformComponent();
-	if(trComponent.expired())
+	if(!trComponent)
 		return uquat::UNIT;
-	return trComponent->GetOrientation();
+	return trComponent->GetRotation();
 }
 void BaseEntity::SetRotation(const Quat &rot)
 {
 	auto trComponent = GetTransformComponent();
-	if(trComponent.expired())
+	if(!trComponent)
 		return;
-	trComponent->SetOrientation(rot);
+	trComponent->SetRotation(rot);
 }
 const Vector3 &BaseEntity::GetScale() const
 {
 	auto trComponent = GetTransformComponent();
-	if(trComponent.expired())
+	if(!trComponent)
 	{
 		static Vector3 defaultScale {1.f,1.f,1.f};
 		return defaultScale;
@@ -245,21 +249,9 @@ const Vector3 &BaseEntity::GetScale() const
 void BaseEntity::SetScale(const Vector3 &scale)
 {
 	auto trComponent = GetTransformComponent();
-	if(trComponent.expired())
+	if(!trComponent)
 		return;
 	trComponent->SetScale(scale);
-}
-
-void BaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
-{
-	pragma::BaseEntityComponentSystem::OnComponentAdded(component);
-	auto *ptrTransformComponent = dynamic_cast<pragma::BaseTransformComponent*>(&component);
-	if(ptrTransformComponent != nullptr)
-		m_transformComponent = std::static_pointer_cast<pragma::BaseTransformComponent>(ptrTransformComponent->shared_from_this());
-}
-void BaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
-{
-	pragma::BaseEntityComponentSystem::OnComponentRemoved(component);
 }
 
 void BaseEntity::DoSpawn()
@@ -291,19 +283,22 @@ bool BaseEntity::IsInert() const
 	if(IsStatic() == true)
 		return true;
 	auto pPhysComponent = GetPhysicsComponent();
-	auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	return (phys != nullptr && phys->IsSleeping()) ? true : false;
 }
 
 unsigned int BaseEntity::GetIndex() const {return m_index;}
 uint32_t BaseEntity::GetLocalIndex() const {return GetIndex();}
 
-bool BaseEntity::IsWorld() const {return false;}
+bool BaseEntity::IsWorld() const {return umath::is_flag_set(m_stateFlags,StateFlags::HasWorldComponent);}
 bool BaseEntity::IsScripted() const {return false;}
 
 void BaseEntity::PrecacheModels() {}
 
-util::WeakHandle<pragma::BaseTransformComponent> BaseEntity::GetTransformComponent() const {return m_transformComponent.expired() ? nullptr : m_transformComponent.lock();}
+pragma::BaseTransformComponent *BaseEntity::GetTransformComponent() const {return m_transformComponent;}
+pragma::BasePhysicsComponent *BaseEntity::GetPhysicsComponent() const {return m_physicsComponent;}
+pragma::BaseModelComponent *BaseEntity::GetModelComponent() const {return m_modelComponent;}
+pragma::BaseGenericComponent *BaseEntity::GetGenericComponent() const {return m_genericComponent;}
 
 void BaseEntity::Remove() {}
 void BaseEntity::RemoveSafely() {GetNetworkState()->GetGameState()->ScheduleEntityForRemoval(*this);}

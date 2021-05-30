@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __BASE_CHARACTER_COMPONENT_HPP__
 #define __BASE_CHARACTER_COMPONENT_HPP__
@@ -158,6 +158,8 @@ namespace pragma
 
 		virtual void SetCharacterOrientation(const Vector3 &up);
 
+		virtual void OnTick(double tDelta) override;
+
 		const util::PVector3Property &GetUpDirectionProperty() const;
 		const Vector3 &GetUpDirection() const;
 		virtual void SetUpDirection(const Vector3 &direction);
@@ -260,7 +262,6 @@ namespace pragma
 		virtual float CalcAirMovementModifier() const;
 		virtual float CalcMovementAcceleration() const;
 		virtual Vector3 CalcMovementDirection(const Vector3 &forward,const Vector3 &right) const;
-		virtual void Think(double tDelta);
 		void UpdateNeckControllers();
 
 		virtual void UpdateOrientation();

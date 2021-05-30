@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -27,7 +27,6 @@
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_observable_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
-#include "pragma/entities/components/logic_component.hpp"
 #include "pragma/model/model.h"
 
 using namespace pragma;
@@ -66,7 +65,7 @@ bool BaseAIComponent::TurnStep(const Vector3 &target,float &turnAngle,const floa
 	}
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(!pTrComponent)
 		return true;
 	auto *nw = ent.GetNetworkState();
 	auto *game = nw->GetGameState();
@@ -81,8 +80,8 @@ bool BaseAIComponent::TurnStep(const Vector3 &target,float &turnAngle,const floa
 	auto speedMax = static_cast<double>((turnSpeed != nullptr) ? *turnSpeed : (charComponent.valid() ? charComponent->GetTurnSpeed() : 100.f)) *game->DeltaTickTime();
 	Vector2 rotAm = {};
 	const Vector2 pitchLimit {0.f,0.f};
-	auto newRot = uquat::approach_direction(pTrComponent->GetOrientation(),charComponent.valid() ? charComponent->GetUpDirection() : uvec::UP,dir,Vector2(speedMax,speedMax),&rotAm,&pitchLimit);
-	pTrComponent->SetOrientation(newRot);
+	auto newRot = uquat::approach_direction(pTrComponent->GetRotation(),charComponent.valid() ? charComponent->GetUpDirection() : uvec::UP,dir,Vector2(speedMax,speedMax),&rotAm,&pitchLimit);
+	pTrComponent->SetRotation(newRot);
 	return (umath::abs(rotAm.y) <= speedMax) ? true : false;
 
 	// Deprecated if the above code works properly
@@ -231,9 +230,6 @@ void BaseAIComponent::Initialize()
 		if(&animInfo == &animComponent->GetBaseAnimationInfo()) // Only apply for base animation, not for gestures
 			BaseAIComponent::BlendAnimationMovement(evDataBlend.bonePoses,evDataBlend.boneScales);
 	});
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		Think(static_cast<CEOnTick&>(evData.get()).deltaTime);
-	});
 	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		OnPhysicsInitialized();
 	});
@@ -246,7 +242,8 @@ void BaseAIComponent::Initialize()
 	auto *pCharComponent = static_cast<BaseCharacterComponent*>(ent.AddComponent("character").get());
 	if(pCharComponent != nullptr)
 		pCharComponent->SetTurnSpeed(160.f);
-	ent.AddComponent<LogicComponent>();
+
+	SetTickPolicy(TickPolicy::Always);
 }
 
 void BaseAIComponent::OnEntitySpawn()
@@ -304,14 +301,14 @@ void BaseAIComponent::OnPhysicsInitialized()
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent)
 		pPhysComponent->AddCollisionFilter(CollisionMask::NPC);
 }
 
 void BaseAIComponent::Spawn()
 {}
 
-void BaseAIComponent::Think(double tDelta)
+void BaseAIComponent::OnTick(double tDelta)
 {
 	UpdatePath();
 	LookAtStep(tDelta);

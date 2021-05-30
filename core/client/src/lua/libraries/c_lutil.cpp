@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -24,10 +24,11 @@
 #include <pragma/asset_types/world.hpp>
 #include <pragma/model/model.h>
 #include <util_image_buffer.hpp>
+#include <prosper_window.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 
 int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua_State *l)
@@ -37,9 +38,9 @@ int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua_State *l)
 		return Lua::util::calc_world_direction_from_2d_coordinates(l);
 	auto &hCam = *Lua::CheckCCamera(l,arg++);
 	auto trComponent = hCam->GetEntity().GetTransformComponent();
-	auto &forward = trComponent.valid() ? trComponent->GetForward() : uvec::FORWARD;
-	auto &right = trComponent.valid() ? trComponent->GetRight() : uvec::RIGHT;
-	auto &up = trComponent.valid() ? trComponent->GetUp() : uvec::UP;
+	auto forward = trComponent ? trComponent->GetForward() : uvec::FORWARD;
+	auto right = trComponent ? trComponent->GetRight() : uvec::RIGHT;
+	auto up = trComponent ? trComponent->GetUp() : uvec::UP;
 	auto *uv = Lua::CheckVector2(l,arg++);
 	auto dir = uvec::calc_world_direction_from_2d_coordinates(forward,right,up,hCam->GetFOVRad(),hCam->GetNearZ(),hCam->GetFarZ(),hCam->GetAspectRatio(),0.f,0.f,*uv);
 	Lua::Push<Vector3>(l,dir);
@@ -88,7 +89,7 @@ int Lua::util::Client::create_muzzle_flash(lua_State *l)
 		if(pt == nullptr)
 			return 0;
 		auto pRenderComponent = static_cast<CBaseEntity*>(ent)->GetRenderComponent();
-		if(pRenderComponent.valid())
+		if(pRenderComponent)
 			pt->SetRenderMode(pRenderComponent->GetRenderMode());
 		pt->GetEntity().SetKeyValue("transform_with_emitter","1");
 		pt->SetRemoveOnComplete(true);
@@ -116,10 +117,10 @@ int Lua::util::Client::create_muzzle_flash(lua_State *l)
 	if(pt == nullptr)
 		return 0;
 	auto pTrComponent = pt->GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 	{
 		pTrComponent->SetPosition(pos);
-		pTrComponent->SetOrientation(rot);
+		pTrComponent->SetRotation(rot);
 	}
 	pt->SetRemoveOnComplete(true);
 	pt->Start();
@@ -275,5 +276,5 @@ int Lua::util::Client::export_material(lua_State *l)
 	return 2;
 }
 
-std::string Lua::util::Client::get_clipboard_string() {return c_engine->GetWindow().GetClipboardString();}
-void Lua::util::Client::set_clipboard_string(const std::string &str) {c_engine->GetWindow().SetClipboardString(str);}
+std::string Lua::util::Client::get_clipboard_string() {return c_engine->GetWindow()->GetClipboardString();}
+void Lua::util::Client::set_clipboard_string(const std::string &str) {c_engine->GetWindow()->SetClipboardString(str);}

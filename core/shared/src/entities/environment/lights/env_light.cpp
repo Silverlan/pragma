@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -15,6 +15,7 @@
 #include "pragma/entities/environment/lights/env_light_point.h"
 #include "pragma/entities/environment/lights/env_light_directional.h"
 #include "pragma/entities/baseentity_events.hpp"
+#include <udm.hpp>
 #include <algorithm>
 
 using namespace pragma;
@@ -62,6 +63,25 @@ void BaseEnvLightComponent::Initialize()
 	ent.AddComponent("color");
 	m_netEvSetShadowType = SetupNetEvent("set_shadow_type");
 	m_netEvSetFalloffExponent = SetupNetEvent("set_falloff_exponent");
+}
+
+void BaseEnvLightComponent::Save(udm::LinkedPropertyWrapper &udm)
+{
+	BaseEntityComponent::Save(udm);
+	udm["lightType"] = m_lightType;
+	udm["shadowType"] = m_shadowType;
+	udm["falloffExponent"] = m_falloffExponent;
+	udm["lightIntensityType"] = m_lightIntensityType;
+	udm["lightIntensity"] = m_lightIntensity;
+}
+void BaseEnvLightComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+{
+	BaseEntityComponent::Load(udm,version);
+	udm["lightType"](m_lightType);
+	udm["shadowType"](m_shadowType);
+	udm["falloffExponent"](m_falloffExponent);
+	udm["lightIntensityType"](m_lightIntensityType);
+	udm["lightIntensity"](m_lightIntensity);
 }
 void BaseEnvLightComponent::OnEntitySpawn()
 {

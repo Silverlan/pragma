@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -25,7 +25,7 @@
 #include <assimp/IOSystem.hpp>
 #include <assimp/IOStream.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 
 int Lua::import::import_wad(lua_State *l)
@@ -39,11 +39,11 @@ int Lua::import::import_wad(lua_State *l)
 		Lua::PushBool(l,false);
 		return 1;
 	}
-	auto anim = Animation::Create();
+	auto anim = pragma::animation::Animation::Create();
 	auto version = f.Read<uint16_t>();
 	auto flags = f.Read<uint32_t>();
 	auto numBones = f.Read<uint32_t>();
-	std::vector<uint32_t> boneList;
+	std::vector<uint16_t> boneList;
 	boneList.reserve(numBones);
 	for(auto i=decltype(numBones){0};i<numBones;++i)
 	{
@@ -66,7 +66,7 @@ int Lua::import::import_wad(lua_State *l)
 		anim->AddFrame(frame);
 	}
 	anim->Localize(skeleton);
-	Lua::Push<std::shared_ptr<Animation>>(l,anim);
+	Lua::Push<std::shared_ptr<pragma::animation::Animation>>(l,anim);
 	return 1;
 }
 int Lua::import::import_wrci(lua_State *l)

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_ENV_SHADOW_CSM_HPP__
@@ -16,7 +16,7 @@
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <mathutil/boundingvolume.h>
-#include <pragma/math/plane.h>
+#include <mathutil/plane.hpp>
 
 class ModelSubMesh;
 namespace prosper {class PrimaryCommandBuffer;};
@@ -34,7 +34,7 @@ namespace pragma
 		Frustum();
 		FrustumSplit split = {};
 		std::vector<Vector3> points;
-		std::vector<Plane> planes;
+		std::vector<umath::Plane> planes;
 		Vector3 bounds[2] = {{},{}};
 		Mat4 projection = umat::identity();
 		Mat4 viewProjection = umat::identity();

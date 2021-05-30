@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __ENV_LIGHT_SPOT_H__
 #define __ENV_LIGHT_SPOT_H__
@@ -35,7 +35,10 @@ namespace pragma
 
 		virtual void SetConeStartOffset(float offset);
 		float GetConeStartOffset() const;
+
+		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
 	protected:
+		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
 		util::PFloatProperty m_angInnerCutoff = nullptr;
 		util::PFloatProperty m_angOuterCutoff = nullptr;
 		util::PFloatProperty m_coneStartOffset = nullptr;

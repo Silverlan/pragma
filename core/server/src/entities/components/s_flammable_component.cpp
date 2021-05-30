@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_flammable_component.hpp"
@@ -42,7 +42,7 @@ void SFlammableComponent::ApplyIgnitionDamage()
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pDamageableComponent = ent.GetComponent<pragma::DamageableComponent>();
-	if(pTrComponent.expired() || pDamageableComponent.expired())
+	if(pTrComponent == nullptr || pDamageableComponent.expired())
 		return;
 	auto pos = ent.GetCenter();
 	DamageInfo info {};

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/debug/debugoverlay.h"
@@ -10,7 +10,7 @@
 #include <pragma/serverstate/serverstate.h>
 #include <pragma/math/angle/wvangle.h>
 #include <pragma/networking/nwm_util.h>
-#include <pragma/math/plane.h>
+#include <mathutil/plane.hpp>
 
 extern DLLSERVER ServerState *server;
 
@@ -169,4 +169,4 @@ void SDebugRenderer::DrawPlane(const Vector3 &n,float dist,const Color &color,fl
 	p->Write<float>(duration);
 	server->SendPacket("debug_drawplane",p,pragma::networking::Protocol::FastUnreliable);
 }
-void SDebugRenderer::DrawPlane(const Plane &plane,const Color &color,float duration) {DrawPlane(const_cast<Plane&>(plane).GetNormal(),static_cast<float>(plane.GetDistance()),color,duration);}
+void SDebugRenderer::DrawPlane(const umath::Plane &plane,const Color &color,float duration) {DrawPlane(const_cast<umath::Plane&>(plane).GetNormal(),static_cast<float>(plane.GetDistance()),color,duration);}

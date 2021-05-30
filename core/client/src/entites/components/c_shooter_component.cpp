@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -73,13 +73,13 @@ void CShooterComponent::FireBullets(const BulletInfo &bulletInfo,const Vector3 &
 							if(pt != nullptr)
 							{
 								auto pTrComponent = pt->GetEntity().GetTransformComponent();
-								if(pTrComponent.valid())
+								if(pTrComponent != nullptr)
 								{
 									pTrComponent->SetPosition(result.position);
 
 									auto ang = uvec::to_angle(result.normal);
 									auto rot = uquat::create(ang);
-									pTrComponent->SetOrientation(rot);
+									pTrComponent->SetRotation(rot);
 								}
 								pt->SetRemoveOnComplete(true);
 								pt->GetEntity().Spawn();
@@ -118,7 +118,7 @@ void CShooterComponent::FireBullets(const BulletInfo &bulletInfo,std::vector<Tra
 	Vector3 effectsOrigin {};
 	OnFireBullets(bulletInfo,origin,dir,&effectsOrigin);
 
-	ScopeGuard sg([this]() {
+	util::ScopeGuard sg([this]() {
 		m_nextBullet = nullptr;
 	});
 

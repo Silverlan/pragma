@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -16,7 +16,6 @@
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/base_render_component.hpp"
 #include "pragma/entities/components/base_ownable_component.hpp"
-#include "pragma/entities/components/logic_component.hpp"
 #include "pragma/util/bulletinfo.h"
 
 using namespace pragma;
@@ -73,7 +72,7 @@ void BaseWeaponComponent::OnPhysicsInitialized()
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(!pPhysComponent)
 		return;
 	pPhysComponent->AddCollisionFilter(CollisionMask::Item);
 	pPhysComponent->SetCollisionFilterGroup(pPhysComponent->GetCollisionFilter() | CollisionMask::Item);
@@ -85,7 +84,7 @@ void BaseWeaponComponent::OnFireBullets(const BulletInfo &bulletInfo,Vector3 &bu
 	if(owner != nullptr)
 	{
 		auto pTrComponent = owner->GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent)
 		{
 			bulletOrigin = pTrComponent->GetEyePosition(); // TODO ShootPos?
 			bulletDir = pTrComponent->GetForward(); // TODO View Forward
@@ -96,10 +95,10 @@ void BaseWeaponComponent::OnFireBullets(const BulletInfo &bulletInfo,Vector3 &bu
 		auto rot = uquat::identity();
 		auto &ent = GetEntity();
 		auto mdlC = ent.GetModelComponent();
-		if(mdlC.valid() && mdlC->GetAttachment(m_attMuzzle,static_cast<Vector3*>(nullptr),&rot) == true)
+		if(mdlC && mdlC->GetAttachment(m_attMuzzle,static_cast<Vector3*>(nullptr),&rot) == true)
 		{
 			auto pTrComponent = ent.GetTransformComponent();
-			if(pTrComponent.valid())
+			if(pTrComponent)
 				pTrComponent->LocalToWorld(&rot);
 			bulletDir = uquat::forward(rot);
 		}
@@ -114,7 +113,14 @@ void BaseWeaponComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 		m_whOwnerComponent = pOwnerComponent->GetHandle<BaseOwnableComponent>();
 }
 
-void BaseWeaponComponent::Think(double)
+void BaseWeaponComponent::UpdateTickPolicy()
+{
+	auto *owner = m_whOwnerComponent.valid() ? m_whOwnerComponent->GetOwner() : nullptr;
+	auto shouldTick = (m_bInAttack1 == true || m_bInAttack2 == true) && owner != nullptr;
+	SetTickPolicy(shouldTick ? TickPolicy::Always : TickPolicy::Never);
+}
+
+void BaseWeaponComponent::OnTick(double)
 {
 	auto *owner = m_whOwnerComponent.valid() ? m_whOwnerComponent->GetOwner() : nullptr;
 	if((m_bInAttack1 == true || m_bInAttack2 == true) && owner != nullptr)
@@ -132,6 +138,7 @@ void BaseWeaponComponent::Think(double)
 				else
 				{
 					m_bInAttack1 = false;
+					UpdateTickPolicy();
 					EndPrimaryAttack();
 				}
 			}
@@ -145,6 +152,7 @@ void BaseWeaponComponent::Think(double)
 				else
 				{
 					m_bInAttack2 = true;
+					UpdateTickPolicy();
 					EndSecondaryAttack();
 				}
 			}
@@ -175,12 +183,14 @@ void BaseWeaponComponent::EndAttack()
 void BaseWeaponComponent::EndPrimaryAttack()
 {
 	m_bInAttack1 = false;
+	UpdateTickPolicy();
 
 	BroadcastEvent(EVENT_ON_END_PRIMARY_ATTACK);
 }
 void BaseWeaponComponent::EndSecondaryAttack()
 {
 	m_bInAttack2 = false;
+	UpdateTickPolicy();
 
 	BroadcastEvent(EVENT_ON_END_SECONDARY_ATTACK);
 }
@@ -189,13 +199,19 @@ void BaseWeaponComponent::SetAutomaticPrimary(bool b)
 {
 	m_bAutomaticPrimary = b;
 	if(b == false)
+	{
 		m_bInAttack1 = false;
+		UpdateTickPolicy();
+	}
 }
 void BaseWeaponComponent::SetAutomaticSecondary(bool b)
 {
 	m_bAutomaticSecondary = b;
 	if(b == false)
+	{
 		m_bInAttack2 = false;
+		UpdateTickPolicy();
+	}
 }
 bool BaseWeaponComponent::IsAutomaticPrimary() const {return m_bAutomaticPrimary;}
 bool BaseWeaponComponent::IsAutomaticSecondary() const {return m_bAutomaticSecondary;}
@@ -221,16 +237,13 @@ void BaseWeaponComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		Think(static_cast<pragma::CEOnTick&>(evData.get()).deltaTime);
-	});
 	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		OnPhysicsInitialized();
 	});
 	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &ent = GetEntity();
 		auto mdlComponent = ent.GetModelComponent();
-		m_attMuzzle = mdlComponent.valid() ? mdlComponent->LookupAttachment("muzzle") : -1;
+		m_attMuzzle = mdlComponent ? mdlComponent->LookupAttachment("muzzle") : -1;
 	});
 	BindEventUnhandled(BaseShooterComponent::EVENT_ON_FIRE_BULLETS,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &evDataOnFireBullets = static_cast<pragma::CEOnFireBullets&>(evData.get());
@@ -240,7 +253,7 @@ void BaseWeaponComponent::Initialize()
 		auto &ownerChangedData = static_cast<pragma::CEOnOwnerChanged&>(evData.get());
 		auto &ent = GetEntity();
 		auto ptrPhysComponent = ent.GetPhysicsComponent();
-		if(ptrPhysComponent.valid())
+		if(ptrPhysComponent)
 			ptrPhysComponent->DestroyPhysicsObject();
 		if(ownerChangedData.newOwner == nullptr)
 			EndAttack();
@@ -279,7 +292,10 @@ void BaseWeaponComponent::Holster()
 void BaseWeaponComponent::PrimaryAttack()
 {
 	if(IsAutomaticPrimary())
+	{
 		m_bInAttack1 = true;
+		UpdateTickPolicy();
+	}
 	
 	BroadcastEvent(EVENT_ON_PRIMARY_ATTACK);
 }
@@ -287,7 +303,10 @@ void BaseWeaponComponent::PrimaryAttack()
 void BaseWeaponComponent::SecondaryAttack()
 {
 	if(IsAutomaticSecondary())
+	{
 		m_bInAttack2 = true;
+		UpdateTickPolicy();
+	}
 
 	BroadcastEvent(EVENT_ON_SECONDARY_ATTACK);
 }

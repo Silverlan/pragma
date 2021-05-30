@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __S_MODEL_COMPONENT_HPP__
 #define __S_MODEL_COMPONENT_HPP__
@@ -27,6 +27,7 @@ namespace pragma
 		using BaseModelComponent::SetModel;
 		virtual bool SetBodyGroup(UInt32 groupId,UInt32 id) override;
 		virtual void SetSkin(unsigned int skin) override;
+		virtual void SetMaxDrawDistance(float maxDist) override;
 	protected:
 		virtual void OnModelChanged(const std::shared_ptr<Model> &model) override;
 	};

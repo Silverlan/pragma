@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -12,6 +12,7 @@
 #include "pragma/entities/baseentity_events.hpp"
 #include <pragma/entities/entity_iterator.hpp>
 #include <algorithm>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -41,6 +42,21 @@ void BaseEnvLightSpotComponent::Initialize()
 	ent.AddComponent("radius");
 	ent.AddComponent("point_at_target");
 	m_netEvSetConeStartOffset = SetupNetEvent("set_cone_start_offset");
+}
+
+void BaseEnvLightSpotComponent::Save(udm::LinkedPropertyWrapper &udm)
+{
+	BaseEntityComponent::Save(udm);
+	udm["innerConeAngle"] = **m_angInnerCutoff;
+	udm["outerConeAngle"] = **m_angOuterCutoff;
+	udm["coneStartOffset"] = **m_coneStartOffset;
+}
+void BaseEnvLightSpotComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+{
+	BaseEntityComponent::Load(udm,version);
+	udm["innerConeAngle"](**m_angInnerCutoff);
+	udm["outerConeAngle"](**m_angOuterCutoff);
+	udm["coneStartOffset"](**m_coneStartOffset);
 }
 
 void BaseEnvLightSpotComponent::SetOuterCutoffAngle(umath::Degree ang) {*m_angOuterCutoff = ang;}

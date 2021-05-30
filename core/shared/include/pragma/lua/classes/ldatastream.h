@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __LDATASTREAM_H__
 #define __LDATASTREAM_H__
@@ -11,6 +11,7 @@
 #include <pragma/lua/luaapi.h>
 #include "luasystem.h"
 #include "pragma/lua/luabind_int.h"
+#include "pragma/model/vertex.h"
 #include <sharedutils/datastream.h>
 
 lua_registercheck(DataStream,::DataStream);
@@ -160,6 +161,7 @@ namespace Lua
 			void register_class(luabind::class_<TClass> &classDef)
 		{
 			classDef.def(luabind::constructor<>());
+			classDef.def(luabind::tostring(luabind::self));
 			classDef.def("GetSize",&Lua::DataStream::GetSize<TClass>);
 			classDef.def("Seek",&Lua::DataStream::Seek<TClass>);
 			classDef.def("Tell",&Lua::DataStream::Tell<TClass>);
@@ -225,6 +227,7 @@ namespace Lua
 			classDef.def("WriteVector2i",&Lua::DataStream::WriteData<TClass,::Vector2i>);
 			classDef.def("WriteVectori",&Lua::DataStream::WriteData<TClass,Vector3i>);
 			classDef.def("WriteVector4i",&Lua::DataStream::WriteData<TClass,::Vector4i>);
+			classDef.def("WriteVertex",&Lua::DataStream::WriteData<TClass,::Vertex>);
 			classDef.def("ReadMat2",&Lua::DataStream::Read<TClass,::Mat2>);
 			classDef.def("ReadMat2x3",&Lua::DataStream::Read<TClass,::Mat2x3>);
 			classDef.def("ReadMat2x4",&Lua::DataStream::Read<TClass,::Mat2x4>);
@@ -238,6 +241,7 @@ namespace Lua
 			classDef.def("ReadVector2i",&Lua::DataStream::Read<TClass,::Vector2i>);
 			classDef.def("ReadVectori",&Lua::DataStream::Read<TClass,Vector3i>);
 			classDef.def("ReadVector4i",&Lua::DataStream::Read<TClass,::Vector4i>);
+			classDef.def("ReadVertex",&Lua::DataStream::Read<TClass,::Vertex>);
 		}
 	};
 };

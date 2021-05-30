@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_OCCLUSION_OCTREE_IMPL_HPP__
@@ -162,26 +162,50 @@ template<class T>
 	auto it = m_objectNodes.find(o);
 	return (it != m_objectNodes.end()) ? true : false;
 }
+	
+template<class T>
+	void OcclusionOctree<T>::InsertObject(const T &o,Node *optNode)
+{
+	auto it = m_objectNodes.find(o);
+	if(it == m_objectNodes.end())
+		it = m_objectNodes.insert(typename decltype(m_objectNodes)::value_type(o,std::vector<std::weak_ptr<BaseOcclusionOctree::Node>>{})).first;
+	else if(it->second.size() > 0)
+		return; // Object already exists in tree
+	
+#if ENABLE_OCCLUSION_DEBUG_MODE == 1
+	m_dbgObjects.push_back(o);
+#endif
+	auto &nodes = it->second;
+	Vector3 min,max;
+	GetObjectBounds(o,min,max);
+	if(
+		optNode == nullptr &&
+		(min.x == std::numeric_limits<float>::lowest() || min.y == std::numeric_limits<float>::lowest() || min.z == std::numeric_limits<float>::lowest() ||
+		max.x == std::numeric_limits<float>::max() || max.y == std::numeric_limits<float>::max() || max.z == std::numeric_limits<float>::max())
+	)
+	{
+		// Note: This case usually indicates some kind of error, objects inserted into the tree should never be this large.
+		// We'll just force-insert it into the root node and don't grow the tree.
+		m_objectNodes.erase(it);
+		InsertObject(o,static_cast<Node*>(m_root.get()));
+		return;
+	}
+	auto &root = optNode ? *optNode : GetRootNode();
+	if(root.InsertObject(o,min,max,nodes,optNode ? true : false) == false)
+	{
+		m_objectNodes.erase(it);
+#if ENABLE_OCCLUSION_DEBUG_MODE == 1
+		m_dbgObjects.erase(m_dbgObjects.end() -1);
+#endif
+		if(optNode == nullptr)
+			root.InsertObjectReverse(o,min,max,nodes);
+	}
+}
 
 template<class T>
 	void OcclusionOctree<T>::InsertObject(const T &o)
 {
-	auto it = m_objectNodes.find(o);
-	if(it == m_objectNodes.end())
-	{
-		it = m_objectNodes.insert(typename decltype(m_objectNodes)::value_type(o,std::vector<std::weak_ptr<BaseOcclusionOctree::Node>>{})).first;
-#if ENABLE_OCCLUSION_DEBUG_MODE == 1
-		m_dbgObjects.push_back(o);
-#endif
-	}
-	else
-		return; // Object already exists in tree
-	auto &nodes = it->second;
-	Vector3 min,max;
-	GetObjectBounds(o,min,max);
-	auto &root = GetRootNode();
-	if(root.InsertObject(o,min,max,nodes) == false)
-		root.InsertObjectReverse(o,min,max,nodes);
+	InsertObject(o,nullptr);
 }
 
 template<class T>
@@ -274,7 +298,7 @@ template<class T>
 	if(recursiveCount == 0)
 	{
 		recursiveCount = std::numeric_limits<uint32_t>::max();
-		root.InsertObject(o,min,max,nodesInserted,true); // Force object into root node
+		InsertObject(o,&root); // Force object into root node
 		// Con::cwar<<"WARNING: Object "<<o<<" outside of occlusion tree bounds! Forcing in root node..."<<Con::endl;
 		return;
 	}
@@ -295,7 +319,7 @@ template<class T>
 	{
 		Vector3 r;
 		auto &rootBounds = root.GetWorldBounds();
-		Geometry::ClosestPointOnAABBToPoint(rootBounds.first,rootBounds.second,p,&r);
+		umath::geometry::closest_point_on_aabb_to_point(rootBounds.first,rootBounds.second,p,&r);
 		auto d = uvec::length_sqr(p -r);
 		if(d > dFurthest)
 		{

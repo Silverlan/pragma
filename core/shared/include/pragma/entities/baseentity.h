@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __BASEENTITY_H__
 #define __BASEENTITY_H__
@@ -36,10 +36,13 @@ enum class Activity : uint16_t;
 enum class CollisionMask : uint32_t;
 enum class PHYSICSTYPE : int;
 
+namespace util {using Uuid = std::array<uint64_t,2>;};
+
 namespace pragma
 {
 	class BaseEntityComponent;
 	class BaseModelComponent;
+	class BaseGenericComponent;
 	class BaseAnimatedComponent;
 	class BaseWeaponComponent;
 	class BaseVehicleComponent;
@@ -60,6 +63,8 @@ const double ENT_EPSILON = 0.000'01;
 
 class EntityHandle;
 class DataStream;
+using EntityIndex = uint32_t;
+namespace udm {struct LinkedPropertyWrapper;};
 #pragma warning(push)
 #pragma warning(disable : 4251)
 class DLLNETWORK BaseEntity
@@ -71,6 +76,8 @@ public:
 	static pragma::ComponentEventId EVENT_ON_SPAWN;
 	static pragma::ComponentEventId EVENT_ON_POST_SPAWN;
 	static pragma::ComponentEventId EVENT_ON_REMOVE;
+	static constexpr auto PSAVE_IDENTIFIER = "PSAVE";
+	static constexpr uint32_t PSAVE_VERSION = 1;
 
 	enum class StateFlags : uint8_t
 	{
@@ -81,7 +88,10 @@ public:
 		PositionChanged = SnapshotUpdateRequired<<1u,
 		RotationChanged = PositionChanged<<1u,
 		CollisionBoundsChanged = RotationChanged<<1u,
-		RenderBoundsChanged = CollisionBoundsChanged<<1u
+		RenderBoundsChanged = CollisionBoundsChanged<<1u,
+
+		HasWorldComponent = RenderBoundsChanged<<1u,
+		Removed = HasWorldComponent<<1u
 	};
 
 	static void RegisterEvents(pragma::EntityComponentManager &componentManager);
@@ -89,6 +99,9 @@ public:
 	virtual std::string GetClass() const;
 	BaseEntity();
 	void Construct(unsigned int idx);
+
+	const util::Uuid GetUuid() const {return m_uuid;}
+	void SetUuid(const util::Uuid &uuid) {m_uuid = uuid;}
 
 	friend EntityHandle;
 	friend Engine;
@@ -106,9 +119,8 @@ public:
 	pragma::ComponentEventId RegisterComponentEvent(const std::string &name) const;
 	pragma::ComponentEventId GetEventId(const std::string &name) const;
 
-	// Returns ORIGIN if the entity has no transform component
-	void GetPose(umath::ScaledTransform &outTransform) const;
-	void GetPose(umath::Transform &outTransform) const;
+	// Returns IDENTITY if the entity has no transform component
+	const umath::ScaledTransform &GetPose() const;
 	void SetPose(const umath::ScaledTransform &outTransform);
 	void SetPose(const umath::Transform &outTransform);
 	const Vector3 &GetPosition() const;
@@ -123,17 +135,18 @@ public:
 	void SetScale(const Vector3 &scale);
 
 	// Helper functions
-	virtual util::WeakHandle<pragma::BaseModelComponent> GetModelComponent() const=0;
 	virtual util::WeakHandle<pragma::BaseAnimatedComponent> GetAnimatedComponent() const=0;
 	virtual util::WeakHandle<pragma::BaseWeaponComponent> GetWeaponComponent() const=0;
 	virtual util::WeakHandle<pragma::BaseVehicleComponent> GetVehicleComponent() const=0;
 	virtual util::WeakHandle<pragma::BaseAIComponent> GetAIComponent() const=0;
 	virtual util::WeakHandle<pragma::BaseCharacterComponent> GetCharacterComponent() const=0;
 	virtual util::WeakHandle<pragma::BasePlayerComponent> GetPlayerComponent() const=0;
-	virtual util::WeakHandle<pragma::BasePhysicsComponent> GetPhysicsComponent() const=0;
 	virtual util::WeakHandle<pragma::BaseTimeScaleComponent> GetTimeScaleComponent() const=0;
 	virtual util::WeakHandle<pragma::BaseNameComponent> GetNameComponent() const=0;
-	util::WeakHandle<pragma::BaseTransformComponent> GetTransformComponent() const;
+	pragma::BaseModelComponent *GetModelComponent() const;
+	pragma::BaseTransformComponent *GetTransformComponent() const;
+	pragma::BasePhysicsComponent *GetPhysicsComponent() const;
+	pragma::BaseGenericComponent *GetGenericComponent() const;
 
 	// These are quick-access functions for commonly used component functions.
 	// In some cases these may create the component, if it doesn't exist, and transmit
@@ -146,7 +159,7 @@ public:
 
 	void SetModel(const std::string &mdl);
 	void SetModel(const std::shared_ptr<Model> &mdl);
-	std::shared_ptr<Model> GetModel() const;
+	const std::shared_ptr<Model> &GetModel() const;
 	std::string GetModelName() const;
 	std::optional<umath::Transform> GetAttachmentPose(uint32_t attId) const;
 	uint32_t GetSkin() const;
@@ -222,17 +235,15 @@ public:
 	virtual void PrecacheModels();
 
 	virtual void Initialize();
-	unsigned int GetIndex() const;
+	EntityIndex GetIndex() const;
 	virtual uint32_t GetLocalIndex() const;
-	uint64_t GetUniqueIndex() const;
-	void SetUniqueIndex(uint64_t idx);
 
 	virtual bool IsCharacter() const=0;
 	virtual bool IsPlayer() const=0;
 	virtual bool IsWeapon() const=0;
 	virtual bool IsVehicle() const=0;
 	virtual bool IsNPC() const=0;
-	virtual bool IsWorld() const;
+	bool IsWorld() const;
 	virtual bool IsScripted() const;
 
 	virtual Con::c_cout& print(Con::c_cout&);
@@ -248,17 +259,17 @@ public:
 
 	lua_State *GetLuaState() const;
 
-	virtual void Load(DataStream &ds);
-	virtual void Save(DataStream &ds);
+	virtual void Load(udm::LinkedPropertyWrapper &udm);
+	virtual void Save(udm::LinkedPropertyWrapper &udm);
 	virtual BaseEntity *Copy();
 protected:
 	StateFlags m_stateFlags = StateFlags::None;
 
 	// Transform component is needed frequently, so we store a direct reference to it for faster access
-	std::weak_ptr<pragma::BaseTransformComponent> m_transformComponent = {};
-
-	virtual void OnComponentAdded(pragma::BaseEntityComponent &component) override;
-	virtual void OnComponentRemoved(pragma::BaseEntityComponent &component) override;
+	pragma::BaseTransformComponent *m_transformComponent = nullptr;
+	pragma::BasePhysicsComponent *m_physicsComponent = nullptr;
+	pragma::BaseModelComponent *m_modelComponent = nullptr;
+	pragma::BaseGenericComponent *m_genericComponent = nullptr;
 
 	// Should only be used by quick-access methods!
 	// Adds the component and trasmits the information
@@ -269,8 +280,8 @@ protected:
 
 	std::vector<EntityHandle> m_entsRemove; // List of entities that should be removed when this entity is removed
 	std::string m_class = "BaseEntity";
-	uint32_t m_index = 0u;
-	uint64_t m_uniqueIndex = 0ull;
+	util::Uuid m_uuid {};
+	EntityIndex m_index = 0u;
 	virtual void EraseFunction(int function);
 	virtual void DoSpawn();
 	pragma::NetEventId SetupNetEvent(const std::string &name) const;

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -58,8 +58,8 @@ void Lua::shader::push_shader(lua_State *l,prosper::Shader &shader)
 				{
 					if(dynamic_cast<pragma::ShaderEntity*>(&shader) != nullptr)
 					{
-						if(dynamic_cast<pragma::ShaderTextured3DBase*>(&shader) != nullptr)
-							Lua::Push<pragma::ShaderTextured3DBase*>(l,static_cast<pragma::ShaderTextured3DBase*>(&shader));
+						if(dynamic_cast<pragma::ShaderGameWorldLightingPass*>(&shader) != nullptr)
+							Lua::Push<pragma::ShaderGameWorldLightingPass*>(l,static_cast<pragma::ShaderGameWorldLightingPass*>(&shader));
 						else
 							Lua::Push<pragma::ShaderEntity*>(l,static_cast<pragma::ShaderEntity*>(&shader));
 					}
@@ -203,5 +203,5 @@ void Lua::Shader::GetCurrentCommandBuffer(lua_State *l,pragma::LuaShaderBase &sh
 	auto wpDrawCmd = shader.GetCurrentCommandBuffer();
 	if(wpDrawCmd == nullptr)
 		return;
-	Lua::Push(l,std::static_pointer_cast<prosper::ICommandBuffer>(wpDrawCmd));
+	Lua::Push(l,std::static_pointer_cast<prosper::ICommandBuffer>(wpDrawCmd->shared_from_this()));
 }

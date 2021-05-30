@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -24,27 +24,27 @@
 Vector3 Lua::geometry::closest_point_on_aabb_to_point(const Vector3 &min,const Vector3 &max,const Vector3 &p)
 {
 	Vector3 res;
-	Geometry::ClosestPointOnAABBToPoint(min,max,p,&res);
+	umath::geometry::closest_point_on_aabb_to_point(min,max,p,&res);
 	return res;
 }
 
 void Lua::geometry::closest_points_between_lines(const Vector3 &pA,const Vector3 &qA,const Vector3 &pB,const Vector3 &qB,Vector3 &outCA,Vector3 &outCB,float &outD)
 {
 	float s,t;
-	outD = Geometry::ClosestPointsBetweenLines(pA,qA,pB,qB,&s,&t,&outCA,&outCB);
+	outD = umath::geometry::closest_points_between_lines(pA,qA,pB,qB,&s,&t,&outCA,&outCB);
 }
 
 Vector3 Lua::geometry::closest_point_on_plane_to_point(const Vector3 &n,float d,const Vector3 &p)
 {
 	Vector3 res;
-	Geometry::ClosestPointOnPlaneToPoint(n,d,p,&res);
+	umath::geometry::closest_point_on_plane_to_point(n,d,p,&res);
 	return res;
 }
 
 Vector3 Lua::geometry::closest_point_on_triangle_to_point(const Vector3 &a,const Vector3 &b,const Vector3 &c,const Vector3 &p)
 {
 	Vector3 res;
-	Geometry::ClosestPointOnTriangleToPoint(a,b,c,p,&res);
+	umath::geometry::closest_point_on_triangle_to_point(a,b,c,p,&res);
 	return res;
 }
 
@@ -63,7 +63,7 @@ void Lua::geometry::generate_truncated_cone_mesh(
 	std::vector<Vector3> verts;
 	std::vector<uint16_t> triangles;
 	std::vector<Vector3> normals;
-	Geometry::GenerateTruncatedConeMesh(origin,static_cast<float>(startRadius),dir,static_cast<float>(dist),static_cast<float>(endRadius),verts,(generateTriangles == true) ? &triangles : nullptr,(generateNormals == true) ? &normals : nullptr,segmentCount,caps);
+	umath::geometry::generate_truncated_cone_mesh(origin,static_cast<float>(startRadius),dir,static_cast<float>(dist),static_cast<float>(endRadius),verts,(generateTriangles == true) ? &triangles : nullptr,(generateNormals == true) ? &normals : nullptr,segmentCount,caps);
 
 	outVerts = Lua::vector_to_table(l,verts);
 	auto *outNext = &outTris;
@@ -81,7 +81,7 @@ double Lua::geometry::calc_volume_of_polyhedron(lua_State *l,luabind::table<> tV
 	auto tris = Lua::table_to_vector<uint16_t>(l,tTriangles,2);
 	auto numTris = Lua::GetObjectLength(l,2);
 	uint32_t idx = 0;
-	return Geometry::calc_volume_of_polyhedron([l,&verts,&tris,numTris,idx](const Vector3 **v0,const Vector3 **v1,const Vector3 **v2) mutable -> bool {
+	return umath::geometry::calc_volume_of_polyhedron([l,&verts,&tris,numTris,idx](const Vector3 **v0,const Vector3 **v1,const Vector3 **v2) mutable -> bool {
 		if(idx >= numTris)
 			return false;
 		auto idx0 = tris.at(idx);
@@ -101,7 +101,7 @@ void Lua::geometry::calc_center_of_mass(lua_State *l,luabind::table<> tVerts,lua
 	auto tris = Lua::table_to_vector<uint16_t>(l,tTriangles,2);
 	auto numTris = Lua::GetObjectLength(l,2);
 	uint32_t idx = 0;
-	outVolume = Geometry::calc_volume_of_polyhedron([l,&verts,&tris,numTris,idx](const Vector3 **v0,const Vector3 **v1,const Vector3 **v2) mutable -> bool {
+	outVolume = umath::geometry::calc_volume_of_polyhedron([l,&verts,&tris,numTris,idx](const Vector3 **v0,const Vector3 **v1,const Vector3 **v2) mutable -> bool {
 		if(idx >= numTris)
 			return false;
 		auto idx0 = tris.at(idx);
@@ -118,13 +118,13 @@ void Lua::geometry::calc_center_of_mass(lua_State *l,luabind::table<> tVerts,lua
 Vector2 Lua::geometry::calc_barycentric_coordinates(const Vector3 &p0,const Vector3 &p1,const Vector3 &p2,const Vector3 &hitPoint)
 {
 	float b1,b2;
-	auto r = ::Geometry::calc_barycentric_coordinates(p0,p1,p2,hitPoint,b1,b2);
+	auto r = ::umath::geometry::calc_barycentric_coordinates(p0,p1,p2,hitPoint,b1,b2);
 	return Vector2{b1,b2};
 }
 Vector2 Lua::geometry::calc_barycentric_coordinates(const Vector3 &p0,const Vector2 &uv0,const Vector3 &p1,const Vector2 &uv1,const Vector3 &p2,const Vector2 &uv2,const Vector3 &hitPoint)
 {
 	float b1,b2;
-	auto r = ::Geometry::calc_barycentric_coordinates(p0,uv0,p1,uv1,p2,uv2,hitPoint,b1,b2);
+	auto r = ::umath::geometry::calc_barycentric_coordinates(p0,uv0,p1,uv1,p2,uv2,hitPoint,b1,b2);
 	return Vector2{b1,b2};
 }
 
@@ -140,7 +140,7 @@ int Lua::geometry::get_outline_vertices(lua_State *l)
 		Lua::GetTableValue(l,1);
 		vertices.push_back(*Lua::CheckVector2(l,-1));
 	}
-	auto indices = ::Geometry::get_outline_vertices(vertices);
+	auto indices = ::umath::geometry::get_outline_vertices(vertices);
 	if(indices.has_value() == false)
 		return 0;
 	auto t = Lua::CreateTable(l);
@@ -314,7 +314,7 @@ def splitViaDelaunay(points, maxLength):
 }
 
 #include "pragma/model/modelmesh.h"
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 /*#include "vhcl.h"
 #include <sb/SBScene.h>

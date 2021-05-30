@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -17,7 +17,9 @@ IKController::IKController(const IKController &other)
 	: m_effectorName{other.m_effectorName},m_type{other.m_type},
 	m_chainLength{other.m_chainLength},m_method{other.m_method},
 	m_keyValues{other.m_keyValues}
-{}
+{
+	static_assert(sizeof(IKController) == 152,"Update this function when making changes to this class!");
+}
 const std::string &IKController::GetEffectorName() const {return m_effectorName;}
 uint32_t IKController::GetChainLength() const {return m_chainLength;}
 const std::string &IKController::GetType() const {return m_type;}
@@ -31,3 +33,9 @@ util::ik::Method IKController::GetMethod() const {return m_method;}
 
 const std::unordered_map<std::string,std::string> &IKController::GetKeyValues() const {return const_cast<IKController*>(this)->GetKeyValues();}
 std::unordered_map<std::string,std::string> &IKController::GetKeyValues() {return m_keyValues;}
+
+bool IKController::operator==(const IKController &other) const
+{
+	static_assert(sizeof(IKController) == 152,"Update this function when making changes to this class!");
+	return m_effectorName == other.m_effectorName && m_type == other.m_type && m_chainLength == other.m_chainLength && m_method == other.m_method && m_keyValues == other.m_keyValues;
+}

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_CVAR_MOVEMENT_H__
@@ -50,6 +50,7 @@ namespace Console
 		DLLCLIENT void godmode(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &args);
 		DLLCLIENT void next_weapon(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &args);
 		DLLCLIENT void give_weapon(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &args);
+		DLLCLIENT void strip_weapons(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &args);
 		DLLCLIENT void previous_weapon(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &args);
 		DLLCLIENT void give_ammo(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &args);
 		DLLCLIENT void suicide(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &args);
@@ -94,6 +95,7 @@ REGISTER_CONCOMMAND_CL(noclip,Console::commands::noclip,ConVarFlags::None,"Toggl
 REGISTER_CONCOMMAND_CL(notarget,Console::commands::notarget,ConVarFlags::None,"Toggles notarget mode. Requires cheats to be enabled (Or single player mode running).");
 REGISTER_CONCOMMAND_CL(godmode,Console::commands::godmode,ConVarFlags::None,"Toggles god mode. Requires cheats to be enabled (Or single player mode running).");
 REGISTER_CONCOMMAND_CL(give_weapon,Console::commands::give_weapon,ConVarFlags::None,"Gives the local player the specified weapon and deploys it.");
+REGISTER_CONCOMMAND_CL(strip_weapons,Console::commands::strip_weapons,ConVarFlags::None,"Strips all weapons from the local player.");
 REGISTER_CONCOMMAND_CL(next_weapon,Console::commands::next_weapon,ConVarFlags::None,"Switches to the next weapon in the player's inventory.");
 REGISTER_CONCOMMAND_CL(previous_weapon,Console::commands::previous_weapon,ConVarFlags::None,"Switches to the previous weapon in the player's inventory.");
 REGISTER_CONCOMMAND_CL(give_ammo,Console::commands::give_ammo,ConVarFlags::None,"Gives the local player the specified ammunition.");

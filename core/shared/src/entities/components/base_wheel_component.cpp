@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -11,7 +11,6 @@
 #include "pragma/entities/components/base_vehicle_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_generic_component.hpp"
-#include "pragma/entities/components/logic_component.hpp"
 #include <sharedutils/scope_guard.h>
 
 //#define ENABLE_DEPRECATED_PHYSICS
@@ -26,14 +25,11 @@ void BaseWheelComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		Think();
-	});
 	auto &ent = GetEntity();
-	ent.AddComponent<LogicComponent>();
 	ent.AddComponent("render");
 	ent.AddComponent("transform");
 	ent.AddComponent("model");
+	SetTickPolicy(TickPolicy::Always); // TODO
 	/*m_netEvAttach = SetupNetEvent("attach");
 	m_netEvDetach = SetupNetEvent("detach");
 	m_netEvFrontWheel = SetupNetEvent("front_wheel");
@@ -162,7 +158,7 @@ void BaseWheelComponent::UpdateWheel()
 	auto rotation = Quat(CFloat(btRot.w()),CFloat(btRot.x()),CFloat(btRot.y()),CFloat(btRot.z()));
 	rotation = rotation *GetModelRotation();
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 	{
 		pTrComponent->SetPosition(origin);
 		pTrComponent->SetOrientation(rotation);
@@ -170,7 +166,7 @@ void BaseWheelComponent::UpdateWheel()
 #endif
 }
 
-void BaseWheelComponent::Think()
+void BaseWheelComponent::OnTick(double dt)
 {
 	UpdateWheel();
 	UpdatePose();

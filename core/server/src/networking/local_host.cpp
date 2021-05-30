@@ -2,14 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/networking/local_server.hpp"
 #include "pragma/networking/recipient_filter.hpp"
 #include <sharedutils/util_clock.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 bool pragma::networking::LocalServer::DoStart(Error &outErr,uint16_t port,bool useP2PIfAvailable) {return true;}
 bool pragma::networking::LocalServer::PollEvents(Error &outErr) {return true;}

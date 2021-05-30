@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -12,6 +12,8 @@
 #include <pragma/console/convars.h>
 #include <prosper_util.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
+
+extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
 
@@ -25,10 +27,10 @@ decltype(ShaderPPHDR::DESCRIPTOR_SET_TEXTURE) ShaderPPHDR::DESCRIPTOR_SET_TEXTUR
 			prosper::DescriptorType::CombinedImageSampler,
 			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::DescriptorSetInfo::Binding { // Glow
+		/*prosper::DescriptorSetInfo::Binding { // Glow
 			prosper::DescriptorType::CombinedImageSampler,
 			prosper::ShaderStageFlags::FragmentBit
-		}
+		}*/
 	}
 };
 decltype(ShaderPPHDR::RENDER_PASS_FORMAT) ShaderPPHDR::RENDER_PASS_FORMAT = prosper::Format::R8G8B8A8_UNorm;
@@ -54,6 +56,10 @@ void ShaderPPHDR::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 	AddDefaultVertexAttributes(pipelineInfo);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_TEXTURE);
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
+
+	auto &settings = c_game->GetGameWorldShaderSettings();
+	AddSpecializationConstant(pipelineInfo,prosper::ShaderStageFlags::FragmentBit,0u /* constantId */,static_cast<uint32_t>(settings.bloomEnabled));
+	AddSpecializationConstant(pipelineInfo,prosper::ShaderStageFlags::FragmentBit,1u /* constantId */,static_cast<uint32_t>(settings.fxaaEnabled));
 }
 
 bool ShaderPPHDR::Draw(prosper::IDescriptorSet &descSetTexture,pragma::rendering::ToneMapping toneMapping,float exposure,float bloomScale,float glowScale,bool flipVertically)

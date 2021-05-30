@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __RESOURCE_WATCHER_H__
@@ -12,6 +12,7 @@
 #include <sharedutils/util_extensible_enum.hpp>
 #include <sharedutils/scope_guard.h>
 #include <fsys/directory_watcher.h>
+#include <unordered_set>
 
 #define RESOURCE_WATCHER_VERBOSE 0
 
@@ -42,6 +43,7 @@ protected:
 };
 DEFINE_STD_HASH_SPECIALIZATION(EResourceWatcherCallbackType);
 
+class Model;
 class LuaDirectoryWatcherManager;
 class DLLNETWORK ResourceWatcherManager
 {
@@ -55,7 +57,7 @@ public:
 	// times to resume watching
 	void Lock();
 	void Unlock();
-	ScopeGuard ScopeLock();
+	util::ScopeGuard ScopeLock();
 	bool IsLocked() const;
 	CallbackHandle AddChangeCallback(EResourceWatcherCallbackType type,const std::function<void(std::reference_wrapper<const std::string>,std::reference_wrapper<const std::string>)> &fcallback);
 protected:
@@ -63,6 +65,7 @@ protected:
 	uint32_t m_lockedCount = 0;
 	void OnResourceChanged(const std::string &path);
 	void ReloadMaterial(const std::string &path);
+	virtual void OnMaterialReloaded(const std::string &path,const std::unordered_set<Model*> &modelMap) {}
 	virtual void OnResourceChanged(const std::string &path,const std::string &ext);
 	virtual void GetWatchPaths(std::vector<std::string> &paths);
 	virtual void ReloadTexture(const std::string &path);

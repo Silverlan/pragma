@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -117,12 +117,12 @@ bool BrushMesh::IntersectAABB(const Vector3 &pos,const Vector3 &posNew,const Vec
 {
 	Vector3 extentsThis = (m_max -m_min) *0.5f;
 	Vector3 posThis = posObj +m_min +extentsThis;
-	return Sweep::AABBWithAABB(pos,posNew,extents,posThis,posThis,extentsThis,entryTime,exitTime,hitnormal);
+	return umath::sweep::aabb_with_aabb(pos,posNew,extents,posThis,posThis,extentsThis,entryTime,exitTime,hitnormal);
 }
 
 bool BrushMesh::IntersectAABB(Vector3 *min,Vector3 *max) const
 {
-	if(!Intersection::AABBAABB(m_min,m_max,*min,*max))
+	if(umath::intersection::aabb_aabb(m_min,m_max,*min,*max) == umath::intersection::Intersect::Outside)
 		return false;
 	return true;
 }

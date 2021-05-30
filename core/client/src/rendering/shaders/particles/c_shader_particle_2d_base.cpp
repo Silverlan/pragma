@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -15,9 +15,10 @@
 #include <prosper_util.hpp>
 #include <image/prosper_msaa_texture.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#include <prosper_command_buffer.hpp>
 #include <datasystem_vector.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
@@ -51,7 +52,7 @@ decltype(ShaderParticle2DBase::DESCRIPTOR_SET_DEPTH_MAP) ShaderParticle2DBase::D
 	}
 };
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION) ShaderParticle2DBase::DESCRIPTOR_SET_ANIMATION = {&ShaderParticleBase::DESCRIPTOR_SET_ANIMATION};
-decltype(ShaderParticle2DBase::DESCRIPTOR_SET_CAMERA) ShaderParticle2DBase::DESCRIPTOR_SET_CAMERA = {&ShaderSceneLit::DESCRIPTOR_SET_CAMERA};
+decltype(ShaderParticle2DBase::DESCRIPTOR_SET_SCENE) ShaderParticle2DBase::DESCRIPTOR_SET_SCENE = {&ShaderSceneLit::DESCRIPTOR_SET_SCENE};
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_RENDER_SETTINGS) ShaderParticle2DBase::DESCRIPTOR_SET_RENDER_SETTINGS = {&ShaderSceneLit::DESCRIPTOR_SET_RENDER_SETTINGS};
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_LIGHTS) ShaderParticle2DBase::DESCRIPTOR_SET_LIGHTS = {&ShaderSceneLit::DESCRIPTOR_SET_LIGHTS};
 decltype(ShaderParticle2DBase::DESCRIPTOR_SET_SHADOWS) ShaderParticle2DBase::DESCRIPTOR_SET_SHADOWS = {&ShaderSceneLit::DESCRIPTOR_SET_SHADOWS};
@@ -103,7 +104,7 @@ void ShaderParticle2DBase::RegisterDefaultGfxPipelineDescriptorSetGroups(prosper
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_TEXTURE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_DEPTH_MAP);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_ANIMATION);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_RENDER_SETTINGS);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_LIGHTS);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SHADOWS);
@@ -122,7 +123,7 @@ void ShaderParticle2DBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreate
 	RegisterDefaultGfxPipelineDescriptorSetGroups(pipelineInfo);
 }
 
-bool ShaderParticle2DBase::BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,pragma::CParticleSystemComponent &pSys,ParticleRenderFlags renderFlags,Pipeline pipeline,RecordFlags recordFlags)
+bool ShaderParticle2DBase::BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,pragma::CParticleSystemComponent &pSys,ParticleRenderFlags renderFlags,RecordFlags recordFlags)
 {
 	uint32_t pipelineIdx;
 	if(umath::is_flag_set(renderFlags,ParticleRenderFlags::DepthOnly))
@@ -130,14 +131,14 @@ bool ShaderParticle2DBase::BeginDraw(const std::shared_ptr<prosper::IPrimaryComm
 	else
 	{
 		auto alphaMode = GetRenderAlphaMode(pSys);
-		pipelineIdx = umath::to_integral(pipeline) *umath::to_integral(ParticleAlphaMode::Count) +umath::to_integral(alphaMode);
+		pipelineIdx = /*umath::to_integral(pipeline) **/umath::to_integral(ParticleAlphaMode::Count) +umath::to_integral(alphaMode);
 	}
 	return ShaderSceneLit::BeginDraw(cmdBuffer,pipelineIdx,recordFlags);
 }
 
 uint32_t ShaderParticle2DBase::GetRenderSettingsDescriptorSetIndex() const {return DESCRIPTOR_SET_RENDER_SETTINGS.setIndex;}
 uint32_t ShaderParticle2DBase::GetLightDescriptorSetIndex() const {return DESCRIPTOR_SET_LIGHTS.setIndex;}
-uint32_t ShaderParticle2DBase::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_CAMERA.setIndex;}
+uint32_t ShaderParticle2DBase::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_SCENE.setIndex;}
 
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderParticle2DBase::InitializeMaterialDescriptorSet(CMaterial &mat)
 {
@@ -197,7 +198,7 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(
 ) const
 {
 	auto pTrComponent = particle.GetEntity().GetTransformComponent();
-	auto rot = pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
+	auto rot = pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity();
 
 	nearZ = camNearZ;
 	farZ = camFarZ;
@@ -266,7 +267,7 @@ void ShaderParticle2DBase::GetParticleSystemOrientationInfo(
 }
 
 prosper::DescriptorSetInfo &ShaderParticle2DBase::GetAnimationDescriptorSetInfo() const {return DESCRIPTOR_SET_ANIMATION;}
-bool ShaderParticle2DBase::BindParticleMaterial(const rendering::RasterizationRenderer &renderer,const pragma::CParticleSystemComponent &ps)
+bool ShaderParticle2DBase::BindParticleMaterial(const CRasterizationRendererComponent &renderer,const pragma::CParticleSystemComponent &ps)
 {
 	auto *mat = static_cast<CMaterial*>(ps.GetMaterial());
 	if(mat == nullptr)
@@ -284,7 +285,7 @@ bool ShaderParticle2DBase::BindParticleMaterial(const rendering::RasterizationRe
 	return RecordBindDescriptorSets({&descSetTexture,descSetDepth,&animDescSet},DESCRIPTOR_SET_TEXTURE.setIndex);
 }
 
-bool ShaderParticle2DBase::Draw(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const pragma::CParticleSystemComponent &ps,pragma::CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags ptRenderFlags)
+bool ShaderParticle2DBase::Draw(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const pragma::CParticleSystemComponent &ps,pragma::CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags ptRenderFlags)
 {
 	if(BindParticleMaterial(renderer,ps) == false)
 		return false;

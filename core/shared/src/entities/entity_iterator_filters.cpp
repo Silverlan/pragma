@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -11,7 +11,9 @@
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_name_component.hpp"
+#include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/basefilterentity.h"
+#include "pragma/asset/util_asset.hpp"
 #include <pragma/math/intersection.h>
 
 EntityIteratorFilterName::EntityIteratorFilterName(Game &game,const std::string &name,bool caseSensitive,bool exactMatch)
@@ -24,6 +26,26 @@ bool EntityIteratorFilterName::ShouldPass(BaseEntity &ent)
 		return false;
 	return m_bExactMatch ? ustring::match(pNameComponent->GetName(),m_name,m_bCaseSensitive) : ustring::compare(pNameComponent->GetName(),m_name,m_bCaseSensitive);
 }
+
+/////////////////
+
+EntityIteratorFilterModel::EntityIteratorFilterModel(Game &game,const std::string &mdlName)
+	: m_modelName{mdlName}
+{}
+bool EntityIteratorFilterModel::ShouldPass(BaseEntity &ent)
+{
+	auto pMdlComponent = static_cast<pragma::BaseModelComponent*>(ent.FindComponent("model").get());
+	if(pMdlComponent == nullptr)
+		return false;
+	return pragma::asset::matches(m_modelName,pMdlComponent->GetModelName(),pragma::asset::Type::Model);
+}
+
+/////////////////
+
+EntityIteratorFilterUuid::EntityIteratorFilterUuid(Game &game,const util::Uuid &uuid)
+	: m_uuid{uuid}
+{}
+bool EntityIteratorFilterUuid::ShouldPass(BaseEntity &ent) {return ent.GetUuid() == m_uuid;}
 
 /////////////////
 
@@ -45,7 +67,7 @@ bool EntityIteratorFilterNameOrClass::ShouldPass(BaseEntity &ent)
 	if(m_bExactMatch ? ustring::match(ent.GetClass(),m_name,m_bCaseSensitive) : ustring::compare(ent.GetClass(),m_name,m_bCaseSensitive))
 		return true;
 	auto pNameComponent = static_cast<pragma::BaseNameComponent*>(ent.FindComponent("name").get());
-	return pNameComponent != nullptr && m_bExactMatch ? ustring::match(pNameComponent->GetName(),m_name,m_bCaseSensitive) : ustring::compare(pNameComponent->GetName(),m_name,m_bCaseSensitive);
+	return pNameComponent != nullptr && (m_bExactMatch ? ustring::match(pNameComponent->GetName(),m_name,m_bCaseSensitive) : ustring::compare(pNameComponent->GetName(),m_name,m_bCaseSensitive));
 }
 
 /////////////////
@@ -111,16 +133,16 @@ bool EntityIteratorFilterFlags::ShouldPass(BaseEntity &ent)
 		bIncludeEntity = true;
 	if(bIncludeEntity == false || (m_flags &EntityIterator::FilterFlags::AnyType) == EntityIterator::FilterFlags::AnyType || (m_flags &EntityIterator::FilterFlags::AnyType) == EntityIterator::FilterFlags::None)
 	{
-		if((m_flags &EntityIterator::FilterFlags::HasTransform) != EntityIterator::FilterFlags::None && ent.GetTransformComponent().valid())
+		if((m_flags &EntityIterator::FilterFlags::HasTransform) != EntityIterator::FilterFlags::None && ent.GetTransformComponent())
 			return true;
 
-		if((m_flags &EntityIterator::FilterFlags::HasModel) != EntityIterator::FilterFlags::None && ent.GetModelComponent().valid())
+		if((m_flags &EntityIterator::FilterFlags::HasModel) != EntityIterator::FilterFlags::None && ent.GetModelComponent())
 			return true;
 		return bIncludeEntity;
 	}
-	if((m_flags &EntityIterator::FilterFlags::HasTransform) != EntityIterator::FilterFlags::None && ent.GetTransformComponent().expired())
+	if((m_flags &EntityIterator::FilterFlags::HasTransform) != EntityIterator::FilterFlags::None && !ent.GetTransformComponent())
 		return false;
-	if((m_flags &EntityIterator::FilterFlags::HasModel) != EntityIterator::FilterFlags::None && ent.GetModelComponent().expired())
+	if((m_flags &EntityIterator::FilterFlags::HasModel) != EntityIterator::FilterFlags::None && !ent.GetModelComponent())
 		return false;
 
 	if((m_flags &EntityIterator::FilterFlags::Character) != EntityIterator::FilterFlags::None && ent.IsCharacter())
@@ -140,7 +162,7 @@ bool EntityIteratorFilterFlags::ShouldPass(BaseEntity &ent)
 	if((m_flags &EntityIterator::FilterFlags::Physical) != EntityIterator::FilterFlags::None)
 	{
 		auto pPhysComponent = ent.GetPhysicsComponent();
-		if(pPhysComponent.valid() && pPhysComponent->GetPhysicsObject() != nullptr)
+		if(pPhysComponent != nullptr && pPhysComponent->GetPhysicsObject() != nullptr)
 			return true;
 	}
 	return false;
@@ -182,21 +204,21 @@ EntityIteratorFilterSphere::EntityIteratorFilterSphere(Game &game,const Vector3 
 bool EntityIteratorFilterSphere::ShouldPass(BaseEntity &ent,Vector3 &outClosestPointOnEntityBounds,float &outDistToEntity) const
 {
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return false;
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	Vector3 colCenter;
 	auto &pos = pTrComponent->GetPosition();
-	auto colRadius = pPhysComponent.valid() ? pPhysComponent->GetCollisionRadius(&colCenter) : 0.f;
+	auto colRadius = pPhysComponent != nullptr ? pPhysComponent->GetCollisionRadius(&colCenter) : 0.f;
 	colCenter += pos;
 	auto distToCol = uvec::distance(m_origin,colCenter) -colRadius;
 	if(distToCol > m_radius)
 		return false;
 	Vector3 min {};
 	Vector3 max {};
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->GetCollisionBounds(&min,&max);
-	Geometry::ClosestPointOnAABBToPoint(min,max,m_origin -pos,&outClosestPointOnEntityBounds);
+	umath::geometry::closest_point_on_aabb_to_point(min,max,m_origin -pos,&outClosestPointOnEntityBounds);
 	outDistToEntity = uvec::length(outClosestPointOnEntityBounds);
 	return outDistToEntity <= m_radius;
 }
@@ -217,14 +239,14 @@ EntityIteratorFilterBox::EntityIteratorFilterBox(Game &game,const Vector3 &min,c
 bool EntityIteratorFilterBox::ShouldPass(BaseEntity &ent)
 {
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return false;
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	Vector3 entMin {};
 	Vector3 entMax {};
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->GetCollisionBounds(&entMin,&entMax);
-	return Intersection::AABBAABB(m_min,m_max,entMin,entMax) != INTERSECT_OUTSIDE;
+	return umath::intersection::aabb_aabb(m_min,m_max,entMin,entMax) != umath::intersection::Intersect::Outside;
 }
 
 /////////////////

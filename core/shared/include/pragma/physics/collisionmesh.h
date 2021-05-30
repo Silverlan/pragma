@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __COLLISIONMESH_H__
@@ -17,11 +17,15 @@
 class Game;
 struct PhysSoftBodyInfo;
 class ModelSubMesh;
+class Model;
 namespace pragma::physics {class IShape;};
+namespace udm {struct AssetData; using Version = uint32_t;};
 class DLLNETWORK CollisionMesh
 	: public std::enable_shared_from_this<CollisionMesh>
 {
 public:
+	static constexpr auto PCOL_IDENTIFIER = "PCOL";
+	static constexpr udm::Version PCOL_VERSION = 1;
 #pragma pack(push,1)
 	struct DLLNETWORK SoftBodyAnchor
 	{
@@ -35,9 +39,14 @@ public:
 		uint32_t boneId = std::numeric_limits<uint32_t>::max();
 		float influence = 1.f;
 		Flags flags = Flags::None;
+
+		bool operator==(const SoftBodyAnchor &other) const;
+		bool operator!=(const SoftBodyAnchor &other) const {return !operator==(other);}
 	};
 #pragma pack(pop)
 	CollisionMesh(const CollisionMesh &other);
+	bool operator==(const CollisionMesh &other) const;
+	bool operator!=(const CollisionMesh &other) const {return !operator==(other);}
 private:
 	CollisionMesh(Game *game);
 
@@ -49,7 +58,10 @@ private:
 		std::vector<uint32_t> triangles; // Triangles of sub-mesh to use of soft-body physics
 		std::shared_ptr<PhysSoftBodyInfo> info = nullptr;
 		std::vector<SoftBodyAnchor> anchors;
+		bool operator==(const SoftBodyInfo &other) const;
+		bool operator!=(const SoftBodyInfo &other) const {return !operator==(other);}
 	};
+
 	std::shared_ptr<SoftBodyInfo> m_softBodyInfo = nullptr;
 
 	Game *m_game = nullptr;
@@ -67,14 +79,16 @@ private:
 	Vector3 m_centerOfMass = {};
 	double m_volume = 0.0;
 	void ClipAgainstPlane(const Vector3 &n,double d,CollisionMesh &clippedMesh);
+	bool LoadFromAssetData(Game &game,Model &mdl,const udm::AssetData &data,std::string &outErr);
 public:
 	static std::shared_ptr<CollisionMesh> Create(Game *game);
 	static std::shared_ptr<CollisionMesh> Create(const CollisionMesh &other);
+	static std::shared_ptr<CollisionMesh> Load(Game &game,Model &mdl,const udm::AssetData &data,std::string &outErr);
 	std::shared_ptr<pragma::physics::IShape> CreateShape(const Vector3 &scale={1.f,1.f,1.f}) const;
 	void SetBoneParent(int boneID);
-	int GetBoneParent();
+	int GetBoneParent() const;
 	void CalculateBounds();
-	void GetAABB(Vector3 *min,Vector3 *max);
+	void GetAABB(Vector3 *min,Vector3 *max) const;
 	void SetAABB(Vector3 &min,Vector3 &max);
 	void SetOrigin(const Vector3 &origin);
 	const Vector3 &GetOrigin() const;
@@ -122,7 +136,11 @@ public:
 	void ClearSoftBodyAnchors();
 	const std::vector<SoftBodyAnchor> *GetSoftBodyAnchors() const;
 	std::vector<SoftBodyAnchor> *GetSoftBodyAnchors();
+
+	bool Save(Game &game,Model &mdl,udm::AssetData &outData,std::string &outErr);
 };
 REGISTER_BASIC_BITWISE_OPERATORS(CollisionMesh::SoftBodyAnchor::Flags);
+
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const CollisionMesh &o);
 
 #endif

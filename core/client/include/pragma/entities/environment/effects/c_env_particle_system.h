@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_ENV_PARTICLE_SYSTEM_H__
@@ -47,12 +47,14 @@ namespace pragma
 		static const uint32_t VERTEX_COUNT;
 		static bool Save(const std::string &fileName,const std::vector<pragma::CParticleSystemComponent*> &particleSystems);
 		static bool Save(VFilePtrReal &f,const std::vector<pragma::CParticleSystemComponent*> &particleSystems);
+		static bool Save(const std::vector<pragma::CParticleSystemComponent*> &particleSystems,udm::AssetData &outData,std::string &outErr);
 		static bool IsParticleFilePrecached(const std::string &fname);
 		static void InitializeBuffers();
 		static void ClearBuffers();
 		static std::optional<ParticleSystemFileHeader> ReadHeader(NetworkState &nw,const std::string &fileName);
 		static std::optional<ParticleSystemFileHeader> ReadHeader(VFilePtr &f);
 		static bool Precache(std::string fname,bool bReload=false);
+		static bool PrecacheLegacy(std::string fname,bool bReload=false);
 		static const std::vector<std::string> &GetPrecachedParticleSystemFiles();
 		static std::optional<std::string> FindParticleSystemFile(const std::string ptName);
 		static const std::unordered_map<std::string,std::unique_ptr<CParticleSystemData>> &GetCachedParticleSystemData();
@@ -141,6 +143,8 @@ namespace pragma
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual void OnEntitySpawn() override;
 		virtual void SetParticleFile(const std::string &fileName) override;
+		void ToParticleSystemData(CParticleSystemData &outData);
+		static bool LoadFromAssetData(CParticleSystemData &ptData,const udm::AssetData &data,std::string &outErr);
 
 		// Particle
 		// Returns the buffer index for the specified particle. Only particles which are alive have a valid buffer index!
@@ -239,8 +243,8 @@ namespace pragma
 		void SetColorFactor(const Vector4 &colorFactor);
 		
 		void Simulate(double tDelta);
-		void Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,ParticleRenderFlags renderFlags);
-		void RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent *light,uint32_t layerId=0);
+		void Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,ParticleRenderFlags renderFlags);
+		void RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent *light,uint32_t layerId=0);
 		uint32_t GetParticleCount() const;
 		// Same as m_numParticles, minus particles with a radius of 0, alpha of 0 or similar (Invisible particles)
 		uint32_t GetRenderParticleCount() const;
@@ -371,7 +375,7 @@ namespace pragma
 
 		std::vector<ControlPoint> m_controlPoints {};
 		std::vector<ControlPoint> m_controlPointsPrev {};
-		Material *m_material = nullptr;
+		MaterialHandle m_material {};
 		float m_tNextEmission = 0.f;
 		double m_tLastEmission = 0.0;
 		double m_tLifeTime = 0.0;

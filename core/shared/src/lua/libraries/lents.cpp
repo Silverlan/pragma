@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -27,7 +27,7 @@
 #include "pragma/lua/lua_entity_iterator.hpp"
 #include "pragma/lua/sh_lua_component.hpp"
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 void Lua::ents::register_library(lua_State *l)
 {
@@ -118,7 +118,7 @@ int Lua::ents::create_trigger(lua_State *l)
 	if(ent == nullptr)
 		return 0;
 	auto pTrComponent = ent->GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 	{
 		if(ang != nullptr)
 			pTrComponent->SetAngles(*ang);
@@ -129,7 +129,7 @@ int Lua::ents::create_trigger(lua_State *l)
 	if(shape != nullptr)
 	{
 		auto pPhysComponent = ent->GetPhysicsComponent();
-		if(pPhysComponent.valid())
+		if(pPhysComponent != nullptr)
 			pPhysComponent->InitializePhysics(*shape);
 	}
 	lua_pushentity(l,ent);
@@ -194,7 +194,7 @@ int Lua::ents::get_closest(lua_State *l)
 	BaseEntity *entClosest = nullptr;
 	iterate_entities(l,[&dClosest,&entClosest,&origin](BaseEntity *ent) {
 		auto pTransformComponent = ent->GetTransformComponent();
-		if(pTransformComponent.expired())
+		if(!pTransformComponent)
 			return;
 		auto d = uvec::distance_sqr(pTransformComponent->GetPosition(),origin);
 		if(d >= dClosest)
@@ -215,7 +215,7 @@ int Lua::ents::get_farthest(lua_State *l)
 	BaseEntity *entClosest = nullptr;
 	iterate_entities(l,[&dFarthest,&entClosest,&origin](BaseEntity *ent) {
 		auto pTransformComponent = ent->GetTransformComponent();
-		if(pTransformComponent.expired())
+		if(!pTransformComponent)
 			return;
 		auto d = uvec::distance_sqr(pTransformComponent->GetPosition(),origin);
 		if(d <= dFarthest)
@@ -235,7 +235,7 @@ int Lua::ents::get_sorted_by_distance(lua_State *l)
 	std::vector<std::pair<BaseEntity*,float>> ents {};
 	iterate_entities(l,[&ents,&origin](BaseEntity *ent) {
 		auto pTransformComponent = ent->GetTransformComponent();
-		if(pTransformComponent.expired())
+		if(!pTransformComponent)
 			return;
 		auto d = uvec::distance_sqr(pTransformComponent->GetPosition(),origin);
 		ents.push_back({ent,d});
@@ -293,15 +293,16 @@ int Lua::ents::get_all(lua_State *l)
 			std::vector<BaseEntity*> ents {};
 			iterate_entities(l,[&ents](BaseEntity *ent) {ents.push_back(ent);});
 			if(ents.empty())
-				return 0;
-			auto t = Lua::CreateTable(l);
+			{
+				auto t = luabind::newtable(l);
+				t.push(l);
+				return 1;
+			}
+			auto t = luabind::newtable(l);
 			auto idx = 1;
 			for(auto *ent : ents)
-			{
-				Lua::PushInt(l,idx++);
-				ent->GetLuaObject()->push(l);
-				Lua::SetTableValue(l,t);
-			}
+				t[idx++] = *ent->GetLuaObject();
+			t.push(l);
 			return 1;
 		}
 		if(Lua::IsSet(l,2) == false)
@@ -452,12 +453,12 @@ int Lua::ents::get_by_local_index(lua_State *l)
 
 int Lua::ents::find_by_unique_index(lua_State *l)
 {
-	auto uniqueIndex = Lua::CheckInt(l,1);
+	auto uniqueIndex = util::uuid_string_to_bytes(Lua::CheckString(l,1));
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	EntityIterator entIt {*game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
 	auto it = std::find_if(entIt.begin(),entIt.end(),[uniqueIndex](const BaseEntity *ent) {
-		return ent->GetUniqueIndex() == uniqueIndex;
+		return ent->GetUuid() == uniqueIndex;
 	});
 	if(it == entIt.end())
 		return 0;
@@ -687,6 +688,26 @@ int Lua::ents::register_class(lua_State *l)
 	Lua::PushNil(l);
 	Lua::SetGlobal(l,luaClassName);
 	return 0;
+}
+
+int Lua::ents::register_component_net_event(lua_State *l)
+{
+	auto componentId = Lua::CheckInt(l,1);
+	auto *name = Lua::CheckString(l,2);
+
+	auto *state = ::engine->GetNetworkState(l);
+	auto *game = state->GetGameState();
+	auto &componentManager = game->GetEntityComponentManager();
+	auto *componentInfo = componentManager.GetComponentInfo(componentId);
+	if(componentInfo == nullptr)
+	{
+		Con::cwar<<"WARNING: Attempted to register component net event '"<<name<<"' to unknown component type "<<componentId<<"!"<<Con::endl;
+		return 0;
+	}
+
+	auto netName = componentInfo->name +'_' +std::string{name};
+	Lua::PushInt(l,game->SetupNetEvent(netName));
+	return 1;
 }
 
 int Lua::ents::register_component_event(lua_State *l)

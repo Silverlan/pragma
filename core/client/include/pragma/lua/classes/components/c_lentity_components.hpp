@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_LENTITY_COMPONENTS_HPP__
@@ -62,11 +62,13 @@ namespace Lua
 		DLLCLIENT void RenderModel(lua_State *l,CRenderHandle &hEnt);
 		DLLCLIENT void SetRenderMode(lua_State *l,CRenderHandle &hEnt,unsigned int mode);
 		DLLCLIENT void GetRenderMode(lua_State *l,CRenderHandle &hEnt);
-		DLLCLIENT void GetRenderBounds(lua_State *l,CRenderHandle &hEnt);
-		DLLCLIENT void GetRenderSphereBounds(lua_State *l,CRenderHandle &hEnt);
-		DLLCLIENT void SetRenderBounds(lua_State *l,CRenderHandle &hEnt,Vector3 &min,Vector3 &max);
-		DLLCLIENT void UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,bool bForceBufferUpdate);
-		DLLCLIENT void UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd);
+		DLLCLIENT void GetLocalRenderBounds(lua_State *l,CRenderHandle &hEnt);
+		DLLCLIENT void GetLocalRenderSphereBounds(lua_State *l,CRenderHandle &hEnt);
+		DLLCLIENT void GetAbsoluteRenderBounds(lua_State *l,CRenderHandle &hEnt);
+		DLLCLIENT void GetAbsoluteRenderSphereBounds(lua_State *l,CRenderHandle &hEnt);
+		DLLCLIENT void SetLocalRenderBounds(lua_State *l,CRenderHandle &hEnt,Vector3 &min,Vector3 &max);
+		// DLLCLIENT void UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,CSceneHandle &hScene,CCameraHandle &hCam,bool bForceBufferUpdate);
+		// DLLCLIENT void UpdateRenderBuffers(lua_State *l,CRenderHandle &hEnt,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,CSceneHandle &hScene,CCameraHandle &hCam);
 		DLLCLIENT void GetRenderBuffer(lua_State *l,CRenderHandle &hEnt);
 		DLLCLIENT void GetBoneBuffer(lua_State *l,CRenderHandle &hEnt);
 		DLLCLIENT void CalcRayIntersection(lua_State *l,CRenderHandle &hComponent,const Vector3 &start,const Vector3 &dir,bool precise);

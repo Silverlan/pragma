@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -34,7 +34,7 @@ void CViewModelComponent::Initialize()
 		auto *pl = c_game->GetLocalPlayer();
 		if(pl == nullptr || pl->GetObserverMode() != OBSERVERMODE::FIRSTPERSON)
 		{
-			shouldDrawData.shouldDraw = CEShouldDraw::ShouldDraw::No;
+			shouldDrawData.shouldDraw = false;
 			return util::EventReply::Handled;
 		}
 		return util::EventReply::Unhandled;
@@ -57,8 +57,7 @@ void CViewModelComponent::Initialize()
 	});
 	BindEventUnhandled(CAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &ent = GetEntity();
-		auto mdlComponent = ent.GetModelComponent();
-		auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+		auto &hMdl = ent.GetModel();
 		if(hMdl != nullptr)
 		{
 			auto anim = hMdl->GetAnimation(static_cast<CEOnAnimationComplete&>(evData.get()).animation);
@@ -68,6 +67,11 @@ void CViewModelComponent::Initialize()
 		auto animComponent = ent.GetAnimatedComponent();
 		if(animComponent.valid())
 			animComponent->PlayActivity(Activity::VmIdle);
+	});
+	BindEventUnhandled(CAnimatedComponent::EVENT_ON_ANIMATION_RESET,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		auto *wepC = GetWeapon();
+		if(wepC)
+			wepC->UpdateDeployState();
 	});
 
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
@@ -102,16 +106,35 @@ float CViewModelComponent::GetViewFOV() const
 		return cvViewFov->GetFloat();
 	return m_viewFov;
 }
-
-void CViewModelComponent::SetViewModelOffset(const Vector3 &offset)
+CPlayerComponent *CViewModelComponent::GetPlayer()
 {
-	m_viewModelOffset = offset;
 	auto &ent = GetEntity();
 	auto pAttComponent = ent.GetComponent<CAttachableComponent>();
 	auto *parent = pAttComponent.valid() ? pAttComponent->GetParent() : nullptr;
 	if(parent == nullptr || parent->GetEntity().IsPlayer() == false)
+		return nullptr;
+	return static_cast<pragma::CPlayerComponent*>(parent->GetEntity().GetPlayerComponent().get());
+}
+CWeaponComponent *CViewModelComponent::GetWeapon()
+{
+	auto *pl = GetPlayer();
+	if(pl == nullptr)
+		return nullptr;
+	auto charC = pl->GetEntity().GetComponent<CCharacterComponent>();
+	if(charC.expired())
+		return nullptr;
+	auto *weapon = charC->GetActiveWeapon();
+	auto weaponC = weapon ? weapon->GetComponent<CWeaponComponent>() : util::WeakHandle<CWeaponComponent>{};
+	return weaponC.get();
+}
+
+void CViewModelComponent::SetViewModelOffset(const Vector3 &offset)
+{
+	m_viewModelOffset = offset;
+	auto *pl = GetPlayer();
+	if(pl == nullptr)
 		return;
-	static_cast<pragma::CPlayerComponent*>(parent->GetEntity().GetPlayerComponent().get())->UpdateViewModelTransform();
+	pl->UpdateViewModelTransform();
 }
 const Vector3 &CViewModelComponent::GetViewModelOffset() const {return m_viewModelOffset;}
 luabind::object CViewModelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CViewModelComponentHandleWrapper>(l);}

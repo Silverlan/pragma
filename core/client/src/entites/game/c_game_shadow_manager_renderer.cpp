@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -10,6 +10,7 @@
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/render_queue.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/console/c_cvar.h"
@@ -20,11 +21,11 @@
 #include <image/prosper_render_target.hpp>
 #include <prosper_command_buffer.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 using namespace pragma;
-#pragma optimize("",off)
+
 ShadowRenderer::ShadowRenderer()
 {
 	m_shader = c_game->GetGameShader(CGame::GameShader::Shadow);
@@ -36,7 +37,7 @@ ShadowRenderer::ShadowRenderer()
 
 	m_octreeCallbacks.nodeCallback = [this](const OcclusionOctree<std::shared_ptr<ModelMesh>>::Node &node) -> bool {
 		auto &bounds = node.GetWorldBounds();
-		return Intersection::AABBSphere(bounds.first,bounds.second,m_lightSourceData.position,m_lightSourceData.radius);
+		return umath::intersection::aabb_sphere(bounds.first,bounds.second,m_lightSourceData.position,m_lightSourceData.radius);
 	};
 
 	m_octreeCallbacks.entityCallback = [this](const CBaseEntity &ent,uint32_t renderFlags) {
@@ -53,10 +54,11 @@ ShadowRenderer::ShadowRenderer()
 		info.entity = &ent;
 		info.renderFlags = (m_lightSourceData.type == util::pragma::LightType::Point) ? renderFlags : 1u; // Spot-lights only have 1 layer, so we can ignore the flags
 		auto pRenderComponent = ent.GetRenderComponent();
-		if(pRenderComponent.valid())
+		if(pRenderComponent)
 		{
 			// Make sure entity buffer data is up to date
-			pRenderComponent->UpdateRenderData(m_lightSourceData.drawCmd);
+			// TODO
+			//pRenderComponent->UpdateRenderData(m_lightSourceData.drawCmd,{}); // TODO: Camera position
 		}
 	};
 
@@ -98,8 +100,7 @@ void ShadowRenderer::UpdateWorldShadowCasters(std::shared_ptr<prosper::IPrimaryC
 	auto &entWorld = static_cast<CBaseEntity&>(pWorld->GetEntity());
 	if(entWorld.IsInScene(*scene) == false)
 		return;
-	auto mdlComponent = entWorld.GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = entWorld.GetModel();
 	auto meshTree = mdl ? static_cast<pragma::CWorldComponent*>(pWorld)->GetMeshTree() : nullptr;
 	if(meshTree == nullptr)
 		return;
@@ -124,17 +125,17 @@ void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimary
 	// Iterate all entities in the scene and populate m_shadowCasters
 	octree.IterateObjects([this](const OcclusionOctree<CBaseEntity*>::Node &node) -> bool {
 		auto &bounds = node.GetWorldBounds();
-		return Intersection::AABBSphere(bounds.first,bounds.second,m_lightSourceData.position,m_lightSourceData.radius);
+		return umath::intersection::aabb_sphere(bounds.first,bounds.second,m_lightSourceData.position,m_lightSourceData.radius);
 		},[this,&light,&drawCmd,scene](const CBaseEntity *ent) {
 			auto pRenderComponent = ent->GetRenderComponent();
-			if(pRenderComponent.expired() || ent->IsInScene(*scene) == false || pRenderComponent->ShouldDrawShadow(m_lightSourceData.position) == false || ent->IsWorld() == true)
+			if(!pRenderComponent || ent->IsInScene(*scene) == false || pRenderComponent->ShouldDrawShadow() == false || ent->IsWorld() == true)
 				return;
 			uint32_t renderFlags = 0;
 			if(light.ShouldPass(*ent,renderFlags) == false)
 				return;
 			m_octreeCallbacks.entityCallback(*ent,renderFlags);
-			auto &mdlComponent = pRenderComponent->GetModelComponent();
-			if(mdlComponent.valid())
+			auto *mdlComponent = pRenderComponent->GetModelComponent();
+			if(mdlComponent)
 			{
 				auto mdl = mdlComponent->GetModel();
 				for(auto &mesh : static_cast<pragma::CModelComponent&>(*mdlComponent).GetLODMeshes())
@@ -159,6 +160,8 @@ void ShadowRenderer::UpdateEntityShadowCasters(std::shared_ptr<prosper::IPrimary
 
 bool ShadowRenderer::UpdateShadowCasters(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightComponent &light,pragma::CLightComponent::ShadowMapType smType)
 {
+	// TODO: Remove me
+#if 0
 	m_shadowCasters.clear();
 	auto hShadowMap = light.GetShadowMap(smType);
 	if(hShadowMap.expired())
@@ -206,6 +209,7 @@ bool ShadowRenderer::UpdateShadowCasters(std::shared_ptr<prosper::IPrimaryComman
 		UpdateEntityShadowCasters(drawCmd,light);
 		break;
 	}
+#endif
 	return true;
 }
 
@@ -215,6 +219,8 @@ ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(
 	pragma::ShaderShadow &shader,bool bTranslucent
 )
 {
+	// TODO
+#if 0
 	auto bRetTranslucent = false;
 	if(shader.BeginDraw(drawCmd) == false)
 		return ShadowRenderer::RenderResultFlags::None;
@@ -255,6 +261,8 @@ ShadowRenderer::RenderResultFlags ShadowRenderer::RenderShadows(
 	}
 	shader.EndDraw();
 	return hasTranslucents ? ShadowRenderer::RenderResultFlags::TranslucentPending : ShadowRenderer::RenderResultFlags::None;
+#endif
+	return RenderResultFlags::None;
 }
 
 static CVar cvParticleQuality = GetClientConVar("cl_render_particle_quality");
@@ -283,8 +291,9 @@ void ShadowRenderer::RenderShadows(
 	auto &tex = smRt->GetTexture();
 	auto *scene = c_game->GetScene();
 	auto *renderer = scene ? scene->GetRenderer() : nullptr;
-	if(renderer->IsRasterizationRenderer() == false)
-		renderer = nullptr;
+	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+	if(raster.expired())
+		return;
 
 	auto &img = tex.GetImage();
 	auto numLayers = hShadowMap->GetLayerCount();
@@ -296,11 +305,12 @@ void ShadowRenderer::RenderShadows(
 		auto *framebuffer = hShadowMap->GetFramebuffer(layerId);
 
 		const prosper::ClearValue clearVal {prosper::ClearDepthStencilValue{1.f}};
-		if(drawCmd->RecordBeginRenderPass(*smRt,layerId,&clearVal) == false)
+		if(drawCmd->RecordBeginRenderPass(*smRt,layerId,prosper::IPrimaryCommandBuffer::RenderPassFlags::None,&clearVal) == false)
 			continue;
-		auto renderResultFlags = RenderShadows(drawCmd,light,layerId,depthMVP,shader,false);
-		if(umath::is_flag_set(renderResultFlags,RenderResultFlags::TranslucentPending) && shaderTransparent != nullptr)
-			RenderShadows(drawCmd,light,layerId,depthMVP,shader,true); // Draw translucent shadows
+		// TODO
+		//auto renderResultFlags = RenderShadows(drawCmd,light,layerId,depthMVP,shader,false);
+		//if(umath::is_flag_set(renderResultFlags,RenderResultFlags::TranslucentPending) && shaderTransparent != nullptr)
+		//	RenderShadows(drawCmd,light,layerId,depthMVP,shader,true); // Draw translucent shadows
 		if(drawParticleShadows == true && renderer)
 		{
 			auto *scene = c_game->GetRenderScene();
@@ -311,7 +321,7 @@ void ShadowRenderer::RenderShadows(
 			{
 				auto p = ent->GetComponent<pragma::CParticleSystemComponent>();
 				if(p.valid() && p->GetCastShadows() == true)
-					p->RenderShadow(drawCmd,*scene,*static_cast<pragma::rendering::RasterizationRenderer*>(renderer),&light,layerId);
+					p->RenderShadow(drawCmd,*scene,*raster,&light,layerId);
 			}
 		}
 		drawCmd->RecordEndRenderPass();
@@ -341,4 +351,3 @@ void ShadowRenderer::RenderShadows(std::shared_ptr<prosper::IPrimaryCommandBuffe
 	RenderShadows(drawCmd,light,pragma::CLightComponent::ShadowMapType::Static,type,bDrawParticleShadows);
 	RenderShadows(drawCmd,light,pragma::CLightComponent::ShadowMapType::Dynamic,type,bDrawParticleShadows);
 }
-#pragma optimize("",on)

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -51,11 +51,11 @@ void CEnvSoundProbeComponent::OnEntitySpawn()
 
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return;
 	auto &origin = pTrComponent->GetPosition();
 	auto mdlComponent = ent.GetModelComponent();
-	if(mdlComponent.expired() || mdlComponent->GetModel() == nullptr)
+	if(!mdlComponent || mdlComponent->GetModel() == nullptr)
 	{
 		// Use radius
 		s_probes.push_back({origin,origin,Placement::Centroid,m_radius,0.f});
@@ -64,7 +64,7 @@ void CEnvSoundProbeComponent::OnEntitySpawn()
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	Vector3 min {};
 	Vector3 max {};
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->GetCollisionBounds(&min,&max);
 	s_probes.push_back({origin +min,origin +max,Placement::UniformFloor,m_spacing,m_heightAboveFloor});
 	if(s_probeCallback.IsValid() == false)

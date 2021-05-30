@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -17,7 +17,7 @@
 
 REGISTER_PARTICLE_RENDERER(blob,CParticleRendererBlob);
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 decltype(CParticleRendererBlob::s_bShowNeighborLinks) CParticleRendererBlob::s_bShowNeighborLinks = false;
@@ -494,7 +494,7 @@ void CParticleRendererBlob::UpdateAdjacentParticles(const Vulkan::Buffer &blobIn
 	UpdateDebugNeighborLinks();
 }
 */ // prosper TODO
-void CParticleRendererBlob::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags)
+void CParticleRendererBlob::Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::ParticleRenderFlags renderFlags)
 {
 	/*if(s_dsParticles == nullptr || m_adjacentBlobBuffer == nullptr)
 		return;
@@ -517,7 +517,7 @@ void CParticleRendererBlob::Render(const std::shared_ptr<prosper::IPrimaryComman
 	s_shader->EndDraw();*/ // prosper TODO
 }
 
-void CParticleRendererBlob::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId)
+void CParticleRendererBlob::RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent &light,uint32_t layerId)
 {
 	/*auto &shader = *s_shadowShader;
 	auto &context = c_engine->GetRenderContext();

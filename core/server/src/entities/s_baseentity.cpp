@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/entities/s_baseentity.h"
@@ -28,6 +28,8 @@
 #include "pragma/entities/components/s_physics_component.hpp"
 #include "pragma/entities/components/s_time_scale_component.hpp"
 #include "pragma/entities/components/s_name_component.hpp"
+#include "pragma/entities/components/s_transform_component.hpp"
+#include "pragma/entities/components/s_generic_component.hpp"
 #include <servermanager/sv_nwm_recipientfilter.h>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
@@ -46,7 +48,7 @@
 extern EntityClassMap<SBaseEntity> *g_ServerEntityFactories;
 extern ServerEntityNetworkMap *g_SvEntityNetworkMap;
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 extern ServerState *server;
 extern SGame *s_game;
 
@@ -63,6 +65,35 @@ void SBaseEntity::DoSpawn()
 	BaseEntity::DoSpawn();
 	Game *game = server->GetGameState();
 	game->SpawnEntity(this);
+}
+
+void SBaseEntity::OnComponentAdded(pragma::BaseEntityComponent &component)
+{
+	BaseEntity::OnComponentAdded(component);
+	if(typeid(component) == typeid(pragma::STransformComponent))
+		m_transformComponent = &static_cast<pragma::STransformComponent&>(component);
+	else if(typeid(component) == typeid(pragma::SPhysicsComponent))
+		m_physicsComponent = &static_cast<pragma::SPhysicsComponent&>(component);
+	else if(typeid(component) == typeid(pragma::SWorldComponent))
+		umath::set_flag(m_stateFlags,StateFlags::HasWorldComponent);
+	else if(typeid(component) == typeid(pragma::SModelComponent))
+		m_modelComponent = &static_cast<pragma::SModelComponent&>(component);
+	else if(typeid(component) == typeid(pragma::SGenericComponent))
+		m_genericComponent = &static_cast<pragma::SGenericComponent&>(component);
+}
+void SBaseEntity::OnComponentRemoved(pragma::BaseEntityComponent &component)
+{
+	BaseEntity::OnComponentRemoved(component);
+	if(typeid(component) == typeid(pragma::SWorldComponent))
+		umath::set_flag(m_stateFlags,StateFlags::HasWorldComponent,false);
+	else if(typeid(component) == typeid(pragma::STransformComponent))
+		m_transformComponent = nullptr;
+	else if(typeid(component) == typeid(pragma::SPhysicsComponent))
+		m_physicsComponent = nullptr;
+	else if(typeid(component) == typeid(pragma::SModelComponent))
+		m_modelComponent = nullptr;
+	else if(typeid(component) == typeid(pragma::SGenericComponent))
+		m_genericComponent = nullptr;
 }
 
 BaseEntity *SBaseEntity::GetClientsideEntity() const
@@ -103,8 +134,8 @@ bool SBaseEntity::IsNetworkLocal() const {return IsServersideOnly();}
 
 void SBaseEntity::SendData(NetPacket &packet,pragma::networking::ClientRecipientFilter &rp)
 {
-	packet->Write<uint64_t>(GetUniqueIndex());
 	packet->Write<uint32_t>(GetSpawnFlags());
+	packet->Write(GetUuid());
 
 	auto &componentManager = s_game->GetEntityComponentManager();
 	auto &components = GetComponents();
@@ -147,6 +178,8 @@ pragma::NetEventId SBaseEntity::RegisterNetEvent(const std::string &name) const
 
 void SBaseEntity::Remove()
 {
+	if(umath::is_flag_set(GetStateFlags(),BaseEntity::StateFlags::Removed))
+		return;
 	BaseEntity::Remove();
 	Game *game = server->GetGameState();
 	game->RemoveEntity(this);
@@ -200,11 +233,6 @@ Bool SBaseEntity::ReceiveNetEvent(pragma::BasePlayerComponent &pl,pragma::NetEve
 	return false;
 }
 
-util::WeakHandle<pragma::BaseModelComponent> SBaseEntity::GetModelComponent() const
-{
-	auto pComponent = GetComponent<pragma::SModelComponent>();
-	return pComponent.valid() ? std::static_pointer_cast<pragma::BaseModelComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BaseModelComponent>{};
-}
 util::WeakHandle<pragma::BaseAnimatedComponent> SBaseEntity::GetAnimatedComponent() const
 {
 	auto pComponent = GetComponent<pragma::SAnimatedComponent>();
@@ -234,11 +262,6 @@ util::WeakHandle<pragma::BasePlayerComponent> SBaseEntity::GetPlayerComponent() 
 {
 	auto pComponent = GetComponent<pragma::SPlayerComponent>();
 	return pComponent.valid() ? std::static_pointer_cast<pragma::BasePlayerComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BasePlayerComponent>{};
-}
-util::WeakHandle<pragma::BasePhysicsComponent> SBaseEntity::GetPhysicsComponent() const
-{
-	auto pComponent = GetComponent<pragma::SPhysicsComponent>();
-	return pComponent.valid() ? std::static_pointer_cast<pragma::BasePhysicsComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BasePhysicsComponent>{};
 }
 util::WeakHandle<pragma::BaseTimeScaleComponent> SBaseEntity::GetTimeScaleComponent() const
 {

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -19,8 +19,9 @@
 #include "pragma/gui/wgui_luainterface.h"
 #include <pragma/lua/lua_call.hpp>
 #include <pragma/lua/classes/ldef_vector.h>
+#include <prosper_window.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 int Lua::gui::create(lua_State *l)
@@ -184,7 +185,14 @@ int Lua::gui::register_element(lua_State *l)
 
 int Lua::gui::get_base_element(lua_State *l)
 {
-	auto *el = WGUI::GetInstance().GetBaseElement();
+	::WIBase *el = nullptr;
+	if(Lua::IsSet(l,1))
+	{
+		auto &window = Lua::Check<prosper::Window>(l,1);
+		el = WGUI::GetInstance().GetBaseElement(&window);
+	}
+	else
+		el = WGUI::GetInstance().GetBaseElement();
 	if(el == NULL)
 		return 0;
 	auto o = WGUILuaInterface::GetLuaObject(l,*el);
@@ -226,6 +234,9 @@ int Lua::gui::get_element_under_cursor(lua_State *l)
 int Lua::gui::get_element_at_position(lua_State *l,int32_t *optX,int32_t *optY)
 {
 	int32_t argIdx = 1;
+	prosper::Window *window = nullptr;
+	if(Lua::IsType<prosper::Window>(l,argIdx))
+		window = &Lua::Check<prosper::Window>(l,argIdx++);
 	::WIBase *baseElement = nullptr;
 	if(Lua::IsType<WIHandle>(l,argIdx))
 		baseElement = Lua::Check<WIHandle>(l,argIdx++).get();
@@ -251,7 +262,7 @@ int Lua::gui::get_element_at_position(lua_State *l,int32_t *optX,int32_t *optY)
 		};
 		++argIdx;
 	}
-	auto *p = WGUI::GetInstance().GetGUIElement(baseElement,x,y,condition);
+	auto *p = WGUI::GetInstance().GetGUIElement(baseElement,x,y,condition,window);
 	if(p == nullptr)
 		return 0;
 	auto oElement = WGUILuaInterface::GetLuaObject(l,*p);
@@ -351,7 +362,7 @@ int Lua::gui::get_window_size(lua_State *l)
 {
 	auto &context = WGUI::GetInstance().GetContext();
 	auto &window = context.GetWindow();
-	Lua::Push<Vector2i>(l,window.GetSize());
+	Lua::Push<Vector2i>(l,window->GetSize());
 	return 1;
 }
 
@@ -368,12 +379,12 @@ int Lua::gui::inject_mouse_input(lua_State *l)
 		gui.GetMousePos(cursorPos.x,cursorPos.y);
 		auto *cursorPos = Lua::CheckVector2i(l,4);
 		auto &window = c_engine->GetWindow();
-		window.SetCursorPos({cursorPos->x,cursorPos->y});
+		window->SetCursorPos({cursorPos->x,cursorPos->y});
 	}
 	auto &window = c_engine->GetWindow();
 	auto b = gui.HandleMouseInput(window,static_cast<GLFW::MouseButton>(button),static_cast<GLFW::KeyState>(state),static_cast<GLFW::Modifier>(mods));
 	if(bCursorPos == true)
-		window.SetCursorPos(cursorPos);
+		window->SetCursorPos(cursorPos);
 	Lua::PushBool(l,b);
 	return 1;
 }
@@ -408,12 +419,12 @@ int Lua::gui::inject_scroll_input(lua_State *l)
 		gui.GetMousePos(cursorPos.x,cursorPos.y);
 		auto *cursorPos = Lua::CheckVector2i(l,2);
 		auto &window = c_engine->GetWindow();
-		window.SetCursorPos({cursorPos->x,cursorPos->y});
+		window->SetCursorPos({cursorPos->x,cursorPos->y});
 	}
 	auto &window = c_engine->GetWindow();
 	auto b = gui.HandleScrollInput(window,*offset);
 	if(bCursorPos == true)
-		window.SetCursorPos(cursorPos);
+		window->SetCursorPos(cursorPos);
 	Lua::PushBool(l,b);
 	return 1;
 }

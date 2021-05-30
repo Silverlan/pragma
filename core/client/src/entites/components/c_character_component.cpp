@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -43,9 +43,8 @@ void CCharacterComponent::Initialize()
 	BaseCharacterComponent::Initialize();
 	BindEventUnhandled(CAnimatedComponent::EVENT_ON_BLEND_ANIMATION,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &ent = GetEntity();
-		auto mdlComponent = ent.GetModelComponent();
 		auto animComponent = ent.GetAnimatedComponent();
-		auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+		auto &hMdl = ent.GetModel();
 		if(hMdl == nullptr || animComponent.expired())
 			return;
 		// Apply movement blending
@@ -94,7 +93,7 @@ void CCharacterComponent::CreateWaterSplash()
 	auto pSoundEmitterComponent = ent.GetComponent<CSoundEmitterComponent>();
 	auto *pWater = pSubmergibleComponent.valid() ? pSubmergibleComponent->GetWaterEntity() : nullptr;
 	auto pWaterComponent = (pWater != nullptr) ? pWater->GetComponent<CWaterComponent>() : util::WeakHandle<CWaterComponent>{};
-	if(pSoundEmitterComponent.valid() && pTrComponent.valid() && pWaterComponent.valid())
+	if(pSoundEmitterComponent.valid() && pTrComponent != nullptr && pWaterComponent.valid())
 	{
 		auto pos = pTrComponent->GetPosition();
 		pos = pWaterComponent->ProjectToSurface(pos);
@@ -103,7 +102,7 @@ void CCharacterComponent::CreateWaterSplash()
 		if(pt != nullptr)
 		{
 			auto pTrComponent = pt->GetEntity().GetTransformComponent();
-			if(pTrComponent.valid())
+			if(pTrComponent != nullptr)
 			{
 				pTrComponent->SetPosition(pos);
 				Vector3 n;
@@ -112,7 +111,7 @@ void CCharacterComponent::CreateWaterSplash()
 				auto up = uvec::create(n);
 				uvec::normalize(&up);
 				const auto rot = Quat{0.5f,-0.5f,-0.5f,-0.5f};
-				pTrComponent->SetOrientation(uquat::create_look_rotation(uvec::get_perpendicular(up),up) *rot);
+				pTrComponent->SetRotation(uquat::create_look_rotation(uvec::get_perpendicular(up),up) *rot);
 			}
 			pt->SetRemoveOnComplete(true);
 			pt->Start();

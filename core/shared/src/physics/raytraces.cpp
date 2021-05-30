@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -26,21 +26,21 @@
 
 void TraceResult::InitializeMeshes()
 {
-	if(m_meshInfo != nullptr)
+	if(meshInfo != nullptr)
 		return;
-	m_meshInfo = std::make_shared<MeshInfo>();
+	meshInfo = std::make_shared<MeshInfo>();
 	if(entity.IsValid() == false)
 		return;
 	auto mdlComponent = entity->GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto hMdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 	if(hMdl == nullptr)
 		return;
-	hMdl->GetBodyGroupMeshes(mdlComponent->GetBodyGroups(),0u,m_meshInfo->meshes);
+	hMdl->GetBodyGroupMeshes(mdlComponent->GetBodyGroups(),0u,meshInfo->meshes);
 	auto closestDist = std::numeric_limits<float>::max();
 
 	auto pTrComponent = entity->GetTransformComponent();
-	auto origin = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
-	auto rot = pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
+	auto origin = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
+	auto rot = pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity();
 
 	auto startPosLocal = startPosition;
 	uvec::world_to_local(origin,rot,startPosLocal);
@@ -52,24 +52,24 @@ void TraceResult::InitializeMeshes()
 	dir *= maxDist;
 
 	Intersection::LineMeshResult res{};
-	for(auto &mesh : m_meshInfo->meshes)
+	for(auto &mesh : meshInfo->meshes)
 	{
 		Vector3 min,max;
 		mesh->GetBounds(min,max);
 		auto dist = umath::min(maxDist,static_cast<float>(res.hitValue));
 		auto t = 0.f;
-		if(Intersection::LineAABB(startPosLocal,dir,min,max,&t) != Intersection::Result::Intersect || umath::abs(t) > (dist /maxDist))
+		if(umath::intersection::line_aabb(startPosLocal,dir,min,max,&t) != umath::intersection::Result::Intersect || umath::abs(t) > (dist /maxDist))
 			continue;
 		auto &subMeshes = mesh->GetSubMeshes();
 		for(auto &subMesh : subMeshes)
 		{
 			subMesh->GetBounds(min,max);
-			if(Intersection::LineAABB(startPosLocal,dir,min,max,&t) != Intersection::Result::Intersect || umath::abs(t) > (dist /maxDist))
+			if(umath::intersection::line_aabb(startPosLocal,dir,min,max,&t) != umath::intersection::Result::Intersect || umath::abs(t) > (dist /maxDist))
 				continue;
 			if(Intersection::LineMesh(startPosLocal,dir,*subMesh,res,true,nullptr,nullptr) == false || umath::abs(res.hitValue) > (dist /maxDist))
 				continue;
-			m_meshInfo->mesh = mesh.get();
-			m_meshInfo->subMesh = subMesh.get();
+			meshInfo->mesh = mesh.get();
+			meshInfo->subMesh = subMesh.get();
 		}
 	}
 }
@@ -77,15 +77,14 @@ void TraceResult::InitializeMeshes()
 void TraceResult::GetMeshes(ModelMesh **outMesh,ModelSubMesh **outSubMesh)
 {
 	InitializeMeshes();
-	*outMesh = m_meshInfo->mesh;
-	*outSubMesh = m_meshInfo->subMesh;
+	*outMesh = meshInfo->mesh;
+	*outSubMesh = meshInfo->subMesh;
 }
 Material *TraceResult::GetMaterial()
 {
 	if(entity.IsValid() == false)
 		return nullptr;
-	auto mdlComponent = entity->GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = entity->GetModel();
 	if(hMdl == nullptr)
 		return nullptr;
 	ModelMesh *mesh = nullptr;
@@ -103,8 +102,7 @@ bool TraceResult::GetMaterial(std::string &mat)
 {
 	if(entity.IsValid() == false)
 		return false;
-	auto mdlComponent = entity->GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = entity->GetModel();
 	if(hMdl == nullptr)
 		return false;
 	ModelMesh *mesh = nullptr;

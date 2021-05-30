@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -83,9 +83,19 @@ namespace Lua
 	};
 };
 
+static std::ostream &operator<<(std::ostream &out,const PhysObjHandle &o)
+{
+	if(!o.IsValid())
+		out<<"PhysObj[NULL]";
+	else
+		operator<<(out,*o.get());
+	return out;
+}
+
 void Lua::PhysObj::register_class(lua_State *l,luabind::module_ &mod)
 {
 	auto classDef = luabind::class_<PhysObjHandle>("Object");
+	classDef.def(luabind::tostring(luabind::self));
 	classDef.def("IsValid",&IsValid);
 	classDef.def("SetLinearVelocity",&SetLinearVelocity);
 	classDef.def("GetLinearVelocity",&GetLinearVelocity);

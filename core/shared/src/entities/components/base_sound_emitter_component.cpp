@@ -2,14 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
 #include "pragma/entities/components/base_sound_emitter_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/velocity_component.hpp"
-#include "pragma/entities/components/logic_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/lua/luacallback.h"
 #include "pragma/lua/luafunction_call.h"
@@ -37,10 +36,6 @@ void BaseSoundEmitterComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		MaintainSounds();
-	});
-
 	auto &ent = GetEntity();
 	ent.AddComponent("transform");
 }
@@ -57,6 +52,8 @@ void BaseSoundEmitterComponent::StopSounds()
 		al->Stop();
 	}
 	m_sounds.clear();
+
+	SetTickPolicy(TickPolicy::Never);
 }
 
 void BaseSoundEmitterComponent::GetSounds(std::vector<std::shared_ptr<ALSound>> **sounds) {*sounds = &m_sounds;}
@@ -64,8 +61,10 @@ void BaseSoundEmitterComponent::GetSounds(std::vector<std::shared_ptr<ALSound>> 
 bool BaseSoundEmitterComponent::ShouldRemoveSound(ALSound &snd) const
 {
 	// Index 0 = shared sound
-	return (snd.GetIndex() == 0 && snd.IsPlaying() == false) ? true : false;
+	return (/*snd.GetIndex() == 0 && */snd.IsPlaying() == false) ? true : false;
 }
+
+void BaseSoundEmitterComponent::OnTick(double dt) {MaintainSounds();}
 
 void BaseSoundEmitterComponent::MaintainSounds()
 {
@@ -94,6 +93,7 @@ void BaseSoundEmitterComponent::InitializeSound(const std::shared_ptr<ALSound> &
 	UpdateSoundTransform(*snd);
 
 	m_sounds.push_back(ptrSnd);
+	SetTickPolicy(TickPolicy::Always);
 
 	CEOnSoundCreated evData{ptrSnd};
 	BroadcastEvent(EVENT_ON_SOUND_CREATED,evData);

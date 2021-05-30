@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_LCAMERA_H__
@@ -38,37 +38,36 @@ namespace Lua
 		DLLCLIENT void GetCameraDescriptorSet(lua_State *l,CSceneHandle &scene);
 		DLLCLIENT void GetCameraDescriptorSet(lua_State *l,CSceneHandle &scene,uint32_t bindPoint);
 		DLLCLIENT void GetViewCameraDescriptorSet(lua_State *l,CSceneHandle &scene);
-		DLLCLIENT void GetIndex(lua_State *l,CSceneHandle &scene);
+		DLLCLIENT void GetIndex(lua_State *l,const CSceneHandle &scene);
 
 		DLLCLIENT void GetDebugMode(lua_State *l,CSceneHandle &scene);
 		DLLCLIENT void SetDebugMode(lua_State *l,CSceneHandle &scene,uint32_t debugMode);
 		
-		DLLCLIENT void Link(lua_State *l,CSceneHandle &scene,CSceneHandle &sceneOther);
-		DLLCLIENT void UpdateRenderInfo(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo);
+		DLLCLIENT void BuildRenderQueue(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo);
 		DLLCLIENT void RenderPrepass(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode);
-		DLLCLIENT void Render(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode,RenderSystem::RenderFlags renderFlags);
+		DLLCLIENT void Render(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode,RenderFlags renderFlags);
 		DLLCLIENT void Render(lua_State *l,CSceneHandle &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode);
 	};
 	namespace RasterizationRenderer
 	{
-		DLLCLIENT void GetPrepassDepthTexture(lua_State *l,pragma::rendering::RasterizationRenderer &renderer);
-		DLLCLIENT void GetPrepassNormalTexture(lua_State *l,pragma::rendering::RasterizationRenderer &renderer);
+		DLLCLIENT void GetPrepassDepthTexture(lua_State *l,CRasterizationRendererHandle &renderer);
+		DLLCLIENT void GetPrepassNormalTexture(lua_State *l,CRasterizationRendererHandle &renderer);
 
-		DLLCLIENT void GetRenderTarget(lua_State *l,pragma::rendering::RasterizationRenderer &renderer);
-		DLLCLIENT void BeginRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const ::util::DrawSceneInfo &drawSceneInfo);
-		DLLCLIENT void BeginRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const ::util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass &rp);
-		DLLCLIENT void EndRenderPass(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const ::util::DrawSceneInfo &drawSceneInfo);
-		DLLCLIENT void GetPrepassShader(lua_State *l,pragma::rendering::RasterizationRenderer &renderer);
+		DLLCLIENT void GetRenderTarget(lua_State *l,CRasterizationRendererHandle &renderer);
+		DLLCLIENT void BeginRenderPass(lua_State *l,CRasterizationRendererHandle &renderer,const ::util::DrawSceneInfo &drawSceneInfo);
+		DLLCLIENT void BeginRenderPass(lua_State *l,CRasterizationRendererHandle &renderer,const ::util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass &rp);
+		DLLCLIENT void EndRenderPass(lua_State *l,CRasterizationRendererHandle &renderer,const ::util::DrawSceneInfo &drawSceneInfo);
+		DLLCLIENT void GetPrepassShader(lua_State *l,CRasterizationRendererHandle &renderer);
 
-		DLLCLIENT void SetShaderOverride(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const std::string &srcName,const std::string &dstName);
-		DLLCLIENT void ClearShaderOverride(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,const std::string &srcName);
+		DLLCLIENT void SetShaderOverride(lua_State *l,CRasterizationRendererHandle &renderer,const std::string &srcName,const std::string &dstName);
+		DLLCLIENT void ClearShaderOverride(lua_State *l,CRasterizationRendererHandle &renderer,const std::string &srcName);
 
-		DLLCLIENT void SetPrepassMode(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,uint32_t mode);
-		DLLCLIENT void GetPrepassMode(lua_State *l,pragma::rendering::RasterizationRenderer &renderer);
+		DLLCLIENT void SetPrepassMode(lua_State *l,CRasterizationRendererHandle &renderer,uint32_t mode);
+		DLLCLIENT void GetPrepassMode(lua_State *l,CRasterizationRendererHandle &renderer);
 
-		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,CSceneHandle &scene,uint32_t renderMode,pragma::ShaderTextured3DBase &shader,::Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh);
-		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,CSceneHandle &scene,uint32_t renderMode,const std::string &shaderName,::Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh);
-		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,pragma::rendering::RasterizationRenderer &renderer,CSceneHandle &scene,uint32_t renderMode,::Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh);
+		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,CRasterizationRendererHandle &renderer,CSceneHandle &scene,uint32_t renderMode,pragma::ShaderGameWorldLightingPass &shader,::Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh);
+		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,CRasterizationRendererHandle &renderer,CSceneHandle &scene,uint32_t renderMode,const std::string &shaderName,::Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh);
+		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,CRasterizationRendererHandle &renderer,CSceneHandle &scene,uint32_t renderMode,::Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh);
 	};
 };
 

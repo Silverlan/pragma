@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -10,9 +10,9 @@
 #include <sharedutils/util.h>
 
 template<typename TUniformDist,typename T>
-	static TUniformDist to_random_number(const std::string &s,const std::function<T(const std::string&)> &fToValue)
+	static TUniformDist to_random_number(const std::string_view &s,const std::function<T(const std::string_view&)> &fToValue)
 {
-	auto t = s;
+	auto t = std::string{s}; // TODO: Use string_view instead
 	ustring::remove_whitespace(t);
 	if(t.empty() == false && t.at(0) == '{')
 	{
@@ -43,7 +43,7 @@ void util::to_random_float(const std::string &s,float &outF0,float &outF1)
 }
 std::uniform_real_distribution<float> util::to_random_float(const std::string &s)
 {
-	return to_random_number<std::uniform_real_distribution<float>,float>(s,static_cast<float(*)(const std::string&)>(util::to_float));
+	return to_random_number<std::uniform_real_distribution<float>,float>(s,static_cast<float(*)(const std::string_view&)>(util::to_float));
 }
 void util::to_random_int(const std::string &s,int32_t &outI0,int32_t &outI1)
 {
@@ -53,5 +53,5 @@ void util::to_random_int(const std::string &s,int32_t &outI0,int32_t &outI1)
 }
 std::uniform_int_distribution<int32_t> util::to_random_int(const std::string &s)
 {
-	return to_random_number<std::uniform_int_distribution<int32_t>,int32_t>(s,static_cast<int32_t(*)(const std::string&)>(util::to_int));
+	return to_random_number<std::uniform_int_distribution<int32_t>,int32_t>(s,static_cast<int32_t(*)(const std::string_view&)>(util::to_int));
 }

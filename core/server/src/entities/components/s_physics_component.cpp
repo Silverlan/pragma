@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_physics_component.hpp"
@@ -91,6 +91,16 @@ void SPhysicsComponent::SetCollisionsEnabled(bool b)
 	p->Write<bool>(b);
 	ent.SendNetEvent(m_netEvSetCollisionsEnabled,p,pragma::networking::Protocol::SlowReliable);
 }
+void SPhysicsComponent::SetSimulationEnabled(bool b)
+{
+	if(b == GetSimulationEnabled())
+		return;
+	BasePhysicsComponent::SetSimulationEnabled(b);
+	auto &ent = static_cast<SBaseEntity&>(GetEntity());
+	NetPacket p {};
+	p->Write<bool>(b);
+	ent.SendNetEvent(m_netEvSetSimEnabled,p,pragma::networking::Protocol::SlowReliable);
+}
 void SPhysicsComponent::SetCollisionType(COLLISIONTYPE collisiontype)
 {
 	BasePhysicsComponent::SetCollisionType(collisiontype);
@@ -117,17 +127,17 @@ void SPhysicsComponent::SetCollisionFilter(CollisionMask filterGroup,CollisionMa
 	}
 }
 
-void SPhysicsComponent::PostPhysicsSimulate()
+bool SPhysicsComponent::PostPhysicsSimulate()
 {
-	BasePhysicsComponent::PostPhysicsSimulate();
+	auto keepAwake = BasePhysicsComponent::PostPhysicsSimulate();
 	if(GetPhysicsType() != PHYSICSTYPE::SOFTBODY)
-		return;
+		return keepAwake;
 #ifdef ENABLE_DEPRECATED_PHYSICS
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	auto *phys = GetPhysicsObject();
 	auto *entCl = ent.GetClientsideEntity();
 	auto pPhysComponent = (entCl != nullptr) ? entCl->GetPhysicsComponent() : util::WeakHandle<BasePhysicsComponent>{};
-	auto *physCl = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	auto *physCl = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(phys == nullptr || physCl == nullptr)
 		return;
 	// Only executed on listen servers; Serverside soft-body data will be transferred to client directly
@@ -159,4 +169,5 @@ void SPhysicsComponent::PostPhysicsSimulate()
 		}
 	}
 #endif
+	return keepAwake;
 }

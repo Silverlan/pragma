@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_CVAR_GLOBAL_FUNCTIONS_H__
@@ -24,10 +24,12 @@ DLLCLIENT void CMD_status_cl(NetworkState *state,pragma::BasePlayerComponent *pl
 DLLCLIENT void CMD_screenshot(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 DLLCLIENT void CMD_shader_reload(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 DLLCLIENT void CMD_shader_list(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
+DLLCLIENT void CMD_shader_optimize(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 DLLCLIENT void CMD_debug_light_shadowmap(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 DLLCLIENT void CMD_debug_glow_bloom(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 DLLCLIENT void CMD_debug_hdr_bloom(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 DLLCLIENT void CMD_debug_render_octree_dynamic_print(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
+DLLCLIENT void CMD_debug_render_octree_dynamic_find(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 DLLCLIENT void CMD_debug_render_octree_static_print(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 DLLCLIENT void CMD_debug_ai_schedule_print(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 DLLCLIENT void CMD_debug_ai_schedule(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
@@ -77,12 +79,13 @@ namespace Console
 		DLLCLIENT void debug_lightmaps(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 		DLLCLIENT void debug_particle_alpha_mode(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 		DLLCLIENT void debug_font_glyph_map(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
+		DLLCLIENT void debug_render_depth_buffer(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 
 		DLLCLIENT void debug_audio_aux_effect(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 		DLLCLIENT void debug_audio_sounds(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 		DLLCLIENT void cl_steam_audio_reload_scene(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 
-		DLLCENGINE void cl_gpu_timer_queries_dump(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
+		DLLCLIENT void cl_gpu_timer_queries_dump(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 
 		DLLCLIENT void map_build_reflection_probes(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);
 		DLLCLIENT void map_rebuild_lightmaps(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv);

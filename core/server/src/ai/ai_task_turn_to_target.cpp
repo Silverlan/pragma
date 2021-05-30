@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/ai/ai_task_turn_to_target.h"
@@ -47,7 +47,7 @@ bool ai::TaskTurnToTarget::IsFacingTarget(pragma::SAIComponent &ai,const Vector3
 		return false;
 	auto &ent = ai.GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	return (pTrComponent.valid() && pTrComponent->GetDotProduct(pos) >= *m_targetAng) ? true : false;
+	return (pTrComponent != nullptr && pTrComponent->GetDotProduct(pos) >= *m_targetAng) ? true : false;
 }
 
 void ai::TaskTurnToTarget::Print(const Schedule *sched,std::ostream &o) const

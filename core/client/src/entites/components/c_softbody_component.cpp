@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -12,16 +12,17 @@
 #include <pragma/physics/environment.hpp>
 #include <pragma/physics/collisionmesh.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
 void CSoftBodyComponent::Initialize()
 {
 	BaseSoftBodyComponent::Initialize();
-	BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		UpdateSoftBodyGeometry(); // TODO: Is this update ALWAYS required?
-	});
+	// TODO
+	//BindEventUnhandled(CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	//	UpdateSoftBodyGeometry(); // TODO: Is this update ALWAYS required?
+	//});
 }
 luabind::object CSoftBodyComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CSoftBodyComponentHandleWrapper>(l);}
 bool CSoftBodyComponent::InitializeSoftBodyData()

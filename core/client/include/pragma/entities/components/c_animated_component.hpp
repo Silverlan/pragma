@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_ANIMATED_COMPONENT_HPP__
@@ -13,6 +13,7 @@
 #include <pragma/entities/components/base_animated_component.hpp>
 
 struct Eyeball;
+namespace prosper {class SwapBuffer; class SwapDescriptorSet;};
 namespace pragma
 {
 	void initialize_articulated_buffers();
@@ -27,7 +28,8 @@ namespace pragma
 		enum class StateFlags : uint8_t
 		{
 			None = 0u,
-			BoneBufferDirty = 1u
+			BoneBufferDirty = 1u,
+			EnableSkeletonUpdateCallbacks = BoneBufferDirty<<1u
 		};
 
 		static ComponentEventId EVENT_ON_SKELETON_UPDATED;
@@ -42,12 +44,14 @@ namespace pragma
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
-
-		std::weak_ptr<prosper::IBuffer> GetBoneBuffer() const;
+		
+		prosper::SwapBuffer *GetSwapBoneBuffer();
+		const prosper::SwapBuffer *GetSwapBoneBuffer() const {return const_cast<CAnimatedComponent*>(this)->GetSwapBoneBuffer();}
+		const prosper::IBuffer *GetBoneBuffer() const;
 		const std::vector<Mat4> &GetBoneMatrices() const;
 		std::vector<Mat4> &GetBoneMatrices();
-		void UpdateBoneMatrices();
-		void UpdateBoneBuffer(prosper::IPrimaryCommandBuffer &commandBuffer);
+		void UpdateBoneMatricesMT();
+		void UpdateBoneBuffer(prosper::IPrimaryCommandBuffer &commandBuffer,bool flagAsDirty=false);
 		void InitializeBoneBuffer();
 		std::optional<Mat4> GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 *optOutNormalOffset=nullptr,float *optOutDelta=nullptr) const;
 		virtual std::optional<Mat4> GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId) const override;
@@ -55,14 +59,16 @@ namespace pragma
 		uint32_t OnSkeletonUpdated();
 		bool MaintainAnimations(double dt) override;
 
+		void SetSkeletonUpdateCallbacksEnabled(bool enabled);
+		bool AreSkeletonUpdateCallbacksEnabled() const;
 		void SetBoneBufferDirty();
 	protected:
-		virtual void OnModelChanged(const std::shared_ptr<Model> &mdl) override;
+		virtual void ResetAnimation(const std::shared_ptr<Model> &mdl) override;
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	private:
-		std::shared_ptr<prosper::IBuffer> m_boneBuffer = nullptr;
+		std::shared_ptr<prosper::SwapBuffer> m_boneBuffer = nullptr;
 		std::vector<Mat4> m_boneMatrices;
-		std::shared_ptr<prosper::IDescriptorSetGroup> m_boneDescSetGroup = nullptr;
+		std::shared_ptr<prosper::SwapDescriptorSet> m_boneDescSetGroup = nullptr;
 		StateFlags m_stateFlags = StateFlags::BoneBufferDirty;
 	};
 
@@ -81,9 +87,9 @@ namespace pragma
 	struct DLLCLIENT CEOnBoneBufferInitialized
 		: public ComponentEvent
 	{
-		CEOnBoneBufferInitialized(const std::shared_ptr<prosper::IBuffer> &buffer);
+		CEOnBoneBufferInitialized(const std::shared_ptr<prosper::SwapBuffer> &buffer);
 		virtual void PushArguments(lua_State *l) override;
-		std::shared_ptr<prosper::IBuffer> buffer;
+		std::shared_ptr<prosper::SwapBuffer> buffer;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::CAnimatedComponent::StateFlags)

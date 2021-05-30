@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -21,8 +21,9 @@
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/lua/lua_component_event.hpp"
 #include <sharedutils/datastream.h>
+#include <udm.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 namespace Lua
 {
@@ -87,6 +88,22 @@ void Game::RegisterLuaEntityComponent(luabind::class_<BaseEntityComponentHandleW
 	}));
 	def.def("GetEntity",&Lua::BaseEntityComponent::GetEntity);
 	def.def("GetComponentId",&Lua::BaseEntityComponent::GetComponentId);
+	def.def("SetTickPolicy",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,pragma::TickPolicy)>([](lua_State *l,BaseEntityComponentHandle &hComponent,pragma::TickPolicy tickPolicy) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->SetTickPolicy(tickPolicy);
+	}));
+	def.def("GetTickPolicy",static_cast<pragma::TickPolicy(*)(lua_State*,BaseEntityComponentHandle&)>([](lua_State *l,BaseEntityComponentHandle &hComponent) -> pragma::TickPolicy {
+		pragma::Lua::check_component(l,hComponent);
+		return hComponent->GetTickPolicy();
+	}));
+	def.def("GetNextTick",static_cast<double(*)(lua_State*,BaseEntityComponentHandle&)>([](lua_State *l,BaseEntityComponentHandle &hComponent) -> double {
+		pragma::Lua::check_component(l,hComponent);
+		return hComponent->GetNextTick();
+	}));
+	def.def("SetNextTick",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,double)>([](lua_State *l,BaseEntityComponentHandle &hComponent,double dt) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->SetNextTick(dt);
+	}));
 	def.def("IsValid",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&)>([](lua_State *l,BaseEntityComponentHandle &hComponent) {
 		Lua::PushBool(l,hComponent.expired() == false);
 	}));
@@ -151,24 +168,23 @@ void Game::RegisterLuaEntityComponent(luabind::class_<BaseEntityComponentHandleW
 			hComponent->InjectEvent(eventId,luaEvent);
 		}
 	}));
-	def.def("Save",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,DataStream&)>([](lua_State *l,BaseEntityComponentHandle &hComponent,DataStream &ds) {
+	def.def("Save",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,udm::LinkedPropertyWrapper&)>([](lua_State *l,BaseEntityComponentHandle &hComponent,udm::LinkedPropertyWrapper &udm) {
 		pragma::Lua::check_component(l,hComponent);
-		hComponent->Save(ds);
+		hComponent->Save(udm);
 	}));
-	def.def("Load",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,DataStream&)>([](lua_State *l,BaseEntityComponentHandle &hComponent,DataStream &ds) {
+	def.def("Load",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,udm::LinkedPropertyWrapper&)>([](lua_State *l,BaseEntityComponentHandle &hComponent,udm::LinkedPropertyWrapper &udm) {
 		pragma::Lua::check_component(l,hComponent);
-		hComponent->Load(ds);
+		hComponent->Load(udm);
 	}));
 	def.def("Copy",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,BaseEntityComponentHandle&)>([](lua_State *l,BaseEntityComponentHandle &hComponent,BaseEntityComponentHandle &hComponentOther) {
 		pragma::Lua::check_component(l,hComponent);
 		pragma::Lua::check_component(l,hComponentOther);
 		if(hComponent->GetComponentId() != hComponentOther->GetComponentId() || hComponent.get() == hComponentOther.get())
 			return;
-		DataStream ds {};
-		ds->SetOffset(0);
-		hComponent->Save(ds);
-		ds->SetOffset(0);
-		hComponentOther->Load(ds);
+		auto el = udm::Property::Create<udm::Element>();
+		udm::LinkedPropertyWrapper prop {*el};
+		hComponent->Save(prop);
+		hComponentOther->Load(prop);
 	}));
 	def.add_static_constant("FREGISTER_NONE",umath::to_integral(pragma::ComponentFlags::None));
 	def.add_static_constant("FREGISTER_BIT_NETWORKED",umath::to_integral(pragma::ComponentFlags::Networked));

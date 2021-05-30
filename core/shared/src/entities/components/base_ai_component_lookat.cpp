@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -22,7 +22,7 @@ void BaseAIComponent::LookAtStep(float tDelta)
 		return;
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(!pTrComponent)
 		return;
 	auto *nw = ent.GetNetworkState();
 	auto *game = nw->GetGameState();
@@ -32,7 +32,7 @@ void BaseAIComponent::LookAtStep(float tDelta)
 	Vector3 pos = {};
 	auto rot = uquat::identity();
 	pos = pTrComponent->GetEyePosition();
-	rot = pTrComponent->GetOrientation();
+	rot = pTrComponent->GetRotation();
 	//if(ent.GetLocalBonePosition(m_neckInfo.boneId,pos,rot) == false)
 	//	return;
 	//ent.LocalToWorld(&pos,&rot);
@@ -44,7 +44,7 @@ void BaseAIComponent::LookAtStep(float tDelta)
 		auto dir = tgtPos -pos;
 		uvec::normalize(&dir);
 
-		auto rotInv = pTrComponent->GetOrientation();
+		auto rotInv = pTrComponent->GetRotation();
 		uquat::inverse(rotInv);
 		ang = EulerAngles(rotInv *uquat::create_look_rotation(dir,pTrComponent->GetUp()));
 		// Deprecated
@@ -55,9 +55,8 @@ void BaseAIComponent::LookAtStep(float tDelta)
 	auto turnAcceleration = maxTurnSpeed /fadeTime; // Reach full acceleration after x seconds
 	m_neckInfo.neckTurned = false;
 
-	auto mdlComponent = ent.GetModelComponent();
 	auto animComponent = ent.GetAnimatedComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr || animComponent.expired())
 		return;
 	std::array<int32_t,2> blendControllers = {0,0};
@@ -113,7 +112,7 @@ void BaseAIComponent::SetLookTarget(const BaseEntity &ent,float t)
 		return;
 	auto pTrComponentEnt = ent.GetTransformComponent();
 	m_neckInfo.lookTargetType = BaseAIComponent::LookTargetType::Entity;
-	m_neckInfo.lookTarget = pTrComponentEnt.valid() ? pTrComponentEnt->GetEyePosition() : Vector3{};
+	m_neckInfo.lookTarget = pTrComponentEnt ? pTrComponentEnt->GetEyePosition() : Vector3{};
 	m_neckInfo.hEntityLookTarget = ent.GetHandle();
 
 	OnLookTargetChanged();
@@ -128,7 +127,7 @@ Vector3 BaseAIComponent::GetLookTarget() const
 		{
 			if(m_neckInfo.hEntityLookTarget.IsValid() == false)
 				return uvec::ORIGIN;
-			return m_neckInfo.hEntityLookTarget.get()->GetTransformComponent().valid() ? m_neckInfo.hEntityLookTarget.get()->GetCenter() : uvec::ORIGIN;
+			return m_neckInfo.hEntityLookTarget.get()->GetTransformComponent() ? m_neckInfo.hEntityLookTarget.get()->GetCenter() : uvec::ORIGIN;
 		}
 		default:
 			return uvec::ORIGIN;

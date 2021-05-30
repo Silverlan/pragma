@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __BASE_ATTACHABLE_COMPONENT_HPP__
 #define __BASE_ATTACHABLE_COMPONENT_HPP__
@@ -33,7 +33,7 @@ namespace pragma
 
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
-		void UpdateAttachmentOffset();
+		void UpdateAttachmentOffset(bool invokeUpdateEvents=true);
 
 		AttachmentData *AttachToEntity(BaseEntity *ent,const AttachmentInfo &attInfo={});
 		AttachmentData *AttachToBone(BaseEntity *ent,uint32_t boneID,const AttachmentInfo &attInfo={});
@@ -53,10 +53,13 @@ namespace pragma
 		std::optional<umath::Transform> GetLocalPose() const;
 		void SetLocalPose(const umath::Transform &pose);
 
+		virtual void OnTick(double dt) override;
+
 		void GetChildren(std::vector<BaseEntity*> &children) const;
 		const std::vector<BaseEntity*> &GetChildren() const;
 	protected:
 		BaseAttachableComponent(BaseEntity &ent);
+		virtual void OnAttachmentChanged() {}
 		virtual AttachmentData *SetupAttachment(BaseEntity *ent,const AttachmentInfo &attInfo);
 		virtual void UpdateViewAttachmentOffset(BaseEntity *ent,pragma::BaseCharacterComponent &pl,Vector3 &pos,Quat &rot,Bool bYawOnly=false) const;
 		virtual void OnEntitySpawn() override;
@@ -69,8 +72,7 @@ namespace pragma
 		float m_tLastAttachmentUpdate = 0.f;
 		std::unique_ptr<AttachmentData> m_attachment = nullptr;
 		std::string m_parentName = {};
-		CallbackHandle m_posChangeCallback = {};
-		CallbackHandle m_rotChangeCallback = {};
+		CallbackHandle m_poseChangeCallback = {};
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseAttachableComponent::StateFlags)

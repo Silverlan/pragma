@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -11,11 +11,12 @@
 #include "pragma/model/model.h"
 #include "pragma/model/modelmesh.h"
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 void Lua::ModelMesh::register_class(luabind::class_<::ModelMesh> &classDef)
 {
 	classDef.def(luabind::const_self == luabind::const_self);
+	classDef.def(luabind::tostring(luabind::self));
 	classDef.def("GetVertexCount",&Lua::ModelMesh::GetVertexCount);
 	classDef.def("GetTriangleVertexCount",&Lua::ModelMesh::GetTriangleVertexCount);
 	classDef.def("GetTriangleCount",&Lua::ModelMesh::GetTriangleCount);
@@ -39,6 +40,12 @@ void Lua::ModelMesh::register_class(luabind::class_<::ModelMesh> &classDef)
 	}));
 	classDef.def("ClearSubMeshes",static_cast<void(*)(lua_State*,::ModelMesh&)>([](lua_State *l,::ModelMesh &mesh) {
 		mesh.GetSubMeshes().clear();
+	}));
+	classDef.def("RemoveSubMesh",static_cast<void(*)(lua_State*,::ModelMesh&,uint32_t)>([](lua_State *l,::ModelMesh &mesh,uint32_t i) {
+		auto &subMeshes = mesh.GetSubMeshes();
+		if(i >= subMeshes.size())
+			return;
+		subMeshes.erase(subMeshes.begin() +i);
 	}));
 	classDef.def("SetSubMeshes",static_cast<void(*)(lua_State*,::ModelMesh&,luabind::object)>([](lua_State *l,::ModelMesh &mesh,luabind::object tSubMeshes) {
 		auto idxSubMeshes = 2;
@@ -127,6 +134,7 @@ void Lua::ModelMesh::Scale(lua_State *l,::ModelMesh &mdl,const Vector3 &scale) {
 void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef)
 {
 	classDef.def(luabind::const_self == luabind::const_self);
+	classDef.def(luabind::tostring(luabind::self));
 	classDef.def("GetSkinTextureIndex",&Lua::ModelSubMesh::GetSkinTextureIndex);
 	classDef.def("FlipTriangleWindingOrder",&Lua::ModelSubMesh::FlipTriangleWindingOrder);
 	classDef.def("GetVertexCount",&Lua::ModelSubMesh::GetVertexCount);
@@ -173,6 +181,12 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("ApplyUVMapping",static_cast<void(*)(lua_State*,::ModelSubMesh&,::Model&,const Vector3&,const Vector3&,float,float,float,float)>(&Lua::ModelSubMesh::ApplyUVMapping));
 	classDef.def("ApplyUVMapping",static_cast<void(*)(lua_State*,::ModelSubMesh&,const Vector3&,const Vector3&,uint32_t,uint32_t,float,float,float,float)>(&Lua::ModelSubMesh::ApplyUVMapping));
 	classDef.def("Scale",&Lua::ModelSubMesh::Scale);
+	classDef.def("Copy",static_cast<std::shared_ptr<::ModelSubMesh>(*)(lua_State*,::ModelSubMesh&,bool)>([](lua_State *l,::ModelSubMesh &mesh,bool fullCopy) -> std::shared_ptr<::ModelSubMesh> {
+		return mesh.Copy(fullCopy);
+	}));
+	classDef.def("Copy",static_cast<std::shared_ptr<::ModelSubMesh>(*)(lua_State*,::ModelSubMesh&)>([](lua_State *l,::ModelSubMesh &mesh) -> std::shared_ptr<::ModelSubMesh> {
+		return mesh.Copy();
+	}));
 	classDef.def("SetVertexTangent",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t,const Vector4&)>([](lua_State *l,::ModelSubMesh &mesh,uint32_t idx,const Vector4 &t) {
 		if(idx >= mesh.GetVertexCount())
 			return;
@@ -348,24 +362,7 @@ void Lua::ModelSubMesh::GetNormalMapping(lua_State *l,::ModelSubMesh &mesh)
 void Lua::ModelSubMesh::GetVertexWeights(lua_State *l,::ModelSubMesh &mesh)
 {
 	auto &vertWeights = mesh.GetVertexWeights();
-	auto t = Lua::CreateTable(l); /* 1 */
-	for(auto i=decltype(vertWeights.size()){0};i<vertWeights.size();++i)
-	{
-		auto &w = vertWeights[i];
-		Lua::PushInt(l,i +1); /* 2 */
-
-		auto tWeight = Lua::CreateTable(l); /* 3 */
-
-		Lua::PushInt(l,1); /* 4 */
-		Lua::Push<Vector4i>(l,w.boneIds); /* 5 */
-		Lua::SetTableValue(l,tWeight); /* 3 */
-
-		Lua::PushInt(l,2); /* 4 */
-		Lua::Push<Vector4>(l,w.weights); /* 5 */
-		Lua::SetTableValue(l,tWeight); /* 3 */
-
-		Lua::SetTableValue(l,t); /* 1 */
-	}
+	Lua::vector_to_table(l,vertWeights).push(l);
 }
 void Lua::ModelSubMesh::GetCenter(lua_State *l,::ModelSubMesh &mdl)
 {
@@ -693,7 +690,7 @@ void Lua::ModelSubMesh::InitializeCylinder(lua_State *l,::ModelSubMesh &mesh,flo
 	auto &meshVerts = mesh.GetVertices();
 	auto &triangles = mesh.GetTriangles();
 	std::vector<Vector3> verts;
-	Geometry::GenerateTruncatedConeMesh({},startRadius,{0.f,0.f,1.f},length,startRadius,verts,&triangles,nullptr,segmentCount);
+	umath::geometry::generate_truncated_cone_mesh({},startRadius,{0.f,0.f,1.f},length,startRadius,verts,&triangles,nullptr,segmentCount);
 	meshVerts.reserve(verts.size());
 	for(auto &v : verts)
 	{
@@ -713,7 +710,7 @@ void Lua::ModelSubMesh::InitializeCone(lua_State *l,::ModelSubMesh &mesh,float s
 	auto &meshVerts = mesh.GetVertices();
 	auto &triangles = mesh.GetTriangles();
 	std::vector<Vector3> verts;
-	Geometry::GenerateTruncatedConeMesh({},startRadius,{0.f,0.f,1.f},length,endRadius,verts,&triangles,nullptr,segmentCount);
+	umath::geometry::generate_truncated_cone_mesh({},startRadius,{0.f,0.f,1.f},length,endRadius,verts,&triangles,nullptr,segmentCount);
 	meshVerts.reserve(verts.size());
 	for(auto &v : verts)
 	{

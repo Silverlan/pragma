@@ -1,0 +1,237 @@
+"particleSystemDefinitions"
+{
+	"muzzleflash01"
+	{
+		"assetData"
+		{
+			$array children [element;0][]
+			$array operators [element;0][]
+			"keyValues"
+			{
+				$string sort_particles "0"
+				$string bloom_scale "4"
+				$string emission_rate "1000"
+				$string material "particles/muzzleflash01"
+				$string maxparticles "1"
+				$string orientation_type "1"
+				$string intensity "4"
+			}
+			$array initializers [element;2][
+				{
+					$string name "lifetime_random"
+					"keyValues"
+					{
+						$string lifetime_max "0.1"
+						$string lifetime_min "0.1"
+					}
+				},
+				{
+					$string name "radius_random"
+					"keyValues"
+					{
+						$string radius_max "18"
+						$string radius_min "18"
+					}
+				}
+			]
+			$array renderers [element;0][]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+	"muzzleflash05"
+	{
+		"assetData"
+		{
+			$array children [element;0][]
+			$array operators [element;0][]
+			"keyValues"
+			{
+				$string sort_particles "0"
+				$string bloom_scale "4"
+				$string emission_rate "1000"
+				$string material "particles/muzzleflash05"
+				$string maxparticles "1"
+				$string orientation_type "1"
+				$string intensity "4"
+			}
+			$array initializers [element;2][
+				{
+					$string name "lifetime_random"
+					"keyValues"
+					{
+						$string lifetime_max "0.1"
+						$string lifetime_min "0.1"
+					}
+				},
+				{
+					$string name "radius_random"
+					"keyValues"
+					{
+						$string radius_max "18"
+						$string radius_min "18"
+					}
+				}
+			]
+			$array renderers [element;0][]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+	"muzzleflash02"
+	{
+		"assetData"
+		{
+			$array children [element;0][]
+			$array operators [element;0][]
+			"keyValues"
+			{
+				$string sort_particles "0"
+				$string bloom_scale "4"
+				$string emission_rate "1000"
+				$string material "particles/muzzleflash02"
+				$string maxparticles "1"
+				$string orientation_type "1"
+				$string intensity "4"
+			}
+			$array initializers [element;2][
+				{
+					$string name "lifetime_random"
+					"keyValues"
+					{
+						$string lifetime_max "0.1"
+						$string lifetime_min "0.1"
+					}
+				},
+				{
+					$string name "radius_random"
+					"keyValues"
+					{
+						$string radius_max "18"
+						$string radius_min "18"
+					}
+				}
+			]
+			$array renderers [element;0][]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+	"muzzleflash06"
+	{
+		"assetData"
+		{
+			$array children [element;0][]
+			$array operators [element;0][]
+			"keyValues"
+			{
+				$string sort_particles "0"
+				$string bloom_scale "4"
+				$string emission_rate "1000"
+				$string material "particles/muzzleflash06"
+				$string maxparticles "1"
+				$string orientation_type "1"
+				$string intensity "4"
+			}
+			$array initializers [element;2][
+				{
+					$string name "lifetime_random"
+					"keyValues"
+					{
+						$string lifetime_max "0.1"
+						$string lifetime_min "0.1"
+					}
+				},
+				{
+					$string name "radius_random"
+					"keyValues"
+					{
+						$string radius_max "18"
+						$string radius_min "18"
+					}
+				}
+			]
+			$array renderers [element;0][]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+	"muzzleflash03"
+	{
+		"assetData"
+		{
+			$array children [element;0][]
+			$array operators [element;0][]
+			"keyValues"
+			{
+				$string sort_particles "0"
+				$string bloom_scale "4"
+				$string emission_rate "1000"
+				$string material "particles/muzzleflash03"
+				$string maxparticles "1"
+				$string orientation_type "1"
+				$string intensity "4"
+			}
+			$array initializers [element;2][
+				{
+					$string name "lifetime_random"
+					"keyValues"
+					{
+						$string lifetime_max "0.1"
+						$string lifetime_min "0.1"
+					}
+				},
+				{
+					$string name "radius_random"
+					"keyValues"
+					{
+						$string radius_max "18"
+						$string radius_min "18"
+					}
+				}
+			]
+			$array renderers [element;0][]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+	"muzzleflash04"
+	{
+		"assetData"
+		{
+			$array children [element;0][]
+			$array operators [element;0][]
+			"keyValues"
+			{
+				$string sort_particles "0"
+				$string bloom_scale "4"
+				$string emission_rate "1000"
+				$string material "particles/muzzleflash04"
+				$string maxparticles "1"
+				$string orientation_type "1"
+				$string intensity "4"
+			}
+			$array initializers [element;2][
+				{
+					$string name "lifetime_random"
+					"keyValues"
+					{
+						$string lifetime_max "0.1"
+						$string lifetime_min "0.1"
+					}
+				},
+				{
+					$string name "radius_random"
+					"keyValues"
+					{
+						$string radius_max "18"
+						$string radius_min "18"
+					}
+				}
+			]
+			$array renderers [element;0][]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+}

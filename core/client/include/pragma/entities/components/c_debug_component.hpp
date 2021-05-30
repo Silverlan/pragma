@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_DEBUG_COMPONENT_HPP__
@@ -64,11 +64,15 @@ namespace pragma
 			}
 			else if(typeid(component) == typeid(CTransformComponent))
 			{
-				if(m_posCallback.IsValid())
-					m_posCallback.Remove();
-				m_posCallback = static_cast<CTransformComponent&>(component).GetPosProperty()->AddCallback([this](std::reference_wrapper<const Vector3> oldPos,std::reference_wrapper<const Vector3> pos) {
+				if(m_poseCallback.IsValid())
+					m_poseCallback.Remove();
+				auto &trC = static_cast<CTransformComponent&>(component);
+				m_poseCallback = trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,&trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+					if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags,pragma::TransformChangeFlags::PositionChanged) == false)
+						return util::EventReply::Unhandled;
 					if(m_debugObject != nullptr)
-						m_debugObject->SetPos(pos.get());
+						m_debugObject->SetPos(trC.GetPosition());
+					return util::EventReply::Unhandled;
 				});
 			}
 		}
@@ -82,8 +86,8 @@ namespace pragma
 			}
 			else if(typeid(component) == typeid(CTransformComponent))
 			{
-				if(m_posCallback.IsValid())
-					m_posCallback.Remove();
+				if(m_poseCallback.IsValid())
+					m_poseCallback.Remove();
 			}
 		}
 		void ReloadDebugObject()
@@ -105,7 +109,7 @@ namespace pragma
 		}
 		virtual void ReloadDebugObject(Color color,const Vector3 &pos)=0;
 		std::shared_ptr<DebugRenderer::BaseObject> m_debugObject = nullptr;
-		CallbackHandle m_posCallback = {};
+		CallbackHandle m_poseCallback = {};
 		CallbackHandle m_colorCallback = {};
 	};
 

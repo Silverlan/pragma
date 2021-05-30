@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __LENTS_H__
 #define __LENTS_H__
@@ -12,7 +12,7 @@
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/lua/class_manager.hpp"
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 class LuaEntityIterator;
 using LuaEntityObject = luabind::object;
@@ -57,6 +57,7 @@ namespace Lua
 		DLLNETWORK int get_event_id(lua_State *l);
 		DLLNETWORK int register_class(lua_State *l);
 		DLLNETWORK int register_component_event(lua_State *l);
+		DLLNETWORK int register_component_net_event(lua_State *l);
 		template<class TComponent>
 			int register_component(lua_State *l)
 		{
@@ -179,6 +180,7 @@ namespace Lua
 	{"get_sorted_by_distance",Lua::ents::get_sorted_by_distance}, \
 	{"get_random",Lua::ents::get_random}, \
 	{"get_component_name",Lua::ents::get_component_name}, \
-	{"get_component_id",Lua::ents::get_component_id},
+	{"get_component_id",Lua::ents::get_component_id}, \
+	{"register_component_net_event",Lua::ents::register_component_net_event},
 
 #endif

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -16,6 +16,8 @@
 #include "pragma/entities/components/submergible_component.hpp"
 #include "pragma/entities/components/velocity_component.hpp"
 #include "pragma/entities/components/usable_component.hpp"
+#include "pragma/entities/components/animated_2_component.hpp"
+#include "pragma/entities/components/composite_component.hpp"
 #include "pragma/entities/components/basegravity.h"
 
 void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
@@ -29,6 +31,8 @@ void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentM
 	componentManager.RegisterComponentType<pragma::VelocityComponent>("velocity");
 	componentManager.RegisterComponentType<pragma::UsableComponent>("usable");
 	componentManager.RegisterComponentType<pragma::GlobalNameComponent>("global");
+	componentManager.RegisterComponentType<pragma::Animated2Component>("animated2");
+	componentManager.RegisterComponentType<pragma::CompositeComponent>("composite");
 
 	pragma::BaseEntityComponent::RegisterEvents(componentManager);
 	BaseEntity::RegisterEvents(componentManager);

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __IK_CONTROLLER_HPP__
@@ -33,6 +33,9 @@ public:
 
 	const std::unordered_map<std::string,std::string> &GetKeyValues() const;
 	std::unordered_map<std::string,std::string> &GetKeyValues();
+
+	bool operator==(const IKController &other) const;
+	bool operator!=(const IKController &other) const {return !operator==(other);}
 protected:
 	std::string m_effectorName;
 	std::string m_type;

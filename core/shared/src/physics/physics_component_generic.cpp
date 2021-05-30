@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -31,7 +31,7 @@
 
 using namespace pragma;
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 
 uint32_t pragma::physics::PhysObjCreateInfo::AddShape(pragma::physics::IShape &shape,const umath::Transform &localPose,BoneId boneId)
@@ -77,8 +77,8 @@ util::TSharedHandle<pragma::physics::IRigidBody> BasePhysicsComponent::CreateRig
 	if(body == nullptr)
 		return nullptr;
 	body->TransformLocalPose(localPose);
-	auto originOffset = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
-	auto rot = (pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity()) *localPose.GetRotation();
+	auto originOffset = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
+	auto rot = (pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity()) *localPose.GetRotation();
 	auto tOrigin = localPose.GetOrigin();
 	uvec::rotate(&tOrigin,rot);
 	umath::Transform startTransform;
@@ -108,7 +108,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics:
 {
 	auto &ent = GetEntity();
 	auto mdlComponent = ent.GetModelComponent();
-	if(mdlComponent.expired() || mdlComponent->HasModel() == false)
+	if(!mdlComponent || mdlComponent->HasModel() == false)
 		return {};
 
 	auto &physObjShapes = physObjCreateInfo.GetShapes();
@@ -244,8 +244,8 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics:
 		for(auto it=joints->begin();it!=joints->end();++it)
 		{
 			auto &joint = *it;
-			auto itSrc = modelMeshIndexToShapeIndex.find(joint.dest);//joint.src); // TODO: Swap variable names
-			auto itDest = modelMeshIndexToShapeIndex.find(joint.src);
+			auto itSrc = modelMeshIndexToShapeIndex.find(joint.parent);//joint.src); // TODO: Swap variable names
+			auto itDest = modelMeshIndexToShapeIndex.find(joint.child);
 			if(itSrc != modelMeshIndexToShapeIndex.end() && itDest != modelMeshIndexToShapeIndex.end())
 			{
 				auto it0 = physObjShapes.find(itSrc->second);
@@ -274,9 +274,9 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics:
 				posConstraint = posConstraint +bodySrc->GetOrigin();
 				//Con::cerr<<"Constraint for bone "<<boneId<<": ("<<posConstraint.x<<","<<posConstraint.y<<","<<posConstraint.z<<") ("<<posTgt.x<<","<<posTgt.y<<","<<posTgt.z<<") "<<Con::endl;
 				//
-				if(joint.type == JOINT_TYPE_FIXED)
+				if(joint.type == JointType::Fixed)
 					c = util::shared_handle_cast<pragma::physics::IFixedConstraint,pragma::physics::IConstraint>(physEnv->CreateFixedConstraint(*bodySrc,posConstraint,uquat::identity(),*bodyTgt,posTgt,uquat::identity()));
-				else if(joint.type == JOINT_TYPE_CONETWIST)
+				else if(joint.type == JointType::ConeTwist)
 				{
 					// Conetwist constraints are deprecated for ragdolls and should be avoided.
 					// Use DoF constraints instead!
@@ -343,7 +343,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics:
 					ct->SetDamping(relaxationFactor);
 					c = util::shared_handle_cast<pragma::physics::IConeTwistConstraint,pragma::physics::IConstraint>(ct);
 				}
-				else if(joint.type == JOINT_TYPE_DOF)
+				else if(joint.type == JointType::DOF)
 				{
 					auto limitLinMin = Vector3(0.f,0.f,0.f);
 					auto limitLinMax = Vector3(0.f,0.f,0.f);
@@ -414,7 +414,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics:
 	auto animComponent = ent.GetAnimatedComponent();
 	pragma::physics::ICollisionObject *root = nullptr;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	auto posRoot = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto posRoot = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 	if(!collisionObjs.empty())
 	{
 		auto &hRoot = collisionObjs.front();
@@ -422,8 +422,8 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics:
 		{
 			root = hRoot.Get();
 			auto boneId = root->GetBoneID();
-			if(animComponent.valid() && animComponent->GetLocalBonePosition(boneId,posRoot) == true && pTrComponent.valid())
-				uvec::local_to_world(pTrComponent->GetPosition(),pTrComponent->GetOrientation(),posRoot); // World space position of root collision object bone
+			if(animComponent.valid() && animComponent->GetLocalBonePosition(boneId,posRoot) == true && pTrComponent != nullptr)
+				uvec::local_to_world(pTrComponent->GetPosition(),pTrComponent->GetRotation(),posRoot); // World space position of root collision object bone
 		}
 	}
 
@@ -464,7 +464,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics:
 				auto offset = *posRef +colObj->GetOrigin();
 				uvec::rotate(&offset,rot);
 				pos = pos +(-offset);
-				if(pTrComponent.valid())
+				if(pTrComponent != nullptr)
 					pTrComponent->LocalToWorld(&pos,&rot);
 
 				colObj->SetPos(pos);
@@ -526,16 +526,16 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 
 	auto &ent = GetEntity();
 	auto mdlComponent = ent.GetModelComponent();
-	if(mdlComponent.expired() || mdlComponent->HasModel() == false)
+	if(!mdlComponent || mdlComponent->HasModel() == false)
 		return {};
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto hMdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 	auto &meshes = hMdl->GetCollisionMeshes();
 	if(meshes.empty())
 		return {};
 	physObjCreateInfo.SetModel(*hMdl);
 	unsigned int meshId = 0;
 	auto pTrComponent = ent.GetTransformComponent();
-	auto scale = pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
+	auto scale = pTrComponent != nullptr ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
 	auto bScale = (scale != Vector3{1.f,1.f,1.f}) ? true : false;
 	for(auto &mesh : meshes)
 	{
@@ -617,6 +617,8 @@ void BasePhysicsComponent::OnPhysicsWake(PhysObj*)
 }
 void BasePhysicsComponent::OnPhysicsSleep(PhysObj*)
 {
+	if(AreForcePhysicsAwakeCallbacksEnabled())
+		return;
 	auto &game = *GetEntity().GetNetworkState()->GetGameState();
 	auto &awakePhysC = game.GetAwakePhysicsComponents();
 	auto it = std::find_if(awakePhysC.begin(),awakePhysC.end(),[this](const util::WeakHandle<pragma::BasePhysicsComponent> &hPhysC) {
@@ -713,7 +715,7 @@ PhysObj *BasePhysicsComponent::InitializePhysics(PHYSICSTYPE type,PhysFlags flag
 		case PHYSICSTYPE::DYNAMIC:
 		{
 			auto mdlComponent = GetEntity().GetModelComponent();
-			auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+			auto hMdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 			if(hMdl != nullptr)
 			{
 				Model *mdl = hMdl.get();
@@ -749,7 +751,7 @@ void BasePhysicsComponent::DestroyPhysicsObject()
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	if(!collisionObjs.empty())
 	{
-		posRoot = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+		posRoot = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 		root = collisionObjs.front().Get();
 		originRoot = root->GetOrigin();
 		rotRoot = root->GetRotation();
@@ -765,7 +767,7 @@ void BasePhysicsComponent::DestroyPhysicsObject()
 	if(root != nullptr)
 	{
 		//posRoot += originRoot *rotRoot;//uquat::get_inverse(rotRoot);
-		if(pTrComponent.valid())
+		if(pTrComponent != nullptr)
 			pTrComponent->SetPosition(posRoot,true);
 	}
 	//SetPosition(pos,true);
@@ -779,6 +781,8 @@ void BasePhysicsComponent::OnPhysicsInitialized()
 	// Note: We always need sleep reports enabled for optimization purposes.
 	// TODO: Remove IsSleepReportEnabled / SetSleepReportEnabled?
 	SetSleepReportEnabled(true);
+	if(AreForcePhysicsAwakeCallbacksEnabled())
+		OnPhysicsWake(m_physObject.get());
 	// SetSleepReportEnabled(IsSleepReportEnabled());
 }
 void BasePhysicsComponent::OnPhysicsDestroyed() {BroadcastEvent(EVENT_ON_PHYSICS_DESTROYED);}

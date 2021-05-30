@@ -1,0 +1,20 @@
+"normal"
+{
+	"friction_modifiers"
+	{
+		$float tarmac 1
+		$float snow 1
+		$float grass 1
+		$float mud 1
+	}
+}
+"worn"
+{
+	"friction_modifiers"
+	{
+		$float tarmac 0.1
+		$float snow 1
+		$float grass 1
+		$float mud 1
+	}
+}

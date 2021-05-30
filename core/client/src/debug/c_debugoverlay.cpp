@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -19,7 +19,7 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <pragma/math/intersection.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
@@ -156,19 +156,20 @@ uint32_t DebugRenderer::WorldObject::GetVertexCount() const {return (m_vertexCou
 void DebugRenderer::WorldObject::AddVertex(const Vector3 &v) {m_vertices.push_back(v);}
 std::vector<Vector3> &DebugRenderer::WorldObject::GetVertices() {return m_vertices;}
 std::vector<Vector4> &DebugRenderer::WorldObject::GetColors() {return m_colors;}
-void DebugRenderer::WorldObject::InitializeBuffers(const std::shared_ptr<prosper::IBuffer> &vertexBuffer,uint32_t vertexCount)
+bool DebugRenderer::WorldObject::InitializeBuffers(const std::shared_ptr<prosper::IBuffer> &vertexBuffer,uint32_t vertexCount)
 {
 	m_colorBuffer = nullptr;
 	m_vertexBuffer = vertexBuffer;
 	m_vertexCount = vertexCount;
+	return m_vertexBuffer != nullptr;
 }
-void DebugRenderer::WorldObject::InitializeBuffers()
+bool DebugRenderer::WorldObject::InitializeBuffers()
 {
 	m_colorBuffer = nullptr;
 	m_vertexBuffer = nullptr;
 	m_vertexCount = 0;
 	if(m_vertices.empty())
-		return;
+		return false;
 	auto createInfo = prosper::util::BufferCreateInfo {};
 	createInfo.size = m_vertices.size() *sizeof(m_vertices.front());
 	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
@@ -177,9 +178,10 @@ void DebugRenderer::WorldObject::InitializeBuffers()
 	m_vertexCount = m_vertices.size();
 
 	if(m_colors.empty())
-		return;
+		return true;
 	createInfo.size = m_colors.size() *sizeof(m_colors.front());
 	m_colorBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,m_colors.data());
+	return true;
 }
 
 void DebugRenderer::WorldObject::UpdateVertexBuffer()
@@ -235,7 +237,8 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoints(const std::
 	if(vertexCount == 0)
 		return nullptr;
 	auto o = std::make_shared<DebugRenderer::WorldObject>(color.ToVector4());
-	o->InitializeBuffers(vertexBuffer,vertexCount);
+	if(o->InitializeBuffers(vertexBuffer,vertexCount) == false)
+		return nullptr;
 	auto &objs = s_debugObjects[DebugRenderer::Type::PointsVertex];
 	objs.push_back(DebugRenderer::RuntimeObject{o,duration});
 	return objs.back().obj;
@@ -248,7 +251,8 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPoints(const std::
 	auto o = std::make_shared<DebugRenderer::WorldObject>(color.ToVector4());
 	auto &oVerts = o->GetVertices();
 	oVerts = points;
-	o->InitializeBuffers();
+	if(o->InitializeBuffers() == false)
+		return nullptr;
 	auto &objs = s_debugObjects[DebugRenderer::Type::Points];
 	objs.push_back(DebugRenderer::RuntimeObject{o,duration});
 	return objs.back().obj;
@@ -264,7 +268,8 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawLines(const std::v
 	auto o = std::make_shared<DebugRenderer::WorldObject>(color.ToVector4());
 	auto &oVerts = o->GetVertices();
 	oVerts = lines;
-	o->InitializeBuffers();
+	if(o->InitializeBuffers() == false)
+		return nullptr;
 	auto &objs = s_debugObjects[DebugRenderer::Type::Lines];
 	objs.push_back(DebugRenderer::RuntimeObject{o,duration});
 	return objs.back().obj;
@@ -347,7 +352,8 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_box(const Vector3 &center
 		end,Vector3(end.x,end.y,start.z),
 		end,Vector3(start.x,end.y,end.z)
 	};
-	oOutline->InitializeBuffers();
+	if(oOutline->InitializeBuffers() == false)
+		return nullptr;
 	auto &objs = s_debugObjects[DebugRenderer::Type::Lines];
 	objs.push_back(DebugRenderer::RuntimeObject{oOutline,duration});
 	r->AddObject(oOutline);
@@ -490,7 +496,8 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawMesh(const std::ve
 	auto o = std::make_shared<DebugRenderer::WorldObject>(color.ToVector4());
 	auto &oVerts = o->GetVertices();
 	oVerts = verts;
-	o->InitializeBuffers();
+	if(o->InitializeBuffers() == false)
+		return nullptr;
 	auto &triangleObjs = s_debugObjects[DebugRenderer::Type::Triangles];
 	triangleObjs.push_back(DebugRenderer::RuntimeObject{o,duration});
 	return triangleObjs.back().obj;
@@ -523,7 +530,7 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_truncated_cone(const Vect
 
 	std::vector<Vector3> verts;
 	std::vector<uint16_t> triangles;
-	Geometry::GenerateTruncatedConeMesh({},startRadius,{0.f,0.f,1.f},dist,endRadius,verts,&triangles,nullptr,segmentCount);
+	umath::geometry::generate_truncated_cone_mesh({},startRadius,{0.f,0.f,1.f},dist,endRadius,verts,&triangles,nullptr,segmentCount);
 
 	std::vector<Vector3> meshVerts;
 	meshVerts.reserve(triangles.size());
@@ -632,9 +639,9 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPlane(const Vector
 		r->AddObject(rLines);
 	return r;
 }
-std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPlane(const Plane &plane,const Color &color,float duration)
+std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPlane(const umath::Plane &plane,const Color &color,float duration)
 {
-	return DrawPlane(const_cast<Plane&>(plane).GetNormal(),plane.GetDistance(),color,duration);
+	return DrawPlane(const_cast<umath::Plane&>(plane).GetNormal(),plane.GetDistance(),color,duration);
 }
 std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawFrustum(const std::vector<Vector3> &points,float duration)
 {
@@ -756,7 +763,7 @@ void DebugRenderer::ClearObjects()
 	for(auto &it : s_debugObjects)
 		it.second.clear();
 }
-void DebugRenderer::Render(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
+void DebugRenderer::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
 {
 	if(s_debugObjects.empty())
 		return;

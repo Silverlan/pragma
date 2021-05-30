@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_ENV_LIGHT_H__
@@ -100,7 +100,9 @@ namespace pragma
 
 		void InitializeLightSource();
 	};
-
+	
+	using LightBufferIndex = uint32_t;
+	using ShadowBufferIndex = uint32_t;
 	class DLLCLIENT CLightComponent final
 		: public CBaseLightComponent
 	{
@@ -116,8 +118,8 @@ namespace pragma
 
 		static prosper::IUniformResizableBuffer &GetGlobalRenderBuffer();
 		static prosper::IUniformResizableBuffer &GetGlobalShadowBuffer();
-		static CLightComponent *GetLightByBufferIndex(uint32_t idx);
-		static CLightComponent *GetLightByShadowBufferIndex(uint32_t idx);
+		static CLightComponent *GetLightByBufferIndex(LightBufferIndex idx);
+		static CLightComponent *GetLightByShadowBufferIndex(ShadowBufferIndex idx);
 		static uint32_t GetMaxLightCount();
 		static uint32_t GetMaxShadowCount();
 		static uint32_t GetLightCount();
@@ -132,7 +134,8 @@ namespace pragma
 			StaticUpdateRequired = 1u,
 			DynamicUpdateRequired = StaticUpdateRequired<<1u,
 			FullUpdateRequired = StaticUpdateRequired<<1u,
-			AddToGameScene = FullUpdateRequired<<1u
+			AddToGameScene = FullUpdateRequired<<1u,
+			EnableMorphTargetsInShadows = AddToGameScene<<1u
 		};
 		enum class ShadowMapType : uint8_t
 		{
@@ -142,8 +145,12 @@ namespace pragma
 
 		CLightComponent(BaseEntity &ent);
 		virtual ~CLightComponent() override;
+		CShadowComponent *GetShadowComponent();
+		const CShadowComponent *GetShadowComponent() const;
+		bool HasShadowsEnabled() const;
 		Mat4 &GetTransformationMatrix(unsigned int j);
 		virtual void Initialize() override;
+		virtual void OnTick(double dt) override;
 		bool ShouldUpdateRenderPass(ShadowMapType smType) const;
 		virtual bool ShouldPass(const CBaseEntity &ent,uint32_t &renderFlags);
 		virtual bool ShouldPass(const CBaseEntity &ent,const CModelMesh &mesh,uint32_t &renderFlags);
@@ -154,6 +161,9 @@ namespace pragma
 		virtual void OnEntitySpawn() override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		void SetStateFlag(StateFlags flag,bool enabled);
+
+		void SetMorphTargetsInShadowsEnabled(bool enabled);
+		bool AreMorphTargetsInShadowsEnabled() const;
 
 		bool ShouldCastShadows() const;
 		bool ShouldCastDynamicShadows() const;
@@ -197,6 +207,7 @@ namespace pragma
 		void DestroyShadowBuffer();
 		void InitializeLight(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
+		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 
 		LightBufferData m_bufferData {};
 		std::unique_ptr<ShadowBufferData> m_shadowBufferData = nullptr;
@@ -228,6 +239,7 @@ namespace pragma
 		uint64_t m_lastThink = std::numeric_limits<uint64_t>::max();
 		util::WeakHandle<CShadowComponent> m_shadowMapStatic = {};
 		util::WeakHandle<CShadowComponent> m_shadowMapDynamic = {};
+		CShadowComponent *m_shadowComponent = nullptr;
 		void InitializeShadowMap(CShadowComponent &sm);
 		virtual void InitializeShadowMap();
 	};

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -16,6 +16,11 @@ extern DLLCLIENT CGame *c_game;
 void Lua::Locale::change_language(const std::string &lan)
 {
 	::Locale::SetLanguage(lan);
+}
+
+void Lua::Locale::set_localization(const std::string &id,const std::string &text)
+{
+	::Locale::SetLocalization(id,text);
 }
 
 int Lua::Locale::get_text(lua_State *l)

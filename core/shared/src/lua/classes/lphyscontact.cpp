@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -15,7 +15,7 @@
 #include "pragma/physics/phys_material.hpp"
 #include "pragma/physics/collision_object.hpp"
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 void Lua::PhysContact::register_class(lua_State *l,luabind::module_ &mod)
 {

@@ -2,14 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
 #include "pragma/util/util_image.hpp"
 #include <prosper_command_buffer.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 
 bool util::to_image_buffer(
@@ -138,7 +138,7 @@ bool util::to_image_buffer(
 			auto &mipmapData = layerData.mipmaps.at(iMipmap);
 			auto &mipmapImg = layerImages.at(iMipmap);
 			mipmapImg = uimg::ImageBuffer::Create(mipmapData.extents.width,mipmapData.extents.height,targetFormat);
-			if(buf->Map(mipmapData.bufferOffset,mipmapData.bufferSize))
+			if(buf->Map(mipmapData.bufferOffset,mipmapData.bufferSize,prosper::IBuffer::MapFlags::ReadBit))
 			{
 				buf->Read(0,mipmapData.bufferSize,mipmapImg->GetData());
 				buf->Unmap();

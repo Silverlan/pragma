@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_SHADER_FORWARDP_LIGHT_CULLING_HPP__
@@ -18,7 +18,7 @@ namespace pragma
 	{
 	public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
 
 		static uint32_t TILE_SIZE;
 

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __BASETOGGLE_H__
 #define __BASETOGGLE_H__
@@ -38,8 +38,8 @@ namespace pragma
 		const ::util::PBoolProperty &GetTurnedOnProperty() const;
 		virtual void OnEntitySpawn() override;
 
-		virtual void Save(DataStream &ds) override;
-		virtual void Load(DataStream &ds,uint32_t version) override;
+		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
+		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
 	protected:
 		::util::PBoolProperty m_bTurnedOn = nullptr;
 		bool m_bStartDisabled = false;

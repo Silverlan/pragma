@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/game/s_game.h"
@@ -45,7 +45,7 @@ void ai::Memory::Fragment::UpdateVisibility(float dist)
 	auto *ent = hEntity.get();
 
 	auto pTrComponent = ent->GetTransformComponent();
-	lastPosition = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	lastPosition = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 
 	auto pVelComponent = ent->GetComponent<pragma::VelocityComponent>();
 	lastVelocity = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3{};

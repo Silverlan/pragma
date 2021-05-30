@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -30,6 +30,8 @@ void CPhysicsComponent::Initialize()
 {
 	BasePhysicsComponent::Initialize();
 
+#if 0
+	// TODO
 	BindEvent(CAnimatedComponent::EVENT_ON_SKELETON_UPDATED,[this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto *phys = GetPhysicsObject();
 		if(phys != nullptr && GetPhysicsType() == PHYSICSTYPE::DYNAMIC)
@@ -59,6 +61,7 @@ void CPhysicsComponent::Initialize()
 		if(mdl != nullptr && static_cast<CAnimatedComponent&>(*animComponent).GetBoneMatrices().empty() == false)
 			UpdateRagdollPose();
 	});
+#endif
 }
 void CPhysicsComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BasePhysicsComponent));}
 void CPhysicsComponent::OnEntitySpawn()
@@ -79,7 +82,7 @@ void CPhysicsComponent::PrePhysicsSimulate()
 	}
 	BasePhysicsComponent::PrePhysicsSimulate();
 }
-void CPhysicsComponent::PostPhysicsSimulate()
+bool CPhysicsComponent::PostPhysicsSimulate()
 {
 	auto dt = c_game->DeltaTime();
 	if(dt > 0.0 && GetPhysicsType() != PHYSICSTYPE::SOFTBODY)
@@ -89,7 +92,7 @@ void CPhysicsComponent::PostPhysicsSimulate()
 			pVelComponent->SetVelocity(pVelComponent->GetVelocity() -GetLinearCorrectionVelocity() /static_cast<float>(dt));
 	}
 	ResetLinearCorrectionVelocity();
-	BasePhysicsComponent::PostPhysicsSimulate();
+	return BasePhysicsComponent::PostPhysicsSimulate();
 }
 
 void CPhysicsComponent::ReceiveData(NetPacket &packet)
@@ -104,7 +107,18 @@ Bool CPhysicsComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &pa
 {
 	if(eventId == m_netEvSetCollisionsEnabled)
 		SetCollisionsEnabled(packet->Read<bool>());
+	else if(eventId == m_netEvSetSimEnabled)
+		SetSimulationEnabled(packet->Read<bool>());
 	else
 		return CBaseNetComponent::ReceiveNetEvent(eventId,packet);
 	return true;
+}
+
+void CPhysicsComponent::OnWake()
+{
+	BasePhysicsComponent::OnWake();
+}
+void CPhysicsComponent::OnSleep()
+{
+	BasePhysicsComponent::OnSleep();
 }

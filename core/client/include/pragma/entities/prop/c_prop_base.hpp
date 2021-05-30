@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_PROP_BASE_HPP__
@@ -28,7 +28,6 @@ namespace pragma
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 	protected:
-		double m_sqrMaxVisibleDist = 0.f;
 		PHYSICSTYPE m_propPhysType = PHYSICSTYPE::NONE;
 		MOVETYPE m_propMoveType = MOVETYPE::NONE;
 	};

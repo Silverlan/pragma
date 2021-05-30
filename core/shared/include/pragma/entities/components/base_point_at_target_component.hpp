@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __BASE_POINT_AT_TARGET_COMPONENT_HPP__
 #define __BASE_POINT_AT_TARGET_COMPONENT_HPP__
@@ -18,6 +18,7 @@ namespace pragma
 	{
 	public:
 		virtual void Initialize() override;
+		virtual void OnRemove() override;
 		
 		const pragma::PEntityProperty &GetPointAtTargetProperty() const;
 		void SetPointAtTarget(BaseEntity &ent);
@@ -25,13 +26,15 @@ namespace pragma
 		BaseEntity *GetPointAtTarget() const;
 	protected:
 		BasePointAtTargetComponent(BaseEntity &ent);
+		void UpdatePose();
 		virtual void OnEntitySpawn() override;
 		virtual void SetPointAtTarget(BaseEntity *ent);
 
 		std::string m_kvPointAtTargetName = "";
 		pragma::PEntityProperty m_pointAtTarget;
 		pragma::NetEventId m_netEvSetPointAtTarget = pragma::INVALID_NET_EVENT;
-		CallbackHandle m_cbTick = {};
+		CallbackHandle m_cbOnPoseChanged = {};
+		CallbackHandle m_cbOnPoseChangedThis = {};
 	};
 };
 

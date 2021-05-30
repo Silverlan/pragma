@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -18,7 +18,7 @@ void CEyeComponent::Blink()
 	m_tNextBlink = c_game->CurTime() +umath::random(1.5f,4.f);
 	umath::set_flag(m_stateFlags,StateFlags::BlinkToggle,!umath::is_flag_set(m_stateFlags,StateFlags::BlinkToggle));
 }
-void CEyeComponent::UpdateBlink()
+void CEyeComponent::UpdateBlinkMT()
 {
 	if(m_blinkFlexController == std::numeric_limits<uint32_t>::max() || IsBlinkingEnabled() == false || m_flexC.expired())
 		return;
@@ -29,7 +29,7 @@ void CEyeComponent::UpdateBlink()
 		umath::set_flag(m_stateFlags,StateFlags::PrevBlinkToggle,umath::is_flag_set(m_stateFlags,StateFlags::BlinkToggle));
 
 		m_curBlinkTime = c_game->CurTime() +GetBlinkDuration();
-		BroadcastEvent(EVENT_ON_BLINK);
+		// BroadcastEvent(EVENT_ON_BLINK);
 	}
 	auto blinkFlexControllerWeight = 0.f;
 

@@ -2,13 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/entities/entity_component_manager.hpp"
+#include "pragma/entities/components/basetoggle.h"
+#include "pragma/entities/components/base_generic_component.hpp"
 #include <sharedutils/datastream.h>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -72,6 +75,12 @@ void BaseEntityComponent::OnRemove()
 				continue;
 			hCb.Remove();
 		}
+	}
+	if(umath::is_flag_set(m_stateFlags,StateFlags::IsLogicEnabled))
+	{
+		auto &logicComponents = GetEntity().GetNetworkState()->GetGameState()->GetEntityTickComponents();
+		*std::find(logicComponents.begin(),logicComponents.end(),this) = nullptr;
+		umath::set_flag(m_stateFlags,StateFlags::IsLogicEnabled,false);
 	}
 }
 bool BaseEntityComponent::ShouldTransmitNetData() const {return false;}
@@ -303,19 +312,34 @@ void BaseEntityComponent::OnEntityComponentRemoved(BaseEntityComponent &componen
 		it = m_callbackInfos.erase(it);
 	}
 	pragma::CEOnEntityComponentRemoved evData{*this};
-	BroadcastEvent(EVENT_ON_ENTITY_COMPONENT_REMOVED,evData);
+	auto *genericC = GetEntity().GetGenericComponent();
+	if(BroadcastEvent(EVENT_ON_ENTITY_COMPONENT_REMOVED,evData) != util::EventReply::Handled && genericC)
+		genericC->InvokeEventCallbacks(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED,evData);
 }
-void BaseEntityComponent::Save(DataStream &ds)
+void BaseEntityComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
-	auto ver = GetVersion();
-	ds->Write<decltype(ver)>(ver);
+	udm["version"] = GetVersion();
+
+	auto tCur = GetEntity().GetNetworkState()->GetGameState()->CurTime();
+	udm["lastTick"] = m_tickData.lastTick -tCur;
+	udm["nextTick"] = m_tickData.nextTick -tCur;
 }
-void BaseEntityComponent::Load(DataStream &ds)
+void BaseEntityComponent::Load(udm::LinkedPropertyWrapper &udm)
 {
-	auto ver = ds->Read<decltype(GetVersion())>();
-	Load(ds,ver);
+	uint32_t version = 0;
+	udm["version"](version);
+
+	float lastTick = 0.f;
+	float nextTick = 0.f;
+	udm["lastTick"](lastTick);
+	udm["nextTick"](nextTick);
+
+	auto tCur = GetEntity().GetNetworkState()->GetGameState()->CurTime();
+	m_tickData.lastTick += tCur;
+	m_tickData.nextTick += tCur;
+	Load(udm,version);
 }
-void BaseEntityComponent::Load(DataStream &ds,uint32_t version) {}
+void BaseEntityComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version) {}
 void BaseEntityComponent::OnEntitySpawn() {}
 void BaseEntityComponent::OnEntityPostSpawn() {}
 void BaseEntityComponent::OnAttached(BaseEntity &ent) {}
@@ -335,3 +359,75 @@ void BaseEntityComponent::OnDetached(BaseEntity &ent)
 	}
 }
 pragma::NetEventId BaseEntityComponent::SetupNetEvent(const std::string &name) const {return GetEntity().GetNetworkState()->GetGameState()->SetupNetEvent(name);}
+
+//////////////////
+
+TickPolicy BaseEntityComponent::GetTickPolicy() const {return m_tickData.tickPolicy;}
+
+bool BaseEntityComponent::ShouldThink() const
+{
+	if(m_tickData.tickPolicy != TickPolicy::Always && m_tickData.tickPolicy != TickPolicy::WhenVisible)
+		return false;
+	//auto toggleC = static_cast<pragma::BaseToggleComponent*>(GetEntity().FindComponent("toggle").get());
+	//return toggleC ? toggleC->IsTurnedOn() : true;
+	return true;
+}
+void BaseEntityComponent::SetTickPolicy(TickPolicy policy)
+{
+	if(policy == m_tickData.tickPolicy)
+		return;
+	m_tickData.tickPolicy = policy;
+
+	if(umath::is_flag_set(m_stateFlags,StateFlags::IsThinking))
+		return; // Tick policy update will be handled by game
+	
+	auto &logicComponents = GetEntity().GetNetworkState()->GetGameState()->GetEntityTickComponents();
+	if(ShouldThink())
+	{
+		if(umath::is_flag_set(m_stateFlags,StateFlags::IsLogicEnabled))
+			return;
+		logicComponents.push_back(this);
+		umath::set_flag(m_stateFlags,StateFlags::IsLogicEnabled);
+		return;
+	}
+	if(!umath::is_flag_set(m_stateFlags,StateFlags::IsLogicEnabled))
+		return;
+	logicComponents.erase(std::find(logicComponents.begin(),logicComponents.end(),this));
+	umath::set_flag(m_stateFlags,StateFlags::IsLogicEnabled,false);
+}
+
+double BaseEntityComponent::GetNextTick() const {return m_tickData.nextTick;}
+void BaseEntityComponent::SetNextTick(double t) {m_tickData.nextTick = t;}
+
+double BaseEntityComponent::LastTick() const {return m_tickData.lastTick;}
+
+double BaseEntityComponent::DeltaTime() const
+{
+	Game *game = GetEntity().GetNetworkState()->GetGameState();
+	//auto r = game->CurTime() -m_lastThink; // This would be more accurate, but can be 0 if the engine had to catch up on the tick rate
+	auto r = game->DeltaTickTime();
+	//assert(r != 0.0); // Delta time mustn't ever be 0, otherwise there can be problems with animation events repeating (among other things)
+	return r;
+}
+
+bool BaseEntityComponent::Tick(double tDelta)
+{
+	m_stateFlags |= pragma::BaseEntityComponent::StateFlags::IsThinking;
+
+	auto hThis = GetHandle();
+	auto &ent = GetEntity();
+	OnTick(tDelta);
+	if(hThis.expired())
+		return true; // This component isn't valid anymore; Return immediately
+	Game *game = ent.GetNetworkState()->GetGameState();
+	m_tickData.lastTick = game->CurTime();
+
+	m_stateFlags &= ~pragma::BaseEntityComponent::StateFlags::IsThinking;
+
+	if(ShouldThink() == false)
+	{
+		m_stateFlags &= ~pragma::BaseEntityComponent::StateFlags::IsLogicEnabled;
+		return false; // Game will handle removal from tick componentlist
+	}
+	return true;
+}

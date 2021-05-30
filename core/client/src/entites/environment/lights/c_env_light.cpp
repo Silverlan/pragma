@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -21,7 +21,7 @@
 
 using namespace pragma;
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
@@ -53,8 +53,8 @@ void CLightComponent::InitializeBuffers()
 	pragma::LightDataBufferManager::GetInstance().Initialize();
 	pragma::ShadowDataBufferManager::GetInstance().Initialize();
 }
-CLightComponent *CLightComponent::GetLightByBufferIndex(uint32_t idx) {return LightDataBufferManager::GetInstance().GetLightByBufferIndex(idx);}
-CLightComponent *CLightComponent::GetLightByShadowBufferIndex(uint32_t idx) {return ShadowDataBufferManager::GetInstance().GetLightByBufferIndex(idx);}
+CLightComponent *CLightComponent::GetLightByBufferIndex(LightBufferIndex idx) {return LightDataBufferManager::GetInstance().GetLightByBufferIndex(idx);}
+CLightComponent *CLightComponent::GetLightByShadowBufferIndex(ShadowBufferIndex idx) {return ShadowDataBufferManager::GetInstance().GetLightByBufferIndex(idx);}
 void CLightComponent::ClearBuffers()
 {
 	LightDataBufferManager::GetInstance().Reset();
@@ -73,7 +73,7 @@ CLightComponent::~CLightComponent()
 luabind::object CLightComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CLightComponentHandleWrapper>(l);}
 void CLightComponent::InitializeRenderBuffer()
 {
-	if(m_renderBuffer != nullptr)
+	if(m_renderBuffer != nullptr || umath::is_flag_set(m_lightFlags,LightFlags::BakedLightSource))
 		return;
 	m_renderBuffer = LightDataBufferManager::GetInstance().Request(*this,m_bufferData);
 }
@@ -166,11 +166,11 @@ bool CLightComponent::IsInCone(const CBaseEntity &ent,const Vector3 &dir,float a
 	auto pRenderComponent = ent.GetRenderComponent();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pTrComponentThis = GetEntity().GetTransformComponent();
-	if(pRenderComponent.expired() || pTrComponent.expired() || pTrComponentThis.expired())
+	if(!pRenderComponent || pTrComponent == nullptr || !pTrComponentThis)
 		return false;
 	auto &start = pTrComponentThis->GetPosition();
-	auto sphere = pRenderComponent->GetRenderSphereBounds();
-	return Intersection::SphereCone(pTrComponent->GetPosition() +sphere.pos,sphere.radius,start,dir,angle);
+	auto &sphere = pRenderComponent->GetUpdatedAbsoluteRenderSphere();
+	return umath::intersection::sphere_cone(pTrComponent->GetPosition() +sphere.pos,sphere.radius,start,dir,angle);
 }
 void CLightComponent::SetLightIntensity(float intensity,LightIntensityType type)
 {
@@ -195,10 +195,10 @@ bool CLightComponent::IsInRange(const CBaseEntity &ent) const
 	auto pRenderComponent = ent.GetRenderComponent();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pTrComponentThis = GetEntity().GetTransformComponent();
-	if(pRadiusComponent.expired() || pRenderComponent.expired() || pTrComponent.expired() || pTrComponentThis.expired())
+	if(pRadiusComponent.expired() || !pRenderComponent || pTrComponent == nullptr || !pTrComponentThis)
 		return false;
 	auto &origin = pTrComponentThis->GetPosition();
-	auto sphere = pRenderComponent->GetRenderSphereBounds();
+	auto &sphere = pRenderComponent->GetAbsoluteRenderSphere();
 	auto &pos = pTrComponent->GetPosition();
 	auto radius = pRadiusComponent->GetRadius();
 	return (uvec::distance(pos +sphere.pos,origin) <= (radius +sphere.radius)) ? true : false;
@@ -208,7 +208,7 @@ bool CLightComponent::IsInRange(const CBaseEntity &ent,const CModelMesh &mesh) c
 	auto pRadiusComponent = GetEntity().GetComponent<CRadiusComponent>();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pTrComponentThis = GetEntity().GetTransformComponent();
-	if(pRadiusComponent.expired() || pTrComponent.expired() || pTrComponentThis.expired())
+	if(pRadiusComponent.expired() || pTrComponent == nullptr || !pTrComponentThis)
 		return false;
 	auto &origin = pTrComponentThis->GetPosition();
 	auto radius = pRadiusComponent->GetRadius();
@@ -218,7 +218,7 @@ bool CLightComponent::IsInRange(const CBaseEntity &ent,const CModelMesh &mesh) c
 	mesh.GetBounds(min,max);
 	min += pos;
 	max += pos;
-	return Intersection::AABBSphere(min,max,origin,radius);
+	return umath::intersection::aabb_sphere(min,max,origin,radius);
 }
 
 bool CLightComponent::ShouldUpdateRenderPass(ShadowMapType smType) const
@@ -349,12 +349,14 @@ void CLightComponent::InitializeShadowMap()
 
 void CLightComponent::SetStateFlag(StateFlags flag,bool enabled) {umath::set_flag(m_stateFlags,flag,enabled);}
 
+void CLightComponent::SetMorphTargetsInShadowsEnabled(bool enabled) {SetStateFlag(StateFlags::EnableMorphTargetsInShadows,enabled);}
+bool CLightComponent::AreMorphTargetsInShadowsEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::EnableMorphTargetsInShadows);}
+
 void CLightComponent::Initialize()
 {
 	CBaseLightComponent::Initialize();
 
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
-	ent.AddComponent<LogicComponent>();
 	ent.AddComponent<CShadowComponent>();
 
 	BindEventUnhandled(BaseToggleComponent::EVENT_ON_TURN_ON,[this](std::reference_wrapper<ComponentEvent> evData) {
@@ -368,39 +370,50 @@ void CLightComponent::Initialize()
 		// data when turned on. Once the cause for this has been found and dealt with, this
 		// line can be removed!
 		UpdateBuffers();
+
+		(pragma::TickPolicy::Never);
 	});
 	BindEventUnhandled(BaseToggleComponent::EVENT_ON_TURN_OFF,[this](std::reference_wrapper<ComponentEvent> evData) {
 		umath::set_flag(m_bufferData.flags,LightBufferData::BufferFlags::TurnedOn,false);
 		if(m_renderBuffer != nullptr)
 			c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,flags),m_bufferData.flags);
 		m_tTurnedOff = c_game->RealTime();
-	});
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<ComponentEvent> evData) {
-		auto frameId = c_engine->GetRenderContext().GetLastFrameId();
-		if(m_lastThink == frameId)
-			return;
-		m_lastThink = frameId;
 
-		if(m_renderBuffer != nullptr && c_game->RealTime() -m_tTurnedOff > 30.0)
-		{
-			auto pToggleComponent = GetEntity().GetComponent<CToggleComponent>();
-			if(pToggleComponent.expired() || pToggleComponent->IsTurnedOn() == false)
-				DestroyRenderBuffer(); // Free buffer if light hasn't been on in 30 seconds
-		}
+		SetTickPolicy(pragma::TickPolicy::Always);
+		SetNextTick(c_game->CurTime() +30.f);
 	});
 	BindEventUnhandled(CBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED,[this](std::reference_wrapper<ComponentEvent> evData) {
 		m_bufferData.sceneFlags = static_cast<CBaseEntity&>(GetEntity()).GetSceneFlags();
 		if(m_renderBuffer != nullptr)
 			c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,sceneFlags),m_bufferData.sceneFlags);
 	});
+	SetTickPolicy(pragma::TickPolicy::Never);
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 		reinterpret_cast<Vector3&>(m_bufferData.position) = pTrComponent->GetPosition();
 	if(m_bufferData.direction.x == 0.f && m_bufferData.direction.y == 0.f && m_bufferData.direction.z == 0.f)
 		m_bufferData.direction.z = 1.f;
 	m_bufferData.sceneFlags = ent.GetSceneFlags();
 
 	++s_lightCount;
+}
+void CLightComponent::OnTick(double dt)
+{
+	auto frameId = c_engine->GetRenderContext().GetLastFrameId();
+	if(m_lastThink == frameId)
+		return;
+	m_lastThink = frameId;
+
+	if(c_game->CurTime() -m_tTurnedOff > 30.0)
+	{
+		if(m_renderBuffer != nullptr)
+		{
+			auto pToggleComponent = GetEntity().GetComponent<CToggleComponent>();
+			if(pToggleComponent.expired() || pToggleComponent->IsTurnedOn() == false)
+				DestroyRenderBuffer(); // Free buffer if light hasn't been on in 30 seconds
+		}
+		SetTickPolicy(pragma::TickPolicy::Never);
+	}
 }
 void CLightComponent::UpdateTransformationMatrix(const Mat4 &biasMatrix,const Mat4 &viewMatrix,const Mat4 &projectionMatrix)
 {
@@ -418,28 +431,40 @@ void CLightComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	CBaseLightComponent::OnEntityComponentAdded(component);
 	if(typeid(component) == typeid(CTransformComponent))
 	{
-		FlagCallbackForRemoval(static_cast<CTransformComponent&>(component).GetPosProperty()->AddCallback([this](std::reference_wrapper<const Vector3> oldPos,std::reference_wrapper<const Vector3> pos) {
-			if(uvec::cmp(pos.get(),reinterpret_cast<Vector3&>(m_bufferData.position)) == true)
-				return;
-			reinterpret_cast<Vector3&>(m_bufferData.position) = pos;
-			if(m_renderBuffer != nullptr)
-				c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,position),m_bufferData.position);
-			umath::set_flag(m_stateFlags,StateFlags::FullUpdateRequired);
-		}),CallbackType::Component,&component);
-		FlagCallbackForRemoval(static_cast<CTransformComponent&>(component).GetOrientationProperty()->AddCallback([this](std::reference_wrapper<const Quat> oldRot,std::reference_wrapper<const Quat> rot) {
-			util::pragma::LightType lightType;
-			GetLight(lightType);
-			if(lightType == util::pragma::LightType::Point)
-				return;
-			auto dir = uquat::forward(rot);
-			if(uvec::cmp(dir,reinterpret_cast<Vector3&>(m_bufferData.direction)) == true)
-				return;
-			reinterpret_cast<Vector3&>(m_bufferData.direction) = dir;
-			if(m_bufferData.direction.x == 0.f && m_bufferData.direction.y == 0.f && m_bufferData.direction.z == 0.f)
-				m_bufferData.direction.z = 1.f;
-			if(m_renderBuffer != nullptr)
-				c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,direction),m_bufferData.direction);
-			umath::set_flag(m_stateFlags,StateFlags::FullUpdateRequired);
+		auto &trC = static_cast<CTransformComponent&>(component);
+		FlagCallbackForRemoval(trC.AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this,&trC](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+			if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags,pragma::TransformChangeFlags::PositionChanged))
+			{
+				auto &pos = trC.GetPosition();
+				if(uvec::cmp(pos,reinterpret_cast<Vector3&>(m_bufferData.position)) == false)
+				{
+					reinterpret_cast<Vector3&>(m_bufferData.position) = pos;
+					if(m_renderBuffer != nullptr)
+						c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,position),m_bufferData.position);
+					umath::set_flag(m_stateFlags,StateFlags::FullUpdateRequired);
+				}
+			}
+
+			if(umath::is_flag_set(static_cast<pragma::CEOnPoseChanged&>(evData.get()).changeFlags,pragma::TransformChangeFlags::RotationChanged))
+			{
+				util::pragma::LightType lightType;
+				GetLight(lightType);
+				if(lightType != util::pragma::LightType::Point)
+				{
+					auto &rot = trC.GetRotation();
+					auto dir = uquat::forward(rot);
+					if(uvec::cmp(dir,reinterpret_cast<Vector3&>(m_bufferData.direction)) == false)
+					{
+						reinterpret_cast<Vector3&>(m_bufferData.direction) = dir;
+						if(m_bufferData.direction.x == 0.f && m_bufferData.direction.y == 0.f && m_bufferData.direction.z == 0.f)
+							m_bufferData.direction.z = 1.f;
+						if(m_renderBuffer != nullptr)
+							c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,direction),m_bufferData.direction);
+						umath::set_flag(m_stateFlags,StateFlags::FullUpdateRequired);
+					}
+				}
+			}
+			return util::EventReply::Unhandled;
 		}),CallbackType::Component,&component);
 	}
 	else if(typeid(component) == typeid(CRadiusComponent))
@@ -491,6 +516,14 @@ void CLightComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 		if(m_renderBuffer != nullptr)
 			c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer,offsetof(LightBufferData,flags),m_bufferData.flags);
 	}
+	else if(typeid(component) == typeid(CShadowComponent))
+		m_shadowComponent = &static_cast<CShadowComponent&>(component);
+}
+void CLightComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
+{
+	CBaseLightComponent::OnEntityComponentRemoved(component);
+	if(typeid(component) == typeid(CShadowComponent))
+		m_shadowComponent = nullptr;
 }
 void CLightComponent::OnEntitySpawn()
 {
@@ -511,6 +544,10 @@ const pragma::ShadowBufferData *CLightComponent::GetShadowBufferData() const {re
 pragma::ShadowBufferData *CLightComponent::GetShadowBufferData() {return m_shadowBufferData.get();}
 
 util::WeakHandle<CShadowComponent> CLightComponent::GetShadowMap(ShadowMapType type) const {return (type == ShadowMapType::Dynamic) ? m_shadowMapDynamic : m_shadowMapStatic;}
+
+pragma::CShadowComponent *CLightComponent::GetShadowComponent() {return m_shadowComponent;}
+const pragma::CShadowComponent *CLightComponent::GetShadowComponent() const {return const_cast<CLightComponent*>(this)->GetShadowComponent();}
+bool CLightComponent::HasShadowsEnabled() const {return m_shadowComponent && GetShadowType() != ShadowType::None;}
 
 Mat4 &CLightComponent::GetTransformationMatrix(unsigned int j)
 {

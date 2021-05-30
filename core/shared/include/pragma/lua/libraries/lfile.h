@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __LFILE_H__
 #define __LFILE_H__
@@ -14,6 +14,7 @@
 #include "luasystem.h"
 #include "pragma/lua/ldefinitions.h"
 #include <sharedutils/datastream.h>
+#include <optional>
 
 enum class FileOpenMode : uint32_t
 {
@@ -124,6 +125,7 @@ namespace Lua
 	{
 		DLLNETWORK bool validate_write_operation(lua_State *l,std::string &path);
 		DLLNETWORK bool validate_write_operation(lua_State *l,std::string &path,std::string &outRootPath);
+		DLLNETWORK std::string to_relative_path(lua_State *l,const std::string &path);
 
 		DLLNETWORK std::shared_ptr<LFile> Open(lua_State *l,std::string path,FileOpenMode openMode,fsys::SearchFlags searchFlags=fsys::SearchFlags::All);
 		DLLNETWORK bool CreateDir(lua_State *l,std::string path);
@@ -132,13 +134,12 @@ namespace Lua
 		DLLNETWORK void Find(lua_State *l,const std::string &path,fsys::SearchFlags searchFlags,luabind::object &outFiles,luabind::object &outDirs);
 		DLLNETWORK luabind::object FindLuaFiles(lua_State *l,const std::string &path,fsys::SearchFlags searchFlags=fsys::SearchFlags::All);
 		DLLNETWORK void find_external_game_resource_files(lua_State *l,const std::string &path,luabind::object &outFiles,luabind::object &outDirs);
-		DLLNETWORK std::shared_ptr<LFile> open_external_asset_file(lua_State *l,const std::string &path);
+		DLLNETWORK std::shared_ptr<LFile> open_external_asset_file(lua_State *l,const std::string &path,const std::optional<std::string> &game={});
 		DLLNETWORK luabind::object Read(lua_State *l,const std::string &path);
 		DLLNETWORK bool Write(lua_State *l,std::string path,const std::string &content);
 		DLLNETWORK std::string GetCanonicalizedPath(const std::string &path);
 		DLLNETWORK luabind::object GetFileExtension(lua_State *l,const std::string &path);
 		DLLNETWORK bool ComparePath(const std::string &path0,const std::string &path1);
-		DLLNETWORK std::string RemoveFileExtension(const std::string &path);
 	};
 };
 

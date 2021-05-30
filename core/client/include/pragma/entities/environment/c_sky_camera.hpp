@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_SKY_CAMERA_HPP__
@@ -16,7 +16,8 @@
 
 namespace pragma
 {
-	namespace rendering {struct CulledMeshData;};
+	class ShaderGameWorld;
+	namespace rendering {struct BaseRenderProcessor; class RenderQueue;};
 	class DLLCLIENT CSkyCameraComponent final
 		: public BaseEntityComponent
 	{
@@ -28,14 +29,14 @@ namespace pragma
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 
 		float GetSkyboxScale() const;
-		const rendering::CulledMeshData &UpdateRenderMeshes(rendering::RasterizationRenderer &renderer,FRender renderFlags);
-
-		rendering::RenderMeshCollectionHandler &GetRenderMeshCollectionHandler();
-		const rendering::RenderMeshCollectionHandler &GetRenderMeshCollectionHandler() const;
 	private:
-		rendering::RenderMeshCollectionHandler m_renderMeshCollectionHandler = {};
+		void BindToShader(pragma::rendering::BaseRenderProcessor &processor);
+		void UnbindFromShader(pragma::rendering::BaseRenderProcessor &processor);
 		float m_skyboxScale = 1.f;
-		CallbackHandle m_cbOnPreRender = {};
+		CallbackHandle m_cbOnBuildRenderQueue = {};
+		CallbackHandle m_cbPostRenderSkybox = {};
+		std::shared_ptr<pragma::rendering::RenderQueue> m_renderQueue = nullptr;
+		std::shared_ptr<pragma::rendering::RenderQueue> m_renderQueueTranslucent = nullptr;
 	};
 };
 

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -38,15 +38,18 @@
 #include "pragma/entities/c_viewbody.h"
 #include "pragma/entities/c_player.hpp"
 #include <pragma/physics/physobj.h>
+#include <pragma/util/util_game.hpp>
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_hdr.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/renderers/raytracing_renderer.hpp"
+#include "pragma/rendering/render_queue_worker.hpp"
 #include "pragma/ai/c_navsystem.h"
 #include <texturemanager/texturemanager.h>
 #include <pragma/physics/environment.hpp>
 #include "pragma/rendering/rendersystem.h"
+#include "pragma/rendering/render_queue.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/luacallback.h>
@@ -97,10 +100,12 @@
 #include <sharedutils/util_library.hpp>
 #include <util_image.hpp>
 #include <util_image_buffer.hpp>
+#include <udm.hpp>
+#include <prosper_window.hpp>
 
 extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;
 extern ClientEntityNetworkMap *g_ClEntityNetworkMap;
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 DLLCLIENT CGame *c_game = NULL;
 DLLCLIENT pragma::physics::IEnvironment *c_physEnv = NULL;
@@ -142,6 +147,8 @@ void CGame::MessagePacketTracker::CheckMessages(uint8_t messageId,std::vector<do
 
 //////////////////////////
 
+namespace pragma::rendering {class LightingStageRenderProcessor; class DepthStageRenderProcessor;};
+static auto cvWorkerThreadCount = GetClientConVar("render_queue_worker_thread_count");
 CGame::CGame(NetworkState *state)
 	: Game(state),
 	m_tServer(0),m_renderScene(NULL),
@@ -158,10 +165,14 @@ CGame::CGame(NetworkState *state)
 	m_luaShaderManager = std::make_shared<pragma::LuaShaderManager>();
 	m_luaParticleModifierManager = std::make_shared<pragma::LuaParticleModifierManager>();
 
+	UpdateGameWorldShaderSettings();
+	umath::set_flag(m_stateFlags,StateFlags::PrepassShaderPipelineReloadRequired,false);
+	umath::set_flag(m_stateFlags,StateFlags::GameWorldShaderPipelineReloadRequired,false);
+
 	RegisterCallback<void,CGame*>("OnGameEnd");
 	RegisterCallback<void,pragma::CLightDirectionalComponent*,pragma::CLightDirectionalComponent*>("OnEnvironmentLightSourceChanged");
 	RegisterCallback<void>("PreRenderSkybox");
-	RegisterCallback<void>("PostRenderSkybox");
+	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>,std::reference_wrapper<pragma::rendering::LightingStageRenderProcessor>>("PostRenderSkybox");
 	RegisterCallback<void>("PreRenderWorld");
 	RegisterCallback<void>("PostRenderWorld");
 	RegisterCallback<void>("PreRenderParticles");
@@ -173,13 +184,14 @@ CGame::CGame(NetworkState *state)
 	RegisterCallback<void>("PostRenderWater");
 	RegisterCallback<void>("PreRenderView");
 	RegisterCallback<void>("PostRenderView");
-	RegisterCallback<void>("PreRenderScenes");
+	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes");
+	RegisterCallback<void>("OnRenderScenes");
 	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<const util::DrawSceneInfo>>("DrawScene");
-	RegisterCallback<void>("PostRenderScenes");
 	RegisterCallback<void>("PostRenderScenes");
 	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderPostProcessing");
 	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("OnPreRender");
-	RegisterCallback<void>("RenderPrepass");
+	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>,std::reference_wrapper<pragma::rendering::DepthStageRenderProcessor>>("RenderPrepass");
+	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScene");
 	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("PostRenderScene");
 	RegisterCallback<void,pragma::CPlayerComponent*>("OnLocalPlayerSpawned");
 	RegisterCallback<void,std::reference_wrapper<Vector3>,std::reference_wrapper<Quat>,std::reference_wrapper<Quat>>("CalcView");
@@ -203,7 +215,7 @@ CGame::CGame(NetworkState *state)
 		AddCallback(name,hCallback);
 	}
 
-	LoadAuxEffects("fx_generic.txt");
+	LoadAuxEffects("fx_generic.udm");
 	for(auto &rsnd : client->GetSounds())
 	{
 		auto &snd = static_cast<CALSound&>(rsnd.get());
@@ -243,9 +255,6 @@ CGame::CGame(NetworkState *state)
 		m_gpuProfilingStageManager->InitializeProfilingStageManager(gpuProfiler,{
 			stageScene,
 			stagePrepass,
-			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"PrepassSkybox",defaultStage,stagePrepass.get()),
-			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"PrepassWorld",defaultStage,stagePrepass.get()),
-			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"PrepassView",defaultStage,stagePrepass.get()),
 			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"SSAO",defaultStage,stageScene.get()),
 			stagePostProcessing,
 			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"Present",defaultStage,&stageDrawScene),
@@ -265,7 +274,7 @@ CGame::CGame(NetworkState *state)
 			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"CullLightSources",defaultStage,stageScene.get()),
 			pragma::debug::GPUProfilingStage::Create(gpuProfiler,"Shadows",defaultStage,stageScene.get())
 		});
-		static_assert(umath::to_integral(GPUProfilingPhase::Count) == 21u,"Added new profiling phase, but did not create associated profiling stage!");
+		static_assert(umath::to_integral(GPUProfilingPhase::Count) == 18u,"Added new profiling phase, but did not create associated profiling stage!");
 	});
 	m_cbProfilingHandle = c_engine->AddProfilingHandler([this](bool profilingEnabled) {
 		if(profilingEnabled == false)
@@ -279,8 +288,7 @@ CGame::CGame(NetworkState *state)
 		auto &stageDrawFrame = c_engine->GetProfilingStageManager()->GetProfilerStage(CEngine::CPUProfilingPhase::DrawFrame);
 		m_profilingStageManager->InitializeProfilingStageManager(cpuProfiler,{
 			pragma::debug::ProfilingStage::Create(cpuProfiler,"Present",&stageDrawFrame),
-			pragma::debug::ProfilingStage::Create(cpuProfiler,"OcclusionCulling",&stageDrawFrame),
-			pragma::debug::ProfilingStage::Create(cpuProfiler,"PrepareRendering",&stageDrawFrame),
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"BuildRenderQueue",&stageDrawFrame),
 			pragma::debug::ProfilingStage::Create(cpuProfiler,"Prepass",&stageDrawFrame),
 			pragma::debug::ProfilingStage::Create(cpuProfiler,"SSAO",&stageDrawFrame),
 			pragma::debug::ProfilingStage::Create(cpuProfiler,"CullLightSources",&stageDrawFrame),
@@ -288,14 +296,19 @@ CGame::CGame(NetworkState *state)
 			pragma::debug::ProfilingStage::Create(cpuProfiler,"RenderWorld",&stageDrawFrame),
 			pragma::debug::ProfilingStage::Create(cpuProfiler,"PostProcessing",&stageDrawFrame)
 		});
-		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 9u,"Added new profiling phase, but did not create associated profiling stage!");
+		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 8u,"Added new profiling phase, but did not create associated profiling stage!");
 	});
+
+	m_renderQueueBuilder = std::make_unique<pragma::rendering::RenderQueueBuilder>();
+	m_renderQueueWorkerManager = std::make_unique<pragma::rendering::RenderQueueWorkerManager>(umath::clamp(cvWorkerThreadCount->GetInt(),1,20));
 }
 
 CGame::~CGame() {}
 
 void CGame::OnRemove()
 {
+	m_renderQueueWorkerManager = nullptr;
+	m_renderQueueBuilder = nullptr;
 	c_engine->GetRenderContext().WaitIdle();
 	WGUI::GetInstance().SetFocusCallback(nullptr);
 	if(m_hCbDrawFrame.IsValid())
@@ -350,6 +363,76 @@ void CGame::OnRemove()
 	Game::OnRemove();
 }
 
+void CGame::UpdateGameWorldShaderSettings()
+{
+	auto oldSettings = m_worldShaderSettings;
+	m_worldShaderSettings.shadowQuality = static_cast<pragma::rendering::GameWorldShaderSettings::ShadowQuality>(GetConVarInt("render_shadow_quality"));
+	m_worldShaderSettings.ssaoEnabled = GetConVarBool("cl_render_ssao");
+	m_worldShaderSettings.bloomEnabled = GetConVarBool("render_bloom_enabled");
+	m_worldShaderSettings.debugModeEnabled = GetConVarBool("render_debug_mode") || GetConVarBool("render_unlit");
+	m_worldShaderSettings.fxaaEnabled = static_cast<pragma::rendering::AntiAliasing>(GetConVarInt("cl_render_anti_aliasing")) == pragma::rendering::AntiAliasing::FXAA;
+	m_worldShaderSettings.iblEnabled = GetConVarBool("render_ibl_enabled");
+	m_worldShaderSettings.dynamicLightingEnabled = GetConVarBool("render_dynamic_lighting_enabled");
+	m_worldShaderSettings.dynamicShadowsEnabled = GetConVarBool("render_dynamic_shadows_enabled");
+	if(m_worldShaderSettings == oldSettings)
+		return;
+	if(m_worldShaderSettings.fxaaEnabled != oldSettings.fxaaEnabled || m_worldShaderSettings.bloomEnabled != oldSettings.bloomEnabled)
+	{
+		auto shader = c_engine->GetShaderManager().GetShader("pp_hdr");
+		if(shader.valid())
+			shader->ReloadPipelines();
+	}
+	if(m_worldShaderSettings.ssaoEnabled != oldSettings.ssaoEnabled)
+		ReloadPrepassShaderPipelines();
+	if(
+		m_worldShaderSettings.shadowQuality != oldSettings.shadowQuality ||
+		m_worldShaderSettings.ssaoEnabled != oldSettings.ssaoEnabled ||
+		m_worldShaderSettings.bloomEnabled != oldSettings.bloomEnabled ||
+		m_worldShaderSettings.debugModeEnabled != oldSettings.debugModeEnabled ||
+		m_worldShaderSettings.iblEnabled != oldSettings.iblEnabled ||
+		m_worldShaderSettings.dynamicLightingEnabled != oldSettings.dynamicLightingEnabled ||
+		m_worldShaderSettings.dynamicShadowsEnabled != oldSettings.dynamicShadowsEnabled
+	)
+		ReloadGameWorldShaderPipelines();
+	if(m_worldShaderSettings.dynamicLightingEnabled != oldSettings.dynamicLightingEnabled)
+	{
+		auto shader = c_engine->GetShaderManager().GetShader("forwardp_light_culling");
+		if(shader.valid())
+			shader->ReloadPipelines();
+	}
+}
+
+static void cmd_render_ibl_enabled(NetworkState*,ConVar*,bool,bool enabled)
+{
+	if(c_game == nullptr)
+		return;
+	c_game->UpdateGameWorldShaderSettings();
+}
+REGISTER_CONVAR_CALLBACK_CL(render_ibl_enabled,cmd_render_ibl_enabled);
+REGISTER_CONVAR_CALLBACK_CL(render_dynamic_lighting_enabled,cmd_render_ibl_enabled);
+REGISTER_CONVAR_CALLBACK_CL(render_dynamic_shadows_enabled,cmd_render_ibl_enabled);
+
+static void cmd_render_queue_worker_thread_count(NetworkState*,ConVar*,int,int val)
+{
+	if(c_game == nullptr)
+		return;
+	val = umath::clamp(val,1,20);
+	c_game->GetRenderQueueWorkerManager().SetWorkerCount(val);
+}
+REGISTER_CONVAR_CALLBACK_CL(render_queue_worker_thread_count,cmd_render_queue_worker_thread_count);
+
+static void cmd_render_queue_worker_jobs_per_batch(NetworkState*,ConVar*,int,int val)
+{
+	if(c_game == nullptr)
+		return;
+	val = umath::max(val,1);
+	c_game->GetRenderQueueWorkerManager().SetJobsPerBatchCount(val);
+}
+REGISTER_CONVAR_CALLBACK_CL(render_queue_worker_jobs_per_batch,cmd_render_queue_worker_jobs_per_batch);
+
+pragma::rendering::RenderQueueBuilder &CGame::GetRenderQueueBuilder() {return *m_renderQueueBuilder;}
+pragma::rendering::RenderQueueWorkerManager &CGame::GetRenderQueueWorkerManager() {return *m_renderQueueWorkerManager;}
+
 void CGame::UpdateTime()
 {
 	// TODO: This also has to be applied serverside?
@@ -388,10 +471,43 @@ std::shared_ptr<pragma::EntityComponentManager> CGame::InitializeEntityComponent
 void CGame::OnReceivedRegisterNetEvent(NetPacket &packet)
 {
 	auto name = packet->ReadString();
-	Game::GetEntityNetEventManager().RegisterNetEvent(name);
+	auto localId = SetupNetEvent(name);
+	auto sharedId = packet->Read<pragma::NetEventId>();
+	if(sharedId >= m_clientNetEventData.sharedNetEventIdToLocalId.size())
+	{
+		if(m_clientNetEventData.sharedNetEventIdToLocalId.size() == m_clientNetEventData.sharedNetEventIdToLocalId.capacity())
+			m_clientNetEventData.sharedNetEventIdToLocalId.reserve(m_clientNetEventData.sharedNetEventIdToLocalId.size() *1.1f +100);
+		m_clientNetEventData.sharedNetEventIdToLocalId.resize(sharedId +1,std::numeric_limits<pragma::NetEventId>::max());
+	}
+	m_clientNetEventData.sharedNetEventIdToLocalId[sharedId] = localId;
 }
 
-pragma::NetEventId CGame::SetupNetEvent(const std::string &name) {return FindNetEvent(name);}
+pragma::NetEventId CGame::SharedNetEventIdToLocal(pragma::NetEventId evId) const
+{
+	return (evId < m_clientNetEventData.sharedNetEventIdToLocalId.size()) ? m_clientNetEventData.sharedNetEventIdToLocalId[evId] : std::numeric_limits<pragma::NetEventId>::max();
+}
+
+pragma::NetEventId CGame::LocalNetEventIdToShared(pragma::NetEventId evId) const
+{
+	return (evId < m_clientNetEventData.localNetEventIdToSharedId.size()) ? m_clientNetEventData.localNetEventIdToSharedId[evId] : std::numeric_limits<pragma::NetEventId>::max();
+}
+
+pragma::NetEventId CGame::FindNetEvent(const std::string &name) const
+{
+	auto it = m_clientNetEventData.localNetEventIds.find(name);
+	if(it == m_clientNetEventData.localNetEventIds.end())
+		return std::numeric_limits<pragma::NetEventId>::max();
+	return it->second;
+}
+
+pragma::NetEventId CGame::SetupNetEvent(const std::string &name)
+{
+	auto it = m_clientNetEventData.localNetEventIds.find(name);
+	if(it != m_clientNetEventData.localNetEventIds.end())
+		return it->second;
+	m_clientNetEventData.localNetEventIds.insert(std::make_pair(name,m_clientNetEventData.nextLocalNetEventId++));
+	return m_clientNetEventData.nextLocalNetEventId -1;
+}
 
 std::shared_ptr<pragma::nav::Mesh> CGame::LoadNavMesh(const std::string &fname) {return pragma::nav::CMesh::Load(*this,fname);}
 
@@ -553,12 +669,22 @@ static void render_debug_mode(NetworkState*,ConVar*,int32_t,int32_t debugMode)
 {
 	if(c_game == nullptr)
 		return;
-	auto *scene = c_game->GetScene();
-	if(scene == nullptr)
-		return;
-	scene->SetDebugMode(static_cast<pragma::CSceneComponent::DebugMode>(debugMode));
+	c_game->UpdateGameWorldShaderSettings();
+	EntityIterator entIt {*c_game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CSceneComponent>>();
+	for(auto *ent : entIt)
+	{
+		auto sceneC = ent->GetComponent<pragma::CSceneComponent>();
+		sceneC->SetDebugMode(static_cast<pragma::SceneDebugMode>(debugMode));
+	}
 }
 REGISTER_CONVAR_CALLBACK_CL(render_debug_mode,render_debug_mode);
+
+static void CVAR_CALLBACK_render_unlit(NetworkState *nw,ConVar *cv,bool prev,bool val)
+{
+	render_debug_mode(nw,cv,prev,umath::to_integral(pragma::SceneDebugMode::Unlit));
+}
+REGISTER_CONVAR_CALLBACK_CL(render_unlit,CVAR_CALLBACK_render_unlit);
 
 void CGame::SetViewModelFOV(float fov) {*m_viewFov = fov;}
 const util::PFloatProperty &CGame::GetViewModelFOVProperty() const {return m_viewFov;}
@@ -607,15 +733,27 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 	auto *scene = pragma::CSceneComponent::Create(pragma::CSceneComponent::CreateInfo{});
 	if(scene)
 	{
+		scene->GetEntity().SetName("scene_game");
 		m_scene = scene->GetHandle<pragma::CSceneComponent>();
-		m_scene->SetDebugMode(static_cast<pragma::CSceneComponent::DebugMode>(GetConVarInt("render_debug_mode")));
+		m_scene->SetDebugMode(static_cast<pragma::SceneDebugMode>(GetConVarInt("render_debug_mode")));
 		SetViewModelFOV(GetConVarFloat("cl_fov_viewmodel"));
-		auto renderer = pragma::rendering::RasterizationRenderer::Create<pragma::rendering::RasterizationRenderer>(m_scene->GetWidth(),m_scene->GetHeight());
-		m_scene->SetRenderer(renderer);
-		m_scene->ReloadRenderTarget(static_cast<uint32_t>(resolution.x),static_cast<uint32_t>(resolution.y));
-		m_scene->SetWorldEnvironment(GetWorldEnvironment());
-		if(renderer && renderer->IsRasterizationRenderer())
-			renderer->SetSSAOEnabled(*scene,GetConVarBool("cl_render_ssao"));
+
+		auto *entRenderer = CreateEntity<CRasterizationRenderer>();
+		if(entRenderer)
+		{
+			auto rasterization = entRenderer->GetComponent<pragma::CRasterizationRendererComponent>();
+			if(rasterization.valid())
+			{
+				auto *renderer = rasterization->GetRendererComponent();
+				if(renderer)
+				{
+					m_scene->SetRenderer(renderer);
+					m_scene->ReloadRenderTarget(static_cast<uint32_t>(resolution.x),static_cast<uint32_t>(resolution.y));
+					m_scene->SetWorldEnvironment(GetWorldEnvironment());
+					rasterization->SetSSAOEnabled(GetConVarBool("cl_render_ssao"));
+				}
+			}
+		}
 
 		SetRenderScene(*scene);
 	}
@@ -629,7 +767,7 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 
 	auto &materialManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
 	if(m_surfaceMaterialManager)
-		m_surfaceMaterialManager->Load("scripts\\physics\\materials.txt");
+		m_surfaceMaterialManager->Load("scripts/physics/materials.udm");
 
 	c_engine->GetRenderContext().SavePipelineCache();
 
@@ -647,8 +785,10 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 		m_primaryCamera = cam->GetHandle<pragma::CCameraComponent>();
 	}
 
-	CallCallbacks<void,Game*>("OnGameInitialized",this);
 	m_flags |= GameFlags::GameInitialized;
+	CallCallbacks<void,Game*>("OnGameInitialized",this);
+	for(auto *gmC : GetGamemodeComponents())
+		gmC->OnGameInitialized();
 }
 
 void CGame::RequestResource(const std::string &fileName)
@@ -671,7 +811,7 @@ void CGame::Resize()
 	auto *cam = GetPrimaryCamera();
 	if(cam == nullptr)
 		return;
-	cam->SetAspectRatio(c_engine->GetAspectRatio());
+	cam->SetAspectRatio(c_engine->GetWindow().GetAspectRatio());
 	cam->UpdateMatrices();
 }
 
@@ -683,6 +823,10 @@ void CGame::PostGUIDraw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 {
 	CallLuaCallbacks<void,std::shared_ptr<prosper::ICommandBuffer>>("PostGUIDraw",drawCmd);
 }
+void CGame::SetDefaultGameRenderEnabled(bool enabled) {m_defaultGameRenderEnabled = enabled;}
+bool CGame::IsDefaultGameRenderEnabled() const {return m_defaultGameRenderEnabled;}
+void CGame::QueueForRendering(const util::DrawSceneInfo &drawSceneInfo) {m_sceneRenderQueue.push_back(drawSceneInfo);}
+const std::vector<util::DrawSceneInfo> &CGame::GetQueuedRenderScenes() const {return m_sceneRenderQueue;}
 void CGame::SetRenderScene(pragma::CSceneComponent &scene) {m_renderScene = scene.GetHandle<pragma::CSceneComponent>();}
 void CGame::ResetRenderScene() {m_renderScene = m_scene;}
 pragma::CSceneComponent *CGame::GetRenderScene() {return m_renderScene.get();}
@@ -862,7 +1006,7 @@ void CGame::CreateGiblet(const GibletCreateInfo &info,pragma::CParticleSystemCom
 		{"fade_end",std::to_string(info.lifetime)}
 	});
 	auto pTrComponent = pt->GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 		pTrComponent->SetPosition(info.position);
 	pt->SetRemoveOnComplete(true);
 	pt->Start();
@@ -955,8 +1099,6 @@ void CGame::Think()
 	Game::Think();
 	auto *scene = GetRenderScene();
 	auto *cam = GetPrimaryCamera();
-	if(cam)
-		cam->UpdateFrustumPlanes();
 
 	double tDelta = m_stateNetwork->DeltaTime();
 	m_tServer += DeltaTime();
@@ -991,6 +1133,46 @@ void CGame::Tick()
 	PostTick();
 }
 
+void CGame::ReloadGameWorldShaderPipelines() const
+{
+	if(umath::is_flag_set(m_stateFlags,StateFlags::GameWorldShaderPipelineReloadRequired))
+		return;
+	umath::set_flag(const_cast<CGame*>(this)->m_stateFlags,StateFlags::GameWorldShaderPipelineReloadRequired);
+
+	auto cb = FunctionCallback<void>::Create(nullptr);
+	static_cast<Callback<void>*>(cb.get())->SetFunction([this,cb]() mutable {
+		cb.Remove();
+
+		umath::set_flag(const_cast<CGame*>(this)->m_stateFlags,StateFlags::GameWorldShaderPipelineReloadRequired,false);
+		auto &shaderManager = c_engine->GetShaderManager();
+		for(auto &shader : shaderManager.GetShaders())
+		{
+			auto *gameWorldShader = dynamic_cast<pragma::ShaderGameWorldLightingPass*>(shader.get());
+			if(gameWorldShader == nullptr)
+				continue;
+			gameWorldShader->ReloadPipelines();
+		}
+	});
+	const_cast<CGame*>(this)->AddCallback("PreRenderScenes",cb);
+}
+void CGame::ReloadPrepassShaderPipelines() const
+{
+	if(umath::is_flag_set(m_stateFlags,StateFlags::PrepassShaderPipelineReloadRequired))
+		return;
+	umath::set_flag(const_cast<CGame*>(this)->m_stateFlags,StateFlags::PrepassShaderPipelineReloadRequired);
+
+	auto cb = FunctionCallback<void>::Create(nullptr);
+	static_cast<Callback<void>*>(cb.get())->SetFunction([this,cb]() mutable {
+		cb.Remove();
+
+		umath::set_flag(const_cast<CGame*>(this)->m_stateFlags,StateFlags::PrepassShaderPipelineReloadRequired,false);
+		auto &shader = GetGameShader(GameShader::Prepass);
+		if(shader.valid())
+			shader.get()->ReloadPipelines();
+	});
+	const_cast<CGame*>(this)->AddCallback("PreRenderScenes",cb);
+}
+
 static CVar cvSimEnabled = GetClientConVar("cl_physics_simulation_enabled");
 bool CGame::IsPhysicsSimulationEnabled() const {return cvSimEnabled->GetBool();}
 
@@ -1004,19 +1186,22 @@ std::shared_ptr<ModelSubMesh> CGame::CreateModelSubMesh() const {return std::mak
 Float CGame::GetHDRExposure() const
 {
 	auto *renderer = m_scene->GetRenderer();
-	return renderer && renderer->IsRasterizationRenderer() ? static_cast<const pragma::rendering::RasterizationRenderer*>(renderer)->GetHDRExposure() : 0.f;
+	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+	return raster.valid() ? raster->GetHDRExposure() : 0.f;
 }
 Float CGame::GetMaxHDRExposure() const
 {
 	auto *renderer = m_scene->GetRenderer();
-	return renderer && renderer->IsRasterizationRenderer() ? static_cast<const pragma::rendering::RasterizationRenderer*>(renderer)->GetMaxHDRExposure() : 0.f;
+	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+	return raster.valid() ? raster->GetMaxHDRExposure() : 0.f;
 }
 void CGame::SetMaxHDRExposure(Float exposure)
 {
 	auto *renderer = m_scene->GetRenderer();
-	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+	if(raster.expired())
 		return;
-	static_cast<pragma::rendering::RasterizationRenderer*>(renderer)->SetMaxHDRExposure(exposure);
+	raster->SetMaxHDRExposure(exposure);
 }
 
 void CGame::OnMapLoaded()
@@ -1069,23 +1254,22 @@ void CGame::InitializeMapEntities(pragma::asset::WorldData &worldData,std::vecto
 			{
 				auto *bspTree = worldData.GetBSPTree();
 				if(bspTree)
-					pWorldComponent->SetBSPTree(bspTree->shared_from_this());
+					pWorldComponent->SetBSPTree(bspTree->shared_from_this(),worldData.GetClusterMeshIndices());
 			}
 		}
 
-		auto mdlComponent = ent.GetModelComponent();
-		auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+		auto &mdl = ent.GetModel();
 		if(mdl == nullptr)
 		{
 			auto pRenderComponent = static_cast<CBaseEntity&>(ent).GetRenderComponent();
-			if(pRenderComponent.valid())
+			if(pRenderComponent)
 			{
 				Vector3 min {};
 				Vector3 max {};
 				auto pPhysComponent = ent.GetPhysicsComponent();
-				if(pPhysComponent.valid())
+				if(pPhysComponent != nullptr)
 					pPhysComponent->GetCollisionBounds(&min,&max);
-				pRenderComponent->SetRenderBounds(min,max);
+				pRenderComponent->SetLocalRenderBounds(min,max);
 			}
 		}
 	}
@@ -1111,12 +1295,16 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 		//auto lightmapAtlas = pragma::CLightMapComponent::CreateLightmapTexture(img->GetWidth(),img->GetHeight(),static_cast<uint16_t*>(img->GetData()));
 		auto *scene = GetScene();
 		auto *renderer = scene ? scene->GetRenderer() : nullptr;
-		if(renderer != nullptr && renderer->IsRasterizationRenderer())
+		if(renderer != nullptr)
 		{
-			auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
 			scene->GetSceneRenderDesc().ReloadOcclusionCullingHandler(); // Required if BSP occlusion culling is specified
 			if(lightmapAtlas != nullptr)
-				rasterizer->SetLightMap(lightmapAtlas);
+			{
+				auto *entWorld = c_game->GetWorld();
+				auto lightMapC = entWorld ? entWorld->GetEntity().GetComponent<pragma::CLightMapComponent>() : util::WeakHandle<pragma::CLightMapComponent>{};
+				if(lightMapC.valid())
+					pragma::CRasterizationRendererComponent::UpdateLightmap(*lightMapC);
+			}
 		}
 
 		// Find map entities with lightmap uv sets
@@ -1135,7 +1323,7 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 			auto lightMapC = world->GetEntity().GetComponent<pragma::CLightMapComponent>();
 			if(lightMapC.valid())
 			{
-				lightMapC->SetLightMapIntensity(worldData.GetLightMapIntensity());
+				// lightMapC->SetLightMapIntensity(worldData.GetLightMapIntensity());
 				lightMapC->SetLightMapExposure(worldData.GetLightMapExposure());
 				lightMapC->InitializeLightMapData(lightmapAtlas,globalLightmapUvBuffer,buffers);
 				auto *scene = GetRenderScene();
@@ -1152,17 +1340,19 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 bool CGame::LoadMap(const std::string &map,const Vector3 &origin,std::vector<EntityHandle> *entities)
 {
 	bool r = Game::LoadMap(map,origin,entities);
+	m_flags |= GameFlags::MapLoaded;
 	if(r == true)
 	{
 		CallCallbacks<void>("OnMapLoaded");
 		CallLuaCallbacks<void>("OnMapLoaded");
+		for(auto *gmC : GetGamemodeComponents())
+			gmC->OnMapInitialized();
 	}
-	m_flags |= GameFlags::MapLoaded;
 	OnMapLoaded();
 
 	std::string dsp = "fx_";
 	dsp += map;
-	dsp += ".txt";
+	dsp += ".udm";
 	LoadAuxEffects(dsp.c_str());
 	return r;
 }
@@ -1228,7 +1418,7 @@ void CGame::SendUserInput()
 	auto &ent = pl->GetEntity();
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
-	auto orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
+	auto orientation = charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity();
 	nwm::write_quat(p,orientation);
 	p->Write<Vector3>(pl->GetViewPos());
 
@@ -1302,7 +1492,7 @@ void CGame::ReceiveSnapshot(NetPacket &packet)
 			// Move the entity to the correct position without teleporting it.
 			// Teleporting can lead to odd physics glitches.
 			auto pTrComponent = ent->GetTransformComponent();
-			auto posEnt = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+			auto posEnt = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 			auto correctionVel = pos -posEnt;
 			auto l = uvec::length_sqr(correctionVel);
 #ifdef ENABLE_DEPRECATED_PHYSICS
@@ -1310,7 +1500,7 @@ void CGame::ReceiveSnapshot(NetPacket &packet)
 			if(l > maxCorrectionDistance)
 #endif
 			{
-				if(pTrComponent.valid())
+				if(pTrComponent != nullptr)
 					pTrComponent->SetPosition(pos); // Too far away, just snap into position
 			}
 #ifdef ENABLE_DEPRECATED_PHYSICS
@@ -1329,8 +1519,8 @@ void CGame::ReceiveSnapshot(NetPacket &packet)
 				pVelComponent->SetVelocity(vel);
 				pVelComponent->SetAngularVelocity(angVel);
 			}
-			if(pTrComponent.valid())
-				pTrComponent->SetOrientation(orientation);
+			if(pTrComponent != nullptr)
+				pTrComponent->SetRotation(orientation);
 			ent->ReceiveSnapshotData(packet);
 		}
 		else
@@ -1343,7 +1533,7 @@ void CGame::ReceiveSnapshot(NetPacket &packet)
 			if(ent != NULL)
 			{
 				auto pPhysComponent = ent->GetPhysicsComponent();
-				PhysObj *physObj = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+				PhysObj *physObj = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
 				if(physObj != NULL && !physObj->IsStatic())
 				{
 					auto colObjs = physObj->GetCollisionObjects();
@@ -1508,7 +1698,7 @@ void CGame::DrawPlane(const Vector3 &n,float dist,const Color &color,float durat
 }
 static auto cvRenderPhysics = GetClientConVar("debug_physics_draw");
 static auto cvSvRenderPhysics = GetClientConVar("sv_debug_physics_draw");
-void CGame::RenderDebugPhysics(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
+void CGame::RenderDebugPhysics(std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
 {
 	if(cvRenderPhysics->GetBool())
 	{
@@ -1531,35 +1721,28 @@ void CGame::RenderDebugPhysics(std::shared_ptr<prosper::IPrimaryCommandBuffer> &
 
 bool CGame::LoadAuxEffects(const std::string &fname)
 {
-	std::string path = "scripts\\soundfx\\";
+	std::string path = "scripts/soundfx/";
 	path += fname;
-	auto f = FileManager::OpenFile(path.c_str(),"r");
-	std::shared_ptr<ds::Block> root = nullptr;
-	if(f != NULL)
-		root = std::shared_ptr<ds::Block>(ds::System::ReadData(f));
-	if(root == NULL)
+
+	std::string err;
+	auto udmData = util::load_udm_asset(fname,&err);
+	if(udmData == nullptr)
 		return false;
-	auto *data = root->GetData();
-	if(data == NULL)
+	auto &data = *udmData;
+	auto udm = data.GetAssetData().GetData();
+	if(!udm)
 		return false;
-	for(auto it=data->begin();it!=data->end();it++)
+	for(auto pair : udm.ElIt())
 	{
-		std::shared_ptr<ds::Block> block = nullptr;
-		if(it->second->IsBlock())
-			block = std::static_pointer_cast<ds::Block>(it->second);
-		else if(it->second->IsContainer())
-			block = it->second->GetBlock(0);
-		if(block != NULL)
-		{
-			std::string name = it->first;
-			StringToLower(name);
-			std::string type = block->GetString("type");
-			al::create_aux_effect(name,type,*block);
-		}
+		std::string name = std::string{pair.key};
+		StringToLower(name);
+		std::string type;
+		pair.property["type"](type);
+		al::create_aux_effect(name,type,pair.property);
 	}
 	return true;
 }
-std::shared_ptr<al::Effect> CGame::GetAuxEffect(const std::string &name) {return c_engine->GetAuxEffect(name);}
+std::shared_ptr<al::IEffect> CGame::GetAuxEffect(const std::string &name) {return c_engine->GetAuxEffect(name);}
 
 bool CGame::SaveImage(prosper::IImage &image,const std::string &fileName,const uimg::TextureInfo &imageWriteInfo) const
 {

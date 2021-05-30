@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __NETWORKSTATE_H__
@@ -18,6 +18,7 @@
 #include <pragma/console/fcvar.h>
 #include <sharedutils/util_cpu_profiler.hpp>
 #include <pragma/input/key_state.hpp>
+#include <unordered_set>
 #ifdef __linux__
 #include "pragma/audio/soundscript.h"
 #endif
@@ -191,6 +192,7 @@ protected:
 	std::unique_ptr<Game,void(*)(Game*)> m_game = std::unique_ptr<Game,void(*)(Game*)>{nullptr,[](Game*) {}};
 	std::shared_ptr<pragma::asset::ModelManager> m_modelManager = nullptr;
 	std::unique_ptr<SoundScriptManager> m_soundScriptManager = nullptr;
+	std::unordered_set<std::string> m_missingSoundCache;
 	std::vector<CallbackHandle> m_thinkCallbacks;
 	std::vector<CallbackHandle> m_tickCallbacks;
 	CallbackHandle m_cbProfilingHandle = {};

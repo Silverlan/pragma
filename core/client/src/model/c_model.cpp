@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -16,6 +16,9 @@ extern DLLCLIENT ClientState *client;
 CModel::CModel(NetworkState *nw,unsigned int numBones,const std::string &name)
 	: Model(nw,numBones,name)
 {}
+
+std::shared_ptr<ModelMesh> CModel::CreateMesh() const {return std::make_shared<CModelMesh>();}
+std::shared_ptr<ModelSubMesh> CModel::CreateSubMesh() const {return std::make_shared<CModelSubMesh>();}
 
 void CModel::PrecacheTextureGroup(uint32_t i)
 {

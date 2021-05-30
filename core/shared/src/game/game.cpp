@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -32,6 +32,7 @@
 #include "pragma/input/inkeys.h"
 #include "pragma/entities/trigger/base_trigger_touch.hpp"
 #include "pragma/entities/components/base_player_component.hpp"
+#include "pragma/entities/components/base_gamemode_component.hpp"
 #include "pragma/entities/entity_component_manager.hpp"
 #include "pragma/entities/prop/prop_base.h"
 #include "pragma/entities/components/base_physics_component.hpp"
@@ -48,160 +49,14 @@
 #include "pragma/model/model.h"
 #include "pragma/model/modelmanager.h"
 #include "pragma/physics/collisionmesh.h"
+#include "pragma/asset/util_asset.hpp"
+#include "pragma/util/util_game.hpp"
 #include <sharedutils/util_library.hpp>
 #include <luainterface.hpp>
-
-
-DLLNETWORK void BuildDisplacementTriangles(std::vector<Vector3> &sideVerts,unsigned int start,
-	Vector3 &nu,Vector3 &nv,float sw,float sh,float ou,float ov,float su,float sv,
-	unsigned char power,std::vector<std::vector<Vector3>> &normals,std::vector<std::vector<Vector3>> &offsets,std::vector<std::vector<float>> &distances,unsigned char numAlpha,std::vector<std::vector<Vector2>> &alphas,
-	std::vector<Vector3> &outVertices,std::vector<Vector3> &outNormals,std::vector<Vector2> &outUvs,std::vector<unsigned int> &outTriangles,std::vector<Vector2> *outAlphas)
-{
-	int rows = umath::pow(2,CInt32(power)) +1;
-	unsigned int numVerts = rows *rows;
-	outNormals.resize(numVerts);
-	outUvs.resize(numVerts);
-	if(numAlpha > 0)
-		outAlphas->resize(numVerts);
-	Vector3 sortedSideVerts[4] = {{},{},{},{}};
-	char j = 0;
-	for(auto i=start;i<CUInt32(sideVerts.size());i++)
-	{
-		sortedSideVerts[j] = sideVerts[i];
-		j++;
-	}
-	for(unsigned int i=0;i<start;i++)
-	{
-		sortedSideVerts[j] = sideVerts[i];
-		j++;
-	}
-	Vector3 &x1 = sortedSideVerts[0];
-	Vector3 &x2 = sortedSideVerts[1];
-	Vector3 &y1 = sortedSideVerts[3];
-	Vector3 &y2 = sortedSideVerts[2];
-	Vector3 xOffset1 = (x2 -x1) /float(rows -1);
-	Vector3 xOffset2 = (y2 -y1) /float(rows -1);
-	Vector3 yOffset = (y1 -x1) /float(rows -1); // CHECKME
-	outVertices.resize(numVerts);
-	Vector3 cur = sortedSideVerts[0];
-	for(int col=0;col<rows;col++)
-	{
-		std::vector<Vector3> &cNormals = normals[col];
-		std::vector<Vector2> *cAlphas = (numAlpha > 0) ? &alphas[col] : NULL;
-		std::vector<float> &cDistances = distances[col];
-		std::vector<Vector3> &cOffsets = offsets[col];
-
-		Vector3 rowPos = cur;
-		float offsetScale = col /float(rows -1);
-		for(int row=0;row<rows;row++)
-		{
-			unsigned int idx = col *rows +row;
-			//outNormals[idx] = -cNormals[row]; // This is the offset normal, not the actual face normal!
-			if(numAlpha > 0)
-				(*outAlphas)[idx] = (*cAlphas)[row];
-
-			Vector3 vA = rowPos +cNormals[row] *cDistances[row] +cOffsets[row];
-			Vector2 uv;
-			uv.x = (glm::dot(rowPos,nu) *sw) /su +ou *sw;
-			uv.y = (glm::dot(rowPos,nv) *sh) /sv +ov *sh;
-			outUvs[idx] = uv;
-			outVertices[idx] = vA;
-
-			Vector3 xOffset = (1.f -offsetScale) *xOffset1 +offsetScale *xOffset2;
-			rowPos += xOffset;
-		}
-		cur = sortedSideVerts[0] +(yOffset *float(col +1));
-		//if(col < rows -1)
-		//	cur += yOffset +normals[col +1][0] *distances[col +1][0]; // +cNormals[0] *cDistances[0]; TODO!! -> Next column!
-	}
-	outTriangles.resize((rows -1) *(rows -1) *6);
-	unsigned int idx = 0;
-	std::vector<Vector3> faceNormals;
-	faceNormals.reserve(umath::pow(rows -1,2) *2);
-	for(int col=0;col<rows -1;col++)
-	{
-		for(int row=0;row<rows -1;row++)
-		{
-			int a = col *rows +row;
-			int b = a +1;
-			int c = (col +1) *rows +row;
-			outTriangles[idx] = a;
-			outTriangles[idx +1] = b;
-			outTriangles[idx +2] = c;
-
-			auto na = -uvec::cross(outVertices[c] -outVertices[a],outVertices[b] -outVertices[a]);
-			uvec::normalize(&na);
-			faceNormals.push_back(na);
-
-			idx += 3;
-			int d = (col +1) *rows +row +1;
-			outTriangles[idx] = b;
-			outTriangles[idx +1] = d;
-			outTriangles[idx +2] = c;
-
-			auto nb = -uvec::cross(outVertices[c] -outVertices[b],outVertices[d] -outVertices[b]);
-			uvec::normalize(&nb);
-			faceNormals.push_back(nb);
-
-			idx += 3;
-		}
-	}
-	// Calculate Vertex Normals
-	auto up = Vector3(0.f,1.f,0.f);
-	for(auto col=0;col<rows;col++)
-	{
-		for(auto row=0;row<rows;row++)
-		{
-			auto vertId = col *rows +row;
-			auto a = (col > 0 && row > 0) ?
-				((col -1) *(rows -1) +(row -1))
-				: -1;
-			auto b = (row > 0 && col < (rows -1)) ?
-				(col *(rows -1) +(row -1))
-				: -1;
-			auto c = (col > 0) ?
-				((col -1) *(rows -1) +row)
-				: -1;
-			auto d = (col < (rows -1)) ?
-				(col *(rows -1) +row)
-				: -1;
-
-			auto &na1 = (a >= 0) ? faceNormals[a *2 +1] : up;
-			auto &na2 = na1;
-			auto &nb1 = (b >= 0) ? faceNormals[b *2] : up;
-			auto &nb2 = (b >= 0) ? faceNormals[b *2 +1] : up;
-			auto &nc1 = (c >= 0) ? faceNormals[c *2] : up;
-			auto &nc2 = (c >= 0) ? faceNormals[c *2 +1] : up;
-			auto &nd1 = (c >= 0) ? faceNormals[d *2] : up;
-			auto &nd2 = nd1;
-
-			auto &n = outNormals[vertId] = (na1 +na2 +nb1 +nb2 +nc1 +nc2 +nd1 +nd2) /8.f;
-			uvec::normalize(&n);
-		}
-	}
-	//
-}
-
-DLLNETWORK void ToTriangles(const std::vector<Vector3> &vertices,std::vector<uint16_t> &outTriangles)
-{
-	size_t pivot = 0;
-	//Vector3 &va = (*vertices)[pivot];
-	auto numVerts = vertices.size();
-	if(numVerts == 0)
-		return;
-	auto numVals = (numVerts -2) *3;
-	outTriangles.resize(numVals);
-	auto idx = 0;
-	for(auto i=pivot +2;i<numVerts;i++)
-	{
-		outTriangles[idx] = static_cast<uint16_t>(pivot);
-		outTriangles[idx +1] = static_cast<uint16_t>(i -1);
-		outTriangles[idx +2] = static_cast<uint16_t>(i);
-		idx += 3;
-	}
-}
-
-DLLNETWORK void Lua::VarDump(lua_State *lua,int n)
+#include <udm.hpp>
+#pragma optimize("",off)
+extern DLLNETWORK Engine *engine;
+void Lua::VarDump(lua_State *lua,int n)
 {
 	auto t = GetType(lua,n);
 	switch(t)
@@ -241,7 +96,7 @@ DLLNETWORK void Lua::VarDump(lua_State *lua,int n)
 	}
 }
 
-DLLNETWORK void Lua::StackDump(lua_State *lua)
+void Lua::StackDump(lua_State *lua)
 {
     int top = GetStackTop(lua);
 	Con::cout<<"------------ LUA STACKDUMP ------------"<<Con::endl;
@@ -255,7 +110,7 @@ DLLNETWORK void Lua::StackDump(lua_State *lua)
 	Con::cout<<"---------------------------------------"<<Con::endl;
 }
 
-DLLNETWORK void Lua::TableDump(lua_State *lua,int n)
+void Lua::TableDump(lua_State *lua,int n)
 {
 	if(n < 0)
 		n = Lua::GetStackTop(lua) +n +1;
@@ -287,7 +142,7 @@ DLLNETWORK void Lua::TableDump(lua_State *lua,int n)
 
 ////////////////
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 Game::Game(NetworkState *state)
 {
 	m_stateNetwork = state;
@@ -329,8 +184,8 @@ Game::Game(NetworkState *state)
 
 	RegisterCallback<void>("EndGame");
 
-	LoadSoundScripts("game_sounds_generic.txt");
-	LoadSoundScripts("fx_physics_impact.txt");
+	LoadSoundScripts("game_sounds_generic.udm");
+	LoadSoundScripts("fx_physics_impact.udm");
 }
 
 Game::~Game() {}
@@ -340,7 +195,6 @@ void Game::OnRemove()
 	pragma::BaseAIComponent::ReleaseNavThread();
 	CallCallbacks<void>("OnLuaReleased",GetLuaState());
 	m_luaCallbacks.clear();
-	m_luaGameMode = nullptr;
 	m_luaEnts = nullptr;
 	m_componentManager = nullptr;
 	ClearTimers(); // Timers have to be removed before the lua state is closed
@@ -377,7 +231,7 @@ void Game::InitializeLuaScriptWatcher()
 	m_scriptWatcher = std::make_unique<LuaDirectoryWatcherManager>(this);
 }
 
-luabind::object *Game::GetGameModeLuaObject() {return m_luaGameMode.get();}
+BaseEntity *Game::GetGameModeEntity() {return m_entGamemode.get();}
 bool Game::IsGameInitialized() const {return (m_flags &GameFlags::GameInitialized) != GameFlags::None;}
 bool Game::IsMapLoaded() const {return (m_flags &GameFlags::MapLoaded) != GameFlags::None;}
 
@@ -385,18 +239,24 @@ void Game::OnPlayerReady(pragma::BasePlayerComponent &pl)
 {
 	CallCallbacks<void,pragma::BasePlayerComponent*>("OnPlayerReady",&pl);
 	CallLuaCallbacks<void,luabind::object>("OnPlayerReady",pl.GetLuaObject());
+	for(auto *gmC : GetGamemodeComponents())
+		gmC->OnPlayerReady(pl);
 }
 
 void Game::OnPlayerDropped(pragma::BasePlayerComponent &pl,pragma::networking::DropReason reason)
 {
 	CallCallbacks<void,pragma::BasePlayerComponent*,pragma::networking::DropReason>("OnPlayerDropped",&pl,reason);
 	CallLuaCallbacks<void,luabind::object,std::underlying_type_t<decltype(reason)>>("OnPlayerDropped",pl.GetLuaObject(),umath::to_integral(reason));
+	for(auto *gmC : GetGamemodeComponents())
+		gmC->OnPlayerDropped(pl,reason);
 }
 
 void Game::OnPlayerJoined(pragma::BasePlayerComponent &pl)
 {
 	CallCallbacks<void,pragma::BasePlayerComponent*>("OnPlayerJoined",&pl);
 	CallLuaCallbacks<void,luabind::object>("OnPlayerJoined",pl.GetLuaObject());
+	for(auto *gmC : GetGamemodeComponents())
+		gmC->OnPlayerJoined(pl);
 }
 
 unsigned char Game::GetPlayerCount() {return m_numPlayers;}
@@ -409,6 +269,12 @@ void Game::SetGameMode(const std::string &gameMode)
 {
 	auto *info = GameModeManager::GetGameModeInfo(gameMode);
 	m_gameMode = info;
+
+	if(info)
+	{
+		for(auto &pair : info->gameMountPriorities)
+			util::set_mounted_game_priority(pair.first,pair.second);
+	}
 }
 
 void Game::SetupEntity(BaseEntity*)
@@ -470,7 +336,7 @@ void Game::Initialize()
 	for(auto &info : addons)
 		m_scriptWatcher->MountDirectory(info.GetAbsolutePath() +"/lua",true);
 
-	LoadSoundScripts("fx.txt");
+	LoadSoundScripts("fx.udm");
 }
 void Game::SetUp() {}
 
@@ -535,7 +401,7 @@ public:
 	{
 		auto *physObj = o.GetPhysObj();
 		auto *ent = physObj ? physObj->GetOwner() : nullptr;
-		auto *physC = ent ? ent->GetEntity().GetPhysicsComponent().get() : nullptr;
+		auto *physC = ent ? ent->GetEntity().GetPhysicsComponent() : nullptr;
 		if(physC == nullptr)
 			return;
 		physC->OnWake();
@@ -544,7 +410,7 @@ public:
 	{
 		auto *physObj = o.GetPhysObj();
 		auto *ent = physObj ? physObj->GetOwner() : nullptr;
-		auto *physC = ent ? ent->GetEntity().GetPhysicsComponent().get() : nullptr;
+		auto *physC = ent ? ent->GetEntity().GetPhysicsComponent() : nullptr;
 		if(physC == nullptr)
 			return;
 		physC->OnSleep();
@@ -576,31 +442,26 @@ void Game::InitializeGame()
 
 		auto &tireTypeManager = m_physEnvironment->GetTireTypeManager();
 		auto &surfTypeManager = m_physEnvironment->GetSurfaceTypeManager();
-		auto data = ds::System::LoadData("scripts/physics/tire_types.txt");
-		if(data)
+
+		std::string err;
+		auto udmData = util::load_udm_asset("scripts/physics/tire_types.udm",&err);
+		if(udmData)
 		{
-			auto *values = data->GetData();
-			for(auto it=values->begin();it!=values->end();it++)
+			auto &data = *udmData;
+			auto udm = data.GetAssetData().GetData();
+			for(auto pair : udm.ElIt())
 			{
-				auto &val = it->second;
-				if(val->IsBlock() == false || it->first.empty())
-					continue;
-				auto hTireType = tireTypeManager.RegisterType(it->first);
+				auto &identifier = pair.key;
+				auto hTireType = tireTypeManager.RegisterType(std::string{identifier});
 				if(hTireType.IsExpired())
 					continue;
-				auto *blockData = static_cast<ds::Block*>(val.get());
-				auto frictionMods = blockData->GetBlock("friction_modifiers",0);
-				auto *frictionModsData = frictionMods ? frictionMods->GetData() : nullptr;
-				if(frictionModsData == nullptr || frictionMods->IsBlock() == false)
-					continue;
-				auto *frictionBlock = static_cast<ds::Block*>(frictionMods.get());
-				for(auto &pair : *frictionModsData)
+				auto udmFrictionModifiers = pair.property["friction_modifiers"];
+				for(auto pair : udmFrictionModifiers.ElIt())
 				{
-					auto &surfaceType = pair.first;
-					auto surfType = surfTypeManager.RegisterType(surfaceType);
+					auto &surfaceType = pair.key;
+					auto surfType = surfTypeManager.RegisterType(std::string{surfaceType});
 					auto friction = 1.f;
-					if(surfType.IsExpired() || frictionBlock->GetFloat(surfaceType,&friction) == false)
-						continue;
+					pair.property(friction);
 					hTireType->SetFrictionModifier(*surfType,friction);
 				}
 			}
@@ -732,12 +593,20 @@ void Game::Tick()
 	CallCallbacks("PostPhysicsSimulate");
 	CallLuaCallbacks("PostPhysicsSimulate");
 
-	for(auto &hPhysC : awakePhysics)
+	for(auto it=awakePhysics.begin();it!=awakePhysics.end();)
 	{
+		auto &hPhysC = *it;
 		if(hPhysC.expired() || hPhysC->GetPhysicsType() == PHYSICSTYPE::NONE)
+		{
+			++it;
 			continue;
-		hPhysC->PostPhysicsSimulate();
+		}
+		auto keepAwake = hPhysC->PostPhysicsSimulate();
 		hPhysC->UpdatePhysicsData(); // Has to be before Think (Requires updated physics).
+		if(keepAwake == false)
+			it = awakePhysics.erase(it);
+		else
+			++it;
 	}
 
 	StopProfilingStage(CPUProfilingPhase::Physics);
@@ -752,26 +621,31 @@ void Game::Tick()
 	}
 
 	StartProfilingStage(CPUProfilingPhase::GameObjectLogic);
-	static std::vector<util::WeakHandle<pragma::LogicComponent>> logicComponents {};
-	logicComponents.clear();
-	EntityIterator entItLogic {*this};
-	entItLogic.AttachFilter<TEntityIteratorFilterComponent<pragma::LogicComponent>>();
 
-	for(auto *ent : entItLogic)
+	auto &logicComponents = GetEntityTickComponents();
+	// Note: During the loop, new items may be appended to the end of logicComponents, but no elements
+	// may be erased from outside sources. If an element is removed, it's set to nullptr.
+	for(auto i=decltype(logicComponents.size()){0u};i<logicComponents.size();)
 	{
-		auto pLogicComponent = ent->GetComponent<pragma::LogicComponent>();
-		if(m_tCur < pLogicComponent->GetNextThink())
+		auto *c = logicComponents[i];
+		if(c == nullptr)
+		{
+			logicComponents.erase(logicComponents.begin() +i);
 			continue;
-		pLogicComponent->Think(m_tDeltaTick);
-		logicComponents.push_back(pLogicComponent);
+		}
+		if(m_tCur < c->GetNextTick())
+		{
+			++i;
+			continue;
+		}
+		if(c->Tick(m_tDeltaTick) == false)
+		{
+			logicComponents.erase(logicComponents.begin() +i);
+			continue;
+		}
+		++i;
 	}
 
-	for(auto logicComponent : logicComponents)
-	{
-		if(logicComponent.expired())
-			continue;
-		logicComponent->PostThink();
-	}
 	StopProfilingStage(CPUProfilingPhase::GameObjectLogic);
 
 	StartProfilingStage(CPUProfilingPhase::Timers);
@@ -791,37 +665,27 @@ Game::GameFlags Game::GetGameFlags() const {return m_flags;}
 
 bool Game::IsMapInitialized() {return (m_flags &GameFlags::MapInitialized) != GameFlags::None;}
 
-const pragma::NetEventManager &Game::GetEntityNetEventManager() const {return const_cast<Game*>(this)->GetEntityNetEventManager();}
-pragma::NetEventManager &Game::GetEntityNetEventManager() {return m_entNetEventManager;}
-
-pragma::NetEventId Game::FindNetEvent(const std::string &name) const {return m_entNetEventManager.FindNetEvent(name);}
-const std::vector<std::string> &Game::GetNetEventIds() const {return const_cast<Game*>(this)->GetNetEventIds();}
-std::vector<std::string> &Game::GetNetEventIds() {return m_entNetEventManager.GetNetEventIds();}
-
 const MapInfo &Game::GetMapInfo() const {return m_mapInfo;}
 
 bool Game::LoadSoundScripts(const char *file) {return m_stateNetwork->LoadSoundScripts(file,true);}
 bool Game::LoadMap(const std::string &map,const Vector3 &origin,std::vector<EntityHandle> *entities)
 {
-	std::string smap = "maps\\";
-	smap += map;
-	smap += ".wld";
-
-	m_mapInfo.name = map;
-	m_mapInfo.fileName = smap;
-	auto f = FileManager::OpenFile(smap.c_str(),"rb");
-	if(f == nullptr)
+	auto normPath = pragma::asset::get_normalized_path(map,pragma::asset::Type::Map);
+	std::string format;
+	auto filePath = pragma::asset::find_file(*GetNetworkState(),normPath,pragma::asset::Type::Map,&format);
+	if(filePath.has_value() == false)
 	{
 		static auto bPort = true;
 		if(bPort == true)
 		{
 			Con::cwar<<"WARNING: Map '"<<map<<"' not found."<<Con::endl;
-			if(util::port_source2_map(GetNetworkState(),smap) == false && util::port_hl2_map(GetNetworkState(),smap) == false)
+			auto path = pragma::asset::relative_path_to_absolute_path(normPath,pragma::asset::Type::Map);
+			if(util::port_source2_map(GetNetworkState(),path.GetString()) == false && util::port_hl2_map(GetNetworkState(),path.GetString()) == false)
 				Con::cwar<<" Loading empty map..."<<Con::endl;
 			else
 			{
 				Con::cwar<<Con::endl;
-				Con::cout<<"Successfully ported HL2 map "<<smap<<"!"<<Con::endl;
+				Con::cout<<"Successfully ported HL2 map "<<path.GetString()<<"!"<<Con::endl;
 				bPort = false;
 				auto r = LoadMap(map);
 				bPort = true;
@@ -831,42 +695,75 @@ bool Game::LoadMap(const std::string &map,const Vector3 &origin,std::vector<Enti
 		m_flags |= GameFlags::MapInitialized;
 		return false;
 	}
-	auto worldData = pragma::asset::WorldData::Create(*GetNetworkState());
-	std::string errMsg;
-	auto success = worldData->Read(f,pragma::asset::EntityData::Flags::None,&errMsg);
+	m_mapInfo.name = map;
+	m_mapInfo.fileName = pragma::asset::relative_path_to_absolute_path(*filePath,pragma::asset::Type::Map).GetString();
+	util::ScopeGuard sg {[this]() {
+		m_flags |= GameFlags::MapInitialized;
+	}};
 
-	if(success)
+	auto error = [this,&map](const std::string_view &msg) {
+		Con::cwar<<"WARNING: Unable to load map '"<<map<<"': "<<msg<<Con::endl;
+	};
+
+	auto f = FileManager::OpenFile(m_mapInfo.fileName.c_str(),"rb");
+	if(f == nullptr)
 	{
-		// Load sound scripts
-		std::string soundScript = "soundscapes_";
-		soundScript += map;
-		soundScript += ".txt";
-		LoadSoundScripts(soundScript.c_str());
-
-		// Load entities
-		Con::cout<<"Loading entities..."<<Con::endl;
-
-		std::vector<EntityHandle> ents {};
-		InitializeMapEntities(*worldData,ents);
-		for(auto &hEnt : ents)
-		{
-			if(hEnt.IsValid() == false)
-				continue;
-			hEnt->Spawn();
-		}
-		for(auto &hEnt : ents)
-		{
-			if(hEnt.IsValid() == false || hEnt->IsSpawned() == false)
-				continue;
-			hEnt->OnSpawn();
-		}
-		InitializeWorldData(*worldData);
+		error("Unable to open file '" +m_mapInfo.fileName +"'!");
+		return false;
 	}
 
-	m_flags |= GameFlags::MapInitialized;
-	if(success == false)
-		Con::cwar<<"WARNING: Unable to load map '"<<map<<"': "<<errMsg<<Con::endl;
-	return success;
+	auto worldData = pragma::asset::WorldData::Create(*GetNetworkState());
+	if(pragma::asset::matches_format(format,pragma::asset::FORMAT_MAP_BINARY) || pragma::asset::matches_format(format,pragma::asset::FORMAT_MAP_ASCII))
+	{
+		auto udmData = util::load_udm_asset(f);
+		std::string err;
+		if(udmData == nullptr || worldData->LoadFromAssetData(udmData->GetAssetData(),pragma::asset::EntityData::Flags::None,err) == false)
+		{
+			error(err);
+			return false;
+		}
+	}
+	else if(pragma::asset::matches_format(format,pragma::asset::FORMAT_MAP_LEGACY))
+	{
+		std::string err;
+		auto success = worldData->Read(f,pragma::asset::EntityData::Flags::None,&err);
+		if(success == false)
+		{
+			error(err);
+			return false;
+		}
+	}
+	else
+	{
+		error("Unknown error");
+		return false;
+	}
+
+	// Load sound scripts
+	std::string soundScript = "soundscapes_";
+	soundScript += map;
+	soundScript += ".txt";
+	LoadSoundScripts(soundScript.c_str());
+
+	// Load entities
+	Con::cout<<"Loading entities..."<<Con::endl;
+
+	std::vector<EntityHandle> ents {};
+	InitializeMapEntities(*worldData,ents);
+	for(auto &hEnt : ents)
+	{
+		if(hEnt.IsValid() == false)
+			continue;
+		hEnt->Spawn();
+	}
+	for(auto &hEnt : ents)
+	{
+		if(hEnt.IsValid() == false || hEnt->IsSpawned() == false)
+			continue;
+		hEnt->OnSpawn();
+	}
+	InitializeWorldData(*worldData);
+	return true;
 }
 
 void Game::InitializeWorldData(pragma::asset::WorldData &worldData) {}
@@ -887,6 +784,8 @@ std::shared_ptr<Model> Game::CreateModel(const std::string &mdl) const {return m
 std::shared_ptr<Model> Game::CreateModel(bool bAddReference) const {return m_stateNetwork->GetModelManager().CreateModel("",bAddReference);}
 std::shared_ptr<Model> Game::LoadModel(const std::string &mdl,bool bReload)
 {
+	if(engine->IsVerbose())
+		Con::cout<<"Loading model '"<<mdl<<"'..."<<Con::endl;
 	auto bNewModel = false;
 	auto r = GetNetworkState()->GetModelManager().LoadModel(mdl,bReload,&bNewModel);
 	if(bNewModel == true && r != nullptr)
@@ -909,6 +808,8 @@ void Game::OnGameReady()
 	m_ctReal.Reset();
 	CallCallbacks<void>("OnGameReady");
 	CallLuaCallbacks("OnGameReady");
+	for(auto *gmC : GetGamemodeComponents())
+		gmC->OnGameReady();
 }
 
 void Game::SetWorld(pragma::BaseWorldComponent *entWorld) {m_worldComponent = (entWorld != nullptr) ? entWorld->GetHandle<pragma::BaseWorldComponent>() : util::WeakHandle<pragma::BaseWorldComponent>{};}
@@ -958,4 +859,4 @@ std::string Game::GetConVarString(const std::string &scmd) {return m_stateNetwor
 float Game::GetConVarFloat(const std::string &scmd) {return m_stateNetwork->GetConVarFloat(scmd);}
 bool Game::GetConVarBool(const std::string &scmd) {return m_stateNetwork->GetConVarBool(scmd);}
 ConVarFlags Game::GetConVarFlags(const std::string &scmd) {return m_stateNetwork->GetConVarFlags(scmd);}
-
+#pragma optimize("",on)

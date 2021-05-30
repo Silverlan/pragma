@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -11,9 +11,11 @@
 #include <util_image.hpp>
 #include <util_texture_info.hpp>
 #include <sharedutils/util_file.h>
+#include <sharedutils/datastream.h>
+#include <udm.hpp>
 
-extern DLLENGINE Engine *engine;
-
+extern DLLNETWORK Engine *engine;
+#pragma optimize("",off)
 void pragma::asset::Output::Write(VFilePtrReal &f)
 {
 	auto lname = name;
@@ -41,7 +43,7 @@ bool pragma::asset::WorldData::Write(const std::string &fileName,std::string *op
 	auto nFileName = fileName;
 	ufile::remove_extension_from_filename(nFileName);
 	nFileName += ".wld";
-	auto fullPath = util::IMPORT_PATH +nFileName;
+	auto fullPath = util::CONVERT_PATH +nFileName;
 	auto pathNoFile = ufile::get_path_from_filename(fullPath);
 	if(FileManager::CreatePath(pathNoFile.c_str()) == false)
 	{
@@ -60,17 +62,287 @@ bool pragma::asset::WorldData::Write(const std::string &fileName,std::string *op
 	return true;
 }
 
+static void preprocess_bsp_data(util::BSPTree &bspTree,std::vector<std::vector<size_t>> &outClusterNodes,std::vector<std::vector<uint16_t>> &outClusterToClusterVisibility)
+{
+	auto numClusters = bspTree.GetClusterCount();
+	auto &bspNodes = bspTree.GetNodes();
+
+	// Pre-processing to speed up some calculations
+	{
+		// Nodes per cluster
+		outClusterNodes.resize(numClusters);
+		for(auto i=decltype(bspNodes.size()){0u};i<bspNodes.size();++i)
+		{
+			auto &bspNode = bspNodes.at(i);
+			if(bspNode.cluster >= outClusterNodes.size())
+				continue;
+			auto &nodeList = outClusterNodes.at(bspNode.cluster);
+			if(nodeList.size() == nodeList.capacity())
+				nodeList.reserve(nodeList.size() *1.5f +100);
+			nodeList.push_back(i);
+		}
+
+		// List of clusters visible from every other cluster
+		outClusterToClusterVisibility.resize(numClusters);
+		for(auto cluster0=decltype(numClusters){0u};cluster0<numClusters;++cluster0)
+		{
+			auto &visibleClusters = outClusterToClusterVisibility.at(cluster0);
+			for(auto cluster1=decltype(numClusters){0u};cluster1<numClusters;++cluster1)
+			{
+				if(bspTree.IsClusterVisible(cluster0,cluster1) == false)
+					continue;
+				if(visibleClusters.size() == visibleClusters.capacity())
+					visibleClusters.reserve(visibleClusters.size() *1.5f +50);
+				visibleClusters.push_back(cluster1);
+			}
+		}
+	}
+	//
+}
+
+bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data,EntityData::Flags entMask,std::string &outErr)
+{
+	if(data.GetAssetType() != PMAP_IDENTIFIER)
+	{
+		outErr = "Incorrect format!";
+		return false;
+	}
+
+	auto udm = *data;
+	auto version = data.GetAssetVersion();
+	if(version < 1)
+	{
+		outErr = "Invalid version!";
+		return false;
+	}
+
+	udm["materials"](m_materialTable);
+	std::vector<MaterialHandle> materials {};
+	materials.reserve(m_materialTable.size());
+	for(auto &str : m_materialTable)
+	{
+		auto *mat = m_nw.LoadMaterial(str);
+		materials.push_back(mat ? mat->GetHandle() : MaterialHandle{});
+	}
+
+	auto udmLightmap = udm["lightmap"];
+	if(udmLightmap)
+	{
+		udm["lightmap"]["intensity"](m_lightMapIntensity);
+		udm["lightmap"]["exposure"](m_lightMapExposure);
+	}
+
+	uint32_t nextEntIdx = 0;
+	for(auto udmEnt : udm["entities"])
+	{
+		auto entIdx = nextEntIdx++;
+		auto entData = EntityData::Create();
+
+		if(udmEnt["flags"])
+		{
+			auto udmClientsideOnly = udmEnt["flags"]["clientsideOnly"];
+			if(udmClientsideOnly.ToValue<bool>(false))
+				entData->SetFlags(EntityData::Flags::ClientsideOnly);
+		}
+
+		if(entMask != EntityData::Flags::None && (entData->GetFlags() &entMask) == EntityData::Flags::None)
+			continue;
+
+		m_entities.push_back(entData);
+		entData->m_mapIndex = entIdx +1; // Map indices always start at 1!
+		entData->SetClassName(udmEnt["className"].ToValue<std::string>(""));
+
+		auto pose = udmEnt["pose"].ToValue<umath::Transform>(umath::Transform{});
+		entData->SetOrigin(pose.GetOrigin());
+
+		udmEnt["keyValues"](entData->GetKeyValues());
+		
+		auto &outputs = entData->GetOutputs();
+		auto udmOutputs = udmEnt["outputs"];
+		outputs.reserve(udmOutputs.GetSize());
+		for(auto udmOutput : udmOutputs)
+		{
+			outputs.push_back({});
+			auto &output = outputs.back();
+			udmOutput["name"](output.name);
+			udmOutput["target"](output.target);
+			udmOutput["input"](output.input);
+			udmOutput["param"](output.param);
+			udmOutput["delay"](output.delay);
+			udmOutput["times"](output.times);
+		}
+		
+		auto &components = entData->GetComponents();
+		udmEnt["components"](components);
+		
+		auto &leaves = entData->GetLeaves();
+		udmEnt["bspLeaves"].GetBlobData(leaves);
+	}
+
+	auto udmBsp = udm["bsp"];
+	if(udmBsp)
+	{
+		m_bspTree = util::BSPTree::Load(udm::AssetData{udmBsp["tree"]},outErr);
+		if(m_bspTree == nullptr)
+			return nullptr;
+
+		auto numClusters = m_bspTree->GetClusterCount();
+		std::vector<uint8_t> clusterMeshIndexData;
+		udmBsp["clusterMeshIndexData"].GetBlobData(clusterMeshIndexData);
+		auto &clusterMeshIndices = GetClusterMeshIndices();
+		clusterMeshIndices.resize(numClusters);
+		if(!clusterMeshIndexData.empty())
+		{
+			auto *ptr = clusterMeshIndexData.data();
+			uint32_t idx = 0;
+			do
+			{
+				auto &numIndices = *reinterpret_cast<uint32_t*>(ptr);
+				ptr += sizeof(numIndices);
+				auto &meshIndices = clusterMeshIndices[idx++];
+				meshIndices.resize(numIndices);
+				memcpy(meshIndices.data(),ptr,numIndices *sizeof(meshIndices.front()));
+				ptr += numIndices *sizeof(meshIndices.front());
+			}
+			while(ptr < &clusterMeshIndexData.back());
+		}
+	}
+	return true;
+}
+
+bool pragma::asset::WorldData::Save(udm::AssetData &outData,const std::string &mapName,std::string &outErr)
+{
+	outData.SetAssetType(PMAP_IDENTIFIER);
+	outData.SetAssetVersion(PMAP_VERSION);
+	auto udm = *outData;
+	
+	// Materials
+	std::vector<std::string> normalizedMaterials;
+	normalizedMaterials.reserve(m_materialTable.size());
+	for(auto &str : m_materialTable)
+	{
+		util::Path path{str};
+		if(ustring::compare(path.GetFront(),"materials",false))
+			path.PopFront();
+
+		auto strPath = path.GetString();
+		ustring::to_lower(strPath);
+		normalizedMaterials.push_back(strPath);
+	}
+	udm["materials"] = normalizedMaterials;
+
+	// Entities
+	auto udmEntities = udm.AddArray("entities",m_entities.size());
+	uint32_t entIdx = 0;
+	for(auto &entData : m_entities)
+	{
+		auto udmEnt = udmEntities[entIdx++];
+		udmEnt["className"] = entData->GetClassName();
+
+		if(umath::is_flag_set(entData->GetFlags(),EntityData::Flags::ClientsideOnly))
+			udmEnt["flags"]["clientsideOnly"] = true;
+
+		umath::ScaledTransform pose {};
+		pose.SetOrigin(entData->GetOrigin());
+		udmEnt["pose"] = pose;
+		udmEnt["keyValues"] = entData->GetKeyValues();
+
+		auto &outputs = entData->GetOutputs();
+		auto udmOutputs = udmEnt.AddArray("outputs",outputs.size());
+		uint32_t outputIdx = 0;
+		for(auto &output : outputs)
+		{
+			auto udmOutput = udmOutputs[outputIdx++];
+			udmOutput["name"] = output.name;
+			udmOutput["target"] = output.target;
+			udmOutput["input"] = output.input;
+			udmOutput["param"] = output.param;
+			udmOutput["delay"] = output.delay;
+			udmOutput["times"] = output.times;
+		}
+
+		udmEnt["components"] = entData->GetComponents();
+
+		uint32_t firstLeaf,numLeaves;
+		entData->GetLeafData(firstLeaf,numLeaves);
+		if(numLeaves > 0)
+		{
+			std::vector<uint16_t> leaves {};
+			leaves.resize(numLeaves);
+			if(numLeaves > 0u)
+				memcpy(leaves.data(),GetStaticPropLeaves().data() +firstLeaf,leaves.size() *sizeof(leaves.front()));
+			udmEnt["bspLeaves"] = leaves;
+		}
+	}
+
+	if(m_lightMapAtlasEnabled)
+	{
+		auto strMapName = mapName;
+		ufile::remove_extension_from_filename(strMapName); // TODO: Specify extensions
+		ustring::to_lower(strMapName);
+		SaveLightmapAtlas(strMapName);
+		udm["lightmap"]["intensity"] = m_lightMapIntensity;
+		udm["lightmap"]["exposure"] = m_lightMapExposure;
+	}
+
+	if(m_bspTree && m_bspTree->GetNodes().empty() == false && m_bspTree->GetClusterCount() > 0)
+	{
+		auto udmBsp = udm["bsp"];
+		auto &bspTree = *m_bspTree;
+
+		if(bspTree.Save(udm::AssetData{udmBsp["tree"]},outErr) == false)
+			return false;
+
+		std::vector<std::vector<size_t>> clusterNodes;
+		std::vector<std::vector<uint16_t>> clusterToClusterVisibility;
+		preprocess_bsp_data(bspTree,clusterNodes,clusterToClusterVisibility);
+
+		auto &clusterMeshIndices = GetClusterMeshIndices();
+		if(clusterMeshIndices.empty() == false)
+		{
+			assert(clusterMeshIndices.size() == m_bspTree->GetClusterCount());
+			if(clusterMeshIndices.size() != m_bspTree->GetClusterCount())
+			{
+				m_messageLogger("Error: Number of items in cluster mesh list mismatches number of BSP tree clusters!");
+				return false;
+			}
+
+			auto numClusters = m_bspTree->GetClusterCount();
+			uint32_t numIndices = 0;
+			for(auto &meshIndices : clusterMeshIndices)
+				numIndices += meshIndices.size();
+			std::vector<uint8_t> clusterData {};
+			clusterData.resize(numClusters *sizeof(uint32_t) +numIndices *sizeof(WorldModelMeshIndex));
+			auto *ptr = clusterData.data();
+			for(auto &meshIndices : clusterMeshIndices)
+			{
+				uint32_t numIndices = meshIndices.size();
+				memcpy(ptr,&numIndices,sizeof(numIndices));
+				ptr += sizeof(numIndices);
+				memcpy(ptr,meshIndices.data(),meshIndices.size() *sizeof(meshIndices.front()));
+				ptr += meshIndices.size() *sizeof(meshIndices.front());
+			}
+			udmBsp["clusterMeshIndexData"] = udm::compress_lz4_blob(clusterData);
+		}
+	}
+	return true;
+}
+
 void pragma::asset::WorldData::Write(VFilePtrReal &f)
 {
-	auto mapName = ufile::get_file_from_filename(f->GetPath());
-	ufile::remove_extension_from_filename(mapName);
-	ustring::to_lower(mapName);
+	auto mapName = util::Path::CreateFile(f->GetPath());
+	while(ustring::compare(mapName.GetFront(),"maps",false) == false)
+		mapName.PopFront();
+	mapName.PopFront(); // Pop "maps"
+	auto strMapName = mapName.GetString();
+	ufile::remove_extension_from_filename(strMapName);
+	ustring::to_lower(strMapName);
 
 	const std::array<char,3> header = {'W','L','D'};
 	f->Write(header.data(),header.size());
 
 	f->Write<uint32_t>(WLD_VERSION);
-	static_assert(WLD_VERSION == 11);
+	static_assert(WLD_VERSION == 12);
 	auto offsetToDataFlags = f->Tell();
 	f->Write<DataFlags>(DataFlags::None);
 	auto offsetMaterials = f->Tell();
@@ -93,10 +365,30 @@ void pragma::asset::WorldData::Write(VFilePtrReal &f)
 		WriteDataOffset(f,offsetBSPTree);
 		flags |= DataFlags::HasBSPTree;
 		WriteBSPTree(f);
+
+		auto &clusterMeshIndices = GetClusterMeshIndices();
+		f->Write<bool>(!clusterMeshIndices.empty());
+		if(clusterMeshIndices.empty() == false)
+		{
+			assert(clusterMeshIndices.size() == m_bspTree->GetClusterCount());
+			if(clusterMeshIndices.size() != m_bspTree->GetClusterCount())
+			{
+				m_messageLogger("Error: Number of items in cluster mesh list mismatches number of BSP tree clusters!");
+				return;
+			}
+
+			auto numClusters = m_bspTree->GetClusterCount();
+			for(auto i=decltype(numClusters){0u};i<numClusters;++i)
+			{
+				auto &meshIndices = clusterMeshIndices.at(i);
+				f->Write<uint32_t>(meshIndices.size());
+				f->Write(meshIndices.data(),meshIndices.size() *sizeof(meshIndices.front()));
+			}
+		}
 	}
 
 	m_messageLogger("Saving lightmap atlas...");
-	SaveLightmapAtlas(mapName);
+	SaveLightmapAtlas(strMapName);
 	if(m_lightMapAtlasEnabled)
 		flags |= DataFlags::HasLightmapAtlas;
 	if(m_lightMapAtlasEnabled)
@@ -138,43 +430,12 @@ void pragma::asset::WorldData::WriteMaterials(VFilePtrReal &f)
 void pragma::asset::WorldData::WriteBSPTree(VFilePtrReal &f)
 {
 	auto &bspTree = *m_bspTree;
-	auto numClusters = bspTree.GetClusterCount();
+	std::vector<std::vector<size_t>> clusterNodes;
+	std::vector<std::vector<uint16_t>> clusterToClusterVisibility;
+	preprocess_bsp_data(bspTree,clusterNodes,clusterToClusterVisibility);
+	
 	auto &bspNodes = bspTree.GetNodes();
-
-	// Pre-processing to speed up some calculations
-	std::vector<std::vector<size_t>> clusterNodes {};
-	std::vector<std::vector<uint16_t>> clusterToClusterVisibility {};
-	{
-		// Nodes per cluster
-		clusterNodes.resize(numClusters);
-		for(auto i=decltype(bspNodes.size()){0u};i<bspNodes.size();++i)
-		{
-			auto &bspNode = bspNodes.at(i);
-			if(bspNode->cluster >= clusterNodes.size())
-				continue;
-			auto &nodeList = clusterNodes.at(bspNode->cluster);
-			if(nodeList.size() == nodeList.capacity())
-				nodeList.reserve(nodeList.size() *1.5f +100);
-			nodeList.push_back(i);
-		}
-
-		// List of clusters visible from every other cluster
-		clusterToClusterVisibility.resize(numClusters);
-		for(auto cluster0=decltype(numClusters){0u};cluster0<numClusters;++cluster0)
-		{
-			auto &visibleClusters = clusterToClusterVisibility.at(cluster0);
-			for(auto cluster1=decltype(numClusters){0u};cluster1<numClusters;++cluster1)
-			{
-				if(bspTree.IsClusterVisible(cluster0,cluster1) == false)
-					continue;
-				if(visibleClusters.size() == visibleClusters.capacity())
-					visibleClusters.reserve(visibleClusters.size() *1.5f +50);
-				visibleClusters.push_back(cluster1);
-			}
-		}
-	}
-	//
-
+	auto numClusters = bspTree.GetClusterCount();
 	auto &clusterVisibility = bspTree.GetClusterVisibility();
 	std::function<void(const util::BSPTree::Node&)> fWriteNode = nullptr;
 	fWriteNode = [&f,&fWriteNode,&clusterVisibility,&clusterToClusterVisibility,&bspNodes,&clusterNodes,&bspTree,numClusters](const util::BSPTree::Node &node) {
@@ -187,8 +448,8 @@ void pragma::asset::WorldData::WriteBSPTree(VFilePtrReal &f)
 		if(node.leaf)
 		{
 			f->Write<uint16_t>(node.cluster);
-			auto itNode = std::find_if(bspNodes.begin(),bspNodes.end(),[&node](const std::shared_ptr<util::BSPTree::Node> &nodeOther) {
-				return nodeOther.get() == &node;
+			auto itNode = std::find_if(bspNodes.begin(),bspNodes.end(),[&node](const util::BSPTree::Node &nodeOther) {
+				return &nodeOther == &node;
 				});
 			// Calculate AABB encompassing all nodes visible by this node
 			auto min = node.min;
@@ -200,7 +461,7 @@ void pragma::asset::WorldData::WriteBSPTree(VFilePtrReal &f)
 					for(auto nodeOtherIdx : clusterNodes.at(clusterDst))
 					{
 						auto &nodeOther = bspNodes.at(nodeOtherIdx);
-						uvec::to_min_max(min,max,nodeOther->min,nodeOther->max);
+						uvec::to_min_max(min,max,nodeOther.min,nodeOther.max);
 					}
 				}
 			}
@@ -212,8 +473,8 @@ void pragma::asset::WorldData::WriteBSPTree(VFilePtrReal &f)
 		f->Write<Vector3>(node.plane.GetNormal());
 		f->Write<float>(node.plane.GetDistance());
 
-		fWriteNode(*node.children.at(0));
-		fWriteNode(*node.children.at(1));
+		fWriteNode(bspNodes[node.children.at(0)]);
+		fWriteNode(bspNodes[node.children.at(1)]);
 	};
 	fWriteNode(bspTree.GetRootNode());
 
@@ -307,3 +568,4 @@ bool pragma::asset::WorldData::SaveLightmapAtlas(const std::string &mapName)
 		m_messageLogger("Lightmap atlas could not be saved as '" +filePath +"'! Lightmaps will not be available.");
 	return result;
 }
+#pragma optimize("",on)

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/serverstate/serverutil.h"
@@ -59,6 +59,7 @@
 #include "pragma/audio/s_alsound.h"
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/error.hpp>
+#include <pragma/entities/components/base_gamemode_component.hpp>
 #include <pragma/entities/components/global_component.hpp>
 #include <pragma/entities/components/base_name_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
@@ -72,6 +73,7 @@
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/entities/components/velocity_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <udm.hpp>
 
 extern "C" {
 	#include "bzlib.h"
@@ -80,7 +82,7 @@ extern "C" {
 
 
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 extern EntityClassMap<SBaseEntity> *g_ServerEntityFactories;
 extern ServerEntityNetworkMap *g_SvEntityNetworkMap;
 extern ServerState *server;
@@ -88,7 +90,7 @@ extern SGame *s_game;
 DLLSERVER pragma::physics::IEnvironment *s_physEnv = nullptr;
 
 SGame::SGame(NetworkState *state)
-	: Game(state),m_nextUniqueEntityIndex(1)
+	: Game(state)
 {
 	RegisterCallback<void,SGame*>("OnGameEnd");
 
@@ -229,9 +231,11 @@ void SGame::Initialize()
 	//server->SendPacket("game_start",p,pragma::networking::Protocol::SlowReliable);
 	SetUp();
 	if(m_surfaceMaterialManager)
-		m_surfaceMaterialManager->Load("scripts\\physics\\materials.txt");
-	CallCallbacks<void,Game*>("OnGameInitialized",this);
+		m_surfaceMaterialManager->Load("scripts/physics/materials.udm");
 	m_flags |= GameFlags::GameInitialized;
+	CallCallbacks<void,Game*>("OnGameInitialized",this);
+	for(auto *gmC : GetGamemodeComponents())
+		gmC->OnGameInitialized();
 }
 
 void SGame::SetUp() {Game::SetUp();}
@@ -247,9 +251,11 @@ bool SGame::LoadMap(const std::string &map,const Vector3 &origin,std::vector<Ent
 	server->SendPacket("map_ready",pragma::networking::Protocol::SlowReliable);
 	LoadNavMesh();
 
+	m_flags |= GameFlags::MapLoaded;
 	CallCallbacks<void>("OnMapLoaded");
 	CallLuaCallbacks<void>("OnMapLoaded");
-	m_flags |= GameFlags::MapLoaded;
+	for(auto *gmC : GetGamemodeComponents())
+		gmC->OnMapInitialized();
 	OnMapLoaded();
 	return true;
 }
@@ -299,7 +305,7 @@ void SGame::Tick()
 		EntityIterator entIt {*this};
 		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::GlobalNameComponent>>();
 
-		std::unordered_map<std::string,DataStream> worldState {};
+		std::unordered_map<std::string,udm::PProperty> worldState {};
 		for(auto *ent : entIt)
 		{
 			auto globalComponent = ent->GetComponent<pragma::GlobalNameComponent>();
@@ -310,11 +316,11 @@ void SGame::Tick()
 				Con::cwar<<"WARNING: More than one entity found with global name '"<<globalName<<"'! This may cause issues."<<Con::endl;
 				continue;
 			}
-			DataStream dsEntity {};
-			worldState.insert(std::make_pair(globalName,dsEntity));
+			auto prop = udm::Property::Create<udm::Element>();
+			worldState.insert(std::make_pair(globalName,prop));
 
-			ent->Save(dsEntity);
-			dsEntity->SetOffset(0u);
+			udm::LinkedPropertyWrapper udm {*prop};
+			ent->Save(udm);
 		}
 
 		auto landmarkName = m_changeLevelInfo->landmarkName;
@@ -743,13 +749,20 @@ void SGame::ReceiveUserInfo(pragma::networking::IServerClient &session,NetPacket
 
 pragma::NetEventId SGame::RegisterNetEvent(const std::string &name)
 {
+	auto id = m_entNetEventManager.RegisterNetEvent(name);
 	NetPacket packet;
 	packet->WriteString(name);
+	packet->Write<pragma::NetEventId>(id);
 	server->SendPacket("register_net_event",packet,pragma::networking::Protocol::SlowReliable);
-	return m_entNetEventManager.RegisterNetEvent(name);
+	return id;
 }
 
+pragma::NetEventId SGame::FindNetEvent(const std::string &name) const {return m_entNetEventManager.FindNetEvent(name);}
 pragma::NetEventId SGame::SetupNetEvent(const std::string &name) {return RegisterNetEvent(name);}
+const pragma::NetEventManager &SGame::GetEntityNetEventManager() const {return const_cast<SGame*>(this)->GetEntityNetEventManager();}
+pragma::NetEventManager &SGame::GetEntityNetEventManager() {return m_entNetEventManager;}
+const std::vector<std::string> &SGame::GetNetEventIds() const {return const_cast<SGame*>(this)->GetNetEventIds();}
+std::vector<std::string> &SGame::GetNetEventIds() {return m_entNetEventManager.GetNetEventIds();}
 
 void SGame::SpawnPlayer(pragma::BasePlayerComponent &pl)
 {

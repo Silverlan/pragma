@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __GAMEMODEMANAGER_H__
 #define __GAMEMODEMANAGER_H__
@@ -15,9 +15,11 @@ struct DLLNETWORK GameModeInfo
 {
 	std::string id;
 	std::string name;
-	std::string class_name;
+	std::string component_name;
 	std::string author;
+	std::string initial_map;
 	util::Version version;
+	std::unordered_map<std::string,int32_t> gameMountPriorities;
 };
 
 class DLLNETWORK GameModeManager

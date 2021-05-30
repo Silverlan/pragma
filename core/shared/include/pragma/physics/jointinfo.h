@@ -2,34 +2,45 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __JOINTINFO_H__
 #define __JOINTINFO_H__
 
 #include "pragma/networkdefinitions.h"
-#define JOINT_TYPE_NONE 0
-#define JOINT_TYPE_FIXED 1
-#define JOINT_TYPE_BALLSOCKET 2
-#define JOINT_TYPE_HINGE 3
-#define JOINT_TYPE_SLIDER 4
-#define JOINT_TYPE_CONETWIST 5
-#define JOINT_TYPE_DOF 6
 
+enum class JointType : uint8_t
+{
+	None = 0,
+	Fixed,
+	BallSocket,
+	Hinge,
+	Slider,
+	ConeTwist,
+	DOF
+};
+
+using BoneId = uint16_t;
 struct DLLNETWORK JointInfo
 {
-	JointInfo(unsigned char ptype,unsigned int _src,unsigned int _dest)
-		: type(ptype),src(_src),dest(_dest),collide(false)
+	JointInfo(JointType type,BoneId child,BoneId parent)
+		: type(type),parent(parent),child(child),collide(false)
 	{}
 	JointInfo()
-		: JointInfo(JOINT_TYPE_NONE,0,0)
+		: JointInfo(JointType::None,0,0)
 	{}
-	unsigned char type;
-	unsigned int src;
-	unsigned int dest;
+	JointType type;
+	BoneId parent;
+	BoneId child;
 	bool collide;
 	std::unordered_map<std::string,std::string> args;
+
+	bool operator==(const JointInfo &other) const
+	{
+		return type == other.type && parent == other.parent && child == other.child && collide == other.collide && args == other.args;
+	}
+	bool operator!=(const JointInfo &other) const {return !operator==(other);}
 };
 
 #endif

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/serverstate/serverutil.h"
@@ -90,7 +90,7 @@ DLLSERVER void NET_sv_cmd_setpos(pragma::networking::IServerClient &session,NetP
 	if(pl == NULL)
 		return;
 	auto pTrComponent = pl->GetEntity().GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return;
 	Vector3 pos = nwm::read_vector(packet);
 	pTrComponent->SetPosition(pos);
@@ -258,7 +258,7 @@ DLLSERVER void NET_sv_noclip(pragma::networking::IServerClient &session,NetPacke
 	if(pl == NULL)
 		return;
 	auto pPhysComponent = pl->GetEntity().GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	auto bNoclip = pPhysComponent->GetMoveType() != MOVETYPE::NOCLIP;
 	if(bNoclip == false)
@@ -376,6 +376,19 @@ void NET_sv_give_weapon(pragma::networking::IServerClient &session,NetPacket pac
 	if(wep == nullptr)
 		return;
 	sCharComponent->DeployWeapon(*wep);
+}
+
+void NET_sv_strip_weapons(pragma::networking::IServerClient &session,NetPacket packet)
+{
+	if(!server->CheatsEnabled() || s_game == nullptr)
+		return;
+	auto *pl = server->GetPlayer(session);
+	if(pl == nullptr)
+		return;
+	auto sCharComponent = static_cast<pragma::SCharacterComponent*>(pl->GetEntity().GetCharacterComponent().get());
+	if(sCharComponent == nullptr)
+		return;
+	sCharComponent->RemoveWeapons();
 }
 
 void NET_sv_give_ammo(pragma::networking::IServerClient &session,NetPacket packet)

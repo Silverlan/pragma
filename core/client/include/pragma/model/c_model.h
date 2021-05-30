@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_MODEL_H__
@@ -22,6 +22,9 @@ public:
 	virtual void PrecacheTextureGroup(uint32_t i) override;
 	virtual void PrecacheTexture(uint32_t texId,bool bReload=false) override;
 	virtual void Update(ModelUpdateFlags flags=ModelUpdateFlags::AllData) override;
+
+	virtual std::shared_ptr<ModelMesh> CreateMesh() const override;
+	virtual std::shared_ptr<ModelSubMesh> CreateSubMesh() const override;
 
 	const std::shared_ptr<prosper::IBuffer> &GetVertexAnimationBuffer() const;
 	bool GetVertexAnimationBufferFrameOffset(uint32_t vaIdx,CModelSubMesh &subMesh,uint32_t frameId,uint64_t &offset) const;

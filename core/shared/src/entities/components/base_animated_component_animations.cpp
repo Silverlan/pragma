@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -22,51 +22,47 @@ void BaseAnimatedComponent::MaintainAnimationMovement(const Vector3 &disp)
 
 void BaseAnimatedComponent::SetGlobalBonePosition(UInt32 boneId,const Vector3 &pos,const Quat &rot,const Vector3 &scale)
 {
-	umath::Transform pose;
-	GetEntity().GetPose(pose);
+	auto pose = GetEntity().GetPose();
 	pose = pose.GetInverse();
 	pose *= umath::ScaledTransform{pos,rot,scale};
 	auto npos = pose.GetOrigin();
 	auto nrot = pose.GetRotation();
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent)
 		pPhysComponent->WorldToOrigin(&npos,&nrot);
 	SetLocalBonePosition(boneId,npos,nrot,scale);
 }
 void BaseAnimatedComponent::SetGlobalBonePosition(UInt32 boneId,const Vector3 &pos,const Quat &rot)
 {
-	umath::Transform pose;
-	GetEntity().GetPose(pose);
+	auto pose = GetEntity().GetPose();
 	pose = pose.GetInverse();
 	pose *= umath::Transform{pos,rot};
 	auto npos = pose.GetOrigin();
 	auto nrot = pose.GetRotation();
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent)
 		pPhysComponent->WorldToOrigin(&npos,&nrot);
 	SetLocalBonePosition(boneId,npos,nrot);
 }
 void BaseAnimatedComponent::SetGlobalBonePosition(UInt32 boneId,const Vector3 &pos)
 {
-	umath::Transform pose;
-	GetEntity().GetPose(pose);
+	auto pose = GetEntity().GetPose();
 	pose = pose.GetInverse();
 	pose *= umath::Transform{pos,uquat::identity()};
 	auto npos = pose.GetOrigin();
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent)
 		pPhysComponent->WorldToOrigin(&npos);
 	SetLocalBonePosition(boneId,npos);
 }
 void BaseAnimatedComponent::SetGlobalBoneRotation(UInt32 boneId,const Quat &rot)
 {
-	umath::Transform pose;
-	GetEntity().GetPose(pose);
+	auto pose = GetEntity().GetPose();
 	pose = pose.GetInverse();
 	pose *= umath::Transform{Vector3{},rot};
 	auto nrot = pose.GetRotation();
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 		pTrComponent->WorldToLocal(&nrot);
 	SetLocalBoneRotation(boneId,nrot);
 }

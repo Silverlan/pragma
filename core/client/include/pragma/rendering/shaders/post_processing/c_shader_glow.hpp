@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_SHADER_GLOW_HPP__
@@ -13,11 +13,11 @@
 namespace pragma
 {
 	class DLLCLIENT ShaderGlow
-		: public ShaderTextured3DBase
+		: public ShaderGameWorldLightingPass
 	{
 	public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_INSTANCE;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_MATERIAL;
 
 		static prosper::Format RENDER_PASS_FORMAT;
@@ -31,7 +31,7 @@ namespace pragma
 
 		ShaderGlow(prosper::IPrContext &context,const std::string &identifier);
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
-		bool BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx=Pipeline::Regular);
+		bool BeginDraw(const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer);
 		bool BindGlowMaterial(CMaterial &mat);
 	protected:
 		virtual bool BindClipPlane(const Vector4 &clipPlane) override;

@@ -2,13 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_OCCLUSION_OCTREE_HPP__
 #define __C_OCCLUSION_OCTREE_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include <sharedutils/functioncallback.h>
 #include <array>
 #include <vector>
 #include <cinttypes>
@@ -18,7 +19,7 @@
 
 namespace DebugRenderer {class BaseObject;};
 
-#define ENABLE_OCCLUSION_DEBUG_MODE 1
+#define ENABLE_OCCLUSION_DEBUG_MODE 0
 
 #pragma warning(push)
 #pragma warning(disable : 4251)
@@ -167,6 +168,7 @@ public:
 	ValidationError Validate(const T **r=nullptr) const;
 #endif
 protected:
+	void InsertObject(const T &o,Node *optNode);
 	void GetObjectBounds(const T &o,Vector3 &min,Vector3 &max) const;
 	void RemoveNodeReference(const Node &node,const T &o);
 private:

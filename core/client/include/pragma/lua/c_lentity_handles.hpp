@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_LENTITY_HANDLES_HPP__
@@ -37,6 +37,7 @@
 #include "pragma/entities/components/c_generic_component.hpp"
 #include "pragma/entities/components/c_point_at_target_component.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
+#include "pragma/entities/components/c_gamemode_component.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/entities/c_filter_entity_class.h"
@@ -97,6 +98,9 @@
 #include "pragma/entities/c_listener.h"
 #include "pragma/entities/c_viewbody.h"
 #include "pragma/entities/c_viewmodel.h"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_raytracing_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/c_flex_component.hpp"
 #include "pragma/entities/components/c_softbody_component.hpp"
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
@@ -204,6 +208,7 @@ DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLCLIENT,CDebugPlane,BaseDebugPlaneComponentHa
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLCLIENT,CFilterClass,BaseFilterClassComponentHandleWrapper);
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLCLIENT,CFilterName,BaseFilterNameComponentHandleWrapper);
 DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLCLIENT,CPointAtTarget,BasePointAtTargetComponentHandleWrapper);
+DEFINE_LUA_COMPONENT_HANDLE_BASE(DLLCLIENT,CGamemode,BaseGamemodeComponentHandleWrapper);
 
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CEnvSoundProbe);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CWeather);
@@ -228,5 +233,8 @@ DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,COcclusionCuller);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CEye);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CSkyCamera);
 DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CScene);
+DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CRenderer);
+DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CRasterizationRenderer);
+DEFINE_LUA_COMPONENT_HANDLE(DLLCLIENT,CRaytracingRenderer);
 
 #endif

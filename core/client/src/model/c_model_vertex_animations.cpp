@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -11,7 +11,7 @@
 #include <pragma/model/animation/vertex_animation.hpp>
 #include <prosper_util.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 void CModel::UpdateVertexAnimationBuffer()
 {
@@ -19,6 +19,8 @@ void CModel::UpdateVertexAnimationBuffer()
 	auto &vertexAnimations = GetVertexAnimations();
 	if(vertexAnimations.empty())
 	{
+		if(m_vertexAnimationBuffer)
+			c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_vertexAnimationBuffer);
 		m_vertexAnimationBuffer = nullptr;
 		return;
 	}
@@ -99,6 +101,8 @@ void CModel::UpdateVertexAnimationBuffer()
 	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit;
 	createInfo.size = vertexAnimData.size() *sizeof(vertexAnimData.front());
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
+	if(m_vertexAnimationBuffer)
+		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_vertexAnimationBuffer);
 	m_vertexAnimationBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo,vertexAnimData.data());
 }
 const std::shared_ptr<prosper::IBuffer> &CModel::GetVertexAnimationBuffer() const {return m_vertexAnimationBuffer;}

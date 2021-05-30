@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __MODELMESH_H__
@@ -21,10 +21,13 @@ namespace umath
 	DLLNETWORK void compute_tangent_basis(std::vector<Vertex> &verts,const std::vector<uint16_t> &triangles);
 };
 
+namespace udm {struct AssetData; using Version = uint32_t;};
 class DLLNETWORK ModelSubMesh
 	: public std::enable_shared_from_this<ModelSubMesh>
 {
 public:
+	static constexpr auto PMESH_IDENTIFIER = "PMESH";
+	static constexpr udm::Version PMESH_VERSION = 1;
 	enum class ShareMode : uint32_t
 	{
 		None = 0,
@@ -42,8 +45,10 @@ public:
 	};
 	ModelSubMesh();
 	ModelSubMesh(const ModelSubMesh &other);
+	static std::shared_ptr<ModelSubMesh> Load(const udm::AssetData &data,std::string &outErr);
 	bool operator==(const ModelSubMesh &other) const;
 	bool operator!=(const ModelSubMesh &other) const;
+	bool IsEqual(const ModelSubMesh &other) const;
 	void SetShared(const ModelSubMesh &other,ShareMode mode=ShareMode::All);
 	void ClearTriangles();
 	virtual void Centralize(const Vector3 &origin);
@@ -105,7 +110,7 @@ public:
 	void Merge(const ModelSubMesh &other);
 	void Scale(const Vector3 &scale);
 	void ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clippedMeshA,ModelSubMesh &clippedMeshB,const std::vector<Mat4> *boneMatrices=nullptr,ModelSubMesh *clippedCoverMeshA=nullptr,ModelSubMesh *clippedCoverMeshB=nullptr);
-	virtual std::shared_ptr<ModelSubMesh> Copy() const;
+	virtual std::shared_ptr<ModelSubMesh> Copy(bool fullCopy=false) const;
 
 	void ApplyUVMapping(const Vector3 &nu,const Vector3 &nv,uint32_t w,uint32_t h,float ou,float ov,float su,float sv);
 	void RemoveVertex(uint64_t idx);
@@ -116,7 +121,11 @@ public:
 
 	uint32_t GetReferenceId() const;
 	void SetReferenceId(uint32_t refId);
+
+	bool Save(udm::AssetData &outData,std::string &outErr);
+	bool LoadFromAssetData(const udm::AssetData &data,std::string &outErr);
 protected:
+	void Copy(ModelSubMesh &other,bool fullCopy) const;
 	std::vector<VertexWeight> &GetVertexWeightSet(uint32_t idx);
 	const std::vector<VertexWeight> &GetVertexWeightSet(uint32_t idx) const;
 	void ComputeTangentBasis();
@@ -149,6 +158,7 @@ public:
 	ModelMesh &operator=(const ModelMesh&)=delete;
 	bool operator==(const ModelMesh &other) const;
 	bool operator!=(const ModelMesh &other) const;
+	bool IsEqual(const ModelMesh &other) const;
 	void Centralize();
 	const Vector3 &GetCenter() const;
 	void SetCenter(const Vector3 &center);
@@ -177,5 +187,8 @@ protected:
 	std::vector<std::shared_ptr<ModelSubMesh>> m_subMeshes;
 	uint32_t m_referenceId = std::numeric_limits<uint32_t>::max();
 };
+
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const ModelSubMesh &o);
+DLLNETWORK std::ostream &operator<<(std::ostream &out,const ModelMesh &o);
 
 #endif

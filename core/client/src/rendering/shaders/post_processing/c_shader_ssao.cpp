@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -19,7 +19,7 @@
 
 using namespace pragma;
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 decltype(ShaderSSAO::RENDER_PASS_FORMAT) ShaderSSAO::RENDER_PASS_FORMAT = prosper::Format::R8_UNorm;
 decltype(ShaderSSAO::DESCRIPTOR_SET_PREPASS) ShaderSSAO::DESCRIPTOR_SET_PREPASS = {
@@ -50,7 +50,7 @@ decltype(ShaderSSAO::DESCRIPTOR_SET_SAMPLE_BUFFER) ShaderSSAO::DESCRIPTOR_SET_SA
 		}
 	}
 };
-decltype(ShaderSSAO::DESCRIPTOR_SET_CAMERA) ShaderSSAO::DESCRIPTOR_SET_CAMERA = {&ShaderScene::DESCRIPTOR_SET_CAMERA};
+decltype(ShaderSSAO::DESCRIPTOR_SET_SCENE) ShaderSSAO::DESCRIPTOR_SET_SCENE = {&ShaderScene::DESCRIPTOR_SET_SCENE};
 ShaderSSAO::ShaderSSAO(prosper::IPrContext &context,const std::string &identifier)
 	: prosper::ShaderBaseImageProcessing(context,identifier,"screen/fs_ssao")
 {
@@ -160,7 +160,7 @@ void ShaderSSAO::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipe
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_PREPASS);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_NOISE_TEXTURE);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SAMPLE_BUFFER);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::FragmentBit);
 }
 

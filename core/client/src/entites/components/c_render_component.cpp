@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -20,6 +20,8 @@
 #include <pragma/entities/parentinfo.h>
 #include <prosper_descriptor_set_group.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
+#include <buffers/prosper_swap_buffer.hpp>
+#include <prosper_descriptor_set_group.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <prosper_command_buffer.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
@@ -35,27 +37,37 @@ namespace pragma
 };
 
 extern DLLCLIENT CGame *c_game;
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 static std::shared_ptr<prosper::IUniformResizableBuffer> s_instanceBuffer = nullptr;
 decltype(CRenderComponent::s_ocExemptEntities) CRenderComponent::s_ocExemptEntities = {};
-ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA = INVALID_COMPONENT_ID;
+ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_DATA_MT = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId CRenderComponent::EVENT_ON_RENDER_MODE_CHANGED = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_SHOULD_DRAW = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_SHOULD_DRAW_SHADOW = INVALID_COMPONENT_ID;
+ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES = INVALID_COMPONENT_ID;
+ComponentEventId CRenderComponent::EVENT_UPDATE_INSTANTIABILITY = INVALID_COMPONENT_ID;
+ComponentEventId CRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId CRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED = INVALID_COMPONENT_ID;
 void CRenderComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
-	EVENT_ON_UPDATE_RENDER_DATA = componentManager.RegisterEvent("ON_UPDATE_RENDER_DATA",std::type_index(typeid(CRenderComponent)));
+	EVENT_ON_UPDATE_RENDER_DATA_MT = componentManager.RegisterEvent("ON_UPDATE_RENDER_DATA_MT",std::type_index(typeid(CRenderComponent)));
 	EVENT_ON_RENDER_BUFFERS_INITIALIZED = componentManager.RegisterEvent("ON_RENDER_BUFFERS_INITIALIZED");
-	EVENT_ON_RENDER_BOUNDS_CHANGED = componentManager.RegisterEvent("ON_RENDER_BUFFERS_INITIALIZED");
+	EVENT_ON_RENDER_BOUNDS_CHANGED = componentManager.RegisterEvent("ON_RENDER_BOUNDS_CHANGED");
+	EVENT_ON_RENDER_MODE_CHANGED = componentManager.RegisterEvent("ON_RENDER_MODE_CHANGED");
 	EVENT_SHOULD_DRAW = componentManager.RegisterEvent("SHOULD_DRAW",std::type_index(typeid(CRenderComponent)));
 	EVENT_SHOULD_DRAW_SHADOW = componentManager.RegisterEvent("SHOULD_DRAW_SHADOW",std::type_index(typeid(CRenderComponent)));
+	EVENT_ON_UPDATE_RENDER_BUFFERS = componentManager.RegisterEvent("ON_UPDATE_RENDER_BUFFERS",std::type_index(typeid(CRenderComponent)));
 	EVENT_ON_UPDATE_RENDER_MATRICES = componentManager.RegisterEvent("ON_UPDATE_RENDER_MATRICES",std::type_index(typeid(CRenderComponent)));
+	EVENT_UPDATE_INSTANTIABILITY = componentManager.RegisterEvent("UPDATE_INSTANTIABILITY");
+	EVENT_ON_CLIP_PLANE_CHANGED = componentManager.RegisterEvent("ON_CLIP_PLANE_CHANGED");
+	EVENT_ON_DEPTH_BIAS_CHANGED = componentManager.RegisterEvent("ON_DEPTH_BIAS_CHANGED");
 }
 CRenderComponent::CRenderComponent(BaseEntity &ent)
-	: BaseRenderComponent(ent),m_renderMode(util::TEnumProperty<RenderMode>::Create(RenderMode::Auto))
+	: BaseRenderComponent(ent),m_renderMode{util::TEnumProperty<RenderMode>::Create(RenderMode::World)}
 {}
 luabind::object CRenderComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CRenderComponentHandleWrapper>(l);}
 void CRenderComponent::InitializeBuffers()
@@ -64,19 +76,38 @@ void CRenderComponent::InitializeBuffers()
 	auto instanceCount = 32'768u;
 	auto maxInstanceCount = instanceCount *100u;
 	prosper::util::BufferCreateInfo createInfo {};
-	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+	if constexpr(USE_HOST_MEMORY_FOR_RENDER_DATA)
+	{
+		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent;
+		createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
+	}
+	else
+		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
 	createInfo.size = instanceSize *instanceCount;
-	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
-#ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
-	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
+	createInfo.usageFlags = prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
+#if ENTITY_RENDER_BUFFER_USE_STORAGE_BUFFER == 0
+		createInfo.usageFlags |= prosper::BufferUsageFlags::UniformBufferBit;
 #endif
-	s_instanceBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(createInfo,instanceSize,instanceSize *maxInstanceCount,0.1f);
+#ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
+	createInfo.usageFlags |= prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::StorageBufferBit;
+#endif
+	constexpr prosper::DeviceSize alignment = 256; // See https://vulkan.gpuinfo.org/displaydevicelimit.php?name=minUniformBufferOffsetAlignment
+	auto internalAlignment = c_engine->GetRenderContext().CalcBufferAlignment(prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::StorageBufferBit);
+	if(internalAlignment > alignment)
+		throw std::runtime_error{"Unsupported minimum uniform buffer alignment (" +std::to_string(internalAlignment) +"!"};
+	s_instanceBuffer = c_engine->GetRenderContext().CreateUniformResizableBuffer(createInfo,instanceSize,instanceSize *maxInstanceCount,0.1f,nullptr,alignment);
 	s_instanceBuffer->SetDebugName("entity_instance_data_buf");
+	if constexpr(USE_HOST_MEMORY_FOR_RENDER_DATA)
+		s_instanceBuffer->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::WriteBit | prosper::IBuffer::MapFlags::Unsynchronized);
 
 	pragma::initialize_articulated_buffers();
+	pragma::initialize_vertex_animation_buffer();
 }
-std::weak_ptr<prosper::IBuffer> CRenderComponent::GetRenderBuffer() const {return m_renderBuffer;}
-prosper::IDescriptorSet *CRenderComponent::GetRenderDescriptorSet() const {return (m_renderDescSetGroup != nullptr) ? m_renderDescSetGroup->GetDescriptorSet() : nullptr;}
+const prosper::IBuffer &CRenderComponent::GetRenderBuffer() const {return m_renderBuffer->GetBuffer();}
+const std::shared_ptr<prosper::SwapBuffer> &CRenderComponent::GetSwapRenderBuffer() const {return m_renderBuffer;}
+std::optional<RenderBufferIndex> CRenderComponent::GetRenderBufferIndex() const {return m_renderBuffer ? m_renderBuffer->GetBuffer().GetBaseIndex() : std::optional<RenderBufferIndex>{};}
+prosper::IDescriptorSet *CRenderComponent::GetRenderDescriptorSet() const {return (m_renderDescSetGroup != nullptr) ? &m_renderDescSetGroup->GetDescriptorSet() : nullptr;}
+prosper::SwapDescriptorSet *CRenderComponent::GetSwapRenderDescriptorSet() const {return m_renderDescSetGroup.get();}
 void CRenderComponent::ClearRenderObjects()
 {
 	/*std::unordered_map<unsigned int,RenderInstance*>::iterator it;
@@ -87,23 +118,39 @@ void CRenderComponent::ClearRenderObjects()
 	}
 	m_renderInstances.clear();*/ // Vulkan TODO
 }
-void CRenderComponent::GetDepthBias(float &outConstantFactor,float &outBiasClamp,float &outSlopeFactor) const
-{
-	outConstantFactor = m_depthBias.constantFactor;
-	outBiasClamp = m_depthBias.biasClamp;
-	outSlopeFactor = m_depthBias.slopeFactor;
-}
-void CRenderComponent::SetDepthBias(float constantFactor,float biasClamp,float slopeFactor)
-{
-	m_depthBias = {constantFactor,biasClamp,slopeFactor};
-	umath::set_flag(m_stateFlags,StateFlags::HasDepthBias,(constantFactor != 0.f) || (biasClamp != 0.f) || (slopeFactor != 0.f));
-}
 CRenderComponent::StateFlags CRenderComponent::GetStateFlags() const {return m_stateFlags;}
 void CRenderComponent::SetDepthPassEnabled(bool enabled) {umath::set_flag(m_stateFlags,StateFlags::EnableDepthPass,enabled);}
 bool CRenderComponent::IsDepthPassEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::EnableDepthPass);}
-void CRenderComponent::SetRenderClipPlane(const Vector4 &plane) {m_renderClipPlane = plane;}
-void CRenderComponent::ClearRenderClipPlane() {m_renderClipPlane = {};}
+void CRenderComponent::SetRenderClipPlane(const Vector4 &plane)
+{
+	if(plane == m_renderClipPlane)
+		return;
+	m_renderClipPlane = plane;
+	BroadcastEvent(EVENT_ON_CLIP_PLANE_CHANGED);
+}
+void CRenderComponent::ClearRenderClipPlane()
+{
+	if(!m_renderClipPlane.has_value())
+		return;
+	m_renderClipPlane = {};
+	BroadcastEvent(EVENT_ON_CLIP_PLANE_CHANGED);
+}
 const Vector4 *CRenderComponent::GetRenderClipPlane() const {return m_renderClipPlane.has_value() ? &*m_renderClipPlane : nullptr;}
+void CRenderComponent::SetDepthBias(float d,float delta)
+{
+	if(m_depthBias->x == d && m_depthBias->y == delta)
+		return;
+	m_depthBias = {d,delta};
+	BroadcastEvent(EVENT_ON_DEPTH_BIAS_CHANGED);
+}
+void CRenderComponent::ClearDepthBias()
+{
+	if(!m_depthBias.has_value())
+		return;
+	m_depthBias = {};
+	BroadcastEvent(EVENT_ON_DEPTH_BIAS_CHANGED);
+}
+const Vector2 *CRenderComponent::GetDepthBias() const {return m_depthBias.has_value() ? &*m_depthBias : nullptr;}
 void CRenderComponent::SetReceiveShadows(bool enabled) {umath::set_flag(m_stateFlags,StateFlags::DisableShadows,!enabled);}
 bool CRenderComponent::IsReceivingShadows() const {return !umath::is_flag_set(m_stateFlags,StateFlags::DisableShadows);}
 void CRenderComponent::Initialize()
@@ -117,33 +164,33 @@ void CRenderComponent::Initialize()
 		SetRenderBufferDirty();
 	});
 	BindEventUnhandled(CModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		uvec::zero(&m_renderMin);
-		uvec::zero(&m_renderMax);
-		uvec::zero(&m_renderMinRot);
-		uvec::zero(&m_renderMaxRot);
+		m_localRenderBounds = {};
+		m_absoluteRenderBounds = {};
+		m_localRenderSphere = {};
+		m_absoluteRenderSphere = {};
 
 		auto &ent = GetEntity();
-		auto &mdlComponent = GetModelComponent();
-		auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+		auto *mdlComponent = GetModelComponent();
+		auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 		if(mdl == nullptr)
 		{
 			UpdateRenderMeshes();
-			m_renderMode->InvokeCallbacks();
+			BroadcastEvent(EVENT_ON_RENDER_MODE_CHANGED);
 			return;
 		}
 
 		Vector3 rMin,rMax;
 		mdl->GetRenderBounds(rMin,rMax);
 		auto pPhysComponent = ent.GetPhysicsComponent();
-		auto lorigin = pPhysComponent.valid() ? pPhysComponent->GetLocalOrigin() : Vector3{};
+		auto lorigin = pPhysComponent != nullptr ? pPhysComponent->GetLocalOrigin() : Vector3{};
 		rMin += lorigin;
 		rMax += lorigin;
-		SetRenderBounds(rMin,rMax);
-		UpdateRenderBounds();
+		SetLocalRenderBounds(rMin,rMax);
 
 		UpdateRenderMeshes();
-		m_renderMode->InvokeCallbacks();
+		BroadcastEvent(EVENT_ON_RENDER_MODE_CHANGED);
 	});
+	UpdateInstantiability();
 }
 CRenderComponent::~CRenderComponent()
 {
@@ -170,100 +217,93 @@ void CRenderComponent::OnEntitySpawn()
 		occlusionCullerC->AddEntity(static_cast<CBaseEntity&>(GetEntity()));
 	}
 }
-Sphere CRenderComponent::GetRenderSphereBounds() const
+void CRenderComponent::UpdateAbsoluteRenderBounds()
 {
-	auto r = m_renderSphere;
+	if(umath::is_flag_set(m_stateFlags,StateFlags::RenderBoundsDirty) == false)
+		return;
+	umath::set_flag(m_stateFlags,StateFlags::RenderBoundsDirty,false);
+	UpdateAbsoluteAABBRenderBounds();
+	UpdateAbsoluteSphereRenderBounds();
+}
+void CRenderComponent::UpdateAbsoluteSphereRenderBounds() {m_absoluteRenderSphere = CalcAbsoluteRenderSphere();}
+void CRenderComponent::UpdateAbsoluteAABBRenderBounds() {m_absoluteRenderBounds = CalcAbsoluteRenderBounds();}
+const bounding_volume::AABB &CRenderComponent::GetLocalRenderBounds() const {return m_localRenderBounds;}
+const Sphere &CRenderComponent::GetLocalRenderSphere() const {return m_localRenderSphere;}
+
+const bounding_volume::AABB &CRenderComponent::GetUpdatedAbsoluteRenderBounds() const
+{
+	const_cast<CRenderComponent*>(this)->UpdateAbsoluteRenderBounds();
+	return GetAbsoluteRenderBounds();
+}
+const Sphere &CRenderComponent::GetUpdatedAbsoluteRenderSphere() const
+{
+	const_cast<CRenderComponent*>(this)->UpdateAbsoluteRenderBounds();
+	return GetAbsoluteRenderSphere();
+}
+
+const bounding_volume::AABB &CRenderComponent::GetAbsoluteRenderBounds() const {return m_absoluteRenderBounds;}
+const Sphere &CRenderComponent::GetAbsoluteRenderSphere() const {return m_absoluteRenderSphere;}
+
+bounding_volume::AABB CRenderComponent::CalcAbsoluteRenderBounds() const
+{
+	auto absBounds = m_localRenderBounds;
+	auto &min = absBounds.min;
+	auto &max = absBounds.max;
+
 	auto &ent = GetEntity();
-	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.valid())
-	{
-		auto scale = pTrComponent->GetScale();
-		r.radius *= umath::abs_max(scale.x,scale.y,scale.z);
-	}
+	auto pose = ent.GetPose();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired())
-		return r;
-	auto physType = pPhysComponent->GetPhysicsType();
-	if(physType == PHYSICSTYPE::DYNAMIC || physType == PHYSICSTYPE::STATIC)
+	if(pPhysComponent)
 	{
-		auto &lorigin = pPhysComponent->GetLocalOrigin();
-		r.pos += lorigin;
+		auto physType = pPhysComponent->GetPhysicsType();
+		if(physType == PHYSICSTYPE::DYNAMIC || physType == PHYSICSTYPE::STATIC)
+			pose.SetOrigin(pose.GetOrigin() +pPhysComponent->GetLocalOrigin());
 	}
+	absBounds = absBounds.Transform(pose);
+	return absBounds;
+}
+Sphere CRenderComponent::CalcAbsoluteRenderSphere() const
+{
+	auto r = m_localRenderSphere;
+
+	auto &ent = GetEntity();
+	auto pose = ent.GetPose();
+	auto pPhysComponent = ent.GetPhysicsComponent();
+	if(pPhysComponent)
+	{
+		auto physType = pPhysComponent->GetPhysicsType();
+		if(physType == PHYSICSTYPE::DYNAMIC || physType == PHYSICSTYPE::STATIC)
+			pose.SetOrigin(pose.GetOrigin() +pPhysComponent->GetLocalOrigin());
+	}
+	auto &scale = pose.GetScale();
+	r.radius *= umath::abs_max(scale.x,scale.y,scale.z);
+	r.pos = pose *r.pos;
 	return r;
 }
-void CRenderComponent::GetAbsoluteRenderBounds(Vector3 &outMin,Vector3 &outMax) const
+void CRenderComponent::SetLocalRenderBounds(Vector3 min,Vector3 max)
 {
-	umath::Transform pose;
-	GetEntity().GetPose(pose);
-	GetRenderBounds(&outMin,&outMax);
-	outMin = pose *outMin;
-	outMax = pose *outMax;
-	uvec::to_min_max(outMin,outMax);
-}
-void CRenderComponent::GetRenderBounds(Vector3 *min,Vector3 *max) const
-{
-	*min = m_renderMin;
-	*max = m_renderMax;
-	auto &ent = GetEntity();
-	auto ptrComponent = ent.GetTransformComponent();
-	if(ptrComponent.valid())
-	{
-		auto &scale = ptrComponent->GetScale();
-		*min *= scale;
-		*max *= scale;
-	}
-	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired())
-		return;
-	auto physType = pPhysComponent->GetPhysicsType();
-	if(physType != PHYSICSTYPE::DYNAMIC && physType != PHYSICSTYPE::STATIC)
-		return;
-	auto &lorigin = pPhysComponent->GetLocalOrigin();
-	*min += lorigin;
-	*max += lorigin;
-}
-void CRenderComponent::GetRotatedRenderBounds(Vector3 *min,Vector3 *max)
-{
-	*min = m_renderMinRot;
-	*max = m_renderMaxRot;
-	auto &ent = GetEntity();
-	auto ptrComponent = ent.GetTransformComponent();
-	if(ptrComponent.valid())
-	{
-		auto &scale = ptrComponent->GetScale();
-		*min = scale;
-		*max = scale;
-	}
-	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired())
-		return;
-	auto physType = pPhysComponent->GetPhysicsType();
-	if(physType != PHYSICSTYPE::DYNAMIC && physType != PHYSICSTYPE::STATIC)
-		return;
-	auto &lorigin = pPhysComponent->GetLocalOrigin();
-	*min += lorigin;
-	*max += lorigin;
-}
-void CRenderComponent::SetRenderBounds(Vector3 min,Vector3 max)
-{
-	//auto &mdl = GetModel();
 	uvec::to_min_max(min,max);
-	if(min.x != m_renderMin.x || min.y != m_renderMin.y || min.z != m_renderMin.z || max.x != m_renderMax.x || max.y != m_renderMax.y || max.z != m_renderMax.z)
-		GetEntity().SetStateFlag(BaseEntity::StateFlags::RenderBoundsChanged);
-	m_renderMin = min;
-	m_renderMax = max;
-	m_renderSphere.pos = (min +max) *0.5f;
-	Vector3 bounds = (max -min) *0.5f;
-	m_renderSphere.radius = uvec::length(bounds);
 
-	CEOnRenderBoundsChanged ceData {min,max,m_renderSphere};
+	if(min == m_localRenderBounds.min && max == m_localRenderBounds.max)
+		return;
+	umath::set_flag(m_stateFlags,StateFlags::RenderBoundsDirty);
+	GetEntity().SetStateFlag(BaseEntity::StateFlags::RenderBoundsChanged);
+
+	m_localRenderBounds = {min,max};
+	m_localRenderSphere.pos = (min +max) *0.5f;
+	
+	auto bounds = (max -min) *0.5f;
+	m_localRenderSphere.radius = uvec::length(bounds);
+
+	CEOnRenderBoundsChanged ceData {min,max,m_localRenderSphere};
 	BroadcastEvent(EVENT_ON_RENDER_BOUNDS_CHANGED);
 }
 
+#if 0
 void CRenderComponent::UpdateRenderBounds()
 {
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
-	auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	auto *phys = pPhysComponent != nullptr ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(phys == nullptr || pPhysComponent->GetPhysicsType() != PHYSICSTYPE::SOFTBODY || !phys->IsSoftBody())
 		AABB::GetRotatedBounds(m_renderMin,m_renderMax,Mat4{m_renderPose.GetRotation()},&m_renderMinRot,&m_renderMaxRot); // TODO: Use orientation
 	else
@@ -273,6 +313,7 @@ void CRenderComponent::UpdateRenderBounds()
 		m_renderMaxRot = m_renderMax;
 	}
 }
+#endif
 
 Mat4 &CRenderComponent::GetTransformationMatrix() {return m_matTransformation;}
 const umath::ScaledTransform &CRenderComponent::GetRenderPose() const {return m_renderPose;}
@@ -281,52 +322,87 @@ void CRenderComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	BaseRenderComponent::OnEntityComponentAdded(component);
 	if(typeid(component) == typeid(pragma::CTransformComponent))
 	{
-		FlagCallbackForRemoval(static_cast<pragma::CTransformComponent&>(component).GetPosProperty()->AddCallback([this](std::reference_wrapper<const Vector3> oldPos,std::reference_wrapper<const Vector3> pos) {
+		FlagCallbackForRemoval(static_cast<pragma::CTransformComponent&>(component).AddEventCallback(CTransformComponent::EVENT_ON_POSE_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			SetRenderBufferDirty();
-		}),CallbackType::Component,&component);
-		FlagCallbackForRemoval(static_cast<pragma::CTransformComponent&>(component).GetOrientationProperty()->AddCallback([this](std::reference_wrapper<const Quat> oldRot,std::reference_wrapper<const Quat> rot) {
-			SetRenderBufferDirty();
-		}),CallbackType::Component,&component);
-		FlagCallbackForRemoval(static_cast<pragma::CTransformComponent&>(component).GetScaleProperty()->AddCallback([this](std::reference_wrapper<const Vector3> oldScale,std::reference_wrapper<const Vector3> scale) {
-			SetRenderBufferDirty();
+			SetRenderBoundsDirty();
+			return util::EventReply::Unhandled;
 		}),CallbackType::Component,&component);
 	}
-	else if(typeid(component) == typeid(pragma::CModelComponent))
-		m_mdlComponent = component.GetHandle<CModelComponent>();
+	else if(typeid(component) == typeid(pragma::CAttachableComponent))
+		m_attachableComponent = static_cast<CAttachableComponent*>(&component);
 	else if(typeid(component) == typeid(pragma::CAnimatedComponent))
-		m_animComponent = component.GetHandle<CAnimatedComponent>();
+		m_animComponent = static_cast<CAnimatedComponent*>(&component);
 	else if(typeid(component) == typeid(pragma::CLightMapReceiverComponent))
-		m_lightMapReceiverComponent = component.GetHandle<CLightMapReceiverComponent>();
+		m_lightMapReceiverComponent = static_cast<CLightMapReceiverComponent*>(&component);
 }
 void CRenderComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 {
 	BaseRenderComponent::OnEntityComponentRemoved(component);
-	if(typeid(component) == typeid(pragma::CModelComponent))
-		m_mdlComponent = {};
+	if(typeid(component) == typeid(pragma::CAttachableComponent))
+		m_attachableComponent = nullptr;
 	else if(typeid(component) == typeid(pragma::CAnimatedComponent))
-		m_animComponent = {};
+		m_animComponent = nullptr;
 	else if(typeid(component) == typeid(pragma::CLightMapReceiverComponent))
-		m_lightMapReceiverComponent = {};
+		m_lightMapReceiverComponent = nullptr;
 }
-util::WeakHandle<CModelComponent> &CRenderComponent::GetModelComponent() const {return m_mdlComponent;}
-util::WeakHandle<CAnimatedComponent> &CRenderComponent::GetAnimatedComponent() const {return m_animComponent;}
-util::WeakHandle<CLightMapReceiverComponent> &CRenderComponent::GetLightMapReceiverComponent() const {return m_lightMapReceiverComponent;}
+bool CRenderComponent::IsInstantiable() const {return umath::is_flag_set(m_stateFlags,StateFlags::IsInstantiable);}
+void CRenderComponent::SetInstaniationEnabled(bool enabled)
+{
+	umath::set_flag(m_stateFlags,StateFlags::InstantiationDisabled,!enabled);
+	UpdateInstantiability();
+}
+void CRenderComponent::UpdateInstantiability()
+{
+	umath::set_flag(m_stateFlags,StateFlags::IsInstantiable,false);
+	if(m_renderBuffer == nullptr || umath::is_flag_set(m_stateFlags,StateFlags::InstantiationDisabled))
+		return;
+	auto instantiable = true;
+	BroadcastEvent(EVENT_UPDATE_INSTANTIABILITY,CEUpdateInstantiability{instantiable});
+	umath::set_flag(m_stateFlags,StateFlags::IsInstantiable,instantiable);
+}
+void CRenderComponent::UpdateShouldDrawState()
+{
+	auto shouldDraw = true;
+	BroadcastEvent(EVENT_SHOULD_DRAW,CEShouldDraw{shouldDraw});
+	umath::set_flag(m_stateFlags,StateFlags::ShouldDraw,shouldDraw);
+
+	UpdateShouldDrawShadowState();
+}
+void CRenderComponent::UpdateShouldDrawShadowState()
+{
+	auto shouldDraw = GetCastShadows();
+	if(shouldDraw)
+		BroadcastEvent(EVENT_SHOULD_DRAW_SHADOW,CEShouldDraw{shouldDraw});
+	umath::set_flag(m_stateFlags,StateFlags::ShouldDrawShadow,shouldDraw);
+}
+CModelComponent *CRenderComponent::GetModelComponent() const {return static_cast<CModelComponent*>(GetEntity().GetModelComponent());}
+CAttachableComponent *CRenderComponent::GetAttachableComponent() const {return m_attachableComponent;}
+CAnimatedComponent *CRenderComponent::GetAnimatedComponent() const {return m_animComponent;}
+CLightMapReceiverComponent *CRenderComponent::GetLightMapReceiverComponent() const {return m_lightMapReceiverComponent;}
 void CRenderComponent::SetRenderOffsetTransform(const umath::ScaledTransform &t) {m_renderOffset = t; SetRenderBufferDirty();}
 void CRenderComponent::ClearRenderOffsetTransform() {m_renderOffset = {}; SetRenderBufferDirty();}
 const umath::ScaledTransform *CRenderComponent::GetRenderOffsetTransform() const {return m_renderOffset.has_value() ? &*m_renderOffset : nullptr;}
+GameShaderSpecialization CRenderComponent::GetShaderPipelineSpecialization() const
+{
+	if(GetAnimatedComponent())
+		return GameShaderSpecialization::Animated;
+	if(GetLightMapReceiverComponent())
+		return GameShaderSpecialization::Lightmapped;
+	return GameShaderSpecialization::Generic;
+}
 void CRenderComponent::UpdateMatrices()
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	auto orientation = pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
+	auto orientation = pTrComponent != nullptr ? pTrComponent->GetRotation() : uquat::identity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	umath::ScaledTransform pose {};
-	if(pPhysComponent.expired() || pPhysComponent->GetPhysicsType() != PHYSICSTYPE::SOFTBODY)
+	if(pPhysComponent == nullptr || pPhysComponent->GetPhysicsType() != PHYSICSTYPE::SOFTBODY)
 	{
-		pose.SetOrigin(pPhysComponent.valid() ? pPhysComponent->GetOrigin() : pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{});
+		pose.SetOrigin(pPhysComponent != nullptr ? pPhysComponent->GetOrigin() : pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{});
 		pose.SetRotation(orientation);
 	}
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 		pose.SetScale(pTrComponent->GetScale());
 	if(m_renderOffset.has_value())
 		pose = *m_renderOffset *pose;
@@ -335,7 +411,7 @@ void CRenderComponent::UpdateMatrices()
 	CEOnUpdateRenderMatrices evData{pose,m_matTransformation};
 	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_MATRICES,evData);
 }
-unsigned long long &CRenderComponent::GetLastRenderFrame() {return m_lastRender;}
+uint64_t CRenderComponent::GetLastRenderFrame() const {return m_lastRender;}
 void CRenderComponent::SetLastRenderFrame(unsigned long long &t) {m_lastRender = t;}
 
 void CRenderComponent::UpdateRenderMeshes()
@@ -344,15 +420,15 @@ void CRenderComponent::UpdateRenderMeshes()
 	if(!ent.IsSpawned())
 		return;
 	c_game->UpdateEntityModel(&ent);
-	auto &mdlComponent = GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto *mdlComponent = GetModelComponent();
+	auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
+#if 0
 	m_renderMeshContainer = nullptr;
 	if(mdl == nullptr)
 		return;
 	m_renderMeshContainer = std::make_unique<SortedRenderMeshContainer>(&ent,static_cast<CModelComponent&>(*mdlComponent).GetLODMeshes());
+#endif
 }
-void CRenderComponent::PostRender(RenderMode) {}
-bool CRenderComponent::Render(pragma::ShaderTextured3DBase*,Material*,CModelSubMesh*) {return false;}
 void CRenderComponent::ReceiveData(NetPacket &packet)
 {
 	m_renderFlags = packet->Read<decltype(m_renderFlags)>();
@@ -362,9 +438,9 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 	auto &lodMeshes = GetLODMeshes();
 	if(lodMeshes.empty())
 		return {};
-	umath::Transform pose;
-	GetEntity().GetPose(pose);
+	auto &pose = GetEntity().GetPose();
 	auto invPose = pose.GetInverse();
+	invPose.SetScale(Vector3{1.f,1.f,1.f});
 
 	// Move ray into entity space
 	auto lstart = invPose *start;
@@ -376,19 +452,16 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 	ldir /= scale;
 
 	// Cheap line-aabb check
-	Vector3 min,max;
-	GetRenderBounds(&min,&max);
-	min /= scale;
-	max /= scale;
+	auto aabb = GetLocalRenderBounds();
 	auto n = ldir;
 	auto d = uvec::length(n);
 	n /= d;
 	float dIntersect;
-	if(Intersection::LineAABB(lstart,n,min,max,&dIntersect) == Intersection::Result::NoIntersection || dIntersect > d)
+	if(umath::intersection::line_aabb(lstart,n,aabb.min,aabb.max,&dIntersect) == umath::intersection::Result::NoIntersection || dIntersect > d)
 		return {};
 
 	auto mdlC = GetEntity().GetModelComponent();
-	auto mdl = mdlC.valid() ? mdlC->GetModel() : nullptr;
+	auto mdl = mdlC ? mdlC->GetModel() : nullptr;
 	if(mdl)
 	{
 		auto &hitboxes = mdl->GetHitboxes();
@@ -402,10 +475,10 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 			{
 				Vector3 min,max,origin;
 				Quat rot;
-				if(mdlC->GetHitboxBounds(hb.first,min,max,origin,rot) == false)
+				if(mdlC->GetHitboxBounds(hb.first,min,max,origin,rot) == false || uvec::length_sqr(min) < 0.001f || uvec::length_sqr(max) < 0.001f)
 					continue;
 				float dist;
-				if(Intersection::LineOBB(start,dir,min,max,&dist,origin,rot) == false || dist >= closestHitboxDistance)
+				if(umath::intersection::line_obb(start,dir,min,max,&dist,origin,rot) == false || dist >= closestHitboxDistance)
 					continue;
 				closestHitboxDistance = dist;
 				closestHitbox = &hb.second;
@@ -418,7 +491,7 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 				Intersection::LineMeshResult result {};
 				result.hitPos = start +dir *closestHitboxDistance;
 				result.hitValue = closestHitboxDistance;
-				result.result = Intersection::Result::Intersect;
+				result.result = umath::intersection::Result::Intersect;
 				result.hitbox = closestHitbox;
 				result.boneId = closestHitboxBoneId;
 				return result;
@@ -429,13 +502,14 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 	std::optional<Intersection::LineMeshResult> bestResult = {};
 	for(auto &mesh : lodMeshes)
 	{
+		Vector3 min,max;
 		mesh->GetBounds(min,max);
-		if(Intersection::LineAABB(lstart,n,min,max,&dIntersect) == Intersection::Result::NoIntersection || dIntersect > d)
+		if(umath::intersection::line_aabb(lstart,n,min,max,&dIntersect) == umath::intersection::Result::NoIntersection || dIntersect > d)
 			continue;
 		for(auto &subMesh : mesh->GetSubMeshes())
 		{
 			subMesh->GetBounds(min,max);
-			if(Intersection::LineAABB(lstart,n,min,max,&dIntersect) == Intersection::Result::NoIntersection || dIntersect > d)
+			if(umath::intersection::line_aabb(lstart,n,min,max,&dIntersect) == umath::intersection::Result::NoIntersection || dIntersect > d)
 				continue;
 			Intersection::LineMeshResult result;
 			if(Intersection::LineMesh(lstart,ldir,*subMesh,result,true) == false)
@@ -443,6 +517,8 @@ std::optional<Intersection::LineMeshResult> CRenderComponent::CalcRayIntersectio
 			// Confirm that this is the best result so far
 			if(bestResult.has_value() && result.hitValue > bestResult->hitValue)
 				continue;
+			if(result.precise)
+				result.precise->mesh = mesh;
 			bestResult = result;
 		}
 	}
@@ -467,67 +543,76 @@ void CRenderComponent::SetExemptFromOcclusionCulling(bool exempt)
 }
 bool CRenderComponent::IsExemptFromOcclusionCulling() const {return umath::is_flag_set(m_stateFlags,StateFlags::ExemptFromOcclusionCulling);}
 void CRenderComponent::SetRenderBufferDirty() {umath::set_flag(m_stateFlags,StateFlags::RenderBufferDirty);}
-void CRenderComponent::UpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bForceBufferUpdate)
+void CRenderComponent::SetRenderBoundsDirty() {umath::set_flag(m_stateFlags,StateFlags::RenderBoundsDirty);}
+void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bForceBufferUpdate)
 {
 	InitializeRenderBuffers();
-
-	auto &ent = static_cast<CBaseEntity&>(GetEntity());
-	auto frameId = c_engine->GetRenderContext().GetLastFrameId();
-
-	auto firstFrame = (frameId != m_lastRender);
-	if(firstFrame)
-	{
-		auto pFlexComponent = ent.GetComponent<pragma::CFlexComponent>();
-		if(pFlexComponent.valid())
-			pFlexComponent->UpdateFlexWeights(); // TODO: Move this to CFlexComponent code
-
-		auto pVertexAnimatedComponent = ent.GetComponent<pragma::CVertexAnimatedComponent>();
-		if(pVertexAnimatedComponent.valid())
-			pVertexAnimatedComponent->UpdateVertexAnimationBuffer(drawCmd); // TODO: Move this to CVertexAnimatedComponent code
-		auto pAttComponent = ent.GetComponent<CAttachableComponent>();
-		if(pAttComponent.valid())
-		{
-			auto *attInfo = pAttComponent->GetAttachmentData();
-			if(attInfo != nullptr && (attInfo->flags &FAttachmentMode::UpdateEachFrame) != FAttachmentMode::None && attInfo->parent.valid())
-				pAttComponent->UpdateAttachmentOffset();
-		}
-	}
-
 	auto updateRenderBuffer = umath::is_flag_set(m_stateFlags,StateFlags::RenderBufferDirty) || bForceBufferUpdate;
+	auto bufferDirty = false;
 	if(updateRenderBuffer)
 	{
 		umath::set_flag(m_stateFlags,StateFlags::RenderBufferDirty,false);
 		UpdateMatrices();
+
 		// Update Render Buffer
-		auto wpRenderBuffer = GetRenderBuffer();
-		if(wpRenderBuffer.expired() == false)
-		{
-			auto renderBuffer = wpRenderBuffer.lock();
-			Vector4 color(1.f,1.f,1.f,1.f);
-			auto pColorComponent = ent.GetComponent<CColorComponent>();
-			if(pColorComponent.valid())
-				color = pColorComponent->GetColor().ToVector4();
+		Vector4 color(1.f,1.f,1.f,1.f);
+		auto pColorComponent = GetEntity().GetComponent<CColorComponent>();
+		if(pColorComponent.valid())
+			color = pColorComponent->GetColor().ToVector4();
 
-			auto renderFlags = pragma::ShaderEntity::InstanceData::RenderFlags::None;
-			auto &pMdlComponent = GetModelComponent();
-			auto bWeighted = pMdlComponent.valid() && static_cast<const pragma::CModelComponent&>(*pMdlComponent).IsWeighted();
-			if(bWeighted == true)
-				renderFlags |= pragma::ShaderEntity::InstanceData::RenderFlags::Weighted;
-			auto &m = GetTransformationMatrix();
-			pragma::ShaderEntity::InstanceData instanceData {m,color,renderFlags};
-			drawCmd->RecordUpdateGenericShaderReadBuffer(*renderBuffer,0ull,sizeof(instanceData),&instanceData);
-		}
+		auto renderFlags = pragma::ShaderEntity::InstanceData::RenderFlags::None;
+		auto *pMdlComponent = GetModelComponent();
+		auto bWeighted = pMdlComponent && static_cast<const pragma::CModelComponent&>(*pMdlComponent).IsWeighted();
+		if(bWeighted == true)
+			renderFlags |= pragma::ShaderEntity::InstanceData::RenderFlags::Weighted;
+		auto &m = GetTransformationMatrix();
+		m_instanceData.modelMatrix = m;
+		m_instanceData.color = color;
+		m_instanceData.renderFlags = renderFlags;
+		bufferDirty = true;
 	}
-	m_lastRender = frameId;
+	auto &renderBuffer = GetSwapRenderBuffer();
+	if(renderBuffer)
+		renderBuffer->Update(0ull,sizeof(m_instanceData),&m_instanceData,bufferDirty);
 
-	CEOnUpdateRenderData evData {drawCmd,updateRenderBuffer,firstFrame};
-	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_DATA,evData);
+	CEOnUpdateRenderBuffers evData {drawCmd};
+	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_BUFFERS,evData);
+}
+void CRenderComponent::UpdateRenderDataMT(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp)
+{
+	m_renderDataMutex.lock();
+		// Note: This is called from the render thread, which is why we can't update the render buffers here
+		auto frameId = c_engine->GetRenderContext().GetLastFrameId();
+		if(m_lastRender == frameId)
+		{
+			m_renderDataMutex.unlock();
+			return; // Only update once per frame
+		}
+		m_lastRender = frameId;
+	m_renderDataMutex.unlock();
+
+	UpdateAbsoluteRenderBounds();
+
+	auto &ent = static_cast<CBaseEntity&>(GetEntity());
+	auto *mdlC = GetModelComponent();
+	if(mdlC)
+		mdlC->UpdateLOD(scene,cam,vp); // TODO: Don't update this every frame for every entity!
+
+	CEOnUpdateRenderData evData {drawCmd};
+	InvokeEventCallbacks(EVENT_ON_UPDATE_RENDER_DATA_MT,evData);
+
+	auto pAttComponent = GetAttachableComponent();
+	if(pAttComponent)
+	{
+		auto *attInfo = pAttComponent->GetAttachmentData();
+		if(attInfo != nullptr && (attInfo->flags &FAttachmentMode::UpdateEachFrame) != FAttachmentMode::None && attInfo->parent.valid())
+			pAttComponent->UpdateAttachmentOffset(false);
+	}
 }
 
-void CRenderComponent::Render(RenderMode) {}
 void CRenderComponent::SetRenderMode(RenderMode mode)
 {
-	if(mode == **m_renderMode)
+	if(mode == *m_renderMode)
 		return;
 	*m_renderMode = mode;
 
@@ -542,19 +627,24 @@ void CRenderComponent::SetRenderMode(RenderMode mode)
 
 	if(mode == RenderMode::None)
 		ClearRenderBuffers();
+
+	UpdateShouldDrawState();
+	BroadcastEvent(EVENT_ON_RENDER_MODE_CHANGED);
 }
 void CRenderComponent::InitializeRenderBuffers()
 {
 	// Initialize render buffer if it doesn't exist
-	if(m_renderBuffer != nullptr || pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE.IsValid() == false)
+	if(m_renderBuffer != nullptr || pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE.IsValid() == false)
 		return;
-	m_renderBuffer = s_instanceBuffer->AllocateBuffer();
-	m_renderDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_INSTANCE);
-	m_renderDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(
-		*m_renderBuffer,umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::Instance)
+
+	m_renderBuffer = prosper::SwapBuffer::Create(*s_instanceBuffer);
+	m_renderDescSetGroup = prosper::SwapDescriptorSet::Create(c_engine->GetRenderContext(),pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
+	m_renderDescSetGroup->SetBindingUniformBuffer(
+		*m_renderBuffer,umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::Instance)
 	);
 	UpdateBoneBuffer();
-	m_renderDescSetGroup->GetDescriptorSet()->Update();
+	m_renderDescSetGroup->Update();
+	UpdateInstantiability();
 
 	BroadcastEvent(EVENT_ON_RENDER_BUFFERS_INITIALIZED);
 }
@@ -566,11 +656,11 @@ void CRenderComponent::UpdateBoneBuffer()
 	auto pAnimComponent = ent.GetAnimatedComponent();
 	if(pAnimComponent.expired())
 		return;
-	auto wpBoneBuffer = static_cast<pragma::CAnimatedComponent&>(*pAnimComponent).GetBoneBuffer();
-	if(wpBoneBuffer.expired())
+	auto wpBoneBuffer = static_cast<pragma::CAnimatedComponent&>(*pAnimComponent).GetSwapBoneBuffer();
+	if(!wpBoneBuffer)
 		return;
-	m_renderDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(
-		*wpBoneBuffer.lock(),umath::to_integral(pragma::ShaderTextured3DBase::InstanceBinding::BoneMatrices)
+	m_renderDescSetGroup->SetBindingUniformBuffer(
+		*wpBoneBuffer,umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices)
 	);
 }
 void CRenderComponent::ClearRenderBuffers()
@@ -578,38 +668,58 @@ void CRenderComponent::ClearRenderBuffers()
 	m_renderBuffer = nullptr;
 	m_renderDescSetGroup = nullptr;
 }
+RenderMode CRenderComponent::GetRenderMode() const {return *m_renderMode;}
 const util::PEnumProperty<RenderMode> &CRenderComponent::GetRenderModeProperty() const {return m_renderMode;}
-RenderMode CRenderComponent::GetRenderMode() const
+bool CRenderComponent::ShouldDraw() const {return umath::is_flag_set(m_stateFlags,StateFlags::ShouldDraw);}
+bool CRenderComponent::ShouldDrawShadow() const
 {
-	if(*m_renderMode == RenderMode::Auto)
-	{
-		auto &mdlComponent = GetModelComponent();
-		auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
-		if(mdl == nullptr)
-			return RenderMode::None;
-		return RenderMode::World;
-	}
-	return *m_renderMode;
-}
-bool CRenderComponent::ShouldDraw(const Vector3 &camOrigin) const
-{
-	auto &ent = static_cast<const CBaseEntity&>(GetEntity());
-	auto &mdlComponent = GetModelComponent();
-	if(mdlComponent.expired() || mdlComponent->HasModel() == false)
-		return false;
-	CEShouldDraw evData {camOrigin};
-	InvokeEventCallbacks(EVENT_SHOULD_DRAW,evData);
-	return (evData.shouldDraw == CEShouldDraw::ShouldDraw::No) ? false : true;
-}
-bool CRenderComponent::ShouldDrawShadow(const Vector3 &camOrigin) const
-{
-	if(GetCastShadows() == false)
-		return false;
-	CEShouldDraw evData {camOrigin};
-	InvokeEventCallbacks(EVENT_SHOULD_DRAW_SHADOW,evData);
-	return (evData.shouldDraw == CEShouldDraw::ShouldDraw::No) ? false : true;
+	// TODO: Streamline this! We only need one flag!
+	return umath::is_flag_set(m_stateFlags,StateFlags::ShouldDrawShadow) && !umath::is_flag_set(m_stateFlags,StateFlags::DisableShadows) && GetCastShadows();
 }
 
+RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod)
+{
+	auto *pMdlComponent = GetModelComponent();
+	if(!pMdlComponent)
+	{
+		static RenderMeshGroup meshes {};
+		return meshes;
+	}
+	return static_cast<pragma::CModelComponent&>(*pMdlComponent).GetLodRenderMeshGroup(lod);
+}
+const RenderMeshGroup &CRenderComponent::GetLodRenderMeshGroup(uint32_t lod) const {return const_cast<CRenderComponent*>(this)->GetLodRenderMeshGroup(lod);}
+RenderMeshGroup &CRenderComponent::GetLodMeshGroup(uint32_t lod)
+{
+	auto *pMdlComponent = GetModelComponent();
+	if(!pMdlComponent)
+	{
+		static RenderMeshGroup meshes {};
+		return meshes;
+	}
+	return static_cast<pragma::CModelComponent&>(*pMdlComponent).GetLodMeshGroup(lod);
+}
+const RenderMeshGroup &CRenderComponent::GetLodMeshGroup(uint32_t lod) const {return const_cast<CRenderComponent*>(this)->GetLodMeshGroup(lod);}
+const std::vector<std::shared_ptr<ModelSubMesh>> &CRenderComponent::GetRenderMeshes() const {return const_cast<CRenderComponent*>(this)->GetRenderMeshes();}
+std::vector<std::shared_ptr<ModelSubMesh>> &CRenderComponent::GetRenderMeshes()
+{
+	auto *pMdlComponent = GetModelComponent();
+	if(!pMdlComponent)
+	{
+		static std::vector<std::shared_ptr<ModelSubMesh>> meshes {};
+		return meshes;
+	}
+	return static_cast<pragma::CModelComponent&>(*pMdlComponent).GetRenderMeshes();
+}
+std::vector<rendering::RenderBufferData> &CRenderComponent::GetRenderBufferData()
+{
+	auto *pMdlComponent = GetModelComponent();
+	if(!pMdlComponent)
+	{
+		static std::vector<rendering::RenderBufferData> renderBufferData {};
+		return renderBufferData;
+	}
+	return static_cast<pragma::CModelComponent&>(*pMdlComponent).GetRenderBufferData();
+}
 const std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes() const {return const_cast<CRenderComponent*>(this)->GetLODMeshes();}
 std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes()
 {
@@ -617,31 +727,29 @@ std::vector<std::shared_ptr<ModelMesh>> &CRenderComponent::GetLODMeshes()
 	auto pSoftBodyComponent = ent.GetComponent<pragma::CSoftBodyComponent>();
 	if(pSoftBodyComponent.valid())
 	{
-		auto *pSoftBodyData = pSoftBodyComponent->GetSoftBodyData();
-		if(pSoftBodyData != nullptr)
-			return pSoftBodyData->meshes;
+		static std::vector<std::shared_ptr<ModelMesh>> meshes {};
+		return meshes;
+		// TODO
+		//auto *pSoftBodyData = pSoftBodyComponent->GetSoftBodyData();
+		//if(pSoftBodyData != nullptr)
+		//	return pSoftBodyData->meshes;
 	}
-	auto &pMdlComponent = GetModelComponent();
-	if(pMdlComponent.expired())
+	auto *pMdlComponent = GetModelComponent();
+	if(!pMdlComponent)
 	{
 		static std::vector<std::shared_ptr<ModelMesh>> meshes {};
-		meshes.clear();
 		return meshes;
 	}
 	return static_cast<pragma::CModelComponent&>(*pMdlComponent).GetLODMeshes();
 }
-bool CRenderComponent::RenderCallback(RenderObject *o,CBaseEntity *ent,pragma::CCameraComponent *cam,pragma::ShaderTextured3DBase *shader,Material *mat)
+bool CRenderComponent::RenderCallback(RenderObject *o,CBaseEntity *ent,pragma::CCameraComponent *cam,pragma::ShaderGameWorldLightingPass *shader,Material *mat)
 {
 	auto pRenderComponent = ent->GetRenderComponent();
-	return pRenderComponent.valid() && pRenderComponent->RenderCallback(o,cam,shader,mat);
+	return pRenderComponent && pRenderComponent->RenderCallback(o,cam,shader,mat);
 }
-bool CRenderComponent::RenderCallback(RenderObject*,pragma::CCameraComponent *cam,pragma::ShaderTextured3DBase*,Material*)
+bool CRenderComponent::RenderCallback(RenderObject*,pragma::CCameraComponent *cam,pragma::ShaderGameWorldLightingPass*,Material*)
 {
-	return ShouldDraw(cam->GetEntity().GetPosition());
-}
-void CRenderComponent::PreRender()
-{
-	// TODO: Remove me
+	return ShouldDraw();
 }
 const std::vector<CRenderComponent*> &CRenderComponent::GetEntitiesExemptFromOcclusionCulling() {return s_ocExemptEntities;}
 const std::shared_ptr<prosper::IUniformResizableBuffer> &CRenderComponent::GetInstanceBuffer() {return s_instanceBuffer;}
@@ -649,23 +757,40 @@ void CRenderComponent::ClearBuffers()
 {
 	s_instanceBuffer = nullptr;
 	pragma::clear_articulated_buffers();
+	pragma::clear_vertex_animation_buffer();
 	CRaytracingComponent::ClearBuffers();
 }
 
 /////////////////
 
-CEShouldDraw::CEShouldDraw(const Vector3 &camOrigin)
-	: camOrigin{camOrigin}
+CEUpdateInstantiability::CEUpdateInstantiability(bool &instantiable)
+	: instantiable{instantiable}
+{}
+void CEUpdateInstantiability::PushArguments(lua_State *l)
+{
+	Lua::PushBool(l,instantiable);
+}
+uint32_t CEUpdateInstantiability::GetReturnCount() {return 1u;}
+void CEUpdateInstantiability::HandleReturnValues(lua_State *l)
+{
+	if(Lua::IsSet(l,-1))
+		instantiable = Lua::CheckBool(l,-1);
+}
+
+/////////////////
+
+CEShouldDraw::CEShouldDraw(bool &shouldDraw)
+	: shouldDraw{shouldDraw}
 {}
 void CEShouldDraw::PushArguments(lua_State *l)
 {
-	Lua::Push<Vector3>(l,camOrigin);
+	Lua::PushBool(l,shouldDraw);
 }
 uint32_t CEShouldDraw::GetReturnCount() {return 1u;}
 void CEShouldDraw::HandleReturnValues(lua_State *l)
 {
 	if(Lua::IsSet(l,-1))
-		shouldDraw = Lua::CheckBool(l,-1) ? ShouldDraw::Yes : ShouldDraw::No;
+		shouldDraw = Lua::CheckBool(l,-1);
 }
 
 /////////////////
@@ -689,14 +814,18 @@ void CEOnUpdateRenderMatrices::HandleReturnValues(lua_State *l)
 
 /////////////////
 
-CEOnUpdateRenderData::CEOnUpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &commandBuffer,bool bufferUpdateRequired,bool firstUpdateThisFrame)
-	: bufferUpdateRequired{bufferUpdateRequired},commandBuffer{commandBuffer},firstUpdateThisFrame{firstUpdateThisFrame}
+CEOnUpdateRenderData::CEOnUpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &commandBuffer)
+	: commandBuffer{commandBuffer}
 {}
-void CEOnUpdateRenderData::PushArguments(lua_State *l)
-{
-	Lua::PushBool(l,bufferUpdateRequired);
-	Lua::PushBool(l,firstUpdateThisFrame);
-}
+void CEOnUpdateRenderData::PushArguments(lua_State *l) {throw std::runtime_error{"Lua callbacks of multi-threaded events are not allowed!"};}
+
+/////////////////
+
+CEOnUpdateRenderBuffers::CEOnUpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &commandBuffer)
+	: commandBuffer{commandBuffer}
+{}
+void CEOnUpdateRenderBuffers::PushArguments(lua_State *l)
+{}
 
 /////////////////
 

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -11,6 +11,7 @@
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <alsoundsystem.hpp>
+#include <alsound_listener.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/components/velocity_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
@@ -18,7 +19,7 @@
 
 using namespace pragma;
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 LINK_ENTITY_TO_CLASS(listener,CListener);
 
@@ -26,28 +27,8 @@ void CListenerComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		if(m_listener == nullptr)
-			return;
-		auto &ent = GetEntity();
-		auto pTrComponent = ent.GetTransformComponent();
-		auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
-		if(pTrComponent.valid())
-			m_listener->SetPosition(pTrComponent->GetPosition());
-		if(pVelComponent.valid())
-			m_listener->SetVelocity(pVelComponent->GetVelocity());
-
-		if(pTrComponent.valid())
-		{
-			Vector3 forward,up;
-			pTrComponent->GetOrientation(&forward,nullptr,&up);
-			m_listener->SetOrientation(forward,up);
-		}
-	});
-
 	auto &ent = GetEntity();
 	ent.AddComponent<pragma::CTransformComponent>();
-	ent.AddComponent<LogicComponent>();
 	auto *soundSys = c_engine->GetSoundSystem();
 	if(soundSys == nullptr)
 	{
@@ -55,6 +36,28 @@ void CListenerComponent::Initialize()
 		return;
 	}
 	m_listener = &soundSys->GetListener();
+
+	SetTickPolicy(TickPolicy::Always);
+}
+
+void CListenerComponent::OnTick(double dt)
+{
+	if(m_listener == nullptr)
+		return;
+	auto &ent = GetEntity();
+	auto pTrComponent = ent.GetTransformComponent();
+	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
+	if(pTrComponent != nullptr)
+		m_listener->SetPosition(pTrComponent->GetPosition());
+	if(pVelComponent.valid())
+		m_listener->SetVelocity(pVelComponent->GetVelocity());
+
+	if(pTrComponent != nullptr)
+	{
+		Vector3 forward,up;
+		pTrComponent->GetOrientation(&forward,nullptr,&up);
+		m_listener->SetOrientation(forward,up);
+	}
 }
 
 float CListenerComponent::GetGain()

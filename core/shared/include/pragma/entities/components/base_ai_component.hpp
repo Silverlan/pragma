@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __BASE_AI_COMPONENT_HPP__
 #define __BASE_AI_COMPONENT_HPP__
@@ -190,7 +190,7 @@ namespace pragma
 		std::unordered_map<std::string,float> m_animMoveSpeed;
 		float m_lastMovementBlendScale = 0.f;
 
-		virtual void Think(double tDelta);
+		virtual void OnTick(double tDelta) override;
 
 		void SetPathNodeIndex(uint32_t nodeIdx,const Vector3 &prevPos);
 		void UpdatePath();

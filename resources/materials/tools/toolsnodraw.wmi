@@ -1,4 +1,0 @@
-"nodraw"
-{
-	$texture diffusemap "tools/toolsnodraw"
-}

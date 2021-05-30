@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -28,13 +28,13 @@ CCameraComponent::~CCameraComponent()
 	if(m_cbCameraUpdate.IsValid())
 		m_cbCameraUpdate.Remove();
 }
-void CCameraComponent::Save(DataStream &ds)
+void CCameraComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
-	BaseEnvCameraComponent::Save(ds);
+	BaseEnvCameraComponent::Save(udm);
 }
-void CCameraComponent::Load(DataStream &ds,uint32_t version)
+void CCameraComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {
-	BaseEnvCameraComponent::Load(ds,version);
+	BaseEnvCameraComponent::Load(udm,version);
 }
 void CCameraComponent::OnEntitySpawn()
 {
@@ -67,7 +67,7 @@ void CCameraComponent::UpdateState()
 				auto pTrComponent = ent.GetTransformComponent();
 				auto &pos = refPos.get();
 				auto &rot = refRot.get();
-				if(pTrComponent.expired())
+				if(pTrComponent == nullptr)
 				{
 					pos = {};
 					rot = uquat::identity();
@@ -75,7 +75,7 @@ void CCameraComponent::UpdateState()
 				else
 				{
 					pos = pTrComponent->GetPosition();
-					rot = pTrComponent->GetOrientation();
+					rot = pTrComponent->GetRotation();
 				}
 			}));
 			renderScene->SetActiveCamera(*this);

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -27,7 +27,6 @@
 #include "pragma/entities/components/base_time_scale_component.hpp"
 #include "pragma/entities/components/submergible_component.hpp"
 #include "pragma/entities/components/velocity_component.hpp"
-#include "pragma/entities/components/logic_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/model/model.h"
@@ -38,7 +37,7 @@
 
 using namespace pragma;
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 //////////////////
 
@@ -114,7 +113,7 @@ void BaseCharacterComponent::InitializePhysObj(PhysObj*)
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent)
 		pPhysComponent->AddCollisionFilter(CollisionMask::Character);
 }
 
@@ -124,10 +123,7 @@ void BaseCharacterComponent::Initialize()
 	m_netEvSetActiveWeapon = SetupNetEvent("set_active_weapon");
 	m_netEvSetAmmoCount = SetupNetEvent("set_ammo_count");
 
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		Think(static_cast<CEOnTick&>(evData.get()).deltaTime);
-	});
-	BindEventUnhandled(BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+	BindEvent(BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		return HandleAnimationEvent(static_cast<CEHandleAnimationEvent&>(evData.get()).animationEvent) ? util::EventReply::Handled : util::EventReply::Unhandled;
 	});
 	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PRE_PHYSICS_SIMULATE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
@@ -139,7 +135,7 @@ void BaseCharacterComponent::Initialize()
 			return;
 		auto &ent = GetEntity();
 		auto whPhysComponent = ent.GetPhysicsComponent();
-		auto *phys = whPhysComponent.valid() ? whPhysComponent->GetPhysicsObject() : nullptr;
+		auto *phys = whPhysComponent ? whPhysComponent->GetPhysicsObject() : nullptr;
 		if(phys == nullptr || phys->IsController() == false)
 			return;
 		auto *physController = static_cast<ControllerPhysObj*>(phys);
@@ -166,7 +162,8 @@ void BaseCharacterComponent::Initialize()
 	auto &ent = GetEntity();
 	ent.AddComponent("sound_emitter");
 	ent.AddComponent("physics");
-	ent.AddComponent<LogicComponent>();
+
+	SetTickPolicy(TickPolicy::WhenVisible);
 }
 
 const Vector3 &BaseCharacterComponent::GetUpDirection() const {return *m_upDirection;}
@@ -189,7 +186,7 @@ void BaseCharacterComponent::SetSlopeLimit(float limit)
 
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(phys != NULL && phys->IsController())
 	{
 		ControllerPhysObj *physController = static_cast<ControllerPhysObj*>(phys);
@@ -202,7 +199,7 @@ void BaseCharacterComponent::SetStepOffset(float offset)
 	*m_stepOffset = offset;
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(phys != NULL && phys->IsController())
 	{
 		ControllerPhysObj *physController = static_cast<ControllerPhysObj*>(phys);
@@ -230,8 +227,7 @@ void BaseCharacterComponent::UpdateNeckControllers()
 	m_yawController = -1;
 	m_pitchController = -1;
 	auto &ent = GetEntity();
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = GetEntity().GetModel();
 	if(hMdl == nullptr)
 		return;
 	m_yawController = hMdl->LookupBlendController(m_yawControllerName);
@@ -292,12 +288,11 @@ void BaseCharacterComponent::SetViewOrientation(const Quat &orientation)
 	auto rot = rotRef *orientation;
 	EulerAngles angView(rot);
 	auto animComponent = ent.GetAnimatedComponent();
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = ent.GetModel();
 	if(animComponent.valid() && hMdl != nullptr)
 	{
 		auto pTrComponent = ent.GetTransformComponent();
-		auto rotCur = pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity();
+		auto rotCur = pTrComponent ? pTrComponent->GetRotation() : uquat::identity();
 		auto angCur = EulerAngles(rotRef *rotCur);
 		float pitchDelta = umath::get_angle_difference(angView.p,angCur.p);
 		if(m_pitchController != -1)
@@ -325,7 +320,7 @@ Quat BaseCharacterComponent::GetLocalOrientationRotation() const
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	return GetOrientationAxesRotation() *(pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity());
+	return GetOrientationAxesRotation() *(pTrComponent ? pTrComponent->GetRotation() : uquat::identity());
 }
 EulerAngles BaseCharacterComponent::GetLocalOrientationViewAngles() const {return EulerAngles(GetLocalOrientationViewRotation());}
 Quat BaseCharacterComponent::GetLocalOrientationViewRotation() const {return GetOrientationAxesRotation() *GetViewOrientation();}
@@ -348,7 +343,7 @@ bool BaseCharacterComponent::UpdateMovement()
 		return false;
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(phys == nullptr || phys->IsController() == false)
 		return false;
 	auto mv = pPhysComponent->GetMoveType();
@@ -357,7 +352,7 @@ bool BaseCharacterComponent::UpdateMovement()
 	auto *physController = static_cast<ControllerPhysObj*>(phys);
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
-	auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto pos = pTrComponent ? pTrComponent->GetPosition() : Vector3{};
 	auto vel = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3{};
 
 	auto bOnGround = pPhysComponent->IsOnGround();
@@ -424,7 +419,7 @@ bool BaseCharacterComponent::UpdateMovement()
 
 	auto pTimeScaleComponent = ent.GetTimeScaleComponent();
 	auto ts = pTimeScaleComponent.valid() ? CFloat(pTimeScaleComponent->GetTimeScale()) : 1.f;
-	auto scale = pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
+	auto scale = pTrComponent ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
 	auto speed = CalcMovementSpeed() *ts *umath::abs_max(scale.x,scale.y,scale.z);
 	
 	auto *nw = ent.GetNetworkState();
@@ -493,7 +488,7 @@ bool BaseCharacterComponent::UpdateMovement()
 	// Calculate sideways movement speed (NPC animation movement only)
 	if(speed.y != 0.f)
 	{
-		auto dirRight = (uvec::length_sqr(dir) > 0.99f) ? uvec::cross(dir,pTrComponent.valid() ? pTrComponent->GetUp() : uvec::UP) : (pTrComponent.valid() ? pTrComponent->GetRight() : uvec::RIGHT);
+		auto dirRight = (uvec::length_sqr(dir) > 0.99f) ? uvec::cross(dir,pTrComponent ? pTrComponent->GetUp() : uvec::UP) : (pTrComponent ? pTrComponent->GetRight() : uvec::RIGHT);
 		auto speedDir = glm::dot(dirRight,vel);
 		if(speedDir < umath::abs(speed.y))
 		{
@@ -554,7 +549,7 @@ Vector3 BaseCharacterComponent::GetLocalVelocity() const
 		return Vector3{};
 	auto vel = pVelComponent->GetVelocity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(phys != nullptr && phys->IsController())
 	{
 		auto *physController = static_cast<ControllerPhysObj*>(phys);
@@ -715,7 +710,7 @@ void BaseCharacterComponent::FootStep(FootType foot)
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.expired() || pPhysComponent->IsOnGround() == false)
+	if(!pPhysComponent || pPhysComponent->IsOnGround() == false)
 		return;
 
 	CEOnFootStep footStepInfo {foot};
@@ -743,7 +738,7 @@ TraceData BaseCharacterComponent::GetAimTraceData(std::optional<float> maxDist) 
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(!pTrComponent)
 		return {};
 	auto trData = util::get_entity_trace_data(*pTrComponent);
 	auto origin = GetEyePosition();
@@ -756,8 +751,8 @@ TraceData BaseCharacterComponent::GetAimTraceData(std::optional<float> maxDist) 
 bool BaseCharacterComponent::CanMove() const
 {
 	auto pPhysComponent = GetEntity().GetPhysicsComponent();
-	auto mvType = pPhysComponent.valid() ? pPhysComponent->GetMoveType() : MOVETYPE::NONE;
-	if(pPhysComponent.expired() || mvType == MOVETYPE::NONE)
+	auto mvType = pPhysComponent ? pPhysComponent->GetMoveType() : MOVETYPE::NONE;
+	if(!pPhysComponent || mvType == MOVETYPE::NONE)
 		return false;
 	auto *pPhysObj = pPhysComponent->GetPhysicsObject();
 	return pPhysObj != nullptr && pPhysObj->IsController();
@@ -795,26 +790,26 @@ Vector3 BaseCharacterComponent::CalcMovementDirection(const Vector3 &forward,con
 EulerAngles BaseCharacterComponent::GetViewAngles() const {return EulerAngles(m_angView);}
 void BaseCharacterComponent::SetViewAngles(const EulerAngles &ang) {SetViewOrientation(uquat::create(ang));}
 
-void BaseCharacterComponent::Think(double tDelta)
+void BaseCharacterComponent::OnTick(double tDelta)
 {
 	UpdateOrientation();
 	if(m_turnYaw != nullptr)
 	{
 		auto &ent = GetEntity();
 		auto pTrComponent = ent.GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent)
 		{
 			auto pPhysComponent = ent.GetPhysicsComponent();
-			auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+			auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 			if(phys == nullptr || phys->IsController())
 			{
 				auto &rotRef = GetOrientationAxesRotation();
-				auto &rotCur = pTrComponent->GetOrientation();
+				auto &rotCur = pTrComponent->GetRotation();
 				auto rot = rotRef *rotCur;
 				auto angCur = EulerAngles(rot);
 				angCur.y = umath::approach_angle(angCur.y,*m_turnYaw,m_turnSpeed *CFloat(tDelta));
 				rot = uquat::get_inverse(rotRef) *uquat::create(angCur);
-				pTrComponent->SetOrientation(rot);
+				pTrComponent->SetRotation(rot);
 			}
 		}
 	}
@@ -831,10 +826,10 @@ Vector3 BaseCharacterComponent::GetEyePosition() const
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(!pTrComponent)
 		return Vector3{};
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto physType = pPhysComponent.valid() ? pPhysComponent->GetPhysicsType() : PHYSICSTYPE::NONE;
+	auto physType = pPhysComponent ? pPhysComponent->GetPhysicsType() : PHYSICSTYPE::NONE;
 	if(physType != PHYSICSTYPE::BOXCONTROLLER && physType != PHYSICSTYPE::CAPSULECONTROLLER)
 		return pTrComponent->GetPosition();
 	Vector3 eyeOffset = pTrComponent->GetEyeOffset();
@@ -870,7 +865,7 @@ bool BaseCharacterComponent::Jump()
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
 	auto upDir = (charComponent.valid()) ? charComponent->GetUpDirection() : uvec::UP;
-	auto vel = upDir *(m_jumpPower->GetValue() *(pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f}));
+	auto vel = upDir *(m_jumpPower->GetValue() *(pTrComponent ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f}));
 	return Jump(vel);
 }
 
@@ -882,7 +877,7 @@ bool BaseCharacterComponent::CanJump() const
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
-	return pPhysComponent.valid() && pPhysComponent->IsOnGround() == true && pVelComponent.valid();
+	return pPhysComponent && pPhysComponent->IsOnGround() == true && pVelComponent.valid();
 }
 void BaseCharacterComponent::DetachFromGround(float duration)
 {

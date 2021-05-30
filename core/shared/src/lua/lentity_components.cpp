@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -39,11 +39,6 @@ namespace Lua
 		static void GetLocalVelocity(lua_State *l,VelocityHandle &hEnt);
 		static void SetLocalVelocity(lua_State *l,VelocityHandle &hEnt,Vector3 &vel);
 		static void AddLocalVelocity(lua_State *l,VelocityHandle &hEnt,Vector3 &vel);
-	};
-	namespace Logic
-	{
-		static void GetNextThink(lua_State *l,LogicHandle &hEnt);
-		static void SetNextThink(lua_State *l,LogicHandle &hEnt,double t);
 	};
 	namespace Damageable
 	{
@@ -144,6 +139,35 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	}));
 	gameMod[defGlobal];
 
+	auto defComposite = luabind::class_<CompositeHandle,BaseEntityComponentHandle>("CompositeComponent");
+	defComposite.def("AddEntity",static_cast<void(*)(lua_State*,CompositeHandle&,EntityHandle&)>([](lua_State *l,CompositeHandle &hComponent,EntityHandle &hEnt) {
+		pragma::Lua::check_component(l,hComponent);
+		LUA_CHECK_ENTITY(l,hEnt);
+		hComponent->AddEntity(*hEnt.get());
+	}));
+	defComposite.def("RemoveEntity",static_cast<void(*)(lua_State*,CompositeHandle&,EntityHandle&)>([](lua_State *l,CompositeHandle &hComponent,EntityHandle &hEnt) {
+		pragma::Lua::check_component(l,hComponent);
+		LUA_CHECK_ENTITY(l,hEnt);
+		hComponent->RemoveEntity(*hEnt.get());
+	}));
+	defComposite.def("GetEntities",static_cast<luabind::object(*)(lua_State*,CompositeHandle&)>([](lua_State *l,CompositeHandle &hComponent) -> luabind::object {
+		pragma::Lua::check_component(l,hComponent);
+		auto &ents = hComponent->GetEntities();
+		auto tEnts = luabind::newtable(l);
+		int32_t idx = 1;
+		for(auto &hEnt : ents)
+		{
+			if(!hEnt.IsValid())
+				continue;
+			tEnts[idx++] = *hEnt.get()->GetLuaObject();
+		}
+		return tEnts;
+	}));
+	gameMod[defComposite];
+	
+	auto defAnimated2 = luabind::class_<Animated2Handle,BaseEntityComponentHandle>("Animated2Component");
+	gameMod[defAnimated2];
+
 	auto defIK = luabind::class_<IKHandle,BaseEntityComponentHandle>("IKComponent");
 	defIK.def("SetIKControllerEnabled",&Lua::IK::SetIKControllerEnabled);
 	defIK.def("IsIKControllerEnabled",&Lua::IK::IsIKControllerEnabled);
@@ -152,8 +176,6 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	gameMod[defIK];
 
 	auto defLogic = luabind::class_<LogicHandle,BaseEntityComponentHandle>("LogicComponent");
-	defLogic.def("GetNextThink",&Lua::Logic::GetNextThink);
-	defLogic.def("SetNextThink",&Lua::Logic::SetNextThink);
 	defLogic.add_static_constant("EVENT_ON_TICK",pragma::LogicComponent::EVENT_ON_TICK);
 	gameMod[defLogic];
 
@@ -261,20 +283,6 @@ void Lua::Velocity::AddLocalVelocity(lua_State *l,VelocityHandle &hEnt,Vector3 &
 {
 	pragma::Lua::check_component(l,hEnt);
 	hEnt->AddLocalVelocity(vel);
-}
-
-//////////////
-
-void Lua::Logic::GetNextThink(lua_State *l,LogicHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	Lua::PushNumber(l,hEnt->GetNextThink());
-}
-
-void Lua::Logic::SetNextThink(lua_State *l,LogicHandle &hEnt,double t)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->SetNextThink(t);
 }
 
 //////////////

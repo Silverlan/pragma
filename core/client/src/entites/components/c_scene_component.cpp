@@ -2,11 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_scene_component.hpp"
+#include "pragma/entities/environment/lights/c_env_shadow.hpp"
+#include "pragma/entities/entity_instance_index_buffer.hpp"
+#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
@@ -16,14 +19,16 @@
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include "pragma/rendering/renderers/base_renderer.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/render_queue.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
+#include <prosper_command_buffer.hpp>
 
 using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 LINK_ENTITY_TO_CLASS(scene,CScene);
 
@@ -32,7 +37,7 @@ CSceneComponent::CSMCascadeDescriptor::CSMCascadeDescriptor()
 
 ///////////////////////////
 
-ShaderMeshContainer::ShaderMeshContainer(pragma::ShaderTextured3DBase *shader)
+ShaderMeshContainer::ShaderMeshContainer(pragma::ShaderGameWorldLightingPass *shader)
 	: shader(shader->GetHandle())
 {}
 
@@ -47,6 +52,35 @@ CSceneComponent::CreateInfo::CreateInfo()
 void CSceneComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	EVENT_ON_ACTIVE_CAMERA_CHANGED = componentManager.RegisterEvent("ON_ACTIVE_CAMERA_CHANGED");
+	EVENT_ON_BUILD_RENDER_QUEUES = componentManager.RegisterEvent("ON_BUILD_RENDER_QUEUES",typeid(CSceneComponent));
+	EVENT_POST_RENDER_PREPASS = componentManager.RegisterEvent("POST_RENDER_PREPASS",typeid(CSceneComponent));
+}
+
+static std::shared_ptr<rendering::EntityInstanceIndexBuffer> g_entityInstanceIndexBuffer = nullptr;
+const std::shared_ptr<rendering::EntityInstanceIndexBuffer> &CSceneComponent::GetEntityInstanceIndexBuffer()
+{
+	return g_entityInstanceIndexBuffer;
+}
+
+void CSceneComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const rendering::RenderQueue &renderQueue,RenderPassStats *optStats)
+{
+	renderQueue.WaitForCompletion(optStats);
+	CSceneComponent::GetEntityInstanceIndexBuffer()->UpdateBufferData(renderQueue);
+	auto curEntity = std::numeric_limits<EntityIndex>::max();
+	for(auto &item : renderQueue.queue)
+	{
+		if(item.entity == curEntity)
+			continue;
+		curEntity = item.entity;
+		auto &ent = static_cast<CBaseEntity&>(*c_game->GetEntityByLocalIndex(item.entity));
+		auto &renderC = *ent.GetRenderComponent();
+		if(optStats && umath::is_flag_set(renderC.GetStateFlags(),CRenderComponent::StateFlags::RenderBufferDirty))
+			(*optStats)->Increment(RenderPassStats::Counter::EntityBufferUpdates);
+		auto *animC = renderC.GetAnimatedComponent();
+		if(animC && animC->AreSkeletonUpdateCallbacksEnabled())
+			animC->UpdateBoneMatricesMT();
+		renderC.UpdateRenderBuffers(drawCmd);
+	}
 }
 
 using SceneCount = uint32_t;
@@ -54,6 +88,8 @@ static std::array<SceneCount,32> g_sceneUseCount {};
 static std::array<CSceneComponent*,32> g_scenes {};
 
 ComponentEventId CSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId CSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES = INVALID_COMPONENT_ID;
+ComponentEventId CSceneComponent::EVENT_POST_RENDER_PREPASS = INVALID_COMPONENT_ID;
 CSceneComponent *CSceneComponent::Create(const CreateInfo &createInfo,CSceneComponent *optParent)
 {
 	SceneIndex sceneIndex;
@@ -78,15 +114,21 @@ CSceneComponent *CSceneComponent::Create(const CreateInfo &createInfo,CSceneComp
 	}
 	++g_sceneUseCount.at(sceneIndex);
 	sceneC->Setup(createInfo,sceneIndex);
-	g_scenes.at(sceneIndex) = sceneC.get();
+	if(optParent == nullptr)
+		g_scenes.at(sceneIndex) = sceneC.get();
+	else
+		umath::set_flag(sceneC->m_stateFlags,StateFlags::HasParentScene);
 
 	scene->Spawn();
 	return sceneC.get();
 }
 
+static uint32_t g_numScenes = 0;
 CSceneComponent::CSceneComponent(BaseEntity &ent)
 	: BaseEntityComponent{ent},m_sceneRenderDesc{*this}
-{}
+{
+	++g_numScenes;
+}
 CSceneComponent::~CSceneComponent()
 {
 	ClearWorldEnvironment();
@@ -103,23 +145,30 @@ void CSceneComponent::OnRemove()
 		return;
 	assert(g_sceneUseCount > 0);
 	--g_sceneUseCount.at(sceneIndex);
-	g_scenes.at(sceneIndex) = nullptr;
-
-	// Clear all entities from this scene
-	std::vector<CBaseEntity*> *ents;
-	c_game->GetEntities(&ents);
-	for(auto *ent : *ents)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::HasParentScene) == false)
 	{
-		if(ent == nullptr)
-			continue;
-		ent->RemoveFromScene(*this);
+		g_scenes.at(sceneIndex) = nullptr;
+
+		// Clear all entities from this scene
+		std::vector<CBaseEntity*> *ents;
+		c_game->GetEntities(&ents);
+		for(auto *ent : *ents)
+		{
+			if(ent == nullptr)
+				continue;
+			ent->RemoveFromScene(*this);
+		}
 	}
+
+	if(--g_numScenes == 0)
+		g_entityInstanceIndexBuffer = nullptr;
 }
 luabind::object CSceneComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CSceneComponentHandleWrapper>(l);}
 void CSceneComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 }
+
 
 void CSceneComponent::Setup(const CreateInfo &createInfo,SceneIndex sceneIndex)
 {
@@ -133,9 +182,12 @@ void CSceneComponent::Setup(const CreateInfo &createInfo,SceneIndex sceneIndex)
 	InitializeRenderSettingsBuffer();
 	InitializeSwapDescriptorBuffers();
 	InitializeShadowDescriptorSet();
+
+	if(g_entityInstanceIndexBuffer == nullptr)
+		g_entityInstanceIndexBuffer = std::make_shared<rendering::EntityInstanceIndexBuffer>();
 }
 
-void CSceneComponent::Link(const CSceneComponent &other)
+void CSceneComponent::Link(const CSceneComponent &other,bool linkCamera)
 {
 	auto &hCam = other.GetActiveCamera();
 	if(hCam.valid())
@@ -144,9 +196,9 @@ void CSceneComponent::Link(const CSceneComponent &other)
 		SetActiveCamera();
 
 	auto *renderer = const_cast<CSceneComponent&>(other).GetRenderer();
-	SetRenderer(renderer ? renderer->shared_from_this() : nullptr);
+	SetRenderer(renderer);
 
-	m_sceneRenderDesc.SetOcclusionCullingHandler(const_cast<pragma::OcclusionCullingHandler&>(other.m_sceneRenderDesc.GetOcclusionCullingHandler()).shared_from_this());
+	// m_sceneRenderDesc.SetOcclusionCullingHandler(const_cast<pragma::OcclusionCullingHandler&>(other.m_sceneRenderDesc.GetOcclusionCullingHandler()).shared_from_this());
 
 	auto *occlusionCuller = const_cast<CSceneComponent&>(other).FindOcclusionCuller();
 	if(occlusionCuller)
@@ -158,6 +210,8 @@ void CSceneComponent::Link(const CSceneComponent &other)
 
 	if(m_cbLink.IsValid())
 		m_cbLink.Remove();
+	if(linkCamera == false)
+		return;
 	m_cbLink = const_cast<CSceneComponent&>(other).AddEventCallback(EVENT_ON_ACTIVE_CAMERA_CHANGED,[this,&other](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &hCam = other.GetActiveCamera();
 		if(hCam.valid())
@@ -170,8 +224,15 @@ void CSceneComponent::Link(const CSceneComponent &other)
 
 void CSceneComponent::InitializeShadowDescriptorSet()
 {
-	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS.IsValid())
-		m_shadowDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_SHADOWS);
+	if(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SHADOWS.IsValid())
+	{
+		auto &context = c_engine->GetRenderContext();
+		m_shadowDsg = context.CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SHADOWS);
+		auto &cubeTex = context.GetDummyCubemapTexture();
+		auto n = umath::to_integral(GameLimits::MaxActiveShadowCubeMaps);
+		for(auto i=decltype(n){0u};i<n;++i)
+			m_shadowDsg->GetDescriptorSet()->SetBindingArrayTexture(*cubeTex,umath::to_integral(pragma::ShaderSceneLit::ShadowBinding::ShadowCubeMaps),i);
+	}
 }
 
 pragma::CSceneComponent *CSceneComponent::GetByIndex(SceneIndex sceneIndex)
@@ -204,10 +265,8 @@ void CSceneComponent::InitializeRenderSettingsBuffer()
 	m_renderSettings.shadowRatioX = 1.f /szShadowMap;
 	m_renderSettings.shadowRatioY = 1.f /szShadowMap;
 	m_renderSettings.shaderQuality = cvShaderQuality->GetInt();
-	m_renderSettings.lightmapIntensity = 1.f;
-	m_renderSettings.lightmapExposurePow = 1.f;
 
-	if(m_renderer)
+	if(m_renderer.valid())
 		m_renderer->UpdateRenderSettings();
 
 	prosper::util::BufferCreateInfo createInfo {};
@@ -259,6 +318,7 @@ pragma::COcclusionCullerComponent *CSceneComponent::FindOcclusionCuller()
 	auto *ent = (it != entIt.end()) ? *it : nullptr;
 	return ent ? ent->GetComponent<pragma::COcclusionCullerComponent>().get() : nullptr;
 }
+const pragma::COcclusionCullerComponent *CSceneComponent::FindOcclusionCuller() const {return const_cast<CSceneComponent*>(this)->FindOcclusionCuller();}
 const std::shared_ptr<prosper::IBuffer> &CSceneComponent::GetFogBuffer() const {return m_fogBuffer;}
 void CSceneComponent::UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bView)
 {
@@ -267,17 +327,17 @@ void CSceneComponent::UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryComman
 		return;
 	auto &bufCam = (bView == true) ? GetViewCameraBuffer() : GetCameraBuffer();
 	auto &v = cam->GetViewMatrix();
-	auto &p = (bView == true) ? pragma::CCameraComponent::CalcProjectionMatrix(c_game->GetViewModelFOV(),cam->GetAspectRatio(),cam->GetNearZ(),cam->GetFarZ()) : cam->GetProjectionMatrix();
+	auto &p = (bView == true) ? pragma::CCameraComponent::CalcProjectionMatrix(c_game->GetViewModelFOVRad(),cam->GetAspectRatio(),cam->GetNearZ(),cam->GetFarZ()) : cam->GetProjectionMatrix();
 	m_cameraData.V = v;
 	m_cameraData.P = p;
 	m_cameraData.VP = p *v;
 
-	if(bView == false && m_renderer)
+	if(bView == false && m_renderer.valid())
 		m_renderer->UpdateCameraData(*this,m_cameraData);
 
 	drawCmd->RecordBufferBarrier(
 		*bufCam,
-		prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::GeometryShaderBit,prosper::PipelineStageFlags::TransferBit,
+		prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::GeometryShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,prosper::PipelineStageFlags::TransferBit,
 		prosper::AccessFlags::ShaderReadBit,prosper::AccessFlags::TransferWriteBit
 	);
 	drawCmd->RecordUpdateBuffer(*bufCam,0ull,m_cameraData);
@@ -292,11 +352,23 @@ void CSceneComponent::UpdateBuffers(std::shared_ptr<prosper::IPrimaryCommandBuff
 	auto camPos = cam.valid() ? cam->GetEntity().GetPosition() : Vector3{};
 	m_renderSettings.posCam = camPos;
 
+	drawCmd->RecordBufferBarrier(
+		*m_renderSettingsBuffer,
+		prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::GeometryShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,prosper::PipelineStageFlags::TransferBit,
+		prosper::AccessFlags::ShaderReadBit,prosper::AccessFlags::TransferWriteBit
+	);
 	drawCmd->RecordUpdateBuffer(*m_renderSettingsBuffer,0ull,m_renderSettings);
 	// prosper TODO: Move camPos to camera buffer, and don't update render settings buffer every frame (update when needed instead)
 
-	if(m_renderer && m_renderer->IsRasterizationRenderer())
-		static_cast<pragma::rendering::RasterizationRenderer*>(m_renderer.get())->UpdateRendererBuffer(drawCmd);
+	if(m_renderer.valid())
+		m_renderer->UpdateRendererBuffer(drawCmd);
+}
+void CSceneComponent::RecordRenderCommandBuffers(const util::DrawSceneInfo &drawSceneInfo)
+{
+	auto *renderer = GetRenderer();
+	if(renderer == nullptr)
+		return;
+	renderer->RecordCommandBuffers(drawSceneInfo);
 }
 void CSceneComponent::InitializeDescriptorSetLayouts()
 {
@@ -313,18 +385,18 @@ void CSceneComponent::InitializeDescriptorSetLayouts()
 }
 void CSceneComponent::InitializeSwapDescriptorBuffers()
 {
-	if(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA.IsValid() == false || pragma::ShaderPPFog::DESCRIPTOR_SET_FOG.IsValid() == false)
+	if(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE.IsValid() == false || pragma::ShaderPPFog::DESCRIPTOR_SET_FOG.IsValid() == false)
 		return;
-	m_camDescSetGroupGraphics = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA);
+	m_camDescSetGroupGraphics = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE);
 	auto &descSetGraphics = *m_camDescSetGroupGraphics->GetDescriptorSet();
 	descSetGraphics.SetBindingUniformBuffer(
-		*m_cameraBuffer,umath::to_integral(pragma::ShaderTextured3DBase::CameraBinding::Camera)
+		*m_cameraBuffer,umath::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::Camera)
 	);
 	descSetGraphics.SetBindingUniformBuffer(
-		*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderTextured3DBase::CameraBinding::RenderSettings)
+		*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::RenderSettings)
 	);
 
-	m_camDescSetGroupCompute = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_CAMERA);
+	m_camDescSetGroupCompute = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderForwardPLightCulling::DESCRIPTOR_SET_SCENE);
 	auto &descSetCompute = *m_camDescSetGroupCompute->GetDescriptorSet();
 	descSetCompute.SetBindingUniformBuffer(
 		*m_cameraBuffer,umath::to_integral(pragma::ShaderForwardPLightCulling::CameraBinding::Camera)
@@ -333,13 +405,13 @@ void CSceneComponent::InitializeSwapDescriptorBuffers()
 		*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderForwardPLightCulling::CameraBinding::RenderSettings)
 	);
 
-	m_camViewDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderTextured3DBase::DESCRIPTOR_SET_CAMERA);
+	m_camViewDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_SCENE);
 	auto &descSetViewGraphics = *m_camViewDescSetGroup->GetDescriptorSet();
 	descSetViewGraphics.SetBindingUniformBuffer(
-		*m_cameraViewBuffer,umath::to_integral(pragma::ShaderTextured3DBase::CameraBinding::Camera)
+		*m_cameraViewBuffer,umath::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::Camera)
 	);
 	descSetViewGraphics.SetBindingUniformBuffer(
-		*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderTextured3DBase::CameraBinding::RenderSettings)
+		*m_renderSettingsBuffer,umath::to_integral(pragma::ShaderGameWorldLightingPass::SceneBinding::RenderSettings)
 	);
 
 	m_fogDescSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPPFog::DESCRIPTOR_SET_FOG);
@@ -367,6 +439,27 @@ prosper::IDescriptorSet *CSceneComponent::GetCameraDescriptorSetGraphics() const
 prosper::IDescriptorSet *CSceneComponent::GetCameraDescriptorSetCompute() const {return m_camDescSetGroupCompute->GetDescriptorSet();}
 prosper::IDescriptorSet *CSceneComponent::GetViewCameraDescriptorSet() const {return m_camViewDescSetGroup->GetDescriptorSet();}
 const std::shared_ptr<prosper::IDescriptorSetGroup> &CSceneComponent::GetFogDescriptorSetGroup() const {return m_fogDescSetGroup;}
+
+void CSceneComponent::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo)
+{
+	pragma::CEDrawSceneInfo evData {drawSceneInfo};
+	InvokeEventCallbacks(pragma::CSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES,evData);
+	GetSceneRenderDesc().BuildRenderQueues(drawSceneInfo);
+
+	// Start building the render queues for the light sources
+	// that create shadows and were previously visible.
+	// At this point we don't actually know if they're still visible,
+	// but it's very likely.
+	for(auto &hLight : m_previouslyVisibleShadowedLights)
+	{
+		if(hLight.expired())
+			continue;
+		auto *shadowC = hLight->GetShadowComponent();
+		if(shadowC == nullptr)
+			continue;
+		shadowC->GetRenderer().BuildRenderQueues(drawSceneInfo);
+	}
+}
 
 WorldEnvironment *CSceneComponent::GetWorldEnvironment() const {return m_worldEnvironment.get();}
 void CSceneComponent::SetWorldEnvironment(WorldEnvironment &env)
@@ -429,21 +522,22 @@ void CSceneComponent::SetWorldEnvironment(WorldEnvironment &env)
 void CSceneComponent::SetLightMap(pragma::CLightMapComponent &lightMapC)
 {
 	auto &renderSettings = GetRenderSettings();
-	renderSettings.lightmapIntensity = lightMapC.GetLightMapIntensity();
-	renderSettings.lightmapExposurePow = umath::pow(2.0,static_cast<double>(lightMapC.GetLightMapExposure()));
 	m_lightMap = lightMapC.GetHandle<pragma::CLightMapComponent>();
+	auto &prop = lightMapC.GetLightMapExposureProperty();
 	UpdateRenderSettings();
 	UpdateRendererLightMap();
 }
 void CSceneComponent::UpdateRendererLightMap()
 {
-	if(m_renderer == nullptr || m_renderer->IsRasterizationRenderer() == false || m_lightMap.expired())
+	if(m_renderer.expired() || m_lightMap.expired())
 		return;
 	auto &texLightMap = m_lightMap->GetLightMap();
 	if(texLightMap == nullptr)
 		return;
 	// TODO: Not ideal to have this here; How to handle this in a better way?
-	static_cast<pragma::rendering::RasterizationRenderer*>(m_renderer.get())->SetLightMap(texLightMap);
+	auto raster = m_renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>();
+	if(raster.valid())
+		raster->SetLightMap(*m_lightMap);
 }
 void CSceneComponent::UpdateRenderSettings()
 {
@@ -454,7 +548,7 @@ void CSceneComponent::UpdateRenderSettings()
 	if(unlitProperty->GetValue() == true)
 		flags |= FRenderSetting::Unlit;
 	m_renderSettings.flags = umath::to_integral(flags);
-	if(m_renderer)
+	if(m_renderer.valid())
 		m_renderer->UpdateRenderSettings();
 }
 void CSceneComponent::ClearWorldEnvironment()
@@ -476,9 +570,7 @@ Vulkan::Texture &CSceneComponent::ResolveBloomTexture(Vulkan::CommandBufferObjec
 
 void CSceneComponent::Resize(uint32_t width,uint32_t height,bool reload)
 {
-	if(m_renderer == nullptr)
-		return;
-	if(reload == false && width == GetWidth() && height == GetHeight())
+	if(m_renderer.expired() || (reload == false && width == GetWidth() && height == GetHeight()))
 		return;
 	ReloadRenderTarget(width,height);
 }
@@ -502,17 +594,17 @@ void CSceneComponent::LinkWorldEnvironment(CSceneComponent &other)
 	fogSettings.GetTypeProperty()->Link(*fogSettingsOther.GetTypeProperty());
 }
 
-void CSceneComponent::SetRenderer(const std::shared_ptr<pragma::rendering::BaseRenderer> &renderer)
+void CSceneComponent::SetRenderer(CRendererComponent *renderer)
 {
-	m_renderer = renderer;
+	m_renderer = renderer ? renderer->GetHandle<CRendererComponent>() : util::WeakHandle<CRendererComponent>{};
 	UpdateRenderSettings();
 	UpdateRendererLightMap();
 }
-pragma::rendering::BaseRenderer *CSceneComponent::GetRenderer() {return m_renderer.get();}
-const pragma::rendering::BaseRenderer *CSceneComponent::GetRenderer() const {return const_cast<CSceneComponent*>(this)->GetRenderer();}
+pragma::CRendererComponent *CSceneComponent::GetRenderer() {return m_renderer.get();}
+const pragma::CRendererComponent *CSceneComponent::GetRenderer() const {return const_cast<CSceneComponent*>(this)->GetRenderer();}
 
-CSceneComponent::DebugMode CSceneComponent::GetDebugMode() const {return m_debugMode;}
-void CSceneComponent::SetDebugMode(CSceneComponent::DebugMode debugMode) {m_debugMode = debugMode;}
+SceneDebugMode CSceneComponent::GetDebugMode() const {return m_debugMode;}
+void CSceneComponent::SetDebugMode(SceneDebugMode debugMode) {m_debugMode = debugMode;}
 
 SceneRenderDesc &CSceneComponent::GetSceneRenderDesc() {return m_sceneRenderDesc;}
 const SceneRenderDesc &CSceneComponent::GetSceneRenderDesc() const {return const_cast<CSceneComponent*>(this)->GetSceneRenderDesc();}
@@ -520,23 +612,30 @@ const SceneRenderDesc &CSceneComponent::GetSceneRenderDesc() const {return const
 void CSceneComponent::SetParticleSystemColorFactor(const Vector4 &colorFactor) {m_particleSystemColorFactor = colorFactor;}
 const Vector4 &CSceneComponent::GetParticleSystemColorFactor() const {return m_particleSystemColorFactor;}
 
-bool CSceneComponent::IsValid() const {return m_bValid;}
+bool CSceneComponent::IsValid() const {return umath::is_flag_set(m_stateFlags,StateFlags::ValidRenderer);}
+
+CSceneComponent *CSceneComponent::GetParentScene()
+{
+	if(umath::is_flag_set(m_stateFlags,StateFlags::HasParentScene) == false)
+		return nullptr;
+	return GetByIndex(GetSceneIndex());
+}
 
 CSceneComponent::SceneIndex CSceneComponent::GetSceneIndex() const {return m_sceneIndex;}
 
-uint32_t CSceneComponent::GetWidth() const {return m_renderer ? m_renderer->GetWidth() : 0;}
-uint32_t CSceneComponent::GetHeight() const {return m_renderer ? m_renderer->GetHeight() : 0;}
+uint32_t CSceneComponent::GetWidth() const {return m_renderer.valid() ? m_renderer->GetWidth() : 0;}
+uint32_t CSceneComponent::GetHeight() const {return m_renderer.valid() ? m_renderer->GetHeight() : 0;}
 
 //const Vulkan::DescriptorSet &CSceneComponent::GetBloomGlowDescriptorSet() const {return m_descSetBloomGlow;} // prosper TODO
 
 void CSceneComponent::ReloadRenderTarget(uint32_t width,uint32_t height)
 {
-	m_bValid = false;
+	umath::set_flag(m_stateFlags,StateFlags::ValidRenderer,false);
 
-	if(m_renderer == nullptr || m_renderer->ReloadRenderTarget(*this,width,height) == false)
+	if(m_renderer.expired() || m_renderer->ReloadRenderTarget(*this,width,height) == false)
 		return;
-
-	m_bValid = true;
+	
+	umath::set_flag(m_stateFlags,StateFlags::ValidRenderer,true);
 }
 
 const util::WeakHandle<pragma::CCameraComponent> &CSceneComponent::GetActiveCamera() const {return const_cast<CSceneComponent*>(this)->GetActiveCamera();}
@@ -554,6 +653,16 @@ void CSceneComponent::SetActiveCamera()
 	m_camera = {};
 
 	BroadcastEvent(EVENT_ON_ACTIVE_CAMERA_CHANGED);
+}
+
+/////////////////
+
+CEDrawSceneInfo::CEDrawSceneInfo(const util::DrawSceneInfo &drawSceneInfo)
+	: drawSceneInfo{drawSceneInfo}
+{}
+void CEDrawSceneInfo::PushArguments(lua_State *l)
+{
+	Lua::Push<const util::DrawSceneInfo*>(l,&drawSceneInfo);
 }
 
 ////////

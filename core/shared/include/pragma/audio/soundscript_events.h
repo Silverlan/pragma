@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __SOUNDSCRIPT_EVENTS_H__
 #define __SOUNDSCRIPT_EVENTS_H__
@@ -18,6 +18,7 @@
 
 class NetworkState;
 namespace ds {class Block;};
+namespace udm {struct LinkedPropertyWrapper;};
 class SoundScriptManager;
 class DLLNETWORK SoundScriptEvent;
 class DLLNETWORK SoundScriptEventContainer
@@ -25,7 +26,7 @@ class DLLNETWORK SoundScriptEventContainer
 protected:
 	std::vector<std::shared_ptr<SoundScriptEvent>> m_events;
 	SoundScriptManager *m_manager;
-	void InitializeEvents(const std::shared_ptr<ds::Block> &data);
+	void InitializeEvents(udm::LinkedPropertyWrapper &prop);
 public:
 	SoundScriptEventContainer(SoundScriptManager *manager);
 	virtual ~SoundScriptEventContainer();
@@ -42,12 +43,12 @@ private:
 	float m_max;
 	bool m_bIsSet = false;
 	void Initialize(float f);
-	void Initialize(std::string s);
+	void Initialize(float min,float max);
 public:
 	SoundScriptValue(float f);
-	SoundScriptValue(std::string s);
-	SoundScriptValue(const std::shared_ptr<ds::Block> &data,const char *name);
-	bool Load(const std::shared_ptr<ds::Block> &data,const char *name);
+	SoundScriptValue(float min,float max);
+	SoundScriptValue(udm::LinkedPropertyWrapper &prop);
+	bool Load(udm::LinkedPropertyWrapper &prop);
 	float GetValue() const;
 	bool IsSet() const;
 };
@@ -59,7 +60,7 @@ class DLLNETWORK SoundScriptEvent
 public:
 	SoundScriptEvent(SoundScriptManager *manager,float off=0.f,bool bRepeat=false);
 	virtual ~SoundScriptEvent();
-	virtual void Initialize(const std::shared_ptr<ds::Block> &data);
+	virtual void Initialize(udm::LinkedPropertyWrapper &prop);
 	SSEBase *CreateEvent(double tStart);
 	virtual void Precache();
 	SoundScriptValue eventOffset;
@@ -119,7 +120,7 @@ public:
 	virtual ~SSEPlaySound() override
 	{}
 	std::vector<std::string> sources;
-	bool loop;
+	bool loop = false;
 	bool global = false;
 	bool stream = false;
 	SoundScriptValue type;
@@ -137,10 +138,10 @@ public:
 	SoundScriptValue endTime;
 	SoundScriptValue fadeInTime;
 	SoundScriptValue fadeOutTime;
-	double maxDistance;
-	int position;
-	ALChannel mode;
-	virtual void Initialize(const std::shared_ptr<ds::Block> &data) override;
+	double maxDistance = ALSOUND_DEFAULT_MAX_DISTANCE;
+	int position = 0;
+	ALChannel mode = ALChannel::Mono;
+	virtual void Initialize(udm::LinkedPropertyWrapper &prop) override;
 	virtual SSESound *CreateSound(double tStart,const std::function<std::shared_ptr<ALSound>(const std::string&,ALChannel,ALCreateFlags)> &createSound);
 	virtual void Precache() override;
 };

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_SHADER_SSAO_HPP__
@@ -11,8 +11,10 @@
 #include "pragma/clientdefinitions.h"
 #include <shader/prosper_shader_base_image_processing.hpp>
 
+namespace prosper {class Texture; class IBuffer; class IDescriptorSetGroup;};
 namespace pragma
 {
+	class CSceneComponent;
 	class DLLCLIENT ShaderSSAO
 		: public prosper::ShaderBaseImageProcessing
 	{
@@ -22,7 +24,7 @@ namespace pragma
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_PREPASS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_NOISE_TEXTURE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SAMPLE_BUFFER;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
 
 		enum class PrepassBinding : uint32_t
 		{

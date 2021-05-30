@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __SH_LUA_COMPONENT_HPP__
@@ -15,7 +15,7 @@
 #include <pragma/lua/luaapi.h>
 #include <any>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 class BaseEntity;
 namespace pragma
@@ -60,6 +60,7 @@ namespace pragma
 
 		virtual void Initialize() override;
 		virtual void InitializeMembers(const std::vector<BaseLuaBaseEntityComponent::MemberInfo> &members);
+		virtual void OnTick(double dt) override;
 		void SetNetworked(bool b);
 		bool IsNetworked() const;
 		void SetShouldTransmitSnapshotData(bool b);
@@ -74,8 +75,8 @@ namespace pragma
 		const luabind::object &GetLuaObject() const;
 		luabind::object &GetLuaObject();
 
-		virtual void Save(DataStream &ds) override;
-		virtual void Load(DataStream &ds,uint32_t version) override;
+		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
+		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
 		virtual uint32_t GetVersion() const override;
 
 		CallbackHandle BindInitComponentEvent(ComponentId componentId,const std::function<void(std::reference_wrapper<pragma::BaseEntityComponent>)> &callback);
@@ -97,6 +98,8 @@ namespace pragma
 		std::any GetMemberValue(const MemberInfo &memberInfo) const;
 		void SetMemberValue(const MemberInfo &memberInfo,const std::any &value) const;
 		const std::vector<MemberInfo> &GetMembers() const;
+		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
+		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 		std::unordered_map<pragma::NetEventId,CallbackHandle> m_boundNetEvents;
 
 		struct NetworkedMemberInfo

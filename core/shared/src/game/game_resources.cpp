@@ -2,19 +2,21 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
 #include "pragma/networkstate/networkstate.h"
 #include "pragma/game/game_resources.hpp"
 #include "pragma/model/model.h"
+#include <pragma/asset/util_asset.hpp>
 #include <pragma/util/resource_watcher.h>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_path.hpp>
+#include <udm.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 static bool s_bModuleInitialized = false;
 
@@ -56,6 +58,29 @@ void util::close_external_archive_manager()
 	if(fClose != nullptr)
 		fClose();
 }
+std::optional<int32_t> util::get_mounted_game_priority(const std::string &game)
+{
+	if(s_bModuleInitialized == false)
+		return {};
+	auto dllHandle = load_module(nullptr);
+	auto *fGetMountedGamePriority = dllHandle->FindSymbolAddress<bool(*)(const std::string&,int32_t&)>("get_mounted_game_priority");
+	if(fGetMountedGamePriority)
+	{
+		int32_t priority;
+		auto r = fGetMountedGamePriority(game,priority);
+		return r ? priority : std::optional<int32_t>{};
+	}
+	return {};
+}
+void util::set_mounted_game_priority(const std::string &game,int32_t priority)
+{
+	if(s_bModuleInitialized == false)
+		return;
+	auto dllHandle = load_module(nullptr);
+	auto *fSetMountedGamePriority = dllHandle->FindSymbolAddress<void(*)(const std::string&,int32_t)>("set_mounted_game_priority");
+	if(fSetMountedGamePriority != nullptr)
+		fSetMountedGamePriority(game,priority);
+}
 
 static bool port_model(
 	NetworkState *nw,const std::string &path,std::string mdlName,const std::string &formatName,
@@ -72,7 +97,7 @@ static bool port_model(
 	//if(FileManager::Exists(path +mdlName) == false) // Could be in bsa archive
 	//	return false;
 	//Con::cout<<"Found "<<formatName<<" Model '"<<(path +mdlName)<<"', attempting to port..."<<Con::endl;
-	ufile::remove_extension_from_filename(mdlName);
+	ufile::remove_extension_from_filename(mdlName,pragma::asset::get_supported_extensions(pragma::asset::Type::Model,true));
 	auto *game = nw->GetGameState();
 	auto fcreateModel = static_cast<std::shared_ptr<Model>(Game::*)(bool) const>(&Game::CreateModel);
 	std::vector<std::shared_ptr<Model>> models;
@@ -82,22 +107,24 @@ static bool port_model(
 		return mdl;
 	},[game,formatName](const std::shared_ptr<Model> &mdl,const std::string &path,const std::string &mdlName) {
 		auto outPath = ustring::substr(path,7) // Remove "models/"-prefix
-			+mdlName +".wmd";
-		if(FileManager::CreatePath((ufile::get_path_from_filename(util::IMPORT_PATH +"models\\" +outPath)).c_str()) == false)
+			+mdlName +'.' +pragma::asset::FORMAT_MODEL_BINARY;
+		if(FileManager::CreatePath((ufile::get_path_from_filename(util::CONVERT_PATH +"models\\" +outPath)).c_str()) == false)
 			return false;
-		auto r = false;
-		try
+		auto f = FileManager::OpenFile<VFilePtrReal>((util::CONVERT_PATH +"models\\" +outPath).c_str(),"wb");
+		if(f == nullptr)
 		{
-			r = mdl->Save(game,outPath,util::IMPORT_PATH);
-		}
-		catch(const std::logic_error &err)
-		{
-			Con::cwar<<"WARNING: Unable to save model '"<<outPath<<"': "<<err.what()<<Con::endl;
+			Con::cwar<<"WARNING: Unable to save model '"<<outPath<<"': Unable to open file!"<<Con::endl;
 			return false;
 		}
-		if(r == false)
+		auto udmData = udm::Data::Create();
+		std::string err;
+		if(mdl->Save(*game,udmData->GetAssetData(),err) == false)
+		{
+			Con::cwar<<"WARNING: Unable to save model '"<<outPath<<"': "<<err<<Con::endl;
 			return false;
-		r = FileManager::Exists(util::IMPORT_PATH +"models\\" +outPath);
+		}
+		auto r = udmData->Save(f);
+		r = r ? FileManager::Exists(util::CONVERT_PATH +"models\\" +outPath) : false;
 		if(r == true)
 			Con::cout<<"Successfully ported "<<formatName<<" Model '"<<(path +mdlName)<<"' and saved it as '"<<outPath<<"'!"<<Con::endl;
 		return r;

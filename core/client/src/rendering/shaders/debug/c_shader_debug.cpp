@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -12,7 +12,7 @@
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
@@ -66,7 +66,7 @@ void ShaderDebug::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 	AttachPushConstantRange(pipelineInfo,0u,sizeof(PushConstants),prosper::ShaderStageFlags::VertexBit);
 }
 
-bool ShaderDebug::BeginDraw(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,Pipeline pipelineIdx)
+bool ShaderDebug::BeginDraw(const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,Pipeline pipelineIdx)
 {
 	return ShaderGraphics::BeginDraw(cmdBuffer,umath::to_integral(pipelineIdx)) == true &&
 		cmdBuffer->RecordSetDepthBias(1.f,0.f,0.f);

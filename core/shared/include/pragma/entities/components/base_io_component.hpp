@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __BASE_IO_COMPONENT_HPP__
 #define __BASE_IO_COMPONENT_HPP__
@@ -28,22 +28,31 @@ namespace pragma
 		: public BaseEntityComponent
 	{
 	public:
+		enum class IoFlags : uint32_t
+		{
+			None = 0u,
+			ForceDelayedFire = 1u // Never triggers the input/output immediately, even if the delay is set to 0
+		};
+
 		static pragma::ComponentEventId EVENT_HANDLE_INPUT;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 		virtual void Initialize() override;
 
 		void StoreOutput(std::string name,std::string entities,std::string input,std::string param,float delay=0.f,int times=-1);
 		void StoreOutput(std::string name,std::string info);
-		void TriggerOutput(std::string name,BaseEntity *activator);
+		void TriggerOutput(std::string name,BaseEntity *activator,IoFlags flags=IoFlags::None);
 
 		virtual void Input(std::string input,BaseEntity *activator,BaseEntity *caller,std::string data);
 		void Input(const std::string input,BaseEntity *activator=nullptr,BaseEntity *caller=nullptr);
+		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
 	protected:
+		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
 		BaseIOComponent(BaseEntity &ent);
-		bool FireSingleOutput(Output &output,BaseEntity *activator);
+		bool FireSingleOutput(Output &output,BaseEntity *activator,IoFlags flags=IoFlags::None);
 
 		std::unordered_map<std::string,std::vector<Output>> m_outputs;
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseIOComponent::IoFlags)
 
 #endif

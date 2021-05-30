@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -15,6 +15,7 @@
 #include "pragma/rendering/shaders/debug/c_shader_debug.hpp"
 #include "pragma/rendering/shaders/debug/c_shader_debug_text.hpp"
 #include "pragma/rendering/shaders/world/c_shader_flat.hpp"
+#include "pragma/rendering/shaders/world/c_shader_test.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/rendering/shaders/c_shader_depth_to_rgb.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
@@ -61,7 +62,7 @@
 
 
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 REGISTER_CONVAR_CALLBACK_CL(cl_render_shader_quality,[](NetworkState*,ConVar*,int,int val) {
@@ -69,14 +70,6 @@ REGISTER_CONVAR_CALLBACK_CL(cl_render_shader_quality,[](NetworkState*,ConVar*,in
 		return;
 	c_game->GetWorldEnvironment().SetShaderQuality(val);
 });
-
-static void CVAR_CALLBACK_render_unlit(NetworkState*,ConVar*,bool,bool val)
-{
-	if(c_game == nullptr)
-		return;
-	c_game->GetWorldEnvironment().SetUnlit(val);
-}
-REGISTER_CONVAR_CALLBACK_CL(render_unlit,CVAR_CALLBACK_render_unlit);
 
 static void CVAR_CALLBACK_cl_render_shadow_resolution(NetworkState*,ConVar*,int,int val)
 {
@@ -96,20 +89,21 @@ void CGame::InitShaders()
 	shaderManager.RegisterShader("clear_color",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderClearColor(context,identifier);});
 
 	shaderManager.RegisterShader("prepass",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPrepass(context,identifier);});
-	shaderManager.RegisterShader("prepass_depth",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPrepassDepth(context,identifier);});
 
-	shaderManager.RegisterShader("forwardp_light_indexing",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderForwardPLightIndexing(context,identifier);});
+	// shaderManager.RegisterShader("forwardp_light_indexing",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderForwardPLightIndexing(context,identifier);});
 	shaderManager.RegisterShader("forwardp_light_culling",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderForwardPLightCulling(context,identifier);});
 
 	shaderManager.RegisterShader("raytracing",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderRayTracing(context,identifier);});
 	shaderManager.RegisterShader("pbr",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPBR(context,identifier);});
-	shaderManager.RegisterShader("pbr_blend",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPBRBlend(context,identifier);});
+	// shaderManager.RegisterShader("pbr_blend",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPBRBlend(context,identifier);}); // TODO: Fixme
+	shaderManager.RegisterShader("pbr_blend",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderPBR(context,identifier);});
 	shaderManager.RegisterShader("eye",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderEye(context,identifier);});
 
 	shaderManager.RegisterShader("flat",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderFlat(context,identifier);});
-	shaderManager.RegisterShader("unlit",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderUnlit(context,identifier);});
+	// shaderManager.RegisterShader("test",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderTest(context,identifier);});
+	shaderManager.RegisterShader("unlit",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderUnlit(context,identifier);}); // TODO: Fixme
 	shaderManager.RegisterShader("wireframe",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderWireframe(context,identifier);});
-	shaderManager.RegisterShader("texturedalphatransition",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderTexturedAlphaTransition(context,identifier);});
+	// shaderManager.RegisterShader("texturedalphatransition",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderTexturedAlphaTransition(context,identifier);});
 	shaderManager.RegisterShader("skybox",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderSkybox(context,identifier);});
 	shaderManager.RegisterShader("skybox_equirect",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderSkyboxEquirect(context,identifier);});
 	shaderManager.RegisterShader("loading",[](prosper::IPrContext &context,const std::string &identifier) {return new pragma::ShaderLoading(context,identifier);});
@@ -170,9 +164,11 @@ void CGame::InitShaders()
 	m_gameShaders.at(umath::to_integral(GameShader::PPFXAA)) = shaderManager.GetShader("pp_fxaa");
 
 	// Make sure these are always loaded
-	shaderManager.GetShader("pbr");
+	m_gameShaders.at(umath::to_integral(GameShader::Pbr)) = shaderManager.GetShader("pbr");
+	// shaderManager.GetShader("test");
+	shaderManager.GetShader("light_cone");
 	shaderManager.GetShader("forwardp_light_culling");
-	shaderManager.GetShader("prepass");
+	m_gameShaders.at(umath::to_integral(GameShader::Prepass)) = shaderManager.GetShader("prepass");
 	shaderManager.GetShader("shadow");
 	shaderManager.GetShader("pp_fog");
 	shaderManager.GetShader("pp_hdr");
@@ -182,7 +178,7 @@ void CGame::InitShaders()
 
 void CGame::UpdateShaderTimeData()
 {
-	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_globalRenderSettingsBufferData->timeBuffer,0ull,pragma::ShaderTextured3DBase::TimeData{
+	c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_globalRenderSettingsBufferData->timeBuffer,0ull,pragma::ShaderGameWorldLightingPass::TimeData{
 		static_cast<float>(CurTime()),static_cast<float>(DeltaTime()),
 		static_cast<float>(RealTime()),static_cast<float>(DeltaRealTime())
 	});

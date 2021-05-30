@@ -2,13 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
 #include <pragma/definitions.h>
 #include <pragma/engine.h>
 #include "pragma/entities/components/base_player_component.hpp"
+#include "pragma/entities/components/base_gamemode_component.hpp"
 #include <pragma/math/angle/wvquaternion.h>
 #include <pragma/physics/movetypes.h>
 #include "pragma/physics/physobj.h"
@@ -41,7 +42,6 @@
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/velocity_component.hpp"
-#include "pragma/entities/components/logic_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/model.h"
 
@@ -78,7 +78,10 @@ void BasePlayerComponent::OnKilled(DamageInfo *dmgInfo)
 	auto &ent = GetEntity();
 	auto *nw = ent.GetNetworkState();
 	auto *game = nw->GetGameState();
+
 	game->CallCallbacks<void,BasePlayerComponent*,DamageInfo*>("OnPlayerDeath",this,dmgInfo);
+	for(auto *gmC : game->GetGamemodeComponents())
+		gmC->OnPlayerDeath(*this,dmgInfo);
 
 	auto charComponent = ent.GetCharacterComponent();
 	charComponent->RemoveWeapons();
@@ -104,7 +107,7 @@ bool BasePlayerComponent::CanUnCrouch() const
 		return true;
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(phys == nullptr)
 		return true;
 	auto *col = phys->GetCollisionObject();
@@ -119,15 +122,15 @@ bool BasePlayerComponent::CanUnCrouch() const
 	auto *game = nw->GetGameState();
 	auto data = charComponent.GetAimTraceData();
 	data.SetSource(colPos);
-	data.SetTarget(colPos +(pTrComponent.valid() ? pTrComponent->GetUp() : uvec::UP) *0.001f); // Target position musn't be the same as the source position, otherwise the trace will never detect a hit
+	data.SetTarget(colPos +(pTrComponent ? pTrComponent->GetUp() : uvec::UP) *0.001f); // Target position musn't be the same as the source position, otherwise the trace will never detect a hit
 	data.SetShape(*m_shapeStand);
 	return game->Sweep(data).hitType == RayCastHitType::None; // Overlap only works with collision objects, not with individual shapes, so we have to use Sweep instead
 }
-void BasePlayerComponent::Think(double tDelta)
+void BasePlayerComponent::OnTick(double tDelta)
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	if(m_bCrouching || m_crouchTransition != CrouchTransition::None)
 	{
 		if(GetActionInput(Action::Crouch) == false && m_crouchTransition != CrouchTransition::Uncrouching)
@@ -188,9 +191,9 @@ void BasePlayerComponent::Think(double tDelta)
 				m_movementActivity = animComponent->GetActivity();
 			m_bForceAnimationUpdate = false;
 			
-			if(pTrComponent.valid())
+			if(pTrComponent)
 			{
-				auto rot = pTrComponent->GetOrientation();
+				auto rot = pTrComponent->GetRotation();
 				auto rotView = charComponent.valid() ? charComponent->GetViewOrientation() : rot;
 				auto rotRef = charComponent.valid() ? charComponent->GetOrientationAxesRotation() : rot;
 				rotView = rotRef *rotView;
@@ -198,7 +201,7 @@ void BasePlayerComponent::Think(double tDelta)
 				auto ang = EulerAngles(rot);
 				ang.y = EulerAngles(rotView).y;
 				rot = uquat::get_inverse(rotRef) *uquat::create(ang);
-				pTrComponent->SetOrientation(rot);
+				pTrComponent->SetRotation(rot);
 			}
 		}
 		else
@@ -229,8 +232,7 @@ Con::c_cout& BasePlayerComponent::print(Con::c_cout &os)
 	auto &ent = GetEntity();
 	auto nameComponent = ent.GetNameComponent();
 	os<<"Player["<<(nameComponent.valid() ? nameComponent->GetName() : "")<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = GetEntity().GetModel();
 	if(hMdl == nullptr)
 		os<<"NULL";
 	else
@@ -244,8 +246,7 @@ std::ostream& BasePlayerComponent::print(std::ostream &os)
 	auto &ent = GetEntity();
 	auto nameComponent = ent.GetNameComponent();
 	os<<"Player["<<(nameComponent.valid() ? nameComponent->GetName() : "")<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = GetEntity().GetModel();
 	if(hMdl == nullptr)
 		os<<"NULL";
 	else
@@ -254,7 +255,7 @@ std::ostream& BasePlayerComponent::print(std::ostream &os)
 	return os;
 }
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 BasePlayerComponent::BasePlayerComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),
 	m_portUDP(0),
@@ -286,6 +287,8 @@ void BasePlayerComponent::OnRespawn()
 	auto *nw = ent.GetNetworkState();
 	auto *game = nw->GetGameState();
 	game->CallCallbacks<void,BasePlayerComponent*>("OnPlayerSpawned",this);
+	for(auto *gmC : game->GetGamemodeComponents())
+		gmC->OnPlayerSpawned(*this);
 }
 
 BasePlayer *BasePlayerComponent::GetBasePlayer() const {return dynamic_cast<BasePlayer*>(m_hBasePlayer.get());}
@@ -323,8 +326,7 @@ void BasePlayerComponent::Initialize()
 		return util::EventReply::Handled;
 	});
 	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_ANIMATION_COMPLETE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto mdlComponent = GetEntity().GetModelComponent();
-		auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+		auto &hMdl = GetEntity().GetModel();
 		if(hMdl == nullptr)
 			return util::EventReply::Unhandled;
 		auto anim = hMdl->GetAnimation(static_cast<CEOnAnimationComplete&>(evData.get()).animation);
@@ -332,6 +334,10 @@ void BasePlayerComponent::Initialize()
 			return util::EventReply::Unhandled;
 		if(anim->HasFlag(FAnim::Loop) == false)
 			PlaySharedActivity(Activity::Idle); // A non-looping animation has completed; Switch back to idle
+		return util::EventReply::Unhandled;
+	});
+	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_ANIMATION_RESET,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		PlaySharedActivity(Activity::Idle); // A non-looping animation has completed; Switch back to idle
 		return util::EventReply::Unhandled;
 	});
 	BindEventUnhandled(BaseAnimatedComponent::EVENT_ON_ANIMATION_START,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
@@ -359,10 +365,6 @@ void BasePlayerComponent::Initialize()
 		OnPhysicsInitialized();
 		return util::EventReply::Unhandled;
 	});
-	BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		Think(static_cast<CEOnTick&>(evData.get()).deltaTime);
-		return util::EventReply::Unhandled;
-	});
 	BindEvent(BaseCharacterComponent::EVENT_IS_MOVING,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		static_cast<CEIsMoving&>(evData.get()).moving = IsMoving();
 		return util::EventReply::Handled;
@@ -379,13 +381,15 @@ void BasePlayerComponent::Initialize()
 		pObservableComponent->SetCameraEnabled(BaseObservableComponent::CameraType::ThirdPerson,true);
 		pObservableComponent->SetLocalCameraOffset(BaseObservableComponent::CameraType::ThirdPerson,{0.f,10.f,-80.f});
 	}
+
+	SetTickPolicy(TickPolicy::Always);
 }
 
 void BasePlayerComponent::OnPhysicsInitialized()
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent)
 		pPhysComponent->AddCollisionFilter(CollisionMask::Player);
 }
 
@@ -396,8 +400,8 @@ BaseEntity *BasePlayerComponent::FindUseEntity() const
 	Game *game = state->GetGameState();
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
-	Vector3 origin = charComponent.valid() ? charComponent->GetEyePosition() : (pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{});
-	Vector3 viewDir = charComponent.valid() ? charComponent->GetViewForward() : (pTrComponent.valid() ? pTrComponent->GetForward() : Vector3{});
+	Vector3 origin = charComponent.valid() ? charComponent->GetEyePosition() : (pTrComponent ? pTrComponent->GetPosition() : Vector3{});
+	Vector3 viewDir = charComponent.valid() ? charComponent->GetViewForward() : (pTrComponent ? pTrComponent->GetForward() : Vector3{});
 	const auto dotMin = 0.6f;
 	float dotClosest = 1.f;
 	float maxDist = 96.f;
@@ -411,18 +415,18 @@ BaseEntity *BasePlayerComponent::FindUseEntity() const
 		if(pUsableComponent->CanUse(const_cast<BaseEntity*>(&ent)))
 		{
 			auto pTrComponentOther = entOther->GetTransformComponent();
-			if(pTrComponentOther.expired())
+			if(!pTrComponentOther)
 				continue;
 			auto pPhysComponentOther = entOther->GetPhysicsComponent();
 			auto &posEnt = pTrComponentOther->GetPosition();
 			Vector3 min {};
 			Vector3 max {};
-			if(pPhysComponentOther.valid())
+			if(pPhysComponentOther)
 				pPhysComponentOther->GetCollisionBounds(&min,&max);
 			min += posEnt;
 			max += posEnt;
 			Vector3 res;
-			Geometry::ClosestPointOnAABBToPoint(min,max,origin,&res);
+			umath::geometry::closest_point_on_aabb_to_point(min,max,origin,&res);
 			
 			float dist = glm::distance(origin,res);
 			if(dist <= maxDist)
@@ -480,7 +484,7 @@ Vector2 BasePlayerComponent::CalcMovementSpeed() const
 {
 	float speed;
 	auto physComponent = GetEntity().GetPhysicsComponent();
-	if(physComponent.valid() && physComponent->GetMoveType() == MOVETYPE::NOCLIP)
+	if(physComponent && physComponent->GetMoveType() == MOVETYPE::NOCLIP)
 	{
 		speed = GetEntity().GetNetworkState()->GetGameState()->GetConVarFloat("sv_noclip_speed");
 		if(IsWalking())
@@ -535,7 +539,7 @@ void BasePlayerComponent::OnEntitySpawn()
 	m_timeConnected = state->RealTime();
 
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent)
 		pPhysComponent->SetCollisionBounds(Vector3(-16,0,-16),Vector3(16,m_standHeight,16));
 	PlaySharedActivity(Activity::Idle);
 }
@@ -753,7 +757,7 @@ void BasePlayerComponent::Crouch()
 		return;
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto *phys = pPhysComponent.valid() ? pPhysComponent->GetPhysicsObject() : nullptr;
+	auto *phys = pPhysComponent ? pPhysComponent->GetPhysicsObject() : nullptr;
 	m_shapeStand = nullptr;
 	NetworkState *state = ent.GetNetworkState();
 	Game *game = state->GetGameState();
@@ -825,7 +829,7 @@ float BasePlayerComponent::GetWalkSpeed() const
 {
 	auto r = m_speedWalk;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 	{
 		auto &scale = pTrComponent->GetScale();
 		r *= umath::abs_max(scale.x,scale.y,scale.z);
@@ -836,7 +840,7 @@ float BasePlayerComponent::GetRunSpeed() const
 {
 	auto r = m_speedRun;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 	{
 		auto &scale = pTrComponent->GetScale();
 		r *= umath::abs_max(scale.x,scale.y,scale.z);
@@ -847,7 +851,7 @@ float BasePlayerComponent::GetSprintSpeed() const
 {
 	auto r = m_speedSprint;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 	{
 		auto &scale = pTrComponent->GetScale();
 		r *= umath::abs_max(scale.x,scale.y,scale.z);
@@ -861,7 +865,7 @@ float BasePlayerComponent::GetCrouchedWalkSpeed() const
 {
 	auto r = m_speedCrouchWalk;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 	{
 		auto &scale = pTrComponent->GetScale();
 		r *= umath::abs_max(scale.x,scale.y,scale.z);

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __S_WEAPON_COMPONENT_HPP__
 #define __S_WEAPON_COMPONENT_HPP__
@@ -38,7 +38,7 @@ namespace pragma
 		virtual void TertiaryAttack() override;
 		virtual void Attack4() override;
 		virtual void Reload() override;
-		virtual void Think(double tDelta);
+		virtual void OnTick(double tDelta) override;
 		virtual void OnRemove();
 		void Drop();
 		virtual void OnPickedUp(BaseEntity *ent);

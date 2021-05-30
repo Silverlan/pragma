@@ -1,0 +1,7 @@
+"wguitextured"
+{
+	"textures"
+	{
+		$string diffuse_map "wgui/cross"
+	}
+}

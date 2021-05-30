@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/serverstate/serverutil.h"
@@ -47,7 +47,7 @@ Con::c_cout& SPlayerComponent::print(Con::c_cout &os)
 	auto nameC = ent.GetNameComponent();
 	os<<"Player["<<(nameC.valid() ? nameC->GetName() : "")<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
 	auto mdlComponent = ent.GetModelComponent();
-	if(mdlComponent.expired() || mdlComponent->GetModel() == nullptr)
+	if(!mdlComponent || mdlComponent->GetModel() == nullptr)
 		os<<"NULL";
 	else
 		os<<mdlComponent->GetModel()->GetName();
@@ -61,7 +61,7 @@ std::ostream& SPlayerComponent::print(std::ostream &os)
 	auto nameC = ent.GetNameComponent();
 	os<<"Player["<<(nameC.valid() ? nameC->GetName() : "")<<"]["<<ent.GetIndex()<<"]"<<"["<<ent.GetClass()<<"]"<<"[";
 	auto mdlComponent = ent.GetModelComponent();
-	if(mdlComponent.expired() || mdlComponent->GetModel() == nullptr)
+	if(!mdlComponent || mdlComponent->GetModel() == nullptr)
 		os<<"NULL";
 	else
 		os<<mdlComponent->GetModel()->GetName();
@@ -129,7 +129,7 @@ void SPlayerComponent::OnRespawn()
 {
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->InitializePhysics(PHYSICSTYPE::CAPSULECONTROLLER);
 	SetObserverMode(OBSERVERMODE::FIRSTPERSON);
 
@@ -209,16 +209,16 @@ void SPlayerComponent::InitializeFlashlight()
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	auto charComponent = ent.GetCharacterComponent();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return;
 	auto *light = game->CreateEntity<Flashlight>();
 	if(light == nullptr)
 		return;
 	auto pTrComponentLight = light->GetTransformComponent();
-	if(pTrComponentLight.valid())
+	if(pTrComponentLight)
 	{
 		pTrComponentLight->SetPosition(pTrComponent->GetPosition());
-		pTrComponentLight->SetOrientation(charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetOrientation());
+		pTrComponentLight->SetRotation(charComponent.valid() ? charComponent->GetViewOrientation() : pTrComponent->GetRotation());
 	}
 	light->Spawn();
 	m_entFlashlight = light->GetHandle();

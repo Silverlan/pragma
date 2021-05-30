@@ -2,22 +2,23 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
+#include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 
 using namespace pragma;
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 uint32_t ShaderForwardPLightCulling::TILE_SIZE = 16u;
 decltype(ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS) ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Light Buffers
-			prosper::DescriptorType::StorageBuffer,
+			LIGHT_SOURCE_BUFFER_TYPE,
 			prosper::ShaderStageFlags::ComputeBit
 		},
 		prosper::DescriptorSetInfo::Binding { // Visible light tile index buffer
@@ -25,7 +26,7 @@ decltype(ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS) ShaderForwardPLightC
 			prosper::ShaderStageFlags::ComputeBit
 		},
 		prosper::DescriptorSetInfo::Binding { // Shadow Buffers
-			prosper::DescriptorType::StorageBuffer,
+			LIGHT_SOURCE_BUFFER_TYPE,
 			prosper::ShaderStageFlags::ComputeBit
 		},
 		prosper::DescriptorSetInfo::Binding { // Visible light index buffer
@@ -38,7 +39,7 @@ decltype(ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS) ShaderForwardPLightC
 		}
 	}
 };
-decltype(ShaderForwardPLightCulling::DESCRIPTOR_SET_CAMERA) ShaderForwardPLightCulling::DESCRIPTOR_SET_CAMERA = {
+decltype(ShaderForwardPLightCulling::DESCRIPTOR_SET_SCENE) ShaderForwardPLightCulling::DESCRIPTOR_SET_SCENE = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Camera
 			prosper::DescriptorType::UniformBuffer,
@@ -63,7 +64,7 @@ void ShaderForwardPLightCulling::InitializeComputePipeline(prosper::ComputePipel
 	// AddSpecializationConstant(pipelineInfo,0u /* constant id */,sizeof(TILE_SIZE),&TILE_SIZE);
 
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_LIGHTS);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 }
 
 bool ShaderForwardPLightCulling::Compute(
@@ -75,6 +76,6 @@ bool ShaderForwardPLightCulling::Compute(
 			lightCount,1u<<sceneIndex,vpWidth<<16 | static_cast<uint16_t>(vpHeight)
 		}) &&
 		RecordBindDescriptorSet(descSetLights,DESCRIPTOR_SET_LIGHTS.setIndex) &&
-		RecordBindDescriptorSet(descSetCamera,DESCRIPTOR_SET_CAMERA.setIndex) &&
+		RecordBindDescriptorSet(descSetCamera,DESCRIPTOR_SET_SCENE.setIndex) &&
 		RecordDispatch(workGroupsX,workGroupsY);
 }

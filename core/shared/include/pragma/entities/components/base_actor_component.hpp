@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __BASE_ACTOR_COMPONENT_HPP__
 #define __BASE_ACTOR_COMPONENT_HPP__
@@ -45,16 +45,24 @@ namespace pragma
 		const util::PBoolProperty &GetFrozenProperty() const;
 
 		void SetMoveController(const std::string &moveController);
+		void SetMoveController(const std::string &moveControllerX,const std::string &moveControllerY);
 		int32_t GetMoveController() const;
+		int32_t GetMoveControllerY() const;
+
+		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
 	protected:
+		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
 		BaseActorComponent(BaseEntity &ent);
 		bool m_bAlive;
 		util::PBoolProperty m_bFrozen = nullptr;
 		std::string m_moveControllerName = "move_yaw";
+		std::optional<std::string> m_moveControllerNameY;
 		int32_t m_moveController = -1;
+		int32_t m_moveControllerY = -1;
 		struct DLLNETWORK HitboxData
 		{
 			HitboxData(uint32_t boneId,const Vector3 &offset);
+			HitboxData()=default;
 			uint32_t boneId;
 			Vector3 offset;
 		};

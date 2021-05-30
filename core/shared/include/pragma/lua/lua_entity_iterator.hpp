@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __LUA_ENTITY_ITERATOR_HPP__
@@ -57,6 +57,24 @@ private:
 	std::string m_name;
 	bool m_bCaseSensitive = false;
 	bool m_bExactMatch = true;
+};
+
+struct LuaEntityIteratorFilterModel
+	: public LuaEntityIteratorFilterBase
+{
+	LuaEntityIteratorFilterModel(const std::string &mdlName);
+	virtual void Attach(EntityIterator &iterator) override;
+private:
+	std::string m_modelName;
+};
+
+struct LuaEntityIteratorFilterUuid
+	: public LuaEntityIteratorFilterBase
+{
+	LuaEntityIteratorFilterUuid(const std::string &uuid);
+	virtual void Attach(EntityIterator &iterator) override;
+private:
+	std::string m_uuid;
 };
 
 struct LuaEntityIteratorFilterClass
@@ -125,6 +143,7 @@ private:
 struct LuaEntityIteratorFilterComponent
 	: public LuaEntityIteratorFilterBase
 {
+	LuaEntityIteratorFilterComponent(luabind::object);
 	LuaEntityIteratorFilterComponent(pragma::ComponentId componentId);
 	LuaEntityIteratorFilterComponent(lua_State *l,const std::string &componentName);
 	virtual void Attach(EntityIterator &iterator) override;

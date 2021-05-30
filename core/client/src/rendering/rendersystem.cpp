@@ -2,22 +2,24 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/rendersystem.h"
+#include "pragma/rendering/render_queue.hpp"
 #include "cmaterialmanager.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/entities/c_baseentity.h"
+#include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/shaders/world/c_shader_wireframe.hpp"
 #include "pragma/rendering/sortedrendermeshcontainer.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
-#include "pragma/rendering/renderers/rasterization/culled_mesh_data.hpp"
+#include "pragma/entities/components/renderers/rasterization/culled_mesh_data.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/rendering/render_stats.hpp"
 #include "pragma/debug/renderdebuginfo.hpp"
@@ -32,13 +34,13 @@
 #include <prosper_util.hpp>
 #include <image/prosper_render_target.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
 // Disables rendering of meshes and shadows; For debug purposes only!
 #define DEBUG_RENDER_DISABLED 0
-#pragma optimize("",off)
+
 RenderSystem::TranslucentMesh::TranslucentMesh(CBaseEntity *_ent,CModelSubMesh *_mesh,Material *_mat,::util::WeakHandle<prosper::Shader> shader,float _distance)
 	: ent(_ent),mesh(_mesh),distance(_distance),material(_mat),shader(shader)
 {}
@@ -168,6 +170,9 @@ void RenderSystem::Render(
 	RenderFlags flags,std::vector<std::unique_ptr<RenderSystem::TranslucentMesh>> &translucentMeshes,const Vector4 &drawOrigin
 )
 {
+	if(true)
+		return; // TODO
+#if 0
 	if(translucentMeshes.empty())
 		return;
 	auto &scene = drawSceneInfo.scene;
@@ -177,9 +182,9 @@ void RenderSystem::Render(
 	auto bReflection = umath::is_flag_set(flags,RenderFlags::Reflection);
 	auto renderAs3dSky = umath::is_flag_set(flags,RenderFlags::RenderAs3DSky);
 	//auto &lights = scene->GetCulledLights();
-	auto &rasterizer = *static_cast<const pragma::rendering::RasterizationRenderer*>(renderer);
-	auto pipelineType = pragma::ShaderTextured3DBase::GetPipelineIndex(rasterizer.GetSampleCount(),bReflection);
-	pragma::ShaderTextured3DBase *shaderPrev = nullptr;
+	auto &rasterizer = *static_cast<const pragma::CRasterizationRendererComponent*>(renderer);
+	auto pipelineType = pragma::ShaderGameWorldLightingPass::GetPipelineIndex(rasterizer.GetSampleCount(),bReflection);
+	pragma::ShaderGameWorldLightingPass *shaderPrev = nullptr;
 	CBaseEntity *entPrev = nullptr;
 	pragma::CRenderComponent *renderC = nullptr;
 	std::optional<Vector4> clipPlane {};
@@ -192,7 +197,7 @@ void RenderSystem::Render(
 		auto &whShader = meshInfo->shader;
 		if(whShader.expired())
 			continue;
-		auto *shader = static_cast<pragma::ShaderTextured3DBase*>(whShader.get());
+		auto *shader = static_cast<pragma::ShaderGameWorldLightingPass*>(whShader.get());
 		if(shader != shaderPrev)
 		{
 			if(shaderPrev != nullptr)
@@ -206,11 +211,11 @@ void RenderSystem::Render(
 				pipelineType
 			) == false)
 				continue;
-			if(debugMode != pragma::CSceneComponent::DebugMode::None)
+			if(debugMode != pragma::SceneDebugMode::None)
 				shader->SetDebugMode(debugMode);
 			shader->Set3DSky(renderAs3dSky);
 			shaderPrev = shader;
-			if(shader->BindScene(*scene.get(),const_cast<pragma::rendering::RasterizationRenderer&>(rasterizer),renderMode == RenderMode::View) == false)
+			if(shader->BindScene(*scene.get(),const_cast<pragma::CRasterizationRendererComponent&>(rasterizer),renderMode == RenderMode::View) == false)
 			{
 				shaderPrev = nullptr;
 				continue;
@@ -228,7 +233,7 @@ void RenderSystem::Render(
 			{
 			// TODO: Enable/disable shadows
 				entPrev = ent;
-				renderC = entPrev->GetRenderComponent().get();
+				renderC = entPrev->GetRenderComponent();
 				if(shader->BindEntity(*meshInfo->ent) == false || renderC == nullptr || (drawSceneInfo.renderFilter && drawSceneInfo.renderFilter(*ent) == false))
 				{
 					renderC = nullptr;
@@ -255,7 +260,7 @@ void RenderSystem::Render(
 				continue;
 			auto *mesh = meshInfo->mesh;
 			auto pRenderComponent = ent->GetRenderComponent();
-			if(pRenderComponent.valid() && pRenderComponent->Render(shader,&mat,mesh) == false)
+			if(pRenderComponent)
 			{
 				auto pVertAnimComponent = ent->GetComponent<pragma::CVertexAnimatedComponent>();
 				auto &mdlComponent = pRenderComponent->GetModelComponent();
@@ -288,63 +293,15 @@ void RenderSystem::Render(
 	}
 	if(shaderPrev != nullptr)
 		shaderPrev->EndDraw();
+#endif
 }
 
-RenderStats g_renderStats;
-bool g_collectRenderStats = false;
-static void print_pass_stats(const RenderPassStats &stats)
+#include "pragma/rendering/render_processor.hpp"
+
+
+uint32_t pragma::rendering::LightingStageRenderProcessor::Render(const pragma::rendering::RenderQueue &renderQueue,RenderPassStats *optStats,std::optional<uint32_t> worldRenderQueueIndex)
 {
-	Con::cout<<"\nEntities:"<<Con::endl;
-	for(auto &hEnt : stats.entities)
-	{
-		if(hEnt.IsValid() == false)
-			continue;
-		hEnt.get()->print(Con::cout);
-		Con::cout<<Con::endl;
-	}
-
-	Con::cout<<"\nMaterials:"<<Con::endl;
-	for(auto &hMat : stats.materials)
-	{
-		if(hMat.IsValid() == false)
-			continue;
-		auto *albedoMap = hMat.get()->GetAlbedoMap();
-		Con::cout<<hMat.get()->GetName();
-		if(albedoMap)
-			Con::cout<<" ["<<albedoMap->name<<"]";
-		Con::cout<<Con::endl;
-	}
-
-	Con::cout<<"\nShaders:"<<Con::endl;
-	for(auto &hShader : stats.shaders)
-	{
-		if(hShader.expired())
-			continue;
-		Con::cout<<hShader->GetIdentifier()<<Con::endl;
-	}
-	
-	Con::cout<<"\nMeshes:"<<Con::endl;
-	for(auto &mesh : stats.meshes)
-	{
-		Con::cout<<"Mesh["<<mesh->GetVertexCount()<<"]["<<mesh->GetTriangleCount()<<"]"<<Con::endl;
-	}
-}
-DLLCLIENT void debug_render_stats()
-{
-	g_renderStats = {};
-	g_collectRenderStats = true;
-}
-DLLCLIENT void print_debug_render_stats()
-{
-	g_collectRenderStats = false;
-	Con::cout<<"Lighting pass:"<<Con::endl;
-	print_pass_stats(g_renderStats.lightingPass);
-
-	Con::cout<<"Depth prepass:"<<Con::endl;
-	print_pass_stats(g_renderStats.prepass);
-
-	Con::cout<<"Transparency pass:"<<Con::endl;
-	print_pass_stats(g_renderStats.transparencyPass);
+	return BaseRenderProcessor::Render(renderQueue,false,optStats,worldRenderQueueIndex);
 }
 
 static CVar cvDebugNormals = GetClientConVar("debug_render_normals");
@@ -353,162 +310,31 @@ uint32_t RenderSystem::Render(
 	RenderMode renderMode,RenderFlags flags,const Vector4 &drawOrigin
 )
 {
-	auto &debugInfo = get_render_debug_info();
-	auto &scene = drawSceneInfo.scene;
-	auto *renderer = scene->GetRenderer();
-	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
-		return 0;
-	auto bReflection = umath::is_flag_set(flags,RenderFlags::Reflection);
-	auto renderAs3dSky = umath::is_flag_set(flags,RenderFlags::RenderAs3DSky);
-	auto &rasterizer = *static_cast<const pragma::rendering::RasterizationRenderer*>(renderer);
-	auto numShaderInvocations = 0u;
-
-	auto &containers = renderMeshes.containers;
-	auto &processed = renderMeshes.processed;
-
-	auto pipelineType = pragma::ShaderTextured3DBase::GetPipelineIndex(rasterizer.GetSampleCount(),bReflection);
-	//auto frameId = c_engine->GetRenderContext().GetLastFrameId();
-	CBaseEntity *entLast = nullptr;
-	std::optional<Vector4> clipPlane {};
-	pragma::CRenderComponent *renderC = nullptr;
-	pragma::ShaderTextured3DBase *shaderLast = nullptr;
-	auto depthBiasActive = false;
-	auto debugMode = scene->GetDebugMode();
-	auto &drawCmd = drawSceneInfo.commandBuffer;
-	auto *stats = g_collectRenderStats ? &g_renderStats.lightingPass : nullptr;
-	for(auto itShader=containers.begin();itShader!=containers.end();itShader++)
+#if 0
+	pragma::rendering::LightingStageRenderProcessor rsys {drawSceneInfo,flags,drawOrigin};
+	if(renderMode == RenderMode::World)
 	{
-		auto &shaderContainer = *itShader;
-		auto &whShader = shaderContainer->shader;
-		auto *shader = static_cast<pragma::ShaderTextured3DBase*>(whShader.get());
-		auto bView = (renderMode == RenderMode::View) ? true : false;
-		if(shader->BeginDraw(
-			drawCmd,c_game->GetRenderClipPlane(),drawOrigin,
-			pipelineType
-		) == true
-			)
-		{
-			if(stats)
-				stats->shaders.push_back(shader->GetHandle());
-			if(shader->BindScene(*scene.get(),const_cast<pragma::rendering::RasterizationRenderer&>(rasterizer),bView) == true)
-			{
-				if(debugMode != ::pragma::CSceneComponent::DebugMode::None)
-					shader->SetDebugMode(debugMode);
-				shader->Set3DSky(renderAs3dSky);
-
-				++debugInfo.shaderCount;
-				for(auto itMat=shaderContainer->containers.begin();itMat!=shaderContainer->containers.end();itMat++)
-				{
-					auto &matContainer = *itMat;
-					auto &mat = static_cast<CMaterial&>(*matContainer->material);
-					if(mat.IsInitialized() && shader->BindMaterial(mat) == true)
-					{
-						if(stats)
-							stats->materials.push_back(mat.GetHandle());
-						++debugInfo.materialCount;
-						for(auto &pair : matContainer->containers)
-						{
-							auto *ent = pair.first;
-							if(ent != entLast || shader != shaderLast)
-							{
-								if(shader->BindEntity(*ent) == false)
-									continue;
-								if(stats)
-									stats->entities.push_back(ent->GetHandle());
-								entLast = ent;
-								shaderLast = shader;
-								renderC = entLast->GetRenderComponent().get();
-								if(drawSceneInfo.renderFilter && drawSceneInfo.renderFilter(*ent) == false)
-								{
-									renderC = nullptr;
-									continue;
-								}
-
-								auto *entClipPlane = renderC->GetRenderClipPlane();
-								clipPlane = entClipPlane ? *entClipPlane : std::optional<Vector4>{};
-							}
-							if(renderC == nullptr)
-								continue;
-								if(umath::is_flag_set(renderC->GetStateFlags(),pragma::CRenderComponent::StateFlags::HasDepthBias))
-								{
-									float constantFactor,biasClamp,slopeFactor;
-									renderC->GetDepthBias(constantFactor,biasClamp,slopeFactor);
-									drawCmd->RecordSetDepthBias(constantFactor,biasClamp,slopeFactor);
-
-									depthBiasActive = true;
-								}
-								else if(depthBiasActive)
-								{
-									// Clear depth bias
-									depthBiasActive = false;
-									drawCmd->RecordSetDepthBias();
-								}
-							for(auto *mesh : pair.second.meshes)
-							{
-#if DEBUG_RENDER_DISABLED == 0
-								if(renderC && renderC->Render(shader,&mat,mesh) == false)
-								{
-									++numShaderInvocations;
-
-									auto &mdlComponent = renderC->GetModelComponent();
-									auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
-									auto &vertAnimBuffer = static_cast<CModel&>(*mdl).GetVertexAnimationBuffer();
-									auto bUseVertexAnim = false;
-									if(vertAnimBuffer != nullptr)
-									{
-										auto pVertexAnimatedComponent = ent->GetComponent<pragma::CVertexAnimatedComponent>();
-										if(pVertexAnimatedComponent.valid())
-										{
-											auto offset = 0u;
-											auto animCount = 0u;
-											if(pVertexAnimatedComponent->GetVertexAnimationBufferMeshOffset(*mesh,offset,animCount) == true)
-											{
-												auto vaData = ((offset<<16)>>16) | animCount<<16;
-												shader->BindVertexAnimationOffset(vaData);
-												bUseVertexAnim = true;
-											}
-										}
-									}
-									if(bUseVertexAnim == false)
-										shader->BindVertexAnimationOffset(0u);
-									
-									if(clipPlane.has_value())
-										shader->BindClipPlane(*clipPlane);
-
-									if(stats)
-										stats->meshes.push_back(std::static_pointer_cast<CModelSubMesh>(mesh->shared_from_this()));
-									shader->Draw(*mesh);
-
-									auto numTriangles = mesh->GetTriangleCount();
-									++debugInfo.meshCount;
-									if(ent->IsStatic() == true)
-										++debugInfo.staticMeshCount;
-									debugInfo.triangleCount += numTriangles;
-									debugInfo.vertexCount += mesh->GetVertexCount();
-									
-									if(clipPlane.has_value())
-										shader->BindClipPlane(c_game->GetRenderClipPlane());
-								}
-#endif
-							}
-						}
-					}
-				}
-				shader->EndDraw();
-				//shader->Unbind(); // Vulkan TODO
-			}
-		}
+		// For optimization purposes, world geometry is stored in separate render queues.
+		// This could be less efficient if many models in the scene use the same materials as
+		// the world, but this generally doesn't happen.
+		// By rendering world geometry first, we can also avoid overdraw.
+		// This does *not* include translucent geometry, which is instead copied over to the
+		// general translucency world render queue.
+		auto &worldRenderQueues = drawSceneInfo.scene->GetSceneRenderDesc().GetWorldRenderQueues();
+		for(auto i=decltype(worldRenderQueues.size()){0u};i<worldRenderQueues.size();++i)
+			rsys.Render(*worldRenderQueues.at(i),i);
 	}
-
-	for(auto it : processed)
-		static_cast<CBaseEntity*>(it.first)->GetRenderComponent()->PostRender(renderMode);
-
-	return numShaderInvocations;
+	auto *renderQueue = drawSceneInfo.scene->GetSceneRenderDesc().GetRenderQueue(renderMode,false /* translucent */);
+	if(renderQueue)
+		rsys.Render(*renderQueue);
+#endif
+	return 0;
 }
 uint32_t RenderSystem::Render(const util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode,RenderFlags flags,const Vector4 &drawOrigin)
 {
-	auto &scene = drawSceneInfo.scene;
+	return Render(drawSceneInfo,*static_cast<pragma::rendering::CulledMeshData*>(nullptr),renderMode,flags,drawOrigin);
+	// TODO: Remove this function
+	/*auto &scene = drawSceneInfo.scene;
 	auto *renderInfo = scene->GetSceneRenderDesc().GetRenderInfo(renderMode);
-	return renderInfo ? Render(drawSceneInfo,*renderInfo,renderMode,flags,drawOrigin) : 0;
+	return renderInfo ? Render(drawSceneInfo,*renderInfo,renderMode,flags,drawOrigin) : 0;*/
 }
-#pragma optimize("",on)

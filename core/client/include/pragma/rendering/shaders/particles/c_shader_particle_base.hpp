@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_SHADER_PARTICLE_BASE_HPP__
@@ -28,7 +28,7 @@ namespace pragma
 			AdditiveBlendByColor = TextureScrolling<<1,
 			DepthPass = AdditiveBlendByColor<<1
 		};
-		static uint32_t PIPELINE_COUNT;
+		//static uint32_t PIPELINE_COUNT;
 
 		ShaderParticleBase()=default;
 		RenderFlags GetRenderFlags(const CParticleSystemComponent &particle,ParticleRenderFlags ptRenderFlags) const;

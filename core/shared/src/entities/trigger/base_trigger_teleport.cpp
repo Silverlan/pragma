@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -55,7 +55,7 @@ util::EventReply BaseTriggerTeleportComponent::HandleEvent(ComponentEventId even
 		auto *entTarget = targetCandidates[umath::random(0,targetCandidates.size() -1)];
 		auto ptrTrComponent = ent.GetTransformComponent();
 		auto ptrTrComponentTgt = entTarget->GetTransformComponent();
-		if(ptrTrComponent.valid() && ptrTrComponentTgt.valid())
+		if(ptrTrComponent && ptrTrComponentTgt)
 		{
 			ptrTrComponent->SetPosition(ptrTrComponentTgt->GetPosition());
 			if(ent.GetSpawnFlags() &umath::to_integral(SpawnFlags::FaceTargetDirectionOnTeleport))

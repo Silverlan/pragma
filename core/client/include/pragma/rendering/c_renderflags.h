@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_RENDERFLAGS_H__
@@ -23,8 +23,10 @@ enum class FRender : uint32_t
 	Water = Debug<<1,
 	Static = Water<<1,
 	Dynamic = Static<<1,
-	All = (Dynamic <<1) -1,
-	Reflection = Dynamic<<1,
+	Translucent = Dynamic<<1,
+
+	All = (Translucent <<1) -1,
+	Reflection = Translucent<<1,
 	HDR = Reflection<<1,
 	ParticleDepth = HDR<<1
 };

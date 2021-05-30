@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -33,6 +33,8 @@
 #include "pragma/entities/components/c_health_component.hpp"
 #include "pragma/entities/components/c_attachable_component.hpp"
 #include "pragma/gui/wiluabase.h"
+#include <pragma/math/intersection.h>
+#include <pragma/entities/baseentity_trace.hpp>
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/audio/alsound_type.h>
 #include <pragma/debug/debugbehaviortree.h>
@@ -43,11 +45,12 @@
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/entities/entity_iterator.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/util/giblet_create_info.hpp>
 
 enum class CLIENT_DROPPED;
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
@@ -223,13 +226,13 @@ DLLCLIENT void NET_cl_fire_bullet(NetPacket packet)
 				if(pt != nullptr)
 				{
 					auto pTrComponent = pt->GetEntity().GetTransformComponent();
-					if(pTrComponent.valid())
+					if(pTrComponent != nullptr)
 					{
 						pTrComponent->SetPosition(p);
 
 						auto ang = uvec::to_angle(n);
 						auto rot = uquat::create(ang);
-						pTrComponent->SetOrientation(rot);
+						pTrComponent->SetRotation(rot);
 					}
 					pt->SetRemoveOnComplete(true);
 					pt->Start();
@@ -277,7 +280,7 @@ DLLCLIENT void NET_cl_ent_setunlit(NetPacket packet)
 	if(ent == NULL)
 		return;
 	auto pRenderComponent = ent->GetRenderComponent();
-	if(pRenderComponent.expired())
+	if(!pRenderComponent)
 		return;
 	bool b = packet->Read<bool>();
 	pRenderComponent->SetUnlit(b);
@@ -291,7 +294,7 @@ DLLCLIENT void NET_cl_ent_setcastshadows(NetPacket packet)
 	if(ent == NULL)
 		return;
 	auto pRenderComponent = ent->GetRenderComponent();
-	if(pRenderComponent.expired())
+	if(!pRenderComponent)
 		return;
 	bool b = packet->Read<bool>();
 	pRenderComponent->SetCastShadows(b);
@@ -335,7 +338,7 @@ DLLCLIENT void NET_cl_ent_model(NetPacket packet)
 	std::string mdl = packet->ReadString();
 	CBaseEntity *cent = static_cast<CBaseEntity*>(ent);
 	auto mdlComponent = cent->GetModelComponent();
-	if(mdlComponent.valid())
+	if(mdlComponent)
 		mdlComponent->SetModel(mdl.c_str());
 }
 
@@ -348,7 +351,7 @@ DLLCLIENT void NET_cl_ent_skin(NetPacket packet)
 		return;
 	unsigned int skin = packet->Read<unsigned int>();
 	auto mdlComponent = ent->GetModelComponent();
-	if(mdlComponent.valid())
+	if(mdlComponent)
 		mdlComponent->SetSkin(skin);
 }
 
@@ -437,7 +440,7 @@ DLLCLIENT void NET_cl_ent_phys_init(NetPacket packet)
 	if(ent == NULL)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	unsigned int type = packet->Read<unsigned int>();
 	pPhysComponent->InitializePhysics(PHYSICSTYPE(type));
@@ -451,7 +454,7 @@ DLLCLIENT void NET_cl_ent_phys_destroy(NetPacket packet)
 	if(ent == NULL)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	pPhysComponent->DestroyPhysicsObject();
 }
@@ -465,8 +468,14 @@ void NET_cl_ent_event(NetPacket packet)
 	if(ent == nullptr)
 		return;
 	auto eventId = packet->Read<UInt32>();
+	auto localId = c_game->SharedNetEventIdToLocal(eventId);
+	if(localId == std::numeric_limits<pragma::NetEventId>::max())
+	{
+		Con::cwar<<"WARNING: Unknown net event with shared id "<<eventId<<"!"<<Con::endl;
+		return;
+	}
 	packet->SetOffset(0);
-	ent->ReceiveNetEvent(eventId,packet);
+	ent->ReceiveNetEvent(localId,packet);
 }
 
 DLLCLIENT void NET_cl_ent_movetype(NetPacket packet)
@@ -477,7 +486,7 @@ DLLCLIENT void NET_cl_ent_movetype(NetPacket packet)
 	if(ent == NULL)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	MOVETYPE movetype = MOVETYPE(packet->Read<unsigned char>());
 	pPhysComponent->SetMoveType(movetype);
@@ -492,7 +501,7 @@ DLLCLIENT void NET_cl_pl_toggle_noclip(NetPacket packet)
 		return;
 	auto bNoclip = packet->Read<bool>();
 	auto pPhysComponent = ent->GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	if(bNoclip == false)
 	{
@@ -515,7 +524,7 @@ DLLCLIENT void NET_cl_ent_collisiontype(NetPacket packet)
 	if(ent == NULL)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	COLLISIONTYPE collisiontype = COLLISIONTYPE(packet->Read<unsigned char>());
 	pPhysComponent->SetCollisionType(collisiontype);
@@ -529,7 +538,7 @@ DLLCLIENT void NET_cl_ent_eyeoffset(NetPacket packet)
 	if(ent == NULL)
 		return;
 	auto pTrComponent = ent->GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return;
 	Vector3 offset = nwm::read_vector(packet);
 	pTrComponent->SetEyeOffset(offset);
@@ -958,7 +967,7 @@ DLLCLIENT void NET_cl_ent_setcollisionfilter(NetPacket packet)
 	if(ent == NULL)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	CollisionMask filterGroup = static_cast<CollisionMask>(packet->Read<unsigned int>());
 	CollisionMask filterMask = static_cast<CollisionMask>(packet->Read<unsigned int>());
@@ -971,7 +980,7 @@ DLLCLIENT void NET_cl_ent_setkinematic(NetPacket packet)
 	if(ent == NULL)
 		return;
 	auto pPhysComponent = ent->GetPhysicsComponent();
-	if(pPhysComponent.expired())
+	if(pPhysComponent == nullptr)
 		return;
 	bool bKinematic = packet->Read<bool>();
 	pPhysComponent->SetKinematic(bKinematic);
@@ -1056,7 +1065,7 @@ void NET_cl_create_explosion(NetPacket packet)
 	if(pt != nullptr)
 	{
 		auto pTrComponent = pt->GetEntity().GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent != nullptr)
 			pTrComponent->SetPosition(origin);
 		pt->SetRemoveOnComplete(true);
 		pt->Start();
@@ -1075,7 +1084,7 @@ void NET_cl_create_explosion(NetPacket packet)
 	{
 		auto *pQuakeComponent = static_cast<pragma::BaseEnvQuakeComponent*>(entQuake->FindComponent("quake").get());
 		auto pTrComponent = entQuake->GetTransformComponent();
-		if(pTrComponent.valid())
+		if(pTrComponent != nullptr)
 			pTrComponent->SetPosition(origin);
 		if(pQuakeComponent != nullptr)
 		{
@@ -1208,12 +1217,68 @@ void CMD_debug_aim_info(NetworkState *state,pragma::BasePlayerComponent *pl,std:
 {
 	if(pl == nullptr)
 		return;
-	auto &ent = pl->GetEntity();
-	if(ent.IsCharacter() == false)
+	auto &entPl = pl->GetEntity();
+	if(entPl.IsCharacter() == false)
 		return;
-	auto *game = state->GetGameState();
-	auto aimData = ent.GetCharacterComponent()->GetAimTraceData();
-	auto res = game->RayCast(aimData);
+	auto charComponent = entPl.GetCharacterComponent();
+	auto ents = command::find_target_entity(state,*charComponent,argv);
+	pragma::CCameraComponent *cam = nullptr;
+	if(ents.empty() == false)
+	{
+		for(auto *ent : ents)
+		{
+			auto sceneC = ent->GetComponent<pragma::CSceneComponent>();
+			if(sceneC.expired() || sceneC->GetActiveCamera().expired())
+				continue;
+			cam = sceneC->GetActiveCamera().get();
+			break;
+		}
+	}
+	cam = cam ? cam : c_game->GetPrimaryCamera();
+	if(cam == nullptr)
+		return;
+	auto trC = cam->GetEntity().GetComponent<pragma::CTransformComponent>();
+	if(trC.expired())
+		return;
+	auto trData = util::get_entity_trace_data(*trC);
+	trData.SetFlags(RayCastFlags::InvertFilter);
+	trData.SetFilter(entPl);
+	auto res = c_game->RayCast(trData);
+	if(res.hitType == RayCastHitType::None)
+	{
+		EntityIterator entIt {*c_game};
+		entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
+		std::optional<Intersection::LineMeshResult> closestMesh {};
+		BaseEntity *entClosest = nullptr;
+		for(auto *ent : entIt)
+		{
+			if(ent == &entPl)
+				continue;
+			auto renderC = ent->GetComponent<pragma::CRenderComponent>();
+			auto lineMeshResult = renderC->CalcRayIntersection(trData.GetSourceOrigin(),trData.GetTargetOrigin(),true);
+			if(lineMeshResult.has_value() == false || lineMeshResult->result != umath::intersection::Result::Intersect)
+				continue;
+			if(closestMesh.has_value() && lineMeshResult->hitValue > closestMesh->hitValue)
+				continue;
+			closestMesh = lineMeshResult;
+			entClosest = ent;
+		}
+		if(closestMesh.has_value())
+		{
+			res.hitType = RayCastHitType::Block;
+			res.entity = entClosest->GetHandle();
+			res.position = closestMesh->hitPos;
+			res.normal = {};
+			res.distance = uvec::distance(closestMesh->hitPos,trData.GetSourceOrigin());
+			if(closestMesh->precise)
+			{
+				res.meshInfo = std::make_shared<TraceResult::MeshInfo>();
+				res.meshInfo->mesh = closestMesh->precise->mesh.get();
+				res.meshInfo->subMesh = closestMesh->precise->subMesh.get();
+			}
+		}
+	}
+
 	if(res.hitType == RayCastHitType::None)
 	{
 		Con::cout<<"Nothing found in player aim direction!"<<Con::endl;

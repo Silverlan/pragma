@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __BASE_ENTITY_COMPONENT_HPP__
 #define __BASE_ENTITY_COMPONENT_HPP__
@@ -38,12 +38,27 @@ namespace pragma
 	};
 };
 DEFINE_STD_HASH_SPECIALIZATION(pragma::EEntityComponentCallbackEvent);
+namespace udm {struct LinkedPropertyWrapper;};
 class DataStream;
 namespace pragma
 {
 	struct ComponentEvent;
 	class BaseEntityComponentSystem;
 	class EntityComponentManager;
+
+	enum class TickPolicy : uint8_t
+	{
+		Never = 0u,
+		WhenVisible, // Not yet implemented!
+		Always
+	};
+	struct DLLNETWORK TickData
+	{
+		TickPolicy tickPolicy = TickPolicy::Never;
+		double lastTick = 0.0;
+		double nextTick = 0.0;
+	};
+
 	class DLLNETWORK BaseEntityComponent
 		: public std::enable_shared_from_this<BaseEntityComponent>
 	{
@@ -53,6 +68,13 @@ namespace pragma
 		static ComponentEventId EVENT_ON_ENTITY_COMPONENT_ADDED;
 		static ComponentEventId EVENT_ON_ENTITY_COMPONENT_REMOVED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		enum class StateFlags : uint32_t
+		{
+			None = 0u,
+			IsThinking = 1u,
+			IsLogicEnabled = IsThinking<<1u,
+			Removed = IsLogicEnabled<<1u
+		};
 
 		BaseEntityComponent(const BaseEntityComponent&)=delete;
 		BaseEntityComponent &operator=(const BaseEntityComponent&)=delete;
@@ -104,8 +126,8 @@ namespace pragma
 		virtual void OnAttached(BaseEntity &ent);
 		virtual void OnDetached(BaseEntity &ent);
 
-		virtual void Save(DataStream &ds);
-		void Load(DataStream &ds);
+		virtual void Save(udm::LinkedPropertyWrapper &udm);
+		void Load(udm::LinkedPropertyWrapper &udm);
 
 		virtual void OnEntitySpawn();
 		virtual void OnEntityPostSpawn();
@@ -138,12 +160,27 @@ namespace pragma
 		// Do not overwrite these unless the component is a descendant of SBaseNetComponent/SBaseSnapshotComponent respectively!
 		virtual bool ShouldTransmitNetData() const;
 		virtual bool ShouldTransmitSnapshotData() const;
+
+		// Tick updates
+		void SetTickPolicy(TickPolicy policy);
+		TickPolicy GetTickPolicy() const;
+		bool ShouldThink() const;
+		double LastTick() const;
+		double GetNextTick() const;
+		void SetNextTick(double t);
+		double DeltaTime() const;
+		bool Tick(double tDelta);
+		virtual void OnTick(double tDelta) {}
+		
+		// For internal use only!
+		StateFlags GetStateFlags() const {return m_stateFlags;}
+		void SetStateFlags(StateFlags stateFlags) {m_stateFlags = stateFlags;}
 	protected:
 		friend EntityComponentManager;
 		friend BaseEntityComponentSystem;
 		BaseEntityComponent(BaseEntity &ent);
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData);
-		virtual void Load(DataStream &ds,uint32_t version);
+		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version);
 
 		// Used for typed callback lookups. If this function doesn't change outTypeIndex, the actual component's type is used
 		// as reference. Overwrite this on the serverside or clientside version of the component,
@@ -176,10 +213,14 @@ namespace pragma
 		void OnEntityComponentAdded(BaseEntityComponent &component,bool bSkipEventBinding);
 		luabind::object m_luaObj = {};
 		BaseEntity &m_entity;
+
+		StateFlags m_stateFlags = StateFlags::None;
+		TickData m_tickData {};
 	private:
 		friend BaseEntityComponentSystem;
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseEntityComponent::StateFlags)
 
 template<class THandleWrapper>
 	luabind::object pragma::BaseEntityComponent::InitializeLuaObject(lua_State *l)

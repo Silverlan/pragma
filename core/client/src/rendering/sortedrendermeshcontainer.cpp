@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -165,7 +165,7 @@ SortedRenderMeshContainer::SortedRenderMeshContainer(CBaseEntity *ent,std::vecto
 	if(true)
 		return;
 	auto mdlComponent = ent->GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 	assert(mdl != nullptr);
 	auto &materials = mdl->GetMaterials();
 	if(materials.empty())

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __OCCLUSION_CULLING_HANDLER_BSP_HPP__
@@ -29,15 +29,15 @@ namespace pragma
 		const util::BSPTree::Node *GetCurrentNode() const;
 		virtual void Update(const Vector3 &camPos) override;
 		virtual void PerformCulling(
-			CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+			CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const Vector3 &camPos,
 			std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut,bool cullByViewFrustum=true
 		) override;
 
 		void SetCurrentNodeLocked(bool bLocked);
 		bool IsCurrentNodeLocked() const;
 	protected:
-		virtual bool ShouldExamine(CModelMesh &mesh,const Vector3 &pos,bool bViewModel,std::size_t numMeshes,const std::vector<Plane> *optPlanes=nullptr) const override;
-		virtual bool ShouldExamine(CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,CBaseEntity &cent,bool &outViewModel,std::vector<Plane> **outPlanes) const override;
+		virtual bool ShouldExamine(CModelMesh &mesh,const Vector3 &pos,bool bViewModel,std::size_t numMeshes,const std::vector<umath::Plane> *optPlanes=nullptr) const override;
+		virtual bool ShouldExamine(CSceneComponent &scene,const CRasterizationRendererComponent &renderer,CBaseEntity &cent,bool &outViewModel,std::vector<umath::Plane> **outPlanes) const override;
 		std::shared_ptr<util::BSPTree> m_bspTree = nullptr;
 		bool m_bLockCurrentNode = false;
 

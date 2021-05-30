@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -20,7 +20,7 @@
 
 DEFINE_BASE_HANDLE(DLLCLIENT,CHCNode,CHCNode);
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 static const uint32_t maxPrevInvisNodeBatchSize = 50;
 
@@ -517,7 +517,7 @@ bool CHC::InsideViewFrustum(CHCNode *cNode)
 {
 	if(cvCulling->GetInt() == 0)
 		return true;
-	return Intersection::AABBInPlaneMesh(cNode->GetMin(),cNode->GetMax(),m_frustumPlanes) != INTERSECT_OUTSIDE;
+	return umath::intersection::aabb_in_plane_mesh(cNode->GetMin(),cNode->GetMax(),m_frustumPlanes) != umath::intersection::Intersect::Outside;
 }
 
 bool CHC::WasVisible(CHCNode *cNode)

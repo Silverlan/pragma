@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -74,9 +74,9 @@ Bool CFlammableComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &
 		return CBaseNetComponent::ReceiveNetEvent(eventId,packet);
 	return true;
 }
-void CFlammableComponent::OnThink(double dt)
+void CFlammableComponent::OnTick(double dt)
 {
-	BaseFlammableComponent::OnThink(dt);
+	BaseFlammableComponent::OnTick(dt);
 	UpdateFlameParticlePositions();
 }
 void CFlammableComponent::ReceiveData(NetPacket &packet)
@@ -95,15 +95,15 @@ void CFlammableComponent::UpdateFlameParticlePositions()
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(!IsOnFire() || pTrComponent.expired())
+	if(!IsOnFire() || pTrComponent == nullptr)
 		return;
-	auto &rot = pTrComponent->GetOrientation();
+	auto &rot = pTrComponent->GetRotation();
 	for(auto &info : m_igniteInfo.flameParticles)
 	{
 		if(info.hParticle.expired())
 			continue;
 		auto pTrComponent = info.hParticle->GetEntity().GetTransformComponent();
-		if(pTrComponent.expired())
+		if(pTrComponent == nullptr)
 			continue;
 		Vector3 pos {};
 		if(info.boneId == 0)
@@ -128,7 +128,7 @@ util::EventReply CFlammableComponent::Ignite(float duration,BaseEntity *attacker
 		return util::EventReply::Handled;
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(bOnFire == true || pTrComponent.expired())
+	if(bOnFire == true || pTrComponent == nullptr)
 		return util::EventReply::Handled;
 	auto pSndComponent = ent.GetComponent<pragma::CSoundEmitterComponent>();
 	if(pSndComponent.valid())
@@ -167,7 +167,7 @@ util::EventReply CFlammableComponent::Ignite(float duration,BaseEntity *attacker
 		{"fade_end","0.3"}
 	};
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	auto extents = pPhysComponent.valid() ? pPhysComponent->GetCollisionExtents() : Vector3{};
+	auto extents = pPhysComponent != nullptr ? pPhysComponent->GetCollisionExtents() : Vector3{};
 	auto radius = uvec::length(extents);
 	auto particleDistance = radius *0.06f;
 	auto distSqr = particleDistance *particleDistance;
@@ -191,8 +191,7 @@ util::EventReply CFlammableComponent::Ignite(float duration,BaseEntity *attacker
 	std::vector<ParticleInfo> particlePositions;
 	particlePositions.reserve(particleCount);
 	decltype(particleCount) particleId = 0;
-	auto mdlComponent = ent.GetModelComponent();
-	auto mdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &mdl = ent.GetModel();
 	if(mdl != nullptr)
 	{
 		auto &skeleton = mdl->GetSkeleton();
@@ -217,7 +216,7 @@ util::EventReply CFlammableComponent::Ignite(float duration,BaseEntity *attacker
 	// Create remaining particles
 	Vector3 min {};
 	Vector3 max {};
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->GetCollisionBounds(&min,&max);
 	for(auto i=particleId;i<particleCount;++i)
 	{
@@ -232,7 +231,7 @@ util::EventReply CFlammableComponent::Ignite(float duration,BaseEntity *attacker
 	//
 
 	auto &origin = pTrComponent->GetPosition();
-	auto &rot = pTrComponent->GetOrientation();
+	auto &rot = pTrComponent->GetRotation();
 	for(auto &info : particlePositions)
 	{
 		auto pos = info.position;
@@ -248,10 +247,10 @@ util::EventReply CFlammableComponent::Ignite(float duration,BaseEntity *attacker
 			pt->AddInitializer("rotation_random",rotationRandom);
 			pt->AddInitializer("color_fade",colorFade);
 			auto pTrComponent = pt->GetEntity().GetTransformComponent();
-			if(pTrComponent.valid())
+			if(pTrComponent != nullptr)
 			{
 				pTrComponent->SetPosition(pos);
-				pTrComponent->SetOrientation(rot);
+				pTrComponent->SetRotation(rot);
 			}
 			pt->SetRemoveOnComplete(true);
 			pt->SetContinuous(true);
@@ -265,7 +264,7 @@ util::EventReply CFlammableComponent::Ignite(float duration,BaseEntity *attacker
 		if(pt != nullptr)
 		{
 			auto pTrComponent = pt->GetEntity().GetTransformComponent();
-			if(pTrComponent.valid())
+			if(pTrComponent != nullptr)
 				pTrComponent->SetPosition(pos);
 			pt->SetRemoveOnComplete(true);
 			pt->Start();

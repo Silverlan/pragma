@@ -1,8 +1,0 @@
-"pbr"
-{
-	$texture albedo_map "models/player/soldier/soldier_d"
-	$texture roughness_map "pbr/rough"
-	$float metalness_factor "0.000000"
-	$texture metalness_map "pbr/nonmetal"
-	$texture ao_map "models/player/soldier/soldier_d_ao"
-}

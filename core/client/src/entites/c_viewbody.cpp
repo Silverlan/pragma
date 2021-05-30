@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -30,7 +30,7 @@ void CViewBodyComponent::Initialize()
 		auto *pl = c_game->GetLocalPlayer();
 		if(pl == nullptr || pl->GetObserverMode() != OBSERVERMODE::FIRSTPERSON)
 		{
-			shouldDrawData.shouldDraw = CEShouldDraw::ShouldDraw::No;
+			shouldDrawData.shouldDraw = false;
 			return util::EventReply::Handled;
 		}
 		return util::EventReply::Unhandled;

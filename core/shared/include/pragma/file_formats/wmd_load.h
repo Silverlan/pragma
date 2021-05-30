@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __WMD_LOAD_H__
 #define __WMD_LOAD_H__
@@ -14,18 +14,58 @@
 #include "pragma/game/game_resources.hpp"
 #include "pragma/physics/physsoftbodyinfo.hpp"
 #include "pragma/model/animation/vertex_animation.hpp"
+#include "pragma/asset/util_asset.hpp"
+#include "pragma/util/util_game.hpp"
+#include <udm.hpp>
 #include <sharedutils/util_file.h>
 
 template<class TModel,class TModelMesh,class TModelSubMesh>
-	std::shared_ptr<Model> FWMD::Load(Game *game,const std::string &model,const std::function<Material*(const std::string&,bool)> &loadMaterial,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel)
+	std::shared_ptr<Model> FWMD::Load(Game *game,const std::string &pmodel,const std::function<Material*(const std::string&,bool)> &loadMaterial,const std::function<std::shared_ptr<Model>(const std::string&)> &loadModel)
 {
-	std::string pathCache(model);
+	auto &nw = *game->GetNetworkState();
+	std::string pathCache(pmodel);
 	// std::transform(pathCache.begin(),pathCache.end(),pathCache.begin(),::tolower);
+
+	auto model = pmodel;
+	
+	std::string ext;
+	auto mdlPath = pragma::asset::find_file(nw,pathCache,pragma::asset::Type::Model,&ext);
+	if(mdlPath.has_value())
+		model = *mdlPath;
 
 	std::string path = "models\\";
 	path += model;
+
+	ustring::to_lower(ext);
+	if(ext == pragma::asset::FORMAT_MODEL_BINARY || ext == pragma::asset::FORMAT_MODEL_ASCII)
+	{
+		auto udm = util::load_udm_asset(path);
+		if(udm == nullptr)
+			return nullptr;
+		std::string err;
+		auto mdl = Model::Load<TModel>(*game,udm->GetAssetData(),err);
+		if(mdl == nullptr)
+			Con::cwar<<"WARNING: Unable to load model '"<<model<<"': "<<err<<"!"<<Con::endl;
+		if(mdl)
+		{
+			mdl->SetName(model);
+			mdl->LoadMaterials(loadMaterial);
+
+			for(auto &inc : mdl->GetMetaInfo().includes)
+			{
+				auto mdlOther = loadModel(inc);
+				if(mdlOther == nullptr)
+					Con::cwar<<"WARNING: Model '"<<model<<"' has include reference to model '"<<inc<<"', but that model is invalid! Ignoring..."<<Con::endl;
+				else
+					mdl->Merge(*mdlOther);
+			}
+			mdl->Update(ModelUpdateFlags::UpdateVertexAnimationBuffer);
+		}
+		return mdl;
+	}
+
+	// Deprecated format
 	const char *cPath = path.c_str();
-	
 	m_file = FileManager::OpenFile(cPath,"rb");
 	if(m_file == NULL)
 	{
@@ -35,13 +75,24 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 		static auto bSkipPort = false;
 		if(bSkipPort == false)
 		{
-			auto mdlName = model;
-			ufile::remove_extension_from_filename(mdlName);
+			auto pathNoExt = path;
+			ufile::remove_extension_from_filename(pathNoExt,pragma::asset::get_supported_extensions(pragma::asset::Type::Model,true));
+			auto assetWrapper = pragma::get_engine()->GetAssetManager().ImportAsset(*game,pragma::asset::Type::Model,nullptr,pathNoExt);
+			if(assetWrapper != nullptr)
+			{
+				bSkipPort = true; // Safety flag to make sure we never end up in an infinite recursion
+				auto r = Load<TModel,TModelMesh,TModelSubMesh>(game,pmodel,loadMaterial,loadModel);
+				bSkipPort = false;
+				return r;
+			}
+
+			auto mdlName = pmodel;
+			ufile::remove_extension_from_filename(mdlName,pragma::asset::get_supported_extensions(pragma::asset::Type::Model,true));
 			auto *nw = game->GetNetworkState();
 			if(util::port_hl2_model(nw,"models\\",mdlName +".mdl") == true || util::port_source2_model(nw,"models\\",mdlName +".vmdl_c") == true || util::port_nif_model(nw,"models\\",mdlName +".nif"))
 			{
 				bSkipPort = true; // Safety flag to make sure we never end up in an infinite recursion
-				auto r = Load<TModel,TModelMesh,TModelSubMesh>(game,model,loadMaterial,loadModel);
+				auto r = Load<TModel,TModelMesh,TModelSubMesh>(game,pmodel,loadMaterial,loadModel);
 				bSkipPort = false;
 				return r;
 			}
@@ -80,6 +131,8 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 		auto offBodygroups = Read<unsigned long long>();
 		UNUSED(offBodygroups);
 	}
+	if(ver >= 38)
+		Read<unsigned long long>(); // Joints
 	unsigned long long offCollisionMesh = Read<unsigned long long>();
 	if(!m_bStatic)
 	{
@@ -89,6 +142,8 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 		if(ver >= 0x0016)
 			m_file->Seek(m_file->Tell() +sizeof(uint64_t) *1u);
 		if(ver >= 28)
+			m_file->Seek(m_file->Tell() +sizeof(uint64_t) *1u);
+		if(ver >= 37)
 			m_file->Seek(m_file->Tell() +sizeof(uint64_t) *1u);
 	}
 
@@ -175,6 +230,10 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 	// Bodygroups
 	if(ver >= 0x0004)
 		LoadBodygroups(*mdl);
+
+	// Joints
+	if(ver >= 38)
+		LoadJoints(*mdl);
 	
 	// Collision Meshes
 	if(offCollisionMesh > 0)

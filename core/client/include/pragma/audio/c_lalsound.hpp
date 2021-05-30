@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_ALSOUND_HPP__
@@ -19,7 +19,7 @@ namespace Lua
 		namespace Client
 		{
 			DLLCLIENT void register_class(luabind::class_<::ALSound> &classDef);
-			DLLCLIENT void register_buffer(luabind::class_<al::SoundBuffer> &classDef);
+			DLLCLIENT void register_buffer(luabind::class_<al::ISoundBuffer> &classDef);
 		};
 	};
 };

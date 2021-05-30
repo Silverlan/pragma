@@ -2,9 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
+// TODO: Remove this file
+#if 0
 #ifndef __RAYTRACING_RENDERER_HPP__
 #define __RAYTRACING_RENDERER_HPP__
 
@@ -22,7 +24,8 @@ namespace pragma::rendering
 		prosper::IDescriptorSet& GetOutputImageDescriptorSet();
 
 		virtual void EndRendering() override;
-		virtual bool RenderScene(const util::DrawSceneInfo &drawSceneInfo) override;
+		virtual bool RecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo) override;
+		virtual bool Render(const util::DrawSceneInfo &drawSceneInfo) override;
 		virtual bool ReloadRenderTarget(CSceneComponent &scene,uint32_t width,uint32_t height) override;
 		virtual bool IsRayTracingRenderer() const override;
 		virtual prosper::Texture *GetSceneTexture() override;
@@ -38,4 +41,5 @@ namespace pragma::rendering
 	};
 };
 
+#endif
 #endif

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -12,8 +12,9 @@
 #include "pragma/audio/c_sound_efx.hpp"
 #include <alsoundsystem.hpp>
 #include <algorithm>
+#include <udm.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;
 
 #undef CreateEvent
@@ -44,10 +45,11 @@ SSESound *CSSEPlaySound::CreateSound(double tStart,const std::function<std::shar
 	return s;
 }
 void CSSEPlaySound::PrecacheSound(const char *name) {client->PrecacheSound(name,GetChannel());}
-void CSSEPlaySound::Initialize(const std::shared_ptr<ds::Block> &data)
+void CSSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 {
-	SSEPlaySound::Initialize(data);
-	auto dsp = data->GetString("dsp");
+	SSEPlaySound::Initialize(prop);
+	std::string dsp;
+	prop["dsp"](dsp);
 	if(dsp.empty() == false)
 		m_dspEffect = c_engine->GetAuxEffect(dsp);
 	auto *soundSys = c_engine->GetSoundSystem();
@@ -55,10 +57,10 @@ void CSSEPlaySound::Initialize(const std::shared_ptr<ds::Block> &data)
 		return;
 	for(auto &type : al::get_aux_types())
 	{
-		auto dataBlock = data->GetBlock(type,0);
-		if(dataBlock == nullptr)
+		auto dataBlock = prop[type];
+		if(!dataBlock)
 			continue;
-		auto effect = al::create_aux_effect(type,*dataBlock);
+		auto effect = al::create_aux_effect(type,dataBlock);
 		if(effect != nullptr)
 			effects.push_back(effect);
 	}

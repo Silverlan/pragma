@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -15,6 +15,7 @@
 #include "pragma/physics/shape.hpp"
 #include "pragma/physics/collisionmasks.h"
 #include "pragma/entities/components/base_physics_component.hpp"
+#include <sharedutils/magic_enum.hpp>
 
 DEFINE_BASE_HANDLE(DLLNETWORK,PhysObj,PhysObj);
 
@@ -134,6 +135,7 @@ void PhysObj::Spawn()
 }
 const pragma::physics::ICollisionObject *PhysObj::GetCollisionObject() const {return const_cast<PhysObj*>(this)->GetCollisionObject();}
 std::vector<util::TSharedHandle<pragma::physics::ICollisionObject>> &PhysObj::GetCollisionObjects() {return m_collisionObjects;}
+const std::vector<util::TSharedHandle<pragma::physics::ICollisionObject>> &PhysObj::GetCollisionObjects() const {return const_cast<PhysObj*>(this)->GetCollisionObjects();}
 pragma::physics::ICollisionObject *PhysObj::GetCollisionObject()
 {
 	if(m_collisionObjects.empty())
@@ -160,7 +162,7 @@ void PhysObj::OnSleep()
 	if(m_owner.expired())
 		return;
 	auto pPhysComponent = m_owner->GetEntity().GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->OnPhysicsSleep(this);
 }
 void PhysObj::OnWake()
@@ -168,7 +170,7 @@ void PhysObj::OnWake()
 	if(m_owner.expired())
 		return;
 	auto pPhysComponent = m_owner->GetEntity().GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->OnPhysicsWake(this);
 }
 void PhysObj::Enable() {umath::set_flag(m_stateFlags,StateFlags::Disabled,false);}
@@ -353,3 +355,15 @@ void PhysObj::ApplyTorqueImpulse(const Vector3&) {}
 void PhysObj::ClearForces() {}
 Vector3 PhysObj::GetTotalForce() const {return Vector3(0.f,0.f,0.f);}
 Vector3 PhysObj::GetTotalTorque() const {return Vector3(0.f,0.f,0.f);}
+
+std::ostream &operator<<(std::ostream &out,const PhysObj &o)
+{
+	out<<"PhysObj";
+	out<<"[FilterGroup:"<<magic_enum::flags::enum_name(o.GetCollisionFilter())<<"]";
+	out<<"[FilterMask:"<<magic_enum::flags::enum_name(o.GetCollisionFilterMask())<<"]";
+	out<<"[ColObjs:"<<o.GetCollisionObjects().size()<<"]";
+	out<<"[ColObjsAwake:"<<o.GetNumberOfCollisionObjectsAwake()<<"]";
+	out<<"[Vel:"<<o.GetLinearVelocity()<<"]";
+	out<<"[AngVel:"<<o.GetAngularVelocity()<<"]";
+	return out;
+}

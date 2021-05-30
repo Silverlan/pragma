@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/model/s_modelmanager.h"
@@ -65,11 +65,22 @@ void SModelComponent::SetSkin(unsigned int skin)
 	server->SendPacket("ent_skin",p,pragma::networking::Protocol::SlowReliable);
 }
 
+void SModelComponent::SetMaxDrawDistance(float maxDist)
+{
+	if(maxDist == m_maxDrawDistance)
+		return;
+	BaseModelComponent::SetMaxDrawDistance(maxDist);
+	NetPacket p {};
+	p->Write<float>(m_maxDrawDistance);
+	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvMaxDrawDist,p,pragma::networking::Protocol::SlowReliable);
+}
+
 void SModelComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	std::string mdl = GetModelName();
 	packet->WriteString(mdl);
 	packet->Write<unsigned int>(GetSkin());
+	packet->Write<float>(m_maxDrawDistance);
 
 	auto &bodyGroups = GetBodyGroups();
 	packet->Write<uint32_t>(static_cast<uint32_t>(bodyGroups.size()));

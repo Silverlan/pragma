@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "pragma/lua/class_manager.hpp"
@@ -28,7 +28,7 @@ const pragma::lua::ClassManager::ClassInfo *pragma::lua::ClassManager::FindClass
 {
 	return const_cast<ClassManager*>(this)->FindClassInfo(classRef);
 }
-void pragma::lua::ClassManager::RegisterClass(const std::string &className,luabind::object oClass)
+void pragma::lua::ClassManager::RegisterClass(const std::string &className,luabind::object oClass,luabind::object regFc)
 {
 	/*
 	// Obsolete? Lua-registered classes don't seem to be a part of the luabind registry
@@ -53,6 +53,7 @@ void pragma::lua::ClassManager::RegisterClass(const std::string &className,luabi
 	auto &classInfo = m_classes.back();
 	classInfo.classObject = oClass;
 	classInfo.className = className;
+	classInfo.regFunc = regFc;
 
 	m_classNameToClassIndex[className] = m_classes.size() -1u;
 }

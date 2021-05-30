@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __BASE_FLAMMABLE_COMPONENT_HPP__
 #define __BASE_FLAMMABLE_COMPONENT_HPP__
@@ -30,12 +30,12 @@ namespace pragma
 		virtual util::EventReply Ignite(float duration,BaseEntity *attacker=nullptr,BaseEntity *inflictor=nullptr);
 		virtual void Extinguish();
 		virtual void SetIgnitable(bool b);
+		virtual void OnTick(double dt);
 
-		virtual void Save(DataStream &ds) override;
-		virtual void Load(DataStream &ds,uint32_t version) override;
+		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
+		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
 	protected:
 		BaseFlammableComponent(BaseEntity &ent);
-		virtual void OnThink(double dt);
 		pragma::NetEventId m_netEvIgnite = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvExtinguish = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvSetIgnitable = pragma::INVALID_NET_EVENT;

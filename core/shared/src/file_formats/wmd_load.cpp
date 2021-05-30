@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -10,12 +10,13 @@
 #include "pragma/model/modelmesh.h"
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/model/animation/vertex_animation.hpp"
+#include "pragma/model/animation/flex_animation.hpp"
 #include "pragma/physics/physsoftbodyinfo.hpp"
 
 void FWMD::LoadBones(unsigned short version,unsigned int numBones,Model &mdl)
 {
 	auto &skeleton = mdl.GetSkeleton();
-	auto reference = Animation::Create();
+	auto reference = pragma::animation::Animation::Create();
 	if(!m_bStatic)
 	{
 		reference->ReserveBoneIds(reference->GetBoneCount() +numBones);
@@ -149,6 +150,20 @@ void FWMD::LoadAttachments(Model &mdl)
 	}
 }
 
+static void clamp_bounds(Vector3 &min,Vector3 &max,unsigned short version)
+{
+	if(version >= 36)
+		return;
+	for(auto &v : {&min,&max})
+	{
+		for(uint8_t i=0;i<3;++i)
+		{
+			if((*v)[i] == std::numeric_limits<float>::lowest() || (*v)[i] == std::numeric_limits<float>::max())
+				(*v)[i] = 0.f;
+		}
+	}
+}
+
 void FWMD::LoadMeshes(unsigned short version,Model &mdl,const std::function<std::shared_ptr<ModelMesh>()> &meshFactory,const std::function<std::shared_ptr<ModelSubMesh>()> &subMeshFactory)
 {
 	Vector3 renderMin,renderMax;
@@ -156,6 +171,7 @@ void FWMD::LoadMeshes(unsigned short version,Model &mdl,const std::function<std:
 		renderMin[i] = Read<float>();
 	for(char i=0;i<3;i++)
 		renderMax[i] = Read<float>();
+	clamp_bounds(renderMin,renderMax,version);
 	mdl.SetRenderBounds(renderMin,renderMax);
 	unsigned int numMeshGroups = Read<unsigned int>();
 	for(unsigned int i=0;i<numMeshGroups;i++)
@@ -415,6 +431,7 @@ void FWMD::LoadCollisionMeshes(Game *game,unsigned short version,Model &mdl,Surf
 	Vector3 collisionMax(std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest(),std::numeric_limits<float>::lowest());
 	uint32_t numMeshes = (version < 30) ? Read<uint8_t>() : Read<uint32_t>();
 	auto massPerMesh = mass /static_cast<float>(numMeshes); // TODO: Allow individual mass per collision mesh
+	std::vector<JointInfo> oldJointSystemJoints;
 	for(auto i=decltype(numMeshes){0u};i<numMeshes;++i)
 	{
 		auto flags = CollisionMeshLoadFlags::None;
@@ -471,14 +488,15 @@ void FWMD::LoadCollisionMeshes(Game *game,unsigned short version,Model &mdl,Surf
 			else
 				mesh->CalculateVolumeAndCom();
 		}
-		if(version >= 0x0002)
+		if(version >= 0x0002 && version < 38)
 		{
 			auto numConstraints = Read<unsigned char>();
 			for(unsigned char iConstraint=0;iConstraint<numConstraints;iConstraint++)
 			{
-				auto type = Read<unsigned char>();
+				auto type = Read<JointType>();
 				auto idTgt = Read<unsigned int>();
-				auto &joint = mdl.AddJoint(type,i,idTgt);
+				oldJointSystemJoints.push_back(JointInfo{type,static_cast<uint16_t>(i),static_cast<uint16_t>(idTgt)});
+				auto &joint = oldJointSystemJoints.back();
 				joint.collide = Read<bool>();
 				auto numArgs = Read<unsigned char>();
 				for(unsigned char i=0;i<numArgs;i++)
@@ -502,6 +520,26 @@ void FWMD::LoadCollisionMeshes(Game *game,unsigned short version,Model &mdl,Surf
 	}
 	mdl.SetCollisionBounds(collisionMin,collisionMax);
 	mdl.UpdateShape();
+
+	// Old joint system, where joints referenced collision meshes instead of bones.
+	// We'll translate it into the new system here
+	auto &colMeshes = mdl.GetCollisionMeshes();
+	for(auto &jointInfo : oldJointSystemJoints)
+	{
+		auto colSrcId = jointInfo.child;
+		auto colDstId = jointInfo.parent;
+		if(colSrcId >= numMeshes || colDstId >= numMeshes)
+			continue;
+		auto &meshSrc = colMeshes[colSrcId];
+		auto &meshDst = colMeshes[colDstId];
+		auto srcBoneId = meshSrc->GetBoneParent();
+		auto dstBoneId = meshDst->GetBoneParent();
+		if(srcBoneId < 0 || dstBoneId < 0)
+			continue;
+		auto &jointInfoMdl = mdl.AddJoint(jointInfo.type,srcBoneId,dstBoneId);
+		jointInfoMdl.args = jointInfo.args;
+		jointInfoMdl.collide = jointInfo.collide;
+	}
 }
 
 void FWMD::LoadBlendControllers(Model &mdl)
@@ -549,13 +587,14 @@ void FWMD::LoadAnimations(unsigned short version,Model &mdl)
 	{
 		std::string name = ReadString();
 		FWAD wad;
-		auto anim = std::shared_ptr<Animation>(wad.ReadData(version,m_file));
+		auto anim = std::shared_ptr<pragma::animation::Animation>(wad.ReadData(version,m_file));
 		if(anim)
 		{
 			if(version < 0x0007)
 			{
 				Vector3 min,max;
 				mdl.GetRenderBounds(min,max);
+				clamp_bounds(min,max,version);
 				anim->SetRenderBounds(min,max);
 			}
 			mdl.AddAnimation(name,anim);
@@ -751,6 +790,22 @@ void FWMD::LoadAnimations(unsigned short version,Model &mdl)
 				Read(reinterpret_cast<uint8_t*>(&eyeball) +sizeof(std::string),sizeof(Eyeball) -sizeof(std::string));
 			}
 		}
+
+		if(version >= 37)
+		{
+			auto numFlexAnims = Read<uint32_t>();
+			auto &flexAnims = mdl.GetFlexAnimations();
+			auto &flexAnimNames = mdl.GetFlexAnimationNames();
+			flexAnimNames.reserve(numFlexAnims);
+			flexAnims.reserve(numFlexAnims);
+			for(auto i=decltype(numFlexAnims){0u};i<numFlexAnims;++i)
+			{
+				auto name = ReadString();
+				auto flexAnim = FlexAnimation::Load(m_file);
+				flexAnimNames.push_back(name);
+				flexAnims.push_back(flexAnim);
+			}
+		}
 	}
 }
 
@@ -762,6 +817,11 @@ void FWMD::LoadLODData(unsigned short version,Model &mdl)
 		for(UChar i=0;i<numLods;i++)
 		{
 			auto lod = Read<unsigned char>();
+			float dist;
+			if(version >= 36)
+				dist = Read<float>();
+			else
+				dist = (i +1) *500.f;
 			auto numReplace = Read<unsigned char>();
 			std::unordered_map<unsigned int,unsigned int> meshReplacements;
 			meshReplacements.reserve(numReplace);
@@ -771,7 +831,7 @@ void FWMD::LoadLODData(unsigned short version,Model &mdl)
 				auto repId = Read<unsigned int>();
 				meshReplacements[origId] = repId;
 			}
-			mdl.AddLODInfo(lod,meshReplacements);
+			mdl.AddLODInfo(lod,dist,meshReplacements);
 		}
 		return;
 	}
@@ -894,6 +954,26 @@ void FWMD::LoadSoftBodyData(Model &mdl,CollisionMesh &colMesh)
 
 	if(bValid == false)
 		colMesh.SetSoftBody(false);
+}
+
+void FWMD::LoadJoints(Model &mdl)
+{
+	auto numJoints = Read<uint32_t>();
+	for(auto i=decltype(numJoints){0u};i<numJoints;++i)
+	{
+		auto type = Read<JointType>();
+		auto child = Read<BoneId>();
+		auto parent = Read<BoneId>();
+		auto &joint = mdl.AddJoint(type,child,parent);
+		joint.collide = Read<bool>();
+		auto numArgs = Read<uint8_t>();
+		for(auto i=decltype(numArgs){0u};i<numArgs;++i)
+		{
+			auto k = ReadString();
+			auto v = ReadString();
+			joint.args[k] = v;
+		}
+	}
 }
 
 void FWMD::LoadBodygroups(Model &mdl)

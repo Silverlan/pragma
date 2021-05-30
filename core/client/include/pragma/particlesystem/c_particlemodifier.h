@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_PARTICLEMODIFIER_H__
@@ -110,7 +110,7 @@ namespace pragma
 {
 	class CLightComponent;
 	class CSceneComponent;
-	namespace rendering {class RasterizationRenderer;};
+	class CRasterizationRendererComponent;
 	class ShaderParticleBase;
 };
 class DLLCLIENT CParticleRenderer
@@ -118,8 +118,8 @@ class DLLCLIENT CParticleRenderer
 {
 public:
 	CParticleRenderer()=default;
-	virtual void Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::ParticleRenderFlags renderFlags)=0;
-	virtual void RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::rendering::RasterizationRenderer &renderer,pragma::CLightComponent &light,uint32_t layerId=0)=0;
+	virtual void Render(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::ParticleRenderFlags renderFlags)=0;
+	virtual void RenderShadow(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,pragma::CLightComponent &light,uint32_t layerId=0)=0;
 	virtual void PostSimulate(double tDelta);
 	virtual std::pair<Vector3,Vector3> GetRenderBounds() const;
 	virtual pragma::ShaderParticleBase *GetShader() const=0;

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_LENGINE_H__
@@ -35,6 +35,7 @@ namespace Lua
 		DLLCLIENT void clear_unused_materials();
 		DLLCLIENT Material *create_material(const std::string &identifier,const std::string &shader);
 		DLLCLIENT Material *create_material(const std::string &shader);
+		DLLCLIENT Material *get_material(const std::string &identifier);
 		DLLCLIENT int create_particle_system(lua_State *l);
 		DLLCLIENT bool precache_particle_system(lua_State *l,const std::string &particle,bool reload);
 		DLLCLIENT bool precache_particle_system(lua_State *l,const std::string &particle);
@@ -50,6 +51,7 @@ namespace Lua
 		DLLCLIENT void set_tick_delta_time_tied_to_frame_rate(bool tieToFrameRate);
 		DLLCLIENT Vector2i get_window_resolution();
 		DLLCLIENT Vector2i get_render_resolution();
+		DLLCLIENT uint32_t get_current_frame_index();
 
 		DLLCLIENT void register_library(lua_State *l);
 	};

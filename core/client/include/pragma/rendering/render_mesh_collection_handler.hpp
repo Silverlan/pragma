@@ -2,9 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
+// TODO: Remove this file
 #ifndef __RENDER_MESH_COLLECTION_HANDLER_HPP__
 #define __RENDER_MESH_COLLECTION_HANDLER_HPP__
 
@@ -13,7 +14,7 @@
 #include <vector>
 #include <mathutil/uvec.h>
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler.hpp"
-#include "pragma/rendering/renderers/rasterization/culled_mesh_data.hpp"
+#include "pragma/entities/components/renderers/rasterization/culled_mesh_data.hpp"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/rendering/c_renderflags.h"
 
@@ -21,11 +22,11 @@ namespace pragma
 {
 	class CParticleSystemComponent;
 	class CSceneComponent;
+	class CRasterizationRendererComponent;
 };
 namespace pragma::rendering
 {
 	struct CulledMeshData;
-	class RasterizationRenderer;
 	struct DLLCLIENT RenderMeshCollectionHandler
 	{
 	public:
@@ -35,8 +36,8 @@ namespace pragma::rendering
 			HasGlowMeshes = 1u
 		};
 		RenderMeshCollectionHandler()=default;
-		const std::vector<pragma::OcclusionMeshInfo> &PerformOcclusionCulling(CSceneComponent &scene,const RasterizationRenderer &renderer,const Vector3 &posCam,bool cullByViewFrustum=true);
-		ResultFlags GenerateOptimizedRenderObjectStructures(CSceneComponent &scene,const RasterizationRenderer &renderer,const Vector3 &posCam,FRender renderFlags,RenderMode renderMode,bool useGlowMeshes,bool useTranslucentMeshes);
+		const std::vector<pragma::OcclusionMeshInfo> &PerformOcclusionCulling(CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const Vector3 &posCam,bool cullByViewFrustum=true);
+		ResultFlags GenerateOptimizedRenderObjectStructures(CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const Vector3 &posCam,FRender renderFlags,RenderMode renderMode,bool useGlowMeshes,bool useTranslucentMeshes);
 	
 		const std::vector<pragma::OcclusionMeshInfo> &GetOcclusionFilteredMeshes() const;
 		std::vector<pragma::OcclusionMeshInfo> &GetOcclusionFilteredMeshes();

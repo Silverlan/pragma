@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_weave.h"
@@ -74,12 +74,12 @@ static std::string get_last_system_error_string(DWORD errorMessageID)
 }
 #endif
 
-int main(int argc,char* argv[]) //try
+int main(int argc,char* argv[])// try
 {
 	#ifdef __linux__
-		const char *library = "libcengine.so";
+		const char *library = "libclient.so";
 	#else
-		const char *library = "cengine.dll";
+		const char *library = "client.dll";
 	#endif
 	#ifdef _WIN32
 		// Check if Vulkan drivers are installed
@@ -100,7 +100,7 @@ int main(int argc,char* argv[]) //try
 		}
 		//
 #if ENABLE_GDEBUGGER_SUPPORT == 1
-		HINSTANCE hEngine = LoadLibrary("cengine.dll");
+		HINSTANCE hEngine = LoadLibrary("client.dll");
 #else
 		std::string path = GetAppPath();
 		path += "\\bin\\";

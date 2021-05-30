@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __BASE_ANIMATED_COMPONENT_HPP__
 #define __BASE_ANIMATED_COMPONENT_HPP__
@@ -16,13 +16,14 @@
 #include <mathutil/transform.hpp>
 #include <mathutil/uvec.h>
 
-class Animation;
 class Frame;
 class ModelSubMesh;
 struct AnimationEvent;
+using BoneId = uint16_t;
 enum class ALSoundType : int32_t;
 namespace pragma
 {
+	namespace animation {class Animation;};
 	class DLLNETWORK BaseAnimatedComponent
 		: public BaseEntityComponent
 	{
@@ -49,7 +50,17 @@ namespace pragma
 		static ComponentEventId EVENT_ON_ANIMATIONS_UPDATED;
 		static ComponentEventId EVENT_ON_BLEND_ANIMATION;
 		static ComponentEventId EVENT_PLAY_ANIMATION;
+		static ComponentEventId EVENT_ON_ANIMATION_RESET;
+		static constexpr auto *ROOT_POSE_BONE_NAME = "%rootPose%";
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+
+		enum class StateFlags : uint8_t
+		{
+			None = 0u,
+			AbsolutePosesDirty = 1u,
+			BaseAnimationDirty = AbsolutePosesDirty<<1u,
+			RootPoseTransformEnabled = BaseAnimationDirty<<1u
+		};
 
 		struct DLLNETWORK AnimationSlotInfo
 		{
@@ -79,7 +90,7 @@ namespace pragma
 				float blendScale = 1.f;
 			} lastAnim;
 		};
-		static bool GetBlendFramesFromCycle(Animation &anim,float cycle,Frame **outFrameSrc,Frame **outFrameDst,float &outInterpFactor,int32_t frameOffset=0);
+		static bool GetBlendFramesFromCycle(pragma::animation::Animation &anim,float cycle,Frame **outFrameSrc,Frame **outFrameDst,float &outInterpFactor,int32_t frameOffset=0);
 
 		virtual void Initialize() override;
 
@@ -96,6 +107,12 @@ namespace pragma
 		void SetBoneScale(uint32_t boneId,const Vector3 &scale);
 		const Vector3 *GetBoneScale(uint32_t boneId) const;
 		std::optional<Mat4> GetBoneMatrix(unsigned int boneID) const;
+
+		FPlayAnim GetBaseAnimationFlags() const;
+		void SetBaseAnimationFlags(FPlayAnim flags);
+
+		std::optional<FPlayAnim> GetLayeredAnimationFlags(uint32_t layerIdx) const;
+		void SetLayeredAnimationFlags(uint32_t layerIdx,FPlayAnim flags);
 
 		// Returns the bone position / rotation in world space. Very expensive.
 		Bool GetGlobalBonePosition(UInt32 boneId,Vector3 &pos,Quat &rot,Vector3 *scale=nullptr) const;
@@ -130,7 +147,7 @@ namespace pragma
 
 		float GetCycle() const;
 		void SetCycle(float cycle);
-		Animation *GetAnimationObject() const;
+		pragma::animation::Animation *GetAnimationObject() const;
 		int32_t GetAnimation() const;
 
 		Activity GetActivity() const;
@@ -151,6 +168,13 @@ namespace pragma
 		int SelectWeightedAnimation(Activity activity,int animAvoid=-1) const;
 		// Returns the time left until the current animation has finished playing
 		float GetAnimationDuration() const;
+
+		BoneId AddRootPoseBone();
+		void SetRootPoseBoneId(BoneId boneId);
+		BoneId GetRootPoseBoneId() const {return m_rootPoseBoneId;}
+
+		void SetAnimatedRootPoseTransformEnabled(bool enabled);
+		bool IsAnimatedRootPoseTransformEnabled() const;
 
 		void SetBlendController(unsigned int controller,float val);
 		void SetBlendController(const std::string &controller,float val);
@@ -196,18 +220,21 @@ namespace pragma
 		std::unordered_map<uint32_t,AnimationSlotInfo> &GetAnimationSlotInfos();
 
 		Activity TranslateActivity(Activity act);
+		void SetBaseAnimationDirty();
 
 		void BlendBonePoses(
 			const std::vector<umath::Transform> &srcBonePoses,const std::vector<Vector3> *optSrcBoneScales,
 			const std::vector<umath::Transform> &dstBonePoses,const std::vector<Vector3> *optDstBoneScales,
 			std::vector<umath::Transform> &outBonePoses,std::vector<Vector3> *optOutBoneScales,
-			Animation &anim,float interpFactor
+			pragma::animation::Animation &anim,float interpFactor
 		) const;
 		void BlendBoneFrames(
 			std::vector<umath::Transform> &tgt,std::vector<Vector3> *tgtScales,std::vector<umath::Transform> &add,std::vector<Vector3> *addScales,float blendScale
 		) const;
 
 		virtual bool MaintainAnimations(double dt);
+		virtual void OnTick(double dt) override;
+		bool MaintainGestures(double dt);
 
 		virtual std::optional<Mat4> GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId) const;
 		virtual bool GetLocalVertexPosition(const ModelSubMesh &subMesh,uint32_t vertexId,Vector3 &pos,const std::optional<Vector3> &vertexOffset={}) const;
@@ -219,17 +246,18 @@ namespace pragma
 
 		CallbackHandle BindAnimationEvent(AnimationEvent::Type eventId,const std::function<void(std::reference_wrapper<const AnimationEvent>)> &fCallback);
 
-		virtual void Save(DataStream &ds) override;
+		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
 		using BaseEntityComponent::Load;
 	protected:
 		BaseAnimatedComponent(BaseEntity &ent);
 		virtual void OnModelChanged(const std::shared_ptr<Model> &mdl);
-		virtual void Load(DataStream &ds,uint32_t version) override;
+		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
+		virtual void ResetAnimation(const std::shared_ptr<Model> &mdl);
 		
 		struct DLLNETWORK AnimationBlendInfo
 		{
 			float scale = 0.f;
-			Animation *animation = nullptr;
+			pragma::animation::Animation *animation = nullptr;
 			Frame *frameSrc = nullptr; // Frame to blend from
 			Frame *frameDst = nullptr; // Frame to blend to
 		};
@@ -237,7 +265,7 @@ namespace pragma
 		struct AnimationEventQueueItem
 		{
 			int32_t animId = -1;
-			std::shared_ptr<Animation> animation = nullptr;
+			std::shared_ptr<pragma::animation::Animation> animation = nullptr;
 			int32_t lastFrame = -1;
 			uint32_t frameId = 0;
 		};
@@ -267,12 +295,17 @@ namespace pragma
 		virtual void ApplyAnimationBlending(AnimationSlotInfo &animInfo,double tDelta);
 		void HandleAnimationEvent(const AnimationEvent &ev);
 		void PlayLayeredAnimation(int slot,int animation,FPlayAnim flags,AnimationSlotInfo **animInfo);
-		void GetAnimationBlendController(Animation *anim,float cycle,std::array<AnimationBlendInfo,2> &bcFrames,float *blendScale) const;
+		void GetAnimationBlendController(pragma::animation::Animation *anim,float cycle,std::array<AnimationBlendInfo,2> &bcFrames,float *blendScale) const;
 		Frame *GetPreviousAnimationBlendFrame(AnimationSlotInfo &animInfo,double tDelta,float &blendScale);
 
 		// Animations
-		void TransformBoneFrames(std::vector<umath::Transform> &bonePoses,std::vector<Vector3> *boneScales,Animation &anim,Frame *frameBlend,bool bAdd=true);
-		void TransformBoneFrames(std::vector<umath::Transform> &tgt,std::vector<Vector3> *boneScales,const std::shared_ptr<Animation> &anim,std::vector<umath::Transform> &add,std::vector<Vector3> *addScales,bool bAdd=true);
+		void TransformBoneFrames(std::vector<umath::Transform> &bonePoses,std::vector<Vector3> *boneScales,pragma::animation::Animation &anim,Frame *frameBlend,bool bAdd=true);
+		void TransformBoneFrames(
+			std::vector<umath::Transform> &tgt,std::vector<Vector3> *boneScales,
+			const std::shared_ptr<pragma::animation::Animation> &baseAnim,
+			const std::shared_ptr<pragma::animation::Animation> &anim,
+			std::vector<umath::Transform> &add,std::vector<Vector3> *addScales,bool bAdd=true
+		);
 		//
 
 		std::unordered_map<uint32_t,AnimationSlotInfo> m_animSlots = {};
@@ -281,7 +314,7 @@ namespace pragma
 		Vector3 m_animDisplacement = {};
 		std::vector<umath::ScaledTransform> m_bones = {};
 		std::vector<umath::ScaledTransform> m_processedBones = {}; // Bone positions / rotations in entity space
-	private:
+	protected:
 		// We have to collect the animation events for the current frame and execute them after ALL animations have been completed (In case some events need to access animation data)
 		std::queue<AnimationEventQueueItem> m_animEventQueue = std::queue<AnimationEventQueueItem>{};
 
@@ -294,6 +327,8 @@ namespace pragma
 		std::vector<TemplateAnimationEvent> m_animEventTemplates;
 		std::unordered_map<uint32_t,std::unordered_map<uint32_t,std::vector<CustomAnimationEvent>>> m_animEvents;
 		
+		BoneId m_rootPoseBoneId = std::numeric_limits<BoneId>::max();
+		StateFlags m_stateFlags = StateFlags::AbsolutePosesDirty;
 		std::shared_ptr<const Frame> m_bindPose = nullptr;
 		std::unordered_map<unsigned int,float> m_blendControllers = {};
 		util::PFloatProperty m_playbackRate = nullptr;
@@ -469,5 +504,6 @@ namespace pragma
 		bool shouldUpdate = true;
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseAnimatedComponent::StateFlags)
 
 #endif

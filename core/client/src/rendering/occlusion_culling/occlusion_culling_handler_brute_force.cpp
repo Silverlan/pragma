@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -16,7 +16,7 @@ using namespace pragma;
 extern DLLCLIENT CGame *c_game;
 
 void OcclusionCullingHandlerBruteForce::PerformCulling(
-	pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+	pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const Vector3 &camPos,
 	std::vector<OcclusionMeshInfo> &culledMeshesOut,bool cullByViewFrustum
 )
 {
@@ -35,17 +35,17 @@ void OcclusionCullingHandlerBruteForce::PerformCulling(
 			continue;
 		auto pRenderComponent = ent->GetRenderComponent();
 		bool bViewModel = false;
-		std::vector<Plane> *planes = nullptr;
+		std::vector<umath::Plane> *planes = nullptr;
 		if((ShouldExamine(scene,renderer,*ent,bViewModel,cullByViewFrustum ? &planes : nullptr) == true))
 		{
 			//if(bUpdateLod == true) // Needs to be updated every frame (in case the entity is moving towards or away from us)
-			pRenderComponent->GetModelComponent()->UpdateLOD(camPos);
-			if(pRenderComponent.valid())
+			//pRenderComponent->GetModelComponent()->UpdateLOD(camPos);
+			if(pRenderComponent)
 			{
 				auto pTrComponent = ent->GetTransformComponent();
 				auto &meshes = pRenderComponent->GetLODMeshes();
 				auto numMeshes = meshes.size();
-				auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+				auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 				for(auto itMesh=meshes.begin();itMesh!=meshes.end();++itMesh)
 				{
 					auto *mesh = static_cast<CModelMesh*>(itMesh->get());

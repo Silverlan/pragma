@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __S_AI_COMPONENT_HPP__
 #define __S_AI_COMPONENT_HPP__
@@ -174,7 +174,7 @@ namespace pragma
 		DISPOSITION GetDisposition(Faction &faction,int *priority=nullptr);
 		std::shared_ptr<ai::Schedule> GetCurrentSchedule();
 		void StartSchedule(std::shared_ptr<ai::Schedule> &sched);
-		virtual void Think(double tDelta) override;
+		virtual void OnTick(double tDelta) override;
 		ai::Memory &GetMemory();
 		ai::Memory::Fragment *GetMemory(BaseEntity *ent);
 		ai::Memory::Fragment *Memorize(BaseEntity *ent,ai::Memory::MemoryType memType);

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -31,7 +31,7 @@
 #include <luabind/iterator_policy.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 // #define ENABLE_DEPRECATED_PHYSICS
 
@@ -172,11 +172,11 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	});
 
 	Lua::RegisterLibraryEnums(l,libName,{
-		{"ACTIVATION_STATE_ACTIVE_TAG",ACTIVE_TAG},
-		{"ACTIVATION_STATE_DISABLE_DEACTIVATION",DISABLE_DEACTIVATION},
-		{"ACTIVATION_STATE_DISABLE_SIMULATION",DISABLE_SIMULATION},
-		{"ACTIVATION_STATE_ISLAND_SLEEPING",ISLAND_SLEEPING},
-		{"ACTIVATION_STATE_WANTS_DEACTIVATION",WANTS_DEACTIVATION}
+		{"ACTIVATION_STATE_ACTIVE",umath::to_integral(pragma::physics::ICollisionObject::ActivationState::Active)},
+		{"ACTIVATION_STATE_ALWAYS_ACTIVE",umath::to_integral(pragma::physics::ICollisionObject::ActivationState::AlwaysActive)},
+		{"ACTIVATION_STATE_ALWAYS_INACTIVE",umath::to_integral(pragma::physics::ICollisionObject::ActivationState::AlwaysInactive)},
+		{"ACTIVATION_STATE_WAIT_FOR_DEACTIVATION",umath::to_integral(pragma::physics::ICollisionObject::ActivationState::WaitForDeactivation)},
+		{"ACTIVATION_STATE_COUNT",umath::to_integral(pragma::physics::ICollisionObject::ActivationState::Count)}
 	});
 
 	Lua::RegisterLibraryEnums(l,libName,{
@@ -827,6 +827,12 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefTransform.def("SetIdentity",static_cast<void(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &t) {
 		t.SetIdentity();
 	}));
+	classDefTransform.def("IsIdentity",static_cast<bool(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &t) -> bool {
+		auto &origin = t.GetOrigin();
+		auto &rotation = t.GetRotation();
+		return umath::abs(origin.x) < 0.001f && umath::abs(origin.y) < 0.001f && umath::abs(origin.z) < 0.001f &&
+			umath::abs(1.f -rotation.w) < 0.001f && umath::abs(rotation.x) < 0.001f && umath::abs(rotation.y) < 0.001f && umath::abs(rotation.z) < 0.001f;
+	}));
 	classDefTransform.def("TranslateGlobal",static_cast<void(*)(lua_State*,umath::Transform&,const Vector3&)>([](lua_State *l,umath::Transform &t,const Vector3 &v) {
 		t.TranslateGlobal(v);
 	}));
@@ -872,12 +878,15 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefTransform.def(luabind::const_self *umath::ScaledTransform());
 	classDefTransform.def(luabind::const_self *Vector3());
 	classDefTransform.def(luabind::const_self *Quat());
+
 	physMod[classDefTransform];
 
 	auto classDefScaledTransform = luabind::class_<umath::ScaledTransform,umath::Transform>("ScaledTransform");
 	classDefScaledTransform.def(luabind::constructor<const Mat4&>());
 	classDefScaledTransform.def(luabind::constructor<const Vector3&,const Quat&>());
 	classDefScaledTransform.def(luabind::constructor<const Vector3&,const Quat&,const Vector3&>());
+	classDefScaledTransform.def(luabind::constructor<const umath::Transform&,const Vector3&>());
+	classDefScaledTransform.def(luabind::constructor<const umath::Transform&>());
 	classDefScaledTransform.def(luabind::constructor<>());
 	classDefScaledTransform.def(luabind::tostring(luabind::self));
 	classDefScaledTransform.def("Copy",static_cast<void(*)(lua_State*,umath::ScaledTransform&)>([](lua_State *l,umath::ScaledTransform &t) {

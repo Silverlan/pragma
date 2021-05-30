@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -15,6 +15,7 @@
 #include <sharedutils/datastream.h>
 #include <pragma/util/transform.h>
 #include <pragma/entities/baseentity_events.hpp>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -42,6 +43,7 @@ void BaseModelComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	m_netEvSetBodyGroup = SetupNetEvent("set_body_group");
+	m_netEvMaxDrawDist = SetupNetEvent("set_max_draw_distance");
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
 		if(ustring::compare(kvData.key,"model",false))
@@ -56,11 +58,16 @@ void BaseModelComponent::Initialize()
 			if(GetEntity().IsSpawned())
 				SetSkin(m_kvSkin);
 		}
+		else if(ustring::compare(kvData.key,"maxvisibledist",false))
+			SetMaxDrawDistance(ustring::to_float(kvData.value));
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
 }
+
+void BaseModelComponent::SetMaxDrawDistance(float maxDist) {m_maxDrawDistance = maxDist;}
+float BaseModelComponent::GetMaxDrawDistance() const {return m_maxDrawDistance;}
 
 void BaseModelComponent::OnEntitySpawn()
 {
@@ -82,8 +89,7 @@ bool BaseModelComponent::GetAttachment(unsigned int attID,Vector3 *pos,EulerAngl
 }
 bool BaseModelComponent::GetAttachment(const std::string &name,Vector3 *pos,EulerAngles *angles) const
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = GetEntity().GetModel();
 	if(hMdl == nullptr)
 		return false;
 	int attID = hMdl->LookupAttachment(name);
@@ -116,6 +122,7 @@ bool BaseModelComponent::GetAttachment(unsigned int attID,Vector3 *pos,Quat *rot
 		if(attPose.has_value())
 			pose *= *attPose;
 	}
+	pose.SetOrigin(pose.GetOrigin() *ent.GetScale());
 	if(pos)
 		*pos = pose.GetOrigin();
 	if(rot)
@@ -124,8 +131,7 @@ bool BaseModelComponent::GetAttachment(unsigned int attID,Vector3 *pos,Quat *rot
 }
 bool BaseModelComponent::GetAttachment(const std::string &name,Vector3 *pos,Quat *rot) const
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = GetEntity().GetModel();
 	if(hMdl == nullptr)
 		return false;
 	return GetAttachment(hMdl->LookupAttachment(name),pos,rot);
@@ -333,18 +339,21 @@ bool BaseModelComponent::GetHitboxBounds(uint32_t boneId,Vector3 &min,Vector3 &m
 	GetModel().get()->GetHitboxBounds(boneId,min,max);
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	auto scale = pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
+	auto scale = pTrComponent ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
 	min *= scale;
 	max *= scale;
 	auto animComponent = ent.GetAnimatedComponent();
-	if(animComponent.valid() && animComponent->GetGlobalBonePosition(boneId,origin,rot) == false)
+	Vector3 boneScale {1.f,1.f,1.f};
+	if(animComponent.valid() && animComponent->GetGlobalBonePosition(boneId,origin,rot,&boneScale) == false)
 	{
 		auto pPhysComponent = ent.GetPhysicsComponent();
-		if(pPhysComponent.valid())
+		if(pPhysComponent)
 			origin = pPhysComponent->GetOrigin();
-		if(pTrComponent.valid())
-			rot = pTrComponent->GetOrientation();
+		if(pTrComponent)
+			rot = pTrComponent->GetRotation();
 	}
+	min *= boneScale;
+	max *= boneScale;
 	return true;
 }
 uint32_t BaseModelComponent::GetFlexControllerCount() const
@@ -354,8 +363,7 @@ uint32_t BaseModelComponent::GetFlexControllerCount() const
 }
 int BaseModelComponent::LookupAnimation(const std::string &name) const
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hModel = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hModel = GetEntity().GetModel();
 	if(hModel == nullptr)
 		return -1;
 	return hModel->LookupAnimation(name);
@@ -367,37 +375,35 @@ bool BaseModelComponent::LookupFlexController(const std::string &name,uint32_t &
 		return false;
 	return hMdl->GetFlexControllerId(name,flexId);
 }
-void BaseModelComponent::Save(DataStream &ds)
+void BaseModelComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
-	BaseEntityComponent::Save(ds);
+	BaseEntityComponent::Save(udm);
 
-	ds->WriteString(GetModelName());
-	ds->Write<uint32_t>(GetSkin());
+	udm["modelName"] = GetModelName();
+	udm["skin"] = GetSkin();
 
 	// Write body groups
 	auto &bodyGroups = GetBodyGroups();
-	ds->Write<std::size_t>(bodyGroups.size());
-	for(auto &bodyGroup : bodyGroups)
-		ds->Write<uint32_t>(bodyGroup);
+	udm["bodyGroups"] = bodyGroups;
 }
-void BaseModelComponent::Load(DataStream &ds,uint32_t version)
+void BaseModelComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {
-	BaseEntityComponent::Load(ds,version);
+	BaseEntityComponent::Load(udm,version);
 
-	auto modelName = ds->ReadString();
+	std::string modelName;
+	udm["modelName"](modelName);
 	if(modelName.empty() == false)
 		SetModel(modelName);
 
-	auto skin = ds->Read<uint32_t>();
+	uint32_t skin = 0;
+	udm["skin"](skin);
 	SetSkin(skin);
 
 	// Read body groups
-	auto numBodyGroups = ds->Read<std::size_t>();
-	for(auto i=decltype(numBodyGroups){0};i<numBodyGroups;++i)
-	{
-		auto id = ds->Read<uint32_t>();
-		SetBodyGroup(i,id);
-	}
+	std::vector<uint32_t> bodyGroups;
+	udm["bodyGroups"](bodyGroups);
+	for(auto i=decltype(bodyGroups.size()){0u};i<bodyGroups.size();++i)
+		SetBodyGroup(i,bodyGroups[i]);
 }
 
 ///////////////

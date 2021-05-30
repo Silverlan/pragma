@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -44,10 +44,36 @@
 #include <luabind/class_info.hpp>
 #include <util_zip.h>
 
-extern DLLENGINE Engine *engine;
-
+extern DLLNETWORK Engine *engine;
+#pragma optimize("",off)
 static auto s_bIgnoreIncludeCache = false;
 void Lua::set_ignore_include_cache(bool b) {s_bIgnoreIncludeCache = b;}
+
+luabind::detail::class_rep *Lua::get_crep(luabind::object o)
+{
+	auto *L = o.interpreter();
+	luabind::detail::class_rep *crep = nullptr;
+
+	o.push(L);
+	if(luabind::detail::is_class_rep(L,-1))
+	{
+		crep = static_cast<luabind::detail::class_rep *>(lua_touserdata(L, -1));
+		lua_pop(L, 1);
+	}
+	else
+	{
+		auto *obj = luabind::detail::get_instance(L,-1);
+		if(!obj)
+			lua_pop(L,1);
+		else
+		{
+			lua_pop(L,1);
+			// OK, we were given an object - gotta get the crep.
+			crep = obj->crep();
+		}
+	}
+	return crep;
+}
 
 void Lua::util::register_library(lua_State *l)
 {
@@ -69,18 +95,22 @@ void Lua::util::register_library(lua_State *l)
 		luabind::def("metres_to_units",Lua::util::metres_to_units),
 		luabind::def("variable_type_to_string",Lua::util::variable_type_to_string),
 		luabind::def("open_url_in_browser",Lua::util::open_url_in_browser),
-		luabind::def("get_addon_path",Lua::util::get_addon_path),
-		luabind::def("get_string_hash",Lua::util::get_string_hash)
+		luabind::def("get_addon_path",static_cast<std::string(*)(lua_State*)>(Lua::util::get_addon_path)),
+		luabind::def("get_string_hash",Lua::util::get_string_hash),
+		luabind::def("generate_uuid_v4",static_cast<std::string(*)()>([]() -> std::string {
+			return ::util::uuid_to_string(::util::generate_uuid_v4());
+		}))
 	];
 }
 
 luabind::object Lua::global::include(lua_State *l,const std::string &f) {return include(l,f,s_bIgnoreIncludeCache);}
+luabind::object Lua::global::include(lua_State *l,const std::string &f,bool ignoreCache) {return include(l,f,ignoreCache,false);}
 
-luabind::object Lua::global::include(lua_State *l,const std::string &f,bool ignoreCache)
+luabind::object Lua::global::include(lua_State *l,const std::string &f,bool ignoreCache,bool reload)
 {
 	auto *lInterface = engine->GetLuaInterface(l);
 	std::vector<std::string> *includeCache = (lInterface != nullptr) ? &lInterface->GetIncludeCache() : nullptr;
-	auto fShouldInclude = [includeCache,ignoreCache](std::string fpath) -> bool {
+	auto fShouldInclude = [includeCache,ignoreCache,reload](std::string fpath) -> bool {
 		if(includeCache == nullptr)
 			return true;
 		if(fpath.empty() == false)
@@ -94,9 +124,10 @@ luabind::object Lua::global::include(lua_State *l,const std::string &f,bool igno
 		auto it = std::find_if(includeCache->begin(),includeCache->end(),[fpath](const std::string &other) {
 			return ustring::compare(fpath,other,false);
 		});
-		if(it != includeCache->end())
+		if(!reload && it != includeCache->end())
 			return ignoreCache;
-		includeCache->push_back(fpath);
+		if(it == includeCache->end())
+			includeCache->push_back(fpath);
 		return true;
 	};
 	auto *nw = engine->GetNetworkState(l);
@@ -280,7 +311,16 @@ static void safely_remove(luabind::object &o,const char *removeFunction,bool use
 			if(useSafeMethod)
 				(*pEnt)->RemoveSafely();
 			else
-				(*pEnt)->Remove();
+			{
+				try
+				{
+					(*pEnt)->Remove();
+				}
+				catch(const std::exception &e)
+				{
+					Lua::Error(o.interpreter(),e.what());
+				}
+			}
 		}
 		return;
 	}
@@ -362,7 +402,7 @@ int Lua::util::fire_bullets(lua_State *l,const std::function<void(DamageInfo&,::
 				return RayCastHitType::None;
 			auto filterGroup = phys->GetCollisionFilter();
 			auto mdlComponent = ent->GetEntity().GetModelComponent();
-			if(mdlComponent.valid() && mdlComponent->GetHitboxCount() > 0 && (filterGroup &CollisionMask::NPC) != CollisionMask::None || (filterGroup &CollisionMask::Player) != CollisionMask::None) // Filter out player and NPC collision objects, since we only want to check their hitboxes
+			if(mdlComponent && mdlComponent->GetHitboxCount() > 0 && (filterGroup &CollisionMask::NPC) != CollisionMask::None || (filterGroup &CollisionMask::Player) != CollisionMask::None) // Filter out player and NPC collision objects, since we only want to check their hitboxes
 				return RayCastHitType::None;
 			return RayCastHitType::Block;
 		});
@@ -370,7 +410,7 @@ int Lua::util::fire_bullets(lua_State *l,const std::function<void(DamageInfo&,::
 		if(attacker != nullptr)
 		{
 			auto pPhysComponent = attacker->GetPhysicsComponent();
-			if(pPhysComponent.valid())
+			if(pPhysComponent != nullptr)
 				filterGroup = pPhysComponent->GetCollisionFilter();
 			filterGroup |= CollisionMask::Water | CollisionMask::WaterSurface | CollisionMask::PlayerHitbox | CollisionMask::NPCHitbox;
 		}
@@ -465,8 +505,7 @@ int Lua::util::register_class(lua_State *l)
 			if(Lua::IsSet(l,-1) == false)
 			{
 				Lua::Pop(l,1); /* 0 */
-				Lua::PushBool(l,false);
-				return 1;
+				return 0;
 			}
 
 			auto numPop = 0u;
@@ -483,8 +522,7 @@ int Lua::util::register_class(lua_State *l)
 					if(bLast == true)
 						break;
 					Lua::Pop(l,numPop +1); /* 0 */
-					Lua::PushBool(l,false);
-					return 1;
+					return 0;
 				}
 				if(bLast == true)
 				{
@@ -496,13 +534,15 @@ int Lua::util::register_class(lua_State *l)
 					if(classInfo)
 					{
 						// Re-register base classes for this class, in case they have been changed
-						classInfo->classObject.push(l); /* 1 */
+						classInfo->regFunc.push(l); /* 1 */
 						fRegisterBaseClasses();
 						Lua::Pop(l,1); /* 0 */
+
+						classInfo->classObject.push(l);
+						return 1;
 					}
 
-					Lua::PushBool(l,false);
-					return 1;
+					return 0;
 				}
 			}
 			Lua::Pop(l,numPop +1); /* 0 */
@@ -523,13 +563,15 @@ int Lua::util::register_class(lua_State *l)
 			if(classInfo)
 			{
 				// Re-register base classes for this class, in case they have been changed
-				classInfo->classObject.push(l); /* 1 */
+				classInfo->regFunc.push(l); /* 1 */
 				fRegisterBaseClasses();
 				Lua::Pop(l,1); /* 0 */
+
+				classInfo->classObject.push(l);
+				return 1;
 			}
 
-			Lua::PushBool(l,false);
-			return 1;
+			return 0;
 		}
 		Lua::Pop(l,1); /* 0 */
 	}
@@ -540,12 +582,36 @@ int Lua::util::register_class(lua_State *l)
 	std::stringstream ss;
 	ss<<"return class '"<<className<<"'";
 	auto r = Lua::RunString(l,ss.str(),1,"internal"); /* 1 */
+	luabind::object oClass {};
 	if(r == Lua::StatusCode::Ok)
 	{
 		auto *nw = engine->GetNetworkState(l);
 		auto *game = nw->GetGameState();
-		luabind::object oClass {luabind::from_stack(l,-1)};
-		game->GetLuaClassManager().RegisterClass(fullClassName,oClass);
+		oClass = luabind::globals(l)[className];
+		luabind::object regFc {luabind::from_stack(l,-1)};
+		game->GetLuaClassManager().RegisterClass(fullClassName,oClass,regFc);
+
+		// Init default constructor and print methods; They can still be overwritten by the Lua script
+		oClass["__init"] = luabind::make_function(l,static_cast<void(*)(lua_State*,const luabind::object&)>([](lua_State *l,const luabind::object &o) {
+			auto *crep = Lua::get_crep(o);
+			if(!crep)
+				return;
+			std::vector<luabind::detail::class_rep*> initialized;
+			for(auto &base : crep->bases())
+			{
+				if(std::find(initialized.begin(),initialized.end(),base.base) != initialized.end())
+					continue;
+				initialized.push_back(base.base);
+
+				base.base->get_table(l);
+				auto oBase = luabind::object{luabind::from_stack(l,-1)};
+				oBase["__init"](o);
+				Lua::Pop(l,1);
+			}
+		}));
+		oClass["__tostring"] = luabind::make_function(l,static_cast<std::string(*)(lua_State*,const luabind::object&)>([](lua_State *l,const luabind::object &o) -> std::string {
+			return luabind::get_class_info(luabind::from_stack(l,1)).name;
+		}));
 
 		fRegisterBaseClasses();
 		Lua::Pop(l,1); /* 0 */
@@ -566,8 +632,9 @@ int Lua::util::register_class(lua_State *l)
 
 	if(restorePreviousGlobalValue)
 		Lua::SetGlobal(l,className); /* -1 */
-
-	Lua::PushBool(l,true);
+	if(!oClass)
+		return 0;
+	oClass.push(l);
 	return 1;
 }
 
@@ -588,14 +655,14 @@ void Lua::util::splash_damage(
 			Vector3 min {};
 			Vector3 max {};
 			auto pPhysComponent = ent->GetPhysicsComponent();
-			if(pPhysComponent.valid())
+			if(pPhysComponent != nullptr)
 				pPhysComponent->GetCollisionBounds(&min,&max);
 			auto pTrComponent = ent->GetTransformComponent();
-			auto pos = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+			auto pos = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 			min += pos;
 			max += pos;
 			Vector3 posCone {};
-			Geometry::ClosestPointOnAABBToPoint(min,max,posEnd,&posCone);
+			umath::geometry::closest_point_on_aabb_to_point(min,max,posEnd,&posCone);
 			auto dirEnt = posCone -splashDamageInfo.origin;
 			uvec::normalize(&dirEnt);
 			if(uvec::dot(forward,dirEnt) < coneAngle)
@@ -637,7 +704,7 @@ int Lua::util::shake_screen(lua_State *l)
 		if(bUseRadius == true)
 		{
 			auto pTrComponent = ent->GetTransformComponent();
-			if(pTrComponent.valid())
+			if(pTrComponent != nullptr)
 				pTrComponent->SetPosition(pos);
 			pQuakeComponent->SetRadius(radius);
 		}
@@ -782,8 +849,24 @@ int Lua::util::depth_to_distance(lua_State *l)
 	return 1;
 }
 void Lua::util::open_url_in_browser(const std::string &url) {return ::util::open_url_in_browser(url);}
-void Lua::util::open_path_in_explorer(const std::string &path,const std::string &selectFile) {::util::open_path_in_explorer(::util::get_program_path() +'/' +path,selectFile);}
-void Lua::util::open_path_in_explorer(const std::string &path) {::util::open_path_in_explorer(::util::get_program_path() +'/' +path);}
+void Lua::util::open_path_in_explorer(const std::string &spath,const std::string &selectFile)
+{
+	auto path = ::util::Path::CreatePath(spath) +::util::Path::CreateFile(selectFile);
+	std::string strAbsPath;
+	if(FileManager::FindAbsolutePath(path.GetString(),strAbsPath) == false)
+		return;
+	auto absPath = ::util::Path::CreateFile(strAbsPath);
+	::util::open_path_in_explorer(absPath.GetPath(),absPath.GetFileName());
+}
+void Lua::util::open_path_in_explorer(const std::string &spath)
+{
+	auto path = ::util::Path::CreatePath(spath);
+	std::string strAbsPath;
+	if(FileManager::FindAbsolutePath(path.GetString(),strAbsPath) == false)
+		return;
+	auto absPath = ::util::Path::CreatePath(strAbsPath);
+	::util::open_path_in_explorer(absPath.GetPath());
+}
 int Lua::util::clamp_resolution_to_aspect_ratio(lua_State *l)
 {
 	auto w = Lua::CheckInt(l,1);
@@ -1051,7 +1134,8 @@ int Lua::util::pack_zip_archive(lua_State *l)
 	int32_t t = 2;
 	Lua::CheckTable(l,t);
 	std::unordered_map<std::string,std::string> files {};
-	std::unordered_map<std::string,std::string> customFiles {};
+	std::unordered_map<std::string,std::string> customTextFiles {};
+	std::unordered_map<std::string,DataStream> customBinaryFiles {};
 	auto numFiles = Lua::GetObjectLength(l,t);
 	if(numFiles > 0)
 	{
@@ -1075,7 +1159,13 @@ int Lua::util::pack_zip_archive(lua_State *l)
 			auto zipFileName = luabind::object_cast<std::string>(i.key());
 			auto value = *i;
 			if(luabind::type(value) == LUA_TTABLE)
-				customFiles[zipFileName] = luabind::object_cast<std::string>(value["contents"]);
+			{
+				auto *ds = luabind::object_cast_nothrow<DataStream*>(value["contents"],static_cast<DataStream*>(nullptr));
+				if(ds)
+					customBinaryFiles[zipFileName] = *ds;
+				else
+					customTextFiles[zipFileName] = luabind::object_cast<std::string>(value["contents"]);
+			}
 			else
 			{
 				auto diskFileName = luabind::object_cast<std::string>(*i);
@@ -1090,22 +1180,43 @@ int Lua::util::pack_zip_archive(lua_State *l)
 		Lua::PushBool(l,false);
 		return 1;
 	}
+	auto tNotFound = luabind::newtable(l);
+	uint32_t notFoundIdx = 1;
 	for(auto &pair : files)
 	{
 		auto f = FileManager::OpenFile(pair.second.c_str(),"rb");
 		if(f == nullptr)
+		{
+			tNotFound[notFoundIdx++] = pair.second;
 			continue;
+		}
 		auto sz = f->GetSize();
 		std::vector<uint8_t> data {};
 		data.resize(sz);
 		f->Read(data.data(),sz);
 		zip->AddFile(pair.first,data.data(),sz);
 	}
-	for(auto &pair : customFiles)
+	for(auto &pair : customTextFiles)
 		zip->AddFile(pair.first,pair.second);
+	for(auto &pair : customBinaryFiles)
+	{
+		auto &ds = pair.second;
+		zip->AddFile(pair.first,ds->GetData(),ds->GetInternalSize());
+	}
 	zip = nullptr;
 	Lua::PushBool(l,true);
-	return 1;
+	tNotFound.push(l);
+	return 2;
+}
+
+std::string Lua::util::get_addon_path(lua_State *l,const std::string &relPath)
+{
+	std::string rpath;
+	if(FileManager::FindAbsolutePath(relPath,rpath) == false)
+		return relPath;
+	::util::Path path{relPath};
+	path.MakeRelative(::util::get_program_path());
+	return path.GetString();
 }
 
 std::string Lua::util::get_addon_path(lua_State *l)
@@ -1122,3 +1233,4 @@ std::string Lua::util::get_addon_path(lua_State *l)
 	path += '/';
 	return path;
 }
+#pragma optimize("",on)

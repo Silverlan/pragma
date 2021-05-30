@@ -2,13 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __WAD_H__
 #define __WAD_H__
 #include "pragma/networkdefinitions.h"
 #include "pragma/file_formats/wdf.h"
-#include "pragma/model/animation/animation.h"
+#include "pragma/model/animation/animation.hpp"
 
 class DLLNETWORK FWAD
 	: FWDF
@@ -16,8 +16,8 @@ class DLLNETWORK FWAD
 private:
 	
 public:
-	std::shared_ptr<Animation> ReadData(unsigned short version,VFilePtr f);
-	std::shared_ptr<Animation> Load(unsigned short version,const char *animation);
+	std::shared_ptr<pragma::animation::Animation> ReadData(unsigned short version,VFilePtr f);
+	std::shared_ptr<pragma::animation::Animation> Load(unsigned short version,const char *animation);
 };
 
 #endif

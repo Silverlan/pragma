@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_SHADER_PARTICLE_2D_BASE_HPP__
@@ -14,7 +14,7 @@
 
 namespace pragma
 {
-	namespace rendering {class RasterizationRenderer;};
+	class CRasterizationRendererComponent;
 	class DLLCLIENT ShaderParticle2DBase
 		: public ShaderSceneLit,
 		public ShaderParticleBase
@@ -37,7 +37,7 @@ namespace pragma
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_DEPTH_MAP;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_ANIMATION;
 
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SHADOWS;
@@ -75,10 +75,10 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderParticle2DBase(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
-		bool Draw(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const CParticleSystemComponent &ps,CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags renderFlags);
+		bool Draw(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const CParticleSystemComponent &ps,CParticleSystemComponent::OrientationType orientationType,ParticleRenderFlags renderFlags);
 		bool BeginDraw(
 			const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,
-			CParticleSystemComponent &pSys,ParticleRenderFlags renderFlags,Pipeline pipelineIdx=Pipeline::Regular,
+			CParticleSystemComponent &pSys,ParticleRenderFlags renderFlags,
 			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
 		);
 
@@ -100,7 +100,7 @@ namespace pragma
 		) const;
 
 		virtual prosper::DescriptorSetInfo &GetAnimationDescriptorSetInfo() const override;
-		bool BindParticleMaterial(const rendering::RasterizationRenderer &renderer,const CParticleSystemComponent &ps);
+		bool BindParticleMaterial(const CRasterizationRendererComponent &renderer,const CParticleSystemComponent &ps);
 
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override;
 		virtual uint32_t GetLightDescriptorSetIndex() const override;

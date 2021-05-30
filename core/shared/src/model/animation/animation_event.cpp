@@ -2,12 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
 #include "pragma/model/animation/animation_event.h"
-#include "pragma/model/animation/animation.h"
+#include "pragma/model/animation/animation.hpp"
 
 DLLNETWORK std::unordered_map<int32_t,std::string> ANIMATION_EVENT_NAMES = {
 	{umath::to_integral(AnimationEvent::Type::EmitSound),"EVENT_EMITSOUND"},
@@ -17,7 +17,7 @@ DLLNETWORK std::unordered_map<int32_t,std::string> ANIMATION_EVENT_NAMES = {
 
 void pragma::register_engine_animation_events()
 {
-	auto &reg = Animation::GetEventEnumRegister();
+	auto &reg = pragma::animation::Animation::GetEventEnumRegister();
 	for(auto i=std::underlying_type_t<AnimationEvent::Type>{0};i<umath::to_integral(AnimationEvent::Type::Count);++i)
 	{
 		auto it = ANIMATION_EVENT_NAMES.find(i);

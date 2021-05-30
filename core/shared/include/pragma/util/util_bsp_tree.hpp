@@ -2,27 +2,35 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __UTIL_BSP_TREE_HPP__
 #define __UTIL_BSP_TREE_HPP__
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/math/plane.h"
 #include <array>
 #include <mathutil/uvec.h>
+#include <mathutil/plane.hpp>
 
+namespace udm {struct AssetData;};
 namespace util
 {
+#pragma pack(push,1)
 	class DLLNETWORK BSPTree
 		: public std::enable_shared_from_this<BSPTree>
 	{
 	public:
-		struct Node
-			: public std::enable_shared_from_this<Node>
+		static constexpr uint32_t PBSP_VERSION = 1;
+		static constexpr auto PBSP_IDENTIFIER = "PBSP";
+		using ClusterIndex = uint16_t;
+		using ChildIndex = uint32_t;
+		struct DLLNETWORK Node
 		{
-			std::array<std::shared_ptr<Node>,2u> children = {};
+			const Node *GetChild(BSPTree &tree,uint8_t idx);
+
+			ChildIndex index = 0;
+			std::array<ChildIndex,2u> children = {};
 			bool leaf = true;
 			Vector3 min = {};
 			Vector3 max = {};
@@ -37,36 +45,46 @@ namespace util
 			int32_t numFaces = 0u;
 
 			// Only valid if this is a leaf node
-			uint16_t cluster = std::numeric_limits<uint16_t>::max();
+			ClusterIndex cluster = std::numeric_limits<ClusterIndex>::max();
 			Vector3 minVisible = {}; // Min bounds encompassing entire visible area of this leaf
 			Vector3 maxVisible = {}; // Max bounds encompassing entire visible area of this leaf
 
 			// Only valid if this is a non-leaf node
-			Plane plane = {};
-
-			friend BSPTree;
+			umath::Plane plane = {};
 		};
 		static std::shared_ptr<BSPTree> Create();
+		static std::shared_ptr<BSPTree> Load(const udm::AssetData &data,std::string &outErr);
+		
 		bool IsValid() const;
-		bool IsClusterVisible(uint16_t clusterSrc,uint16_t clusterDst) const;
+		bool IsClusterVisible(ClusterIndex clusterSrc,ClusterIndex clusterDst) const;
 		const Node &GetRootNode() const;
 		Node &GetRootNode();
-		const std::vector<std::shared_ptr<Node>> &GetNodes() const;
+		const std::vector<Node> &GetNodes() const;
+		std::vector<Node> &GetNodes();
 		const std::vector<uint8_t> &GetClusterVisibility() const;
 		std::vector<uint8_t> &GetClusterVisibility();
 		uint64_t GetClusterCount() const;
 		void SetClusterCount(uint64_t numClusters);
 		Node *FindLeafNode(const Vector3 &pos);
-		std::vector<Node*> FindLeafNodesInAABB(const Vector3 &min,const Vector3 &max);
+		std::vector<Node*> FindLeafNodesInAabb(const Vector3 &min,const Vector3 &max);
+		bool IsAabbVisibleInCluster(const Vector3 &min,const Vector3 &max,ClusterIndex clusterIdx) const;
+		void UpdateVisibilityBounds();
 
-		std::shared_ptr<Node> CreateNode();
+		bool Save(udm::AssetData &outData,std::string &outErr);
+		Node &CreateNode();
 	protected:
 		BSPTree()=default;
-		std::shared_ptr<Node> m_rootNode = nullptr;
-		std::vector<std::shared_ptr<Node>> m_nodes = {};
+		void UpdateVisibilityBounds(BSPTree::Node &node);
+		BSPTree::Node *FindLeafNode(BSPTree::Node &node,const Vector3 &point);
+		void FindLeafNodesInAabb(BSPTree::Node &node,const std::array<Vector3,8> &aabbPoints,std::vector<BSPTree::Node*> &outNodes);
+		bool IsAabbVisibleInCluster(const BSPTree::Node &node,const std::array<Vector3,8> &aabbPoints,BSPTree::ClusterIndex clusterIdx) const;
+		ChildIndex m_rootNode = std::numeric_limits<ChildIndex>::max();
+		std::vector<Node> m_nodes = {};
 		std::vector<uint8_t> m_clusterVisibility = {};
 		uint64_t m_clusterCount = 0ull;
+		friend Node;
 	};
+#pragma pack(pop)
 };
 
 #endif

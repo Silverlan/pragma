@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -15,10 +15,10 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 
 extern DLLCLIENT CGame *c_game;
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 
-void RenderSystem::RenderShadows(const util::DrawSceneInfo &drawSceneInfo,pragma::rendering::RasterizationRenderer &renderer,std::vector<pragma::CLightComponent*> &lights)
+void RenderSystem::RenderShadows(const util::DrawSceneInfo &drawSceneInfo,pragma::CRasterizationRendererComponent &renderer,std::vector<pragma::CLightComponent*> &lights)
 {
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CShadowManagerComponent>>();

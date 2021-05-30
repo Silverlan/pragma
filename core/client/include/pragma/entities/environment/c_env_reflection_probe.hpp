@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_ENV_REFLECTION_PROBE_HPP__
@@ -53,7 +53,7 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
-		bool CaptureIBLReflectionsFromScene();
+		bool CaptureIBLReflectionsFromScene(const std::vector<BaseEntity*> *optEntityList=nullptr,bool renderJob=false);
 		bool GenerateIBLReflectionsFromEnvMap(const std::string &envMapFileName);
 		bool GenerateIBLReflectionsFromCubemap(prosper::Texture &cubemap);
 		bool LoadIBLReflectionsFromFile();
@@ -66,17 +66,19 @@ namespace pragma
 
 		UpdateStatus UpdateIBLData(bool rebuild=false);
 		bool RequiresRebuild() const;
+
+		std::string GetCubemapIBLMaterialFilePath() const;
 	private:
 		static std::shared_ptr<prosper::IImage> CreateCubemapImage();
 		Material *LoadMaterial(bool &outIsDefault);
 
 		void InitializeDescriptorSet();
 		util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> CaptureRaytracedIBLReflectionsFromScene(
-			uint32_t width,uint32_t height,const Vector3 &camPos,const Quat &camRot,float nearZ,float farZ,umath::Degree fov
+			uint32_t width,uint32_t height,const Vector3 &camPos,const Quat &camRot,float nearZ,float farZ,umath::Degree fov,
+			float exposure,const std::vector<BaseEntity*> *optEntityList=nullptr,bool renderJob=false
 		);
 		bool FinalizeCubemap(prosper::IImage &imgCubemap);
 		std::string GetCubemapIBLMaterialPath() const;
-		std::string GetCubemapIBLMaterialFilePath() const;
 		std::string GetCubemapIdentifier() const;
 		std::unique_ptr<rendering::IBLData> m_iblData = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_iblDsg = nullptr;

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -133,7 +133,7 @@ void WILuaBase::SetAlpha(float alpha)
 void WILuaBase::Render(const DrawInfo &drawInfo,const Mat4 &matDraw,const Vector2 &scale)
 {
 	WIBase::Render(drawInfo,matDraw);
-	CallLuaMember<void,std::reference_wrapper<const DrawInfo>,Mat4,Vector2>("OnDraw",std::ref(drawInfo),matDraw,scale);
+	//CallLuaMember<void,std::reference_wrapper<const DrawInfo>,Mat4,Vector2>("OnDraw",std::ref(drawInfo),matDraw,scale);
 }
 void WILuaBase::OnCursorEntered()
 {

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -13,12 +13,13 @@
 #include <wgui/types/wirect.h>
 #include <wgui/types/wiscrollbar.h>
 #include "pragma/gui/wiscrollcontainer.h"
+#include <prosper_window.hpp>
 
 LINK_WGUI_TO_CLASS(WITable,WITable);
 LINK_WGUI_TO_CLASS(WITableRow,WITableRow);
 LINK_WGUI_TO_CLASS(WITableCell,WITableCell);
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern ClientState *client;
 WITable::WITable()
 	: WIContainer(),m_bSortAsc(true),m_sortColumn(CUInt32(-1)),m_rowHeight(-1),m_bSortable(false),m_bScrollable(false)
@@ -345,8 +346,8 @@ void WITable::SelectRow(WITableRow &row)
 	if(m_selectableMode == SelectableMode::Multi)
 	{
 		auto &window = WGUI::GetInstance().GetContext().GetWindow();
-		auto lctrl = window.GetKeyState(GLFW::Key::LeftControl);
-		auto rctrl = window.GetKeyState(GLFW::Key::RightControl);
+		auto lctrl = window->GetKeyState(GLFW::Key::LeftControl);
+		auto rctrl = window->GetKeyState(GLFW::Key::RightControl);
 		deselect = !(lctrl == GLFW::KeyState::Press || lctrl == GLFW::KeyState::Held || rctrl == GLFW::KeyState::Press || rctrl == GLFW::KeyState::Held);
 	}
 	if(deselect)

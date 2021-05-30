@@ -2,27 +2,49 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
 #include "pragma/model/modelmanager.h"
+#include "pragma/asset/util_asset.hpp"
 #include <sharedutils/util_path.hpp>
 
+extern DLLNETWORK Engine *engine;
 
+static const std::vector<std::string> &get_model_extensions()
+{
+	static std::vector<std::string> extensions {};
+	if(extensions.empty())
+	{
+		extensions = pragma::asset::get_supported_extensions(pragma::asset::Type::Model,true);
+		auto &assetManager = engine->GetAssetManager();
+		auto numImporters = assetManager.GetImporterCount(pragma::asset::Type::Model);
+		for(auto i=decltype(numImporters){0u};i<numImporters;++i)
+		{
+			auto *importerInfo = assetManager.GetImporterInfo(pragma::asset::Type::Model,i);
+			if(importerInfo == nullptr)
+				continue;
+			extensions.reserve(extensions.size() +importerInfo->fileExtensions.size());
+			for(auto &ext : importerInfo->fileExtensions)
+				extensions.push_back(ext);
+		}
+	}
+	return extensions;
+}
 std::string pragma::asset::ModelManager::GetNormalizedModelName(const std::string &mdlName)
 {
 	util::Path path {mdlName};
 	path.Canonicalize();
-	path.RemoveFileExtension();
-	path += ".wmd";
+	path.RemoveFileExtension(get_model_extensions());
+	// path += ".wmd"; // TODO: Remove this extension!
 	return path.GetString();
 }
 std::string pragma::asset::ModelManager::GetCacheName(const std::string &mdlName)
 {
 	auto normalizedName = GetNormalizedModelName(mdlName);
 	util::Path path {normalizedName};
-	path.RemoveFileExtension();
+	path.RemoveFileExtension(get_model_extensions());
 	auto strPath = path.GetString();
 	ustring::to_lower(strPath);
 	return strPath;
@@ -107,7 +129,7 @@ std::shared_ptr<Model> pragma::asset::ModelManager::CreateModel(const std::strin
 	uint32_t boneCount = (bAddReference == true) ? 1 : 0;
 	auto mdl = CreateModel(boneCount,name);
 	auto &skeleton = mdl->GetSkeleton();
-	auto reference = Animation::Create();
+	auto reference = pragma::animation::Animation::Create();
 
 	if(bAddReference == true)
 	{

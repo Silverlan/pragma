@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "pragma/game/c_game.h"
@@ -93,8 +93,7 @@ static aiMatrix4x4 to_assimp_matrix(const Mat4 &m)
 
 static aiNode &add_node(aiNode &parentNode,uint32_t index,const std::string &name,BaseEntity &ent)
 {
-	umath::Transform t {};
-	ent.GetPose(t);
+	auto &t = ent.GetPose();
 
 	auto scale = static_cast<float>(util::pragma::units_to_metres(1.f));
 	umath::ScaledTransform tScaled = t;

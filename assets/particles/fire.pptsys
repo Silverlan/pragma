@@ -1,0 +1,318 @@
+"particleSystemDefinitions"
+{
+	"fire_3"
+	{
+		"assetData"
+		{
+			$array children [element;0][]
+			$array operators [element;0][]
+			"keyValues"
+			{
+				$string maxparticles "500"
+				$string material "particles/fire_sprites_v3"
+				$string emission_rate "10"
+				$string bloom_scale "0.8"
+				$string sort_particles "1"
+			}
+			$array initializers [element;5][
+				{
+					$string name "color_fade"
+					"keyValues"
+					{
+						$string fade_end "2.66"
+						$string fade_start "2"
+						$string color "255 255 255 0"
+					}
+				},
+				{
+					$string name "rotation_random"
+					"keyValues"
+					{
+						$string rotation_min "-45"
+						$string rotation_max "45"
+					}
+				},
+				{
+					$string name "radius_random"
+					"keyValues"
+					{
+						$string radius_max "50"
+						$string radius_min "25"
+					}
+				},
+				{
+					$string name "lifetime_random"
+					"keyValues"
+					{
+						$string lifetime_max "2.66"
+						$string lifetime_min "2.66"
+					}
+				},
+				{
+					$string name "initial_velocity"
+					"keyValues"
+					{
+						$string velocity "0 20 0"
+						$string spread_min "-0.3 0 -0.3"
+						$string spread_max "0.3 0 0.3"
+					}
+				}
+			]
+			$array renderers [element;0][]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+	"fire_ignite"
+	{
+		"assetData"
+		{
+			$array children [element;0][]
+			$array operators [element;0][]
+			"keyValues"
+			{
+				$string maxparticles "80"
+				$string material "particles/fire_sprites_v3"
+				$string emission_rate "40"
+				$string bloom_scale "0.8"
+				$string sort_particles "1"
+			}
+			$array initializers [element;5][
+				{
+					$string name "color_fade"
+					"keyValues"
+					{
+						$string fade_end "2.66"
+						$string fade_start "2"
+						$string color "255 255 255 0"
+					}
+				},
+				{
+					$string name "rotation_random"
+					"keyValues"
+					{
+						$string rotation_min "-45"
+						$string rotation_max "45"
+					}
+				},
+				{
+					$string name "radius_random"
+					"keyValues"
+					{
+						$string radius_max "50"
+						$string radius_min "25"
+					}
+				},
+				{
+					$string name "lifetime_random"
+					"keyValues"
+					{
+						$string lifetime_max "0.6"
+						$string lifetime_min "0.6"
+					}
+				},
+				{
+					$string name "initial_velocity"
+					"keyValues"
+					{
+						$string velocity "0 80 0"
+						$string spread_min "-0.3 0 -0.3"
+						$string spread_max "0.3 0 0.3"
+					}
+				}
+			]
+			$array renderers [element;0][]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+	"fire_2"
+	{
+		"assetData"
+		{
+			$array children [element;0][]
+			$array operators [element;0][]
+			"keyValues"
+			{
+				$string maxparticles "500"
+				$string material "particles/fire_sprites_v2"
+				$string emission_rate "10"
+				$string bloom_scale "0.01"
+				$string sort_particles "1"
+			}
+			$array initializers [element;5][
+				{
+					$string name "color_fade"
+					"keyValues"
+					{
+						$string fade_end "2.66"
+						$string fade_start "2"
+						$string color "255 255 255 0"
+					}
+				},
+				{
+					$string name "rotation_random"
+					"keyValues"
+					{
+						$string rotation_min "-45"
+						$string rotation_max "45"
+					}
+				},
+				{
+					$string name "radius_random"
+					"keyValues"
+					{
+						$string radius_max "50"
+						$string radius_min "25"
+					}
+				},
+				{
+					$string name "lifetime_random"
+					"keyValues"
+					{
+						$string lifetime_max "2.66"
+						$string lifetime_min "2.66"
+					}
+				},
+				{
+					$string name "initial_velocity"
+					"keyValues"
+					{
+						$string velocity "0 20 0"
+						$string spread_min "-0.3 0 -0.3"
+						$string spread_max "0.3 0 0.3"
+					}
+				}
+			]
+			$array renderers [element;0][]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+	"flame"
+	{
+		"assetData"
+		{
+			$array children [element;0][]
+			$array operators [element;0][]
+			"keyValues"
+			{
+				$string maxparticles "80"
+				$string material "particles/fire_sprites_v3"
+				$string emission_rate "40"
+				$string bloom_scale "0.8"
+				$string sort_particles "1"
+			}
+			$array initializers [element;5][
+				{
+					$string name "color_fade"
+					"keyValues"
+					{
+						$string fade_end "2.66"
+						$string fade_start "2"
+						$string color "255 255 255 0"
+					}
+				},
+				{
+					$string name "rotation_random"
+					"keyValues"
+					{
+						$string rotation_min "-45"
+						$string rotation_max "45"
+					}
+				},
+				{
+					$string name "radius_random"
+					"keyValues"
+					{
+						$string radius_max "50"
+						$string radius_min "25"
+					}
+				},
+				{
+					$string name "lifetime_random"
+					"keyValues"
+					{
+						$string lifetime_max "0.6"
+						$string lifetime_min "0.6"
+					}
+				},
+				{
+					$string name "initial_velocity"
+					"keyValues"
+					{
+						$string velocity "0 80 0"
+						$string spread_min "-0.3 0 -0.3"
+						$string spread_max "0.3 0 0.3"
+					}
+				}
+			]
+			$array renderers [element;0][]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+	"fire"
+	{
+		"assetData"
+		{
+			$array children [element;0][]
+			$array operators [element;0][]
+			"keyValues"
+			{
+				$string maxparticles "500"
+				$string material "particles/fire_sprites_v1"
+				$string emission_rate "10"
+				$string bloom_scale "0.2"
+				$string sort_particles "1"
+			}
+			$array initializers [element;5][
+				{
+					$string name "color_fade"
+					"keyValues"
+					{
+						$string fade_end "2.66"
+						$string fade_start "2"
+						$string color "255 255 255 0"
+					}
+				},
+				{
+					$string name "rotation_random"
+					"keyValues"
+					{
+						$string rotation_min "-45"
+						$string rotation_max "45"
+					}
+				},
+				{
+					$string name "radius_random"
+					"keyValues"
+					{
+						$string radius_max "50"
+						$string radius_min "25"
+					}
+				},
+				{
+					$string name "lifetime_random"
+					"keyValues"
+					{
+						$string lifetime_max "2.66"
+						$string lifetime_min "2.66"
+					}
+				},
+				{
+					$string name "initial_velocity"
+					"keyValues"
+					{
+						$string velocity "0 20 0"
+						$string spread_min "-0.3 0 -0.3"
+						$string spread_max "0.3 0 0.3"
+					}
+				}
+			]
+			$array renderers [element;0][]
+		}
+		$string assetType "PPTSYS"
+		$uint32 assetVersion 1
+	}
+}

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_RENDER_COMPONENT_HPP__
@@ -10,44 +10,72 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
+#include "pragma/entities/c_world.h"
+#include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/rendering/c_rendermode.h"
-#include <sharedutils/property/util_property.hpp>
+#include "pragma/rendering/c_model_render_buffer_data.hpp"
+#include <pragma/util/orientedpoint.h>
 #include <pragma/math/sphere.h>
 #include <pragma/entities/components/base_render_component.hpp>
 #include <mathutil/uvec.h>
+#include <mathutil/boundingvolume.h>
+#include <mathutil/transform.hpp>
 
-namespace prosper {class IUniformResizableBuffer; class IDescriptorSet;};
+#define ENTITY_RENDER_BUFFER_USE_STORAGE_BUFFER 1
+
+class ModelSubMesh;
+class ModelMesh;
+namespace prosper {class IUniformResizableBuffer; class IDescriptorSet; class SwapDescriptorSet; class SwapBuffer;};
 namespace Intersection {struct LineMeshResult;};
 namespace pragma
 {
 	class CModelComponent;
 	class CAnimatedComponent;
+	class CAttachableComponent;
 	class CLightMapReceiverComponent;
+	enum class GameShaderSpecialization : uint32_t;
+	using RenderMeshIndex = uint32_t;
+	using RenderBufferIndex = uint32_t;
 	class DLLCLIENT CRenderComponent final
 		: public BaseRenderComponent,
 		public CBaseNetComponent
 	{
 	public:
-		enum class StateFlags : uint8_t
+		enum class StateFlags : uint16_t
 		{
 			None = 0u,
 			RenderBufferDirty = 1u,
 			ExemptFromOcclusionCulling = RenderBufferDirty<<1u,
-			HasDepthBias = ExemptFromOcclusionCulling<<1u,
-			EnableDepthPass = HasDepthBias<<1u,
-			DisableShadows = EnableDepthPass<<1u
+			EnableDepthPass = ExemptFromOcclusionCulling<<1u,
+			DisableShadows = EnableDepthPass<<1u,
+			IsInstantiable = DisableShadows<<1u,
+			InstantiationDisabled = IsInstantiable<<1u,
+			RenderBoundsDirty = InstantiationDisabled<<1u,
+			ShouldDraw = RenderBoundsDirty<<1u,
+			ShouldDrawShadow = ShouldDraw<<1u
 		};
-		static ComponentEventId EVENT_ON_UPDATE_RENDER_DATA;
+		static constexpr auto USE_HOST_MEMORY_FOR_RENDER_DATA = true;
+
+		static ComponentEventId EVENT_ON_UPDATE_RENDER_DATA_MT;
 		static ComponentEventId EVENT_ON_RENDER_BUFFERS_INITIALIZED;
 		static ComponentEventId EVENT_ON_RENDER_BOUNDS_CHANGED;
+		static ComponentEventId EVENT_ON_RENDER_MODE_CHANGED;
 		static ComponentEventId EVENT_SHOULD_DRAW;
 		static ComponentEventId EVENT_SHOULD_DRAW_SHADOW;
+		static ComponentEventId EVENT_ON_UPDATE_RENDER_BUFFERS;
 		static ComponentEventId EVENT_ON_UPDATE_RENDER_MATRICES;
+		static ComponentEventId EVENT_UPDATE_INSTANTIABILITY;
+		static ComponentEventId EVENT_ON_CLIP_PLANE_CHANGED;
+		static ComponentEventId EVENT_ON_DEPTH_BIAS_CHANGED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
 		CRenderComponent(BaseEntity &ent);
-		std::weak_ptr<prosper::IBuffer> GetRenderBuffer() const;
+		const std::shared_ptr<prosper::SwapBuffer> &GetSwapRenderBuffer() const;
+		const prosper::IBuffer &GetRenderBuffer() const;
+		bool IsRenderBufferValid() const {return m_renderBuffer != nullptr;}
+		std::optional<RenderBufferIndex> GetRenderBufferIndex() const;
 		prosper::IDescriptorSet *GetRenderDescriptorSet() const;
+		prosper::SwapDescriptorSet *GetSwapRenderDescriptorSet() const;
 
 		static const std::vector<CRenderComponent*> &GetEntitiesExemptFromOcclusionCulling();
 		static const std::shared_ptr<prosper::IUniformResizableBuffer> &GetInstanceBuffer();
@@ -56,17 +84,36 @@ namespace pragma
 
 		virtual void Initialize() override;
 		virtual ~CRenderComponent() override;
+
+		std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes();
+		const std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes() const;
+		std::vector<rendering::RenderBufferData> &GetRenderBufferData();
+		const std::vector<rendering::RenderBufferData> &GetRenderBufferData() const {return const_cast<CRenderComponent*>(this)->GetRenderBufferData();}
 		std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes();
 		const std::vector<std::shared_ptr<ModelMesh>> &GetLODMeshes() const;
 
-		unsigned long long &GetLastRenderFrame();
+		RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod);
+		const RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod) const;
+		RenderMeshGroup &GetLodMeshGroup(uint32_t lod);
+		const RenderMeshGroup &GetLodMeshGroup(uint32_t lod) const;
+
+		uint64_t GetLastRenderFrame() const;
 		void SetLastRenderFrame(unsigned long long &t);
 
-		void GetAbsoluteRenderBounds(Vector3 &outMin,Vector3 &outMax) const;
-		void GetRenderBounds(Vector3 *min,Vector3 *max) const;
-		virtual void SetRenderBounds(Vector3 min,Vector3 max);
-		Sphere GetRenderSphereBounds() const;
-		void GetRotatedRenderBounds(Vector3 *min,Vector3 *max);
+		void SetLocalRenderBounds(Vector3 min,Vector3 max);
+
+		const bounding_volume::AABB &GetLocalRenderBounds() const;
+		const Sphere &GetLocalRenderSphere() const;
+		
+		const bounding_volume::AABB &GetAbsoluteRenderBounds() const;
+		const Sphere &GetAbsoluteRenderSphere() const;
+
+		// Note: These mustn't be called during rendering!
+		const bounding_volume::AABB &GetUpdatedAbsoluteRenderBounds() const;
+		const Sphere &GetUpdatedAbsoluteRenderSphere() const;
+
+		bounding_volume::AABB CalcAbsoluteRenderBounds() const;
+		Sphere CalcAbsoluteRenderSphere() const;
 
 		void SetRenderMode(RenderMode mode);
 		RenderMode GetRenderMode() const;
@@ -77,29 +124,25 @@ namespace pragma
 
 		virtual void ReceiveData(NetPacket &packet) override;
 
-		virtual void UpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bForceBufferUpdate=false);
+		// Note: Called in render thread
+		void UpdateRenderDataMT(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const CSceneComponent &scene,const CCameraComponent &cam,const Mat4 &vp);
 
-		virtual void Render(RenderMode renderMode);
-		virtual void PostRender(RenderMode renderMode);
-		virtual bool Render(pragma::ShaderTextured3DBase *shader,Material *mat,CModelSubMesh *mesh); // Return true to override default rendering
-		virtual void PreRender();
+		void UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bForceBufferUpdate=false);
 
-		virtual bool ShouldDraw(const Vector3 &camOrigin) const;
-		virtual bool ShouldDrawShadow(const Vector3 &camOrigin) const;
+		bool ShouldDraw() const;
+		bool ShouldDrawShadow() const;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual void OnEntitySpawn() override;
-		void UpdateRenderBounds();
 
-		util::WeakHandle<CModelComponent> &GetModelComponent() const;
-		util::WeakHandle<CAnimatedComponent> &GetAnimatedComponent() const;
-		util::WeakHandle<CLightMapReceiverComponent> &GetLightMapReceiverComponent() const;
+		CModelComponent *GetModelComponent() const;
+		CAttachableComponent *GetAttachableComponent() const;
+		CAnimatedComponent *GetAnimatedComponent() const;
+		CLightMapReceiverComponent *GetLightMapReceiverComponent() const;
 
 		void SetExemptFromOcclusionCulling(bool exempt);
 		bool IsExemptFromOcclusionCulling() const;
 
-		void GetDepthBias(float &outConstantFactor,float &outBiasClamp,float &outSlopeFactor) const;
-		void SetDepthBias(float constantFactor,float biasClamp,float slopeFactor);
 		StateFlags GetStateFlags() const;
 
 		void SetDepthPassEnabled(bool enabled);
@@ -109,26 +152,40 @@ namespace pragma
 		void ClearRenderClipPlane();
 		const Vector4 *GetRenderClipPlane() const;
 
+		void SetDepthBias(float d,float delta);
+		void ClearDepthBias();
+		const Vector2 *GetDepthBias() const;
+
 		void SetReceiveShadows(bool enabled);
 		bool IsReceivingShadows() const;
 
 		void SetRenderBufferDirty();
+		void SetRenderBoundsDirty();
 		std::optional<Intersection::LineMeshResult> CalcRayIntersection(const Vector3 &start,const Vector3 &dir,bool precise=false) const;
+
+		bool IsInstantiable() const;
+		void SetInstaniationEnabled(bool enabled);
+		void UpdateInstantiability();
+
+		void UpdateShouldDrawState();
 
 		void SetRenderOffsetTransform(const umath::ScaledTransform &t);
 		void ClearRenderOffsetTransform();
 		const umath::ScaledTransform *GetRenderOffsetTransform() const;
+
+		GameShaderSpecialization GetShaderPipelineSpecialization() const;
+		void ClearRenderBuffers();
 	protected:
+		void UpdateShouldDrawShadowState();
 		void UpdateRenderBuffer() const;
-		virtual void UpdateMatrices();
+		void UpdateMatrices();
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 		void ClearRenderObjects();
-		static bool RenderCallback(RenderObject *o,CBaseEntity *ent,pragma::CCameraComponent *cam,pragma::ShaderTextured3DBase *shader,Material *mat);
-		virtual bool RenderCallback(RenderObject *o,pragma::CCameraComponent *cam,pragma::ShaderTextured3DBase *shader,Material *mat);
-		virtual void UpdateRenderMeshes();
+		static bool RenderCallback(RenderObject *o,CBaseEntity *ent,pragma::CCameraComponent *cam,pragma::ShaderGameWorldLightingPass *shader,Material *mat);
+		bool RenderCallback(RenderObject *o,pragma::CCameraComponent *cam,pragma::ShaderGameWorldLightingPass *shader,Material *mat);
+		void UpdateRenderMeshes();
 
-		void ClearRenderBuffers();
 		void InitializeRenderBuffers();
 		void UpdateBoneBuffer();
 
@@ -138,51 +195,55 @@ namespace pragma
 		util::PEnumProperty<RenderMode> m_renderMode = nullptr;
 
 		// Used for quick access to avoid having to do a lookup on the entity's components
-		mutable util::WeakHandle<CModelComponent> m_mdlComponent = {};
-		mutable util::WeakHandle<CAnimatedComponent> m_animComponent = {};
-		mutable util::WeakHandle<CLightMapReceiverComponent> m_lightMapReceiverComponent = {};
+		mutable CAttachableComponent *m_attachableComponent = nullptr;
+		mutable CAnimatedComponent *m_animComponent = nullptr;
+		mutable CLightMapReceiverComponent *m_lightMapReceiverComponent = nullptr;
 
-		Vector3 m_renderMin = {};
-		Vector3 m_renderMax = {};
-		Vector3 m_renderMinRot = {};
-		Vector3 m_renderMaxRot = {};
-		Sphere m_renderSphere = {};
+		bounding_volume::AABB m_localRenderBounds {};
+		Sphere m_localRenderSphere {};
+
+		bounding_volume::AABB m_absoluteRenderBounds {};
+		Sphere m_absoluteRenderSphere {};
 
 		std::optional<Vector4> m_renderClipPlane {};
+		std::optional<Vector2> m_depthBias {};
 
-		StateFlags m_stateFlags = static_cast<StateFlags>(umath::to_integral(StateFlags::RenderBufferDirty) | umath::to_integral(StateFlags::EnableDepthPass));
-		unsigned long long m_lastRender = 0ull;
+		StateFlags m_stateFlags = static_cast<StateFlags>(umath::to_integral(StateFlags::RenderBufferDirty) | umath::to_integral(StateFlags::EnableDepthPass) | umath::to_integral(StateFlags::RenderBoundsDirty) |
+			 umath::to_integral(StateFlags::ShouldDraw) | umath::to_integral(StateFlags::ShouldDrawShadow));
+		std::atomic<uint64_t> m_lastRender = 0ull;
+		std::mutex m_renderDataMutex;
 		std::unordered_map<unsigned int,RenderInstance*> m_renderInstances;
 		std::unique_ptr<SortedRenderMeshContainer> m_renderMeshContainer = nullptr;
 		static std::vector<CRenderComponent*> s_ocExemptEntities;
 	private:
-		struct
-		{
-			float constantFactor = 0.f;
-			float biasClamp = 0.f;
-			float slopeFactor = 0.f;
-		} m_depthBias;
-		std::shared_ptr<prosper::IBuffer> m_renderBuffer = nullptr;
-		std::shared_ptr<prosper::IDescriptorSetGroup> m_renderDescSetGroup = nullptr;
+		void UpdateAbsoluteRenderBounds();
+		void UpdateAbsoluteSphereRenderBounds();
+		void UpdateAbsoluteAABBRenderBounds();
+		pragma::ShaderEntity::InstanceData m_instanceData {};
+		std::shared_ptr<prosper::SwapBuffer> m_renderBuffer = nullptr;
+		std::shared_ptr<prosper::SwapDescriptorSet> m_renderDescSetGroup = nullptr;
 	};
 
 	// Events
+	
+	struct DLLCLIENT CEUpdateInstantiability
+		: public ComponentEvent
+	{
+		CEUpdateInstantiability(bool &instantiable);
+		virtual void PushArguments(lua_State *l) override;
+		virtual uint32_t GetReturnCount() override;
+		virtual void HandleReturnValues(lua_State *l) override;
+		bool &instantiable;
+	};
 
 	struct DLLCLIENT CEShouldDraw
 		: public ComponentEvent
 	{
-		enum class ShouldDraw : uint8_t
-		{
-			Undefined = 0u,
-			Yes,
-			No
-		};
-		CEShouldDraw(const Vector3 &camOrigin);
+		CEShouldDraw(bool &shouldDraw);
 		virtual void PushArguments(lua_State *l) override;
 		virtual uint32_t GetReturnCount() override;
 		virtual void HandleReturnValues(lua_State *l) override;
-		const Vector3 &camOrigin;
-		ShouldDraw shouldDraw = ShouldDraw::Undefined;
+		bool &shouldDraw;
 	};
 
 	struct DLLCLIENT CEOnUpdateRenderMatrices
@@ -199,10 +260,16 @@ namespace pragma
 	struct DLLCLIENT CEOnUpdateRenderData
 		: public ComponentEvent
 	{
-		CEOnUpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &commandBuffer,bool bufferUpdateRequired,bool firstUpdateThisFrame);
+		CEOnUpdateRenderData(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &commandBuffer);
 		virtual void PushArguments(lua_State *l) override;
-		const bool bufferUpdateRequired;
-		const bool firstUpdateThisFrame;
+		std::shared_ptr<prosper::IPrimaryCommandBuffer> commandBuffer;
+	};
+
+	struct DLLCLIENT CEOnUpdateRenderBuffers
+		: public ComponentEvent
+	{
+		CEOnUpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &commandBuffer);
+		virtual void PushArguments(lua_State *l) override;
 		std::shared_ptr<prosper::IPrimaryCommandBuffer> commandBuffer;
 	};
 

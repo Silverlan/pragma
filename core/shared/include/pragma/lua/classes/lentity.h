@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __LENTITY_H__
 #define __LENTITY_H__
@@ -40,8 +40,8 @@ namespace Lua
 		DLLNETWORK void RemoveEntityOnRemoval(lua_State *l,EntityHandle &hEnt,EntityHandle &hEntOther,Bool bRemove);
 		DLLNETWORK void GetSpawnFlags(lua_State *l,EntityHandle &hEnt);
 
-		DLLNETWORK void Save(lua_State *l,EntityHandle &hEnt,::DataStream &ds);
-		DLLNETWORK void Load(lua_State *l,EntityHandle &hEnt,::DataStream &ds);
+		DLLNETWORK void Save(lua_State *l,EntityHandle &hEnt,udm::LinkedPropertyWrapper &udm);
+		DLLNETWORK void Load(lua_State *l,EntityHandle &hEnt,udm::LinkedPropertyWrapper &udm);
 		DLLNETWORK void Copy(lua_State *l,EntityHandle &hEnt);
 
 		DLLNETWORK void GetAirDensity(lua_State *l,EntityHandle &hEnt);

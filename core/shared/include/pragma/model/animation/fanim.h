@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __FANIM_H__
@@ -20,7 +20,9 @@ enum class DLLNETWORK FAnim : uint32_t
 	MoveZ = 64,
 	Autoplay = 128,
 	Gesture = 256,
-	NoMoveBlend = 512
+	NoMoveBlend = 512,
+
+	Count = 7
 };
 REGISTER_BASIC_BITWISE_OPERATORS(FAnim)
 

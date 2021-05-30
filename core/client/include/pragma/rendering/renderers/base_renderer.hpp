@@ -2,12 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __BASE_RENDERER_HPP__
 #define __BASE_RENDERER_HPP__
-
+// TODO: Remove this file
+#if 0
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/c_renderflags.h"
 #include <prosper_command_buffer.hpp>
@@ -25,13 +26,17 @@ namespace pragma::rendering
 		: public std::enable_shared_from_this<BaseRenderer>
 	{
 	public:
+		static const std::vector<BaseRenderer*> &GetRenderers();
 		template<class TRenderer>
 			static std::shared_ptr<TRenderer> Create(uint32_t w,uint32_t h);
 		bool operator==(const BaseRenderer &other) const;
 		bool operator!=(const BaseRenderer &other) const;
-		virtual ~BaseRenderer()=default;
-		virtual bool RenderScene(const util::DrawSceneInfo &drawSceneInfo);
+		virtual ~BaseRenderer();
+		virtual bool RecordCommandBuffers(const util::DrawSceneInfo &drawSceneInfo);
+		virtual bool Render(const util::DrawSceneInfo &drawSceneInfo);
+
 		virtual bool ReloadRenderTarget(CSceneComponent &scene,uint32_t width,uint32_t height)=0;
+		virtual bool ReloadBloomRenderTarget(uint32_t width) {return true;};
 		virtual prosper::Texture *GetSceneTexture()=0;
 		virtual prosper::Texture *GetPresentationTexture();
 		virtual prosper::Texture *GetHDRPresentationTexture()=0;
@@ -63,5 +68,6 @@ template<class TRenderer>
 		return nullptr;
 	return res;
 }
+#endif
 
 #endif

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_SHADER_PARTICLE_MODEL_HPP__
@@ -14,7 +14,7 @@
 namespace pragma
 {
 	class DLLCLIENT ShaderParticleModel
-		: public ShaderTextured3DBase,
+		: public ShaderGameWorldLightingPass,
 		public ShaderParticleBase
 	{
 	public:
@@ -48,8 +48,8 @@ namespace pragma
 		bool BindParticleSystem(pragma::CParticleSystemComponent &pSys);
 
 		bool BeginDraw(
-			const std::shared_ptr<prosper::IPrimaryCommandBuffer> &cmdBuffer,const Vector4 &clipPlane,
-			pragma::CParticleSystemComponent &pSys,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},Pipeline pipelineIdx=Pipeline::Regular,
+			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,
+			pragma::CParticleSystemComponent &pSys,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},
 			ShaderScene::RecordFlags recordFlags=ShaderScene::RecordFlags::RenderPassTargetAsViewportAndScissor
 		);
 	protected:
@@ -61,7 +61,7 @@ namespace pragma
 	private:
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_dummyAnimDescSetGroup = nullptr;
 		// These are unused
-		virtual bool Draw(CModelSubMesh &mesh) override {return false;};
+		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override {return false;};
 	};
 };
 

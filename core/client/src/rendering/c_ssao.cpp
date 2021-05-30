@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -19,7 +19,7 @@
 #include <image/prosper_sampler.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 bool SSAOInfo::Initialize(
@@ -97,9 +97,9 @@ void Console::commands::debug_ssao(NetworkState *state,pragma::BasePlayerCompone
 
 	auto *scene = c_game->GetScene();
 	auto *renderer = scene ? scene->GetRenderer() : nullptr;
-	if(renderer == nullptr || renderer->IsRasterizationRenderer() == false)
+	auto rasterizer = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+	if(rasterizer.expired())
 		return;
-	auto *rasterizer = static_cast<pragma::rendering::RasterizationRenderer*>(renderer);
 	auto &ssaoInfo = rasterizer->GetSSAOInfo();
 	auto &prepass = rasterizer->GetPrepass();
 
@@ -146,3 +146,11 @@ void Console::commands::debug_ssao(NetworkState *state,pragma::BasePlayerCompone
 
 	pEl->SizeToContents();
 }
+
+static void cl_render_ssao_callback(NetworkState*,ConVar*,bool,bool val)
+{
+	if(c_game == nullptr)
+		return;
+	c_game->UpdateGameWorldShaderSettings();
+}
+REGISTER_CONVAR_CALLBACK_CL(cl_render_ssao,cl_render_ssao_callback);

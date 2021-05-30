@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_sound_emitter_component.hpp"
@@ -41,7 +41,7 @@ void SSoundEmitterComponent::UpdateSoundTransform(ALSound &snd) const
 	auto *baseSnd = SALSound::GetBase(&snd);
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 	{
 		baseSnd->SetPosition(pTrComponent->GetPosition(),true);
 		baseSnd->SetDirection(pTrComponent->GetForward(),true);
@@ -81,7 +81,7 @@ std::shared_ptr<ALSound> SSoundEmitterComponent::EmitSound(std::string sndname,A
 	al->SetPitch(pitch);
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent != nullptr)
 		al->SetPosition(pTrComponent->GetPosition());
 	auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
 	if(pVelComponent.valid())

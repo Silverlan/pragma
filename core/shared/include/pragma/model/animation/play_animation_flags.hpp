@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __PLAY_ANIMATION_FLAGS_HPP__
@@ -19,6 +19,8 @@ namespace pragma
 		Reset = 1u,
 		Transmit = Reset<<1u, // Only used for entities
 		SnapTo = Transmit<<1u, // Unused
+		Loop = SnapTo<<1u,
+
 		Default = Transmit
 	};
 };

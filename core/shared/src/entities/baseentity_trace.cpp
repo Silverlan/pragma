@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -17,5 +17,5 @@ TraceData util::get_entity_trace_data(BaseEntity &ent)
 	if(pCharComponent.valid())
 		return pCharComponent->GetAimTraceData();
 	auto pTrComponent = ent.GetTransformComponent();
-	return pTrComponent.valid() ? get_entity_trace_data(*pTrComponent) : TraceData{};
+	return pTrComponent != nullptr ? get_entity_trace_data(*pTrComponent) : TraceData{};
 }

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_transform_component.hpp"
@@ -15,10 +15,11 @@ using namespace pragma;
 
 extern DLLSERVER ServerState *server;
 
+void STransformComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BaseTransformComponent));}
 void STransformComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	nwm::write_vector(packet,GetPosition());
-	nwm::write_quat(packet,GetOrientation());
+	nwm::write_quat(packet,GetRotation());
 	packet->Write<Vector3>(GetEyeOffset());
 	packet->Write<Vector3>(GetScale());
 }
@@ -32,7 +33,7 @@ void STransformComponent::SetScale(const Vector3 &scale)
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	ent.SendNetEvent(m_netEvSetScale,p,pragma::networking::Protocol::SlowReliable);
 	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent.valid())
+	if(pPhysComponent != nullptr)
 		pPhysComponent->InitializePhysics(pPhysComponent->GetPhysicsType());
 }
 luabind::object STransformComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<STransformComponentHandleWrapper>(l);}

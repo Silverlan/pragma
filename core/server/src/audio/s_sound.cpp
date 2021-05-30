@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/game/s_game.h"
@@ -55,9 +55,14 @@ void ServerState::SendSoundSourceToClient(SALSound &sound,bool sendFullUpdate,co
 		p->Write<float>(sound.GetOuterConeGainHF());
 		p->Write<uint32_t>(sound.GetFlags());
 		
-		auto range = sound.GetRange();
-		p->Write<float>(range.first);
-		p->Write<float>(range.second);
+		auto hasRange = sound.HasRange();
+		p->Write<bool>(hasRange);
+		if(hasRange)
+		{
+			auto range = sound.GetRange();
+			p->Write<float>(range.first);
+			p->Write<float>(range.second);
+		}
 
 		p->Write<float>(sound.GetFadeInDuration());
 		p->Write<float>(sound.GetFadeOutDuration());
@@ -93,7 +98,9 @@ void ServerState::SendSoundSourceToClient(SALSound &sound,bool sendFullUpdate,co
 std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd,ALSoundType type,ALCreateFlags flags)
 {
 	std::transform(snd.begin(),snd.end(),snd.begin(),::tolower);
-	snd = FileManager::GetCanonicalizedPath(snd);
+	snd = FileManager::GetNormalizedPath(snd);
+	if(m_missingSoundCache.find(snd) != m_missingSoundCache.end())
+		return nullptr;
 	SoundScript *script = m_soundScriptManager->FindScript(snd.c_str());
 	float duration = 0.f;
 	if(script == NULL)
@@ -115,6 +122,7 @@ std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd,ALSoundType ty
 					return r;
 				}
 			}
+			m_missingSoundCache.insert(snd);
 			return std::shared_ptr<ALSound>();
 		}
 		else
@@ -135,6 +143,7 @@ std::shared_ptr<ALSound> ServerState::CreateSound(std::string snd,ALSoundType ty
 						return r;
 					}
 				}
+				m_missingSoundCache.insert(snd);
 				return std::shared_ptr<ALSound>();
 			}
 		}

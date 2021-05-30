@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -87,8 +87,8 @@ std::vector<DecalProjector::VertexInfo> DecalProjector::CropTriangleVertsByLine(
 	for(auto i=decltype(verts.size()){0u};i<verts.size();++i)
 	{
 		auto &vInfo = verts.at(i);
-		auto side = Geometry::get_side_of_point_to_line(lineStart,lineEnd,vInfo.position);
-		pointsOutOfBounds.at(i) = (side == Geometry::LineSide::Right);
+		auto side = umath::geometry::get_side_of_point_to_line(lineStart,lineEnd,vInfo.position);
+		pointsOutOfBounds.at(i) = (side == umath::geometry::LineSide::Right);
 	}
 
 	std::vector<VertexInfo> newVerts {};
@@ -107,11 +107,11 @@ std::vector<DecalProjector::VertexInfo> DecalProjector::CropTriangleVertsByLine(
 			(pointsOutOfBounds.at(v0Idx) == false && pointsOutOfBounds.at(v1Idx) == true)
 		)
 		{
-			auto intersectionPos = Intersection::LineLine(lineStart,lineEnd,verts.at(v0Idx).position,verts.at(v1Idx).position);
+			auto intersectionPos = umath::intersection::line_line(lineStart,lineEnd,verts.at(v0Idx).position,verts.at(v1Idx).position);
 			if(intersectionPos.has_value())
 			{
 				float u,v;
-				if(Geometry::calc_barycentric_coordinates(v0,v1,v2,Vector3{intersectionPos->x,intersectionPos->y,0.f},u,v))
+				if(umath::geometry::calc_barycentric_coordinates(v0,v1,v2,Vector3{intersectionPos->x,intersectionPos->y,0.f},u,v))
 					newVerts.push_back({*intersectionPos,std::numeric_limits<uint32_t>::max(),Vector2{u,v}});
 			}
 		}
@@ -157,7 +157,7 @@ bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas,st
 				auto p1 = effectivePose *v1.position;
 				auto p2 = effectivePose *v2.position;
 
-				if(Intersection::AABBTriangle(bounds.first,bounds.second,p0,p1,p2) == false)
+				if(umath::intersection::aabb_triangle(bounds.first,bounds.second,p0,p1,p2) == false)
 					continue;
 				intersectingTris.push_back({
 					indices,
@@ -192,7 +192,7 @@ bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas,st
 					uvec::project_to_plane(triInfo.vertices.at(1),n,d),
 					uvec::project_to_plane(triInfo.vertices.at(2),n,d)
 				};
-				auto area = Geometry::calc_triangle_area(vertsPs.at(0),vertsPs.at(1),vertsPs.at(2));
+				auto area = umath::geometry::calc_triangle_area(vertsPs.at(0),vertsPs.at(1),vertsPs.at(2));
 				constexpr auto AREA_EPSILON = 0.004f;
 				if(area < AREA_EPSILON)
 					continue; // Points don't actually create a triangle; skip it; TODO: It would be cheaper to use dot products for this!
@@ -311,7 +311,7 @@ void CDecalComponent::OnEntitySpawn()
 	BaseEnvDecalComponent::OnEntitySpawn();
 	/*auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return;
 	auto &pos = pTrComponent->GetPosition();
 	auto dir = -pTrComponent->GetForward();
@@ -359,8 +359,7 @@ bool CDecalComponent::ApplyDecal(DecalProjector &projector,const std::vector<Dec
 		return false;
 
 	// Vertices are in world space; Move them into entity space
-	umath::ScaledTransform pose;
-	GetEntity().GetPose(pose);
+	auto &pose = GetEntity().GetPose();
 	auto invPose = pose.GetInverse();
 	for(auto &v : verts)
 		v.position = invPose *v.position;
@@ -380,7 +379,8 @@ bool CDecalComponent::ApplyDecal(DecalProjector &projector,const std::vector<Dec
 	mdl->Update(ModelUpdateFlags::All);
 
 	auto decalRenderC = GetEntity().AddComponent<pragma::CRenderComponent>();
-	decalRenderC->SetDepthBias(-1'000.f,0.f,-2.f);
+	//decalRenderC->SetDepthBias(-1'000.f,0.f,-2.f);
+	// TODO
 
 	GetEntity().SetModel(mdl);
 	// GetEntity().SetPose(pose);
@@ -412,16 +412,9 @@ bool CDecalComponent::ApplyDecal()
 		if(physC->GetPhysicsType() != PHYSICSTYPE::STATIC)
 			continue;
 		// TODO: We can speed this up by using the BSP Tree for occlusion culling
-		auto renderC = ent->GetComponent<CRenderComponent>();
-		Vector3 min,max;
-		renderC->GetRenderBounds(&min,&max);
+		auto &aabb = static_cast<CBaseEntity*>(ent)->GetAbsoluteRenderBounds();
 
-		umath::Transform pose;
-		ent->GetPose(pose);
-		min = pose *min;
-		max = pose *max;
-
-		if(Intersection::AABBInAABB(projectorAABB.first,projectorAABB.second,min,max) == false)
+		if(umath::intersection::aabb_in_aabb(projectorAABB.first,projectorAABB.second,aabb.min,aabb.max) == false)
 			continue;
 
 		targetEnts.push_back(static_cast<CBaseEntity*>(ent));
@@ -433,8 +426,7 @@ bool CDecalComponent::ApplyDecal()
 	meshDatas.reserve(targetEnts.size());
 	for(auto *ent : targetEnts)
 	{
-		umath::ScaledTransform pose;
-		ent->GetPose(pose);
+		auto &pose = ent->GetPose();
 
 		auto renderC = ent->GetComponent<CRenderComponent>();
 		auto targetMeshes = renderC->GetLODMeshes();
@@ -446,7 +438,7 @@ bool CDecalComponent::ApplyDecal()
 			if(bspTree)
 			{
 				// Filter out meshes outside the projector AABB
-				auto leafNodes = bspTree->FindLeafNodesInAABB(projectorAABB.first,projectorAABB.second);
+				auto leafNodes = bspTree->FindLeafNodesInAabb(projectorAABB.first,projectorAABB.second);
 				for(auto it=targetMeshes.begin();it!=targetMeshes.end();)
 				{
 					auto &mesh = *it;
@@ -480,7 +472,7 @@ bool CDecalComponent::ApplyDecal()
 			for(auto &subMesh : mesh->GetSubMeshes())
 				meshData.subMeshes.push_back(subMesh.get());
 		}
-		ent->GetPose(meshData.pose);
+		meshData.pose = ent->GetPose();
 	}
 	return ApplyDecal(projector,meshDatas);
 }

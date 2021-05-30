@@ -2,13 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/entities/entity_component_manager.hpp"
 #include "pragma/entities/entity_component_system.hpp"
+#include "pragma/entities/components/base_generic_component.hpp"
 #include <unordered_set>
 
 using namespace pragma;
@@ -85,7 +86,9 @@ util::WeakHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::AddComp
 	OnComponentAdded(*ptrComponent);
 
 	pragma::CEOnEntityComponentAdded evData{*ptrComponent};
-	BroadcastEvent(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED,evData,ptrComponent.get());
+	auto *genericC = m_entity->GetGenericComponent();
+	if(BroadcastEvent(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED,evData,ptrComponent.get()) != util::EventReply::Handled && genericC)
+		genericC->InvokeEventCallbacks(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED,evData);
 
 	for(auto &ptrComponentOther : components)
 	{
@@ -115,6 +118,9 @@ util::WeakHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::AddComp
 }
 void BaseEntityComponentSystem::RemoveComponent(pragma::BaseEntityComponent &component)
 {
+	if(umath::is_flag_set(component.m_stateFlags,BaseEntityComponent::StateFlags::Removed))
+		return;
+	umath::set_flag(component.m_stateFlags,BaseEntityComponent::StateFlags::Removed);
 	auto it = std::find_if(m_components.begin(),m_components.end(),[&component](const std::shared_ptr<BaseEntityComponent> &componentOther) {
 		return componentOther.get() == &component;
 	});

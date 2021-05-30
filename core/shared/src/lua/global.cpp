@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -13,6 +13,7 @@
 #include "pragma/lua/libraries/lutil.h"
 #include "pragma/lua/libraries/lmath.h"
 #include "pragma/lua/libraries/ldebug.h"
+#include "pragma/lua/libraries/ludm.hpp"
 #include <pragma/console/fcvar.h>
 #include "pragma/physics/raytraces.h"
 #include "pragma/lua/ldefinitions.h"
@@ -27,6 +28,7 @@
 #include <pragma/math/intersection.h>
 #include "pragma/input/inkeys.h"
 #include "pragma/entities/observermode.h"
+#include "pragma/entities/entity_iterator.hpp"
 #include "pragma/physics/collisionmasks.h"
 #include <fsys/filesystem.h>
 #include "pragma/audio/alsound_type.h"
@@ -59,7 +61,7 @@
 	#define FILE_ATTRIBUTE_VIRTUAL 0x10000
 #endif
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 
 void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 {
@@ -155,6 +157,75 @@ void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 	});
 }
 
+static BaseEntity *find_entity(lua_State *l,Game &game,luabind::object o)
+{
+	BaseEntity *ent = nullptr;
+	auto idx = luabind::object_cast_nothrow<int>(o,-1);
+	if(idx != -1)
+		ent = game.GetEntityByLocalIndex(idx);
+	else
+	{
+		std::string targetName = Lua::CheckString(l,1);
+		EntityIterator entIt {game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+		entIt.AttachFilter<EntityIteratorFilterNameOrClass>(targetName);
+		auto it = entIt.begin();
+		if(it != entIt.end())
+			ent = *it;
+		else
+		{
+			EntityIterator entIt {game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+			struct EntityNamePair
+			{
+				std::vector<std::string> names;
+				std::vector<BaseEntity*> ents;
+				void Add(BaseEntity *ent,const std::string &name)
+				{
+					ents.push_back(ent);
+					names.push_back(name);
+				}
+			};
+			EntityNamePair entNames;
+			EntityNamePair classNames;
+			EntityNamePair mdlNames;
+			for(auto *ent : entIt)
+			{
+				auto name = ent->GetName();
+				if(!name.empty())
+					entNames.Add(ent,name);
+
+				auto className = ent->GetClass();
+				if(!className.empty())
+					entNames.Add(ent,className);
+
+				auto mdlName = ent->GetModelName();
+				if(!mdlName.empty())
+					entNames.Add(ent,mdlName);
+			}
+			std::vector<EntityNamePair*> lists = {&entNames,&classNames,&mdlNames};
+			for(auto *pair : lists)
+			{
+				std::vector<size_t> similarElements {};
+				std::vector<float> similarities {};
+				ustring::gather_similar_elements(targetName,pair->names,similarElements,1,&similarities);
+				if(!similarElements.empty() && similarities[0] >= 0.3f)
+				{
+					ent = pair->ents[similarElements.front()];
+					break;
+				}
+			}
+			for(auto *pair : lists)
+			{
+				for(auto i=decltype(pair->names.size()){0u};i<pair->names.size();++i)
+				{
+					if(ustring::match(pair->names[i],'*' +targetName +'*'))
+						return pair->ents[i];
+				}
+			}
+		}
+	}
+	return ent;
+}
+
 void Game::RegisterLuaGlobals()
 {
 	NetworkState::RegisterSharedLuaGlobals(GetLuaInterface());
@@ -216,14 +287,14 @@ void Game::RegisterLuaGlobals()
 
 	Lua::RegisterLibraryEnums(GetLuaState(),"intersect",{
 		// TODO: These should be obsolete?
-		{"RESULT_OUTSIDE",INTERSECT_OUTSIDE},
-		{"RESULT_INSIDE",INTERSECT_INSIDE},
-		{"RESULT_OVERLAP",INTERSECT_OVERLAP},
+		{"RESULT_OUTSIDE",umath::to_integral(umath::intersection::Intersect::Outside)},
+		{"RESULT_INSIDE",umath::to_integral(umath::intersection::Intersect::Inside)},
+		{"RESULT_OVERLAP",umath::to_integral(umath::intersection::Intersect::Overlap)},
 		//
 
-		{"RESULT_NO_INTERSECTION",umath::to_integral(Intersection::Result::NoIntersection)},
-		{"RESULT_INTERSECT",umath::to_integral(Intersection::Result::Intersect)},
-		{"RESULT_OUT_OF_RANGE",umath::to_integral(Intersection::Result::OutOfRange)}
+		{"RESULT_NO_INTERSECTION",umath::to_integral(umath::intersection::Result::NoIntersection)},
+		{"RESULT_INTERSECT",umath::to_integral(umath::intersection::Result::Intersect)},
+		{"RESULT_OUT_OF_RANGE",umath::to_integral(umath::intersection::Result::OutOfRange)}
 	});
 
 	Lua::RegisterLibraryEnums(GetLuaState(),"time",{
@@ -325,4 +396,63 @@ void Game::RegisterLuaGlobals()
 		{"SEARCH_ALL",umath::to_integral(fsys::SearchFlags::All)},
 		{"SEARCH_ADDON",FSYS_SEARCH_ADDON}
 	});
+
+	auto enableShorthand = Lua::get_extended_lua_modules_enabled();
+	if(enableShorthand)
+	{
+		luabind::globals(l)["ec"] = luabind::make_function(l,static_cast<luabind::object(*)(lua_State*,luabind::object,luabind::object)>([](lua_State *l,luabind::object o,luabind::object o2) -> luabind::object {
+			auto &nw = *engine->GetNetworkState(l);
+			auto *game = nw.GetGameState();
+			if(!game)
+				return {};
+			auto *ent = find_entity(l,*game,o);
+			if(!Lua::IsSet(l,2) || !ent)
+				return ent ? *ent->GetLuaObject() : luabind::object{};
+			std::string name = Lua::CheckString(l,2);
+			auto &components = ent->GetComponents();
+			std::vector<std::string> componentNames;
+			componentNames.reserve(components.size());
+			for(auto &c : components)
+			{
+				auto *info = game->GetEntityComponentManager().GetComponentInfo(c->GetComponentId());
+				if(!info)
+					continue;
+				componentNames.push_back(info->name);
+			}
+			std::vector<size_t> similarElements {};
+			std::vector<float> similarities {};
+			ustring::gather_similar_elements(name,componentNames,similarElements,1,&similarities);
+			if(!similarElements.empty() && similarities.front() >= 0.3f)
+			{
+				auto &componentName = componentNames[similarElements.front()];
+				auto c = ent->FindComponent(componentName);
+				if(c.valid())
+					return c->GetLuaObject();
+			}
+			componentNames.clear();
+			for(auto &c : game->GetEntityComponentManager().GetRegisteredComponentTypes())
+				componentNames.push_back(c.name);
+			similarElements.clear();
+			similarities.clear();
+			ustring::gather_similar_elements(name,componentNames,similarElements,1,&similarities);
+			if(!similarElements.empty())
+			{
+				auto &componentName = componentNames[similarElements.front()];
+				auto c = ent->AddComponent(componentName);
+				if(c.valid())
+					return c->GetLuaObject();
+			}
+			return {};
+		}));
+		luabind::globals(l)["e"] = luabind::make_function(l,static_cast<luabind::object(*)(lua_State*,luabind::object)>([](lua_State *l,luabind::object o) -> luabind::object {
+			auto &nw = *engine->GetNetworkState(l);
+			auto *game = nw.GetGameState();
+			if(!game)
+				return {};
+			auto *ent = find_entity(l,*game,o);
+			return ent ? *ent->GetLuaObject() : luabind::object{};
+		}));
+	}
+
+	Lua::udm::register_library(GetLuaInterface());
 }

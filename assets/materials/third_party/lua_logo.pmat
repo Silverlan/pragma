@@ -1,0 +1,7 @@
+"wguitextured"
+{
+	"textures"
+	{
+		$string diffuse_map "third_party/lua_logo"
+	}
+}

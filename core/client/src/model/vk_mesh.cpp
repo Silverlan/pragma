@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -13,12 +13,28 @@
 
 using namespace pragma;
 
-extern DLLCENGINE CEngine *c_engine;
-
+extern DLLCLIENT CEngine *c_engine;
+#pragma optimize("",off)
 SceneMesh::SceneMesh()
 	: m_vertexBuffer(nullptr),m_vertexWeightBuffer(nullptr),
 	m_alphaBuffer(nullptr),m_indexBuffer(nullptr)
 {}
+SceneMesh::SceneMesh(const SceneMesh &other)
+	: m_renderBuffers{other.m_renderBuffers},m_vertexBuffer{other.m_vertexBuffer},
+	m_vertexWeightBuffer{other.m_vertexWeightBuffer},m_alphaBuffer{other.m_alphaBuffer},
+	m_indexBuffer{other.m_indexBuffer},m_lightmapUvBuffer{other.m_lightmapUvBuffer}
+{}
+SceneMesh::~SceneMesh() {}
+SceneMesh &SceneMesh::operator=(const SceneMesh &other)
+{
+	m_renderBuffers = other.m_renderBuffers;
+	m_vertexBuffer = other.m_vertexBuffer;
+	m_vertexWeightBuffer = other.m_vertexWeightBuffer;
+	m_alphaBuffer = other.m_alphaBuffer;
+	m_indexBuffer = other.m_indexBuffer;
+	m_lightmapUvBuffer = other.m_lightmapUvBuffer;
+	return *this;
+}
 const std::shared_ptr<prosper::IBuffer> &SceneMesh::GetVertexBuffer() const {return m_vertexBuffer;}
 const std::shared_ptr<prosper::IBuffer> &SceneMesh::GetVertexWeightBuffer() const {return m_vertexWeightBuffer;}
 const std::shared_ptr<prosper::IBuffer> &SceneMesh::GetAlphaBuffer() const {return m_alphaBuffer;}
@@ -30,6 +46,15 @@ void SceneMesh::SetVertexWeightBuffer(const std::shared_ptr<prosper::IBuffer> &b
 void SceneMesh::SetAlphaBuffer(const std::shared_ptr<prosper::IBuffer> &buffer) {m_alphaBuffer = buffer; SetDirty();}
 void SceneMesh::SetIndexBuffer(const std::shared_ptr<prosper::IBuffer> &buffer) {m_indexBuffer = buffer; SetDirty();}
 void SceneMesh::SetLightmapUvBuffer(const std::shared_ptr<prosper::IBuffer> &lightmapUvBuffer) {m_lightmapUvBuffer = lightmapUvBuffer; SetDirty();}
+void SceneMesh::ClearBuffers()
+{
+	m_vertexBuffer = nullptr;
+	m_vertexWeightBuffer = nullptr;
+	m_alphaBuffer = nullptr;
+	m_indexBuffer = nullptr;
+	m_lightmapUvBuffer = nullptr;
+	m_renderBuffers.clear();
+}
 
 void SceneMesh::SetDirty() {m_renderBuffers.clear();}
 const std::shared_ptr<prosper::IRenderBuffer> &SceneMesh::GetRenderBuffer(CModelSubMesh &mesh,pragma::ShaderEntity &shader,uint32_t pipelineIdx)
@@ -40,7 +65,8 @@ const std::shared_ptr<prosper::IRenderBuffer> &SceneMesh::GetRenderBuffer(CModel
 		static std::shared_ptr<prosper::IRenderBuffer> nptr = nullptr;
 		return nptr;
 	}
-	auto it = m_renderBuffers.find(pipelineId);
+	std::unique_lock lock {m_renderBufferMutex};
+	auto it = std::find_if(m_renderBuffers.begin(),m_renderBuffers.end(),[pipelineId](const std::pair<prosper::PipelineID,std::shared_ptr<prosper::IRenderBuffer>> &pair) {return pair.first == pipelineId;});
 	if(it != m_renderBuffers.end())
 		return it->second;
 	auto renderBuffer = shader.CreateRenderBuffer(mesh,pipelineIdx);
@@ -49,6 +75,7 @@ const std::shared_ptr<prosper::IRenderBuffer> &SceneMesh::GetRenderBuffer(CModel
 		static std::shared_ptr<prosper::IRenderBuffer> nptr = nullptr;
 		return nptr;
 	}
-	it = m_renderBuffers.insert(std::make_pair(pipelineId,renderBuffer)).first;
-	return it->second;
+	m_renderBuffers.push_back(std::make_pair(pipelineId,renderBuffer));
+	return m_renderBuffers.back().second;
 }
+#pragma optimize("",on)

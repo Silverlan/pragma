@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -12,12 +12,12 @@
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
 // +1 for depth pass
-uint32_t ShaderParticleBase::PIPELINE_COUNT = umath::to_integral(ParticleAlphaMode::Count) *umath::to_integral(pragma::ShaderScene::Pipeline::Count) +1;
+//uint32_t ShaderParticleBase::PIPELINE_COUNT = umath::to_integral(ParticleAlphaMode::Count) *umath::to_integral(pragma::ShaderScene::Pipeline::Count) +1;
 decltype(ShaderParticleBase::DESCRIPTOR_SET_ANIMATION) ShaderParticleBase::DESCRIPTOR_SET_ANIMATION = {
 	{
 		prosper::DescriptorSetInfo::Binding {
@@ -125,12 +125,12 @@ void Console::commands::debug_particle_alpha_mode(NetworkState *state,pragma::Ba
 	if(argv.size() > 5)
 		g_customAlphaBlendMode.opAlpha = name_to_blend_op(argv.at(5));
 
-	for(auto &pair : c_engine->GetShaderManager().GetShaders())
+	for(auto &hShader : c_engine->GetShaderManager().GetShaders())
 	{
-		auto *ptShader = dynamic_cast<ShaderParticleBase*>(pair.second.get());
+		auto *ptShader = dynamic_cast<ShaderParticleBase*>(hShader.get());
 		if(ptShader == nullptr)
 			continue;
-		pair.second->ReloadPipelines();
+		hShader->ReloadPipelines();
 	}
 }
 
@@ -258,5 +258,5 @@ pragma::ParticleAlphaMode ShaderParticleBase::GetRenderAlphaMode(const pragma::C
 
 uint32_t ShaderParticleBase::GetParticlePipelineCount()
 {
-	return PIPELINE_COUNT;
+	return 1;//PIPELINE_COUNT;
 }

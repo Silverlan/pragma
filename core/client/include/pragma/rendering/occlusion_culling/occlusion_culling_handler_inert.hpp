@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __OCCLUSION_CULLING_HANDLER_INERT_HPP__
@@ -19,11 +19,11 @@ namespace pragma
 	public:
 		OcclusionCullingHandlerInert()=default;
 		virtual void PerformCulling(
-			CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+			CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const Vector3 &camPos,
 			std::vector<pragma::CParticleSystemComponent*> &particlesOut
 		) override;
 		virtual void PerformCulling(
-			CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const Vector3 &camPos,
+			CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const Vector3 &camPos,
 			std::vector<pragma::OcclusionMeshInfo> &culledMeshesOut,bool cullByViewFrustum=true
 		) override;
 	};

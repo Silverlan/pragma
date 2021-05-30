@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
 #include "pragma/console/s_cvar_server.h"
@@ -25,7 +25,7 @@
 #include <pragma/console/sh_cmd.h>
 #include <pragma/networking/netmessages.h>
 
-extern DLLENGINE Engine *engine;
+extern DLLNETWORK Engine *engine;
 extern ServerState *server;
 extern SGame *s_game;
 DLLSERVER void CMD_sv_send(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string> &argv)
@@ -126,7 +126,7 @@ void CMD_ent_scale(NetworkState *state,pragma::BasePlayerComponent *pl,std::vect
 		for(auto *ent : ents)
 		{
 			auto pTransformComponent = ent->GetTransformComponent();
-			if(pTransformComponent.valid())
+			if(pTransformComponent)
 				pTransformComponent->SetScale(static_cast<float>(scale));
 		}
 		return;
@@ -142,7 +142,7 @@ void CMD_ent_scale(NetworkState *state,pragma::BasePlayerComponent *pl,std::vect
 	for(auto *ent : ents)
 	{
 		auto pTransformComponent = ent->GetTransformComponent();
-		if(pTransformComponent.valid())
+		if(pTransformComponent)
 			pTransformComponent->SetScale(static_cast<float>(scale));
 	}
 }
@@ -175,7 +175,7 @@ DLLSERVER void CMD_ent_create(NetworkState *state,pragma::BasePlayerComponent *p
 		return;
 	auto &ent = pl->GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(pTrComponent == nullptr)
 		return;
 	auto charComponent = ent.GetCharacterComponent();
 	Vector3 origin = pTrComponent->GetEyePosition();
@@ -196,11 +196,11 @@ DLLSERVER void CMD_ent_create(NetworkState *state,pragma::BasePlayerComponent *p
 	if(entNew == NULL)
 		return;
 	auto pTrComponentNew = entNew->GetTransformComponent();
-	if(pTrComponentNew.valid())
+	if(pTrComponentNew)
 	{
 		auto posSpawn = r.position;
 		auto pPhysComponent = entNew->GetPhysicsComponent();
-		if(pPhysComponent.valid())
+		if(pPhysComponent != nullptr)
 			posSpawn += r.normal *pPhysComponent->GetCollisionRadius();
 		else
 			posSpawn += r.normal *1.f;

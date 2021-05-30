@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -10,6 +10,7 @@
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include <sharedutils/datastream.h>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -46,15 +47,17 @@ void BaseRadiusComponent::Initialize()
 	ent.AddComponent("io");
 	m_netEvSetRadius = SetupNetEvent("set_radius");
 }
-void BaseRadiusComponent::Save(DataStream &ds)
+void BaseRadiusComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
-	BaseEntityComponent::Save(ds);
-	ds->Write<float>(*m_radius);
+	BaseEntityComponent::Save(udm);
+	udm["radius"] = **m_radius;
 }
-void BaseRadiusComponent::Load(DataStream &ds,uint32_t version)
+void BaseRadiusComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {
-	BaseEntityComponent::Load(ds,version);
-	SetRadius(ds->Read<float>());
+	BaseEntityComponent::Load(udm,version);
+	auto radius = GetRadius();
+	udm["radius"](radius);
+	SetRadius(radius);
 }
 float BaseRadiusComponent::GetRadius() const {return *m_radius;}
 const util::PFloatProperty &BaseRadiusComponent::GetRadiusProperty() const {return m_radius;}

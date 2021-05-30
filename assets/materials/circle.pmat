@@ -1,0 +1,7 @@
+"pbr"
+{
+	"textures"
+	{
+		$string albedo_map "circle"
+	}
+}

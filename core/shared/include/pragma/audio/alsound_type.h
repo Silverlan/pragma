@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __ALSOUND_TYPE_H__
 #define __ALSOUND_TYPE_H__
@@ -24,6 +24,7 @@ enum class DLLNETWORK ALSoundType : Int32
 	Environment = Physics<<1,
 	GUI = Environment<<1,
 
+	Count,
 	All = Effect | Music | Voice | Weapon | NPC | Player | Vehicle | Physics | Environment | GUI
 };
 REGISTER_BASIC_BITWISE_OPERATORS(ALSoundType)

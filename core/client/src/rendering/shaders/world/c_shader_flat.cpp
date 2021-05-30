@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -18,7 +18,7 @@
 #include <prosper_descriptor_set_group.hpp>
 
 extern DLLCLIENT CGame *c_game;
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
@@ -29,11 +29,11 @@ decltype(ShaderFlat::VERTEX_ATTRIBUTE_UV) ShaderFlat::VERTEX_ATTRIBUTE_UV = {VER
 decltype(ShaderFlat::DESCRIPTOR_SET_INSTANCE) ShaderFlat::DESCRIPTOR_SET_INSTANCE = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Instance
-			prosper::DescriptorType::UniformBufferDynamic,
+			prosper::DescriptorType::UniformBuffer,
 			prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit
 		},
 		prosper::DescriptorSetInfo::Binding { // Bone Matrices
-			prosper::DescriptorType::UniformBufferDynamic,
+			prosper::DescriptorType::UniformBuffer,
 			prosper::ShaderStageFlags::VertexBit
 		},
 		prosper::DescriptorSetInfo::Binding { // Vertex Animations
@@ -46,25 +46,25 @@ decltype(ShaderFlat::DESCRIPTOR_SET_INSTANCE) ShaderFlat::DESCRIPTOR_SET_INSTANC
 		}
 	}
 };
-decltype(ShaderFlat::DESCRIPTOR_SET_CAMERA) ShaderFlat::DESCRIPTOR_SET_CAMERA = {
+decltype(ShaderFlat::DESCRIPTOR_SET_SCENE) ShaderFlat::DESCRIPTOR_SET_SCENE = {
 	{
 		prosper::DescriptorSetInfo::Binding { // Camera
 			prosper::DescriptorType::UniformBuffer,
-			prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit
+			prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::GeometryBit
 		},
 		prosper::DescriptorSetInfo::Binding { // Render Settings
 			prosper::DescriptorType::UniformBuffer,
-			prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit
-		},
-		prosper::DescriptorSetInfo::Binding { // SSAO Map
-			prosper::DescriptorType::CombinedImageSampler,
-			prosper::ShaderStageFlags::FragmentBit
+			prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::GeometryBit
 		}
 	}
 };
 decltype(ShaderFlat::DESCRIPTOR_SET_MATERIAL) ShaderFlat::DESCRIPTOR_SET_MATERIAL = {
 	{
-		prosper::DescriptorSetInfo::Binding { // Diffuse Map
+		prosper::DescriptorSetInfo::Binding { // Material settings
+			prosper::DescriptorType::UniformBuffer,
+			prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::GeometryBit
+		},
+		prosper::DescriptorSetInfo::Binding { // Albedo Map
 			prosper::DescriptorType::CombinedImageSampler,
 			prosper::ShaderStageFlags::FragmentBit
 		},
@@ -72,7 +72,11 @@ decltype(ShaderFlat::DESCRIPTOR_SET_MATERIAL) ShaderFlat::DESCRIPTOR_SET_MATERIA
 			prosper::DescriptorType::CombinedImageSampler,
 			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::DescriptorSetInfo::Binding { // Specular Map
+		prosper::DescriptorSetInfo::Binding { // RMA Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
+		},
+		prosper::DescriptorSetInfo::Binding { // Emission Map
 			prosper::DescriptorType::CombinedImageSampler,
 			prosper::ShaderStageFlags::FragmentBit
 		},
@@ -80,7 +84,15 @@ decltype(ShaderFlat::DESCRIPTOR_SET_MATERIAL) ShaderFlat::DESCRIPTOR_SET_MATERIA
 			prosper::DescriptorType::CombinedImageSampler,
 			prosper::ShaderStageFlags::FragmentBit
 		},
-		prosper::DescriptorSetInfo::Binding { // Glow Map
+		prosper::DescriptorSetInfo::Binding { // Wrinkle Stretch Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
+		},
+		prosper::DescriptorSetInfo::Binding { // Wrinkle Compress Map
+			prosper::DescriptorType::CombinedImageSampler,
+			prosper::ShaderStageFlags::FragmentBit
+		},
+		prosper::DescriptorSetInfo::Binding { // Exponent Map
 			prosper::DescriptorType::CombinedImageSampler,
 			prosper::ShaderStageFlags::FragmentBit
 		}
@@ -94,14 +106,14 @@ ShaderFlat::ShaderFlat(prosper::IPrContext &context,const std::string &identifie
 bool ShaderFlat::BindScene(const pragma::CSceneComponent &scene,bool bView)
 {
 	auto descSet = (bView == true) ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
-	return RecordBindDescriptorSet(*descSet,DESCRIPTOR_SET_CAMERA.setIndex);
+	return RecordBindDescriptorSet(*descSet,DESCRIPTOR_SET_SCENE.setIndex);
 }
 bool ShaderFlat::BindEntity(CBaseEntity &ent)
 {
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(pRenderComponent.expired())
+	if(!pRenderComponent)
 		return false;
-	pRenderComponent->UpdateRenderData(c_game->GetCurrentDrawCommandBuffer());
+	// pRenderComponent->UpdateRenderData(c_game->GetCurrentDrawCommandBuffer());
 	return RecordBindDescriptorSet(*pRenderComponent->GetRenderDescriptorSet(),DESCRIPTOR_SET_INSTANCE.setIndex,{0u,0u});
 }
 bool ShaderFlat::BindMaterial(CMaterial &mat)
@@ -119,8 +131,8 @@ void ShaderFlat::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipe
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_UV);
 
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_INSTANCE);
-	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_CAMERA);
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_MATERIAL);
+	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_SCENE);
 }
 bool ShaderFlat::Draw(CModelSubMesh &mesh)
 {

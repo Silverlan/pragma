@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __PHYSENVIRONMENT_H__
@@ -222,6 +222,7 @@ namespace pragma::physics
 		void OnWake(ICollisionObject &o);
 		void OnSleep(ICollisionObject &o);
 		void OnConstraintBroken(IConstraint &constraint);
+		virtual void OnVisualDebuggerChanged(pragma::physics::IVisualDebugger *debugger) {}
 		virtual RemainingDeltaTime DoStepSimulation(float timeStep,int maxSubSteps=1,float fixedTimeStep=(1.f /60.f))=0;
 		virtual void UpdateSurfaceTypes()=0;
 

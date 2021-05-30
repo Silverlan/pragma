@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -12,7 +12,7 @@
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <buffers/prosper_buffer.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
@@ -40,7 +40,7 @@ void ShaderParticlePolyboard::InitializeGfxPipeline(prosper::GraphicsPipelineCre
 	RegisterDefaultGfxPipelineDescriptorSetGroups(pipelineInfo);
 }
 
-bool ShaderParticlePolyboard::Draw(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,const pragma::CParticleSystemComponent &ps,prosper::IBuffer &vertexBuffer,prosper::IBuffer &indexBuffer,uint32_t numIndices,float radius,float curvature)
+bool ShaderParticlePolyboard::Draw(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,const pragma::CParticleSystemComponent &ps,prosper::IBuffer &vertexBuffer,prosper::IBuffer &indexBuffer,uint32_t numIndices,float radius,float curvature)
 {
 	if(BindParticleMaterial(renderer,ps) == false)
 		return false;

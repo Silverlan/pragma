@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_FORWARDPLUS_HPP__
@@ -28,13 +28,14 @@ class Scene;
 namespace pragma
 {
 	class CCameraComponent;
+	class CSceneComponent;
+	class CRasterizationRendererComponent;
 	namespace rendering
 	{
-		class RasterizationRenderer;
 		class DLLCLIENT ForwardPlusInstance
 		{
 		public:
-			ForwardPlusInstance(RasterizationRenderer &rasterizer);
+			ForwardPlusInstance(CRasterizationRendererComponent &rasterizer);
 			bool Initialize(prosper::IPrContext &context,uint32_t width,uint32_t height,prosper::Texture &depthTexture);
 
 			std::pair<uint32_t,uint32_t> GetWorkGroupCount() const;
@@ -49,7 +50,7 @@ namespace pragma
 			static std::pair<uint32_t,uint32_t> CalcWorkGroupCount(uint32_t w,uint32_t h);
 			static uint32_t CalcTileCount(uint32_t w,uint32_t h);
 		private:
-			RasterizationRenderer &m_rasterizer;
+			CRasterizationRendererComponent &m_rasterizer;
 			uint32_t m_workGroupCountX = 0u;
 			uint32_t m_workGroupCountY = 0u;
 			uint32_t m_tileCount = 0u;
@@ -57,7 +58,6 @@ namespace pragma
 			std::shared_ptr<prosper::IBuffer> m_bufTileVisLightIndex = nullptr;
 			std::shared_ptr<prosper::IBuffer> m_bufVisLightIndex = nullptr;
 			util::WeakHandle<prosper::Shader> m_shaderLightCulling = {};
-			util::WeakHandle<prosper::Shader> m_shaderLightIndexing = {};
 			std::shared_ptr<prosper::IPrimaryCommandBuffer> m_cmdBuffer = nullptr;
 			uint32_t m_cmdBufferQueueFamilyIndex = std::numeric_limits<uint32_t>::max();
 

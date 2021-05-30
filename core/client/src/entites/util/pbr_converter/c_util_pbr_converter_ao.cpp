@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "pragma/clientstate/clientstate.h"
@@ -24,7 +24,7 @@
 
 using namespace pragma;
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 
@@ -116,6 +116,7 @@ void CPBRConverterComponent::UpdateAmbientOcclusion(Model &mdl,const AmbientOccl
 		job.hEntity = optEnt ? optEnt->GetHandle() : EntityHandle{};
 		m_workQueue.push(job);
 	}
+	SetTickPolicy(TickPolicy::Always);
 }
 void CPBRConverterComponent::WriteAOMap(Model &mdl,CMaterial &mat,uimg::ImageBuffer &imgBuffer,uint32_t w,uint32_t h) const
 {
@@ -148,6 +149,7 @@ void CPBRConverterComponent::WriteAOMap(Model &mdl,CMaterial &mat,uimg::ImageBuf
 	if(requiresSave)
 	{
 		mat.UpdateTextures();
-		mat.Save();
+		std::string err;
+		mat.Save(err);
 	}
 }

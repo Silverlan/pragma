@@ -2,14 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
 #include "pragma/model/model.h"
 #include "pragma/model/modelmesh.h"
 #include "pragma/physics/collisionmesh.h"
-
 #pragma optimize("",off)
 static void subtract_frame(Frame &frame,const Frame &frameToSubtract)
 {
@@ -161,14 +160,14 @@ void Model::Merge(const Model &other,MergeFlags flags)
 			auto &animOther = animsOther.at(i);
 			auto animName = other.GetAnimationName(i);
 			
-			auto shareMode = Animation::ShareMode::Events;
+			auto shareMode = pragma::animation::Animation::ShareMode::Events;
 			if(other.GetSkeleton().GetBoneCount() >= skeleton.GetBoneCount()) // TODO: Check this properly! The included model has to have all bones of this model (it may also have more, but not fewer!)
 			{
 				// If the number of bones of the included model is less than this model, we have to make a copy of all animation frames and fill up the missing bones - Otherwise there may be animation issues!
 				// TODO: Make missing bones always use transformations of reference animation, then this won't be necessary anymore!
-				shareMode |= Animation::ShareMode::Frames;
+				shareMode |= pragma::animation::Animation::ShareMode::Frames;
 			}
-			auto anim = Animation::Create(*animOther,shareMode);
+			auto anim = pragma::animation::Animation::Create(*animOther,shareMode);
 			auto &boneList = anim->GetBoneList();
 			for(auto idx=decltype(boneList.size()){0};idx<boneList.size();++idx)
 				anim->SetBoneId(idx,boneTranslations.at(boneList.at(idx)));
@@ -305,7 +304,7 @@ void Model::Merge(const Model &other,MergeFlags flags)
 		joints.reserve(joints.size() +jointsOther.size());
 		for(auto &jointOther : jointsOther)
 		{
-			joints.push_back(JointInfo(jointOther.type,boneTranslations.at(jointOther.src),boneTranslations.at(jointOther.dest)));
+			joints.push_back(JointInfo(jointOther.type,boneTranslations.at(jointOther.parent),boneTranslations.at(jointOther.child)));
 			auto &joint = joints.back();
 			joint.args = jointOther.args;
 			joint.collide = jointOther.collide;

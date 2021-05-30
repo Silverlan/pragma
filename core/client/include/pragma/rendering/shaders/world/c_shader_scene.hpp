@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_SHADER_SCENE_HPP__
@@ -11,29 +11,25 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/rendering/shaders/c_shader_3d.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured_base.hpp"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include <shader/prosper_shader.hpp>
 
 class CModelSubMesh;
 namespace prosper {class IRenderBuffer;};
 namespace pragma
 {
+	using RenderMeshIndex = uint32_t;
+	class CSceneComponent;
 	class SceneMesh;
-	namespace rendering {class RasterizationRenderer;};
+	enum class SceneDebugMode : uint32_t;
+	class CRasterizationRendererComponent;
 	class DLLCLIENT ShaderScene
 		: public Shader3DBase,
 		public ShaderTexturedBase
 	{
 	public:
-		enum class Pipeline : uint32_t
-		{
-			Regular = 0u,
-			MultiSample,
-			//LightMap,
-
-			Count
-		};
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDER_SETTINGS;
-		static prosper::DescriptorSetInfo DESCRIPTOR_SET_CAMERA;
+		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SCENE;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_RENDERER;
 
 		static prosper::Format RENDER_PASS_FORMAT;
@@ -42,7 +38,7 @@ namespace pragma
 		static prosper::SampleCountFlags RENDER_PASS_SAMPLES;
 		static void SetRenderPassSampleCount(prosper::SampleCountFlags samples);
 
-		enum class CameraBinding : uint32_t
+		enum class SceneBinding : uint32_t
 		{
 			Camera = 0u,
 			RenderSettings
@@ -59,7 +55,8 @@ namespace pragma
 		{
 			Debug = 0u,
 			Time,
-			CSMData
+			CSMData,
+			GlobalInstance
 		};
 
 		enum class DebugFlags : uint32_t
@@ -69,7 +66,8 @@ namespace pragma
 			LightShowShadowMapDepth = LightShowCascades<<1u,
 			LightShowFragmentDepthShadowSpace = LightShowShadowMapDepth<<1u,
 
-			ForwardPlusHeatmap = LightShowFragmentDepthShadowSpace<<1u
+			ForwardPlusHeatmap = LightShowFragmentDepthShadowSpace<<1u,
+			Unlit = ForwardPlusHeatmap<<1u
 		};
 
 #pragma pack(push,1)
@@ -86,7 +84,7 @@ namespace pragma
 		};
 #pragma pack(pop)
 
-		virtual bool BindSceneCamera(pragma::CSceneComponent &scene,const rendering::RasterizationRenderer &renderer,bool bView);
+		virtual bool BindSceneCamera(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,bool bView);
 		virtual bool BindRenderSettings(prosper::IDescriptorSet &descSetRenderSettings);
 	protected:
 		ShaderScene(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
@@ -131,7 +129,7 @@ namespace pragma
 #pragma pack(pop)
 
 		virtual bool BindLights(prosper::IDescriptorSet &dsLights);
-		virtual bool BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView);
+		virtual bool BindScene(pragma::CSceneComponent &scene,CRasterizationRendererComponent &renderer,bool bView);
 	protected:
 		ShaderSceneLit(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 		virtual uint32_t GetLightDescriptorSetIndex() const=0;
@@ -143,6 +141,9 @@ namespace pragma
 		: public ShaderSceneLit
 	{
 	public:
+		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_RENDER_BUFFER_INDEX;
+		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX;
+
 		static prosper::ShaderGraphics::VertexBinding VERTEX_BINDING_BONE_WEIGHT;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT_ID;
 		static prosper::ShaderGraphics::VertexAttribute VERTEX_ATTRIBUTE_BONE_WEIGHT;
@@ -165,7 +166,9 @@ namespace pragma
 
 		enum class VertexBinding : uint32_t
 		{
-			BoneWeight = 0u,
+			RenderBufferIndex = 0u,
+
+			BoneWeight,
 			BoneWeightExt,
 			
 			Vertex,
@@ -189,30 +192,116 @@ namespace pragma
 #pragma pack(pop)
 
 		bool BindInstanceDescriptorSet(prosper::IDescriptorSet &descSet);
+		virtual bool BindMaterial(CMaterial &mat)=0;
 		virtual bool BindEntity(CBaseEntity &ent);
 		virtual bool BindVertexAnimationOffset(uint32_t offset);
-		virtual bool BindScene(pragma::CSceneComponent &scene,rendering::RasterizationRenderer &renderer,bool bView) override;
-		virtual bool Draw(CModelSubMesh &mesh);
+		virtual bool BindScene(pragma::CSceneComponent &scene,CRasterizationRendererComponent &renderer,bool bView) override;
+		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1);
 		virtual void EndDraw() override;
 		virtual bool GetRenderBufferTargets(
 			CModelSubMesh &mesh,uint32_t pipelineIdx,std::vector<prosper::IBuffer*> &outBuffers,std::vector<prosper::DeviceSize> &outOffsets,
 			std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo
 		) const;
+		virtual uint32_t GetInstanceDescriptorSetIndex() const=0;
+		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const=0;
 		std::shared_ptr<prosper::IRenderBuffer> CreateRenderBuffer(CModelSubMesh &mesh,uint32_t pipelineIdx) const;
 		CBaseEntity *GetBoundEntity();
 	protected:
 		ShaderEntity(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 		virtual void OnBindEntity(CBaseEntity &ent,CRenderComponent &renderC);
-		bool Draw(CModelSubMesh &mesh,bool bUseVertexWeightBuffer);
-		bool Draw(CModelSubMesh &mesh,const std::function<bool(CModelSubMesh&)> &fDraw,bool bUseVertexWeightBuffer);
-
-		virtual uint32_t GetInstanceDescriptorSetIndex() const=0;
-		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const=0;
+		bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,bool bUseVertexWeightBuffer,uint32_t instanceCount=1);
+		bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,const std::function<bool(CModelSubMesh&)> &fDraw,bool bUseVertexWeightBuffer);
 
 		CBaseEntity *m_boundEntity = nullptr;
+	};
+
+	namespace rendering {class ShaderProcessor;};
+	class DLLCLIENT ShaderGameWorld
+		: public ShaderEntity
+	{
+	public:
+		static constexpr auto MATERIAL_DESCRIPTOR_SET_INDEX = 1u;
+		static constexpr auto SCENE_DESCRIPTOR_SET_START_INDEX = 2u;
+		enum class SceneFlags : uint32_t
+		{
+			None = 0u,
+			UseExtendedVertexWeights = 1u,
+			RenderAs3DSky = UseExtendedVertexWeights<<1u,
+			AlphaTest = RenderAs3DSky<<1u,
+			LightmapsEnabled = AlphaTest<<1u,
+			NoIBL = LightmapsEnabled<<1u,
+			DisableShadows = NoIBL<<1u
+		};
+		enum class GameShaderType : uint8_t
+		{
+			LightingPass = 0,
+			DepthPrepass,
+			ShadowPass,
+			SkyPass
+		};
+#pragma pack(push,1)
+		struct ScenePushConstants
+		{
+			Vector4 clipPlane;
+			Vector4 drawOrigin; // w is scale
+			Vector2 depthBias;
+			uint32_t vertexAnimInfo;
+			SceneFlags flags;
+
+			void Initialize()
+			{
+				clipPlane = {};
+				drawOrigin = {0.f,0.f,0.f,1.f};
+				depthBias = {};
+				vertexAnimInfo = 0;
+				flags = SceneFlags::None;
+			}
+		};
+#pragma pack(pop)
+
+		static uint32_t HASH_TYPE;
+		using ShaderEntity::ShaderEntity;
+		// TODO: Remove these, they're deprecated
+		virtual bool BindClipPlane(const Vector4 &clipPlane)=0;
+		virtual bool BeginDraw(
+			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},
+			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
+		)=0;
+		virtual bool SetDebugMode(pragma::SceneDebugMode debugMode) {return true;};
+		virtual void Set3DSky(bool is3dSky)=0;
+		virtual bool BindDrawOrigin(const Vector4 &drawOrigin)=0;
+		virtual bool SetDepthBias(const Vector2 &depthBias)=0;
+		//
+
+		virtual GameShaderType GetPassType() const {return GameShaderType::LightingPass;}
+		virtual size_t GetBaseTypeHashCode() const override;
+		virtual uint32_t GetMaterialDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
+		prosper::IDescriptorSet &GetDefaultMaterialDescriptorSet() const;
+
+		virtual void RecordBindScene(
+			rendering::ShaderProcessor &shaderProcessor,
+			const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
+			prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
+			prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
+			prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
+			SceneFlags &inOutSceneFlags
+		) const {}
+		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor,CMaterial &mat) const;
+		virtual void RecordSceneFlags(rendering::ShaderProcessor &shaderProcessor,SceneFlags sceneFlags) const;
+		virtual void RecordBindLight(rendering::ShaderProcessor &shaderProcessor,CLightComponent &light,uint32_t layerId) const {}
+		virtual void RecordAlphaCutoff(rendering::ShaderProcessor &shaderProcessor,float alphaCutoff) const {}
+		virtual void RecordClipPlane(rendering::ShaderProcessor &shaderProcessor,const Vector4 &clipPlane) const;
+		virtual void RecordDepthBias(rendering::ShaderProcessor &shaderProcessor,const Vector2 &depthBias) const;
+		virtual void RecordVertexAnimationOffset(rendering::ShaderProcessor &shaderProcessor,uint32_t vertexAnimationOffset) const;
+		virtual void OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor,CModelSubMesh &mesh) const {}
+		virtual bool IsUsingLightmaps() const {return false;}
+	protected:
+		SceneFlags m_sceneFlags = SceneFlags::None;
+		std::shared_ptr<prosper::IDescriptorSetGroup> m_defaultMatDsg = nullptr;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderEntity::InstanceData::RenderFlags);
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderScene::DebugFlags);
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderGameWorld::SceneFlags);
 
 #endif

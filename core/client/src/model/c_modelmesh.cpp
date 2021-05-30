@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -19,9 +19,9 @@ static constexpr uint64_t GLOBAL_MESH_VERTEX_WEIGHT_BUFFER_SIZE = MEGABYTE *32; 
 static constexpr uint64_t GLOBAL_MESH_ALPHA_BUFFER_SIZE = MEGABYTE *16; // 131'072 instances per MiB
 static constexpr uint64_t GLOBAL_MESH_INDEX_BUFFER_SIZE = MEGABYTE *32; // 524'288 instances per MiB
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
-
+#pragma optimize("",off)
 CModelMesh::CModelMesh()
 	: ModelMesh()
 {}
@@ -53,7 +53,12 @@ const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGloba
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalVertexWeightBuffer() {return s_vertexWeightBuffer;}
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalAlphaBuffer() {return s_alphaBuffer;}
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &CModelSubMesh::GetGlobalIndexBuffer() {return s_indexBuffer;}
-std::shared_ptr<ModelSubMesh> CModelSubMesh::Copy() const {return std::make_shared<CModelSubMesh>(*this);}
+std::shared_ptr<ModelSubMesh> CModelSubMesh::Copy(bool fullCopy) const
+{
+	auto cpy = std::make_shared<CModelSubMesh>(*this);
+	ModelSubMesh::Copy(*cpy,fullCopy);
+	return cpy;
+}
 
 void CModelSubMesh::InitializeBuffers()
 {
@@ -70,7 +75,7 @@ void CModelSubMesh::InitializeBuffers()
 #endif
 	s_vertexBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo,createInfo.size *4u,0.05f);
 	s_vertexBuffer->SetDebugName("mesh_vertex_data_buf");
-	s_vertexBuffer->SetPermanentlyMapped(true);
+	s_vertexBuffer->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::WriteBit);
 
 	// Initialize global vertex weight buffer
 	createInfo.size = GLOBAL_MESH_VERTEX_WEIGHT_BUFFER_SIZE;
@@ -80,7 +85,7 @@ void CModelSubMesh::InitializeBuffers()
 #endif
 	s_vertexWeightBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo,createInfo.size *4u,0.025f);
 	s_vertexWeightBuffer->SetDebugName("mesh_vertex_weight_data_buf");
-	s_vertexWeightBuffer->SetPermanentlyMapped(true);
+	s_vertexWeightBuffer->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::WriteBit);
 
 	// Initialize global alpha buffer
 	createInfo.size = GLOBAL_MESH_ALPHA_BUFFER_SIZE;
@@ -90,7 +95,7 @@ void CModelSubMesh::InitializeBuffers()
 #endif
 	s_alphaBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo,createInfo.size *4u,0.025f);
 	s_alphaBuffer->SetDebugName("mesh_alpha_data_buf");
-	s_alphaBuffer->SetPermanentlyMapped(true);
+	s_alphaBuffer->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::WriteBit);
 
 	// Initialize global index buffer
 	createInfo.size = GLOBAL_MESH_INDEX_BUFFER_SIZE;
@@ -100,7 +105,7 @@ void CModelSubMesh::InitializeBuffers()
 #endif
 	s_indexBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo,createInfo.size *4u,0.025f);
 	s_indexBuffer->SetDebugName("mesh_index_data_buf");
-	s_indexBuffer->SetPermanentlyMapped(true);
+	s_indexBuffer->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::WriteBit);
 }
 void CModelSubMesh::ClearBuffers()
 {
@@ -203,4 +208,4 @@ void CModelSubMesh::Update(ModelUpdateFlags flags)
 		m_sceneMesh->SetAlphaBuffer(std::move(alphaBuffer));
 	}
 }
-
+#pragma optimize("",on)

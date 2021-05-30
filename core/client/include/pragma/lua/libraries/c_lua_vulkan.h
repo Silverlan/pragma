@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #ifndef __C_LUA_VULKAN_H__
@@ -28,6 +28,8 @@ namespace prosper
 	class RenderPass;
 	class ICommandBuffer;
 	class IDescriptorSetGroup;
+	class SwapBuffer;
+	class ISwapCommandBufferGroup;
 };
 
 namespace vk
@@ -68,10 +70,12 @@ namespace Lua
 		//using Memory = prosper::MemoryBlock;
 		using CommandBuffer = prosper::ICommandBuffer;
 		using Buffer = prosper::IBuffer;
+		using SwapBuffer = prosper::SwapBuffer;
 		using DescriptorSet = prosper::IDescriptorSetGroup;
 		using RenderTarget = prosper::RenderTarget;
 		using TimestampQuery = prosper::TimestampQuery;
 		using TimerQuery = prosper::TimerQuery;
+		using CommandBufferRecorder = prosper::ISwapCommandBufferGroup;
 		struct DLLCLIENT RenderPassInfo
 		{
 			RenderPassInfo(const std::shared_ptr<RenderTarget> &renderTarget)

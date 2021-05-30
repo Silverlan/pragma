@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -23,6 +23,7 @@
 #include <sharedutils/netpacket.hpp>
 #include <pragma/physics/movetypes.h>
 #include <pragma/physics/collisiontypes.h>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -68,6 +69,7 @@ void BasePhysicsComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	m_netEvSetCollisionsEnabled = SetupNetEvent("set_collisions_enabled");
+	m_netEvSetSimEnabled = SetupNetEvent("set_simulation_enabled");
 
 	BindEvent(BaseAnimatedComponent::EVENT_SHOULD_UPDATE_BONES,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		if(IsRagdoll())
@@ -101,34 +103,34 @@ void BasePhysicsComponent::Initialize()
 Vector3 BasePhysicsComponent::GetCenter() const
 {
 	auto trComponent = GetEntity().GetTransformComponent();
-	if(trComponent.expired())
+	if(!trComponent)
 		return uvec::ORIGIN;
 	auto &pos = trComponent->GetPosition();
 	auto colCenter = GetCollisionCenter();
-	uvec::rotate(&colCenter,trComponent->GetOrientation());
+	uvec::rotate(&colCenter,trComponent->GetRotation());
 	return pos +colCenter;
 }
 void BasePhysicsComponent::Sweep(const Vector3&,float) const {}
 float BasePhysicsComponent::GetAABBDistance(const Vector3 &p) const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	auto origin = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto origin = pTrComponent ? pTrComponent->GetPosition() : Vector3{};
 	Vector3 min,max;
 	GetCollisionBounds(&min,&max);
 	min += origin;
 	max += origin;
 
 	Vector3 r {};
-	Geometry::ClosestPointOnAABBToPoint(min,max,p,&r);
+	umath::geometry::closest_point_on_aabb_to_point(min,max,p,&r);
 	return uvec::distance(r,p);
 }
 float BasePhysicsComponent::GetAABBDistance(const BaseEntity &ent) const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	auto origin0 = pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+	auto origin0 = pTrComponent ? pTrComponent->GetPosition() : Vector3{};
 
 	auto pTrComponentEnt = ent.GetTransformComponent();
-	auto origin1 = pTrComponentEnt.valid() ? pTrComponentEnt->GetPosition() : Vector3{};
+	auto origin1 = pTrComponentEnt ? pTrComponentEnt->GetPosition() : Vector3{};
 
 	Vector3 min0,max0;
 	GetCollisionBounds(&min0,&max0);
@@ -138,16 +140,16 @@ float BasePhysicsComponent::GetAABBDistance(const BaseEntity &ent) const
 	auto pPhysComponentEnt = ent.GetPhysicsComponent();
 	Vector3 min1 {};
 	Vector3 max1 {};
-	if(pPhysComponentEnt.valid())
+	if(pPhysComponentEnt)
 		pPhysComponentEnt->GetCollisionBounds(&min1,&max1);
 	min1 += origin1;
 	max1 += origin1;
 
 	Vector3 r0 {};
-	Geometry::ClosestPointOnAABBToPoint(min0,max0,origin1,&r0);
+	umath::geometry::closest_point_on_aabb_to_point(min0,max0,origin1,&r0);
 
 	Vector3 r1 {};
-	Geometry::ClosestPointOnAABBToPoint(min1,max1,origin0,&r1);
+	umath::geometry::closest_point_on_aabb_to_point(min1,max1,origin0,&r1);
 
 	return uvec::distance(r0,r1);
 }
@@ -193,9 +195,11 @@ void BasePhysicsComponent::UpdatePhysicsData()
 	auto t = o->GetWorldTransform();
 	Vector3 pos = phys->GetPosition();
 	Quat rot = t.GetRotation();
-	if(!m_physObject->IsController() && pTrComponent.valid()) // TODO
+	
+	auto transformChangeFlags = TransformChangeFlags::None;
+	if(!m_physObject->IsController() && pTrComponent) // TODO
 	{
-		auto &rotCur = pTrComponent->GetOrientation();
+		auto &rotCur = pTrComponent->GetRotation();
 		if(
 			fabsf(rot.w -rotCur.w) > ENT_EPSILON ||
 			fabsf(rot.x -rotCur.x) > ENT_EPSILON ||
@@ -205,35 +209,36 @@ void BasePhysicsComponent::UpdatePhysicsData()
 		{
 			ent.SetStateFlag(BaseEntity::StateFlags::RotationChanged);
 			bSnapshot = true;
-		}
 
-		// Sanity check
-		if(std::isnan(rot.w) || std::isnan(rot.x) || std::isnan(rot.y) || std::isnan(rot.z))
-		{
-			std::stringstream ss {};
-			ss<<"UpdatePhysicsData: NaN rotation ("<<rot.w<<","<<rot.x<<","<<rot.y<<","<<rot.z<<") for entity "<<ent.GetClass()<<"!";
-			throw std::runtime_error(ss.str());
-		}
-		umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsRotation);
-		pTrComponent->SetRawOrientation(rot);
-		umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsRotation,false);
-
-		if(!bStatic && pVelComponent.valid())
-		{
-			auto angVel = phys->GetAngularVelocity();
 			// Sanity check
-			if(std::isnan(angVel.x) || std::isnan(angVel.y) || std::isnan(angVel.z))
+			if(std::isnan(rot.w) || std::isnan(rot.x) || std::isnan(rot.y) || std::isnan(rot.z))
 			{
 				std::stringstream ss {};
-				ss<<"UpdatePhysicsData: NaN angular velocity ("<<angVel.x<<","<<angVel.y<<","<<angVel.z<<") for entity "<<ent.GetClass()<<"!";
+				ss<<"UpdatePhysicsData: NaN rotation ("<<rot.w<<","<<rot.x<<","<<rot.y<<","<<rot.z<<") for entity "<<ent.GetClass()<<"!";
 				throw std::runtime_error(ss.str());
 			}
-			umath::set_flag(m_stateFlags,StateFlags::ApplyingAngularVelocity);
-			pVelComponent->SetRawAngularVelocity(angVel);
-			umath::set_flag(m_stateFlags,StateFlags::ApplyingAngularVelocity,false);
+			umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsRotation);
+			pTrComponent->SetRawRotation(rot);
+			transformChangeFlags |= TransformChangeFlags::RotationChanged;
+			umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsRotation,false);
+
+			if(!bStatic && pVelComponent.valid())
+			{
+				auto angVel = phys->GetAngularVelocity();
+				// Sanity check
+				if(std::isnan(angVel.x) || std::isnan(angVel.y) || std::isnan(angVel.z))
+				{
+					std::stringstream ss {};
+					ss<<"UpdatePhysicsData: NaN angular velocity ("<<angVel.x<<","<<angVel.y<<","<<angVel.z<<") for entity "<<ent.GetClass()<<"!";
+					throw std::runtime_error(ss.str());
+				}
+				umath::set_flag(m_stateFlags,StateFlags::ApplyingAngularVelocity);
+				pVelComponent->SetRawAngularVelocity(angVel);
+				umath::set_flag(m_stateFlags,StateFlags::ApplyingAngularVelocity,false);
+			}
 		}
 	}
-	if(pTrComponent.valid())
+	if(pTrComponent)
 	{
 		auto &posCur = pTrComponent->GetPosition();
 		if(
@@ -245,17 +250,19 @@ void BasePhysicsComponent::UpdatePhysicsData()
 			ent.SetStateFlag(BaseEntity::StateFlags::PositionChanged);
 			pTrComponent->UpdateLastMovedTime();
 			bSnapshot = true;
+
+			// Sanity check
+			if(std::isnan(pos.x) || std::isnan(pos.y) || std::isnan(pos.z))
+			{
+				std::stringstream ss {};
+				ss<<"UpdatePhysicsData: NaN position ("<<pos.x<<","<<pos.y<<","<<pos.z<<") for entity "<<ent.GetClass()<<"!";
+				throw std::runtime_error(ss.str());
+			}
+			umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsPosition);
+			pTrComponent->SetRawPosition(pos);
+			transformChangeFlags |= TransformChangeFlags::PositionChanged;
+			umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsPosition,false);
 		}
-		// Sanity check
-		if(std::isnan(pos.x) || std::isnan(pos.y) || std::isnan(pos.z))
-		{
-			std::stringstream ss {};
-			ss<<"UpdatePhysicsData: NaN position ("<<pos.x<<","<<pos.y<<","<<pos.z<<") for entity "<<ent.GetClass()<<"!";
-			throw std::runtime_error(ss.str());
-		}
-		umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsPosition);
-		pTrComponent->SetRawPosition(pos);
-		umath::set_flag(m_stateFlags,StateFlags::ApplyingPhysicsPosition,false);
 	}
 	if(type == PHYSICSTYPE::DYNAMIC)
 	{
@@ -298,6 +305,8 @@ void BasePhysicsComponent::UpdatePhysicsData()
 	}
 	if(bSnapshot)
 		ent.MarkForSnapshot(true);
+	if(transformChangeFlags != TransformChangeFlags::None)
+		pTrComponent->OnPoseChanged(transformChangeFlags,false);
 }
 
 BaseEntity *BasePhysicsComponent::GetGroundEntity() const {return nullptr;}
@@ -338,6 +347,23 @@ void BasePhysicsComponent::SetCollisionsEnabled(bool b)
 	}
 }
 bool BasePhysicsComponent::GetCollisionsEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::CollisionsEnabled);}
+void BasePhysicsComponent::SetSimulationEnabled(bool b)
+{
+	if(b == GetSimulationEnabled())
+		return;
+	umath::set_flag(m_stateFlags,StateFlags::SimulationEnabled,b);
+	auto *phys = GetPhysicsObject();
+	if(phys == nullptr)
+		return;
+	auto &hColObjs = phys->GetCollisionObjects();
+	for(auto &hCol : hColObjs)
+	{
+		if(!hCol.IsValid())
+			continue;
+		hCol->SetSimulationEnabled(b);
+	}
+}
+bool BasePhysicsComponent::GetSimulationEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::SimulationEnabled);}
 bool BasePhysicsComponent::IsTrigger() const
 {
 	PhysObj *phys = GetPhysicsObject();
@@ -384,7 +410,7 @@ float BasePhysicsComponent::GetCollisionRadius(Vector3 *center) const
 	if(center != NULL)
 		*center = GetCollisionCenter();
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.expired())
+	if(!pTrComponent)
 		return m_colRadius;
 	auto &scale = pTrComponent->GetScale();
 	return m_colRadius *umath::abs_max(scale.x,scale.y,scale.z);
@@ -445,7 +471,7 @@ Vector3 BasePhysicsComponent::GetOrigin() const
 	if(phys == nullptr || (physType != PHYSICSTYPE::DYNAMIC && physType != PHYSICSTYPE::STATIC))
 	{
 		auto pTrComponent = GetEntity().GetTransformComponent();
-		return pTrComponent.valid() ? pTrComponent->GetPosition() : Vector3{};
+		return pTrComponent ? pTrComponent->GetPosition() : Vector3{};
 	}
 	return phys->GetOrigin();
 }
@@ -453,7 +479,7 @@ Vector3 BasePhysicsComponent::GetOrigin() const
 void BasePhysicsComponent::GetCollisionBounds(Vector3 *min,Vector3 *max) const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	auto scale = pTrComponent.valid() ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
+	auto scale = pTrComponent ? pTrComponent->GetScale() : Vector3{1.f,1.f,1.f};
 	*min = m_colMin *scale;
 	*max = m_colMax *scale;
 }
@@ -476,7 +502,7 @@ void BasePhysicsComponent::SetCollisionBounds(const Vector3 &min,const Vector3 &
 void BasePhysicsComponent::GetRotatedCollisionBounds(Vector3 *min,Vector3 *max) const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	AABB::GetRotatedBounds(m_colMin,m_colMax,pTrComponent.valid() ? pTrComponent->GetRotationMatrix() : umat::identity(),min,max);
+	bounding_volume::AABB::GetRotatedBounds(m_colMin,m_colMax,pTrComponent ? pTrComponent->GetRotationMatrix() : umat::identity(),min,max);
 }
 
 BasePhysicsComponent::StateFlags BasePhysicsComponent::GetStateFlags() const {return m_stateFlags;}
@@ -485,7 +511,7 @@ Vector3 BasePhysicsComponent::GetCollisionExtents() const
 {
 	auto r = (m_colMax -m_colMin) *0.5f;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 		r *= pTrComponent->GetScale();
 	return r;
 }
@@ -494,7 +520,7 @@ Vector3 BasePhysicsComponent::GetCollisionCenter() const
 {
 	auto r = m_colMin +(m_colMax -m_colMin) *0.5f;
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 		r *= pTrComponent->GetScale();
 	return r;
 }
@@ -587,8 +613,8 @@ void BasePhysicsComponent::UpdatePhysicsBone(Frame &reference,const std::shared_
 	uvec::rotate(&boneOffset,o->GetRotation());
 	auto boneWorldPos = o->GetPos() +boneOffset;
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.valid())
-		uvec::world_to_local(GetOrigin(),pTrComponent->GetOrientation(),boneWorldPos);
+	if(pTrComponent)
+		uvec::world_to_local(GetOrigin(),pTrComponent->GetRotation(),boneWorldPos);
 	auto localOffset = boneWorldPos;
 
 	auto rotConstraint = invRot *o->GetRotation() *(*rotRef);
@@ -654,24 +680,25 @@ void BasePhysicsComponent::PostPhysicsSimulate(Frame &reference,std::unordered_m
 
 float BasePhysicsComponent::GetPhysicsMass() const
 {
-	auto mdlComponent = GetEntity().GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = GetEntity().GetModel();
 	return (hMdl != nullptr) ? hMdl->GetMass() : 0.f;
 }
 
-void BasePhysicsComponent::Save(DataStream &ds)
+void BasePhysicsComponent::Save(udm::LinkedPropertyWrapper &udm)
 {
-	BaseEntityComponent::Save(ds);
-	ds->Write<uint32_t>(umath::to_integral(m_moveType));
-	ds->Write<uint32_t>(umath::to_integral(m_collisionType));
+	BaseEntityComponent::Save(udm);
+	udm["moveType"] = m_moveType;
+	udm["collisionType"] = m_collisionType;
 }
-void BasePhysicsComponent::Load(DataStream &ds,uint32_t version)
+void BasePhysicsComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
 {
-	BaseEntityComponent::Load(ds,version);
-	auto moveType = static_cast<MOVETYPE>(ds->Read<uint32_t>());
+	BaseEntityComponent::Load(udm,version);
+	auto moveType = GetMoveType();
+	udm["moveType"](moveType);
 	SetMoveType(moveType);
 
-	auto collisionType = static_cast<COLLISIONTYPE>(ds->Read<uint32_t>());
+	auto collisionType = GetCollisionType();
+	udm["collisionType"](collisionType);
 	SetCollisionType(collisionType);
 }
 
@@ -700,12 +727,27 @@ void BasePhysicsComponent::OnSleep()
 
 bool BasePhysicsComponent::IsRagdoll() const {return umath::is_flag_set(m_stateFlags,StateFlags::Ragdoll);}
 
+void BasePhysicsComponent::SetForcePhysicsAwakeCallbacksEnabled(bool enabled,bool apply)
+{
+	umath::set_flag(m_stateFlags,StateFlags::ForcePhysicsAwakeCallbacksEnabled,enabled);
+	if(apply == false)
+		return;
+	if(enabled)
+		OnPhysicsWake(m_physObject.get());
+	else if(m_physObject->IsSleeping())
+		OnPhysicsSleep(m_physObject.get());
+}
+bool BasePhysicsComponent::AreForcePhysicsAwakeCallbacksEnabled() const
+{
+	return umath::is_flag_set(m_stateFlags,StateFlags::ForcePhysicsAwakeCallbacksEnabled);
+}
+
 void BasePhysicsComponent::UpdateRagdollPose()
 {
 	auto &ent = GetEntity();
 	auto animatedComponent = ent.GetAnimatedComponent();
 	auto mdlComponent = ent.GetModelComponent();
-	if(mdlComponent.expired() || animatedComponent.expired() || IsRagdoll() == false)
+	if(!mdlComponent || animatedComponent.expired() || IsRagdoll() == false)
 		return;
 	auto *phys = GetPhysicsObject();
 	if(phys == nullptr || phys->IsStatic() == true)
@@ -722,7 +764,7 @@ void BasePhysicsComponent::UpdateRagdollPose()
 		return;
 	auto physRootBoneId = physRoot->GetBoneID();
 	auto pTrComponent = ent.GetTransformComponent();
-	auto invRot = pTrComponent.valid() ? uquat::get_inverse(pTrComponent->GetOrientation()) : uquat::identity();
+	auto invRot = pTrComponent ? uquat::get_inverse(pTrComponent->GetRotation()) : uquat::identity();
 
 	auto physRootBone = skeleton.GetBone(physRootBoneId).lock();
 	if(physRootBone != nullptr)
@@ -735,14 +777,16 @@ void BasePhysicsComponent::UpdateRagdollPose()
 	PostPhysicsSimulate(reference,rootBones,moveOffset,invRot,physRootBoneId);
 }
 
-void BasePhysicsComponent::PostPhysicsSimulate()
+bool BasePhysicsComponent::PostPhysicsSimulate()
 {
 	PhysObj *phys = GetPhysicsObject();
-	InvokeEventCallbacks(EVENT_ON_POST_PHYSICS_SIMULATE);
+	CEPostPhysicsSimulate evData {};
+	InvokeEventCallbacks(EVENT_ON_POST_PHYSICS_SIMULATE,evData);
 	if(phys == NULL || phys->IsStatic())
-		return;
+		return evData.keepAwake;
 	dynamic_cast<PhysObjDynamic*>(phys)->PostSimulate();
 	UpdateRagdollPose();
+	return evData.keepAwake;
 }
 #if PHYS_KEEP_SIMULATION_TRANSFORM != 0
 Vector3 BasePhysicsComponent::GetPhysicsSimulationOffset()
@@ -765,7 +809,7 @@ void BasePhysicsComponent::DropToFloor()
 {
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
-	if(pTrComponent.expired())
+	if(!pTrComponent)
 		return;
 	auto *nw = ent.GetNetworkState();
 	auto *game = nw->GetGameState();
@@ -821,26 +865,26 @@ void BasePhysicsComponent::OnEntityComponentAdded(BaseEntityComponent &component
 void BasePhysicsComponent::OriginToWorld(Vector3 *origin) const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	uvec::local_to_world(GetOrigin(),pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity(),*origin);
+	uvec::local_to_world(GetOrigin(),pTrComponent ? pTrComponent->GetRotation() : uquat::identity(),*origin);
 }
 void BasePhysicsComponent::OriginToWorld(Vector3 *origin,Quat *rot) const
 {
 	OriginToWorld(origin);
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 		pTrComponent->LocalToWorld(rot);
 }
 
 void BasePhysicsComponent::WorldToOrigin(Vector3 *origin) const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	uvec::world_to_local(GetOrigin(),pTrComponent.valid() ? pTrComponent->GetOrientation() : uquat::identity(),*origin);
+	uvec::world_to_local(GetOrigin(),pTrComponent ? pTrComponent->GetRotation() : uquat::identity(),*origin);
 }
 void BasePhysicsComponent::WorldToOrigin(Vector3 *origin,Quat *rot) const
 {
 	WorldToOrigin(origin);
 	auto pTrComponent = GetEntity().GetTransformComponent();
-	if(pTrComponent.valid())
+	if(pTrComponent)
 		pTrComponent->WorldToLocal(rot);
 }
 
@@ -854,8 +898,7 @@ void BasePhysicsComponent::UpdateBoneCollisionObject(UInt32 boneId,Bool updatePo
 		return;
 	auto &ent = GetEntity();
 	auto animatedComponent = ent.GetAnimatedComponent();
-	auto mdlComponent = ent.GetModelComponent();
-	auto hMdl = mdlComponent.valid() ? mdlComponent->GetModel() : nullptr;
+	auto &hMdl = GetEntity().GetModel();
 	if(animatedComponent.expired() || hMdl == nullptr)
 		return;
 	auto &reference = hMdl->GetReference();
@@ -893,17 +936,17 @@ void BasePhysicsComponent::UpdateBoneCollisionObject(UInt32 boneId,Bool updatePo
 				oPos += -offset +offsetRoot;
 				if(updateRot == true)
 				{
-					if(pTrComponent.valid())
+					if(pTrComponent)
 						pTrComponent->LocalToWorld(&oPos,&oRot);
 					o->SetRotation(oRot);
 				}
-				else if(pTrComponent.valid())
+				else if(pTrComponent)
 					pTrComponent->LocalToWorld(&oPos);
 				o->SetPos(oPos);
 			}
 			else
 			{
-				if(pTrComponent.valid())
+				if(pTrComponent)
 					pTrComponent->LocalToWorld(&oRot);
 				o->SetRotation(oRot);
 			}
@@ -941,3 +984,14 @@ void CEInitializePhysics::PushArguments(lua_State *l)
 	Lua::PushInt(l,umath::to_integral(flags));
 }
 
+///////////////
+
+CEPostPhysicsSimulate::CEPostPhysicsSimulate()
+{}
+void CEPostPhysicsSimulate::PushArguments(lua_State *l) {}
+uint32_t CEPostPhysicsSimulate::GetReturnCount() {return 1;}
+void CEPostPhysicsSimulate::HandleReturnValues(lua_State *l)
+{
+	if(Lua::IsSet(l,-1))
+		keepAwake = Lua::CheckBool(l,-1);
+}

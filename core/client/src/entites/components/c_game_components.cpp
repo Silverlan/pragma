@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -99,6 +99,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CShadowManagerComponent>("shadow_manager");
 	componentManager.RegisterComponentType<pragma::COcclusionCullerComponent>("occlusion_culler");
 	componentManager.RegisterComponentType<pragma::CSceneComponent>("scene");
+	componentManager.RegisterComponentType<pragma::CGamemodeComponent>("gamemode");
 
 	componentManager.RegisterComponentType<pragma::CEnvSoundProbeComponent>("sound_probe");
 	componentManager.RegisterComponentType<pragma::CWeatherComponent>("weather");
@@ -129,6 +130,9 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CBSPComponent>("bsp");
 	componentManager.RegisterComponentType<pragma::CLightMapComponent>("light_map");
 	componentManager.RegisterComponentType<pragma::CLightMapReceiverComponent>("light_map_receiver");
+	componentManager.RegisterComponentType<pragma::CRendererComponent>("renderer");
+	componentManager.RegisterComponentType<pragma::CRasterizationRendererComponent>("rasterization_renderer");
+	componentManager.RegisterComponentType<pragma::CRaytracingRendererComponent>("raytracing_renderer");
 
 	auto *l = GetLuaState();
 	for(auto &evName : {

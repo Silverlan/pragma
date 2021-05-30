@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include <string>
@@ -68,9 +68,9 @@ static std::string GetAppPath()
 int main(int argc,char* argv[]) try
 {
 	#ifdef __linux__
-		const char *library = "libengine.so";
+		const char *library = "libshared.so";
 	#else
-		const char *library = "engine.dll";
+		const char *library = "shared.dll";
 	#endif
 	#ifdef _WIN32
 		std::string path = GetAppPath();

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -11,6 +11,7 @@
 #include "pragma/entities/components/base_name_component.hpp"
 #include "pragma/lua/libraries/ltimer.h"
 #include <pragma/game/game.h>
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -32,6 +33,49 @@ void BaseIOComponent::Initialize()
 	BindEventUnhandled(BaseEntity::EVENT_ON_SPAWN,[this](std::reference_wrapper<ComponentEvent> evData) {
 		TriggerOutput("OnSpawn",&GetEntity());
 	});
+}
+
+void BaseIOComponent::Save(udm::LinkedPropertyWrapper &udm)
+{
+	BaseEntityComponent::Save(udm);
+	auto udmOutputs = udm["outputs"];
+	for(auto &pair : m_outputs)
+	{
+		auto &outputs = pair.second;
+		auto udmOutputList = udmOutputs.AddArray(pair.first,outputs.size());
+		for(auto i=decltype(outputs.size()){0u};i<outputs.size();++i)
+		{
+			auto &output = outputs[i];
+			auto udmOutput = udmOutputList[i];
+			udmOutput["entities"] = output.entities;
+			udmOutput["input"] = output.input;
+			udmOutput["param"] = output.param;
+			udmOutput["delay"] = output.delay;
+			udmOutput["times"] = output.times;
+		}
+	}
+}
+void BaseIOComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+{
+	BaseEntityComponent::Load(udm,version);
+	auto udmOutputs = udm["outputs"];
+	auto numOutputs = udmOutputs.GetChildCount();
+	for(auto udmOutputList : udmOutputs.ElIt())
+	{
+		auto &outputs = m_outputs[std::string{udmOutputList.key}] = {};
+		auto udmOutputs = udmOutputList.property;
+		outputs.resize(udmOutputs.GetSize());
+		for(auto i=decltype(outputs.size()){0u};i<outputs.size();++i)
+		{
+			auto &output = outputs[i];
+			auto udmOutput = udmOutputs[i];
+			udmOutput["entities"](output.entities);
+			udmOutput["input"](output.input);
+			udmOutput["param"](output.param);
+			udmOutput["delay"](output.delay);
+			udmOutput["times"](output.times);
+		}
+	}
 }
 
 void BaseIOComponent::Input(const std::string input,BaseEntity *activator,BaseEntity *caller) {Input(input,activator,caller,"");}
@@ -72,7 +116,7 @@ void BaseIOComponent::StoreOutput(std::string name,std::string entities,std::str
 	it->second.push_back(Output(entities,input,param,delay,times));
 }
 
-bool BaseIOComponent::FireSingleOutput(Output &output,BaseEntity *activator)
+bool BaseIOComponent::FireSingleOutput(Output &output,BaseEntity *activator,IoFlags flags)
 {
 	if(output.times == 0)
 		return false;
@@ -106,7 +150,7 @@ bool BaseIOComponent::FireSingleOutput(Output &output,BaseEntity *activator)
 		auto *pIoComponent = static_cast<BaseIOComponent*>(ent->FindComponent("io").get());
 		if(pIoComponent == nullptr)
 			continue;
-		if(output.delay <= 0.f)
+		if(output.delay <= 0.f && !umath::is_flag_set(flags,IoFlags::ForceDelayedFire))
 		{
 			pIoComponent->Input(output.input,activator,&entThis,output.param);
 			if(!hThis.IsValid())
@@ -165,7 +209,7 @@ void BaseIOComponent::Input(std::string input,BaseEntity *activator,BaseEntity *
 		Con::cout<<"WARNING: Unhandled input '"<<input<<"' for entity '"<<entThis.GetClass()<<"'!"<<Con::endl;
 }
 
-void BaseIOComponent::TriggerOutput(std::string name,BaseEntity *activator)
+void BaseIOComponent::TriggerOutput(std::string name,BaseEntity *activator,IoFlags flags)
 {
 	StringToLower(name);
 	std::unordered_map<std::string,std::vector<Output>>::iterator it = m_outputs.find(name);
@@ -176,7 +220,7 @@ void BaseIOComponent::TriggerOutput(std::string name,BaseEntity *activator)
 	for(auto i=outputs.size() -1;i!=size_t(-1);i--)
 	{
 		Output &output = outputs[i];
-		if(!FireSingleOutput(output,activator))
+		if(!FireSingleOutput(output,activator,flags))
 		{
 			if(!hActivator.IsValid())
 				return;

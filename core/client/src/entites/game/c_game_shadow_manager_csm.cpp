@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -16,11 +16,13 @@
 
 using namespace pragma;
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CLightDirectionalComponent &light,bool drawParticleShadows)
 {
+	// TODO
+#if 0
 	auto pLightComponent = light.GetEntity().GetComponent<pragma::CLightComponent>();
 	auto *shadowScene = pLightComponent.valid() ? pLightComponent->FindShadowScene() : nullptr;
 	// TODO
@@ -152,8 +154,8 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 					if(bProcessMeshes == true)
 					{
 						auto pRenderComponent = const_cast<CBaseEntity*>(info.entity)->GetRenderComponent();
-						if(pRenderComponent.valid())
-							pRenderComponent->UpdateRenderData(drawCmd);
+						if(pRenderComponent)
+							;//pRenderComponent->UpdateRenderData(drawCmd); // TODO
 					}
 				}
 			}
@@ -212,7 +214,7 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 					{
 						auto p = ent->GetComponent<pragma::CParticleSystemComponent>();
 						if(p.valid() && p->GetCastShadows() == true)
-							p->RenderShadow(drawCmd,*scene,*static_cast<pragma::rendering::RasterizationRenderer*>(renderer),pLightComponent.get(),layer);
+							p->RenderShadow(drawCmd,*scene,*static_cast<pragma::CRasterizationRendererComponent*>(renderer),pLightComponent.get(),layer);
 					}
 				}
 
@@ -231,4 +233,5 @@ void ShadowRenderer::RenderCSMShadows(std::shared_ptr<prosper::IPrimaryCommandBu
 			drawCmd->RecordEndRenderPass();
 		}
 	}
+#endif
 }

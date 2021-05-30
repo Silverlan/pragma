@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_shared.h"
@@ -37,7 +37,7 @@ int PolyMesh::BuildPolyMesh()
 				auto na = a->GetNormal();
 				auto nb = b->GetNormal();
 				auto nc = c->GetNormal();
-				bool bIntersect = Plane::GetPlaneIntersection(&intersect,na,nb,nc,a->GetDistance(),b->GetDistance(),c->GetDistance());
+				bool bIntersect = umath::Plane::GetPlaneIntersection(&intersect,na,nb,nc,a->GetDistance(),b->GetDistance(),c->GetDistance());
 				if(bIntersect)
 				{
 					for(int m=0;m<numPolys;m++)

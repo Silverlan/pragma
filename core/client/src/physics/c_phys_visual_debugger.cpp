@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -11,7 +11,7 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_util.hpp>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 CPhysVisualDebugger::CPhysVisualDebugger()
@@ -19,7 +19,7 @@ CPhysVisualDebugger::CPhysVisualDebugger()
 	InitializeBuffers();
 }
 
-void CPhysVisualDebugger::Render(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
+void CPhysVisualDebugger::Render(std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pragma::CCameraComponent &cam)
 {
 	auto vp = cam.GetProjectionMatrix() *cam.GetViewMatrix();
 	auto m = umat::identity();
@@ -72,7 +72,7 @@ void CPhysVisualDebugger::InitializeBuffers()
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
 	createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
 	m_debugBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo);
-	m_debugBuffer->SetPermanentlyMapped(true);
+	m_debugBuffer->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::WriteBit);
 
 	constexpr auto colorBufferSize = (decltype(m_lineBuffer)::VERTS_PER_INSTANCE *decltype(m_lineBuffer)::MAX_INSTANCES +
 		decltype(m_pointBuffer)::VERTS_PER_INSTANCE *decltype(m_pointBuffer)::MAX_INSTANCES +
@@ -81,7 +81,7 @@ void CPhysVisualDebugger::InitializeBuffers()
 	createInfo.size = colorBufferSize;
 
 	m_colorBuffer = c_engine->GetRenderContext().CreateBuffer(createInfo);
-	m_colorBuffer->SetPermanentlyMapped(true);
+	m_colorBuffer->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::WriteBit);
 
 	prosper::DeviceSize offset = 0;
 	prosper::DeviceSize colorOffset = 0;
@@ -116,7 +116,7 @@ void CPhysVisualDebugger::DrawTriangle(const Vector3 &v0,const Vector3 &v1,const
 }
 void CPhysVisualDebugger::ReportErrorWarning(const std::string &str)
 {
-	Con::cwar<<"[PhysX] WARNING: "<<str<<Con::endl;
+	Con::cwar<<"[Phys] WARNING: "<<str<<Con::endl;
 }
 void CPhysVisualDebugger::DrawText(const std::string &str,const Vector3 &location,const Color &color,float size)
 {

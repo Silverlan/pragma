@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __S_BASEENTITY_H__
 #define __S_BASEENTITY_H__
@@ -23,11 +23,13 @@ class DLLSERVER SBaseEntity
 {
 public:
 	SBaseEntity();
+	virtual util::WeakHandle<pragma::BaseEntityComponent> AddNetworkedComponent(const std::string &name) override;
 protected:
 	bool m_bShared;
 	Bool m_bSynchronized;
 	void EraseFunction(int function);
-	virtual util::WeakHandle<pragma::BaseEntityComponent> AddNetworkedComponent(const std::string &name) override;
+	virtual void OnComponentAdded(pragma::BaseEntityComponent &component) override;
+	virtual void OnComponentRemoved(pragma::BaseEntityComponent &component) override;
 public:
 	virtual void DoSpawn() override;
 
@@ -48,14 +50,12 @@ public:
 	Bool IsSynchronized() const;
 	void SetSynchronized(Bool b);
 
-	virtual util::WeakHandle<pragma::BaseModelComponent> GetModelComponent() const override;
 	virtual util::WeakHandle<pragma::BaseAnimatedComponent> GetAnimatedComponent() const override;
 	virtual util::WeakHandle<pragma::BaseWeaponComponent> GetWeaponComponent() const override;
 	virtual util::WeakHandle<pragma::BaseVehicleComponent> GetVehicleComponent() const override;
 	virtual util::WeakHandle<pragma::BaseAIComponent> GetAIComponent() const override;
 	virtual util::WeakHandle<pragma::BaseCharacterComponent> GetCharacterComponent() const override;
 	virtual util::WeakHandle<pragma::BasePlayerComponent> GetPlayerComponent() const override;
-	virtual util::WeakHandle<pragma::BasePhysicsComponent> GetPhysicsComponent() const override;
 	virtual util::WeakHandle<pragma::BaseTimeScaleComponent> GetTimeScaleComponent() const override;
 	virtual util::WeakHandle<pragma::BaseNameComponent> GetNameComponent() const override;
 	virtual bool IsCharacter() const override;

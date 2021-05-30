@@ -1,0 +1,7 @@
+"testgeneric"
+{
+	"textures"
+	{
+		$string diffuse_map "tools/toolsnodraw"
+	}
+}

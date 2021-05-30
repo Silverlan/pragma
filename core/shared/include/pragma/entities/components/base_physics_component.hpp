@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer */
+ * Copyright (c) 2021 Silverlan */
 
 #ifndef __BASE_PHYSICS_COMPONENT_HPP__
 #define __BASE_PHYSICS_COMPONENT_HPP__
@@ -89,7 +89,9 @@ namespace pragma
 			ApplyingAngularVelocity = ApplyingLinearVelocity<<1u,
 			ApplyingPhysicsPosition = ApplyingAngularVelocity<<1u,
 			ApplyingPhysicsRotation = ApplyingPhysicsPosition<<1u,
-			SleepReportEnabled = ApplyingPhysicsRotation<<1u
+			SleepReportEnabled = ApplyingPhysicsRotation<<1u,
+			ForcePhysicsAwakeCallbacksEnabled = SleepReportEnabled<<1u,
+			SimulationEnabled = ForcePhysicsAwakeCallbacksEnabled<<1u
 		};
 
 		enum class PhysFlags : uint32_t
@@ -137,13 +139,16 @@ namespace pragma
 		Quat GetPhysicsSimulationRotation();
 #endif
 		virtual void PrePhysicsSimulate();
-		virtual void PostPhysicsSimulate();
+		virtual bool PostPhysicsSimulate();
 		virtual void SetKinematic(bool b);
 		bool IsKinematic() const;
 		virtual void OnPhysicsWake(PhysObj *phys);
 		virtual void OnPhysicsSleep(PhysObj *phys);
 		bool IsOnGround() const;
 		bool IsGroundWalkable() const;
+
+		void SetForcePhysicsAwakeCallbacksEnabled(bool enabled,bool apply=true);
+		bool AreForcePhysicsAwakeCallbacksEnabled() const;
 
 		BaseEntity *GetGroundEntity() const;
 		PhysObj *GetPhysicsObject() const;
@@ -190,6 +195,8 @@ namespace pragma
 		float GetMass() const;
 		virtual void SetCollisionsEnabled(bool b);
 		bool GetCollisionsEnabled() const;
+		virtual void SetSimulationEnabled(bool b);
+		bool GetSimulationEnabled() const;
 
 		void GetCollisionBounds(Vector3 *min,Vector3 *max) const;
 		float GetCollisionRadius(Vector3 *center=nullptr) const;
@@ -208,13 +215,13 @@ namespace pragma
 		void WorldToOrigin(Vector3 *origin) const;
 		void WorldToOrigin(Vector3 *origin,Quat *rot) const;
 
-		virtual void Save(DataStream &ds) override;
-		virtual void Load(DataStream &ds,uint32_t version) override;
+		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
+		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
 
 		void SetSleepReportEnabled(bool reportEnabled);
 		bool IsSleepReportEnabled() const;
-		void OnWake();
-		void OnSleep();
+		virtual void OnWake();
+		virtual void OnSleep();
 
 		// Should only be called from within an EVENT_INITIALIZE_PHYSICS event!
 		util::WeakHandle<PhysObj> InitializePhysics(const physics::PhysObjCreateInfo &physObjCreateInfo,PhysFlags flags,int32_t rootMeshBoneId=-1);
@@ -227,6 +234,7 @@ namespace pragma
 		void UpdateBoneCollisionObject(UInt32 boneId,Bool updatePos=true,Bool updateRot=false);
 		
 		pragma::NetEventId m_netEvSetCollisionsEnabled = pragma::INVALID_NET_EVENT;
+		pragma::NetEventId m_netEvSetSimEnabled = pragma::INVALID_NET_EVENT;
 
 		bool m_bRayResultCallbackEnabled = false;
 		PHYSICSTYPE m_physicsType = PHYSICSTYPE::NONE;
@@ -267,6 +275,15 @@ namespace pragma
 		virtual void PushArguments(lua_State *l) override;
 		PHYSICSTYPE physicsType;
 		BasePhysicsComponent::PhysFlags flags;
+	};
+	struct DLLNETWORK CEPostPhysicsSimulate
+		: public ComponentEvent
+	{
+		CEPostPhysicsSimulate();
+		virtual void PushArguments(lua_State *l) override;
+		virtual uint32_t GetReturnCount() override;
+		virtual void HandleReturnValues(lua_State *l) override;
+		bool keepAwake = true;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::BasePhysicsComponent::StateFlags);

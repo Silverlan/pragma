@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2020 Florian Weischer
+ * Copyright (c) 2021 Silverlan
  */
 
 #include "stdafx_client.h"
@@ -29,7 +29,7 @@
 #include <pragma/rendering/c_sci_gpu_timer_manager.hpp>
 #include <sharedutils/scope_guard.h>
 
-extern DLLCENGINE CEngine *c_engine;
+extern DLLCLIENT CEngine *c_engine;
 
 void CGame::RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,prosper::Texture &texPostHdr,prosper::IImage *optOutImage,uint32_t layerId)
 {
@@ -41,31 +41,36 @@ void CGame::RenderScenePresent(std::shared_ptr<prosper::IPrimaryCommandBuffer> &
 		drawCmd->RecordBlitImage(blitInfo,texPostHdr.GetImage(),*optOutImage);
 		drawCmd->RecordImageBarrier(*optOutImage,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 	}
-	drawCmd->RecordImageBarrier(texPostHdr.GetImage(),prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+	drawCmd->RecordImageBarrier(texPostHdr.GetImage(),prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 }
 
 std::shared_ptr<prosper::IPrimaryCommandBuffer> CGame::GetCurrentDrawCommandBuffer() const {return m_currentDrawCmd.lock();}
-	
+
 void CGame::RenderScene(const util::DrawSceneInfo &drawSceneInfo)
 {
 	m_currentDrawCmd = drawSceneInfo.commandBuffer;
-	ScopeGuard sgCurrentDrawCmd {[this]() {
+	util::ScopeGuard sgCurrentDrawCmd {[this]() {
 		m_currentDrawCmd = {};
 	}};
 
+	CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScene",drawSceneInfo);
+	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScene",drawSceneInfo);
+
 	auto &scene = drawSceneInfo.scene;
-	auto *renderer = const_cast<pragma::rendering::BaseRenderer*>(scene->GetRenderer());
+	auto *renderer = const_cast<pragma::CSceneComponent*>(scene.get())->GetRenderer();
 	if(renderer)
 	{
-		renderer->RenderScene(drawSceneInfo);
-		StartProfilingStage(CGame::GPUProfilingPhase::Present);
-		StartProfilingStage(CGame::CPUProfilingPhase::Present);
 
 		prosper::Texture *presentationTexture = nullptr;
 		if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::HDR))
 			presentationTexture = drawSceneInfo.renderTarget ? &drawSceneInfo.renderTarget->GetTexture() : renderer->GetHDRPresentationTexture();
 		else
 			presentationTexture = renderer->GetPresentationTexture();
+		drawSceneInfo.commandBuffer->RecordImageBarrier(presentationTexture->GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+
+		renderer->Render(drawSceneInfo);
+		StartProfilingStage(CGame::GPUProfilingPhase::Present);
+		StartProfilingStage(CGame::CPUProfilingPhase::Present);
 
 		RenderScenePresent(drawSceneInfo.commandBuffer,*presentationTexture,drawSceneInfo.outputImage.get(),drawSceneInfo.outputLayerId);
 		StopProfilingStage(CGame::CPUProfilingPhase::Present);

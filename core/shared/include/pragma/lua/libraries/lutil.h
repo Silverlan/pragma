@@ -14,6 +14,7 @@ struct TraceResult;
 namespace util {struct SplashDamageInfo; enum class VarType : uint8_t;};
 namespace Lua
 {
+	DLLNETWORK luabind::detail::class_rep *get_crep(luabind::object o);
 	DLLNETWORK void set_ignore_include_cache(bool b);
 	namespace global
 	{

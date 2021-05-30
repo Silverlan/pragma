@@ -56,156 +56,7 @@
 #include <udm.hpp>
 #pragma optimize("",off)
 extern DLLNETWORK Engine *engine;
-DLLNETWORK void BuildDisplacementTriangles(std::vector<Vector3> &sideVerts,unsigned int start,
-	Vector3 &nu,Vector3 &nv,float sw,float sh,float ou,float ov,float su,float sv,
-	unsigned char power,std::vector<std::vector<Vector3>> &normals,std::vector<std::vector<Vector3>> &offsets,std::vector<std::vector<float>> &distances,unsigned char numAlpha,std::vector<std::vector<Vector2>> &alphas,
-	std::vector<Vector3> &outVertices,std::vector<Vector3> &outNormals,std::vector<Vector2> &outUvs,std::vector<unsigned int> &outTriangles,std::vector<Vector2> *outAlphas)
-{
-	int rows = umath::pow(2,CInt32(power)) +1;
-	unsigned int numVerts = rows *rows;
-	outNormals.resize(numVerts);
-	outUvs.resize(numVerts);
-	if(numAlpha > 0)
-		outAlphas->resize(numVerts);
-	Vector3 sortedSideVerts[4] = {{},{},{},{}};
-	char j = 0;
-	for(auto i=start;i<CUInt32(sideVerts.size());i++)
-	{
-		sortedSideVerts[j] = sideVerts[i];
-		j++;
-	}
-	for(unsigned int i=0;i<start;i++)
-	{
-		sortedSideVerts[j] = sideVerts[i];
-		j++;
-	}
-	Vector3 &x1 = sortedSideVerts[0];
-	Vector3 &x2 = sortedSideVerts[1];
-	Vector3 &y1 = sortedSideVerts[3];
-	Vector3 &y2 = sortedSideVerts[2];
-	Vector3 xOffset1 = (x2 -x1) /float(rows -1);
-	Vector3 xOffset2 = (y2 -y1) /float(rows -1);
-	Vector3 yOffset = (y1 -x1) /float(rows -1); // CHECKME
-	outVertices.resize(numVerts);
-	Vector3 cur = sortedSideVerts[0];
-	for(int col=0;col<rows;col++)
-	{
-		std::vector<Vector3> &cNormals = normals[col];
-		std::vector<Vector2> *cAlphas = (numAlpha > 0) ? &alphas[col] : NULL;
-		std::vector<float> &cDistances = distances[col];
-		std::vector<Vector3> &cOffsets = offsets[col];
-
-		Vector3 rowPos = cur;
-		float offsetScale = col /float(rows -1);
-		for(int row=0;row<rows;row++)
-		{
-			unsigned int idx = col *rows +row;
-			//outNormals[idx] = -cNormals[row]; // This is the offset normal, not the actual face normal!
-			if(numAlpha > 0)
-				(*outAlphas)[idx] = (*cAlphas)[row];
-
-			Vector3 vA = rowPos +cNormals[row] *cDistances[row] +cOffsets[row];
-			Vector2 uv;
-			uv.x = (glm::dot(rowPos,nu) *sw) /su +ou *sw;
-			uv.y = (glm::dot(rowPos,nv) *sh) /sv +ov *sh;
-			outUvs[idx] = uv;
-			outVertices[idx] = vA;
-
-			Vector3 xOffset = (1.f -offsetScale) *xOffset1 +offsetScale *xOffset2;
-			rowPos += xOffset;
-		}
-		cur = sortedSideVerts[0] +(yOffset *float(col +1));
-		//if(col < rows -1)
-		//	cur += yOffset +normals[col +1][0] *distances[col +1][0]; // +cNormals[0] *cDistances[0]; TODO!! -> Next column!
-	}
-	outTriangles.resize((rows -1) *(rows -1) *6);
-	unsigned int idx = 0;
-	std::vector<Vector3> faceNormals;
-	faceNormals.reserve(umath::pow(rows -1,2) *2);
-	for(int col=0;col<rows -1;col++)
-	{
-		for(int row=0;row<rows -1;row++)
-		{
-			int a = col *rows +row;
-			int b = a +1;
-			int c = (col +1) *rows +row;
-			outTriangles[idx] = a;
-			outTriangles[idx +1] = b;
-			outTriangles[idx +2] = c;
-
-			auto na = -uvec::cross(outVertices[c] -outVertices[a],outVertices[b] -outVertices[a]);
-			uvec::normalize(&na);
-			faceNormals.push_back(na);
-
-			idx += 3;
-			int d = (col +1) *rows +row +1;
-			outTriangles[idx] = b;
-			outTriangles[idx +1] = d;
-			outTriangles[idx +2] = c;
-
-			auto nb = -uvec::cross(outVertices[c] -outVertices[b],outVertices[d] -outVertices[b]);
-			uvec::normalize(&nb);
-			faceNormals.push_back(nb);
-
-			idx += 3;
-		}
-	}
-	// Calculate Vertex Normals
-	auto up = Vector3(0.f,1.f,0.f);
-	for(auto col=0;col<rows;col++)
-	{
-		for(auto row=0;row<rows;row++)
-		{
-			auto vertId = col *rows +row;
-			auto a = (col > 0 && row > 0) ?
-				((col -1) *(rows -1) +(row -1))
-				: -1;
-			auto b = (row > 0 && col < (rows -1)) ?
-				(col *(rows -1) +(row -1))
-				: -1;
-			auto c = (col > 0) ?
-				((col -1) *(rows -1) +row)
-				: -1;
-			auto d = (col < (rows -1)) ?
-				(col *(rows -1) +row)
-				: -1;
-
-			auto &na1 = (a >= 0) ? faceNormals[a *2 +1] : up;
-			auto &na2 = na1;
-			auto &nb1 = (b >= 0) ? faceNormals[b *2] : up;
-			auto &nb2 = (b >= 0) ? faceNormals[b *2 +1] : up;
-			auto &nc1 = (c >= 0) ? faceNormals[c *2] : up;
-			auto &nc2 = (c >= 0) ? faceNormals[c *2 +1] : up;
-			auto &nd1 = (c >= 0) ? faceNormals[d *2] : up;
-			auto &nd2 = nd1;
-
-			auto &n = outNormals[vertId] = (na1 +na2 +nb1 +nb2 +nc1 +nc2 +nd1 +nd2) /8.f;
-			uvec::normalize(&n);
-		}
-	}
-	//
-}
-
-DLLNETWORK void ToTriangles(const std::vector<Vector3> &vertices,std::vector<uint16_t> &outTriangles)
-{
-	size_t pivot = 0;
-	//Vector3 &va = (*vertices)[pivot];
-	auto numVerts = vertices.size();
-	if(numVerts == 0)
-		return;
-	auto numVals = (numVerts -2) *3;
-	outTriangles.resize(numVals);
-	auto idx = 0;
-	for(auto i=pivot +2;i<numVerts;i++)
-	{
-		outTriangles[idx] = static_cast<uint16_t>(pivot);
-		outTriangles[idx +1] = static_cast<uint16_t>(i -1);
-		outTriangles[idx +2] = static_cast<uint16_t>(i);
-		idx += 3;
-	}
-}
-
-DLLNETWORK void Lua::VarDump(lua_State *lua,int n)
+void Lua::VarDump(lua_State *lua,int n)
 {
 	auto t = GetType(lua,n);
 	switch(t)
@@ -245,7 +96,7 @@ DLLNETWORK void Lua::VarDump(lua_State *lua,int n)
 	}
 }
 
-DLLNETWORK void Lua::StackDump(lua_State *lua)
+void Lua::StackDump(lua_State *lua)
 {
     int top = GetStackTop(lua);
 	Con::cout<<"------------ LUA STACKDUMP ------------"<<Con::endl;
@@ -259,7 +110,7 @@ DLLNETWORK void Lua::StackDump(lua_State *lua)
 	Con::cout<<"---------------------------------------"<<Con::endl;
 }
 
-DLLNETWORK void Lua::TableDump(lua_State *lua,int n)
+void Lua::TableDump(lua_State *lua,int n)
 {
 	if(n < 0)
 		n = Lua::GetStackTop(lua) +n +1;

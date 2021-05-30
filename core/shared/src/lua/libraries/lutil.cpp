@@ -45,9 +45,35 @@
 #include <util_zip.h>
 
 extern DLLNETWORK Engine *engine;
-
+#pragma optimize("",off)
 static auto s_bIgnoreIncludeCache = false;
 void Lua::set_ignore_include_cache(bool b) {s_bIgnoreIncludeCache = b;}
+
+luabind::detail::class_rep *Lua::get_crep(luabind::object o)
+{
+	auto *L = o.interpreter();
+	luabind::detail::class_rep *crep = nullptr;
+
+	o.push(L);
+	if(luabind::detail::is_class_rep(L,-1))
+	{
+		crep = static_cast<luabind::detail::class_rep *>(lua_touserdata(L, -1));
+		lua_pop(L, 1);
+	}
+	else
+	{
+		auto *obj = luabind::detail::get_instance(L,-1);
+		if(!obj)
+			lua_pop(L,1);
+		else
+		{
+			lua_pop(L,1);
+			// OK, we were given an object - gotta get the crep.
+			crep = obj->crep();
+		}
+	}
+	return crep;
+}
 
 void Lua::util::register_library(lua_State *l)
 {
@@ -566,7 +592,23 @@ int Lua::util::register_class(lua_State *l)
 		game->GetLuaClassManager().RegisterClass(fullClassName,oClass,regFc);
 
 		// Init default constructor and print methods; They can still be overwritten by the Lua script
-		oClass["__init"] = luabind::make_function(l,static_cast<void(*)(const luabind::object&)>([](const luabind::object&) {}));
+		oClass["__init"] = luabind::make_function(l,static_cast<void(*)(lua_State*,const luabind::object&)>([](lua_State *l,const luabind::object &o) {
+			auto *crep = Lua::get_crep(o);
+			if(!crep)
+				return;
+			std::vector<luabind::detail::class_rep*> initialized;
+			for(auto &base : crep->bases())
+			{
+				if(std::find(initialized.begin(),initialized.end(),base.base) != initialized.end())
+					continue;
+				initialized.push_back(base.base);
+
+				base.base->get_table(l);
+				auto oBase = luabind::object{luabind::from_stack(l,-1)};
+				oBase["__init"](o);
+				Lua::Pop(l,1);
+			}
+		}));
 		oClass["__tostring"] = luabind::make_function(l,static_cast<std::string(*)(lua_State*,const luabind::object&)>([](lua_State *l,const luabind::object &o) -> std::string {
 			return luabind::get_class_info(luabind::from_stack(l,1)).name;
 		}));
@@ -1191,3 +1233,4 @@ std::string Lua::util::get_addon_path(lua_State *l)
 	path += '/';
 	return path;
 }
+#pragma optimize("",on)

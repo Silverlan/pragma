@@ -406,6 +406,7 @@ uint32_t Engine::ClearUnusedAssets(const std::vector<pragma::asset::Type> &types
 
 void Engine::ClearCache()
 {
+	constexpr auto clearAssetFiles = false;
 	Con::cout<<"Clearing cached files..."<<Con::endl;
 	auto fRemoveDir = [](const std::string &name) {
 		Con::cout<<"Removing '"<<name<<"'..."<<Con::endl;
@@ -415,8 +416,11 @@ void Engine::ClearCache()
 		return result;
 	};
 	fRemoveDir("cache");
-	fRemoveDir("addons/imported");
-	fRemoveDir("addons/converted");
+	if(clearAssetFiles)
+	{
+		fRemoveDir("addons/imported");
+		fRemoveDir("addons/converted");
+	}
 
 	Con::cout<<"Removing addon cache directories..."<<Con::endl;
 	for(auto &addonInfo : AddonSystem::GetMountedAddons())
@@ -433,8 +437,11 @@ void Engine::ClearCache()
 
 	// Re-create the directories
 	FileManager::CreatePath("cache");
-	FileManager::CreatePath("addons/imported");
-	FileManager::CreatePath("addons/converted");
+	if(clearAssetFiles)
+	{
+		FileManager::CreatePath("addons/imported");
+		FileManager::CreatePath("addons/converted");
+	}
 
 	// Give it a bit of time to complete
 	std::this_thread::sleep_for(std::chrono::milliseconds{500});
@@ -569,15 +576,14 @@ bool Engine::Initialize(int argc,char *argv[])
 	if(!IsServerOnly())
 		LoadConfig();
 
-	/*
-	auto cacheVersion = util::Version::FromString(GetConVarString("cache_version"));
-	auto curVersion = get_engine_version();
-	if(curVersion != cacheVersion)
+	auto cacheVersion = GetConVarInt("cache_version");
+	auto cacheVersionTarget = GetConVarInt("cache_version_target");
+	if(cacheVersion != cacheVersionTarget)
 	{
-		SetConVar("cache_version",curVersion.ToString());
+		SetConVar("cache_version",std::to_string(cacheVersionTarget));
 		ClearCache();
 	}
-	*/
+	
 	ServerState *server = OpenServerState();
 	if(server != nullptr && IsServerOnly())
 		LoadConfig();

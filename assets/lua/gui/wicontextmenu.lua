@@ -117,6 +117,11 @@ function gui.WIContextMenu:OnUpdate()
 	self:SetSize(w,h)
 end
 function gui.WIContextMenu:GetItemCount() return #self.m_tItems end
+function gui.WIContextMenu:Clear()
+	for _,item in ipairs(self.m_tItems) do
+		util.remove(item)
+	end
+end
 function gui.WIContextMenu:AddItem(name,fcOnClick,keybind)
 	local pItem = gui.create("WIMenuItem",self.m_contents)
 	if(pItem == nil) then return end

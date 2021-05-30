@@ -1,3 +1,4 @@
+include_component("gm_generic")
 util.register_class("ents.GmZen",BaseEntityComponent)
 local Component = ents.GmZen
 

@@ -2,6 +2,7 @@
 {
 	$bool enabled 1
 	$string localization_name "mount_game_hla"
+	$int32 priority 1000
 	"steam"
 	{
 		$uint32 app_id 546560
@@ -20,6 +21,7 @@
 {
 	$bool enabled 1
 	$string localization_name "mount_game_sfm"
+	$int32 priority 950
 	"steam"
 	{
 		$uint32 app_id 1840
@@ -44,6 +46,7 @@
 {
 	$bool enabled 1
 	$string localization_name "mount_game_ep2"
+	$int32 priority 750
 	"steam"
 	{
 		$uint32 app_id 420
@@ -101,6 +104,7 @@
 "csgo"
 {
 	$bool enabled 1
+	$int32 priority 900
 	$string localization_name "mount_game_cs_go"
 	"steam"
 	{
@@ -171,6 +175,43 @@
 		$string name "source_engine"
 		$array archives [string][
 			"cstrike_pak_dir.vpk"
+		]
+	}
+}
+"l4d2"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_l4d2"
+	$int32 priority 700
+	"steam"
+	{
+		$uint32 app_id 550
+		$string game_path "common/Left 4 Dead 2/left4dead2/"
+		$bool mount_workshop 0
+	}
+	"engine"
+	{
+		$string name "source_engine"
+		$array archives [string][
+			"pak01_dir.vpk"
+		]
+	}
+}
+"l4d"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_l4d"
+	"steam"
+	{
+		$uint32 app_id 500
+		$string game_path "common/left 4 dead/left4dead/"
+		$bool mount_workshop 0
+	}
+	"engine"
+	{
+		$string name "source_engine"
+		$array archives [string][
+			"pak01_dir.vpk"
 		]
 	}
 }
@@ -263,6 +304,7 @@
 {
 	$bool enabled 1
 	$string localization_name "mount_game_portal2"
+	$int32 priority 800
 	"steam"
 	{
 		$uint32 app_id 620
@@ -397,6 +439,7 @@
 {
 	$bool enabled 1
 	$string localization_name "mount_game_tf2"
+	$int32 priority 850
 	"steam"
 	{
 		$uint32 app_id 440

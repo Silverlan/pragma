@@ -51,6 +51,7 @@ local function get_viewport_data()
 			vpData.y = absPos.y
 			vpData.cursorPos = viewport:GetCursorPos()
 			vpData.camera = viewport:GetCamera()
+			vpData.viewport = viewport
 			return vpData
 		end
 	end
@@ -86,6 +87,7 @@ function ents.ClickComponent.inject_click_input(action,pressed,filter)
 end
 function ents.ClickComponent.get_ray_data()
 	local vpData = get_viewport_data()
+
 	local cam = vpData.camera
 	if(util.is_valid(cam) == false) then return end
 	local dir = cam:CalcRayDirection(Vector2(vpData.cursorPos.x /vpData.width,vpData.cursorPos.y /vpData.height))

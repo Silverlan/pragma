@@ -15,7 +15,7 @@ function gui.BaseFileExplorer:SetPath(path)
 	self:CallCallbacks("OnPathChanged",path)
 	self.m_path = path
 end
-function gui.BaseFileExplorer:ReloadPath() self:SetPath(self:GetPath()) end
+function gui.BaseFileExplorer:ReloadPath() self:SetPath(self:GetPath()) self:Update() end
 function gui.BaseFileExplorer:Refresh() self:ReloadPath() end
 function gui.BaseFileExplorer:SetRootPath(path)
 	path = file.get_canonicalized_path(path)

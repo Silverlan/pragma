@@ -1,4 +1,3 @@
-include("/gamemodes/generic/client/cl_init.lua")
 include("../shared.lua")
 include("cl_hud.lua")
 local Component = ents.GmZen

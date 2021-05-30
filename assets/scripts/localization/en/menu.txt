@@ -1,4 +1,8 @@
 audio_device = "Audio Device"
+audio_engine = "Audio Engine"
+audio_engine_alure = "Alure"
+audio_engine_dummy = "Dummy"
+audio_engine_fmod = "FMOD"
 audio_options = "Audio Options"
 audio_streaming = "Audio Streaming"
 anti_aliasing = "Anti-Aliasing"

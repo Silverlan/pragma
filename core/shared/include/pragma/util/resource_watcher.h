@@ -63,10 +63,10 @@ public:
 protected:
 	NetworkState *m_networkState = nullptr;
 	uint32_t m_lockedCount = 0;
-	void OnResourceChanged(const std::string &path);
+	void OnResourceChanged(const std::string &rootPath,const std::string &path);
 	void ReloadMaterial(const std::string &path);
 	virtual void OnMaterialReloaded(const std::string &path,const std::unordered_set<Model*> &modelMap) {}
-	virtual void OnResourceChanged(const std::string &path,const std::string &ext);
+	virtual void OnResourceChanged(const std::string &rootPath,const std::string &path,const std::string &ext);
 	virtual void GetWatchPaths(std::vector<std::string> &paths);
 	virtual void ReloadTexture(const std::string &path);
 	void CallChangeCallbacks(EResourceWatcherCallbackType type,const std::string &path,const std::string &ext);

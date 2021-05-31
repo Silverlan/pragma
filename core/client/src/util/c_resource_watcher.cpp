@@ -13,6 +13,7 @@
 #include <cmaterialmanager.h>
 #include <textureinfo.h>
 #include <pragma/entities/entity_iterator.hpp>
+#include <pragma/asset/util_asset.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
@@ -110,6 +111,7 @@ void CResourceWatcherManager::OnMaterialReloaded(const std::string &path,const s
 			continue;
 		auto mdlC = static_cast<pragma::CModelComponent*>(ent->GetModelComponent());
 		mdlC->SetRenderMeshesDirty();
+		mdlC->UpdateRenderMeshes();
 	}
 }
 
@@ -121,10 +123,25 @@ void CResourceWatcherManager::GetWatchPaths(std::vector<std::string> &paths)
 	paths.push_back("particles");
 }
 
-void CResourceWatcherManager::OnResourceChanged(const std::string &path,const std::string &ext)
+void CResourceWatcherManager::OnResourceChanged(const std::string &rootPath,const std::string &path,const std::string &ext)
 {
-	ResourceWatcherManager::OnResourceChanged(path,ext);
-	if(ext == "gls" || ext == "hls")
+	ResourceWatcherManager::OnResourceChanged(rootPath,path,ext);
+	auto assetType = pragma::asset::determine_type_from_extension(ext);
+	if(assetType.has_value())
+	{
+		if(*assetType == pragma::asset::Type::ParticleSystem)
+		{
+			if(pragma::CParticleSystemComponent::IsParticleFilePrecached(path) == false)
+				return;
+#if RESOURCE_WATCHER_VERBOSE > 0
+			auto ptPath = "particles\\" +path;
+			Con::cout<<"[ResourceWatcher] Particle has changed: "<<ptPath<<". Attempting to reload..."<<Con::endl;
+#endif
+			pragma::CParticleSystemComponent::Precache(path,true);
+			CallChangeCallbacks(ECResourceWatcherCallbackType::ParticleSystem,path,ext);
+		}
+	}
+	else if(ext == "gls" || ext == "hls")
 	{
 #if RESOURCE_WATCHER_VERBOSE > 0
 		auto shaderPath = "shaders\\" +path;
@@ -157,17 +174,6 @@ void CResourceWatcherManager::OnResourceChanged(const std::string &path,const st
 			c_engine->ReloadShader(name);
 		}
 		CallChangeCallbacks(ECResourceWatcherCallbackType::Shader,path,ext);
-	}
-	else if(ext == "wpt")
-	{
-		if(pragma::CParticleSystemComponent::IsParticleFilePrecached(path) == false)
-			return;
-#if RESOURCE_WATCHER_VERBOSE > 0
-		auto ptPath = "particles\\" +path;
-		Con::cout<<"[ResourceWatcher] Particle has changed: "<<ptPath<<". Attempting to reload..."<<Con::endl;
-#endif
-		pragma::CParticleSystemComponent::Precache(path,true);
-		CallChangeCallbacks(ECResourceWatcherCallbackType::ParticleSystem,path,ext);
 	}
 }
 

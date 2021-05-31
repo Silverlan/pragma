@@ -12,6 +12,7 @@
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/model/model.h"
 #include <sharedutils/util_file.h>
+#include <pragma/asset/util_asset.hpp>
 
 decltype(EResourceWatcherCallbackType::Model) EResourceWatcherCallbackType::Model = EResourceWatcherCallbackType{umath::to_integral(E::Model)};
 decltype(EResourceWatcherCallbackType::Material) EResourceWatcherCallbackType::Material = EResourceWatcherCallbackType{umath::to_integral(E::Material)};
@@ -137,136 +138,122 @@ static bool is_image_format(const std::string &ext)
 		return ustring::compare(format.extension,ext,false);
 	}) != supportedFormats.end();
 }
-
-void ResourceWatcherManager::OnResourceChanged(const std::string &path,const std::string &ext)
+void ResourceWatcherManager::OnResourceChanged(const std::string &rootPath,const std::string &path,const std::string &ext)
 {
 	auto *nw = m_networkState;
 	auto *game = nw->GetGameState();
-	if(ext == "wmd")
+	auto assetType = pragma::asset::determine_type_from_extension(ext);
+	if(assetType.has_value())
 	{
-		if(game != nullptr)
+		if(*assetType == pragma::asset::Type::Model)
 		{
-			auto &mdls = m_networkState->GetCachedModels();
-			auto it = mdls.find(path);
-			if(it != mdls.end())
+			if(game != nullptr)
 			{
-#if RESOURCE_WATCHER_VERBOSE > 0
-				auto mdlPath = "models\\" +path;
-				Con::cout<<"[ResourceWatcher] Model has changed: "<<mdlPath<<". Attempting to reload..."<<Con::endl;
-#endif
-				auto mdl = game->LoadModel(path,true);
-				if(mdl != nullptr)
+				auto &mdls = m_networkState->GetCachedModels();
+				auto it = mdls.find(path);
+				if(it != mdls.end())
 				{
 #if RESOURCE_WATCHER_VERBOSE > 0
-					Con::cout<<"[ResourceWatcher] Model has been reloaded, reloading entities..."<<Con::endl;
+					auto mdlPath = "models\\" +path;
+					Con::cout<<"[ResourceWatcher] Model has changed: "<<mdlPath<<". Attempting to reload..."<<Con::endl;
 #endif
-					EntityIterator entIt {*game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
-					entIt.AttachFilter<EntityIteratorFilterComponent>("model");
-					for(auto *ent : entIt)
+					auto mdl = game->LoadModel(path,true);
+					if(mdl != nullptr)
 					{
-						auto mdlComponent = ent->GetModelComponent();
-						if(!mdlComponent || FileManager::ComparePath(mdlComponent->GetModelName(),path) == false)
-							continue;
 #if RESOURCE_WATCHER_VERBOSE > 0
-						Con::cout<<"[ResourceWatcher] Reloading model for entity "<<ent->GetClass()<<"..."<<Con::endl;
+						Con::cout<<"[ResourceWatcher] Model has been reloaded, reloading entities..."<<Con::endl;
 #endif
-						mdlComponent->SetModel(std::shared_ptr<Model>(nullptr));
-						mdlComponent->SetModel(path);
+						EntityIterator entIt {*game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};
+						entIt.AttachFilter<EntityIteratorFilterComponent>("model");
+						for(auto *ent : entIt)
+						{
+							auto mdlComponent = ent->GetModelComponent();
+							if(!mdlComponent || FileManager::ComparePath(mdlComponent->GetModelName(),path) == false)
+								continue;
+#if RESOURCE_WATCHER_VERBOSE > 0
+							Con::cout<<"[ResourceWatcher] Reloading model for entity "<<ent->GetClass()<<"..."<<Con::endl;
+#endif
+							mdlComponent->SetModel(std::shared_ptr<Model>(nullptr));
+							mdlComponent->SetModel(path);
+						}
 					}
 				}
 			}
+			CallChangeCallbacks(EResourceWatcherCallbackType::Model,path,ext);
 		}
-		CallChangeCallbacks(EResourceWatcherCallbackType::Model,path,ext);
-	}
-	else if(ext == "wmi"/* || ext == "vmt" || ext == "vmat_c"*/)
-	{
-#if RESOURCE_WATCHER_VERBOSE > 0
-		auto matPath = "materials\\" +path;
-		Con::cout<<"[ResourceWatcher] Material has changed: "<<matPath<<". Attempting to reload..."<<Con::endl;
-#endif
-		ReloadMaterial(path);
-		CallChangeCallbacks(EResourceWatcherCallbackType::Material,path,ext);
-	}
-	else if(is_image_format(ext))
-	{
-#if RESOURCE_WATCHER_VERBOSE > 0
-		auto texPath = "materials\\" +path;
-		Con::cout<<"[ResourceWatcher] Texture has changed: "<<texPath<<". Attempting to reload..."<<Con::endl;
-#endif
-		ReloadTexture(path);
-		auto &matManager = nw->GetMaterialManager();
-		for(auto &hMat : matManager.GetMaterials()) // Find all materials which use this texture
+		else if(*assetType == pragma::asset::Type::Material)
 		{
-			if(hMat.IsValid() == false)
-				continue;
-			auto *mat = hMat.get();
-			auto &block = mat->GetDataBlock();
-			if(block == nullptr)
-				continue;
-			auto canonName = FileManager::GetCanonicalizedPath(path);
-			ustring::to_lower(canonName);
-			ufile::remove_extension_from_filename(canonName);
+#if RESOURCE_WATCHER_VERBOSE > 0
+			auto matPath = "materials\\" +path;
+			Con::cout<<"[ResourceWatcher] Material has changed: "<<matPath<<". Attempting to reload..."<<Con::endl;
+#endif
+			ReloadMaterial(path);
+			CallChangeCallbacks(EResourceWatcherCallbackType::Material,path,ext);
+		}
+		else if(*assetType == pragma::asset::Type::Map)
+			CallChangeCallbacks(EResourceWatcherCallbackType::Map,path,ext);
+		else if(*assetType == pragma::asset::Type::Texture)
+		{
+#if RESOURCE_WATCHER_VERBOSE > 0
+			auto texPath = "materials\\" +path;
+			Con::cout<<"[ResourceWatcher] Texture has changed: "<<texPath<<". Attempting to reload..."<<Con::endl;
+#endif
+			ReloadTexture(path);
+			auto &matManager = nw->GetMaterialManager();
+			for(auto &hMat : matManager.GetMaterials()) // Find all materials which use this texture
+			{
+				if(hMat.IsValid() == false)
+					continue;
+				auto *mat = hMat.get();
+				auto &block = mat->GetDataBlock();
+				if(block == nullptr)
+					continue;
+				auto canonName = FileManager::GetCanonicalizedPath(path);
+				ustring::to_lower(canonName);
+				ufile::remove_extension_from_filename(canonName);
 			
-			std::function<bool(const std::shared_ptr<ds::Block>&)> fHasTexture = nullptr;
-			fHasTexture = [&fHasTexture,&canonName](const std::shared_ptr<ds::Block> &block) -> bool {
-				auto *data = block->GetData();
-				if(data != nullptr)
-				{
-					for(auto &pair : *data)
+				std::function<bool(const std::shared_ptr<ds::Block>&)> fHasTexture = nullptr;
+				fHasTexture = [&fHasTexture,&canonName](const std::shared_ptr<ds::Block> &block) -> bool {
+					auto *data = block->GetData();
+					if(data != nullptr)
 					{
-						auto v = pair.second;
-						if(v->IsBlock() == true)
+						for(auto &pair : *data)
 						{
-							if(fHasTexture(std::static_pointer_cast<ds::Block>(v)) == true)
-								return true;
-						}
-						else
-						{
-							auto dataTex = std::dynamic_pointer_cast<ds::Texture>(v);
-							if(dataTex != nullptr)
+							auto v = pair.second;
+							if(v->IsBlock() == true)
 							{
-								auto texName = FileManager::GetCanonicalizedPath(dataTex->GetString());
-								ustring::to_lower(texName);
-								ufile::remove_extension_from_filename(texName);
-								if(canonName == texName)
+								if(fHasTexture(std::static_pointer_cast<ds::Block>(v)) == true)
 									return true;
+							}
+							else
+							{
+								auto dataTex = std::dynamic_pointer_cast<ds::Texture>(v);
+								if(dataTex != nullptr)
+								{
+									auto texName = FileManager::GetCanonicalizedPath(dataTex->GetString());
+									ustring::to_lower(texName);
+									ufile::remove_extension_from_filename(texName);
+									if(canonName == texName)
+										return true;
+								}
 							}
 						}
 					}
+					return false;
+				};
+				if(fHasTexture(block) == true) // Material has texture, reload it
+				{
+					auto matName = mat->GetName();
+					// A new material with a different extension may have just been
+					// moved into the game files. Remove the extension and let the material
+					// system decide which one to load.
+					ufile::remove_extension_from_filename(matName);
+					ReloadMaterial(matName);
 				}
-				return false;
-			};
-			if(fHasTexture(block) == true) // Material has texture, reload it
-			{
-				auto matName = mat->GetName();
-				// A new material with a different extension may have just been
-				// moved into the game files. Remove the extension and let the material
-				// system decide which one to load.
-				ufile::remove_extension_from_filename(matName);
-				ReloadMaterial(matName);
 			}
+			CallChangeCallbacks(EResourceWatcherCallbackType::Texture,path,ext);
 		}
-		CallChangeCallbacks(EResourceWatcherCallbackType::Texture,path,ext);
-	}
-	else if(ext == "txt")
-	{
-		if(game != nullptr)
-		{
-#if RESOURCE_WATCHER_VERBOSE > 0
-			auto scriptPath = "scripts\\" +path;
-			Con::cout<<"[ResourceWatcher] Sound-script has changed: "<<scriptPath<<". Attempting to reload..."<<Con::endl;
-#endif
-			// TODO: Reload sound-scripts if they had been loaded previously
-			game->LoadSoundScripts(path.c_str()); // TODO: Only reload if they have been requested before?
-		}
-		CallChangeCallbacks(EResourceWatcherCallbackType::SoundScript,path,ext);
-	}
-	else if(ext == "wld")
-		CallChangeCallbacks(EResourceWatcherCallbackType::Map,path,ext);
-	else
-	{
-		auto audioFormats = engine_info::get_supported_audio_formats();
-		if(std::find(audioFormats.begin(),audioFormats.end(),ext) != audioFormats.end())
+		else if(*assetType == pragma::asset::Type::Sound)
 		{
 			if(game != nullptr)
 			{
@@ -280,9 +267,26 @@ void ResourceWatcherManager::OnResourceChanged(const std::string &path,const std
 			CallChangeCallbacks(EResourceWatcherCallbackType::Sound,path,ext);
 		}
 	}
+	else if(rootPath == "scripts")
+	{
+		util::Path p {path};
+		if(p.GetFront() == "sounds" && ustring::compare(ext,"udm",false))
+		{
+			if(game != nullptr)
+			{
+#if RESOURCE_WATCHER_VERBOSE > 0
+				auto scriptPath = "scripts\\" +path;
+				Con::cout<<"[ResourceWatcher] Sound-script has changed: "<<scriptPath<<". Attempting to reload..."<<Con::endl;
+#endif
+				// TODO: Reload sound-scripts if they had been loaded previously
+				game->LoadSoundScripts(path.c_str()); // TODO: Only reload if they have been requested before?
+			}
+			CallChangeCallbacks(EResourceWatcherCallbackType::SoundScript,path,ext);
+		}
+	}
 }
 
-void ResourceWatcherManager::OnResourceChanged(const std::string &path)
+void ResourceWatcherManager::OnResourceChanged(const std::string &rootPath,const std::string &path)
 {
 	std::string ext;
 	if(ufile::get_extension(path,&ext) == false)
@@ -290,7 +294,7 @@ void ResourceWatcherManager::OnResourceChanged(const std::string &path)
 #if RESOURCE_WATCHER_VERBOSE > 0
 	Con::cout<<"[ResourceWatcher] File changed: "<<path<<" ("<<ext<<")"<<Con::endl;
 #endif
-	OnResourceChanged(path,ext);
+	OnResourceChanged(rootPath,path,ext);
 }
 
 void ResourceWatcherManager::GetWatchPaths(std::vector<std::string> &paths)
@@ -322,7 +326,7 @@ bool ResourceWatcherManager::MountDirectory(const std::string &path,bool bAbsolu
 			{
 				if(ustring::substr(fName,0,resPath.length()) == resPath)
 				{
-					OnResourceChanged(ustring::substr(fName,resPath.length() +1));
+					OnResourceChanged(resPath,ustring::substr(fName,resPath.length() +1));
 					break;
 				}
 			}

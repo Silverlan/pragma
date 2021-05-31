@@ -157,7 +157,7 @@ std::vector<std::string> pragma::asset::get_supported_extensions(Type type,bool 
 	case Type::ParticleSystem:
 		return {FORMAT_PARTICLE_SYSTEM_BINARY,FORMAT_PARTICLE_SYSTEM_ASCII,FORMAT_PARTICLE_SYSTEM_LEGACY};
 	case Type::Sound:
-		return {"ogg","wav","mp3"};
+		return engine_info::get_supported_audio_formats();
 	case Type::Texture:
 	{
 		auto &supportedFormats = MaterialManager::get_supported_image_formats();

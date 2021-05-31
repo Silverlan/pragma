@@ -12,9 +12,9 @@ extern DLLSERVER SGame *s_game;
 
 decltype(ESResourceWatcherCallbackType::NavMesh) ESResourceWatcherCallbackType::NavMesh = ESResourceWatcherCallbackType{umath::to_integral(E::NavMesh)};
 decltype(ESResourceWatcherCallbackType::Count) ESResourceWatcherCallbackType::Count = ESResourceWatcherCallbackType{umath::to_integral(E::Count)};
-void SResourceWatcherManager::OnResourceChanged(const std::string &path,const std::string &ext)
+void SResourceWatcherManager::OnResourceChanged(const std::string &rootPath,const std::string &path,const std::string &ext)
 {
-	ResourceWatcherManager::OnResourceChanged(path,ext);
+	ResourceWatcherManager::OnResourceChanged(rootPath,path,ext);
 	if(ext == "wnav" && s_game != nullptr)
 	{
 		auto fname = ufile::get_file_from_filename(path);

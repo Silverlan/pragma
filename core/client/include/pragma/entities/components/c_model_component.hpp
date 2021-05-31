@@ -85,14 +85,14 @@ namespace pragma
 		GameShaderSpecializationConstantFlag GetBaseShaderSpecializationFlags() const {return m_baseShaderSpecializationConstantFlags;}
 		void SetBaseShaderSpecializationFlags(pragma::GameShaderSpecializationConstantFlag flags) {m_baseShaderSpecializationConstantFlags = flags;}
 		void SetBaseShaderSpecializationFlag(pragma::GameShaderSpecializationConstantFlag flag,bool enabled=true);
-
+		
+		void UpdateRenderMeshes();
 		// Only use if LOD is handled externally!
 		void SetLOD(uint32_t lod);
 	protected:
 		void UpdateBaseShaderSpecializationFlags();
 		virtual void OnModelChanged(const std::shared_ptr<Model> &model) override;
 		void UpdateRenderBufferList();
-		void UpdateRenderMeshes();
 
 		std::vector<MaterialHandle> m_materialOverrides = {};
 		uint32_t m_lod = 0u;

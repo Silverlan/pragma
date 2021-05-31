@@ -3232,6 +3232,18 @@ namespace Lua
 				return;
 			ent->PushLuaObject(l);
 		}));
+		def.def("SetFlashlightEnabled",static_cast<void(*)(lua_State*,THandle&,bool)>([](lua_State *l,THandle &hPl,bool enabled) {
+			pragma::Lua::check_component(l,hPl);
+			hPl->SetFlashlight(enabled);
+		}));
+		def.def("ToggleFlashlight",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hPl) {
+			pragma::Lua::check_component(l,hPl);
+			hPl->ToggleFlashlight();
+		}));
+		def.def("IsFlashlightEnabled",static_cast<bool(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hPl) -> bool {
+			pragma::Lua::check_component(l,hPl);
+			return hPl->IsFlashlightOn();
+		}));
 
 		def.def("GetViewPos",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hPl) {
 			pragma::Lua::check_component(l,hPl);

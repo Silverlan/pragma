@@ -172,12 +172,16 @@ void Lua::nav::register_library(Lua::Interface &lua)
 		if(Lua::file::validate_write_operation(l,outName) == false)
 		{
 			Lua::PushBool(l,false);
+			Lua::PushString(l,"This file operation is not allowed!");
 			return;
 		}
 		auto &nw = *engine->GetNetworkState(l);
 		auto &game = *nw.GetGameState();
-		auto r = navMesh.Save(game,outName);
+		std::string err;
+		auto r = navMesh.Save(game,outName,err);
 		Lua::PushBool(l,r);
+		if(r == false)
+			Lua::PushString(l,err);
 	}));
 	/*classDefMesh.def("FindPath",static_cast<void(*)(lua_State*,pragma::nav::Mesh&,const Vector3&,const Vector3&)>([](lua_State *l,pragma::nav::Mesh &navMesh,const Vector3 &start,const Vector3 &end) {
 		auto r = navMesh->FindPath(start,end);

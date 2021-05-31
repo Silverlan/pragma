@@ -6,6 +6,7 @@
 
 #include "stdafx_server.h"
 #include "pragma/entities/components/s_resource_watcher.hpp"
+#include <pragma/ai/navsystem.h>
 #include <sharedutils/util_file.h>
 
 extern DLLSERVER SGame *s_game;
@@ -15,7 +16,7 @@ decltype(ESResourceWatcherCallbackType::Count) ESResourceWatcherCallbackType::Co
 void SResourceWatcherManager::OnResourceChanged(const std::string &rootPath,const std::string &path,const std::string &ext)
 {
 	ResourceWatcherManager::OnResourceChanged(rootPath,path,ext);
-	if(ext == "wnav" && s_game != nullptr)
+	if((ext == pragma::nav::PNAV_EXTENSION_BINARY || ext == pragma::nav::PNAV_EXTENSION_ASCII) && s_game != nullptr)
 	{
 		auto fname = ufile::get_file_from_filename(path);
 		ufile::remove_extension_from_filename(fname);

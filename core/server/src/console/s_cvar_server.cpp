@@ -245,9 +245,10 @@ DLLSERVER void CMD_nav_generate(NetworkState*,pragma::BasePlayerComponent*,std::
 		auto navMesh = pragma::nav::Mesh::Create(rcNavMesh,navCfg);
 		Con::cout<<"Navigation mesh has been generated!"<<Con::endl;
 		std::string path = "maps\\" +map;
-		path += ".wnav";
-		if(navMesh->Save(*s_game,path.c_str()) == false)
-			Con::cwar<<"WARNING: Unable to save navigation mesh as '"<<path<<"'!"<<Con::endl;
+		path += "." +std::string{pragma::nav::PNAV_EXTENSION_BINARY};
+		std::string err;
+		if(navMesh->Save(*s_game,path,err) == false)
+			Con::cwar<<"WARNING: Unable to save navigation mesh as '"<<path<<"': "<<err<<"!"<<Con::endl;
 	}
 }
 

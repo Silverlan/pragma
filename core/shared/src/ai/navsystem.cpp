@@ -23,9 +23,9 @@
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/model/model.h"
+#include "pragma/util/util_game.hpp"
 #include <sharedutils/scope_guard.h>
-
-#define WNAV_VERSION 0x0002
+#include <udm.hpp>
 
 RcNavMesh::RcNavMesh(
 	const std::shared_ptr<rcPolyMesh> &polyMesh,
@@ -890,14 +890,23 @@ const pragma::nav::Config &pragma::nav::Mesh::GetConfig() const {return m_config
 const std::shared_ptr<RcNavMesh> &pragma::nav::Mesh::GetRcNavMesh() const {return const_cast<Mesh*>(this)->GetRcNavMesh();}
 std::shared_ptr<RcNavMesh> &pragma::nav::Mesh::GetRcNavMesh() {return m_rcMesh;}
 
-static void write_poly_mesh(VFilePtrReal fOut,const rcPolyMesh &polyMesh,const std::unordered_map<uint32_t,uint32_t> &areaTranslationTable)
+static auto UDM_TYPE_VERTEX = udm::StructDescription::Define<uint16_t,uint16_t,uint16_t>({"x","y","z"});
+static void write_poly_mesh(udm::LinkedPropertyWrapper &udmPolyMesh,const rcPolyMesh &polyMesh,const std::unordered_map<uint32_t,uint32_t> &areaTranslationTable)
 {
-	fOut->Write(&polyMesh.nverts,sizeof(int32_t) *5 +sizeof(float) *8);
-
-	fOut->Write(&polyMesh.verts[0],sizeof(uint16_t) *polyMesh.nverts *3);
-	fOut->Write(&polyMesh.polys[0],sizeof(uint16_t) *polyMesh.maxpolys *2 *polyMesh.nvp);
-	fOut->Write(&polyMesh.regs[0],sizeof(uint16_t) *polyMesh.maxpolys);
-	fOut->Write(&polyMesh.flags[0],sizeof(uint16_t) *polyMesh.maxpolys);
+	udmPolyMesh["maxEdgeError"] = polyMesh.maxEdgeError;
+	udmPolyMesh["borderSize"] = polyMesh.borderSize;
+	udmPolyMesh["cellSize"] = polyMesh.cs;
+	udmPolyMesh["cellHeight"] = polyMesh.ch;
+	udmPolyMesh["bounds"]["min"] = *reinterpret_cast<const Vector3*>(polyMesh.bmin);
+	udmPolyMesh["bounds"]["max"] = *reinterpret_cast<const Vector3*>(polyMesh.bmax);
+	udmPolyMesh["cellHeight"] = polyMesh.ch;
+	udmPolyMesh["maxVertsPerPoly"] = polyMesh.nvp;
+	udmPolyMesh["numAllocatedPolys"] = polyMesh.maxpolys;
+	udmPolyMesh["numPolys"] = polyMesh.npolys;
+	udmPolyMesh.AddArray("vertices",UDM_TYPE_VERTEX,polyMesh.verts,polyMesh.nverts,udm::ArrayType::Compressed);
+	udmPolyMesh.AddArray("flags",polyMesh.maxpolys,polyMesh.flags,udm::ArrayType::Compressed);
+	udmPolyMesh.AddArray("regions",polyMesh.maxpolys,polyMesh.regs,udm::ArrayType::Compressed);
+	udmPolyMesh.AddArray("polyNeighborData",polyMesh.maxpolys *polyMesh.nvp *2,polyMesh.polys,udm::ArrayType::Compressed);
 
 	std::vector<uint8_t> areas(polyMesh.maxpolys);
 	for(auto i=decltype(polyMesh.maxpolys){0};i<polyMesh.maxpolys;++i)
@@ -907,65 +916,102 @@ static void write_poly_mesh(VFilePtrReal fOut,const rcPolyMesh &polyMesh,const s
 			throw std::logic_error("Invalid nav mesh area!");
 		areas.at(i) = it->second;
 	}
-
-	fOut->Write(areas.data(),areas.size() *sizeof(areas.front()));
+	udmPolyMesh.AddArray("areas",areas,udm::ArrayType::Compressed);
 }
 
-static void write_poly_mesh(VFilePtrReal &fOut,const rcPolyMeshDetail &polyMeshDetail)
+static auto UDM_TYPE_TRIANGLE = udm::StructDescription::Define<uint8_t,uint8_t,uint8_t,uint8_t>({"vertA","vertB","vertC","flags"});
+static auto UDM_TYPE_MESH = udm::StructDescription::Define<uint32_t,uint32_t,uint32_t,uint32_t>({"baseVertIndex","vertCount","baseTriIndex","triCount"});
+static void write_poly_mesh(udm::LinkedPropertyWrapper &udmPolyMeshDetail,const rcPolyMeshDetail &polyMeshDetail)
 {
-	fOut->Write(&polyMeshDetail.nmeshes,sizeof(int32_t) *3);
-
-	fOut->Write(&polyMeshDetail.meshes[0],sizeof(uint32_t) *polyMeshDetail.nmeshes *4);
-	fOut->Write(&polyMeshDetail.verts[0],sizeof(float) *polyMeshDetail.nverts *3);
-	fOut->Write(&polyMeshDetail.tris[0],sizeof(uint8_t) *polyMeshDetail.ntris *4);
+	udmPolyMeshDetail.AddArray("vertices",polyMeshDetail.nverts,reinterpret_cast<Vector3*>(polyMeshDetail.verts),udm::ArrayType::Compressed);
+	udmPolyMeshDetail.AddArray("triangles",UDM_TYPE_TRIANGLE,polyMeshDetail.tris,polyMeshDetail.ntris,udm::ArrayType::Compressed);
+	udmPolyMeshDetail.AddArray("meshes",UDM_TYPE_MESH,polyMeshDetail.meshes,polyMeshDetail.nmeshes,udm::ArrayType::Compressed);
 }
 
-static void read_poly_mesh(VFilePtr &fIn,rcPolyMesh &polyMesh,std::vector<uint32_t> &areaTranslationTable)
+template<typename T>
+	static void load_array_data(udm::LinkedPropertyWrapper &udmData,int &outNum,T **outData)
 {
-	fIn->Read(&polyMesh.nverts,sizeof(int32_t) *5 +sizeof(float) *8);
+	auto *a = udmData.GetValuePtr<udm::Array>();
+	if(!a)
+	{
+		outNum = 0;
+		*outData = nullptr;
+		return;
+	}
+	outNum = a->GetSize();
+	*outData = new T[a->GetByteSize() /sizeof(T)];
+	udmData.GetBlobData(*outData,a->GetByteSize());
+}
+static void read_poly_mesh(udm::LinkedPropertyWrapper &udmPolyMesh,rcPolyMesh &polyMesh,std::vector<uint32_t> &areaTranslationTable)
+{
+	udmPolyMesh["maxEdgeError"](polyMesh.maxEdgeError);
+	udmPolyMesh["borderSize"](polyMesh.borderSize);
+	udmPolyMesh["cellSize"](polyMesh.cs);
+	udmPolyMesh["cellHeight"](polyMesh.ch);
+	udmPolyMesh["bounds"]["min"](*reinterpret_cast<Vector3*>(polyMesh.bmin));
+	udmPolyMesh["bounds"]["max"](*reinterpret_cast<Vector3*>(polyMesh.bmax));
+	udmPolyMesh["cellHeight"](polyMesh.ch);
+	udmPolyMesh["maxVertsPerPoly"](polyMesh.nvp);
+	udmPolyMesh["numAllocatedPolys"](polyMesh.maxpolys);
+	udmPolyMesh["numPolys"](polyMesh.npolys);
 
-	polyMesh.verts = new uint16_t[polyMesh.nverts *3];
-	polyMesh.polys = new uint16_t[polyMesh.maxpolys *2 *polyMesh.nvp];
-	polyMesh.regs = new uint16_t[polyMesh.maxpolys];
-	polyMesh.flags = new uint16_t[polyMesh.maxpolys];
-	polyMesh.areas = new uint8_t[polyMesh.maxpolys];
+	load_array_data(udmPolyMesh["vertices"],polyMesh.nverts,&polyMesh.verts);
 
-	fIn->Read(&polyMesh.verts[0],sizeof(uint16_t) *polyMesh.nverts *3);
-	fIn->Read(&polyMesh.polys[0],sizeof(uint16_t) *polyMesh.maxpolys *2 *polyMesh.nvp);
-	fIn->Read(&polyMesh.regs[0],sizeof(uint16_t) *polyMesh.maxpolys);
-	fIn->Read(&polyMesh.flags[0],sizeof(uint16_t) *polyMesh.maxpolys);
-	fIn->Read(&polyMesh.areas[0],sizeof(uint8_t) *polyMesh.maxpolys);
+	int n;
+	load_array_data(udmPolyMesh["flags"],n,&polyMesh.flags);
+	assert(n == polyMesh.maxpolys);
+
+	load_array_data(udmPolyMesh["regions"],n,&polyMesh.regs);
+	assert(n == polyMesh.maxpolys);
+
+	load_array_data(udmPolyMesh["polyNeighborData"],n,&polyMesh.polys);
+	assert(n == polyMesh.maxpolys *polyMesh.nvp *2);
+
+	load_array_data(udmPolyMesh["areas"],n,&polyMesh.areas);
+	assert(n == polyMesh.maxpolys);
 
 	for(auto i=decltype(polyMesh.maxpolys){0};i<polyMesh.maxpolys;++i)
 		polyMesh.areas[i] = (i < areaTranslationTable.size()) ? areaTranslationTable.at(i) : polyMesh.areas[i];
 }
 
-static void read_poly_mesh(VFilePtr &fIn,rcPolyMeshDetail &polyMeshDetail)
+static void read_poly_mesh(udm::LinkedPropertyWrapper &udmPolyMeshDetail,rcPolyMeshDetail &polyMeshDetail)
 {
-	fIn->Read(&polyMeshDetail.nmeshes,sizeof(int) *3);
-
-	polyMeshDetail.meshes = new uint32_t[polyMeshDetail.nmeshes *4];
-	polyMeshDetail.verts = new float[polyMeshDetail.nverts *3];
-	polyMeshDetail.tris = new uint8_t[polyMeshDetail.ntris *4];
-
-	fIn->Read(&polyMeshDetail.meshes[0],sizeof(uint32_t) *polyMeshDetail.nmeshes *4);
-	fIn->Read(&polyMeshDetail.verts[0],sizeof(float) *polyMeshDetail.nverts *3);
-	fIn->Read(&polyMeshDetail.tris[0],sizeof(uint8_t) *polyMeshDetail.ntris *4);
+	load_array_data(udmPolyMeshDetail["vertices"],polyMeshDetail.nverts,&polyMeshDetail.verts);
+	load_array_data(udmPolyMeshDetail["triangles"],polyMeshDetail.ntris,&polyMeshDetail.tris);
+	load_array_data(udmPolyMeshDetail["meshes"],polyMeshDetail.nmeshes,&polyMeshDetail.meshes);
 }
 
-bool pragma::nav::Mesh::Save(Game &game,const std::string &fname)
+bool pragma::nav::Mesh::Save(Game &game,const std::string &fileName,std::string &outErr)
+{
+	auto udmData = udm::Data::Create();
+	std::string err;
+	auto result = Save(game,udmData->GetAssetData(),err);
+	if(result == false)
+		return false;
+	return udmData->Save(fileName);
+}
+bool pragma::nav::Mesh::Save(Game &game,udm::AssetData &outData,std::string &outErr)
 {
 	if(m_rcMesh == nullptr)
 		return false;
 	auto &navMesh = *m_rcMesh;
-	auto fOut = FileManager::OpenFile<VFilePtrReal>(fname.c_str(),"wb");
-	if(fOut == nullptr)
-		return false;
-	const auto *id = "WNAV";
-	fOut->Write(&id[0],4);
-	fOut->Write<uint16_t>(WNAV_VERSION); // Version
-
-	fOut->Write<Config>(m_config);
+	outData.SetAssetType(PNAV_IDENTIFIER);
+	outData.SetAssetVersion(PNAV_VERSION);
+	auto udm = *outData;
+	auto udmConfig = udm["config"];
+	udmConfig["walkableRadius"] = m_config.walkableRadius;
+	udmConfig["characterHeight"] = m_config.characterHeight;
+	udmConfig["maxClimbHeight"] = m_config.maxClimbHeight;
+	udmConfig["walkableSlopeAngle"] = m_config.walkableSlopeAngle;
+	udmConfig["maxEdgeLength"] = m_config.maxEdgeLength;
+	udmConfig["maxSimplificationError"] = m_config.maxSimplificationError;
+	udmConfig["minRegionSize"] = m_config.minRegionSize;
+	udmConfig["mergeRegionSize"] = m_config.mergeRegionSize;
+	udmConfig["cellSize"] = m_config.cellSize;
+	udmConfig["cellHeight"] = m_config.cellHeight;
+	udmConfig["vertsPerPoly"] = m_config.vertsPerPoly;
+	udmConfig["sampleDetailDist"] = m_config.sampleDetailDist;
+	udmConfig["partitionType"] = m_config.partitionType;
 
 	std::vector<std::string> surfaceMaterialNames;
 	std::unordered_map<uint32_t,uint32_t> surfaceMaterialTable;
@@ -989,111 +1035,47 @@ bool pragma::nav::Mesh::Save(Game &game,const std::string &fname)
 	}
 
 	// Write surface material names
-	fOut->Write<uint32_t>(surfaceMaterialNames.size());
-	for(auto &name : surfaceMaterialNames)
-		fOut->WriteString(name);
-
-	write_poly_mesh(fOut,polyMesh,surfaceMaterialTable);
+	udm["surfaceMaterials"] = surfaceMaterialNames;
+	write_poly_mesh(udm["polyMesh"],polyMesh,surfaceMaterialTable);
 
 	auto &polyMeshDetail = navMesh.GetPolyMeshDetail();
-	write_poly_mesh(fOut,polyMeshDetail);
-	/*
-	rcHeightfield *heightField = navMesh->GetHeightField();
-	rcCompactHeightfield *cHeightField = navMesh->GetCompactHeightField();
-	rcContourSet *contourSet = navMesh->GetContourSet();
-	rcPolyMesh *polyMesh = navMesh->GetPolyMesh();
-	rcPolyMeshDetail *polyMeshDetail = navMesh->GetPolyMeshDetail();
-
-	unsigned long long locHeightField = fOut->Tell();
-	fOut->Write<unsigned long long>((unsigned long long)(0));
-
-	unsigned long long locCompactHeightField = fOut->Tell();
-	fOut->Write<unsigned long long>((unsigned long long)(0));
-
-	unsigned long long locContourSet = fOut->Tell();
-	fOut->Write<unsigned long long>((unsigned long long)(0));
-
-	unsigned long long locPolyMesh = fOut->Tell();
-	fOut->Write<unsigned long long>((unsigned long long)(0));
-
-	unsigned long long locPolyMeshDetail = fOut->Tell();
-	fOut->Write<unsigned long long>((unsigned long long)(0));
-
-	unsigned long long offset = fOut->Tell();
-	fOut->Seek(locHeightField);
-	fOut->Write<unsigned long long>(offset);
-	fOut->Seek(offset);
-	WriteHeightField(fOut,heightField);
-
-	offset = fOut->Tell();
-	fOut->Seek(locCompactHeightField);
-	fOut->Write<unsigned long long>(offset);
-	fOut->Seek(offset);
-	fOut->Write<unsigned long long>(sizeof(*cHeightField));
-	fOut->Write(cHeightField,sizeof(*cHeightField));
-
-	offset = fOut->Tell();
-	fOut->Seek(locContourSet);
-	fOut->Write<unsigned long long>(offset);
-	fOut->Seek(offset);
-	fOut->Write<unsigned long long>(sizeof(*contourSet));
-	fOut->Write(contourSet,sizeof(*contourSet));
-
-	offset = fOut->Tell();
-	fOut->Seek(locPolyMesh);
-	fOut->Write<unsigned long long>(offset);
-	fOut->Seek(offset);
-	fOut->Write<unsigned long long>(sizeof(*polyMesh));
-	fOut->Write(polyMesh,sizeof(*polyMesh));
-
-	offset = fOut->Tell();
-	fOut->Seek(locPolyMeshDetail);
-	fOut->Write<unsigned long long>(offset);
-	fOut->Seek(offset);
-	fOut->Write<unsigned long long>(sizeof(*polyMeshDetail));
-	fOut->Write(polyMeshDetail,sizeof(*polyMeshDetail));
-	*/
+	write_poly_mesh(udm["polyMeshDetail"],polyMeshDetail);
 	return true;
 }
 
-std::shared_ptr<RcNavMesh> pragma::nav::load(Game &game,const std::string &fname,Config &outConfig)
+bool pragma::nav::Mesh::LoadFromAssetData(Game &game,const udm::AssetData &data,std::string &outErr)
 {
-	auto fIn = FileManager::OpenFile(fname.c_str(),"rb");
-	if(fIn == nullptr)
-		return nullptr;
-	std::array<char,4> header;
-	fIn->Read(header.data(),header.size() *sizeof(header.front()));
-	if(header.at(0) != 'W' || header.at(1) != 'N' || header.at(2) != 'A' || header.at(3) != 'V')
-		return nullptr;
-	auto version = fIn->Read<uint16_t>();
-	if(version < 1 || version > WNAV_VERSION)
+	if(data.GetAssetType() != PNAV_IDENTIFIER)
 	{
-		Con::cwar<<"WARNING: Incompatible navigation mesh format version "<<+version<<"!"<<Con::endl;
-		return nullptr;
+		outErr = "Incorrect format!";
+		return false;
 	}
 
-	outConfig = {};
-	if(version >= 0x0002)
-		outConfig = fIn->Read<Config>();
-	else
+	auto udm = *data;
+	auto version = data.GetAssetVersion();
+	if(version < 1)
 	{
-		outConfig = {
-			32.f /* walkableRadius */,
-			64.f, /* characterHeight */
-			20.f, /* maxClimbHeight */
-			45.f /* walkableSlopeAngle */
-		};
+		outErr = "Invalid version!";
+		return false;
 	}
+
+	auto udmConfig = udm["config"];
+	udmConfig["walkableRadius"](m_config.walkableRadius);
+	udmConfig["characterHeight"](m_config.characterHeight);
+	udmConfig["maxClimbHeight"](m_config.maxClimbHeight);
+	udmConfig["walkableSlopeAngle"](m_config.walkableSlopeAngle);
+	udmConfig["maxEdgeLength"](m_config.maxEdgeLength);
+	udmConfig["maxSimplificationError"](m_config.maxSimplificationError);
+	udmConfig["minRegionSize"](m_config.minRegionSize);
+	udmConfig["mergeRegionSize"](m_config.mergeRegionSize);
+	udmConfig["cellSize"](m_config.cellSize);
+	udmConfig["cellHeight"](m_config.cellHeight);
+	udmConfig["vertsPerPoly"](m_config.vertsPerPoly);
+	udmConfig["sampleDetailDist"](m_config.sampleDetailDist);
+	udmConfig["partitionType"](m_config.partitionType);
 
 	std::vector<std::string> surfaceMaterialNames;
-	if(version >= 0x0002)
-	{
-		// Read surface material names
-		auto numSurfaceMaterials = fIn->Read<uint32_t>();
-		surfaceMaterialNames.reserve(numSurfaceMaterials);
-		for(auto i=decltype(numSurfaceMaterials){0};i<numSurfaceMaterials;++i)
-			surfaceMaterialNames.push_back(fIn->ReadString());
-	}
+	udm["surfaceMaterials"](surfaceMaterialNames);
 
 	std::vector<uint32_t> surfaceMaterialTable;
 	surfaceMaterialTable.reserve(surfaceMaterialNames.size());
@@ -1109,53 +1091,51 @@ std::shared_ptr<RcNavMesh> pragma::nav::load(Game &game,const std::string &fname
 		rcFreePolyMesh(polyMesh);
 	});
 	if(polyMesh == nullptr)
-		return nullptr;
-	read_poly_mesh(fIn,*polyMesh,surfaceMaterialTable);
+	{
+		outErr = "Unable to allocate rcPolyMesh!";
+		return false;
+	}
+	read_poly_mesh(udm["polyMesh"],*polyMesh,surfaceMaterialTable);
 
 	auto polyMeshDetail = std::shared_ptr<rcPolyMeshDetail>(rcAllocPolyMeshDetail(),[](rcPolyMeshDetail *polyMeshDetail) {
 		rcFreePolyMeshDetail(polyMeshDetail);
 	});
 	if(polyMeshDetail == nullptr)
-		return nullptr;
-	read_poly_mesh(fIn,*polyMeshDetail);
+	{
+		outErr = "Unable to allocate rcPolyMeshDetail!";
+		return false;
+	}
+	read_poly_mesh(udm["polyMeshDetail"],*polyMeshDetail);
 
-		
-	/*
-	fIn->Seek(fIn->Tell() +sizeof(unsigned long long) *5);
-
-	rcHeightfield *heightField = new rcHeightfield;
-	rcCompactHeightfield *cHeightField = new rcCompactHeightfield;
-	rcContourSet *contourSet = new rcContourSet;
-	rcPolyMesh *polyMesh = new rcPolyMesh;
-	rcPolyMeshDetail *polyMeshDetail = new rcPolyMeshDetail;
-
-	unsigned long long szHeightField = fIn->Read<unsigned long long>();
-	fIn->Read(heightField,szHeightField);
-
-	unsigned long long szCompactHeightField = fIn->Read<unsigned long long>();
-	fIn->Read(cHeightField,szCompactHeightField);
-
-	unsigned long long szContourSet = fIn->Read<unsigned long long>();
-	fIn->Read(contourSet,szContourSet);
-
-	unsigned long long szPolyMesh = fIn->Read<unsigned long long>();
-	fIn->Read(polyMesh,szPolyMesh);
-
-	unsigned long long szPolyMeshDetail = fIn->Read<unsigned long long>();
-	fIn->Read(polyMeshDetail,szPolyMeshDetail);
-
-	FileManager::CloseFile(fIn);
-	
-	RcNavMesh *navMesh = new RcNavMesh(NULL,heightField,cHeightField,contourSet,polyMesh,polyMeshDetail);
-	*/
-	fIn.reset();
-	auto dtMesh = initialize_detour_mesh(*polyMesh,*polyMeshDetail,outConfig);
+	auto dtMesh = initialize_detour_mesh(*polyMesh,*polyMeshDetail,m_config);
 	if(dtMesh == nullptr)
-		return nullptr;
+	{
+		outErr = "Unable to allocate dtNavMesh!";
+		return false;
+	}
 	auto navMesh = std::make_shared<RcNavMesh>(polyMesh,polyMeshDetail,dtMesh);
 	if(navMesh == nullptr)
+	{
+		outErr = "Unable to allocate RcNavMesh!";
+		return false;
+	}
+	m_rcMesh = navMesh;
+	return true;
+}
+
+std::shared_ptr<RcNavMesh> pragma::nav::load(Game &game,const std::string &fname,Config &outConfig)
+{
+	std::string err;
+	auto udmData = util::load_udm_asset(fname,&err);
+	if(udmData == nullptr)
+		return false;
+	auto &data = *udmData;
+
+	Mesh mesh {};
+	if(mesh.LoadFromAssetData(game,data.GetAssetData(),err) == false)
 		return nullptr;
-	return navMesh;
+	outConfig = mesh.GetConfig();
+	return mesh.GetRcNavMesh();
 }
 
 bool pragma::nav::Mesh::FindNearestPoly(const Vector3 &pos,dtPolyRef &ref)

@@ -316,7 +316,10 @@ bool Game::LoadNavMesh(bool bReload)
 	}
 	std::string path = "maps\\";
 	path += GetMapName();
-	path += ".wnav";
+
+	auto pathAscii = path +"." +std::string{pragma::nav::PNAV_EXTENSION_ASCII};
+	auto pathBinary = path +"." +std::string{pragma::nav::PNAV_EXTENSION_BINARY};
+	path = FileManager::Exists(pathBinary) ? pathBinary : pathAscii;
 	Con::cout<<"Loading navigation mesh..."<<Con::endl;
 
 	m_navMesh = LoadNavMesh(path);

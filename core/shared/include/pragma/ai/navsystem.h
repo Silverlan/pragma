@@ -53,10 +53,16 @@ private:
 	std::shared_ptr<dtNavMesh> m_navMesh;
 };
 
+namespace udm {struct AssetData;};
+
 namespace pragma
 {
 	namespace nav
 	{
+		static constexpr uint32_t PNAV_VERSION = 1;
+		static constexpr auto PNAV_IDENTIFIER = "PNAV";
+		static constexpr auto PNAV_EXTENSION_BINARY = "pnav_b";
+		static constexpr auto PNAV_EXTENSION_ASCII = "pnav";
 		enum class PolyFlags : uint16_t
 		{
 			None = 0u,
@@ -100,6 +106,10 @@ namespace pragma
 			float sampleDetailMaxError = 1.f;
 			PartitionType partitionType = PartitionType::Watershed;
 		};
+		DLLNETWORK std::shared_ptr<RcNavMesh> generate(Game &game,const Config &config,std::string *err=nullptr);
+		DLLNETWORK std::shared_ptr<RcNavMesh> generate(Game &game,const Config &config,const BaseEntity &ent,std::string *err=nullptr);
+		DLLNETWORK std::shared_ptr<RcNavMesh> generate(Game &game,const Config &config,const std::vector<Vector3> &verts,const std::vector<int32_t> &indices,const std::vector<ConvexArea> *areas=nullptr,std::string *err=nullptr);
+		DLLNETWORK std::shared_ptr<RcNavMesh> load(Game &game,const std::string &fname,Config &outConfig);
 		class DLLNETWORK Mesh
 		{
 		public:
@@ -112,23 +122,23 @@ namespace pragma
 
 			std::shared_ptr<RcPathResult> FindPath(const Vector3 &start,const Vector3 &end);
 			bool RayCast(const Vector3 &start,const Vector3 &end,Vector3 &hit);
-			bool Save(Game &game,const std::string &fname);
+			bool Save(Game &game,udm::AssetData &outData,std::string &outErr);
+			bool Save(Game &game,const std::string &fileName,std::string &outErr);
 
 			const Config &GetConfig() const;
 
 			const std::shared_ptr<RcNavMesh> &GetRcNavMesh() const;
 			std::shared_ptr<RcNavMesh> &GetRcNavMesh();
 		protected:
+			friend std::shared_ptr<RcNavMesh> load(Game &game,const std::string &fname,Config &outConfig);
 			Mesh(const std::shared_ptr<RcNavMesh> &rcMesh,const Config &config);
+			Mesh()=default;
+			bool LoadFromAssetData(Game &game,const udm::AssetData &data,std::string &outErr);
 			bool FindNearestPoly(const Vector3 &pos,dtPolyRef &ref);
 		private:
 			std::shared_ptr<RcNavMesh> m_rcMesh;
 			Config m_config = {};
 		};
-		DLLNETWORK std::shared_ptr<RcNavMesh> generate(Game &game,const Config &config,std::string *err=nullptr);
-		DLLNETWORK std::shared_ptr<RcNavMesh> generate(Game &game,const Config &config,const BaseEntity &ent,std::string *err=nullptr);
-		DLLNETWORK std::shared_ptr<RcNavMesh> generate(Game &game,const Config &config,const std::vector<Vector3> &verts,const std::vector<int32_t> &indices,const std::vector<ConvexArea> *areas=nullptr,std::string *err=nullptr);
-		DLLNETWORK std::shared_ptr<RcNavMesh> load(Game &game,const std::string &fname,Config &outConfig);
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::nav::PolyFlags);

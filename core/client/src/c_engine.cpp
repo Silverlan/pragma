@@ -16,6 +16,7 @@
 #include "pragma/gui/wiconsole.hpp"
 #include "pragma/gui/wiframe.h"
 #include "pragma/asset/c_util_model.hpp"
+#include <pragma/engine_init.hpp>
 #include <pragma/console/convars.h>
 #include "pragma/console/engine_cvar.h"
 #include "pragma/networking/iclient.hpp"

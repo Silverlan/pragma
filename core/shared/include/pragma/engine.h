@@ -307,42 +307,4 @@ template<class T>
 	return static_cast<T*>(cv);
 }
 
-template<class T>
-	std::shared_ptr<T> InitializeEngine(int argc,char *argv[])
-{
-#ifdef _WIN32
-	auto exe = engine_info::get_executable_name();
-	MiniDumper dmp(exe.c_str());
-#endif
-	auto en = std::make_shared<T>(argc,argv);
-	util::ScopeGuard sgEngine([en]() {
-		en->Release(); // Required in case of stack unwinding
-	});
-#ifdef __linux__
-	en->OpenConsole();
-#endif
-	if(en->Initialize(argc,argv) == false)
-		return nullptr;
-	en->Start();
-	return en;
-}
-
-inline DLLNETWORK std::shared_ptr<Engine> InitializeServer(int argc,char *argv[])
-{
-#ifdef _WIN32
-	auto exe = engine_info::get_executable_name();
-	MiniDumper dmp(exe.c_str());
-#endif
-	auto en = std::make_shared<Engine>(argc,argv);
-	util::ScopeGuard sgEngine([en]() {
-		en->Release(); // Required in case of stack unwinding
-	});
-	en->OpenConsole();
-	if(en->Initialize(argc,argv) == false)
-		return nullptr;
-	// en->StartServer(false);
-	en->Start();
-	return en;
-}
-
 #endif

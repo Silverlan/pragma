@@ -13,7 +13,7 @@
 #include "pragma/networking/portinfo.h"
 
 REGISTER_CONVAR_CL(playername,"player",ConVarFlags::Archive | ConVarFlags::Userinfo,"Local player name.");
-REGISTER_CONVAR_CL(password,"",ConVarFlags::None,"Password which will be used for the next connection attempt.");
+REGISTER_CONVAR_CL(password,"",ConVarFlags::Password,"Password which will be used for the next connection attempt.");
 REGISTER_CONVAR_CL(cl_updaterate,"20",ConVarFlags::Archive,"The amount of times per second user input is being transmitted to the server.");
 REGISTER_CONVAR_CL(net_graph,"0",ConVarFlags::None,"Displays a graph about current network transmissions.");
 

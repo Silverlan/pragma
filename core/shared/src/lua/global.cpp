@@ -133,7 +133,8 @@ void NetworkState::RegisterSharedLuaGlobals(Lua::Interface &lua)
 		{"FLAG_BIT_NOTIFY",umath::to_integral(ConVarFlags::Notify)},
 		{"FLAG_BIT_JOYSTICK_AXIS_CONTINUOUS",umath::to_integral(ConVarFlags::JoystickAxisContinuous)},
 		{"FLAG_BIT_JOYSTICK_AXIS_SINGLE",umath::to_integral(ConVarFlags::JoystickAxisSingle)},
-		{"FLAG_BIT_HIDDEN",umath::to_integral(ConVarFlags::Hidden)}
+		{"FLAG_BIT_HIDDEN",umath::to_integral(ConVarFlags::Hidden)},
+		{"FLAG_BIT_PASSWORD",umath::to_integral(ConVarFlags::Password)}
 	});
 
 	Lua::RegisterLibraryEnums(lua.GetState(),"sound",{

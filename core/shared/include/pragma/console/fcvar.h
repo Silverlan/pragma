@@ -23,6 +23,7 @@ enum class DLLNETWORK ConVarFlags : uint32_t
 	JoystickAxisContinuous = Notify<<1,
 	JoystickAxisSingle = JoystickAxisContinuous<<1,
 	Hidden = JoystickAxisSingle<<1,
+	Password = Hidden<<1u,
 
 	Last = Hidden
 };

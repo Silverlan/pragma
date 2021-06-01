@@ -105,6 +105,11 @@ void CEngine::RegisterConsoleCommands()
 			GetRenderContext().SetMultiThreadedRenderingEnabled(enabled);
 	}});
 	conVarMap.RegisterConCommand("crash",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
+		if(!argv.empty() && argv.front() == "exception")
+		{
+			throw std::runtime_error{"Crash!"};
+			return;
+		}
 		volatile int* a = reinterpret_cast<volatile int*>(NULL);
 		*a = 1;
 	},ConVarFlags::None,"Forces the engine to crash.");

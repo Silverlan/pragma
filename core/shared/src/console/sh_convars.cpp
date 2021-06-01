@@ -326,4 +326,4 @@ REGISTER_ENGINE_CONCOMMAND(debug_profiling_physics_end,debug_profiling_physics_e
 
 //////////////// SERVER ////////////////
 
-REGISTER_SHARED_CONVAR(rcon_password,"",ConVarFlags::None,"Specifies a password which can be used to run console commands remotely on a server. If no password is specified, this feature is disabled.");
+REGISTER_SHARED_CONVAR(rcon_password,"",ConVarFlags::Password,"Specifies a password which can be used to run console commands remotely on a server. If no password is specified, this feature is disabled.");

@@ -32,7 +32,7 @@ MiniDumper::MiniDumper( LPCSTR szAppName )
 	::SetUnhandledExceptionFilter( TopLevelFilter );
 	// Note: set_terminate handler is called before SetUnhandledExceptionFilter.
 	// set_terminate allows us to retrieve the underlying message from the exception (if there was one)
-	/*set_terminate([]() {
+	set_terminate([]() {
 		auto eptr = std::current_exception();
 		if(!eptr)
 		{
@@ -53,7 +53,7 @@ MiniDumper::MiniDumper( LPCSTR szAppName )
 		}
 		// Relay exception to SetUnhandledExceptionFilter
 		std::rethrow_exception(eptr);
-	});*/
+	});
 }
 
 LONG MiniDumper::TopLevelFilter( struct _EXCEPTION_POINTERS *pExceptionInfo )
@@ -156,6 +156,7 @@ LONG MiniDumper::TopLevelFilter( struct _EXCEPTION_POINTERS *pExceptionInfo )
 							}
 							zipFile = nullptr;
 							sprintf(szScratch,"Saved dump file to '%s'. Please send it to a developer, along with a description of what you did to trigger the error.",zipName.c_str()/*,engine_info::get_author_mail_address().c_str()*/);
+							util::open_path_in_explorer(ufile::get_path_from_filename(zipName),ufile::get_file_from_filename(zipName));
 							szResult = szScratch;
 							retval = EXCEPTION_EXECUTE_HANDLER;
 						}

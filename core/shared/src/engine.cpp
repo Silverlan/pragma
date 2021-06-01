@@ -29,6 +29,7 @@
 //
 
 #include "pragma/engine.h"
+#include "pragma/engine_init.hpp"
 #include "pragma/lua/libraries/ldebug.h"
 #include <pragma/serverstate/serverstate.h>
 #include <pragma/console/convarhandle.h>
@@ -778,6 +779,8 @@ void Engine::DumpDebugInformation(ZIPFile &zip) const
 			if(pair.second->GetType() != ConType::Variable)
 				continue;
 			auto *cv = static_cast<ConVar*>(pair.second.get());
+			if(umath::is_flag_set(cv->GetFlags(),ConVarFlags::Password))
+				continue; // Don't store potentially personal passwords in the crashdump
 			convars<<pair.first<<" \""<<cv->GetString()<<"\"\n";
 		}
 		zip.AddFile(fileName,convars.str());
@@ -850,8 +853,6 @@ Engine::~Engine()
 	engine = nullptr;
 	if(umath::is_flag_set(m_stateFlags,StateFlags::Running))
 		throw std::runtime_error("Engine has to be closed before it can be destroyed!");
-
-
 }
 
 Engine *pragma::get_engine() {return engine;}

@@ -12,7 +12,11 @@ struct VertexAnimationFrameData
 	uint srcFrameOffset;
 	uint dstFrameOffset;
 	float blend;
-	float padding;
+	float padding0;
+	float padding1;
+	float padding2;
+	float padding3;
+	float padding4;
 };
 
 layout(std430,LAYOUT_ID(DESCRIPTOR_SET_INSTANCE,DESCRIPTOR_SET_INSTANCE_BINDING_VERTEX_ANIMATION_FRAME_DATA)) buffer VAFrameData {

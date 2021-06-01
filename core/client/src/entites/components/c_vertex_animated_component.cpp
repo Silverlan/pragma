@@ -31,6 +31,16 @@ static std::shared_ptr<prosper::IDynamicResizableBuffer> g_vertexAnimationBuffer
 const std::shared_ptr<prosper::IDynamicResizableBuffer> &pragma::get_vertex_animation_buffer() {return g_vertexAnimationBuffer;}
 void pragma::initialize_vertex_animation_buffer()
 {
+	auto alignment = c_engine->GetRenderContext().CalcBufferAlignment(prosper::BufferUsageFlags::StorageBufferBit);
+	if(alignment > 0 && (sizeof(CVertexAnimatedComponent::VertexAnimationData) %alignment) != 0)
+	{
+		Con::cwar<<
+			"WARNING: Minimum storage buffer alignment is "<<alignment<<
+			", but only alignment values of <="<<sizeof(CVertexAnimatedComponent::VertexAnimationData)<<
+			" are supported! Morph target animations will be disabled!"<<
+			Con::endl;
+		return;
+	}
 	auto instanceSize = sizeof(CVertexAnimatedComponent::VertexAnimationData);
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent;
@@ -40,12 +50,11 @@ void pragma::initialize_vertex_animation_buffer()
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
+
 	g_vertexAnimationBuffer = c_engine->GetRenderContext().CreateDynamicResizableBuffer(createInfo,createInfo.size *5 /* 5 MiB */,0.05f);
 	g_vertexAnimationBuffer->SetDebugName("entity_vertex_anim_bone_buf");
 	g_vertexAnimationBuffer->SetPermanentlyMapped(true,prosper::IBuffer::MapFlags::WriteBit | prosper::IBuffer::MapFlags::Unsynchronized);
 	assert(g_vertexAnimationBuffer->GetAlignment() == 0 || (sizeof(CVertexAnimatedComponent::VertexAnimationData) %g_vertexAnimationBuffer->GetAlignment()) == 0);
-	if(g_vertexAnimationBuffer->GetAlignment() > 0 && (sizeof(CVertexAnimatedComponent::VertexAnimationData) %g_vertexAnimationBuffer->GetAlignment()) != 0)
-		throw std::logic_error{"Invalid morph target animation buffer alignment!"};
 }
 void pragma::clear_vertex_animation_buffer() {g_vertexAnimationBuffer = nullptr;}
 CVertexAnimatedComponent::~CVertexAnimatedComponent()
@@ -78,6 +87,10 @@ void CVertexAnimatedComponent::Initialize()
 		static_cast<CEUpdateInstantiability&>(evData.get()).instantiable = false;
 		return util::EventReply::Handled;
 	});
+	// TODO: We shouldn't need the animated component, but morph target animations appear broken if it's not there.
+	// Find out why and then remove this line!
+	GetEntity().AddComponent<CAnimatedComponent>();
+
 	auto whRenderComponent = GetEntity().GetComponent<CRenderComponent>();
 	if(whRenderComponent.valid() && whRenderComponent->GetSwapRenderBuffer())
 	{
@@ -87,6 +100,9 @@ void CVertexAnimatedComponent::Initialize()
 }
 void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 {
+	auto &globalVertAnimBuffer = pragma::get_vertex_animation_buffer();
+	if(!globalVertAnimBuffer)
+		return;
 	auto &ent = GetEntity();
 	auto whRenderComponent = ent.GetComponent<CRenderComponent>();
 	auto &mdl = GetEntity().GetModel();
@@ -102,7 +118,12 @@ void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 			m_maxVertexAnimations += va->GetMeshAnimations().size();
 		if(m_maxVertexAnimations == 0u)
 			return;
-		m_vertexAnimationBuffer = prosper::SwapBuffer::Create(*pragma::get_vertex_animation_buffer(),sizeof(VertexAnimationData),m_maxVertexAnimations);
+		m_vertexAnimationBuffer = prosper::SwapBuffer::Create(*globalVertAnimBuffer,sizeof(VertexAnimationData),m_maxVertexAnimations);
+		if(!m_vertexAnimationBuffer)
+		{
+			m_maxVertexAnimations = 0;
+			return;
+		}
 		m_vertexAnimationBufferData.resize(m_maxVertexAnimations);
 	}
 

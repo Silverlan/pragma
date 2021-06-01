@@ -166,6 +166,7 @@ void CFlexComponent::Initialize()
 	//	UpdateFlexWeightsMT();
 	//});
 	OnModelChanged(GetEntity().GetModel());
+	GetEntity().AddComponent<CVertexAnimatedComponent>();
 
 	SetTickPolicy(TickPolicy::Always); // TODO
 }

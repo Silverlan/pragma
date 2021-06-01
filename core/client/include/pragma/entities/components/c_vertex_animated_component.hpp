@@ -27,7 +27,7 @@ namespace pragma
 			uint32_t srcFrameOffset = 0u;
 			uint32_t dstFrameOffset = 0u;
 			float blend = 0.f;
-			float padding = 0.f;
+			std::array<float,5> padding; // Padding to 32 byte (highest common minStorageBufferOffsetAlignment -> https://vulkan.gpuinfo.org/displaydevicelimit.php?name=minStorageBufferOffsetAlignment )
 		};
 #pragma pack(pop)
 

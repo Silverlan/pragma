@@ -53,6 +53,7 @@ void SGame::RegisterLua()
 
 	Lua::RegisterLibrary(GetLuaState(),"engine",{
 		{"load_library",&Lua::engine::LoadLibrary},
+		{"library_exists",&Lua::engine::LibraryExists},
 		{"get_info",&Lua::engine::get_info},
 		{"poll_console_output",&Lua::engine::poll_console_output}
 	});

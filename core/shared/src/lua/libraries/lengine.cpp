@@ -12,6 +12,7 @@
 #include <pragma/engine.h>
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/file_formats/wmd_load.h"
+#include "pragma/util/util_module.hpp"
 #include "luasystem.h"
 #include "pragma/model/modelmesh.h"
 #include <pragma/lua/lua_call.hpp>
@@ -113,6 +114,14 @@ void Lua::engine::LoadSoundScripts(lua_State *l,const std::string &fileName,bool
 	state->LoadSoundScripts(fileName.c_str(),precache);
 }
 void Lua::engine::LoadSoundScripts(lua_State *l,const std::string &fileName) {LoadSoundScripts(l,fileName,false);}
+
+int Lua::engine::LibraryExists(lua_State *l)
+{
+	std::string library = Lua::CheckString(l,1);
+	auto libAbs = util::get_normalized_module_path(library,::engine->GetNetworkState(l)->IsClient());
+	Lua::PushBool(l,FileManager::Exists(libAbs));
+	return 1;
+}
 
 int Lua::engine::LoadLibrary(lua_State *l)
 {

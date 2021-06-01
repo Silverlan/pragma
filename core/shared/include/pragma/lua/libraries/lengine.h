@@ -20,6 +20,7 @@ namespace Lua
 		DLLNETWORK void LoadSoundScripts(lua_State *l,const std::string &fileName);
 		DLLNETWORK std::shared_ptr<Model> get_model(lua_State *l,const std::string &mdlName);
 		DLLNETWORK int LoadLibrary(lua_State *l);
+		DLLNETWORK int LibraryExists(lua_State *l);
 		DLLNETWORK uint64_t GetTickCount();
 		DLLNETWORK int get_info(lua_State *l);
 		DLLNETWORK void exit();

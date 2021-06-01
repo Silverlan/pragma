@@ -77,6 +77,7 @@ void CGame::RegisterLua()
 
 	GetLuaInterface().RegisterLibrary("engine",{
 		LUA_SHARED_CL_ENGINE_FUNCTIONS
+		{"library_exists",&Lua::engine::LibraryExists},
 		{"load_library",&Lua::engine::LoadLibrary},
 		//{"save_frame_buffer_as_tga",&Lua::engine::save_frame_buffer_as_tga},
 		//{"save_texture_as_tga",&Lua::engine::save_texture_as_tga},

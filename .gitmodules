@@ -88,9 +88,6 @@
 [submodule "third_party_libs/rectangle_bin_pack"]
 	path = third_party_libs/rectangle_bin_pack
 	url = https://github.com/juj/RectangleBinPack.git
-[submodule "third_party_libs/openal-soft"]
-	path = third_party_libs/openal-soft
-	url = https://github.com/kcat/openal-soft.git
 [submodule "third_party_libs/assimp"]
 	path = third_party_libs/assimp
 	url = https://github.com/assimp/assimp.git

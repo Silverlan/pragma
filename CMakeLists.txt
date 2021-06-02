@@ -434,9 +434,6 @@ search_lib_recursive(DEPENDENCY_ASSIMP_LIBRARY third_party_libs/assimp/code/${BI
 set(DEPENDENCY_EIGEN_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/eigen CACHE PATH "Path to include directory.")
 set(DEPENDENCY_TINYGLTF_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/tinygltf CACHE PATH "Path to include directory.")
 
-set(DEPENDENCY_OPENAL_SOFT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/openal-soft/include CACHE PATH "Path to include directory.")
-search_lib_recursive(DEPENDENCY_OPENAL_SOFT_LIBRARY third_party_libs/openal-soft/${BINARY_PRAGMA_DIR} OpenAL32)
-
 set(DEPENDENCY_BULLET_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/bullet/src CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_BULLET_LINEAR_MATH_LIBRARY third_party_libs/bullet/src/LinearMath/${BINARY_PRAGMA_DIR} LinearMath STATIC)
 search_lib_recursive(DEPENDENCY_BULLET_DYNAMICS_LIBRARY third_party_libs/bullet/src/BulletDynamics/${BINARY_PRAGMA_DIR} BulletDynamics STATIC)
@@ -517,7 +514,6 @@ if(UNIX)
 	resolve_links(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_LIBRARY)
 	resolve_links(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_MATH_LIBRARY)
 	resolve_links(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_THREAD_LIBRARY)
-	resolve_links(DEPENDENCY_OPENAL_SOFT_LIBRARY)
 	resolve_links(DEPENDENCY_OPENVR_LIBRARY)
 	resolve_links(DEPENDENCY_OVR_LIBRARY)
 	resolve_links(DEPENDENCY_PCL_FEATURES_LIBRARY)
@@ -643,22 +639,6 @@ set_target_properties(SPIRV-Tools-reduce PROPERTIES FOLDER third_party_libs/anvi
 set_target_properties(SPIRV-Tools-shared PROPERTIES FOLDER third_party_libs/anvil/tools/spirv/libraries)
 
 set_target_properties(spirv-tools-vimsyntax PROPERTIES FOLDER third_party_libs/anvil/tools/spirv/utilities)
-#
-
-
-# Openal-soft
-set(ALSOFT_EXAMPLES OFF CACHE BOOL OFF FORCE)
-set(ALSOFT_INSTALL OFF CACHE BOOL OFF FORCE)
-set(ALSOFT_TESTS OFF CACHE BOOL OFF FORCE)
-register_third_party_library(openal-soft)
-set_target_properties(OpenAL PROPERTIES FOLDER third_party_libs/openal-soft)
-#set_target_properties(alrecord PROPERTIES FOLDER third_party_libs/openal-soft)
-#set_target_properties(altonegen PROPERTIES FOLDER third_party_libs/openal-soft)
-#set_target_properties(build_version PROPERTIES FOLDER third_party_libs/openal-soft)
-set_target_properties(common PROPERTIES FOLDER third_party_libs/openal-soft)
-#set_target_properties(ex-common PROPERTIES FOLDER third_party_libs/openal-soft)
-set_target_properties(native-tools PROPERTIES FOLDER third_party_libs/openal-soft)
-set_target_properties(openal-info PROPERTIES FOLDER third_party_libs/openal-soft)
 #
 
 # Assimp

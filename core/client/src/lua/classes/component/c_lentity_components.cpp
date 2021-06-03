@@ -1142,7 +1142,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto defCBSP = luabind::class_<CBSPHandle,BaseEntityComponentHandle>("BSPComponent");
 	entsMod[defCBSP];
 
-	auto defCGeneric = luabind::class_<CGenericHandle,BaseEntityComponentHandle>("EntityComponent");
+	auto defCGeneric = luabind::class_<CGenericHandle,BaseEntityComponentHandle>("GenericComponent");
 	//Lua::register_base_generic_component_methods<luabind::class_<CGenericHandle,BaseEntityComponentHandle>,CGenericHandle>(l,defCGeneric);
 	entsMod[defCGeneric];
 }

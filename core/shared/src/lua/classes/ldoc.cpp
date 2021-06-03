@@ -6,16 +6,20 @@
  */
 
 #include "pragma/lua/libraries/lfile.h"
+#include "pragma/lua/libraries/lutil.h"
 #include <util_pragma_doc.hpp>
 #include <luasystem.h>
 #include <luainterface.hpp>
 #include <unordered_set>
 #include <udm.hpp>
+#include <sharedutils/util_file.h>
+#include <sharedutils/util_library.hpp>
+#include <filesystem>
 
 #include <luabind/detail/class_rep.hpp>
 #include <luabind/detail/call.hpp>
 #include <luabind/class_info.hpp>
-
+#pragma optimize("",off)
 #if 0
 struct LUABIND_API class_base : scope
 {
@@ -65,11 +69,13 @@ struct LuaMethodInfo
 
 struct LuaClassInfo
 {
+	using EnumSet = std::unordered_map<std::string,int32_t>;
 	luabind::detail::class_rep *classRep = nullptr;
 	std::string name;
 	std::vector<LuaMethodInfo> methods;
 	std::vector<std::string> attributes;
 	std::vector<luabind::detail::class_rep*> bases;
+	std::unordered_map<std::string,EnumSet> enumSets;
 };
 
 class DocValidator
@@ -432,6 +438,93 @@ static void parse_lua_property(lua_State *L,const std::string &name,const luabin
 	}
 };
 
+static std::string_view lcp(const std::string_view &str0,const std::string_view &str1)
+{
+	size_t len = 0;
+	size_t i = 0;
+	while(i < str0.length() && i < str1.length())
+	{
+		if(str0[i] != str1[i])
+		{
+			++i;
+			break;
+		}
+		++len;
+		++i;
+	}
+	return std::string_view{str0.data(),len};
+}
+
+static std::vector<std::string> lcp(std::vector<std::string> &strings,std::string &outPrefix)
+{
+	outPrefix = "";
+	if(strings.empty())
+		return {};
+	std::string subStr {};
+	uint32_t n = 0;
+	for(auto i=decltype(strings.size()){0u};i<strings.size();++i)
+	{
+		for(auto j=i +1;j<strings.size();++j)
+		{
+			auto l = lcp(strings[i],strings[j]);
+			if(l.length() > subStr.length())
+				subStr = l;
+		}
+	}
+
+	if(subStr.empty())
+	{
+		auto b = std::move(strings.back());
+		strings.pop_back();
+		outPrefix = b;
+		return {std::move(b)};
+	}
+
+	std::vector<std::string> list {};
+	list.reserve(strings.size());
+	for(auto it=strings.begin();it!=strings.end();)
+	{
+		auto &str = *it;
+		if(ustring::compare(str.c_str(),subStr.data(),true,subStr.length()) == false)
+		{
+			++it;
+			continue;
+		}
+		list.push_back(std::move(str));
+		it = strings.erase(it);
+	}
+	outPrefix = subStr;
+	return list;
+}
+
+static std::unordered_map<std::string,std::vector<std::string>> group_by_prefix(std::vector<std::string> &strings)
+{
+	std::unordered_map<std::string,std::vector<std::string>> groupedByPrefix;
+	while(!strings.empty())
+	{
+		std::string prefix;
+		auto list = lcp(strings,prefix);
+		groupedByPrefix[prefix] = std::move(list);
+	}
+	return groupedByPrefix;
+}
+
+static void normalize_enum_type(std::string &enumType)
+{
+	std::vector<std::string> subStrings;
+	ustring::explode(enumType,"_",subStrings);
+	if(subStrings.empty())
+		return;
+	if(subStrings.back().empty())
+		subStrings.pop_back();
+	enumType.clear();
+	for(auto &subStr : subStrings)
+	{
+		ustring::to_lower(subStr);
+		subStr[0] = std::toupper(subStr[0]);
+		enumType += subStr;
+	}
+}
 static LuaClassInfo get_class_info(lua_State *L,luabind::detail::class_rep *crep)
 {
 	crep->get_table(L);
@@ -464,6 +557,28 @@ static LuaClassInfo get_class_info(lua_State *L,luabind::detail::class_rep *crep
 			std::string name = Lua::CheckString(L,-1);
 			Lua::Pop(L,1);
 			parse_lua_property(L,name,*i,result);
+		}
+	}
+
+	auto &staticConstants = access_class_rep(*crep).m_static_constants;
+	if(!staticConstants.empty())
+	{
+		std::vector<std::string> enums;
+		enums.reserve(staticConstants.size());
+		for(auto &pair : staticConstants)
+			enums.push_back(pair.first);
+		auto prefixedEnumSets = group_by_prefix(enums);
+		for(auto &pair : prefixedEnumSets)
+		{
+			auto esName = pair.first;
+			normalize_enum_type(esName);
+			auto &es = result.enumSets.insert(std::make_pair(esName,LuaClassInfo::EnumSet{})).first->second;
+			for(auto &enumName : pair.second)
+			{
+				auto it = staticConstants.find(enumName.c_str());
+				assert(it != staticConstants.end());
+				es[enumName] = it->second;
+			}
 		}
 	}
 	return result;
@@ -532,7 +647,51 @@ static void add_function(pragma::doc::Collection &collection,const LuaMethodInfo
 	}
 	collection.AddFunction(fc);
 }
-static void iterate_libraries(luabind::object o,std::vector<luabind::object> &traversed,pragma::doc::Collection &collection)
+static pragma::doc::PCollection class_info_to_collection(const std::string &path,const LuaClassInfo &classInfo)
+{
+	auto collection = pragma::doc::Collection::Create();
+	collection->SetName(classInfo.name);
+	collection->SetFlags(pragma::doc::Collection::Flags::Class);
+
+	/*for(auto *base : classInfo.bases)
+	{
+		// TODO: Base class of base class?
+		std::string dfName = base->name();
+		if(!path.empty())
+			dfName = path +'.' +dfName;
+		auto derivedFrom = pragma::doc::DerivedFrom::Create(dfName);
+		collection->AddDerivedFrom(*derivedFrom);
+	}*/
+
+	for(auto &attr : classInfo.attributes)
+	{
+		auto member = pragma::doc::Member::Create(*collection,attr);
+		collection->AddMember(member);
+	}
+
+	for(auto &method : classInfo.methods)
+		add_function(*collection,method);
+
+	for(auto &ces : classInfo.enumSets)
+	{
+		auto es = pragma::doc::EnumSet::Create(ces.first,collection.get());
+		es->ReserveEnums(ces.second.size());
+		for(auto &pair : ces.second)
+		{
+			auto e = pragma::doc::Enum::Create(*es);
+			e.SetName(pair.first);
+			e.SetValue(std::to_string(pair.second));
+			if(pair.first.find("_BIT_"))
+				e.SetType(pragma::doc::Enum::Type::Bit);
+			else
+				e.SetType(pragma::doc::Enum::Type::Regular);
+			es->AddEnum(std::move(e));
+		}
+		collection->AddEnumSet(es);
+	}
+	return collection;
+}
+static void iterate_libraries(luabind::object o,const std::string &path,std::vector<luabind::object> &traversed,pragma::doc::Collection &collection,std::unordered_map<pragma::doc::Collection*,luabind::detail::class_rep*> &iteratedClasses)
 {
 	if(std::find(traversed.begin(),traversed.end(),o) != traversed.end())
 		return; // Prevent infinite recursion
@@ -552,7 +711,11 @@ static void iterate_libraries(luabind::object o,std::vector<luabind::object> &tr
 			{
 				auto subCollection = pragma::doc::Collection::Create();
 				subCollection->SetName(libName);
-				iterate_libraries(val,traversed,*subCollection);
+				auto subPath = path;
+				if(!subPath.empty())
+					subPath += '.';
+				subPath += libName;
+				iterate_libraries(val,subPath,traversed,*subCollection,iteratedClasses);
 				collection.AddChild(subCollection);
 			}
 		}
@@ -566,16 +729,77 @@ static void iterate_libraries(luabind::object o,std::vector<luabind::object> &tr
 				parse_lua_property(o.interpreter(),fcName,val,classInfo);
 			}
 		}
+		else if(type == LUA_TUSERDATA)
+		{
+			auto *crep = Lua::get_crep(val);
+			if(crep)
+			{
+				if(crep->get_class_type() == luabind::detail::class_rep::class_type::lua_class)
+				{
+					/*auto *l = val.interpreter();
+
+					auto x = luabind::detail::is_class_rep(l, -1);
+					auto y = luabind::detail::get_instance(l, -1);
+
+					val.push(l);
+					luabind::detail::stack_pop sp(l,1);
+					luabind::argument a {luabind::from_stack(l,-1)};
+					auto classInfo = luabind::get_class_info(a);
+					std::cout<<"";*/
+				}
+				else
+				{
+				//	crep->add_static_constant("",0);
+					//m_registration->m_static_constants[name] = val;
+
+					auto classInfo = get_class_info(val.interpreter(),crep);
+					auto subPath = path;
+					if(!subPath.empty())
+						subPath += '.';
+					subPath += classInfo.name;
+					auto col = class_info_to_collection(subPath,classInfo);
+					collection.AddChild(col);
+					iteratedClasses.insert(std::make_pair(col.get(),crep));
+					//classInfo[cl.second] = get_class_info(L,cl.second);
+					//std::cout<<"Found crep!"<<std::endl;
+				}
+				
+				//m_class_type = lua_class (1)
+			}
+		}
 	}
 
 	for(auto &methodInfo : classInfo.methods)
 		add_function(collection,methodInfo);
 }
 
-static void iterate_libraries(luabind::object o,pragma::doc::Collection &collection)
+static void iterate_libraries(luabind::object o,pragma::doc::Collection &collection,std::unordered_map<pragma::doc::Collection*,luabind::detail::class_rep*> &iteratedClasses)
 {
 	std::vector<luabind::object> traversed {};
-	iterate_libraries(o,traversed,collection);
+	iterate_libraries(o,"",traversed,collection,iteratedClasses);
+}
+
+static std::string generate_identifier(const pragma::doc::Function &f)
+{
+	auto name = f.GetFullName();
+	ustring::to_lower(name);
+	std::replace(name.begin(),name.end(),'.','-');
+	name = "f-" +name;
+	return name;
+}
+
+static std::string generate_identifier(const pragma::doc::Collection &c)
+{
+	auto name = c.GetFullName();
+	ustring::to_lower(name);
+	std::replace(name.begin(),name.end(),'.','-');
+	if(umath::is_flag_set(c.GetFlags(),pragma::doc::Collection::Flags::Class))
+		name = "c-" +name;
+	else if(umath::is_flag_set(c.GetFlags(),pragma::doc::Collection::Flags::Library))
+		name = "l-" +name;
+	else
+		name = "g-" +name;
+	return name;
 }
 
 static void save_parameter(udm::LinkedPropertyWrapper &udmParam,const pragma::doc::Parameter &param)
@@ -602,7 +826,8 @@ static void save_collection(udm::LinkedPropertyWrapper &udmCollection,const prag
 	udmCollection["desc"] = collection->GetDescription();
 	udmCollection["url"] = collection->GetURL();
 	udmCollection["flags"] = magic_enum::flags::enum_name(collection->GetFlags());
-	udmCollection["manualInputRequired"] = true;
+	udmCollection["autoGenerated"] = true;
+	udmCollection["identifier"] = generate_identifier(*collection);
 
 	auto udmFunctions = udmCollection["functions"];
 	for(auto &f : collection->GetFunctions())
@@ -614,7 +839,8 @@ static void save_collection(udm::LinkedPropertyWrapper &udmCollection,const prag
 		udmFunction["flags"] = magic_enum::flags::enum_name(f.GetFlags());
 		udmFunction["gameStateFlags"] = magic_enum::flags::enum_name(f.GetGameStateFlags());
 		udmFunction["related"] = f.GetRelated();
-		udmFunction["manualInputRequired"] = true;
+		udmFunction["autoGenerated"] = true;
+		udmFunction["identifier"] = generate_identifier(f);
 
 		auto exampleCode = f.GetExampleCode();
 		if(exampleCode.has_value())
@@ -712,17 +938,149 @@ static void save_collections(udm::LinkedPropertyWrapper &udm,const std::vector<p
 		save_collection(udmCollections[collection->GetName()],collection);
 }
 
+class RepositoryManager
+{
+public:
+	static constexpr auto REPOSITORY_CHECKOUT_URL = "https://github.com/Silverlan/pragma.git";
+	static constexpr auto REPOSITORY_URL = "https://github.com/Silverlan/pragma/blob/";
+	static constexpr auto REPOSITORY_BRANCH = "master";
+	static std::unique_ptr<RepositoryManager> Create(lua_State *l,std::string &outErr);
+	bool LoadRepositoryReferences(std::string &outErr);
+private:
+	RepositoryManager()=default;
+	void ClearLocalRepositoryDir();
+	static void CollectSourceCodeFiles(const std::string &sourceCodeLocation,std::vector<std::string> &outFiles);
+
+	using GitClone = bool(*)(
+		const std::string&,const std::string&,
+		const std::vector<std::string>&,const std::string&,std::string&,
+		std::string*
+	);
+
+	GitClone m_gitClone = nullptr;
+	std::string m_repositoryRootDir = "core/";
+	std::string m_tmpRepositoryLocation = "temp/plad_repo/";
+	std::shared_ptr<util::Library> m_gitLib = nullptr;
+};
+
+std::unique_ptr<RepositoryManager> RepositoryManager::Create(lua_State *l,std::string &outErr)
+{
+	constexpr auto MODULE_NAME = "git/pr_git";
+	auto manager = std::unique_ptr<RepositoryManager>{new RepositoryManager{}};
+	manager->m_gitLib = pragma::get_engine()->GetNetworkState(l)->InitializeLibrary(MODULE_NAME);
+	if(!manager->m_gitLib)
+	{
+		outErr = "Unable to load module '" +std::string{MODULE_NAME} +"'!";
+		return nullptr;
+	}
+	constexpr auto GIT_CLONE_FUNC_NAME = "pr_git_clone";
+	manager->m_gitClone = manager->m_gitLib->FindSymbolAddress<GitClone>(GIT_CLONE_FUNC_NAME);
+	if(!manager->m_gitClone)
+	{
+		outErr = "Could not locate symbol '" +std::string{GIT_CLONE_FUNC_NAME} +"' in module '" +std::string{MODULE_NAME} +"'!";
+		return nullptr;
+	}
+	return manager->m_gitClone ? std::move(manager) : nullptr;
+}
+
+void RepositoryManager::CollectSourceCodeFiles(const std::string &sourceCodeLocation,std::vector<std::string> &outFiles)
+{
+	auto offset = outFiles.size();
+	FileManager::FindSystemFiles((sourceCodeLocation +"*.cpp").c_str(),&outFiles,nullptr,true);
+	for(auto i=offset;i<outFiles.size();++i)
+		outFiles[i] = sourceCodeLocation +outFiles[i];
+
+	std::vector<std::string> dirs;
+	FileManager::FindSystemFiles((sourceCodeLocation +"*").c_str(),nullptr,&dirs,true);
+	for(auto &dir : dirs)
+		CollectSourceCodeFiles(sourceCodeLocation +dir +'/',outFiles);
+}
+
+void RepositoryManager::ClearLocalRepositoryDir()
+{
+	// Git-files are read-only by default; We'll have to change permission flags to remove them
+	auto absRepositoryDir = FileManager::GetProgramPath() +'/' +m_tmpRepositoryLocation;
+	try
+	{
+		for(auto &path : std::filesystem::recursive_directory_iterator(absRepositoryDir +".git"))
+		{
+			try {
+				std::filesystem::permissions(path,std::filesystem::perms::all);
+			}
+			catch (std::exception& e) {
+			}           
+		}
+	}
+	catch(const std::filesystem::filesystem_error &err)
+	{
+	}
+	filemanager::remove_directory(m_tmpRepositoryLocation);
+}
+
+bool RepositoryManager::LoadRepositoryReferences(std::string &outErr)
+{
+	std::string rootDir = "core/shared/";
+	std::string localRepositoryDir = "temp/plad_repo/";
+	auto absRepositoryDir = FileManager::GetProgramPath() +'/' +localRepositoryDir;
+
+	ClearLocalRepositoryDir();
+	FileManager::CreatePath(localRepositoryDir.c_str());
+
+	std::string commitId;
+	auto result = m_gitClone(
+		REPOSITORY_CHECKOUT_URL,REPOSITORY_BRANCH,
+		{rootDir +"*.cpp"},absRepositoryDir,outErr,&commitId
+	);
+	util::ScopeGuard sgClearTmpRepo {[this]() {ClearLocalRepositoryDir();}};
+	if(!result)
+		return false;
+
+	std::vector<std::string> files;
+	auto &sourceCodeDir = absRepositoryDir;
+	CollectSourceCodeFiles(sourceCodeDir +rootDir,files);
+	for(auto &fname : files)
+	{
+		if(ufile::get_file_from_filename(fname) == "ldoc.cpp")
+			continue; // Skip this file
+		auto f = FileManager::OpenSystemFile(fname.c_str(),"r");
+		if(!f)
+			continue;
+		auto contents = f->ReadString();
+		f = nullptr;
+		auto pos = contents.find("#PLAD");
+		if(pos == std::string::npos)
+			continue;
+		auto e = contents.find('\n',pos);
+		auto sub = contents.substr(pos +5,e -(pos +5));
+		ustring::remove_whitespace(sub);
+
+		uint32_t lineIdx = 0;
+		size_t c = 0;
+		while(c < pos)
+		{
+			c = contents.find('\n',c);
+			++lineIdx;
+			if(c != std::string::npos)
+				++c;
+		}
+
+		Con::cout<<"Found PLAD ID: "<<sub<<" (Line "<<lineIdx<<")"<<Con::endl;
+
+		auto relPath = fname.substr(sourceCodeDir.length());
+		std::string url = std::string{REPOSITORY_URL} +std::string{REPOSITORY_BRANCH} +"/" +relPath +"#L" +std::to_string(lineIdx);
+		std::string urlCommit = std::string{REPOSITORY_URL} +commitId +"/" +relPath +"#L" +std::to_string(lineIdx);
+		Con::cout<<"URL: "<<url<<Con::endl;
+		Con::cout<<"URL Commit: "<<urlCommit<<Con::endl;
+	}
+	return true;
+}
+
 static void autogenerate(lua_State *L)
 {
 	auto* reg = luabind::detail::class_registry::get_registry(L);
 	auto& classes = reg->get_classes();
 
 	std::unordered_map<luabind::detail::class_rep*,LuaClassInfo> classInfo {};
-	for(const auto &cl : classes)
-	{
-		std::cout<<"CL: "<<cl.second->name()<<std::endl;
-		classInfo[cl.second] = get_class_info(L,cl.second);
-	}
 
 	{
 		/*auto x = luabind::globals(L)["vector"]["to_min_max"];
@@ -780,7 +1138,97 @@ static void autogenerate(lua_State *L)
 	}
 	collections.push_back(pragma::doc::Collection::Create());
 	collections.back()->SetName("_G");
-	iterate_libraries(luabind::globals(L),*collections.back());
+	auto &gcol = *collections.back();
+	std::unordered_map<pragma::doc::Collection*,luabind::detail::class_rep*> iteratedClasses;
+	iterate_libraries(luabind::globals(L),gcol,iteratedClasses);
+	std::unordered_map<luabind::detail::class_rep*,pragma::doc::Collection*> iteratedClassesRev;
+	for(auto &pair : iteratedClasses)
+		iteratedClassesRev[pair.second] = pair.first;
+
+	for(auto &pair : iteratedClasses)
+	{
+		auto &crep = *pair.second;
+		auto &bases = crep.bases();
+		for(auto &base : bases)
+		{
+			auto it = iteratedClassesRev.find(base.base);
+			assert(it != iteratedClassesRev.end());
+			if(it == iteratedClassesRev.end())
+			{
+				Con::cwar<<"WARNING: Missing class '"<<base.base->name()<<"'"<<Con::endl;
+				continue;
+			}
+			auto fullName = it->second->GetFullName();
+			fullName = fullName.substr(3);
+			auto derivedFrom = pragma::doc::DerivedFrom::Create(fullName);
+			pair.first->AddDerivedFrom(*derivedFrom);
+		}
+		/*for(auto &df : pair.first->GetDerivedFrom())
+		{
+			auto *dfCol = gcol.FindChildCollection(df->GetName());
+			std::cout<<"dfCol: "<<dfCol<<std::endl;
+		}*/
+	}
+	gcol.StripBaseDefinitionsFromDerivedCollections();
+	
+	std::string err;
+	auto repoMan = RepositoryManager::Create(L,err);
+	if(repoMan)
+	{
+		if(!repoMan->LoadRepositoryReferences(err))
+			Con::cwar<<"WARNING: LAD repository manager failed: "<<err<<Con::endl;
+	}
+	else
+		Con::cwar<<"WARNING: Unable to create LAD repository manager: "<<err<<Con::endl;
+
+#if 0
+	/*for(auto *base : classInfo.bases)
+	{
+		// TODO: Base class of base class?
+		std::string dfName = base->name();
+		if(!path.empty())
+			dfName = path +'.' +dfName;
+		auto derivedFrom = pragma::doc::DerivedFrom::Create(dfName);
+		collection->AddDerivedFrom(*derivedFrom);
+	}*/
+#endif
+	/*for(auto &pair : classInfo)
+	{
+		auto it = iteratedClasses.find(pair.first);
+		if(it != iteratedClasses.end())
+			continue;
+		Con::cout<<"Undefined class: "<<pair.first->name()<<std::endl;
+	}*/
+
+#if 0
+	std::unordered_map<
+	for(const auto &cl : classes)
+	{
+		std::cout<<"CL: "<<cl.second->name()<<std::endl;
+
+		if(ustring::compare(cl.second->name(),"AnimatedComponent"))
+		{
+			luabind::object ents = luabind::globals(L)["ents"];
+			if(ents)
+			{
+				luabind::object test = ents["AnimatedComponent"];
+				if(test)
+				{
+					//DLLNETWORK luabind::detail::class_rep *get_crep(luabind::object o);
+					auto *crep = Lua::get_crep(test);
+					if(crep)
+					{
+						if(cl.second == crep)
+						{
+							std::cout<<"MATCH!"<<std::endl;
+						}
+					}
+				}
+			}
+		}
+		classInfo[cl.second] = get_class_info(L,cl.second);
+	}
+#endif
 
 	auto udmData = udm::Data::Create("PDOC",1);
 	try
@@ -792,6 +1240,7 @@ static void autogenerate(lua_State *L)
 		std::cout<<"E: "<<e.what()<<std::endl;
 	}
 	udmData->SaveAscii("test_doc.udm");
+
 #if 0
 	std::stringstream ss;
 	for(auto &pair : classInfo)
@@ -1182,3 +1631,4 @@ void Lua::doc::register_library(Lua::Interface &lua)
 	}));
 	docLib[cdefCollection];
 }
+#pragma optimize("",on)

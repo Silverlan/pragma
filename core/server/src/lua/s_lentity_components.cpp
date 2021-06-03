@@ -431,7 +431,7 @@ void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	//Lua::register_base_info_landmark_component_methods<luabind::class_<SInfoLandmarkHandle,BaseEntityComponentHandle>,SInfoLandmarkHandle>(l,defSInfoLandmark);
 	entsMod[defSInfoLandmark];
 
-	auto defSGeneric = luabind::class_<SGenericHandle,BaseEntityComponentHandle>("EntityComponent");
+	auto defSGeneric = luabind::class_<SGenericHandle,BaseEntityComponentHandle>("GenericComponent");
 	//Lua::register_base_generic_component_methods<luabind::class_<SGenericHandle,BaseEntityComponentHandle>,SGenericHandle>(l,defSGeneric);
 	entsMod[defSGeneric];
 }

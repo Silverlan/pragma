@@ -337,11 +337,13 @@ namespace luabind {
 
 static std::unordered_map<std::string,std::string> g_typeTranslationTable {
 	{"std::string","string"},
-	{"short","int"},
-	{"unsigned char","int"},
-	{"unsigned int","int"},
+	{"short","int16"},
+	{"unsigned char","uint8"},
+	{"unsigned int","uint32"},
 	{"QuaternionInternal","Quaternion"},
-	{"double","float"}
+	{"double","float"},
+	{"__int64","int64"},
+	{"luabind::object","any"}
 };
 
 static void normalize_param_name(std::string &paramName)

@@ -20,6 +20,7 @@
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/lua/util.hpp>
+#include <pragma/asset/util_asset.hpp>
 #include <sharedutils/util_file.h>
 #include <pragma/networking/netmessages.h>
 #include <pragma/entities/entity_iterator.hpp>
@@ -136,7 +137,11 @@ DLLSERVER void CMD_entities_sv(NetworkState *state,pragma::BasePlayerComponent *
 void CMD_list_maps(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string>&)
 {
 	std::vector<std::string> files;
-	FileManager::FindFiles("maps/*.wld",&files,nullptr);
+	auto exts = pragma::asset::get_supported_extensions(pragma::asset::Type::Map);
+	for(auto &ext : exts)
+		filemanager::find_files("maps/*." +ext,&files,nullptr);
+	for(auto &f : files)
+		ufile::remove_extension_from_filename(f,exts);
 	std::sort(files.begin(),files.end());
 	Con::cout<<"Available maps:"<<Con::endl;
 	for(auto &f : files)

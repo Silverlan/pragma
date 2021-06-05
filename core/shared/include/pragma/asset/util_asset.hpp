@@ -52,11 +52,11 @@ namespace pragma::asset
 		Ascii,
 		NotAUdmFormat
 	};
-	DLLNETWORK bool exists(NetworkState &nw,const std::string &name,Type type);
+	DLLNETWORK bool exists(const std::string &name,Type type);
 	DLLNETWORK bool matches(const std::string &name0,const std::string &name1,Type type);
 	DLLNETWORK std::string get_normalized_path(const std::string &name,Type type);
-	DLLNETWORK std::optional<std::string> find_file(NetworkState &nw,const std::string &name,Type type,std::string *optOutFormat=nullptr);
-	DLLNETWORK bool remove_asset(NetworkState &nw,const std::string &name,Type type);
+	DLLNETWORK std::optional<std::string> find_file(const std::string &name,Type type,std::string *optOutFormat=nullptr);
+	DLLNETWORK bool remove_asset(const std::string &name,Type type);
 	DLLNETWORK bool is_loaded(NetworkState &nw,const std::string &name,Type type);
 	DLLNETWORK std::vector<std::string> get_supported_extensions(Type type,bool includeImportTypes=false);
 	DLLNETWORK std::optional<std::string> get_legacy_extension(Type type);

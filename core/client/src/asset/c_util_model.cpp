@@ -26,6 +26,7 @@
 #include <image/prosper_sampler.hpp>
 #include <util_image.hpp>
 #include <cmaterialmanager.h>
+#include <udm.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -1239,8 +1240,16 @@ bool pragma::asset::export_map(const std::string &mapName,const ModelExportInfo 
 {
 	::util::Path mapPath {mapName};
 	mapPath.RemoveFileExtension();
-	mapPath = "maps/" +mapPath +".wld";
-	auto f = FileManager::OpenFile(mapPath.GetString().c_str(),"rb");
+	VFilePtr f = nullptr;
+	auto openLocalMap = [&mapPath,&f]() {
+		auto localMapPath = pragma::asset::find_file(mapPath.GetString(),pragma::asset::Type::Map);
+		if(localMapPath.has_value())
+		{
+			auto filePath = util::Path::CreateFile(std::string{pragma::asset::get_asset_root_directory(pragma::asset::Type::Map)} +'/' +*localMapPath);
+			f = FileManager::OpenFile(filePath.GetString().c_str(),"rb");
+		}
+	};
+	openLocalMap();
 	if(f == nullptr)
 	{
 		if(util::port_source2_map(client,mapPath.GetString()) || util::port_hl2_map(client,mapPath.GetString()))
@@ -1250,7 +1259,7 @@ bool pragma::asset::export_map(const std::string &mapName,const ModelExportInfo 
 			{
 				// Sleep for a bit, then try again, in case the file hasn't been fully written yet
 				std::this_thread::sleep_for(std::chrono::seconds{1});
-				f = FileManager::OpenFile(mapPath.GetString().c_str(),"rb");
+				openLocalMap();
 			}
 		}
 	}
@@ -1261,10 +1270,13 @@ bool pragma::asset::export_map(const std::string &mapName,const ModelExportInfo 
 	}
 	if(exportInfo.verbose)
 		Con::cout<<"Loading map data..."<<Con::endl;
+	
 	auto worldData = pragma::asset::WorldData::Create(*client);
-	if(worldData->Read(f,pragma::asset::EntityData::Flags::None,&outErrMsg) == false)
-		return false;
+	auto udmData = util::load_udm_asset(f);
 	f = nullptr;
+	std::string err;
+	if(udmData == nullptr || worldData->LoadFromAssetData(udmData->GetAssetData(),pragma::asset::EntityData::Flags::None,err) == false)
+		return false;
 
 	if(exportInfo.verbose)
 		Con::cout<<"Collecting world node models..."<<Con::endl;

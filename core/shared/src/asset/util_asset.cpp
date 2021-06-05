@@ -15,9 +15,9 @@
 
 extern DLLNETWORK Engine *engine;
 
-bool pragma::asset::exists(NetworkState &nw,const std::string &name,Type type)
+bool pragma::asset::exists(const std::string &name,Type type)
 {
-	return find_file(nw,name,type).has_value();
+	return find_file(name,type).has_value();
 }
 std::optional<std::string> pragma::asset::determine_format_from_data(VFilePtr &f,Type type)
 {
@@ -149,6 +149,8 @@ std::vector<std::string> pragma::asset::get_supported_extensions(Type type,bool 
 			return {FORMAT_MODEL_BINARY,FORMAT_MODEL_ASCII,FORMAT_MODEL_LEGACY,"mdl","vmdl_c","nif"}; // TODO: Grab import types from import manager
 		return {FORMAT_MODEL_BINARY,FORMAT_MODEL_ASCII,FORMAT_MODEL_LEGACY};
 	case Type::Map:
+		if(includeImportTypes)
+			return {FORMAT_MAP_BINARY,FORMAT_MAP_ASCII,FORMAT_MAP_LEGACY,"bsp"}; // TODO: Grab import types from import manager
 		return {FORMAT_MAP_BINARY,FORMAT_MAP_ASCII,FORMAT_MAP_LEGACY};
 	case Type::Material:
 		if(includeImportTypes)
@@ -192,9 +194,9 @@ bool pragma::asset::matches(const std::string &name0,const std::string &name1,Ty
 {
 	return ustring::compare(get_normalized_path(name0,type),get_normalized_path(name1,type),false);
 }
-bool pragma::asset::remove_asset(NetworkState &nw,const std::string &name,Type type)
+bool pragma::asset::remove_asset(const std::string &name,Type type)
 {
-	auto f = find_file(nw,name,type);
+	auto f = find_file(name,type);
 	std::vector<std::string> deleted;
 	while(f.has_value())
 	{
@@ -205,11 +207,11 @@ bool pragma::asset::remove_asset(NetworkState &nw,const std::string &name,Type t
 		if(FileManager::RemoveFile(fullPath.c_str()) == false)
 			return false;
 		deleted.push_back(*f);
-		f = find_file(nw,name,type);
+		f = find_file(name,type);
 	}
 	return true;
 }
-std::optional<std::string> pragma::asset::find_file(NetworkState &nw,const std::string &name,Type type,std::string *optOutFormat)
+std::optional<std::string> pragma::asset::find_file(const std::string &name,Type type,std::string *optOutFormat)
 {
 	auto normalizedName = get_normalized_path(name,type);
 	switch(type)
@@ -233,7 +235,12 @@ std::optional<std::string> pragma::asset::find_file(NetworkState &nw,const std::
 		return {};
 	}
 	case Type::Material:
-		return nw.GetMaterialManager().FindMaterialPath(name);
+	{
+		auto *sv = engine->GetServerNetworkState();
+		auto *cl = engine->GetClientState();
+		auto *nw = sv ? sv : cl; // Doesn't matter which one
+		return nw ? nw->GetMaterialManager().FindMaterialPath(name) : std::optional<std::string>{};
+	}
 	}
 	return {};
 }

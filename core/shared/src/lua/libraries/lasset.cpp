@@ -106,7 +106,7 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 		luabind::def("find_file",Lua::asset::find_file),
 		luabind::def("is_loaded",Lua::asset::is_loaded),
 		luabind::def("delete",static_cast<bool(*)(lua_State*,const std::string&,pragma::asset::Type)>([](lua_State *l,const std::string &name,pragma::asset::Type type) -> bool {
-			return pragma::asset::remove_asset(*engine->GetNetworkState(l),name,type);
+			return pragma::asset::remove_asset(name,type);
 		}))
 	];
 
@@ -139,12 +139,12 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 bool Lua::asset::exists(lua_State *l,const std::string &name,pragma::asset::Type type)
 {
 	auto *nw = engine->GetNetworkState(l);
-	return pragma::asset::exists(*nw,name,type);
+	return pragma::asset::exists(name,type);
 }
 luabind::object Lua::asset::find_file(lua_State *l,const std::string &name,pragma::asset::Type type)
 {
 	auto *nw = engine->GetNetworkState(l);
-	auto path = pragma::asset::find_file(*nw,name,type);
+	auto path = pragma::asset::find_file(name,type);
 	if(path.has_value() == false)
 		return {};
 	return luabind::object{l,*path};

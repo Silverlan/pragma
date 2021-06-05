@@ -19,6 +19,7 @@
 #include <sharedutils/util_file.h>
 #include <pragma/engine_version.h>
 #include <pragma/lua/lua_doc.hpp>
+#include <pragma/asset/util_asset.hpp>
 #include <map>
 
 #define DLLSPEC_ISTEAMWORKS DLLNETWORK
@@ -254,10 +255,13 @@ REGISTER_SHARED_CONCOMMAND(find,[](NetworkState *state,pragma::BasePlayerCompone
 
 REGISTER_ENGINE_CONCOMMAND(listmaps,[](NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&) {
 	std::vector<std::string> resFiles;
-	FileManager::FindFiles("maps\\*.wld",&resFiles,nullptr);
-	std::vector<std::string>::iterator it;
-	for(it=resFiles.begin();it!=resFiles.end();it++)
-		Con::cout<<*it<<Con::endl;
+	auto exts = pragma::asset::get_supported_extensions(pragma::asset::Type::Map);
+	for(auto &ext : exts)
+		filemanager::find_files("maps/*." +ext,&resFiles,nullptr);
+	for(auto &f : resFiles)
+		ufile::remove_extension_from_filename(f,exts);
+	for(auto &f : resFiles)
+		Con::cout<<f<<Con::endl;
 },ConVarFlags::None,"");
 
 REGISTER_ENGINE_CONCOMMAND(clear,[](NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&) {

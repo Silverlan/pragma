@@ -272,7 +272,7 @@ void CReflectionProbeComponent::BuildReflectionProbes(Game &game,std::vector<CRe
 			for(auto &postfix : filePostfixes)
 			{
 				auto fpath = path +postfix;
-				auto fileName = pragma::asset::find_file(*client,path.GetString(),pragma::asset::Type::Material);
+				auto fileName = pragma::asset::find_file(path.GetString(),pragma::asset::Type::Material);
 				if(fileName.has_value() == false)
 					continue;
 				Con::cout<<"Removing probe IBL file '"<<fpath<<"'..."<<Con::endl;
@@ -767,7 +767,7 @@ Material *CReflectionProbeComponent::LoadMaterial(bool &outIsDefault)
 	outIsDefault = false;
 	auto matPath = util::Path{GetCubemapIBLMaterialFilePath()};
 	matPath.PopFront();
-	if(pragma::asset::exists(*client,matPath.GetString(),pragma::asset::Type::Material) == false)
+	if(pragma::asset::exists(matPath.GetString(),pragma::asset::Type::Material) == false)
 	{
 		outIsDefault = true;
 		matPath = "maps/default_ibl." +std::string{pragma::asset::FORMAT_MATERIAL_ASCII};

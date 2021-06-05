@@ -671,7 +671,7 @@ bool Model::FindMaterial(const std::string &texture,std::string &matPath,const s
 	for(auto &path : texturePaths)
 	{
 		auto texPath = path +texture;
-		auto foundPath = pragma::asset::find_file(*m_networkState,texPath,pragma::asset::Type::Material);
+		auto foundPath = pragma::asset::find_file(texPath,pragma::asset::Type::Material);
 		if(foundPath.has_value() || FileManager::Exists("materials\\" +texPath +".vmt") || FileManager::Exists("materials\\" +texPath +".vmat_c"))
 		{
 			matPath = texPath;

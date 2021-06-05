@@ -181,7 +181,11 @@ void Engine::RegisterConsoleCommands()
 		StartDefaultGame(argv.front());
 	},ConVarFlags::None,"Loads the given map immediately. Usage: map <mapName>",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
 		std::vector<std::string> resFiles;
-		FileManager::FindFiles("maps\\*.wld",&resFiles,nullptr);
+		auto exts = pragma::asset::get_supported_extensions(pragma::asset::Type::Map);
+		for(auto &ext : exts)
+			filemanager::find_files("maps/*." +ext,&resFiles,nullptr);
+		for(auto &f : resFiles)
+			ufile::remove_extension_from_filename(f,exts);
 		auto it = resFiles.begin();
 		std::vector<std::string_view> similarCandidates {};
 		ustring::gather_similar_elements(arg,[&it,&resFiles]() -> std::optional<std::string_view> {

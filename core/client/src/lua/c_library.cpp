@@ -761,7 +761,7 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua,bool bGUI)
 
 	RegisterVulkanLuaInterface(lua);
 }
-static std::optional<std::string> find_asset_file(NetworkState &nw,const std::string &name,pragma::asset::Type type)
+static std::optional<std::string> find_asset_file(const std::string &name,pragma::asset::Type type)
 {
 	if(type == pragma::asset::Type::Texture)
 	{
@@ -774,7 +774,7 @@ static std::optional<std::string> find_asset_file(NetworkState &nw,const std::st
 		path.PopFront();
 		return path.GetString();
 	}
-	return find_file(nw,name,type);
+	return find_file(name,type);
 }
 static bool is_asset_loaded(NetworkState &nw,const std::string &name,pragma::asset::Type type)
 {
@@ -1138,7 +1138,7 @@ void CGame::RegisterLuaLibraries()
 			std::string name = Lua::CheckString(l,1);
 			auto type = static_cast<pragma::asset::Type>(Lua::CheckInt(l,2));
 			auto *nw = c_engine->GetNetworkState(l);
-			auto fileName = find_asset_file(*nw,name,type);
+			auto fileName = find_asset_file(name,type);
 			Lua::PushBool(l,fileName.has_value());
 			return 1;
 		})},
@@ -1146,7 +1146,7 @@ void CGame::RegisterLuaLibraries()
 			std::string name = Lua::CheckString(l,1);
 			auto type = static_cast<pragma::asset::Type>(Lua::CheckInt(l,2));
 			auto *nw = c_engine->GetNetworkState(l);
-			auto fileName = find_asset_file(*nw,name,type);
+			auto fileName = find_asset_file(name,type);
 			if(fileName.has_value() == false)
 				return 0;
 			Lua::PushString(l,*fileName);

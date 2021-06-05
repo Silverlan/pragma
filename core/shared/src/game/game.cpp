@@ -675,7 +675,7 @@ bool Game::LoadMap(const std::string &map,const Vector3 &origin,std::vector<Enti
 {
 	auto normPath = pragma::asset::get_normalized_path(map,pragma::asset::Type::Map);
 	std::string format;
-	auto filePath = pragma::asset::find_file(*GetNetworkState(),normPath,pragma::asset::Type::Map,&format);
+	auto filePath = pragma::asset::find_file(normPath,pragma::asset::Type::Map,&format);
 	if(filePath.has_value() == false)
 	{
 		static auto bPort = true;

@@ -125,7 +125,7 @@ bool CParticleSystemComponent::IsParticleFilePrecached(const std::string &fname)
 
 std::optional<ParticleSystemFileHeader> CParticleSystemComponent::ReadHeader(NetworkState &nw,const std::string &fileName)
 {
-	auto ptPath = pragma::asset::find_file(nw,fileName,pragma::asset::Type::ParticleSystem);
+	auto ptPath = pragma::asset::find_file(fileName,pragma::asset::Type::ParticleSystem);
 	if(ptPath.has_value() == false)
 		return {};
 	auto fullPtPath = "particles/" +*ptPath;
@@ -199,7 +199,7 @@ bool CParticleSystemComponent::Precache(std::string fname,bool bReload)
 	}
 
 	std::string format;
-	auto ptFname = pragma::asset::find_file(*client,fname,pragma::asset::Type::ParticleSystem,&format);
+	auto ptFname = pragma::asset::find_file(fname,pragma::asset::Type::ParticleSystem,&format);
 	if(!ptFname.has_value())
 		return false;
 	if(format == pragma::asset::FORMAT_PARTICLE_SYSTEM_LEGACY)

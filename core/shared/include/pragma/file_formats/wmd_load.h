@@ -29,7 +29,7 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 	auto model = pmodel;
 	
 	std::string ext;
-	auto mdlPath = pragma::asset::find_file(nw,pathCache,pragma::asset::Type::Model,&ext);
+	auto mdlPath = pragma::asset::find_file(pathCache,pragma::asset::Type::Model,&ext);
 	if(mdlPath.has_value())
 		model = *mdlPath;
 

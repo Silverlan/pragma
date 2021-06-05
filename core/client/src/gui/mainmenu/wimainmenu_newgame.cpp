@@ -20,6 +20,7 @@
 #include "pragma/game/gamemode/gamemodemanager.h"
 #include <pragma/util/resource_watcher.h>
 #include <pragma/game/game_resources.hpp>
+#include <pragma/asset/util_asset.hpp>
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_file.h>
 #include <wgui/types/witext.h>
@@ -129,8 +130,18 @@ void WIMainMenuNewGame::ReloadMapList()
 		return;
 	auto *pMap = static_cast<WIDropDownMenu*>(m_hMapList.get());
 	pMap->ClearOptions();
+	auto exts = pragma::asset::get_supported_extensions(pragma::asset::Type::Map,true);
 	std::vector<std::string> files;
-	FileManager::FindFiles("maps/*.wld",&files,nullptr);
+	for(auto &ext : exts)
+		filemanager::find_files("maps/*." +ext,&files,nullptr);
+
+	std::unordered_set<std::string> uniqueFiles;
+	uniqueFiles.reserve(files.size());
+	for(auto &f : files)
+	{
+		ufile::remove_extension_from_filename(f,exts);
+		uniqueFiles.insert(std::move(f));
+	}
 
 	if(c_engine->GetConVarBool("sh_mount_external_game_resources"))
 	{
@@ -144,14 +155,19 @@ void WIMainMenuNewGame::ReloadMapList()
 				std::vector<std::string> extDirs {};
 				fFindFiles("maps/*.bsp",&extFiles,&extDirs);
 
-				files.reserve(files.size() +extFiles.size());
+				uniqueFiles.reserve(uniqueFiles.size() +extFiles.size());
 				for(auto &extFile : extFiles)
-					files.push_back(extFile);
+				{
+					ufile::remove_extension_from_filename(extFile,exts);
+					uniqueFiles.insert(std::move(extFile));
+				}
 			}
 		}
 	}
-	for(auto &f : files)
-		ufile::remove_extension_from_filename(f);
+	files.clear();
+	files.reserve(uniqueFiles.size());
+	for(auto &f : uniqueFiles)
+		files.push_back(f);
 	std::sort(files.begin(),files.end());
 
 	// Remove duplicates

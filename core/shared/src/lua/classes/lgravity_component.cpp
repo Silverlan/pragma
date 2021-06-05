@@ -47,7 +47,6 @@ void Lua::register_gravity_component(luabind::module_ &module)
 
 void Lua::Gravity::SetGravityScale(lua_State *l,GravityHandle &hEnt,float scale)
 {
-	// #PLAD f-ents-gravitycomponent-setgravityscale
 	pragma::Lua::check_component(l,hEnt);
 	hEnt->SetGravityScale(scale);
 }

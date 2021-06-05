@@ -34,6 +34,7 @@
 #include "pragma/lua/classes/c_lwibase.h"
 #include "pragma/networking/local_client.hpp"
 #include <pragma/lua/lua_error_handling.hpp>
+#include <pragma/lua/libraries/lutil.hpp>
 #include <luasystem_file.h>
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/error.hpp>
@@ -240,8 +241,9 @@ void ClientState::InitializeGUILua()
 	m_luaGUI->Open();
 	m_luaGUI->SetIdentifier("gui");
 	Lua::initialize_lua_state(GetGUILuaInterface());
-
-	Lua::RegisterLibrary(GetGUILuaState(),"util",{REGISTER_SHARED_UTIL_GENERIC});
+	
+	auto utilMod = luabind::module(m_luaGUI->GetState(),"util");
+	Lua::util::register_shared_generic(utilMod);
 	NetworkState::RegisterSharedLuaClasses(GetGUILuaInterface());
 	NetworkState::RegisterSharedLuaLibraries(GetGUILuaInterface());
 	ClientState::RegisterSharedLuaClasses(*m_luaGUI,true);

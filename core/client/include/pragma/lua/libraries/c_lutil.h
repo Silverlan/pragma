@@ -10,7 +10,8 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/lua/c_ldefinitions.h"
-#include "pragma/lua/libraries/lutil.h"
+#include "pragma/lua/c_lentity_handles.hpp"
+#include <mathutil/uvec.h>
 
 namespace Lua
 {
@@ -18,7 +19,7 @@ namespace Lua
 	{
 		namespace Client
 		{
-			DLLCLIENT int calc_world_direction_from_2d_coordinates(lua_State *l);
+			DLLCLIENT int calc_world_direction_from_2d_coordinates(lua_State *l,CCameraHandle &hCam,const ::Vector2 &uv);
 			DLLCLIENT int create_particle_tracer(lua_State *l);
 			DLLCLIENT int create_muzzle_flash(lua_State *l);
 			DLLCLIENT luabind::object create_giblet(GibletCreateInfo &createInfo);

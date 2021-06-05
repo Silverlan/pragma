@@ -11,6 +11,7 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include <pragma/lua/lua_entity_component.hpp>
+#include <pragma/lua/util.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <shader/prosper_shader_copy_image.hpp>
 #include <prosper_command_buffer.hpp>
@@ -39,6 +40,15 @@ prosper::DescriptorSetInfo pragma::to_prosper_descriptor_set_info(const LuaDescr
 }
 
 static std::unordered_map<prosper::BasePipelineCreateInfo*,pragma::LuaShaderBase*> s_pipelineToShader;
+
+pragma::LuaDescriptorSetInfo::LuaDescriptorSetInfo(luabind::object lbindings,uint32_t setIndex)
+	: setIndex(setIndex)
+{
+	::Lua::get_table_values<LuaDescriptorSetBinding>(lbindings.interpreter(),2u,bindings,[](lua_State *l,int32_t idx) -> LuaDescriptorSetBinding {
+		return *::Lua::CheckDescriptorSetBinding(l,idx);
+	});
+}
+
 pragma::LuaShaderBase *pragma::LuaShaderBase::GetShader(prosper::BasePipelineCreateInfo &pipelineInfo)
 {
 	auto it = s_pipelineToShader.find(&pipelineInfo);

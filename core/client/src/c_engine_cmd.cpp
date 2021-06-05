@@ -10,6 +10,8 @@
 #include "pragma/audio/c_audio.hpp"
 #include <pragma/asset/util_asset.hpp>
 #include <pragma/lua/libraries/ldebug.h>
+#include <pragma/lua/util.hpp>
+#include <pragma/lua/libraries/lutil.hpp>
 #include <pragma/rendering/render_apis.hpp>
 #include <pragma/console/convars.h>
 #include <sharedutils/util_file.h>

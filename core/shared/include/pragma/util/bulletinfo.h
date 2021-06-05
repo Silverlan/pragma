@@ -9,7 +9,6 @@
 #define __BULLETINFO_H__
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/libraries/lutil.h"
 #include "pragma/game/game_limits.h"
 #include "pragma/game/damagetype.h"
 #include <mathutil/color.h>

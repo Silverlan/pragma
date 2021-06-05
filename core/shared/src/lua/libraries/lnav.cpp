@@ -19,8 +19,9 @@ lua_registercheck(NavConfig,pragma::nav::Config);
 
 void Lua::nav::register_library(Lua::Interface &lua)
 {
-	auto &modNav = lua.RegisterLibrary("nav",std::unordered_map<std::string,int(*)(lua_State*)>{
-		{"generate",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) {
+	auto &modNav = lua.RegisterLibrary("nav");
+	modNav[
+		luabind::def("generate",static_cast<void(*)(lua_State*)>([](lua_State *l) {
 			auto &nw = *engine->GetNetworkState(l);
 			auto &game = *nw.GetGameState();
 			std::string err;
@@ -112,13 +113,12 @@ void Lua::nav::register_library(Lua::Interface &lua)
 			{
 				Lua::PushBool(l,false);
 				Lua::PushString(l,err);
-				return 2;
+				return;
 			}
 			auto navMesh = pragma::nav::Mesh::Create(mesh,navConfig);
 			Lua::Push(l,navMesh);
-			return 1;
-		})},
-		{"load",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) {
+		})),
+		luabind::def("load",static_cast<void(*)(lua_State*)>([](lua_State *l) {
 			auto &nw = *engine->GetNetworkState(l);
 			auto &game = *nw.GetGameState();
 			std::string fname = Lua::CheckString(l,1);
@@ -127,13 +127,12 @@ void Lua::nav::register_library(Lua::Interface &lua)
 			if(mesh == nullptr)
 			{
 				Lua::PushBool(l,false);
-				return 1;
+				return;
 			}
 			auto navMesh = pragma::nav::Mesh::Create(mesh,config);
 			Lua::Push(l,navMesh);
-			return 1;
-		})}
-	});
+		}))
+	];
 	Lua::RegisterLibraryEnums(lua.GetState(),"nav",{
 		{"POLY_TYPE_BIT_NONE",umath::to_integral(pragma::nav::PolyFlags::None)},
 		{"POLY_TYPE_BIT_WALK",umath::to_integral(pragma::nav::PolyFlags::Walk)},

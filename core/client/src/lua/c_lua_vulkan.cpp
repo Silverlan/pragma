@@ -14,6 +14,7 @@
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/lerrorcode.h>
 #include <pragma/lua/classes/ldatastream.h>
+#include <pragma/lua/util.hpp>
 #include <pragma/lua/luaapi.h>
 #include <luainterface.hpp>
 #include <prosper_util.hpp>

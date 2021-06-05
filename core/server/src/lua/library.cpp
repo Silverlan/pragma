@@ -9,7 +9,7 @@
 #include "pragma/lua/classes/lresource.h"
 #include "pragma/lua/libraries/s_ldebugoverlay.h"
 #include "pragma/lua/libraries/s_lai.h"
-#include "pragma/lua/libraries/lutil.h"
+#include <pragma/lua/libraries/lutil.hpp>
 #include "pragma/lua/libraries/s_lutil.h"
 #include "pragma/lua/libraries/s_lsound.h"
 #include "pragma/lua/libraries/s_ldebug.h"
@@ -25,15 +25,14 @@
 void SGame::RegisterLuaLibraries()
 {
 	Lua::util::register_library(GetLuaState());
-	GetLuaInterface().RegisterLibrary("util",{
-		REGISTER_SHARED_UTIL
-		{"calc_world_direction_from_2d_coordinates",Lua::util::calc_world_direction_from_2d_coordinates}
-	});
 	auto utilMod = luabind::module(GetLuaState(),"util");
+	Lua::util::register_shared(utilMod);
 	utilMod[
-		luabind::def("fire_bullets",Lua::util::Server::fire_bullets),
+		luabind::def("fire_bullets",static_cast<luabind::object(*)(lua_State*,const BulletInfo&,bool)>(Lua::util::Server::fire_bullets)),
+		luabind::def("fire_bullets",static_cast<luabind::object(*)(lua_State*,const BulletInfo&)>(Lua::util::Server::fire_bullets)),
 		luabind::def("create_giblet",Lua::util::Server::create_giblet),
-		luabind::def("create_explosion",Lua::util::Server::create_explosion)
+		luabind::def("create_explosion",Lua::util::Server::create_explosion),
+		luabind::def("calc_world_direction_from_2d_coordinates",Lua::util::calc_world_direction_from_2d_coordinates)
 	];
 
 	Game::RegisterLuaLibraries();

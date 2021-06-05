@@ -40,6 +40,11 @@
 
 extern DLLNETWORK Engine *engine;
 
+bool Lua::is_entity(const luabind::object &o)
+{
+	return luabind::object_cast_nothrow<EntityHandle*>(o,static_cast<EntityHandle*>(nullptr));
+}
+
 void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 {
 	classDef.def(luabind::tostring(luabind::self));

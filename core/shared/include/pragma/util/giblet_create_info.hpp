@@ -9,7 +9,6 @@
 #define __GIBLET_CREATE_INFO_HPP__
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/libraries/lutil.h"
 #include <cinttypes>
 #include <string>
 #include <mathutil/uvec.h>

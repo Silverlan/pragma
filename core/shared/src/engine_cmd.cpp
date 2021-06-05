@@ -13,7 +13,8 @@
 #include "pragma/asset/util_asset.hpp"
 #include "pragma/localization.h"
 #include <pragma/console/convars.h>
-#include <pragma/lua/libraries/lutil.h>
+#include <pragma/lua/util.hpp>
+#include <pragma/lua/libraries/lutil.hpp>
 #include <pragma/physics/environment.hpp>
 #include <pragma/networking/networking_modules.hpp>
 #include <pragma/util/util_game.hpp>

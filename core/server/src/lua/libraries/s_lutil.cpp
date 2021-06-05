@@ -8,7 +8,7 @@
 #include "pragma/lua/libraries/s_lutil.h"
 #include <pragma/lua/classes/ldef_color.h>
 #include <pragma/physics/raytraces.h>
-#include <pragma/lua/libraries/lutil.h>
+#include <pragma/lua/libraries/lutil.hpp>
 #include <pragma/util/giblet_create_info.hpp>
 #include <pragma/util/bulletinfo.h>
 #include <pragma/util/util_splash_damage_info.hpp>
@@ -18,7 +18,11 @@
 extern DLLSERVER ServerState *server;
 extern DLLSERVER SGame *s_game;
 
-int Lua::util::Server::fire_bullets(lua_State *l,const BulletInfo &bulletInfo)
+luabind::object Lua::util::Server::fire_bullets(lua_State *l,const BulletInfo &bulletInfo)
+{
+	return fire_bullets(l,bulletInfo,false);
+}
+luabind::object Lua::util::Server::fire_bullets(lua_State *l,const BulletInfo &bulletInfo,bool hitReport)
 {
 	uint8_t tracerSettings = 0;
 	if(bulletInfo.tracerRadius != BulletInfo::DEFAULT_TRACER_RADIUS)
@@ -45,7 +49,7 @@ int Lua::util::Server::fire_bullets(lua_State *l,const BulletInfo &bulletInfo)
 	std::vector<int32_t> hitSurfaceMaterials;
 	Vector3 start;
 	uint32_t numTracer = 0;
-	auto r = Lua::util::fire_bullets(l,[&hitPositions,&hitNormals,&hitSurfaceMaterials,&start,&numTracer](DamageInfo &dmg,TraceData&,TraceResult &result,uint32_t &tracerCount) {
+	auto r = Lua::util::fire_bullets(l,const_cast<BulletInfo&>(bulletInfo),hitReport,[&hitPositions,&hitNormals,&hitSurfaceMaterials,&start,&numTracer](DamageInfo &dmg,TraceData&,TraceResult &result,uint32_t &tracerCount) {
 		if(result.hitType != RayCastHitType::None)
 		{
 			hitPositions.push_back(result.position);

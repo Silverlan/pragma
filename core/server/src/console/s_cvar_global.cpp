@@ -19,7 +19,7 @@
 #include <pragma/console/util_cmd.hpp>
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
-#include <pragma/lua/libraries/lutil.h>
+#include <pragma/lua/util.hpp>
 #include <sharedutils/util_file.h>
 #include <pragma/networking/netmessages.h>
 #include <pragma/entities/entity_iterator.hpp>

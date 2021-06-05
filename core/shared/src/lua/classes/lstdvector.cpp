@@ -6,7 +6,7 @@
 */
 
 #include "stdafx_shared.h"
-#include "pragma/lua/libraries/lutil.h"
+#include "pragma/lua/libraries/lutil.hpp"
 
 template<typename T>
 	static void register_vector(lua_State *l,const char *name)

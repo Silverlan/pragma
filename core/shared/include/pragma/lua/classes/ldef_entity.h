@@ -23,4 +23,9 @@
 
 LUA_SETUP_HANDLE_CHECK(Entity,BaseEntity,EntityHandle);
 
+namespace Lua
+{
+	DLLNETWORK bool is_entity(const luabind::object &o);
+};
+
 #endif

@@ -32,6 +32,7 @@
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/classes/ldef_entity.h>
 #include <pragma/lua/libraries/lfile.h>
+#include <pragma/lua/libraries/lutil.hpp>
 #include <pragma/asset/util_asset.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
@@ -794,13 +795,15 @@ static bool is_asset_loaded(NetworkState &nw,const std::string &name,pragma::ass
 void CGame::RegisterLuaLibraries()
 {
 	Lua::util::register_library(GetLuaState());
-	GetLuaInterface().RegisterLibrary("util",{
-		REGISTER_SHARED_UTIL
-		{"calc_world_direction_from_2d_coordinates",Lua::util::Client::calc_world_direction_from_2d_coordinates},
-		{"create_particle_tracer",Lua::util::Client::create_particle_tracer},
-		{"create_muzzle_flash",Lua::util::Client::create_muzzle_flash},
-		{"fire_bullets",static_cast<int(*)(lua_State*)>(Lua::util::fire_bullets)},
-		{"save_image",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+	auto utilMod = luabind::module(GetLuaState(),"util");
+	Lua::util::register_shared(utilMod);
+	utilMod[
+		luabind::def("calc_world_direction_from_2d_coordinates",Lua::util::calc_world_direction_from_2d_coordinates),
+		luabind::def("calc_world_direction_from_2d_coordinates",Lua::util::Client::calc_world_direction_from_2d_coordinates),
+		luabind::def("create_particle_tracer",Lua::util::Client::create_particle_tracer),
+		luabind::def("create_muzzle_flash",Lua::util::Client::create_muzzle_flash),
+		luabind::def("fire_bullets",static_cast<luabind::object(*)(lua_State*,BulletInfo&)>(Lua::util::fire_bullets)),
+		luabind::def("save_image",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			std::string fileName = Lua::CheckString(l,2);
 			if(Lua::file::validate_write_operation(l,fileName) == false)
 			{
@@ -875,8 +878,8 @@ void CGame::RegisterLuaLibraries()
 			auto &imgWriteInfo = Lua::Check<uimg::TextureInfo>(l,3);
 			Lua::PushBool(l,c_game->SaveImage(img,fileName,imgWriteInfo));
 			return 1;
-		})},
-		{"load_image",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		})),
+		luabind::def("load_image",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			std::string fileName = Lua::CheckString(l,1);
 			std::string ext;
 			if(ufile::get_extension(fileName,&ext) == false)
@@ -938,8 +941,8 @@ void CGame::RegisterLuaLibraries()
 				imgBuffer->Convert(*targetFormat);
 			Lua::Push(l,imgBuffer);
 			return 1;
-		})},
-		{"capture_raytraced_screenshot",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		})),
+		luabind::def("capture_raytraced_screenshot",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			auto width = Lua::CheckInt(l,1);
 			auto height = Lua::CheckInt(l,2);
 			uint32_t samples = 1'024;
@@ -971,8 +974,8 @@ void CGame::RegisterLuaLibraries()
 			auto job = pragma::rendering::cycles::render_image(*client,sceneInfo,renderImgInfo);
 			Lua::Push(l,job);
 			return 1;
-		})},
-		{"cubemap_to_equirectangular_texture",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		})),
+		luabind::def("cubemap_to_equirectangular_texture",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			auto &cubemap = Lua::Check<prosper::Texture>(l,1);
 			auto *shader = static_cast<pragma::ShaderCubemapToEquirectangular*>(c_engine->GetShader("cubemap_to_equirectangular").get());
 			if(shader == nullptr)
@@ -982,11 +985,10 @@ void CGame::RegisterLuaLibraries()
 				return 0;
 			Lua::Push(l,equiRect);
 			return 1;
-		})}
-	});
-	auto utilMod = luabind::module(GetLuaState(),"util");
+		}))
+	];
 	utilMod[
-		luabind::def("fire_bullets",static_cast<int32_t(*)(lua_State*)>(Lua::util::fire_bullets)),
+		// luabind::def("fire_bullets",static_cast<int32_t(*)(lua_State*)>(Lua::util::fire_bullets)),
 		luabind::def("get_clipboard_string",Lua::util::Client::get_clipboard_string),
 		luabind::def("set_clipboard_string",Lua::util::Client::set_clipboard_string),
 		luabind::def("create_giblet",Lua::util::Client::create_giblet),

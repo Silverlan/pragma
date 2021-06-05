@@ -9,6 +9,7 @@
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
+#include <pragma/lua/util.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>

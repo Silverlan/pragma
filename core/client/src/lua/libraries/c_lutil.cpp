@@ -31,18 +31,13 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CEngine *c_engine;
 
 
-int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua_State *l)
+int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua_State *l,CCameraHandle &hCam,const Vector2 &uv)
 {
-	int32_t arg = 1;
-	if(!Lua::IsCCamera(l,arg))
-		return Lua::util::calc_world_direction_from_2d_coordinates(l);
-	auto &hCam = *Lua::CheckCCamera(l,arg++);
 	auto trComponent = hCam->GetEntity().GetTransformComponent();
 	auto forward = trComponent ? trComponent->GetForward() : uvec::FORWARD;
 	auto right = trComponent ? trComponent->GetRight() : uvec::RIGHT;
 	auto up = trComponent ? trComponent->GetUp() : uvec::UP;
-	auto *uv = Lua::CheckVector2(l,arg++);
-	auto dir = uvec::calc_world_direction_from_2d_coordinates(forward,right,up,hCam->GetFOVRad(),hCam->GetNearZ(),hCam->GetFarZ(),hCam->GetAspectRatio(),0.f,0.f,*uv);
+	auto dir = uvec::calc_world_direction_from_2d_coordinates(forward,right,up,hCam->GetFOVRad(),hCam->GetNearZ(),hCam->GetFarZ(),hCam->GetAspectRatio(),0.f,0.f,uv);
 	Lua::Push<Vector3>(l,dir);
 	return 1;
 }

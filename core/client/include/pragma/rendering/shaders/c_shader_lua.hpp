@@ -82,13 +82,7 @@ namespace pragma
 	struct LuaDescriptorSetInfo
 	{
 		LuaDescriptorSetInfo()=default;
-		LuaDescriptorSetInfo(luabind::object lbindings,uint32_t setIndex=std::numeric_limits<uint32_t>::max())
-			: setIndex(setIndex)
-		{
-			::Lua::get_table_values<LuaDescriptorSetBinding>(lbindings.interpreter(),2u,bindings,[](lua_State *l,int32_t idx) -> LuaDescriptorSetBinding {
-				return *::Lua::CheckDescriptorSetBinding(l,idx);
-			});
-		}
+		LuaDescriptorSetInfo(luabind::object lbindings,uint32_t setIndex=std::numeric_limits<uint32_t>::max());
 		uint32_t setIndex = 0u;
 		std::vector<LuaDescriptorSetBinding> bindings;
 	};

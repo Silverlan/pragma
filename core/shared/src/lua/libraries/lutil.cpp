@@ -6,7 +6,8 @@
  */
 
 #include "stdafx_shared.h"
-#include "pragma/lua/libraries/lutil.h"
+#include "pragma/lua/libraries/lutil.hpp"
+#include "pragma/lua/util.hpp"
 #include <pragma/engine.h>
 #include "pragma/lua/classes/ldef_entity.h"
 #include "pragma/lua/classes/ldef_vector.h"
@@ -73,6 +74,70 @@ luabind::detail::class_rep *Lua::get_crep(luabind::object o)
 		}
 	}
 	return crep;
+}
+
+void Lua::util::register_shared_generic(luabind::module_ &mod)
+{
+	mod[
+		luabind::def("is_valid",static_cast<bool(*)(lua_State*)>(Lua::util::is_valid)),
+		luabind::def("is_valid",static_cast<bool(*)(lua_State*,const luabind::object&)>(Lua::util::is_valid)),
+		luabind::def("remove",static_cast<void(*)(lua_State*,const luabind::object&)>(remove)),
+		luabind::def("remove",static_cast<void(*)(lua_State*,const luabind::object&,bool)>(remove)),
+		luabind::def("register_class",static_cast<luabind::object(*)(lua_State*,const std::string&,const luabind::object&,const luabind::object&,const luabind::object&,const luabind::object&,const luabind::object&)>(Lua::util::register_class)),
+		luabind::def("register_class",static_cast<luabind::object(*)(lua_State*,const std::string&,const luabind::object&,const luabind::object&,const luabind::object&,const luabind::object&)>(Lua::util::register_class)),
+		luabind::def("register_class",static_cast<luabind::object(*)(lua_State*,const std::string&,const luabind::object&,const luabind::object&,const luabind::object&)>(Lua::util::register_class)),
+		luabind::def("register_class",static_cast<luabind::object(*)(lua_State*,const std::string&,const luabind::object&,const luabind::object&)>(Lua::util::register_class)),
+		luabind::def("register_class",static_cast<luabind::object(*)(lua_State*,const std::string&,const luabind::object&)>(Lua::util::register_class)),
+		luabind::def("register_class",static_cast<luabind::object(*)(lua_State*,const std::string&)>(Lua::util::register_class)),
+
+		luabind::def("local_to_world",static_cast<Quat(*)(lua_State*,const Quat&,const Quat&)>(local_to_world)),
+		luabind::def("local_to_world",static_cast<Vector3(*)(lua_State*,const Vector3&,const Quat&,const Vector3&)>(local_to_world)),
+		luabind::def("local_to_world",static_cast<void(*)(lua_State*,const Vector3&,const Quat&,const Vector3&,const Quat&)>(local_to_world)),
+
+		luabind::def("world_to_local",static_cast<Quat(*)(lua_State*,const Quat&,const Quat&)>(world_to_local)),
+		luabind::def("world_to_local",static_cast<Vector3(*)(lua_State*,const Vector3&,const Quat&,const Vector3&)>(world_to_local)),
+		luabind::def("world_to_local",static_cast<void(*)(lua_State*,const Vector3&,const Quat&,const Vector3&,const Quat&)>(world_to_local)),
+
+		luabind::def("get_pretty_duration",static_cast<std::string(*)(lua_State*,uint32_t,uint32_t,bool)>(Lua::util::get_pretty_duration)),
+		luabind::def("get_pretty_duration",static_cast<std::string(*)(lua_State*,uint32_t,uint32_t)>(Lua::util::get_pretty_duration)),
+		luabind::def("get_pretty_duration",static_cast<std::string(*)(lua_State*,uint32_t)>(Lua::util::get_pretty_duration)),
+		luabind::def("get_pretty_time",Lua::util::get_pretty_time),
+
+		luabind::def("fade_property",static_cast<luabind::object(*)(lua_State*,LColorProperty&,const Color&,float)>(Lua::util::fade_property)),
+		luabind::def("fade_property",static_cast<luabind::object(*)(lua_State*,LVector2iProperty&,const Vector2i&,float)>(Lua::util::fade_property)),
+		luabind::def("fade_property",static_cast<luabind::object(*)(lua_State*,LVector3Property&,const Vector3&,float)>(Lua::util::fade_property)),
+		luabind::def("fade_property",static_cast<luabind::object(*)(lua_State*,LVector3iProperty&,const Vector3i&,float)>(Lua::util::fade_property)),
+		luabind::def("fade_property",static_cast<luabind::object(*)(lua_State*,LVector4Property&,const Vector4&,float)>(Lua::util::fade_property)),
+		luabind::def("fade_property",static_cast<luabind::object(*)(lua_State*,LVector4iProperty&,const Vector4i&,float)>(Lua::util::fade_property)),
+		luabind::def("fade_property",static_cast<luabind::object(*)(lua_State*,LQuatProperty&,const Quat&,float)>(Lua::util::fade_property)),
+		luabind::def("fade_property",static_cast<luabind::object(*)(lua_State*,LEulerAnglesProperty&,const EulerAngles&,float)>(Lua::util::fade_property)),
+		luabind::def("fade_property",static_cast<luabind::object(*)(lua_State*,LGenericIntPropertyWrapper&,const int64_t&,float)>(Lua::util::fade_property)),
+		luabind::def("fade_property",static_cast<luabind::object(*)(lua_State*,LGenericFloatPropertyWrapper&,const double&,float)>(Lua::util::fade_property)),
+
+		luabind::def("round_string",static_cast<std::string(*)(lua_State*,float,uint32_t)>(Lua::util::round_string)),
+		luabind::def("round_string",static_cast<std::string(*)(lua_State*,float)>(Lua::util::round_string)),
+
+		luabind::def("get_type_name",Lua::util::get_type_name),
+		luabind::def("is_same_object",Lua::util::is_same_object),
+		luabind::def("clamp_resolution_to_aspect_ratio",Lua::util::clamp_resolution_to_aspect_ratio),
+		luabind::def("get_class_value",Lua::util::get_class_value),
+		luabind::def("pack_zip_archive",Lua::util::pack_zip_archive),
+		luabind::def("world_space_point_to_screen_space_uv",static_cast<void(*)(lua_State*,const Vector3&,const Mat4&,float,float)>(Lua::util::world_space_point_to_screen_space_uv)),
+		luabind::def("world_space_direction_to_screen_space",Lua::util::world_space_direction_to_screen_space),
+		luabind::def("calc_screen_space_distance_to_world_space_position",Lua::util::calc_screenspace_distance_to_worldspace_position),
+		luabind::def("depth_to_distance",Lua::util::depth_to_distance)
+	];
+}
+void Lua::util::register_shared(luabind::module_ &mod)
+{
+	register_shared_generic(mod);
+	mod[
+		luabind::def("is_valid_entity",static_cast<bool(*)(lua_State*)>(Lua::util::is_valid_entity)),
+		luabind::def("is_valid_entity",static_cast<bool(*)(lua_State*,const luabind::object&)>(Lua::util::is_valid_entity)),
+		luabind::def("shake_screen",static_cast<void(*)(lua_State*,const Vector3&,float,float,float,float,float,float)>(Lua::util::shake_screen)),
+		luabind::def("shake_screen",static_cast<void(*)(lua_State*,float,float,float,float,float)>(Lua::util::shake_screen)),
+		luabind::def("read_scene_file",Lua::util::read_scene_file)
+	];
 }
 
 void Lua::util::register_library(lua_State *l)
@@ -238,9 +303,8 @@ std::string Lua::global::get_script_path() {return Lua::GetIncludePath();}
 EulerAngles Lua::global::angle_rand() {return EulerAngles(umath::random(-180.f,180.f),umath::random(-180.f,180.f),umath::random(-180.f,180.f));}
 EulerAngles Lua::global::create_from_string(const std::string &str) {return EulerAngles{str};}
 
-static bool check_valid_lua_object(lua_State *l,int32_t stackIdx)
+static bool check_valid_lua_object(lua_State *l,const luabind::object &o)
 {
-	auto o = luabind::object(luabind::from_stack(l,stackIdx));
 	auto *pEnt = luabind::object_cast_nothrow<EntityHandle*>(o,static_cast<EntityHandle*>(nullptr));
 	if(pEnt != nullptr)
 		return pEnt->IsValid(); // Used frequently, and is faster than looking up "IsValid"
@@ -257,51 +321,47 @@ static bool check_valid_lua_object(lua_State *l,int32_t stackIdx)
 	return bValid;
 }
 
-static bool is_valid(lua_State *l)
+bool Lua::util::is_valid(lua_State *l) {return false;}
+bool Lua::util::is_valid(lua_State *l,const luabind::object &o)
 {
-	auto bValid = Lua::IsSet(l,1);
-	if(bValid == true)
+	if(!o)
+		return false;
+	auto type = luabind::type(o);
+	switch(type)
 	{
-		if(Lua::IsUserData(l,1))
-			bValid = check_valid_lua_object(l,1);
-		else if(Lua::IsTable(l,1))
+	case LUA_TUSERDATA:
+		return check_valid_lua_object(l,o);
+	case LUA_TBOOLEAN:
+		return luabind::object_cast<bool>(o);
+	case LUA_TTABLE:
+	{
+		for(luabind::iterator i{o}, e; i != e; ++i)
 		{
-			auto numEls = Lua::GetObjectLength(l,1);
-			for(auto i=decltype(numEls){0};i<numEls;++i)
-			{
-				Lua::PushInt(l,i +1);
-				Lua::GetTableValue(l,1);
-
-				bValid = check_valid_lua_object(l,-1);
-
-				Lua::Pop(l,1);
-				if(bValid == false)
-					break;
-			}
+			auto child = luabind::object{*i};
+			if(check_valid_lua_object(l,child) == false)
+				return false;
 		}
-		else if(Lua::IsBool(l,1))
-			bValid = Lua::CheckBool(l,1);
+		return true;
 	}
-	return bValid;
+	}
+	return true;
 }
 
-int Lua::util::is_valid(lua_State *l)
-{
-	Lua::PushBool(l,::is_valid(l));
-	return 1;
-}
-
-int Lua::util::is_valid_entity(lua_State *l)
+bool Lua::util::is_valid_entity(lua_State *l)
 {
 	if(!Lua::IsSet(l,1) || !Lua::IsEntity(l,1))
-	{
-		Lua::PushBool(l,false);
-		return 1;
-	}
-	return ::is_valid(l);
+		return false;
+	return is_valid(l);
 }
 
-static void safely_remove(luabind::object &o,const char *removeFunction,bool useSafeMethod)
+bool Lua::util::is_valid_entity(lua_State *l,const luabind::object &o)
+{
+	if(!o || !is_entity(o))
+		return false;
+	return is_valid(l,o);
+}
+
+static void safely_remove(const luabind::object &o,const char *removeFunction,bool useSafeMethod)
 {
 	auto *pEnt = luabind::object_cast_nothrow<EntityHandle*>(o,static_cast<EntityHandle*>(nullptr));
 	if(pEnt != nullptr) // Used frequently, and is faster than looking up "IsValid"
@@ -335,27 +395,23 @@ static void safely_remove(luabind::object &o,const char *removeFunction,bool use
 	{}
 }
 
-int Lua::util::remove(lua_State *l)
+void Lua::util::remove(lua_State *l,const luabind::object &o,bool removeSafely)
 {
-	auto safeRemove = Lua::IsSet(l,2) && Lua::CheckBool(l,2);
-	auto *removeFunction = safeRemove ? "RemoveSafely" : "Remove";
-	if(Lua::IsSet(l,1) && Lua::IsTable(l,1))
+	if(is_valid(l,o) == false)
+		return;
+	auto *removeFunction = removeSafely ? "RemoveSafely" : "Remove";
+	if(luabind::type(o) == LUA_TTABLE)
 	{
-		auto t = luabind::object(luabind::from_stack(l,1));
-		for(luabind::iterator i(t), e; i != e; ++i)
+		for(luabind::iterator i(o), e; i != e; ++i)
 		{
 			auto o = luabind::object{*i};
-			safely_remove(o,removeFunction,safeRemove);
+			safely_remove(o,removeFunction,removeSafely);
 		}
-		return 0;
+		return;
 	}
-	auto valid = ::is_valid(l);
-	if(valid == false)
-		return 0;
-	auto o = luabind::object(luabind::from_stack(l,1));
-	safely_remove(o,removeFunction,safeRemove);
-	return 0;
+	safely_remove(o,removeFunction,removeSafely);
 }
+void Lua::util::remove(lua_State *l,const luabind::object &o) {return remove(l,o,false);}
 
 bool Lua::util::is_table(luabind::argument arg) {return luabind::type(arg) == LUA_TTABLE;}
 bool Lua::util::is_table() {return false;}
@@ -363,36 +419,31 @@ bool Lua::util::is_table() {return false;}
 std::string Lua::util::date_time(const std::string &format) {return engine->GetDate(format);}
 std::string Lua::util::date_time() {return engine->GetDate();}
 
-int Lua::util::fire_bullets(lua_State *l,const std::function<void(DamageInfo&,::TraceData&,TraceResult&,uint32_t&)> &f)
+luabind::object Lua::util::fire_bullets(lua_State *l,BulletInfo &bulletInfo,bool hitReport,const std::function<void(DamageInfo&,::TraceData&,TraceResult&,uint32_t&)> &f)
 {
-	auto *bulletInfo = Lua::CheckBulletInfo(l,1);
-	auto bHitReport = false;
-	if(Lua::IsSet(l,2) == true)
-		bHitReport = Lua::CheckBool(l,2);
-
 	DamageInfo dmg;
-	dmg.SetDamage(umath::min(CUInt16(bulletInfo->damage),CUInt16(std::numeric_limits<UInt16>::max())));
-	dmg.SetDamageType(bulletInfo->damageType);
-	dmg.SetSource(bulletInfo->effectOrigin);
-	dmg.SetAttacker(bulletInfo->hAttacker.get());
-	dmg.SetInflictor(bulletInfo->hInflictor.get());
+	dmg.SetDamage(umath::min(CUInt16(bulletInfo.damage),CUInt16(std::numeric_limits<UInt16>::max())));
+	dmg.SetDamageType(bulletInfo.damageType);
+	dmg.SetSource(bulletInfo.effectOrigin);
+	dmg.SetAttacker(bulletInfo.hAttacker.get());
+	dmg.SetInflictor(bulletInfo.hInflictor.get());
 
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 
 	auto &src = dmg.GetSource();
-	int32_t idxResultTable = -1;
-	if(bHitReport == true)
-		idxResultTable = Lua::CreateTable(l);
+	luabind::object t {};
+	if(hitReport == true)
+		t = luabind::newtable(l);
 	int32_t tIdx = 1;
-	for(Int32 i=0;i<bulletInfo->bulletCount;i++)
+	for(Int32 i=0;i<bulletInfo.bulletCount;i++)
 	{
-		auto randSpread = EulerAngles(umath::random(-bulletInfo->spread.p,bulletInfo->spread.p),umath::random(-bulletInfo->spread.y,bulletInfo->spread.y),0);
-		auto bulletDir = bulletInfo->direction;
+		auto randSpread = EulerAngles(umath::random(-bulletInfo.spread.p,bulletInfo.spread.p),umath::random(-bulletInfo.spread.y,bulletInfo.spread.y),0);
+		auto bulletDir = bulletInfo.direction;
 		uvec::rotate(&bulletDir,randSpread);
 		::TraceData data;
 		data.SetSource(src);
-		data.SetTarget(src +bulletDir *bulletInfo->distance);
+		data.SetTarget(src +bulletDir *bulletInfo.distance);
 		data.SetCollisionFilterMask(CollisionMask::AllHitbox &~CollisionMask::Trigger); // Let everything pass (Except specific filters below)
 		auto *attacker = dmg.GetAttacker();
 		data.SetFilter([attacker](pragma::physics::IShape &shape,pragma::physics::IRigidBody &body) -> RayCastHitType {
@@ -432,28 +483,19 @@ int Lua::util::fire_bullets(lua_State *l,const std::function<void(DamageInfo&,::
 						charComponent->FindHitgroup(*result.collisionObj,hitGroup);
 				}
 				dmg.SetHitGroup(hitGroup);
-				dmg.SetForce(bulletDir *bulletInfo->force);
+				dmg.SetForce(bulletDir *bulletInfo.force);
 				dmg.SetHitPosition(result.position);
 				pDamageableComponent->TakeDamage(dmg);
 			}
 		}
-		if(idxResultTable != -1)
+		if(hitReport == true)
 		{
 			if(results.empty())
-			{
-				TraceResult result {data};
-				Lua::PushInt(l,tIdx++);
-				Lua::TraceData::FillTraceResultTable(l,result);
-				Lua::SetTableValue(l,idxResultTable);
-			}
+				t[tIdx++] = TraceResult{data};
 			else
 			{
 				for(auto &result : results)
-				{
-					Lua::PushInt(l,tIdx++);
-					Lua::TraceData::FillTraceResultTable(l,result);
-					Lua::SetTableValue(l,idxResultTable);
-				}
+					t[tIdx++] = result;
 			}
 		}
 		if(f != nullptr)
@@ -461,27 +503,28 @@ int Lua::util::fire_bullets(lua_State *l,const std::function<void(DamageInfo&,::
 			if(results.empty())
 			{
 				TraceResult result {data};
-				f(dmg,data,result,bulletInfo->tracerCount);
+				f(dmg,data,result,bulletInfo.tracerCount);
 			}
 			else
 			{
 				for(auto &result : results)
-					f(dmg,data,result,bulletInfo->tracerCount);
+					f(dmg,data,result,bulletInfo.tracerCount);
 			}
 		}
 	}
-	return (idxResultTable == -1) ? 0 : 1;
+	return t;
 }
-int Lua::util::fire_bullets(lua_State *l) {return fire_bullets(l,nullptr);}
+luabind::object Lua::util::fire_bullets(lua_State *l,BulletInfo &bulletInfo,bool hitReport) {return fire_bullets(l,bulletInfo,hitReport,nullptr);}
+luabind::object Lua::util::fire_bullets(lua_State *l,BulletInfo &bulletInfo) {return fire_bullets(l,bulletInfo,false,nullptr);}
 
-int Lua::util::register_class(lua_State *l)
+static luabind::object register_class(lua_State *l,const std::string &pclassName,uint32_t idxBaseClassStart)
 {
-	std::string className = Lua::CheckString(l,1);
+	auto className = pclassName;
 	auto fullClassName = className;
 
 	auto nParentClasses = Lua::GetStackTop(l) -1;
-	auto fRegisterBaseClasses = [l,nParentClasses]() {
-		for(auto i=decltype(nParentClasses){2};i<=(nParentClasses +1);++i)
+	auto fRegisterBaseClasses = [l,nParentClasses,idxBaseClassStart]() {
+		for(auto i=idxBaseClassStart;i<=(nParentClasses +1);++i)
 		{
 			Lua::PushValue(l,-1); /* 2 */
 			Lua::PushValue(l,i); /* 3 */
@@ -505,7 +548,7 @@ int Lua::util::register_class(lua_State *l)
 			if(Lua::IsSet(l,-1) == false)
 			{
 				Lua::Pop(l,1); /* 0 */
-				return 0;
+				return {};
 			}
 
 			auto numPop = 0u;
@@ -522,7 +565,7 @@ int Lua::util::register_class(lua_State *l)
 					if(bLast == true)
 						break;
 					Lua::Pop(l,numPop +1); /* 0 */
-					return 0;
+					return {};
 				}
 				if(bLast == true)
 				{
@@ -538,11 +581,10 @@ int Lua::util::register_class(lua_State *l)
 						fRegisterBaseClasses();
 						Lua::Pop(l,1); /* 0 */
 
-						classInfo->classObject.push(l);
-						return 1;
+						return classInfo->classObject;
 					}
 
-					return 0;
+					return {};
 				}
 			}
 			Lua::Pop(l,numPop +1); /* 0 */
@@ -567,11 +609,10 @@ int Lua::util::register_class(lua_State *l)
 				fRegisterBaseClasses();
 				Lua::Pop(l,1); /* 0 */
 
-				classInfo->classObject.push(l);
-				return 1;
+				return classInfo->classObject;
 			}
 
-			return 0;
+			return {};
 		}
 		Lua::Pop(l,1); /* 0 */
 	}
@@ -632,11 +673,44 @@ int Lua::util::register_class(lua_State *l)
 
 	if(restorePreviousGlobalValue)
 		Lua::SetGlobal(l,className); /* -1 */
-	if(!oClass)
-		return 0;
-	oClass.push(l);
-	return 1;
+	return oClass;
 }
+luabind::object Lua::util::register_class(lua_State *l,const std::string &className,const luabind::object &oBase0)
+{
+	if(luabind::type(oBase0) == LUA_TTABLE)
+	{
+		uint32_t n = 0;
+		for(luabind::iterator i(oBase0), e; i != e; ++i)
+		{
+			(*i).push(l);
+			++n;
+		}
+
+		auto r = ::register_class(l,className,3);
+		for(auto i=decltype(n){0u};i<n;++i)
+			Lua::RemoveValue(l,-2);
+		return r;
+	}
+	return ::register_class(l,className,2);
+}
+luabind::object Lua::util::register_class(lua_State *l,const std::string &className,const luabind::object &oBase0,const luabind::object &oBase1)
+{
+	return ::register_class(l,className,2);
+}
+luabind::object Lua::util::register_class(lua_State *l,const std::string &className,const luabind::object &oBase0,const luabind::object &oBase1,const luabind::object &oBase2)
+{
+	return ::register_class(l,className,2);
+}
+luabind::object Lua::util::register_class(lua_State *l,const std::string &className,const luabind::object &oBase0,const luabind::object &oBase1,const luabind::object &oBase2,const luabind::object &oBase3)
+{
+	return ::register_class(l,className,2);
+}
+luabind::object Lua::util::register_class(lua_State *l,const std::string &className,const luabind::object &oBase0,const luabind::object &oBase1,const luabind::object &oBase2,const luabind::object &oBase3,const luabind::object &oBase4)
+{
+	return ::register_class(l,className,2);
+}
+
+luabind::object Lua::util::register_class(lua_State *l,const std::string &pclassName) {return ::register_class(l,pclassName,2);}
 
 void Lua::util::splash_damage(
 	lua_State *l,
@@ -675,25 +749,8 @@ void Lua::util::splash_damage(
 	game->SplashDamage(splashDamageInfo.origin,splashDamageInfo.radius,const_cast<DamageInfo&>(splashDamageInfo.damageInfo),splashDamageInfo.callback);
 }
 
-int Lua::util::shake_screen(lua_State *l)
+static void shake_screen(lua_State *l,const Vector3 &pos,float radius,float amplitude,float frequency,float duration,float fadeIn,float fadeOut,bool useRadius)
 {
-	auto iarg = 1;
-	Vector3 pos(0.f,0.f,0.f);
-	auto radius = 0.f;
-	auto bUseRadius = false;
-	if(Lua::IsVector(l,iarg))
-	{
-		auto *lpos = Lua::CheckVector(l,iarg++);
-		pos = *lpos;
-		radius = CFloat(Lua::CheckNumber(l,iarg++));
-		bUseRadius = true;
-	}
-	auto amplitude = Lua::CheckNumber(l,iarg++);
-	auto frequency = Lua::CheckNumber(l,iarg++);
-	auto duration = Lua::CheckNumber(l,iarg++);
-	auto fadeIn = Lua::CheckNumber(l,iarg++);
-	auto fadeOut = Lua::CheckNumber(l,iarg++);
-
 	auto *nw = engine->GetNetworkState(l);
 	auto *game = nw->GetGameState();
 	auto *ent = game->CreateEntity("env_quake");
@@ -701,7 +758,7 @@ int Lua::util::shake_screen(lua_State *l)
 	if(pQuakeComponent != nullptr)
 	{
 		auto spawnFlags = SF_QUAKE_IN_AIR | SF_QUAKE_REMOVE_ON_COMPLETE;
-		if(bUseRadius == true)
+		if(useRadius == true)
 		{
 			auto pTrComponent = ent->GetTransformComponent();
 			if(pTrComponent != nullptr)
@@ -721,7 +778,14 @@ int Lua::util::shake_screen(lua_State *l)
 		if(pInputComponent != nullptr)
 			pInputComponent->Input("StartShake",nullptr,nullptr,"");
 	}
-	return 0;
+}
+void Lua::util::shake_screen(lua_State *l,const Vector3 &pos,float radius,float amplitude,float frequency,float duration,float fadeIn,float fadeOut)
+{
+	::shake_screen(l,pos,radius,amplitude,frequency,duration,fadeIn,fadeOut,true);
+}
+void Lua::util::shake_screen(lua_State *l,float amplitude,float frequency,float duration,float fadeIn,float fadeOut)
+{
+	::shake_screen(l,{},{},amplitude,frequency,duration,fadeIn,fadeOut,false);
 }
 
 float Lua::util::get_faded_time_factor(float cur,float dur,float fadeIn,float fadeOut) {return ::util::get_faded_time_factor(CFloat(cur),CFloat(dur),fadeIn,fadeOut);}
@@ -731,122 +795,81 @@ float Lua::util::get_faded_time_factor(float cur,float dur) {return get_faded_ti
 float Lua::util::get_scale_factor(float val,float min,float max) {return ::util::get_scale_factor(CFloat(val),CFloat(min),CFloat(max));}
 float Lua::util::get_scale_factor(float val,float min) {return ::util::get_scale_factor(CFloat(val),CFloat(min));}
 
-int Lua::util::local_to_world(lua_State *l)
+Quat Lua::util::local_to_world(lua_State *l,const Quat &r0,const Quat &r1)
 {
-	if(Lua::IsQuaternion(l,1))
-	{
-		auto *rLocal = Lua::CheckQuaternion(l,1);
-		auto *r = Lua::CheckQuaternion(l,2);
-		auto rOut = *r;
-		uvec::local_to_world(*rLocal,rOut);
-		Lua::Push<Quat>(l,rOut);
-		return 1;
-	}
-	auto *vLocal = Lua::CheckVector(l,1);
-	auto *rLocal = Lua::CheckQuaternion(l,2);
-	auto *v = Lua::CheckVector(l,3);
-	if(!Lua::IsSet(l,4))
-	{
-		auto vOut = *v;
-		uvec::local_to_world(*vLocal,*rLocal,vOut);
-		Lua::Push<Vector3>(l,vOut);
-		return 1;
-	}
-	auto *r = Lua::CheckQuaternion(l,4);
-	auto vOut = *v;
-	auto rOut = *r;
-	uvec::local_to_world(*vLocal,*rLocal,vOut,rOut);
-	Lua::Push<Vector3>(l,vOut);
-	Lua::Push<Quat>(l,rOut);
-	return 2;
+	auto res = r1;
+	uvec::local_to_world(r0,res);
+	return res;
 }
-int Lua::util::world_to_local(lua_State *l)
-{
-	if(Lua::IsQuaternion(l,1))
-	{
-		auto *rLocal = Lua::CheckQuaternion(l,1);
-		auto *r = Lua::CheckQuaternion(l,2);
-		auto rOut = *r;
-		uvec::world_to_local(*rLocal,rOut);
-		Lua::Push<Quat>(l,rOut);
-		return 1;
-	}
-	auto *vLocal = Lua::CheckVector(l,1);
-	auto *rLocal = Lua::CheckQuaternion(l,2);
-	auto *v = Lua::CheckVector(l,3);
-	if(!Lua::IsSet(l,4))
-	{
-		auto vOut = *v;
-		uvec::world_to_local(*vLocal,*rLocal,vOut);
-		Lua::Push<Vector3>(l,vOut);
-		return 1;
-	}
-	auto *r = Lua::CheckQuaternion(l,4);
-	auto vOut = *v;
-	auto rOut = *r;
-	uvec::world_to_local(*vLocal,*rLocal,vOut,rOut);
-	Lua::Push<Vector3>(l,vOut);
-	Lua::Push<Quat>(l,rOut);
-	return 2;
-}
-int Lua::util::calc_world_direction_from_2d_coordinates(lua_State *l)
-{
-	int32_t arg = 1;
-	auto *forward = Lua::CheckVector(l,arg++);
-	auto *right = Lua::CheckVector(l,arg++);
-	auto *up = Lua::CheckVector(l,arg++);
-	auto fov = Lua::CheckNumber(l,arg++);
-	auto nearZ = Lua::CheckNumber(l,arg++);
-	auto farZ = Lua::CheckNumber(l,arg++);
-	auto aspectRatio = Lua::CheckNumber(l,arg++);
-	auto *uv = Lua::CheckVector2(l,arg++);
 
-	auto dir = uvec::calc_world_direction_from_2d_coordinates(*forward,*right,*up,static_cast<float>(umath::deg_to_rad(fov)),nearZ,farZ,aspectRatio,0.f,0.f,*uv);
-	Lua::Push<Vector3>(l,dir);
-	return 1;
-}
-int Lua::util::world_space_point_to_screen_space_uv(lua_State *l)
+Vector3 Lua::util::local_to_world(lua_State *l,const Vector3 &vLocal,const Quat &rLocal,const Vector3 &v)
 {
-	auto point = *Lua::CheckVector(l,1);
-	auto vp = Lua::Check<Mat4>(l,2);
-	if(Lua::IsSet(l,3))
-	{
-		auto nearZ = Lua::CheckNumber(l,3);
-		auto farZ = Lua::CheckNumber(l,4);
-		float dist;
-		auto uv = uvec::calc_screenspace_uv_from_worldspace_position(point,vp,nearZ,farZ,dist);
-		Lua::Push(l,uv);
-		Lua::PushNumber(l,dist);
-		return 2;
-	}
-	auto uv = uvec::calc_screenspace_uv_from_worldspace_position(point,vp);
+	auto vOut = v;
+	uvec::local_to_world(vLocal,rLocal,vOut);
+	return vOut;
+}
+
+void Lua::util::local_to_world(lua_State *l,const Vector3 &vLocal,const Quat &rLocal,const Vector3 &v,const Quat &r)
+{
+	auto vOut = v;
+	auto rOut = r;
+	uvec::local_to_world(vLocal,rLocal,vOut,rOut);
+	Lua::Push<Vector3>(l,vOut);
+	Lua::Push<Quat>(l,rOut);
+}
+
+Quat Lua::util::world_to_local(lua_State *l,const Quat &rLocal,const Quat &r)
+{
+	auto rOut = r;
+	uvec::world_to_local(rLocal,rOut);
+	return rOut;
+}
+
+Vector3 Lua::util::world_to_local(lua_State *l,const Vector3 &vLocal,const Quat &rLocal,const Vector3 &v)
+{
+	auto vOut = v;
+	uvec::world_to_local(vLocal,rLocal,vOut);
+	return vOut;
+}
+
+void Lua::util::world_to_local(lua_State *l,const Vector3 &vLocal,const Quat &rLocal,const Vector3 &v,const Quat &r)
+{
+	auto vOut = v;
+	auto rOut = r;
+	uvec::world_to_local(vLocal,rLocal,vOut,rOut);
+	Lua::Push<Vector3>(l,vOut);
+	Lua::Push<Quat>(l,rOut);
+}
+
+Vector3 Lua::util::calc_world_direction_from_2d_coordinates(
+	lua_State *l,const Vector3 &forward,const Vector3 &right,const Vector3 &up,
+	float fov,float nearZ,float farZ,float aspectRatio,const Vector2 &uv
+)
+{
+	return uvec::calc_world_direction_from_2d_coordinates(forward,right,up,static_cast<float>(umath::deg_to_rad(fov)),nearZ,farZ,aspectRatio,0.f,0.f,uv);
+}
+void Lua::util::world_space_point_to_screen_space_uv(lua_State *l,const Vector3 &point,const Mat4 &vp,float nearZ,float farZ)
+{
+	float dist;
+	auto uv = uvec::calc_screenspace_uv_from_worldspace_position(point,vp,nearZ,farZ,dist);
 	Lua::Push(l,uv);
-	return 1;
+	Lua::PushNumber(l,dist);
 }
-int Lua::util::world_space_direction_to_screen_space(lua_State *l)
+::Vector2 Lua::util::world_space_point_to_screen_space_uv(lua_State *l,const Vector3 &point,const Mat4 &vp)
 {
-	auto dir = *Lua::CheckVector(l,1);
-	auto vp = Lua::Check<Mat4>(l,2);
-	auto ssDir = uvec::calc_screenspace_direction_from_worldspace_direction(dir,vp);
-	Lua::Push(l,ssDir);
-	return 1;
+	return uvec::calc_screenspace_uv_from_worldspace_position(point,vp);
 }
-int Lua::util::calc_screenspace_distance_to_worldspace_position(lua_State *l)
+Vector2 Lua::util::world_space_direction_to_screen_space(lua_State *l,const Vector3 &dir,const Mat4 &vp)
 {
-	auto point = *Lua::CheckVector(l,1);
-	auto vp = Lua::Check<Mat4>(l,2);
-	auto nearZ = Lua::CheckNumber(l,3);
-	auto farZ = Lua::CheckNumber(l,4);
-	Lua::PushNumber(l,uvec::calc_screenspace_distance_to_worldspace_position(point,vp,nearZ,farZ));
-	return 1;
+	return uvec::calc_screenspace_direction_from_worldspace_direction(dir,vp);
 }
-int Lua::util::depth_to_distance(lua_State *l)
+float Lua::util::calc_screenspace_distance_to_worldspace_position(lua_State *l,const Vector3 &point,const Mat4 &vp,float nearZ,float farZ)
 {
-	auto depth = Lua::CheckNumber(l,1);
-	auto nearZ = Lua::CheckNumber(l,2);
-	auto farZ = Lua::CheckNumber(l,3);
-	Lua::PushNumber(l,uvec::depth_to_distance(depth,nearZ,farZ));
-	return 1;
+	return uvec::calc_screenspace_distance_to_worldspace_position(point,vp,nearZ,farZ);
+}
+float Lua::util::depth_to_distance(lua_State *l,float depth,float nearZ,float farZ)
+{
+	return uvec::depth_to_distance(depth,nearZ,farZ);
 }
 void Lua::util::open_url_in_browser(const std::string &url) {return ::util::open_url_in_browser(url);}
 void Lua::util::open_path_in_explorer(const std::string &spath,const std::string &selectFile)
@@ -867,11 +890,8 @@ void Lua::util::open_path_in_explorer(const std::string &spath)
 	auto absPath = ::util::Path::CreatePath(strAbsPath);
 	::util::open_path_in_explorer(absPath.GetPath());
 }
-int Lua::util::clamp_resolution_to_aspect_ratio(lua_State *l)
+void Lua::util::clamp_resolution_to_aspect_ratio(lua_State *l,uint32_t w,uint32_t h,float aspectRatio)
 {
-	auto w = Lua::CheckInt(l,1);
-	auto h = Lua::CheckInt(l,2);
-	auto aspectRatio = Lua::CheckNumber(l,3);
 	Vector2i size {w,h};
 	w = size.y *aspectRatio;
 	h = size.y;
@@ -882,30 +902,17 @@ int Lua::util::clamp_resolution_to_aspect_ratio(lua_State *l)
 	}
 	Lua::PushNumber(l,w);
 	Lua::PushNumber(l,h);
-	return 2;
 }
 std::string Lua::util::get_pretty_bytes(uint32_t bytes) {return ::util::get_pretty_bytes(bytes);}
-int Lua::util::get_pretty_duration(lua_State *l)
+std::string Lua::util::get_pretty_duration(lua_State *l,uint32_t ms) {return get_pretty_duration(l,ms,0,true);}
+std::string Lua::util::get_pretty_duration(lua_State *l,uint32_t ms,uint32_t segments) {return get_pretty_duration(l,ms,segments,true);}
+std::string Lua::util::get_pretty_duration(lua_State *l,uint32_t ms,uint32_t segments,bool noMs)
 {
-	auto ms = Lua::CheckInt(l,1);
-	int32_t addSegments = 0;
-	if(Lua::IsSet(l,2))
-		addSegments = static_cast<int32_t>(Lua::CheckInt(l,2));
-	auto bNoMs = true;
-	if(Lua::IsSet(l,3))
-		bNoMs = Lua::CheckBool(l,3);
-	auto r = ::util::get_pretty_duration(ms,addSegments,bNoMs);
-	Lua::PushString(l,r);
-	return 1;
+	return ::util::get_pretty_duration(ms,segments,noMs);
 }
-int Lua::util::is_same_object(lua_State *l)
+bool Lua::util::is_same_object(lua_State *l,const luabind::object &o0,const luabind::object &o1) {return lua_rawequal(l,1,2) == 1;}
+std::string Lua::util::get_pretty_time(lua_State *l,float t)
 {
-	Lua::PushBool(l,lua_rawequal(l,1,2) == 1);
-	return 1;
-}
-int Lua::util::get_pretty_time(lua_State *l)
-{
-	auto t = Lua::CheckNumber(l,1);
 	auto sign = umath::sign(static_cast<float>(t));
 	t *= sign;
 	auto seconds = umath::floor(t);
@@ -925,20 +932,19 @@ int Lua::util::get_pretty_time(lua_State *l)
 
 	if(sign < 0)
 		prettyTime = '-' +prettyTime;
-	Lua::PushString(l,prettyTime);
-	return 1;
+	return prettyTime;
 }
 double Lua::util::units_to_metres(double units) {return ::util::pragma::units_to_metres(units);}
 double Lua::util::metres_to_units(double metres) {return ::util::pragma::metres_to_units(metres);}
-int Lua::util::read_scene_file(lua_State *l)
+luabind::object Lua::util::read_scene_file(lua_State *l,const std::string &fileName)
 {
-	auto fname = "scenes\\" +FileManager::GetCanonicalizedPath(Lua::CheckString(l,1));
+	auto fname = "scenes\\" +FileManager::GetCanonicalizedPath(fileName);
 	auto f = FileManager::OpenFile(fname.c_str(),"r");
 	if(f == nullptr)
-		return 0;
+		return {};
 	se::SceneScriptValue root {};
 	if(se::read_scene(f,root) != ::util::MarkupFile::ResultCode::Ok)
-		return 0;
+		return {};
 	std::function<void(const se::SceneScriptValue&)> fPushValue = nullptr;
 	fPushValue = [l,&fPushValue](const se::SceneScriptValue &val) {
 		auto t = Lua::CreateTable(l);
@@ -970,23 +976,19 @@ int Lua::util::read_scene_file(lua_State *l)
 		Lua::SetTableValue(l,t);
 	};
 	fPushValue(root);
-	return 1;
+	auto o = luabind::object{luabind::from_stack{l,-1}};
+	Lua::Pop(l,1);
+	return o;
 }
 
 template<class TProperty,typename TUnderlyingType>
-	bool fade_property_generic(Game &game,lua_State *l,const std::function<TUnderlyingType(lua_State*,int32_t)> &fCheck,const std::function<TUnderlyingType(const TUnderlyingType&,const TUnderlyingType&,float)> &fLerp)
+	static luabind::object fade_property_generic(Game &game,lua_State *l,TProperty &vProp,const TUnderlyingType &vDst,float duration,const std::function<TUnderlyingType(const TUnderlyingType&,const TUnderlyingType&,float)> &fLerp)
 {
-	if(Lua::IsType<TProperty>(l,1) == false)
-		return false;
-	auto &vProp = Lua::Check<TProperty>(l,1);
 	auto vSrc = vProp.GetValue();
-	auto vDst = fCheck(l,2);
-
-	auto duration = Lua::CheckNumber(l,3);
 	if(duration == 0.f)
 	{
 		vProp.SetValue(vDst);
-		return  false;
+		return luabind::object{};
 	}
 	auto tStart = game.RealTime();
 	auto cb = FunctionCallback<void>::Create(nullptr);
@@ -1002,137 +1004,164 @@ template<class TProperty,typename TUnderlyingType>
 		}
 	});
 	game.AddCallback("Think",cb);
-	Lua::Push<CallbackHandle>(l,cb);
-	return true;
+	return luabind::object{l,cb};
 }
 
 template<class TProperty,typename TUnderlyingType>
-	bool fade_vector_property_generic(Game &game,lua_State *l,const std::function<TUnderlyingType(const TUnderlyingType&,const TUnderlyingType&,float)> &fLerp)
+	luabind::object fade_vector_property_generic(Game &game,lua_State *l,TProperty &vProp,const TUnderlyingType &vDst,float duration,const std::function<TUnderlyingType(const TUnderlyingType&,const TUnderlyingType&,float)> &fLerp)
 {
-	return fade_property_generic<TProperty,TUnderlyingType>(game,l,Lua::Check<TUnderlyingType>,fLerp);
+	return fade_property_generic<TProperty,TUnderlyingType>(game,l,vProp,vDst,duration,fLerp);
 }
 
-int Lua::util::fade_property(lua_State *l)
+luabind::object Lua::util::fade_property(lua_State *l,LColorProperty &colProp,const Color &colDst,float duration)
 {
 	auto &game = *engine->GetNetworkState(l)->GetGameState();
-	if(Lua::IsType<LColorProperty>(l,1))
-	{
-		auto &colProp = Lua::Check<LColorProperty>(l,1);
-		auto &colDst = Lua::Check<Color>(l,2);
-		auto hsvSrc = ::util::rgb_to_hsv(*colProp);
-		auto hsvDst = ::util::rgb_to_hsv(colDst);
-		auto aSrc = (*colProp)->a;
-		auto aDst = colDst.a;
+	auto hsvSrc = ::util::rgb_to_hsv(*colProp);
+	auto hsvDst = ::util::rgb_to_hsv(colDst);
+	auto aSrc = (*colProp)->a;
+	auto aDst = colDst.a;
 
-		auto duration = Lua::CheckNumber(l,3);
-		if(duration == 0.f)
+	auto tStart = game.RealTime();
+	auto cb = FunctionCallback<void>::Create(nullptr);
+	cb.get<Callback<void>>()->SetFunction([&game,tStart,duration,colProp,hsvSrc,hsvDst,aSrc,aDst,cb]() mutable {
+		auto tDelta = game.RealTime() -tStart;
+		auto sc = umath::min(umath::smooth_step(0.f,1.f,static_cast<float>(tDelta /duration)),1.f);
+		auto hsv = ::util::lerp_hsv(hsvSrc,hsvDst,sc);
+		auto newColor = ::util::hsv_to_rgb(hsv);
+		newColor.a = aSrc +(aDst -aSrc) *sc;
+		*colProp = newColor;
+		if(sc == 1.f)
 		{
-			*colProp = colDst;
-			return 0;
+			if(cb.IsValid())
+				cb.Remove();
 		}
-		auto tStart = game.RealTime();
-		auto cb = FunctionCallback<void>::Create(nullptr);
-		cb.get<Callback<void>>()->SetFunction([&game,tStart,duration,colProp,hsvSrc,hsvDst,aSrc,aDst,cb]() mutable {
-			auto tDelta = game.RealTime() -tStart;
-			auto sc = umath::min(umath::smooth_step(0.f,1.f,static_cast<float>(tDelta /duration)),1.f);
-			auto hsv = ::util::lerp_hsv(hsvSrc,hsvDst,sc);
-			auto newColor = ::util::hsv_to_rgb(hsv);
-			newColor.a = aSrc +(aDst -aSrc) *sc;
-			*colProp = newColor;
-			if(sc == 1.f)
-			{
-				if(cb.IsValid())
-					cb.Remove();
-			}
-		});
-		game.AddCallback("Think",cb);
-		Lua::Push<CallbackHandle>(l,cb);
-		return 1;
-	}
-	if(fade_vector_property_generic<LVector2Property,Vector2>(game,l,[](const Vector2 &a,const Vector2 &b,float factor) -> Vector2 {
-			return Vector2{umath::lerp(a.x,b.x,factor),umath::lerp(a.y,b.y,factor)};
-		}) ||
-		fade_vector_property_generic<LVector2iProperty,Vector2i>(game,l,[](const Vector2i &a,const Vector2i &b,float factor) -> Vector2i {
-			return Vector2i{static_cast<int32_t>(umath::lerp(a.x,b.x,factor)),static_cast<int32_t>(umath::lerp(a.y,b.y,factor))};
-		}) ||
-		fade_vector_property_generic<LVector3Property,Vector3>(game,l,uvec::lerp) ||
-		fade_vector_property_generic<LVector3iProperty,Vector3i>(game,l,uvec::lerp) ||
-		fade_vector_property_generic<LVector4Property,Vector4>(game,l,[](const Vector4 &a,const Vector4 &b,float factor) -> Vector4 {
-			return Vector4{umath::lerp(a.x,b.x,factor),umath::lerp(a.y,b.y,factor),umath::lerp(a.z,b.z,factor),umath::lerp(a.w,b.w,factor)};
-		}) ||
-		fade_vector_property_generic<LVector4iProperty,Vector4i>(game,l,[](const Vector4i &a,const Vector4i &b,float factor) -> Vector4i {
-			return Vector4i{static_cast<int32_t>(umath::lerp(a.x,b.x,factor)),static_cast<int32_t>(umath::lerp(a.y,b.y,factor)),static_cast<int32_t>(umath::lerp(a.z,b.z,factor)),static_cast<int32_t>(umath::lerp(a.w,b.w,factor))};
-		}) ||
-		fade_vector_property_generic<LQuatProperty,Quat>(game,l,uquat::slerp) ||
-		fade_vector_property_generic<LEulerAnglesProperty,EulerAngles>(game,l,[](const EulerAngles &a,const EulerAngles &b,float factor) -> EulerAngles {
-			return EulerAngles{static_cast<float>(umath::lerp_angle(a.p,b.p,factor)),static_cast<float>(umath::lerp_angle(a.y,b.y,factor)),static_cast<float>(umath::lerp_angle(a.r,b.r,factor))};
-		}) ||
-		fade_property_generic<LGenericIntPropertyWrapper,int64_t>(game,l,[](lua_State *l,int32_t idx) -> int64_t {return Lua::CheckInt(l,idx);},static_cast<Double(*)(Double,Double,Double)>(umath::lerp)) ||
-		fade_property_generic<LGenericFloatPropertyWrapper,float>(game,l,[](lua_State *l,int32_t idx) -> float {return Lua::CheckNumber(l,idx);},static_cast<Double(*)(Double,Double,Double)>(umath::lerp))
-	)
-		return 1;
-	return 0;
+	});
+	game.AddCallback("Think",cb);
+	return luabind::object{l,cb};
 }
 
-int Lua::util::round_string(lua_State *l)
+luabind::object Lua::util::fade_property(lua_State *l,LVector2Property &vProp,const ::Vector2 &vDst,float duration)
 {
-	auto value = Lua::CheckNumber(l,1);
-	auto places = 0;
-	if(Lua::IsSet(l,2))
-		places = Lua::CheckInt(l,2);
-	Lua::PushString(l,::util::round_string(value,places));
-	return 1;
+	auto &game = *engine->GetNetworkState(l)->GetGameState();
+	return fade_vector_property_generic<LVector2Property,Vector2>(game,l,vProp,vDst,duration,[](const Vector2 &a,const Vector2 &b,float factor) -> Vector2 {
+		return Vector2{umath::lerp(a.x,b.x,factor),umath::lerp(a.y,b.y,factor)};
+	});
 }
 
-int Lua::util::get_type_name(lua_State *l)
+luabind::object Lua::util::fade_property(lua_State *l,LVector2iProperty &vProp,const ::Vector2i &vDst,float duration)
+{
+	auto &game = *engine->GetNetworkState(l)->GetGameState();
+	return fade_vector_property_generic<LVector2iProperty,Vector2i>(game,l,vProp,vDst,duration,[](const Vector2i &a,const Vector2i &b,float factor) -> Vector2i {
+		return Vector2i{static_cast<int32_t>(umath::lerp(a.x,b.x,factor)),static_cast<int32_t>(umath::lerp(a.y,b.y,factor))};
+	});
+}
+
+luabind::object Lua::util::fade_property(lua_State *l,LVector3Property &vProp,const ::Vector3 &vDst,float duration)
+{
+	auto &game = *engine->GetNetworkState(l)->GetGameState();
+	return fade_vector_property_generic<LVector3Property,Vector3>(game,l,vProp,vDst,duration,uvec::lerp);
+}
+
+luabind::object Lua::util::fade_property(lua_State *l,LVector3iProperty &vProp,const ::Vector3i &vDst,float duration)
+{
+	auto &game = *engine->GetNetworkState(l)->GetGameState();
+	return fade_vector_property_generic<LVector3iProperty,Vector3i>(game,l,vProp,vDst,duration,uvec::lerp);
+}
+
+luabind::object Lua::util::fade_property(lua_State *l,LVector4Property &vProp,const ::Vector4 &vDst,float duration)
+{
+	auto &game = *engine->GetNetworkState(l)->GetGameState();
+	return fade_vector_property_generic<LVector4Property,Vector4>(game,l,vProp,vDst,duration,[](const Vector4 &a,const Vector4 &b,float factor) -> Vector4 {
+		return Vector4{umath::lerp(a.x,b.x,factor),umath::lerp(a.y,b.y,factor),umath::lerp(a.z,b.z,factor),umath::lerp(a.w,b.w,factor)};
+	});
+}
+
+luabind::object Lua::util::fade_property(lua_State *l,LVector4iProperty &vProp,const ::Vector4i &vDst,float duration)
+{
+	auto &game = *engine->GetNetworkState(l)->GetGameState();
+	return fade_vector_property_generic<LVector4iProperty,Vector4i>(game,l,vProp,vDst,duration,[](const Vector4i &a,const Vector4i &b,float factor) -> Vector4i {
+		return Vector4i{static_cast<int32_t>(umath::lerp(a.x,b.x,factor)),static_cast<int32_t>(umath::lerp(a.y,b.y,factor)),static_cast<int32_t>(umath::lerp(a.z,b.z,factor)),static_cast<int32_t>(umath::lerp(a.w,b.w,factor))};
+	});
+}
+
+luabind::object Lua::util::fade_property(lua_State *l,LQuatProperty &vProp,const ::Quat &vDst,float duration)
+{
+	auto &game = *engine->GetNetworkState(l)->GetGameState();
+	return fade_vector_property_generic<LQuatProperty,Quat>(game,l,vProp,vDst,duration,uquat::slerp);
+}
+
+luabind::object Lua::util::fade_property(lua_State *l,LEulerAnglesProperty &vProp,const ::EulerAngles &vDst,float duration)
+{
+	auto &game = *engine->GetNetworkState(l)->GetGameState();
+	return fade_vector_property_generic<LEulerAnglesProperty,EulerAngles>(game,l,vProp,vDst,duration,[](const EulerAngles &a,const EulerAngles &b,float factor) -> EulerAngles {
+		return EulerAngles{static_cast<float>(umath::lerp_angle(a.p,b.p,factor)),static_cast<float>(umath::lerp_angle(a.y,b.y,factor)),static_cast<float>(umath::lerp_angle(a.r,b.r,factor))};
+	});
+}
+
+luabind::object Lua::util::fade_property(lua_State *l,LGenericIntPropertyWrapper &vProp,const int64_t &vDst,float duration)
+{
+	auto &game = *engine->GetNetworkState(l)->GetGameState();
+	return fade_vector_property_generic<LGenericIntPropertyWrapper,int64_t>(game,l,vProp,vDst,duration,[](const int64_t &a,const int64_t &b,float factor) -> int64_t {
+		return umath::lerp(a,b,factor);
+	});
+}
+
+luabind::object Lua::util::fade_property(lua_State *l,LGenericFloatPropertyWrapper &vProp,const double &vDst,float duration)
+{
+	auto &game = *engine->GetNetworkState(l)->GetGameState();
+	return fade_vector_property_generic<LGenericFloatPropertyWrapper,double>(game,l,vProp,vDst,duration,[](const double &a,const double &b,float factor) -> double {
+		return umath::lerp(a,b,factor);
+	});
+}
+
+std::string Lua::util::round_string(lua_State *l,float value) {return round_string(l,value,0);}
+std::string Lua::util::round_string(lua_State *l,float value,uint32_t places) {return ::util::round_string(value,places);}
+
+std::string Lua::util::get_type_name(lua_State *l,const luabind::object &o)
 {
 	if(Lua::IsSet(l,1) == false)
-	{
-		Lua::PushString(l,Lua::IsNone(l,1) ? "none" : "nil");
-		return 1;
-	}
+		return Lua::IsNone(l,1) ? "none" : "nil";
 
-	auto o = luabind::from_stack(l,1);
-	auto classInfo = luabind::get_class_info(o);
-	Lua::PushString(l,classInfo.name);
-	return 1;
+	auto *crep = Lua::get_crep(o);
+	if(crep)
+		return crep->name();
+	return lua_typename(l,lua_type(l,-1));
 }
 
 std::string Lua::util::variable_type_to_string(::util::VarType varType) {return ::util::variable_type_to_string(varType);}
 std::string Lua::util::get_string_hash(const std::string &str) {return std::to_string(std::hash<std::string>{}(str));}
 
-int Lua::util::get_class_value(lua_State *l)
+luabind::object Lua::util::get_class_value(lua_State *l,const luabind::object &oClass,const std::string &key)
 {
 	int32_t t = 1;
 	Lua::CheckUserData(l,t);
-	auto oClass = luabind::object{luabind::from_stack{l,t}};
-
-	std::string key = Lua::CheckString(l,2);
+	
+	auto n = Lua::GetStackTop(l);
 	Lua::PushString(l,key); /* 1 */
 	auto r = Lua::GetProtectedTableValue(l,t); /* 2 */
 	if(r != Lua::StatusCode::Ok)
 	{
-		Lua::Pop(l,2); /* 0 */
-		return 0;
+		Lua::Pop(l,Lua::GetStackTop(l) -n);
+		return {};
 	}
 	// Pop key from stack
 	Lua::RemoveValue(l,-2); /* 1 */
-	return 1;
+	luabind::object ro {luabind::from_stack{l,-1}};
+	Lua::Pop(l);
+	return ro;
 }
 
-int Lua::util::pack_zip_archive(lua_State *l)
+void Lua::util::pack_zip_archive(lua_State *l,const std::string &pzipFileName,const luabind::table<> &t)
 {
-	std::string zipFileName = Lua::CheckString(l,1);
+	auto zipFileName = pzipFileName;
 	ufile::remove_extension_from_filename(zipFileName);
 	zipFileName += ".zip";
 	if(Lua::file::validate_write_operation(l,zipFileName) == false)
 	{
 		Lua::PushBool(l,false);
-		return 1;
+		return;
 	}
 
-	int32_t t = 2;
-	Lua::CheckTable(l,t);
 	std::unordered_map<std::string,std::string> files {};
 	std::unordered_map<std::string,std::string> customTextFiles {};
 	std::unordered_map<std::string,DataStream> customBinaryFiles {};
@@ -1141,20 +1170,16 @@ int Lua::util::pack_zip_archive(lua_State *l)
 	{
 		// Table format: t{[1] = diskFileName/zipFileName,...}
 		files.reserve(numFiles);
-		for(auto i=decltype(numFiles){0u};i<numFiles;++i)
+		for(luabind::iterator i(t), e; i != e; ++i)
 		{
-			Lua::PushInt(l,i +1);
-			Lua::GetTableValue(l,t);
-			std::string fileName = Lua::CheckString(l,-1);
+			auto fileName = luabind::object_cast<std::string>(*i);
 			files[fileName] = fileName;
-			Lua::Pop(l,1);
 		}
 	}
 	else
 	{
 		// Table format: t{[zipFileName] = diskFileName,...}
-		auto o = luabind::object{luabind::from_stack{l,t}};
-		for(luabind::iterator i(o), e; i != e; ++i)
+		for(luabind::iterator i(t), e; i != e; ++i)
 		{
 			auto zipFileName = luabind::object_cast<std::string>(i.key());
 			auto value = *i;
@@ -1178,7 +1203,7 @@ int Lua::util::pack_zip_archive(lua_State *l)
 	if(zip == nullptr)
 	{
 		Lua::PushBool(l,false);
-		return 1;
+		return;
 	}
 	auto tNotFound = luabind::newtable(l);
 	uint32_t notFoundIdx = 1;
@@ -1206,7 +1231,6 @@ int Lua::util::pack_zip_archive(lua_State *l)
 	zip = nullptr;
 	Lua::PushBool(l,true);
 	tNotFound.push(l);
-	return 2;
 }
 
 std::string Lua::util::get_addon_path(lua_State *l,const std::string &relPath)

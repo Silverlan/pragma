@@ -10,7 +10,7 @@
 #include "pragma/c_engine.h"
 #include "pragma/console/c_en_cvar_global.h"
 #include <sharedutils/util_string.h>
-#include <pragma/lua/libraries/lutil.h>
+#include <pragma/lua/libraries/lutil.hpp>
 #include <pragma/clientstate/clientstate.h>
 
 extern DLLCLIENT CEngine *c_engine;

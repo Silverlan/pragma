@@ -47,7 +47,10 @@ void BaseGravity::SetGravityOverride()
 }
 bool BaseGravity::HasGravityForceOverride() const {return (m_gravity != nullptr) ? true : false;}
 bool BaseGravity::HasGravityDirectionOverride() const {return (m_gravityDir != nullptr) ? true : false;}
+
+//~#PDOC f-ents-gravitycomponent-getgravityscale
 float BaseGravity::GetGravityScale() const {return m_gravityScale;}
+
 Vector3 BaseGravity::GetGravityDirection(NetworkState *state) const
 {
 	if(m_gravityDir != nullptr)

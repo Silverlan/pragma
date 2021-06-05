@@ -26,7 +26,7 @@
 #include "pragma/lua/libraries/lmath.h"
 #include "pragma/lua/libraries/lnoise.h"
 #include "pragma/lua/libraries/lregex.h"
-#include "pragma/lua/libraries/lutil.h"
+#include "pragma/lua/libraries/lutil.hpp"
 #include "pragma/lua/libraries/ldebug.h"
 #include "pragma/lua/libraries/lmesh.h"
 #include "pragma/lua/libraries/ltable.h"

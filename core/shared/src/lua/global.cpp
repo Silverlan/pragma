@@ -10,7 +10,7 @@
 #include <pragma/game/game.h>
 #include <pragma/console/conout.h>
 #include "pragma/lua/libraries/lprint.h"
-#include "pragma/lua/libraries/lutil.h"
+#include "pragma/lua/libraries/lutil.hpp"
 #include "pragma/lua/libraries/lmath.h"
 #include "pragma/lua/libraries/ldebug.h"
 #include "pragma/lua/libraries/ludm.hpp"

@@ -6,7 +6,7 @@
  */
 
 #include "pragma/lua/libraries/lfile.h"
-#include "pragma/lua/libraries/lutil.h"
+#include "pragma/lua/util.hpp"
 #include <util_pragma_doc.hpp>
 #include <luasystem.h>
 #include <luainterface.hpp>
@@ -408,6 +408,8 @@ static std::optional<LuaOverloadInfo> parse_function_overload(std::string &metho
 
 static void parse_lua_property(lua_State *L,const std::string &name,const luabind::object &o,LuaClassInfo &result)
 {
+	o.push(L);
+	luabind::detail::stack_pop opop(L, 1);
 	if(lua_tocfunction(L, -1) == &luabind::detail::property_tag)
 		result.attributes.push_back(name);
 	else
@@ -1080,7 +1082,7 @@ static void autogenerate(lua_State *L)
 	auto* reg = luabind::detail::class_registry::get_registry(L);
 	auto& classes = reg->get_classes();
 
-	std::unordered_map<luabind::detail::class_rep*,LuaClassInfo> classInfo {};
+	//std::unordered_map<luabind::detail::class_rep*,LuaClassInfo> classInfo {};
 
 	{
 		/*auto x = luabind::globals(L)["vector"]["to_min_max"];
@@ -1106,7 +1108,7 @@ static void autogenerate(lua_State *L)
 	//luabind::detail::reg
 	//luabind::detail::get
 
-	for(auto &pair : classInfo)
+	/*for(auto &pair : classInfo)
 		strip_base_class_methods(classInfo,pair.second,pair.second);
 
 	// Generate pragma doc
@@ -1135,7 +1137,8 @@ static void autogenerate(lua_State *L)
 		for(auto &method : classInfo.methods)
 			add_function(*collection,method);
 		collections.push_back(collection);
-	}
+	}*/
+	std::vector<pragma::doc::PCollection> collections {};
 	collections.push_back(pragma::doc::Collection::Create());
 	collections.back()->SetName("_G");
 	auto &gcol = *collections.back();

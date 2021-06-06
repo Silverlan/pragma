@@ -83,6 +83,7 @@ void Lua::util::register_shared_generic(luabind::module_ &mod)
 		luabind::def("is_valid",static_cast<bool(*)(lua_State*,const luabind::object&)>(Lua::util::is_valid)),
 		luabind::def("remove",static_cast<void(*)(lua_State*,const luabind::object&)>(remove)),
 		luabind::def("remove",static_cast<void(*)(lua_State*,const luabind::object&,bool)>(remove)),
+		luabind::def("remove",static_cast<void(*)()>([]() {})),
 		luabind::def("register_class",static_cast<luabind::object(*)(lua_State*,const std::string&,const luabind::object&,const luabind::object&,const luabind::object&,const luabind::object&,const luabind::object&)>(Lua::util::register_class)),
 		luabind::def("register_class",static_cast<luabind::object(*)(lua_State*,const std::string&,const luabind::object&,const luabind::object&,const luabind::object&,const luabind::object&)>(Lua::util::register_class)),
 		luabind::def("register_class",static_cast<luabind::object(*)(lua_State*,const std::string&,const luabind::object&,const luabind::object&,const luabind::object&)>(Lua::util::register_class)),

@@ -792,6 +792,174 @@ static bool is_asset_loaded(NetworkState &nw,const std::string &name,pragma::ass
 	}
 	return is_loaded(nw,name,type);
 }
+
+static bool save_image(lua_State *l,std::string fileName,uimg::ImageBuffer &imgBuffer,uimg::TextureInfo &imgWriteInfo,bool cubemap)
+{
+	if(Lua::file::validate_write_operation(l,fileName) == false)
+		return false;
+	return c_game->SaveImage(imgBuffer,fileName,imgWriteInfo,cubemap);
+}
+
+static bool save_image(lua_State *l,std::string fileName,uimg::ImageBuffer &imgBuffer,uimg::TextureInfo &imgWriteInfo)
+{
+	return save_image(l,fileName,imgBuffer,imgWriteInfo,false);
+}
+
+static bool save_image(lua_State *l,std::string fileName,uimg::ImageBuffer &imgBuffer,uimg::ImageFormat format,float quality)
+{
+	if(Lua::file::validate_write_operation(l,fileName) == false)
+		return false;
+	ufile::remove_extension_from_filename(fileName);
+	fileName += '.' +uimg::get_file_extension(format);
+	auto f = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(),"wb");
+	if(!f)
+		return false;
+	return uimg::save_image(f,imgBuffer,format,quality);
+}
+static bool save_image(lua_State *l,std::string fileName,uimg::ImageBuffer &imgBuffer,uimg::ImageFormat format)
+{
+	return save_image(l,fileName,imgBuffer,format,1.f);
+}
+static bool save_image(lua_State *l,std::string fileName,luabind::table<> t,uimg::TextureInfo &texInfo,bool cubemap)
+{
+	auto n = Lua::GetObjectLength(l,t);
+	std::vector<std::shared_ptr<uimg::ImageBuffer>> imgBufs;
+	imgBufs.reserve(n);
+	auto o = luabind::object{luabind::from_stack(l,1)};
+	uint32_t maxWidth = 0;
+	uint32_t maxHeight = 0;
+	for(luabind::iterator it{o},end;it!=end;++it)
+	{
+		auto val = *it;
+		auto *imgBuf = luabind::object_cast<uimg::ImageBuffer*>(val);
+		imgBufs.push_back(imgBuf->shared_from_this());
+		maxWidth = umath::max(maxWidth,imgBuf->GetWidth());
+		maxHeight = umath::max(maxHeight,imgBuf->GetHeight());
+	}
+	for(auto &imgBuf : imgBufs)
+		imgBuf->Resize(maxWidth,maxHeight);
+	if(imgBufs.empty())
+		return false;
+	auto &imgBuf = imgBufs.front();
+	return uimg::save_texture(fileName,[&imgBufs](uint32_t iLayer,uint32_t iMipmap,std::function<void(void)> &outDeleter) -> const uint8_t* {
+		if(iMipmap > 0)
+			return nullptr;
+		return static_cast<uint8_t*>(imgBufs.at(iLayer)->GetData());
+	},imgBuf->GetWidth(),imgBuf->GetHeight(),imgBuf->GetPixelSize(),imgBufs.size(),0,cubemap,texInfo);
+}
+static bool save_image(lua_State *l,std::string fileName,luabind::table<> t,uimg::TextureInfo &texInfo)
+{
+	return save_image(l,fileName,t,texInfo,false);
+}
+
+static bool save_image(lua_State *l,std::string fileName,prosper::IImage &img,uimg::TextureInfo &imgWriteInfo)
+{
+	if(Lua::file::validate_write_operation(l,fileName) == false)
+		return false;
+	return c_game->SaveImage(img,fileName,imgWriteInfo);
+}
+
+static luabind::object load_image(lua_State *l,const std::string &fileName,bool loadAsynch,const std::optional<uimg::ImageBuffer::Format> &targetFormat)
+{
+	std::string ext;
+	if(ufile::get_extension(fileName,&ext) == false)
+		return {};
+	auto f = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(),"rb");
+	if(f == nullptr)
+		return {};
+	auto pixelFormat = uimg::PixelFormat::LDR;
+	if(ustring::compare(ext,"hdr"))
+		pixelFormat = uimg::PixelFormat::Float;
+
+	if(loadAsynch)
+	{
+		class ImageLoadJob
+			: public util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>>
+		{
+		public:
+			ImageLoadJob(VFilePtr f,uimg::PixelFormat pixelFormat,std::optional<uimg::ImageBuffer::Format> targetFormat)
+			{
+				AddThread([this,f,pixelFormat,targetFormat]() {
+					m_imgBuffer = uimg::load_image(f,pixelFormat);
+					if(m_imgBuffer == nullptr)
+					{
+						SetStatus(util::JobStatus::Failed,"Unable to open image!");
+						UpdateProgress(1.f);
+						return;
+					}
+					if(targetFormat.has_value())
+					{
+						if(IsCancelled())
+							return;
+						UpdateProgress(0.9f);
+						m_imgBuffer->Convert(*targetFormat);
+					}
+					UpdateProgress(1.f);
+				});
+			}
+
+			virtual std::shared_ptr<uimg::ImageBuffer> GetResult() override {return m_imgBuffer;}
+		private:
+			std::shared_ptr<uimg::ImageBuffer> m_imgBuffer = nullptr;
+		};
+		return {l,util::create_parallel_job<ImageLoadJob>(f,pixelFormat,targetFormat)};
+	}
+	auto imgBuffer = uimg::load_image(f,pixelFormat);
+	if(imgBuffer == nullptr)
+		return {};
+	if(targetFormat.has_value())
+		imgBuffer->Convert(*targetFormat);
+	return {l,imgBuffer};
+}
+
+static luabind::object load_image(lua_State *l,const std::string &fileName,bool loadAsynch,uimg::ImageBuffer::Format targetFormat)
+{
+	return load_image(l,fileName,loadAsynch,std::optional<uimg::ImageBuffer::Format>{targetFormat});
+}
+
+static luabind::object load_image(lua_State *l,const std::string &fileName,bool loadAsynch)
+{
+	return load_image(l,fileName,loadAsynch,std::optional<uimg::ImageBuffer::Format>{});
+}
+
+static luabind::object load_image(lua_State *l,const std::string &fileName)
+{
+	return load_image(l,fileName,false);
+}
+
+static util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> capture_raytraced_screenshot(lua_State *l,uint32_t width,uint32_t height,uint32_t samples,bool hdrOutput,bool denoise)
+{
+	pragma::rendering::cycles::RenderImageInfo renderImgInfo {};
+	auto *pCam = c_game->GetRenderCamera();
+	if(pCam)
+	{
+		renderImgInfo.camPose = pCam->GetEntity().GetPose();
+		renderImgInfo.viewProjectionMatrix = pCam->GetProjectionMatrix() *pCam->GetViewMatrix();
+		renderImgInfo.nearZ = pCam->GetNearZ();
+		renderImgInfo.farZ = pCam->GetFarZ();
+		renderImgInfo.fov = pCam->GetFOV();
+	}
+	pragma::rendering::cycles::SceneInfo sceneInfo {};
+	sceneInfo.width = width;
+	sceneInfo.height = height;
+	sceneInfo.samples = samples;
+	sceneInfo.denoise = denoise;
+	sceneInfo.hdrOutput = hdrOutput;
+	return pragma::rendering::cycles::render_image(*client,sceneInfo,renderImgInfo);
+}
+static util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> capture_raytraced_screenshot(lua_State *l,uint32_t width,uint32_t height,uint32_t samples,bool hdrOutput)
+{
+	return capture_raytraced_screenshot(l,width,height,samples,hdrOutput,true);
+}
+static util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> capture_raytraced_screenshot(lua_State *l,uint32_t width,uint32_t height,uint32_t samples)
+{
+	return capture_raytraced_screenshot(l,width,height,samples,false,true);
+}
+static util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>> capture_raytraced_screenshot(lua_State *l,uint32_t width,uint32_t height)
+{
+	return capture_raytraced_screenshot(l,width,height,1'024,false,true);
+}
+
 void CGame::RegisterLuaLibraries()
 {
 	Lua::util::register_library(GetLuaState());
@@ -803,188 +971,28 @@ void CGame::RegisterLuaLibraries()
 		luabind::def("create_particle_tracer",Lua::util::Client::create_particle_tracer),
 		luabind::def("create_muzzle_flash",Lua::util::Client::create_muzzle_flash),
 		luabind::def("fire_bullets",static_cast<luabind::object(*)(lua_State*,BulletInfo&)>(Lua::util::fire_bullets)),
-		luabind::def("save_image",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-			std::string fileName = Lua::CheckString(l,2);
-			if(Lua::file::validate_write_operation(l,fileName) == false)
-			{
-				Lua::PushBool(l,false);
-				return 1;
-			}
-			if(Lua::IsType<uimg::ImageBuffer>(l,1))
-			{
-				auto &imgBuffer = Lua::Check<uimg::ImageBuffer>(l,1);
-				if(Lua::IsType<uimg::TextureInfo>(l,3))
-				{
-					auto &imgWriteInfo = Lua::Check<uimg::TextureInfo>(l,3);
-					auto cubemap = false;
-					if(Lua::IsSet(l,4))
-						cubemap = Lua::CheckBool(l,4);
-					Lua::PushBool(l,c_game->SaveImage(imgBuffer,fileName,imgWriteInfo,cubemap));
-					return 1;
-				}
-
-				auto format = static_cast<uimg::ImageFormat>(Lua::CheckInt(l,3));
-				auto quality = 1.f;
-				if(Lua::IsSet(l,4))
-					quality = Lua::CheckNumber(l,4);
-				ufile::remove_extension_from_filename(fileName);
-				fileName += '.' +uimg::get_file_extension(format);
-				auto f = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(),"wb");
-				if(f == nullptr)
-					Lua::PushBool(l,false);
-				else
-					Lua::PushBool(l,uimg::save_image(f,imgBuffer,format,quality));
-				return 1;
-			}
-			if(Lua::IsTable(l,1))
-			{
-				auto n = Lua::GetObjectLength(l,1);
-				std::vector<std::shared_ptr<uimg::ImageBuffer>> imgBufs;
-				imgBufs.reserve(n);
-				auto o = luabind::object{luabind::from_stack(l,1)};
-				uint32_t maxWidth = 0;
-				uint32_t maxHeight = 0;
-				for(luabind::iterator it{o},end;it!=end;++it)
-				{
-					auto val = *it;
-					auto *imgBuf = luabind::object_cast<uimg::ImageBuffer*>(val);
-					imgBufs.push_back(imgBuf->shared_from_this());
-					maxWidth = umath::max(maxWidth,imgBuf->GetWidth());
-					maxHeight = umath::max(maxHeight,imgBuf->GetHeight());
-				}
-				for(auto &imgBuf : imgBufs)
-					imgBuf->Resize(maxWidth,maxHeight);
-				if(imgBufs.empty())
-					return 0;
-				auto &imgBuf = imgBufs.front();
-				auto &texInfo = Lua::Check<uimg::TextureInfo>(l,3);
-				auto cubemap = false;
-				if(Lua::IsSet(l,4))
-					cubemap = Lua::CheckBool(l,4);
-				auto res = uimg::save_texture(fileName,[&imgBufs](uint32_t iLayer,uint32_t iMipmap,std::function<void(void)> &outDeleter) -> const uint8_t* {
-					if(iMipmap > 0)
-						return nullptr;
-					return static_cast<uint8_t*>(imgBufs.at(iLayer)->GetData());
-				},imgBuf->GetWidth(),imgBuf->GetHeight(),imgBuf->GetPixelSize(),imgBufs.size(),0,cubemap,texInfo);
-				Lua::PushBool(l,res);
-				return 1;
-			}
-			auto &img = Lua::Check<prosper::IImage>(l,1);
-			if(Lua::file::validate_write_operation(l,fileName) == false)
-			{
-				Lua::PushBool(l,false);
-				return 1;
-			}
-			auto &imgWriteInfo = Lua::Check<uimg::TextureInfo>(l,3);
-			Lua::PushBool(l,c_game->SaveImage(img,fileName,imgWriteInfo));
-			return 1;
-		})),
-		luabind::def("load_image",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-			std::string fileName = Lua::CheckString(l,1);
-			std::string ext;
-			if(ufile::get_extension(fileName,&ext) == false)
-				return 0;
-			auto f = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(),"rb");
-			if(f == nullptr)
-				return 0;
-			auto pixelFormat = uimg::PixelFormat::LDR;
-			if(ustring::compare(ext,"hdr"))
-				pixelFormat = uimg::PixelFormat::Float;
-
-			auto loadAsynch = false;
-			if(Lua::IsSet(l,2))
-				loadAsynch = Lua::CheckBool(l,2);
-
-			std::optional<uimg::ImageBuffer::Format> targetFormat {};
-			if(Lua::IsSet(l,3))
-				targetFormat = static_cast<uimg::ImageBuffer::Format>(Lua::CheckInt(l,3));
-
-			if(loadAsynch)
-			{
-				class ImageLoadJob
-					: public util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>>
-				{
-				public:
-					ImageLoadJob(VFilePtr f,uimg::PixelFormat pixelFormat,std::optional<uimg::ImageBuffer::Format> targetFormat)
-					{
-						AddThread([this,f,pixelFormat,targetFormat]() {
-							m_imgBuffer = uimg::load_image(f,pixelFormat);
-							if(m_imgBuffer == nullptr)
-							{
-								SetStatus(util::JobStatus::Failed,"Unable to open image!");
-								UpdateProgress(1.f);
-								return;
-							}
-							if(targetFormat.has_value())
-							{
-								if(IsCancelled())
-									return;
-								UpdateProgress(0.9f);
-								m_imgBuffer->Convert(*targetFormat);
-							}
-							UpdateProgress(1.f);
-						});
-					}
-
-					virtual std::shared_ptr<uimg::ImageBuffer> GetResult() override {return m_imgBuffer;}
-				private:
-					std::shared_ptr<uimg::ImageBuffer> m_imgBuffer = nullptr;
-				};
-				auto job = util::create_parallel_job<ImageLoadJob>(f,pixelFormat,targetFormat);
-				Lua::Push(l,job);
-				return 1;
-			}
-			auto imgBuffer = uimg::load_image(f,pixelFormat);
-			if(imgBuffer == nullptr)
-				return 0;
-			if(targetFormat.has_value())
-				imgBuffer->Convert(*targetFormat);
-			Lua::Push(l,imgBuffer);
-			return 1;
-		})),
-		luabind::def("capture_raytraced_screenshot",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-			auto width = Lua::CheckInt(l,1);
-			auto height = Lua::CheckInt(l,2);
-			uint32_t samples = 1'024;
-			if(Lua::IsSet(l,3))
-				samples = Lua::CheckInt(l,3);
-			auto hdrOutput = false;
-			if(Lua::IsSet(l,4))
-				hdrOutput = Lua::CheckBool(l,4);
-			auto denoise = true;
-			if(Lua::IsSet(l,5))
-				denoise = Lua::CheckBool(l,5);
-
-			pragma::rendering::cycles::RenderImageInfo renderImgInfo {};
-			auto *pCam = c_game->GetRenderCamera();
-			if(pCam)
-			{
-				renderImgInfo.camPose = pCam->GetEntity().GetPose();
-				renderImgInfo.viewProjectionMatrix = pCam->GetProjectionMatrix() *pCam->GetViewMatrix();
-				renderImgInfo.nearZ = pCam->GetNearZ();
-				renderImgInfo.farZ = pCam->GetFarZ();
-				renderImgInfo.fov = pCam->GetFOV();
-			}
-			pragma::rendering::cycles::SceneInfo sceneInfo {};
-			sceneInfo.width = width;
-			sceneInfo.height = height;
-			sceneInfo.samples = samples;
-			sceneInfo.denoise = denoise;
-			sceneInfo.hdrOutput = hdrOutput;
-			auto job = pragma::rendering::cycles::render_image(*client,sceneInfo,renderImgInfo);
-			Lua::Push(l,job);
-			return 1;
-		})),
-		luabind::def("cubemap_to_equirectangular_texture",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-			auto &cubemap = Lua::Check<prosper::Texture>(l,1);
+		luabind::def("save_image",static_cast<bool(*)(lua_State*,std::string,uimg::ImageBuffer&,uimg::TextureInfo&,bool)>(save_image)),
+		luabind::def("save_image",static_cast<bool(*)(lua_State*,std::string,uimg::ImageBuffer&,uimg::TextureInfo&)>(save_image)),
+		luabind::def("save_image",static_cast<bool(*)(lua_State*,std::string,uimg::ImageBuffer&,uimg::ImageFormat,float)>(save_image)),
+		luabind::def("save_image",static_cast<bool(*)(lua_State*,std::string,uimg::ImageBuffer&,uimg::ImageFormat)>(save_image)),
+		luabind::def("save_image",static_cast<bool(*)(lua_State*,std::string,luabind::table<>,uimg::TextureInfo&,bool)>(save_image)),
+		luabind::def("save_image",static_cast<bool(*)(lua_State*,std::string,luabind::table<>,uimg::TextureInfo&)>(save_image)),
+		luabind::def("save_image",static_cast<bool(*)(lua_State*,std::string,prosper::IImage&,uimg::TextureInfo&)>(save_image)),
+		luabind::def("load_image",static_cast<luabind::object(*)(lua_State*,const std::string&,bool,uimg::ImageBuffer::Format)>(load_image)),
+		luabind::def("load_image",static_cast<luabind::object(*)(lua_State*,const std::string&,bool)>(load_image)),
+		luabind::def("load_image",static_cast<luabind::object(*)(lua_State*,const std::string&)>(load_image)),
+		luabind::def("capture_raytraced_screenshot",static_cast<util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>(*)(lua_State*,uint32_t,uint32_t,uint32_t,bool,bool)>(capture_raytraced_screenshot)),
+		luabind::def("capture_raytraced_screenshot",static_cast<util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>(*)(lua_State*,uint32_t,uint32_t,uint32_t,bool)>(capture_raytraced_screenshot)),
+		luabind::def("capture_raytraced_screenshot",static_cast<util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>(*)(lua_State*,uint32_t,uint32_t,uint32_t)>(capture_raytraced_screenshot)),
+		luabind::def("capture_raytraced_screenshot",static_cast<util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>(*)(lua_State*,uint32_t,uint32_t)>(capture_raytraced_screenshot)),
+		luabind::def("cubemap_to_equirectangular_texture",static_cast<luabind::object(*)(lua_State*,prosper::Texture&)>([](lua_State *l,prosper::Texture &cubemap) -> luabind::object {
 			auto *shader = static_cast<pragma::ShaderCubemapToEquirectangular*>(c_engine->GetShader("cubemap_to_equirectangular").get());
 			if(shader == nullptr)
-				return 0;
+				return {};
 			auto equiRect = shader->CubemapToEquirectangularTexture(cubemap);
 			if(equiRect == nullptr)
-				return 0;
-			Lua::Push(l,equiRect);
-			return 1;
+				return {};
+			return {l,equiRect};
 		}))
 	];
 	utilMod[

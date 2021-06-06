@@ -10,8 +10,10 @@
 #include "pragma/console/debugconsole.h"
 #include "pragma/console/util_console_color.hpp"
 #include "pragma/console/conout.h"
+#include <pragma/util/util_game.hpp>
 #include <sharedutils/util_string.h>
 #include <util_pragma_doc.hpp>
+#include <udm.hpp>
 
 static void print_function_documentation(const pragma::doc::Function &function);
 static void print_member_documentation(const pragma::doc::Member &member);
@@ -23,9 +25,12 @@ struct DocInfo
 {
 	std::vector<pragma::doc::PCollection> collections {};
 	std::unordered_map<std::string,const pragma::doc::BaseCollectionObject*> lookupTable;
-	void ReloadLookupTable()
+	void Clear() {lookupTable.clear(); collections.clear();}
+	void AddCollections(const std::vector<pragma::doc::PCollection> &newCollections)
 	{
-		lookupTable.clear();
+		collections.reserve(collections.size() +newCollections.size());
+		for(auto &c : newCollections)
+			collections.push_back(c);
 		std::function<void(const std::vector<pragma::doc::PCollection>&)> fPopulateFunctions = nullptr;
 		fPopulateFunctions = [&fPopulateFunctions,this](const std::vector<pragma::doc::PCollection> &collections) {
 			for(auto &collection : collections)
@@ -44,7 +49,7 @@ struct DocInfo
 				fPopulateFunctions(collection->GetChildren());
 			}
 		};
-		fPopulateFunctions(collections);
+		fPopulateFunctions(newCollections);
 	}
 };
 static DocInfo s_docInfo {};
@@ -56,29 +61,49 @@ inline std::string wrap_web_link(const std::string &arg)
 {
 	return "{[l:url \"" +arg +"\"]}" +arg +"{[/l]}";
 }
+static auto doc_initialized = false;
 static void initialize_pragma_documentation()
 {
-	static auto initialized = false;
-	if(initialized == true)
+	if(doc_initialized == true)
 		return;
-	initialized = true;
-	Lua::doc::load_documentation_file("doc/pragma.wdd");
+	doc_initialized = true;
+	s_docInfo.Clear();
+	std::vector<std::string> files;
+	filemanager::find_files(Lua::doc::FILE_LOCATION +std::string{"*."} +Lua::doc::FILE_EXTENSION_ASCII,&files,nullptr);
+	filemanager::find_files(Lua::doc::FILE_LOCATION +std::string{"*."} +Lua::doc::FILE_EXTENSION_BINARY,&files,nullptr);
+	for(auto &f : files)
+		Lua::doc::load_documentation_file(Lua::doc::FILE_LOCATION +f);
+}
+void Lua::doc::clear()
+{
+	doc_initialized = false;
+	s_docInfo.Clear();
+}
+void Lua::doc::reset()
+{
+	if(!doc_initialized)
+		return;
+	clear();
+	initialize_pragma_documentation();
 }
 bool Lua::doc::load_documentation_file(const std::string &fileName)
 {
 	initialize_pragma_documentation();
-	auto f = FileManager::OpenFile(fileName.c_str(),"rb");
-	if(f == nullptr)
+
+	std::string err;
+	auto udmData = util::load_udm_asset(fileName,&err);
+	if(udmData == nullptr)
 	{
-		Con::cwar<<"WARNING: Lua documentation file '"<<fileName<<"' not found! No documentation info will be available!"<<Con::endl;
+		Con::cwar<<"WARNING: Unable to load Lua documentation '"<<fileName<<"': "<<err<<Con::endl;
 		return false;
 	}
-	if(pragma::doc::load_collections(f,s_docInfo.collections) == false)
+	auto col = pragma::doc::Collection::Load(udmData->GetAssetData(),err);
+	if(!col)
 	{
-		Con::cwar<<"WARNING: Unable to load data from Lua documentation file '"<<fileName<<"'! No documentation info will be available!"<<Con::endl;
+		Con::cwar<<"WARNING: Unable to load Lua documentation '"<<fileName<<"': "<<err<<Con::endl;
 		return false;
 	}
-	s_docInfo.ReloadLookupTable();
+	s_docInfo.AddCollections(col->GetChildren());
 	return true;
 }
 void Lua::doc::find_candidates(const std::string &name,std::vector<const pragma::doc::BaseCollectionObject*> &outCandidates,uint32_t candidateLimit)
@@ -106,6 +131,44 @@ void Lua::doc::find_candidates(const std::string &name,std::vector<const pragma:
 	outCandidates.reserve(similarCandidates.size());
 	for(auto &pair : similarCandidates)
 		outCandidates.push_back(pair.first);
+}
+void Lua::doc::generate_autocomplete_script()
+{
+	initialize_pragma_documentation();
+	auto autocompleteScript = pragma::doc::zerobrane::generate_autocomplete_script(s_docInfo.collections);
+
+	filemanager::create_path("doc/ZeroBrane/api/lua");
+	filemanager::write_file("doc/ZeroBrane/api/lua/pragma.lua",autocompleteScript);
+
+	filemanager::create_path("doc/ZeroBrane/cfg");
+	filemanager::write_file("doc/ZeroBrane/cfg/pragma.lua",
+R"(debugger.allowediting = true
+debugger.ignorecase = true
+editor.autotabs = true
+
+-- Autocomplete options
+autocomplete = true
+acandtip.droprest = false
+acandtip.nodynwords = false
+acandtip.shorttip = false
+acandtip.width = 120)"
+	);
+
+	filemanager::create_path("doc/ZeroBrane/interpreters");
+	filemanager::write_file("doc/ZeroBrane/interpreters/pragma.lua",
+R"(dofile 'interpreters/luabase.lua'
+local interpreter = MakeLuaInterpreter()
+interpreter.name = "Pragma"
+interpreter.description = "Lua-implementation for the Pragma game engine"
+-- table.insert(interpreter.api,"pragma")
+interpreter.api = {"pragma"}
+return interpreter)"
+	);
+
+	filemanager::create_path("doc/ZeroBrane/");
+	filemanager::write_file("doc/ZeroBrane/readme.txt",
+R"(See https://wiki.pragma-engine.com/books/lua-api/page/zerobrane-ide for more information.)"
+	);
 }
 void Lua::doc::print_documentation(const std::string &name)
 {

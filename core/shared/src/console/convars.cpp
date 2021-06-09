@@ -27,9 +27,9 @@ void ConConf::Print(const std::string &name)
 	{
 		ConVar *cvar = static_cast<ConVar*>(this);
 		auto flags = cvar->GetFlags();
-		if(umath::is_flag_set(flags,ConVarFlags::Hidden))
+		if(umath::is_flag_set(flags,ConVarFlags::Hidden) || umath::is_flag_set(flags,ConVarFlags::Password))
 			return;
-		Con::cout<<"\""<<name<<"\" = \""<<cvar->GetString()<<"\""<<Con::endl;
+		Con::cout<<"\""<<name<<"\" = \""<<cvar->GetString()<<"\" (Default: "<<cvar->GetDefault()<<")"<<Con::endl;
 		if(flags > ConVarFlags::None)
 		{
 			util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);

@@ -13,9 +13,9 @@
 #include <wgui/types/wirect.h>
 #include <sharedutils/functioncallback.h>
 
-#define WIMENU_ENABLE_PATREON_LOGO 1
+#define WIMENU_ENABLE_PATREON_LOGO 0
 #define WIMENU_ENABLE_FMOD_LOGO 0 // (ALSYS_LIBRARY_TYPE == ALSYS_LIBRARY_FMOD)
-#define WIMENU_ENABLE_CREDITS_MENU 1
+#define WIMENU_ENABLE_CREDITS_MENU 0
 
 class DLLCLIENT WIMainMenu
 	: public WIBase

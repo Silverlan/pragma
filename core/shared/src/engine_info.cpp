@@ -15,7 +15,6 @@
 #define PRAGMA_FORUMS_URL "https://forums.pragma-engine.com/"
 #define PRAGMA_MODDING_HUB_URL "https://mods.pragma-engine.com/"
 #define PRAGMA_WIKI_URL "https://wiki.pragma-engine.com/"
-#define PRAGMA_PATREON_URL "https://www.patreon.com/silverlan"
 #define PRAGMA_TWITTER_URL "https://twitter.com/SilverlanPFM"
 #define PRAGMA_REDDIT_URL "https://www.reddit.com/r/PRFM/"
 #define PRAGMA_DISCORD_URL "https://discord.gg/Ck5BcCz"
@@ -47,54 +46,6 @@ std::string engine_info::get_website_url() {return PRAGMA_WEBSITE_URL;}
 std::string engine_info::get_modding_hub_url() {return PRAGMA_MODDING_HUB_URL;}
 std::string engine_info::get_wiki_url() {return PRAGMA_WIKI_URL;}
 std::string engine_info::get_forums_url() {return PRAGMA_FORUMS_URL;}
-std::string engine_info::get_patreon_url() {return PRAGMA_PATREON_URL;}
-std::vector<std::string> engine_info::get_patrons()
-{
-	return {
-		"PalmliX",
-		"Dark Dreams",
-		"Borland",
-		"Archangel470",
-		"The Tveit",
-		"Netfuta",
-		"Meehoyminoy",
-		"Alex Roman Nunez (EIREXE)",
-		"Alkaza1996",
-		"ArclightReflex",
-		"Bertbert",
-		"Brandon K.",
-		"Luminious",
-		"Melvin Hood",
-		"Siejax",
-		"SquarePeg",
-		"_HappyGoLucky",
-		"Gnomp",
-		"RED_EYE",
-		"Degman D-Man",
-		"InternalAtake",
-		"yodaman888",
-
-		"Ruthoranium",
-		"CodaAnim",
-		"Googleygareth",
-		"Leeroy Plambeck",
-		"Roach",
-		"Artur 'atrblizzard' Tacacs",
-		"branpurn",
-		"Elektrospy",
-		"Syrr",
-		"Tanooki_Jon",
-		"Xrdexst",
-		"Noah The Troll-Hunting Christian Spy",
-		"Boris \"SunRade\" Serousov",
-		"Prof. Purble",
-		"Antoine Guillo",
-		"ff7sfm",
-		"Kybrid96",
-		"PixMedia"
-	};
-}
-uint32_t engine_info::get_total_patron_count() {return 59;}
 std::string engine_info::get_discord_url() {return PRAGMA_DISCORD_URL;}
 std::string engine_info::get_twitter_url() {return PRAGMA_TWITTER_URL;}
 std::string engine_info::get_reddit_url() {return PRAGMA_REDDIT_URL;}
@@ -102,6 +53,7 @@ uint32_t engine_info::get_steam_app_id() {return PRAGMA_STEAM_APP_ID;}
 
 const std::vector<std::string> engine_info::get_supported_audio_formats()
 {
+	// TODO: Merge this with asset library
 	return {
 		"ogg","wav","mp3"
 	};

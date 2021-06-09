@@ -119,10 +119,10 @@ void WIMainMenuCredits::OnVisibilityChanged(bool bVisible)
 
 	AddGap(120);
 	AddHeader(Locale::GetText("menu_credits"),"header");
-	AddHeader(Locale::GetText("patrons"));
+	/*AddHeader(Locale::GetText("patrons"));
 
 	for(auto &patron : engine_info::get_patrons())
-		AddText(patron,"credits_text");
+		AddText(patron,"credits_text");*/
 
 	AddHeader(Locale::GetText("localization"));
 	AddText("Shmeerz (" +Locale::GetText("lan_portuguese") +")","credits_text");

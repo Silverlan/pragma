@@ -23,9 +23,6 @@ namespace engine_info
 	DLLNETWORK std::string get_modding_hub_url();
 	DLLNETWORK std::string get_wiki_url();
 	DLLNETWORK std::string get_forums_url();
-	DLLNETWORK std::string get_patreon_url();
-	DLLNETWORK std::vector<std::string> get_patrons();
-	DLLNETWORK uint32_t get_total_patron_count();
 	DLLNETWORK std::string get_discord_url();
 	DLLNETWORK std::string get_twitter_url();
 	DLLNETWORK std::string get_reddit_url();

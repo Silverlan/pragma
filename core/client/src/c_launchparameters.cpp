@@ -10,9 +10,14 @@
 #include "pragma/c_engine.h"
 
 extern DLLCLIENT CEngine *c_engine;
+std::optional<bool> g_launchParamWindowedMode {};
+std::optional<int> g_launchParamRefreshRate {};
+std::optional<bool> g_launchParamNoBorder {};
+std::optional<uint32_t> g_launchParamWidth {};
+std::optional<uint32_t> g_launchParamHeight {};
 static void LPARAM_windowed(const std::vector<std::string> &argv)
 {
-	c_engine->GetInitialWindowSettings().windowedMode = true;
+	g_launchParamWindowedMode = true;
 }
 
 static void LPARAM_refresh(const std::vector<std::string> &argv)
@@ -21,26 +26,26 @@ static void LPARAM_refresh(const std::vector<std::string> &argv)
 		return;
 	int freq = atoi(argv[0].c_str());
 	if(freq > 0)
-		c_engine->GetInitialWindowSettings().refreshRate = freq;
+		g_launchParamRefreshRate = freq;
 }
 
 static void LPARAM_noborder(const std::vector<std::string> &argv)
 {
-	c_engine->GetInitialWindowSettings().decorated = false;
+	g_launchParamNoBorder = true;
 }
 
 static void LPARAM_w(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	c_engine->GetInitialWindowSettings().width = atoi(argv[0].c_str());
+	g_launchParamWidth = atoi(argv[0].c_str());
 }
 
 static void LPARAM_h(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
 		return;
-	c_engine->GetInitialWindowSettings().height = atoi(argv[0].c_str());
+	g_launchParamHeight = atoi(argv[0].c_str());
 }
 
 static void LPARAM_fullbright(const std::vector<std::string> &argv) {c_engine->UseFullbrightShader(true);}

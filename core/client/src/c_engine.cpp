@@ -476,6 +476,11 @@ void CEngine::OnFilesDropped(prosper::Window &window,std::vector<std::string> &f
 }
 bool CEngine::IsWindowFocused() const {return umath::is_flag_set(m_stateFlags,StateFlags::WindowFocused);}
 
+extern std::optional<bool> g_launchParamWindowedMode;
+extern std::optional<int> g_launchParamRefreshRate;
+extern std::optional<bool> g_launchParamNoBorder;
+extern std::optional<uint32_t> g_launchParamWidth;
+extern std::optional<uint32_t> g_launchParamHeight;
 bool CEngine::Initialize(int argc,char *argv[])
 {
 	Engine::Initialize(argc,argv);
@@ -542,6 +547,17 @@ bool CEngine::Initialize(int argc,char *argv[])
 	auto &initialWindowSettings = GetRenderContext().GetInitialWindowSettings();
 	initialWindowSettings.windowedMode = (mode == 0);
 	initialWindowSettings.decorated = ((mode == 2) ? false : true);
+
+	if(g_launchParamWindowedMode.has_value())
+		initialWindowSettings.windowedMode = *g_launchParamWindowedMode;
+	if(g_launchParamRefreshRate.has_value())
+		initialWindowSettings.refreshRate = *g_launchParamRefreshRate;
+	if(g_launchParamNoBorder.has_value())
+		initialWindowSettings.decorated = !*g_launchParamNoBorder;
+	if(g_launchParamWidth.has_value())
+		initialWindowSettings.width = *g_launchParamWidth;
+	if(g_launchParamHeight.has_value())
+		initialWindowSettings.height = *g_launchParamHeight;
 
 	res = cmds.find("cl_render_monitor");
 	if(res != nullptr && !res->argv.empty())

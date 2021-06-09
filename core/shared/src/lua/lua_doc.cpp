@@ -104,6 +104,36 @@ bool Lua::doc::load_documentation_file(const std::string &fileName)
 		return false;
 	}
 	s_docInfo.AddCollections(col->GetChildren());
+
+	static auto printStats = false;
+	if(printStats)
+	{
+		uint32_t numFunctions = 0;
+		uint32_t numLibs = 0;
+		uint32_t numClasses = 0;
+		uint32_t numMembers = 0;
+		uint32_t numEnums = 0;
+		std::function<void(const pragma::doc::Collection&)> fCollectStats = nullptr;
+		fCollectStats = [&](const pragma::doc::Collection &col) {
+			numFunctions += col.GetFunctions().size();
+			numEnums += col.GetEnumSets().size();
+			numMembers += col.GetMembers().size();
+			if(umath::is_flag_set(col.GetFlags(),pragma::doc::Collection::Flags::Library))
+				++numLibs;
+			if(umath::is_flag_set(col.GetFlags(),pragma::doc::Collection::Flags::Class))
+				++numClasses;
+
+			for(auto &child : col.GetChildren())
+				fCollectStats(*child);
+		};
+		for(auto &col : s_docInfo.collections)
+			fCollectStats(*col);
+		Con::cout<<"Functions: "<<numFunctions<<Con::endl;
+		Con::cout<<"Libraries: "<<numLibs<<Con::endl;
+		Con::cout<<"Classes: "<<numClasses<<Con::endl;
+		Con::cout<<"Members: "<<numMembers<<Con::endl;
+		Con::cout<<"Enums: "<<numEnums<<Con::endl;
+	}
 	return true;
 }
 void Lua::doc::find_candidates(const std::string &name,std::vector<const pragma::doc::BaseCollectionObject*> &outCandidates,uint32_t candidateLimit)

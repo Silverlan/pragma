@@ -233,6 +233,15 @@ set(DEPENDENCY_ZLIB_BUILD_INCLUDE ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/z
 
 set(DEPENDENCY_UTIL_IMAGE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_image/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_UTIL_IMAGE_LIBRARY util_image STATIC)
+search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC6H_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/bc6h/${BINARY_PRAGMA_DIR} bc6h)
+search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC7_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/bc7/${BINARY_PRAGMA_DIR} bc7)
+search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_CORE_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/nvcore/${BINARY_PRAGMA_DIR} nvcore)
+search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_IMAGE_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/nvimage/${BINARY_PRAGMA_DIR} nvimage)
+search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/nvtt/${BINARY_PRAGMA_DIR} nvtt)
+search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_MATH_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/nvmath/${BINARY_PRAGMA_DIR} nvmath)
+search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_THREAD_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/nvthread/${BINARY_PRAGMA_DIR} nvthread)
+search_lib_recursive(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_SQUISH_LIBRARY external_libs/util_image/third_party_libs/nvtt/src/nvtt/squish/${BINARY_PRAGMA_DIR} nvsquish)
+search_lib_recursive(DEPENDENCY_SQUISH_LIBRARY external_libs/util_image/third_party_libs/nvtt/extern/libsquish-1.15/${BINARY_PRAGMA_DIR} squish)
 
 set(DEPENDENCY_UTIL_SOURCE2_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_source2/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_UTIL_SOURCE2_LIBRARY util_source2 STATIC)
@@ -276,16 +285,6 @@ search_lib_recursive(DEPENDENCY_LZ4_LIBRARY external_libs/util_source2/third_par
 
 set(DEPENDENCY_LUABIND_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/luabind CACHE STRING "" FORCE)
 search_lib_recursive(DEPENDENCY_LUABIND_LIBRARY lib/${BINARY_PRAGMA_DIR} luabind)
-
-set(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/nvtt/src CACHE STRING "" FORCE)
-search_lib_recursive_full(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_LIBRARY ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/nvtt/project/vc2017/Release.x64/lib/nvtt)
-search_lib_recursive_full(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC6H_LIBRARY ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/nvtt/project/vc2017/bc6h/Release/x64/bc6h)
-search_lib_recursive_full(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC7_LIBRARY ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/nvtt/project/vc2017/bc7/Release/x64/bc7)
-search_lib_recursive_full(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_CORE_LIBRARY ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/nvtt/project/vc2017/nvcore/Release/x64/nvcore)
-search_lib_recursive_full(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_IMAGE_LIBRARY ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/nvtt/project/vc2017/nvimage/Release/x64/nvimage)
-search_lib_recursive_full(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_MATH_LIBRARY ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/nvtt/project/vc2017/nvmath/Release/x64/nvmath)
-search_lib_recursive_full(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_THREAD_LIBRARY ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/nvtt/project/vc2017/nvthread/Release/x64/nvthread)
-search_lib_recursive_full(DEPENDENCY_SQUISH_LIBRARY ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/nvtt/project/vc2017/squish/Release/x64/squish)
 
 set(DEPENDENCY_FREETYPE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/freetype/include CACHE STRING "" FORCE)
 search_lib_recursive(DEPENDENCY_FREETYPE_LIBRARY third_party_libs/freetype/${BINARY_PRAGMA_DIR} freetype)
@@ -507,13 +506,6 @@ if(UNIX)
 	resolve_links(DEPENDENCY_MATHUTIL_LIBRARY)
 	resolve_links(DEPENDENCY_NETWORKMANAGER_LIBRARY)
 	resolve_links(DEPENDENCY_NIFTOOLS_LIBRARY)
-	resolve_links(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC6H_LIBRARY)
-	resolve_links(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_BC7_LIBRARY)
-	resolve_links(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_CORE_LIBRARY)
-	resolve_links(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_IMAGE_LIBRARY)
-	resolve_links(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_LIBRARY)
-	resolve_links(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_MATH_LIBRARY)
-	resolve_links(DEPENDENCY_NVIDIA_TEXTURE_TOOLS_THREAD_LIBRARY)
 	resolve_links(DEPENDENCY_OPENVR_LIBRARY)
 	resolve_links(DEPENDENCY_OVR_LIBRARY)
 	resolve_links(DEPENDENCY_PCL_FEATURES_LIBRARY)
@@ -540,7 +532,6 @@ if(UNIX)
 	resolve_links(DEPENDENCY_SPIRV_TOOLS_LIBRARY)
 	resolve_links(DEPENDENCY_SPIRV_TOOLS_OPT_LIBRARY)
 	resolve_links(DEPENDENCY_SPV_REMAPPER_LIBRARY)
-	resolve_links(DEPENDENCY_SQUISH_LIBRARY)
 	resolve_links(DEPENDENCY_STEAMWORKS_LIBRARY)
 	resolve_links(DEPENDENCY_STEAM_AUDIO_LIBRARY)
 	# resolve_links(DEPENDENCY_UTIL_ARCHIVE_LIBRARY)
@@ -1007,11 +998,6 @@ set_target_properties(DetourTileCache PROPERTIES FOLDER third_party_libs/recast)
 set_target_properties(Recast PROPERTIES FOLDER third_party_libs/recast)
 #
 
-# squish
-register_third_party_library(squish)
-set_target_properties(squish PROPERTIES FOLDER third_party_libs)
-#
-
 # rectangle_bin_pack
 # if(WIN32)
 # 	include_external_msproject(rectangle_bin_pack ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/rectangle_bin_pack/RectangleBinPack/RectangleBinPack.vcxproj)
@@ -1033,27 +1019,6 @@ if(WIN32)
 	include_external_msproject(hllib ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/hllib/sln/vs17/HLLib/HLLib.vcxproj)
 	set_target_properties(hllib PROPERTIES FOLDER third_party_libs)
 endif()
-#
-
-# nvtt
-# if(WIN32)
-# 	include_external_msproject(bc6h ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/nvtt/project/vc2017/bc6h/bc6h.vcxproj)
-# 	include_external_msproject(bc7 ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/nvtt/project/vc2017/bc7/bc7.vcxproj)
-# 	include_external_msproject(nvcore ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/nvtt/project/vc2017/nvcore/nvcore.vcxproj)
-# 	include_external_msproject(nvimage ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/nvtt/project/vc2017/nvimage/nvimage.vcxproj)
-# 	include_external_msproject(nvmath ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/nvtt/project/vc2017/nvmath/nvmath.vcxproj)
-# 	include_external_msproject(nvthread ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/nvtt/project/vc2017/nvthread/nvthread.vcxproj)
-# 	include_external_msproject(nvtt ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/nvtt/project/vc2017/nvtt/nvtt.vcxproj)
-# 	include_external_msproject(squish ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/nvtt/project/vc2017/squish/squish.vcxproj)
-# 	set_target_properties(bc6h PROPERTIES FOLDER third_party_libs/nvtt)
-# 	set_target_properties(bc7 PROPERTIES FOLDER third_party_libs/nvtt)
-# 	set_target_properties(nvcore PROPERTIES FOLDER third_party_libs/nvtt)
-# 	set_target_properties(nvimage PROPERTIES FOLDER third_party_libs/nvtt)
-# 	set_target_properties(nvmath PROPERTIES FOLDER third_party_libs/nvtt)
-# 	set_target_properties(nvthread PROPERTIES FOLDER third_party_libs/nvtt)
-# 	set_target_properties(nvtt PROPERTIES FOLDER third_party_libs/nvtt)
-# 	set_target_properties(squish PROPERTIES FOLDER third_party_libs/nvtt)
-# endif()
 #
 
 # dependencies
@@ -1233,7 +1198,6 @@ pragma_install_lib("${DEPENDENCY_LIBZIP_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 pragma_install_lib("${DEPENDENCY_LPNG_LIBRARY}" "${BINARY_OUTPUT_DIR}")
 
 pragma_install_lib_c("${DEPENDENCY_ZLIB_LIBRARY}" zlib1 "${BINARY_OUTPUT_DIR}")
-pragma_install_lib_c("${DEPENDENCY_NVIDIA_TEXTURE_TOOLS_LIBRARY}" ../bin/nvtt "${BINARY_OUTPUT_DIR}")
 
 if(WIN32)
 	set(OS_LIB_BIN_EXT ".dll")

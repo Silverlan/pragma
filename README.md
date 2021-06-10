@@ -50,11 +50,6 @@ b2 toolset=msvc-14.2 address-model=64 stage variant=release link=static runtime-
 - Go to `Pragma/third_party_libs/luajit/src`
 - Run `msvcbuild.bat`
 
-### Building NVTT
-- Go to `Pragma/third_party_libs/nvtt/project/vc2017` in the Windows file explorer
-- Open `nvtt.sln`
-- Build `bc6h`, `bc7`, `nvcore`, `nvimage`, `nvmath`, `nvthread`, `nvtt` in Release mode
-
 4) Run configure with CMake in the Pragma root directory
 5) Set the following variables:
 - `DEPENDENCY_BOOST_INCLUDE`: Boost include directory

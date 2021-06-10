@@ -201,6 +201,25 @@ static int32_t parse_math_expression(lua_State *l)
 	return 1;
 }
 
+static luabind::object copy_table(lua_State *l,const luabind::object &t,bool deepCopy=false)
+{
+	auto tCpy = luabind::newtable(l);
+	if(deepCopy = false)
+	{
+		for(luabind::iterator i{t}, e; i != e; ++i)
+			tCpy[i.key()] = *i;
+		return tCpy;
+	}
+	for(luabind::iterator i{t}, e; i != e; ++i)
+	{
+		auto val = *i;
+		if(luabind::type(val) == LUA_TTABLE)
+			val = copy_table(l,val,true);
+		tCpy[i.key()] = val;
+	}
+	return tCpy;
+}
+
 void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 {
 	// Remove sensitive functions and libraries
@@ -344,6 +363,14 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 			Lua::Pop(l,1); // We need the key at the top for the next iteration
 		}
 		Lua::PushValue(l,1);
+		return 1;
+	}));
+	lua_pushtablecfunction(lua.GetState(),"table","copy",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		Lua::CheckTable(l,1);
+		auto deepCopy = false;
+		if(Lua::IsSet(l,2))
+			deepCopy = Lua::CheckBool(l,2);
+		copy_table(l,luabind::object{luabind::from_stack(l,1)},deepCopy).push(l);
 		return 1;
 	}));
 

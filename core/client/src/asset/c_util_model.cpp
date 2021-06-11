@@ -625,7 +625,7 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 		mat->UpdateTextures();
 		auto savePath = pragma::asset::relative_path_to_absolute_path(matPathRelative,pragma::asset::Type::Material,util::CONVERT_PATH);
 		std::string err;
-		mat->Save(savePath.GetString(),err);
+		mat->Save(savePath.GetString(),err,true);
 
 		mdl->AddMaterial(0,mat);
 
@@ -1239,7 +1239,7 @@ bool pragma::asset::import_texture(prosper::IImage &img,const TextureImportInfo 
 bool pragma::asset::export_map(const std::string &mapName,const ModelExportInfo &exportInfo,std::string &outErrMsg,const std::optional<MapExportInfo> &mapExp)
 {
 	::util::Path mapPath {mapName};
-	mapPath.RemoveFileExtension();
+	mapPath.RemoveFileExtension(get_supported_extensions(Type::Map));
 	VFilePtr f = nullptr;
 	auto openLocalMap = [&mapPath,&f]() {
 		auto localMapPath = pragma::asset::find_file(mapPath.GetString(),pragma::asset::Type::Map);

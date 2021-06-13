@@ -804,10 +804,51 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	auto classDefTransform = luabind::class_<umath::Transform>("Transform");
 	classDefTransform.def(luabind::constructor<const Mat4&>());
 	classDefTransform.def(luabind::constructor<const Vector3&,const Quat&>());
+	classDefTransform.def(luabind::constructor<const Vector3&>());
+	classDefTransform.def(luabind::constructor<const Quat&>());
 	classDefTransform.def(luabind::constructor<>());
 	classDefTransform.def(luabind::tostring(luabind::self));
 	classDefTransform.def("Copy",static_cast<void(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &t) {
 		Lua::Push<umath::Transform>(l,t);
+	}));
+	classDefTransform.property("x",static_cast<float(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &pose) {
+		return pose.GetOrigin().x;
+	}),static_cast<void(*)(lua_State*,umath::Transform&,float)>([](lua_State *l,umath::Transform &pose,float x) {
+		pose.GetOrigin().x = x;
+	}));
+	classDefTransform.property("y",static_cast<float(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &pose) {
+		return pose.GetOrigin().y;
+	}),static_cast<void(*)(lua_State*,umath::Transform&,float)>([](lua_State *l,umath::Transform &pose,float y) {
+		pose.GetOrigin().y = y;
+	}));
+	classDefTransform.property("z",static_cast<float(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &pose) {
+		return pose.GetOrigin().z;
+	}),static_cast<void(*)(lua_State*,umath::Transform&,float)>([](lua_State *l,umath::Transform &pose,float z) {
+		pose.GetOrigin().z = z;
+	}));
+	classDefTransform.property("pitch",static_cast<float(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &pose) {
+		return EulerAngles{pose.GetRotation()}.p;
+	}));
+	classDefTransform.property("yaw",static_cast<float(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &pose) {
+		return EulerAngles{pose.GetRotation()}.y;
+	}));
+	classDefTransform.property("roll",static_cast<float(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &pose) {
+		return EulerAngles{pose.GetRotation()}.r;
+	}));
+	classDefTransform.def("GetAngles",static_cast<EulerAngles(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &pose) {
+		return pose.GetAngles();
+	}));
+	classDefTransform.def("SetAngles",static_cast<void(*)(lua_State*,umath::Transform&,const EulerAngles&)>([](lua_State *l,umath::Transform &pose,const EulerAngles &ang) {
+		pose.SetAngles(ang);
+	}));
+	classDefTransform.def("GetForward",static_cast<Vector3(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &pose) {
+		return pose.GetForward();
+	}));
+	classDefTransform.def("GetRight",static_cast<Vector3(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &pose) {
+		return pose.GetRight();
+	}));
+	classDefTransform.def("GetUp",static_cast<Vector3(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &pose) {
+		return pose.GetUp();
 	}));
 	classDefTransform.def("Set",static_cast<void(*)(lua_State*,umath::Transform&,const umath::Transform&)>([](lua_State *l,umath::Transform &t,const umath::Transform &tOther) {
 		t = tOther;

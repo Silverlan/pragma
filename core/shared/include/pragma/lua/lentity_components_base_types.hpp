@@ -3879,6 +3879,8 @@ namespace Lua
 		def.add_static_constant("EVENT_ON_STOP_LAYERED_ANIMATION",pragma::BaseAnimatedComponent::EVENT_ON_STOP_LAYERED_ANIMATION);
 		def.add_static_constant("EVENT_ON_BONE_TRANSFORM_CHANGED",pragma::BaseAnimatedComponent::EVENT_ON_BONE_TRANSFORM_CHANGED);
 		def.add_static_constant("EVENT_ON_ANIMATIONS_UPDATED",pragma::BaseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED);
+		def.add_static_constant("EVENT_UPDATE_BONE_POSES",pragma::BaseAnimatedComponent::EVENT_UPDATE_BONE_POSES);
+		def.add_static_constant("EVENT_ON_BONE_POSES_FINALIZED",pragma::BaseAnimatedComponent::EVENT_ON_BONE_POSES_FINALIZED);
 		def.add_static_constant("EVENT_ON_BLEND_ANIMATION",pragma::BaseAnimatedComponent::EVENT_ON_BLEND_ANIMATION);
 		def.add_static_constant("EVENT_PLAY_ANIMATION",pragma::BaseAnimatedComponent::EVENT_PLAY_ANIMATION);
 		def.add_static_constant("EVENT_ON_ANIMATION_RESET",pragma::BaseAnimatedComponent::EVENT_ON_ANIMATION_RESET);

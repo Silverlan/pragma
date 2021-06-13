@@ -42,6 +42,8 @@ ComponentEventId BaseAnimatedComponent::EVENT_ON_PLAY_ACTIVITY = pragma::INVALID
 ComponentEventId BaseAnimatedComponent::EVENT_ON_STOP_LAYERED_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_BONE_TRANSFORM_CHANGED = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_ANIMATIONS_UPDATED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId BaseAnimatedComponent::EVENT_UPDATE_BONE_POSES = pragma::INVALID_COMPONENT_ID;
+ComponentEventId BaseAnimatedComponent::EVENT_ON_BONE_POSES_FINALIZED = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_BLEND_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_ANIMATION_RESET = pragma::INVALID_COMPONENT_ID;
@@ -68,6 +70,8 @@ void BaseAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &compo
 	EVENT_ON_STOP_LAYERED_ANIMATION = componentManager.RegisterEvent("ON_STOP_LAYERED_ANIMATION",componentType);
 	EVENT_ON_BONE_TRANSFORM_CHANGED = componentManager.RegisterEvent("ON_BONE_TRANSFORM_CHANGED");
 	EVENT_ON_ANIMATIONS_UPDATED = componentManager.RegisterEvent("ON_ANIMATIONS_UPDATED",componentType);
+	EVENT_UPDATE_BONE_POSES = componentManager.RegisterEvent("UPDATE_BONE_POSES",componentType);
+	EVENT_ON_BONE_POSES_FINALIZED = componentManager.RegisterEvent("ON_BONE_POSES_FINALIZED",componentType);
 	EVENT_ON_BLEND_ANIMATION = componentManager.RegisterEvent("ON_BLEND_ANIMATION",componentType);
 	EVENT_PLAY_ANIMATION = componentManager.RegisterEvent("PLAY_ANIMATION",componentType);
 	EVENT_ON_ANIMATION_RESET = componentManager.RegisterEvent("ON_ANIMATION_RESET");
@@ -715,6 +719,8 @@ bool BaseAnimatedComponent::MaintainAnimations(double dt)
 	if(InvokeEventCallbacks(EVENT_MAINTAIN_ANIMATIONS,evData) == util::EventReply::Handled)
 	{
 		InvokeEventCallbacks(EVENT_ON_ANIMATIONS_UPDATED);
+		InvokeEventCallbacks(EVENT_UPDATE_BONE_POSES);
+		InvokeEventCallbacks(EVENT_ON_BONE_POSES_FINALIZED);
 		return true;
 	}
 
@@ -749,6 +755,8 @@ bool BaseAnimatedComponent::MaintainAnimations(double dt)
 	}
 
 	InvokeEventCallbacks(EVENT_ON_ANIMATIONS_UPDATED);
+	InvokeEventCallbacks(EVENT_UPDATE_BONE_POSES);
+	InvokeEventCallbacks(EVENT_ON_BONE_POSES_FINALIZED);
 
 	// It's now safe to execute animation events
 	const auto fHandleAnimationEvents = [this](uint32_t animId,const std::shared_ptr<pragma::animation::Animation> &anim,int32_t frameId) {

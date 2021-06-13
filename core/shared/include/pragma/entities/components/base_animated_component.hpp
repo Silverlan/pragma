@@ -48,6 +48,8 @@ namespace pragma
 		static ComponentEventId EVENT_ON_STOP_LAYERED_ANIMATION;
 		static ComponentEventId EVENT_ON_BONE_TRANSFORM_CHANGED;
 		static ComponentEventId EVENT_ON_ANIMATIONS_UPDATED;
+		static ComponentEventId EVENT_UPDATE_BONE_POSES;
+		static ComponentEventId EVENT_ON_BONE_POSES_FINALIZED;
 		static ComponentEventId EVENT_ON_BLEND_ANIMATION;
 		static ComponentEventId EVENT_PLAY_ANIMATION;
 		static ComponentEventId EVENT_ON_ANIMATION_RESET;

@@ -793,19 +793,19 @@ static bool is_asset_loaded(NetworkState &nw,const std::string &name,pragma::ass
 	return is_loaded(nw,name,type);
 }
 
-static bool save_image(lua_State *l,std::string fileName,uimg::ImageBuffer &imgBuffer,uimg::TextureInfo &imgWriteInfo,bool cubemap)
+static bool save_image(lua_State *l,uimg::ImageBuffer &imgBuffer,std::string fileName,uimg::TextureInfo &imgWriteInfo,bool cubemap)
 {
 	if(Lua::file::validate_write_operation(l,fileName) == false)
 		return false;
 	return c_game->SaveImage(imgBuffer,fileName,imgWriteInfo,cubemap);
 }
 
-static bool save_image(lua_State *l,std::string fileName,uimg::ImageBuffer &imgBuffer,uimg::TextureInfo &imgWriteInfo)
+static bool save_image(lua_State *l,uimg::ImageBuffer &imgBuffer,std::string fileName,uimg::TextureInfo &imgWriteInfo)
 {
-	return save_image(l,fileName,imgBuffer,imgWriteInfo,false);
+	return save_image(l,imgBuffer,fileName,imgWriteInfo,false);
 }
 
-static bool save_image(lua_State *l,std::string fileName,uimg::ImageBuffer &imgBuffer,uimg::ImageFormat format,float quality)
+static bool save_image(lua_State *l,uimg::ImageBuffer &imgBuffer,std::string fileName,uimg::ImageFormat format,float quality)
 {
 	if(Lua::file::validate_write_operation(l,fileName) == false)
 		return false;
@@ -816,11 +816,11 @@ static bool save_image(lua_State *l,std::string fileName,uimg::ImageBuffer &imgB
 		return false;
 	return uimg::save_image(f,imgBuffer,format,quality);
 }
-static bool save_image(lua_State *l,std::string fileName,uimg::ImageBuffer &imgBuffer,uimg::ImageFormat format)
+static bool save_image(lua_State *l,uimg::ImageBuffer &imgBuffer,std::string fileName,uimg::ImageFormat format)
 {
-	return save_image(l,fileName,imgBuffer,format,1.f);
+	return save_image(l,imgBuffer,fileName,format,1.f);
 }
-static bool save_image(lua_State *l,std::string fileName,luabind::table<> t,uimg::TextureInfo &texInfo,bool cubemap)
+static bool save_image(lua_State *l,luabind::table<> t,std::string fileName,uimg::TextureInfo &texInfo,bool cubemap)
 {
 	auto n = Lua::GetObjectLength(l,t);
 	std::vector<std::shared_ptr<uimg::ImageBuffer>> imgBufs;
@@ -847,12 +847,12 @@ static bool save_image(lua_State *l,std::string fileName,luabind::table<> t,uimg
 		return static_cast<uint8_t*>(imgBufs.at(iLayer)->GetData());
 	},imgBuf->GetWidth(),imgBuf->GetHeight(),imgBuf->GetPixelSize(),imgBufs.size(),0,cubemap,texInfo);
 }
-static bool save_image(lua_State *l,std::string fileName,luabind::table<> t,uimg::TextureInfo &texInfo)
+static bool save_image(lua_State *l,luabind::table<> t,std::string fileName,uimg::TextureInfo &texInfo)
 {
-	return save_image(l,fileName,t,texInfo,false);
+	return save_image(l,t,fileName,texInfo,false);
 }
 
-static bool save_image(lua_State *l,std::string fileName,prosper::IImage &img,uimg::TextureInfo &imgWriteInfo)
+static bool save_image(lua_State *l,prosper::IImage &img,std::string fileName,uimg::TextureInfo &imgWriteInfo)
 {
 	if(Lua::file::validate_write_operation(l,fileName) == false)
 		return false;
@@ -971,13 +971,13 @@ void CGame::RegisterLuaLibraries()
 		luabind::def("create_particle_tracer",Lua::util::Client::create_particle_tracer),
 		luabind::def("create_muzzle_flash",Lua::util::Client::create_muzzle_flash),
 		luabind::def("fire_bullets",static_cast<luabind::object(*)(lua_State*,BulletInfo&)>(Lua::util::fire_bullets)),
-		luabind::def("save_image",static_cast<bool(*)(lua_State*,std::string,uimg::ImageBuffer&,uimg::TextureInfo&,bool)>(save_image)),
-		luabind::def("save_image",static_cast<bool(*)(lua_State*,std::string,uimg::ImageBuffer&,uimg::TextureInfo&)>(save_image)),
-		luabind::def("save_image",static_cast<bool(*)(lua_State*,std::string,uimg::ImageBuffer&,uimg::ImageFormat,float)>(save_image)),
-		luabind::def("save_image",static_cast<bool(*)(lua_State*,std::string,uimg::ImageBuffer&,uimg::ImageFormat)>(save_image)),
-		luabind::def("save_image",static_cast<bool(*)(lua_State*,std::string,luabind::table<>,uimg::TextureInfo&,bool)>(save_image)),
-		luabind::def("save_image",static_cast<bool(*)(lua_State*,std::string,luabind::table<>,uimg::TextureInfo&)>(save_image)),
-		luabind::def("save_image",static_cast<bool(*)(lua_State*,std::string,prosper::IImage&,uimg::TextureInfo&)>(save_image)),
+		luabind::def("save_image",static_cast<bool(*)(lua_State*,uimg::ImageBuffer&,std::string,uimg::TextureInfo&,bool)>(save_image)),
+		luabind::def("save_image",static_cast<bool(*)(lua_State*,uimg::ImageBuffer&,std::string,uimg::TextureInfo&)>(save_image)),
+		luabind::def("save_image",static_cast<bool(*)(lua_State*,uimg::ImageBuffer&,std::string,uimg::ImageFormat,float)>(save_image)),
+		luabind::def("save_image",static_cast<bool(*)(lua_State*,uimg::ImageBuffer&,std::string,uimg::ImageFormat)>(save_image)),
+		luabind::def("save_image",static_cast<bool(*)(lua_State*,luabind::table<>,std::string,uimg::TextureInfo&,bool)>(save_image)),
+		luabind::def("save_image",static_cast<bool(*)(lua_State*,luabind::table<>,std::string,uimg::TextureInfo&)>(save_image)),
+		luabind::def("save_image",static_cast<bool(*)(lua_State*,prosper::IImage&,std::string,uimg::TextureInfo&)>(save_image)),
 		luabind::def("load_image",static_cast<luabind::object(*)(lua_State*,const std::string&,bool,uimg::ImageBuffer::Format)>(load_image)),
 		luabind::def("load_image",static_cast<luabind::object(*)(lua_State*,const std::string&,bool)>(load_image)),
 		luabind::def("load_image",static_cast<luabind::object(*)(lua_State*,const std::string&)>(load_image)),

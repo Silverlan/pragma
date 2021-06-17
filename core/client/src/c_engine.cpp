@@ -24,6 +24,7 @@
 #include "pragma/rendering/c_sci_gpu_timer_manager.hpp"
 #include <pragma/rendering/scene/util_draw_scene_info.hpp>
 #include <pragma/entities/environment/lights/c_env_light.h>
+#include <pragma/lua/lua_error_handling.hpp>
 #include <cmaterialmanager.h>
 #include <pragma/model/c_modelmesh.h>
 #include <cctype>
@@ -170,6 +171,17 @@ void CEngine::DumpDebugInformation(ZIPFile &zip) const
 		ss.str(std::string());
 		ss.clear();
 	}
+
+	auto fWriteLuaTraceback = [&zip](lua_State *l,const std::string &identifier) {
+		if(!l)
+			return;
+		std::stringstream ss;
+		if(!Lua::PrintTraceback(l,ss))
+			return;
+		zip.AddFile("lua_traceback_" +identifier +".txt",ss.str());
+	};
+	if(GetClientState())
+		fWriteLuaTraceback(static_cast<ClientState*>(GetClientState())->GetGUILuaState(),"gui");
 	
 #if 0
 	prosper::debug::dump_layers(c_engine->GetRenderContext(),ss);

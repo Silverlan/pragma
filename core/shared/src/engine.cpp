@@ -31,6 +31,7 @@
 #include "pragma/engine.h"
 #include "pragma/engine_init.hpp"
 #include "pragma/lua/libraries/ldebug.h"
+#include "pragma/lua/lua_error_handling.hpp"
 #include <pragma/serverstate/serverstate.h>
 #include <pragma/console/convarhandle.h>
 #include "luasystem.h"
@@ -786,10 +787,25 @@ void Engine::DumpDebugInformation(ZIPFile &zip) const
 		zip.AddFile(fileName,convars.str());
 	};
 	fWriteConvars(GetConVars(),"cvars_en.txt");
+
+	auto fWriteLuaTraceback = [&zip](lua_State *l,const std::string &identifier) {
+		if(!l)
+			return;
+		std::stringstream ss;
+		if(!Lua::PrintTraceback(l,ss))
+			return;
+		zip.AddFile("lua_traceback_" +identifier +".txt",ss.str());
+	};
 	if(GetClientState())
+	{
 		fWriteConvars(GetClientState()->GetConVars(),"cvars_cl.txt");
+		fWriteLuaTraceback(GetClientState()->GetLuaState(),"cl");
+	}
 	if(GetServerNetworkState())
+	{
 		fWriteConvars(GetServerNetworkState()->GetConVars(),"cvars_sv.txt");
+		fWriteLuaTraceback(GetServerNetworkState()->GetLuaState(),"sv");
+	}
 }
 
 const long long &Engine::GetLastTick() const {return m_lastTick;}

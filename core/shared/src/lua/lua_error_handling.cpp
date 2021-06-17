@@ -220,9 +220,8 @@ bool Lua::get_callstack(lua_State *l,std::stringstream &ss)
 	return true;
 }
 
-void Lua::PrintTraceback(lua_State *l,std::string *pOptErrMsg)
+bool Lua::PrintTraceback(lua_State *l,std::stringstream &ssOut,std::string *pOptErrMsg,std::string *optOutFormattedErrMsg)
 {
-	std::stringstream ssMsg;
 	lua_Debug d {};
 	int32_t level = 1;
 	auto bFoundSrc = false;
@@ -238,7 +237,8 @@ void Lua::PrintTraceback(lua_State *l,std::string *pOptErrMsg)
 	}
 
 	auto errMsg = pOptErrMsg ? *pOptErrMsg : "";
-	ssMsg<<"[LUA] ";
+	auto hasMsg = true;
+	ssOut<<"[LUA] ";
 	if(bFoundSrc == true)
 	{
 		if(!errMsg.empty() && errMsg.front() != '[')
@@ -268,22 +268,36 @@ void Lua::PrintTraceback(lua_State *l,std::string *pOptErrMsg)
 			errMsg = ssErrMsg.str();
 		}
 		transform_path(d,errMsg,d.currentline);
-		ssMsg<<errMsg;
-		bNl = print_code_snippet(ssMsg,d.source,d.currentline,":");
+		ssOut<<errMsg;
+		bNl = print_code_snippet(ssOut,d.source,d.currentline,":");
 	}
 	else
-		ssMsg<<errMsg;
+	{
+		ssOut<<errMsg;
+		hasMsg = !errMsg.empty();
+	}
+	if(optOutFormattedErrMsg)
+		*optOutFormattedErrMsg = std::move(errMsg);
 	// if(level != 1)
 	{
 		level = 1;
 		if(bNl == true)
-			ssMsg<<"\n\n";
+			ssOut<<"\n\n";
 		else
-			ssMsg<<":\n";
-		ssMsg<<"    Callstack:";
-		get_callstack(l,ssMsg);
+			ssOut<<":\n";
+		ssOut<<"    Callstack:";
+		if(get_callstack(l,ssOut))
+			hasMsg = true;
 	}
-	print_lua_error_message(l,ssMsg);
+	return hasMsg;
+}
+
+void Lua::PrintTraceback(lua_State *l,std::string *pOptErrMsg)
+{
+	std::string errMsg;
+	std::stringstream ss;
+	PrintTraceback(l,ss,pOptErrMsg,&errMsg);
+	print_lua_error_message(l,ss);
 
 	std::string cause {};
 	const std::string errMsgIdentifier = "No matching overload found";

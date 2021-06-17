@@ -30,6 +30,7 @@ void Lua::initialize_lua_state(Lua::Interface &lua)
 #else
 		// coroutine already included in base!
 		{LUA_BITLIBNAME,luaopen_bit},
+		{LUA_JITLIBNAME,luaopen_jit},
 #endif
 		{LUA_TABLIBNAME,luaopen_table},
 		{LUA_OSLIBNAME,luaopen_os},

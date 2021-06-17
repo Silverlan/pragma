@@ -93,7 +93,7 @@ void Lua::debug::enable_remote_debugging(lua_State *l)
 	oPackage["cpath"] = cpath;
 
 	Lua::GetGlobal(l,"require");
-	Lua::PushString(l,"modules/mobdebug");
+	Lua::PushString(l,"modules/mobdebug"); // Note: This will disable jit!
 	std::string err;
 	auto r = Lua::ProtectedCall(l,1,1,&err);
 	if(r == Lua::StatusCode::Ok)

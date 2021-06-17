@@ -301,12 +301,7 @@ endif()
 
 set(DEPENDENCY_LUA_INCLUDE ${DEPENDENCY_LUAJIT_INCLUDE} CACHE STRING "" FORCE)
 
-if(UNIX)
-	set(VULKAN_SDK "" CACHE PATH "Path to Vulkan SDK.")
-	search_lib_recursive(DEPENDENCY_GLSLANG_OS_DEPENDENT_LIBRARY external_libs/prosper_vulkan/third_party_libs/anvil/deps/glslang/glslang/OSDependent/Unix OSDependent STATIC)
-else()
-	set(VULKAN_SDK "$ENV{VULKAN_SDK}" CACHE INTERNAL "Path to Vulkan SDK.")
-endif()
+set(VULKAN_SDK "$ENV{VULKAN_SDK}" CACHE INTERNAL "Path to Vulkan SDK.")
 
 set(DEPENDENCY_VULKAN_INCLUDE "${VULKAN_SDK}/Include" CACHE PATH "Path to include directory.")
 if(WIN32)
@@ -608,6 +603,7 @@ set(SPIRV_SKIP_TESTS ON CACHE BOOL ".." FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL OFF FORCE)
 
 add_subdirectory("${VULKAN_SDK}/spirv-tools" third_party_libs/vulkan/spirv-tools)
+
 set(BUILD_SHARED_LIBS ON CACHE BOOL ".." FORCE)
 #set_target_properties(core_tables PROPERTIES FOLDER third_party_libs/anvil/tools/spirv)
 set_target_properties(enum_string_mapping PROPERTIES FOLDER third_party_libs/anvil/tools/spirv)

@@ -12,9 +12,9 @@
 #include <sharedutils/utildefinitions.h>
 #include <string>
 
-#define ENGINE_VERSION_MAJOR 0
-#define ENGINE_VERSION_MINOR 9
-#define ENGINE_VERSION_REVISION 15
+#define ENGINE_VERSION_MAJOR 1
+#define ENGINE_VERSION_MINOR 0
+#define ENGINE_VERSION_REVISION 0
 
 namespace util
 {

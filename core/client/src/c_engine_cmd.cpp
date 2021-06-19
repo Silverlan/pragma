@@ -71,7 +71,7 @@ void CEngine::RegisterConsoleCommands()
 	conVarMap.RegisterConVar("render_dynamic_lighting_enabled","1",ConVarFlags::Archive,"Enables or disables dynamic lighting.");
 	conVarMap.RegisterConVar("render_dynamic_shadows_enabled","1",ConVarFlags::Archive,"Enables or disables dynamic shadows.");
 	conVarMap.RegisterConVar("render_api","vulkan",ConVarFlags::Archive | ConVarFlags::Replicated,"The underlying rendering API to use.",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
-		auto &renderAPIs = pragma::rendering::get_available_graphics_apis();
+		auto renderAPIs = pragma::rendering::get_available_graphics_apis();
 		auto it = renderAPIs.begin();
 		std::vector<std::string_view> similarCandidates {};
 		ustring::gather_similar_elements(arg,[&it,&renderAPIs]() -> std::optional<std::string_view> {
@@ -209,7 +209,7 @@ void CEngine::RegisterConsoleCommands()
 	}});
 
 	conVarMap.RegisterConVar("audio_api","fmod",ConVarFlags::Archive | ConVarFlags::Replicated,"The underlying audio API to use.",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
-		auto &audioAPIs = pragma::audio::get_available_audio_apis();
+		auto audioAPIs = pragma::audio::get_available_audio_apis();
 		auto it = audioAPIs.begin();
 		std::vector<std::string_view> similarCandidates {};
 		ustring::gather_similar_elements(arg,[&it,&audioAPIs]() -> std::optional<std::string_view> {

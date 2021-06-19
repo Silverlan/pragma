@@ -301,7 +301,7 @@ void CPlayerComponent::UpdateObserverCallback()
 		if(rotateWithObservee)
 		{
 			// Apply entity rotation for the current frame
-			auto &entRot = obsC->GetEntity().GetRotation() *rotMod.get();
+			auto entRot = obsC->GetEntity().GetRotation() *rotMod.get();
 			rotMod.get() = entRot;
 			rotPos = entRot *rotPos;
 		}

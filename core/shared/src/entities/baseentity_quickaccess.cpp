@@ -152,7 +152,7 @@ PhysObj *BaseEntity::InitializePhysics(PHYSICSTYPE type)
 {
 	auto *physC = static_cast<pragma::BasePhysicsComponent*>(AddNetworkedComponent("physics").get());
 	if(physC == nullptr)
-		return false;
+		return nullptr;
 	return physC->InitializePhysics(type);
 }
 void BaseEntity::DestroyPhysicsObject()

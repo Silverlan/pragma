@@ -253,7 +253,7 @@ std::shared_ptr<VertexAnimation> VertexAnimation::Load(Model &mdl,const udm::Ass
 		return nullptr;
 	return morphAnim;
 }
-bool VertexAnimation::Save(Model &mdl,udm::AssetData &outData,std::string &outErr)
+bool VertexAnimation::Save(Model &mdl,udm::AssetDataArg outData,std::string &outErr)
 {
 	outData.SetAssetType(PMORPHANI_IDENTIFIER);
 	outData.SetAssetVersion(FORMAT_VERSION);

@@ -202,7 +202,7 @@ bool Skeleton::LoadFromAssetData(Frame &reference,const udm::AssetData &data,std
 		auto i = udmBoneList.size();
 		udmBoneList.push_back({});
 		auto &boneInfo = udmBoneList.back();
-		boneInfo.udmBone = udmBone;
+		boneInfo.udmBone = const_cast<const udm::LinkedPropertyWrapper&>(udmBone);
 		boneInfo.name = name;
 		uint32_t idx = 0;
 		udmBone["index"](idx);
@@ -261,14 +261,14 @@ bool Skeleton::LoadFromAssetData(Frame &reference,const udm::AssetData &data,std
 	return true;
 }
 
-bool Skeleton::Save(Frame &reference,udm::AssetData &outData,std::string &outErr)
+bool Skeleton::Save(Frame &reference,udm::AssetDataArg outData,std::string &outErr)
 {
 	outData.SetAssetType(PSKEL_IDENTIFIER);
 	outData.SetAssetVersion(FORMAT_VERSION);
 	auto udm = *outData;
 
-	std::function<void(udm::LinkedPropertyWrapper &prop,const Bone &bone)> writeBone = nullptr;
-	writeBone = [this,&reference,&writeBone](udm::LinkedPropertyWrapper &prop,const Bone &bone) {
+	std::function<void(udm::LinkedPropertyWrapperArg prop,const Bone &bone)> writeBone = nullptr;
+	writeBone = [this,&reference,&writeBone](udm::LinkedPropertyWrapperArg prop,const Bone &bone) {
 		auto udmBone = prop[bone.name];
 		udmBone["index"] = static_cast<uint32_t>(bone.ID);
 		umath::ScaledTransform transform;

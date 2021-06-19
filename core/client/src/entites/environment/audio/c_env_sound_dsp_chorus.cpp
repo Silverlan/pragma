@@ -9,6 +9,8 @@
 #include "pragma/entities/environment/audio/c_env_sound_dsp_chorus.h"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/c_engine.h"
+#include <alsoundsystem.hpp>
+#include "pragma/audio/c_engine_sound.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/lua/c_lentity_handles.hpp"

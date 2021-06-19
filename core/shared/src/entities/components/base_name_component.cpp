@@ -60,13 +60,13 @@ void BaseNameComponent::SetName(std::string name)
 }
 const util::PStringProperty &BaseNameComponent::GetNameProperty() const {return m_name;}
 
-void BaseNameComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BaseNameComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	udm["name"] = **m_name;
 }
 
-void BaseNameComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void BaseNameComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 	std::string name;

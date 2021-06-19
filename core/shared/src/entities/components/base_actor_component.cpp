@@ -86,7 +86,7 @@ void BaseActorComponent::Initialize()
 	m_netEvSetFrozen = SetupNetEvent("set_frozen");
 }
 
-void BaseActorComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BaseActorComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	udm["alive"] = m_bAlive;
@@ -105,7 +105,7 @@ void BaseActorComponent::Save(udm::LinkedPropertyWrapper &udm)
 		udmHitbox["offset"] = hitboxData.offset;
 	}
 }
-void BaseActorComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void BaseActorComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 	udm["alive"](m_bAlive);

@@ -19,7 +19,7 @@ bool pragma::asset::exists(const std::string &name,Type type)
 {
 	return find_file(name,type).has_value();
 }
-std::optional<std::string> pragma::asset::determine_format_from_data(VFilePtr &f,Type type)
+std::optional<std::string> pragma::asset::determine_format_from_data(VFilePtr f,Type type)
 {
 	auto offset = f->Tell();
 	std::array<char,4> header {};
@@ -352,7 +352,7 @@ std::unique_ptr<pragma::asset::IAssetWrapper> pragma::asset::AssetManager::Impor
 		if(optOutErr)
 			*optOutErr = err;
 	}
-	return false;
+	return nullptr;
 }
 bool pragma::asset::AssetManager::ExportAsset(Game &game,Type type,VFilePtrReal f,const IAssetWrapper &assetWrapper,std::string *optOutErr) const
 {

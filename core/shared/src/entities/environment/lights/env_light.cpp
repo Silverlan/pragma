@@ -65,7 +65,7 @@ void BaseEnvLightComponent::Initialize()
 	m_netEvSetFalloffExponent = SetupNetEvent("set_falloff_exponent");
 }
 
-void BaseEnvLightComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BaseEnvLightComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	udm["lightType"] = m_lightType;
@@ -74,7 +74,7 @@ void BaseEnvLightComponent::Save(udm::LinkedPropertyWrapper &udm)
 	udm["lightIntensityType"] = m_lightIntensityType;
 	udm["lightIntensity"] = m_lightIntensity;
 }
-void BaseEnvLightComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void BaseEnvLightComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 	udm["lightType"](m_lightType);

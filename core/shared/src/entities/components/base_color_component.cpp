@@ -55,12 +55,12 @@ void BaseColorComponent::Initialize()
 	//ent.AddComponent("io");
 	m_netEvSetColor = SetupNetEvent("set_color");
 }
-void BaseColorComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BaseColorComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	udm["color"] = (*m_color)->ToVector4();
 }
-void BaseColorComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void BaseColorComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 	Vector4 color;

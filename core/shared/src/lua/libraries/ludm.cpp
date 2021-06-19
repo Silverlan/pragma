@@ -195,7 +195,7 @@ static void set_property_value(lua_State *l,::udm::LinkedPropertyWrapper p,luabi
 	set_property_value(l,p,udmType,o,3);
 }
 
-static luabind::object get_array_values(lua_State *l,::udm::LinkedPropertyWrapper &p,std::optional<::udm::Type> type)
+static luabind::object get_array_values(lua_State *l,::udm::LinkedPropertyWrapperArg p,std::optional<::udm::Type> type)
 {
 	auto t = luabind::newtable(l);
 	auto size = p.GetSize();
@@ -241,7 +241,7 @@ static luabind::object get_array_values(lua_State *l,::udm::LinkedPropertyWrappe
 	return t;
 }
 
-static luabind::object get_blob_array_values(lua_State *l,::udm::PropertyWrapper &p,::udm::Type type)
+static luabind::object get_blob_array_values(lua_State *l,const ::udm::PropertyWrapper &p,::udm::Type type)
 {
 	auto t = luabind::newtable(l);
 	auto vs = [l,&p,&type,&t](auto tag) {
@@ -259,7 +259,7 @@ static luabind::object get_blob_array_values(lua_State *l,::udm::PropertyWrapper
 	return t;
 }
 
-static void set_blob_array_values(lua_State *l,::udm::PropertyWrapper &p,const std::string &path,::udm::Type type,luabind::table<> t,::udm::Type blobType=::udm::Type::BlobLz4)
+static void set_blob_array_values(lua_State *l,const::udm::PropertyWrapper &p,const std::string &path,::udm::Type type,luabind::table<> t,::udm::Type blobType=::udm::Type::BlobLz4)
 {
 	if(blobType != ::udm::Type::Blob && blobType != ::udm::Type::BlobLz4)
 		return;
@@ -356,7 +356,7 @@ static luabind::object get_property_value(lua_State *l,::udm::Type type,void *pt
 	static_assert(umath::to_integral(::udm::Type::Count) == 36,"Update this when types have been added or removed!");
 	return {};
 }
-static luabind::object get_property_value(lua_State *l,::udm::PropertyWrapper &val)
+static luabind::object get_property_value(lua_State *l,const ::udm::PropertyWrapper &val)
 {
 	if(!static_cast<bool>(val))
 		return {};
@@ -366,7 +366,7 @@ static luabind::object get_property_value(lua_State *l,::udm::PropertyWrapper &v
 		return {};
 	return get_property_value(l,type,ptr);
 }
-static luabind::object get_property_value(lua_State *l,::udm::PropertyWrapper &val,::udm::Type type)
+static luabind::object get_property_value(lua_State *l,const ::udm::PropertyWrapper &val,::udm::Type type)
 {
 	if(!static_cast<bool>(val))
 		return {};
@@ -407,11 +407,11 @@ LuaUdmArrayIterator::LuaUdmArrayIterator(::udm::PropertyWrapper &prop)
 	: m_property{&prop}
 {}
 
-static void data_block_to_udm(ds::Block &dataBlock,udm::LinkedPropertyWrapper &udm)
+static void data_block_to_udm(ds::Block &dataBlock,udm::LinkedPropertyWrapperArg udm)
 {
-	std::function<void(udm::LinkedPropertyWrapper&,ds::Block&)> dataBlockToUdm = nullptr;
-	dataBlockToUdm = [&dataBlockToUdm,&udm](udm::LinkedPropertyWrapper &prop,ds::Block &block) {
-		prop.InitializeProperty();
+	std::function<void(udm::LinkedPropertyWrapperArg,ds::Block&)> dataBlockToUdm = nullptr;
+	dataBlockToUdm = [&dataBlockToUdm,&udm](udm::LinkedPropertyWrapperArg prop,ds::Block &block) {
+		const_cast<udm::LinkedPropertyWrapper&>(prop).InitializeProperty();
 
 		for(auto &pair : *block.GetData())
 		{
@@ -562,21 +562,21 @@ static std::ostream &operator<<(std::ostream& os,const ::udm::HdrColor &hdr) {
 	return os<<hdr[0]<<" "<<hdr[1]<<" "<<hdr[2]<<" "<<hdr[3];
 }
 
-static luabind::object get_children(lua_State *l,::udm::PropertyWrapper &p)
+static luabind::object get_children(lua_State *l,const ::udm::PropertyWrapper &p)
 {
 	auto t = luabind::newtable(l);
 	auto *el = p.GetValuePtr<::udm::Element>();
 	if(el == nullptr)
 		return t;
-	auto *linked = p.GetLinked();
+	auto *linked = const_cast<::udm::PropertyWrapper&>(p).GetLinked();
 	if(linked)
 	{
-		for(auto pair : p.ElIt())
+		for(auto pair : linked->ElIt())
 			t[std::string{pair.key}] = (*linked)[pair.key];
 	}
 	else
 	{
-		for(auto pair : p.ElIt())
+		for(auto pair : linked->ElIt())
 			t[std::string{pair.key}] = p[pair.key];
 	}
 	return t;
@@ -585,7 +585,7 @@ static luabind::object get_children(lua_State *l,::udm::PropertyWrapper &p)
 template<typename T>
 	static void set_array_values(udm::PropertyWrapper &p,const std::string &name,::udm::Type type,luabind::table<> t,size_t size,::udm::ArrayType arrayType)
 {
-	auto &a = p.AddArray(name,size,type,arrayType);
+	auto a = p.AddArray(name,size,type,arrayType);
 	auto *pVal = static_cast<T*>(a.GetValue<::udm::Array>().GetValues());
 	for(auto i=decltype(size){0u};i<size;++i)
 	{
@@ -620,10 +620,7 @@ static void set_array_values(lua_State *l,udm::PropertyWrapper &p,const std::str
 template<class T,class TPropertyWrapper,class TClassDef>
 	void register_property_methods(TClassDef &classDef)
 {
-	classDef.def("It",static_cast<LuaUdmArrayIterator(*)(lua_State*,T&)>([](lua_State *l,T &p) -> LuaUdmArrayIterator {
-		return LuaUdmArrayIterator{static_cast<TPropertyWrapper>(p)};
-	}),luabind::return_stl_iterator{})
-	.def("Add",static_cast<::udm::LinkedPropertyWrapper(*)(lua_State*,T&,const std::string&)>([](lua_State *l,T &p,const std::string &path) -> ::udm::LinkedPropertyWrapper {
+	classDef.def("Add",static_cast<::udm::LinkedPropertyWrapper(*)(lua_State*,T&,const std::string&)>([](lua_State *l,T &p,const std::string &path) -> ::udm::LinkedPropertyWrapper {
 		return static_cast<TPropertyWrapper>(p).Add(path);
 	}))
 	.def("Add",static_cast<::udm::LinkedPropertyWrapper(*)(lua_State*,T&,const std::string&,::udm::Type)>([](lua_State *l,T &p,const std::string &path,::udm::Type type) -> ::udm::LinkedPropertyWrapper {
@@ -1334,6 +1331,11 @@ void Lua::udm::register_library(Lua::Interface &lua)
 	auto cdPropWrap = luabind::class_<::udm::PropertyWrapper>("PropertyWrapper");
 	cdPropWrap.def(luabind::constructor<>());
 	cdPropWrap.def(luabind::tostring(luabind::self));
+	static std::optional<LuaUdmArrayIterator> g_it {}; // HACK: This is a workaround for a bug in luabind, which causes errors when compiled with gcc.
+	cdPropWrap.def("It",static_cast<LuaUdmArrayIterator&(*)(lua_State*,::udm::PropertyWrapper&)>([](lua_State *l,::udm::PropertyWrapper &p) -> LuaUdmArrayIterator& {
+		g_it = LuaUdmArrayIterator{p};
+		return *g_it;
+	}),luabind::return_stl_iterator{});
 	register_property_methods<::udm::PropertyWrapper,::udm::PropertyWrapper&>(cdPropWrap);
 	modUdm[cdPropWrap];
 

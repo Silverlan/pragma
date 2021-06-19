@@ -266,7 +266,7 @@ bool CParticleSystemComponent::LoadFromAssetData(CParticleSystemData &ptData,con
 		for(auto i=decltype(numModifiers){0u};i<numModifiers;++i)
 		{
 			auto &modifier = modifiers.back();
-			auto &udmModifier = udmModifiers[i];
+			auto udmModifier = udmModifiers[i];
 			std::string name;
 			udmModifier["name"](name);
 			if(name.empty())

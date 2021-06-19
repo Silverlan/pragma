@@ -125,7 +125,7 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 			Con::cout<<"No validation errors found, file is a valid UDM file!"<<err<<Con::endl;
 	},ConVarFlags::None,"Validates the specified UDM file.");
 	map.RegisterConVar("phys_engine","bullet",ConVarFlags::Archive | ConVarFlags::Replicated,"The underlying physics engine to use.",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
-		auto &physEngines = pragma::physics::IEnvironment::GetAvailablePhysicsEngines();
+		auto physEngines = pragma::physics::IEnvironment::GetAvailablePhysicsEngines();
 		auto it = physEngines.begin();
 		std::vector<std::string_view> similarCandidates {};
 		ustring::gather_similar_elements(arg,[&it,&physEngines]() -> std::optional<std::string_view> {
@@ -145,7 +145,7 @@ void Engine::RegisterSharedConsoleCommands(ConVarMap &map)
 		}
 	});
 	map.RegisterConVar("net_library","steam_networking",ConVarFlags::Archive | ConVarFlags::Replicated,"The underlying networking library to use for multiplayer games.",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
-		auto &netLibs = pragma::networking::GetAvailableNetworkingModules();
+		auto netLibs = pragma::networking::GetAvailableNetworkingModules();
 		auto it = netLibs.begin();
 		std::vector<std::string_view> similarCandidates {};
 		ustring::gather_similar_elements(arg,[&it,&netLibs]() -> std::optional<std::string_view> {

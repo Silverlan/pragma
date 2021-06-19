@@ -8,6 +8,7 @@
 #ifndef __MODELMESH_H__
 #define __MODELMESH_H__
 #include "pragma/networkdefinitions.h"
+#include <udm_types.hpp>
 #include <vector>
 #include <mathutil/glmutil.h>
 #include "pragma/model/vertex.h"
@@ -122,7 +123,7 @@ public:
 	uint32_t GetReferenceId() const;
 	void SetReferenceId(uint32_t refId);
 
-	bool Save(udm::AssetData &outData,std::string &outErr);
+	bool Save(udm::AssetDataArg outData,std::string &outErr);
 	bool LoadFromAssetData(const udm::AssetData &data,std::string &outErr);
 protected:
 	void Copy(ModelSubMesh &other,bool fullCopy) const;

@@ -489,27 +489,27 @@ void CSceneComponent::SetWorldEnvironment(WorldEnvironment &env)
 	auto &fog = m_worldEnvironment->GetFogSettings();
 	m_envCallbacks.push_back(fog.GetColorProperty()->AddCallback([this](std::reference_wrapper<const Color> oldVal,std::reference_wrapper<const Color> newVal) {
 		m_fogData.color = newVal.get().ToVector4();
-		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(decltype(m_fogData),color),m_fogData.color);
+		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(FogData,color),m_fogData.color);
 	}));
 	m_envCallbacks.push_back(fog.GetStartProperty()->AddCallback([this](std::reference_wrapper<const float> oldVal,std::reference_wrapper<const float> newVal) {
 		m_fogData.start = newVal.get();
-		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(decltype(m_fogData),start),m_fogData.start);
+		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(FogData,start),m_fogData.start);
 	}));
 	m_envCallbacks.push_back(fog.GetEndProperty()->AddCallback([this](std::reference_wrapper<const float> oldVal,std::reference_wrapper<const float> newVal) {
 		m_fogData.end = newVal.get();
-		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(decltype(m_fogData),end),m_fogData.end);
+		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(FogData,end),m_fogData.end);
 	}));
 	m_envCallbacks.push_back(fog.GetMaxDensityProperty()->AddCallback([this](std::reference_wrapper<const float> oldVal,std::reference_wrapper<const float> newVal) {
 		m_fogData.density = newVal.get();
-		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(decltype(m_fogData),density),m_fogData.density);
+		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(FogData,density),m_fogData.density);
 	}));
 	m_envCallbacks.push_back(fog.GetTypeProperty()->AddCallback([this](std::reference_wrapper<const uint8_t> oldVal,std::reference_wrapper<const uint8_t> newVal) {
 		m_fogData.type = static_cast<uint32_t>(newVal.get());
-		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(decltype(m_fogData),type),m_fogData.type);
+		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(FogData,type),m_fogData.type);
 	}));
 	m_envCallbacks.push_back(fog.GetEnabledProperty()->AddCallback([this](std::reference_wrapper<const bool> oldVal,std::reference_wrapper<const bool> newVal) {
 		m_fogData.flags = static_cast<uint32_t>(newVal.get());
-		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(decltype(m_fogData),flags),m_fogData.flags);
+		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(m_fogBuffer,offsetof(FogData,flags),m_fogData.flags);
 	}));
 	m_fogData.color = fog.GetColor().ToVector4();
 	m_fogData.start = fog.GetStart();

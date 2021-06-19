@@ -54,12 +54,12 @@ void BaseGamemodeComponent::OnRemove()
 	gmComponents.erase(it);
 }
 
-void BaseGamemodeComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BaseGamemodeComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 }
 
-void BaseGamemodeComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void BaseGamemodeComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 }

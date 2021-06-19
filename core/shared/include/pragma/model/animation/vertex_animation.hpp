@@ -9,6 +9,7 @@
 #define __VERTEX_ANIMATION_HPP__
 
 #include "pragma/networkdefinitions.h"
+#include <udm_types.hpp>
 #include <mathutil/uvec.h>
 #include <memory>
 
@@ -128,7 +129,7 @@ public:
 
 	void Rotate(const Quat &rot);
 	void Scale(const Vector3 &scale);
-	bool Save(Model &mdl,udm::AssetData &outData,std::string &outErr);
+	bool Save(Model &mdl,udm::AssetDataArg outData,std::string &outErr);
 
 	bool operator==(const VertexAnimation &other) const;
 	bool operator!=(const VertexAnimation &other) const {return !operator==(other);}

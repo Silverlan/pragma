@@ -35,13 +35,13 @@ const std::string &GlobalNameComponent::GetGlobalName() const {return m_globalNa
 void GlobalNameComponent::SetGlobalName(const std::string &name) {m_globalName = name;}
 luabind::object GlobalNameComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<GlobalNameComponentHandleWrapper>(l);}
 
-void GlobalNameComponent::Save(udm::LinkedPropertyWrapper &udm)
+void GlobalNameComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	udm["name"] = GetGlobalName();
 }
 
-void GlobalNameComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void GlobalNameComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 	auto name = m_globalName;

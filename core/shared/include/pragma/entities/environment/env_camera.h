@@ -30,8 +30,8 @@ namespace pragma
 		BaseEnvCameraComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 
-		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
-		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
+		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
+		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 
 		void UpdateMatrices();
 		void UpdateViewMatrix();

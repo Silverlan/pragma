@@ -229,7 +229,7 @@ SoundScriptValue::SoundScriptValue(udm::LinkedPropertyWrapper &prop)
 	Initialize(0.f);
 	Load(prop);
 }
-bool SoundScriptValue::Load(udm::LinkedPropertyWrapper &prop)
+bool SoundScriptValue::Load(const udm::LinkedPropertyWrapper &prop)
 {
 	auto &udmVal = prop;
 	if(udmVal["min"] && udmVal["max"])

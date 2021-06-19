@@ -8,6 +8,7 @@
 #define __PARTICLESYSTEMDATA_H__
 
 #include "pragma/networkdefinitions.h"
+#include <udm_types.hpp>
 #include <unordered_map>
 #include <string>
 #include <vector>
@@ -44,7 +45,7 @@ namespace pragma
 		static constexpr uint32_t PPTSYS_FORMAT_VERSION = 1u;
 		static constexpr auto PPTSYS_COLLECTION_IDENTIFIER = "PPTSYSCOLLECTION";
 		static constexpr auto PPTSYS_IDENTIFIER = "PPTSYS";
-		DLLNETWORK bool save_particle_system(const CParticleSystemData &data,udm::AssetData &outData,std::string &outErr);
+		DLLNETWORK bool save_particle_system(const CParticleSystemData &data,udm::AssetDataArg outData,std::string &outErr);
 		DLLNETWORK bool save_particle_system(const std::string &name,const std::unordered_map<std::string,CParticleSystemData> &particles,const std::string &rootPath="");
 		DLLNETWORK bool save_particle_system(VFilePtrReal &f,const std::unordered_map<std::string,CParticleSystemData> &particles,const std::string &rootPath="");
 	};

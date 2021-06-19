@@ -22,6 +22,7 @@
 #include "pragma/model/model_flexes.hpp"
 #include "pragma/physics/ik/ik_controller.hpp"
 #include "pragma/phonememap.hpp"
+#include <udm_types.hpp>
 #include <sharedutils/def_handle.h>
 #include <memory>
 
@@ -243,10 +244,10 @@ public:
 	template<class TModel>
 		static std::shared_ptr<Model> Create(const Model &other);
 	template<class TModel>
-		static std::shared_ptr<Model> Load(Game &game,const udm::AssetData &data,std::string &outErr)
+		static std::shared_ptr<Model> Load(NetworkState &nw,const udm::AssetData &data,std::string &outErr)
 	{
-		auto mdl = Create<TModel>(game.GetNetworkState(),0u);
-		if(mdl->LoadFromAssetData(game,data,outErr) == false)
+		auto mdl = Create<TModel>(&nw,0u);
+		if(Load(*mdl,nw,data,outErr) == false)
 			return nullptr;
 		return mdl;
 	}
@@ -269,7 +270,7 @@ public:
 	bool operator!=(const Model &other) const;
 	Model &operator=(const Model &other);
 	virtual ~Model();
-	bool Save(Game &game,udm::AssetData &outData,std::string &outErr);
+	bool Save(Game &game,udm::AssetDataArg outData,std::string &outErr);
 	bool Save(Game &game,const std::string &fileName,std::string &outErr);
 	bool Save(Game &game,std::string &outErr);
 	bool SaveLegacy(Game *game,const std::string &name,const std::string &rootPath="") const;
@@ -568,6 +569,7 @@ protected:
 	std::vector<Flex>::iterator FindFlex(const std::string &name);
 private:
 	void Construct();
+	static bool Load(Model &mdl,NetworkState &nw,const udm::AssetData &data,std::string &outErr);
 	NetworkState *m_networkState = nullptr;
 	mutable MetaInfo m_metaInfo = {};
 	bool m_bValid = false;

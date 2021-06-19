@@ -547,7 +547,7 @@ template<class TChannel>
 	channel->AddValue(curVal);
 };
 
-bool pragma::animation::Animation::Save(udm::AssetData &outData,std::string &outErr,const Frame *optReference)
+bool pragma::animation::Animation::Save(udm::AssetDataArg outData,std::string &outErr,const Frame *optReference)
 {
 	outData.SetAssetType(PANIM_IDENTIFIER);
 	outData.SetAssetVersion(PANIM_VERSION);

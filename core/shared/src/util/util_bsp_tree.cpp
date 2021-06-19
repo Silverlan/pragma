@@ -96,7 +96,7 @@ std::shared_ptr<BSPTree> BSPTree::Load(const udm::AssetData &data,std::string &o
 	return bspTree;
 
 }
-bool BSPTree::Save(udm::AssetData &outData,std::string &outErr)
+bool BSPTree::Save(udm::AssetDataArg outData,std::string &outErr)
 {
 	outData.SetAssetType(PBSP_IDENTIFIER);
 	outData.SetAssetVersion(PBSP_VERSION);

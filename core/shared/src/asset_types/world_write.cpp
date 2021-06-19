@@ -184,7 +184,7 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data,Enti
 	{
 		m_bspTree = util::BSPTree::Load(udm::AssetData{udmBsp["tree"]},outErr);
 		if(m_bspTree == nullptr)
-			return nullptr;
+			return false;
 
 		auto numClusters = m_bspTree->GetClusterCount();
 		std::vector<uint8_t> clusterMeshIndexData;
@@ -210,7 +210,7 @@ bool pragma::asset::WorldData::LoadFromAssetData(const udm::AssetData &data,Enti
 	return true;
 }
 
-bool pragma::asset::WorldData::Save(udm::AssetData &outData,const std::string &mapName,std::string &outErr)
+bool pragma::asset::WorldData::Save(udm::AssetDataArg outData,const std::string &mapName,std::string &outErr)
 {
 	outData.SetAssetType(PMAP_IDENTIFIER);
 	outData.SetAssetVersion(PMAP_VERSION);

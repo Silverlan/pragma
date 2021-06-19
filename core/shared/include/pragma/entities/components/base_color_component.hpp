@@ -35,9 +35,9 @@ namespace pragma
 		void SetColor(const Vector4 &color);
 		void SetColor(const Vector3 &color);
 
-		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
+		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 	protected:
-		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
+		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 		BaseColorComponent(BaseEntity &ent);
 		util::PColorProperty m_color;
 		CallbackHandle m_cbOnColorChanged = {};

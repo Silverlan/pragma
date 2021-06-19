@@ -217,7 +217,7 @@ void pragma::CEyeComponent::UpdateEyeballMT(const Eyeball &eyeball,uint32_t eyeb
 	auto &state = eyeballData.state;
 	auto &config = eyeballData.config;
 
-	auto &viewTarget = GetViewTarget();
+	auto viewTarget = GetViewTarget();
 
 	// To world space
 	umath::Transform bonePose {};

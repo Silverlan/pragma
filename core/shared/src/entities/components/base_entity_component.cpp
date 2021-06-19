@@ -316,7 +316,7 @@ void BaseEntityComponent::OnEntityComponentRemoved(BaseEntityComponent &componen
 	if(BroadcastEvent(EVENT_ON_ENTITY_COMPONENT_REMOVED,evData) != util::EventReply::Handled && genericC)
 		genericC->InvokeEventCallbacks(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED,evData);
 }
-void BaseEntityComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BaseEntityComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	udm["version"] = GetVersion();
 
@@ -324,7 +324,7 @@ void BaseEntityComponent::Save(udm::LinkedPropertyWrapper &udm)
 	udm["lastTick"] = m_tickData.lastTick -tCur;
 	udm["nextTick"] = m_tickData.nextTick -tCur;
 }
-void BaseEntityComponent::Load(udm::LinkedPropertyWrapper &udm)
+void BaseEntityComponent::Load(udm::LinkedPropertyWrapperArg udm)
 {
 	uint32_t version = 0;
 	udm["version"](version);
@@ -339,7 +339,7 @@ void BaseEntityComponent::Load(udm::LinkedPropertyWrapper &udm)
 	m_tickData.nextTick += tCur;
 	Load(udm,version);
 }
-void BaseEntityComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version) {}
+void BaseEntityComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) {}
 void BaseEntityComponent::OnEntitySpawn() {}
 void BaseEntityComponent::OnEntityPostSpawn() {}
 void BaseEntityComponent::OnAttached(BaseEntity &ent) {}

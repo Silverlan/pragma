@@ -101,13 +101,13 @@ void BaseHealthComponent::SetHealth(uint16_t health)
 }
 void BaseHealthComponent::SetMaxHealth(uint16_t maxHealth) {*m_maxHealth = maxHealth;}
 
-void BaseHealthComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BaseHealthComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	udm["health"] = **m_health;
 	udm["maxHealth"] = **m_maxHealth;
 }
-void BaseHealthComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void BaseHealthComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 	uint16_t health = 0;

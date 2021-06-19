@@ -66,7 +66,7 @@ namespace pragma::asset
 		const std::unordered_map<std::string,std::string> &GetKeyValues() const;
 		std::unordered_map<std::string,std::string> &GetKeyValues();
 		std::optional<std::string> GetKeyValue(const std::string &key) const;
-		std::string GetKeyValue(const std::string &key,const std::string &default) const;
+		std::string GetKeyValue(const std::string &key,const std::string &def) const;
 		const std::vector<Output> &GetOutputs() const;
 		std::vector<Output> &GetOutputs();
 		const std::vector<uint16_t> &GetLeaves() const;
@@ -133,8 +133,8 @@ namespace pragma::asset
 		std::vector<std::string> &GetMaterialTable();
 		void SetMessageLogger(const std::function<void(const std::string&)> &msgLogger);
 
-		bool Save(udm::AssetData &outData,const std::string &mapName,std::string &outErr);
-		bool LoadFromAssetData(const udm::AssetData &data,EntityData::Flags entMask,std::string &outErr);
+		bool Save(udm::AssetDataArg outData,const std::string &mapName,std::string &outErr);
+		bool LoadFromAssetData(udm::AssetDataArg data,EntityData::Flags entMask,std::string &outErr);
 	private:
 		WorldData(NetworkState &nw);
 		void WriteDataOffset(VFilePtrReal &f,uint64_t offsetToOffset);

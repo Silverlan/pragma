@@ -8,6 +8,7 @@
 #ifndef __SKELETON_H__
 #define __SKELETON_H__
 #include "pragma/networkdefinitions.h"
+#include <udm_types.hpp>
 #include <iostream>
 #include <vector>
 #include <mathutil/glmutil.h>
@@ -68,7 +69,7 @@ public:
 	std::vector<std::shared_ptr<Bone>> &GetBones();
 
 	void Merge(Skeleton &other);
-	bool Save(Frame &reference,udm::AssetData &outData,std::string &outErr);
+	bool Save(Frame &reference,udm::AssetDataArg outData,std::string &outErr);
 
 	bool operator==(const Skeleton &other) const;
 	bool operator!=(const Skeleton &other) const {return !operator==(other);}

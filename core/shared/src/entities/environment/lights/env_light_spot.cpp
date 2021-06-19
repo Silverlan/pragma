@@ -44,14 +44,14 @@ void BaseEnvLightSpotComponent::Initialize()
 	m_netEvSetConeStartOffset = SetupNetEvent("set_cone_start_offset");
 }
 
-void BaseEnvLightSpotComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BaseEnvLightSpotComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	udm["innerConeAngle"] = **m_angInnerCutoff;
 	udm["outerConeAngle"] = **m_angOuterCutoff;
 	udm["coneStartOffset"] = **m_coneStartOffset;
 }
-void BaseEnvLightSpotComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void BaseEnvLightSpotComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 	udm["innerConeAngle"](**m_angInnerCutoff);

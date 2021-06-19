@@ -84,8 +84,8 @@ void Animated2Component::MaintainAnimations(double dt)
 }
 luabind::object Animated2Component::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<Animated2ComponentHandleWrapper>(l);}
 
-void Animated2Component::Save(udm::LinkedPropertyWrapper &udm) {}
-void Animated2Component::Load(udm::LinkedPropertyWrapper &udm,uint32_t version) {}
+void Animated2Component::Save(udm::LinkedPropertyWrapperArg udm) {}
+void Animated2Component::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) {}
 void Animated2Component::ResetAnimation(const std::shared_ptr<Model> &mdl) {}
 
 /////////////////

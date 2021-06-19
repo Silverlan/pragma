@@ -77,7 +77,7 @@ util::EventReply BaseFlammableComponent::HandleEvent(ComponentEventId eventId,Co
 		Extinguish();
 	return util::EventReply::Unhandled;
 }
-void BaseFlammableComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BaseFlammableComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	udm["ignitable"] = **m_bIgnitable;
@@ -88,7 +88,7 @@ void BaseFlammableComponent::Save(udm::LinkedPropertyWrapper &udm)
 		tExtinguish -= tCur;
 	udm["timeUntilExtinguish"] = tExtinguish;
 }
-void BaseFlammableComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void BaseFlammableComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 	auto ignitable = IsIgnitable();

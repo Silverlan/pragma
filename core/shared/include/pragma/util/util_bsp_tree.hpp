@@ -13,7 +13,7 @@
 #include <mathutil/uvec.h>
 #include <mathutil/plane.hpp>
 
-namespace udm {struct AssetData;};
+namespace udm {struct AssetData; using AssetDataArg = const AssetData&;};
 namespace util
 {
 #pragma pack(push,1)
@@ -70,7 +70,7 @@ namespace util
 		bool IsAabbVisibleInCluster(const Vector3 &min,const Vector3 &max,ClusterIndex clusterIdx) const;
 		void UpdateVisibilityBounds();
 
-		bool Save(udm::AssetData &outData,std::string &outErr);
+		bool Save(udm::AssetDataArg outData,std::string &outErr);
 		Node &CreateNode();
 	protected:
 		BSPTree()=default;

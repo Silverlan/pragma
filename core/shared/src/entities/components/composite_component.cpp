@@ -69,7 +69,7 @@ const std::vector<EntityHandle> &CompositeComponent::GetEntities() const {return
 
 luabind::object CompositeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CompositeComponentHandleWrapper>(l);}
 
-void CompositeComponent::Save(udm::LinkedPropertyWrapper &udm)
+void CompositeComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	std::vector<std::string> ents;
@@ -78,7 +78,7 @@ void CompositeComponent::Save(udm::LinkedPropertyWrapper &udm)
 		ents.push_back(util::uuid_to_string(hEnt.get()->GetUuid()));
 	udm["entities"] = ents;
 }
-void CompositeComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void CompositeComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 

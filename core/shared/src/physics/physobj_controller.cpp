@@ -49,8 +49,10 @@ bool ControllerPhysObj::IsGroundWalkable() const
 {
 	if(IsOnGround() == false)
 		return false;
-	auto &n = *m_controller->GetGroundTouchNormal();
-	auto angle = umath::acos(uvec::dot(n,m_controller->GetUpDirection()));
+	auto n = m_controller->GetGroundTouchNormal();
+	if(!n.has_value())
+		return false;
+	auto angle = umath::acos(uvec::dot(*n,m_controller->GetUpDirection()));
 	auto slopeLimit = GetSlopeLimit();
 	auto bGroundWalkable = (angle <= umath::deg_to_rad(slopeLimit));
 	return bGroundWalkable;

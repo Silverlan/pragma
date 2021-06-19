@@ -107,7 +107,7 @@ namespace pragma
 		BaseTouchComponent(BaseEntity &ent);
 		void OnPhysicsInitialized();
 		void UpdateTouch();
-		void StartTouch(PhysTouch &touch);
+		void StartTouch(const PhysTouch &touch);
 		void FireStartTouchEvents(TouchInfo &touch,bool isFirstTouch);
 		void FireEndTouchEvents(TouchInfo &touch,bool isLastTouch);
 		void OnContact(physics::ContactInfo &contact);

@@ -38,7 +38,7 @@ namespace pragma
 	};
 };
 DEFINE_STD_HASH_SPECIALIZATION(pragma::EEntityComponentCallbackEvent);
-namespace udm {struct LinkedPropertyWrapper;};
+namespace udm {struct LinkedPropertyWrapper; using LinkedPropertyWrapperArg = const LinkedPropertyWrapper&;};
 class DataStream;
 namespace pragma
 {
@@ -126,8 +126,8 @@ namespace pragma
 		virtual void OnAttached(BaseEntity &ent);
 		virtual void OnDetached(BaseEntity &ent);
 
-		virtual void Save(udm::LinkedPropertyWrapper &udm);
-		void Load(udm::LinkedPropertyWrapper &udm);
+		virtual void Save(udm::LinkedPropertyWrapperArg udm);
+		void Load(udm::LinkedPropertyWrapperArg udm);
 
 		virtual void OnEntitySpawn();
 		virtual void OnEntityPostSpawn();
@@ -180,7 +180,7 @@ namespace pragma
 		friend BaseEntityComponentSystem;
 		BaseEntityComponent(BaseEntity &ent);
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData);
-		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version);
+		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version);
 
 		// Used for typed callback lookups. If this function doesn't change outTypeIndex, the actual component's type is used
 		// as reference. Overwrite this on the serverside or clientside version of the component,

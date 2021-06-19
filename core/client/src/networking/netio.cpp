@@ -30,5 +30,6 @@ void ClientState::SendPacket(const std::string &name,NetPacket &packet)
 }
 void ClientState::SendPacket(const std::string &name,pragma::networking::Protocol protocol)
 {
-	SendPacket(name,NetPacket{},protocol);
+	NetPacket packet{};
+	SendPacket(name,packet,protocol);
 }

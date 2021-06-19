@@ -50,7 +50,7 @@ void BaseEnvLightSpotVolComponent::Initialize()
 	m_netEvSetSpotlightTarget = SetupNetEvent("set_spotlight_target");
 }
 
-void BaseEnvLightSpotVolComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BaseEnvLightSpotVolComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	udm["coneAngle"] = m_coneAngle;
@@ -58,7 +58,7 @@ void BaseEnvLightSpotVolComponent::Save(udm::LinkedPropertyWrapper &udm)
 	udm["spotlightTargetName"] = m_kvSpotlightTargetName;
 	util::write_udm_entity(udm["spotlightTarget"],m_hSpotlightTarget);
 }
-void BaseEnvLightSpotVolComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void BaseEnvLightSpotVolComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 	udm["coneAngle"](m_coneAngle);

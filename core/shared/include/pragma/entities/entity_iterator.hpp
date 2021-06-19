@@ -341,9 +341,17 @@ public:
 		: BaseEntityIterator{itData,bEndIterator},m_components{&static_cast<ComponentContainer*>(m_iteratorData->entities.get())->components}
 	{}
 	BaseEntityComponentIterator(const BaseEntityIterator &other)
+		: BaseEntityIterator{other}
+	{}
+	BaseEntityComponentIterator(const BaseEntityComponentIterator<TComponent> &other)
 		: BaseEntityIterator{other},m_components{other.m_components}
 	{}
 	BaseEntityComponentIterator<TComponent> &operator=(const BaseEntityIterator &other)
+	{
+		BaseEntityIterator::operator=(other);
+		return *this;
+	}
+	BaseEntityComponentIterator<TComponent> &operator=(const BaseEntityComponentIterator<TComponent> &other)
 	{
 		BaseEntityIterator::operator=(other);
 		m_components = other.m_components;

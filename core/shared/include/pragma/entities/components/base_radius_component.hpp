@@ -23,8 +23,8 @@ namespace pragma
 		const util::PFloatProperty &GetRadiusProperty() const;
 		void SetRadius(float radius);
 
-		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
-		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
+		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
+		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 	protected:
 		BaseRadiusComponent(BaseEntity &ent);
 		pragma::NetEventId m_netEvSetRadius = pragma::INVALID_NET_EVENT;

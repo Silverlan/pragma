@@ -90,7 +90,7 @@ namespace pragma::animation
 		std::pair<uint32_t,uint32_t> FindInterpolationIndices(float t,float &outInterpFactor,uint32_t pivotIndex) const;
 		std::pair<uint32_t,uint32_t> FindInterpolationIndices(float t,float &outInterpFactor) const;
 		template<typename T>
-			bool IsValueType() const {return udm::type_to_enum<T>() == valueType;}
+			bool IsValueType() const {return udm::type_to_enum<T>() == GetValueType();}
 		template<typename T>
 			IteratorWrapper<T> It();
 		template<typename T>
@@ -118,7 +118,7 @@ DLLNETWORK std::ostream &operator<<(std::ostream &out,const pragma::animation::A
 template<typename T>
 	uint32_t pragma::animation::AnimationChannel::AddValue(float t,const T &value)
 {
-	if(udm::type_to_enum<T>() != values.GetValueType())
+	if(udm::type_to_enum<T>() != GetValueType())
 		throw std::invalid_argument{"Value type mismatch!"};
 	return AddValue(t,&value);
 }
@@ -165,54 +165,82 @@ template<typename T>
 {}
 template<typename T>
 	pragma::animation::AnimationChannel::Iterator<T> begin()
-{return Iterator<T>{m_values,false};}
+{
+	// TODO: This is a stub
+	throw std::runtime_error{"Not yet implemented!"};
+	return {};
+	//return Iterator<T>{m_values,false};
+}
 template<typename T>
 	pragma::animation::AnimationChannel::Iterator<T> end()
-{return Iterator<T>{m_values,true};}
+{
+	// TODO: This is a stub
+	throw std::runtime_error{"Not yet implemented!"};
+	return {};
+	//return Iterator<T>{m_values,true};
+}
 
 template<typename T>
 	pragma::animation::AnimationChannel::IteratorWrapper<T> pragma::animation::AnimationChannel::It()
 {
-	static std::vector<uint8_t> empty;
-	return IsValueType<T>() ? IteratorWrapper<T>{values} : IteratorWrapper<T>{empty};
+	// TODO: This is a stub
+	throw std::runtime_error{"Not yet implemented!"};
+	//static std::vector<uint8_t> empty;
+	//return IsValueType<T>() ? IteratorWrapper<T>{values} : IteratorWrapper<T>{empty};
+	return {};
 }
 
 /////////////////////
 
 template<typename T>
-	T &pragma::animation::AnimationChannel::GetValue(uint32_t idx) {return *(reinterpret_cast<T*>(values.data()) +idx);}
+	T &pragma::animation::AnimationChannel::GetValue(uint32_t idx)
+	{
+		// TODO: This is a stub
+		throw std::runtime_error{"Not yet implemented!"};
+		return *static_cast<T*>(nullptr);
+		//return *(reinterpret_cast<T*>(values.data()) +idx);
+	}
 
 template<typename T>
 	auto pragma::animation::AnimationChannel::GetInterpolationFunction() const
 {
-	constexpr auto type = udm::type_to_enum<T>();
+	// TODO: This is a stub
+	throw std::runtime_error{"Not yet implemented!"};
+	return T{};
+	/*constexpr auto type = udm::type_to_enum<T>();
 	if constexpr(std::is_same_v<T,Vector3>)
 		return &uvec::lerp;
 	else if constexpr(std::is_same_v<T,Quat>)
 		return &uquat::lerp; // TODO: Maybe use slerp? Test performance!
 	else
-		return [](const T &v0,const T &v1,float f) -> T {return (v0 +f *(v1 -v0));};
+		return [](const T &v0,const T &v1,float f) -> T {return (v0 +f *(v1 -v0));};*/
 }
 
 template<typename T>
 	T pragma::animation::AnimationChannel::GetInterpolatedValue(float t,uint32_t &inOutPivotTimeIndex) const
 {
-	if(udm::type_to_enum<T>() != valueType || times.empty())
+	// TODO: This is a stub
+	throw std::runtime_error{"Not yet implemented!"};
+	return T{};
+	/*if(udm::type_to_enum<T>() != GetValueType() || times.empty())
 		return {};
 	float factor;
 	auto indices = FindInterpolationIndices(t,factor,inOutPivotTimeIndex);
 	inOutPivotTimeIndex = indices.first;
-	return GetInterpolationFunction<T>()(GetValue<T>(indices.first),GetValue<T>(indices.second),factor);
+	return GetInterpolationFunction<T>()(GetValue<T>(indices.first),GetValue<T>(indices.second),factor);*/
 }
 
 template<typename T>
 	T pragma::animation::AnimationChannel::GetInterpolatedValue(float t) const
 {
-	if(udm::type_to_enum<T>() != valueType || times.empty())
+	// TODO: This is a stub
+	throw std::runtime_error{"Not yet implemented!"};
+	return T{};
+	/*if(udm::type_to_enum<T>() != GetValueType() || times.empty())
 		return {};
 	float factor;
 	auto indices = FindInterpolationIndices(t,factor);
-	return GetInterpolationFunction<T>()(GetValue<T>(indices.first),GetValue<T>(indices.second),factor);
+	return GetInterpolationFunction<T>()(GetValue<T>(indices.first),GetValue<T>(indices.second),factor);*/
 }
 
 #endif

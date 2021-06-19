@@ -56,12 +56,12 @@ void BaseTimeScaleComponent::OnEntityComponentAdded(BaseEntityComponent &compone
 		}),CallbackType::Component,&component);
 	}
 }
-void BaseTimeScaleComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BaseTimeScaleComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	udm["timeScale"] = **m_timeScale;
 }
-void BaseTimeScaleComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void BaseTimeScaleComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 	auto timeScale = GetTimeScale();

@@ -6,11 +6,13 @@
  */
 
 #include "stdafx_client.h"
+#include <alsoundsystem.hpp>
+#include <alsoundsystem_create_effect.hpp>
 #include "pragma/audio/c_sound_efx.hpp"
+#include "pragma/audio/c_engine_sound.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
 #include <pragma/c_engine.h>
 #include <alsound_effect.hpp>
-#include <alsoundsystem.hpp>
 #include <udm.hpp>
 
 extern DLLCLIENT CEngine *c_engine;

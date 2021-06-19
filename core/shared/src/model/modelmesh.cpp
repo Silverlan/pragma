@@ -755,7 +755,7 @@ void ModelSubMesh::RemoveVertex(uint64_t idx)
 		m_extendedVertexWeights->erase(m_extendedVertexWeights->begin() +idx);
 }
 
-bool ModelSubMesh::Save(udm::AssetData &outData,std::string &outErr)
+bool ModelSubMesh::Save(udm::AssetDataArg outData,std::string &outErr)
 {
 	outData.SetAssetType(PMESH_IDENTIFIER);
 	outData.SetAssetVersion(PMESH_VERSION);

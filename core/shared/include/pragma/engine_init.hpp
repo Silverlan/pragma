@@ -19,7 +19,7 @@ template<class T>
 	MiniDumper dmp(exe.c_str());
 #endif
 	auto en = std::shared_ptr<T>{new T{argc,argv},[](T *p) {
-		if(std::uncaught_exception())
+		if(std::uncaught_exceptions() > 0)
 		{
 			// If we're stack unwinding due to an uncaught exception,
 			// we DON'T want to destroy the engine, since we'll need
@@ -45,7 +45,7 @@ inline DLLNETWORK std::shared_ptr<Engine> InitializeServer(int argc,char *argv[]
 	MiniDumper dmp(exe.c_str());
 #endif
 	auto en = std::shared_ptr<Engine>{new Engine{argc,argv},[](Engine *p) {
-		if(std::uncaught_exception())
+		if(std::uncaught_exceptions() > 0)
 		{
 			// If we're stack unwinding due to an uncaught exception,
 			// we DON'T want to destroy the engine, since we'll need

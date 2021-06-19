@@ -891,7 +891,7 @@ const std::shared_ptr<RcNavMesh> &pragma::nav::Mesh::GetRcNavMesh() const {retur
 std::shared_ptr<RcNavMesh> &pragma::nav::Mesh::GetRcNavMesh() {return m_rcMesh;}
 
 static auto UDM_TYPE_VERTEX = udm::StructDescription::Define<uint16_t,uint16_t,uint16_t>({"x","y","z"});
-static void write_poly_mesh(udm::LinkedPropertyWrapper &udmPolyMesh,const rcPolyMesh &polyMesh,const std::unordered_map<uint32_t,uint32_t> &areaTranslationTable)
+static void write_poly_mesh(udm::LinkedPropertyWrapper udmPolyMesh,const rcPolyMesh &polyMesh,const std::unordered_map<uint32_t,uint32_t> &areaTranslationTable)
 {
 	udmPolyMesh["maxEdgeError"] = polyMesh.maxEdgeError;
 	udmPolyMesh["borderSize"] = polyMesh.borderSize;
@@ -921,7 +921,7 @@ static void write_poly_mesh(udm::LinkedPropertyWrapper &udmPolyMesh,const rcPoly
 
 static auto UDM_TYPE_TRIANGLE = udm::StructDescription::Define<uint8_t,uint8_t,uint8_t,uint8_t>({"vertA","vertB","vertC","flags"});
 static auto UDM_TYPE_MESH = udm::StructDescription::Define<uint32_t,uint32_t,uint32_t,uint32_t>({"baseVertIndex","vertCount","baseTriIndex","triCount"});
-static void write_poly_mesh(udm::LinkedPropertyWrapper &udmPolyMeshDetail,const rcPolyMeshDetail &polyMeshDetail)
+static void write_poly_mesh(udm::LinkedPropertyWrapper udmPolyMeshDetail,const rcPolyMeshDetail &polyMeshDetail)
 {
 	udmPolyMeshDetail.AddArray("vertices",polyMeshDetail.nverts,reinterpret_cast<Vector3*>(polyMeshDetail.verts),udm::ArrayType::Compressed);
 	udmPolyMeshDetail.AddArray("triangles",UDM_TYPE_TRIANGLE,polyMeshDetail.tris,polyMeshDetail.ntris,udm::ArrayType::Compressed);
@@ -929,7 +929,7 @@ static void write_poly_mesh(udm::LinkedPropertyWrapper &udmPolyMeshDetail,const 
 }
 
 template<typename T>
-	static void load_array_data(udm::LinkedPropertyWrapper &udmData,int &outNum,T **outData)
+	static void load_array_data(const udm::LinkedPropertyWrapper &udmData,int &outNum,T **outData)
 {
 	auto *a = udmData.GetValuePtr<udm::Array>();
 	if(!a)
@@ -942,7 +942,7 @@ template<typename T>
 	*outData = new T[a->GetByteSize() /sizeof(T)];
 	udmData.GetBlobData(*outData,a->GetByteSize());
 }
-static void read_poly_mesh(udm::LinkedPropertyWrapper &udmPolyMesh,rcPolyMesh &polyMesh,std::vector<uint32_t> &areaTranslationTable)
+static void read_poly_mesh(const udm::LinkedPropertyWrapper &udmPolyMesh,rcPolyMesh &polyMesh,std::vector<uint32_t> &areaTranslationTable)
 {
 	udmPolyMesh["maxEdgeError"](polyMesh.maxEdgeError);
 	udmPolyMesh["borderSize"](polyMesh.borderSize);
@@ -974,7 +974,7 @@ static void read_poly_mesh(udm::LinkedPropertyWrapper &udmPolyMesh,rcPolyMesh &p
 		polyMesh.areas[i] = (i < areaTranslationTable.size()) ? areaTranslationTable.at(i) : polyMesh.areas[i];
 }
 
-static void read_poly_mesh(udm::LinkedPropertyWrapper &udmPolyMeshDetail,rcPolyMeshDetail &polyMeshDetail)
+static void read_poly_mesh(const udm::LinkedPropertyWrapper &udmPolyMeshDetail,rcPolyMeshDetail &polyMeshDetail)
 {
 	load_array_data(udmPolyMeshDetail["vertices"],polyMeshDetail.nverts,&polyMeshDetail.verts);
 	load_array_data(udmPolyMeshDetail["triangles"],polyMeshDetail.ntris,&polyMeshDetail.tris);
@@ -990,7 +990,7 @@ bool pragma::nav::Mesh::Save(Game &game,const std::string &fileName,std::string 
 		return false;
 	return udmData->Save(fileName);
 }
-bool pragma::nav::Mesh::Save(Game &game,udm::AssetData &outData,std::string &outErr)
+bool pragma::nav::Mesh::Save(Game &game,udm::AssetDataArg outData,std::string &outErr)
 {
 	if(m_rcMesh == nullptr)
 		return false;
@@ -1128,7 +1128,7 @@ std::shared_ptr<RcNavMesh> pragma::nav::load(Game &game,const std::string &fname
 	std::string err;
 	auto udmData = util::load_udm_asset(fname,&err);
 	if(udmData == nullptr)
-		return false;
+		return nullptr;
 	auto &data = *udmData;
 
 	Mesh mesh {};

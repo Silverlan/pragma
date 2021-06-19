@@ -281,30 +281,6 @@ namespace pragma
 	DLLCLIENT CEngine *get_cengine();
 	DLLCLIENT ClientState *get_client_state();
 };
-
-template<class TEfxProperties>
-	std::shared_ptr<al::IEffect> CEngine::CreateAuxEffect(const std::string &name,const TEfxProperties &props)
-{
-	auto lname = name;
-	ustring::to_lower(lname);
-	auto effect = GetAuxEffect(lname);
-	if(effect != nullptr)
-		return effect;
-	auto *soundSys = GetSoundSystem();
-	if(soundSys == nullptr)
-		return nullptr;
-	try
-	{
-		effect = soundSys->CreateEffect(props);
-	}
-	catch(const std::runtime_error &e)
-	{
-		Con::cwar<<"WARNING: Unable to create auxiliary effect '"<<name<<"': "<<e.what()<<Con::endl;
-		return nullptr;
-	}
-	m_auxEffects.insert(decltype(m_auxEffects)::value_type(name,effect));
-	return effect;
-}
 #pragma warning(pop)
 
 #endif

@@ -107,7 +107,7 @@ bool FlexAnimation::LoadFromAssetData(const udm::AssetData &data,std::string &ou
 	}
 	return true;
 }
-bool FlexAnimation::Save(udm::AssetData &outData,std::string &outErr)
+bool FlexAnimation::Save(udm::AssetDataArg outData,std::string &outErr)
 {
 	outData.SetAssetType(PFLEXANIM_IDENTIFIER);
 	outData.SetAssetVersion(FORMAT_VERSION);

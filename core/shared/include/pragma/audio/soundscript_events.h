@@ -48,7 +48,7 @@ public:
 	SoundScriptValue(float f);
 	SoundScriptValue(float min,float max);
 	SoundScriptValue(udm::LinkedPropertyWrapper &prop);
-	bool Load(udm::LinkedPropertyWrapper &prop);
+	bool Load(const udm::LinkedPropertyWrapper &prop);
 	float GetValue() const;
 	bool IsSet() const;
 };

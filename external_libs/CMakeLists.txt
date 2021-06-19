@@ -23,7 +23,7 @@ foreach(LIB_PATH ${LIB_LIST})
 	endif()
 endforeach()
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 set_target_properties(networkmanager PROPERTIES FOLDER external_libs/networkmanager)
 set_target_properties(clientmanager PROPERTIES FOLDER external_libs/networkmanager)
@@ -32,4 +32,4 @@ set_target_properties(servermanager PROPERTIES FOLDER external_libs/networkmanag
 set_target_properties(materialsystem PROPERTIES FOLDER external_libs/materialsystem)
 set_target_properties(cmaterialsystem PROPERTIES FOLDER external_libs/materialsystem)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)

@@ -38,10 +38,10 @@ namespace pragma
 		void ClearAnimationPlayers();
 		
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
-		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
+		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		using BaseEntityComponent::Load;
 	protected:
-		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
+		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 		void ResetAnimation(const std::shared_ptr<Model> &mdl);
 		void MaintainAnimations(double dt);
 		util::PFloatProperty m_playbackRate = nullptr;

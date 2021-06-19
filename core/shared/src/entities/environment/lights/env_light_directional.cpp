@@ -38,13 +38,13 @@ void BaseEnvLightDirectionalComponent::Initialize()
 	m_netEvSetAmbientColor = SetupNetEvent("set_ambient_color");
 }
 
-void BaseEnvLightDirectionalComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BaseEnvLightDirectionalComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	udm["maxExposure"] = m_maxExposure;
 	udm["ambientColor"] = (*m_ambientColor)->ToVector4();
 }
-void BaseEnvLightDirectionalComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void BaseEnvLightDirectionalComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 	udm["maxExposure"](m_maxExposure);

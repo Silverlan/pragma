@@ -25,9 +25,9 @@ namespace pragma
 
 		BaseEntity *GetSpotlightTarget() const;
 
-		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
+		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 	protected:
-		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
+		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 		virtual void SetSpotlightTarget(BaseEntity &ent);
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		float m_coneAngle = 45.f;

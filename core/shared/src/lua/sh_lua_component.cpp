@@ -525,7 +525,7 @@ void BaseLuaBaseEntityComponent::SetMemberValue(const MemberInfo &memberInfo,con
 	Lua::Pop(l,1); /* 0 */
 }
 
-static void write_value(udm::LinkedPropertyWrapper &udm,const std::any &value,util::VarType type)
+static void write_value(udm::LinkedPropertyWrapperArg udm,const std::any &value,util::VarType type)
 {
 	switch(type)
 	{
@@ -601,7 +601,7 @@ static void write_value(udm::LinkedPropertyWrapper &udm,const std::any &value,ut
 	}
 }
 
-static void read_value(Game &game,udm::LinkedPropertyWrapper &udm,std::any &value,util::VarType type)
+static void read_value(Game &game,udm::LinkedPropertyWrapperArg udm,std::any &value,util::VarType type)
 {
 	switch(type)
 	{
@@ -766,7 +766,7 @@ void BaseLuaBaseEntityComponent::OnEntityComponentRemoved(BaseEntityComponent &c
 }
 
 const std::vector<BaseLuaBaseEntityComponent::MemberInfo> &BaseLuaBaseEntityComponent::GetMembers() const {return m_members;}
-void BaseLuaBaseEntityComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BaseLuaBaseEntityComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	pragma::BaseEntityComponent::Save(udm);
 	for(auto &member : m_members)
@@ -778,7 +778,7 @@ void BaseLuaBaseEntityComponent::Save(udm::LinkedPropertyWrapper &udm)
 	}
 	CallLuaMember<void,udm::LinkedPropertyWrapper>("Save",udm);
 }
-void BaseLuaBaseEntityComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void BaseLuaBaseEntityComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	pragma::BaseEntityComponent::Load(udm,version);
 	auto &game = *GetEntity().GetNetworkState()->GetGameState();

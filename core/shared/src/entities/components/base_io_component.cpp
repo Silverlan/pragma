@@ -35,7 +35,7 @@ void BaseIOComponent::Initialize()
 	});
 }
 
-void BaseIOComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BaseIOComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	auto udmOutputs = udm["outputs"];
@@ -55,7 +55,7 @@ void BaseIOComponent::Save(udm::LinkedPropertyWrapper &udm)
 		}
 	}
 }
-void BaseIOComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void BaseIOComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 	auto udmOutputs = udm["outputs"];

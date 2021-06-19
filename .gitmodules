@@ -91,9 +91,6 @@
 [submodule "third_party_libs/assimp"]
 	path = third_party_libs/assimp
 	url = https://github.com/assimp/assimp.git
-[submodule "third_party_libs/eigen"]
-	path = third_party_libs/eigen
-	url = https://github.com/eigenteam/eigen-git-mirror.git
 [submodule "third_party_libs/bullet"]
 	path = third_party_libs/bullet
 	url = https://github.com/bulletphysics/bullet3.git
@@ -190,3 +187,6 @@
 [submodule "modules/pr_audio_dummy"]
 	path = modules/pr_audio_dummy
 	url = https://github.com/Silverlan/pr_audio_dummy.git
+[submodule "third_party_libs/eigen"]
+	path = third_party_libs/eigen
+	url = https://gitlab.com/libeigen/eigen.git

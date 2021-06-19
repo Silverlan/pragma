@@ -35,8 +35,8 @@ namespace pragma
 		const std::string &GetName() const;
 		const util::PStringProperty &GetNameProperty() const;
 
-		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
-		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
+		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
+		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 	protected:
 		BaseNameComponent(BaseEntity &ent);
 		util::PStringProperty m_name;

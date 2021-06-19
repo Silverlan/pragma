@@ -10,6 +10,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/entities/baseentity_handle.h"
+#include <udm_types.hpp>
 #include <sharedutils/util_pragma.hpp>
 #include <sharedutils/util_parallel_job.hpp>
 #include <mathutil/uvec.h>
@@ -27,11 +28,11 @@ namespace util
 {
 	DLLNETWORK util::ParallelJob<std::vector<Vector2>&> generate_lightmap_uvs(NetworkState &nwState,uint32_t atlastWidth,uint32_t atlasHeight,const std::vector<Vertex> &verts,const std::vector<uint32_t> &tris);
 	DLLNETWORK std::shared_ptr<udm::Data> load_udm_asset(const std::string &fileName,std::string *optOutErr=nullptr);
-	DLLNETWORK std::shared_ptr<udm::Data> load_udm_asset(std::shared_ptr<VFilePtrInternal> &f,std::string *optOutErr=nullptr);
+	DLLNETWORK std::shared_ptr<udm::Data> load_udm_asset(std::shared_ptr<VFilePtrInternal> f,std::string *optOutErr=nullptr);
 
-	DLLNETWORK void write_udm_entity(udm::LinkedPropertyWrapper &udm,EntityHandle &hEnt);
-	DLLNETWORK EntityHandle read_udm_entity(Game &game,udm::LinkedPropertyWrapper &udm);
-	DLLNETWORK EntityHandle read_udm_entity(::pragma::BaseEntityComponent &c,udm::LinkedPropertyWrapper &udm);
+	DLLNETWORK void write_udm_entity(udm::LinkedPropertyWrapperArg udm,EntityHandle &hEnt);
+	DLLNETWORK EntityHandle read_udm_entity(Game &game,udm::LinkedPropertyWrapperArg udm);
+	DLLNETWORK EntityHandle read_udm_entity(::pragma::BaseEntityComponent &c,udm::LinkedPropertyWrapperArg udm);
 	
 	struct HairConfig;
 	struct HairData;

@@ -8,6 +8,7 @@
 #define __NAVSYSTEM_H__
 
 #include "pragma/networkdefinitions.h"
+#include <udm_types.hpp>
 #include <mathutil/glmutil.h>
 
 class Game;
@@ -122,7 +123,7 @@ namespace pragma
 
 			std::shared_ptr<RcPathResult> FindPath(const Vector3 &start,const Vector3 &end);
 			bool RayCast(const Vector3 &start,const Vector3 &end,Vector3 &hit);
-			bool Save(Game &game,udm::AssetData &outData,std::string &outErr);
+			bool Save(Game &game,udm::AssetDataArg outData,std::string &outErr);
 			bool Save(Game &game,const std::string &fileName,std::string &outErr);
 
 			const Config &GetConfig() const;
@@ -130,7 +131,7 @@ namespace pragma
 			const std::shared_ptr<RcNavMesh> &GetRcNavMesh() const;
 			std::shared_ptr<RcNavMesh> &GetRcNavMesh();
 		protected:
-			friend std::shared_ptr<RcNavMesh> load(Game &game,const std::string &fname,Config &outConfig);
+			friend DLLNETWORK std::shared_ptr<RcNavMesh> load(Game &game,const std::string &fname,Config &outConfig);
 			Mesh(const std::shared_ptr<RcNavMesh> &rcMesh,const Config &config);
 			Mesh()=default;
 			bool LoadFromAssetData(Game &game,const udm::AssetData &data,std::string &outErr);

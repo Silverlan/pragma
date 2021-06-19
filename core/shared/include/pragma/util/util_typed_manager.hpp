@@ -62,7 +62,7 @@ template<class TType>
 	auto id = m_registeredTypes.size();
 	m_typeNameToId[name] = id;
 	m_registeredTypes.push_back(::util::TSharedHandle<TType>{new TType{static_cast<TypeId>(id),name,std::forward<TARGS>(args)...}});
-	return m_registeredTypes.back();
+	return ::util::TWeakSharedHandle<TType>{m_registeredTypes.back()};
 }
 
 template<class TType>

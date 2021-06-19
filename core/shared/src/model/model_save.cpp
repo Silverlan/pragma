@@ -620,7 +620,7 @@ bool Model::LoadFromAssetData(Game &game,const udm::AssetData &data,std::string 
 			udmEyeball.property["iris"]["uvRadius"](eyeball.irisUvRadius);
 			udmEyeball.property["iris"]["scale"](eyeball.irisScale);
 
-			auto writeLid = [](udm::LinkedPropertyWrapper &prop,const Eyeball::LidFlexDesc &lid) {
+			auto writeLid = [](udm::LinkedPropertyWrapperArg prop,const Eyeball::LidFlexDesc &lid) {
 				prop["raiser"]["lidFlexIndex"] = lid.lidFlexIndex;
 
 				prop["raiser"]["raiserFlexIndex"] = lid.raiserFlexIndex;
@@ -704,7 +704,7 @@ bool Model::Save(Game &game,std::string &outErr)
 	return Save(game,absFileName,outErr);
 }
 
-bool Model::Save(Game &game,udm::AssetData &outData,std::string &outErr)
+bool Model::Save(Game &game,udm::AssetDataArg outData,std::string &outErr)
 {
 	outData.SetAssetType(PMDL_IDENTIFIER);
 	outData.SetAssetVersion(PMDL_VERSION);
@@ -973,7 +973,7 @@ bool Model::Save(Game &game,udm::AssetData &outData,std::string &outErr)
 				udmEyeball["iris"]["uvRadius"] = eyeball.irisUvRadius;
 				udmEyeball["iris"]["scale"] = eyeball.irisScale;
 
-				auto readLid = [](udm::LinkedPropertyWrapper &prop,Eyeball::LidFlexDesc &lid) {
+				auto readLid = [](udm::LinkedPropertyWrapperArg prop,Eyeball::LidFlexDesc &lid) {
 					prop["raiser"]["lidFlexIndex"](lid.lidFlexIndex);
 
 					prop["raiser"]["raiserFlexIndex"](lid.raiserFlexIndex);

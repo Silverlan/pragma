@@ -26,7 +26,7 @@ template<typename T>
 		const_cast<std::vector<T>&>(v).erase(v.begin() +pos);
 	}));
 	classDefVec.def("At",static_cast<void(*)(lua_State*,const std::vector<T>&,size_t)>([](lua_State *l,const std::vector<T> &v,size_t pos) {
-		auto &value = const_cast<std::vector<T>&>(v).at(pos);
+		auto value = const_cast<std::vector<T>&>(v).at(pos);
 		Lua::Push<T>(l,value);
 	}));
 	classDefVec.def("Set",static_cast<void(*)(lua_State*,const std::vector<T>&,size_t,const T&)>([](lua_State *l,const std::vector<T> &v,size_t pos,const T &value) {

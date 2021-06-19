@@ -23,8 +23,8 @@ namespace pragma
 		bool IsUnlit() const;
 		bool GetCastShadows() const;
 
-		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
-		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
+		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
+		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 	protected:
 		FRenderFlags m_renderFlags = FRenderFlags::CastShadows;
 	};

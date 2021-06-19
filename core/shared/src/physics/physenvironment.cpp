@@ -249,11 +249,13 @@ void pragma::physics::IEnvironment::RemoveVehicle(IVehicle &vehicle)
 
 std::shared_ptr<pragma::physics::ICompoundShape> pragma::physics::IEnvironment::CreateCompoundShape()
 {
-	return CreateCompoundShape(std::vector<IShape*>{});
+	std::vector<IShape*> shapes{};
+	return CreateCompoundShape(shapes);
 }
 std::shared_ptr<pragma::physics::ICompoundShape> pragma::physics::IEnvironment::CreateCompoundShape(IShape &shape)
 {
-	return CreateCompoundShape(std::vector<IShape*>{&shape});
+	std::vector<IShape*> shapes{&shape};
+	return CreateCompoundShape(shapes);
 }
 
 const std::vector<util::TSharedHandle<pragma::physics::IConstraint>> &pragma::physics::IEnvironment::GetConstraints() const {return const_cast<IEnvironment*>(this)->GetConstraints();}

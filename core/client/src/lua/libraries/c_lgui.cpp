@@ -283,7 +283,8 @@ int Lua::gui::get_focused_element(lua_State *l)
 int Lua::gui::load_skin(lua_State *l)
 {
 	std::string skinName = Lua::CheckString(l,1);
-	auto success = c_game->ExecuteLuaFile("gui/skins/" +skinName +".lua",client->GetGUILuaState());
+	std::string fname = "gui/skins/" +skinName +".lua";
+	auto success = c_game->ExecuteLuaFile(fname,client->GetGUILuaState());
 	Lua::PushBool(l,success);
 	return 1;
 }

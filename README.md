@@ -10,7 +10,7 @@ What platforms and hardware does it work on?
 
 What are Pragma's requirements?
 ------
-- Windows compiler with C++-17 support (Linux support will follow)
+- Windows compiler with C++-20 support (Linux support will follow)
 - CMake 3.18.4 or newer: https://cmake.org/download/#latest
 - Boost 1.72: https://www.boost.org/users/history/version_1_72_0.html
 - zlib 1.2.8: https://github.com/fmrico/zlib-1.2.8

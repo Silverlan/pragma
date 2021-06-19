@@ -78,7 +78,7 @@ namespace pragma::networking
 template<class TServerClient,typename... TARGS>
 	std::shared_ptr<TServerClient> pragma::networking::IServer::AddClient(TARGS&& ...args)
 {
-	auto cl = TServerClient::Create<TServerClient>(std::forward<TARGS>(args)...);
+	auto cl = TServerClient::template Create<TServerClient>(std::forward<TARGS>(args)...);
 	AddClient(cl);
 	if(m_eventInterface.onClientConnected)
 		m_eventInterface.onClientConnected(*cl);

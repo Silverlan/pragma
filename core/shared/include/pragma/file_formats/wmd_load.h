@@ -43,7 +43,7 @@ template<class TModel,class TModelMesh,class TModelSubMesh>
 		if(udm == nullptr)
 			return nullptr;
 		std::string err;
-		auto mdl = Model::Load<TModel>(*game,udm->GetAssetData(),err);
+		auto mdl = Model::Load<TModel>(*game->GetNetworkState(),udm->GetAssetData(),err);
 		if(mdl == nullptr)
 			Con::cwar<<"WARNING: Unable to load model '"<<model<<"': "<<err<<"!"<<Con::endl;
 		if(mdl)

@@ -94,7 +94,8 @@ int Lua::game::Server::load_map(lua_State *l)
 		ptrEnts.push_back(static_cast<SBaseEntity*>(hEnt.get()));
 	}
 
-	s_game->WriteEntityData(packet,ptrEnts.data(),ptrEnts.size(),pragma::networking::ClientRecipientFilter{});
+	pragma::networking::ClientRecipientFilter filter{};
+	s_game->WriteEntityData(packet,ptrEnts.data(),ptrEnts.size(),filter);
 	packet->Write<bool>((entWorld != nullptr) ? true : false);
 
 	server->SendPacket("map_load",packet,pragma::networking::Protocol::SlowReliable);

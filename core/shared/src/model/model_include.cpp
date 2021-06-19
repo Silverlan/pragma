@@ -110,8 +110,8 @@ void Model::Merge(const Model &other,MergeFlags flags)
 			auto animReferenceOther = const_cast<Model&>(other).GetAnimation(other.LookupAnimation("reference"));
 			if(animReference && animReference->GetFrameCount() == 1 && animReferenceOther && animReferenceOther->GetFrameCount() == 1)
 			{
-				auto &frameRef = animReference->GetFrame(0);
-				auto &frameRefOther = animReferenceOther->GetFrame(0);
+				auto frameRef = animReference->GetFrame(0);
+				auto frameRefOther = animReferenceOther->GetFrame(0);
 				animReference->ReserveBoneIds(numNewBones);
 				for(auto i=decltype(diffBoneCount){0u};i<diffBoneCount;++i)
 					animReference->AddBoneId(numOldBones +i);

@@ -129,17 +129,17 @@ std::shared_ptr<udm::Data> util::load_udm_asset(const std::string &fileName,std:
 {
 	return ::load_udm_asset(fileName,optOutErr);
 }
-std::shared_ptr<udm::Data> util::load_udm_asset(std::shared_ptr<VFilePtrInternal> &f,std::string *optOutErr)
+std::shared_ptr<udm::Data> util::load_udm_asset(std::shared_ptr<VFilePtrInternal> f,std::string *optOutErr)
 {
 	return ::load_udm_asset(f,optOutErr);
 }
 
-void util::write_udm_entity(udm::LinkedPropertyWrapper &udm,EntityHandle &hEnt)
+void util::write_udm_entity(udm::LinkedPropertyWrapperArg udm,EntityHandle &hEnt)
 {
 	if(hEnt.IsValid())
 		udm = util::uuid_to_string(hEnt->GetUuid());
 }
-EntityHandle util::read_udm_entity(Game &game,udm::LinkedPropertyWrapper &udm)
+EntityHandle util::read_udm_entity(Game &game,udm::LinkedPropertyWrapperArg udm)
 {
 	std::string uuid;
 	udm(uuid);
@@ -153,7 +153,7 @@ EntityHandle util::read_udm_entity(Game &game,udm::LinkedPropertyWrapper &udm)
 	}
 	return EntityHandle{};
 }
-EntityHandle util::read_udm_entity(::pragma::BaseEntityComponent &c,udm::LinkedPropertyWrapper &udm) {return read_udm_entity(*c.GetEntity().GetNetworkState()->GetGameState(),udm);}
+EntityHandle util::read_udm_entity(::pragma::BaseEntityComponent &c,udm::LinkedPropertyWrapperArg udm) {return read_udm_entity(*c.GetEntity().GetNetworkState()->GetGameState(),udm);}
 
 std::shared_ptr<util::HairFile> util::HairFile::Load(const udm::AssetData &data,std::string &outErr)
 {

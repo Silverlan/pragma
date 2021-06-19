@@ -318,7 +318,7 @@ void BaseTouchComponent::FireEndTouchEvents(TouchInfo &touch,bool isLastTouch)
 	}
 }
 
-void BaseTouchComponent::StartTouch(PhysTouch &touch)
+void BaseTouchComponent::StartTouch(const PhysTouch &touch)
 {
 	BaseEntity *ent = touch.entity.get();
 	if(ent == nullptr || IsTouching(*ent))

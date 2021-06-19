@@ -56,14 +56,14 @@ void VelocityComponent::SetVelocity(const Vector3 &vel)
 void VelocityComponent::AddVelocity(const Vector3 &vel) {SetVelocity(GetVelocity() +vel);}
 
 const Vector3 &VelocityComponent::GetVelocity() const {return *m_velocity;}
-void VelocityComponent::Save(udm::LinkedPropertyWrapper &udm)
+void VelocityComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	udm["velocity"] = **m_velocity;
 	udm["angularVelocity"] = **m_angVelocity;
 }
 
-void VelocityComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void VelocityComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 	Vector3 vel {};

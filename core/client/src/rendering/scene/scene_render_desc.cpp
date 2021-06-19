@@ -721,7 +721,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 					auto &renderMeshes = renderC->GetRenderMeshes();
 					if(item.mesh >= renderMeshes.size())
 						continue;
-					auto &pos = pose *renderMeshes[item.mesh]->GetCenter();
+					auto pos = pose *renderMeshes[item.mesh]->GetCenter();
 					renderQueueTranslucentDst->queue.back().sortingKey.SetDistance(pos,cam);
 				}
 			}

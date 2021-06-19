@@ -508,6 +508,14 @@ void Model::Construct()
 	uvec::zero(&m_renderMax);
 }
 
+bool Model::Load(Model &mdl,NetworkState &nw,const udm::AssetData &data,std::string &outErr)
+{
+	assert(nw.GetGameState());
+	if(mdl.LoadFromAssetData(*nw.GetGameState(),data,outErr) == false)
+		return false;
+	return true;
+}
+
 void Model::OnMaterialLoaded()
 {
 	auto bAllLoaded = true;

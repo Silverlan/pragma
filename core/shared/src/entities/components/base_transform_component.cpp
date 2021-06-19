@@ -193,14 +193,14 @@ void BaseTransformComponent::SetRotation(const Quat &q)
 	ent.MarkForSnapshot();
 }
 
-void BaseTransformComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BaseTransformComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	udm["pose"] = m_pose;
 	udm["eyeOffset"] = m_eyeOffset;
 }
 
-void BaseTransformComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void BaseTransformComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 	auto pose = m_pose;

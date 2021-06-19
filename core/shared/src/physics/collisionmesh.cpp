@@ -379,7 +379,7 @@ std::vector<CollisionMesh::SoftBodyAnchor> *CollisionMesh::GetSoftBodyAnchors()
 		return nullptr;
 	return &m_softBodyInfo->anchors;
 }
-bool CollisionMesh::Save(Game &game,Model &mdl,udm::AssetData &outData,std::string &outErr)
+bool CollisionMesh::Save(Game &game,Model &mdl,udm::AssetDataArg outData,std::string &outErr)
 {
 	outData.SetAssetType(PCOL_IDENTIFIER);
 	outData.SetAssetVersion(PCOL_VERSION);

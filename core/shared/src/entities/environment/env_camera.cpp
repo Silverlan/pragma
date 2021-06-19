@@ -37,7 +37,7 @@ void BaseEnvCameraComponent::Initialize()
 	ent.AddComponent("transform");
 }
 
-void BaseEnvCameraComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BaseEnvCameraComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	udm["projectionMatrix"] = **m_projectionMatrix;
@@ -47,7 +47,7 @@ void BaseEnvCameraComponent::Save(udm::LinkedPropertyWrapper &udm)
 	udm["nearZ"] = **m_nearZ;
 	udm["farZ"] = **m_farZ;
 }
-void BaseEnvCameraComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void BaseEnvCameraComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 	udm["projectionMatrix"](**m_projectionMatrix);

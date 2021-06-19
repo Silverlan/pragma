@@ -57,11 +57,12 @@ macro(link_generic_module_libraries)
 	link_external_library(materialsystem)
 	link_external_library(datasystem)
 	link_external_library(ishared)
+	link_external_library(util_udm)
 
 	add_include_dir(boost)
 endmacro(link_generic_module_libraries)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(ENABLE_STATIC_LIBRARY_FLAG 0)
 
 set(DEFINITIONS

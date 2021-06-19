@@ -62,14 +62,14 @@ void BaseToggleComponent::OnEntitySpawn()
 		TurnOn();
 }
 
-void BaseToggleComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BaseToggleComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	udm["startDisabled"] = m_bStartDisabled;
 	udm["isTurnedOn"] = **m_bTurnedOn;
 }
 
-void BaseToggleComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void BaseToggleComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 	udm["startDisabled"](m_bStartDisabled);

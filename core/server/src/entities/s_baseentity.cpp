@@ -217,7 +217,8 @@ void SBaseEntity::SendNetEvent(pragma::NetEventId eventId,pragma::networking::Pr
 {
 	if(!IsShared() || !IsSpawned())
 		return;
-	SendNetEvent(eventId,NetPacket{},protocol);
+	NetPacket packet{};
+	SendNetEvent(eventId,packet,protocol);
 }
 Bool SBaseEntity::ReceiveNetEvent(pragma::BasePlayerComponent &pl,pragma::NetEventId eventId,NetPacket &packet)
 {

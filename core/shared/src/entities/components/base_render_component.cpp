@@ -44,14 +44,14 @@ void BaseRenderComponent::SetCastShadows(bool b)
 bool BaseRenderComponent::IsUnlit() const {return (m_renderFlags &FRenderFlags::Unlit) != FRenderFlags::None;}
 bool BaseRenderComponent::GetCastShadows() const {return (m_renderFlags &FRenderFlags::CastShadows) != FRenderFlags::None;}
 
-void BaseRenderComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BaseRenderComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	udm::write_flag(udm["renderFlags"],m_renderFlags,FRenderFlags::CastShadows,"castShadows");
 	udm::write_flag(udm["renderFlags"],m_renderFlags,FRenderFlags::Unlit,"unlit");
 	static_assert(magic_enum::flags::enum_count<FRenderFlags>() == 2);
 }
-void BaseRenderComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void BaseRenderComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 	udm::read_flag(udm["renderFlags"],m_renderFlags,FRenderFlags::CastShadows,"castShadows");

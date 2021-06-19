@@ -354,7 +354,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 						auto &renderMeshes = renderC->GetRenderMeshes();
 						if(item.mesh >= renderMeshes.size())
 							continue;
-						auto &pos = pose *renderMeshes.at(item.mesh)->GetCenter();
+						auto pos = pose *renderMeshes.at(item.mesh)->GetCenter();
 						mainRenderQueue->queue.back().sortingKey.SetDistance(pos,*hCam);
 					}
 				}

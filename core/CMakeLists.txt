@@ -27,4 +27,4 @@ set_target_properties(pragma PROPERTIES FOLDER core)
 set_target_properties(pragma_server PROPERTIES FOLDER core)
 set_target_properties(wms_shared PROPERTIES FOLDER core)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)

@@ -9,6 +9,7 @@
 #define __COLLISIONMESH_H__
 
 #include "pragma/networkdefinitions.h"
+#include <udm_types.hpp>
 #include <mathutil/glmutil.h>
 #include "pragma/model/modelupdateflags.hpp"
 #include <vector>
@@ -137,7 +138,7 @@ public:
 	const std::vector<SoftBodyAnchor> *GetSoftBodyAnchors() const;
 	std::vector<SoftBodyAnchor> *GetSoftBodyAnchors();
 
-	bool Save(Game &game,Model &mdl,udm::AssetData &outData,std::string &outErr);
+	bool Save(Game &game,Model &mdl,udm::AssetDataArg outData,std::string &outErr);
 };
 REGISTER_BASIC_BITWISE_OPERATORS(CollisionMesh::SoftBodyAnchor::Flags);
 

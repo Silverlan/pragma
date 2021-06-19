@@ -47,12 +47,12 @@ void BaseRadiusComponent::Initialize()
 	ent.AddComponent("io");
 	m_netEvSetRadius = SetupNetEvent("set_radius");
 }
-void BaseRadiusComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BaseRadiusComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	udm["radius"] = **m_radius;
 }
-void BaseRadiusComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void BaseRadiusComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 	auto radius = GetRadius();

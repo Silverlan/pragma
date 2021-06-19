@@ -52,7 +52,7 @@ set(PROJ_NAME wms_shared)
 
 project(${PROJ_NAME} CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(ENABLE_STATIC_LIBRARY_FLAG 0)
 # set(PRECOMPILED_HEADER "stdafx")
 

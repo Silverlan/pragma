@@ -88,9 +88,15 @@ DLLCLIENT void CMD_connect(NetworkState *state,pragma::BasePlayerComponent *pl,s
 			return;
 		}
 		if(s_lastConnection.address.has_value())
-			CMD_connect(state,pl,std::vector<std::string>{s_lastConnection.address->first,std::to_string(s_lastConnection.address->second)});
+		{
+			std::vector<std::string> argv{s_lastConnection.address->first,std::to_string(s_lastConnection.address->second)};
+			CMD_connect(state,pl,argv);
+		}
 		else if(s_lastConnection.steamId.has_value())
-			CMD_connect(state,pl,std::vector<std::string>{std::to_string(*s_lastConnection.steamId)});
+		{
+			std::vector<std::string> argv{std::to_string(*s_lastConnection.steamId)};
+			CMD_connect(state,pl,argv);
+		}
 		return;
 	}
 	if(argv.size() == 1)

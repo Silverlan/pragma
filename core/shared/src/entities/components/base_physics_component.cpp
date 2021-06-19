@@ -684,13 +684,13 @@ float BasePhysicsComponent::GetPhysicsMass() const
 	return (hMdl != nullptr) ? hMdl->GetMass() : 0.f;
 }
 
-void BasePhysicsComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BasePhysicsComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	udm["moveType"] = m_moveType;
 	udm["collisionType"] = m_collisionType;
 }
-void BasePhysicsComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void BasePhysicsComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 	auto moveType = GetMoveType();

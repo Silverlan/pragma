@@ -48,20 +48,20 @@ struct GLTFBufferData
 	tinygltf::BufferView &bufferView;
 	tinygltf::Buffer &buffer;
 	template<typename T>
-		T GetValue(uint32_t offset,const T &default={}) const
+		T GetValue(uint32_t offset,const T &def={}) const
 	{
 		offset += bufferView.byteOffset +accessor.byteOffset;
 		if(offset +sizeof(T) >= buffer.data.size())
-			return default;
+			return def;
 		return *reinterpret_cast<T*>(buffer.data.data() +offset);
 	}
 	template<typename T>
-		T GetIndexedValue(uint32_t index,const T &default={}) const
+		T GetIndexedValue(uint32_t index,const T &def={}) const
 	{
 		auto stride = bufferView.byteStride;
 		if(stride == 0)
 			stride = sizeof(T);
-		return GetValue(index *stride,default);
+		return GetValue(index *stride,def);
 	}
 	template<uint32_t C>
 		std::array<int64_t,C> GetIntArray(uint32_t index) const
@@ -809,7 +809,7 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 				uint32_t fcId = 0;
 				mdl->GetFlexControllerId(morphTargetName,fcId);
 
-				if(mdl->GetFlex(morphTargetName) == false)
+				if(mdl->GetFlex(morphTargetName) == nullptr)
 				{
 					auto &flex = mdl->AddFlex(morphTargetName);
 					auto va = mdl->AddVertexAnimation(morphTargetName);

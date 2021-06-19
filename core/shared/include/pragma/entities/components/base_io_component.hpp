@@ -44,9 +44,9 @@ namespace pragma
 
 		virtual void Input(std::string input,BaseEntity *activator,BaseEntity *caller,std::string data);
 		void Input(const std::string input,BaseEntity *activator=nullptr,BaseEntity *caller=nullptr);
-		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
+		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 	protected:
-		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
+		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 		BaseIOComponent(BaseEntity &ent);
 		bool FireSingleOutput(Output &output,BaseEntity *activator,IoFlags flags=IoFlags::None);
 

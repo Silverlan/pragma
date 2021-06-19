@@ -40,4 +40,4 @@ endforeach()
 # 	set_target_properties(pr_physx PROPERTIES FOLDER modules)
 # endif()
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)

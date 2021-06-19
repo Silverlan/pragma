@@ -59,11 +59,11 @@ bool BaseObservableComponent::IsCameraEnabled(CameraType type) const {return *Ge
 const util::PBoolProperty &BaseObservableComponent::GetCameraEnabledProperty(CameraType type) const {return GetCameraData(type).enabled;}
 const util::PVector3Property &BaseObservableComponent::GetCameraOffsetProperty(CameraType type) const {return GetCameraData(type).offset;}
 
-void BaseObservableComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BaseObservableComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	constexpr auto numTypes = umath::to_integral(CameraType::Count);
-	auto fWriteCameraData = [](udm::LinkedPropertyWrapper &udm,ObserverCameraData &camData) {
+	auto fWriteCameraData = [](udm::LinkedPropertyWrapperArg udm,ObserverCameraData &camData) {
 		udm["enabled"] = **camData.enabled;
 		if(camData.localOrigin.has_value())
 			udm["localOrigin"] = *camData.localOrigin;
@@ -81,12 +81,12 @@ void BaseObservableComponent::Save(udm::LinkedPropertyWrapper &udm)
 	fWriteCameraData(udm["thirdPerson"],dataTp);
 }
 
-void BaseObservableComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void BaseObservableComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 	
 	constexpr auto numTypes = umath::to_integral(CameraType::Count);
-	auto fReadCameraData = [](udm::LinkedPropertyWrapper &udm,ObserverCameraData &camData) {
+	auto fReadCameraData = [](udm::LinkedPropertyWrapperArg udm,ObserverCameraData &camData) {
 		udm["enabled"](**camData.enabled);
 		camData.localOrigin = udm["localOrigin"].ToValue<Vector3>();
 		udm["offset"](**camData.offset);

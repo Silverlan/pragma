@@ -248,12 +248,12 @@ namespace pragma
 
 		CallbackHandle BindAnimationEvent(AnimationEvent::Type eventId,const std::function<void(std::reference_wrapper<const AnimationEvent>)> &fCallback);
 
-		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
+		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		using BaseEntityComponent::Load;
 	protected:
 		BaseAnimatedComponent(BaseEntity &ent);
 		virtual void OnModelChanged(const std::shared_ptr<Model> &mdl);
-		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
+		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 		virtual void ResetAnimation(const std::shared_ptr<Model> &mdl);
 		
 		struct DLLNETWORK AnimationBlendInfo

@@ -341,29 +341,29 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderTest::InitializeMaterialDesc
 		return nullptr;
 
 	if(bind_texture(mat,descSet,mat.GetNormalMap(),umath::to_integral(MaterialBinding::NormalMap),"black") == false)
-		return false;
+		return nullptr;
 
 	if(bind_texture(mat,descSet,mat.GetRMAMap(),umath::to_integral(MaterialBinding::RMAMap),"pbr/rma_neutral") == false)
-		return false;
+		return nullptr;
 
 	bind_texture(mat,descSet,mat.GetGlowMap(),umath::to_integral(MaterialBinding::EmissionMap));
 
 	if(bind_texture(mat,descSet,mat.GetParallaxMap(),umath::to_integral(MaterialBinding::ParallaxMap),"black") == false)
-		return false;
+		return nullptr;
 
 	if(bind_texture(mat,descSet,mat.GetTextureInfo("wrinkle_stretch_map"),umath::to_integral(MaterialBinding::WrinkleStretchMap),albedoTexture.get()) == false)
-		return false;
+		return nullptr;
 
 	if(bind_texture(mat,descSet,mat.GetTextureInfo("wrinkle_compress_map"),umath::to_integral(MaterialBinding::WrinkleCompressMap),albedoTexture.get()) == false)
-		return false;
+		return nullptr;
 
 	if(bind_texture(mat,descSet,mat.GetTextureInfo("exponent_map"),umath::to_integral(MaterialBinding::ExponentMap),"white") == false)
-		return false;
+		return nullptr;
 
 	// TODO: FIXME: It would probably be a good idea to update the descriptor set lazily (i.e. not update it here), but
 	// that seems to cause crashes in some cases
 	if(descSet.Update() == false)
-		return false;
+		return nullptr;
 	return descSetGroup;
 }
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderTest::InitializeMaterialDescriptorSet(CMaterial &mat)

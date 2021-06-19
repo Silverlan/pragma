@@ -37,7 +37,7 @@ bool pragma::asset::save_particle_system(const std::string &name,const std::unor
 		return false;
 	return save_particle_system(f,particles,rootPath);
 }
-bool pragma::asset::save_particle_system(const CParticleSystemData &data,udm::AssetData &outData,std::string &outErr)
+bool pragma::asset::save_particle_system(const CParticleSystemData &data,udm::AssetDataArg outData,std::string &outErr)
 {
 	outData.SetAssetType(PPTSYS_IDENTIFIER);
 	outData.SetAssetVersion(PPTSYS_FORMAT_VERSION);

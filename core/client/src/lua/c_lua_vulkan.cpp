@@ -374,180 +374,184 @@ namespace Lua
 	};
 };
 
-DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Image &hImg)
-{
-	out<<"VKImage[";
-	auto extents = hImg.GetExtents();
-	out<<extents.width<<"x"<<extents.height;
-	out<<"][";
-	auto format = hImg.GetFormat();
-	out<<prosper::util::to_string(format);
-	out<<"]";
-	return out;
-}
+namespace prosper { // For some reason these need to be in the same namespaces as the types, otherwise luabind can't locate them
+	static bool operator==(const Lua::Vulkan::Texture &a,const Lua::Vulkan::Texture &b) {return &a == &b;}
+	static bool operator==(const Lua::Vulkan::Image &a,const Lua::Vulkan::Image &b) {return &a == &b;}
+	static bool operator==(const Lua::Vulkan::ImageView &a,const Lua::Vulkan::ImageView &b) {return &a == &b;}
+	static bool operator==(const Lua::Vulkan::Sampler &a,const Lua::Vulkan::Sampler &b) {return &a == &b;}
+	static bool operator==(const Lua::Vulkan::Framebuffer &a,const Lua::Vulkan::Framebuffer &b) {return &a == &b;}
+	static bool operator==(const Lua::Vulkan::RenderPass &a,const Lua::Vulkan::RenderPass &b) {return &a == &b;}
+	static bool operator==(const Lua::Vulkan::Event &a,const Lua::Vulkan::Event &b) {return &a == &b;}
+	static bool operator==(const Lua::Vulkan::Fence &a,const Lua::Vulkan::Fence &b) {return &a == &b;}
+	static bool operator==(const Lua::Vulkan::CommandBuffer &a,const Lua::Vulkan::CommandBuffer &b) {return &a == &b;}
+	static bool operator==(const Lua::Vulkan::Buffer &a,const Lua::Vulkan::Buffer &b) {return &a == &b;}
+	static bool operator==(const Lua::Vulkan::DescriptorSet &a,const Lua::Vulkan::DescriptorSet &b) {return &a == &b;}
+	static bool operator==(const Lua::Vulkan::RenderTarget &a,const Lua::Vulkan::RenderTarget &b) {return &a == &b;}
+	static bool operator==(const Lua::Vulkan::TimestampQuery &a,const Lua::Vulkan::TimestampQuery &b) {return &a == &b;}
+	static bool operator==(const Lua::Vulkan::TimerQuery &a,const Lua::Vulkan::TimerQuery &b) {return &a == &b;}
+	static bool operator==(const Lua::Vulkan::CommandBufferRecorder &a,const Lua::Vulkan::CommandBufferRecorder &b) {return &a == &b;}
 
-DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::ImageView &hImgView)
-{
-	out<<"VKImageView[";
-	out<<"]";
-	return out;
-}
+	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Image &hImg)
+	{
+		out<<"VKImage[";
+		auto extents = hImg.GetExtents();
+		out<<extents.width<<"x"<<extents.height;
+		out<<"][";
+		auto format = hImg.GetFormat();
+		out<<prosper::util::to_string(format);
+		out<<"]";
+		return out;
+	}
 
-DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Sampler &hSampler)
-{
-	out<<"VKSampler[";
-	out<<"]";
-	return out;
-}
+	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::ImageView &hImgView)
+	{
+		out<<"VKImageView[";
+		out<<"]";
+		return out;
+	}
 
-DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Texture &hTex)
-{
-	out<<"VKTexture[";
-	auto &img = hTex.GetImage();
-	auto *imgView = hTex.GetImageView();
-	auto *sampler = hTex.GetSampler();
-	out<<img<<"][";
-	if(imgView == nullptr)
-		out<<"NULL][";
-	else
-		out<<imgView<<"][";
-	if(sampler == nullptr)
-		out<<"NULL";
-	else
-		out<<sampler;
-	out<<"]";
-	return out;
-}
+	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Sampler &hSampler)
+	{
+		out<<"VKSampler[";
+		out<<"]";
+		return out;
+	}
 
-DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Framebuffer &hFramebuffer)
-{
-	out<<"VKFramebuffer[";
-	out<<"]";
-	return out;
-}
+	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Texture &hTex)
+	{
+		out<<"VKTexture[";
+		auto &img = hTex.GetImage();
+		auto *imgView = hTex.GetImageView();
+		auto *sampler = hTex.GetSampler();
+		out<<img<<"][";
+		if(imgView == nullptr)
+			out<<"NULL][";
+		else
+			out<<imgView<<"][";
+		if(sampler == nullptr)
+			out<<"NULL";
+		else
+			out<<sampler;
+		out<<"]";
+		return out;
+	}
 
-DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::RenderPass &hRenderPass)
-{
-	out<<"VKRenderPass[";
-	out<<"]";
-	return out;
-}
+	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Framebuffer &hFramebuffer)
+	{
+		out<<"VKFramebuffer[";
+		out<<"]";
+		return out;
+	}
 
-DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Event &hEvent)
-{
-	out<<"VKEvent[";
-	auto r = prosper::Result::EventReset;
-	if(hEvent.IsSet())
-		r = prosper::Result::EventSet;
-	out<<prosper::util::to_string(r);
-	out<<"]";
-	return out;
-}
+	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::RenderPass &hRenderPass)
+	{
+		out<<"VKRenderPass[";
+		out<<"]";
+		return out;
+	}
 
-DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Fence &hFence)
-{
-	out<<"VKFence[";
-	out<<"]";
-	return out;
-}
+	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Event &hEvent)
+	{
+		out<<"VKEvent[";
+		auto r = prosper::Result::EventReset;
+		if(hEvent.IsSet())
+			r = prosper::Result::EventSet;
+		out<<prosper::util::to_string(r);
+		out<<"]";
+		return out;
+	}
+
+	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Fence &hFence)
+	{
+		out<<"VKFence[";
+		out<<"]";
+		return out;
+	}
 #if 0
-DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Semaphore &hSemaphore)
-{
-	out<<"VKSemaphore[";
-	out<<"]";
-	return out;
-}
+	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Semaphore &hSemaphore)
+	{
+		out<<"VKSemaphore[";
+		out<<"]";
+		return out;
+	}
 
-DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Memory &hMemory)
-{
-	out<<"VKMemory[";
-	out<<"]";
-	return out;
-}
+	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Memory &hMemory)
+	{
+		out<<"VKMemory[";
+		out<<"]";
+		return out;
+	}
 #endif
-DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::CommandBuffer &hCommandBuffer)
+	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::CommandBuffer &hCommandBuffer)
+	{
+		out<<"VKCommandBuffer[";
+		out<<"]";
+		return out;
+	}
+
+	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Buffer &hBuffer)
+	{
+		out<<"VKBuffer[";
+		out<<hBuffer.GetSize();
+		out<<"]";
+		return out;
+	}
+
+	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::DescriptorSet &hDescSet)
+	{
+		out<<"VKDescriptorSet[";
+		out<<"]";
+		return out;
+	}
+
+	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::RenderTarget &hRt)
+	{
+		out<<"VKRenderTarget[";
+		auto &tex = hRt.GetTexture();
+		auto &framebuffer = hRt.GetFramebuffer();
+		auto &renderPass = hRt.GetRenderPass();
+
+		out<<tex<<"][";
+		out<<framebuffer<<"][";
+		out<<renderPass<<"][";
+		out<<"]";
+		return out;
+	}
+
+	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::TimestampQuery &hTimestampQuery)
+	{
+		out<<"VKTimestampQuery[";
+		out<<hTimestampQuery.IsResultAvailable();
+		out<<"]";
+		return out;
+	}
+
+	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::TimerQuery &hTimerQuery)
+	{
+		out<<"VKTimerQuery[";
+		out<<hTimerQuery.IsResultAvailable();
+		out<<"]";
+		return out;
+	}
+
+	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::CommandBufferRecorder &hCmdBufferRecorder)
+	{
+		out<<"VKCommandBufferRecorder[";
+		out<<hCmdBufferRecorder.IsPending();
+		out<<"]";
+		return out;
+	}
+};
+
+namespace pragma
 {
-	out<<"VKCommandBuffer[";
-	out<<"]";
-	return out;
-}
+	static bool operator==(const pragma::SceneMesh &a,const pragma::SceneMesh &b) {return &a == &b;}
 
-DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Buffer &hBuffer)
-{
-	out<<"VKBuffer[";
-	out<<hBuffer.GetSize();
-	out<<"]";
-	return out;
-}
-
-DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::DescriptorSet &hDescSet)
-{
-	out<<"VKDescriptorSet[";
-	out<<"]";
-	return out;
-}
-
-DLLCLIENT std::ostream &operator<<(std::ostream &out,const pragma::SceneMesh&)
-{
-	out<<"SceneMesh";
-	return out;
-}
-
-DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::RenderTarget &hRt)
-{
-	out<<"VKRenderTarget[";
-	auto &tex = hRt.GetTexture();
-	auto &framebuffer = hRt.GetFramebuffer();
-	auto &renderPass = hRt.GetRenderPass();
-
-	out<<tex<<"][";
-	out<<framebuffer<<"][";
-	out<<renderPass<<"][";
-	out<<"]";
-	return out;
-}
-
-DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::TimestampQuery &hTimestampQuery)
-{
-	out<<"VKTimestampQuery[";
-	out<<hTimestampQuery.IsResultAvailable();
-	out<<"]";
-	return out;
-}
-
-DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::TimerQuery &hTimerQuery)
-{
-	out<<"VKTimerQuery[";
-	out<<hTimerQuery.IsResultAvailable();
-	out<<"]";
-	return out;
-}
-
-DLLCLIENT std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::CommandBufferRecorder &hCmdBufferRecorder)
-{
-	out<<"VKCommandBufferRecorder[";
-	out<<hCmdBufferRecorder.IsPending();
-	out<<"]";
-	return out;
-}
-
-namespace luabind { // For some reason these need to be in the luabind namespace, otherwise luabind can't locate them
-static bool operator==(const Lua::Vulkan::Texture &a,const Lua::Vulkan::Texture &b) {return &a == &b;}
-static bool operator==(const Lua::Vulkan::Image &a,const Lua::Vulkan::Image &b) {return &a == &b;}
-static bool operator==(const Lua::Vulkan::ImageView &a,const Lua::Vulkan::ImageView &b) {return &a == &b;}
-static bool operator==(const Lua::Vulkan::Sampler &a,const Lua::Vulkan::Sampler &b) {return &a == &b;}
-static bool operator==(const Lua::Vulkan::Framebuffer &a,const Lua::Vulkan::Framebuffer &b) {return &a == &b;}
-static bool operator==(const Lua::Vulkan::RenderPass &a,const Lua::Vulkan::RenderPass &b) {return &a == &b;}
-static bool operator==(const Lua::Vulkan::Event &a,const Lua::Vulkan::Event &b) {return &a == &b;}
-static bool operator==(const Lua::Vulkan::Fence &a,const Lua::Vulkan::Fence &b) {return &a == &b;}
-static bool operator==(const Lua::Vulkan::CommandBuffer &a,const Lua::Vulkan::CommandBuffer &b) {return &a == &b;}
-static bool operator==(const Lua::Vulkan::Buffer &a,const Lua::Vulkan::Buffer &b) {return &a == &b;}
-static bool operator==(const Lua::Vulkan::DescriptorSet &a,const Lua::Vulkan::DescriptorSet &b) {return &a == &b;}
-static bool operator==(const pragma::SceneMesh &a,const pragma::SceneMesh &b) {return &a == &b;}
-static bool operator==(const Lua::Vulkan::RenderTarget &a,const Lua::Vulkan::RenderTarget &b) {return &a == &b;}
-static bool operator==(const Lua::Vulkan::TimestampQuery &a,const Lua::Vulkan::TimestampQuery &b) {return &a == &b;}
-static bool operator==(const Lua::Vulkan::TimerQuery &a,const Lua::Vulkan::TimerQuery &b) {return &a == &b;}
-static bool operator==(const Lua::Vulkan::CommandBufferRecorder &a,const Lua::Vulkan::CommandBufferRecorder &b) {return &a == &b;}
+	static std::ostream &operator<<(std::ostream &out,const pragma::SceneMesh&)
+	{
+		out<<"SceneMesh";
+		return out;
+	}
 };
 
 std::shared_ptr<prosper::IBuffer> Lua::Vulkan::create_buffer(prosper::util::BufferCreateInfo &bufCreateInfo,::DataStream &ds)

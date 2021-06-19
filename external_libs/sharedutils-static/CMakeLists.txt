@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.12)
 set(PROJ_NAME sharedutils-static)
 project(${PROJ_NAME} CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 set(DEPENDENCY_GLM_INCLUDE "" CACHE PATH "Path to GLM include directory.")
 set(DEPENDENCY_MATHUTIL_INCLUDE "" CACHE PATH "Path to sharedutils include directory.")

@@ -7,8 +7,11 @@
 
 #include "stdafx_client.h"
 #include "pragma/c_engine.h"
+#include <alsoundsystem.hpp>
+#include <alsoundsystem_create_effect.hpp>
 #include "pragma/game/c_game.h"
 #include "pragma/lua/libraries/c_lsound.h"
+#include "pragma/audio/c_engine_sound.hpp"
 #include "luasystem.h"
 #include <alsoundsystem.hpp>
 

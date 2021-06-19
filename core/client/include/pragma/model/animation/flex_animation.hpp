@@ -9,6 +9,7 @@
 #define __FLEX_ANIMATION_HPP__
 
 #include "pragma/networkdefinitions.h"
+#include <udm_types.hpp>
 
 using FlexControllerId = uint32_t;
 class DLLNETWORK FlexAnimationFrame
@@ -47,7 +48,7 @@ public:
 	void SetFps(float fps) {m_fps = fps;}
 	float GetFps() const {return m_fps;}
 	
-	bool Save(udm::AssetData &outData,std::string &outErr);
+	bool Save(udm::AssetDataArg outData,std::string &outErr);
 	bool SaveLegacy(std::shared_ptr<VFilePtrInternalReal> &f);
 
 	bool operator==(const FlexAnimation &other) const;

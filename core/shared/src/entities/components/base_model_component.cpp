@@ -375,7 +375,7 @@ bool BaseModelComponent::LookupFlexController(const std::string &name,uint32_t &
 		return false;
 	return hMdl->GetFlexControllerId(name,flexId);
 }
-void BaseModelComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BaseModelComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 
@@ -386,7 +386,7 @@ void BaseModelComponent::Save(udm::LinkedPropertyWrapper &udm)
 	auto &bodyGroups = GetBodyGroups();
 	udm["bodyGroups"] = bodyGroups;
 }
-void BaseModelComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void BaseModelComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 

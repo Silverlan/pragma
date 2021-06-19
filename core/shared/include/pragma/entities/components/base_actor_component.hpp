@@ -49,9 +49,9 @@ namespace pragma
 		int32_t GetMoveController() const;
 		int32_t GetMoveControllerY() const;
 
-		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
+		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 	protected:
-		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
+		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 		BaseActorComponent(BaseEntity &ent);
 		bool m_bAlive;
 		util::PBoolProperty m_bFrozen = nullptr;

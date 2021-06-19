@@ -355,7 +355,8 @@ bool CLightMapComponent::ImportLightmapAtlas(uimg::ImageBuffer &imgBuffer)
 	if(lightmapC.valid())
 		lightmapC->SetLightMapAtlas(tex);
 
-	Console::commands::debug_lightmaps(client,nullptr,std::vector<std::string>{});
+	std::vector<std::string> argv{};
+	Console::commands::debug_lightmaps(client,nullptr,argv);
 	return true;
 }
 

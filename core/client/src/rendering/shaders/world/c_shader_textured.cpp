@@ -189,7 +189,7 @@ GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetMaterialPip
 	if(rmaMap)
 	{
 		flags |= GameShaderSpecializationConstantFlag::EnableRmaMapBit;
-		auto &texture = std::static_pointer_cast<Texture>(rmaMap->texture);
+		auto texture = std::static_pointer_cast<Texture>(rmaMap->texture);
 		if(texture)
 		{
 			auto texName = texture->GetName();

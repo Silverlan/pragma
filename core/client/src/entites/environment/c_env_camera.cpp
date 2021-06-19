@@ -28,11 +28,11 @@ CCameraComponent::~CCameraComponent()
 	if(m_cbCameraUpdate.IsValid())
 		m_cbCameraUpdate.Remove();
 }
-void CCameraComponent::Save(udm::LinkedPropertyWrapper &udm)
+void CCameraComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEnvCameraComponent::Save(udm);
 }
-void CCameraComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void CCameraComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEnvCameraComponent::Load(udm,version);
 }

@@ -26,8 +26,8 @@ namespace pragma
 
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		
-		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
-		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
+		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
+		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 	protected:
 		BaseTimeScaleComponent(BaseEntity &ent);
 		pragma::NetEventId m_netEvSetTimeScale = pragma::INVALID_NET_EVENT;

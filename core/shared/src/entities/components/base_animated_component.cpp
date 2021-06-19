@@ -1165,7 +1165,7 @@ bool BaseAnimatedComponent::CalcAnimationMovementSpeed(float *x,float *z,int32_t
 	return true;
 }
 
-static void write_anim_flags(udm::LinkedPropertyWrapper &udm,FPlayAnim flags)
+static void write_anim_flags(udm::LinkedPropertyWrapperArg udm,FPlayAnim flags)
 {
 	udm::write_flag(udm["flags"],flags,FPlayAnim::Reset,"reset");
 	udm::write_flag(udm["flags"],flags,FPlayAnim::Transmit,"transmit");
@@ -1174,7 +1174,7 @@ static void write_anim_flags(udm::LinkedPropertyWrapper &udm,FPlayAnim flags)
 	static_assert(magic_enum::flags::enum_count<FPlayAnim>() == 4);
 }
 
-static FPlayAnim read_anim_flags(udm::LinkedPropertyWrapper &udm)
+static FPlayAnim read_anim_flags(udm::LinkedPropertyWrapperArg &udm)
 {
 	auto flags = FPlayAnim::None;
 	udm::read_flag(udm["flags"],flags,FPlayAnim::Reset,"reset");
@@ -1185,7 +1185,7 @@ static FPlayAnim read_anim_flags(udm::LinkedPropertyWrapper &udm)
 	return flags;
 }
 
-static void write_animation_slot_info(udm::LinkedPropertyWrapper &udm,const BaseAnimatedComponent::AnimationSlotInfo &slotInfo)
+static void write_animation_slot_info(udm::LinkedPropertyWrapperArg udm,const BaseAnimatedComponent::AnimationSlotInfo &slotInfo)
 {
 	udm["activity"] = slotInfo.activity;
 	udm["animation"] = slotInfo.animation;
@@ -1204,7 +1204,7 @@ static void write_animation_slot_info(udm::LinkedPropertyWrapper &udm,const Base
 	udm["lastAnimation"]["blendFadeOut"] = slotInfo.lastAnim.blendTimeScale.second;
 	udm["lastAnimation"]["blendScale"] = slotInfo.lastAnim.blendScale;
 }
-void BaseAnimatedComponent::Save(udm::LinkedPropertyWrapper &udm)
+void BaseAnimatedComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	BaseEntityComponent::Save(udm);
 	udm["playbackRate"] = GetPlaybackRate();
@@ -1234,7 +1234,7 @@ void BaseAnimatedComponent::Save(udm::LinkedPropertyWrapper &udm)
 
 	udm["animDisplacement"] = m_animDisplacement;
 }
-static void read_animation_slot_info(udm::LinkedPropertyWrapper &udm,BaseAnimatedComponent::AnimationSlotInfo &slotInfo)
+static void read_animation_slot_info(udm::LinkedPropertyWrapperArg udm,BaseAnimatedComponent::AnimationSlotInfo &slotInfo)
 {
 	udm["activity"](slotInfo.activity);
 	udm["animation"](slotInfo.animation);
@@ -1253,7 +1253,7 @@ static void read_animation_slot_info(udm::LinkedPropertyWrapper &udm,BaseAnimate
 	slotInfo.lastAnim.flags = read_anim_flags(udm["lastAnimation"]["flags"]);
 	udm["lastAnimation"]["blendScale"](slotInfo.lastAnim.blendScale);
 }
-void BaseAnimatedComponent::Load(udm::LinkedPropertyWrapper &udm,uint32_t version)
+void BaseAnimatedComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
 	BaseEntityComponent::Load(udm,version);
 	auto playbackRate = GetPlaybackRate();;

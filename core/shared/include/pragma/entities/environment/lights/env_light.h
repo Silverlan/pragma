@@ -64,7 +64,7 @@ namespace pragma
 		BaseEntityComponent *GetLight(util::pragma::LightType &outType) const;
 		BaseEntityComponent *GetLight() const;
 
-		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
+		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 
 		virtual void SetLightIntensityType(LightIntensityType type);
 		virtual void SetLightIntensity(float intensity,LightIntensityType type);
@@ -74,7 +74,7 @@ namespace pragma
 		Candela GetLightIntensityCandela() const;
 		Lumen GetLightIntensityLumen() const;
 	protected:
-		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
+		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 		virtual void InitializeLight(BaseEntityComponent &component);
 		util::WeakHandle<BaseEntityComponent> m_hLight = {};
 

@@ -19,8 +19,8 @@ namespace pragma
 	public:
 		CCameraComponent(BaseEntity &ent) : BaseEnvCameraComponent(ent) {}
 		virtual ~CCameraComponent() override;
-		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
-		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
+		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
+		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual void OnEntitySpawn() override;

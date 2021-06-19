@@ -83,7 +83,7 @@ namespace pragma
 		uint32_t GetFlexControllerCount() const;
 		bool LookupFlexController(const std::string &name,uint32_t &flexId) const;
 
-		virtual void Save(udm::LinkedPropertyWrapper &udm) override;
+		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		using BaseEntityComponent::Load;
 
 		uint32_t GetHitboxCount() const;
@@ -91,7 +91,7 @@ namespace pragma
 	protected:
 		BaseModelComponent(BaseEntity &ent);
 		virtual void OnModelChanged(const std::shared_ptr<Model> &model);
-		virtual void Load(udm::LinkedPropertyWrapper &udm,uint32_t version) override;
+		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 		std::shared_ptr<Model> m_model = nullptr;
 
 		std::vector<unsigned int> m_bodyGroups;

@@ -108,10 +108,10 @@ std::optional<std::string> pragma::asset::EntityData::GetKeyValue(const std::str
 	auto it = m_keyValues.find(key);
 	return (it != m_keyValues.end()) ? it->second : std::optional<std::string>{};
 }
-std::string pragma::asset::EntityData::GetKeyValue(const std::string &key,const std::string &default) const
+std::string pragma::asset::EntityData::GetKeyValue(const std::string &key,const std::string &def) const
 {
 	auto val = GetKeyValue(key);
-	return val.has_value() ? *val : default;
+	return val.has_value() ? *val : def;
 }
 const Vector3 &pragma::asset::EntityData::GetOrigin() const {return m_origin;}
 umath::Transform pragma::asset::EntityData::GetPose() const
@@ -123,7 +123,7 @@ umath::Transform pragma::asset::EntityData::GetPose() const
 	auto itAngles = keyValues.find("angles");
 	if(itAngles != keyValues.end())
 	{
-		auto &ang = EulerAngles{itAngles->second};
+		EulerAngles ang {itAngles->second};
 		auto rot = uquat::create(ang);
 		pose.SetRotation(rot);
 	}

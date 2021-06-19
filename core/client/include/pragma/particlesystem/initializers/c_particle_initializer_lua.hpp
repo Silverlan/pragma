@@ -55,7 +55,7 @@ template<class TModifier>
 	void TParticleModifierLua<TModifier>::Initialize(pragma::CParticleSystemComponent &pSystem,const std::unordered_map<std::string,std::string> &values)
 {
 	TModifier::Initialize(pSystem,values);
-	RecordKeyValues(values);
+	// RecordKeyValues(values);
 	CallLuaMember("Initialize");
 }
 

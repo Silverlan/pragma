@@ -1217,7 +1217,7 @@ void Lua::ParticleSystem::AddInitializer(lua_State *l,pragma::CParticleSystemCom
 	for(luabind::iterator i{ot},end;i!=end;++i)
 	{
 		auto key = luabind::object_cast<std::string>(i.key());
-		auto &valRef = *i;
+		auto valRef = *i;
 		valRef.push(l);
 		auto idx = Lua::GetStackTop(l);
 		std::string val = Lua::ParticleSystem::get_key_value(l,idx);
@@ -1242,7 +1242,7 @@ void Lua::ParticleSystem::AddOperator(lua_State *l,pragma::CParticleSystemCompon
 	for(luabind::iterator i{ot},end;i!=end;++i)
 	{
 		auto key = luabind::object_cast<std::string>(i.key());
-		auto &valRef = *i;
+		auto valRef = *i;
 		valRef.push(l);
 		auto idx = Lua::GetStackTop(l);
 		std::string val = Lua::ParticleSystem::get_key_value(l,idx);
@@ -1267,7 +1267,7 @@ void Lua::ParticleSystem::AddRenderer(lua_State *l,pragma::CParticleSystemCompon
 	for(luabind::iterator i{ot},end;i!=end;++i)
 	{
 		auto key = luabind::object_cast<std::string>(i.key());
-		auto &valRef = *i;
+		auto valRef = *i;
 		valRef.push(l);
 		auto idx = Lua::GetStackTop(l);
 		std::string val = Lua::ParticleSystem::get_key_value(l,idx);

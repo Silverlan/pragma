@@ -104,7 +104,8 @@ public:
 		GameInitialized = MapInitialized<<1u,
 		MapLoaded = GameInitialized<<1u,
 		InitialTick = MapLoaded<<1u,
-		LevelTransition = InitialTick<<1u
+		LevelTransition = InitialTick<<1u,
+		ClosingGame = LevelTransition<<1u
 	};
 
 	Vector3 &GetGravity();

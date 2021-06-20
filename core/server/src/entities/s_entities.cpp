@@ -37,6 +37,8 @@ pragma::SPlayerComponent *SGame::GetPlayer(pragma::networking::IServerClient &se
 
 SBaseEntity *SGame::CreateEntity(std::string classname)
 {
+	if(umath::is_flag_set(m_flags,GameFlags::ClosingGame))
+		return nullptr;
 	StringToLower(classname);
 	auto *entlua = CreateLuaEntity(classname);
 	if(entlua != NULL)

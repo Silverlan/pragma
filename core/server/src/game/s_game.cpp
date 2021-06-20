@@ -172,6 +172,7 @@ SGame::~SGame() {}
 
 void SGame::OnRemove()
 {
+	m_flags |= GameFlags::ClosingGame;
 	CallCallbacks<void,SGame*>("OnGameEnd",this);
 	m_luaCache = nullptr;
 	for(unsigned int i=0;i<m_ents.size();i++)

@@ -307,6 +307,7 @@ CGame::~CGame() {}
 
 void CGame::OnRemove()
 {
+	m_flags |= GameFlags::ClosingGame;
 	m_renderQueueWorkerManager = nullptr;
 	m_renderQueueBuilder = nullptr;
 	c_engine->GetRenderContext().WaitIdle();
@@ -331,13 +332,11 @@ void CGame::OnRemove()
 
 	SetTimeScale(1.f);
 
-	for(unsigned int i=0;i<m_ents.size();i++)
+	for(auto *ent : m_ents)
 	{
-		if(m_ents[i] != NULL)
-		{
-			m_ents[i]->OnRemove();
-			m_ents[i]->Remove();
-		}
+		if(!ent)
+			continue;
+		ent->Remove();
 	}
 	m_listener = {};
 	m_worldComponent = {};

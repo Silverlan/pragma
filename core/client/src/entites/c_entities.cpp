@@ -33,6 +33,8 @@ pragma::CPlayerComponent *CGame::GetLocalPlayer()
 
 CBaseEntity *CGame::CreateEntity(std::string classname)
 {
+	if(umath::is_flag_set(m_flags,GameFlags::ClosingGame))
+		return nullptr;
 	StringToLower(classname);
 	CBaseEntity *entlua = CreateLuaEntity(classname);
 	if(entlua != NULL)

@@ -198,6 +198,8 @@ public:
 template<class T>
 	T *SGame::CreateEntity(unsigned int idx)
 {
+	if(umath::is_flag_set(m_flags,GameFlags::ClosingGame))
+		return nullptr;
 	T *ent = new T();
 	SetupEntity(ent,idx);
 	return ent;
@@ -206,6 +208,8 @@ template<class T>
 template<class T>
 	T *SGame::CreateEntity()
 {
+	if(umath::is_flag_set(m_flags,GameFlags::ClosingGame))
+		return nullptr;
 	return CreateEntity<T>(GetFreeEntityIndex());
 }
 

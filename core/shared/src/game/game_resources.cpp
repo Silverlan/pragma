@@ -34,7 +34,7 @@ static std::shared_ptr<util::Library> load_module(NetworkState *nw)
 			if(bPrintError == true)
 			{
 				bPrintError = false;
-				Con::cwar<<"WARNING: Unable to load wv_external_mount module: "<<err<<Con::endl;
+				Con::cwar<<"WARNING: Unable to load pr_mount_external module: "<<err<<Con::endl;
 			}
 			return nullptr;
 		}

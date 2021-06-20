@@ -12,7 +12,7 @@ What are Pragma's requirements?
 ------
 - Windows compiler with C++-20 support (Linux support will follow)
 - CMake 3.18.4 or newer: https://cmake.org/download/#latest
-- Boost 1.76: https://www.boost.org/users/history/version_1_72_0.html
+- Boost 1.76: https://www.boost.org/users/history/version_1_76_0.html
 - zlib 1.2.8: https://github.com/fmrico/zlib-1.2.8
 - Geometric Tools Engine: https://github.com/davideberly/GeometricTools
 - Python 3.8 or newer: https://www.python.org/downloads/

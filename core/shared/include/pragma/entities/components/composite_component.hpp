@@ -30,6 +30,7 @@ namespace pragma
 		void AddEntity(BaseEntity &ent);
 		void RemoveEntity(BaseEntity &ent);
 		const std::vector<EntityHandle> &GetEntities() const;
+		void ClearEntities(bool safely=true);
 
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 	protected:

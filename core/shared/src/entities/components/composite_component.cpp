@@ -67,6 +67,20 @@ void CompositeComponent::RemoveEntity(BaseEntity &ent)
 }
 const std::vector<EntityHandle> &CompositeComponent::GetEntities() const {return m_ents;}
 
+void CompositeComponent::ClearEntities(bool safely)
+{
+	for(auto &hEnt : m_ents)
+	{
+		if(!hEnt.IsValid())
+			continue;
+		if(safely)
+			hEnt->RemoveSafely();
+		else
+			hEnt->Remove();
+	}
+	m_ents.clear();
+}
+
 luabind::object CompositeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CompositeComponentHandleWrapper>(l);}
 
 void CompositeComponent::Save(udm::LinkedPropertyWrapperArg udm)

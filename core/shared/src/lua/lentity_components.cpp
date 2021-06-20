@@ -150,6 +150,14 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 		LUA_CHECK_ENTITY(l,hEnt);
 		hComponent->RemoveEntity(*hEnt.get());
 	}));
+	defComposite.def("ClearEntities",static_cast<void(*)(lua_State*,CompositeHandle&)>([](lua_State *l,CompositeHandle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->ClearEntities();
+	}));
+	defComposite.def("ClearEntities",static_cast<void(*)(lua_State*,CompositeHandle&,bool)>([](lua_State *l,CompositeHandle &hComponent,bool safely) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->ClearEntities(safely);
+	}));
 	defComposite.def("GetEntities",static_cast<luabind::object(*)(lua_State*,CompositeHandle&)>([](lua_State *l,CompositeHandle &hComponent) -> luabind::object {
 		pragma::Lua::check_component(l,hComponent);
 		auto &ents = hComponent->GetEntities();

@@ -752,6 +752,12 @@ bool CEngine::Initialize(int argc,char *argv[])
 				ShutDown();
 		}
 	}
+	else if(util::is_process_running("bdcam.exe"))
+	{
+		auto r = MessageBox(NULL,"Detected Bandicam running in the background, this can cause crashes and/or freezing! Please close Bandicam and restart Pragma. You can restart Bandicam after Pragma has been started, but it mustn't be running before then.","Bandicam Warning",MB_OK | MB_OKCANCEL);
+		if(r == IDCANCEL)
+			ShutDown();
+	}
 #endif
 	return true;
 }

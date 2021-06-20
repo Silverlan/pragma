@@ -921,6 +921,9 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefTransform.def(luabind::const_self *Quat());
 
 	physMod[classDefTransform];
+	Lua::RegisterLibraryValues<umath::Transform>(lua.GetState(),"phys.Transform",{
+		std::pair<std::string,umath::Transform>{"IDENTITY",umath::Transform{}}
+	});
 
 	auto classDefScaledTransform = luabind::class_<umath::ScaledTransform,umath::Transform>("ScaledTransform");
 	classDefScaledTransform.def(luabind::constructor<const Mat4&>());
@@ -959,6 +962,9 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefScaledTransform.def(luabind::const_self *Vector3());
 	classDefScaledTransform.def(luabind::const_self *Quat());
 	physMod[classDefScaledTransform];
+	Lua::RegisterLibraryValues<umath::ScaledTransform>(lua.GetState(),"phys.ScaledTransform",{
+		std::pair<std::string,umath::ScaledTransform>{"IDENTITY",umath::ScaledTransform{}}
+	});
 
 	auto classTreeIkTree = luabind::class_<Tree>("IKTree");
 	classTreeIkTree.scope[luabind::def("Create",static_cast<void(*)(lua_State*)>([](lua_State *l) {

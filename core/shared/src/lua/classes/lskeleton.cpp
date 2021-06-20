@@ -76,6 +76,19 @@ void Lua::Skeleton::MakeRootBone(lua_State *l,::Skeleton &skeleton,::Bone &bone)
 	skeleton.GetRootBones()[bone.ID] = bone.shared_from_this();
 	Lua::PushBool(l,true);
 }
+luabind::object Lua::Skeleton::GetBoneHierarchy(lua_State *l,::Skeleton &skeleton)
+{
+	auto t = luabind::newtable(l);
+	std::function<void(const ::Bone&,const luabind::object&)> fGetHierarchy = nullptr;
+	fGetHierarchy = [l,&fGetHierarchy](const ::Bone &bone,const luabind::object &t) {
+		t[bone.ID] = luabind::newtable(l);
+		for(auto &pair : bone.children)
+			fGetHierarchy(*pair.second,t[bone.ID]);
+	};
+	for(auto &pair : skeleton.GetRootBones())
+		fGetHierarchy(*pair.second,t);
+	return t;
+}
 void Lua::Skeleton::GetBoneCount(lua_State *l,::Skeleton &skeleton) {Lua::PushInt(l,skeleton.GetBoneCount());}
 void Lua::Skeleton::Merge(lua_State *l,::Skeleton &skeleton,::Skeleton &skeletonOther) {skeleton.Merge(skeletonOther);}
 void Lua::Skeleton::ClearBones(lua_State *l,::Skeleton &skeleton) {skeleton.GetBones().clear(); skeleton.GetRootBones().clear();}

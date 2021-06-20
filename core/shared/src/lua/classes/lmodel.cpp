@@ -1087,6 +1087,7 @@ void Lua::Model::register_class(
 	classDefSkeleton.def("Merge",&Lua::Skeleton::Merge);
 	classDefSkeleton.def("ClearBones",&Lua::Skeleton::ClearBones);
 	classDefSkeleton.def("MakeRootBone",Lua::Skeleton::MakeRootBone);
+	classDefSkeleton.def("GetBoneHierarchy",Lua::Skeleton::GetBoneHierarchy);
 	classDefSkeleton.def("IsRootBone",static_cast<void(*)(lua_State*,::Skeleton&,uint32_t)>([](lua_State *l,::Skeleton &skeleton,uint32_t boneId) {
 		Lua::PushBool(l,skeleton.IsRootBone(boneId));
 	}));

@@ -26,6 +26,7 @@ namespace Lua
 		DLLNETWORK void Merge(lua_State *l,::Skeleton &skeleton,::Skeleton &skeletonOther);
 		DLLNETWORK void ClearBones(lua_State *l,::Skeleton &skeleton);
 		DLLNETWORK void MakeRootBone(lua_State *l,::Skeleton &skeleton,::Bone &bone);
+		DLLNETWORK luabind::object GetBoneHierarchy(lua_State *l,::Skeleton &skeleton);
 	};
 	namespace Bone
 	{

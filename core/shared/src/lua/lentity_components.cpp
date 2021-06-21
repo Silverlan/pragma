@@ -140,16 +140,6 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	gameMod[defGlobal];
 
 	auto defComposite = luabind::class_<CompositeHandle,BaseEntityComponentHandle>("CompositeComponent");
-	defComposite.def("AddEntity",static_cast<void(*)(lua_State*,CompositeHandle&,EntityHandle&)>([](lua_State *l,CompositeHandle &hComponent,EntityHandle &hEnt) {
-		pragma::Lua::check_component(l,hComponent);
-		LUA_CHECK_ENTITY(l,hEnt);
-		hComponent->AddEntity(*hEnt.get());
-	}));
-	defComposite.def("RemoveEntity",static_cast<void(*)(lua_State*,CompositeHandle&,EntityHandle&)>([](lua_State *l,CompositeHandle &hComponent,EntityHandle &hEnt) {
-		pragma::Lua::check_component(l,hComponent);
-		LUA_CHECK_ENTITY(l,hEnt);
-		hComponent->RemoveEntity(*hEnt.get());
-	}));
 	defComposite.def("ClearEntities",static_cast<void(*)(lua_State*,CompositeHandle&)>([](lua_State *l,CompositeHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->ClearEntities();
@@ -158,9 +148,21 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->ClearEntities(safely);
 	}));
+	defComposite.def("ClearEntities",static_cast<void(*)(lua_State*,CompositeHandle&,const std::string&)>([](lua_State *l,CompositeHandle &hComponent,const std::string &groupName) {
+		pragma::Lua::check_component(l,hComponent);
+		auto *group = hComponent->GetRootCompositeGroup().FindChildGroup(groupName);
+		if(group)
+			group->ClearEntities();
+	}));
+	defComposite.def("ClearEntities",static_cast<void(*)(lua_State*,CompositeHandle&,const std::string&,bool)>([](lua_State *l,CompositeHandle &hComponent,const std::string &groupName,bool safely) {
+		pragma::Lua::check_component(l,hComponent);
+		auto *group = hComponent->GetRootCompositeGroup().FindChildGroup(groupName);
+		if(group)
+			group->ClearEntities(safely);
+	}));
 	defComposite.def("GetEntities",static_cast<luabind::object(*)(lua_State*,CompositeHandle&)>([](lua_State *l,CompositeHandle &hComponent) -> luabind::object {
 		pragma::Lua::check_component(l,hComponent);
-		auto &ents = hComponent->GetEntities();
+		auto &ents = hComponent->GetRootCompositeGroup().GetEntities();
 		auto tEnts = luabind::newtable(l);
 		int32_t idx = 1;
 		for(auto &hEnt : ents)
@@ -171,6 +173,88 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 		}
 		return tEnts;
 	}));
+	defComposite.def("GetEntities",static_cast<luabind::object(*)(lua_State*,CompositeHandle&,const std::string&)>([](lua_State *l,CompositeHandle &hComponent,const std::string &groupName) -> luabind::object {
+		pragma::Lua::check_component(l,hComponent);
+		auto tEnts = luabind::newtable(l);
+		auto *group = hComponent->GetRootCompositeGroup().FindChildGroup(groupName);
+		if(!group)
+			return tEnts;
+		auto &ents = group->GetEntities();
+		int32_t idx = 1;
+		for(auto &hEnt : ents)
+		{
+			if(!hEnt.IsValid())
+				continue;
+			tEnts[idx++] = *hEnt.get()->GetLuaObject();
+		}
+		return tEnts;
+	}));
+	defComposite.def("GetRootGroup",static_cast<pragma::CompositeGroup&(*)(lua_State*,CompositeHandle&,const std::string&)>([](lua_State *l,CompositeHandle &hComponent,const std::string &name) -> pragma::CompositeGroup& {
+		pragma::Lua::check_component(l,hComponent);
+		return hComponent->GetRootCompositeGroup();
+	}));
+	defComposite.def("AddEntity",static_cast<void(*)(lua_State*,CompositeHandle&,EntityHandle&)>([](lua_State *l,CompositeHandle &hComponent,EntityHandle &hEnt) {
+		pragma::Lua::check_component(l,hComponent);
+		LUA_CHECK_ENTITY(l,hEnt);
+		hComponent->GetRootCompositeGroup().AddEntity(*hEnt.get());
+	}));
+	defComposite.def("AddEntity",static_cast<void(*)(lua_State*,CompositeHandle&,EntityHandle&,const std::string&)>([](lua_State *l,CompositeHandle &hComponent,EntityHandle &hEnt,const std::string &groupName) {
+		pragma::Lua::check_component(l,hComponent);
+		LUA_CHECK_ENTITY(l,hEnt);
+		hComponent->GetRootCompositeGroup().AddChildGroup(groupName).AddEntity(*hEnt.get());
+	}));
+	auto defCompositeGroup = luabind::class_<pragma::CompositeGroup>("CompositeGroup");
+	defCompositeGroup.def("AddEntity",static_cast<void(*)(lua_State*,pragma::CompositeGroup&,EntityHandle&)>([](lua_State *l,pragma::CompositeGroup &hComponent,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hComponent.AddEntity(*hEnt.get());
+	}));
+	defCompositeGroup.def("AddEntity",static_cast<void(*)(lua_State*,pragma::CompositeGroup&,EntityHandle&,const std::string&)>([](lua_State *l,pragma::CompositeGroup &hComponent,EntityHandle &hEnt,const std::string &groupName) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hComponent.AddChildGroup(groupName).AddEntity(*hEnt.get());
+	}));
+	defCompositeGroup.def("RemoveEntity",static_cast<void(*)(lua_State*,pragma::CompositeGroup&,EntityHandle&)>([](lua_State *l,pragma::CompositeGroup &hComponent,EntityHandle &hEnt) {
+		LUA_CHECK_ENTITY(l,hEnt);
+		hComponent.RemoveEntity(*hEnt.get());
+	}));
+	defCompositeGroup.def("ClearEntities",static_cast<void(*)(lua_State*,pragma::CompositeGroup&)>([](lua_State *l,pragma::CompositeGroup &hComponent) {
+		hComponent.ClearEntities();
+	}));
+	defCompositeGroup.def("ClearEntities",static_cast<void(*)(lua_State*,pragma::CompositeGroup&,bool)>([](lua_State *l,pragma::CompositeGroup &hComponent,bool safely) {
+		hComponent.ClearEntities(safely);
+	}));
+	defCompositeGroup.def("ClearEntities",static_cast<void(*)(lua_State*,pragma::CompositeGroup&,const std::string&)>([](lua_State *l,pragma::CompositeGroup &hComponent,const std::string &groupName) {
+		auto *group = hComponent.FindChildGroup(groupName);
+		if(group)
+			group->ClearEntities();
+	}));
+	defCompositeGroup.def("ClearEntities",static_cast<void(*)(lua_State*,pragma::CompositeGroup&,const std::string&,bool)>([](lua_State *l,pragma::CompositeGroup &hComponent,const std::string &groupName,bool safely) {
+		auto *group = hComponent.FindChildGroup(groupName);
+		if(group)
+			group->ClearEntities(safely);
+	}));
+	defCompositeGroup.def("GetEntities",static_cast<luabind::object(*)(lua_State*,pragma::CompositeGroup&)>([](lua_State *l,pragma::CompositeGroup &hComponent) -> luabind::object {
+		auto &ents = hComponent.GetEntities();
+		auto tEnts = luabind::newtable(l);
+		int32_t idx = 1;
+		for(auto &hEnt : ents)
+		{
+			if(!hEnt.IsValid())
+				continue;
+			tEnts[idx++] = *hEnt.get()->GetLuaObject();
+		}
+		return tEnts;
+	}));
+	defCompositeGroup.def("AddChildGroup",static_cast<pragma::CompositeGroup&(*)(lua_State*,pragma::CompositeGroup&,const std::string&)>([](lua_State *l,pragma::CompositeGroup &hComponent,const std::string &name) -> pragma::CompositeGroup& {
+		return hComponent.AddChildGroup(name);
+	}));
+	defCompositeGroup.def("GetChildGroups",static_cast<luabind::object(*)(lua_State*,pragma::CompositeGroup&,const std::string&)>([](lua_State *l,pragma::CompositeGroup &hComponent,const std::string &name) -> luabind::object {
+		auto t = luabind::newtable(l);
+		int32_t idx = 1;
+		for(auto &childGroup : hComponent.GetChildGroups())
+			t[idx++] = childGroup.get();
+		return t;
+	}));
+	defComposite.scope[defCompositeGroup];
 	gameMod[defComposite];
 	
 	auto defAnimated2 = luabind::class_<Animated2Handle,BaseEntityComponentHandle>("Animated2Component");

@@ -58,6 +58,7 @@ CompositeGroup &CompositeGroup::AddChildGroup(const std::string &groupName)
 	if(group)
 		return *group;
 	m_childGroups.push_back(std::make_unique<CompositeGroup>(*m_compositeComponent,groupName));
+	m_childGroups.back()->m_parent = this;
 	return *m_childGroups.back();
 }
 void CompositeGroup::ClearEntities(bool safely)

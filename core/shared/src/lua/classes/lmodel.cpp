@@ -1088,9 +1088,8 @@ void Lua::Model::register_class(
 	classDefSkeleton.def("ClearBones",&Lua::Skeleton::ClearBones);
 	classDefSkeleton.def("MakeRootBone",Lua::Skeleton::MakeRootBone);
 	classDefSkeleton.def("GetBoneHierarchy",Lua::Skeleton::GetBoneHierarchy);
-	classDefSkeleton.def("IsRootBone",static_cast<void(*)(lua_State*,::Skeleton&,uint32_t)>([](lua_State *l,::Skeleton &skeleton,uint32_t boneId) {
-		Lua::PushBool(l,skeleton.IsRootBone(boneId));
-	}));
+	classDefSkeleton.def("IsRootBone",static_cast<bool(*)(lua_State*,::Skeleton&,const std::string&)>(&Lua::Skeleton::IsRootBone));
+	classDefSkeleton.def("IsRootBone",static_cast<bool(*)(lua_State*,::Skeleton&,uint32_t)>(&Lua::Skeleton::IsRootBone));
 	Lua::Bone::register_class(l,classDefSkeleton);
 
 	auto modelMeshGroupClassDef = luabind::class_<::ModelMeshGroup>("MeshGroup");

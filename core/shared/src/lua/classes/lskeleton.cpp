@@ -9,6 +9,17 @@
 #include "pragma/lua/classes/lskeleton.h"
 #include "luasystem.h"
 
+bool Lua::Skeleton::IsRootBone(lua_State *l,::Skeleton &skeleton,const std::string &boneName)
+{
+	auto boneId = skeleton.LookupBone(boneName);
+	return IsRootBone(l,skeleton,boneId);
+}
+bool Lua::Skeleton::IsRootBone(lua_State *l,::Skeleton &skeleton,uint32_t boneId)
+{
+	auto &rootBones = skeleton.GetRootBones();
+	return rootBones.find(boneId) != rootBones.end();
+}
+
 void Lua::Skeleton::GetRootBones(lua_State *l,::Skeleton &skeleton)
 {
 	auto &rootBones = skeleton.GetRootBones();

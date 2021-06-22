@@ -15,6 +15,8 @@ namespace Lua
 {
 	namespace Skeleton
 	{
+		DLLNETWORK bool IsRootBone(lua_State *l,::Skeleton &skeleton,const std::string &boneId);
+		DLLNETWORK bool IsRootBone(lua_State *l,::Skeleton &skeleton,uint32_t boneId);
 		DLLNETWORK void GetRootBones(lua_State *l,::Skeleton &skeleton);
 		DLLNETWORK void GetBones(lua_State *l,::Skeleton &skeleton);
 		DLLNETWORK void GetBone(lua_State *l,::Skeleton &skeleton,uint32_t boneId);

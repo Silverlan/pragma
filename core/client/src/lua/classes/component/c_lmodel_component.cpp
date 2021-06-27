@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/model/c_model.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
+#include <pragma/asset/util_asset.hpp>
 #include <prosper_command_buffer.hpp>
 
 void Lua::ModelDef::register_class(lua_State *l,luabind::module_ &entsMod)
@@ -23,6 +24,21 @@ void Lua::ModelDef::register_class(lua_State *l,luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hModel);
 		hModel->SetMaterialOverride(matIdx,static_cast<CMaterial&>(mat));
 		}));
+	defCModel.def("SetMaterialOverride",static_cast<void(*)(lua_State*,CModelHandle&,const std::string&,const std::string&)>([](lua_State *l,CModelHandle &hModel,const std::string &matSrc,const std::string &matDst) {
+		pragma::Lua::check_component(l,hModel);
+		auto &mdl = hModel->GetModel();
+		if(!mdl)
+			return;
+		auto &mats = mdl->GetMaterials();
+		auto it = std::find_if(mats.begin(),mats.end(),[&matSrc](const MaterialHandle &hMat) {
+			if(!hMat.IsValid())
+				return false;
+			return pragma::asset::matches(hMat.get()->GetName(),matSrc,pragma::asset::Type::Material);
+		});
+		if(it == mats.end())
+			return;
+		hModel->SetMaterialOverride(it -mats.begin(),matDst);
+	}));
 	defCModel.def("ClearMaterialOverride",static_cast<void(*)(lua_State*,CModelHandle&,uint32_t)>([](lua_State *l,CModelHandle &hModel,uint32_t matIdx) {
 		pragma::Lua::check_component(l,hModel);
 		hModel->ClearMaterialOverride(matIdx);

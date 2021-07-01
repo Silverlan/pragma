@@ -34,9 +34,6 @@
 [submodule "external_libs/util_pad"]
 	path = external_libs/util_pad
 	url = https://github.com/Silverlan/util_pad.git
-[submodule "external_libs/util_pragma_doc"]
-	path = external_libs/util_pragma_doc
-	url = https://github.com/Silverlan/util_pragma_doc.git
 [submodule "external_libs/util_sound"]
 	path = external_libs/util_sound
 	url = https://github.com/Silverlan/util_sound.git

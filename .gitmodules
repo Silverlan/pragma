@@ -187,3 +187,6 @@
 [submodule "third_party_libs/eigen"]
 	path = third_party_libs/eigen
 	url = https://gitlab.com/libeigen/eigen.git
+[submodule "external_libs/util_pragma_doc"]
+	path = external_libs/util_pragma_doc
+	url = https://github.com/Silverlan/util_pragma_doc.git

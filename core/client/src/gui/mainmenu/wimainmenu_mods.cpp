@@ -15,7 +15,9 @@
 #include "pragma/gui/wiprogressbar.h"
 #include <pragma/addonsystem/addonsystem.h>
 #include <pragma/localization.h>
+#ifdef PRAGMA_CHROMIUM_ENABLED
 #include <../../../modules/pr_chromium/include/util_javascript.hpp>
+#endif
 
 #define PAD_ADDON_VERBOSE 1
 
@@ -136,6 +138,7 @@ void WIMainMenuMods::OnVisibilityChanged(bool bVisible)
 void WIMainMenuMods::InitializeJavascript()
 {
 	WIChromiumPage::InitializeJavascript();
+#ifdef PRAGMA_CHROMIUM_ENABLED
 	auto hThis = GetHandle();
 	RegisterJavascriptFunction("set_addon_subscription",[hThis](const std::vector<pragma::JSValue> &args) -> std::unique_ptr<pragma::JSValue> {
 		auto r = std::make_unique<pragma::JSValue>();
@@ -163,6 +166,7 @@ void WIMainMenuMods::InitializeJavascript()
 			*static_cast<bool*>(r->data.get()) = true;
 		return r;
 	});
+#endif
 }
 
 void WIMainMenuMods::Initialize()

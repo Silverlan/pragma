@@ -13,31 +13,19 @@ file(GLOB MODULE_LIST
 foreach(MODULE_PATH ${MODULE_LIST})
 	if(IS_DIRECTORY ${MODULE_PATH})
 		get_filename_component(MODULE_NAME ${MODULE_PATH} NAME)
+
+		set_property(GLOBAL PROPERTY PRAGMA_MODULE_SKIP_TARGET_PROPERTY_FOLDER 0)
+
 		register_module(${MODULE_NAME})
 
-		if("${MODULE_NAME}" STREQUAL "pr_steam_networking")
-			set_target_properties(pr_game_networking_server PROPERTIES FOLDER modules)
-			set_target_properties(pr_game_networking_client PROPERTIES FOLDER modules)
-			set_target_properties(pr_steam_networking_server PROPERTIES FOLDER modules)
-			set_target_properties(pr_steam_networking_client PROPERTIES FOLDER modules)
-		else()
+		get_property(PRAGMA_MODULE_SKIP_TARGET_PROPERTY_FOLDER GLOBAL PROPERTY PRAGMA_MODULE_SKIP_TARGET_PROPERTY_FOLDER)
+
+		if(${PRAGMA_MODULE_SKIP_TARGET_PROPERTY_FOLDER} EQUAL 0)
 			if(NOT "${MODULE_NAME}" STREQUAL "interfaces")
 				set_target_properties(${MODULE_NAME} PROPERTIES FOLDER modules)
 			endif()
 		endif()
 	endif()
 endforeach()
-
-# option(CONFIG_ENABLE_BULLET_PHYSICS "Enable Bullet physics engine" ON)
-# if(CONFIG_ENABLE_BULLET_PHYSICS)
-# 	register_module(pr_bullet)
-# 	set_target_properties(pr_bullet PROPERTIES FOLDER modules)
-# endif()
-
-# option(CONFIG_ENABLE_PHYSX_PHYSICS "Enable PhysX physics engine" ON)
-# if(CONFIG_ENABLE_PHYSX_PHYSICS)
-# 	register_module(pr_physx)
-# 	set_target_properties(pr_physx PROPERTIES FOLDER modules)
-# endif()
 
 set(CMAKE_CXX_STANDARD 20)

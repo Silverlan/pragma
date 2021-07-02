@@ -28,9 +28,6 @@
 [submodule "external_libs/prosper"]
 	path = external_libs/prosper
 	url = https://github.com/Silverlan/prosper.git
-[submodule "external_libs/util_fgd"]
-	path = external_libs/util_fgd
-	url = https://github.com/Silverlan/util_fgd.git
 [submodule "external_libs/util_pad"]
 	path = external_libs/util_pad
 	url = https://github.com/Silverlan/util_pad.git
@@ -88,18 +85,12 @@
 [submodule "third_party_libs/assimp"]
 	path = third_party_libs/assimp
 	url = https://github.com/assimp/assimp.git
-[submodule "third_party_libs/bullet"]
-	path = third_party_libs/bullet
-	url = https://github.com/bulletphysics/bullet3.git
 [submodule "third_party_libs/libsamplerate"]
 	path = third_party_libs/libsamplerate
 	url = https://github.com/erikd/libsamplerate.git
 [submodule "external_libs/util_smdmodel"]
 	path = external_libs/util_smdmodel
 	url = https://github.com/Silverlan/util_smdmodel.git
-[submodule "external_libs/util_pcl"]
-	path = external_libs/util_pcl
-	url = https://github.com/Silverlan/util_pcl.git
 [submodule "third_party_libs/luabind"]
 	path = third_party_libs/luabind
 	url = https://github.com/Silverlan/luabind-deboostified.git
@@ -139,9 +130,6 @@
 [submodule "third_party_libs/freetype"]
 	path = third_party_libs/freetype
 	url = https://github.com/aseprite/freetype2.git
-[submodule "external_libs/util_video_recorder"]
-	path = external_libs/util_video_recorder
-	url = https://github.com/Silverlan/util_video_recorder.git
 [submodule "modules/pr_curl"]
 	path = modules/pr_curl
 	url = https://github.com/Silverlan/pr_curl.git
@@ -157,18 +145,9 @@
 [submodule "modules/pr_prosper_vulkan"]
 	path = modules/pr_prosper_vulkan
 	url = https://github.com/Silverlan/pr_prosper_vulkan.git
-[submodule "external_libs/prosper_opengl"]
-	path = external_libs/prosper_opengl
-	url = https://github.com/Silverlan/prosper_opengl.git
-[submodule "external_libs/prosper_vulkan"]
-	path = external_libs/prosper_vulkan
-	url = https://github.com/Silverlan/prosper_vulkan.git
 [submodule "third_party_libs/squish"]
 	path = third_party_libs/squish
 	url = https://github.com/ivan-kulikov-dev/squish.git
-[submodule "external_libs/util_bsp"]
-	path = external_libs/util_bsp
-	url = https://github.com/Silverlan/util_bsp.git
 [submodule "external_libs/util_source2"]
 	path = external_libs/util_source2
 	url = https://github.com/Silverlan/util_source2.git

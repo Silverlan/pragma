@@ -932,6 +932,7 @@ pragma_install(util_image "${BINARY_OUTPUT_DIR}")
 pragma_install(util_sound "${BINARY_OUTPUT_DIR}")
 pragma_install(vfilesystem "${BINARY_OUTPUT_DIR}")
 pragma_install(wgui "${BINARY_OUTPUT_DIR}")
+pragma_install(util_raytracing "${BINARY_OUTPUT_DIR}")
 
 add_custom_target(pragma-install
 	DEPENDS pragma

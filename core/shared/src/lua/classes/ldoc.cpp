@@ -346,10 +346,39 @@ static std::unordered_map<std::string,std::string> g_typeTranslationTable {
 	{"double","float"},
 	{"__int64","int64"},
 	{"luabind::object","any"},
-	{"File","file.File"}
+	{"File","file.File"},
+	{"Vector","math.Vector"},
+	{"Vertex","game.Model.Vertex"},
+	{"Skeleton","game.Model.Skeleton"},
+	{"Model","game.Model"},
+	{"Sub","game.Model.Mesh.Sub"},
+	{"ModelSubMesh","game.Model.Mesh.Sub"},
+	{"FlexAnimation","game.Model.FlexAnimation"},
+	{"CollisionMesh","game.Model.CollisionMesh"},
+	{"MeshGroup","game.Model.MeshGroup"},
+	{"Joint","game.Model.Joint"},
+	{"Eyeball","game.Model.Eyeball"},
+	{"VertexAnimation","game.Model.VertexAnimation"},
+	{"MeshAnimation","game.Model.VertexAnimation.MeshAnimation"},
+	{"VertexWeight","game.Model.VertexWeight"},
+	{"Flex","game.Model.Flex"},
+	{"Bone","game.Model.Skeleton.Bone"},
+	{"char","char"},
+	{"signed char","char"},
+	{"unsigned short","uint16"},
+	{"unsigned __int64","uint64"},
+	{"int","int32"},
+	{"float","float"},
+	{"bool","bool"},
+	{"FlexAnimationFrame","game.Model.FlexAnimation.Frame"},
+	{"TimerHandle","time.Timer"},
+	{"pragma::ai::Schedule","ai.Schedule"},
+	{"LFile","file.File"},
+	{"Version","util.Version"}
 };
 
 std::unordered_set<std::string> g_typeWarningCache;
+std::unordered_map<std::string,std::string> g_classNameToFullName;
 static void normalize_param_name(std::string &paramName)
 {
 	auto isRef = (paramName.find("&") != std::string::npos);
@@ -359,6 +388,10 @@ static void normalize_param_name(std::string &paramName)
 	ustring::replace(paramName,"*","");
 	ustring::replace(paramName,"custom ","");
 	ustring::replace(paramName," const","");
+	ustring::replace(paramName,"std::shared_ptr<","");
+	ustring::replace(paramName,"util::TSharedHandle<","");
+	ustring::replace(paramName,"util::WeakHandle<","");
+	ustring::replace(paramName,">","");
 
 	if(paramName.empty() == false && paramName.front() == '[' && paramName.back() == ']')
 	{
@@ -374,17 +407,18 @@ static void normalize_param_name(std::string &paramName)
 		paramName = it->second;
 	else
 	{
-		if(g_typeWarningCache.find(paramName) == g_typeWarningCache.end())
+		auto it = g_classNameToFullName.find(paramName);
+		if(it != g_classNameToFullName.end())
+			paramName = it->second;
+		else
 		{
-			g_typeWarningCache.insert(paramName);
-			Con::cwar<<"WARNING: Unknown type '"<<paramName<<"'!"<<Con::endl;
+			if(g_typeWarningCache.find(paramName) == g_typeWarningCache.end())
+			{
+				g_typeWarningCache.insert(paramName);
+				Con::cwar<<"WARNING: Unknown type '"<<paramName<<"'!"<<Con::endl;
+			}
 		}
 	}
-}
-
-static void normalize_return_name(std::string &retName)
-{
-	normalize_param_name(retName);
 }
 
 static std::optional<LuaOverloadInfo> parse_function_overload(std::string &methodName,bool method)
@@ -402,23 +436,10 @@ static std::optional<LuaOverloadInfo> parse_function_overload(std::string &metho
 
 	auto &paramList = info.parameters;
 	ustring::explode(params,",",paramList);
-	for(auto &param : paramList)
-		normalize_param_name(param);
-	if(paramList.size() >= 2)
-	{
-		if(paramList.front() == "lua_State")
-			paramList.erase(paramList.begin());
-		if(method)
-			paramList.erase(paramList.begin()); // Second arg is self
-	}
 
 	auto sp = methodName.rfind(' ',paramStart);
 	if(sp != std::string::npos)
-	{
-		auto retType = methodName.substr(0,sp);
-		normalize_return_name(retType);
-		info.returnValue = retType;
-	}
+		info.returnValue = methodName.substr(0,sp);
 	return info;
 }
 
@@ -1323,6 +1344,85 @@ static void autogenerate()
 		auto &stateInfo = *it;
 		merge_collection(*rootCol,*it->collection);
 	}
+	//
+
+	// Get class names
+	g_classNameToFullName.clear();
+	std::unordered_map<std::string,uint32_t> classNameCount;
+	std::function<void(pragma::doc::Collection&)> getClassNames = nullptr;
+	getClassNames = [&getClassNames,&classNameCount](pragma::doc::Collection &col) {
+		auto &name = col.GetName();
+		auto fullName = col.GetFullName();
+		if(ustring::compare(fullName.c_str(),"root",true,4))
+			fullName = fullName.substr(4);
+		if(ustring::compare(fullName.c_str(),".",true,1))
+			fullName = fullName.substr(1);
+		if(fullName.empty() == false)
+		{
+			g_classNameToFullName[name] = std::move(fullName);
+			auto it = classNameCount.find(name);
+			if(it == classNameCount.end())
+				it = classNameCount.insert(std::make_pair(name,0)).first;
+			++it->second;
+		}
+
+		for(auto &child : col.GetChildren())
+			getClassNames(*child);
+	};
+	getClassNames(*rootCol);
+	for(auto &pair : classNameCount)
+	{
+		if(pair.second == 1)
+			continue;
+		auto it = g_classNameToFullName.find(pair.first);
+		if(it != g_classNameToFullName.end())
+			g_classNameToFullName.erase(it);
+	}
+	//
+
+	// Translate parameter and return types
+	std::function<void(pragma::doc::Collection&)> translateCollectionTypes = nullptr;
+	translateCollectionTypes = [&translateCollectionTypes](pragma::doc::Collection &col) {
+		auto isClass = umath::is_flag_set(col.GetFlags(),pragma::doc::Collection::Flags::Class);
+		auto &functions = col.GetFunctions();
+		for(auto &f : functions)
+		{
+			auto &overloads = f.GetOverloads();
+			for(auto &overload : overloads)
+			{
+				auto &params = overload.GetParameters();
+				for(auto &param : params)
+				{
+					auto type = param.GetType();
+					normalize_param_name(type);
+					param.SetType(type);
+				}
+				if(!params.empty() && params.front().GetType() == "lua_State")
+					params.erase(params.begin());
+				auto isMethod = isClass;
+				if(isMethod && !params.empty())
+					params.erase(params.begin());
+				for(auto &ret : overload.GetReturnValues())
+				{
+					auto type = ret.GetType();
+					normalize_param_name(type);
+					ret.SetType(type);
+				}
+			}
+		}
+
+		auto &members = col.GetMembers();
+		for(auto &member : members)
+		{
+			auto type = member.GetType();
+			normalize_param_name(type);
+			member.SetType(type);
+		}
+
+		for(auto &child : col.GetChildren())
+			translateCollectionTypes(*child);
+	};
+	translateCollectionTypes(*rootCol);
 	//
 	
 	std::string err;

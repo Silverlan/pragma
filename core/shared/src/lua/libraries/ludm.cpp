@@ -1055,6 +1055,13 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			auto type = ::udm::ascii_type_to_enum(stype);
 			Lua::PushInt(l,umath::to_integral(type));
 			return 1;
+		})},
+		{"to_json",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) {
+			auto &udm = Lua::Check<::udm::LinkedPropertyWrapper>(l,1);
+			std::stringstream ss;
+			::udm::to_json(udm,ss);
+			Lua::PushString(l,ss.str());
+			return 1;
 		})}
 	});
 

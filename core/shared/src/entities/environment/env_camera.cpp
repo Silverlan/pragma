@@ -20,6 +20,8 @@
 
 using namespace pragma;
 
+static float normalize_plane_z(float z) {return umath::max(z,0.1f);} // z value must never be 0; values close to zero can cause visual artifacts
+
 decltype(BaseEnvCameraComponent::DEFAULT_NEAR_Z) BaseEnvCameraComponent::DEFAULT_NEAR_Z = 1.f;
 decltype(BaseEnvCameraComponent::DEFAULT_FAR_Z) BaseEnvCameraComponent::DEFAULT_FAR_Z = 32'768.f;
 decltype(BaseEnvCameraComponent::DEFAULT_FOV) BaseEnvCameraComponent::DEFAULT_FOV = 90.f;
@@ -87,7 +89,7 @@ void BaseEnvCameraComponent::UpdateViewMatrix()
 }
 void BaseEnvCameraComponent::UpdateProjectionMatrix()
 {
-	*m_projectionMatrix = CalcProjectionMatrix(GetFOVRad(),*m_aspectRatio,**m_nearZ,**m_farZ);
+	*m_projectionMatrix = CalcProjectionMatrix(GetFOVRad(),*m_aspectRatio,normalize_plane_z(**m_nearZ),normalize_plane_z(**m_farZ));
 }
 void BaseEnvCameraComponent::SetViewMatrix(const Mat4 &mat)
 {
@@ -620,7 +622,7 @@ void BaseEnvCameraComponent::CreateFrustumKDop(const std::vector<umath::Plane> &
 }
 Mat4 BaseEnvCameraComponent::CalcProjectionMatrix(float fovRad,float aspectRatio,float nearZ,float farZ)
 {
-	auto mat = glm::perspectiveRH(fovRad,aspectRatio,nearZ,farZ);
+	auto mat = glm::perspectiveRH(fovRad,aspectRatio,normalize_plane_z(nearZ),normalize_plane_z(farZ));
 	mat = glm::scale(mat,Vector3(1.f,-1.f,1.f));
 	return mat;
 }

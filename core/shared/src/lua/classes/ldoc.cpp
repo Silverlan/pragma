@@ -17,6 +17,8 @@
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
 #include <filesystem>
+#include <Psapi.h>
+#include <Dia2.h>
 
 #include <luabind/detail/class_rep.hpp>
 #include <luabind/detail/call.hpp>
@@ -61,6 +63,8 @@ struct LuaOverloadInfo
 {
 	std::vector<std::string> parameters {};
 	std::string returnValue {};
+	std::optional<pragma::doc::Source> source {};
+	std::optional<std::vector<std::string>> namedParameters {};
 };
 
 struct LuaMethodInfo
@@ -442,39 +446,47 @@ static std::optional<LuaOverloadInfo> parse_function_overload(std::string &metho
 		info.returnValue = methodName.substr(0,sp);
 	return info;
 }
-
-static void parse_lua_property(lua_State *L,const std::string &name,const luabind::object &o,LuaClassInfo &result,bool isMethod)
+static void *get_function_pointer_from_luabind_function_object(const luabind::detail::function_object &o)
 {
-	o.push(L);
-	luabind::detail::stack_pop opop(L, 1);
-	if(lua_tocfunction(L, -1) == &luabind::detail::property_tag)
-		result.attributes.push_back(name);
-	else
-	{
-		result.methods.push_back({});
-		auto &method = result.methods.back();
-		method.name = name;
+	using T = luabind::detail::function_object_impl<Vector3 (__cdecl*)(void),luabind::meta::type_list<Vector3 >,luabind::meta::type_list<> >; // Template arguments are arbitrary; We only care about the function pointer, so they don't matter here
+	return static_cast<void*>(static_cast<const T*>(&o)->f);
+}
+static void *get_function_pointer_from_luabind_function(lua_State *l,const luabind::object &lbFunc)
+{
+	lbFunc.push(l);
+	luabind::detail::stack_pop popFunc {l,1};
 
-		auto &omethod = o;
-		luabind::detail::function_object * fobj = luabind::get_function_object(omethod);
-		if(fobj) {
-			luabind::object overloadTable(luabind::newtable(L));
-			const char* function_name = fobj->name.c_str();
-			for(luabind::detail::function_object const* f = fobj; f != 0; f = f->next)
-			{
-				f->format_signature(L, function_name);
-				luabind::detail::stack_pop pop(L, 1);
+	auto *f = lua_tocfunction(l,-1);
+	auto fidx = Lua::GetStackTop(l);
 
-				if(Lua::IsString(L,-1))
-				{
-					std::string def = Lua::CheckString(L,-1);
-					auto overloadInfo = parse_function_overload(def,isMethod);
-					if(overloadInfo.has_value())
-						method.overloads.push_back(*overloadInfo);
-				}
-			}
-		}
-	}
+	auto *name = lua_getupvalue(l,fidx,1);
+	if(!name)
+		return nullptr;
+	luabind::detail::stack_pop popUpValue {l,1};
+	auto *tmp = *(luabind::detail::function_object**)lua_touserdata(l,-1);
+	if(!tmp)
+		return nullptr;
+	return get_function_pointer_from_luabind_function_object(*tmp);
+}
+
+namespace pragma::os::windows
+{
+	using RVA = uint64_t;
+};
+class SymbolHandler
+{
+public:
+	~SymbolHandler();
+	bool Initialize();
+	std::optional<std::string> FindModule(DWORD64 rva) const;
+	std::optional<std::string> FindAddress(DWORD64 rva) const;
+	std::optional<pragma::os::windows::RVA> FindSymbol(const std::string &symbol) const;
+	std::optional<std::string> FindSource(DWORD64 rva,uint32_t &outLine) const;
+
+	operator bool() const {return m_valid;}
+private:
+	HANDLE m_hProcess = nullptr;
+	bool m_valid = false;
 };
 
 static std::string_view lcp(const std::string_view &str0,const std::string_view &str1)
@@ -564,64 +576,6 @@ static void normalize_enum_type(std::string &enumType)
 		enumType += subStr;
 	}
 }
-static LuaClassInfo get_class_info(lua_State *L,luabind::detail::class_rep *crep)
-{
-	crep->get_table(L);
-	luabind::object table(luabind::from_stack(L, -1));
-	lua_pop(L, 1);
-
-	LuaClassInfo result {};
-	result.classRep = crep;
-	result.name = crep->name();
-
-	for(auto &baseInfo : crep->bases())
-		result.bases.push_back(baseInfo.base);
-
-	for(luabind::iterator i(table), e; i != e; ++i)
-	{
-		if(luabind::type(*i) != LUA_TFUNCTION)
-			continue;
-
-		// We have to create a temporary `object` here, otherwise the proxy
-		// returned by operator->() will mess up the stack. This is a known
-		// problem that probably doesn't show up in real code very often.
-		luabind::object member(*i);
-		member.push(L);
-		luabind::detail::stack_pop pop(L, 1);
-		
-		auto attr = i.key();
-		attr.push(L);
-		if(Lua::IsString(L,-1))
-		{
-			std::string name = Lua::CheckString(L,-1);
-			Lua::Pop(L,1);
-			parse_lua_property(L,name,*i,result,true);
-		}
-	}
-
-	auto &staticConstants = access_class_rep(*crep).m_static_constants;
-	if(!staticConstants.empty())
-	{
-		std::vector<std::string> enums;
-		enums.reserve(staticConstants.size());
-		for(auto &pair : staticConstants)
-			enums.push_back(pair.first);
-		auto prefixedEnumSets = group_by_prefix(enums);
-		for(auto &pair : prefixedEnumSets)
-		{
-			auto esName = pair.first;
-			normalize_enum_type(esName);
-			auto &es = result.enumSets.insert(std::make_pair(esName,LuaClassInfo::EnumSet{})).first->second;
-			for(auto &enumName : pair.second)
-			{
-				auto it = staticConstants.find(enumName.c_str());
-				assert(it != staticConstants.end());
-				es[enumName] = it->second;
-			}
-		}
-	}
-	return result;
-}
 
 static void strip_base_class_methods(std::unordered_map<luabind::detail::class_rep*,LuaClassInfo> &classInfoList,LuaClassInfo &classInfo,LuaClassInfo &bc)
 {
@@ -663,85 +617,6 @@ static void strip_base_class_methods(std::unordered_map<luabind::detail::class_r
 	}
 }
 
-static void add_function(lua_State *l,pragma::doc::Collection &collection,const LuaMethodInfo &method)
-{
-	auto fc = pragma::doc::Function::Create(collection,method.name);
-	fc.SetFlags(pragma::doc::Function::Flags::AutoGenerated);
-	for(auto &overloadInfo : method.overloads)
-	{
-		auto overload = pragma::doc::Overload::Create();
-		uint32_t argIdx = 1;
-		for(auto &type : overloadInfo.parameters)
-		{
-			auto param = pragma::doc::Parameter::Create("arg" +std::to_string(argIdx++));
-			param.SetType(type);
-			overload.AddParameter(param);
-		}
-		if(overloadInfo.returnValue != "void")
-		{
-			auto param = pragma::doc::Parameter::Create("ret1");
-			param.SetType(overloadInfo.returnValue);
-			overload.AddReturnValue(param);
-		}
-		fc.AddOverload(overload);
-	}
-	auto *en = pragma::get_engine();
-	auto *cl = en->GetClientState();
-	auto *sv = en->GetServerNetworkState();
-	auto *lcl = cl ? cl->GetLuaState() : nullptr;
-	auto *lsv = sv ? sv->GetLuaState() : nullptr;
-	if(l == lcl)
-		fc.SetGameStateFlags(fc.GetGameStateFlags() | pragma::doc::GameStateFlags::Client);
-	if(l == lsv)
-		fc.SetGameStateFlags(fc.GetGameStateFlags() | pragma::doc::GameStateFlags::Server);
-	collection.AddFunction(fc);
-}
-static pragma::doc::PCollection class_info_to_collection(lua_State *l,const std::string &path,const LuaClassInfo &classInfo)
-{
-	auto collection = pragma::doc::Collection::Create();
-	collection->SetName(classInfo.name);
-	collection->SetFlags(pragma::doc::Collection::Flags::Class);
-
-	/*for(auto *base : classInfo.bases)
-	{
-		// TODO: Base class of base class?
-		std::string dfName = base->name();
-		if(!path.empty())
-			dfName = path +'.' +dfName;
-		auto derivedFrom = pragma::doc::DerivedFrom::Create(dfName);
-		collection->AddDerivedFrom(*derivedFrom);
-	}*/
-
-	for(auto &attr : classInfo.attributes)
-	{
-		auto member = pragma::doc::Member::Create(*collection,attr);
-		member.SetFlags(pragma::doc::Member::Flags::AutoGenerated);
-		collection->AddMember(member);
-	}
-
-	for(auto &method : classInfo.methods)
-		add_function(l,*collection,method);
-
-	for(auto &ces : classInfo.enumSets)
-	{
-		auto es = pragma::doc::EnumSet::Create(ces.first,collection.get());
-		es->ReserveEnums(ces.second.size());
-		for(auto &pair : ces.second)
-		{
-			auto e = pragma::doc::Enum::Create(*es);
-			e.SetName(pair.first);
-			e.SetValue(std::to_string(pair.second));
-			if(pair.first.find("_BIT_"))
-				e.SetType(pragma::doc::Enum::Type::Bit);
-			else
-				e.SetType(pragma::doc::Enum::Type::Regular);
-			es->AddEnum(std::move(e));
-		}
-		es->SetFlags(pragma::doc::EnumSet::Flags::AutoGenerated);
-		collection->AddEnumSet(es);
-	}
-	return collection;
-}
 #include "pragma/lua/libraries/lutil.hpp"
 
 class class_rep_public
@@ -801,84 +676,151 @@ struct ClassRegInfo
 	LuaClassInfo classInfo;
 	bool cppDefined = true;
 };
-static void add_class(
-	lua_State *l,luabind::detail::class_rep *crep,const std::string &path,std::unordered_map<luabind::detail::class_rep*,pragma::doc::Collection*> &iteratedClasses,
-	std::unordered_map<luabind::detail::class_rep*,ClassRegInfo> &classRegs
-)
+
+#include <span>
+
+class PdbManager
 {
-	if(crep->get_class_type() == luabind::detail::class_rep::class_type::lua_class)
+public:
+	struct SymbolInfo
 	{
-		/*auto *l = val.interpreter();
+		struct Source
+		{
+			std::string fileName;
+			uint32_t line;
+		};
+		std::string name;
+		DWORD64 rva = 0;
+		std::optional<Source> source {};
+	};
 
-		auto x = luabind::detail::is_class_rep(l, -1);
-		auto y = luabind::detail::get_instance(l, -1);
+	~PdbManager();
+	bool Initialize();
+	bool LoadPdb(const std::string &moduleName,const std::string &pdbPath);
+	const std::vector<std::string> &GetModuleNames() const {return m_moduleNames;}
 
-		val.push(l);
-		luabind::detail::stack_pop sp(l,1);
-		luabind::argument a {luabind::from_stack(l,-1)};
-		auto classInfo = luabind::get_class_info(a);
-		std::cout<<"";*/
+	std::optional<SymbolInfo> FindSymbolByRva(const std::string &moduleName,DWORD64 rva);
+private:
+	struct PdbSession
+	{
+		~PdbSession();
+		std::string pdbPath;
+		IDiaDataSource *source = nullptr;
+		IDiaSession *session = nullptr;
+		IDiaSymbol *globalSymbol = nullptr;
+		IDiaEnumTables *enumTables = nullptr;
+		IDiaEnumSymbolsByAddr *enumSymbolsByAddr = nullptr;
+		operator bool() const {return m_valid;}
+		void SetValid() {m_valid = true;}
+	private:
+		bool m_valid = false;
+	};
+	std::unordered_map<std::string,std::unique_ptr<PdbSession>> m_pdbSessions {};
+	std::vector<std::string> m_moduleNames;
+};
+
+struct LuaDocGenerator
+{
+public:
+	LuaDocGenerator(lua_State *l);
+	void IterateLibraries(luabind::object o,pragma::doc::Collection &collection,pragma::doc::Collection &colTarget);
+	void SetPdbManager(PdbManager *manager) {m_pdbManager = manager;}
+	void SetSymbolHandler(SymbolHandler *symHandler) {m_symbolHandler = symHandler;}
+
+	const std::unordered_map<luabind::detail::class_rep*,pragma::doc::Collection*> &GetClassMap() const {return m_iteratedClasses;}
+private:
+	std::string *LoadFileContents(const std::string &fileName);
+	void IterateLibraries(
+		luabind::object o,const std::string &path,pragma::doc::Collection &collection,
+		pragma::doc::Collection &colTarget
+	);
+	void ParseLuaProperty(const std::string &name,const luabind::object &o,LuaClassInfo &result,bool isMethod);
+	LuaClassInfo GetClassInfo(luabind::detail::class_rep *crep);
+	void AddClass(luabind::detail::class_rep *crep,const std::string &path);
+	void InitializeRepositoryUrls();
+	static std::optional<std::string> GetCommitId(const std::string &repositoryUrl);
+	static std::string BuildRepositoryUrl(const std::string &baseUrl,const std::string &commitUrl);
+	std::optional<std::string> SourceToUrl(const pragma::doc::Source &source);
+	pragma::doc::PCollection ClassInfoToCollection(lua_State *l,const std::string &path,const LuaClassInfo &classInfo);
+	void AddFunction(lua_State *l,pragma::doc::Collection &collection,const LuaMethodInfo &method);
+	
+	void TranslateFunctionLineDefinition(const std::string &fileName,uint32_t &inOutLine);
+	std::optional<std::vector<std::string>> FindFunctionArguments(const std::string &fileName,uint32_t line);
+
+	lua_State *m_luaState = nullptr;
+	std::unordered_map<std::string,std::string> m_cachedFileContents {};
+	std::vector<luabind::object> m_traversed {};
+	std::unordered_map<luabind::detail::class_rep*,ClassRegInfo> m_classRegs;
+	std::unordered_map<luabind::detail::class_rep*,pragma::doc::Collection*> m_iteratedClasses;
+	std::unordered_map<std::string,std::string> m_moduleToRepositoryMap;
+	PdbManager *m_pdbManager = nullptr;
+	SymbolHandler *m_symbolHandler = nullptr;
+};
+
+LuaDocGenerator::LuaDocGenerator(lua_State *l)
+	: m_luaState{l}
+{
+	InitializeRepositoryUrls();
+}
+
+std::optional<std::string> LuaDocGenerator::SourceToUrl(const pragma::doc::Source &source)
+{
+	auto &moduleName = source.moduleName;
+	auto it = m_moduleToRepositoryMap.find(moduleName);
+	if(it != m_moduleToRepositoryMap.end())
+	{
+		auto &repoName = it->second;
+		auto url = repoName +source.fileName +"#L" +std::to_string(source.line);
+		return url;
 	}
 	else
-	{
-		ClassRegInfo info {};
-		info.classInfo = get_class_info(l,crep);
-		
-		auto subPath = path;
-		if(!subPath.empty())
-			subPath += '.';
-		subPath += info.classInfo.name;
-		info.path = subPath;
-
-		auto addNewClass = true;
-		auto it = classRegs.find(crep);
-		if(it != classRegs.end())
-		{
-			// Found class duplicate; Prioritize the one with the lower number of parents
-			uint32_t numParentsCur = std::count_if(it->second.path.begin(),it->second.path.end(),[](char c) {return c == '.';});
-			if(it->second.path.find('.') == std::string::npos) // Global namespace; Avoid if possible (and choose alternatives instead)
-				numParentsCur = std::numeric_limits<uint32_t>::max();
-			uint32_t numParentsNew = std::count_if(subPath.begin(),subPath.end(),[](char c) {return c == '.';});
-			if(subPath.find('.') == std::string::npos)
-				numParentsNew = std::numeric_limits<uint32_t>::max();
-			if(numParentsNew < numParentsCur)
-			{
-				classRegs.erase(it);
-				addNewClass = true;
-			}
-			else
-				addNewClass = false;
-		}
-
-		if(addNewClass)
-		{
-			classRegs[crep] = std::move(info);
-
-			crep->get_default_table(l);
-			luabind::object t {luabind::from_stack{l,-1}};
-			for(luabind::iterator it{t},end;it!=end;++it)
-			{
-				auto type = luabind::type(*it);
-				if(type == LUA_TUSERDATA)
-				{
-					auto *crepChild = Lua::get_crep(*it);
-					if(crepChild && crepChild != crep)
-					{
-						auto cpy = it.key();
-						add_class(l,crepChild,subPath,iteratedClasses,classRegs);
-					}
-				}
-			}
-			Lua::Pop(l,1);
-		}
-	}
+		Con::cwar<<"WARNING: No repository specified for module '"<<moduleName<<"'!"<<Con::endl;
+	return {};
 }
-static void iterate_libraries(
-	luabind::object o,const std::string &path,std::vector<luabind::object> &traversed,pragma::doc::Collection &collection,
-	pragma::doc::Collection &colTarget,std::unordered_map<luabind::detail::class_rep*,pragma::doc::Collection*> &iteratedClasses,
-	std::unordered_map<luabind::detail::class_rep*,ClassRegInfo> &classRegs
+
+std::optional<std::string> LuaDocGenerator::GetCommitId(const std::string &repositoryUrl)
+{
+	std::string output;
+	if(!util::start_and_wait_for_command(("git ls-remote " +repositoryUrl +" HEAD").c_str(),nullptr,nullptr,&output))
+		return {};
+	ustring::remove_whitespace(output);
+	if(output.empty())
+		return {};
+	auto t = output.find('\t');
+	if(t == std::string::npos)
+		return {};
+	return output.substr(0,t);
+}
+
+std::string LuaDocGenerator::BuildRepositoryUrl(const std::string &baseUrl,const std::string &commitUrl)
+{
+	auto commitId = GetCommitId(baseUrl);
+	if(!commitId.has_value())
+		commitId = "master";
+	auto url = commitUrl;
+	ustring::replace(url,"%commitid%",*commitId);
+	return baseUrl +url;
+}
+
+void LuaDocGenerator::InitializeRepositoryUrls()
+{
+	m_moduleToRepositoryMap = {
+		{"shared",BuildRepositoryUrl("https://github.com/Silverlan/pragma/","blob/%commitid%/core/shared/")},
+		{"server",BuildRepositoryUrl("https://github.com/Silverlan/pragma/","blob/%commitid%/core/server/")},
+		{"client",BuildRepositoryUrl("https://github.com/Silverlan/pragma/","blob/%commitid%/core/client/")},
+		{"luabind",BuildRepositoryUrl("https://github.com/Silverlan/luabind-deboostified/","blob/%commitid%/")},
+		{"pr_steamworks",BuildRepositoryUrl("https://github.com/Silverlan/pr_steamworks/","blob/%commitid%/")}
+	};
+}
+
+void LuaDocGenerator::IterateLibraries(
+	luabind::object o,const std::string &path,pragma::doc::Collection &collection,
+	pragma::doc::Collection &colTarget
 )
 {
+	auto &traversed = m_traversed;
+	auto &iteratedClasses = m_iteratedClasses;
+	auto &classRegs = m_classRegs;
 	auto *l = o.interpreter();
 	if(std::find(traversed.begin(),traversed.end(),o) != traversed.end())
 		return; // Prevent infinite recursion
@@ -906,7 +848,7 @@ static void iterate_libraries(
 				subPath += libName;
 				collection.AddChild(subCollection);
 				subCollection->SetFlags(subCollection->GetFlags() | pragma::doc::Collection::Flags::Library | pragma::doc::Collection::Flags::AutoGenerated);
-				iterate_libraries(val,subPath,traversed,*subCollection,*subCollection,iteratedClasses,classRegs);
+				IterateLibraries(val,subPath,*subCollection,*subCollection);
 			}
 		}
 		else if(type == LUA_TFUNCTION)
@@ -916,28 +858,115 @@ static void iterate_libraries(
 			if(fobj)
 			{
 				std::cout<<"FUN: "<<fcName<<std::endl;
-				parse_lua_property(o.interpreter(),fcName,val,classInfo,false);
+				ParseLuaProperty(fcName,val,classInfo,false);
 			}
 		}
 		else if(type == LUA_TUSERDATA)
 		{
 			auto *crep = Lua::get_crep(val);
 			if(crep)
-				add_class(l,crep,path,iteratedClasses,classRegs);
+				AddClass(crep,path);
 		}
 	}
 
 	for(auto &methodInfo : classInfo.methods)
-		add_function(l,colTarget,methodInfo);
+		AddFunction(l,colTarget,methodInfo);
 }
 
-#include <span>
-static void iterate_libraries(luabind::object o,pragma::doc::Collection &collection,pragma::doc::Collection &colTarget,std::unordered_map<luabind::detail::class_rep*,pragma::doc::Collection*> &iteratedClasses)
+void LuaDocGenerator::AddFunction(lua_State *l,pragma::doc::Collection &collection,const LuaMethodInfo &method)
 {
-	auto *l = o.interpreter();
-	std::vector<luabind::object> traversed {};
-	std::unordered_map<luabind::detail::class_rep*,ClassRegInfo> classRegs;
-	iterate_libraries(o,"",traversed,collection,colTarget,iteratedClasses,classRegs);
+	auto fc = pragma::doc::Function::Create(collection,method.name);
+	fc.SetFlags(pragma::doc::Function::Flags::AutoGenerated);
+	for(auto &overloadInfo : method.overloads)
+	{
+		auto overload = pragma::doc::Overload::Create();
+		for(auto argIdx=decltype(overloadInfo.parameters.size()){0u};argIdx<overloadInfo.parameters.size();++argIdx)
+		{
+			auto &type = overloadInfo.parameters[argIdx];
+			std::string argName = "arg" +std::to_string(argIdx);
+			if(overloadInfo.namedParameters.has_value())
+				argName = (*overloadInfo.namedParameters)[argIdx];
+			auto param = pragma::doc::Parameter::Create(argName);
+			param.SetType(type);
+			overload.AddParameter(param);
+		}
+		if(overloadInfo.returnValue != "void")
+		{
+			auto param = pragma::doc::Parameter::Create("ret1");
+			param.SetType(overloadInfo.returnValue);
+			overload.AddReturnValue(param);
+		}
+		if(overloadInfo.source.has_value())
+		{
+			overload.SetSource(*overloadInfo.source);
+			auto url = SourceToUrl(*overloadInfo.source);
+			if(url.has_value())
+				overload.SetURL(*url);
+		}
+		fc.AddOverload(overload);
+	}
+	auto *en = pragma::get_engine();
+	auto *cl = en->GetClientState();
+	auto *sv = en->GetServerNetworkState();
+	auto *lcl = cl ? cl->GetLuaState() : nullptr;
+	auto *lsv = sv ? sv->GetLuaState() : nullptr;
+	if(l == lcl)
+		fc.SetGameStateFlags(fc.GetGameStateFlags() | pragma::doc::GameStateFlags::Client);
+	if(l == lsv)
+		fc.SetGameStateFlags(fc.GetGameStateFlags() | pragma::doc::GameStateFlags::Server);
+	collection.AddFunction(fc);
+}
+
+pragma::doc::PCollection LuaDocGenerator::ClassInfoToCollection(lua_State *l,const std::string &path,const LuaClassInfo &classInfo)
+{
+	auto collection = pragma::doc::Collection::Create();
+	collection->SetName(classInfo.name);
+	collection->SetFlags(pragma::doc::Collection::Flags::Class);
+
+	/*for(auto *base : classInfo.bases)
+	{
+		// TODO: Base class of base class?
+		std::string dfName = base->name();
+		if(!path.empty())
+			dfName = path +'.' +dfName;
+		auto derivedFrom = pragma::doc::DerivedFrom::Create(dfName);
+		collection->AddDerivedFrom(*derivedFrom);
+	}*/
+
+	for(auto &attr : classInfo.attributes)
+	{
+		auto member = pragma::doc::Member::Create(*collection,attr);
+		member.SetFlags(pragma::doc::Member::Flags::AutoGenerated);
+		collection->AddMember(member);
+	}
+
+	for(auto &method : classInfo.methods)
+		AddFunction(l,*collection,method);
+
+	for(auto &ces : classInfo.enumSets)
+	{
+		auto es = pragma::doc::EnumSet::Create(ces.first,collection.get());
+		es->ReserveEnums(ces.second.size());
+		for(auto &pair : ces.second)
+		{
+			auto e = pragma::doc::Enum::Create(*es);
+			e.SetName(pair.first);
+			e.SetValue(std::to_string(pair.second));
+			if(pair.first.find("_BIT_"))
+				e.SetType(pragma::doc::Enum::Type::Bit);
+			else
+				e.SetType(pragma::doc::Enum::Type::Regular);
+			es->AddEnum(std::move(e));
+		}
+		es->SetFlags(pragma::doc::EnumSet::Flags::AutoGenerated);
+		collection->AddEnumSet(es);
+	}
+	return collection;
+}
+
+void LuaDocGenerator::IterateLibraries(luabind::object o,pragma::doc::Collection &collection,pragma::doc::Collection &colTarget)
+{
+	IterateLibraries(o,"",collection,colTarget);
 
 	struct ClassRegTreeItem
 	{
@@ -965,7 +994,7 @@ static void iterate_libraries(luabind::object o,pragma::doc::Collection &collect
 		addItem(classRegInfo,**it,path.subspan(1));
 	};
 	ClassRegTreeItem root {};
-	for(auto &pair : classRegs)
+	for(auto &pair : m_classRegs)
 	{
 		std::vector<std::string> pathComponents;
 		ustring::explode(pair.second.path,".",pathComponents);
@@ -975,17 +1004,17 @@ static void iterate_libraries(luabind::object o,pragma::doc::Collection &collect
 	}
 	
 	std::function<void(pragma::doc::Collection&,const ClassRegTreeItem&)> classRegToCollection = nullptr;
-	classRegToCollection = [l,&classRegToCollection,&iteratedClasses,&collection](pragma::doc::Collection &parentCollection,const ClassRegTreeItem &item) {
+	classRegToCollection = [this,&classRegToCollection,&collection](pragma::doc::Collection &parentCollection,const ClassRegTreeItem &item) {
 		for(auto &child : item.children)
 		{
 			pragma::doc::PCollection childCollection = nullptr;
 			auto newCollection = true;
 			if(child->regInfo)
 			{
-				childCollection = class_info_to_collection(l,child->regInfo->path,child->regInfo->classInfo);
+				childCollection = ClassInfoToCollection(m_luaState,child->regInfo->path,child->regInfo->classInfo);
 				if(child->regInfo->cppDefined)
 					childCollection->SetFlags(childCollection->GetFlags() | pragma::doc::Collection::Flags::DefinedInCpp);
-				iteratedClasses[child->regInfo->classInfo.classRep] = childCollection.get();
+				m_iteratedClasses[child->regInfo->classInfo.classRep] = childCollection.get();
 			}
 			else
 			{
@@ -1013,6 +1042,430 @@ static void iterate_libraries(luabind::object o,pragma::doc::Collection &collect
 	};
 	classRegToCollection(collection,root);
 }
+
+void LuaDocGenerator::AddClass(luabind::detail::class_rep *crep,const std::string &path)
+{
+	auto *l = m_luaState;
+	if(crep->get_class_type() == luabind::detail::class_rep::class_type::lua_class)
+	{
+		/*auto *l = val.interpreter();
+
+		auto x = luabind::detail::is_class_rep(l, -1);
+		auto y = luabind::detail::get_instance(l, -1);
+
+		val.push(l);
+		luabind::detail::stack_pop sp(l,1);
+		luabind::argument a {luabind::from_stack(l,-1)};
+		auto classInfo = luabind::get_class_info(a);
+		std::cout<<"";*/
+	}
+	else
+	{
+		ClassRegInfo info {};
+		info.classInfo = GetClassInfo(crep);
+		
+		auto subPath = path;
+		if(!subPath.empty())
+			subPath += '.';
+		subPath += info.classInfo.name;
+		info.path = subPath;
+
+		auto addNewClass = true;
+		auto it = m_classRegs.find(crep);
+		if(it != m_classRegs.end())
+		{
+			// Found class duplicate; Prioritize the one with the lower number of parents
+			uint32_t numParentsCur = std::count_if(it->second.path.begin(),it->second.path.end(),[](char c) {return c == '.';});
+			if(it->second.path.find('.') == std::string::npos) // Global namespace; Avoid if possible (and choose alternatives instead)
+				numParentsCur = std::numeric_limits<uint32_t>::max();
+			uint32_t numParentsNew = std::count_if(subPath.begin(),subPath.end(),[](char c) {return c == '.';});
+			if(subPath.find('.') == std::string::npos)
+				numParentsNew = std::numeric_limits<uint32_t>::max();
+			if(numParentsNew < numParentsCur)
+			{
+				m_classRegs.erase(it);
+				addNewClass = true;
+			}
+			else
+				addNewClass = false;
+		}
+
+		if(addNewClass)
+		{
+			m_classRegs[crep] = std::move(info);
+
+			crep->get_default_table(l);
+			luabind::object t {luabind::from_stack{l,-1}};
+			for(luabind::iterator it{t},end;it!=end;++it)
+			{
+				auto type = luabind::type(*it);
+				if(type == LUA_TUSERDATA)
+				{
+					auto *crepChild = Lua::get_crep(*it);
+					if(crepChild && crepChild != crep)
+					{
+						auto cpy = it.key();
+						AddClass(crepChild,subPath);
+					}
+				}
+			}
+			Lua::Pop(l,1);
+		}
+	}
+}
+
+LuaClassInfo LuaDocGenerator::GetClassInfo(luabind::detail::class_rep *crep)
+{
+	auto *L = m_luaState;
+	crep->get_table(L);
+	luabind::object table(luabind::from_stack(L, -1));
+	lua_pop(L, 1);
+
+	LuaClassInfo result {};
+	result.classRep = crep;
+	result.name = crep->name();
+
+	for(auto &baseInfo : crep->bases())
+		result.bases.push_back(baseInfo.base);
+
+	for(luabind::iterator i(table), e; i != e; ++i)
+	{
+		if(luabind::type(*i) != LUA_TFUNCTION)
+			continue;
+
+		// We have to create a temporary `object` here, otherwise the proxy
+		// returned by operator->() will mess up the stack. This is a known
+		// problem that probably doesn't show up in real code very often.
+		luabind::object member(*i);
+		member.push(L);
+		luabind::detail::stack_pop pop(L, 1);
+		
+		auto attr = i.key();
+		attr.push(L);
+		if(Lua::IsString(L,-1))
+		{
+			std::string name = Lua::CheckString(L,-1);
+			Lua::Pop(L,1);
+			ParseLuaProperty(name,*i,result,true);
+		}
+	}
+
+	auto &staticConstants = access_class_rep(*crep).m_static_constants;
+	if(!staticConstants.empty())
+	{
+		std::vector<std::string> enums;
+		enums.reserve(staticConstants.size());
+		for(auto &pair : staticConstants)
+			enums.push_back(pair.first);
+		auto prefixedEnumSets = group_by_prefix(enums);
+		for(auto &pair : prefixedEnumSets)
+		{
+			auto esName = pair.first;
+			normalize_enum_type(esName);
+			auto &es = result.enumSets.insert(std::make_pair(esName,LuaClassInfo::EnumSet{})).first->second;
+			for(auto &enumName : pair.second)
+			{
+				auto it = staticConstants.find(enumName.c_str());
+				assert(it != staticConstants.end());
+				es[enumName] = it->second;
+			}
+		}
+	}
+	return result;
+}
+
+static std::vector<std::string> parse_function_argument_names(const std::string_view &argStr)
+{
+	std::vector<std::string> args;
+	ustring::explode(std::string{argStr},",",args);
+	std::vector<std::string> argNames;
+	argNames.reserve(args.size());
+	for(auto &arg : args)
+	{
+		ustring::remove_whitespace(arg);
+		auto pos = arg.find_last_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+		if(pos == std::string::npos)
+			argNames.push_back(arg);
+		else
+			argNames.push_back(arg.substr(pos +1));
+	}
+	return argNames;
+}
+static std::optional<size_t> find_beginning_of_function_definition(const std::string &contents,uint32_t line)
+{
+	size_t p = -1;
+	while(line > 0)
+	{
+		p = contents.find('\n',p +1);
+		if(p == std::string::npos)
+			return {};
+		if(--line == 0)
+			break;
+	}
+	if(p == -1)
+		p = 0;
+
+    std::string_view view = contents;
+    view = view.substr(0,p);
+    auto pe = contents.rfind('\n',p -1);
+	if(pe == std::string::npos)
+		pe = 0;
+    auto strLine = contents.substr(pe +1,p -(pe +1));
+    ustring::remove_whitespace(strLine);
+    if(strLine.back() != '{')
+    {
+        p = std::string::npos;
+        uint32_t depth = 0;
+        p = view.find_last_of("{}");
+        if(p != std::string::npos && view[p] == '{')
+            ++depth;
+        do
+        {
+            if(p == std::string::npos)
+                return {};
+            if(view[p] == '{')
+            {
+                view = view.substr(0,p);
+                if(depth == 0)
+                    return {};
+                if(depth == 1)
+                    break;
+                --depth;
+				p = view.find_last_of("{}");
+                continue;
+            }
+            if(view[p] == '}')
+                ++depth;
+            view = view.substr(0,p);
+            p = view.find_last_of("{}");
+        }
+        while(true);
+    }
+	p = view.find_last_of(")");
+	if(p == std::string::npos)
+		return {};
+	return p;
+}
+static std::optional<std::string_view> find_function_argument_string(const std::string &contents,uint32_t line)
+{
+	auto op = find_beginning_of_function_definition(contents,line);
+	if(!op.has_value())
+		return {};
+	auto p = *op;
+	std::string_view view = contents;
+	view = view.substr(0,p);
+	uint32_t depth = 0;
+	auto argEnd = p;
+	while(true)
+	{
+		p = view.find_last_of("()");
+        
+		if(p == std::string::npos)
+			return {};
+		if(view[p] == '(')
+		{
+			if(depth == 0)
+				break;
+			--depth;
+			view = view.substr(0,p);
+			continue;
+		}
+		if(view[p] == ')')
+			++depth;
+		view = view.substr(0,p);
+	}
+	view = view.substr(p +1,argEnd -p -1);
+	return view;
+}
+void LuaDocGenerator::TranslateFunctionLineDefinition(const std::string &fileName,uint32_t &inOutLine)
+{
+	auto *contents = LoadFileContents(fileName);
+	if(!contents)
+		return;
+	auto pos = find_beginning_of_function_definition(*contents,inOutLine);
+	if(!pos.has_value())
+		return;
+	size_t p = -1;
+	uint32_t line = 0;
+	do
+	{
+		p = contents->find('\n',p +1);
+		if(p < *pos)
+			++line;
+	}
+	while(p < *pos);
+	inOutLine = line +1;
+}
+std::string *LuaDocGenerator::LoadFileContents(const std::string &fileName)
+{
+	auto it = m_cachedFileContents.find(fileName);
+	if(it == m_cachedFileContents.end())
+	{
+		auto f = FileManager::OpenSystemFile(fileName.c_str(),"r");
+		if(!f)
+			return nullptr;
+		auto contents = f->ReadString();
+		m_cachedFileContents[fileName] = std::move(contents);
+		f = nullptr;
+
+		it = m_cachedFileContents.find(fileName);
+	}
+	return &it->second;
+}
+std::optional<std::vector<std::string>> LuaDocGenerator::FindFunctionArguments(const std::string &fileName,uint32_t line)
+{
+	auto *contents = LoadFileContents(fileName);
+	if(!contents)
+		return {};
+	auto view = find_function_argument_string(*contents,line);
+	if(!view.has_value())
+		return {};
+	return parse_function_argument_names(*view);
+}
+
+void LuaDocGenerator::ParseLuaProperty(const std::string &name,const luabind::object &o,LuaClassInfo &result,bool isMethod)
+{
+	auto *L = m_luaState;
+	o.push(L);
+	luabind::detail::stack_pop opop(L, 1);
+	if(lua_tocfunction(L, -1) == &luabind::detail::property_tag)
+		result.attributes.push_back(name);
+	else
+	{
+		result.methods.push_back({});
+		auto &method = result.methods.back();
+		method.name = name;
+
+		auto &omethod = o;
+		luabind::detail::function_object * fobj = luabind::get_function_object(omethod);
+		if(fobj) {
+			luabind::object overloadTable(luabind::newtable(L));
+			const char* function_name = fobj->name.c_str();
+			for(luabind::detail::function_object const* f = fobj; f != 0; f = f->next)
+			{
+				auto *fptr = get_function_pointer_from_luabind_function_object(*f);
+				f->format_signature(L, function_name);
+				luabind::detail::stack_pop pop(L, 1);
+
+				if(Lua::IsString(L,-1))
+				{
+					std::string def = Lua::CheckString(L,-1);
+					auto overloadInfo = parse_function_overload(def,isMethod);
+					if(overloadInfo.has_value())
+					{
+						if(fptr)
+						{
+							auto fAddress = reinterpret_cast<DWORD64>(fptr);
+							uint32_t line;
+							auto fileName = m_symbolHandler->FindSource(fAddress,line);
+							if(!fileName.has_value())
+							{
+								std::optional<std::string> moduleName {};
+								HMODULE hModule = NULL;
+								if(GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+									   GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+									   (LPCTSTR)fAddress, &hModule))
+								{
+									TCHAR name[MAX_PATH];
+									if(GetModuleBaseName(GetCurrentProcess(),hModule,name,sizeof(name) /sizeof(TCHAR)) != 0)
+									{
+										moduleName = name;
+										ufile::remove_extension_from_filename(*moduleName,std::vector<std::string>{"dll"});
+
+										fAddress -= reinterpret_cast<DWORD64>(hModule);
+									}
+								}
+
+								if(moduleName.has_value())
+								{
+									auto symbol = m_pdbManager->FindSymbolByRva(*moduleName,fAddress);
+									if(symbol.has_value() && symbol->source.has_value())
+									{
+										fileName = symbol->source->fileName;
+										line = symbol->source->line;
+									}
+
+									if(!fileName.has_value())
+										Con::cwar<<"WARNING: Unable to determine function source for "<<fptr<<" ("<<function_name<<") in module "<<*moduleName<<"!"<<Con::endl;
+								}
+								else
+									Con::cwar<<"WARNING: Unable to determine module for function "<<fptr<<" ("<<function_name<<")"<<"!"<<Con::endl;
+							}
+							if(fileName.has_value())
+							{
+								auto args = FindFunctionArguments(*fileName,line);
+								TranslateFunctionLineDefinition(*fileName,line);
+								if(!args.has_value())
+									std::cout<<"";
+								else if(args->size() != overloadInfo->parameters.size())
+									std::cout<<"";
+								else
+									overloadInfo->namedParameters = args;
+
+								auto normalizedFileName = *fileName;
+								ustring::replace(normalizedFileName,"\\","/");
+								auto p = normalizedFileName.rfind("/src/");
+								if(p == std::string::npos)
+									p = normalizedFileName.rfind("/include/");
+								if(p != std::string::npos)
+								{
+									p = normalizedFileName.rfind("/",p -1);
+									normalizedFileName = normalizedFileName.substr(p);
+								}
+								else
+									std::cout<<"!";
+
+								//auto modName = m_symbolHandler.FindModule(reinterpret_cast<DWORD64>(fptr));
+								//if(modName.has_value())
+								{
+									auto path = util::Path::CreateFile(normalizedFileName);
+									auto modName = path.GetFront();
+									path.PopFront();
+									pragma::doc::Source source {};
+									source.fileName = path.GetString();
+									source.line = line;
+									source.moduleName = std::move(modName);
+									overloadInfo->source = std::move(source);
+								}
+							}
+						}
+						method.overloads.push_back(*overloadInfo);
+					}
+				}
+			}
+		}
+#if 0
+/*
+* static BOOL test_dbg_help(const std::string &szImageName,const std::string &functionName,uint64_t &outRva)
+{
+	SymbolHandler handler {};
+	if(handler.Initialize())
+	{
+
+	{
+	auto &en = *pragma::get_engine();
+	auto *sv = en.GetServerNetworkState();
+		auto *lsv = sv->GetLuaState();
+		luabind::object o = luabind::globals(lsv)["ai"];
+		o = o["create_schedule"];
+
+		auto *fptr = get_function_pointer_from_luabind_function(lsv,o);
+		if(fptr)
+		{
+			uint32_t line;
+			auto fileName = handler.FindSource(reinterpret_cast<DWORD64>(fptr),line);
+			if(fileName.has_value())
+			{
+				std::cout<<"FileName: "<<*fileName<<std::endl;
+			}
+		}
+		
+	}
+}
+*/
+#endif
+	}
+};
 
 class RepositoryManager
 {
@@ -1271,6 +1724,556 @@ static void merge_collection(pragma::doc::Collection &a,const pragma::doc::Colle
 	}
 }
 
+FARPROC customGetProcAddress(HMODULE module, const PSTR functionName) 
+{ 
+  PIMAGE_DOS_HEADER pDosHeader = reinterpret_cast<PIMAGE_DOS_HEADER>(module); 
+  if(!pDosHeader || pDosHeader->e_magic != IMAGE_DOS_SIGNATURE) 
+    throw std::runtime_error("Process::customGetProcAddress Error : DOS PE header is invalid."); 
+
+  PIMAGE_NT_HEADERS pNtHeader = reinterpret_cast<PIMAGE_NT_HEADERS>(reinterpret_cast<PCHAR>(module) + pDosHeader->e_lfanew); 
+  if(pNtHeader->Signature != IMAGE_NT_SIGNATURE) 
+    throw std::runtime_error("Process::customGetProcAddress Error : NT PE header is invalid."); 
+
+  PVOID pExportDirTemp        = reinterpret_cast<PBYTE>(module) + pNtHeader->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress; 
+  PIMAGE_EXPORT_DIRECTORY pExportDir  = reinterpret_cast<PIMAGE_EXPORT_DIRECTORY>(pExportDirTemp); 
+  if(pExportDir->AddressOfNames == NULL) 
+    throw std::runtime_error("Process::customGetProcAddress Error : Symbol names missing entirely."); 
+
+  PDWORD pNamesRvas      = reinterpret_cast<PDWORD>(reinterpret_cast<PBYTE>(module) + pExportDir->AddressOfNames); 
+  PWORD pNameOrdinals      = reinterpret_cast<PWORD>(reinterpret_cast<PBYTE>(module) + pExportDir->AddressOfNameOrdinals); 
+  PDWORD pFunctionAddresses  = reinterpret_cast<PDWORD>( reinterpret_cast<PBYTE>(module) + pExportDir->AddressOfFunctions); 
+
+  for (DWORD n = 0; n < pExportDir->NumberOfNames; n++) 
+  { 
+    PSTR CurrentName = reinterpret_cast<PSTR>(reinterpret_cast<PBYTE>(module) + pNamesRvas[n]);   
+    if(strcmp(functionName, CurrentName) == 0) 
+    { 
+      WORD Ordinal = pNameOrdinals[n]; 
+      return reinterpret_cast<FARPROC>(reinterpret_cast<PBYTE>(module) + pFunctionAddresses[Ordinal]); 
+    } 
+  } 
+
+  return 0; 
+}
+
+#include <Tlhelp32.h>
+MODULEENTRY32 GetModuleInfo(std::uint32_t ProcessID, const char* ModuleName)
+{
+    void* hSnap = nullptr;
+    MODULEENTRY32 Mod32 = {0};
+
+    if ((hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, ProcessID)) == INVALID_HANDLE_VALUE)
+        return Mod32;
+
+    Mod32.dwSize = sizeof(MODULEENTRY32);
+    while (Module32Next(hSnap, &Mod32))
+    {
+        if (!strcmp(ModuleName, Mod32.szModule))
+        {
+            CloseHandle(hSnap);
+            return Mod32;
+        }
+    }
+
+    CloseHandle(hSnap);
+    return {0};
+}
+
+namespace pragma::ai {class Schedule;}
+__declspec(dllexport) std::shared_ptr<pragma::ai::Schedule> testt() {return nullptr;}
+
+__declspec(dllexport) void test_function() {}
+
+static std::string GetLastErrorAsString()
+{
+    //Get the error message ID, if any.
+    DWORD errorMessageID = ::GetLastError();
+    if(errorMessageID == 0) {
+        return std::string(); //No error message has been recorded
+    }
+    
+    LPSTR messageBuffer = nullptr;
+
+    //Ask Win32 to give us the string version of that message ID.
+    //The parameters we pass in, tell Win32 to create the buffer that holds the message for us (because we don't yet know how long the message string will be).
+    size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                                 NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
+    
+    //Copy the error message into a std::string.
+    std::string message(messageBuffer, size);
+    
+    //Free the Win32's string's buffer.
+    LocalFree(messageBuffer);
+            
+    return message;
+}
+
+SymbolHandler::~SymbolHandler()
+{
+
+}
+
+bool SymbolHandler::Initialize()
+{
+    SymSetOptions(/*SYMOPT_UNDNAME | */SYMOPT_DEFERRED_LOADS);
+    m_hProcess = GetCurrentProcess();
+    if(!SymInitialize(m_hProcess,nullptr,TRUE))
+	{
+		Con::cwar<<"WARNING: Unable to initialize symbol handler: "<<GetLastErrorAsString()<<Con::endl;
+		m_valid = false;
+        return false;
+	}
+	m_valid = true;
+	return true;
+}
+
+/*void SymbolHandler::AddModule(const std::string &mod)
+{
+    DWORD64 dwBaseAddr = 0;
+    auto baseAddress = SymLoadModuleEx(
+		m_hProcess, // target process 
+		nullptr, // handle to image - not used
+		mod.c_str(), // name of image file
+		nullptr, // name of module - not required
+		dwBaseAddr, // base address - not required
+		0, // size of image - not required
+		nullptr, // MODLOAD_DATA used for special cases 
+		0
+	);
+	if(baseAddress)
+		m_modules.push_back(baseAddress);
+}*/
+
+static void *get_fptr()
+{
+	if(true)
+		return &testt;
+	auto &en = *pragma::get_engine();
+	auto *sv = en.GetServerNetworkState();
+	if(sv)
+	{
+		auto *lsv = sv->GetLuaState();
+
+		luabind::object o = luabind::globals(lsv)["ai"];
+		o = o["create_schedule"];
+		o.push(lsv);
+
+		lua_CFunction f = lua_tocfunction(lsv,-1);
+		return f;
+	}
+	return nullptr;
+}
+std::optional<std::string> SymbolHandler::FindModule(DWORD64 rva) const
+{
+	if(!*this)
+		return {};
+	IMAGEHLP_MODULE moduleInfo;
+	moduleInfo.SizeOfStruct = sizeof(IMAGEHLP_MODULE);
+	if(SymGetModuleInfo(m_hProcess,rva,&moduleInfo))
+		return moduleInfo.ModuleName;
+	return {};
+}
+std::optional<std::string> SymbolHandler::FindAddress(DWORD64 rva) const
+{
+	if(!*this)
+		return {};
+	DWORD64 dwDisplacement;
+	constexpr uint32_t maxNameLen = 4'096;
+	auto *ptr = new uint8_t[sizeof(SYMBOL_INFO) +maxNameLen +1]; // See https://docs.microsoft.com/en-us/windows/win32/api/dbghelp/ns-dbghelp-symbol_info?redirectedfrom=MSDN
+	util::ScopeGuard sg {[ptr]() {delete[] ptr;}};
+	auto &sym = *reinterpret_cast<SYMBOL_INFO*>(ptr);
+	sym.MaxNameLen = maxNameLen;
+	sym.SizeOfStruct = sizeof(SYMBOL_INFO);
+	if(SymFromAddr(m_hProcess,rva,&dwDisplacement,&sym))
+		return sym.Name;
+	return {};
+}
+std::optional<std::string> SymbolHandler::FindSource(DWORD64 rva,uint32_t &outLine) const
+{
+	if(!*this)
+		return {};
+	IMAGEHLP_LINE64 line;
+	line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
+	DWORD dwDisplacement;
+	if(SymGetLineFromAddr(m_hProcess,rva,&dwDisplacement,&line) == TRUE)
+	{
+		outLine = line.LineNumber;
+		return line.FileName;
+	}
+	else
+		Con::cwar<<"WARNING: "<<GetLastErrorAsString()<<Con::endl;
+	return {};
+}
+std::optional<pragma::os::windows::RVA> SymbolHandler::FindSymbol(const std::string &symbol) const
+{
+	if(!*this)
+		return {};
+	struct SymbolInfo
+	{
+		const SymbolHandler &symbolHandler;
+		std::optional<pragma::os::windows::RVA> rva {};
+	} symbolInfo {*this};
+	auto mask = "*!" +symbol; // See https://docs.microsoft.com/en-us/windows/win32/api/dbghelp/nf-dbghelp-symenumsymbols
+    SymEnumSymbols(m_hProcess, // Process handle from SymInitialize.
+		0, // Base address of module.
+		mask.c_str(), // Name of symbols to match.
+		[](
+			PSYMBOL_INFO pSymInfo,   
+			ULONG SymbolSize,      
+			PVOID UserContext
+		) -> BOOL {
+			auto &symbolInfo = *static_cast<SymbolInfo*>(UserContext);
+			symbolInfo.rva = pSymInfo->Address -pSymInfo->ModBase;
+
+			IMAGEHLP_LINE64 line;
+			DWORD dwDisplacement;
+			if(SymGetLineFromAddr(symbolInfo.symbolHandler.m_hProcess,(DWORD64)testt/*pSymInfo->Address*/,&dwDisplacement,&line) == TRUE)
+			{
+				std::cout<<"LINE: "<<line.FileName<<": "<<line.LineNumber<<std::endl;
+			}
+			else
+				std::cout<<GetLastErrorAsString()<<std::endl;
+			return TRUE;
+		}, // Symbol handler procedure.
+		&symbolInfo
+	);
+	return symbolInfo.rva;
+}
+
+namespace dbg
+{
+    class Help
+    {
+    public:
+        bool Initialize();
+        void LoadSymbolModule();
+    private:
+        void EnumerateSymbols();
+        static BOOL CALLBACK EnumSymProc( 
+            PSYMBOL_INFO pSymInfo,   
+            ULONG SymbolSize,      
+            PVOID UserContext);
+        HANDLE m_hProcess;
+    };
+};
+
+bool dbg::Help::Initialize()
+{
+    DWORD  error;
+
+    SymSetOptions(SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS);
+
+    m_hProcess = GetCurrentProcess();
+
+    if (!SymInitialize(m_hProcess, NULL, TRUE))
+    {
+        // SymInitialize failed
+        error = GetLastError();
+        printf("SymInitialize returned error : %d\n", error);
+        return FALSE;
+    }
+    return TRUE;
+}
+
+void dbg::Help::EnumerateSymbols()
+{
+
+}
+
+BOOL CALLBACK dbg::Help::EnumSymProc( 
+    PSYMBOL_INFO pSymInfo,   
+    ULONG SymbolSize,      
+    PVOID UserContext)
+{
+    UNREFERENCED_PARAMETER(UserContext);
+    
+    printf("%08X %4u %s\n", 
+           pSymInfo->Address, SymbolSize, pSymInfo->Name);
+
+    {
+        IMAGEHLP_LINE64 imgHlp;
+        auto *hlp = static_cast<Help*>(UserContext);
+        DWORD displacement;
+        if(SymGetLineFromAddr64(hlp->m_hProcess,pSymInfo->Address,&displacement,&imgHlp) == TRUE)
+        {
+            std::cout<<"Filename: "<<imgHlp.FileName<<std::endl;
+        }
+    }
+
+
+    return TRUE;
+}
+
+#include <Winbase.h>
+void dbg::Help::LoadSymbolModule()
+{
+    std::string szImageName = "E:/projects/pragma/build_winx64/install/bin/shared.dll";
+    DWORD64 dwBaseAddr = 0;
+	AddDllDirectory(L"E:/projects/pragma/build_winx64/install/bin/");
+    auto dllBase = SymLoadModuleEx(m_hProcess,    // target process 
+                        NULL,        // handle to image - not used
+                        szImageName.c_str(), // name of image file
+                        NULL,        // name of module - not required
+                        dwBaseAddr,  // base address - not required
+                        0,           // size of image - not required
+                        NULL,        // MODLOAD_DATA used for special cases 
+                        0);
+    if (dllBase)          // flags - not required
+    {
+        // SymLoadModuleEx returned success
+    }
+    else
+    {
+        // SymLoadModuleEx failed
+        DWORD error = GetLastError();
+        //printf("SymLoadModuleEx returned error : %d\n", error);
+		std::cout<<"ERR: "<<GetLastErrorAsString()<<std::endl;
+    }
+
+    // Enum
+    const char *Mask = "?testt@@YA?AV?$shared_ptr@VSchedule@ai@pragma@@@std@@XZ";
+    if (SymEnumSymbols(m_hProcess,     // Process handle from SymInitialize.
+                        dllBase,   // Base address of module.
+                        NULL,        // Name of symbols to match.
+                        EnumSymProc, // Symbol handler procedure.
+                        this))       // User context.
+    {
+        // SymEnumSymbols succeeded
+    }
+    else
+    {
+        // SymEnumSymbols failed
+        //printf("SymEnumSymbols failed: %d\n", GetLastError());
+        std::cout<<GetLastErrorAsString()<<std::endl;
+    }
+}
+
+#pragma comment(lib,"Dbghelp.lib")
+#pragma comment(lib,"Psapi.lib")
+#pragma comment(lib,"C:/Program Files (x86)/Microsoft Visual Studio 14.0/DIA SDK/lib/amd64/diaguids.lib")
+
+std::string ConvertWCSToMBS(const wchar_t* pstr, long wslen)
+{
+    int len = ::WideCharToMultiByte(CP_ACP, 0, pstr, wslen, NULL, 0, NULL, NULL);
+
+    std::string dblstr(len, '\0');
+    len = ::WideCharToMultiByte(CP_ACP, 0 /* no flags */,
+                                pstr, wslen /* not necessary NULL-terminated */,
+                                &dblstr[0], len,
+                                NULL, NULL /* no default char */);
+
+    return dblstr;
+}
+
+std::string ConvertBSTRToMBS(BSTR bstr)
+{
+    int wslen = ::SysStringLen(bstr);
+    return ConvertWCSToMBS((wchar_t*)bstr, wslen);
+}
+
+PdbManager::PdbSession::~PdbSession()
+{
+	if(enumSymbolsByAddr)
+		enumSymbolsByAddr->Release();
+	if(enumTables)
+		enumTables->Release();
+	if(globalSymbol)
+		globalSymbol->Release();
+	if(session)
+		session->Release();
+	if(source)
+		source->Release();
+}
+PdbManager::~PdbManager()
+{
+	m_pdbSessions.clear();
+	CoUninitialize();
+}
+bool PdbManager::Initialize()
+{
+	CoInitializeEx(nullptr,COINIT_MULTITHREADED); // If failed, was probably already initialized, so we're ignoring the return value (we still have to call CoUnInitialize either way)
+	return true;
+}
+
+bool PdbManager::LoadPdb(const std::string &moduleName,const std::string &pdbPath)
+{
+	auto sessionInfo = std::unique_ptr<PdbSession>{new PdbSession{}};
+	auto hr = CoCreateInstance(
+		CLSID_DiaSource,
+		nullptr,
+		CLSCTX_INPROC_SERVER,
+		__uuidof(IDiaDataSource),
+		(void**)&sessionInfo->source
+	);
+	if(FAILED(hr))
+		return false;
+
+	wchar_t wszFilename[_MAX_PATH];
+	mbstowcs(wszFilename,pdbPath.data(),sizeof(wszFilename) /sizeof(wszFilename[0]));
+	if(FAILED(sessionInfo->source->loadDataFromPdb(wszFilename)))
+	{
+		if(FAILED(sessionInfo->source->loadDataForExe(wszFilename,nullptr,nullptr)))
+			return false;
+	}
+
+	if(FAILED(sessionInfo->source->openSession(&sessionInfo->session))) 
+		return false;
+	if(FAILED(sessionInfo->session->get_globalScope(&sessionInfo->globalSymbol)))
+		return false;
+	if(FAILED(sessionInfo->session->getEnumTables(&sessionInfo->enumTables)))
+		return false;
+	if(FAILED(sessionInfo->session->getSymbolsByAddr(&sessionInfo->enumSymbolsByAddr)))
+		return false;
+	sessionInfo->SetValid();
+	m_pdbSessions[moduleName] = std::move(sessionInfo);
+	m_moduleNames.push_back(moduleName);
+	return true;
+}
+
+std::optional<PdbManager::SymbolInfo> PdbManager::FindSymbolByRva(const std::string &moduleName,DWORD64 rva)
+{
+	auto it = m_pdbSessions.find(moduleName);
+	if(it == m_pdbSessions.end() || !*it->second)
+		return {};
+	IDiaSymbol *symbol;
+	auto &sessionInfo = *it->second;
+	if(sessionInfo.session->findSymbolByRVA(rva,SymTagEnum::SymTagFunction,&symbol) != S_OK)
+		return {};
+	DWORD symTag;
+	if(symbol->get_symTag(&symTag) != S_OK || symTag != SymTagFunction)
+		return {};
+	SymbolInfo symbolInfo {};
+
+	BSTR name;
+	if(symbol->get_name(&name) == S_OK)
+		symbolInfo.name = ConvertBSTRToMBS(name);
+	symbolInfo.rva = rva;
+
+	ULONGLONG length = 0;
+	if(symbol->get_length(&length) == S_OK)
+	{
+		IDiaEnumLineNumbers *lineNums[100];
+		if(sessionInfo.session->findLinesByRVA(rva,length,lineNums) == S_OK)
+		{
+			auto &l = lineNums[0];
+			IDiaLineNumber *lineNum;
+			ULONG fetched = 0;
+			for(uint8_t i=0;i<5;++i)
+			{
+				if(l->Next(i,&lineNum,&fetched) == S_OK && fetched == 1)
+				{
+					DWORD l;
+					IDiaSourceFile *srcFile;
+					if(lineNum->get_sourceFile(&srcFile) == S_OK)
+					{
+						BSTR fileName;
+						srcFile->get_fileName(&fileName);
+						if(lineNum->get_lineNumber(&l) == S_OK)
+						{
+							symbolInfo.source = SymbolInfo::Source{};
+							symbolInfo.source->fileName = ConvertBSTRToMBS(fileName);
+							symbolInfo.source->line = l;
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+	symbol->Release();
+	return symbolInfo;
+}
+
+
+
+
+
+
+static BOOL test_pdb(const std::string &pdbFilePath,uint64_t rva)
+{
+    IDiaDataSource  *pSource;
+    if(FAILED(CoInitializeEx(NULL,COINIT_MULTITHREADED)))
+        return FALSE;
+    auto hr = CoCreateInstance(
+        CLSID_DiaSource,
+        NULL,
+        CLSCTX_INPROC_SERVER,
+        __uuidof(IDiaDataSource),
+        (void **) &pSource
+    );
+    if(FAILED(hr))
+        return FALSE;
+
+    wchar_t wszFilename[_MAX_PATH];
+    mbstowcs(wszFilename,pdbFilePath.data(),sizeof(wszFilename) /sizeof(wszFilename[0]));
+    if(FAILED(pSource->loadDataFromPdb(wszFilename)))
+    {
+        if(FAILED(pSource->loadDataForExe(wszFilename,NULL,NULL)))
+            return FALSE;
+    }
+
+    IDiaSession *session;
+    IDiaSymbol *globalSymbol = nullptr;
+    IDiaEnumTables *enumTables = nullptr;
+    IDiaEnumSymbolsByAddr *enumSymbolsByAddr = nullptr;
+    if(FAILED(pSource->openSession(&session))) 
+        return FALSE;
+
+    if(FAILED(session->get_globalScope(&globalSymbol)))
+        return FALSE;
+
+    if(FAILED(session->getEnumTables(&enumTables)))
+        return FALSE;
+
+    if(FAILED(session->getSymbolsByAddr(&enumSymbolsByAddr)))
+        return FALSE;
+
+    IDiaSymbol *symbol;
+    if(session->findSymbolByVA(rva,SymTagEnum::SymTagFunction,&symbol) == S_OK)
+    {
+        BSTR name;
+        symbol->get_name(&name);
+        std::cout<<"Name: "<<ConvertBSTRToMBS(name)<<std::endl;
+
+        ULONGLONG length = 0;
+        if(symbol->get_length(&length) == S_OK)
+        {
+            uint32_t lineId;
+            //auto sourceFile = symbol.GetSourceFile(lineId);
+
+            IDiaEnumLineNumbers *lineNums[100];
+            if(session->findLinesByRVA(rva,length,lineNums) == S_OK)
+            {
+                auto &l = lineNums[0];
+                IDiaLineNumber *line;
+                IDiaLineNumber *lineNum;
+                ULONG fetched = 0;
+                for(uint8_t i=0;i<5;++i) {
+                if(l->Next(i,&lineNum,&fetched) == S_OK && fetched == 1)
+                {
+                    DWORD l;
+                    IDiaSourceFile *srcFile;
+                    if(lineNum->get_sourceFile(&srcFile) == S_OK)
+                    {
+                        BSTR fileName;
+                        srcFile->get_fileName(&fileName);
+                        std::cout<<"File: "<<ConvertBSTRToMBS(fileName)<<std::endl;
+                    }
+                    if(lineNum->get_lineNumber(&l) == S_OK)
+                        std::cout<<"Line: "<<l<<std::endl;
+                    if(lineNum->get_lineNumberEnd(&l) == S_OK)
+                        std::cout<<"Line End: "<<l<<std::endl;
+                    
+                }
+                }
+            }
+        }
+    }
+
+    return TRUE;
+}
+
+#include <luabind/make_function.hpp>
 static void autogenerate()
 {
 	g_typeWarningCache.clear();
@@ -1287,6 +2290,50 @@ static void autogenerate()
 		auto *lsv = sv->GetLuaState();
 		if(lsv)
 			luaStates.push_back({lsv});
+
+#if 0
+		luabind::object o = luabind::globals(lsv)["ai"];
+		o = o["create_schedule"];
+		o.push(lsv);
+		Lua::StackDump(lsv);
+
+		auto base = GetModuleInfo(GetCurrentProcessId(),"server.dll");
+		std::cout<<"Addr: "<<base.modBaseAddr<<std::endl;
+		
+		lua_CFunction f = lua_tocfunction(lsv,-1);
+		std::cout<<"F: "<<std::hex<<(reinterpret_cast<uint64_t>(f))<<std::endl;
+		std::cout<<"Rel Ptr: "<<std::hex<<(reinterpret_cast<uint64_t>(f) -reinterpret_cast<uint64_t>(base.modBaseAddr))<<std::endl;
+
+
+    dbg::Help help {};
+    if(help.Initialize())
+    {
+        help.LoadSymbolModule();
+    }
+
+		testt();
+		base = GetModuleInfo(GetCurrentProcessId(),"shared.dll");
+		std::cout<<"&testt: "<<std::hex<<reinterpret_cast<uint64_t>(&testt)<<","<<GetProcAddress(base.hModule,"?testt@@YA?AV?$shared_ptr@VSchedule@ai@pragma@@@std@@XZ")<<std::endl;
+		std::cout<<"&modBaseAddr: "<<std::hex<<reinterpret_cast<uint64_t>(base.modBaseAddr)<<std::endl;
+		std::cout<<"Diff: "<<std::hex<<(reinterpret_cast<uint64_t>(&testt) -reinterpret_cast<uint64_t>(base.modBaseAddr))<<std::endl;
+
+		
+		std::cout<<"A: "<<typeid(f).name()<<std::endl;
+		std::cout<<"B: "<<typeid(decltype(f)).name()<<std::endl;
+
+		auto mod = GetModuleHandle("server.dll");
+		CHAR name[] = {'a','s','d','f','\0'};
+		customGetProcAddress(mod,name);
+		//auto *x = luabind::touserdata<luabind::detail::function_object*>(o);
+		//auto *y = luabind::object_cast<luabind::detail::function_object*>(o);
+		//luabind::detail::function_object const* impl_const = *(luabind::detail::function_object const**)lua_touserdata(lsv, lua_upvalueindex(1));
+		//luabind::detail::function_object const* impl_const2 = (luabind::detail::function_object const*)lua_touserdata(lsv, lua_upvalueindex(1));
+		std::cout<<f<<std::endl;
+		//luabind::detail::function_object_impl const* impl_const = *(luabind::detail::function_object_impl const**)lua_touserdata(lsv, lua_upvalueindex(1));
+
+		//luabind::detail::function_object_impl* impl = const_cast<luabind::detail::function_object_impl*>(impl_const);
+		//impl->f
+#endif
 	}
 	auto *cl = en.GetClientState();
 	if(cl)
@@ -1298,6 +2345,19 @@ static void autogenerate()
 	if(luaStates.empty())
 		return;
 
+	PdbManager pdbManager {};
+	if(pdbManager.Initialize())
+	{
+		// TODO: Determine the paths automatically somehow?
+		pdbManager.LoadPdb("server","E:/projects/pragma/build_winx64/core/server/RelWithDebInfo/server.pdb");
+		pdbManager.LoadPdb("client","E:/projects/pragma/build_winx64/core/client/RelWithDebInfo/client.pdb");
+		pdbManager.LoadPdb("shared","E:/projects/pragma/build_winx64/core/shared/RelWithDebInfo/shared.pdb");
+		pdbManager.LoadPdb("mathutil","E:/projects/pragma/build_winx64/external_libs/mathutil/RelWithDebInfo/mathutil.pdb");
+		pdbManager.LoadPdb("sharedutils","E:/projects/pragma/build_winx64/external_libs/sharedutils/RelWithDebInfo/sharedutils.pdb");
+	}
+
+	SymbolHandler symHandler {};
+	symHandler.Initialize();
 	for(auto &stateInfo : luaStates)
 	{
 		auto *L = stateInfo.l;
@@ -1311,18 +2371,21 @@ static void autogenerate()
 		gCol->SetName("_G");
 		gCol->SetFlags(gCol->GetFlags() | pragma::doc::Collection::Flags::AutoGenerated);
 		rootCol->AddChild(gCol);
-		std::unordered_map<luabind::detail::class_rep*,pragma::doc::Collection*> iteratedClasses;
-		iterate_libraries(luabind::globals(L),*rootCol,*gCol,iteratedClasses);
+		
+		LuaDocGenerator docGenerator {L};
+		docGenerator.SetPdbManager(&pdbManager);
+		docGenerator.SetSymbolHandler(&symHandler);
+		docGenerator.IterateLibraries(luabind::globals(L),*rootCol,*gCol);
 
-		for(auto &pair : iteratedClasses)
+		auto &classMap = docGenerator.GetClassMap();
+		for(auto &pair : classMap)
 		{
 			auto &crep = *pair.first;
 			auto &bases = crep.bases();
 			for(auto &base : bases)
 			{
-				auto it = iteratedClasses.find(base.base);
-				assert(it != iteratedClassesRev.end());
-				if(it == iteratedClasses.end())
+				auto it = classMap.find(base.base);
+				if(it == classMap.end())
 				{
 					Con::cwar<<"WARNING: Missing class '"<<base.base->name()<<"'"<<Con::endl;
 					continue;

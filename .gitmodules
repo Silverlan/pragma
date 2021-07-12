@@ -169,3 +169,6 @@
 [submodule "third_party_libs/miniball"]
 	path = third_party_libs/miniball
 	url = https://github.com/Silverlan/miniball.git
+[submodule "external_libs/util_bsp"]
+	path = external_libs/util_bsp
+	url = https://github.com/Silverlan/util_bsp.git

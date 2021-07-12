@@ -14,6 +14,11 @@
 struct AnimationEvent;
 namespace pragma
 {
+	namespace animation
+	{
+		class AnimationManager;
+		using PAnimationManager = std::shared_ptr<AnimationManager>;
+	};
 	class DLLNETWORK Animated2Component final
 		: public BaseEntityComponent
 	{
@@ -32,10 +37,12 @@ namespace pragma
 		void SetPlaybackRate(float rate);
 		float GetPlaybackRate() const;
 		const util::PFloatProperty &GetPlaybackRateProperty() const;
-
-		animation::PAnimationPlayer AddAnimationPlayer();
-		void RemoveAnimationPlayer(const animation::AnimationPlayer &player);
-		void ClearAnimationPlayers();
+		
+		std::vector<animation::PAnimationManager> &GetAnimationManagers() {return m_animationManagers;}
+		const std::vector<animation::PAnimationManager> &GetAnimationManagers() const {return const_cast<Animated2Component*>(this)->GetAnimationManagers();}
+		animation::PAnimationManager AddAnimationManager();
+		void RemoveAnimationManager(const animation::AnimationManager &player);
+		void ClearAnimationManagers();
 		
 		virtual luabind::object InitializeLuaObject(lua_State *l) override;
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
@@ -45,7 +52,7 @@ namespace pragma
 		void ResetAnimation(const std::shared_ptr<Model> &mdl);
 		void MaintainAnimations(double dt);
 		util::PFloatProperty m_playbackRate = nullptr;
-		std::vector<animation::PAnimationPlayer> m_animationPlayers;
+		std::vector<animation::PAnimationManager> m_animationManagers;
 	};
 
 	struct DLLNETWORK CEAnim2OnAnimationComplete

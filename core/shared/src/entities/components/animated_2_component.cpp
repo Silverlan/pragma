@@ -9,7 +9,7 @@
 #include "pragma/entities/components/animated_2_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/model/model.h"
-#include "pragma/model/animation/animation_player.hpp"
+#include "pragma/model/animation/animation_manager.hpp"
 #include "pragma/model/animation/animation.hpp"
 #include "pragma/lua/l_entity_handles.hpp"
 
@@ -40,12 +40,12 @@ Animated2Component::Animated2Component(BaseEntity &ent)
 void Animated2Component::SetPlaybackRate(float rate) {*m_playbackRate = rate;}
 float Animated2Component::GetPlaybackRate() const {return *m_playbackRate;}
 const util::PFloatProperty &Animated2Component::GetPlaybackRateProperty() const {return m_playbackRate;}
-animation::PAnimationPlayer Animated2Component::AddAnimationPlayer()
+animation::PAnimationManager Animated2Component::AddAnimationManager()
 {
 	auto mdl = GetEntity().GetModel();
 	if(!mdl)
 		return nullptr;
-	auto player = animation::AnimationPlayer::Create(*mdl);
+	auto player = animation::AnimationManager::Create(*mdl);
 
 	animation::AnimationPlayerCallbackInterface callbackInteface {};
 	callbackInteface.onPlayAnimation = [this](animation::AnimationId animId,FPlayAnim flags) -> bool {
@@ -60,27 +60,27 @@ animation::PAnimationPlayer Animated2Component::AddAnimationPlayer()
 		InvokeEventCallbacks(EVENT_TRANSLATE_ANIMATION,evTranslateAnimData);
 	};
 
-	m_animationPlayers.push_back(player);
+	m_animationManagers.push_back(player);
 	return player;
 }
-void Animated2Component::RemoveAnimationPlayer(const animation::AnimationPlayer &player)
+void Animated2Component::RemoveAnimationManager(const animation::AnimationManager &player)
 {
-	auto it = std::find_if(m_animationPlayers.begin(),m_animationPlayers.end(),[&player](const animation::PAnimationPlayer &playerOther) {
+	auto it = std::find_if(m_animationManagers.begin(),m_animationManagers.end(),[&player](const animation::PAnimationManager &playerOther) {
 		return playerOther.get() == &player;
 	});
-	if(it == m_animationPlayers.end())
+	if(it == m_animationManagers.end())
 		return;
-	m_animationPlayers.erase(it);
+	m_animationManagers.erase(it);
 }
-void Animated2Component::ClearAnimationPlayers()
+void Animated2Component::ClearAnimationManagers()
 {
-	m_animationPlayers.clear();
+	m_animationManagers.clear();
 }
 void Animated2Component::MaintainAnimations(double dt)
 {
 	dt *= GetPlaybackRate();
-	for(auto &animPlayer : m_animationPlayers)
-		animPlayer->Advance(dt);
+	for(auto &animPlayer : m_animationManagers)
+		(*animPlayer)->Advance(dt);
 }
 luabind::object Animated2Component::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<Animated2ComponentHandleWrapper>(l);}
 

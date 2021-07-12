@@ -1101,7 +1101,7 @@ unsigned char pragma::animation::Animation::GetActivityWeight() const {return m_
 void pragma::animation::Animation::SetActivityWeight(unsigned char weight) {m_activityWeight = weight;}
 unsigned char pragma::animation::Animation::GetFPS() {return m_fps;}
 void pragma::animation::Animation::SetFPS(unsigned char fps) {m_fps = fps;}
-float pragma::animation::Animation::GetDuration()
+float pragma::animation::Animation::GetDuration() const
 {
 	if(m_fps == 0)
 		return 0.f;

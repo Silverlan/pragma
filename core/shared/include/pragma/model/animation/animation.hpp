@@ -85,7 +85,7 @@ namespace pragma::animation
 		void AddFlags(FAnim flags);
 		void RemoveFlags(FAnim flags);
 		void AddFrame(std::shared_ptr<Frame> frame);
-		float GetDuration();
+		float GetDuration() const;
 		std::shared_ptr<Frame> GetFrame(unsigned int ID);
 		const std::vector<uint16_t> &GetBoneList() const;
 		const std::unordered_map<uint32_t,uint32_t> &GetBoneMap() const;

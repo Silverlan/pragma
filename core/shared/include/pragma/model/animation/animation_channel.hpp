@@ -87,6 +87,12 @@ namespace pragma::animation
 		bool Save(udm::LinkedPropertyWrapper &prop) const;
 		bool Load(udm::LinkedPropertyWrapper &prop);
 		
+		udm::Property &GetTimesProperty() {return *m_times;}
+		const udm::Property &GetTimesProperty() const {return const_cast<AnimationChannel*>(this)->GetTimesProperty();}
+
+		udm::Property &GetValueProperty() {return *m_values;}
+		const udm::Property &GetValueProperty() const {return const_cast<AnimationChannel*>(this)->GetValueProperty();}
+
 		std::pair<uint32_t,uint32_t> FindInterpolationIndices(float t,float &outInterpFactor,uint32_t pivotIndex) const;
 		std::pair<uint32_t,uint32_t> FindInterpolationIndices(float t,float &outInterpFactor) const;
 		template<typename T>
@@ -105,6 +111,9 @@ namespace pragma::animation
 			T GetInterpolatedValue(float t,uint32_t &inOutPivotTimeIndex) const;
 		template<typename T>
 			T GetInterpolatedValue(float t) const;
+
+		void Resize(uint32_t numValues);
+		uint32_t GetSize() const;
 	private:
 		uint32_t AddValue(float t,const void *value);
 		std::pair<uint32_t,uint32_t> FindInterpolationIndices(float t,float &outInterpFactor,uint32_t pivotIndex,uint32_t recursionDepth) const;
@@ -195,52 +204,42 @@ template<typename T>
 template<typename T>
 	T &pragma::animation::AnimationChannel::GetValue(uint32_t idx)
 	{
-		// TODO: This is a stub
-		throw std::runtime_error{"Not yet implemented!"};
-		return *static_cast<T*>(nullptr);
-		//return *(reinterpret_cast<T*>(values.data()) +idx);
+		return GetValueArray().GetValue<T>(idx);
 	}
 
 template<typename T>
 	auto pragma::animation::AnimationChannel::GetInterpolationFunction() const
 {
-	// TODO: This is a stub
-	throw std::runtime_error{"Not yet implemented!"};
-	return T{};
-	/*constexpr auto type = udm::type_to_enum<T>();
+	constexpr auto type = udm::type_to_enum<T>();
 	if constexpr(std::is_same_v<T,Vector3>)
 		return &uvec::lerp;
 	else if constexpr(std::is_same_v<T,Quat>)
 		return &uquat::lerp; // TODO: Maybe use slerp? Test performance!
 	else
-		return [](const T &v0,const T &v1,float f) -> T {return (v0 +f *(v1 -v0));};*/
+		return [](const T &v0,const T &v1,float f) -> T {return (v0 +f *(v1 -v0));};
 }
 
 template<typename T>
 	T pragma::animation::AnimationChannel::GetInterpolatedValue(float t,uint32_t &inOutPivotTimeIndex) const
 {
-	// TODO: This is a stub
-	throw std::runtime_error{"Not yet implemented!"};
-	return T{};
-	/*if(udm::type_to_enum<T>() != GetValueType() || times.empty())
+	auto &times = GetTimesArray();
+	if(udm::type_to_enum<T>() != GetValueType() || times.IsEmpty())
 		return {};
 	float factor;
 	auto indices = FindInterpolationIndices(t,factor,inOutPivotTimeIndex);
 	inOutPivotTimeIndex = indices.first;
-	return GetInterpolationFunction<T>()(GetValue<T>(indices.first),GetValue<T>(indices.second),factor);*/
+	return GetInterpolationFunction<T>()(GetValue<T>(indices.first),GetValue<T>(indices.second),factor);
 }
 
 template<typename T>
 	T pragma::animation::AnimationChannel::GetInterpolatedValue(float t) const
 {
-	// TODO: This is a stub
-	throw std::runtime_error{"Not yet implemented!"};
-	return T{};
-	/*if(udm::type_to_enum<T>() != GetValueType() || times.empty())
+	auto &times = GetTimesArray();
+	if(udm::type_to_enum<T>() != GetValueType() || times.IsEmpty())
 		return {};
 	float factor;
 	auto indices = FindInterpolationIndices(t,factor);
-	return GetInterpolationFunction<T>()(GetValue<T>(indices.first),GetValue<T>(indices.second),factor);*/
+	return GetInterpolationFunction<T>()(GetValue<T>(indices.first),GetValue<T>(indices.second),factor);
 }
 
 #endif

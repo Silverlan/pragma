@@ -8,9 +8,13 @@
 #include "stdafx_shared.h"
 #include "pragma/model/animation/animation_channel.hpp"
 
+static constexpr auto VALUE_EPSILON = 0.001f;
+#pragma optimize("",off)
 pragma::animation::AnimationChannel::AnimationChannel()
-	: m_times{::udm::Property::Create(udm::Type::Float)},m_values{::udm::Property::Create(udm::Type::Array)}
-{}
+	: m_times{::udm::Property::Create(udm::Type::Array)},m_values{::udm::Property::Create(udm::Type::Array)}
+{
+	GetTimesArray().SetValueType(udm::Type::Float);
+}
 bool pragma::animation::AnimationChannel::Save(udm::LinkedPropertyWrapper &prop) const
 {
 	prop["interpolation"] = interpolation;
@@ -31,8 +35,44 @@ bool pragma::animation::AnimationChannel::Load(udm::LinkedPropertyWrapper &prop)
 	prop["values"](m_values);
 	return true;
 }
+uint32_t pragma::animation::AnimationChannel::GetSize() const {return GetTimesArray().GetSize();}
+void pragma::animation::AnimationChannel::Resize(uint32_t numValues)
+{
+	m_times->GetValue<udm::Array>().Resize(numValues);
+	m_values->GetValue<udm::Array>().Resize(numValues);
+}
 uint32_t pragma::animation::AnimationChannel::AddValue(float t,const void *value)
 {
+	float interpFactor;
+	auto indices = FindInterpolationIndices(t,interpFactor);
+	if(indices.first == std::numeric_limits<decltype(indices.first)>::max())
+	{
+		auto size = GetSize() +1;
+		Resize(size);
+		GetTimesArray()[size -1] = t;
+		GetValueArray()[size -1] = value;
+		return 0;
+	}
+	if(umath::abs(t -*GetTime(indices.first)) < VALUE_EPSILON)
+	{
+		// Replace value at first index with new value
+		GetTimesArray()[indices.first] = t;
+		GetValueArray()[indices.first] = value;
+		return 0;
+	}
+	if(umath::abs(t -*GetTime(indices.second)) < VALUE_EPSILON)
+	{
+		// Replace value at second index with new value
+		GetTimesArray()[indices.second] = t;
+		GetValueArray()[indices.second] = value;
+		return 0;
+	}
+	// Insert new value between the two indices
+	
+	//	udm::PProperty m_times = nullptr;
+	//	udm::PProperty m_values = nullptr;
+
+
 	// This is a stub
 	throw std::runtime_error{"Not yet implemented"};
 	return 0;
@@ -54,7 +94,7 @@ std::pair<uint32_t,uint32_t> pragma::animation::AnimationChannel::FindInterpolat
 	// We'll use the pivot index as the starting point of our search and check out the times immediately surrounding it.
 	// If we have a match, we can return immediately. If not, we'll slightly broaden the search until we've reached the max recursion depth or found a match.
 	// If we hit the max recusion depth, we'll just do a regular binary search instead.
-	auto tPivot = times[pivotIndex];
+	auto tPivot = times.GetValue<float>(pivotIndex);
 	if(t >= tPivot)
 	{
 		if(pivotIndex == times.GetSize() -1)
@@ -62,10 +102,11 @@ std::pair<uint32_t,uint32_t> pragma::animation::AnimationChannel::FindInterpolat
 			interpFactor = 0.f;
 			return {static_cast<uint32_t>(GetValueArray().GetSize() -1),static_cast<uint32_t>(GetValueArray().GetSize() -1)};
 		}
-		if(t < times[pivotIndex +1])
+		auto tPivotNext = times.GetValue<float>(pivotIndex +1);
+		if(t < tPivotNext)
 		{
 			// Most common case
-			interpFactor = (t -times[pivotIndex]) /(times[pivotIndex +1] -times[pivotIndex]);
+			interpFactor = (t -tPivot) /(tPivotNext -tPivot);
 			return {pivotIndex,pivotIndex +1};
 		}
 		return FindInterpolationIndices(t,interpFactor,pivotIndex +1,recursionDepth +1);
@@ -110,7 +151,7 @@ public:
 		m_data += n;
 		return *this;
 	}
-	int32_t operator-(const ArrayFloatIterator &other) const {return (m_data -other.m_data) /sizeof(float);}
+	int32_t operator-(const ArrayFloatIterator &other) const {return m_data -other.m_data;}
 	ArrayFloatIterator operator-(int32_t idx) const {return ArrayFloatIterator{m_data -idx};}
 	reference operator*() {return *m_data;}
 	const reference operator*() const {return const_cast<ArrayFloatIterator*>(this)->operator*();}
@@ -176,3 +217,4 @@ std::ostream &operator<<(std::ostream &out,const pragma::animation::AnimationCha
 		out<<"[TimeRange:"<<*o.GetTime(0)<<","<<*o.GetTime(n -1)<<"]";
 	return out;
 }
+#pragma optimize("",on)

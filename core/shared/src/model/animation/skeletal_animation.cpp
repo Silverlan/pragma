@@ -120,11 +120,11 @@ void pragma::animation::skeletal::animation_slice_to_animated_pose(const BoneCha
 		auto &pose = transforms[idx];
 		auto &channelDesc = pair.second;
 		if(channelDesc.positionChannel != AnimBoneChannelDesc::INVALID_CHANNEL)
-			pose.SetOrigin(slice.channelValues[channelDesc.positionChannel].GetValue<Vector3>());
+			pose.SetOrigin(slice.channelValues[channelDesc.positionChannel]->GetValue<Vector3>());
 		if(channelDesc.rotationChannel != AnimBoneChannelDesc::INVALID_CHANNEL)
-			pose.SetRotation(slice.channelValues[channelDesc.rotationChannel].GetValue<Quat>());
+			pose.SetRotation(slice.channelValues[channelDesc.rotationChannel]->GetValue<Quat>());
 		if(channelDesc.scaleChannel != AnimBoneChannelDesc::INVALID_CHANNEL)
-			pose.SetScale(slice.channelValues[channelDesc.scaleChannel].GetValue<Vector3>());
+			pose.SetScale(slice.channelValues[channelDesc.scaleChannel]->GetValue<Vector3>());
 		++idx;
 	}
 }

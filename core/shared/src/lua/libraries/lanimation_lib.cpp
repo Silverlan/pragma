@@ -10,6 +10,7 @@
 #include "pragma/model/animation/animated_pose.hpp"
 #include "pragma/model/animation/animation_channel.hpp"
 #include "pragma/model/animation/animation_player.hpp"
+#include "pragma/model/animation/animation_manager.hpp"
 #include "pragma/model/animation/skeletal_animation.hpp"
 #include "pragma/model/animation/play_animation_flags.hpp"
 #include "pragma/model/model.h"
@@ -77,10 +78,14 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		[](lua_State *l,pragma::animation::AnimationChannel &channel) -> util::Path {
 		return channel.targetPath;
 	}));
-	/*cdChannel.def("GetTimes",static_cast<luabind::object(*)(lua_State*,pragma::animation::AnimationChannel&)>(
-		[](lua_State *l,pragma::animation::AnimationChannel &channel) -> luabind::object {
-		return Lua::vector_to_table(l,channel.times);
-	}));*/
+	cdChannel.def("GetTimesArray",static_cast<udm::LinkedPropertyWrapper(*)(lua_State*,pragma::animation::AnimationChannel&)>(
+		[](lua_State *l,pragma::animation::AnimationChannel &channel) -> udm::LinkedPropertyWrapper {
+			return udm::LinkedPropertyWrapper{channel.GetTimesProperty()};
+	}));
+	cdChannel.def("GetValueArray",static_cast<udm::LinkedPropertyWrapper(*)(lua_State*,pragma::animation::AnimationChannel&)>(
+		[](lua_State *l,pragma::animation::AnimationChannel &channel) -> udm::LinkedPropertyWrapper {
+			return udm::LinkedPropertyWrapper{channel.GetValueProperty()};
+	}));
 	cdChannel.def("Save",static_cast<bool(*)(lua_State*,pragma::animation::AnimationChannel&,udm::LinkedPropertyWrapper&)>(
 		[](lua_State *l,pragma::animation::AnimationChannel &channel,udm::LinkedPropertyWrapper &prop) -> bool {
 		return channel.Save(prop);
@@ -93,17 +98,14 @@ void Lua::animation::register_library(Lua::Interface &lua)
 
 	auto cdPlayer = luabind::class_<pragma::animation::AnimationPlayer>("Player");
 	cdPlayer.def(luabind::tostring(luabind::self));
-	cdPlayer.scope[luabind::def("create",static_cast<std::shared_ptr<pragma::animation::AnimationPlayer>(*)(lua_State*,Model&)>([](lua_State *l,Model &mdl) {
-		return pragma::animation::AnimationPlayer::Create(mdl);
+	cdPlayer.scope[luabind::def("create",static_cast<std::shared_ptr<pragma::animation::AnimationPlayer>(*)(lua_State*)>([](lua_State *l) {
+		return pragma::animation::AnimationPlayer::Create();
 	}))];
 	cdPlayer.def("Advance",static_cast<void(*)(lua_State*,pragma::animation::AnimationPlayer&,float,bool)>([](lua_State *l,pragma::animation::AnimationPlayer &player,float dt,bool force) {
 		player.Advance(dt,force);
 	}));
 	cdPlayer.def("Advance",static_cast<void(*)(lua_State*,pragma::animation::AnimationPlayer&,float)>([](lua_State *l,pragma::animation::AnimationPlayer &player,float dt) {
 		player.Advance(dt);
-	}));
-	cdPlayer.def("GetCurrentAnimationId",static_cast<pragma::animation::AnimationId(*)(lua_State*,pragma::animation::AnimationPlayer&)>([](lua_State *l,pragma::animation::AnimationPlayer &player) {
-		return player.GetCurrentAnimationId();
 	}));
 	cdPlayer.def("GetDuration",static_cast<float(*)(lua_State*,pragma::animation::AnimationPlayer&)>([](lua_State *l,pragma::animation::AnimationPlayer &player) {
 		return player.GetDuration();
@@ -129,22 +131,56 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdPlayer.def("SetCurrentTime",static_cast<void(*)(lua_State*,pragma::animation::AnimationPlayer&,float,bool)>([](lua_State *l,pragma::animation::AnimationPlayer &player,float time,bool force) {
 		player.SetCurrentTime(time,force);
 	}));
-	cdPlayer.def("StopAnimation",static_cast<void(*)(lua_State*,pragma::animation::AnimationPlayer&)>(
+	cdPlayer.def("Reset",static_cast<void(*)(lua_State*,pragma::animation::AnimationPlayer&)>(
 		[](lua_State *l,pragma::animation::AnimationPlayer &player) {
-		player.StopAnimation();
+		player.Reset();
 	}));
 	cdPlayer.def("GetCurrentSlice",static_cast<pragma::animation::AnimationSlice*(*)(lua_State*,pragma::animation::AnimationPlayer&)>(
 		[](lua_State *l,pragma::animation::AnimationPlayer &player) {
 		return &player.GetCurrentSlice();
 	}));
-	cdPlayer.def("GetPreviousSlice",static_cast<pragma::animation::AnimationSlice*(*)(lua_State*,pragma::animation::AnimationPlayer&)>(
-		[](lua_State *l,pragma::animation::AnimationPlayer &player) {
-		return &player.GetPreviousSlice();
+	cdPlayer.def("SetLooping",static_cast<void(*)(lua_State*,pragma::animation::AnimationPlayer&,bool)>(
+		[](lua_State *l,pragma::animation::AnimationPlayer &player,bool looping) {
+		player.SetLooping(looping);
+	}));
+	cdPlayer.def("IsLooping",static_cast<bool(*)(lua_State*,const pragma::animation::AnimationPlayer&)>(
+		[](lua_State *l,const pragma::animation::AnimationPlayer &player) -> bool {
+		return player.IsLooping();
+	}));
+	cdPlayer.def("SetAnimation",static_cast<void(*)(lua_State*,pragma::animation::AnimationPlayer&,pragma::animation::Animation2&)>(
+		[](lua_State *l,pragma::animation::AnimationPlayer &player,pragma::animation::Animation2 &anim) {
+		player.SetAnimation(anim);
 	}));
 	animMod[cdPlayer];
 
+	auto cdManager = luabind::class_<pragma::animation::AnimationManager>("Manager");
+	cdManager.def(luabind::tostring(luabind::self));
+	cdManager.scope[luabind::def("create",static_cast<std::shared_ptr<pragma::animation::AnimationManager>(*)(lua_State*,Model&)>([](lua_State *l,Model &mdl) {
+		return pragma::animation::AnimationManager::Create(mdl);
+	}))];
+	cdManager.def("GetPreviousSlice",static_cast<pragma::animation::AnimationSlice*(*)(lua_State*,pragma::animation::AnimationManager&)>(
+		[](lua_State *l,pragma::animation::AnimationManager &manager) {
+		return &manager.GetPreviousSlice();
+	}));
+	cdManager.def("GetCurrentAnimationId",static_cast<pragma::animation::AnimationId(*)(lua_State*,pragma::animation::AnimationManager&)>([](lua_State *l,pragma::animation::AnimationManager &manager) {
+		return manager.GetCurrentAnimationId();
+	}));
+	cdManager.def("GetPlayer",static_cast<pragma::animation::PAnimationPlayer(*)(lua_State*,pragma::animation::AnimationManager&)>(
+		[](lua_State *l,pragma::animation::AnimationManager &manager) -> pragma::animation::PAnimationPlayer {
+		return manager.GetPlayer().shared_from_this();
+	}));
+	animMod[cdManager];
+
 	auto cdSlice = luabind::class_<pragma::animation::AnimationSlice>("Slice");
 	cdSlice.def(luabind::tostring(luabind::self));
+	cdSlice.def("GetChannelValueCount",static_cast<uint32_t(*)(lua_State*,pragma::animation::AnimationSlice&)>([](lua_State *l,pragma::animation::AnimationSlice &slice) -> uint32_t {
+		return slice.channelValues.size();
+	}));
+	cdSlice.def("GetChannelProperty",static_cast<luabind::object(*)(lua_State*,pragma::animation::AnimationSlice&,uint32_t)>([](lua_State *l,pragma::animation::AnimationSlice &slice,uint32_t idx) -> luabind::object {
+		if(idx >= slice.channelValues.size())
+			return {};
+		return luabind::object{l,slice.channelValues[idx]};
+	}));
 	animMod[cdSlice];
 
 	auto cdAnim2 = luabind::class_<pragma::animation::Animation2>("Animation2");

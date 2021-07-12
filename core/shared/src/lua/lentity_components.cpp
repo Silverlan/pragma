@@ -17,10 +17,12 @@
 #include "pragma/lua/classes/lphysics.h"
 #include "pragma/util/bulletinfo.h"
 #include "pragma/lua/libraries/lray.h"
+#include "pragma/model/animation/animation_manager.hpp"
 #include "pragma/util/util_ballistic.h"
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/physics/raytraces.h"
 #include "pragma/lua/lentity_components_base_types.hpp"
+#include "pragma/entities/components/animated_2_component.hpp"
 #include <pragma/physics/movetypes.h>
 
 namespace Lua
@@ -258,6 +260,38 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	gameMod[defComposite];
 	
 	auto defAnimated2 = luabind::class_<Animated2Handle,BaseEntityComponentHandle>("Animated2Component");
+	defAnimated2.def("SetPlaybackRate",static_cast<void(*)(lua_State*,Animated2Handle&,float)>([](lua_State *l,Animated2Handle &hAnim,float playbackRate) {
+		pragma::Lua::check_component(l,hAnim);
+		hAnim->SetPlaybackRate(playbackRate);
+	}));
+	defAnimated2.def("GetPlaybackRate",static_cast<float(*)(lua_State*,Animated2Handle&)>([](lua_State *l,Animated2Handle &hAnim) -> float {
+		pragma::Lua::check_component(l,hAnim);
+		return hAnim->GetPlaybackRate();
+	}));
+	defAnimated2.def("GetPlaybackRateProperty",static_cast<void(*)(lua_State*,Animated2Handle&)>([](lua_State *l,Animated2Handle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		Lua::Property::push(l,*hComponent->GetPlaybackRateProperty());
+	}));
+	defAnimated2.def("ClearAnimationManagers",static_cast<void(*)(lua_State*,Animated2Handle&)>([](lua_State *l,Animated2Handle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->ClearAnimationManagers();
+	}));
+	defAnimated2.def("AddAnimationManager",static_cast<pragma::animation::PAnimationManager(*)(lua_State*,Animated2Handle&)>([](lua_State *l,Animated2Handle &hComponent) -> pragma::animation::PAnimationManager {
+		pragma::Lua::check_component(l,hComponent);
+		return hComponent->AddAnimationManager();
+	}));
+	defAnimated2.def("RemoveAnimationManager",static_cast<void(*)(lua_State*,Animated2Handle&,const pragma::animation::AnimationManager&)>([](lua_State *l,Animated2Handle &hComponent,const pragma::animation::AnimationManager &manager) {
+		pragma::Lua::check_component(l,hComponent);
+		hComponent->RemoveAnimationManager(manager);
+	}));
+	defAnimated2.def("GetAnimationManagers",static_cast<luabind::object(*)(lua_State*,Animated2Handle&)>([](lua_State *l,Animated2Handle &hComponent) {
+		pragma::Lua::check_component(l,hComponent);
+		auto t = luabind::newtable(l);
+		auto &animManagers = hComponent->GetAnimationManagers();
+		for(auto i=decltype(animManagers.size()){0u};i<animManagers.size();++i)
+			animManagers[i +1] = animManagers[i];
+		return t;
+	}));
 	gameMod[defAnimated2];
 
 	auto defIK = luabind::class_<IKHandle,BaseEntityComponentHandle>("IKComponent");

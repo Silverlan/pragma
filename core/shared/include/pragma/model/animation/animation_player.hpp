@@ -9,6 +9,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/types.hpp"
+#include "pragma/model/animation/play_animation_flags.hpp"
 #include <udm.hpp>
 #include <vector>
 #include <memory>
@@ -19,6 +20,7 @@
 class Model;
 namespace pragma::animation
 {
+	class Animation2;
 	struct DLLNETWORK AnimationSlice
 	{
 		AnimationSlice()=default;
@@ -26,62 +28,51 @@ namespace pragma::animation
 		AnimationSlice(AnimationSlice &&other)=default;
 		AnimationSlice &operator=(const AnimationSlice&)=default;
 		AnimationSlice &operator=(AnimationSlice &&)=default;
-		std::vector<udm::Property> channelValues;
-	};
-	struct DLLNETWORK AnimationPlayerCallbackInterface
-	{
-		std::function<bool(AnimationId,FPlayAnim)> onPlayAnimation = nullptr;
-		std::function<void()> onStopAnimation = nullptr;
-		std::function<void(AnimationId&,FPlayAnim&)> translateAnimation = nullptr;
+		std::vector<udm::PProperty> channelValues;
 	};
 	class DLLNETWORK AnimationPlayer
 		: public std::enable_shared_from_this<AnimationPlayer>
 	{
 	public:
-		static std::shared_ptr<AnimationPlayer> Create(const Model &mdl);
+		static std::shared_ptr<AnimationPlayer> Create();
 		static std::shared_ptr<AnimationPlayer> Create(const AnimationPlayer &other);
 		static std::shared_ptr<AnimationPlayer> Create(AnimationPlayer &&other);
 		void Advance(float dt,bool force=false);
 
-		AnimationId GetCurrentAnimationId() const {return m_currentAnimation;}
-		Animation *GetCurrentAnimation() const;
-		Model *GetModel() const;
 		float GetDuration() const;
 		float GetRemainingAnimationDuration() const;
 		float GetCurrentTimeFraction() const;
 		float GetCurrentTime() const {return m_currentTime;}
+		void SetCurrentTimeFraction(float t,bool forceUpdate);
 		float GetPlaybackRate() const {return m_playbackRate;}
 		void SetPlaybackRate(float playbackRate) {m_playbackRate = playbackRate;}
 		void SetCurrentTime(float t,bool forceUpdate=false);
-
-		void PlayAnimation(AnimationId animation,FPlayAnim flags=FPlayAnim::Default);
-		void PlayAnimation(const std::string &animation,FPlayAnim flags=FPlayAnim::Default);
-		void StopAnimation();
-
+		
 		AnimationSlice &GetCurrentSlice() {return m_currentSlice;}
 		const AnimationSlice &GetCurrentSlice() const {return const_cast<AnimationPlayer*>(this)->GetCurrentSlice();}
-		AnimationSlice &GetPreviousSlice() {return m_prevAnimSlice;}
-		const AnimationSlice &GetPreviousSlice() const {return const_cast<AnimationPlayer*>(this)->GetPreviousSlice();}
+
+		void SetLooping(bool looping) {m_looping = looping;}
+		bool IsLooping() const {return m_looping;}
+
+		void SetAnimation(const Animation2 &animation);
+		void Reset();
+
+		const Animation2 *GetAnimation() const {return m_animation.get();}
 
 		AnimationPlayer &operator=(const AnimationPlayer &other);
 		AnimationPlayer &operator=(AnimationPlayer &&other);
-
-		void SetCallbackInterface(const AnimationPlayerCallbackInterface &i) {m_callbackInterface = i;}
 	private:
-		AnimationPlayer(const Model &mdl);
+		AnimationPlayer();
 		AnimationPlayer(const AnimationPlayer &other);
 		AnimationPlayer(AnimationPlayer &&other);
 		static void ApplySliceInterpolation(const AnimationSlice &src,AnimationSlice &dst,float f);
-		std::weak_ptr<const Model> m_model {};
-		float m_playbackRate = 1.f;
-		AnimationId m_currentAnimation = std::numeric_limits<AnimationId>::max();
-		float m_currentTime = 0.f;
-		FPlayAnim m_currentFlags = FPlayAnim::None;
-
-		AnimationPlayerCallbackInterface m_callbackInterface {};
-		std::vector<uint32_t> m_lastChannelTimestampIndices;
+		std::shared_ptr<const Animation2> m_animation = nullptr;
 		AnimationSlice m_currentSlice;
-		AnimationSlice m_prevAnimSlice;
+		float m_playbackRate = 1.f;
+		float m_currentTime = 0.f;
+		bool m_looping = false;
+
+		std::vector<uint32_t> m_lastChannelTimestampIndices;
 	};
 	using PAnimationPlayer = std::shared_ptr<AnimationPlayer>;
 };

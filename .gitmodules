@@ -166,3 +166,6 @@
 [submodule "external_libs/util_pragma_doc"]
 	path = external_libs/util_pragma_doc
 	url = https://github.com/Silverlan/util_pragma_doc.git
+[submodule "third_party_libs/miniball"]
+	path = third_party_libs/miniball
+	url = https://github.com/Silverlan/miniball.git

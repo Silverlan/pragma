@@ -55,12 +55,14 @@ bool pragma::rendering::ShaderProcessor::RecordBindShader(const pragma::CSceneCo
 	m_vertexAnimC = nullptr;
 	m_modelC = nullptr;
 	m_lightMapReceiverC = nullptr;
-	m_curVertexAnimationOffset = 0;
+	m_curVertexAnimationOffset = std::numeric_limits<uint32_t>::max();
 	m_sceneFlags = ShaderGameWorld::SceneFlags::None;
 	m_alphaCutoff = std::numeric_limits<float>::max();
 
 	if(m_cmdBuffer.RecordBindShaderPipeline(shader,pipelineIdx) == false)
 		return false;
+
+
 
 #if 0
 	// Reset depth bias

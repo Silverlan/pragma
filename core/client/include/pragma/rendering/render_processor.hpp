@@ -73,7 +73,7 @@ namespace pragma::rendering
 		const RenderQueue::InstanceSet *m_curInstanceSet = nullptr;
 
 		pragma::ShaderGameWorld *m_curShader = nullptr;
-		uint32_t m_curVertexAnimationOffset = 0;
+		uint32_t m_curVertexAnimationOffset = std::numeric_limits<uint32_t>::max();
 		RenderPassStats *m_stats = nullptr;
 
 		float m_alphaCutoff = std::numeric_limits<float>::max();

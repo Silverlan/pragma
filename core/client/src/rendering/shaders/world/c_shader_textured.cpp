@@ -657,17 +657,21 @@ void ShaderGameWorldLightingPass::RecordBindScene(
 		descSets[4] = &dsLights,
 		descSets[5] = &dsShadows
 	};
-		
+
+	PushSceneConstants(shaderProcessor,scene);
+	static const std::vector<uint32_t> dynamicOffsets {};
+	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,shaderProcessor.GetCurrentPipelineLayout(),pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX,descSets,dynamicOffsets);
+}
+
+bool ShaderGameWorldLightingPass::PushSceneConstants(rendering::ShaderProcessor &shaderProcessor,const pragma::CSceneComponent &scene) const
+{
 	ShaderGameWorldLightingPass::PushConstants pushConstants {};
 	pushConstants.Initialize();
 	auto &hCam = scene.GetActiveCamera();
 	assert(hCam.valid());
 	pushConstants.debugMode = scene.GetDebugMode();
 	pushConstants.flags = m_sceneFlags;
-	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0u,sizeof(pushConstants),&pushConstants);
-
-	static const std::vector<uint32_t> dynamicOffsets {};
-	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,shaderProcessor.GetCurrentPipelineLayout(),pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX,descSets,dynamicOffsets);
+	return shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0u,sizeof(pushConstants),&pushConstants);
 }
 
 ////////

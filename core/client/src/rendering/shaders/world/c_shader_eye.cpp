@@ -20,7 +20,6 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-
 ShaderEye::ShaderEye(prosper::IPrContext &context,const std::string &identifier)
 	: ShaderPBR{context,identifier,"world/eye/vs_eye","world/eye/fs_eye"}
 {}
@@ -75,6 +74,7 @@ void ShaderEye::RecordBindScene(
 	ShaderGameWorld::SceneFlags &inOutSceneFlags
 ) const
 {
+	PushSceneConstants(shaderProcessor,scene);
 	auto iblStrength = 1.f;
 	RecordBindSceneDescriptorSets(
 		shaderProcessor,scene,renderer,

@@ -240,6 +240,7 @@ namespace pragma
 		virtual bool SetDebugMode(pragma::SceneDebugMode debugMode) override;
 		virtual void Set3DSky(bool is3dSky) override;
 		void SetShadowsEnabled(bool enabled);
+		bool PushSceneConstants(rendering::ShaderProcessor &shaderProcessor,const pragma::CSceneComponent &scene) const;
 
 		virtual uint32_t GetMaterialDescriptorSetIndex() const override;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;

@@ -5,6 +5,9 @@
  * Copyright (c) 2021 Silverlan
  */
 
+#define ENABLE_LAD 0
+
+#if ENABLE_LAD == 1
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/lua/util.hpp"
 #include "pragma/lua/lua_doc.hpp"
@@ -3035,3 +3038,9 @@ void Lua::doc::register_library(Lua::Interface &lua)
 	docLib[cdefCollection];
 }
 #pragma optimize("",on)
+#else
+namespace Lua::doc
+{
+	void register_library(Lua::Interface &lua) {}
+};
+#endif

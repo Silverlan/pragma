@@ -168,6 +168,7 @@ void ShaderPrepassBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInf
 
 	pipelineInfo.ToggleDepthWrites(true);
 	pipelineInfo.ToggleDepthTest(true,prosper::CompareOp::Less);
+	ToggleDynamicScissorState(pipelineInfo,true);
 
 	//pipelineInfo.ToggleDepthBias(true,0.f,0.f,0.f);
 	//pipelineInfo.ToggleDynamicState(true,prosper::DynamicState::DepthBias); // Required for decals

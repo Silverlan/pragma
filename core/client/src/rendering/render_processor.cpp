@@ -493,8 +493,8 @@ bool pragma::rendering::BaseRenderProcessor::BindEntity(CBaseEntity &ent)
 		m_curRenderC->GetDepthBias(constantFactor,biasClamp,slopeFactor);
 		m_drawSceneInfo.commandBuffer->RecordSetDepthBias(constantFactor,biasClamp,slopeFactor);
 	}
-	else*/
-		m_drawSceneInfo.commandBuffer->RecordSetDepthBias();
+	else
+		m_drawSceneInfo.commandBuffer->RecordSetDepthBias();*/
 	
 	if(m_stats)
 	{

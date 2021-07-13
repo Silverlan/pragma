@@ -19,7 +19,6 @@
 #include "pragma/entities/components/base_character_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
-#include <BulletCollision/CollisionShapes/btMultimaterialTriangleMeshShape.h>
 
 
 ControllerPhysObj::~ControllerPhysObj()

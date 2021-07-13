@@ -13,9 +13,6 @@
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/lua/classes/lphysics.h"
 #include "pragma/networkstate/networkstate.h"
-#include <BulletCollision/CollisionDispatch/btInternalEdgeUtility.h>
-#include <BulletCollision/CollisionShapes/btShapeHull.h>
-#include <BulletCollision/CollisionShapes/btMultimaterialTriangleMeshShape.h>
 
 
 pragma::physics::IShape::IShape(IEnvironment &env)

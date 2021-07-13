@@ -36,11 +36,14 @@ extern DLLCLIENT CGame *c_game;
 
 // #define ENABLE_DEPRECATED_PHYSICS
 
+#ifdef ENABLE_DEPRECATED_PHYSICS
 #include "BulletSoftBody/btSoftRigidDynamicsWorld.h"
 #include "BulletSoftBody/btSoftBodyHelpers.h"
 #include <BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h>
+#endif
 #include "pragma/debug/c_debugoverlay.h"
 #include <pragma/physics/environment.hpp>
+#ifdef ENABLE_DEPRECATED_PHYSICS
 static btSoftBody *createSoftBody(btSoftRigidDynamicsWorld *world,btSoftBodyWorldInfo *info,const btScalar s,
 					const int numX,
 					const int numY, 
@@ -60,14 +63,17 @@ static btSoftBody *createSoftBody(btSoftRigidDynamicsWorld *world,btSoftBodyWorl
 	world->addSoftBody(cloth);
 	return cloth;
 }
+#endif
 #include "pragma/cinematic/choreographic_scene.hpp"
 #include <se_scene.hpp>
 
+#ifdef ENABLE_DEPRECATED_PHYSICS
 #include <pragma/buss_ik/Node.h>
 #include <pragma/buss_ik/Tree.h>
 #include <pragma/buss_ik/Jacobian.h>
 #include <pragma/buss_ik/VectorRn.h>
 #include <Bullet3Common/b3AlignedObjectArray.h>
+#endif
 
 #ifdef ENABLE_DEPRECATED_PHYSICS
 static void update_vehicle(Vehicle_Car *vhc)

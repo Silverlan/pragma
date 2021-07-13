@@ -18,6 +18,12 @@ namespace pragma
 	public:
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_TEXTURE;
 
+		enum class TextureBinding : uint32_t
+		{
+			SceneTexturePostToneMapping = 0,
+			SceneTextureHdr
+		};
+
 #pragma pack(push,1)
 		struct DLLCLIENT PushConstants
 		{

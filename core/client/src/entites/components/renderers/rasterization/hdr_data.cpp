@@ -228,7 +228,7 @@ void HDRData::ReloadPresentationRenderTarget(uint32_t width,uint32_t height,pros
 	toneMappedRenderTarget = context.CreateRenderTarget({postHdrTex},static_cast<prosper::ShaderGraphics*>(hShaderTonemapping.get())->GetRenderPass());
 	toneMappedRenderTarget->SetDebugName("scene_post_hdr_rt");
 
-	dsgTonemappedPostProcessing->GetDescriptorSet()->SetBindingTexture(*postHdrTex,0u);
+	dsgTonemappedPostProcessing->GetDescriptorSet()->SetBindingTexture(*postHdrTex,umath::to_integral(pragma::ShaderPPFXAA::TextureBinding::SceneTexturePostToneMapping));
 }
 
 static auto cvBloomResolution = GetClientConVar("render_bloom_resolution");
@@ -314,7 +314,7 @@ bool HDRData::Initialize(uint32_t width,uint32_t height,prosper::SampleCountFlag
 	imgCreateInfo.samples = prosper::SampleCountFlags::e1Bit;
 	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
 	dsgTonemappedPostProcessing = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPPFXAA::DESCRIPTOR_SET_TEXTURE);
-	dsgTonemappedPostProcessing->GetDescriptorSet()->SetBindingTexture(*resolvedTex,1u);
+	dsgTonemappedPostProcessing->GetDescriptorSet()->SetBindingTexture(*resolvedTex,umath::to_integral(pragma::ShaderPPFXAA::TextureBinding::SceneTextureHdr));
 
 	ReloadPresentationRenderTarget(width,height,sampleCount);
 

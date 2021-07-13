@@ -36,6 +36,7 @@ void pragma::CRasterizationRendererComponent::RenderToneMapping(const util::Draw
 	if(IsMultiSampled() == false) // The resolved images already have the correct layout
 	{
 		drawCmd->RecordImageBarrier(*srcImg,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+		drawCmd->RecordImageBarrier(*srcImgBloom,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 		//.RecordImageBarrier(*(*drawCmd),**srcImgBloom,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 		// drawCmd->RecordImageBarrier(*srcImgGlow,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
 	}
@@ -80,6 +81,7 @@ void pragma::CRasterizationRendererComponent::RenderToneMapping(const util::Draw
 	if(IsMultiSampled() == false)
 	{
 		drawCmd->RecordImageBarrier(*srcImg,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+		drawCmd->RecordImageBarrier(*srcImgBloom,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 		//.RecordImageBarrier(*(*drawCmd),srcImgBloom,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 		// drawCmd->RecordImageBarrier(*srcImgGlow,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 	}

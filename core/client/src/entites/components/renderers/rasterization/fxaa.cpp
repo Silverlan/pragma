@@ -45,6 +45,11 @@ void pragma::CRasterizationRendererComponent::RenderFXAA(const util::DrawSceneIn
 
 		auto &toneMappedImg = hdrInfo.toneMappedRenderTarget->GetTexture().GetImage();
 		drawCmd->RecordImageBarrier(toneMappedImg,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+
+		auto *srcImg = hdrInfo.dsgTonemappedPostProcessing->GetDescriptorSet()->GetBoundImage(umath::to_integral(pragma::ShaderPPFXAA::TextureBinding::SceneTextureHdr));
+		if(srcImg)
+			drawCmd->RecordImageBarrier(*srcImg,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+
 		if(drawCmd->RecordBeginRenderPass(*hdrInfo.toneMappedPostProcessingRenderTarget) == true)
 		{
 			if(shaderFXAA.BeginDraw(drawCmd) == true)
@@ -78,6 +83,9 @@ void pragma::CRasterizationRendererComponent::RenderFXAA(const util::DrawSceneIn
 		drawCmd->RecordImageBarrier(toneMappedImg,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::TransferSrcOptimal);
 		// TODO: This would be better placed BEFORE the FXAA render pass
 		drawCmd->RecordImageBarrier(fxaaOutputImg,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+
+		if(srcImg)
+			drawCmd->RecordImageBarrier(*srcImg,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 	}
 	c_game->StopProfilingStage(CGame::GPUProfilingPhase::PostProcessingFXAA);
 }

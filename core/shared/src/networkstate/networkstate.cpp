@@ -503,7 +503,16 @@ bool NetworkState::RunConsoleCommand(std::string scmd,std::vector<std::string> &
 
 std::shared_ptr<util::Library> NetworkState::LoadLibraryModule(const std::string &lib,const std::vector<std::string> &additionalSearchDirectories,std::string *err)
 {
-	return util::load_library_module(lib,additionalSearchDirectories,{},err);
+	auto pathLib = util::Path::CreateFile(lib);
+	static std::unordered_set<std::string> cache;
+	auto it = cache.find(pathLib.GetString());
+	if(it != cache.end())
+		return nullptr;
+
+	auto libModule = util::load_library_module(lib,additionalSearchDirectories,{},err);
+	if(!libModule)
+		cache.insert(pathLib.GetString()); // Cache libraries we weren't able to load to avoid continuous error messages
+	return libModule;
 }
 
 std::shared_ptr<util::Library> NetworkState::GetLibraryModule(const std::string &library) const

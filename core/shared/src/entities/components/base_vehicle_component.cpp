@@ -8,7 +8,6 @@
 #include "stdafx_shared.h"
 #include "pragma/entities/components/base_vehicle_component.hpp"
 #include "pragma/entities/components/base_wheel_component.hpp"
-#include "pragma/basevehicle_raycaster.h"
 #include "pragma/physics/environment.hpp"
 #include "pragma/input/inkeys.h"
 #include "pragma/model/model.h"

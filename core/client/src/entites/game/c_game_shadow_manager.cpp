@@ -66,6 +66,7 @@ void CShadowManagerComponent::Initialize()
 	auto &dummyCubeTex = c_engine->GetRenderContext().GetDummyCubemapTexture();
 	for(auto i=decltype(arraySizeCubeShadows){0u};i<arraySizeCubeShadows;++i)
 		descSet->SetBindingArrayTexture(*dummyCubeTex,umath::to_integral(pragma::ShaderSceneLit::ShadowBinding::ShadowCubeMaps),i);
+	descSet->Update();
 }
 
 void CShadowManagerComponent::OnRemove()
@@ -158,6 +159,7 @@ CShadowManagerComponent::RtHandle CShadowManagerComponent::RequestRenderTarget(T
 		umath::to_integral((type != Type::Cube) ? pragma::ShaderSceneLit::ShadowBinding::ShadowMaps : pragma::ShaderSceneLit::ShadowBinding::ShadowCubeMaps),
 		rt->index
 	);
+	m_descSetGroup->GetDescriptorSet()->Update();
 	return data.renderTargetHandle;
 }
 

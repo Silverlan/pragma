@@ -10,7 +10,7 @@
 #include "pragma/model/animation/animation.hpp"
 #include "pragma/model/animation/animation_channel.hpp"
 #include "pragma/model/animation/animation_manager.hpp"
-
+#pragma optimize("",off)
 std::shared_ptr<pragma::animation::AnimationManager> pragma::animation::AnimationManager::Create(const Model &mdl)
 {
 	return std::shared_ptr<AnimationManager>{new AnimationManager{mdl}};
@@ -58,6 +58,9 @@ pragma::animation::AnimationManager &pragma::animation::AnimationManager::operat
 	static_assert(sizeof(*this) == 272,"Update this implementation when class has changed!");
 	return *this;
 }
+
+pragma::animation::Animation2 *pragma::animation::AnimationManager::GetCurrentAnimation() const {return nullptr;} // TODO
+const Model *pragma::animation::AnimationManager::GetModel() const {return m_model.lock().get();}
 
 void pragma::animation::AnimationManager::PlayAnimation(const std::string &animation,FPlayAnim flags)
 {
@@ -158,3 +161,4 @@ std::ostream &operator<<(std::ostream &out,const pragma::animation::AnimationMan
 	out<<"[Player:"<<*o<<"]";
 	return out;
 }
+#pragma optimize("",on)

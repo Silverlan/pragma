@@ -50,6 +50,35 @@ pragma::animation::AnimationChannel *pragma::animation::Animation2::FindChannel(
 	return it->get();
 }
 
+bool pragma::animation::Animation2::Save(udm::LinkedPropertyWrapper &prop) const
+{
+	auto udmChannels = prop.AddArray("channels",m_channels.size());
+	for(auto i=decltype(m_channels.size()){0u};i<m_channels.size();++i)
+	{
+		auto udmChannel = udmChannels[i];
+		m_channels[i]->Save(udmChannel);
+	}
+
+	prop["speedFactor"] = m_speedFactor;
+	prop["duration"] = m_duration;
+	return true;
+}
+bool pragma::animation::Animation2::Load(udm::LinkedPropertyWrapper &prop)
+{
+	auto udmChannels = prop["channels"];
+	auto numChannels = udmChannels.GetSize();
+	m_channels.reserve(numChannels);
+	for(auto udmChannel : udmChannels)
+	{
+		m_channels.push_back(std::make_shared<AnimationChannel>());
+		m_channels.back()->Load(udmChannel);
+	}
+
+	prop["speedFactor"](m_speedFactor);
+	prop["duration"](m_duration);
+	return true;
+}
+
 std::ostream &operator<<(std::ostream &out,const pragma::animation::Animation2 &o)
 {
 	out<<"Animation2";

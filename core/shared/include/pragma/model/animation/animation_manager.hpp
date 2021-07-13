@@ -35,8 +35,8 @@ namespace pragma::animation
 		static std::shared_ptr<AnimationManager> Create(AnimationManager &&other);
 		
 		AnimationId GetCurrentAnimationId() const {return m_currentAnimation;}
-		Animation *GetCurrentAnimation() const;
-		Model *GetModel() const;
+		Animation2 *GetCurrentAnimation() const;
+		const Model *GetModel() const;
 
 		void PlayAnimation(AnimationId animation,FPlayAnim flags=FPlayAnim::Default);
 		void PlayAnimation(const std::string &animation,FPlayAnim flags=FPlayAnim::Default);

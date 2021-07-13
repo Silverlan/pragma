@@ -165,9 +165,38 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdManager.def("GetCurrentAnimationId",static_cast<pragma::animation::AnimationId(*)(lua_State*,pragma::animation::AnimationManager&)>([](lua_State *l,pragma::animation::AnimationManager &manager) {
 		return manager.GetCurrentAnimationId();
 	}));
+	cdManager.def("GetCurrentAnimation",static_cast<std::shared_ptr<pragma::animation::Animation2>(*)(lua_State*,pragma::animation::AnimationManager&)>([](lua_State *l,pragma::animation::AnimationManager &manager) -> std::shared_ptr<pragma::animation::Animation2> {
+		auto *anim = manager.GetCurrentAnimation();
+		return anim ? anim->shared_from_this() : nullptr;
+	}));
 	cdManager.def("GetPlayer",static_cast<pragma::animation::PAnimationPlayer(*)(lua_State*,pragma::animation::AnimationManager&)>(
 		[](lua_State *l,pragma::animation::AnimationManager &manager) -> pragma::animation::PAnimationPlayer {
 		return manager.GetPlayer().shared_from_this();
+	}));
+	cdManager.def("GetModel",static_cast<std::shared_ptr<Model>(*)(lua_State*,pragma::animation::AnimationManager&)>(
+		[](lua_State *l,pragma::animation::AnimationManager &manager) -> std::shared_ptr<Model> {
+		auto *mdl = const_cast<Model*>(manager.GetModel());
+		return mdl ? mdl->shared_from_this() : nullptr;
+	}));
+	cdManager.def("StopAnimation",static_cast<void(*)(lua_State*,pragma::animation::AnimationManager&)>(
+		[](lua_State *l,pragma::animation::AnimationManager &manager) {
+		manager.StopAnimation();
+	}));
+	cdManager.def("PlayAnimation",static_cast<void(*)(lua_State*,pragma::animation::AnimationManager&,pragma::animation::AnimationId,pragma::FPlayAnim)>(
+		[](lua_State *l,pragma::animation::AnimationManager &manager,pragma::animation::AnimationId id,pragma::FPlayAnim flags) {
+		manager.PlayAnimation(id,flags);
+	}));
+	cdManager.def("PlayAnimation",static_cast<void(*)(lua_State*,pragma::animation::AnimationManager&,pragma::animation::AnimationId)>(
+		[](lua_State *l,pragma::animation::AnimationManager &manager,pragma::animation::AnimationId id) {
+		manager.PlayAnimation(id);
+	}));
+	cdManager.def("PlayAnimation",static_cast<void(*)(lua_State*,pragma::animation::AnimationManager&,const std::string&,pragma::FPlayAnim)>(
+		[](lua_State *l,pragma::animation::AnimationManager &manager,const std::string &anim,pragma::FPlayAnim flags) {
+		manager.PlayAnimation(anim,flags);
+	}));
+	cdManager.def("PlayAnimation",static_cast<void(*)(lua_State*,pragma::animation::AnimationManager&,const std::string&)>(
+		[](lua_State *l,pragma::animation::AnimationManager &manager,const std::string &anim) {
+		manager.PlayAnimation(anim);
 	}));
 	animMod[cdManager];
 

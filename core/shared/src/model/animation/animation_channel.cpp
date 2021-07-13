@@ -11,7 +11,7 @@
 static constexpr auto VALUE_EPSILON = 0.001f;
 #pragma optimize("",off)
 pragma::animation::AnimationChannel::AnimationChannel()
-	: m_times{::udm::Property::Create(udm::Type::Array)},m_values{::udm::Property::Create(udm::Type::Array)}
+	: m_times{::udm::Property::Create(udm::Type::ArrayLz4)},m_values{::udm::Property::Create(udm::Type::ArrayLz4)}
 {
 	GetTimesArray().SetValueType(udm::Type::Float);
 }

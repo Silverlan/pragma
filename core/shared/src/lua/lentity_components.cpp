@@ -292,6 +292,13 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 			animManagers[i +1] = animManagers[i];
 		return t;
 	}));
+	defAnimated2.def("GetAnimationManager",static_cast<luabind::object(*)(lua_State*,Animated2Handle&,uint32_t)>([](lua_State *l,Animated2Handle &hComponent,uint32_t idx) {
+		pragma::Lua::check_component(l,hComponent);
+		auto &animManagers = hComponent->GetAnimationManagers();
+		if(idx >= animManagers.size())
+			return luabind::object{};
+		return luabind::object{l,animManagers[idx]};
+	}));
 	gameMod[defAnimated2];
 
 	auto defIK = luabind::class_<IKHandle,BaseEntityComponentHandle>("IKComponent");

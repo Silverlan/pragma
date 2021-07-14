@@ -56,58 +56,104 @@
 #include <udm.hpp>
 
 extern DLLNETWORK Engine *engine;
-void Lua::VarDump(lua_State *lua,int n)
+std::optional<std::string> Lua::VarToString(lua_State *lua,int n)
 {
 	auto t = GetType(lua,n);
 	switch(t)
 	{
 		case Lua::Type::None:
-			Con::cout<<"none";
-			break;
+			return "none";
 		case Lua::Type::Nil:
-			Con::cout<<"nil";
-			break;
+			return "nil";
 		case Lua::Type::Bool:
-			Con::cout<<"bool ("<<(ToBool(lua,n) ? "true" : "false")<<")";
-			break;
+			return "bool (" +std::string{ToBool(lua,n) ? "true" : "false"} +")";
 		case Lua::Type::LightUserData:
-			Con::cout<<"lightuserdata";
-			break;
+			return "lightuserdata";
 		case Lua::Type::Number:
-			Con::cout<<"number ("<<ToNumber(lua,n)<<")";
-			break;
+			return "number ("+ std::to_string(ToNumber(lua,n)) +")";
 		case Lua::Type::String:
-			Con::cout<<"string ("<<ToString(lua,n)<<")";
-			break;
+			return "string (" +std::string{ToString(lua,n)} +")";
 		case Lua::Type::Table:
-			Con::cout<<"table";
-			break;
+			return "table";
 		case Lua::Type::Function:
-			Con::cout<<"function";
-			break;
+			return "function";
 		case Lua::Type::UserData:
-			Con::cout<<"userdata";
-			break;
+			return "userdata";
 		case Lua::Type::Thread:
-			Con::cout<<"thread";
-			break;
+			return "thread";
 		default:
-			Con::cout<<"other ("<<GetTypeName(lua,n)<<")";
+			return "other (" +std::string{GetTypeName(lua,n)} +")";
 	}
+	return {};
+}
+void Lua::VarDump(lua_State *lua,int n)
+{
+	auto str = VarToString(lua,n);
+	if(str.has_value())
+		Con::cout<<*str;
+}
+
+std::optional<std::string> Lua::StackToString(lua_State *lua)
+{
+	std::string str;
+    int top = GetStackTop(lua);
+	str += "------------ LUA STACKDUMP ------------\n";
+	str += "Values in stack: " +std::to_string(top) +"\n";
+	for(int i=1;i<=top;i++)
+	{
+		str += "\t" +std::to_string(i) +": ";
+		auto var = VarToString(lua,i);
+		if(var.has_value())
+			str += *var;
+		str += "\n";
+	}
+	str += "---------------------------------------\n";
+	return str;
 }
 
 void Lua::StackDump(lua_State *lua)
 {
-    int top = GetStackTop(lua);
-	Con::cout<<"------------ LUA STACKDUMP ------------"<<Con::endl;
-	Con::cout<<"Values in stack: "<<top<<Con::endl;
-	for(int i=1;i<=top;i++)
+	auto str = StackToString(lua);
+	if(str.has_value())
+		Con::cout<<*str<<Con::endl;
+}
+
+std::optional<std::string> Lua::TableToString(lua_State *lua,int n)
+{
+	if(n < 0)
+		n = Lua::GetStackTop(lua) +n +1;
+	std::string str;
+	str += "------------ LUA TABLEDUMP ------------\n";
+	if(n <= 0)
 	{
-		Con::cout<<"\t"<<i<<": ";
-		VarDump(lua,i);
-		Con::cout<<Con::endl;
+		str += "INVALID STACK INDEX (" +std::to_string(n) +")\n";
+		return str;
 	}
-	Con::cout<<"---------------------------------------"<<Con::endl;
+	if(!Lua::IsTable(lua,n))
+	{
+		str += "VALUE " +std::to_string(n) +" ON STACK IS A ";
+		auto var = VarToString(lua,n);
+		if(var.has_value())
+			str += *var;
+		str += ", NOT A TABLE!\n";
+		return str;
+	}
+	Lua::PushNil(lua);
+	while(Lua::GetNextPair(lua,n) != 0)
+	{
+		str += "\t";
+		auto var = VarToString(lua,-2);
+		if(var.has_value())
+			str += *var;
+		str += " = ";
+		var = VarToString(lua,-1);
+		if(var.has_value())
+			str += *var;
+		str += "\n";
+		Lua::Pop(lua,1); // We need the key at the top for the next iteration
+	}
+	str += "---------------------------------------\n";
+	return str;
 }
 
 void Lua::TableDump(lua_State *lua,int n)

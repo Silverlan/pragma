@@ -794,6 +794,9 @@ void Engine::DumpDebugInformation(ZIPFile &zip) const
 		std::stringstream ss;
 		if(!Lua::PrintTraceback(l,ss))
 			return;
+		auto strStack = Lua::StackToString(l);
+		if(strStack.has_value())
+			ss<<"\n\n"<<*strStack;
 		zip.AddFile("lua_traceback_" +identifier +".txt",ss.str());
 	};
 	if(GetClientState())

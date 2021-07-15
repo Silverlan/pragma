@@ -1060,22 +1060,20 @@ int Lua::Vulkan::create_gradient_texture(lua_State *l)
 	createInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit;
 	createInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
-	auto img = c_engine->GetRenderContext().CreateImage(createInfo);
+	auto &context = c_engine->GetRenderContext();
+	auto img = context.CreateImage(createInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
-	auto texture = c_engine->GetRenderContext().CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
-	auto rt = c_engine->GetRenderContext().CreateRenderTarget({texture},static_cast<prosper::ShaderGraphics&>(*whShader.get()).GetRenderPass());
+	auto texture = context.CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
+	auto rt = context.CreateRenderTarget({texture},static_cast<prosper::ShaderGraphics&>(*whShader.get()).GetRenderPass());
 	rt->SetDebugName("lua_gradient");
-	auto cb = FunctionCallback<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>::Create(nullptr);
-	static_cast<Callback<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>*>(cb.get())->SetFunction([cb,rt,dir,nodes](std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>> drawCmd) mutable {
-		c_engine->GetRenderContext().KeepResourceAliveUntilPresentationComplete(rt);
-		pragma::util::record_draw_gradient(
-			c_engine->GetRenderContext(),drawCmd.get(),*rt,dir,nodes
-		);
-		if(cb.IsValid())
-			cb.Remove();
-	});
-	c_engine->AddCallback("DrawFrame",cb);
+
+	auto &setupCmd = context.GetSetupCommandBuffer();
+	pragma::util::record_draw_gradient(
+		context,setupCmd,*rt,dir,nodes
+	);
+	context.FlushSetupCommandBuffer();
+
 	Lua::Push(l,texture);
 	return 1;
 }

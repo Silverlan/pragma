@@ -75,6 +75,15 @@ void ShaderEye::RecordBindScene(
 ) const
 {
 	PushSceneConstants(shaderProcessor,scene);
+
+	// I'm not sure why we have to push these at this point in time (since the actual constants we want are pushed in :BindEyeball),
+	// but for some reason if we don't do it here, it can cause the Engine to permanently freeze on AMD GPUs
+	static constexpr PushConstants p {};
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(
+		shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,sizeof(ShaderPBR::PushConstants),sizeof(p),&p
+	);
+	//
+
 	auto iblStrength = 1.f;
 	RecordBindSceneDescriptorSets(
 		shaderProcessor,scene,renderer,

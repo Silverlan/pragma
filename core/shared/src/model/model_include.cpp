@@ -144,9 +144,23 @@ void Model::Merge(const Model &other,MergeFlags flags)
 		}
 	}
 	
-	auto refAnim = GetAnimation(LookupAnimation("reference"));
-	auto refFrame = refAnim ? refAnim->GetFrame(0) : nullptr;
+	auto &reference = GetReference();
 	auto &skeleton = GetSkeleton();
+	auto refAnim = GetAnimation(LookupAnimation("reference"));
+	if(refAnim)
+	{
+		auto newRefAnimFrame = Frame::Create(reference);
+		newRefAnimFrame->Localize(skeleton);
+		std::vector<uint16_t> boneList {};
+		auto numBones = skeleton.GetBoneCount();
+		boneList.reserve(numBones);
+		for(auto i=decltype(numBones){0u};i<numBones;++i)
+			boneList.push_back(i);
+		refAnim->SetBoneList(boneList);
+		refAnim->GetFrames().clear();
+		refAnim->AddFrame(newRefAnimFrame);
+	}
+	auto refFrame = refAnim ? refAnim->GetFrame(0) : nullptr;
 	auto &bones = skeleton.GetBones();
 	if((flags &MergeFlags::Animations) != MergeFlags::None)
 	{

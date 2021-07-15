@@ -216,7 +216,6 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(CModelSubMesh &mesh,pragma::
 
 		(*m_stats)->Increment(RenderPassStats::Counter::DrawCalls);
 	}
-	m_curShader->OnRecordDrawMesh(*this,mesh);
-	return m_cmdBuffer.RecordDrawIndexed(mesh.GetTriangleVertexCount(),instanceCount);
+	return m_curShader->OnRecordDrawMesh(*this,mesh) && m_cmdBuffer.RecordDrawIndexed(mesh.GetTriangleVertexCount(),instanceCount);
 }
 inline CBaseEntity &pragma::rendering::ShaderProcessor::GetCurrentEntity() const {return static_cast<CBaseEntity&>(m_modelC->GetEntity());}

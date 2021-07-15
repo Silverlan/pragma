@@ -83,7 +83,7 @@ void ShaderEye::RecordBindScene(
 	);
 }
 
-void ShaderEye::OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor,CModelSubMesh &mesh) const
+bool ShaderEye::OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor,CModelSubMesh &mesh) const
 {
-	BindEyeball(shaderProcessor,mesh.GetSkinTextureIndex());
+	return BindEyeball(shaderProcessor,mesh.GetSkinTextureIndex());
 }

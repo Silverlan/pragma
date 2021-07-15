@@ -293,7 +293,7 @@ namespace pragma
 		virtual void RecordClipPlane(rendering::ShaderProcessor &shaderProcessor,const Vector4 &clipPlane) const;
 		virtual void RecordDepthBias(rendering::ShaderProcessor &shaderProcessor,const Vector2 &depthBias) const;
 		virtual void RecordVertexAnimationOffset(rendering::ShaderProcessor &shaderProcessor,uint32_t vertexAnimationOffset) const;
-		virtual void OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor,CModelSubMesh &mesh) const {}
+		virtual bool OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor,CModelSubMesh &mesh) const {return true;}
 		virtual bool IsUsingLightmaps() const {return false;}
 	protected:
 		SceneFlags m_sceneFlags = SceneFlags::None;

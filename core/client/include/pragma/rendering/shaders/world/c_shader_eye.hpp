@@ -44,7 +44,7 @@ namespace pragma
 			prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
 			ShaderGameWorld::SceneFlags &inOutSceneFlags
 		) const override;
-		virtual void OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor,CModelSubMesh &mesh) const override;
+		virtual bool OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor,CModelSubMesh &mesh) const override;
 	protected:
 		bool BindEyeball(rendering::ShaderProcessor &shaderProcessor,uint32_t skinMatIdx) const;
 		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;

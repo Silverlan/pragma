@@ -108,7 +108,10 @@ CMaterial *CModelComponent::GetRenderMaterial(uint32_t idx) const
 		return nullptr;
 	idx = texGroup->textures.at(idx);
 	auto *matOverride = GetMaterialOverride(idx);
-	return matOverride ? matOverride : static_cast<CMaterial*>(mdl->GetMaterial(idx));
+	if(matOverride)
+		return matOverride;
+	auto *mat = static_cast<CMaterial*>(mdl->GetMaterial(idx));
+	return mat ? mat : static_cast<CMaterial*>(client->GetMaterialManager().GetErrorMaterial());
 }
 
 Bool CModelComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)

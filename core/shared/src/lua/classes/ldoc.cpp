@@ -21,7 +21,8 @@
 #include <sharedutils/util_library.hpp>
 #include <filesystem>
 #include <Psapi.h>
-#include <Dia2.h>
+// C:/Program Files (x86)/Microsoft Visual Studio 14.0/DIA SDK/include
+#include <C:/Program Files (x86)/Microsoft Visual Studio 14.0/DIA SDK/include/Dia2.h>
 
 #include <luabind/detail/class_rep.hpp>
 #include <luabind/detail/call.hpp>
@@ -1410,6 +1411,10 @@ void LuaDocGenerator::ParseLuaProperty(const std::string &name,const luabind::ob
 								auto p = normalizedFileName.rfind("/src/");
 								if(p == std::string::npos)
 									p = normalizedFileName.rfind("/include/");
+								if(p == std::string::npos)
+									p = normalizedFileName.rfind("/luabind/");
+								if(p == std::string::npos)
+									p = normalizedFileName.rfind("/glm/");
 								if(p != std::string::npos)
 								{
 									p = normalizedFileName.rfind("/",p -1);
@@ -2141,7 +2146,15 @@ std::optional<PdbManager::SymbolInfo> PdbManager::FindSymbolByRva(const std::str
 	IDiaSymbol *symbol;
 	auto &sessionInfo = *it->second;
 	if(sessionInfo.session->findSymbolByRVA(rva,SymTagEnum::SymTagFunction,&symbol) != S_OK)
-		return {};
+	{
+		if(sessionInfo.session->findSymbolByRVA(rva,SymTagEnum::SymTagPublicSymbol,&symbol) != S_OK)
+			return {};
+		// Found as a public symbol; Try to find private symbol
+		DWORD targetRva;
+		if(symbol->get_targetRelativeVirtualAddress(&targetRva) != S_OK || sessionInfo.session->findSymbolByRVA(targetRva,SymTagEnum::SymTagFunction,&symbol) != S_OK)
+			return {};
+		rva = targetRva;
+	}
 	DWORD symTag;
 	if(symbol->get_symTag(&symTag) != S_OK || symTag != SymTagFunction)
 		return {};
@@ -2187,96 +2200,8 @@ std::optional<PdbManager::SymbolInfo> PdbManager::FindSymbolByRva(const std::str
 	return symbolInfo;
 }
 
-
-
-
-
-
-static BOOL test_pdb(const std::string &pdbFilePath,uint64_t rva)
-{
-    IDiaDataSource  *pSource;
-    if(FAILED(CoInitializeEx(NULL,COINIT_MULTITHREADED)))
-        return FALSE;
-    auto hr = CoCreateInstance(
-        CLSID_DiaSource,
-        NULL,
-        CLSCTX_INPROC_SERVER,
-        __uuidof(IDiaDataSource),
-        (void **) &pSource
-    );
-    if(FAILED(hr))
-        return FALSE;
-
-    wchar_t wszFilename[_MAX_PATH];
-    mbstowcs(wszFilename,pdbFilePath.data(),sizeof(wszFilename) /sizeof(wszFilename[0]));
-    if(FAILED(pSource->loadDataFromPdb(wszFilename)))
-    {
-        if(FAILED(pSource->loadDataForExe(wszFilename,NULL,NULL)))
-            return FALSE;
-    }
-
-    IDiaSession *session;
-    IDiaSymbol *globalSymbol = nullptr;
-    IDiaEnumTables *enumTables = nullptr;
-    IDiaEnumSymbolsByAddr *enumSymbolsByAddr = nullptr;
-    if(FAILED(pSource->openSession(&session))) 
-        return FALSE;
-
-    if(FAILED(session->get_globalScope(&globalSymbol)))
-        return FALSE;
-
-    if(FAILED(session->getEnumTables(&enumTables)))
-        return FALSE;
-
-    if(FAILED(session->getSymbolsByAddr(&enumSymbolsByAddr)))
-        return FALSE;
-
-    IDiaSymbol *symbol;
-    if(session->findSymbolByVA(rva,SymTagEnum::SymTagFunction,&symbol) == S_OK)
-    {
-        BSTR name;
-        symbol->get_name(&name);
-        std::cout<<"Name: "<<ConvertBSTRToMBS(name)<<std::endl;
-
-        ULONGLONG length = 0;
-        if(symbol->get_length(&length) == S_OK)
-        {
-            uint32_t lineId;
-            //auto sourceFile = symbol.GetSourceFile(lineId);
-
-            IDiaEnumLineNumbers *lineNums[100];
-            if(session->findLinesByRVA(rva,length,lineNums) == S_OK)
-            {
-                auto &l = lineNums[0];
-                IDiaLineNumber *line;
-                IDiaLineNumber *lineNum;
-                ULONG fetched = 0;
-                for(uint8_t i=0;i<5;++i) {
-                if(l->Next(i,&lineNum,&fetched) == S_OK && fetched == 1)
-                {
-                    DWORD l;
-                    IDiaSourceFile *srcFile;
-                    if(lineNum->get_sourceFile(&srcFile) == S_OK)
-                    {
-                        BSTR fileName;
-                        srcFile->get_fileName(&fileName);
-                        std::cout<<"File: "<<ConvertBSTRToMBS(fileName)<<std::endl;
-                    }
-                    if(lineNum->get_lineNumber(&l) == S_OK)
-                        std::cout<<"Line: "<<l<<std::endl;
-                    if(lineNum->get_lineNumberEnd(&l) == S_OK)
-                        std::cout<<"Line End: "<<l<<std::endl;
-                    
-                }
-                }
-            }
-        }
-    }
-
-    return TRUE;
-}
-
 #include <luabind/make_function.hpp>
+#include "pragma/lua/libraries/lasset.hpp"
 static void autogenerate()
 {
 	g_typeWarningCache.clear();
@@ -2293,50 +2218,6 @@ static void autogenerate()
 		auto *lsv = sv->GetLuaState();
 		if(lsv)
 			luaStates.push_back({lsv});
-
-#if 0
-		luabind::object o = luabind::globals(lsv)["ai"];
-		o = o["create_schedule"];
-		o.push(lsv);
-		Lua::StackDump(lsv);
-
-		auto base = GetModuleInfo(GetCurrentProcessId(),"server.dll");
-		std::cout<<"Addr: "<<base.modBaseAddr<<std::endl;
-		
-		lua_CFunction f = lua_tocfunction(lsv,-1);
-		std::cout<<"F: "<<std::hex<<(reinterpret_cast<uint64_t>(f))<<std::endl;
-		std::cout<<"Rel Ptr: "<<std::hex<<(reinterpret_cast<uint64_t>(f) -reinterpret_cast<uint64_t>(base.modBaseAddr))<<std::endl;
-
-
-    dbg::Help help {};
-    if(help.Initialize())
-    {
-        help.LoadSymbolModule();
-    }
-
-		testt();
-		base = GetModuleInfo(GetCurrentProcessId(),"shared.dll");
-		std::cout<<"&testt: "<<std::hex<<reinterpret_cast<uint64_t>(&testt)<<","<<GetProcAddress(base.hModule,"?testt@@YA?AV?$shared_ptr@VSchedule@ai@pragma@@@std@@XZ")<<std::endl;
-		std::cout<<"&modBaseAddr: "<<std::hex<<reinterpret_cast<uint64_t>(base.modBaseAddr)<<std::endl;
-		std::cout<<"Diff: "<<std::hex<<(reinterpret_cast<uint64_t>(&testt) -reinterpret_cast<uint64_t>(base.modBaseAddr))<<std::endl;
-
-		
-		std::cout<<"A: "<<typeid(f).name()<<std::endl;
-		std::cout<<"B: "<<typeid(decltype(f)).name()<<std::endl;
-
-		auto mod = GetModuleHandle("server.dll");
-		CHAR name[] = {'a','s','d','f','\0'};
-		customGetProcAddress(mod,name);
-		//auto *x = luabind::touserdata<luabind::detail::function_object*>(o);
-		//auto *y = luabind::object_cast<luabind::detail::function_object*>(o);
-		//luabind::detail::function_object const* impl_const = *(luabind::detail::function_object const**)lua_touserdata(lsv, lua_upvalueindex(1));
-		//luabind::detail::function_object const* impl_const2 = (luabind::detail::function_object const*)lua_touserdata(lsv, lua_upvalueindex(1));
-		std::cout<<f<<std::endl;
-		//luabind::detail::function_object_impl const* impl_const = *(luabind::detail::function_object_impl const**)lua_touserdata(lsv, lua_upvalueindex(1));
-
-		//luabind::detail::function_object_impl* impl = const_cast<luabind::detail::function_object_impl*>(impl_const);
-		//impl->f
-#endif
 	}
 	auto *cl = en.GetClientState();
 	if(cl)

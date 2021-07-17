@@ -74,9 +74,17 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		[](lua_State *l,pragma::animation::AnimationChannel &channel) -> pragma::animation::AnimationChannelInterpolation {
 		return channel.interpolation;
 	}));
+	cdChannel.def("SetInterpolation",static_cast<void(*)(lua_State*,pragma::animation::AnimationChannel&,pragma::animation::AnimationChannelInterpolation)>(
+		[](lua_State *l,pragma::animation::AnimationChannel &channel,pragma::animation::AnimationChannelInterpolation interp) {
+		channel.interpolation = interp;
+	}));
 	cdChannel.def("GetTargetPath",static_cast<util::Path(*)(lua_State*,pragma::animation::AnimationChannel&)>(
 		[](lua_State *l,pragma::animation::AnimationChannel &channel) -> util::Path {
 		return channel.targetPath;
+	}));
+	cdChannel.def("SetTargetPath",static_cast<void(*)(lua_State*,pragma::animation::AnimationChannel&,const std::string &path)>(
+		[](lua_State *l,pragma::animation::AnimationChannel &channel,const std::string &path) {
+		channel.targetPath = path;
 	}));
 	cdChannel.def("GetTimesArray",static_cast<udm::LinkedPropertyWrapper(*)(lua_State*,pragma::animation::AnimationChannel&)>(
 		[](lua_State *l,pragma::animation::AnimationChannel &channel) -> udm::LinkedPropertyWrapper {

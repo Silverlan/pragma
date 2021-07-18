@@ -13,18 +13,21 @@
 #include <pragma/math/angle/wvangle.h>
 #include <pragma/math/angle/wvquaternion.h>
 
-struct Vertex;
-struct VertexWeight;
+namespace umath
+{
+	struct Vertex;
+	struct VertexWeight;
+};
 
 namespace Lua
 {
 	namespace Vertex
 	{
-		DLLNETWORK ::Vertex Copy(::Vertex &v);
+		DLLNETWORK umath::Vertex Copy(umath::Vertex &v);
 	};
 	namespace VertexWeight
 	{
-		DLLNETWORK ::VertexWeight Copy(::VertexWeight &vw);
+		DLLNETWORK umath::VertexWeight Copy(umath::VertexWeight &vw);
 	};
 	namespace Vectori
 	{

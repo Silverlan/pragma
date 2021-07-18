@@ -16,7 +16,6 @@
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
-#include <pragma/model/vertex.h>
 
 using namespace pragma;
 

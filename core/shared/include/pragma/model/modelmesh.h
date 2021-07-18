@@ -11,7 +11,7 @@
 #include <udm_types.hpp>
 #include <vector>
 #include <mathutil/glmutil.h>
-#include "pragma/model/vertex.h"
+#include <mathutil/vertex.hpp>
 #include "pragma/model/modelupdateflags.hpp"
 #include <unordered_map>
 #include <mathutil/transform.hpp>
@@ -62,21 +62,21 @@ public:
 	void GenerateNormals();
 	void NormalizeUVCoordinates();
 	void SetSkinTextureIndex(uint32_t texture);
-	std::vector<Vertex> &GetVertices();
+	std::vector<umath::Vertex> &GetVertices();
 	std::vector<Vector2> &GetAlphas();
 	std::vector<uint16_t> &GetTriangles();
-	std::vector<VertexWeight> &GetVertexWeights(); // Vertex weights 0-3
-	std::vector<VertexWeight> &GetExtendedVertexWeights(); // Vertex weights 0-7
-	const std::vector<Vertex> &GetVertices() const {return const_cast<ModelSubMesh*>(this)->GetVertices();}
+	std::vector<umath::VertexWeight> &GetVertexWeights(); // Vertex weights 0-3
+	std::vector<umath::VertexWeight> &GetExtendedVertexWeights(); // Vertex weights 0-7
+	const std::vector<umath::Vertex> &GetVertices() const {return const_cast<ModelSubMesh*>(this)->GetVertices();}
 	const std::vector<Vector2> &GetAlphas() const {return const_cast<ModelSubMesh*>(this)->GetAlphas();}
 	const std::vector<uint16_t> &GetTriangles() const {return const_cast<ModelSubMesh*>(this)->GetTriangles();}
-	const std::vector<VertexWeight> &GetVertexWeights() const {return const_cast<ModelSubMesh*>(this)->GetVertexWeights();}
-	const std::vector<VertexWeight> &GetExtendedVertexWeights() const {return const_cast<ModelSubMesh*>(this)->GetExtendedVertexWeights();}
+	const std::vector<umath::VertexWeight> &GetVertexWeights() const {return const_cast<ModelSubMesh*>(this)->GetVertexWeights();}
+	const std::vector<umath::VertexWeight> &GetExtendedVertexWeights() const {return const_cast<ModelSubMesh*>(this)->GetExtendedVertexWeights();}
 	void GetBounds(Vector3 &min,Vector3 &max) const;
 	uint8_t GetAlphaCount() const;
 	void SetAlphaCount(uint8_t numAlpha);
-	uint32_t AddVertex(const Vertex &v);
-	void AddTriangle(const Vertex &v1,const Vertex &v2,const Vertex &v3);
+	uint32_t AddVertex(const umath::Vertex &v);
+	void AddTriangle(const umath::Vertex &v1,const umath::Vertex &v2,const umath::Vertex &v3);
 	void AddTriangle(uint32_t a,uint32_t b,uint32_t c);
 	void AddLine(uint32_t idx0,uint32_t idx1);
 	void AddPoint(uint32_t idx);
@@ -85,12 +85,12 @@ public:
 	GeometryType GetGeometryType() const;
 	void SetGeometryType(GeometryType type);
 
-	void SetVertex(uint32_t idx,const Vertex &v);
+	void SetVertex(uint32_t idx,const umath::Vertex &v);
 	void SetVertexPosition(uint32_t idx,const Vector3 &pos);
 	void SetVertexNormal(uint32_t idx,const Vector3 &normal);
 	void SetVertexUV(uint32_t idx,const Vector2 &uv);
 	void SetVertexAlpha(uint32_t idx,const Vector2 &alpha);
-	void SetVertexWeight(uint32_t idx,const VertexWeight &weight);
+	void SetVertexWeight(uint32_t idx,const umath::VertexWeight &weight);
 
 	const std::vector<Vector2> *GetUVSet(const std::string &name) const;
 	std::vector<Vector2> *GetUVSet(const std::string &name);
@@ -98,12 +98,12 @@ public:
 	std::unordered_map<std::string,std::vector<Vector2>> &GetUVSets();
 	std::vector<Vector2> &AddUVSet(const std::string &name);
 
-	Vertex GetVertex(uint32_t idx) const;
+	umath::Vertex GetVertex(uint32_t idx) const;
 	Vector3 GetVertexPosition(uint32_t idx) const;
 	Vector3 GetVertexNormal(uint32_t idx) const;
 	Vector2 GetVertexUV(uint32_t idx) const;
 	Vector2 GetVertexAlpha(uint32_t idx) const;
-	VertexWeight GetVertexWeight(uint32_t idx) const;
+	umath::VertexWeight GetVertexWeight(uint32_t idx) const;
 	void Optimize();
 	void Rotate(const Quat &rot);
 	void Translate(const Vector3 &t);
@@ -127,19 +127,19 @@ public:
 	bool LoadFromAssetData(const udm::AssetData &data,std::string &outErr);
 protected:
 	void Copy(ModelSubMesh &other,bool fullCopy) const;
-	std::vector<VertexWeight> &GetVertexWeightSet(uint32_t idx);
-	const std::vector<VertexWeight> &GetVertexWeightSet(uint32_t idx) const;
+	std::vector<umath::VertexWeight> &GetVertexWeightSet(uint32_t idx);
+	const std::vector<umath::VertexWeight> &GetVertexWeightSet(uint32_t idx) const;
 	void ComputeTangentBasis();
 
 	uint32_t m_skinTextureIndex;
 	Vector3 m_center;
-	std::shared_ptr<std::vector<Vertex>> m_vertices;
+	std::shared_ptr<std::vector<umath::Vertex>> m_vertices;
 	std::shared_ptr<std::vector<Vector2>> m_alphas;
 	std::shared_ptr<std::unordered_map<std::string,std::vector<Vector2>>> m_uvSets;
 	uint8_t m_numAlphas;
 	std::shared_ptr<std::vector<uint16_t>> m_triangles;
-	std::shared_ptr<std::vector<VertexWeight>> m_vertexWeights;
-	std::shared_ptr<std::vector<VertexWeight>> m_extendedVertexWeights;
+	std::shared_ptr<std::vector<umath::VertexWeight>> m_vertexWeights;
+	std::shared_ptr<std::vector<umath::VertexWeight>> m_extendedVertexWeights;
 	Vector3 m_min;
 	Vector3 m_max;
 	GeometryType m_geometryType = GeometryType::Triangles;

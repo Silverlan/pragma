@@ -8,7 +8,6 @@
 #define __GAME_RESOURCES_HP__
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/model/vertex.h"
 #include <string>
 #include <optional>
 #include <fsys/filesystem.h>

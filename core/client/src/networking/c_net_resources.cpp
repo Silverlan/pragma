@@ -437,7 +437,7 @@ void ModelLoadManager::Update()
 				auto &v = meshVerts[i];
 				auto &uv = uvs[i];
 				auto &n = meshNormals[i];
-				dstVerts.push_back(Vertex{-origin +v,uv,n});
+				dstVerts.push_back(umath::Vertex{-origin +v,uv,n});
 			}
 		
 			auto &dstIndices = subMesh->GetTriangles();

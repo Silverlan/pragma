@@ -14,11 +14,11 @@
 #include <sharedutils/util_pragma.hpp>
 #include <sharedutils/util_parallel_job.hpp>
 #include <mathutil/uvec.h>
+#include <mathutil/vertex.hpp>
 #include <vector>
 #include <cinttypes>
 
 class NetworkState;
-struct Vertex;
 class Game;
 namespace udm {class Data; struct AssetData; struct LinkedPropertyWrapper;};
 namespace pragma {class BaseEntityComponent;};
@@ -26,7 +26,7 @@ class VFilePtrInternal;
 #include <sharedutils/util_hair.hpp>
 namespace util
 {
-	DLLNETWORK util::ParallelJob<std::vector<Vector2>&> generate_lightmap_uvs(NetworkState &nwState,uint32_t atlastWidth,uint32_t atlasHeight,const std::vector<Vertex> &verts,const std::vector<uint32_t> &tris);
+	DLLNETWORK util::ParallelJob<std::vector<Vector2>&> generate_lightmap_uvs(NetworkState &nwState,uint32_t atlastWidth,uint32_t atlasHeight,const std::vector<umath::Vertex> &verts,const std::vector<uint32_t> &tris);
 	DLLNETWORK std::shared_ptr<udm::Data> load_udm_asset(const std::string &fileName,std::string *optOutErr=nullptr);
 	DLLNETWORK std::shared_ptr<udm::Data> load_udm_asset(std::shared_ptr<VFilePtrInternal> f,std::string *optOutErr=nullptr);
 

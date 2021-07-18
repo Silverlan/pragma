@@ -11,7 +11,7 @@
 #include "luasystem.h"
 #include "pragma/lua/classes/ldef_vector.h"
 #include <sharedutils/util.h>
-#include "pragma/model/vertex.h"
+#include <mathutil/vertex.hpp>
 #include "pragma/lua/libraries/lmatrix.h"
 #include "pragma/lua/classes/ldef_mat4.h"
 #include "pragma/util/util_best_fitting_plane.hpp"
@@ -19,8 +19,8 @@
 #include <glm/gtx/projection.hpp>
 #include <sharedutils/scope_guard.h>
 
-::Vertex Lua::Vertex::Copy(::Vertex &v) {return v;}
-::VertexWeight Lua::VertexWeight::Copy(::VertexWeight &vw) {return vw;}
+umath::Vertex Lua::Vertex::Copy(umath::Vertex &v) {return v;}
+umath::VertexWeight Lua::VertexWeight::Copy(umath::VertexWeight &vw) {return vw;}
 ::Vector3i Lua::Vectori::Copy(::Vector3i &v) {return v;}
 ::Vector2i Lua::Vector2i::Copy(::Vector2i &v) {return v;}
 ::Vector4i Lua::Vector4i::Copy(::Vector4i &v) {return v;}

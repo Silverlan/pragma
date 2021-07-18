@@ -150,7 +150,7 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("GetUVSetNames",&Lua::ModelSubMesh::GetUVSetNames);
 	classDef.def("GetNormals",&Lua::ModelSubMesh::GetNormalMapping);
 	classDef.def("GetVertexWeights",&Lua::ModelSubMesh::GetVertexWeights);
-	classDef.def("AddTriangle",static_cast<void(*)(lua_State*,::ModelSubMesh&,const Vertex&,const Vertex&,const Vertex&)>(&Lua::ModelSubMesh::AddTriangle));
+	classDef.def("AddTriangle",static_cast<void(*)(lua_State*,::ModelSubMesh&,const umath::Vertex&,const umath::Vertex&,const umath::Vertex&)>(&Lua::ModelSubMesh::AddTriangle));
 	classDef.def("AddTriangle",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t,uint32_t,uint32_t)>(&Lua::ModelSubMesh::AddTriangle));
 	classDef.def("SetSkinTextureIndex",&Lua::ModelSubMesh::SetSkinTextureIndex);
 	classDef.def("Update",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t)>(&Lua::ModelSubMesh::Update));
@@ -368,7 +368,7 @@ void Lua::ModelSubMesh::GetCenter(lua_State *l,::ModelSubMesh &mdl)
 {
 	Lua::Push<Vector3>(l,mdl.GetCenter());
 }
-void Lua::ModelSubMesh::AddTriangle(lua_State*,::ModelSubMesh &mdl,const Vertex &v1,const Vertex &v2,const Vertex &v3)
+void Lua::ModelSubMesh::AddTriangle(lua_State*,::ModelSubMesh &mdl,const umath::Vertex &v1,const umath::Vertex &v2,const umath::Vertex &v3)
 {
 	mdl.AddTriangle(v1,v2,v3);
 }
@@ -388,7 +388,7 @@ void Lua::ModelSubMesh::Update(lua_State*,::ModelSubMesh &mdl,uint32_t flags)
 {
 	mdl.Update(static_cast<ModelUpdateFlags>(flags));
 }
-void Lua::ModelSubMesh::AddVertex(lua_State *l,::ModelSubMesh &mdl,const Vertex &v)
+void Lua::ModelSubMesh::AddVertex(lua_State *l,::ModelSubMesh &mdl,const umath::Vertex &v)
 {
 	auto idx = mdl.AddVertex(v);
 	Lua::PushInt(l,idx);
@@ -401,7 +401,7 @@ void Lua::ModelSubMesh::GetBounds(lua_State *l,::ModelSubMesh &mdl)
 	Lua::Push<Vector3>(l,max);
 }
 
-void Lua::ModelSubMesh::SetVertex(lua_State*,::ModelSubMesh &mdl,uint32_t idx,const Vertex &v)
+void Lua::ModelSubMesh::SetVertex(lua_State*,::ModelSubMesh &mdl,uint32_t idx,const umath::Vertex &v)
 {
 	mdl.SetVertex(idx,v);
 }
@@ -428,7 +428,7 @@ void Lua::ModelSubMesh::SetVertexAlpha(lua_State*,::ModelSubMesh &mdl,uint32_t i
 {
 	mdl.SetVertexAlpha(idx,alpha);
 }
-void Lua::ModelSubMesh::SetVertexWeight(lua_State*,::ModelSubMesh &mdl,uint32_t idx,const VertexWeight &weight)
+void Lua::ModelSubMesh::SetVertexWeight(lua_State*,::ModelSubMesh &mdl,uint32_t idx,const umath::VertexWeight &weight)
 {
 	mdl.SetVertexWeight(idx,weight);
 }
@@ -436,7 +436,7 @@ void Lua::ModelSubMesh::GetVertex(lua_State *l,::ModelSubMesh &mdl,uint32_t idx)
 {
 	if(idx >= mdl.GetVertexCount())
 		return;
-	Lua::Push<Vertex>(l,mdl.GetVertex(idx));
+	Lua::Push<umath::Vertex>(l,mdl.GetVertex(idx));
 }
 void Lua::ModelSubMesh::GetVertexPosition(lua_State *l,::ModelSubMesh &mdl,uint32_t idx)
 {
@@ -473,7 +473,7 @@ void Lua::ModelSubMesh::GetVertexWeight(lua_State *l,::ModelSubMesh &mdl,uint32_
 {
 	if(idx >= mdl.GetVertexWeights().size())
 		return;
-	Lua::Push<VertexWeight>(l,mdl.GetVertexWeight(idx));
+	Lua::Push<umath::VertexWeight>(l,mdl.GetVertexWeight(idx));
 }
 void Lua::ModelSubMesh::Optimize(lua_State*,::ModelSubMesh &mdl)
 {
@@ -584,9 +584,9 @@ void Lua::ModelSubMesh::InitializeQuad(lua_State *l,::ModelSubMesh &mesh,float s
 	for(auto i=decltype(verts.size()){0};i<verts.size();i+=3)
 	{
 		auto &n = faceNormals[i /3];
-		mesh.AddVertex(::Vertex{verts[i],uvs[i],n});
-		mesh.AddVertex(::Vertex{verts[i +1],uvs[i +1],n});
-		mesh.AddVertex(::Vertex{verts[i +2],uvs[i +2],n});
+		mesh.AddVertex(umath::Vertex{verts[i],uvs[i],n});
+		mesh.AddVertex(umath::Vertex{verts[i +1],uvs[i +1],n});
+		mesh.AddVertex(umath::Vertex{verts[i +2],uvs[i +2],n});
 
 		mesh.AddTriangle(static_cast<uint32_t>(i),static_cast<uint32_t>(i +1),static_cast<uint32_t>(i +2));
 	}
@@ -651,9 +651,9 @@ void Lua::ModelSubMesh::InitializeBox(lua_State *l,::ModelSubMesh &mesh,const Ve
 	for(auto i=decltype(verts.size()){0};i<verts.size();i+=3)
 	{
 		auto &n = faceNormals[i /3];
-		mesh.AddVertex(::Vertex{verts[i],uvs[i],n});
-		mesh.AddVertex(::Vertex{verts[i +1],uvs[i +1],n});
-		mesh.AddVertex(::Vertex{verts[i +2],uvs[i +2],n});
+		mesh.AddVertex(umath::Vertex{verts[i],uvs[i],n});
+		mesh.AddVertex(umath::Vertex{verts[i +1],uvs[i +1],n});
+		mesh.AddVertex(umath::Vertex{verts[i +2],uvs[i +2],n});
 
 		mesh.AddTriangle(static_cast<uint32_t>(i),static_cast<uint32_t>(i +1),static_cast<uint32_t>(i +2));
 	}

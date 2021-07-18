@@ -44,7 +44,7 @@ static void write_offset(VFilePtrReal f,uint64_t offIndex)
 	f->Seek(cur);
 }
 
-static void to_vertex_list(ModelMesh &mesh,std::vector<Vertex> &vertices,std::unordered_map<ModelSubMesh*,std::vector<uint32_t>> &vertexIds)
+static void to_vertex_list(ModelMesh &mesh,std::vector<umath::Vertex> &vertices,std::unordered_map<ModelSubMesh*,std::vector<uint32_t>> &vertexIds)
 {
 	vertices.reserve(mesh.GetVertexCount());
 	for(auto &subMesh : mesh.GetSubMeshes())

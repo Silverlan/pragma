@@ -240,13 +240,13 @@ void FWMD::LoadMeshes(unsigned short version,Model &mdl,const std::function<std:
 						meshVertIDs[k] = meshVertID;
 
 						auto &vert = wmdVerts[meshVertID];
-						subVertices.push_back(Vertex{
+						subVertices.push_back(umath::Vertex{
 							vert.position,
 							vert.normal
 							});
 						if(!vert.weights.empty())
 						{
-							vertexWeights.push_back(VertexWeight{
+							vertexWeights.push_back(umath::VertexWeight{
 								Vector4i{-1,-1,-1,-1},
 								Vector4{0.f,0.f,0.f,0.f}
 								});

@@ -251,7 +251,7 @@ static void generate_lightmap_uv_atlas(BaseEntity &ent,uint32_t width,uint32_t h
 	}
 
 	// Populate data vectors
-	std::vector<Vertex> verts {};
+	std::vector<umath::Vertex> verts {};
 	std::vector<uint32_t> tris {};
 	verts.reserve(numVerts);
 	tris.reserve(numTris *3);

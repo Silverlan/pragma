@@ -16,7 +16,7 @@ static Vector3 intersect_line_plane(const Vector3 &a,const Vector3 &b,float da,f
 }
 
 static Vector2 calc_barycentric_coordinates(
-	const Vertex &a,const Vertex &b,const Vertex &c,
+	const umath::Vertex &a,const umath::Vertex &b,const umath::Vertex &c,
 	const Vector3 &va,const Vector3 &vb,const Vector3 &vc,
 	const Vector3 &hitPoint
 )
@@ -28,7 +28,7 @@ static Vector2 calc_barycentric_coordinates(
 
 static void clip_triangle(
 	const std::function<void(uint16_t)> &fAddTriangleIndex,const std::function<void(uint16_t,uint16_t,const Vector3&,const Vector2&)> &fAddNewVertex,
-	const Vector3 &C,const std::vector<Vertex> &verts,const std::array<uint16_t,3> &indices,const std::array<double,3> &distances
+	const Vector3 &C,const std::vector<umath::Vertex> &verts,const std::array<uint16_t,3> &indices,const std::array<double,3> &distances
 )
 {
 	const auto d0 = distances.at(0);
@@ -111,7 +111,7 @@ void ModelSubMesh::ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clip
 	auto fGetVertexPosition = std::function<const Vector3&(uint32_t)>([&verts](uint32_t vertexIndex) -> const Vector3& {
 		return verts.at(vertexIndex).position;
 	});
-	auto fApplyVertexBoneTransformations = [boneMatrices](const Vector3 &v,const VertexWeight &vw) -> Vector3 {
+	auto fApplyVertexBoneTransformations = [boneMatrices](const Vector3 &v,const umath::VertexWeight &vw) -> Vector3 {
 		auto m = Mat4{0.f};
 		for(auto i=0u;i<4u;++i)
 		{
@@ -160,8 +160,8 @@ void ModelSubMesh::ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clip
 	};
 	struct PointData
 	{
-		Vertex vertex;
-		VertexWeight weight;
+		umath::Vertex vertex;
+		umath::VertexWeight weight;
 	};
 	using BoneId = int32_t;
 	std::vector<PointData> newPoints {};
@@ -219,7 +219,7 @@ void ModelSubMesh::ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clip
 				fApplyVertexBoneTransformations(clipMeshVerts.back().position,vwClipped);
 		}
 
-		newPoints.push_back({clipMeshVerts.back(),bUseWeights ? clippedVertexWeights.back() : VertexWeight{}});
+		newPoints.push_back({clipMeshVerts.back(),bUseWeights ? clippedVertexWeights.back() : umath::VertexWeight{}});
 
 		if(idx0 < alphas.size() && idx1 < alphas.size())
 		{
@@ -336,7 +336,7 @@ void ModelSubMesh::ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clip
 
 		if(/*b == true &&*/ newTriangles.empty() == false)
 		{
-			auto fCalcVertexWeights = [&newPoints](const Vector3 &pos) -> VertexWeight {
+			auto fCalcVertexWeights = [&newPoints](const Vector3 &pos) -> umath::VertexWeight {
 				std::vector<float> pointWeights {};
 				pointWeights.reserve(newPoints.size());
 				auto weightSum = 0.f;
@@ -378,7 +378,7 @@ void ModelSubMesh::ClipAgainstPlane(const Vector3 &n,double d,ModelSubMesh &clip
 					return a.second > b.second;
 				});
 
-				VertexWeight r {};
+				umath::VertexWeight r {};
 				auto num = umath::min(sortedWeights.size(),static_cast<size_t>(4));
 				weightSum = 0.f;
 				for(auto i=decltype(num){0u};i<num;++i)

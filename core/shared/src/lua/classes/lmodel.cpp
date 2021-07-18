@@ -19,7 +19,6 @@
 #include "pragma/model/model.h"
 #include "pragma/asset/util_asset.hpp"
 #include "pragma/physics/collisionmesh.h"
-#include "pragma/model/vertex.h"
 #include "pragma/physics/physsoftbodyinfo.hpp"
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/model/animation/flex_animation.hpp"
@@ -28,6 +27,7 @@
 #include <pragma/lua/lua_call.hpp>
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_file.h>
+#include <mathutil/vertex.hpp>
 #include <udm.hpp>
 
 extern DLLNETWORK Engine *engine;
@@ -1099,28 +1099,28 @@ void Lua::Model::register_class(
 	Lua::CollisionMesh::register_class(collisionMeshClassDef);
 
 	// Vertex
-	auto defVertex = luabind::class_<::Vertex>("Vertex");
+	auto defVertex = luabind::class_<umath::Vertex>("Vertex");
 	defVertex.def(luabind::constructor<const Vector3&,const ::Vector2&,const Vector3&,const ::Vector4&>());
 	defVertex.def(luabind::constructor<const Vector3&,const ::Vector2&,const Vector3&>());
 	defVertex.def(luabind::constructor<const Vector3&,const Vector3&>());
 	defVertex.def(luabind::constructor<>());
 	defVertex.def(luabind::tostring(luabind::self));
 	defVertex.def(luabind::const_self ==luabind::const_self);
-	defVertex.def_readwrite("position",&::Vertex::position);
-	defVertex.def_readwrite("uv",&::Vertex::uv);
-	defVertex.def_readwrite("normal",&::Vertex::normal);
-	defVertex.def_readwrite("tangent",&::Vertex::tangent);
+	defVertex.def_readwrite("position",&umath::Vertex::position);
+	defVertex.def_readwrite("uv",&umath::Vertex::uv);
+	defVertex.def_readwrite("normal",&umath::Vertex::normal);
+	defVertex.def_readwrite("tangent",&umath::Vertex::tangent);
 	defVertex.def("Copy",&Lua::Vertex::Copy);
-	defVertex.def("GetBiTangent",&::Vertex::GetBiTangent);
+	defVertex.def("GetBiTangent",&umath::Vertex::GetBiTangent);
 	classDef.scope[defVertex];
 
-	auto defVertWeight = luabind::class_<::VertexWeight>("VertexWeight");
+	auto defVertWeight = luabind::class_<umath::VertexWeight>("VertexWeight");
 	defVertWeight.def(luabind::constructor<const ::Vector4i&,const ::Vector4&>());
 	defVertWeight.def(luabind::constructor<>());
 	defVertWeight.def(luabind::tostring(luabind::self));
 	defVertWeight.def(luabind::const_self ==luabind::const_self);
-	defVertWeight.def_readwrite("boneIds",&::VertexWeight::boneIds);
-	defVertWeight.def_readwrite("weights",&::VertexWeight::weights);
+	defVertWeight.def_readwrite("boneIds",&umath::VertexWeight::boneIds);
+	defVertWeight.def_readwrite("weights",&umath::VertexWeight::weights);
 	defVertWeight.def("Copy",&Lua::VertexWeight::Copy);
 	classDef.scope[defVertWeight];
 

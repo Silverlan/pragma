@@ -13,7 +13,10 @@
 
 #define ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 
-struct Vertex;
+namespace umath
+{
+	struct Vertex;
+};
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	#pragma pack(push,1)
 	struct DLLCLIENT VertexBufferData
@@ -23,7 +26,7 @@ struct Vertex;
 		VertexBufferData(const Vector3 &position,const Vector3 &normal);
 		VertexBufferData();
 		VertexBufferData(const VertexBufferData &other);
-		VertexBufferData(const Vertex &vertex);
+		VertexBufferData(const umath::Vertex &vertex);
 		union
 		{
 			Vector3 position;

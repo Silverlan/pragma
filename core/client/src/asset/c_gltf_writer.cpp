@@ -1088,7 +1088,7 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 			auto numVerts = mesh->GetVertexCount();
 			for(auto i=decltype(numVerts){0u};i<numVerts;++i)
 			{
-				auto vw = (i < vertWeights.size()) ? vertWeights.at(i) : VertexWeight{};
+				auto vw = (i < vertWeights.size()) ? vertWeights.at(i) : umath::VertexWeight{};
 				auto *gltfVwData = skinData.data() +vertWeightOffset *sizeof(GLTFVertexWeight);
 				GLTFVertexWeight gltfVw {};
 				auto weightSum = 0.f;

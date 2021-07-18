@@ -16,7 +16,6 @@
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
-#include <pragma/model/vertex.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;

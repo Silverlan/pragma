@@ -192,7 +192,7 @@ void CModelSubMesh::Update(ModelUpdateFlags flags)
 		else
 		{
 			auto numVertWeights = m_vertexWeights->size() +m_extendedVertexWeights->size();
-			std::vector<VertexWeight> vertWeights {};
+			std::vector<umath::VertexWeight> vertWeights {};
 			vertWeights.resize(numVertWeights);
 			memcpy(vertWeights.data(),m_vertexWeights->data(),m_vertexWeights->size() *sizeof(m_vertexWeights->front()));
 			memcpy(vertWeights.data() +m_vertexWeights->size(),m_extendedVertexWeights->data(),m_extendedVertexWeights->size() *sizeof(m_extendedVertexWeights->front()));

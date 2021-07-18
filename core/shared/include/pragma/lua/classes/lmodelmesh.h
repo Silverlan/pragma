@@ -13,8 +13,11 @@
 
 class ModelMesh;
 class ModelSubMesh;
-struct VertexWeight;
-struct Vertex;
+namespace umath
+{
+	struct VertexWeight;
+	struct Vertex;
+};
 
 namespace Lua
 {
@@ -60,20 +63,20 @@ namespace Lua
 		DLLNETWORK luabind::object GetUVSetNames(lua_State *l,::ModelSubMesh &mdl);
 		DLLNETWORK void GetNormalMapping(lua_State *l,::ModelSubMesh &mdl);
 		DLLNETWORK void GetVertexWeights(lua_State *l,::ModelSubMesh &mdl);
-		DLLNETWORK void AddTriangle(lua_State *l,::ModelSubMesh &mdl,const ::Vertex &v1,const ::Vertex &v2,const ::Vertex &v3);
+		DLLNETWORK void AddTriangle(lua_State *l,::ModelSubMesh &mdl,const umath::Vertex &v1,const umath::Vertex &v2,const umath::Vertex &v3);
 		DLLNETWORK void AddTriangle(lua_State *l,::ModelSubMesh &mdl,uint32_t a,uint32_t b,uint32_t c);
 		DLLNETWORK void SetSkinTextureIndex(lua_State *l,::ModelSubMesh &mdl,uint32_t texture);
 		DLLNETWORK void Update(lua_State *l,::ModelSubMesh &mdl);
 		DLLNETWORK void Update(lua_State *l,::ModelSubMesh &mdl,uint32_t flags);
-		DLLNETWORK void AddVertex(lua_State *l,::ModelSubMesh &mdl,const ::Vertex &v);
+		DLLNETWORK void AddVertex(lua_State *l,::ModelSubMesh &mdl,const umath::Vertex &v);
 		DLLNETWORK void GetBounds(lua_State *l,::ModelSubMesh &mdl);
-		DLLNETWORK void SetVertex(lua_State *l,::ModelSubMesh &mdl,uint32_t idx,const ::Vertex &v);
+		DLLNETWORK void SetVertex(lua_State *l,::ModelSubMesh &mdl,uint32_t idx,const umath::Vertex &v);
 		DLLNETWORK void SetVertexPosition(lua_State *l,::ModelSubMesh &mdl,uint32_t idx,const Vector3 &pos);
 		DLLNETWORK void SetVertexNormal(lua_State *l,::ModelSubMesh &mdl,uint32_t idx,const Vector3 &normal);
 		DLLNETWORK void SetVertexUV(lua_State *l,::ModelSubMesh &mdl,uint32_t idx,const ::Vector2 &uv);
 		DLLNETWORK void SetVertexUV(lua_State *l,::ModelSubMesh &mdl,const std::string &uvSetName,uint32_t idx,const ::Vector2 &uv);
 		DLLNETWORK void SetVertexAlpha(lua_State *l,::ModelSubMesh &mdl,uint32_t idx,const ::Vector2 &alpha);
-		DLLNETWORK void SetVertexWeight(lua_State *l,::ModelSubMesh &mdl,uint32_t idx,const ::VertexWeight &weight);
+		DLLNETWORK void SetVertexWeight(lua_State *l,::ModelSubMesh &mdl,uint32_t idx,const umath::VertexWeight &weight);
 		DLLNETWORK void GetVertex(lua_State *l,::ModelSubMesh &mdl,uint32_t idx);
 		DLLNETWORK void GetVertexPosition(lua_State *l,::ModelSubMesh &mdl,uint32_t idx);
 		DLLNETWORK void GetVertexNormal(lua_State *l,::ModelSubMesh &mdl,uint32_t idx);

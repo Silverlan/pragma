@@ -222,7 +222,7 @@ int Lua::import::import_wrmi(lua_State *l)
 			v.second = f.Read<Vector3>();
 		}
 		auto numBonesMesh = f.Read<uint32_t>();
-		std::vector<VertexWeight> boneWeights(numVerts);
+		std::vector<umath::VertexWeight> boneWeights(numVerts);
 		for(auto j=decltype(numBonesMesh){0};j<numBonesMesh;++j)
 		{
 

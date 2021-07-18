@@ -10,7 +10,6 @@
 #include "pragma/file_formats/wmd.h"
 #include "pragma/physics/collisionmesh.h"
 #include <sharedutils/util_string.h>
-#include "pragma/model/vertex.h"
 #include "pragma/game/game_resources.hpp"
 #include "pragma/physics/physsoftbodyinfo.hpp"
 #include "pragma/model/animation/vertex_animation.hpp"

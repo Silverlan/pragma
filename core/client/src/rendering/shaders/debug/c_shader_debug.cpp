@@ -8,7 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/debug/c_shader_debug.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
-#include <pragma/model/vertex.h>
+#include <mathutil/vertex.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 
@@ -55,7 +55,7 @@ void ShaderDebug::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 			pipelineInfo.ToggleDynamicStates(true,{prosper::DynamicState::LineWidth});
 			break;
 		case Pipeline::Vertex:
-			VERTEX_BINDING_VERTEX.stride = sizeof(Vertex);
+			VERTEX_BINDING_VERTEX.stride = sizeof(umath::Vertex);
 		case Pipeline::Point:
 			prosper::util::set_graphics_pipeline_polygon_mode(pipelineInfo,prosper::PolygonMode::Point);
 			pipelineInfo.SetPrimitiveTopology(prosper::PrimitiveTopology::PointList);

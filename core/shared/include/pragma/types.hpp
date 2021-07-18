@@ -12,6 +12,12 @@
 
 namespace util {class EnumRegister;};
 
+namespace umath
+{
+	struct Vertex;
+	struct VertexWeight;
+};
+
 enum class Activity : uint16_t;
 using BoneId = uint16_t;
 class Skeleton;

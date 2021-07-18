@@ -12,7 +12,7 @@
 #include "pragma/entities/environment/effects/c_env_sprite.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/entities/environment/env_decal.h>
-#include <pragma/model/vertex.h>
+#include <mathutil/vertex.hpp>
 
 namespace pragma
 {
@@ -31,7 +31,7 @@ namespace pragma
 		float GetSize() const;
 		std::pair<Vector3,Vector3> GetAABB() const;
 
-		bool GenerateDecalMesh(const std::vector<MeshData> &meshDatas,std::vector<Vertex> &outVerts,std::vector<uint16_t> &outTris);
+		bool GenerateDecalMesh(const std::vector<MeshData> &meshDatas,std::vector<umath::Vertex> &outVerts,std::vector<uint16_t> &outTris);
 		void DebugDraw(float duration) const;
 	private:
 		struct VertexInfo

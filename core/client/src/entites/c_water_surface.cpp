@@ -141,7 +141,7 @@ void CWaterSurfaceComponent::InitializeSurface()
 	for(auto i=decltype(numParticles){0};i<numParticles;++i)
 	{
 		auto pos = sim.CalcParticlePosition(i);
-		verts.push_back(Vertex(pos,{pos.x /(10.f *sim.GetWidth()),pos.z /(10.f *sim.GetLength())},{0.f,1.f,0.f})); // TODO
+		verts.push_back(umath::Vertex(pos,{pos.x /(10.f *sim.GetWidth()),pos.z /(10.f *sim.GetLength())},{0.f,1.f,0.f})); // TODO
 	}
 	sim.UnlockParticleHeights();
 

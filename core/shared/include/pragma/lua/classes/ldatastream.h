@@ -11,7 +11,7 @@
 #include <pragma/lua/luaapi.h>
 #include "luasystem.h"
 #include "pragma/lua/luabind_int.h"
-#include "pragma/model/vertex.h"
+#include <mathutil/vertex.hpp>
 #include <sharedutils/datastream.h>
 
 lua_registercheck(DataStream,::DataStream);
@@ -227,7 +227,7 @@ namespace Lua
 			classDef.def("WriteVector2i",&Lua::DataStream::WriteData<TClass,::Vector2i>);
 			classDef.def("WriteVectori",&Lua::DataStream::WriteData<TClass,Vector3i>);
 			classDef.def("WriteVector4i",&Lua::DataStream::WriteData<TClass,::Vector4i>);
-			classDef.def("WriteVertex",&Lua::DataStream::WriteData<TClass,::Vertex>);
+			classDef.def("WriteVertex",&Lua::DataStream::WriteData<TClass,umath::Vertex>);
 			classDef.def("ReadMat2",&Lua::DataStream::Read<TClass,::Mat2>);
 			classDef.def("ReadMat2x3",&Lua::DataStream::Read<TClass,::Mat2x3>);
 			classDef.def("ReadMat2x4",&Lua::DataStream::Read<TClass,::Mat2x4>);
@@ -241,7 +241,7 @@ namespace Lua
 			classDef.def("ReadVector2i",&Lua::DataStream::Read<TClass,::Vector2i>);
 			classDef.def("ReadVectori",&Lua::DataStream::Read<TClass,Vector3i>);
 			classDef.def("ReadVector4i",&Lua::DataStream::Read<TClass,::Vector4i>);
-			classDef.def("ReadVertex",&Lua::DataStream::Read<TClass,::Vertex>);
+			classDef.def("ReadVertex",&Lua::DataStream::Read<TClass,umath::Vertex>);
 		}
 	};
 };

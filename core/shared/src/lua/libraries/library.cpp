@@ -758,7 +758,8 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		{"SIZEOF_VECTOR2I",sizeof(Vector2i)},
 		{"SIZEOF_VECTOR3I",sizeof(Vector3i)},
 		{"SIZEOF_VECTOR4I",sizeof(Vector4i)},
-		{"SIZEOF_VERTEX",sizeof(Vertex)},
+		{"SIZEOF_VERTEX",sizeof(umath::Vertex)},
+		{"SIZEOF_VERTEX_WEIGHT",sizeof(umath::VertexWeight)},
 
 		{"VAR_TYPE_INVALID",umath::to_integral(util::VarType::Invalid)},
 		{"VAR_TYPE_BOOL",umath::to_integral(util::VarType::Bool)},

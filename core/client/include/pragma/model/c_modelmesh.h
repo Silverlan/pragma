@@ -13,6 +13,7 @@
 
 namespace prosper {class IDynamicResizableBuffer; class IRenderBuffer;};
 namespace pragma {class SceneMesh; class ShaderEntity;};
+namespace umath {struct VertexWeight;};
 struct VertexBufferData;
 class DLLCLIENT CModelSubMesh
 	: public ModelSubMesh
@@ -34,7 +35,7 @@ public:
 	const std::shared_ptr<prosper::IRenderBuffer> &GetRenderBuffer(pragma::ShaderEntity &shader,uint32_t pipelineIdx=0u);
 
 	using VertexType = VertexBufferData;
-	using VertexWeightType = VertexWeight;
+	using VertexWeightType = umath::VertexWeight;
 	using IndexType = uint16_t;
 	using AlphaType = Vector2;
 private:

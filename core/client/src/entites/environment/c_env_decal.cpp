@@ -118,7 +118,7 @@ std::vector<DecalProjector::VertexInfo> DecalProjector::CropTriangleVertsByLine(
 	}
 	return newVerts;
 }
-bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas,std::vector<Vertex> &outVerts,std::vector<uint16_t> &outTris)
+bool DecalProjector::GenerateDecalMesh(const std::vector<MeshData> &meshDatas,std::vector<umath::Vertex> &outVerts,std::vector<uint16_t> &outTris)
 {
 	auto bounds = GetProjectorCubeBounds();
 
@@ -353,7 +353,7 @@ bool CDecalComponent::ApplyDecal(DecalProjector &projector,const std::vector<Dec
 	auto *mat = client->LoadMaterial(GetMaterial());
 	if(mat == nullptr)
 		return false;
-	std::vector<Vertex> verts;
+	std::vector<umath::Vertex> verts;
 	std::vector<uint16_t> tris;
 	if(projector.GenerateDecalMesh(meshDatas,verts,tris) == false)
 		return false;

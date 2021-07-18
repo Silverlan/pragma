@@ -158,8 +158,8 @@ void umath::normalize_uv_coordinates(Vector2 &uv)
 
 ModelSubMesh::ModelSubMesh()
 	: std::enable_shared_from_this<ModelSubMesh>(),m_skinTextureIndex(0),m_numAlphas(0),m_alphas(std::make_shared<std::vector<Vector2>>()),
-	m_triangles(std::make_shared<std::vector<uint16_t>>()),m_vertexWeights(std::make_shared<std::vector<VertexWeight>>()),
-	m_extendedVertexWeights(std::make_shared<std::vector<VertexWeight>>()),m_vertices(std::make_shared<std::vector<Vertex>>()),
+	m_triangles(std::make_shared<std::vector<uint16_t>>()),m_vertexWeights(std::make_shared<std::vector<umath::VertexWeight>>()),
+	m_extendedVertexWeights(std::make_shared<std::vector<umath::VertexWeight>>()),m_vertices(std::make_shared<std::vector<umath::Vertex>>()),
 	m_uvSets{std::make_shared<std::unordered_map<std::string,std::vector<Vector2>>>()}
 {}
 ModelSubMesh::ModelSubMesh(const ModelSubMesh &other)
@@ -256,11 +256,11 @@ bool ModelSubMesh::IsEqual(const ModelSubMesh &other) const
 }
 void ModelSubMesh::Copy(ModelSubMesh &cpy,bool fullCopy) const
 {
-	cpy.m_vertices = std::make_shared<std::vector<Vertex>>(*cpy.m_vertices);
+	cpy.m_vertices = std::make_shared<std::vector<umath::Vertex>>(*cpy.m_vertices);
 	cpy.m_alphas = std::make_shared<std::vector<Vector2>>(*cpy.m_alphas);
 	cpy.m_triangles = std::make_shared<std::vector<uint16_t>>(*cpy.m_triangles);
-	cpy.m_vertexWeights = std::make_shared<std::vector<VertexWeight>>(*cpy.m_vertexWeights);
-	cpy.m_extendedVertexWeights = std::make_shared<std::vector<VertexWeight>>(*cpy.m_extendedVertexWeights);
+	cpy.m_vertexWeights = std::make_shared<std::vector<umath::VertexWeight>>(*cpy.m_vertexWeights);
+	cpy.m_extendedVertexWeights = std::make_shared<std::vector<umath::VertexWeight>>(*cpy.m_extendedVertexWeights);
 	cpy.m_uvSets = std::make_shared<std::unordered_map<std::string,std::vector<Vector2>>>(*cpy.m_uvSets);
 	static_assert(sizeof(ModelSubMesh) == 216,"Update this function when making changes to this class!");
 }
@@ -293,7 +293,7 @@ void ModelSubMesh::Merge(const ModelSubMesh &other)
 	if(other.m_vertices != nullptr)
 	{
 		if(m_vertices == nullptr)
-			m_vertices = std::make_shared<std::vector<Vertex>>();
+			m_vertices = std::make_shared<std::vector<umath::Vertex>>();
 		vertCount = m_vertices->size();
 		m_vertices->reserve(m_vertices->size() +other.m_vertices->size());
 		for(auto &v : *other.m_vertices)
@@ -323,7 +323,7 @@ void ModelSubMesh::Merge(const ModelSubMesh &other)
 	if(other.m_vertexWeights != nullptr)
 	{
 		if(m_vertexWeights == nullptr)
-			m_vertexWeights = std::make_shared<std::vector<VertexWeight>>();
+			m_vertexWeights = std::make_shared<std::vector<umath::VertexWeight>>();
 		m_vertexWeights->reserve(newVertCount);
 		m_vertexWeights->resize(vertCount);
 		for(auto &vw : *other.m_vertexWeights)
@@ -333,7 +333,7 @@ void ModelSubMesh::Merge(const ModelSubMesh &other)
 	if(other.m_extendedVertexWeights != nullptr)
 	{
 		if(m_extendedVertexWeights == nullptr)
-			m_extendedVertexWeights = std::make_shared<std::vector<VertexWeight>>();
+			m_extendedVertexWeights = std::make_shared<std::vector<umath::VertexWeight>>();
 		m_extendedVertexWeights->reserve(newVertCount);
 		m_extendedVertexWeights->resize(vertCount);
 		for(auto &vw : *other.m_extendedVertexWeights)
@@ -441,21 +441,21 @@ uint32_t ModelSubMesh::GetTriangleVertexCount() const {return static_cast<uint32
 uint32_t ModelSubMesh::GetTriangleCount() const {return static_cast<uint32_t>(m_triangles->size()) /3;}
 uint32_t ModelSubMesh::GetSkinTextureIndex() const {return m_skinTextureIndex;}
 void ModelSubMesh::SetSkinTextureIndex(uint32_t texture) {m_skinTextureIndex = texture;}
-std::vector<Vertex> &ModelSubMesh::GetVertices() {return *m_vertices;}
+std::vector<umath::Vertex> &ModelSubMesh::GetVertices() {return *m_vertices;}
 std::vector<Vector2> &ModelSubMesh::GetAlphas() {return *m_alphas;}
 std::vector<uint16_t> &ModelSubMesh::GetTriangles() {return *m_triangles;}
-std::vector<VertexWeight> &ModelSubMesh::GetVertexWeights() {return *m_vertexWeights;}
-std::vector<VertexWeight> &ModelSubMesh::GetExtendedVertexWeights() {return *m_extendedVertexWeights;}
+std::vector<umath::VertexWeight> &ModelSubMesh::GetVertexWeights() {return *m_vertexWeights;}
+std::vector<umath::VertexWeight> &ModelSubMesh::GetExtendedVertexWeights() {return *m_extendedVertexWeights;}
 uint8_t ModelSubMesh::GetAlphaCount() const {return m_numAlphas;}
 void ModelSubMesh::SetAlphaCount(uint8_t numAlpha) {m_numAlphas = numAlpha;}
-uint32_t ModelSubMesh::AddVertex(const Vertex &v)
+uint32_t ModelSubMesh::AddVertex(const umath::Vertex &v)
 {
 	if(m_vertices->size() == m_vertices->capacity())
 		m_vertices->reserve(static_cast<uint32_t>(m_vertices->size() *1.5f));
 	m_vertices->push_back(v);
 	return static_cast<uint32_t>(m_vertices->size() -1);
 }
-void ModelSubMesh::AddTriangle(const Vertex &v1,const Vertex &v2,const Vertex &v3)
+void ModelSubMesh::AddTriangle(const umath::Vertex &v1,const umath::Vertex &v2,const umath::Vertex &v3)
 {
 	if(m_vertices->size() == m_vertices->capacity())
 		m_vertices->reserve(static_cast<uint32_t>(m_vertices->size() *1.5f));
@@ -513,7 +513,7 @@ void ModelSubMesh::Update(ModelUpdateFlags flags)
 		m_max = Vector3(0.f,0.f,0.f);
 	}
 }
-void ModelSubMesh::SetVertex(uint32_t idx,const Vertex &v)
+void ModelSubMesh::SetVertex(uint32_t idx,const umath::Vertex &v)
 {
 	if(idx >= m_vertices->size())
 		return;
@@ -595,15 +595,15 @@ void ModelSubMesh::ComputeTangentBasis()
 	}
 #endif
 }
-const std::vector<VertexWeight> &ModelSubMesh::GetVertexWeightSet(uint32_t idx) const
+const std::vector<umath::VertexWeight> &ModelSubMesh::GetVertexWeightSet(uint32_t idx) const
 {
 	return const_cast<ModelSubMesh*>(this)->GetVertexWeightSet(idx);
 }
-std::vector<VertexWeight> &ModelSubMesh::GetVertexWeightSet(uint32_t idx)
+std::vector<umath::VertexWeight> &ModelSubMesh::GetVertexWeightSet(uint32_t idx)
 {
 	return (idx >= 4) ? *m_extendedVertexWeights : *m_vertexWeights;
 }
-void ModelSubMesh::SetVertexWeight(uint32_t idx,const VertexWeight &weight)
+void ModelSubMesh::SetVertexWeight(uint32_t idx,const umath::VertexWeight &weight)
 {
 	auto &vertexWeights = GetVertexWeightSet(idx);
 	if(idx >= vertexWeights.size())
@@ -627,7 +627,7 @@ std::vector<Vector2> &ModelSubMesh::AddUVSet(const std::string &name)
 	auto it = m_uvSets->insert(std::make_pair(name,std::vector<Vector2>{})).first;
 	return it->second;
 }
-Vertex ModelSubMesh::GetVertex(uint32_t idx) const
+umath::Vertex ModelSubMesh::GetVertex(uint32_t idx) const
 {
 	if(idx >= m_vertices->size())
 		return {};
@@ -657,7 +657,7 @@ Vector2 ModelSubMesh::GetVertexAlpha(uint32_t idx) const
 		return {};
 	return (*m_alphas)[idx];
 }
-VertexWeight ModelSubMesh::GetVertexWeight(uint32_t idx) const
+umath::VertexWeight ModelSubMesh::GetVertexWeight(uint32_t idx) const
 {
 	auto &vertexWeights = GetVertexWeightSet(idx);
 	if(idx >= vertexWeights.size())
@@ -671,7 +671,7 @@ void ModelSubMesh::GetBounds(Vector3 &min,Vector3 &max) const
 }
 void ModelSubMesh::Optimize()
 {
-	std::vector<Vertex> newVerts;
+	std::vector<umath::Vertex> newVerts;
 	newVerts.reserve(m_vertices->size());
 	std::vector<uint16_t> newTriangles;
 	newTriangles.reserve(m_triangles->size());
@@ -682,7 +682,7 @@ void ModelSubMesh::Optimize()
 	std::vector<Vector2> newAlphas;
 	if(bCheckAlphas == true)
 		newAlphas.reserve(m_alphas->size());
-	std::vector<VertexWeight> newVertexWeights;
+	std::vector<umath::VertexWeight> newVertexWeights;
 	if(bCheckWeights == true)
 		newVertexWeights.reserve(m_vertexWeights->size());
 
@@ -701,7 +701,7 @@ void ModelSubMesh::Optimize()
 			auto *weightOther = (j < newVertexWeights.size()) ? &newVertexWeights[j] : nullptr;
 			if((bCheckAlphas && alphaOther == nullptr) || (bCheckWeights && weightOther == nullptr))
 				break;
-			if(v == vOther && (bCheckAlphas == false || (umath::abs(alpha->x -alphaOther->x) <= VERTEX_EPSILON && umath::abs(alpha->y -alphaOther->y) <= VERTEX_EPSILON)) && (bCheckWeights == false || *weight == *weightOther))
+			if(v == vOther && (bCheckAlphas == false || (umath::abs(alpha->x -alphaOther->x) <= umath::VERTEX_EPSILON && umath::abs(alpha->y -alphaOther->y) <= umath::VERTEX_EPSILON)) && (bCheckWeights == false || *weight == *weightOther))
 			{
 				vertIdx = j;
 				break;
@@ -765,7 +765,7 @@ bool ModelSubMesh::Save(udm::AssetDataArg outData,std::string &outErr)
 	udm["pose"] = GetPose();
 	udm["geometryType"] = udm::enum_to_string(GetGeometryType());
 
-	static_assert(sizeof(Vertex) == 48);
+	static_assert(sizeof(umath::Vertex) == 48);
 	auto strctVertex = ::udm::StructDescription::Define<Vector3,Vector2,Vector3,Vector4>({"pos","uv","n","t"});
 	udm.AddArray("vertices",strctVertex,GetVertices(),udm::ArrayType::Compressed);
 	udm.AddArray("indices",GetTriangles(),udm::ArrayType::Compressed);
@@ -778,7 +778,7 @@ bool ModelSubMesh::Save(udm::AssetDataArg outData,std::string &outErr)
 	auto &vertexWeights = GetVertexWeights();
 	if(!vertexWeights.empty())
 	{
-		static_assert(sizeof(VertexWeight) == 32);
+		static_assert(sizeof(umath::VertexWeight) == 32);
 		auto strctVertexWeight = ::udm::StructDescription::Define<Vector4i,Vector4>({"id","w"});
 		udm.AddArray("vertexWeights",strctVertexWeight,vertexWeights,udm::ArrayType::Compressed);
 

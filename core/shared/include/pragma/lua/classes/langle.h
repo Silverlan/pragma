@@ -17,12 +17,10 @@ namespace Lua
 {
 	namespace Angle
 	{
-		DLLNETWORK Vector3 Up(EulerAngles *ang);
-		DLLNETWORK void Orientation(lua_State *l,EulerAngles *ang);
-		DLLNETWORK void Copy(lua_State *l,EulerAngles *ang);
-		DLLNETWORK void ToMatrix(lua_State *l,EulerAngles *ang);
-		DLLNETWORK void ToQuaternion(lua_State *l,EulerAngles *ang,uint32_t rotationOrder);
-		DLLNETWORK void Set(lua_State *l,EulerAngles *ang,float p,float y,float r);
+		DLLNETWORK luabind::mult<Vector3,Vector3,Vector3> Orientation(lua_State *l,const EulerAngles &ang);
+		DLLNETWORK EulerAngles Copy(lua_State *l,const EulerAngles &ang);
+		DLLNETWORK void ToQuaternion(lua_State *l,const EulerAngles &ang,uint32_t rotationOrder);
+		DLLNETWORK void Set(lua_State *l,EulerAngles &ang,float p,float y,float r);
 	};
 };
 

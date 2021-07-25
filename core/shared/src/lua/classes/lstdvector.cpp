@@ -13,8 +13,8 @@ template<typename T>
 {
 	auto classDefVec = luabind::class_<std::vector<T>>(name);
 	classDefVec.def(luabind::constructor<>());
-	classDefVec.def("__len",static_cast<void(*)(lua_State*,const std::vector<T>&)>([](lua_State *l,const std::vector<T> &v) {
-		Lua::PushInt(l,v.size());
+	classDefVec.def("__len",static_cast<size_t(*)(lua_State*,const std::vector<T>&)>([](lua_State *l,const std::vector<T> &v) {
+		return v.size();
 	}));
 	classDefVec.def("PushBack",static_cast<void(*)(lua_State*,const std::vector<T>&,const T&)>([](lua_State *l,const std::vector<T> &v,const T &value) {
 		const_cast<std::vector<T>&>(v).push_back(value);
@@ -25,24 +25,23 @@ template<typename T>
 	classDefVec.def("Erase",static_cast<void(*)(lua_State*,const std::vector<T>&,size_t)>([](lua_State *l,const std::vector<T> &v,size_t pos) {
 		const_cast<std::vector<T>&>(v).erase(v.begin() +pos);
 	}));
-	classDefVec.def("At",static_cast<void(*)(lua_State*,const std::vector<T>&,size_t)>([](lua_State *l,const std::vector<T> &v,size_t pos) {
-		auto value = const_cast<std::vector<T>&>(v).at(pos);
-		Lua::Push<T>(l,value);
+	classDefVec.def("At",static_cast<T(*)(lua_State*,const std::vector<T>&,size_t)>([](lua_State *l,const std::vector<T> &v,size_t pos) -> T {
+		return const_cast<std::vector<T>&>(v).at(pos);
 	}));
 	classDefVec.def("Set",static_cast<void(*)(lua_State*,const std::vector<T>&,size_t,const T&)>([](lua_State *l,const std::vector<T> &v,size_t pos,const T &value) {
 		const_cast<std::vector<T>&>(v).at(pos) = value;
 	}));
-	classDefVec.def("Back",static_cast<void(*)(lua_State*,const std::vector<T>&)>([](lua_State *l,const std::vector<T> &v) {
-		Lua::Push<T>(l,v.back());
+	classDefVec.def("Back",static_cast<T(*)(lua_State*,const std::vector<T>&)>([](lua_State *l,const std::vector<T> &v) {
+		return v.back();
 	}));
-	classDefVec.def("Front",static_cast<void(*)(lua_State*,const std::vector<T>&)>([](lua_State *l,const std::vector<T> &v) {
-		Lua::Push<T>(l,v.front());
+	classDefVec.def("Front",static_cast<T(*)(lua_State*,const std::vector<T>&)>([](lua_State *l,const std::vector<T> &v) {
+		return v.front();
 	}));
-	classDefVec.def("Size",static_cast<void(*)(lua_State*,const std::vector<T>&)>([](lua_State *l,const std::vector<T> &v) {
-		Lua::PushInt(l,v.size());
+	classDefVec.def("Size",static_cast<size_t(*)(lua_State*,const std::vector<T>&)>([](lua_State *l,const std::vector<T> &v) {
+		return v.size();
 	}));
-	classDefVec.def("Capacity",static_cast<void(*)(lua_State*,const std::vector<T>&)>([](lua_State *l,const std::vector<T> &v) {
-		Lua::PushInt(l,v.capacity());
+	classDefVec.def("Capacity",static_cast<size_t(*)(lua_State*,const std::vector<T>&)>([](lua_State *l,const std::vector<T> &v) {
+		return v.capacity();
 	}));
 	classDefVec.def("Resize",static_cast<void(*)(lua_State*,const std::vector<T>&,size_t)>([](lua_State *l,const std::vector<T> &v,size_t size) {
 		const_cast<std::vector<T>&>(v).resize(size);

@@ -29,43 +29,18 @@ std::string Lua::engine::get_working_directory()
 	return path.GetString();
 }
 
-int Lua::engine::get_info(lua_State *l)
+Lua::tb<void> Lua::engine::get_info(lua_State *l)
 {
-	auto t = Lua::CreateTable(l);
-
-	Lua::PushString(l,"identifier");
-	Lua::PushString(l,engine_info::get_identifier());
-	Lua::SetTableValue(l,t);
-
-	Lua::PushString(l,"twitterURL");
-	Lua::PushString(l,engine_info::get_twitter_url());
-	Lua::SetTableValue(l,t);
-
-	Lua::PushString(l,"redditURL");
-	Lua::PushString(l,engine_info::get_reddit_url());
-	Lua::SetTableValue(l,t);
-
-	Lua::PushString(l,"discordURL");
-	Lua::PushString(l,engine_info::get_discord_url());
-	Lua::SetTableValue(l,t);
-
-	Lua::PushString(l,"steamAppId");
-	Lua::PushInt(l,engine_info::get_steam_app_id());
-	Lua::SetTableValue(l,t);
-
-	Lua::PushString(l,"websiteURL");
-	Lua::PushString(l,engine_info::get_website_url());
-	Lua::SetTableValue(l,t);
-
-	Lua::PushString(l,"wikiURL");
-	Lua::PushString(l,engine_info::get_wiki_url());
-	Lua::SetTableValue(l,t);
-
-	Lua::PushString(l,"name");
-	Lua::PushString(l,engine_info::get_name());
-	Lua::SetTableValue(l,t);
-	
-	return 1;
+	auto t = luabind::newtable(l);
+	t["identifier"] = engine_info::get_identifier();
+	t["twitterURL"] = engine_info::get_twitter_url();
+	t["redditURL"] = engine_info::get_reddit_url();
+	t["discordURL"] = engine_info::get_discord_url();
+	t["steamAppId"] = engine_info::get_steam_app_id();
+	t["websiteURL"] = engine_info::get_website_url();
+	t["wikiURL"] = engine_info::get_wiki_url();
+	t["name"] = engine_info::get_name();
+	return t;
 }
 
 void Lua::engine::PrecacheModel_sv(lua_State *l,const std::string &mdlName)
@@ -95,41 +70,32 @@ void Lua::engine::LoadSoundScripts(lua_State *l,const std::string &fileName,bool
 }
 void Lua::engine::LoadSoundScripts(lua_State *l,const std::string &fileName) {LoadSoundScripts(l,fileName,false);}
 
-int Lua::engine::LibraryExists(lua_State *l)
+bool Lua::engine::LibraryExists(lua_State *l,const std::string &library)
 {
-	std::string library = Lua::CheckString(l,1);
 	auto libAbs = util::get_normalized_module_path(library,::engine->GetNetworkState(l)->IsClient());
-	Lua::PushBool(l,FileManager::Exists(libAbs));
-	return 1;
+	return FileManager::Exists(libAbs);
 }
 
-int Lua::engine::LoadLibrary(lua_State *l)
+Lua::var<bool,std::string> Lua::engine::LoadLibrary(lua_State *l,const std::string &path)
 {
-	std::string path = Lua::CheckString(l,1);
 	NetworkState *state = ::engine->GetNetworkState(l);
 	std::string err;
 	bool b = state->InitializeLibrary(path,&err,l) != nullptr;
-	if(b == true)
-		Lua::PushBool(l,b);
-	else
-		Lua::PushString(l,err);
-	return 1;
+	if(b)
+		return luabind::object{l,true};
+	return luabind::object{l,err};
 }
 
 uint64_t Lua::engine::GetTickCount() {return ::engine->GetTickCount();}
 
 void Lua::engine::set_record_console_output(bool record) {::engine->SetRecordConsoleOutput(record);}
-int32_t Lua::engine::poll_console_output(lua_State *l)
+Lua::opt<Lua::mult<std::string,Con::MessageFlags,Lua::opt<Color>>> Lua::engine::poll_console_output(lua_State *l)
 {
 	auto output = ::engine->PollConsoleOutput();
 	if(output.has_value() == false)
-		return 0;
-	Lua::PushString(l,output->output);
-	Lua::PushInt(l,umath::to_integral(output->messageFlags));
+		return nil;
+	luabind::object color {};
 	if(output->color)
-	{
-		Lua::Push<Color>(l,*output->color);
-		return 3;
-	}
-	return 2;
+		color = {l,*output->color};
+	return Lua::mult<std::string,Con::MessageFlags,Lua::opt<Color>>{l,output->output,output->messageFlags,opt<Color>{color}};
 }

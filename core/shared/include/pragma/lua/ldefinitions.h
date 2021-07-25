@@ -120,22 +120,22 @@ namespace Lua
 	DLLNETWORK void HandleLuaError(lua_State *l,Lua::StatusCode s);
 	DLLNETWORK ErrorColorMode GetErrorColorMode(lua_State *l);
 	template<typename T>
-		void table_to_vector(lua_State *l,luabind::table<> t,int32_t tableStackIndex,std::vector<T> &outData);
+		void table_to_vector(lua_State *l,const luabind::object &t,int32_t tableStackIndex,std::vector<T> &outData);
 	template<typename T>
-		std::vector<T> table_to_vector(lua_State *l,luabind::table<> t,int32_t tableStackIndex);
+		std::vector<T> table_to_vector(lua_State *l,const luabind::object &t,int32_t tableStackIndex);
 	template<typename T>
 		luabind::object vector_to_table(lua_State *l,const std::vector<T> &data);
 
 	template<typename T0,typename T1>
-		void table_to_map(lua_State *l,luabind::table<> t,int32_t tableStackIndex,std::unordered_map<T0,T1> &outData);
+		void table_to_map(lua_State *l,const luabind::object &t,int32_t tableStackIndex,std::unordered_map<T0,T1> &outData);
 	template<typename T0,typename T1>
-		std::unordered_map<T0,T1> table_to_map(lua_State *l,luabind::table<> t,int32_t tableStackIndex);
+		std::unordered_map<T0,T1> table_to_map(lua_State *l,const luabind::object &t,int32_t tableStackIndex);
 	template<typename T0,typename T1>
 		luabind::object map_to_table(lua_State *l,const std::unordered_map<T0,T1> &data);
 };
 
 template<typename T>
-	void Lua::table_to_vector(lua_State *l,luabind::table<> t,int32_t tableStackIndex,std::vector<T> &outData)
+	void Lua::table_to_vector(lua_State *l,const luabind::object &t,int32_t tableStackIndex,std::vector<T> &outData)
 {
 	auto n = Lua::GetObjectLength(l,tableStackIndex);
 	outData.reserve(outData.size() +n);
@@ -147,7 +147,7 @@ template<typename T>
 }
 
 template<typename T>
-	std::vector<T> Lua::table_to_vector(lua_State *l,luabind::table<> t,int32_t tableStackIndex)
+	std::vector<T> Lua::table_to_vector(lua_State *l,const luabind::object &t,int32_t tableStackIndex)
 {
 	std::vector<T> result {};
 	table_to_vector(l,t,tableStackIndex,result);
@@ -165,7 +165,7 @@ template<typename T>
 }
 
 template<typename T0,typename T1>
-	void Lua::table_to_map(lua_State *l,luabind::table<> t,int32_t tableStackIndex,std::unordered_map<T0,T1> &outData)
+	void Lua::table_to_map(lua_State *l,const luabind::object &t,int32_t tableStackIndex,std::unordered_map<T0,T1> &outData)
 {
 	for(auto it=luabind::iterator{t},end=luabind::iterator{};it!=end;++it)
 	{
@@ -176,7 +176,7 @@ template<typename T0,typename T1>
 }
 
 template<typename T0,typename T1>
-	std::unordered_map<T0,T1> Lua::table_to_map(lua_State *l,luabind::table<> t,int32_t tableStackIndex)
+	std::unordered_map<T0,T1> Lua::table_to_map(lua_State *l,const luabind::object &t,int32_t tableStackIndex)
 {
 	std::unordered_map<T0,T1> result {};
 	table_to_map(l,t,tableStackIndex,result);

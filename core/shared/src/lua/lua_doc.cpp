@@ -297,7 +297,7 @@ void print_member_documentation(const pragma::doc::Member &member)
 	util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 	Con::cout<<"Type: ";
 	util::set_console_color(util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Intensity);
-	Con::cout<<member.GetType()<<Con::endl;
+	Con::cout<<member.GetType().GetFullType()<<Con::endl;
 
 	auto &def = member.GetDefault();
 	if(def.has_value())
@@ -382,7 +382,7 @@ void print_collection(const pragma::doc::Collection &collection)
 			auto &member = members.at(idx);
 			Con::cout<<"- ";
 			util::set_console_color(util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Intensity);
-			Con::cout<<"["<<wrap_link(member.GetType())<<"] ";
+			Con::cout<<"["<<wrap_link(member.GetType().GetFullType())<<"] ";
 			util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 			Con::cout<<member.GetFullName()<<Con::endl;
 		}

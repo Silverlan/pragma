@@ -1214,21 +1214,21 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defEulerAngles.def(float() *luabind::const_self);
 	defEulerAngles.def("GetForward",&EulerAngles::Forward);
 	defEulerAngles.def("GetRight",&EulerAngles::Right);
-	defEulerAngles.def("GetUp",&Lua::Angle::Up);
+	defEulerAngles.def("GetUp",static_cast<Vector3(EulerAngles::*)() const>(&EulerAngles::Up));
 	defEulerAngles.def("GetOrientation",&Lua::Angle::Orientation);
 	defEulerAngles.def("Normalize",static_cast<void(EulerAngles::*)()>(&EulerAngles::Normalize));
 	defEulerAngles.def("Normalize",static_cast<void(EulerAngles::*)(float)>(&EulerAngles::Normalize));
-	defEulerAngles.def("ToMatrix",&Lua::Angle::ToMatrix);
+	defEulerAngles.def("ToMatrix",&EulerAngles::ToMatrix);
 	defEulerAngles.def("Copy",&Lua::Angle::Copy);
-	defEulerAngles.def("Equals",static_cast<void(*)(lua_State*,const EulerAngles&,const EulerAngles&,float)>([](lua_State *l,const EulerAngles &a,const EulerAngles &b,float epsilon) {
-		Lua::PushBool(l,umath::abs(a.p -b.p) <= epsilon && umath::abs(a.y -b.y) <= epsilon && umath::abs(a.r -b.r) <= epsilon);
-		}));
-	defEulerAngles.def("Equals",static_cast<void(*)(lua_State*,const EulerAngles&,const EulerAngles&)>([](lua_State *l,const EulerAngles &a,const EulerAngles &b) {
+	defEulerAngles.def("Equals",static_cast<bool(*)(lua_State*,const EulerAngles&,const EulerAngles&,float)>([](lua_State *l,const EulerAngles &a,const EulerAngles &b,float epsilon) {
+		return umath::abs(a.p -b.p) <= epsilon && umath::abs(a.y -b.y) <= epsilon && umath::abs(a.r -b.r) <= epsilon;
+	}));
+	defEulerAngles.def("Equals",static_cast<bool(*)(lua_State*,const EulerAngles&,const EulerAngles&)>([](lua_State *l,const EulerAngles &a,const EulerAngles &b) {
 		float epsilon = 0.001f;
-		Lua::PushBool(l,umath::abs(a.p -b.p) <= epsilon && umath::abs(a.y -b.y) <= epsilon && umath::abs(a.r -b.r) <= epsilon);
+		return umath::abs(a.p -b.p) <= epsilon && umath::abs(a.y -b.y) <= epsilon && umath::abs(a.r -b.r) <= epsilon;
 	}));
 	defEulerAngles.def("ToQuaternion",Lua::Angle::ToQuaternion);
-	defEulerAngles.def("ToQuaternion",static_cast<void(*)(lua_State*,EulerAngles*)>([](lua_State *l,EulerAngles *ang) {
+	defEulerAngles.def("ToQuaternion",static_cast<void(*)(lua_State*,const EulerAngles&)>([](lua_State *l,const EulerAngles &ang) {
 		Lua::Angle::ToQuaternion(l,ang,umath::to_integral(pragma::RotationOrder::YXZ));
 	}));
 	defEulerAngles.def("Set",static_cast<void(EulerAngles::*)(const EulerAngles&)>(&EulerAngles::Set));
@@ -1236,8 +1236,8 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defEulerAngles.def("Set",static_cast<void(*)(lua_State*,EulerAngles&,uint32_t,float value)>([](lua_State *l,EulerAngles &ang,uint32_t idx,float value) {
 		ang[idx] = value;
 	}));
-	defEulerAngles.def("Get",static_cast<void(*)(lua_State*,const EulerAngles&,uint32_t)>([](lua_State *l,const EulerAngles &ang,uint32_t idx) {
-		Lua::PushNumber(l,ang[idx]);
+	defEulerAngles.def("Get",static_cast<float(*)(lua_State*,const EulerAngles&,uint32_t)>([](lua_State *l,const EulerAngles &ang,uint32_t idx) {
+		return ang[idx];
 	}));
 	modMath[defEulerAngles];
 
@@ -1263,27 +1263,27 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat.def(luabind::const_self ==luabind::const_self);
 	//defQuat.def(luabind::const_self *umath::Transform());
 	//defQuat.def(luabind::const_self *umath::ScaledTransform());
-	defQuat.def("Mul",static_cast<void(*)(lua_State*,const Quat&,const umath::Transform&)>([](lua_State *l,const Quat &a,const umath::Transform &b) {
-		Lua::Push<Quat>(l,a *b);
-		}));
-	defQuat.def("Mul",static_cast<void(*)(lua_State*,const Quat&,const umath::ScaledTransform&)>([](lua_State *l,const Quat &a,const umath::ScaledTransform &b) {
-		Lua::Push<Quat>(l,a *b);
+	defQuat.def("Mul",static_cast<Quat(*)(lua_State*,const Quat&,const umath::Transform&)>([](lua_State *l,const Quat &a,const umath::Transform &b) {
+		return a *b;
+	}));
+	defQuat.def("Mul",static_cast<Quat(*)(lua_State*,const Quat&,const umath::ScaledTransform&)>([](lua_State *l,const Quat &a,const umath::ScaledTransform &b) {
+		return a *b;
 	}));
 	defQuat.def(float() *luabind::const_self);
-	defQuat.def("GetForward",&Lua::Quaternion::GetForward);
-	defQuat.def("GetRight",&Lua::Quaternion::GetRight);
-	defQuat.def("GetUp",&Lua::Quaternion::GetUp);
+	defQuat.def("GetForward",&uquat::forward);
+	defQuat.def("GetRight",&uquat::right);
+	defQuat.def("GetUp",&uquat::up);
 	defQuat.def("GetOrientation",&Lua::Quaternion::GetOrientation);
-	defQuat.def("DotProduct",&Lua::Quaternion::DotProduct);
-	defQuat.def("Inverse",&Lua::Quaternion::Inverse);
-	defQuat.def("GetInverse",&Lua::Quaternion::GetInverse);
-	defQuat.def("Length",&Lua::Quaternion::Length);
-	defQuat.def("Normalize",&Lua::Quaternion::Normalize);
-	defQuat.def("GetNormal",&Lua::Quaternion::GetNormal);
+	defQuat.def("DotProduct",&uquat::dot_product);
+	defQuat.def("Inverse",&uquat::inverse);
+	defQuat.def("GetInverse",&uquat::get_inverse);
+	defQuat.def("Length",&uquat::length);
+	defQuat.def("Normalize",&uquat::normalize);
+	defQuat.def("GetNormal",&uquat::get_normal);
 	defQuat.def("Copy",&Lua::Quaternion::Copy);
-	defQuat.def("ToMatrix",&Lua::Quaternion::ToMatrix);
-	defQuat.def("Lerp",&Lua::Quaternion::Lerp);
-	defQuat.def("Slerp",&Lua::Quaternion::Slerp);
+	defQuat.def("ToMatrix",static_cast<Mat4(*)(const Quat&)>(&glm::toMat4));
+	defQuat.def("Lerp",&uquat::lerp);
+	defQuat.def("Slerp",&uquat::slerp);
 	defQuat.def("ToEulerAngles",Lua::Quaternion::ToEulerAngles);
 	defQuat.def("ToEulerAngles",static_cast<void(*)(lua_State*,Quat&)>([](lua_State *l,Quat &rot) {
 		Lua::Quaternion::ToEulerAngles(l,rot,umath::to_integral(pragma::RotationOrder::YXZ));
@@ -1306,11 +1306,11 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat.def("RotateZ",static_cast<void(*)(Quat&,float)>(&uquat::rotate_z));
 	defQuat.def("Rotate",static_cast<void(*)(Quat&,const Vector3&,float)>(&uquat::rotate));
 	defQuat.def("Rotate",static_cast<void(*)(Quat&,const EulerAngles&)>(&uquat::rotate));
-	defQuat.def("ApproachDirection",static_cast<void(*)(lua_State*,const Quat&,const Vector3&,const Vector3&,const ::Vector2&,const ::Vector2*,const ::Vector2*,const Quat*,const EulerAngles*)>(&Lua::Quaternion::ApproachDirection));
-	defQuat.def("ApproachDirection",static_cast<void(*)(lua_State*,const Quat&,const Vector3&,const Vector3&,const ::Vector2&,const ::Vector2*,const ::Vector2*,const Quat*)>(&Lua::Quaternion::ApproachDirection));
-	defQuat.def("ApproachDirection",static_cast<void(*)(lua_State*,const Quat&,const Vector3&,const Vector3&,const ::Vector2&,const ::Vector2*,const ::Vector2*)>(&Lua::Quaternion::ApproachDirection));
-	defQuat.def("ApproachDirection",static_cast<void(*)(lua_State*,const Quat&,const Vector3&,const Vector3&,const ::Vector2&,const ::Vector2*)>(&Lua::Quaternion::ApproachDirection));
-	defQuat.def("ApproachDirection",static_cast<void(*)(lua_State*,const Quat&,const Vector3&,const Vector3&,const ::Vector2&)>(&Lua::Quaternion::ApproachDirection));
+	defQuat.def("ApproachDirection",static_cast<luabind::mult<Quat,::Vector2>(*)(lua_State*,const Quat&,const Vector3&,const Vector3&,const ::Vector2&,const ::Vector2*,const ::Vector2*,const Quat*,const EulerAngles*)>(&Lua::Quaternion::ApproachDirection));
+	defQuat.def("ApproachDirection",static_cast<luabind::mult<Quat,::Vector2>(*)(lua_State*,const Quat&,const Vector3&,const Vector3&,const ::Vector2&,const ::Vector2*,const ::Vector2*,const Quat*)>(&Lua::Quaternion::ApproachDirection));
+	defQuat.def("ApproachDirection",static_cast<luabind::mult<Quat,::Vector2>(*)(lua_State*,const Quat&,const Vector3&,const Vector3&,const ::Vector2&,const ::Vector2*,const ::Vector2*)>(&Lua::Quaternion::ApproachDirection));
+	defQuat.def("ApproachDirection",static_cast<luabind::mult<Quat,::Vector2>(*)(lua_State*,const Quat&,const Vector3&,const Vector3&,const ::Vector2&,const ::Vector2*)>(&Lua::Quaternion::ApproachDirection));
+	defQuat.def("ApproachDirection",static_cast<luabind::mult<Quat,::Vector2>(*)(lua_State*,const Quat&,const Vector3&,const Vector3&,const ::Vector2&)>(&Lua::Quaternion::ApproachDirection));
 	defQuat.def("ClampRotation",static_cast<Quat(*)(lua_State*,Quat&,const EulerAngles&,const EulerAngles&)>([](lua_State *l,Quat &rot,const EulerAngles &minBounds,const EulerAngles &maxBounds) -> Quat {
 		return uquat::clamp_rotation(rot,minBounds,maxBounds);
 	}));
@@ -1318,7 +1318,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		return uquat::clamp_rotation(rot,-bounds,bounds);
 	}));
 	defQuat.def("Distance",&uquat::distance);
-	defQuat.def("GetConjugate",&Lua::Quaternion::GetConjugate);
+	defQuat.def("GetConjugate",static_cast<Quat(*)(const Quat&)>(&glm::conjugate));
 	modMath[defQuat];
 	auto _G = luabind::globals(lua.GetState());
 	_G["Vector2i"] = _G["math"]["Vector2i"];
@@ -1387,19 +1387,49 @@ void Game::RegisterLuaClasses()
 
 	auto &modMath = m_lua->RegisterLibrary("math");
 	auto defPlane = luabind::class_<umath::Plane>("Plane");
+#if 0
+DLLNETWORK void Lua_Plane_GetNormal(lua_State *l,umath::Plane &plane)
+{
+	Lua::Push<Vector3>(l,plane.GetNormal());
+}
+DLLNETWORK void Lua_Plane_GetPos(lua_State *l,umath::Plane &plane)
+{
+	Lua::Push<Vector3>(l,plane.GetPos());
+}
+DLLNETWORK void Lua_Plane_GetDistance(lua_State *l,umath::Plane &plane)
+{
+	Lua::PushNumber(l,plane.GetDistance());
+}
+DLLNETWORK void Lua_Plane_GetDistance(lua_State *l,umath::Plane &plane,const Vector3 &pos)
+{
+	Lua::PushNumber(l,plane.GetDistance(pos));
+}
+DLLNETWORK void Lua_Plane_MoveToPos(lua_State*,umath::Plane &plane,Vector3 &pos)
+{
+	plane.MoveToPos(pos);
+}
+DLLNETWORK void Lua_Plane_Rotate(lua_State*,umath::Plane &plane,EulerAngles &ang)
+{
+	plane.Rotate(ang);
+}
+DLLNETWORK void Lua_Plane_GetCenterPos(lua_State *l,umath::Plane &plane)
+{
+	Lua::Push<Vector3>(l,plane.GetCenterPos());
+}
+#endif
 	defPlane.def(luabind::constructor<Vector3,Vector3,Vector3>());
 	defPlane.def(luabind::constructor<Vector3,Vector3>());
 	defPlane.def(luabind::constructor<Vector3,double>());
 	defPlane.def("Copy",static_cast<void(*)(lua_State*,umath::Plane&)>([](lua_State *l,umath::Plane &plane) {
 		Lua::Push<umath::Plane>(l,umath::Plane{plane});
 	}));
-	defPlane.def("GetNormal",&Lua_Plane_GetNormal);
-	defPlane.def("GetPos",&Lua_Plane_GetPos);
-	defPlane.def("GetDistance",static_cast<void(*)(lua_State*,umath::Plane&)>(&Lua_Plane_GetDistance));
-	defPlane.def("GetDistance",static_cast<void(*)(lua_State*,umath::Plane&,const Vector3&)>(&Lua_Plane_GetDistance));
-	defPlane.def("MoveToPos",&Lua_Plane_MoveToPos);
-	defPlane.def("Rotate",&Lua_Plane_Rotate);
-	defPlane.def("GetCenterPos",&Lua_Plane_GetCenterPos);
+	defPlane.def("GetNormal",static_cast<const Vector3&(umath::Plane::*)() const>(&umath::Plane::GetNormal));
+	defPlane.def("GetPos",static_cast<Vector3(*)(const umath::Plane&)>([](const umath::Plane &plane) {return plane.GetPos();}));
+	defPlane.def("GetDistance",static_cast<double(umath::Plane::*)() const>(&umath::Plane::GetDistance));
+	defPlane.def("GetDistance",static_cast<float(umath::Plane::*)(const Vector3&) const>(&umath::Plane::GetDistance));
+	defPlane.def("MoveToPos",static_cast<void(*)(umath::Plane&,const Vector3 &pos)>([](umath::Plane &plane,const Vector3 &pos) {plane.MoveToPos(pos);}));
+	defPlane.def("Rotate",&umath::Plane::Rotate);
+	defPlane.def("GetCenterPos",static_cast<Vector3(*)(const umath::Plane&)>([](const umath::Plane &plane) {return plane.GetCenterPos();}));
 	defPlane.def("Transform",static_cast<void(*)(lua_State*,umath::Plane&,const Mat4&)>([](lua_State *l,umath::Plane &plane,const Mat4 &transform) {
 		const auto &n = plane.GetNormal();
 		auto p = n *static_cast<float>(plane.GetDistance());
@@ -1417,12 +1447,15 @@ void Game::RegisterLuaClasses()
 	modMath[defPlane];
 }
 
-LuaEntityIterator Lua::ents::create_lua_entity_iterator(lua_State *l,luabind::object oFilter,uint32_t idxFilter,EntityIterator::FilterFlags filterFlags)
+LuaEntityIterator Lua::ents::create_lua_entity_iterator(lua_State *l,const tb<LuaEntityIteratorFilterBase> &filterTable,EntityIterator::FilterFlags filterFlags)
 {
 	auto r = LuaEntityIterator{l,filterFlags};
-	if(idxFilter != std::numeric_limits<uint32_t>::max())
+	if(filterTable)
 	{
-		auto t = idxFilter;
+		filterTable.push(l);
+		luabind::detail::stack_pop sp {l,1};
+
+		auto t = Lua::GetStackTop(l);
 		Lua::CheckTable(l,t);
 		auto numFilters = Lua::GetObjectLength(l,t);
 		for(auto i=decltype(numFilters){0u};i<numFilters;++i)
@@ -1451,23 +1484,20 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 		}),luabind::return_stl_iterator{})
 	];
 	modEnts[
-		luabind::def("iterator",static_cast<LuaEntityIterator&(*)(lua_State*,luabind::object)>([](lua_State *l,luabind::object oFilterOrFlags) -> LuaEntityIterator& {
+		luabind::def("iterator",static_cast<LuaEntityIterator&(*)(lua_State*,const Lua::var<EntityIterator::FilterFlags,Lua::tb<LuaEntityIteratorFilterBase>>&)>([](lua_State *l,const Lua::var<EntityIterator::FilterFlags,Lua::tb<LuaEntityIteratorFilterBase>> &oFilterOrFlags) -> LuaEntityIterator& {
 			auto filterFlags = EntityIterator::FilterFlags::Default;
-			auto filterIdx = 1u;
+			luabind::object filterTable {};
 			if(Lua::IsNumber(l,1))
-			{
-				filterFlags = static_cast<EntityIterator::FilterFlags>(Lua::CheckInt(l,1));
-				filterIdx = std::numeric_limits<uint32_t>::max();
-			}
-			s_entIterator = Lua::ents::create_lua_entity_iterator(l,oFilterOrFlags,filterIdx,filterFlags);
+				filterFlags = static_cast<EntityIterator::FilterFlags>(luabind::object_cast<uint32_t>(oFilterOrFlags));
+			else
+				filterTable = oFilterOrFlags;
+			s_entIterator = Lua::ents::create_lua_entity_iterator(l,filterTable,filterFlags);
 			return *s_entIterator;
 		}),luabind::return_stl_iterator{})
 	];
 	modEnts[
-		luabind::def("iterator",static_cast<LuaEntityIterator&(*)(lua_State*,luabind::object,luabind::object)>([](lua_State *l,luabind::object oFilterFlags,luabind::object oFilter) -> LuaEntityIterator& {
-			Lua::CheckInt(l,1);
-			auto filterFlags = static_cast<EntityIterator::FilterFlags>(Lua::CheckInt(l,1));
-			s_entIterator = Lua::ents::create_lua_entity_iterator(l,oFilter,2u,filterFlags);
+		luabind::def("iterator",static_cast<LuaEntityIterator&(*)(lua_State*,EntityIterator::FilterFlags,const Lua::tb<LuaEntityIteratorFilterBase>&)>([](lua_State *l,EntityIterator::FilterFlags filterFlags,const Lua::tb<LuaEntityIteratorFilterBase> &oFilter) -> LuaEntityIterator& {
+			s_entIterator = Lua::ents::create_lua_entity_iterator(l,oFilter,filterFlags);
 			return *s_entIterator;
 		}),luabind::return_stl_iterator{})
 	];

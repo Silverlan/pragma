@@ -17,25 +17,25 @@ namespace Lua
 	{
 		DLLNETWORK bool IsRootBone(lua_State *l,::Skeleton &skeleton,const std::string &boneId);
 		DLLNETWORK bool IsRootBone(lua_State *l,::Skeleton &skeleton,uint32_t boneId);
-		DLLNETWORK void GetRootBones(lua_State *l,::Skeleton &skeleton);
-		DLLNETWORK void GetBones(lua_State *l,::Skeleton &skeleton);
-		DLLNETWORK void GetBone(lua_State *l,::Skeleton &skeleton,uint32_t boneId);
-		DLLNETWORK void LookupBone(lua_State *l,::Skeleton &skeleton,const std::string &name);
+		DLLNETWORK luabind::map<uint32_t,std::shared_ptr<::Bone>> GetRootBones(lua_State *l,::Skeleton &skeleton);
+		DLLNETWORK luabind::tableT<std::shared_ptr<::Bone>> GetBones(lua_State *l,::Skeleton &skeleton);
+		DLLNETWORK std::shared_ptr<::Bone> GetBone(lua_State *l,::Skeleton &skeleton,uint32_t boneId);
+		DLLNETWORK int32_t LookupBone(lua_State *l,::Skeleton &skeleton,const std::string &name);
 
-		DLLNETWORK void AddBone(lua_State *l,::Skeleton &skeleton,const std::string &name);
-		DLLNETWORK void AddBone(lua_State *l,::Skeleton &skeleton,const std::string &name,::Bone &parent);
-		DLLNETWORK void GetBoneCount(lua_State *l,::Skeleton &skeleton);
+		DLLNETWORK std::shared_ptr<::Bone> AddBone(lua_State *l,::Skeleton &skeleton,const std::string &name);
+		DLLNETWORK std::shared_ptr<::Bone> AddBone(lua_State *l,::Skeleton &skeleton,const std::string &name,::Bone &parent);
+		DLLNETWORK uint32_t GetBoneCount(lua_State *l,::Skeleton &skeleton);
 		DLLNETWORK void Merge(lua_State *l,::Skeleton &skeleton,::Skeleton &skeletonOther);
 		DLLNETWORK void ClearBones(lua_State *l,::Skeleton &skeleton);
-		DLLNETWORK void MakeRootBone(lua_State *l,::Skeleton &skeleton,::Bone &bone);
-		DLLNETWORK luabind::object GetBoneHierarchy(lua_State *l,::Skeleton &skeleton);
+		DLLNETWORK bool MakeRootBone(lua_State *l,::Skeleton &skeleton,::Bone &bone);
+		DLLNETWORK luabind::map<uint16_t,luabind::tableT<void>> GetBoneHierarchy(lua_State *l,::Skeleton &skeleton);
 	};
 	namespace Bone
 	{
-		DLLNETWORK void GetName(lua_State *l,::Bone &bone);
-		DLLNETWORK void GetID(lua_State *l,::Bone &bone);
-		DLLNETWORK void GetChildren(lua_State *l,::Bone &bone);
-		DLLNETWORK void GetParent(lua_State *l,::Bone &bone);
+		DLLNETWORK std::string GetName(lua_State *l,::Bone &bone);
+		DLLNETWORK BoneId GetID(lua_State *l,::Bone &bone);
+		DLLNETWORK luabind::map<BoneId,std::shared_ptr<::Bone>> GetChildren(lua_State *l,::Bone &bone);
+		DLLNETWORK std::shared_ptr<::Bone> GetParent(lua_State *l,::Bone &bone);
 		DLLNETWORK void SetName(lua_State *l,::Bone &bone,const std::string &name);
 		DLLNETWORK void SetParent(lua_State *l,::Bone &bone,::Bone &parent);
 		DLLNETWORK void ClearParent(lua_State *l,::Bone &bone);

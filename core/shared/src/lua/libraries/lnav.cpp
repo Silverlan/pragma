@@ -118,19 +118,15 @@ void Lua::nav::register_library(Lua::Interface &lua)
 			auto navMesh = pragma::nav::Mesh::Create(mesh,navConfig);
 			Lua::Push(l,navMesh);
 		})),
-		luabind::def("load",static_cast<void(*)(lua_State*)>([](lua_State *l) {
+		luabind::def("load",static_cast<opt<std::shared_ptr<pragma::nav::Mesh>>(*)(lua_State*)>([](lua_State *l) -> opt<std::shared_ptr<pragma::nav::Mesh>> {
 			auto &nw = *engine->GetNetworkState(l);
 			auto &game = *nw.GetGameState();
 			std::string fname = Lua::CheckString(l,1);
 			pragma::nav::Config config;
 			auto mesh = pragma::nav::load(game,fname,config);
 			if(mesh == nullptr)
-			{
-				Lua::PushBool(l,false);
-				return;
-			}
-			auto navMesh = pragma::nav::Mesh::Create(mesh,config);
-			Lua::Push(l,navMesh);
+				return nil;
+			return {l,pragma::nav::Mesh::Create(mesh,config)};
 		}))
 	];
 	Lua::RegisterLibraryEnums(lua.GetState(),"nav",{
@@ -195,9 +191,9 @@ void Lua::nav::register_library(Lua::Interface &lua)
 		else
 			Lua::Push<Vector3>(l,hit);
 	}));
-	classDefMesh.def("GetConfig",static_cast<void(*)(lua_State*,pragma::nav::Mesh&)>([](lua_State *l,pragma::nav::Mesh &navMesh) {
+	classDefMesh.def("GetConfig",static_cast<const pragma::nav::Config*(*)(lua_State*,pragma::nav::Mesh&)>([](lua_State *l,pragma::nav::Mesh &navMesh) -> const pragma::nav::Config* {
 		auto &config = navMesh.GetConfig();
-		Lua::Push<pragma::nav::Config>(l,config);
+		return &config;
 	}));
 	modNav[classDefMesh];
 }

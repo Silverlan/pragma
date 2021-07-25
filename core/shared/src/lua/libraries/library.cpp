@@ -403,112 +403,90 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		})),
 		luabind::def("map_value_to_range",static_cast<float(*)(lua_State*,float,float,float)>([](lua_State *l,float value,float lower,float upper) -> float {
 			return umath::clamp((value -lower) /(upper -lower),0.f,1.f);
-		}))
-	];
-	lua_pushtablecfunction(lua.GetState(),"math","randomf",Lua::math::randomf);
-	lua_pushtablecfunction(lua.GetState(),"math","normalize_angle",Lua::math::normalize_angle);
-	lua_pushtablecfunction(lua.GetState(),"math","perlin_noise",Lua::math::perlin_noise);
-	lua_pushtablecfunction(lua.GetState(),"math","sign",Lua::math::sign);
-	lua_pushtablecfunction(lua.GetState(),"math","lerp",Lua::math::lerp);
-	lua_pushtablecfunction(lua.GetState(),"math","round",Lua::math::round);
-	lua_pushtablecfunction(lua.GetState(),"math","snap_to_grid",Lua::math::snap_to_grid);
-	lua_pushtablecfunction(lua.GetState(),"math","calc_hermite_spline",Lua::math::calc_hermite_spline);
-	lua_pushtablecfunction(lua.GetState(),"math","calc_hermite_spline_position",Lua::math::calc_hermite_spline_position);
-	lua_pushtablecfunction(lua.GetState(),"math","is_in_range",Lua::math::is_in_range);
-	lua_pushtablecfunction(lua.GetState(),"math","normalize_uv_coordinates",Lua::math::normalize_uv_coordinates);
+		})),
+		luabind::def("randomf",static_cast<float(*)()>([]() -> float {
+			return umath::random(0.f,1.f);
+		})),
+		luabind::def("randomf",static_cast<float(*)(float,float)>([](float min,float max) -> float {
+			return umath::random(min,max);
+		})),
+		luabind::def("normalize_angle",static_cast<float(*)(float)>([](float angle) -> float {
+			return umath::normalize_angle(angle);
+		})),
+		luabind::def("normalize_angle",static_cast<float(*)(float,float)>([](float angle,float base) -> float {
+			return umath::normalize_angle(angle,base);
+		})),
+		luabind::def("sign",static_cast<int(*)(double)>([](double n) -> int {
+			if(n == 0.0)
+				return 1;
+			return static_cast<int>(n /fabs(n));
+		})),
+		luabind::def("perlin_noise",static_cast<double(*)(const Vector3&,uint32_t)>(Lua::math::perlin_noise)),
+		luabind::def("perlin_noise",static_cast<double(*)(const Vector3&)>(Lua::math::perlin_noise)),
+		luabind::def("lerp",&Lua::math::lerp),
+		luabind::def("round",&Lua::math::round),
+		luabind::def("round",static_cast<int32_t(*)(float)>(&umath::round)),
+		luabind::def("snap_to_grid",static_cast<int32_t(*)(float)>([](float f) -> int32_t {return umath::snap_to_grid(f);})),
+		luabind::def("snap_to_grid",&umath::snap_to_grid),
+		luabind::def("calc_hermite_spline",static_cast<luabind::object(*)(lua_State*,const Vector3&,const Vector3&,const Vector3&,const Vector3&,uint32_t)>([](lua_State *l,const Vector3 &p0,const Vector3 &p1,const Vector3 &p2,const Vector3 &p3,uint32_t segmentCount) -> luabind::object {return Lua::math::calc_hermite_spline(l,p0,p1,p2,p3,segmentCount);})),
+		luabind::def("calc_hermite_spline",&Lua::math::calc_hermite_spline),
+		luabind::def("calc_hermite_spline_position",static_cast<Vector3(*)(lua_State*,const Vector3&,const Vector3&,const Vector3&,const Vector3&,float)>([](lua_State *l,const Vector3 &p0,const Vector3 &p1,const Vector3 &p2,const Vector3 &p3,float s) -> Vector3 {return Lua::math::calc_hermite_spline_position(l,p0,p1,p2,p3,s);})),
+		luabind::def("calc_hermite_spline_position",&Lua::math::calc_hermite_spline_position),
+		luabind::def("is_in_range",&Lua::math::is_in_range),
+		luabind::def("normalize_uv_coordinates",&umath::normalize_uv_coordinates),
+		luabind::def("is_nan",static_cast<double(*)(double)>([](double val) -> double {return std::isnan<double>(val);})),
+		luabind::def("is_inf",static_cast<double(*)(double)>([](double val) -> double {return std::isinf<double>(val);})),
+		luabind::def("is_finite",static_cast<double(*)(double)>([](double val) -> double {return std::isfinite<double>(val);})),
+		luabind::def("cot",umath::cot),
+		luabind::def("calc_fov_from_lens",&::umath::camera::calc_fov_from_lens),
+		luabind::def("calc_focal_length_from_fov",&::umath::camera::calc_focal_length_from_fov),
+		luabind::def("calc_fov_from_focal_length",&::umath::camera::calc_fov_from_focal_length),
+		luabind::def("calc_aperture_size_from_fstop",&::umath::camera::calc_aperture_size_from_fstop),
+		luabind::def("calc_aperture_size_from_fstop",static_cast<float(*)(float,umath::Millimeter)>([](float fstop,umath::Millimeter focalLength) -> float {return ::umath::camera::calc_aperture_size_from_fstop(fstop,focalLength);})),
+		luabind::def("float_to_half_float",&::umath::float32_to_float16_glm),
+		luabind::def("half_float_to_float",&::umath::float16_to_float32_glm),
+		luabind::def("set_flag",static_cast<int64_t(*)(int64_t,int64_t,bool)>([](int64_t flags,int64_t flag,bool set) -> int64_t {
+			if(set)
+				flags |= flag;
+			else
+				flags &= ~flag;
+			return flags;
+		})),
+		luabind::def("calc_horizontal_fov",&Lua::math::calc_horizontal_fov),
+		luabind::def("calc_vertical_fov",&Lua::math::calc_vertical_fov),
+		luabind::def("calc_diagonal_fov",&Lua::math::calc_diagonal_fov),
+		luabind::def("calc_dielectric_specular_reflection",&::umath::calc_dielectric_specular_reflection),
+		luabind::def("calc_ballistic_velocity",&Lua::math::calc_ballistic_velocity),
+		luabind::def("ease_in",&Lua::math::ease_in),
+		luabind::def("ease_out",&Lua::math::ease_out),
+		luabind::def("ease_in_out",&Lua::math::ease_in_out),
+		luabind::def("get_frustum_plane_size",&Lua::math::get_frustum_plane_size),
+		luabind::def("get_frustum_plane_boundaries",&Lua::math::get_frustum_plane_boundaries),
+		luabind::def("get_frustum_plane_point",&Lua::math::get_frustum_plane_point),
+			
+		luabind::def("horizontal_fov_to_vertical_fov",&Lua::math::horizontal_fov_to_vertical_fov),
+		luabind::def("horizontal_fov_to_vertical_fov",static_cast<double(*)(float,float)>([](float fovDeg,float widthOrAspectRatio) -> double {return Lua::math::horizontal_fov_to_vertical_fov(fovDeg,widthOrAspectRatio);})),
+		luabind::def("vertical_fov_to_horizontal_fov",&Lua::math::vertical_fov_to_horizontal_fov),
+		luabind::def("vertical_fov_to_horizontal_fov",static_cast<double(*)(float,float)>([](float fovDeg,float widthOrAspectRatio) -> double {return Lua::math::vertical_fov_to_horizontal_fov(fovDeg,widthOrAspectRatio);})),
+		luabind::def("diagonal_fov_to_vertical_fov",&Lua::math::diagonal_fov_to_vertical_fov),
 
+		luabind::def("calc_ballistic_time_of_flight",static_cast<float(*)(const Vector3&,float,float,float)>(&umath::calc_ballistic_time_of_flight)),
+		luabind::def("calc_ballistic_time_of_flight",static_cast<float(*)(const Vector3&,const Vector3&,float)>(&umath::calc_ballistic_time_of_flight)),
+		luabind::def("calc_ballistic_time_of_flight",static_cast<float(*)(const Vector3&,const Vector3&,float,float,float)>(&umath::calc_ballistic_time_of_flight)),
+		luabind::def("calc_ballistic_time_of_flight",static_cast<float(*)(const Vector3&,const Vector3&,const Vector3&,float)>(&umath::calc_ballistic_time_of_flight)),
+			
+		luabind::def("solve_ballistic_arc",static_cast<luabind::tableT<Vector3>(*)(lua_State*,const Vector3&,double,const Vector3&,const Vector3&,double)>(&Lua::math::solve_ballistic_arc)),
+		luabind::def("solve_ballistic_arc",static_cast<luabind::tableT<Vector3>(*)(lua_State*,const Vector3&,double,const Vector3&,double)>(&Lua::math::solve_ballistic_arc)),
+			
+		luabind::def("solve_ballistic_arc_lateral",static_cast<luabind::optional<luabind::mult<Vector3,double,Vector3>>(*)(lua_State*,const Vector3&,double,const Vector3&,const Vector3&,double)>(&Lua::math::solve_ballistic_arc_lateral)),
+		luabind::def("solve_ballistic_arc_lateral",static_cast<luabind::optional<luabind::mult<Vector3,double>>(*)(lua_State*,const Vector3&,double,const Vector3&,double)>(&Lua::math::solve_ballistic_arc_lateral))
+	];
+	lua_pushtablecfunction(lua.GetState(),"math","parse_expression",parse_math_expression);
 	lua_pushtablecfunction(lua.GetState(),"math","solve_quadric",Lua::math::solve_quadric);
 	lua_pushtablecfunction(lua.GetState(),"math","solve_cubic",Lua::math::solve_cubic);
 	lua_pushtablecfunction(lua.GetState(),"math","solve_quartic",Lua::math::solve_quartic);
-	lua_pushtablecfunction(lua.GetState(),"math","calc_ballistic_velocity",Lua::math::calc_ballistic_velocity);
-	lua_pushtablecfunction(lua.GetState(),"math","calc_ballistic_time_of_flight",Lua::math::calc_ballistic_time_of_flight);
-	lua_pushtablecfunction(lua.GetState(),"math","solve_ballistic_arc",Lua::math::solve_ballistic_arc);
-	lua_pushtablecfunction(lua.GetState(),"math","solve_ballistic_arc_lateral",Lua::math::solve_ballistic_arc_lateral);
-
-	lua_pushtablecfunction(lua.GetState(),"math","calc_horizontal_fov",Lua::math::calc_horizontal_fov);
-	lua_pushtablecfunction(lua.GetState(),"math","calc_vertical_fov",Lua::math::calc_vertical_fov);
-	lua_pushtablecfunction(lua.GetState(),"math","calc_diagonal_fov",Lua::math::calc_diagonal_fov);
-
-	lua_pushtablecfunction(lua.GetState(),"math","horizontal_fov_to_vertical_fov",Lua::math::horizontal_fov_to_vertical_fov);
-	lua_pushtablecfunction(lua.GetState(),"math","vertical_fov_to_horizontal_fov",Lua::math::vertical_fov_to_horizontal_fov);
-	lua_pushtablecfunction(lua.GetState(),"math","diagonal_fov_to_vertical_fov",Lua::math::diagonal_fov_to_vertical_fov);
-
-	lua_pushtablecfunction(lua.GetState(),"math","get_frustum_plane_size",Lua::math::get_frustum_plane_size);
-	lua_pushtablecfunction(lua.GetState(),"math","get_frustum_plane_boundaries",Lua::math::get_frustum_plane_boundaries);
-	lua_pushtablecfunction(lua.GetState(),"math","get_frustum_plane_point",Lua::math::get_frustum_plane_point);
-	lua_pushtablecfunction(lua.GetState(),"math","calc_dielectric_specular_reflection",Lua::math::calc_dielectric_specular_reflection);
 
 	lua_pushtablecfunction(lua.GetState(),"math","max_abs",Lua::math::abs_max);
-	lua_pushtablecfunction(lua.GetState(),"math","ease_in",Lua::math::ease_in);
-	lua_pushtablecfunction(lua.GetState(),"math","ease_out",Lua::math::ease_out);
-	lua_pushtablecfunction(lua.GetState(),"math","ease_in_out",Lua::math::ease_in_out);
-	lua_pushtablecfunction(lua.GetState(),"math","is_nan",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-		auto f = Lua::CheckNumber(l,1);
-		Lua::PushBool(l,std::isnan(f));
-		return 1;
-	}));
-	lua_pushtablecfunction(lua.GetState(),"math","is_inf",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-		auto f = Lua::CheckNumber(l,1);
-		Lua::PushBool(l,std::isinf(f));
-		return 1;
-	}));
-	lua_pushtablecfunction(lua.GetState(),"math","is_finite",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-		auto f = Lua::CheckNumber(l,1);
-		Lua::PushBool(l,std::isfinite(f));
-		return 1;
-	}));
-	lua_pushtablecfunction(lua.GetState(),"math","calc_fov_from_lens",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-		auto sensorSize = Lua::CheckNumber(l,1);
-		auto focalLength = Lua::CheckNumber(l,1);
-		auto aspectRatio = Lua::CheckNumber(l,1);
-		Lua::PushNumber(l,::umath::camera::calc_fov_from_lens(sensorSize,focalLength,aspectRatio));
-		return 1;
-	}));
-	lua_pushtablecfunction(lua.GetState(),"math","calc_aperture_size_from_fstop",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-		auto fstop = Lua::CheckNumber(l,1);
-		auto focalLength = Lua::CheckNumber(l,2);
-		auto orthographicCamera = false;
-		if(Lua::IsSet(l,3))
-			orthographicCamera = Lua::CheckBool(l,3);
-		Lua::PushNumber(l,::umath::camera::calc_aperture_size_from_fstop(fstop,focalLength,orthographicCamera));
-		return 1;
-	}));
-	lua_pushtablecfunction(lua.GetState(),"math","calc_focal_length_from_fov",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-		auto fov = Lua::CheckNumber(l,1);
-		auto sensorSize = Lua::CheckNumber(l,2);
-		Lua::PushNumber(l,::umath::camera::calc_focal_length_from_fov(fov,sensorSize));
-		return 1;
-	}));
-	lua_pushtablecfunction(lua.GetState(),"math","calc_fov_from_focal_length",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-		auto focalLength = Lua::CheckNumber(l,1);
-		auto sensorSize = Lua::CheckNumber(l,2);
-		Lua::PushNumber(l,::umath::camera::calc_fov_from_focal_length(focalLength,sensorSize));
-		return 1;
-	}));
-	lua_pushtablecfunction(lua.GetState(),"math","cot",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-		Lua::PushNumber(l,umath::cot(Lua::CheckNumber(l,1)));
-		return 1;
-	}));
-	lua_pushtablecfunction(lua.GetState(),"math","float_to_half_float",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-		Lua::PushInt(l,umath::float32_to_float16_glm(Lua::CheckNumber(l,1)));
-		return 1;
-	}));
-	lua_pushtablecfunction(lua.GetState(),"math","half_float_to_float",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-		Lua::PushNumber(l,umath::float16_to_float32_glm(Lua::CheckInt(l,1)));
-		return 1;
-	}));
-	lua_pushtablecfunction(lua.GetState(),"math","parse_expression",parse_math_expression);
-	lua_pushtablecfunction(lua.GetState(),"math","set_flag",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-		auto flags = Lua::CheckInt(l,1);
-		auto flag = Lua::CheckInt(l,2);
-		auto set = Lua::CheckBool(l,3);
-		if(set)
-			flags |= flag;
-		else
-			flags &= ~flag;
-		Lua::PushInt(l,flags);
-		return 1;
-	}));
 
 	Lua::RegisterLibraryEnums(lua.GetState(),"math",{
 		{"EXPRESSION_CODE_BRACKET_OPENING",mup::ECmdCode::cmBO},
@@ -1475,7 +1453,7 @@ void Game::RegisterLuaLibraries()
 
 	auto boundingVolMod = luabind::module(GetLuaState(),"boundingvolume");
 	boundingVolMod[
-		luabind::def("get_rotated_aabb",Lua::boundingvolume::GetRotatedAABB,luabind::meta::join<luabind::pure_out_value<4>,luabind::pure_out_value<5>>::type{})
+		luabind::def("get_rotated_aabb",Lua::boundingvolume::GetRotatedAABB)
 	];
 
 	auto intersectMod = luabind::module(GetLuaState(),"intersect");

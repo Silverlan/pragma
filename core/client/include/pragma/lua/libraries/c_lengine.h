@@ -57,7 +57,4 @@ namespace Lua
 	};
 };
 
-#define LUA_SHARED_CL_ENGINE_FUNCTIONS \
-	{"poll_console_output",&Lua::engine::poll_console_output},
-
 #endif

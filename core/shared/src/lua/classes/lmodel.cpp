@@ -790,7 +790,7 @@ void Lua::Model::register_class(
 	auto classDefAnimation = luabind::class_<pragma::animation::Animation>("Animation")
 		.def("GetFrame",&Lua::Animation::GetFrame)
 		.def("GetBoneList",&Lua::Animation::GetBoneList)
-		.def("GetActivity",&Lua::Animation::GetActivity)
+		.def("GetActivity",&pragma::animation::Animation::GetActivity)
 		.def("GetActivityName",static_cast<luabind::object(*)(lua_State*,pragma::animation::Animation&)>([](lua_State *l,pragma::animation::Animation &anim) -> luabind::object {
 			auto &reg = pragma::animation::Animation::GetActivityEnumRegister();
 			auto *name = reg.GetEnumName(umath::to_integral(anim.GetActivity()));
@@ -802,45 +802,45 @@ void Lua::Model::register_class(
 			auto boneList = anim.GetBoneList();
 			return (idx < boneList.size()) ? boneList[idx] : -1;
 		}))
-		.def("SetActivity",&Lua::Animation::SetActivity)
-		.def("GetActivityWeight",&Lua::Animation::GetActivityWeight)
-		.def("SetActivityWeight",&Lua::Animation::SetActivityWeight)
-		.def("GetFPS",&Lua::Animation::GetFPS)
-		.def("SetFPS",&Lua::Animation::SetFPS)
-		.def("GetFlags",&Lua::Animation::GetFlags)
-		.def("SetFlags",&Lua::Animation::SetFlags)
-		.def("AddFlags",&Lua::Animation::AddFlags)
-		.def("RemoveFlags",&Lua::Animation::RemoveFlags)
+		.def("SetActivity",&pragma::animation::Animation::SetActivity)
+		.def("GetActivityWeight",&pragma::animation::Animation::GetActivityWeight)
+		.def("SetActivityWeight",&pragma::animation::Animation::SetActivityWeight)
+		.def("GetFPS",&pragma::animation::Animation::GetFPS)
+		.def("SetFPS",&pragma::animation::Animation::SetFPS)
+		.def("GetFlags",&pragma::animation::Animation::GetFlags)
+		.def("SetFlags",&pragma::animation::Animation::SetFlags)
+		.def("AddFlags",&pragma::animation::Animation::AddFlags)
+		.def("RemoveFlags",&pragma::animation::Animation::RemoveFlags)
 		.def("AddFrame",&Lua::Animation::AddFrame)
 		.def("GetFrames",&Lua::Animation::GetFrames)
-		.def("GetDuration",&Lua::Animation::GetDuration)
-		.def("GetBoneCount",&Lua::Animation::GetBoneCount)
-		.def("GetFrameCount",&Lua::Animation::GetFrameCount)
+		.def("GetDuration",&pragma::animation::Animation::GetDuration)
+		.def("GetBoneCount",&pragma::animation::Animation::GetBoneCount)
+		.def("GetFrameCount",&pragma::animation::Animation::GetFrameCount)
 		.def("AddEvent",&Lua::Animation::AddEvent)
 		.def("GetEvents",static_cast<void(*)(lua_State*,pragma::animation::Animation&,uint32_t)>(&Lua::Animation::GetEvents))
 		.def("GetEvents",static_cast<void(*)(lua_State*,pragma::animation::Animation&)>(&Lua::Animation::GetEvents))
 		.def("GetEventCount",static_cast<void(*)(lua_State*,pragma::animation::Animation&,uint32_t)>(&Lua::Animation::GetEventCount))
 		.def("GetEventCount",static_cast<void(*)(lua_State*,pragma::animation::Animation&)>(&Lua::Animation::GetEventCount))
-		.def("GetFadeInTime",&Lua::Animation::GetFadeInTime)
-		.def("GetFadeOutTime",&Lua::Animation::GetFadeOutTime)
+		.def("GetFadeInTime",&pragma::animation::Animation::GetFadeInTime)
+		.def("GetFadeOutTime",&pragma::animation::Animation::GetFadeOutTime)
 		.def("GetBlendController",&Lua::Animation::GetBlendController)
 		.def("CalcRenderBounds",&Lua::Animation::CalcRenderBounds)
 		.def("GetRenderBounds",&Lua::Animation::GetRenderBounds)
-		.def("Rotate",&Lua::Animation::Rotate)
-		.def("Translate",&Lua::Animation::Translate)
-		.def("Scale",&Lua::Animation::Scale)
-		.def("Reverse",&Lua::Animation::Reverse)
+		.def("Rotate",&pragma::animation::Animation::Rotate)
+		.def("Translate",&pragma::animation::Animation::Translate)
+		.def("Scale",&pragma::animation::Animation::Scale)
+		.def("Reverse",&pragma::animation::Animation::Reverse)
 		.def("RemoveEvent",&Lua::Animation::RemoveEvent)
 		.def("SetEventData",&Lua::Animation::SetEventData)
 		.def("SetEventType",&Lua::Animation::SetEventType)
 		.def("SetEventArgs",&Lua::Animation::SetEventArgs)
 		.def("LookupBone",&Lua::Animation::LookupBone)
 		.def("SetBoneList",&Lua::Animation::SetBoneList)
-		.def("AddBoneId",&Lua::Animation::AddBoneId)
-		.def("SetFadeInTime",&Lua::Animation::SetFadeInTime)
-		.def("SetFadeOutTime",&Lua::Animation::SetFadeOutTime)
-		.def("SetBoneWeight",&Lua::Animation::SetBoneWeight)
-		.def("GetBoneWeight",&Lua::Animation::GetBoneWeight)
+		.def("AddBoneId",&pragma::animation::Animation::AddBoneId)
+		.def("SetFadeInTime",&pragma::animation::Animation::SetFadeInTime)
+		.def("SetFadeOutTime",&pragma::animation::Animation::SetFadeOutTime)
+		.def("SetBoneWeight",&pragma::animation::Animation::SetBoneWeight)
+		.def("GetBoneWeight",static_cast<float(pragma::animation::Animation::*)(uint32_t) const>(&pragma::animation::Animation::GetBoneWeight))
 		.def("GetBoneWeights",&Lua::Animation::GetBoneWeights)
 		.def("ClearFrames",static_cast<void(*)(lua_State*,pragma::animation::Animation&)>([](lua_State *l,pragma::animation::Animation &anim) {
 			anim.GetFrames().clear();
@@ -1081,8 +1081,8 @@ void Lua::Model::register_class(
 	classDefSkeleton.def("GetRootBones",&Lua::Skeleton::GetRootBones);
 	classDefSkeleton.def("GetBones",&Lua::Skeleton::GetBones);
 	classDefSkeleton.def("LookupBone",&Lua::Skeleton::LookupBone);
-	classDefSkeleton.def("AddBone",static_cast<void(*)(lua_State*,::Skeleton&,const std::string&,::Bone&)>(&Lua::Skeleton::AddBone));
-	classDefSkeleton.def("AddBone",static_cast<void(*)(lua_State*,::Skeleton&,const std::string&)>(&Lua::Skeleton::AddBone));
+	classDefSkeleton.def("AddBone",static_cast<std::shared_ptr<::Bone>(*)(lua_State*,::Skeleton&,const std::string&,::Bone&)>(&Lua::Skeleton::AddBone));
+	classDefSkeleton.def("AddBone",static_cast<std::shared_ptr<::Bone>(*)(lua_State*,::Skeleton&,const std::string&)>(&Lua::Skeleton::AddBone));
 	classDefSkeleton.def("GetBoneCount",&Lua::Skeleton::GetBoneCount);
 	classDefSkeleton.def("Merge",&Lua::Skeleton::Merge);
 	classDefSkeleton.def("ClearBones",&Lua::Skeleton::ClearBones);

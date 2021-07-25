@@ -24,7 +24,7 @@
 #include "pragma/lua/lentity_components_base_types.hpp"
 #include "pragma/entities/components/animated_2_component.hpp"
 #include <pragma/physics/movetypes.h>
-
+#pragma optimize("",off)
 namespace Lua
 {
 	namespace Velocity
@@ -99,6 +99,147 @@ AnimationEvent Lua::get_animation_event(lua_State *l,int32_t tArgs,uint32_t even
 	return ev;
 }
 
+namespace util
+{
+	template<typename T>
+		class TWeakSharedHandle;
+	template<typename T>
+		class TSharedHandle;
+	template<typename T>
+		class WeakHandle;
+};
+namespace luabind
+{
+	namespace detail
+	{
+		template<typename T>
+		struct pointer_traits<util::WeakHandle<T>>
+		{
+			enum { is_pointer = true };
+			using value_type = T;
+		};
+	};
+};
+
+namespace luabind {
+
+	namespace detail
+	{
+
+		struct weak_handle_deleter
+		{
+			weak_handle_deleter(lua_State* L, int index)
+				: life_support(get_main_thread(L), L, index)
+			{}
+
+			void operator()(void const*)
+			{
+				handle().swap(life_support);
+			}
+
+			handle life_support;
+		};
+
+	} // namespace detail
+
+	template <class T>
+	struct default_converter<util::WeakHandle<T> >
+		: default_converter<T*>
+	{
+		using is_native = std::false_type;
+
+		template <class U>
+		int match(lua_State* L, U, int index)
+		{
+			return default_converter<T*>::match(L, decorate_type_t<T*>(), index);
+		}
+
+		template <class U>
+		util::WeakHandle<T> to_cpp(lua_State* L, U, int index)
+		{
+			T* raw_ptr = default_converter<T*>::to_cpp(L, decorate_type_t<T*>(), index);
+
+			if(!raw_ptr) {
+				return util::WeakHandle<T>();
+			} else {
+				return util::WeakHandle<T>(raw_ptr, detail::weak_handle_deleter(L, index));
+			}
+		}
+
+		void to_lua(lua_State* L, util::WeakHandle<T> const& p)
+		{
+			if(detail::weak_handle_deleter* d = nullptr)
+			{
+				d->life_support.push(L);
+			} else {
+				detail::value_converter().to_lua(L, p);
+			}
+		}
+
+		template <class U>
+		void converter_postcall(lua_State*, U const&, int)
+		{}
+	};
+
+	template <class T>
+	struct default_converter<util::WeakHandle<T> const&>
+		: default_converter<util::WeakHandle<T> >
+	{};
+
+	template <typename T>
+	struct lua_proxy_traits<util::WeakHandle<T> >
+		: lua_proxy_traits<object>
+	{
+		static bool check(lua_State* L, int idx)
+		{
+			return lua_proxy_traits<object>::check(L, idx) && lua_istable(L, idx) && lua_isboolean(L,idx);
+		}
+	};
+
+	//////
+
+	namespace adl {
+		template <typename T>
+		struct TestWrapper : object
+		{
+			TestWrapper(from_stack const& stack_reference)
+				: object(stack_reference)
+			{}
+			TestWrapper(const object &o)
+				: object(o)
+			{}
+			TestWrapper(lua_State *l,const T &t)
+				: object(l,t)
+			{}
+			using value_type = T;
+		};
+	};
+
+	namespace detail
+	{
+		template<typename T>
+		struct pseudo_traits<adl::TestWrapper<T>>
+		{
+			enum { is_pseudo_type = true };
+			enum { is_variadic = false };
+			using value_type = T;
+		};
+
+	};
+	using adl::TestWrapper;
+
+	template <typename T>
+	struct lua_proxy_traits<adl::TestWrapper<T> >
+		: lua_proxy_traits<object>
+	{
+		static bool check(lua_State* L, int idx)
+		{
+			return lua_proxy_traits<object>::check(L, idx) && lua_istable(L,idx);//(lua_isnoneornil(L, idx) || lua_isnumber(L, idx));
+		}
+	};
+
+} // namespace luabind
+
 void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 {
 	auto def = luabind::class_<BaseEntityComponentHandle>("EntityComponent");
@@ -106,6 +247,10 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	gameMod[def];
 
 	Lua::register_gravity_component(gameMod);
+
+	//pragma::VelocityComponent *x;
+	//x->GetHandle<pragma::VelocityComponent>();
+	//util::WeakHandle<pragma::VelocityComponent>();
 
 	auto defVelocity = luabind::class_<VelocityHandle,BaseEntityComponentHandle>("VelocityComponent");
 	defVelocity.def("GetVelocity",&Lua::Velocity::GetVelocity);
@@ -129,7 +274,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 		Lua::Property::push(l,*hComponent->GetAngularVelocityProperty());
 	}));
 	gameMod[defVelocity];
-	
+
 	auto defGlobal = luabind::class_<GlobalNameHandle,BaseEntityComponentHandle>("GlobalComponent");
 	defGlobal.def("GetGlobalName",static_cast<void(*)(lua_State*,GlobalNameHandle&)>([](lua_State *l,GlobalNameHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);
@@ -528,3 +673,4 @@ DLLNETWORK void Lua::TraceData::FillTraceResultTable(lua_State *l,TraceResult &r
 	Lua::SetTableValue(l,tableIdx);
 	//Lua::Push<TraceResult>(l,res);*/
 }
+#pragma optimize("",on)

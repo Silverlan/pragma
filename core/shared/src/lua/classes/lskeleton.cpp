@@ -20,74 +20,55 @@ bool Lua::Skeleton::IsRootBone(lua_State *l,::Skeleton &skeleton,uint32_t boneId
 	return rootBones.find(boneId) != rootBones.end();
 }
 
-void Lua::Skeleton::GetRootBones(lua_State *l,::Skeleton &skeleton)
+luabind::map<uint32_t,std::shared_ptr<::Bone>> Lua::Skeleton::GetRootBones(lua_State *l,::Skeleton &skeleton)
 {
 	auto &rootBones = skeleton.GetRootBones();
-
-	lua_newtable(l);
-	int top = lua_gettop(l);
-	for(auto it=rootBones.begin();it!=rootBones.end();it++)
-	{
-		luabind::object(l,it->second).push(l);
-		lua_rawseti(l,top,it->first);
-	}
+	return Lua::map_to_table(l,rootBones);
 }
 
-void Lua::Skeleton::GetBones(lua_State *l,::Skeleton &skeleton)
+luabind::tableT<std::shared_ptr<::Bone>> Lua::Skeleton::GetBones(lua_State *l,::Skeleton &skeleton)
 {
 	auto &bones = skeleton.GetBones();
-	lua_newtable(l);
-	int top = lua_gettop(l);
-	for(int i=0;i<bones.size();i++)
-	{
-		luabind::object(l,bones[i]).push(l);
-		lua_rawseti(l,top,i +1);
-	}
+	return Lua::vector_to_table(l,bones);
 }
 
-void Lua::Skeleton::GetBone(lua_State *l,::Skeleton &skeleton,uint32_t boneId)
+std::shared_ptr<::Bone> Lua::Skeleton::GetBone(lua_State *l,::Skeleton &skeleton,uint32_t boneId)
 {
-	auto bone = skeleton.GetBone(boneId).lock();
-	if(bone == nullptr)
-		return;
-	Lua::Push(l,bone);
+	return skeleton.GetBone(boneId).lock();
 }
 
-void Lua::Skeleton::LookupBone(lua_State *l,::Skeleton &skeleton,const std::string &name) {Lua::PushInt(l,skeleton.LookupBone(name));}
+int32_t Lua::Skeleton::LookupBone(lua_State *l,::Skeleton &skeleton,const std::string &name) {return skeleton.LookupBone(name);}
 
-void Lua::Skeleton::AddBone(lua_State *l,::Skeleton &skeleton,const std::string &name,::Bone &parent)
+std::shared_ptr<::Bone> Lua::Skeleton::AddBone(lua_State *l,::Skeleton &skeleton,const std::string &name,::Bone &parent)
 {
 	auto *bone = new ::Bone();
 	bone->name = name;
 	bone->parent = parent.shared_from_this();
 	skeleton.AddBone(bone);
 	auto ptrBone = skeleton.GetBone(bone->ID).lock();
-	Lua::Push(l,ptrBone);
 	parent.children[bone->ID] = ptrBone;
+	return ptrBone;
 }
-void Lua::Skeleton::AddBone(lua_State *l,::Skeleton &skeleton,const std::string &name)
+std::shared_ptr<::Bone> Lua::Skeleton::AddBone(lua_State *l,::Skeleton &skeleton,const std::string &name)
 {
 	auto *bone = new ::Bone();
 	bone->name = name;
 	skeleton.AddBone(bone);
 	auto ptrBone = skeleton.GetBone(bone->ID).lock();
-	Lua::Push(l,ptrBone);
+	return ptrBone;
 }
-void Lua::Skeleton::MakeRootBone(lua_State *l,::Skeleton &skeleton,::Bone &bone)
+bool Lua::Skeleton::MakeRootBone(lua_State *l,::Skeleton &skeleton,::Bone &bone)
 {
 	auto &bones = skeleton.GetBones();
 	auto it = std::find_if(bones.begin(),bones.end(),[&bone](const std::shared_ptr<::Bone> &boneOther) {
 		return &bone == boneOther.get();
 	});
 	if(it == bones.end())
-	{
-		Lua::PushBool(l,false);
-		return;
-	}
+		return false;
 	skeleton.GetRootBones()[bone.ID] = bone.shared_from_this();
-	Lua::PushBool(l,true);
+	return true;
 }
-luabind::object Lua::Skeleton::GetBoneHierarchy(lua_State *l,::Skeleton &skeleton)
+luabind::map<uint16_t,luabind::tableT<void>> Lua::Skeleton::GetBoneHierarchy(lua_State *l,::Skeleton &skeleton)
 {
 	auto t = luabind::newtable(l);
 	std::function<void(const ::Bone&,const luabind::object&)> fGetHierarchy = nullptr;
@@ -100,40 +81,25 @@ luabind::object Lua::Skeleton::GetBoneHierarchy(lua_State *l,::Skeleton &skeleto
 		fGetHierarchy(*pair.second,t);
 	return t;
 }
-void Lua::Skeleton::GetBoneCount(lua_State *l,::Skeleton &skeleton) {Lua::PushInt(l,skeleton.GetBoneCount());}
+uint32_t Lua::Skeleton::GetBoneCount(lua_State *l,::Skeleton &skeleton) {return skeleton.GetBoneCount();}
 void Lua::Skeleton::Merge(lua_State *l,::Skeleton &skeleton,::Skeleton &skeletonOther) {skeleton.Merge(skeletonOther);}
 void Lua::Skeleton::ClearBones(lua_State *l,::Skeleton &skeleton) {skeleton.GetBones().clear(); skeleton.GetRootBones().clear();}
 
 /////////////////////////////
 
-void Lua::Bone::GetName(lua_State *l,::Bone &bone)
+std::string Lua::Bone::GetName(lua_State *l,::Bone &bone) {return bone.name;}
+
+BoneId Lua::Bone::GetID(lua_State *l,::Bone &bone) {return bone.ID;}
+
+luabind::map<BoneId,std::shared_ptr<::Bone>> Lua::Bone::GetChildren(lua_State *l,::Bone &bone)
 {
-	lua_pushstring(l,bone.name.c_str());
+	auto t = luabind::newtable(l);
+	for(auto &pair : bone.children)
+		t[pair.first] = pair.second;
+	return t;
 }
 
-void Lua::Bone::GetID(lua_State *l,::Bone &bone)
-{
-	Lua::PushInt(l,bone.ID);
-}
-
-void Lua::Bone::GetChildren(lua_State *l,::Bone &bone)
-{
-	lua_newtable(l);
-	int top = lua_gettop(l);
-	for(auto it=bone.children.begin();it!=bone.children.end();it++)
-	{
-		luabind::object(l,it->second).push(l);
-		lua_rawseti(l,top,it->first);
-	}
-}
-
-void Lua::Bone::GetParent(lua_State *l,::Bone &bone)
-{
-	auto parent = bone.parent.lock();
-	if(parent == nullptr)
-		return;
-	luabind::object(l,parent).push(l);
-}
+std::shared_ptr<::Bone> Lua::Bone::GetParent(lua_State *l,::Bone &bone) {return bone.parent.lock();}
 void Lua::Bone::SetName(lua_State *l,::Bone &bone,const std::string &name) {bone.name = name;}
 void Lua::Bone::SetParent(lua_State *l,::Bone &bone,::Bone &parent)
 {

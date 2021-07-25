@@ -257,9 +257,10 @@ void ClientState::InitializeGUILua()
 		{"delta_time",Lua_gui_DeltaTime}
 	});
 
-	Lua::RegisterLibrary(GetGUILuaState(),"engine",{
-		LUA_SHARED_CL_ENGINE_FUNCTIONS
-	});
+	auto enMod = luabind::module(m_luaGUI->GetState(),"engine");
+	enMod[
+		luabind::def("poll_console_output",&Lua::engine::poll_console_output)
+	];
 	Lua::engine::register_library(GetGUILuaState());
 
 	WGUILuaInterface::Initialize();

@@ -10,12 +10,5 @@
 #include <pragma/lua/luaapi.h>
 
 namespace umath {class Plane;};
-DLLNETWORK void Lua_Plane_GetNormal(lua_State *l,umath::Plane &plane);
-DLLNETWORK void Lua_Plane_GetPos(lua_State *l,umath::Plane &plane);
-DLLNETWORK void Lua_Plane_GetDistance(lua_State *l,umath::Plane &plane);
-DLLNETWORK void Lua_Plane_GetDistance(lua_State *l,umath::Plane &plane,const Vector3 &pos);
-DLLNETWORK void Lua_Plane_MoveToPos(lua_State *l,umath::Plane &plane,Vector3 &pos);
-DLLNETWORK void Lua_Plane_Rotate(lua_State *l,umath::Plane &plane,EulerAngles &ang);
-DLLNETWORK void Lua_Plane_GetCenterPos(lua_State *l,umath::Plane &plane);
 
 #endif

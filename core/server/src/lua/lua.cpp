@@ -51,30 +51,28 @@ void SGame::RegisterLua()
 	lua_pushboolean(GetLuaState(),0);
 	lua_setglobal(GetLuaState(),"CLIENT");
 
-	Lua::RegisterLibrary(GetLuaState(),"engine",{
-		{"load_library",&Lua::engine::LoadLibrary},
-		{"library_exists",&Lua::engine::LibraryExists},
-		{"get_info",&Lua::engine::get_info},
-		{"poll_console_output",&Lua::engine::poll_console_output}
-	});
 	auto engineMod = luabind::module(GetLuaState(),"engine");
 	engineMod[
 		luabind::def("shutdown",Lua::engine::exit),
 		luabind::def("get_working_directory",Lua::engine::get_working_directory),
 		luabind::def("set_record_console_output",Lua::engine::set_record_console_output),
-		luabind::def("get_tick_count",Lua::engine::GetTickCount)
+		luabind::def("get_tick_count",Lua::engine::GetTickCount),
+		luabind::def("load_library",Lua::engine::LoadLibrary),
+		luabind::def("library_exists",Lua::engine::LibraryExists),
+		luabind::def("get_info",Lua::engine::get_info),
+		luabind::def("poll_console_output",Lua::engine::poll_console_output)
 	];
 	
 	Lua::RegisterLibrary(GetLuaState(),"game",{
-		LUA_LIB_GAME_SHARED
+		{"call_callbacks",Lua::game::call_callbacks},
 		//{"create_light",Lua::engine::CreateLight},
 		//{"remove_lights",Lua::engine::RemoveLights},
 		//{"create_sprite",Lua::engine::CreateSprite},
 		{"create_model",Lua::game::Server::create_model},
-		{"set_time_scale",Lua::game::set_time_scale},
 		{"load_map",Lua::game::Server::load_map}
 	});
 	auto gameMod = luabind::module(GetLuaState(),"game");
+	Lua::game::register_shared_functions(gameMod);
 	gameMod[
 		luabind::def("change_map",static_cast<void(*)(const std::string&,const std::string&)>(Lua::game::Server::change_level)),
 		luabind::def("change_map",static_cast<void(*)(const std::string&)>(Lua::game::Server::change_level)),
@@ -86,15 +84,18 @@ void SGame::RegisterLua()
 		luabind::def("precache_model",Lua::engine::PrecacheModel_sv),
 		luabind::def("get_model",Lua::engine::get_model),
 		luabind::def("load_material",static_cast<Material*(*)(const std::string&,bool)>(Lua::engine::server::LoadMaterial)),
-		luabind::def("load_material",static_cast<Material*(*)(const std::string&)>(Lua::engine::server::LoadMaterial))
+		luabind::def("load_material",static_cast<Material*(*)(const std::string&)>(Lua::engine::server::LoadMaterial)),
+		luabind::def("set_time_scale",&Lua::game::set_time_scale)
 	];
 	RegisterLuaGameClasses(gameMod);
 
 	Lua::ents::register_library(GetLuaState());
+	auto entsMod = luabind::module(GetLuaState(),"ents");
+	entsMod[
+		luabind::def("register_component_event",&Lua::ents::register_component_event)
+	];
 	auto &modEnts = GetLuaInterface().RegisterLibrary("ents",{
-		LUA_LIB_ENTS_SHARED
-		{"register_component",Lua::ents::register_component<pragma::SLuaBaseEntityComponent>},
-		{"register_component_event",Lua::ents::register_component_event}
+		{"register_component",Lua::ents::register_component<pragma::SLuaBaseEntityComponent>}
 	});
 
 	Lua::RegisterLibraryEnums(GetLuaState(),"ents",{

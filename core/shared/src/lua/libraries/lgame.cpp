@@ -32,19 +32,16 @@
 #include <pragma/math/intersection.h>
 
 extern DLLNETWORK Engine *engine;
-int Lua::game::add_callback(lua_State *l)
+Lua::opt<Lua::type<CallbackHandle>> Lua::game::add_callback(lua_State *l,const std::string &identifier,const func<void> &function)
 {
-	std::string identifier = luaL_checkstring(l,1);
-	luaL_checkfunction(l,2);
 	NetworkState *state = engine->GetNetworkState(l);
 	if(state == NULL)
-		return 0;
+		return nil;
 	if(!state->IsGameActive())
-		return 0;
+		return nil;
 	Game *game = state->GetGameState();
-	CallbackHandle hCallback = game->AddLuaCallback(identifier,luabind::object(luabind::from_stack(l,2)));
-	Lua::Push<CallbackHandle>(l,hCallback);
-	return 1;
+	CallbackHandle hCallback = game->AddLuaCallback(identifier,function);
+	return Lua::type<CallbackHandle>{l,hCallback};
 }
 
 int Lua::game::call_callbacks(lua_State *l)
@@ -117,91 +114,60 @@ int Lua::game::call_callbacks(lua_State *l)
 	return (t == -1) ? numResults : 1;
 }
 
-int Lua::game::clear_callbacks(lua_State *l)
+void Lua::game::clear_callbacks(lua_State *l,const std::string &identifier)
 {
-	auto identifier = Lua::CheckString(l,1);
-
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto *callbacks = game->GetLuaCallbacks(identifier);
 	if(callbacks == nullptr)
-		return 0;
+		return;
 	callbacks->clear();
-	return 0;
 }
-
-int Lua::game::register_ammo_type(lua_State *l)
+bool Lua::game::register_ammo_type(lua_State *l,const std::string &name,int32_t damage,float force,DAMAGETYPE damageType)
 {
-	auto *name = Lua::CheckString(l,1);
 	auto *nw = engine->GetNetworkState(l);
 	auto *game = nw->GetGameState();
-	auto r = false;
-	if(Lua::IsSet(l,2))
-	{
-		auto dmg = Lua::CheckInt(l,2);
-		if(Lua::IsSet(l,3))
-		{
-			auto force = Lua::CheckNumber(l,3);
-			if(Lua::IsSet(l,4))
-			{
-				auto dmgType = DAMAGETYPE(Lua::CheckInt(l,4));
-				r = game->RegisterAmmoType(name,CInt32(dmg),CFloat(force),dmgType);
-			}
-			else
-				r = game->RegisterAmmoType(name,CInt32(dmg),CFloat(force));
-		}
-		else
-			r = game->RegisterAmmoType(name,CInt32(dmg));
-	}
-	else
-		r = game->RegisterAmmoType(name);
-	Lua::PushBool(l,r);
-	return 1;
+	return game->RegisterAmmoType(name,damage,force,damageType);
 }
-int Lua::game::get_ammo_type_id(lua_State *l)
+Lua::opt<uint32_t> Lua::game::get_ammo_type_id(lua_State *l,const std::string &name)
 {
-	auto *name = Lua::CheckString(l,1);
 	auto *nw = engine->GetNetworkState(l);
 	auto *game = nw->GetGameState();
 	UInt32 ammoId = 0;
-	game->GetAmmoType(name,&ammoId);
-	Lua::PushInt(l,ammoId);
-	return 1;
+	if(game->GetAmmoType(name,&ammoId) == nullptr)
+		return nil;
+	return {l,ammoId};
 }
-int Lua::game::get_ammo_type_name(lua_State *l)
+Lua::opt<std::string> Lua::game::get_ammo_type_name(lua_State *l,uint32_t typeId)
 {
-	auto typeId = Lua::CheckInt(l,1);
 	auto *nw = engine->GetNetworkState(l);
 	auto *game = nw->GetGameState();
 	auto *type = game->GetAmmoType(CUInt32(typeId));
 	if(type == nullptr)
-		return 0;
-	Lua::PushString(l,type->name);
-	return 1;
+		return nil;
+	return {l,type->name};
 }
-int Lua::game::get_game_mode(lua_State *l)
+Lua::opt<Lua::type<pragma::BaseGamemodeComponent>> Lua::game::get_game_mode(lua_State *l)
 {
 	auto *nw = engine->GetNetworkState(l);
 	auto *game = nw->GetGameState();
 	auto *ent = game->GetGameModeEntity();
 	if(ent == nullptr)
-		return 0;
+		return nil;
 	auto gmC = static_cast<pragma::BaseGamemodeComponent*>(ent->FindComponent("gamemode").get());
 	if(gmC == nullptr)
-		return 0;
-	gmC->PushLuaObject(l);
-	return 1;
+		return nil;
+	return gmC->GetLuaObject();
 }
-int Lua::game::get_light_color(lua_State *l)
+Lua::opt<Vector3> Lua::game::get_light_color(lua_State *l,const Vector3 &pos)
 {
-	auto &pos = *Lua::CheckVector(l,1);
 	auto *nw = engine->GetNetworkState(l);
 	auto *game = nw->GetGameState();
 	auto &componentManager = game->GetEntityComponentManager();
 	auto componentIdLight = pragma::INVALID_COMPONENT_ID;
 	auto componentIdToggle = pragma::INVALID_COMPONENT_ID;
 	if(componentManager.GetComponentTypeId("light",componentIdLight) == false)
-		return 0;
+		return nil;
 	componentManager.GetComponentTypeId("toggle",componentIdToggle);
 	Vector3 col {};
 	for(auto *ent : EntityIterator{*game,componentIdLight})
@@ -223,12 +189,10 @@ int Lua::game::get_light_color(lua_State *l)
 		brightness *= dist /lightDist;
 		col += Vector3(lightCol.r /255.f,lightCol.g /255.f,lightCol.b /255.f) *brightness;
 	}
-	Lua::Push<Vector3>(l,col);
-	return 1;
+	return {l,col};
 }
-int Lua::game::get_sound_intensity(lua_State *l)
+float Lua::game::get_sound_intensity(lua_State *l,const Vector3 &pos)
 {
-	auto &pos = *Lua::CheckVector(l,1);
 	auto *nw = engine->GetNetworkState(l);
 	auto &snds = nw->GetSounds();
 	auto totalIntensity = 0.f;
@@ -239,30 +203,25 @@ int Lua::game::get_sound_intensity(lua_State *l)
 			continue;
 		totalIntensity += snd.GetSoundIntensity(pos);
 	}
-	Lua::PushNumber(l,totalIntensity);
-	return 1;
+	return totalIntensity;
 }
-int Lua::game::get_time_scale(lua_State *l)
+float Lua::game::get_time_scale(lua_State *l)
 {
 	auto *nw = engine->GetNetworkState(l);
 	auto *game = nw->GetGameState();
-	Lua::PushNumber(l,game->GetTimeScale());
-	return 1;
+	return game->GetTimeScale();
 }
-int Lua::game::set_time_scale(lua_State *l)
+void Lua::game::set_time_scale(lua_State *l,float timeScale)
 {
 	auto *nw = engine->GetNetworkState(l);
 	auto *game = nw->GetGameState();
-	auto timeScale = Lua::CheckNumber(l,1);
-	game->SetTimeScale(static_cast<float>(timeScale));
-	return 0;
+	game->SetTimeScale(timeScale);
 }
-int Lua::game::is_game_mode_initialized(lua_State *l)
+bool Lua::game::is_game_mode_initialized(lua_State *l)
 {
 	auto *nw = engine->GetNetworkState(l);
 	auto *game = nw->GetGameState();
-	Lua::PushBool(l,game->IsGameModeInitialized());
-	return 1;
+	return game->IsGameModeInitialized();
 }
 std::pair<bool,int> Lua::game::load_map(lua_State *l,std::string &mapName,BaseEntity **ptrEntWorld,Vector3 &origin)
 {
@@ -304,49 +263,38 @@ std::pair<bool,int> Lua::game::load_map(lua_State *l,std::string &mapName,BaseEn
 	}
 	return {r,1};
 }
-int Lua::game::get_nav_mesh(lua_State *l)
+Lua::opt<std::shared_ptr<pragma::nav::Mesh>> Lua::game::get_nav_mesh(lua_State *l)
 {
 	auto *nw = engine->GetNetworkState(l);
 	auto *game = nw->GetGameState();
 	auto &navMesh = game->GetNavMesh();
 	if(navMesh == nullptr)
-		return 0;
-	Lua::Push<std::shared_ptr<pragma::nav::Mesh>>(l,navMesh);
-	return 1;
+		return nil;
+	return {l,navMesh};
 }
-int Lua::game::load_nav_mesh(lua_State *l)
-{
-	auto bReload = false;
-	if(Lua::IsSet(l,1))
-		bReload = Lua::CheckBool(l,1);
-
-	auto *nw = engine->GetNetworkState(l);
-	auto *game = nw->GetGameState();
-	auto r = game->LoadNavMesh(bReload);
-	Lua::PushBool(l,r);
-	return 1;
-}
-int Lua::game::is_map_loaded(lua_State *l)
+bool Lua::game::load_nav_mesh(lua_State *l,bool reload)
 {
 	auto *nw = engine->GetNetworkState(l);
 	auto *game = nw->GetGameState();
-	Lua::PushBool(l,game->IsMapLoaded());
-	return 1;
+	return game->LoadNavMesh(reload);
 }
-int Lua::game::get_map_name(lua_State *l)
+bool Lua::game::is_map_loaded(lua_State *l)
 {
 	auto *nw = engine->GetNetworkState(l);
-	Lua::PushString(l,nw->GetMap());
-	return 1;
+	auto *game = nw->GetGameState();
+	return game->IsMapLoaded();
 }
-int Lua::game::get_game_state_flags(lua_State *l)
+std::string Lua::game::get_map_name(lua_State *l)
 {
-	Lua::PushInt(l,umath::to_integral(engine->GetNetworkState(l)->GetGameState()->GetGameFlags()));
-	return 1;
+	auto *nw = engine->GetNetworkState(l);
+	return nw->GetMap();
 }
-int Lua::game::raycast(lua_State *l)
+Game::GameFlags Lua::game::get_game_state_flags(lua_State *l)
 {
-	auto &data = *Lua::CheckTraceData(l,1);
+	return engine->GetNetworkState(l)->GetGameState()->GetGameFlags();
+}
+bool Lua::game::raycast(lua_State *l,const ::TraceData &data)
+{
 	auto start = data.GetSourceOrigin();
 	auto end = data.GetTargetOrigin();
 	auto n = end -start;
@@ -393,6 +341,7 @@ int Lua::game::raycast(lua_State *l)
 #endif
 		Intersection::LineMesh(start,end -start,*hMdl,meshResult,true,pTrComponent->GetPosition(),pTrComponent->GetRotation());
 	}
+#if 0
 	if(entClosest != nullptr)
 	{
 		TraceResult r {};
@@ -411,6 +360,7 @@ int Lua::game::raycast(lua_State *l)
 		//	res.reserve(res.size() +5);
 		//res.push_back(r);
 	}
+#endif
 	/*if(res.empty() == false)
 	{
 		auto t = Lua::CreateTable(l);
@@ -423,6 +373,32 @@ int Lua::game::raycast(lua_State *l)
 		}
 		return 1;
 	}*/
-	Lua::PushBool(l,false);
-	return 1;
+	return false;
+}
+
+void Lua::game::register_shared_functions(luabind::module_ &modGame)
+{
+	modGame[
+		luabind::def("add_callback",Lua::game::add_callback),
+		luabind::def("call_callbacks",Lua::game::call_callbacks),
+		luabind::def("clear_callbacks",Lua::game::clear_callbacks),
+		luabind::def("register_ammo_type",Lua::game::register_ammo_type),
+		luabind::def("register_ammo_type",static_cast<bool(*)(lua_State*,const std::string&,int32_t,float)>([](lua_State *l,const std::string &name,int32_t damage,float force) {return Lua::game::register_ammo_type(l,name,damage,force);})),
+		luabind::def("register_ammo_type",static_cast<bool(*)(lua_State*,const std::string&,int32_t)>([](lua_State *l,const std::string &name,int32_t damage) {return Lua::game::register_ammo_type(l,name,damage);})),
+		luabind::def("register_ammo_type",static_cast<bool(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &name) {return Lua::game::register_ammo_type(l,name);})),
+		luabind::def("get_ammo_type_id",Lua::game::get_ammo_type_id),
+		luabind::def("get_ammo_type_name",Lua::game::get_ammo_type_name),
+		luabind::def("get_game_mode",Lua::game::get_game_mode),
+		luabind::def("get_light_color",Lua::game::get_light_color),
+		luabind::def("get_sound_intensity",Lua::game::get_sound_intensity),
+		luabind::def("get_time_scale",Lua::game::get_time_scale),
+		luabind::def("is_game_mode_initialized",Lua::game::is_game_mode_initialized),
+		// luabind::def("raycast",Lua::game::raycast),
+		luabind::def("get_nav_mesh",Lua::game::get_nav_mesh),
+		luabind::def("load_nav_mesh",Lua::game::load_nav_mesh),
+		luabind::def("load_nav_mesh",static_cast<bool(*)(lua_State*)>([](lua_State *l) {return Lua::game::load_nav_mesh(l);})),
+		luabind::def("is_map_loaded",Lua::game::is_map_loaded),
+		luabind::def("get_map_name",Lua::game::get_map_name),
+		luabind::def("get_game_state_flags",Lua::game::get_game_state_flags)
+	];
 }

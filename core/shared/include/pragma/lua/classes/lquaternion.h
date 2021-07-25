@@ -15,29 +15,16 @@ namespace Lua
 {
 	namespace Quaternion
 	{
-		DLLNETWORK void Copy(lua_State *l,Quat *q);
-		DLLNETWORK void ToMatrix(lua_State *l,Quat *q);
-		DLLNETWORK void ToEulerAngles(lua_State *l,Quat &q,uint32_t rotationOrder);
-		DLLNETWORK void ToAxisAngle(lua_State *l,Quat *q);
-		DLLNETWORK void GetForward(lua_State *l,Quat *q);
-		DLLNETWORK void GetRight(lua_State *l,Quat *q);
-		DLLNETWORK void GetUp(lua_State *l,Quat *q);
-		DLLNETWORK void GetOrientation(lua_State *l,Quat *q);
-		DLLNETWORK void Inverse(lua_State *l,Quat *q);
-		DLLNETWORK void GetInverse(lua_State *l,Quat *q);
-		DLLNETWORK void Lerp(lua_State *l,Quat &qa,Quat &qb,float factor);
-		DLLNETWORK void Slerp(lua_State *l,Quat &qa,Quat &qb,float factor);
-		DLLNETWORK void DotProduct(lua_State *l,Quat &q,Quat &qb);
-		DLLNETWORK void Length(lua_State *l,Quat &q);
-		DLLNETWORK void Normalize(lua_State *l,Quat &q);
-		DLLNETWORK void GetNormal(lua_State *l,Quat &q);
+		DLLNETWORK Quat Copy(lua_State *l,const Quat &rot);
+		DLLNETWORK EulerAngles ToEulerAngles(lua_State *l,Quat &q,uint32_t rotationOrder);
+		DLLNETWORK luabind::mult<Vector3,float> ToAxisAngle(lua_State *l,const Quat &rot);
+		DLLNETWORK luabind::mult<Vector3,Vector3,Vector3> GetOrientation(lua_State *l,const Quat &rot);
 		DLLNETWORK void Set(lua_State *l,Quat &q,float w,float x,float y,float z);
-		DLLNETWORK void GetConjugate(lua_State *l,Quat &q);
-		DLLNETWORK void ApproachDirection(lua_State *l,const Quat &rot,const Vector3 &up,const Vector3 &targetDir,const ::Vector2 &rotAmount,const ::Vector2 *pitchLimit,const ::Vector2 *yawLimit,const Quat *rotPivot,const EulerAngles *angOffset);
-		DLLNETWORK void ApproachDirection(lua_State *l,const Quat &rot,const Vector3 &up,const Vector3 &targetDir,const ::Vector2 &rotAmount,const ::Vector2 *pitchLimit,const ::Vector2 *yawLimit,const Quat *rotPivot);
-		DLLNETWORK void ApproachDirection(lua_State *l,const Quat &rot,const Vector3 &up,const Vector3 &targetDir,const ::Vector2 &rotAmount,const ::Vector2 *pitchLimit,const ::Vector2 *yawLimit);
-		DLLNETWORK void ApproachDirection(lua_State *l,const Quat &rot,const Vector3 &up,const Vector3 &targetDir,const ::Vector2 &rotAmount,const ::Vector2 *pitchLimit);
-		DLLNETWORK void ApproachDirection(lua_State *l,const Quat &rot,const Vector3 &up,const Vector3 &targetDir,const ::Vector2 &rotAmount);
+		DLLNETWORK luabind::mult<Quat,::Vector2> ApproachDirection(lua_State *l,const Quat &rot,const Vector3 &up,const Vector3 &targetDir,const ::Vector2 &rotAmount,const ::Vector2 *pitchLimit,const ::Vector2 *yawLimit,const Quat *rotPivot,const EulerAngles *angOffset);
+		DLLNETWORK luabind::mult<Quat,::Vector2> ApproachDirection(lua_State *l,const Quat &rot,const Vector3 &up,const Vector3 &targetDir,const ::Vector2 &rotAmount,const ::Vector2 *pitchLimit,const ::Vector2 *yawLimit,const Quat *rotPivot);
+		DLLNETWORK luabind::mult<Quat,::Vector2> ApproachDirection(lua_State *l,const Quat &rot,const Vector3 &up,const Vector3 &targetDir,const ::Vector2 &rotAmount,const ::Vector2 *pitchLimit,const ::Vector2 *yawLimit);
+		DLLNETWORK luabind::mult<Quat,::Vector2> ApproachDirection(lua_State *l,const Quat &rot,const Vector3 &up,const Vector3 &targetDir,const ::Vector2 &rotAmount,const ::Vector2 *pitchLimit);
+		DLLNETWORK luabind::mult<Quat,::Vector2> ApproachDirection(lua_State *l,const Quat &rot,const Vector3 &up,const Vector3 &targetDir,const ::Vector2 &rotAmount);
 	};
 };
 

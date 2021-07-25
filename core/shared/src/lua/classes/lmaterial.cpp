@@ -38,11 +38,10 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 	classDef.scope[luabind::def("detail_blend_mode_to_enum",static_cast<void(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &name) {
 		Lua::PushInt(l,umath::to_integral(msys::to_detail_mode(name)));
 	}))];
-	classDef.def("IsValid",&Lua::Material::IsValid);
-	classDef.def("GetShaderName",&Lua::Material::GetShaderName);
-	classDef.def("GetName",&Lua::Material::GetName);
-	classDef.def("IsTranslucent",&Lua::Material::IsTranslucent);
-	classDef.def("GetDataBlock",&Lua::Material::GetDataBlock);
+	classDef.def("IsValid",&::Material::IsValid);
+	classDef.def("GetShaderName",&::Material::GetShaderIdentifier);
+	classDef.def("GetName",&::Material::GetName);
+	classDef.def("GetDataBlock",&::Material::GetDataBlock);
 	classDef.def("Copy",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
 		auto *matCopy = mat.Copy();
 		if(matCopy == nullptr)
@@ -52,68 +51,31 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 	classDef.def("UpdateTextures",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
 		mat.UpdateTextures();
 	}));
-	classDef.def("Save",static_cast<void(*)(lua_State*,::Material&,udm::AssetData&)>([](lua_State *l,::Material &mat,udm::AssetData &assetData) {
+	classDef.def("Save",static_cast<luabind::variant<std::string,bool>(*)(lua_State*,::Material&,udm::AssetData&)>([](lua_State *l,::Material &mat,udm::AssetData &assetData) -> luabind::variant<std::string,bool> {
 		std::string err;
 		auto result = mat.Save(assetData,err);
 		if(result == false)
-			Lua::PushString(l,err);
-		else
-			Lua::PushBool(l,result);
+			return luabind::object{l,err};
+		return luabind::object{l,result};
 	}));
-	classDef.def("Save",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
+	classDef.def("Save",static_cast<luabind::variant<std::string,bool>(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) -> luabind::variant<std::string,bool> {
 		std::string err;
 		auto result = mat.Save(err);
 		if(result == false)
-			Lua::PushString(l,err);
-		else
-			Lua::PushBool(l,result);
+			return luabind::object{l,err};
+		return luabind::object{l,result};
 	}));
-	classDef.def("Save",static_cast<void(*)(lua_State*,::Material&,const std::string&)>([](lua_State *l,::Material &mat,const std::string &fname) {
+	classDef.def("Save",static_cast<luabind::variant<std::string,bool>(*)(lua_State*,::Material&,const std::string&)>([](lua_State *l,::Material &mat,const std::string &fname) -> luabind::variant<std::string,bool> {
 		std::string err;
 		auto result = mat.Save(fname,err);
 		if(result == false)
-			Lua::PushString(l,err);
-		else
-			Lua::PushBool(l,result);
+			return luabind::object{l,err};
+		return luabind::object{l,result};
 	}));
-	classDef.def("IsError",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
-		Lua::PushBool(l,mat.IsError());
-	}));
-	classDef.def("IsLoaded",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
-		Lua::PushBool(l,mat.IsLoaded());
-	}));
-	classDef.def("IsTranslucent",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
-		Lua::PushBool(l,mat.IsTranslucent());
-	}));
-	classDef.def("GetAlphaMode",static_cast<AlphaMode(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) -> AlphaMode {
-		return mat.GetAlphaMode();
-	}));
-	classDef.def("GetAlphaCutoff",static_cast<float(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) -> float {
-		return mat.GetAlphaCutoff();
-	}));
-	classDef.def("Reset",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {mat.Reset();}));
+	classDef.def("IsError",&::Material::IsError);
+	classDef.def("IsLoaded",&::Material::IsLoaded);
+	classDef.def("IsTranslucent",&::Material::IsTranslucent);
+	classDef.def("GetAlphaMode",&::Material::GetAlphaMode);
+	classDef.def("GetAlphaCutoff",&::Material::GetAlphaCutoff);
+	classDef.def("Reset",&::Material::Reset);
 }
-
-void Lua::Material::IsTranslucent(lua_State *l,::Material &mat)
-{
-	Lua::PushBool(l,mat.IsTranslucent());
-}
-
-void Lua::Material::IsValid(lua_State *l,::Material &mat)
-{
-	Lua::PushBool(l,mat.IsValid());
-}
-
-void Lua::Material::GetName(lua_State *l,::Material &mat)
-{
-	Lua::PushString(l,mat.GetName());
-}
-
-void Lua::Material::GetShaderName(lua_State *l,::Material &mat) {Lua::PushString(l,mat.GetShaderIdentifier());}
-
-void Lua::Material::GetDataBlock(lua_State *l,::Material &mat)
-{
-	auto &dataBlock = mat.GetDataBlock();
-	Lua::Push<std::shared_ptr<ds::Block>>(l,dataBlock);
-}
-

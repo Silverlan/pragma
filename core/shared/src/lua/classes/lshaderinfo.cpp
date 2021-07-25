@@ -9,7 +9,7 @@
 #include "pragma/lua/classes/lshaderinfo.h"
 #include "luasystem.h"
 
-DLLNETWORK void Lua_ShaderInfo_GetName(lua_State *l,util::ShaderInfo *shader)
+DLLNETWORK std::string Lua_ShaderInfo_GetName(lua_State *l,util::ShaderInfo *shader)
 {
-	Lua::PushString(l,shader->GetIdentifier());
+	return shader->GetIdentifier();
 }

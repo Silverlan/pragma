@@ -12,7 +12,7 @@
 
 namespace Lua::boundingvolume
 {
-	DLLNETWORK void GetRotatedAABB(const Vector3 &min,const Vector3 &max,const Mat4 &rot,Vector3 &rmin,Vector3 &rmax);
+	DLLNETWORK luabind::mult<Vector3,Vector3> GetRotatedAABB(lua_State *l,const Vector3 &min,const Vector3 &max,const Mat4 &rot);
 };
 
 #endif

@@ -13,38 +13,39 @@
 #include "pragma/model/modelmesh.h"
 #include "pragma/physics/physsoftbodyinfo.hpp"
 #include <pragma/lua/luaapi.h>
+#include <luabind/copy_policy.hpp>
 
 extern DLLNETWORK Engine *engine;
 
 void Lua::CollisionMesh::register_class(luabind::class_<::CollisionMesh> &classDef)
 {
 	classDef.def(luabind::tostring(luabind::self));
-	classDef.scope[luabind::def("Create",static_cast<void(*)(lua_State*)>(&Create))];
-	classDef.scope[luabind::def("CreateBox",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&)>(&CreateBox))];
+	classDef.scope[luabind::def("Create",static_cast<std::shared_ptr<::CollisionMesh>(*)(lua_State*)>(&Create))];
+	classDef.scope[luabind::def("CreateBox",static_cast<std::shared_ptr<::CollisionMesh>(*)(lua_State*,const Vector3&,const Vector3&)>(&CreateBox))];
 	classDef.def("GetVertices",&GetVertices);
 	classDef.def("GetAABB",&GetAABB);
-	classDef.def("GetBoneParentId",&GetBoneParentId);
-	classDef.def("GetOrigin",&GetOrigin);
+	classDef.def("GetBoneParentId",&::CollisionMesh::GetBoneParent);
+	classDef.def("GetOrigin",static_cast<const Vector3&(::CollisionMesh::*)() const>(&::CollisionMesh::GetOrigin),luabind::copy_policy<0>{});
 	classDef.def("GetShape",&GetShape);
-	classDef.def("GetSurfaceMaterialId",&GetSurfaceMaterialId);
+	classDef.def("GetSurfaceMaterialId",&::CollisionMesh::GetSurfaceMaterial);
 	classDef.def("GetSurfaceMaterialIds",&GetSurfaceMaterialIds);
 	classDef.def("IntersectAABB",&IntersectAABB);
-	classDef.def("IsConvex",&IsConvex);
+	classDef.def("IsConvex",&::CollisionMesh::IsConvex);
 	classDef.def("SetAABB",&SetAABB);
-	classDef.def("SetBoneParentId",&SetBoneParentId);
-	classDef.def("SetConvex",&SetConvex);
-	classDef.def("SetOrigin",&SetOrigin);
-	classDef.def("SetSurfaceMaterialId",&SetSurfaceMaterialId);
+	classDef.def("SetBoneParentId",&::CollisionMesh::SetBoneParent);
+	classDef.def("SetConvex",&::CollisionMesh::SetConvex);
+	classDef.def("SetOrigin",&::CollisionMesh::SetOrigin);
+	classDef.def("SetSurfaceMaterialId",static_cast<void(::CollisionMesh::*)(int)>(&::CollisionMesh::SetSurfaceMaterial));
 	classDef.def("Update",&Update);
-	classDef.def("AddVertex",&AddVertex);
+	classDef.def("AddVertex",&::CollisionMesh::AddVertex);
 	classDef.def("GetVertexCount",&GetVertexCount);
-	classDef.def("Rotate",&Rotate);
-	classDef.def("Translate",&Translate);
+	classDef.def("Rotate",&::CollisionMesh::Rotate);
+	classDef.def("Translate",&::CollisionMesh::Translate);
 	classDef.def("GetTriangles",&GetTriangles);
-	classDef.def("ClipAgainstPlane",&ClipAgainstPlane);
-	classDef.def("Centralize",&Centralize);
-	classDef.def("GetVolume",&GetVolume);
-	classDef.def("SetVolume",&SetVolume);
+	classDef.def("ClipAgainstPlane",static_cast<void(::CollisionMesh::*)(const Vector3&,double,::CollisionMesh&,::CollisionMesh&)>(&::CollisionMesh::ClipAgainstPlane));
+	classDef.def("Centralize",&::CollisionMesh::Centralize);
+	classDef.def("GetVolume",&::CollisionMesh::GetVolume);
+	classDef.def("SetVolume",&::CollisionMesh::SetVolume);
 	classDef.def("ClearVertices",static_cast<void(*)(lua_State*,::CollisionMesh&)>([](lua_State *l,::CollisionMesh &mesh) {
 		mesh.GetVertices().clear();
 	}));
@@ -58,67 +59,44 @@ void Lua::CollisionMesh::register_class(luabind::class_<::CollisionMesh> &classD
 		triangles.push_back(idx1);
 		triangles.push_back(idx2);
 	}));
-	classDef.def("SetVertices",static_cast<void(*)(lua_State*,::CollisionMesh&,luabind::object)>([](lua_State *l,::CollisionMesh &mesh,luabind::object tVertices) {
-		auto idxVertices = 2;
-		Lua::CheckTable(l,idxVertices);
-		auto numVerts = Lua::GetObjectLength(l,idxVertices);
+	classDef.def("SetVertices",static_cast<void(*)(lua_State*,::CollisionMesh&,const luabind::tableT<Vector3>&)>([](lua_State *l,::CollisionMesh &mesh,const luabind::tableT<Vector3> &tVertices) {
 		auto &verts = mesh.GetVertices();
 		verts.clear();
-		verts.reserve(numVerts);
-		for(auto i=decltype(numVerts){0u};i<numVerts;++i)
-		{
-			Lua::PushInt(l,i +1);
-			Lua::GetTableValue(l,idxVertices);
-			auto &v = Lua::Check<Vector3>(l,-1);
-			verts.push_back(v);
-			Lua::Pop(l,1);
-		}
+		Lua::table_to_vector(l,tVertices,2,verts);
 	}));
-	classDef.def("SetTriangles",static_cast<void(*)(lua_State*,::CollisionMesh&,luabind::object)>([](lua_State *l,::CollisionMesh &mesh,luabind::object tTriangles) {
-		auto idxTriangles = 2;
-		Lua::CheckTable(l,idxTriangles);
-		auto numTris = Lua::GetObjectLength(l,idxTriangles);
+	classDef.def("SetTriangles",static_cast<void(*)(lua_State*,::CollisionMesh&,const luabind::tableT<uint16_t>&)>([](lua_State *l,::CollisionMesh &mesh,const luabind::tableT<uint16_t> &tTriangles) {
 		auto &tris = mesh.GetTriangles();
 		tris.clear();
-		tris.reserve(numTris);
-		for(auto i=decltype(numTris){0u};i<numTris;++i)
-		{
-			Lua::PushInt(l,i +1);
-			Lua::GetTableValue(l,idxTriangles);
-			auto idx = Lua::CheckInt(l,-1);
-			tris.push_back(idx);
-			Lua::Pop(l,1);
-		}
+		Lua::table_to_vector(l,tTriangles,2,tris);
 	}));
-	classDef.def("Copy",static_cast<void(*)(lua_State*,::CollisionMesh&)>([](lua_State *l,::CollisionMesh &mesh) {
-		auto cpy = std::make_shared<::CollisionMesh>(mesh);
-		Lua::Push<std::shared_ptr<::CollisionMesh>>(l,cpy);
+	classDef.def("Copy",static_cast<std::shared_ptr<::CollisionMesh>(*)(lua_State*,::CollisionMesh&)>([](lua_State *l,::CollisionMesh &mesh) {
+		return std::make_shared<::CollisionMesh>(mesh);
 	}));
 
-	classDef.def("SetSoftBody",&SetSoftBody);
-	classDef.def("IsSoftBody",&IsSoftBody);
+	classDef.def("SetSoftBody",&::CollisionMesh::SetSoftBody);
+	classDef.def("IsSoftBody",&::CollisionMesh::IsSoftBody);
 	classDef.def("GetSoftBodyMesh",&GetSoftBodyMesh);
 	classDef.def("SetSoftBodyMesh",&SetSoftBodyMesh);
 	classDef.def("GetSoftBodyInfo",&GetSoftBodyInfo);
 	classDef.def("GetSoftBodyTriangles",&GetSoftBodyTriangles);
 	classDef.def("SetSoftBodyTriangles",&SetSoftBodyTriangles);
 
-	classDef.def("AddSoftBodyAnchor",static_cast<void(*)(lua_State*,::CollisionMesh&,uint32_t,uint32_t,uint32_t,float)>(&AddSoftBodyAnchor));
-	classDef.def("AddSoftBodyAnchor",static_cast<void(*)(lua_State*,::CollisionMesh&,uint32_t,uint32_t,uint32_t)>(&AddSoftBodyAnchor));
-	classDef.def("AddSoftBodyAnchor",static_cast<void(*)(lua_State*,::CollisionMesh&,uint32_t,uint32_t)>(&AddSoftBodyAnchor));
-	classDef.def("RemoveSoftBodyAnchor",&RemoveSoftBodyAnchor);
-	classDef.def("ClearSoftBodyAnchors",&ClearSoftBodyAnchors);
+	classDef.def("AddSoftBodyAnchor",static_cast<luabind::optional<uint32_t>(*)(lua_State*,::CollisionMesh&,uint32_t,uint32_t,::CollisionMesh::SoftBodyAnchor::Flags,float)>(&AddSoftBodyAnchor));
+	classDef.def("AddSoftBodyAnchor",static_cast<luabind::optional<uint32_t>(*)(lua_State*,::CollisionMesh&,uint32_t,uint32_t,::CollisionMesh::SoftBodyAnchor::Flags)>(&AddSoftBodyAnchor));
+	classDef.def("AddSoftBodyAnchor",static_cast<luabind::optional<uint32_t>(*)(lua_State*,::CollisionMesh&,uint32_t,uint32_t)>(&AddSoftBodyAnchor));
+	classDef.def("RemoveSoftBodyAnchor",&::CollisionMesh::RemoveSoftBodyAnchor);
+	classDef.def("ClearSoftBodyAnchors",&::CollisionMesh::ClearSoftBodyAnchors);
 	classDef.def("GetSoftBodyAnchors",&GetSoftBodyAnchors);
 
 	classDef.add_static_constant("FSOFTBODY_ANCHOR_NONE",umath::to_integral(::CollisionMesh::SoftBodyAnchor::Flags::None));
 	classDef.add_static_constant("FSOFTBODY_ANCHOR_RIGID",umath::to_integral(::CollisionMesh::SoftBodyAnchor::Flags::Rigid));
 	classDef.add_static_constant("FSOFTBODY_ANCHOR_DISABLE_COLLISIONS",umath::to_integral(::CollisionMesh::SoftBodyAnchor::Flags::DisableCollisions));
 }
-void Lua::CollisionMesh::Create(lua_State *l)
+std::shared_ptr<::CollisionMesh> Lua::CollisionMesh::Create(lua_State *l)
 {
-	Lua::Push<std::shared_ptr<::CollisionMesh>>(l,::CollisionMesh::Create(engine->GetNetworkState(l)->GetGameState()));
+	return ::CollisionMesh::Create(engine->GetNetworkState(l)->GetGameState());
 }
-void Lua::CollisionMesh::CreateBox(lua_State *l,const Vector3 &cmin,const Vector3 &cmax)
+std::shared_ptr<::CollisionMesh> Lua::CollisionMesh::CreateBox(lua_State *l,const Vector3 &cmin,const Vector3 &cmax)
 {
 	auto min = cmin;
 	auto max = cmax;
@@ -133,109 +111,44 @@ void Lua::CollisionMesh::CreateBox(lua_State *l,const Vector3 &cmin,const Vector
 	mesh->AddVertex(Vector3(min.x,min.y,max.z));
 	mesh->AddVertex(Vector3(min.x,max.y,max.z));
 	mesh->Update();
-	Lua::Push<decltype(mesh)>(l,mesh);
+	return mesh;
 }
-void Lua::CollisionMesh::GetVertices(lua_State *l,::CollisionMesh &mesh)
+luabind::tableT<Vector3> Lua::CollisionMesh::GetVertices(lua_State *l,::CollisionMesh &mesh)
 {
-	lua_newtable(l);
-	int top = lua_gettop(l);
-	std::vector<Vector3> &verts = mesh.GetVertices();
-	for(int i=0;i<verts.size();i++)
-	{
-		luabind::object(l,verts[i]).push(l);
-		lua_rawseti(l,top,i +1);
-	}
+	return Lua::vector_to_table(l,mesh.GetVertices());
 }
-void Lua::CollisionMesh::GetVertexCount(lua_State *l,::CollisionMesh &mesh)
+uint32_t Lua::CollisionMesh::GetVertexCount(lua_State *l,::CollisionMesh &mesh)
 {
-	Lua::PushInt(l,mesh.GetVertices().size());
+	return mesh.GetVertices().size();
 }
-void Lua::CollisionMesh::Rotate(lua_State*,::CollisionMesh &mesh,const Quat &rot)
-{
-	mesh.Rotate(rot);
-}
-void Lua::CollisionMesh::Translate(lua_State*,::CollisionMesh &mesh,const Vector3 &t)
-{
-	mesh.Translate(t);
-}
-void Lua::CollisionMesh::GetAABB(lua_State *l,::CollisionMesh &mesh)
+luabind::mult<Vector3,Vector3> Lua::CollisionMesh::GetAABB(lua_State *l,::CollisionMesh &mesh)
 {
 	Vector3 min,max;
 	mesh.GetAABB(&min,&max);
-	Lua::Push<Vector3>(l,min);
-	Lua::Push<Vector3>(l,max);
+	return {l,min,max};
 }
-void Lua::CollisionMesh::GetBoneParentId(lua_State *l,::CollisionMesh &mesh)
-{
-	auto boneId = mesh.GetBoneParent();
-	Lua::PushInt(l,boneId);
-}
-void Lua::CollisionMesh::GetOrigin(lua_State *l,::CollisionMesh &mesh)
-{
-	auto &origin = mesh.GetOrigin();
-	Lua::Push<Vector3>(l,origin);
-}
-void Lua::CollisionMesh::GetShape(lua_State *l,::CollisionMesh &mesh)
+luabind::optional<pragma::physics::IShape> Lua::CollisionMesh::GetShape(lua_State *l,::CollisionMesh &mesh)
 {
 	auto shape = mesh.GetShape();
 	if(shape == nullptr)
-		return;
-	shape->Push(l);
+		return nil;
+	return shape->GetLuaObject();
 }
-void Lua::CollisionMesh::GetSurfaceMaterialId(lua_State *l,::CollisionMesh &mesh)
+luabind::tableT<int32_t> Lua::CollisionMesh::GetSurfaceMaterialIds(lua_State *l,::CollisionMesh &mesh)
 {
-	auto surfaceMaterial = mesh.GetSurfaceMaterial();
-	Lua::PushInt(l,surfaceMaterial);
+	return Lua::vector_to_table(l,mesh.GetSurfaceMaterials());
 }
-void Lua::CollisionMesh::GetSurfaceMaterialIds(lua_State *l,::CollisionMesh &mesh)
+bool Lua::CollisionMesh::IntersectAABB(lua_State *l,::CollisionMesh &mesh,const Vector3 &min,const Vector3 &max)
 {
-	auto t = Lua::CreateTable(l);
-	auto &surfaceMaterials = mesh.GetSurfaceMaterials();
-	int32_t n = 1;
-	for(auto matId : surfaceMaterials)
-	{
-		Lua::PushInt(l,n);
-		Lua::PushInt(l,matId);
-		Lua::SetTableValue(l,t);
-		++n;
-	}
-}
-void Lua::CollisionMesh::IntersectAABB(lua_State *l,::CollisionMesh &mesh,const Vector3 &min,const Vector3 &max)
-{
-	auto r = mesh.IntersectAABB(const_cast<Vector3*>(&min),const_cast<Vector3*>(&max));
-	Lua::PushBool(l,r);
-}
-void Lua::CollisionMesh::IsConvex(lua_State *l,::CollisionMesh &mesh)
-{
-	Lua::PushBool(l,mesh.IsConvex());
+	return mesh.IntersectAABB(const_cast<Vector3*>(&min),const_cast<Vector3*>(&max));
 }
 void Lua::CollisionMesh::SetAABB(lua_State*,::CollisionMesh &mesh,const Vector3 &min,const Vector3 &max)
 {
 	mesh.SetAABB(const_cast<Vector3&>(min),const_cast<Vector3&>(max));
 }
-void Lua::CollisionMesh::SetBoneParentId(lua_State*,::CollisionMesh &mesh,int32_t boneId)
-{
-	mesh.SetBoneParent(boneId);
-}
-void Lua::CollisionMesh::SetConvex(lua_State*,::CollisionMesh &mesh,bool bConvex)
-{
-	mesh.SetConvex(bConvex);
-}
-void Lua::CollisionMesh::SetOrigin(lua_State*,::CollisionMesh &mesh,const Vector3 &origin)
-{
-	mesh.SetOrigin(origin);
-}
-void Lua::CollisionMesh::SetSurfaceMaterialId(lua_State*,::CollisionMesh &mesh,int32_t surfaceMaterialId)
-{
-	mesh.SetSurfaceMaterial(surfaceMaterialId);
-}
 void Lua::CollisionMesh::Update(lua_State*,::CollisionMesh &mesh)
 {
 	mesh.Update();
-}
-void Lua::CollisionMesh::AddVertex(lua_State*,::CollisionMesh &mesh,const Vector3 &v)
-{
-	mesh.AddVertex(v);
 }
 void Lua::CollisionMesh::GetTriangles(lua_State *l,::CollisionMesh &mesh)
 {
@@ -249,15 +162,6 @@ void Lua::CollisionMesh::GetTriangles(lua_State *l,::CollisionMesh &mesh)
 		Lua::SetTableValue(l,t);
 	}
 }
-void Lua::CollisionMesh::ClipAgainstPlane(lua_State *l,::CollisionMesh &mdl,const Vector3 &n,double d,::CollisionMesh &clippedMeshA,::CollisionMesh &clippedMeshB)
-{
-	mdl.ClipAgainstPlane(n,d,clippedMeshA,clippedMeshB);
-}
-void Lua::CollisionMesh::Centralize(lua_State *l,::CollisionMesh &mesh) {mesh.Centralize();}
-void Lua::CollisionMesh::GetVolume(lua_State *l,::CollisionMesh &mesh) {Lua::PushNumber(l,mesh.GetVolume());}
-void Lua::CollisionMesh::SetVolume(lua_State *l,::CollisionMesh &mesh,float volume) {mesh.SetVolume(volume);}
-void Lua::CollisionMesh::SetSoftBody(lua_State *l,::CollisionMesh &mesh,bool bSoftBody) {mesh.SetSoftBody(bSoftBody);}
-void Lua::CollisionMesh::IsSoftBody(lua_State *l,::CollisionMesh &mesh) {Lua::PushBool(l,mesh.IsSoftBody());}
 void Lua::CollisionMesh::GetSoftBodyMesh(lua_State *l,::CollisionMesh &mesh)
 {
 	auto *subMesh = mesh.GetSoftBodyMesh();
@@ -273,81 +177,50 @@ void Lua::CollisionMesh::GetSoftBodyInfo(lua_State *l,::CollisionMesh &mesh)
 		return;
 	Lua::Push<PhysSoftBodyInfo*>(l,sbInfo);
 }
-void Lua::CollisionMesh::GetSoftBodyTriangles(lua_State *l,::CollisionMesh &mesh)
+luabind::optional<luabind::tableT<uint32_t>> Lua::CollisionMesh::GetSoftBodyTriangles(lua_State *l,::CollisionMesh &mesh)
 {
 	auto *sbTriangles = mesh.GetSoftBodyTriangles();
 	if(sbTriangles == nullptr)
-		return;
-	auto t = Lua::CreateTable(l);
-	auto idx = 1u;
-	for(auto vertIdx : *sbTriangles)
-	{
-		Lua::PushInt(l,idx++);
-		Lua::PushInt(l,vertIdx);
-		Lua::SetTableValue(l,t);
-	}
+		return nil;
+	return Lua::vector_to_table(l,*sbTriangles);
 }
-void Lua::CollisionMesh::SetSoftBodyTriangles(lua_State *l,::CollisionMesh &mesh,luabind::object o)
+void Lua::CollisionMesh::SetSoftBodyTriangles(lua_State *l,::CollisionMesh &mesh,const luabind::tableT<uint32_t> &o)
 {
 	auto *sbTriangles = mesh.GetSoftBodyTriangles();
 	if(sbTriangles == nullptr)
 		return;
-	auto t = 2u;
-	Lua::CheckTable(l,t);
-	auto numIndices = Lua::GetObjectLength(l,t);
+	auto numIndices = Lua::GetObjectLength(l,o);
 	sbTriangles->clear();
 	sbTriangles->resize(numIndices);
-	for(auto i=decltype(numIndices){0};i<numIndices;++i)
-	{
-		Lua::PushInt(l,i +1);
-		Lua::GetTableValue(l,t);
-		sbTriangles->at(i) = Lua::CheckInt(l,-1);
-		Lua::Pop(l,1);
-	}
+	Lua::table_to_vector(l,o,2,*sbTriangles);
 }
-void Lua::CollisionMesh::AddSoftBodyAnchor(lua_State *l,::CollisionMesh &mesh,uint32_t vertIdx,uint32_t boneIdx,uint32_t flags,float influence)
+luabind::optional<uint32_t> Lua::CollisionMesh::AddSoftBodyAnchor(lua_State *l,::CollisionMesh &mesh,uint32_t vertIdx,uint32_t boneIdx,::CollisionMesh::SoftBodyAnchor::Flags flags,float influence)
 {
 	auto idx = 0u;
 	auto b = mesh.AddSoftBodyAnchor(vertIdx,boneIdx,static_cast<::CollisionMesh::SoftBodyAnchor::Flags>(flags),influence,&idx);
 	if(b == false)
-		return;
-	Lua::PushInt(l,idx);
+		return nil;
+	return {l,idx};
 }
-void Lua::CollisionMesh::AddSoftBodyAnchor(lua_State *l,::CollisionMesh &mesh,uint32_t vertIdx,uint32_t boneIdx,uint32_t flags) {AddSoftBodyAnchor(l,mesh,vertIdx,boneIdx,flags,1.f);}
-void Lua::CollisionMesh::AddSoftBodyAnchor(lua_State *l,::CollisionMesh &mesh,uint32_t vertIdx,uint32_t boneIdx){AddSoftBodyAnchor(l,mesh,vertIdx,boneIdx,0u,1.f);}
-void Lua::CollisionMesh::RemoveSoftBodyAnchor(lua_State *l,::CollisionMesh &mesh,uint32_t anchorIdx) {mesh.RemoveSoftBodyAnchor(anchorIdx);}
-void Lua::CollisionMesh::ClearSoftBodyAnchors(lua_State *l,::CollisionMesh &mesh) {mesh.ClearSoftBodyAnchors();}
-static void push_soft_body_anchor(lua_State *l,const ::CollisionMesh::SoftBodyAnchor &anchor)
+luabind::optional<uint32_t> Lua::CollisionMesh::AddSoftBodyAnchor(lua_State *l,::CollisionMesh &mesh,uint32_t vertIdx,uint32_t boneIdx,::CollisionMesh::SoftBodyAnchor::Flags flags) {return AddSoftBodyAnchor(l,mesh,vertIdx,boneIdx,flags,1.f);}
+luabind::optional<uint32_t> Lua::CollisionMesh::AddSoftBodyAnchor(lua_State *l,::CollisionMesh &mesh,uint32_t vertIdx,uint32_t boneIdx) {return AddSoftBodyAnchor(l,mesh,vertIdx,boneIdx,::CollisionMesh::SoftBodyAnchor::Flags::None);}
+static luabind::object push_soft_body_anchor(lua_State *l,const ::CollisionMesh::SoftBodyAnchor &anchor)
 {
-	auto t = Lua::CreateTable(l);
-
-	Lua::PushString(l,"vertexIndex");
-	Lua::PushInt(l,anchor.vertexIndex);
-	Lua::SetTableValue(l,t);
-
-	Lua::PushString(l,"boneId");
-	Lua::PushInt(l,anchor.boneId);
-	Lua::SetTableValue(l,t);
-
-	Lua::PushString(l,"influence");
-	Lua::PushNumber(l,anchor.influence);
-	Lua::SetTableValue(l,t);
-
-	Lua::PushString(l,"flags");
-	Lua::PushInt(l,umath::to_integral(anchor.flags));
-	Lua::SetTableValue(l,t);
+	auto t = luabind::newtable(l);
+	t["vertexIndex"] = anchor.vertexIndex;
+	t["boneId"] = anchor.boneId;
+	t["influence"] = anchor.influence;
+	t["flags"] = umath::to_integral(anchor.flags);
+	return t;
 }
-void Lua::CollisionMesh::GetSoftBodyAnchors(lua_State *l,::CollisionMesh &mesh)
+luabind::tableT<void> Lua::CollisionMesh::GetSoftBodyAnchors(lua_State *l,::CollisionMesh &mesh)
 {
 	auto *anchors = mesh.GetSoftBodyAnchors();
 	if(anchors == nullptr)
-		return;
-	auto t = Lua::CreateTable(l);
+		return nil;
+	auto t = luabind::newtable(l);
 	auto anchorIdx = 1u;
 	for(auto &anchor : *anchors)
-	{
-		Lua::PushInt(l,anchorIdx++);
-		push_soft_body_anchor(l,anchor);
-		Lua::SetTableValue(l,t);
-	}
+		t[anchorIdx++] = push_soft_body_anchor(l,anchor);
+	return t;
 }

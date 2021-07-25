@@ -75,14 +75,6 @@ void CGame::RegisterLua()
 {
 	GetLuaInterface().SetIdentifier("cl");
 
-	GetLuaInterface().RegisterLibrary("engine",{
-		LUA_SHARED_CL_ENGINE_FUNCTIONS
-		{"library_exists",&Lua::engine::LibraryExists},
-		{"load_library",&Lua::engine::LoadLibrary},
-		//{"save_frame_buffer_as_tga",&Lua::engine::save_frame_buffer_as_tga},
-		//{"save_texture_as_tga",&Lua::engine::save_texture_as_tga},
-		{"get_info",&Lua::engine::get_info}
-	});
 	Lua::engine::register_library(GetLuaState());
 	auto modEngine = luabind::module_(GetLuaState(),"engine");
 	modEngine[
@@ -90,11 +82,16 @@ void CGame::RegisterLua()
 		luabind::def("bind_key",static_cast<void(*)(lua_State*,const std::string&,luabind::object)>(Lua::engine::bind_key)),
 		luabind::def("unbind_key",Lua::engine::unbind_key),
 		luabind::def("get_text_size",static_cast<Vector2i(*)(lua_State*,const std::string&,const std::string&)>(Lua::engine::get_text_size)),
-		luabind::def("get_text_size",static_cast<Vector2i(*)(lua_State*,const std::string&,const FontInfo&)>(Lua::engine::get_text_size))
+		luabind::def("get_text_size",static_cast<Vector2i(*)(lua_State*,const std::string&,const FontInfo&)>(Lua::engine::get_text_size)),
+			
+		luabind::def("poll_console_output",Lua::engine::poll_console_output),
+		luabind::def("library_exists",Lua::engine::LibraryExists),
+		luabind::def("load_library",Lua::engine::LoadLibrary),
+		luabind::def("get_info",Lua::engine::get_info)
 	];
 	
 	Lua::RegisterLibrary(GetLuaState(),"game",{
-		LUA_LIB_GAME_SHARED
+		{"call_callbacks",Lua::game::call_callbacks},
 		//{"create_light",Lua::engine::CreateLight},
 		//{"remove_lights",Lua::engine::RemoveLights},
 		//{"create_sprite",Lua::engine::CreateSprite},
@@ -148,6 +145,7 @@ void CGame::RegisterLua()
 		})}*/
 	});
 	auto modGame = luabind::module_(GetLuaState(),"game");
+	Lua::game::register_shared_functions(modGame);
 	modGame[
 		luabind::def("load_material",static_cast<Material*(*)(lua_State*,const std::string&,bool,bool)>(Lua::engine::load_material)),
 		luabind::def("load_material",static_cast<Material*(*)(lua_State*,const std::string&,bool)>(Lua::engine::load_material)),
@@ -174,7 +172,6 @@ void CGame::RegisterLua()
 
 	Lua::ents::register_library(GetLuaState());
 	auto &modEnts = GetLuaInterface().RegisterLibrary("ents",{
-		LUA_LIB_ENTS_SHARED
 		{"get_local_player",Lua::ents::Client::get_local_player},
 		{"get_listener",Lua::ents::Client::get_listener},
 		{"get_view_body",Lua::ents::Client::get_view_body},
@@ -182,7 +179,6 @@ void CGame::RegisterLua()
 		{"get_instance_buffer",Lua::ents::Client::get_instance_buffer},
 		{"get_instance_bone_buffer",Lua::ents::Client::get_instance_bone_buffer},
 		{"register_component",Lua::ents::register_component<pragma::CLuaBaseEntityComponent>},
-		{"register_component_event",Lua::ents::register_component_event},
 		{"create_camera",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			auto aspectRatio = Lua::CheckNumber(l,1);
 			auto fov = Lua::CheckNumber(l,2);
@@ -196,6 +192,9 @@ void CGame::RegisterLua()
 		})},
 		{"create_scene",Lua::game::Client::create_scene}
 	});
+	modEnts[
+		luabind::def("register_component_event",&Lua::ents::register_component_event)
+	];
 
 	auto entityClassDef = luabind::class_<EntityHandle>("Entity");
 	Lua::Entity::Client::register_class(entityClassDef);

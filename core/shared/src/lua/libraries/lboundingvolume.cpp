@@ -14,7 +14,10 @@
 #include <pragma/math/intersection.h>
 #include <mathutil/boundingvolume.h>
 
-void Lua::boundingvolume::GetRotatedAABB(const Vector3 &min,const Vector3 &max,const Mat4 &rot,Vector3 &rmin,Vector3 &rmax)
+luabind::mult<Vector3,Vector3> Lua::boundingvolume::GetRotatedAABB(lua_State *l,const Vector3 &min,const Vector3 &max,const Mat4 &rot)
 {
+	Vector3 rmin;
+	Vector3 rmax;
 	bounding_volume::AABB::GetRotatedBounds(min,max,rot,&rmin,&rmax);
+	return {l,rmin,rmax};
 }

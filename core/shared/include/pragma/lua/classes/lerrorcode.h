@@ -33,8 +33,8 @@ DLLNETWORK std::ostream &operator<<(std::ostream &out,const ErrorCode &err);
 
 //////////////////////////////
 
-DLLNETWORK void Lua_ErrorCode_GetMessage(lua_State *l,ErrorCode &err);
-DLLNETWORK void Lua_ErrorCode_GetValue(lua_State *l,ErrorCode &err);
-DLLNETWORK void Lua_ErrorCode_IsError(lua_State *l,ErrorCode &err);
+DLLNETWORK std::string Lua_ErrorCode_GetMessage(lua_State *l,ErrorCode &err);
+DLLNETWORK int32_t Lua_ErrorCode_GetValue(lua_State *l,ErrorCode &err);
+DLLNETWORK bool Lua_ErrorCode_IsError(lua_State *l,ErrorCode &err);
 
 #endif

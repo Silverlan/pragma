@@ -53,15 +53,15 @@ std::ostream &operator<<(std::ostream &out,const ErrorCode &err)
 
 //////////////////////////////
 
-void Lua_ErrorCode_GetMessage(lua_State *l,ErrorCode &err)
+std::string Lua_ErrorCode_GetMessage(lua_State *l,ErrorCode &err)
 {
-	Lua::PushString(l,err.GetMessage());
+	return err.GetMessage();
 }
-void Lua_ErrorCode_GetValue(lua_State *l,ErrorCode &err)
+int32_t Lua_ErrorCode_GetValue(lua_State *l,ErrorCode &err)
 {
-	Lua::PushInt(l,err.GetValue());
+	return err.GetValue();
 }
-void Lua_ErrorCode_IsError(lua_State *l,ErrorCode &err)
+bool Lua_ErrorCode_IsError(lua_State *l,ErrorCode &err)
 {
-	Lua::PushBool(l,err.IsError());
+	return err.IsError();
 }

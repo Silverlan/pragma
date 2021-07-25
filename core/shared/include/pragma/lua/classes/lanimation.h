@@ -22,22 +22,22 @@ namespace Lua
 		DLLNETWORK void PushAnimationEvent(lua_State *l,const AnimationEvent &ev);
 		DLLNETWORK void GetAnimationEventArguments(lua_State *l,int32_t tArgs,std::vector<std::string> &args);
 
-		DLLNETWORK void Create(lua_State *l);
+		DLLNETWORK std::shared_ptr<pragma::animation::Animation> Create(lua_State *l);
 		DLLNETWORK void Load(lua_State *l,LFile &f);
-		DLLNETWORK void RegisterActivityEnum(lua_State *l,const std::string &name);
-		DLLNETWORK void RegisterEventEnum(lua_State *l,const std::string &name);
-		DLLNETWORK void GetActivityEnums(lua_State *l);
-		DLLNETWORK void GetEventEnums(lua_State *l);
-		DLLNETWORK void GetActivityEnumName(lua_State *l,uint32_t id);
-		DLLNETWORK void GetEventEnumName(lua_State *l,uint32_t id);
-		DLLNETWORK void FindActivityId(lua_State *l,const std::string &name);
-		DLLNETWORK void FindEventId(lua_State *l,const std::string &name);
+		DLLNETWORK uint32_t RegisterActivityEnum(lua_State *l,const std::string &name);
+		DLLNETWORK uint32_t RegisterEventEnum(lua_State *l,const std::string &name);
+		DLLNETWORK luabind::tableT<std::string> GetActivityEnums(lua_State *l);
+		DLLNETWORK luabind::tableT<std::string> GetEventEnums(lua_State *l);
+		DLLNETWORK luabind::optional<std::string> GetActivityEnumName(lua_State *l,uint32_t id);
+		DLLNETWORK luabind::optional<std::string> GetEventEnumName(lua_State *l,uint32_t id);
+		DLLNETWORK luabind::optional<uint32_t> FindActivityId(lua_State *l,const std::string &name);
+		DLLNETWORK luabind::optional<uint32_t> FindEventId(lua_State *l,const std::string &name);
 
 		DLLNETWORK void GetFrame(lua_State *l,pragma::animation::Animation &anim,unsigned int ID);
-		DLLNETWORK void GetBoneList(lua_State *l,pragma::animation::Animation &anim);
-		DLLNETWORK void GetActivity(lua_State *l,pragma::animation::Animation &anim);
-		DLLNETWORK void SetActivity(lua_State *l,pragma::animation::Animation &anim,uint16_t act);
-		DLLNETWORK void GetActivityWeight(lua_State *l,pragma::animation::Animation &anim);
+		DLLNETWORK luabind::tableT<uint16_t> GetBoneList(lua_State *l,pragma::animation::Animation &anim);
+		DLLNETWORK Activity GetActivity(lua_State *l,pragma::animation::Animation &anim);
+		DLLNETWORK void SetActivity(lua_State *l,pragma::animation::Animation &anim,Activity act);
+		DLLNETWORK uint8_t GetActivityWeight(lua_State *l,pragma::animation::Animation &anim);
 		DLLNETWORK void SetActivityWeight(lua_State *l,pragma::animation::Animation &anim,uint8_t weight);
 		DLLNETWORK void GetFPS(lua_State *l,pragma::animation::Animation &anim);
 		DLLNETWORK void SetFPS(lua_State *l,pragma::animation::Animation &anim,uint8_t fps);

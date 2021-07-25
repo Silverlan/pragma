@@ -310,7 +310,7 @@ static bool check_valid_lua_object(lua_State *l,const luabind::object &o)
 {
 	auto *pEnt = luabind::object_cast_nothrow<EntityHandle*>(o,static_cast<EntityHandle*>(nullptr));
 	if(pEnt != nullptr)
-		return pEnt->IsValid(); // Used frequently, and is faster than looking up "IsValid"
+		return pEnt->valid(); // Used frequently, and is faster than looking up "IsValid"
 	auto bValid = true;
 	try
 	{
@@ -352,7 +352,7 @@ bool Lua::util::is_valid(lua_State *l,const luabind::object &o)
 
 bool Lua::util::is_valid_entity(lua_State *l)
 {
-	if(!Lua::IsSet(l,1) || !Lua::IsEntity(l,1))
+	if(!Lua::IsSet(l,1) || !Lua::IsType<BaseEntity>(l,1))
 		return false;
 	return is_valid(l);
 }
@@ -369,7 +369,7 @@ static void safely_remove(const luabind::object &o,const char *removeFunction,bo
 	auto *pEnt = luabind::object_cast_nothrow<EntityHandle*>(o,static_cast<EntityHandle*>(nullptr));
 	if(pEnt != nullptr) // Used frequently, and is faster than looking up "IsValid"
 	{
-		if(pEnt->IsValid())
+		if(pEnt->valid())
 		{
 			if(useSafeMethod)
 				(*pEnt)->RemoveSafely();
@@ -472,7 +472,7 @@ luabind::object Lua::util::fire_bullets(lua_State *l,BulletInfo &bulletInfo,bool
 			filterGroup = CollisionMask::AllHitbox;
 		data.SetCollisionFilterGroup(filterGroup);
 		std::vector<TraceResult> results {};
-		if(game->RayCast(data,&results) && results.front().entity.IsValid())
+		if(game->RayCast(data,&results) && results.front().entity.valid())
 		{
 			auto &result = results.front();
 			auto pDamageableComponent = result.entity->GetComponent<pragma::DamageableComponent>();

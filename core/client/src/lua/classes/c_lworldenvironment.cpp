@@ -45,14 +45,14 @@ namespace Lua
 
 void Lua::WorldEnvironment::register_class(luabind::class_<::WorldEnvironment> &classDef)
 {
-	classDef.def("SetAmbientColor",&SetAmbientColor);
-	classDef.def("GetAmbientColor",&GetAmbientColor);
-	classDef.def("SetShaderQuality",&SetShaderQuality);
-	classDef.def("GetShaderQuality",&GetShaderQuality);
-	classDef.def("SetUnlit",&SetUnlit);
-	classDef.def("IsUnlit",&IsUnlit);
-	classDef.def("SetShadowResolution",&SetShadowResolution);
-	classDef.def("GetShadowResolution",&GetShadowResolution);
+	classDef.def("SetAmbientColor",&::WorldEnvironment::SetAmbientColor);
+	classDef.def("GetAmbientColor",&::WorldEnvironment::GetAmbientColor);
+	classDef.def("SetShaderQuality",&::WorldEnvironment::SetShaderQuality);
+	classDef.def("GetShaderQuality",&::WorldEnvironment::GetShaderQuality);
+	classDef.def("SetUnlit",&::WorldEnvironment::SetUnlit);
+	classDef.def("IsUnlit",&::WorldEnvironment::IsUnlit);
+	classDef.def("SetShadowResolution",&::WorldEnvironment::SetShadowResolution);
+	classDef.def("GetShadowResolution",&::WorldEnvironment::GetShadowResolution);
 
 	classDef.def("SetFogStart",&SetFogStart);
 	classDef.def("SetFogEnd",&SetFogEnd);
@@ -102,42 +102,6 @@ void Lua::WorldEnvironment::register_class(luabind::class_<::WorldEnvironment> &
 	classDef.add_static_constant("FOG_TYPE_LINEAR",umath::to_integral(::WorldEnvironment::Fog::Type::Linear));
 	classDef.add_static_constant("FOG_TYPE_EXPONENTIAL",umath::to_integral(::WorldEnvironment::Fog::Type::Exponential));
 	classDef.add_static_constant("FOG_TYPE_EXPONENTIAL2",umath::to_integral(::WorldEnvironment::Fog::Type::Exponential2));
-}
-
-void Lua::WorldEnvironment::SetAmbientColor(lua_State *l,::WorldEnvironment &worldEnv,const Vector4 &ambientColor)
-{
-	worldEnv.SetAmbientColor(ambientColor);
-}
-void Lua::WorldEnvironment::GetAmbientColor(lua_State *l,::WorldEnvironment &worldEnv)
-{
-	Lua::Push<Vector4>(l,worldEnv.GetAmbientColor());
-}
-
-void Lua::WorldEnvironment::SetShaderQuality(lua_State *l,::WorldEnvironment &worldEnv,int32_t shaderQuality)
-{
-	worldEnv.SetShaderQuality(shaderQuality);
-}
-void Lua::WorldEnvironment::GetShaderQuality(lua_State *l,::WorldEnvironment &worldEnv)
-{
-	Lua::PushInt(l,worldEnv.GetShaderQuality());
-}
-
-void Lua::WorldEnvironment::SetUnlit(lua_State *l,::WorldEnvironment &worldEnv,bool bUnlit)
-{
-	worldEnv.SetUnlit(bUnlit);
-}
-void Lua::WorldEnvironment::IsUnlit(lua_State *l,::WorldEnvironment &worldEnv)
-{
-	Lua::PushBool(l,worldEnv.IsUnlit());
-}
-
-void Lua::WorldEnvironment::SetShadowResolution(lua_State *l,::WorldEnvironment &worldEnv,uint32_t shadowResolution)
-{
-	worldEnv.SetShadowResolution(shadowResolution);
-}
-void Lua::WorldEnvironment::GetShadowResolution(lua_State *l,::WorldEnvironment &worldEnv)
-{
-	Lua::PushInt(l,worldEnv.GetShadowResolution());
 }
 
 ////////////////////////////////

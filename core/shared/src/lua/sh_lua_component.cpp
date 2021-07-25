@@ -589,7 +589,7 @@ static void write_value(udm::LinkedPropertyWrapperArg udm,const std::any &value,
 	case util::VarType::Entity:
 	{
 		auto hEnt = std::any_cast<EntityHandle>(value);
-		if(hEnt.IsValid())
+		if(hEnt.valid())
 			udm = util::uuid_to_string(hEnt->GetUuid());
 		//else
 		//	udm = udm::Nil{};

@@ -75,22 +75,12 @@ void Lua::Material::Client::InitializeShaderData(lua_State *l,::Material *mat) {
 
 ///////////////////
 
-void Lua::TextureInfo::GetTexture(lua_State *l,::TextureInfo *tex)
+std::shared_ptr<Texture> Lua::TextureInfo::GetTexture(lua_State *l,::TextureInfo *tex)
 {
 	if(tex->texture == nullptr)
-		return;
-	Lua::Push<Texture*>(l,static_cast<Texture*>(tex->texture.get()));
+		return nullptr;
+	return std::static_pointer_cast<Texture>(tex->texture);
 }
-void Lua::TextureInfo::GetSize(lua_State *l,::TextureInfo *tex)
-{
-	Lua::PushInt(l,tex->width);
-	Lua::PushInt(l,tex->height);
-}
-void Lua::TextureInfo::GetWidth(lua_State *l,::TextureInfo *tex)
-{
-	Lua::PushInt(l,tex->width);
-}
-void Lua::TextureInfo::GetHeight(lua_State *l,::TextureInfo *tex)
-{
-	Lua::PushInt(l,tex->height);
-}
+std::pair<uint32_t,uint32_t> Lua::TextureInfo::GetSize(lua_State *l,::TextureInfo *tex) {return {tex->width,tex->height};}
+uint32_t Lua::TextureInfo::GetWidth(lua_State *l,::TextureInfo *tex) {return tex->width;}
+uint32_t Lua::TextureInfo::GetHeight(lua_State *l,::TextureInfo *tex) {return tex->height;}

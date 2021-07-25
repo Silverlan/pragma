@@ -13,24 +13,18 @@
 
 class DLLCLIENT CLuaEntity
 	: public CBaseEntity,
-	public LuaObjectBase
+	public LuaObjectBase,
+	public luabind::wrap_base
 {
 public:
 	CLuaEntity(luabind::object &o,const std::string &className);
 	virtual void Initialize() override;
+
+	void LuaInitialize() {}
+	static void default_Initialize(CBaseEntity *ent);
 protected:
 	virtual void InitializeHandle() override;
 	virtual void InitializeLuaObject(lua_State *lua) override;
-};
-DECLARE_DERIVED_CHILD_HANDLE(DLLCLIENT,Entity,BaseEntity,Entity,CLuaEntity,CLuaEntity);
-
-class DLLCLIENT CLuaEntityWrapper
-	: public CLuaEntityHandle,
-	public luabind::wrap_base
-{
-public:
-	void Initialize();
-	static void default_Initialize(CLuaEntityWrapper *ent);
 };
 
 #endif

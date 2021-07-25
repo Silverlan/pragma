@@ -8,6 +8,7 @@
 #define __PRAGMA_TYPES_HPP__
 
 #include "pragma/networkdefinitions.h"
+#include "pragma/entities/baseentity_handle.h"
 #include <cinttypes>
 
 namespace util {class EnumRegister;};

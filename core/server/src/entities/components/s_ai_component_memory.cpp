@@ -23,7 +23,7 @@ void SAIComponent::UpdateMemory()
 		if(fragment.occupied == true)
 		{
 			float dist;
-			if(!fragment.hEntity.IsValid() || (fragment.hEntity->IsCharacter() && fragment.hEntity->GetCharacterComponent()->IsAlive() == false) || (!fragment.visible && t -fragment.GetLastTimeSensed() >= m_memoryDuration) || HasCharacterNoTargetEnabled(*fragment.hEntity.get()) == true)
+			if(!fragment.hEntity.valid() || (fragment.hEntity->IsCharacter() && fragment.hEntity->GetCharacterComponent()->IsAlive() == false) || (!fragment.visible && t -fragment.GetLastTimeSensed() >= m_memoryDuration) || HasCharacterNoTargetEnabled(*fragment.hEntity.get()) == true)
 				m_memory.Clear(fragment);
 			else if(t -fragment.lastSeen >= (fragment.visible ? AI_MEMORY_NEXT_CHECK_IF_HIDDEN : AI_MEMORY_NEXT_CHECK_IF_VISIBLE))
 			{
@@ -75,7 +75,7 @@ void SAIComponent::SelectPrimaryTarget()
 	for(int i=0;i<MAX_AIMEMORY_FRAGMENTS;i++)
 	{
 		auto &fragment = m_memory.fragments[i];
-		if(fragment.occupied == true && fragment.hEntity.IsValid() && HasCharacterNoTargetEnabled(*fragment.hEntity.get()) == false)
+		if(fragment.occupied == true && fragment.hEntity.valid() && HasCharacterNoTargetEnabled(*fragment.hEntity.get()) == false)
 		{
 			if(fragment.lastDistance < dClosest)
 			{

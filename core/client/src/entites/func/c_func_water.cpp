@@ -60,7 +60,7 @@ void CWaterComponent::Initialize()
 
 	BindEvent(CRenderComponent::EVENT_SHOULD_DRAW,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		// TODO: Run CRenderComponent::UpdateShouldDrawState when any of these change
-		if(!(m_hWaterSurface.IsValid() == false && (m_waterScene == nullptr || m_waterScene->descSetGroupTexEffects != nullptr)))
+		if(!(m_hWaterSurface.valid() == false && (m_waterScene == nullptr || m_waterScene->descSetGroupTexEffects != nullptr)))
 		{
 			static_cast<CEShouldDraw&>(evData.get()).shouldDraw = false;
 			return util::EventReply::Handled;
@@ -269,7 +269,7 @@ void CWaterComponent::ReloadSurfaceSimulator()
 {
 	SetSpacing(c_game->GetConVarInt("cl_water_surface_simulation_spacing"));
 	BaseFuncWaterComponent::ReloadSurfaceSimulator();
-	if(m_hWaterSurface.IsValid())
+	if(m_hWaterSurface.valid())
 		m_hWaterSurface->Remove();
 	if(m_physSurfaceSim == nullptr)
 		return;

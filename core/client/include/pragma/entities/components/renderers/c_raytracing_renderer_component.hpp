@@ -25,7 +25,6 @@ namespace pragma
 	};
 };
 
-class EntityHandle;
 class DLLCLIENT CRaytracingRenderer
 	: public CBaseEntity
 {

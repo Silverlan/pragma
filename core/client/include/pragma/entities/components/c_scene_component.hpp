@@ -350,7 +350,6 @@ namespace pragma
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::CSceneComponent::FRenderSetting);
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::CSceneComponent::StateFlags);
 
-class EntityHandle;
 class DLLCLIENT CScene
 	: public CBaseEntity
 {

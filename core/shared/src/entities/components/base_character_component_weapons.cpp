@@ -44,7 +44,7 @@ BaseEntity *BaseCharacterComponent::GiveWeapon(std::string className)
 }
 BaseEntity *BaseCharacterComponent::GetActiveWeapon()
 {
-	if(m_weaponActive.IsValid() == false)
+	if(m_weaponActive.valid() == false)
 		return nullptr;
 	return m_weaponActive.get();
 }
@@ -52,7 +52,7 @@ BaseEntity *BaseCharacterComponent::GetWeapon(std::string className)
 {
 	ustring::to_lower(className);
 	auto it = std::find_if(m_weapons.begin(),m_weapons.end(),[&className](const EntityHandle &hEnt) {
-		return (hEnt.IsValid() && hEnt.get()->GetClass() == className) ? true : false;
+		return (hEnt.valid() && hEnt.get()->GetClass() == className) ? true : false;
 	});
 	return (it != m_weapons.end()) ? it->get() : nullptr;
 }
@@ -67,7 +67,7 @@ void BaseCharacterComponent::GetWeapons(std::string className,std::vector<BaseEn
 	ustring::to_lower(className);
 	for(auto &hEnt : m_weapons)
 	{
-		if(hEnt.IsValid() && hEnt->GetClass() == className)
+		if(hEnt.valid() && hEnt->GetClass() == className)
 			weapons.push_back(hEnt.get());
 	}
 }
@@ -76,7 +76,7 @@ void BaseCharacterComponent::DeployWeapon(const std::string &className)
 	if(m_weapons.empty())
 		return;
 	auto it = std::find_if(m_weapons.begin(),m_weapons.end(),[&className](EntityHandle &hEnt) {
-		return (hEnt.IsValid() && hEnt->GetClass() == className) ? true : false;
+		return (hEnt.valid() && hEnt->GetClass() == className) ? true : false;
 	});
 	if(it == m_weapons.end())
 		return;
@@ -112,7 +112,7 @@ void BaseCharacterComponent::SetActiveWeapon(BaseEntity *ent)
 }
 void BaseCharacterComponent::HolsterWeapon()
 {
-	if(m_weaponActive.IsValid() && m_weaponActive->IsWeapon())
+	if(m_weaponActive.valid() && m_weaponActive->IsWeapon())
 		m_weaponActive->GetWeaponComponent()->Holster();
 	m_weaponActive = EntityHandle();
 }
@@ -124,7 +124,7 @@ void BaseCharacterComponent::RemoveWeapon(std::string className)
 	for(auto it=m_weapons.begin();it!=m_weapons.end();)
 	{
 		auto &hEnt = *it;
-		if(hEnt.IsValid() == false)
+		if(hEnt.valid() == false)
 		{
 			it = m_weapons.erase(it);
 			continue;
@@ -150,7 +150,7 @@ void BaseCharacterComponent::RemoveWeapons()
 {
 	for(auto &hEnt : m_weapons)
 	{
-		if(hEnt.IsValid() == false)
+		if(hEnt.valid() == false)
 			continue;
 		hEnt->Remove();
 	}
@@ -160,7 +160,7 @@ bool BaseCharacterComponent::HasWeapon(std::string className)
 {
 	ustring::to_lower(className);
 	auto it = std::find_if(m_weapons.begin(),m_weapons.end(),[&className](const EntityHandle &hEnt) {
-		return (hEnt.IsValid() && hEnt.get()->GetClass() == className) ? true : false;
+		return (hEnt.valid() && hEnt.get()->GetClass() == className) ? true : false;
 	});
 	return (it != m_weapons.end()) ? true : false;
 }

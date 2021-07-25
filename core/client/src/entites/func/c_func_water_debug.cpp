@@ -91,7 +91,7 @@ void Console::commands::debug_water(NetworkState *state,pragma::BasePlayerCompon
 				return r->GetHandle();
 			});
 			dbg->AddCallback("PostRenderScenes",FunctionCallback<void>::Create([]() {
-				if(hWater.IsValid() == false)
+				if(hWater.valid() == false)
 					return;
 				auto *entWater = static_cast<CFuncWater*>(hWater.get());
 				auto *cam = c_game->GetRenderCamera();

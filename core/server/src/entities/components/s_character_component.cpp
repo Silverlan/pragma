@@ -81,7 +81,7 @@ void SCharacterComponent::DropWeapon(std::string className)
 	for(unsigned int i=0;i<m_weapons.size();i++)
 	{
 		EntityHandle &hEnt = m_weapons[i];
-		if(hEnt.IsValid())
+		if(hEnt.valid())
 		{
 			BaseEntity *ent = hEnt.get();
 			if(ent->GetClass() == className)
@@ -94,7 +94,7 @@ void SCharacterComponent::DropWeapon(BaseEntity *ent)
 	if(m_weapons.empty())
 		return;
 	auto it = std::find_if(m_weapons.begin(),m_weapons.end(),[ent](EntityHandle &hEnt) {
-		return (hEnt.IsValid() && hEnt.get() == ent) ? true : false;
+		return (hEnt.valid() && hEnt.get() == ent) ? true : false;
 	});
 	if(it == m_weapons.end())
 		return;
@@ -129,7 +129,7 @@ void SCharacterComponent::SelectNextWeapon()
 		if(it != m_weapons.end())
 		{
 			const auto fValid = [wep](const EntityHandle &hWepOther) {
-				return hWepOther.IsValid();
+				return hWepOther.valid();
 			};
 			auto itNext = std::find_if(it +1,m_weapons.end(),fValid);
 			if(itNext == m_weapons.end())
@@ -155,7 +155,7 @@ void SCharacterComponent::SelectPreviousWeapon()
 		if(it != m_weapons.rend())
 		{
 			const auto fValid = [wep](const EntityHandle &hWepOther) {
-				return hWepOther.IsValid();
+				return hWepOther.valid();
 			};
 			auto itNext = std::find_if(it +1,m_weapons.rend(),fValid);
 			if(itNext == m_weapons.rend())

@@ -233,7 +233,7 @@ void SALSound::SetPosition(const Vector3 &pos) {SetPosition(pos,false);}
 
 Vector3 SALSound::GetPosition() const
 {
-	if(m_hSourceEntity.IsValid())
+	if(m_hSourceEntity.valid())
 	{
 		auto pTrComponent = m_hSourceEntity.get()->GetTransformComponent();
 		if(pTrComponent != nullptr)

@@ -176,7 +176,7 @@ void BaseVehicleComponent::SetupSteeringWheel(const std::string &mdl,umath::Degr
 	auto &entThis = GetEntity();
 	if(!entThis.IsSpawned())
 		return;
-	if(!m_steeringWheel.IsValid())
+	if(!m_steeringWheel.valid())
 	{
 		auto *ent = entThis.GetNetworkState()->GetGameState()->CreateEntity("prop_dynamic");
 		if(ent == nullptr)
@@ -206,7 +206,7 @@ void BaseVehicleComponent::ClearDriver()
 
 void BaseVehicleComponent::SetDriver(BaseEntity *ent)
 {
-	if(m_driver.IsValid())
+	if(m_driver.valid())
 		ClearDriver();
 	m_driver = ent->GetHandle();
 	umath::set_flag(m_stateFlags,StateFlags::HasDriver,true);
@@ -215,7 +215,7 @@ void BaseVehicleComponent::SetDriver(BaseEntity *ent)
 }
 
 BaseEntity *BaseVehicleComponent::GetDriver() {return m_driver.get();}
-Bool BaseVehicleComponent::HasDriver() const {return m_driver.IsValid();}
+Bool BaseVehicleComponent::HasDriver() const {return m_driver.valid();}
 
 BaseWheelComponent *BaseVehicleComponent::CreateWheelEntity(uint8_t wheelIndex)
 {

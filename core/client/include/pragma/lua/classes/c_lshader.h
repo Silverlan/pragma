@@ -195,7 +195,7 @@ namespace Lua
 		namespace ShaderEntity
 		{
 			DLLCLIENT void BindInstanceDescriptorSet(lua_State *l,pragma::ShaderEntity &shader,std::shared_ptr<prosper::IDescriptorSetGroup> &descSet);
-			DLLCLIENT void BindEntity(lua_State *l,pragma::ShaderEntity &shader,EntityHandle &hEnt);
+			DLLCLIENT void BindEntity(lua_State *l,pragma::ShaderEntity &shader,BaseEntity &hEnt);
 			DLLCLIENT void BindVertexAnimationOffset(lua_State *l,pragma::ShaderEntity &shader,uint32_t offset);
 			DLLCLIENT void Draw(lua_State *l,pragma::ShaderEntity &shader,::ModelSubMesh &mesh);
 		};

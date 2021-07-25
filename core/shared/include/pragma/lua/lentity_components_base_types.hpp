@@ -124,11 +124,10 @@ namespace Lua
 			hNPC.get()->SetLookTarget(tgt,t);
 		}
 		template<class THandle>
-			void SetLookTarget(lua_State *l,THandle &hNPC,EntityHandle &hEnt,float t)
+			void SetLookTarget(lua_State *l,THandle &hNPC,BaseEntity &ent,float t)
 		{
 			pragma::Lua::check_component(l,hNPC);
-			LUA_CHECK_ENTITY(l,hEnt);
-			hNPC.get()->SetLookTarget(*hEnt.get(),t);
+			hNPC.get()->SetLookTarget(ent,t);
 		}
 	};
 	namespace Weapon
@@ -169,11 +168,10 @@ namespace Lua
 			Lua::Push<Vector3>(l,hEnt->GetDirection(hOther->GetEntity(),bIgnoreYAxis));
 		}
 		template<class THandle>
-			void GetDirection(lua_State *l,THandle &hEnt,EntityHandle &hOther,bool bIgnoreYAxis)
+			void GetDirection(lua_State *l,THandle &hEnt,BaseEntity &entOther,bool bIgnoreYAxis)
 		{
 			pragma::Lua::check_component(l,hEnt);
-			LUA_CHECK_ENTITY(l,hOther);
-			Lua::Push<Vector3>(l,hEnt->GetDirection(*hOther.get(),bIgnoreYAxis));
+			Lua::Push<Vector3>(l,hEnt->GetDirection(entOther,bIgnoreYAxis));
 		}
 		template<class THandle>
 			void GetAngles(lua_State *l,THandle &hEnt,const Vector3 &p,bool bIgnoreYAxis)
@@ -188,11 +186,10 @@ namespace Lua
 			Lua::Push<EulerAngles>(l,hEnt->GetAngles(hOther->GetEntity(),bIgnoreYAxis));
 		}
 		template<class THandle>
-			void GetAngles(lua_State *l,THandle &hEnt,EntityHandle &hOther,bool bIgnoreYAxis)
+			void GetAngles(lua_State *l,THandle &hEnt,BaseEntity &entOther,bool bIgnoreYAxis)
 		{
 			pragma::Lua::check_component(l,hEnt);
-			LUA_CHECK_ENTITY(l,hOther);
-			Lua::Push<EulerAngles>(l,hEnt->GetAngles(*hOther.get(),bIgnoreYAxis));
+			Lua::Push<EulerAngles>(l,hEnt->GetAngles(entOther,bIgnoreYAxis));
 		}
 		template<class THandle>
 			void GetDotProduct(lua_State *l,THandle &hEnt,const Vector3 &p,bool bIgnoreYAxis)
@@ -207,11 +204,10 @@ namespace Lua
 			Lua::PushNumber(l,hEnt->GetDotProduct(hOther->GetEntity(),bIgnoreYAxis));
 		}
 		template<class THandle>
-			void GetDotProduct(lua_State *l,THandle &hEnt,EntityHandle &hOther,bool bIgnoreYAxis)
+			void GetDotProduct(lua_State *l,THandle &hEnt,BaseEntity &other,bool bIgnoreYAxis)
 		{
 			pragma::Lua::check_component(l,hEnt);
-			LUA_CHECK_ENTITY(l,hOther);
-			Lua::PushNumber(l,hEnt->GetDotProduct(*hOther.get(),bIgnoreYAxis));
+			Lua::PushNumber(l,hEnt->GetDotProduct(other,bIgnoreYAxis));
 		}
 	};
 	namespace Animated
@@ -709,16 +705,13 @@ namespace Lua
 	template<class TLuaClass,class THandle>
 		void register_base_flammable_component_methods(lua_State *l,TLuaClass &def)
 	{
-		def.def("Ignite",static_cast<void(*)(lua_State*,THandle&,float,EntityHandle&,EntityHandle&)>([](lua_State *l,THandle &hEnt,float duration,EntityHandle &hAttacker,EntityHandle &hInflictor) {
+		def.def("Ignite",static_cast<void(*)(lua_State*,THandle&,float,BaseEntity&,BaseEntity&)>([](lua_State *l,THandle &hEnt,float duration,BaseEntity &attacker,BaseEntity &inflictor) {
 			pragma::Lua::check_component(l,hEnt);
-			LUA_CHECK_ENTITY(l,hAttacker);
-			LUA_CHECK_ENTITY(l,hInflictor);
-			hEnt->Ignite(duration,hAttacker.get(),hInflictor.get());
+			hEnt->Ignite(duration,&attacker,&inflictor);
 		}));
-		def.def("Ignite",static_cast<void(*)(lua_State*,THandle&,float,EntityHandle&)>([](lua_State *l,THandle &hEnt,float duration,EntityHandle &hAttacker) {
+		def.def("Ignite",static_cast<void(*)(lua_State*,THandle&,float,BaseEntity&)>([](lua_State *l,THandle &hEnt,float duration,BaseEntity &attacker) {
 			pragma::Lua::check_component(l,hEnt);
-			LUA_CHECK_ENTITY(l,hAttacker);
-			hEnt->Ignite(duration,hAttacker.get());
+			hEnt->Ignite(duration,&attacker);
 		}));
 		def.def("Ignite",static_cast<void(*)(lua_State*,THandle&,float)>([](lua_State *l,THandle &hEnt,float duration) {
 			pragma::Lua::check_component(l,hEnt);
@@ -1363,10 +1356,9 @@ namespace Lua
 			pragma::Lua::check_component(l,hOther);
 			Lua::PushNumber(l,hEnt->GetAABBDistance(hOther->GetEntity()));
 		}));
-		def.def("GetAABBDistance",static_cast<void(*)(lua_State*,THandle&,EntityHandle&)>([](lua_State *l,THandle &hEnt,EntityHandle &hOther) {
+		def.def("GetAABBDistance",static_cast<void(*)(lua_State*,THandle&,BaseEntity&)>([](lua_State *l,THandle &hEnt,BaseEntity &other) {
 			pragma::Lua::check_component(l,hEnt);
-			LUA_CHECK_ENTITY(l,hOther);
-			Lua::PushNumber(l,hEnt->GetAABBDistance(*hOther.get()));
+			Lua::PushNumber(l,hEnt->GetAABBDistance(other));
 		}));
 
 		def.def("IsRagdoll",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
@@ -1626,10 +1618,9 @@ namespace Lua
 			pragma::Lua::check_component(l,hOther);
 			Lua::PushNumber(l,hEnt->GetDistance(hOther->GetEntity()));
 		}));
-		def.def("GetDistance",static_cast<void(*)(lua_State*,THandle&,EntityHandle&)>([](lua_State *l,THandle &hEnt,EntityHandle &hOther) {
+		def.def("GetDistance",static_cast<void(*)(lua_State*,THandle&,BaseEntity&)>([](lua_State *l,THandle &hEnt,BaseEntity &other) {
 			pragma::Lua::check_component(l,hEnt);
-			LUA_CHECK_ENTITY(l,hOther);
-			Lua::PushNumber(l,hEnt->GetDistance(*hOther.get()));
+			Lua::PushNumber(l,hEnt->GetDistance(other));
 		}));
 
 		def.def("GetDirection",static_cast<void(*)(lua_State*,THandle&,const Vector3&,bool)>([](lua_State *l,THandle &hEnt,const Vector3 &p,bool bIgnoreYAxis) {
@@ -1641,10 +1632,9 @@ namespace Lua
 			pragma::Lua::check_component(l,hOther);
 			Lua::Push<Vector3>(l,hEnt->GetDirection(hOther->GetEntity(),bIgnoreYAxis));
 		}));
-		def.def("GetDirection",static_cast<void(*)(lua_State*,THandle&,EntityHandle&,bool)>([](lua_State *l,THandle &hEnt,EntityHandle &hOther,bool bIgnoreYAxis) {
+		def.def("GetDirection",static_cast<void(*)(lua_State*,THandle&,BaseEntity&,bool)>([](lua_State *l,THandle &hEnt,BaseEntity &other,bool bIgnoreYAxis) {
 			pragma::Lua::check_component(l,hEnt);
-			LUA_CHECK_ENTITY(l,hOther);
-			Lua::Push<Vector3>(l,hEnt->GetDirection(*hOther.get(),bIgnoreYAxis));
+			Lua::Push<Vector3>(l,hEnt->GetDirection(other,bIgnoreYAxis));
 		}));
 		def.def("GetAngles",static_cast<void(*)(lua_State*,THandle&,const Vector3&,bool)>([](lua_State *l,THandle &hEnt,const Vector3 &p,bool bIgnoreYAxis) {
 			pragma::Lua::check_component(l,hEnt);
@@ -1655,10 +1645,9 @@ namespace Lua
 			pragma::Lua::check_component(l,hOther);
 			Lua::Push<EulerAngles>(l,hEnt->GetAngles(hOther->GetEntity(),bIgnoreYAxis));
 		}));
-		def.def("GetAngles",static_cast<void(*)(lua_State*,THandle&,EntityHandle&,bool)>([](lua_State *l,THandle &hEnt,EntityHandle &hOther,bool bIgnoreYAxis) {
+		def.def("GetAngles",static_cast<void(*)(lua_State*,THandle&,BaseEntity&,bool)>([](lua_State *l,THandle &hEnt,BaseEntity &other,bool bIgnoreYAxis) {
 			pragma::Lua::check_component(l,hEnt);
-			LUA_CHECK_ENTITY(l,hOther);
-			Lua::Push<EulerAngles>(l,hEnt->GetAngles(*hOther.get(),bIgnoreYAxis));
+			Lua::Push<EulerAngles>(l,hEnt->GetAngles(other,bIgnoreYAxis));
 		}));
 		def.def("GetDotProduct",static_cast<void(*)(lua_State*,THandle&,const Vector3&,bool)>([](lua_State *l,THandle &hEnt,const Vector3 &p,bool bIgnoreYAxis) {
 			pragma::Lua::check_component(l,hEnt);
@@ -1669,10 +1658,9 @@ namespace Lua
 			pragma::Lua::check_component(l,hOther);
 			Lua::PushNumber(l,hEnt->GetDotProduct(hOther->GetEntity(),bIgnoreYAxis));
 		}));
-		def.def("GetDotProduct",static_cast<void(*)(lua_State*,THandle&,EntityHandle&,bool)>([](lua_State *l,THandle &hEnt,EntityHandle &hOther,bool bIgnoreYAxis) {
+		def.def("GetDotProduct",static_cast<void(*)(lua_State*,THandle&,BaseEntity&,bool)>([](lua_State *l,THandle &hEnt,BaseEntity &other,bool bIgnoreYAxis) {
 			pragma::Lua::check_component(l,hEnt);
-			LUA_CHECK_ENTITY(l,hOther);
-			Lua::PushNumber(l,hEnt->GetDotProduct(*hOther.get(),bIgnoreYAxis));
+			Lua::PushNumber(l,hEnt->GetDotProduct(other,bIgnoreYAxis));
 		}));
 
 		def.def("GetDirection",static_cast<void(*)(lua_State*,THandle&,const Vector3&)>([](lua_State *l,THandle &hEnt,const Vector3 &p) {
@@ -1681,8 +1669,8 @@ namespace Lua
 		def.def("GetDirection",static_cast<void(*)(lua_State*,THandle&,THandle&)>([](lua_State *l,THandle &hEnt,THandle &hOther) {
 			Lua::Transform::GetDirection<THandle>(l,hEnt,hOther,false);
 		}));
-		def.def("GetDirection",static_cast<void(*)(lua_State*,THandle&,EntityHandle&)>([](lua_State *l,THandle &hEnt,EntityHandle &hOther) {
-			Lua::Transform::GetDirection<THandle>(l,hEnt,hOther,false);
+		def.def("GetDirection",static_cast<void(*)(lua_State*,THandle&,BaseEntity&)>([](lua_State *l,THandle &hEnt,BaseEntity &other) {
+			Lua::Transform::GetDirection<THandle>(l,hEnt,other,false);
 		}));
 		def.def("GetAngles",static_cast<void(*)(lua_State*,THandle&,const Vector3&)>([](lua_State *l,THandle &hEnt,const Vector3 &p) {
 			Lua::Transform::GetAngles<THandle>(l,hEnt,p,false);
@@ -1690,8 +1678,8 @@ namespace Lua
 		def.def("GetAngles",static_cast<void(*)(lua_State*,THandle&,THandle&)>([](lua_State *l,THandle &hEnt,THandle &hOther) {
 			Lua::Transform::GetAngles<THandle>(l,hEnt,hOther,false);
 		}));
-		def.def("GetAngles",static_cast<void(*)(lua_State*,THandle&,EntityHandle&)>([](lua_State *l,THandle &hEnt,EntityHandle &hOther) {
-			Lua::Transform::GetAngles<THandle>(l,hEnt,hOther,false);
+		def.def("GetAngles",static_cast<void(*)(lua_State*,THandle&,BaseEntity&)>([](lua_State *l,THandle &hEnt,BaseEntity &other) {
+			Lua::Transform::GetAngles<THandle>(l,hEnt,other,false);
 		}));
 		def.def("GetDotProduct",static_cast<void(*)(lua_State*,THandle&,const Vector3&)>([](lua_State *l,THandle &hEnt,const Vector3 &p) {
 			Lua::Transform::GetDotProduct<THandle>(l,hEnt,p,false);
@@ -1699,8 +1687,8 @@ namespace Lua
 		def.def("GetDotProduct",static_cast<void(*)(lua_State*,THandle&,THandle&)>([](lua_State *l,THandle &hEnt,THandle &hOther) {
 			Lua::Transform::GetDotProduct<THandle>(l,hEnt,hOther,false);
 		}));
-		def.def("GetDotProduct",static_cast<void(*)(lua_State*,THandle&,EntityHandle&)>([](lua_State *l,THandle &hEnt,EntityHandle &hOther) {
-			Lua::Transform::GetDotProduct<THandle>(l,hEnt,hOther,false);
+		def.def("GetDotProduct",static_cast<void(*)(lua_State*,THandle&,BaseEntity&)>([](lua_State *l,THandle &hEnt,BaseEntity &other) {
+			Lua::Transform::GetDotProduct<THandle>(l,hEnt,other,false);
 		}));
 	}
 
@@ -2264,10 +2252,9 @@ namespace Lua
 	template<class TLuaClass,class THandle>
 		void register_base_env_filter_name_component_methods(lua_State *l,TLuaClass &def)
 	{
-		def.def("ShouldPass",static_cast<void(*)(lua_State*,THandle&,EntityHandle&)>([](lua_State *l,THandle &hComponent,EntityHandle &hEnt) {
+		def.def("ShouldPass",static_cast<void(*)(lua_State*,THandle&,BaseEntity&)>([](lua_State *l,THandle &hComponent,BaseEntity &ent) {
 			pragma::Lua::check_component(l,hComponent);
-			LUA_CHECK_ENTITY(l,hEnt);
-			Lua::PushBool(l,hComponent->ShouldPass(*hEnt.get()));
+			Lua::PushBool(l,hComponent->ShouldPass(ent));
 		}));
 		def.add_static_constant("EVENT_ON_NAME_CHANGED",pragma::BaseNameComponent::EVENT_ON_NAME_CHANGED);
 	}
@@ -2275,10 +2262,9 @@ namespace Lua
 	template<class TLuaClass,class THandle>
 		void register_base_env_filter_class_component_methods(lua_State *l,TLuaClass &def)
 	{
-		def.def("ShouldPass",static_cast<void(*)(lua_State*,THandle&,EntityHandle&)>([](lua_State *l,THandle &hComponent,EntityHandle &hEnt) {
+		def.def("ShouldPass",static_cast<void(*)(lua_State*,THandle&,BaseEntity&)>([](lua_State *l,THandle &hComponent,BaseEntity &ent) {
 			pragma::Lua::check_component(l,hComponent);
-			LUA_CHECK_ENTITY(l,hEnt);
-			Lua::PushBool(l,hComponent->ShouldPass(*hEnt.get()));
+			Lua::PushBool(l,hComponent->ShouldPass(ent));
 		}));
 	}
 
@@ -2399,7 +2385,7 @@ namespace Lua
 			int32_t idx = 1;
 			for(auto &touchInfo : hComponent->GetTouchingInfo())
 			{
-				if(touchInfo.touch.entity.IsValid() == false || touchInfo.triggered == false)
+				if(touchInfo.touch.entity.valid() == false || touchInfo.triggered == false)
 					continue;
 				t[idx++] = *touchInfo.touch.entity.get()->GetLuaObject();
 			}
@@ -2409,7 +2395,7 @@ namespace Lua
 			pragma::Lua::check_component(l,hComponent);
 			auto &touchingInfo = hComponent->GetTouchingInfo();
 			return std::count_if(touchingInfo.begin(),touchingInfo.end(),[](const pragma::BaseTouchComponent::TouchInfo &touchInfo) -> bool {
-				return touchInfo.triggered && touchInfo.touch.entity.IsValid();
+				return touchInfo.triggered && touchInfo.touch.entity.valid();
 			});
 		}));
 
@@ -2493,11 +2479,11 @@ namespace Lua
 		def.def("SetLookTarget",static_cast<void(*)(lua_State*,THandle&,const Vector3&)>([](lua_State *l,THandle &hNPC,const Vector3 &tgt) {
 			Lua::AI::SetLookTarget(l,hNPC,tgt,std::numeric_limits<float>::max());
 		}));
-		def.def("SetLookTarget",static_cast<void(*)(lua_State*,THandle&,EntityHandle&,float)>([](lua_State *l,THandle &hNPC,EntityHandle &hEnt,float t) {
-			Lua::AI::SetLookTarget(l,hNPC,hEnt,t);
+		def.def("SetLookTarget",static_cast<void(*)(lua_State*,THandle&,BaseEntity&,float)>([](lua_State *l,THandle &hNPC,BaseEntity &ent,float t) {
+			Lua::AI::SetLookTarget(l,hNPC,ent,t);
 		}));
-		def.def("SetLookTarget",static_cast<void(*)(lua_State*,THandle&,EntityHandle&)>([](lua_State *l,THandle &hNPC,EntityHandle &hEnt) {
-			Lua::AI::SetLookTarget(l,hNPC,hEnt,std::numeric_limits<float>::max());
+		def.def("SetLookTarget",static_cast<void(*)(lua_State*,THandle&,BaseEntity&)>([](lua_State *l,THandle &hNPC,BaseEntity &ent) {
+			Lua::AI::SetLookTarget(l,hNPC,ent,std::numeric_limits<float>::max());
 		}));
 		def.def("GetLookTarget",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hNPC) {
 			pragma::Lua::check_component(l,hNPC);
@@ -2650,7 +2636,7 @@ namespace Lua
 			auto idx = 1;
 			for(auto it=weapons.begin();it!=weapons.end();++it)
 			{
-				if(it->IsValid())
+				if(it->valid())
 				{
 					Lua::PushInt(l,idx++);
 					lua_pushentity(l,it->get());
@@ -2885,10 +2871,9 @@ namespace Lua
 				return;
 			driver->GetLuaObject()->push(l);
 		}));
-		def.def("SetDriver",static_cast<void(*)(lua_State*,THandle&,EntityHandle&)>([](lua_State *l,THandle &hEnt,EntityHandle &hDriver) {
+		def.def("SetDriver",static_cast<void(*)(lua_State*,THandle&,BaseEntity&)>([](lua_State *l,THandle &hEnt,BaseEntity &driver) {
 			pragma::Lua::check_component(l,hEnt);
-			LUA_CHECK_ENTITY(l,hDriver);
-			hEnt.get()->SetDriver(hDriver.get());
+			hEnt.get()->SetDriver(&driver);
 		}));
 		def.def("ClearDriver",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);
@@ -3332,16 +3317,13 @@ namespace Lua
 	template<class TLuaClass,class THandle>
 		void register_base_io_component_methods(lua_State *l,TLuaClass &def)
 	{
-		def.def("Input",static_cast<void(*)(lua_State*,THandle&,std::string,EntityHandle&,EntityHandle&,std::string)>([](lua_State *l,THandle &hIo,std::string input,EntityHandle &hActivator,EntityHandle &hCaller,std::string data) {
+		def.def("Input",static_cast<void(*)(lua_State*,THandle&,std::string,BaseEntity&,BaseEntity&,std::string)>([](lua_State *l,THandle &hIo,std::string input,BaseEntity &activator,BaseEntity &caller,std::string data) {
 			pragma::Lua::check_component(l,hIo);
-			LUA_CHECK_ENTITY(l,hActivator);
-			LUA_CHECK_ENTITY(l,hCaller);
-			hIo->Input(input,hActivator.get(),hCaller.get(),data);
+			hIo->Input(input,&activator,&caller,data);
 		}));
-		def.def("Input",static_cast<void(*)(lua_State*,THandle&,std::string,EntityHandle&,std::string)>([](lua_State *l,THandle &hIo,std::string input,EntityHandle &hActivator,std::string data) {
+		def.def("Input",static_cast<void(*)(lua_State*,THandle&,std::string,BaseEntity&,std::string)>([](lua_State *l,THandle &hIo,std::string input,BaseEntity &activator,std::string data) {
 			pragma::Lua::check_component(l,hIo);
-			LUA_CHECK_ENTITY(l,hActivator);
-			hIo->Input(input,hActivator.get(),NULL,data);
+			hIo->Input(input,&activator,NULL,data);
 		}));
 		def.def("Input",static_cast<void(*)(lua_State*,THandle&,std::string,std::string)>([](lua_State *l,THandle &hIo,std::string input,std::string data) {
 			pragma::Lua::check_component(l,hIo);
@@ -3367,15 +3349,13 @@ namespace Lua
 			pragma::Lua::check_component(l,hIo);
 			hIo->StoreOutput(name,info);
 		}));
-		def.def("FireOutput",static_cast<void(*)(lua_State*,THandle&,const std::string&,EntityHandle&)>([](lua_State *l,THandle &hIo,const std::string &name,EntityHandle &hEnt) {
+		def.def("FireOutput",static_cast<void(*)(lua_State*,THandle&,const std::string&,BaseEntity&)>([](lua_State *l,THandle &hIo,const std::string &name,BaseEntity &ent) {
 			pragma::Lua::check_component(l,hIo);
-			LUA_CHECK_ENTITY(l,hEnt);
-			hIo->TriggerOutput(name,hEnt.get());
+			hIo->TriggerOutput(name,&ent);
 		}));
-		def.def("FireOutput",static_cast<void(*)(lua_State*,THandle&,const std::string&,EntityHandle&,pragma::BaseIOComponent::IoFlags)>([](lua_State *l,THandle &hIo,const std::string &name,EntityHandle &hEnt,pragma::BaseIOComponent::IoFlags flags) {
+		def.def("FireOutput",static_cast<void(*)(lua_State*,THandle&,const std::string&,BaseEntity&,pragma::BaseIOComponent::IoFlags)>([](lua_State *l,THandle &hIo,const std::string &name,BaseEntity &ent,pragma::BaseIOComponent::IoFlags flags) {
 			pragma::Lua::check_component(l,hIo);
-			LUA_CHECK_ENTITY(l,hEnt);
-			hIo->TriggerOutput(name,hEnt.get(),flags);
+			hIo->TriggerOutput(name,&ent,flags);
 		}));
 		def.add_static_constant("EVENT_HANDLE_INPUT",pragma::BaseIOComponent::EVENT_HANDLE_INPUT);
 		
@@ -3918,13 +3898,13 @@ namespace Lua
 	template<class TLuaClass,class THandle>
 		void register_base_ownable_component_methods(lua_State *l,TLuaClass &def)
 	{
-		def.def("SetOwner",static_cast<void(*)(lua_State*,THandle&,EntityHandle&)>([](lua_State *l,THandle &hEnt,EntityHandle &hOwner) {
+		def.def("SetOwner",static_cast<void(*)(lua_State*,THandle&,BaseEntity*)>([](lua_State *l,THandle &hEnt,BaseEntity *owner) {
 			if(pragma::Lua::check_component(l,hEnt) == false)
 				return;
 			//LUA_CHECK_ENTITY(l,hOwner);
 			auto *ownerComponent = hEnt.get();
-			if(hOwner.IsValid())
-				ownerComponent->SetOwner(*hOwner.get());
+			if(owner)
+				ownerComponent->SetOwner(*owner);
 			else
 				ownerComponent->ClearOwner();
 		}));
@@ -3986,11 +3966,10 @@ namespace Lua
 	template<class TLuaClass,class THandle>
 		void register_base_point_at_target_component_methods(lua_State *l,TLuaClass &def)
 	{
-		def.def("SetPointAtTarget",static_cast<void(*)(lua_State*,THandle&,EntityHandle&)>([](lua_State *l,THandle &hEnt,EntityHandle &hTarget) {
+		def.def("SetPointAtTarget",static_cast<void(*)(lua_State*,THandle&,BaseEntity*)>([](lua_State *l,THandle &hEnt,BaseEntity *target) {
 			pragma::Lua::check_component(l,hEnt);
-			LUA_CHECK_ENTITY(l,hTarget);
-			if(hTarget.IsValid())
-				hEnt->SetPointAtTarget(*hTarget.get());
+			if(target)
+				hEnt->SetPointAtTarget(*target);
 			else
 				hEnt->ClearPointAtTarget();
 		}));
@@ -4010,16 +3989,14 @@ namespace Lua
 	template<class TLuaClass,class THandle>
 		void register_base_attachable_component_methods(lua_State *l,TLuaClass &def)
 	{
-		def.def("AttachToEntity",static_cast<void(*)(lua_State*,THandle&,EntityHandle&,AttachmentInfo&)>([](lua_State *l,THandle &hEnt,EntityHandle &hParent,AttachmentInfo &attInfo) {
+		def.def("AttachToEntity",static_cast<void(*)(lua_State*,THandle&,BaseEntity&,AttachmentInfo&)>([](lua_State *l,THandle &hEnt,BaseEntity &parent,AttachmentInfo &attInfo) {
 			pragma::Lua::check_component(l,hEnt);
-			LUA_CHECK_ENTITY(l,hParent);
-			hEnt->AttachToEntity(hParent.get(),attInfo);
+			hEnt->AttachToEntity(&parent,attInfo);
 		}));
 
-		def.def("AttachToEntity",static_cast<void(*)(lua_State*,THandle&,EntityHandle&)>([](lua_State *l,THandle &hEnt,EntityHandle &hParent) {
+		def.def("AttachToEntity",static_cast<void(*)(lua_State*,THandle&,BaseEntity&)>([](lua_State *l,THandle &hEnt,BaseEntity &parent) {
 			pragma::Lua::check_component(l,hEnt);
-			LUA_CHECK_ENTITY(l,hParent);
-			hEnt->AttachToEntity(hParent.get());
+			hEnt->AttachToEntity(&parent);
 		}));
 
 		def.def("ClearAttachment",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
@@ -4027,45 +4004,37 @@ namespace Lua
 			hEnt->ClearAttachment();
 		}));
 
-		def.def("AttachToAttachment",static_cast<void(*)(lua_State*,THandle&,EntityHandle&,std::string,AttachmentInfo&)>([](lua_State *l,THandle &hEnt,EntityHandle &hParent,std::string attachment,AttachmentInfo &attInfo) {
+		def.def("AttachToAttachment",static_cast<void(*)(lua_State*,THandle&,BaseEntity&,std::string,AttachmentInfo&)>([](lua_State *l,THandle &hEnt,BaseEntity &parent,std::string attachment,AttachmentInfo &attInfo) {
 			pragma::Lua::check_component(l,hEnt);
-			LUA_CHECK_ENTITY(l,hParent);
-			hEnt->AttachToAttachment(hParent.get(),attachment,attInfo);
+			hEnt->AttachToAttachment(&parent,attachment,attInfo);
 		}));
-		def.def("AttachToAttachment",static_cast<void(*)(lua_State*,THandle&,EntityHandle&,std::string)>([](lua_State *l,THandle &hEnt,EntityHandle &hParent,std::string attachment) {
+		def.def("AttachToAttachment",static_cast<void(*)(lua_State*,THandle&,BaseEntity&,std::string)>([](lua_State *l,THandle &hEnt,BaseEntity &parent,std::string attachment) {
 			pragma::Lua::check_component(l,hEnt);
-			LUA_CHECK_ENTITY(l,hParent);
-			hEnt->AttachToAttachment(hParent.get(),attachment);
+			hEnt->AttachToAttachment(&parent,attachment);
 		}));
-		def.def("AttachToAttachment",static_cast<void(*)(lua_State*,THandle&,EntityHandle&,int,AttachmentInfo&)>([](lua_State *l,THandle &hEnt,EntityHandle &hParent,int attachment,AttachmentInfo &attInfo) {
+		def.def("AttachToAttachment",static_cast<void(*)(lua_State*,THandle&,BaseEntity&,int,AttachmentInfo&)>([](lua_State *l,THandle &hEnt,BaseEntity &parent,int attachment,AttachmentInfo &attInfo) {
 			pragma::Lua::check_component(l,hEnt);
-			LUA_CHECK_ENTITY(l,hParent);
-			hEnt->AttachToAttachment(hParent.get(),attachment,attInfo);
+			hEnt->AttachToAttachment(&parent,attachment,attInfo);
 		}));
-		def.def("AttachToAttachment",static_cast<void(*)(lua_State*,THandle&,EntityHandle&,int)>([](lua_State *l,THandle &hEnt,EntityHandle &hParent,int attachment) {
+		def.def("AttachToAttachment",static_cast<void(*)(lua_State*,THandle&,BaseEntity&,int)>([](lua_State *l,THandle &hEnt,BaseEntity &parent,int attachment) {
 			pragma::Lua::check_component(l,hEnt);
-			LUA_CHECK_ENTITY(l,hParent);
-			hEnt->AttachToAttachment(hParent.get(),attachment);
+			hEnt->AttachToAttachment(&parent,attachment);
 		}));
-		def.def("AttachToBone",static_cast<void(*)(lua_State*,THandle&,EntityHandle&,std::string,AttachmentInfo&)>([](lua_State *l,THandle &hEnt,EntityHandle &hParent,std::string bone,AttachmentInfo &attInfo) {
+		def.def("AttachToBone",static_cast<void(*)(lua_State*,THandle&,BaseEntity&,std::string,AttachmentInfo&)>([](lua_State *l,THandle &hEnt,BaseEntity &parent,std::string bone,AttachmentInfo &attInfo) {
 			pragma::Lua::check_component(l,hEnt);
-			LUA_CHECK_ENTITY(l,hParent);
-			hEnt->AttachToBone(hParent.get(),bone,attInfo);
+			hEnt->AttachToBone(&parent,bone,attInfo);
 		}));
-		def.def("AttachToBone",static_cast<void(*)(lua_State*,THandle&,EntityHandle&,std::string)>([](lua_State *l,THandle &hEnt,EntityHandle &hParent,std::string bone) {
+		def.def("AttachToBone",static_cast<void(*)(lua_State*,THandle&,BaseEntity&,std::string)>([](lua_State *l,THandle &hEnt,BaseEntity &parent,std::string bone) {
 			pragma::Lua::check_component(l,hEnt);
-			LUA_CHECK_ENTITY(l,hParent);
-			hEnt->AttachToBone(hParent.get(),bone);
+			hEnt->AttachToBone(&parent,bone);
 		}));
-		def.def("AttachToBone",static_cast<void(*)(lua_State*,THandle&,EntityHandle&,int,AttachmentInfo&)>([](lua_State *l,THandle &hEnt,EntityHandle &hParent,int bone,AttachmentInfo &attInfo) {
+		def.def("AttachToBone",static_cast<void(*)(lua_State*,THandle&,BaseEntity&,int,AttachmentInfo&)>([](lua_State *l,THandle &hEnt,BaseEntity &parent,int bone,AttachmentInfo &attInfo) {
 			pragma::Lua::check_component(l,hEnt);
-			LUA_CHECK_ENTITY(l,hParent);
-			hEnt->AttachToBone(hParent.get(),bone,attInfo);
+			hEnt->AttachToBone(&parent,bone,attInfo);
 		}));
-		def.def("AttachToBone",static_cast<void(*)(lua_State*,THandle&,EntityHandle&,int)>([](lua_State *l,THandle &hEnt,EntityHandle &hParent,int bone) {
+		def.def("AttachToBone",static_cast<void(*)(lua_State*,THandle&,BaseEntity&,int)>([](lua_State *l,THandle &hEnt,BaseEntity &parent,int bone) {
 			pragma::Lua::check_component(l,hEnt);
-			LUA_CHECK_ENTITY(l,hParent);
-			hEnt->AttachToBone(hParent.get(),bone);
+			hEnt->AttachToBone(&parent,bone);
 		}));
 		def.def("GetLocalPose",static_cast<void(*)(lua_State*,THandle&)>([](lua_State *l,THandle &hEnt) {
 			pragma::Lua::check_component(l,hEnt);

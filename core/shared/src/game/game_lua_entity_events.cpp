@@ -67,9 +67,9 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t eve
 	{
 		Lua::PushInt(l,1);
 		Lua::GetTableValue(l,argsIdx);
-		auto *ent = Lua::CheckEntity(l,-1);
+		auto &ent = Lua::Check<BaseEntity>(l,-1);
 		Lua::Pop(l,1);
-		pragma::CEOnUseData evData{ent};
+		pragma::CEOnUseData evData{&ent};
 		if(bInject)
 			component.InjectEvent(eventId,evData);
 		else
@@ -79,9 +79,9 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t eve
 	{
 		Lua::PushInt(l,1);
 		Lua::GetTableValue(l,argsIdx);
-		auto *ent = Lua::CheckEntity(l,-1);
+		auto &ent = Lua::Check<BaseEntity>(l,-1);
 		Lua::Pop(l,1);
-		pragma::CECanUseData evData{ent};
+		pragma::CECanUseData evData{&ent};
 		if(bInject)
 			component.InjectEvent(eventId,evData);
 		else
@@ -96,12 +96,12 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t eve
 
 		Lua::PushInt(l,2);
 		Lua::GetTableValue(l,argsIdx);
-		auto &activator = *Lua::CheckEntity(l,-1);
+		auto &activator = Lua::Check<BaseEntity>(l,-1);
 		Lua::Pop(l,1);
 
 		Lua::PushInt(l,3);
 		Lua::GetTableValue(l,argsIdx);
-		auto &caller = *Lua::CheckEntity(l,-1);
+		auto &caller = Lua::Check<BaseEntity>(l,-1);
 		Lua::Pop(l,1);
 
 		Lua::PushInt(l,4);
@@ -527,7 +527,7 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t eve
 	{
 		Lua::PushInt(l,1);
 		Lua::GetTableValue(l,argsIdx);
-		auto &ent = *Lua::CheckEntity(l,-1);
+		auto &ent = Lua::Check<BaseEntity>(l,-1);
 		Lua::Pop(l,1);
 		pragma::CEOnDeployWeapon evData{ent};
 		if(bInject)
@@ -539,7 +539,7 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t eve
 	{
 		Lua::PushInt(l,1);
 		Lua::GetTableValue(l,argsIdx);
-		auto &ent = *Lua::CheckEntity(l,-1);
+		auto &ent = Lua::Check<BaseEntity>(l,-1);
 		Lua::Pop(l,1);
 		pragma::CEOnSetActiveWeapon evData{&ent};
 		if(bInject)
@@ -584,7 +584,7 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t eve
 	{
 		Lua::PushInt(l,1);
 		Lua::GetTableValue(l,argsIdx);
-		auto &ent = *Lua::CheckEntity(l,-1);
+		auto &ent = Lua::Check<BaseEntity>(l,-1);
 		Lua::Pop(l,1);
 
 		pragma::CECanTriggerData evData{&ent};
@@ -621,12 +621,12 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t eve
 	{
 		Lua::PushInt(l,1);
 		Lua::GetTableValue(l,argsIdx);
-		auto *ent0 = Lua::IsSet(l,-1) ? Lua::CheckEntity(l,-1) : nullptr;
+		auto *ent0 = Lua::IsSet(l,-1) ? &Lua::Check<BaseEntity>(l,-1) : nullptr;
 		Lua::Pop(l,1);
 
 		Lua::PushInt(l,2);
 		Lua::GetTableValue(l,argsIdx);
-		auto *ent1 = Lua::IsSet(l,-1) ? Lua::CheckEntity(l,-1) : nullptr;
+		auto *ent1 = Lua::IsSet(l,-1) ? &Lua::Check<BaseEntity>(l,-1) : nullptr;
 		Lua::Pop(l,1);
 
 		pragma::CEOnOwnerChanged evData{ent0,ent1};
@@ -720,7 +720,7 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t eve
 	{
 		Lua::PushInt(l,1);
 		Lua::GetTableValue(l,argsIdx);
-		auto &ent = *Lua::CheckEntity(l,-1);
+		auto &ent = Lua::Check<BaseEntity>(l,-1);
 		Lua::Pop(l,1);
 
 		pragma::CETouchData evData{ent};

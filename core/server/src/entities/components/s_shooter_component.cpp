@@ -35,8 +35,8 @@ luabind::object SShooterComponent::InitializeLuaObject(lua_State *l) {return Bas
 void SShooterComponent::FireBullets(const BulletInfo &bulletInfo,const std::function<bool(DamageInfo&,BaseEntity*)> &fCallback,std::vector<TraceResult> &outHitTargets,bool bMaster)
 {
 	DamageInfo dmg;
-	dmg.SetAttacker(bulletInfo.hAttacker.IsValid() ? bulletInfo.hAttacker.get() : &GetEntity());
-	dmg.SetInflictor(bulletInfo.hInflictor.IsValid() ? bulletInfo.hInflictor.get() : &GetEntity());
+	dmg.SetAttacker(bulletInfo.hAttacker.valid() ? bulletInfo.hAttacker.get() : &GetEntity());
+	dmg.SetInflictor(bulletInfo.hInflictor.valid() ? bulletInfo.hInflictor.get() : &GetEntity());
 	dmg.SetDamageType(DAMAGETYPE::BULLET);
 
 	auto bCustomForce = (isnan(bulletInfo.force) == false) ? true : false;
@@ -120,7 +120,7 @@ void SShooterComponent::FireBullets(const BulletInfo &bulletInfo,DamageInfo &dmg
 			for(auto i=offset;i<outHitTargets.size();++i)
 			{
 				auto &result = outHitTargets.at(i);
-				if(result.entity.IsValid() == false)
+				if(result.entity.valid() == false)
 					continue;
 				auto pDamageableComponent = result.entity->GetComponent<pragma::DamageableComponent>();
 				if(pDamageableComponent.valid())

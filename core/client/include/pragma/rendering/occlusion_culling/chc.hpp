@@ -71,7 +71,6 @@ public:
 
 class ModelMesh;
 class CBaseEntity;
-class EntityHandle;
 class WIHandle;
 namespace pragma {class CCameraComponent;};
 class DLLCLIENT CHC

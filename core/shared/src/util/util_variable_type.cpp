@@ -249,7 +249,7 @@ struct EntityHandler
 	virtual void Push(lua_State *l,const std::any &value) const override
 	{
 		auto hEnt = Get<EntityHandle>(value);
-		if(hEnt.IsValid())
+		if(hEnt.valid())
 		{
 			lua_pushentity(l,hEnt);
 			return;
@@ -263,7 +263,7 @@ struct EntityHandler
 	virtual void Write(DataStream &ds,const std::any &value,uint32_t *pos=nullptr) const override
 	{
 		auto hEnt = Get<EntityHandle>(value);
-		auto idx = hEnt.IsValid() ? hEnt->GetIndex() : std::numeric_limits<uint32_t>::max();
+		auto idx = hEnt.valid() ? hEnt->GetIndex() : std::numeric_limits<uint32_t>::max();
 		ds->Write<uint32_t>(idx);
 	}
 	virtual void Write(NetPacket &ds,const std::any &value,uint32_t *pos=nullptr) const override

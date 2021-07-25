@@ -310,10 +310,9 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hChild);
 		hComponent.get()->AddChild(*hChild);
 		}));
-	defCParticleSystem.def("SetNodeTarget",static_cast<void(*)(lua_State*,CParticleSystemHandle&,uint32_t,EntityHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent,uint32_t nodeId,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
+	defCParticleSystem.def("SetNodeTarget",static_cast<void(*)(lua_State*,CParticleSystemHandle&,uint32_t,BaseEntity&)>([](lua_State *l,CParticleSystemHandle &hComponent,uint32_t nodeId,BaseEntity &ent) {
 		pragma::Lua::check_component(l,hComponent);
-		hComponent->SetNodeTarget(nodeId,static_cast<CBaseEntity*>(hEnt.get()));
+		hComponent->SetNodeTarget(nodeId,static_cast<CBaseEntity*>(&ent));
 		}));
 	defCParticleSystem.def("SetNodeTarget",static_cast<void(*)(lua_State*,CParticleSystemHandle&,uint32_t,const Vector3&)>([](lua_State *l,CParticleSystemHandle &hComponent,uint32_t nodeId,const Vector3 &pos) {
 		pragma::Lua::check_component(l,hComponent);
@@ -681,10 +680,9 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 		pragma::Lua::check_component(l,hComponent);
 		Lua::PushBool(l,hComponent->SetupParticleSystem(name));
 	}));
-	defCParticleSystem.def("SetControlPointEntity",static_cast<void(*)(lua_State*,CParticleSystemHandle&,uint32_t,EntityHandle&)>([](lua_State *l,CParticleSystemHandle &hComponent,uint32_t cpIdx,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
+	defCParticleSystem.def("SetControlPointEntity",static_cast<void(*)(lua_State*,CParticleSystemHandle&,uint32_t,BaseEntity&)>([](lua_State *l,CParticleSystemHandle &hComponent,uint32_t cpIdx,BaseEntity &ent) {
 		pragma::Lua::check_component(l,hComponent);
-		hComponent->SetControlPointEntity(cpIdx,static_cast<CBaseEntity&>(*hEnt.get()));
+		hComponent->SetControlPointEntity(cpIdx,static_cast<CBaseEntity&>(ent));
 	}));
 	defCParticleSystem.def("SetControlPointPosition",static_cast<void(*)(lua_State*,CParticleSystemHandle&,uint32_t,const Vector3&)>([](lua_State *l,CParticleSystemHandle &hComponent,uint32_t cpIdx,const Vector3 &pos) {
 		pragma::Lua::check_component(l,hComponent);

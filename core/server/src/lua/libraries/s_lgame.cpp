@@ -89,7 +89,7 @@ int Lua::game::Server::load_map(lua_State *l)
 	ptrEnts.reserve(ents.size());
 	for(auto &hEnt : ents)
 	{
-		if(hEnt.IsValid() == false)
+		if(hEnt.valid() == false)
 			continue;
 		ptrEnts.push_back(static_cast<SBaseEntity*>(hEnt.get()));
 	}

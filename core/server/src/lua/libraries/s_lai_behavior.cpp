@@ -53,7 +53,7 @@ namespace Lua
 		static void GetParameterInt(lua_State *l,ai::TaskWrapper &task,std::shared_ptr<pragma::ai::Schedule> &sched,uint8_t paramIdx,int32_t def);
 		static void GetParameterFloat(lua_State *l,ai::TaskWrapper &task,std::shared_ptr<pragma::ai::Schedule> &sched,uint8_t paramIdx,float def);
 		static void GetParameterString(lua_State *l,ai::TaskWrapper &task,std::shared_ptr<pragma::ai::Schedule> &sched,uint8_t paramIdx,const std::string &def);
-		static void GetParameterEntity(lua_State *l,ai::TaskWrapper &task,std::shared_ptr<pragma::ai::Schedule> &sched,uint8_t paramIdx,EntityHandle &def);
+		static void GetParameterEntity(lua_State *l,ai::TaskWrapper &task,std::shared_ptr<pragma::ai::Schedule> &sched,uint8_t paramIdx,BaseEntity *def);
 		static void GetParameterVector(lua_State *l,ai::TaskWrapper &task,std::shared_ptr<pragma::ai::Schedule> &sched,uint8_t paramIdx,const Vector3 &def);
 		static void GetParameterQuaternion(lua_State *l,ai::TaskWrapper &task,std::shared_ptr<pragma::ai::Schedule> &sched,uint8_t paramIdx,const Quat &def);
 		static void GetParameterEulerAngles(lua_State *l,ai::TaskWrapper &task,std::shared_ptr<pragma::ai::Schedule> &sched,uint8_t paramIdx,const EulerAngles &def);
@@ -66,7 +66,7 @@ namespace Lua
 		static void SetParameterInt(lua_State *l,ai::TaskWrapper &task,uint8_t idx,int32_t i);
 		static void SetParameterFloat(lua_State *l,ai::TaskWrapper &task,uint8_t idx,float f);
 		static void SetParameterString(lua_State *l,ai::TaskWrapper &task,uint8_t idx,const std::string &s);
-		static void SetParameterEntity(lua_State *l,ai::TaskWrapper &task,uint8_t idx,EntityHandle &hEnt);
+		static void SetParameterEntity(lua_State *l,ai::TaskWrapper &task,uint8_t idx,BaseEntity &ent);
 		static void SetParameterVector(lua_State *l,ai::TaskWrapper &task,uint8_t idx,const Vector3 &v);
 		static void SetParameterQuaternion(lua_State *l,ai::TaskWrapper &task,uint8_t idx,const Quat &rot);
 		static void SetParameterEulerAngles(lua_State *l,ai::TaskWrapper &task,uint8_t idx,const EulerAngles &ang);
@@ -248,7 +248,7 @@ void Lua::AIBehaviorNode::register_class(lua_State *l,luabind::module_ &mod)
 	classDef.def("GetParameterFloat",static_cast<void(*)(lua_State*,ai::TaskWrapper&,std::shared_ptr<pragma::ai::Schedule>&,uint8_t)>(&GetParameterFloat));
 	classDef.def("GetParameterString",static_cast<void(*)(lua_State*,ai::TaskWrapper&,std::shared_ptr<pragma::ai::Schedule>&,uint8_t,const std::string&)>(&GetParameterString));
 	classDef.def("GetParameterString",static_cast<void(*)(lua_State*,ai::TaskWrapper&,std::shared_ptr<pragma::ai::Schedule>&,uint8_t)>(&GetParameterString));
-	classDef.def("GetParameterEntity",static_cast<void(*)(lua_State*,ai::TaskWrapper&,std::shared_ptr<pragma::ai::Schedule>&,uint8_t,EntityHandle&)>(&GetParameterEntity));
+	classDef.def("GetParameterEntity",static_cast<void(*)(lua_State*,ai::TaskWrapper&,std::shared_ptr<pragma::ai::Schedule>&,uint8_t,BaseEntity*)>(&GetParameterEntity));
 	classDef.def("GetParameterEntity",static_cast<void(*)(lua_State*,ai::TaskWrapper&,std::shared_ptr<pragma::ai::Schedule>&,uint8_t)>(&GetParameterEntity));
 	classDef.def("GetParameterVector",static_cast<void(*)(lua_State*,ai::TaskWrapper&,std::shared_ptr<pragma::ai::Schedule>&,uint8_t,const Vector3&)>(&GetParameterVector));
 	classDef.def("GetParameterVector",static_cast<void(*)(lua_State*,ai::TaskWrapper&,std::shared_ptr<pragma::ai::Schedule>&,uint8_t)>(&GetParameterVector));
@@ -265,7 +265,7 @@ void Lua::AIBehaviorNode::register_class(lua_State *l,luabind::module_ &mod)
 	classDef.def("SetParameterInt",static_cast<void(*)(lua_State*,ai::TaskWrapper&,uint8_t,int32_t)>(&SetParameterInt));
 	classDef.def("SetParameterFloat",static_cast<void(*)(lua_State*,ai::TaskWrapper&,uint8_t,float)>(&SetParameterFloat));
 	classDef.def("SetParameterString",static_cast<void(*)(lua_State*,ai::TaskWrapper&,uint8_t,const std::string&)>(&SetParameterString));
-	classDef.def("SetParameterEntity",static_cast<void(*)(lua_State*,ai::TaskWrapper&,uint8_t,EntityHandle&)>(&SetParameterEntity));
+	classDef.def("SetParameterEntity",static_cast<void(*)(lua_State*,ai::TaskWrapper&,uint8_t,BaseEntity&)>(&SetParameterEntity));
 	classDef.def("SetParameterVector",static_cast<void(*)(lua_State*,ai::TaskWrapper&,uint8_t,const Vector3&)>(&SetParameterVector));
 	classDef.def("SetParameterQuaternion",static_cast<void(*)(lua_State*,ai::TaskWrapper&,uint8_t,const Quat&)>(&SetParameterQuaternion));
 	classDef.def("SetParameterEulerAngles",static_cast<void(*)(lua_State*,ai::TaskWrapper&,uint8_t,const EulerAngles&)>(&SetParameterEulerAngles));
@@ -402,17 +402,16 @@ void Lua::AIBehaviorNode::GetParameterString(lua_State *l,ai::TaskWrapper &task,
 	Lua::PushString(l,*r);
 }
 void Lua::AIBehaviorNode::GetParameterString(lua_State *l,ai::TaskWrapper &task,std::shared_ptr<pragma::ai::Schedule> &sched,uint8_t paramIdx) {GetParameterString(l,task,sched,paramIdx,"");}
-void Lua::AIBehaviorNode::GetParameterEntity(lua_State *l,ai::TaskWrapper &task,std::shared_ptr<pragma::ai::Schedule> &sched,uint8_t paramIdx,EntityHandle &def)
+void Lua::AIBehaviorNode::GetParameterEntity(lua_State *l,ai::TaskWrapper &task,std::shared_ptr<pragma::ai::Schedule> &sched,uint8_t paramIdx,BaseEntity *def)
 {
 	//LUA_CHECK_ENTITY(l,def);
-	auto *r = get_parameter<const BaseEntity*>(task,sched,paramIdx,pragma::ai::Schedule::Parameter::Type::Entity,&pragma::ai::BehaviorParameter::GetEntity,def.get());
+	auto *r = get_parameter<const BaseEntity*>(task,sched,paramIdx,pragma::ai::Schedule::Parameter::Type::Entity,&pragma::ai::BehaviorParameter::GetEntity,def);
 	if(r != nullptr)
 		const_cast<BaseEntity*>(r)->GetLuaObject()->push(l);
 }
 void Lua::AIBehaviorNode::GetParameterEntity(lua_State *l,ai::TaskWrapper &task,std::shared_ptr<pragma::ai::Schedule> &sched,uint8_t paramIdx)
 {
-	EntityHandle def {};
-	GetParameterEntity(l,task,sched,paramIdx,def);
+	GetParameterEntity(l,task,sched,paramIdx,nullptr);
 }
 void Lua::AIBehaviorNode::GetParameterVector(lua_State *l,ai::TaskWrapper &task,std::shared_ptr<pragma::ai::Schedule> &sched,uint8_t paramIdx,const Vector3 &def)
 {
@@ -452,10 +451,9 @@ void Lua::AIBehaviorNode::SetParameterBool(lua_State*,ai::TaskWrapper &task,uint
 void Lua::AIBehaviorNode::SetParameterInt(lua_State*,ai::TaskWrapper &task,uint8_t idx,int32_t i) {task->SetParameter(idx,i);}
 void Lua::AIBehaviorNode::SetParameterFloat(lua_State*,ai::TaskWrapper &task,uint8_t idx,float f) {task->SetParameter(idx,f);}
 void Lua::AIBehaviorNode::SetParameterString(lua_State*,ai::TaskWrapper &task,uint8_t idx,const std::string &s) {task->SetParameter(idx,s);}
-void Lua::AIBehaviorNode::SetParameterEntity(lua_State *l,ai::TaskWrapper &task,uint8_t idx,EntityHandle &hEnt)
+void Lua::AIBehaviorNode::SetParameterEntity(lua_State *l,ai::TaskWrapper &task,uint8_t idx,BaseEntity &ent)
 {
-	LUA_CHECK_ENTITY(l,hEnt);
-	task->SetParameter(idx,hEnt.get());
+	task->SetParameter(idx,&ent);
 }
 void Lua::AIBehaviorNode::SetParameterVector(lua_State*,ai::TaskWrapper &task,uint8_t idx,const Vector3 &v) {task->SetParameter(idx,v);}
 void Lua::AIBehaviorNode::SetParameterQuaternion(lua_State*,ai::TaskWrapper &task,uint8_t idx,const Quat &rot) {task->SetParameter(idx,rot);}

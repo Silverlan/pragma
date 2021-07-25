@@ -31,9 +31,9 @@ namespace Lua
 			static void GetSquadName(lua_State *l,SAIHandle &hEnt);
 			static void SetRelationship(lua_State *l,SAIHandle &hEnt,const std::string &className,uint32_t disposition,int32_t priority);
 			static void SetRelationship(lua_State *l,SAIHandle &hEnt,const std::string &className,uint32_t disposition);
-			static void SetRelationship(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther,uint32_t disposition,bool revert,int32_t priority);
-			static void SetRelationship(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther,uint32_t disposition,bool revert);
-			static void SetRelationship(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther,uint32_t disposition);
+			static void SetRelationship(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther,uint32_t disposition,bool revert,int32_t priority);
+			static void SetRelationship(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther,uint32_t disposition,bool revert);
+			static void SetRelationship(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther,uint32_t disposition);
 			static void SetRelationship(lua_State *l,SAIHandle &hEnt,const std::shared_ptr<Faction> &faction,uint32_t disposition,int32_t priority);
 			static void SetRelationship(lua_State *l,SAIHandle &hEnt,const std::shared_ptr<Faction> &faction,uint32_t disposition);
 			static void GetMaxViewDistance(lua_State *l,SAIHandle &hEnt);
@@ -43,21 +43,21 @@ namespace Lua
 			static void SetSquad(lua_State *l,SAIHandle &hEnt,const std::string &squadName);
 			static void GetNPCState(lua_State *l,SAIHandle &hEnt);
 			static void GetSquad(lua_State *l,SAIHandle &hEnt);
-			static void ClearRelationship(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther);
+			static void ClearRelationship(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther);
 			static void ClearRelationship(lua_State *l,SAIHandle &hEnt,const std::string &className);
 			static void ClearRelationship(lua_State *l,SAIHandle &hEnt,const std::shared_ptr<Faction> &faction);
-			static void GetDisposition(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther);
+			static void GetDisposition(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther);
 			static void GetDisposition(lua_State *l,SAIHandle &hEnt,const std::string &className);
 			static void GetDisposition(lua_State *l,SAIHandle &hEnt,const std::shared_ptr<Faction> &faction);
 			static void GetCurrentSchedule(lua_State *l,SAIHandle &hEnt);
 			static void GetMemory(lua_State *l,SAIHandle &hEnt);
-			static void GetMemory(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther);
-			static void Memorize(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther,uint32_t memType,const Vector3 &pos,const Vector3 &vel);
-			static void Memorize(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther,uint32_t memType);
-			static void Forget(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther);
+			static void GetMemory(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther);
+			static void Memorize(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther,uint32_t memType,const Vector3 &pos,const Vector3 &vel);
+			static void Memorize(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther,uint32_t memType);
+			static void Forget(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther);
 			static void ClearMemory(lua_State *l,SAIHandle &hEnt);
-			static void IsInMemory(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther);
-			static void IsInViewCone(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther);
+			static void IsInMemory(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther);
+			static void IsInViewCone(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther);
 			static void GetMemoryDuration(lua_State *l,SAIHandle &hEnt);
 			static void SetMemoryDuration(lua_State *l,SAIHandle &hEnt,float dur);
 			static void CanSee(lua_State *l,SAIHandle &hEnt);
@@ -79,7 +79,7 @@ namespace Lua
 			static void EndControl(lua_State *l,SAIHandle &hEnt);
 			static void IsControlled(lua_State *l,SAIHandle &hEnt);
 			static void GetController(lua_State *l,SAIHandle &hEnt);
-			static void IsEnemy(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther);
+			static void IsEnemy(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther);
 			static void LockAnimation(lua_State *l,SAIHandle &hEnt,bool b);
 			static void IsAnimationLocked(lua_State *l,SAIHandle &hEnt);
 
@@ -110,9 +110,9 @@ void Lua::register_sv_ai_component(lua_State *l,luabind::module_ &module)
 	def.def("GetSquadName",&Lua::NPC::Server::GetSquadName);
 	def.def("SetRelationship",static_cast<void(*)(lua_State*,SAIHandle&,const std::string&,uint32_t,int32_t)>(&Lua::NPC::Server::SetRelationship));
 	def.def("SetRelationship",static_cast<void(*)(lua_State*,SAIHandle&,const std::string&,uint32_t)>(&Lua::NPC::Server::SetRelationship));
-	def.def("SetRelationship",static_cast<void(*)(lua_State*,SAIHandle&,EntityHandle&,uint32_t,bool,int32_t)>(&Lua::NPC::Server::SetRelationship));
-	def.def("SetRelationship",static_cast<void(*)(lua_State*,SAIHandle&,EntityHandle&,uint32_t,bool)>(&Lua::NPC::Server::SetRelationship));
-	def.def("SetRelationship",static_cast<void(*)(lua_State*,SAIHandle&,EntityHandle&,uint32_t)>(&Lua::NPC::Server::SetRelationship));
+	def.def("SetRelationship",static_cast<void(*)(lua_State*,SAIHandle&,BaseEntity&,uint32_t,bool,int32_t)>(&Lua::NPC::Server::SetRelationship));
+	def.def("SetRelationship",static_cast<void(*)(lua_State*,SAIHandle&,BaseEntity&,uint32_t,bool)>(&Lua::NPC::Server::SetRelationship));
+	def.def("SetRelationship",static_cast<void(*)(lua_State*,SAIHandle&,BaseEntity&,uint32_t)>(&Lua::NPC::Server::SetRelationship));
 	def.def("SetRelationship",static_cast<void(*)(lua_State*,SAIHandle&,const std::shared_ptr<Faction>&,uint32_t,int32_t)>(&Lua::NPC::Server::SetRelationship));
 	def.def("SetRelationship",static_cast<void(*)(lua_State*,SAIHandle&,const std::shared_ptr<Faction>&,uint32_t)>(&Lua::NPC::Server::SetRelationship));
 	def.def("GetMaxViewDistance",&Lua::NPC::Server::GetMaxViewDistance);
@@ -120,17 +120,17 @@ void Lua::register_sv_ai_component(lua_State *l,luabind::module_ &module)
 	def.def("GetMaxViewAngle",&Lua::NPC::Server::GetMaxViewAngle);
 	def.def("SetMaxViewAngle",&Lua::NPC::Server::SetMaxViewAngle);
 	def.def("GetSquad",&Lua::NPC::Server::GetSquad);
-	def.def("ClearRelationship",static_cast<void(*)(lua_State*,SAIHandle&,EntityHandle&)>(&Lua::NPC::Server::ClearRelationship));
+	def.def("ClearRelationship",static_cast<void(*)(lua_State*,SAIHandle&,BaseEntity&)>(&Lua::NPC::Server::ClearRelationship));
 	def.def("ClearRelationship",static_cast<void(*)(lua_State*,SAIHandle&,const std::string&)>(&Lua::NPC::Server::ClearRelationship));
 	def.def("ClearRelationship",static_cast<void(*)(lua_State*,SAIHandle&,const std::shared_ptr<Faction>&)>(&Lua::NPC::Server::ClearRelationship));
-	def.def("GetDisposition",static_cast<void(*)(lua_State*,SAIHandle&,EntityHandle&)>(&Lua::NPC::Server::GetDisposition));
+	def.def("GetDisposition",static_cast<void(*)(lua_State*,SAIHandle&,BaseEntity&)>(&Lua::NPC::Server::GetDisposition));
 	def.def("GetDisposition",static_cast<void(*)(lua_State*,SAIHandle&,const std::string&)>(&Lua::NPC::Server::GetDisposition));
 	def.def("GetDisposition",static_cast<void(*)(lua_State*,SAIHandle&,const std::shared_ptr<Faction>&)>(&Lua::NPC::Server::GetDisposition));
 	def.def("GetCurrentSchedule",&Lua::NPC::Server::GetCurrentSchedule);
-	def.def("GetMemory",static_cast<void(*)(lua_State*,SAIHandle&,EntityHandle&)>(&Lua::NPC::Server::GetMemory));
+	def.def("GetMemory",static_cast<void(*)(lua_State*,SAIHandle&,BaseEntity&)>(&Lua::NPC::Server::GetMemory));
 	def.def("GetMemory",static_cast<void(*)(lua_State*,SAIHandle&)>(&Lua::NPC::Server::GetMemory));
-	def.def("Memorize",static_cast<void(*)(lua_State*,SAIHandle&,EntityHandle&,uint32_t,const Vector3&,const Vector3&)>(&Lua::NPC::Server::Memorize));
-	def.def("Memorize",static_cast<void(*)(lua_State*,SAIHandle&,EntityHandle&,uint32_t)>(&Lua::NPC::Server::Memorize));
+	def.def("Memorize",static_cast<void(*)(lua_State*,SAIHandle&,BaseEntity&,uint32_t,const Vector3&,const Vector3&)>(&Lua::NPC::Server::Memorize));
+	def.def("Memorize",static_cast<void(*)(lua_State*,SAIHandle&,BaseEntity&,uint32_t)>(&Lua::NPC::Server::Memorize));
 	def.def("Forget",&Lua::NPC::Server::Forget);
 	def.def("ClearMemory",&Lua::NPC::Server::ClearMemory);
 	def.def("IsInMemory",&Lua::NPC::Server::IsInMemory);
@@ -203,9 +203,8 @@ void Lua::register_sv_ai_component(lua_State *l,luabind::module_ &module)
 	defAIAnimInfo.def("SetFaceTarget",static_cast<void(*)(lua_State*,pragma::SAIComponent::AIAnimationInfo&,const Vector3&)>([](lua_State *l,pragma::SAIComponent::AIAnimationInfo &info,const Vector3 &pos) {
 		info.SetFaceTarget(pos);
 	}));
-	defAIAnimInfo.def("SetFaceTarget",static_cast<void(*)(lua_State*,pragma::SAIComponent::AIAnimationInfo&,EntityHandle&)>([](lua_State *l,pragma::SAIComponent::AIAnimationInfo &info,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		info.SetFaceTarget(hEnt.get());
+	defAIAnimInfo.def("SetFaceTarget",static_cast<void(*)(lua_State*,pragma::SAIComponent::AIAnimationInfo&,BaseEntity&)>([](lua_State *l,pragma::SAIComponent::AIAnimationInfo &info,BaseEntity &ent) {
+		info.SetFaceTarget(&ent);
 	}));
 	def.scope[defAIAnimInfo];
 
@@ -253,14 +252,13 @@ void Lua::NPC::Server::SetRelationship(lua_State *l,SAIHandle &hEnt,const std::s
 	hEnt->SetRelationship(className,static_cast<DISPOSITION>(disposition),priority);
 }
 void Lua::NPC::Server::SetRelationship(lua_State *l,SAIHandle &hEnt,const std::string &className,uint32_t disposition) {SetRelationship(l,hEnt,className,disposition,0);}
-void Lua::NPC::Server::SetRelationship(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther,uint32_t disposition,bool revert,int32_t priority)
+void Lua::NPC::Server::SetRelationship(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther,uint32_t disposition,bool revert,int32_t priority)
 {
 	pragma::Lua::check_component(l,hEnt);
-	LUA_CHECK_ENTITY(l,hEntOther);
-	hEnt.get()->SetRelationship(hEntOther,static_cast<DISPOSITION>(disposition),revert,priority);
+	hEnt.get()->SetRelationship(&entOther,static_cast<DISPOSITION>(disposition),revert,priority);
 }
-void Lua::NPC::Server::SetRelationship(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther,uint32_t disposition,bool revert) {SetRelationship(l,hEnt,hEntOther,disposition,revert,0);}
-void Lua::NPC::Server::SetRelationship(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther,uint32_t disposition) {SetRelationship(l,hEnt,hEntOther,disposition,true,0);}
+void Lua::NPC::Server::SetRelationship(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther,uint32_t disposition,bool revert) {SetRelationship(l,hEnt,entOther,disposition,revert,0);}
+void Lua::NPC::Server::SetRelationship(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther,uint32_t disposition) {SetRelationship(l,hEnt,entOther,disposition,true,0);}
 void Lua::NPC::Server::SetRelationship(lua_State *l,SAIHandle &hEnt,const std::shared_ptr<Faction> &faction,uint32_t disposition,int32_t priority)
 {
 	pragma::Lua::check_component(l,hEnt);
@@ -300,11 +298,10 @@ void Lua::NPC::Server::GetSquad(lua_State *l,SAIHandle &hEnt)
 		return;
 	Lua::Push(l,squad);
 }
-void Lua::NPC::Server::ClearRelationship(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther)
+void Lua::NPC::Server::ClearRelationship(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther)
 {
 	pragma::Lua::check_component(l,hEnt);
-	LUA_CHECK_ENTITY(l,hEntOther);
-	hEnt->ClearRelationship(hEntOther);
+	hEnt->ClearRelationship(&entOther);
 }
 void Lua::NPC::Server::ClearRelationship(lua_State *l,SAIHandle &hEnt,const std::string &className)
 {
@@ -316,12 +313,11 @@ void Lua::NPC::Server::ClearRelationship(lua_State *l,SAIHandle &hEnt,const std:
 	pragma::Lua::check_component(l,hEnt);
 	hEnt->ClearRelationship(*faction);
 }
-void Lua::NPC::Server::GetDisposition(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther)
+void Lua::NPC::Server::GetDisposition(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther)
 {
 	pragma::Lua::check_component(l,hEnt);
-	LUA_CHECK_ENTITY(l,hEntOther);
 	int32_t priority = 0;
-	auto disp = hEnt->GetDisposition(hEntOther,&priority);
+	auto disp = hEnt->GetDisposition(&entOther,&priority);
 	Lua::PushInt(l,umath::to_integral(disp));
 	Lua::PushInt(l,priority);
 }
@@ -355,50 +351,44 @@ void Lua::NPC::Server::GetMemory(lua_State *l,SAIHandle &hEnt)
 	auto &mem = hEnt->GetMemory();
 	Lua::Push<pragma::ai::Memory*>(l,&mem);
 }
-void Lua::NPC::Server::GetMemory(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther)
+void Lua::NPC::Server::GetMemory(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther)
 {
 	pragma::Lua::check_component(l,hEnt);
-	LUA_CHECK_ENTITY(l,hEntOther);
-	auto *fragment = hEnt->GetMemory(hEntOther.get());
+	auto *fragment = hEnt->GetMemory(&entOther);
 	if(fragment == nullptr)
 		return;
 	Lua::Push<pragma::ai::Memory::Fragment*>(l,fragment);
 }
-void Lua::NPC::Server::Memorize(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther,uint32_t memType,const Vector3 &pos,const Vector3 &vel)
+void Lua::NPC::Server::Memorize(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther,uint32_t memType,const Vector3 &pos,const Vector3 &vel)
 {
 	pragma::Lua::check_component(l,hEnt);
-	LUA_CHECK_ENTITY(l,hEntOther);
-	hEnt->Memorize(hEntOther.get(),static_cast<pragma::ai::Memory::MemoryType>(memType),pos,vel);
+	hEnt->Memorize(&entOther,static_cast<pragma::ai::Memory::MemoryType>(memType),pos,vel);
 }
-void Lua::NPC::Server::Memorize(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther,uint32_t memType)
+void Lua::NPC::Server::Memorize(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther,uint32_t memType)
 {
 	pragma::Lua::check_component(l,hEnt);
-	LUA_CHECK_ENTITY(l,hEntOther);
-	hEnt->Memorize(hEntOther.get(),static_cast<pragma::ai::Memory::MemoryType>(memType));
+	hEnt->Memorize(&entOther,static_cast<pragma::ai::Memory::MemoryType>(memType));
 }
-void Lua::NPC::Server::Forget(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther)
+void Lua::NPC::Server::Forget(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther)
 {
 	pragma::Lua::check_component(l,hEnt);
-	LUA_CHECK_ENTITY(l,hEntOther);
-	hEnt->Forget(hEntOther.get());
+	hEnt->Forget(&entOther);
 }
 void Lua::NPC::Server::ClearMemory(lua_State *l,SAIHandle &hEnt)
 {
 	pragma::Lua::check_component(l,hEnt);
 	hEnt->ClearMemory();
 }
-void Lua::NPC::Server::IsInMemory(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther)
+void Lua::NPC::Server::IsInMemory(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther)
 {
 	pragma::Lua::check_component(l,hEnt);
-	LUA_CHECK_ENTITY(l,hEntOther);
-	Lua::PushBool(l,hEnt->IsInMemory(hEntOther.get()));
+	Lua::PushBool(l,hEnt->IsInMemory(&entOther));
 }
-void Lua::NPC::Server::IsInViewCone(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther)
+void Lua::NPC::Server::IsInViewCone(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther)
 {
 	pragma::Lua::check_component(l,hEnt);
-	LUA_CHECK_ENTITY(l,hEntOther);
 	auto dist = 0.f;
-	auto r = hEnt->IsInViewCone(hEntOther.get(),&dist);
+	auto r = hEnt->IsInViewCone(&entOther,&dist);
 	Lua::PushBool(l,r);
 	if(r == true)
 		Lua::PushNumber(l,dist);
@@ -526,11 +516,10 @@ void Lua::NPC::Server::GetController(lua_State *l,SAIHandle &hEnt)
 		return;
 	controller->GetEntity().GetLuaObject()->push(l);
 }
-void Lua::NPC::Server::IsEnemy(lua_State *l,SAIHandle &hEnt,EntityHandle &hEntOther)
+void Lua::NPC::Server::IsEnemy(lua_State *l,SAIHandle &hEnt,BaseEntity &entOther)
 {
 	pragma::Lua::check_component(l,hEnt);
-	LUA_CHECK_ENTITY(l,hEntOther);
-	Lua::PushBool(l,hEnt->IsEnemy(hEntOther.get()));
+	Lua::PushBool(l,hEnt->IsEnemy(&entOther));
 }
 void Lua::NPC::Server::GetDistanceToMoveTarget(lua_State *l,SAIHandle &hEnt)
 {

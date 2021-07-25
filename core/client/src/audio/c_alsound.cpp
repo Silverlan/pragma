@@ -717,7 +717,7 @@ Vector3 CALSound::GetPosition() const
 {
 	if(m_bTerminated == true)
 		return Vector3(0.f,0.f,0.f);
-	if(m_hSourceEntity.IsValid())
+	if(m_hSourceEntity.valid())
 	{
 		auto pTrComponent = m_hSourceEntity.get()->GetTransformComponent();
 		if(pTrComponent != nullptr)

@@ -63,6 +63,7 @@
 #include <mpParser.h>
 #include <luainterface.hpp>
 #include <luabind/out_value_policy.hpp>
+#include <luabind/copy_policy.hpp>
 
 extern DLLNETWORK Engine *engine;
 
@@ -286,12 +287,13 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		luabind::def("create_from_string",Lua::global::create_from_string)
 	];
 
-	Lua::RegisterLibrary(lua.GetState(),"noise",{
-		{"perlin",Lua_noise_perlin},
-		{"const",Lua_noise_const},
-		{"voronoi",Lua_noise_voronoi},
-		{"generate_height_map",Lua_noise_generate_height_map}
-	});
+	auto modNoise = luabind::module_(lua.GetState(),"noise");
+	modNoise[
+		luabind::def("perlin",Lua::noise::perlin),
+		luabind::def("const",Lua::noise::noise_const),
+		luabind::def("voronoi",Lua::noise::voronoi),
+		luabind::def("generate_height_map",Lua::noise::generate_height_map)
+	];
 
 	Lua::RegisterLibraryEnums(lua.GetState(),"noise",{
 		{"QUALITY_FAST",umath::to_integral(noise::NoiseQuality::QUALITY_FAST)},
@@ -658,23 +660,31 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		{"print_warning",Lua::console::msgw},
 		{"print_error",Lua::console::msge},
 
-		{"register_variable",Lua_cvar_CreateConVar},
-		{"register_command",Lua_cvar_CreateConCommand},
-		{"run",Lua_cvar_Run},
-		{"get_convar",Lua_cvar_GetConVar},
-		{"get_convar_int",Lua_cvar_GetConVarInt},
-		{"get_convar_float",Lua_cvar_GetConVarFloat},
-		{"get_convar_string",Lua_cvar_GetConVarString},
-		{"get_convar_bool",Lua_cvar_GetConVarBool},
-		{"get_convar_flags",Lua_cvar_GetConVarFlags},
-		{"add_change_callback",Lua_cvar_AddChangeCallback},
+		{"run",Lua::console::Run},
+		{"add_change_callback",Lua::console::AddChangeCallback},
 
-		{"register_override",Lua::console::register_override},
-		{"clear_override",Lua::console::clear_override},
 		{"parse_command_arguments",Lua::console::parse_command_arguments}
 	});
 
 	auto consoleMod = luabind::module(lua.GetState(),"console");
+	consoleMod[
+		luabind::def("register_variable",&Lua::console::CreateConVar),
+		luabind::def("register_command",static_cast<void(*)(lua_State*,const std::string&,const Lua::func<void,pragma::BasePlayerComponent,float,Lua::variadic<std::string>>&,ConVarFlags,const std::string&)>(&Lua::console::CreateConCommand)),
+		luabind::def("register_command",static_cast<void(*)(lua_State*,const std::string&,const Lua::func<void,pragma::BasePlayerComponent,float,Lua::variadic<std::string>>&,ConVarFlags)>(&Lua::console::CreateConCommand)),
+		luabind::def("register_command",static_cast<void(*)(lua_State*,const std::string&,const Lua::func<void,pragma::BasePlayerComponent,float,Lua::variadic<std::string>>&,const std::string&)>(&Lua::console::CreateConCommand)),
+		luabind::def("register_command",static_cast<void(*)(lua_State*,const std::string&,const Lua::func<void,pragma::BasePlayerComponent,float,Lua::variadic<std::string>>&)>(
+			[](lua_State *l,const std::string &name,const Lua::func<void,pragma::BasePlayerComponent,float,Lua::variadic<std::string>> &function) {
+			Lua::console::CreateConCommand(l,name,function,"");
+		})),
+		luabind::def("get_convar",&Lua::console::GetConVar),
+		luabind::def("get_convar_int",&Lua::console::GetConVarInt),
+		luabind::def("get_convar_float",&Lua::console::GetConVarFloat),
+		luabind::def("get_convar_string",&Lua::console::GetConVarString),
+		luabind::def("get_convar_bool",&Lua::console::GetConVarBool),
+		luabind::def("get_convar_flags",&Lua::console::GetConVarFlags),
+		luabind::def("register_override",&Lua::console::register_override),
+		luabind::def("clear_override",&Lua::console::clear_override)
+	];
 
 	static const auto fGetConVarName = [](lua_State *l,ConVar &cvar) -> std::string {
 		auto *nw = engine->GetNetworkState(l);
@@ -687,25 +697,18 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		return it->first;
 	};
 	auto classDefConVar = luabind::class_<ConVar>("Var");
-	classDefConVar.def("GetString",&Lua_ConVar_GetString);
-	classDefConVar.def("GetInt",&Lua_ConVar_GetInt);
-	classDefConVar.def("GetFloat",&Lua_ConVar_GetFloat);
-	classDefConVar.def("GetBool",&Lua_ConVar_GetBool);
-	classDefConVar.def("GetFlags",&Lua_ConVar_GetFlags);
-	classDefConVar.def("GetDefault",static_cast<void(*)(lua_State*,ConVar&)>([](lua_State *l,ConVar &cvar) {
-		Lua::PushString(l,cvar.GetDefault());
+	classDefConVar.def("GetString",&ConVar::GetString,luabind::copy_policy<0>{});
+	classDefConVar.def("GetInt",&ConVar::GetInt);
+	classDefConVar.def("GetFloat",&ConVar::GetFloat);
+	classDefConVar.def("GetBool",&ConVar::GetBool);
+	classDefConVar.def("GetFlags",&ConVar::GetFlags);
+	classDefConVar.def("GetDefault",&ConVar::GetDefault,luabind::copy_policy<0>{});
+	classDefConVar.def("GetHelpText",&ConVar::GetHelpText,luabind::copy_policy<0>{});
+	classDefConVar.def("AddChangeCallback",static_cast<void(*)(lua_State*,ConVar&,const Lua::func<void,Lua::var<std::string,int32_t,float,bool>>&)>([](lua_State *l,ConVar &cvar,const Lua::func<void,Lua::var<std::string,int32_t,float,bool>> &function) {
+		engine->GetNetworkState(l)->GetGameState()->AddConVarCallback(fGetConVarName(l,cvar),function);
 	}));
-	classDefConVar.def("GetHelpText",static_cast<void(*)(lua_State*,ConVar&)>([](lua_State *l,ConVar &cvar) {
-		Lua::PushString(l,cvar.GetHelpText());
-	}));
-	classDefConVar.def("AddChangeCallback",static_cast<void(*)(lua_State*,ConVar&,luabind::object)>([](lua_State *l,ConVar &cvar,luabind::object oFunction) {
-		Lua::CheckFunction(l,2);
-		auto fc = luabind::object(luabind::from_stack(l,2));
-		engine->GetNetworkState(l)->GetGameState()->AddConVarCallback(fGetConVarName(l,cvar),fc);
-	}));
-	classDefConVar.def("GetName",static_cast<void(*)(lua_State*,ConVar&)>([](lua_State *l,ConVar &cvar) {
-		auto name = fGetConVarName(l,cvar);
-		Lua::PushString(l,name);
+	classDefConVar.def("GetName",static_cast<std::string(*)(lua_State*,ConVar&)>([](lua_State *l,ConVar &cvar) {
+		return fGetConVarName(l,cvar);
 	}));
 	consoleMod[classDefConVar];
 

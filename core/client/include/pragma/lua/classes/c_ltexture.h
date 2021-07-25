@@ -18,9 +18,7 @@ namespace Lua
 {
 	namespace Texture
 	{
-		DLLCLIENT void GetWidth(lua_State *l,::Texture &tex);
-		DLLCLIENT void GetHeight(lua_State *l,::Texture &tex);
-		DLLCLIENT void GetVkTexture(lua_State *l,::Texture &tex);
+		DLLCLIENT std::shared_ptr<prosper::Texture> GetVkTexture(lua_State *l,::Texture &tex);
 	};
 };
 

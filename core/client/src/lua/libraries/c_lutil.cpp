@@ -62,9 +62,9 @@ int Lua::util::Client::create_particle_tracer(lua_State *l)
 
 int Lua::util::Client::create_muzzle_flash(lua_State *l)
 {
-	if(Lua::IsEntity(l,1) == true)
+	if(Lua::IsType<BaseEntity>(l,1) == true)
 	{
-		auto *ent = Lua::CheckEntity(l,1);
+		auto &ent = Lua::Check<BaseEntity>(l,1);
 		int32_t attId = -1;
 		std::string att {};
 		if(Lua::IsNumber(l,2))
@@ -83,7 +83,7 @@ int Lua::util::Client::create_muzzle_flash(lua_State *l)
 		auto *pt = pragma::CParticleSystemComponent::Create(particleName);
 		if(pt == nullptr)
 			return 0;
-		auto pRenderComponent = static_cast<CBaseEntity*>(ent)->GetRenderComponent();
+		auto pRenderComponent = static_cast<CBaseEntity*>(&ent)->GetRenderComponent();
 		if(pRenderComponent)
 			pt->SetRenderMode(pRenderComponent->GetRenderMode());
 		pt->GetEntity().SetKeyValue("transform_with_emitter","1");
@@ -98,9 +98,9 @@ int Lua::util::Client::create_muzzle_flash(lua_State *l)
 			attInfo.rotation = relRot;
 			attInfo.flags |= FAttachmentMode::UpdateEachFrame;
 			if(att.empty() == false)
-				pAttachableComponent->AttachToAttachment(ent,att,attInfo);
+				pAttachableComponent->AttachToAttachment(&ent,att,attInfo);
 			else
-				pAttachableComponent->AttachToAttachment(ent,attId,attInfo);
+				pAttachableComponent->AttachToAttachment(&ent,attId,attInfo);
 		}
 		pt->PushLuaObject(l);
 		return 1;

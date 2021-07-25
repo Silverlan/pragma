@@ -15,124 +15,93 @@
 #include <pragma/console/command_options.hpp>
 
 extern DLLNETWORK Engine *engine;
-int Lua_cvar_CreateConVar(lua_State *l)
+ConVar *Lua::console::CreateConVar(lua_State *l,const std::string &cmd,const std::string &def,ConVarFlags flags,const std::string &help)
 {
-	auto cmd = Lua::CheckString(l,1);
-	auto def = Lua::CheckString(l,2);
-	auto flags = ConVarFlags::None;
-	std::string help;
-	if(Lua::IsSet(l,3))
-		flags = Lua::CheckInt<ConVarFlags>(l,3);
-	if(Lua::IsSet(l,4))
-		help = Lua::CheckString(l,4);
 	auto *state = engine->GetNetworkState(l);
 	if(state == nullptr)
 		return 0;
 	auto *cvar = state->CreateConVar(cmd,def,flags,help);
 	if(cvar == nullptr)
 		return 0;
-	Lua::Push<ConVar*>(l,cvar);
-	return 1;
+	return cvar;
 }
 
-int Lua_cvar_CreateConCommand(lua_State *l)
+void Lua::console::CreateConCommand(lua_State *l,const std::string &name,const Lua::func<void,pragma::BasePlayerComponent,float,Lua::variadic<std::string>> &function,ConVarFlags flags,const std::string &help)
 {
-	auto name = Lua::CheckString(l,1);
-	Lua::CheckFunction(l,2);
-	auto fc = luabind::object(luabind::from_stack(l,2));
-	auto flags = ConVarFlags::None;
-	std::string help;
-	if(Lua::IsSet(l,3))
-	{
-		if(Lua::IsNumber(l,3) == false)
-			help = Lua::CheckString(l,3);
-		else
-		{
-			flags = static_cast<ConVarFlags>(Lua::CheckInt(l,3));
-			if(Lua::IsSet(l,4) == true)
-				help = Lua::CheckString(l,4);
-		}
-	}
 	auto *state = engine->GetNetworkState(l);
-	if(state == nullptr)
-		return 0;
-	state->CreateConCommand(name,fc,flags,help);
-	return 0;
+	state->CreateConCommand(name,function,flags,help);
+}
+void Lua::console::CreateConCommand(lua_State *l,const std::string &name,const Lua::func<void,pragma::BasePlayerComponent,float,Lua::variadic<std::string>> &function,ConVarFlags flags)
+{
+	auto *state = engine->GetNetworkState(l);
+	state->CreateConCommand(name,function,flags);
+}
+void Lua::console::CreateConCommand(lua_State *l,const std::string &name,const Lua::func<void,pragma::BasePlayerComponent,float,Lua::variadic<std::string>> &function,const std::string &help)
+{
+	auto *state = engine->GetNetworkState(l);
+	state->CreateConCommand(name,function,ConVarFlags::None,help);
 }
 
-int Lua_cvar_GetConVar(lua_State *l)
+ConVar *Lua::console::GetConVar(lua_State *l,const std::string &name)
 {
-	auto name = Lua::CheckString(l,1);
 	auto *state = engine->GetNetworkState(l);
 	if(state == nullptr)
-		return 0;
+		return nullptr;
 	auto *cv = state->GetConVar(name);
 	if(cv == nullptr)
-		return 0;
+		return nullptr;
 	if(cv->GetType() != ConType::Var)
-		return 0;
-	auto *cvar = static_cast<ConVar*>(cv);
-	Lua::Push<ConVar*>(l,cvar);
-	return 1;
+		return nullptr;
+	return static_cast<ConVar*>(cv);
 }
 
-#define GetConVarType(lua_state,cmd,lua_push,valDef,dataType) \
-	auto *state = engine->GetNetworkState(lua_state); \
-	if(state == nullptr) \
-		lua_push(lua_state,valDef); \
-	else \
-	{ \
-		auto *cv = state->GetConVar(cmd); \
-		if(cv == nullptr || cv->GetType() != ConType::Var) \
-			lua_push(lua_state,valDef); \
-		else \
-		{ \
-			auto *cvar = static_cast<ConVar*>(cv); \
-			lua_push(lua_state,cvar->dataType); \
-		} \
-	} \
-	return 1;
-
-
-int Lua_cvar_GetConVarInt(lua_State *l)
+static ConVar *get_con_var(lua_State *l,const std::string &conVar)
 {
-	std::string cmd = luaL_checkstring(l,1);
-	GetConVarType(l,cmd,Lua::PushInt,0,GetInt());
-}
-
-int Lua_cvar_GetConVarFloat(lua_State *l)
-{
-	std::string cmd = luaL_checkstring(l,1);
-	GetConVarType(l,cmd,Lua::PushNumber,0,GetFloat());
-}
-
-int Lua_cvar_GetConVarString(lua_State *l)
-{
-	std::string cmd = luaL_checkstring(l,1);
-	GetConVarType(l,cmd,lua_pushstring,"",GetString().c_str());
-}
-
-int Lua_cvar_GetConVarBool(lua_State *l)
-{
-	std::string cmd = luaL_checkstring(l,1);
-	GetConVarType(l,cmd,lua_pushboolean,false,GetBool());
-}
-
-int Lua_cvar_GetConVarFlags(lua_State *l)
-{
-	std::string cmd = luaL_checkstring(l,1);
-	auto name = Lua::CheckString(l,1);
 	auto *state = engine->GetNetworkState(l);
 	if(state == nullptr)
-		return 0;
-	auto *cv = state->GetConVar(name);
-	if(cv == nullptr)
-		return 0;
-	Lua::PushInt(l,umath::to_integral(cv->GetFlags()));
-	return 1;
+		return nullptr;
+	auto *cv = state->GetConVar(conVar);
+	if(cv == nullptr || cv->GetType() != ConType::Var)
+		return nullptr;
+	return static_cast<ConVar*>(cv);
 }
 
-int Lua_cvar_Run(lua_State *l)
+int32_t Lua::console::GetConVarInt(lua_State *l,const std::string &conVar)
+{
+	auto *cv = get_con_var(l,conVar);
+	return cv ? cv->GetInt() : 0;
+}
+
+float Lua::console::GetConVarFloat(lua_State *l,const std::string &conVar)
+{
+	auto *cv = get_con_var(l,conVar);
+	return cv ? cv->GetFloat() : 0.f;
+}
+
+std::string Lua::console::GetConVarString(lua_State *l,const std::string &conVar)
+{
+	auto *cv = get_con_var(l,conVar);
+	return cv ? cv->GetString() : "";
+}
+
+bool Lua::console::GetConVarBool(lua_State *l,const std::string &conVar)
+{
+	auto *cv = get_con_var(l,conVar);
+	return cv ? cv->GetBool() : false;
+}
+
+ConVarFlags Lua::console::GetConVarFlags(lua_State *l,const std::string &conVar)
+{
+	auto *state = engine->GetNetworkState(l);
+	if(state == nullptr)
+		return ConVarFlags::None;
+	auto *cv = state->GetConVar(conVar);
+	if(cv == nullptr)
+		return ConVarFlags::None;
+	return cv->GetFlags();
+}
+
+int Lua::console::Run(lua_State *l)
 {
 	int argc = lua_gettop(l);
 	std::string cmd = luaL_checkstring(l,1);
@@ -148,7 +117,7 @@ int Lua_cvar_Run(lua_State *l)
 	return 0;
 }
 
-int Lua_cvar_AddChangeCallback(lua_State *l)
+int Lua::console::AddChangeCallback(lua_State *l)
 {
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
@@ -161,20 +130,15 @@ int Lua_cvar_AddChangeCallback(lua_State *l)
 	return 0;
 }
 
-int Lua::console::register_override(lua_State *l)
+void Lua::console::register_override(lua_State *l,const std::string &src,const std::string &dst)
 {
 	auto *state = engine->GetNetworkState(l);
-	std::string src = Lua::CheckString(l,1);
-	std::string dst = Lua::CheckString(l,2);
 	state->SetConsoleCommandOverride(src,dst);
-	return 0;
 }
-int Lua::console::clear_override(lua_State *l)
+void Lua::console::clear_override(lua_State *l,const std::string &src)
 {
 	auto *state = engine->GetNetworkState(l);
-	std::string src = Lua::CheckString(l,1);
 	state->ClearConsoleCommandOverride(src);
-	return 0;
 }
 int Lua::console::parse_command_arguments(lua_State *l)
 {
@@ -212,12 +176,3 @@ int Lua::console::parse_command_arguments(lua_State *l)
 	}
 	return 1;
 }
-
-////////////////////////////////////
-
-void Lua_ConVar_GetString(lua_State *l,ConVar *cvar) {lua_pushstring(l,cvar->GetString().c_str());}
-void Lua_ConVar_GetInt(lua_State *l,ConVar *cvar) {Lua::PushInt(l,cvar->GetInt());}
-void Lua_ConVar_GetFloat(lua_State *l,ConVar *cvar) {Lua::PushNumber(l,cvar->GetFloat());}
-void Lua_ConVar_GetBool(lua_State *l,ConVar *cvar) {lua_pushboolean(l,cvar->GetBool());}
-//void Lua_ConVar_SetValue(lua_State *l,ConVar *cvar,std::string value) {cvar->SetValue(value);} // WEAVETODO
-void Lua_ConVar_GetFlags(lua_State *l,ConVar *cvar) {Lua::PushInt(l,cvar->GetFlags());}

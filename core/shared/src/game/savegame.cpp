@@ -101,7 +101,7 @@ bool savegame::load(Game &game,const std::string &fileName,std::string &outErr)
 	}
 	for(auto &hEnt : entities)
 	{
-		if(hEnt.IsValid() == false)
+		if(hEnt.valid() == false)
 			continue;
 		hEnt->Spawn();
 	}

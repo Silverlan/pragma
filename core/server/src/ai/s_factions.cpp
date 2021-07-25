@@ -110,7 +110,7 @@ DISPOSITION Faction::GetDisposition(std::string className,int *priority)
 }
 DISPOSITION Faction::GetDisposition(EntityHandle &hEnt,int *priority)
 {
-	if(!hEnt.IsValid())
+	if(!hEnt.valid())
 	{
 		if(priority != NULL)
 			*priority = 0;

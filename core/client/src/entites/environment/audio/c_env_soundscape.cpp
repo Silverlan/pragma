@@ -132,7 +132,7 @@ void CSoundScapeComponent::UpdateTargetPositions()
 	for(it=m_targets.begin();it!=m_targets.end();it++)
 	{
 		EntityHandle &hEnt = it->second;
-		if(hEnt.IsValid())
+		if(hEnt.valid())
 		{
 			auto pTrComponent = hEnt->GetTransformComponent();
 			if(pTrComponent != nullptr)

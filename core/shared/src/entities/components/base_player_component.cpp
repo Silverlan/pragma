@@ -277,7 +277,7 @@ BasePlayerComponent::~BasePlayerComponent()
 {
 	//if(m_sprite != NULL)
 	//	server->RemoveSprite(m_sprite); // WEAVETODO
-	if(m_entFlashlight.IsValid())
+	if(m_entFlashlight.valid())
 		m_entFlashlight->Remove();
 }
 
@@ -465,7 +465,7 @@ void BasePlayerComponent::Use()
 
 void BasePlayerComponent::SetFlashlight(bool b)
 {
-	if(m_entFlashlight.IsValid() == false)
+	if(m_entFlashlight.valid() == false)
 		return;
 	auto *toggleComponent = static_cast<pragma::BaseToggleComponent*>(m_entFlashlight.get()->FindComponent("toggle").get());
 	if(toggleComponent != nullptr)
@@ -474,7 +474,7 @@ void BasePlayerComponent::SetFlashlight(bool b)
 void BasePlayerComponent::ToggleFlashlight() {if(IsFlashlightOn()) SetFlashlight(false); else SetFlashlight(true);}
 bool BasePlayerComponent::IsFlashlightOn() const
 {
-	if(m_entFlashlight.IsValid() == false)
+	if(m_entFlashlight.valid() == false)
 		return false;
 	auto *toggleComponent = static_cast<pragma::BaseToggleComponent*>(m_entFlashlight.get()->FindComponent("toggle").get());
 	return (toggleComponent != nullptr) ? toggleComponent->IsTurnedOn() : false;

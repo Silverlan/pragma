@@ -1558,37 +1558,29 @@ void Lua::doc::register_library(Lua::Interface &lua)
 
 	const auto *libName = "doc";
 	auto &docLib = lua.RegisterLibrary(libName);
-	Lua::RegisterLibrary(l,libName,{
-		{"load",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-			std::string fileName = Lua::CheckString(l,1);
-			if(Lua::file::validate_write_operation(l,fileName) == false)
-				return 0;
+	docLib[
+		luabind::def("load",static_cast<luabind::optional<pragma::doc::Collection>(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &fileName) -> luabind::optional<pragma::doc::Collection> {
+			auto fname = fileName;
+			if(Lua::file::validate_write_operation(l,fname) == false)
+				return nil;
 			std::string err;
-			auto udmData = ::util::load_udm_asset(fileName,&err);
+			auto udmData = ::util::load_udm_asset(fname,&err);
 			if(udmData == nullptr)
-				return 0;
+				return nil;
 
 			auto col = pragma::doc::Collection::Load(udmData->GetAssetData(),err);
 			if(!col)
-				return 0;
-			Lua::Push(l,col);
-			return 1;
-		})},
-		{"autogenerate",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-			pragma::get_engine()->AddCallback("Think",FunctionCallback<void>::Create([]() {
-				autogenerate();
-			}));
-			return 0;
-		})},
-		{"generate_lad_assets",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+				return nil;
+			return luabind::object{l,col};
+		})),
+		luabind::def("autogenerate",&autogenerate),
+		luabind::def("generate_lad_assets",static_cast<void(*)(lua_State*)>([](lua_State *l) {
 			Lua::RunString(l,"doc.autogenerate() local el = udm.load('doc/lua/pragma.ldoc'):GetAssetData():GetData() local js = udm.to_json(el) file.write('doc/lua/web_api.json',js) doc.generate_zerobrane_autocomplete_script()","internal");
-			return 0;
-		})},
-		{"generate_zerobrane_autocomplete_script",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		})),
+		luabind::def("generate_zerobrane_autocomplete_script",static_cast<void(*)(lua_State*)>([](lua_State *l) {
 			Lua::doc::generate_autocomplete_script();
-			return 0;
-		})}
-	});
+		}))
+	];
 	Lua::RegisterLibraryEnums(l,libName,{
 		{"GAME_STATE_FLAG_NONE",umath::to_integral(pragma::doc::GameStateFlags::None)},
 		{"GAME_STATE_FLAG_BIT_SERVER",umath::to_integral(pragma::doc::GameStateFlags::Server)},

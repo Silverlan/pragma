@@ -32,7 +32,7 @@ void Lua::AISquad::GetMembers(lua_State *l,SAIHandle&,::AISquad &squad)
 	uint32_t idx = 1;
 	for(auto &member : squad.members)
 	{
-		if(member.IsValid() == false)
+		if(member.valid() == false)
 			continue;
 		Lua::PushInt(l,idx++);
 		member->GetLuaObject()->push(l);

@@ -12,7 +12,6 @@
 
 class TraceData;
 class PhysObjHandle;
-class EntityHandle;
 namespace pragma::physics {class IConvexShape;};
 namespace Lua::TraceData
 {

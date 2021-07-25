@@ -93,7 +93,7 @@ void ShaderWater::SetReflectionEnabled(bool b) {m_bReflectionEnabled = b;}
 bool ShaderWater::UpdateBindFogDensity()
 {
 	auto fogIntensity = 1.f;
-	if(m_boundEntity.IsValid() == false || m_boundScene.expired() == true)
+	if(m_boundEntity.valid() == false || m_boundScene.expired() == true)
 		return true;
 	auto whWaterComponent = m_boundEntity->GetComponent<CWaterComponent>();
 	if(whWaterComponent.expired())

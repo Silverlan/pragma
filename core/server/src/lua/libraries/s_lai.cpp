@@ -111,9 +111,8 @@ void Lua::ai::server::register_library(Lua::Interface &lua)
 	cdMoveToTarget.def("SetMoveTarget",static_cast<void(*)(lua_State*,TaskWrapperMoveToTarget&,const Vector3&)>([](lua_State *l,TaskWrapperMoveToTarget &task,const Vector3 &target) {
 		task->SetTarget(target);
 	}));
-	cdMoveToTarget.def("SetMoveTarget",static_cast<void(*)(lua_State*,TaskWrapperMoveToTarget&,EntityHandle&)>([](lua_State *l,TaskWrapperMoveToTarget &task,EntityHandle &hEnt) {
-		lua_checkentity(l,(&hEnt));
-		task->SetTarget(hEnt.get());
+	cdMoveToTarget.def("SetMoveTarget",static_cast<void(*)(lua_State*,TaskWrapperMoveToTarget&,BaseEntity&)>([](lua_State *l,TaskWrapperMoveToTarget &task,BaseEntity &ent) {
+		task->SetTarget(ent.GetHandle());
 	}));
 	cdMoveToTarget.def("SetMoveDistance",static_cast<void(*)(lua_State*,TaskWrapperMoveToTarget&,float)>([](lua_State *l,TaskWrapperMoveToTarget &task,float dist) {
 		task->SetMoveDistance(dist);
@@ -153,9 +152,8 @@ void Lua::ai::server::register_library(Lua::Interface &lua)
 	cdPlayAnimation.def("SetFaceTarget",static_cast<void(*)(lua_State*,TaskWrapperPlayAnimation&,const Vector3&)>([](lua_State *l,TaskWrapperPlayAnimation &task,const Vector3 &target) {
 		task->SetFaceTarget(target);
 	}));
-	cdPlayAnimation.def("SetFaceTarget",static_cast<void(*)(lua_State*,TaskWrapperPlayAnimation&,EntityHandle&)>([](lua_State *l,TaskWrapperPlayAnimation &task,EntityHandle &target) {
-		lua_checkentity(l,(&target));
-		task->SetFaceTarget(*target.get());
+	cdPlayAnimation.def("SetFaceTarget",static_cast<void(*)(lua_State*,TaskWrapperPlayAnimation&,BaseEntity&)>([](lua_State *l,TaskWrapperPlayAnimation &task,BaseEntity &target) {
+		task->SetFaceTarget(target);
 	}));
 	cdPlayAnimation.def("SetFacePrimaryTarget",static_cast<void(*)(lua_State*,TaskWrapperPlayAnimation&)>([](lua_State *l,TaskWrapperPlayAnimation &task) {
 		task->SetFacePrimaryTarget();
@@ -171,9 +169,8 @@ void Lua::ai::server::register_library(Lua::Interface &lua)
 	cdPlayActivity.def("SetFaceTarget",static_cast<void(*)(lua_State*,TaskWrapperPlayActivity&,const Vector3&)>([](lua_State *l,TaskWrapperPlayActivity &task,const Vector3 &target) {
 		task->SetFaceTarget(target);
 	}));
-	cdPlayActivity.def("SetFaceTarget",static_cast<void(*)(lua_State*,TaskWrapperPlayActivity&,EntityHandle&)>([](lua_State *l,TaskWrapperPlayActivity &task,EntityHandle &target) {
-		lua_checkentity(l,(&target));
-		task->SetFaceTarget(*target.get());
+	cdPlayActivity.def("SetFaceTarget",static_cast<void(*)(lua_State*,TaskWrapperPlayActivity&,BaseEntity&)>([](lua_State *l,TaskWrapperPlayActivity &task,BaseEntity &target) {
+		task->SetFaceTarget(target);
 	}));
 	cdPlayActivity.def("SetFacePrimaryTarget",static_cast<void(*)(lua_State*,TaskWrapperPlayActivity&)>([](lua_State *l,TaskWrapperPlayActivity &task) {
 		task->SetFacePrimaryTarget();

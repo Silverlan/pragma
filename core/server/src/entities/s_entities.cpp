@@ -116,7 +116,7 @@ void SGame::SpawnEntity(BaseEntity *ent) // Don't call directly
 	auto hEnt = ent->GetHandle();
 	CallCallbacks<void,BaseEntity*>("OnEntitySpawned",ent); // TODO: Call this after transmission for lua-entities has finished (Entity:OnPostSpawn)
 	
-	if(hEnt.IsValid() == false)
+	if(hEnt.valid() == false)
 		return;
 	auto globalNameComponent = ent->GetComponent<pragma::GlobalNameComponent>();
 	if(globalNameComponent.valid())
@@ -127,7 +127,7 @@ void SGame::SpawnEntity(BaseEntity *ent) // Don't call directly
 		{
 			udm::LinkedPropertyWrapper udm{*it->second};
 			ent->Load(udm);
-			if(hEnt.IsValid())
+			if(hEnt.valid())
 			{
 				// Move global entities by landmark offset between this level and the previous one.
 				// This will not affect map-entities, as the delta offset will be 0 at this point,
@@ -203,7 +203,7 @@ unsigned int SGame::GetFreeEntityIndex()
 SBaseEntity *SGame::CreateLuaEntity(std::string classname,bool bLoadIfNotExists)
 {
 	luabind::object oClass {};
-	auto *ent = static_cast<SBaseEntity*>(Game::CreateLuaEntity<SLuaEntity,SLuaEntityHandle>(classname,oClass,bLoadIfNotExists));
+	auto *ent = static_cast<SBaseEntity*>(Game::CreateLuaEntity<SLuaEntity,util::WeakHandle<SLuaEntity>>(classname,oClass,bLoadIfNotExists));
 	if(ent == nullptr)
 		return nullptr;
 	auto oType = oClass["Type"];

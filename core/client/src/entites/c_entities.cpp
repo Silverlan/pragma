@@ -124,7 +124,7 @@ CBaseEntity *CGame::GetEntityByClientIndex(unsigned int idx)
 CBaseEntity *CGame::CreateLuaEntity(std::string classname,unsigned int idx,bool bLoadIfNotExists)
 {
 	luabind::object oClass {};
-	auto *ent = static_cast<CBaseEntity*>(Game::CreateLuaEntity<CLuaEntity,CLuaEntityHandle>(classname,oClass,bLoadIfNotExists));
+	auto *ent = static_cast<CBaseEntity*>(Game::CreateLuaEntity<CLuaEntity,util::WeakHandle<CLuaEntity>>(classname,oClass,bLoadIfNotExists));
 	if(ent == nullptr)
 		return nullptr;
 	SetupEntity(ent,idx);

@@ -54,25 +54,21 @@ namespace Lua
 			hComponent->GenerateAmbientOcclusionMaps(mdl);
 		}
 		
-		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,EntityHandle &hEnt,uint32_t width,uint32_t height,uint32_t samples,bool rebuild)
+		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,BaseEntity &ent,uint32_t width,uint32_t height,uint32_t samples,bool rebuild)
 		{
-			LUA_CHECK_ENTITY(l,hEnt);
-			hComponent->GenerateAmbientOcclusionMaps(*hEnt.get(),width,height,samples,rebuild);
+			hComponent->GenerateAmbientOcclusionMaps(ent,width,height,samples,rebuild);
 		}
-		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,EntityHandle &hEnt,uint32_t width,uint32_t height,uint32_t samples)
+		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,BaseEntity &ent,uint32_t width,uint32_t height,uint32_t samples)
 		{
-			LUA_CHECK_ENTITY(l,hEnt);
-			hComponent->GenerateAmbientOcclusionMaps(*hEnt.get(),width,height,samples);
+			hComponent->GenerateAmbientOcclusionMaps(ent,width,height,samples);
 		}
-		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,EntityHandle &hEnt,uint32_t width,uint32_t height)
+		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,BaseEntity &ent,uint32_t width,uint32_t height)
 		{
-			LUA_CHECK_ENTITY(l,hEnt);
-			hComponent->GenerateAmbientOcclusionMaps(*hEnt.get(),width,height);
+			hComponent->GenerateAmbientOcclusionMaps(ent,width,height);
 		}
-		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,EntityHandle &hEnt)
+		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,BaseEntity &ent)
 		{
-			LUA_CHECK_ENTITY(l,hEnt);
-			hComponent->GenerateAmbientOcclusionMaps(*hEnt.get());
+			hComponent->GenerateAmbientOcclusionMaps(ent);
 		}
 	};
 	namespace ParticleSystem
@@ -191,7 +187,8 @@ static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l,CRe
 	for(auto it=luabind::iterator{tEnts},end=luabind::iterator{};it!=end;++it)
 	{
 		auto val = luabind::object_cast_nothrow<EntityHandle>(*it,EntityHandle{});
-		LUA_CHECK_ENTITY_RET(l,val,false);
+		if(val.expired())
+			return false;
 		ents.push_back(val.get());
 	}
 	return hRp->CaptureIBLReflectionsFromScene(&ents,renderJob);
@@ -358,13 +355,13 @@ static void register_renderer_bindings(luabind::module_ &entsMod)
 		renderer->ReloadPresentationRenderTarget();
 	}));
 	defRaster.def("ScheduleMeshForRendering",static_cast<void(*)(
-		lua_State*,CRasterizationRendererHandle&,CSceneHandle&,uint32_t,pragma::ShaderGameWorldLightingPass&,Material&,EntityHandle&,ModelSubMesh&
+		lua_State*,CRasterizationRendererHandle&,CSceneHandle&,uint32_t,pragma::ShaderGameWorldLightingPass&,Material&,BaseEntity&,ModelSubMesh&
 	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));
 	defRaster.def("ScheduleMeshForRendering",static_cast<void(*)(
-		lua_State*,CRasterizationRendererHandle&,CSceneHandle&,uint32_t,const std::string&,Material&,EntityHandle&,ModelSubMesh&
+		lua_State*,CRasterizationRendererHandle&,CSceneHandle&,uint32_t,const std::string&,Material&,BaseEntity&,ModelSubMesh&
 	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));
 	defRaster.def("ScheduleMeshForRendering",static_cast<void(*)(
-		lua_State*,CRasterizationRendererHandle&,CSceneHandle&,uint32_t,::Material&,EntityHandle&,ModelSubMesh&
+		lua_State*,CRasterizationRendererHandle&,CSceneHandle&,uint32_t,::Material&,BaseEntity&,ModelSubMesh&
 	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));
 	defRaster.def("RecordPrepass",static_cast<void(*)(lua_State*,CRasterizationRendererHandle&,const util::DrawSceneInfo&)>([](lua_State *l,CRasterizationRendererHandle &renderer,const util::DrawSceneInfo &drawSceneInfo) {
 		pragma::Lua::check_component(l,renderer);
@@ -1033,10 +1030,10 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,Model&,uint32_t,uint32_t,uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
 	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,Model&,uint32_t,uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
 	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,Model&)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,EntityHandle&,uint32_t,uint32_t,uint32_t,bool)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,EntityHandle&,uint32_t,uint32_t,uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,EntityHandle&,uint32_t,uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,EntityHandle&)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,BaseEntity&,uint32_t,uint32_t,uint32_t,bool)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,BaseEntity&,uint32_t,uint32_t,uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,BaseEntity&,uint32_t,uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,BaseEntity&)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
 	entsMod[defCPBRConverter];
 
 	auto defShadow = luabind::class_<CShadowHandle,BaseEntityComponentHandle>("ShadowMapComponent");

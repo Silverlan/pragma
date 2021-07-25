@@ -15,7 +15,6 @@
 
 class EulerAngles;
 class BaseEntity;
-class EntityHandle;
 class BasePlayer;
 namespace pragma {class BasePlayerComponent;};
 namespace nwm

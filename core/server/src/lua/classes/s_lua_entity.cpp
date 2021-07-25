@@ -18,7 +18,6 @@
 extern DLLSERVER SGame *s_game;
 extern DLLSERVER ServerState *server;
 
-DEFINE_DERIVED_CHILD_HANDLE(DLLSERVER,Entity,BaseEntity,Entity,SLuaEntity,SLuaEntity);
 SLuaEntity::SLuaEntity(luabind::object &o,const std::string &className)
 	: SBaseEntity(),LuaObjectBase(o)
 {
@@ -34,9 +33,8 @@ bool SLuaEntity::IsScripted() const {return true;}
 void SLuaEntity::InitializeLuaObject(lua_State*) {}
 void SLuaEntity::InitializeHandle()
 {
-	auto *hEntity = luabind::object_cast_nothrow<SLuaEntityHandle*>(*m_luaObj,static_cast<SLuaEntityHandle*>(nullptr));
-	*hEntity = new PtrEntity(this);
-	m_handle = hEntity;
+	auto *hEntity = luabind::object_cast_nothrow<util::WeakHandle<BaseEntity>*>(*m_luaObj,static_cast<util::WeakHandle<BaseEntity>*>(nullptr));
+	*hEntity = util::WeakHandle<BaseEntity>{std::shared_ptr<BaseEntity>{this,[](BaseEntity*) {}}};
 	m_bExternalHandle = true;
 }
 
@@ -68,8 +66,4 @@ void SLuaEntity::Remove()
 	}
 	SBaseEntity::Remove();
 }
-
-///////////
-
-void SLuaEntityWrapper::Initialize() {}
-void SLuaEntityWrapper::default_Initialize(SLuaEntityWrapper *ent) {}
+void SLuaEntity::default_Initialize(SBaseEntity *ent) {}

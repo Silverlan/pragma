@@ -58,8 +58,9 @@ bool SGame::InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t ev
 		Lua::PushInt(l,1);
 		Lua::GetTableValue(l,argsIdx);
 		auto &ent = Lua::Check<EntityHandle>(l,-1);
-		lua_checkentityret(l,(&ent),true);
 		Lua::Pop(l,1);
+		if(ent.expired())
+			return false;
 
 		Lua::PushInt(l,2);
 		Lua::GetTableValue(l,argsIdx);

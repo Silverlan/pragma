@@ -153,20 +153,20 @@ bool BaseIOComponent::FireSingleOutput(Output &output,BaseEntity *activator,IoFl
 		if(output.delay <= 0.f && !umath::is_flag_set(flags,IoFlags::ForceDelayedFire))
 		{
 			pIoComponent->Input(output.input,activator,&entThis,output.param);
-			if(!hThis.IsValid())
+			if(!hThis.valid())
 				return false;
 		}
 		else
 		{
 			game->CreateTimer(output.delay,1,FunctionCallback<>::Create(std::bind([](EntityHandle &hEnt,EntityHandle activator,Output output) {
-				if(!hEnt.IsValid())
+				if(!hEnt.valid())
 					return;
 				BaseEntity *ent = hEnt.get();
 				auto *pIoComponent = static_cast<BaseIOComponent*>(ent->FindComponent("io").get());
 				if(pIoComponent == nullptr)
 					return;
 				BaseEntity *entActivator = NULL;
-				if(activator.IsValid())
+				if(activator.valid())
 					entActivator = activator.get();
 				pIoComponent->Input(output.input,entActivator,ent,output.param);
 			},ent->GetHandle(),activator->GetHandle(),output)))->Start(game);
@@ -222,11 +222,11 @@ void BaseIOComponent::TriggerOutput(std::string name,BaseEntity *activator,IoFla
 		Output &output = outputs[i];
 		if(!FireSingleOutput(output,activator,flags))
 		{
-			if(!hActivator.IsValid())
+			if(!hActivator.valid())
 				return;
 			outputs.erase(outputs.begin() +i);
 		}
-		else if(!hActivator.IsValid())
+		else if(!hActivator.valid())
 			return;
 	}
 	if(outputs.empty())

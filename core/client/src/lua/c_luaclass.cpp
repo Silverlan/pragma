@@ -55,6 +55,7 @@
 #include <wgui/fontmanager.h>
 #include <wgui/shaders/wishader_textured.hpp>
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include <pragma/lua/policies/pair_policy.hpp>
 #include <pragma/entities/func/basefuncwater.h>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
@@ -75,18 +76,18 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 
 	auto &modUtil = lua.RegisterLibrary("util");
 	auto defTexture = luabind::class_<Texture>("Texture");
-	defTexture.def("GetWidth",&Lua::Texture::GetWidth);
-	defTexture.def("GetHeight",&Lua::Texture::GetHeight);
+	defTexture.def("GetWidth",&Texture::GetWidth);
+	defTexture.def("GetHeight",&Texture::GetHeight);
 	defTexture.def("GetVkTexture",&Lua::Texture::GetVkTexture);
 	modUtil[defTexture];
 
 	auto defTexInfo = luabind::class_<TextureInfo>("TextureInfo");
 	defTexInfo.def("GetTexture",&Lua::TextureInfo::GetTexture);
-	defTexInfo.def("GetSize",&Lua::TextureInfo::GetSize);
+	defTexInfo.def("GetSize",&Lua::TextureInfo::GetSize,luabind::pair_policy<0>{});
 	defTexInfo.def("GetWidth",&Lua::TextureInfo::GetWidth);
 	defTexInfo.def("GetHeight",&Lua::TextureInfo::GetHeight);
-	defTexInfo.def("GetName",static_cast<void(*)(lua_State*,TextureInfo&)>([](lua_State *l,TextureInfo &textureInfo) {
-		Lua::PushString(l,textureInfo.name);
+	defTexInfo.def("GetName",static_cast<std::string(*)(lua_State*,TextureInfo&)>([](lua_State *l,TextureInfo &textureInfo) {
+		return textureInfo.name;
 	}));
 	modUtil[defTexInfo];
 
@@ -96,77 +97,64 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	auto spriteSheetDef = luabind::class_<SpriteSheetAnimation>("SpriteSheetAnimation");
 
 	auto sequenceDef = luabind::class_<SpriteSheetAnimation::Sequence>("Sequence");
-	sequenceDef.def("GetDuration",static_cast<void(*)(lua_State*,SpriteSheetAnimation::Sequence&)>([](lua_State *l,SpriteSheetAnimation::Sequence &seq) {
-		Lua::PushNumber(l,seq.GetDuration());
-	}));
-	sequenceDef.def("GetFrameOffset",static_cast<void(*)(lua_State*,SpriteSheetAnimation::Sequence&)>([](lua_State *l,SpriteSheetAnimation::Sequence &seq) {
-		Lua::PushNumber(l,seq.GetFrameOffset());
-	}));
+	sequenceDef.def("GetDuration",&SpriteSheetAnimation::Sequence::GetDuration);
+	sequenceDef.def("GetFrameOffset",&SpriteSheetAnimation::Sequence::GetFrameOffset);
 
 	auto frameDef = luabind::class_<SpriteSheetAnimation::Sequence::Frame>("Frame");
-	frameDef.def("GetUVBounds",static_cast<void(*)(lua_State*,SpriteSheetAnimation::Sequence::Frame&)>([](lua_State *l,SpriteSheetAnimation::Sequence::Frame &frame) {
-		Lua::Push<Vector2>(l,frame.uvStart);
-		Lua::Push<Vector2>(l,frame.uvEnd);
-	}));
-	frameDef.def("GetDuration",static_cast<void(*)(lua_State*,SpriteSheetAnimation::Sequence::Frame&)>([](lua_State *l,SpriteSheetAnimation::Sequence::Frame &frame) {
-		Lua::PushNumber(l,frame.duration);
+	frameDef.def("GetUVBounds",static_cast<std::pair<Vector2,Vector2>(*)(lua_State*,SpriteSheetAnimation::Sequence::Frame&)>([](lua_State *l,SpriteSheetAnimation::Sequence::Frame &frame) {
+		return std::pair<Vector2,Vector2>{frame.uvStart,frame.uvEnd};
+	}),luabind::pair_policy<0>{});
+	frameDef.def("GetDuration",static_cast<float(*)(lua_State*,SpriteSheetAnimation::Sequence::Frame&)>([](lua_State *l,SpriteSheetAnimation::Sequence::Frame &frame) -> float {
+		return frame.duration;
 	}));
 	sequenceDef.scope[frameDef];
 
-	sequenceDef.def("GetFrameCount",static_cast<void(*)(lua_State*,SpriteSheetAnimation::Sequence&)>([](lua_State *l,SpriteSheetAnimation::Sequence &sequence) {
-		Lua::PushInt(l,sequence.frames.size());
+	sequenceDef.def("GetFrameCount",static_cast<uint32_t(*)(lua_State*,SpriteSheetAnimation::Sequence&)>([](lua_State *l,SpriteSheetAnimation::Sequence &sequence) -> uint32_t {
+		return sequence.frames.size();
 	}));
-	sequenceDef.def("GetFrame",static_cast<void(*)(lua_State*,SpriteSheetAnimation::Sequence&,uint32_t)>([](lua_State *l,SpriteSheetAnimation::Sequence &sequence,uint32_t frameIdx) {
+	sequenceDef.def("GetFrame",static_cast<SpriteSheetAnimation::Sequence::Frame*(*)(lua_State*,SpriteSheetAnimation::Sequence&,uint32_t)>([](lua_State *l,SpriteSheetAnimation::Sequence &sequence,uint32_t frameIdx) -> SpriteSheetAnimation::Sequence::Frame* {
 		if(frameIdx >= sequence.frames.size())
-			return;
+			return nullptr;
 		auto &frame = sequence.frames.at(frameIdx);
-		Lua::Push<SpriteSheetAnimation::Sequence::Frame*>(l,&frame);
+		return &frame;
 	}));
-	sequenceDef.def("GetFrames",static_cast<void(*)(lua_State*,SpriteSheetAnimation::Sequence&)>([](lua_State *l,SpriteSheetAnimation::Sequence &sequence) {
+	sequenceDef.def("GetFrames",static_cast<luabind::tableT<SpriteSheetAnimation::Sequence::Frame>(*)(lua_State*,SpriteSheetAnimation::Sequence&)>([](lua_State *l,SpriteSheetAnimation::Sequence &sequence) -> luabind::tableT<SpriteSheetAnimation::Sequence::Frame> {
 		auto &frames = sequence.frames;
-		auto t = Lua::CreateTable(l);
+		auto t = luabind::newtable(l);
 		uint32_t frameIndex = 1;
 		for(auto &frame : frames)
-		{
-			Lua::PushInt(l,frameIndex++);
-			Lua::Push<SpriteSheetAnimation::Sequence::Frame*>(l,&frame);
-			Lua::SetTableValue(l,t);
-		}
+			t[frameIndex++] = &frame;
+		return t;
 	}));
-	sequenceDef.def("IsLooping",static_cast<void(*)(lua_State*,SpriteSheetAnimation::Sequence&)>([](lua_State *l,SpriteSheetAnimation::Sequence &sequence) {
-		Lua::PushBool(l,sequence.loop);
+	sequenceDef.def("IsLooping",static_cast<bool(*)(lua_State*,SpriteSheetAnimation::Sequence&)>([](lua_State *l,SpriteSheetAnimation::Sequence &sequence) {
+		return sequence.loop;
 	}));
-	sequenceDef.def("GetInterpolatedFrameData",static_cast<void(*)(lua_State*,SpriteSheetAnimation::Sequence&,float)>([](lua_State *l,SpriteSheetAnimation::Sequence &sequence,float ptTime) {
+	sequenceDef.def("GetInterpolatedFrameData",static_cast<luabind::optional<luabind::mult<uint32_t,uint32_t,float>>(*)(lua_State*,SpriteSheetAnimation::Sequence&,float)>([](lua_State *l,SpriteSheetAnimation::Sequence &sequence,float ptTime) -> luabind::optional<luabind::mult<uint32_t,uint32_t,float>> {
 		uint32_t frameIndex0,frameIndex1;
 		float interpFactor;
 		if(sequence.GetInterpolatedFrameData(ptTime,frameIndex0,frameIndex1,interpFactor) == false)
-			return;
-		Lua::PushInt(l,frameIndex0);
-		Lua::PushInt(l,frameIndex1);
-		Lua::PushNumber(l,interpFactor);
+			return Lua::nil;
+		return luabind::mult<uint32_t,uint32_t,float>{l,frameIndex0,frameIndex1,interpFactor};
 	}));
 
 	spriteSheetDef.scope[sequenceDef];
 	
-	spriteSheetDef.def("GetSequenceCount",static_cast<void(*)(lua_State*,SpriteSheetAnimation&)>([](lua_State *l,SpriteSheetAnimation &spriteSheetAnim) {
-		Lua::PushInt(l,spriteSheetAnim.sequences.size());
+	spriteSheetDef.def("GetSequenceCount",static_cast<uint32_t(*)(lua_State*,SpriteSheetAnimation&)>([](lua_State *l,SpriteSheetAnimation &spriteSheetAnim) -> uint32_t {
+		return spriteSheetAnim.sequences.size();
 	}));
-	spriteSheetDef.def("GetSequence",static_cast<void(*)(lua_State*,SpriteSheetAnimation&,uint32_t)>([](lua_State *l,SpriteSheetAnimation &spriteSheetAnim,uint32_t seqIdx) {
+	spriteSheetDef.def("GetSequence",static_cast<SpriteSheetAnimation::Sequence*(*)(lua_State*,SpriteSheetAnimation&,uint32_t)>([](lua_State *l,SpriteSheetAnimation &spriteSheetAnim,uint32_t seqIdx) -> SpriteSheetAnimation::Sequence* {
 		if(seqIdx >= spriteSheetAnim.sequences.size())
-			return;
+			return nullptr;
 		auto &seq = spriteSheetAnim.sequences.at(seqIdx);
-		Lua::Push<SpriteSheetAnimation::Sequence*>(l,&seq);
+		return &seq;
 	}));
-	spriteSheetDef.def("GetSequences",static_cast<void(*)(lua_State*,SpriteSheetAnimation&)>([](lua_State *l,SpriteSheetAnimation &spriteSheetAnim) {
+	spriteSheetDef.def("GetSequences",static_cast<luabind::tableT<SpriteSheetAnimation::Sequence>(*)(lua_State*,SpriteSheetAnimation&)>([](lua_State *l,SpriteSheetAnimation &spriteSheetAnim) -> luabind::tableT<SpriteSheetAnimation::Sequence> {
 		auto &sequences = spriteSheetAnim.sequences;
-		auto t = Lua::CreateTable(l);
+		auto t = luabind::newtable(l);
 		uint32_t seqIdx = 1;
 		for(auto &seq : sequences)
-		{
-			Lua::PushInt(l,seqIdx++);
-			Lua::Push<SpriteSheetAnimation::Sequence*>(l,&seq);
-			Lua::SetTableValue(l,t);
-		}
+			t[seqIdx++] = &seq;
+		return t;
 	}));
 	materialClassDef.scope[spriteSheetDef];
 

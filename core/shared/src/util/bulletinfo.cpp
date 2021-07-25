@@ -29,14 +29,14 @@ std::ostream &operator<<(std::ostream &out,const BulletInfo &o)
 	out<<"[Bullets:"<<o.bulletCount<<"]";
 
 	out<<"[Attacker:";
-	if(o.hAttacker.IsValid())
+	if(o.hAttacker.valid())
 		o.hAttacker.get()->print(out);
 	else
 		out<<"NULL";
 	out<<"]";
 
 	out<<"[Inflictor:";
-	if(o.hInflictor.IsValid())
+	if(o.hInflictor.valid())
 		o.hInflictor.get()->print(out);
 	else
 		out<<"NULL";

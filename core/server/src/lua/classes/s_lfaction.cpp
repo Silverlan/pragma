@@ -31,7 +31,7 @@ void Lua::Faction::register_class(lua_State *l,luabind::module_ &mod)
 	classDef.def("SetFearsomeFaction",static_cast<void(*)(lua_State*,::Faction&,::Faction&)>(&SetFearsomeFaction));
 	classDef.def("GetDisposition",static_cast<void(*)(lua_State*,::Faction&,::Faction&)>(&GetDisposition));
 	classDef.def("GetDisposition",static_cast<void(*)(lua_State*,::Faction&,const std::string&)>(&GetDisposition));
-	classDef.def("GetDisposition",static_cast<void(*)(lua_State*,::Faction&,EntityHandle&)>(&GetDisposition));
+	classDef.def("GetDisposition",static_cast<void(*)(lua_State*,::Faction&,BaseEntity&)>(&GetDisposition));
 	classDef.def("HasClass",&HasClass);
 	classDef.def("SetDefaultDisposition",&SetDefaultDisposition);
 	classDef.def("GetDefaultDisposition",&GetDefaultDisposition);
@@ -95,11 +95,10 @@ void Lua::Faction::GetDisposition(lua_State *l,::Faction &faction,const std::str
 	Lua::PushInt(l,umath::to_integral(disp));
 	Lua::PushInt(l,priority);
 }
-void Lua::Faction::GetDisposition(lua_State *l,::Faction &faction,EntityHandle &hEnt)
+void Lua::Faction::GetDisposition(lua_State *l,::Faction &faction,BaseEntity &ent)
 {
-	LUA_CHECK_ENTITY(l,hEnt);
 	int32_t priority = 0;
-	auto disp = faction.GetDisposition(hEnt,&priority);
+	auto disp = faction.GetDisposition(&ent,&priority);
 	Lua::PushInt(l,umath::to_integral(disp));
 	Lua::PushInt(l,priority);
 }

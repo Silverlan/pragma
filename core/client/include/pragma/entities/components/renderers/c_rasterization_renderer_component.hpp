@@ -291,7 +291,6 @@ namespace pragma
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::CRasterizationRendererComponent::StateFlags)
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::RendererData::Flags)
 
-class EntityHandle;
 class DLLCLIENT CRasterizationRenderer
 	: public CBaseEntity
 {

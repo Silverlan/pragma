@@ -1243,7 +1243,7 @@ void CGame::InitializeMapEntities(pragma::asset::WorldData &worldData,std::vecto
 
 	for(auto &hEnt : outEnts)
 	{
-		if(hEnt.IsValid() == false)
+		if(hEnt.valid() == false)
 			continue;
 		auto &ent = *hEnt.get();
 		if(ent.IsWorld())

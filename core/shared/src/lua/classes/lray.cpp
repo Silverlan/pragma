@@ -47,16 +47,16 @@ void Lua::TraceData::GetDistance(lua_State *l,::TraceData &data) {Lua::PushNumbe
 void Lua::TraceData::GetDirection(lua_State *l,::TraceData &data) {Lua::Push<Vector3>(l,data.GetDirection());}
 void Lua::TraceData::SetFilter(lua_State *l,::TraceData &data,luabind::object)
 {
-	if(Lua::IsEntity(l,2))
+	if(Lua::IsType<BaseEntity>(l,2))
 	{
-		auto *ent = Lua::CheckEntity(l,2);
-		data.SetFilter(*ent);
+		auto &ent = Lua::Check<BaseEntity>(l,2);
+		data.SetFilter(ent);
 		return;
 	}
 	else if(Lua::IsPhysObj(l,2))
 	{
-		auto *phys = Lua::CheckEntity(l,2);
-		data.SetFilter(*phys);
+		auto &phys = Lua::Check<PhysObj>(l,2);
+		data.SetFilter(phys);
 		return;
 	}
 	else if(Lua::IsTable(l,2))
@@ -69,8 +69,8 @@ void Lua::TraceData::SetFilter(lua_State *l,::TraceData &data,luabind::object)
 		std::vector<EntityHandle> ents;
 		while(Lua::GetNextPair(l,table) != 0) /* 3 */
 		{
-			BaseEntity *v = Lua::CheckEntity(l,-1); /* 3 */
-			ents.push_back(v->GetHandle());
+			BaseEntity &v = Lua::Check<BaseEntity>(l,-1); /* 3 */
+			ents.push_back(v.GetHandle());
 
 			Lua::Pop(l,1); /* 2 */
 		} /* 1 */

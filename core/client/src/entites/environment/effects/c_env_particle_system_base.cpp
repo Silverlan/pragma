@@ -1003,7 +1003,7 @@ void CParticleSystemComponent::AddChild(CParticleSystemComponent &particle,float
 	uint32_t cpIdx = 0;
 	for(auto &cp : m_controlPoints)
 	{
-		if(cp.hEntity.IsValid())
+		if(cp.hEntity.valid())
 			particle.SetControlPointEntity(cpIdx,static_cast<CBaseEntity&>(*cp.hEntity.get()));
 		particle.SetControlPointPose(cpIdx,cp.pose);
 		++cpIdx;
@@ -1327,7 +1327,7 @@ Vector3 CParticleSystemComponent::GetNodePosition(uint32_t node) const
 		return pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
 	}
 	--node;
-	if(node >= m_nodes.size() || (m_nodes[node].bEntity == true && !m_nodes[node].hEntity.IsValid()))
+	if(node >= m_nodes.size() || (m_nodes[node].bEntity == true && !m_nodes[node].hEntity.valid()))
 		return {0.f,0.f,0.f};
 	if(m_nodes[node].bEntity == false)
 		return m_nodes[node].position;

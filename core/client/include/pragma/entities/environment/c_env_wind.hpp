@@ -27,7 +27,6 @@ namespace pragma
 	};
 };
 
-class EntityHandle;
 class DLLCLIENT CEnvWind
 	: public CBaseEntity
 {

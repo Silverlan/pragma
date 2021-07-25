@@ -17,16 +17,11 @@ namespace Lua
 	{
 		namespace Server
 		{
-			DLLSERVER void register_class(luabind::class_<EntityHandle> &classDef);
-			DLLSERVER void IsShared(lua_State *l,EntityHandle &hEnt);
-			DLLSERVER void SetShared(lua_State *l,EntityHandle &hEnt,bool b);
-			DLLSERVER void SendNetEvent(lua_State *l,EntityHandle &hEnt,uint32_t protocol,unsigned int eventId,::NetPacket packet,pragma::networking::TargetRecipientFilter &rp);
-			DLLSERVER void SendNetEvent(lua_State *l,EntityHandle &hEnt,uint32_t protocol,unsigned int eventId,::NetPacket packet);
-			DLLSERVER void SendNetEvent(lua_State *l,EntityHandle &hEnt,uint32_t protocol,unsigned int eventId,pragma::networking::TargetRecipientFilter &rp);
-			DLLSERVER void SendNetEvent(lua_State *l,EntityHandle &hEnt,uint32_t protocol,unsigned int eventId);
-			DLLSERVER void IsSynchronized(lua_State *l,EntityHandle &hEnt);
-			DLLSERVER void SetSynchronized(lua_State *l,EntityHandle &hEnt,Bool b);
-			DLLSERVER void SetSnapshotDirty(lua_State *l,EntityHandle &hEnt,bool b);
+			DLLSERVER void register_class(luabind::class_<SBaseEntity,BaseEntity> &classDef);
+			DLLSERVER void SendNetEvent(lua_State *l,SBaseEntity &ent,nwm::Protocol protocol,unsigned int eventId,::NetPacket packet,pragma::networking::TargetRecipientFilter &rp);
+			DLLSERVER void SendNetEvent(lua_State *l,SBaseEntity &ent,nwm::Protocol protocol,unsigned int eventId,::NetPacket packet);
+			DLLSERVER void SendNetEvent(lua_State *l,SBaseEntity &ent,nwm::Protocol protocol,unsigned int eventId,pragma::networking::TargetRecipientFilter &rp);
+			DLLSERVER void SendNetEvent(lua_State *l,SBaseEntity &ent,nwm::Protocol protocol,unsigned int eventId);
 		};
 	};
 };

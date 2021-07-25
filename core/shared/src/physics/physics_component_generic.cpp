@@ -833,7 +833,7 @@ void BasePhysicsComponent::SetCollisionsEnabled(BaseEntity *ent,bool b)
 	for(auto it=m_customCollisions.begin();it!=m_customCollisions.end();)
 	{
 		auto &info = *it;
-		if(!info.entity.IsValid())
+		if(!info.entity.valid())
 			it = m_customCollisions.erase(it);
 		else
 			++it;

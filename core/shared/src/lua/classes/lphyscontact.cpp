@@ -24,55 +24,51 @@ void Lua::PhysContact::register_class(lua_State *l,luabind::module_ &mod)
 	classDefPoint.def_readwrite("normal",&::pragma::physics::ContactPoint::normal);
 	classDefPoint.def_readwrite("position",&::pragma::physics::ContactPoint::position);
 	classDefPoint.def_readwrite("distance",&::pragma::physics::ContactPoint::distance);
-	classDefPoint.property("material0",static_cast<void(*)(lua_State*,::pragma::physics::ContactPoint&)>([](lua_State *l,::pragma::physics::ContactPoint &cp) {
+	classDefPoint.property("material0",static_cast<luabind::optional<pragma::physics::IMaterial>(*)(lua_State*,::pragma::physics::ContactPoint&)>([](lua_State *l,::pragma::physics::ContactPoint &cp) -> luabind::optional<pragma::physics::IMaterial> {
 		if(cp.material0.expired())
-			return;
-		cp.material0->Push(l);
+			return nil;
+		return cp.material0->GetLuaObject();
 	}));
-	classDefPoint.property("material1",static_cast<void(*)(lua_State*,::pragma::physics::ContactPoint&)>([](lua_State *l,::pragma::physics::ContactPoint &cp) {
+	classDefPoint.property("material1",static_cast<luabind::optional<pragma::physics::IMaterial>(*)(lua_State*,::pragma::physics::ContactPoint&)>([](lua_State *l,::pragma::physics::ContactPoint &cp) -> luabind::optional<pragma::physics::IMaterial> {
 		if(cp.material1.expired())
-			return;
-		cp.material1->Push(l);
+			return nil;
+		return cp.material1->GetLuaObject();
 	}));
 	mod[classDefPoint];
 
 	auto classDef = luabind::class_<::pragma::physics::ContactInfo>("ContactInfo");
-	classDef.property("GetContactPointCount",static_cast<void(*)(lua_State*,::pragma::physics::ContactInfo&)>([](lua_State *l,::pragma::physics::ContactInfo &contactInfo) {
-		Lua::PushInt(l,contactInfo.contactPoints.size());
+	classDef.property("GetContactPointCount",static_cast<uint32_t(*)(lua_State*,::pragma::physics::ContactInfo&)>([](lua_State *l,::pragma::physics::ContactInfo &contactInfo) -> uint32_t {
+		return contactInfo.contactPoints.size();
 	}));
-	classDef.property("GetContactPoint",static_cast<void(*)(lua_State*,::pragma::physics::ContactInfo&,uint32_t)>([](lua_State *l,::pragma::physics::ContactInfo &contactInfo,uint32_t index) {
-		auto &point = contactInfo.contactPoints.at(index);
-		Lua::Push<pragma::physics::ContactPoint>(l,point);
+	classDef.property("GetContactPoint",static_cast<pragma::physics::ContactPoint(*)(lua_State*,::pragma::physics::ContactInfo&,uint32_t)>([](lua_State *l,::pragma::physics::ContactInfo &contactInfo,uint32_t index) {
+		return contactInfo.contactPoints.at(index);
 	}));
-	classDef.property("GetContactPoints",static_cast<void(*)(lua_State*,::pragma::physics::ContactInfo&,uint32_t)>([](lua_State *l,::pragma::physics::ContactInfo &contactInfo,uint32_t index) {
-		auto t = Lua::CreateTable(l);
+	classDef.property("GetContactPoints",static_cast<luabind::tableT<pragma::physics::ContactPoint>(*)(lua_State*,::pragma::physics::ContactInfo&,uint32_t)>([](lua_State *l,::pragma::physics::ContactInfo &contactInfo,uint32_t index) -> luabind::tableT<pragma::physics::ContactPoint> {
+		auto t = luabind::newtable(l);
 		auto idx = 1;
 		for(auto &p : contactInfo.contactPoints)
-		{
-			Lua::PushInt(l,idx++);
-			Lua::Push<pragma::physics::ContactPoint>(l,p);
-			Lua::SetTableValue(l,t);
-		}
+			t[idx++] = p;
+		return t;
 	}));
-	classDef.property("shape0",static_cast<void(*)(lua_State*,::pragma::physics::ContactInfo&)>([](lua_State *l,::pragma::physics::ContactInfo &contactInfo) {
+	classDef.property("shape0",static_cast<luabind::optional<pragma::physics::IShape>(*)(lua_State*,::pragma::physics::ContactInfo&)>([](lua_State *l,::pragma::physics::ContactInfo &contactInfo) -> luabind::optional<pragma::physics::IShape> {
 		if(contactInfo.shape0.expired())
-			return;
-		contactInfo.shape0->Push(l);
+			return nil;
+		return contactInfo.shape0->GetLuaObject();
 	}));
-	classDef.property("shape1",static_cast<void(*)(lua_State*,::pragma::physics::ContactInfo&)>([](lua_State *l,::pragma::physics::ContactInfo &contactInfo) {
+	classDef.property("shape1",static_cast<luabind::optional<pragma::physics::IShape>(*)(lua_State*,::pragma::physics::ContactInfo&)>([](lua_State *l,::pragma::physics::ContactInfo &contactInfo) -> luabind::optional<pragma::physics::IShape> {
 		if(contactInfo.shape1.expired())
-			return;
-		contactInfo.shape1->Push(l);
+			return nil;
+		return contactInfo.shape1->GetLuaObject();
 	}));
-	classDef.property("collisionObj0",static_cast<void(*)(lua_State*,::pragma::physics::ContactInfo&)>([](lua_State *l,::pragma::physics::ContactInfo &contactInfo) {
+	classDef.property("collisionObj0",static_cast<luabind::optional<pragma::physics::ICollisionObject>(*)(lua_State*,::pragma::physics::ContactInfo&)>([](lua_State *l,::pragma::physics::ContactInfo &contactInfo) -> luabind::optional<pragma::physics::ICollisionObject> {
 		if(contactInfo.collisionObj0.IsExpired())
-			return;
-		contactInfo.collisionObj0->Push(l);
+			return nil;
+		return contactInfo.collisionObj0->GetLuaObject();
 	}));
-	classDef.property("collisionObj1",static_cast<void(*)(lua_State*,::pragma::physics::ContactInfo&)>([](lua_State *l,::pragma::physics::ContactInfo &contactInfo) {
+	classDef.property("collisionObj1",static_cast<luabind::optional<pragma::physics::ICollisionObject>(*)(lua_State*,::pragma::physics::ContactInfo&)>([](lua_State *l,::pragma::physics::ContactInfo &contactInfo) -> luabind::optional<pragma::physics::ICollisionObject> {
 		if(contactInfo.collisionObj1.IsExpired())
-			return;
-		contactInfo.collisionObj1->Push(l);
+			return nil;
+		return contactInfo.collisionObj1->GetLuaObject();
 	}));
 	classDef.def_readwrite("flags",reinterpret_cast<std::underlying_type_t<decltype(::pragma::physics::ContactInfo::flags)> pragma::physics::ContactInfo::*>(&::pragma::physics::ContactInfo::flags));
 	mod[classDef];

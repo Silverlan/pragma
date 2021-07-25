@@ -9,12 +9,12 @@
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/game/damagetype.h"
+#include "pragma/types.hpp"
 #include <mathutil/glmutil.h>
 #include "pragma/physics/hitboxes.h"
 #include "pragma/entities/baseentity_handle.h"
 
 class BaseEntity;
-class EntityHandle;
 class DLLNETWORK DamageInfo
 {
 protected:

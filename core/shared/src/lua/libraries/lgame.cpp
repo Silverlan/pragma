@@ -253,7 +253,7 @@ std::pair<bool,int> Lua::game::load_map(lua_State *l,std::string &mapName,BaseEn
 		uint32_t entIdx = 1;
 		for(auto &hEnt : entities)
 		{
-			if(hEnt.IsValid() == false)
+			if(hEnt.valid() == false)
 				continue;
 			Lua::PushInt(l,entIdx++);
 			lua_pushentity(l,hEnt.get());

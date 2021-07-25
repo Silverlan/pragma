@@ -151,7 +151,7 @@ bool ai::TaskPlayAnimation::GetFaceTarget(const Schedule *sched,pragma::SAICompo
 	else if(type == ai::Schedule::Parameter::Type::Bool && param->GetBool() == true)
 	{
 		auto *fragment = ent.GetPrimaryTarget();
-		if(fragment == nullptr || !fragment->hEntity.IsValid())
+		if(fragment == nullptr || !fragment->hEntity.valid())
 			return false;
 		auto pTrComponentTgt = fragment->hEntity.get()->GetTransformComponent();
 		if(!pTrComponentTgt)

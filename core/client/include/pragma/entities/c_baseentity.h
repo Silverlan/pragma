@@ -13,7 +13,6 @@
 #include <sharedutils/property/util_property.hpp>
 
 class CALSound;
-class EntityHandle;
 class Engine;
 class NetPacket;
 enum class RenderMode : uint32_t;

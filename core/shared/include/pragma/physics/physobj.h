@@ -30,7 +30,6 @@ DECLARE_BASE_HANDLE(DLLNETWORK,PhysObj,PhysObj);
 // Very expensive
 #define PHYS_KEEP_SIMULATION_TRANSFORM 0
 
-class EntityHandle;
 namespace pragma
 {
 	class BaseEntityComponent;

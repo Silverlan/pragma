@@ -93,7 +93,6 @@ namespace pragma
 	};
 };
 
-class EntityHandle;
 class DLLCLIENT CUtilPBRConverter
 	: public CBaseEntity
 {

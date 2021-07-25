@@ -125,7 +125,7 @@ Vector3 BaseAIComponent::GetLookTarget() const
 			return m_neckInfo.lookTarget;
 		case BaseAIComponent::LookTargetType::Entity:
 		{
-			if(m_neckInfo.hEntityLookTarget.IsValid() == false)
+			if(m_neckInfo.hEntityLookTarget.valid() == false)
 				return uvec::ORIGIN;
 			return m_neckInfo.hEntityLookTarget.get()->GetTransformComponent() ? m_neckInfo.hEntityLookTarget.get()->GetCenter() : uvec::ORIGIN;
 		}

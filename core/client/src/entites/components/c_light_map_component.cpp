@@ -287,9 +287,9 @@ static void generate_lightmap_uv_atlas(BaseEntity &ent,uint32_t width,uint32_t h
 			return;
 		}
 
-		auto mdl = hEnt.IsValid() ? hEnt.get()->GetModel() : nullptr;
+		auto mdl = hEnt.valid() ? hEnt.get()->GetModel() : nullptr;
 		auto meshGroup = mdl ? mdl->GetMeshGroup(0) : nullptr;
-		auto lightmapC = hEnt.IsValid() ? hEnt.get()->GetComponent<pragma::CLightMapComponent>() : util::WeakHandle<pragma::CLightMapComponent>{};
+		auto lightmapC = hEnt.valid() ? hEnt.get()->GetComponent<pragma::CLightMapComponent>() : util::WeakHandle<pragma::CLightMapComponent>{};
 		if(meshGroup == nullptr || lightmapC.expired())
 		{
 			Con::cwar<<"WARNING: Resources used for atlas generation are no longer valid!"<<Con::endl;
@@ -458,7 +458,7 @@ bool CLightMapComponent::BakeLightmaps(const LightmapBakeSettings &bakeSettings)
 	if(bakeSettings.rebuildUvAtlas)
 	{
 		generate_lightmap_uv_atlas(*ent,resolution.x,resolution.y,[hEnt,resolution,bakeSettings](bool success) {
-			if(success == false || hEnt.IsValid() == false)
+			if(success == false || hEnt.valid() == false)
 				return;
 			generate_lightmaps(resolution.x,resolution.y,bakeSettings.samples,bakeSettings.denoise,bakeSettings.createAsRenderJob,bakeSettings.exposure,bakeSettings.skyStrength,bakeSettings.globalLightIntensityFactor,bakeSettings.sky,bakeSettings.colorTransform);
 		});

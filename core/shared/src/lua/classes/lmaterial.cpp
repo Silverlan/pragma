@@ -48,9 +48,7 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 			return;
 		Lua::Push<::Material*>(l,matCopy);
 	}));
-	classDef.def("UpdateTextures",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
-		mat.UpdateTextures();
-	}));
+	classDef.def("UpdateTextures",&::Material::UpdateTextures);
 	classDef.def("Save",static_cast<luabind::variant<std::string,bool>(*)(lua_State*,::Material&,udm::AssetData&)>([](lua_State *l,::Material &mat,udm::AssetData &assetData) -> luabind::variant<std::string,bool> {
 		std::string err;
 		auto result = mat.Save(assetData,err);

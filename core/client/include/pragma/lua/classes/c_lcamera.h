@@ -65,9 +65,9 @@ namespace Lua
 		DLLCLIENT void SetPrepassMode(lua_State *l,CRasterizationRendererHandle &renderer,uint32_t mode);
 		DLLCLIENT void GetPrepassMode(lua_State *l,CRasterizationRendererHandle &renderer);
 
-		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,CRasterizationRendererHandle &renderer,CSceneHandle &scene,uint32_t renderMode,pragma::ShaderGameWorldLightingPass &shader,::Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh);
-		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,CRasterizationRendererHandle &renderer,CSceneHandle &scene,uint32_t renderMode,const std::string &shaderName,::Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh);
-		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,CRasterizationRendererHandle &renderer,CSceneHandle &scene,uint32_t renderMode,::Material &mat,EntityHandle &hEnt,ModelSubMesh &mesh);
+		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,CRasterizationRendererHandle &renderer,CSceneHandle &scene,uint32_t renderMode,pragma::ShaderGameWorldLightingPass &shader,::Material &mat,BaseEntity &ent,ModelSubMesh &mesh);
+		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,CRasterizationRendererHandle &renderer,CSceneHandle &scene,uint32_t renderMode,const std::string &shaderName,::Material &mat,BaseEntity &ent,ModelSubMesh &mesh);
+		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,CRasterizationRendererHandle &renderer,CSceneHandle &scene,uint32_t renderMode,::Material &mat,BaseEntity &ent,ModelSubMesh &mesh);
 	};
 };
 

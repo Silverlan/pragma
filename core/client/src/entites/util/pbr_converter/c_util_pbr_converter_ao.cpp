@@ -66,7 +66,7 @@ void CPBRConverterComponent::ProcessQueue()
 	sceneInfo.height = item.height;
 	sceneInfo.samples = item.samples;
 
-	if(item.hEntity.IsValid())
+	if(item.hEntity.valid())
 		item.job = rendering::cycles::bake_ambient_occlusion(*client,sceneInfo,*item.hEntity.get(),itMat -mats.begin() /* materialIndex */);
 	else
 		item.job = rendering::cycles::bake_ambient_occlusion(*client,sceneInfo,*item.hModel.get(),itMat -mats.begin() /* materialIndex */);

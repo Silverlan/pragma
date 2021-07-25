@@ -40,7 +40,6 @@ namespace pragma
 	};
 };
 
-class EntityHandle;
 class DLLCLIENT CSkyCamera
 	: public CBaseEntity
 {

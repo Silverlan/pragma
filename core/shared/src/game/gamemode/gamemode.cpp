@@ -67,7 +67,7 @@ bool Game::InitializeGameMode()
 
 bool Game::IsGameModeInitialized() const
 {
-	if(m_entGamemode.IsValid() == false)
+	if(m_entGamemode.valid() == false)
 		return false;
 	return true;
 }

@@ -101,12 +101,12 @@ void BaseFuncKinematicComponent::OnEntitySpawn()
 
 void BaseFuncKinematicComponent::OnTick(double tDelta)
 {
-	if(m_bMoving == false || m_nextNode.IsValid() == false)
+	if(m_bMoving == false || m_nextNode.valid() == false)
 		return;
 	MoveToTarget(m_nextNode.get(),m_speed); // Shouldnt be in think (PhysicsUpdate)
 }
 
-void BaseFuncKinematicComponent::UpdateTickPolicy() {SetTickPolicy((m_bMoving && m_nextNode.IsValid()) ? TickPolicy::Always : TickPolicy::Never);}
+void BaseFuncKinematicComponent::UpdateTickPolicy() {SetTickPolicy((m_bMoving && m_nextNode.valid()) ? TickPolicy::Always : TickPolicy::Never);}
 
 void BaseFuncKinematicComponent::MoveToTarget(BaseEntity *node,float speed)
 {

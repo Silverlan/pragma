@@ -58,7 +58,7 @@ void BaseTriggerPushComponent::OnTick(double dt)
 	for(auto it=m_entityPushQueue.begin();it!=m_entityPushQueue.end();)
 	{
 		auto &info = *it;
-		if(info.hEntity.IsValid() == false)
+		if(info.hEntity.valid() == false)
 		{
 			it = m_entityPushQueue.erase(it);
 			continue;
@@ -100,7 +100,7 @@ void BaseTriggerPushComponent::OnTick(double dt)
 	for(auto &touch : pTouchComponent->GetTouchingInfo())
 	{
 		auto &hEnt = touch.touch.entity;
-		if(hEnt.IsValid() == false || touch.triggered == false)
+		if(hEnt.valid() == false || touch.triggered == false)
 			continue;
 		auto pVelComponentEnt = hEnt.get()->GetComponent<pragma::VelocityComponent>();
 		if(pVelComponentEnt.valid())

@@ -29,19 +29,19 @@ void DamageInfo::ScaleDamage(float scale)
 unsigned short DamageInfo::GetDamage() {return m_damage;}
 BaseEntity *DamageInfo::GetAttacker()
 {
-	if(!m_attacker.IsValid())
+	if(!m_attacker.valid())
 		return nullptr;
 	return m_attacker.get();
 }
 BaseEntity *DamageInfo::GetInflictor()
 {
-	if(!m_inflictor.IsValid())
+	if(!m_inflictor.valid())
 		return nullptr;
 	return m_inflictor.get();
 }
 void DamageInfo::SetAttacker(const BaseEntity *ent)
 {
-	if(m_attacker.IsValid())
+	if(m_attacker.valid())
 		m_attacker = EntityHandle();
 	if(ent == nullptr)
 		return;
@@ -50,7 +50,7 @@ void DamageInfo::SetAttacker(const BaseEntity *ent)
 void DamageInfo::SetAttacker(const EntityHandle &hnd) {SetAttacker(hnd.get());}
 void DamageInfo::SetInflictor(const BaseEntity *ent)
 {
-	if(m_inflictor.IsValid())
+	if(m_inflictor.valid())
 		m_inflictor = EntityHandle();
 	if(ent == nullptr)
 		return;

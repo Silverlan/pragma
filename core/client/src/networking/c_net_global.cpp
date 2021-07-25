@@ -1285,7 +1285,7 @@ void CMD_debug_aim_info(NetworkState *state,pragma::BasePlayerComponent *pl,std:
 		return;
 	}
 	Con::cout<<"Hit Entity: ";
-	if(res.entity.IsValid() == false)
+	if(res.entity.valid() == false)
 		Con::cout<<"NULL";
 	else
 		res.entity->print(Con::cout);
@@ -1492,7 +1492,7 @@ void NET_cl_debug_ai_schedule_tree(NetPacket packet)
 			return;
 		dbgTree = std::static_pointer_cast<DebugBehaviorTreeNode>(dbgAiSchedule->GetUserData(0));
 		auto *hEnt = static_cast<EntityHandle*>(dbgAiSchedule->GetUserData(1).get());
-		if(dbgTree == nullptr || hEnt == nullptr || hEnt->IsValid() == false)
+		if(dbgTree == nullptr || hEnt == nullptr || hEnt->valid() == false)
 		{
 			dbgAiSchedule = nullptr;
 			return;

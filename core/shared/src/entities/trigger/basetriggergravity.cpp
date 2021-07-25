@@ -62,7 +62,7 @@ void BaseEntityTriggerGravityComponent::OnEndTouch(BaseEntity *ent)
 	for(auto it=m_gravityReset.begin();it!=m_gravityReset.end();)
 	{
 		auto &hEnt = *it->first;
-		if(hEnt.IsValid() && hEnt.get() == ent)
+		if(hEnt.valid() && hEnt.get() == ent)
 		{
 			auto &settings = it->second;
 			if(entThis.GetSpawnFlags() &umath::to_integral(pragma::Entity::TriggerGravity::SpawnFlags::ResetOnEndTouch))

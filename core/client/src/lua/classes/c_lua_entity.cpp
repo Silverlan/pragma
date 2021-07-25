@@ -8,7 +8,6 @@
 #include "stdafx_client.h"
 #include "pragma/lua/classes/c_lua_entity.h"
 
-DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,Entity,BaseEntity,Entity,CLuaEntity,CLuaEntity);
 CLuaEntity::CLuaEntity(luabind::object &o,const std::string &className)
 	: CBaseEntity(),LuaObjectBase(o)
 {
@@ -23,11 +22,9 @@ void CLuaEntity::Initialize()
 void CLuaEntity::InitializeLuaObject(lua_State*) {}
 void CLuaEntity::InitializeHandle()
 {
-	auto *hEntity = luabind::object_cast_nothrow<CLuaEntityHandle*>(*m_luaObj,static_cast<CLuaEntityHandle*>(nullptr));
-	*hEntity = new PtrEntity(this);
-	m_handle = hEntity;
+	auto *hEntity = luabind::object_cast_nothrow<util::WeakHandle<BaseEntity>*>(*m_luaObj,static_cast<util::WeakHandle<BaseEntity>*>(nullptr));
+	*hEntity = util::WeakHandle<BaseEntity>{std::shared_ptr<BaseEntity>{this,[](BaseEntity*) {}}};
 	m_bExternalHandle = true;
 }
 
-void CLuaEntityWrapper::Initialize() {}
-void CLuaEntityWrapper::default_Initialize(CLuaEntityWrapper *ent) {}
+void CLuaEntity::default_Initialize(CBaseEntity *ent) {}

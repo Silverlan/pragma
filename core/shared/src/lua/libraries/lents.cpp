@@ -289,17 +289,15 @@ Lua::type<BaseEntity> Lua::ents::get_random(lua_State *l)
 	return *ent->GetLuaObject();
 }
 
-Lua::opt<std::string> Lua::ents::get_component_name(lua_State *l)
+Lua::opt<std::string> Lua::ents::get_component_name(lua_State *l,pragma::ComponentId componentId)
 {
-	auto componentId = Lua::CheckInt(l,1);
 	auto *info = engine->GetNetworkState(l)->GetGameState()->GetEntityComponentManager().GetComponentInfo(componentId);
 	if(info == nullptr)
 		return nil;
 	return {l,info->name};
 }
-Lua::opt<uint32_t> Lua::ents::get_component_id(lua_State *l)
+Lua::opt<uint32_t> Lua::ents::get_component_id(lua_State *l,const std::string &componentName)
 {
-	auto *componentName = Lua::CheckString(l,1);
 	pragma::ComponentId componentId;
 	if(engine->GetNetworkState(l)->GetGameState()->GetEntityComponentManager().GetComponentTypeId(componentName,componentId) == false)
 		return nil;
@@ -419,31 +417,29 @@ Lua::opt<Lua::type<BaseEntity>> Lua::ents::get_world(lua_State *l)
 	return *world.GetLuaObject();
 }
 
-Lua::opt<Lua::type<BaseEntity>> Lua::ents::get_by_index(lua_State *l)
+Lua::opt<Lua::type<BaseEntity>> Lua::ents::get_by_index(lua_State *l,uint32_t idx)
 {
 	NetworkState *state = engine->GetNetworkState(l);
 	Game *game = state->GetGameState();
-	int idx = Lua::CheckInt<int>(l,1);
 	BaseEntity *ent = game->GetEntity(idx);
 	if(ent == NULL)
 		return nil;
 	return *ent->GetLuaObject();
 }
 
-Lua::opt<Lua::type<BaseEntity>> Lua::ents::get_by_local_index(lua_State *l)
+Lua::opt<Lua::type<BaseEntity>> Lua::ents::get_by_local_index(lua_State *l,uint32_t idx)
 {
 	NetworkState *state = engine->GetNetworkState(l);
 	Game *game = state->GetGameState();
-	int idx = Lua::CheckInt<int>(l,1);
 	BaseEntity *ent = game->GetEntityByLocalIndex(idx);
 	if(ent == NULL)
 		return nil;
 	return *ent->GetLuaObject();
 }
 
-Lua::opt<Lua::type<BaseEntity>> Lua::ents::find_by_unique_index(lua_State *l)
+Lua::opt<Lua::type<BaseEntity>> Lua::ents::find_by_unique_index(lua_State *l,const std::string &uuid)
 {
-	auto uniqueIndex = util::uuid_string_to_bytes(Lua::CheckString(l,1));
+	auto uniqueIndex = util::uuid_string_to_bytes(uuid);
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	EntityIterator entIt {*game,EntityIterator::FilterFlags::Default | EntityIterator::FilterFlags::Pending};

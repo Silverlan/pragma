@@ -14,7 +14,6 @@
 #include <vector>
 #include <optional>
 
-class EntityHandle;
 namespace pragma
 {
 	class BaseParentComponent;

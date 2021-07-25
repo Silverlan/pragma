@@ -36,7 +36,7 @@ void SAIComponent::SetRelationship(BaseEntity *ent,DISPOSITION disp,bool revert,
 }
 void SAIComponent::SetRelationship(EntityHandle &hEnt,DISPOSITION disp,bool revert,int priority)
 {
-	if(!hEnt.IsValid())
+	if(!hEnt.valid())
 		return;
 	SetRelationship(hEnt.get(),disp,revert,priority);
 }
@@ -69,7 +69,7 @@ void SAIComponent::ClearRelationship(BaseEntity *ent)
 	{
 		auto it = std::find_if(rels.begin(),rels.end(),[ent](const std::shared_ptr<NPCRelationship> &rel) {
 			auto ptrEntHandle = std::static_pointer_cast<EntityHandle>(rel->data);
-			return (ptrEntHandle != nullptr && ptrEntHandle->IsValid() && (*ptrEntHandle).get() == ent) ? true : false;
+			return (ptrEntHandle != nullptr && ptrEntHandle->valid() && (*ptrEntHandle).get() == ent) ? true : false;
 		});
 		if(it != rels.end())
 			rels.erase(it);
@@ -77,7 +77,7 @@ void SAIComponent::ClearRelationship(BaseEntity *ent)
 }
 void SAIComponent::ClearRelationship(EntityHandle &hEnt)
 {
-	if(!hEnt.IsValid())
+	if(!hEnt.valid())
 		return;
 	ClearRelationship(hEnt.get());
 }
@@ -108,7 +108,7 @@ void SAIComponent::ClearRelationship(Faction &faction)
 }
 DISPOSITION SAIComponent::GetDisposition(EntityHandle &hEnt,int *priority)
 {
-	if(!hEnt.IsValid())
+	if(!hEnt.valid())
 		return GetDefaultDisposition();
 	return GetDisposition(hEnt.get(),priority);
 }
@@ -146,7 +146,7 @@ DISPOSITION SAIComponent::GetDisposition(BaseEntity *ent,int *priority)
 		for(auto &rel : rels)
 		{
 			auto ptrEntityHandle = std::static_pointer_cast<EntityHandle>(rel->data);
-			if(ptrEntityHandle != nullptr && ptrEntityHandle->IsValid() && ptrEntityHandle->get() == ent)
+			if(ptrEntityHandle != nullptr && ptrEntityHandle->valid() && ptrEntityHandle->get() == ent)
 			{
 				bFound = true;
 				if(bFoundFaction == false && rel->priority > prio)

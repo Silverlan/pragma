@@ -339,7 +339,7 @@ networking::IServerClient *SPlayerComponent::GetClientSession() {return m_sessio
 void SPlayerComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->Write<double>(ConnectionTime());
-	if(m_entFlashlight == nullptr)
+	if(m_entFlashlight.expired())
 		nwm::write_unique_entity(packet,nullptr);
 	else
 		nwm::write_unique_entity(packet,m_entFlashlight.get());

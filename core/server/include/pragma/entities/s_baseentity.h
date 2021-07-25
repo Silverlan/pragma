@@ -10,7 +10,6 @@
 #include "pragma/serverdefinitions.h"
 #include <pragma/entities/baseentity.h>
 
-class EntityHandle;
 class Engine;
 class NetPacket;
 class TimerHandle;

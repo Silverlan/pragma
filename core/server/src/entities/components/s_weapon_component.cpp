@@ -54,7 +54,7 @@ void SWeaponComponent::OnUse(BaseEntity *pl)
 		if(charComponent.valid())
 			charComponent->GiveWeapon(GetEntity());
 	}
-	if(hEnt.IsValid() == false)
+	if(hEnt.valid() == false)
 		return;
 	OnPickedUp(pl);
 }
@@ -78,7 +78,7 @@ void SWeaponComponent::Drop()
 		auto sCharComponent = ent.GetComponent<SCharacterComponent>();
 		if(sCharComponent.expired() == false)
 			sCharComponent.get()->DropWeapon(&ent);
-		if(hEnt.IsValid() == false)
+		if(hEnt.valid() == false)
 			return;
 		auto pTrComponent = ent.GetTransformComponent();
 		if(pTrComponent == nullptr)

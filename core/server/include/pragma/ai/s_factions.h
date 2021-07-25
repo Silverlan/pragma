@@ -13,7 +13,6 @@
 #include <vector>
 
 enum class DISPOSITION : uint32_t;
-class EntityHandle;
 class BaseEntity;
 class FactionManager;
 struct FactionDisposition;

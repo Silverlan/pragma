@@ -15,6 +15,11 @@
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/lua/classes/ldef_angle.h"
 #include "pragma/lua/classes/ldef_color.h"
+#include "pragma/lua/policies/game_object_policy.hpp"
+#include "pragma/lua/policies/optional_policy.hpp"
+#include "pragma/lua/policies/handle_policy.hpp"
+#include "pragma/lua/policies/pair_policy.hpp"
+#include "pragma/lua/policies/vector_policy.hpp"
 #include "pragma/lua/libraries/lray.h"
 #include "pragma/model/brush/brushmesh.h"
 #include "pragma/audio/alsound.h"
@@ -34,6 +39,7 @@
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/lua/l_entity_handles.hpp"
 #include "pragma/lua/lua_entity_component.hpp"
+#include <luabind/copy_policy.hpp>
 #include <sharedutils/datastream.h>
 #include <pragma/physics/movetypes.h>
 #include <udm.hpp>
@@ -45,674 +51,299 @@ bool Lua::is_entity(const luabind::object &o)
 	return luabind::object_cast_nothrow<EntityHandle*>(o,static_cast<EntityHandle*>(nullptr));
 }
 
-void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
+static bool operator==(const BaseEntity &a,const BaseEntity &b)
+{
+	return &a == &b;
+}
+
+static std::ostream &operator<<(std::ostream &stream,const BaseEntity &a)
+{
+	const_cast<BaseEntity&>(a).print(stream);
+	return stream;
+}
+
+void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 {
 	classDef.def(luabind::tostring(luabind::self));
 	classDef.def("IsValid",&IsValid);
-	classDef.def("Spawn",&Spawn);
-	classDef.def("Remove",&Remove);
-	classDef.def("GetIndex",&GetIndex);
-	classDef.def("GetLocalIndex",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::PushInt(l,hEnt->GetLocalIndex());
-	}));
-	classDef.def("IsMapEntity",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::PushBool(l,hEnt->IsMapEntity());
-	}));
-	classDef.def("IsCharacter",&IsCharacter);
-	classDef.def("IsPlayer",&IsPlayer);
-	classDef.def("IsWorld",&IsWorld);
-	classDef.def("IsInert",&IsInert);
-	classDef.def("GetClass",&GetClass);
+	classDef.def("Spawn",&BaseEntity::Spawn);
+	classDef.def("Remove",&BaseEntity::Remove);
+	classDef.def("GetIndex",&BaseEntity::GetIndex);
+	classDef.def("GetLocalIndex",&BaseEntity::GetLocalIndex);
+	classDef.def("IsMapEntity",&BaseEntity::IsMapEntity);
+	classDef.def("IsCharacter",&BaseEntity::IsCharacter);
+	classDef.def("IsPlayer",&BaseEntity::IsPlayer);
+	classDef.def("IsWorld",&BaseEntity::IsWorld);
+	classDef.def("IsInert",&BaseEntity::IsInert);
+	classDef.def("GetClass",&BaseEntity::GetClass);
 	//classDef.def("AddCallback",&AddCallback); // Obsolete
-	classDef.def("IsScripted",&IsScripted);
-	classDef.def("IsSpawned",&IsSpawned);
-	classDef.def("SetKeyValue",&SetKeyValue);
-	classDef.def("IsNPC",&IsNPC);
-	classDef.def("IsWeapon",&IsWeapon);
-	classDef.def("IsVehicle",&IsVehicle);
-	classDef.def("RemoveSafely",&RemoveSafely);
-	classDef.def("RemoveEntityOnRemoval",static_cast<void(*)(lua_State*,EntityHandle&,EntityHandle&)>(&RemoveEntityOnRemoval));
-	classDef.def("RemoveEntityOnRemoval",static_cast<void(*)(lua_State*,EntityHandle&,EntityHandle&,Bool)>(&RemoveEntityOnRemoval));
-	classDef.def("GetSpawnFlags",&GetSpawnFlags);
-	classDef.def("GetPose",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::Push<umath::ScaledTransform>(l,hEnt->GetPose());
-	}));
-	classDef.def("SetPose",static_cast<void(*)(lua_State*,EntityHandle&,const umath::Transform&)>([](lua_State *l,EntityHandle &hEnt,const umath::Transform &t) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto *trComponent = static_cast<pragma::BaseTransformComponent*>(hEnt->AddComponent("transform").get());
+	classDef.def("IsScripted",&BaseEntity::IsScripted);
+	classDef.def("IsSpawned",&BaseEntity::IsSpawned);
+	classDef.def("SetKeyValue",&BaseEntity::SetKeyValue);
+	classDef.def("IsNPC",&BaseEntity::IsNPC);
+	classDef.def("IsWeapon",&BaseEntity::IsWeapon);
+	classDef.def("IsVehicle",&BaseEntity::IsVehicle);
+	classDef.def("RemoveSafely",&BaseEntity::RemoveSafely);
+	classDef.def("RemoveEntityOnRemoval",static_cast<void(*)(BaseEntity&,BaseEntity&)>(&RemoveEntityOnRemoval));
+	classDef.def("RemoveEntityOnRemoval",static_cast<void(*)(BaseEntity&,BaseEntity&,Bool)>(&RemoveEntityOnRemoval));
+	classDef.def("GetSpawnFlags",&BaseEntity::GetSpawnFlags);
+	classDef.def("GetPose",&BaseEntity::GetPose,luabind::copy_policy<0>{});
+	classDef.def("SetPose",static_cast<void(*)(BaseEntity&,const umath::Transform&)>([](BaseEntity &ent,const umath::Transform &t) {
+		auto *trComponent = static_cast<pragma::BaseTransformComponent*>(ent.AddComponent("transform").get());
 		if(trComponent == nullptr)
 			return;
-		hEnt->SetPose(t);
+		ent.SetPose(t);
 	}));
-	classDef.def("SetPose",static_cast<void(*)(lua_State*,EntityHandle&,const umath::ScaledTransform&)>([](lua_State *l,EntityHandle &hEnt,const umath::ScaledTransform &t) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto *trComponent = static_cast<pragma::BaseTransformComponent*>(hEnt->AddComponent("transform").get());
+	classDef.def("SetPose",static_cast<void(*)(BaseEntity&,const umath::ScaledTransform&)>([](BaseEntity &ent,const umath::ScaledTransform &t) {
+		auto *trComponent = static_cast<pragma::BaseTransformComponent*>(ent.AddComponent("transform").get());
 		if(trComponent == nullptr)
 			return;
-		hEnt->SetPose(t);
+		ent.SetPose(t);
 	}));
-	classDef.def("GetPos",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		if(!hEnt->GetTransformComponent())
-		{
-			Lua::Push<Vector3>(l,Vector3{});
-			return;
-		}
-		Lua::Push<Vector3>(l,hEnt->GetPosition());
-	}));
-	classDef.def("SetPos",static_cast<void(*)(lua_State*,EntityHandle&,const Vector3&)>([](lua_State *l,EntityHandle &hEnt,const Vector3 &pos) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto *trComponent = static_cast<pragma::BaseTransformComponent*>(hEnt->AddComponent("transform").get());
+	classDef.def("GetPos",&BaseEntity::GetPosition,luabind::copy_policy<0>{});
+	classDef.def("SetPos",static_cast<void(*)(BaseEntity&,const Vector3&)>([](BaseEntity &ent,const Vector3 &pos) {
+		auto *trComponent = static_cast<pragma::BaseTransformComponent*>(ent.AddComponent("transform").get());
 		if(trComponent == nullptr)
 			return;
-		hEnt->SetPosition(pos);
+		ent.SetPosition(pos);
 	}));
-	classDef.def("GetAngles",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		if(!hEnt->GetTransformComponent())
-		{
-			Lua::Push<EulerAngles>(l,EulerAngles{});
-			return;
-		}
-		Lua::Push<EulerAngles>(l,hEnt->GetTransformComponent()->GetAngles());
+	classDef.def("GetAngles",static_cast<EulerAngles(*)(BaseEntity&)>([](BaseEntity &ent) -> EulerAngles {
+		if(!ent.GetTransformComponent())
+			return {};
+		return ent.GetTransformComponent()->GetAngles();
 	}));
-	classDef.def("SetAngles",static_cast<void(*)(lua_State*,EntityHandle&,const EulerAngles&)>([](lua_State *l,EntityHandle &hEnt,const EulerAngles &ang) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto *trComponent = static_cast<pragma::BaseTransformComponent*>(hEnt->AddComponent("transform").get());
+	classDef.def("SetAngles",static_cast<void(*)(BaseEntity&,const EulerAngles&)>([](BaseEntity &ent,const EulerAngles &ang) {
+		auto *trComponent = static_cast<pragma::BaseTransformComponent*>(ent.AddComponent("transform").get());
 		if(trComponent == nullptr)
 			return;
 		trComponent->SetAngles(ang);
 	}));
-	classDef.def("SetScale",static_cast<void(*)(lua_State*,EntityHandle&,const Vector3&)>([](lua_State *l,EntityHandle &hEnt,const Vector3 &v) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto *trComponent = static_cast<pragma::BaseTransformComponent*>(hEnt->AddComponent("transform").get());
+	classDef.def("SetScale",static_cast<void(*)(BaseEntity&,const Vector3&)>([](BaseEntity &ent,const Vector3 &v) {
+		auto *trComponent = static_cast<pragma::BaseTransformComponent*>(ent.AddComponent("transform").get());
 		if(trComponent == nullptr)
 			return;
 		trComponent->SetScale(v);
 	}));
-	classDef.def("GetScale",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		if(!hEnt->GetTransformComponent())
-		{
-			Lua::Push<Vector3>(l,Vector3{1.f,1.f,1.f});
-			return;
-		}
-		Lua::Push<Vector3>(l,hEnt->GetTransformComponent()->GetScale());
-	}));
-	classDef.def("GetRotation",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		if(!hEnt->GetTransformComponent())
-		{
-			Lua::Push<Quat>(l,Quat{});
-			return;
-		}
-		Lua::Push<Quat>(l,hEnt->GetTransformComponent()->GetRotation());
-	}));
-	classDef.def("SetRotation",static_cast<void(*)(lua_State*,EntityHandle&,const Quat&)>([](lua_State *l,EntityHandle &hEnt,const Quat &rot) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto *trComponent = static_cast<pragma::BaseTransformComponent*>(hEnt->AddComponent("transform").get());
+	classDef.def("GetScale",&BaseEntity::GetScale,luabind::copy_policy<0>{});
+	classDef.def("GetRotation",&BaseEntity::GetRotation,luabind::copy_policy<0>{});
+	classDef.def("SetRotation",static_cast<void(*)(BaseEntity&,const Quat&)>([](BaseEntity &ent,const Quat &rot) {
+		auto *trComponent = static_cast<pragma::BaseTransformComponent*>(ent.AddComponent("transform").get());
 		if(trComponent == nullptr)
 			return;
 		trComponent->SetRotation(rot);
 	}));
-	classDef.def("GetCenter",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		if(!hEnt->GetPhysicsComponent())
-		{
-			if(!hEnt->GetTransformComponent())
-			{
-				Lua::Push<Vector3>(l,Vector3{});
-				return;
-			}
-			Lua::Push<Vector3>(l,hEnt->GetTransformComponent()->GetPosition());
-			return;
-		}
-		Lua::Push<Vector3>(l,hEnt->GetPhysicsComponent()->GetCenter());
-	}));
+	classDef.def("GetCenter",&BaseEntity::GetCenter);
 
-	classDef.def("AddComponent",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,bool)>([](lua_State *l,EntityHandle &hEnt,const std::string &name,bool bForceCreateNew) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto pComponent = hEnt->AddComponent(name,bForceCreateNew);
-		if(pComponent.expired())
-			return;
-		pComponent->PushLuaObject(l);
+	classDef.def("AddComponent",static_cast<util::WeakHandle<pragma::BaseEntityComponent>(BaseEntity::*)(const std::string&,bool)>(&BaseEntity::AddComponent),luabind::game_object_smartptr_policy<0>{});
+	classDef.def("AddComponent",static_cast<util::WeakHandle<pragma::BaseEntityComponent>(*)(BaseEntity&,const std::string&)>([](BaseEntity &ent,const std::string &name) -> util::WeakHandle<pragma::BaseEntityComponent> {
+		return ent.AddComponent(name);
+	}),luabind::game_object_smartptr_policy<0>{});
+	classDef.def("AddComponent",static_cast<util::WeakHandle<pragma::BaseEntityComponent>(BaseEntity::*)(pragma::ComponentId,bool)>(&BaseEntity::AddComponent),luabind::game_object_smartptr_policy<0>{});
+	classDef.def("AddComponent",static_cast<util::WeakHandle<pragma::BaseEntityComponent>(*)(BaseEntity&,pragma::ComponentId)>([](BaseEntity &ent,pragma::ComponentId componentId) {
+		return ent.AddComponent(componentId);
 	}));
-	classDef.def("AddComponent",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&)>([](lua_State *l,EntityHandle &hEnt,const std::string &name) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto pComponent = hEnt->AddComponent(name);
-		if(pComponent.expired())
-			return;
-		pComponent->PushLuaObject(l);
-	}));
-	classDef.def("AddComponent",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t,bool)>([](lua_State *l,EntityHandle &hEnt,uint32_t componentId,bool bForceCreateNew) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto pComponent = hEnt->AddComponent(componentId,bForceCreateNew);
-		if(pComponent.expired())
-			return;
-		pComponent->PushLuaObject(l);
-	}));
-	classDef.def("AddComponent",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t componentId) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto pComponent = hEnt->AddComponent(componentId);
-		if(pComponent.expired())
-			return;
-		pComponent->PushLuaObject(l);
-	}));
-	classDef.def("RemoveComponent",static_cast<void(*)(lua_State*,EntityHandle&,BaseEntityComponentHandle&)>([](lua_State *l,EntityHandle &hEnt,BaseEntityComponentHandle &hComponent) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		::pragma::Lua::check_component(l,hComponent);
-		hEnt->RemoveComponent(*hComponent.get());
-	}));
-	classDef.def("RemoveComponent",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&)>([](lua_State *l,EntityHandle &hEnt,const std::string &name) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->RemoveComponent(name);
-	}));
-	classDef.def("RemoveComponent",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t componentId) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->RemoveComponent(componentId);
-	}));
-	classDef.def("ClearComponents",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->ClearComponents();
-	}));
-	classDef.def("HasComponent",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&)>([](lua_State *l,EntityHandle &hEnt,const std::string &name) {
-		LUA_CHECK_ENTITY(l,hEnt);
+	classDef.def("RemoveComponent",static_cast<void(BaseEntity::*)(pragma::BaseEntityComponent&)>(&BaseEntity::RemoveComponent));
+	classDef.def("RemoveComponent",static_cast<void(BaseEntity::*)(const std::string&)>(&BaseEntity::RemoveComponent));
+	classDef.def("RemoveComponent",static_cast<void(BaseEntity::*)(pragma::ComponentId)>(&BaseEntity::RemoveComponent));
+	classDef.def("ClearComponents",&BaseEntity::ClearComponents);
+	classDef.def("HasComponent",static_cast<bool(*)(lua_State*,BaseEntity&,const std::string&)>([](lua_State *l,BaseEntity &ent,const std::string &name) {
 		auto *nw = engine->GetNetworkState(l);
 		auto *game = nw->GetGameState();
 		auto &componentManager = game->GetEntityComponentManager();
 		auto componentId = pragma::INVALID_COMPONENT_ID;
 		if(componentManager.GetComponentTypeId(name,componentId) == false)
-		{
-			Lua::PushBool(l,false);
-			return;
-		}
-		Lua::PushBool(l,hEnt->HasComponent(componentId));
+			return false;
+		return ent.HasComponent(componentId);
 	}));
-	classDef.def("HasComponent",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t componentId) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::PushBool(l,hEnt->HasComponent(componentId));
-	}));
-	classDef.def("HasComponent",static_cast<void(*)(lua_State*,EntityHandle&,luabind::object)>([](lua_State *l,EntityHandle &hEnt,luabind::object) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::PushBool(l,false);
-	}));
-	classDef.def("GetComponent",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&)>([](lua_State *l,EntityHandle &hEnt,const std::string &name) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto pComponent = hEnt->FindComponent(name);
-		if(pComponent.expired())
-			return;
-		pComponent->PushLuaObject(l);
-	}));
-	classDef.def("GetComponent",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t componentId) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto pComponent = hEnt->FindComponent(componentId);
-		if(pComponent.expired())
-			return;
-		pComponent->PushLuaObject(l);
-	}));
-	classDef.def("GetComponent",static_cast<void(*)(lua_State*,EntityHandle&,luabind::object)>([](lua_State *l,EntityHandle &hEnt,luabind::object) {
-		LUA_CHECK_ENTITY(l,hEnt);
-	}));
+	classDef.def("HasComponent",static_cast<bool(BaseEntity::*)(pragma::ComponentId) const>(&BaseEntity::HasComponent));
+	classDef.def("HasComponent",static_cast<bool(*)(BaseEntity&,luabind::object)>([](BaseEntity &ent,luabind::object) {return false;}));
+	classDef.def("GetComponent",static_cast<util::WeakHandle<pragma::BaseEntityComponent>(BaseEntity::*)(const std::string&) const>(&BaseEntity::FindComponent),luabind::game_object_smartptr_policy<0>{});
+	classDef.def("GetComponent",static_cast<util::WeakHandle<pragma::BaseEntityComponent>(BaseEntity::*)(pragma::ComponentId) const>(&BaseEntity::FindComponent),luabind::game_object_smartptr_policy<0>{});
+	classDef.def("GetComponent",static_cast<void(*)(BaseEntity&,luabind::object)>([](BaseEntity &ent,luabind::object) {}));
 	if(Lua::get_extended_lua_modules_enabled())
 	{
 		// Shorthand functions
-		classDef.def("C",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&)>([](lua_State *l,EntityHandle &hEnt,const std::string &name) {
-			LUA_CHECK_ENTITY(l,hEnt);
-			auto pComponent = hEnt->FindComponent(name);
+		classDef.def("C",static_cast<luabind::optional<pragma::BaseEntityComponent>(*)(BaseEntity&,const std::string&)>([](BaseEntity &ent,const std::string &name) -> luabind::optional<pragma::BaseEntityComponent> {
+			auto pComponent = ent.FindComponent(name);
 			if(pComponent.expired())
-				return;
-			pComponent->PushLuaObject(l);
+				return nil;
+			return pComponent->GetLuaObject();
 		}));
-		classDef.def("C",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t componentId) {
-			LUA_CHECK_ENTITY(l,hEnt);
-			auto pComponent = hEnt->FindComponent(componentId);
+		classDef.def("C",static_cast<luabind::optional<pragma::BaseEntityComponent>(*)(BaseEntity&,uint32_t)>([](BaseEntity &ent,uint32_t componentId) -> luabind::optional<pragma::BaseEntityComponent> {
+			auto pComponent = ent.FindComponent(componentId);
 			if(pComponent.expired())
-				return;
-			pComponent->PushLuaObject(l);
+				return nil;
+			return pComponent->GetLuaObject();
 		}));
-		classDef.def("C",static_cast<void(*)(lua_State*,EntityHandle&,luabind::object)>([](lua_State *l,EntityHandle &hEnt,luabind::object) {
-			LUA_CHECK_ENTITY(l,hEnt);
-		}));
+		classDef.def("C",static_cast<luabind::optional<pragma::BaseEntityComponent>(*)(BaseEntity&,luabind::object)>([](BaseEntity &ent,luabind::object) -> luabind::optional<pragma::BaseEntityComponent> {return nil;}));
 	}
-	classDef.def("GetComponents",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto &components = hEnt->GetComponents();
-		auto t = Lua::CreateTable(l);
-		auto idx = 1;
-		for(auto &pComponent : components)
-		{
-			Lua::PushInt(l,idx++);
-			pComponent->PushLuaObject(l);
-			Lua::SetTableValue(l,t);
-		}
+	classDef.def("GetComponents",static_cast<std::vector<std::shared_ptr<pragma::BaseEntityComponent>>&(BaseEntity::*)()>(&BaseEntity::GetComponents),luabind::vector_policy<0,std::shared_ptr<pragma::BaseEntityComponent>,[](const std::shared_ptr<pragma::BaseEntityComponent> &c) -> luabind::object {return c->GetLuaObject();}>{});
+	classDef.def("GetTransformComponent",&BaseEntity::GetTransformComponent,luabind::game_object_policy<0>{});
+	classDef.def("GetPhysicsComponent",&BaseEntity::GetPhysicsComponent,luabind::game_object_policy<0>{});
+	classDef.def("GetGenericComponent",&BaseEntity::GetGenericComponent,luabind::game_object_policy<0>{});
+	classDef.def("GetCharacterComponent",&BaseEntity::GetCharacterComponent,luabind::game_object_smartptr_policy<0>{});
+	classDef.def("GetWeaponComponent",&BaseEntity::GetWeaponComponent,luabind::game_object_smartptr_policy<0>{});
+	classDef.def("GetVehicleComponent",&BaseEntity::GetVehicleComponent,luabind::game_object_smartptr_policy<0>{});
+	classDef.def("GetPlayerComponent",&BaseEntity::GetPlayerComponent,luabind::game_object_smartptr_policy<0>{});
+	classDef.def("GetTimeScaleComponent",&BaseEntity::GetTimeScaleComponent,luabind::game_object_smartptr_policy<0>{});
+	classDef.def("GetNameComponent",&BaseEntity::GetNameComponent,luabind::game_object_smartptr_policy<0>{});
+	classDef.def("GetAIComponent",&BaseEntity::GetAIComponent,luabind::game_object_smartptr_policy<0>{});
+	classDef.def("GetModelComponent",&BaseEntity::GetModelComponent,luabind::game_object_policy<0>{});
+	classDef.def("GetAnimatedComponent",&BaseEntity::GetAnimatedComponent,luabind::game_object_smartptr_policy<0>{});
+	classDef.def("GetUuid",static_cast<std::string(*)(BaseEntity&)>([](BaseEntity &ent) -> std::string {
+		return util::uuid_to_string(ent.GetUuid());
 	}));
-	classDef.def("GetTransformComponent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto pTrComponent = hEnt->GetTransformComponent();
-		if(pTrComponent == nullptr)
-			return;
-		pTrComponent->PushLuaObject(l);
-	}));
-	classDef.def("GetPhysicsComponent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto pPhysComponent = hEnt->GetPhysicsComponent();
-		if(pPhysComponent == nullptr)
-			return;
-		pPhysComponent->PushLuaObject(l);
-	}));
-	classDef.def("GetGenericComponent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto pGenc = hEnt->GetGenericComponent();
-		if(pGenc == nullptr)
-			return;
-		pGenc->PushLuaObject(l);
-	}));
-	classDef.def("GetCharacterComponent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto pCharComponent = hEnt->GetCharacterComponent();
-		if(pCharComponent.expired())
-			return;
-		pCharComponent->PushLuaObject(l);
-	}));
-	classDef.def("GetWeaponComponent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto pWepComponent = hEnt->GetWeaponComponent();
-		if(pWepComponent.expired())
-			return;
-		pWepComponent->PushLuaObject(l);
-	}));
-	classDef.def("GetVehicleComponent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto pVhcComponent = hEnt->GetVehicleComponent();
-		if(pVhcComponent.expired())
-			return;
-		pVhcComponent->PushLuaObject(l);
-	}));
-	classDef.def("GetPlayerComponent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto pPlComponent = hEnt->GetPlayerComponent();
-		if(pPlComponent.expired())
-			return;
-		pPlComponent->PushLuaObject(l);
-	}));
-	classDef.def("GetTimeScaleComponent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto pTc = hEnt->GetTimeScaleComponent();
-		if(pTc.expired())
-			return;
-		pTc->PushLuaObject(l);
-	}));
-	classDef.def("GetNameComponent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto pnc = hEnt->GetNameComponent();
-		if(pnc.expired())
-			return;
-		pnc->PushLuaObject(l);
-	}));
-	classDef.def("GetAIComponent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto pAIComponent = hEnt->GetAIComponent();
-		if(pAIComponent.expired())
-			return;
-		pAIComponent->PushLuaObject(l);
-	}));
-	classDef.def("GetModelComponent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto pMdlComponent = hEnt->GetModelComponent();
-		if(!pMdlComponent)
-			return;
-		pMdlComponent->PushLuaObject(l);
-	}));
-	classDef.def("GetAnimatedComponent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto pAnimComponent = hEnt->GetAnimatedComponent();
-		if(pAnimComponent.expired())
-			return;
-		pAnimComponent->PushLuaObject(l);
-	}));
-	classDef.def("GetUuid",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::PushString(l,util::uuid_to_string(hEnt->GetUuid()));
-	}));
-	classDef.def("SetUuid",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&)>([](lua_State *l,EntityHandle &hEnt,const std::string &uuid) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->SetUuid(util::uuid_string_to_bytes(uuid));
+	classDef.def("SetUuid",static_cast<void(*)(BaseEntity&,const std::string&)>([](BaseEntity &ent,const std::string &uuid) {
+		ent.SetUuid(util::uuid_string_to_bytes(uuid));
 	}));
 
-	classDef.def("Save",&Save);
-	classDef.def("Load",&Load);
-	classDef.def("Copy",&Copy);
+	classDef.def("Save",&BaseEntity::Save);
+	classDef.def("Load",&BaseEntity::Load);
+	classDef.def("Copy",&BaseEntity::Copy,luabind::game_object_policy<0>{});
 
 	classDef.def("GetAirDensity",&GetAirDensity);
 
-	classDef.def("IsStatic",&IsStatic);
-	classDef.def("IsDynamic",&IsDynamic);
+	classDef.def("IsStatic",&BaseEntity::IsStatic);
+	classDef.def("IsDynamic",&BaseEntity::IsDynamic);
 
 	// Quick-access methods
-	classDef.def("CreateSound",static_cast<void(*)(lua_State*,EntityHandle&,std::string,uint32_t)>([](lua_State *l,EntityHandle &hEnt,std::string sndname,uint32_t soundType) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		std::shared_ptr<ALSound> snd = hEnt->CreateSound(sndname,static_cast<ALSoundType>(soundType));
-		if(snd == nullptr)
-			return;
-		luabind::object(l,snd).push(l);
+	classDef.def("CreateSound",&BaseEntity::CreateSound);
+	classDef.def("EmitSound",&BaseEntity::EmitSound);
+	classDef.def("EmitSound",static_cast<std::shared_ptr<ALSound>(*)(BaseEntity&,const std::string&,ALSoundType,float)>([](BaseEntity &ent,const std::string &sndname,ALSoundType soundType,float gain) {
+		return ent.EmitSound(sndname,soundType,gain);
 	}));
-	classDef.def("EmitSound",static_cast<void(*)(lua_State*,EntityHandle&,std::string,uint32_t,float,float)>([](lua_State *l,EntityHandle &hEnt,std::string sndname,uint32_t soundType,float gain,float pitch) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		std::shared_ptr<ALSound> snd = hEnt->EmitSound(sndname,static_cast<ALSoundType>(soundType),gain,pitch);
-		if(snd == nullptr)
-			return;
-		luabind::object(l,snd).push(l);
+	classDef.def("EmitSound",static_cast<std::shared_ptr<ALSound>(*)(BaseEntity&,const std::string&,ALSoundType)>([](BaseEntity &ent,const std::string &sndname,ALSoundType soundType) {
+		return ent.EmitSound(sndname,soundType);
 	}));
-	classDef.def("EmitSound",static_cast<void(*)(lua_State*,EntityHandle&,std::string,uint32_t,float)>([](lua_State *l,EntityHandle &hEnt,std::string sndname,uint32_t soundType,float gain) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		std::shared_ptr<ALSound> snd = hEnt->EmitSound(sndname,static_cast<ALSoundType>(soundType),gain);
-		if(snd == nullptr)
-			return;
-		luabind::object(l,snd).push(l);
+	classDef.def("GetName",&BaseEntity::GetName);
+	classDef.def("SetName",&BaseEntity::SetName);
+	classDef.def("SetModel",static_cast<void(BaseEntity::*)(const std::string&)>(&BaseEntity::SetModel));
+	classDef.def("SetModel",static_cast<void(BaseEntity::*)(const std::shared_ptr<Model>&)>(&BaseEntity::SetModel));
+	classDef.def("ClearModel",static_cast<void(*)(BaseEntity&)>([](BaseEntity &ent) {
+		ent.SetModel(std::shared_ptr<Model>{nullptr});
 	}));
-	classDef.def("EmitSound",static_cast<void(*)(lua_State*,EntityHandle&,std::string,uint32_t)>([](lua_State *l,EntityHandle &hEnt,std::string sndname,uint32_t soundType) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		std::shared_ptr<ALSound> snd = hEnt->EmitSound(sndname,static_cast<ALSoundType>(soundType));
-		if(snd == nullptr)
-			return;
-		luabind::object(l,snd).push(l);
-	}));
-	classDef.def("GetName",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::PushString(l,hEnt->GetName());
-	}));
-	classDef.def("SetName",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&)>([](lua_State *l,EntityHandle &hEnt,const std::string &name) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->SetName(name);
-	}));
-	classDef.def("SetModel",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&)>([](lua_State *l,EntityHandle &hEnt,const std::string &mdl) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->SetModel(mdl);
-	}));
-	classDef.def("SetModel",static_cast<void(*)(lua_State*,EntityHandle&,const std::shared_ptr<Model>&)>([](lua_State *l,EntityHandle &hEnt,const std::shared_ptr<Model> &mdl) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->SetModel(mdl);
-	}));
-	classDef.def("ClearModel",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->SetModel(std::shared_ptr<Model>{nullptr});
-	}));
-	classDef.def("GetModel",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto mdl = hEnt->GetModel();
-		if(mdl == nullptr)
-			return;
-		luabind::object(l,mdl).push(l);
-	}));
-	classDef.def("GetModelName",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::PushString(l,hEnt->GetModelName());
-	}));
-	classDef.def("GetAttachmentPose",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t attId) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto t = hEnt->GetAttachmentPose(attId);
-		if(t.has_value() == false)
-			return;
-		Lua::Push<umath::Transform>(l,*t);
-	}));
-	classDef.def("GetSkin",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::PushInt(l,hEnt->GetSkin());
-	}));
-	classDef.def("SetSkin",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t skin) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->SetSkin(skin);
-	}));
-	classDef.def("GetBodyGroup",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&)>([](lua_State *l,EntityHandle &hEnt,const std::string &name) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::PushInt(l,hEnt->GetBodyGroup(name));
-	}));
-	classDef.def("GetBodyGroup",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t bgId) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto mdlC = hEnt->GetModelComponent();
+	classDef.def("GetModel",&BaseEntity::GetModel);
+	classDef.def("GetModelName",&BaseEntity::GetModelName);
+	classDef.def("GetAttachmentPose",&BaseEntity::GetAttachmentPose,luabind::optional_policy<0>{});
+	classDef.def("GetSkin",&BaseEntity::GetSkin);
+	classDef.def("SetSkin",&BaseEntity::SetSkin);
+	classDef.def("GetBodyGroup",&BaseEntity::GetBodyGroup);
+	classDef.def("GetBodyGroup",static_cast<std::optional<uint32_t>(*)(BaseEntity&,uint32_t)>([](BaseEntity &ent,uint32_t bgId) -> std::optional<uint32_t> {
+		auto mdlC = ent.GetModelComponent();
 		if(!mdlC)
-			return;
-		Lua::PushInt(l,mdlC->GetBodyGroup(bgId));
+			return {};
+		return mdlC->GetBodyGroup(bgId);
 	}));
-	classDef.def("SetBodyGroup",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,const std::string &group,uint32_t id) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->SetBodyGroup(group,id);
-	}));
-	classDef.def("SetBodyGroup",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t bgId,uint32_t id) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto mdlC = hEnt->GetModelComponent();
+	classDef.def("SetBodyGroup",&BaseEntity::SetBodyGroup);
+	classDef.def("SetBodyGroup",static_cast<void(*)(BaseEntity&,uint32_t,uint32_t)>([](BaseEntity &ent,uint32_t bgId,uint32_t id) {
+		auto mdlC = ent.GetModelComponent();
 		if(!mdlC)
 			return;
 		mdlC->SetBodyGroup(bgId,id);
 	}));
-	classDef.def("GetParent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto *parent = hEnt->GetParent();
+	classDef.def("GetParent",static_cast<luabind::optional<pragma::BaseParentComponent>(*)(BaseEntity&)>([](BaseEntity &ent) -> luabind::optional<pragma::BaseParentComponent> {
+		auto *parent = ent.GetParent();
 		if(parent == nullptr)
-			return;
-		parent->PushLuaObject(l);
+			return nil;
+		return parent->GetLuaObject();
 	}));
-	classDef.def("ClearParent",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->ClearParent();
-	}));
-	classDef.def("SetParent",static_cast<void(*)(lua_State*,EntityHandle&,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt,EntityHandle &hParent) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		LUA_CHECK_ENTITY(l,hParent);
-		hEnt->SetParent(hParent.get());
-	}));
-	classDef.def("SetOwner",static_cast<void(*)(lua_State*,EntityHandle&,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt,EntityHandle &hOwner) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		LUA_CHECK_ENTITY(l,hOwner);
-		auto *ownableC = dynamic_cast<pragma::BaseOwnableComponent*>(hEnt->AddComponent("ownable").get());
+	classDef.def("ClearParent",&BaseEntity::ClearParent);
+	classDef.def("SetParent",&BaseEntity::SetParent);
+	classDef.def("SetOwner",static_cast<void(*)(BaseEntity&,BaseEntity&)>([](BaseEntity &ent,BaseEntity &hOwner) {
+		auto *ownableC = dynamic_cast<pragma::BaseOwnableComponent*>(ent.AddComponent("ownable").get());
 		if(ownableC == nullptr)
 			return;
-		ownableC->SetOwner(*hOwner.get());
+		ownableC->SetOwner(hOwner);
 	}));
-	classDef.def("GetOwner",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto *ownableC = dynamic_cast<pragma::BaseOwnableComponent*>(hEnt->FindComponent("ownable").get());
+	classDef.def("GetOwner",static_cast<luabind::optional<BaseEntity>(*)(BaseEntity&)>([](BaseEntity &ent) -> luabind::optional<BaseEntity> {
+		auto *ownableC = dynamic_cast<pragma::BaseOwnableComponent*>(ent.FindComponent("ownable").get());
 		if(ownableC == nullptr)
-			return;
+			return nil;
 		auto *owner = ownableC->GetOwner();
 		if(owner == nullptr)
-			return;
-		owner->GetLuaObject()->push(l);
+			return nil;
+		return *owner->GetLuaObject();
 	}));
 	classDef.def("SetEnabled",&Lua::Entity::SetEnabled);
 	classDef.def("SetTurnedOn",&Lua::Entity::SetEnabled);
-	classDef.def("Enable",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {SetEnabled(l,hEnt,true);}));
-	classDef.def("TurnOn",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {SetEnabled(l,hEnt,true);}));
-	classDef.def("Disable",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {SetEnabled(l,hEnt,false);}));
-	classDef.def("TurnOff",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {SetEnabled(l,hEnt,false);}));
+	classDef.def("Enable",static_cast<void(*)(BaseEntity&)>([](BaseEntity &ent) {SetEnabled(ent,true);}));
+	classDef.def("TurnOn",static_cast<void(*)(BaseEntity&)>([](BaseEntity &ent) {SetEnabled(ent,true);}));
+	classDef.def("Disable",static_cast<void(*)(BaseEntity&)>([](BaseEntity &ent) {SetEnabled(ent,false);}));
+	classDef.def("TurnOff",static_cast<void(*)(BaseEntity&)>([](BaseEntity &ent) {SetEnabled(ent,false);}));
 	classDef.def("IsEnabled",&Lua::Entity::IsEnabled);
 	classDef.def("IsTurnedOn",&Lua::Entity::IsEnabled);
 	classDef.def("IsDisabled",&Lua::Entity::IsDisabled);
 	classDef.def("IsTurnedOff",&Lua::Entity::IsDisabled);
 	classDef.def("SetColor",&Lua::Entity::SetColor);
 	classDef.def("GetColor",&Lua::Entity::GetColor);
-	classDef.def("GetPhysicsObject",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto *physObj = hEnt->GetPhysicsObject();
-		if(physObj == nullptr)
-			return;
-		luabind::object(l,physObj->GetHandle()).push(l);
+	classDef.def("GetPhysicsObject",&BaseEntity::GetPhysicsObject,luabind::handle_policy<0>{});
+	classDef.def("InitializePhysics",&BaseEntity::InitializePhysics,luabind::handle_policy<0>{});
+	classDef.def("DestroyPhysicsObject",&BaseEntity::DestroyPhysicsObject);
+	classDef.def("DropToFloor",&BaseEntity::DropToFloor);
+	classDef.def("GetCollisionBounds",&BaseEntity::GetCollisionBounds,luabind::pair_policy<0>{});
+	classDef.def("SetCollisionFilterMask",&BaseEntity::SetCollisionFilterMask);
+	classDef.def("SetCollisionFilterGroup",&BaseEntity::SetCollisionFilterGroup);
+	classDef.def("GetCollisionFilterGroup",&BaseEntity::GetCollisionFilterGroup);
+	classDef.def("GetCollisionFilterMask",&BaseEntity::GetCollisionFilterMask);
+	classDef.def("GetForward",&BaseEntity::GetForward);
+	classDef.def("GetUp",&BaseEntity::GetUp);
+	classDef.def("GetRight",&BaseEntity::GetRight);
+	classDef.def("Input",&BaseEntity::Input);
+	classDef.def("Input",static_cast<void(*)(BaseEntity&,const std::string&,BaseEntity&,BaseEntity&)>([](BaseEntity &ent,const std::string &input,BaseEntity &activator,BaseEntity &caller) {
+		ent.Input(input,&activator,&caller);
 	}));
-	classDef.def("InitializePhysics",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t type) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto *physObj = hEnt->InitializePhysics(static_cast<PHYSICSTYPE>(type));
-		if(physObj == nullptr)
-			return;
-		luabind::object(l,physObj->GetHandle()).push(l);
+	classDef.def("Input",static_cast<void(*)(BaseEntity&,const std::string&,BaseEntity&)>([](BaseEntity &ent,const std::string &input,BaseEntity &activator) {
+		ent.Input(input,&activator);
 	}));
-	classDef.def("DestroyPhysicsObject",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->DestroyPhysicsObject();
+	classDef.def("Input",static_cast<void(*)(BaseEntity&,const std::string&)>([](BaseEntity &ent,const std::string &input) {
+		ent.Input(input);
 	}));
-	classDef.def("DropToFloor",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+	classDef.def("GetHealth",&BaseEntity::GetHealth);
+	classDef.def("GetMaxHealth",&BaseEntity::GetMaxHealth);
+	classDef.def("SetHealth",&BaseEntity::SetHealth);
+	classDef.def("SetMaxHealth",&BaseEntity::SetMaxHealth);
+	classDef.def("SetVelocity",&BaseEntity::SetVelocity);
+	classDef.def("AddVelocity",&BaseEntity::AddVelocity);
+	classDef.def("SetAngularVelocity",&BaseEntity::SetAngularVelocity);
+	classDef.def("AddAngularVelocity",&BaseEntity::AddAngularVelocity);
+	classDef.def("GetVelocity",&BaseEntity::GetVelocity);
+	classDef.def("GetAngularVelocity",&BaseEntity::GetAngularVelocity);
+	/*classDef.def("PlayAnimation",static_cast<void(*)(EntityHandle&,int32_t,uint32_t)>([](BaseEntity &ent,int32_t animation,uint32_t flags) {
 		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->DropToFloor();
+		ent.PlayAnimation(animation,static_cast<pragma::FPlayAnim>(flags));
 	}));
-	classDef.def("GetCollisionBounds",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
+	classDef.def("PlayLayeredAnimation",static_cast<void(*)(EntityHandle&,int32_t,int32_t,uint32_t)>([](BaseEntity &ent,int32_t slot,int32_t animation,uint32_t flags) {
 		LUA_CHECK_ENTITY(l,hEnt);
-		auto bounds = hEnt->GetCollisionBounds();
-		Lua::Push<Vector3>(l,bounds.first);
-		Lua::Push<Vector3>(l,bounds.second);
-	}));
-	classDef.def("SetCollisionFilterMask",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t mask) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->SetCollisionFilterMask(static_cast<CollisionMask>(mask));
-	}));
-	classDef.def("SetCollisionFilterGroup",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t group) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->SetCollisionFilterGroup(static_cast<CollisionMask>(group));
-	}));
-	classDef.def("GetCollisionFilterGroup",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::PushInt(l,umath::to_integral(hEnt->GetCollisionFilterGroup()));
-	}));
-	classDef.def("GetCollisionFilterMask",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::PushInt(l,umath::to_integral(hEnt->GetCollisionFilterMask()));
-	}));
-	classDef.def("GetForward",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::Push<Vector3>(l,hEnt->GetForward());
-	}));
-	classDef.def("GetUp",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::Push<Vector3>(l,hEnt->GetUp());
-	}));
-	classDef.def("GetRight",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::Push<Vector3>(l,hEnt->GetRight());
-	}));
-	classDef.def("Input",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,EntityHandle&,EntityHandle&,const std::string&)>([](lua_State *l,EntityHandle &hEnt,const std::string &input,EntityHandle &hActivator,EntityHandle &hCaller,const std::string &data) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		LUA_CHECK_ENTITY(l,hActivator);
-		LUA_CHECK_ENTITY(l,hCaller);
-		hEnt->Input(input,hActivator.get(),hCaller.get(),data);
-	}));
-	classDef.def("Input",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,EntityHandle&,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt,const std::string &input,EntityHandle &hActivator,EntityHandle &hCaller) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		LUA_CHECK_ENTITY(l,hActivator);
-		LUA_CHECK_ENTITY(l,hCaller);
-		hEnt->Input(input,hActivator.get(),hCaller.get());
-	}));
-	classDef.def("Input",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt,const std::string &input,EntityHandle &hActivator) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		LUA_CHECK_ENTITY(l,hActivator);
-		hEnt->Input(input,hActivator.get());
-	}));
-	classDef.def("Input",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&)>([](lua_State *l,EntityHandle &hEnt,const std::string &input) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->Input(input);
-	}));
-	classDef.def("GetHealth",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::PushInt(l,hEnt->GetHealth());
-	}));
-	classDef.def("GetMaxHealth",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::PushInt(l,hEnt->GetMaxHealth());
-	}));
-	classDef.def("SetHealth",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t health) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->SetHealth(health);
-	}));
-	classDef.def("SetMaxHealth",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t health) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->SetMaxHealth(health);
-	}));
-	classDef.def("SetVelocity",static_cast<void(*)(lua_State*,EntityHandle&,const Vector3&)>([](lua_State *l,EntityHandle &hEnt,const Vector3 &velocity) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->SetVelocity(velocity);
-	}));
-	classDef.def("AddVelocity",static_cast<void(*)(lua_State*,EntityHandle&,const Vector3&)>([](lua_State *l,EntityHandle &hEnt,const Vector3 &velocity) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->AddVelocity(velocity);
-	}));
-	classDef.def("SetAngularVelocity",static_cast<void(*)(lua_State*,EntityHandle&,const Vector3&)>([](lua_State *l,EntityHandle &hEnt,const Vector3 &velocity) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->SetAngularVelocity(velocity);
-	}));
-	classDef.def("AddAngularVelocity",static_cast<void(*)(lua_State*,EntityHandle&,const Vector3&)>([](lua_State *l,EntityHandle &hEnt,const Vector3 &velocity) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->AddAngularVelocity(velocity);
-	}));
-	classDef.def("GetVelocity",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::Push<Vector3>(l,hEnt->GetVelocity());
-	}));
-	classDef.def("GetAngularVelocity",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::Push<Vector3>(l,hEnt->GetAngularVelocity());
-	}));
-	/*classDef.def("PlayAnimation",static_cast<void(*)(lua_State*,EntityHandle&,int32_t,uint32_t)>([](lua_State *l,EntityHandle &hEnt,int32_t animation,uint32_t flags) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->PlayAnimation(animation,static_cast<pragma::FPlayAnim>(flags));
-	}));
-	classDef.def("PlayLayeredAnimation",static_cast<void(*)(lua_State*,EntityHandle&,int32_t,int32_t,uint32_t)>([](lua_State *l,EntityHandle &hEnt,int32_t slot,int32_t animation,uint32_t flags) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->PlayLayeredAnimation(slot,animation,static_cast<pragma::FPlayAnim>(flags));
+		ent.PlayLayeredAnimation(slot,animation,static_cast<pragma::FPlayAnim>(flags));
 	}));*/
-	classDef.def("PlayActivity",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t activity,uint32_t flags) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::PushBool(l,hEnt->PlayActivity(static_cast<Activity>(activity),static_cast<pragma::FPlayAnim>(flags)));
+	classDef.def("PlayActivity",&BaseEntity::PlayActivity);
+	classDef.def("PlayActivity",static_cast<bool(*)(BaseEntity&,Activity)>([](BaseEntity &ent,Activity activity) {
+		return ent.PlayActivity(activity);
 	}));
-	classDef.def("PlayActivity",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t activity) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::PushBool(l,hEnt->PlayActivity(static_cast<Activity>(activity),pragma::FPlayAnim::Default));
+	classDef.def("PlayLayeredActivity",&BaseEntity::PlayLayeredActivity);
+	classDef.def("PlayLayeredAnimation",static_cast<bool(*)(BaseEntity&,int32_t,const std::string&,pragma::FPlayAnim)>([](BaseEntity &ent,int32_t slot,const std::string &anim,pragma::FPlayAnim flags) {
+		return ent.PlayLayeredAnimation(slot,anim,flags);
 	}));
-	classDef.def("PlayLayeredActivity",static_cast<void(*)(lua_State*,EntityHandle&,int32_t,uint32_t,uint32_t)>([](lua_State *l,EntityHandle &hEnt,int32_t slot,uint32_t activity,uint32_t flags) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::PushBool(l,hEnt->PlayLayeredActivity(slot,static_cast<Activity>(activity),static_cast<pragma::FPlayAnim>(flags)));
-	}));
-	classDef.def("PlayLayeredAnimation",static_cast<void(*)(lua_State*,EntityHandle&,int32_t,const std::string&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,int32_t slot,const std::string &anim,uint32_t flags) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::PushBool(l,hEnt->PlayLayeredAnimation(slot,anim,static_cast<pragma::FPlayAnim>(flags)));
-	}));
-	classDef.def("StopLayeredAnimation",static_cast<void(*)(lua_State*,EntityHandle&,int32_t)>([](lua_State *l,EntityHandle &hEnt,int32_t slot) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->StopLayeredAnimation(slot);
-	}));
-	classDef.def("PlayAnimation",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t anim,uint32_t flags) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto animC = hEnt->GetAnimatedComponent();
+	classDef.def("StopLayeredAnimation",&BaseEntity::StopLayeredAnimation);
+	classDef.def("PlayAnimation",static_cast<void(*)(BaseEntity&,uint32_t,pragma::FPlayAnim)>([](BaseEntity &ent,uint32_t anim,pragma::FPlayAnim flags) {
+		auto animC = ent.GetAnimatedComponent();
 		if(animC.expired())
 			return;
-		animC->PlayAnimation(anim,static_cast<pragma::FPlayAnim>(flags));
+		animC->PlayAnimation(anim,flags);
 	}));
-	classDef.def("PlayAnimation",static_cast<void(*)(lua_State*,EntityHandle&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,uint32_t anim) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		auto animC = hEnt->GetAnimatedComponent();
+	classDef.def("PlayAnimation",static_cast<void(*)(BaseEntity&,uint32_t)>([](BaseEntity &ent,uint32_t anim) {
+		auto animC = ent.GetAnimatedComponent();
 		if(animC.expired())
 			return;
 		animC->PlayAnimation(anim);
 	}));
-	classDef.def("PlayAnimation",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&,uint32_t)>([](lua_State *l,EntityHandle &hEnt,const std::string &anim,uint32_t flags) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::PushBool(l,hEnt->PlayAnimation(anim,static_cast<pragma::FPlayAnim>(flags)));
+	classDef.def("PlayAnimation",static_cast<bool(BaseEntity::*)(const std::string&,pragma::FPlayAnim)>(&BaseEntity::PlayAnimation));
+	classDef.def("PlayAnimation",static_cast<bool(*)(BaseEntity&,const std::string&)>([](BaseEntity &ent,const std::string &anim) {
+		return ent.PlayAnimation(anim,pragma::FPlayAnim::Default);
 	}));
-	classDef.def("PlayAnimation",static_cast<void(*)(lua_State*,EntityHandle&,const std::string&)>([](lua_State *l,EntityHandle &hEnt,const std::string &anim) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::PushBool(l,hEnt->PlayAnimation(anim,pragma::FPlayAnim::Default));
-	}));
-	classDef.def("GetAnimation",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::PushInt(l,hEnt->GetAnimation());
-	}));
-	classDef.def("GetActivity",static_cast<void(*)(lua_State*,EntityHandle&)>([](lua_State *l,EntityHandle &hEnt) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		Lua::PushInt(l,umath::to_integral(hEnt->GetActivity()));
-	}));
-	classDef.def("TakeDamage",static_cast<void(*)(lua_State*,EntityHandle&,DamageInfo&)>([](lua_State *l,EntityHandle &hEnt,DamageInfo &dmgInfo) {
-		LUA_CHECK_ENTITY(l,hEnt);
-		hEnt->TakeDamage(dmgInfo);
-	}));
+	classDef.def("GetAnimation",&BaseEntity::GetAnimation);
+	classDef.def("GetActivity",&BaseEntity::GetActivity);
+	classDef.def("TakeDamage",&BaseEntity::TakeDamage);
 	//
 
 	// Enums
@@ -731,208 +362,62 @@ void Lua::Entity::register_class(luabind::class_<EntityHandle> &classDef)
 	classDef.def(luabind::const_self ==luabind::const_self);
 }
 
-void Lua::Entity::IsValid(lua_State *l,EntityHandle &hEnt)
+bool Lua::Entity::IsValid(BaseEntity *ent)
 {
-	lua_pushboolean(l,hEnt.IsValid() ? true : false);
+	return ent != nullptr;
 }
 
-void Lua::Entity::Remove(lua_State *l,EntityHandle &hEnt)
+void Lua::Entity::RemoveEntityOnRemoval(BaseEntity &ent,BaseEntity &entOther,Bool remove)
 {
-	LUA_CHECK_ENTITY(l,hEnt);
-	hEnt->Remove();
+	ent.RemoveEntityOnRemoval(&entOther,remove);
 }
-
-void Lua::Entity::GetIndex(lua_State *l,EntityHandle &hEnt)
+void Lua::Entity::RemoveEntityOnRemoval(BaseEntity &ent,BaseEntity &entOther) {Lua::Entity::RemoveEntityOnRemoval(ent,entOther,true);}
+void Lua::Entity::SetEnabled(BaseEntity &ent,bool enabled)
 {
-	LUA_CHECK_ENTITY(l,hEnt);
-	Lua::PushInt(l,hEnt->GetIndex());
-}
-
-void Lua::Entity::IsCharacter(lua_State *l,EntityHandle &hEnt)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	Lua::PushBool(l,hEnt->IsCharacter());
-}
-
-void Lua::Entity::IsPlayer(lua_State *l,EntityHandle &hEnt)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	lua_pushboolean(l,hEnt->IsPlayer());
-}
-
-void Lua::Entity::IsNPC(lua_State *l,EntityHandle &hEnt)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	lua_pushboolean(l,hEnt->IsNPC());
-}
-
-void Lua::Entity::IsWorld(lua_State *l,EntityHandle &hEnt)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	lua_pushboolean(l,hEnt->IsWorld());
-}
-
-void Lua::Entity::IsInert(lua_State *l,EntityHandle &hEnt)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	lua_pushboolean(l,hEnt->IsInert());
-}
-
-void Lua::Entity::Spawn(lua_State *l,EntityHandle &hEnt)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	if(hEnt->IsSpawned())
-		return;
-	hEnt->Spawn();
-}
-
-void Lua::Entity::GetClass(lua_State *l,EntityHandle &hEnt)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	std::string classname = hEnt->GetClass();
-	lua_pushstring(l,classname.c_str());
-}
-
-// Obsolete
-/*void Lua::Entity::AddCallback(lua_State *l,EntityHandle &hEnt,std::string identifier,luabind::object o)
-{
-	luaL_checkfunction(l,3);
-	LUA_CHECK_ENTITY(l,hEnt);
-	auto callback = hEnt->AddLuaCallback(identifier,o);
-	Lua::Push<CallbackHandle>(l,callback);
-}
-*/
-void Lua::Entity::IsScripted(lua_State *l,EntityHandle &hEnt)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	bool b = hEnt->IsScripted();
-	lua_pushboolean(l,b);
-}
-
-void Lua::Entity::IsSpawned(lua_State *l,EntityHandle &hEnt)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	auto b = hEnt->IsSpawned();
-	lua_pushboolean(l,b);
-}
-
-void Lua::Entity::SetKeyValue(lua_State *l,EntityHandle &hEnt,std::string key,std::string val)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	hEnt->SetKeyValue(key,val);
-}
-
-void Lua::Entity::IsWeapon(lua_State *l,EntityHandle &hEnt)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	bool b = hEnt->IsWeapon();
-	lua_pushboolean(l,b);
-}
-
-void Lua::Entity::IsVehicle(lua_State *l,EntityHandle &hEnt)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	bool b = hEnt->IsVehicle();
-	lua_pushboolean(l,b);
-}
-void Lua::Entity::RemoveSafely(lua_State *l,EntityHandle &hEnt)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	hEnt->RemoveSafely();
-}
-void Lua::Entity::RemoveEntityOnRemoval(lua_State *l,EntityHandle &hEnt,EntityHandle &hEntOther,Bool)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	LUA_CHECK_ENTITY(l,hEntOther);
-	hEnt->RemoveEntityOnRemoval(hEntOther);
-}
-void Lua::Entity::RemoveEntityOnRemoval(lua_State *l,EntityHandle &hEnt,EntityHandle &hEntOther) {Lua::Entity::RemoveEntityOnRemoval(l,hEnt,hEntOther,true);}
-void Lua::Entity::GetSpawnFlags(lua_State *l,EntityHandle &hEnt)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	Lua::PushInt(l,hEnt->GetSpawnFlags());
-}
-void Lua::Entity::IsStatic(lua_State *l,EntityHandle &hEnt)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	Lua::PushBool(l,hEnt->IsStatic());
-}
-void Lua::Entity::IsDynamic(lua_State *l,EntityHandle &hEnt)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	Lua::PushBool(l,hEnt->IsDynamic());
-}
-
-void Lua::Entity::SetEnabled(lua_State *l,EntityHandle &hEnt,bool enabled)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	auto *toggleC = dynamic_cast<pragma::BaseToggleComponent*>(hEnt->FindComponent("toggle").get());
+	auto *toggleC = dynamic_cast<pragma::BaseToggleComponent*>(ent.FindComponent("toggle").get());
 	if(toggleC == nullptr && enabled == true)
 		return;
 	if(toggleC == nullptr)
-		toggleC = dynamic_cast<pragma::BaseToggleComponent*>(hEnt->AddComponent("toggle").get());
+		toggleC = dynamic_cast<pragma::BaseToggleComponent*>(ent.AddComponent("toggle").get());
 	if(toggleC == nullptr)
 		return;
 	toggleC->SetTurnedOn(enabled);
 }
 
-void Lua::Entity::IsEnabled(lua_State *l,EntityHandle &hEnt)
+bool Lua::Entity::IsEnabled(BaseEntity &ent)
 {
-	LUA_CHECK_ENTITY(l,hEnt);
 	auto isEnabled = true;
-	auto *toggleC = dynamic_cast<pragma::BaseToggleComponent*>(hEnt->FindComponent("toggle").get());
+	auto *toggleC = dynamic_cast<pragma::BaseToggleComponent*>(ent.FindComponent("toggle").get());
 	if(toggleC != nullptr)
 		isEnabled = toggleC->IsTurnedOn();
-	Lua::PushBool(l,isEnabled);
+	return isEnabled;
 }
 
-void Lua::Entity::IsDisabled(lua_State *l,EntityHandle &hEnt)
+bool Lua::Entity::IsDisabled(BaseEntity &ent)
 {
-	LUA_CHECK_ENTITY(l,hEnt);
 	auto isEnabled = true;
-	auto *toggleC = dynamic_cast<pragma::BaseToggleComponent*>(hEnt->FindComponent("toggle").get());
+	auto *toggleC = dynamic_cast<pragma::BaseToggleComponent*>(ent.FindComponent("toggle").get());
 	if(toggleC != nullptr)
 		isEnabled = toggleC->IsTurnedOn();
-	Lua::PushBool(l,!isEnabled);
+	return !isEnabled;
 }
 
-Color Lua::Entity::GetColor(lua_State *l,EntityHandle &hEnt)
+Color Lua::Entity::GetColor(BaseEntity &ent)
 {
-	LUA_CHECK_ENTITY_RET(l,hEnt,Color::White);
-	auto *colorC = dynamic_cast<pragma::BaseColorComponent*>(hEnt->FindComponent("color").get());
+	auto *colorC = dynamic_cast<pragma::BaseColorComponent*>(ent.FindComponent("color").get());
 	if(colorC == nullptr)
 		return Color::White;
 	return colorC->GetColor();
 }
-void Lua::Entity::SetColor(lua_State *l,EntityHandle &hEnt,const Color &color)
+void Lua::Entity::SetColor(BaseEntity &ent,const Color &color)
 {
-	LUA_CHECK_ENTITY(l,hEnt);
-	auto *colorC = dynamic_cast<pragma::BaseColorComponent*>(hEnt->AddComponent("color").get());
+	auto *colorC = dynamic_cast<pragma::BaseColorComponent*>(ent.AddComponent("color").get());
 	if(colorC == nullptr)
 		return;
 	colorC->SetColor(color);
 }
 
-void Lua::Entity::Save(lua_State *l,EntityHandle &hEnt,udm::LinkedPropertyWrapper &udm)
+float Lua::Entity::GetAirDensity(BaseEntity &ent)
 {
-	LUA_CHECK_ENTITY(l,hEnt);
-	hEnt->Save(udm);
-}
-void Lua::Entity::Load(lua_State *l,EntityHandle &hEnt,udm::LinkedPropertyWrapper &udm)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	hEnt->Load(udm);
-}
-void Lua::Entity::Copy(lua_State *l,EntityHandle &hEnt)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	auto *ent = hEnt->Copy();
-	if(ent == nullptr)
-		return;
-	ent->GetLuaObject()->push(l);
-}
-void Lua::Entity::GetAirDensity(lua_State *l,EntityHandle &hEnt)
-{
-	LUA_CHECK_ENTITY(l,hEnt);
-	Lua::PushNumber(l,1.225f); // Placeholder
+	return 1.225f; // Placeholder
 }

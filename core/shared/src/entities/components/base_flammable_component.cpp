@@ -155,12 +155,12 @@ void CEOnIgnited::PushArguments(lua_State *l)
 {
 	Lua::PushNumber(l,duration);
 
-	if(attacker.IsValid())
+	if(attacker.valid())
 		attacker->GetLuaObject()->push(l);
 	else
 		Lua::PushNil(l);
 
-	if(inflictor.IsValid())
+	if(inflictor.valid())
 		inflictor->GetLuaObject()->push(l);
 	else
 		Lua::PushNil(l);

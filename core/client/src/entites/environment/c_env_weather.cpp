@@ -22,7 +22,7 @@ extern DLLCLIENT CGame *c_game;
 
 CWeatherComponent::~CWeatherComponent()
 {
-	if(m_hParticle.IsValid())
+	if(m_hParticle.valid())
 		m_hParticle->Remove();
 }
 void CWeatherComponent::Initialize()

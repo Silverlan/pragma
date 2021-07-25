@@ -103,7 +103,6 @@ namespace pragma
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::CReflectionProbeComponent::StateFlags)
 
-class EntityHandle;
 class DLLCLIENT CEnvReflectionProbe
 	: public CBaseEntity
 {

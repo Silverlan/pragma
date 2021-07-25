@@ -156,7 +156,7 @@ void BaseTouchComponent::EndAllTouch()
 	while(m_touching.empty() == false)
 	{
 		auto &touch = m_touching.back();
-		if(touch.touch.entity.IsValid() == false)
+		if(touch.touch.entity.valid() == false)
 		{
 			m_touching.pop_back();
 			continue;
@@ -172,7 +172,7 @@ void BaseTouchComponent::UpdateTouch()
 		auto &contactEvent = m_contactEventQueue.front();
 		m_contactEventQueue.pop();
 
-		if(contactEvent.contactTarget.IsValid() == false)
+		if(contactEvent.contactTarget.valid() == false)
 			continue;
 		switch(contactEvent.eventType)
 		{
@@ -199,7 +199,7 @@ void BaseTouchComponent::UpdateTouch()
 	for(unsigned int i=0;i<m_contactReport.size();i++)
 	{
 		OnContact(m_contactReport[i]);
-		if(!hEnt.IsValid())
+		if(!hEnt.valid())
 			return;
 	}
 	m_contactReport.clear();
@@ -294,7 +294,7 @@ void BaseTouchComponent::FireStartTouchEvents(TouchInfo &touch,bool isFirstTouch
 		if(pIoComponent != nullptr)
 			pIoComponent->TriggerOutput("onstarttouchall",ent);
 	}
-	if(!hEnt.IsValid())
+	if(!hEnt.valid())
 		return;
 	if(pPhysComponent != nullptr && pPhysComponent->IsTrigger())
 		Trigger(*ent);
@@ -308,7 +308,7 @@ void BaseTouchComponent::FireEndTouchEvents(TouchInfo &touch,bool isLastTouch)
 	touch.triggered = false;
 	auto hEnt = GetEntity().GetHandle();
 	OnEndTouch(*ent);
-	if(hEnt.IsValid())
+	if(hEnt.valid())
 		Trigger(*ent);
 	if(isLastTouch)
 	{

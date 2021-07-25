@@ -126,7 +126,7 @@ void SWaterComponent::UpdateSurfaceSimulator()
 					m_physSurfaceSim = surfSim->shared_from_this();
 					auto hEnt = cent->GetHandle();
 					m_cbClientSimulatorUpdate = pWaterComponent->BindEventUnhandled(BaseFuncWaterComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED,[this,hEnt](std::reference_wrapper<pragma::ComponentEvent> evData) {
-						if(hEnt.IsValid() == false)
+						if(hEnt.valid() == false)
 							return;
 						auto *pWaterComponent = static_cast<pragma::BaseFuncWaterComponent*>(hEnt.get()->FindComponent("water").get());
 						auto *surfSim = (pWaterComponent != nullptr) ? pWaterComponent->GetSurfaceSimulator() : nullptr;

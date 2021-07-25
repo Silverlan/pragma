@@ -663,7 +663,7 @@ void Game::Tick()
 	while(m_entsScheduledForRemoval.empty() == false)
 	{
 		auto &hEnt = m_entsScheduledForRemoval.front();
-		if(hEnt.IsValid())
+		if(hEnt.valid())
 			hEnt->Remove();
 
 		m_entsScheduledForRemoval.pop();
@@ -801,13 +801,13 @@ bool Game::LoadMap(const std::string &map,const Vector3 &origin,std::vector<Enti
 	InitializeMapEntities(*worldData,ents);
 	for(auto &hEnt : ents)
 	{
-		if(hEnt.IsValid() == false)
+		if(hEnt.valid() == false)
 			continue;
 		hEnt->Spawn();
 	}
 	for(auto &hEnt : ents)
 	{
-		if(hEnt.IsValid() == false || hEnt->IsSpawned() == false)
+		if(hEnt.valid() == false || hEnt->IsSpawned() == false)
 			continue;
 		hEnt->OnSpawn();
 	}

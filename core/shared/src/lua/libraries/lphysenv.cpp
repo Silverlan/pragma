@@ -616,7 +616,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefRayCastResult.add_static_constant("HIT_TYPE_NONE",umath::to_integral(RayCastHitType::None));
 	classDefRayCastResult.def_readonly("hitType",reinterpret_cast<std::underlying_type_t<decltype(TraceResult::hitType)> TraceResult::*>(&TraceResult::hitType));
 	classDefRayCastResult.property("entity",static_cast<void(*)(lua_State*,TraceResult&)>([](lua_State *l,TraceResult &tr) {
-		if(tr.entity.IsValid() == false)
+		if(tr.entity.valid() == false)
 			return;
 		lua_pushentity(l,tr.entity);
 	}));

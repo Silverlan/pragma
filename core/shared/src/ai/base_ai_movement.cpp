@@ -499,7 +499,7 @@ void BaseAIComponent::ResolvePathObstruction(Vector3 &dir)
 	auto dstPos = pos +dir *(pPhysComponent ? (pPhysComponent->GetCollisionRadius() *1.1f) : 0.f);
 
 	const auto fCheckForObstruction = [this,&pTrComponent,&dir,t](TraceResult &r) -> bool {
-		if(r.hitType != RayCastHitType::None && (r.entity.IsValid() == false || IsObstruction(*r.entity.get()))) // Obstructed
+		if(r.hitType != RayCastHitType::None && (r.entity.valid() == false || IsObstruction(*r.entity.get()))) // Obstructed
 		{
 			m_obstruction.pathObstructed = true;
 			auto aimDir = pTrComponent->GetForward();

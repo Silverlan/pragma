@@ -175,7 +175,7 @@ void Console::commands::debug_render_depth_buffer(NetworkState *state,pragma::Ba
 		hEnt = ents.front()->GetHandle();
 	dbg = std::make_unique<DebugGameGUI>([hEnt]() {
 		pragma::CSceneComponent *scene = nullptr;
-		if(hEnt.IsValid())
+		if(hEnt.valid())
 		{
 			auto sceneC = hEnt.get()->GetComponent<pragma::CSceneComponent>();
 			if(sceneC.expired())

@@ -68,7 +68,7 @@ void Game::SplashDamage(const Vector3 &origin,Float radius,DamageInfo &dmg,const
 	for(auto it=ents.begin();it!=ents.end();++it)
 	{
 		auto &c = *it;
-		if(c.hEntity.IsValid())
+		if(c.hEntity.valid())
 		{
 			auto *ent = c.hEntity.get();
 			auto pTrComponent = ent->GetTransformComponent();

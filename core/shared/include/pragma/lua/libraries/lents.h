@@ -30,8 +30,8 @@ namespace Lua
 		DLLNETWORK opt<mult<type<BaseEntity>,double>> get_farthest(lua_State *l,const Vector3 &origin);
 		DLLNETWORK tb<type<BaseEntity>> get_sorted_by_distance(lua_State *l,const Vector3 &origin);
 		DLLNETWORK type<BaseEntity> get_random(lua_State *l);
-		DLLNETWORK opt<std::string> get_component_name(lua_State *l);
-		DLLNETWORK opt<uint32_t> get_component_id(lua_State *l);
+		DLLNETWORK opt<std::string> get_component_name(lua_State *l,pragma::ComponentId componentId);
+		DLLNETWORK opt<uint32_t> get_component_id(lua_State *l,const std::string &componentName);
 
 		DLLNETWORK tb<type<BaseEntity>> get_all(lua_State *l);
 		DLLNETWORK tb<type<BaseEntity>> get_all(lua_State *l,func<bool,type<BaseEntity>> func);
@@ -45,9 +45,9 @@ namespace Lua
 		DLLNETWORK tb<type<BaseEntity>> get_weapons(lua_State *l);
 		DLLNETWORK tb<type<pragma::BaseVehicleComponent>> get_vehicles(lua_State *l);
 		DLLNETWORK opt<type<BaseEntity>> get_world(lua_State *l);
-		DLLNETWORK opt<type<BaseEntity>> get_by_index(lua_State *l);
-		DLLNETWORK opt<type<BaseEntity>> get_by_local_index(lua_State *l);
-		DLLNETWORK opt<type<BaseEntity>> find_by_unique_index(lua_State *l);
+		DLLNETWORK opt<type<BaseEntity>> get_by_index(lua_State *l,uint32_t idx);
+		DLLNETWORK opt<type<BaseEntity>> get_by_local_index(lua_State *l,uint32_t idx);
+		DLLNETWORK opt<type<BaseEntity>> find_by_unique_index(lua_State *l,const std::string &uuid);
 		DLLNETWORK type<BaseEntity> get_null(lua_State *l);
 		DLLNETWORK type<BaseEntity> create(lua_State *l,const std::string &classname);
 		DLLNETWORK Lua::type<BaseEntity> create_prop(lua_State *l,const std::string &mdl,const Vector3 *origin,const EulerAngles *angles,bool physicsProp);

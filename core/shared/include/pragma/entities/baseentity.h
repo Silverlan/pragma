@@ -11,6 +11,7 @@
 #include "pragma/lua/baseluaobj.h"
 #include "pragma/entities/entity_component_system.hpp"
 #include "pragma/model/animation/play_animation_flags.hpp"
+#include "pragma/types.hpp"
 #include <pragma/console/conout.h>
 
 #define DECLARE_ENTITY_HANDLE \
@@ -61,7 +62,6 @@ namespace umath {class Transform; class ScaledTransform;};
 
 const double ENT_EPSILON = 0.000'01;
 
-class EntityHandle;
 class DataStream;
 using EntityIndex = uint32_t;
 namespace udm {struct LinkedPropertyWrapper;};
@@ -287,8 +287,6 @@ protected:
 	pragma::NetEventId SetupNetEvent(const std::string &name) const;
 
 	virtual void InitializeHandle() override;
-	template<class THandle>
-		void InitializeHandle();
 };
 REGISTER_BASIC_BITWISE_OPERATORS(BaseEntity::StateFlags);
 #pragma warning(pop)

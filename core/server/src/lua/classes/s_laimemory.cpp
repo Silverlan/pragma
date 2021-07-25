@@ -74,7 +74,7 @@ void Lua::AIMemory::GetFragmentCount(lua_State *l,pragma::ai::Memory *mem)
 
 void Lua::AIMemoryFragment::GetEntity(lua_State *l,pragma::ai::Memory::Fragment *fragment)
 {
-	if(!fragment->hEntity.IsValid())
+	if(!fragment->hEntity.valid())
 		return;
 	fragment->hEntity->GetLuaObject()->push(l);
 }

@@ -117,7 +117,7 @@ CPlayerComponent::~CPlayerComponent()
 	m_upDirOffset = nullptr;
 	if(m_cbObserver.IsValid())
 		m_cbObserver.Remove();
-	if(m_cbUnderwaterDsp.IsValid() == true)
+	if(m_cbUnderwaterDsp.valid() == true)
 		m_cbUnderwaterDsp->Remove();
 }
 
@@ -181,7 +181,7 @@ void CPlayerComponent::OnSetActiveWeapon(BaseEntity *ent)
 
 void CPlayerComponent::OnWaterSubmerged()
 {
-	if(IsLocalPlayer() == false || m_cbUnderwaterDsp.IsValid() == true)
+	if(IsLocalPlayer() == false || m_cbUnderwaterDsp.valid() == true)
 		return;
 	auto *entDsp = c_game->CreateEntity<CEnvSoundDsp>();
 	if(entDsp == nullptr)
@@ -199,7 +199,7 @@ void CPlayerComponent::OnWaterSubmerged()
 
 void CPlayerComponent::OnWaterEmerged()
 {
-	if(m_cbUnderwaterDsp.IsValid() == false)
+	if(m_cbUnderwaterDsp.valid() == false)
 		return;
 	m_cbUnderwaterDsp->Remove();
 }

@@ -35,7 +35,7 @@ namespace Lua
 		DLLSERVER void SetFearsomeFaction(lua_State *l,::Faction &faction,::Faction &factionTgt);
 		DLLSERVER void GetDisposition(lua_State *l,::Faction &faction,::Faction &factionTgt);
 		DLLSERVER void GetDisposition(lua_State *l,::Faction &faction,const std::string &className);
-		DLLSERVER void GetDisposition(lua_State *l,::Faction &faction,EntityHandle &hEnt);
+		DLLSERVER void GetDisposition(lua_State *l,::Faction &faction,BaseEntity &ent);
 		DLLSERVER void HasClass(lua_State *l,::Faction &faction,const std::string &className);
 		DLLSERVER void SetDefaultDisposition(lua_State *l,::Faction &faction,uint32_t disposition);
 		DLLSERVER void GetDefaultDisposition(lua_State *l,::Faction &faction);

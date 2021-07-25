@@ -66,7 +66,7 @@ void CompositeGroup::ClearEntities(bool safely)
 	auto ents = std::move(m_ents);
 	for(auto &hEnt : ents)
 	{
-		if(!hEnt.IsValid())
+		if(!hEnt.valid())
 			continue;
 		if(safely)
 		{

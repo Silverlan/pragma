@@ -12,7 +12,8 @@
 
 class DLLSERVER SLuaEntity
 	: public SBaseEntity,
-	public LuaObjectBase
+	public LuaObjectBase,
+	public luabind::wrap_base
 {
 public:
 	SLuaEntity(luabind::object &o,const std::string &className);
@@ -21,19 +22,12 @@ public:
 	virtual bool IsScripted() const override;
 	virtual void DoSpawn() override;
 	virtual void Remove() override;
+
+	void LuaInitialize() {}
+	static void default_Initialize(SBaseEntity *ent);
 protected:
 	virtual void InitializeHandle() override;
 	virtual void InitializeLuaObject(lua_State *lua) override;
-};
-DECLARE_DERIVED_CHILD_HANDLE(DLLSERVER,Entity,BaseEntity,Entity,SLuaEntity,SLuaEntity);
-
-class DLLSERVER SLuaEntityWrapper
-	: public SLuaEntityHandle,
-	public luabind::wrap_base
-{
-public:
-	void Initialize();
-	static void default_Initialize(SLuaEntityWrapper *ent);
 };
 
 #endif

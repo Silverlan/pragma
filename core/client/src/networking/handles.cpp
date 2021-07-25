@@ -201,7 +201,7 @@ void ClientState::ReadEntityData(NetPacket &packet)
 	for(unsigned int i=0;i<ents.size();i++)
 	{
 		EntityHandle &h = ents[i];
-		if(h.IsValid())
+		if(h.valid())
 			h->Spawn();
 	}
 }

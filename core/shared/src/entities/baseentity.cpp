@@ -18,8 +18,6 @@
 #include "pragma/model/model.h"
 #include "pragma/entities/baseentity_events.hpp"
 
-DEFINE_BASE_HANDLE(DLLNETWORK,BaseEntity,Entity);
-
 bool BaseEntity::IsStatic() const
 {
 	if(GetAnimatedComponent().valid())
@@ -89,7 +87,7 @@ void BaseEntity::OnRemove()
 	for(auto it=m_entsRemove.begin();it!=m_entsRemove.end();++it)
 	{
 		auto &hEnt = *it;
-		if(hEnt.IsValid())
+		if(hEnt.valid())
 			hEnt->Remove();
 	}
 	BroadcastEvent(EVENT_ON_REMOVE);
@@ -111,11 +109,11 @@ bool BaseEntity::IsMapEntity() const
 void BaseEntity::RemoveEntityOnRemoval(BaseEntity *ent,Bool bRemove) {RemoveEntityOnRemoval(ent->GetHandle(),bRemove);}
 void BaseEntity::RemoveEntityOnRemoval(const EntityHandle &hEnt,Bool bRemove)
 {
-	if(!hEnt.IsValid())
+	if(!hEnt.valid())
 		return;
 	auto *ent = hEnt.get();
 	auto it = std::find_if(m_entsRemove.begin(),m_entsRemove.end(),[ent](EntityHandle &hOther) {
-		return (hOther.IsValid() && hOther.get() == ent) ? true : false;
+		return (hOther.valid() && hOther.get() == ent) ? true : false;
 	});
 	if(bRemove == true)
 	{
@@ -303,7 +301,10 @@ pragma::BaseGenericComponent *BaseEntity::GetGenericComponent() const {return m_
 void BaseEntity::Remove() {}
 void BaseEntity::RemoveSafely() {GetNetworkState()->GetGameState()->ScheduleEntityForRemoval(*this);}
 
-void BaseEntity::InitializeHandle() {BaseEntity::InitializeHandle<EntityHandle>();}
+void BaseEntity::InitializeHandle()
+{
+	m_handle = new EntityHandle{std::shared_ptr<BaseEntity>{this,[](BaseEntity*) {}}};
+}
 
 ////////////////////////////////////
 
@@ -311,7 +312,7 @@ DLLNETWORK bool operator==(const EntityHandle &a,const EntityHandle &b) {return 
 
 DLLNETWORK Con::c_cout& operator<<(Con::c_cout &os,const EntityHandle &ent)
 {
-	if(!ent.IsValid())
+	if(!ent.valid())
 		os<<"NULL";
 	else
 		os<<*ent.get();
@@ -322,7 +323,7 @@ static std::ostream& operator<<(std::ostream &os,BaseEntity &ent) {return ent.pr
 
 DLLNETWORK std::ostream& operator<<(std::ostream &os,const EntityHandle ent)
 {
-	if(!ent.IsValid())
+	if(!ent.valid())
 		os<<"NULL";
 	else
 		os<<*ent.get();

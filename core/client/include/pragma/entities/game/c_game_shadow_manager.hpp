@@ -142,7 +142,6 @@ namespace pragma
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShadowRenderer::RenderResultFlags)
 
-class EntityHandle;
 class DLLCLIENT CShadowManager
 	: public CBaseEntity
 {

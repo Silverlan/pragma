@@ -9,32 +9,30 @@
 #include "pragma/networkdefinitions.h"
 #include <pragma/lua/luaapi.h>
 #include <pragma/console/convars.h>
-DLLNETWORK int Lua_cvar_CreateConVar(lua_State *l);
-DLLNETWORK int Lua_cvar_CreateConCommand(lua_State *l);
-DLLNETWORK int Lua_cvar_GetConVar(lua_State *l);
-DLLNETWORK int Lua_cvar_GetConVarInt(lua_State *l);
-DLLNETWORK int Lua_cvar_GetConVarFloat(lua_State *l);
-DLLNETWORK int Lua_cvar_GetConVarString(lua_State *l);
-DLLNETWORK int Lua_cvar_GetConVarBool(lua_State *l);
-DLLNETWORK int Lua_cvar_GetConVarFlags(lua_State *l);
-DLLNETWORK int Lua_cvar_Run(lua_State *l);
-DLLNETWORK int Lua_cvar_AddChangeCallback(lua_State *l);
+namespace Lua::console
+{
+	ConVar *CreateConVar(lua_State *l,const std::string &cmd,const std::string &def,ConVarFlags flags=ConVarFlags::None,const std::string &help="");
+	void CreateConCommand(lua_State *l,const std::string &name,const Lua::func<void,pragma::BasePlayerComponent,float,Lua::variadic<std::string>> &function,ConVarFlags flags,const std::string &help);
+	void CreateConCommand(lua_State *l,const std::string &name,const Lua::func<void,pragma::BasePlayerComponent,float,Lua::variadic<std::string>> &function,ConVarFlags flags);
+	void CreateConCommand(lua_State *l,const std::string &name,const Lua::func<void,pragma::BasePlayerComponent,float,Lua::variadic<std::string>> &function,const std::string &help);
+	ConVar *GetConVar(lua_State *l,const std::string &name);
+	int32_t GetConVarInt(lua_State *l,const std::string &conVar);
+	float GetConVarFloat(lua_State *l,const std::string &conVar);
+	std::string GetConVarString(lua_State *l,const std::string &conVar);
+	bool GetConVarBool(lua_State *l,const std::string &conVar);
+	ConVarFlags GetConVarFlags(lua_State *l,const std::string &conVar);
+	DLLNETWORK int Run(lua_State *l);
+	DLLNETWORK int AddChangeCallback(lua_State *l);
+};
 
 ////////////////////////////////////
-
-DLLNETWORK void Lua_ConVar_GetString(lua_State *l,ConVar *cvar);
-DLLNETWORK void Lua_ConVar_GetInt(lua_State *l,ConVar *cvar);
-DLLNETWORK void Lua_ConVar_GetFloat(lua_State *l,ConVar *cvar);
-DLLNETWORK void Lua_ConVar_GetBool(lua_State *l,ConVar *cvar);
-//DLLNETWORK void Lua_ConVar_SetValue(lua_State *l,ConVar *cvar,std::string value);
-DLLNETWORK void Lua_ConVar_GetFlags(lua_State *l,ConVar *cvar);
 
 namespace Lua
 {
 	namespace console
 	{
-		DLLNETWORK int register_override(lua_State *l);
-		DLLNETWORK int clear_override(lua_State *l);
+		DLLNETWORK void register_override(lua_State *l,const std::string &src,const std::string &dst);
+		DLLNETWORK void clear_override(lua_State *l,const std::string &src);
 		DLLNETWORK int parse_command_arguments(lua_State *l);
 	};
 };

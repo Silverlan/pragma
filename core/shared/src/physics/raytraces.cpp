@@ -29,7 +29,7 @@ void TraceResult::InitializeMeshes()
 	if(meshInfo != nullptr)
 		return;
 	meshInfo = std::make_shared<MeshInfo>();
-	if(entity.IsValid() == false)
+	if(entity.valid() == false)
 		return;
 	auto mdlComponent = entity->GetModelComponent();
 	auto hMdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
@@ -82,7 +82,7 @@ void TraceResult::GetMeshes(ModelMesh **outMesh,ModelSubMesh **outSubMesh)
 }
 Material *TraceResult::GetMaterial()
 {
-	if(entity.IsValid() == false)
+	if(entity.valid() == false)
 		return nullptr;
 	auto &hMdl = entity->GetModel();
 	if(hMdl == nullptr)
@@ -100,7 +100,7 @@ Material *TraceResult::GetMaterial()
 }
 bool TraceResult::GetMaterial(std::string &mat)
 {
-	if(entity.IsValid() == false)
+	if(entity.valid() == false)
 		return false;
 	auto &hMdl = entity->GetModel();
 	if(hMdl == nullptr)

@@ -676,10 +676,9 @@ void Lua::Shader::ShaderEntity::BindInstanceDescriptorSet(lua_State *l,pragma::S
 {
 	Lua::PushBool(l,shader.BindInstanceDescriptorSet(*descSet->GetDescriptorSet()));
 }
-void Lua::Shader::ShaderEntity::BindEntity(lua_State *l,pragma::ShaderEntity &shader,EntityHandle &hEnt)
+void Lua::Shader::ShaderEntity::BindEntity(lua_State *l,pragma::ShaderEntity &shader,BaseEntity &ent)
 {
-	LUA_CHECK_ENTITY(l,hEnt);
-	Lua::Push(l,shader.BindEntity(static_cast<CBaseEntity&>(*hEnt.get())));
+	Lua::Push(l,shader.BindEntity(static_cast<CBaseEntity&>(ent)));
 }
 void Lua::Shader::ShaderEntity::BindVertexAnimationOffset(lua_State *l,pragma::ShaderEntity &shader,uint32_t offset)
 {

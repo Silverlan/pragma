@@ -21,7 +21,7 @@ const BaseEntity *ai::TaskTarget::GetTargetEntity(const Schedule *sched,pragma::
 	else if(type != ai::Schedule::Parameter::Type::Vector)
 	{
 		auto *memFragment = ent.GetPrimaryTarget();
-		if(memFragment == nullptr || memFragment->hEntity.IsValid() == false)
+		if(memFragment == nullptr || memFragment->hEntity.valid() == false)
 			return nullptr;
 		return memFragment->hEntity.get();
 	}
@@ -44,7 +44,7 @@ bool ai::TaskTarget::GetTargetPosition(const Schedule *sched,pragma::SAIComponen
 	if(type != ai::Schedule::Parameter::Type::Entity && type != ai::Schedule::Parameter::Type::Vector)
 	{
 		auto *memFragment = ent.GetPrimaryTarget();
-		if(memFragment == nullptr || memFragment->hEntity.IsValid() == false)
+		if(memFragment == nullptr || memFragment->hEntity.valid() == false)
 			return false;
 		auto pTrComponentEnt = memFragment->hEntity.get()->GetTransformComponent();
 		if(!pTrComponentEnt)

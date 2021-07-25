@@ -159,7 +159,7 @@ void SVehicleComponent::SendData(NetPacket &packet,networking::ClientRecipientFi
 void SVehicleComponent::SetupSteeringWheel(const std::string &mdl,umath::Degree maxSteeringAngle)
 {
 	BaseVehicleComponent::SetupSteeringWheel(mdl,maxSteeringAngle);
-	if(m_steeringWheel.IsValid())
+	if(m_steeringWheel.valid())
 		static_cast<SBaseEntity&>(*m_steeringWheel.get()).SetSynchronized(false);
 	NetPacket p;
 	nwm::write_entity(p,m_steeringWheel);

@@ -34,10 +34,10 @@ namespace Lua
 	};
 	namespace TextureInfo
 	{
-		DLLCLIENT void GetTexture(lua_State *l,::TextureInfo *tex);
-		DLLCLIENT void GetSize(lua_State *l,::TextureInfo *tex);
-		DLLCLIENT void GetWidth(lua_State *l,::TextureInfo *tex);
-		DLLCLIENT void GetHeight(lua_State *l,::TextureInfo *tex);
+		DLLCLIENT std::shared_ptr<Texture> GetTexture(lua_State *l,::TextureInfo *tex);
+		DLLCLIENT std::pair<uint32_t,uint32_t> GetSize(lua_State *l,::TextureInfo *tex);
+		DLLCLIENT uint32_t GetWidth(lua_State *l,::TextureInfo *tex);
+		DLLCLIENT uint32_t GetHeight(lua_State *l,::TextureInfo *tex);
 	};
 };
 

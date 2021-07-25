@@ -50,6 +50,9 @@
 #include "pragma/lua/classes/lproperty_generic.hpp"
 #include "pragma/lua/classes/lproperty_entity.hpp"
 #include "pragma/game/game_coordinate_system.hpp"
+#include "pragma/lua/lua_entity_handles.hpp"
+#include "pragma/lua/policies/handle_policy.hpp"
+#include "pragma/lua/policies/game_object_policy.hpp"
 #include <pragma/util/transform.h>
 #include <sharedutils/datastream.h>
 #include <sharedutils/util_parallel_job.hpp>
@@ -59,6 +62,7 @@
 #include <luainterface.hpp>
 #include <luabind/iterator_policy.hpp>
 #include <luabind/out_value_policy.hpp>
+#include <luabind/copy_policy.hpp>
 #include <mathutil/inverse_kinematics/ik.hpp>
 #include <mathutil/inverse_kinematics/constraints.hpp>
 #include <sharedutils/magic_enum.hpp>
@@ -180,6 +184,115 @@ static Quat QuaternionConstruct(const Vector3 &a,const Vector3 &b,const Vector3 
 static Quat QuaternionConstruct(const Quat &q) {return Quat(q);}
 static Quat QuaternionConstruct(const Vector3 &forward,const Vector3 &up) {return uquat::create_look_rotation(forward,up);}
 
+
+#if 0
+namespace luabind {
+		template <class T>
+		struct default_converter<util::WeakHandle<T> >
+			: default_converter<T*>
+		{
+			using is_native = std::false_type;
+			template <class U>
+			int match(lua_State* L, U, int index)
+			{
+				return default_converter<T*>::match(L, decorate_type_t<T*>(), index);
+			}
+
+			template <class U>
+			util::WeakHandle<T> to_cpp(lua_State* L, U, int index)
+			{
+				T* raw_ptr = default_converter<T*>::to_cpp(L, decorate_type_t<T*>(), index);
+
+				if(!raw_ptr) {
+					return util::WeakHandle<T>();
+				} else {
+					return raw_ptr->GetHandle();
+				}
+			}
+
+			void to_lua(lua_State* L, util::WeakHandle<T> const& p)
+			{
+				default_converter().to_lua(L, p.get());
+			}
+			template <class U>
+			void converter_postcall(lua_State*, U const&, int)
+			{}
+		};
+		template <class T>
+		struct default_converter<util::WeakHandle<T> const&>
+			: default_converter<util::WeakHandle<T> >
+		{};
+	}
+#endif
+#if 0
+namespace luabind {
+
+	namespace detail
+	{
+
+		struct weak_handle3_deleter
+		{
+			weak_handle3_deleter(lua_State* L, int index)
+				: life_support(get_main_thread(L), L, index)
+			{}
+
+			void operator()(void const*)
+			{
+				handle().swap(life_support);
+			}
+
+			handle life_support;
+		};
+
+	} // namespace detail
+
+	template <class T>
+	struct default_converter<util::WeakHandle<T> >
+		: default_converter<T*>
+	{
+		using is_native = std::false_type;
+
+		template <class U>
+		int match(lua_State* L, U, int index)
+		{
+			return default_converter<T*>::match(L, decorate_type_t<T*>(), index);
+		}
+
+		template <class U>
+		util::WeakHandle<T> to_cpp(lua_State* L, U, int index)
+		{
+			T* raw_ptr = default_converter<T*>::to_cpp(L, decorate_type_t<T*>(), index);
+
+			if(!raw_ptr) {
+				return util::WeakHandle<T>();
+			} else {
+				return raw_ptr->GetHandle();
+			}
+		}
+
+		void to_lua(lua_State* L, util::WeakHandle<T> const& p)
+		{
+			if(detail::weak_handle3_deleter* d = std::get_deleter<detail::weak_handle3_deleter>(p))
+			{
+				d->life_support.push(L);
+			} else {
+				detail::value_converter().to_lua(L, p);
+			}
+		}
+
+		template <class U>
+		void converter_postcall(lua_State*, U const&, int)
+		{}
+	};
+
+	template <class T>
+	struct default_converter<util::WeakHandle<T> const&>
+		: default_converter<util::WeakHandle<T> >
+	{};
+
+} // namespace luabind
+
+#endif
 void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 {
 	auto modString = luabind::module_(lua.GetState(),"string");
@@ -839,25 +952,25 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 
 	// Noise
 	auto defNoiseModule = luabind::class_<NoiseBaseModule>("NoiseModule");
-	defNoiseModule.def("GetValue",&Lua_NoiseModule_GetValue);
-	defNoiseModule.def("SetScale",&Lua_NoiseModule_SetScale);
+	defNoiseModule.def("GetValue",&Lua::noise::NoiseModule::GetValue);
+	defNoiseModule.def("SetScale",&Lua::noise::NoiseModule::SetScale);
 	
 	auto defNoiseAbs = luabind::class_<NoiseAbs,NoiseBaseModule>("Abs");
 	defNoiseModule.scope[defNoiseAbs];
 
 	auto defNoiseBillow = luabind::class_<NoiseBillow,NoiseBaseModule>("Billow");
-	defNoiseBillow.def("GetFrequency",&Lua_BillowNoise_GetFrequency);
-	defNoiseBillow.def("GetLacunarity",&Lua_BillowNoise_GetLacunarity);
-	defNoiseBillow.def("GetNoiseQuality",&Lua_BillowNoise_GetNoiseQuality);
-	defNoiseBillow.def("GetOctaveCount",&Lua_BillowNoise_GetOctaveCount);
-	defNoiseBillow.def("GetPersistence",&Lua_BillowNoise_GetPersistence);
-	defNoiseBillow.def("GetSeed",&Lua_BillowNoise_GetSeed);
-	defNoiseBillow.def("SetFrequency",&Lua_BillowNoise_SetFrequency);
-	defNoiseBillow.def("SetLacunarity",&Lua_BillowNoise_SetLacunarity);
-	defNoiseBillow.def("SetNoiseQuality",&Lua_BillowNoise_SetNoiseQuality);
-	defNoiseBillow.def("SetOctaveCount",&Lua_BillowNoise_SetOctaveCount);
-	defNoiseBillow.def("SetPersistence",&Lua_BillowNoise_SetPersistence);
-	defNoiseBillow.def("SetSeed",&Lua_BillowNoise_SetSeed);
+	defNoiseBillow.def("GetFrequency",&Lua::noise::BillowNoise::GetFrequency);
+	defNoiseBillow.def("GetLacunarity",&Lua::noise::BillowNoise::GetLacunarity);
+	defNoiseBillow.def("GetNoiseQuality",&Lua::noise::BillowNoise::GetNoiseQuality);
+	defNoiseBillow.def("GetOctaveCount",&Lua::noise::BillowNoise::GetOctaveCount);
+	defNoiseBillow.def("GetPersistence",&Lua::noise::BillowNoise::GetPersistence);
+	defNoiseBillow.def("GetSeed",&Lua::noise::BillowNoise::GetSeed);
+	defNoiseBillow.def("SetFrequency",&Lua::noise::BillowNoise::SetFrequency);
+	defNoiseBillow.def("SetLacunarity",&Lua::noise::BillowNoise::SetLacunarity);
+	defNoiseBillow.def("SetNoiseQuality",&Lua::noise::BillowNoise::SetNoiseQuality);
+	defNoiseBillow.def("SetOctaveCount",&Lua::noise::BillowNoise::SetOctaveCount);
+	defNoiseBillow.def("SetPersistence",&Lua::noise::BillowNoise::SetPersistence);
+	defNoiseBillow.def("SetSeed",&Lua::noise::BillowNoise::SetSeed);
 	defNoiseModule.scope[defNoiseBillow];
 
 	auto defNoiseBlend = luabind::class_<NoiseBlend,NoiseBaseModule>("Blend");
@@ -900,34 +1013,34 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defNoiseModule.scope[defNoiseMultiply];
 
 	auto defNoisePerlin = luabind::class_<NoisePerlin,NoiseBaseModule>("Perlin");
-	defNoisePerlin.def("GetFrequency",&Lua_PerlinNoise_GetFrequency);
-	defNoisePerlin.def("GetLacunarity",&Lua_PerlinNoise_GetLacunarity);
-	defNoisePerlin.def("GetNoiseQuality",&Lua_PerlinNoise_GetNoiseQuality);
-	defNoisePerlin.def("GetOctaveCount",&Lua_PerlinNoise_GetOctaveCount);
-	defNoisePerlin.def("GetPersistence",&Lua_PerlinNoise_GetPersistence);
-	defNoisePerlin.def("GetSeed",&Lua_PerlinNoise_GetSeed);
-	defNoisePerlin.def("SetFrequency",&Lua_PerlinNoise_SetFrequency);
-	defNoisePerlin.def("SetLacunarity",&Lua_PerlinNoise_SetLacunarity);
-	defNoisePerlin.def("SetNoiseQuality",&Lua_PerlinNoise_SetNoiseQuality);
-	defNoisePerlin.def("SetOctaveCount",&Lua_PerlinNoise_SetOctaveCount);
-	defNoisePerlin.def("SetPersistence",&Lua_PerlinNoise_SetPersistence);
-	defNoisePerlin.def("SetSeed",&Lua_PerlinNoise_SetSeed);
+	defNoisePerlin.def("GetFrequency",&Lua::noise::PerlinNoise::GetFrequency);
+	defNoisePerlin.def("GetLacunarity",&Lua::noise::PerlinNoise::GetLacunarity);
+	defNoisePerlin.def("GetNoiseQuality",&Lua::noise::PerlinNoise::GetNoiseQuality);
+	defNoisePerlin.def("GetOctaveCount",&Lua::noise::PerlinNoise::GetOctaveCount);
+	defNoisePerlin.def("GetPersistence",&Lua::noise::PerlinNoise::GetPersistence);
+	defNoisePerlin.def("GetSeed",&Lua::noise::PerlinNoise::GetSeed);
+	defNoisePerlin.def("SetFrequency",&Lua::noise::PerlinNoise::SetFrequency);
+	defNoisePerlin.def("SetLacunarity",&Lua::noise::PerlinNoise::SetLacunarity);
+	defNoisePerlin.def("SetNoiseQuality",&Lua::noise::PerlinNoise::SetNoiseQuality);
+	defNoisePerlin.def("SetOctaveCount",&Lua::noise::PerlinNoise::SetOctaveCount);
+	defNoisePerlin.def("SetPersistence",&Lua::noise::PerlinNoise::SetPersistence);
+	defNoisePerlin.def("SetSeed",&Lua::noise::PerlinNoise::SetSeed);
 	defNoiseModule.scope[defNoisePerlin];
 
 	auto defNoisePower = luabind::class_<NoisePower,NoiseBaseModule>("Power");
 	defNoiseModule.scope[defNoisePower];
 
 	auto defNoiseRidgedMulti = luabind::class_<NoiseRidgedMulti,NoiseBaseModule>("RidgedMulti");
-	defNoiseRidgedMulti.def("GetFrequency",&Lua_RidgedMultiNoise_GetFrequency);
-	defNoiseRidgedMulti.def("GetLacunarity",&Lua_RidgedMultiNoise_GetLacunarity);
-	defNoiseRidgedMulti.def("GetNoiseQuality",&Lua_RidgedMultiNoise_GetNoiseQuality);
-	defNoiseRidgedMulti.def("GetOctaveCount",&Lua_RidgedMultiNoise_GetOctaveCount);
-	defNoiseRidgedMulti.def("GetSeed",&Lua_RidgedMultiNoise_GetSeed);
-	defNoiseRidgedMulti.def("SetFrequency",&Lua_RidgedMultiNoise_SetFrequency);
-	defNoiseRidgedMulti.def("SetLacunarity",&Lua_RidgedMultiNoise_SetLacunarity);
-	defNoiseRidgedMulti.def("SetNoiseQuality",&Lua_RidgedMultiNoise_SetNoiseQuality);
-	defNoiseRidgedMulti.def("SetOctaveCount",&Lua_RidgedMultiNoise_SetOctaveCount);
-	defNoiseRidgedMulti.def("SetSeed",&Lua_RidgedMultiNoise_SetSeed);
+	defNoiseRidgedMulti.def("GetFrequency",&Lua::noise::RidgedMultiNoise::GetFrequency);
+	defNoiseRidgedMulti.def("GetLacunarity",&Lua::noise::RidgedMultiNoise::GetLacunarity);
+	defNoiseRidgedMulti.def("GetNoiseQuality",&Lua::noise::RidgedMultiNoise::GetNoiseQuality);
+	defNoiseRidgedMulti.def("GetOctaveCount",&Lua::noise::RidgedMultiNoise::GetOctaveCount);
+	defNoiseRidgedMulti.def("GetSeed",&Lua::noise::RidgedMultiNoise::GetSeed);
+	defNoiseRidgedMulti.def("SetFrequency",&Lua::noise::RidgedMultiNoise::SetFrequency);
+	defNoiseRidgedMulti.def("SetLacunarity",&Lua::noise::RidgedMultiNoise::SetLacunarity);
+	defNoiseRidgedMulti.def("SetNoiseQuality",&Lua::noise::RidgedMultiNoise::SetNoiseQuality);
+	defNoiseRidgedMulti.def("SetOctaveCount",&Lua::noise::RidgedMultiNoise::SetOctaveCount);
+	defNoiseRidgedMulti.def("SetSeed",&Lua::noise::RidgedMultiNoise::SetSeed);
 	defNoiseModule.scope[defNoiseRidgedMulti];
 
 	auto defNoiseRotatePoint = luabind::class_<NoiseRotatePoint,NoiseBaseModule>("RotatePoint");
@@ -955,20 +1068,20 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defNoiseModule.scope[noiseTurbulance];
 
 	auto noiseVoroni = luabind::class_<NoiseVoronoi,NoiseBaseModule>("Voronoi");
-	noiseVoroni.def("GetDisplacement",&Lua_VoronoiNoise_GetDisplacement);
-	noiseVoroni.def("GetFrequency",&Lua_VoronoiNoise_GetFrequency);
-	noiseVoroni.def("GetSeed",&Lua_VoronoiNoise_GetSeed);
-	noiseVoroni.def("SetDisplacement",&Lua_VoronoiNoise_SetDisplacement);
-	noiseVoroni.def("SetFrequency",&Lua_VoronoiNoise_SetFrequency);
-	noiseVoroni.def("SetSeed",&Lua_VoronoiNoise_SetSeed);
+	noiseVoroni.def("GetDisplacement",&Lua::noise::VoronoiNoise::GetDisplacement);
+	noiseVoroni.def("GetFrequency",&Lua::noise::VoronoiNoise::GetFrequency);
+	noiseVoroni.def("GetSeed",&Lua::noise::VoronoiNoise::GetSeed);
+	noiseVoroni.def("SetDisplacement",&Lua::noise::VoronoiNoise::SetDisplacement);
+	noiseVoroni.def("SetFrequency",&Lua::noise::VoronoiNoise::SetFrequency);
+	noiseVoroni.def("SetSeed",&Lua::noise::VoronoiNoise::SetSeed);
 	defNoiseModule.scope[noiseVoroni];
 
 	modMath[defNoiseModule];
 
 	auto noiseMap = luabind::class_<noise::utils::NoiseMap>("NoiseMap");
-	noiseMap.def("GetValue",&Lua_NoiseMap_GetValue);
-	noiseMap.def("GetHeight",&Lua_NoiseMap_GetHeight);
-	noiseMap.def("GetWidth",&Lua_NoiseMap_GetWidth);
+	noiseMap.def("GetValue",&Lua::noise::NoiseMap::GetValue);
+	noiseMap.def("GetHeight",&Lua::noise::NoiseMap::GetHeight);
+	noiseMap.def("GetWidth",&Lua::noise::NoiseMap::GetWidth);
 	modMath[noiseMap];
 	//
 
@@ -1336,7 +1449,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 static bool operator==(const EntityHandle &v,const LEntityProperty &prop) {return **prop == v;}
 static std::ostream& operator<<(std::ostream &str,const LEntityProperty &v)
 {
-	if((*v)->IsValid())
+	if((*v)->valid())
 		(*v)->get()->print(str);
 	else
 		str<<"NULL";
@@ -1351,7 +1464,7 @@ void Game::RegisterLuaClasses()
 	// Entity
 	auto &modUtil = GetLuaInterface().RegisterLibrary("util");
 	auto entDef = luabind::class_<LEntityProperty,LBasePropertyWrapper>("EntityProperty");
-	Lua::Property::add_generic_methods<LEntityProperty,EntityHandle,luabind::class_<LEntityProperty,LBasePropertyWrapper>>(entDef);
+	//Lua::Property::add_generic_methods<LEntityProperty,EntityHandle,luabind::class_<LEntityProperty,LBasePropertyWrapper>>(entDef);
 	entDef.def(luabind::constructor<>());
 	entDef.def(luabind::constructor<EntityHandle>());
 	entDef.def(luabind::tostring(luabind::const_self));
@@ -1387,36 +1500,6 @@ void Game::RegisterLuaClasses()
 
 	auto &modMath = m_lua->RegisterLibrary("math");
 	auto defPlane = luabind::class_<umath::Plane>("Plane");
-#if 0
-DLLNETWORK void Lua_Plane_GetNormal(lua_State *l,umath::Plane &plane)
-{
-	Lua::Push<Vector3>(l,plane.GetNormal());
-}
-DLLNETWORK void Lua_Plane_GetPos(lua_State *l,umath::Plane &plane)
-{
-	Lua::Push<Vector3>(l,plane.GetPos());
-}
-DLLNETWORK void Lua_Plane_GetDistance(lua_State *l,umath::Plane &plane)
-{
-	Lua::PushNumber(l,plane.GetDistance());
-}
-DLLNETWORK void Lua_Plane_GetDistance(lua_State *l,umath::Plane &plane,const Vector3 &pos)
-{
-	Lua::PushNumber(l,plane.GetDistance(pos));
-}
-DLLNETWORK void Lua_Plane_MoveToPos(lua_State*,umath::Plane &plane,Vector3 &pos)
-{
-	plane.MoveToPos(pos);
-}
-DLLNETWORK void Lua_Plane_Rotate(lua_State*,umath::Plane &plane,EulerAngles &ang)
-{
-	plane.Rotate(ang);
-}
-DLLNETWORK void Lua_Plane_GetCenterPos(lua_State *l,umath::Plane &plane)
-{
-	Lua::Push<Vector3>(l,plane.GetCenterPos());
-}
-#endif
 	defPlane.def(luabind::constructor<Vector3,Vector3,Vector3>());
 	defPlane.def(luabind::constructor<Vector3,Vector3>());
 	defPlane.def(luabind::constructor<Vector3,double>());
@@ -1471,6 +1554,105 @@ LuaEntityIterator Lua::ents::create_lua_entity_iterator(lua_State *l,const tb<Lu
 	}
 	return r;
 }
+
+template<typename T>
+class TestX
+{
+public:
+	T *get();
+};
+
+namespace luabind
+{
+	template<typename T>
+	T* get_pointer(const TestX<T>& pointer)
+	{
+		return pointer.get();
+	}
+	namespace detail
+	{
+		template<typename T>
+		struct pointer_traits<TestX<T>>
+		{
+			enum { is_pointer = true };
+			using value_type = T;
+		};
+
+		namespace has_get_pointer_
+		{
+			template<class T>
+			T* get_pointer(TestX<T> const&);
+
+		};
+	};
+};
+
+namespace luabind {
+
+	namespace detail
+	{
+
+		struct test_x_deleter
+		{
+			test_x_deleter(lua_State* L, int index)
+				: life_support(get_main_thread(L), L, index)
+			{}
+
+			void operator()(void const*)
+			{
+				handle().swap(life_support);
+			}
+
+			handle life_support;
+		};
+
+	} // namespace detail
+
+	template <class T>
+	struct default_converter<util::WeakHandle<T> >
+		: default_converter<T*>
+	{
+		using is_native = std::false_type;
+
+		template <class U>
+		int match(lua_State* L, U, int index)
+		{
+			return default_converter<T*>::match(L, decorate_type_t<T*>(), index);
+		}
+
+		template <class U>
+		util::WeakHandle<T> to_cpp(lua_State* L, U, int index)
+		{
+			T* raw_ptr = default_converter<T*>::to_cpp(L, decorate_type_t<T*>(), index);
+
+			if(!raw_ptr) {
+				return util::WeakHandle<T>();
+			} else {
+				return util::WeakHandle<T>();//raw_ptr, detail::test_x_deleter(L, index));
+			}
+		}
+
+		void to_lua(lua_State* L, util::WeakHandle<T> const& p)
+		{
+			if(detail::test_x_deleter* d = std::get_deleter<detail::test_x_deleter>(p))
+			{
+				d->life_support.push(L);
+			} else {
+				detail::value_converter().to_lua(L, p);
+			}
+		}
+
+		template <class U>
+		void converter_postcall(lua_State*, U const&, int)
+		{}
+	};
+
+	template <class T>
+	struct default_converter<util::WeakHandle<T> const&>
+		: default_converter<util::WeakHandle<T> >
+	{};
+
+} // namespace luabind
 
 static std::optional<LuaEntityIterator> s_entIterator {}; // HACK: This is a workaround for a bug in luabind, which causes errors when compiled with gcc.
 void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
@@ -1718,6 +1900,14 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	gibletCreateInfo.add_static_constant("PHYS_SHAPE_CYLINDER",umath::to_integral(GibletCreateInfo::PhysShape::Cylinder));
 	gameMod[gibletCreateInfo];
 
+	struct Test
+	{
+		util::WeakHandle<BaseEntity> m0;
+	};
+	auto tdeef = luabind::class_<Test>("Test");
+	//tdeef.def_readwrite("attacker",&Test::m0,luabind::weak_handle_policy<0>{},luabind::weak_handle_policy<0>{});
+	tdeef.def_readwrite("attacker",&Test::m0);
+
 	auto bulletInfo = luabind::class_<BulletInfo>("BulletInfo");
 	bulletInfo.def(luabind::constructor<>());
 	bulletInfo.def(luabind::tostring(luabind::self));
@@ -1726,8 +1916,8 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	bulletInfo.def_readwrite("distance",&BulletInfo::distance);
 	bulletInfo.def_readwrite("damageType",reinterpret_cast<std::underlying_type_t<decltype(BulletInfo::damageType)> BulletInfo::*>(&BulletInfo::damageType));
 	bulletInfo.def_readwrite("bulletCount",&BulletInfo::bulletCount);
-	bulletInfo.def_readwrite("attacker",&BulletInfo::hAttacker);
-	bulletInfo.def_readwrite("inflictor",&BulletInfo::hInflictor);
+	//bulletInfo.def_readwrite("attacker",&BulletInfo::hAttacker,luabind::weak_handle_policy<0>{},luabind::weak_handle_policy<0>{});
+	//bulletInfo.def_readwrite("inflictor",&BulletInfo::hInflictor,luabind::weak_handle_policy<0>{},luabind::weak_handle_policy<0>{});
 	bulletInfo.def_readwrite("tracerCount",&BulletInfo::tracerCount);
 	bulletInfo.def_readwrite("tracerRadius",&BulletInfo::tracerRadius);
 	bulletInfo.def_readwrite("tracerColor",&BulletInfo::tracerColor);
@@ -1744,27 +1934,27 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	auto classDefDamageInfo = luabind::class_<DamageInfo>("DamageInfo");
 	classDefDamageInfo.def(luabind::constructor<>());
 	classDefDamageInfo.def(luabind::tostring(luabind::self));
-	classDefDamageInfo.def("SetDamage",&Lua::DamageInfo::SetDamage);
-	classDefDamageInfo.def("AddDamage",&Lua::DamageInfo::AddDamage);
-	classDefDamageInfo.def("ScaleDamage",&Lua::DamageInfo::ScaleDamage);
-	classDefDamageInfo.def("GetDamage",&Lua::DamageInfo::GetDamage);
-	classDefDamageInfo.def("GetAttacker",&Lua::DamageInfo::GetAttacker);
-	classDefDamageInfo.def("SetAttacker",&Lua::DamageInfo::SetAttacker);
-	classDefDamageInfo.def("GetInflictor",&Lua::DamageInfo::GetInflictor);
-	classDefDamageInfo.def("SetInflictor",&Lua::DamageInfo::SetInflictor);
-	classDefDamageInfo.def("GetDamageTypes",&Lua::DamageInfo::GetDamageTypes);
-	classDefDamageInfo.def("SetDamageType",&Lua::DamageInfo::SetDamageType);
-	classDefDamageInfo.def("AddDamageType",&Lua::DamageInfo::AddDamageType);
-	classDefDamageInfo.def("RemoveDamageType",&Lua::DamageInfo::RemoveDamageType);
-	classDefDamageInfo.def("IsDamageType",&Lua::DamageInfo::IsDamageType);
-	classDefDamageInfo.def("SetSource",&Lua::DamageInfo::SetSource);
-	classDefDamageInfo.def("GetSource",&Lua::DamageInfo::GetSource);
-	classDefDamageInfo.def("SetHitPosition",&Lua::DamageInfo::SetHitPosition);
-	classDefDamageInfo.def("GetHitPosition",&Lua::DamageInfo::GetHitPosition);
-	classDefDamageInfo.def("SetForce",&Lua::DamageInfo::SetForce);
-	classDefDamageInfo.def("GetForce",&Lua::DamageInfo::GetForce);
-	classDefDamageInfo.def("GetHitGroup",&Lua::DamageInfo::GetHitGroup);
-	classDefDamageInfo.def("SetHitGroup",&Lua::DamageInfo::SetHitGroup);
+	classDefDamageInfo.def("SetDamage",&::DamageInfo::SetDamage);
+	classDefDamageInfo.def("AddDamage",&::DamageInfo::AddDamage);
+	classDefDamageInfo.def("ScaleDamage",&::DamageInfo::ScaleDamage);
+	classDefDamageInfo.def("GetDamage",&::DamageInfo::GetDamage);
+	classDefDamageInfo.def("GetAttacker",&::DamageInfo::GetAttacker,luabind::game_object_policy<0>{});
+	classDefDamageInfo.def("SetAttacker",static_cast<void(::DamageInfo::*)(const BaseEntity*)>(&::DamageInfo::SetAttacker));
+	classDefDamageInfo.def("GetInflictor",&::DamageInfo::GetInflictor,luabind::game_object_policy<0>{});
+	classDefDamageInfo.def("SetInflictor",static_cast<void(::DamageInfo::*)(const BaseEntity*)>(&::DamageInfo::SetInflictor));
+	classDefDamageInfo.def("GetDamageTypes",&::DamageInfo::GetDamageTypes);
+	classDefDamageInfo.def("SetDamageType",&::DamageInfo::SetDamageType);
+	classDefDamageInfo.def("AddDamageType",&::DamageInfo::AddDamageType);
+	classDefDamageInfo.def("RemoveDamageType",&::DamageInfo::RemoveDamageType);
+	classDefDamageInfo.def("IsDamageType",&::DamageInfo::IsDamageType);
+	classDefDamageInfo.def("SetSource",&::DamageInfo::SetSource);
+	classDefDamageInfo.def("GetSource",&::DamageInfo::GetSource,luabind::copy_policy<0>{});
+	classDefDamageInfo.def("SetHitPosition",&::DamageInfo::SetHitPosition);
+	classDefDamageInfo.def("GetHitPosition",&::DamageInfo::GetHitPosition,luabind::copy_policy<0>{});
+	classDefDamageInfo.def("SetForce",&::DamageInfo::SetForce);
+	classDefDamageInfo.def("GetForce",&::DamageInfo::GetForce,luabind::copy_policy<0>{});
+	classDefDamageInfo.def("GetHitGroup",&::DamageInfo::GetHitGroup);
+	classDefDamageInfo.def("SetHitGroup",&::DamageInfo::SetHitGroup);
 	gameMod[classDefDamageInfo];
 }
 

@@ -17,6 +17,7 @@
 #include "pragma/lua/libraries/lengine.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include <pragma/lua/classes/lentity.h>
 #include <pragma/lua/classes/ldef_entity.h>
 #include <mathutil/glmutil.h>
 #include "luasystem.h"
@@ -196,14 +197,21 @@ void CGame::RegisterLua()
 		luabind::def("register_component_event",&Lua::ents::register_component_event)
 	];
 
-	auto entityClassDef = luabind::class_<EntityHandle>("Entity");
-	Lua::Entity::Client::register_class(entityClassDef);
+	auto entityClassDef = luabind::class_<BaseEntity>("BaseEntity");
+	Lua::Entity::register_class(entityClassDef);
 	modEnts[entityClassDef];
 
-	auto classDefBase = luabind::class_<CLuaEntityHandle,luabind::bases<EntityHandle>,luabind::default_holder,CLuaEntityWrapper>("BaseEntity");
-	classDefBase.def(luabind::tostring(luabind::self));
-	classDefBase.def(luabind::constructor<>());
-	classDefBase.def("Initialize",&CLuaEntityWrapper::Initialize,&CLuaEntityWrapper::default_Initialize);
+	auto cEntityClassDef = luabind::class_<CBaseEntity,BaseEntity>("Entity");
+	Lua::Entity::Client::register_class(cEntityClassDef);
+	modEnts[cEntityClassDef];
+
+	//auto tmp = luabind::class_<EntityHandle>("EntityOld");
+	//modEnts[tmp];
+
+	auto classDefBase = luabind::class_<CLuaEntity,luabind::bases<CBaseEntity>,luabind::default_holder,CLuaEntity>("BaseEntity");
+	// classDefBase.def(luabind::tostring(luabind::self));
+	//classDefBase.def(luabind::constructor<>());
+	classDefBase.def("Initialize",&CLuaEntity::LuaInitialize,&CLuaEntity::default_Initialize);
 	//classDefBase.def("ReceiveNetEvent",&SLuaEntityWrapper::ReceiveNetEvent,&SLuaBaseEntityWrapper::default_ReceiveNetEvent);
 	modEnts[classDefBase];
 

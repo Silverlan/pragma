@@ -136,7 +136,7 @@ std::shared_ptr<udm::Data> util::load_udm_asset(std::shared_ptr<VFilePtrInternal
 
 void util::write_udm_entity(udm::LinkedPropertyWrapperArg udm,EntityHandle &hEnt)
 {
-	if(hEnt.IsValid())
+	if(hEnt.valid())
 		udm = util::uuid_to_string(hEnt->GetUuid());
 }
 EntityHandle util::read_udm_entity(Game &game,udm::LinkedPropertyWrapperArg udm)

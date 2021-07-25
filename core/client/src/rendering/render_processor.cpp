@@ -50,7 +50,7 @@ static void print_pass_stats(const RenderPassStats &stats,bool full)
 	entities.reserve(stats.entities.size());
 	for(auto &hEnt : stats.entities)
 	{
-		if(hEnt.IsValid() == false)
+		if(hEnt.valid() == false)
 			continue;
 		entities.push_back({});
 		entities.back().hEntity = hEnt;
@@ -72,7 +72,7 @@ static void print_pass_stats(const RenderPassStats &stats,bool full)
 		for(auto &entData : entities)
 		{
 			auto &hEnt = entData.hEntity;
-			if(hEnt.IsValid() == false)
+			if(hEnt.valid() == false)
 				continue;
 			uint32_t lod = 0;
 			auto mdlC = hEnt.get()->GetComponent<pragma::CModelComponent>();

@@ -40,7 +40,7 @@ float ai::Memory::Fragment::GetLastTimeSensed() const {return umath::max(lastSee
 
 void ai::Memory::Fragment::UpdateVisibility(float dist)
 {
-	if(!hEntity.IsValid())
+	if(!hEntity.valid())
 		return;
 	auto *ent = hEntity.get();
 
@@ -66,7 +66,7 @@ void ai::Memory::Update()
 {
 	for(auto &fragment : fragments)
 	{
-		if(fragment.occupied == true && fragment.hEntity.IsValid())
+		if(fragment.occupied == true && fragment.hEntity.valid())
 		{
 			fragment.Clear();
 			--occupiedFragmentCount;

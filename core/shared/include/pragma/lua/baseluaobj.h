@@ -46,7 +46,7 @@ template<class THandle>
 template<class THandle>
 	LuaObj<THandle>::~LuaObj()
 {
-	m_handle->Invalidate();
+	m_handle->reset();
 	if(m_bExternalHandle == false)
 		delete m_handle;
 }

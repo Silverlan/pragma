@@ -63,7 +63,7 @@ BaseEntity *SAIComponent::AIAnimationInfo::GetEntityFaceTarget() const
 	if(umath::is_flag_set(m_aiAnimFlags,AIAnimFlags::FaceEntity) == false)
 		return nullptr;
 	auto *hEnt = static_cast<EntityHandle*>(m_faceTarget.get());
-	return (hEnt != nullptr && hEnt->IsValid()) ? hEnt->get() : nullptr;
+	return (hEnt != nullptr && hEnt->valid()) ? hEnt->get() : nullptr;
 }
 
 //////////////////////
@@ -95,7 +95,7 @@ bool SAIComponent::PlayAnimation(const AIAnimationInfo &info)
 		else if(umath::is_flag_set(flags,AIAnimationInfo::AIAnimFlags::FacePrimaryTarget))
 		{
 			auto *pFragment = GetPrimaryTarget();
-			if(pFragment != nullptr && pFragment->hEntity.IsValid())
+			if(pFragment != nullptr && pFragment->hEntity.valid())
 				sched->SetParameter(1,pFragment->hEntity.get());
 		}
 		m_bSkipHandling = true;

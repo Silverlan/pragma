@@ -10,7 +10,7 @@
 #include "pragma/entities/baseentity.h"
 #include "pragma/entities/baseentity_handle.h"
 
-#define LUA_CHECK_ENTITY_RET(l,hEnt,ret) \
+/*#define LUA_CHECK_ENTITY_RET(l,hEnt,ret) \
 	if(hEnt == nullptr) \
 	{ \
 		lua_pushstring(l,"Attempted to use a NULL entity"); \
@@ -22,7 +22,7 @@
 	LUA_CHECK_ENTITY_RET(l,hEnt,);
 
 LUA_SETUP_HANDLE_CHECK(Entity,BaseEntity,EntityHandle);
-
+*/
 namespace Lua
 {
 	DLLNETWORK bool is_entity(const luabind::object &o);

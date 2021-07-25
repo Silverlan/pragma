@@ -31,9 +31,9 @@ void Lua::nav::register_library(Lua::Interface &lua)
 				mesh = pragma::nav::generate(game,navConfig,&err);
 			else
 			{
-				if(Lua::IsEntity(l,2))
+				if(Lua::IsType<BaseEntity>(l,2))
 				{
-					auto &ent = *Lua::CheckEntity(l,2);
+					auto &ent = Lua::Check<BaseEntity>(l,2);
 					mesh = pragma::nav::generate(game,navConfig,ent,&err);
 				}
 				else

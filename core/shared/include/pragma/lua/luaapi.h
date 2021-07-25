@@ -109,6 +109,17 @@ namespace luabind
 		};
 
 		template <typename ...T>
+		struct variadic : object
+		{
+			variadic(from_stack const& stack_reference)
+				: object(stack_reference)
+			{}
+			variadic(const object &o)
+				: object(o)
+			{}
+		};
+
+		template <typename ...T>
 			struct mult : object
 		{
 			mult(from_stack const& stack_reference)
@@ -196,6 +207,13 @@ namespace luabind
 		};
 
 		template<typename ...T>
+		struct pseudo_traits<adl::variadic<T...>>
+		{
+			enum { is_pseudo_type = true };
+			enum { is_variadic = true };
+		};
+
+		template<typename ...T>
 		struct pseudo_traits<adl::mult<T...>>
 		{
 			enum { is_pseudo_type = true };
@@ -217,6 +235,7 @@ namespace luabind
 	using adl::tableT;
 	using adl::tableTT;
 	using adl::variant;
+	using adl::variadic;
 	using adl::mult;
 	using adl::typehint;
 	using adl::functype;
@@ -295,6 +314,16 @@ namespace luabind
 	};
 
 	template <typename ...T>
+	struct lua_proxy_traits<adl::variadic<T...> >
+		: lua_proxy_traits<object>
+	{
+		static bool check(lua_State* L, int idx)
+		{
+			return lua_proxy_traits<object>::check(L, idx);
+		}
+	};
+
+	template <typename ...T>
 	struct lua_proxy_traits<adl::mult<T...> >
 		: lua_proxy_traits<object>
 	{
@@ -334,6 +363,8 @@ namespace Lua
 	template <typename ...T>
 		using var = luabind::variant<T...>;
 	template <typename ...T>
+		using variadic = luabind::variadic<T...>;
+	template <typename ...T>
 		using mult = luabind::mult<T...>;
 	template <typename T>
 		using tb = luabind::tableT<T>;
@@ -346,7 +377,7 @@ namespace Lua
 	template <typename TRet,typename ...T>
 		using func = luabind::functype<TRet,T...>;
 
-	extern const luabind::object nil;
+	DLLNETWORK extern const luabind::object nil;
 	using object = luabind::object;
 
 	class Interface;

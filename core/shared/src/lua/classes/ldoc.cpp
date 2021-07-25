@@ -11,6 +11,11 @@
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/lua/util.hpp"
 #include "pragma/lua/lua_doc.hpp"
+#include "pragma/lua/lad/pdb_manager.hpp"
+#include "pragma/lua/lad/symbol_handler.hpp"
+#include "pragma/lua/lad/generator.hpp"
+#include "pragma/lua/lad/repository_manager.hpp"
+#include "pragma/lua/lad/type_name_manager.hpp"
 #include <util_pragma_doc.hpp>
 #include <pragma/util/util_game.hpp>
 #include <luasystem.h>
@@ -20,198 +25,13 @@
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
 #include <filesystem>
-#include <Psapi.h>
-// C:/Program Files (x86)/Microsoft Visual Studio 14.0/DIA SDK/include
-#include <C:/Program Files (x86)/Microsoft Visual Studio 14.0/DIA SDK/include/Dia2.h>
 
 #include <luabind/detail/class_rep.hpp>
 #include <luabind/detail/call.hpp>
 #include <luabind/class_info.hpp>
 #pragma optimize("",off)
-#if 0
-struct LUABIND_API class_base : scope
-{
-public:
-	class_base(char const* name);
-
-	struct base_desc
-	{
-		type_id type;
-		int ptr_offset;
-	};
-
-	void init(
-		type_id const& type, class_id id
-		, type_id const& wrapped_type, class_id wrapper_id);
-
-	void add_base(type_id const& base, cast_function cast);
-
-	void add_member(registration* member);
-	void add_default_member(registration* member);
-
-	const char* name() const;
-
-	void add_static_constant(const char* name, int val);
-	void add_inner_scope(scope& s);
-
-	void add_cast(class_id src, class_id target, cast_function cast);
-
-private:
-	class_registration* m_registration;
-};
-#endif
 
 #undef GetClassInfo
-
-struct LuaOverloadInfo
-{
-	std::vector<std::string> parameters {};
-	std::string returnValue {};
-	std::optional<pragma::doc::Source> source {};
-	std::optional<std::vector<std::string>> namedParameters {};
-};
-
-struct LuaMethodInfo
-{
-	std::string name;
-	std::vector<LuaOverloadInfo> overloads;
-};
-
-struct LuaClassInfo
-{
-	using EnumSet = std::unordered_map<std::string,int32_t>;
-	luabind::detail::class_rep *classRep = nullptr;
-	std::string name;
-	std::vector<LuaMethodInfo> methods;
-	std::vector<std::string> attributes;
-	std::vector<luabind::detail::class_rep*> bases;
-	std::unordered_map<std::string,EnumSet> enumSets;
-};
-
-class DocValidator
-{
-public:
-private:
-	template<class TItem>
-		static const TItem *FindItem(const std::string &name,const std::vector<TItem>&(pragma::doc::Collection::*fPt)() const)
-	{
-		return nullptr;
-	}
-	template<class TItem>
-		static const TItem *FindItem(const pragma::doc::Collection &collection,const std::string &name,const std::vector<TItem>&(pragma::doc::Collection::*fPt)() const);
-	void GetClassInfo(lua_State *L,luabind::detail::class_rep *crep);
-	void FindFunction(const std::string &name) {}
-	void WriteToLog(const std::stringstream &log) {}
-	void ValidateCollection(const pragma::doc::Collection &collection);
-	std::vector<LuaClassInfo> m_classes;
-};
-
-template<class TItem>
-	static const TItem *DocValidator::FindItem(const pragma::doc::Collection &collection,const std::string &name,const std::vector<TItem>&(pragma::doc::Collection::*fPt)() const)
-{
-	auto &items = (collection.*fPt)();
-	auto it = std::find_if(items.begin(),items.end(),[&name](const TItem &el) {
-		return el.GetName() == name;
-	});
-	if(it != items.end())
-		return &*it;
-	for(auto &child : collection.GetChildren())
-	{
-		auto *pItem = find_item(*child,name,fPt);
-		if(pItem)
-			return pItem;
-	}
-	return nullptr;
-}
-
-static bool find_function(const pragma::doc::Collection &collection,const std::string &name)
-{
-
-}
-
-void DocValidator::ValidateCollection(const pragma::doc::Collection &collection)
-{
-	auto name = collection.GetName();
-	auto it = std::find_if(m_classes.begin(),m_classes.end(),[&name](const LuaClassInfo &luaClass) {
-		return luaClass.name == name;
-	});
-	if(it == m_classes.end())
-		Con::cout<<"CLASS NOT FOUND!"<<Con::endl;
-	//find_item<pragma::doc::Function>(collection,name,&pragma::doc::Collection::GetFunctions);
-	for(auto &f : collection.GetFunctions())
-	{
-
-	}
-}
-
-void DocValidator::GetClassInfo(lua_State *L,luabind::detail::class_rep * crep)
-{
-	crep->get_table(L);
-	luabind::object table(luabind::from_stack(L, -1));
-	lua_pop(L, 1);
-
-	std::size_t index = 1;
-
-	for(luabind::iterator i(table), e; i != e; ++i)
-	{
-		std::string key;
-		auto lkey = i.key();
-		lkey.push(L);
-		if(Lua::IsString(L,-1))
-			key = Lua::CheckString(L,-1);
-		Lua::Pop(L,1);
-
-		auto type = luabind::type(*i);
-		switch(type)
-		{
-		case LUA_TFUNCTION:
-		{
-			auto *f = FindItem<pragma::doc::Function>(key,&pragma::doc::Collection::GetFunctions);
-			if(f == nullptr)
-			{
-				std::stringstream ss;
-				ss<<"Function '"<<key<<"' not found!";
-				WriteToLog(ss);
-			}
-			break;
-		}
-		case LUA_TBOOLEAN:
-			break;
-		case LUA_TNUMBER:
-			break;
-		case LUA_TSTRING:
-			break;
-		case LUA_TTABLE:
-			break;
-		case LUA_TUSERDATA:
-			break;
-		case LUA_TLIGHTUSERDATA:
-			break;
-		}
-		if(type != LUA_TFUNCTION)
-			Con::cout<<"Type: "<<type<<Con::endl;
-		if(type == LUA_TNUMBER)
-		{
-		}
-		if(type != LUA_TFUNCTION)
-			continue;
-
-		// We have to create a temporary `object` here, otherwise the proxy
-		// returned by operator->() will mess up the stack. This is a known
-		// problem that probably doesn't show up in real code very often.
-		luabind::object member(*i);
-		member.push(L);
-		luabind::detail::stack_pop pop(L, 1);
-
-		if(lua_tocfunction(L, -1) == &luabind::detail::property_tag)
-		{
-			//result.attributes[index++] = i.key();
-		} else
-		{
-			//result.methods[i.key()] = *i;
-		}
-	}
-}
 
 static const pragma::doc::Collection *find_class(const std::vector<pragma::doc::PCollection> &collections,const std::string &className)
 {
@@ -300,51 +120,6 @@ static void GetClassInfo(lua_State *L,luabind::detail::class_rep * crep)
 	}
 }
 
-// We have to access some members of luabind::detail::class_rep which are inaccessable,
-// so we'll force them to be accessable.
-class Luaclass_rep
-{
-public:
-	luabind::type_id m_type;
-	std::vector<luabind::detail::class_rep::base_info> m_bases;
-	const char* m_name;
-	luabind::detail::lua_reference m_self_ref;
-	luabind::handle m_table;
-	luabind::handle m_default_table;
-	luabind::detail::class_rep::class_type m_class_type;
-	int m_instance_metatable;
-	std::map<const char*, int, luabind::detail::ltstr> m_static_constants;
-	int m_operator_cache;
-	luabind::detail::cast_graph* m_casts;
-	luabind::detail::class_id_map* m_classes;
-};
-static_assert(sizeof(Luaclass_rep) == sizeof(luabind::detail::class_rep));
-static Luaclass_rep &access_class_rep(luabind::detail::class_rep &rep) {return reinterpret_cast<Luaclass_rep&>(rep);}
-
-namespace luabind {
-
-	LUABIND_API class_info get_class_info(argument const& o);
-	detail::function_object* get_function_object(object const& fn) {
-		lua_State * L = fn.interpreter();
-		{
-			fn.push(L);
-			detail::stack_pop pop(L, 1);
-			if(!detail::is_luabind_function(L, -1)) {
-				return NULL;
-			}
-		}
-		return *touserdata<detail::function_object*>(std::get<1>(getupvalue(fn, 1)));
-	}
-
-	std::string get_function_name(object const& fn) {
-		detail::function_object * f = get_function_object(fn);
-		if(!f) {
-			return "";
-		}
-		return f->name;
-	}
-};
-
 static std::unordered_map<std::string,std::string> g_typeTranslationTable {
 	{"std::string","string"},
 	{"short","int16"},
@@ -382,80 +157,541 @@ static std::unordered_map<std::string,std::string> g_typeTranslationTable {
 	{"TimerHandle","time.Timer"},
 	{"pragma::ai::Schedule","ai.Schedule"},
 	{"LFile","file.File"},
-	{"Version","util.Version"}
+	{"Version","util.Version"},
+	{"std::basic_string","string"},
+
+	{"std::basic_string","string"},
+	{"glm::qua","QuaternionInternal"},
+	{"luabind::argument","any"},
+	{"luabind::object","any"},
+	{"CallbackHandle","Callback"},
+	{"void","nil"},
+	{"BaseGamemodeComponent",""},
+	{"Material","game.Material"},
+	{"ModelMesh","game.Model.Mesh"},
+	{"pragma::nav::Mesh","nav.Mesh"},
+	{"ConVar","console.Var"},
+	{"pragma::animation::AnimatedPose","animation.Pose"},
+	{"pragma::animation::AnimationSlice","animation.Slice"},
+	{"pragma::animation::AnimationPlayer","animation.Player"},
+	{"pragma::animation::AnimationChannel","animation.Channel"},
+	{"pragma::physics::ISliderConstraint","phys.SliderConstraint"},
+	{"pragma::physics::IRigidBody","phys.RigidBody"},
+	{"pragma::physics::IConvexHullShape","phys.ConvexHullShape"},
+	{"pragma::physics::IGhostObject","phys.GhostObj"},
+	{"pragma::physics::IBoxShape","phys.BoxShape"},
+	{"pragma::physics::ISoftBody","phys.SoftBody"},
+	{"pragma::physics::IConeTwistConstraint","phys.ConeTwistConstraint"},
+	{"pragma::physics::IController","phys.Controller"},
+	{"pragma::physics::IConvexShape","phys.ConvexShape"},
+	{"pragma::physics::IVehicle","phys.Vehicle"},
+	{"pragma::physics::IConstraint","phys.Constraint"}
 };
 
 std::unordered_set<std::string> g_typeWarningCache;
 std::unordered_map<std::string,std::string> g_classNameToFullName;
-static void normalize_param_name(std::string &paramName)
+
+struct TypeInfo
 {
-	auto isRef = (paramName.find("&") != std::string::npos);
-	auto isPtr = (paramName.find("*") != std::string::npos);
-	auto isConst = (paramName.find(" const") != std::string::npos);
-	ustring::replace(paramName,"&","");
-	ustring::replace(paramName,"*","");
-	ustring::replace(paramName,"custom ","");
-	ustring::replace(paramName," const","");
-	ustring::replace(paramName,"std::shared_ptr<","");
-	ustring::replace(paramName,"util::TSharedHandle<","");
-	ustring::replace(paramName,"util::WeakHandle<","");
-	ustring::replace(paramName,">","");
+	std::string typeName;
+	std::vector<TypeInfo> templateParameterTypes;
+};
+static TypeInfo parse_type(std::string_view &str)
+{
+	TypeInfo typeInfo {};
+	uint32_t idx = 0;
+	while(idx < str.length() && str[idx] != '\0' && str[idx] != '<' && str[idx] != '>' && str[idx] != ',')
+		++idx;
+	typeInfo.typeName = str.substr(0,idx);
+	str = (idx < str.length()) ? str.substr(idx) : std::string_view{};
 
-	if(paramName.empty() == false && paramName.front() == '[' && paramName.back() == ']')
+	if(!str.empty())
 	{
-		paramName.erase(paramName.begin());
-		paramName.erase(paramName.end() -1);
-		ustring::replace(paramName,"struct ","");
-		ustring::replace(paramName,"class ","");
-		// ustring::replace(paramName,"std::shared_ptr<","");
+		if(str[0] == '<')
+		{
+			do
+			{
+				str = str.substr(1);
+				typeInfo.templateParameterTypes.push_back(parse_type(str));
+				ustring::remove_whitespace(str);
+			}
+			while(!str.empty() && str[0] == ',');
+			if(!str.empty() && str[0] == '>')
+				str = str.substr(1);
+		}
 	}
+	
+	return typeInfo;
+}
 
-	auto it = g_typeTranslationTable.find(paramName);
+static void normalize_type_name(pragma::lua::TypeNameManager &nameManager,std::string &type,const TypeInfo *typeInfo=nullptr)
+{
+	auto typeTranslated = nameManager.TranslateType(type);
+	if(typeTranslated.has_value())
+	{
+		type = *typeTranslated;
+		return;
+	}
+	Con::cout<<"Normalize Type Name: "<<type<<Con::endl;
+	ustring::remove_whitespace(type);
+	if(ustring::compare(type.data(),"[struct",true,7))
+		type = type.substr(7);
+	if(ustring::compare(type.data(),"[class",true,6))
+		type = type.substr(6);
+
+	//ustring::replace(paramName,"util::TSharedHandle<","");
+	//ustring::replace(paramName,"util::WeakHandle<","");
+
+	auto isRef = (type.find("&") != std::string::npos);
+	auto isPtr = (type.find("*") != std::string::npos);
+	auto isConst = (type.find(" const") != std::string::npos);
+	//if(isRef)
+	//	dtype.flags |= pragma::doc::Variant::Flags::Reference;
+	//if(isPtr)
+	//	dtype.flags |= pragma::doc::Variant::Flags::Pointer;
+	//if(isConst)
+	//	dtype.flags |= pragma::doc::Variant::Flags::Const;
+	ustring::replace(type,"[","");
+	ustring::replace(type,"]","");
+	ustring::replace(type,"&","");
+	ustring::replace(type,"*","");
+	ustring::replace(type," const","");
+	ustring::replace(type,"luabind::adl::","");
+	ustring::replace(type,"custom","");
+	ustring::replace(type,"enum","");
+	//ustring::replace(paramName,">","");
+	ustring::remove_whitespace(type);
+
+	auto baseType = type;
+	//auto p = baseType.rfind("::");
+	//if(p != std::string::npos)
+	//	baseType = baseType.substr(p +2);
+	auto it = g_typeTranslationTable.find(baseType);
 	if(it != g_typeTranslationTable.end())
-		paramName = it->second;
+		type = it->second;
 	else
 	{
-		auto it = g_classNameToFullName.find(paramName);
+		auto it = g_classNameToFullName.find(baseType);
 		if(it != g_classNameToFullName.end())
-			paramName = it->second;
+			type = it->second;
 		else
 		{
-			if(g_typeWarningCache.find(paramName) == g_typeWarningCache.end())
+			if(g_typeWarningCache.find(type) == g_typeWarningCache.end())
 			{
-				g_typeWarningCache.insert(paramName);
-				Con::cwar<<"WARNING: Unknown type '"<<paramName<<"'!"<<Con::endl;
+				g_typeWarningCache.insert(type);
+				Con::cwar<<"WARNING: Unknown type '"<<type<<"' ('"<<baseType<<"')!"<<Con::endl;
 			}
 		}
 	}
 }
-
-static std::optional<LuaOverloadInfo> parse_function_overload(std::string &methodName,bool method)
+static std::vector<pragma::doc::Variant> normalize_type_namee(const pragma::doc::Variant &type)
 {
-	auto paramStart = methodName.find('(');
-	auto paramEnd = methodName.rfind(')');
-	if(paramStart == std::string::npos || paramEnd == std::string::npos)
-		return {};
+	std::vector<pragma::doc::Variant> newTypes;
+	newTypes.push_back(type);
+	auto &newType = newTypes.back();
+	auto &paramName = newType.name;
+	if(paramName.find("luabind::adl") != std::string::npos)
+		std::cout<<"";
+	ustring::replace(paramName,"custom ","");
+	ustring::replace(paramName,"class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >","string");
 
-	LuaOverloadInfo info {};
+	struct TypeInfo
+	{
+		std::string name;
+		std::vector<TypeInfo> templateTypes;
+		pragma::doc::Variant::Flags flags = pragma::doc::Variant::Flags::None;
+	};
+	auto normalize = [](std::string &type,TypeInfo &dtype) {
+		ustring::remove_whitespace(type);
+		if(ustring::compare(type.data(),"[struct",true,7))
+			type = type.substr(7);
+		if(ustring::compare(type.data(),"[class",true,6))
+			type = type.substr(6);
 
-	auto params = methodName.substr(paramStart +1,paramEnd -paramStart -1);
-	if(params.empty() == false && params.front() == ',')
-		params.erase(params.begin());
+		//ustring::replace(paramName,"util::TSharedHandle<","");
+		//ustring::replace(paramName,"util::WeakHandle<","");
 
-	auto &paramList = info.parameters;
-	ustring::explode(params,",",paramList);
+		auto isRef = (type.find("&") != std::string::npos);
+		auto isPtr = (type.find("*") != std::string::npos);
+		auto isConst = (type.find(" const") != std::string::npos);
+		if(isRef)
+			dtype.flags |= pragma::doc::Variant::Flags::Reference;
+		if(isPtr)
+			dtype.flags |= pragma::doc::Variant::Flags::Pointer;
+		if(isConst)
+			dtype.flags |= pragma::doc::Variant::Flags::Const;
+		ustring::replace(type,"[","");
+		ustring::replace(type,"]","");
+		ustring::replace(type,"&","");
+		ustring::replace(type,"*","");
+		ustring::replace(type," const","");
+		ustring::replace(type,"luabind::adl::","");
+		//ustring::replace(paramName,">","");
+		ustring::remove_whitespace(type);
 
-	auto sp = methodName.rfind(' ',paramStart);
-	if(sp != std::string::npos)
-		info.returnValue = methodName.substr(0,sp);
-	return info;
+		auto it = g_typeTranslationTable.find(type);
+		if(it != g_typeTranslationTable.end())
+			type = it->second;
+		else
+		{
+			auto it = g_classNameToFullName.find(type);
+			if(it != g_classNameToFullName.end())
+				type = it->second;
+			else
+			{
+				if(g_typeWarningCache.find(type) == g_typeWarningCache.end())
+				{
+					g_typeWarningCache.insert(type);
+					Con::cwar<<"WARNING: Unknown type '"<<type<<"'!"<<Con::endl;
+				}
+			}
+		}
+	};
+
+	auto fFindClosingTag = [](const std::string_view &str) -> size_t {
+		if(str.empty())
+			return std::string::npos;
+		uint32_t idx = 0;
+		uint32_t depth = 1;
+		while(idx < str.length())
+		{
+			auto c = str[idx];
+			if(c == '>')
+			{
+				if(--depth == 0)
+					return idx;
+			}
+			else if(c == '<')
+				++depth;
+			++idx;
+		}
+		return std::string::npos;
+	};
+
+	std::function<void(TypeInfo&)> parseTemplateTypes = nullptr;
+	std::string_view vpn {paramName};
+	parseTemplateTypes = [&parseTemplateTypes,&vpn,&normalize,&fFindClosingTag](TypeInfo &type) {
+		auto pStart = vpn.find('<');
+		auto pEnd = vpn.find('>');
+		if(pStart < pEnd)
+		{
+			type.name = vpn.substr(0,pStart);
+			normalize(type.name,type);
+			vpn = vpn.substr(pStart +1);
+			
+			if(type.name == "typehint") // We'll skip this one
+				return parseTemplateTypes(type);
+			uint32_t maxTypes = 1;
+			if(type.name == "tableTT")
+				maxTypes = 2;
+			else if(type.name == "variant" || type.name == "mult")
+				maxTypes = std::numeric_limits<decltype(maxTypes)>::max();
+			for(;;)
+			{
+				type.templateTypes.push_back({});
+				parseTemplateTypes(type.templateTypes.back());
+				auto &t = type.templateTypes.back();
+				if(t.name == "std::shared_ptr" && t.templateTypes.size() == 1)
+				{
+					auto tmp = std::move(t.templateTypes[0]);
+					t = std::move(tmp);
+				}
+				pEnd = fFindClosingTag(vpn);
+				if(--maxTypes == 0)
+					break;
+				auto c = vpn.find(',');
+				if(c >= pEnd)
+					break;
+				pEnd = c;
+			}
+			if(pEnd == std::string::npos)
+				vpn = {};
+			else
+				vpn = vpn.substr(pEnd +1);
+			return;
+		}
+		type.name = vpn.substr(0,pEnd);
+		normalize(type.name,type);
+		if(pEnd == std::string::npos)
+			vpn = {};
+		else
+			vpn = vpn.substr(pEnd +1);
+	};
+
+	std::string_view strView{paramName};
+	auto typeInfo = parse_type(strView);
+
+
+	return newTypes;
+	/*TypeInfo typeInfo {};
+	typeInfo.name = paramName;
+	parseTemplateTypes(typeInfo);
+
+	if(typeInfo.name == "optional")
+	{
+		if(typeInfo.templateTypes.empty())
+		{
+			newType.name = "nil";
+			return newTypes;
+		}
+		newType.name = typeInfo.templateTypes[0].name;
+		newType.flags |= pragma::doc::Type::Flags::Optional;
+		return newTypes;
+	}
+	if(typeInfo.name == "table")
+	{
+		newType.name = "table";
+		return newTypes;
+	}
+	if(typeInfo.name == "tableT")
+	{
+		newType.name = "table";
+		if(typeInfo.templateTypes.size() > 0)
+			newType.name += "[" +typeInfo.templateTypes[0].name +"]";
+		return newTypes;
+	}
+	if(typeInfo.name == "tableTT")
+	{
+		newType.name = "table";
+		if(typeInfo.templateTypes.size() > 0)
+		{
+			newType.name += "[" +typeInfo.templateTypes[0].name +"]";
+			if(typeInfo.templateTypes.size() > 1)
+				newType.name += "[" +typeInfo.templateTypes[1].name +"]";
+		}
+		return newTypes;
+	}
+	if(typeInfo.name == "variant")
+	{
+		auto tmp = std::move(newType);
+		newTypes.clear();
+		newTypes.reserve(typeInfo.templateTypes.size());
+		for(auto &typeInfo : typeInfo.templateTypes)
+		{
+
+		}
+		return newTypes;
+	}
+
+	return newTypes;*/
+	/*
+	if(typeInfo.name == "variant")
+	{
+		type.name
+		type.name = "table";
+		if(typeInfo.templateTypes.size() > 0)
+			type.name += "[" +typeInfo.templateTypes[0].name +"]"; // TODO: Table of variants?
+		return;
+	}*/
 }
-static void *get_function_pointer_from_luabind_function_object(const luabind::detail::function_object &o)
+static void apply(pragma::lua::TypeNameManager &nameManager,pragma::doc::Variant &variant,const TypeInfo &typeInfo)
 {
-	using T = luabind::detail::function_object_impl<Vector3 (__cdecl*)(void),luabind::meta::type_list<Vector3 >,luabind::meta::type_list<> >; // Template arguments are arbitrary; We only care about the function pointer, so they don't matter here
-	return static_cast<void*>(static_cast<const T*>(&o)->f);
+	variant.name = typeInfo.typeName;
+	normalize_type_name(nameManager,variant.name,&typeInfo);
+	if(variant.name == "optional")
+	{
+		if(typeInfo.templateParameterTypes.empty())
+		{
+			variant.name = "nil";
+			Con::cwar<<"WARNING: Missing optional template type"<<Con::endl;
+		}
+		else
+		{
+			auto tmp = std::move(typeInfo.templateParameterTypes.front());
+			apply(nameManager,variant,tmp);
+			variant.flags |= pragma::doc::Variant::Flags::Optional;
+		}
+		return;
+	}
+	if(variant.name == "typehint")
+	{
+		if(typeInfo.templateParameterTypes.empty())
+		{
+			variant.name = "nil";
+			Con::cwar<<"WARNING: Missing typehint template type"<<Con::endl;
+		}
+		else
+		{
+			auto tmp = std::move(typeInfo.templateParameterTypes.front());
+			apply(nameManager,variant,tmp);
+		}
+		return;
+	}
+	if(variant.name == "tableT")
+	{
+		variant.name = "table";
+		if(typeInfo.templateParameterTypes.empty())
+			Con::cwar<<"WARNING: Missing tableT template type"<<Con::endl;
+		else
+		{
+			variant.typeParameters.push_back({});
+			auto &p = variant.typeParameters.back();
+			apply(nameManager,p,typeInfo.templateParameterTypes.front());
+		}
+		return;
+	}
+	if(variant.name == "tableTT")
+	{
+		variant.name = "table";
+		if(typeInfo.templateParameterTypes.empty())
+			Con::cwar<<"WARNING: Missing tableTT template type"<<Con::endl;
+		else
+		{
+			variant.typeParameters.push_back({});
+			apply(nameManager,variant.typeParameters.back(),typeInfo.templateParameterTypes.front());
+			if(typeInfo.templateParameterTypes.size() > 1)
+			{
+				variant.typeParameters.push_back({});
+				apply(nameManager,variant.typeParameters.back(),typeInfo.templateParameterTypes[1]);
+			}
+		}
+		return;
+	}
+	if(variant.name == "variant")
+	{
+		variant.name = "variant";
+		if(typeInfo.templateParameterTypes.empty())
+			Con::cwar<<"WARNING: Missing variant template type"<<Con::endl;
+		else
+		{
+			variant.typeParameters.reserve(typeInfo.templateParameterTypes.size());
+			for(auto &type : typeInfo.templateParameterTypes)
+			{
+				variant.typeParameters.push_back({});
+				apply(nameManager,variant.typeParameters.back(),type);
+			}
+		}
+		return;
+	}
+	if(variant.name == "mult")
+	{
+		variant.name = "mult";
+		if(typeInfo.templateParameterTypes.empty())
+			Con::cwar<<"WARNING: Missing mult template type"<<Con::endl;
+		else
+		{
+			variant.typeParameters.reserve(typeInfo.templateParameterTypes.size());
+			for(auto &type : typeInfo.templateParameterTypes)
+			{
+				variant.typeParameters.push_back({});
+				apply(nameManager,variant.typeParameters.back(),type);
+			}
+		}
+		return;
+	}
+	std::cout<<"";
 }
-static void *get_function_pointer_from_luabind_function(lua_State *l,const luabind::object &lbFunc)
+static void normalize_variant(pragma::lua::TypeNameManager &nameManager,pragma::doc::Variant &variant)
+{
+	auto &name = variant.name;
+	if(name.empty())
+		return;
+	static const std::vector<std::pair<std::string,char>> templatePrefixes = {
+		{"std::shared_ptr<",'>'},
+		{"util::WeakHandle<",'>'},
+		{"custom [",']'},
+	};
+	for(auto &prefix : templatePrefixes)
+	{
+		if(!ustring::compare(name.c_str(),prefix.first.c_str(),true,prefix.first.length()))
+			continue;
+		name = name.substr(prefix.first.length());
+		name = name.substr(0,name.rfind(prefix.second));
+	}
+	auto typeTranslated = nameManager.TranslateType(name);
+	if(typeTranslated.has_value())
+	{
+		name = *typeTranslated;
+		return;
+	}
+
+	std::string_view v {variant.name};
+
+	auto typeInfo = parse_type(v);
+	//std::cout<<"TEST: "<<variant.name<<std::endl;
+	//apply(nameManager,variant,typeInfo);
+	if(typeInfo.typeName == "optional")
+	{
+		//apply(variant,typeInfo);
+		/*if(typeInfo.templateParameterTypes.empty())
+		{
+			variant.name = "nil";
+			Con::cwar<<"WARNING: Missing optional template type"<<Con::endl;
+		}
+		else
+		{
+			auto tmp = std::move(typeInfo.templateParameterTypes.front());
+			variant.flags |= pragma::doc::Variant::Flags::Optional;
+			variant.name = typeInfo.templateParameterTypes.front().typeName;
+			normalize_variant(variant);
+		}*/
+		return;
+	}
+	/*if(typeInfo.typeName == "tableT")
+	{
+		variant.name = "table";
+		if(typeInfo.templateParameterTypes.empty())
+			Con::cwar<<"WARNING: Missing tableT template type"<<Con::endl;
+		else
+		{
+			variant.typeParameters.push_back({});
+			auto &p = variant.typeParameters.back();
+			apply(p,typeInfo.templateParameterTypes.front());
+		}
+		return;
+	}
+	if(typeInfo.typeName == "tableTT")
+	{
+		variant.name = "table";
+		if(typeInfo.templateParameterTypes.empty())
+			Con::cwar<<"WARNING: Missing tableTT template type"<<Con::endl;
+		else
+		{
+			variant.typeParameters.push_back({});
+			auto &p = variant.typeParameters.back();
+			p.name = typeInfo.templateParameterTypes.front().typeName;
+			normalize_variant(p);
+			if(typeInfo.templateParameterTypes.size() > 1)
+			{
+				variant.typeParameters.push_back({});
+				auto &p = variant.typeParameters.back();
+				p.name = typeInfo.templateParameterTypes[1].typeName;
+				normalize_variant(p);
+			}
+		}
+		return;
+	}
+	variant.name = typeInfo.typeName;*/ // Ignore template types
+	/*if(typeInfo.typeName == "variant")
+	{
+		variant.name = "table";
+		if(typeInfo.templateParameterTypes.empty())
+			Con::cwar<<"WARNING: Missing tableT template type"<<Con::endl;
+		else
+		{
+			variant.typeParameters.push_back({});
+			auto &p = variant.typeParameters.back();
+			p.name = typeInfo.templateParameterTypes.front().typeName;
+			normalize_variant(p);
+		}
+		return;
+	}*/
+
+	/*for(auto it=variant.typeParameters.begin();it!=variant.typeParameters.end();)
+	{
+		auto &type = *it;
+		auto newTypes = normalize_type_name(type);
+		it = variant.typeParameters.erase(it);
+		for(auto &newType : newTypes)
+		{
+			normalize_variant(newType);
+			it = variant.typeParameters.insert(it,newType);
+			++it;
+		}
+	}*/
+}
+
+/*static void *get_function_pointer_from_luabind_function(lua_State *l,const luabind::object &lbFunc)
 {
 	lbFunc.push(l);
 	luabind::detail::stack_pop popFunc {l,1};
@@ -471,124 +707,6 @@ static void *get_function_pointer_from_luabind_function(lua_State *l,const luabi
 	if(!tmp)
 		return nullptr;
 	return get_function_pointer_from_luabind_function_object(*tmp);
-}
-
-namespace pragma::os::windows
-{
-	using RVA = uint64_t;
-};
-class SymbolHandler
-{
-public:
-	~SymbolHandler();
-	bool Initialize();
-	std::optional<std::string> FindModule(DWORD64 rva) const;
-	std::optional<std::string> FindAddress(DWORD64 rva) const;
-	std::optional<pragma::os::windows::RVA> FindSymbol(const std::string &symbol) const;
-	std::optional<std::string> FindSource(DWORD64 rva,uint32_t &outLine) const;
-
-	operator bool() const {return m_valid;}
-private:
-	HANDLE m_hProcess = nullptr;
-	bool m_valid = false;
-};
-
-static std::string_view lcp(const std::string_view &str0,const std::string_view &str1)
-{
-	size_t len = 0;
-	size_t i = 0;
-	while(i < str0.length() && i < str1.length())
-	{
-		if(str0[i] != str1[i])
-		{
-			++i;
-			break;
-		}
-		++len;
-		++i;
-	}
-	return std::string_view{str0.data(),len};
-}
-
-static std::vector<std::string> lcp(std::vector<std::string> &strings,std::string &outPrefix)
-{
-	outPrefix = "";
-	if(strings.empty())
-		return {};
-	std::string subStr {};
-	uint32_t n = 0;
-	for(auto i=decltype(strings.size()){0u};i<strings.size();++i)
-	{
-		for(auto j=i +1;j<strings.size();++j)
-		{
-			auto l = lcp(strings[i],strings[j]);
-
-			auto p = l.rfind("_ON_");
-			if(p != std::string::npos)
-				l = l.substr(0,p);
-			else
-			{
-				p = l.rfind('_');
-				if(p != std::string::npos)
-					l = l.substr(0,p);
-			}
-			if(l.length() > subStr.length())
-				subStr = l;
-		}
-	}
-
-	if(subStr.empty())
-	{
-		auto b = std::move(strings.back());
-		strings.pop_back();
-		outPrefix = b;
-		return {std::move(b)};
-	}
-
-	std::vector<std::string> list {};
-	list.reserve(strings.size());
-	for(auto it=strings.begin();it!=strings.end();)
-	{
-		auto &str = *it;
-		if(ustring::compare(str.c_str(),subStr.data(),true,subStr.length()) == false)
-		{
-			++it;
-			continue;
-		}
-		list.push_back(std::move(str));
-		it = strings.erase(it);
-	}
-	outPrefix = subStr;
-	return list;
-}
-
-static std::unordered_map<std::string,std::vector<std::string>> group_by_prefix(std::vector<std::string> &strings)
-{
-	std::unordered_map<std::string,std::vector<std::string>> groupedByPrefix;
-	while(!strings.empty())
-	{
-		std::string prefix;
-		auto list = lcp(strings,prefix);
-		groupedByPrefix[prefix] = std::move(list);
-	}
-	return groupedByPrefix;
-}
-
-static void normalize_enum_type(std::string &enumType)
-{
-	std::vector<std::string> subStrings;
-	ustring::explode(enumType,"_",subStrings);
-	if(subStrings.empty())
-		return;
-	if(subStrings.back().empty())
-		subStrings.pop_back();
-	enumType.clear();
-	for(auto &subStr : subStrings)
-	{
-		ustring::to_lower(subStr);
-		subStr[0] = std::toupper(subStr[0]);
-		enumType += subStr;
-	}
 }
 
 static void strip_base_class_methods(std::unordered_map<luabind::detail::class_rep*,LuaClassInfo> &classInfoList,LuaClassInfo &classInfo,LuaClassInfo &bc)
@@ -616,7 +734,7 @@ static void strip_base_class_methods(std::unordered_map<luabind::detail::class_r
 			{
 				auto &overload = *it;
 				auto itBase = std::find_if(baseClassMethod.overloads.begin(),baseClassMethod.overloads.end(),[&overload](const LuaOverloadInfo &overloadInfoOther) {
-					return overload.parameters == overloadInfoOther.parameters && overload.returnValue == overloadInfoOther.returnValue;
+					return overload.parameters == overloadInfoOther.parameters && overload.returnValues == overloadInfoOther.returnValues;
 				});
 				if(itBase != baseClassMethod.overloads.end())
 					it = methodInfo.overloads.erase(it);
@@ -629,7 +747,7 @@ static void strip_base_class_methods(std::unordered_map<luabind::detail::class_r
 				++itMethod;
 		}
 	}
-}
+}*/
 
 #include "pragma/lua/libraries/lutil.hpp"
 
@@ -683,945 +801,6 @@ static int static_class_gettable(lua_State* L) // Same as luabind::detail::class
 	//return lua_type(interpreter, -1);
 
 	return 1;
-}
-struct ClassRegInfo
-{
-	std::string path;
-	LuaClassInfo classInfo;
-	bool cppDefined = true;
-};
-
-#include <span>
-
-class PdbManager
-{
-public:
-	struct SymbolInfo
-	{
-		struct Source
-		{
-			std::string fileName;
-			uint32_t line;
-		};
-		std::string name;
-		DWORD64 rva = 0;
-		std::optional<Source> source {};
-	};
-
-	~PdbManager();
-	bool Initialize();
-	bool LoadPdb(const std::string &moduleName,const std::string &pdbPath);
-	const std::vector<std::string> &GetModuleNames() const {return m_moduleNames;}
-
-	std::optional<SymbolInfo> FindSymbolByRva(const std::string &moduleName,DWORD64 rva);
-private:
-	struct PdbSession
-	{
-		~PdbSession();
-		std::string pdbPath;
-		IDiaDataSource *source = nullptr;
-		IDiaSession *session = nullptr;
-		IDiaSymbol *globalSymbol = nullptr;
-		IDiaEnumTables *enumTables = nullptr;
-		IDiaEnumSymbolsByAddr *enumSymbolsByAddr = nullptr;
-		operator bool() const {return m_valid;}
-		void SetValid() {m_valid = true;}
-	private:
-		bool m_valid = false;
-	};
-	std::unordered_map<std::string,std::unique_ptr<PdbSession>> m_pdbSessions {};
-	std::vector<std::string> m_moduleNames;
-};
-
-struct LuaDocGenerator
-{
-public:
-	LuaDocGenerator(lua_State *l);
-	void IterateLibraries(luabind::object o,pragma::doc::Collection &collection,pragma::doc::Collection &colTarget);
-	void SetPdbManager(PdbManager *manager) {m_pdbManager = manager;}
-	void SetSymbolHandler(SymbolHandler *symHandler) {m_symbolHandler = symHandler;}
-
-	const std::unordered_map<luabind::detail::class_rep*,pragma::doc::Collection*> &GetClassMap() const {return m_iteratedClasses;}
-private:
-	std::string *LoadFileContents(const std::string &fileName);
-	void IterateLibraries(
-		luabind::object o,const std::string &path,pragma::doc::Collection &collection,
-		pragma::doc::Collection &colTarget
-	);
-	void ParseLuaProperty(const std::string &name,const luabind::object &o,LuaClassInfo &result,bool isMethod);
-	LuaClassInfo GetClassInfo(luabind::detail::class_rep *crep);
-	void AddClass(luabind::detail::class_rep *crep,const std::string &path);
-	void InitializeRepositoryUrls();
-	static std::optional<std::string> GetCommitId(const std::string &repositoryUrl);
-	static std::string BuildRepositoryUrl(const std::string &baseUrl,const std::string &commitUrl);
-	std::optional<std::string> SourceToUrl(const pragma::doc::Source &source);
-	pragma::doc::PCollection ClassInfoToCollection(lua_State *l,const std::string &path,const LuaClassInfo &classInfo);
-	void AddFunction(lua_State *l,pragma::doc::Collection &collection,const LuaMethodInfo &method,bool isMethod=false);
-	
-	void TranslateFunctionLineDefinition(const std::string &fileName,uint32_t &inOutLine);
-	std::optional<std::vector<std::string>> FindFunctionArguments(const std::string &fileName,uint32_t line);
-
-	lua_State *m_luaState = nullptr;
-	std::unordered_map<std::string,std::string> m_cachedFileContents {};
-	std::vector<luabind::object> m_traversed {};
-	std::unordered_map<luabind::detail::class_rep*,ClassRegInfo> m_classRegs;
-	std::unordered_map<luabind::detail::class_rep*,pragma::doc::Collection*> m_iteratedClasses;
-	std::unordered_map<std::string,std::string> m_moduleToRepositoryMap;
-	PdbManager *m_pdbManager = nullptr;
-	SymbolHandler *m_symbolHandler = nullptr;
-};
-
-LuaDocGenerator::LuaDocGenerator(lua_State *l)
-	: m_luaState{l}
-{
-	InitializeRepositoryUrls();
-}
-
-std::optional<std::string> LuaDocGenerator::SourceToUrl(const pragma::doc::Source &source)
-{
-	auto &moduleName = source.moduleName;
-	auto it = m_moduleToRepositoryMap.find(moduleName);
-	if(it != m_moduleToRepositoryMap.end())
-	{
-		auto &repoName = it->second;
-		auto url = repoName +source.fileName +"#L" +std::to_string(source.line);
-		return url;
-	}
-	else
-		Con::cwar<<"WARNING: No repository specified for module '"<<moduleName<<"'!"<<Con::endl;
-	return {};
-}
-
-std::optional<std::string> LuaDocGenerator::GetCommitId(const std::string &repositoryUrl)
-{
-	std::string output;
-	if(!util::start_and_wait_for_command(("git ls-remote " +repositoryUrl +" HEAD").c_str(),nullptr,nullptr,&output))
-		return {};
-	ustring::remove_whitespace(output);
-	if(output.empty())
-		return {};
-	auto t = output.find('\t');
-	if(t == std::string::npos)
-		return {};
-	return output.substr(0,t);
-}
-
-std::string LuaDocGenerator::BuildRepositoryUrl(const std::string &baseUrl,const std::string &commitUrl)
-{
-	auto commitId = GetCommitId(baseUrl);
-	if(!commitId.has_value())
-		commitId = "master";
-	auto url = commitUrl;
-	ustring::replace(url,"%commitid%",*commitId);
-	return baseUrl +url;
-}
-
-void LuaDocGenerator::InitializeRepositoryUrls()
-{
-	m_moduleToRepositoryMap = {
-		{"shared",BuildRepositoryUrl("https://github.com/Silverlan/pragma/","blob/%commitid%/core/shared/")},
-		{"server",BuildRepositoryUrl("https://github.com/Silverlan/pragma/","blob/%commitid%/core/server/")},
-		{"client",BuildRepositoryUrl("https://github.com/Silverlan/pragma/","blob/%commitid%/core/client/")},
-		{"luabind",BuildRepositoryUrl("https://github.com/Silverlan/luabind-deboostified/","blob/%commitid%/")},
-		{"pr_steamworks",BuildRepositoryUrl("https://github.com/Silverlan/pr_steamworks/","blob/%commitid%/")}
-	};
-}
-
-void LuaDocGenerator::IterateLibraries(
-	luabind::object o,const std::string &path,pragma::doc::Collection &collection,
-	pragma::doc::Collection &colTarget
-)
-{
-	auto &traversed = m_traversed;
-	auto &iteratedClasses = m_iteratedClasses;
-	auto &classRegs = m_classRegs;
-	auto *l = o.interpreter();
-	if(std::find(traversed.begin(),traversed.end(),o) != traversed.end())
-		return; // Prevent infinite recursion
-	LuaClassInfo classInfo {};
-	traversed.push_back(o);
-	for(luabind::iterator it{o},end;it!=end;++it)
-	{
-		auto val = *it;
-		auto type = luabind::type(val);
-		if(type == LUA_TTABLE)
-		{
-			auto libName = luabind::object_cast_nothrow<std::string>(it.key(),std::string{});
-			if(path == "package" && libName == "loaded")
-				continue;
-			std::cout<<"LIB: "<<libName<<std::endl;
-			if(libName.empty())
-				std::cout<<"";
-			else
-			{
-				auto subCollection = pragma::doc::Collection::Create();
-				subCollection->SetName(libName);
-				auto subPath = path;
-				if(!subPath.empty())
-					subPath += '.';
-				subPath += libName;
-				collection.AddChild(subCollection);
-				subCollection->SetFlags(subCollection->GetFlags() | pragma::doc::Collection::Flags::Library | pragma::doc::Collection::Flags::AutoGenerated);
-				IterateLibraries(val,subPath,*subCollection,*subCollection);
-			}
-		}
-		else if(type == LUA_TFUNCTION)
-		{
-			auto fcName = luabind::object_cast_nothrow<std::string>(it.key(),std::string{});
-			luabind::detail::function_object * fobj = luabind::get_function_object(val);
-			if(fobj)
-			{
-				std::cout<<"FUN: "<<fcName<<std::endl;
-				ParseLuaProperty(fcName,val,classInfo,false);
-			}
-		}
-		else if(type == LUA_TUSERDATA)
-		{
-			auto *crep = Lua::get_crep(val);
-			if(crep)
-				AddClass(crep,path);
-		}
-	}
-
-	for(auto &methodInfo : classInfo.methods)
-		AddFunction(l,colTarget,methodInfo);
-}
-
-void LuaDocGenerator::AddFunction(lua_State *l,pragma::doc::Collection &collection,const LuaMethodInfo &method,bool isMethod)
-{
-	auto fc = pragma::doc::Function::Create(collection,method.name);
-	fc.SetFlags(pragma::doc::Function::Flags::AutoGenerated);
-	for(auto &overloadInfo : method.overloads)
-	{
-		auto overload = pragma::doc::Overload::Create();
-		for(auto argIdx=decltype(overloadInfo.parameters.size()){0u};argIdx<overloadInfo.parameters.size();++argIdx)
-		{
-			auto &type = overloadInfo.parameters[argIdx];
-			std::string argName = "arg" +std::to_string(argIdx);
-			if(overloadInfo.namedParameters.has_value())
-				argName = (*overloadInfo.namedParameters)[argIdx];
-			auto param = pragma::doc::Parameter::Create(argName);
-			param.SetType(type);
-			overload.AddParameter(param);
-		}
-		if(overloadInfo.returnValue != "void")
-		{
-			auto param = pragma::doc::Parameter::Create("ret1");
-			param.SetType(overloadInfo.returnValue);
-			overload.AddReturnValue(param);
-		}
-		if(overloadInfo.source.has_value())
-		{
-			overload.SetSource(*overloadInfo.source);
-			auto url = SourceToUrl(*overloadInfo.source);
-			if(url.has_value())
-				overload.SetURL(*url);
-		}
-		fc.AddOverload(overload);
-	}
-	auto *en = pragma::get_engine();
-	auto *cl = en->GetClientState();
-	auto *sv = en->GetServerNetworkState();
-	auto *lcl = cl ? cl->GetLuaState() : nullptr;
-	auto *lsv = sv ? sv->GetLuaState() : nullptr;
-	if(l == lcl)
-		fc.SetGameStateFlags(fc.GetGameStateFlags() | pragma::doc::GameStateFlags::Client);
-	if(l == lsv)
-		fc.SetGameStateFlags(fc.GetGameStateFlags() | pragma::doc::GameStateFlags::Server);
-	if(isMethod)
-		fc.SetType(pragma::doc::Function::Type::Method);
-	collection.AddFunction(fc);
-}
-
-pragma::doc::PCollection LuaDocGenerator::ClassInfoToCollection(lua_State *l,const std::string &path,const LuaClassInfo &classInfo)
-{
-	auto collection = pragma::doc::Collection::Create();
-	collection->SetName(classInfo.name);
-	collection->SetFlags(pragma::doc::Collection::Flags::Class);
-
-	/*for(auto *base : classInfo.bases)
-	{
-		// TODO: Base class of base class?
-		std::string dfName = base->name();
-		if(!path.empty())
-			dfName = path +'.' +dfName;
-		auto derivedFrom = pragma::doc::DerivedFrom::Create(dfName);
-		collection->AddDerivedFrom(*derivedFrom);
-	}*/
-
-	for(auto &attr : classInfo.attributes)
-	{
-		auto member = pragma::doc::Member::Create(*collection,attr);
-		member.SetFlags(pragma::doc::Member::Flags::AutoGenerated);
-		collection->AddMember(member);
-	}
-
-	for(auto &method : classInfo.methods)
-		AddFunction(l,*collection,method,true);
-
-	for(auto &ces : classInfo.enumSets)
-	{
-		auto es = pragma::doc::EnumSet::Create(ces.first,collection.get());
-		es->ReserveEnums(ces.second.size());
-		for(auto &pair : ces.second)
-		{
-			auto e = pragma::doc::Enum::Create(*es);
-			e.SetName(pair.first);
-			e.SetValue(std::to_string(pair.second));
-			if(pair.first.find("_BIT_"))
-				e.SetType(pragma::doc::Enum::Type::Bit);
-			else
-				e.SetType(pragma::doc::Enum::Type::Regular);
-			es->AddEnum(std::move(e));
-		}
-		es->SetFlags(pragma::doc::EnumSet::Flags::AutoGenerated);
-		collection->AddEnumSet(es);
-	}
-	return collection;
-}
-
-void LuaDocGenerator::IterateLibraries(luabind::object o,pragma::doc::Collection &collection,pragma::doc::Collection &colTarget)
-{
-	IterateLibraries(o,"",collection,colTarget);
-
-	struct ClassRegTreeItem
-	{
-		ClassRegInfo *regInfo = nullptr;
-		std::string name;
-		std::vector<std::unique_ptr<ClassRegTreeItem>> children;
-	};
-	std::function<void(ClassRegInfo&,ClassRegTreeItem&,const std::span<std::string>&)> addItem = nullptr;
-	addItem = [&addItem](ClassRegInfo &classRegInfo,ClassRegTreeItem &parent,const std::span<std::string> &path) {
-		auto it = std::find_if(parent.children.begin(),parent.children.end(),[&path](const std::unique_ptr<ClassRegTreeItem> &child) {
-			return child->name == path.front();
-		});
-		if(it == parent.children.end())
-		{
-			parent.children.push_back(std::make_unique<ClassRegTreeItem>());
-			auto &child = parent.children.back();
-			child->name = path.front();
-			it = parent.children.end() -1;
-		}
-		if(path.size() == 1)
-		{
-			(*it)->regInfo = &classRegInfo;
-			return;
-		}
-		addItem(classRegInfo,**it,path.subspan(1));
-	};
-	ClassRegTreeItem root {};
-	for(auto &pair : m_classRegs)
-	{
-		std::vector<std::string> pathComponents;
-		ustring::explode(pair.second.path,".",pathComponents);
-		if(pathComponents.empty())
-			pathComponents.push_back("_G");
-		addItem(pair.second,root,pathComponents);
-	}
-	
-	std::function<void(pragma::doc::Collection&,const ClassRegTreeItem&)> classRegToCollection = nullptr;
-	classRegToCollection = [this,&classRegToCollection,&collection](pragma::doc::Collection &parentCollection,const ClassRegTreeItem &item) {
-		for(auto &child : item.children)
-		{
-			pragma::doc::PCollection childCollection = nullptr;
-			auto newCollection = true;
-			if(child->regInfo)
-			{
-				childCollection = ClassInfoToCollection(m_luaState,child->regInfo->path,child->regInfo->classInfo);
-				if(child->regInfo->cppDefined)
-					childCollection->SetFlags(childCollection->GetFlags() | pragma::doc::Collection::Flags::DefinedInCpp);
-				m_iteratedClasses[child->regInfo->classInfo.classRep] = childCollection.get();
-			}
-			else
-			{
-				auto *c = collection.FindChildCollection(child->name);
-				if(c)
-				{
-					newCollection = false;
-					childCollection = c->shared_from_this();
-				}
-				else
-				{
-					childCollection = pragma::doc::Collection::Create();
-					childCollection->SetName(child->name);
-					childCollection->SetFlags(pragma::doc::Collection::Flags::Library);
-				}
-			}
-			if(newCollection)
-			{
-				childCollection->SetFlags(childCollection->GetFlags() | pragma::doc::Collection::Flags::AutoGenerated);
-				parentCollection.AddChild(childCollection);
-			}
-
-			classRegToCollection(*childCollection,*child);
-		}
-	};
-	classRegToCollection(collection,root);
-}
-
-void LuaDocGenerator::AddClass(luabind::detail::class_rep *crep,const std::string &path)
-{
-	auto *l = m_luaState;
-	if(crep->get_class_type() == luabind::detail::class_rep::class_type::lua_class)
-	{
-		/*auto *l = val.interpreter();
-
-		auto x = luabind::detail::is_class_rep(l, -1);
-		auto y = luabind::detail::get_instance(l, -1);
-
-		val.push(l);
-		luabind::detail::stack_pop sp(l,1);
-		luabind::argument a {luabind::from_stack(l,-1)};
-		auto classInfo = luabind::get_class_info(a);
-		std::cout<<"";*/
-	}
-	else
-	{
-		ClassRegInfo info {};
-		info.classInfo = GetClassInfo(crep);
-		
-		auto subPath = path;
-		if(!subPath.empty())
-			subPath += '.';
-		subPath += info.classInfo.name;
-		info.path = subPath;
-
-		auto addNewClass = true;
-		auto it = m_classRegs.find(crep);
-		if(it != m_classRegs.end())
-		{
-			// Found class duplicate; Prioritize the one with the lower number of parents
-			uint32_t numParentsCur = std::count_if(it->second.path.begin(),it->second.path.end(),[](char c) {return c == '.';});
-			if(it->second.path.find('.') == std::string::npos) // Global namespace; Avoid if possible (and choose alternatives instead)
-				numParentsCur = std::numeric_limits<uint32_t>::max();
-			uint32_t numParentsNew = std::count_if(subPath.begin(),subPath.end(),[](char c) {return c == '.';});
-			if(subPath.find('.') == std::string::npos)
-				numParentsNew = std::numeric_limits<uint32_t>::max();
-			if(numParentsNew < numParentsCur)
-			{
-				m_classRegs.erase(it);
-				addNewClass = true;
-			}
-			else
-				addNewClass = false;
-		}
-
-		if(addNewClass)
-		{
-			m_classRegs[crep] = std::move(info);
-
-			crep->get_default_table(l);
-			luabind::object t {luabind::from_stack{l,-1}};
-			for(luabind::iterator it{t},end;it!=end;++it)
-			{
-				auto type = luabind::type(*it);
-				if(type == LUA_TUSERDATA)
-				{
-					auto *crepChild = Lua::get_crep(*it);
-					if(crepChild && crepChild != crep)
-					{
-						auto cpy = it.key();
-						AddClass(crepChild,subPath);
-					}
-				}
-			}
-			Lua::Pop(l,1);
-		}
-	}
-}
-
-LuaClassInfo LuaDocGenerator::GetClassInfo(luabind::detail::class_rep *crep)
-{
-	auto *L = m_luaState;
-	crep->get_table(L);
-	luabind::object table(luabind::from_stack(L, -1));
-	lua_pop(L, 1);
-
-	LuaClassInfo result {};
-	result.classRep = crep;
-	result.name = crep->name();
-
-	for(auto &baseInfo : crep->bases())
-		result.bases.push_back(baseInfo.base);
-
-	for(luabind::iterator i(table), e; i != e; ++i)
-	{
-		if(luabind::type(*i) != LUA_TFUNCTION)
-			continue;
-
-		// We have to create a temporary `object` here, otherwise the proxy
-		// returned by operator->() will mess up the stack. This is a known
-		// problem that probably doesn't show up in real code very often.
-		luabind::object member(*i);
-		member.push(L);
-		luabind::detail::stack_pop pop(L, 1);
-		
-		auto attr = i.key();
-		attr.push(L);
-		if(Lua::IsString(L,-1))
-		{
-			std::string name = Lua::CheckString(L,-1);
-			Lua::Pop(L,1);
-			ParseLuaProperty(name,*i,result,true);
-		}
-	}
-
-	auto &staticConstants = access_class_rep(*crep).m_static_constants;
-	if(!staticConstants.empty())
-	{
-		std::vector<std::string> enums;
-		enums.reserve(staticConstants.size());
-		for(auto &pair : staticConstants)
-			enums.push_back(pair.first);
-		auto prefixedEnumSets = group_by_prefix(enums);
-		for(auto &pair : prefixedEnumSets)
-		{
-			auto esName = pair.first;
-			normalize_enum_type(esName);
-			auto &es = result.enumSets.insert(std::make_pair(esName,LuaClassInfo::EnumSet{})).first->second;
-			for(auto &enumName : pair.second)
-			{
-				auto it = staticConstants.find(enumName.c_str());
-				assert(it != staticConstants.end());
-				es[enumName] = it->second;
-			}
-		}
-	}
-	return result;
-}
-
-static std::vector<std::string> parse_function_argument_names(const std::string_view &argStr)
-{
-	std::vector<std::string> args;
-	ustring::explode(std::string{argStr},",",args);
-	std::vector<std::string> argNames;
-	argNames.reserve(args.size());
-	for(auto &arg : args)
-	{
-		ustring::remove_whitespace(arg);
-		auto pos = arg.find_last_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-		if(pos == std::string::npos)
-			argNames.push_back(arg);
-		else
-			argNames.push_back(arg.substr(pos +1));
-	}
-	return argNames;
-}
-static std::optional<size_t> find_beginning_of_function_definition(const std::string &contents,uint32_t line)
-{
-	size_t p = -1;
-	while(line > 0)
-	{
-		p = contents.find('\n',p +1);
-		if(p == std::string::npos)
-			return {};
-		if(--line == 0)
-			break;
-	}
-	if(p == -1)
-		p = 0;
-
-    std::string_view view = contents;
-    view = view.substr(0,p);
-    auto pe = contents.rfind('\n',p -1);
-	if(pe == std::string::npos)
-		pe = 0;
-    auto strLine = contents.substr(pe +1,p -(pe +1));
-    ustring::remove_whitespace(strLine);
-    if(strLine.back() != '{')
-    {
-        p = std::string::npos;
-        uint32_t depth = 0;
-        p = view.find_last_of("{}");
-        if(p != std::string::npos && view[p] == '{')
-            ++depth;
-        do
-        {
-            if(p == std::string::npos)
-                return {};
-            if(view[p] == '{')
-            {
-                view = view.substr(0,p);
-                if(depth == 0)
-                    return {};
-                if(depth == 1)
-                    break;
-                --depth;
-				p = view.find_last_of("{}");
-                continue;
-            }
-            if(view[p] == '}')
-                ++depth;
-            view = view.substr(0,p);
-            p = view.find_last_of("{}");
-        }
-        while(true);
-    }
-	p = view.find_last_of(")");
-	if(p == std::string::npos)
-		return {};
-	return p;
-}
-static std::optional<std::string_view> find_function_argument_string(const std::string &contents,uint32_t line)
-{
-	auto op = find_beginning_of_function_definition(contents,line);
-	if(!op.has_value())
-		return {};
-	auto p = *op;
-	std::string_view view = contents;
-	view = view.substr(0,p);
-	uint32_t depth = 0;
-	auto argEnd = p;
-	while(true)
-	{
-		p = view.find_last_of("()");
-        
-		if(p == std::string::npos)
-			return {};
-		if(view[p] == '(')
-		{
-			if(depth == 0)
-				break;
-			--depth;
-			view = view.substr(0,p);
-			continue;
-		}
-		if(view[p] == ')')
-			++depth;
-		view = view.substr(0,p);
-	}
-	view = view.substr(p +1,argEnd -p -1);
-	return view;
-}
-void LuaDocGenerator::TranslateFunctionLineDefinition(const std::string &fileName,uint32_t &inOutLine)
-{
-	auto *contents = LoadFileContents(fileName);
-	if(!contents)
-		return;
-	auto pos = find_beginning_of_function_definition(*contents,inOutLine);
-	if(!pos.has_value())
-		return;
-	size_t p = -1;
-	uint32_t line = 0;
-	do
-	{
-		p = contents->find('\n',p +1);
-		if(p < *pos)
-			++line;
-	}
-	while(p < *pos);
-	inOutLine = line +1;
-}
-std::string *LuaDocGenerator::LoadFileContents(const std::string &fileName)
-{
-	auto it = m_cachedFileContents.find(fileName);
-	if(it == m_cachedFileContents.end())
-	{
-		auto f = FileManager::OpenSystemFile(fileName.c_str(),"r");
-		if(!f)
-			return nullptr;
-		auto contents = f->ReadString();
-		m_cachedFileContents[fileName] = std::move(contents);
-		f = nullptr;
-
-		it = m_cachedFileContents.find(fileName);
-	}
-	return &it->second;
-}
-std::optional<std::vector<std::string>> LuaDocGenerator::FindFunctionArguments(const std::string &fileName,uint32_t line)
-{
-	auto *contents = LoadFileContents(fileName);
-	if(!contents)
-		return {};
-	auto view = find_function_argument_string(*contents,line);
-	if(!view.has_value())
-		return {};
-	return parse_function_argument_names(*view);
-}
-
-void LuaDocGenerator::ParseLuaProperty(const std::string &name,const luabind::object &o,LuaClassInfo &result,bool isMethod)
-{
-	auto *L = m_luaState;
-	o.push(L);
-	luabind::detail::stack_pop opop(L, 1);
-	if(lua_tocfunction(L, -1) == &luabind::detail::property_tag)
-		result.attributes.push_back(name);
-	else
-	{
-		result.methods.push_back({});
-		auto &method = result.methods.back();
-		method.name = name;
-
-		auto &omethod = o;
-		luabind::detail::function_object * fobj = luabind::get_function_object(omethod);
-		if(fobj) {
-			luabind::object overloadTable(luabind::newtable(L));
-			const char* function_name = fobj->name.c_str();
-			for(luabind::detail::function_object const* f = fobj; f != 0; f = f->next)
-			{
-				auto *fptr = get_function_pointer_from_luabind_function_object(*f);
-				f->format_signature(L, function_name);
-				luabind::detail::stack_pop pop(L, 1);
-
-				if(Lua::IsString(L,-1))
-				{
-					std::string def = Lua::CheckString(L,-1);
-					auto overloadInfo = parse_function_overload(def,isMethod);
-					if(overloadInfo.has_value())
-					{
-						if(fptr)
-						{
-							auto fAddress = reinterpret_cast<DWORD64>(fptr);
-							uint32_t line;
-							auto fileName = m_symbolHandler->FindSource(fAddress,line);
-							if(!fileName.has_value())
-							{
-								std::optional<std::string> moduleName {};
-								HMODULE hModule = NULL;
-								if(GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
-									   GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-									   (LPCTSTR)fAddress, &hModule))
-								{
-									TCHAR name[MAX_PATH];
-									if(GetModuleBaseName(GetCurrentProcess(),hModule,name,sizeof(name) /sizeof(TCHAR)) != 0)
-									{
-										moduleName = name;
-										ufile::remove_extension_from_filename(*moduleName,std::vector<std::string>{"dll"});
-
-										fAddress -= reinterpret_cast<DWORD64>(hModule);
-									}
-								}
-
-								if(moduleName.has_value())
-								{
-									auto symbol = m_pdbManager->FindSymbolByRva(*moduleName,fAddress);
-									if(symbol.has_value() && symbol->source.has_value())
-									{
-										fileName = symbol->source->fileName;
-										line = symbol->source->line;
-									}
-
-									if(!fileName.has_value())
-										Con::cwar<<"WARNING: Unable to determine function source for "<<fptr<<" ("<<function_name<<") in module "<<*moduleName<<"!"<<Con::endl;
-								}
-								else
-									Con::cwar<<"WARNING: Unable to determine module for function "<<fptr<<" ("<<function_name<<")"<<"!"<<Con::endl;
-							}
-							if(fileName.has_value())
-							{
-								auto args = FindFunctionArguments(*fileName,line);
-								TranslateFunctionLineDefinition(*fileName,line);
-								if(!args.has_value())
-									std::cout<<"";
-								else if(args->size() != overloadInfo->parameters.size())
-									std::cout<<"";
-								else
-									overloadInfo->namedParameters = args;
-
-								auto normalizedFileName = *fileName;
-								ustring::replace(normalizedFileName,"\\","/");
-								auto p = normalizedFileName.rfind("/src/");
-								if(p == std::string::npos)
-									p = normalizedFileName.rfind("/include/");
-								if(p == std::string::npos)
-									p = normalizedFileName.rfind("/luabind/");
-								if(p == std::string::npos)
-									p = normalizedFileName.rfind("/glm/");
-								if(p != std::string::npos)
-								{
-									p = normalizedFileName.rfind("/",p -1);
-									normalizedFileName = normalizedFileName.substr(p);
-								}
-								else
-									std::cout<<"!";
-
-								//auto modName = m_symbolHandler.FindModule(reinterpret_cast<DWORD64>(fptr));
-								//if(modName.has_value())
-								{
-									auto path = util::Path::CreateFile(normalizedFileName);
-									auto modName = path.GetFront();
-									path.PopFront();
-									pragma::doc::Source source {};
-									source.fileName = path.GetString();
-									source.line = line;
-									source.moduleName = std::move(modName);
-									overloadInfo->source = std::move(source);
-								}
-							}
-						}
-						method.overloads.push_back(*overloadInfo);
-					}
-				}
-			}
-		}
-#if 0
-/*
-* static BOOL test_dbg_help(const std::string &szImageName,const std::string &functionName,uint64_t &outRva)
-{
-	SymbolHandler handler {};
-	if(handler.Initialize())
-	{
-
-	{
-	auto &en = *pragma::get_engine();
-	auto *sv = en.GetServerNetworkState();
-		auto *lsv = sv->GetLuaState();
-		luabind::object o = luabind::globals(lsv)["ai"];
-		o = o["create_schedule"];
-
-		auto *fptr = get_function_pointer_from_luabind_function(lsv,o);
-		if(fptr)
-		{
-			uint32_t line;
-			auto fileName = handler.FindSource(reinterpret_cast<DWORD64>(fptr),line);
-			if(fileName.has_value())
-			{
-				std::cout<<"FileName: "<<*fileName<<std::endl;
-			}
-		}
-		
-	}
-}
-*/
-#endif
-	}
-};
-
-class RepositoryManager
-{
-public:
-	static constexpr auto REPOSITORY_CHECKOUT_URL = "https://github.com/Silverlan/pragma.git";
-	static constexpr auto REPOSITORY_URL = "https://github.com/Silverlan/pragma/blob/";
-	static constexpr auto REPOSITORY_BRANCH = "master";
-	static std::unique_ptr<RepositoryManager> Create(lua_State *l,std::string &outErr);
-	bool LoadRepositoryReferences(std::string &outErr);
-private:
-	RepositoryManager()=default;
-	void ClearLocalRepositoryDir();
-	static void CollectSourceCodeFiles(const std::string &sourceCodeLocation,std::vector<std::string> &outFiles);
-
-	using GitClone = bool(*)(
-		const std::string&,const std::string&,
-		const std::vector<std::string>&,const std::string&,std::string&,
-		std::string*
-	);
-
-	GitClone m_gitClone = nullptr;
-	std::string m_repositoryRootDir = "core/";
-	std::string m_tmpRepositoryLocation = "temp/plad_repo/";
-	std::shared_ptr<util::Library> m_gitLib = nullptr;
-};
-
-std::unique_ptr<RepositoryManager> RepositoryManager::Create(lua_State *l,std::string &outErr)
-{
-	constexpr auto MODULE_NAME = "git/pr_git";
-	auto manager = std::unique_ptr<RepositoryManager>{new RepositoryManager{}};
-	manager->m_gitLib = pragma::get_engine()->GetNetworkState(l)->InitializeLibrary(MODULE_NAME);
-	if(!manager->m_gitLib)
-	{
-		outErr = "Unable to load module '" +std::string{MODULE_NAME} +"'!";
-		return nullptr;
-	}
-	constexpr auto GIT_CLONE_FUNC_NAME = "pr_git_clone";
-	manager->m_gitClone = manager->m_gitLib->FindSymbolAddress<GitClone>(GIT_CLONE_FUNC_NAME);
-	if(!manager->m_gitClone)
-	{
-		outErr = "Could not locate symbol '" +std::string{GIT_CLONE_FUNC_NAME} +"' in module '" +std::string{MODULE_NAME} +"'!";
-		return nullptr;
-	}
-	return manager->m_gitClone ? std::move(manager) : nullptr;
-}
-
-void RepositoryManager::CollectSourceCodeFiles(const std::string &sourceCodeLocation,std::vector<std::string> &outFiles)
-{
-	auto offset = outFiles.size();
-	FileManager::FindSystemFiles((sourceCodeLocation +"*.cpp").c_str(),&outFiles,nullptr,true);
-	for(auto i=offset;i<outFiles.size();++i)
-		outFiles[i] = sourceCodeLocation +outFiles[i];
-
-	std::vector<std::string> dirs;
-	FileManager::FindSystemFiles((sourceCodeLocation +"*").c_str(),nullptr,&dirs,true);
-	for(auto &dir : dirs)
-		CollectSourceCodeFiles(sourceCodeLocation +dir +'/',outFiles);
-}
-
-void RepositoryManager::ClearLocalRepositoryDir()
-{
-	// Git-files are read-only by default; We'll have to change permission flags to remove them
-	auto absRepositoryDir = FileManager::GetProgramPath() +'/' +m_tmpRepositoryLocation;
-	try
-	{
-		for(auto &path : std::filesystem::recursive_directory_iterator(absRepositoryDir +".git"))
-		{
-			try {
-				std::filesystem::permissions(path,std::filesystem::perms::all);
-			}
-			catch (std::exception& e) {
-			}           
-		}
-	}
-	catch(const std::filesystem::filesystem_error &err)
-	{
-	}
-	filemanager::remove_directory(m_tmpRepositoryLocation);
-}
-
-bool RepositoryManager::LoadRepositoryReferences(std::string &outErr)
-{
-	std::string rootDir = "core/shared/";
-	std::string localRepositoryDir = "temp/plad_repo/";
-	auto absRepositoryDir = FileManager::GetProgramPath() +'/' +localRepositoryDir;
-
-	ClearLocalRepositoryDir();
-	FileManager::CreatePath(localRepositoryDir.c_str());
-
-	std::string commitId;
-	auto result = m_gitClone(
-		REPOSITORY_CHECKOUT_URL,REPOSITORY_BRANCH,
-		{rootDir +"*.cpp"},absRepositoryDir,outErr,&commitId
-	);
-	util::ScopeGuard sgClearTmpRepo {[this]() {ClearLocalRepositoryDir();}};
-	if(!result)
-		return false;
-
-	std::vector<std::string> files;
-	auto &sourceCodeDir = absRepositoryDir;
-	CollectSourceCodeFiles(sourceCodeDir +rootDir,files);
-	for(auto &fname : files)
-	{
-		if(ufile::get_file_from_filename(fname) == "ldoc.cpp")
-			continue; // Skip this file
-		auto f = FileManager::OpenSystemFile(fname.c_str(),"r");
-		if(!f)
-			continue;
-		auto contents = f->ReadString();
-		f = nullptr;
-		auto pos = contents.find("#PLAD");
-		if(pos == std::string::npos)
-			continue;
-		auto e = contents.find('\n',pos);
-		auto sub = contents.substr(pos +5,e -(pos +5));
-		ustring::remove_whitespace(sub);
-
-		uint32_t lineIdx = 0;
-		size_t c = 0;
-		while(c < pos)
-		{
-			c = contents.find('\n',c);
-			++lineIdx;
-			if(c != std::string::npos)
-				++c;
-		}
-
-		Con::cout<<"Found PLAD ID: "<<sub<<" (Line "<<lineIdx<<")"<<Con::endl;
-
-		auto relPath = fname.substr(sourceCodeDir.length());
-		std::string url = std::string{REPOSITORY_URL} +std::string{REPOSITORY_BRANCH} +"/" +relPath +"#L" +std::to_string(lineIdx);
-		std::string urlCommit = std::string{REPOSITORY_URL} +commitId +"/" +relPath +"#L" +std::to_string(lineIdx);
-		Con::cout<<"URL: "<<url<<Con::endl;
-		Con::cout<<"URL Commit: "<<urlCommit<<Con::endl;
-	}
-	return true;
 }
 
 static void merge_function(pragma::doc::Function &a,const pragma::doc::Function &b)
@@ -1799,167 +978,6 @@ MODULEENTRY32 GetModuleInfo(std::uint32_t ProcessID, const char* ModuleName)
     return {0};
 }
 
-namespace pragma::ai {class Schedule;}
-__declspec(dllexport) std::shared_ptr<pragma::ai::Schedule> testt() {return nullptr;}
-
-__declspec(dllexport) void test_function() {}
-
-static std::string GetLastErrorAsString()
-{
-    //Get the error message ID, if any.
-    DWORD errorMessageID = ::GetLastError();
-    if(errorMessageID == 0) {
-        return std::string(); //No error message has been recorded
-    }
-    
-    LPSTR messageBuffer = nullptr;
-
-    //Ask Win32 to give us the string version of that message ID.
-    //The parameters we pass in, tell Win32 to create the buffer that holds the message for us (because we don't yet know how long the message string will be).
-    size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                                 NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
-    
-    //Copy the error message into a std::string.
-    std::string message(messageBuffer, size);
-    
-    //Free the Win32's string's buffer.
-    LocalFree(messageBuffer);
-            
-    return message;
-}
-
-SymbolHandler::~SymbolHandler()
-{
-
-}
-
-bool SymbolHandler::Initialize()
-{
-    SymSetOptions(/*SYMOPT_UNDNAME | */SYMOPT_DEFERRED_LOADS);
-    m_hProcess = GetCurrentProcess();
-    if(!SymInitialize(m_hProcess,nullptr,TRUE))
-	{
-		Con::cwar<<"WARNING: Unable to initialize symbol handler: "<<GetLastErrorAsString()<<Con::endl;
-		m_valid = false;
-        return false;
-	}
-	m_valid = true;
-	return true;
-}
-
-/*void SymbolHandler::AddModule(const std::string &mod)
-{
-    DWORD64 dwBaseAddr = 0;
-    auto baseAddress = SymLoadModuleEx(
-		m_hProcess, // target process 
-		nullptr, // handle to image - not used
-		mod.c_str(), // name of image file
-		nullptr, // name of module - not required
-		dwBaseAddr, // base address - not required
-		0, // size of image - not required
-		nullptr, // MODLOAD_DATA used for special cases 
-		0
-	);
-	if(baseAddress)
-		m_modules.push_back(baseAddress);
-}*/
-
-static void *get_fptr()
-{
-	if(true)
-		return &testt;
-	auto &en = *pragma::get_engine();
-	auto *sv = en.GetServerNetworkState();
-	if(sv)
-	{
-		auto *lsv = sv->GetLuaState();
-
-		luabind::object o = luabind::globals(lsv)["ai"];
-		o = o["create_schedule"];
-		o.push(lsv);
-
-		lua_CFunction f = lua_tocfunction(lsv,-1);
-		return f;
-	}
-	return nullptr;
-}
-std::optional<std::string> SymbolHandler::FindModule(DWORD64 rva) const
-{
-	if(!*this)
-		return {};
-	IMAGEHLP_MODULE moduleInfo;
-	moduleInfo.SizeOfStruct = sizeof(IMAGEHLP_MODULE);
-	if(SymGetModuleInfo(m_hProcess,rva,&moduleInfo))
-		return moduleInfo.ModuleName;
-	return {};
-}
-std::optional<std::string> SymbolHandler::FindAddress(DWORD64 rva) const
-{
-	if(!*this)
-		return {};
-	DWORD64 dwDisplacement;
-	constexpr uint32_t maxNameLen = 4'096;
-	auto *ptr = new uint8_t[sizeof(SYMBOL_INFO) +maxNameLen +1]; // See https://docs.microsoft.com/en-us/windows/win32/api/dbghelp/ns-dbghelp-symbol_info?redirectedfrom=MSDN
-	util::ScopeGuard sg {[ptr]() {delete[] ptr;}};
-	auto &sym = *reinterpret_cast<SYMBOL_INFO*>(ptr);
-	sym.MaxNameLen = maxNameLen;
-	sym.SizeOfStruct = sizeof(SYMBOL_INFO);
-	if(SymFromAddr(m_hProcess,rva,&dwDisplacement,&sym))
-		return sym.Name;
-	return {};
-}
-std::optional<std::string> SymbolHandler::FindSource(DWORD64 rva,uint32_t &outLine) const
-{
-	if(!*this)
-		return {};
-	IMAGEHLP_LINE64 line;
-	line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
-	DWORD dwDisplacement;
-	if(SymGetLineFromAddr(m_hProcess,rva,&dwDisplacement,&line) == TRUE)
-	{
-		outLine = line.LineNumber;
-		return line.FileName;
-	}
-	else
-		Con::cwar<<"WARNING: "<<GetLastErrorAsString()<<Con::endl;
-	return {};
-}
-std::optional<pragma::os::windows::RVA> SymbolHandler::FindSymbol(const std::string &symbol) const
-{
-	if(!*this)
-		return {};
-	struct SymbolInfo
-	{
-		const SymbolHandler &symbolHandler;
-		std::optional<pragma::os::windows::RVA> rva {};
-	} symbolInfo {*this};
-	auto mask = "*!" +symbol; // See https://docs.microsoft.com/en-us/windows/win32/api/dbghelp/nf-dbghelp-symenumsymbols
-    SymEnumSymbols(m_hProcess, // Process handle from SymInitialize.
-		0, // Base address of module.
-		mask.c_str(), // Name of symbols to match.
-		[](
-			PSYMBOL_INFO pSymInfo,   
-			ULONG SymbolSize,      
-			PVOID UserContext
-		) -> BOOL {
-			auto &symbolInfo = *static_cast<SymbolInfo*>(UserContext);
-			symbolInfo.rva = pSymInfo->Address -pSymInfo->ModBase;
-
-			IMAGEHLP_LINE64 line;
-			DWORD dwDisplacement;
-			if(SymGetLineFromAddr(symbolInfo.symbolHandler.m_hProcess,(DWORD64)testt/*pSymInfo->Address*/,&dwDisplacement,&line) == TRUE)
-			{
-				std::cout<<"LINE: "<<line.FileName<<": "<<line.LineNumber<<std::endl;
-			}
-			else
-				std::cout<<GetLastErrorAsString()<<std::endl;
-			return TRUE;
-		}, // Symbol handler procedure.
-		&symbolInfo
-	);
-	return symbolInfo.rva;
-}
-
 namespace dbg
 {
     class Help
@@ -2047,7 +1065,7 @@ void dbg::Help::LoadSymbolModule()
         // SymLoadModuleEx failed
         DWORD error = GetLastError();
         //printf("SymLoadModuleEx returned error : %d\n", error);
-		std::cout<<"ERR: "<<GetLastErrorAsString()<<std::endl;
+		std::cout<<"ERR: "<<pragma::os::windows::get_last_error_as_string()<<std::endl;
     }
 
     // Enum
@@ -2064,156 +1082,21 @@ void dbg::Help::LoadSymbolModule()
     {
         // SymEnumSymbols failed
         //printf("SymEnumSymbols failed: %d\n", GetLastError());
-        std::cout<<GetLastErrorAsString()<<std::endl;
+        std::cout<<pragma::os::windows::get_last_error_as_string()<<std::endl;
     }
 }
 
+class DLLNETWORK ThisIsATestClass {
+public:
+	ThisIsATestClass()=default;
+};
+ThisIsATestClass test_test_test() {return ThisIsATestClass{};}
+
 #pragma comment(lib,"Dbghelp.lib")
-#pragma comment(lib,"Psapi.lib")
-#pragma comment(lib,"C:/Program Files (x86)/Microsoft Visual Studio 14.0/DIA SDK/lib/amd64/diaguids.lib")
-
-std::string ConvertWCSToMBS(const wchar_t* pstr, long wslen)
-{
-    int len = ::WideCharToMultiByte(CP_ACP, 0, pstr, wslen, NULL, 0, NULL, NULL);
-
-    std::string dblstr(len, '\0');
-    len = ::WideCharToMultiByte(CP_ACP, 0 /* no flags */,
-                                pstr, wslen /* not necessary NULL-terminated */,
-                                &dblstr[0], len,
-                                NULL, NULL /* no default char */);
-
-    return dblstr;
-}
-
-std::string ConvertBSTRToMBS(BSTR bstr)
-{
-    int wslen = ::SysStringLen(bstr);
-    return ConvertWCSToMBS((wchar_t*)bstr, wslen);
-}
-
-PdbManager::PdbSession::~PdbSession()
-{
-	if(enumSymbolsByAddr)
-		enumSymbolsByAddr->Release();
-	if(enumTables)
-		enumTables->Release();
-	if(globalSymbol)
-		globalSymbol->Release();
-	if(session)
-		session->Release();
-	if(source)
-		source->Release();
-}
-PdbManager::~PdbManager()
-{
-	m_pdbSessions.clear();
-	CoUninitialize();
-}
-bool PdbManager::Initialize()
-{
-	CoInitializeEx(nullptr,COINIT_MULTITHREADED); // If failed, was probably already initialized, so we're ignoring the return value (we still have to call CoUnInitialize either way)
-	return true;
-}
-
-bool PdbManager::LoadPdb(const std::string &moduleName,const std::string &pdbPath)
-{
-	auto sessionInfo = std::unique_ptr<PdbSession>{new PdbSession{}};
-	auto hr = CoCreateInstance(
-		CLSID_DiaSource,
-		nullptr,
-		CLSCTX_INPROC_SERVER,
-		__uuidof(IDiaDataSource),
-		(void**)&sessionInfo->source
-	);
-	if(FAILED(hr))
-		return false;
-
-	wchar_t wszFilename[_MAX_PATH];
-	mbstowcs(wszFilename,pdbPath.data(),sizeof(wszFilename) /sizeof(wszFilename[0]));
-	if(FAILED(sessionInfo->source->loadDataFromPdb(wszFilename)))
-	{
-		if(FAILED(sessionInfo->source->loadDataForExe(wszFilename,nullptr,nullptr)))
-			return false;
-	}
-
-	if(FAILED(sessionInfo->source->openSession(&sessionInfo->session))) 
-		return false;
-	if(FAILED(sessionInfo->session->get_globalScope(&sessionInfo->globalSymbol)))
-		return false;
-	if(FAILED(sessionInfo->session->getEnumTables(&sessionInfo->enumTables)))
-		return false;
-	if(FAILED(sessionInfo->session->getSymbolsByAddr(&sessionInfo->enumSymbolsByAddr)))
-		return false;
-	sessionInfo->SetValid();
-	m_pdbSessions[moduleName] = std::move(sessionInfo);
-	m_moduleNames.push_back(moduleName);
-	return true;
-}
-
-std::optional<PdbManager::SymbolInfo> PdbManager::FindSymbolByRva(const std::string &moduleName,DWORD64 rva)
-{
-	auto it = m_pdbSessions.find(moduleName);
-	if(it == m_pdbSessions.end() || !*it->second)
-		return {};
-	IDiaSymbol *symbol;
-	auto &sessionInfo = *it->second;
-	if(sessionInfo.session->findSymbolByRVA(rva,SymTagEnum::SymTagFunction,&symbol) != S_OK)
-	{
-		if(sessionInfo.session->findSymbolByRVA(rva,SymTagEnum::SymTagPublicSymbol,&symbol) != S_OK)
-			return {};
-		// Found as a public symbol; Try to find private symbol
-		DWORD targetRva;
-		if(symbol->get_targetRelativeVirtualAddress(&targetRva) != S_OK || sessionInfo.session->findSymbolByRVA(targetRva,SymTagEnum::SymTagFunction,&symbol) != S_OK)
-			return {};
-		rva = targetRva;
-	}
-	DWORD symTag;
-	if(symbol->get_symTag(&symTag) != S_OK || symTag != SymTagFunction)
-		return {};
-	SymbolInfo symbolInfo {};
-
-	BSTR name;
-	if(symbol->get_name(&name) == S_OK)
-		symbolInfo.name = ConvertBSTRToMBS(name);
-	symbolInfo.rva = rva;
-
-	ULONGLONG length = 0;
-	if(symbol->get_length(&length) == S_OK)
-	{
-		IDiaEnumLineNumbers *lineNums[100];
-		if(sessionInfo.session->findLinesByRVA(rva,length,lineNums) == S_OK)
-		{
-			auto &l = lineNums[0];
-			IDiaLineNumber *lineNum;
-			ULONG fetched = 0;
-			for(uint8_t i=0;i<5;++i)
-			{
-				if(l->Next(i,&lineNum,&fetched) == S_OK && fetched == 1)
-				{
-					DWORD l;
-					IDiaSourceFile *srcFile;
-					if(lineNum->get_sourceFile(&srcFile) == S_OK)
-					{
-						BSTR fileName;
-						srcFile->get_fileName(&fileName);
-						if(lineNum->get_lineNumber(&l) == S_OK)
-						{
-							symbolInfo.source = SymbolInfo::Source{};
-							symbolInfo.source->fileName = ConvertBSTRToMBS(fileName);
-							symbolInfo.source->line = l;
-							break;
-						}
-					}
-				}
-			}
-		}
-	}
-	symbol->Release();
-	return symbolInfo;
-}
 
 #include <luabind/make_function.hpp>
 #include "pragma/lua/libraries/lasset.hpp"
+
 static void autogenerate()
 {
 	g_typeWarningCache.clear();
@@ -2241,24 +1124,79 @@ static void autogenerate()
 	if(luaStates.empty())
 		return;
 
-	PdbManager pdbManager {};
+	const std::unordered_map<std::string,std::string> pdbModules = {
+		{"server","E:/projects/pragma/build_winx64/core/server/RelWithDebInfo/server.pdb"},
+		{"client","E:/projects/pragma/build_winx64/core/client/RelWithDebInfo/client.pdb"},
+		{"shared","E:/projects/pragma/build_winx64/core/shared/RelWithDebInfo/shared.pdb"},
+		{"mathutil","E:/projects/pragma/build_winx64/external_libs/mathutil/RelWithDebInfo/mathutil.pdb"},
+		{"sharedutils","E:/projects/pragma/build_winx64/external_libs/sharedutils/RelWithDebInfo/sharedutils.pdb"}
+	};
+	pragma::lua::PdbManager pdbManager {};
 	if(pdbManager.Initialize())
 	{
 		// TODO: Determine the paths automatically somehow?
-		pdbManager.LoadPdb("server","E:/projects/pragma/build_winx64/core/server/RelWithDebInfo/server.pdb");
-		pdbManager.LoadPdb("client","E:/projects/pragma/build_winx64/core/client/RelWithDebInfo/client.pdb");
-		pdbManager.LoadPdb("shared","E:/projects/pragma/build_winx64/core/shared/RelWithDebInfo/shared.pdb");
-		pdbManager.LoadPdb("mathutil","E:/projects/pragma/build_winx64/external_libs/mathutil/RelWithDebInfo/mathutil.pdb");
-		pdbManager.LoadPdb("sharedutils","E:/projects/pragma/build_winx64/external_libs/sharedutils/RelWithDebInfo/sharedutils.pdb");
+		for(auto &pair : pdbModules)
+			pdbManager.LoadPdb(pair.first,pair.second);
 	}
-
-	SymbolHandler symHandler {};
-	symHandler.Initialize();
+	
+	pragma::lua::TypeNameManager typeManager {};
 	for(auto &stateInfo : luaStates)
 	{
 		auto *L = stateInfo.l;
-		auto* reg = luabind::detail::class_registry::get_registry(L);
-		auto& classes = reg->get_classes();
+
+		auto *reg = luabind::detail::class_registry::get_registry(L);
+		auto &classes = reg->get_classes();
+		for(auto &pair : classes)
+		{
+			static_assert(sizeof(luabind::type_id) == sizeof(std::type_info*));
+			auto &typeInfo = **(reinterpret_cast<std::type_info* const *>(&pair.second->type()));
+			typeManager.RegisterType(typeInfo,*pair.second);
+		}
+	}
+
+	pragma::lua::SymbolHandler symHandler {};
+	symHandler.Initialize();
+	for(auto &stateInfo : luaStates)
+	{
+		//
+		/*for(auto &pair : pdbModules)
+		{
+			auto begin = pdbManager.begin(pair.first);
+			auto end = pdbManager.end();
+			for(auto it=begin;it!=end;++it)
+			{
+				auto &symbol = *it;
+				if(symbol.GetTag() != pragma::lua::SymTag::PublicSymbol)
+					continue;
+				auto name = symbol.GetName();
+				if(!name.has_value())
+					continue;
+				auto itType = typeList.find(*name);
+				if(itType == typeList.end())
+					continue;
+				itType->second = "LuaType";
+			}
+		}
+
+
+
+		Con::cout<<"Found:"<<Con::endl;
+		for(auto &pair : typeList)
+		{
+			Con::cout<<pair.first<<": ";
+			if(!pair.second.has_value())
+				Con::cout<<"n/a";
+			else
+				Con::cout<<*pair.second;
+			Con::cout<<Con::endl;
+		}
+		for(auto &pair : typeList)
+			Con::cout<<pair.first<<Con::endl;
+		Con::cout<<Con::endl;*/
+		//
+
+		
+		auto *L = stateInfo.l;
 
 		auto rootCol = pragma::doc::Collection::Create();
 		std::string rootColName = "root";
@@ -2268,10 +1206,16 @@ static void autogenerate()
 		gCol->SetFlags(gCol->GetFlags() | pragma::doc::Collection::Flags::AutoGenerated);
 		rootCol->AddChild(gCol);
 		
-		LuaDocGenerator docGenerator {L};
+		pragma::lua::LuaDocGenerator docGenerator {L};
 		docGenerator.SetPdbManager(&pdbManager);
 		docGenerator.SetSymbolHandler(&symHandler);
+		docGenerator.SetTypeManager(&typeManager);
 		docGenerator.IterateLibraries(luabind::globals(L),*rootCol,*gCol);
+
+		// All class information has now been collected, so we have the full type names for all registered types now, which we
+		// need to generate the correct parameters and return values for our methods.
+		docGenerator.PopulateMethods(L);
+		//
 
 		auto &classMap = docGenerator.GetClassMap();
 		for(auto &pair : classMap)
@@ -2294,6 +1238,21 @@ static void autogenerate()
 		}
 		rootCol->StripBaseDefinitionsFromDerivedCollections();
 		stateInfo.collection = rootCol;
+	}
+
+	auto &assignedTypes = typeManager.GetAssignedTypes();
+	for(auto &pair : typeManager.GetTypes())
+	{
+		if(pair.second->bestMatch.has_value())
+			continue;
+		Con::cwar<<"WARNING: Unassigned type '"<<pair.second->luaName<<"' ("<<pair.second->name<<")"<<Con::endl;
+	}
+	for(auto &pair : assignedTypes)
+	{
+		if(!pair.second)
+			continue;
+		auto *ti = typeManager.GetTypeInfo(pair.second);
+		Con::cout<<pair.first<<" = "<<ti->luaName<<" ("<<ti->name<<")"<<Con::endl;
 	}
 
 	// Merge collections from all Lua states
@@ -2341,7 +1300,7 @@ static void autogenerate()
 
 	// Translate parameter and return types
 	std::function<void(pragma::doc::Collection&)> translateCollectionTypes = nullptr;
-	translateCollectionTypes = [&translateCollectionTypes](pragma::doc::Collection &col) {
+	translateCollectionTypes = [&translateCollectionTypes,&typeManager](pragma::doc::Collection &col) {
 		auto isClass = umath::is_flag_set(col.GetFlags(),pragma::doc::Collection::Flags::Class);
 		auto &functions = col.GetFunctions();
 		for(auto &f : functions)
@@ -2350,22 +1309,29 @@ static void autogenerate()
 			for(auto &overload : overloads)
 			{
 				auto &params = overload.GetParameters();
-				for(auto &param : params)
+				for(auto it=params.begin();it!=params.end();)
 				{
-					auto type = param.GetType();
-					normalize_param_name(type);
-					param.SetType(type);
+					auto &param = *it;
+					auto variant = param.GetType();
+					if(variant.name == "lua_State")
+					{
+						it = params.erase(it);
+						continue;
+					}
+					normalize_variant(typeManager,variant);
+					param.SetType(std::move(variant));
+					++it;
 				}
-				if(!params.empty() && params.front().GetType() == "lua_State")
+				if(!params.empty() && params.front().GetType().name == "lua_State")
 					params.erase(params.begin());
 				auto isMethod = isClass;
 				if(isMethod && !params.empty())
 					params.erase(params.begin());
 				for(auto &ret : overload.GetReturnValues())
 				{
-					auto type = ret.GetType();
-					normalize_param_name(type);
-					ret.SetType(type);
+					auto variant = ret.GetType();
+					normalize_variant(typeManager,variant);
+					ret.SetType(std::move(variant));
 				}
 			}
 		}
@@ -2374,8 +1340,8 @@ static void autogenerate()
 		for(auto &member : members)
 		{
 			auto type = member.GetType();
-			normalize_param_name(type);
-			member.SetType(type);
+			normalize_type_name(typeManager,type.name);
+			member.SetType(std::move(type));
 		}
 
 		for(auto &child : col.GetChildren())
@@ -2385,7 +1351,7 @@ static void autogenerate()
 	//
 	
 	std::string err;
-	auto repoMan = RepositoryManager::Create(luaStates.front().l,err);
+	auto repoMan = pragma::lua::RepositoryManager::Create(luaStates.front().l,err);
 	if(repoMan)
 	{
 		if(!repoMan->LoadRepositoryReferences(err))
@@ -2538,7 +1504,22 @@ static void autogenerate()
 	filemanager::create_path(Lua::doc::FILE_LOCATION);
 	udmData = udm::Data::Create();
 	rootCol->Save(udmData->GetAssetData(),err);
+	try
+	{
 	udmData->SaveAscii(docLocation);
+	}
+	catch(const udm::Exception &e)
+	{
+		std::cout<<e.what()<<std::endl;
+	}
+	catch(const std::exception &e)
+	{
+		std::cout<<e.what()<<std::endl;
+	}
+	catch(...)
+	{
+		std::cout<<"Unknown!"<<std::endl;
+	}
 	Lua::doc::reset();
 
 #if 0
@@ -2594,7 +1575,9 @@ void Lua::doc::register_library(Lua::Interface &lua)
 			return 1;
 		})},
 		{"autogenerate",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-			autogenerate();
+			pragma::get_engine()->AddCallback("Think",FunctionCallback<void>::Create([]() {
+				autogenerate();
+			}));
 			return 0;
 		})},
 		{"generate_lad_assets",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
@@ -2741,8 +1724,8 @@ void Lua::doc::register_library(Lua::Interface &lua)
 	cdefMember.def("GetFullName",static_cast<void(*)(lua_State*,pragma::doc::Member&)>([](lua_State *l,pragma::doc::Member &member) {
 		Lua::PushString(l,member.GetFullName());
 	}));
-	cdefMember.def("GetType",static_cast<void(*)(lua_State*,pragma::doc::Member&)>([](lua_State *l,pragma::doc::Member &member) {
-		Lua::PushString(l,member.GetType());
+	cdefMember.def("GetType",static_cast<pragma::doc::Variant*(*)(lua_State*,pragma::doc::Member&)>([](lua_State *l,pragma::doc::Member &member) {
+		return &const_cast<pragma::doc::Variant&>(member.GetType());
 	}));
 	cdefMember.def("GetWikiURL",static_cast<void(*)(lua_State*,pragma::doc::Member&)>([](lua_State *l,pragma::doc::Member &member) {
 		Lua::PushString(l,member.GetWikiURL());

@@ -17,6 +17,8 @@ static auto s_bExtendedModules = false;
 void Lua::set_extended_lua_modules_enabled(bool b) {s_bExtendedModules = b;}
 bool Lua::get_extended_lua_modules_enabled() {return s_bExtendedModules;}
 
+DLLNETWORK const Lua::object Lua::nil {};
+
 void Lua::initialize_lua_state(Lua::Interface &lua)
 {
 	// See http://www.lua.org/source/5.3/linit.c.html

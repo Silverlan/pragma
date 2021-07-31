@@ -16,7 +16,7 @@ std::vector<std::pair<BaseEntity*,float>> util::cmd::get_sorted_entities(Game &g
 	game.GetEntities(&entities);
 
 	std::vector<std::pair<BaseEntity*,float>> sortedEntities {};
-	auto charComponent = (pl != nullptr) ? pl->GetEntity().GetCharacterComponent() : util::WeakHandle<pragma::BaseCharacterComponent>{};
+	auto charComponent = (pl != nullptr) ? pl->GetEntity().GetCharacterComponent() : pragma::ComponentHandle<pragma::BaseCharacterComponent>{};
 	sortedEntities.reserve(entities->size());
 	for(auto *ent : *entities)
 	{

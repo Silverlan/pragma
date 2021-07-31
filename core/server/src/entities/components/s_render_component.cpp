@@ -18,7 +18,7 @@ void SRenderComponent::SendData(NetPacket &packet,networking::ClientRecipientFil
 {
 	packet->Write<decltype(m_renderFlags)>(m_renderFlags);
 }
-luabind::object SRenderComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SRenderComponentHandleWrapper>(l);}
+void SRenderComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void SRenderComponent::SetUnlit(bool b)
 {
 	BaseRenderComponent::SetUnlit(b);

@@ -20,7 +20,7 @@ namespace pragma
 		void SetMapIndex(unsigned int idx);
 		unsigned int GetMapIndex() const;
 
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	protected:
 		uint32_t m_mapIndex = 0u;
 	};

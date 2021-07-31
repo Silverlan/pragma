@@ -96,7 +96,7 @@ namespace pragma
 		virtual void OnPhysicsInitialized();
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 
-		util::WeakHandle<pragma::BaseOwnableComponent> m_whOwnerComponent = {};
+		ComponentHandle<pragma::BaseOwnableComponent> m_whOwnerComponent = {};
 		float m_tDeploy = 0.f;
 		float m_tNextPrimaryAttack = 0.f;
 		float m_tNextSecondaryAttack = 0.f;

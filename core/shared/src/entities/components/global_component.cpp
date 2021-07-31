@@ -33,7 +33,7 @@ void GlobalNameComponent::Initialize()
 
 const std::string &GlobalNameComponent::GetGlobalName() const {return m_globalName;}
 void GlobalNameComponent::SetGlobalName(const std::string &name) {m_globalName = name;}
-luabind::object GlobalNameComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<GlobalNameComponentHandleWrapper>(l);}
+void GlobalNameComponent::InitializeLuaObject(lua_State *l) {pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void GlobalNameComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {

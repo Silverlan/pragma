@@ -29,7 +29,7 @@ namespace pragma
 		virtual CMaterial *GetWaterMaterial() const override;
 		void SetWaterObject(CWaterComponent *ent);
 		CModelSubMesh *GetWaterSurfaceMesh() const;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual const Vector3 &GetPosition() const override;
 		virtual const Quat &GetOrientation() const override;
 		virtual void OnEntitySpawn() override;
@@ -37,7 +37,7 @@ namespace pragma
 		std::shared_ptr<PhysWaterSurfaceSimulator> m_surfaceSimulator = nullptr;
 		mutable std::weak_ptr<CModelSubMesh> m_waterSurfaceMesh = {};
 		CallbackHandle m_cbRenderSurface = {};
-		util::WeakHandle<CWaterComponent> m_hFuncWater = {};
+		ComponentHandle<CWaterComponent> m_hFuncWater = {};
 		void UpdateSurfaceMesh();
 		void InitializeSurface();
 		void DestroySurface();

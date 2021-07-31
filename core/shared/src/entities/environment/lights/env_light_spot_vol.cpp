@@ -67,7 +67,7 @@ void BaseEnvLightSpotVolComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32
 	m_hSpotlightTarget = util::read_udm_entity(*this,udm["spotlightTarget"]);
 }
 
-BaseEntity *BaseEnvLightSpotVolComponent::GetSpotlightTarget() const {return m_hSpotlightTarget.get();}
+BaseEntity *BaseEnvLightSpotVolComponent::GetSpotlightTarget() const {return const_cast<BaseEntity*>(m_hSpotlightTarget.get());}
 
 void BaseEnvLightSpotVolComponent::SetSpotlightTarget(BaseEntity &ent)
 {

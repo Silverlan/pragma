@@ -34,7 +34,7 @@ void SCharacterComponent::Initialize()
 	});
 }
 void SCharacterComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BaseCharacterComponent));}
-luabind::object SCharacterComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SCharacterComponentHandleWrapper>(l);}
+void SCharacterComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void SCharacterComponent::OnTick(double tDelta)
 {
 	BaseCharacterComponent::OnTick(tDelta);

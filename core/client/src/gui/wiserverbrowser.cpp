@@ -281,7 +281,7 @@ void WIServerBrowser::Initialize()
 	{
 		buttonRefresh->SetText(Locale::GetText("refresh"));
 		auto hServerBrowser = GetHandle();
-		buttonRefresh->AddCallback("OnPressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hServerBrowser](util::EventReply *reply) -> CallbackReturnType {
+		buttonRefresh->AddCallback("OnPressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hServerBrowser](util::EventReply *reply) mutable -> CallbackReturnType {
 			*reply = util::EventReply::Handled;
 			if(!hServerBrowser.IsValid())
 				return CallbackReturnType::HasReturnValue;
@@ -296,14 +296,14 @@ void WIServerBrowser::Initialize()
 	{
 		buttonConnect->SetText(Locale::GetText("connect"));
 		auto hServerBrowser = GetHandle();
-		buttonConnect->AddCallback("OnPressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this,hServerBrowser](util::EventReply *reply) -> CallbackReturnType {
+		buttonConnect->AddCallback("OnPressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this,hServerBrowser](util::EventReply *reply) mutable -> CallbackReturnType {
 			*reply = util::EventReply::Handled;
 			if(!hServerBrowser.IsValid())
 				return CallbackReturnType::HasReturnValue;
 			auto *sb = hServerBrowser.get<WIServerBrowser>();
 			if(!sb->m_hServerList.IsValid())
 				return CallbackReturnType::HasReturnValue;
-			WITable *t = sb->m_hServerList.get<WITable>();
+			auto *t = sb->m_hServerList.get<WITable>();
 			if(t == nullptr)
 				return CallbackReturnType::HasReturnValue;
 			auto hRow = t->GetFirstSelectedRow();

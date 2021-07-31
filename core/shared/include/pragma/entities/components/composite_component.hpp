@@ -61,7 +61,7 @@ namespace pragma
 		const CompositeGroup &GetRootCompositeGroup() const {return const_cast<CompositeComponent*>(this)->GetRootCompositeGroup();}
 		void ClearEntities(bool safely=true);
 
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	protected:
 		std::unique_ptr<CompositeGroup> m_rootGroup = nullptr;
 	};

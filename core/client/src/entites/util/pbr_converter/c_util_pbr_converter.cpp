@@ -41,7 +41,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(util_pbr_converter,CUtilPBRConverter);
 
-luabind::object CPBRConverterComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CPBRConverterComponentHandleWrapper>(l);}
+void CPBRConverterComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void CPBRConverterComponent::Initialize()
 {
@@ -145,7 +145,7 @@ void CPBRConverterComponent::ScheduleModelUpdate(Model &mdl,bool updateMetalness
 		updateInfo.updateAmbientOcclusion = *updateAOInfo;
 	auto hEnt = optEnt ? optEnt->GetHandle() : EntityHandle{};
 	auto cb = mdl.CallOnMaterialsLoaded([this,&mdl,&updateInfo,hEnt]() {
-		UpdateModel(mdl,updateInfo,hEnt.get());
+		UpdateModel(mdl,updateInfo,const_cast<BaseEntity*>(hEnt.get()));
 	});
 	if(cb.IsValid())
 		updateInfo.cbOnMaterialsLoaded = cb;

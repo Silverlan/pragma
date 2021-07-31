@@ -17,7 +17,7 @@ namespace pragma
 	{
 	public:
 		SFilterNameComponent(BaseEntity &ent) : BaseFilterNameComponent(ent) {}
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 

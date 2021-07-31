@@ -10,7 +10,7 @@
 
 using namespace pragma;
 
-luabind::object CParentComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CParentComponentHandleWrapper>(l);}
+void CParentComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CParentComponent::OnRemove()
 {
 	BaseParentComponent::OnRemove();

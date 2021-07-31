@@ -31,7 +31,7 @@ void SPhysicsComponent::SendData(NetPacket &packet,networking::ClientRecipientFi
 	packet->Write<unsigned int>(static_cast<unsigned int>(m_physicsType));
 	packet->Write<uint32_t>(static_cast<uint32_t>(GetMoveType()));
 }
-luabind::object SPhysicsComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SPhysicsComponentHandleWrapper>(l);}
+void SPhysicsComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void SPhysicsComponent::SetKinematic(bool b)
 {

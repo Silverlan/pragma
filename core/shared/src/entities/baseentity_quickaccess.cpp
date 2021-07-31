@@ -23,7 +23,7 @@
 #include "pragma/entities/components/base_render_component.hpp"
 #include "pragma/model/model.h"
 
-util::WeakHandle<pragma::BaseEntityComponent> BaseEntity::AddNetworkedComponent(const std::string &name)
+pragma::ComponentHandle<pragma::BaseEntityComponent> BaseEntity::AddNetworkedComponent(const std::string &name)
 {
 	auto c = FindComponent(name);
 	if(c.valid())

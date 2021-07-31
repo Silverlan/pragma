@@ -14,7 +14,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(point_target,PointTarget);
 
-luabind::object SPointTargetComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SPointTargetComponentHandleWrapper>(l);}
+void SPointTargetComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void PointTarget::Initialize()
 {

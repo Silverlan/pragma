@@ -76,7 +76,7 @@ namespace pragma
 	protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 		virtual void InitializeLight(BaseEntityComponent &component);
-		util::WeakHandle<BaseEntityComponent> m_hLight = {};
+		ComponentHandle<BaseEntityComponent> m_hLight = {};
 
 		util::pragma::LightType m_lightType = util::pragma::LightType::Undefined;
 		ShadowType m_shadowType = ShadowType::Full;

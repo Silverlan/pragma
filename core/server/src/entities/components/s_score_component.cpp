@@ -22,7 +22,7 @@ void SScoreComponent::Initialize()
 	}),CallbackType::Component,this);
 }
 
-luabind::object SScoreComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SScoreComponentHandleWrapper>(l);}
+void SScoreComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void SScoreComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {

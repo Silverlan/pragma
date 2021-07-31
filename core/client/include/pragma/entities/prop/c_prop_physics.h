@@ -19,7 +19,7 @@ namespace pragma
 	public:
 		CPropPhysicsComponent(BaseEntity &ent) : BasePropPhysicsComponent(ent) {}
 		virtual void Initialize() override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	protected:
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 	};

@@ -24,7 +24,7 @@ public:
 	struct DLLCLIENT WaterScene
 	{
 		~WaterScene();
-		util::WeakHandle<pragma::CSceneComponent> sceneReflection = {};
+		util::TWeakSharedHandle<pragma::CSceneComponent> sceneReflection = {};
 		std::shared_ptr<prosper::IBuffer> settingsBuffer = nullptr;
 
 		// Fog

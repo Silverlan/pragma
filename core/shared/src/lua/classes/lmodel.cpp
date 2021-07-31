@@ -1083,8 +1083,8 @@ void Lua::Model::register_class(
 	classDefSkeleton.def("LookupBone",&Lua::Skeleton::LookupBone);
 	classDefSkeleton.def("AddBone",static_cast<std::shared_ptr<::Bone>(*)(lua_State*,::Skeleton&,const std::string&,::Bone&)>(&Lua::Skeleton::AddBone));
 	classDefSkeleton.def("AddBone",static_cast<std::shared_ptr<::Bone>(*)(lua_State*,::Skeleton&,const std::string&)>(&Lua::Skeleton::AddBone));
-	classDefSkeleton.def("GetBoneCount",&Lua::Skeleton::GetBoneCount);
-	classDefSkeleton.def("Merge",&Lua::Skeleton::Merge);
+	classDefSkeleton.def("GetBoneCount",&::Skeleton::GetBoneCount);
+	classDefSkeleton.def("Merge",&::Skeleton::Merge);
 	classDefSkeleton.def("ClearBones",&Lua::Skeleton::ClearBones);
 	classDefSkeleton.def("MakeRootBone",Lua::Skeleton::MakeRootBone);
 	classDefSkeleton.def("GetBoneHierarchy",Lua::Skeleton::GetBoneHierarchy);

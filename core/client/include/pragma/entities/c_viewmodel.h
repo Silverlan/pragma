@@ -24,7 +24,7 @@ namespace pragma
 		const Vector3 &GetViewModelOffset() const;
 		void SetViewFOV(float fov);
 		float GetViewFOV() const;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 
 		CPlayerComponent *GetPlayer();
 		CWeaponComponent *GetWeapon();

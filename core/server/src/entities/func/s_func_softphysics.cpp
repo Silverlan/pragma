@@ -20,7 +20,7 @@ void SFuncSoftPhysicsComponent::SendData(NetPacket &packet,networking::ClientRec
 	packet->Write<PhysSoftBodyInfo>(m_softBodyInfo);
 }
 
-luabind::object SFuncSoftPhysicsComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SFuncSoftPhysicsComponentHandleWrapper>(l);}
+void SFuncSoftPhysicsComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 ////////
 

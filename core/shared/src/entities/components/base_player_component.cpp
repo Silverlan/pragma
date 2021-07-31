@@ -601,14 +601,14 @@ OBSERVERMODE BasePlayerComponent::GetObserverMode() const {return *m_obsMode;}
 const util::PEnumProperty<OBSERVERMODE> &BasePlayerComponent::GetObserverModeProperty() const {return m_obsMode;}
 void BasePlayerComponent::SetObserverTarget(BaseObservableComponent *ent)
 {
-	m_hEntObserverTarget = {};
+	m_hEntObserverTarget = pragma::ComponentHandle<pragma::BaseObservableComponent>{};
 	if(ent == nullptr)
 		return;
 	m_hEntObserverTarget = ent->GetHandle<BaseObservableComponent>();
 }
 BaseObservableComponent *BasePlayerComponent::GetObserverTarget() const
 {
-	auto *r = m_hEntObserverTarget.get();
+	auto *r = const_cast<BaseObservableComponent*>(m_hEntObserverTarget.get());
 	if(r == nullptr)
 	{
 		auto pObsComponent = GetEntity().FindComponent("observable");

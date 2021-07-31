@@ -61,7 +61,7 @@ CWaterSurfaceComponent::~CWaterSurfaceComponent()
 
 void CWaterSurfaceComponent::SetWaterObject(CWaterComponent *ent)
 {
-	m_hFuncWater = (ent != nullptr) ? ent->GetHandle<CWaterComponent>() : util::WeakHandle<CWaterComponent>{};
+	m_hFuncWater = (ent != nullptr) ? ent->GetHandle<CWaterComponent>() : pragma::ComponentHandle<CWaterComponent>{};
 	if(ent != nullptr && ent->IsWaterSceneValid())
 		InitializeWaterScene(ent->GetWaterScene());
 }
@@ -195,7 +195,7 @@ void CWaterSurfaceComponent::DestroySurface()
 	if(m_cbRenderSurface.IsValid())
 		m_cbRenderSurface.Remove();
 }
-luabind::object CWaterSurfaceComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CWaterSurfaceComponentHandleWrapper>(l);}
+void CWaterSurfaceComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 const Vector3 &CWaterSurfaceComponent::GetPosition() const
 {
 	auto pTrComponent = GetEntity().GetTransformComponent();

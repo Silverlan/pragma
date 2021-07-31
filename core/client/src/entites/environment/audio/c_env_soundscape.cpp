@@ -178,7 +178,7 @@ bool CSoundScapeComponent::IsPlayerInRange()
 	auto &pos = pTrComponentPl->GetPosition();
 	return (glm::distance(origin,pos) <= m_kvRadius) ? true : false;
 }
-luabind::object CSoundScapeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CSoundScapeComponentHandleWrapper>(l);}
+void CSoundScapeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 /////////////
 

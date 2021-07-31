@@ -26,7 +26,7 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual void OnRemove() override;
 		virtual void OnEntitySpawn() override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 
 		float GetSkyboxScale() const;
 	private:

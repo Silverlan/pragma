@@ -36,7 +36,7 @@ void SLightDirectionalComponent::SetAmbientColor(const Color &color)
 	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_netEvSetAmbientColor,p,pragma::networking::Protocol::SlowReliable);
 }
 
-luabind::object SLightDirectionalComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SLightDirectionalComponentHandleWrapper>(l);}
+void SLightDirectionalComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void SLightDirectionalComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {

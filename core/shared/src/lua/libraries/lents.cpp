@@ -29,8 +29,10 @@
 
 extern DLLNETWORK Engine *engine;
 
+void test_lua_policies(lua_State *l);
 void Lua::ents::register_library(lua_State *l)
 {
+	test_lua_policies(l);
 	auto entsMod = luabind::module(l,"ents");
 	entsMod[
 		luabind::def("create",create),
@@ -100,7 +102,7 @@ Lua::type<BaseEntity> Lua::ents::create(lua_State *l,const std::string &classnam
 	auto *ent = game->CreateEntity(classname);
 	if(ent == NULL)
 		return nil;
-	return *ent->GetLuaObject();
+	return ent->GetLuaObject();
 }
 
 Lua::type<BaseEntity> Lua::ents::create_prop(lua_State *l,const std::string &mdl,const Vector3 *origin,const EulerAngles *angles,bool physicsProp=false)
@@ -116,7 +118,7 @@ Lua::type<BaseEntity> Lua::ents::create_prop(lua_State *l,const std::string &mdl
 		ent->SetRotation(uquat::create(*angles));
 	ent->SetModel(mdl);
 	ent->Spawn();
-	return *ent->GetLuaObject();
+	return ent->GetLuaObject();
 }
 
 namespace Lua::ents
@@ -143,7 +145,7 @@ namespace Lua::ents
 			if(pPhysComponent != nullptr)
 				pPhysComponent->InitializePhysics(*shape);
 		}
-		return *ent->GetLuaObject();
+		return ent->GetLuaObject();
 	}
 };
 Lua::type<BaseEntity> Lua::ents::create_trigger(lua_State *l,const Vector3 &origin,float radius)
@@ -186,7 +188,7 @@ static Lua::tb<Lua::type<BaseEntity>> entities_to_table(lua_State *l,std::vector
 	{
 		if(!ent)
 			continue;
-		t[idx++] = *ent->GetLuaObject();
+		t[idx++] = ent->GetLuaObject();
 	}
 	return t;
 }
@@ -196,7 +198,7 @@ static Lua::tb<Lua::type<BaseEntity>> entities_to_table(lua_State *l,EntityItera
 	auto t = luabind::newtable(l);
 	uint32_t idx = 1;
 	for(auto *ent : entIt)
-		t[idx++] = *ent->GetLuaObject();
+		t[idx++] = ent->GetLuaObject();
 	return t;
 }
 
@@ -239,7 +241,7 @@ Lua::opt<Lua::mult<Lua::type<BaseEntity>,double>> Lua::ents::get_closest(lua_Sta
 	});
 	if(entClosest == nullptr)
 		return nil;
-	return Lua::mult<Lua::type<BaseEntity>,double>{l,*entClosest->GetLuaObject(),dClosest};
+	return Lua::mult<Lua::type<BaseEntity>,double>{l,entClosest->GetLuaObject(),dClosest};
 }
 Lua::opt<Lua::mult<Lua::type<BaseEntity>,double>> Lua::ents::get_farthest(lua_State *l,const Vector3 &origin)
 {
@@ -257,7 +259,7 @@ Lua::opt<Lua::mult<Lua::type<BaseEntity>,double>> Lua::ents::get_farthest(lua_St
 	});
 	if(entClosest == nullptr)
 		return nil;
-	return Lua::mult<Lua::type<BaseEntity>,double>{l,*entClosest->GetLuaObject(),dFarthest};
+	return Lua::mult<Lua::type<BaseEntity>,double>{l,entClosest->GetLuaObject(),dFarthest};
 }
 Lua::tb<Lua::type<BaseEntity>> Lua::ents::get_sorted_by_distance(lua_State *l,const Vector3 &origin)
 {
@@ -275,7 +277,7 @@ Lua::tb<Lua::type<BaseEntity>> Lua::ents::get_sorted_by_distance(lua_State *l,co
 	auto t = luabind::newtable(l);
 	auto idx = 1;
 	for(auto &pair : ents)
-		t[idx++] = *pair.first->GetLuaObject();
+		t[idx++] = pair.first->GetLuaObject();
 	return t;
 }
 Lua::type<BaseEntity> Lua::ents::get_random(lua_State *l)
@@ -286,7 +288,7 @@ Lua::type<BaseEntity> Lua::ents::get_random(lua_State *l)
 		return nil;
 	auto r = umath::random(0,ents.size() -1);
 	auto *ent = ents.at(r);
-	return *ent->GetLuaObject();
+	return ent->GetLuaObject();
 }
 
 Lua::opt<std::string> Lua::ents::get_component_name(lua_State *l,pragma::ComponentId componentId)
@@ -322,7 +324,7 @@ Lua::tb<Lua::type<BaseEntity>> Lua::ents::get_all(lua_State *l,func<bool,type<Ba
 	auto idx = 1;
 	for(auto *ent : ents)
 	{
-		auto &o = *ent->GetLuaObject();
+		auto &o = ent->GetLuaObject();
 		if(!luabind::object_cast<bool>(func(o)))
 			continue;
 		t[idx++] = o;
@@ -414,7 +416,7 @@ Lua::opt<Lua::type<BaseEntity>> Lua::ents::get_world(lua_State *l)
 	if(pWorld == nullptr)
 		return nil;
 	BaseEntity &world = pWorld->GetEntity();
-	return *world.GetLuaObject();
+	return world.GetLuaObject();
 }
 
 Lua::opt<Lua::type<BaseEntity>> Lua::ents::get_by_index(lua_State *l,uint32_t idx)
@@ -424,7 +426,7 @@ Lua::opt<Lua::type<BaseEntity>> Lua::ents::get_by_index(lua_State *l,uint32_t id
 	BaseEntity *ent = game->GetEntity(idx);
 	if(ent == NULL)
 		return nil;
-	return *ent->GetLuaObject();
+	return ent->GetLuaObject();
 }
 
 Lua::opt<Lua::type<BaseEntity>> Lua::ents::get_by_local_index(lua_State *l,uint32_t idx)
@@ -434,7 +436,7 @@ Lua::opt<Lua::type<BaseEntity>> Lua::ents::get_by_local_index(lua_State *l,uint3
 	BaseEntity *ent = game->GetEntityByLocalIndex(idx);
 	if(ent == NULL)
 		return nil;
-	return *ent->GetLuaObject();
+	return ent->GetLuaObject();
 }
 
 Lua::opt<Lua::type<BaseEntity>> Lua::ents::find_by_unique_index(lua_State *l,const std::string &uuid)
@@ -448,7 +450,7 @@ Lua::opt<Lua::type<BaseEntity>> Lua::ents::find_by_unique_index(lua_State *l,con
 	});
 	if(it == entIt.end())
 		return nil;
-	return *it->GetLuaObject();
+	return it->GetLuaObject();
 }
 
 Lua::type<BaseEntity> Lua::ents::get_null(lua_State *l)
@@ -494,7 +496,7 @@ Lua::tb<Lua::type<BaseEntity>> Lua::ents::find_by_component(lua_State *l,const s
 	auto t = luabind::newtable(l);
 	auto idx = 1u;
 	for(auto *ent : EntityIterator{*game,componentName})
-		t[idx++] = *ent->GetLuaObject();
+		t[idx++] = ent->GetLuaObject();
 	return t;
 }
 

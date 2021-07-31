@@ -21,7 +21,7 @@ namespace pragma
 		CPropDynamicComponent(BaseEntity &ent) : BasePropDynamicComponent(ent) {}
 		virtual void Initialize() override;
 		using BasePropDynamicComponent::BasePropDynamicComponent;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	protected:
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 	};

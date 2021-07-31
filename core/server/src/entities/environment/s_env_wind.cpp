@@ -20,7 +20,7 @@ void SWindComponent::SendData(NetPacket &packet,networking::ClientRecipientFilte
 	packet->Write<Vector3>(GetWindForce());
 }
 
-luabind::object SWindComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SWindComponentHandleWrapper>(l);}
+void SWindComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void EnvWind::Initialize()
 {

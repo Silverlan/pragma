@@ -21,7 +21,7 @@ void MapComponent::Initialize()
 	GetEntity().AddComponent("name");
 }
 
-luabind::object MapComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<MapComponentHandleWrapper>(l);}
+void MapComponent::InitializeLuaObject(lua_State *l) {pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void MapComponent::SetMapIndex(unsigned int idx) {m_mapIndex = idx;}
 unsigned int MapComponent::GetMapIndex() const {return m_mapIndex;}

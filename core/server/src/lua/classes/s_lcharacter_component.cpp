@@ -17,6 +17,7 @@
 #include <pragma/lua/lentity_components.hpp>
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/entities/components/base_actor_component.hpp>
+#include <pragma/lua/policies/game_object_policy.hpp>
 
 namespace Lua
 {
@@ -24,199 +25,70 @@ namespace Lua
 	{
 		namespace Server
 		{
-			static void GiveWeapon(lua_State *l,SCharacterHandle &hEnt,const std::string &className);
-			static void DropActiveWeapon(lua_State *l,SCharacterHandle &hEnt);
-			static void DropWeapon(lua_State *l,SCharacterHandle &hEnt,const std::string &className);
-			static void DropWeapon(lua_State *l,SCharacterHandle &hEnt,SWeaponHandle &hWep);
-			static void RemoveWeapon(lua_State *l,SCharacterHandle &hEnt,const std::string &className);
-			static void RemoveWeapon(lua_State *l,SCharacterHandle &hEnt,SWeaponHandle &hWep);
-			static void RemoveWeapons(lua_State *l,SCharacterHandle &hEnt);
-			static void DeployWeapon(lua_State *l,SCharacterHandle &hEnt,const std::string &className);
-			static void DeployWeapon(lua_State *l,SCharacterHandle &hEnt,SWeaponHandle &hWep);
-			static void HolsterWeapon(lua_State *l,SCharacterHandle &hEnt);
-			static void SelectNextWeapon(lua_State *l,SCharacterHandle &hEnt);
-			static void SelectPreviousWeapon(lua_State *l,SCharacterHandle &hEnt);
-
-			static void PrimaryAttack(lua_State *l,SCharacterHandle &hEnt);
-			static void SecondaryAttack(lua_State *l,SCharacterHandle &hEnt);
-			static void TertiaryAttack(lua_State *l,SCharacterHandle &hEnt);
-			static void Attack4(lua_State *l,SCharacterHandle &hEnt);
-			static void ReloadWeapon(lua_State *l,SCharacterHandle &hEnt);
+			static void DropWeapon(lua_State *l,pragma::SCharacterComponent &hEnt,pragma::SWeaponComponent &hWep);
+			static void RemoveWeapon(lua_State *l,pragma::SCharacterComponent &hEnt,pragma::SWeaponComponent &hWep);
+			static void DeployWeapon(lua_State *l,pragma::SCharacterComponent &hEnt,pragma::SWeaponComponent &hWep);
 		};
 	};
 	namespace Actor
 	{
 		namespace Server
 		{
-			static void GetNoTarget(lua_State *l,SCharacterHandle &hEntity);
-			static void SetNoTarget(lua_State *l,SCharacterHandle &hEntity,bool b);
-			static void GetGodMode(lua_State *l,SCharacterHandle &hEntity);
-			static void SetGodMode(lua_State *l,SCharacterHandle &hEntity,bool b);
-			static void GetFaction(lua_State *l,SCharacterHandle &hEnt);
-			static void SetFaction(lua_State *l,SCharacterHandle &hEnt,const std::string &factionName);
-			static void SetFaction(lua_State *l,SCharacterHandle &hEnt,std::shared_ptr<::Faction> &faction);
+			static void SetFaction(lua_State *l,pragma::SCharacterComponent &hEnt,const std::string &factionName);
 		};
 	};
 };
 
 void Lua::register_sv_character_component(lua_State *l,luabind::module_ &module)
 {
-	auto def = luabind::class_<SCharacterHandle,BaseEntityComponentHandle>("CharacterComponent");
-	Lua::register_base_character_component_methods<luabind::class_<SCharacterHandle,BaseEntityComponentHandle>,SCharacterHandle>(l,def);
-	def.def("GiveWeapon",&Lua::Character::Server::GiveWeapon);
-	def.def("DropActiveWeapon",&Lua::Character::Server::DropActiveWeapon);
-	def.def("DropWeapon",static_cast<void(*)(lua_State*,SCharacterHandle&,const std::string&)>(&Lua::Character::Server::DropWeapon));
-	def.def("DropWeapon",static_cast<void(*)(lua_State*,SCharacterHandle&,SWeaponHandle&)>(&Lua::Character::Server::DropWeapon));
-	def.def("RemoveWeapon",static_cast<void(*)(lua_State*,SCharacterHandle&,const std::string&)>(&Lua::Character::Server::RemoveWeapon));
-	def.def("RemoveWeapon",static_cast<void(*)(lua_State*,SCharacterHandle&,SWeaponHandle&)>(&Lua::Character::Server::RemoveWeapon));
-	def.def("RemoveWeapons",&Lua::Character::Server::RemoveWeapons);
-	def.def("DeployWeapon",static_cast<void(*)(lua_State*,SCharacterHandle&,const std::string&)>(&Lua::Character::Server::DeployWeapon));
-	def.def("DeployWeapon",static_cast<void(*)(lua_State*,SCharacterHandle&,SWeaponHandle&)>(&Lua::Character::Server::DeployWeapon));
-	def.def("HolsterWeapon",&Lua::Character::Server::HolsterWeapon);
-	def.def("SelectNextWeapon",&Lua::Character::Server::HolsterWeapon);
-	def.def("SelectPreviousWeapon",&Lua::Character::Server::HolsterWeapon);
-	def.def("PrimaryAttack",&Lua::Character::Server::PrimaryAttack);
-	def.def("SecondaryAttack",&Lua::Character::Server::SecondaryAttack);
-	def.def("TertiaryAttack",&Lua::Character::Server::TertiaryAttack);
-	def.def("Attack4",&Lua::Character::Server::Attack4);
-	def.def("ReloadWeapon",&Lua::Character::Server::ReloadWeapon);
+	auto def = luabind::class_<pragma::SCharacterComponent,pragma::BaseCharacterComponent>("CharacterComponent");
+	def.def("GiveWeapon",static_cast<BaseEntity*(pragma::SCharacterComponent::*)(std::string)>(&pragma::SCharacterComponent::GiveWeapon),luabind::game_object_policy<0>{});
+	def.def("DropActiveWeapon",&pragma::SCharacterComponent::DropActiveWeapon);
+	def.def("DropWeapon",static_cast<void(pragma::SCharacterComponent::*)(std::string)>(&pragma::SCharacterComponent::DropWeapon));
+	def.def("DropWeapon",&Lua::Character::Server::DropWeapon);
+	def.def("RemoveWeapon",static_cast<void(pragma::SCharacterComponent::*)(std::string)>(&pragma::SCharacterComponent::RemoveWeapon));
+	def.def("RemoveWeapon",&Lua::Character::Server::RemoveWeapon);
+	def.def("RemoveWeapons",&pragma::SCharacterComponent::RemoveWeapons);
+	def.def("DeployWeapon",static_cast<void(pragma::SCharacterComponent::*)(const std::string&)>(&pragma::SCharacterComponent::DeployWeapon));
+	def.def("DeployWeapon",&Lua::Character::Server::DeployWeapon);
+	def.def("HolsterWeapon",&pragma::SCharacterComponent::HolsterWeapon);
+	def.def("SelectNextWeapon",&pragma::SCharacterComponent::SelectNextWeapon);
+	def.def("SelectPreviousWeapon",&pragma::SCharacterComponent::SelectPreviousWeapon);
+	def.def("PrimaryAttack",&pragma::SCharacterComponent::PrimaryAttack);
+	def.def("SecondaryAttack",&pragma::SCharacterComponent::SecondaryAttack);
+	def.def("TertiaryAttack",&pragma::SCharacterComponent::TertiaryAttack);
+	def.def("Attack4",&pragma::SCharacterComponent::Attack4);
+	def.def("ReloadWeapon",&pragma::SCharacterComponent::ReloadWeapon);
 
-	def.def("SetNoTarget",&Lua::Actor::Server::SetNoTarget);
-	def.def("GetNoTarget",&Lua::Actor::Server::GetNoTarget);
-	def.def("SetGodMode",&Lua::Actor::Server::SetGodMode);
-	def.def("GetGodMode",&Lua::Actor::Server::GetGodMode);
-	def.def("GetFaction",&Lua::Actor::Server::GetFaction);
-	def.def("SetFaction",static_cast<void(*)(lua_State*,SCharacterHandle&,const std::string&)>(&Lua::Actor::Server::SetFaction));
-	def.def("SetFaction",static_cast<void(*)(lua_State*,SCharacterHandle&,std::shared_ptr<::Faction>&)>(&Lua::Actor::Server::SetFaction));
+	def.def("SetNoTarget",&pragma::SCharacterComponent::SetNoTarget);
+	def.def("GetNoTarget",&pragma::SCharacterComponent::GetNoTarget);
+	def.def("SetGodMode",&pragma::SCharacterComponent::SetGodMode);
+	def.def("GetGodMode",&pragma::SCharacterComponent::GetGodMode);
+	def.def("GetFaction",&pragma::SCharacterComponent::GetFaction);
+	def.def("SetFaction",static_cast<void(*)(lua_State*,pragma::SCharacterComponent&,const std::string&)>(&Lua::Actor::Server::SetFaction));
+	def.def("SetFaction",&pragma::SCharacterComponent::SetFaction);
 	module[def];
 }
-void Lua::Character::Server::GiveWeapon(lua_State *l,SCharacterHandle &hEnt,const std::string &className)
+void Lua::Character::Server::DropWeapon(lua_State *l,pragma::SCharacterComponent &hEnt,pragma::SWeaponComponent &hWep)
 {
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->GiveWeapon(className);
+	hEnt.DropWeapon(&hWep.GetEntity());
 }
-void Lua::Character::Server::DropWeapon(lua_State *l,SCharacterHandle &hEnt,const std::string &className)
+void Lua::Character::Server::RemoveWeapon(lua_State *l,pragma::SCharacterComponent &hEnt,pragma::SWeaponComponent &hWep)
 {
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->DropWeapon(className);
+	hEnt.RemoveWeapon(hWep.GetEntity());
 }
-void Lua::Character::Server::DropWeapon(lua_State *l,SCharacterHandle &hEnt,SWeaponHandle &hWep)
+void Lua::Character::Server::DeployWeapon(lua_State *l,pragma::SCharacterComponent &hEnt,pragma::SWeaponComponent &hWep)
 {
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->DropWeapon(&hWep.get()->GetEntity());
-}
-void Lua::Character::Server::DropActiveWeapon(lua_State *l,SCharacterHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->DropActiveWeapon();
-}
-void Lua::Character::Server::RemoveWeapon(lua_State *l,SCharacterHandle &hEnt,const std::string &className)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->RemoveWeapon(className);
-}
-void Lua::Character::Server::RemoveWeapon(lua_State *l,SCharacterHandle &hEnt,SWeaponHandle &hWep)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->RemoveWeapon(hWep.get()->GetEntity());
-}
-void Lua::Character::Server::RemoveWeapons(lua_State *l,SCharacterHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->RemoveWeapons();
-}
-void Lua::Character::Server::DeployWeapon(lua_State *l,SCharacterHandle &hEnt,const std::string &className)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->DeployWeapon(className);
-}
-void Lua::Character::Server::DeployWeapon(lua_State *l,SCharacterHandle &hEnt,SWeaponHandle &hWep)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->DeployWeapon(hWep.get()->GetEntity());
-}
-void Lua::Character::Server::HolsterWeapon(lua_State *l,SCharacterHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->HolsterWeapon();
-}
-void Lua::Character::Server::SelectNextWeapon(lua_State *l,SCharacterHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->SelectNextWeapon();
-}
-void Lua::Character::Server::SelectPreviousWeapon(lua_State *l,SCharacterHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->SelectPreviousWeapon();
-}
-void Lua::Character::Server::PrimaryAttack(lua_State *l,SCharacterHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->PrimaryAttack();
-}
-void Lua::Character::Server::SecondaryAttack(lua_State *l,SCharacterHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->SecondaryAttack();
-}
-void Lua::Character::Server::TertiaryAttack(lua_State *l,SCharacterHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->TertiaryAttack();
-}
-void Lua::Character::Server::Attack4(lua_State *l,SCharacterHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->Attack4();
-}
-void Lua::Character::Server::ReloadWeapon(lua_State *l,SCharacterHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->ReloadWeapon();
+	hEnt.DeployWeapon(hWep.GetEntity());
 }
 
 /////////////
 
-void Lua::Actor::Server::GetNoTarget(lua_State *l,SCharacterHandle &hEntity)
+void Lua::Actor::Server::SetFaction(lua_State *l,pragma::SCharacterComponent &hEnt,const std::string &factionName)
 {
-	pragma::Lua::check_component(l,hEntity);
-	Lua::PushBool(l,hEntity->GetNoTarget());
-}
-void Lua::Actor::Server::SetNoTarget(lua_State *l,SCharacterHandle &hEntity,bool b)
-{
-	pragma::Lua::check_component(l,hEntity);
-	hEntity->SetNoTarget(b);
-}
-void Lua::Actor::Server::GetGodMode(lua_State *l,SCharacterHandle &hEntity)
-{
-	pragma::Lua::check_component(l,hEntity);
-	Lua::PushBool(l,hEntity->GetGodMode());
-}
-void Lua::Actor::Server::SetGodMode(lua_State *l,SCharacterHandle &hEntity,bool b)
-{
-	pragma::Lua::check_component(l,hEntity);
-	hEntity->SetGodMode(b);
-}
-void Lua::Actor::Server::GetFaction(lua_State *l,SCharacterHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	auto *faction = hEnt->GetFaction();
-	if(faction == nullptr)
-		return;
-	Lua::Push<std::shared_ptr<::Faction>>(l,faction->shared_from_this());
-}
-void Lua::Actor::Server::SetFaction(lua_State *l,SCharacterHandle &hEnt,const std::string &factionName)
-{
-	pragma::Lua::check_component(l,hEnt);
 	auto &factionManager = pragma::SAIComponent::GetFactionManager();
 	auto faction = factionManager.FindFactionByName(factionName);
 	if(faction == nullptr)
 		return;
-	hEnt->SetFaction(*faction);
-}
-void Lua::Actor::Server::SetFaction(lua_State *l,SCharacterHandle &hEnt,std::shared_ptr<::Faction> &faction)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->SetFaction(*faction);
+	hEnt.SetFaction(*faction);
 }

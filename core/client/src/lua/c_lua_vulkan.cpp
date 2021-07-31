@@ -8,12 +8,15 @@
 #include "stdafx_client.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/game/c_game.h"
-#include "pragma/rendering/shaders/image/c_shader_gradient.hpp"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
 #include <pragma/lua/classes/ldef_color.h>
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/lerrorcode.h>
 #include <pragma/lua/classes/ldatastream.h>
+#include <pragma/lua/policies/optional_policy.hpp>
+#include <pragma/lua/policies/shared_from_this_policy.hpp>
+#include <pragma/lua/policies/pair_policy.hpp>
+#include <pragma/lua/policies/vector_policy.hpp>
 #include <pragma/lua/util.hpp>
 #include <pragma/lua/luaapi.h>
 #include <luainterface.hpp>
@@ -35,341 +38,174 @@
 #include "pragma/model/vk_mesh.h"
 #include <prosper_event.hpp>
 #include <prosper_window.hpp>
+#include <pragma/rendering/shaders/image/c_shader_gradient.hpp>
 #include <wgui/wgui.h>
+#include <luabind/copy_policy.hpp>
+#include <luabind/detail/meta.hpp>
 
-extern DLLCLIENT CEngine *c_engine;
+extern CEngine *c_engine;
+
+namespace luabind {
+	namespace detail {
+
+		struct render_context_converter
+		{
+			enum { consumed_args = 0 };
+
+			template<typename U>
+			prosper::IPrContext& to_cpp(lua_State* L, U, int)
+			{
+				return c_engine->GetRenderContext();
+			}
+
+			static int match(...)
+			{
+				return 0;
+			}
+			template<typename U>
+			void converter_postcall(lua_State*, by_reference<U>, int) {}
+		};
+
+		struct render_context_policy
+		{
+			template<class T, class Direction>
+			struct specialize
+			{
+				using type = render_context_converter;
+			};
+		};
+
+	}
+
+	template<unsigned int N>
+	using render_context_policy = meta::type_list< converter_policy_injector< N, detail::render_context_policy > >;
+
+}
+
 namespace Lua
 {
 	namespace Vulkan
 	{
-		DLLCLIENT std::shared_ptr<prosper::IBuffer> create_buffer(prosper::util::BufferCreateInfo &bufCreateInfo,::DataStream &ds);
-		DLLCLIENT std::shared_ptr<prosper::IBuffer> create_buffer(prosper::util::BufferCreateInfo &bufCreateInfo);
-		DLLCLIENT int create_texture(lua_State *l);
-		DLLCLIENT int create_descriptor_set(lua_State *l);
-		DLLCLIENT int create_image(lua_State *l);
-		DLLCLIENT int create_image_view(lua_State *l);
-		DLLCLIENT int create_image_create_info(lua_State *l);
-		DLLCLIENT int create_gradient_texture(lua_State *l);
-		DLLCLIENT int create_event(lua_State *l);
-		DLLCLIENT int create_fence(lua_State *l);
-		DLLCLIENT int create_framebuffer(lua_State *l);
-		DLLCLIENT int create_render_pass(lua_State *l);
-		DLLCLIENT int create_render_target(lua_State *l);
-		DLLCLIENT int calculate_mipmap_size(lua_State *l);
-		DLLCLIENT int calculate_mipmap_count(lua_State *l);
-		DLLCLIENT int result_to_string(lua_State *l);
-		DLLCLIENT int format_to_string(lua_State *l);
-		DLLCLIENT int shader_stage_to_string(lua_State *l);
-		DLLCLIENT int is_depth_format(lua_State *l);
-		DLLCLIENT int is_compressed_format(lua_State *l);
-		DLLCLIENT int is_uncompressed_format(lua_State *l);
-		DLLCLIENT int get_bit_size(lua_State *l);
-		DLLCLIENT int get_byte_size(lua_State *l);
-		DLLCLIENT int get_swapchain_image_count(lua_State *l);
-		DLLCLIENT int wait_idle(lua_State *l);
-		DLLCLIENT int flush(lua_State *l);
-		DLLCLIENT int get_square_vertex_uv_buffer(lua_State *l);
-		DLLCLIENT int get_square_vertex_buffer(lua_State *l);
-		DLLCLIENT int get_square_uv_buffer(lua_State *l);
-		DLLCLIENT int get_square_vertices(lua_State *l);
-		DLLCLIENT int get_square_uv_coordinates(lua_State *l);
-		DLLCLIENT int get_square_vertex_count(lua_State *l);
-		DLLCLIENT int get_square_vertex_format(lua_State *l);
-		DLLCLIENT int get_square_uv_format(lua_State *l);
-		DLLCLIENT int allocate_temporary_buffer(lua_State *l,uint32_t size);
-		DLLCLIENT int allocate_temporary_buffer(lua_State *l,::DataStream &ds);
-		DLLCLIENT int get_line_vertex_buffer(lua_State *l);
-		DLLCLIENT int get_line_vertices(lua_State *l);
-		DLLCLIENT int get_line_vertex_count(lua_State *l);
-		DLLCLIENT int get_line_vertex_format(lua_State *l);
-		namespace VKContextObject
-		{
-			template<class T>
-				void SetDebugName(lua_State *l,T &o,const std::string &name,T&(*fCheck)(lua_State*,int))
-			{
-				fCheck(l,1);
-				o.SetDebugName(name);
-			}
-			template<class T>
-				void GetDebugName(lua_State *l,T &o,T&(*fCheck)(lua_State*,int))
-			{
-				fCheck(l,1);
-				Lua::PushString(l,o.GetDebugName());
-			}
-		};
+		std::vector<pragma::ShaderGradient::Node> get_gradient_nodes(lua_State *l,const luabind::tableT<void> &tNodes);
+		static std::shared_ptr<prosper::IBuffer> create_buffer(prosper::IPrContext &context,prosper::util::BufferCreateInfo &bufCreateInfo,::DataStream &ds);
+		static std::shared_ptr<prosper::IBuffer> create_buffer(prosper::IPrContext &context,prosper::util::BufferCreateInfo &bufCreateInfo);
+		static std::shared_ptr<prosper::Texture> create_texture(prosper::IImage &img,const prosper::util::TextureCreateInfo &texCreateInfo,const prosper::util::ImageViewCreateInfo &imgViewCreateInfo,const prosper::util::SamplerCreateInfo &samplerCreateInfo);
+		static std::shared_ptr<prosper::Texture> create_texture(prosper::IImage &img,const prosper::util::TextureCreateInfo &texCreateInfo,const prosper::util::ImageViewCreateInfo &imgViewCreateInfo);
+		static std::shared_ptr<prosper::Texture> create_texture(prosper::IImage &img,const prosper::util::TextureCreateInfo &texCreateInfo);
+		static std::shared_ptr<prosper::IDescriptorSetGroup> create_descriptor_set(const pragma::LuaDescriptorSetInfo &ldescSetInfo);
+		static std::shared_ptr<prosper::IImage> create_image(const prosper::util::ImageCreateInfo &imgCreateInfo,::DataStream &ds);
+		static std::shared_ptr<prosper::IImage> create_image(const prosper::util::ImageCreateInfo &imgCreateInfo);
+		static std::shared_ptr<prosper::IImage> create_image(const std::array<std::shared_ptr<uimg::ImageBuffer>,6> &imgBuffers);
+		static std::shared_ptr<prosper::IImage> create_image(const std::array<std::shared_ptr<uimg::ImageBuffer>,6> &imgBuffers,const prosper::util::ImageCreateInfo &imgCreateInfo);
+		static std::shared_ptr<prosper::IImage> create_image(uimg::ImageBuffer &imgBuffer);
+		static std::shared_ptr<prosper::IImage> create_image(uimg::ImageBuffer &imgBuffer,const prosper::util::ImageCreateInfo &imgCreateInfo);
+		static std::shared_ptr<prosper::IImageView> create_image_view(prosper::IPrContext &context,const prosper::util::ImageViewCreateInfo &imgViewCreateInfo,prosper::IImage &img);
+		static prosper::util::ImageCreateInfo create_image_create_info(const uimg::ImageBuffer &imgBuf,bool cubemap);
+		static prosper::util::ImageCreateInfo create_image_create_info(const uimg::ImageBuffer &imgBuf);
+		static std::shared_ptr<prosper::Texture> create_gradient_texture(lua_State *l,uint32_t width,uint32_t height,prosper::Format format,const Vector2 &dir,const luabind::tableT<void> &tNodes);
+		static std::shared_ptr<prosper::IFence> create_fence(bool createSignalled);
+		static std::shared_ptr<prosper::IFence> create_fence();
+		static std::shared_ptr<prosper::IFramebuffer> create_framebuffer(uint32_t width,uint32_t height,const std::vector<prosper::IImageView*> &attachments,uint32_t layers);
+		static std::shared_ptr<prosper::IFramebuffer> create_framebuffer(uint32_t width,uint32_t height,const std::vector<prosper::IImageView*> &attachments);
+		static std::shared_ptr<prosper::IRenderPass> create_render_pass(const prosper::util::RenderPassCreateInfo &rpCreateInfo);
+
+		static std::shared_ptr<prosper::RenderTarget> create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo,Texture &texture);
+		static std::shared_ptr<prosper::RenderTarget> create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo,Texture &texture,Lua::Vulkan::RenderPass &renderPass);
+		static std::shared_ptr<prosper::RenderTarget> create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo,const std::vector<std::shared_ptr<Texture>> &textures,Lua::Vulkan::RenderPass &renderPass);
+		static std::shared_ptr<prosper::RenderTarget> create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo,const std::vector<std::shared_ptr<Texture>> &textures);
+
+		static Vector2i calculate_mipmap_size(uint32_t w,uint32_t h,uint32_t level);
+		static uint32_t calculate_mipmap_size(uint32_t v,uint32_t level);
+		static std::shared_ptr<prosper::IBuffer> get_square_vertex_uv_buffer(lua_State *l);
+		static std::shared_ptr<prosper::IBuffer> get_square_vertex_buffer(lua_State *l);
+		static std::shared_ptr<prosper::IBuffer> get_square_uv_buffer(lua_State *l);
+		static std::shared_ptr<prosper::IBuffer> allocate_temporary_buffer(lua_State *l,uint32_t size);
+		static std::shared_ptr<prosper::IBuffer> allocate_temporary_buffer(lua_State *l,::DataStream &ds);
+		static std::shared_ptr<prosper::IBuffer> get_line_vertex_buffer(lua_State *l);
 		namespace VKTexture
 		{
-			DLLCLIENT void IsValid(lua_State *l,Texture &hTex);
-			DLLCLIENT void GetImage(lua_State *l,Texture &hTex);
-			DLLCLIENT void GetImageView(lua_State *l,Texture &hTex,uint32_t layerId);
-			DLLCLIENT void GetImageView(lua_State *l,Texture &hTex);
-			DLLCLIENT void GetSampler(lua_State *l,Texture &hTex);
-			DLLCLIENT void GetWidth(lua_State *l,Texture &hTex);
-			DLLCLIENT void GetHeight(lua_State *l,Texture &hTex);
-			DLLCLIENT void GetFormat(lua_State *l,Texture &hTex);
-			DLLCLIENT void IsMSAATexture(lua_State *l,Texture &hTex);
+			static bool IsValid(lua_State *l,Texture &hTex);
+			static uint32_t GetWidth(lua_State *l,Texture &hTex);
+			static uint32_t GetHeight(lua_State *l,Texture &hTex);
 		};
 		namespace VKImage
 		{
-			DLLCLIENT void IsValid(lua_State *l,Image &hImg);
-			DLLCLIENT void GetAspectSubresourceLayout(lua_State *l,Image &hImg,uint32_t layer=0u,uint32_t mipmap=0u);
-			DLLCLIENT void GetAlignment(lua_State *l,Image &hImg);
-			DLLCLIENT void GetExtent2D(lua_State *l,Image &hImg,uint32_t mipmap=0u);
+			static bool IsValid(lua_State *l,Image &hImg);
+			static std::pair<uint32_t,uint32_t> GetExtent2D(lua_State *l,Image &hImg,uint32_t mipmap=0u);
 #if 0
-			DLLCLIENT void GetExtent3D(lua_State *l,Image &hImg,uint32_t mipmap=0u);
-			DLLCLIENT void GetMemoryTypes(lua_State *l,Image &hImg);
-			DLLCLIENT void GetStorageSize(lua_State *l,Image &hImg);
-			DLLCLIENT void GetParentSwapchain(lua_State *l,Image &hImg);
-			DLLCLIENT void GetMemoryBlock(lua_State *l,Image &hImg);
-			DLLCLIENT void GetSubresourceRange(lua_State *l,Image &hImg);
+			static void GetExtent3D(lua_State *l,Image &hImg,uint32_t mipmap=0u);
+			static void GetMemoryTypes(lua_State *l,Image &hImg);
+			static void GetStorageSize(lua_State *l,Image &hImg);
+			static void GetParentSwapchain(lua_State *l,Image &hImg);
+			static void GetMemoryBlock(lua_State *l,Image &hImg);
+			static void GetSubresourceRange(lua_State *l,Image &hImg);
 #endif
-			DLLCLIENT void GetFormat(lua_State *l,Image &hImg);
-			DLLCLIENT void GetMipmapSize(lua_State *l,Image &hImg,uint32_t mipmap=0u);
-			DLLCLIENT void GetLayerCount(lua_State *l,Image &hImg);
-			DLLCLIENT void GetMipmapCount(lua_State *l,Image &hImg);
-			DLLCLIENT void GetSampleCount(lua_State *l,Image &hImg);
-			DLLCLIENT void GetSharingMode(lua_State *l,Image &hImg);
-			DLLCLIENT void GetTiling(lua_State *l,Image &hImg);
-			DLLCLIENT void GetType(lua_State *l,Image &hImg);
-			DLLCLIENT void GetUsage(lua_State *l,Image &hImg);
-			DLLCLIENT void GetWidth(lua_State *l,Image &hImg);
-			DLLCLIENT void GetHeight(lua_State *l,Image &hImg);
-			DLLCLIENT void WriteMemory(lua_State *l,Image &hImg,uint32_t x,uint32_t y,uimg::ImageBuffer &imgBuf,uint32_t layerIndex,uint32_t mipLevel);
-			DLLCLIENT void WriteMemory(lua_State *l,Image &hImg,uint32_t x,uint32_t y,uimg::ImageBuffer &imgBuf,uint32_t layerIndex);
-			DLLCLIENT void WriteMemory(lua_State *l,Image &hImg,uint32_t x,uint32_t y,uimg::ImageBuffer &imgBuf);
+			static std::pair<uint32_t,uint32_t> GetMipmapSize(lua_State *l,Image &hImg,uint32_t mipmap=0u);
+			static void WriteMemory(lua_State *l,Image &hImg,uint32_t x,uint32_t y,uimg::ImageBuffer &imgBuf,uint32_t layerIndex,uint32_t mipLevel);
+			static void WriteMemory(lua_State *l,Image &hImg,uint32_t x,uint32_t y,uimg::ImageBuffer &imgBuf,uint32_t layerIndex);
+			static void WriteMemory(lua_State *l,Image &hImg,uint32_t x,uint32_t y,uimg::ImageBuffer &imgBuf);
 		};
 		namespace VKImageView
 		{
-			DLLCLIENT void IsValid(lua_State *l,ImageView &hImgView);
-			DLLCLIENT void GetAspectMask(lua_State *l,ImageView &hImgView);
-			DLLCLIENT void GetBaseLayer(lua_State *l,ImageView &hImgView);
-			DLLCLIENT void GetBaseMipmapLevel(lua_State *l,ImageView &hImgView);
+			static bool IsValid(lua_State *l,ImageView &hImgView);
 #if 0
-			DLLCLIENT void GetBaseMipmapSize(lua_State *l,ImageView &hImgView);
-			DLLCLIENT void GetParentImage(lua_State *l,ImageView &hImgView);
-			DLLCLIENT void GetSubresourceRange(lua_State *l,ImageView &hImgView);
+			static void GetBaseMipmapSize(lua_State *l,ImageView &hImgView);
+			static void GetParentImage(lua_State *l,ImageView &hImgView);
+			static void GetSubresourceRange(lua_State *l,ImageView &hImgView);
 #endif
-			DLLCLIENT void GetImageFormat(lua_State *l,ImageView &hImgView);
-			DLLCLIENT void GetLayerCount(lua_State *l,ImageView &hImgView);
-			DLLCLIENT void GetMipmapCount(lua_State *l,ImageView &hImgView);
-			DLLCLIENT void GetSwizzleArray(lua_State *l,ImageView &hImgView);
-			DLLCLIENT void GetType(lua_State *l,ImageView &hImgView);
 		};
 		namespace VKSampler
 		{
-			DLLCLIENT void IsValid(lua_State *l,Sampler &hSampler);
-			DLLCLIENT void Update(lua_State *l,Sampler &hSampler);
-			DLLCLIENT void GetMagFilter(lua_State *l,Sampler &hSampler);
-			DLLCLIENT void GetMinFilter(lua_State *l,Sampler &hSampler);
-			DLLCLIENT void GetMipmapMode(lua_State *l,Sampler &hSampler);
-			DLLCLIENT void GetAddressModeU(lua_State *l,Sampler &hSampler);
-			DLLCLIENT void GetAddressModeV(lua_State *l,Sampler &hSampler);
-			DLLCLIENT void GetAddressModeW(lua_State *l,Sampler &hSampler);
-			DLLCLIENT void GetMipLodBias(lua_State *l,Sampler &hSampler);
-			DLLCLIENT void GetAnisotropyEnabled(lua_State *l,Sampler &hSampler);
-			DLLCLIENT void GetMaxAnisotropy(lua_State *l,Sampler &hSampler);
-			DLLCLIENT void GetCompareEnabled(lua_State *l,Sampler &hSampler);
-			DLLCLIENT void GetCompareOperation(lua_State *l,Sampler &hSampler);
-			DLLCLIENT void GetMinLod(lua_State *l,Sampler &hSampler);
-			DLLCLIENT void GetMaxLod(lua_State *l,Sampler &hSampler);
-			DLLCLIENT void GetBorderColor(lua_State *l,Sampler &hSampler);
-			// DLLCLIENT void GetUseUnnormalizedCoordinates(lua_State *l,Sampler &hSampler);
-			DLLCLIENT void SetMagFilter(lua_State *l,Sampler &hSampler,int32_t magFilter);
-			DLLCLIENT void SetMinFilter(lua_State *l,Sampler &hSampler,int32_t minFilter);
-			DLLCLIENT void SetMipmapMode(lua_State *l,Sampler &hSampler,int32_t mipmapMode);
-			DLLCLIENT void SetAddressModeU(lua_State *l,Sampler &hSampler,int32_t addressModeU);
-			DLLCLIENT void SetAddressModeV(lua_State *l,Sampler &hSampler,int32_t addressModeV);
-			DLLCLIENT void SetAddressModeW(lua_State *l,Sampler &hSampler,int32_t addressModeW);
-			DLLCLIENT void SetMipLodBias(lua_State *l,Sampler &hSampler,float mipLodBias);
-			DLLCLIENT void SetAnisotropyEnabled(lua_State *l,Sampler &hSampler,bool anisotropyEnabled);
-			DLLCLIENT void SetMaxAnisotropy(lua_State *l,Sampler &hSampler,float maxAnisotropy);
-			DLLCLIENT void SetCompareEnabled(lua_State *l,Sampler &hSampler,bool compareEnabled);
-			DLLCLIENT void SetCompareOperation(lua_State *l,Sampler &hSampler,int32_t compareOp);
-			DLLCLIENT void SetMinLod(lua_State *l,Sampler &hSampler,float minLod);
-			DLLCLIENT void SetMaxLod(lua_State *l,Sampler &hSampler,float maxLod);
-			DLLCLIENT void SetBorderColor(lua_State *l,Sampler &hSampler,int32_t borderColor);
-			// DLLCLIENT void SetUseUnnormalizedCoordinates(lua_State *l,Sampler &hSampler,bool bUnnormalizedCoordinates);
+			static bool IsValid(lua_State *l,Sampler &hSampler);
+			static bool GetAnisotropyEnabled(lua_State *l,Sampler &hSampler);
+			// static void GetUseUnnormalizedCoordinates(lua_State *l,Sampler &hSampler);
+			// static void SetUseUnnormalizedCoordinates(lua_State *l,Sampler &hSampler,bool bUnnormalizedCoordinates);
 		};
-		namespace VKFramebuffer
+		namespace VKContextObject
 		{
-			DLLCLIENT void IsValid(lua_State *l,Framebuffer &hFramebuffer);
-#if 0
-			DLLCLIENT void GetAttachment(lua_State *l,Framebuffer &hFramebuffer,uint32_t attId);
-			DLLCLIENT void GetAttachmentCount(lua_State *l,Framebuffer &hFramebuffer);
-#endif
-			DLLCLIENT void GetSize(lua_State *l,Framebuffer &hFramebuffer);
-		};
-		namespace VKRenderPass
-		{
-			DLLCLIENT void IsValid(lua_State *l,RenderPass &hRenderPass);
-#if 0
-			DLLCLIENT void GetInfo(lua_State *l,RenderPass &hRenderPass);
-			DLLCLIENT void GetSwapchain(lua_State *l,RenderPass &hRenderPass);
-#endif
-		};
-		namespace VKEvent
-		{
-			DLLCLIENT void IsValid(lua_State *l,Event &hEvent);
-			DLLCLIENT void GetStatus(lua_State *l,Event &hEvent);
-			DLLCLIENT void IsSet(lua_State *l,Event &hEvent);
-		};
-		namespace VKFence
-		{
-			DLLCLIENT void IsValid(lua_State *l,Fence &hFence);
-
+			static void SetDebugName(lua_State *l,prosper::ContextObject &o,const std::string &name)
+			{
+				o.SetDebugName(name);
+			}
+			static std::string GetDebugName(lua_State *l,const prosper::ContextObject &o)
+			{
+				return o.GetDebugName();
+			}
 		};
 #if 0
 		namespace VKSemaphore
 		{
-			DLLCLIENT void IsValid(lua_State *l,Semaphore &hFence);
+			static bool IsValid(lua_State *l,Semaphore &hFence);
 		};
 		namespace VKMemory
 		{
-			DLLCLIENT void IsValid(lua_State *l,Memory &hMemory);
-			DLLCLIENT void GetParentMemory(lua_State *l,Memory &hMemory);
-			DLLCLIENT void GetSize(lua_State *l,Memory &hMemory);
-			DLLCLIENT void GetStartOffset(lua_State *l,Memory &hMemory);
-			DLLCLIENT void Write(lua_State *l,Memory &hMemory,uint32_t offset,::DataStream &ds,uint32_t dsOffset,uint32_t dsSize);
-			DLLCLIENT void Read(lua_State *l,Memory &hMemory,uint32_t offset,uint32_t size);
-			DLLCLIENT void Read(lua_State *l,Memory &hMemory,uint32_t offset,uint32_t size,::DataStream &ds,uint32_t dsOffset);
-			DLLCLIENT void Map(lua_State *l,Memory &hMemory,uint32_t offset,uint32_t size);
-			DLLCLIENT void Unmap(lua_State *l,Memory &hMemory);
+			static bool IsValid(lua_State *l,Memory &hMemory);
+			static void GetParentMemory(lua_State *l,Memory &hMemory);
+			static void GetSize(lua_State *l,Memory &hMemory);
+			static void GetStartOffset(lua_State *l,Memory &hMemory);
+			static void Write(lua_State *l,Memory &hMemory,uint32_t offset,::DataStream &ds,uint32_t dsOffset,uint32_t dsSize);
+			static void Read(lua_State *l,Memory &hMemory,uint32_t offset,uint32_t size);
+			static void Read(lua_State *l,Memory &hMemory,uint32_t offset,uint32_t size,::DataStream &ds,uint32_t dsOffset);
+			static void Map(lua_State *l,Memory &hMemory,uint32_t offset,uint32_t size);
+			static void Unmap(lua_State *l,Memory &hMemory);
 		};
 #endif
-		namespace VKCommandBuffer
-		{
-			DLLCLIENT void IsValid(lua_State *l,CommandBuffer &hCommandBuffer);
-			DLLCLIENT void RecordClearImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &img,const Color &col,const prosper::util::ClearImageInfo &clearImageInfo={});
-			DLLCLIENT void RecordClearImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &img,float clearDepth,const prosper::util::ClearImageInfo &clearImageInfo={});
-			DLLCLIENT void RecordClearAttachment(lua_State *l,CommandBuffer &hCommandBuffer,Image &img,const Color &col,uint32_t attId=0u);
-			DLLCLIENT void RecordClearAttachment(lua_State *l,CommandBuffer &hCommandBuffer,Image &img,float clearDepth);
-			DLLCLIENT void RecordCopyImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &imgSrc,Image &imgDst,const prosper::util::CopyInfo &copyInfo);
-			DLLCLIENT void RecordCopyBufferToImage(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &bufSrc,Image &imgDst,const prosper::util::BufferImageCopyInfo &copyInfo);
-			DLLCLIENT void RecordCopyBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &bufSrc,Buffer &bufDst,const prosper::util::BufferCopy &copyInfo);
-			DLLCLIENT void RecordUpdateBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buf,uint32_t offset,::DataStream &ds);
-			DLLCLIENT void RecordBlitImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &imgSrc,Image &imgDst,const prosper::util::BlitInfo &blitInfo);
-			DLLCLIENT void RecordResolveImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &imgSrc,Image &imgDst);
-			DLLCLIENT void RecordBlitTexture(lua_State *l,CommandBuffer &hCommandBuffer,Texture &texSrc,Image &imgDst);
-			DLLCLIENT void RecordGenerateMipmaps(lua_State *l,CommandBuffer &hCommandBuffer,Image &img,uint32_t currentLayout,uint32_t srcAccessMask,uint32_t srcStage);
-			DLLCLIENT void RecordPipelineBarrier(lua_State *l,CommandBuffer &hCommandBuffer,const prosper::util::PipelineBarrierInfo &barrierInfo);
-			DLLCLIENT void RecordImageBarrier(
-				lua_State *l,CommandBuffer &hCommandBuffer,Image &img,
-				uint32_t srcStageMask,uint32_t dstStageMask,
-				uint32_t oldLayout,uint32_t newLayout,
-				uint32_t srcAccessMask,uint32_t dstAccessMask,
-				uint32_t baseLayer
-			);
-			DLLCLIENT void RecordImageBarrier(
-				lua_State *l,CommandBuffer &hCommandBuffer,Image &img,
-				uint32_t oldLayout,uint32_t newLayout,const prosper::util::ImageSubresourceRange &subresourceRange
-			);
-			DLLCLIENT void RecordBufferBarrier(
-				lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buf,
-				uint32_t srcStageMask,uint32_t dstStageMask,
-				uint32_t srcAccessMask,uint32_t dstAccessMask,
-				uint32_t offset=0ull,uint32_t size=std::numeric_limits<uint32_t>::max()
-			);
-			DLLCLIENT void RecordSetViewport(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t width,uint32_t height,uint32_t x=0u,uint32_t y=0u);
-			DLLCLIENT void RecordSetScissor(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t width,uint32_t height,uint32_t x=0u,uint32_t y=0u);
-			DLLCLIENT void RecordBeginRenderPass(lua_State *l,CommandBuffer &hCommandBuffer,Lua::Vulkan::RenderPassInfo &rpInfo);
-			DLLCLIENT void RecordEndRenderPass(lua_State *l,CommandBuffer &hCommandBuffer);
-			DLLCLIENT void RecordBindIndexBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &indexBuffer,uint32_t indexType,uint32_t offset);
-			DLLCLIENT void RecordBindVertexBuffer(lua_State *l,CommandBuffer &hCommandBuffer,prosper::ShaderGraphics&,Buffer &vertexBuffer,uint32_t startBinding,uint32_t offset);
-			DLLCLIENT void RecordBindVertexBuffers(lua_State *l,CommandBuffer &hCommandBuffer,prosper::ShaderGraphics&,luabind::object vertexBuffers,uint32_t startBinding,luabind::object offsets);
-			DLLCLIENT void RecordCopyImageToBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Image &imgSrc,uint32_t srcImageLayout,Buffer &bufDst,const prosper::util::BufferImageCopyInfo &copyInfo);
-			//DLLCLIENT void RecordDispatch(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t x,uint32_t y,uint32_t z);
-			//DLLCLIENT void RecordDispatchIndirect(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buffer,uint32_t offset);
-			DLLCLIENT void RecordDraw(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t vertexCount,uint32_t instanceCount,uint32_t firstVertex,uint32_t firstInstance);
-			DLLCLIENT void RecordDrawIndexed(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex,uint32_t firstInstance);
-			DLLCLIENT void RecordDrawIndexedIndirect(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buffer,uint32_t offset,uint32_t drawCount,uint32_t stride);
-			DLLCLIENT void RecordDrawIndirect(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buffer,uint32_t offset,uint32_t drawCount,uint32_t stride);
-			DLLCLIENT void RecordFillBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buffer,uint32_t offset,uint32_t size,uint32_t data);
-			//DLLCLIENT void RecordResetEvent(lua_State *l,CommandBuffer &hCommandBuffer,Event &ev,uint32_t stageMask);
-			DLLCLIENT void RecordSetBlendConstants(lua_State *l,CommandBuffer &hCommandBuffer,const Vector4 &blendConstants);
-			DLLCLIENT void RecordSetDepthBias(lua_State *l,CommandBuffer &hCommandBuffer,float depthBiasConstantFactor,float depthBiasClamp,float slopeScaledDepthBias);
-			DLLCLIENT void RecordSetDepthBounds(lua_State *l,CommandBuffer &hCommandBuffer,float minDepthBounds,float maxDepthBounds);
-			//DLLCLIENT void RecordSetEvent(lua_State *l,CommandBuffer &hCommandBuffer,Event &ev,uint32_t stageMask);
-			DLLCLIENT void RecordSetLineWidth(lua_State *l,CommandBuffer &hCommandBuffer,float lineWidt);
-			DLLCLIENT void RecordSetStencilCompareMask(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t faceMask,uint32_t stencilCompareMask);
-			DLLCLIENT void RecordSetStencilReference(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t faceMask,uint32_t stencilReference);
-			DLLCLIENT void RecordSetStencilWriteMask(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t faceMask,uint32_t stencilWriteMask);
-			//DLLCLIENT void RecordWaitEvents(lua_State *l,CommandBuffer &hCommandBuffer); // TODO
-			//DLLCLIENT void RecordWriteTimestamp(lua_State *l,CommandBuffer &hCommandBuffer); // TODO
-			//DLLCLIENT void RecordBeginQuery(lua_State *l,CommandBuffer &hCommandBuffer); // TODO
-			//DLLCLIENT void RecordEndQuery(lua_State *l,CommandBuffer &hCommandBuffer); // TODO
-			DLLCLIENT void RecordDrawGradient(lua_State *l,CommandBuffer &hCommandBuffer,RenderTarget &rt,const Vector2 &dir,luabind::object lnodes);
-			DLLCLIENT void StopRecording(lua_State *l,CommandBuffer &hCommandBuffer);
-			DLLCLIENT void StartRecording(lua_State *l,CommandBuffer &hCommandBuffer,bool oneTimeSubmit,bool simultaneousUseAllowed);
-		};
-		namespace VKBuffer
-		{
-			DLLCLIENT void IsValid(lua_State *l,Buffer &hBuffer);
-			DLLCLIENT void GetStartOffset(lua_State *l,Buffer &hBuffer);
-			DLLCLIENT void GetBaseIndex(lua_State *l,Buffer &hBuffer);
-			DLLCLIENT void GetSize(lua_State *l,Buffer &hBuffer);
-			DLLCLIENT void GetUsageFlags(lua_State *l,Buffer &hBuffer);
-			DLLCLIENT void SetPermanentlyMapped(lua_State *l,Buffer &hBuffer,bool b,Buffer::MapFlags mapFlags);
-			DLLCLIENT void GetParent(lua_State *l,Buffer &hBuffer);
-			DLLCLIENT void Write(lua_State *l,Buffer &hBuffer,uint32_t offset,::DataStream &ds,uint32_t dsOffset,uint32_t dsSize);
-			DLLCLIENT void Read(lua_State *l,Buffer &hBuffer,uint32_t offset,uint32_t size);
-			DLLCLIENT void Read(lua_State *l,Buffer &hBuffer,uint32_t offset,uint32_t size,::DataStream &ds,uint32_t dsOffset);
-			DLLCLIENT void Map(lua_State *l,Buffer &hBuffer,uint32_t offset,uint32_t size,Buffer::MapFlags mapFlags);
-			DLLCLIENT void Unmap(lua_State *l,Buffer &hBuffer);
-		};
-		namespace VKDescriptorSet
-		{
-			DLLCLIENT void IsValid(lua_State *l,DescriptorSet &hDescSet);
-#if 0
-			DLLCLIENT void GetBindingInfo(lua_State *l,DescriptorSet &hDescSet);
-			DLLCLIENT void GetBindingInfo(lua_State *l,DescriptorSet &hDescSet,uint32_t bindingIdx);
-#endif
-			DLLCLIENT void GetBindingCount(lua_State *l,DescriptorSet &hDescSet);
-			DLLCLIENT void SetBindingTexture(lua_State *l,DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Texture &texture,uint32_t layerId);
-			DLLCLIENT void SetBindingTexture(lua_State *l,DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Texture &texture);
-			DLLCLIENT void SetBindingArrayTexture(lua_State *l,DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Texture &texture,uint32_t arrayIdx,uint32_t layerId);
-			DLLCLIENT void SetBindingArrayTexture(lua_State *l,DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Texture &texture,uint32_t arrayIdx);
-			DLLCLIENT void SetBindingStorageBuffer(lua_State *l,DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Buffer &buffer,uint32_t startOffset,uint32_t size);
-			DLLCLIENT void SetBindingUniformBuffer(lua_State *l,DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Buffer &buffer,uint32_t startOffset,uint32_t size);
-			DLLCLIENT void SetBindingUniformBufferDynamic(lua_State *l,DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Buffer &buffer,uint32_t startOffset,uint32_t size);
-			//DLLCLIENT void GetLayout(lua_State *l,DescriptorSet &hDescSet); // TODO
-			//DLLCLIENT void GetBindingProperties(lua_State *l,DescriptorSet &hDescSet); // TODO
-		};
-		namespace VKMesh
-		{
-			DLLCLIENT void GetVertexBuffer(lua_State *l,pragma::SceneMesh &mesh);
-			DLLCLIENT void GetVertexWeightBuffer(lua_State *l,pragma::SceneMesh &mesh);
-			DLLCLIENT void GetAlphaBuffer(lua_State *l,pragma::SceneMesh &mesh);
-			DLLCLIENT void GetIndexBuffer(lua_State *l,pragma::SceneMesh &mesh);
-			DLLCLIENT void SetVertexBuffer(lua_State *l,pragma::SceneMesh &mesh,Buffer &hImg);
-			DLLCLIENT void SetVertexWeightBuffer(lua_State *l,pragma::SceneMesh &mesh,Buffer &hImg);
-			DLLCLIENT void SetAlphaBuffer(lua_State *l,pragma::SceneMesh &mesh,Buffer &hImg);
-			DLLCLIENT void SetIndexBuffer(lua_State *l,pragma::SceneMesh &mesh,Buffer &hImg);
-		};
 		namespace VKRenderTarget
 		{
-			DLLCLIENT void IsValid(lua_State *l,RenderTarget &hRt);
-			DLLCLIENT void GetWidth(lua_State *l,RenderTarget &hRt);
-			DLLCLIENT void GetHeight(lua_State *l,RenderTarget &hRt);
-			DLLCLIENT void GetFormat(lua_State *l,RenderTarget &hRt);
-			DLLCLIENT void GetTexture(lua_State *l,RenderTarget &hRt,uint32_t idx);
-			DLLCLIENT void GetRenderPass(lua_State *l,RenderTarget &hRt);
-			DLLCLIENT void GetFramebuffer(lua_State *l,RenderTarget &hRt);
+			static bool IsValid(lua_State *l,RenderTarget &hRt);
+			static uint32_t GetWidth(lua_State *l,RenderTarget &hRt);
+			static uint32_t GetHeight(lua_State *l,RenderTarget &hRt);
+			static prosper::Format GetFormat(lua_State *l,RenderTarget &hRt);
 		};
 		namespace VKTimestampQuery
 		{
-			DLLCLIENT void IsValid(lua_State *l,TimestampQuery &hTimestampQuery);
-			DLLCLIENT void IsResultAvailable(lua_State *l,TimestampQuery &hTimestampQuery);
-			DLLCLIENT void GetPipelineStage(lua_State *l,TimestampQuery &hTimestampQuery);
-			DLLCLIENT void Write(lua_State *l,TimestampQuery &hTimestampQuery,CommandBuffer &cmdBuffer);
-			DLLCLIENT void QueryResult(lua_State *l,TimestampQuery &hTimestampQuery);
+			static bool IsValid(lua_State *l,TimestampQuery &hTimestampQuery);
+			static Lua::var<bool,int64_t> QueryResult(lua_State *l,TimestampQuery &hTimestampQuery);
 		};
 		namespace VKTimerQuery
 		{
-			DLLCLIENT void IsValid(lua_State *l,TimerQuery &hTimerQuery);
-			DLLCLIENT void Begin(lua_State *l,TimerQuery &hTimerQuery,CommandBuffer &cmdBuffer);
-			DLLCLIENT void End(lua_State *l,TimerQuery &hTimerQuery,CommandBuffer &cmdBuffer);
-			DLLCLIENT void IsResultAvailable(lua_State *l,TimerQuery &hTimerQuery);
-			DLLCLIENT void QueryResult(lua_State *l,TimerQuery &hTimerQuery);
+			static bool IsValid(lua_State *l,TimerQuery &hTimerQuery);
+			static Lua::var<bool,int64_t> QueryResult(lua_State *l,TimerQuery &hTimerQuery);
 		};
 	};
 };
@@ -379,17 +215,24 @@ namespace prosper { // For some reason these need to be in the same namespaces a
 	static bool operator==(const Lua::Vulkan::Image &a,const Lua::Vulkan::Image &b) {return &a == &b;}
 	static bool operator==(const Lua::Vulkan::ImageView &a,const Lua::Vulkan::ImageView &b) {return &a == &b;}
 	static bool operator==(const Lua::Vulkan::Sampler &a,const Lua::Vulkan::Sampler &b) {return &a == &b;}
-	static bool operator==(const Lua::Vulkan::Framebuffer &a,const Lua::Vulkan::Framebuffer &b) {return &a == &b;}
-	static bool operator==(const Lua::Vulkan::RenderPass &a,const Lua::Vulkan::RenderPass &b) {return &a == &b;}
-	static bool operator==(const Lua::Vulkan::Event &a,const Lua::Vulkan::Event &b) {return &a == &b;}
-	static bool operator==(const Lua::Vulkan::Fence &a,const Lua::Vulkan::Fence &b) {return &a == &b;}
-	static bool operator==(const Lua::Vulkan::CommandBuffer &a,const Lua::Vulkan::CommandBuffer &b) {return &a == &b;}
-	static bool operator==(const Lua::Vulkan::Buffer &a,const Lua::Vulkan::Buffer &b) {return &a == &b;}
-	static bool operator==(const Lua::Vulkan::DescriptorSet &a,const Lua::Vulkan::DescriptorSet &b) {return &a == &b;}
 	static bool operator==(const Lua::Vulkan::RenderTarget &a,const Lua::Vulkan::RenderTarget &b) {return &a == &b;}
 	static bool operator==(const Lua::Vulkan::TimestampQuery &a,const Lua::Vulkan::TimestampQuery &b) {return &a == &b;}
 	static bool operator==(const Lua::Vulkan::TimerQuery &a,const Lua::Vulkan::TimerQuery &b) {return &a == &b;}
 	static bool operator==(const Lua::Vulkan::CommandBufferRecorder &a,const Lua::Vulkan::CommandBufferRecorder &b) {return &a == &b;}
+
+	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::ImageView &hImgView)
+	{
+		out<<"VKImageView[";
+		out<<"]";
+		return out;
+	}
+
+	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Sampler &hSampler)
+	{
+		out<<"VKSampler[";
+		out<<"]";
+		return out;
+	}
 
 	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Image &hImg)
 	{
@@ -403,16 +246,16 @@ namespace prosper { // For some reason these need to be in the same namespaces a
 		return out;
 	}
 
-	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::ImageView &hImgView)
+	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Framebuffer &hFramebuffer)
 	{
-		out<<"VKImageView[";
+		out<<"VKFramebuffer[";
 		out<<"]";
 		return out;
 	}
 
-	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Sampler &hSampler)
+	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::RenderPass &hRenderPass)
 	{
-		out<<"VKSampler[";
+		out<<"VKRenderPass[";
 		out<<"]";
 		return out;
 	}
@@ -432,74 +275,6 @@ namespace prosper { // For some reason these need to be in the same namespaces a
 			out<<"NULL";
 		else
 			out<<sampler;
-		out<<"]";
-		return out;
-	}
-
-	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Framebuffer &hFramebuffer)
-	{
-		out<<"VKFramebuffer[";
-		out<<"]";
-		return out;
-	}
-
-	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::RenderPass &hRenderPass)
-	{
-		out<<"VKRenderPass[";
-		out<<"]";
-		return out;
-	}
-
-	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Event &hEvent)
-	{
-		out<<"VKEvent[";
-		auto r = prosper::Result::EventReset;
-		if(hEvent.IsSet())
-			r = prosper::Result::EventSet;
-		out<<prosper::util::to_string(r);
-		out<<"]";
-		return out;
-	}
-
-	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Fence &hFence)
-	{
-		out<<"VKFence[";
-		out<<"]";
-		return out;
-	}
-#if 0
-	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Semaphore &hSemaphore)
-	{
-		out<<"VKSemaphore[";
-		out<<"]";
-		return out;
-	}
-
-	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Memory &hMemory)
-	{
-		out<<"VKMemory[";
-		out<<"]";
-		return out;
-	}
-#endif
-	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::CommandBuffer &hCommandBuffer)
-	{
-		out<<"VKCommandBuffer[";
-		out<<"]";
-		return out;
-	}
-
-	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::Buffer &hBuffer)
-	{
-		out<<"VKBuffer[";
-		out<<hBuffer.GetSize();
-		out<<"]";
-		return out;
-	}
-
-	static std::ostream &operator<<(std::ostream &out,const Lua::Vulkan::DescriptorSet &hDescSet)
-	{
-		out<<"VKDescriptorSet[";
 		out<<"]";
 		return out;
 	}
@@ -543,29 +318,18 @@ namespace prosper { // For some reason these need to be in the same namespaces a
 	}
 };
 
-namespace pragma
+std::shared_ptr<prosper::IBuffer> Lua::Vulkan::create_buffer(prosper::IPrContext &context,prosper::util::BufferCreateInfo &bufCreateInfo,::DataStream &ds)
 {
-	static bool operator==(const pragma::SceneMesh &a,const pragma::SceneMesh &b) {return &a == &b;}
-
-	static std::ostream &operator<<(std::ostream &out,const pragma::SceneMesh&)
-	{
-		out<<"SceneMesh";
-		return out;
-	}
-};
-
-std::shared_ptr<prosper::IBuffer> Lua::Vulkan::create_buffer(prosper::util::BufferCreateInfo &bufCreateInfo,::DataStream &ds)
-{
-	auto buf = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo,ds->GetData());
+	auto buf = context.CreateBuffer(bufCreateInfo,ds->GetData());
 	if(buf == nullptr)
 		return 0;
 	buf->SetDebugName("lua_buf");
 	return buf;
 }
 
-std::shared_ptr<prosper::IBuffer> Lua::Vulkan::create_buffer(prosper::util::BufferCreateInfo &bufCreateInfo)
+std::shared_ptr<prosper::IBuffer> Lua::Vulkan::create_buffer(prosper::IPrContext &context,prosper::util::BufferCreateInfo &bufCreateInfo)
 {
-	auto buf = c_engine->GetRenderContext().CreateBuffer(bufCreateInfo);
+	auto buf = context.CreateBuffer(bufCreateInfo);
 	if(buf == nullptr)
 		return 0;
 	buf->SetDebugName("lua_buf");
@@ -602,457 +366,231 @@ void Lua::Vulkan::get_descriptor_set_layout_bindings(lua_State *l,std::vector<::
 }
 #endif // TODO
 
-int Lua::Vulkan::create_descriptor_set(lua_State *l)
+std::shared_ptr<prosper::IDescriptorSetGroup> Lua::Vulkan::create_descriptor_set(const pragma::LuaDescriptorSetInfo &ldescSetInfo)
 {
-	auto &ldescSetInfo = *Lua::CheckDescriptorSetInfo(l,1);
 	auto shaderDescSetInfo = to_prosper_descriptor_set_info(ldescSetInfo);
 	auto dsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(shaderDescSetInfo);
 	if(dsg == nullptr)
-		return 0;
+		return nullptr;
 	dsg->SetDebugName("lua_dsg");
-	Lua::Push(l,dsg);
-	return 1;
+	return dsg;
 }
 
-int Lua::Vulkan::create_image_view(lua_State *l)
+std::shared_ptr<prosper::IImageView> Lua::Vulkan::create_image_view(prosper::IPrContext &context,const prosper::util::ImageViewCreateInfo &imgViewCreateInfo,prosper::IImage &img)
 {
-	auto &imgViewCreateInfo = Lua::Check<prosper::util::ImageViewCreateInfo>(l,1);
-	auto &img = Lua::Check<prosper::IImage>(l,2);
-	auto imgView = c_engine->GetRenderContext().CreateImageView(imgViewCreateInfo,img);
-	Lua::Push(l,imgView);
-	return 1;
+	return context.CreateImageView(imgViewCreateInfo,img);
 }
 
-int Lua::Vulkan::create_image_create_info(lua_State *l)
+prosper::util::ImageCreateInfo Lua::Vulkan::create_image_create_info(const uimg::ImageBuffer &imgBuf,bool cubemap)
 {
-	auto &imgBuf = Lua::Check<uimg::ImageBuffer>(l,1);
-	auto cubemap = false;
-	if(Lua::IsSet(l,2))
-		cubemap = Lua::CheckBool(l,2);
-	Lua::Push(l,prosper::util::get_image_create_info(imgBuf,cubemap));
-	return 1;
+	return prosper::util::get_image_create_info(imgBuf,cubemap);
 }
 
-int Lua::Vulkan::create_image(lua_State *l)
+prosper::util::ImageCreateInfo Lua::Vulkan::create_image_create_info(const uimg::ImageBuffer &imgBuf)
 {
-	auto arg = 1;
-	if(Lua::IsType<uimg::ImageBuffer>(l,arg))
-	{
-		if(Lua::IsTable(l,arg) == false)
-		{
-			auto &imgBuffer = Lua::Check<uimg::ImageBuffer>(l,arg++);
-			std::shared_ptr<prosper::IImage> img = nullptr;
-			if(Lua::IsSet(l,arg))
-			{
-				auto &imgCreateInfo = Lua::Check<prosper::util::ImageCreateInfo>(l,arg++);
-				img = c_engine->GetRenderContext().CreateImage(imgBuffer,imgCreateInfo);
-			}
-			else
-				img = c_engine->GetRenderContext().CreateImage(imgBuffer);
-			if(img == nullptr)
-				return 0;
-			img->SetDebugName("lua_img");
-			Lua::Push(l,img);
-			return 1;
-		}
-	}
-	else if(Lua::IsTable(l,arg))
-	{
-		std::array<std::shared_ptr<uimg::ImageBuffer>,6> imgBuffers {};
-		auto t = arg;
-		for(auto i=decltype(imgBuffers.size()){0u};i<imgBuffers.size();++i)
-		{
-			Lua::PushInt(l,i +1);
-			Lua::GetTableValue(l,t);
-			auto &imgBuf = Lua::Check<uimg::ImageBuffer>(l,-1);
-			imgBuffers.at(i) = imgBuf.shared_from_this();
-			Lua::Pop(l,1);
-		}
-		std::shared_ptr<prosper::IImage> img = nullptr;
-		if(Lua::IsSet(l,arg))
-		{
-			auto &imgCreateInfo = Lua::Check<prosper::util::ImageCreateInfo>(l,arg++);
-			img = c_engine->GetRenderContext().CreateCubemap(imgBuffers,imgCreateInfo);
-		}
-		else
-			img = c_engine->GetRenderContext().CreateCubemap(imgBuffers);
-		if(img == nullptr)
-			return 0;
+	return prosper::util::get_image_create_info(imgBuf,false);
+}
+
+std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(uimg::ImageBuffer &imgBuffer,const prosper::util::ImageCreateInfo &imgCreateInfo)
+{
+	auto img = c_engine->GetRenderContext().CreateImage(imgBuffer,imgCreateInfo);
+	if(img)
 		img->SetDebugName("lua_img");
-		Lua::Push(l,img);
-		return 1;
-	}
-	auto &imgCreateInfo = Lua::Check<prosper::util::ImageCreateInfo>(l,arg++);
-	std::shared_ptr<Image> img = nullptr;
-	if(Lua::IsSet(l,arg) == false)
-		img = c_engine->GetRenderContext().CreateImage(imgCreateInfo);
-	else
-	{
-		auto &ds = *Lua::CheckDataStream(l,arg++);
-		img = c_engine->GetRenderContext().CreateImage(imgCreateInfo,ds->GetData());
-	}
-	if(img == nullptr)
-		return 0;
-	img->SetDebugName("lua_img");
-	Lua::Push(l,img);
-	return 1;
+	return img;
 }
 
-int Lua::Vulkan::create_texture(lua_State *l)
+std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(uimg::ImageBuffer &imgBuffer)
 {
-	auto arg = 1;
-	auto &img = Lua::Check<Image>(l,arg++);
-	auto &texCreateInfo = Lua::Check<prosper::util::TextureCreateInfo>(l,arg++);
-	std::optional<prosper::util::ImageViewCreateInfo> imgViewCreateInfo {};
-	std::optional<prosper::util::SamplerCreateInfo> samplerCreateInfo {};
-	if(Lua::IsSet(l,arg))
-	{
-		imgViewCreateInfo = Lua::Check<prosper::util::ImageViewCreateInfo>(l,arg++);
-		if(Lua::IsSet(l,arg))
-			samplerCreateInfo = Lua::Check<prosper::util::SamplerCreateInfo>(l,arg++);
-	}
+	auto img = c_engine->GetRenderContext().CreateImage(imgBuffer);
+	if(img)
+		img->SetDebugName("lua_img");
+	return img;
+}
+
+std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(const std::array<std::shared_ptr<uimg::ImageBuffer>,6> &imgBuffers,const prosper::util::ImageCreateInfo &imgCreateInfo)
+{
+	// TODO: Parameter for CreateCubemap should be const
+	auto img = c_engine->GetRenderContext().CreateCubemap(const_cast<std::array<std::shared_ptr<uimg::ImageBuffer>,6>&>(imgBuffers),imgCreateInfo);
+	if(img)
+		img->SetDebugName("lua_img");
+	return img;
+}
+
+std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(const std::array<std::shared_ptr<uimg::ImageBuffer>,6> &imgBuffers)
+{
+	// TODO: Parameter for CreateCubemap should be const
+	auto img = c_engine->GetRenderContext().CreateCubemap(const_cast<std::array<std::shared_ptr<uimg::ImageBuffer>,6>&>(imgBuffers));
+	if(img)
+		img->SetDebugName("lua_img");
+	return img;
+}
+
+std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(const prosper::util::ImageCreateInfo &imgCreateInfo)
+{
+	auto img = c_engine->GetRenderContext().CreateImage(imgCreateInfo);
+	if(img)
+		img->SetDebugName("lua_img");
+	return img;
+}
+
+std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(const prosper::util::ImageCreateInfo &imgCreateInfo,::DataStream &ds)
+{
+	auto img = c_engine->GetRenderContext().CreateImage(imgCreateInfo,ds->GetData());
+	if(img)
+		img->SetDebugName("lua_img");
+	return img;
+}
+
+std::shared_ptr<prosper::Texture> Lua::Vulkan::create_texture(prosper::IImage &img,const prosper::util::TextureCreateInfo &texCreateInfo,const prosper::util::ImageViewCreateInfo &imgViewCreateInfo,const prosper::util::SamplerCreateInfo &samplerCreateInfo)
+{
 	auto tex = c_engine->GetRenderContext().CreateTexture(texCreateInfo,img,imgViewCreateInfo,samplerCreateInfo);
 	if(tex == nullptr)
-		return 0;
+		return nullptr;
 	tex->SetDebugName("lua_tex");
-	Lua::Push(l,tex);
-	return 1;
+	return tex;
 }
 
-int Lua::Vulkan::create_framebuffer(lua_State *l)
+std::shared_ptr<prosper::Texture> Lua::Vulkan::create_texture(prosper::IImage &img,const prosper::util::TextureCreateInfo &texCreateInfo,const prosper::util::ImageViewCreateInfo &imgViewCreateInfo)
 {
-	auto arg = 1;
-	auto width = Lua::CheckInt(l,arg++);
-	auto height = Lua::CheckInt(l,arg++);
-	std::vector<prosper::IImageView*> attachments;
-	auto tAttachments = arg++;
-	Lua::CheckTable(l,tAttachments);
-	auto numAttachments = Lua::GetObjectLength(l,tAttachments);
-	attachments.reserve(numAttachments);
-	for(auto i=decltype(numAttachments){0};i<numAttachments;++i)
-	{
-		Lua::PushInt(l,i +1); /* 1 */
-		Lua::GetTableValue(l,tAttachments);
+	std::optional<prosper::util::SamplerCreateInfo> samplerCreateInfo {};
+	auto tex = c_engine->GetRenderContext().CreateTexture(texCreateInfo,img,imgViewCreateInfo,samplerCreateInfo);
+	if(tex == nullptr)
+		return nullptr;
+	tex->SetDebugName("lua_tex");
+	return tex;
+}
 
-		attachments.push_back(&Lua::Check<ImageView>(l,-1));
+std::shared_ptr<prosper::Texture> Lua::Vulkan::create_texture(prosper::IImage &img,const prosper::util::TextureCreateInfo &texCreateInfo)
+{
+	std::optional<prosper::util::ImageViewCreateInfo> imgViewCreateInfo {};
+	std::optional<prosper::util::SamplerCreateInfo> samplerCreateInfo {};
+	auto tex = c_engine->GetRenderContext().CreateTexture(texCreateInfo,img,imgViewCreateInfo,samplerCreateInfo);
+	if(tex == nullptr)
+		return nullptr;
+	tex->SetDebugName("lua_tex");
+	return tex;
+}
 
-		Lua::Pop(l,1); /* 0 */
-	}
-	auto layers = 1u;
-	if(Lua::IsSet(l,arg))
-		layers = Lua::CheckInt(l,arg++);
+std::shared_ptr<prosper::IFramebuffer> Lua::Vulkan::create_framebuffer(uint32_t width,uint32_t height,const std::vector<prosper::IImageView*> &attachments,uint32_t layers)
+{
 	auto fb = c_engine->GetRenderContext().CreateFramebuffer(width,height,layers,attachments);
 	if(fb == nullptr)
-		return 0;
+		return nullptr;
 	fb->SetDebugName("lua_fb");
-	Lua::Push(l,fb);
-	return 1;
+	return fb;
 }
-int Lua::Vulkan::create_render_pass(lua_State *l)
+
+std::shared_ptr<prosper::IFramebuffer> Lua::Vulkan::create_framebuffer(uint32_t width,uint32_t height,const std::vector<prosper::IImageView*> &attachments)
 {
-	auto &rpCreateInfo = Lua::Check<prosper::util::RenderPassCreateInfo>(l,1);
+	return create_framebuffer(width,height,attachments,1);
+}
+std::shared_ptr<prosper::IRenderPass> Lua::Vulkan::create_render_pass(const prosper::util::RenderPassCreateInfo &rpCreateInfo)
+{
 	auto rp = c_engine->GetRenderContext().CreateRenderPass(rpCreateInfo);
 	if(rp == nullptr)
-		return 0;
+		return nullptr;
 	rp->SetDebugName("lua_rp");
-	Lua::Push(l,rp);
-	return 1;
+	return rp;
 }
 
-int Lua::Vulkan::create_render_target(lua_State *l)
+std::shared_ptr<prosper::RenderTarget> Lua::Vulkan::create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo,Texture &texture)
 {
-	auto arg = 1;
-	auto &rtCreateInfo = Lua::Check<prosper::util::RenderTargetCreateInfo>(l,arg++);
-	std::vector<std::shared_ptr<Texture>> textures;
-	if(Lua::IsType<Texture>(l,arg))
-		textures.push_back(Lua::Check<Texture>(l,arg++).shared_from_this());
-	else
-	{
-		Lua::CheckTable(l,arg);
-		auto t = arg;
-		auto numTextures = Lua::GetObjectLength(l,arg);
-		textures.reserve(numTextures);
-		for(auto i=decltype(numTextures){0};i<numTextures;++i)
-		{
-			Lua::PushInt(l,i +1); /* 1 */
-			Lua::GetTableValue(l,t);
-
-			textures.push_back(Lua::Check<Texture>(l,-1).shared_from_this());
-
-			Lua::Pop(l,1); /* 0 */
-		}
-		++arg;
-	}
-	std::shared_ptr<Lua::Vulkan::RenderPass> rp = nullptr;
-	if(Lua::IsSet(l,arg))
-		rp = Lua::Check<RenderPass>(l,arg++).shared_from_this();
-	auto rt = c_engine->GetRenderContext().CreateRenderTarget(textures,rp,rtCreateInfo);
+	auto rt = c_engine->GetRenderContext().CreateRenderTarget({texture.shared_from_this()},nullptr,rtCreateInfo);
 	if(rt == nullptr)
-		return 0;
+		return nullptr;
 	rt->SetDebugName("lua_rt");
-	Lua::Push(l,rt);
-	return 1;
+	return rt;
+}
+std::shared_ptr<prosper::RenderTarget> Lua::Vulkan::create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo,Texture &texture,Lua::Vulkan::RenderPass &renderPass)
+{
+	auto rt = c_engine->GetRenderContext().CreateRenderTarget({texture.shared_from_this()},renderPass.shared_from_this(),rtCreateInfo);
+	if(rt == nullptr)
+		return nullptr;
+	rt->SetDebugName("lua_rt");
+	return rt;
+}
+std::shared_ptr<prosper::RenderTarget> Lua::Vulkan::create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo,const std::vector<std::shared_ptr<Texture>> &textures,Lua::Vulkan::RenderPass &renderPass)
+{
+	auto rt = c_engine->GetRenderContext().CreateRenderTarget(textures,renderPass.shared_from_this(),rtCreateInfo);
+	if(rt == nullptr)
+		return nullptr;
+	rt->SetDebugName("lua_rt");
+	return rt;
+}
+std::shared_ptr<prosper::RenderTarget> Lua::Vulkan::create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo,const std::vector<std::shared_ptr<Texture>> &textures)
+{
+	auto rt = c_engine->GetRenderContext().CreateRenderTarget(textures,nullptr,rtCreateInfo);
+	if(rt == nullptr)
+		return nullptr;
+	rt->SetDebugName("lua_rt");
+	return rt;
+}
+std::shared_ptr<prosper::IFence> Lua::Vulkan::create_fence(bool createSignalled)
+{
+	return c_engine->GetRenderContext().CreateFence(createSignalled);
+}
+std::shared_ptr<prosper::IFence> Lua::Vulkan::create_fence()
+{
+	return create_fence(false);
 }
 
-int Lua::Vulkan::create_event(lua_State *l)
+Vector2i Lua::Vulkan::calculate_mipmap_size(uint32_t w,uint32_t h,uint32_t level)
 {
-	auto ev = c_engine->GetRenderContext().CreateEvent();
-	if(ev == nullptr)
-		return 0;
-	Lua::Push(l,ev);
-	return 1;
+	uint32_t wMipmap;
+	uint32_t hMipmap;
+	::prosper::util::calculate_mipmap_size(w,h,&wMipmap,&hMipmap,level);
+	return {wMipmap,hMipmap};
+}
+uint32_t Lua::Vulkan::calculate_mipmap_size(uint32_t v,uint32_t level)
+{
+	return ::prosper::util::calculate_mipmap_size(v,level);
+}
+std::shared_ptr<prosper::IBuffer> Lua::Vulkan::get_line_vertex_buffer(lua_State *l)
+{
+	return c_engine->GetRenderContext().GetCommonBufferCache().GetLineVertexBuffer();
+}
+std::shared_ptr<prosper::IBuffer> Lua::Vulkan::get_square_vertex_uv_buffer(lua_State *l)
+{
+	return c_engine->GetRenderContext().GetCommonBufferCache().GetSquareVertexUvBuffer();
+}
+std::shared_ptr<prosper::IBuffer> Lua::Vulkan::get_square_vertex_buffer(lua_State *l)
+{
+	return c_engine->GetRenderContext().GetCommonBufferCache().GetSquareVertexBuffer();
+}
+std::shared_ptr<prosper::IBuffer> Lua::Vulkan::get_square_uv_buffer(lua_State *l)
+{
+	return c_engine->GetRenderContext().GetCommonBufferCache().GetSquareUvBuffer();
+}
+std::shared_ptr<prosper::IBuffer> Lua::Vulkan::allocate_temporary_buffer(lua_State *l,uint32_t size)
+{
+	return c_engine->GetRenderContext().AllocateTemporaryBuffer(size);
+}
+std::shared_ptr<prosper::IBuffer> Lua::Vulkan::allocate_temporary_buffer(lua_State *l,::DataStream &ds)
+{
+	return c_engine->GetRenderContext().AllocateTemporaryBuffer(ds->GetSize(),0u /* alignment */,ds->GetData());
 }
 
-int Lua::Vulkan::create_fence(lua_State *l)
+std::vector<pragma::ShaderGradient::Node> Lua::Vulkan::get_gradient_nodes(lua_State *l,const luabind::tableT<void> &tNodes)
 {
-	auto bCreateSignalled = false;
-	if(Lua::IsSet(l,1))
-		bCreateSignalled = Lua::CheckBool(l,1);
-	auto fence = c_engine->GetRenderContext().CreateFence(bCreateSignalled);
-	if(fence == nullptr)
-		return 0;
-	Lua::Push(l,fence);
-	return 1;
-}
-
-int Lua::Vulkan::calculate_mipmap_count(lua_State *l)
-{
-	auto w = Lua::CheckInt(l,1);
-	auto h = Lua::CheckInt(l,2);
-	auto mipmapCount = ::prosper::util::calculate_mipmap_count(static_cast<uint32_t>(w),static_cast<uint32_t>(h));
-	Lua::PushInt(l,mipmapCount);
-	return 1;
-}
-
-int Lua::Vulkan::calculate_mipmap_size(lua_State *l)
-{
-	if(Lua::IsSet(l,3))
-	{
-		auto w = Lua::CheckInt(l,1);
-		auto h = Lua::CheckInt(l,2);
-		auto level = Lua::CheckInt(l,3);
-		uint32_t wMipmap;
-		uint32_t hMipmap;
-		::prosper::util::calculate_mipmap_size(static_cast<uint32_t>(w),static_cast<uint32_t>(h),&wMipmap,&hMipmap,static_cast<uint32_t>(level));
-		Lua::Push<Vector2i>(l,Vector2{wMipmap,hMipmap});
-		return 1;
-	}
-	auto v = Lua::CheckInt(l,1);
-	auto level = Lua::CheckInt(l,1);
-	Lua::PushInt(l,::prosper::util::calculate_mipmap_size(static_cast<uint32_t>(v),static_cast<uint32_t>(level)));
-	return 1;
-}
-int Lua::Vulkan::result_to_string(lua_State *l)
-{
-	auto result = Lua::CheckInt(l,1);
-	Lua::PushString(l,::prosper::util::to_string(static_cast<prosper::Result>(result)));
-	return 1;
-}
-int Lua::Vulkan::format_to_string(lua_State *l)
-{
-	auto format = Lua::CheckInt(l,1);
-	Lua::PushString(l,::prosper::util::to_string(static_cast<prosper::Format>(format)));
-	return 1;
-}
-int Lua::Vulkan::shader_stage_to_string(lua_State *l)
-{
-	auto shaderStage = Lua::CheckInt(l,1);
-	Lua::PushString(l,::prosper::util::to_string(static_cast<prosper::ShaderStageFlags>(shaderStage)));
-	return 1;
-}
-int Lua::Vulkan::is_depth_format(lua_State *l)
-{
-	auto format = Lua::CheckInt(l,1);
-	Lua::PushBool(l,::prosper::util::is_depth_format(static_cast<prosper::Format>(format)));
-	return 1;
-}
-int Lua::Vulkan::is_compressed_format(lua_State *l)
-{
-	auto format = Lua::CheckInt(l,1);
-	Lua::PushBool(l,::prosper::util::is_compressed_format(static_cast<prosper::Format>(format)));
-	return 1;
-}
-int Lua::Vulkan::is_uncompressed_format(lua_State *l)
-{
-	auto format = Lua::CheckInt(l,1);
-	Lua::PushBool(l,::prosper::util::is_uncompressed_format(static_cast<prosper::Format>(format)));
-	return 1;
-}
-int Lua::Vulkan::get_bit_size(lua_State *l)
-{
-	auto format = Lua::CheckInt(l,1);
-	Lua::PushInt(l,::prosper::util::get_bit_size(static_cast<prosper::Format>(format)));
-	return 1;
-}
-int Lua::Vulkan::get_byte_size(lua_State *l)
-{
-	auto format = Lua::CheckInt(l,1);
-	Lua::PushInt(l,::prosper::util::get_byte_size(static_cast<prosper::Format>(format)));
-	return 1;
-}
-int Lua::Vulkan::get_swapchain_image_count(lua_State *l)
-{
-	Lua::PushInt(l,c_engine->GetRenderContext().GetSwapchainImageCount());
-	return 1;
-}
-int Lua::Vulkan::wait_idle(lua_State *l)
-{
-	c_engine->GetRenderContext().WaitIdle();
-	return 0;
-}
-int Lua::Vulkan::flush(lua_State *l)
-{
-	c_engine->GetRenderContext().Flush();
-	return 0;
-}
-int Lua::Vulkan::get_line_vertex_buffer(lua_State *l)
-{
-	auto buf = c_engine->GetRenderContext().GetCommonBufferCache().GetLineVertexBuffer();
-	Lua::Push(l,buf);
-	return 1;
-}
-int Lua::Vulkan::get_line_vertices(lua_State *l)
-{
-	auto &verts = prosper::CommonBufferCache::GetLineVertices();
-	auto t = Lua::CreateTable(l);
-	auto idx = 1u;
-	for(auto &v : verts)
-	{
-		Lua::PushInt(l,idx++);
-		Lua::Push<Vector2>(l,v);
-		Lua::SetTableValue(l,t);
-	}
-	return 1;
-}
-int Lua::Vulkan::get_line_vertex_count(lua_State *l)
-{
-	auto numVerts = prosper::CommonBufferCache::GetLineVertexCount();
-	Lua::PushInt(l,numVerts);
-	return 1;
-}
-int Lua::Vulkan::get_line_vertex_format(lua_State *l)
-{
-	auto format = prosper::CommonBufferCache::GetLineVertexFormat();
-	Lua::PushInt(l,umath::to_integral(format));
-	return 1;
-}
-int Lua::Vulkan::get_square_vertex_uv_buffer(lua_State *l)
-{
-	auto uvBuffer = c_engine->GetRenderContext().GetCommonBufferCache().GetSquareVertexUvBuffer();
-	Lua::Push(l,uvBuffer);
-	return 1;
-}
-int Lua::Vulkan::get_square_vertex_buffer(lua_State *l)
-{
-	auto vertexBuffer = c_engine->GetRenderContext().GetCommonBufferCache().GetSquareVertexBuffer();
-	Lua::Push(l,vertexBuffer);
-	return 1;
-}
-int Lua::Vulkan::get_square_uv_buffer(lua_State *l)
-{
-	auto uvBuffer = c_engine->GetRenderContext().GetCommonBufferCache().GetSquareUvBuffer();
-	Lua::Push(l,uvBuffer);
-	return 1;
-}
-int Lua::Vulkan::get_square_vertices(lua_State *l)
-{
-	auto &squareVerts = prosper::CommonBufferCache::GetSquareVertices();
-	auto t = Lua::CreateTable(l);
-	auto idx = 1u;
-	for(auto &v : squareVerts)
-	{
-		Lua::PushInt(l,idx++);
-		Lua::Push<Vector2>(l,v);
-		Lua::SetTableValue(l,t);
-	}
-	return 1;
-}
-int Lua::Vulkan::get_square_uv_coordinates(lua_State *l)
-{
-	auto &squareUvs = prosper::CommonBufferCache::GetSquareUvCoordinates();
-	auto t = Lua::CreateTable(l);
-	auto idx = 1u;
-	for(auto &v : squareUvs)
-	{
-		Lua::PushInt(l,idx++);
-		Lua::Push<Vector2>(l,v);
-		Lua::SetTableValue(l,t);
-	}
-	return 1;
-}
-int Lua::Vulkan::get_square_vertex_count(lua_State *l)
-{
-	auto numVerts = prosper::CommonBufferCache::GetSquareVertexCount();
-	Lua::PushInt(l,numVerts);
-	return 1;
-}
-int Lua::Vulkan::get_square_vertex_format(lua_State *l)
-{
-	auto format = prosper::CommonBufferCache::GetSquareVertexFormat();
-	Lua::PushInt(l,umath::to_integral(format));
-	return 1;
-}
-int Lua::Vulkan::get_square_uv_format(lua_State *l)
-{
-	auto uvFormat = prosper::CommonBufferCache::GetSquareUvFormat();
-	Lua::PushInt(l,umath::to_integral(uvFormat));
-	return 1;
-}
-int Lua::Vulkan::allocate_temporary_buffer(lua_State *l,uint32_t size)
-{
-	auto buf = c_engine->GetRenderContext().AllocateTemporaryBuffer(size);
-	if(buf == nullptr)
-		return 0;
-	Lua::Push(l,buf);
-	return 1;
-}
-int Lua::Vulkan::allocate_temporary_buffer(lua_State *l,::DataStream &ds)
-{
-	auto buf = c_engine->GetRenderContext().AllocateTemporaryBuffer(ds->GetSize(),0u /* alignment */,ds->GetData());
-	if(buf == nullptr)
-		return 0;
-	Lua::Push(l,buf);
-	return 1;
-}
-
-static std::vector<pragma::ShaderGradient::Node> get_gradient_nodes(lua_State *l,uint32_t argIdx)
-{
-	Lua::CheckTable(l,argIdx);
 	std::vector<pragma::ShaderGradient::Node> nodes;
-	Lua::PushNil(l); /* 2 */
-	while(Lua::GetNextPair(l,argIdx) != 0) /* 3 */
+
+	auto n = Lua::GetObjectLength(l,tNodes);
+	nodes.reserve(n);
+	for(luabind::iterator i{tNodes},end;i!=end;++i)
 	{
-		if(Lua::IsTable(l,-1))
-		{
-			Lua::PushString(l,"offset"); /* 4 */
-			Lua::GetTableValue(l,-2); /* 4 */
-			float offset = Lua::CheckNumber<float>(l,-1); /* 4 */
-			Lua::Pop(l,1); /* 3 */
-
-			Lua::PushString(l,"color"); /* 4 */
-			Lua::GetTableValue(l,-2); /* 4 */
-			auto *col = Lua::CheckColor(l,-1); /* 4 */
-			Lua::Pop(l,1); /* 3 */
-			nodes.push_back(pragma::ShaderGradient::Node(Vector4(col->r /255.f,col->g /255.f,col->b /255.f,col->a /255.f),offset));
-		}
-		Lua::Pop(l,1); /* 2 */
-	} /* 1 */
-
-	Lua::Pop(l); /* 0 */
+		luabind::object o = *i;
+		auto offset = luabind::object_cast<float>(o["offset"]);
+		auto color = luabind::object_cast<Color>(o["color"]);
+		nodes.push_back(pragma::ShaderGradient::Node(Vector4(color.r /255.f,color.g /255.f,color.b /255.f,color.a /255.f),offset));
+	}
 	return nodes;
 }
-int Lua::Vulkan::create_gradient_texture(lua_State *l)
+std::shared_ptr<prosper::Texture> Lua::Vulkan::create_gradient_texture(lua_State *l,uint32_t width,uint32_t height,prosper::Format format,const Vector2 &dir,const luabind::tableT<void> &tNodes)
 {
 	auto whShader = c_engine->GetShader("gradient");
 	if(whShader.expired())
-		return 0;
-	auto arg = 1;
-	auto width = Lua::CheckInt(l,arg++);
-	auto height = Lua::CheckInt(l,arg++);
-	auto format = Lua::CheckInt(l,arg++);
-	auto &dir = *Lua::CheckVector2(l,arg++);
-	auto nodes = get_gradient_nodes(l,arg++);
-
+		return nullptr;
+	auto nodes = get_gradient_nodes(l,tNodes);
 	prosper::util::ImageCreateInfo createInfo {};
 	createInfo.width = width;
 	createInfo.height = height;
@@ -1073,9 +611,7 @@ int Lua::Vulkan::create_gradient_texture(lua_State *l)
 		context,setupCmd,*rt,dir,nodes
 	);
 	context.FlushSetupCommandBuffer();
-
-	Lua::Push(l,texture);
-	return 1;
+	return texture;
 }
 
 static void push_image_buffers(lua_State *l,bool includeLayers,bool includeMipmaps,const std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &imgBuffers)
@@ -1133,76 +669,77 @@ static void push_image_buffers(lua_State *l,bool includeLayers,bool includeMipma
 	}
 }
 
+void register_vulkan_lua_interface2(luabind::module_ &prosperMod); // Registration is split up to avoid compiler errors
 void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 {
-	lua.RegisterLibrary("prosper",{
-		{"create_descriptor_set",Lua::Vulkan::create_descriptor_set},
-		{"create_image",Lua::Vulkan::create_image},
-		{"create_image_view",Lua::Vulkan::create_image_view},
-		{"create_image_create_info",Lua::Vulkan::create_image_create_info},
-		{"create_texture",Lua::Vulkan::create_texture},
-		{"create_framebuffer",Lua::Vulkan::create_framebuffer},
-		{"create_render_pass",Lua::Vulkan::create_render_pass},
-		{"create_render_target",Lua::Vulkan::create_render_target},
-		{"create_gradient_texture",Lua::Vulkan::create_gradient_texture},
-		{"create_event",Lua::Vulkan::create_event},
-		{"create_fence",Lua::Vulkan::create_fence},
-		{"calculate_mipmap_count",Lua::Vulkan::calculate_mipmap_count},
-		{"calculate_mipmap_size",Lua::Vulkan::calculate_mipmap_size},
-		{"result_to_string",Lua::Vulkan::result_to_string},
-		{"format_to_string",Lua::Vulkan::format_to_string},
-		{"shader_stage_to_string",Lua::Vulkan::shader_stage_to_string},
-		{"is_depth_format",Lua::Vulkan::is_depth_format},
-		{"is_compressed_format",Lua::Vulkan::is_compressed_format},
-		{"is_uncompressed_format",Lua::Vulkan::is_uncompressed_format},
-		{"get_bit_size",Lua::Vulkan::get_bit_size},
-		{"get_byte_size",Lua::Vulkan::get_byte_size},
-		{"get_swapchain_image_count",Lua::Vulkan::get_swapchain_image_count},
-		{"wait_idle",Lua::Vulkan::wait_idle},
-		{"flush",Lua::Vulkan::flush},
-		{"get_api_identifier",static_cast<int(*)(lua_State*)>([](lua_State *l) -> int {
-			Lua::PushString(l,c_engine->GetRenderContext().GetAPIIdentifier());
-			return 1;
-		})},
-		{"get_api_abbreviation",static_cast<int(*)(lua_State*)>([](lua_State *l) -> int {
-			Lua::PushString(l,c_engine->GetRenderContext().GetAPIAbbreviation());
-			return 1;
-		})},
-		{"wait_for_current_swapchain_command_buffer_completion",static_cast<int(*)(lua_State*)>([](lua_State *l) -> int {
+	auto prosperMod = luabind::module_(lua.GetState(),"prosper");
+	prosperMod[
+		luabind::def("create_buffer",static_cast<std::shared_ptr<prosper::IBuffer>(*)(prosper::IPrContext&,prosper::util::BufferCreateInfo&,::DataStream&)>(&Lua::Vulkan::create_buffer),luabind::render_context_policy<1>{}),
+		luabind::def("create_buffer",static_cast<std::shared_ptr<prosper::IBuffer>(*)(prosper::IPrContext&,prosper::util::BufferCreateInfo&)>(&Lua::Vulkan::create_buffer),luabind::render_context_policy<1>{}),
+		luabind::def("create_descriptor_set",Lua::Vulkan::create_descriptor_set),
+		luabind::def("create_image",static_cast<std::shared_ptr<prosper::IImage>(*)(const prosper::util::ImageCreateInfo&,::DataStream&)>(&Lua::Vulkan::create_image)),
+		luabind::def("create_image",static_cast<std::shared_ptr<prosper::IImage>(*)(const prosper::util::ImageCreateInfo&)>(&Lua::Vulkan::create_image)),
+		luabind::def("create_image",static_cast<std::shared_ptr<prosper::IImage>(*)(const std::array<std::shared_ptr<uimg::ImageBuffer>,6>&)>(&Lua::Vulkan::create_image),luabind::array_policy<1,std::shared_ptr<uimg::ImageBuffer>,6>{}),
+		luabind::def("create_image",static_cast<std::shared_ptr<prosper::IImage>(*)(const std::array<std::shared_ptr<uimg::ImageBuffer>,6>&,const prosper::util::ImageCreateInfo&)>(&Lua::Vulkan::create_image),luabind::array_policy<1,std::shared_ptr<uimg::ImageBuffer>,6>{}),
+		luabind::def("create_image",static_cast<std::shared_ptr<prosper::IImage>(*)(uimg::ImageBuffer&)>(&Lua::Vulkan::create_image)),
+		luabind::def("create_image",static_cast<std::shared_ptr<prosper::IImage>(*)(uimg::ImageBuffer&,const prosper::util::ImageCreateInfo&)>(&Lua::Vulkan::create_image)),
+		luabind::def("create_image_view",Lua::Vulkan::create_image_view),
+		luabind::def("create_image_create_info",static_cast<prosper::util::ImageCreateInfo(*)(const uimg::ImageBuffer&,bool)>(&Lua::Vulkan::create_image_create_info)),
+		luabind::def("create_image_create_info",static_cast<prosper::util::ImageCreateInfo(*)(const uimg::ImageBuffer&)>(&Lua::Vulkan::create_image_create_info)),
+		luabind::def("create_texture",static_cast<std::shared_ptr<prosper::Texture>(*)(prosper::IImage&,const prosper::util::TextureCreateInfo&,const prosper::util::ImageViewCreateInfo&,const prosper::util::SamplerCreateInfo&)>(&Lua::Vulkan::create_texture)),
+		luabind::def("create_texture",static_cast<std::shared_ptr<prosper::Texture>(*)(prosper::IImage&,const prosper::util::TextureCreateInfo&,const prosper::util::ImageViewCreateInfo&)>(&Lua::Vulkan::create_texture)),
+		luabind::def("create_texture",static_cast<std::shared_ptr<prosper::Texture>(*)(prosper::IImage&,const prosper::util::TextureCreateInfo&)>(&Lua::Vulkan::create_texture)),
+		luabind::def("create_framebuffer",static_cast<std::shared_ptr<prosper::IFramebuffer>(*)(uint32_t,uint32_t,const std::vector<prosper::IImageView*>&,uint32_t)>(&Lua::Vulkan::create_framebuffer),luabind::vector_policy<3,prosper::IImageView*>{}),
+		luabind::def("create_framebuffer",static_cast<std::shared_ptr<prosper::IFramebuffer>(*)(uint32_t,uint32_t,const std::vector<prosper::IImageView*>&)>(&Lua::Vulkan::create_framebuffer),luabind::vector_policy<3,prosper::IImageView*>{}),
+		luabind::def("create_render_pass",Lua::Vulkan::create_render_pass),
+
+		luabind::def("create_render_target",static_cast<std::shared_ptr<prosper::RenderTarget>(*)(const prosper::util::RenderTargetCreateInfo&,prosper::Texture&)>(&Lua::Vulkan::create_render_target)),
+		luabind::def("create_render_target",static_cast<std::shared_ptr<prosper::RenderTarget>(*)(const prosper::util::RenderTargetCreateInfo&,prosper::Texture&,Lua::Vulkan::RenderPass&)>(&Lua::Vulkan::create_render_target)),
+		luabind::def("create_render_target",static_cast<std::shared_ptr<prosper::RenderTarget>(*)(const prosper::util::RenderTargetCreateInfo&,const std::vector<std::shared_ptr<prosper::Texture>>&,Lua::Vulkan::RenderPass&)>(&Lua::Vulkan::create_render_target),luabind::vector_policy<2,std::shared_ptr<prosper::Texture>>{}),
+		luabind::def("create_render_target",static_cast<std::shared_ptr<prosper::RenderTarget>(*)(const prosper::util::RenderTargetCreateInfo&,const std::vector<std::shared_ptr<prosper::Texture>>&)>(&Lua::Vulkan::create_render_target),luabind::vector_policy<2,std::shared_ptr<prosper::Texture>>{}),
+
+		luabind::def("create_gradient_texture",&Lua::Vulkan::create_gradient_texture),
+		luabind::def("create_event",&prosper::IPrContext::CreateEvent,luabind::render_context_policy<1>{}),
+		luabind::def("create_fence",static_cast<std::shared_ptr<prosper::IFence>(*)(bool)>(&Lua::Vulkan::create_fence)),
+		luabind::def("create_fence",static_cast<std::shared_ptr<prosper::IFence>(*)()>(&Lua::Vulkan::create_fence)),
+		luabind::def("calculate_mipmap_count",&prosper::util::calculate_mipmap_count),
+		luabind::def("calculate_mipmap_size",static_cast<Vector2i(*)(uint32_t,uint32_t,uint32_t)>(&Lua::Vulkan::calculate_mipmap_size)),
+		luabind::def("calculate_mipmap_size",static_cast<uint32_t(*)(uint32_t,uint32_t)>(&Lua::Vulkan::calculate_mipmap_size)),
+		luabind::def("result_to_string",static_cast<std::string(*)(prosper::Result)>(&::prosper::util::to_string)),
+		luabind::def("format_to_string",static_cast<std::string(*)(prosper::Format)>(&::prosper::util::to_string)),
+		luabind::def("shader_stage_to_string",static_cast<std::string(*)(prosper::ShaderStage)>(&::prosper::util::to_string)),
+		luabind::def("is_depth_format",::prosper::util::is_depth_format),
+		luabind::def("is_compressed_format",::prosper::util::is_compressed_format),
+		luabind::def("is_uncompressed_format",::prosper::util::is_uncompressed_format),
+		luabind::def("get_bit_size",::prosper::util::get_bit_size),
+		luabind::def("get_byte_size",::prosper::util::get_byte_size),
+		luabind::def("get_swapchain_image_count",&::prosper::IPrContext::GetSwapchainImageCount,luabind::render_context_policy<1>{}),
+		luabind::def("wait_idle",&::prosper::IPrContext::WaitIdle,luabind::render_context_policy<1>{}),
+		luabind::def("flush",&::prosper::IPrContext::Flush,luabind::render_context_policy<1>{}),
+		luabind::def("get_api_identifier",&::prosper::IPrContext::GetAPIIdentifier,luabind::render_context_policy<1>{}),
+		luabind::def("get_api_abbreviation",&::prosper::IPrContext::GetAPIAbbreviation,luabind::render_context_policy<1>{}),
+		luabind::def("wait_for_current_swapchain_command_buffer_completion",static_cast<Lua::var<bool,std::string>(*)(lua_State*)>([](lua_State *l) -> Lua::var<bool,std::string> {
 			std::string err;
 			if(c_engine->GetRenderContext().WaitForCurrentSwapchainCommandBuffer(err))
-			{
-				Lua::PushBool(l,true);
-				return 1;
-			}
-			Lua::PushString(l,err);
-			return 1;
-		})},
-		{"create_primary_command_buffer",static_cast<int(*)(lua_State*)>([](lua_State *l) -> int {
+				return luabind::object{l,false};
+			return luabind::object{l,err};
+		})),
+		luabind::def("create_primary_command_buffer",static_cast<std::shared_ptr<prosper::ICommandBuffer>(*)(lua_State*)>([](lua_State *l) -> std::shared_ptr<prosper::ICommandBuffer> {
 			uint32_t universalQueueFamilyIndex;
-			auto buf = c_engine->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Universal,universalQueueFamilyIndex);
-			if(buf == nullptr)
-				return 0;
-			Lua::Push(l,std::static_pointer_cast<prosper::ICommandBuffer>(buf));
-			return 1;
-		})},
-		{"create_secondary_command_buffer",static_cast<int(*)(lua_State*)>([](lua_State *l) -> int {
+			return c_engine->GetRenderContext().AllocatePrimaryLevelCommandBuffer(prosper::QueueFamilyType::Universal,universalQueueFamilyIndex);
+		})),
+		luabind::def("create_secondary_command_buffer",static_cast<std::shared_ptr<prosper::ICommandBuffer>(*)(lua_State*)>([](lua_State *l) -> std::shared_ptr<prosper::ICommandBuffer> {
 			uint32_t universalQueueFamilyIndex;
-			auto buf = c_engine->GetRenderContext().AllocateSecondaryLevelCommandBuffer(prosper::QueueFamilyType::Universal,universalQueueFamilyIndex);
-			if(buf == nullptr)
-				return 0;
-			Lua::Push(l,std::static_pointer_cast<prosper::ICommandBuffer>(buf));
-			return 1;
-		})},
-		{"create_window",static_cast<int(*)(lua_State*)>([](lua_State *l) -> int {
+			return c_engine->GetRenderContext().AllocateSecondaryLevelCommandBuffer(prosper::QueueFamilyType::Universal,universalQueueFamilyIndex);
+		})),
+		luabind::def("create_window",static_cast<std::shared_ptr<prosper::Window>(*)(prosper::WindowSettings&)>([](prosper::WindowSettings &windowSettings) -> std::shared_ptr<prosper::Window> {
 			auto &context = c_engine->GetRenderContext();
 			auto &mainWindowCreateInfo = c_engine->GetRenderContext().GetWindow().GetWindowSettings();
-			auto cpy = Lua::Check<prosper::WindowSettings>(l,1);
-			cpy.flags = mainWindowCreateInfo.flags;
-			cpy.api = mainWindowCreateInfo.api;
-			auto window = context.CreateWindow(cpy);
+			windowSettings.flags = mainWindowCreateInfo.flags;
+			windowSettings.api = mainWindowCreateInfo.api;
+			auto window = context.CreateWindow(windowSettings);
 			if(!window)
-				return 0;
+				return nullptr;
 			auto *pWindow = window.get();
 			(*window)->SetWindowSizeCallback([pWindow](GLFW::Window &window,Vector2i size) {
 				pWindow->ReloadStagingRenderTarget();
@@ -1211,15 +748,8 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 					el->SetSize(size);
 			});
 			c_engine->InitializeWindowInputCallbacks(*window);
-			Lua::Push(l,window);
-			return 1;
-		})}
-	});
-
-	auto prosperMod = luabind::module_(lua.GetState(),"prosper");
-	prosperMod[
-		luabind::def("create_buffer",static_cast<std::shared_ptr<prosper::IBuffer>(*)(prosper::util::BufferCreateInfo&,::DataStream&)>([](prosper::util::BufferCreateInfo &bufCreateInfo,::DataStream &ds) {return Lua::Vulkan::create_buffer(bufCreateInfo,ds);})),
-		luabind::def("create_buffer",static_cast<std::shared_ptr<prosper::IBuffer>(*)(prosper::util::BufferCreateInfo&)>([](prosper::util::BufferCreateInfo &bufCreateInfo) {return Lua::Vulkan::create_buffer(bufCreateInfo);}))
+			return window;
+		}))
 	];
 
 	prosperMod[
@@ -1228,18 +758,18 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 			luabind::def("get_square_vertex_uv_buffer",&Lua::Vulkan::get_square_vertex_uv_buffer),
 			luabind::def("get_square_vertex_buffer",&Lua::Vulkan::get_square_vertex_buffer),
 			luabind::def("get_square_uv_buffer",&Lua::Vulkan::get_square_uv_buffer),
-			luabind::def("get_square_vertices",&Lua::Vulkan::get_square_vertices),
-			luabind::def("get_square_uv_coordinates",&Lua::Vulkan::get_square_uv_coordinates),
-			luabind::def("get_square_vertex_count",&Lua::Vulkan::get_square_vertex_count),
-			luabind::def("get_square_vertex_format",&Lua::Vulkan::get_square_vertex_format),
-			luabind::def("get_square_uv_format",&Lua::Vulkan::get_square_uv_format),
-			luabind::def("allocate_temporary_buffer",static_cast<int(*)(lua_State*,::DataStream&)>(&Lua::Vulkan::allocate_temporary_buffer)),
-			luabind::def("allocate_temporary_buffer",static_cast<int(*)(lua_State*,uint32_t)>(&Lua::Vulkan::allocate_temporary_buffer)),
+			luabind::def("get_square_vertices",&prosper::CommonBufferCache::GetSquareVertices),
+			luabind::def("get_square_uv_coordinates",&prosper::CommonBufferCache::GetSquareUvCoordinates),
+			luabind::def("get_square_vertex_count",&prosper::CommonBufferCache::GetSquareVertexCount),
+			luabind::def("get_square_vertex_format",&prosper::CommonBufferCache::GetSquareVertexFormat),
+			luabind::def("get_square_uv_format",&prosper::CommonBufferCache::GetSquareUvFormat),
+			luabind::def("allocate_temporary_buffer",static_cast<std::shared_ptr<prosper::IBuffer>(*)(lua_State*,::DataStream&)>(&Lua::Vulkan::allocate_temporary_buffer)),
+			luabind::def("allocate_temporary_buffer",static_cast<std::shared_ptr<prosper::IBuffer>(*)(lua_State*,uint32_t)>(&Lua::Vulkan::allocate_temporary_buffer)),
 
 			luabind::def("get_line_vertex_buffer",&Lua::Vulkan::get_line_vertex_buffer),
-			luabind::def("get_line_vertices",&Lua::Vulkan::get_line_vertices),
-			luabind::def("get_line_vertex_count",&Lua::Vulkan::get_line_vertex_count),
-			luabind::def("get_line_vertex_format",&Lua::Vulkan::get_line_vertex_format)
+			luabind::def("get_line_vertices",&prosper::CommonBufferCache::GetLineVertices,luabind::vector_policy<0,Vector2>{}),
+			luabind::def("get_line_vertex_count",&prosper::CommonBufferCache::GetLineVertexCount),
+			luabind::def("get_line_vertex_format",&prosper::CommonBufferCache::GetLineVertexFormat)
 		]
 	];
 
@@ -2049,13 +1579,13 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		createInfo.attachments.push_back({static_cast<prosper::Format>(format),static_cast<prosper::ImageLayout>(initialLayout),static_cast<prosper::AttachmentLoadOp>(loadOp),static_cast<prosper::AttachmentStoreOp>(storeOp),static_cast<prosper::SampleCountFlags>(sampleCount),static_cast<prosper::ImageLayout>(finalLayout)});
 		return createInfo.attachments.size() -1ull;
 	}));
-	defRenderPassCreateInfo.def("AddAttachment",static_cast<void(*)(lua_State*,prosper::util::RenderPassCreateInfo&,uint32_t,uint32_t,uint32_t,uint32_t,uint32_t)>([](lua_State *l,prosper::util::RenderPassCreateInfo &createInfo,uint32_t format,uint32_t initialLayout,uint32_t finalLayout,uint32_t loadOp,uint32_t storeOp) {
+	defRenderPassCreateInfo.def("AddAttachment",static_cast<uint32_t(*)(lua_State*,prosper::util::RenderPassCreateInfo&,uint32_t,uint32_t,uint32_t,uint32_t,uint32_t)>([](lua_State *l,prosper::util::RenderPassCreateInfo &createInfo,uint32_t format,uint32_t initialLayout,uint32_t finalLayout,uint32_t loadOp,uint32_t storeOp) -> uint32_t {
 		createInfo.attachments.push_back({static_cast<prosper::Format>(format),static_cast<prosper::ImageLayout>(initialLayout),static_cast<prosper::AttachmentLoadOp>(loadOp),static_cast<prosper::AttachmentStoreOp>(storeOp),prosper::SampleCountFlags::e1Bit,static_cast<prosper::ImageLayout>(finalLayout)});
-		Lua::PushInt(l,createInfo.attachments.size() -1ull);
+		return createInfo.attachments.size() -1ull;
 	}));
-	defRenderPassCreateInfo.def("AddSubPass",static_cast<void(*)(lua_State*,prosper::util::RenderPassCreateInfo&)>([](lua_State *l,prosper::util::RenderPassCreateInfo &createInfo) {
+	defRenderPassCreateInfo.def("AddSubPass",static_cast<uint32_t(*)(lua_State*,prosper::util::RenderPassCreateInfo&)>([](lua_State *l,prosper::util::RenderPassCreateInfo &createInfo) -> uint32_t {
 		createInfo.subPasses.push_back({});
-		Lua::PushInt(l,createInfo.subPasses.size() -1ull);
+		return createInfo.subPasses.size() -1ull;
 	}));
 	defRenderPassCreateInfo.def("AddSubPassColorAttachment",static_cast<void(*)(lua_State*,prosper::util::RenderPassCreateInfo&,uint32_t,uint32_t)>([](lua_State *l,prosper::util::RenderPassCreateInfo &createInfo,uint32_t subPassId,uint32_t colorAttId) {
 		if(subPassId >= createInfo.subPasses.size() || colorAttId >= createInfo.attachments.size())
@@ -2120,16 +1650,16 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defBufferImageCopyInfo.def("SetHeight",static_cast<void(*)(lua_State*,prosper::util::BufferImageCopyInfo&,uint32_t)>([](lua_State *l,prosper::util::BufferImageCopyInfo &copyInfo,uint32_t height) {
 		copyInfo.height = height;
 	}));
-	defBufferImageCopyInfo.def("GetWidth",static_cast<void(*)(lua_State*,prosper::util::BufferImageCopyInfo&)>([](lua_State *l,prosper::util::BufferImageCopyInfo &copyInfo) {
+	defBufferImageCopyInfo.def("GetWidth",static_cast<std::optional<uint32_t>(*)(lua_State*,prosper::util::BufferImageCopyInfo&)>([](lua_State *l,prosper::util::BufferImageCopyInfo &copyInfo) -> std::optional<uint32_t> {
 		if(copyInfo.width.has_value() == false)
-			return;
-		Lua::PushInt(l,*copyInfo.width);
-	}));
-	defBufferImageCopyInfo.def("GetHeight",static_cast<void(*)(lua_State*,prosper::util::BufferImageCopyInfo&)>([](lua_State *l,prosper::util::BufferImageCopyInfo &copyInfo) {
+			return {};
+		return *copyInfo.width;
+	}),luabind::optional_policy<0>{});
+	defBufferImageCopyInfo.def("GetHeight",static_cast<std::optional<uint32_t>(*)(lua_State*,prosper::util::BufferImageCopyInfo&)>([](lua_State *l,prosper::util::BufferImageCopyInfo &copyInfo) -> std::optional<uint32_t> {
 		if(copyInfo.height.has_value() == false)
-			return;
-		Lua::PushInt(l,*copyInfo.height);
-	}));
+			return {};
+		return *copyInfo.height;
+	}),luabind::optional_policy<0>{});
 	defBufferImageCopyInfo.def_readwrite("bufferOffset",&prosper::util::BufferImageCopyInfo::bufferOffset);
 	defBufferImageCopyInfo.def_readwrite("width",&prosper::util::BufferImageCopyInfo::width);
 	defBufferImageCopyInfo.def_readwrite("height",&prosper::util::BufferImageCopyInfo::height);
@@ -2168,23 +1698,23 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	auto defVkTexture = luabind::class_<Lua::Vulkan::Texture>("Texture");
 	defVkTexture.def(luabind::tostring(luabind::self));
 	defVkTexture.def(luabind::const_self ==luabind::const_self);
-	defVkTexture.def("GetImage",&Lua::Vulkan::VKTexture::GetImage);
-	defVkTexture.def("GetImageView",static_cast<void(*)(lua_State*,Lua::Vulkan::Texture&,uint32_t)>(&Lua::Vulkan::VKTexture::GetImageView));
-	defVkTexture.def("GetImageView",static_cast<void(*)(lua_State*,Lua::Vulkan::Texture&)>(&Lua::Vulkan::VKTexture::GetImageView));
-	defVkTexture.def("GetSampler",&Lua::Vulkan::VKTexture::GetSampler);
+	defVkTexture.def("GetImage",static_cast<prosper::IImage&(Lua::Vulkan::Texture::*)()>(&Lua::Vulkan::Texture::GetImage),luabind::shared_from_this_policy<0>{});
+	defVkTexture.def("GetImageView",static_cast<prosper::IImageView*(Lua::Vulkan::Texture::*)()>(&Lua::Vulkan::Texture::GetImageView),luabind::shared_from_this_policy<0>{});
+	defVkTexture.def("GetImageView",static_cast<prosper::IImageView*(Lua::Vulkan::Texture::*)(uint32_t)>(&Lua::Vulkan::Texture::GetImageView),luabind::shared_from_this_policy<0>{});
+	defVkTexture.def("GetSampler",static_cast<prosper::ISampler*(Lua::Vulkan::Texture::*)()>(&Lua::Vulkan::Texture::GetSampler),luabind::shared_from_this_policy<0>{});
 	defVkTexture.def("GetWidth",&Lua::Vulkan::VKTexture::GetWidth);
 	defVkTexture.def("GetHeight",&Lua::Vulkan::VKTexture::GetHeight);
-	defVkTexture.def("GetFormat",&Lua::Vulkan::VKTexture::GetFormat);
+	defVkTexture.def("GetFormat",static_cast<prosper::Format(*)(const Lua::Vulkan::Texture&)>([](const Lua::Vulkan::Texture &tex) {
+		return tex.GetImage().GetFormat();
+	}));
 	defVkTexture.def("IsValid",&Lua::Vulkan::VKTexture::IsValid);
 	defVkTexture.def("SetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Texture&,const std::string&)>([](lua_State *l,Lua::Vulkan::Texture &tex,const std::string &name) {
-		Lua::Vulkan::VKContextObject::SetDebugName<Lua::Vulkan::Texture>(l,tex,name,&Lua::Check<Lua::Vulkan::Texture>);
+		Lua::Vulkan::VKContextObject::SetDebugName(l,tex,name);
 	}));
 	defVkTexture.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Texture&)>([](lua_State *l,Lua::Vulkan::Texture &tex) {
-		Lua::Vulkan::VKContextObject::GetDebugName<Lua::Vulkan::Texture>(l,tex,&Lua::Check<Lua::Vulkan::Texture>);
+		Lua::Vulkan::VKContextObject::GetDebugName(l,tex);
 	}));
-	defVkTexture.def("SetImageView",static_cast<void(*)(lua_State*,Lua::Vulkan::Texture&,Lua::Vulkan::ImageView&)>([](lua_State *l,Lua::Vulkan::Texture &tex,Lua::Vulkan::ImageView &imgView) {
-		tex.SetImageView(imgView);
-	}));
+	defVkTexture.def("SetImageView",&Lua::Vulkan::Texture::SetImageView);
 	//
 	prosperMod[defVkTexture];
 
@@ -2192,28 +1722,23 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkImage.def(luabind::tostring(luabind::self));
 	defVkImage.def(luabind::const_self ==luabind::const_self);
 	defVkImage.def("IsValid",&Lua::Vulkan::VKImage::IsValid);
-	defVkImage.def("GetAspectSubresourceLayout",&Lua::Vulkan::VKImage::GetAspectSubresourceLayout);
-	defVkImage.def("GetAspectSubresourceLayout",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uint32_t)>([](lua_State *l,Lua::Vulkan::Image &img,uint32_t layer) {
-		Lua::Vulkan::VKImage::GetAspectSubresourceLayout(l,img,layer);
-	}));
-	defVkImage.def("GetAspectSubresourceLayout",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&)>([](lua_State *l,Lua::Vulkan::Image &img) {
-		Lua::Vulkan::VKImage::GetAspectSubresourceLayout(l,img);
-	}));
-	defVkImage.def("IsSrgb",static_cast<bool(*)(lua_State*,Lua::Vulkan::Image&)>([](lua_State *l,Lua::Vulkan::Image &img) -> bool {
-		return img.IsSrgb();
-	}));
-	defVkImage.def("IsNormalMap",static_cast<bool(*)(lua_State*,Lua::Vulkan::Image&)>([](lua_State *l,Lua::Vulkan::Image &img) -> bool {
-		return img.IsNormalMap();
-	}));
-	defVkImage.def("SetSrgb",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,bool)>([](lua_State *l,Lua::Vulkan::Image &img,bool srgb) {
-		img.SetSrgb(srgb);
-	}));
-	defVkImage.def("SetNormalMap",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,bool)>([](lua_State *l,Lua::Vulkan::Image &img,bool normalMap) {
-		img.SetNormalMap(normalMap);
-	}));
-	defVkImage.def("GetAlignment",&Lua::Vulkan::VKImage::GetAlignment);
-	defVkImage.def("GetExtent2D",&Lua::Vulkan::VKImage::GetExtent2D);
-	defVkImage.def("GetFormat",&Lua::Vulkan::VKImage::GetFormat);
+	defVkImage.def("GetAspectSubresourceLayout",&prosper::IImage::GetSubresourceLayout,luabind::optional_policy<0>{});
+	defVkImage.def("GetAspectSubresourceLayout",static_cast<std::optional<prosper::util::SubresourceLayout>(*)(Lua::Vulkan::Image&,uint32_t)>([](Lua::Vulkan::Image &img,uint32_t layer) -> std::optional<prosper::util::SubresourceLayout> {
+		return img.GetSubresourceLayout(layer);
+	}),luabind::optional_policy<0>{});
+	defVkImage.def("GetAspectSubresourceLayout",static_cast<std::optional<prosper::util::SubresourceLayout>(*)(Lua::Vulkan::Image&)>([](Lua::Vulkan::Image &img) -> std::optional<prosper::util::SubresourceLayout> {
+		return img.GetSubresourceLayout();
+	}),luabind::optional_policy<0>{});
+	defVkImage.def("IsSrgb",&Lua::Vulkan::Image::IsSrgb);
+	defVkImage.def("IsNormalMap",&Lua::Vulkan::Image::IsNormalMap);
+	defVkImage.def("SetSrgb",&Lua::Vulkan::Image::SetSrgb);
+	defVkImage.def("SetNormalMap",&Lua::Vulkan::Image::SetNormalMap);
+	defVkImage.def("GetAlignment",&Lua::Vulkan::Image::GetAlignment);
+	defVkImage.def("GetExtent2D",static_cast<std::pair<uint32_t,uint32_t>(*)(Lua::Vulkan::Image&,uint32_t)>([](Lua::Vulkan::Image &img,uint32_t mipmap) -> std::pair<uint32_t,uint32_t> {
+		auto extents = img.GetExtents(mipmap);
+		return {extents.width,extents.height};
+	}),luabind::pair_policy<0>{});
+	defVkImage.def("GetFormat",&Lua::Vulkan::Image::GetFormat);
 #if 0
 	defVkImage.def("GetExtent3D",&Lua::Vulkan::VKImage::GetExtent3D);
 	defVkImage.def("GetMemoryTypes",&Lua::Vulkan::VKImage::GetMemoryTypes);
@@ -2222,46 +1747,38 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkImage.def("GetMemoryBlock",&Lua::Vulkan::VKImage::GetMemoryBlock);
 	defVkImage.def("GetSubresourceRange",&Lua::Vulkan::VKImage::GetSubresourceRange);
 #endif
-	defVkImage.def("GetMipmapSize",&Lua::Vulkan::VKImage::GetMipmapSize);
-	defVkImage.def("GetLayerCount",&Lua::Vulkan::VKImage::GetLayerCount);
-	defVkImage.def("GetMipmapCount",&Lua::Vulkan::VKImage::GetMipmapCount);
-	defVkImage.def("GetSampleCount",&Lua::Vulkan::VKImage::GetSampleCount);
-	defVkImage.def("GetSharingMode",&Lua::Vulkan::VKImage::GetSharingMode);
-	defVkImage.def("GetTiling",&Lua::Vulkan::VKImage::GetTiling);
-	defVkImage.def("GetType",&Lua::Vulkan::VKImage::GetType);
-	defVkImage.def("GetUsage",&Lua::Vulkan::VKImage::GetUsage);
-	defVkImage.def("GetWidth",&Lua::Vulkan::VKImage::GetWidth);
-	defVkImage.def("GetHeight",&Lua::Vulkan::VKImage::GetHeight);
+	defVkImage.def("GetMipmapSize",static_cast<std::pair<uint32_t,uint32_t>(*)(Lua::Vulkan::Image&,uint32_t)>([](Lua::Vulkan::Image &img,uint32_t mipmap) -> std::pair<uint32_t,uint32_t> {
+		auto extents = img.GetExtents(mipmap);
+		return {extents.width,extents.height};
+	}),luabind::pair_policy<0>{});
+	defVkImage.def("GetLayerCount",&Lua::Vulkan::Image::GetLayerCount);
+	defVkImage.def("GetMipmapCount",&Lua::Vulkan::Image::GetMipmapCount);
+	defVkImage.def("GetSampleCount",&Lua::Vulkan::Image::GetSampleCount);
+	defVkImage.def("GetSharingMode",&Lua::Vulkan::Image::GetSharingMode);
+	defVkImage.def("GetTiling",&Lua::Vulkan::Image::GetTiling);
+	defVkImage.def("GetType",&Lua::Vulkan::Image::GetType);
+	defVkImage.def("GetUsage",&Lua::Vulkan::Image::GetUsageFlags);
+	defVkImage.def("GetWidth",&Lua::Vulkan::Image::GetWidth);
+	defVkImage.def("GetHeight",&Lua::Vulkan::Image::GetHeight);
 	defVkImage.def("WriteMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uint32_t,uint32_t,uimg::ImageBuffer&,uint32_t,uint32_t)>(Lua::Vulkan::VKImage::WriteMemory));
 	defVkImage.def("WriteMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uint32_t,uint32_t,uimg::ImageBuffer&,uint32_t)>(Lua::Vulkan::VKImage::WriteMemory));
 	defVkImage.def("WriteMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uint32_t,uint32_t,uimg::ImageBuffer&)>(Lua::Vulkan::VKImage::WriteMemory));
 	defVkImage.def("SetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,const std::string&)>([](lua_State *l,Lua::Vulkan::Image &img,const std::string &name) {
-		Lua::Vulkan::VKContextObject::SetDebugName<Lua::Vulkan::Image>(l,img,name,&Lua::Check<Lua::Vulkan::Image>);
+		Lua::Vulkan::VKContextObject::SetDebugName(l,img,name);
 	}));
 	defVkImage.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&)>([](lua_State *l,Lua::Vulkan::Image &img) {
-		Lua::Vulkan::VKContextObject::GetDebugName<Lua::Vulkan::Image>(l,img,&Lua::Check<Lua::Vulkan::Image>);
+		Lua::Vulkan::VKContextObject::GetDebugName(l,img);
 	}));
-	defVkImage.def("Convert",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,Lua::Vulkan::CommandBuffer&,prosper::Format)>([](lua_State *l,Lua::Vulkan::Image &img,Lua::Vulkan::CommandBuffer &cmd,prosper::Format format) {
-		auto cpy = img.Convert(cmd,format);
-		if(cpy == nullptr)
-			return;
-		Lua::Push(l,cpy);
+	defVkImage.def("Convert",static_cast<std::shared_ptr<prosper::IImage>(*)(lua_State*,Lua::Vulkan::Image&,Lua::Vulkan::CommandBuffer&,prosper::Format)>([](lua_State *l,Lua::Vulkan::Image &img,Lua::Vulkan::CommandBuffer &cmd,prosper::Format format) -> std::shared_ptr<prosper::IImage> {
+		return img.Convert(cmd,format);
 	}));
-	defVkImage.def("Copy",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,Lua::Vulkan::CommandBuffer&,prosper::util::ImageCreateInfo&)>([](lua_State *l,Lua::Vulkan::Image &img,Lua::Vulkan::CommandBuffer &cmd,prosper::util::ImageCreateInfo &imgCreateInfo) {
-		auto cpy = img.Copy(cmd,imgCreateInfo);
-		if(cpy == nullptr)
-			return;
-		Lua::Push(l,cpy);
+	defVkImage.def("Copy",static_cast<std::shared_ptr<prosper::IImage>(*)(lua_State*,Lua::Vulkan::Image&,Lua::Vulkan::CommandBuffer&,prosper::util::ImageCreateInfo&)>([](lua_State *l,Lua::Vulkan::Image &img,Lua::Vulkan::CommandBuffer &cmd,prosper::util::ImageCreateInfo &imgCreateInfo) -> std::shared_ptr<prosper::IImage> {
+		return img.Copy(cmd,imgCreateInfo);
 	}));
-	defVkImage.def("Copy",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,Lua::Vulkan::CommandBuffer&)>([](lua_State *l,Lua::Vulkan::Image &img,Lua::Vulkan::CommandBuffer &cmd) {
-		auto cpy = img.Copy(cmd,img.GetCreateInfo());
-		if(cpy == nullptr)
-			return;
-		Lua::Push(l,cpy);
+	defVkImage.def("Copy",static_cast<std::shared_ptr<prosper::IImage>(*)(lua_State*,Lua::Vulkan::Image&,Lua::Vulkan::CommandBuffer&)>([](lua_State *l,Lua::Vulkan::Image &img,Lua::Vulkan::CommandBuffer &cmd) -> std::shared_ptr<prosper::IImage> {
+		return img.Copy(cmd,img.GetCreateInfo());
 	}));
-	defVkImage.def("GetCreateInfo",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&)>([](lua_State *l,Lua::Vulkan::Image &img) {
-		Lua::Push(l,img.GetCreateInfo());
-	}));
+	defVkImage.def("GetCreateInfo",static_cast<prosper::util::ImageCreateInfo&(prosper::IImage::*)()>(&prosper::IImage::GetCreateInfo),luabind::copy_policy<0>{});
 	defVkImage.def("ToImageBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,bool,bool,uint32_t)>([](lua_State *l,Lua::Vulkan::Image &img,bool includeLayers,bool includeMipmaps,uint32_t targetFormat) {
 		std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> imgBuffers;
 		auto result = util::to_image_buffer(img,static_cast<uimg::ImageBuffer::Format>(targetFormat),imgBuffers,includeLayers,includeMipmaps);
@@ -2276,12 +1793,12 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 			return;
 		push_image_buffers(l,includeLayers,includeMipmaps,imgBuffers);
 	}));
-	defVkImage.def("GetMemoryBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&)>([](lua_State *l,Lua::Vulkan::Image &img) {
+	defVkImage.def("GetMemoryBuffer",static_cast<prosper::IBuffer*(*)(lua_State*,Lua::Vulkan::Image&)>([](lua_State *l,Lua::Vulkan::Image &img) -> prosper::IBuffer* {
 		auto *buf = img.GetMemoryBuffer();
 		if(buf == nullptr)
-			return;
+			return nullptr;
 		// The image should have ownership over the memory, so we'll just return a pointer. It's up to the user to make sure not to use the memory after the image has been destroyed!
-		Lua::Push(l,buf);
+		return buf;
 		//Lua::Push(l,buf->shared_from_this());
 	}));
 	prosperMod[defVkImage];
@@ -2299,24 +1816,24 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkImageView.def(luabind::tostring(luabind::self));
 	defVkImageView.def(luabind::const_self ==luabind::const_self);
 	defVkImageView.def("IsValid",&Lua::Vulkan::VKImageView::IsValid);
-	defVkImageView.def("GetAspectMask",&Lua::Vulkan::VKImageView::GetAspectMask);
-	defVkImageView.def("GetBaseLayer",&Lua::Vulkan::VKImageView::GetBaseLayer);
-	defVkImageView.def("GetBaseMipmapLevel",&Lua::Vulkan::VKImageView::GetBaseMipmapLevel);
+	defVkImageView.def("GetAspectMask",&Lua::Vulkan::ImageView::GetAspectMask);
+	defVkImageView.def("GetBaseLayer",&Lua::Vulkan::ImageView::GetBaseLayer);
+	defVkImageView.def("GetBaseMipmapLevel",&Lua::Vulkan::ImageView::GetBaseMipmapLevel);
 #if 0
 	defVkImageView.def("GetBaseMipmapSize",&Lua::Vulkan::VKImageView::GetBaseMipmapSize);
 	//defVkImageView.def("GetParentImage",&Lua::Vulkan::VKImageView::GetParentImage);
 	defVkImageView.def("GetSubresourceRange",&Lua::Vulkan::VKImageView::GetSubresourceRange);
 #endif
-	defVkImageView.def("GetImageFormat",&Lua::Vulkan::VKImageView::GetImageFormat);
-	defVkImageView.def("GetLayerCount",&Lua::Vulkan::VKImageView::GetLayerCount);
-	defVkImageView.def("GetMipmapCount",&Lua::Vulkan::VKImageView::GetMipmapCount);
-	defVkImageView.def("GetSwizzleArray",&Lua::Vulkan::VKImageView::GetSwizzleArray);
-	defVkImageView.def("GetType",&Lua::Vulkan::VKImageView::GetType);
+	defVkImageView.def("GetImageFormat",&Lua::Vulkan::ImageView::GetFormat);
+	defVkImageView.def("GetLayerCount",&Lua::Vulkan::ImageView::GetLayerCount);
+	defVkImageView.def("GetMipmapCount",&Lua::Vulkan::ImageView::GetMipmapCount);
+	defVkImageView.def("GetSwizzleArray",&Lua::Vulkan::ImageView::GetSwizzleArray);
+	defVkImageView.def("GetType",&Lua::Vulkan::ImageView::GetType);
 	defVkImageView.def("SetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::ImageView&,const std::string&)>([](lua_State *l,Lua::Vulkan::ImageView &imgView,const std::string &name) {
-		Lua::Vulkan::VKContextObject::SetDebugName<Lua::Vulkan::ImageView>(l,imgView,name,&Lua::Check<Lua::Vulkan::ImageView>);
+		Lua::Vulkan::VKContextObject::SetDebugName(l,imgView,name);
 	}));
 	defVkImageView.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::ImageView&)>([](lua_State *l,Lua::Vulkan::ImageView &imgView) {
-		Lua::Vulkan::VKContextObject::GetDebugName<Lua::Vulkan::ImageView>(l,imgView,&Lua::Check<Lua::Vulkan::ImageView>);
+		Lua::Vulkan::VKContextObject::GetDebugName(l,imgView);
 	}));
 	prosperMod[defVkImageView];
 
@@ -2324,360 +1841,60 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkSampler.def(luabind::tostring(luabind::self));
 	defVkSampler.def(luabind::const_self ==luabind::const_self);
 	defVkSampler.def("IsValid",&Lua::Vulkan::VKSampler::IsValid);
-	defVkSampler.def("Update",&Lua::Vulkan::VKSampler::Update);
-	defVkSampler.def("GetMagFilter",&Lua::Vulkan::VKSampler::GetMagFilter);
-	defVkSampler.def("GetMinFilter",&Lua::Vulkan::VKSampler::GetMinFilter);
-	defVkSampler.def("GetMipmapMode",&Lua::Vulkan::VKSampler::GetMipmapMode);
-	defVkSampler.def("GetAddressModeU",&Lua::Vulkan::VKSampler::GetAddressModeU);
-	defVkSampler.def("GetAddressModeV",&Lua::Vulkan::VKSampler::GetAddressModeV);
-	defVkSampler.def("GetAddressModeW",&Lua::Vulkan::VKSampler::GetAddressModeW);
-	defVkSampler.def("GetMipLodBias",&Lua::Vulkan::VKSampler::GetMipLodBias);
+	defVkSampler.def("Update",&Lua::Vulkan::Sampler::Update);
+	defVkSampler.def("GetMagFilter",&Lua::Vulkan::Sampler::GetMagFilter);
+	defVkSampler.def("GetMinFilter",&Lua::Vulkan::Sampler::GetMinFilter);
+	defVkSampler.def("GetMipmapMode",&Lua::Vulkan::Sampler::GetMipmapMode);
+	defVkSampler.def("GetAddressModeU",&Lua::Vulkan::Sampler::GetAddressModeU);
+	defVkSampler.def("GetAddressModeV",&Lua::Vulkan::Sampler::GetAddressModeV);
+	defVkSampler.def("GetAddressModeW",&Lua::Vulkan::Sampler::GetAddressModeW);
+	defVkSampler.def("GetMipLodBias",&Lua::Vulkan::Sampler::GetLodBias);
 	defVkSampler.def("GetAnisotropyEnabled",&Lua::Vulkan::VKSampler::GetAnisotropyEnabled);
-	defVkSampler.def("GetMaxAnisotropy",&Lua::Vulkan::VKSampler::GetMaxAnisotropy);
-	defVkSampler.def("GetCompareEnabled",&Lua::Vulkan::VKSampler::GetCompareEnabled);
-	defVkSampler.def("GetCompareOperation",&Lua::Vulkan::VKSampler::GetCompareOperation);
-	defVkSampler.def("GetMinLod",&Lua::Vulkan::VKSampler::GetMinLod);
-	defVkSampler.def("GetMaxLod",&Lua::Vulkan::VKSampler::GetMaxLod);
-	defVkSampler.def("GetBorderColor",&Lua::Vulkan::VKSampler::GetBorderColor);
+	defVkSampler.def("GetMaxAnisotropy",&Lua::Vulkan::Sampler::GetMaxAnisotropy);
+	defVkSampler.def("GetCompareEnabled",&Lua::Vulkan::Sampler::GetCompareEnabled);
+	defVkSampler.def("GetCompareOperation",&Lua::Vulkan::Sampler::GetCompareOp);
+	defVkSampler.def("GetMinLod",&Lua::Vulkan::Sampler::GetMinLod);
+	defVkSampler.def("GetMaxLod",&Lua::Vulkan::Sampler::GetMaxLod);
+	defVkSampler.def("GetBorderColor",&Lua::Vulkan::Sampler::GetBorderColor);
 	// defVkSampler.def("GetUnnormalizedCoordinates",&Lua::Vulkan::VKSampler::GetUseUnnormalizedCoordinates);
-	defVkSampler.def("SetMagFilter",&Lua::Vulkan::VKSampler::SetMagFilter);
-	defVkSampler.def("SetMinFilter",&Lua::Vulkan::VKSampler::SetMinFilter);
-	defVkSampler.def("SetMipmapMode",&Lua::Vulkan::VKSampler::SetMipmapMode);
-	defVkSampler.def("SetAddressModeU",&Lua::Vulkan::VKSampler::SetAddressModeU);
-	defVkSampler.def("SetAddressModeV",&Lua::Vulkan::VKSampler::SetAddressModeV);
-	defVkSampler.def("SetAddressModeW",&Lua::Vulkan::VKSampler::SetAddressModeW);
+	defVkSampler.def("SetMagFilter",&Lua::Vulkan::Sampler::SetMagFilter);
+	defVkSampler.def("SetMinFilter",&Lua::Vulkan::Sampler::SetMinFilter);
+	defVkSampler.def("SetMipmapMode",&Lua::Vulkan::Sampler::SetMipmapMode);
+	defVkSampler.def("SetAddressModeU",&Lua::Vulkan::Sampler::SetAddressModeU);
+	defVkSampler.def("SetAddressModeV",&Lua::Vulkan::Sampler::SetAddressModeV);
+	defVkSampler.def("SetAddressModeW",&Lua::Vulkan::Sampler::SetAddressModeW);
 	//defVkSampler.def("SetMipLodBias",&Lua::Vulkan::VKSampler::SetMipLodBias);
 	//defVkSampler.def("SetAnisotropyEnabled",&Lua::Vulkan::VKSampler::SetAnisotropyEnabled);
-	defVkSampler.def("SetMaxAnisotropy",&Lua::Vulkan::VKSampler::SetMaxAnisotropy);
-	defVkSampler.def("SetCompareEnabled",&Lua::Vulkan::VKSampler::SetCompareEnabled);
-	defVkSampler.def("SetCompareOperation",&Lua::Vulkan::VKSampler::SetCompareOperation);
-	defVkSampler.def("SetMinLod",&Lua::Vulkan::VKSampler::SetMinLod);
-	defVkSampler.def("SetMaxLod",&Lua::Vulkan::VKSampler::SetMaxLod);
-	defVkSampler.def("SetBorderColor",&Lua::Vulkan::VKSampler::SetBorderColor);
+	defVkSampler.def("SetMaxAnisotropy",&Lua::Vulkan::Sampler::SetMaxAnisotropy);
+	defVkSampler.def("SetCompareEnabled",&Lua::Vulkan::Sampler::SetCompareEnable);
+	defVkSampler.def("SetCompareOperation",&Lua::Vulkan::Sampler::SetCompareOp);
+	defVkSampler.def("SetMinLod",&Lua::Vulkan::Sampler::SetMinLod);
+	defVkSampler.def("SetMaxLod",&Lua::Vulkan::Sampler::SetMaxLod);
+	defVkSampler.def("SetBorderColor",&Lua::Vulkan::Sampler::SetBorderColor);
 	// defVkSampler.def("SetUnnormalizedCoordinates",&Lua::Vulkan::VKSampler::SetUseUnnormalizedCoordinates);
 	defVkSampler.def("SetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Sampler&,const std::string&)>([](lua_State *l,Lua::Vulkan::Sampler &smp,const std::string &name) {
-		Lua::Vulkan::VKContextObject::SetDebugName<Lua::Vulkan::Sampler>(l,smp,name,&Lua::Check<Lua::Vulkan::Sampler>);
+		Lua::Vulkan::VKContextObject::SetDebugName(l,smp,name);
 	}));
 	defVkSampler.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Sampler&)>([](lua_State *l,Lua::Vulkan::Sampler &smp) {
-		Lua::Vulkan::VKContextObject::GetDebugName<Lua::Vulkan::Sampler>(l,smp,&Lua::Check<Lua::Vulkan::Sampler>);
+		Lua::Vulkan::VKContextObject::GetDebugName(l,smp);
 	}));
 	prosperMod[defVkSampler];
 
-	auto defVkFramebuffer = luabind::class_<Lua::Vulkan::Framebuffer>("Framebuffer");
-	defVkFramebuffer.def(luabind::tostring(luabind::self));
-	defVkFramebuffer.def(luabind::const_self ==luabind::const_self);
-	defVkFramebuffer.def("IsValid",&Lua::Vulkan::VKFramebuffer::IsValid);
-	defVkFramebuffer.def("GetWidth",static_cast<void(*)(lua_State*,Lua::Vulkan::Framebuffer&)>([](lua_State *l,Lua::Vulkan::Framebuffer &framebuffer) {
-		Lua::PushInt(l,framebuffer.GetWidth());
-	}));
-	defVkFramebuffer.def("GetHeight",static_cast<void(*)(lua_State*,Lua::Vulkan::Framebuffer&)>([](lua_State *l,Lua::Vulkan::Framebuffer &framebuffer) {
-		Lua::PushInt(l,framebuffer.GetHeight());
-	}));
-	prosperMod[defVkFramebuffer];
-	
-	auto defVkRenderPass = luabind::class_<Lua::Vulkan::RenderPass>("RenderPass");
-	defVkRenderPass.def(luabind::tostring(luabind::self));
-	defVkRenderPass.def(luabind::const_self ==luabind::const_self);
-	defVkRenderPass.def("IsValid",&Lua::Vulkan::VKRenderPass::IsValid);
-	prosperMod[defVkRenderPass];
-	
-	auto defVkEvent = luabind::class_<Lua::Vulkan::Event>("Event");
-	defVkEvent.def(luabind::tostring(luabind::self));
-	defVkEvent.def(luabind::const_self ==luabind::const_self);
-	defVkEvent.def("IsValid",&Lua::Vulkan::VKEvent::IsValid);
-	prosperMod[defVkEvent];
-	
-	auto defVkFence = luabind::class_<Lua::Vulkan::Fence>("Fence");
-	defVkFence.def(luabind::tostring(luabind::self));
-	defVkFence.def(luabind::const_self ==luabind::const_self);
-	defVkFence.def("IsValid",&Lua::Vulkan::VKFence::IsValid);
-	prosperMod[defVkFence];
-	
-#if 0
-	auto defVkSemaphore = luabind::class_<Lua::Vulkan::Semaphore>("Semaphore");
-	defVkSemaphore.def(luabind::tostring(luabind::self));
-	defVkSemaphore.def("IsValid",&Lua::Vulkan::VKSemaphore::IsValid);
-	prosperMod[defVkSemaphore];
-	
-	auto defVkMemory = luabind::class_<Lua::Vulkan::Memory>("Memory");
-	defVkMemory.def(luabind::tostring(luabind::self));
-	defVkMemory.def("IsValid",&Lua::Vulkan::VKMemory::IsValid);
-	defVkMemory.def("GetParentMemory",&Lua::Vulkan::VKMemory::GetParentMemory);
-	defVkMemory.def("GetSize",&Lua::Vulkan::VKMemory::GetSize);
-	defVkMemory.def("GetStartOffset",&Lua::Vulkan::VKMemory::GetStartOffset);
-	defVkMemory.def("Write",&Lua::Vulkan::VKMemory::Write);
-	defVkMemory.def("Write",static_cast<void(*)(lua_State*,Lua::Vulkan::Memory&,uint32_t,::DataStream&)>([](lua_State *l,Lua::Vulkan::Memory &hMemory,uint32_t offset,::DataStream &ds) {
-		Lua::Vulkan::VKMemory::Write(l,hMemory,offset,ds,0u,ds->GetSize());
-	}));
-	defVkMemory.def("Read",static_cast<void(*)(lua_State*,Lua::Vulkan::Memory&,uint32_t,uint32_t,::DataStream&,uint32_t)>(&Lua::Vulkan::VKMemory::Read));
-	defVkMemory.def("Read",static_cast<void(*)(lua_State*,Lua::Vulkan::Memory&,uint32_t,uint32_t,::DataStream&)>([](lua_State *l,Lua::Vulkan::Memory &hMemory,uint32_t offset,uint32_t size,::DataStream &ds) {
-		Lua::Vulkan::VKMemory::Read(l,hMemory,offset,size,ds,0u);
-	}));
-	defVkMemory.def("Read",static_cast<void(*)(lua_State*,Lua::Vulkan::Memory&,uint32_t,uint32_t)>(&Lua::Vulkan::VKMemory::Read));
-	defVkMemory.def("Read",static_cast<void(*)(lua_State*,Lua::Vulkan::Memory&)>([](lua_State *l,Lua::Vulkan::Memory &hMemory) {
-		Lua::Vulkan::VKMemory::Read(l,hMemory,0u,hMemory.get_create_info_ptr()->get_size());
-	}));
-	defVkMemory.def("Map",&Lua::Vulkan::VKMemory::Map);
-	defVkMemory.def("Map",static_cast<void(*)(lua_State*,Lua::Vulkan::Memory&)>([](lua_State *l,Lua::Vulkan::Memory &hMemory) {
-		Lua::Vulkan::VKMemory::Map(l,hMemory,0u,hMemory.get_create_info_ptr()->get_size());
-	}));
-	defVkMemory.def("Unmap",&Lua::Vulkan::VKMemory::Unmap);
-	prosperMod[defVkMemory];
-#endif
-	auto defVkCommandBuffer = luabind::class_<Lua::Vulkan::CommandBuffer>("CommandBuffer");
-	defVkCommandBuffer.def(luabind::tostring(luabind::self));
-	defVkCommandBuffer.def(luabind::const_self ==luabind::const_self);
-	defVkCommandBuffer.def("RecordClearImage",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Image&,const Color&,const prosper::util::ClearImageInfo&)>(&Lua::Vulkan::VKCommandBuffer::RecordClearImage));
-	defVkCommandBuffer.def("RecordClearImage",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Image&,const Color&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &cmdBuffer,Lua::Vulkan::Image &img,const Color &col) {
-		Lua::Vulkan::VKCommandBuffer::RecordClearImage(l,cmdBuffer,img,col);
-	}));
-	defVkCommandBuffer.def("RecordClearImage",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Image&,float,const prosper::util::ClearImageInfo&)>(&Lua::Vulkan::VKCommandBuffer::RecordClearImage));
-	defVkCommandBuffer.def("RecordClearImage",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Image&,float)>([](lua_State *l,Lua::Vulkan::CommandBuffer &cmdBuffer,Lua::Vulkan::Image &img,float depth) {
-		Lua::Vulkan::VKCommandBuffer::RecordClearImage(l,cmdBuffer,img,depth);
-	}));
-	defVkCommandBuffer.def("RecordClearAttachment",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Image&,const Color&,uint32_t)>(&Lua::Vulkan::VKCommandBuffer::RecordClearAttachment));
-	defVkCommandBuffer.def("RecordClearAttachment",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Image&,float)>(&Lua::Vulkan::VKCommandBuffer::RecordClearAttachment));
-	defVkCommandBuffer.def("RecordCopyImage",&Lua::Vulkan::VKCommandBuffer::RecordCopyImage);
-	defVkCommandBuffer.def("RecordCopyBufferToImage",&Lua::Vulkan::VKCommandBuffer::RecordCopyBufferToImage);
-	defVkCommandBuffer.def("RecordCopyBufferToImage",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Buffer&,Lua::Vulkan::Image&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,Lua::Vulkan::Buffer &bufSrc,Lua::Vulkan::Image &imgDst) {
-		Lua::Vulkan::VKCommandBuffer::RecordCopyBufferToImage(l,hCommandBuffer,bufSrc,imgDst,{});
-	}));
-	defVkCommandBuffer.def("RecordCopyBuffer",&Lua::Vulkan::VKCommandBuffer::RecordCopyBuffer);
-	defVkCommandBuffer.def("RecordUpdateBuffer",&Lua::Vulkan::VKCommandBuffer::RecordUpdateBuffer);
-	defVkCommandBuffer.def("RecordBlitImage",&Lua::Vulkan::VKCommandBuffer::RecordBlitImage);
-	defVkCommandBuffer.def("RecordResolveImage",&Lua::Vulkan::VKCommandBuffer::RecordResolveImage);
-	defVkCommandBuffer.def("RecordBlitTexture",&Lua::Vulkan::VKCommandBuffer::RecordBlitTexture);
-	defVkCommandBuffer.def("RecordGenerateMipmaps",&Lua::Vulkan::VKCommandBuffer::RecordGenerateMipmaps);
-	defVkCommandBuffer.def("RecordPipelineBarrier",&Lua::Vulkan::VKCommandBuffer::RecordPipelineBarrier);
-	defVkCommandBuffer.def("RecordImageBarrier",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Image&,uint32_t,uint32_t,const prosper::util::ImageSubresourceRange&)>(&Lua::Vulkan::VKCommandBuffer::RecordImageBarrier));
-	defVkCommandBuffer.def("RecordImageBarrier",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Image&,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,Lua::Vulkan::Image &img,uint32_t oldLayout,uint32_t newLayout) {
-		Lua::Vulkan::VKCommandBuffer::RecordImageBarrier(l,hCommandBuffer,img,oldLayout,newLayout,prosper::util::ImageSubresourceRange{});
-	}));
-	defVkCommandBuffer.def("RecordImageBarrier",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Image&,uint32_t,uint32_t,uint32_t,uint32_t,uint32_t,uint32_t,uint32_t)>(&Lua::Vulkan::VKCommandBuffer::RecordImageBarrier));
-	defVkCommandBuffer.def("RecordImageBarrier",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Image&,uint32_t,uint32_t,uint32_t,uint32_t,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,Lua::Vulkan::Image &img,uint32_t srcStageMask,uint32_t dstStageMask,uint32_t oldLayout,uint32_t newLayout,uint32_t srcAccessMask,uint32_t dstAccessMask) {
-		Lua::Vulkan::VKCommandBuffer::RecordImageBarrier(l,hCommandBuffer,img,srcStageMask,dstStageMask,oldLayout,newLayout,srcAccessMask,dstAccessMask,0u);
-	}));
-	defVkCommandBuffer.def("RecordBufferBarrier",&Lua::Vulkan::VKCommandBuffer::RecordBufferBarrier);
-	defVkCommandBuffer.def("RecordBufferBarrier",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Buffer&,uint32_t,uint32_t,uint32_t,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,Lua::Vulkan::Buffer &buf,uint32_t srcStageMask,uint32_t dstStageMask,uint32_t srcAccessMask,uint32_t dstAccessMask,uint32_t offset) {
-		Lua::Vulkan::VKCommandBuffer::RecordBufferBarrier(l,hCommandBuffer,buf,srcStageMask,dstStageMask,srcAccessMask,dstAccessMask,offset,std::numeric_limits<uint32_t>::max());
-	}));
-	defVkCommandBuffer.def("RecordBufferBarrier",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Buffer&,uint32_t,uint32_t,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,Lua::Vulkan::Buffer &buf,uint32_t srcStageMask,uint32_t dstStageMask,uint32_t srcAccessMask,uint32_t dstAccessMask) {
-		Lua::Vulkan::VKCommandBuffer::RecordBufferBarrier(l,hCommandBuffer,buf,srcStageMask,dstStageMask,srcAccessMask,dstAccessMask,0u,std::numeric_limits<uint32_t>::max());
-	}));
-	defVkCommandBuffer.def("RecordSetViewport",&Lua::Vulkan::VKCommandBuffer::RecordSetViewport);
-	defVkCommandBuffer.def("RecordSetScissor",&Lua::Vulkan::VKCommandBuffer::RecordSetScissor);
-	defVkCommandBuffer.def("RecordBeginRenderPass",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::RenderPassInfo&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,Lua::Vulkan::RenderPassInfo &rpInfo) {
-		Lua::Vulkan::VKCommandBuffer::RecordBeginRenderPass(l,hCommandBuffer,rpInfo);
-	}));
-	defVkCommandBuffer.def("RecordEndRenderPass",&Lua::Vulkan::VKCommandBuffer::RecordEndRenderPass);
-	defVkCommandBuffer.def("RecordBindIndexBuffer",&Lua::Vulkan::VKCommandBuffer::RecordBindIndexBuffer);
-	defVkCommandBuffer.def("RecordBindIndexBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Buffer&,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,Lua::Vulkan::Buffer &indexBuffer,uint32_t indexType) {
-		Lua::Vulkan::VKCommandBuffer::RecordBindIndexBuffer(l,hCommandBuffer,indexBuffer,indexType,0u);
-	}));
-	defVkCommandBuffer.def("RecordBindVertexBuffer",&Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffer);
-	defVkCommandBuffer.def("RecordBindVertexBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,prosper::ShaderGraphics&,Lua::Vulkan::Buffer&,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,prosper::ShaderGraphics &graphics,Lua::Vulkan::Buffer &vertexBuffer,uint32_t startBinding) {
-		Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffer(l,hCommandBuffer,graphics,vertexBuffer,startBinding,0u);
-	}));
-	defVkCommandBuffer.def("RecordBindVertexBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,prosper::ShaderGraphics&,Lua::Vulkan::Buffer&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,prosper::ShaderGraphics &graphics,Lua::Vulkan::Buffer &vertexBuffer) {
-		Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffer(l,hCommandBuffer,graphics,vertexBuffer,0u,0u);
-	}));
-	defVkCommandBuffer.def("RecordBindVertexBuffers",&Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers);
-	defVkCommandBuffer.def("RecordBindVertexBuffers",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,prosper::ShaderGraphics&,luabind::object,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,prosper::ShaderGraphics &graphics,luabind::object vertexBuffers,uint32_t startBinding) {
-		Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(l,hCommandBuffer,graphics,vertexBuffers,startBinding,{});
-	}));
-	defVkCommandBuffer.def("RecordBindVertexBuffers",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,prosper::ShaderGraphics&,luabind::object)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,prosper::ShaderGraphics &graphics,luabind::object vertexBuffers) {
-		Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(l,hCommandBuffer,graphics,vertexBuffers,0u,{});
-	}));
-	defVkCommandBuffer.def("RecordCopyImageToBuffer",&Lua::Vulkan::VKCommandBuffer::RecordCopyImageToBuffer);
-#if 0
-	defVkCommandBuffer.def("RecordDispatch",&Lua::Vulkan::VKCommandBuffer::RecordDispatch);
-	defVkCommandBuffer.def("RecordDispatch",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t x,uint32_t y) {
-		Lua::Vulkan::VKCommandBuffer::RecordDispatch(l,hCommandBuffer,x,y,0u);
-	}));
-	defVkCommandBuffer.def("RecordDispatch",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t x) {
-		Lua::Vulkan::VKCommandBuffer::RecordDispatch(l,hCommandBuffer,x,0u,0u);
-	}));
-	defVkCommandBuffer.def("RecordDispatch",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer) {
-		Lua::Vulkan::VKCommandBuffer::RecordDispatch(l,hCommandBuffer,0u,0u,0u);
-	}));
-	defVkCommandBuffer.def("RecordDispatchIndirect",&Lua::Vulkan::VKCommandBuffer::RecordDispatchIndirect);
-	defVkCommandBuffer.def("RecordDispatchIndirect",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Buffer&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,Lua::Vulkan::Buffer &buffer) {
-		Lua::Vulkan::VKCommandBuffer::RecordDispatchIndirect(l,hCommandBuffer,buffer,0u);
-	}));
-#endif
-	defVkCommandBuffer.def("RecordDraw",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t,uint32_t,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t vertexCount,uint32_t instanceCount,uint32_t firstVertex,uint32_t firstInstance) {
-		Lua::Vulkan::VKCommandBuffer::RecordDraw(l,hCommandBuffer,vertexCount,instanceCount,firstVertex,firstInstance);
-	}));
-	defVkCommandBuffer.def("RecordDraw",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t vertexCount,uint32_t instanceCount,uint32_t firstVertex) {
-		Lua::Vulkan::VKCommandBuffer::RecordDraw(l,hCommandBuffer,vertexCount,instanceCount,firstVertex,0u);
-	}));
-	defVkCommandBuffer.def("RecordDraw",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t vertexCount,uint32_t instanceCount) {
-		Lua::Vulkan::VKCommandBuffer::RecordDraw(l,hCommandBuffer,vertexCount,instanceCount,0u,0u);
-	}));
-	defVkCommandBuffer.def("RecordDraw",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t vertexCount) {
-		Lua::Vulkan::VKCommandBuffer::RecordDraw(l,hCommandBuffer,vertexCount,1u,0u,0u);
-	}));
-	defVkCommandBuffer.def("RecordDrawIndexed",&Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed);
-	defVkCommandBuffer.def("RecordDrawIndexed",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex) {
-		Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed(l,hCommandBuffer,indexCount,instanceCount,firstIndex,0u);
-	}));
-	defVkCommandBuffer.def("RecordDrawIndexed",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t indexCount,uint32_t instanceCount) {
-		Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed(l,hCommandBuffer,indexCount,instanceCount,0u,0u);
-	}));
-	defVkCommandBuffer.def("RecordDrawIndexed",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t indexCount) {
-		Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed(l,hCommandBuffer,indexCount,1u,0u,0u);
-	}));
-	defVkCommandBuffer.def("RecordDrawIndexedIndirect",&Lua::Vulkan::VKCommandBuffer::RecordDrawIndexedIndirect);
-	defVkCommandBuffer.def("RecordDrawIndirect",&Lua::Vulkan::VKCommandBuffer::RecordDrawIndirect);
-	defVkCommandBuffer.def("RecordFillBuffer",&Lua::Vulkan::VKCommandBuffer::RecordFillBuffer);
-	//defVkCommandBuffer.def("RecordResetEvent",&Lua::Vulkan::VKCommandBuffer::RecordResetEvent);
-	defVkCommandBuffer.def("RecordSetBlendConstants",&Lua::Vulkan::VKCommandBuffer::RecordSetBlendConstants);
-	defVkCommandBuffer.def("RecordSetDepthBias",&Lua::Vulkan::VKCommandBuffer::RecordSetDepthBias);
-	defVkCommandBuffer.def("RecordSetDepthBounds",&Lua::Vulkan::VKCommandBuffer::RecordSetDepthBounds);
-	//defVkCommandBuffer.def("RecordSetEvent",&Lua::Vulkan::VKCommandBuffer::RecordSetEvent);
-	defVkCommandBuffer.def("RecordSetLineWidth",&Lua::Vulkan::VKCommandBuffer::RecordSetLineWidth);
-	defVkCommandBuffer.def("RecordSetStencilCompareMask",&Lua::Vulkan::VKCommandBuffer::RecordSetStencilCompareMask);
-	defVkCommandBuffer.def("RecordSetStencilReference",&Lua::Vulkan::VKCommandBuffer::RecordSetStencilReference);
-	defVkCommandBuffer.def("RecordSetStencilWriteMask",&Lua::Vulkan::VKCommandBuffer::RecordSetStencilWriteMask);
-	//defVkCommandBuffer.def("RecordWaitEvents",&Lua::Vulkan::VKCommandBuffer::RecordWaitEvents); // TODO
-	//defVkCommandBuffer.def("RecordWriteTimestamp",&Lua::Vulkan::VKCommandBuffer::RecordWriteTimestamp); // TODO
-	//defVkCommandBuffer.def("RecordBeginQuery",&Lua::Vulkan::VKCommandBuffer::RecordBeginQuery); // TODO
-	//defVkCommandBuffer.def("RecordEndQuery",&Lua::Vulkan::VKCommandBuffer::RecordEndQuery); // TODO
-	defVkCommandBuffer.def("RecordDrawGradient",&Lua::Vulkan::VKCommandBuffer::RecordDrawGradient);
-	defVkCommandBuffer.def("StopRecording",&Lua::Vulkan::VKCommandBuffer::StopRecording);
-	defVkCommandBuffer.def("StartRecording",&Lua::Vulkan::VKCommandBuffer::StartRecording);
-	defVkCommandBuffer.def("SetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,const std::string&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &cb,const std::string &name) {
-		Lua::Vulkan::VKContextObject::SetDebugName<Lua::Vulkan::CommandBuffer>(l,cb,name,&Lua::Check<Lua::Vulkan::CommandBuffer>);
-	}));
-	defVkCommandBuffer.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &cb) {
-		Lua::Vulkan::VKContextObject::GetDebugName<Lua::Vulkan::CommandBuffer>(l,cb,&Lua::Check<Lua::Vulkan::CommandBuffer>);
-	}));
-	defVkCommandBuffer.def("Flush",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &cb) {
-		c_engine->GetRenderContext().FlushCommandBuffer(cb);
-	}));
-	prosperMod[defVkCommandBuffer];
-
-	auto devVkBuffer = luabind::class_<Lua::Vulkan::Buffer>("Buffer");
-	devVkBuffer.def(luabind::tostring(luabind::self));
-	devVkBuffer.def(luabind::const_self ==luabind::const_self);
-	devVkBuffer.def("IsValid",&Lua::Vulkan::VKBuffer::IsValid);
-	devVkBuffer.def("GetStartOffset",&Lua::Vulkan::VKBuffer::GetStartOffset);
-	devVkBuffer.def("GetBaseIndex",&Lua::Vulkan::VKBuffer::GetBaseIndex);
-	devVkBuffer.def("GetSize",&Lua::Vulkan::VKBuffer::GetSize);
-	devVkBuffer.def("GetUsageFlags",&Lua::Vulkan::VKBuffer::GetUsageFlags);
-	devVkBuffer.def("SetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Buffer&,const std::string&)>([](lua_State *l,Lua::Vulkan::Buffer &buf,const std::string &name) {
-		Lua::Vulkan::VKContextObject::SetDebugName<Lua::Vulkan::Buffer>(l,buf,name,&Lua::Check<Lua::Vulkan::Buffer>);
-	}));
-	devVkBuffer.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Buffer&)>([](lua_State *l,Lua::Vulkan::Buffer &buf) {
-		Lua::Vulkan::VKContextObject::GetDebugName<Lua::Vulkan::Buffer>(l,buf,&Lua::Check<Lua::Vulkan::Buffer>);
-	}));
-	devVkBuffer.def("GetCreateInfo",static_cast<void(*)(lua_State*,Lua::Vulkan::Buffer&)>([](lua_State *l,Lua::Vulkan::Buffer &buf) {
-		Lua::Push(l,buf.GetCreateInfo());
-	}));
-	devVkBuffer.def("SetPermanentlyMapped",&Lua::Vulkan::VKBuffer::SetPermanentlyMapped);
-	devVkBuffer.def("GetParent",&Lua::Vulkan::VKBuffer::GetParent);
-	devVkBuffer.def("WriteMemory",&Lua::Vulkan::VKBuffer::Write);
-	devVkBuffer.def("WriteMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Buffer&,uint32_t,::DataStream&)>([](lua_State *l,Lua::Vulkan::Buffer &hBuffer,uint32_t offset,::DataStream &ds) {
-		Lua::Vulkan::VKBuffer::Write(l,hBuffer,offset,ds,0u,ds->GetSize());
-	}));
-	devVkBuffer.def("ReadMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Buffer&,uint32_t,uint32_t,::DataStream&,uint32_t)>(&Lua::Vulkan::VKBuffer::Read));
-	devVkBuffer.def("ReadMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Buffer&,uint32_t,uint32_t,::DataStream&)>([](lua_State *l,Lua::Vulkan::Buffer &hBuffer,uint32_t offset,uint32_t size,::DataStream &ds) {
-		Lua::Vulkan::VKBuffer::Read(l,hBuffer,offset,size,ds,0u);
-	}));
-	devVkBuffer.def("ReadMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Buffer&,uint32_t,uint32_t)>(&Lua::Vulkan::VKBuffer::Read));
-	devVkBuffer.def("ReadMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Buffer&)>([](lua_State *l,Lua::Vulkan::Buffer &hBuffer) {
-		Lua::Vulkan::VKBuffer::Read(l,hBuffer,0u,hBuffer.GetSize());
-	}));
-	devVkBuffer.def("MapMemory",&Lua::Vulkan::VKBuffer::Map);
-	devVkBuffer.def("MapMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Buffer&,Lua::Vulkan::Buffer::MapFlags)>([](lua_State *l,Lua::Vulkan::Buffer &hBuffer,Lua::Vulkan::Buffer::MapFlags mapFlags) {
-		Lua::Vulkan::VKBuffer::Map(l,hBuffer,0u,hBuffer.GetSize(),mapFlags);
-	}));
-	devVkBuffer.def("UnmapMemory",&Lua::Vulkan::VKBuffer::Unmap);
-	prosperMod[devVkBuffer];
-	
-	auto devVkSwapBuffer = luabind::class_<Lua::Vulkan::SwapBuffer>("SwapBuffer");
-	prosperMod[devVkSwapBuffer];
-
-	auto defVkDescriptorSet = luabind::class_<Lua::Vulkan::DescriptorSet>("DescriptorSet");
-	defVkDescriptorSet.def(luabind::tostring(luabind::self));
-	defVkDescriptorSet.def(luabind::const_self ==luabind::const_self);
-#if 0
-	defVkDescriptorSet.def("GetBindingInfo",static_cast<void(*)(lua_State*,Lua::Vulkan::DescriptorSet&,uint32_t)>(&Lua::Vulkan::VKDescriptorSet::GetBindingInfo));
-	defVkDescriptorSet.def("GetBindingInfo",static_cast<void(*)(lua_State*,Lua::Vulkan::DescriptorSet&)>(&Lua::Vulkan::VKDescriptorSet::GetBindingInfo));
-#endif
-	defVkDescriptorSet.def("GetBindingCount",&Lua::Vulkan::VKDescriptorSet::GetBindingCount);
-	defVkDescriptorSet.def("SetBindingTexture",static_cast<void(*)(lua_State*,Lua::Vulkan::DescriptorSet&,uint32_t,Lua::Vulkan::Texture&,uint32_t)>([](lua_State *l,Lua::Vulkan::DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Texture &texture,uint32_t layerId) {
-		Lua::Vulkan::VKDescriptorSet::SetBindingTexture(l,hDescSet,bindingIdx,texture,layerId);
-	}));
-	defVkDescriptorSet.def("SetBindingTexture",static_cast<void(*)(lua_State*,Lua::Vulkan::DescriptorSet&,uint32_t,Lua::Vulkan::Texture&)>([](lua_State *l,Lua::Vulkan::DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Texture &texture) {
-		Lua::Vulkan::VKDescriptorSet::SetBindingTexture(l,hDescSet,bindingIdx,texture);
-	}));
-	defVkDescriptorSet.def("SetBindingArrayTexture",static_cast<void(*)(lua_State*,Lua::Vulkan::DescriptorSet&,uint32_t,Lua::Vulkan::Texture&,uint32_t,uint32_t)>(&Lua::Vulkan::VKDescriptorSet::SetBindingArrayTexture));
-	defVkDescriptorSet.def("SetBindingArrayTexture",static_cast<void(*)(lua_State*,Lua::Vulkan::DescriptorSet&,uint32_t,Lua::Vulkan::Texture&,uint32_t)>([](lua_State *l,Lua::Vulkan::DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Texture &texture,uint32_t arrayIdx) {
-		Lua::Vulkan::VKDescriptorSet::SetBindingArrayTexture(l,hDescSet,bindingIdx,texture,arrayIdx);
-	}));
-	defVkDescriptorSet.def("SetBindingUniformBuffer",&Lua::Vulkan::VKDescriptorSet::SetBindingUniformBuffer);
-	defVkDescriptorSet.def("SetBindingUniformBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::DescriptorSet&,uint32_t,Lua::Vulkan::Buffer&,uint32_t)>([](lua_State *l,Lua::Vulkan::DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Buffer &buffer,uint32_t startOffset) {
-		Lua::Vulkan::VKDescriptorSet::SetBindingUniformBuffer(l,hDescSet,bindingIdx,buffer,startOffset,std::numeric_limits<uint32_t>::max());
-	}));
-	defVkDescriptorSet.def("SetBindingUniformBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::DescriptorSet&,uint32_t,Lua::Vulkan::Buffer&)>([](lua_State *l,Lua::Vulkan::DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Buffer &buffer) {
-		Lua::Vulkan::VKDescriptorSet::SetBindingUniformBuffer(l,hDescSet,bindingIdx,buffer,0u,std::numeric_limits<uint32_t>::max());
-	}));
-	defVkDescriptorSet.def("SetBindingUniformBufferDynamic",&Lua::Vulkan::VKDescriptorSet::SetBindingUniformBufferDynamic);
-	defVkDescriptorSet.def("SetBindingUniformBufferDynamic",static_cast<void(*)(lua_State*,Lua::Vulkan::DescriptorSet&,uint32_t,Lua::Vulkan::Buffer&,uint32_t)>([](lua_State *l,Lua::Vulkan::DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Buffer &buffer,uint32_t startOffset) {
-		Lua::Vulkan::VKDescriptorSet::SetBindingUniformBufferDynamic(l,hDescSet,bindingIdx,buffer,startOffset,std::numeric_limits<uint32_t>::max());
-	}));
-	defVkDescriptorSet.def("SetBindingUniformBufferDynamic",static_cast<void(*)(lua_State*,Lua::Vulkan::DescriptorSet&,uint32_t,Lua::Vulkan::Buffer&)>([](lua_State *l,Lua::Vulkan::DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Buffer &buffer) {
-		Lua::Vulkan::VKDescriptorSet::SetBindingUniformBufferDynamic(l,hDescSet,bindingIdx,buffer,0u,std::numeric_limits<uint32_t>::max());
-	}));
-	defVkDescriptorSet.def("SetBindingStorageBuffer",&Lua::Vulkan::VKDescriptorSet::SetBindingStorageBuffer);
-	defVkDescriptorSet.def("SetBindingStorageBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::DescriptorSet&,uint32_t,Lua::Vulkan::Buffer&,uint32_t)>([](lua_State *l,Lua::Vulkan::DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Buffer &buffer,uint32_t startOffset) {
-		Lua::Vulkan::VKDescriptorSet::SetBindingStorageBuffer(l,hDescSet,bindingIdx,buffer,startOffset,std::numeric_limits<uint32_t>::max());
-	}));
-	defVkDescriptorSet.def("SetBindingStorageBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::DescriptorSet&,uint32_t,Lua::Vulkan::Buffer&)>([](lua_State *l,Lua::Vulkan::DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Buffer &buffer) {
-		Lua::Vulkan::VKDescriptorSet::SetBindingStorageBuffer(l,hDescSet,bindingIdx,buffer,0u,std::numeric_limits<uint32_t>::max());
-	}));
-	defVkDescriptorSet.def("SetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::DescriptorSet&,const std::string&)>([](lua_State *l,Lua::Vulkan::DescriptorSet &ds,const std::string &name) {
-		Lua::Vulkan::VKContextObject::SetDebugName<Lua::Vulkan::DescriptorSet>(l,ds,name,&Lua::Check<Lua::Vulkan::DescriptorSet>);
-	}));
-	defVkDescriptorSet.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::DescriptorSet&)>([](lua_State *l,Lua::Vulkan::DescriptorSet &ds) {
-		Lua::Vulkan::VKContextObject::GetDebugName<Lua::Vulkan::DescriptorSet>(l,ds,&Lua::Check<Lua::Vulkan::DescriptorSet>);
-	}));
-	prosperMod[defVkDescriptorSet];
-	
-	auto defVkMesh = luabind::class_<pragma::SceneMesh>("Mesh");
-	defVkMesh.def(luabind::tostring(luabind::self));
-	defVkMesh.def(luabind::const_self ==luabind::const_self);
-	defVkMesh.def("GetVertexBuffer",&Lua::Vulkan::VKMesh::GetVertexBuffer);
-	defVkMesh.def("GetVertexWeightBuffer",&Lua::Vulkan::VKMesh::GetVertexWeightBuffer);
-	defVkMesh.def("GetAlphaBuffer",&Lua::Vulkan::VKMesh::GetAlphaBuffer);
-	defVkMesh.def("GetIndexBuffer",&Lua::Vulkan::VKMesh::GetIndexBuffer);
-	defVkMesh.def("SetVertexBuffer",&Lua::Vulkan::VKMesh::SetVertexBuffer);
-	defVkMesh.def("SetVertexWeightBuffer",&Lua::Vulkan::VKMesh::SetVertexWeightBuffer);
-	defVkMesh.def("SetAlphaBuffer",&Lua::Vulkan::VKMesh::SetAlphaBuffer);
-	defVkMesh.def("SetIndexBuffer",&Lua::Vulkan::VKMesh::SetIndexBuffer);
-	defVkMesh.def("ClearBuffers",static_cast<void(*)(lua_State*,pragma::SceneMesh&)>([](lua_State *l,pragma::SceneMesh &mesh) {
-		mesh.ClearBuffers();
-	}));
-	prosperMod[defVkMesh];
-	
 	auto defVkRenderTarget = luabind::class_<Lua::Vulkan::RenderTarget>("RenderTarget");
 	defVkRenderTarget.def(luabind::tostring(luabind::self));
 	defVkRenderTarget.def(luabind::const_self ==luabind::const_self);
-	defVkRenderTarget.def("GetTexture",&Lua::Vulkan::VKRenderTarget::GetTexture);
-	defVkRenderTarget.def("GetTexture",static_cast<void(*)(lua_State*,Lua::Vulkan::RenderTarget&)>([](lua_State *l,Lua::Vulkan::RenderTarget &rt) {
-		Lua::Vulkan::VKRenderTarget::GetTexture(l,rt,0u);
-	}));
-	defVkRenderTarget.def("GetRenderPass",&Lua::Vulkan::VKRenderTarget::GetRenderPass);
-	defVkRenderTarget.def("GetFramebuffer",&Lua::Vulkan::VKRenderTarget::GetFramebuffer);
+	defVkRenderTarget.def("GetTexture",static_cast<prosper::Texture&(Lua::Vulkan::RenderTarget::*)()>(&Lua::Vulkan::RenderTarget::GetTexture),luabind::shared_from_this_policy<0>{});
+	defVkRenderTarget.def("GetTexture",static_cast<prosper::Texture*(Lua::Vulkan::RenderTarget::*)(uint32_t)>(&Lua::Vulkan::RenderTarget::GetTexture),luabind::shared_from_this_policy<0>{});
+	defVkRenderTarget.def("GetRenderPass",static_cast<prosper::IRenderPass&(Lua::Vulkan::RenderTarget::*)()>(&Lua::Vulkan::RenderTarget::GetRenderPass),luabind::shared_from_this_policy<0>{});
+	defVkRenderTarget.def("GetFramebuffer",static_cast<prosper::IFramebuffer&(Lua::Vulkan::RenderTarget::*)()>(&Lua::Vulkan::RenderTarget::GetFramebuffer),luabind::shared_from_this_policy<0>{});
 	defVkRenderTarget.def("GetWidth",&Lua::Vulkan::VKRenderTarget::GetWidth);
 	defVkRenderTarget.def("GetHeight",&Lua::Vulkan::VKRenderTarget::GetHeight);
 	defVkRenderTarget.def("GetFormat",&Lua::Vulkan::VKRenderTarget::GetFormat);
 	defVkRenderTarget.def("SetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::RenderTarget&,const std::string&)>([](lua_State *l,Lua::Vulkan::RenderTarget &rt,const std::string &name) {
-		Lua::Vulkan::VKContextObject::SetDebugName<Lua::Vulkan::RenderTarget>(l,rt,name,&Lua::Check<Lua::Vulkan::RenderTarget>);
+		Lua::Vulkan::VKContextObject::SetDebugName(l,rt,name);
 	}));
 	defVkRenderTarget.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::RenderTarget&)>([](lua_State *l,Lua::Vulkan::RenderTarget &rt) {
-		Lua::Vulkan::VKContextObject::GetDebugName<Lua::Vulkan::RenderTarget>(l,rt,&Lua::Check<Lua::Vulkan::RenderTarget>);
+		Lua::Vulkan::VKContextObject::GetDebugName(l,rt);
 	}));
 	prosperMod[defVkRenderTarget];
 	
@@ -2692,16 +1909,14 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkTimerQuery.def(luabind::const_self ==luabind::const_self);
 	defVkTimerQuery.def("IsValid",&Lua::Vulkan::VKTimerQuery::IsValid);
 	prosperMod[defVkTimerQuery];
-	
+
 	auto defCommandBufferRecorder = luabind::class_<Lua::Vulkan::CommandBufferRecorder>("CommandBufferRecorder");
 	defCommandBufferRecorder.def(luabind::tostring(luabind::self));
 	defCommandBufferRecorder.def(luabind::const_self ==luabind::const_self);
 	defCommandBufferRecorder.def("IsValid",static_cast<bool(*)()>([]() -> bool {
 		return true;
 	}));
-	defCommandBufferRecorder.def("IsPending",static_cast<bool(*)(Lua::Vulkan::CommandBufferRecorder&)>([](Lua::Vulkan::CommandBufferRecorder &recorder) -> bool {
-		return recorder.IsPending();
-	}));
+	defCommandBufferRecorder.def("IsPending",&Lua::Vulkan::CommandBufferRecorder::IsPending);
 	defCommandBufferRecorder.def("ExecuteCommands",static_cast<bool(*)(Lua::Vulkan::CommandBufferRecorder&,Lua::Vulkan::CommandBuffer&)>([](Lua::Vulkan::CommandBufferRecorder &recorder,Lua::Vulkan::CommandBuffer &drawCmd) -> bool {
 		return drawCmd.IsPrimary() && recorder.ExecuteCommands(dynamic_cast<prosper::IPrimaryCommandBuffer&>(drawCmd));
 	}));
@@ -2731,21 +1946,9 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defRenderPassInfo.def("SetLayer",static_cast<void(*)(lua_State*,Lua::Vulkan::RenderPassInfo&,uint32_t)>([](lua_State *l,Lua::Vulkan::RenderPassInfo &rpInfo,uint32_t layerId) {
 		rpInfo.layerId = layerId;
 	}));
-	defRenderPassInfo.def("SetClearValues",static_cast<void(*)(lua_State*,Lua::Vulkan::RenderPassInfo&,luabind::object)>([](lua_State *l,Lua::Vulkan::RenderPassInfo &rpInfo,luabind::object tClearValues) {
-		auto t = 2;
-		Lua::CheckTable(l,t);
-		auto numClearValues = Lua::GetObjectLength(l,t);
-		rpInfo.clearValues.clear();
-		rpInfo.clearValues.reserve(numClearValues);
-		for(auto i=decltype(numClearValues){0u};i<numClearValues;++i)
-		{
-			Lua::PushInt(l,i +1u);
-			Lua::GetTableValue(l,t);
-			auto &clearVal = Lua::Check<Lua::Vulkan::ClearValue>(l,-1);
-			rpInfo.clearValues.push_back(clearVal);
-			Lua::Pop(l,1);
-		}
-	}));
+	defRenderPassInfo.def("SetClearValues",static_cast<void(*)(lua_State*,Lua::Vulkan::RenderPassInfo&,std::vector<Lua::Vulkan::ClearValue>&&)>([](lua_State *l,Lua::Vulkan::RenderPassInfo &rpInfo,std::vector<Lua::Vulkan::ClearValue> &&clearValues) {
+		rpInfo.clearValues = std::move(clearValues);
+	}),luabind::vector_policy<3,Lua::Vulkan::ClearValue>{});
 	defRenderPassInfo.def("AddClearValue",static_cast<void(*)(lua_State*,Lua::Vulkan::RenderPassInfo&,Lua::Vulkan::ClearValue&)>([](lua_State *l,Lua::Vulkan::RenderPassInfo &rpInfo,Lua::Vulkan::ClearValue &clearValue) {
 		rpInfo.clearValues.push_back(clearValue);
 	}));
@@ -2893,94 +2096,49 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defWindow.def("SetCursor",static_cast<void(*)(prosper::Window&,GLFW::Cursor&)>([](prosper::Window &window,GLFW::Cursor &cursor) {
 		window->SetCursor(cursor);
 	}));
-	defWindow.def("Close",static_cast<void(*)(prosper::Window&)>([](prosper::Window &window) {
-		window.Close();
-	}));
+	defWindow.def("Close",&prosper::Window::Close);
 	defWindow.def("IsValid",static_cast<bool(*)(prosper::Window&)>([](prosper::Window &window) -> bool {
 		return window.IsValid();
 	}));
-	defWindow.def("SetCloseCallback",static_cast<void(*)(lua_State*,prosper::Window&,luabind::object)>([](lua_State *l,prosper::Window &window,luabind::object oOnClose) {
-		Lua::CheckFunction(l,2);
-		window.SetCloseCallback([oOnClose]() mutable {
-			oOnClose();
+	defWindow.def("SetCloseCallback",static_cast<void(*)(lua_State*,prosper::Window&,const Lua::func<void>&)>([](lua_State *l,prosper::Window &window,const Lua::func<void> &function) {
+		window.SetCloseCallback([function]() mutable {
+			const_cast<Lua::func<void>&>(function)();
 		});
 	}));
 	prosperMod[defWindow];
+
+	register_vulkan_lua_interface2(prosperMod);
 }
 
 /////////////////////////////////
 
-void Lua::Vulkan::VKTexture::IsValid(lua_State *l,Texture &hTex)
+bool Lua::Vulkan::VKTexture::IsValid(lua_State *l,Texture &hTex)
 {
-	Lua::PushBool(l,true);
+	return true;
 }
-void Lua::Vulkan::VKTexture::GetImage(lua_State *l,Texture &hTex)
-{
-	auto &img = hTex.GetImage();
-	Lua::Push<std::shared_ptr<Image>>(l,img.shared_from_this());
-}
-void Lua::Vulkan::VKTexture::GetImageView(lua_State *l,Texture &hTex)
-{
-	auto *imgView = hTex.GetImageView();
-	if(imgView != nullptr)
-		Lua::Push<std::shared_ptr<ImageView>>(l,imgView->shared_from_this());
-}
-void Lua::Vulkan::VKTexture::GetImageView(lua_State *l,Texture &hTex,uint32_t layerId)
-{
-	auto *imgView = hTex.GetImageView(layerId);
-	if(imgView != nullptr)
-		Lua::Push<std::shared_ptr<ImageView>>(l,imgView->shared_from_this());
-}
-void Lua::Vulkan::VKTexture::GetSampler(lua_State *l,Texture &hTex)
-{
-	auto *sampler = hTex.GetSampler();
-	if(sampler != nullptr)
-		Lua::Push<std::shared_ptr<Sampler>>(l,sampler->shared_from_this());
-}
-void Lua::Vulkan::VKTexture::GetWidth(lua_State *l,Texture &hTex)
+uint32_t Lua::Vulkan::VKTexture::GetWidth(lua_State *l,Texture &hTex)
 {
 	auto &img = hTex.GetImage();
 	auto extents = img.GetExtents();
-	Lua::PushInt(l,extents.width);
+	return extents.width;
 }
-void Lua::Vulkan::VKTexture::GetHeight(lua_State *l,Texture &hTex)
+uint32_t Lua::Vulkan::VKTexture::GetHeight(lua_State *l,Texture &hTex)
 {
 	auto &img = hTex.GetImage();
 	auto extents = img.GetExtents();
-	Lua::PushInt(l,extents.height);
-}
-void Lua::Vulkan::VKTexture::GetFormat(lua_State *l,Texture &hTex)
-{
-	auto &img = hTex.GetImage();
-	Lua::PushInt(l,umath::to_integral(img.GetFormat()));
-}
-void Lua::Vulkan::VKTexture::IsMSAATexture(lua_State *l,Texture &hTex)
-{
-	Lua::PushBool(l,hTex.IsMSAATexture());
+	return extents.height;
 }
 
 /////////////////////////////////
 
-void Lua::Vulkan::VKImage::IsValid(lua_State *l,Image &hImg)
+bool Lua::Vulkan::VKImage::IsValid(lua_State *l,Image &hImg)
 {
-	Lua::PushBool(l,true);
+	return true;
 }
-void Lua::Vulkan::VKImage::GetAspectSubresourceLayout(lua_State *l,Image &hImg,uint32_t layer,uint32_t mipmap)
-{
-	auto layout = hImg.GetSubresourceLayout(layer,mipmap);
-	if(layout.has_value() == false)
-		return;
-	Lua::Push(l,*layout);
-}
-void Lua::Vulkan::VKImage::GetAlignment(lua_State *l,Image &hImg)
-{
-	Lua::PushInt(l,hImg.GetAlignment()); // TODO: Plane parameter
-}
-void Lua::Vulkan::VKImage::GetExtent2D(lua_State *l,Image &hImg,uint32_t mipmap)
+std::pair<uint32_t,uint32_t> Lua::Vulkan::VKImage::GetExtent2D(lua_State *l,Image &hImg,uint32_t mipmap)
 {
 	auto extents = hImg.GetExtents(mipmap);
-	Lua::PushInt(l,extents.width);
-	Lua::PushInt(l,extents.height);
+	return {extents.width,extents.height};
 }
 #if 0
 void Lua::Vulkan::VKImage::GetExtent3D(lua_State *l,Image &hImg,uint32_t mipmap)
@@ -3012,55 +2170,12 @@ void Lua::Vulkan::VKImage::GetSubresourceRange(lua_State *l,Image &hImg)
 	Lua::Push(l,reinterpret_cast<prosper::ImageSubresourceRange&>(subresourceRange));
 }
 #endif
-void Lua::Vulkan::VKImage::GetFormat(lua_State *l,Image &hImg)
-{
-	Lua::PushInt(l,static_cast<int32_t>(hImg.GetFormat()));
-}
-void Lua::Vulkan::VKImage::GetMipmapSize(lua_State *l,Image &hImg,uint32_t mipmap)
+std::pair<uint32_t,uint32_t> Lua::Vulkan::VKImage::GetMipmapSize(lua_State *l,Image &hImg,uint32_t mipmap)
 {
 	uint32_t width;
 	uint32_t height;
 	auto extents = hImg.GetExtents(mipmap);
-	Lua::PushInt(l,extents.width);
-	Lua::PushInt(l,extents.height);
-}
-void Lua::Vulkan::VKImage::GetLayerCount(lua_State *l,Image &hImg)
-{
-	Lua::PushInt(l,hImg.GetLayerCount());
-}
-void Lua::Vulkan::VKImage::GetMipmapCount(lua_State *l,Image &hImg)
-{
-	Lua::PushInt(l,hImg.GetMipmapCount());
-}
-void Lua::Vulkan::VKImage::GetSampleCount(lua_State *l,Image &hImg)
-{
-	Lua::PushInt(l,umath::to_integral(hImg.GetSampleCount()));
-}
-void Lua::Vulkan::VKImage::GetSharingMode(lua_State *l,Image &hImg)
-{
-	Lua::PushInt(l,umath::to_integral(hImg.GetSharingMode()));
-}
-void Lua::Vulkan::VKImage::GetTiling(lua_State *l,Image &hImg)
-{
-	Lua::PushInt(l,static_cast<uint32_t>(hImg.GetTiling()));
-}
-void Lua::Vulkan::VKImage::GetType(lua_State *l,Image &hImg)
-{
-	Lua::PushInt(l,static_cast<uint32_t>(hImg.GetType()));
-}
-void Lua::Vulkan::VKImage::GetUsage(lua_State *l,Image &hImg)
-{
-	Lua::PushInt(l,umath::to_integral(hImg.GetCreateInfo().usage));
-}
-void Lua::Vulkan::VKImage::GetWidth(lua_State *l,Image &hImg)
-{
-	auto extents = hImg.GetExtents();
-	Lua::PushInt(l,extents.width);
-}
-void Lua::Vulkan::VKImage::GetHeight(lua_State *l,Image &hImg)
-{
-	auto extents = hImg.GetExtents();
-	Lua::PushInt(l,extents.height);
+	return {extents.width,extents.height};
 }
 void Lua::Vulkan::VKImage::WriteMemory(lua_State *l,Image &hImg,uint32_t x,uint32_t y,uimg::ImageBuffer &imgBuf,uint32_t layerIndex,uint32_t mipLevel)
 {
@@ -3077,21 +2192,9 @@ void Lua::Vulkan::VKImage::WriteMemory(lua_State *l,Image &hImg,uint32_t x,uint3
 
 /////////////////////////////////
 
-void Lua::Vulkan::VKImageView::IsValid(lua_State *l,ImageView &hImgView)
+bool Lua::Vulkan::VKImageView::IsValid(lua_State *l,ImageView &hImgView)
 {
-	Lua::PushBool(l,true);
-}
-void Lua::Vulkan::VKImageView::GetAspectMask(lua_State *l,ImageView &hImgView)
-{
-	Lua::PushInt(l,umath::to_integral(hImgView.GetAspectMask()));
-}
-void Lua::Vulkan::VKImageView::GetBaseLayer(lua_State *l,ImageView &hImgView)
-{
-	Lua::PushInt(l,hImgView.GetBaseLayer());
-}
-void Lua::Vulkan::VKImageView::GetBaseMipmapLevel(lua_State *l,ImageView &hImgView)
-{
-	Lua::PushInt(l,hImgView.GetBaseMipmapLevel());
+	return true;
 }
 #if 0
 void Lua::Vulkan::VKImageView::GetBaseMipmapSize(lua_State *l,ImageView &hImgView)
@@ -3116,848 +2219,63 @@ void Lua::Vulkan::VKImageView::GetSubresourceRange(lua_State *l,ImageView &hImgV
 	Lua::Push(l,reinterpret_cast<prosper::ImageSubresourceRange&>(subresourceRange));
 }
 #endif
-void Lua::Vulkan::VKImageView::GetImageFormat(lua_State *l,ImageView &hImgView)
+
+/////////////////////////////////
+
+bool Lua::Vulkan::VKSampler::IsValid(lua_State *l,Sampler &hSampler)
 {
-	Lua::PushInt(l,hImgView.GetFormat());
+	return true;
 }
-void Lua::Vulkan::VKImageView::GetLayerCount(lua_State *l,ImageView &hImgView)
+bool Lua::Vulkan::VKSampler::GetAnisotropyEnabled(lua_State *l,Sampler &hSampler)
 {
-	Lua::PushInt(l,hImgView.GetLayerCount());
-}
-void Lua::Vulkan::VKImageView::GetMipmapCount(lua_State *l,ImageView &hImgView)
-{
-	Lua::PushInt(l,hImgView.GetMipmapCount());
-}
-void Lua::Vulkan::VKImageView::GetSwizzleArray(lua_State *l,ImageView &hImgView)
-{
-	auto swizzle = hImgView.GetSwizzleArray();
-	auto t = Lua::CreateTable(l);
-	for(auto i=decltype(swizzle.size()){0};i<swizzle.size();++i)
-	{
-		Lua::PushInt(l,i +1);
-		Lua::PushInt(l,static_cast<uint32_t>(swizzle.at(i)));
-		Lua::SetTableValue(l,t);
-	}
-}
-void Lua::Vulkan::VKImageView::GetType(lua_State *l,ImageView &hImgView)
-{
-	Lua::PushInt(l,static_cast<uint32_t>(hImgView.GetType()));
+	return hSampler.GetMaxAnisotropy() != 0.f;
 }
 
 /////////////////////////////////
 
-void Lua::Vulkan::VKSampler::IsValid(lua_State *l,Sampler &hSampler)
+bool Lua::Vulkan::VKRenderTarget::IsValid(lua_State *l,RenderTarget &hRt)
 {
-	Lua::PushBool(l,true);
+	return true;
 }
-void Lua::Vulkan::VKSampler::Update(lua_State *l,Sampler &hSampler)
-{
-	hSampler.Update();
-}
-void Lua::Vulkan::VKSampler::GetMagFilter(lua_State *l,Sampler &hSampler)
-{
-	Lua::PushInt(l,static_cast<uint32_t>(hSampler.GetMagFilter()));
-}
-void Lua::Vulkan::VKSampler::GetMinFilter(lua_State *l,Sampler &hSampler)
-{
-	Lua::PushInt(l,static_cast<uint32_t>(hSampler.GetMinFilter()));
-}
-void Lua::Vulkan::VKSampler::GetMipmapMode(lua_State *l,Sampler &hSampler)
-{
-	Lua::PushInt(l,static_cast<uint32_t>(hSampler.GetMipmapMode()));
-}
-void Lua::Vulkan::VKSampler::GetAddressModeU(lua_State *l,Sampler &hSampler)
-{
-	Lua::PushInt(l,static_cast<uint32_t>(hSampler.GetAddressModeU()));
-}
-void Lua::Vulkan::VKSampler::GetAddressModeV(lua_State *l,Sampler &hSampler)
-{
-	Lua::PushInt(l,static_cast<uint32_t>(hSampler.GetAddressModeV()));
-}
-void Lua::Vulkan::VKSampler::GetAddressModeW(lua_State *l,Sampler &hSampler)
-{
-	Lua::PushInt(l,static_cast<uint32_t>(hSampler.GetAddressModeW()));
-}
-void Lua::Vulkan::VKSampler::GetMipLodBias(lua_State *l,Sampler &hSampler)
-{
-	Lua::PushNumber(l,hSampler.GetLodBias());
-}
-void Lua::Vulkan::VKSampler::GetAnisotropyEnabled(lua_State *l,Sampler &hSampler)
-{
-	Lua::PushBool(l,hSampler.GetMaxAnisotropy() != 0.f);
-}
-void Lua::Vulkan::VKSampler::GetMaxAnisotropy(lua_State *l,Sampler &hSampler)
-{
-	Lua::PushNumber(l,hSampler.GetMaxAnisotropy());
-}
-void Lua::Vulkan::VKSampler::GetCompareEnabled(lua_State *l,Sampler &hSampler)
-{
-	Lua::PushBool(l,hSampler.GetCompareEnabled());
-}
-void Lua::Vulkan::VKSampler::GetCompareOperation(lua_State *l,Sampler &hSampler)
-{
-	Lua::PushInt(l,static_cast<uint32_t>(hSampler.GetCompareOp()));
-}
-void Lua::Vulkan::VKSampler::GetMinLod(lua_State *l,Sampler &hSampler)
-{
-	Lua::PushNumber(l,hSampler.GetMinLod());
-}
-void Lua::Vulkan::VKSampler::GetMaxLod(lua_State *l,Sampler &hSampler)
-{
-	Lua::PushNumber(l,hSampler.GetMaxLod());
-}
-void Lua::Vulkan::VKSampler::GetBorderColor(lua_State *l,Sampler &hSampler)
-{
-	Lua::PushInt(l,static_cast<uint32_t>(hSampler.GetBorderColor()));
-}
-#if 0
-void Lua::Vulkan::VKSampler::GetUseUnnormalizedCoordinates(lua_State *l,Sampler &hSampler)
-{
-	Lua::PushBool(l,hSampler.GetUseUnnormalizedCoordinates());
-}
-#endif
-void Lua::Vulkan::VKSampler::SetMagFilter(lua_State *l,Sampler &hSampler,int32_t magFilter)
-{
-	hSampler.SetMagFilter(static_cast<prosper::Filter>(magFilter));
-}
-void Lua::Vulkan::VKSampler::SetMinFilter(lua_State *l,Sampler &hSampler,int32_t minFilter)
-{
-	hSampler.SetMinFilter(static_cast<prosper::Filter>(minFilter));
-}
-void Lua::Vulkan::VKSampler::SetMipmapMode(lua_State *l,Sampler &hSampler,int32_t mipmapMode)
-{
-	hSampler.SetMipmapMode(static_cast<prosper::SamplerMipmapMode>(mipmapMode));
-}
-void Lua::Vulkan::VKSampler::SetAddressModeU(lua_State *l,Sampler &hSampler,int32_t addressModeU)
-{
-	hSampler.SetAddressModeU(static_cast<prosper::SamplerAddressMode>(addressModeU));
-}
-void Lua::Vulkan::VKSampler::SetAddressModeV(lua_State *l,Sampler &hSampler,int32_t addressModeV)
-{
-	hSampler.SetAddressModeV(static_cast<prosper::SamplerAddressMode>(addressModeV));
-}
-void Lua::Vulkan::VKSampler::SetAddressModeW(lua_State *l,Sampler &hSampler,int32_t addressModeW)
-{
-	hSampler.SetAddressModeW(static_cast<prosper::SamplerAddressMode>(addressModeW));
-}
-void Lua::Vulkan::VKSampler::SetMipLodBias(lua_State *l,Sampler &hSampler,float mipLodBias)
-{
-	//hSampler.SetMipLodBias(mipLodBias); // TODO
-}
-void Lua::Vulkan::VKSampler::SetAnisotropyEnabled(lua_State *l,Sampler &hSampler,bool anisotropyEnabled)
-{
-	//hSampler.SetAnisotropyEnabled(anisotropyEnabled); // TODO
-}
-void Lua::Vulkan::VKSampler::SetMaxAnisotropy(lua_State *l,Sampler &hSampler,float maxAnisotropy)
-{
-	hSampler.SetMaxAnisotropy(maxAnisotropy);
-}
-void Lua::Vulkan::VKSampler::SetCompareEnabled(lua_State *l,Sampler &hSampler,bool compareEnabled)
-{
-	hSampler.SetCompareEnable(compareEnabled);
-}
-void Lua::Vulkan::VKSampler::SetCompareOperation(lua_State *l,Sampler &hSampler,int32_t compareOp)
-{
-	hSampler.SetCompareOp(static_cast<prosper::CompareOp>(compareOp));
-}
-void Lua::Vulkan::VKSampler::SetMinLod(lua_State *l,Sampler &hSampler,float minLod)
-{
-	hSampler.SetMinLod(minLod);
-}
-void Lua::Vulkan::VKSampler::SetMaxLod(lua_State *l,Sampler &hSampler,float maxLod)
-{
-	hSampler.SetMaxLod(maxLod);
-}
-void Lua::Vulkan::VKSampler::SetBorderColor(lua_State *l,Sampler &hSampler,int32_t borderColor)
-{
-	hSampler.SetBorderColor(static_cast<prosper::BorderColor>(borderColor));
-}
-#if 0
-void Lua::Vulkan::VKSampler::SetUseUnnormalizedCoordinates(lua_State *l,Sampler &hSampler,bool bUnnormalizedCoordinates)
-{
-	hSampler.SetUseUnnormalizedCoordinates(bUnnormalizedCoordinates);
-}
-#endif
-
-/////////////////////////////////
-
-void Lua::Vulkan::VKFramebuffer::IsValid(lua_State *l,Framebuffer &hFramebuffer)
-{
-	Lua::PushBool(l,true);
-}
-#if 0
-void Lua::Vulkan::VKFramebuffer::GetAttachment(lua_State *l,Framebuffer &hFramebuffer,uint32_t attId)
-{
-	Anvil::ImageView *imgView;
-	if(hFramebuffer->get_create_info_ptr()->get_attachment_at_index(attId,&imgView) == false || imgView == nullptr)
-		return;
-	// prosper TODO
-}
-void Lua::Vulkan::VKFramebuffer::GetAttachmentCount(lua_State *l,Framebuffer &hFramebuffer)
-{
-	Lua::PushInt(l,hFramebuffer.GetAttachmentCount());
-}
-#endif
-void Lua::Vulkan::VKFramebuffer::GetSize(lua_State *l,Framebuffer &hFramebuffer)
-{
-	Lua::PushInt(l,hFramebuffer.GetAttachmentCount());
-	uint32_t width;
-	uint32_t height;
-	uint32_t depth;
-	hFramebuffer.GetSize(width,height,depth);
-	Lua::PushInt(l,width);
-	Lua::PushInt(l,height);
-	Lua::PushInt(l,depth);
-}
-
-/////////////////////////////////
-
-void Lua::Vulkan::VKRenderPass::IsValid(lua_State *l,RenderPass &hRenderPass)
-{
-	Lua::PushBool(l,true);
-}
-#if 0
-void Lua::Vulkan::VKRenderPass::GetInfo(lua_State *l,RenderPass &hRenderPass)
-{
-	auto *info = hRenderPass->get_render_pass_create_info(); // prosper TODO
-
-}
-void Lua::Vulkan::VKRenderPass::GetSwapchain(lua_State *l,RenderPass &hRenderPass)
-{
-	auto *swapchain = hRenderPass->get_swapchain(); // prosper TODO
-}
-#endif
-
-/////////////////////////////////
-
-void Lua::Vulkan::VKEvent::IsValid(lua_State *l,Event &hEvent)
-{
-	Lua::PushBool(l,true);
-}
-void Lua::Vulkan::VKEvent::GetStatus(lua_State *l,Event &hEvent)
-{
-	auto b = hEvent.IsSet();
-	auto r = b ? prosper::Result::EventSet : prosper::Result::EventReset;
-	Lua::PushInt(l,umath::to_integral(r));
-}
-void Lua::Vulkan::VKEvent::IsSet(lua_State *l,Event &hEvent)
-{
-	Lua::PushBool(l,hEvent.IsSet());
-}
-
-/////////////////////////////////
-
-void Lua::Vulkan::VKFence::IsValid(lua_State *l,Fence &hFence)
-{
-	Lua::PushBool(l,true);
-}
-
-/////////////////////////////////
-
-#if 0
-void Lua::Vulkan::VKSemaphore::IsValid(lua_State *l,Semaphore &hSemaphore)
-{
-	Lua::PushBool(l,true);
-}
-
-/////////////////////////////////
-
-void Lua::Vulkan::VKMemory::IsValid(lua_State *l,Memory &hMemory)
-{
-	Lua::PushBool(l,&hMemory != nullptr);
-}
-void Lua::Vulkan::VKMemory::GetParentMemory(lua_State *l,Memory &hMemory)
-{
-	auto *pParentMemory = hMemory.get_create_info_ptr()->get_parent_memory_block();
-	if(pParentMemory == nullptr)
-		return;
-	Lua::Push<Memory*>(l,pParentMemory);
-}
-void Lua::Vulkan::VKMemory::GetSize(lua_State *l,Memory &hMemory)
-{
-	Lua::PushInt(l,hMemory.get_create_info_ptr()->get_size());
-}
-void Lua::Vulkan::VKMemory::GetStartOffset(lua_State *l,Memory &hMemory)
-{
-	Lua::PushInt(l,hMemory.get_start_offset());
-}
-void Lua::Vulkan::VKMemory::Write(lua_State *l,Memory &hMemory,uint32_t offset,::DataStream &ds,uint32_t dsOffset,uint32_t dsSize)
-{
-	Lua::PushBool(l,hMemory.write(offset,dsSize,ds->GetData() +dsOffset));
-}
-void Lua::Vulkan::VKMemory::Read(lua_State *l,Memory &hMemory,uint32_t offset,uint32_t size)
-{
-	auto ds = ::DataStream(size);
-	if(hMemory.read(offset,size,ds->GetData()) == false)
-		return;
-	Lua::Push(l,ds);
-}
-void Lua::Vulkan::VKMemory::Read(lua_State *l,Memory &hMemory,uint32_t offset,uint32_t size,::DataStream &ds,uint32_t dsOffset)
-{
-	auto reqSize = dsOffset +size;
-	if(ds->GetSize() < reqSize)
-		ds->Resize(reqSize);
-	Lua::PushBool(l,hMemory.read(offset,size,ds->GetData() +dsOffset));
-}
-void Lua::Vulkan::VKMemory::Map(lua_State *l,Memory &hMemory,uint32_t offset,uint32_t size)
-{
-	Lua::PushBool(l,hMemory.map(offset,size));
-}
-void Lua::Vulkan::VKMemory::Unmap(lua_State *l,Memory &hMemory)
-{
-	Lua::PushBool(l,hMemory.unmap());
-}
-#endif
-
-/////////////////////////////////
-
-void Lua::Vulkan::VKCommandBuffer::IsValid(lua_State *l,CommandBuffer &hCommandBuffer)
-{
-	Lua::PushBool(l,true);
-}
-void Lua::Vulkan::VKCommandBuffer::RecordClearImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &img,const Color &col,const prosper::util::ClearImageInfo &clearImageInfo)
-{
-	auto vcol = col.ToVector4();
-	Lua::PushBool(l,hCommandBuffer.RecordClearImage(img,prosper::ImageLayout::TransferDstOptimal,{vcol.r,vcol.g,vcol.b,vcol.a},clearImageInfo));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordClearImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &img,float clearDepth,const prosper::util::ClearImageInfo &clearImageInfo)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordClearImage(img,prosper::ImageLayout::TransferDstOptimal,clearDepth,clearImageInfo));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordClearAttachment(lua_State *l,CommandBuffer &hCommandBuffer,Image &img,const Color &col,uint32_t attId)
-{
-	auto vcol = col.ToVector4();
-	Lua::PushBool(l,hCommandBuffer.RecordClearAttachment(img,{vcol.r,vcol.g,vcol.b,vcol.a},attId));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordClearAttachment(lua_State *l,CommandBuffer &hCommandBuffer,Image &img,float clearDepth)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordClearAttachment(img,clearDepth));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordCopyImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &imgSrc,Image &imgDst,const prosper::util::CopyInfo &copyInfo)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordCopyImage(copyInfo,imgSrc,imgDst));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordCopyBufferToImage(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &bufSrc,Image &imgDst,const prosper::util::BufferImageCopyInfo &copyInfo)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordCopyBufferToImage(copyInfo,bufSrc,imgDst));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordCopyBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &bufSrc,Buffer &bufDst,const prosper::util::BufferCopy &copyInfo)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordCopyBuffer(copyInfo,bufSrc,bufDst));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordUpdateBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buf,uint32_t offset,::DataStream &ds)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordUpdateBuffer(buf,offset,ds->GetSize(),ds->GetData()));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordBlitImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &imgSrc,Image &imgDst,const prosper::util::BlitInfo &blitInfo)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordBlitImage(blitInfo,imgSrc,imgDst));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordResolveImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &imgSrc,Image &imgDst)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordResolveImage(imgSrc,imgDst));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordBlitTexture(lua_State *l,CommandBuffer &hCommandBuffer,Texture &texSrc,Image &imgDst)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordBlitTexture(texSrc,imgDst));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordGenerateMipmaps(lua_State *l,CommandBuffer &hCommandBuffer,Image &img,uint32_t currentLayout,uint32_t srcAccessMask,uint32_t srcStage)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordGenerateMipmaps(img,static_cast<prosper::ImageLayout>(currentLayout),static_cast<prosper::AccessFlags>(srcAccessMask),static_cast<prosper::PipelineStageFlags>(srcStage)));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordPipelineBarrier(lua_State *l,CommandBuffer &hCommandBuffer,const prosper::util::PipelineBarrierInfo &barrierInfo)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordPipelineBarrier(barrierInfo));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordImageBarrier(
-	lua_State *l,CommandBuffer &hCommandBuffer,Image &img,
-	uint32_t oldLayout,uint32_t newLayout,const prosper::util::ImageSubresourceRange &subresourceRange
-)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordImageBarrier(
-		img,
-		static_cast<prosper::ImageLayout>(oldLayout),static_cast<prosper::ImageLayout>(newLayout),
-		subresourceRange
-	));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordImageBarrier(
-	lua_State *l,CommandBuffer &hCommandBuffer,Image &img,
-	uint32_t srcStageMask,uint32_t dstStageMask,
-	uint32_t oldLayout,uint32_t newLayout,
-	uint32_t srcAccessMask,uint32_t dstAccessMask,
-	uint32_t baseLayer
-)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordImageBarrier(
-		img,
-		static_cast<prosper::PipelineStageFlags>(srcStageMask),static_cast<prosper::PipelineStageFlags>(dstStageMask),
-		static_cast<prosper::ImageLayout>(oldLayout),static_cast<prosper::ImageLayout>(newLayout),
-		static_cast<prosper::AccessFlags>(srcAccessMask),static_cast<prosper::AccessFlags>(dstAccessMask),
-		baseLayer
-	));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordBufferBarrier(
-	lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buf,
-	uint32_t srcStageMask,uint32_t dstStageMask,
-	uint32_t srcAccessMask,uint32_t dstAccessMask,
-	uint32_t offset,uint32_t size
-)
-{
-	auto lsize = (size != std::numeric_limits<uint32_t>::max()) ? static_cast<uint64_t>(size) : std::numeric_limits<uint64_t>::max();
-	Lua::PushBool(l,hCommandBuffer.RecordBufferBarrier(
-		buf,
-		static_cast<prosper::PipelineStageFlags>(srcStageMask),static_cast<prosper::PipelineStageFlags>(dstStageMask),
-		static_cast<prosper::AccessFlags>(srcAccessMask),static_cast<prosper::AccessFlags>(dstAccessMask),
-		offset,lsize
-	));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordSetViewport(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t width,uint32_t height,uint32_t x,uint32_t y)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordSetViewport(width,height,x,y));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordSetScissor(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t width,uint32_t height,uint32_t x,uint32_t y)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordSetScissor(width,height,x,y));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordBeginRenderPass(lua_State *l,CommandBuffer &hCommandBuffer,Lua::Vulkan::RenderPassInfo &rpInfo)
-{
-	if(hCommandBuffer.IsPrimary() == false)
-	{
-		Lua::PushBool(l,false);
-		return;
-	}
-	static_assert(sizeof(Lua::Vulkan::ClearValue) == sizeof(prosper::ClearValue));
-	auto &primaryCmdBuffer = dynamic_cast<prosper::IPrimaryCommandBuffer&>(hCommandBuffer);
-	if(rpInfo.layerId.has_value())
-	{
-		auto r = primaryCmdBuffer.RecordBeginRenderPass(
-			*rpInfo.renderTarget,
-			*rpInfo.layerId,
-			reinterpret_cast<std::vector<prosper::ClearValue>&>(rpInfo.clearValues),
-			prosper::IPrimaryCommandBuffer::RenderPassFlags::None,
-			rpInfo.renderPass.get()
-		);
-		Lua::PushBool(l,r);
-		return;
-	}
-	auto r = primaryCmdBuffer.RecordBeginRenderPass(
-		*rpInfo.renderTarget,
-		reinterpret_cast<std::vector<prosper::ClearValue>&>(rpInfo.clearValues),
-		prosper::IPrimaryCommandBuffer::RenderPassFlags::None,
-		rpInfo.renderPass.get()
-	);
-	Lua::PushBool(l,r);
-}
-void Lua::Vulkan::VKCommandBuffer::RecordEndRenderPass(lua_State *l,CommandBuffer &hCommandBuffer)
-{
-	if(hCommandBuffer.IsPrimary() == false)
-	{
-		Lua::PushBool(l,false);
-		return;
-	}
-	auto &primaryCmdBuffer = dynamic_cast<prosper::IPrimaryCommandBuffer&>(hCommandBuffer);;
-	Lua::PushBool(l,primaryCmdBuffer.RecordEndRenderPass());
-}
-void Lua::Vulkan::VKCommandBuffer::RecordBindIndexBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &indexBuffer,uint32_t indexType,uint32_t offset)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordBindIndexBuffer(indexBuffer,static_cast<prosper::IndexType>(indexType),offset));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffer(lua_State *l,CommandBuffer &hCommandBuffer,prosper::ShaderGraphics &graphics,Buffer &vertexBuffer,uint32_t startBinding,uint32_t offset)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordBindVertexBuffers(graphics,{&vertexBuffer},startBinding,{static_cast<uint64_t>(offset)}));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(lua_State *l,CommandBuffer &hCommandBuffer,prosper::ShaderGraphics &graphics,luabind::object vertexBuffers,uint32_t startBinding,luabind::object offsets)
-{
-	auto buffers = Lua::get_table_values<prosper::IBuffer*>(l,2,[](lua_State *l,int32_t idx) {
-		return &Lua::Check<Buffer>(l,idx);
-	});
-	static std::vector<uint64_t> voffsets;
-	voffsets.clear();
-	if(Lua::IsSet(l,4))
-	{
-		voffsets = Lua::get_table_values<uint64_t>(l,4,[](lua_State *l,int32_t idx) {
-			return static_cast<uint64_t>(Lua::CheckInt(l,idx));
-		});
-	}
-	else
-		voffsets.resize(buffers.size(),0ull);
-	Lua::PushBool(l,hCommandBuffer.RecordBindVertexBuffers(graphics,buffers,startBinding,voffsets));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordCopyImageToBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Image &imgSrc,uint32_t srcImageLayout,Buffer &bufDst,const prosper::util::BufferImageCopyInfo &copyInfo)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordCopyImageToBuffer(copyInfo,imgSrc,static_cast<prosper::ImageLayout>(srcImageLayout),bufDst));
-}
-#if 0
-void Lua::Vulkan::VKCommandBuffer::RecordDispatch(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t x,uint32_t y,uint32_t z)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordDispatch(x,y,z));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordDispatchIndirect(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buffer,uint32_t offset)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordDispatchIndirect(buffer,size);
-}
-void Lua::Vulkan::VKCommandBuffer::RecordResetEvent(lua_State *l,CommandBuffer &hCommandBuffer,Event &ev,uint32_t stageMask)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordResetEvent(&ev,static_cast<Anvil::PipelineStageFlagBits>(stageMask)));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordSetEvent(lua_State *l,CommandBuffer &hCommandBuffer,Event &ev,uint32_t stageMask)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordSetEvent(&ev,static_cast<Anvil::PipelineStageFlagBits>(stageMask)));
-}
-#endif
-void Lua::Vulkan::VKCommandBuffer::RecordDraw(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t vertexCount,uint32_t instanceCount,uint32_t firstVertex,uint32_t firstInstance)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordDraw(vertexCount,instanceCount,firstVertex,firstInstance));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex,uint32_t firstInstance)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordDrawIndexed(indexCount,instanceCount,firstIndex,firstInstance));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordDrawIndexedIndirect(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buffer,uint32_t offset,uint32_t drawCount,uint32_t stride)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordDrawIndexedIndirect(buffer,offset,drawCount,stride));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordDrawIndirect(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buffer,uint32_t offset,uint32_t drawCount,uint32_t stride)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordDrawIndirect(buffer,offset,drawCount,stride));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordFillBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &buffer,uint32_t offset,uint32_t size,uint32_t data)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordFillBuffer(buffer,offset,size,data));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordSetBlendConstants(lua_State *l,CommandBuffer &hCommandBuffer,const Vector4 &blendConstants)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordSetBlendConstants(std::array<float,4>{blendConstants[0],blendConstants[1],blendConstants[2],blendConstants[3]}));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordSetDepthBias(lua_State *l,CommandBuffer &hCommandBuffer,float depthBiasConstantFactor,float depthBiasClamp,float slopeScaledDepthBias)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordSetDepthBias(depthBiasConstantFactor,depthBiasClamp,slopeScaledDepthBias));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordSetDepthBounds(lua_State *l,CommandBuffer &hCommandBuffer,float minDepthBounds,float maxDepthBounds)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordSetDepthBounds(minDepthBounds,maxDepthBounds));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordSetLineWidth(lua_State *l,CommandBuffer &hCommandBuffer,float lineWidth)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordSetLineWidth(lineWidth));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordSetStencilCompareMask(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t faceMask,uint32_t stencilCompareMask)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordSetStencilCompareMask(static_cast<prosper::StencilFaceFlags>(faceMask),stencilCompareMask));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordSetStencilReference(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t faceMask,uint32_t stencilReference)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordSetStencilReference(static_cast<prosper::StencilFaceFlags>(faceMask),stencilReference));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordSetStencilWriteMask(lua_State *l,CommandBuffer &hCommandBuffer,uint32_t faceMask,uint32_t stencilWriteMask)
-{
-	Lua::PushBool(l,hCommandBuffer.RecordSetStencilWriteMask(static_cast<prosper::StencilFaceFlags>(faceMask),stencilWriteMask));
-}
-/*void Lua::Vulkan::VKCommandBuffer::RecordWaitEvents(lua_State *l,CommandBuffer &hCommandBuffer)
-{
-	Lua::PushBool(l,hCommandBuffer.record_wait_events(event,));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordWriteTimestamp(lua_State *l,CommandBuffer &hCommandBuffer)
-{
-	Lua::PushBool(l,hCommandBuffer.record_write_timestamp(stage,queryPool,queryIndex));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordBeginQuery(lua_State *l,CommandBuffer &hCommandBuffer)
-{
-	Lua::PushBool(l,hCommandBuffer.record_begin_query(queryPool,entry,flags));
-}
-void Lua::Vulkan::VKCommandBuffer::RecordEndQuery(lua_State *l,CommandBuffer &hCommandBuffer)
-{
-	Lua::PushBool(l,hCommandBuffer.record_end_query(queryPool,queryIndex));
-}*/ // TODO
-void Lua::Vulkan::VKCommandBuffer::RecordDrawGradient(lua_State *l,CommandBuffer &hCommandBuffer,RenderTarget &rt,const Vector2 &dir,luabind::object lnodes)
-{
-	if(hCommandBuffer.IsPrimary() == false)
-	{
-		Lua::PushBool(l,false);
-		return;
-	}
-	auto nodes = get_gradient_nodes(l,4);
-	auto primCmd = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
-	Lua::PushBool(l,pragma::util::record_draw_gradient(c_engine->GetRenderContext(),primCmd,rt,dir,nodes));
-}
-void Lua::Vulkan::VKCommandBuffer::StopRecording(lua_State *l,CommandBuffer &hCommandBuffer)
-{
-	Lua::PushBool(l,hCommandBuffer.StopRecording());
-}
-void Lua::Vulkan::VKCommandBuffer::StartRecording(lua_State *l,CommandBuffer &hCommandBuffer,bool oneTimeSubmit,bool simultaneousUseAllowed)
-{
-	if(hCommandBuffer.IsPrimary() == false)
-	{
-		Lua::PushBool(l,false);
-		return;
-	}
-	Lua::PushBool(l,dynamic_cast<prosper::IPrimaryCommandBuffer&>(hCommandBuffer).StartRecording(oneTimeSubmit,simultaneousUseAllowed));
-}
-
-/////////////////////////////////
-
-void Lua::Vulkan::VKBuffer::IsValid(lua_State *l,Buffer &hBuffer)
-{
-	Lua::PushBool(l,true);
-}
-void Lua::Vulkan::VKBuffer::GetStartOffset(lua_State *l,Buffer &hBuffer)
-{
-	Lua::PushInt(l,hBuffer.GetStartOffset());
-}
-void Lua::Vulkan::VKBuffer::SetPermanentlyMapped(lua_State *l,Buffer &hBuffer,bool b,Buffer::MapFlags mapFlags)
-{
-	hBuffer.SetPermanentlyMapped(b,mapFlags);
-}
-void Lua::Vulkan::VKBuffer::GetBaseIndex(lua_State *l,Buffer &hBuffer)
-{
-	Lua::PushInt(l,hBuffer.GetBaseIndex());
-}
-void Lua::Vulkan::VKBuffer::GetSize(lua_State *l,Buffer &hBuffer)
-{
-	Lua::PushInt(l,hBuffer.GetSize());
-}
-void Lua::Vulkan::VKBuffer::GetUsageFlags(lua_State *l,Buffer &hBuffer)
-{
-	Lua::PushInt(l,umath::to_integral(hBuffer.GetUsageFlags()));
-}
-void Lua::Vulkan::VKBuffer::GetParent(lua_State *l,Buffer &hBuffer)
-{
-	auto parent = hBuffer.GetParent();
-	if(parent == nullptr)
-		return;
-	Lua::Push(l,parent);
-}
-void Lua::Vulkan::VKBuffer::Write(lua_State *l,Buffer &hBuffer,uint32_t offset,::DataStream &ds,uint32_t dsOffset,uint32_t dsSize)
-{
-	Lua::PushBool(l,hBuffer.Write(offset,dsSize,ds->GetData() +dsOffset));
-}
-void Lua::Vulkan::VKBuffer::Read(lua_State *l,Buffer &hBuffer,uint32_t offset,uint32_t size)
-{
-	auto ds = ::DataStream(size);
-	auto r = hBuffer.Read(offset,size,ds->GetData());
-	if(r == false)
-		return;
-	Lua::Push(l,ds);
-}
-void Lua::Vulkan::VKBuffer::Read(lua_State *l,Buffer &hBuffer,uint32_t offset,uint32_t size,::DataStream &ds,uint32_t dsOffset)
-{
-	auto reqSize = size +dsOffset;
-	if(ds->GetSize() < reqSize)
-		ds->Resize(reqSize);
-	Lua::PushBool(l,hBuffer.Read(offset,size,ds->GetData() +dsOffset));
-}
-void Lua::Vulkan::VKBuffer::Map(lua_State *l,Buffer &hBuffer,uint32_t offset,uint32_t size,Buffer::MapFlags mapFlags)
-{
-	Lua::PushBool(l,hBuffer.Map(offset,size,mapFlags));
-}
-void Lua::Vulkan::VKBuffer::Unmap(lua_State *l,Buffer &hBuffer)
-{
-	Lua::PushBool(l,hBuffer.Unmap());
-}
-
-/////////////////////////////////
-
-void Lua::Vulkan::VKDescriptorSet::IsValid(lua_State *l,DescriptorSet &hDescSet)
-{
-	Lua::PushBool(l,true);
-}
-void Lua::Vulkan::VKDescriptorSet::GetBindingCount(lua_State *l,DescriptorSet &hDescSet)
-{
-	Lua::PushInt(l,hDescSet.GetBindingCount());
-}
-#if 0
-void Lua::Vulkan::VKDescriptorSet::GetBindingInfo(lua_State *l,DescriptorSet &hDescSet)
-{
-	auto *infos = hDescSet->get_descriptor_set_create_info();
-	if(infos == nullptr || infos->empty())
-		return;
-	auto &info = *infos->at(0);
-	auto numBindings = info.get_n_bindings();
-	auto t = Lua::CreateTable(l);
-	auto idx = 1u;
-	for(auto i=decltype(numBindings){0};i<numBindings;++i)
-	{
-		pragma::LuaDescriptorSetBinding binding {};
-		if(infos->at(0)->get_binding_properties_by_index_number(
-				i,&binding.bindingIndex,reinterpret_cast<Anvil::DescriptorType*>(&binding.type),&binding.descriptorArraySize,reinterpret_cast<Anvil::ShaderStageFlags*>(&binding.shaderStages)
-			) == false)
-			continue;
-		Lua::PushInt(l,idx++);
-		Lua::Push(l,binding);
-		Lua::SetTableValue(l,t);
-	}
-}
-void Lua::Vulkan::VKDescriptorSet::GetBindingInfo(lua_State *l,DescriptorSet &hDescSet,uint32_t bindingIdx)
-{
-	auto *infos = hDescSet->get_descriptor_set_create_info();
-	if(infos == nullptr || infos->empty())
-		return;
-	pragma::LuaDescriptorSetBinding binding {};
-	if(infos->at(0)->get_binding_properties_by_index_number(
-			bindingIdx,&binding.bindingIndex,reinterpret_cast<Anvil::DescriptorType*>(&binding.type),&binding.descriptorArraySize,reinterpret_cast<Anvil::ShaderStageFlags*>(&binding.shaderStages)
-		) == false)
-		return;
-	Lua::Push(l,binding);
-}
-#endif
-void Lua::Vulkan::VKDescriptorSet::SetBindingTexture(lua_State *l,Lua::Vulkan::DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Texture &texture)
-{
-	Lua::PushBool(l,hDescSet.GetDescriptorSet()->SetBindingTexture(texture,bindingIdx));
-}
-void Lua::Vulkan::VKDescriptorSet::SetBindingTexture(lua_State *l,Lua::Vulkan::DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Texture &texture,uint32_t layerId)
-{
-	Lua::PushBool(l,hDescSet.GetDescriptorSet()->SetBindingTexture(texture,bindingIdx,layerId));
-}
-void Lua::Vulkan::VKDescriptorSet::SetBindingArrayTexture(lua_State *l,DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Texture &texture,uint32_t arrayIdx,uint32_t layerId)
-{
-	Lua::PushBool(l,hDescSet.GetDescriptorSet()->SetBindingArrayTexture(texture,bindingIdx,arrayIdx,layerId));
-}
-void Lua::Vulkan::VKDescriptorSet::SetBindingArrayTexture(lua_State *l,DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Texture &texture,uint32_t arrayIdx)
-{
-	Lua::PushBool(l,hDescSet.GetDescriptorSet()->SetBindingArrayTexture(texture,bindingIdx,arrayIdx));
-}
-void Lua::Vulkan::VKDescriptorSet::SetBindingStorageBuffer(lua_State *l,DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Buffer &buffer,uint32_t startOffset,uint32_t size)
-{
-	Lua::PushBool(l,hDescSet.GetDescriptorSet()->SetBindingStorageBuffer(buffer,bindingIdx,startOffset,(size != std::numeric_limits<uint32_t>::max()) ? static_cast<uint64_t>(size) : std::numeric_limits<uint64_t>::max()));
-}
-void Lua::Vulkan::VKDescriptorSet::SetBindingUniformBuffer(lua_State *l,DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Buffer &buffer,uint32_t startOffset,uint32_t size)
-{
-	Lua::PushBool(l,hDescSet.GetDescriptorSet()->SetBindingUniformBuffer(buffer,bindingIdx,startOffset,(size != std::numeric_limits<uint32_t>::max()) ? static_cast<uint64_t>(size) : std::numeric_limits<uint64_t>::max()));
-}
-void Lua::Vulkan::VKDescriptorSet::SetBindingUniformBufferDynamic(lua_State *l,DescriptorSet &hDescSet,uint32_t bindingIdx,Lua::Vulkan::Buffer &buffer,uint32_t startOffset,uint32_t size)
-{
-	Lua::PushBool(l,hDescSet.GetDescriptorSet()->SetBindingDynamicUniformBuffer(buffer,bindingIdx,startOffset,(size != std::numeric_limits<uint32_t>::max()) ? static_cast<uint64_t>(size) : std::numeric_limits<uint64_t>::max()));
-}
-
-/////////////////////////////////
-
-void Lua::Vulkan::VKMesh::GetVertexBuffer(lua_State *l,pragma::SceneMesh &mesh)
-{
-	auto &vertexBuffer = mesh.GetVertexBuffer();
-	if(vertexBuffer != nullptr)
-		Lua::Push<std::shared_ptr<Buffer>>(l,vertexBuffer);
-}
-void Lua::Vulkan::VKMesh::GetVertexWeightBuffer(lua_State *l,pragma::SceneMesh &mesh)
-{
-	auto &vertexWeightBuffer = mesh.GetVertexBuffer();
-	if(vertexWeightBuffer != nullptr)
-		Lua::Push<std::shared_ptr<Buffer>>(l,vertexWeightBuffer);
-}
-void Lua::Vulkan::VKMesh::GetAlphaBuffer(lua_State *l,pragma::SceneMesh &mesh)
-{
-	auto &alphaBuffer = mesh.GetAlphaBuffer();
-	if(alphaBuffer != nullptr)
-		Lua::Push<std::shared_ptr<Buffer>>(l,alphaBuffer);
-}
-void Lua::Vulkan::VKMesh::GetIndexBuffer(lua_State *l,pragma::SceneMesh &mesh)
-{
-	auto &indexBuffer = mesh.GetIndexBuffer();
-	if(indexBuffer != nullptr)
-		Lua::Push<std::shared_ptr<Buffer>>(l,indexBuffer);
-}
-void Lua::Vulkan::VKMesh::SetVertexBuffer(lua_State*,pragma::SceneMesh &mesh,Buffer &hBuffer)
-{
-	mesh.SetVertexBuffer(hBuffer.shared_from_this());
-}
-void Lua::Vulkan::VKMesh::SetVertexWeightBuffer(lua_State*,pragma::SceneMesh &mesh,Buffer &hBuffer)
-{
-	mesh.SetVertexWeightBuffer(hBuffer.shared_from_this());
-}
-void Lua::Vulkan::VKMesh::SetAlphaBuffer(lua_State*,pragma::SceneMesh &mesh,Buffer &hBuffer)
-{
-	mesh.SetAlphaBuffer(hBuffer.shared_from_this());
-}
-void Lua::Vulkan::VKMesh::SetIndexBuffer(lua_State*,pragma::SceneMesh &mesh,Buffer &hBuffer)
-{
-	mesh.SetIndexBuffer(hBuffer.shared_from_this());
-}
-
-/////////////////////////////////
-
-void Lua::Vulkan::VKRenderTarget::IsValid(lua_State *l,RenderTarget &hRt)
-{
-	Lua::PushBool(l,true);
-}
-void Lua::Vulkan::VKRenderTarget::GetWidth(lua_State *l,RenderTarget &hRt)
+uint32_t Lua::Vulkan::VKRenderTarget::GetWidth(lua_State *l,RenderTarget &hRt)
 {
 	auto extents = hRt.GetTexture().GetImage().GetExtents();
-	Lua::PushInt(l,extents.width);
+	return extents.width;
 }
-void Lua::Vulkan::VKRenderTarget::GetHeight(lua_State *l,RenderTarget &hRt)
+uint32_t Lua::Vulkan::VKRenderTarget::GetHeight(lua_State *l,RenderTarget &hRt)
 {
 	auto extents = hRt.GetTexture().GetImage().GetExtents();
-	Lua::PushInt(l,extents.height);
+	return extents.height;
 }
-void Lua::Vulkan::VKRenderTarget::GetFormat(lua_State *l,RenderTarget &hRt)
+prosper::Format Lua::Vulkan::VKRenderTarget::GetFormat(lua_State *l,RenderTarget &hRt)
 {
-	Lua::PushInt(l,umath::to_integral(hRt.GetTexture().GetImage().GetFormat()));
-}
-void Lua::Vulkan::VKRenderTarget::GetTexture(lua_State *l,RenderTarget &hRt,uint32_t idx)
-{
-	auto *tex = hRt.GetTexture(idx);
-	if(tex == nullptr)
-		return;
-	Lua::Push<std::shared_ptr<Texture>>(l,tex->shared_from_this());
-}
-void Lua::Vulkan::VKRenderTarget::GetRenderPass(lua_State *l,RenderTarget &hRt)
-{
-	Lua::Push<std::shared_ptr<RenderPass>>(l,hRt.GetRenderPass().shared_from_this());
-}
-void Lua::Vulkan::VKRenderTarget::GetFramebuffer(lua_State *l,RenderTarget &hRt)
-{
-	Lua::Push<std::shared_ptr<Framebuffer>>(l,hRt.GetFramebuffer().shared_from_this());
+	return hRt.GetTexture().GetImage().GetFormat();
 }
 
 /////////////////////////////////
 
-void Lua::Vulkan::VKTimestampQuery::IsValid(lua_State *l,TimestampQuery &hTimestampQuery)
+bool Lua::Vulkan::VKTimestampQuery::IsValid(lua_State *l,TimestampQuery &hTimestampQuery)
 {
-	Lua::PushBool(l,true);
+	return true;
 }
-void Lua::Vulkan::VKTimestampQuery::IsResultAvailable(lua_State *l,TimestampQuery &hTimestampQuery)
-{
-	Lua::PushBool(l,hTimestampQuery.IsResultAvailable());
-}
-void Lua::Vulkan::VKTimestampQuery::GetPipelineStage(lua_State *l,TimestampQuery &hTimestampQuery)
-{
-	Lua::PushInt(l,umath::to_integral(hTimestampQuery.GetPipelineStage()));
-}
-void Lua::Vulkan::VKTimestampQuery::Write(lua_State *l,TimestampQuery &hTimestampQuery,CommandBuffer &cmdBuffer)
-{
-	hTimestampQuery.Write(cmdBuffer);
-}
-void Lua::Vulkan::VKTimestampQuery::QueryResult(lua_State *l,TimestampQuery &hTimestampQuery)
+Lua::var<bool,int64_t> Lua::Vulkan::VKTimestampQuery::QueryResult(lua_State *l,TimestampQuery &hTimestampQuery)
 {
 	std::chrono::nanoseconds r;
 	if(hTimestampQuery.QueryResult(r) == false)
-		Lua::PushBool(l,false);
-	else
-		Lua::PushInt(l,r.count());
+		return {luabind::object{l,false}};
+	return {luabind::object{l,r.count()}};
 }
 
 /////////////////////////////////
 
-void Lua::Vulkan::VKTimerQuery::IsValid(lua_State *l,TimerQuery &hTimerQuery)
+bool Lua::Vulkan::VKTimerQuery::IsValid(lua_State *l,TimerQuery &hTimerQuery)
 {
-	Lua::PushBool(l,true);
+	return true;
 }
-void Lua::Vulkan::VKTimerQuery::Begin(lua_State*,TimerQuery &hTimerQuery,CommandBuffer &cmdBuffer)
-{
-	hTimerQuery.Begin(cmdBuffer);
-}
-void Lua::Vulkan::VKTimerQuery::End(lua_State*,TimerQuery &hTimerQuery,CommandBuffer &cmdBuffer)
-{
-	hTimerQuery.End(cmdBuffer);
-}
-void Lua::Vulkan::VKTimerQuery::IsResultAvailable(lua_State *l,TimerQuery &hTimerQuery)
-{
-	Lua::PushBool(l,hTimerQuery.IsResultAvailable());
-}
-void Lua::Vulkan::VKTimerQuery::QueryResult(lua_State *l,TimerQuery &hTimerQuery)
+Lua::var<bool,int64_t> Lua::Vulkan::VKTimerQuery::QueryResult(lua_State *l,TimerQuery &hTimerQuery)
 {
 	std::chrono::nanoseconds r;
 	if(hTimerQuery.QueryResult(r) == false)
-		Lua::PushBool(l,false);
-	else
-		Lua::PushInt(l,r.count());
+		return {luabind::object{l,false}};
+	return {luabind::object{l,r.count()}};
 }

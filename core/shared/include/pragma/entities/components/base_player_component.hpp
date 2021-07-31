@@ -144,7 +144,7 @@ namespace pragma
 		Vector3 m_posView;
 		mutable EntityHandle m_hBasePlayer = {};
 
-		util::WeakHandle<BaseObservableComponent> m_hEntObserverTarget = {};
+		ComponentHandle<BaseObservableComponent> m_hEntObserverTarget = {};
 
 		pragma::NetEventId m_netEvSetObserverTarget = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvApplyViewRotationOffset = pragma::INVALID_NET_EVENT;

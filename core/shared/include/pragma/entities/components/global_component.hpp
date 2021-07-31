@@ -25,7 +25,7 @@ namespace pragma
 		const std::string &GetGlobalName() const;
 		void SetGlobalName(const std::string &name);
 
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	protected:
 		std::string m_globalName = {};
 	};

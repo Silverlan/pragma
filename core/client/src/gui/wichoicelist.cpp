@@ -29,24 +29,24 @@ void WIChoiceList::Initialize()
 	m_text->SetAutoCenterToParent(true);
 	m_buttonPrev = CreateChild<WIButton>();
 	WIHandle hChoiceList = GetHandle();
-	auto *buttonPrev = m_buttonPrev.get<WIButton>();
+	auto *buttonPrev = static_cast<WIButton*>(m_buttonPrev.get());
 	buttonPrev->SetText("<");
-	buttonPrev->AddCallback("OnPressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hChoiceList](util::EventReply *reply) -> CallbackReturnType {
+	buttonPrev->AddCallback("OnPressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hChoiceList](util::EventReply *reply) mutable -> CallbackReturnType {
 		*reply = util::EventReply::Handled;
 		if(!hChoiceList.IsValid())
 			return CallbackReturnType::HasReturnValue;
-		hChoiceList.get<WIChoiceList>()->SelectPrevious();
+		static_cast<WIChoiceList*>(hChoiceList.get())->SelectPrevious();
 		return CallbackReturnType::HasReturnValue;
 	}));
 
 	m_buttonNext = CreateChild<WIButton>();
-	auto *buttonNext = m_buttonNext.get<WIButton>();
+	auto *buttonNext = static_cast<WIButton*>(m_buttonNext.get());
 	buttonNext->SetText(">");
-	buttonNext->AddCallback("OnPressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hChoiceList](util::EventReply *reply) -> CallbackReturnType {
+	buttonNext->AddCallback("OnPressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hChoiceList](util::EventReply *reply) mutable -> CallbackReturnType {
 		*reply = util::EventReply::Handled;
 		if(!hChoiceList.IsValid())
 			return CallbackReturnType::HasReturnValue;
-		hChoiceList.get<WIChoiceList>()->SelectNext();
+		static_cast<WIChoiceList*>(hChoiceList.get())->SelectNext();
 		return CallbackReturnType::HasReturnValue;
 	}));
 }
@@ -64,12 +64,12 @@ void WIChoiceList::SetSize(int x,int y)
 	WIBase::SetSize(x,y);
 	if(m_buttonPrev.IsValid())
 	{
-		auto *buttonPrev = m_buttonPrev.get<WIButton>();
+		auto *buttonPrev = static_cast<WIButton*>(m_buttonPrev.get());
 		buttonPrev->SetSize(y,y);
 	}
 	if(m_buttonNext.IsValid())
 	{
-		auto *buttonNext = m_buttonNext.get<WIButton>();
+		auto *buttonNext = static_cast<WIButton*>(m_buttonNext.get());
 		buttonNext->SetSize(y,y);
 		buttonNext->SetX(x -buttonNext->GetWidth());
 	}
@@ -106,7 +106,7 @@ void WIChoiceList::SelectChoice(UInt ichoice)
 	m_selected = ichoice;
 	if(!m_text.IsValid())
 		return;
-	auto *pText = m_text.get<WIText>();
+	auto *pText = static_cast<WIText*>(m_text.get());
 	auto &choice = m_choices[ichoice];
 	pText->SetText(choice.choice);
 	pText->SizeToContents();

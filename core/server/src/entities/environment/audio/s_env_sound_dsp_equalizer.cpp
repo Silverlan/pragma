@@ -58,7 +58,7 @@ void SSoundDspEqualizerComponent::SendData(NetPacket &packet,networking::ClientR
 	packet->Write<float>(m_highGain);
 	packet->Write<float>(m_highCutoff);
 }
-luabind::object SSoundDspEqualizerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SSoundDspEqualizerComponentHandleWrapper>(l);}
+void SSoundDspEqualizerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 /////////////////
 

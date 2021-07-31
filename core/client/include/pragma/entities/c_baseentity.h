@@ -39,15 +39,16 @@ public:
 
 	CBaseEntity();
 	void Construct(unsigned int idx,unsigned int clientIdx);
+	virtual void InitializeLuaObject(lua_State *lua) override;
 
-	virtual util::WeakHandle<pragma::BaseAnimatedComponent> GetAnimatedComponent() const override;
-	virtual util::WeakHandle<pragma::BaseWeaponComponent> GetWeaponComponent() const override;
-	virtual util::WeakHandle<pragma::BaseVehicleComponent> GetVehicleComponent() const override;
-	virtual util::WeakHandle<pragma::BaseAIComponent> GetAIComponent() const override;
-	virtual util::WeakHandle<pragma::BaseCharacterComponent> GetCharacterComponent() const override;
-	virtual util::WeakHandle<pragma::BasePlayerComponent> GetPlayerComponent() const override;
-	virtual util::WeakHandle<pragma::BaseTimeScaleComponent> GetTimeScaleComponent() const override;
-	virtual util::WeakHandle<pragma::BaseNameComponent> GetNameComponent() const override;
+	virtual pragma::ComponentHandle<pragma::BaseAnimatedComponent> GetAnimatedComponent() const override;
+	virtual pragma::ComponentHandle<pragma::BaseWeaponComponent> GetWeaponComponent() const override;
+	virtual pragma::ComponentHandle<pragma::BaseVehicleComponent> GetVehicleComponent() const override;
+	virtual pragma::ComponentHandle<pragma::BaseAIComponent> GetAIComponent() const override;
+	virtual pragma::ComponentHandle<pragma::BaseCharacterComponent> GetCharacterComponent() const override;
+	virtual pragma::ComponentHandle<pragma::BasePlayerComponent> GetPlayerComponent() const override;
+	virtual pragma::ComponentHandle<pragma::BaseTimeScaleComponent> GetTimeScaleComponent() const override;
+	virtual pragma::ComponentHandle<pragma::BaseNameComponent> GetNameComponent() const override;
 	virtual bool IsCharacter() const override;
 	virtual bool IsPlayer() const override;
 	virtual bool IsWeapon() const override;

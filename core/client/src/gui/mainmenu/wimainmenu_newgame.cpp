@@ -42,7 +42,7 @@ void WIMainMenuNewGame::OnStartGame(GLFW::MouseButton button,GLFW::KeyState stat
 {
 	if(button != GLFW::MouseButton::Left || state != GLFW::KeyState::Press)
 		return;
-	auto *pOptionsList = m_hControlSettings.get<WIOptionsList>();
+	auto *pOptionsList = static_cast<WIOptionsList*>(m_hControlSettings.get());
 	std::string map;
 	std::string serverName;
 	std::string gameMode;
@@ -50,27 +50,27 @@ void WIMainMenuNewGame::OnStartGame(GLFW::MouseButton button,GLFW::KeyState stat
 	UInt32 maxPlayers = 1;
 	if(m_hMapList.IsValid())
 	{
-		auto *pMap = m_hMapList.get<WIDropDownMenu>();
+		auto *pMap = static_cast<WIDropDownMenu*>(m_hMapList.get());
 		map = pMap->GetValue();
 	}
 	if(m_hServerName.IsValid())
 	{
-		auto *pServerName = m_hServerName.get<WITextEntry>();
+		auto *pServerName = static_cast<WITextEntry*>(m_hServerName.get());
 		serverName = pServerName->GetText();
 	}
 	if(m_hGameMode.IsValid())
 	{
-		auto *pGameMode = m_hGameMode.get<WIDropDownMenu>();
+		auto *pGameMode = static_cast<WIDropDownMenu*>(m_hGameMode.get());
 		gameMode = pGameMode->GetText();
 	}
 	if(m_hRconPassword.IsValid())
 	{
-		auto *pRconPassword = m_hRconPassword.get<WITextEntry>();
+		auto *pRconPassword = static_cast<WITextEntry*>(m_hRconPassword.get());
 		rconPassword = pRconPassword->GetText();
 	}
 	if(m_hMaxPlayers.IsValid())
 	{
-		auto *pSlider = m_hMaxPlayers.get<WISlider>();
+		auto *pSlider = static_cast<WISlider*>(m_hMaxPlayers.get());
 		maxPlayers = CUInt32(pSlider->GetValue());
 	}
 	if(map.empty())

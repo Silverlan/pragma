@@ -25,7 +25,7 @@ void CButtonComponent::Initialize()
 	if(pRenderComponent)
 		pRenderComponent->SetRenderMode(RenderMode::World);
 }
-luabind::object CButtonComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CButtonComponentHandleWrapper>(l);}
+void CButtonComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 //////////
 

@@ -137,8 +137,8 @@ void WIImageSlideShow::DisplayPreloadedImage()
 	}
 	texPreload = m_blurSet->GetFinalRenderTarget()->GetTexture().shared_from_this();
 
-	auto *pImgPrev = m_hImgPrev.get<WITexturedRect>();
-	auto *pImgNext = m_hImgNext.get<WITexturedRect>();
+	auto *pImgPrev = static_cast<WITexturedRect*>(m_hImgPrev.get());
+	auto *pImgNext = static_cast<WITexturedRect*>(m_hImgNext.get());
 
 	if(m_lastTexture == nullptr)
 		pImgPrev->ClearTexture();
@@ -175,7 +175,7 @@ void WIImageSlideShow::SetImages(const std::vector<std::string> &images)
 		auto tex = c_engine->GetRenderContext().CreateTexture(texCreateInfo,*img,imgViewCreateInfo,samplerCreateInfo);
 		if(tex != nullptr)
 		{
-			auto *pImgNext = m_hImgNext.get<WITexturedRect>();
+			auto *pImgNext = static_cast<WITexturedRect*>(m_hImgNext.get());
 			pImgNext->SetTexture(*tex);
 		}
 	}

@@ -21,7 +21,7 @@ namespace pragma
 	public:
 		CNameComponent(BaseEntity &ent) : BaseNameComponent(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 	};
 };

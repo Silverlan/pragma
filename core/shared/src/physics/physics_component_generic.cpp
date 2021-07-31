@@ -104,7 +104,7 @@ util::TSharedHandle<pragma::physics::IRigidBody> BasePhysicsComponent::CreateRig
 	return body;
 }
 
-util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics::PhysObjCreateInfo &physObjCreateInfo,PhysFlags flags,int32_t rootMeshBoneId)
+PhysObjHandle BasePhysicsComponent::InitializePhysics(const physics::PhysObjCreateInfo &physObjCreateInfo,PhysFlags flags,int32_t rootMeshBoneId)
 {
 	auto &ent = GetEntity();
 	auto mdlComponent = ent.GetModelComponent();
@@ -200,7 +200,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics:
 					bPhys = true;
 					if(m_physObject != nullptr)
 						DestroyPhysicsObject();
-					m_physObject = PhysObj::Create<RigidPhysObj,pragma::physics::IRigidBody&>(*this,*body);
+					m_physObject = util::to_shared_handle<PhysObj>(PhysObj::Create<RigidPhysObj,pragma::physics::IRigidBody&>(*this,*body));
 				}
 				else
 				m_physObject->AddCollisionObject(*body);
@@ -233,7 +233,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics:
 			bPhys = true;
 			if(m_physObject != nullptr)
 				DestroyPhysicsObject();
-			m_physObject = PhysObj::Create<RigidPhysObj,pragma::physics::IRigidBody&>(*this,*body);
+			m_physObject = util::to_shared_handle<PhysObj>(PhysObj::Create<RigidPhysObj,pragma::physics::IRigidBody&>(*this,*body));
 		}
 		else
 			m_physObject->AddCollisionObject(*body);
@@ -517,10 +517,10 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializePhysics(const physics:
 	}
 	InitializePhysObj();
 	OnPhysicsInitialized();
-	return m_physObject;
+	return PhysObjHandle{m_physObject};
 }
 
-util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags flags)
+util::TSharedHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags flags)
 {
 	physics::PhysObjCreateInfo physObjCreateInfo {};
 
@@ -550,17 +550,17 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeModelPhysics(PhysFlags
 		}
 		meshId++;
 	}
-	return InitializePhysics(physObjCreateInfo,flags,meshes.front()->GetBoneParent());
+	return util::claim_shared_handle_ownership(InitializePhysics(physObjCreateInfo,flags,meshes.front()->GetBoneParent()));
 }
 
-util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeBoxControllerPhysics()
+util::TSharedHandle<PhysObj> BasePhysicsComponent::InitializeBoxControllerPhysics()
 {
 	Vector3 min,max;
 	GetCollisionBounds(&min,&max);
 	auto origin = (min +max) /2.f;
 	auto extents = max -min;
 
-	m_physObject = std::shared_ptr<PhysObj>{PhysObj::Create<BoxControllerPhysObj>(*this,extents *0.5f,24)};
+	m_physObject = util::to_shared_handle<PhysObj>(PhysObj::Create<BoxControllerPhysObj>(*this,extents *0.5f,24));
 	if(m_physObject == nullptr)
 		return {};
 	m_physObject->GetCollisionObject()->SetOrigin(-origin);
@@ -572,12 +572,12 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeBoxControllerPhysics()
 	OnPhysicsInitialized();
 	return m_physObject;
 }
-util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeCapsuleControllerPhysics()
+util::TSharedHandle<PhysObj> BasePhysicsComponent::InitializeCapsuleControllerPhysics()
 {
 	Vector3 min,max;
 	GetCollisionBounds(&min,&max);
 
-	m_physObject = std::shared_ptr<PhysObj>{PhysObj::Create<CapsuleControllerPhysObj>(*this,CUInt32(umath::max(max.x -min.x,max.z -min.z)),CUInt32(max.y -min.y),24)};
+	m_physObject = util::to_shared_handle<PhysObj>(PhysObj::Create<CapsuleControllerPhysObj>(*this,CUInt32(umath::max(max.x -min.x,max.z -min.z)),CUInt32(max.y -min.y),24));
 	if(m_physObject == nullptr)
 		return {};
 	m_physicsType = PHYSICSTYPE::CAPSULECONTROLLER;
@@ -592,7 +592,7 @@ void BasePhysicsComponent::ClearAwakeStatus()
 {
 	auto &game = *GetEntity().GetNetworkState()->GetGameState();
 	auto &awakePhysC = game.GetAwakePhysicsComponents();
-	auto it = std::find_if(awakePhysC.begin(),awakePhysC.end(),[this](const util::WeakHandle<pragma::BasePhysicsComponent> &hPhysC) {
+	auto it = std::find_if(awakePhysC.begin(),awakePhysC.end(),[this](const pragma::ComponentHandle<pragma::BasePhysicsComponent> &hPhysC) {
 		return this == hPhysC.get();
 	});
 	if(it == awakePhysC.end())
@@ -605,7 +605,7 @@ void BasePhysicsComponent::OnPhysicsWake(PhysObj*)
 
 	auto &game = *GetEntity().GetNetworkState()->GetGameState();
 	auto &awakePhysC = game.GetAwakePhysicsComponents();
-	auto it = std::find_if(awakePhysC.begin(),awakePhysC.end(),[this](const util::WeakHandle<pragma::BasePhysicsComponent> &hPhysC) {
+	auto it = std::find_if(awakePhysC.begin(),awakePhysC.end(),[this](const pragma::ComponentHandle<pragma::BasePhysicsComponent> &hPhysC) {
 		return this == hPhysC.get();
 	});
 	if(it != awakePhysC.end())
@@ -621,7 +621,7 @@ void BasePhysicsComponent::OnPhysicsSleep(PhysObj*)
 		return;
 	auto &game = *GetEntity().GetNetworkState()->GetGameState();
 	auto &awakePhysC = game.GetAwakePhysicsComponents();
-	auto it = std::find_if(awakePhysC.begin(),awakePhysC.end(),[this](const util::WeakHandle<pragma::BasePhysicsComponent> &hPhysC) {
+	auto it = std::find_if(awakePhysC.begin(),awakePhysC.end(),[this](const pragma::ComponentHandle<pragma::BasePhysicsComponent> &hPhysC) {
 		return this == hPhysC.get();
 	});
 	if(it == awakePhysC.end())
@@ -629,7 +629,7 @@ void BasePhysicsComponent::OnPhysicsSleep(PhysObj*)
 	ClearAwakeStatus();
 }
 
-PhysObj *BasePhysicsComponent::GetPhysicsObject() const {return m_physObject.get();}
+PhysObj *BasePhysicsComponent::GetPhysicsObject() const {return const_cast<PhysObj*>(m_physObject.get());}
 
 void BasePhysicsComponent::InitializePhysObj()
 {
@@ -658,7 +658,7 @@ PhysObj *BasePhysicsComponent::InitializePhysics(pragma::physics::IConvexShape &
 
 	if(m_physObject != NULL)
 		DestroyPhysicsObject();
-	m_physObject = PhysObj::Create<RigidPhysObj,pragma::physics::IRigidBody&>(*this,*body);
+	m_physObject = util::to_shared_handle<PhysObj>(PhysObj::Create<RigidPhysObj,pragma::physics::IRigidBody&>(*this,*body));
 	auto group = GetCollisionFilter();
 	auto mask = GetCollisionFilterMask();
 	if(bDynamic)
@@ -759,7 +759,7 @@ void BasePhysicsComponent::DestroyPhysicsObject()
 
 	m_physObject = nullptr;
 	m_joints.clear();
-	m_physObject = NULL;
+	m_physObject = {};
 	m_physicsType = PHYSICSTYPE::NONE;
 	umath::set_flag(m_stateFlags,StateFlags::Ragdoll,false);
 	GetEntity().RemoveComponent("softbody");

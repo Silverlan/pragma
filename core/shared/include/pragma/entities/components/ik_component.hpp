@@ -26,7 +26,7 @@ namespace pragma
 		bool IsIKControllerEnabled(uint32_t ikControllerId) const;
 		void SetIKEffectorPos(uint32_t ikControllerId,uint32_t effectorIdx,const Vector3 &pos);
 		const Vector3 *GetIKEffectorPos(uint32_t ikControllerId,uint32_t effectorIdx) const;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	protected:
 		struct DLLNETWORK IKTreeInfo
 		{

@@ -44,7 +44,7 @@ int Lua::ents::Client::get_view_model(lua_State *l)
 	auto *vm = c_game->GetViewModel();
 	if(vm == nullptr)
 		return 0;
-	vm->GetEntity().GetLuaObject()->push(l);
+	vm->GetEntity().GetLuaObject().push(l);
 	return 1;
 }
 
@@ -53,7 +53,7 @@ int Lua::ents::Client::get_view_body(lua_State *l)
 	auto *vb = c_game->GetViewBody();
 	if(vb == nullptr)
 		return 0;
-	vb->GetEntity().GetLuaObject()->push(l);
+	vb->GetEntity().GetLuaObject().push(l);
 	return 1;
 }
 

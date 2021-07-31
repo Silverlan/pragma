@@ -121,7 +121,7 @@ CPlayerComponent::~CPlayerComponent()
 		m_cbUnderwaterDsp->Remove();
 }
 
-luabind::object CPlayerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CPlayerHandle>(l);}
+void CPlayerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void CPlayerComponent::OnDeployWeapon(BaseEntity &ent)
 {

@@ -75,7 +75,7 @@ void CSmokeTrailComponent::DestroyParticle()
 		m_hParticle->SetRemoveOnComplete(true);
 	}
 }
-luabind::object CSmokeTrailComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CSmokeTrailComponentHandleWrapper>(l);}
+void CSmokeTrailComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 ////////////
 

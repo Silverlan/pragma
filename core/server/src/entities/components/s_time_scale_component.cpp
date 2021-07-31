@@ -16,7 +16,7 @@ void STimeScaleComponent::Initialize()
 {
 	BaseTimeScaleComponent::Initialize();
 }
-luabind::object STimeScaleComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<STimeScaleComponentHandleWrapper>(l);}
+void STimeScaleComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void STimeScaleComponent::SetTimeScale(float timeScale)
 {

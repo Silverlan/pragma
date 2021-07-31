@@ -359,7 +359,7 @@ void BaseFuncWaterComponent::SimulateBuoyancy() const
 		{
 			if(touchInfo.touch.entity.valid() == false || touchInfo.triggered == false)
 				continue;
-			buoyancySim.Simulate(const_cast<BaseEntity&>(ent),m_liquid,*touchInfo.touch.entity.get(),n,d,m_waterVelocity,m_physSurfaceSim.get());
+			buoyancySim.Simulate(const_cast<BaseEntity&>(ent),m_liquid,const_cast<BaseEntity&>(*touchInfo.touch.entity.get()),n,d,m_waterVelocity,m_physSurfaceSim.get());
 		} // TODO: Trigger has to be higher than max surface height
 	}
 	if(m_physSurfaceSim != nullptr)

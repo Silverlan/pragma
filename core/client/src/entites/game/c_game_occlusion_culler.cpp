@@ -23,7 +23,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(game_occlusion_culler,COcclusionCuller);
 
-luabind::object COcclusionCullerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CShadowManagerComponentHandleWrapper>(l);}
+void COcclusionCullerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void COcclusionCullerComponent::Initialize()
 {

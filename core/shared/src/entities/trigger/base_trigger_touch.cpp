@@ -320,7 +320,7 @@ void BaseTouchComponent::FireEndTouchEvents(TouchInfo &touch,bool isLastTouch)
 
 void BaseTouchComponent::StartTouch(const PhysTouch &touch)
 {
-	BaseEntity *ent = touch.entity.get();
+	BaseEntity *ent = const_cast<BaseEntity*>(touch.entity.get());
 	if(ent == nullptr || IsTouching(*ent))
 		return;
 	auto bFirst = m_touching.empty();
@@ -375,7 +375,7 @@ void CECanTriggerData::HandleReturnValues(lua_State *l)
 void CECanTriggerData::PushArguments(lua_State *l)
 {
 	if(entity != nullptr)
-		entity->GetLuaObject()->push(l);
+		entity->GetLuaObject().push(l);
 	else
 		Lua::PushNil(l);
 }
@@ -388,7 +388,7 @@ CETouchData::CETouchData(BaseEntity &ent)
 void CETouchData::PushArguments(lua_State *l)
 {
 	if(entity != nullptr)
-		entity->GetLuaObject()->push(l);
+		entity->GetLuaObject().push(l);
 	else
 		Lua::PushNil(l);
 }

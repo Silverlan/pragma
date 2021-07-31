@@ -17,7 +17,7 @@ namespace pragma
 	{
 	public:
 		SPlayerSpawnComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 

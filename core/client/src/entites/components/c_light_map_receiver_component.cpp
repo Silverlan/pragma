@@ -80,7 +80,7 @@ void CLightMapReceiverComponent::UpdateLightMapUvData()
 	}
 	UpdateRenderMeshBufferList();
 }
-luabind::object CLightMapReceiverComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CLightMapReceiverComponentHandleWrapper>(l);}
+void CLightMapReceiverComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CLightMapReceiverComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

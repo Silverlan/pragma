@@ -119,7 +119,7 @@ util::EventReply CCameraComponent::HandleEvent(ComponentEventId eventId,Componen
 		UpdateState();
 	return util::EventReply::Unhandled;
 }
-luabind::object CCameraComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CCameraComponentHandleWrapper>(l);}
+void CCameraComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 /////////
 

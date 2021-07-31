@@ -82,7 +82,7 @@ void Animated2Component::MaintainAnimations(double dt)
 	for(auto &animPlayer : m_animationManagers)
 		(*animPlayer)->Advance(dt);
 }
-luabind::object Animated2Component::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<Animated2ComponentHandleWrapper>(l);}
+void Animated2Component::InitializeLuaObject(lua_State *l) {pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void Animated2Component::Save(udm::LinkedPropertyWrapperArg udm) {}
 void Animated2Component::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) {}

@@ -52,7 +52,7 @@ namespace pragma
 		CReflectionProbeComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		bool CaptureIBLReflectionsFromScene(const std::vector<BaseEntity*> *optEntityList=nullptr,bool renderJob=false);
 		bool GenerateIBLReflectionsFromEnvMap(const std::string &envMapFileName);
 		bool GenerateIBLReflectionsFromCubemap(prosper::Texture &cubemap);

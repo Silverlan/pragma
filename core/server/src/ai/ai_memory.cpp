@@ -27,7 +27,7 @@ ai::Memory::Fragment::Fragment()
 
 void ai::Memory::Fragment::Clear()
 {
-	hEntity = {};
+	hEntity = EntityHandle{};
 	occupied = false;
 	lastDistance = std::numeric_limits<float>::max();
 	lastSeen = 0.f;

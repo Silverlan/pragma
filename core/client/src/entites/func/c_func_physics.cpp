@@ -38,7 +38,7 @@ void CFuncPhysicsComponent::OnEntitySpawn()
 {
 	BaseFuncPhysicsComponent::OnEntitySpawn();
 }
-luabind::object CFuncPhysicsComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CFuncPhysicsComponentHandleWrapper>(l);}
+void CFuncPhysicsComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 /////////////
 

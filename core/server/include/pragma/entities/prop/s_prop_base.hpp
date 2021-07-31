@@ -20,7 +20,7 @@ namespace pragma
 	{
 	public:
 		PropComponent(BaseEntity &ent) : BasePropComponent(ent) {}
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 	};

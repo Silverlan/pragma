@@ -111,7 +111,7 @@ namespace pragma
 	public:
 		void _debugSendNavInfo(pragma::SPlayerComponent &pl);
 		void _debugSendScheduleInfo(pragma::SPlayerComponent &pl,std::shared_ptr<DebugBehaviorTreeNode> &dbgTree,std::shared_ptr<ai::Schedule> &aiSchedule,float &tLastSchedUpdate);
-		static std::vector<util::WeakHandle<pragma::SPlayerComponent>> s_plDebugAiNav;
+		static std::vector<ComponentHandle<pragma::SPlayerComponent>> s_plDebugAiNav;
 	private:
 		static std::vector<SAIComponent*> s_npcs;
 		static FactionManager s_factionManager;
@@ -318,7 +318,7 @@ namespace pragma
 		void Listen(std::vector<TargetInfo> &targets);
 		void SelectPrimaryTarget();
 		void OnPrePhysicsSimulate();
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 		virtual void OnPrimaryTargetChanged(const ai::Memory::Fragment *memFragment);
 		virtual void OnPathChanged() override;

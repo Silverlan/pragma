@@ -57,7 +57,7 @@ void SLightSpotComponent::SetInnerCutoffAngle(float ang)
 	server->SendPacket("env_light_spot_innercutoff_angle",p,pragma::networking::Protocol::SlowReliable);
 }
 
-luabind::object SLightSpotComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SLightSpotComponentHandleWrapper>(l);}
+void SLightSpotComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void SLightSpotComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {

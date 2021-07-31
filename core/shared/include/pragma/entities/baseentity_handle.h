@@ -7,9 +7,9 @@
 #ifndef __BASEENTITY_HANDLE_H__
 #define __BASEENTITY_HANDLE_H__
 
-#include <sharedutils/util_weak_handle.hpp>
+#include <sharedutils/util_shared_handle.hpp>
 
 class BaseEntity;
-using EntityHandle = util::WeakHandle<BaseEntity>;
+using EntityHandle = util::TWeakSharedHandle<BaseEntity>;
 
 #endif

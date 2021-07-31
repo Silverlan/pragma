@@ -22,7 +22,7 @@ class DLLSERVER SBaseEntity
 {
 public:
 	SBaseEntity();
-	virtual util::WeakHandle<pragma::BaseEntityComponent> AddNetworkedComponent(const std::string &name) override;
+	virtual pragma::ComponentHandle<pragma::BaseEntityComponent> AddNetworkedComponent(const std::string &name) override;
 protected:
 	bool m_bShared;
 	Bool m_bSynchronized;
@@ -34,6 +34,7 @@ public:
 
 	virtual void Remove() override;
 	virtual void Initialize() override;
+	virtual void InitializeLuaObject(lua_State *lua) override;
 	virtual void SendSnapshotData(NetPacket &packet,pragma::BasePlayerComponent &pl);
 	virtual void SendData(NetPacket &packet,pragma::networking::ClientRecipientFilter &rp);
 	bool IsShared() const;
@@ -49,14 +50,14 @@ public:
 	Bool IsSynchronized() const;
 	void SetSynchronized(Bool b);
 
-	virtual util::WeakHandle<pragma::BaseAnimatedComponent> GetAnimatedComponent() const override;
-	virtual util::WeakHandle<pragma::BaseWeaponComponent> GetWeaponComponent() const override;
-	virtual util::WeakHandle<pragma::BaseVehicleComponent> GetVehicleComponent() const override;
-	virtual util::WeakHandle<pragma::BaseAIComponent> GetAIComponent() const override;
-	virtual util::WeakHandle<pragma::BaseCharacterComponent> GetCharacterComponent() const override;
-	virtual util::WeakHandle<pragma::BasePlayerComponent> GetPlayerComponent() const override;
-	virtual util::WeakHandle<pragma::BaseTimeScaleComponent> GetTimeScaleComponent() const override;
-	virtual util::WeakHandle<pragma::BaseNameComponent> GetNameComponent() const override;
+	virtual pragma::ComponentHandle<pragma::BaseAnimatedComponent> GetAnimatedComponent() const override;
+	virtual pragma::ComponentHandle<pragma::BaseWeaponComponent> GetWeaponComponent() const override;
+	virtual pragma::ComponentHandle<pragma::BaseVehicleComponent> GetVehicleComponent() const override;
+	virtual pragma::ComponentHandle<pragma::BaseAIComponent> GetAIComponent() const override;
+	virtual pragma::ComponentHandle<pragma::BaseCharacterComponent> GetCharacterComponent() const override;
+	virtual pragma::ComponentHandle<pragma::BasePlayerComponent> GetPlayerComponent() const override;
+	virtual pragma::ComponentHandle<pragma::BaseTimeScaleComponent> GetTimeScaleComponent() const override;
+	virtual pragma::ComponentHandle<pragma::BaseNameComponent> GetNameComponent() const override;
 	virtual bool IsCharacter() const override;
 	virtual bool IsPlayer() const override;
 	virtual bool IsWeapon() const override;

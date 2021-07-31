@@ -91,7 +91,7 @@ void CAIComponent::ReceiveSnapshotData(NetPacket &packet)
 			m_moveInfo.faceTarget = nullptr;
 	}
 }
-luabind::object CAIComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CAIHandle>(l);}
+void CAIComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CAIComponent>(l);}
 
 void CAIComponent::ReceiveData(NetPacket &packet)
 {

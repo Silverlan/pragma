@@ -90,7 +90,7 @@ void BaseAIComponent::ClearLookTarget()
 		return;
 	m_neckInfo.lookTargetType = BaseAIComponent::LookTargetType::None;
 	m_neckInfo.lookTarget = {};
-	m_neckInfo.hEntityLookTarget = {};
+	m_neckInfo.hEntityLookTarget = EntityHandle{};
 	m_neckInfo.lookTime = std::numeric_limits<float>::max();
 	OnLookTargetChanged();
 }
@@ -101,7 +101,7 @@ void BaseAIComponent::SetLookTarget(const Vector3 &pos,float t)
 		return;
 	m_neckInfo.lookTargetType = BaseAIComponent::LookTargetType::Position;
 	m_neckInfo.lookTarget = pos;
-	m_neckInfo.hEntityLookTarget = {};
+	m_neckInfo.hEntityLookTarget = EntityHandle{};
 
 	OnLookTargetChanged();
 }

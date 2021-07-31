@@ -41,7 +41,7 @@ namespace pragma
 
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual void Initialize() override;
 

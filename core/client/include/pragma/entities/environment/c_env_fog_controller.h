@@ -29,7 +29,7 @@ namespace pragma
 		virtual void SetFogStart(float start) override;
 		virtual void SetFogEnd(float end) override;
 		virtual void SetMaxDensity(float density) override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual void OnEntitySpawn() override;
 	protected:

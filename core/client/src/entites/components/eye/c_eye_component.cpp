@@ -25,7 +25,7 @@ void CEyeComponent::RegisterEvents(pragma::EntityComponentManager &componentMana
 	// EVENT_ON_EYEBALLS_UPDATED = componentManager.RegisterEvent("ON_EYEBALLS_UPDATED",std::type_index(typeid(CEyeComponent)));
 	// EVENT_ON_BLINK = componentManager.RegisterEvent("EVENT_ON_BLINK");
 }
-luabind::object CEyeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CEyeComponentHandleWrapper>(l);}
+void CEyeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 CEyeComponent::CEyeComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_stateFlags{StateFlags::BlinkingEnabled | StateFlags::PrevBlinkToggle}

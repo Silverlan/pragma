@@ -29,7 +29,7 @@ void SRenderTargetComponent::SendData(NetPacket &packet,networking::ClientRecipi
 	packet->Write<int>(m_kvRenderDepth);
 }
 
-luabind::object SRenderTargetComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SRenderTargetComponentHandleWrapper>(l);}
+void SRenderTargetComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void PointRenderTarget::Initialize()
 {

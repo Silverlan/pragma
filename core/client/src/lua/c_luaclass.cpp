@@ -67,7 +67,7 @@
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 {
 	auto &modEngine = lua.RegisterLibrary("engine");
@@ -239,7 +239,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 
 	auto defShaderInfo = luabind::class_<util::ShaderInfo>("Info");
 	//defShaderInfo.def("GetID",&Lua_ShaderInfo_GetID);
-	defShaderInfo.def("GetName",&Lua_ShaderInfo_GetName);
+	defShaderInfo.def("GetName",&::util::ShaderInfo::GetIdentifier);
 	modShader[defShaderInfo];
 
 	auto defShader = luabind::class_<prosper::Shader>("Shader");
@@ -376,7 +376,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 		auto *ent = shader.GetBoundEntity();
 		if(ent == nullptr)
 			return;
-		ent->GetLuaObject()->push(l);
+		ent->GetLuaObject().push(l);
 	}));
 	modShader[defShaderEntity];
 
@@ -780,7 +780,7 @@ void CGame::RegisterLuaClasses()
 	}),static_cast<void(*)(lua_State*,::util::DrawSceneInfo&,luabind::object)>([](lua_State *l,::util::DrawSceneInfo &drawSceneInfo,luabind::object o) {
 		if(Lua::IsSet(l,2) == false)
 		{
-			drawSceneInfo.scene = {};
+			drawSceneInfo.scene = decltype(drawSceneInfo.scene){};
 			return;
 		}
 		auto &scene = Lua::Check<CSceneHandle>(l,2);
@@ -830,7 +830,7 @@ void CGame::RegisterLuaClasses()
 		drawSceneInfo.renderFilter = [f,l](CBaseEntity &ent) -> bool {
 			auto r = Lua::CallFunction(l,[&f,&ent](lua_State *l) {
 				f.push(l);
-				ent.GetLuaObject()->push(l);
+				ent.GetLuaObject().push(l);
 				return Lua::StatusCode::Ok;
 				},1);
 			if(r == Lua::StatusCode::Ok)
@@ -847,7 +847,7 @@ void CGame::RegisterLuaClasses()
 		drawSceneInfo.prepassFilter = [f,l](CBaseEntity &ent) -> bool {
 			auto r = Lua::CallFunction(l,[&f,&ent](lua_State *l) {
 				f.push(l);
-				ent.GetLuaObject()->push(l);
+				ent.GetLuaObject().push(l);
 				return Lua::StatusCode::Ok;
 				},1);
 			if(r == Lua::StatusCode::Ok)
@@ -1093,3 +1093,4 @@ void CGame::RegisterLuaClasses()
 	Lua::WorldEnvironment::register_class(worldEnvClassDef);
 	modGame[worldEnvClassDef];
 }
+#pragma optimize("",on)

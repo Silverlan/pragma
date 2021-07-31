@@ -31,7 +31,7 @@ Bool SShooterComponent::ReceiveNetEvent(pragma::BasePlayerComponent &pl,pragma::
 		return false;
 	return true;
 }
-luabind::object SShooterComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SShooterComponentHandleWrapper>(l);}
+void SShooterComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void SShooterComponent::FireBullets(const BulletInfo &bulletInfo,const std::function<bool(DamageInfo&,BaseEntity*)> &fCallback,std::vector<TraceResult> &outHitTargets,bool bMaster)
 {
 	DamageInfo dmg;

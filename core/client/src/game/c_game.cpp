@@ -151,7 +151,7 @@ namespace pragma::rendering {class LightingStageRenderProcessor; class DepthStag
 static auto cvWorkerThreadCount = GetClientConVar("render_queue_worker_thread_count");
 CGame::CGame(NetworkState *state)
 	: Game(state),
-	m_tServer(0),m_renderScene(NULL),
+	m_tServer(0),m_renderScene({}),
 	m_matOverride(NULL),m_colScale(1,1,1,1),
 	//m_shaderOverride(NULL), // prosper TODO
 	m_matLoad(),m_scene(nullptr),
@@ -338,11 +338,11 @@ void CGame::OnRemove()
 			continue;
 		ent->Remove();
 	}
-	m_listener = {};
-	m_worldComponent = {};
-	m_plLocal = {};
-	m_viewModel = {};
-	m_viewBody = {};
+	m_listener = decltype(m_listener){};
+	m_worldComponent = decltype(m_worldComponent){};
+	m_plLocal = decltype(m_plLocal){};
+	m_viewModel = decltype(m_viewModel){};
+	m_viewBody = decltype(m_viewBody){};
 
 	c_engine->ClearLuaKeyMappings();
 
@@ -701,7 +701,7 @@ Mat4 CGame::GetViewModelProjectionMatrix() const
 pragma::CCameraComponent *CGame::CreateCamera(float aspectRatio,float fov,float nearZ,float farZ)
 {
 	auto *cam = CreateEntity<CEnvCamera>();
-	auto whCamComponent = cam ? cam->GetComponent<pragma::CCameraComponent>() : util::WeakHandle<pragma::CCameraComponent>{};
+	auto whCamComponent = cam ? cam->GetComponent<pragma::CCameraComponent>() : pragma::ComponentHandle<pragma::CCameraComponent>{};
 	if(whCamComponent.expired())
 	{
 		if(cam)
@@ -834,9 +834,9 @@ pragma::CCameraComponent *CGame::GetRenderCamera() const
 {
 	if(m_renderScene.expired())
 		return nullptr;
-	return m_renderScene->GetActiveCamera().get();
+	return const_cast<pragma::CCameraComponent*>(m_renderScene->GetActiveCamera().get());
 }
-pragma::CCameraComponent *CGame::GetPrimaryCamera() const {return m_primaryCamera.get();}
+pragma::CCameraComponent *CGame::GetPrimaryCamera() const {return const_cast<pragma::CCameraComponent*>(m_primaryCamera.get());}
 
 void CGame::SetMaterialOverride(Material *mat) {m_matOverride = mat;}
 Material *CGame::GetMaterialOverride() {return m_matOverride;}
@@ -872,7 +872,7 @@ WIBase *CGame::CreateGUIElement(std::string className,WIBase *parent)
 			Con::csv<<"WARNING: Unable to create lua GUI Element '"<<className<<"'!"<<Con::endl;
 			return nullptr;
 		}
-		if(luabind::object_cast_nothrow<WILuaHandle*>(r,static_cast<WILuaHandle*>(nullptr)))
+		if(luabind::object_cast_nothrow<WILuaBase*>(r,static_cast<WILuaBase*>(nullptr)))
 		{
 			el = new WILuaBase(r,className);
 			gui.Setup<WILuaBase>(*el,parent);
@@ -1185,19 +1185,19 @@ std::shared_ptr<ModelSubMesh> CGame::CreateModelSubMesh() const {return std::mak
 Float CGame::GetHDRExposure() const
 {
 	auto *renderer = m_scene->GetRenderer();
-	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent>{};
 	return raster.valid() ? raster->GetHDRExposure() : 0.f;
 }
 Float CGame::GetMaxHDRExposure() const
 {
 	auto *renderer = m_scene->GetRenderer();
-	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent>{};
 	return raster.valid() ? raster->GetMaxHDRExposure() : 0.f;
 }
 void CGame::SetMaxHDRExposure(Float exposure)
 {
 	auto *renderer = m_scene->GetRenderer();
-	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent>{};
 	if(raster.expired())
 		return;
 	raster->SetMaxHDRExposure(exposure);
@@ -1300,7 +1300,7 @@ void CGame::InitializeWorldData(pragma::asset::WorldData &worldData)
 			if(lightmapAtlas != nullptr)
 			{
 				auto *entWorld = c_game->GetWorld();
-				auto lightMapC = entWorld ? entWorld->GetEntity().GetComponent<pragma::CLightMapComponent>() : util::WeakHandle<pragma::CLightMapComponent>{};
+				auto lightMapC = entWorld ? entWorld->GetEntity().GetComponent<pragma::CLightMapComponent>() : pragma::ComponentHandle<pragma::CLightMapComponent>{};
 				if(lightMapC.valid())
 					pragma::CRasterizationRendererComponent::UpdateLightmap(*lightMapC);
 			}

@@ -40,7 +40,7 @@ void CPropPhysicsComponent::OnEntityComponentAdded(BaseEntityComponent &componen
 	}*/
 }
 
-luabind::object CPropPhysicsComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CPropPhysicsComponentHandleWrapper>(l);}
+void CPropPhysicsComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 //////////////////
 

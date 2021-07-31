@@ -17,7 +17,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_fire,EnvFire);
 
-luabind::object SFireComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SFireComponentHandleWrapper>(l);}
+void SFireComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void EnvFire::Initialize()
 {

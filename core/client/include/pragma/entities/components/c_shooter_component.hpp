@@ -24,7 +24,7 @@ namespace pragma
 		virtual void FireBullets(const BulletInfo &bulletInfo,std::vector<TraceResult> &outHitTargets,bool bMaster=true) override final;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override {}
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 	protected:
 		void FireBullets(const BulletInfo &bulletInfo,const Vector3 &origin,const Vector3 &effectsOrigins,const std::vector<Vector3> &destPositions,bool bTransmitToServer,std::vector<TraceResult> &outHitTargets);

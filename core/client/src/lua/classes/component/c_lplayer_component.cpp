@@ -22,35 +22,34 @@ namespace Lua
 	{
 		namespace Client
 		{
-			static void GetViewOffset(lua_State *l,CPlayerHandle &hPl);
-			static void SetViewOffset(lua_State *l,CPlayerHandle &hPl,const Vector3 &offset);
-			static void IsInFirstPersonMode(lua_State *l,CPlayerHandle &hPl);
+			static void GetViewOffset(lua_State *l,pragma::CPlayerComponent &hPl);
+			static void SetViewOffset(lua_State *l,pragma::CPlayerComponent &hPl,const Vector3 &offset);
+			static void IsInFirstPersonMode(lua_State *l,pragma::CPlayerComponent &hPl);
 		};
 	};
 };
 void Lua::register_cl_player_component(lua_State *l,luabind::module_ &module)
 {
-	auto def = luabind::class_<CPlayerHandle,BaseEntityComponentHandle>("PlayerComponent");
-	Lua::register_base_player_component_methods<luabind::class_<CPlayerHandle,BaseEntityComponentHandle>,CPlayerHandle>(l,def);
+	auto def = luabind::class_<pragma::CPlayerComponent,pragma::BasePlayerComponent>("PlayerComponent");
 	def.def("SetViewOffset",&Lua::Player::Client::SetViewOffset);
 	def.def("GetViewOffset",&Lua::Player::Client::GetViewOffset);
 	def.def("IsInFirstPersonMode",&Lua::Player::Client::IsInFirstPersonMode);
 	module[def];
 }
-void Lua::Player::Client::GetViewOffset(lua_State *l,CPlayerHandle &hPl)
+void Lua::Player::Client::GetViewOffset(lua_State *l,pragma::CPlayerComponent &hPl)
 {
-	pragma::Lua::check_component(l,hPl);
-	Lua::Push<Vector3>(l,hPl->GetViewOffset());
+	
+	Lua::Push<Vector3>(l,hPl.GetViewOffset());
 }
 
-void Lua::Player::Client::SetViewOffset(lua_State *l,CPlayerHandle &hPl,const Vector3 &offset)
+void Lua::Player::Client::SetViewOffset(lua_State *l,pragma::CPlayerComponent &hPl,const Vector3 &offset)
 {
-	pragma::Lua::check_component(l,hPl);
-	hPl->SetViewOffset(offset);
+	
+	hPl.SetViewOffset(offset);
 }
 
-void Lua::Player::Client::IsInFirstPersonMode(lua_State *l,CPlayerHandle &hPl)
+void Lua::Player::Client::IsInFirstPersonMode(lua_State *l,pragma::CPlayerComponent &hPl)
 {
-	pragma::Lua::check_component(l,hPl);
-	Lua::PushBool(l,hPl->IsInFirstPersonMode());
+	
+	Lua::PushBool(l,hPl.IsInFirstPersonMode());
 }

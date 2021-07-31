@@ -356,7 +356,7 @@ void CGame::RegisterLua()
 	RegisterLuaGameClasses(gameMod);
 
 	// Needs to be registered AFTER RegisterLuaGameClasses has been called!
-	auto defEntCmp = luabind::class_<BaseLuaBaseEntityHandle,luabind::bases<BaseEntityComponentHandle>,luabind::default_holder,LuaBaseEntityComponentWrapper>("BaseEntityComponent");
+	/*auto defEntCmp = luabind::class_<BaseLuaBaseEntityHandle,luabind::bases<BaseEntityComponentHandle>,luabind::default_holder,LuaBaseEntityComponentWrapper>("BaseEntityComponent");
 	Lua::register_base_entity_component(defEntCmp);
 	defEntCmp.def("ReceiveData",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,NetPacket)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,NetPacket packet) {
 
@@ -367,7 +367,7 @@ void CGame::RegisterLua()
 	defEntCmp.def("ReceiveSnapshotData",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,NetPacket)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,NetPacket packet) {
 		
 	}));
-	modEnts[defEntCmp];
+	modEnts[defEntCmp];*/
 
 	auto _G = luabind::globals(GetLuaState());
 	_G["BaseEntityComponent"] = _G["ents"]["BaseEntityComponent"];

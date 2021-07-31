@@ -46,7 +46,7 @@ void SSoundDspFlangerComponent::SendData(NetPacket &packet,networking::ClientRec
 	packet->Write<float>(m_kvFeedback);
 	packet->Write<float>(m_kvDelay);
 }
-luabind::object SSoundDspFlangerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SSoundDspFlangerComponentHandleWrapper>(l);}
+void SSoundDspFlangerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 /////////////////
 

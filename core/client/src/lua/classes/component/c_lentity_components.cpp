@@ -21,6 +21,10 @@
 #include <pragma/lua/classes/ldef_color.h>
 #include <pragma/lua/classes/ldef_angle.h>
 #include <pragma/lua/classes/ldef_quaternion.h>
+#include <pragma/lua/policies/game_object_policy.hpp>
+#include <pragma/lua/policies/optional_policy.hpp>
+#include <pragma/lua/policies/shared_from_this_policy.hpp>
+#include <pragma/lua/policies/pair_policy.hpp>
 #include <pragma/model/model.h>
 #include <pragma/physics/raytraces.h>
 #include <pragma/lua/lentity_components_base_types.hpp>
@@ -31,44 +35,45 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <pragma/physics/movetypes.h>
 #include <pragma/lua/lua_call.hpp>
+#include <luabind/copy_policy.hpp>
 #include <image/prosper_render_target.hpp>
 
 namespace Lua
 {
 	namespace PBRConverter
 	{
-		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,Model &mdl,uint32_t width,uint32_t height,uint32_t samples,bool rebuild)
+		static void GenerateAmbientOcclusionMaps(lua_State *l,pragma::CPBRConverterComponent &hComponent,Model &mdl,uint32_t width,uint32_t height,uint32_t samples,bool rebuild)
 		{
-			hComponent->GenerateAmbientOcclusionMaps(mdl,width,height,samples,rebuild);
+			hComponent.GenerateAmbientOcclusionMaps(mdl,width,height,samples,rebuild);
 		}
-		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,Model &mdl,uint32_t width,uint32_t height,uint32_t samples)
+		static void GenerateAmbientOcclusionMaps(lua_State *l,pragma::CPBRConverterComponent &hComponent,Model &mdl,uint32_t width,uint32_t height,uint32_t samples)
 		{
-			hComponent->GenerateAmbientOcclusionMaps(mdl,width,height,samples);
+			hComponent.GenerateAmbientOcclusionMaps(mdl,width,height,samples);
 		}
-		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,Model &mdl,uint32_t width,uint32_t height)
+		static void GenerateAmbientOcclusionMaps(lua_State *l,pragma::CPBRConverterComponent &hComponent,Model &mdl,uint32_t width,uint32_t height)
 		{
-			hComponent->GenerateAmbientOcclusionMaps(mdl,width,height);
+			hComponent.GenerateAmbientOcclusionMaps(mdl,width,height);
 		}
-		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,Model &mdl)
+		static void GenerateAmbientOcclusionMaps(lua_State *l,pragma::CPBRConverterComponent &hComponent,Model &mdl)
 		{
-			hComponent->GenerateAmbientOcclusionMaps(mdl);
+			hComponent.GenerateAmbientOcclusionMaps(mdl);
 		}
 		
-		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,BaseEntity &ent,uint32_t width,uint32_t height,uint32_t samples,bool rebuild)
+		static void GenerateAmbientOcclusionMaps(lua_State *l,pragma::CPBRConverterComponent &hComponent,BaseEntity &ent,uint32_t width,uint32_t height,uint32_t samples,bool rebuild)
 		{
-			hComponent->GenerateAmbientOcclusionMaps(ent,width,height,samples,rebuild);
+			hComponent.GenerateAmbientOcclusionMaps(ent,width,height,samples,rebuild);
 		}
-		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,BaseEntity &ent,uint32_t width,uint32_t height,uint32_t samples)
+		static void GenerateAmbientOcclusionMaps(lua_State *l,pragma::CPBRConverterComponent &hComponent,BaseEntity &ent,uint32_t width,uint32_t height,uint32_t samples)
 		{
-			hComponent->GenerateAmbientOcclusionMaps(ent,width,height,samples);
+			hComponent.GenerateAmbientOcclusionMaps(ent,width,height,samples);
 		}
-		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,BaseEntity &ent,uint32_t width,uint32_t height)
+		static void GenerateAmbientOcclusionMaps(lua_State *l,pragma::CPBRConverterComponent &hComponent,BaseEntity &ent,uint32_t width,uint32_t height)
 		{
-			hComponent->GenerateAmbientOcclusionMaps(ent,width,height);
+			hComponent.GenerateAmbientOcclusionMaps(ent,width,height);
 		}
-		static void GenerateAmbientOcclusionMaps(lua_State *l,CPBRConverterHandle &hComponent,BaseEntity &ent)
+		static void GenerateAmbientOcclusionMaps(lua_State *l,pragma::CPBRConverterComponent &hComponent,BaseEntity &ent)
 		{
-			hComponent->GenerateAmbientOcclusionMaps(ent);
+			hComponent.GenerateAmbientOcclusionMaps(ent);
 		}
 	};
 	namespace ParticleSystem
@@ -129,9 +134,9 @@ namespace Lua
 	};
 	namespace Decal
 	{
-		static void create_from_projection(lua_State *l,CDecalHandle &hComponent,luabind::object tMeshes,const umath::ScaledTransform &pose)
+		static void create_from_projection(lua_State *l,pragma::CDecalComponent &hComponent,luabind::object tMeshes,const umath::ScaledTransform &pose)
 		{
-			pragma::Lua::check_component(l,hComponent);
+			
 			int32_t t = 2;
 			Lua::CheckTable(l,t);
 			std::vector<pragma::DecalProjector::MeshData> meshesDatas {};
@@ -170,18 +175,18 @@ namespace Lua
 
 				Lua::Pop(l,1); /* 0 */
 			}
-			Lua::PushBool(l,hComponent->ApplyDecal(meshesDatas));
+			Lua::PushBool(l,hComponent.ApplyDecal(meshesDatas));
 		}
-		static void create_from_projection(lua_State *l,CDecalHandle &hComponent,luabind::object tMeshes)
+		static void create_from_projection(lua_State *l,pragma::CDecalComponent &hComponent,luabind::object tMeshes)
 		{
 			create_from_projection(l,hComponent,tMeshes,{});
 		}
 	};
 };
 
-static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l,CReflectionProbeHandle &hRp,luabind::table<> tEnts,bool renderJob)
+static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l,pragma::CReflectionProbeComponent &hRp,luabind::table<> tEnts,bool renderJob)
 {
-	pragma::Lua::check_component(l,hRp);
+	
 	std::vector<BaseEntity*> ents {};
 	ents.reserve(Lua::GetObjectLength(l,2));
 	for(auto it=luabind::iterator{tEnts},end=luabind::iterator{};it!=end;++it)
@@ -191,72 +196,48 @@ static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l,CRe
 			return false;
 		ents.push_back(val.get());
 	}
-	return hRp->CaptureIBLReflectionsFromScene(&ents,renderJob);
+	return hRp.CaptureIBLReflectionsFromScene(&ents,renderJob);
 }
-static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l,CReflectionProbeHandle &hRp,luabind::table<> tEnts)
+static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l,pragma::CReflectionProbeComponent &hRp,luabind::table<> tEnts)
 {
 	return reflection_probe_capture_ibl_reflections_from_scene(l,hRp,tEnts,false);
 }
-static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l,CReflectionProbeHandle &hRp,bool renderJob)
+static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l,pragma::CReflectionProbeComponent &hRp,bool renderJob)
 {
-	pragma::Lua::check_component(l,hRp);
-	return hRp->CaptureIBLReflectionsFromScene(nullptr,renderJob);
+	
+	return hRp.CaptureIBLReflectionsFromScene(nullptr,renderJob);
 }
-static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l,CReflectionProbeHandle &hRp)
+static bool reflection_probe_capture_ibl_reflections_from_scene(lua_State *l,pragma::CReflectionProbeComponent &hRp)
 {
-	pragma::Lua::check_component(l,hRp);
-	return hRp->CaptureIBLReflectionsFromScene();
+	
+	return hRp.CaptureIBLReflectionsFromScene();
 }
 
 static void register_renderer_bindings(luabind::module_ &entsMod)
 {
-	auto defRenderer = luabind::class_<CRendererHandle,BaseEntityComponentHandle>("RendererComponent");
-	defRenderer.def("GetWidth",static_cast<uint32_t(*)(lua_State*,CRendererHandle&)>([](lua_State *l,CRendererHandle &renderer) -> uint32_t {
-		pragma::Lua::check_component(l,renderer);
-		return renderer->GetWidth();
-	}));
-	defRenderer.def("GetHeight",static_cast<uint32_t(*)(lua_State*,CRendererHandle&)>([](lua_State *l,CRendererHandle &renderer) -> uint32_t {
-		pragma::Lua::check_component(l,renderer);
-		return renderer->GetHeight();
-	}));
-	defRenderer.def("InitializeRenderTarget", static_cast<void(*)(lua_State*,CRendererHandle&,CSceneHandle&,uint32_t,uint32_t,bool)>([](lua_State *l,CRendererHandle &renderer,CSceneHandle &scene,uint32_t width,uint32_t height,bool reload) {
-		pragma::Lua::check_component(l,renderer);
-		pragma::Lua::check_component(l,scene);
-		if(reload == false && width == renderer->GetWidth() && height == renderer->GetHeight())
+	auto defRenderer = luabind::class_<pragma::CRendererComponent,pragma::BaseEntityComponent>("RendererComponent");
+	defRenderer.def("GetWidth",&pragma::CRendererComponent::GetWidth);
+	defRenderer.def("GetHeight",&pragma::CRendererComponent::GetHeight);
+	defRenderer.def("InitializeRenderTarget", static_cast<void(*)(lua_State*,pragma::CRendererComponent&,pragma::CSceneComponent&,uint32_t,uint32_t,bool)>([](lua_State *l,pragma::CRendererComponent &renderer,pragma::CSceneComponent &scene,uint32_t width,uint32_t height,bool reload) {
+		
+		
+		if(reload == false && width == renderer.GetWidth() && height == renderer.GetHeight())
 			return;
-		renderer->ReloadRenderTarget(*scene.get(),width,height);
+		renderer.ReloadRenderTarget(scene,width,height);
 	}));
-	defRenderer.def("InitializeRenderTarget", static_cast<void(*)(lua_State*,CRendererHandle&,CSceneHandle&,uint32_t,uint32_t)>([](lua_State *l,CRendererHandle &renderer,CSceneHandle &scene,uint32_t width,uint32_t height) {
-		pragma::Lua::check_component(l,renderer);
-		pragma::Lua::check_component(l,scene);
-		if(width == renderer->GetWidth() && height == renderer->GetHeight())
+	defRenderer.def("InitializeRenderTarget", static_cast<void(*)(lua_State*,pragma::CRendererComponent&,pragma::CSceneComponent&,uint32_t,uint32_t)>([](lua_State *l,pragma::CRendererComponent &renderer,pragma::CSceneComponent &scene,uint32_t width,uint32_t height) {
+		
+		
+		if(width == renderer.GetWidth() && height == renderer.GetHeight())
 			return;
-		renderer->ReloadRenderTarget(*scene.get(),width,height);
+		renderer.ReloadRenderTarget(scene,width,height);
 	}));
-	defRenderer.def("GetSceneTexture",static_cast<void(*)(lua_State*,CRendererHandle&)>([](lua_State *l,CRendererHandle &renderer) {
-		pragma::Lua::check_component(l,renderer);
-		auto *tex = renderer->GetSceneTexture();
-		if(tex == nullptr)
-			return;
-		Lua::Push(l,tex->shared_from_this());
-	}));
-	defRenderer.def("GetPresentationTexture",static_cast<void(*)(lua_State*,CRendererHandle&)>([](lua_State *l,CRendererHandle &renderer) {
-		pragma::Lua::check_component(l,renderer);
-		auto *tex = renderer->GetPresentationTexture();
-		if(tex == nullptr)
-			return;
-		Lua::Push(l,tex->shared_from_this());
-	}));
-	defRenderer.def("GetHDRPresentationTexture",static_cast<void(*)(lua_State*,CRendererHandle&)>([](lua_State *l,CRendererHandle &renderer) {
-		pragma::Lua::check_component(l,renderer);
-		auto *tex = renderer->GetHDRPresentationTexture();
-		if(tex == nullptr)
-			return;
-		Lua::Push(l,tex->shared_from_this());
-	}));
+	defRenderer.def("GetSceneTexture",&pragma::CRendererComponent::GetSceneTexture,luabind::shared_from_this_policy<0>{});
+	defRenderer.def("GetPresentationTexture",&pragma::CRendererComponent::GetPresentationTexture,luabind::shared_from_this_policy<0>{});
+	defRenderer.def("GetHDRPresentationTexture",&pragma::CRendererComponent::GetHDRPresentationTexture,luabind::shared_from_this_policy<0>{});
 	entsMod[defRenderer];
 
-	auto defRaster = luabind::class_<CRasterizationRendererHandle,BaseEntityComponentHandle>("RasterizationRendererComponent");
+	auto defRaster = luabind::class_<pragma::CRasterizationRendererComponent,pragma::BaseEntityComponent>("RasterizationRendererComponent");
 	defRaster.add_static_constant("EVENT_ON_RECORD_PREPASS",pragma::CRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS);
 	defRaster.add_static_constant("EVENT_ON_RECORD_LIGHTING_PASS",pragma::CRasterizationRendererComponent::EVENT_ON_RECORD_LIGHTING_PASS);
 	defRaster.add_static_constant("EVENT_PRE_EXECUTE_PREPASS",pragma::CRasterizationRendererComponent::EVENT_PRE_EXECUTE_PREPASS);
@@ -270,141 +251,105 @@ static void register_renderer_bindings(luabind::module_ &entsMod)
 	defRaster.def("GetPrepassDepthTexture",&Lua::RasterizationRenderer::GetPrepassDepthTexture);
 	defRaster.def("GetPrepassNormalTexture",&Lua::RasterizationRenderer::GetPrepassNormalTexture);
 	defRaster.def("GetRenderTarget",&Lua::RasterizationRenderer::GetRenderTarget);
-	defRaster.def("BeginRenderPass",static_cast<void(*)(lua_State*,CRasterizationRendererHandle&,const ::util::DrawSceneInfo&,prosper::IRenderPass&)>(&Lua::RasterizationRenderer::BeginRenderPass));
-	defRaster.def("BeginRenderPass",static_cast<void(*)(lua_State*,CRasterizationRendererHandle&,const ::util::DrawSceneInfo&)>(&Lua::RasterizationRenderer::BeginRenderPass));
-	defRaster.def("EndRenderPass",&Lua::RasterizationRenderer::EndRenderPass);
+	defRaster.def("BeginRenderPass",static_cast<void(*)(lua_State*,pragma::CRasterizationRendererComponent&,const ::util::DrawSceneInfo&,prosper::IRenderPass&)>(&Lua::RasterizationRenderer::BeginRenderPass));
+	defRaster.def("BeginRenderPass",static_cast<void(*)(lua_State*,pragma::CRasterizationRendererComponent&,const ::util::DrawSceneInfo&)>(&Lua::RasterizationRenderer::BeginRenderPass));
+	defRaster.def("EndRenderPass",&pragma::CRasterizationRendererComponent::EndRenderPass);
 	defRaster.def("GetPrepassShader",&Lua::RasterizationRenderer::GetPrepassShader);
-	defRaster.def("SetShaderOverride",&Lua::RasterizationRenderer::SetShaderOverride);
-	defRaster.def("ClearShaderOverride",&Lua::RasterizationRenderer::ClearShaderOverride);
-	defRaster.def("SetPrepassMode",&Lua::RasterizationRenderer::SetPrepassMode);
-	defRaster.def("GetPrepassMode",&Lua::RasterizationRenderer::GetPrepassMode);
-	defRaster.def("SetSSAOEnabled", static_cast<void(*)(lua_State*,CRasterizationRendererHandle&,bool)>([](lua_State *l,CRasterizationRendererHandle &renderer,bool ssaoEnabled) {
-		pragma::Lua::check_component(l,renderer);
-		renderer->SetSSAOEnabled(ssaoEnabled);
-	}));
-	defRaster.def("IsSSAOEnabled", static_cast<void(*)(lua_State*,CRasterizationRendererHandle&)>([](lua_State *l,CRasterizationRendererHandle &renderer) {
-		pragma::Lua::check_component(l,renderer);
-		Lua::PushBool(l,renderer->IsSSAOEnabled());
-	}));
-	defRaster.def("GetLightSourceDescriptorSet", static_cast<void(*)(lua_State*, CRasterizationRendererHandle&)>([](lua_State *l,CRasterizationRendererHandle &renderer) {
-		pragma::Lua::check_component(l,renderer);
+	defRaster.def("SetShaderOverride",&pragma::CRasterizationRendererComponent::SetShaderOverride);
+	defRaster.def("ClearShaderOverride",&pragma::CRasterizationRendererComponent::ClearShaderOverride);
+	defRaster.def("SetPrepassMode",&pragma::CRasterizationRendererComponent::SetPrepassMode);
+	defRaster.def("GetPrepassMode",&pragma::CRasterizationRendererComponent::GetPrepassMode);
+	defRaster.def("SetSSAOEnabled",&pragma::CRasterizationRendererComponent::SetSSAOEnabled);
+	defRaster.def("IsSSAOEnabled", &pragma::CRasterizationRendererComponent::IsSSAOEnabled);
+	defRaster.def("GetLightSourceDescriptorSet", static_cast<void(*)(lua_State*, pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) {
+		
 		auto *ds = pragma::CShadowManagerComponent::GetShadowManager()->GetDescriptorSet();
 		if(ds == nullptr)
 			return;
 		Lua::Push(l,ds->GetDescriptorSetGroup().shared_from_this());
 	}));
-	defRaster.def("GetPostPrepassDepthTexture", static_cast<void(*)(lua_State*, CRasterizationRendererHandle&)>([](lua_State *l,CRasterizationRendererHandle &renderer) {
-		pragma::Lua::check_component(l,renderer);
-		auto &depthTex = renderer->GetPrepass().textureDepth;
+	defRaster.def("GetPostPrepassDepthTexture", static_cast<void(*)(lua_State*, pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) {
+		
+		auto &depthTex = renderer.GetPrepass().textureDepth;
 		if (depthTex == nullptr)
 			return;
 		Lua::Push(l,depthTex);
 	}));
-	defRaster.def("GetPostProcessingDepthDescriptorSet", static_cast<void(*)(lua_State*, CRasterizationRendererHandle&)>([](lua_State *l,CRasterizationRendererHandle &renderer) {
-		pragma::Lua::check_component(l,renderer);
-		auto &depthTex = renderer->GetHDRInfo().dsgDepthPostProcessing;
+	defRaster.def("GetPostProcessingDepthDescriptorSet", static_cast<void(*)(lua_State*, pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) {
+		
+		auto &depthTex = renderer.GetHDRInfo().dsgDepthPostProcessing;
 		if (depthTex == nullptr)
 			return;
 		Lua::Push(l,depthTex);
 	}));
-	defRaster.def("GetPostProcessingHDRColorDescriptorSet",static_cast<void(*)(lua_State*,CRasterizationRendererHandle&)>([](lua_State *l,CRasterizationRendererHandle &renderer) {
-		pragma::Lua::check_component(l,renderer);
-		auto &dsg = renderer->GetHDRInfo().dsgHDRPostProcessing;
+	defRaster.def("GetPostProcessingHDRColorDescriptorSet",static_cast<void(*)(lua_State*,pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) {
+		
+		auto &dsg = renderer.GetHDRInfo().dsgHDRPostProcessing;
 		if(dsg == nullptr)
 			return;
 		Lua::Push(l,dsg);
 	}));
 #if 0
-	defRaster.def("GetStagingRenderTarget",static_cast<void(*)(lua_State*,CRasterizationRendererHandle&)>([](lua_State *l,CRasterizationRendererHandle &renderer) {
-		pragma::Lua::check_component(l,renderer);
-		auto &rt = renderer->GetHDRInfo().hdrPostProcessingRenderTarget;
+	defRaster.def("GetStagingRenderTarget",static_cast<void(*)(lua_State*,pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) {
+		
+		auto &rt = renderer.GetHDRInfo().hdrPostProcessingRenderTarget;
 		if(rt == nullptr)
 			return;
 		Lua::Push(l,rt);
 		}));
-	defRaster.def("BlitStagingRenderTargetToMainRenderTarget",static_cast<void(*)(lua_State*,CRasterizationRendererHandle&,const util::DrawSceneInfo&)>([](lua_State *l,CRasterizationRendererHandle &renderer,const util::DrawSceneInfo &drawSceneInfo) {
-		pragma::Lua::check_component(l,renderer);
-		renderer->GetHDRInfo().BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo);
+	defRaster.def("BlitStagingRenderTargetToMainRenderTarget",static_cast<void(*)(lua_State*,pragma::CRasterizationRendererComponent&,const util::DrawSceneInfo&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer,const util::DrawSceneInfo &drawSceneInfo) {
+		
+		renderer.GetHDRInfo().BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo);
 	}));
 #endif
-	defRaster.def("GetBloomTexture",static_cast<void(*)(lua_State*,CRasterizationRendererHandle&)>([](lua_State *l,CRasterizationRendererHandle &renderer) {
-		pragma::Lua::check_component(l,renderer);
-		auto &rt = renderer->GetHDRInfo().bloomBlurRenderTarget;
+	defRaster.def("GetBloomTexture",static_cast<void(*)(lua_State*,pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) {
+		
+		auto &rt = renderer.GetHDRInfo().bloomBlurRenderTarget;
 		if(rt == nullptr)
 			return;
 		Lua::Push(l,rt->GetTexture().shared_from_this());
 	}));
 #if 0
-	defRaster.def("GetGlowTexture",static_cast<void(*)(lua_State*,CRasterizationRendererHandle&)>([](lua_State *l,CRasterizationRendererHandle &renderer) {
-		pragma::Lua::check_component(l,renderer);
-		auto &rt = renderer->GetGlowInfo().renderTarget;
+	defRaster.def("GetGlowTexture",static_cast<void(*)(lua_State*,pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) {
+		
+		auto &rt = renderer.GetGlowInfo().renderTarget;
 		if(rt == nullptr)
 			return;
 		Lua::Push(l,rt->GetTexture().shared_from_this());
 	}));
 #endif
-	defRaster.def("GetRenderTargetTextureDescriptorSet",static_cast<void(*)(lua_State*,CRasterizationRendererHandle&)>([](lua_State *l,CRasterizationRendererHandle &renderer) {
-		pragma::Lua::check_component(l,renderer);
-		auto &dsg = renderer->GetHDRInfo().dsgHDRPostProcessing;
+	defRaster.def("GetRenderTargetTextureDescriptorSet",static_cast<void(*)(lua_State*,pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) {
+		
+		auto &dsg = renderer.GetHDRInfo().dsgHDRPostProcessing;
 		if(dsg == nullptr)
 			return;
 		Lua::Push(l,dsg);
 	}));
-	defRaster.def("ReloadPresentationRenderTarget",static_cast<void(*)(lua_State*,CRasterizationRendererHandle&)>([](lua_State *l,CRasterizationRendererHandle &renderer) {
-		pragma::Lua::check_component(l,renderer);
-		renderer->ReloadPresentationRenderTarget();
-	}));
+	defRaster.def("ReloadPresentationRenderTarget",&pragma::CRasterizationRendererComponent::ReloadPresentationRenderTarget);
 	defRaster.def("ScheduleMeshForRendering",static_cast<void(*)(
-		lua_State*,CRasterizationRendererHandle&,CSceneHandle&,uint32_t,pragma::ShaderGameWorldLightingPass&,Material&,BaseEntity&,ModelSubMesh&
+		lua_State*,pragma::CRasterizationRendererComponent&,pragma::CSceneComponent&,uint32_t,pragma::ShaderGameWorldLightingPass&,Material&,BaseEntity&,ModelSubMesh&
 	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));
 	defRaster.def("ScheduleMeshForRendering",static_cast<void(*)(
-		lua_State*,CRasterizationRendererHandle&,CSceneHandle&,uint32_t,const std::string&,Material&,BaseEntity&,ModelSubMesh&
+		lua_State*,pragma::CRasterizationRendererComponent&,pragma::CSceneComponent&,uint32_t,const std::string&,Material&,BaseEntity&,ModelSubMesh&
 	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));
 	defRaster.def("ScheduleMeshForRendering",static_cast<void(*)(
-		lua_State*,CRasterizationRendererHandle&,CSceneHandle&,uint32_t,::Material&,BaseEntity&,ModelSubMesh&
+		lua_State*,pragma::CRasterizationRendererComponent&,pragma::CSceneComponent&,uint32_t,::Material&,BaseEntity&,ModelSubMesh&
 	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));
-	defRaster.def("RecordPrepass",static_cast<void(*)(lua_State*,CRasterizationRendererHandle&,const util::DrawSceneInfo&)>([](lua_State *l,CRasterizationRendererHandle &renderer,const util::DrawSceneInfo &drawSceneInfo) {
-		pragma::Lua::check_component(l,renderer);
-		renderer->RecordPrepass(drawSceneInfo);
-	}));
-	defRaster.def("RecordLightingPass",static_cast<void(*)(lua_State*,CRasterizationRendererHandle&,const util::DrawSceneInfo&)>([](lua_State *l,CRasterizationRendererHandle &renderer,const util::DrawSceneInfo &drawSceneInfo) {
-		pragma::Lua::check_component(l,renderer);
-		renderer->RecordLightingPass(drawSceneInfo);
-	}));
-	defRaster.def("ExecutePrepass",static_cast<void(*)(lua_State*,CRasterizationRendererHandle&,const util::DrawSceneInfo&)>([](lua_State *l,CRasterizationRendererHandle &renderer,const util::DrawSceneInfo &drawSceneInfo) {
-		pragma::Lua::check_component(l,renderer);
-		renderer->ExecutePrepass(drawSceneInfo);
-	}));
-	defRaster.def("ExecuteLightingPass",static_cast<void(*)(lua_State*,CRasterizationRendererHandle&,const util::DrawSceneInfo&)>([](lua_State *l,CRasterizationRendererHandle &renderer,const util::DrawSceneInfo &drawSceneInfo) {
-		pragma::Lua::check_component(l,renderer);
-		renderer->ExecuteLightingPass(drawSceneInfo);
-	}));
-	defRaster.def("GetPrepassCommandBufferRecorder",static_cast<std::shared_ptr<prosper::ISwapCommandBufferGroup>(*)(lua_State*,CRasterizationRendererHandle&)>([](lua_State *l,CRasterizationRendererHandle &renderer) -> std::shared_ptr<prosper::ISwapCommandBufferGroup> {
-		pragma::Lua::check_component(l,renderer);
-		return renderer->GetPrepassCommandBufferRecorder();
-	}));
-	defRaster.def("GetShadowCommandBufferRecorder",static_cast<std::shared_ptr<prosper::ISwapCommandBufferGroup>(*)(lua_State*,CRasterizationRendererHandle&)>([](lua_State *l,CRasterizationRendererHandle &renderer) -> std::shared_ptr<prosper::ISwapCommandBufferGroup> {
-		pragma::Lua::check_component(l,renderer);
-		return renderer->GetShadowCommandBufferRecorder();
-	}));
-	defRaster.def("GetLightingPassCommandBufferRecorder",static_cast<std::shared_ptr<prosper::ISwapCommandBufferGroup>(*)(lua_State*,CRasterizationRendererHandle&)>([](lua_State *l,CRasterizationRendererHandle &renderer) -> std::shared_ptr<prosper::ISwapCommandBufferGroup> {
-		pragma::Lua::check_component(l,renderer);
-		return renderer->GetLightingPassCommandBufferRecorder();
-	}));
-	defRaster.def("UpdatePrepassRenderBuffers",static_cast<void(*)(lua_State*,CRasterizationRendererHandle&,const util::DrawSceneInfo&)>([](lua_State *l,CRasterizationRendererHandle &renderer,const util::DrawSceneInfo &drawSceneInfo) {
-		pragma::Lua::check_component(l,renderer);
-		renderer->UpdatePrepassRenderBuffers(drawSceneInfo);
-	}));
-	defRaster.def("UpdateLightingPassRenderBuffers",static_cast<void(*)(lua_State*,CRasterizationRendererHandle&,const util::DrawSceneInfo&)>([](lua_State *l,CRasterizationRendererHandle &renderer,const util::DrawSceneInfo &drawSceneInfo) {
-		pragma::Lua::check_component(l,renderer);
-		renderer->UpdateLightingPassRenderBuffers(drawSceneInfo);
-	}));
+	defRaster.def("RecordPrepass",&pragma::CRasterizationRendererComponent::RecordPrepass);
+	defRaster.def("RecordLightingPass",&pragma::CRasterizationRendererComponent::RecordLightingPass);
+	defRaster.def("ExecutePrepass",&pragma::CRasterizationRendererComponent::ExecutePrepass);
+	defRaster.def("ExecuteLightingPass",&pragma::CRasterizationRendererComponent::ExecuteLightingPass);
+	defRaster.def("GetPrepassCommandBufferRecorder",&pragma::CRasterizationRendererComponent::GetPrepassCommandBufferRecorder,luabind::copy_policy<0>{});
+	defRaster.def("GetShadowCommandBufferRecorder",&pragma::CRasterizationRendererComponent::GetShadowCommandBufferRecorder,luabind::copy_policy<0>{});
+	defRaster.def("GetLightingPassCommandBufferRecorder",&pragma::CRasterizationRendererComponent::GetLightingPassCommandBufferRecorder,luabind::copy_policy<0>{});
+	defRaster.def("UpdatePrepassRenderBuffers",&pragma::CRasterizationRendererComponent::UpdatePrepassRenderBuffers);
+	defRaster.def("UpdateLightingPassRenderBuffers",&pragma::CRasterizationRendererComponent::UpdateLightingPassRenderBuffers);
 	defRaster.add_static_constant("PREPASS_MODE_DISABLED",umath::to_integral(pragma::CRasterizationRendererComponent::PrepassMode::NoPrepass));
 	defRaster.add_static_constant("PREPASS_MODE_DEPTH_ONLY",umath::to_integral(pragma::CRasterizationRendererComponent::PrepassMode::DepthOnly));
 	defRaster.add_static_constant("PREPASS_MODE_EXTENDED",umath::to_integral(pragma::CRasterizationRendererComponent::PrepassMode::Extended));
 	entsMod[defRaster];
 
-	auto defRaytracing = luabind::class_<CRaytracingRendererHandle,BaseEntityComponentHandle>("RaytracingRendererComponent");
+	auto defRaytracing = luabind::class_<pragma::CRaytracingComponent,pragma::BaseEntityComponent>("RaytracingRendererComponent");
 	entsMod[defRaytracing];
 }
 
@@ -418,167 +363,122 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	Lua::register_cl_vehicle_component(l,entsMod);
 	Lua::register_cl_weapon_component(l,entsMod);
 
-	auto defCGamemode = luabind::class_<CGamemodeHandle,BaseEntityComponentHandle>("GamemodeComponent");
-	Lua::register_base_gamemode_component_methods<luabind::class_<CGamemodeHandle,BaseEntityComponentHandle>,CGamemodeHandle>(l,defCGamemode);
+	auto defCGamemode = luabind::class_<pragma::CGamemodeComponent,pragma::BaseGamemodeComponent>("GamemodeComponent");
 	entsMod[defCGamemode];
 
-	auto defCColor = luabind::class_<CColorHandle,BaseEntityComponentHandle>("ColorComponent");
-	Lua::register_base_color_component_methods<luabind::class_<CColorHandle,BaseEntityComponentHandle>,CColorHandle>(l,defCColor);
+	auto defCColor = luabind::class_<pragma::CColorComponent,pragma::BaseColorComponent>("ColorComponent");
 	entsMod[defCColor];
 
-	auto defCScore = luabind::class_<CScoreHandle,BaseEntityComponentHandle>("ScoreComponent");
-	Lua::register_base_score_component_methods<luabind::class_<CScoreHandle,BaseEntityComponentHandle>,CScoreHandle>(l,defCScore);
+	auto defCScore = luabind::class_<pragma::CScoreComponent,pragma::BaseScoreComponent>("ScoreComponent");
 	entsMod[defCScore];
 
-	auto defCFlammable = luabind::class_<CFlammableHandle,BaseEntityComponentHandle>("FlammableComponent");
-	Lua::register_base_flammable_component_methods<luabind::class_<CFlammableHandle,BaseEntityComponentHandle>,CFlammableHandle>(l,defCFlammable);
+	auto defCFlammable = luabind::class_<pragma::CFlammableComponent,pragma::BaseFlammableComponent>("FlammableComponent");
 	entsMod[defCFlammable];
 
-	auto defCHealth = luabind::class_<CHealthHandle,BaseEntityComponentHandle>("HealthComponent");
-	Lua::register_base_health_component_methods<luabind::class_<CHealthHandle,BaseEntityComponentHandle>,CHealthHandle>(l,defCHealth);
+	auto defCHealth = luabind::class_<pragma::CHealthComponent,pragma::BaseHealthComponent>("HealthComponent");
 	entsMod[defCHealth];
 
-	auto defCName = luabind::class_<CNameHandle,BaseEntityComponentHandle>("NameComponent");
-	Lua::register_base_name_component_methods<luabind::class_<CNameHandle,BaseEntityComponentHandle>,CNameHandle>(l,defCName);
+	auto defCName = luabind::class_<pragma::CNameComponent,pragma::BaseNameComponent>("NameComponent");
 	entsMod[defCName];
 
-	auto defCNetworked = luabind::class_<CNetworkedHandle,BaseEntityComponentHandle>("NetworkedComponent");
-	Lua::register_base_networked_component_methods<luabind::class_<CNetworkedHandle,BaseEntityComponentHandle>,CNetworkedHandle>(l,defCNetworked);
+	auto defCNetworked = luabind::class_<pragma::CNetworkedComponent,pragma::BaseNetworkedComponent>("NetworkedComponent");
 	entsMod[defCNetworked];
 
-	auto defCObservable = luabind::class_<CObservableHandle,BaseEntityComponentHandle>("ObservableComponent");
-	Lua::register_base_observable_component_methods<luabind::class_<CObservableHandle,BaseEntityComponentHandle>,CObservableHandle>(l,defCObservable);
+	auto defCObservable = luabind::class_<pragma::CObservableComponent,pragma::BaseObservableComponent>("ObservableComponent");
 	entsMod[defCObservable];
 
-	auto defCShooter = luabind::class_<CShooterHandle,BaseEntityComponentHandle>("ShooterComponent");
-	Lua::register_base_shooter_component_methods<luabind::class_<CShooterHandle,BaseEntityComponentHandle>,CShooterHandle>(l,defCShooter);
+	auto defCShooter = luabind::class_<pragma::CShooterComponent,pragma::BaseShooterComponent>("ShooterComponent");
 	entsMod[defCShooter];
 
-	auto defCPhysics = luabind::class_<CPhysicsHandle,BaseEntityComponentHandle>("PhysicsComponent");
-	Lua::register_base_physics_component_methods<luabind::class_<CPhysicsHandle,BaseEntityComponentHandle>,CPhysicsHandle>(l,defCPhysics);
+	auto defCPhysics = luabind::class_<pragma::CPhysicsComponent,pragma::BasePhysicsComponent>("PhysicsComponent");
 	entsMod[defCPhysics];
 
-	auto defCRadius = luabind::class_<CRadiusHandle,BaseEntityComponentHandle>("RadiusComponent");
-	Lua::register_base_radius_component_methods<luabind::class_<CRadiusHandle,BaseEntityComponentHandle>,CRadiusHandle>(l,defCRadius);
+	auto defCRadius = luabind::class_<pragma::CRadiusComponent,pragma::BaseRadiusComponent>("RadiusComponent");
 	entsMod[defCRadius];
 
-	auto defCWorld = luabind::class_<CWorldHandle,BaseEntityComponentHandle>("WorldComponent");
-	Lua::register_base_world_component_methods<luabind::class_<CWorldHandle,BaseEntityComponentHandle>,CWorldHandle>(l,defCWorld);
-	defCWorld.def("GetBSPTree",static_cast<void(*)(lua_State*,CWorldHandle&)>([](lua_State *l,CWorldHandle &hEnt) {
-		pragma::Lua::check_component(l,hEnt);
-		auto bspTree = hEnt->GetBSPTree();
-		if(bspTree == nullptr)
-			return;
-		Lua::Push(l,bspTree);
-	}));
+	auto defCWorld = luabind::class_<pragma::CWorldComponent,pragma::BaseWorldComponent>("WorldComponent");
+	defCWorld.def("GetBSPTree",&pragma::CWorldComponent::GetBSPTree,luabind::optional_policy<0>{});
 
-	auto defCEye = luabind::class_<CEyeHandle,BaseEntityComponentHandle>("EyeComponent");
-	defCEye.def("GetEyePose",static_cast<void(*)(lua_State*,CEyeHandle&)>([](lua_State *l,CEyeHandle &hEye) {
-		pragma::Lua::check_component(l,hEye);
-		auto eyePose = hEye->GetEyePose();
-		if(!eyePose.has_value())
-			return;
-		Lua::Push<umath::Transform>(l,*eyePose);
-	}));
-	defCEye.def("GetViewTarget",static_cast<void(*)(lua_State*,CEyeHandle&)>([](lua_State *l,CEyeHandle &hEye) {
-		pragma::Lua::check_component(l,hEye);
-		Lua::Push<Vector3>(l,hEye->GetViewTarget());
-		}));
-	defCEye.def("SetViewTarget",static_cast<void(*)(lua_State*,CEyeHandle&,const Vector3&)>([](lua_State *l,CEyeHandle &hEye,const Vector3 &viewTarget) {
-		pragma::Lua::check_component(l,hEye);
-		hEye->SetViewTarget(viewTarget);
-		}));
-	defCEye.def("ClearViewTarget",static_cast<void(*)(lua_State*,CEyeHandle&)>([](lua_State *l,CEyeHandle &hEye) {
-		pragma::Lua::check_component(l,hEye);
-		hEye->ClearViewTarget();
-	}));
-	defCEye.def("GetEyeShift",static_cast<void(*)(lua_State*,CEyeHandle&,uint32_t)>([](lua_State *l,CEyeHandle &hEye,uint32_t eyeIndex) {
-		pragma::Lua::check_component(l,hEye);
-		auto *config = hEye->GetEyeballConfig(eyeIndex);
+	auto defCEye = luabind::class_<pragma::CEyeComponent,pragma::BaseEntityComponent>("EyeComponent");
+	defCEye.def("GetEyePose",&pragma::CEyeComponent::GetEyePose,luabind::optional_policy<0>{});
+	defCEye.def("GetViewTarget",&pragma::CEyeComponent::GetViewTarget);
+	defCEye.def("SetViewTarget",&pragma::CEyeComponent::SetViewTarget);
+	defCEye.def("ClearViewTarget",&pragma::CEyeComponent::ClearViewTarget);
+	defCEye.def("GetEyeShift",static_cast<void(*)(lua_State*,pragma::CEyeComponent&,uint32_t)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex) {
+		
+		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
 			return;
 		Lua::Push<Vector3>(l,config->eyeShift);
 		}));
-	defCEye.def("SetEyeShift",static_cast<void(*)(lua_State*,CEyeHandle&,uint32_t,const Vector3&)>([](lua_State *l,CEyeHandle &hEye,uint32_t eyeIndex,const Vector3 &eyeShift) {
-		pragma::Lua::check_component(l,hEye);
-		auto *config = hEye->GetEyeballConfig(eyeIndex);
+	defCEye.def("SetEyeShift",static_cast<void(*)(lua_State*,pragma::CEyeComponent&,uint32_t,const Vector3&)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex,const Vector3 &eyeShift) {
+		
+		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
 			return;
 		config->eyeShift = eyeShift;
 		}));
-	defCEye.def("GetEyeJitter",static_cast<void(*)(lua_State*,CEyeHandle&,uint32_t)>([](lua_State *l,CEyeHandle &hEye,uint32_t eyeIndex) {
-		pragma::Lua::check_component(l,hEye);
-		auto *config = hEye->GetEyeballConfig(eyeIndex);
+	defCEye.def("GetEyeJitter",static_cast<void(*)(lua_State*,pragma::CEyeComponent&,uint32_t)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex) {
+		
+		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
 			return;
 		Lua::Push<Vector2>(l,config->jitter);
 		}));
-	defCEye.def("SetEyeJitter",static_cast<void(*)(lua_State*,CEyeHandle&,uint32_t,const Vector2&)>([](lua_State *l,CEyeHandle &hEye,uint32_t eyeIndex,const Vector2 &eyeJitter) {
-		pragma::Lua::check_component(l,hEye);
-		auto *config = hEye->GetEyeballConfig(eyeIndex);
+	defCEye.def("SetEyeJitter",static_cast<void(*)(lua_State*,pragma::CEyeComponent&,uint32_t,const Vector2&)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex,const Vector2 &eyeJitter) {
+		
+		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
 			return;
 		config->jitter = eyeJitter;
 		}));
-	defCEye.def("GetEyeSize",static_cast<void(*)(lua_State*,CEyeHandle&,uint32_t)>([](lua_State *l,CEyeHandle &hEye,uint32_t eyeIndex) {
-		pragma::Lua::check_component(l,hEye);
-		auto *config = hEye->GetEyeballConfig(eyeIndex);
+	defCEye.def("GetEyeSize",static_cast<void(*)(lua_State*,pragma::CEyeComponent&,uint32_t)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex) {
+		
+		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
 			return;
 		Lua::PushNumber(l,config->eyeSize);
 		}));
-	defCEye.def("SetEyeSize",static_cast<void(*)(lua_State*,CEyeHandle&,uint32_t,float)>([](lua_State *l,CEyeHandle &hEye,uint32_t eyeIndex,float eyeSize) {
-		pragma::Lua::check_component(l,hEye);
-		auto *config = hEye->GetEyeballConfig(eyeIndex);
+	defCEye.def("SetEyeSize",static_cast<void(*)(lua_State*,pragma::CEyeComponent&,uint32_t,float)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex,float eyeSize) {
+		
+		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
 			return;
 		config->eyeSize = eyeSize;
 		}));
-	defCEye.def("SetIrisDilation",static_cast<void(*)(lua_State*,CEyeHandle&,uint32_t,float)>([](lua_State *l,CEyeHandle &hEye,uint32_t eyeIndex,float dilation) {
-		pragma::Lua::check_component(l,hEye);
-		auto *config = hEye->GetEyeballConfig(eyeIndex);
+	defCEye.def("SetIrisDilation",static_cast<void(*)(lua_State*,pragma::CEyeComponent&,uint32_t,float)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex,float dilation) {
+		
+		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
 			return;
 		config->dilation = dilation;
 		}));
-	defCEye.def("GetIrisDilation",static_cast<void(*)(lua_State*,CEyeHandle&,uint32_t)>([](lua_State *l,CEyeHandle &hEye,uint32_t eyeIndex) {
-		pragma::Lua::check_component(l,hEye);
-		auto *config = hEye->GetEyeballConfig(eyeIndex);
+	defCEye.def("GetIrisDilation",static_cast<void(*)(lua_State*,pragma::CEyeComponent&,uint32_t)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex) {
+		
+		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
 			return;
 		Lua::PushNumber(l,config->dilation);
 		}));
-	defCEye.def("CalcEyeballPose",static_cast<void(*)(lua_State*,CEyeHandle&,uint32_t)>([](lua_State *l,CEyeHandle &hEye,uint32_t eyeIndex) {
-		pragma::Lua::check_component(l,hEye);
+	defCEye.def("CalcEyeballPose",static_cast<void(*)(lua_State*,pragma::CEyeComponent&,uint32_t)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex) {
+		
 		umath::Transform bonePose;
-		auto pose = hEye->CalcEyeballPose(eyeIndex,&bonePose);
+		auto pose = hEye.CalcEyeballPose(eyeIndex,&bonePose);
 		Lua::Push(l,pose);
 		Lua::Push(l,bonePose);
 	}));
-	defCEye.def("GetEyeballState",static_cast<void(*)(lua_State*,CEyeHandle&,uint32_t)>([](lua_State *l,CEyeHandle &hEye,uint32_t eyeIndex) {
-		pragma::Lua::check_component(l,hEye);
-		auto *eyeballData = hEye->GetEyeballData(eyeIndex);
+	defCEye.def("GetEyeballState",static_cast<void(*)(lua_State*,pragma::CEyeComponent&,uint32_t)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex) {
+		
+		auto *eyeballData = hEye.GetEyeballData(eyeIndex);
 		if(eyeballData == nullptr)
 			return;
 		auto &eyeballState = eyeballData->state;
 		Lua::Push<pragma::CEyeComponent::EyeballState*>(l,&eyeballState);
 		}));
-	defCEye.def("SetBlinkDuration",static_cast<void(*)(lua_State*,CEyeHandle&,float)>([](lua_State *l,CEyeHandle &hEye,float blinkDuration) {
-		pragma::Lua::check_component(l,hEye);
-		hEye->SetBlinkDuration(blinkDuration);
-	}));
-	defCEye.def("GetBlinkDuration",static_cast<void(*)(lua_State*,CEyeHandle&)>([](lua_State *l,CEyeHandle &hEye) {
-		pragma::Lua::check_component(l,hEye);
-		Lua::PushNumber(l,hEye->GetBlinkDuration());
-	}));
-	defCEye.def("SetBlinkingEnabled",static_cast<void(*)(lua_State*,CEyeHandle&,bool)>([](lua_State *l,CEyeHandle &hEye,bool blinkingEnabled) {
-		pragma::Lua::check_component(l,hEye);
-		hEye->SetBlinkingEnabled(blinkingEnabled);
-	}));
-	defCEye.def("IsBlinkingEnabled",static_cast<void(*)(lua_State*,CEyeHandle&)>([](lua_State *l,CEyeHandle &hEye) {
-		pragma::Lua::check_component(l,hEye);
-		Lua::PushBool(l,hEye->IsBlinkingEnabled());
-	}));
+	defCEye.def("SetBlinkDuration",&pragma::CEyeComponent::SetBlinkDuration);
+	defCEye.def("GetBlinkDuration",&pragma::CEyeComponent::GetBlinkDuration);
+	defCEye.def("SetBlinkingEnabled",&pragma::CEyeComponent::SetBlinkingEnabled);
+	defCEye.def("IsBlinkingEnabled",&pragma::CEyeComponent::IsBlinkingEnabled);
 
 	auto defEyeballState = luabind::class_<pragma::CEyeComponent::EyeballState>("EyeballState");
 	defEyeballState.def_readwrite("origin",&pragma::CEyeComponent::EyeballState::origin);
@@ -595,7 +495,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 
 	register_renderer_bindings(entsMod);
 
-	auto defCScene = luabind::class_<CSceneHandle,BaseEntityComponentHandle>("SceneComponent");
+	auto defCScene = luabind::class_<pragma::CSceneComponent,pragma::BaseEntityComponent>("SceneComponent");
 	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_BRUTE_FORCE",umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::BruteForce));
 	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_CHC_PLUSPLUS",umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::CHCPP));
 	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_BSP",umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::BSP));
@@ -614,74 +514,46 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.add_static_constant("DEBUG_MODE_IBL_PREFILTER",umath::to_integral(pragma::SceneDebugMode::IBLPrefilter));
 	defCScene.add_static_constant("DEBUG_MODE_IBL_IRRADIANCE",umath::to_integral(pragma::SceneDebugMode::IBLIrradiance));
 	defCScene.add_static_constant("DEBUG_MODE_EMISSION",umath::to_integral(pragma::SceneDebugMode::Emission));
-	defCScene.def("GetActiveCamera",&Lua::Scene::GetCamera);
-	defCScene.def("SetActiveCamera",static_cast<void(*)(lua_State*,CSceneHandle&,CCameraHandle&)>([](lua_State *l,CSceneHandle &scene,CCameraHandle &hCam) {
-		pragma::Lua::check_component(l,scene);
-		pragma::Lua::check_component(l,hCam);
-		scene->SetActiveCamera(*hCam);
+	defCScene.def("GetActiveCamera",static_cast<pragma::ComponentHandle<pragma::CCameraComponent>&(pragma::CSceneComponent::*)()>(&pragma::CSceneComponent::GetActiveCamera),luabind::game_object_policy<0>{});
+	defCScene.def("SetActiveCamera",static_cast<void(pragma::CSceneComponent::*)(pragma::CCameraComponent&)>(&pragma::CSceneComponent::SetActiveCamera));
+	defCScene.def("SetActiveCamera",static_cast<void(pragma::CSceneComponent::*)()>(&pragma::CSceneComponent::SetActiveCamera));
+	defCScene.def("SetOcclusionCullingMethod",static_cast<void(*)(lua_State*,pragma::CSceneComponent&,uint32_t)>([](lua_State *l,pragma::CSceneComponent &scene,uint32_t method) {
+		scene.GetSceneRenderDesc().SetOcclusionCullingMethod(static_cast<SceneRenderDesc::OcclusionCullingMethod>(method));
 	}));
-	defCScene.def("SetOcclusionCullingMethod",static_cast<void(*)(lua_State*,CSceneHandle&,uint32_t)>([](lua_State *l,CSceneHandle &scene,uint32_t method) {
-		pragma::Lua::check_component(l,scene);
-		scene->GetSceneRenderDesc().SetOcclusionCullingMethod(static_cast<SceneRenderDesc::OcclusionCullingMethod>(method));
-	}));
-	defCScene.def("GetWidth",&Lua::Scene::GetWidth);
-	defCScene.def("GetHeight",&Lua::Scene::GetHeight);
-	defCScene.def("GetSize",&Lua::Scene::GetSize);
-	defCScene.def("Resize",&Lua::Scene::Resize);
-	defCScene.def("BeginDraw",&Lua::Scene::BeginDraw);
+	defCScene.def("GetWidth",&pragma::CSceneComponent::GetWidth);
+	defCScene.def("GetHeight",&pragma::CSceneComponent::GetHeight);
+	defCScene.def("GetSize",static_cast<std::pair<uint32_t,uint32_t>(*)(const pragma::CSceneComponent&)>([](const pragma::CSceneComponent &scene) -> std::pair<uint32_t,uint32_t> {
+		return {scene.GetWidth(),scene.GetHeight()};
+	}),luabind::pair_policy<0>{});
+	defCScene.def("Resize",&pragma::CSceneComponent::Resize);
+	// defCScene.def("BeginDraw",&pragma::CSceneComponent::BeginDraw);
 	defCScene.def("UpdateBuffers",&Lua::Scene::UpdateBuffers);
 	defCScene.def("GetWorldEnvironment",&Lua::Scene::GetWorldEnvironment);
-	defCScene.def("SetWorldEnvironment",&Lua::Scene::SetWorldEnvironment);
-	defCScene.def("ClearWorldEnvironment",&Lua::Scene::ClearWorldEnvironment);
-	defCScene.def("InitializeRenderTarget",&Lua::Scene::ReloadRenderTarget);
+	defCScene.def("SetWorldEnvironment",&pragma::CSceneComponent::SetWorldEnvironment);
+	defCScene.def("ClearWorldEnvironment",&pragma::CSceneComponent::ClearWorldEnvironment);
+	defCScene.def("InitializeRenderTarget",&pragma::CSceneComponent::ReloadRenderTarget);
 
-	defCScene.def("GetIndex",&Lua::Scene::GetIndex);
-	defCScene.def("GetCameraDescriptorSet",static_cast<void(*)(lua_State*,CSceneHandle&,uint32_t)>(&Lua::Scene::GetCameraDescriptorSet));
-	defCScene.def("GetCameraDescriptorSet",static_cast<void(*)(lua_State*,CSceneHandle&)>(&Lua::Scene::GetCameraDescriptorSet));
-	defCScene.def("GetViewCameraDescriptorSet",&Lua::Scene::GetViewCameraDescriptorSet);
-	defCScene.def("GetDebugMode",&Lua::Scene::GetDebugMode);
-	defCScene.def("SetDebugMode",&Lua::Scene::SetDebugMode);
-	defCScene.def("Link",static_cast<void(*)(lua_State*,CSceneHandle&,CSceneHandle&)>([](lua_State *l,CSceneHandle &scene,CSceneHandle &sceneOther) {
-		pragma::Lua::check_component(l,scene);
-		pragma::Lua::check_component(l,sceneOther);
-		scene->Link(*sceneOther);
+	defCScene.def("GetIndex",static_cast<pragma::CSceneComponent::SceneIndex(pragma::CSceneComponent::*)() const>(&pragma::CSceneComponent::GetSceneIndex));
+	defCScene.def("GetCameraDescriptorSet",static_cast<const std::shared_ptr<prosper::IDescriptorSetGroup>&(pragma::CSceneComponent::*)(prosper::PipelineBindPoint) const>(&pragma::CSceneComponent::GetCameraDescriptorSetGroup));
+	defCScene.def("GetCameraDescriptorSet",static_cast<const std::shared_ptr<prosper::IDescriptorSetGroup>&(*)(const pragma::CSceneComponent&)>([](const pragma::CSceneComponent &scene) -> const std::shared_ptr<prosper::IDescriptorSetGroup>& {
+		return scene.GetCameraDescriptorSetGroup(prosper::PipelineBindPoint::Graphics);
 	}));
-	defCScene.def("Link",static_cast<void(*)(lua_State*,CSceneHandle&,CSceneHandle&,bool)>([](lua_State *l,CSceneHandle &scene,CSceneHandle &sceneOther,bool linkCamera) {
-		pragma::Lua::check_component(l,scene);
-		pragma::Lua::check_component(l,sceneOther);
-		scene->Link(*sceneOther,linkCamera);
-	}));
-	defCScene.def("BuildRenderQueue",&Lua::Scene::BuildRenderQueue);
+	defCScene.def("GetViewCameraDescriptorSet",&pragma::CSceneComponent::GetViewCameraDescriptorSet);
+	defCScene.def("GetDebugMode",&pragma::CSceneComponent::GetDebugMode);
+	defCScene.def("SetDebugMode",&pragma::CSceneComponent::SetDebugMode);
+	defCScene.def("Link",&pragma::CSceneComponent::Link);
+	defCScene.def("Link",&pragma::CSceneComponent::Link);
+	// defCScene.def("BuildRenderQueue",&pragma::CSceneComponent::BuildRenderQueue);
 	defCScene.def("RenderPrepass",&Lua::Scene::RenderPrepass);
-	defCScene.def("Render",static_cast<void(*)(lua_State*,CSceneHandle&,::util::DrawSceneInfo&,RenderMode,RenderFlags)>(Lua::Scene::Render));
-	defCScene.def("Render",static_cast<void(*)(lua_State*,CSceneHandle&,::util::DrawSceneInfo&,RenderMode)>(Lua::Scene::Render));
-	defCScene.def("GetRenderer",static_cast<void(*)(lua_State*,CSceneHandle&)>([](lua_State *l,CSceneHandle &scene) {
-		pragma::Lua::check_component(l,scene);
-		auto *renderer = scene->GetRenderer();
-		if(renderer == nullptr)
-			return;
-		renderer->PushLuaObject(l);
-	}));
-	defCScene.def("SetRenderer",static_cast<void(*)(lua_State*,CSceneHandle&,CRendererHandle&)>([](lua_State *l,CSceneHandle &scene,CRendererHandle &renderer) {
-		pragma::Lua::check_component(l,scene);
-		pragma::Lua::check_component(l,renderer);
-		scene->SetRenderer(renderer.get());
-	}));
-	defCScene.def("GetSceneIndex",static_cast<void(*)(lua_State*,CSceneHandle&)>([](lua_State *l,CSceneHandle &scene) {
-		pragma::Lua::check_component(l,scene);
-		Lua::PushInt(l,scene->GetSceneIndex());
-	}));
-	defCScene.def("SetParticleSystemColorFactor",static_cast<void(*)(lua_State*,CSceneHandle&,const Vector4&)>([](lua_State *l,CSceneHandle &scene,const Vector4 &factor) {
-		pragma::Lua::check_component(l,scene);
-		scene->SetParticleSystemColorFactor(factor);
-	}));
-	defCScene.def("GetParticleSystemColorFactor",static_cast<void(*)(lua_State*,CSceneHandle&)>([](lua_State *l,CSceneHandle &scene) {
-		pragma::Lua::check_component(l,scene);
-		Lua::Push<Vector4>(l,scene->GetParticleSystemColorFactor());
-	}));
-	defCScene.def("GetRenderParticleSystems",static_cast<void(*)(lua_State*,CSceneHandle&)>([](lua_State *l,CSceneHandle &scene) {
-		pragma::Lua::check_component(l,scene);
-		auto &particleSystems = scene->GetSceneRenderDesc().GetCulledParticles();
+	defCScene.def("Render",static_cast<void(*)(lua_State*,pragma::CSceneComponent&,::util::DrawSceneInfo&,RenderMode,RenderFlags)>(Lua::Scene::Render));
+	defCScene.def("Render",static_cast<void(*)(lua_State*,pragma::CSceneComponent&,::util::DrawSceneInfo&,RenderMode)>(Lua::Scene::Render));
+	defCScene.def("GetRenderer",static_cast<pragma::CRendererComponent*(pragma::CSceneComponent::*)()>(&pragma::CSceneComponent::GetRenderer),luabind::game_object_policy<0>{});
+	defCScene.def("SetRenderer",&pragma::CSceneComponent::SetRenderer);
+	defCScene.def("GetSceneIndex",static_cast<pragma::CSceneComponent::SceneIndex(pragma::CSceneComponent::*)() const>(&pragma::CSceneComponent::GetSceneIndex));
+	defCScene.def("SetParticleSystemColorFactor",&pragma::CSceneComponent::SetParticleSystemColorFactor);
+	defCScene.def("GetParticleSystemColorFactor",&pragma::CSceneComponent::GetParticleSystemColorFactor);
+	defCScene.def("GetRenderParticleSystems",static_cast<void(*)(lua_State*,pragma::CSceneComponent&)>([](lua_State *l,pragma::CSceneComponent &scene) {
+		auto &particleSystems = scene.GetSceneRenderDesc().GetCulledParticles();
 		auto t = Lua::CreateTable(l);
 		int32_t idx = 1;
 		for(auto &pts : particleSystems)
@@ -693,9 +565,8 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 			Lua::SetTableValue(l,t);
 		}
 	}));
-	defCScene.def("GetRenderQueue",static_cast<void(*)(lua_State*,CSceneHandle&,RenderMode,bool)>([](lua_State *l,CSceneHandle &scene,RenderMode renderMode,bool translucent) {
-		pragma::Lua::check_component(l,scene);
-		auto *renderQueue = scene->GetSceneRenderDesc().GetRenderQueue(renderMode,translucent);
+	defCScene.def("GetRenderQueue",static_cast<void(*)(lua_State*,pragma::CSceneComponent&,RenderMode,bool)>([](lua_State *l,pragma::CSceneComponent &scene,RenderMode renderMode,bool translucent) {
+		auto *renderQueue = scene.GetSceneRenderDesc().GetRenderQueue(renderMode,translucent);
 		if(renderQueue == nullptr)
 			return;
 		Lua::Push<pragma::rendering::RenderQueue*>(l,renderQueue);
@@ -725,92 +596,68 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 
 	auto &componentManager = engine->GetNetworkState(l)->GetGameState()->GetEntityComponentManager();
 
-	auto defCToggle = luabind::class_<CToggleHandle,BaseEntityComponentHandle>("ToggleComponent");
-	Lua::register_base_toggle_component_methods<luabind::class_<CToggleHandle,BaseEntityComponentHandle>,CToggleHandle>(l,defCToggle);
+	auto defCToggle = luabind::class_<pragma::CToggleComponent,pragma::BaseToggleComponent>("ToggleComponent");
 	entsMod[defCToggle];
 
-	auto defCTransform = luabind::class_<CTransformHandle,BaseEntityComponentHandle>("TransformComponent");
-	Lua::register_base_transform_component_methods<luabind::class_<CTransformHandle,BaseEntityComponentHandle>,CTransformHandle>(l,defCTransform);
+	auto defCTransform = luabind::class_<pragma::CTransformComponent,pragma::BaseTransformComponent>("TransformComponent");
 	entsMod[defCTransform];
 
-	auto defCWheel = luabind::class_<CWheelHandle,BaseEntityComponentHandle>("WheelComponent");
-	Lua::register_base_wheel_component_methods<luabind::class_<CWheelHandle,BaseEntityComponentHandle>,CWheelHandle>(l,defCWheel);
+	auto defCWheel = luabind::class_<pragma::CWheelComponent,pragma::BaseWheelComponent>("WheelComponent");
 	entsMod[defCWheel];
 
-	auto defCSoundDsp = luabind::class_<CSoundDspHandle,BaseEntityComponentHandle>("SoundDspComponent");
-	Lua::register_base_env_sound_dsp_component_methods<luabind::class_<CSoundDspHandle,BaseEntityComponentHandle>,CSoundDspHandle>(l,defCSoundDsp);
+	auto defCSoundDsp = luabind::class_<pragma::CSoundDspComponent,pragma::BaseEnvSoundDspComponent>("SoundDspComponent");
 	entsMod[defCSoundDsp];
 
-	auto defCSoundDspChorus = luabind::class_<CSoundDspChorusHandle,BaseEntityComponentHandle>("SoundDspChorusComponent");
+	auto defCSoundDspChorus = luabind::class_<pragma::CSoundDspChorusComponent,pragma::BaseEnvSoundDspComponent>("SoundDspChorusComponent");
 	entsMod[defCSoundDspChorus];
 
-	auto defCSoundDspDistortion = luabind::class_<CSoundDspDistortionHandle,BaseEntityComponentHandle>("SoundDspDistortionComponent");
+	auto defCSoundDspDistortion = luabind::class_<pragma::CSoundDspDistortionComponent,pragma::BaseEnvSoundDspComponent>("SoundDspDistortionComponent");
 	entsMod[defCSoundDspDistortion];
 
-	auto defCSoundDspEAXReverb = luabind::class_<CSoundDspEAXReverbHandle,BaseEntityComponentHandle>("SoundDspEAXReverbComponent");
+	auto defCSoundDspEAXReverb = luabind::class_<pragma::CSoundDspEAXReverbComponent,pragma::BaseEnvSoundDspComponent>("SoundDspEAXReverbComponent");
 	entsMod[defCSoundDspEAXReverb];
 
-	auto defCSoundDspEcho = luabind::class_<CSoundDspEchoHandle,BaseEntityComponentHandle>("SoundDspEchoComponent");
+	auto defCSoundDspEcho = luabind::class_<pragma::CSoundDspEchoComponent,pragma::BaseEnvSoundDspComponent>("SoundDspEchoComponent");
 	entsMod[defCSoundDspEcho];
 
-	auto defCSoundDspEqualizer = luabind::class_<CSoundDspEqualizerHandle,BaseEntityComponentHandle>("SoundDspEqualizerComponent");
+	auto defCSoundDspEqualizer = luabind::class_<pragma::CSoundDspEqualizerComponent,pragma::BaseEnvSoundDspComponent>("SoundDspEqualizerComponent");
 	entsMod[defCSoundDspEqualizer];
 
-	auto defCSoundDspFlanger = luabind::class_<CSoundDspFlangerHandle,BaseEntityComponentHandle>("SoundDspFlangerComponent");
+	auto defCSoundDspFlanger = luabind::class_<pragma::CSoundDspFlangerComponent,pragma::BaseEnvSoundDspComponent>("SoundDspFlangerComponent");
 	entsMod[defCSoundDspFlanger];
 
-	auto defCCamera = luabind::class_<CCameraHandle,BaseEntityComponentHandle>("CameraComponent");
-	Lua::register_base_env_camera_component_methods<luabind::class_<CCameraHandle,BaseEntityComponentHandle>,CCameraHandle>(l,defCCamera);
+	auto defCCamera = luabind::class_<pragma::CCameraComponent,pragma::BaseEnvCameraComponent>("CameraComponent");
 	entsMod[defCCamera];
 
-	auto defCDecal = luabind::class_<CDecalHandle,BaseEntityComponentHandle>("DecalComponent");
-	Lua::register_base_decal_component_methods<luabind::class_<CDecalHandle,BaseEntityComponentHandle>,CDecalHandle>(l,defCDecal);
-	defCDecal.def("CreateFromProjection",static_cast<void(*)(lua_State*,CDecalHandle&,luabind::object,const umath::ScaledTransform&)>(&Lua::Decal::create_from_projection));
-	defCDecal.def("CreateFromProjection",static_cast<void(*)(lua_State*,CDecalHandle&,luabind::object)>(&Lua::Decal::create_from_projection));
-	defCDecal.def("DebugDraw",static_cast<void(*)(lua_State*,CDecalHandle&,float)>([](lua_State *l,CDecalHandle &hEnt,float duration) {
-		pragma::Lua::check_component(l,hEnt);
-		hEnt->GetProjector().DebugDraw(duration);
+	auto defCOccl = luabind::class_<pragma::COcclusionCullerComponent,pragma::BaseEntityComponent>("OcclusionCullerComponent");
+	entsMod[defCOccl];
+
+	auto defCDecal = luabind::class_<pragma::CDecalComponent,pragma::BaseEnvDecalComponent>("DecalComponent");
+	defCDecal.def("CreateFromProjection",static_cast<void(*)(lua_State*,pragma::CDecalComponent&,luabind::object,const umath::ScaledTransform&)>(&Lua::Decal::create_from_projection));
+	defCDecal.def("CreateFromProjection",static_cast<void(*)(lua_State*,pragma::CDecalComponent&,luabind::object)>(&Lua::Decal::create_from_projection));
+	defCDecal.def("DebugDraw",static_cast<void(*)(lua_State*,pragma::CDecalComponent&,float)>([](lua_State *l,pragma::CDecalComponent &hEnt,float duration) {
+		hEnt.GetProjector().DebugDraw(duration);
 	}));
 	entsMod[defCDecal];
 
-	auto defCExplosion = luabind::class_<CExplosionHandle,BaseEntityComponentHandle>("ExplosionComponent");
-	Lua::register_base_env_explosion_component_methods<luabind::class_<CExplosionHandle,BaseEntityComponentHandle>,CExplosionHandle>(l,defCExplosion);
+	auto defCExplosion = luabind::class_<pragma::CExplosionComponent,pragma::BaseEnvExplosionComponent>("ExplosionComponent");
 	entsMod[defCExplosion];
 
-	auto defCFire = luabind::class_<CFireHandle,BaseEntityComponentHandle>("FireComponent");
-	Lua::register_base_env_fire_component_methods<luabind::class_<CFireHandle,BaseEntityComponentHandle>,CFireHandle>(l,defCFire);
+	auto defCFire = luabind::class_<pragma::CFireComponent,pragma::BaseEnvFireComponent>("FireComponent");
 	entsMod[defCFire];
 
-	auto defCFogController = luabind::class_<CFogControllerHandle,BaseEntityComponentHandle>("FogControllerComponent");
-	Lua::register_base_env_fog_controller_component_methods<luabind::class_<CFogControllerHandle,BaseEntityComponentHandle>,CFogControllerHandle>(l,defCFogController);
+	auto defCFogController = luabind::class_<pragma::CFogControllerComponent,pragma::BaseEnvFogControllerComponent>("FogControllerComponent");
 	entsMod[defCFogController];
 
-	auto defCLight = luabind::class_<CLightHandle,BaseEntityComponentHandle>("LightComponent");
-	Lua::register_base_env_light_component_methods<luabind::class_<CLightHandle,BaseEntityComponentHandle>,CLightHandle>(l,defCLight);
-	defCLight.def("SetShadowType",static_cast<void(*)(lua_State*,CLightHandle&,uint32_t)>([](lua_State *l,CLightHandle &hComponent,uint32_t type) {
-		pragma::Lua::check_component(l,hComponent);
-		hComponent->SetShadowType(static_cast<pragma::BaseEnvLightComponent::ShadowType>(type));
+	auto defCLight = luabind::class_<pragma::CLightComponent,pragma::BaseEnvLightComponent>("LightComponent");
+	defCLight.def("SetShadowType",&pragma::CLightComponent::SetShadowType);
+	defCLight.def("GetShadowType",&pragma::CLightComponent::GetShadowType);
+	defCLight.def("UpdateBuffers",&pragma::CLightComponent::UpdateBuffers);
+	defCLight.def("SetAddToGameScene",static_cast<void(*)(lua_State*,pragma::CLightComponent&,bool)>([](lua_State *l,pragma::CLightComponent &hComponent,bool b) {
+		hComponent.SetStateFlag(pragma::CLightComponent::StateFlags::AddToGameScene,b);
 	}));
-	defCLight.def("GetShadowType",static_cast<void(*)(lua_State*,CLightHandle&)>([](lua_State *l,CLightHandle &hComponent) {
-		pragma::Lua::check_component(l,hComponent);
-		Lua::PushInt(l,umath::to_integral(hComponent->GetShadowType()));
-	}));
-	defCLight.def("UpdateBuffers",static_cast<void(*)(lua_State*,CLightHandle&)>([](lua_State *l,CLightHandle &hComponent) {
-		pragma::Lua::check_component(l,hComponent);
-		hComponent->UpdateBuffers();
-	}));
-	defCLight.def("SetAddToGameScene",static_cast<void(*)(lua_State*,CLightHandle&,bool)>([](lua_State *l,CLightHandle &hComponent,bool b) {
-		pragma::Lua::check_component(l,hComponent);
-		hComponent->SetStateFlag(pragma::CLightComponent::StateFlags::AddToGameScene,b);
-	}));
-	defCLight.def("SetMorphTargetsInShadowsEnabled",static_cast<void(*)(lua_State*,CLightHandle&,bool)>([](lua_State *l,CLightHandle &hComponent,bool enabled) {
-		pragma::Lua::check_component(l,hComponent);
-		hComponent->SetMorphTargetsInShadowsEnabled(enabled);
-	}));
-	defCLight.def("AreMorphTargetsInShadowsEnabled",static_cast<bool(*)(lua_State*,CLightHandle&)>([](lua_State *l,CLightHandle &hComponent) {
-		pragma::Lua::check_component(l,hComponent);
-		return hComponent->AreMorphTargetsInShadowsEnabled();
-	}));
+	defCLight.def("SetMorphTargetsInShadowsEnabled",&pragma::CLightComponent::SetMorphTargetsInShadowsEnabled);
+	defCLight.def("AreMorphTargetsInShadowsEnabled",&pragma::CLightComponent::AreMorphTargetsInShadowsEnabled);
 	defCLight.add_static_constant("SHADOW_TYPE_NONE",umath::to_integral(ShadowType::None));
 	defCLight.add_static_constant("SHADOW_TYPE_STATIC_ONLY",umath::to_integral(ShadowType::StaticOnly));
 	defCLight.add_static_constant("SHADOW_TYPE_FULL",umath::to_integral(ShadowType::Full));
@@ -824,371 +671,292 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCLight.add_static_constant("EVENT_ON_SHADOW_BUFFER_INITIALIZED",pragma::CLightComponent::EVENT_ON_SHADOW_BUFFER_INITIALIZED);
 	entsMod[defCLight];
 
-	auto defCLightDirectional = luabind::class_<CLightDirectionalHandle,BaseEntityComponentHandle>("LightDirectionalComponent");
-	Lua::register_base_env_light_directional_component_methods<luabind::class_<CLightDirectionalHandle,BaseEntityComponentHandle>,CLightDirectionalHandle>(l,defCLightDirectional);
+	auto defCLightDirectional = luabind::class_<pragma::CLightDirectionalComponent,pragma::BaseEnvLightDirectionalComponent>("LightDirectionalComponent");
 	entsMod[defCLightDirectional];
 
-	auto defCLightPoint = luabind::class_<CLightPointHandle,BaseEntityComponentHandle>("LightPointComponent");
-	Lua::register_base_env_light_point_component_methods<luabind::class_<CLightPointHandle,BaseEntityComponentHandle>,CLightPointHandle>(l,defCLightPoint);
+	auto defCLightPoint = luabind::class_<pragma::CLightPointComponent,pragma::BaseEnvLightPointComponent>("LightPointComponent");
 	entsMod[defCLightPoint];
 
-	auto defCLightSpot = luabind::class_<CLightSpotHandle,BaseEntityComponentHandle>("LightSpotComponent");
-	Lua::register_base_env_light_spot_component_methods<luabind::class_<CLightSpotHandle,BaseEntityComponentHandle>,CLightSpotHandle>(l,defCLightSpot);
+	auto defCLightSpot = luabind::class_<pragma::CLightSpotComponent,pragma::BaseEnvLightSpotComponent>("LightSpotComponent");
 	entsMod[defCLightSpot];
 
-	auto defCLightSpotVol = luabind::class_<CLightSpotVolHandle,BaseEntityComponentHandle>("LightSpotVolComponent");
-	Lua::register_base_env_light_spot_vol_component_methods<luabind::class_<CLightSpotVolHandle,BaseEntityComponentHandle>,CLightSpotVolHandle>(l,defCLightSpotVol);
+	auto defCLightSpotVol = luabind::class_<pragma::CLightSpotVolComponent,pragma::BaseEnvLightSpotVolComponent>("LightSpotVolComponent");
 	entsMod[defCLightSpotVol];
 
-	auto defCMicrophone = luabind::class_<CMicrophoneHandle,BaseEntityComponentHandle>("MicrophoneComponent");
-	Lua::register_base_env_microphone_component_methods<luabind::class_<CMicrophoneHandle,BaseEntityComponentHandle>,CMicrophoneHandle>(l,defCMicrophone);
+	auto defCMicrophone = luabind::class_<pragma::CMicrophoneComponent,pragma::BaseEnvMicrophoneComponent>("MicrophoneComponent");
 	entsMod[defCMicrophone];
 
 	Lua::ParticleSystem::register_class(l,entsMod);
 
-	auto defCQuake = luabind::class_<CQuakeHandle,BaseEntityComponentHandle>("QuakeComponent");
-	Lua::register_base_env_quake_component_methods<luabind::class_<CQuakeHandle,BaseEntityComponentHandle>,CQuakeHandle>(l,defCQuake);
+	auto defCQuake = luabind::class_<pragma::CQuakeComponent,pragma::BaseEnvQuakeComponent>("QuakeComponent");
 	entsMod[defCQuake];
 
-	auto defCSmokeTrail = luabind::class_<CSmokeTrailHandle,BaseEntityComponentHandle>("SmokeTrailComponent");
-	Lua::register_base_env_smoke_trail_component_methods<luabind::class_<CSmokeTrailHandle,BaseEntityComponentHandle>,CSmokeTrailHandle>(l,defCSmokeTrail);
+	auto defCSmokeTrail = luabind::class_<pragma::CSmokeTrailComponent,pragma::BaseEnvSmokeTrailComponent>("SmokeTrailComponent");
 	entsMod[defCSmokeTrail];
 
-	auto defCSound = luabind::class_<CSoundHandle,BaseEntityComponentHandle>("SoundComponent");
-	Lua::register_base_env_sound_component_methods<luabind::class_<CSoundHandle,BaseEntityComponentHandle>,CSoundHandle>(l,defCSound);
+	auto defCSound = luabind::class_<pragma::CSoundComponent,pragma::BaseEnvSoundComponent>("SoundComponent");
 	entsMod[defCSound];
 
-	auto defCSoundScape = luabind::class_<CSoundScapeHandle,BaseEntityComponentHandle>("SoundScapeComponent");
-	Lua::register_base_env_soundscape_component_methods<luabind::class_<CSoundScapeHandle,BaseEntityComponentHandle>,CSoundScapeHandle>(l,defCSoundScape);
+	auto defCSoundScape = luabind::class_<pragma::CSoundScapeComponent,pragma::BaseEnvSoundScapeComponent>("SoundScapeComponent");
 	entsMod[defCSoundScape];
 
-	auto defCSprite = luabind::class_<CSpriteHandle,BaseEntityComponentHandle>("SpriteComponent");
-	Lua::register_base_env_sprite_component_methods<luabind::class_<CSpriteHandle,BaseEntityComponentHandle>,CSpriteHandle>(l,defCSprite);
-	defCSprite.def("StopAndRemoveEntity",static_cast<void(*)(lua_State*,CSpriteHandle&)>([](lua_State *l,CSpriteHandle &hSprite) {
-		pragma::Lua::check_component(l,hSprite);
-		hSprite->StopAndRemoveEntity();
-	}));
+	auto defCSprite = luabind::class_<pragma::CSpriteComponent,pragma::BaseEnvSpriteComponent>("SpriteComponent");
+	defCSprite.def("StopAndRemoveEntity",&pragma::CSpriteComponent::StopAndRemoveEntity);
 	entsMod[defCSprite];
 
-	auto defCTimescale = luabind::class_<CEnvTimescaleHandle,BaseEntityComponentHandle>("EnvTimescaleComponent");
-	Lua::register_base_env_timescale_component_methods<luabind::class_<CEnvTimescaleHandle,BaseEntityComponentHandle>,CEnvTimescaleHandle>(l,defCTimescale);
+	auto defCTimescale = luabind::class_<pragma::CEnvTimescaleComponent,pragma::BaseEnvTimescaleComponent>("EnvTimescaleComponent");
 	entsMod[defCTimescale];
 
-	auto defCWind = luabind::class_<CWindHandle,BaseEntityComponentHandle>("WindComponent");
-	Lua::register_base_env_wind_component_methods<luabind::class_<CWindHandle,BaseEntityComponentHandle>,CWindHandle>(l,defCWind);
+	auto defCWind = luabind::class_<pragma::CWindComponent,pragma::BaseEnvWindComponent>("WindComponent");
 	entsMod[defCWind];
 
-	auto defCFilterClass = luabind::class_<CFilterClassHandle,BaseEntityComponentHandle>("FilterClassComponent");
-	Lua::register_base_env_filter_class_component_methods<luabind::class_<CFilterClassHandle,BaseEntityComponentHandle>,CFilterClassHandle>(l,defCFilterClass);
+	auto defCFilterClass = luabind::class_<pragma::CFilterClassComponent,pragma::BaseFilterClassComponent>("FilterClassComponent");
 	entsMod[defCFilterClass];
 
-	auto defCFilterName = luabind::class_<CFilterNameHandle,BaseEntityComponentHandle>("FilterNameComponent");
-	Lua::register_base_env_filter_name_component_methods<luabind::class_<CFilterNameHandle,BaseEntityComponentHandle>,CFilterNameHandle>(l,defCFilterName);
+	auto defCFilterName = luabind::class_<pragma::CFilterNameComponent,pragma::BaseFilterNameComponent>("FilterNameComponent");
 	entsMod[defCFilterName];
 
-	auto defCBrush = luabind::class_<CBrushHandle,BaseEntityComponentHandle>("BrushComponent");
-	Lua::register_base_func_brush_component_methods<luabind::class_<CBrushHandle,BaseEntityComponentHandle>,CBrushHandle>(l,defCBrush);
+	auto defCBrush = luabind::class_<pragma::CBrushComponent,pragma::BaseFuncBrushComponent>("BrushComponent");
 	entsMod[defCBrush];
 
-	auto defCKinematic = luabind::class_<CKinematicHandle,BaseEntityComponentHandle>("KinematicComponent");
-	Lua::register_base_func_kinematic_component_methods<luabind::class_<CKinematicHandle,BaseEntityComponentHandle>,CKinematicHandle>(l,defCKinematic);
+	auto defCKinematic = luabind::class_<pragma::CKinematicComponent,pragma::BaseFuncKinematicComponent>("KinematicComponent");
 	entsMod[defCKinematic];
 
-	auto defCFuncPhysics = luabind::class_<CFuncPhysicsHandle,BaseEntityComponentHandle>("FuncPhysicsComponent");
-	Lua::register_base_func_physics_component_methods<luabind::class_<CFuncPhysicsHandle,BaseEntityComponentHandle>,CFuncPhysicsHandle>(l,defCFuncPhysics);
+	auto defCFuncPhysics = luabind::class_<pragma::CFuncPhysicsComponent,pragma::BaseFuncPhysicsComponent>("FuncPhysicsComponent");
 	entsMod[defCFuncPhysics];
 
-	auto defCFuncSoftPhysics = luabind::class_<CFuncSoftPhysicsHandle,BaseEntityComponentHandle>("FuncSoftPhysicsComponent");
-	Lua::register_base_func_soft_physics_component_methods<luabind::class_<CFuncSoftPhysicsHandle,BaseEntityComponentHandle>,CFuncSoftPhysicsHandle>(l,defCFuncSoftPhysics);
+	auto defCFuncSoftPhysics = luabind::class_<pragma::CFuncSoftPhysicsComponent,pragma::BaseFuncSoftPhysicsComponent>("FuncSoftPhysicsComponent");
 	entsMod[defCFuncSoftPhysics];
 
-	auto defCFuncPortal = luabind::class_<CFuncPortalHandle,BaseEntityComponentHandle>("FuncPortalComponent");
-	Lua::register_base_func_portal_component_methods<luabind::class_<CFuncPortalHandle,BaseEntityComponentHandle>,CFuncPortalHandle>(l,defCFuncPortal);
+	auto defCFuncPortal = luabind::class_<pragma::CFuncPortalComponent,pragma::BaseFuncPortalComponent>("FuncPortalComponent");
 	entsMod[defCFuncPortal];
 
-	auto defCWater = luabind::class_<CWaterHandle,BaseEntityComponentHandle>("WaterComponent");
-	Lua::register_base_func_water_component_methods<luabind::class_<CWaterHandle,BaseEntityComponentHandle>,CWaterHandle>(l,defCWater);
-	defCWater.def("GetReflectionScene",static_cast<void(*)(lua_State*,CWaterHandle&)>([](lua_State *l,CWaterHandle &hEnt) {
-		pragma::Lua::check_component(l,hEnt);
-		if(hEnt->IsWaterSceneValid() == false)
+	auto defCWater = luabind::class_<pragma::CWaterComponent,pragma::BaseFuncWaterComponent>("WaterComponent");
+	defCWater.def("GetReflectionScene",static_cast<void(*)(lua_State*,pragma::CWaterComponent&)>([](lua_State *l,pragma::CWaterComponent &hEnt) {
+		
+		if(hEnt.IsWaterSceneValid() == false)
 			return;
-		hEnt->GetWaterScene().sceneReflection->GetLuaObject().push(l);
+		hEnt.GetWaterScene().sceneReflection->GetLuaObject().push(l);
 	}));
-	defCWater.def("GetWaterSceneTexture",static_cast<void(*)(lua_State*,CWaterHandle&)>([](lua_State *l,CWaterHandle &hEnt) {
-		pragma::Lua::check_component(l,hEnt);
-		if(hEnt->IsWaterSceneValid() == false)
+	defCWater.def("GetWaterSceneTexture",static_cast<void(*)(lua_State*,pragma::CWaterComponent&)>([](lua_State *l,pragma::CWaterComponent &hEnt) {
+		
+		if(hEnt.IsWaterSceneValid() == false)
 			return;
-		Lua::Push<std::shared_ptr<prosper::Texture>>(l,hEnt->GetWaterScene().texScene);
+		Lua::Push<std::shared_ptr<prosper::Texture>>(l,hEnt.GetWaterScene().texScene);
 	}));
-	defCWater.def("GetWaterSceneDepthTexture",static_cast<void(*)(lua_State*,CWaterHandle&)>([](lua_State *l,CWaterHandle &hEnt) {
-		pragma::Lua::check_component(l,hEnt);
-		if(hEnt->IsWaterSceneValid() == false)
+	defCWater.def("GetWaterSceneDepthTexture",static_cast<void(*)(lua_State*,pragma::CWaterComponent&)>([](lua_State *l,pragma::CWaterComponent &hEnt) {
+		
+		if(hEnt.IsWaterSceneValid() == false)
 			return;
-		Lua::Push<std::shared_ptr<prosper::Texture>>(l,hEnt->GetWaterScene().texSceneDepth);
+		Lua::Push<std::shared_ptr<prosper::Texture>>(l,hEnt.GetWaterScene().texSceneDepth);
 	}));
 	entsMod[defCWater];
 
-	auto defCButton = luabind::class_<CButtonHandle,BaseEntityComponentHandle>("ButtonComponent");
-	Lua::register_base_func_button_component_methods<luabind::class_<CButtonHandle,BaseEntityComponentHandle>,CButtonHandle>(l,defCButton);
+	auto defCButton = luabind::class_<pragma::CButtonComponent,pragma::BaseFuncButtonComponent>("ButtonComponent");
 	entsMod[defCButton];
 
-	auto defCBot = luabind::class_<CBotHandle,BaseEntityComponentHandle>("BotComponent");
-	Lua::register_base_bot_component_methods<luabind::class_<CBotHandle,BaseEntityComponentHandle>,CBotHandle>(l,defCBot);
+	auto defCBot = luabind::class_<pragma::CBotComponent,pragma::BaseBotComponent>("BotComponent");
 	entsMod[defCBot];
 
-	auto defCPointConstraintBallSocket = luabind::class_<CPointConstraintBallSocketHandle,BaseEntityComponentHandle>("PointConstraintBallSocketComponent");
-	Lua::register_base_point_constraint_ball_socket_component_methods<luabind::class_<CPointConstraintBallSocketHandle,BaseEntityComponentHandle>,CPointConstraintBallSocketHandle>(l,defCPointConstraintBallSocket);
+	auto defCPointConstraintBallSocket = luabind::class_<pragma::CPointConstraintBallSocketComponent,pragma::BasePointConstraintBallSocketComponent>("PointConstraintBallSocketComponent");
 	entsMod[defCPointConstraintBallSocket];
 
-	auto defCPointConstraintConeTwist = luabind::class_<CPointConstraintConeTwistHandle,BaseEntityComponentHandle>("PointConstraintConeTwistComponent");
-	Lua::register_base_point_constraint_cone_twist_component_methods<luabind::class_<CPointConstraintConeTwistHandle,BaseEntityComponentHandle>,CPointConstraintConeTwistHandle>(l,defCPointConstraintConeTwist);
+	auto defCPointConstraintConeTwist = luabind::class_<pragma::CPointConstraintConeTwistComponent,pragma::BasePointConstraintConeTwistComponent>("PointConstraintConeTwistComponent");
 	entsMod[defCPointConstraintConeTwist];
 
-	auto defCPointConstraintDoF = luabind::class_<CPointConstraintDoFHandle,BaseEntityComponentHandle>("PointConstraintDoFComponent");
-	Lua::register_base_point_constraint_dof_component_methods<luabind::class_<CPointConstraintDoFHandle,BaseEntityComponentHandle>,CPointConstraintDoFHandle>(l,defCPointConstraintDoF);
+	auto defCPointConstraintDoF = luabind::class_<pragma::CPointConstraintDoFComponent,pragma::BasePointConstraintDoFComponent>("PointConstraintDoFComponent");
 	entsMod[defCPointConstraintDoF];
 
-	auto defCPointConstraintFixed = luabind::class_<CPointConstraintFixedHandle,BaseEntityComponentHandle>("PointConstraintFixedComponent");
-	Lua::register_base_point_constraint_fixed_component_methods<luabind::class_<CPointConstraintFixedHandle,BaseEntityComponentHandle>,CPointConstraintFixedHandle>(l,defCPointConstraintFixed);
+	auto defCPointConstraintFixed = luabind::class_<pragma::CPointConstraintFixedComponent,pragma::BasePointConstraintFixedComponent>("PointConstraintFixedComponent");
 	entsMod[defCPointConstraintFixed];
 
-	auto defCPointConstraintHinge = luabind::class_<CPointConstraintHingeHandle,BaseEntityComponentHandle>("PointConstraintHingeComponent");
-	Lua::register_base_point_constraint_hinge_component_methods<luabind::class_<CPointConstraintHingeHandle,BaseEntityComponentHandle>,CPointConstraintHingeHandle>(l,defCPointConstraintHinge);
+	auto defCPointConstraintHinge = luabind::class_<pragma::CPointConstraintHingeComponent,pragma::BasePointConstraintHingeComponent>("PointConstraintHingeComponent");
 	entsMod[defCPointConstraintHinge];
 
-	auto defCPointConstraintSlider = luabind::class_<CPointConstraintSliderHandle,BaseEntityComponentHandle>("PointConstraintSliderComponent");
-	Lua::register_base_point_constraint_slider_component_methods<luabind::class_<CPointConstraintSliderHandle,BaseEntityComponentHandle>,CPointConstraintSliderHandle>(l,defCPointConstraintSlider);
+	auto defCPointConstraintSlider = luabind::class_<pragma::CPointConstraintSliderComponent,pragma::BasePointConstraintSliderComponent>("PointConstraintSliderComponent");
 	entsMod[defCPointConstraintSlider];
 
-	auto defCRenderTarget = luabind::class_<CRenderTargetHandle,BaseEntityComponentHandle>("RenderTargetComponent");
-	Lua::register_base_point_render_target_component_methods<luabind::class_<CRenderTargetHandle,BaseEntityComponentHandle>,CRenderTargetHandle>(l,defCRenderTarget);
+	auto defCRenderTarget = luabind::class_<pragma::CRenderTargetComponent,pragma::BasePointRenderTargetComponent>("RenderTargetComponent");
 	entsMod[defCRenderTarget];
 
-	auto defCPointTarget = luabind::class_<CPointTargetHandle,BaseEntityComponentHandle>("PointTargetComponent");
-	Lua::register_base_point_target_component_methods<luabind::class_<CPointTargetHandle,BaseEntityComponentHandle>,CPointTargetHandle>(l,defCPointTarget);
+	auto defCPointTarget = luabind::class_<pragma::CPointTargetComponent,pragma::BasePointTargetComponent>("PointTargetComponent");
 	entsMod[defCPointTarget];
 
-	auto defCProp = luabind::class_<CPropHandle,BaseEntityComponentHandle>("PropComponent");
-	Lua::register_base_prop_component_methods<luabind::class_<CPropHandle,BaseEntityComponentHandle>,CPropHandle>(l,defCProp);
+	auto defCProp = luabind::class_<pragma::CPropComponent,pragma::BasePropComponent>("PropComponent");
 	entsMod[defCProp];
 
-	auto defCPropDynamic = luabind::class_<CPropDynamicHandle,BaseEntityComponentHandle>("PropDynamicComponent");
-	Lua::register_base_prop_dynamic_component_methods<luabind::class_<CPropDynamicHandle,BaseEntityComponentHandle>,CPropDynamicHandle>(l,defCPropDynamic);
+	auto defCPropDynamic = luabind::class_<pragma::CPropDynamicComponent,pragma::BasePropDynamicComponent>("PropDynamicComponent");
 	entsMod[defCPropDynamic];
 
-	auto defCPropPhysics = luabind::class_<CPropPhysicsHandle,BaseEntityComponentHandle>("PropPhysicsComponent");
-	Lua::register_base_prop_physics_component_methods<luabind::class_<CPropPhysicsHandle,BaseEntityComponentHandle>,CPropPhysicsHandle>(l,defCPropPhysics);
+	auto defCPropPhysics = luabind::class_<pragma::CPropPhysicsComponent,pragma::BasePropPhysicsComponent>("PropPhysicsComponent");
 	entsMod[defCPropPhysics];
 
-	auto defCTouch = luabind::class_<CTouchHandle,BaseEntityComponentHandle>("TouchComponent");
-	Lua::register_base_touch_component_methods<luabind::class_<CTouchHandle,BaseEntityComponentHandle>,CTouchHandle>(l,defCTouch);
+	auto defCTouch = luabind::class_<pragma::CTouchComponent,pragma::BaseTouchComponent>("TouchComponent");
 	entsMod[defCTouch];
 
-	auto defCSkybox = luabind::class_<CSkyboxHandle,BaseEntityComponentHandle>("SkyboxComponent");
-	Lua::register_base_skybox_component_methods<luabind::class_<CSkyboxHandle,BaseEntityComponentHandle>,CSkyboxHandle>(l,defCSkybox);
+	auto defCSkybox = luabind::class_<pragma::CSkyboxComponent,pragma::BaseSkyboxComponent>("SkyboxComponent");
 	entsMod[defCSkybox];
 
-	auto defCFlashlight = luabind::class_<CFlashlightHandle,BaseEntityComponentHandle>("FlashlightComponent");
-	Lua::register_base_flashlight_component_methods<luabind::class_<CFlashlightHandle,BaseEntityComponentHandle>,CFlashlightHandle>(l,defCFlashlight);
+	auto defCFlashlight = luabind::class_<pragma::CFlashlightComponent,pragma::BaseFlashlightComponent>("FlashlightComponent");
 	entsMod[defCFlashlight];
 
-	auto defCEnvSoundProbe = luabind::class_<CEnvSoundProbeHandle,BaseEntityComponentHandle>("EnvSoundProbeComponent");
+	auto defCEnvSoundProbe = luabind::class_<pragma::CEnvSoundProbeComponent,pragma::BaseEntityComponent>("EnvSoundProbeComponent");
 	entsMod[defCEnvSoundProbe];
 
-	auto defCWeather = luabind::class_<CWeatherHandle,BaseEntityComponentHandle>("WeatherComponent");
-	Lua::register_base_env_weather_component_methods<luabind::class_<CWeatherHandle,BaseEntityComponentHandle>,CWeatherHandle>(l,defCWeather);
+	auto defCWeather = luabind::class_<pragma::CWeatherComponent,pragma::BaseEnvWeatherComponent>("WeatherComponent");
 	entsMod[defCWeather];
 
-	auto defCReflectionProbe = luabind::class_<CReflectionProbeHandle,BaseEntityComponentHandle>("ReflectionProbeComponent");
-	defCReflectionProbe.def("GetIBLStrength",static_cast<void(*)(lua_State*,CReflectionProbeHandle&)>([](lua_State *l,CReflectionProbeHandle &hRp) {
-		pragma::Lua::check_component(l,hRp);
-		Lua::PushNumber(l,hRp->GetIBLStrength());
-	}));
-	defCReflectionProbe.def("SetIBLStrength",static_cast<void(*)(lua_State*,CReflectionProbeHandle&,float)>([](lua_State *l,CReflectionProbeHandle &hRp,float strength) {
-		pragma::Lua::check_component(l,hRp);
-		hRp->SetIBLStrength(strength);
-	}));
-	defCReflectionProbe.def("GetIBLMaterialFilePath",static_cast<std::string(*)(lua_State*,CReflectionProbeHandle&)>([](lua_State *l,CReflectionProbeHandle &hRp) -> std::string {
-		pragma::Lua::check_component(l,hRp);
-		return hRp->GetCubemapIBLMaterialFilePath();
-	}));
-	defCReflectionProbe.def("CaptureIBLReflectionsFromScene",static_cast<bool(*)(lua_State*,CReflectionProbeHandle&,luabind::table<>,bool)>(&reflection_probe_capture_ibl_reflections_from_scene));
-	defCReflectionProbe.def("CaptureIBLReflectionsFromScene",static_cast<bool(*)(lua_State*,CReflectionProbeHandle&,luabind::table<>)>(&reflection_probe_capture_ibl_reflections_from_scene));
-	defCReflectionProbe.def("CaptureIBLReflectionsFromScene",static_cast<bool(*)(lua_State*,CReflectionProbeHandle&,bool)>(&reflection_probe_capture_ibl_reflections_from_scene));
-	defCReflectionProbe.def("CaptureIBLReflectionsFromScene",static_cast<bool(*)(lua_State*,CReflectionProbeHandle&)>(&reflection_probe_capture_ibl_reflections_from_scene));
-	defCReflectionProbe.def("RequiresRebuild",static_cast<bool(*)(lua_State*,CReflectionProbeHandle&)>([](lua_State *l,CReflectionProbeHandle &hRp) -> bool {
-		pragma::Lua::check_component(l,hRp);
-		return hRp->RequiresRebuild();
-	}));
+	auto defCReflectionProbe = luabind::class_<pragma::CReflectionProbeComponent,pragma::BaseEntityComponent>("ReflectionProbeComponent");
+	defCReflectionProbe.def("GetIBLStrength",&pragma::CReflectionProbeComponent::GetIBLStrength);
+	defCReflectionProbe.def("SetIBLStrength",&pragma::CReflectionProbeComponent::SetIBLStrength);
+	defCReflectionProbe.def("GetIBLMaterialFilePath",&pragma::CReflectionProbeComponent::GetCubemapIBLMaterialFilePath);
+	defCReflectionProbe.def("CaptureIBLReflectionsFromScene",static_cast<bool(*)(lua_State*,pragma::CReflectionProbeComponent&,luabind::table<>,bool)>(&reflection_probe_capture_ibl_reflections_from_scene));
+	defCReflectionProbe.def("CaptureIBLReflectionsFromScene",static_cast<bool(*)(lua_State*,pragma::CReflectionProbeComponent&,luabind::table<>)>(&reflection_probe_capture_ibl_reflections_from_scene));
+	defCReflectionProbe.def("CaptureIBLReflectionsFromScene",static_cast<bool(*)(lua_State*,pragma::CReflectionProbeComponent&,bool)>(&reflection_probe_capture_ibl_reflections_from_scene));
+	defCReflectionProbe.def("CaptureIBLReflectionsFromScene",static_cast<bool(*)(lua_State*,pragma::CReflectionProbeComponent&)>(&reflection_probe_capture_ibl_reflections_from_scene));
+	defCReflectionProbe.def("RequiresRebuild",&pragma::CReflectionProbeComponent::RequiresRebuild);
 	entsMod[defCReflectionProbe];
 
-	auto defCSkyCamera = luabind::class_<CSkyCameraHandle,BaseEntityComponentHandle>("SkyCameraComponent");
+	auto defCSkyCamera = luabind::class_<pragma::CSkyCameraComponent,pragma::BaseEntityComponent>("SkyCameraComponent");
 	entsMod[defCSkyCamera];
 
-	auto defCPBRConverter = luabind::class_<CPBRConverterHandle,BaseEntityComponentHandle>("PBRConverterComponent");
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,Model&,uint32_t,uint32_t,uint32_t,bool)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,Model&,uint32_t,uint32_t,uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,Model&,uint32_t,uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,Model&)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,BaseEntity&,uint32_t,uint32_t,uint32_t,bool)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,BaseEntity&,uint32_t,uint32_t,uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,BaseEntity&,uint32_t,uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
-	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,CPBRConverterHandle&,BaseEntity&)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	auto defCPBRConverter = luabind::class_<pragma::CPBRConverterComponent,pragma::BaseEntityComponent>("PBRConverterComponent");
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,pragma::CPBRConverterComponent&,Model&,uint32_t,uint32_t,uint32_t,bool)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,pragma::CPBRConverterComponent&,Model&,uint32_t,uint32_t,uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,pragma::CPBRConverterComponent&,Model&,uint32_t,uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,pragma::CPBRConverterComponent&,Model&)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,pragma::CPBRConverterComponent&,BaseEntity&,uint32_t,uint32_t,uint32_t,bool)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,pragma::CPBRConverterComponent&,BaseEntity&,uint32_t,uint32_t,uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,pragma::CPBRConverterComponent&,BaseEntity&,uint32_t,uint32_t)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
+	defCPBRConverter.def("GenerateAmbientOcclusionMaps",static_cast<void(*)(lua_State*,pragma::CPBRConverterComponent&,BaseEntity&)>(Lua::PBRConverter::GenerateAmbientOcclusionMaps));
 	entsMod[defCPBRConverter];
 
-	auto defShadow = luabind::class_<CShadowHandle,BaseEntityComponentHandle>("ShadowMapComponent");
+	auto defShadow = luabind::class_<pragma::CShadowComponent,pragma::BaseEntityComponent>("ShadowMapComponent");
 	entsMod[defShadow];
 
-	auto defShadowCsm = luabind::class_<CShadowCSMHandle,BaseEntityComponentHandle>("CSMComponent");
+	auto defShadowCsm = luabind::class_<pragma::CShadowCSMComponent,pragma::BaseEntityComponent>("CSMComponent");
 	entsMod[defShadowCsm];
 
-	auto defShadowManager = luabind::class_<CShadowManagerHandle,BaseEntityComponentHandle>("ShadowManagerComponent");
+	auto defShadowManager = luabind::class_<pragma::CShadowManagerComponent,pragma::BaseEntityComponent>("ShadowManagerComponent");
 	entsMod[defShadowManager];
 
-	auto defCWaterSurface = luabind::class_<CWaterSurfaceHandle,BaseEntityComponentHandle>("WaterSurfaceComponent");
+	auto defCWaterSurface = luabind::class_<pragma::CWaterSurfaceComponent,pragma::BaseEntityComponent>("WaterSurfaceComponent");
 	entsMod[defCWaterSurface];
 
-	auto defCListener = luabind::class_<CListenerHandle,BaseEntityComponentHandle>("ListenerComponent");
+	auto defCListener = luabind::class_<pragma::CListenerComponent,pragma::BaseEntityComponent>("ListenerComponent");
 	entsMod[defCListener];
 
-	auto defCViewBody = luabind::class_<CViewBodyHandle,BaseEntityComponentHandle>("ViewBodyComponent");
+	auto defCViewBody = luabind::class_<pragma::CViewBodyComponent,pragma::BaseEntityComponent>("ViewBodyComponent");
 	entsMod[defCViewBody];
 
-	auto defCViewModel = luabind::class_<CViewModelHandle,BaseEntityComponentHandle>("ViewModelComponent");
-	defCViewModel.def("GetPlayer",static_cast<luabind::object(*)(lua_State*,CViewModelHandle&)>([](lua_State *l,CViewModelHandle &hVm) -> luabind::object {
-		pragma::Lua::check_component(l,hVm);
-		auto *pl = hVm->GetPlayer();
-		if(pl == nullptr)
-			return {};
-		return pl->GetLuaObject();
-	}));
-	defCViewModel.def("GetWeapon",static_cast<luabind::object(*)(lua_State*,CViewModelHandle&)>([](lua_State *l,CViewModelHandle &hVm) -> luabind::object {
-		pragma::Lua::check_component(l,hVm);
-		auto *wep = hVm->GetWeapon();
-		if(wep == nullptr)
-			return {};
-		return wep->GetLuaObject();
-	}));
+	auto defCViewModel = luabind::class_<pragma::CViewModelComponent,pragma::BaseEntityComponent>("ViewModelComponent");
+	defCViewModel.def("GetPlayer",&pragma::CViewModelComponent::GetPlayer,luabind::game_object_policy<0>{});
+	defCViewModel.def("GetWeapon",&pragma::CViewModelComponent::GetWeapon,luabind::game_object_policy<0>{});
 	entsMod[defCViewModel];
 
-	auto defCSoftBody = luabind::class_<CSoftBodyHandle,BaseEntityComponentHandle>("SoftBodyComponent");
+	auto defCSoftBody = luabind::class_<pragma::CSoftBodyComponent,pragma::BaseSoftBodyComponent>("SoftBodyComponent");
 	entsMod[defCSoftBody];
 
-	auto defCRaytracing = luabind::class_<CRaytracingHandle,BaseEntityComponentHandle>("RaytracingComponent");
+	auto defCRaytracing = luabind::class_<pragma::CRaytracingComponent,pragma::BaseEntityComponent>("RaytracingComponent");
 	entsMod[defCRaytracing];
 
-	auto defCBSPLeaf = luabind::class_<CBSPLeafHandle,BaseEntityComponentHandle>("BSPLeafComponent");
+	auto defCBSPLeaf = luabind::class_<pragma::CBSPLeafComponent,pragma::BaseEntityComponent>("BSPLeafComponent");
 	entsMod[defCBSPLeaf];
 
-	auto defCIo = luabind::class_<CIOHandle,BaseEntityComponentHandle>("IOComponent");
-	Lua::register_base_io_component_methods<luabind::class_<CIOHandle,BaseEntityComponentHandle>,CIOHandle>(l,defCIo);
+	auto defCIo = luabind::class_<pragma::CIOComponent,pragma::BaseIOComponent>("IOComponent");
 	entsMod[defCIo];
 
-	auto defCTimeScale = luabind::class_<CTimeScaleHandle,BaseEntityComponentHandle>("TimeScaleComponent");
-	Lua::register_base_time_scale_component_methods<luabind::class_<CTimeScaleHandle,BaseEntityComponentHandle>,CTimeScaleHandle>(l,defCTimeScale);
+	auto defCTimeScale = luabind::class_<pragma::CTimeScaleComponent,pragma::BaseTimeScaleComponent>("TimeScaleComponent");
 	entsMod[defCTimeScale];
 
-	auto defCAttachable = luabind::class_<CAttachableHandle,BaseEntityComponentHandle>("AttachableComponent");
-	Lua::register_base_attachable_component_methods<luabind::class_<CAttachableHandle,BaseEntityComponentHandle>,CAttachableHandle>(l,defCAttachable);
+	auto defCAttachable = luabind::class_<pragma::CAttachableComponent,pragma::BaseAttachableComponent>("AttachableComponent");
 	entsMod[defCAttachable];
 
-	auto defCParent = luabind::class_<CParentHandle,BaseEntityComponentHandle>("ParentComponent");
-	Lua::register_base_parent_component_methods<luabind::class_<CParentHandle,BaseEntityComponentHandle>,CParentHandle>(l,defCParent);
+	auto defCParent = luabind::class_<pragma::CParentComponent,pragma::BaseParentComponent>("ParentComponent");
 	entsMod[defCParent];
 	
-	auto defCOwnable = luabind::class_<COwnableHandle,BaseEntityComponentHandle>("OwnableComponent");
-	Lua::register_base_ownable_component_methods<luabind::class_<COwnableHandle,BaseEntityComponentHandle>,COwnableHandle>(l,defCOwnable);
+	auto defCOwnable = luabind::class_<pragma::COwnableComponent,pragma::BaseOwnableComponent>("OwnableComponent");
 	entsMod[defCOwnable];
 
-	auto defCDebugText = luabind::class_<CDebugTextHandle,BaseEntityComponentHandle>("DebugTextComponent");
-	Lua::register_base_debug_text_component_methods<luabind::class_<CDebugTextHandle,BaseEntityComponentHandle>,CDebugTextHandle>(l,defCDebugText);
+	auto defCDebugText = luabind::class_<pragma::CDebugTextComponent,pragma::BaseDebugTextComponent>("DebugTextComponent");
 	entsMod[defCDebugText];
 
-	auto defCDebugPoint = luabind::class_<CDebugPointHandle,BaseEntityComponentHandle>("DebugPointComponent");
-	Lua::register_base_debug_point_component_methods<luabind::class_<CDebugPointHandle,BaseEntityComponentHandle>,CDebugPointHandle>(l,defCDebugPoint);
+	auto defCDebugPoint = luabind::class_<pragma::CDebugPointComponent,pragma::BaseDebugPointComponent>("DebugPointComponent");
 	entsMod[defCDebugPoint];
 
-	auto defCDebugLine = luabind::class_<CDebugLineHandle,BaseEntityComponentHandle>("DebugLineComponent");
-	Lua::register_base_debug_line_component_methods<luabind::class_<CDebugLineHandle,BaseEntityComponentHandle>,CDebugLineHandle>(l,defCDebugLine);
+	auto defCDebugLine = luabind::class_<pragma::CDebugLineComponent,pragma::BaseDebugLineComponent>("DebugLineComponent");
 	entsMod[defCDebugLine];
 
-	auto defCDebugBox = luabind::class_<CDebugBoxHandle,BaseEntityComponentHandle>("DebugBoxComponent");
-	Lua::register_base_debug_box_component_methods<luabind::class_<CDebugBoxHandle,BaseEntityComponentHandle>,CDebugBoxHandle>(l,defCDebugBox);
+	auto defCDebugBox = luabind::class_<pragma::CDebugBoxComponent,pragma::BaseDebugBoxComponent>("DebugBoxComponent");
 	entsMod[defCDebugBox];
 
-	auto defCDebugSphere = luabind::class_<CDebugSphereHandle,BaseEntityComponentHandle>("DebugSphereComponent");
-	Lua::register_base_debug_sphere_component_methods<luabind::class_<CDebugSphereHandle,BaseEntityComponentHandle>,CDebugSphereHandle>(l,defCDebugSphere);
+	auto defCDebugSphere = luabind::class_<pragma::CDebugSphereComponent,pragma::BaseDebugSphereComponent>("DebugSphereComponent");
 	entsMod[defCDebugSphere];
 
-	auto defCDebugCone = luabind::class_<CDebugConeHandle,BaseEntityComponentHandle>("DebugConeComponent");
-	Lua::register_base_debug_cone_component_methods<luabind::class_<CDebugConeHandle,BaseEntityComponentHandle>,CDebugConeHandle>(l,defCDebugCone);
+	auto defCDebugCone = luabind::class_<pragma::CDebugConeComponent,pragma::BaseDebugConeComponent>("DebugConeComponent");
 	entsMod[defCDebugCone];
 
-	auto defCDebugCylinder = luabind::class_<CDebugCylinderHandle,BaseEntityComponentHandle>("DebugCylinderComponent");
-	Lua::register_base_debug_cylinder_component_methods<luabind::class_<CDebugCylinderHandle,BaseEntityComponentHandle>,CDebugCylinderHandle>(l,defCDebugCylinder);
+	auto defCDebugCylinder = luabind::class_<pragma::CDebugCylinderComponent,pragma::BaseDebugCylinderComponent>("DebugCylinderComponent");
 	entsMod[defCDebugCylinder];
 
-	auto defCDebugPlane = luabind::class_<CDebugPlaneHandle,BaseEntityComponentHandle>("DebugPlaneComponent");
-	Lua::register_base_debug_plane_component_methods<luabind::class_<CDebugPlaneHandle,BaseEntityComponentHandle>,CDebugPlaneHandle>(l,defCDebugPlane);
+	auto defCDebugPlane = luabind::class_<pragma::CDebugPlaneComponent,pragma::BaseDebugPlaneComponent>("DebugPlaneComponent");
 	entsMod[defCDebugPlane];
 
-	auto defCPointAtTarget = luabind::class_<CPointAtTargetHandle,BaseEntityComponentHandle>("PointAtTargetComponent");
-	Lua::register_base_point_at_target_component_methods<luabind::class_<CPointAtTargetHandle,BaseEntityComponentHandle>,CPointAtTargetHandle>(l,defCPointAtTarget);
+	auto defCPointAtTarget = luabind::class_<pragma::CPointAtTargetComponent,pragma::BasePointAtTargetComponent>("PointAtTargetComponent");
 	entsMod[defCPointAtTarget];
 
-	auto defCBSP = luabind::class_<CBSPHandle,BaseEntityComponentHandle>("BSPComponent");
+	auto defCBSP = luabind::class_<pragma::CBSPComponent,pragma::BaseEntityComponent>("BSPComponent");
 	entsMod[defCBSP];
 
-	auto defCGeneric = luabind::class_<CGenericHandle,BaseEntityComponentHandle>("GenericComponent");
-	//Lua::register_base_generic_component_methods<luabind::class_<CGenericHandle,BaseEntityComponentHandle>,CGenericHandle>(l,defCGeneric);
+	auto defCGeneric = luabind::class_<pragma::CGenericComponent,pragma::BaseGenericComponent>("GenericComponent");
 	entsMod[defCGeneric];
 }
 
 //////////////
 
-void Lua::Flex::GetFlexController(lua_State *l,CFlexHandle &hEnt,uint32_t flexId)
+void Lua::Flex::GetFlexController(lua_State *l,pragma::CFlexComponent &hEnt,uint32_t flexId)
 {
-	pragma::Lua::check_component(l,hEnt);
+	
 	auto val = 0.f;
-	if(hEnt->GetFlexController(flexId,val) == false)
+	if(hEnt.GetFlexController(flexId,val) == false)
 		return;
 	Lua::PushNumber(l,val);
 }
-void Lua::Flex::GetFlexController(lua_State *l,CFlexHandle &hEnt,const std::string &flexController)
+void Lua::Flex::GetFlexController(lua_State *l,pragma::CFlexComponent &hEnt,const std::string &flexController)
 {
-	pragma::Lua::check_component(l,hEnt);
+	
 	auto flexId = 0u;
-	auto mdlComponent = hEnt->GetEntity().GetModelComponent();
+	auto mdlComponent = hEnt.GetEntity().GetModelComponent();
 	if(!mdlComponent || mdlComponent->LookupFlexController(flexController,flexId) == false)
 		return;
 	auto val = 0.f;
-	if(hEnt->GetFlexController(flexId,val) == false)
+	if(hEnt.GetFlexController(flexId,val) == false)
 		return;
 	Lua::PushNumber(l,val);
 }
-void Lua::Flex::CalcFlexValue(lua_State *l,CFlexHandle &hEnt,uint32_t flexId)
+void Lua::Flex::CalcFlexValue(lua_State *l,pragma::CFlexComponent &hEnt,uint32_t flexId)
 {
-	pragma::Lua::check_component(l,hEnt);
+	
 	auto val = 0.f;
-	if(hEnt->CalcFlexValue(flexId,val) == false)
+	if(hEnt.CalcFlexValue(flexId,val) == false)
 		return;
 	Lua::PushNumber(l,val);
 }
 
 //////////////
 
-void Lua::SoundEmitter::CreateSound(lua_State *l,CSoundEmitterHandle &hEnt,std::string sndname,uint32_t soundType,bool bTransmit)
+void Lua::SoundEmitter::CreateSound(lua_State *l,pragma::CSoundEmitterComponent &hEnt,std::string sndname,uint32_t soundType,bool bTransmit)
 {
-	pragma::Lua::check_component(l,hEnt);
-	auto snd = hEnt->CreateSound(sndname,static_cast<ALSoundType>(soundType));
+	
+	auto snd = hEnt.CreateSound(sndname,static_cast<ALSoundType>(soundType));
 	if(snd == nullptr)
 		return;
 	luabind::object(l,snd).push(l);
 }
-void Lua::SoundEmitter::EmitSound(lua_State *l,CSoundEmitterHandle &hEnt,std::string sndname,uint32_t soundType,float gain,float pitch,bool bTransmit)
+void Lua::SoundEmitter::EmitSound(lua_State *l,pragma::CSoundEmitterComponent &hEnt,std::string sndname,uint32_t soundType,float gain,float pitch,bool bTransmit)
 {
-	pragma::Lua::check_component(l,hEnt);
-	auto snd = hEnt->EmitSound(sndname,static_cast<ALSoundType>(soundType),gain,pitch);
+	
+	auto snd = hEnt.EmitSound(sndname,static_cast<ALSoundType>(soundType),gain,pitch);
 	if(snd == nullptr)
 		return;
 	luabind::object(l,snd).push(l);
@@ -1196,13 +964,13 @@ void Lua::SoundEmitter::EmitSound(lua_State *l,CSoundEmitterHandle &hEnt,std::st
 
 //////////////
 
-void Lua::ParticleSystem::Stop(lua_State *l,CParticleSystemHandle &hComponent,bool bStopImmediately)
+void Lua::ParticleSystem::Stop(lua_State *l,pragma::CParticleSystemComponent &hComponent,bool bStopImmediately)
 {
-	pragma::Lua::check_component(l,hComponent);
+	
 	if(bStopImmediately == true)
-		hComponent->Stop();
+		hComponent.Stop();
 	else
-		hComponent->Die();
+		hComponent.Die();
 }
 void Lua::ParticleSystem::AddInitializer(lua_State *l,pragma::CParticleSystemComponent &hComponent,std::string name,luabind::object o)
 {

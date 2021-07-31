@@ -189,7 +189,7 @@ void CReflectionProbeComponent::RaytracingJobManager::Finalize()
 ////////////////
 
 //static auto *GUI_EL_NAME = "cubemap_generation_image";
-static std::queue<util::WeakHandle<CReflectionProbeComponent>> g_reflectionProbeQueue = {};
+static std::queue<pragma::ComponentHandle<CReflectionProbeComponent>> g_reflectionProbeQueue = {};
 static std::vector<CReflectionProbeComponent*> get_probes()
 {
 	if(c_game == nullptr)
@@ -383,7 +383,7 @@ CReflectionProbeComponent::UpdateStatus CReflectionProbeComponent::UpdateIBLData
 	return UpdateStatus::Complete;
 }
 
-luabind::object CReflectionProbeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CReflectionProbeComponentHandleWrapper>(l);}
+void CReflectionProbeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 bool CReflectionProbeComponent::SaveIBLReflectionsToFile()
 {
@@ -961,7 +961,7 @@ void Console::commands::debug_pbr_ibl(NetworkState *state,pragma::BasePlayerComp
 		pSlider->SetRange(0.f,maxLod,0.01f);
 		pSlider->SetPostFix(" LOD");
 		auto hBrdf = pBrdf->GetHandle();
-		pSlider->AddCallback("OnChange",FunctionCallback<void,float,float>::Create([hBrdf](float oldVal,float newVal) {
+		pSlider->AddCallback("OnChange",FunctionCallback<void,float,float>::Create([hBrdf](float oldVal,float newVal) mutable {
 			if(hBrdf.IsValid() == false)
 				return;
 			static_cast<WITexturedRect*>(hBrdf.get())->SetLOD(newVal);
@@ -988,7 +988,7 @@ void Console::commands::debug_pbr_ibl(NetworkState *state,pragma::BasePlayerComp
 		pSlider->SetRange(0.f,maxLod,0.01f);
 		pSlider->SetPostFix(" LOD");
 		auto hIrradiance = pIrradiance->GetHandle();
-		pSlider->AddCallback("OnChange",FunctionCallback<void,float,float>::Create([hIrradiance](float oldVal,float newVal) {
+		pSlider->AddCallback("OnChange",FunctionCallback<void,float,float>::Create([hIrradiance](float oldVal,float newVal) mutable {
 			if(hIrradiance.IsValid() == false)
 				return;
 			static_cast<WITexturedCubemap*>(hIrradiance.get())->SetLOD(newVal);
@@ -1015,7 +1015,7 @@ void Console::commands::debug_pbr_ibl(NetworkState *state,pragma::BasePlayerComp
 		pSlider->SetRange(0.f,maxLod,0.01f);
 		pSlider->SetPostFix(" LOD");
 		auto hPrefilter = pPrefilter->GetHandle();
-		pSlider->AddCallback("OnChange",FunctionCallback<void,float,float>::Create([hPrefilter](float oldVal,float newVal) {
+		pSlider->AddCallback("OnChange",FunctionCallback<void,float,float>::Create([hPrefilter](float oldVal,float newVal) mutable {
 			if(hPrefilter.IsValid() == false)
 				return;
 			static_cast<WITexturedCubemap*>(hPrefilter.get())->SetLOD(newVal);

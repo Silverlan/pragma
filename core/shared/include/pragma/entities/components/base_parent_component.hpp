@@ -21,15 +21,15 @@ namespace pragma
 
 		void UpdateChildAttachmentData();
 
-		const std::vector<util::WeakHandle<BaseAttachableComponent>> &GetChildren() const;
-		std::vector<util::WeakHandle<BaseAttachableComponent>> &GetChildren();
+		const std::vector<pragma::ComponentHandle<BaseAttachableComponent>> &GetChildren() const;
+		std::vector<pragma::ComponentHandle<BaseAttachableComponent>> &GetChildren();
 	protected:
 		friend BaseAttachableComponent;
 		BaseParentComponent(BaseEntity &ent);
 		void AddChild(BaseAttachableComponent &ent);
 		void RemoveChild(BaseAttachableComponent &ent);
 
-		std::vector<util::WeakHandle<BaseAttachableComponent>> m_children = {};
+		std::vector<pragma::ComponentHandle<BaseAttachableComponent>> m_children = {};
 	};
 };
 

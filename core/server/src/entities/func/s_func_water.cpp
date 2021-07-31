@@ -174,7 +174,7 @@ const Quat &SWaterComponent::GetOrientation() const
 
 ///////////////
 
-luabind::object SWaterComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SWaterComponentHandleWrapper>(l);}
+void SWaterComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void FuncWater::Initialize()
 {

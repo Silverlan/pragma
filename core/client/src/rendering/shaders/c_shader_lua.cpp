@@ -332,7 +332,7 @@ bool pragma::LuaShaderTextured3D::BindEntity(CBaseEntity &ent)
 {
 	if(ShaderGameWorldLightingPass::BindEntity(ent) == false)
 		return false;
-	auto &o = *ent.GetLuaObject();
+	auto &o = ent.GetLuaObject();
 	CallLuaMember<void,luabind::object>("OnBindEntity",o);
 	return true;
 }
@@ -436,7 +436,7 @@ bool pragma::LuaShaderPbr::BindEntity(CBaseEntity &ent)
 {
 	if(ShaderPBR::BindEntity(ent) == false)
 		return false;
-	auto &o = *ent.GetLuaObject();
+	auto &o = ent.GetLuaObject();
 	CallLuaMember<void,luabind::object>("OnBindEntity",o);
 	return true;
 }

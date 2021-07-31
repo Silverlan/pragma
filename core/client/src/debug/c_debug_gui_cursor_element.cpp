@@ -121,7 +121,7 @@ bool GUIDebugCursorManager::Initialize()
 
 bool GUIDebugCursorManager::ShouldPass(WIBase &el) const
 {
-	if(el.IsVisible() == false || &el == m_hText.get() || el.IsDescendantOf(m_hText.get()))
+	if(el.IsVisible() == false || &el == m_hText.get() || el.IsDescendantOf(const_cast<WIBase*>(m_hText.get())))
 		return false;
 	for(auto &hEl : m_borderElements)
 	{

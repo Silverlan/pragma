@@ -12,7 +12,7 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-luabind::object CBSPComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CBSPComponentHandleWrapper>(l);}
+void CBSPComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CBSPComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

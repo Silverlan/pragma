@@ -37,7 +37,7 @@ namespace pragma
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 		UsableComponent(BaseEntity &ent);
 		virtual void Initialize() override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 
 		bool CanUse(BaseEntity *pl) const;
 		void OnUse(BaseEntity *pl);

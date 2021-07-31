@@ -22,7 +22,7 @@ void CNetworkedComponent::ReceiveData(NetPacket &packet)
 		m_networkedVarNames.push_back(packet->ReadString());
 #endif
 }
-luabind::object CNetworkedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CNetworkedComponentHandleWrapper>(l);}
+void CNetworkedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 Bool CNetworkedComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
 {
 #if NETWORKED_VARS_ENABLED != 0

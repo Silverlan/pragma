@@ -25,6 +25,7 @@
 #include <queue>
 #include <wgui/wihandle.h>
 #include <sharedutils/property/util_property.hpp>
+#include <sharedutils/util_shared_handle.hpp>
 
 static constexpr auto LOD_SWAP_DISTANCE = 500.f;
 static constexpr auto LOD_SWAP_DISTANCE_SQR = umath::pow2(LOD_SWAP_DISTANCE);
@@ -39,9 +40,10 @@ struct DLLCLIENT KeyAction
 	int key,action;
 };
 
-class CBaseEntity;
 class WIBase;
-class WIHandle;
+using WIHandle = util::TWeakSharedHandle<WIBase>;
+
+class CBaseEntity;
 class ShaderScreen;
 class CBrushMesh;
 class CModelMesh;
@@ -552,7 +554,7 @@ private:
 	std::unique_ptr<GlobalRenderSettingsBufferData> m_globalRenderSettingsBufferData = nullptr;
 
 	// Scene
-	util::WeakHandle<pragma::CSceneComponent> m_scene = {};
+	util::TWeakSharedHandle<pragma::CSceneComponent> m_scene = util::TWeakSharedHandle<pragma::CSceneComponent>{};
 	std::shared_ptr<WorldEnvironment> m_worldEnvironment = nullptr;
 
 	void OnEnvironmentLightSourceChanged(pragma::CLightDirectionalComponent *oldSource,pragma::CLightDirectionalComponent *newSource);
@@ -567,14 +569,14 @@ private:
 	std::vector<CBaseEntity*> m_shEnts;
 	std::vector<CBaseEntity*> m_entsOccluded;
 	std::vector<BaseEntity*> m_shBaseEnts;
-	util::WeakHandle<pragma::CLightDirectionalComponent> m_hEnvLight = {};
-	util::WeakHandle<pragma::CListenerComponent> m_listener = {};
-	util::WeakHandle<pragma::CPlayerComponent> m_plLocal = {};
-	util::WeakHandle<pragma::CViewModelComponent> m_viewModel = {};
-	util::WeakHandle<pragma::CViewBodyComponent> m_viewBody = {};
-	util::WeakHandle<pragma::CCameraComponent> m_primaryCamera = {};
+	util::TWeakSharedHandle<pragma::CLightDirectionalComponent> m_hEnvLight = util::TWeakSharedHandle<pragma::CLightDirectionalComponent>{};
+	util::TWeakSharedHandle<pragma::CListenerComponent> m_listener = util::TWeakSharedHandle<pragma::CListenerComponent>{};
+	util::TWeakSharedHandle<pragma::CPlayerComponent> m_plLocal = util::TWeakSharedHandle<pragma::CPlayerComponent>{};
+	util::TWeakSharedHandle<pragma::CViewModelComponent> m_viewModel = util::TWeakSharedHandle<pragma::CViewModelComponent>{};
+	util::TWeakSharedHandle<pragma::CViewBodyComponent> m_viewBody = util::TWeakSharedHandle<pragma::CViewBodyComponent>{};
+	util::TWeakSharedHandle<pragma::CCameraComponent> m_primaryCamera = util::TWeakSharedHandle<pragma::CCameraComponent>{};
 
-	util::WeakHandle<pragma::CSceneComponent> m_renderScene = {};
+	util::TWeakSharedHandle<pragma::CSceneComponent> m_renderScene = util::TWeakSharedHandle<pragma::CSceneComponent>{};
 
 	// Map
 	virtual std::shared_ptr<pragma::nav::Mesh> LoadNavMesh(const std::string &fname) override;

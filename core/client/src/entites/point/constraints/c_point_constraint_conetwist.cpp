@@ -29,7 +29,7 @@ void CPointConstraintConeTwistComponent::ReceiveData(NetPacket &packet)
 	// m_kvBiasFactor = packet->Read<float>();
 	m_kvRelaxationFactor = packet->Read<float>();
 }
-luabind::object CPointConstraintConeTwistComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CPointConstraintConeTwistComponentHandleWrapper>(l);}
+void CPointConstraintConeTwistComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void CPointConstraintConeTwist::Initialize()
 {

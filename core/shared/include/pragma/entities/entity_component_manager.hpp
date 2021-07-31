@@ -9,6 +9,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/entities/entity_component_info.hpp"
+#include "pragma/types.hpp"
 #include <cinttypes>
 #include <string>
 #include <functional>
@@ -57,7 +58,7 @@ namespace pragma
 		struct DLLNETWORK ComponentInfo
 		{
 			std::string name;
-			std::function<std::shared_ptr<BaseEntityComponent>(BaseEntity&)> factory = nullptr;
+			std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity&)> factory = nullptr;
 			ComponentId id = std::numeric_limits<uint32_t>::max();
 			ComponentFlags flags = ComponentFlags::None;
 
@@ -77,13 +78,13 @@ namespace pragma
 			std::unique_ptr<std::type_index> componentType = nullptr;
 		};
 
-		std::shared_ptr<BaseEntityComponent> CreateComponent(const std::string &name,BaseEntity &ent) const;
-		std::shared_ptr<BaseEntityComponent> CreateComponent(ComponentId componentId,BaseEntity &ent) const;
+		util::TSharedHandle<BaseEntityComponent> CreateComponent(const std::string &name,BaseEntity &ent) const;
+		util::TSharedHandle<BaseEntityComponent> CreateComponent(ComponentId componentId,BaseEntity &ent) const;
 		template<class TComponent,typename=std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<BaseEntityComponent,TComponent>::value>>
-			std::shared_ptr<TComponent> CreateComponent(BaseEntity &ent) const;
+			util::TSharedHandle<TComponent> CreateComponent(BaseEntity &ent) const;
 		ComponentId PreRegisterComponentType(const std::string &name);
-		ComponentId RegisterComponentType(const std::string &name,const std::function<std::shared_ptr<BaseEntityComponent>(BaseEntity&)> &factory,ComponentFlags flags,std::type_index typeIndex);
-		ComponentId RegisterComponentType(const std::string &name,const std::function<std::shared_ptr<BaseEntityComponent>(BaseEntity&)> &factory,ComponentFlags flags);
+		ComponentId RegisterComponentType(const std::string &name,const std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity&)> &factory,ComponentFlags flags,std::type_index typeIndex);
+		ComponentId RegisterComponentType(const std::string &name,const std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity&)> &factory,ComponentFlags flags);
 		template<class TComponent,typename=std::enable_if_t<std::is_final<TComponent>::value && std::is_base_of<BaseEntityComponent,TComponent>::value>>
 			ComponentId RegisterComponentType(const std::string &name);
 		bool GetComponentTypeId(const std::string &name,ComponentId &outId,bool bIncludePreregistered=true) const;
@@ -128,7 +129,7 @@ namespace pragma
 		// Automatically called when a component was removed; Don't call this manually!
 		void DeregisterComponent(BaseEntityComponent &component);
 	private:
-		ComponentId RegisterComponentType(const std::string &name,const std::function<std::shared_ptr<BaseEntityComponent>(BaseEntity&)> &factory,ComponentFlags flags,const std::type_index *typeIndex);
+		ComponentId RegisterComponentType(const std::string &name,const std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity&)> &factory,ComponentFlags flags,const std::type_index *typeIndex);
 		virtual void OnComponentTypeRegistered(const ComponentInfo &componentInfo);
 
 		std::vector<ComponentInfo> m_preRegistered;
@@ -156,12 +157,12 @@ template<class TComponent,typename>
 		flags |= ComponentFlags::Networked;
 	TComponent::RegisterEvents(*this);
 	return RegisterComponentType(name,[](BaseEntity &ent) {
-		return std::static_pointer_cast<BaseEntityComponent>(std::make_shared<TComponent>(ent));
+		return util::TSharedHandle<BaseEntityComponent>{new TComponent{ent},[](pragma::BaseEntityComponent *c) {delete c;}};
 	},flags,std::type_index(typeid(TComponent)));
 }
 
 template<class TComponent,typename>
-	std::shared_ptr<TComponent> pragma::EntityComponentManager::CreateComponent(BaseEntity &ent) const
+	util::TSharedHandle<TComponent> pragma::EntityComponentManager::CreateComponent(BaseEntity &ent) const
 {
 	auto it = std::find(m_componentInfos.begin(),m_componentInfos.end(),std::type_index(typeid(TComponent)));
 	if(it == m_componentInfos.end())

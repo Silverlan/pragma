@@ -291,7 +291,7 @@ void ShadowRenderer::RenderShadows(
 	auto &tex = smRt->GetTexture();
 	auto *scene = c_game->GetScene();
 	auto *renderer = scene ? scene->GetRenderer() : nullptr;
-	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent>{};
 	if(raster.expired())
 		return;
 

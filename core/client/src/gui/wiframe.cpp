@@ -40,40 +40,40 @@ void WIFrame::Initialize()
 	{
 		auto &gui = WGUI::GetInstance();
 		m_hTitleBar = gui.Create<WIBase>(m_hMoveRect.get())->GetHandle();
-		WIBase *pTitleBar = m_hTitleBar.get<WIBase>();
+		WIBase *pTitleBar = m_hTitleBar.get();
 		pTitleBar->AddStyleClass("frame_titlebar");
 		pTitleBar->SetAutoAlignToParent(true);
 		auto hFrame = GetHandle();
-		pTitleBar->AddCallback("SetSize",FunctionCallback<>::Create([hFrame]() {
+		pTitleBar->AddCallback("SetSize",FunctionCallback<>::Create([hFrame]() mutable {
 			if(!hFrame.IsValid())
 				return;
-			auto *pFrame = hFrame.get<WIFrame>();
+			auto *pFrame = static_cast<WIFrame*>(hFrame.get());
 			if(!pFrame->m_hTitleBar.IsValid())
 				return;
-			auto *pTitleBar = pFrame->m_hTitleBar.get<WIBase>();
+			auto *pTitleBar = pFrame->m_hTitleBar.get();
 			if(pFrame->m_hClose.IsValid())
 			{
-				WIButton *pButton = pFrame->m_hClose.get<WIButton>();
+				WIButton *pButton = static_cast<WIButton*>(pFrame->m_hClose.get());
 				pButton->SetX(pTitleBar->GetWidth() -pButton->GetWidth() -10);
 				pButton->SetY(CInt32(pTitleBar->GetHeight() *0.5f -pButton->GetHeight() *0.5f));
 			}
 			if(pFrame->m_hTitle.IsValid())
 			{
-				WIText *pText = pFrame->m_hTitle.get<WIText>();
+				WIText *pText = static_cast<WIText*>(pFrame->m_hTitle.get());
 				pText->SetX(10);
 				pText->SetY(CInt32(pTitleBar->GetHeight() *0.5f -pText->GetHeight() *0.5f));
 			}
 		}));
 	
 		m_hTitle = gui.Create<WIText>(pTitleBar)->GetHandle();
-		WIText *pTitle = m_hTitle.get<WIText>();
+		WIText *pTitle = static_cast<WIText*>(m_hTitle.get());
 		pTitle->AddStyleClass("frame_title");
 		pTitle->SetName("frame_title");
 		if(pTitle != nullptr)
 			pTitle->SetVisible(false);
 
 		m_hClose = gui.Create<WIButton>(pTitleBar)->GetHandle();
-		WIButton *pButton = m_hClose.get<WIButton>();
+		WIButton *pButton = static_cast<WIButton*>(m_hClose.get());
 		pButton->SetText("X");
 		pButton->AddCallback("OnPressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this](util::EventReply *reply) -> CallbackReturnType {
 			*reply = util::EventReply::Handled;
@@ -125,7 +125,7 @@ void WIFrame::SetTitle(std::string title)
 {
 	if(!m_hTitle.IsValid())
 		return;
-	WIText *pText = m_hTitle.get<WIText>();
+	WIText *pText = static_cast<WIText*>(m_hTitle.get());
 	pText->SetText(title);
 	pText->SizeToContents();
 	pText->SetVisible(!title.empty());
@@ -134,5 +134,5 @@ std::string WIFrame::GetTitle() const
 {
 	if(!m_hTitle.IsValid())
 		return "";
-	return m_hTitle.get<WIText>()->GetText();
+	return static_cast<const WIText*>(m_hTitle.get())->GetText();
 }

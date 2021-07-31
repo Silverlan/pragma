@@ -10,6 +10,7 @@
 
 #include "pragma/clientdefinitions.h"
 #include "pragma/particlesystem/c_particlemodifier.h"
+#include <pragma/types.hpp>
 
 namespace prosper {class Buffer;};
 class DLLCLIENT CParticleRendererRotationalBuffer
@@ -25,7 +26,7 @@ protected:
 	uint64_t m_lastFrameUpdate = std::numeric_limits<uint64_t>::max();
 	std::shared_ptr<prosper::IBuffer> m_rotBuffer = nullptr;
 	std::vector<Quat> m_rotations;
-	util::WeakHandle<pragma::CParticleSystemComponent> m_hParticleSystem = {};
+	pragma::ComponentHandle<pragma::CParticleSystemComponent> m_hParticleSystem = {};
 	bool m_bAlignVelocity = false;
 };
 

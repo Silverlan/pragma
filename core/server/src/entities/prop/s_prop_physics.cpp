@@ -16,7 +16,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(prop_physics,PropPhysics);
 
-luabind::object SPropPhysicsComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SPropPhysicsComponentHandleWrapper>(l);}
+void SPropPhysicsComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void PropPhysics::Initialize()
 {

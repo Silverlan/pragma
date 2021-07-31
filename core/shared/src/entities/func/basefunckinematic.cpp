@@ -129,7 +129,7 @@ void BaseFuncKinematicComponent::MoveToTarget(BaseEntity *node,float speed)
 	//kinematic->SetKinematicTarget(posTarget);
 	if(d <= speed)
 	{
-		m_nextNode = {};
+		m_nextNode = EntityHandle{};
 		UpdateTickPolicy();
 		auto *ptrPathNodeComponent = static_cast<pragma::BasePointPathNodeComponent*>(node->FindComponent("path_node").get());
 		if(ptrPathNodeComponent != nullptr)

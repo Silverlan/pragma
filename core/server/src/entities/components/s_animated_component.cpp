@@ -19,7 +19,7 @@ void SAnimatedComponent::Initialize()
 {
 	BaseAnimatedComponent::Initialize();
 }
-luabind::object SAnimatedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SAnimatedComponentHandleWrapper>(l);}
+void SAnimatedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void SAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	BaseAnimatedComponent::RegisterEvents(componentManager);

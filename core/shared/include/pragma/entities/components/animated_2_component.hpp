@@ -44,7 +44,7 @@ namespace pragma
 		void RemoveAnimationManager(const animation::AnimationManager &player);
 		void ClearAnimationManagers();
 		
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		using BaseEntityComponent::Load;
 	protected:

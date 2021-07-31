@@ -16,7 +16,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_decal,EnvDecal);
 
-luabind::object SDecalComponent::InitializeLuaObject(lua_State *l) {return BaseEnvDecalComponent::InitializeLuaObject<SDecalComponentHandleWrapper>(l);}
+void SDecalComponent::InitializeLuaObject(lua_State *l) {return BaseEnvDecalComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void SDecalComponent::Initialize()
 {

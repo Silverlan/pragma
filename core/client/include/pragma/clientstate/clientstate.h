@@ -11,7 +11,6 @@
 #include "pragma/c_enginedefinitions.h"
 #include "pragma/clientdefinitions.h"
 #include <pragma/networkstate/networkstate.h>
-#include <wgui/wihandle.h>
 #include <pragma/networking/portinfo.h>
 #include "pragma/game/c_game.h"
 #include "pragma/audio/c_alsound.h"

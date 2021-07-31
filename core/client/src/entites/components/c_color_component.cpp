@@ -15,7 +15,7 @@ void CColorComponent::ReceiveData(NetPacket &packet)
 {
 	*m_color = packet->Read<Color>();
 }
-luabind::object CColorComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CColorComponentHandleWrapper>(l);}
+void CColorComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 Bool CColorComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
 {
 	if(eventId == m_netEvSetColor)

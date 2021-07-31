@@ -132,7 +132,8 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 	m_waterScene = std::make_unique<WaterScene>();
 	m_waterScene->descSetGroupTexEffects = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderWater::DESCRIPTOR_SET_WATER);
 	auto *sceneC = pragma::CSceneComponent::Create(pragma::CSceneComponent::CreateInfo{});
-	auto &sceneReflection = m_waterScene->sceneReflection = sceneC ? sceneC->GetHandle<pragma::CSceneComponent>() : util::WeakHandle<pragma::CSceneComponent>{};
+	auto &sceneReflection = m_waterScene->sceneReflection;
+	sceneReflection = sceneC ? sceneC->GetHandle<pragma::CSceneComponent>() : pragma::ComponentHandle<pragma::CSceneComponent>{};
 	sceneReflection->ReloadRenderTarget(width,height);
 	if(cam)
 	{
@@ -288,7 +289,7 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 			return;
 		auto *scene = c_game->GetRenderScene();
 		auto *renderer = scene ? dynamic_cast<pragma::CRasterizationRendererComponent*>(scene->GetRenderer()) : nullptr;
-		auto camScene = scene ? scene->GetActiveCamera() : util::WeakHandle<pragma::CCameraComponent>{};
+		auto camScene = scene ? scene->GetActiveCamera() : pragma::ComponentHandle<pragma::CCameraComponent>{};
 		if(renderer == nullptr || camScene.expired())
 			return;
 		auto &waterScene = *m_waterScene;

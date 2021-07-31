@@ -229,7 +229,7 @@ template<typename T0,typename T1>
 
 #define lua_pushentity(luastate,ent) \
 	{ \
-		ent->GetLuaObject()->push(luastate); \
+		ent->GetLuaObject().push(luastate); \
 	}
 
 #define lua_pushtablecfunction(l,tablename,funcname,cfuncref) \

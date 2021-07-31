@@ -14,7 +14,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(info_landmark,InfoLandmark);
 
-luabind::object SInfoLandmarkComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SInfoLandmarkComponentHandleWrapper>(l);}
+void SInfoLandmarkComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void InfoLandmark::Initialize()
 {

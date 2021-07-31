@@ -34,7 +34,7 @@ void CAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &componen
 	EVENT_ON_BONE_BUFFER_INITIALIZED = componentManager.RegisterEvent("ON_BONE_BUFFER_INITIALIZED");
 }
 void CAnimatedComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BaseAnimatedComponent));}
-luabind::object CAnimatedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CAnimatedComponentHandleWrapper>(l);}
+void CAnimatedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 static std::shared_ptr<prosper::IUniformResizableBuffer> s_instanceBoneBuffer = nullptr;
 const std::shared_ptr<prosper::IUniformResizableBuffer> &pragma::get_instance_bone_buffer() {return s_instanceBoneBuffer;}
 void pragma::initialize_articulated_buffers()

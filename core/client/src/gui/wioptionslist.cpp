@@ -115,7 +115,7 @@ WITableRow *WIOptionsList::AddRow(const std::optional<std::string> &identifier)
 WITableRow *WIOptionsList::GetRow(const std::string &identifier) const
 {
 	auto it = m_rows.find(identifier);
-	return (it != m_rows.end()) ? dynamic_cast<WITableRow*>(it->second.get()) : nullptr;
+	return (it != m_rows.end()) ? const_cast<WITableRow*>(dynamic_cast<const WITableRow*>(it->second.get())) : nullptr;
 }
 
 WICheckbox *WIOptionsList::AddToggleChoice(const std::string &name,const std::string &cvarName,const std::function<std::string(bool)> &translator,const std::function<bool(std::string)> &translator2)
@@ -129,7 +129,7 @@ WICheckbox *WIOptionsList::AddToggleChoice(const std::string &name,const std::st
 	if((translator2 == nullptr) ? c_engine->GetConVarBool(cvarName) : translator2(c_engine->GetConVarString(cvarName)))
 		pCheckbox->SetChecked(true);
 	auto hOptions = GetHandle();
-	pCheckbox->AddCallback("OnChange",FunctionCallback<void,bool>::Create([hOptions,cvarName,translator](bool bChecked) {
+	pCheckbox->AddCallback("OnChange",FunctionCallback<void,bool>::Create([hOptions,cvarName,translator](bool bChecked) mutable {
 		if(!hOptions.IsValid())
 			return;
 		hOptions.get<WIOptionsList>()->m_updateCvars[cvarName] = (translator == nullptr) ? std::to_string(bChecked) : translator(bChecked);
@@ -160,7 +160,7 @@ template<class T>
 	if(cvarName.empty() == false)
 	{
 		pChoiceList->SelectChoice(client->GetConVarString(cvarName));
-		pChoiceList->AddCallback("OnSelect",FunctionCallback<void,uint32_t,std::reference_wrapper<std::string>>::Create([hOptions,cvarName](uint32_t,std::reference_wrapper<std::string> value) {
+		pChoiceList->AddCallback("OnSelect",FunctionCallback<void,uint32_t,std::reference_wrapper<std::string>>::Create([hOptions,cvarName](uint32_t,std::reference_wrapper<std::string> value) mutable {
 			if(!hOptions.IsValid())
 				return;
 			hOptions.get<WIOptionsList>()->m_updateCvars[cvarName] = value;
@@ -193,7 +193,7 @@ template<class T>
 	{
 		auto hOptions = GetHandle();
 		pDropDownMenu->SelectOption(client->GetConVarString(cvarName));
-		pDropDownMenu->AddCallback("OnOptionSelected",FunctionCallback<void,uint32_t>::Create([hOptions,pDropDownMenu,cvarName](uint32_t optionIdx) {
+		pDropDownMenu->AddCallback("OnOptionSelected",FunctionCallback<void,uint32_t>::Create([hOptions,pDropDownMenu,cvarName](uint32_t optionIdx) mutable {
 			if(!hOptions.IsValid())
 				return;
 			hOptions.get<WIOptionsList>()->m_updateCvars[cvarName] = pDropDownMenu->GetOptionValue(optionIdx);
@@ -249,7 +249,7 @@ WITextEntry *WIOptionsList::AddTextEntry(const std::string &name,const std::stri
 	{
 		auto hOptions = GetHandle();
 		pTextEntry->SetText(client->GetConVarString(cvarName));
-		pTextEntry->AddCallback("OnTextChanged",FunctionCallback<void,std::reference_wrapper<const std::string>,bool>::Create([hOptions,cvarName](std::reference_wrapper<const std::string> text,bool) {
+		pTextEntry->AddCallback("OnTextChanged",FunctionCallback<void,std::reference_wrapper<const std::string>,bool>::Create([hOptions,cvarName](std::reference_wrapper<const std::string> text,bool) mutable {
 			if(!hOptions.IsValid())
 				return;
 			hOptions.get<WIOptionsList>()->m_updateCvars[cvarName] = text;
@@ -275,7 +275,7 @@ WISlider *WIOptionsList::AddSlider(const std::string &name,const std::function<v
 	{
 		auto hOptions = GetHandle();
 		pSlider->SetValue(client->GetConVarFloat(cvarName));
-		pSlider->AddCallback("OnChange",FunctionCallback<void,float,float>::Create([hOptions,cvarName](float,float value) {
+		pSlider->AddCallback("OnChange",FunctionCallback<void,float,float>::Create([hOptions,cvarName](float,float value)mutable {
 			if(!hOptions.IsValid())
 				return;
 			hOptions.get<WIOptionsList>()->m_updateCvars[cvarName] = std::to_string(value);
@@ -295,7 +295,7 @@ void WIOptionsList::AddKeyBinding(const std::string &keyName,const std::string &
 	auto key2 = (mappedKeys.size() > 1) ? mappedKeys.at(1) : static_cast<GLFW::Key>(-1);
 	row->SetValue(0,keyName);
 	WIHandle hOptionsList = GetHandle();
-	auto callback = [hOptionsList,cvarName](int entryId,WIHandle hKeyOther,GLFW::Key oldKey,GLFW::Key newKey) {
+	auto callback = [hOptionsList,cvarName](int entryId,WIHandle hKeyOther,GLFW::Key oldKey,GLFW::Key newKey) mutable {
 		if(!hOptionsList.IsValid())
 			return;
 		auto *pOptionsList = hOptionsList.get<WIOptionsList>();

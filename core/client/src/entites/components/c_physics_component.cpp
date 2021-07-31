@@ -70,7 +70,7 @@ void CPhysicsComponent::OnEntitySpawn()
 	if(m_physicsType != PHYSICSTYPE::NONE)
 		InitializePhysics(m_physicsType);
 }
-luabind::object CPhysicsComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CPhysicsComponentHandleWrapper>(l);}
+void CPhysicsComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CPhysicsComponent::PrePhysicsSimulate()
 {
 	auto dt = c_game->DeltaTime();

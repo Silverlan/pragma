@@ -34,8 +34,8 @@ void Lua::Vector::Rotate(lua_State*,Vector3 &vec,const EulerAngles &ang) {uvec::
 void Lua::Vector::Rotate(lua_State*,Vector3 &vec,const Vector3 &normal,float angle) {vec = glm::rotate(vec,angle,normal);}
 void Lua::Vector::Rotate(lua_State*,Vector3 &vec,const Quat &orientation) {uvec::rotate(&vec,orientation);}
 void Lua::Vector::RotateAround(lua_State*,Vector3 &vec,const Vector3 &origin,const EulerAngles &ang) {uvec::rotate_around(&vec,ang,origin);}
-void Lua::Vector::Copy(lua_State *l,const Vector3 &vec) {luabind::object(l,vec).push(l);}
-void Lua::Vector::Lerp(lua_State *l,const Vector3 &vec,const Vector3 &vecB,float factor) {luabind::object(l,uvec::lerp(vec,vecB,factor)).push(l);}
+::Vector3 Lua::Vector::Copy(lua_State *l,const Vector3 &vec) {return vec;}
+::Vector3 Lua::Vector::Lerp(lua_State *l,const Vector3 &vec,const Vector3 &vecB,float factor) {return uvec::lerp(vec,vecB,factor);}
 
 void Lua::Vector::Set(lua_State*,Vector3 &vec,const Vector3 &vecB)
 {
@@ -51,10 +51,9 @@ void Lua::Vector::Set(lua_State*,Vector3 &vec,float x,float y,float z)
 	vec.z = z;
 }
 
-void Lua::Vector::ToMatrix(lua_State *l,const Vector3 &vec)
+Mat4 Lua::Vector::ToMatrix(lua_State *l,const Vector3 &vec)
 {
-	auto m = glm::translate(umat::identity(),vec);
-	luabind::object(l,m).push(l);
+	return glm::translate(umat::identity(),vec);
 }
 
 void Lua::Vector::SnapToGrid(lua_State*,Vector3 &vec,UInt32 gridSize)
@@ -93,15 +92,14 @@ float Lua::Vector2::DistanceSqr(const ::Vector2 &a,const ::Vector2 &b)
 	Vector3 v = Vector3(b.x,b.y,0) -Vector3(a.x,a.y,0);
 	return uvec::length_sqr(v);
 }
-void Lua::Vector2::Cross(lua_State *l,const ::Vector2 &a,const ::Vector2 &b)
+::Vector2 Lua::Vector2::Cross(lua_State *l,const ::Vector2 &a,const ::Vector2 &b)
 {
 	Vector3 cross = glm::cross(Vector3(a.x,a.y,0),Vector3(b.x,b.y,0));
-	luabind::object(l,::Vector2(cross.x,cross.y)).push(l);
+	return ::Vector2(cross.x,cross.y);
 }
-void Lua::Vector2::DotProduct(lua_State *l,const ::Vector2 &a,const ::Vector2 &b)
+float Lua::Vector2::DotProduct(lua_State *l,const ::Vector2 &a,const ::Vector2 &b)
 {
-	float d = glm::dot(Vector3(a.x,a.y,0),Vector3(b.x,b.y,0));
-	Lua::PushNumber(l,d);
+	return glm::dot(Vector3(a.x,a.y,0),Vector3(b.x,b.y,0));
 }
 void Lua::Vector2::Rotate(lua_State*,::Vector2 &vec,const EulerAngles &ang)
 {
@@ -118,14 +116,14 @@ void Lua::Vector2::RotateAround(lua_State*,::Vector2 &vec,const ::Vector2 &origi
 	vec.x = v.x;
 	vec.y = v.y;
 }
-void Lua::Vector2::Copy(lua_State *l,const ::Vector2 &vec)
+::Vector2 Lua::Vector2::Copy(lua_State *l,const ::Vector2 &vec)
 {
-	luabind::object(l,::Vector2(vec.x,vec.y)).push(l);
+	return ::Vector2(vec.x,vec.y);
 }
-void Lua::Vector2::Lerp(lua_State *l,const ::Vector2 &vec,const ::Vector2 &vecB,float factor)
+::Vector2 Lua::Vector2::Lerp(lua_State *l,const ::Vector2 &vec,const ::Vector2 &vecB,float factor)
 {
 	Vector3 v = uvec::lerp(Vector3(vec.x,vec.y,0),Vector3(vecB.x,vecB.y,0),factor);
-	luabind::object(l,v).push(l);
+	return ::Vector2{v.x,v.y};
 }
 void Lua::Vector2::Set(lua_State*,::Vector2 &vec,const ::Vector2 &vecB)
 {
@@ -137,9 +135,9 @@ void Lua::Vector2::Set(lua_State*,::Vector2 &vec,float x,float y)
 	vec.x = x;
 	vec.y = y;
 }
-void Lua::Vector2::Project(lua_State *l,const ::Vector2 &vec,const ::Vector2 &n)
+::Vector2 Lua::Vector2::Project(lua_State *l,const ::Vector2 &vec,const ::Vector2 &n)
 {
-	Lua::Push<::Vector2>(l,glm::proj(vec,n));
+	return glm::proj(vec,n);
 }
 
 ////////////////////////
@@ -168,17 +166,17 @@ float Lua::Vector4::DistanceSqr(const ::Vector4 &a,const ::Vector4 &b)
 {
 	return glm::distance2(a,b);
 }
-void Lua::Vector4::DotProduct(lua_State *l,const ::Vector4 &a,const ::Vector4 &b)
+float Lua::Vector4::DotProduct(lua_State *l,const ::Vector4 &a,const ::Vector4 &b)
 {
-	luabind::object(l,glm::dot(a,b)).push(l);
+	return glm::dot(a,b);
 }
-void Lua::Vector4::Copy(lua_State *l,const ::Vector4 &vec)
+::Vector4 Lua::Vector4::Copy(lua_State *l,const ::Vector4 &vec)
 {
-	luabind::object(l,::Vector4(vec.x,vec.y,vec.z,vec.w)).push(l);
+	return ::Vector4(vec.x,vec.y,vec.z,vec.w);
 }
-void Lua::Vector4::Lerp(lua_State *l,const ::Vector4 &vec,const ::Vector4 &vecB,float factor)
+::Vector4 Lua::Vector4::Lerp(lua_State *l,const ::Vector4 &vec,const ::Vector4 &vecB,float factor)
 {
-	luabind::object(l,vec +(vecB -vec) *factor).push(l);
+	return vec +(vecB -vec) *factor;
 }
 void Lua::Vector4::Set(lua_State*,::Vector4 &vec,const ::Vector4 &vecB)
 {
@@ -194,9 +192,9 @@ void Lua::Vector4::Set(lua_State*,::Vector4 &vec,float x,float y,float z,float w
 	vec.y = y;
 	vec.z = z;
 }
-void Lua::Vector4::Project(lua_State *l,const ::Vector4 &vec,const ::Vector4 &n)
+::Vector4 Lua::Vector4::Project(lua_State *l,const ::Vector4 &vec,const ::Vector4 &n)
 {
-	Lua::Push<::Vector4>(l,glm::proj(vec,n));
+	return glm::proj(vec,n);
 }
 
 ////////////////////////

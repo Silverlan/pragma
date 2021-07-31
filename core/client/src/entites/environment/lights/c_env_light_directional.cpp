@@ -215,7 +215,7 @@ void CLightDirectionalComponent::UpdateAmbientColor()
 	c_game->GetWorldEnvironment().SetAmbientColor((*m_ambientColor)->ToVector4());
 	c_game->SetMaxHDRExposure(m_maxExposure);
 }
-luabind::object CLightDirectionalComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CLightDirectionalComponentHandleWrapper>(l);}
+void CLightDirectionalComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 //////////////
 

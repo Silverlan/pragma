@@ -26,7 +26,7 @@ void SSpriteComponent::SendData(NetPacket &packet,networking::ClientRecipientFil
 	packet->Write<float>(m_tFadeOut);
 }
 
-luabind::object SSpriteComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SSpriteComponentHandleWrapper>(l);}
+void SSpriteComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void EnvSprite::Initialize()
 {

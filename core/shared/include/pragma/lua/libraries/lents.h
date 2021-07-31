@@ -108,7 +108,7 @@ namespace Lua
 			}
 
 			auto firstCreation = true;
-			auto componentId = game->GetEntityComponentManager().RegisterComponentType(name,[o,game,name,firstCreation](BaseEntity &ent) mutable -> std::shared_ptr<pragma::BaseEntityComponent> {
+			auto componentId = game->GetEntityComponentManager().RegisterComponentType(name,[o,game,name,firstCreation](BaseEntity &ent) mutable -> util::TSharedHandle<pragma::BaseEntityComponent> {
 				if(firstCreation)
 				{
 					firstCreation = false;
@@ -157,7 +157,7 @@ namespace Lua
 						}
 					}
 				}
-				return std::static_pointer_cast<pragma::BaseEntityComponent>(std::shared_ptr<TComponent>(static_cast<TComponent*>(game->CreateLuaEntityComponent(ent,name))));
+				return util::to_shared_handle<pragma::BaseEntityComponent>(std::shared_ptr<TComponent>{static_cast<TComponent*>(game->CreateLuaEntityComponent(ent,name))});
 			},componentFlags);
 			Lua::PushInt(l,componentId);
 			return 1;

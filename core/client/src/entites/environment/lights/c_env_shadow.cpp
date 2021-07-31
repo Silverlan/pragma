@@ -106,7 +106,7 @@ uint32_t CShadowComponent::GetLayerCount() const
 	return 0;
 }
 
-luabind::object CShadowComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CShadowComponentHandleWrapper>(l);}
+void CShadowComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 LightShadowRenderer &CShadowComponent::GetRenderer() {return *m_lightShadowRenderer;}
 const LightShadowRenderer &CShadowComponent::GetRenderer() const {return const_cast<CShadowComponent*>(this)->GetRenderer();}

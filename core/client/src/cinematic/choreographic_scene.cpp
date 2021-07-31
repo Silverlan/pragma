@@ -26,7 +26,7 @@ choreography::Event::Event(uts::Channel &channel)
 {}
 CBaseEntity *choreography::Event::GetActor() const {return static_cast<CBaseEntity*>(m_actor.get());}
 void choreography::Event::SetActor(CBaseEntity &actor) {m_actor = actor.GetHandle();}
-void choreography::Event::ClearActor() {m_actor = {};}
+void choreography::Event::ClearActor() {m_actor = EntityHandle{};}
 
 choreography::AudioEvent::AudioEvent(uts::Channel &channel,const std::string &snd)
 	: Event(channel),m_soundSource(snd)
@@ -102,7 +102,7 @@ bool choreography::FacialFlexEvent::GetInterpolatedValue(double t,const std::vec
 choreography::FacialFlexEvent::State choreography::FacialFlexEvent::HandleTick(double t,double dt)
 {
 	auto *actor = GetActor();
-	auto pFlexComponent = (actor != nullptr) ? actor->GetComponent<pragma::CFlexComponent>() : util::WeakHandle<pragma::CFlexComponent>{};
+	auto pFlexComponent = (actor != nullptr) ? actor->GetComponent<pragma::CFlexComponent>() : pragma::ComponentHandle<pragma::CFlexComponent>{};
 	if(pFlexComponent.valid())
 	{
 		for(auto &pair : m_values)

@@ -20,7 +20,7 @@ namespace pragma
 	{
 	public:
 		CTimeScaleComponent(BaseEntity &ent) : BaseTimeScaleComponent(ent) {}
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void ReceiveData(NetPacket &packet) override {}
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;

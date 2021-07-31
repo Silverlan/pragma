@@ -16,7 +16,7 @@ void SOwnableComponent::Initialize()
 {
 	BaseOwnableComponent::Initialize();
 }
-luabind::object SOwnableComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SOwnableComponentHandleWrapper>(l);}
+void SOwnableComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void SOwnableComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {

@@ -110,7 +110,7 @@ void CompositeComponent::OnRemove()
 
 void CompositeComponent::ClearEntities(bool safely) {m_rootGroup->ClearEntities(safely);}
 
-luabind::object CompositeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CompositeComponentHandleWrapper>(l);}
+void CompositeComponent::InitializeLuaObject(lua_State *l) {pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 static void write_group(udm::LinkedPropertyWrapperArg udmGroup,const CompositeGroup &group)
 {
@@ -171,5 +171,5 @@ CECompositeEntityChanged::CECompositeEntityChanged(CompositeGroup &group,BaseEnt
 void CECompositeEntityChanged::PushArguments(lua_State *l)
 {
 	Lua::Push<CompositeGroup*>(l,&group);
-	ent.GetLuaObject()->push(l);
+	ent.GetLuaObject().push(l);
 }

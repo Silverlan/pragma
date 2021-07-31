@@ -17,7 +17,7 @@ bool BasePhysRayCallbackFilterLuaFunction::ShouldPass(BaseEntity *ent,PhysObj *p
 	if(BasePhysRayCallbackFilter::ShouldPass(ent,phys,col) == false)
 		return false;
 	Bool bShouldPass = false;
-	if(m_filter.Call<bool,luabind::object,PhysObjHandle>(&bShouldPass,*ent->GetLuaObject(),phys->GetHandle()) == true)
+	if(m_filter.Call<bool,luabind::object,PhysObjHandle>(&bShouldPass,ent->GetLuaObject(),phys->GetHandle()) == true)
 		return TranslateFilterValue(bShouldPass);
 	return false;
 }

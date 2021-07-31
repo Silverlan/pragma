@@ -594,7 +594,7 @@ CBaseEntity *CParticleSystemComponent::GetControlPointEntity(ControlPointIndex i
 {
 	if(idx >= m_controlPoints.size())
 		return nullptr;
-	return static_cast<CBaseEntity*>(m_controlPoints.at(idx).hEntity.get());
+	return static_cast<CBaseEntity*>(const_cast<BaseEntity*>(m_controlPoints.at(idx).hEntity.get()));
 }
 std::optional<umath::Transform> CParticleSystemComponent::GetControlPointPose(ControlPointIndex idx,float *optOutTimestamp) const
 {
@@ -1341,7 +1341,7 @@ CBaseEntity *CParticleSystemComponent::GetNodeTarget(uint32_t node) const
 	--node;
 	if(node >= m_nodes.size())
 		return nullptr;
-	return static_cast<CBaseEntity*>(m_nodes[node].hEntity.get());
+	return static_cast<CBaseEntity*>(const_cast<BaseEntity*>(m_nodes[node].hEntity.get()));
 }
 
 CallbackHandle CParticleSystemComponent::AddRenderCallback(const std::function<void(void)> &cb)

@@ -48,7 +48,7 @@ CWeaponComponent::~CWeaponComponent()
 	ClearOwnerCallbacks();
 }
 
-luabind::object CWeaponComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CWeaponHandle>(l);}
+void CWeaponComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void CWeaponComponent::ReceiveData(NetPacket &packet)
 {
@@ -260,7 +260,7 @@ void CWeaponComponent::ClearOwnerCallbacks()
 
 void CWeaponComponent::UpdateOwnerAttachment()
 {
-	m_hTarget = {};
+	m_hTarget = EntityHandle{};
 	UpdateWorldModel();
 	auto &ent = GetEntity();
 	auto *owner = m_whOwnerComponent.valid() ? m_whOwnerComponent->GetOwner() : nullptr;
@@ -419,7 +419,7 @@ CEAttachToOwner::CEAttachToOwner(BaseEntity &owner,CViewModelComponent *optViewm
 {}
 void CEAttachToOwner::PushArguments(lua_State *l)
 {
-	owner.GetLuaObject()->push(l);
+	owner.GetLuaObject().push(l);
 	if(viewModel)
 		viewModel->PushLuaObject(l);
 }

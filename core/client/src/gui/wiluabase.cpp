@@ -13,12 +13,6 @@
 #include "pragma/lua/classes/c_ldef_wgui.h"
 
 extern DLLCLIENT CGame *c_game;
-DEFINE_DERIVED_CHILD_HANDLE(DLLCLIENT,WI,WIBase,WI,WILuaBase,WILua);
-void WILuaHandle::Reset(PtrWI *e)
-{
-	m_basePointer.reset(e);
-	m_bEmpty = false;
-}
 
 extern ClientState *client;
 WILuaBase::WILuaBase(luabind::object &o,std::string &className)
@@ -31,12 +25,12 @@ WILuaBase::WILuaBase(luabind::object &o,std::string &className)
 WILuaBase::~WILuaBase()
 {}
 
-void WILuaBase::InitializeHandle()
+/*void WILuaBase::InitializeHandle()
 {
 	auto &hElement = *luabind::object_cast_nothrow<WILuaHandle*>(*m_baseLuaObj,static_cast<WILuaHandle*>(nullptr));
 	hElement.Reset(new PtrWI(this));
 	m_handle = std::shared_ptr<WILuaHandle>(&hElement,[](WILuaHandle*) {}); // Empty deleter, Lua will take care of its deletion!
-}
+}*/
 
 void WILuaBase::Initialize()
 {

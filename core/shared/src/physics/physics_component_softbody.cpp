@@ -21,7 +21,7 @@
 
 using namespace pragma;
 
-util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
+util::TSharedHandle<PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
 {
 	auto &ent = GetEntity();
 	auto *pSoftBodyComponent = static_cast<pragma::BaseSoftBodyComponent*>(ent.AddComponent("softbody").get());
@@ -55,7 +55,7 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
 	auto *state = ent.GetNetworkState();
 	auto *game = state->GetGameState();
 	auto *physEnv = game->GetPhysicsEnvironment();
-	std::shared_ptr<SoftBodyPhysObj> phys = nullptr;
+	util::TSharedHandle<SoftBodyPhysObj> phys = nullptr;
 	for(auto idx : softBodyMeshes)
 	{
 		auto &colMesh = colMeshes.at(idx);
@@ -144,14 +144,14 @@ util::WeakHandle<PhysObj> BasePhysicsComponent::InitializeSoftBodyPhysics()
 			softBody->AppendAnchor(nodeIdx,*pRigid,(anchor.flags &CollisionMesh::SoftBodyAnchor::Flags::DisableCollisions) != CollisionMesh::SoftBodyAnchor::Flags::None,anchor.influence);
 		}
 		if(phys == nullptr)
-			phys = PhysObj::Create<SoftBodyPhysObj,pragma::physics::ISoftBody&>(*this,*softBody);
+			phys = util::to_shared_handle<SoftBodyPhysObj>(PhysObj::Create<SoftBodyPhysObj,pragma::physics::ISoftBody&>(*this,*softBody));
 		else
 			phys->AddCollisionObject(*softBody);
 	}
 
 	if(phys == nullptr)
 		return {};
-	m_physObject = phys;
+	m_physObject = util::shared_handle_cast<SoftBodyPhysObj,PhysObj>(phys);
 	m_physObject->Spawn();
 
 	m_physicsType = PHYSICSTYPE::SOFTBODY;

@@ -9,6 +9,7 @@
 #define __CHC_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include <pragma/types.hpp>
 #include <pragma/math/plane.h>
 #include <sharedutils/def_handle.h>
 #include <sharedutils/functioncallback.h>
@@ -71,7 +72,6 @@ public:
 
 class ModelMesh;
 class CBaseEntity;
-class WIHandle;
 namespace pragma {class CCameraComponent;};
 class DLLCLIENT CHC
 {
@@ -81,7 +81,7 @@ private:
 #ifdef CHC_DEBUGGING_ENABLED
 	// Overhead
 	unsigned int m_debugFrustumBuffer;
-	util::WeakHandle<pragma::CCameraComponent> m_debugQueryDepthOverheadCamera = {};
+	pragma::ComponentHandle<pragma::CCameraComponent> m_debugQueryDepthOverheadCamera = {};
 	//
 	unsigned int m_debugMeshVertexBuffer;
 	bool m_bDrawDebugTexture;
@@ -111,7 +111,7 @@ private:
 	std::vector<std::shared_ptr<CHCNode>> m_nodes;
 	CallbackHandle m_cbOnNodeCreated;
 	CallbackHandle m_cbOnNodeDestroyed;
-	util::WeakHandle<pragma::CCameraComponent> m_cam = {};
+	pragma::ComponentHandle<pragma::CCameraComponent> m_cam {};
 	void TraverseNode(CHCNode *cNode);
 	void PullUpVisibility(CHCNode *cNode);
 	void QueryPreviouslyInvisibleNode(CHCNode *cNode);

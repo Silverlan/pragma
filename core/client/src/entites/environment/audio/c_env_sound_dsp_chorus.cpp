@@ -49,7 +49,7 @@ void CSoundDspChorusComponent::OnEntitySpawn()
 	props.flDelay = m_kvDelay;
 	m_dsp = soundSys->CreateEffect(props);
 }
-luabind::object CSoundDspChorusComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CSoundDspChorusComponentHandleWrapper>(l);}
+void CSoundDspChorusComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 //////////////////
 

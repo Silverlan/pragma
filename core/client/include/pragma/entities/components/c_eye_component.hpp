@@ -61,7 +61,7 @@ namespace pragma
 		CEyeComponent(BaseEntity &ent);
 
 		virtual void Initialize() override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 
 		void Blink();
 
@@ -100,8 +100,8 @@ namespace pragma
 		std::optional<Vector3> m_viewTarget = {};
 		StateFlags m_stateFlags;
 		std::unordered_map<uint32_t,uint32_t> m_skinMaterialIndexToEyeballIndex = {};
-		util::WeakHandle<CFlexComponent> m_flexC = {};
-		util::WeakHandle<CAnimatedComponent> m_animC = {};
+		ComponentHandle<CFlexComponent> m_flexC = {};
+		ComponentHandle<CAnimatedComponent> m_animC = {};
 		uint32_t m_eyeUpDownFlexController = std::numeric_limits<uint32_t>::max();
 		uint32_t m_eyeLeftRightFlexController = std::numeric_limits<uint32_t>::max();
 		uint32_t m_eyeAttachmentIndex = std::numeric_limits<uint32_t>::max();

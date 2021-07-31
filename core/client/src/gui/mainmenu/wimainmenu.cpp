@@ -157,7 +157,7 @@ void WIMainMenu::Initialize()
 	
 	SetSize(1024,768);
 	m_hBg = CreateChild<WIRect>();
-	WIRect *bg = m_hBg.get<WIRect>();
+	WIRect *bg = static_cast<WIRect*>(m_hBg.get());
 	bg->SetColor(0,0,0,0.5f);
 	bg->SetSize(GetSize());
 	bg->SetAnchor(0.f,0.f,1.f,1.f);
@@ -169,7 +169,7 @@ void WIMainMenu::Initialize()
 	//}));
 
 	m_hBgSlideShow = CreateChild<WIImageSlideShow>();
-	auto *pImageSlideShow = m_hBgSlideShow.get<WIImageSlideShow>();
+	auto *pImageSlideShow = static_cast<WIImageSlideShow*>(m_hBgSlideShow.get());
 	pImageSlideShow->SetSize(GetWidth(),GetHeight());
 	pImageSlideShow->SetAnchor(0.f,0.f,1.f,1.f);
 	pImageSlideShow->SetColor(0.75f,0.75f,0.75f,1.f);
@@ -182,7 +182,7 @@ void WIMainMenu::Initialize()
 
 	//std::shared_ptr<ALSound> PlaySound(std::string snd,int mode=AL_CHANNEL_AUTO,unsigned char priority=0);
 	m_hMain = CreateChild<WIMainMenuBase>();
-	WIMainMenuBase *menu = m_hMain.get<WIMainMenuBase>();
+	WIMainMenuBase *menu = static_cast<WIMainMenuBase*>(m_hMain.get());
 	menu->SetVisible(false);
 	menu->SetSize(GetWidth(),GetHeight());
 	menu->SetAnchor(0.f,0.f,1.f,1.f);
@@ -193,7 +193,7 @@ void WIMainMenu::Initialize()
 		if(m_hServerBrowser.IsValid())
 			m_hServerBrowser->Remove();
 		m_hServerBrowser = CreateChild<WIServerBrowser>();
-		auto *sb = m_hServerBrowser.get<WIServerBrowser>();
+		auto *sb = static_cast<WIServerBrowser*>(m_hServerBrowser.get());
 		sb->SetKeyboardInputEnabled(true);
 		sb->SetMouseInputEnabled(true);
 		sb->SetPos(200,200);
@@ -228,21 +228,21 @@ void WIMainMenu::Initialize()
 	menu->SetKeyboardInputEnabled(true);
 
 	m_hNewGame = CreateChild<WIMainMenuNewGame>();
-	WIMainMenuNewGame *newGame = m_hNewGame.get<WIMainMenuNewGame>();
+	WIMainMenuNewGame *newGame = static_cast<WIMainMenuNewGame*>(m_hNewGame.get());
 	newGame->SetVisible(false);
 	newGame->SetSize(GetWidth(),GetHeight());
 	newGame->SetAnchor(0.f,0.f,1.f,1.f);
 	newGame->SetKeyboardInputEnabled(true);
 
 	m_hOptions = CreateChild<WIMainMenuOptions>();
-	WIMainMenuOptions *options = m_hOptions.get<WIMainMenuOptions>();
+	WIMainMenuOptions *options = static_cast<WIMainMenuOptions*>(m_hOptions.get());
 	options->SetVisible(false);
 	options->SetSize(GetWidth(),GetHeight());
 	options->SetAnchor(0.f,0.f,1.f,1.f);
 	options->SetKeyboardInputEnabled(true);
 
 	m_hMods = CreateChild<WIMainMenuMods>();
-	auto *pMods = m_hMods.get<WIMainMenuMods>();
+	auto *pMods = static_cast<WIMainMenuMods*>(m_hMods.get());
 	pMods->SetVisible(false);
 	pMods->SetSize(GetWidth(),GetHeight());
 	pMods->SetAnchor(0.f,0.f,1.f,1.f);
@@ -258,21 +258,21 @@ void WIMainMenu::Initialize()
 #endif
 
 	m_hLoad = CreateChild<WIMainMenuLoadGame>();
-	WIMainMenuLoadGame *loadGame = m_hLoad.get<WIMainMenuLoadGame>();
+	WIMainMenuLoadGame *loadGame = static_cast<WIMainMenuLoadGame*>(m_hLoad.get());
 	loadGame->SetVisible(false);
 	loadGame->SetSize(GetWidth(),GetHeight());
 	loadGame->SetAnchor(0.f,0.f,1.f,1.f);
 	loadGame->SetKeyboardInputEnabled(true);
 
 	m_hLoadScreen = CreateChild<WILoadScreen>();
-	auto *pLoadScreen = m_hLoadScreen.get<WILoadScreen>();
+	auto *pLoadScreen = static_cast<WILoadScreen*>(m_hLoadScreen.get());
 	pLoadScreen->SetVisible(false);
 	pLoadScreen->SetSize(GetWidth(),GetHeight());
 	pLoadScreen->SetAnchor(0.f,0.f,1.f,1.f);
 	pLoadScreen->SetKeyboardInputEnabled(true);
 
 	m_hVersion = CreateChild<WIText>();
-	auto *pVersion = m_hVersion.get<WIText>();
+	auto *pVersion = static_cast<WIText*>(m_hVersion.get());
 	pVersion->AddStyleClass("game_version");
 	pVersion->SetColor(1.f,1.f,1.f,1.f);
 	pVersion->SetText(get_pretty_engine_version());
@@ -283,7 +283,7 @@ void WIMainMenu::Initialize()
 		if(m_hVersion.IsValid() == false || isteamworks.get().get_build_id == nullptr)
 			return;
 		m_hBuild = CreateChild<WIText>();
-		auto *pBuildId = m_hBuild.get<WIText>();
+		auto *pBuildId = static_cast<WIText*>(m_hBuild.get());
 		pBuildId->AddStyleClass("game_version");
 		pBuildId->SetColor(1.f,1.f,1.f,1.f);
 		pBuildId->SetText("Build: " +std::to_string(isteamworks.get().get_build_id()));
@@ -302,7 +302,7 @@ void WIMainMenu::Initialize()
 	if(Lua::get_extended_lua_modules_enabled() == true)
 	{
 		m_hVersionAttributes = CreateChild<WIText>();
-		auto *pAttributes = m_hVersionAttributes.get<WIText>();
+		auto *pAttributes = static_cast<WIText*>(m_hVersionAttributes.get());
 		pAttributes->AddStyleClass("game_version");
 		pAttributes->SetColor(Color::Red);
 		pAttributes->SetText("[D]");
@@ -403,7 +403,7 @@ void WIMainMenu::OnFocusGained()
 {
 	if(!m_hActive.IsValid())
 		return;
-	WIMainMenuBase *menu = m_hActive.get<WIMainMenuBase>();
+	WIMainMenuBase *menu = static_cast<WIMainMenuBase*>(m_hActive.get());
 	menu->RequestFocus();
 }
 
@@ -411,7 +411,7 @@ void WIMainMenu::OnFocusKilled()
 {
 	if(!m_hActive.IsValid())
 		return;
-	WIMainMenuBase *menu = m_hActive.get<WIMainMenuBase>();
+	WIMainMenuBase *menu = static_cast<WIMainMenuBase*>(m_hActive.get());
 	menu->KillFocus(true);
 }
 
@@ -420,7 +420,7 @@ void WIMainMenu::SetContinueMenu()
 	if(m_menuType == 1 || !m_hMain.IsValid())
 		return;
 	m_menuType = 1;
-	WIMainMenuBase *menu = m_hMain.get<WIMainMenuBase>();
+	WIMainMenuBase *menu = static_cast<WIMainMenuBase*>(m_hMain.get());
 	menu->AddMenuItem(0,Locale::GetText("menu_resumegame"),FunctionCallback<>::Create([]() {
 		client->CloseMainMenu();
 	}));
@@ -434,7 +434,7 @@ void WIMainMenu::SetNewGameMenu()
 	if(m_menuType == 0 || !m_hMain.IsValid())
 		return;
 	m_menuType = 0;
-	WIMainMenuBase *menu = m_hMain.get<WIMainMenuBase>();
+	WIMainMenuBase *menu = static_cast<WIMainMenuBase*>(m_hMain.get());
 	menu->RemoveMenuItem(1);
 	menu->RemoveMenuItem(0);
 }

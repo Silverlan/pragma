@@ -87,7 +87,7 @@ namespace pragma
 		bool IsDynamicValid() const;
 		uint64_t GetLastUpdateFrameId() const;
 		void SetLastUpdateFrameId(uint64_t id);
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	protected:
 		void DestroyTextures();
 		uint32_t m_layerCount = 0;

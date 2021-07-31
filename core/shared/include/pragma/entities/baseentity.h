@@ -8,21 +8,12 @@
 #define __BASEENTITY_H__
 
 #include "pragma/networkdefinitions.h"
-#include "pragma/lua/baseluaobj.h"
+#include "pragma/lua/base_lua_handle.hpp"
 #include "pragma/entities/entity_component_system.hpp"
 #include "pragma/model/animation/play_animation_flags.hpp"
 #include "pragma/types.hpp"
 #include <pragma/console/conout.h>
-
-#define DECLARE_ENTITY_HANDLE \
-	protected: \
-	virtual void InitializeHandle() override; \
-	public: \
-	virtual void InitializeLuaObject(lua_State *lua) override; \
-
-#define DEFINE_ENTITY_HANDLE(localname,handleName) \
-	void localname::InitializeLuaObject(lua_State *lua) {BaseEntity::InitializeLuaObject<handleName>(lua);} \
-	void localname::InitializeHandle() {return BaseEntity::InitializeHandle<handleName>();}
+#include <sharedutils/util_shared_handle.hpp>
 
 class Engine;
 class NetworkState;
@@ -68,7 +59,7 @@ namespace udm {struct LinkedPropertyWrapper;};
 #pragma warning(push)
 #pragma warning(disable : 4251)
 class DLLNETWORK BaseEntity
-	: public LuaObj<EntityHandle>,
+	: public pragma::BaseLuaHandle,
 	public pragma::BaseEntityComponentSystem
 {
 public:
@@ -99,11 +90,11 @@ public:
 	virtual std::string GetClass() const;
 	BaseEntity();
 	void Construct(unsigned int idx);
+	EntityHandle GetHandle() const;
 
 	const util::Uuid GetUuid() const {return m_uuid;}
 	void SetUuid(const util::Uuid &uuid) {m_uuid = uuid;}
 
-	friend EntityHandle;
 	friend Engine;
 public:
 	StateFlags GetStateFlags() const;
@@ -135,14 +126,14 @@ public:
 	void SetScale(const Vector3 &scale);
 
 	// Helper functions
-	virtual util::WeakHandle<pragma::BaseAnimatedComponent> GetAnimatedComponent() const=0;
-	virtual util::WeakHandle<pragma::BaseWeaponComponent> GetWeaponComponent() const=0;
-	virtual util::WeakHandle<pragma::BaseVehicleComponent> GetVehicleComponent() const=0;
-	virtual util::WeakHandle<pragma::BaseAIComponent> GetAIComponent() const=0;
-	virtual util::WeakHandle<pragma::BaseCharacterComponent> GetCharacterComponent() const=0;
-	virtual util::WeakHandle<pragma::BasePlayerComponent> GetPlayerComponent() const=0;
-	virtual util::WeakHandle<pragma::BaseTimeScaleComponent> GetTimeScaleComponent() const=0;
-	virtual util::WeakHandle<pragma::BaseNameComponent> GetNameComponent() const=0;
+	virtual pragma::ComponentHandle<pragma::BaseAnimatedComponent> GetAnimatedComponent() const=0;
+	virtual pragma::ComponentHandle<pragma::BaseWeaponComponent> GetWeaponComponent() const=0;
+	virtual pragma::ComponentHandle<pragma::BaseVehicleComponent> GetVehicleComponent() const=0;
+	virtual pragma::ComponentHandle<pragma::BaseAIComponent> GetAIComponent() const=0;
+	virtual pragma::ComponentHandle<pragma::BaseCharacterComponent> GetCharacterComponent() const=0;
+	virtual pragma::ComponentHandle<pragma::BasePlayerComponent> GetPlayerComponent() const=0;
+	virtual pragma::ComponentHandle<pragma::BaseTimeScaleComponent> GetTimeScaleComponent() const=0;
+	virtual pragma::ComponentHandle<pragma::BaseNameComponent> GetNameComponent() const=0;
 	pragma::BaseModelComponent *GetModelComponent() const;
 	pragma::BaseTransformComponent *GetTransformComponent() const;
 	pragma::BasePhysicsComponent *GetPhysicsComponent() const;
@@ -274,7 +265,7 @@ protected:
 	// Should only be used by quick-access methods!
 	// Adds the component and trasmits the information
 	// to the clients if called serverside.
-	virtual util::WeakHandle<pragma::BaseEntityComponent> AddNetworkedComponent(const std::string &name);
+	virtual pragma::ComponentHandle<pragma::BaseEntityComponent> AddNetworkedComponent(const std::string &name);
 protected:
 	uint32_t m_spawnFlags = 0u;
 
@@ -285,8 +276,6 @@ protected:
 	virtual void EraseFunction(int function);
 	virtual void DoSpawn();
 	pragma::NetEventId SetupNetEvent(const std::string &name) const;
-
-	virtual void InitializeHandle() override;
 };
 REGISTER_BASIC_BITWISE_OPERATORS(BaseEntity::StateFlags);
 #pragma warning(pop)

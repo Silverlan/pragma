@@ -15,8 +15,8 @@ namespace Lua
 {
 	namespace ParticleSystemModifier
 	{
-		void register_particle_class(luabind::class_<CParticleSystemHandle,BaseEntityComponentHandle> &defPtc);
-		void register_modifier_class(luabind::class_<CParticleSystemHandle,BaseEntityComponentHandle> &defPtc);
+		void register_particle_class(luabind::class_<pragma::CParticleSystemComponent,pragma::BaseEnvParticleSystemComponent> &defPtc);
+		void register_modifier_class(luabind::class_<pragma::CParticleSystemComponent,pragma::BaseEnvParticleSystemComponent> &defPtc);
 	};
 };
 

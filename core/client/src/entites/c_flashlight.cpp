@@ -62,7 +62,7 @@ util::EventReply CFlashlightComponent::HandleEvent(ComponentEventId eventId,Comp
 	}
 	return util::EventReply::Unhandled;
 }
-luabind::object CFlashlightComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CFlashlightComponentHandleWrapper>(l);}
+void CFlashlightComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void CFlashlight::Initialize()
 {

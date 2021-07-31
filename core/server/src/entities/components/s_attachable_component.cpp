@@ -18,7 +18,7 @@ void SAttachableComponent::Initialize()
 {
 	BaseAttachableComponent::Initialize();
 }
-luabind::object SAttachableComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SAttachableComponentHandleWrapper>(l);}
+void SAttachableComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void SAttachableComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BaseAttachableComponent));}
 

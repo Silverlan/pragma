@@ -93,7 +93,7 @@ bool SPlayerComponent::SendResource(const std::string &fileName) const
 	return r;
 }
 
-luabind::object SPlayerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SPlayerComponentHandleWrapper>(l);}
+void SPlayerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void SPlayerComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {

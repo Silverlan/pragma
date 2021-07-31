@@ -204,7 +204,7 @@ void WITransformable::Close()
 		SetVisible(false);
 	CallCallbacks<void>("OnClose");
 }
-WIBase *WITransformable::GetDragArea() const {return m_hMoveRect.get();}
+WIBase *WITransformable::GetDragArea() const {return const_cast<WIBase*>(m_hMoveRect.get());}
 void WITransformable::Initialize()
 {
 	WIBase::Initialize();
@@ -470,7 +470,7 @@ void WITransformable::Think()
 	auto itSnapTarget = std::find_if(m_snapTargets.begin(),m_snapTargets.end(),[](const WIHandle &hSnapTarget) {
 		if(hSnapTarget.IsValid() == false)
 			return false;
-		auto *pTriggerArea = static_cast<WISnapArea*>(hSnapTarget.get())->GetTriggerArea();
+		auto *pTriggerArea = const_cast<WISnapArea*>(static_cast<const WISnapArea*>(hSnapTarget.get()))->GetTriggerArea();
 		return pTriggerArea && pTriggerArea->MouseInBounds();
 	});
 	util::ScopeGuard sgSnapGhost = [this,bDragging]() {
@@ -649,7 +649,7 @@ void WITransformable::SetResizable(bool b)
 	resizeRect->SetVisible(IsVisible());
 	resizeRect->SetZPos(GetZPos());
 	resizeRect->AddCallback("OnMouseEvent",FunctionCallback<util::EventReply,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>::CreateWithOptionalReturn(
-		[hThis](util::EventReply *reply,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) -> CallbackReturnType {
+		[hThis](util::EventReply *reply,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) mutable -> CallbackReturnType {
 		if(hThis.IsValid() == false)
 		{
 			*reply = util::EventReply::Handled;

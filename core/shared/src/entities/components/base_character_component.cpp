@@ -891,7 +891,7 @@ CEOnDeployWeapon::CEOnDeployWeapon(BaseEntity &entWeapon)
 {}
 void CEOnDeployWeapon::PushArguments(lua_State *l)
 {
-	weapon.GetLuaObject()->push(l);
+	weapon.GetLuaObject().push(l);
 }
 
 //////////////////
@@ -902,7 +902,7 @@ CEOnSetActiveWeapon::CEOnSetActiveWeapon(BaseEntity *entWeapon)
 void CEOnSetActiveWeapon::PushArguments(lua_State *l)
 {
 	if(weapon != nullptr)
-		weapon->GetLuaObject()->push(l);
+		weapon->GetLuaObject().push(l);
 	else
 		Lua::PushNil(l);
 }

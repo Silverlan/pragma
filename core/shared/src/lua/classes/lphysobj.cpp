@@ -10,8 +10,11 @@
 #include "luasystem.h"
 #include "pragma/lua/classes/ldef_physobj.h"
 #include <mathutil/glmutil.h>
+#include "pragma/types.hpp"
 #include "pragma/lua/classes/lphysics.h"
 #include "pragma/lua/libraries/lray.h"
+#include "pragma/lua/policies/pair_policy.hpp"
+#include "pragma/lua/policies/game_object_policy.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/physics/environment.hpp"
 #include "pragma/physics/raytraces.h"
@@ -19,466 +22,147 @@
 #include "pragma/physics/phys_material.hpp"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
+#include <luabind/out_value_policy.hpp>
 
-class PhysObjHandle;
 namespace Lua
 {
 	namespace PhysObj
 	{
-		static void IsValid(lua_State *l,PhysObjHandle &hPhysObj);
-		static void SetLinearVelocity(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &vel);
-		static void GetLinearVelocity(lua_State *l,PhysObjHandle &hPhysObj);
-		static void AddLinearVelocity(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &vel);
-		static void SetAngularVelocity(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &vel);
-		static void GetAngularVelocity(lua_State *l,PhysObjHandle &hPhysObj);
-		static void AddAngularVelocity(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &vel);
-		static void PutToSleep(lua_State *l,PhysObjHandle &hPhysObj);
-		static void WakeUp(lua_State *l,PhysObjHandle &hPhysObj);
-		static void GetActor(lua_State *l,PhysObjHandle &hPhysObj);
-		static void GetActors(lua_State *l,PhysObjHandle &hPhysObj);
-		static void GetMass(lua_State *l,PhysObjHandle &hPhysObj);
-		static void SetMass(lua_State *l,PhysObjHandle &hPhysObj,float mass);
-		static void SetLinearFactor(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &factor);
-		static void SetAngularFactor(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &factor);
-		static void GetLinearFactor(lua_State *l,PhysObjHandle &hPhysObj);
-		static void GetAngularFactor(lua_State *l,PhysObjHandle &hPhysObj);
-		static void GetCollisionObjects(lua_State *l,PhysObjHandle &hPhysObj);
-		static void GetOwner(lua_State *l,PhysObjHandle &hPhysObj);
-		static void SetCollisionFilterMask(lua_State *l,PhysObjHandle &hPhysObj,int mask);
-		static void GetCollisionFilterMask(lua_State *l,PhysObjHandle &hPhysObj);
-		static void SetCollisionFilterGroup(lua_State *l,PhysObjHandle &hPhysObj,int group);
-		static void GetCollisionFilterGroup(lua_State *l,PhysObjHandle &hPhysObj);
-		static void SetCollisionFilter(lua_State *l,PhysObjHandle &hPhysObj,int mask,int group);
+		static bool IsValid(PhysObjHandle &hPhysObj);
+		static luabind::tableT<pragma::physics::ICollisionObject> GetCollisionObjects(lua_State *l,::PhysObj &physObj);
+		static void SetCollisionFilterGroup(lua_State *l,::PhysObj &physObj,int group);
 
-		static void SetDamping(lua_State *l,PhysObjHandle &hPhysObj,float linDamping,float angDamping);
-		static void SetLinearDamping(lua_State *l,PhysObjHandle &hPhysObj,float linDamping);
-		static void SetAngularDamping(lua_State *l,PhysObjHandle &hPhysObj,float angDamping);
-		static void GetLinearDamping(lua_State *l,PhysObjHandle &hPhysObj);
-		static void GetAngularDamping(lua_State *l,PhysObjHandle &hPhysObj);
-
-		static void ApplyForce(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &force);
-		static void ApplyForce(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &force,Vector3 &relPos);
-		static void ApplyImpulse(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &impulse);
-		static void ApplyImpulse(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &impulse,Vector3 &relPos);
-		static void ApplyTorque(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &torque);
-		static void ApplyTorqueImpulse(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &torque);
-		static void ClearForces(lua_State *l,PhysObjHandle &hPhysObj);
-		static void GetTotalForce(lua_State *l,PhysObjHandle &hPhysObj);
-		static void GetTotalTorque(lua_State *l,PhysObjHandle &hPhysObj);
-
-		static void GetPos(lua_State *l,PhysObjHandle &hPhysObj);
-		static void SetPos(lua_State *l,PhysObjHandle &hPhysObj,const Vector3 &pos);
-		static void GetRotation(lua_State *l,PhysObjHandle &hPhysObj);
-		static void SetRotation(lua_State *l,PhysObjHandle &hPhysObj,const Quat &rot);
-		static void GetBounds(lua_State *l,PhysObjHandle &hPhysObj);
-
-		static void SetLinearSleepingThreshold(lua_State *l,PhysObjHandle &hPhysObj,float threshold);
-		static void SetAngularSleepingThreshold(lua_State *l,PhysObjHandle &hPhysObj,float threshold);
-		static void SetSleepingThresholds(lua_State *l,PhysObjHandle &hPhysObj,float linear,float angular);
-		static void GetLinearSleepingThreshold(lua_State *l,PhysObjHandle &hPhysObj);
-		static void GetAngularSleepingThreshold(lua_State *l,PhysObjHandle &hPhysObj);
-		static void GetSleepingThreshold(lua_State *l,PhysObjHandle &hPhysObj);
-
-		static void IsOnGround(lua_State *l,PhysObjHandle &hPhysObj);
+		static bool IsOnGround(lua_State *l,::PhysObj &physObj);
 	};
 };
 
-static std::ostream &operator<<(std::ostream &out,const PhysObjHandle &o)
+static std::ostream &operator<<(std::ostream &out,const ::PhysObj *physObj)
 {
-	if(!o.IsValid())
+	if(!physObj)
 		out<<"PhysObj[NULL]";
 	else
-		operator<<(out,*o.get());
+		operator<<(out,*physObj);
 	return out;
 }
 
 void Lua::PhysObj::register_class(lua_State *l,luabind::module_ &mod)
 {
-	auto classDef = luabind::class_<PhysObjHandle>("Object");
+	auto classDef = luabind::class_<::PhysObj>("Object");
 	classDef.def(luabind::tostring(luabind::self));
 	classDef.def("IsValid",&IsValid);
-	classDef.def("SetLinearVelocity",&SetLinearVelocity);
-	classDef.def("GetLinearVelocity",&GetLinearVelocity);
-	classDef.def("AddLinearVelocity",&AddLinearVelocity);
-	classDef.def("SetAngularVelocity",&SetAngularVelocity);
-	classDef.def("GetAngularVelocity",&GetAngularVelocity);
-	classDef.def("AddAngularVelocity",&AddAngularVelocity);
-	classDef.def("PutToSleep",&PutToSleep);
-	classDef.def("WakeUp",&WakeUp);
-	classDef.def("GetMass",&GetMass);
-	classDef.def("SetMass",&SetMass);
-	classDef.def("GetLinearFactor",&GetLinearFactor);
-	classDef.def("GetAngularFactor",&GetAngularFactor);
-	classDef.def("SetLinearFactor",&SetLinearFactor);
-	classDef.def("SetAngularFactor",&SetAngularFactor);
+	classDef.def("SetLinearVelocity",&::PhysObj::SetLinearVelocity);
+	classDef.def("GetLinearVelocity",&::PhysObj::GetLinearVelocity);
+	classDef.def("AddLinearVelocity",&::PhysObj::AddLinearVelocity);
+	classDef.def("SetAngularVelocity",&::PhysObj::SetAngularVelocity);
+	classDef.def("GetAngularVelocity",&::PhysObj::GetAngularVelocity);
+	classDef.def("AddAngularVelocity",&::PhysObj::AddAngularVelocity);
+	classDef.def("PutToSleep",&::PhysObj::PutToSleep);
+	classDef.def("WakeUp",&::PhysObj::WakeUp);
+	classDef.def("GetMass",&::PhysObj::GetMass);
+	classDef.def("SetMass",&::PhysObj::SetMass);
+	classDef.def("GetLinearFactor",&::PhysObj::GetLinearFactor);
+	classDef.def("GetAngularFactor",&::PhysObj::GetAngularFactor);
+	classDef.def("SetLinearFactor",&::PhysObj::SetLinearFactor);
+	classDef.def("SetAngularFactor",&::PhysObj::SetAngularFactor);
 	classDef.def("GetCollisionObjects",&GetCollisionObjects);
-	classDef.def("GetOwner",&GetOwner);
-	classDef.def("SetCollisionFilterMask",&SetCollisionFilterMask);
-	classDef.def("GetCollisionFilterMask",&GetCollisionFilterMask);
+	classDef.def("GetOwner",&::PhysObj::GetOwner,luabind::game_object_policy<0>{});
+	classDef.def("SetCollisionFilterMask",&::PhysObj::SetCollisionFilterMask);
+	classDef.def("GetCollisionFilterMask",&::PhysObj::GetCollisionFilterMask);
 	classDef.def("SetCollisionFilterGroup",&SetCollisionFilterGroup);
-	classDef.def("GetCollisionFilterGroup",&GetCollisionFilterGroup);
-	classDef.def("SetCollisionFilter",&SetCollisionFilter);
-	classDef.def("SetDamping",&SetDamping);
-	classDef.def("SetLinearDamping",&SetLinearDamping);
-	classDef.def("SetAngularDamping",&SetAngularDamping);
-	classDef.def("GetLinearDamping",&GetLinearDamping);
-	classDef.def("GetAngularDamping",&GetAngularDamping);
-	classDef.def("ApplyForce",static_cast<void(*)(lua_State*,PhysObjHandle&,Vector3&)>(&ApplyForce));
-	classDef.def("ApplyForce",static_cast<void(*)(lua_State*,PhysObjHandle&,Vector3&,Vector3&)>(&ApplyForce));
-	classDef.def("ApplyImpulse",static_cast<void(*)(lua_State*,PhysObjHandle&,Vector3&)>(&ApplyImpulse));
-	classDef.def("ApplyImpulse",static_cast<void(*)(lua_State*,PhysObjHandle&,Vector3&,Vector3&)>(&ApplyImpulse));
-	classDef.def("ApplyTorque",&ApplyTorque);
-	classDef.def("ApplyTorqueImpulse",&ApplyTorqueImpulse);
-	classDef.def("ClearForces",&ClearForces);
-	classDef.def("GetTotalForce",&GetTotalForce);
-	classDef.def("GetTotalTorque",&GetTotalTorque);
-	classDef.def("GetPos",&GetPos);
-	classDef.def("SetPos",&SetPos);
-	classDef.def("GetRotation",&GetRotation);
-	classDef.def("SetRotation",&SetRotation);
-	classDef.def("GetBounds",&GetBounds);
+	classDef.def("GetCollisionFilterGroup",static_cast<CollisionMask(::PhysObj::*)() const>(&::PhysObj::GetCollisionFilter));
+	classDef.def("SetCollisionFilter",static_cast<void(::PhysObj::*)(CollisionMask,CollisionMask)>(&::PhysObj::SetCollisionFilter));
+	classDef.def("SetDamping",&::PhysObj::SetDamping);
+	classDef.def("SetLinearDamping",&::PhysObj::SetLinearDamping);
+	classDef.def("SetAngularDamping",&::PhysObj::SetAngularDamping);
+	classDef.def("GetLinearDamping",&::PhysObj::GetLinearDamping);
+	classDef.def("GetAngularDamping",&::PhysObj::GetAngularDamping);
+	classDef.def("ApplyForce",static_cast<void(::PhysObj::*)(const Vector3&)>(&::PhysObj::ApplyForce));
+	classDef.def("ApplyForce",static_cast<void(::PhysObj::*)(const Vector3&,const Vector3&)>(&::PhysObj::ApplyForce));
+	classDef.def("ApplyImpulse",static_cast<void(::PhysObj::*)(const Vector3&)>(&::PhysObj::ApplyImpulse));
+	classDef.def("ApplyImpulse",static_cast<void(::PhysObj::*)(const Vector3&,const Vector3&)>(&::PhysObj::ApplyImpulse));
+	classDef.def("ApplyTorque",&::PhysObj::ApplyTorque);
+	classDef.def("ApplyTorqueImpulse",&::PhysObj::ApplyTorqueImpulse);
+	classDef.def("ClearForces",&::PhysObj::ClearForces);
+	classDef.def("GetTotalForce",&::PhysObj::GetTotalForce);
+	classDef.def("GetTotalTorque",&::PhysObj::GetTotalTorque);
+	classDef.def("GetPos",&::PhysObj::GetPosition);
+	classDef.def("SetPos",&::PhysObj::SetPosition);
+	classDef.def("GetRotation",&::PhysObj::GetOrientation);
+	classDef.def("SetRotation",&::PhysObj::SetOrientation);
+	classDef.def("GetBounds",&::PhysObj::GetAABB,luabind::meta::join<luabind::out_value<2>,luabind::out_value<3>>::type{});
 
-	classDef.def("SetLinearSleepingThreshold",&SetLinearSleepingThreshold);
-	classDef.def("SetAngularSleepingThreshold",&SetAngularSleepingThreshold);
-	classDef.def("SetSleepingThresholds",&SetSleepingThresholds);
-	classDef.def("GetLinearSleepingThreshold",&GetLinearSleepingThreshold);
-	classDef.def("GetAngularSleepingThreshold",&GetAngularSleepingThreshold);
-	classDef.def("GetSleepingThreshold",&GetSleepingThreshold);
+	classDef.def("SetLinearSleepingThreshold",&::PhysObj::SetLinearSleepingThreshold);
+	classDef.def("SetAngularSleepingThreshold",&::PhysObj::SetAngularSleepingThreshold);
+	classDef.def("SetSleepingThresholds",&::PhysObj::SetSleepingThresholds);
+	classDef.def("GetLinearSleepingThreshold",&::PhysObj::GetLinearSleepingThreshold);
+	classDef.def("GetAngularSleepingThreshold",&::PhysObj::GetAngularSleepingThreshold);
+	classDef.def("GetSleepingThreshold",&::PhysObj::GetSleepingThreshold,luabind::pair_policy<0>{});
 
 	classDef.def("IsOnGround",&IsOnGround);
-	classDef.def("IsGroundWalkable",static_cast<void(*)(lua_State*,PhysObjHandle&)>([](lua_State *l,PhysObjHandle &hPhysObj) {
-		LUA_CHECK_PHYSOBJ(l,hPhysObj);
-		if(hPhysObj->IsController() == false)
-		{
-			Lua::PushBool(l,false);
-			return;
-		}
-		Lua::PushBool(l,static_cast<ControllerPhysObj*>(hPhysObj.get())->IsGroundWalkable());
+	classDef.def("IsGroundWalkable",static_cast<bool(*)(lua_State*,::PhysObj&)>([](lua_State *l,::PhysObj &physObj) {
+		if(physObj.IsController() == false)
+			return false;
+		return static_cast<ControllerPhysObj&>(physObj).IsGroundWalkable();
 	}));
-	classDef.def("GetGroundEntity",static_cast<void(*)(lua_State*,PhysObjHandle&)>([](lua_State *l,PhysObjHandle &hPhysObj) {
-		LUA_CHECK_PHYSOBJ(l,hPhysObj);
-		if(hPhysObj->IsController() == false)
-			return;
-		auto *ent = static_cast<ControllerPhysObj*>(hPhysObj.get())->GetGroundEntity();
-		if(ent == nullptr)
-			return;
-		ent->GetLuaObject()->push(l);
+	classDef.def("GetGroundEntity",static_cast<BaseEntity*(*)(lua_State*,::PhysObj&)>([](lua_State *l,::PhysObj &physObj) -> BaseEntity* {
+		if(physObj.IsController() == false)
+			return nullptr;
+		return static_cast<ControllerPhysObj&>(physObj).GetGroundEntity();
+	}),luabind::game_object_policy<0>{});
+	classDef.def("GetGroundPhysObject",static_cast<::PhysObj*(*)(lua_State*,::PhysObj&)>([](lua_State *l,::PhysObj &physObj) -> ::PhysObj* {
+		if(physObj.IsController() == false)
+			return nullptr;
+		return static_cast<ControllerPhysObj*>(&physObj)->GetGroundPhysObject();
+	}),luabind::game_object_policy<0>{});
+	classDef.def("GetGroundPhysCollisionObject",static_cast<pragma::physics::ICollisionObject*(*)(lua_State*,::PhysObj&)>([](lua_State *l,::PhysObj &physObj) -> pragma::physics::ICollisionObject* {
+		if(physObj.IsController() == false)
+			return nullptr;
+		return static_cast<ControllerPhysObj*>(&physObj)->GetGroundPhysCollisionObject();
+	}),luabind::game_object_policy<0>{});
+	classDef.def("GetGroundSurfaceMaterial",static_cast<int32_t(*)(lua_State*,::PhysObj&)>([](lua_State *l,::PhysObj &physObj) {
+		if(physObj.IsController() == false)
+			return -1;
+		return static_cast<ControllerPhysObj&>(physObj).GetGroundSurfaceMaterial();
 	}));
-	classDef.def("GetGroundPhysObject",static_cast<void(*)(lua_State*,PhysObjHandle&)>([](lua_State *l,PhysObjHandle &hPhysObj) {
-		LUA_CHECK_PHYSOBJ(l,hPhysObj);
-		if(hPhysObj->IsController() == false)
-			return;
-		auto *physObj = static_cast<ControllerPhysObj*>(hPhysObj.get())->GetGroundPhysObject();
-		if(physObj == nullptr)
-			return;
-		luabind::object(l,physObj->GetHandle()).push(l);
+	classDef.def("GetGroundVelocity",static_cast<Vector3(*)(lua_State*,::PhysObj&)>([](lua_State *l,::PhysObj &physObj) -> Vector3 {
+		if(physObj.IsController() == false)
+			return {};
+		return static_cast<ControllerPhysObj&>(physObj).GetGroundVelocity();
 	}));
-	classDef.def("GetGroundPhysCollisionObject",static_cast<void(*)(lua_State*,PhysObjHandle&)>([](lua_State *l,PhysObjHandle &hPhysObj) {
-		LUA_CHECK_PHYSOBJ(l,hPhysObj);
-		if(hPhysObj->IsController() == false)
-			return;
-		auto *colObj = static_cast<ControllerPhysObj*>(hPhysObj.get())->GetGroundPhysCollisionObject();
-		if(colObj == nullptr)
-			return;
-		luabind::object(l,colObj->GetHandle()).push(l);
-	}));
-	classDef.def("GetGroundSurfaceMaterial",static_cast<void(*)(lua_State*,PhysObjHandle&)>([](lua_State *l,PhysObjHandle &hPhysObj) {
-		LUA_CHECK_PHYSOBJ(l,hPhysObj);
-		if(hPhysObj->IsController() == false)
-		{
-			Lua::PushInt(l,-1);
-			return;
-		}
-		Lua::PushInt(l,static_cast<ControllerPhysObj*>(hPhysObj.get())->GetGroundSurfaceMaterial());
-	}));
-	classDef.def("GetGroundVelocity",static_cast<void(*)(lua_State*,PhysObjHandle&)>([](lua_State *l,PhysObjHandle &hPhysObj) {
-		LUA_CHECK_PHYSOBJ(l,hPhysObj);
-		if(hPhysObj->IsController() == false)
-		{
-			Lua::Push<Vector3>(l,Vector3{});
-			return;
-		}
-		Lua::Push<Vector3>(l,static_cast<ControllerPhysObj*>(hPhysObj.get())->GetGroundVelocity());
-	}));
-	classDef.def("GetGroundFriction",static_cast<void(*)(lua_State*,PhysObjHandle&)>([](lua_State *l,PhysObjHandle &hPhysObj) {
-		LUA_CHECK_PHYSOBJ(l,hPhysObj);
-		auto *physMat = hPhysObj->IsController() ? static_cast<ControllerPhysObj*>(hPhysObj.get())->GetController()->GetGroundMaterial() : nullptr;
+	classDef.def("GetGroundFriction",static_cast<float(*)(lua_State*,::PhysObj&)>([](lua_State *l,::PhysObj &physObj) {
+		auto *physMat = physObj.IsController() ? static_cast<ControllerPhysObj&>(physObj).GetController()->GetGroundMaterial() : nullptr;
 		if(physMat == nullptr)
-		{
-			Lua::PushNumber(l,1.0);
-			return;
-		}
-		Lua::PushNumber(l,physMat->GetDynamicFriction());
+			return 1.f;
+		return physMat->GetDynamicFriction();
 	}));
 	mod[classDef];
 }
 
-void Lua::PhysObj::IsValid(lua_State *l,PhysObjHandle &hPhysObj)
+bool Lua::PhysObj::IsValid(PhysObjHandle &hPhysObj)
 {
-	lua_pushboolean(l,hPhysObj.IsValid() ? true : false);
+	return hPhysObj.IsValid();
 }
-void Lua::PhysObj::SetLinearVelocity(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &vel)
+luabind::tableT<pragma::physics::ICollisionObject> Lua::PhysObj::GetCollisionObjects(lua_State *l,::PhysObj &physObj)
 {
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->SetLinearVelocity(vel);
-}
-void Lua::PhysObj::GetLinearVelocity(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	Vector3 vel = hPhysObj->GetLinearVelocity();
-	Lua::Push<Vector3>(l,vel);
-}
-void Lua::PhysObj::AddLinearVelocity(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &vel)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->AddLinearVelocity(vel);
-}
-void Lua::PhysObj::SetAngularVelocity(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &vel)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->SetAngularVelocity(vel);
-}
-void Lua::PhysObj::GetAngularVelocity(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	Vector3 vel = hPhysObj->GetAngularVelocity();
-	Lua::Push<Vector3>(l,vel);
-}
-void Lua::PhysObj::AddAngularVelocity(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &vel)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->AddAngularVelocity(vel);
-}
-void Lua::PhysObj::PutToSleep(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->PutToSleep();
-}
-void Lua::PhysObj::WakeUp(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->WakeUp();
-}
-void Lua::PhysObj::GetMass(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	Lua::PushNumber(l,hPhysObj->GetMass());
-}
-void Lua::PhysObj::SetMass(lua_State *l,PhysObjHandle &hPhysObj,float mass)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->SetMass(mass);
-}
-void Lua::PhysObj::SetLinearFactor(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &factor)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->SetLinearFactor(factor);
-}
-void Lua::PhysObj::SetAngularFactor(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &factor)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->SetAngularFactor(factor);
-}
-void Lua::PhysObj::GetLinearFactor(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	Lua::Push<Vector3>(l,hPhysObj->GetLinearFactor());
-}
-void Lua::PhysObj::GetAngularFactor(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	Lua::Push<Vector3>(l,hPhysObj->GetAngularFactor());
-}
-void Lua::PhysObj::GetCollisionObjects(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	auto &objs = hPhysObj->GetCollisionObjects();
-	lua_newtable(l);
-	int top = lua_gettop(l);
-	int n = 1;
-	for(auto it=objs.begin();it!=objs.end();++it)
+	auto &objs = physObj.GetCollisionObjects();
+	auto t = luabind::newtable(l);
+	uint32_t idx = 1;
+	for(auto &o : objs)
 	{
-		auto &o = *it;
-		if(o.IsValid())
-		{
-			o->Push(l);
-			lua_rawseti(l,top,n);
-			n++;
-		}
+		if(o.IsExpired())
+			continue;
+		t[idx++] = o->GetLuaObject();
 	}
+	return t;
 }
-void Lua::PhysObj::GetOwner(lua_State *l,PhysObjHandle &hPhysObj)
+void Lua::PhysObj::SetCollisionFilterGroup(lua_State *l,::PhysObj &physObj,int group)
 {
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	auto *owner = hPhysObj->GetOwner();
-	if(owner == nullptr)
-		return;
-	owner->PushLuaObject(l);
+	physObj.SetCollisionFilter(physObj.GetCollisionFilter(),static_cast<CollisionMask>(group));
 }
-void Lua::PhysObj::SetCollisionFilterMask(lua_State *l,PhysObjHandle &hPhysObj,int mask)
+bool Lua::PhysObj::IsOnGround(lua_State *l,::PhysObj &physObj)
 {
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->SetCollisionFilterMask(static_cast<CollisionMask>(mask));
-}
-void Lua::PhysObj::GetCollisionFilterMask(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	Lua::PushInt(l,hPhysObj->GetCollisionFilterMask());
-}
-void Lua::PhysObj::SetCollisionFilterGroup(lua_State *l,PhysObjHandle &hPhysObj,int group)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->SetCollisionFilter(hPhysObj->GetCollisionFilter(),static_cast<CollisionMask>(group));
-}
-void Lua::PhysObj::GetCollisionFilterGroup(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	Lua::PushInt(l,hPhysObj->GetCollisionFilter());
-}
-void Lua::PhysObj::SetCollisionFilter(lua_State *l,PhysObjHandle &hPhysObj,int mask,int group)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->SetCollisionFilter(static_cast<CollisionMask>(mask),static_cast<CollisionMask>(group));
-}
-void Lua::PhysObj::SetDamping(lua_State *l,PhysObjHandle &hPhysObj,float linDamping,float angDamping)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->SetDamping(linDamping,angDamping);
-}
-void Lua::PhysObj::SetLinearDamping(lua_State *l,PhysObjHandle &hPhysObj,float linDamping)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->SetLinearDamping(linDamping);
-}
-void Lua::PhysObj::SetAngularDamping(lua_State *l,PhysObjHandle &hPhysObj,float angDamping)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->SetAngularDamping(angDamping);
-}
-void Lua::PhysObj::GetLinearDamping(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	Lua::PushNumber(l,hPhysObj->GetLinearDamping());
-}
-void Lua::PhysObj::GetAngularDamping(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	Lua::PushNumber(l,hPhysObj->GetAngularDamping());
-}
-
-void Lua::PhysObj::ApplyForce(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &force)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->ApplyForce(force);
-}
-void Lua::PhysObj::ApplyForce(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &force,Vector3 &relPos)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->ApplyForce(force,relPos);
-}
-void Lua::PhysObj::ApplyImpulse(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &impulse)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->ApplyImpulse(impulse);
-}
-void Lua::PhysObj::ApplyImpulse(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &torque,Vector3 &relPos)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->ApplyImpulse(torque,relPos);
-}
-void Lua::PhysObj::ApplyTorqueImpulse(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &torque)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->ApplyTorqueImpulse(torque);
-}
-void Lua::PhysObj::ApplyTorque(lua_State *l,PhysObjHandle &hPhysObj,Vector3 &torque)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->ApplyTorque(torque);
-}
-void Lua::PhysObj::ClearForces(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->ClearForces();
-}
-void Lua::PhysObj::GetTotalForce(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	Lua::Push<Vector3>(l,hPhysObj->GetTotalForce());
-}
-void Lua::PhysObj::GetTotalTorque(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	Lua::Push<Vector3>(l,hPhysObj->GetTotalTorque());
-}
-
-void Lua::PhysObj::GetPos(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	Lua::Push<Vector3>(l,hPhysObj->GetPosition());
-}
-void Lua::PhysObj::SetPos(lua_State *l,PhysObjHandle &hPhysObj,const Vector3 &pos)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->SetPosition(pos);
-}
-void Lua::PhysObj::GetRotation(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	Lua::Push<Quat>(l,hPhysObj->GetOrientation());
-}
-void Lua::PhysObj::SetRotation(lua_State *l,PhysObjHandle &hPhysObj,const Quat &rot)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->SetOrientation(rot);
-}
-void Lua::PhysObj::GetBounds(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	Vector3 min,max;
-	hPhysObj->GetAABB(min,max);
-	Lua::Push<Vector3>(l,min);
-	Lua::Push<Vector3>(l,max);
-}
-void Lua::PhysObj::SetLinearSleepingThreshold(lua_State *l,PhysObjHandle &hPhysObj,float threshold)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->SetLinearSleepingThreshold(threshold);
-}
-void Lua::PhysObj::SetAngularSleepingThreshold(lua_State *l,PhysObjHandle &hPhysObj,float threshold)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->SetAngularSleepingThreshold(threshold);
-}
-void Lua::PhysObj::SetSleepingThresholds(lua_State *l,PhysObjHandle &hPhysObj,float linear,float angular)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	hPhysObj->SetSleepingThresholds(linear,angular);
-}
-void Lua::PhysObj::GetLinearSleepingThreshold(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	Lua::PushNumber(l,hPhysObj->GetLinearSleepingThreshold());
-}
-void Lua::PhysObj::GetAngularSleepingThreshold(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	Lua::PushNumber(l,hPhysObj->GetAngularSleepingThreshold());
-}
-void Lua::PhysObj::GetSleepingThreshold(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	auto thresholds = hPhysObj->GetSleepingThreshold();
-	Lua::PushNumber(l,thresholds.first);
-	Lua::PushNumber(l,thresholds.second);
-}
-void Lua::PhysObj::IsOnGround(lua_State *l,PhysObjHandle &hPhysObj)
-{
-	LUA_CHECK_PHYSOBJ(l,hPhysObj);
-	if(hPhysObj->IsController() == false)
-	{
-		Lua::PushBool(l,false);
-		return;
-	}
-	Lua::PushBool(l,static_cast<ControllerPhysObj*>(hPhysObj.get())->IsOnGround());
+	
+	if(physObj.IsController() == false)
+		return false;
+	return static_cast<ControllerPhysObj&>(physObj).IsOnGround();
 }

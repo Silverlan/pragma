@@ -75,7 +75,7 @@ protected:
 	virtual std::shared_ptr<pragma::EntityComponentManager> InitializeEntityComponentManager() override;
 	virtual void InitializeEntityComponents(pragma::EntityComponentManager &componentManager) override;
 	virtual void RegisterLuaEntityComponents(luabind::module_ &gameMod) override;
-	virtual void RegisterLuaEntityComponent(luabind::class_<BaseEntityComponentHandleWrapper> &classDef) override;
+	virtual void RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityComponent> &classDef) override;
 	virtual bool InitializeGameMode() override;
 
 	const pragma::NetEventManager &GetEntityNetEventManager() const;

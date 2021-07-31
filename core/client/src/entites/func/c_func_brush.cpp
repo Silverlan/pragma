@@ -44,7 +44,7 @@ void CBrushComponent::ReceiveData(NetPacket &packet)
 	m_kvSolid = packet->Read<bool>();
 	m_kvSurfaceMaterial = packet->ReadString();
 }
-luabind::object CBrushComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CBrushComponentHandleWrapper>(l);}
+void CBrushComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 ////////
 

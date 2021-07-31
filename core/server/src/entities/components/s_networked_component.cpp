@@ -22,7 +22,7 @@ void SNetworkedComponent::SendData(NetPacket &packet,networking::ClientRecipient
 #endif
 }
 
-luabind::object SNetworkedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SNetworkedComponentHandleWrapper>(l);}
+void SNetworkedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 #if NETWORKED_VARS_ENABLED != 0
 template<typename T>

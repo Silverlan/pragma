@@ -40,7 +40,7 @@ namespace pragma
 		CEnvSoundProbeComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	protected:
 		static std::vector<ProbeInfo> s_probes;
 		static CallbackHandle s_probeCallback;

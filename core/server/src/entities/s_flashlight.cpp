@@ -15,7 +15,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(flashlight,Flashlight);
 
-luabind::object SFlashlightComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SFlashlightComponentHandleWrapper>(l);}
+void SFlashlightComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void Flashlight::Initialize()
 {

@@ -13,6 +13,7 @@
 namespace luabind {
 	namespace detail {
 
+		template<class ValuePolicy=void>
 		struct optional_converter
 		{
 			template <class T>
@@ -21,7 +22,32 @@ namespace luabind {
 				if(!x.has_value())
 					lua_pushnil(L);
 				else
-					default_converter<T>().to_lua(L, *x);
+				{
+					if constexpr(std::is_same_v<ValuePolicy,void>)
+						default_converter<T>().to_lua(L, *x);
+					else
+					{
+						specialized_converter_policy_n<0, luabind::policy_list<ValuePolicy>, T, cpp_to_lua> converter;
+						converter.to_lua(L,const_cast<T&>(*x));
+					}
+				}
+			}
+
+			template <class T>
+			void to_lua(lua_State* L, std::shared_ptr<T> const& x)
+			{
+				if(!x)
+					lua_pushnil(L);
+				else
+				{
+					if constexpr(std::is_same_v<ValuePolicy,void>)
+						default_converter<T>().to_lua(L, *x);
+					else
+					{
+						specialized_converter_policy_n<0, luabind::policy_list<ValuePolicy>, T, cpp_to_lua> converter;
+						converter.to_lua(L,const_cast<T&>(*x));
+					}
+				}
 			}
 
 			template <class T>
@@ -34,20 +60,21 @@ namespace luabind {
 			}
 		};
 
+		template<class ValuePolicy=void>
 		struct optional_policy
 		{
 			template <class T, class Direction>
 			struct specialize
 			{
 				static_assert(std::is_same<Direction, cpp_to_lua>::value, "Optional policy only supports cpp -> lua");
-				using type = optional_converter;
+				using type = optional_converter<ValuePolicy>;
 			};
 		};
 
 	} // namespace detail
 
-	template< unsigned int N >
-	using optional_policy = meta::type_list< converter_policy_injector< N, detail::optional_policy > >;
+	template< unsigned int N,class ValuePolicy=void >
+	using optional_policy = meta::type_list< converter_policy_injector< N, detail::optional_policy<ValuePolicy> > >;
 
 } // namespace luabind
 

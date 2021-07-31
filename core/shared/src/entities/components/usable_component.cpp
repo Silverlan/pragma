@@ -27,7 +27,7 @@ void UsableComponent::Initialize()
 	BaseEntityComponent::Initialize();
 	GetEntity().AddComponent("transform");
 }
-luabind::object UsableComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<UsableComponentHandleWrapper>(l);}
+void UsableComponent::InitializeLuaObject(lua_State *l) {pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 bool UsableComponent::CanUse(BaseEntity *ent) const
 {
@@ -49,7 +49,7 @@ CEOnUseData::CEOnUseData(BaseEntity *ent)
 void CEOnUseData::PushArguments(lua_State *l)
 {
 	if(entity != nullptr)
-		entity->GetLuaObject()->push(l);
+		entity->GetLuaObject().push(l);
 	else
 		Lua::PushNil(l);
 }
@@ -62,7 +62,7 @@ CECanUseData::CECanUseData(BaseEntity *ent)
 void CECanUseData::PushArguments(lua_State *l)
 {
 	if(entity != nullptr)
-		entity->GetLuaObject()->push(l);
+		entity->GetLuaObject().push(l);
 	else
 		Lua::PushNil(l);
 }

@@ -76,7 +76,7 @@ void STriggerGravityComponent::OnStartTouch(BaseEntity *ent)
 
 ////////////
 
-luabind::object STriggerGravityComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<STriggerGravityComponentHandleWrapper>(l);}
+void STriggerGravityComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void TriggerGravity::Initialize()
 {

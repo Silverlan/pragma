@@ -54,7 +54,7 @@ namespace pragma
 		struct DLLNETWORK WheelData
 		{
 			WheelData()=default;
-			util::WeakHandle<pragma::BaseWheelComponent> hWheel = {};
+			ComponentHandle<pragma::BaseWheelComponent> hWheel = {};
 			std::string model = "";
 		};
 		pragma::NetEventId m_netEvSteeringWheelModel = pragma::INVALID_NET_EVENT;

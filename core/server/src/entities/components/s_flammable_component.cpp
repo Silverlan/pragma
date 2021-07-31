@@ -31,8 +31,8 @@ void SFlammableComponent::IgniteInfo::Clear()
 {
 	if(damageTimer != nullptr && damageTimer->IsValid())
 		damageTimer->GetTimer()->Remove(s_game);
-	hAttacker = {};
-	hInflictor = {};
+	hAttacker = EntityHandle{};
+	hInflictor = EntityHandle{};
 }
 
 /////////////////////////
@@ -54,7 +54,7 @@ void SFlammableComponent::ApplyIgnitionDamage()
 	info.SetDamage(5);
 	pDamageableComponent->TakeDamage(info);
 }
-luabind::object SFlammableComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SFlammableComponentHandleWrapper>(l);}
+void SFlammableComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 util::EventReply SFlammableComponent::Ignite(float duration,BaseEntity *attacker,BaseEntity *inflictor)
 {
 	if(!IsIgnitable())

@@ -22,7 +22,7 @@ void CPointConstraintBallSocketComponent::ReceiveData(NetPacket &packet)
 	m_kvTarget = packet->ReadString();
 	m_posTarget = nwm::read_vector(packet);
 }
-luabind::object CPointConstraintBallSocketComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CPointConstraintBallSocketComponentHandleWrapper>(l);}
+void CPointConstraintBallSocketComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void CPointConstraintBallSocket::Initialize()
 {

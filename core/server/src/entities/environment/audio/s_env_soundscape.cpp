@@ -30,7 +30,7 @@ void SSoundScapeComponent::SendData(NetPacket &packet,networking::ClientRecipien
 	}
 }
 
-luabind::object SSoundScapeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SSoundScapeComponentHandleWrapper>(l);}
+void SSoundScapeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 ///////
 

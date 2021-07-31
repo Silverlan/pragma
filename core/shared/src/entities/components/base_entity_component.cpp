@@ -36,16 +36,11 @@ void BaseEntityComponent::RegisterEvents(pragma::EntityComponentManager &compone
 	EVENT_ON_ENTITY_COMPONENT_ADDED = componentManager.RegisterEvent("ON_ENTITY_COMPONENT_ADDED");
 	EVENT_ON_ENTITY_COMPONENT_REMOVED = componentManager.RegisterEvent("ON_ENTITY_COMPONENT_REMOVED");
 }
-util::WeakHandle<const BaseEntityComponent> BaseEntityComponent::GetHandle() const {return GetHandle<BaseEntityComponent>();}
-util::WeakHandle<BaseEntityComponent> BaseEntityComponent::GetHandle() {return GetHandle<BaseEntityComponent>();}
-void BaseEntityComponent::InitializeLuaObject()
-{
-	if(!m_luaObj)
-		m_luaObj = InitializeLuaObject(GetEntity().GetNetworkState()->GetGameState()->GetLuaState());
-}
+util::TWeakSharedHandle<const BaseEntityComponent> BaseEntityComponent::GetHandle() const {return GetHandle<BaseEntityComponent>();}
+util::TWeakSharedHandle<BaseEntityComponent> BaseEntityComponent::GetHandle() {return GetHandle<BaseEntityComponent>();}
 void BaseEntityComponent::Initialize()
 {
-	InitializeLuaObject();
+	InitializeLuaObject(GetEntity().GetLuaState());
 
 	auto &ent = GetEntity();
 	OnAttached(ent);

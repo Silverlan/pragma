@@ -92,7 +92,7 @@ namespace pragma
 		virtual void OnMemberValueChanged(uint32_t memberIdx);
 	protected:
 		BaseLuaBaseEntityComponent(BaseEntity &ent,luabind::object &o);
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void InvokeNetEventHandle(const std::string &methodName,NetPacket &packet,pragma::BasePlayerComponent *pl)=0;
 		virtual void InitializeMember(const MemberInfo &memberInfo);
 		std::any GetMemberValue(const MemberInfo &memberInfo) const;

@@ -8,10 +8,10 @@
 #define __LRAY_H__
 #include "pragma/networkdefinitions.h"
 #include "pragma/physics/shape.hpp"
+#include "pragma/types.hpp"
 #include <pragma/lua/luaapi.h>
 
 class TraceData;
-class PhysObjHandle;
 namespace pragma::physics {class IConvexShape;};
 namespace Lua::TraceData
 {

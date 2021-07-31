@@ -37,7 +37,7 @@ void CTouchComponent::OnEntitySpawn()
 	if(pRenderComponent)
 		pRenderComponent->SetRenderMode(RenderMode::World);
 }
-luabind::object CTouchComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CTouchComponentHandleWrapper>(l);}
+void CTouchComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 /////////////
 

@@ -39,7 +39,7 @@ CLightMapComponent::CLightMapComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_lightMapExposure{util::FloatProperty::Create(0.f)}
 {}
 
-luabind::object CLightMapComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CLightMapComponentHandleWrapper>(l);}
+void CLightMapComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CLightMapComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -289,7 +289,7 @@ static void generate_lightmap_uv_atlas(BaseEntity &ent,uint32_t width,uint32_t h
 
 		auto mdl = hEnt.valid() ? hEnt.get()->GetModel() : nullptr;
 		auto meshGroup = mdl ? mdl->GetMeshGroup(0) : nullptr;
-		auto lightmapC = hEnt.valid() ? hEnt.get()->GetComponent<pragma::CLightMapComponent>() : util::WeakHandle<pragma::CLightMapComponent>{};
+		auto lightmapC = hEnt.valid() ? hEnt.get()->GetComponent<pragma::CLightMapComponent>() : pragma::ComponentHandle<pragma::CLightMapComponent>{};
 		if(meshGroup == nullptr || lightmapC.expired())
 		{
 			Con::cwar<<"WARNING: Resources used for atlas generation are no longer valid!"<<Con::endl;
@@ -511,7 +511,7 @@ void Console::commands::debug_lightmaps(NetworkState *state,pragma::BasePlayerCo
 
 	auto *scene = c_game->GetRenderScene();
 	auto *renderer = scene ? scene->GetRenderer() : nullptr;
-	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent>{};
 	if(raster.expired())
 		return;
 	auto &lightmap = raster->GetLightMap();

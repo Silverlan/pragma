@@ -11,7 +11,7 @@
 
 using namespace pragma;
 
-luabind::object PropComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<PropComponentHandleWrapper>(l);}
+void PropComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void PropComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {

@@ -9,7 +9,7 @@
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include <prosper_command_buffer.hpp>
 
-void Lua::BSP::register_class(lua_State *l,luabind::module_ &entsMod,luabind::class_<CWorldHandle,BaseEntityComponentHandle> &defWorld)
+void Lua::BSP::register_class(lua_State *l,luabind::module_ &entsMod,luabind::class_<pragma::CWorldComponent,pragma::BaseWorldComponent> &defWorld)
 {
 	auto defBspTree = luabind::class_<::util::BSPTree>("BSPTree");
 	defBspTree.def("IsValid",static_cast<void(*)(lua_State*,::util::BSPTree&)>([](lua_State *l,::util::BSPTree &tree) {

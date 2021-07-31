@@ -52,7 +52,7 @@ Bool CLightSpotVolComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacke
 		if(ent != nullptr)
 			SetSpotlightTarget(*ent);
 		else
-			m_hSpotlightTarget = {};
+			m_hSpotlightTarget = EntityHandle{};
 	}
 	else
 		return CBaseNetComponent::ReceiveNetEvent(eventId,packet);
@@ -70,7 +70,7 @@ void CLightSpotVolComponent::ReceiveData(NetPacket &packet)
 		if(ent != nullptr)
 			SetSpotlightTarget(*ent);
 		else
-			m_hSpotlightTarget = {};
+			m_hSpotlightTarget = EntityHandle{};
 	});
 }
 
@@ -158,7 +158,7 @@ void CLightSpotVolComponent::OnEntitySpawn()
 	InitializeVolumetricLight();
 }
 
-luabind::object CLightSpotVolComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CLightSpotVolComponentHandleWrapper>(l);}
+void CLightSpotVolComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 ///////
 

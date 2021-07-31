@@ -14,4 +14,4 @@ void SIOComponent::Initialize()
 {
 	BaseIOComponent::Initialize();
 }
-luabind::object SIOComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SIOComponentHandleWrapper>(l);}
+void SIOComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}

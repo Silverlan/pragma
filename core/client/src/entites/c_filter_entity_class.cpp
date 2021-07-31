@@ -17,7 +17,7 @@ LINK_ENTITY_TO_CLASS(filter_entity_class,CFilterEntityClass);
 
 extern CGame *s_game;
 
-luabind::object CFilterClassComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CFilterClassComponentHandleWrapper>(l);}
+void CFilterClassComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void CFilterEntityClass::Initialize()
 {

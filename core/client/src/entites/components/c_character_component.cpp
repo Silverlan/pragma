@@ -92,7 +92,7 @@ void CCharacterComponent::CreateWaterSplash()
 	auto pSubmergibleComponent = ent.GetComponent<SubmergibleComponent>();
 	auto pSoundEmitterComponent = ent.GetComponent<CSoundEmitterComponent>();
 	auto *pWater = pSubmergibleComponent.valid() ? pSubmergibleComponent->GetWaterEntity() : nullptr;
-	auto pWaterComponent = (pWater != nullptr) ? pWater->GetComponent<CWaterComponent>() : util::WeakHandle<CWaterComponent>{};
+	auto pWaterComponent = (pWater != nullptr) ? pWater->GetComponent<CWaterComponent>() : pragma::ComponentHandle<CWaterComponent>{};
 	if(pSoundEmitterComponent.valid() && pTrComponent != nullptr && pWaterComponent.valid())
 	{
 		auto pos = pTrComponent->GetPosition();
@@ -119,7 +119,7 @@ void CCharacterComponent::CreateWaterSplash()
 	}
 }
 
-luabind::object CCharacterComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CCharacterHandle>(l);}
+void CCharacterComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CCharacterComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BaseCharacterComponent));}
 void CCharacterComponent::ReceiveData(NetPacket &packet)
 {

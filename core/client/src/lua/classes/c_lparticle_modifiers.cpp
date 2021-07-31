@@ -114,7 +114,7 @@ luabind::object *pragma::LuaParticleModifierManager::GetClassObject(std::string 
 
 /////////////
 
-void Lua::ParticleSystemModifier::register_particle_class(luabind::class_<CParticleSystemHandle,BaseEntityComponentHandle> &defPtc)
+void Lua::ParticleSystemModifier::register_particle_class(luabind::class_<pragma::CParticleSystemComponent,pragma::BaseEnvParticleSystemComponent> &defPtc)
 {
 	auto defPt = luabind::class_<::CParticle>("Particle");
 	defPt.add_static_constant("FIELD_ID_POS",umath::to_integral(CParticle::FieldId::Pos));
@@ -348,7 +348,7 @@ void Lua::ParticleSystemModifier::register_particle_class(luabind::class_<CParti
 	}));
 	defPtc.scope[defPt];
 }
-void Lua::ParticleSystemModifier::register_modifier_class(luabind::class_<CParticleSystemHandle,BaseEntityComponentHandle> &defPtc)
+void Lua::ParticleSystemModifier::register_modifier_class(luabind::class_<pragma::CParticleSystemComponent,pragma::BaseEnvParticleSystemComponent> &defPtc)
 {
 	auto defPtModifier = luabind::class_<::CParticleModifier>("ParticleModifier");
 	defPtModifier.def("GetName",static_cast<void(*)(lua_State*,::CParticleModifier&)>([](lua_State *l,::CParticleModifier &ptm) {

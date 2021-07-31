@@ -11,7 +11,7 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 
 template<class TComponent,typename>
-	util::WeakHandle<TComponent> pragma::BaseEntityComponentSystem::AddComponent(bool bForceCreateNew)
+	pragma::ComponentHandle<TComponent> pragma::BaseEntityComponentSystem::AddComponent(bool bForceCreateNew)
 {
 	ComponentId componentId;
 	if(m_componentManager->GetComponentTypeId<TComponent>(componentId) == false)
@@ -19,7 +19,7 @@ template<class TComponent,typename>
 	auto whComponent = AddComponent(componentId,bForceCreateNew);
 	if(whComponent.expired())
 		return {};
-	return util::WeakHandle<TComponent>(std::static_pointer_cast<TComponent>(whComponent.get()->shared_from_this()));
+	return whComponent->GetHandle<TComponent>();
 }
 template<class TComponent,typename>
 	void pragma::BaseEntityComponentSystem::RemoveComponent()
@@ -30,13 +30,13 @@ template<class TComponent,typename>
 	RemoveComponent(componentId);
 }
 template<class TComponent,typename>
-	util::WeakHandle<TComponent> pragma::BaseEntityComponentSystem::GetComponent() const
+	pragma::ComponentHandle<TComponent> pragma::BaseEntityComponentSystem::GetComponent() const
 {
 	ComponentId componentId;
 	if(m_componentManager->GetComponentId(std::type_index(typeid(TComponent)),componentId) == false)
-		return util::WeakHandle<TComponent>{};
+		return pragma::ComponentHandle<TComponent>{};
 	auto it = m_componentLookupTable.find(componentId);
-	return (it != m_componentLookupTable.end()) ? util::WeakHandle<TComponent>(std::static_pointer_cast<TComponent>(it->second.lock())) : util::WeakHandle<TComponent>{};
+	return (it != m_componentLookupTable.end()) ? const_cast<BaseEntityComponent*>(it->second.get())->GetHandle<TComponent>() : pragma::ComponentHandle<TComponent>{};
 }
 template<class TComponent,typename>
 	bool pragma::BaseEntityComponentSystem::HasComponent() const

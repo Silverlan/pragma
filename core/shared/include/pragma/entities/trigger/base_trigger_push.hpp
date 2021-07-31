@@ -40,7 +40,7 @@ namespace pragma
 			float t = 1.f;
 		};
 		std::vector<PushInfo> m_entityPushQueue;
-		util::WeakHandle<pragma::BaseToggleComponent> m_toggleComponent = {};
+		ComponentHandle<pragma::BaseToggleComponent> m_toggleComponent = {};
 	};
 };
 

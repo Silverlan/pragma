@@ -35,11 +35,11 @@ void BaseParentComponent::UpdateChildAttachmentData()
 		hChild->UpdateAttachmentData(true);
 	}
 }
-const std::vector<util::WeakHandle<BaseAttachableComponent>> &BaseParentComponent::GetChildren() const {return const_cast<BaseParentComponent*>(this)->GetChildren();}
-std::vector<util::WeakHandle<BaseAttachableComponent>> &BaseParentComponent::GetChildren() {return m_children;}
+const std::vector<util::TWeakSharedHandle<BaseAttachableComponent>> &BaseParentComponent::GetChildren() const {return const_cast<BaseParentComponent*>(this)->GetChildren();}
+std::vector<util::TWeakSharedHandle<BaseAttachableComponent>> &BaseParentComponent::GetChildren() {return m_children;}
 void BaseParentComponent::RemoveChild(BaseAttachableComponent &child)
 {
-	auto it = std::find_if(m_children.begin(),m_children.end(),[&child](const util::WeakHandle<BaseAttachableComponent> &component) {
+	auto it = std::find_if(m_children.begin(),m_children.end(),[&child](const ComponentHandle<BaseAttachableComponent> &component) {
 		return &child == component.get();
 	});
 	if(it != m_children.end())

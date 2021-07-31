@@ -133,7 +133,7 @@ void WITreeListElement::SetTreeParent(WITreeListElement *pEl)
 	{
 		if(m_pArrow.IsValid())
 			m_pArrow->Remove();
-		m_pTreeParent = {};
+		m_pTreeParent = decltype(m_pTreeParent){};
 		m_depth = 0;
 		return;
 	}
@@ -149,7 +149,7 @@ void WITreeListElement::SetTreeParent(WITreeListElement *pEl)
 		pArrow->SetPos(m_xOffset,3);
 		pArrow->SetDirection(WIArrow::Direction::Down);
 		auto hThis = GetHandle();
-		pArrow->AddCallback("OnMousePressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hThis](util::EventReply *reply) -> CallbackReturnType {
+		pArrow->AddCallback("OnMousePressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hThis](util::EventReply *reply) mutable -> CallbackReturnType {
 			*reply = util::EventReply::Handled;
 			if(hThis.IsValid() == false)
 				return CallbackReturnType::HasReturnValue;
@@ -163,7 +163,7 @@ void WITreeListElement::SetList(WITreeList *pList)
 {
 	if(pList == nullptr)
 	{
-		m_pList = {};
+		m_pList = decltype(m_pList){};
 		return;
 	}
 	m_pList = pList->GetHandle();
@@ -175,7 +175,7 @@ WITreeListElement *WITreeListElement::GetLastItem() const
 	{
 		auto &hItem = *it;
 		if(hItem.IsValid())
-			return static_cast<WITreeListElement*>(hItem.get())->GetLastItem();
+			return static_cast<const WITreeListElement*>(hItem.get())->GetLastItem();
 	}
 	return const_cast<WITreeListElement*>(this);
 }
@@ -189,7 +189,7 @@ void WITreeListElement::SetTextElement(WIText *pText)
 		pText->GetColorProperty()->Link(*GetColorProperty());
 	}
 }
-WIText *WITreeListElement::GetTextElement() const {return m_hText.IsValid() ? static_cast<WIText*>(m_hText.get()) : nullptr;}
+WIText *WITreeListElement::GetTextElement() const {return m_hText.IsValid() ? const_cast<WIText*>(static_cast<const WIText*>(m_hText.get())) : nullptr;}
 WITreeListElement *WITreeListElement::AddItem(const std::string &text,const std::function<void(WITreeListElement&)> &fPopulate)
 {
 	if(m_pList.IsValid() == false)
@@ -203,7 +203,7 @@ WITreeListElement *WITreeListElement::AddItem(const std::string &text,const std:
 	pEl->SetList(pList);
 	pEl->m_fPopulate = fPopulate;
 	auto hThis = GetHandle();
-	pEl->AddCallback("OnTreeUpdate",FunctionCallback<>::Create([hThis]() {
+	pEl->AddCallback("OnTreeUpdate",FunctionCallback<>::Create([hThis]() mutable {
 		if(hThis.IsValid() == false)
 			return;
 		hThis.get()->CallCallbacks("OnTreeUpdate");
@@ -246,7 +246,7 @@ void WITreeList::DoUpdate()
 {
 	WITable::DoUpdate();
 }
-WITreeListElement *WITreeList::GetRootItem() const {return static_cast<WITreeListElement*>(m_pRoot.get());}
+WITreeListElement *WITreeList::GetRootItem() const {return const_cast<WITreeListElement*>(static_cast<const WITreeListElement*>(m_pRoot.get()));}
 WITreeListElement *WITreeList::AddItem(const std::string &text,const std::function<void(WITreeListElement&)> &fPopulate)
 {
 	if(m_pRoot.IsValid() == false)

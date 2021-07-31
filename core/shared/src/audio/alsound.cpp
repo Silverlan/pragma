@@ -79,7 +79,7 @@ bool ALSound::IsSoundScript() const {return false;}
 NetworkState *ALSound::GetNetworkState() const {return m_networkState;}
 
 void ALSound::SetSource(BaseEntity *ent) {m_hSourceEntity = (ent != nullptr) ? ent->GetHandle() : EntityHandle{};}
-BaseEntity *ALSound::GetSource() const {return m_hSourceEntity.get();}
+BaseEntity *ALSound::GetSource() const {return const_cast<BaseEntity*>(m_hSourceEntity.get());}
 
 float ALSound::GetSoundIntensity(const Vector3 &pos) const
 {

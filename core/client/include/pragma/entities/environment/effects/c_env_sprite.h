@@ -31,13 +31,13 @@ namespace pragma
 		void SetOrientationType(CParticleSystemComponent::OrientationType orientationType);
 		virtual void StartParticle();
 		virtual void StopParticle();
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual void OnEntitySpawn() override;
 
 		void StopAndRemoveEntity();
 	protected:
-		util::WeakHandle<CParticleSystemComponent> m_hParticle = {};
+		ComponentHandle<CParticleSystemComponent> m_hParticle = {};
 		CallbackHandle m_hCbRenderCallback;
 		CParticleSystemComponent::OrientationType m_orientationType = CParticleSystemComponent::OrientationType::Aligned;
 	};

@@ -49,7 +49,6 @@ namespace pragma
 			TBaseComponent::OnRemove();
 			m_debugObject = nullptr;
 		}
-		virtual luabind::object InitializeLuaObject(lua_State *l) override {return BaseEntityComponent::template InitializeLuaObject<CDebugTextComponentHandleWrapper>(l);}
 	protected:
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override
 		{
@@ -126,6 +125,7 @@ namespace pragma
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
+		virtual void InitializeLuaObject(lua_State *l) override;
 	protected:
 		virtual void ReloadDebugObject(Color color,const Vector3 &pos) override;
 		using TCBaseDebugComponent<BaseDebugTextComponent>::ReloadDebugObject;
@@ -151,7 +151,7 @@ namespace pragma
 	public:
 		CDebugPointComponent(BaseEntity &ent) : TCBaseDebugComponent<BaseDebugPointComponent>(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 	protected:
 		virtual void ReloadDebugObject(Color color,const Vector3 &pos) override;
@@ -167,7 +167,7 @@ namespace pragma
 	public:
 		CDebugLineComponent(BaseEntity &ent) : TCBaseDebugComponent<BaseDebugLineComponent>(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 	protected:
 		virtual void ReloadDebugObject(Color color,const Vector3 &pos) override;
@@ -186,7 +186,7 @@ namespace pragma
 		
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	protected:
 		virtual void ReloadDebugObject(Color color,const Vector3 &pos) override;
 		using TCBaseDebugComponent<BaseDebugBoxComponent>::ReloadDebugObject;
@@ -201,7 +201,7 @@ namespace pragma
 	public:
 		CDebugSphereComponent(BaseEntity &ent) : TCBaseDebugComponent<BaseDebugSphereComponent>(ent) {}
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	protected:
 		virtual void ReloadDebugObject(Color color,const Vector3 &pos) override;
 		using TCBaseDebugComponent<BaseDebugSphereComponent>::ReloadDebugObject;
@@ -220,7 +220,7 @@ namespace pragma
 		
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	protected:
 		virtual void ReloadDebugObject(Color color,const Vector3 &pos) override;
 		using TCBaseDebugComponent<BaseDebugConeComponent>::ReloadDebugObject;
@@ -238,7 +238,7 @@ namespace pragma
 		
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	protected:
 		virtual void ReloadDebugObject(Color color,const Vector3 &pos) override;
 		using TCBaseDebugComponent<BaseDebugCylinderComponent>::ReloadDebugObject;
@@ -252,7 +252,7 @@ namespace pragma
 	{
 	public:
 		CDebugPlaneComponent(BaseEntity &ent) : TCBaseDebugComponent<BaseDebugPlaneComponent>(ent) {}
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 	protected:

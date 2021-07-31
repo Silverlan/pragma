@@ -54,15 +54,15 @@ util::EventReply BaseEntityComponentSystem::BroadcastEvent(ComponentEventId even
 	CEGenericComponentEvent ev {};
 	return BroadcastEvent(eventId,ev);
 }
-util::WeakHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::AddComponent(ComponentId componentId,bool bForceCreateNew)
+pragma::ComponentHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::AddComponent(ComponentId componentId,bool bForceCreateNew)
 {
 	if(bForceCreateNew == false)
 	{
-		auto it = std::find_if(m_components.begin(),m_components.end(),[componentId](const std::shared_ptr<pragma::BaseEntityComponent> &ptrComponent) {
+		auto it = std::find_if(m_components.begin(),m_components.end(),[componentId](const util::TSharedHandle<pragma::BaseEntityComponent> &ptrComponent) {
 			return ptrComponent->GetComponentId() == componentId;
 		});
 		if(it != m_components.end())
-			return *it;
+			return {*it};
 	}
 	auto ptrComponent = m_componentManager->CreateComponent(componentId,*m_entity);
 	if(ptrComponent == nullptr)
@@ -97,9 +97,9 @@ util::WeakHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::AddComp
 		ptrComponentOther->OnEntityComponentAdded(*ptrComponent,false);
 		ptrComponent->OnEntityComponentAdded(*ptrComponentOther,true);
 	}
-	return ptrComponent;
+	return {ptrComponent};
 }
-util::WeakHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::AddComponent(const std::string &name,bool bForceCreateNew)
+pragma::ComponentHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::AddComponent(const std::string &name,bool bForceCreateNew)
 {
 	pragma::ComponentId componentId;
 	if(m_componentManager->GetComponentTypeId(name,componentId) == false)
@@ -121,7 +121,7 @@ void BaseEntityComponentSystem::RemoveComponent(pragma::BaseEntityComponent &com
 	if(umath::is_flag_set(component.m_stateFlags,BaseEntityComponent::StateFlags::Removed))
 		return;
 	umath::set_flag(component.m_stateFlags,BaseEntityComponent::StateFlags::Removed);
-	auto it = std::find_if(m_components.begin(),m_components.end(),[&component](const std::shared_ptr<BaseEntityComponent> &componentOther) {
+	auto it = std::find_if(m_components.begin(),m_components.end(),[&component](const util::TSharedHandle<BaseEntityComponent> &componentOther) {
 		return componentOther.get() == &component;
 	});
 	if(it == m_components.end())
@@ -141,7 +141,7 @@ void BaseEntityComponentSystem::RemoveComponent(pragma::BaseEntityComponent &com
 	if(itType != m_componentLookupTable.end())
 	{
 		// Find a different component of the same type
-		auto it = std::find_if(m_components.begin(),m_components.end(),[componentId](const std::shared_ptr<BaseEntityComponent> &ptrComponent) {
+		auto it = std::find_if(m_components.begin(),m_components.end(),[componentId](const util::TSharedHandle<BaseEntityComponent> &ptrComponent) {
 			return ptrComponent->GetComponentId() == componentId;
 		});
 		if(it == m_components.end())
@@ -176,17 +176,17 @@ bool pragma::BaseEntityComponentSystem::HasComponent(ComponentId componentId) co
 	return it != m_componentLookupTable.end() && it->second.expired() == false;
 }
 
-const std::vector<std::shared_ptr<BaseEntityComponent>> &BaseEntityComponentSystem::GetComponents() const {return const_cast<BaseEntityComponentSystem*>(this)->GetComponents();}
-std::vector<std::shared_ptr<BaseEntityComponent>> &BaseEntityComponentSystem::GetComponents() {return m_components;}
+const std::vector<util::TSharedHandle<BaseEntityComponent>> &BaseEntityComponentSystem::GetComponents() const {return const_cast<BaseEntityComponentSystem*>(this)->GetComponents();}
+std::vector<util::TSharedHandle<BaseEntityComponent>> &BaseEntityComponentSystem::GetComponents() {return m_components;}
 
-util::WeakHandle<BaseEntityComponent> BaseEntityComponentSystem::FindComponent(ComponentId componentId) const
+pragma::ComponentHandle<BaseEntityComponent> BaseEntityComponentSystem::FindComponent(ComponentId componentId) const
 {
 	auto it = m_componentLookupTable.find(componentId);
 	if(it == m_componentLookupTable.end())
 		return {};
-	return it->second.lock();
+	return it->second;
 }
-util::WeakHandle<BaseEntityComponent> BaseEntityComponentSystem::FindComponent(const std::string &name) const
+pragma::ComponentHandle<BaseEntityComponent> BaseEntityComponentSystem::FindComponent(const std::string &name) const
 {
 	ComponentId componentId;
 	auto typeIndex = std::type_index(typeid(*this));

@@ -62,7 +62,7 @@ void CFireComponent::DestroyParticle()
 		m_hParticle->SetRemoveOnComplete(true);
 	}
 }
-luabind::object CFireComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CFireComponentHandleWrapper>(l);}
+void CFireComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 //////////////
 

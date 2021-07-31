@@ -43,7 +43,7 @@ namespace pragma
 		void SetFlexWeight(uint32_t flexId,float weight);
 		void UpdateSoundPhonemes(CALSound &snd);
 		void UpdateFlexWeightsMT();
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 
 		void SetFlexWeightOverride(uint32_t flexId,float weight);
 		void ClearFlexWeightOverride(uint32_t flexId);

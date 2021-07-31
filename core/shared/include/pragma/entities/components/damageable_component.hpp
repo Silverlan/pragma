@@ -26,7 +26,7 @@ namespace pragma
 		virtual void OnTakeDamage(DamageInfo &info);
 
 		virtual void TakeDamage(DamageInfo &info);
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 	struct DLLNETWORK CEOnTakeDamage
 		: public ComponentEvent

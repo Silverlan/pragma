@@ -49,5 +49,5 @@ void SLightComponent::SetFalloffExponent(float falloffExponent)
 	ent.SendNetEvent(m_netEvSetFalloffExponent,p,pragma::networking::Protocol::SlowReliable);
 }
 
-luabind::object SLightComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SLightComponentHandleWrapper>(l);}
+void SLightComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 

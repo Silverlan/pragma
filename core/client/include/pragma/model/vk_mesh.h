@@ -18,6 +18,7 @@ namespace prosper
 	class IRenderBuffer;
 };
 
+class CModelSubMesh;
 namespace pragma
 {
 	class ShaderEntity;

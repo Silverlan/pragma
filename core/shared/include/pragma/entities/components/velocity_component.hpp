@@ -40,7 +40,7 @@ namespace pragma
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *lua) override;
 
 		// Set member variables directly, without any other influences
 		void SetRawVelocity(const Vector3 &vel);

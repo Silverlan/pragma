@@ -14,6 +14,7 @@
 #include <luabind/get_main_thread.hpp>  // for get_main_thread
 #include <luabind/handle.hpp>           // for handle
 #include <luabind/detail/decorate_type.hpp>  // for decorated_type
+#include <sharedutils/util_shared_handle.hpp>
 #include <memory>
 
 namespace util
@@ -26,46 +27,41 @@ namespace util
 		class WeakHandle;
 };
 
-#define LUA_DEFINE_PTR_TYPE(TPTR,BASENAME) \
-	namespace luabind \
+// Note: get_const_holder and get_pointer have to be defined
+// in the same namespace as the type!! (luabind namespace will *not* work
+// unless they're defined before *any* luabind includes)
+#define LUA_DEFINE_PTR_TYPE(NAMESPACE,TPTR,BASENAME) \
+	namespace NAMESPACE \
 	{ \
-		template<typename T> \
-		T* get_pointer(const TPTR& pointer) \
+		template <class T> \
+		TPTR<T const>* get_const_holder(TPTR<T>*) \
 		{ \
-			return const_cast<T*>(pointer.Get()); \
+			return 0; \
 		} \
-	}; \
-	namespace luabind::detail::has_get_pointer_ \
-	{ \
 		template<typename T> \
-			T* get_pointer(const TPTR &pointer) \
+		T* get_pointer(const TPTR<T>& pointer) \
 		{ \
-			return const_cast<T*>(pointer.Get()); \
+			return const_cast<T*>(pointer.get()); \
 		} \
 	};
 
-LUA_DEFINE_PTR_TYPE(util::TWeakSharedHandle<T>,weak_shared_handle);
-LUA_DEFINE_PTR_TYPE(util::TSharedHandle<T>,shared_handle);
-LUA_DEFINE_PTR_TYPE(util::WeakHandle<T>,weak_handle);
+LUA_DEFINE_PTR_TYPE(util,util::TWeakSharedHandle,weak_shared_handle);
+LUA_DEFINE_PTR_TYPE(util,util::TSharedHandle,shared_handle);
+LUA_DEFINE_PTR_TYPE(util,util::WeakHandle,weak_handle);
 
-/*
+// Implementation similar to shared_ptr_converter.hpp
+#define LUA_DEFINE_PTR_TYPE_CONVERTER(TClass,CastFunc) \
 	namespace luabind { \
-		namespace detail \
-		{ \
-			struct BASENAME##_deleter \
+		namespace detail { \
+			template<typename T> \
+			struct pointer_traits<TClass<T>> \
 			{ \
-				BASENAME##_deleter(lua_State* L, int index) \
-					: life_support(get_main_thread(L), L, index) \
-				{} \
-				void operator()(void const*) \
-				{ \
-					handle().swap(life_support); \
-				} \
-				handle life_support; \
+				enum { is_pointer = true }; \
+				using value_type = T; \
 			}; \
-		} \
+		}; \
 		template <class T> \
-		struct default_converter<TPTR > \
+		struct default_converter<TClass<T> > \
 			: default_converter<T*> \
 		{ \
 			using is_native = std::false_type; \
@@ -75,33 +71,31 @@ LUA_DEFINE_PTR_TYPE(util::WeakHandle<T>,weak_handle);
 				return default_converter<T*>::match(L, decorate_type_t<T*>(), index); \
 			} \
 			template <class U> \
-			TPTR to_cpp(lua_State* L, U, int index) \
+			TClass<T> to_cpp(lua_State* L, U, int index) \
 			{ \
 				T* raw_ptr = default_converter<T*>::to_cpp(L, decorate_type_t<T*>(), index); \
 				if(!raw_ptr) { \
-					return TPTR(); \
+					return TClass<T>(); \
 				} else { \
-					return TPTR(raw_ptr, detail::BASENAME##_deleter(L, index)); \
+					auto h = raw_ptr->GetHandle(); \
+					return util::CastFunc<decltype(h)::value_type,T>(h); \
 				} \
 			} \
-			void to_lua(lua_State* L, TPTR const& p) \
+			void to_lua(lua_State* L, TClass<T> const& p) \
 			{ \
-				if(detail::BASENAME##_deleter* d = std::get_deleter<detail::BASENAME##_deleter>(p)) \
-				{ \
-					d->life_support.push(L); \
-				} else { \
-					detail::value_converter().to_lua(L, p); \
-				} \
+				default_converter<T>().to_lua(L, p); \
 			} \
 			template <class U> \
 			void converter_postcall(lua_State*, U const&, int) \
 			{} \
 		}; \
 		template <class T> \
-		struct default_converter<TPTR const&> \
-			: default_converter<TPTR > \
+		struct default_converter<TClass<T> const&> \
+			: default_converter<TClass<T> > \
 		{}; \
 	}
-*/
+
+LUA_DEFINE_PTR_TYPE_CONVERTER(util::TWeakSharedHandle,weak_shared_handle_cast);
+LUA_DEFINE_PTR_TYPE_CONVERTER(util::TSharedHandle,shared_handle_cast);
 
 #endif

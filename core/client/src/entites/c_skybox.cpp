@@ -71,7 +71,7 @@ void CSkyboxComponent::OnRemove()
 	if(m_cbOnModelMaterialsLoaded.IsValid())
 		m_cbOnModelMaterialsLoaded.Remove();
 }
-luabind::object CSkyboxComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CSkyboxComponentHandleWrapper>(l);}
+void CSkyboxComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &materialPath,const std::string &postfix) const
 {
 	// Check if this skybox is made of individual textures

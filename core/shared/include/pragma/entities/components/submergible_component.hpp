@@ -36,7 +36,7 @@ namespace pragma
 		BaseEntity *GetWaterEntity();
 		const BaseEntity *GetWaterEntity() const;
 		const util::PFloatProperty &GetSubmergedFractionProperty() const;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	protected:
 		util::PFloatProperty m_submergedFraction;
 		EntityHandle m_waterEntity = {};

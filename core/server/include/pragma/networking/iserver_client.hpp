@@ -66,7 +66,7 @@ namespace pragma::networking
 	protected:
 		IServerClient()=default;
 	private:
-		mutable ::util::WeakHandle<pragma::SPlayerComponent> m_player = {};
+		mutable pragma::ComponentHandle<pragma::SPlayerComponent> m_player = {};
 		bool m_bTransferring = false;
 		std::vector<std::shared_ptr<Resource>> m_resourceTransfer;
 		TransferState m_initialResourceTransferState = TransferState::Initial;

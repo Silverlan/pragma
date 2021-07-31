@@ -405,7 +405,7 @@ static std::shared_ptr<DebugRenderer::BaseObject> draw_text(WIText *el,const Vec
 		auto *cam = c_game->GetRenderCamera();
 		if(!hEl.IsValid() || cam == nullptr)
 			return;
-		auto *el = static_cast<WIText*>(hEl.get());
+		auto *el = static_cast<const WIText*>(hEl.get());
 		auto rot = cam->GetEntity().GetRotation();
 		ptrO->SetRotation(rot);
 

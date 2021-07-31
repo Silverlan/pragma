@@ -88,7 +88,7 @@ CRaytracingComponent::~CRaytracingComponent()
 {
 	m_subMeshBuffers.clear();
 }
-luabind::object CRaytracingComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CRaytracingComponentHandleWrapper>(l);}
+void CRaytracingComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CRaytracingComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

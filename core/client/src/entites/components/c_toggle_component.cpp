@@ -11,7 +11,7 @@
 
 using namespace pragma;
 
-luabind::object CToggleComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CToggleComponentHandleWrapper>(l);}
+void CToggleComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CToggleComponent::ReceiveData(NetPacket &packet)
 {
 	SetTurnedOn(packet->Read<bool>());

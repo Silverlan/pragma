@@ -17,7 +17,6 @@
 
 void Lua::register_cl_vehicle_component(lua_State *l,luabind::module_ &module)
 {
-	auto def = luabind::class_<CVehicleHandle,BaseEntityComponentHandle>("VehicleComponent");
-	Lua::register_base_vehicle_component_methods<luabind::class_<CVehicleHandle,BaseEntityComponentHandle>,CVehicleHandle>(l,def);
+	auto def = luabind::class_<pragma::CVehicleComponent,pragma::BaseVehicleComponent>("VehicleComponent");
 	module[def];
 }

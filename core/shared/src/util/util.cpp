@@ -160,7 +160,7 @@ void Game::SplashDamage(const Vector3 &origin,Float radius,UInt32 damage,Float f
 }
 void Game::SplashDamage(const Vector3 &origin,Float radius,UInt32 damage,Float force,const EntityHandle &attacker,const EntityHandle &inflictor,const std::function<bool(BaseEntity*,DamageInfo&)> &callback)
 {
-	SplashDamage(origin,radius,damage,force,attacker.get(),inflictor.get(),callback);
+	SplashDamage(origin,radius,damage,force,const_cast<BaseEntity*>(attacker.get()),const_cast<BaseEntity*>(inflictor.get()),callback);
 }
 Bool Game::Overlap(const TraceData &data,std::vector<TraceResult> *optOutResults) const
 {

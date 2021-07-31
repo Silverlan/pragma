@@ -67,7 +67,7 @@ namespace pragma
 		virtual void OnUse(BaseEntity *pl);
 		virtual void OnPhysicsInitialized() override;
 		virtual void OnEntitySpawn() override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	private:
 		static std::vector<SWeaponComponent*> s_weapons;
 	};

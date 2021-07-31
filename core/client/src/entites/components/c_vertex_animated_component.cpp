@@ -61,7 +61,7 @@ CVertexAnimatedComponent::~CVertexAnimatedComponent()
 {
 	DestroyVertexAnimationBuffer();
 }
-luabind::object CVertexAnimatedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CVertexAnimatedComponentHandleWrapper>(l);}
+void CVertexAnimatedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CVertexAnimatedComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();

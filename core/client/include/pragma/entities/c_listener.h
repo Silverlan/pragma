@@ -24,7 +24,7 @@ namespace pragma
 		virtual void OnTick(double dt) override;
 		float GetGain();
 		void SetGain(float gain);
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	private:
 		al::IListener *m_listener = nullptr;
 	};

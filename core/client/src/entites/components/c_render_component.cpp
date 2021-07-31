@@ -69,7 +69,7 @@ void CRenderComponent::RegisterEvents(pragma::EntityComponentManager &componentM
 CRenderComponent::CRenderComponent(BaseEntity &ent)
 	: BaseRenderComponent(ent),m_renderMode{util::TEnumProperty<RenderMode>::Create(RenderMode::World)}
 {}
-luabind::object CRenderComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CRenderComponentHandleWrapper>(l);}
+void CRenderComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CRenderComponent::InitializeBuffers()
 {
 	auto instanceSize = sizeof(pragma::ShaderEntity::InstanceData);

@@ -163,7 +163,7 @@ void CSceneComponent::OnRemove()
 	if(--g_numScenes == 0)
 		g_entityInstanceIndexBuffer = nullptr;
 }
-luabind::object CSceneComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CSceneComponentHandleWrapper>(l);}
+void CSceneComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CSceneComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -191,7 +191,7 @@ void CSceneComponent::Link(const CSceneComponent &other,bool linkCamera)
 {
 	auto &hCam = other.GetActiveCamera();
 	if(hCam.valid())
-		SetActiveCamera(*hCam.get());
+		SetActiveCamera(const_cast<pragma::CCameraComponent&>(*hCam.get()));
 	else
 		SetActiveCamera();
 
@@ -215,7 +215,7 @@ void CSceneComponent::Link(const CSceneComponent &other,bool linkCamera)
 	m_cbLink = const_cast<CSceneComponent&>(other).AddEventCallback(EVENT_ON_ACTIVE_CAMERA_CHANGED,[this,&other](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &hCam = other.GetActiveCamera();
 		if(hCam.valid())
-			SetActiveCamera(*hCam.get());
+			SetActiveCamera(const_cast<pragma::CCameraComponent&>(*hCam.get()));
 		else
 			SetActiveCamera();
 		return util::EventReply::Unhandled;
@@ -596,7 +596,7 @@ void CSceneComponent::LinkWorldEnvironment(CSceneComponent &other)
 
 void CSceneComponent::SetRenderer(CRendererComponent *renderer)
 {
-	m_renderer = renderer ? renderer->GetHandle<CRendererComponent>() : util::WeakHandle<CRendererComponent>{};
+	m_renderer = renderer ? renderer->GetHandle<CRendererComponent>() : pragma::ComponentHandle<CRendererComponent>{};
 	UpdateRenderSettings();
 	UpdateRendererLightMap();
 }
@@ -638,8 +638,8 @@ void CSceneComponent::ReloadRenderTarget(uint32_t width,uint32_t height)
 	umath::set_flag(m_stateFlags,StateFlags::ValidRenderer,true);
 }
 
-const util::WeakHandle<pragma::CCameraComponent> &CSceneComponent::GetActiveCamera() const {return const_cast<CSceneComponent*>(this)->GetActiveCamera();}
-util::WeakHandle<pragma::CCameraComponent> &CSceneComponent::GetActiveCamera() {return m_camera;}
+const pragma::ComponentHandle<pragma::CCameraComponent> &CSceneComponent::GetActiveCamera() const {return const_cast<CSceneComponent*>(this)->GetActiveCamera();}
+pragma::ComponentHandle<pragma::CCameraComponent> &CSceneComponent::GetActiveCamera() {return m_camera;}
 void CSceneComponent::SetActiveCamera(pragma::CCameraComponent &cam)
 {
 	m_camera = cam.GetHandle<pragma::CCameraComponent>();
@@ -650,7 +650,7 @@ void CSceneComponent::SetActiveCamera(pragma::CCameraComponent &cam)
 }
 void CSceneComponent::SetActiveCamera()
 {
-	m_camera = {};
+	m_camera = decltype(m_camera){};
 
 	BroadcastEvent(EVENT_ON_ACTIVE_CAMERA_CHANGED);
 }

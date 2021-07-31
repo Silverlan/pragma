@@ -60,7 +60,7 @@ namespace pragma
 	public:
 		CDecalComponent(BaseEntity &ent) : BaseEnvDecalComponent(ent) {}
 		virtual void Initialize() override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnEntitySpawn() override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}

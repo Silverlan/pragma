@@ -12,6 +12,7 @@
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include <pragma/util/util_game.hpp>
 #include <pragma/asset/util_asset.hpp>
+#include <pragma/types.hpp>
 #include <util_texture_info.hpp>
 #include <sharedutils/util_path.hpp>
 
@@ -62,13 +63,13 @@ namespace pragma::asset
 	{
 		bool includeMapLightSources = true;
 		void AddCamera(CCameraComponent &cam);
-		const std::vector<util::WeakHandle<CCameraComponent>> &GetCameras() const {return m_cameras;}
+		const std::vector<pragma::ComponentHandle<CCameraComponent>> &GetCameras() const {return m_cameras;}
 
 		void AddLightSource(CLightComponent &light);
-		const std::vector<util::WeakHandle<CLightComponent>> &GetLightSources() const {return m_lightSources;}
+		const std::vector<pragma::ComponentHandle<CLightComponent>> &GetLightSources() const {return m_lightSources;}
 	private:
-		std::vector<util::WeakHandle<CCameraComponent>> m_cameras {};
-		std::vector<util::WeakHandle<CLightComponent>> m_lightSources {};
+		std::vector<ComponentHandle<CCameraComponent>> m_cameras {};
+		std::vector<ComponentHandle<CLightComponent>> m_lightSources {};
 	};
 	struct DLLCLIENT TextureImportInfo
 	{

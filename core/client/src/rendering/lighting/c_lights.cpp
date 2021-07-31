@@ -14,7 +14,7 @@
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
 
-pragma::CLightDirectionalComponent *CGame::GetEnvironmentLightSource() const {return m_hEnvLight.get();}
+pragma::CLightDirectionalComponent *CGame::GetEnvironmentLightSource() const {return const_cast<pragma::CLightDirectionalComponent*>(m_hEnvLight.get());}
 void CGame::UpdateEnvironmentLightSource()
 {
 	auto *oldLightSource = m_hEnvLight.get();
@@ -36,7 +36,7 @@ void CGame::UpdateEnvironmentLightSource()
 	}
 	if(oldLightSource == nullptr)
 		return;
-	m_hEnvLight = {};
+	m_hEnvLight = decltype(m_hEnvLight){};
 	OnEnvironmentLightSourceChanged(oldLightSource,nullptr);
 }
 void CGame::OnEnvironmentLightSourceChanged(pragma::CLightDirectionalComponent *oldSource,pragma::CLightDirectionalComponent *newSource)

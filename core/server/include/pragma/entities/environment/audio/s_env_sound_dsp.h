@@ -31,7 +31,7 @@ namespace pragma
 	{
 	public:
 		SSoundDspComponent(BaseEntity &ent) : SBaseSoundDspComponent(ent) {}
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 

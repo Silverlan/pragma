@@ -30,7 +30,7 @@ namespace pragma
 		virtual const Vector3 &GetPosition() const override;
 		virtual const Quat &GetOrientation() const override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	protected:
 		virtual bool ShouldSimulateSurface() const override;
 		bool m_bUsingClientsideSimulation = false;

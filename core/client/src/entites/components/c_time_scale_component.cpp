@@ -10,7 +10,7 @@
 
 using namespace pragma;
 
-luabind::object CTimeScaleComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CTimeScaleComponentHandleWrapper>(l);}
+void CTimeScaleComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 Bool CTimeScaleComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
 {
 	if(eventId == m_netEvSetTimeScale)

@@ -447,7 +447,7 @@ void NET_sv_debug_ai_schedule_tree(pragma::networking::IServerClient &session,Ne
 		return;
 	auto hPl = pl->GetHandle<pragma::SPlayerComponent>();
 	auto sAiComponent = ent->GetComponent<pragma::SAIComponent>();
-	auto hSAiComponent = (sAiComponent.expired() == false) ? sAiComponent.get()->GetHandle<pragma::SAIComponent>() : util::WeakHandle<pragma::SAIComponent>{};
+	auto hSAiComponent = (sAiComponent.expired() == false) ? sAiComponent.get()->GetHandle<pragma::SAIComponent>() : pragma::ComponentHandle<pragma::SAIComponent>{};
 	auto dbgTree = std::make_shared<DebugBehaviorTreeNode>();
 	std::shared_ptr<pragma::ai::Schedule> aiSchedule = nullptr;
 	auto tLastScheduleUpdate = 0.f;

@@ -302,7 +302,7 @@ void CWaterComponent::SetPropagation(float propagation)
 		return;
 	m_physSurfaceSim->SetPropagation(propagation);
 }
-luabind::object CWaterComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CWaterComponentHandleWrapper>(l);}
+void CWaterComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 ///////////////
 

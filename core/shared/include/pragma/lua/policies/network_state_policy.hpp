@@ -44,7 +44,7 @@ namespace luabind {
 	}
 
 	template<unsigned int N>
-	using network_state_policy = meta::type_list< converter_policy_injector< N, detail::network_state_policy > >();
+	using network_state_policy = meta::type_list< converter_policy_injector< N, detail::network_state_policy > >;
 
 } // namespace luabind
 

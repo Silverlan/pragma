@@ -20,7 +20,7 @@ namespace pragma
 		CWeatherComponent(BaseEntity &ent) : BaseEnvWeatherComponent(ent) {}
 		virtual ~CWeatherComponent() override;
 		virtual void Initialize() override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnEntitySpawn() override;
 	protected:
 		EntityHandle m_hParticle = {};

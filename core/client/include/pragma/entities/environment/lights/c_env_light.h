@@ -155,11 +155,11 @@ namespace pragma
 		virtual bool ShouldPass(const CBaseEntity &ent,uint32_t &renderFlags);
 		virtual bool ShouldPass(const CBaseEntity &ent,const CModelMesh &mesh,uint32_t &renderFlags);
 		virtual bool ShouldPass(const Model &mdl,const CModelSubMesh &mesh);
-		util::WeakHandle<CShadowComponent> GetShadowMap(ShadowMapType type) const;
+		pragma::ComponentHandle<CShadowComponent> GetShadowMap(ShadowMapType type) const;
 		bool ShouldRender();
 		void UpdateTransformationMatrix(const Mat4 &biasMatrix,const Mat4 &viewMatrix,const Mat4 &projectionMatrix);
 		virtual void OnEntitySpawn() override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		void SetStateFlag(StateFlags flag,bool enabled);
 
 		void SetMorphTargetsInShadowsEnabled(bool enabled);
@@ -237,8 +237,8 @@ namespace pragma
 		StateFlags m_stateFlags;
 		double m_tTurnedOff = 0.0;
 		uint64_t m_lastThink = std::numeric_limits<uint64_t>::max();
-		util::WeakHandle<CShadowComponent> m_shadowMapStatic = {};
-		util::WeakHandle<CShadowComponent> m_shadowMapDynamic = {};
+		ComponentHandle<CShadowComponent> m_shadowMapStatic = {};
+		ComponentHandle<CShadowComponent> m_shadowMapDynamic = {};
 		CShadowComponent *m_shadowComponent = nullptr;
 		void InitializeShadowMap(CShadowComponent &sm);
 		virtual void InitializeShadowMap();

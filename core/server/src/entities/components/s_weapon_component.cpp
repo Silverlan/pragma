@@ -42,7 +42,7 @@ SWeaponComponent::~SWeaponComponent()
 		s_weapons.erase(it);
 }
 
-luabind::object SWeaponComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SWeaponComponentHandleWrapper>(l);}
+void SWeaponComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void SWeaponComponent::OnUse(BaseEntity *pl)
 {

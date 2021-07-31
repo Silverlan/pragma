@@ -99,7 +99,7 @@ SAIComponent::~SAIComponent()
 		s_npcs.erase(it);
 }
 
-luabind::object SAIComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SAIComponentHandleWrapper>(l);}
+void SAIComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void SAIComponent::OnRemove()
 {
@@ -615,7 +615,7 @@ CEOnTargetAcquired::CEOnTargetAcquired(BaseEntity *entity,float distance,bool is
 void CEOnTargetAcquired::PushArguments(lua_State *l)
 {
 	if(entity != nullptr)
-		entity->GetLuaObject()->push(l);
+		entity->GetLuaObject().push(l);
 	else
 		Lua::PushNil(l);
 	Lua::PushNumber(l,distance);

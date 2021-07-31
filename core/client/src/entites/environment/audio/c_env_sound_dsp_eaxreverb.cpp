@@ -82,7 +82,7 @@ void CSoundDspEAXReverbComponent::OnEntitySpawn()
 	props.flAirAbsorptionGainHF = m_kvAirAbsorpGainHF;
 	m_dsp = soundSys->CreateEffect(props);
 }
-luabind::object CSoundDspEAXReverbComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CSoundDspEAXReverbComponentHandleWrapper>(l);}
+void CSoundDspEAXReverbComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 //////////////////
 

@@ -15,7 +15,7 @@ namespace Lua
 {
 	namespace AISquad
 	{
-		static void GetMembers(lua_State *l,SAIHandle &hEnt,::AISquad &squad);
+		static luabind::tableT<BaseEntity> GetMembers(lua_State *l,::AISquad &squad);
 	};
 };
 
@@ -26,16 +26,15 @@ void Lua::AISquad::register_class(lua_State *l,luabind::module_ &mod)
 	mod[classDef];
 }
 
-void Lua::AISquad::GetMembers(lua_State *l,SAIHandle&,::AISquad &squad)
+luabind::tableT<BaseEntity> Lua::AISquad::GetMembers(lua_State *l,::AISquad &squad)
 {
-	auto t = Lua::CreateTable(l);
+	auto t = luabind::newtable(l);
 	uint32_t idx = 1;
 	for(auto &member : squad.members)
 	{
 		if(member.valid() == false)
 			continue;
-		Lua::PushInt(l,idx++);
-		member->GetLuaObject()->push(l);
-		Lua::SetTableValue(l,t);
+		t[idx++] = member->GetLuaObject();
 	}
+	return t;
 }

@@ -39,7 +39,7 @@ void CPropDynamicComponent::OnEntityComponentAdded(BaseEntityComponent &componen
 		pRenderComponent->SetCastShadows(true);
 	}
 }
-luabind::object CPropDynamicComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CPropDynamicComponentHandleWrapper>(l);}
+void CPropDynamicComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 //////////////////
 

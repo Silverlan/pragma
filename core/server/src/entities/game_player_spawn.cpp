@@ -14,7 +14,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(game_player_spawn,GamePlayerSpawn);
 
-luabind::object SPlayerSpawnComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SPlayerSpawnComponentHandleWrapper>(l);}
+void SPlayerSpawnComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void GamePlayerSpawn::Initialize()
 {

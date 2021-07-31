@@ -12,6 +12,8 @@
 #include "pragma/entities/entity_component_info.hpp"
 #include "pragma/entities/baseentity_net_event_manager.hpp"
 #include "pragma/util/util_handled.hpp"
+#include "pragma/lua/base_lua_handle.hpp"
+#include "pragma/types.hpp"
 #include <luasystem.h>
 #include <unordered_map>
 #include <sharedutils/callback_handler.h>
@@ -60,7 +62,8 @@ namespace pragma
 	};
 
 	class DLLNETWORK BaseEntityComponent
-		: public std::enable_shared_from_this<BaseEntityComponent>
+		: public pragma::BaseLuaHandle,
+		public std::enable_shared_from_this<BaseEntityComponent>
 	{
 	public:
 		// Note: Use BaseEntityComponent::OnEntityComponentAdded to initialize data for other components
@@ -140,12 +143,12 @@ namespace pragma
 		void PushLuaObject();
 		void PushLuaObject(lua_State *l);
 
-		util::WeakHandle<const BaseEntityComponent> GetHandle() const;
-		util::WeakHandle<BaseEntityComponent> GetHandle();
+		ComponentHandle<const BaseEntityComponent> GetHandle() const;
+		ComponentHandle<BaseEntityComponent> GetHandle();
 		template<class TComponent>
-			util::WeakHandle<const TComponent> GetHandle() const;
+			ComponentHandle<const TComponent> GetHandle() const;
 		template<class TComponent>
-			util::WeakHandle<TComponent> GetHandle();
+			ComponentHandle<TComponent> GetHandle();
 
 		enum class CallbackType : uint8_t
 		{
@@ -194,11 +197,6 @@ namespace pragma
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component);
 		virtual void OnEntityComponentRemoved(BaseEntityComponent &component);
 
-		void InitializeLuaObject();
-		virtual luabind::object InitializeLuaObject(lua_State *l)=0;
-		template<class TComponent>
-			luabind::object InitializeLuaObject(lua_State *l);
-
 		struct CallbackInfo
 		{
 			CallbackHandle hCallback;
@@ -222,22 +220,15 @@ namespace pragma
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseEntityComponent::StateFlags)
 
-template<class THandleWrapper>
-	luabind::object pragma::BaseEntityComponent::InitializeLuaObject(lua_State *l)
-{
-	static_assert(std::is_base_of<BaseEntityComponentHandleWrapper,THandleWrapper>::value,"THandleWrapper must be a descendant of BaseEntityComponentHandleWrapper!");
-	return luabind::object(l,THandleWrapper{GetHandle()});
-}
-
 template<class TComponent>
-	util::WeakHandle<const TComponent> pragma::BaseEntityComponent::GetHandle() const
+	pragma::ComponentHandle<const TComponent> pragma::BaseEntityComponent::GetHandle() const
 {
-	return util::WeakHandle<const TComponent>(std::static_pointer_cast<const TComponent>(shared_from_this()));
+	return pragma::BaseLuaHandle::GetHandle<const TComponent>();
 }
 template<class TComponent>
-	util::WeakHandle<TComponent> pragma::BaseEntityComponent::GetHandle()
+	pragma::ComponentHandle<TComponent> pragma::BaseEntityComponent::GetHandle()
 {
-	return util::WeakHandle<TComponent>(std::static_pointer_cast<TComponent>(shared_from_this()));
+	return pragma::BaseLuaHandle::GetHandle<TComponent>();
 }
 
 #endif

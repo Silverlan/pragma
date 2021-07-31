@@ -36,7 +36,7 @@ namespace pragma
 		void ReloadMeshCache();
 		std::shared_ptr<OcclusionOctree<std::shared_ptr<ModelMesh>>> GetMeshTree() const;
 		std::shared_ptr<CHC> GetCHCController() const;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 
 		const rendering::RenderQueue *GetClusterRenderQueue(util::BSPTree::ClusterIndex clusterIndex,bool translucent=false) const;
 		void SetBSPTree(const std::shared_ptr<util::BSPTree> &bspTree,const std::vector<std::vector<RenderMeshIndex>> &meshesPerCluster);

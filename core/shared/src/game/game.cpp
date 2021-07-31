@@ -335,8 +335,8 @@ pragma::physics::IEnvironment *Game::GetPhysicsEnvironment() {return m_physEnvir
 void Game::OnEntityCreated(BaseEntity *ent)
 {
 	CallCallbacks<void,BaseEntity*>("OnEntityCreated",ent);
-	auto *o = ent->GetLuaObject();
-	CallLuaCallbacks<void,luabind::object>("OnEntityCreated",*o);
+	auto &o = ent->GetLuaObject();
+	CallLuaCallbacks<void,luabind::object>("OnEntityCreated",o);
 }
 
 Vector3 &Game::GetGravity() {return m_gravity;}
@@ -861,9 +861,9 @@ void Game::OnGameReady()
 		gmC->OnGameReady();
 }
 
-void Game::SetWorld(pragma::BaseWorldComponent *entWorld) {m_worldComponent = (entWorld != nullptr) ? entWorld->GetHandle<pragma::BaseWorldComponent>() : util::WeakHandle<pragma::BaseWorldComponent>{};}
+void Game::SetWorld(pragma::BaseWorldComponent *entWorld) {m_worldComponent = (entWorld != nullptr) ? entWorld->GetHandle<pragma::BaseWorldComponent>() : pragma::ComponentHandle<pragma::BaseWorldComponent>{};}
 
-std::vector<util::WeakHandle<pragma::BasePhysicsComponent>> &Game::GetAwakePhysicsComponents() {return m_awakePhysicsEntities;}
+std::vector<pragma::ComponentHandle<pragma::BasePhysicsComponent>> &Game::GetAwakePhysicsComponents() {return m_awakePhysicsEntities;}
 
 const pragma::EntityComponentManager &Game::GetEntityComponentManager() const {return const_cast<Game*>(this)->GetEntityComponentManager();}
 pragma::EntityComponentManager &Game::GetEntityComponentManager() {return *m_componentManager;}

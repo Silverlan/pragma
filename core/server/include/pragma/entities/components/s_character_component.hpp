@@ -39,7 +39,7 @@ namespace pragma
 	protected:
 		void OnFrozen(bool bFrozen);
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		Faction *m_faction;
 		bool m_bNoTarget;
 		bool m_bGodMode;

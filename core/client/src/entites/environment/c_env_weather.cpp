@@ -57,7 +57,7 @@ void CWeatherComponent::OnEntitySpawn()
 		}
 	}
 }
-luabind::object CWeatherComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CWeatherComponentHandleWrapper>(l);}
+void CWeatherComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 /////////////
 

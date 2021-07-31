@@ -15,7 +15,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_light_point,EnvLightPoint);
 
-luabind::object SLightPointComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SLightPointComponentHandleWrapper>(l);}
+void SLightPointComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void SLightPointComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {

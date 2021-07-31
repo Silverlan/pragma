@@ -257,7 +257,7 @@ void CShadowCSMComponent::UpdateFrustum(uint32_t splitId,pragma::CCameraComponen
 	// Calculate new split distances
 	splitDistance[splitId] = 0.5f *(-frustumSplit.split.fard *camProj[2][2] +camProj[3][2]) /frustumSplit.split.fard +0.5f;
 }
-luabind::object CShadowCSMComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CShadowCSMComponentHandleWrapper>(l);}
+void CShadowCSMComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CShadowCSMComponent::InitializeTextureSet(TextureSet &set,pragma::CLightComponent::ShadowMapType smType)
 {
 	auto wpShaderShadow = c_engine->GetShader("shadowcsm");

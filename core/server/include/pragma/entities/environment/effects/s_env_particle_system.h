@@ -22,7 +22,7 @@ namespace pragma
 		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual void SetContinuous(bool b) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 

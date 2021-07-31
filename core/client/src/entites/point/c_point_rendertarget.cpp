@@ -66,7 +66,7 @@ void CRenderTargetComponent::Render(RenderMode renderMode)
 {
 	// TODO
 }
-luabind::object CRenderTargetComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CRenderTargetComponentHandleWrapper>(l);}
+void CRenderTargetComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void CPointRenderTarget::Initialize()
 {

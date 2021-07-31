@@ -26,7 +26,7 @@ void DamageableComponent::Initialize()
 	ent.AddComponent("health");
 }
 
-luabind::object DamageableComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<DamageableComponentHandleWrapper>(l);}
+void DamageableComponent::InitializeLuaObject(lua_State *l) {pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void DamageableComponent::OnTakeDamage(DamageInfo &info) {}
 

@@ -24,7 +24,7 @@ namespace pragma
 
 		virtual void OnTick(double tDelta) override;
 
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnEntitySpawn() override;
 	};
 	struct DLLNETWORK CEOnTick

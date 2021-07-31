@@ -9,9 +9,13 @@
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/entities/baseentity_handle.h"
+#include <sharedutils/util_shared_handle.hpp>
 #include <cinttypes>
 
 namespace util {class EnumRegister;};
+
+class PhysObj;
+using PhysObjHandle = util::TWeakSharedHandle<PhysObj>;
 
 namespace umath
 {
@@ -22,6 +26,11 @@ namespace umath
 enum class Activity : uint16_t;
 using BoneId = uint16_t;
 class Skeleton;
+namespace pragma
+{
+	template<class T>
+		using ComponentHandle = util::TWeakSharedHandle<T>;
+};
 namespace pragma::asset {enum class Type : uint8_t;};
 namespace pragma::animation
 {

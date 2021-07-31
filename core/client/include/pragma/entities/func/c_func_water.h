@@ -37,7 +37,7 @@ namespace pragma
 		virtual void SetPropagation(float propagation) override;
 		virtual void ReloadSurfaceSimulator() override;
 		virtual CMaterial *GetWaterMaterial() const override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 
 		virtual const Vector3 &GetPosition() const override;

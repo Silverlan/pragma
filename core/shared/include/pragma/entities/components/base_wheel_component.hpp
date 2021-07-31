@@ -25,7 +25,7 @@ namespace pragma
 	protected:
 		BaseWheelComponent(BaseEntity &ent);
 		void UpdatePose();
-		util::WeakHandle<pragma::BaseVehicleComponent> m_vehicle = {};
+		ComponentHandle<pragma::BaseVehicleComponent> m_vehicle = {};
 		uint8_t m_wheelId = 0u;
 		physics::WheelCreateInfo m_createInfo = {};
 		umath::Transform m_localTransform = {};

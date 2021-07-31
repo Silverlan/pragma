@@ -225,7 +225,8 @@ BaseWheelComponent *BaseVehicleComponent::CreateWheelEntity(uint8_t wheelIndex)
 	auto wheelComponent = entWheel->FindComponent("wheel");
 	if(wheelComponent.expired())
 		return nullptr;
-	auto &hWheel = m_wheels.at(wheelIndex).hWheel = wheelComponent->GetHandle<BaseWheelComponent>();
+	auto &hWheel = m_wheels.at(wheelIndex).hWheel;
+	hWheel = m_wheels.at(wheelIndex).hWheel = wheelComponent->GetHandle<BaseWheelComponent>();
 	return hWheel.get();
 }
 

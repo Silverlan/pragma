@@ -22,7 +22,7 @@ void SColorComponent::Initialize()
 	}),CallbackType::Component,this);
 }
 
-luabind::object SColorComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SColorComponentHandleWrapper>(l);}
+void SColorComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void SColorComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {

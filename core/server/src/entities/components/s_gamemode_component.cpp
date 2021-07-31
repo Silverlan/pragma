@@ -14,7 +14,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(gamemode,SGamemode);
 
-luabind::object SGamemodeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SGamemodeComponentHandleWrapper>(l);}
+void SGamemodeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 ////////////
 

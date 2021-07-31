@@ -39,7 +39,7 @@ void CPropComponent::Initialize()
 		BasePropComponent::InitializePhysics(physType);
 	});*/
 }
-luabind::object CPropComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CPropComponentHandleWrapper>(l);}
+void CPropComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CPropComponent::ReceiveData(NetPacket &packet)
 {
 	m_kvMass = packet->Read<float>();

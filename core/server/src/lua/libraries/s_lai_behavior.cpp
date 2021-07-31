@@ -407,7 +407,7 @@ void Lua::AIBehaviorNode::GetParameterEntity(lua_State *l,ai::TaskWrapper &task,
 	//LUA_CHECK_ENTITY(l,def);
 	auto *r = get_parameter<const BaseEntity*>(task,sched,paramIdx,pragma::ai::Schedule::Parameter::Type::Entity,&pragma::ai::BehaviorParameter::GetEntity,def);
 	if(r != nullptr)
-		const_cast<BaseEntity*>(r)->GetLuaObject()->push(l);
+		const_cast<BaseEntity*>(r)->GetLuaObject().push(l);
 }
 void Lua::AIBehaviorNode::GetParameterEntity(lua_State *l,ai::TaskWrapper &task,std::shared_ptr<pragma::ai::Schedule> &sched,uint8_t paramIdx)
 {

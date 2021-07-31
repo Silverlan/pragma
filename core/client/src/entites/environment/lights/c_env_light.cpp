@@ -70,7 +70,7 @@ CLightComponent::~CLightComponent()
 	DestroyRenderBuffer();
 	DestroyShadowBuffer();
 }
-luabind::object CLightComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CLightComponentHandleWrapper>(l);}
+void CLightComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CLightComponent::InitializeRenderBuffer()
 {
 	if(m_renderBuffer != nullptr || umath::is_flag_set(m_lightFlags,LightFlags::BakedLightSource))
@@ -272,8 +272,8 @@ void CLightComponent::SetShadowType(ShadowType type)
 		InitializeShadowMap();
 	else
 	{
-		m_shadowMapStatic = {};
-		m_shadowMapDynamic = {};
+		m_shadowMapStatic = ComponentHandle<CShadowComponent>{};
+		m_shadowMapDynamic = ComponentHandle<CShadowComponent>{};
 	}
 	UpdateShadowTypes(); // Has to be called AFTER the shadowmap has been initialized!
 }
@@ -543,7 +543,7 @@ pragma::LightBufferData &CLightComponent::GetBufferData() {return m_bufferData;}
 const pragma::ShadowBufferData *CLightComponent::GetShadowBufferData() const {return const_cast<CLightComponent*>(this)->GetShadowBufferData();}
 pragma::ShadowBufferData *CLightComponent::GetShadowBufferData() {return m_shadowBufferData.get();}
 
-util::WeakHandle<CShadowComponent> CLightComponent::GetShadowMap(ShadowMapType type) const {return (type == ShadowMapType::Dynamic) ? m_shadowMapDynamic : m_shadowMapStatic;}
+pragma::ComponentHandle<CShadowComponent> CLightComponent::GetShadowMap(ShadowMapType type) const {return (type == ShadowMapType::Dynamic) ? m_shadowMapDynamic : m_shadowMapStatic;}
 
 pragma::CShadowComponent *CLightComponent::GetShadowComponent() {return m_shadowComponent;}
 const pragma::CShadowComponent *CLightComponent::GetShadowComponent() const {return const_cast<CLightComponent*>(this)->GetShadowComponent();}

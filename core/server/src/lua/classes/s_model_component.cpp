@@ -19,7 +19,7 @@ void SModelComponent::Initialize()
 {
 	BaseModelComponent::Initialize();
 }
-luabind::object SModelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SModelComponentHandleWrapper>(l);}
+void SModelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void SModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 {

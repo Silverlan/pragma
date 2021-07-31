@@ -408,7 +408,7 @@ void Game::RegisterLuaGlobals()
 				return {};
 			auto *ent = find_entity(l,*game,o);
 			if(!Lua::IsSet(l,2) || !ent)
-				return ent ? *ent->GetLuaObject() : luabind::object{};
+				return ent ? ent->GetLuaObject() : luabind::object{};
 			std::string name = Lua::CheckString(l,2);
 			auto &components = ent->GetComponents();
 			std::vector<std::string> componentNames;
@@ -451,7 +451,7 @@ void Game::RegisterLuaGlobals()
 			if(!game)
 				return {};
 			auto *ent = find_entity(l,*game,o);
-			return ent ? *ent->GetLuaObject() : luabind::object{};
+			return ent ? ent->GetLuaObject() : luabind::object{};
 		}));
 	}
 

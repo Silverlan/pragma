@@ -15,7 +15,7 @@ void CScoreComponent::ReceiveData(NetPacket &packet)
 {
 	*m_score = packet->Read<Score>();
 }
-luabind::object CScoreComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CScoreComponentHandleWrapper>(l);}
+void CScoreComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 Bool CScoreComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
 {
 	if(eventId == m_netEvSetScore)

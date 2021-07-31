@@ -19,7 +19,7 @@ namespace pragma
 	public:
 		STriggerGravityComponent(BaseEntity &ent) : BaseEntityTriggerGravityComponent(ent) {}
 		virtual void Initialize() override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	protected:
 		virtual void OnStartTouch(BaseEntity *ent) override;
 		virtual void OnResetGravity(BaseEntity *ent,GravitySettings &settings) override;

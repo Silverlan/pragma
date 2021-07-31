@@ -29,7 +29,7 @@ namespace pragma
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
 		virtual void SetAmbientColor(const Color &color) override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual void OnEntitySpawn() override;
 
@@ -46,7 +46,7 @@ namespace pragma
 		void UpdateAmbientColor();
 		void SetShadowDirty();
 
-		util::WeakHandle<CShadowCSMComponent> m_shadowMap = {};
+		ComponentHandle<CShadowCSMComponent> m_shadowMap = {};
 		bool m_bShadowBufferUpdateScheduled;
 		void RenderStaticWorldGeometry();
 	};

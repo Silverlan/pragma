@@ -53,7 +53,7 @@ WIMainMenuOptions::~WIMainMenuOptions()
 
 void WIMainMenuOptions::ApplyWindowSize()
 {
-	WIDropDownMenu *resMenu = m_hResolutionList.get<WIDropDownMenu>();
+	WIDropDownMenu *resMenu = static_cast<WIDropDownMenu*>(m_hResolutionList.get());
 	auto text = resMenu->GetText();
 	std::vector<std::string> res;
 	ustring::explode(std::string{text},"x",res);
@@ -68,7 +68,7 @@ void WIMainMenuOptions::ApplyWindowSize()
 void WIMainMenuOptions::ApplyOptions()
 {
 	if(m_hActive.IsValid())
-		m_hActive.get<WIOptionsList>()->RunUpdateConVars();
+		static_cast<WIOptionsList*>(m_hActive.get())->RunUpdateConVars();
 	if(m_hAntiAliasing.IsValid())
 	{
 		auto *pChoice = static_cast<WIChoiceList*>(m_hAntiAliasing.get())->GetSelectedChoice();
@@ -144,7 +144,7 @@ void WIMainMenuOptions::ResetDefaults(GLFW::MouseButton button,GLFW::KeyState st
 void WIMainMenuOptions::CreateLabel(std::string text)
 {
 	WIHandle hLabel = CreateChild<WIText>();
-	WIText *t = hLabel.get<WIText>();
+	WIText *t = static_cast<WIText*>(hLabel.get());
 	t->SetText(text);
 	t->SizeToContents();
 	t->SetPos(Vector2i(100,m_yOffset));
@@ -155,7 +155,7 @@ WIDropDownMenu *WIMainMenuOptions::CreateDropDownMenu(std::string text)
 {
 	CreateLabel(text);
 	WIHandle hDropDown = CreateChild<WIDropDownMenu>();
-	WIDropDownMenu *menu = hDropDown.get<WIDropDownMenu>();
+	WIDropDownMenu *menu = static_cast<WIDropDownMenu*>(hDropDown.get());
 	menu->SetPos(Vector2i(256,m_yOffset));
 	menu->SetSize(200,28);
 	m_yOffset += menu->GetHeight() +20;
@@ -166,7 +166,7 @@ WICheckbox *WIMainMenuOptions::CreateCheckbox(std::string text)
 {
 	CreateLabel(text);
 	WIHandle hCheckBox = CreateChild<WICheckbox>();
-	WICheckbox *checkBox = hCheckBox.get<WICheckbox>();
+	WICheckbox *checkBox = static_cast<WICheckbox*>(hCheckBox.get());
 	checkBox->SetPos(Vector2i(256,m_yOffset));
 	m_yOffset += checkBox->GetHeight() +20;
 	return checkBox;
@@ -275,7 +275,7 @@ void WIMainMenuOptions::InitializeGeneralSettings()
 {
 	m_hGeneralSettings = CreateChild<WIOptionsList>();
 	m_hGeneralSettings->SetName("settings_general");
-	auto *pList = m_hGeneralSettings.get<WIOptionsList>();
+	auto *pList = static_cast<WIOptionsList*>(m_hGeneralSettings.get());
 	auto title = Locale::GetText("general_options");
 	ustring::to_upper(title);
 	pList->SetTitle(title);
@@ -392,7 +392,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 {
 	m_hVideoSettings = CreateChild<WIOptionsList>();
 	m_hVideoSettings->SetName("settings_video");
-	auto *pList = m_hVideoSettings.get<WIOptionsList>();
+	auto *pList = static_cast<WIOptionsList*>(m_hVideoSettings.get());
 	auto title = Locale::GetText("video_options");
 	ustring::to_upper(title);
 	pList->SetTitle(title);
@@ -406,7 +406,7 @@ void WIMainMenuOptions::InitializeVideoSettings()
 		pList->AddChoice(Locale::GetText("very_high"),"4");
 	},"cl_render_preset");
 	auto hThis = GetHandle();
-	pListPreset->AddCallback("OnSelect",FunctionCallback<void,uint32_t,std::reference_wrapper<std::string>>::Create([hThis](uint32_t,std::reference_wrapper<std::string> value) {
+	pListPreset->AddCallback("OnSelect",FunctionCallback<void,uint32_t,std::reference_wrapper<std::string>>::Create([hThis](uint32_t,std::reference_wrapper<std::string> value) mutable {
 		if(hThis.IsValid() == false)
 			return;
 		auto *el = static_cast<WIMainMenuOptions*>(hThis.get());
@@ -1023,7 +1023,7 @@ void WIMainMenuOptions::InitializeAudioSettings()
 {
 	m_hAudioSettings = CreateChild<WIOptionsList>();
 	m_hAudioSettings->SetName("settings_audio");
-	auto *pList = m_hAudioSettings.get<WIOptionsList>();
+	auto *pList = static_cast<WIOptionsList*>(m_hAudioSettings.get());
 	auto title = Locale::GetText("audio_options");
 	ustring::to_upper(title);
 	pList->SetTitle(title);
@@ -1131,7 +1131,7 @@ void WIMainMenuOptions::InitializeControlSettings()
 {
 	m_hControlSettings = CreateChild<WIOptionsList>();
 	m_hControlSettings->SetName("settings_controls");
-	auto *pList = m_hControlSettings.get<WIOptionsList>();
+	auto *pList = static_cast<WIOptionsList*>(m_hControlSettings.get());
 	auto title = Locale::GetText("control_options");
 	ustring::to_upper(title);
 	pList->SetTitle(title);

@@ -51,7 +51,7 @@ void CKinematicComponent::ReceiveData(NetPacket &packet)
 	m_kvMoveSpeed = packet->Read<float>();
 	m_bInitiallyMoving = packet->Read<bool>();
 }
-luabind::object CKinematicComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CKinematicComponentHandleWrapper>(l);}
+void CKinematicComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 ////////////
 

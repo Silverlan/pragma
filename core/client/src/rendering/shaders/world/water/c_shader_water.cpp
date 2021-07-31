@@ -110,8 +110,8 @@ bool ShaderWater::UpdateBindFogDensity()
 
 void ShaderWater::EndDraw()
 {
-	m_boundEntity = {};
-	m_boundScene = {};
+	m_boundEntity = EntityHandle{};
+	m_boundScene = decltype(m_boundScene){};
 }
 
 bool ShaderWater::BindSceneCamera(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,bool bView)

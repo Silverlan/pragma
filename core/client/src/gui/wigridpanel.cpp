@@ -42,7 +42,7 @@ float WIGridPanel::UpdateRowHeights(float yOffset,float defHeight)
 			auto &hRow = m_rows[i];
 			if(hRow.IsValid() && hRow->IsVisible())
 			{
-				auto *row = hRow.get<WITableRow>();
+				auto *row = static_cast<WITableRow*>(hRow.get());
 
 				auto hRow = 0.f;
 				auto numCells = row->GetCellCount();

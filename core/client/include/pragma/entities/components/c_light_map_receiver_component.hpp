@@ -30,7 +30,7 @@ namespace pragma
 
 		CLightMapReceiverComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void Initialize() override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		
 		void UpdateLightMapUvData();
 		const std::unordered_map<MeshIdx,std::vector<Vector2>> &GetMeshLightMapUvData() const;

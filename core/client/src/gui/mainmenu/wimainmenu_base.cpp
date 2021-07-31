@@ -38,7 +38,7 @@ void WIMainMenuBase::Initialize()
 {
 	WIBase::Initialize();
 	SetSize(1'024,768);
-	m_menuElementsContainer = WGUI::GetInstance().Create<WIBase>(this);
+	m_menuElementsContainer = WGUI::GetInstance().Create<WIBase>(this)->GetHandle();
 	m_menuElementsContainer->SetAutoSizeToContents(true);
 	m_menuElementsContainer->SetX(168);
 	ScheduleUpdate();
@@ -82,18 +82,18 @@ void WIMainMenuBase::SelectItem(int i)
 		if(m_elements[i].IsValid() == false)
 			return;
 		m_selected = i;
-		m_elements[i].get<WIMainMenuElement>()->Select();
+		static_cast<WIMainMenuElement*>(m_elements[i].get())->Select();
 		return;
 	}
 	if(m_elements[m_selected].IsValid())
-		m_elements[m_selected].get<WIMainMenuElement>()->Deselect();
+		static_cast<WIMainMenuElement*>(m_elements[m_selected].get())->Deselect();
 	if(i >= m_elements.size())
 	{
 		m_selected = -1;
 		return;
 	}
 	m_selected = i;
-	m_elements[i].get<WIMainMenuElement>()->Select();
+	static_cast<WIMainMenuElement*>(m_elements[i].get())->Select();
 }
 WIMainMenuElement *WIMainMenuBase::GetSelectedElement()
 {
@@ -102,7 +102,7 @@ WIMainMenuElement *WIMainMenuBase::GetSelectedElement()
 	auto &hElement = m_elements[m_selected];
 	if(!hElement.IsValid())
 		return NULL;
-	return hElement.get<WIMainMenuElement>();
+	return static_cast<WIMainMenuElement*>(hElement.get());
 }
 void WIMainMenuBase::SelectNextItem()
 {
@@ -198,7 +198,7 @@ WIMainMenuElement *WIMainMenuBase::GetElement(int i)
 	auto &hElement = m_elements[i];
 	if(!hElement.IsValid())
 		return NULL;
-	return hElement.get<WIMainMenuElement>();
+	return static_cast<WIMainMenuElement*>(hElement.get());
 }
 void WIMainMenuBase::RemoveMenuItem(int i)
 {
@@ -218,7 +218,7 @@ WIOptionsList *WIMainMenuBase::InitializeOptionsList()
 {
 	m_hControlSettings = CreateChild<WIOptionsList>();
 	m_hControlSettings->SetName("options");
-	return m_hControlSettings.get<WIOptionsList>();
+	return static_cast<WIOptionsList*>(m_hControlSettings.get());
 }
 void WIMainMenuBase::InitializeOptionsList(WIOptionsList *pList)
 {
@@ -329,7 +329,7 @@ void WIMainMenuElement::SetText(std::string &text)
 	{
 		auto upperText = text;
 		ustring::to_upper(upperText);
-		WIText *pText = m_hText.get<WIText>();
+		WIText *pText = static_cast<WIText*>(m_hText.get());
 		pText->SetText(upperText);
 		pText->SizeToContents();
 	}

@@ -21,7 +21,6 @@
 
 void Lua::register_cl_character_component(lua_State *l,luabind::module_ &module)
 {
-	auto def = luabind::class_<CCharacterHandle,BaseEntityComponentHandle>("CharacterComponent");
-	Lua::register_base_character_component_methods<luabind::class_<CCharacterHandle,BaseEntityComponentHandle>,CCharacterHandle>(l,def);
+	auto def = luabind::class_<pragma::CCharacterComponent,pragma::BaseCharacterComponent>("CharacterComponent");
 	module[def];
 }

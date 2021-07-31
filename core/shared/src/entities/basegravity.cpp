@@ -223,7 +223,7 @@ void GravityComponent::ApplyGravity(double dt)
 }
 
 void GravityComponent::OnPhysicsInitialized() {}
-luabind::object GravityComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<GravityComponentHandleWrapper>(l);}
+void GravityComponent::InitializeLuaObject(lua_State *l) {pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 Vector3 GravityComponent::GetGravityDirection() const {return BaseGravity::GetGravityDirection(GetEntity().GetNetworkState());}
 float GravityComponent::GetGravity() const {return BaseGravity::GetGravity(GetEntity().GetNetworkState());}
 Vector3 GravityComponent::GetGravityForce() const {return BaseGravity::GetGravityForce(GetEntity().GetNetworkState());}

@@ -63,7 +63,7 @@ pragma::ComponentEventId BaseEntity::EVENT_ON_SPAWN = pragma::INVALID_COMPONENT_
 pragma::ComponentEventId BaseEntity::EVENT_ON_POST_SPAWN = pragma::INVALID_COMPONENT_ID;
 pragma::ComponentEventId BaseEntity::EVENT_ON_REMOVE = pragma::INVALID_COMPONENT_ID;
 BaseEntity::BaseEntity()
-	: pragma::BaseEntityComponentSystem(),LuaObj<EntityHandle>(),m_uuid{util::generate_uuid_v4()}
+	: pragma::BaseEntityComponentSystem{},pragma::BaseLuaHandle{},m_uuid{util::generate_uuid_v4()}
 {}
 pragma::NetEventId BaseEntity::FindNetEvent(const std::string &name) const
 {
@@ -84,10 +84,11 @@ pragma::ComponentEventId BaseEntity::GetEventId(const std::string &name) const
 }
 void BaseEntity::OnRemove()
 {
+	pragma::BaseLuaHandle::InvalidateHandle();
 	for(auto it=m_entsRemove.begin();it!=m_entsRemove.end();++it)
 	{
 		auto &hEnt = *it;
-		if(hEnt.valid())
+		if(hEnt.IsValid())
 			hEnt->Remove();
 	}
 	BroadcastEvent(EVENT_ON_REMOVE);
@@ -105,6 +106,8 @@ bool BaseEntity::IsMapEntity() const
 	auto *mapComponent = static_cast<pragma::MapComponent*>(FindComponent("map").get());
 	return mapComponent != nullptr && mapComponent->GetMapIndex() != 0;
 }
+
+EntityHandle BaseEntity::GetHandle() const {return pragma::BaseLuaHandle::GetHandle<BaseEntity>();}
 
 void BaseEntity::RemoveEntityOnRemoval(BaseEntity *ent,Bool bRemove) {RemoveEntityOnRemoval(ent->GetHandle(),bRemove);}
 void BaseEntity::RemoveEntityOnRemoval(const EntityHandle &hEnt,Bool bRemove)
@@ -169,7 +172,8 @@ void BaseEntity::RegisterEvents(pragma::EntityComponentManager &componentManager
 
 void BaseEntity::Initialize()
 {
-	InitializeHandle();
+	InitializeLuaObject(GetLuaState());
+
 	BaseEntityComponentSystem::Initialize(*this,GetNetworkState()->GetGameState()->GetEntityComponentManager());
 	AddComponent("entity");
 }
@@ -301,11 +305,6 @@ pragma::BaseGenericComponent *BaseEntity::GetGenericComponent() const {return m_
 void BaseEntity::Remove() {}
 void BaseEntity::RemoveSafely() {GetNetworkState()->GetGameState()->ScheduleEntityForRemoval(*this);}
 
-void BaseEntity::InitializeHandle()
-{
-	m_handle = new EntityHandle{std::shared_ptr<BaseEntity>{this,[](BaseEntity*) {}}};
-}
-
 ////////////////////////////////////
 
 DLLNETWORK bool operator==(const EntityHandle &a,const EntityHandle &b) {return a.get() == b.get();}
@@ -315,7 +314,7 @@ DLLNETWORK Con::c_cout& operator<<(Con::c_cout &os,const EntityHandle &ent)
 	if(!ent.valid())
 		os<<"NULL";
 	else
-		os<<*ent.get();
+		os<<const_cast<BaseEntity&>(*ent.get());
 	return os;
 }
 
@@ -326,6 +325,6 @@ DLLNETWORK std::ostream& operator<<(std::ostream &os,const EntityHandle ent)
 	if(!ent.valid())
 		os<<"NULL";
 	else
-		os<<*ent.get();
+		os<<const_cast<BaseEntity&>(*ent.get());
 	return os;
 }

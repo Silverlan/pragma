@@ -35,7 +35,7 @@ void WIKeyEntry::OnTextChanged(const std::string &text,bool changedByUser)
 	WITextEntryBase::OnTextChanged(text,changedByUser);
 	if(!m_hText.IsValid())
 		return;
-	WIText *t = m_hText.get<WIText>();
+	WIText *t = static_cast<WIText*>(m_hText.get());
 	t->SizeToContents();
 	int w = GetWidth();
 	int wText = t->GetWidth();
@@ -52,7 +52,7 @@ void WIKeyEntry::Initialize()
 	if(m_hText.IsValid())
 	{
 		auto hThis = GetHandle();
-		m_hText->AddCallback("OnTextChanged",FunctionCallback<void,std::reference_wrapper<const std::string>>::Create([hThis](std::reference_wrapper<const std::string> newText) {
+		m_hText->AddCallback("OnTextChanged",FunctionCallback<void,std::reference_wrapper<const std::string>>::Create([hThis](std::reference_wrapper<const std::string> newText) mutable {
 			if(!hThis.IsValid())
 				return;
 			static_cast<WIKeyEntry*>(hThis.get())->OnTextChanged(newText,false);
@@ -66,7 +66,7 @@ void WIKeyEntry::SetSize(int x,int y)
 	WITextEntryBase::SetSize(x,y);
 	if(!m_hText.IsValid())
 		return;
-	WIText *t = m_hText.get<WIText>();
+	WIText *t = static_cast<WIText*>(m_hText.get());
 	OnTextChanged(t->GetText(),false);
 }
 
@@ -133,26 +133,26 @@ void WIKeyEntry::OnFocusGained()
 	auto hKeyEntry = GetHandle();
 	auto hRect = pRect->GetHandle();
 	pRect->AddCallback("OnMouseEvent",FunctionCallback<util::EventReply,GLFW::MouseButton,GLFW::KeyState,GLFW::Modifier>::CreateWithOptionalReturn(
-		[hRect,hKeyEntry](util::EventReply *reply,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier) -> CallbackReturnType {
+		[hRect,hKeyEntry](util::EventReply *reply,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier) mutable -> CallbackReturnType {
 		if(state != GLFW::KeyState::Press || !hKeyEntry.IsValid())
 		{
 			*reply = util::EventReply::Handled;
 			return CallbackReturnType::HasReturnValue;
 		}
-		auto *pKeyEntry = hKeyEntry.get<WIKeyEntry>();
+		auto *pKeyEntry = static_cast<WIKeyEntry*>(hKeyEntry.get());
 		pKeyEntry->ApplyKey(static_cast<GLFW::Key>(static_cast<uint32_t>(button) +static_cast<uint32_t>(GLFW::Key::Last)));
 		if(hRect.IsValid())
 			hRect.get()->RemoveSafely();
 		*reply = util::EventReply::Handled;
 		return CallbackReturnType::HasReturnValue;
 	}));
-	pRect->AddCallback("OnScroll",FunctionCallback<util::EventReply,Vector2>::CreateWithOptionalReturn([hRect,hKeyEntry](util::EventReply *reply,Vector2 offset) -> CallbackReturnType {
+	pRect->AddCallback("OnScroll",FunctionCallback<util::EventReply,Vector2>::CreateWithOptionalReturn([hRect,hKeyEntry](util::EventReply *reply,Vector2 offset) mutable -> CallbackReturnType {
 		if(!hKeyEntry.IsValid())
 		{
 			*reply = util::EventReply::Handled;
 			return CallbackReturnType::HasReturnValue;
 		}
-		auto *pKeyEntry = hKeyEntry.get<WIKeyEntry>();
+		auto *pKeyEntry = static_cast<WIKeyEntry*>(hKeyEntry.get());
 		pKeyEntry->ApplyKey(static_cast<GLFW::Key>((offset.y >= 0.f) ? GLFW_CUSTOM_KEY_SCRL_UP : GLFW_CUSTOM_KEY_SCRL_DOWN));
 		if(hRect.IsValid())
 			hRect.get()->RemoveSafely();

@@ -21,7 +21,7 @@ void CPointAtTargetComponent::ReceiveData(NetPacket &packet)
 		SetPointAtTarget(ent);
 	});
 }
-luabind::object CPointAtTargetComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CPointAtTargetComponentHandleWrapper>(l);}
+void CPointAtTargetComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 Bool CPointAtTargetComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
 {

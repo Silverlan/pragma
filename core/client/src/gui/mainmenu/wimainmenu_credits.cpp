@@ -21,7 +21,7 @@ WIMainMenuCredits::~WIMainMenuCredits()
 void WIMainMenuCredits::AddCreditsElement(WIBase &el)
 {
 	auto hThis = GetHandle();
-	el.AddCallback("SetSize",FunctionCallback<void>::Create([hThis]() {
+	el.AddCallback("SetSize",FunctionCallback<void>::Create([hThis]() mutable {
 		if(hThis.IsValid() == false)
 			return;
 		hThis.get()->ScheduleUpdate();

@@ -15,6 +15,7 @@
 #include "pragma/lua/classes/ldef_physobj.h"
 #include "pragma/lua/classes/ldef_entity.h"
 #include "pragma/lua/classes/lphysics.h"
+#include "pragma/lua/policies/property_policy.hpp"
 #include "pragma/util/bulletinfo.h"
 #include "pragma/lua/libraries/lray.h"
 #include "pragma/model/animation/animation_manager.hpp"
@@ -23,46 +24,18 @@
 #include "pragma/physics/raytraces.h"
 #include "pragma/lua/lentity_components_base_types.hpp"
 #include "pragma/entities/components/animated_2_component.hpp"
+#include "pragma/lua/classes/entity_components.hpp"
 #include <pragma/physics/movetypes.h>
 #pragma optimize("",off)
 namespace Lua
 {
-	namespace Velocity
-	{
-		static void GetVelocity(lua_State *l,VelocityHandle &hEnt);
-		static void SetVelocity(lua_State *l,VelocityHandle &hEnt,Vector3 vel);
-		static void AddVelocity(lua_State *l,VelocityHandle &hEnt,Vector3 vel);
-		static void GetAngularVelocity(lua_State *l,VelocityHandle &hEnt);
-		static void SetAngularVelocity(lua_State *l,VelocityHandle &hEnt,Vector3 vel);
-		static void AddAngularVelocity(lua_State *l,VelocityHandle &hEnt,Vector3 vel);
-		static void GetLocalAngularVelocity(lua_State *l,VelocityHandle &hEnt);
-		static void SetLocalAngularVelocity(lua_State *l,VelocityHandle &hEnt,Vector3 &vel);
-		static void AddLocalAngularVelocity(lua_State *l,VelocityHandle &hEnt,Vector3 &vel);
-		static void GetLocalVelocity(lua_State *l,VelocityHandle &hEnt);
-		static void SetLocalVelocity(lua_State *l,VelocityHandle &hEnt,Vector3 &vel);
-		static void AddLocalVelocity(lua_State *l,VelocityHandle &hEnt,Vector3 &vel);
-	};
-	namespace Damageable
-	{
-		static void TakeDamage(lua_State *l,DamageableHandle &hEnt,DamageInfo &info);
-	};
-	namespace Submergible
-	{
-		// Water
-		static void IsSubmerged(lua_State *l,SubmergibleHandle &hEnt);
-		static void IsFullySubmerged(lua_State *l,SubmergibleHandle &hEnt);
-		static void GetSubmergedFraction(lua_State *l,SubmergibleHandle &hEnt);
-		static void IsInWater(lua_State *l,SubmergibleHandle &hEnt);
-	};
 	namespace IK
 	{
-		static void SetIKControllerEnabled(lua_State *l,IKHandle &hEnt,uint32_t ikControllerId,bool b);
-		static void IsIKControllerEnabled(lua_State *l,IKHandle &hEnt,uint32_t ikControllerId);
-		static void SetIKEffectorPos(lua_State *l,IKHandle &hEnt,uint32_t ikControllerId,uint32_t effectorIdx,const Vector3 &pos);
 		static void GetIKEffectorPos(lua_State *l,IKHandle &hEnt,uint32_t ikControllerId,uint32_t effectorIdx);
 	};
 };
 
+namespace Lua {bool get_bullet_master(BaseEntity &ent);};
 bool Lua::get_bullet_master(BaseEntity &ent)
 {
 	auto bMaster = true;
@@ -242,25 +215,22 @@ namespace luabind {
 
 void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 {
-	auto def = luabind::class_<BaseEntityComponentHandle>("EntityComponent");
-	RegisterLuaEntityComponent(def);
-	gameMod[def];
-
+	pragma::lua::register_entity_component_classes(gameMod);
 	Lua::register_gravity_component(gameMod);
 
-	auto defVelocity = luabind::class_<VelocityHandle,BaseEntityComponentHandle>("VelocityComponent");
-	defVelocity.def("GetVelocity",&Lua::Velocity::GetVelocity);
-	defVelocity.def("SetVelocity",&Lua::Velocity::SetVelocity);
-	defVelocity.def("AddVelocity",&Lua::Velocity::AddVelocity);
-	defVelocity.def("GetAngularVelocity",&Lua::Velocity::GetAngularVelocity);
-	defVelocity.def("SetAngularVelocity",&Lua::Velocity::SetAngularVelocity);
-	defVelocity.def("AddAngularVelocity",&Lua::Velocity::AddAngularVelocity);
-	defVelocity.def("GetLocalAngularVelocity",&Lua::Velocity::GetLocalAngularVelocity);
-	defVelocity.def("SetLocalAngularVelocity",&Lua::Velocity::SetLocalAngularVelocity);
-	defVelocity.def("AddLocalAngularVelocity",&Lua::Velocity::AddLocalAngularVelocity);
-	defVelocity.def("GetLocalVelocity",&Lua::Velocity::GetLocalVelocity);
-	defVelocity.def("SetLocalVelocity",&Lua::Velocity::SetLocalVelocity);
-	defVelocity.def("AddLocalVelocity",&Lua::Velocity::AddLocalVelocity);
+	auto defVelocity = luabind::class_<pragma::VelocityComponent,pragma::BaseEntityComponent>("VelocityComponent");
+	defVelocity.def("GetVelocity",&pragma::VelocityComponent::GetVelocity);
+	defVelocity.def("SetVelocity",&pragma::VelocityComponent::SetVelocity);
+	defVelocity.def("AddVelocity",&pragma::VelocityComponent::AddVelocity);
+	defVelocity.def("GetAngularVelocity",&pragma::VelocityComponent::GetAngularVelocity);
+	defVelocity.def("SetAngularVelocity",&pragma::VelocityComponent::SetAngularVelocity);
+	defVelocity.def("AddAngularVelocity",&pragma::VelocityComponent::AddAngularVelocity);
+	defVelocity.def("GetLocalAngularVelocity",&pragma::VelocityComponent::GetLocalAngularVelocity);
+	defVelocity.def("SetLocalAngularVelocity",&pragma::VelocityComponent::SetLocalAngularVelocity);
+	defVelocity.def("AddLocalAngularVelocity",&pragma::VelocityComponent::AddLocalAngularVelocity);
+	defVelocity.def("GetLocalVelocity",&pragma::VelocityComponent::GetLocalVelocity);
+	defVelocity.def("SetLocalVelocity",&pragma::VelocityComponent::SetLocalVelocity);
+	defVelocity.def("AddLocalVelocity",&pragma::VelocityComponent::AddLocalVelocity);
 	defVelocity.def("GetVelocityProperty",static_cast<void(*)(lua_State*,VelocityHandle&)>([](lua_State *l,VelocityHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);
 		Lua::Property::push(l,*hComponent->GetVelocityProperty());
@@ -271,18 +241,12 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	}));
 	gameMod[defVelocity];
 
-	auto defGlobal = luabind::class_<GlobalNameHandle,BaseEntityComponentHandle>("GlobalComponent");
-	defGlobal.def("GetGlobalName",static_cast<void(*)(lua_State*,GlobalNameHandle&)>([](lua_State *l,GlobalNameHandle &hComponent) {
-		pragma::Lua::check_component(l,hComponent);
-		Lua::PushString(l,hComponent->GetGlobalName());
-	}));
-	defGlobal.def("SetGlobalName",static_cast<void(*)(lua_State*,GlobalNameHandle&,const std::string&)>([](lua_State *l,GlobalNameHandle &hComponent,const std::string &globalName) {
-		pragma::Lua::check_component(l,hComponent);
-		hComponent->SetGlobalName(globalName);
-	}));
+	auto defGlobal = luabind::class_<pragma::GlobalNameComponent,pragma::BaseEntityComponent>("GlobalComponent");
+	defGlobal.def("GetGlobalName",&pragma::GlobalNameComponent::GetGlobalName);
+	defGlobal.def("SetGlobalName",&pragma::GlobalNameComponent::SetGlobalName);
 	gameMod[defGlobal];
 
-	auto defComposite = luabind::class_<CompositeHandle,BaseEntityComponentHandle>("CompositeComponent");
+	auto defComposite = luabind::class_<pragma::CompositeComponent,pragma::BaseEntityComponent>("CompositeComponent");
 	defComposite.def("ClearEntities",static_cast<void(*)(lua_State*,CompositeHandle&)>([](lua_State *l,CompositeHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->ClearEntities();
@@ -312,7 +276,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 		{
 			if(!hEnt.valid())
 				continue;
-			tEnts[idx++] = *hEnt.get()->GetLuaObject();
+			tEnts[idx++] = hEnt.get()->GetLuaObject();
 		}
 		return tEnts;
 	}));
@@ -328,7 +292,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 		{
 			if(!hEnt.valid())
 				continue;
-			tEnts[idx++] = *hEnt.get()->GetLuaObject();
+			tEnts[idx++] = hEnt.get()->GetLuaObject();
 		}
 		return tEnts;
 	}));
@@ -378,7 +342,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 		{
 			if(!hEnt.valid())
 				continue;
-			tEnts[idx++] = *hEnt.get()->GetLuaObject();
+			tEnts[idx++] = hEnt.get()->GetLuaObject();
 		}
 		return tEnts;
 	}));
@@ -395,31 +359,16 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	defComposite.scope[defCompositeGroup];
 	gameMod[defComposite];
 	
-	auto defAnimated2 = luabind::class_<Animated2Handle,BaseEntityComponentHandle>("Animated2Component");
-	defAnimated2.def("SetPlaybackRate",static_cast<void(*)(lua_State*,Animated2Handle&,float)>([](lua_State *l,Animated2Handle &hAnim,float playbackRate) {
-		pragma::Lua::check_component(l,hAnim);
-		hAnim->SetPlaybackRate(playbackRate);
-	}));
-	defAnimated2.def("GetPlaybackRate",static_cast<float(*)(lua_State*,Animated2Handle&)>([](lua_State *l,Animated2Handle &hAnim) -> float {
-		pragma::Lua::check_component(l,hAnim);
-		return hAnim->GetPlaybackRate();
-	}));
-	defAnimated2.def("GetPlaybackRateProperty",static_cast<void(*)(lua_State*,Animated2Handle&)>([](lua_State *l,Animated2Handle &hComponent) {
-		pragma::Lua::check_component(l,hComponent);
-		Lua::Property::push(l,*hComponent->GetPlaybackRateProperty());
-	}));
+	auto defAnimated2 = luabind::class_<pragma::Animated2Component,pragma::BaseEntityComponent>("Animated2Component");
+	defAnimated2.def("SetPlaybackRate",&pragma::Animated2Component::SetPlaybackRate);
+	defAnimated2.def("GetPlaybackRate",&pragma::Animated2Component::GetPlaybackRate);
+	defAnimated2.def("GetPlaybackRateProperty",&pragma::Animated2Component::GetPlaybackRateProperty,luabind::property_policy<0>{});
 	defAnimated2.def("ClearAnimationManagers",static_cast<void(*)(lua_State*,Animated2Handle&)>([](lua_State *l,Animated2Handle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);
 		hComponent->ClearAnimationManagers();
 	}));
-	defAnimated2.def("AddAnimationManager",static_cast<pragma::animation::PAnimationManager(*)(lua_State*,Animated2Handle&)>([](lua_State *l,Animated2Handle &hComponent) -> pragma::animation::PAnimationManager {
-		pragma::Lua::check_component(l,hComponent);
-		return hComponent->AddAnimationManager();
-	}));
-	defAnimated2.def("RemoveAnimationManager",static_cast<void(*)(lua_State*,Animated2Handle&,const pragma::animation::AnimationManager&)>([](lua_State *l,Animated2Handle &hComponent,const pragma::animation::AnimationManager &manager) {
-		pragma::Lua::check_component(l,hComponent);
-		hComponent->RemoveAnimationManager(manager);
-	}));
+	defAnimated2.def("AddAnimationManager",&pragma::Animated2Component::AddAnimationManager);
+	defAnimated2.def("RemoveAnimationManager",&pragma::Animated2Component::RemoveAnimationManager);
 	defAnimated2.def("GetAnimationManagers",static_cast<luabind::object(*)(lua_State*,Animated2Handle&)>([](lua_State *l,Animated2Handle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);
 		auto t = luabind::newtable(l);
@@ -437,34 +386,31 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	}));
 	gameMod[defAnimated2];
 
-	auto defIK = luabind::class_<IKHandle,BaseEntityComponentHandle>("IKComponent");
-	defIK.def("SetIKControllerEnabled",&Lua::IK::SetIKControllerEnabled);
-	defIK.def("IsIKControllerEnabled",&Lua::IK::IsIKControllerEnabled);
-	defIK.def("SetIKEffectorPos",&Lua::IK::SetIKEffectorPos);
+	auto defIK = luabind::class_<pragma::IKComponent,pragma::BaseEntityComponent>("IKComponent");
+	defIK.def("SetIKControllerEnabled",&pragma::IKComponent::SetIKControllerEnabled);
+	defIK.def("IsIKControllerEnabled",&pragma::IKComponent::IsIKControllerEnabled);
+	defIK.def("SetIKEffectorPos",&pragma::IKComponent::SetIKEffectorPos);
 	defIK.def("GetIKEffectorPos",&Lua::IK::GetIKEffectorPos);
 	gameMod[defIK];
 
-	auto defLogic = luabind::class_<LogicHandle,BaseEntityComponentHandle>("LogicComponent");
+	auto defLogic = luabind::class_<pragma::LogicComponent,pragma::BaseEntityComponent>("LogicComponent");
 	defLogic.add_static_constant("EVENT_ON_TICK",pragma::LogicComponent::EVENT_ON_TICK);
 	gameMod[defLogic];
 
-	auto defUsable = luabind::class_<UsableHandle,BaseEntityComponentHandle>("UsableComponent");
+	auto defUsable = luabind::class_<pragma::UsableComponent,pragma::BaseEntityComponent>("UsableComponent");
 	defUsable.add_static_constant("EVENT_ON_USE",pragma::UsableComponent::EVENT_ON_USE);
 	defUsable.add_static_constant("EVENT_CAN_USE",pragma::UsableComponent::EVENT_CAN_USE);
 	gameMod[defUsable];
 
-	auto defMap = luabind::class_<MapHandle,BaseEntityComponentHandle>("MapComponent");
-	defMap.def("GetMapIndex",static_cast<void(*)(lua_State*,MapHandle&)>([](lua_State *l,MapHandle &hComponent) {
-		pragma::Lua::check_component(l,hComponent);
-		Lua::PushInt(l,hComponent->GetMapIndex());
-	}));
+	auto defMap = luabind::class_<pragma::MapComponent,pragma::BaseEntityComponent>("MapComponent");
+	defMap.def("GetMapIndex",&pragma::MapComponent::GetMapIndex);
 	gameMod[defMap];
 
-	auto defSubmergible = luabind::class_<SubmergibleHandle,BaseEntityComponentHandle>("SubmergibleComponent");
-	defSubmergible.def("IsSubmerged",&Lua::Submergible::IsSubmerged);
-	defSubmergible.def("IsFullySubmerged",&Lua::Submergible::IsFullySubmerged);
-	defSubmergible.def("GetSubmergedFraction",&Lua::Submergible::GetSubmergedFraction);
-	defSubmergible.def("IsInWater",&Lua::Submergible::IsInWater);
+	auto defSubmergible = luabind::class_<pragma::SubmergibleComponent,pragma::BaseEntityComponent>("SubmergibleComponent");
+	defSubmergible.def("IsSubmerged",&pragma::SubmergibleComponent::IsSubmerged);
+	defSubmergible.def("IsFullySubmerged",&pragma::SubmergibleComponent::IsFullySubmerged);
+	defSubmergible.def("GetSubmergedFraction",&pragma::SubmergibleComponent::GetSubmergedFraction);
+	defSubmergible.def("IsInWater",&pragma::SubmergibleComponent::IsInWater);
 	defSubmergible.def("GetSubmergedFractionProperty",static_cast<void(*)(lua_State*,SubmergibleHandle&)>([](lua_State *l,SubmergibleHandle &hComponent) {
 		pragma::Lua::check_component(l,hComponent);
 		Lua::Property::push(l,*hComponent->GetSubmergedFractionProperty());
@@ -474,7 +420,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 		auto *entWater = hComponent->GetWaterEntity();
 		if(entWater == nullptr)
 			return;
-		entWater->GetLuaObject()->push(l);
+		entWater->GetLuaObject().push(l);
 	}));
 	defSubmergible.add_static_constant("EVENT_ON_WATER_SUBMERGED",pragma::SubmergibleComponent::EVENT_ON_WATER_SUBMERGED);
 	defSubmergible.add_static_constant("EVENT_ON_WATER_EMERGED",pragma::SubmergibleComponent::EVENT_ON_WATER_EMERGED);
@@ -482,127 +428,12 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	defSubmergible.add_static_constant("EVENT_ON_WATER_EXITED",pragma::SubmergibleComponent::EVENT_ON_WATER_EXITED);
 	gameMod[defSubmergible];
 
-	auto defDamageable = luabind::class_<DamageableHandle,BaseEntityComponentHandle>("DamageableComponent");
-	defDamageable.def("TakeDamage",&Lua::Damageable::TakeDamage);
+	auto defDamageable = luabind::class_<pragma::DamageableComponent,pragma::BaseEntityComponent>("DamageableComponent");
+	defDamageable.def("TakeDamage",&pragma::DamageableComponent::TakeDamage);
 	defDamageable.add_static_constant("EVENT_ON_TAKE_DAMAGE",pragma::DamageableComponent::EVENT_ON_TAKE_DAMAGE);
 	gameMod[defDamageable];
 }
 
-void Lua::Velocity::GetVelocity(lua_State *l,VelocityHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	luabind::object(l,hEnt->GetVelocity()).push(l);
-}
-void Lua::Velocity::SetVelocity(lua_State *l,VelocityHandle &hEnt,Vector3 vel)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->SetVelocity(vel);
-}
-void Lua::Velocity::AddVelocity(lua_State *l,VelocityHandle &hEnt,Vector3 vel)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->AddVelocity(vel);
-}
-
-void Lua::Velocity::GetAngularVelocity(lua_State *l,VelocityHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	luabind::object(l,hEnt->GetAngularVelocity()).push(l);
-}
-
-void Lua::Velocity::SetAngularVelocity(lua_State *l,VelocityHandle &hEnt,Vector3 vel)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->SetAngularVelocity(vel);
-}
-
-void Lua::Velocity::AddAngularVelocity(lua_State *l,VelocityHandle &hEnt,Vector3 vel)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->AddAngularVelocity(vel);
-}
-
-void Lua::Velocity::GetLocalAngularVelocity(lua_State *l,VelocityHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	luabind::object(l,hEnt->GetLocalAngularVelocity()).push(l);
-}
-void Lua::Velocity::SetLocalAngularVelocity(lua_State *l,VelocityHandle &hEnt,Vector3 &vel)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->SetLocalAngularVelocity(vel);
-}
-void Lua::Velocity::AddLocalAngularVelocity(lua_State *l,VelocityHandle &hEnt,Vector3 &vel)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->AddLocalAngularVelocity(vel);
-}
-
-void Lua::Velocity::GetLocalVelocity(lua_State *l,VelocityHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	luabind::object(l,hEnt->GetLocalVelocity()).push(l);
-}
-void Lua::Velocity::SetLocalVelocity(lua_State *l,VelocityHandle &hEnt,Vector3 &vel)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->SetLocalVelocity(vel);
-}
-void Lua::Velocity::AddLocalVelocity(lua_State *l,VelocityHandle &hEnt,Vector3 &vel)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->AddLocalVelocity(vel);
-}
-
-//////////////
-
-void Lua::Damageable::TakeDamage(lua_State *l,DamageableHandle &hEnt,DamageInfo &info)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->TakeDamage(info);
-}
-
-
-//////////////
-
-void Lua::Submergible::IsSubmerged(lua_State *l,SubmergibleHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	Lua::PushBool(l,hEnt->IsSubmerged());
-}
-void Lua::Submergible::IsFullySubmerged(lua_State *l,SubmergibleHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	Lua::PushBool(l,hEnt->IsFullySubmerged());
-}
-void Lua::Submergible::GetSubmergedFraction(lua_State *l,SubmergibleHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	Lua::PushNumber(l,hEnt->GetSubmergedFraction());
-}
-void Lua::Submergible::IsInWater(lua_State *l,SubmergibleHandle &hEnt)
-{
-	pragma::Lua::check_component(l,hEnt);
-	Lua::PushBool(l,hEnt->IsInWater());
-}
-
-//////////////
-
-void Lua::IK::SetIKControllerEnabled(lua_State *l,IKHandle &hEnt,uint32_t ikControllerId,bool b)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->SetIKControllerEnabled(ikControllerId,b);
-}
-void Lua::IK::IsIKControllerEnabled(lua_State *l,IKHandle &hEnt,uint32_t ikControllerId)
-{
-	pragma::Lua::check_component(l,hEnt);
-	Lua::PushBool(l,hEnt->IsIKControllerEnabled(ikControllerId));
-}
-void Lua::IK::SetIKEffectorPos(lua_State *l,IKHandle &hEnt,uint32_t ikControllerId,uint32_t effectorIdx,const Vector3 &pos)
-{
-	pragma::Lua::check_component(l,hEnt);
-	hEnt->SetIKEffectorPos(ikControllerId,effectorIdx,pos);
-}
 void Lua::IK::GetIKEffectorPos(lua_State *l,IKHandle &hEnt,uint32_t ikControllerId,uint32_t effectorIdx)
 {
 	pragma::Lua::check_component(l,hEnt);

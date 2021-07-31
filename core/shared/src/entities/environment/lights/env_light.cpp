@@ -114,9 +114,9 @@ void BaseEnvLightComponent::SetLight(BaseEnvLightDirectionalComponent &light)
 BaseEntityComponent *BaseEnvLightComponent::GetLight(util::pragma::LightType &outType) const
 {
 	outType = m_lightType;
-	return m_hLight.get();
+	return const_cast<BaseEntityComponent*>(m_hLight.get());
 }
-BaseEntityComponent *BaseEnvLightComponent::GetLight() const {return m_hLight.get();}
+BaseEntityComponent *BaseEnvLightComponent::GetLight() const {return const_cast<BaseEntityComponent*>(m_hLight.get());}
 void BaseEnvLightComponent::InitializeLight(BaseEntityComponent &component) {m_hLight = component.GetHandle();}
 void BaseEnvLightComponent::SetLightIntensityType(LightIntensityType type) {m_lightIntensityType = type;}
 BaseEnvLightComponent::LightIntensityType BaseEnvLightComponent::GetLightIntensityType() const {return m_lightIntensityType;}

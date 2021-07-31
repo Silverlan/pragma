@@ -28,12 +28,12 @@ LuaBaseEntityIterator LuaBaseEntityIterator::operator++(int)
 luabind::object LuaBaseEntityIterator::operator*()
 {
 	auto *ent = *m_iterator;
-	return (ent != nullptr) ? *ent->GetLuaObject() : luabind::object{};
+	return (ent != nullptr) ? ent->GetLuaObject() : luabind::object{};
 }
 luabind::object LuaBaseEntityIterator::operator->()
 {
 	auto *ent = *m_iterator;
-	return (ent != nullptr) ? *ent->GetLuaObject() : luabind::object{};
+	return (ent != nullptr) ? ent->GetLuaObject() : luabind::object{};
 }
 bool LuaBaseEntityIterator::operator==(const LuaBaseEntityIterator &other) {return m_iterator == other.m_iterator;}
 bool LuaBaseEntityIterator::operator!=(const LuaBaseEntityIterator &other) {return m_iterator != other.m_iterator;}

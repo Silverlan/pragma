@@ -142,7 +142,7 @@ void CSkyCameraComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
 }
-luabind::object CSkyCameraComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CSkyCameraComponentHandleWrapper>(l);}
+void CSkyCameraComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 ////////
 

@@ -11,6 +11,7 @@
 #include <mathutil/glmutil.h>
 #include <pragma/math/angle/wvquaternion.h>
 #include "pragma/entities/parentmode.h"
+#include <sharedutils/util_shared_handle.hpp>
 #include <vector>
 #include <optional>
 
@@ -33,7 +34,7 @@ struct DLLNETWORK AttachmentData
 	FAttachmentMode flags=FAttachmentMode::None;
 	int32_t bone = -1;
 	int32_t attachment = -1;
-	util::WeakHandle<pragma::BaseParentComponent> parent = {};
+	pragma::ComponentHandle<pragma::BaseParentComponent> parent = {};
 	std::vector<int32_t> boneMapping = {};
 };
 

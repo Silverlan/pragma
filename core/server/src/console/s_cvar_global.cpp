@@ -63,7 +63,7 @@ void CMD_kick(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string
 	entIt.AttachFilter<EntityIteratorFilterName>(name,false,false);
 	auto it = entIt.begin();
 	auto *ent = (it != entIt.end()) ? *it : nullptr;
-	auto plComponent = (ent != nullptr) ? ent->GetComponent<pragma::SPlayerComponent>() : util::WeakHandle<pragma::SPlayerComponent>{};
+	auto plComponent = (ent != nullptr) ? ent->GetComponent<pragma::SPlayerComponent>() : pragma::ComponentHandle<pragma::SPlayerComponent>{};
 	if(plComponent.expired() == false)
 		kickTarget = plComponent.get();
 	else

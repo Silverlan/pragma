@@ -8,6 +8,8 @@
 #define __GAME_OBJECT_POLICY_HPP__
 
 #include <luabind/detail/policy.hpp>
+#include <sharedutils/util.h>
+#include <sharedutils/util_shared_handle.hpp>
 
 namespace luabind {
 	namespace detail {
@@ -18,7 +20,9 @@ namespace luabind {
 			void to_lua(lua_State* L, T const& x)
 			{
 				auto &xnc = const_cast<T&>(x);
-				if constexpr(std::is_pointer_v<decltype(xnc.GetLuaObject())>)
+				if constexpr(util::is_specialization<T,util::TWeakSharedHandle>::value || util::is_specialization<T,util::TSharedHandle>::value)
+					xnc->GetLuaObject().push(L);
+				else if constexpr(std::is_pointer_v<decltype(xnc.GetLuaObject())>)
 					xnc.GetLuaObject()->push(L);
 				else
 					xnc.GetLuaObject().push(L);

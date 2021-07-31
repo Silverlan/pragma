@@ -26,7 +26,6 @@ public:
 	void LuaInitialize() {}
 	static void default_Initialize(SBaseEntity *ent);
 protected:
-	virtual void InitializeHandle() override;
 	virtual void InitializeLuaObject(lua_State *lua) override;
 };
 

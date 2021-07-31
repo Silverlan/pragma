@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/audio/c_lalsound.hpp"
+#include <pragma/lua/policies/pair_policy.hpp>
 #include <se_scene.hpp>
 
 namespace Lua
@@ -29,17 +30,11 @@ namespace Lua
 			static void GetChannelConfig(lua_State *l,::ALSound &snd);
 			static void GetSampleType(lua_State *l,::ALSound &snd);
 			static void GetLength(lua_State *l,::ALSound &snd);
-			static void GetLoopFramePoints(lua_State *l,::ALSound &snd);
-			static void GetLoopTimePoints(lua_State *l,::ALSound &snd);
-
-			static void SetPropagationIdentifier(lua_State *l,::ALSound &snd,const std::string &identifier);
-			static void GetPropagationIdentifier(lua_State *l,::ALSound &snd);
-			static void GetBuffer(lua_State *l,::ALSound &snd);
 		};
 	};
 	namespace ALBuffer
 	{
-		static void GetPhonemeData(lua_State *l,al::ISoundBuffer&);
+		static Lua::opt<luabind::tableT<void>> GetPhonemeData(lua_State *l,al::ISoundBuffer&);
 	};
 };
 
@@ -65,11 +60,21 @@ void Lua::ALSound::Client::register_class(luabind::class_<::ALSound> &classDef)
 	classDef.def("GetChannelConfig",&Lua::ALSound::Client::GetChannelConfig);
 	classDef.def("GetSampleType",&Lua::ALSound::Client::GetSampleType);
 	classDef.def("GetLength",&Lua::ALSound::Client::GetLength);
-	classDef.def("GetLoopFramePoints",&Lua::ALSound::Client::GetLoopFramePoints);
-	classDef.def("GetLoopTimePoints",&Lua::ALSound::Client::GetLoopTimePoints);
-	classDef.def("SetPropagationIdentifier",&Lua::ALSound::Client::SetPropagationIdentifier);
-	classDef.def("GetPropagationIdentifier",&Lua::ALSound::Client::GetPropagationIdentifier);
-	classDef.def("GetBuffer",&Lua::ALSound::Client::GetBuffer);
+	classDef.def("GetLoopFramePoints",static_cast<std::pair<uint64_t,uint64_t>(*)(::ALSound&)>([](::ALSound &sound) {
+		return static_cast<CALSound&>(sound)->GetLoopFramePoints();
+	}),luabind::pair_policy<0>{});
+	classDef.def("GetLoopTimePoints",static_cast<std::pair<float,float>(*)(::ALSound&)>([](::ALSound &sound) {
+		return static_cast<CALSound&>(sound)->GetLoopTimePoints();
+	}),luabind::pair_policy<0>{});
+	classDef.def("SetPropagationIdentifier",static_cast<void(*)(::ALSound&,const std::string&)>([](::ALSound &sound,const std::string &identifier) {
+		static_cast<CALSound&>(sound)->SetIdentifier(identifier);
+	}));
+	classDef.def("GetPropagationIdentifier",static_cast<std::string(*)(::ALSound&)>([](::ALSound &sound) {
+		return static_cast<CALSound&>(sound)->GetIdentifier();
+	}));
+	classDef.def("GetBuffer",static_cast<al::ISoundBuffer*(*)(::ALSound&)>([](::ALSound &sound) -> al::ISoundBuffer* {
+		return static_cast<CALSound&>(sound)->GetBuffer();
+	}));
 }
 
 void Lua::ALSound::Client::GetWorldPosition(lua_State *l,::ALSound &snd)
@@ -89,88 +94,38 @@ void Lua::ALSound::Client::GetFrequency(lua_State *l,::ALSound &snd) {Lua::PushI
 void Lua::ALSound::Client::GetChannelConfig(lua_State *l,::ALSound &snd) {Lua::PushInt(l,umath::to_integral(static_cast<CALSound&>(snd)->GetChannelConfig()));}
 void Lua::ALSound::Client::GetSampleType(lua_State *l,::ALSound &snd) {Lua::PushInt(l,umath::to_integral(static_cast<CALSound&>(snd)->GetSampleType()));}
 void Lua::ALSound::Client::GetLength(lua_State *l,::ALSound &snd) {Lua::PushInt(l,static_cast<CALSound&>(snd)->GetLength());}
-void Lua::ALSound::Client::GetLoopFramePoints(lua_State *l,::ALSound &snd)
-{
-	auto points = static_cast<CALSound&>(snd)->GetLoopFramePoints();
-	Lua::PushInt(l,points.first);
-	Lua::PushInt(l,points.second);
-}
-void Lua::ALSound::Client::GetLoopTimePoints(lua_State *l,::ALSound &snd)
-{
-	auto points = static_cast<CALSound&>(snd)->GetLoopTimePoints();
-	Lua::PushNumber(l,points.first);
-	Lua::PushNumber(l,points.second);
-}
-void Lua::ALSound::Client::SetPropagationIdentifier(lua_State *l,::ALSound &snd,const std::string &identifier) {static_cast<CALSound&>(snd)->SetIdentifier(identifier);}
-void Lua::ALSound::Client::GetPropagationIdentifier(lua_State *l,::ALSound &snd) {Lua::PushString(l,static_cast<CALSound&>(snd)->GetIdentifier());}
-void Lua::ALSound::Client::GetBuffer(lua_State *l,::ALSound &snd)
-{
-	auto *pBuffer = static_cast<CALSound&>(snd)->GetBuffer();
-	if(pBuffer == nullptr)
-		return;
-	Lua::Push<al::PSoundBuffer>(l,pBuffer->shared_from_this());
-}
 
 /////////////////
 
-void Lua::ALBuffer::GetPhonemeData(lua_State *l,al::ISoundBuffer &buffer)
+Lua::opt<luabind::tableT<void>> Lua::ALBuffer::GetPhonemeData(lua_State *l,al::ISoundBuffer &buffer)
 {
 	auto pUserData = buffer.GetUserData();
 	if(pUserData == nullptr)
-		return;
+		return nil;
 	auto &phonemeData = *static_cast<se::SoundPhonemeData*>(pUserData.get());
+	
+	auto t = luabind::newtable(l);
+	t["plainText"] = phonemeData.plainText;
 
-	auto t = Lua::CreateTable(l);
-
-	Lua::PushString(l,"plainText");
-	Lua::PushString(l,phonemeData.plainText);
-	Lua::SetTableValue(l,t);
-
-	Lua::PushString(l,"words");
-	auto tWords = Lua::CreateTable(l);
+	auto tWords = t["words"];
 	auto idx = 1u;
 	for(auto &word : phonemeData.words)
 	{
-		Lua::PushInt(l,idx++);
-		auto tWord = Lua::CreateTable(l);
+		auto tWord = tWords[idx++];
 
-		Lua::PushString(l,"tStart");
-		Lua::PushNumber(l,word.tStart);
-		Lua::SetTableValue(l,tWord);
+		tWord["tStart"] = word.tStart;
+		tWord["tEnd"] = word.tEnd;
+		tWord["word"] = word.word;
 
-		Lua::PushString(l,"tEnd");
-		Lua::PushNumber(l,word.tEnd);
-		Lua::SetTableValue(l,tWord);
-
-		Lua::PushString(l,"word");
-		Lua::PushString(l,word.word);
-		Lua::SetTableValue(l,tWord);
-
-		Lua::PushString(l,"phonemes");
-		auto tPhonemes = Lua::CreateTable(l);
+		auto tPhonemes = tWord["phonemes"];
 		auto idxPhoneme = 1u;
 		for(auto &phoneme : word.phonemes)
 		{
-			Lua::PushInt(l,idxPhoneme++);
-			auto tPhoneme = Lua::CreateTable(l);
-
-			Lua::PushString(l,"phoneme");
-			Lua::PushString(l,phoneme.phoneme);
-			Lua::SetTableValue(l,tPhoneme);
-
-			Lua::PushString(l,"tStart");
-			Lua::PushNumber(l,phoneme.tStart);
-			Lua::SetTableValue(l,tPhoneme);
-
-			Lua::PushString(l,"tEnd");
-			Lua::PushNumber(l,phoneme.tEnd);
-			Lua::SetTableValue(l,tPhoneme);
-
-			Lua::SetTableValue(l,tPhonemes);
+			auto tPhoneme = tPhonemes[idxPhoneme++];
+			tPhoneme["phoneme"] = phoneme.phoneme;
+			tPhoneme["tStart"] = phoneme.tStart;
+			tPhoneme["tEnd"] = phoneme.tEnd;
 		}
-		Lua::SetTableValue(l,tWord);
-
-		Lua::SetTableValue(l,tWords);
 	}
-	Lua::SetTableValue(l,t);
+	return t;
 }

@@ -36,7 +36,7 @@ void STransformComponent::SetScale(const Vector3 &scale)
 	if(pPhysComponent != nullptr)
 		pPhysComponent->InitializePhysics(pPhysComponent->GetPhysicsType());
 }
-luabind::object STransformComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<STransformComponentHandleWrapper>(l);}
+void STransformComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void STransformComponent::SetEyeOffset(const Vector3 &offset)
 {
 	BaseTransformComponent::SetEyeOffset(offset);

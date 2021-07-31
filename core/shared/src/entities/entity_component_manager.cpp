@@ -14,7 +14,7 @@ using namespace pragma;
 decltype(EntityComponentManager::s_nextEventId) EntityComponentManager::s_nextEventId = 0u;
 decltype(EntityComponentManager::s_componentEvents) EntityComponentManager::s_componentEvents = {};
 
-std::shared_ptr<BaseEntityComponent> EntityComponentManager::CreateComponent(ComponentId componentId,BaseEntity &ent) const
+util::TSharedHandle<BaseEntityComponent> EntityComponentManager::CreateComponent(ComponentId componentId,BaseEntity &ent) const
 {
 	if(componentId >= m_componentInfos.size() || m_componentInfos[componentId].id == INVALID_COMPONENT_ID)
 	{
@@ -46,7 +46,7 @@ std::shared_ptr<BaseEntityComponent> EntityComponentManager::CreateComponent(Com
 	m_components.at(r->m_componentId).Push(*r);
 	return r;
 }
-std::shared_ptr<BaseEntityComponent> EntityComponentManager::CreateComponent(const std::string &name,BaseEntity &ent) const
+util::TSharedHandle<BaseEntityComponent> EntityComponentManager::CreateComponent(const std::string &name,BaseEntity &ent) const
 {
 	auto componentId = pragma::INVALID_COMPONENT_ID;
 	// Try to find the component as Lua component and load it (if the component hasn't been registered yet)
@@ -83,15 +83,15 @@ ComponentId EntityComponentManager::PreRegisterComponentType(const std::string &
 	m_components.push_back({});
 	return componentInfo.id;
 }
-ComponentId EntityComponentManager::RegisterComponentType(const std::string &name,const std::function<std::shared_ptr<BaseEntityComponent>(BaseEntity&)> &factory,ComponentFlags flags,std::type_index typeIndex)
+ComponentId EntityComponentManager::RegisterComponentType(const std::string &name,const std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity&)> &factory,ComponentFlags flags,std::type_index typeIndex)
 {
 	return RegisterComponentType(name,factory,flags,&typeIndex);
 }
-ComponentId EntityComponentManager::RegisterComponentType(const std::string &name,const std::function<std::shared_ptr<BaseEntityComponent>(BaseEntity&)> &factory,ComponentFlags flags)
+ComponentId EntityComponentManager::RegisterComponentType(const std::string &name,const std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity&)> &factory,ComponentFlags flags)
 {
 	return RegisterComponentType(name,factory,flags,nullptr);
 }
-ComponentId EntityComponentManager::RegisterComponentType(const std::string &name,const std::function<std::shared_ptr<BaseEntityComponent>(BaseEntity&)> &factory,ComponentFlags flags,const std::type_index *typeIndex)
+ComponentId EntityComponentManager::RegisterComponentType(const std::string &name,const std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity&)> &factory,ComponentFlags flags,const std::type_index *typeIndex)
 {
 	if(typeIndex != nullptr)
 	{

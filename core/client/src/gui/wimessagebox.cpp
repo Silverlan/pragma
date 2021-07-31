@@ -89,14 +89,14 @@ void WIMessageBox::SetTitle(const std::string &title)
 {
 	if(!m_hMessage.IsValid())
 		return;
-	m_hMessage.get<WIFrame>()->SetTitle(title);
+	static_cast<WIFrame*>(m_hMessage.get())->SetTitle(title);
 }
 
 void WIMessageBox::__buttonCallback(WIHandle hMessageBox,WIMessageBox::Button button)
 {
 	if(!hMessageBox.IsValid())
 		return;
-	auto *pMessageBox = hMessageBox.get<WIMessageBox>();
+	auto *pMessageBox = static_cast<WIMessageBox*>(hMessageBox.get());
 	if(pMessageBox->m_buttonCallback == nullptr)
 		return;
 	pMessageBox->m_buttonCallback(pMessageBox,button);
@@ -168,7 +168,7 @@ void WIMessageBox::Initialize()
 	pMessage->SetWidth(512);
 	pMessage->SetCloseButtonEnabled(false);
 	auto hMessageBox = GetHandle();
-	pMessage->AddCallback("SetSize",FunctionCallback<>::Create([hMessageBox]() {
+	pMessage->AddCallback("SetSize",FunctionCallback<>::Create([hMessageBox]() mutable {
 		if(!hMessageBox.IsValid())
 			return;
 		auto *pMessageBox = hMessageBox.get<WIMessageBox>();

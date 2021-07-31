@@ -71,7 +71,7 @@ bool WITable::SortRows(bool bAsc,unsigned int col,const WIHandle &a,const WIHand
 {
 	const std::string *textA = nullptr;
 	const std::string *textB = nullptr;
-	WITableRow *rowA = a.get<WITableRow>();
+	const WITableRow *rowA = a.get<const WITableRow>();
 	if(rowA != nullptr)
 	{
 		WITableCell *cellA = rowA->GetCell(col);
@@ -82,7 +82,7 @@ bool WITable::SortRows(bool bAsc,unsigned int col,const WIHandle &a,const WIHand
 				textA = &vA->GetText();
 		}
 	}
-	WITableRow *rowB = b.get<WITableRow>();
+	const WITableRow *rowB = b.get<const WITableRow>();
 	if(rowB != nullptr)
 	{
 		WITableCell *cellB = rowB->GetCell(col);
@@ -286,7 +286,7 @@ void WITable::Clear(bool bAll)
 		if(m_hRowHeader.IsValid())
 		{
 			m_hRowHeader->RemoveSafely();
-			m_hRowHeader = {};
+			m_hRowHeader = WIHandle{};
 		}
 	}
 }
@@ -424,7 +424,7 @@ WITableRow *WITable::GetRow(unsigned int id) const
 	const WIHandle &hRow = m_rows[id];
 	if(!hRow.IsValid())
 		return nullptr;
-	return hRow.get<WITableRow>();
+	return const_cast<WITableRow*>(hRow.get<const WITableRow>());
 }
 
 void WITable::UpdateCell(const WITableCell &cell)
@@ -641,7 +641,7 @@ void WITableRow::DetachCell(uint32_t colId)
 		m_cells.erase(m_cells.end() -1);
 		return;
 	}
-	m_cells[colId] = {};
+	m_cells[colId] = WIHandle{};
 }
 void WITableRow::AttachCell(uint32_t colid,const WITableCell &cell)
 {
@@ -674,7 +674,7 @@ WITableCell *WITableRow::GetCell(unsigned int id) const
 	const WIHandle &hCell = m_cells[id];
 	if(!hCell.IsValid())
 		return nullptr;
-	return hCell.get<WITableCell>();
+	return const_cast<WITableCell*>(static_cast<const WITableCell*>(hCell.get()));
 }
 WITable *WITableRow::GetTable()
 {

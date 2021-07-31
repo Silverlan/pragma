@@ -26,7 +26,7 @@ namespace pragma
 		Vector3 OnCalcMovementDirection(const Vector3 &forward,const Vector3 &right) const;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 	public:
 		static unsigned int GetNPCCount();

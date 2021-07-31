@@ -74,7 +74,7 @@ void CExplosionComponent::Explode()
 			pIoComponent->Input("StartShake");
 	}
 }
-luabind::object CExplosionComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CExplosionComponentHandleWrapper>(l);}
+void CExplosionComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 ////////////////
 

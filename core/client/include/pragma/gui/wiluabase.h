@@ -37,14 +37,7 @@
 		Lua::Pop(m_stateLua,1); \
 	}
 
-class WILuaBase;
-DECLARE_DERIVED_CHILD_HANDLE_EXT(DLLCLIENT,WI,WIBase,WI,WILuaBase,WILua,
-	public:
-		void Reset(PtrWI *e);
-,);
-
 struct lua_State;
-class WIHandle;
 struct WILuaWrapper;
 class DLLCLIENT WILuaBase
 	: public WIBase,public LuaObjectBase
@@ -53,7 +46,6 @@ public:
 	WILuaBase(luabind::object &o,std::string &className);
 	virtual ~WILuaBase() override;
 	virtual void Initialize() override;
-	virtual void InitializeHandle() override;
 	virtual void Think() override;
 	virtual void OnFirstThink() override;
 	virtual util::EventReply MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
@@ -75,7 +67,7 @@ protected:
 };
 
 struct DLLCLIENT WILuaWrapper
-	: WILuaHandle,luabind::wrap_base
+	: luabind::wrap_base
 {
 public:
 	void OnInitialize();

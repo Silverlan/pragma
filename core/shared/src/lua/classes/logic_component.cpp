@@ -34,7 +34,7 @@ void LogicComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
 }
-luabind::object LogicComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<LogicComponentHandleWrapper>(l);}
+void LogicComponent::InitializeLuaObject(lua_State *l) {pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void LogicComponent::OnTick(double dt)
 {

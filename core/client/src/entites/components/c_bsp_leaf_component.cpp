@@ -13,7 +13,7 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-luabind::object CBSPLeafComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CBSPLeafComponentHandleWrapper>(l);}
+void CBSPLeafComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CBSPLeafComponent::SetLeaves(const std::vector<uint16_t> &leaves)
 {
 	for(auto idx : leaves)

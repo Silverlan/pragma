@@ -907,7 +907,7 @@ DLLCLIENT void NET_cl_sv_send(NetPacket packet)
 DLLCLIENT void NET_cl_env_light_spot_outercutoff_angle(NetPacket packet)
 {
 	auto *light = nwm::read_entity(packet);
-	auto pLightSpotComponent = (light != nullptr) ? light->GetComponent<pragma::CLightSpotComponent>() : util::WeakHandle<pragma::CLightSpotComponent>();
+	auto pLightSpotComponent = (light != nullptr) ? light->GetComponent<pragma::CLightSpotComponent>() : pragma::ComponentHandle<pragma::CLightSpotComponent>();
 	if(pLightSpotComponent.expired())
 		return;
 	float cutoffAngle = packet->Read<float>();
@@ -917,7 +917,7 @@ DLLCLIENT void NET_cl_env_light_spot_outercutoff_angle(NetPacket packet)
 DLLCLIENT void NET_cl_env_light_spot_innercutoff_angle(NetPacket packet)
 {
 	auto *light = nwm::read_entity(packet);
-	auto pLightSpotComponent = (light != nullptr) ? light->GetComponent<pragma::CLightSpotComponent>() : util::WeakHandle<pragma::CLightSpotComponent>();
+	auto pLightSpotComponent = (light != nullptr) ? light->GetComponent<pragma::CLightSpotComponent>() : pragma::ComponentHandle<pragma::CLightSpotComponent>();
 	if(pLightSpotComponent.expired())
 		return;
 	float cutoffAngle = packet->Read<float>();
@@ -1531,7 +1531,7 @@ void NET_cl_debug_ai_schedule_tree(NetPacket packet)
 						break;
 					auto &child = node.children[i];
 					auto &guiChild = guiChildren[i];
-					fReadUpdates(p,*child,static_cast<WITreeListElement*>(guiChild.get()));
+					fReadUpdates(p,*child,const_cast<WITreeListElement*>(static_cast<const WITreeListElement*>(guiChild.get())));
 				}
 			}
 			else
@@ -1550,7 +1550,7 @@ void NET_cl_debug_ai_schedule_tree(NetPacket packet)
 				auto &children = pRoot->GetItems();
 				if(children.empty() || children.front().IsValid() == false)
 					return;
-				pRoot = static_cast<WITreeListElement*>(children.front().get());
+				pRoot = const_cast<WITreeListElement*>(static_cast<const WITreeListElement*>(children.front().get()));
 			}
 		}
 

@@ -44,6 +44,7 @@
 #include "pragma/lua/libraries/lents.h"
 #include "pragma/util/util_splash_damage_info.hpp"
 #include "pragma/lua/lua_call.hpp"
+#include "pragma/lua/classes/lentity.h"
 #include "pragma/entities/entity_property.hpp"
 #include "pragma/entities/environment/lights/env_light.h"
 #include "pragma/lua/classes/lproperty.hpp"
@@ -63,13 +64,14 @@
 #include <luabind/iterator_policy.hpp>
 #include <luabind/out_value_policy.hpp>
 #include <luabind/copy_policy.hpp>
+#include <pragma/lua/policies/optional_policy.hpp>
 #include <mathutil/inverse_kinematics/ik.hpp>
 #include <mathutil/inverse_kinematics/constraints.hpp>
 #include <sharedutils/magic_enum.hpp>
 #include <fsys/directory_watcher.h>
 
 extern DLLNETWORK Engine *engine;
-
+#pragma optimize("",off)
 std::ostream &operator<<(std::ostream &out,const ALSound &snd)
 {
 	auto state = snd.GetState();
@@ -184,115 +186,7 @@ static Quat QuaternionConstruct(const Vector3 &a,const Vector3 &b,const Vector3 
 static Quat QuaternionConstruct(const Quat &q) {return Quat(q);}
 static Quat QuaternionConstruct(const Vector3 &forward,const Vector3 &up) {return uquat::create_look_rotation(forward,up);}
 
-
-#if 0
-namespace luabind {
-		template <class T>
-		struct default_converter<util::WeakHandle<T> >
-			: default_converter<T*>
-		{
-			using is_native = std::false_type;
-			template <class U>
-			int match(lua_State* L, U, int index)
-			{
-				return default_converter<T*>::match(L, decorate_type_t<T*>(), index);
-			}
-
-			template <class U>
-			util::WeakHandle<T> to_cpp(lua_State* L, U, int index)
-			{
-				T* raw_ptr = default_converter<T*>::to_cpp(L, decorate_type_t<T*>(), index);
-
-				if(!raw_ptr) {
-					return util::WeakHandle<T>();
-				} else {
-					return raw_ptr->GetHandle();
-				}
-			}
-
-			void to_lua(lua_State* L, util::WeakHandle<T> const& p)
-			{
-				default_converter().to_lua(L, p.get());
-			}
-			template <class U>
-			void converter_postcall(lua_State*, U const&, int)
-			{}
-		};
-		template <class T>
-		struct default_converter<util::WeakHandle<T> const&>
-			: default_converter<util::WeakHandle<T> >
-		{};
-	}
-#endif
-#if 0
-namespace luabind {
-
-	namespace detail
-	{
-
-		struct weak_handle3_deleter
-		{
-			weak_handle3_deleter(lua_State* L, int index)
-				: life_support(get_main_thread(L), L, index)
-			{}
-
-			void operator()(void const*)
-			{
-				handle().swap(life_support);
-			}
-
-			handle life_support;
-		};
-
-	} // namespace detail
-
-	template <class T>
-	struct default_converter<util::WeakHandle<T> >
-		: default_converter<T*>
-	{
-		using is_native = std::false_type;
-
-		template <class U>
-		int match(lua_State* L, U, int index)
-		{
-			return default_converter<T*>::match(L, decorate_type_t<T*>(), index);
-		}
-
-		template <class U>
-		util::WeakHandle<T> to_cpp(lua_State* L, U, int index)
-		{
-			T* raw_ptr = default_converter<T*>::to_cpp(L, decorate_type_t<T*>(), index);
-
-			if(!raw_ptr) {
-				return util::WeakHandle<T>();
-			} else {
-				return raw_ptr->GetHandle();
-			}
-		}
-
-		void to_lua(lua_State* L, util::WeakHandle<T> const& p)
-		{
-			if(detail::weak_handle3_deleter* d = std::get_deleter<detail::weak_handle3_deleter>(p))
-			{
-				d->life_support.push(L);
-			} else {
-				detail::value_converter().to_lua(L, p);
-			}
-		}
-
-		template <class U>
-		void converter_postcall(lua_State*, U const&, int)
-		{}
-	};
-
-	template <class T>
-	struct default_converter<util::WeakHandle<T> const&>
-		: default_converter<util::WeakHandle<T> >
-	{};
-
-} // namespace luabind
-
-#endif
+DLLNETWORK void test_shared_ptr(lua_State *l);
 void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 {
 	auto modString = luabind::module_(lua.GetState(),"string");
@@ -1450,7 +1344,7 @@ static bool operator==(const EntityHandle &v,const LEntityProperty &prop) {retur
 static std::ostream& operator<<(std::ostream &str,const LEntityProperty &v)
 {
 	if((*v)->valid())
-		(*v)->get()->print(str);
+		const_cast<BaseEntity*>((*v)->get())->print(str);
 	else
 		str<<"NULL";
 	return str;
@@ -1460,6 +1354,7 @@ void Lua::Property::push(lua_State *l,pragma::EntityProperty &prop) {Lua::Proper
 void Game::RegisterLuaClasses()
 {
 	NetworkState::RegisterSharedLuaClasses(GetLuaInterface());
+
 
 	// Entity
 	auto &modUtil = GetLuaInterface().RegisterLibrary("util");
@@ -1485,7 +1380,7 @@ void Game::RegisterLuaClasses()
 			auto r = Lua::CallFunction(l,[ent,&dmgInfo,&oCallback](lua_State *l) -> Lua::StatusCode {
 				oCallback.push(l);
 				if(ent != nullptr)
-					ent->GetLuaObject()->push(l);
+					ent->GetLuaObject().push(l);
 				else
 					Lua::PushNil(l);
 				Lua::Push<DamageInfo*>(l,&dmgInfo);
@@ -1555,104 +1450,10 @@ LuaEntityIterator Lua::ents::create_lua_entity_iterator(lua_State *l,const tb<Lu
 	return r;
 }
 
-template<typename T>
-class TestX
+namespace Lua
 {
-public:
-	T *get();
+	void register_bullet_info(luabind::module_ &gameMod);
 };
-
-namespace luabind
-{
-	template<typename T>
-	T* get_pointer(const TestX<T>& pointer)
-	{
-		return pointer.get();
-	}
-	namespace detail
-	{
-		template<typename T>
-		struct pointer_traits<TestX<T>>
-		{
-			enum { is_pointer = true };
-			using value_type = T;
-		};
-
-		namespace has_get_pointer_
-		{
-			template<class T>
-			T* get_pointer(TestX<T> const&);
-
-		};
-	};
-};
-
-namespace luabind {
-
-	namespace detail
-	{
-
-		struct test_x_deleter
-		{
-			test_x_deleter(lua_State* L, int index)
-				: life_support(get_main_thread(L), L, index)
-			{}
-
-			void operator()(void const*)
-			{
-				handle().swap(life_support);
-			}
-
-			handle life_support;
-		};
-
-	} // namespace detail
-
-	template <class T>
-	struct default_converter<util::WeakHandle<T> >
-		: default_converter<T*>
-	{
-		using is_native = std::false_type;
-
-		template <class U>
-		int match(lua_State* L, U, int index)
-		{
-			return default_converter<T*>::match(L, decorate_type_t<T*>(), index);
-		}
-
-		template <class U>
-		util::WeakHandle<T> to_cpp(lua_State* L, U, int index)
-		{
-			T* raw_ptr = default_converter<T*>::to_cpp(L, decorate_type_t<T*>(), index);
-
-			if(!raw_ptr) {
-				return util::WeakHandle<T>();
-			} else {
-				return util::WeakHandle<T>();//raw_ptr, detail::test_x_deleter(L, index));
-			}
-		}
-
-		void to_lua(lua_State* L, util::WeakHandle<T> const& p)
-		{
-			if(detail::test_x_deleter* d = std::get_deleter<detail::test_x_deleter>(p))
-			{
-				d->life_support.push(L);
-			} else {
-				detail::value_converter().to_lua(L, p);
-			}
-		}
-
-		template <class U>
-		void converter_postcall(lua_State*, U const&, int)
-		{}
-	};
-
-	template <class T>
-	struct default_converter<util::WeakHandle<T> const&>
-		: default_converter<util::WeakHandle<T> >
-	{};
-
-} // namespace luabind
 
 static std::optional<LuaEntityIterator> s_entIterator {}; // HACK: This is a workaround for a bug in luabind, which causes errors when compiled with gcc.
 void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
@@ -1765,111 +1566,82 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 
 	auto surfaceMatDef = luabind::class_<SurfaceMaterial>("SurfaceMaterial");
 	surfaceMatDef.def(luabind::tostring(luabind::self));
-	surfaceMatDef.def("GetName",&Lua::SurfaceMaterial::GetName);
-	surfaceMatDef.def("GetIndex",&Lua::SurfaceMaterial::GetIndex);
-	surfaceMatDef.def("SetFriction",&Lua::SurfaceMaterial::SetFriction);
-	surfaceMatDef.def("SetStaticFriction",&Lua::SurfaceMaterial::SetStaticFriction);
-	surfaceMatDef.def("SetDynamicFriction",&Lua::SurfaceMaterial::SetDynamicFriction);
-	surfaceMatDef.def("GetStaticFriction",&Lua::SurfaceMaterial::GetStaticFriction);
-	surfaceMatDef.def("GetDynamicFriction",&Lua::SurfaceMaterial::GetDynamicFriction);
-	surfaceMatDef.def("GetRestitution",&Lua::SurfaceMaterial::GetRestitution);
-	surfaceMatDef.def("SetRestitution",&Lua::SurfaceMaterial::SetRestitution);
-	surfaceMatDef.def("GetFootstepSound",&Lua::SurfaceMaterial::GetFootstepType);
-	surfaceMatDef.def("SetFootstepSound",&Lua::SurfaceMaterial::SetFootstepType);
-	surfaceMatDef.def("SetImpactParticleEffect",&Lua::SurfaceMaterial::SetImpactParticleEffect);
-	surfaceMatDef.def("GetImpactParticleEffect",&Lua::SurfaceMaterial::GetImpactParticleEffect);
-	surfaceMatDef.def("GetBulletImpactSound",&Lua::SurfaceMaterial::GetBulletImpactSound);
-	surfaceMatDef.def("SetBulletImpactSound",&Lua::SurfaceMaterial::SetBulletImpactSound);
-	surfaceMatDef.def("SetHardImpactSound",&Lua::SurfaceMaterial::SetHardImpactSound);
-	surfaceMatDef.def("GetHardImpactSound",&Lua::SurfaceMaterial::GetHardImpactSound);
-	surfaceMatDef.def("SetSoftImpactSound",&Lua::SurfaceMaterial::SetSoftImpactSound);
-	surfaceMatDef.def("GetSoftImpactSound",&Lua::SurfaceMaterial::GetSoftImpactSound);
-	surfaceMatDef.def("GetIOR",static_cast<luabind::object(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) -> luabind::object {
-		auto ior = surfMat.GetIOR();
-		if(ior.has_value() == false)
-			return {};
-		return luabind::object{l,*ior};
-	}));
-	surfaceMatDef.def("SetIOR",static_cast<void(*)(lua_State*,SurfaceMaterial&,float)>([](lua_State *l,SurfaceMaterial &surfMat,float ior) {surfMat.SetIOR(ior);}));
-	surfaceMatDef.def("ClearIOR",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {surfMat.ClearIOR();}));
+	surfaceMatDef.def("GetName",&::SurfaceMaterial::GetIdentifier);
+	surfaceMatDef.def("GetIndex",&::SurfaceMaterial::GetIndex);
+	surfaceMatDef.def("SetFriction",&::SurfaceMaterial::SetFriction);
+	surfaceMatDef.def("SetStaticFriction",&::SurfaceMaterial::SetStaticFriction);
+	surfaceMatDef.def("SetDynamicFriction",&::SurfaceMaterial::SetDynamicFriction);
+	surfaceMatDef.def("GetStaticFriction",&::SurfaceMaterial::GetStaticFriction);
+	surfaceMatDef.def("GetDynamicFriction",&::SurfaceMaterial::GetDynamicFriction);
+	surfaceMatDef.def("GetRestitution",&::SurfaceMaterial::GetRestitution);
+	surfaceMatDef.def("SetRestitution",&::SurfaceMaterial::SetRestitution);
+	surfaceMatDef.def("GetFootstepSound",&::SurfaceMaterial::GetFootstepType);
+	surfaceMatDef.def("SetFootstepSound",&::SurfaceMaterial::SetFootstepType);
+	surfaceMatDef.def("SetImpactParticleEffect",&::SurfaceMaterial::SetImpactParticleEffect);
+	surfaceMatDef.def("GetImpactParticleEffect",&::SurfaceMaterial::GetImpactParticleEffect);
+	surfaceMatDef.def("GetBulletImpactSound",&::SurfaceMaterial::GetBulletImpactSound);
+	surfaceMatDef.def("SetBulletImpactSound",&::SurfaceMaterial::SetBulletImpactSound);
+	surfaceMatDef.def("SetHardImpactSound",&::SurfaceMaterial::SetHardImpactSound);
+	surfaceMatDef.def("GetHardImpactSound",&::SurfaceMaterial::GetHardImpactSound);
+	surfaceMatDef.def("SetSoftImpactSound",&::SurfaceMaterial::SetSoftImpactSound);
+	surfaceMatDef.def("GetSoftImpactSound",&::SurfaceMaterial::GetSoftImpactSound);
+	surfaceMatDef.def("GetIOR",&::SurfaceMaterial::GetIOR,luabind::optional_policy<0>{});
+	surfaceMatDef.def("SetIOR",&::SurfaceMaterial::SetIOR);
+	surfaceMatDef.def("ClearIOR",&::SurfaceMaterial::ClearIOR);
 
-	surfaceMatDef.def("SetAudioLowFrequencyAbsorption",&Lua::SurfaceMaterial::SetAudioLowFrequencyAbsorption);
-	surfaceMatDef.def("GetAudioLowFrequencyAbsorption",&Lua::SurfaceMaterial::GetAudioLowFrequencyAbsorption);
-	surfaceMatDef.def("SetAudioMidFrequencyAbsorption",&Lua::SurfaceMaterial::SetAudioMidFrequencyAbsorption);
-	surfaceMatDef.def("GetAudioMidFrequencyAbsorption",&Lua::SurfaceMaterial::GetAudioMidFrequencyAbsorption);
-	surfaceMatDef.def("SetAudioHighFrequencyAbsorption",&Lua::SurfaceMaterial::SetAudioHighFrequencyAbsorption);
-	surfaceMatDef.def("GetAudioHighFrequencyAbsorption",&Lua::SurfaceMaterial::GetAudioHighFrequencyAbsorption);
-	surfaceMatDef.def("SetAudioScattering",&Lua::SurfaceMaterial::SetAudioScattering);
-	surfaceMatDef.def("GetAudioScattering",&Lua::SurfaceMaterial::GetAudioScattering);
-	surfaceMatDef.def("SetAudioLowFrequencyTransmission",&Lua::SurfaceMaterial::SetAudioLowFrequencyTransmission);
-	surfaceMatDef.def("GetAudioLowFrequencyTransmission",&Lua::SurfaceMaterial::GetAudioLowFrequencyTransmission);
-	surfaceMatDef.def("SetAudioMidFrequencyTransmission",&Lua::SurfaceMaterial::SetAudioMidFrequencyTransmission);
-	surfaceMatDef.def("GetAudioMidFrequencyTransmission",&Lua::SurfaceMaterial::GetAudioMidFrequencyTransmission);
-	surfaceMatDef.def("SetAudioHighFrequencyTransmission",&Lua::SurfaceMaterial::SetAudioHighFrequencyTransmission);
-	surfaceMatDef.def("GetAudioHighFrequencyTransmission",&Lua::SurfaceMaterial::GetAudioHighFrequencyTransmission);
+	surfaceMatDef.def("SetAudioLowFrequencyAbsorption",&::SurfaceMaterial::SetAudioLowFrequencyAbsorption);
+	surfaceMatDef.def("GetAudioLowFrequencyAbsorption",&::SurfaceMaterial::GetAudioLowFrequencyAbsorption);
+	surfaceMatDef.def("SetAudioMidFrequencyAbsorption",&::SurfaceMaterial::SetAudioMidFrequencyAbsorption);
+	surfaceMatDef.def("GetAudioMidFrequencyAbsorption",&::SurfaceMaterial::GetAudioMidFrequencyAbsorption);
+	surfaceMatDef.def("SetAudioHighFrequencyAbsorption",&::SurfaceMaterial::SetAudioHighFrequencyAbsorption);
+	surfaceMatDef.def("GetAudioHighFrequencyAbsorption",&::SurfaceMaterial::GetAudioHighFrequencyAbsorption);
+	surfaceMatDef.def("SetAudioScattering",&::SurfaceMaterial::SetAudioScattering);
+	surfaceMatDef.def("GetAudioScattering",&::SurfaceMaterial::GetAudioScattering);
+	surfaceMatDef.def("SetAudioLowFrequencyTransmission",&::SurfaceMaterial::SetAudioLowFrequencyTransmission);
+	surfaceMatDef.def("GetAudioLowFrequencyTransmission",&::SurfaceMaterial::GetAudioLowFrequencyTransmission);
+	surfaceMatDef.def("SetAudioMidFrequencyTransmission",&::SurfaceMaterial::SetAudioMidFrequencyTransmission);
+	surfaceMatDef.def("GetAudioMidFrequencyTransmission",&::SurfaceMaterial::GetAudioMidFrequencyTransmission);
+	surfaceMatDef.def("SetAudioHighFrequencyTransmission",&::SurfaceMaterial::SetAudioHighFrequencyTransmission);
+	surfaceMatDef.def("GetAudioHighFrequencyTransmission",&::SurfaceMaterial::GetAudioHighFrequencyTransmission);
 
-	surfaceMatDef.def("GetNavigationFlags",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
-		Lua::PushInt(l,umath::to_integral(surfMat.GetNavigationFlags()));
+	surfaceMatDef.def("GetNavigationFlags",&::SurfaceMaterial::GetNavigationFlags);
+	surfaceMatDef.def("SetNavigationFlags",&::SurfaceMaterial::SetNavigationFlags);
+	surfaceMatDef.def("SetDensity",&::SurfaceMaterial::SetDensity);
+	surfaceMatDef.def("GetDensity",&::SurfaceMaterial::GetDensity);
+	surfaceMatDef.def("SetLinearDragCoefficient",&::SurfaceMaterial::SetLinearDragCoefficient);
+	surfaceMatDef.def("GetLinearDragCoefficient",&::SurfaceMaterial::GetLinearDragCoefficient);
+	surfaceMatDef.def("SetTorqueDragCoefficient",&::SurfaceMaterial::SetTorqueDragCoefficient);
+	surfaceMatDef.def("GetTorqueDragCoefficient",&::SurfaceMaterial::GetTorqueDragCoefficient);
+	surfaceMatDef.def("SetWaveStiffness",&::SurfaceMaterial::SetWaveStiffness);
+	surfaceMatDef.def("GetWaveStiffness",&::SurfaceMaterial::GetWaveStiffness);
+	surfaceMatDef.def("SetWavePropagation",&::SurfaceMaterial::SetWavePropagation);
+	surfaceMatDef.def("GetWavePropagation",&::SurfaceMaterial::GetWavePropagation);
+	surfaceMatDef.def("GetPBRMetalness",static_cast<float(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
+		return surfMat.GetPBRInfo().metalness;
 	}));
-	surfaceMatDef.def("SetNavigationFlags",static_cast<void(*)(lua_State*,SurfaceMaterial&,uint32_t)>([](lua_State *l,SurfaceMaterial &surfMat,uint32_t navFlags) {
-		surfMat.SetNavigationFlags(static_cast<pragma::nav::PolyFlags>(navFlags));
+	surfaceMatDef.def("GetPBRRoughness",static_cast<float(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
+		return surfMat.GetPBRInfo().roughness;
 	}));
-	surfaceMatDef.def("SetDensity",static_cast<void(*)(lua_State*,SurfaceMaterial&,float)>([](lua_State *l,SurfaceMaterial &surfMat,float density) {
-		surfMat.SetDensity(density);
-	}));
-	surfaceMatDef.def("GetDensity",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
-		Lua::PushNumber(l,surfMat.GetDensity());
-	}));
-	surfaceMatDef.def("SetLinearDragCoefficient",static_cast<void(*)(lua_State*,SurfaceMaterial&,float)>([](lua_State *l,SurfaceMaterial &surfMat,float coefficient) {
-		surfMat.SetLinearDragCoefficient(coefficient);
-	}));
-	surfaceMatDef.def("GetLinearDragCoefficient",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
-		Lua::PushNumber(l,surfMat.GetLinearDragCoefficient());
-	}));
-	surfaceMatDef.def("SetTorqueDragCoefficient",static_cast<void(*)(lua_State*,SurfaceMaterial&,float)>([](lua_State *l,SurfaceMaterial &surfMat,float coefficient) {
-		surfMat.SetTorqueDragCoefficient(coefficient);
-	}));
-	surfaceMatDef.def("GetTorqueDragCoefficient",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
-		Lua::PushNumber(l,surfMat.GetTorqueDragCoefficient());
-	}));
-	surfaceMatDef.def("SetWaveStiffness",static_cast<void(*)(lua_State*,SurfaceMaterial&,float)>([](lua_State *l,SurfaceMaterial &surfMat,float stiffness) {
-		surfMat.SetWaveStiffness(stiffness);
-	}));
-	surfaceMatDef.def("GetWaveStiffness",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
-		Lua::PushNumber(l,surfMat.GetWaveStiffness());
-	}));
-	surfaceMatDef.def("SetWavePropagation",static_cast<void(*)(lua_State*,SurfaceMaterial&,float)>([](lua_State *l,SurfaceMaterial &surfMat,float propagation) {
-		surfMat.SetWavePropagation(propagation);
-	}));
-	surfaceMatDef.def("GetWavePropagation",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
-		Lua::PushNumber(l,surfMat.GetWavePropagation());
-	}));
-	surfaceMatDef.def("GetPBRMetalness",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
-		Lua::PushNumber(l,surfMat.GetPBRInfo().metalness);
-	}));
-	surfaceMatDef.def("GetPBRRoughness",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
-		Lua::PushNumber(l,surfMat.GetPBRInfo().roughness);
-	}));
-	surfaceMatDef.def("GetSubsurfaceFactor",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
-		Lua::PushNumber(l,surfMat.GetPBRInfo().subsurface.factor);
+	surfaceMatDef.def("GetSubsurfaceFactor",static_cast<float(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
+		return surfMat.GetPBRInfo().subsurface.factor;
 	}));
 	surfaceMatDef.def("SetSubsurfaceFactor",static_cast<void(*)(lua_State*,SurfaceMaterial&,float)>([](lua_State *l,SurfaceMaterial &surfMat,float factor) {
 		surfMat.GetPBRInfo().subsurface.factor = factor;
 	}));
-	surfaceMatDef.def("GetSubsurfaceScatterColor",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
-		Lua::Push<Vector3>(l,surfMat.GetPBRInfo().subsurface.scatterColor);
+	surfaceMatDef.def("GetSubsurfaceScatterColor",static_cast<Vector3(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
+		return surfMat.GetPBRInfo().subsurface.scatterColor;
 	}));
 	surfaceMatDef.def("SetSubsurfaceScatterColor",static_cast<void(*)(lua_State*,SurfaceMaterial&,const Vector3&)>([](lua_State *l,SurfaceMaterial &surfMat,const Vector3 &radiusRGB) {
 		surfMat.GetPBRInfo().subsurface.scatterColor = radiusRGB;
 	}));
-	surfaceMatDef.def("GetSubsurfaceRadiusMM",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
-		Lua::Push<Vector3>(l,surfMat.GetPBRInfo().subsurface.radiusMM);
+	surfaceMatDef.def("GetSubsurfaceRadiusMM",static_cast<Vector3(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
+		return surfMat.GetPBRInfo().subsurface.radiusMM;
 	}));
 	surfaceMatDef.def("SetSubsurfaceRadiusMM",static_cast<void(*)(lua_State*,SurfaceMaterial&,const Vector3&)>([](lua_State *l,SurfaceMaterial &surfMat,const Vector3 &radiusMM) {
 		surfMat.GetPBRInfo().subsurface.radiusMM = radiusMM;
 	}));
-	surfaceMatDef.def("GetSubsurfaceColor",static_cast<void(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
-		Lua::Push<Color>(l,surfMat.GetPBRInfo().subsurface.color);
+	surfaceMatDef.def("GetSubsurfaceColor",static_cast<Color(*)(lua_State*,SurfaceMaterial&)>([](lua_State *l,SurfaceMaterial &surfMat) {
+		return surfMat.GetPBRInfo().subsurface.color;
 	}));
 	surfaceMatDef.def("SetSubsurfaceColor",static_cast<void(*)(lua_State*,SurfaceMaterial&,const Color&)>([](lua_State *l,SurfaceMaterial &surfMat,const Color &color) {
 		surfMat.GetPBRInfo().subsurface.color = color;
@@ -1900,36 +1672,7 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	gibletCreateInfo.add_static_constant("PHYS_SHAPE_CYLINDER",umath::to_integral(GibletCreateInfo::PhysShape::Cylinder));
 	gameMod[gibletCreateInfo];
 
-	struct Test
-	{
-		util::WeakHandle<BaseEntity> m0;
-	};
-	auto tdeef = luabind::class_<Test>("Test");
-	//tdeef.def_readwrite("attacker",&Test::m0,luabind::weak_handle_policy<0>{},luabind::weak_handle_policy<0>{});
-	tdeef.def_readwrite("attacker",&Test::m0);
-
-	auto bulletInfo = luabind::class_<BulletInfo>("BulletInfo");
-	bulletInfo.def(luabind::constructor<>());
-	bulletInfo.def(luabind::tostring(luabind::self));
-	bulletInfo.def_readwrite("spread",&BulletInfo::spread);
-	bulletInfo.def_readwrite("force",&BulletInfo::force);
-	bulletInfo.def_readwrite("distance",&BulletInfo::distance);
-	bulletInfo.def_readwrite("damageType",reinterpret_cast<std::underlying_type_t<decltype(BulletInfo::damageType)> BulletInfo::*>(&BulletInfo::damageType));
-	bulletInfo.def_readwrite("bulletCount",&BulletInfo::bulletCount);
-	//bulletInfo.def_readwrite("attacker",&BulletInfo::hAttacker,luabind::weak_handle_policy<0>{},luabind::weak_handle_policy<0>{});
-	//bulletInfo.def_readwrite("inflictor",&BulletInfo::hInflictor,luabind::weak_handle_policy<0>{},luabind::weak_handle_policy<0>{});
-	bulletInfo.def_readwrite("tracerCount",&BulletInfo::tracerCount);
-	bulletInfo.def_readwrite("tracerRadius",&BulletInfo::tracerRadius);
-	bulletInfo.def_readwrite("tracerColor",&BulletInfo::tracerColor);
-	bulletInfo.def_readwrite("tracerLength",&BulletInfo::tracerLength);
-	bulletInfo.def_readwrite("tracerSpeed",&BulletInfo::tracerSpeed);
-	bulletInfo.def_readwrite("tracerMaterial",&BulletInfo::tracerMaterial);
-	bulletInfo.def_readwrite("tracerBloom",&BulletInfo::tracerBloom);
-	bulletInfo.def_readwrite("ammoType",&BulletInfo::ammoType);
-	bulletInfo.def_readwrite("direction",&BulletInfo::direction);
-	bulletInfo.def_readwrite("effectOrigin",&BulletInfo::effectOrigin);
-	bulletInfo.def_readwrite("damage",&BulletInfo::damage);
-	gameMod[bulletInfo];
+	Lua::register_bullet_info(gameMod);
 
 	auto classDefDamageInfo = luabind::class_<DamageInfo>("DamageInfo");
 	classDefDamageInfo.def(luabind::constructor<>());
@@ -2150,34 +1893,20 @@ void IkLuaConstraint::Apply(int i)
 static void RegisterIk(Lua::Interface &lua)
 {
 	auto defIkSolver = luabind::class_<uvec::ik::IkSolver>("IkSolver");
-	defIkSolver.def("GetGlobalTransform",static_cast<umath::ScaledTransform(*)(uvec::ik::IkSolver&,uint32_t)>([](uvec::ik::IkSolver &solver,uint32_t idx) -> umath::ScaledTransform {
-		auto t = solver.GetGlobalTransform(idx);
-		return t;
-	}));
-	defIkSolver.def("SetLocalTransform",static_cast<void(*)(uvec::ik::IkSolver&,uint32_t,umath::ScaledTransform&)>([](uvec::ik::IkSolver &solver,uint32_t idx,umath::ScaledTransform &pose) {
-		solver.SetLocalTransform(idx,pose);
-	}));
-	defIkSolver.def("GetLocalTransform",static_cast<umath::ScaledTransform(*)(uvec::ik::IkSolver&,uint32_t)>([](uvec::ik::IkSolver &solver,uint32_t idx) -> umath::ScaledTransform {
-		return solver.GetLocalTransform(idx);
-	}));
-	defIkSolver.def("Solve",static_cast<void(*)(uvec::ik::IkSolver&,const umath::ScaledTransform&)>([](uvec::ik::IkSolver &solver,const umath::ScaledTransform &pose) {
-		solver.Solve(pose);
-	}));
-	defIkSolver.def("Resize",static_cast<void(*)(uvec::ik::IkSolver&,uint32_t)>([](uvec::ik::IkSolver &solver,uint32_t n) {
-		solver.Resize(n);
-	}));
-	defIkSolver.def("Size",static_cast<uint32_t(*)(uvec::ik::IkSolver&)>([](uvec::ik::IkSolver &solver) -> uint32_t {
-		return solver.Size();
-	}));
+	defIkSolver.def("GetGlobalTransform",&uvec::ik::IkSolver::GetGlobalTransform);
+	defIkSolver.def("SetLocalTransform",&uvec::ik::IkSolver::SetLocalTransform);
+	defIkSolver.def("GetLocalTransform",&uvec::ik::IkSolver::GetLocalTransform);
+	defIkSolver.def("Solve",&uvec::ik::IkSolver::Solve);
+	defIkSolver.def("Resize",&uvec::ik::IkSolver::Resize);
+	defIkSolver.def("Size",&uvec::ik::IkSolver::Size);
 	defIkSolver.def("AddHingeConstraint",static_cast<uvec::ik::IkHingeConstraint*(*)(uvec::ik::IkSolver&,uint32_t,const Vector3&)>([](uvec::ik::IkSolver &solver,uint32_t idx,const Vector3 &axis) {
 		return &solver.GetJoint(idx).AddConstraint<uvec::ik::IkHingeConstraint>(axis);
 	}));
 	defIkSolver.def("AddBallSocketConstraint",static_cast<uvec::ik::IkBallSocketConstraint*(*)(uvec::ik::IkSolver&,uint32_t,float)>([](uvec::ik::IkSolver &solver,uint32_t idx,float limit) {
 		return &solver.GetJoint(idx).AddConstraint<uvec::ik::IkBallSocketConstraint>(limit);
 	}));
-	defIkSolver.def("AddCustomConstraint",static_cast<uvec::ik::IkConstraint*(*)(lua_State*,uvec::ik::IkSolver&,uint32_t,luabind::object)>([](lua_State *l,uvec::ik::IkSolver &solver,uint32_t idx,luabind::object f) -> uvec::ik::IkConstraint* {
-		Lua::CheckFunction(l,3);
-		return &solver.GetJoint(idx).AddConstraint<IkLuaConstraint>(f);
+	defIkSolver.def("AddCustomConstraint",static_cast<uvec::ik::IkConstraint*(*)(lua_State*,uvec::ik::IkSolver&,uint32_t,const Lua::func<void,int32_t>&)>([](lua_State *l,uvec::ik::IkSolver &solver,uint32_t idx,const Lua::func<void,int32_t> &function) -> uvec::ik::IkConstraint* {
+		return &solver.GetJoint(idx).AddConstraint<IkLuaConstraint>(function);
 	}));
 	
 	auto &modIk = lua.RegisterLibrary("ik");
@@ -2188,26 +1917,19 @@ static void RegisterIk(Lua::Interface &lua)
 	modIk[defIkConstraint];
 
 	auto defIkHingeConstraint = luabind::class_<uvec::ik::IkHingeConstraint,uvec::ik::IkConstraint>("IkHingeConstraint");
-	defIkHingeConstraint.def("SetLimits",static_cast<void(*)(lua_State*,uvec::ik::IkHingeConstraint&,const Vector2&)>([](lua_State *l,uvec::ik::IkHingeConstraint &constraint,const Vector2 &limits) {
-		constraint.SetLimits(limits);
-	}));
+	defIkHingeConstraint.def("SetLimits",&uvec::ik::IkHingeConstraint::SetLimits);
 	defIkHingeConstraint.def("ClearLimits",&uvec::ik::IkHingeConstraint::ClearLimits);
-	defIkHingeConstraint.def("GetLimits",static_cast<void(*)(lua_State*,uvec::ik::IkHingeConstraint&)>([](lua_State *l,uvec::ik::IkHingeConstraint &constraint) {
-		auto limits = constraint.GetLimits();
-		if(limits.has_value() == false)
-			return;
-		Lua::Push<Vector2>(l,*limits);
-	}));
+	defIkHingeConstraint.def("GetLimits",&uvec::ik::IkHingeConstraint::GetLimits,luabind::optional_policy<0>{});
 	modIk[defIkHingeConstraint];
 
 	auto defIkBallSocketConstraint = luabind::class_<uvec::ik::IkBallSocketConstraint,uvec::ik::IkConstraint>("IkBallSocketConstraint");
 	defIkBallSocketConstraint.def("SetLimit",&uvec::ik::IkBallSocketConstraint::SetLimit);
-	defIkBallSocketConstraint.def("GetLimit",static_cast<void(*)(lua_State*,uvec::ik::IkBallSocketConstraint&)>([](lua_State *l,uvec::ik::IkBallSocketConstraint &constraint) {
+	defIkBallSocketConstraint.def("GetLimit",static_cast<std::optional<float>(*)(lua_State*,uvec::ik::IkBallSocketConstraint&)>([](lua_State *l,uvec::ik::IkBallSocketConstraint &constraint) -> std::optional<float> {
 		float limit;
 		if(constraint.GetLimit(limit) == false)
-			return;
-		Lua::PushNumber(l,limit);
-	}));
+			return {};
+		return limit;
+	}),luabind::optional_policy<0>{});
 	modIk[defIkBallSocketConstraint];
 
 	auto defCcdSolver = luabind::class_<uvec::ik::CCDSolver,uvec::ik::IkSolver>("CCDIkSolver");
@@ -2220,3 +1942,4 @@ static void RegisterIk(Lua::Interface &lua)
 	modIk[defCcdSolver];
 	modIk[defFABRIKSolver];
 }
+#pragma optimize("",on)

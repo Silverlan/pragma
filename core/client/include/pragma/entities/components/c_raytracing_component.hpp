@@ -73,7 +73,7 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual ~CRaytracingComponent() override;
 
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	private:
 		void InitializeModelRaytracingBuffers();
 		void InitializeBufferUpdateCallback();

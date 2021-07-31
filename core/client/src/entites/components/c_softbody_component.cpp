@@ -24,7 +24,7 @@ void CSoftBodyComponent::Initialize()
 	//	UpdateSoftBodyGeometry(); // TODO: Is this update ALWAYS required?
 	//});
 }
-luabind::object CSoftBodyComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CSoftBodyComponentHandleWrapper>(l);}
+void CSoftBodyComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 bool CSoftBodyComponent::InitializeSoftBodyData()
 {
 	return BaseSoftBodyComponent::InitializeSoftBodyData();

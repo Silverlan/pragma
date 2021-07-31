@@ -14,7 +14,7 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 
-luabind::object CAttachableComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CAttachableComponentHandleWrapper>(l);}
+void CAttachableComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CAttachableComponent::ReceiveData(NetPacket &packet)
 {
 	auto bParent = packet->Read<Bool>();
@@ -45,13 +45,13 @@ void CAttachableComponent::ReceiveData(NetPacket &packet)
 			if(m_attachment == nullptr)
 				m_attachment = std::make_unique<AttachmentData>();
 			if(ent == nullptr)
-				m_attachment->parent = {};
+				m_attachment->parent = ComponentHandle<pragma::BaseParentComponent>{};
 			else
 			{
 				auto pParentComponent = ent->AddComponent<CParentComponent>();
 				m_attachment->parent = pParentComponent.valid() ? 
-					util::WeakHandle<BaseParentComponent>{std::static_pointer_cast<CParentComponent>(pParentComponent->shared_from_this())} :
-					util::WeakHandle<BaseParentComponent>{};
+					util::weak_shared_handle_cast<pragma::CParentComponent,BaseParentComponent>(pParentComponent) :
+					ComponentHandle<BaseParentComponent>{};
 			}
 			m_attachment->attachment = att;
 			m_attachment->bone = bone;
@@ -68,7 +68,7 @@ void CAttachableComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const
 void CAttachableComponent::UpdateViewAttachmentOffset(BaseEntity *ent,pragma::BaseCharacterComponent &pl,Vector3 &pos,Quat &rot,Bool bYawOnly) const
 {
 	auto *scene = c_game->GetRenderScene();
-	auto cam = scene ? scene->GetActiveCamera() : util::WeakHandle<pragma::CCameraComponent>{};
+	auto cam = scene ? scene->GetActiveCamera() : pragma::ComponentHandle<pragma::CCameraComponent>{};
 	if(cam.expired())
 		return;
 	auto trComponent = cam->GetEntity().GetTransformComponent();

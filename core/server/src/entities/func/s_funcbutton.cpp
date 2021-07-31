@@ -37,7 +37,7 @@ void SButtonComponent::Initialize()
 
 ////////////
 
-luabind::object SButtonComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SButtonComponentHandleWrapper>(l);}
+void SButtonComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void FuncButton::Initialize()
 {

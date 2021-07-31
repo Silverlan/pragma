@@ -574,7 +574,7 @@ pragma::physics::ICollisionObject *BasePhysicsComponent::GetCollisionObject(UInt
 		if(o.IsValid())
 		{
 			if(o->GetBoneID() == boneId)
-				return o.Get();
+				return const_cast<pragma::physics::ICollisionObject*>(o.Get());
 		}
 	}
 	return nullptr;

@@ -11,4 +11,4 @@
 
 using namespace pragma;
 
-luabind::object CGenericComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CGenericComponentHandleWrapper>(l);}
+void CGenericComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}

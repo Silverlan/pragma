@@ -40,12 +40,10 @@ void Lua::PhysSoftBodyInfo::register_class(lua_State *l,luabind::class_<::PhysSo
 		it->second.angular = angular;
 		it->second.volume = volume;
 	}));
-	classDef.def("GetMaterialStiffnessCoefficients",static_cast<void(*)(lua_State*,::PhysSoftBodyInfo&,uint32_t)>([](lua_State *l,::PhysSoftBodyInfo &sbInfo,uint32_t matId) {
+	classDef.def("GetMaterialStiffnessCoefficients",static_cast<luabind::optional<luabind::mult<float,float,float>>(*)(lua_State*,::PhysSoftBodyInfo&,uint32_t)>([](lua_State *l,::PhysSoftBodyInfo &sbInfo,uint32_t matId) -> luabind::optional<luabind::mult<float,float,float>> {
 		auto it = sbInfo.materialStiffnessCoefficient.find(matId);
 		if(it == sbInfo.materialStiffnessCoefficient.end())
-			return;
-		Lua::PushNumber(l,it->second.linear);
-		Lua::PushNumber(l,it->second.angular);
-		Lua::PushNumber(l,it->second.volume);
+			return nil;
+		return luabind::mult<float,float,float>{l,it->second.linear,it->second.angular,it->second.volume};
 	}));
 }

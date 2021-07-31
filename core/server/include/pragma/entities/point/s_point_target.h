@@ -17,7 +17,7 @@ namespace pragma
 	{
 	public:
 		SPointTargetComponent(BaseEntity &ent) : BasePointTargetComponent(ent) {}
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 

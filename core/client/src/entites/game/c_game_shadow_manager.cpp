@@ -33,7 +33,7 @@ LINK_ENTITY_TO_CLASS(game_shadow_manager,CShadowManager);
 static CShadowManagerComponent *g_shadowManager = nullptr;
 CShadowManagerComponent *CShadowManagerComponent::GetShadowManager() {return g_shadowManager;}
 
-luabind::object CShadowManagerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CShadowManagerComponentHandleWrapper>(l);}
+void CShadowManagerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void CShadowManagerComponent::Initialize()
 {

@@ -20,7 +20,7 @@ void CFuncSoftPhysicsComponent::Initialize()
 	BaseFuncSoftPhysicsComponent::Initialize();
 	GetEntity().AddComponent("func_physics");
 }
-luabind::object CFuncSoftPhysicsComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CFuncSoftPhysicsComponentHandleWrapper>(l);}
+void CFuncSoftPhysicsComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 ///////////
 

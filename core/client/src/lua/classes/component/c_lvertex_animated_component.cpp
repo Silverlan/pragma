@@ -7,26 +7,21 @@
 
 #include "stdafx_client.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
+#include <pragma/lua/policies/optional_policy.hpp>
 #include "pragma/model/c_modelmesh.h"
 #include <prosper_command_buffer.hpp>
 #include <buffers/prosper_swap_buffer.hpp>
 
 void Lua::VertexAnimated::register_class(lua_State *l,luabind::module_ &entsMod)
 {
-	auto defCVertexAnimated = luabind::class_<CVertexAnimatedHandle,BaseEntityComponentHandle>("VertexAnimatedComponent");
+	auto defCVertexAnimated = luabind::class_<pragma::CVertexAnimatedComponent,pragma::BaseEntityComponent>("VertexAnimatedComponent");
 	defCVertexAnimated.def("UpdateVertexAnimationBuffer",static_cast<void(*)(lua_State*,CVertexAnimatedHandle&,std::shared_ptr<prosper::ICommandBuffer>&)>([](lua_State *l,CVertexAnimatedHandle &hAnim,std::shared_ptr<prosper::ICommandBuffer> &drawCmd) {
 		pragma::Lua::check_component(l,hAnim);
 		if(drawCmd->IsPrimary() == false)
 			return;
 		hAnim->UpdateVertexAnimationBuffer(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd));
 		}));
-	defCVertexAnimated.def("GetVertexAnimationBuffer",static_cast<void(*)(lua_State*,CVertexAnimatedHandle&)>([](lua_State *l,CVertexAnimatedHandle &hAnim) {
-		pragma::Lua::check_component(l,hAnim);
-		auto &buffer = hAnim->GetVertexAnimationBuffer();
-		if(buffer == nullptr)
-			return;
-		Lua::Push<std::shared_ptr<prosper::SwapBuffer>>(l,buffer);
-		}));
+	defCVertexAnimated.def("GetVertexAnimationBuffer",&pragma::CVertexAnimatedComponent::GetVertexAnimationBuffer,luabind::optional_policy<0>{});
 	defCVertexAnimated.def("GetVertexAnimationBufferMeshOffset",static_cast<void(*)(lua_State*,CVertexAnimatedHandle&,std::shared_ptr<::ModelSubMesh>&)>([](lua_State *l,CVertexAnimatedHandle &hAnim,std::shared_ptr<::ModelSubMesh> &subMesh) {
 		pragma::Lua::check_component(l,hAnim);
 		uint32_t offset;

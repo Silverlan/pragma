@@ -45,7 +45,7 @@ namespace pragma
 		std::vector<CallbackHandle> m_sceneCallbacks {};
 		CallbackHandle m_cbOnSceneFlagsChanged {};
 		CallbackHandle m_cbPreRenderScenes {};
-		util::WeakHandle<CLightComponent> m_hLight {};
+		ComponentHandle<CLightComponent> m_hLight {};
 		RenderState m_renderState = RenderState::NoRenderRequired;
 		bool m_requiresRenderQueueUpdate = false;
 	};
@@ -83,7 +83,7 @@ namespace pragma
 		std::weak_ptr<CShadowManagerComponent::RenderTarget> RequestRenderTarget();
 		void FreeRenderTarget();
 		bool HasRenderTarget() const;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 
 		LightShadowRenderer &GetRenderer();
 		const LightShadowRenderer &GetRenderer() const;

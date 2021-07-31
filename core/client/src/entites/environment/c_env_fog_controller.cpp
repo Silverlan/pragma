@@ -82,7 +82,7 @@ void CFogControllerComponent::SetMaxDensity(float density)
 	BaseEnvFogControllerComponent::SetMaxDensity(density);
 	GetFog().SetMaxDensity(density);
 }
-luabind::object CFogControllerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CFogControllerComponentHandleWrapper>(l);}
+void CFogControllerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 /////////////
 

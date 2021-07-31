@@ -356,7 +356,7 @@ void CWorldComponent::UpdateRenderMeshes()
 			renderMeshes.push_back(subMesh);
 	}
 }
-luabind::object CWorldComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CWorldComponentHandleWrapper>(l);}
+void CWorldComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 //////////////
 

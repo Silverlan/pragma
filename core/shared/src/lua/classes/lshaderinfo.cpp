@@ -8,8 +8,3 @@
 #include "stdafx_shared.h"
 #include "pragma/lua/classes/lshaderinfo.h"
 #include "luasystem.h"
-
-DLLNETWORK std::string Lua_ShaderInfo_GetName(lua_State *l,util::ShaderInfo *shader)
-{
-	return shader->GetIdentifier();
-}

@@ -48,7 +48,7 @@
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_window.hpp>
-
+#pragma optimize("",off)
 static std::unordered_map<std::string,std::shared_ptr<PtrConVar>> *conVarPtrs = NULL;
 std::unordered_map<std::string,std::shared_ptr<PtrConVar>> &ClientState::GetConVarPtrs() {return *conVarPtrs;}
 ConVarHandle ClientState::GetConVarHandle(std::string scvar)
@@ -65,40 +65,6 @@ extern DLLCLIENT CEngine *c_engine;
 DLLCLIENT ClientState *client = NULL;
 extern CGame *c_game;
 
-static std::shared_ptr<WIHandle> wgui_handle_factory(WIBase &el)
-{
-	// Class specific handles have to also be defined in CGame::InitializeGUIElement!
-	const std::type_info &info = typeid(el);
-	if(info == typeid(WIShape))
-		return std::make_shared<WIShapeHandle>(new PtrWI(&el));
-	else if(info == typeid(WITexturedShape) || info == typeid(WITexturedRect))
-		return std::make_shared<WITexturedShapeHandle>(new PtrWI(&el));
-	else if(info == typeid(WIText))
-		return std::make_shared<WITextHandle>(new PtrWI(&el));
-	else if(info == typeid(WITextEntry))
-		return std::make_shared<WITextEntryHandle>(new PtrWI(&el));
-	else if(info == typeid(WIOutlinedRect))
-		return std::make_shared<WIOutlinedRectHandle>(new PtrWI(&el));
-	else if(info == typeid(WILine))
-		return std::make_shared<WILineHandle>(new PtrWI(&el));
-	else if(info == typeid(WIRoundedRect))
-		return std::make_shared<WIRoundedRectHandle>(new PtrWI(&el));
-	else if(info == typeid(WIRoundedTexturedRect))
-		return std::make_shared<WIRoundedTexturedRectHandle>(new PtrWI(&el));
-	else if(info == typeid(WIScrollBar))
-		return std::make_shared<WIScrollBarHandle>(new PtrWI(&el));
-	else if(info == typeid(WISilkIcon))
-		return std::make_shared<WISilkIconHandle>(new PtrWI(&el));
-	else if(info == typeid(WIDropDownMenu))
-		return std::make_shared<WIDropDownMenuHandle>(new PtrWI(&el));
-	else if(info == typeid(WICheckbox))
-		return std::make_shared<WICheckboxHandle>(new PtrWI(&el));
-	else if(info == typeid(WIButton))
-		return std::make_shared<WIButtonHandle>(new PtrWI(&el));
-	return std::make_shared<WIHandle>();
-}
-
-
 ClientState::ClientState()
 	: NetworkState(),m_client(nullptr),m_svInfo(nullptr),m_resDownload(nullptr),
 	m_volMaster(1.f),m_hMainMenu(),m_luaGUI(NULL)
@@ -107,7 +73,6 @@ ClientState::ClientState()
 	m_soundScriptManager = std::make_unique<CSoundScriptManager>();
 	m_modelManager = std::make_unique<pragma::asset::CModelManager>(*this);
 	auto &gui = WGUI::GetInstance();
-	gui.SetHandleFactory(wgui_handle_factory);
 	gui.SetCreateCallback(WGUILuaInterface::InitializeGUIElement);
 	//CVarHandler::Initialize();
 	FileManager::AddCustomMountDirectory("downloads",static_cast<fsys::SearchFlags>(FSYS_SEARCH_RESOURCES));
@@ -235,6 +200,8 @@ REGISTER_CONVAR_CALLBACK_CL(cl_show_fps,[](NetworkState*,ConVar*,bool,bool val) 
 lua_State *ClientState::GetGUILuaState() {return (m_luaGUI != nullptr) ? m_luaGUI->GetState() : nullptr;}
 Lua::Interface &ClientState::GetGUILuaInterface() {return *m_luaGUI;}
 
+__declspec(dllimport) void test_lua_policies(lua_State *l);
+#include "pragma/lua/policies/gui_element_policy.hpp"
 void ClientState::InitializeGUILua()
 {
 	m_luaGUI = std::make_shared<Lua::Interface>();
@@ -250,18 +217,49 @@ void ClientState::InitializeGUILua()
 	ClientState::RegisterSharedLuaLibraries(*m_luaGUI,true);
 	NetworkState::RegisterSharedLuaGlobals(GetGUILuaInterface());
 	ClientState::RegisterSharedLuaGlobals(*m_luaGUI);
-
-	Lua::RegisterLibrary(GetGUILuaState(),"time",{
-		{"last_think",Lua_gui_LastThink},
-		{"real_time",Lua_gui_RealTime},
-		{"delta_time",Lua_gui_DeltaTime}
-	});
+	
+	auto timeMod = luabind::module(m_luaGUI->GetState(),"time");
+	timeMod[
+		luabind::def("last_think",&Lua::gui::LastThink),
+		luabind::def("real_time",&Lua::gui::RealTime),
+		luabind::def("delta_time",&Lua::gui::DeltaTime)
+	];
 
 	auto enMod = luabind::module(m_luaGUI->GetState(),"engine");
 	enMod[
 		luabind::def("poll_console_output",&Lua::engine::poll_console_output)
 	];
 	Lua::engine::register_library(GetGUILuaState());
+
+	// Testing
+	/*{
+
+		test_lua_policies(GetGUILuaState());
+
+		auto *l = m_luaGUI->GetState();
+		auto *el = WGUI::GetInstance().Create<WIRect>();
+		auto hEl = el->GetHandle();
+		auto hElCast = util::weak_shared_handle_cast<WIBase,WIShape>(hEl);
+		auto o = luabind::object{l,hElCast};
+
+		auto *h1 = luabind::object_cast<util::TWeakSharedHandle<WIShape>*>(o);
+		auto *h2 = luabind::object_cast<WIShape*>(o);
+		auto *h3 = luabind::object_cast<WIBase*>(o);
+
+		luabind::globals(l)["testObject"] = hEl;
+		luabind::globals(l)["testObjectCast"] = hElCast;
+		Lua::RunString(l,"print(\"Valid: \",testObject:IsValid())","test");
+		Lua::RunString(l,"print(\"Valid: \",testObjectCast:IsValid())","test");
+
+		el->Remove();
+		h1 = luabind::object_cast<util::TWeakSharedHandle<WIShape>*>(o);
+		h2 = luabind::object_cast<WIShape*>(o);
+		h3 = luabind::object_cast<WIBase*>(o);
+
+		Lua::RunString(l,"print(\"Valid: \",testObject:IsValid())","test");
+
+		Lua::RunString(l,"print(\"Valid: \",testObjectCast:IsValid())","test");
+	}*/
 
 	WGUILuaInterface::Initialize();
 
@@ -803,3 +801,4 @@ REGISTER_CONVAR_CALLBACK_CL(sv_tickrate,[](NetworkState*,ConVar*,int,int val) {
 		val = 0;
 	c_engine->SetTickRate(val);
 });
+#pragma optimize("",on)

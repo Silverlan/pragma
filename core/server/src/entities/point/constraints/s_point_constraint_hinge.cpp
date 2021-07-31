@@ -30,7 +30,7 @@ void SPointConstraintHingeComponent::SendData(NetPacket &packet,networking::Clie
 	packet->Write<float>(m_kvLimitRelaxationFactor);
 }
 
-luabind::object SPointConstraintHingeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SPointConstraintHingeComponentHandleWrapper>(l);}
+void SPointConstraintHingeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void PointConstraintHinge::Initialize()
 {

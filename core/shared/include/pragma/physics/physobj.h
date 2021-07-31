@@ -20,12 +20,10 @@
 #include <mathutil/transform.hpp>
 #include "pragma/physics/collision_object.hpp"
 #include "pragma/physics/phys_contact_info.hpp"
+#include "pragma/types.hpp"
 #ifdef __linux__
 #include "pragma/physics/controller.hpp"
 #endif
-
-class DLLNETWORK PhysObj;
-DECLARE_BASE_HANDLE(DLLNETWORK,PhysObj,PhysObj);
 
 // Very expensive
 #define PHYS_KEEP_SIMULATION_TRANSFORM 0
@@ -39,8 +37,12 @@ namespace pragma
 		class IGhostObject;
 	};
 };
+
+using PhysObjHandle = util::TWeakSharedHandle<PhysObj>;
+
 enum class CollisionMask : uint32_t;
 class DLLNETWORK PhysObj
+	: public pragma::BaseLuaHandle
 {
 public:
 	enum class StateFlags : uint32_t
@@ -57,7 +59,6 @@ public:
 	virtual ~PhysObj();
 	virtual void Spawn();
 	virtual void UpdateVelocity();
-	PhysObjHandle GetHandle() const;
 	virtual pragma::BaseEntityComponent *GetOwner();
 	NetworkState *GetNetworkState();
 	virtual void Enable();
@@ -72,7 +73,10 @@ public:
 	virtual void SetMass(float mass);
 	virtual bool IsRigid() const;
 	virtual bool IsSoftBody() const;
+	virtual void InitializeLuaObject(lua_State *lua) override;
 	void SetCCDEnabled(bool b);
+
+	PhysObjHandle GetHandle() const;
 
 	void SetCollisionFilter(CollisionMask filterGroup,CollisionMask filterMask);
 	void SetCollisionFilterMask(CollisionMask filterMask);
@@ -150,13 +154,12 @@ protected:
 	Vector3 m_velocity = {};
 	std::vector<util::TSharedHandle<pragma::physics::ICollisionObject>> m_collisionObjects;
 
-	util::WeakHandle<pragma::BaseEntityComponent> m_owner = {};
+	pragma::ComponentHandle<pragma::BaseEntityComponent> m_owner = {};
 	NetworkState *m_networkState;
 	CollisionMask m_collisionFilterGroup = {};
 	CollisionMask m_collisionFilterMask = {};
 	StateFlags m_stateFlags = StateFlags::None;
 	uint32_t m_colObjAwakeCount = 0u;
-	PhysObjHandle m_handle = {};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(PhysObj::StateFlags)
 

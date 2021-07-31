@@ -15,7 +15,7 @@ using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
 
-luabind::object CTransformComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CTransformComponentHandleWrapper>(l);}
+void CTransformComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CTransformComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BaseTransformComponent));}
 void CTransformComponent::ReceiveData(NetPacket &packet)
 {

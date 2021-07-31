@@ -34,7 +34,7 @@ namespace Lua
 		static void GetName(lua_State *l,BaseEntityComponentHandle &component);
 	};
 };
-void Game::RegisterLuaEntityComponent(luabind::class_<BaseEntityComponentHandleWrapper> &def)
+void Game::RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityComponent> &def)
 {
 	def.def("BroadcastEvent",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,uint32_t)>([](lua_State *l,BaseEntityComponentHandle &hComponent,uint32_t eventId) {
 		pragma::Lua::check_component(l,hComponent);
@@ -196,7 +196,7 @@ void Lua::BaseEntityComponent::GetEntity(lua_State *l,BaseEntityComponentHandle 
 {
 	pragma::Lua::check_component(l,component);
 	auto &ent = component->GetEntity();
-	ent.GetLuaObject()->push(l);
+	ent.GetLuaObject().push(l);
 }
 void Lua::BaseEntityComponent::GetComponentId(lua_State *l,BaseEntityComponentHandle &component)
 {

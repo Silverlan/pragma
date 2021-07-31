@@ -18,7 +18,6 @@
 
 void Lua::register_cl_ai_component(lua_State *l,luabind::module_ &module)
 {
-	auto def = luabind::class_<CAIHandle,BaseEntityComponentHandle>("AIComponent");
-	Lua::register_base_ai_component_methods<luabind::class_<CAIHandle,BaseEntityComponentHandle>,CAIHandle>(l,def);
+	auto def = luabind::class_<pragma::CAIComponent,pragma::BaseAIComponent>("AIComponent");
 	module[def];
 }

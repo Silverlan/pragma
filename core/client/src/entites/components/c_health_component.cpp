@@ -11,7 +11,7 @@
 
 using namespace pragma;
 
-luabind::object CHealthComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CHealthComponentHandleWrapper>(l);}
+void CHealthComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CHealthComponent::ReceiveData(NetPacket &packet)
 {
 	*m_health = packet->Read<unsigned short>();

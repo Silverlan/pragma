@@ -27,6 +27,7 @@
 #include "pragma/entities/baseentity_net_event_manager.hpp"
 #include <fsys/filesystem.h>
 #include <sharedutils/util_weak_handle.hpp>
+#include <sharedutils/util_shared_handle.hpp>
 #include <pragma/console/fcvar.h>
 #include <pragma/debug/debug_performance_profiler.hpp>
 #ifdef __linux__
@@ -333,7 +334,7 @@ public:
 
 	virtual bool IsPhysicsSimulationEnabled() const=0;
 
-	std::vector<util::WeakHandle<pragma::BasePhysicsComponent>> &GetAwakePhysicsComponents();
+	std::vector<pragma::ComponentHandle<pragma::BasePhysicsComponent>> &GetAwakePhysicsComponents();
 	std::vector<pragma::BaseEntityComponent*> &GetEntityTickComponents() {return m_entityTickComponents;}
 	std::vector<pragma::BaseGamemodeComponent*> &GetGamemodeComponents() {return m_gamemodeComponents;}
 
@@ -350,7 +351,7 @@ protected:
 	GameFlags m_flags = GameFlags::InitialTick;
 	std::vector<BaseEntity*> m_baseEnts;
 	std::queue<EntityHandle> m_entsScheduledForRemoval;
-	std::vector<util::WeakHandle<pragma::BasePhysicsComponent>> m_awakePhysicsEntities;
+	std::vector<pragma::ComponentHandle<pragma::BasePhysicsComponent>> m_awakePhysicsEntities;
 	std::vector<pragma::BaseEntityComponent*> m_entityTickComponents;
 	std::vector<pragma::BaseGamemodeComponent*> m_gamemodeComponents;
 	std::shared_ptr<Lua::Interface> m_lua = nullptr;
@@ -381,7 +382,7 @@ protected:
 	// for the next tick.
 	float m_tPhysDeltaRemainder = 0.f;
 	Vector3 m_gravity = {0,-600,0};
-	util::WeakHandle<pragma::BaseWorldComponent> m_worldComponent = {};
+	util::TWeakSharedHandle<pragma::BaseWorldComponent> m_worldComponent = util::TWeakSharedHandle<pragma::BaseWorldComponent>{};
 	GameModeInfo *m_gameMode = nullptr;
 	EntityHandle m_entGamemode;
 	CallbackHandle m_cbProfilingHandle = {};
@@ -403,7 +404,7 @@ protected:
 
 	virtual bool InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t eventId,int32_t argsIdx,bool bInject);
 	virtual void RegisterLuaEntityComponents(luabind::module_ &gameMod);
-	virtual void RegisterLuaEntityComponent(luabind::class_<BaseEntityComponentHandleWrapper> &classDef);
+	virtual void RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityComponent> &classDef);
 	void LoadConfig();
 	void SaveConfig();
 	void UpdateTimers();

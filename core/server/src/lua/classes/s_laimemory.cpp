@@ -9,25 +9,26 @@
 #include "pragma/lua/classes/s_laimemory.h"
 #include "luasystem.h"
 #include "pragma/ai/ai_memory.h"
+#include <pragma/lua/policies/game_object_policy.hpp>
 
 namespace Lua
 {
 	namespace AIMemoryFragment
 	{
-		static void GetEntity(lua_State *l,pragma::ai::Memory::Fragment *fragment);
-		static void IsInView(lua_State *l,pragma::ai::Memory::Fragment *fragment);
-		static void GetLastKnownPosition(lua_State *l,pragma::ai::Memory::Fragment *fragment);
-		static void GetLastVelocity(lua_State *l,pragma::ai::Memory::Fragment *fragment);
+		static BaseEntity *GetEntity(pragma::ai::Memory::Fragment &fragment);
+		static bool IsInView(const pragma::ai::Memory::Fragment &fragment);
+		static Vector3 GetLastKnownPosition(const pragma::ai::Memory::Fragment &fragment);
+		static Vector3 GetLastVelocity(const pragma::ai::Memory::Fragment &fragment);
 		// static void GetLastKnownDistance(lua_State *l,ai::Memory::Fragment *fragment); // Only useful for internal purposes
-		static void GetLastCheckTime(lua_State *l,pragma::ai::Memory::Fragment *fragment);
-		static void GetLastTimeSeen(lua_State *l,pragma::ai::Memory::Fragment *fragment);
-		static void GetLastTimeHeared(lua_State *l,pragma::ai::Memory::Fragment *fragment);
-		static void GetLastTimeSensed(lua_State *l,pragma::ai::Memory::Fragment *fragment);
+		static float GetLastCheckTime(const pragma::ai::Memory::Fragment &fragment);
+		static float GetLastTimeSeen(const pragma::ai::Memory::Fragment &fragment);
+		static float GetLastTimeHeared(const pragma::ai::Memory::Fragment &fragment);
+		static float GetLastTimeSensed(const pragma::ai::Memory::Fragment &fragment);
 	};
 	namespace AIMemory
 	{
-		static void GetFragments(lua_State *l,pragma::ai::Memory *mem);
-		static void GetFragmentCount(lua_State *l,pragma::ai::Memory *mem);
+		static luabind::tableT<pragma::ai::Memory::Fragment> GetFragments(lua_State *l,pragma::ai::Memory &mem);
+		static uint32_t GetFragmentCount(const pragma::ai::Memory &mem);
 	};
 };
 
@@ -42,7 +43,7 @@ void Lua::AIMemory::register_class(lua_State *l,luabind::module_ &mod)
 	mod[classDef];
 
 	auto classDefFragment = luabind::class_<pragma::ai::Memory::Fragment>("MemoryFragment");
-	classDefFragment.def("GetEntity",&AIMemoryFragment::GetEntity);
+	classDefFragment.def("GetEntity",&AIMemoryFragment::GetEntity,luabind::game_object_policy<0>{});
 	classDefFragment.def("IsInView",&AIMemoryFragment::IsInView);
 	classDefFragment.def("GetLastKnownPosition",&AIMemoryFragment::GetLastKnownPosition);
 	classDefFragment.def("GetLastKnownVelocity",&AIMemoryFragment::GetLastVelocity);
@@ -53,56 +54,53 @@ void Lua::AIMemory::register_class(lua_State *l,luabind::module_ &mod)
 	mod[classDefFragment];
 }
 
-void Lua::AIMemory::GetFragments(lua_State *l,pragma::ai::Memory *mem)
+luabind::tableT<pragma::ai::Memory::Fragment> Lua::AIMemory::GetFragments(lua_State *l,pragma::ai::Memory &mem)
 {
-	auto t = Lua::CreateTable(l);
-	for(auto i=decltype(mem->fragments.size()){0};i<mem->fragments.size();++i)
+	auto t = luabind::newtable(l);
+	uint32_t idx = 1;
+	for(auto &memFrag : mem.fragments)
 	{
-		auto &fragment = mem->fragments[i];
-		if(fragment.occupied == false)
+		if(memFrag.occupied == false)
 			continue;
-		Lua::PushInt(l,i +1);
-		Lua::Push<pragma::ai::Memory::Fragment*>(l,&fragment);
-		Lua::SetTableValue(l,t);
+		t[idx++] = &memFrag;
 	}
+	return t;
 }
 
-void Lua::AIMemory::GetFragmentCount(lua_State *l,pragma::ai::Memory *mem)
+uint32_t Lua::AIMemory::GetFragmentCount(const pragma::ai::Memory &mem)
 {
-	Lua::PushInt(l,mem->occupiedFragmentCount);
+	return mem.occupiedFragmentCount;
 }
 
-void Lua::AIMemoryFragment::GetEntity(lua_State *l,pragma::ai::Memory::Fragment *fragment)
+BaseEntity *Lua::AIMemoryFragment::GetEntity(pragma::ai::Memory::Fragment &fragment)
 {
-	if(!fragment->hEntity.valid())
-		return;
-	fragment->hEntity->GetLuaObject()->push(l);
+	return fragment.hEntity.get();
 }
-void Lua::AIMemoryFragment::IsInView(lua_State *l,pragma::ai::Memory::Fragment *fragment)
+bool Lua::AIMemoryFragment::IsInView(const pragma::ai::Memory::Fragment &fragment)
 {
-	Lua::PushBool(l,fragment->visible);
+	return fragment.visible;
 }
-void Lua::AIMemoryFragment::GetLastKnownPosition(lua_State *l,pragma::ai::Memory::Fragment *fragment)
+Vector3 Lua::AIMemoryFragment::GetLastKnownPosition(const pragma::ai::Memory::Fragment &fragment)
 {
-	Lua::Push<Vector3>(l,fragment->lastPosition);
+	return fragment.lastPosition;
 }
-void Lua::AIMemoryFragment::GetLastVelocity(lua_State *l,pragma::ai::Memory::Fragment *fragment)
+Vector3 Lua::AIMemoryFragment::GetLastVelocity(const pragma::ai::Memory::Fragment &fragment)
 {
-	Lua::Push<Vector3>(l,fragment->lastVelocity);
+	return fragment.lastVelocity;
 }
-void Lua::AIMemoryFragment::GetLastCheckTime(lua_State *l,pragma::ai::Memory::Fragment *fragment)
+float Lua::AIMemoryFragment::GetLastCheckTime(const pragma::ai::Memory::Fragment &fragment)
 {
-	Lua::PushNumber(l,fragment->lastCheck);
+	return fragment.lastCheck;
 }
-void Lua::AIMemoryFragment::GetLastTimeSeen(lua_State *l,pragma::ai::Memory::Fragment *fragment)
+float Lua::AIMemoryFragment::GetLastTimeSeen(const pragma::ai::Memory::Fragment &fragment)
 {
-	Lua::PushNumber(l,fragment->lastSeen);
+	return fragment.lastSeen;
 }
-void Lua::AIMemoryFragment::GetLastTimeHeared(lua_State *l,pragma::ai::Memory::Fragment *fragment)
+float Lua::AIMemoryFragment::GetLastTimeHeared(const pragma::ai::Memory::Fragment &fragment)
 {
-	Lua::PushNumber(l,fragment->lastHeared);
+	return fragment.lastHeared;
 }
-void Lua::AIMemoryFragment::GetLastTimeSensed(lua_State *l,pragma::ai::Memory::Fragment *fragment)
+float Lua::AIMemoryFragment::GetLastTimeSensed(const pragma::ai::Memory::Fragment &fragment)
 {
-	Lua::PushNumber(l,fragment->GetLastTimeSensed());
+	return fragment.GetLastTimeSensed();
 }

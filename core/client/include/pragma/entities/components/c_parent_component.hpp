@@ -20,7 +20,7 @@ namespace pragma
 	{
 	public:
 		CParentComponent(BaseEntity &ent) : BaseParentComponent(ent) {}
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 
 		virtual void OnRemove() override;
 	};

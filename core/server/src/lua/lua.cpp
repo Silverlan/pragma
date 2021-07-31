@@ -88,7 +88,6 @@ void SGame::RegisterLua()
 		luabind::def("load_material",static_cast<Material*(*)(const std::string&)>(Lua::engine::server::LoadMaterial)),
 		luabind::def("set_time_scale",&Lua::game::set_time_scale)
 	];
-	RegisterLuaGameClasses(gameMod);
 
 	Lua::ents::register_library(GetLuaState());
 	auto entsMod = luabind::module(GetLuaState(),"ents");
@@ -107,6 +106,7 @@ void SGame::RegisterLua()
 	auto entityClassDef = luabind::class_<BaseEntity>("BaseEntity");
 	Lua::Entity::register_class(entityClassDef);
 	modEnts[entityClassDef];
+	RegisterLuaGameClasses(gameMod);
 
 	auto sEntityClassDef = luabind::class_<SBaseEntity,BaseEntity>("Entity");
 	Lua::Entity::Server::register_class(sEntityClassDef);
@@ -125,7 +125,7 @@ void SGame::RegisterLua()
 	//
 
 	// Needs to be registered AFTER RegisterLuaGameClasses has been called!
-	auto defEntCmp = luabind::class_<BaseLuaBaseEntityHandle,luabind::bases<BaseEntityComponentHandle>,luabind::default_holder,LuaBaseEntityComponentWrapper>("BaseEntityComponent");
+	/*auto defEntCmp = luabind::class_<BaseLuaBaseEntityHandle,luabind::bases<BaseEntityComponentHandle>,luabind::default_holder,LuaBaseEntityComponentWrapper>("BaseEntityComponent");
 	Lua::register_base_entity_component<luabind::class_<BaseLuaBaseEntityHandle,luabind::bases<BaseEntityComponentHandle>,luabind::default_holder,LuaBaseEntityComponentWrapper>>(defEntCmp);
 	defEntCmp.def("SendData",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,NetPacket,pragma::networking::ClientRecipientFilter&)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,NetPacket packet,pragma::networking::ClientRecipientFilter &rp) {
 		
@@ -136,7 +136,7 @@ void SGame::RegisterLua()
 	defEntCmp.def("SendSnapshotData",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,NetPacket,SPlayerHandle&)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,NetPacket packet,SPlayerHandle &pl) {
 		
 	}));
-	modEnts[defEntCmp];
+	modEnts[defEntCmp];*/
 
 	Lua::RegisterLibrary(GetLuaState(),"net",{
 		{"broadcast",Lua_sv_net_Broadcast},

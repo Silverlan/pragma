@@ -33,14 +33,14 @@ void WILoadScreen::Initialize()
 		mainMenu->OpenMainMenu();
 	}));
 	m_hText = CreateChild<WIText>();
-	auto *pText = m_hText.get<WIText>();
+	auto *pText = static_cast<WIText*>(m_hText.get());
 	pText->SetText("LOADING...");
 	pText->SetColor(1.f,1.f,1.f,1.f);
 	pText->SizeToContents();
 	pText->SetAutoCenterToParentX(true);
 
 	m_hProgress = CreateChild<WIProgressBar>();
-	auto *pProgressBar = m_hProgress.get<WIProgressBar>();
+	auto *pProgressBar = static_cast<WIProgressBar*>(m_hProgress.get());
 	pProgressBar->SetAutoCenterToParentX(true);
 }
 
@@ -51,13 +51,13 @@ void WILoadScreen::SetSize(int x,int y)
 	if(m_hText.IsValid())
 	{
 		yOffset = CInt32(CFloat(y) *0.6f);
-		auto *pText = m_hText.get<WIText>();
+		auto *pText = static_cast<WIText*>(m_hText.get());
 		pText->SetY(yOffset);
 		yOffset += pText->GetHeight();
 	}
 	if(m_hProgress.IsValid())
 	{
-		auto *pProgressBar = m_hProgress.get<WIProgressBar>();
+		auto *pProgressBar = static_cast<WIProgressBar*>(m_hProgress.get());
 		pProgressBar->SetProgress(0.5f);
 		pProgressBar->SetY(yOffset);
 		pProgressBar->SetWidth(512);

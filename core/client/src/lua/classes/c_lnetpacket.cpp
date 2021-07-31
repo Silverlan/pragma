@@ -25,7 +25,7 @@ void Lua::NetPacket::Client::ReadUniqueEntity(lua_State *l,::NetPacket &packet,l
 	auto cb = FunctionCallback<void,BaseEntity*>::Create([l,o](BaseEntity *ent) {
 		Lua::CallFunction(l,[&o,ent](lua_State *l) {
 			o.push(l);
-			ent->GetLuaObject()->push(l);
+			ent->GetLuaObject().push(l);
 			return Lua::StatusCode::Ok;
 		},0);
 	});

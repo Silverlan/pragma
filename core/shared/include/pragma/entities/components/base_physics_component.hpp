@@ -224,7 +224,7 @@ namespace pragma
 		virtual void OnSleep();
 
 		// Should only be called from within an EVENT_INITIALIZE_PHYSICS event!
-		util::WeakHandle<PhysObj> InitializePhysics(const physics::PhysObjCreateInfo &physObjCreateInfo,PhysFlags flags,int32_t rootMeshBoneId=-1);
+		PhysObjHandle InitializePhysics(const physics::PhysObjCreateInfo &physObjCreateInfo,PhysFlags flags,int32_t rootMeshBoneId=-1);
 	protected:
 		BasePhysicsComponent(BaseEntity &ent);
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
@@ -238,15 +238,15 @@ namespace pragma
 
 		bool m_bRayResultCallbackEnabled = false;
 		PHYSICSTYPE m_physicsType = PHYSICSTYPE::NONE;
-		std::shared_ptr<PhysObj> m_physObject = nullptr;
+		util::TSharedHandle<PhysObj> m_physObject = nullptr;
 		std::vector<PhysJoint> m_joints;
 		std::vector<CollisionInfo> m_customCollisions;
 		std::vector<CollisionInfo>::iterator FindCollisionInfo(BaseEntity *ent);
 		util::TSharedHandle<pragma::physics::IRigidBody> CreateRigidBody(pragma::physics::IShape &shape,bool dynamic,const umath::Transform &localPose={});
-		util::WeakHandle<PhysObj> InitializeSoftBodyPhysics();
-		util::WeakHandle<PhysObj> InitializeModelPhysics(PhysFlags flags=PhysFlags::Dynamic);
-		util::WeakHandle<PhysObj> InitializeBoxControllerPhysics();
-		util::WeakHandle<PhysObj> InitializeCapsuleControllerPhysics();
+		util::TSharedHandle<PhysObj> InitializeSoftBodyPhysics();
+		util::TSharedHandle<PhysObj> InitializeModelPhysics(PhysFlags flags=PhysFlags::Dynamic);
+		util::TSharedHandle<PhysObj> InitializeBoxControllerPhysics();
+		util::TSharedHandle<PhysObj> InitializeCapsuleControllerPhysics();
 		virtual void OnPhysicsInitialized();
 		virtual void OnPhysicsDestroyed();
 		CollisionMask m_collisionFilterGroup = CollisionMask::Default;

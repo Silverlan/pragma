@@ -313,7 +313,7 @@ pragma::rendering::BaseRenderProcessor::BaseRenderProcessor(const util::RenderPa
 {
 	auto &scene = drawSceneInfo.drawSceneInfo.scene;
 	auto *renderer = scene->GetRenderer();
-	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent>{};
 	m_renderer = raster.get();
 }
 pragma::rendering::BaseRenderProcessor::~BaseRenderProcessor()
@@ -389,7 +389,7 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::PipelineID pipe
 	auto &scene = *m_drawSceneInfo.drawSceneInfo.scene;
 	auto bView = (m_camType == CameraType::View) ? true : false;
 	auto *renderer = scene.GetRenderer();
-	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : util::WeakHandle<pragma::CRasterizationRendererComponent>{};
+	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : ComponentHandle<pragma::CRasterizationRendererComponent>{};
 	if(raster.expired())
 		return false;
 	m_shaderProcessor.RecordBindShader(scene,*raster,bView,*shaderScene,pipelineIdx);

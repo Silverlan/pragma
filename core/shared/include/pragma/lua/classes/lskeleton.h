@@ -24,8 +24,6 @@ namespace Lua
 
 		DLLNETWORK std::shared_ptr<::Bone> AddBone(lua_State *l,::Skeleton &skeleton,const std::string &name);
 		DLLNETWORK std::shared_ptr<::Bone> AddBone(lua_State *l,::Skeleton &skeleton,const std::string &name,::Bone &parent);
-		DLLNETWORK uint32_t GetBoneCount(lua_State *l,::Skeleton &skeleton);
-		DLLNETWORK void Merge(lua_State *l,::Skeleton &skeleton,::Skeleton &skeletonOther);
 		DLLNETWORK void ClearBones(lua_State *l,::Skeleton &skeleton);
 		DLLNETWORK bool MakeRootBone(lua_State *l,::Skeleton &skeleton,::Bone &bone);
 		DLLNETWORK luabind::map<uint16_t,luabind::tableT<void>> GetBoneHierarchy(lua_State *l,::Skeleton &skeleton);

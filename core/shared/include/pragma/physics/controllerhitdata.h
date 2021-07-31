@@ -11,7 +11,6 @@
 #include "pragma/networkdefinitions.h"
 #include <mathutil/glmutil.h>
 
-class PhysObjHandle;
 struct DLLNETWORK ControllerHitData
 {
 	ControllerHitData();

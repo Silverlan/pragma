@@ -73,7 +73,7 @@ void CListenerComponent::SetGain(float gain)
 		return;
 	m_listener->SetGain(gain);
 }
-luabind::object CListenerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CListenerComponentHandleWrapper>(l);}
+void CListenerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 ////////////////
 

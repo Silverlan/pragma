@@ -16,6 +16,7 @@
 #include <pragma/lua/luafunction_call.h>
 #include "pragma/entities/player.h"
 #include "pragma/networking/recipient_filter.hpp"
+#include "pragma/lua/lua_handles.hpp"
 #include "pragma/model/s_modelmanager.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
@@ -45,6 +46,7 @@
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
+#pragma optimize("",off)
 extern EntityClassMap<SBaseEntity> *g_ServerEntityFactories;
 extern ServerEntityNetworkMap *g_SvEntityNetworkMap;
 
@@ -116,14 +118,15 @@ void SBaseEntity::Initialize()
 {
 	BaseEntity::Initialize();
 
-	SGame *game = server->GetGameState();
-	lua_State *lua = game->GetLuaState();
-	InitializeLuaObject(lua);
 	g_ServerEntityFactories->GetClassName(typeid(*this),&m_class);
 	unsigned int ID = g_SvEntityNetworkMap->GetFactoryID(typeid(*this));
 	if(ID == 0)
 		return;
 	m_bShared = true;
+}
+void SBaseEntity::InitializeLuaObject(lua_State *lua)
+{
+	pragma::BaseLuaHandle::InitializeLuaObject<SBaseEntity>(lua);
 }
 bool SBaseEntity::IsShared() const {return m_bShared;}
 void SBaseEntity::SetShared(bool b) {m_bShared = b;}
@@ -234,45 +237,45 @@ Bool SBaseEntity::ReceiveNetEvent(pragma::BasePlayerComponent &pl,pragma::NetEve
 	return false;
 }
 
-util::WeakHandle<pragma::BaseAnimatedComponent> SBaseEntity::GetAnimatedComponent() const
+pragma::ComponentHandle<pragma::BaseAnimatedComponent> SBaseEntity::GetAnimatedComponent() const
 {
 	auto pComponent = GetComponent<pragma::SAnimatedComponent>();
-	return pComponent.valid() ? std::static_pointer_cast<pragma::BaseAnimatedComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BaseAnimatedComponent>{};
+	return pComponent.valid() ? pComponent->GetHandle<pragma::BaseAnimatedComponent>() : pragma::ComponentHandle<pragma::BaseAnimatedComponent>{};
 }
-util::WeakHandle<pragma::BaseWeaponComponent> SBaseEntity::GetWeaponComponent() const
+pragma::ComponentHandle<pragma::BaseWeaponComponent> SBaseEntity::GetWeaponComponent() const
 {
 	auto pComponent = GetComponent<pragma::SWeaponComponent>();
-	return pComponent.valid() ? std::static_pointer_cast<pragma::BaseWeaponComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BaseWeaponComponent>{};
+	return pComponent.valid() ? pComponent->GetHandle<pragma::BaseWeaponComponent>() : pragma::ComponentHandle<pragma::BaseWeaponComponent>{};
 }
-util::WeakHandle<pragma::BaseVehicleComponent> SBaseEntity::GetVehicleComponent() const
+pragma::ComponentHandle<pragma::BaseVehicleComponent> SBaseEntity::GetVehicleComponent() const
 {
 	auto pComponent = GetComponent<pragma::SVehicleComponent>();
-	return pComponent.valid() ? std::static_pointer_cast<pragma::BaseVehicleComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BaseVehicleComponent>{};
+	return pComponent.valid() ? pComponent->GetHandle<pragma::BaseVehicleComponent>() : pragma::ComponentHandle<pragma::BaseVehicleComponent>{};
 }
-util::WeakHandle<pragma::BaseAIComponent> SBaseEntity::GetAIComponent() const
+pragma::ComponentHandle<pragma::BaseAIComponent> SBaseEntity::GetAIComponent() const
 {
 	auto pComponent = GetComponent<pragma::SAIComponent>();
-	return pComponent.valid() ? std::static_pointer_cast<pragma::BaseAIComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BaseAIComponent>{};
+	return pComponent.valid() ? pComponent->GetHandle<pragma::BaseAIComponent>() : pragma::ComponentHandle<pragma::BaseAIComponent>{};
 }
-util::WeakHandle<pragma::BaseCharacterComponent> SBaseEntity::GetCharacterComponent() const
+pragma::ComponentHandle<pragma::BaseCharacterComponent> SBaseEntity::GetCharacterComponent() const
 {
 	auto pComponent = GetComponent<pragma::SCharacterComponent>();
-	return pComponent.valid() ? std::static_pointer_cast<pragma::BaseCharacterComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BaseCharacterComponent>{};
+	return pComponent.valid() ? pComponent->GetHandle<pragma::BaseCharacterComponent>() : pragma::ComponentHandle<pragma::BaseCharacterComponent>{};
 }
-util::WeakHandle<pragma::BasePlayerComponent> SBaseEntity::GetPlayerComponent() const
+pragma::ComponentHandle<pragma::BasePlayerComponent> SBaseEntity::GetPlayerComponent() const
 {
 	auto pComponent = GetComponent<pragma::SPlayerComponent>();
-	return pComponent.valid() ? std::static_pointer_cast<pragma::BasePlayerComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BasePlayerComponent>{};
+	return pComponent.valid() ? pComponent->GetHandle<pragma::BasePlayerComponent>() : pragma::ComponentHandle<pragma::BasePlayerComponent>{};
 }
-util::WeakHandle<pragma::BaseTimeScaleComponent> SBaseEntity::GetTimeScaleComponent() const
+pragma::ComponentHandle<pragma::BaseTimeScaleComponent> SBaseEntity::GetTimeScaleComponent() const
 {
 	auto pComponent = GetComponent<pragma::STimeScaleComponent>();
-	return pComponent.valid() ? std::static_pointer_cast<pragma::BaseTimeScaleComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BaseTimeScaleComponent>{};
+	return pComponent.valid() ? pComponent->GetHandle<pragma::BaseTimeScaleComponent>() : pragma::ComponentHandle<pragma::BaseTimeScaleComponent>{};
 }
-util::WeakHandle<pragma::BaseNameComponent> SBaseEntity::GetNameComponent() const
+pragma::ComponentHandle<pragma::BaseNameComponent> SBaseEntity::GetNameComponent() const
 {
 	auto pComponent = GetComponent<pragma::SNameComponent>();
-	return pComponent.valid() ? std::static_pointer_cast<pragma::BaseNameComponent>(pComponent->shared_from_this()) : util::WeakHandle<pragma::BaseNameComponent>{};
+	return pComponent.valid() ? pComponent->GetHandle<pragma::BaseNameComponent>() : pragma::ComponentHandle<pragma::BaseNameComponent>{};
 }
 bool SBaseEntity::IsCharacter() const {return HasComponent<pragma::SCharacterComponent>();}
 bool SBaseEntity::IsPlayer() const {return HasComponent<pragma::SPlayerComponent>();}
@@ -280,7 +283,7 @@ bool SBaseEntity::IsWeapon() const {return HasComponent<pragma::SWeaponComponent
 bool SBaseEntity::IsVehicle() const {return HasComponent<pragma::SVehicleComponent>();}
 bool SBaseEntity::IsNPC() const {return HasComponent<pragma::SAIComponent>();}
 
-util::WeakHandle<pragma::BaseEntityComponent> SBaseEntity::AddNetworkedComponent(const std::string &name)
+pragma::ComponentHandle<pragma::BaseEntityComponent> SBaseEntity::AddNetworkedComponent(const std::string &name)
 {
 	auto c = FindComponent(name);
 	if(c.valid())
@@ -295,3 +298,4 @@ util::WeakHandle<pragma::BaseEntityComponent> SBaseEntity::AddNetworkedComponent
 	static_cast<ServerState*>(GetNetworkState())->SendPacket("add_shared_component",packet,pragma::networking::Protocol::SlowReliable);
 	return c;
 }
+#pragma optimize("",on)

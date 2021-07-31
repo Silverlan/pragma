@@ -29,7 +29,7 @@ void CFlexComponent::RegisterEvents(pragma::EntityComponentManager &componentMan
 	EVENT_ON_FLEX_CONTROLLERS_UPDATED = componentManager.RegisterEvent("ON_FLEX_CONTROLLERS_UPDATED",std::type_index(typeid(CFlexComponent)));
 }
 
-luabind::object CFlexComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CFlexComponentHandleWrapper>(l);}
+void CFlexComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CFlexComponent::UpdateFlexControllers(float dt)
 {
 	// TODO: Update every frame!

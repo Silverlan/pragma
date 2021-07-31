@@ -108,7 +108,7 @@ void WILineGraph::UpdateGraph()
 		auto &hLine = m_lines[i];
 		if(hLine.IsValid())
 		{
-			auto *pLine = hLine.get<WILine>();
+			auto *pLine = static_cast<WILine*>(hLine.get());
 			pLine->SetStartColor(colPrev);
 			pLine->SetEndColor(endColor);
 			pLine->SetStartPos(prevEndPos);

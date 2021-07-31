@@ -41,7 +41,7 @@ namespace pragma
 		void OnPostSpawn();
 		void OnUse(BaseEntity *pl);
 		virtual BaseWheelComponent *CreateWheelEntity(uint8_t wheelIndex) override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	private:
 		static std::vector<SVehicleComponent*> s_vehicles;
 	};

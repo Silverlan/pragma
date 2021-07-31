@@ -61,7 +61,7 @@ namespace pragma
 		virtual void ApplyViewRotationOffset(const EulerAngles &ang,float dur=0.5f) override;
 
 		virtual bool ShouldTransmitNetData() const override {return true;};
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	protected:
 		mutable util::WeakHandle<networking::IServerClient> m_session = {};
 		bool m_bGameReady;

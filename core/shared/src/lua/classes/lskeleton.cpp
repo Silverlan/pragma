@@ -81,8 +81,6 @@ luabind::map<uint16_t,luabind::tableT<void>> Lua::Skeleton::GetBoneHierarchy(lua
 		fGetHierarchy(*pair.second,t);
 	return t;
 }
-uint32_t Lua::Skeleton::GetBoneCount(lua_State *l,::Skeleton &skeleton) {return skeleton.GetBoneCount();}
-void Lua::Skeleton::Merge(lua_State *l,::Skeleton &skeleton,::Skeleton &skeletonOther) {skeleton.Merge(skeletonOther);}
 void Lua::Skeleton::ClearBones(lua_State *l,::Skeleton &skeleton) {skeleton.GetBones().clear(); skeleton.GetRootBones().clear();}
 
 /////////////////////////////

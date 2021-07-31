@@ -9,6 +9,7 @@
 #define __C_SHADER_WATER_HPP__
 
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include <pragma/types.hpp>
 
 namespace pragma
 {
@@ -64,7 +65,7 @@ namespace pragma
 	private:
 		bool UpdateBindFogDensity();
 		bool m_bReflectionEnabled = false;
-		util::WeakHandle<pragma::CSceneComponent> m_boundScene = {};
+		ComponentHandle<pragma::CSceneComponent> m_boundScene = {};
 		EntityHandle m_boundEntity = {};
 	};
 };

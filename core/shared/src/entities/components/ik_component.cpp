@@ -45,7 +45,7 @@ void IKComponent::Initialize()
 		ClearIKControllers();
 	});
 }
-luabind::object IKComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<IKComponentHandleWrapper>(l);}
+void IKComponent::InitializeLuaObject(lua_State *l) {pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 {
 	auto it = m_ikTrees.find(ikControllerId);

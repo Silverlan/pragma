@@ -189,7 +189,7 @@ void WIConsole::Initialize()
 	pEntry->SetAnchor(0,1,1,1);
 	auto hScrollContainer = pLogScrollContainer->GetHandle();
 	auto hThis = GetHandle();
-	m_cbCommandEntryVisibility = pEntry->GetVisibilityProperty()->AddCallback([hScrollContainer,hThis](std::reference_wrapper<const bool> oldValue,std::reference_wrapper<const bool> visible) {
+	m_cbCommandEntryVisibility = pEntry->GetVisibilityProperty()->AddCallback([hScrollContainer,hThis](std::reference_wrapper<const bool> oldValue,std::reference_wrapper<const bool> visible) mutable {
 		if(hScrollContainer.IsValid() == false || hThis.IsValid() == false)
 			return;
 		static_cast<WIScrollContainer*>(hScrollContainer.get())->ScrollToBottom();
@@ -198,7 +198,7 @@ void WIConsole::Initialize()
 		pScrollBar->SetIgnoreParentAlpha(visible);
 	});
 	auto hLog = pLog->GetHandle();
-	pEntry->AddCallback("OnTextEntered",FunctionCallback<void>::Create([this,hThis,pEntry,hLog]() {
+	pEntry->AddCallback("OnTextEntered",FunctionCallback<void>::Create([this,hThis,pEntry,hLog]() mutable {
 		if(hThis.IsValid() == false)
 			return;
 		auto cmd = pEntry->GetText();
@@ -288,12 +288,12 @@ void WIConsole::Initialize()
 	pLogBg->SetAnchor(0,0,1,1);
 
 	pLog->SetSize(pLogBg->GetSize());
-	pLog->AddCallback("SetSize",FunctionCallback<void>::Create([pLog,hScrollContainer]() {
+	pLog->AddCallback("SetSize",FunctionCallback<void>::Create([pLog,hScrollContainer]() mutable {
 		if(hScrollContainer.IsValid() == false)
 			return;
 		static_cast<WIScrollContainer*>(hScrollContainer.get())->Update();
 	}));
-	pLogBg->AddCallback("SetSize",FunctionCallback<void>::Create([hLog,pLogBg]() {
+	pLogBg->AddCallback("SetSize",FunctionCallback<void>::Create([hLog,pLogBg]() mutable {
 		if(hLog.IsValid())
 			hLog.get()->SetWidth(pLogBg->GetWidth());
 	}));
@@ -472,10 +472,10 @@ const std::string &WIConsole::GetText() const
 	static std::string s {};
 	if(m_hLog.IsValid())
 	{
-		auto *pTextEntry = static_cast<WITextEntry*>(m_hLog.get());
+		auto *pTextEntry = static_cast<const WITextEntry*>(m_hLog.get());
 		if(pTextEntry == nullptr)
 			return s;
-		auto *pText = pTextEntry->GetTextElement();
+		auto *pText = const_cast<WITextEntry*>(pTextEntry)->GetTextElement();
 		if(pText == nullptr)
 			return s;
 		return pText->GetText();

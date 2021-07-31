@@ -27,7 +27,7 @@ namespace pragma
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
 	protected:
 		void CreateWaterSplash();
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	};
 };

@@ -42,7 +42,7 @@ SVehicleComponent::~SVehicleComponent()
 	if(it != s_vehicles.end())
 		s_vehicles.erase(it);
 }
-luabind::object SVehicleComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SVehicleComponentHandleWrapper>(l);}
+void SVehicleComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void SVehicleComponent::OnRemove() {ClearDriver();}
 void SVehicleComponent::OnUse(BaseEntity *pl)
 {

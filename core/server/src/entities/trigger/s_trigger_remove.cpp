@@ -16,7 +16,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(trigger_remove,TriggerRemove);
 
-luabind::object STriggerRemoveComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<STriggerRemoveComponentHandleWrapper>(l);}
+void STriggerRemoveComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void TriggerRemove::Initialize()
 {

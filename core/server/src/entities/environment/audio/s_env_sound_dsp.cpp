@@ -49,7 +49,7 @@ void SBaseSoundDspComponent::SetGain(float gain)
 	ent.SendNetEvent(m_netEvSetGain,p,pragma::networking::Protocol::SlowReliable);
 }
 
-luabind::object SSoundDspComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SSoundDspComponentHandleWrapper>(l);}
+void SSoundDspComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 /////////////////
 

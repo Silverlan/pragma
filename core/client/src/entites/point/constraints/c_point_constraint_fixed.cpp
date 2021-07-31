@@ -22,7 +22,7 @@ void CPointConstraintFixedComponent::ReceiveData(NetPacket &packet)
 	m_kvTarget = packet->ReadString();
 	m_posTarget = nwm::read_vector(packet);
 }
-luabind::object CPointConstraintFixedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CPointConstraintFixedComponentHandleWrapper>(l);}
+void CPointConstraintFixedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void CPointConstraintFixed::Initialize()
 {

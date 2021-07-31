@@ -956,7 +956,7 @@ int Lua::game::Client::set_debug_render_filter(lua_State *l)
 	{
 		auto entityFilter = luabind::object{t["entityFilter"]};
 		filter->entityFilter = [entityFilter](CBaseEntity &ent,CMaterial &mat) mutable -> bool {
-			auto &oEnt = *ent.GetLuaObject();
+			auto &oEnt = ent.GetLuaObject();
 			auto r = entityFilter(oEnt,static_cast<Material*>(&mat));
 			return luabind::object_cast<bool>(r);
 		};
@@ -965,7 +965,7 @@ int Lua::game::Client::set_debug_render_filter(lua_State *l)
 	{
 		auto meshFilter = luabind::object{t["meshFilter"]};
 		filter->meshFilter = [meshFilter](CBaseEntity &ent,CMaterial *mat,CModelSubMesh &mesh,pragma::RenderMeshIndex meshIdx) mutable -> bool {
-			auto &oEnt = *ent.GetLuaObject();
+			auto &oEnt = ent.GetLuaObject();
 			auto r = meshFilter(oEnt,mat ? static_cast<Material*>(mat) : nullptr,mesh.shared_from_this(),meshIdx);
 			return luabind::object_cast<bool>(r);
 		};

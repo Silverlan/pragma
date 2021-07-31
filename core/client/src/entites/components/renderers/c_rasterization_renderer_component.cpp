@@ -49,9 +49,9 @@ void CRasterizationRendererComponent::RegisterEvents(pragma::EntityComponentMana
 	EVENT_POST_LIGHTING_PASS = componentManager.RegisterEvent("POST_LIGHTING_PASS",typeid(CRasterizationRendererComponent));
 }
 
-luabind::object CRasterizationRendererComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CRasterizationRendererComponentHandleWrapper>(l);}
+void CRasterizationRendererComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
-static util::WeakHandle<pragma::CLightMapComponent> g_lightmapC = {};
+static pragma::ComponentHandle<pragma::CLightMapComponent> g_lightmapC = {};
 void CRasterizationRendererComponent::UpdateLightmap(CLightMapComponent &lightMapC)
 {
 	for(auto &renderer : EntityCIterator<CRasterizationRendererComponent>{*c_game})
@@ -461,7 +461,7 @@ void CRasterizationRendererComponent::SetLightMap(pragma::CLightMapComponent &li
 	auto &ds = *m_descSetGroupRenderer->GetDescriptorSet();
 	ds.SetBindingTexture(*m_lightMapInfo.lightMapTexture,umath::to_integral(pragma::ShaderScene::RendererBinding::LightMap));
 }
-const util::WeakHandle<pragma::CLightMapComponent> &CRasterizationRendererComponent::GetLightMap() const {return m_lightMapInfo.lightMapComponent;}
+const pragma::ComponentHandle<pragma::CLightMapComponent> &CRasterizationRendererComponent::GetLightMap() const {return m_lightMapInfo.lightMapComponent;}
 
 void CRasterizationRendererComponent::ReloadPresentationRenderTarget()
 {

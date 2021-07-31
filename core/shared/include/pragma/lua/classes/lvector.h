@@ -49,10 +49,10 @@ namespace Lua
 		DLLNETWORK void Rotate(lua_State *l,Vector3 &vec,const Vector3 &normal,float angle);
 		DLLNETWORK void Rotate(lua_State *l,Vector3 &vec,const Quat &orientation);
 		DLLNETWORK void RotateAround(lua_State *l,Vector3 &vec,const Vector3 &origin,const EulerAngles &ang);
-		DLLNETWORK void Copy(lua_State *l,const Vector3 &vec);
-		DLLNETWORK void Lerp(lua_State *l,const Vector3 &vec,const Vector3 &vecB,float factor);
+		DLLNETWORK ::Vector3 Copy(lua_State *l,const Vector3 &vec);
+		DLLNETWORK ::Vector3 Lerp(lua_State *l,const Vector3 &vec,const Vector3 &vecB,float factor);
 		DLLNETWORK void Set(lua_State *l,Vector3 &vec,const Vector3 &vecB);
-		DLLNETWORK void ToMatrix(lua_State *l,const Vector3 &vec);
+		DLLNETWORK ::Mat4 ToMatrix(lua_State *l,const Vector3 &vec);
 		DLLNETWORK void Set(lua_State *l,Vector3 &vec,float x,float y,float z);
 		DLLNETWORK void SnapToGrid(lua_State *l,Vector3 &vec);
 		DLLNETWORK void SnapToGrid(lua_State *l,Vector3 &vec,UInt32 gridSize);
@@ -65,15 +65,15 @@ namespace Lua
 		DLLNETWORK float LengthSqr(const ::Vector2 &vec);
 		DLLNETWORK float Distance(const ::Vector2 &a,const ::Vector2 &b);
 		DLLNETWORK float DistanceSqr(const ::Vector2 &a,const ::Vector2 &b);
-		DLLNETWORK void Cross(lua_State *l,const ::Vector2 &a,const ::Vector2 &b);
-		DLLNETWORK void DotProduct(lua_State *l,const ::Vector2 &a,const ::Vector2 &b);
+		DLLNETWORK ::Vector2 Cross(lua_State *l,const ::Vector2 &a,const ::Vector2 &b);
+		DLLNETWORK float DotProduct(lua_State *l,const ::Vector2 &a,const ::Vector2 &b);
 		DLLNETWORK void Rotate(lua_State *l,::Vector2 &vec,const EulerAngles &ang);
 		DLLNETWORK void RotateAround(lua_State *l,::Vector2 &vec,const ::Vector2 &origin,const EulerAngles &ang);
-		DLLNETWORK void Copy(lua_State *l,const ::Vector2 &vec);
-		DLLNETWORK void Lerp(lua_State *l,const ::Vector2 &vec,const ::Vector2 &vecB,float factor);
+		DLLNETWORK ::Vector2 Copy(lua_State *l,const ::Vector2 &vec);
+		DLLNETWORK ::Vector2 Lerp(lua_State *l,const ::Vector2 &vec,const ::Vector2 &vecB,float factor);
 		DLLNETWORK void Set(lua_State *l,::Vector2 &vec,const ::Vector2 &vecB);
 		DLLNETWORK void Set(lua_State *l,::Vector2 &vec,float x,float y);
-		DLLNETWORK void Project(lua_State *l,const ::Vector2 &vec,const ::Vector2 &n);
+		DLLNETWORK ::Vector2 Project(lua_State *l,const ::Vector2 &vec,const ::Vector2 &n);
 	};
 	namespace Vector4
 	{
@@ -83,12 +83,12 @@ namespace Lua
 		DLLNETWORK float LengthSqr(const ::Vector4 &vec);
 		DLLNETWORK float Distance(const ::Vector4 &a,const ::Vector4 &b);
 		DLLNETWORK float DistanceSqr(const ::Vector4 &a,const ::Vector4 &b);
-		DLLNETWORK void DotProduct(lua_State *l,const ::Vector4 &a,const ::Vector4 &b);
-		DLLNETWORK void Copy(lua_State *l,const ::Vector4 &vec);
-		DLLNETWORK void Lerp(lua_State *l,const ::Vector4 &vec,const ::Vector4 &vecB,float factor);
+		DLLNETWORK float DotProduct(lua_State *l,const ::Vector4 &a,const ::Vector4 &b);
+		DLLNETWORK ::Vector4 Copy(lua_State *l,const ::Vector4 &vec);
+		DLLNETWORK ::Vector4 Lerp(lua_State *l,const ::Vector4 &vec,const ::Vector4 &vecB,float factor);
 		DLLNETWORK void Set(lua_State *l,::Vector4 &vec,const ::Vector4 &vecB);
 		DLLNETWORK void Set(lua_State *l,::Vector4 &vec,float x,float y,float z,float w);
-		DLLNETWORK void Project(lua_State *l,const ::Vector4 &vec,const ::Vector4 &n);
+		DLLNETWORK ::Vector4 Project(lua_State *l,const ::Vector4 &vec,const ::Vector4 &n);
 	};
 	namespace vector
 	{

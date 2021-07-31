@@ -512,7 +512,7 @@ void SGame::CreateExplosion(const Vector3 &origin,Float radius,UInt32 damage,Flo
 }
 void SGame::CreateExplosion(const Vector3 &origin,Float radius,UInt32 damage,Float force,const EntityHandle &attacker,const EntityHandle &inflictor,const std::function<bool(BaseEntity*,DamageInfo&)> &callback)
 {
-	CreateExplosion(origin,radius,damage,force,attacker.get(),inflictor.get(),callback);
+	CreateExplosion(origin,radius,damage,force,const_cast<BaseEntity*>(attacker.get()),const_cast<BaseEntity*>(inflictor.get()),callback);
 }
 void SGame::OnClientDropped(pragma::networking::IServerClient &client,pragma::networking::DropReason reason)
 {

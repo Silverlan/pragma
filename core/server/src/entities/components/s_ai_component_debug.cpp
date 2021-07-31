@@ -204,7 +204,7 @@ void NET_sv_debug_ai_navigation(pragma::networking::IServerClient &session,NetPa
 	auto b = packet->Read<bool>();
 	if(b == false)
 	{
-		auto it = std::find_if(SAIComponent::s_plDebugAiNav.begin(),SAIComponent::s_plDebugAiNav.end(),[pl](const util::WeakHandle<pragma::SPlayerComponent> &sPlComponent) {
+		auto it = std::find_if(SAIComponent::s_plDebugAiNav.begin(),SAIComponent::s_plDebugAiNav.end(),[pl](const pragma::ComponentHandle<pragma::SPlayerComponent> &sPlComponent) {
 			return (sPlComponent.get() == pl) ? true : false;
 		});
 		if(it != SAIComponent::s_plDebugAiNav.end())

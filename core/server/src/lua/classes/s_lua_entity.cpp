@@ -19,10 +19,11 @@ extern DLLSERVER SGame *s_game;
 extern DLLSERVER ServerState *server;
 
 SLuaEntity::SLuaEntity(luabind::object &o,const std::string &className)
-	: SBaseEntity(),LuaObjectBase(o)
+	: SBaseEntity{},LuaObjectBase{}
 {
 	m_class = className;
-	m_luaObj = std::make_unique<luabind::object>(o);
+	SBaseEntity::SetLuaObject(o);
+	LuaObjectBase::SetLuaObject(o);
 }
 void SLuaEntity::Initialize()
 {
@@ -31,12 +32,6 @@ void SLuaEntity::Initialize()
 }
 bool SLuaEntity::IsScripted() const {return true;}
 void SLuaEntity::InitializeLuaObject(lua_State*) {}
-void SLuaEntity::InitializeHandle()
-{
-	auto *hEntity = luabind::object_cast_nothrow<util::WeakHandle<BaseEntity>*>(*m_luaObj,static_cast<util::WeakHandle<BaseEntity>*>(nullptr));
-	*hEntity = util::WeakHandle<BaseEntity>{std::shared_ptr<BaseEntity>{this,[](BaseEntity*) {}}};
-	m_bExternalHandle = true;
-}
 
 void SLuaEntity::DoSpawn()
 {

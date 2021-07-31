@@ -124,7 +124,7 @@ CWeaponComponent *CViewModelComponent::GetWeapon()
 	if(charC.expired())
 		return nullptr;
 	auto *weapon = charC->GetActiveWeapon();
-	auto weaponC = weapon ? weapon->GetComponent<CWeaponComponent>() : util::WeakHandle<CWeaponComponent>{};
+	auto weaponC = weapon ? weapon->GetComponent<CWeaponComponent>() : pragma::ComponentHandle<CWeaponComponent>{};
 	return weaponC.get();
 }
 
@@ -137,7 +137,7 @@ void CViewModelComponent::SetViewModelOffset(const Vector3 &offset)
 	pl->UpdateViewModelTransform();
 }
 const Vector3 &CViewModelComponent::GetViewModelOffset() const {return m_viewModelOffset;}
-luabind::object CViewModelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CViewModelComponentHandleWrapper>(l);}
+void CViewModelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 /////////////////
 

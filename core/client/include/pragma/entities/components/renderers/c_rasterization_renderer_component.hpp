@@ -130,12 +130,12 @@ namespace pragma
 					cbExposure.Remove();
 			}
 			std::shared_ptr<prosper::Texture> lightMapTexture = nullptr;
-			util::WeakHandle<pragma::CLightMapComponent> lightMapComponent {};
+			ComponentHandle<pragma::CLightMapComponent> lightMapComponent {};
 			CallbackHandle cbExposure {};
 		};
 
 		CRasterizationRendererComponent(BaseEntity &ent);
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void Initialize() override;
 
 		friend SceneRenderDesc;
@@ -147,7 +147,7 @@ namespace pragma
 		PrepassMode GetPrepassMode() const;
 
 		void SetLightMap(pragma::CLightMapComponent &lightMapC);
-		const util::WeakHandle<pragma::CLightMapComponent> &GetLightMap() const;
+		const ComponentHandle<pragma::CLightMapComponent> &GetLightMap() const;
 
 		void SetShaderOverride(const std::string &srcShader,const std::string &shaderOverride);
 		pragma::ShaderGameWorldLightingPass *GetShaderOverride(pragma::ShaderGameWorldLightingPass *srcShader) const;
@@ -269,7 +269,7 @@ namespace pragma
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_dsgLightsCompute;
 
 		std::vector<pragma::CLightComponent*> m_visLightSources;
-		std::vector<util::WeakHandle<pragma::CLightComponent>> m_visShadowedLights;
+		std::vector<ComponentHandle<pragma::CLightComponent>> m_visShadowedLights;
 
 		// HDR
 		rendering::HDRData m_hdrInfo;

@@ -269,6 +269,8 @@ BaseLuaBaseEntityComponent::BaseLuaBaseEntityComponent(BaseEntity &ent,luabind::
 	m_luaObj = o;
 }
 
+void BaseLuaBaseEntityComponent::InitializeLuaObject(lua_State *l) {}
+
 void BaseLuaBaseEntityComponent::Initialize()
 {
 	// The underlying handle for the lua object has not yet been assigned to our shared ptr, so we have to do it now.
@@ -283,8 +285,8 @@ void BaseLuaBaseEntityComponent::Initialize()
 	if((componentManager.GetComponentInfo(GetComponentId())->flags &pragma::ComponentFlags::Networked) != pragma::ComponentFlags::None)
 		SetNetworked(true);
 
-	InitializeLuaObject();
 	auto *l = GetLuaState();
+	InitializeLuaObject(l);
 
 	auto *pInfo = componentManager.GetComponentInfo(GetComponentId());
 	if(pInfo != nullptr)
@@ -814,12 +816,6 @@ void BaseLuaBaseEntityComponent::SetNetworked(bool b) {m_bShouldTransmitNetData 
 bool BaseLuaBaseEntityComponent::IsNetworked() const {return m_bShouldTransmitNetData;}
 void BaseLuaBaseEntityComponent::SetShouldTransmitSnapshotData(bool b) {m_bShouldTransmitSnapshotData = b;}
 bool BaseLuaBaseEntityComponent::ShouldTransmitSnapshotData() const {return m_bShouldTransmitSnapshotData;}
-
-luabind::object BaseLuaBaseEntityComponent::InitializeLuaObject(lua_State *l)
-{
-	throw std::logic_error("Attempted to re-initialize lua object for lua entity component!");
-	return BaseEntityComponent::InitializeLuaObject<LuaBaseEntityComponentWrapper>(l);
-}
 
 CallbackHandle BaseLuaBaseEntityComponent::BindInitComponentEvent(lua_State *l,pragma::ComponentId componentId,luabind::object methodNameOrFunction)
 {

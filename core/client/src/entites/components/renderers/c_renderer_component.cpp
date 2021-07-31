@@ -44,7 +44,7 @@ void CRendererComponent::RegisterEvents(pragma::EntityComponentManager &componen
 	EVENT_RENDER = componentManager.RegisterEvent("EVENT_RENDER",typeid(CRendererComponent));
 }
 
-luabind::object CRendererComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CRendererComponentHandleWrapper>(l);}
+void CRendererComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void CRendererComponent::UpdateRenderSettings() {InvokeEventCallbacks(EVENT_UPDATE_RENDER_SETTINGS);}
 
@@ -114,7 +114,7 @@ bool CRendererComponent::ReloadBloomRenderTarget(uint32_t width)
 void CRendererComponent::EndRendering() {InvokeEventCallbacks(EVENT_END_RENDERING);}
 void CRendererComponent::BeginRendering(const util::DrawSceneInfo &drawSceneInfo)
 {
-	drawSceneInfo.scene.get()->UpdateBuffers(drawSceneInfo.commandBuffer);
+	const_cast<pragma::CSceneComponent*>(drawSceneInfo.scene.get())->UpdateBuffers(drawSceneInfo.commandBuffer);
 	InvokeEventCallbacks(EVENT_BEGIN_RENDERING);
 }
 

@@ -31,7 +31,7 @@ void WIDebugMSAATexture::SetTexture(prosper::Texture &texture)
 	m_msaaTexture = texture.shared_from_this();
 	UpdateResolvedTexture();
 	if(m_hTextureRect.IsValid() && m_resolvedTexture != nullptr)
-		m_hTextureRect.get<WITexturedRect>()->SetTexture(*m_resolvedTexture);
+		static_cast<WITexturedRect*>(m_hTextureRect.get())->SetTexture(*m_resolvedTexture);
 }
 
 void WIDebugMSAATexture::UpdateResolvedTexture()

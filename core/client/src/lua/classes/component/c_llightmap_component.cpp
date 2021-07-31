@@ -8,6 +8,9 @@
 #include "stdafx_client.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/lua/libraries/lfile.h"
+#include "pragma/lua/policies/file_policy.hpp"
+#include "pragma/lua/policies/optional_policy.hpp"
+#include "pragma/lua/policies/property_policy.hpp"
 #include <util_image_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <texturemanager/texturemanager.h>
@@ -17,44 +20,22 @@ extern DLLCLIENT CEngine *c_engine;
 
 void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 {
-	auto defCLightMap = luabind::class_<CLightMapHandle,BaseEntityComponentHandle>("LightMapComponent");
-	defCLightMap.scope[luabind::def("bake_lightmaps",static_cast<bool(*)(lua_State*,const pragma::CLightMapComponent::LightmapBakeSettings&)>([](lua_State *l,const pragma::CLightMapComponent::LightmapBakeSettings &bakeSettings) -> bool {
-		return pragma::CLightMapComponent::BakeLightmaps(bakeSettings);
-	}))];
-	defCLightMap.scope[luabind::def("import_lightmap_atlas",static_cast<bool(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &path) -> bool {
-		return pragma::CLightMapComponent::ImportLightmapAtlas(path);
-	}))];
-	defCLightMap.scope[luabind::def("import_lightmap_atlas",static_cast<bool(*)(lua_State*,uimg::ImageBuffer&)>([](lua_State *l,uimg::ImageBuffer &imgBuf) -> bool {
-		return pragma::CLightMapComponent::ImportLightmapAtlas(imgBuf);
-	}))];
-	defCLightMap.scope[luabind::def("import_lightmap_atlas",static_cast<bool(*)(lua_State*,LFile&)>([](lua_State *l,LFile &f) -> bool {
-		return pragma::CLightMapComponent::ImportLightmapAtlas(f.GetHandle());
-	}))];
-	defCLightMap.def("GetLightmapTexture",static_cast<void(*)(lua_State*,CLightMapHandle&)>([](lua_State *l,CLightMapHandle &hLightMapC) {
-		pragma::Lua::check_component(l,hLightMapC);
+	auto defCLightMap = luabind::class_<pragma::CLightMapComponent,pragma::BaseEntityComponent>("LightMapComponent");
+	defCLightMap.scope[luabind::def("bake_lightmaps",&pragma::CLightMapComponent::BakeLightmaps)];
+	defCLightMap.scope[luabind::def("import_lightmap_atlas",static_cast<bool(*)(const std::string&)>(&pragma::CLightMapComponent::ImportLightmapAtlas))];
+	defCLightMap.scope[luabind::def("import_lightmap_atlas",static_cast<bool(*)(uimg::ImageBuffer&)>(&pragma::CLightMapComponent::ImportLightmapAtlas))];
+	//defCLightMap.scope[luabind::def("import_lightmap_atlas",static_cast<bool(*)(VFilePtr)>(&pragma::CLightMapComponent::ImportLightmapAtlas),luabind::file_policy<1>{})];
+	defCLightMap.def("GetLightmapTexture",static_cast<std::optional<std::shared_ptr<prosper::Texture>>(*)(lua_State*,CLightMapHandle&)>([](lua_State *l,CLightMapHandle &hLightMapC) -> std::optional<std::shared_ptr<prosper::Texture>> {
 		auto lightMap = hLightMapC->GetLightMap();
 		if(lightMap == nullptr)
-			return;
-		Lua::Push<std::shared_ptr<prosper::Texture>>(l,lightMap);
-		}));
-	defCLightMap.def("ConvertLightmapToBSPLuxelData",static_cast<void(*)(lua_State*,CLightMapHandle&)>([](lua_State *l,CLightMapHandle &hLightMapC) {
-		pragma::Lua::check_component(l,hLightMapC);
-		hLightMapC->ConvertLightmapToBSPLuxelData();
-		}));
-	defCLightMap.def("UpdateLightmapUvBuffers",static_cast<void(*)(lua_State*,CLightMapHandle&)>([](lua_State *l,CLightMapHandle &hLightMapC) {
-		pragma::Lua::check_component(l,hLightMapC);
-		hLightMapC->UpdateLightmapUvBuffers();
-	}));;
-	defCLightMap.def("ReloadLightmapData",static_cast<void(*)(lua_State*,CLightMapHandle&)>([](lua_State *l,CLightMapHandle &hLightMapC) {
-		pragma::Lua::check_component(l,hLightMapC);
-		hLightMapC->ReloadLightMapData();
-	}));
-	defCLightMap.def("SetLightmapAtlas",static_cast<void(*)(lua_State*,CLightMapHandle&,prosper::Texture&)>([](lua_State *l,CLightMapHandle &hLightMapC,prosper::Texture &texture) {
-		pragma::Lua::check_component(l,hLightMapC);
-		hLightMapC->SetLightMapAtlas(texture.shared_from_this());
-	}));
+			return {};
+		return lightMap;
+	}),luabind::optional_policy<0>{});
+	defCLightMap.def("ConvertLightmapToBSPLuxelData",&pragma::CLightMapComponent::ConvertLightmapToBSPLuxelData);
+	defCLightMap.def("UpdateLightmapUvBuffers",&pragma::CLightMapComponent::UpdateLightmapUvBuffers);
+	defCLightMap.def("ReloadLightmapData",&pragma::CLightMapComponent::ReloadLightMapData);
+	defCLightMap.def("SetLightmapAtlas",&pragma::CLightMapComponent::SetLightMapAtlas);
 	defCLightMap.def("SetLightmapAtlas",static_cast<void(*)(lua_State*,CLightMapHandle&,const std::string &path)>([](lua_State *l,CLightMapHandle &hLightMapC,const std::string &path) {
-		pragma::Lua::check_component(l,hLightMapC);
 		auto *nw = c_engine->GetNetworkState(l);
 
 		TextureManager::LoadInfo loadInfo {};
@@ -73,18 +54,9 @@ void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 			return;
 		hLightMapC->SetLightMapAtlas(vkTex);
 	}));
-	defCLightMap.def("SetExposure",static_cast<void(*)(lua_State*,CLightMapHandle&,float)>([](lua_State *l,CLightMapHandle &hLightMapC,float exposure) {
-		pragma::Lua::check_component(l,hLightMapC);
-		hLightMapC->SetLightMapExposure(exposure);
-	}));
-	defCLightMap.def("GetExposure",static_cast<float(*)(lua_State*,CLightMapHandle&)>([](lua_State *l,CLightMapHandle &hLightMapC) -> float {
-		pragma::Lua::check_component(l,hLightMapC);
-		return hLightMapC->GetLightMapExposure();
-	}));
-	defCLightMap.def("GetExposureProperty",static_cast<void(*)(lua_State*,CLightMapHandle&)>([](lua_State *l,CLightMapHandle &hLightMapC) {
-		pragma::Lua::check_component(l,hLightMapC);
-		Lua::Property::push(l,*hLightMapC->GetLightMapExposureProperty());
-	}));
+	defCLightMap.def("SetExposure",&pragma::CLightMapComponent::SetLightMapExposure);
+	defCLightMap.def("GetExposure",&pragma::CLightMapComponent::GetLightMapExposure);
+	defCLightMap.def("GetExposureProperty",&pragma::CLightMapComponent::GetLightMapExposureProperty,luabind::property_policy<0>{});
 
 	auto defLightmapBakeSettings = luabind::class_<pragma::CLightMapComponent::LightmapBakeSettings>("BakeSettings");
 	defLightmapBakeSettings.def(luabind::constructor<>());
@@ -126,10 +98,7 @@ void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 
 	entsMod[defCLightMap];
 
-	auto defCLightMapReceiver = luabind::class_<CLightMapReceiverHandle,BaseEntityComponentHandle>("LightMapReceiverComponent");
-	defCLightMapReceiver.def("UpdateLightmapUvData",static_cast<void(*)(lua_State*,CLightMapReceiverHandle&)>([](lua_State *l,CLightMapReceiverHandle &hLightMapReceiverC) {
-		pragma::Lua::check_component(l,hLightMapReceiverC);
-		hLightMapReceiverC->UpdateLightMapUvData();
-	}));
+	auto defCLightMapReceiver = luabind::class_<pragma::CLightMapReceiverComponent,pragma::BaseEntityComponent>("LightMapReceiverComponent");
+	defCLightMapReceiver.def("UpdateLightmapUvData",&pragma::CLightMapReceiverComponent::UpdateLightMapUvData);
 	entsMod[defCLightMapReceiver];
 }

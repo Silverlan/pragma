@@ -22,7 +22,7 @@ void CEnvTimescaleComponent::ReceiveData(NetPacket &packet)
 	m_kvInnerRadius = packet->Read<float>();
 	m_kvOuterRadius = packet->Read<float>();
 }
-luabind::object CEnvTimescaleComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CEnvTimescaleComponentHandleWrapper>(l);}
+void CEnvTimescaleComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 //////////
 

@@ -32,7 +32,7 @@ void SExplosionComponent::Explode()
 	BaseEnvExplosionComponent::Explode();
 }
 
-luabind::object SExplosionComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SExplosionComponentHandleWrapper>(l);}
+void SExplosionComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void EnvExplosion::Initialize()
 {

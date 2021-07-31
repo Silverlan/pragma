@@ -233,7 +233,7 @@ std::shared_ptr<Model> CParticleSystemComponent::GenerateModel() const
 	return GenerateModel(game,particleSystems);
 }
 
-luabind::object CParticleSystemComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CParticleSystemComponentHandleWrapper>(l);}
+void CParticleSystemComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 bool CParticleSystemComponent::LoadFromAssetData(CParticleSystemData &ptData,const udm::AssetData &data,std::string &outErr)
 {

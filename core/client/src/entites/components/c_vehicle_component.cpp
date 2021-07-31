@@ -70,7 +70,7 @@ void CVehicleComponent::ReceiveSnapshotData(NetPacket &packet)
 	}
 }
 
-luabind::object CVehicleComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CVehicleHandle>(l);}
+void CVehicleComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void CVehicleComponent::ReadWheelInfo(NetPacket &packet)
 {

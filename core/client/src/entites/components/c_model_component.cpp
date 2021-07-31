@@ -20,7 +20,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 
 ComponentEventId CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED = INVALID_COMPONENT_ID;
-luabind::object CModelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CModelComponentHandleWrapper>(l);}
+void CModelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CModelComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	BaseModelComponent::RegisterEvents(componentManager);

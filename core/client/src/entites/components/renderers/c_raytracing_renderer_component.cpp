@@ -17,7 +17,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(raytracing_renderer,CRaytracingRenderer);
 
-luabind::object CRaytracingRendererComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CRaytracingRendererComponentHandleWrapper>(l);}
+void CRaytracingRendererComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 ////////
 

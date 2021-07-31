@@ -139,7 +139,7 @@ void CLightSpotComponent::SetConeStartOffset(float offset)
 	if(renderBuffer != nullptr)
 		c_engine->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer,offsetof(LightBufferData,direction) +offsetof(Vector4,w),offset);
 }
-luabind::object CLightSpotComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CLightSpotComponentHandleWrapper>(l);}
+void CLightSpotComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CLightSpotComponent::UpdateTransformMatrix()
 {
 	auto pLightComponent = GetEntity().GetComponent<pragma::CLightComponent>();

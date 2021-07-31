@@ -17,11 +17,8 @@
 #include "pragma/entities/components/base_physics_component.hpp"
 #include <sharedutils/magic_enum.hpp>
 
-DEFINE_BASE_HANDLE(DLLNETWORK,PhysObj,PhysObj);
-
 PhysObj::PhysObj(pragma::BaseEntityComponent *owner)
-	: m_handle(new PtrPhysObj(this)),
-	m_collisionFilterGroup(CollisionMask::None),m_collisionFilterMask(CollisionMask::None)
+	: pragma::BaseLuaHandle{},m_collisionFilterGroup(CollisionMask::None),m_collisionFilterMask(CollisionMask::None)
 {
 	m_owner = owner->GetHandle<pragma::BaseEntityComponent>();
 	m_networkState = owner->GetEntity().GetNetworkState();
@@ -40,6 +37,10 @@ PhysObj::PhysObj(pragma::BaseEntityComponent *owner,const std::vector<pragma::ph
 		AddCollisionObject(*objects[i]);
 }
 bool PhysObj::Initialize() {return true;}
+void PhysObj::InitializeLuaObject(lua_State *lua)
+{
+
+}
 void PhysObj::OnCollisionObjectWake(pragma::physics::ICollisionObject &o)
 {
 	if(m_colObjAwakeCount++ == 0)
@@ -148,7 +149,7 @@ pragma::physics::ICollisionObject *PhysObj::GetCollisionObject()
 
 PhysObj::~PhysObj()
 {
-	m_handle.Invalidate();
+	pragma::BaseLuaHandle::InvalidateHandle();
 	//NetworkState *state = m_networkState;
 	for(unsigned int i=0;i<m_collisionObjects.size();i++)
 	{
@@ -192,7 +193,7 @@ float PhysObj::GetAngularSleepingThreshold() const {return 0.f;}
 
 void PhysObj::Simulate(double,bool) {}
 
-PhysObjHandle PhysObj::GetHandle() const {return m_handle;}
+PhysObjHandle PhysObj::GetHandle() const {return pragma::BaseLuaHandle::GetHandle<PhysObj>();}
 
 void PhysObj::SetPosition(const Vector3 &pos)
 {

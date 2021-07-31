@@ -15,7 +15,7 @@ void COwnableComponent::ReceiveData(NetPacket &packet)
 {
 	SetOwner(nwm::read_entity(packet));
 }
-luabind::object COwnableComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<COwnableComponentHandleWrapper>(l);}
+void COwnableComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 Bool COwnableComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
 {

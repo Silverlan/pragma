@@ -17,7 +17,7 @@ using namespace pragma;
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 
-luabind::object CShooterComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CShooterComponentHandleWrapper>(l);}
+void CShooterComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CShooterComponent::FireBullets(const BulletInfo &bulletInfo,const Vector3 &origin,const Vector3 &effectsOrigins,const std::vector<Vector3> &destPositions,bool bTransmitToServer,std::vector<TraceResult> &outHitTargets)
 {
 	auto *physEnv = c_game->GetPhysicsEnvironment();

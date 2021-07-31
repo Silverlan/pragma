@@ -44,7 +44,7 @@ namespace luabind {
 	}
 
 	template<unsigned int N>
-	using game_policy = meta::type_list< converter_policy_injector< N, detail::game_policy > >();
+	using game_policy = meta::type_list< converter_policy_injector< N, detail::game_policy > >;
 
 } // namespace luabind
 

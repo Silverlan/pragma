@@ -334,12 +334,12 @@ CEOnOwnerChanged::CEOnOwnerChanged(BaseEntity *oldOwner,BaseEntity *newOwner)
 void CEOnOwnerChanged::PushArguments(lua_State *l)
 {
 	if(oldOwner != nullptr)
-		oldOwner->GetLuaObject()->push(l);
+		oldOwner->GetLuaObject().push(l);
 	else
 		Lua::PushNil(l);
 
 	if(newOwner != nullptr)
-		newOwner->GetLuaObject()->push(l);
+		newOwner->GetLuaObject().push(l);
 	else
 		Lua::PushNil(l);
 }

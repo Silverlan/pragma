@@ -15,7 +15,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(skybox,Skybox);
 
-luabind::object SSkyboxComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SSkyboxComponentHandleWrapper>(l);}
+void SSkyboxComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void SSkyboxComponent::SetSkyAngles(const EulerAngles &ang)
 {

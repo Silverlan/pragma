@@ -13,7 +13,7 @@
 using namespace pragma;
 
 extern DLLCLIENT CGame *c_game;
-luabind::object CObservableComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<CObservableComponentHandleWrapper>(l);}
+void CObservableComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CObservableComponent::ReceiveData(NetPacket &packet)
 {
 	constexpr auto numTypes = umath::to_integral(CameraType::Count);

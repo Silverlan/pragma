@@ -24,7 +24,7 @@ namespace pragma
 		CKinematicComponent(BaseEntity &ent) : BaseFuncKinematicComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
 		virtual void OnEntitySpawn() override;

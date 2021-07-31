@@ -18,7 +18,7 @@ using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(env_fog_controller,EnvFogController);
 
-luabind::object SFogControllerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SFogControllerComponentHandleWrapper>(l);}
+void SFogControllerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void SFogControllerComponent::SetFogStart(float start)
 {
 	BaseEnvFogControllerComponent::SetFogStart(start);

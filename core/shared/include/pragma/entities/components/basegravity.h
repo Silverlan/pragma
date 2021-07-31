@@ -56,7 +56,7 @@ namespace pragma
 		virtual Vector3 GetGravityForce() const override;
 
 		bool CalcBallisticVelocity(const Vector3 &origin,const Vector3 &destPos,float fireAngle,float maxSpeed,float spread,float maxPitch,float maxYaw,Vector3 &vel) const;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	private:
 		void OnPhysicsInitialized();
 		void ApplyGravity(double dt);

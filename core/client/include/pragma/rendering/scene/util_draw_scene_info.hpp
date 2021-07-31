@@ -11,6 +11,7 @@
 #include "pragma/rendering/c_renderflags.h"
 #include "pragma/rendering/c_settings.hpp"
 #include "pragma/rendering/render_stats.hpp"
+#include <sharedutils/util_shared_handle.hpp>
 #include <memory>
 #include <optional>
 #include <functional>
@@ -54,7 +55,7 @@ namespace util
 			renderStats = other.renderStats ? std::make_unique<RenderStats>(*other.renderStats) : nullptr;
 			return *this;
 		}
-		util::WeakHandle<::pragma::CSceneComponent> scene = {};
+		util::TWeakSharedHandle<::pragma::CSceneComponent> scene = util::TWeakSharedHandle<::pragma::CSceneComponent>{};
 		mutable std::shared_ptr<prosper::IPrimaryCommandBuffer> commandBuffer = nullptr;
 		std::shared_ptr<prosper::RenderTarget> renderTarget = nullptr;
 		FRender renderFlags = FRender::All;

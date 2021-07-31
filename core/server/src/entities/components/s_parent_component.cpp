@@ -14,4 +14,4 @@ void SParentComponent::Initialize()
 {
 	BaseParentComponent::Initialize();
 }
-luabind::object SParentComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SParentComponentHandleWrapper>(l);}
+void SParentComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}

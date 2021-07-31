@@ -27,7 +27,7 @@ namespace pragma
 		virtual std::shared_ptr<ALSound> EmitSharedSound(const std::string &snd,ALSoundType type,float gain=1.f,float pitch=1.f) override;
 		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 	};
 };
 

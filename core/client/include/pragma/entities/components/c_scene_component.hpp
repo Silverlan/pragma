@@ -219,11 +219,11 @@ namespace pragma
 		virtual void OnRemove() override;
 		virtual ~CSceneComponent() override;
 
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 
 		void Setup(const CreateInfo &createInfo,SceneIndex sceneIndex);
-		const util::WeakHandle<pragma::CCameraComponent> &GetActiveCamera() const;
-		util::WeakHandle<pragma::CCameraComponent> &GetActiveCamera();
+		const ComponentHandle<pragma::CCameraComponent> &GetActiveCamera() const;
+		ComponentHandle<pragma::CCameraComponent> &GetActiveCamera();
 		void SetActiveCamera(pragma::CCameraComponent &cam);
 		void SetActiveCamera();
 
@@ -277,8 +277,8 @@ namespace pragma
 
 		void BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo);
 
-		const std::vector<util::WeakHandle<pragma::CLightComponent>> &GetPreviouslyVisibleShadowedLights() const {return m_previouslyVisibleShadowedLights;}
-		void SwapPreviouslyVisibleLights(std::vector<util::WeakHandle<pragma::CLightComponent>> &&components) {std::swap(m_previouslyVisibleShadowedLights,components);}
+		const std::vector<ComponentHandle<pragma::CLightComponent>> &GetPreviouslyVisibleShadowedLights() const {return m_previouslyVisibleShadowedLights;}
+		void SwapPreviouslyVisibleLights(std::vector<ComponentHandle<pragma::CLightComponent>> &&components) {std::swap(m_previouslyVisibleShadowedLights,components);}
 		
 		void RecordRenderCommandBuffers(const util::DrawSceneInfo &drawSceneInfo);
 	private:
@@ -300,9 +300,9 @@ namespace pragma
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_camViewDescSetGroup = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_shadowDsg = nullptr;
 
-		std::vector<util::WeakHandle<pragma::CLightComponent>> m_previouslyVisibleShadowedLights;
-		util::WeakHandle<pragma::CLightMapComponent> m_lightMap = {};
-		util::WeakHandle<pragma::CCameraComponent> m_camera = {};
+		std::vector<ComponentHandle<pragma::CLightComponent>> m_previouslyVisibleShadowedLights;
+		ComponentHandle<pragma::CLightMapComponent> m_lightMap = {};
+		ComponentHandle<pragma::CCameraComponent> m_camera = {};
 		std::shared_ptr<prosper::IBuffer> m_cameraBuffer = nullptr;
 		std::shared_ptr<prosper::IBuffer> m_cameraViewBuffer = nullptr;
 
@@ -323,7 +323,7 @@ namespace pragma
 		CallbackHandle m_cbLink {};
 
 		StateFlags m_stateFlags = StateFlags::None;
-		util::WeakHandle<CRendererComponent> m_renderer {};
+		ComponentHandle<CRendererComponent> m_renderer = ComponentHandle<CRendererComponent>{};
 		SceneRenderDesc m_sceneRenderDesc;
 
 		void UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,bool bView=false);

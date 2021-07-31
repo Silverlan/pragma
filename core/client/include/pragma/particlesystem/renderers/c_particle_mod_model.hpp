@@ -9,6 +9,7 @@
 #define __C_PARTICLE_MOD_MODEL_HPP__
 
 #include "pragma/particlesystem/renderers/c_particle_renderer_rotational_buffer.hpp"
+#include <pragma/types.hpp>
 
 namespace pragma
 {
@@ -34,7 +35,7 @@ protected:
 
 	struct ParticleModelComponent
 	{
-		util::WeakHandle<pragma::CAnimatedComponent> animatedComponent;
+		pragma::ComponentHandle<pragma::CAnimatedComponent> animatedComponent;
 		std::shared_ptr<prosper::IDescriptorSetGroup> instanceDescSetGroupAnimated;
 	};
 	ParticleModelComponent &GetParticleComponent(uint32_t particleIdx);

@@ -24,7 +24,7 @@ void SPointConstraintFixedComponent::SendData(NetPacket &packet,networking::Clie
 	nwm::write_vector(packet,m_posTarget);
 }
 
-luabind::object SPointConstraintFixedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<SPointConstraintFixedComponentHandleWrapper>(l);}
+void SPointConstraintFixedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void PointConstraintFixed::Initialize()
 {

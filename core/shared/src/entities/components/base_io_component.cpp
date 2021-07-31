@@ -242,11 +242,11 @@ void CEInputData::PushArguments(lua_State *l)
 {
 	Lua::PushString(l,input);
 	if(activator != nullptr)
-		activator->GetLuaObject()->push(l);
+		activator->GetLuaObject().push(l);
 	else
 		Lua::PushNil(l);
 	if(caller != nullptr)
-		caller->GetLuaObject()->push(l);
+		caller->GetLuaObject().push(l);
 	else
 		Lua::PushNil(l);
 	Lua::PushString(l,data);

@@ -19,7 +19,7 @@ namespace pragma
 	{
 	public:
 		CBSPLeafComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 
 		void SetLeaves(const std::vector<uint16_t> &leaves);
 		bool GetLeafVisibility(uint16_t leafIdx) const;

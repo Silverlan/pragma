@@ -9,5 +9,4 @@
 #include "pragma/networkdefinitions.h"
 #include "pragma/lua/ldefinitions.h"
 #include <sharedutils/util_shaderinfo.hpp>
-DLLNETWORK std::string Lua_ShaderInfo_GetName(lua_State *l,util::ShaderInfo *shader);
 #endif

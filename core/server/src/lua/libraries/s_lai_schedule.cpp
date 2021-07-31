@@ -167,7 +167,7 @@ void Lua::AISchedule::GetParameterEntity(lua_State *l,pragma::ai::Schedule &sche
 	//LUA_CHECK_ENTITY(l,def);
 	auto *r = get_parameter<const BaseEntity*>(schedule,paramIdx,::pragma::ai::Schedule::Parameter::Type::Entity,&::pragma::ai::BehaviorParameter::GetEntity,def.get());
 	if(r != nullptr)
-		const_cast<BaseEntity*>(r)->GetLuaObject()->push(l);
+		const_cast<BaseEntity*>(r)->GetLuaObject().push(l);
 }
 void Lua::AISchedule::GetParameterEntity(lua_State *l,pragma::ai::Schedule &schedule,uint8_t paramIdx)
 {

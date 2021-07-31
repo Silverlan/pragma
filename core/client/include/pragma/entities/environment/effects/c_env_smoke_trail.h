@@ -26,11 +26,11 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
-		virtual luabind::object InitializeLuaObject(lua_State *l) override;
+		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual void OnEntitySpawn() override;
 	protected:
-		util::WeakHandle<CParticleSystemComponent> m_hParticle = {};
+		ComponentHandle<CParticleSystemComponent> m_hParticle = {};
 		void InitializeParticle();
 		void DestroyParticle();
 	};

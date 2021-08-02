@@ -9,6 +9,7 @@
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/particlesystem/operators/c_particle_mod_operator_texture_scrolling.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <mathutil/umath.h>
 #include <pragma/math/vector/wvvector3.h>
 #include <sharedutils/util_string.h>

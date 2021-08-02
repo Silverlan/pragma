@@ -5,6 +5,7 @@
  * Copyright (c) 2021 Silverlan
  */
 
+#if 0
 #include "stdafx_shared.h"
 #include "pragma/lua/policies/pair_policy.hpp"
 #include "pragma/lua/policies/tuple_policy.hpp"
@@ -206,3 +207,4 @@ __declspec(dllexport) void test_lua_policies(lua_State *l)
 
 }
 #pragma optimize("",on)
+#endif

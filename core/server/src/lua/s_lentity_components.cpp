@@ -8,7 +8,69 @@
 #include "pragma/game/s_game.h"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/lua/s_lentity_components.hpp"
+#include "pragma/entities/components/s_sound_emitter_component.hpp"
 #include "pragma/networking/recipient_filter.hpp"
+#include "pragma/entities/components/s_ai_component.hpp"
+#include "pragma/entities/components/s_character_component.hpp"
+#include "pragma/entities/components/s_color_component.hpp"
+#include "pragma/entities/components/s_score_component.hpp"
+#include "pragma/entities/components/s_flammable_component.hpp"
+#include "pragma/entities/components/s_health_component.hpp"
+#include "pragma/entities/components/s_name_component.hpp"
+#include "pragma/entities/components/s_networked_component.hpp"
+#include "pragma/entities/components/s_observable_component.hpp"
+#include "pragma/entities/components/s_physics_component.hpp"
+#include "pragma/entities/components/s_radius_component.hpp"
+#include "pragma/entities/components/s_render_component.hpp"
+#include "pragma/entities/components/s_sound_emitter_component.hpp"
+#include "pragma/entities/components/s_toggle_component.hpp"
+#include "pragma/entities/components/s_transform_component.hpp"
+#include "pragma/entities/components/s_vehicle_component.hpp"
+#include "pragma/entities/components/s_weapon_component.hpp"
+#include "pragma/entities/components/s_wheel_component.hpp"
+#include "pragma/entities/components/s_player_component.hpp"
+#include "pragma/entities/environment/audio/s_env_sound_dsp.h"
+#include "pragma/entities/environment/audio/s_env_sound_dsp_chorus.h"
+#include "pragma/entities/environment/audio/s_env_sound_dsp_distortion.h"
+#include "pragma/entities/environment/audio/s_env_sound_dsp_eaxreverb.h"
+#include "pragma/entities/environment/audio/s_env_sound_dsp_echo.h"
+#include "pragma/entities/environment/audio/s_env_sound_dsp_equalizer.h"
+#include "pragma/entities/environment/audio/s_env_sound_dsp_flanger.h"
+#include "pragma/entities/environment/s_env_camera.h"
+#include "pragma/entities/environment/effects/s_env_explosion.h"
+#include "pragma/entities/environment/effects/s_env_fire.h"
+#include "pragma/entities/environment/s_env_decal.h"
+#include "pragma/entities/environment/s_env_fog_controller.h"
+#include "pragma/entities/environment/lights/s_env_light.h"
+#include "pragma/entities/environment/lights/s_env_light_directional.h"
+#include "pragma/entities/environment/lights/s_env_light_point.h"
+#include "pragma/entities/environment/lights/s_env_light_spot.h"
+#include "pragma/entities/environment/lights/s_env_light_spot_vol.h"
+#include "pragma/entities/environment/s_env_microphone.h"
+#include "pragma/entities/environment/effects/s_env_particle_system.h"
+#include "pragma/entities/environment/s_env_quake.h"
+#include "pragma/entities/environment/effects/s_env_smoke_trail.h"
+#include "pragma/entities/environment/audio/s_env_sound.h"
+#include "pragma/entities/environment/audio/s_env_soundscape.h"
+#include "pragma/entities/environment/effects/s_env_sprite.h"
+#include "pragma/entities/environment/s_env_wind.hpp"
+#include "pragma/entities/filter/s_filter_entity_class.h"
+#include "pragma/entities/filter/s_filter_entity_name.h"
+#include "pragma/entities/func/s_func_brush.h"
+#include "pragma/entities/func/s_func_kinematic.hpp"
+#include "pragma/entities/func/s_func_physics.h"
+#include "pragma/entities/func/s_func_softphysics.hpp"
+#include "pragma/entities/func/s_func_portal.h"
+#include "pragma/entities/func/s_func_water.h"
+#include "pragma/entities/func/s_funcbutton.h"
+#include "pragma/entities/game_player_spawn.h"
+#include "pragma/entities/logic/s_logic_relay.h"
+#include "pragma/entities/s_bot.h"
+#include "pragma/entities/components/s_shooter_component.hpp"
+#include "pragma/entities/components/s_entity_component.hpp"
+#include "pragma/entities/components/s_time_scale_component.hpp"
+#include "pragma/entities/components/s_gamemode_component.hpp"
+#include "pragma/entities/environment/s_env_timescale.h"
 #include <pragma/physics/raytraces.h>
 #include <pragma/model/model.h>
 #include <pragma/model/modelmesh.h>
@@ -36,25 +98,21 @@ namespace Lua
 void SGame::RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityComponent> &def)
 {
 	Game::RegisterLuaEntityComponent(def);
-	def.def("SendNetEvent",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,uint32_t,uint32_t,NetPacket&,pragma::networking::TargetRecipientFilter&)>(
-		[](lua_State *l,BaseEntityComponentHandle &hComponent,uint32_t protocol,uint32_t eventId,NetPacket &packet,pragma::networking::TargetRecipientFilter &rf) {
-			pragma::Lua::check_component(l,hComponent);
-			static_cast<SBaseEntity&>(hComponent->GetEntity()).SendNetEvent(eventId,packet,static_cast<pragma::networking::Protocol>(protocol),rf);
+	def.def("SendNetEvent",static_cast<void(*)(lua_State*,pragma::BaseEntityComponent&,uint32_t,uint32_t,NetPacket&,pragma::networking::TargetRecipientFilter&)>(
+		[](lua_State *l,pragma::BaseEntityComponent &hComponent,uint32_t protocol,uint32_t eventId,NetPacket &packet,pragma::networking::TargetRecipientFilter &rf) {
+			static_cast<SBaseEntity&>(hComponent.GetEntity()).SendNetEvent(eventId,packet,static_cast<pragma::networking::Protocol>(protocol),rf);
 	}));
-	def.def("SendNetEvent",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,uint32_t,uint32_t,NetPacket&)>(
-		[](lua_State *l,BaseEntityComponentHandle &hComponent,uint32_t protocol,uint32_t eventId,NetPacket &packet) {
-			pragma::Lua::check_component(l,hComponent);
-			static_cast<SBaseEntity&>(hComponent->GetEntity()).SendNetEvent(eventId,packet,static_cast<pragma::networking::Protocol>(protocol));
+	def.def("SendNetEvent",static_cast<void(*)(lua_State*,pragma::BaseEntityComponent&,uint32_t,uint32_t,NetPacket&)>(
+		[](lua_State *l,pragma::BaseEntityComponent &hComponent,uint32_t protocol,uint32_t eventId,NetPacket &packet) {
+			static_cast<SBaseEntity&>(hComponent.GetEntity()).SendNetEvent(eventId,packet,static_cast<pragma::networking::Protocol>(protocol));
 	}));
-	def.def("SendNetEvent",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,uint32_t,uint32_t)>(
-		[](lua_State *l,BaseEntityComponentHandle &hComponent,uint32_t protocol,uint32_t eventId) {
-			pragma::Lua::check_component(l,hComponent);
-			static_cast<SBaseEntity&>(hComponent->GetEntity()).SendNetEvent(eventId,static_cast<pragma::networking::Protocol>(protocol));
+	def.def("SendNetEvent",static_cast<void(*)(lua_State*,pragma::BaseEntityComponent&,uint32_t,uint32_t)>(
+		[](lua_State *l,pragma::BaseEntityComponent &hComponent,uint32_t protocol,uint32_t eventId) {
+			static_cast<SBaseEntity&>(hComponent.GetEntity()).SendNetEvent(eventId,static_cast<pragma::networking::Protocol>(protocol));
 	}));
-	def.def("SendNetEvent",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,uint32_t,NetPacket&)>(
-		[](lua_State *l,BaseEntityComponentHandle &hComponent,uint32_t eventId,NetPacket &packet) {
-			pragma::Lua::check_component(l,hComponent);
-			static_cast<SBaseEntity&>(hComponent->GetEntity()).SendNetEvent(eventId,packet);
+	def.def("SendNetEvent",static_cast<void(*)(lua_State*,pragma::BaseEntityComponent&,uint32_t,NetPacket&)>(
+		[](lua_State *l,pragma::BaseEntityComponent &hComponent,uint32_t eventId,NetPacket &packet) {
+			static_cast<SBaseEntity&>(hComponent.GetEntity()).SendNetEvent(eventId,packet);
 	}));
 }
 void RegisterLuaEntityComponents2(lua_State *l,luabind::module_ &entsMod);

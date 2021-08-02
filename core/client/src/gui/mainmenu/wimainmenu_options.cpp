@@ -22,6 +22,7 @@
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/rendering/c_msaa.h"
 #include "pragma/rendering/render_apis.hpp"
+#include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/localization.h"
 #include <sharedutils/util_string.h>
 #include "pragma/rendering/c_settings.hpp"

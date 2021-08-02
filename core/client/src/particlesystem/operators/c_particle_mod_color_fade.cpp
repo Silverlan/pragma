@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/particlesystem/operators/c_particle_mod_color_fade.h"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 
 REGISTER_PARTICLE_OPERATOR(color_fade,CParticleOperatorColorFade);
 

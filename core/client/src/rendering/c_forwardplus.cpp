@@ -15,6 +15,9 @@
 #include "pragma/rendering/shaders/c_shader_forwardp_light_indexing.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/console/c_cvar.h"
 #include <wgui/types/wirect.h>
 #include <prosper_util.hpp>

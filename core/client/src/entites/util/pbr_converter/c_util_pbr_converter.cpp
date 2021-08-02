@@ -29,9 +29,11 @@
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
+#include <pragma/entities/components/logic_component.hpp>
 #include <util_texture_info.hpp>
 #include <pragma/model/modelmanager.h>
 #include <cmaterialmanager.h>
+#include <cmaterial.h>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

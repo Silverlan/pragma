@@ -32,6 +32,7 @@
 #include <pragma/lua/libraries/lengine.h>
 #include <texturemanager/texturemanager.h>
 #include "pragma/lua/classes/c_lwibase.h"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/networking/local_client.hpp"
 #include <pragma/lua/lua_error_handling.hpp>
 #include <pragma/lua/libraries/lutil.hpp>

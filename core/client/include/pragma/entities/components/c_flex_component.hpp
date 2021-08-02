@@ -13,6 +13,7 @@
 #include <pragma/util/lookup_identifier.hpp>
 #include <pragma/entities/components/base_flex_component.hpp>
 
+struct Eyeball;
 namespace pragma
 {
 	class DLLCLIENT CFlexComponent final

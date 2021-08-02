@@ -7,6 +7,7 @@
 
 #include "stdafx_shared.h"
 #include <pragma/game/game.h>
+#include "pragma/entities/components/basetoggle.h"
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/lua/classes/ldef_quaternion.h"
 #include "pragma/lua/classes/ldef_entity.h"
@@ -19,6 +20,25 @@
 #include "pragma/lua/classes/ldef_surface_material.h"
 #include "pragma/lua/classes/lanimation.h"
 #include "pragma/model/animation/play_animation_flags.hpp"
+#include "pragma/entities/components/logic_component.hpp"
+#include "pragma/entities/components/usable_component.hpp"
+#include "pragma/entities/components/base_io_component.hpp"
+#include "pragma/entities/components/base_color_component.hpp"
+#include "pragma/entities/components/base_animated_component.hpp"
+#include "pragma/entities/components/base_sound_emitter_component.hpp"
+#include "pragma/entities/components/base_model_component.hpp"
+#include "pragma/entities/components/base_actor_component.hpp"
+#include "pragma/entities/components/base_physics_component.hpp"
+#include "pragma/entities/components/base_character_component.hpp"
+#include "pragma/entities/trigger/base_trigger_touch.hpp"
+#include "pragma/entities/components/damageable_component.hpp"
+#include "pragma/entities/components/base_ownable_component.hpp"
+#include "pragma/entities/components/base_weapon_component.hpp"
+#include "pragma/entities/components/base_health_component.hpp"
+#include "pragma/entities/components/base_radius_component.hpp"
+#include "pragma/entities/components/base_attachable_component.hpp"
+#include "pragma/entities/components/submergible_component.hpp"
+#include "pragma/entities/func/basefuncwater.h"
 
 bool Game::InjectEntityEvent(pragma::BaseEntityComponent &component,uint32_t eventId,int32_t argsIdx) {return InvokeEntityEvent(component,eventId,argsIdx,true);}
 bool Game::BroadcastEntityEvent(pragma::BaseEntityComponent &component,uint32_t eventId,int32_t argsIdx) {return InvokeEntityEvent(component,eventId,argsIdx,false);}
@@ -29,10 +49,9 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t eve
 	{
 		Lua::PushInt(l,1);
 		Lua::GetTableValue(l,argsIdx);
-		auto &componentHandle = Lua::Check<BaseEntityComponentHandle>(l,-1);
-		Lua::CheckComponentHandle(l,componentHandle);
+		auto &componentHandle = Lua::Check<pragma::BaseEntityComponent>(l,-1);
 		Lua::Pop(l,1);
-		pragma::CEOnEntityComponentAdded evData{*componentHandle.get()};
+		pragma::CEOnEntityComponentAdded evData{componentHandle};
 		if(bInject)
 			component.InjectEvent(eventId,evData);
 		else
@@ -42,10 +61,9 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t eve
 	{
 		Lua::PushInt(l,1);
 		Lua::GetTableValue(l,argsIdx);
-		auto &componentHandle = Lua::Check<BaseEntityComponentHandle>(l,-1);
-		pragma::Lua::check_component(l,componentHandle);
+		auto &componentHandle = Lua::Check<pragma::BaseEntityComponent>(l,-1);
 		Lua::Pop(l,1);
-		pragma::CEOnEntityComponentRemoved evData{*componentHandle.get()};
+		pragma::CEOnEntityComponentRemoved evData{componentHandle};
 		if(bInject)
 			component.InjectEvent(eventId,evData);
 		else

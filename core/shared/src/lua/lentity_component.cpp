@@ -14,6 +14,7 @@
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/components/base_vehicle_component.hpp"
 #include "pragma/entities/components/base_weapon_component.hpp"
+#include "pragma/lua/policies/game_object_policy.hpp"
 #include "pragma/lua/l_entity_handles.hpp"
 #include "pragma/lua/lua_entity_component.hpp"
 #include "pragma/lua/classes/lproperty.hpp"
@@ -29,22 +30,15 @@ namespace Lua
 {
 	namespace BaseEntityComponent
 	{
-		static void GetEntity(lua_State *l,BaseEntityComponentHandle &component);
-		static void GetComponentId(lua_State *l,BaseEntityComponentHandle &component);
-		static void GetName(lua_State *l,BaseEntityComponentHandle &component);
+		static std::string GetName(lua_State *l,pragma::BaseEntityComponent &component);
 	};
 };
 void Game::RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityComponent> &def)
 {
-	def.def("BroadcastEvent",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,uint32_t)>([](lua_State *l,BaseEntityComponentHandle &hComponent,uint32_t eventId) {
-		pragma::Lua::check_component(l,hComponent);
-		hComponent->BroadcastEvent(eventId);
-	}));
-	def.def("BroadcastEvent",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,uint32_t,luabind::object)>([](lua_State *l,BaseEntityComponentHandle &hComponent,uint32_t eventId,luabind::object) {
-		pragma::Lua::check_component(l,hComponent);
-		auto t = 3;
-		Lua::CheckTable(l,t);
-		if(::engine->GetNetworkState(l)->GetGameState()->BroadcastEntityEvent(*hComponent.get(),eventId,t) == false)
+	def.def("BroadcastEvent",static_cast<util::EventReply(pragma::BaseEntityComponent::*)(pragma::ComponentEventId) const>(&pragma::BaseEntityComponent::BroadcastEvent));
+	def.def("BroadcastEvent",static_cast<util::EventReply(*)(lua_State*,pragma::BaseEntityComponent&,uint32_t,const luabind::tableT<void>&)>([](lua_State *l,pragma::BaseEntityComponent &hComponent,uint32_t eventId,const luabind::tableT<void> &eventArgs) {
+		int32_t t = 3;
+		if(::engine->GetNetworkState(l)->GetGameState()->BroadcastEntityEvent(hComponent,eventId,t) == false)
 		{
 			LuaComponentEvent luaEvent {};
 			auto numArgs = Lua::GetObjectLength(l,t);
@@ -56,22 +50,15 @@ void Game::RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityComponen
 				luaEvent.arguments.push_back(luabind::object(luabind::from_stack(l,-1)));
 				Lua::Pop(l,1);
 			}
-			auto handled = hComponent->BroadcastEvent(eventId,luaEvent);
+			auto handled = hComponent.BroadcastEvent(eventId,luaEvent);
 			//hComponent->InvokeEventCallbacks(eventId,luaEvent);
-			Lua::PushInt(l,umath::to_integral(handled));
-			return;
+			return handled;
 		}
-		Lua::PushInt(l,umath::to_integral(util::EventReply::Handled));
+		return util::EventReply::Handled;
 	}));
-	def.def("InvokeEventCallbacks",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,uint32_t)>([](lua_State *l,BaseEntityComponentHandle &hComponent,uint32_t eventId) {
-		pragma::Lua::check_component(l,hComponent);
-		auto handled = hComponent->InvokeEventCallbacks(eventId);
-		Lua::PushInt(l,umath::to_integral(handled));
-	}));
-	def.def("InvokeEventCallbacks",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,uint32_t,luabind::object)>([](lua_State *l,BaseEntityComponentHandle &hComponent,uint32_t eventId,luabind::object) {
-		pragma::Lua::check_component(l,hComponent);
-		auto t = 3;
-		Lua::CheckTable(l,t);
+	def.def("InvokeEventCallbacks",static_cast<util::EventReply(pragma::BaseEntityComponent::*)(pragma::ComponentEventId) const>(&pragma::BaseEntityComponent::InvokeEventCallbacks));
+	def.def("InvokeEventCallbacks",static_cast<util::EventReply(*)(lua_State*,pragma::BaseEntityComponent&,uint32_t,const luabind::tableT<void>&)>([](lua_State *l,pragma::BaseEntityComponent &hComponent,uint32_t eventId,const luabind::tableT<void> &eventArgs) {
+		int32_t t = 3;
 
 		LuaComponentEvent luaEvent {};
 		auto numArgs = Lua::GetObjectLength(l,t);
@@ -83,48 +70,32 @@ void Game::RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityComponen
 			luaEvent.arguments.push_back(luabind::object(luabind::from_stack(l,-1)));
 			Lua::Pop(l,1);
 		}
-		auto handled = hComponent->InvokeEventCallbacks(eventId,luaEvent);
-		Lua::PushInt(l,umath::to_integral(handled));
+		return hComponent.InvokeEventCallbacks(eventId,luaEvent);
 	}));
-	def.def("GetEntity",&Lua::BaseEntityComponent::GetEntity);
-	def.def("GetComponentId",&Lua::BaseEntityComponent::GetComponentId);
-	def.def("SetTickPolicy",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,pragma::TickPolicy)>([](lua_State *l,BaseEntityComponentHandle &hComponent,pragma::TickPolicy tickPolicy) {
-		pragma::Lua::check_component(l,hComponent);
-		hComponent->SetTickPolicy(tickPolicy);
+	def.def("GetEntity",static_cast<BaseEntity&(pragma::BaseEntityComponent::*)()>(&pragma::BaseEntityComponent::GetEntity),luabind::game_object_policy<0>{});
+	def.def("GetComponentId",&pragma::BaseEntityComponent::GetComponentId);
+	def.def("SetTickPolicy",&pragma::BaseEntityComponent::SetTickPolicy);
+	def.def("GetTickPolicy",&pragma::BaseEntityComponent::GetTickPolicy);
+	def.def("GetNextTick",&pragma::BaseEntityComponent::GetNextTick);
+	def.def("SetNextTick",&pragma::BaseEntityComponent::SetNextTick);
+	def.def("IsValid",static_cast<bool(*)(lua_State*,pragma::BaseEntityComponent*)>([](lua_State *l,pragma::BaseEntityComponent *hComponent) {
+		return hComponent != nullptr;
 	}));
-	def.def("GetTickPolicy",static_cast<pragma::TickPolicy(*)(lua_State*,BaseEntityComponentHandle&)>([](lua_State *l,BaseEntityComponentHandle &hComponent) -> pragma::TickPolicy {
-		pragma::Lua::check_component(l,hComponent);
-		return hComponent->GetTickPolicy();
-	}));
-	def.def("GetNextTick",static_cast<double(*)(lua_State*,BaseEntityComponentHandle&)>([](lua_State *l,BaseEntityComponentHandle &hComponent) -> double {
-		pragma::Lua::check_component(l,hComponent);
-		return hComponent->GetNextTick();
-	}));
-	def.def("SetNextTick",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,double)>([](lua_State *l,BaseEntityComponentHandle &hComponent,double dt) {
-		pragma::Lua::check_component(l,hComponent);
-		hComponent->SetNextTick(dt);
-	}));
-	def.def("IsValid",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&)>([](lua_State *l,BaseEntityComponentHandle &hComponent) {
-		Lua::PushBool(l,hComponent.expired() == false);
-	}));
-	def.def("RegisterNetEvent",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&)>([](lua_State *l,BaseEntityComponentHandle &hComponent) {
-		pragma::Lua::check_component(l,hComponent);
-		Lua::PushInt(l,hComponent->SetupNetEvent(Lua::CheckString(l,1)));
+	def.def("RegisterNetEvent",static_cast<void(*)(lua_State*,pragma::BaseEntityComponent&,const std::string&)>([](lua_State *l,pragma::BaseEntityComponent &hComponent,const std::string &eventName) {
+		hComponent.SetupNetEvent(eventName);
 		auto *nw = engine->GetNetworkState(l);
 		auto *game = nw->GetGameState();
-		auto *componentInfo = game->GetEntityComponentManager().GetComponentInfo(hComponent->GetComponentId());
+		auto *componentInfo = game->GetEntityComponentManager().GetComponentInfo(hComponent.GetComponentId());
 		if(componentInfo && umath::is_flag_set(componentInfo->flags,pragma::ComponentFlags::Networked) == false)
 			Con::cwar<<"WARNING: Component '"<<componentInfo->name<<"' has uses net-events, but was not registered as networked, this means networking will be disabled for this component! Set the 'ents.EntityComponent.FREGISTER_BIT_NETWORKED' flag when registering the component to fix this!"<<Con::endl;
 	}));
 	def.def("GetComponentName",&Lua::BaseEntityComponent::GetName);
-	def.def("AddEventCallback",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,uint32_t,luabind::object)>([](lua_State *l,BaseEntityComponentHandle &hComponent,uint32_t eventId,luabind::object oCallback) {
-		pragma::Lua::check_component(l,hComponent);
-		Lua::CheckFunction(l,3);
-		auto hCb = hComponent->AddEventCallback(eventId,[l,oCallback](std::reference_wrapper<pragma::ComponentEvent> ev) -> util::EventReply {
+	def.def("AddEventCallback",static_cast<CallbackHandle(*)(lua_State*,pragma::BaseEntityComponent&,uint32_t,const Lua::func<void>&)>([](lua_State *l,pragma::BaseEntityComponent &hComponent,uint32_t eventId,const Lua::func<void> &function) {
+		auto hCb = hComponent.AddEventCallback(eventId,[l,function](std::reference_wrapper<pragma::ComponentEvent> ev) -> util::EventReply {
 			// We need to create a copy of the lua-state pointer, since the callback can remove itself, which
 			// would also cause the std::function-object to be destroyed (and therefore the captured variables).
 			auto lTmp = l;
-			auto oCallbackTmp = oCallback;
+			auto oCallbackTmp = function;
 
 			auto nstack = Lua::GetStackTop(l);
 			auto c = Lua::CallFunction(l,[&oCallbackTmp,&ev](lua_State *l) -> Lua::StatusCode {
@@ -143,17 +114,12 @@ void Game::RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityComponen
 			}
 			return util::EventReply::Unhandled;
 		});
-		Lua::Push<CallbackHandle>(l,hCb);
+		return hCb;
 	}));
-	def.def("InjectEvent",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,uint32_t)>([](lua_State *l,BaseEntityComponentHandle &hComponent,uint32_t eventId) {
-		pragma::Lua::check_component(l,hComponent);
-		hComponent->InjectEvent(eventId);
-	}));
-	def.def("InjectEvent",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,uint32_t,luabind::object)>([](lua_State *l,BaseEntityComponentHandle &hComponent,uint32_t eventId,luabind::object) {
-		pragma::Lua::check_component(l,hComponent);
-		auto t = 3;
-		Lua::CheckTable(l,t);
-		if(engine->GetNetworkState(l)->GetGameState()->InjectEntityEvent(*hComponent.get(),eventId,t) == false)
+	def.def("InjectEvent",static_cast<util::EventReply(pragma::BaseEntityComponent::*)(pragma::ComponentEventId)>(&pragma::BaseEntityComponent::InjectEvent));
+	def.def("InjectEvent",static_cast<void(*)(lua_State*,pragma::BaseEntityComponent&,uint32_t,const luabind::tableT<void>&)>([](lua_State *l,pragma::BaseEntityComponent &hComponent,uint32_t eventId,const luabind::tableT<void> &eventArgs) {
+		int32_t t = 3;
+		if(engine->GetNetworkState(l)->GetGameState()->InjectEntityEvent(hComponent,eventId,t) == false)
 		{
 			LuaComponentEvent luaEvent {};
 			auto numArgs = Lua::GetObjectLength(l,t);
@@ -165,26 +131,18 @@ void Game::RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityComponen
 				luaEvent.arguments.push_back(luabind::object(luabind::from_stack(l,-1)));
 				Lua::Pop(l,1);
 			}
-			hComponent->InjectEvent(eventId,luaEvent);
+			hComponent.InjectEvent(eventId,luaEvent);
 		}
 	}));
-	def.def("Save",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,udm::LinkedPropertyWrapper&)>([](lua_State *l,BaseEntityComponentHandle &hComponent,udm::LinkedPropertyWrapper &udm) {
-		pragma::Lua::check_component(l,hComponent);
-		hComponent->Save(udm);
-	}));
-	def.def("Load",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,udm::LinkedPropertyWrapper&)>([](lua_State *l,BaseEntityComponentHandle &hComponent,udm::LinkedPropertyWrapper &udm) {
-		pragma::Lua::check_component(l,hComponent);
-		hComponent->Load(udm);
-	}));
-	def.def("Copy",static_cast<void(*)(lua_State*,BaseEntityComponentHandle&,BaseEntityComponentHandle&)>([](lua_State *l,BaseEntityComponentHandle &hComponent,BaseEntityComponentHandle &hComponentOther) {
-		pragma::Lua::check_component(l,hComponent);
-		pragma::Lua::check_component(l,hComponentOther);
-		if(hComponent->GetComponentId() != hComponentOther->GetComponentId() || hComponent.get() == hComponentOther.get())
+	def.def("Save",&pragma::BaseEntityComponent::Save);
+	def.def("Load",static_cast<void(pragma::BaseEntityComponent::*)(udm::LinkedPropertyWrapperArg)>(&pragma::BaseEntityComponent::Load));
+	def.def("Copy",static_cast<void(*)(lua_State*,pragma::BaseEntityComponent&,pragma::BaseEntityComponent&)>([](lua_State *l,pragma::BaseEntityComponent &hComponent,pragma::BaseEntityComponent &hComponentOther) {
+		if(hComponent.GetComponentId() != hComponentOther.GetComponentId() || &hComponent == &hComponentOther)
 			return;
 		auto el = udm::Property::Create<udm::Element>();
 		udm::LinkedPropertyWrapper prop {*el};
-		hComponent->Save(prop);
-		hComponentOther->Load(prop);
+		hComponent.Save(prop);
+		hComponentOther.Load(prop);
 	}));
 	def.add_static_constant("FREGISTER_NONE",umath::to_integral(pragma::ComponentFlags::None));
 	def.add_static_constant("FREGISTER_BIT_NETWORKED",umath::to_integral(pragma::ComponentFlags::Networked));
@@ -192,23 +150,11 @@ void Game::RegisterLuaEntityComponent(luabind::class_<pragma::BaseEntityComponen
 	def.add_static_constant("CALLBACK_TYPE_ENTITY",umath::to_integral(pragma::BaseEntityComponent::CallbackType::Entity));
 	def.add_static_constant("CALLBACK_TYPE_COMPONENT",umath::to_integral(pragma::BaseEntityComponent::CallbackType::Component));
 }
-void Lua::BaseEntityComponent::GetEntity(lua_State *l,BaseEntityComponentHandle &component)
+std::string Lua::BaseEntityComponent::GetName(lua_State *l,pragma::BaseEntityComponent &component)
 {
-	pragma::Lua::check_component(l,component);
-	auto &ent = component->GetEntity();
-	ent.GetLuaObject().push(l);
-}
-void Lua::BaseEntityComponent::GetComponentId(lua_State *l,BaseEntityComponentHandle &component)
-{
-	pragma::Lua::check_component(l,component);
-	Lua::PushInt(l,component->GetComponentId());
-}
-void Lua::BaseEntityComponent::GetName(lua_State *l,BaseEntityComponentHandle &component)
-{
-	pragma::Lua::check_component(l,component);
 	auto *nw = engine->GetNetworkState(l);
 	auto *game = nw->GetGameState();
 	auto &componentManager = game->GetEntityComponentManager();
-	auto &info = *componentManager.GetComponentInfo(component->GetComponentId());
-	Lua::PushString(l,info.name);
+	auto &info = *componentManager.GetComponentInfo(component.GetComponentId());
+	return info.name;
 }

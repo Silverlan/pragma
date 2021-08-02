@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_eye_component.hpp"
+#include "pragma/entities/components/c_flex_component.hpp"
 #include "pragma/model/c_model.h"
 
 extern DLLCLIENT CGame *c_game;

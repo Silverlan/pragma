@@ -15,6 +15,7 @@
 #include "pragma/lua/libraries/c_lents.h"
 #include "pragma/lua/libraries/c_lrender.h"
 #include "pragma/lua/libraries/lengine.h"
+#include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/lua/classes/lentity.h>
@@ -214,12 +215,13 @@ void CGame::RegisterLua()
 	classDefBase.def("Initialize",&CLuaEntity::LuaInitialize,&CLuaEntity::default_Initialize);
 	//classDefBase.def("ReceiveNetEvent",&SLuaEntityWrapper::ReceiveNetEvent,&SLuaBaseEntityWrapper::default_ReceiveNetEvent);
 	modEnts[classDefBase];
-
-	auto &modNet = GetLuaInterface().RegisterLibrary("net",{
-		{"send",Lua_cl_net_Send},
-		{"receive",Lua_cl_net_Receive},
-		{"register_event",Lua::net::register_event}
-	});
+	
+	auto modNet = luabind::module(GetLuaState(),"net");
+	modNet[
+		luabind::def("send",&Lua::net::client::send),
+		luabind::def("receive",&Lua::net::client::receive),
+		luabind::def("register_event",&Lua::net::register_event)
+	];
 
 	auto netPacketClassDef = luabind::class_<NetPacket>("Packet");
 	Lua::NetPacket::Client::register_class(netPacketClassDef);

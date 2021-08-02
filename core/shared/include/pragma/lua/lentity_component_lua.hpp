@@ -14,12 +14,10 @@
 #include "pragma/lua/l_entity_handles.hpp"
 #include <sharedutils/util_weak_handle.hpp>
 
-DEFINE_LUA_COMPONENT_HANDLE(DLLNETWORK,BaseLuaBaseEntity);
-
-inline std::ostream &operator<<(std::ostream &out,const BaseLuaBaseEntityHandle &hComponent)
+inline std::ostream &operator<<(std::ostream &out,const pragma::BaseEntityComponent *hComponent)
 {
 	out<<"EntityComponent[";
-	if(hComponent.expired())
+	if(!hComponent)
 		out<<"NULL]";
 	else
 	{

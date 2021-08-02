@@ -12,6 +12,8 @@
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/entities/entity_iterator.hpp"
+#include "pragma/entities/components/base_io_component.hpp"
+#include "pragma/entities/components/base_player_component.hpp"
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/datastream.h>
 #include <sharedutils/netpacket.hpp>
@@ -276,9 +278,9 @@ void BaseLuaBaseEntityComponent::Initialize()
 	// The underlying handle for the lua object has not yet been assigned to our shared ptr, so we have to do it now.
 	// This has to be done before any Lua member-functions are called, but can't be done inside the constructor, because
 	// at that point the object hasn't been assigned to a shared ptr yet!
-	auto *pHandleWrapper = luabind::object_cast_nothrow<BaseLuaBaseEntityComponentHandleWrapper*>(GetLuaObject(),static_cast<BaseLuaBaseEntityComponentHandleWrapper*>(nullptr));
-	if(pHandleWrapper != nullptr)
-		pHandleWrapper->handle = util::WeakHandle<pragma::BaseEntityComponent>(shared_from_this());
+	//auto *pHandleWrapper = luabind::object_cast_nothrow<BaseLuaBaseEntityComponentHandleWrapper*>(GetLuaObject(),static_cast<BaseLuaBaseEntityComponentHandleWrapper*>(nullptr));
+	//if(pHandleWrapper != nullptr)
+	//	pHandleWrapper->handle = util::WeakHandle<pragma::BaseEntityComponent>(shared_from_this());
 	
 	auto &game = *GetEntity().GetNetworkState()->GetGameState();
 	auto &componentManager = game.GetEntityComponentManager();
@@ -968,7 +970,6 @@ CallbackHandle BaseLuaBaseEntityComponent::BindEvent(lua_State *l,pragma::Compon
 /////////////////
 
 LuaBaseEntityComponentWrapper::LuaBaseEntityComponentWrapper(const util::WeakHandle<pragma::BaseEntityComponent> &hComponent)
-	: BaseLuaBaseEntityHandle(hComponent)
 {}
 LuaBaseEntityComponentWrapper::LuaBaseEntityComponentWrapper()
 	: LuaBaseEntityComponentWrapper(util::WeakHandle<pragma::BaseEntityComponent>{})

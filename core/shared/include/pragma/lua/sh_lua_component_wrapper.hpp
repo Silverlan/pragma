@@ -14,8 +14,7 @@
 #include <sharedutils/datastream.h>
 
 struct DLLNETWORK LuaBaseEntityComponentWrapper
-	: public BaseLuaBaseEntityHandle,
-	public luabind::wrap_base
+	: public luabind::wrap_base
 {
 public:
 	LuaBaseEntityComponentWrapper(const util::WeakHandle<pragma::BaseEntityComponent> &hComponent);

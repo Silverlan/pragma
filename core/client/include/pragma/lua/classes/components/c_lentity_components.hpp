@@ -15,6 +15,12 @@
 #include <pragma/lua/lentity_components_base_types.hpp>
 #include "pragma/clientdefinitions.h"
 
+namespace pragma
+{
+	class CSoundEmitterComponent;
+	class CFlexComponent;
+};
+
 namespace Lua
 {
 	DLLCLIENT void register_cl_ai_component(lua_State *l,luabind::module_ &module);

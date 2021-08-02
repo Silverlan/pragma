@@ -10,6 +10,7 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include "pragma/entities/environment/c_sky_camera.hpp"
+#include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"

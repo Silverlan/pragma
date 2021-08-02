@@ -11,6 +11,8 @@
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_player_component.hpp"
+#include "pragma/entities/components/c_animated_component.hpp"
+#include "pragma/entities/c_viewbody.h"
 #include "pragma/entities/c_listener.h"
 #include "pragma/entities/c_viewmodel.h"
 #include "pragma/lua/classes/ldef_material.h"

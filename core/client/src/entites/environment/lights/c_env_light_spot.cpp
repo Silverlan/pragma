@@ -12,6 +12,8 @@
 #include <pragma/networking/nwm_util.h>
 #include "pragma/entities/components/c_radius_component.hpp"
 #include "pragma/entities/components/c_color_component.hpp"
+#include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>

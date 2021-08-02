@@ -11,6 +11,8 @@
 #include "pragma/game/c_game.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
+#include "pragma/entities/components/c_attachable_component.hpp"
+#include "pragma/entities/components/c_parent_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/components/c_radius_component.hpp"
 #include "pragma/entities/components/c_color_component.hpp"

@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/func/c_func_water.h"
+#include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/gui/widebugdepthtexture.h"
@@ -17,7 +18,11 @@
 #include "pragma/gui/widebugmsaatexture.hpp"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/lua/c_lentity_handles.hpp"
+#include "pragma/entities/components/c_scene_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/renderers/base_renderer.hpp"
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/console/sh_cmd.h>
 #include <image/prosper_render_target.hpp>

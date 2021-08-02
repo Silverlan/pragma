@@ -9,6 +9,11 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/entities/components/c_generic_component.hpp"
+#include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"

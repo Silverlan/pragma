@@ -7,10 +7,13 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/environment/c_env_decal.h"
+#include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/components/c_physics_component.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_model.h"
+#include "pragma/debug/c_debugoverlay.h"
 #include <pragma/physics/raytraces.h>
 #include <pragma/entities/environment/env_decal.h>
 #include <pragma/entities/components/base_transform_component.hpp>

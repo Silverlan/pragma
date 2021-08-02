@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/lua/lnetmessages.h"
+#include "pragma/lua/libraries/c_lnetmessages.h"
 #include "pragma/game/c_game.h"
 #include "pragma/lua/classes/ldef_netpacket.h"
 #include <pragma/networking/enums.hpp>
@@ -39,39 +40,34 @@ void CGame::HandleLuaNetPacket(NetPacket &packet)
 ////////////////////////////
 
 extern ClientState *client;
-int Lua_cl_net_Send(lua_State *l)
+void Lua::net::client::send(nwm::Protocol protocol,const std::string &identifier,::NetPacket &packet)
 {
-	auto protocol = static_cast<nwm::Protocol>(Lua::CheckInt(l,1));
-	std::string identifier = luaL_checkstring(l,2);
-	NetPacket *p = _lua_NetPacket_check(l,3);
 	NetPacket packetNew;
-	if(!NetIncludePacketID(client,identifier,*p,packetNew))
+	if(!NetIncludePacketID(::client,identifier,packet,packetNew))
 	{
 		Con::ccl<<"WARNING: Attempted to send unindexed lua net message: "<<identifier<<Con::endl;
-		return 0;
+		return;
 	}
 	switch(protocol)
 	{
 		case nwm::Protocol::TCP:
-			client->SendPacket("luanet",packetNew,pragma::networking::Protocol::SlowReliable);
+			::client->SendPacket("luanet",packetNew,pragma::networking::Protocol::SlowReliable);
 			break;
 		case nwm::Protocol::UDP:
-			client->SendPacket("luanet",packetNew,pragma::networking::Protocol::FastUnreliable);
+			::client->SendPacket("luanet",packetNew,pragma::networking::Protocol::FastUnreliable);
 			break;
 	}
-	return 0;
 }
 
-int Lua_cl_net_Receive(lua_State *l)
+void Lua::net::client::receive(lua_State *l,const std::string &name,const Lua::func<void> &function)
 {
-	if(!client->IsGameActive())
-		return 0;
-	Game *game = client->GetGameState();
-	std::string name = luaL_checkstring(l,1);
-	luaL_checkfunction(l,2);
+	if(!::client->IsGameActive())
+		return;
+	Game *game = ::client->GetGameState();
+	function.push(l);
 	int fc = lua_createreference(l,2);
+	Lua::Pop(l,1);
 	game->RegisterLuaNetMessage(name,fc);
-	return 0;
 }
 
 DLLCLIENT void NET_cl_luanet(NetPacket packet) {client->HandleLuaNetPacket(packet);}

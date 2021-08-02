@@ -11,11 +11,19 @@
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/shaders/c_shader_forwardp_light_culling.hpp"
 #include "pragma/entities/c_entityfactories.h"
+#include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/c_light_map_component.hpp"
+#include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
+#include "pragma/entities/environment/lights/c_env_light.h"
+#include "pragma/entities/environment/lights/c_env_light_directional.h"
+#include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <image/prosper_msaa_texture.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <prosper_command_buffer.hpp>
+#include <buffers/prosper_buffer.hpp>
 #include <image/prosper_render_target.hpp>
 
 extern DLLCLIENT CGame *c_game;

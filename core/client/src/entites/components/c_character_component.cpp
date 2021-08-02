@@ -20,11 +20,17 @@
 #include "pragma/rendering/c_rendermode.h"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/entities/components/c_character_component.hpp"
+#include "pragma/entities/components/c_animated_component.hpp"
+#include "pragma/entities/components/c_sound_emitter_component.hpp"
+#include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
+#include "pragma/entities/func/c_func_water.h"
 #include "pragma/entities/components/c_eye_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/entities/components/submergible_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/model/model.h>
+#include <pragma/audio/alsound_type.h>
 
 extern DLLCLIENT ClientState *client;
 

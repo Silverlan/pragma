@@ -7,6 +7,9 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_raytracing_component.hpp"
+#include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/components/c_animated_component.hpp"
+#include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
@@ -19,6 +22,7 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
 #include <material_descriptor_array.hpp>
+#include <buffers/prosper_uniform_resizable_buffer.hpp>
 
 using namespace pragma;
 

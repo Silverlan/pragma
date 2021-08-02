@@ -11,29 +11,10 @@
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/entities/components/c_weapon_component.hpp"
+#include "pragma/entities/c_viewmodel.h"
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/lentity_components_base_types.hpp>
 
-namespace Lua
-{
-	namespace Weapon
-	{
-		namespace Client
-		{
-			static void PlayViewActivity(lua_State *l,pragma::CWeaponComponent &hWep,int activity,uint32_t flags);
-			static void PlayViewActivity(lua_State *l,pragma::CWeaponComponent &hWep,int activity);
-			static void SetViewModel(lua_State *l,pragma::CWeaponComponent &hWep,const std::string &mdl);
-			static void GetViewModel(lua_State *l,pragma::CWeaponComponent &hWep);
-			static void SetHideWorldModelInFirstPerson(lua_State *l,pragma::CWeaponComponent &hWep,bool b);
-			static void GetHideWorldModelInFirstPerson(lua_State *l,pragma::CWeaponComponent &hWep);
-			static void IsInFirstPersonMode(lua_State *l,pragma::CWeaponComponent &hWep);
-			static void SetViewModelOffset(lua_State *l,pragma::CWeaponComponent &hWep,const Vector3 &offset);
-			static void GetViewModelOffset(lua_State *l,pragma::CWeaponComponent &hWep);
-			static void SetViewFOV(lua_State *l,pragma::CWeaponComponent &hWep,float fov);
-			static void GetViewFOV(lua_State *l,pragma::CWeaponComponent &hWep);
-		};
-	};
-};
 void Lua::register_cl_weapon_component(lua_State *l,luabind::module_ &module)
 {
 	auto def = luabind::class_<pragma::CWeaponComponent,pragma::BaseWeaponComponent>("WeaponComponent");

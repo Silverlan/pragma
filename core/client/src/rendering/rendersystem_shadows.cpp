@@ -9,7 +9,11 @@
 #include "pragma/c_engine.h"
 #include "pragma/rendering/rendersystem.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include "pragma/entities/components/c_toggle_component.hpp"
+#include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>

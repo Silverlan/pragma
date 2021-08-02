@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/environment/effects/c_env_smoke_trail.h"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/util/util_smoke_trail.h"
 #include "pragma/lua/c_lentity_handles.hpp"

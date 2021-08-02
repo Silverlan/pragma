@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/particlesystem/operators/c_particle_mod_radius_fade.h"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/math/util_random.hpp>
 #include <mathutil/umath_random.hpp>
 

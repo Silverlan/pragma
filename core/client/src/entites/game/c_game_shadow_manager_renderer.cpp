@@ -8,6 +8,13 @@
 #include "stdafx_client.h"
 #include "pragma/entities/game/c_game_shadow_manager.hpp"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
+#include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
+#include "pragma/entities/environment/lights/c_env_light_directional.h"
+#include "pragma/entities/environment/lights/c_env_shadow.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/render_queue.hpp"
@@ -20,6 +27,7 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <image/prosper_render_target.hpp>
 #include <prosper_command_buffer.hpp>
+#include <cmaterial.h>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

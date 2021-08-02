@@ -13,6 +13,7 @@
 #include "pragma/rendering/shaders/particles/c_shader_particle_shadow.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/particlesystem/renderers/c_particle_renderer_rotational_buffer.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 

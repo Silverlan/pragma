@@ -17,6 +17,7 @@ struct Eyeball;
 namespace pragma
 {
 	class CFlexComponent;
+	class CAnimatedComponent;
 	class DLLCLIENT CEyeComponent final
 		: public BaseEntityComponent
 	{

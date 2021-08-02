@@ -12,6 +12,10 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
+#include "pragma/entities/components/c_light_map_receiver_component.hpp"
+#include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/gui/wiframe.h"
 #include <pragma/util/util_tga.hpp>

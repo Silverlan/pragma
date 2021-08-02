@@ -16,12 +16,16 @@
 #include "pragma/console/c_cvar.h"
 #include "pragma/rendering/c_renderflags.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/entities/environment/c_env_camera.h"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include <glm/gtx/projection.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_sampler.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#include <buffers/prosper_buffer.hpp>
 #include <pragma/math/intersection.h>
 
 extern DLLCLIENT CEngine *c_engine;

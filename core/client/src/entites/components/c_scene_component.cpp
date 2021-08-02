@@ -7,6 +7,13 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_scene_component.hpp"
+#include "pragma/entities/components/c_animated_component.hpp"
+#include "pragma/entities/components/c_light_map_component.hpp"
+#include "pragma/entities/game/c_game_occlusion_culler.hpp"
+#include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
+#include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
@@ -20,7 +27,9 @@
 #include "pragma/rendering/renderers/base_renderer.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/render_queue.hpp"
+#include "pragma/rendering/world_environment.hpp"
 #include "pragma/entities/c_entityfactories.h"
+#include <sharedutils/property/util_property_color.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <prosper_command_buffer.hpp>

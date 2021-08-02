@@ -11,6 +11,7 @@
 #include "pragma/lua/lentity_component_lua.hpp"
 #include "pragma/lua/lua_entity_component.hpp"
 #include "pragma/lua/sh_lua_component_wrapper.hpp"
+#include "pragma/lua/policies/game_object_policy.hpp"
 
 namespace Lua
 {
@@ -19,94 +20,52 @@ namespace Lua
 	{
 		classDef.def(luabind::tostring(luabind::self));
 		classDef.def(luabind::constructor<>());
-		classDef.def("SetNetworked",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,bool)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,bool bNetworked) {
-			pragma::Lua::check_component(l,hComponent);
-			hComponent->SetNetworked(bNetworked);
-		}));
-		classDef.def("IsNetworked",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent) {
-			pragma::Lua::check_component(l,hComponent);
-			Lua::PushBool(l,hComponent->IsNetworked());
-		}));
-		classDef.def("SetShouldTransmitSnapshotData",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,bool)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,bool bSend) {
-			pragma::Lua::check_component(l,hComponent);
-			hComponent->SetShouldTransmitSnapshotData(bSend);
-		}));
-		classDef.def("ShouldTransmitSnapshotData",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent) {
-			pragma::Lua::check_component(l,hComponent);
-			Lua::PushBool(l,hComponent->ShouldTransmitSnapshotData());
-		}));
-		classDef.def("GetVersion",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent) {
-			pragma::Lua::check_component(l,hComponent);
-			Lua::PushInt(l,hComponent->GetVersion());
-		}));
-		classDef.def("RegisterNetEvent",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,const std::string&)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,const std::string &name) {
-			pragma::Lua::check_component(l,hComponent);
-			Lua::PushInt(l,hComponent->SetupNetEvent(name));
-		}));
-		classDef.def("FlagCallbackForRemoval",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,CallbackHandle&,uint32_t,BaseEntityComponentHandle&)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,CallbackHandle &hCb,uint32_t callbackType,BaseEntityComponentHandle &hComponentOther) {
-			pragma::Lua::check_component(l,hComponent);
-			pragma::Lua::check_component(l,hComponentOther);
+		classDef.def("SetNetworked",&TLuaClass::SetNetworked);
+		classDef.def("IsNetworked",&TLuaClass::IsNetworked);
+		classDef.def("SetShouldTransmitSnapshotData",&TLuaClass::SetShouldTransmitSnapshotData);
+		classDef.def("ShouldTransmitSnapshotData",&TLuaClass::ShouldTransmitSnapshotData);
+		classDef.def("GetVersion",&TLuaClass::GetVersion);
+		classDef.def("RegisterNetEvent",&TLuaClass::SetupNetEvent);
+		classDef.def("FlagCallbackForRemoval",static_cast<void(*)(lua_State*,TLuaClass&,CallbackHandle&,pragma::BaseEntityComponent::CallbackType,TLuaClass&)>([](lua_State *l,TLuaClass &hComponent,CallbackHandle &hCb,pragma::BaseEntityComponent::CallbackType callbackType,TLuaClass &hComponentOther) {
 			if(hCb.IsValid() == false)
 				return;
-			hComponent->FlagCallbackForRemoval(hCb,static_cast<pragma::BaseEntityComponent::CallbackType>(callbackType),hComponentOther.get());
+			hComponent.FlagCallbackForRemoval(hCb,callbackType,&hComponentOther);
 		}));
-		classDef.def("FlagCallbackForRemoval",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,CallbackHandle&,uint32_t)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,CallbackHandle &hCb,uint32_t callbackType) {
-			pragma::Lua::check_component(l,hComponent);
+		classDef.def("FlagCallbackForRemoval",static_cast<void(*)(lua_State*,TLuaClass&,CallbackHandle&,pragma::BaseEntityComponent::CallbackType)>([](lua_State *l,TLuaClass &hComponent,CallbackHandle &hCb,pragma::BaseEntityComponent::CallbackType callbackType) {
 			if(hCb.IsValid() == false)
 				return;
-			hComponent->FlagCallbackForRemoval(hCb,static_cast<pragma::BaseEntityComponent::CallbackType>(callbackType));
+			hComponent.FlagCallbackForRemoval(hCb,callbackType);
 		}));
-		classDef.def("BindComponentInitEvent",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,uint32_t,luabind::object)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,uint32_t componentId,luabind::object methodNameOrFunction) {
-			pragma::Lua::check_component(l,hComponent);
-			Lua::Push<CallbackHandle>(l,hComponent->BindInitComponentEvent(l,componentId,methodNameOrFunction));
+		classDef.def("BindComponentInitEvent",static_cast<CallbackHandle(*)(lua_State*,TLuaClass&,uint32_t,luabind::object)>([](lua_State *l,TLuaClass &hComponent,uint32_t componentId,luabind::object methodNameOrFunction) {
+			return hComponent.BindInitComponentEvent(l,componentId,methodNameOrFunction);
 		}));
-		classDef.def("BindEvent",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,uint32_t,luabind::object)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,uint32_t eventId,luabind::object methodNameOrFunction) {
-			pragma::Lua::check_component(l,hComponent);
-			Lua::Push<CallbackHandle>(l,hComponent->BindEvent(l,eventId,methodNameOrFunction));
+		classDef.def("BindEvent",static_cast<CallbackHandle(*)(lua_State*,TLuaClass&,uint32_t,luabind::object)>([](lua_State *l,TLuaClass &hComponent,uint32_t eventId,luabind::object methodNameOrFunction) {
+			return hComponent.BindEvent(l,eventId,methodNameOrFunction);
 		}));
-		classDef.def("GetEntityComponent",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,uint32_t)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,uint32_t componentId) {
-			pragma::Lua::check_component(l,hComponent);
-			auto c = hComponent->GetEntity().FindComponent(componentId);
-			if(c.valid())
-				c->PushLuaObject(l);
-		}));
-		classDef.def("GetEntityComponent",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,const std::string&)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,const std::string &componentName) {
-			pragma::Lua::check_component(l,hComponent);
-			auto c = hComponent->GetEntity().FindComponent(componentName);
-			if(c.valid())
-				c->PushLuaObject(l);
-		}));
-		classDef.def("AddEntityComponent",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,uint32_t)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,uint32_t componentId) {
-			pragma::Lua::check_component(l,hComponent);
-			auto c = hComponent->GetEntity().AddComponent(componentId);
-			if(c.valid())
-				c->PushLuaObject(l);
-		}));
-		classDef.def("AddEntityComponent",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,uint32_t,luabind::object)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,uint32_t componentId,luabind::object methodNameOrFunction) {
-			pragma::Lua::check_component(l,hComponent);
+		classDef.def("GetEntityComponent",static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent>(*)(lua_State*,TLuaClass&,uint32_t)>([](lua_State *l,TLuaClass &hComponent,uint32_t componentId) -> pragma::ComponentHandle<pragma::BaseEntityComponent> {
+			return hComponent.GetEntity().FindComponent(componentId);
+		}),luabind::game_object_policy<0>{});
+		classDef.def("GetEntityComponent",static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent>(*)(lua_State*,TLuaClass&,const std::string&)>([](lua_State *l,TLuaClass &hComponent,const std::string &componentName) -> pragma::ComponentHandle<pragma::BaseEntityComponent> {
+			return hComponent.GetEntity().FindComponent(componentName);
+		}),luabind::game_object_policy<0>{});
+		classDef.def("AddEntityComponent",static_cast<void(*)(lua_State*,TLuaClass&,uint32_t)>([](lua_State *l,TLuaClass &hComponent,uint32_t componentId) -> pragma::ComponentHandle<pragma::BaseEntityComponent> {
+			return hComponent.GetEntity().AddComponent(componentId);
+		}),luabind::game_object_policy<0>{});
+		classDef.def("AddEntityComponent",static_cast<void(*)(lua_State*,TLuaClass&,uint32_t,luabind::object)>([](lua_State *l,TLuaClass &hComponent,uint32_t componentId,luabind::object methodNameOrFunction) -> pragma::ComponentHandle<pragma::BaseEntityComponent> {
 			hComponent->BindInitComponentEvent(l,componentId,methodNameOrFunction);
-			auto c = hComponent->GetEntity().AddComponent(componentId);
-			if(c.valid())
-				c->PushLuaObject(l);
-		}));
-		classDef.def("AddEntityComponent",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,const std::string&)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,const std::string &name) {
-			pragma::Lua::check_component(l,hComponent);
-			auto c = hComponent->GetEntity().AddComponent(name);
-			if(c.valid())
-				c->PushLuaObject(l);
-		}));
-		classDef.def("AddEntityComponent",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,const std::string&,luabind::object)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,const std::string &name,luabind::object methodNameOrFunction) {
-			pragma::Lua::check_component(l,hComponent);
-			auto hNewComponent = hComponent->GetEntity().AddComponent(name);
+			return hComponent.GetEntity().AddComponent(componentId);
+		}),luabind::game_object_policy<0>{});
+		classDef.def("AddEntityComponent",static_cast<void(*)(lua_State*,TLuaClass&,const std::string&)>([](lua_State *l,TLuaClass &hComponent,const std::string &name) -> pragma::ComponentHandle<pragma::BaseEntityComponent> {
+			return hComponent.GetEntity().AddComponent(name);
+		}),luabind::game_object_policy<0>{});
+		classDef.def("AddEntityComponent",static_cast<void(*)(lua_State*,TLuaClass&,const std::string&,luabind::object)>([](lua_State *l,TLuaClass &hComponent,const std::string &name,luabind::object methodNameOrFunction) -> pragma::ComponentHandle<pragma::BaseEntityComponent> {
+			auto hNewComponent = hComponent.GetEntity().AddComponent(name);
 			if(hNewComponent.expired())
 				return;
-			hComponent->BindInitComponentEvent(l,hNewComponent->GetComponentId(),methodNameOrFunction);
-			hNewComponent->PushLuaObject(l);
-		}));
-		classDef.def("OnMemberValueChanged",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,uint32_t)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,uint32_t memberIndex) {
-			pragma::Lua::check_component(l,hComponent);
-			hComponent->OnMemberValueChanged(memberIndex);
-		}));
+			hComponent.BindInitComponentEvent(l,hNewComponent->GetComponentId(),methodNameOrFunction);
+			return hNewComponent;
+		}),luabind::game_object_policy<0>{});
+		classDef.def("OnMemberValueChanged",&TLuaClass::OnMemberValueChanged);
 		classDef.scope[luabind::def("RegisterMember",static_cast<void(*)(lua_State*,luabind::object,const std::string&,uint32_t,luabind::object,uint32_t,uint32_t)>([](lua_State *l,luabind::object o,const std::string &memberName,uint32_t memberType,luabind::object oDefault,uint32_t memberFlags,uint32_t version) {
 			auto anyInitialValue = Lua::GetAnyValue(l,static_cast<::util::VarType>(memberType),4);
 			pragma::BaseLuaBaseEntityComponent::RegisterMember(o,memberName,static_cast<::util::VarType>(memberType),anyInitialValue,static_cast<pragma::BaseLuaBaseEntityComponent::MemberFlags>(memberFlags),version);

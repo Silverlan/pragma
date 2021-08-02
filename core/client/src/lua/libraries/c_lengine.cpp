@@ -16,6 +16,7 @@
 #include "pragma/file_formats/wmd_load.h"
 #include "pragma/lua/libraries/c_lengine.h"
 #include "pragma/entities/components/c_scene_component.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <wgui/fontmanager.h>
 #include "pragma/lua/classes/c_ldef_fontinfo.h"
 #include <texturemanager/texturemanager.h>
@@ -181,9 +182,8 @@ int Lua::engine::create_particle_system(lua_State *l)
 		pragma::CParticleSystemComponent *parent = NULL;
 		if(Lua::IsSet(l,2))
 		{
-			auto hParent = Lua::Check<CParticleSystemHandle>(l,2);
-			pragma::Lua::check_component(l,hParent);
-			parent = hParent.get();
+			auto &hParent = Lua::Check<pragma::CParticleSystemComponent>(l,2);
+			parent = &hParent;
 		}
 		particle = pragma::CParticleSystemComponent::Create(name,parent,bRecordKeyvalues);
 	}
@@ -266,9 +266,8 @@ int Lua::engine::create_particle_system(lua_State *l)
 		pragma::CParticleSystemComponent *parent = NULL;
 		if(Lua::IsSet(l,2))
 		{
-			auto hParent = Lua::Check<CParticleSystemHandle>(l,2);
-			pragma::Lua::check_component(l,hParent);
-			parent = hParent.get();
+			auto &hParent = Lua::Check<pragma::CParticleSystemComponent>(l,2);
+			parent = &hParent;
 		}
 		particle = pragma::CParticleSystemComponent::Create(values,parent,bRecordKeyvalues);
 		if(particle != nullptr)
@@ -357,14 +356,13 @@ int Lua::engine::save_particle_system(lua_State *l)
 			{
 				Lua::PushInt(l,i +1u);
 				Lua::GetTableValue(l,t);
-				auto &ps = Lua::Check<CParticleSystemHandle>(l,-1);
-				pragma::Lua::check_component(l,ps);
-				if(ps->IsRecordingKeyValues() == false)
-					Con::cwar<<"WARNING: Cannot save particle system '"<<ps->GetParticleSystemName()<<"', which wasn't created with the \"record key-values\" flag set! Skipping..."<<Con::endl;
+				auto &ps = Lua::Check<pragma::CParticleSystemComponent>(l,-1);
+				if(ps.IsRecordingKeyValues() == false)
+					Con::cwar<<"WARNING: Cannot save particle system '"<<ps.GetParticleSystemName()<<"', which wasn't created with the \"record key-values\" flag set! Skipping..."<<Con::endl;
 				else
 				{
-					particleSystems.push_back(ps.get());
-					fIncludeChildren(*ps);
+					particleSystems.push_back(&ps);
+					fIncludeChildren(ps);
 				}
 				Lua::Pop(l,1);
 			}

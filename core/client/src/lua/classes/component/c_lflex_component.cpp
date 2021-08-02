@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
+#include "pragma/entities/components/c_flex_component.hpp"
 #include <prosper_command_buffer.hpp>
 
 void Lua::Flex::register_class(lua_State *l,luabind::module_ &entsMod)

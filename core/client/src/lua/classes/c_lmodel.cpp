@@ -15,6 +15,7 @@
 #include "pragma/lua/classes/ldef_model.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include <pragma/lua/libraries/lfile.h>
+#include <buffers/prosper_buffer.hpp>
 
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;

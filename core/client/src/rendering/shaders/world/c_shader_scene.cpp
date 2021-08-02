@@ -11,6 +11,9 @@
 #include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
+#include "pragma/entities/environment/lights/c_env_shadow.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/entities/components/c_render_component.hpp"
@@ -20,6 +23,7 @@
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#include <cmaterial.h>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;

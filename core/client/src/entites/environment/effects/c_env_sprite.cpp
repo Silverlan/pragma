@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/environment/effects/c_env_sprite.h"
+#include "pragma/entities/components/c_attachable_component.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/physics/raytraces.h>

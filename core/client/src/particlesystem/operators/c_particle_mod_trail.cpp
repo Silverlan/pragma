@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/particlesystem/operators/c_particle_mod_trail.h"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <mathutil/umath.h>
 #include <pragma/math/vector/wvvector3.h>
 #include <sharedutils/util_string.h>

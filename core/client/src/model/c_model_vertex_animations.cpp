@@ -10,6 +10,7 @@
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/model/animation/vertex_animation.hpp>
 #include <prosper_util.hpp>
+#include <buffers/prosper_buffer.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 

@@ -9,6 +9,9 @@
 #include "pragma/rendering/shaders/particles/c_shader_particle_2d_base.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
+#include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/console/c_cvar.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <buffers/prosper_buffer.hpp>
@@ -17,6 +20,7 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
 #include <datasystem_vector.h>
+#include <cmaterial.h>
 
 extern DLLCLIENT CEngine *c_engine;
 

@@ -25,12 +25,17 @@
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_observable_component.hpp"
+#include "pragma/entities/components/c_sound_emitter_component.hpp"
+#include "pragma/entities/components/c_character_component.hpp"
+#include "pragma/entities/components/c_attachable_component.hpp"
 #include "pragma/networking/c_nwm_util.h"
 #include <pragma/entities/components/submergible_component.hpp>
 #include <pragma/physics/raytraces.h>
 #include <pragma/model/model.h>
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
+#include <pragma/entities/components/base_name_component.hpp>
+#include <pragma/entities/components/basetoggle.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>

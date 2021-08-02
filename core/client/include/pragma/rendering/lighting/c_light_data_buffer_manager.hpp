@@ -26,6 +26,8 @@
 namespace pragma
 {
 	class CLightComponent;
+	struct ShadowBufferData;
+	struct LightBufferData;
 	
 	using LightBufferIndex = uint32_t;
 	using ShadowBufferIndex = uint32_t;

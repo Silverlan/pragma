@@ -16,7 +16,7 @@ namespace Lua
 	namespace net
 	{
 		DLLNETWORK void RegisterLibraryEnums(lua_State *l);
-		DLLNETWORK int32_t register_event(lua_State *l);
+		DLLNETWORK pragma::NetEventId register_event(lua_State *l,const std::string &name);
 	};
 };
 

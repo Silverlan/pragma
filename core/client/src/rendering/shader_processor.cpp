@@ -15,8 +15,14 @@
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
+#include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/entities/components/c_vertex_animated_component.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
+#include "pragma/entities/environment/lights/c_env_shadow.hpp"
 #include "pragma/model/c_model.h"
 #include <prosper_command_buffer.hpp>
+#include <cmaterial.h>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/particlesystem/c_particle.h"
 #include "pragma/particlesystem/modifiers/c_particle_modifier_component_ease.hpp"
 #include <mathutil/umath.h>
 #include <pragma/math/util_easing.hpp>

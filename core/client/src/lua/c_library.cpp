@@ -17,6 +17,8 @@
 #include "pragma/lua/libraries/c_lutil.h"
 #include "pragma/lua/libraries/c_linput.h"
 #include "pragma/lua/libraries/lasset.hpp"
+#include "pragma/entities/environment/c_env_camera.h"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/audio/c_laleffect.h"
 #include "pragma/audio/c_lalsound.hpp"
 #include "pragma/gui/wiluabase.h"
@@ -34,6 +36,9 @@
 #include <pragma/lua/classes/ldef_entity.h>
 #include <pragma/lua/libraries/lfile.h>
 #include <pragma/lua/libraries/lutil.hpp>
+#include <pragma/lua/policies/default_parameter_policy.hpp>
+#include <pragma/lua/policies/vector_policy.hpp>
+#include <pragma/lua/policies/optional_policy.hpp>
 #include <pragma/asset/util_asset.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
@@ -49,7 +54,7 @@
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CEngine *c_engine;
-
+#pragma optimize("",off)
 static void register_gui(Lua::Interface &lua)
 {
 	auto *l = lua.GetState();
@@ -203,27 +208,27 @@ static void register_gui(Lua::Interface &lua)
 	guiMod[wiElementClassDef];
 
 	// Custom Classes
-	/*auto wiBaseWIElement = luabind::class_<WILuaBase,luabind::bases<WIBase>,luabind::default_holder,WILuaWrapper>("Base");
+	auto wiBaseWIElement = luabind::class_<WILuaBase,luabind::bases<WIBase>,pragma::lua::WILuaBaseHolder>("Base");
 	wiBaseWIElement.def(luabind::constructor<>());
-	wiBaseWIElement.def("OnInitialize",&WILuaWrapper::OnInitialize,&WILuaWrapper::default_OnInitialize);
-	wiBaseWIElement.def("OnThink",&WILuaWrapper::OnThink,&WILuaWrapper::default_OnThink);
-	wiBaseWIElement.def("OnInitialThink",&WILuaWrapper::OnFirstThink,&WILuaWrapper::default_OnFirstThink);
-	wiBaseWIElement.def("MouseCallback",&WILuaWrapper::MouseCallback,&WILuaWrapper::default_MouseCallback);
-	wiBaseWIElement.def("KeyboardCallback",&WILuaWrapper::KeyboardCallback,&WILuaWrapper::default_KeyboardCallback);
-	wiBaseWIElement.def("CharCallback",&WILuaWrapper::CharCallback,&WILuaWrapper::default_CharCallback);
-	wiBaseWIElement.def("ScrollCallback",&WILuaWrapper::ScrollCallback,&WILuaWrapper::default_ScrollCallback);
-	wiBaseWIElement.def("OnUpdate",&WILuaWrapper::OnUpdate,&WILuaWrapper::default_OnUpdate);
-	wiBaseWIElement.def("OnVisibilityChanged",&WILuaWrapper::OnSetVisible,&WILuaWrapper::default_OnSetVisible);
-	wiBaseWIElement.def("OnSizeChanged",&WILuaWrapper::OnSetSize,&WILuaWrapper::default_OnSetSize);
-	wiBaseWIElement.def("OnColorChanged",&WILuaWrapper::OnSetColor,&WILuaWrapper::default_OnSetColor);
-	wiBaseWIElement.def("OnAlphaChanged",&WILuaWrapper::OnSetAlpha,&WILuaWrapper::default_OnSetAlpha);
-	wiBaseWIElement.def("OnDraw",&WILuaWrapper::Render,&WILuaWrapper::default_Render);
-	wiBaseWIElement.def("OnCursorEntered",&WILuaWrapper::OnCursorEntered,&WILuaWrapper::default_OnCursorEntered);
-	wiBaseWIElement.def("OnCursorExited",&WILuaWrapper::OnCursorExited,&WILuaWrapper::default_OnCursorExited);
-	wiBaseWIElement.def("OnFocusGained",&WILuaWrapper::OnFocusGained,&WILuaWrapper::default_OnFocusGained);
-	wiBaseWIElement.def("OnFocusKilled",&WILuaWrapper::OnFocusKilled,&WILuaWrapper::default_OnFocusKilled);
-	wiBaseWIElement.def("OnRemove",&WILuaWrapper::OnRemove,&WILuaWrapper::default_OnRemove);
-	guiMod[wiBaseWIElement];*/
+	wiBaseWIElement.def("OnInitialize",&WILuaBase::Lua_OnInitialize,&WILuaBase::default_OnInitialize);
+	wiBaseWIElement.def("OnThink",&WILuaBase::Lua_OnThink,&WILuaBase::default_OnThink);
+	wiBaseWIElement.def("OnInitialThink",&WILuaBase::Lua_OnFirstThink,&WILuaBase::default_OnFirstThink);
+	wiBaseWIElement.def("MouseCallback",&WILuaBase::Lua_MouseCallback,&WILuaBase::default_MouseCallback);
+	wiBaseWIElement.def("KeyboardCallback",&WILuaBase::Lua_KeyboardCallback,&WILuaBase::default_KeyboardCallback);
+	wiBaseWIElement.def("CharCallback",&WILuaBase::Lua_CharCallback,&WILuaBase::default_CharCallback);
+	wiBaseWIElement.def("ScrollCallback",&WILuaBase::Lua_ScrollCallback,&WILuaBase::default_ScrollCallback);
+	wiBaseWIElement.def("OnUpdate",&WILuaBase::Lua_OnUpdate,&WILuaBase::default_OnUpdate);
+	wiBaseWIElement.def("OnVisibilityChanged",&WILuaBase::Lua_OnSetVisible,&WILuaBase::default_OnSetVisible);
+	wiBaseWIElement.def("OnSizeChanged",&WILuaBase::Lua_OnSetSize,&WILuaBase::default_OnSetSize);
+	wiBaseWIElement.def("OnColorChanged",&WILuaBase::Lua_OnSetColor,&WILuaBase::default_OnSetColor);
+	wiBaseWIElement.def("OnAlphaChanged",&WILuaBase::Lua_OnSetAlpha,&WILuaBase::default_OnSetAlpha);
+	wiBaseWIElement.def("OnDraw",&WILuaBase::Lua_Render,&WILuaBase::default_Render);
+	wiBaseWIElement.def("OnCursorEntered",&WILuaBase::Lua_OnCursorEntered,&WILuaBase::default_OnCursorEntered);
+	wiBaseWIElement.def("OnCursorExited",&WILuaBase::Lua_OnCursorExited,&WILuaBase::default_OnCursorExited);
+	wiBaseWIElement.def("OnFocusGained",&WILuaBase::Lua_OnFocusGained,&WILuaBase::default_OnFocusGained);
+	wiBaseWIElement.def("OnFocusKilled",&WILuaBase::Lua_OnFocusKilled,&WILuaBase::default_OnFocusKilled);
+	wiBaseWIElement.def("OnRemove",&WILuaBase::Lua_OnRemove,&WILuaBase::default_OnRemove);
+	guiMod[wiBaseWIElement];
 	//
 
 	// Class specific handles have to also be defined in CGame::InitializeGUIElement and WGUIHandleFactory!
@@ -1046,14 +1051,8 @@ void CGame::RegisterLuaLibraries()
 	auto defMapExportInfo = luabind::class_<pragma::asset::MapExportInfo>("MapExportInfo");
 	defMapExportInfo.def(luabind::constructor<>());
 	defMapExportInfo.def_readwrite("includeMapLightSources",&pragma::asset::MapExportInfo::includeMapLightSources);
-	defMapExportInfo.def("AddCamera",static_cast<void(*)(lua_State*,pragma::asset::MapExportInfo&,const CCameraHandle&)>([](lua_State *l,pragma::asset::MapExportInfo &exportInfo,const CCameraHandle &cam) {
-		pragma::Lua::check_component(l,cam);
-		exportInfo.AddCamera(const_cast<pragma::CCameraComponent&>(*cam));
-	}));
-	defMapExportInfo.def("AddLightSource",static_cast<void(*)(lua_State*,pragma::asset::MapExportInfo&,const CLightHandle&)>([](lua_State *l,pragma::asset::MapExportInfo &exportInfo,const CLightHandle &light) {
-		pragma::Lua::check_component(l,light);
-		exportInfo.AddLightSource(const_cast<pragma::CLightComponent&>(*light));
-	}));
+	defMapExportInfo.def("AddCamera",&pragma::asset::MapExportInfo::AddCamera);
+	defMapExportInfo.def("AddLightSource",&pragma::asset::MapExportInfo::AddLightSource);
 	modAsset[defMapExportInfo];
 
 	Lua::asset::register_library(GetLuaInterface(),false);
@@ -1076,26 +1075,67 @@ void CGame::RegisterLuaLibraries()
 		{"export_scene",static_cast<int32_t(*)(lua_State*)>(Lua::lib_export::export_scene)}
 	});
 
-	std::vector<luaL_Reg> debugFuncs = {
-		{"draw_points",Lua::DebugRenderer::Client::DrawPoints},
-		{"draw_lines",Lua::DebugRenderer::Client::DrawLines},
-		{"draw_point",Lua::DebugRenderer::Client::DrawPoint},
-		{"draw_line",Lua::DebugRenderer::Client::DrawLine},
-		{"draw_box",Lua::DebugRenderer::Client::DrawBox},
-		{"draw_mesh",Lua::DebugRenderer::Client::DrawMeshes},
-		{"draw_sphere",Lua::DebugRenderer::Client::DrawSphere},
-		{"draw_cone",Lua::DebugRenderer::Client::DrawCone},
-		{"draw_truncated_cone",Lua::DebugRenderer::Client::DrawTruncatedCone},
-		{"draw_cylinder",Lua::DebugRenderer::Client::DrawCylinder},
-		{"draw_pose",Lua::DebugRenderer::Client::DrawAxis},
-		{"draw_text",Lua::DebugRenderer::Client::DrawText},
-		{"draw_path",Lua::DebugRenderer::Client::DrawPath},
-		{"draw_spline",Lua::DebugRenderer::Client::DrawSpline},
-		{"draw_plane",Lua::DebugRenderer::Client::DrawPlane},
-		{"draw_frustum",Lua::DebugRenderer::Client::DrawFrustum}
-	};
-	for(auto &f : debugFuncs)
-	{
-		lua_pushtablecfunction(GetLuaState(),"debug",(f.name),(f.func));
-	}
+	auto modAsset = luabind::module_(GetLuaState(),"debug");
+	modAsset[
+		luabind::def("draw_points",&Lua::DebugRenderer::Client::DrawPoints,luabind::policy_list<luabind::meta::join<luabind::vector_policy<1,Vector3>,luabind::default_parameter_policy<3,0.f>>>{}),
+		luabind::def("draw_lines",&Lua::DebugRenderer::Client::DrawLines,luabind::policy_list<luabind::meta::join<luabind::vector_policy<1,Vector3>,luabind::default_parameter_policy<3,0.f>>>{}),
+		luabind::def("draw_point",&Lua::DebugRenderer::Client::DrawPoint,luabind::default_parameter_policy<3,0.f>{}),
+		luabind::def("draw_line",&Lua::DebugRenderer::Client::DrawLine,luabind::default_parameter_policy<4,0.f>{}),
+		luabind::def("draw_box",
+			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const Vector3&,const Vector3&,const Vector3&,const Color&,const std::optional<Color>&,float,const EulerAngles&)>(&Lua::DebugRenderer::Client::DrawBox),
+			luabind::policy_list<luabind::meta::join<luabind::optional_policy<5>,luabind::default_parameter_policy<6,0.f>,luabind::default_parameter_policy<7,EulerAngles{}>>>{}
+		),
+		luabind::def("draw_box",
+			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const Vector3&,const Vector3&,const Color&,const std::optional<Color>&,float,const EulerAngles&)>(&Lua::DebugRenderer::Client::DrawBox),
+			luabind::policy_list<luabind::meta::join<luabind::optional_policy<4>,luabind::default_parameter_policy<5,0.f>,luabind::default_parameter_policy<6,EulerAngles{}>>>{}
+		),
+		luabind::def("draw_mesh",&Lua::DebugRenderer::Client::DrawMeshes,luabind::policy_list<luabind::meta::join<luabind::vector_policy<1,Vector3>,luabind::optional_policy<3>,luabind::default_parameter_policy<4,0.f>>>{}),
+		luabind::def("draw_sphere",&Lua::DebugRenderer::Client::DrawSphere,luabind::policy_list<luabind::meta::join<luabind::optional_policy<4>,luabind::default_parameter_policy<5,0.f>,luabind::default_parameter_policy<6,1>>>{}),
+		luabind::def("draw_truncated_cone",&Lua::DebugRenderer::Client::DrawTruncatedCone,luabind::policy_list<luabind::meta::join<luabind::optional_policy<7>,luabind::default_parameter_policy<8,0.f>,luabind::default_parameter_policy<9,12u>>>{}),
+		luabind::def("draw_cylinder",&Lua::DebugRenderer::Client::DrawCylinder,luabind::policy_list<luabind::meta::join<luabind::optional_policy<6>,luabind::default_parameter_policy<7,0.f>,luabind::default_parameter_policy<8,12u>>>{}),
+		luabind::def("draw_cone",&Lua::DebugRenderer::Client::DrawCone,luabind::policy_list<luabind::meta::join<luabind::optional_policy<6>,luabind::default_parameter_policy<7,0.f>,luabind::default_parameter_policy<8,12u>>>{}),
+		luabind::def("draw_pose",
+			static_cast<std::array<std::shared_ptr<::DebugRenderer::BaseObject>,3>(*)(const Vector3&,const EulerAngles&,float)>(&Lua::DebugRenderer::Client::DrawAxis),
+			luabind::policy_list<luabind::meta::join<luabind::array_policy<0,std::shared_ptr<::DebugRenderer::BaseObject>,3>,luabind::default_parameter_policy<3,0.f>>>{}
+		),
+		luabind::def("draw_pose",
+			static_cast<std::array<std::shared_ptr<::DebugRenderer::BaseObject>,3>(*)(const umath::Transform&,float)>(&Lua::DebugRenderer::Client::DrawAxis),
+			luabind::policy_list<luabind::meta::join<luabind::array_policy<0,std::shared_ptr<::DebugRenderer::BaseObject>,3>,luabind::default_parameter_policy<2,0.f>>>{}
+		),
+		luabind::def("draw_pose",
+			static_cast<std::array<std::shared_ptr<::DebugRenderer::BaseObject>,3>(*)(const Vector3&,const Vector3&,const Vector3&,const Vector3&,float)>(&Lua::DebugRenderer::Client::DrawAxis),
+			luabind::policy_list<luabind::meta::join<luabind::array_policy<0,std::shared_ptr<::DebugRenderer::BaseObject>,3>,luabind::default_parameter_policy<5,0.f>>>{}
+		),
+		luabind::def("draw_text",
+			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const std::string&,const Vector3&,const Vector2&,const Color&,float)>(&Lua::DebugRenderer::Client::DrawText),
+			luabind::policy_list<luabind::meta::join<luabind::default_parameter_policy<5,0.f>>>{}
+		),
+		luabind::def("draw_text",
+			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const std::string&,const Vector3&,float,const Color&,float)>(&Lua::DebugRenderer::Client::DrawText),
+			luabind::policy_list<luabind::meta::join<luabind::default_parameter_policy<5,0.f>>>{}
+		),
+		luabind::def("draw_text",
+			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const std::string&,const Vector3&,const Color&,float)>(&Lua::DebugRenderer::Client::DrawText),
+			luabind::policy_list<luabind::meta::join<luabind::default_parameter_policy<4,0.f>>>{}
+		),
+		luabind::def("draw_path",&Lua::DebugRenderer::Client::DrawPath,luabind::policy_list<luabind::meta::join<luabind::vector_policy<1,Vector3>,luabind::default_parameter_policy<3,0.f>>>{}),
+		luabind::def("draw_spline",&Lua::DebugRenderer::Client::DrawSpline,luabind::policy_list<luabind::meta::join<luabind::vector_policy<1,Vector3>,luabind::default_parameter_policy<4,0.f>,luabind::default_parameter_policy<5,1.f>>>{}),
+		luabind::def("draw_plane",
+			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const umath::Plane&,const Color&,float duration)>(&Lua::DebugRenderer::Client::DrawPlane),
+			luabind::default_parameter_policy<3,0.f>{}
+		),
+		luabind::def("draw_plane",
+			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const Vector3&,float,const Color&,float)>(&Lua::DebugRenderer::Client::DrawPlane),
+			luabind::default_parameter_policy<4,0.f>{}
+		),
+		luabind::def("draw_frustum",
+			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(pragma::CCameraComponent&,float)>(&Lua::DebugRenderer::Client::DrawFrustum),
+			luabind::default_parameter_policy<2,0.f>{}
+		),
+		luabind::def("draw_frustum",
+			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const std::vector<Vector3>&,float)>(&Lua::DebugRenderer::Client::DrawFrustum),
+			luabind::default_parameter_policy<2,0.f>{}
+		)
+	];
 }
+#pragma optimize("",on)

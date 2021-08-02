@@ -8,6 +8,12 @@
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_eye_component.hpp"
+#include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/components/c_vertex_animated_component.hpp"
+#include "pragma/entities/components/c_parent_component.hpp"
+#include "pragma/entities/components/c_attachable_component.hpp"
+#include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include <pragma/model/model.h>

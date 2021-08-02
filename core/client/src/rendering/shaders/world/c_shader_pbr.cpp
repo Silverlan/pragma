@@ -9,6 +9,7 @@
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "cmaterialmanager.h"
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"
+#include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/model/vk_mesh.h"
@@ -20,6 +21,7 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
 #include <texture_type.h>
+#include <cmaterial.h>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

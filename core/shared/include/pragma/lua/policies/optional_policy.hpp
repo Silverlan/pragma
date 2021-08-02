@@ -58,6 +58,18 @@ namespace luabind {
 				else
 					to_lua(L,*x);
 			}
+
+			template <class T> requires(std::is_pointer_v<T>)
+			void to_lua(lua_State* L, T x)
+			{
+				if(!x)
+					lua_pushnil(L);
+				else
+				{
+					specialized_converter_policy_n<0, luabind::policy_list<ValuePolicy>, std::add_lvalue_reference_t<std::remove_pointer_t<T>>, cpp_to_lua> converter;
+					converter.to_lua(L,*x);
+				}
+			}
 		};
 
 		template<class ValuePolicy=void>

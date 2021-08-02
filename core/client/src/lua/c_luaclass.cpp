@@ -23,6 +23,8 @@
 #include "pragma/lua/classes/c_lshaderinfo.h"
 #include "pragma/lua/classes/lshaderinfo.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/entities/environment/lights/c_env_light_spot.h"
 #include "pragma/entities/environment/lights/c_env_light_point.h"
@@ -605,19 +607,13 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defShaderParticleBase.def(luabind::constructor<>());
 	defShaderParticleBase.add_static_constant("PUSH_CONSTANTS_SIZE",sizeof(pragma::ShaderParticle2DBase::PushConstants));
 	defShaderParticleBase.add_static_constant("PUSH_CONSTANTS_USER_DATA_OFFSET",sizeof(pragma::ShaderParticle2DBase::PushConstants));
-	defShaderParticleBase.def("RecordDraw",static_cast<void(*)(lua_State*,pragma::LuaShaderGUIParticle2D&,CSceneHandle&,pragma::CRasterizationRendererComponent&,CParticleSystemHandle&,uint32_t)>([](lua_State *l,pragma::LuaShaderGUIParticle2D &shader,CSceneHandle &scene,pragma::CRasterizationRendererComponent &renderer,CParticleSystemHandle &ps,uint32_t renderFlags) {
-		pragma::Lua::check_component(l,ps);
-		pragma::Lua::check_component(l,scene);
-		Lua::PushBool(l,shader.Draw(*scene,renderer,*ps,ps->GetOrientationType(),static_cast<pragma::ParticleRenderFlags>(renderFlags)));
+	defShaderParticleBase.def("RecordDraw",static_cast<bool(*)(lua_State*,pragma::LuaShaderGUIParticle2D&,pragma::CSceneComponent&,pragma::CRasterizationRendererComponent&,pragma::CParticleSystemComponent&,uint32_t)>([](lua_State *l,pragma::LuaShaderGUIParticle2D &shader,pragma::CSceneComponent &scene,pragma::CRasterizationRendererComponent &renderer,pragma::CParticleSystemComponent &ps,uint32_t renderFlags) {
+		return shader.Draw(scene,renderer,ps,ps.GetOrientationType(),static_cast<pragma::ParticleRenderFlags>(renderFlags));
 	}));
-	defShaderParticleBase.def("RecordBeginDraw",static_cast<void(*)(lua_State*,pragma::LuaShaderGUIParticle2D&,Lua::Vulkan::CommandBuffer&,CParticleSystemHandle&,uint32_t)>([](lua_State *l,pragma::LuaShaderGUIParticle2D &shader,Lua::Vulkan::CommandBuffer &drawCmd,CParticleSystemHandle &ps,uint32_t renderFlags) {
-		pragma::Lua::check_component(l,ps);
+	defShaderParticleBase.def("RecordBeginDraw",static_cast<bool(*)(lua_State*,pragma::LuaShaderGUIParticle2D&,Lua::Vulkan::CommandBuffer&,pragma::CParticleSystemComponent&,uint32_t)>([](lua_State *l,pragma::LuaShaderGUIParticle2D &shader,Lua::Vulkan::CommandBuffer &drawCmd,pragma::CParticleSystemComponent &ps,uint32_t renderFlags) {
 		if(drawCmd.IsPrimary() == false)
-		{
-			Lua::PushBool(l,false);
-			return;
-		}
-		Lua::PushBool(l,shader.BeginDraw(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd.shared_from_this()),*ps,static_cast<pragma::ParticleRenderFlags>(renderFlags)));
+			return false;
+		return shader.BeginDraw(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd.shared_from_this()),ps,static_cast<pragma::ParticleRenderFlags>(renderFlags));
 	}));
 
 	modShader[defShaderParticleBase];
@@ -783,9 +779,8 @@ void CGame::RegisterLuaClasses()
 			drawSceneInfo.scene = decltype(drawSceneInfo.scene){};
 			return;
 		}
-		auto &scene = Lua::Check<CSceneHandle>(l,2);
-		pragma::Lua::check_component(l,scene);
-		drawSceneInfo.scene = scene->GetHandle<pragma::CSceneComponent>();
+		auto &scene = Lua::Check<pragma::CSceneComponent>(l,2);
+		drawSceneInfo.scene = scene.GetHandle<pragma::CSceneComponent>();
 	}));
 	defDrawSceneInfo.property("toneMapping",static_cast<luabind::object(*)(lua_State*,::util::DrawSceneInfo&)>([](lua_State *l,::util::DrawSceneInfo &drawSceneInfo) -> luabind::object {
 		return drawSceneInfo.toneMapping.has_value() ? luabind::object{l,umath::to_integral(*drawSceneInfo.toneMapping)} : luabind::object{};

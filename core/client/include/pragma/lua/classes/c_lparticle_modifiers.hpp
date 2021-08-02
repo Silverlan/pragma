@@ -11,6 +11,7 @@
 #include <pragma/lua/ldefinitions.h>
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 
+namespace pragma {class BaseEnvParticleSystemComponent;};
 namespace Lua
 {
 	namespace ParticleSystemModifier

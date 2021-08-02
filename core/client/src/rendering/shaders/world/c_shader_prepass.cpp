@@ -16,6 +16,7 @@
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_util.hpp>
+#include <cmaterial.h>
 
 using namespace pragma;
 

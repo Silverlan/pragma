@@ -15,6 +15,7 @@
 #include "pragma/lua/classes/ldef_recipientfilter.h"
 #include "pragma/lua/classes/ldef_netpacket.h"
 #include "pragma/lua/classes/ldef_recipientfilter.h"
+#include "pragma/lua/libraries/s_lnetmessages.h"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/networking/enums.hpp>
@@ -49,97 +50,77 @@ void SGame::HandleLuaNetPacket(pragma::networking::IServerClient &session,NetPac
 ////////////////////////////
 
 extern ServerState *server;
-DLLSERVER bool GetRecipients(lua_State *l,int arg,pragma::networking::TargetRecipientFilter &rp)
+static bool GetRecipients(const luabind::tableT<pragma::SPlayerComponent> &t,pragma::networking::TargetRecipientFilter &rp)
 {
-	if(lua_istable(l,arg))
+	for(luabind::iterator it{t},end;it!=end;++it)
 	{
-		luaL_checktype(l,arg,LUA_TTABLE);
-		lua_pushnil(l);
-		while(lua_next(l,-2) != 0)
-		{
-			if(lua_isnumber(l,-2))
-			{
-				auto *hnd = Lua::CheckSPlayer(l,-1);
-				if(hnd->expired() == false)
-				{
-					auto *session = (*hnd)->GetClientSession();
-					if(session != nullptr)
-						rp.AddRecipient(*session);
-				}
-			}
-			lua_pop(l,1);
-		}
-	}
-	else if(_lua_isRecipientFilter(l,arg))
-	{
-		auto *rpc = _lua_RecipientFilter_check(l,arg);
-		rp = *rpc;
-	}
-	else
-	{
-		auto *hnd = Lua::CheckSPlayer(l,arg);
-		if(Lua::CheckComponentHandle(l,*hnd) == false)
-			return false;
-		auto *session = (*hnd)->GetClientSession();
-		if(session != nullptr)
-			rp.AddRecipient(*session);
+		luabind::object o = *it;
+		rp.AddRecipient(*luabind::object_cast<pragma::SPlayerComponent*>(o)->GetClientSession());
 	}
 	return true;
 }
-
-DLLSERVER int Lua_sv_net_Register(lua_State *l)
+static bool GetRecipients(pragma::SPlayerComponent &pl,pragma::networking::TargetRecipientFilter &rp)
 {
-	if(!server->IsGameActive())
-		return 0;
-	Game *game = server->GetGameState();
-	std::string identifier = luaL_checkstring(l,1);
-	game->RegisterNetMessage(identifier);
-	return 0;
+	rp.AddRecipient(*pl.GetClientSession());
+	return true;
 }
 
-DLLSERVER int Lua_sv_net_Broadcast(lua_State *l)
+bool Lua::net::server::register_net_message(const std::string &identifier)
 {
-	auto protocol = static_cast<pragma::networking::Protocol>(Lua::CheckInt(l,1));
-	std::string identifier = luaL_checkstring(l,2);
-	NetPacket *p = _lua_NetPacket_check(l,3);
-	NetPacket packetNew;
-	if(!NetIncludePacketID(server,identifier,*p,packetNew))
-	{
-		Con::csv<<"WARNING: Attempted to send unindexed lua net message: "<<identifier<<Con::endl;
-		return 0;
-	}
-	server->SendPacket("luanet",packetNew,protocol);
-	return 0;
+	if(!::server->IsGameActive())
+		return false;
+	Game *game = ::server->GetGameState();
+	return game->RegisterNetMessage(identifier);
 }
 
-DLLSERVER int Lua_sv_net_Send(lua_State *l)
+void Lua::net::server::broadcast(pragma::networking::Protocol protocol,const std::string &identifier,NetPacket &packet)
 {
-	auto protocol = static_cast<pragma::networking::Protocol>(Lua::CheckInt(l,1));
-	std::string identifier = luaL_checkstring(l,2);
-	NetPacket *p = _lua_NetPacket_check(l,3);
 	NetPacket packetNew;
-	if(!NetIncludePacketID(server,identifier,*p,packetNew))
+	if(!NetIncludePacketID(::server,identifier,packet,packetNew))
 	{
 		Con::csv<<"WARNING: Attempted to send unindexed lua net message: "<<identifier<<Con::endl;
-		return 0;
+		return;
 	}
+	::server->SendPacket("luanet",packetNew,protocol);
+}
+
+static void send(lua_State *l,pragma::networking::Protocol protocol,const std::string &identifier,NetPacket &packet,const pragma::networking::TargetRecipientFilter &rp)
+{
+	NetPacket packetNew;
+	if(!NetIncludePacketID(::server,identifier,packet,packetNew))
+	{
+		Con::csv<<"WARNING: Attempted to send unindexed lua net message: "<<identifier<<Con::endl;
+		return;
+	}
+	::server->SendPacket("luanet",packetNew,protocol,rp);
+}
+
+void Lua::net::server::send(lua_State *l,pragma::networking::Protocol protocol,const std::string &identifier,NetPacket &packet,const luabind::tableT<pragma::SPlayerComponent> &recipients)
+{
 	pragma::networking::TargetRecipientFilter rp {};
-	if(!GetRecipients(l,4,rp))
-		return 0;
-	server->SendPacket("luanet",packetNew,protocol,rp);
-	return 0;
+	GetRecipients(recipients,rp);
+	::send(l,protocol,identifier,packet,rp);
+}
+void Lua::net::server::send(lua_State *l,pragma::networking::Protocol protocol,const std::string &identifier,NetPacket &packet,pragma::networking::TargetRecipientFilter &recipients)
+{
+	::send(l,protocol,identifier,packet,recipients);
+}
+void Lua::net::server::send(lua_State *l,pragma::networking::Protocol protocol,const std::string &identifier,NetPacket &packet,pragma::SPlayerComponent &recipient)
+{
+	pragma::networking::TargetRecipientFilter rp {};
+	GetRecipients(recipient,rp);
+	::send(l,protocol,identifier,packet,rp);
 }
 
-DLLSERVER int Lua_sv_net_Receive(lua_State *l)
+void Lua::net::server::receive(lua_State *l,const std::string &name,const Lua::func<void> &function)
 {
-	if(!server->IsGameActive())
-		return 0;
-	Game *game = server->GetGameState();
-	std::string name = luaL_checkstring(l,1);
-	luaL_checkfunction(l,2);
-	int fc = lua_createreference(l,2);
+	if(!::server->IsGameActive())
+		return;
+	Game *game = ::server->GetGameState();
+	function.push(l);
+	int fc = lua_createreference(l,-1);
+	Lua::Pop(l,1);
 	game->RegisterLuaNetMessage(name,fc);
-	return 0;
 }
 
 

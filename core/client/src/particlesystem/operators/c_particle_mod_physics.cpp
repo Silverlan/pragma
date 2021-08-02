@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/particlesystem/operators/c_particle_mod_physics.h"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include <pragma/physics/environment.hpp>
 #include <pragma/physics/shape.hpp>
 #include <pragma/physics/collisionmesh.h>

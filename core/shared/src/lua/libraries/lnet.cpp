@@ -26,12 +26,9 @@ void Lua::net::RegisterLibraryEnums(lua_State *l)
 	});
 }
 
-int32_t Lua::net::register_event(lua_State *l)
+pragma::NetEventId Lua::net::register_event(lua_State *l,const std::string &name)
 {
-	std::string name = Lua::CheckString(l,1);
 	auto *nw = engine->GetNetworkState(l);
 	auto *game = nw->GetGameState();
-	auto eventId = game->SetupNetEvent(name);
-	Lua::PushInt(l,eventId);
-	return 1;
+	return game->SetupNetEvent(name);
 }

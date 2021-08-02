@@ -12,6 +12,7 @@
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/model/vk_mesh.h"
 #include <pragma/lua/classes/lmodelmesh.h>
+#include <buffers/prosper_buffer.hpp>
 
 void Lua::ModelMesh::Client::Create(lua_State *l)
 {

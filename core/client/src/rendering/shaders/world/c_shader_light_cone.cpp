@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_light_cone.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/entities/environment/lights/c_env_light_spot_vol.h"
@@ -17,6 +18,7 @@
 #include <prosper_util.hpp>
 #include <datasystem_color.h>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <cmaterial.h>
 
 using namespace pragma;
 

@@ -11,11 +11,15 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/components/c_radius_component.hpp"
+#include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/entities/environment/lights/c_env_light.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
 #include <prosper_command_buffer.hpp>
+#include <cmaterial.h>
 
 using namespace pragma;
 

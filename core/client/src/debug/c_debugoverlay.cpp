@@ -9,6 +9,7 @@
 #include "pragma/debug/c_debugoverlay.h"
 #include "pragma/rendering/shaders/debug/c_shader_debug.hpp"
 #include "pragma/rendering/shaders/debug/c_shader_debug_text.hpp"
+#include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/math/icosphere.h"
 #include <pragma/math/util_hermite.h>
 #include <pragma/math/e_frustum.h>

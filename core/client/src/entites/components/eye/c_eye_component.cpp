@@ -8,6 +8,9 @@
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_eye_component.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/entities/components/c_animated_component.hpp"
+#include "pragma/entities/components/c_flex_component.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/entities/entity_component_system_t.hpp>

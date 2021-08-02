@@ -14,6 +14,7 @@
 #include <unordered_map>
 #include <mathutil/uvec.h>
 #include <tiny_gltf.h>
+#include <mathutil/umath_lighting.hpp>
 
 class Model;
 class ModelSubMesh;

@@ -10,6 +10,8 @@
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/entities/components/c_radius_component.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/networking/c_nwm_util.h"
@@ -18,6 +20,7 @@
 #include <pragma/model/model.h>
 #include <pragma/math/intersection.h>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <cmaterial.h>
 
 using namespace pragma;
 

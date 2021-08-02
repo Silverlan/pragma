@@ -9,6 +9,12 @@
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_bsp.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/entities/components/c_bsp_leaf_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/entities/environment/c_env_camera.h"
+#include "pragma/debug/c_debugoverlay.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_model.h"
 #include <pragma/math/intersection.h>

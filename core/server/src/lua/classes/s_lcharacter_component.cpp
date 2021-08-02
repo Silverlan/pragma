@@ -11,6 +11,7 @@
 #include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
+#include "pragma/entities/components/s_ai_component.hpp"
 #include <pragma/lua/classes/lproperty.hpp>
 #include <pragma/physics/raytraces.h>
 #include <pragma/lua/lentity_components_base_types.hpp>

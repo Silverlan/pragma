@@ -13,6 +13,7 @@
 
 class FontInfo;
 class LFile;
+enum class TextureLoadFlags : uint32_t;
 namespace Lua
 {
 	namespace engine

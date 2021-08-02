@@ -11,6 +11,8 @@
 #include "pragma/particlesystem/initializers/c_particle_initializer_lua.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include <prosper_command_buffer.hpp>
 #include <luasystem.h>
 

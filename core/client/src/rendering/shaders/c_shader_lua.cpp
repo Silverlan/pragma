@@ -10,6 +10,8 @@
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/util.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>
@@ -232,12 +234,10 @@ pragma::LuaShaderGUIParticle2D::LuaShaderGUIParticle2D()
 	: TLuaShaderBase(c_engine->GetRenderContext(),"","","")
 {}
 Vector3 pragma::LuaShaderGUIParticle2D::Lua_CalcVertexPosition(
-	lua_State *l,CParticleSystemHandle &hPtC,uint32_t ptIdx,uint32_t localVertIdx,const Vector3 &camPos,const Vector3 &camUpWs,const Vector3 &camRightWs,float nearZ,float farZ
+	lua_State *l,pragma::CParticleSystemComponent &hPtC,uint32_t ptIdx,uint32_t localVertIdx,const Vector3 &camPos,const Vector3 &camUpWs,const Vector3 &camRightWs,float nearZ,float farZ
 )
 {
-	pragma::Lua::check_component(l,hPtC);
-	auto *ptr = hPtC.get();
-	return pragma::ShaderParticle2DBase::DoCalcVertexPosition(*ptr,ptIdx,localVertIdx,camPos,camUpWs,camRightWs,nearZ,farZ);
+	return pragma::ShaderParticle2DBase::DoCalcVertexPosition(hPtC,ptIdx,localVertIdx,camPos,camUpWs,camRightWs,nearZ,farZ);
 }
 void pragma::LuaShaderGUIParticle2D::Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {

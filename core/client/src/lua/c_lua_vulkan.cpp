@@ -38,6 +38,7 @@
 #include "pragma/model/vk_mesh.h"
 #include <prosper_event.hpp>
 #include <prosper_window.hpp>
+#include <prosper_swap_command_buffer.hpp>
 #include <pragma/rendering/shaders/image/c_shader_gradient.hpp>
 #include <wgui/wgui.h>
 #include <luabind/copy_policy.hpp>

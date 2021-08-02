@@ -7,6 +7,9 @@
 
 #include "stdafx_client.h"
 #include "pragma/clientstate/clientstate.h"
+#include "pragma/entities/components/c_radius_component.hpp"
+#include "pragma/entities/environment/lights/c_env_shadow.hpp"
+#include "pragma/entities/environment/lights/c_env_shadow_csm.hpp"
 #include "pragma/gui/debug/widebugshadowmap.hpp"
 #include "pragma/gui/widebugdepthtexture.h"
 #include "pragma/rendering/c_cubemapside.h"

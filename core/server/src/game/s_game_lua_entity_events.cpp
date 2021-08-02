@@ -7,6 +7,7 @@
 #include "stdafx_server.h"
 #include "pragma/game/s_game.h"
 #include "pragma/entities/components/s_ai_component.hpp"
+#include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/lua/s_ldef_memory_fragment.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/lua/lua_entity_component.hpp>
@@ -113,11 +114,10 @@ bool SGame::InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t ev
 	{
 		Lua::PushInt(l,1);
 		Lua::GetTableValue(l,argsIdx);
-		auto &hPl = Lua::Check<SPlayerHandle>(l,-1);
-		pragma::Lua::check_component(l,hPl);
+		auto &hPl = Lua::Check<pragma::SPlayerComponent>(l,-1);
 		Lua::Pop(l,1);
 		
-		pragma::CEOnStartControl evData{*hPl};
+		pragma::CEOnStartControl evData{hPl};
 		if(bInject)
 			component.InjectEvent(eventId,evData);
 		else

@@ -29,10 +29,10 @@
 
 extern DLLNETWORK Engine *engine;
 
-void test_lua_policies(lua_State *l);
+//void test_lua_policies(lua_State *l);
 void Lua::ents::register_library(lua_State *l)
 {
-	test_lua_policies(l);
+	//test_lua_policies(l);
 	auto entsMod = luabind::module(l,"ents");
 	entsMod[
 		luabind::def("create",create),

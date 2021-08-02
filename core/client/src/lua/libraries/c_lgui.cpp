@@ -66,12 +66,16 @@ static void initialize_element(lua_State *l,::WIBase &p)
 ::WIBase *Lua::gui::create(lua_State *l,const std::string &name,::WIBase &parent)
 {
 	auto *el = WGUI::GetInstance().Create(name,&parent);
+	if(!el)
+		return nullptr;
 	initialize_element(l,*el);
 	return el;
 }
 ::WIBase *Lua::gui::create(lua_State *l,const std::string &name)
 {
 	auto *el = c_game->CreateGUIElement(name);
+	if(!el)
+		return nullptr;
 	initialize_element(l,*el);
 	return el;
 }

@@ -7,6 +7,8 @@
 
 #include "stdafx_client.h"
 #include "pragma/util/c_resource_watcher.hpp"
+#include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/console/c_cvar.h"
 #include <texture_load_flags.hpp>
 #include <sharedutils/util_file.h>
@@ -14,6 +16,7 @@
 #include <textureinfo.h>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/asset/util_asset.hpp>
+#include <cmaterial.h>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;

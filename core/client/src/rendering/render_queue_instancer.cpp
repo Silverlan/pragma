@@ -9,6 +9,7 @@
 #include "pragma/rendering/render_queue_instancer.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
+#include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/console/c_cvar.h"
 
 using namespace pragma;

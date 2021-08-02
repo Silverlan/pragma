@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_client.h"
+#include "pragma/particlesystem/c_particle.h"
 #include "pragma/particlesystem/modifiers/c_particle_modifier_component_time.hpp"
 
 void CParticleModifierComponentTime::Initialize(const std::string &prefix,const std::unordered_map<std::string,std::string> &values)

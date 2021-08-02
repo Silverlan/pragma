@@ -13,6 +13,13 @@
 #include "pragma/util/util_image.hpp"
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/rendering/shaders/util/c_shader_specular_glossiness_to_metalness_roughness.hpp"
+#include "pragma/entities/environment/c_env_camera.h"
+#include "pragma/entities/environment/lights/c_env_light.h"
+#include "pragma/entities/environment/lights/c_env_light_spot.h"
+#include "pragma/entities/environment/lights/c_env_light_point.h"
+#include "pragma/entities/environment/lights/c_env_light_directional.h"
+#include "pragma/entities/components/c_color_component.hpp"
+#include "pragma/entities/components/c_radius_component.hpp"
 #include "c_gltf_writer.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/model/animation/vertex_animation.hpp>
@@ -26,6 +33,7 @@
 #include <image/prosper_sampler.hpp>
 #include <util_image.hpp>
 #include <cmaterialmanager.h>
+#include <cmaterial.h>
 #include <udm.hpp>
 
 extern DLLCLIENT CEngine *c_engine;

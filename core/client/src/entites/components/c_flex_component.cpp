@@ -7,6 +7,9 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_flex_component.hpp"
+#include "pragma/entities/components/c_eye_component.hpp"
+#include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/entities/components/c_vertex_animated_component.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/audio/c_alsound.h"
 #include "pragma/lua/c_lentity_handles.hpp"

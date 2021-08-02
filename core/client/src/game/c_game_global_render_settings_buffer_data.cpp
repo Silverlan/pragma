@@ -8,8 +8,10 @@
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/entities/components/c_render_component.hpp"
 #include <prosper_util.hpp>
 #include <buffers/prosper_buffer.hpp>
+#include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
 extern DLLCLIENT CEngine *c_engine;

@@ -10,6 +10,7 @@
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/components/s_entity_component.hpp"
 #include <pragma/lua/sh_lua_component.hpp>
+#include <pragma/lua/handle_holder.hpp>
 
 namespace pragma
 {
@@ -30,6 +31,11 @@ namespace pragma
 	protected:
 		virtual void InvokeNetEventHandle(const std::string &methodName,NetPacket &packet,pragma::BasePlayerComponent *pl) override;
 	};
+};
+
+namespace pragma::lua
+{
+	using SLuaBaseEntityComponentHolder = HandleHolder<SLuaBaseEntityComponent>;
 };
 
 #endif

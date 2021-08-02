@@ -125,29 +125,29 @@ void SGame::RegisterLua()
 	//
 
 	// Needs to be registered AFTER RegisterLuaGameClasses has been called!
-	/*auto defEntCmp = luabind::class_<BaseLuaBaseEntityHandle,luabind::bases<BaseEntityComponentHandle>,luabind::default_holder,LuaBaseEntityComponentWrapper>("BaseEntityComponent");
-	Lua::register_base_entity_component<luabind::class_<BaseLuaBaseEntityHandle,luabind::bases<BaseEntityComponentHandle>,luabind::default_holder,LuaBaseEntityComponentWrapper>>(defEntCmp);
-	defEntCmp.def("SendData",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,NetPacket,pragma::networking::ClientRecipientFilter&)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,NetPacket packet,pragma::networking::ClientRecipientFilter &rp) {
+	auto defEntCmp = luabind::class_<pragma::SLuaBaseEntityComponent,luabind::bases<pragma::BaseEntityComponent>,pragma::lua::SLuaBaseEntityComponentHolder>("BaseEntityComponent");
+	// Lua::register_base_entity_component<luabind::class_<pragma::SLuaBaseEntityComponent,luabind::bases<BaseEntityComponentHandle>,luabind::default_holder,LuaBaseEntityComponentWrapper>>(defEntCmp);
+	defEntCmp.def("SendData",static_cast<void(*)(lua_State*,pragma::SLuaBaseEntityComponent&,NetPacket,pragma::networking::ClientRecipientFilter&)>([](lua_State *l,pragma::SLuaBaseEntityComponent &hComponent,NetPacket packet,pragma::networking::ClientRecipientFilter &rp) {
 		
 	}));
-	defEntCmp.def("ReceiveNetEvent",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,SPlayerHandle&,uint32_t,NetPacket)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,SPlayerHandle &pl,uint32_t evId,NetPacket packet) {
+	defEntCmp.def("ReceiveNetEvent",static_cast<void(*)(lua_State*,pragma::SLuaBaseEntityComponent&,pragma::SPlayerComponent&,uint32_t,NetPacket)>([](lua_State *l,pragma::SLuaBaseEntityComponent &hComponent,pragma::SPlayerComponent &pl,uint32_t evId,NetPacket packet) {
 		
 	}));
-	defEntCmp.def("SendSnapshotData",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,NetPacket,SPlayerHandle&)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,NetPacket packet,SPlayerHandle &pl) {
+	defEntCmp.def("SendSnapshotData",static_cast<void(*)(lua_State*,pragma::SLuaBaseEntityComponent&,NetPacket,pragma::SPlayerComponent&)>([](lua_State *l,pragma::SLuaBaseEntityComponent &hComponent,NetPacket packet,pragma::SPlayerComponent &pl) {
 		
 	}));
-	modEnts[defEntCmp];*/
+	modEnts[defEntCmp];
 
-	Lua::RegisterLibrary(GetLuaState(),"net",{
-		{"broadcast",Lua_sv_net_Broadcast},
-		{"send",Lua_sv_net_Send},
-		{"receive",Lua_sv_net_Receive},
-		{"register",Lua_sv_net_Register},
-		{"register_event",Lua::net::register_event}
-		//{"send_resource_file",Lua_sv_net_SendResourceFile}
-	});
-	
 	auto modNet = luabind::module(GetLuaState(),"net");
+	modNet[
+		luabind::def("broadcast",&Lua::net::server::broadcast),
+		luabind::def("send",static_cast<void(*)(lua_State*,pragma::networking::Protocol,const std::string&,NetPacket&,const luabind::tableT<pragma::SPlayerComponent>&)>(&Lua::net::server::send)),
+		luabind::def("send",static_cast<void(*)(lua_State*,pragma::networking::Protocol,const std::string&,NetPacket&,pragma::networking::TargetRecipientFilter&)>(&Lua::net::server::send)),
+		luabind::def("send",static_cast<void(*)(lua_State*,pragma::networking::Protocol,const std::string&,NetPacket&,pragma::SPlayerComponent&)>(&Lua::net::server::send)),
+		luabind::def("receive",&Lua::net::server::receive),
+		luabind::def("register",&Lua::net::server::register_net_message),
+		luabind::def("register_event",&Lua::net::register_event)
+	];
 	auto netPacketClassDef = luabind::class_<NetPacket>("Packet");
 	Lua::NetPacket::Server::register_class(netPacketClassDef);
 	netPacketClassDef.def("WritePlayer",static_cast<void(*)(lua_State*,::NetPacket&,util::WeakHandle<pragma::SPlayerComponent>&)>([](lua_State *l,::NetPacket &packet,util::WeakHandle<pragma::SPlayerComponent> &pl) {

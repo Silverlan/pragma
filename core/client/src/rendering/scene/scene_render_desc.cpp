@@ -8,6 +8,10 @@
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/entity_instance_index_buffer.hpp"
+#include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/entities/environment/c_env_camera.h"
+#include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_brute_force.hpp"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_bsp.hpp"
 #include "pragma/rendering/occlusion_culling/occlusion_culling_handler_chc.hpp"
@@ -16,7 +20,10 @@
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/renderers/base_renderer.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/entities/components/renderers/rasterization/culled_mesh_data.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/render_queue_worker.hpp"
 #include "pragma/rendering/render_queue_instancer.hpp"
@@ -28,6 +35,7 @@
 #include <sharedutils/alpha_mode.hpp>
 #include <sharedutils/util_hash.hpp>
 #include <pragma/entities/entity_iterator.hpp>
+#include <cmaterial.h>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

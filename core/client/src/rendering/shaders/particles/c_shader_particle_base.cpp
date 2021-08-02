@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle_base.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/console/c_cvar.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include <shader/prosper_pipeline_create_info.hpp>

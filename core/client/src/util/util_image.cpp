@@ -8,6 +8,8 @@
 #include "stdafx_client.h"
 #include "pragma/util/util_image.hpp"
 #include <prosper_command_buffer.hpp>
+#include <image/prosper_image.hpp>
+#include <buffers/prosper_buffer.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 

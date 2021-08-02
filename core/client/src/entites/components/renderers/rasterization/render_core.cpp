@@ -11,6 +11,7 @@
 #include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
 #include "pragma/entities/components/renderers/rasterization/glow_data.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/rendering/shaders/post_processing/c_shader_glow.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fog.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_pp_fxaa.hpp"

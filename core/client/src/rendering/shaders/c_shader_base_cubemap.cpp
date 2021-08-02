@@ -13,6 +13,7 @@
 #include <image/prosper_render_target.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
+#include <buffers/prosper_buffer.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 

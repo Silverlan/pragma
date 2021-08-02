@@ -219,10 +219,10 @@ namespace pragma
 		virtual void Lua_InitializePipeline(prosper::BasePipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 
 		Vector3 Lua_CalcVertexPosition(
-			lua_State *l,CParticleSystemHandle &hPtC,uint32_t ptIdx,uint32_t localVertIdx,const Vector3 &camPos,const Vector3 &camUpWs,const Vector3 &camRightWs,float nearZ,float farZ
+			lua_State *l,pragma::CParticleSystemComponent &hPtC,uint32_t ptIdx,uint32_t localVertIdx,const Vector3 &camPos,const Vector3 &camUpWs,const Vector3 &camRightWs,float nearZ,float farZ
 		);
 		static Vector3 Lua_default_CalcVertexPosition(
-			lua_State *l,LuaShaderGUIParticle2D &shader,CParticleSystemHandle &hPtC,uint32_t ptIdx,uint32_t localVertIdx,
+			lua_State *l,LuaShaderGUIParticle2D &shader,pragma::CParticleSystemComponent &hPtC,uint32_t ptIdx,uint32_t localVertIdx,
 			const Vector3 &camPos,const Vector3 &camUpWs,const Vector3 &camRightWs,float nearZ,float farZ
 		) {
 			return shader.Lua_CalcVertexPosition(l,hPtC,ptIdx,localVertIdx,camPos,camUpWs,camRightWs,nearZ,farZ);

@@ -61,7 +61,6 @@
 #include <buffers/prosper_buffer.hpp>
 
 
-
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 

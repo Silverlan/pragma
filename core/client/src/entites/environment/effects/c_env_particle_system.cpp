@@ -7,6 +7,10 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
+#include "pragma/entities/components/c_io_component.hpp"
+#include "pragma/entities/components/c_animated_component.hpp"
+#include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/c_entityfactories.h"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/entities/baseentity_luaobject.h"

@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include <prosper_command_buffer.hpp>

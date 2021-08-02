@@ -28,6 +28,7 @@ using BoneId = uint16_t;
 class Skeleton;
 namespace pragma
 {
+	using RenderBufferIndex = uint32_t;
 	template<class T>
 		using ComponentHandle = util::TWeakSharedHandle<T>;
 };

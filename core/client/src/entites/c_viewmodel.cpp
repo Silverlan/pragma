@@ -15,9 +15,14 @@
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/entities/components/c_attachable_component.hpp"
+#include "pragma/entities/components/c_parent_component.hpp"
+#include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/entities/components/c_character_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/model/model.h>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/entities/components/logic_component.hpp>
 
 using namespace pragma;
 

@@ -16,10 +16,10 @@ namespace Lua
 {
 	namespace RecipientFilter
 	{
-		DLLSERVER void GetRecipients(lua_State *l,pragma::networking::TargetRecipientFilter &rp);
-		DLLSERVER void AddRecipient(lua_State *l,pragma::networking::TargetRecipientFilter &rp,SPlayerHandle &hPl);
-		DLLSERVER void RemoveRecipient(lua_State *l,pragma::networking::TargetRecipientFilter &rp,SPlayerHandle &hPl);
-		DLLSERVER void HasRecipient(lua_State *l,pragma::networking::TargetRecipientFilter &rp,SPlayerHandle &hPl);
+		DLLSERVER luabind::tableT<pragma::SPlayerComponent> GetRecipients(lua_State *l,pragma::networking::TargetRecipientFilter &rp);
+		DLLSERVER void AddRecipient(lua_State *l,pragma::networking::TargetRecipientFilter &rp,pragma::SPlayerComponent &hPl);
+		DLLSERVER void RemoveRecipient(lua_State *l,pragma::networking::TargetRecipientFilter &rp,pragma::SPlayerComponent &hPl);
+		DLLSERVER bool HasRecipient(lua_State *l,pragma::networking::TargetRecipientFilter &rp,pragma::SPlayerComponent &hPl);
 	};
 };
 

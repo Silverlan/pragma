@@ -7,6 +7,8 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/environment/c_env_fog_controller.h"
+#include "pragma/entities/components/c_toggle_component.hpp"
+#include "pragma/entities/components/c_color_component.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include <pragma/networking/nwm_util.h>
 #include "pragma/lua/c_lentity_handles.hpp"

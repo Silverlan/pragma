@@ -16,6 +16,8 @@
 #include "pragma/entities/c_water_surface.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/model/model.h>
 #include <pragma/physics/raytraces.h>

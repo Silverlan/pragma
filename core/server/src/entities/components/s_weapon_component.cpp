@@ -16,6 +16,8 @@
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
+#include <pragma/entities/components/base_ownable_component.hpp>
+#include <pragma/entities/components/usable_component.hpp>
 #include <pragma/entities/components/velocity_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>

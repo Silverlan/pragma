@@ -7,6 +7,10 @@
 
 #include "pragma/math/c_util_math.hpp"
 #include "pragma/entities/environment/lights/c_env_light.h"
+#include "pragma/entities/environment/lights/c_env_light_directional.h"
+#include "pragma/entities/environment/lights/c_env_light_point.h"
+#include "pragma/entities/environment/lights/c_env_light_spot.h"
+#include "pragma/entities/components/c_color_component.hpp"
 #include <pragma/entities/environment/lights/env_light.h>
 
 const std::array<Mat4,6> &pragma::math::get_cubemap_view_matrices()

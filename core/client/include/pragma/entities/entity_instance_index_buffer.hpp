@@ -9,6 +9,7 @@
 #define __ENTITY_INSTANCE_INDEX_BUFFER_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include "pragma/types.hpp"
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>
 #include <sharedutils/util_hash.hpp>
 

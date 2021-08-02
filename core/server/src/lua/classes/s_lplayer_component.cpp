@@ -8,6 +8,8 @@
 #include "pragma/entities/player.h"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/lua/s_lentity_components.hpp"
+#include "pragma/entities/components/s_player_component.hpp"
+#include "pragma/entities/components/s_character_component.hpp"
 #include <pragma/lua/libraries/lfile.h>
 #include <pragma/lua/luaapi.h>
 #include <pragma/lua/lentity_components_base_types.hpp>
@@ -21,8 +23,7 @@ namespace Lua
 			static void register_class(luabind::class_<pragma::SPlayerComponent,EntityHandle> &classDef);
 			static void Respawn(lua_State *l,pragma::SPlayerComponent &hEnt);
 			static void SetActionInput(lua_State *l,pragma::SPlayerComponent &hPl,UInt32 input,Bool pressed);
-			static void Kick(lua_State *l,pragma::SPlayerComponent &hPl,const std::string &reason);
-			static void SendResource(lua_State *l,pragma::SPlayerComponent &hPl,const std::string &name);
+			static bool SendResource(lua_State *l,pragma::SPlayerComponent &hPl,const std::string &name);
 		};
 	};
 };
@@ -34,13 +35,12 @@ void Lua::register_sv_player_component(lua_State *l,luabind::module_ &module)
 	auto def = luabind::class_<pragma::SPlayerComponent,pragma::BasePlayerComponent>("PlayerComponent");
 	def.def("Respawn",&Lua::Player::Server::Respawn);
 	def.def("SetActionInput",&Lua::Player::Server::SetActionInput);
-	def.def("Kick",&Lua::Player::Server::Kick);
+	def.def("Kick",&pragma::SPlayerComponent::Kick);
 	def.def("SendResource",&Lua::Player::Server::SendResource);
 	module[def];
 }
 void Lua::Player::Server::Respawn(lua_State *l,pragma::SPlayerComponent &hEnt)
 {
-	
 	auto charComponent = hEnt.GetEntity().GetCharacterComponent();
 	if(charComponent.valid())
 		charComponent->Respawn();
@@ -48,17 +48,10 @@ void Lua::Player::Server::Respawn(lua_State *l,pragma::SPlayerComponent &hEnt)
 
 void Lua::Player::Server::SetActionInput(lua_State *l,pragma::SPlayerComponent &hPl,UInt32 input,Bool pressed)
 {
-	
 	hPl.SetActionInput(static_cast<Action>(input),pressed);
 }
 
-void Lua::Player::Server::Kick(lua_State *l,pragma::SPlayerComponent &hPl,const std::string &reason)
+bool Lua::Player::Server::SendResource(lua_State *l,pragma::SPlayerComponent &hPl,const std::string &name)
 {
-	
-	hPl.Kick(reason);
-}
-void Lua::Player::Server::SendResource(lua_State *l,pragma::SPlayerComponent &hPl,const std::string &name)
-{
-	
-	Lua::PushBool(l,hPl.SendResource(name));
+	return hPl.SendResource(name);
 }

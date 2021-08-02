@@ -12,6 +12,10 @@
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
+#include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/entities/components/c_time_scale_component.hpp"
+#include "pragma/entities/components/c_attachable_component.hpp"
+#include "pragma/entities/environment/c_env_camera.h"
 #include <pragma/asset/util_asset.hpp>
 #include <sprite_sheet_animation.hpp>
 #include <buffers/prosper_dynamic_resizable_buffer.hpp>

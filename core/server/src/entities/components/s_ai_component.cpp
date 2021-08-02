@@ -10,6 +10,8 @@
 #include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_model_component.hpp"
 #include "pragma/entities/components/s_animated_component.hpp"
+#include "pragma/entities/components/s_health_component.hpp"
+#include "pragma/entities/components/s_physics_component.hpp"
 #include "pragma/ai/s_npcstate.h"
 #include "pragma/entities/s_baseentity.h"
 #include "pragma/ai/ai_squad.h"
@@ -24,6 +26,7 @@
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_io_component.hpp>
+#include <pragma/entities/components/damageable_component.hpp>
 #include <sharedutils/netpacket.hpp>
 #include <pragma/networking/nwm_util.h>
 

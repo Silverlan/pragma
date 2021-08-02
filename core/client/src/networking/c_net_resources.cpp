@@ -9,6 +9,7 @@
 #include "pragma/networking/c_net_resources.h"
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/networking/resources.h"
+#include "pragma/entities/components/c_model_component.hpp"
 #include <fsys/filesystem.h>
 #include "pragma/model/c_modelmanager.h"
 #include "pragma/model/c_modelmesh.h"

@@ -10,6 +10,8 @@
 #include "pragma/rendering/c_msaa.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/entities/components/renderers/rasterization/hdr_data.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/rendering/shaders/image/c_shader_calc_image_color.hpp"
 #include "pragma/rendering/shaders/particles/c_shader_particle.hpp"
 #include "pragma/rendering/shaders/post_processing/c_shader_hdr.hpp"
@@ -595,11 +597,11 @@ void Console::commands::debug_render_scene(NetworkState *state,pragma::BasePlaye
 		}
 		r->SetSize(size *idx,size);
 		return r->GetHandle();
-		});
+	});
 	dbg->AddCallback("PostRenderScene",FunctionCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>::Create([](std::reference_wrapper<const util::DrawSceneInfo> drawSceneInfo) {
 		if(hTexture.IsValid() == true)
 			static_cast<WIDebugMSAATexture*>(hTexture.get())->Update();
 		if(hBloomTexture.IsValid() == true)
 			static_cast<WIDebugMSAATexture*>(hBloomTexture.get())->Update();
-		}));
+	}));
 }

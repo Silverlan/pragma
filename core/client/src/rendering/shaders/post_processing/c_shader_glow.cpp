@@ -13,6 +13,7 @@
 #include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_util.hpp>
+#include <cmaterial.h>
 
 using namespace pragma;
 

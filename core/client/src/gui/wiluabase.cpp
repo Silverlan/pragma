@@ -13,24 +13,20 @@
 #include "pragma/lua/classes/c_ldef_wgui.h"
 
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 extern ClientState *client;
-WILuaBase::WILuaBase(luabind::object &o,std::string &className)
-	: WIBase(),LuaObjectBase(o)
-{
-	m_class = className;
-	SetUserData2(m_baseLuaObj);
-}
+WILuaBase::WILuaBase()
+{}
 
 WILuaBase::~WILuaBase()
 {}
 
-/*void WILuaBase::InitializeHandle()
+void WILuaBase::SetupLua(const luabind::object &o,std::string &className)
 {
-	auto &hElement = *luabind::object_cast_nothrow<WILuaHandle*>(*m_baseLuaObj,static_cast<WILuaHandle*>(nullptr));
-	hElement.Reset(new PtrWI(this));
-	m_handle = std::shared_ptr<WILuaHandle>(&hElement,[](WILuaHandle*) {}); // Empty deleter, Lua will take care of its deletion!
-}*/
+	m_class = className;
+	SetLuaObject(o);
+	SetUserData2(m_baseLuaObj);
+}
 
 void WILuaBase::Initialize()
 {
@@ -157,56 +153,57 @@ void WILuaBase::OnRemove()
 
 ///////////////////////////////////////////
 
-void WILuaWrapper::OnInitialize() {}
-void WILuaWrapper::default_OnInitialize(lua_State*,WIHandle&) {}
+void WILuaBase::Lua_OnInitialize() {}
+void WILuaBase::default_OnInitialize(lua_State*,WILuaBase&) {}
 
-void WILuaWrapper::OnThink() {}
-void WILuaWrapper::default_OnThink(lua_State*,WIHandle&) {}
+void WILuaBase::Lua_OnThink() {}
+void WILuaBase::default_OnThink(lua_State*,WILuaBase&) {}
 
-void WILuaWrapper::OnFirstThink() {}
-void WILuaWrapper::default_OnFirstThink(lua_State*,WIHandle&) {}
+void WILuaBase::Lua_OnFirstThink() {}
+void WILuaBase::default_OnFirstThink(lua_State*,WILuaBase&) {}
 
-void WILuaWrapper::MouseCallback(int,int,int) {}
-void WILuaWrapper::default_MouseCallback(lua_State*,WIHandle&,int,int,int) {}
+void WILuaBase::Lua_MouseCallback(int,int,int) {}
+void WILuaBase::default_MouseCallback(lua_State*,WILuaBase&,int,int,int) {}
 
-void WILuaWrapper::KeyboardCallback(int,int,int,int) {}
-void WILuaWrapper::default_KeyboardCallback(lua_State*,WIHandle&,int,int,int,int) {}
+void WILuaBase::Lua_KeyboardCallback(int,int,int,int) {}
+void WILuaBase::default_KeyboardCallback(lua_State*,WILuaBase&,int,int,int,int) {}
 
-void WILuaWrapper::CharCallback(unsigned int,uint32_t) {}
-void WILuaWrapper::default_CharCallback(lua_State*,WIHandle&,unsigned int,uint32_t) {}
+void WILuaBase::Lua_CharCallback(unsigned int,uint32_t) {}
+void WILuaBase::default_CharCallback(lua_State*,WILuaBase&,unsigned int,uint32_t) {}
 
-void WILuaWrapper::ScrollCallback(double,double) {}
-void WILuaWrapper::default_ScrollCallback(lua_State*,WIHandle&,double,double) {}
+void WILuaBase::Lua_ScrollCallback(double,double) {}
+void WILuaBase::default_ScrollCallback(lua_State*,WILuaBase&,double,double) {}
 
-void WILuaWrapper::OnUpdate() {}
-void WILuaWrapper::default_OnUpdate(lua_State *l,WIHandle &hElement) {}
+void WILuaBase::Lua_OnUpdate() {}
+void WILuaBase::default_OnUpdate(lua_State *l,WILuaBase &hElement) {}
 
-void WILuaWrapper::OnSetSize(int,int) {}
-void WILuaWrapper::default_OnSetSize(lua_State*,WIHandle&,int,int) {}
+void WILuaBase::Lua_OnSetSize(int,int) {}
+void WILuaBase::default_OnSetSize(lua_State*,WILuaBase&,int,int) {}
 
-void WILuaWrapper::OnSetVisible(bool) {}
-void WILuaWrapper::default_OnSetVisible(lua_State*,WIHandle&,bool) {}
+void WILuaBase::Lua_OnSetVisible(bool) {}
+void WILuaBase::default_OnSetVisible(lua_State*,WILuaBase&,bool) {}
 
-void WILuaWrapper::OnSetColor(float,float,float,float) {}
-void WILuaWrapper::default_OnSetColor(lua_State*,WIHandle&,float,float,float,float) {}
+void WILuaBase::Lua_OnSetColor(float,float,float,float) {}
+void WILuaBase::default_OnSetColor(lua_State*,WILuaBase&,float,float,float,float) {}
 
-void WILuaWrapper::OnSetAlpha(float) {}
-void WILuaWrapper::default_OnSetAlpha(lua_State*,WIHandle&,float) {}
+void WILuaBase::Lua_OnSetAlpha(float) {}
+void WILuaBase::default_OnSetAlpha(lua_State*,WILuaBase&,float) {}
 
-void WILuaWrapper::Render(const ::WIBase::DrawInfo &drawInfo,const Mat4 &matDraw,const Vector2 &scale) {}
-void WILuaWrapper::default_Render(lua_State*,WIHandle&,const ::WIBase::DrawInfo &drawInfo,const Mat4 &matDraw,const Vector2 &scale) {}
+void WILuaBase::Lua_Render(const ::WIBase::DrawInfo &drawInfo,const Mat4 &matDraw,const Vector2 &scale) {}
+void WILuaBase::default_Render(lua_State*,WILuaBase&,const ::WIBase::DrawInfo &drawInfo,const Mat4 &matDraw,const Vector2 &scale) {}
 
-void WILuaWrapper::OnCursorEntered() {}
-void WILuaWrapper::default_OnCursorEntered(lua_State*,WIHandle&) {}
+void WILuaBase::Lua_OnCursorEntered() {}
+void WILuaBase::default_OnCursorEntered(lua_State*,WILuaBase&) {}
 
-void WILuaWrapper::OnCursorExited() {}
-void WILuaWrapper::default_OnCursorExited(lua_State*,WIHandle&) {}
+void WILuaBase::Lua_OnCursorExited() {}
+void WILuaBase::default_OnCursorExited(lua_State*,WILuaBase&) {}
 
-void WILuaWrapper::OnFocusGained() {}
-void WILuaWrapper::default_OnFocusGained(lua_State*,WIHandle&) {}
+void WILuaBase::Lua_OnFocusGained() {}
+void WILuaBase::default_OnFocusGained(lua_State*,WILuaBase&) {}
 
-void WILuaWrapper::OnFocusKilled() {}
-void WILuaWrapper::default_OnFocusKilled(lua_State*,WIHandle&) {}
+void WILuaBase::Lua_OnFocusKilled() {}
+void WILuaBase::default_OnFocusKilled(lua_State*,WILuaBase&) {}
 
-void WILuaWrapper::OnRemove() {}
-void WILuaWrapper::default_OnRemove(lua_State*,WIHandle&) {}
+void WILuaBase::Lua_OnRemove() {}
+void WILuaBase::default_OnRemove(lua_State*,WILuaBase&) {}
+#pragma optimize("",on)

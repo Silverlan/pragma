@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
+#include "pragma/entities/environment/c_env_camera.h"
 
 extern DLLCLIENT CGame *c_game;
 

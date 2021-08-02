@@ -28,6 +28,9 @@
 #include <pragma/entities/baseentity_events.hpp>
 #include <pragma/console/command_options.hpp>
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"
+#include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/entities/components/c_player_component.hpp"
+#include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/gui/witexturedcubemap.hpp"

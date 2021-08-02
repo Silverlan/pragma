@@ -17,35 +17,41 @@ namespace Lua
 	{
 		namespace Client
 		{
-			DLLCLIENT int DrawPoints(lua_State *l);
-			DLLCLIENT int DrawLines(lua_State *l);
-			DLLCLIENT int DrawPoint(lua_State *l);
-			DLLCLIENT int DrawLine(lua_State *l);
-			DLLCLIENT int DrawBox(lua_State *l);
-			DLLCLIENT int DrawMeshes(lua_State *l);
-			DLLCLIENT int DrawSphere(lua_State *l);
-			DLLCLIENT int DrawTruncatedCone(lua_State *l);
-			DLLCLIENT int DrawCylinder(lua_State *l);
-			DLLCLIENT int DrawCone(lua_State *l);
-			DLLCLIENT int DrawAxis(lua_State *l);
-			DLLCLIENT int DrawText(lua_State *l);
-			DLLCLIENT int DrawPath(lua_State *l);
-			DLLCLIENT int DrawSpline(lua_State *l);
-			DLLCLIENT int DrawPlane(lua_State *l);
-			DLLCLIENT int DrawFrustum(lua_State *l);
-			namespace Object
-			{
-				DLLCLIENT void Remove(lua_State *l,::DebugRenderer::BaseObject &o);
-				DLLCLIENT void IsValid(lua_State *l,::DebugRenderer::BaseObject &o);
-				DLLCLIENT void SetPos(lua_State *l,::DebugRenderer::BaseObject &o,const Vector3 &pos);
-				DLLCLIENT void GetPos(lua_State *l,::DebugRenderer::BaseObject &o);
-				DLLCLIENT void SetRotation(lua_State *l,::DebugRenderer::BaseObject &o,const Quat &rot);
-				DLLCLIENT void GetRotation(lua_State *l,::DebugRenderer::BaseObject &o);
-				DLLCLIENT void SetAngles(lua_State *l,::DebugRenderer::BaseObject &o,const EulerAngles &ang);
-				DLLCLIENT void GetAngles(lua_State *l,::DebugRenderer::BaseObject &o);
-				DLLCLIENT void IsVisible(lua_State *l,::DebugRenderer::BaseObject &o);
-				DLLCLIENT void SetVisible(lua_State *l,::DebugRenderer::BaseObject &o,bool b);
-			};
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawPoints(const std::vector<Vector3> &points,const Color &col,float duration=0.f);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawLines(const std::vector<Vector3> &linePoints,const Color &col,float duration=0.f);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawPoint(const Vector3 &pos,const Color &color,float duration=0.f);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawLine(const Vector3 &start,const Vector3 &end,const Color &color,float duration=0.f);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawBox(
+				const Vector3 &center,const Vector3 &start,const Vector3 &end,const Color &color,const std::optional<Color> &colOutline,float duration=0.f,const EulerAngles &angles={}
+			);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawBox(
+				const Vector3 &center,const Vector3 &start,const Color &color,const std::optional<Color> &colOutline,float duration=0.f,const EulerAngles &angles={}
+			);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawMeshes(const std::vector<Vector3> &verts,const Color &color,const std::optional<Color> &outlineColor,float duration=0.f);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawSphere(
+				const Vector3 &origin,float radius,const Color &col,const std::optional<Color> &outlineColor,float duration=0.f,uint32_t recursionLevel=1
+			);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawTruncatedCone(
+				const Vector3 &origin,float startRadius,const Vector3 &dir,float dist,float endRadius,const Color &col,const std::optional<Color> &outlineColor,float duration=0.f,uint32_t segmentCount=12
+			);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawCylinder(
+				const Vector3 &origin,float radius,const Vector3 &dir,float dist,const Color &color,const std::optional<Color> &outlineColor,float duration=0.f,uint32_t segmentCount=12
+			);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawCone(
+				const Vector3 &origin,const Vector3 &dir,float dist,float angle,const Color &col,const std::optional<Color> &outlineColor,float duration=0.f,uint32_t segmentCount=12
+			);
+			DLLCLIENT std::array<std::shared_ptr<::DebugRenderer::BaseObject>,3> DrawAxis(const Vector3 &origin,const EulerAngles &ang,float duration=0.f);
+			DLLCLIENT std::array<std::shared_ptr<::DebugRenderer::BaseObject>,3> DrawAxis(const umath::Transform &pose,float duration=0.f);
+			DLLCLIENT std::array<std::shared_ptr<::DebugRenderer::BaseObject>,3> DrawAxis(const Vector3 &origin,const Vector3 &x,const Vector3 &y,const Vector3 &z,float duration=0.f);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawText(const std::string &text,const Vector3 &origin,const Vector2 &size,const Color &col,float duration=0.f);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawText(const std::string &text,const Vector3 &origin,float scale,const Color &col,float duration=0.f);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawText(const std::string &text,const Vector3 &origin,const Color &col,float duration=0.f);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawPath(const std::vector<Vector3> &path,const Color &col,float duration=0.f);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawSpline(const std::vector<Vector3> &path,const Color &col,uint32_t numSegments,float duration=0.f,float curvature=1.f);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawPlane(const umath::Plane &plane,const Color &color,float duration=0.f);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawPlane(const Vector3 &n,float d,const Color &color,float duration=0.f);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawFrustum(pragma::CCameraComponent &cam,float duration=0.f);
+			DLLCLIENT std::shared_ptr<::DebugRenderer::BaseObject> DrawFrustum(const std::vector<Vector3> &points,float duration=0.f);
 		};
 	};
 };

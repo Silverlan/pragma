@@ -7,6 +7,8 @@
 
 #include "stdafx_client.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
+#include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <prosper_command_buffer.hpp>
 #include <buffers/prosper_swap_buffer.hpp>

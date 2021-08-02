@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/util/util_smoke_trail.h"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 
 pragma::CParticleSystemComponent *util::create_smoke_trail_particle(float distance,float speed,float minSpriteSize,float maxSpriteSize,const std::string &material)
 {

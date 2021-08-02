@@ -14,6 +14,7 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <image/prosper_image_view.hpp>
 #include <prosper_framebuffer.hpp>
+#include <buffers/prosper_buffer.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 

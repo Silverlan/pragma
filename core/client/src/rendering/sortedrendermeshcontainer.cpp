@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/sortedrendermeshcontainer.h"
+#include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/model/model.h>
 

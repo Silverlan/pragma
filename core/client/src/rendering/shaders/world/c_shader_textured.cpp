@@ -8,6 +8,8 @@
 #include "stdafx_client.h"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/render_processor.hpp"
+#include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/model/c_vertex_buffer_data.hpp"
@@ -24,6 +26,7 @@
 #include <prosper_command_buffer.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <sharedutils/util_path.hpp>
+#include <cmaterial.h>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;

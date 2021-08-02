@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/components/c_player_component.hpp"
+#include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/console/c_cvar.h"
 #include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/console/c_cvar_global_functions.h"

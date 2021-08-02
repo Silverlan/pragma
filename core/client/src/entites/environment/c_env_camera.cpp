@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/c_player_component.hpp"
+#include "pragma/entities/components/c_toggle_component.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/shared_spawnflags.h"
 #include <pragma/networking/nwm_util.h>

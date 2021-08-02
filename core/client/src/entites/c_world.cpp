@@ -16,9 +16,13 @@
 #include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/entities/components/c_bsp_component.hpp"
 #include "pragma/entities/components/c_light_map_component.hpp"
+#include "pragma/entities/components/c_color_component.hpp"
+#include "pragma/entities/components/c_toggle_component.hpp"
+#include "pragma/entities/environment/lights/c_env_light_directional.h"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/render_queue.hpp"
+#include "pragma/rendering/world_environment.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <util_bsp.hpp>
 #include <buffers/prosper_buffer.hpp>
@@ -26,6 +30,7 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <cmaterial.h>
 
 using namespace pragma;
 

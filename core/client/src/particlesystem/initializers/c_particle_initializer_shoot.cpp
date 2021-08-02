@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/particlesystem/initializers/c_particle_initializer_shoot.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 
 REGISTER_PARTICLE_INITIALIZER(shoot_cone,CParticleInitializerShootCone);
 REGISTER_PARTICLE_INITIALIZER(shoot_outward,CParticleInitializerShootOutward);

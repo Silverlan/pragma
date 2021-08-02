@@ -20,12 +20,16 @@
 #include <pragma/networking/error.hpp>
 #include <pragma/util/util_handled.hpp>
 #include <pragma/model/model.h>
+#include <pragma/entities/components/base_animated_component.hpp>
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/components/base_observable_component.hpp>
 #include <pragma/entities/components/base_score_component.hpp>
 #include <pragma/entities/components/base_name_component.hpp>
+#include <pragma/entities/components/base_model_component.hpp>
+#include <pragma/entities/components/global_component.hpp>
+#include <pragma/entities/components/damageable_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
 using namespace pragma;

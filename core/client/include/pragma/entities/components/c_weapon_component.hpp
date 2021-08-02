@@ -18,6 +18,7 @@ namespace nwm
 {
 	class RecipientFilter;
 };
+struct AnimationEvent;
 namespace pragma
 {
 	class CViewModelComponent;

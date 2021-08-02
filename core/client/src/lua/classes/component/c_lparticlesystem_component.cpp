@@ -8,12 +8,16 @@
 #include "stdafx_client.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/lua/classes/c_lparticle_modifiers.hpp"
 #include "pragma/particlesystem/initializers/c_particle_initializer_lua.hpp"
 #include <pragma/entities/environment/effects/particlesystemdata.h>
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include <pragma/model/model.h>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#include <buffers/prosper_buffer.hpp>
 
 extern DLLCLIENT CGame *c_game;
 
@@ -575,12 +579,10 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 		
 		hComponent.Simulate(tDelta);
 		}));
-	defCParticleSystem.def("Render",static_cast<void(*)(lua_State*,pragma::CParticleSystemComponent&,std::shared_ptr<prosper::ICommandBuffer>&,CSceneHandle&,pragma::CRasterizationRendererComponent&,uint32_t)>([](lua_State *l,pragma::CParticleSystemComponent &hComponent,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,CSceneHandle &scene,pragma::CRasterizationRendererComponent &renderer,uint32_t renderFlags) {
-		
-		
+	defCParticleSystem.def("Render",static_cast<void(*)(lua_State*,pragma::CParticleSystemComponent&,std::shared_ptr<prosper::ICommandBuffer>&,pragma::CSceneComponent&,pragma::CRasterizationRendererComponent&,uint32_t)>([](lua_State *l,pragma::CParticleSystemComponent &hComponent,std::shared_ptr<prosper::ICommandBuffer> &drawCmd,pragma::CSceneComponent &scene,pragma::CRasterizationRendererComponent &renderer,uint32_t renderFlags) {
 		if(drawCmd->IsPrimary() == false)
 			return;
-		hComponent.Render(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd),*scene,renderer,static_cast<pragma::ParticleRenderFlags>(renderFlags));
+		hComponent.Render(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd),scene,renderer,static_cast<pragma::ParticleRenderFlags>(renderFlags));
 		}));
 	defCParticleSystem.def("GetRenderParticleCount",static_cast<void(*)(lua_State*,pragma::CParticleSystemComponent&)>([](lua_State *l,pragma::CParticleSystemComponent &hComponent) {
 		

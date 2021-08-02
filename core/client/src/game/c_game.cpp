@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/game/c_game.h"
 #include "pragma/entities/c_entityfactories.h"
+#include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/model/c_polymesh.h"
 #include "pragma/model/brush/c_brushmesh.h"
 #include "pragma/entities/c_world.h"
@@ -28,9 +29,14 @@
 #include "pragma/entities/components/c_bsp_leaf_component.hpp"
 #include "pragma/entities/components/c_toggle_component.hpp"
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
+#include "pragma/entities/components/c_light_map_component.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
+#include "pragma/entities/components/c_gamemode_component.hpp"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/level/mapgeometry.h"
 #include "pragma/model/c_modelmanager.h"
 #include "pragma/gui/wiluahandlewrapper.h"
@@ -102,7 +108,7 @@
 #include <util_image_buffer.hpp>
 #include <udm.hpp>
 #include <prosper_window.hpp>
-
+#pragma optimize("",off)
 extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;
 extern ClientEntityNetworkMap *g_ClEntityNetworkMap;
 extern DLLCLIENT CEngine *c_engine;
@@ -858,7 +864,26 @@ WIBase *CGame::CreateGUIElement(std::string className,WIBase *parent)
 		try
 		{
 #endif
+			// Object is created through Luabind using 'new'
+			// but we steal it with our WILuaBaseHolder holder so it can get destroyed through
+			// the WGUI library instead.
 			r = (*o)();
+
+			auto *elLua = luabind::object_cast<WILuaBase*>(r);
+			auto *holder = luabind::object_cast<pragma::lua::WILuaBaseHolder*>(r);
+			if(elLua && holder)
+			{
+				elLua->SetupLua(r,className);
+				WGUI::GetInstance().RegisterElement(*elLua,className,parent);
+				holder->SetHandle(util::weak_shared_handle_cast<WIBase,WILuaBase>(elLua->GetHandle()));
+				el = elLua;
+			}
+			else
+			{
+				Con::csv<<"WARNING: Unable to create lua GUI Element '"<<className<<"': Lua class is not derived from valid GUI base!"<<Con::endl;
+				return nullptr;
+			}
+
 #ifndef LUABIND_NO_EXCEPTIONS
 		}
 		catch(luabind::error&)
@@ -870,16 +895,6 @@ WIBase *CGame::CreateGUIElement(std::string className,WIBase *parent)
 		if(!r)
 		{
 			Con::csv<<"WARNING: Unable to create lua GUI Element '"<<className<<"'!"<<Con::endl;
-			return nullptr;
-		}
-		if(luabind::object_cast_nothrow<WILuaBase*>(r,static_cast<WILuaBase*>(nullptr)))
-		{
-			el = new WILuaBase(r,className);
-			gui.Setup<WILuaBase>(*el,parent);
-		}
-		else
-		{
-			Con::csv<<"WARNING: Unable to create lua GUI Element '"<<className<<"': Lua class is not derived from valid GUI base!"<<Con::endl;
 			return nullptr;
 		}
 	}
@@ -1783,3 +1798,4 @@ Float CGame::GetRestitutionScale() const
 {
 	return cvRestitution->GetFloat();
 }
+#pragma optimize("",on)

@@ -11,6 +11,7 @@
 #include "pragma/game/c_game.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/components/c_model_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/model/c_model.h"
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -20,7 +21,10 @@
 #include <util_image_buffer.hpp>
 #include <util_texture_info.hpp>
 #include <prosper_command_buffer.hpp>
+#include <image/prosper_image.hpp>
 #include <pragma/entities/entity_iterator.hpp>
+#include <buffers/prosper_buffer.hpp>
+#include <cmaterial.h>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

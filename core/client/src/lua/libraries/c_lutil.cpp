@@ -11,8 +11,12 @@
 #include "pragma/lua/libraries/c_lutil.h"
 #include "pragma/lua/classes/c_lcamera.h"
 #include "pragma/entities/point/c_point_target.h"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
+#include "pragma/entities/environment/c_env_camera.h"
 #include "luasystem.h"
 #include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/entities/components/c_attachable_component.hpp"
+#include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/asset/c_util_model.hpp"
 #include <pragma/lua/classes/ldef_color.h>
 #include <pragma/lua/classes/ldef_vector.h>
@@ -31,13 +35,13 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CEngine *c_engine;
 
 
-int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua_State *l,CCameraHandle &hCam,const Vector2 &uv)
+int Lua::util::Client::calc_world_direction_from_2d_coordinates(lua_State *l,pragma::CCameraComponent &hCam,const Vector2 &uv)
 {
-	auto trComponent = hCam->GetEntity().GetTransformComponent();
+	auto trComponent = hCam.GetEntity().GetTransformComponent();
 	auto forward = trComponent ? trComponent->GetForward() : uvec::FORWARD;
 	auto right = trComponent ? trComponent->GetRight() : uvec::RIGHT;
 	auto up = trComponent ? trComponent->GetUp() : uvec::UP;
-	auto dir = uvec::calc_world_direction_from_2d_coordinates(forward,right,up,hCam->GetFOVRad(),hCam->GetNearZ(),hCam->GetFarZ(),hCam->GetAspectRatio(),0.f,0.f,uv);
+	auto dir = uvec::calc_world_direction_from_2d_coordinates(forward,right,up,hCam.GetFOVRad(),hCam.GetNearZ(),hCam.GetFarZ(),hCam.GetAspectRatio(),0.f,0.f,uv);
 	Lua::Push<Vector3>(l,dir);
 	return 1;
 }

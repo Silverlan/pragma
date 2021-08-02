@@ -33,6 +33,16 @@
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
 #include "pragma/entities/components/c_name_component.hpp"
 #include "pragma/entities/components/c_scene_component.hpp"
+#include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/entities/components/c_physics_component.hpp"
+#include "pragma/entities/components/c_model_component.hpp"
+#include "pragma/entities/components/c_generic_component.hpp"
+#include "pragma/entities/components/c_animated_component.hpp"
+#include "pragma/entities/components/c_weapon_component.hpp"
+#include "pragma/entities/components/c_vehicle_component.hpp"
+#include "pragma/entities/components/c_character_component.hpp"
+#include "pragma/entities/components/c_time_scale_component.hpp"
+#include "pragma/entities/components/c_ai_component.hpp"
 #include <pragma/util/bulletinfo.h>
 #include <pragma/physics/raytraces.h>
 #include <pragma/physics/collisionmasks.h>

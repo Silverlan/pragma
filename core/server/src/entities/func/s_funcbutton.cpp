@@ -7,6 +7,7 @@
 #include "stdafx_server.h"
 #include "pragma/entities/func/s_funcbutton.h"
 #include "pragma/entities/s_entityfactories.h"
+#include <pragma/entities/components/usable_component.hpp>
 #include <sharedutils/util_string.h>
 #include <sharedutils/util.h>
 #include <pragma/audio/alsound.h>

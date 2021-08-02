@@ -14,8 +14,9 @@
 #include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/entities/components/s_wheel_component.hpp"
 #include "pragma/entities/components/s_attachable_component.hpp"
+#include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/entities/components/base_character_component.hpp>
-#include <pragma/entities/components/base_player_component.hpp>
+#include <pragma/entities/components/usable_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/physics/environment.hpp>
 #include <pragma/networking/nwm_util.h>

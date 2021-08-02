@@ -7,10 +7,13 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_shooter_component.hpp"
+#include "pragma/entities/components/c_transform_component.hpp"
+#include "pragma/entities/environment/effects/c_env_particle_system.h"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/physics/raytraces.h>
 #include <pragma/physics/environment.hpp>
 #include <sharedutils/scope_guard.h>
+#include <pragma/audio/alsound_type.h>
 
 using namespace pragma;
 

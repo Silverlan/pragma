@@ -18,6 +18,7 @@
 #include "pragma/rendering/shaders/world/c_shader_scene.hpp"
 #include "pragma/debug/debug_render_filter.hpp"
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"
+#include "pragma/entities/environment/c_env_camera.h"
 #include <pragma/util/transform.h>
 #include <pragma/lua/libraries/lgame.h>
 #include <pragma/lua/libraries/lfile.h>
@@ -26,10 +27,13 @@
 #include <image/prosper_render_target.hpp>
 #include <image/prosper_texture.hpp>
 #include <image/prosper_image.hpp>
+#include <buffers/prosper_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_util.hpp>
 #include <util_timeline_impl.hpp>
 #include <pragma/entities/entity_iterator.hpp>
+#include <cmaterial.h>
+
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
@@ -1030,7 +1034,7 @@ int Lua::game::Client::create_scene(lua_State *l)
 		createInfo = Lua::Check<pragma::CSceneComponent::CreateInfo>(l,argIdx++);
 	::pragma::CSceneComponent *parent = nullptr;
 	if(Lua::IsSet(l,argIdx))
-		parent = Lua::Check<::CSceneHandle>(l,argIdx++).get();
+		parent = &Lua::Check<::pragma::CSceneComponent>(l,argIdx++);
 	auto *scene = pragma::CSceneComponent::Create(createInfo,parent);
 	if(scene == nullptr)
 		return 0;

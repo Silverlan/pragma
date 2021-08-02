@@ -145,14 +145,14 @@ public:
 	//AILuaBehaviorNodeWrapper(const AILuaBehaviorNodeWrapper&)=delete;
 	//AILuaBehaviorNodeWrapper &operator=(const AILuaBehaviorNodeWrapper&)=delete;
 
-	uint32_t Start(std::shared_ptr<pragma::ai::Schedule> &schedule,SAIHandle &hEnt);
-	static uint32_t default_Start(lua_State *l,AILuaBehaviorNodeWrapper &wrapper,std::shared_ptr<pragma::ai::Schedule> &schedule,SAIHandle &hEnt);
+	uint32_t Start(std::shared_ptr<pragma::ai::Schedule> &schedule,pragma::SAIComponent &hEnt);
+	static uint32_t default_Start(lua_State *l,AILuaBehaviorNodeWrapper &wrapper,std::shared_ptr<pragma::ai::Schedule> &schedule,pragma::SAIComponent &hEnt);
 
 	void Stop();
 	static void default_Stop(lua_State *l,AILuaBehaviorNodeWrapper &wrapper);
 
-	uint32_t Think(std::shared_ptr<pragma::ai::Schedule> &schedule,SAIHandle &hEnt,std::underlying_type_t<pragma::ai::BehaviorNode::Result> result);
-	static uint32_t default_Think(lua_State *l,AILuaBehaviorNodeWrapper &wrapper,std::shared_ptr<pragma::ai::Schedule> &schedule,SAIHandle &hEnt,std::underlying_type_t<pragma::ai::BehaviorNode::Result> result);
+	uint32_t Think(std::shared_ptr<pragma::ai::Schedule> &schedule,pragma::SAIComponent &hEnt,std::underlying_type_t<pragma::ai::BehaviorNode::Result> result);
+	static uint32_t default_Think(lua_State *l,AILuaBehaviorNodeWrapper &wrapper,std::shared_ptr<pragma::ai::Schedule> &schedule,pragma::SAIComponent &hEnt,std::underlying_type_t<pragma::ai::BehaviorNode::Result> result);
 
 	void OnTaskComplete(std::shared_ptr<pragma::ai::Schedule> &schedule,uint32_t taskId,std::underlying_type_t<pragma::ai::BehaviorNode::Result> result);
 	static void default_OnTaskComplete(lua_State *l,AILuaBehaviorNodeWrapper &wrapper,std::shared_ptr<pragma::ai::Schedule> &schedule,uint32_t taskId,std::underlying_type_t<pragma::ai::BehaviorNode::Result> result);

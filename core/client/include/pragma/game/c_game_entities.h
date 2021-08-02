@@ -11,6 +11,7 @@
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_ai_component.hpp"
 #include "pragma/entities/components/c_vehicle_component.hpp"
+#include "pragma/entities/components/c_weapon_component.hpp"
 
 template<class T>
 	void CGame::GetPlayers(std::vector<T*> *ents)

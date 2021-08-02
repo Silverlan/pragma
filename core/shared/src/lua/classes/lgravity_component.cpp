@@ -14,7 +14,7 @@ namespace Lua
 {
 	namespace Gravity
 	{
-		static void CalcBallisticVelocity(lua_State *l,GravityHandle &hEnt,const Vector3 &origin,const Vector3 &destPos,float fireAngle,float maxSpeed,float spread,float maxPitch,float maxYaw);
+		static void CalcBallisticVelocity(lua_State *l,pragma::GravityComponent &hEnt,const Vector3 &origin,const Vector3 &destPos,float fireAngle,float maxSpeed,float spread,float maxPitch,float maxYaw);
 	};
 };
 void Lua::register_gravity_component(luabind::module_ &module)
@@ -34,11 +34,10 @@ void Lua::register_gravity_component(luabind::module_ &module)
 	module[def];
 }
 
-void Lua::Gravity::CalcBallisticVelocity(lua_State *l,GravityHandle &hEnt,const Vector3 &origin,const Vector3 &destPos,float fireAngle,float maxSpeed,float spread,float maxPitch,float maxYaw)
+void Lua::Gravity::CalcBallisticVelocity(lua_State *l,pragma::GravityComponent &hEnt,const Vector3 &origin,const Vector3 &destPos,float fireAngle,float maxSpeed,float spread,float maxPitch,float maxYaw)
 {
-	pragma::Lua::check_component(l,hEnt);
 	Vector3 vel;
-	auto b = hEnt->CalcBallisticVelocity(origin,destPos,fireAngle,maxSpeed,spread,maxPitch,maxYaw,vel);
+	auto b = hEnt.CalcBallisticVelocity(origin,destPos,fireAngle,maxSpeed,spread,maxPitch,maxYaw,vel);
 	Lua::PushBool(l,b);
 	if(b == true)
 		Lua::Push<Vector3>(l,vel);

@@ -9,6 +9,9 @@
 #include "pragma/clientstate/clientstate.h"
 #include "pragma/gui/debug/widebughdrbloom.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
+#include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
+#include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include <sharedutils/util_string.h>
 #include <image/prosper_sampler.hpp>
 #include <image/prosper_render_target.hpp>

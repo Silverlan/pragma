@@ -9,7 +9,7 @@
 
 #include <pragma/game/game.h>
 
-template<class TComponent>
+template<class TComponent,class THolder>
 	pragma::BaseEntityComponent *Game::CreateLuaEntityComponent(BaseEntity &ent,std::string classname)
 {
 	auto *o = m_luaEnts->GetComponentClassObject(classname);
@@ -20,7 +20,20 @@ template<class TComponent>
 	try
 	{
 #endif
-		r = (*o)();
+		r = (*o)(ent.GetLuaObject());
+
+		auto *elLua = luabind::object_cast<TComponent*>(r);
+		auto *holder = luabind::object_cast<THolder*>(r);
+		if(elLua && holder)
+		{
+			elLua->SetupLua(r);
+			holder->SetHandle(util::weak_shared_handle_cast<pragma::BaseEntityComponent,TComponent>(elLua->GetHandle()));
+		}
+		else
+		{
+			Con::csv<<"WARNING: Unable to create lua entity component '"<<classname<<"': Lua class is not derived from valid GUI base!"<<Con::endl;
+			return nullptr;
+		}
 #ifndef LUABIND_NO_EXCEPTIONS
 	}
 	catch(luabind::error&)
@@ -34,15 +47,6 @@ template<class TComponent>
 		Con::cwar<<"WARNING: Unable to create lua entity component '"<<classname<<"'!"<<Con::endl;
 		return nullptr;
 	}
-	/*pragma::BaseEntityComponent *pComponent = nullptr;
-	if(luabind::object_cast_nothrow<BaseLuaBaseEntityComponentHandleWrapper*>(r,static_cast<BaseLuaBaseEntityComponentHandleWrapper*>(nullptr)))
-		pComponent = new TComponent(ent,r);
-	else
-	{
-		Con::cwar<<"WARNING: Unable to create lua entity component '"<<classname<<"': Lua class is not derived from valid component base!"<<Con::endl;
-		return nullptr;
-	}
-	return pComponent;*/
 	return nullptr;
 }
 

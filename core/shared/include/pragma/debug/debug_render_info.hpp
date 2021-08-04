@@ -15,6 +15,7 @@
 
 struct DLLNETWORK DebugRenderInfo
 {
+	DebugRenderInfo()=default;
 	DebugRenderInfo(const umath::Transform &pose,const Color &color)
 		: pose{pose},color{color}
 	{}

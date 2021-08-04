@@ -17,7 +17,7 @@
 
 extern DLLSERVER SGame *s_game;
 extern DLLSERVER ServerState *server;
-
+#pragma optimize("",off)
 SLuaEntity::SLuaEntity(luabind::object &o,const std::string &className)
 	: SBaseEntity{},LuaObjectBase{}
 {
@@ -31,7 +31,10 @@ void SLuaEntity::Initialize()
 	CallLuaMember("Initialize");
 }
 bool SLuaEntity::IsScripted() const {return true;}
-void SLuaEntity::InitializeLuaObject(lua_State*) {}
+void SLuaEntity::InitializeLuaObject(lua_State *lua)
+{
+	pragma::BaseLuaHandle::InitializeLuaObject<SLuaEntity>(lua);
+}
 
 void SLuaEntity::DoSpawn()
 {
@@ -62,3 +65,4 @@ void SLuaEntity::Remove()
 	SBaseEntity::Remove();
 }
 void SLuaEntity::default_Initialize(SBaseEntity *ent) {}
+#pragma optimize("",on)

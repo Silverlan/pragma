@@ -42,6 +42,15 @@
 
 extern DLLSERVER ServerState *server;
 
+namespace pragma
+{
+	// Has to be in same namespace as class, otherwise luabind can't locate it
+	static std::ostream &operator<<(std::ostream &stream,const pragma::SLuaBaseEntityComponent &component)
+	{
+		return ::operator<<(stream,static_cast<const pragma::BaseEntityComponent&>(component));
+	}
+};
+
 void SGame::RegisterLua()
 {
 	GetLuaInterface().SetIdentifier("sv");
@@ -126,7 +135,8 @@ void SGame::RegisterLua()
 
 	// Needs to be registered AFTER RegisterLuaGameClasses has been called!
 	auto defEntCmp = luabind::class_<pragma::SLuaBaseEntityComponent,luabind::bases<pragma::BaseEntityComponent>,pragma::lua::SLuaBaseEntityComponentHolder>("BaseEntityComponent");
-	// Lua::register_base_entity_component<luabind::class_<pragma::SLuaBaseEntityComponent,luabind::bases<BaseEntityComponentHandle>,luabind::default_holder,LuaBaseEntityComponentWrapper>>(defEntCmp);
+	defEntCmp.def(luabind::constructor<SBaseEntity&>());
+	Lua::register_base_entity_component<pragma::SLuaBaseEntityComponent>(defEntCmp);
 	defEntCmp.def("SendData",static_cast<void(*)(lua_State*,pragma::SLuaBaseEntityComponent&,NetPacket,pragma::networking::ClientRecipientFilter&)>([](lua_State *l,pragma::SLuaBaseEntityComponent &hComponent,NetPacket packet,pragma::networking::ClientRecipientFilter &rp) {
 		
 	}));

@@ -7,11 +7,12 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_lua_component.hpp"
+#include "pragma/lua/base_lua_handle_method.hpp"
 
 using namespace pragma;
 
-CLuaBaseEntityComponent::CLuaBaseEntityComponent(BaseEntity &ent,luabind::object &o)
-	: BaseLuaBaseEntityComponent(ent,o),CBaseSnapshotComponent()
+CLuaBaseEntityComponent::CLuaBaseEntityComponent(BaseEntity &ent)
+	: BaseLuaBaseEntityComponent(ent),CBaseSnapshotComponent()
 {}
 
 void CLuaBaseEntityComponent::ReceiveData(NetPacket &packet)
@@ -27,7 +28,7 @@ void CLuaBaseEntityComponent::ReceiveData(NetPacket &packet)
 			SetMemberValue(member,value);
 		}
 	}
-	CallLuaMember<void,NetPacket>("ReceiveData",packet);
+	CallLuaMethod<void,NetPacket>("ReceiveData",packet);
 }
 Bool CLuaBaseEntityComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
 {
@@ -54,7 +55,7 @@ Bool CLuaBaseEntityComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPack
 		return true;
 	}
 	auto handled = static_cast<uint32_t>(util::EventReply::Unhandled);
-	CallLuaMember<uint32_t,uint32_t,NetPacket>("ReceiveNetEvent",&handled,eventId,packet);
+	CallLuaMethod<uint32_t,uint32_t,NetPacket>("ReceiveNetEvent",&handled,eventId,packet);
 	return static_cast<util::EventReply>(handled) == util::EventReply::Handled;
 }
 void CLuaBaseEntityComponent::ReceiveSnapshotData(NetPacket &packet)
@@ -70,11 +71,11 @@ void CLuaBaseEntityComponent::ReceiveSnapshotData(NetPacket &packet)
 			SetMemberValue(member,value);
 		}
 	}
-	CallLuaMember<void,NetPacket>("ReceiveSnapshotData",packet);
+	CallLuaMethod<void,NetPacket>("ReceiveSnapshotData",packet);
 }
 bool CLuaBaseEntityComponent::ShouldTransmitNetData() const {return IsNetworked();}
 bool CLuaBaseEntityComponent::ShouldTransmitSnapshotData() const {return BaseLuaBaseEntityComponent::ShouldTransmitSnapshotData();}
 void CLuaBaseEntityComponent::InvokeNetEventHandle(const std::string &methodName,NetPacket &packet,pragma::BasePlayerComponent *pl)
 {
-	CallLuaMember<void,NetPacket>(methodName,packet);
+	CallLuaMethod<void,NetPacket>(methodName,packet);
 }

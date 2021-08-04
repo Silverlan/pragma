@@ -399,7 +399,7 @@ protected:
 	virtual void InitializeMapEntities(pragma::asset::WorldData &worldData,std::vector<EntityHandle> &outEnts);
 	virtual bool LoadLuaComponent(const std::string &luaFilePath,const std::string &mainPath,const std::string &componentName);
 	virtual bool InitializeGameMode();
-	template<class TComponent>
+	template<class TComponent,class THolder>
 		pragma::BaseEntityComponent *CreateLuaEntityComponent(BaseEntity &ent,std::string classname);
 
 	virtual bool InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t eventId,int32_t argsIdx,bool bInject);

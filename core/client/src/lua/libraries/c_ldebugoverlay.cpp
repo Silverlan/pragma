@@ -13,136 +13,126 @@
 #include "pragma/lua/classes/ldef_color.h"
 #include <pragma/lua/classes/ldef_vector.h>
 #include "pragma/lua/classes/ldef_plane.h"
+#include <pragma/debug/debug_render_info.hpp>
 #include "luasystem.h"
 
 static std::shared_ptr<DebugRenderer::BaseObject> get_dbg_object(const std::shared_ptr<DebugRenderer::BaseObject> &obj,float duration)
 {
 	return (duration > 0.f) ? nullptr : obj;
 }
-std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPoints(const std::vector<Vector3> &points,const Color &col,float duration)
+std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPoints(const std::vector<Vector3> &points,const DebugRenderInfo &renderInfo)
 {
-	return get_dbg_object(::DebugRenderer::DrawPoints(points,col,duration),duration);
+	return get_dbg_object(::DebugRenderer::DrawPoints(points,renderInfo.color,renderInfo.duration),renderInfo.duration);
 }
 
-std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawLines(const std::vector<Vector3> &linePoints,const Color &col,float duration)
+std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawLines(const std::vector<Vector3> &linePoints,const DebugRenderInfo &renderInfo)
 {
-	return get_dbg_object(::DebugRenderer::DrawLines(linePoints,col,duration),duration);
+	return get_dbg_object(::DebugRenderer::DrawLines(linePoints,renderInfo.color,renderInfo.duration),renderInfo.duration);
 }
 
-std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawLines(const std::vector<Vector3> &linePoints,const Color &col,float duration)
+std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPoint(const DebugRenderInfo &renderInfo)
 {
-	return get_dbg_object(::DebugRenderer::DrawLines(linePoints,col,duration),duration);
+	return get_dbg_object(::DebugRenderer::DrawPoint(renderInfo.pose.GetOrigin(),renderInfo.color,renderInfo.duration),renderInfo.duration);
 }
 
-std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPoint(const Vector3 &pos,const Color &color,float duration)
+std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawLine(const Vector3 &start,const Vector3 &end,const DebugRenderInfo &renderInfo)
 {
-	return get_dbg_object(::DebugRenderer::DrawPoint(pos,color,duration),duration);
-}
-
-std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawLine(const Vector3 &start,const Vector3 &end,const Color &color,float duration)
-{
-	return get_dbg_object(::DebugRenderer::DrawLine(start,end,color,duration),duration);
+	auto o = ::DebugRenderer::DrawLine(start,end,renderInfo.color,renderInfo.duration);
+	if(o)
+		o->SetPose(renderInfo.pose);
+	return get_dbg_object(o,renderInfo.duration);
 }
 std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawBox(
-	const Vector3 &center,const Vector3 &start,const Vector3 &end,const Color &color,const std::optional<Color> &colOutline,float duration,const EulerAngles &angles
+	const Vector3 &start,const Vector3 &end,const DebugRenderInfo &renderInfo
 )
 {
-	return get_dbg_object(::DebugRenderer::DrawBox(center,start,end,angles,color,*colOutline,duration),duration);
-}
-std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawBox(
-	const Vector3 &center,const Vector3 &start,const Color &color,const std::optional<Color> &colOutline,float duration,const EulerAngles &angles
-)
-{
-	return get_dbg_object(::DebugRenderer::DrawBox(center,start,angles,color,*colOutline,duration),duration);
+	if(renderInfo.outlineColor.has_value())
+		return get_dbg_object(::DebugRenderer::DrawBox(renderInfo.pose.GetOrigin(),start,end,renderInfo.pose.GetAngles(),renderInfo.color,*renderInfo.outlineColor,renderInfo.duration),renderInfo.duration);
+	return get_dbg_object(::DebugRenderer::DrawBox(renderInfo.pose.GetOrigin(),start,end,renderInfo.pose.GetAngles(),renderInfo.color,renderInfo.duration),renderInfo.duration);
 }
 std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawMeshes(
-	const std::vector<Vector3> &verts,const Color &color,const std::optional<Color> &outlineColor,float duration
+	const std::vector<Vector3> &verts,const DebugRenderInfo &renderInfo
 )
 {
-	if(outlineColor.has_value())
-		return get_dbg_object(::DebugRenderer::DrawMesh(verts,color,*outlineColor,duration),duration);
-	return get_dbg_object(::DebugRenderer::DrawMesh(verts,color,duration),duration);
+	if(renderInfo.outlineColor.has_value())
+		return get_dbg_object(::DebugRenderer::DrawMesh(verts,renderInfo.color,*renderInfo.outlineColor,renderInfo.duration),renderInfo.duration);
+	return get_dbg_object(::DebugRenderer::DrawMesh(verts,renderInfo.color,renderInfo.duration),renderInfo.duration);
 }
 std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawTruncatedCone(
-	const Vector3 &origin,float startRadius,const Vector3 &dir,float dist,float endRadius,const Color &col,const std::optional<Color> &outlineColor,float duration,uint32_t segmentCount
+	float startRadius,const Vector3 &dir,float dist,float endRadius,const DebugRenderInfo &renderInfo,uint32_t segmentCount
 )
 {
-	if(outlineColor.has_value())
-		return get_dbg_object(::DebugRenderer::DrawTruncatedCone(origin,startRadius,dir,dist,endRadius,col,*outlineColor,duration,segmentCount),duration);
-	return get_dbg_object(::DebugRenderer::DrawTruncatedCone(origin,startRadius,dir,dist,endRadius,col,duration,segmentCount),duration);
+	if(renderInfo.outlineColor.has_value())
+		return get_dbg_object(::DebugRenderer::DrawTruncatedCone(renderInfo.pose.GetOrigin(),startRadius,dir,dist,endRadius,renderInfo.color,*renderInfo.outlineColor,renderInfo.duration,segmentCount),renderInfo.duration);
+	return get_dbg_object(::DebugRenderer::DrawTruncatedCone(renderInfo.pose.GetOrigin(),startRadius,dir,dist,endRadius,renderInfo.color,renderInfo.duration,segmentCount),renderInfo.duration);
 }
 std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawCylinder(
-	const Vector3 &origin,float radius,const Vector3 &dir,float dist,const Color &color,const std::optional<Color> &outlineColor,float duration,uint32_t segmentCount
+	float radius,const Vector3 &dir,float dist,const DebugRenderInfo &renderInfo,uint32_t segmentCount
 )
 {
-	if(outlineColor.has_value())
-		return get_dbg_object(::DebugRenderer::DrawCylinder(origin,dir,dist,radius,color,*outlineColor,duration,segmentCount),duration);
-	return get_dbg_object(::DebugRenderer::DrawCylinder(origin,dir,dist,radius,color,duration,segmentCount),duration);
+	if(renderInfo.outlineColor.has_value())
+		return get_dbg_object(::DebugRenderer::DrawCylinder(renderInfo.pose.GetOrigin(),dir,dist,radius,renderInfo.color,*renderInfo.outlineColor,renderInfo.duration,segmentCount),renderInfo.duration);
+	return get_dbg_object(::DebugRenderer::DrawCylinder(renderInfo.pose.GetOrigin(),dir,dist,radius,renderInfo.color,renderInfo.duration,segmentCount),renderInfo.duration);
 }
 std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawCone(
-	const Vector3 &origin,const Vector3 &dir,float dist,float angle,const Color &col,const std::optional<Color> &outlineColor,float duration,uint32_t segmentCount
+	const Vector3 &dir,float dist,float angle,const DebugRenderInfo &renderInfo,uint32_t segmentCount
 )
 {
-	if(outlineColor.has_value())
-		return get_dbg_object(::DebugRenderer::DrawCone(origin,dir,dist,angle,col,*outlineColor,duration,segmentCount),duration);
-	return get_dbg_object(::DebugRenderer::DrawCone(origin,dir,dist,angle,col,duration,segmentCount),duration);
+	if(renderInfo.outlineColor.has_value())
+		return get_dbg_object(::DebugRenderer::DrawCone(renderInfo.pose.GetOrigin(),dir,dist,angle,renderInfo.color,*renderInfo.outlineColor,renderInfo.duration,segmentCount),renderInfo.duration);
+	return get_dbg_object(::DebugRenderer::DrawCone(renderInfo.pose.GetOrigin(),dir,dist,angle,renderInfo.color,renderInfo.duration,segmentCount),renderInfo.duration);
 }
 std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawSphere(
-	const Vector3 &origin,float radius,const Color &col,const std::optional<Color> &outlineColor,float duration,uint32_t recursionLevel
+	float radius,const DebugRenderInfo &renderInfo,uint32_t recursionLevel
 )
 {
-	if(outlineColor.has_value())
-		return get_dbg_object(::DebugRenderer::DrawSphere(origin,radius,col,*outlineColor,duration,recursionLevel),duration);
-	return get_dbg_object(::DebugRenderer::DrawSphere(origin,radius,col,duration,recursionLevel),duration);
+	if(renderInfo.outlineColor.has_value())
+		return get_dbg_object(::DebugRenderer::DrawSphere(renderInfo.pose.GetOrigin(),radius,renderInfo.color,*renderInfo.outlineColor,renderInfo.duration,recursionLevel),renderInfo.duration);
+	return get_dbg_object(::DebugRenderer::DrawSphere(renderInfo.pose.GetOrigin(),radius,renderInfo.color,renderInfo.duration,recursionLevel),renderInfo.duration);
 }
-std::array<std::shared_ptr<DebugRenderer::BaseObject>,3> Lua::DebugRenderer::Client::DrawAxis(lua_State *l,const Vector3 &origin,const EulerAngles &ang,float duration)
+std::array<std::shared_ptr<DebugRenderer::BaseObject>,3> Lua::DebugRenderer::Client::DrawAxis(const DebugRenderInfo &renderInfo)
 {
-	return ::DebugRenderer::DrawAxis(origin,ang,duration);
+	auto objs = ::DebugRenderer::DrawAxis(renderInfo.pose.GetOrigin(),renderInfo.pose.GetAngles(),renderInfo.duration);
+	if(renderInfo.duration > 0.f)
+		return {};
+	return objs;
 }
-std::array<std::shared_ptr<DebugRenderer::BaseObject>,3> Lua::DebugRenderer::Client::DrawAxis(lua_State *l,const umath::Transform &pose,float duration)
+std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawText(const std::string &text,const Vector2 &size,const DebugRenderInfo &renderInfo)
 {
-	return ::DebugRenderer::DrawAxis(pose.GetOrigin(),pose.GetAngles(),duration);
+	return get_dbg_object(::DebugRenderer::DrawText(text,renderInfo.pose.GetOrigin(),size,renderInfo.color,renderInfo.duration),renderInfo.duration);
 }
-std::array<std::shared_ptr<DebugRenderer::BaseObject>,3> Lua::DebugRenderer::Client::DrawAxis(lua_State *l,const Vector3 &origin,const Vector3 &x,const Vector3 &y,const Vector3 &z,float duration)
+std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawText(const std::string &text,float scale,const DebugRenderInfo &renderInfo)
 {
-	return ::DebugRenderer::DrawAxis(origin,x,y,z,duration);
+	return get_dbg_object(::DebugRenderer::DrawText(text,renderInfo.pose.GetOrigin(),scale,renderInfo.color,renderInfo.duration),renderInfo.duration);
 }
-std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawText(const std::string &text,const Vector3 &origin,const Vector2 &size,const Color &col,float duration)
+std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawText(const std::string &text,const DebugRenderInfo &renderInfo)
 {
-	return ::DebugRenderer::DrawText(text,origin,size,col,duration);
+	return DrawText(text,1.f,renderInfo);
 }
-std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawText(const std::string &text,const Vector3 &origin,float scale,const Color &col,float duration)
+std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPath(const std::vector<Vector3> &path,const DebugRenderInfo &renderInfo)
 {
-	return ::DebugRenderer::DrawText(text,origin,scale,col,duration);
+	return get_dbg_object(::DebugRenderer::DrawPath(path,renderInfo.color,renderInfo.duration),renderInfo.duration);
 }
-std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawText(const std::string &text,const Vector3 &origin,const Color &col,float duration)
+std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawSpline(const std::vector<Vector3> &path,uint32_t numSegments,const DebugRenderInfo &renderInfo,float curvature)
 {
-	return DrawText(text,origin,1.f,col,duration);
+	return get_dbg_object(::DebugRenderer::DrawSpline(path,renderInfo.color,numSegments,curvature,renderInfo.duration),renderInfo.duration);
 }
-std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPath(const std::vector<Vector3> &path,const Color &col,float duration)
+std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPlane(const umath::Plane &plane,const DebugRenderInfo &renderInfo)
 {
-	return ::DebugRenderer::DrawPath(path,col,duration);
+	return get_dbg_object(::DebugRenderer::DrawPlane(plane,renderInfo.color,renderInfo.duration),renderInfo.duration);
 }
-std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawSpline(const std::vector<Vector3> &path,const Color &col,uint32_t numSegments,float duration,float curvature)
+std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPlane(const Vector3 &n,float d,const DebugRenderInfo &renderInfo)
 {
-	return ::DebugRenderer::DrawSpline(path,col,numSegments,curvature,duration);
+	return get_dbg_object(::DebugRenderer::DrawPlane(n,d,renderInfo.color,renderInfo.duration),renderInfo.duration);
 }
-std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPlane(const umath::Plane &plane,const Color &color,float duration)
-{
-	return ::DebugRenderer::DrawPlane(plane,color,duration);
-}
-std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawPlane(const Vector3 &n,float d,const Color &color,float duration)
-{
-	return ::DebugRenderer::DrawPlane(n,d,color,duration);
-}
-std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawFrustum(pragma::CCameraComponent &cam,float duration=0.f)
+std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawFrustum(pragma::CCameraComponent &cam,const DebugRenderInfo &renderInfo)
 {
 	std::vector<Vector3> points {};
 	points.reserve(8u);
 	cam.GetFrustumPoints(points);
-	return ::DebugRenderer::DrawFrustum(points,duration);
+	return get_dbg_object(::DebugRenderer::DrawFrustum(points,renderInfo.duration),renderInfo.duration);
 }
-std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawFrustum(const std::vector<Vector3> &points,float duration)
+std::shared_ptr<DebugRenderer::BaseObject> Lua::DebugRenderer::Client::DrawFrustum(const std::vector<Vector3> &points,const DebugRenderInfo &renderInfo)
 {
-	return ::DebugRenderer::DrawFrustum(points,duration);
+	return get_dbg_object(::DebugRenderer::DrawFrustum(points,renderInfo.duration),renderInfo.duration);
 }

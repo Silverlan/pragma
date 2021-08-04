@@ -137,12 +137,6 @@ namespace pragma
 		virtual void Initialize();
 		virtual void OnRemove();
 
-		const luabind::object &GetLuaObject() const;
-		luabind::object &GetLuaObject();
-		lua_State *GetLuaState() const;
-		void PushLuaObject();
-		void PushLuaObject(lua_State *l);
-
 		ComponentHandle<const BaseEntityComponent> GetHandle() const;
 		ComponentHandle<BaseEntityComponent> GetHandle();
 		template<class TComponent>
@@ -209,7 +203,6 @@ namespace pragma
 		mutable std::unordered_map<ComponentEventId,std::vector<CallbackHandle>> m_boundEvents;
 	protected:
 		void OnEntityComponentAdded(BaseEntityComponent &component,bool bSkipEventBinding);
-		luabind::object m_luaObj = {};
 		BaseEntity &m_entity;
 
 		StateFlags m_stateFlags = StateFlags::None;
@@ -219,6 +212,8 @@ namespace pragma
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseEntityComponent::StateFlags)
+
+DLLNETWORK std::ostream& operator<<(std::ostream &os,const pragma::BaseEntityComponent &component);
 
 template<class TComponent>
 	pragma::ComponentHandle<const TComponent> pragma::BaseEntityComponent::GetHandle() const

@@ -31,6 +31,7 @@
 #include "pragma/rendering/raytracing/cycles.hpp"
 #include "pragma/rendering/shaders/c_shader_cubemap_to_equirectangular.hpp"
 #include "pragma/asset/c_util_model.hpp"
+#include <pragma/debug/debug_render_info.hpp>
 #include <pragma/util/giblet_create_info.hpp>
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/classes/ldef_entity.h>
@@ -1075,66 +1076,45 @@ void CGame::RegisterLuaLibraries()
 		{"export_scene",static_cast<int32_t(*)(lua_State*)>(Lua::lib_export::export_scene)}
 	});
 
-	auto modAsset = luabind::module_(GetLuaState(),"debug");
-	modAsset[
-		luabind::def("draw_points",&Lua::DebugRenderer::Client::DrawPoints,luabind::policy_list<luabind::meta::join<luabind::vector_policy<1,Vector3>,luabind::default_parameter_policy<3,0.f>>>{}),
-		luabind::def("draw_lines",&Lua::DebugRenderer::Client::DrawLines,luabind::policy_list<luabind::meta::join<luabind::vector_policy<1,Vector3>,luabind::default_parameter_policy<3,0.f>>>{}),
-		luabind::def("draw_point",&Lua::DebugRenderer::Client::DrawPoint,luabind::default_parameter_policy<3,0.f>{}),
-		luabind::def("draw_line",&Lua::DebugRenderer::Client::DrawLine,luabind::default_parameter_policy<4,0.f>{}),
-		luabind::def("draw_box",
-			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const Vector3&,const Vector3&,const Vector3&,const Color&,const std::optional<Color>&,float,const EulerAngles&)>(&Lua::DebugRenderer::Client::DrawBox),
-			luabind::policy_list<luabind::meta::join<luabind::optional_policy<5>,luabind::default_parameter_policy<6,0.f>,luabind::default_parameter_policy<7,EulerAngles{}>>>{}
-		),
-		luabind::def("draw_box",
-			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const Vector3&,const Vector3&,const Color&,const std::optional<Color>&,float,const EulerAngles&)>(&Lua::DebugRenderer::Client::DrawBox),
-			luabind::policy_list<luabind::meta::join<luabind::optional_policy<4>,luabind::default_parameter_policy<5,0.f>,luabind::default_parameter_policy<6,EulerAngles{}>>>{}
-		),
-		luabind::def("draw_mesh",&Lua::DebugRenderer::Client::DrawMeshes,luabind::policy_list<luabind::meta::join<luabind::vector_policy<1,Vector3>,luabind::optional_policy<3>,luabind::default_parameter_policy<4,0.f>>>{}),
-		luabind::def("draw_sphere",&Lua::DebugRenderer::Client::DrawSphere,luabind::policy_list<luabind::meta::join<luabind::optional_policy<4>,luabind::default_parameter_policy<5,0.f>,luabind::default_parameter_policy<6,1>>>{}),
-		luabind::def("draw_truncated_cone",&Lua::DebugRenderer::Client::DrawTruncatedCone,luabind::policy_list<luabind::meta::join<luabind::optional_policy<7>,luabind::default_parameter_policy<8,0.f>,luabind::default_parameter_policy<9,12u>>>{}),
-		luabind::def("draw_cylinder",&Lua::DebugRenderer::Client::DrawCylinder,luabind::policy_list<luabind::meta::join<luabind::optional_policy<6>,luabind::default_parameter_policy<7,0.f>,luabind::default_parameter_policy<8,12u>>>{}),
-		luabind::def("draw_cone",&Lua::DebugRenderer::Client::DrawCone,luabind::policy_list<luabind::meta::join<luabind::optional_policy<6>,luabind::default_parameter_policy<7,0.f>,luabind::default_parameter_policy<8,12u>>>{}),
+	auto modDebug = luabind::module_(GetLuaState(),"debug");
+	modDebug[
+		luabind::def("draw_points",&Lua::DebugRenderer::Client::DrawPoints,luabind::vector_policy<1,Vector3>{}),
+		luabind::def("draw_lines",&Lua::DebugRenderer::Client::DrawLines,luabind::vector_policy<1,Vector3>{}),
+		luabind::def("draw_point",&Lua::DebugRenderer::Client::DrawPoint),
+		luabind::def("draw_line",&Lua::DebugRenderer::Client::DrawLine),
+		luabind::def("draw_box",&Lua::DebugRenderer::Client::DrawBox),
+		luabind::def("draw_mesh",&Lua::DebugRenderer::Client::DrawMeshes,luabind::vector_policy<1,Vector3>{}),
+		luabind::def("draw_sphere",&Lua::DebugRenderer::Client::DrawSphere,luabind::default_parameter_policy<3,1>{}),
+		luabind::def("draw_truncated_cone",&Lua::DebugRenderer::Client::DrawTruncatedCone,luabind::default_parameter_policy<6,12u>{}),
+		luabind::def("draw_cylinder",&Lua::DebugRenderer::Client::DrawCylinder,luabind::default_parameter_policy<5,12u>{}),
+		luabind::def("draw_cone",&Lua::DebugRenderer::Client::DrawCone,luabind::default_parameter_policy<5,12u>{}),
 		luabind::def("draw_pose",
-			static_cast<std::array<std::shared_ptr<::DebugRenderer::BaseObject>,3>(*)(const Vector3&,const EulerAngles&,float)>(&Lua::DebugRenderer::Client::DrawAxis),
-			luabind::policy_list<luabind::meta::join<luabind::array_policy<0,std::shared_ptr<::DebugRenderer::BaseObject>,3>,luabind::default_parameter_policy<3,0.f>>>{}
-		),
-		luabind::def("draw_pose",
-			static_cast<std::array<std::shared_ptr<::DebugRenderer::BaseObject>,3>(*)(const umath::Transform&,float)>(&Lua::DebugRenderer::Client::DrawAxis),
-			luabind::policy_list<luabind::meta::join<luabind::array_policy<0,std::shared_ptr<::DebugRenderer::BaseObject>,3>,luabind::default_parameter_policy<2,0.f>>>{}
-		),
-		luabind::def("draw_pose",
-			static_cast<std::array<std::shared_ptr<::DebugRenderer::BaseObject>,3>(*)(const Vector3&,const Vector3&,const Vector3&,const Vector3&,float)>(&Lua::DebugRenderer::Client::DrawAxis),
-			luabind::policy_list<luabind::meta::join<luabind::array_policy<0,std::shared_ptr<::DebugRenderer::BaseObject>,3>,luabind::default_parameter_policy<5,0.f>>>{}
+			&Lua::DebugRenderer::Client::DrawAxis,
+			luabind::array_policy<0,std::shared_ptr<::DebugRenderer::BaseObject>,3>{}
 		),
 		luabind::def("draw_text",
-			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const std::string&,const Vector3&,const Vector2&,const Color&,float)>(&Lua::DebugRenderer::Client::DrawText),
-			luabind::policy_list<luabind::meta::join<luabind::default_parameter_policy<5,0.f>>>{}
+			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const std::string&,const Vector2&,const DebugRenderInfo&)>(&Lua::DebugRenderer::Client::DrawText)
 		),
 		luabind::def("draw_text",
-			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const std::string&,const Vector3&,float,const Color&,float)>(&Lua::DebugRenderer::Client::DrawText),
-			luabind::policy_list<luabind::meta::join<luabind::default_parameter_policy<5,0.f>>>{}
+			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const std::string&,float,const DebugRenderInfo&)>(&Lua::DebugRenderer::Client::DrawText)
 		),
 		luabind::def("draw_text",
-			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const std::string&,const Vector3&,const Color&,float)>(&Lua::DebugRenderer::Client::DrawText),
-			luabind::policy_list<luabind::meta::join<luabind::default_parameter_policy<4,0.f>>>{}
+			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const std::string&,const DebugRenderInfo&)>(&Lua::DebugRenderer::Client::DrawText)
 		),
-		luabind::def("draw_path",&Lua::DebugRenderer::Client::DrawPath,luabind::policy_list<luabind::meta::join<luabind::vector_policy<1,Vector3>,luabind::default_parameter_policy<3,0.f>>>{}),
-		luabind::def("draw_spline",&Lua::DebugRenderer::Client::DrawSpline,luabind::policy_list<luabind::meta::join<luabind::vector_policy<1,Vector3>,luabind::default_parameter_policy<4,0.f>,luabind::default_parameter_policy<5,1.f>>>{}),
+		luabind::def("draw_path",&Lua::DebugRenderer::Client::DrawPath),
+		luabind::def("draw_spline",&Lua::DebugRenderer::Client::DrawSpline,luabind::default_parameter_policy<4,1.f>{}),
 		luabind::def("draw_plane",
-			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const umath::Plane&,const Color&,float duration)>(&Lua::DebugRenderer::Client::DrawPlane),
-			luabind::default_parameter_policy<3,0.f>{}
+			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const umath::Plane&,const DebugRenderInfo&)>(&Lua::DebugRenderer::Client::DrawPlane)
 		),
 		luabind::def("draw_plane",
-			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const Vector3&,float,const Color&,float)>(&Lua::DebugRenderer::Client::DrawPlane),
-			luabind::default_parameter_policy<4,0.f>{}
+			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const Vector3&,float,const DebugRenderInfo&)>(&Lua::DebugRenderer::Client::DrawPlane)
 		),
 		luabind::def("draw_frustum",
-			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(pragma::CCameraComponent&,float)>(&Lua::DebugRenderer::Client::DrawFrustum),
-			luabind::default_parameter_policy<2,0.f>{}
+			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(pragma::CCameraComponent&,const DebugRenderInfo&)>(&Lua::DebugRenderer::Client::DrawFrustum)
 		),
 		luabind::def("draw_frustum",
-			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const std::vector<Vector3>&,float)>(&Lua::DebugRenderer::Client::DrawFrustum),
-			luabind::default_parameter_policy<2,0.f>{}
+			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const std::vector<Vector3>&,const DebugRenderInfo&)>(&Lua::DebugRenderer::Client::DrawFrustum),
+			luabind::vector_policy<1,Vector3>{}
 		)
 	];
 }

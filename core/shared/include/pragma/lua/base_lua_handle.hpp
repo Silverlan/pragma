@@ -11,6 +11,7 @@
 #include "pragma/networkdefinitions.h"
 #include <pragma/lua/luaapi.h>
 #include <sharedutils/util_shared_handle.hpp>
+#include <sharedutils/functioncallback.h>
 #include "pragma/lua/lua_handles.hpp"
 
 namespace pragma
@@ -22,7 +23,17 @@ namespace pragma
 		virtual ~BaseLuaHandle();
 		util::TWeakSharedHandle<BaseLuaHandle> GetHandle() const {return util::TWeakSharedHandle<BaseLuaHandle>{m_handle};}
 		virtual void InitializeLuaObject(lua_State *lua)=0;
-		const luabind::object &GetLuaObject() const {return m_luaObj;}
+		const luabind::object &GetLuaObject() const {return const_cast<BaseLuaHandle*>(this)->GetLuaObject();}
+		luabind::object &GetLuaObject() {return m_luaObj;}
+		lua_State *GetLuaState() const;
+		void PushLuaObject();
+		void PushLuaObject(lua_State *l);
+
+		void CallLuaMethod(const std::string &name);
+		template<class T,typename... TARGS>
+			T CallLuaMethod(const std::string &name,TARGS ...args);
+		template<class T,typename... TARGS>
+			CallbackReturnType CallLuaMethod(const std::string &name,T *ret,TARGS ...args);
 
 		template<typename T>
 			util::TWeakSharedHandle<T> GetHandle() const;

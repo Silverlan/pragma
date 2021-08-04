@@ -15,6 +15,18 @@
 
 using namespace pragma;
 
+DLLNETWORK std::ostream& operator<<(std::ostream &os,const pragma::BaseEntityComponent &component)
+{
+	auto *info = component.GetEntity().GetNetworkState()->GetGameState()->GetEntityComponentManager().GetComponentInfo(component.GetComponentId());
+	os<<"Component[";
+	if(!info)
+		os<<"NULL";
+	else
+		os<<info->name<<"]["<<info->id<<"]"<<magic_enum::flags::enum_name(info->flags);
+	os<<"]";
+	return os;
+}
+
 decltype(EEntityComponentCallbackEvent::Count) EEntityComponentCallbackEvent::Count = EEntityComponentCallbackEvent{umath::to_integral(E::Count)};
 decltype(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED) BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED = INVALID_COMPONENT_ID;
 decltype(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED) BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED = INVALID_COMPONENT_ID;
@@ -80,11 +92,6 @@ void BaseEntityComponent::OnRemove()
 }
 bool BaseEntityComponent::ShouldTransmitNetData() const {return false;}
 bool BaseEntityComponent::ShouldTransmitSnapshotData() const {return false;}
-const luabind::object &BaseEntityComponent::GetLuaObject() const {return const_cast<BaseEntityComponent*>(this)->GetLuaObject();}
-luabind::object &BaseEntityComponent::GetLuaObject() {return m_luaObj;}
-lua_State *BaseEntityComponent::GetLuaState() const {return m_luaObj.interpreter();}
-void BaseEntityComponent::PushLuaObject(lua_State *l) {GetLuaObject().push(l);}
-void BaseEntityComponent::PushLuaObject() {PushLuaObject(GetLuaObject().interpreter());}
 void BaseEntityComponent::FlagCallbackForRemoval(const CallbackHandle &hCallback,CallbackType cbType,BaseEntityComponent *component)
 {
 	switch(cbType)

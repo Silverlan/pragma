@@ -249,5 +249,5 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 
 pragma::BaseEntityComponent *CGame::CreateLuaEntityComponent(BaseEntity &ent,std::string classname)
 {
-	return Game::CreateLuaEntityComponent<pragma::CLuaBaseEntityComponent>(ent,classname);
+	return Game::CreateLuaEntityComponent<pragma::CLuaBaseEntityComponent,pragma::lua::CLuaBaseEntityComponentHolder>(ent,classname);
 }

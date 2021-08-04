@@ -669,16 +669,16 @@ void CGame::RegisterLuaClasses()
 
 	auto debugMod = luabind::module(GetLuaState(),"debug");
 	auto defDebugRendererObject = luabind::class_<DebugRenderer::BaseObject>("RendererObject");
-	defDebugRendererObject.def("Remove",&Lua::DebugRenderer::Client::Object::Remove);
-	defDebugRendererObject.def("IsValid",&Lua::DebugRenderer::Client::Object::IsValid);
-	defDebugRendererObject.def("SetPos",&Lua::DebugRenderer::Client::Object::SetPos);
-	defDebugRendererObject.def("GetPos",&Lua::DebugRenderer::Client::Object::GetPos);
-	defDebugRendererObject.def("SetRotation",&Lua::DebugRenderer::Client::Object::SetRotation);
-	defDebugRendererObject.def("GetRotation",&Lua::DebugRenderer::Client::Object::GetRotation);
-	defDebugRendererObject.def("SetAngles",&Lua::DebugRenderer::Client::Object::SetAngles);
-	defDebugRendererObject.def("GetAngles",&Lua::DebugRenderer::Client::Object::GetAngles);
-	defDebugRendererObject.def("IsVisible",&Lua::DebugRenderer::Client::Object::IsVisible);
-	defDebugRendererObject.def("SetVisible",&Lua::DebugRenderer::Client::Object::SetVisible);
+	defDebugRendererObject.def("Remove",&::DebugRenderer::BaseObject::Remove);
+	defDebugRendererObject.def("IsValid",&::DebugRenderer::BaseObject::IsValid);
+	defDebugRendererObject.def("SetPos",&::DebugRenderer::BaseObject::SetPos);
+	defDebugRendererObject.def("GetPos",&::DebugRenderer::BaseObject::GetPos);
+	defDebugRendererObject.def("SetRotation",&::DebugRenderer::BaseObject::SetRotation);
+	defDebugRendererObject.def("GetRotation",&::DebugRenderer::BaseObject::GetRotation);
+	defDebugRendererObject.def("SetAngles",&::DebugRenderer::BaseObject::SetAngles);
+	defDebugRendererObject.def("GetAngles",&::DebugRenderer::BaseObject::GetAngles);
+	defDebugRendererObject.def("IsVisible",&::DebugRenderer::BaseObject::IsVisible);
+	defDebugRendererObject.def("SetVisible",&::DebugRenderer::BaseObject::SetVisible);
 	defDebugRendererObject.def("SetScale",&::DebugRenderer::BaseObject::SetScale);
 	defDebugRendererObject.def("GetScale",&::DebugRenderer::BaseObject::GetScale);
 	defDebugRendererObject.def("SetPose",&::DebugRenderer::BaseObject::SetPose);

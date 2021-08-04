@@ -11,6 +11,7 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/components/c_entity_component.hpp"
 #include <pragma/lua/sh_lua_component.hpp>
+#include <pragma/lua/handle_holder.hpp>
 
 namespace pragma
 {
@@ -19,7 +20,7 @@ namespace pragma
 		public CBaseSnapshotComponent
 	{
 	public:
-		CLuaBaseEntityComponent(BaseEntity &ent,luabind::object &o);
+		CLuaBaseEntityComponent(BaseEntity &ent);
 
 		virtual void ReceiveData(NetPacket &packet) override;
 		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
@@ -29,6 +30,11 @@ namespace pragma
 	protected:
 		virtual void InvokeNetEventHandle(const std::string &methodName,NetPacket &packet,pragma::BasePlayerComponent *pl) override;
 	};
+};
+
+namespace pragma::lua
+{
+	using CLuaBaseEntityComponentHolder = HandleHolder<CLuaBaseEntityComponent>;
 };
 
 #endif

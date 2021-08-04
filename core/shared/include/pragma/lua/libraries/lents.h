@@ -94,7 +94,7 @@ namespace Lua
 			// If there isn't, generate one!
 			if(classManager.IsClassMethodDefined(o,"__init") == false)
 			{
-				std::string luaStr = "function(self) BaseEntityComponent.__init(self) end";
+				std::string luaStr = "function(self,ent) BaseEntityComponent.__init(self,ent) end";
 				std::string err;
 				if(Lua::PushLuaFunctionFromString(l,luaStr,"ComponentInit",err) == false)
 					Con::cwar<<"WARNING: Unable to register __init method for component class '"<<name<<"': "<<err<<Con::endl;

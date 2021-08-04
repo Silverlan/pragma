@@ -21,8 +21,7 @@ class BaseEntity;
 namespace pragma
 {
 	class DLLNETWORK BaseLuaBaseEntityComponent
-		: public pragma::BaseEntityComponent,
-		public LuaObjectBase
+		: public pragma::BaseEntityComponent
 	{
 	public:
 		enum class MemberFlags : uint32_t
@@ -61,6 +60,7 @@ namespace pragma
 		virtual void Initialize() override;
 		virtual void InitializeMembers(const std::vector<BaseLuaBaseEntityComponent::MemberInfo> &members);
 		virtual void OnTick(double dt) override;
+		void SetupLua(const luabind::object &o);
 		void SetNetworked(bool b);
 		bool IsNetworked() const;
 		void SetShouldTransmitSnapshotData(bool b);
@@ -91,7 +91,7 @@ namespace pragma
 		CallbackHandle BindNetEvent(lua_State *l,pragma::NetEventId eventId,luabind::object methodNameOrFunction);
 		virtual void OnMemberValueChanged(uint32_t memberIdx);
 	protected:
-		BaseLuaBaseEntityComponent(BaseEntity &ent,luabind::object &o);
+		BaseLuaBaseEntityComponent(BaseEntity &ent);
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void InvokeNetEventHandle(const std::string &methodName,NetPacket &packet,pragma::BasePlayerComponent *pl)=0;
 		virtual void InitializeMember(const MemberInfo &memberInfo);

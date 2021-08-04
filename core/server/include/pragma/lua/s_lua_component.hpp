@@ -19,7 +19,7 @@ namespace pragma
 		public SBaseSnapshotComponent
 	{
 	public:
-		SLuaBaseEntityComponent(BaseEntity &ent,luabind::object &o);
+		SLuaBaseEntityComponent(BaseEntity &ent);
 
 		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual Bool ReceiveNetEvent(pragma::BasePlayerComponent &pl,pragma::NetEventId,NetPacket &packet) override;

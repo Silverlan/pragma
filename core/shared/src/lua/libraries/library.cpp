@@ -19,6 +19,7 @@
 #include "pragma/lua/libraries/lmatrix.h"
 #include "pragma/lua/libraries/lasset.hpp"
 #include "pragma/lua/classes/ldef_vector.h"
+#include "pragma/debug/debug_render_info.hpp"
 #include "luasystem.h"
 #include <pragma/math/angle/wvquaternion.h>
 #include "pragma/lua/classes/lvector.h"
@@ -622,6 +623,19 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		luabind::def("beep",Lua::debug::beep)
 	];
 	lua_pushtablecfunction(lua.GetState(),"debug","print",Lua::debug::print);
+	auto classDefDrawInfo = luabind::class_<DebugRenderInfo>("DrawInfo");
+	classDefDrawInfo.def(luabind::constructor<>());
+	classDefDrawInfo.def(luabind::constructor<const umath::Transform&,const Color&>());
+	classDefDrawInfo.def(luabind::constructor<const umath::Transform&,const Color&,const Color&>());
+	classDefDrawInfo.def(luabind::constructor<const umath::Transform&,const Color&,float>());
+	classDefDrawInfo.def(luabind::constructor<const umath::Transform&,const Color&,const Color&,float>());
+	classDefDrawInfo.def("SetOrigin",&DebugRenderInfo::SetOrigin);
+	classDefDrawInfo.def("SetRotation",&DebugRenderInfo::SetRotation);
+	classDefDrawInfo.def("SetColor",&DebugRenderInfo::SetColor);
+	classDefDrawInfo.def("SetOutlineColor",&DebugRenderInfo::SetOutlineColor);
+	classDefDrawInfo.def("SetDuration",&DebugRenderInfo::SetDuration);
+	modDebug[classDefDrawInfo];
+
 	auto isBreakDefined = false;
 	if(Lua::get_extended_lua_modules_enabled())
 	{

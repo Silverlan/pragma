@@ -14,6 +14,7 @@
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/components/base_player_component.hpp"
+#include "pragma/lua/base_lua_handle_method.hpp"
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/datastream.h>
 #include <sharedutils/netpacket.hpp>
@@ -262,14 +263,13 @@ void BaseLuaBaseEntityComponent::ClearMembers(lua_State *l)
 		return;
 	s_classMembers.erase(it);
 }
+void BaseLuaBaseEntityComponent::SetupLua(const luabind::object &o) {SetLuaObject(o);}
 
 ////////////////
 
-BaseLuaBaseEntityComponent::BaseLuaBaseEntityComponent(BaseEntity &ent,luabind::object &o)
-	: pragma::BaseEntityComponent(ent),LuaObjectBase(o)
-{
-	m_luaObj = o;
-}
+BaseLuaBaseEntityComponent::BaseLuaBaseEntityComponent(BaseEntity &ent)
+	: pragma::BaseEntityComponent(ent)
+{}
 
 void BaseLuaBaseEntityComponent::InitializeLuaObject(lua_State *l) {}
 
@@ -305,7 +305,7 @@ void BaseLuaBaseEntityComponent::Initialize()
 	if(m_networkedMemberInfo != nullptr)
 		m_networkedMemberInfo->netEvSetMember = SetupNetEvent("set_member_value");
 
-	CallLuaMember("Initialize");
+	CallLuaMethod("Initialize");
 
 	PushLuaObject(); /* 1 */
 	auto t = Lua::GetStackTop(l);
@@ -316,7 +316,7 @@ void BaseLuaBaseEntityComponent::Initialize()
 	Lua::Pop(l,2); /* 0 */
 
 	auto &ent = GetEntity();
-	CallLuaMember("OnAttachedToEntity");
+	CallLuaMethod("OnAttachedToEntity");
 	pragma::BaseEntityComponent::Initialize();
 }
 
@@ -399,7 +399,7 @@ void BaseLuaBaseEntityComponent::InitializeMembers(const std::vector<BaseLuaBase
 
 void BaseLuaBaseEntityComponent::OnTick(double dt)
 {
-	CallLuaMember<void,double>("OnTick",dt);
+	CallLuaMethod<void,double>("OnTick",dt);
 }
 
 void BaseLuaBaseEntityComponent::InitializeMember(const MemberInfo &memberInfo) {}
@@ -481,12 +481,12 @@ util::EventReply BaseLuaBaseEntityComponent::HandleEvent(ComponentEventId eventI
 void BaseLuaBaseEntityComponent::OnAttached(BaseEntity &ent)
 {
 	pragma::BaseEntityComponent::OnAttached(ent);
-	CallLuaMember("OnAttachedToEntity");
+	CallLuaMethod("OnAttachedToEntity");
 }
 void BaseLuaBaseEntityComponent::OnDetached(BaseEntity &ent)
 {
 	pragma::BaseEntityComponent::OnDetached(ent);
-	CallLuaMember("OnDetachedToEntity");
+	CallLuaMethod("OnDetachedToEntity");
 }
 
 std::any BaseLuaBaseEntityComponent::GetMemberValue(const MemberInfo &memberInfo) const
@@ -780,7 +780,7 @@ void BaseLuaBaseEntityComponent::Save(udm::LinkedPropertyWrapperArg udm)
 		auto value = GetMemberValue(member);
 		write_value(udm["members." +member.name],value,member.type);
 	}
-	CallLuaMember<void,udm::LinkedPropertyWrapper>("Save",udm);
+	CallLuaMethod<void,udm::LinkedPropertyWrapper>("Save",udm);
 }
 void BaseLuaBaseEntityComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version)
 {
@@ -798,20 +798,20 @@ void BaseLuaBaseEntityComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t
 			SetMemberValue(member,value);
 		}
 	}
-	CallLuaMember<void,udm::LinkedPropertyWrapper,uint32_t>("Load",udm,version);
+	CallLuaMethod<void,udm::LinkedPropertyWrapper,uint32_t>("Load",udm,version);
 }
 uint32_t BaseLuaBaseEntityComponent::GetVersion() const {return m_version;}
 
 void BaseLuaBaseEntityComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
-	CallLuaMember("OnEntitySpawn");
+	CallLuaMethod("OnEntitySpawn");
 }
 
 void BaseLuaBaseEntityComponent::OnRemove()
 {
 	pragma::BaseEntityComponent::OnRemove();
-	CallLuaMember("OnRemove");
+	CallLuaMethod("OnRemove");
 }
 
 void BaseLuaBaseEntityComponent::SetNetworked(bool b) {m_bShouldTransmitNetData = b;}
@@ -831,7 +831,7 @@ CallbackHandle BaseLuaBaseEntityComponent::BindInitComponentEvent(lua_State *l,p
 	{
 		std::string methodName = Lua::CheckString(l,argTarget);
 		auto hCb = BindInitComponentEvent(componentId,[this,methodName](std::reference_wrapper<pragma::BaseEntityComponent> component) {
-			CallLuaMember<void,luabind::object>(methodName,component.get().GetLuaObject());
+			CallLuaMethod<void,luabind::object>(methodName,component.get().GetLuaObject());
 		});
 		Lua::Push<CallbackHandle>(l,hCb);
 		return hCb;

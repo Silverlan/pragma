@@ -73,6 +73,15 @@
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
+namespace pragma
+{
+	// Has to be in same namespace as class, otherwise luabind can't locate it
+	static std::ostream &operator<<(std::ostream &stream,const pragma::CLuaBaseEntityComponent &component)
+	{
+		return ::operator<<(stream,static_cast<const pragma::BaseEntityComponent&>(component));
+	}
+};
+
 void CGame::RegisterLua()
 {
 	GetLuaInterface().SetIdentifier("cl");
@@ -358,18 +367,19 @@ void CGame::RegisterLua()
 	RegisterLuaGameClasses(gameMod);
 
 	// Needs to be registered AFTER RegisterLuaGameClasses has been called!
-	/*auto defEntCmp = luabind::class_<BaseLuaBaseEntityHandle,luabind::bases<BaseEntityComponentHandle>,luabind::default_holder,LuaBaseEntityComponentWrapper>("BaseEntityComponent");
-	Lua::register_base_entity_component(defEntCmp);
-	defEntCmp.def("ReceiveData",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,NetPacket)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,NetPacket packet) {
+	auto defEntCmp = luabind::class_<pragma::CLuaBaseEntityComponent,luabind::bases<pragma::BaseEntityComponent>,pragma::lua::CLuaBaseEntityComponentHolder>("BaseEntityComponent");
+	
+	Lua::register_base_entity_component<pragma::CLuaBaseEntityComponent>(defEntCmp);
+	defEntCmp.def("ReceiveData",static_cast<void(*)(lua_State*,pragma::CLuaBaseEntityComponent&,NetPacket)>([](lua_State *l,pragma::CLuaBaseEntityComponent &hComponent,NetPacket packet) {
 
 	}));
-	defEntCmp.def("ReceiveNetEvent",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,uint32_t,NetPacket)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,uint32_t evId,NetPacket packet) {
+	defEntCmp.def("ReceiveNetEvent",static_cast<void(*)(lua_State*,pragma::CLuaBaseEntityComponent&,uint32_t,NetPacket)>([](lua_State *l,pragma::CLuaBaseEntityComponent &hComponent,uint32_t evId,NetPacket packet) {
 		
 	}));
-	defEntCmp.def("ReceiveSnapshotData",static_cast<void(*)(lua_State*,BaseLuaBaseEntityHandle&,NetPacket)>([](lua_State *l,BaseLuaBaseEntityHandle &hComponent,NetPacket packet) {
+	defEntCmp.def("ReceiveSnapshotData",static_cast<void(*)(lua_State*,pragma::CLuaBaseEntityComponent&,NetPacket)>([](lua_State *l,pragma::CLuaBaseEntityComponent &hComponent,NetPacket packet) {
 		
 	}));
-	modEnts[defEntCmp];*/
+	modEnts[defEntCmp];
 
 	auto _G = luabind::globals(GetLuaState());
 	_G["BaseEntityComponent"] = _G["ents"]["BaseEntityComponent"];

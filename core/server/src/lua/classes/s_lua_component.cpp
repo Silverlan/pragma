@@ -7,14 +7,15 @@
 #include "stdafx_server.h"
 #include "pragma/lua/s_lua_component.hpp"
 #include "pragma/networking/recipient_filter.hpp"
+#include "pragma/lua/base_lua_handle_method.hpp"
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <pragma/entities/components/base_player_component.hpp>
 #include <pragma/networking/enums.hpp>
 
 using namespace pragma;
 
-SLuaBaseEntityComponent::SLuaBaseEntityComponent(BaseEntity &ent,luabind::object &o)
-	: BaseLuaBaseEntityComponent(ent,o),SBaseSnapshotComponent()
+SLuaBaseEntityComponent::SLuaBaseEntityComponent(BaseEntity &ent)
+	: BaseLuaBaseEntityComponent(ent),SBaseSnapshotComponent()
 {}
 void SLuaBaseEntityComponent::OnMemberValueChanged(uint32_t memberIdx)
 {
@@ -64,7 +65,7 @@ void SLuaBaseEntityComponent::SendData(NetPacket &packet,networking::ClientRecip
 		}
 	}
 
-	CallLuaMember<void,NetPacket,pragma::networking::ClientRecipientFilter>("SendData",packet,rp);
+	CallLuaMethod<void,NetPacket,pragma::networking::ClientRecipientFilter>("SendData",packet,rp);
 }
 Bool SLuaBaseEntityComponent::ReceiveNetEvent(pragma::BasePlayerComponent &pl,pragma::NetEventId evId,NetPacket &packet)
 {
@@ -76,7 +77,7 @@ Bool SLuaBaseEntityComponent::ReceiveNetEvent(pragma::BasePlayerComponent &pl,pr
 	}
 
 	auto handled = static_cast<uint32_t>(util::EventReply::Unhandled);
-	CallLuaMember<uint32_t,luabind::object,uint32_t,NetPacket>("ReceiveNetEvent",&handled,pl.GetLuaObject(),evId,packet);
+	CallLuaMethod<uint32_t,luabind::object,uint32_t,NetPacket>("ReceiveNetEvent",&handled,pl.GetLuaObject(),evId,packet);
 	return static_cast<util::EventReply>(handled) == util::EventReply::Handled;
 }
 void SLuaBaseEntityComponent::SendSnapshotData(NetPacket &packet,pragma::BasePlayerComponent &pl)
@@ -91,11 +92,11 @@ void SLuaBaseEntityComponent::SendSnapshotData(NetPacket &packet,pragma::BasePla
 			Lua::WriteAny(packet,member.type,value);
 		}
 	}
-	CallLuaMember<void,NetPacket,luabind::object>("SendSnapshotData",packet,pl.GetLuaObject());
+	CallLuaMethod<void,NetPacket,luabind::object>("SendSnapshotData",packet,pl.GetLuaObject());
 }
 bool SLuaBaseEntityComponent::ShouldTransmitNetData() const {return IsNetworked();}
 bool SLuaBaseEntityComponent::ShouldTransmitSnapshotData() const {return BaseLuaBaseEntityComponent::ShouldTransmitSnapshotData();}
 void SLuaBaseEntityComponent::InvokeNetEventHandle(const std::string &methodName,NetPacket &packet,pragma::BasePlayerComponent *pl)
 {
-	CallLuaMember<void,luabind::object,NetPacket>(methodName,pl->GetLuaObject(),packet);
+	CallLuaMethod<void,luabind::object,NetPacket>(methodName,pl->GetLuaObject(),packet);
 }

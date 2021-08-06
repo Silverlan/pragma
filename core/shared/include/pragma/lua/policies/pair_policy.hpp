@@ -7,6 +7,8 @@
 #ifndef __PAIR_POLICY_HPP__
 #define __PAIR_POLICY_HPP__
 
+// TODO: Remove this file
+#if 0
 #include <luabind/detail/policy.hpp>
 
 namespace luabind {
@@ -100,5 +102,6 @@ namespace luabind {
 	using pair_policy = meta::type_list< converter_policy_injector< N, detail::pair_policy<T0,T1,ValuePolicy1,ValuePolicy2> > >;
 
 } // namespace luabind
+#endif
 
 #endif

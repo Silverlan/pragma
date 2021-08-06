@@ -27,6 +27,12 @@
 #include "pragma/lua/classes/s_lua_entity.h"
 #include "pragma/physics/collision_object.hpp"
 #include "pragma/lua/classes/s_lmodelmesh.h"
+#include <pragma/lua/converters/vector_converter_t.hpp>
+#include <pragma/lua/converters/pair_converter_t.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/lua/converters/optional_converter_t.hpp>
+#include <pragma/lua/converters/string_view_converter_t.hpp>
+#include <pragma/lua/converters/file_converter_t.hpp>
 #include <pragma/entities/func/basefuncwater.h>
 #include <pragma/model/modelmesh.h>
 #include <luainterface.hpp>
@@ -91,625 +97,6 @@ template<typename T>
 		}
 	};
 #endif
-namespace luabind {
-	template<typename T0,typename T1>
-	struct default_converter<std::pair<T0,T1>>
-		: native_converter_base<std::pair<T0,T1>>
-	{
-		enum { consumed_args = 2 };
-
-		template <typename U>
-		std::pair<T0,T1> to_cpp(lua_State* L, U u, int index)
-		{
-			std::pair<T0,T1> pair {};
-			pair.first = c0.to_cpp(L, decorate_type_t<T0>(), index);
-			pair.second = c1.to_cpp(L, decorate_type_t<T1>(), index +1);
-			return pair;
-		}
-
-		template <class U>
-		int match(lua_State *l, U u, int index)
-		{
-			return (c0.match(l,decorate_type_t<T0>(),index) == 0 && c1.match(l,decorate_type_t<T1>(),index +1) == 0) ? 0 : no_match;
-		}
-
-		template <class U>
-		void converter_postcall(lua_State*, U u, int) {}
-
-		void to_lua(lua_State* L, std::pair<T0,T1> const& x)
-		{
-			c0.to_lua(L,x.first);
-			c1.to_lua(L,x.second);
-		}
-
-		void to_lua(lua_State* L, std::pair<T0,T1>* x)
-		{
-			if(!x)
-				lua_pushnil(L);
-			else
-				to_lua(L,*x);
-		}
-	private:
-		default_converter<T0> c0;
-		default_converter<T1> c1;
-	};
-
-	template<typename T0,typename T1>
-	struct default_converter< const std::pair<T0,T1> >
-		: default_converter< std::pair<T0,T1> >
-	{ };
-
-	template<typename T0,typename T1>
-	struct default_converter<std::pair<T0,T1> const&>
-		: default_converter<std::pair<T0,T1>>
-	{};
-}
-
-namespace luabind {
-	template <class ...T>
-	struct default_converter<std::tuple<T...>>
-		: native_converter_base<std::tuple<T...>>
-	{
-		enum { consumed_args = sizeof...(T) };
-
-		template<size_t I = 0, typename... Tp>
-		int match_all(lua_State *L,int index,std::tuple<default_converter<Tp>...>&) { // tuple parameter is unused but required for overload resolution for some reason
-			using T = std::tuple_element<I, std::tuple<Tp...> >::type;
-				if(std::get<I>(m_converters).match(L,decorate_type_t<base_type<T>>(),index) != 0)
-					return no_match;
-			 if constexpr(I+1 != sizeof...(Tp))
-				return match_all<I +1>(L,index +1,m_converters);
-			 return 0;
-		}
-
-		template<size_t I = 0, typename... Tp>
-		void to_lua_all(lua_State *L,const std::tuple<Tp...>& t) {
-			 std::get<I>(m_converters).to_lua(L,std::get<I>(t));
-			if constexpr(I+1 != sizeof...(Tp))
-				to_lua_all<I+1>(L,t);
-		}
-
-		template<size_t I = 0, typename... Tp>
-		void to_cpp_all(lua_State *L,int index,std::tuple<Tp...>& t) {
-			auto &v = std::get<I>(t);
-			v = std::get<I>(m_converters).to_cpp(L,decorate_type_t<base_type<decltype(v)>>(),index++);
-			if constexpr(I+1 != sizeof...(Tp))
-				to_cpp_all<I+1>(L,index,t);
-		}
-
-		template <typename U>
-		std::tuple<T...> to_cpp(lua_State* L, U u, int index)
-		{
-			std::tuple<T...> tuple {};
-			to_cpp_all(L,index,tuple);
-			return tuple;
-		}
-
-		template <class U>
-		int match(lua_State *l, U u, int index)
-		{
-			return match_all<0,T...>(l,index,m_converters);
-		}
-
-		template <class U>
-		void converter_postcall(lua_State*, U u, int) {}
-
-		void to_lua(lua_State* L, std::tuple<T...> const& x)
-		{
-			to_lua_all(L,x);
-		}
-
-		void to_lua(lua_State* L, std::tuple<T...>* x)
-		{
-			if(!x)
-				lua_pushnil(L);
-			else
-				to_lua(L,*x);
-		}
-	private:
-		std::tuple<default_converter<T>...> m_converters;
-	};
-
-	template <class ...T>
-	struct default_converter< const std::tuple<T...> >
-		: default_converter< std::tuple<T...> >
-	{ };
-
-	template <class ...T>
-	struct default_converter<std::tuple<T...> const&>
-		: default_converter<std::tuple<T...>>
-	{};
-}
-
-namespace luabind {
-	template<>
-	struct default_converter<std::string_view>
-		: native_converter_base<std::string_view>
-	{
-		enum { consumed_args = 1 };
-
-		template <typename U>
-		std::string_view to_cpp(lua_State* L, U u, int index)
-		{
-			return {luaL_checkstring(L,index)};
-		}
-
-		template <class U>
-		static int match(lua_State *l, U u, int index)
-		{
-			return lua_isstring(l,index) ? 0 : no_match;
-		}
-
-		template <class U>
-		void converter_postcall(lua_State*, U u, int) {}
-		
-		void to_lua(lua_State* L, std::string_view const& x)
-		{
-			luabind::object{L,std::string{x}}.push(L);
-		}
-
-		void to_lua(lua_State* L, std::string_view* x)
-		{
-			if(!x)
-				lua_pushnil(L);
-			else
-				to_lua(L,*x);
-		}
-	};
-
-	template<>
-	struct default_converter< const std::string_view >
-		: default_converter< std::string_view >
-	{ };
-
-	template<>
-	struct default_converter<std::string_view const&>
-		: default_converter<std::string_view>
-	{};
-}
-
-namespace luabind {
-	template<typename T>
-	struct default_converter<std::optional<T>>
-		: native_converter_base<std::optional<T>>
-	{
-		enum { consumed_args = 1 };
-
-		template <typename U>
-		std::optional<T> to_cpp(lua_State* L, U u, int index)
-		{
-			if(lua_isnil(L,index))
-				return {};
-			return m_converter.to_cpp(L,decorate_type_t<T>(),index);
-		}
-
-		template <class U>
-		int match(lua_State *l, U u, int index)
-		{
-			if(lua_isnil(l,index))
-				return 0;
-			return m_converter.match(l,decorate_type_t<T>(),index);
-		}
-
-		template <class U>
-		void converter_postcall(lua_State*, U u, int) {}
-		
-		void to_lua(lua_State* L, std::optional<T> const& x)
-		{
-			if(!x.has_value())
-				lua_pushnil(L);
-			else
-				m_converter.to_lua(L,*x);
-		}
-
-		void to_lua(lua_State* L, std::optional<T>* x)
-		{
-			if(!x || !x->has_value())
-				lua_pushnil(L);
-			else
-				to_lua(L,*x);
-		}
-	private:
-		default_converter<T> m_converter;
-	};
-
-	template<typename T>
-	struct default_converter< const std::optional<T> >
-		: default_converter< std::optional<T> >
-	{ };
-
-	template<typename T>
-	struct default_converter<std::optional<T> const&>
-		: default_converter<std::optional<T>>
-	{};
-}
-
-namespace luabind {
-	template<typename T>
-	struct default_converter<std::vector<T>>
-		: native_converter_base<std::vector<T>>
-	{
-		enum { consumed_args = 1 };
-
-		template <typename U>
-		std::vector<T> to_cpp(lua_State* L, U u, int index)
-		{
-			default_converter<T> converter;
-
-			auto o = luabind::object{luabind::from_stack(L,index)};
-			auto n = Lua::GetObjectLength(L,o);
-			std::vector<T> v;
-			v.reserve(n);
-			for(luabind::iterator it{o},end;it!=end;++it)
-			{
-				luabind::object o = *it;
-				o.push(L);
-				if(converter.match(L,decorate_type_t<T>(),-1) != no_match)
-					v.push_back(converter.to_cpp(L, decorate_type_t<T>(), -1));
-				lua_pop(L,1);
-			}
-			return v;
-		}
-
-		template <class U>
-		static int match(lua_State *l, U u, int index)
-		{
-			return lua_istable(l,index) ? 0 : no_match;
-		}
-
-		template <class U>
-		void converter_postcall(lua_State*, U u, int) {}
-		
-		void to_lua(lua_State* L, std::vector<T> const& x)
-		{
-			default_converter<T> converter;
-			auto t = luabind::newtable(L);
-			t.push(L);
-			int index = 1;
-
-			for(const auto& element : x)
-			{
-				if constexpr(std::is_fundamental_v<decltype(element)>)
-					t[index] = element;
-				else
-				{
-					converter.to_lua(L, element);
-					lua_rawseti(L, -2, index);
-				}
-				++index;
-			}
-		}
-
-		void to_lua(lua_State* L, std::vector<T>* x)
-		{
-			if(!x)
-				luabind::newtable(L).push(L);
-			else
-				to_lua(L,*x);
-		}
-	};
-
-	template<typename T>
-	struct default_converter< const std::vector<T> >
-		: default_converter< std::vector<T> >
-	{ };
-
-	template<typename T>
-	struct default_converter<std::vector<T> const&>
-		: default_converter<std::vector<T>>
-	{};
-}
-
-namespace luabind {
-	template<typename T,size_t SIZE>
-	struct default_converter<std::array<T,SIZE>>
-		: native_converter_base<std::array<T,SIZE>>
-	{
-		enum { consumed_args = 1 };
-
-		template <typename U>
-		std::array<T,SIZE> to_cpp(lua_State* L, U u, int index)
-		{
-			default_converter<T> converter;
-
-			auto o = luabind::object{luabind::from_stack(L,index)};
-			auto n = Lua::GetObjectLength(L,o);
-			assert(n == SIZE);
-			if(n > SIZE)
-				n = SIZE;
-			std::array<T,SIZE> v;
-			uint32_t i = 0;
-			for(luabind::iterator it{o},end;it!=end;++it)
-			{
-				luabind::object o = *it;
-				o.push(L);
-				if(converter.match(L,decorate_type_t<T>(),-1) != no_match)
-					v[i] = converter.to_cpp(L, decorate_type_t<T>(), -1);
-				lua_pop(L,1);
-
-				++i;
-			}
-			return v;
-		}
-
-		template <class U>
-		static int match(lua_State *l, U u, int index)
-		{
-			if(!lua_istable(l,index))
-				return no_match;
-			auto n = Lua::GetObjectLength(l,index);
-			if(n != SIZE)
-				return no_match;
-			return 0;
-		}
-
-		template <class U>
-		void converter_postcall(lua_State*, U u, int) {}
-		
-		void to_lua(lua_State* L, std::array<T,SIZE> const& x)
-		{
-			default_converter<T> converter;
-			auto t = luabind::newtable(L);
-			t.push(L);
-			int index = 1;
-
-			for(const auto& element : x)
-			{
-				if constexpr(std::is_fundamental_v<decltype(element)>)
-					t[index] = element;
-				else
-				{
-					converter.to_lua(L, element);
-					lua_rawseti(L, -2, index);
-				}
-				++index;
-			}
-		}
-
-		void to_lua(lua_State* L, std::array<T,SIZE>* x)
-		{
-			if(!x)
-				luabind::newtable(L).push(L);
-			else
-				to_lua(L,*x);
-		}
-	};
-
-	template<typename T,size_t SIZE>
-	struct default_converter< const std::array<T,SIZE> >
-		: default_converter< std::array<T,SIZE> >
-	{ };
-
-	template<typename T,size_t SIZE>
-	struct default_converter<std::array<T,SIZE> const&>
-		: default_converter<std::array<T,SIZE>>
-	{};
-}
-
-namespace luabind {
-
-	template <typename T>
-	using base_type = typename std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>;
-
-	template <class T,class Test>
-	concept is_type_or_derived = std::is_same_v<base_type<T>,Test> || std::derived_from<base_type<T>,Test>;
-
-	// Game
-	template <typename T> requires(is_type_or_derived<T,Game>)
-	struct default_converter<T>
-	{
-		enum { consumed_args = 0 };
-
-		template <class U>
-		T to_cpp(lua_State* L, U, int /*index*/)
-		{
-			auto *game = pragma::get_engine()->GetNetworkState(L)->GetGameState();
-			if constexpr(std::is_pointer_v<T>)
-				return static_cast<T>(game);
-			else
-				return static_cast<T>(*game);
-		}
-
-		template <class U>
-		static int match(lua_State*, U, int /*index*/) {return 0;}
-
-		template <class U>
-		void converter_postcall(lua_State*, U, int) {}
-	};
-
-	// NetworkState
-	template <typename T> requires(is_type_or_derived<T,NetworkState>)
-	struct default_converter<T>
-	{
-		enum { consumed_args = 0 };
-
-		template <class U>
-		T to_cpp(lua_State* L, U, int /*index*/)
-		{
-			auto *nw = pragma::get_engine()->GetNetworkState(L);
-			if constexpr(std::is_pointer_v<T>)
-				return static_cast<T>(nw);
-			else
-				return static_cast<T>(*nw);
-		}
-
-		template <class U>
-		static int match(lua_State*, U, int /*index*/) {return 0;}
-
-		template <class U>
-		void converter_postcall(lua_State*, U, int) {}
-	};
-
-	// NetworkState
-	template <typename T> requires(is_type_or_derived<T,Engine>)
-	struct default_converter<T>
-	{
-		using Test = std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>;
-		enum { consumed_args = 0 };
-
-		template <class U>
-		T to_cpp(lua_State* L, U, int /*index*/)
-		{
-			auto *en = pragma::get_engine();
-			if constexpr(std::is_pointer_v<T>)
-				return static_cast<T>(en);
-			else
-				return static_cast<T>(*en);
-		}
-
-		template <class U>
-		static int match(lua_State*, U, int /*index*/) {return 0;}
-
-		template <class U>
-		void converter_postcall(lua_State*, U, int) {}
-	};
-
-	/*namespace detail {
-
-		// This is the one that gets hit, if default_policy doesn't hit one of the specializations defined all over the place
-		template< class T >
-		struct default_converter_generator
-			: public meta::select_ <
-			meta::case_< is_lua_proxy_arg<T>, lua_proxy_converter<T> >,
-			meta::case_< std::is_enum<typename std::remove_reference<T>::type>, enum_converter >,
-			meta::case_< is_nonconst_pointer<T>, pointer_converter >,
-			meta::case_< is_const_pointer<T>, const_pointer_converter >,
-			meta::case_< is_nonconst_reference<T>, ref_converter >,
-			meta::case_< is_const_reference<T>, const_ref_converter >,
-			meta::default_< value_converter >
-			> ::type
-		{
-		};
-
-	}
-
-	template <class T, class Enable>
-	struct default_converter
-		: detail::default_converter_generator<T>::type
-	{};*/
-}
-
-#include "pragma/lua/libraries/lfile.h"
-namespace luabind {
-	LFile;
-	template<>
-	struct default_converter<std::shared_ptr<VFilePtrInternal> >
-		: default_converter<VFilePtrInternal*>
-	{
-		using is_native = std::false_type;
-
-		template <class U>
-		int match(lua_State* L, U, int index)
-		{
-			return Lua::IsFile(L,index);
-		}
-
-		template <class U>
-		std::shared_ptr<VFilePtrInternal> to_cpp(lua_State* L, U u, int index)
-		{
-			auto *f = luabind::object_cast<LFile*>(luabind::object{luabind::from_stack(L,index)});
-			return f->GetHandle();
-		}
-
-		void to_lua(lua_State* L, std::shared_ptr<VFilePtrInternal> const& p)
-		{
-			auto f = std::make_shared<LFile>();
-			f->Construct(p);
-			default_converter<std::shared_ptr<LFile>>{}.to_lua(L,f);
-		}
-
-		template <class U>
-		void converter_postcall(lua_State*, U const&, int)
-		{}
-	};
-
-
-	/*template <typename T> requires(std::is_same_v<base_type<T>,VFilePtr> || std::derived_from<base_type<T>,VFilePtr>)
-	struct default_converter<T>
-	{
-		enum { consumed_args = 1 };
-
-		VFilePtr to_cpp(lua_State* L, luabind::by_reference<T> u, int index)
-		{
-			return const_cast<LFile&>(u).GetHandle();
-		}
-
-		template <class U>
-		static int match(lua_State *l, U u, int index)
-		{
-			return Lua::IsType<LFile>(l,index) ? 0 : no_match;
-		}
-
-		template <class U>
-		void converter_postcall(lua_State*, U u, int) {}
-	};*/
-};
-
-namespace luabind
-{
-	template <typename T,typename TConverter>
-	struct game_object_converter
-	{
-		enum { consumed_args = 1 };
-
-		template <class U>
-		T to_cpp(lua_State* L, U u, int index)
-		{
-			return m_converter.to_cpp(L,u,index);
-		}
-
-		void to_lua(lua_State* L, T x)
-		{
-			if constexpr(std::is_pointer_v<T>)
-			{
-				if(!x)
-					lua_pushnil(L);
-				else
-					const_cast<T>(x)->GetLuaObject().push(L);
-			}
-			else
-				const_cast<T>(x).GetLuaObject().push(L);
-		}
-
-		template <class U>
-		int match(lua_State* L, U u, int index)
-		{
-			return m_converter.match(L,u,index);
-		}
-
-		template <class U>
-		void converter_postcall(lua_State*, U u, int) {}
-	private:
-		TConverter m_converter;
-	};
-
-	template <class T>
-		concept IsEntity = is_type_or_derived<T,BaseEntity>;
-
-	template <class T>
-		concept IsEntityComponent = is_type_or_derived<T,pragma::BaseEntityComponent>;
-
-	template <class T>
-		concept IsGameObjectType = IsEntity<T> || IsEntityComponent<T>;
-
-	template <typename T> requires(IsGameObjectType<T> && std::is_pointer_v<T> && !std::is_const_v<std::remove_pointer_t<T>>)
-	struct default_converter<T>
-		: game_object_converter<T,luabind::detail::pointer_converter>
-	{};
-	template <typename T> requires(IsGameObjectType<T> && std::is_pointer_v<T> && std::is_const_v<std::remove_pointer_t<T>>)
-	struct default_converter<T>
-		: game_object_converter<T,luabind::detail::const_pointer_converter>
-	{};
-
-	template <typename T> requires(IsGameObjectType<T> && std::is_reference_v<T> && !std::is_const_v<std::remove_reference_t<T>>)
-	struct default_converter<T>
-		: game_object_converter<T,luabind::detail::ref_converter>
-	{};
-	template <typename T> requires(IsGameObjectType<T> && std::is_reference_v<T> && std::is_const_v<std::remove_reference_t<T>>)
-	struct default_converter<T>
-		: game_object_converter<T,luabind::detail::const_ref_converter>
-	{};
-};
 
 #include "pragma/lua/classes/lproperty.hpp"
 namespace luabind
@@ -718,6 +105,13 @@ namespace luabind
 	struct default_converter<T>
 	{
 		enum { consumed_args = 1 };
+
+		template <class U>
+		int match(lua_State* L, U u, int index)
+		{
+			Con::cout<<"MATCHX"<<Con::endl;
+			return 0;//m_converter.match(L,decorate_type_t<T>(),index);
+		}
 
 		void to_lua(lua_State* L, T x)
 		{
@@ -795,8 +189,11 @@ namespace util
 		//struct default_converter<util::TestHandle<T> const&>
 		//	: default_converter<util::TestHandle<T> >
 		//{};
+#if 0
+	template <class T>
+	concept is_handle_type = util::is_specialization<base_type<T>,util::TestHandle>::value && IsGameObjectType<typename T::value_type>;
 
-	template <typename T> requires(util::is_specialization<base_type<T>,util::TestHandle>::value && IsGameObjectType<typename T::value_type>)
+	template <typename T,typename TConverter>
 	struct handle_converter
 	{
 		enum { consumed_args = 1 };
@@ -804,26 +201,37 @@ namespace util
 		template <class U>
 		T to_cpp(lua_State* L, U u, int index)
 		{
-			return m_converter.to_cpp(L,u,index);
+			return m_converter.to_cpp(L,decorate_type_t<T>(),index);
 		}
 
 		void to_lua(lua_State* L, T x)
 		{
 			if constexpr(std::is_pointer_v<T>)
 			{
-				if(!x)
+				if(!x || x->expired())
 					lua_pushnil(L);
 				else
-					const_cast<T>(x)->GetLuaObject().push(L);
+					(*const_cast<T>(x))->GetLuaObject().push(L);
 			}
 			else
-				const_cast<T>(x).GetLuaObject().push(L);
+			{
+				if(x.expired())
+					lua_pushnil(L);
+				else
+				{
+					if constexpr(std::is_reference_v<T>)
+						const_cast<T>(x)->GetLuaObject().push(L);
+					else
+						x->GetLuaObject().push(L);
+				}
+			}
 		}
 
 		template <class U>
 		int match(lua_State* L, U u, int index)
 		{
-			return m_converter.match(L,u,index);
+			Con::cout<<"MATCH"<<Con::endl;
+			return m_converter.match(L,decorate_type_t<T>(),index);
 		}
 
 		template <class U>
@@ -832,24 +240,102 @@ namespace util
 		TConverter m_converter;
 	};
 
-	template <class T>
-		concept IsEntity = is_type_or_derived<T,BaseEntity>;
-
-	template <class T>
-		concept IsEntityComponent = is_type_or_derived<T,pragma::BaseEntityComponent>;
-
-	template <class T>
-		concept IsGameObjectType = IsEntity<T> || IsEntityComponent<T>;
-
-	template <typename T> requires(IsGameObjectType<T> && std::is_pointer_v<T> && !std::is_const_v<std::remove_pointer_t<T>>)
+	template <typename T> requires(is_handle_type<T> && std::is_pointer_v<T> && !std::is_const_v<std::remove_pointer_t<T>>)
 	struct default_converter<T>
-		: game_object_converter<T,luabind::detail::pointer_converter>
+		: handle_converter<T,luabind::detail::pointer_converter>
 	{};
-	template <typename T> requires(IsGameObjectType<T> && std::is_pointer_v<T> && std::is_const_v<std::remove_pointer_t<T>>)
+	template <typename T> requires(is_handle_type<T> && std::is_pointer_v<T> && std::is_const_v<std::remove_pointer_t<T>>)
 	struct default_converter<T>
-		: game_object_converter<T,luabind::detail::const_pointer_converter>
+		: handle_converter<T,luabind::detail::const_pointer_converter>
 	{};
-	}
+
+	template <typename T> requires(is_handle_type<T> && std::is_reference_v<T> && !std::is_const_v<std::remove_reference_t<T>>)
+	struct default_converter<T>
+		: handle_converter<T,luabind::detail::ref_converter>
+	{};
+	template <typename T> requires(is_handle_type<T> && std::is_reference_v<T> && std::is_const_v<std::remove_reference_t<T>>)
+	struct default_converter<T>
+		: handle_converter<T,luabind::detail::const_ref_converter>
+	{};
+
+	template <typename T> requires(is_handle_type<T> && !std::is_pointer_v<T> && !std::is_reference_v<T> && !std::is_const_v<std::remove_reference_t<T>>)
+	struct default_converter<T>
+		: handle_converter<T,luabind::detail::value_converter>
+	{};
+#endif
+	template <class T>
+	concept is_property = std::derived_from<T,util::BaseProperty>;
+
+	template <typename T,typename TConverter>
+	struct property_converter
+	{
+		enum { consumed_args = 1 };
+
+		template <class U>
+		T to_cpp(lua_State* L, U u, int index)
+		{
+			return m_converter.to_cpp(L,decorate_type_t<T>(),index);
+		}
+
+		void to_lua(lua_State* L, T x)
+		{
+			/*if constexpr(std::is_pointer_v<T>)
+			{
+				if(!x || x->expired())
+					lua_pushnil(L);
+				else
+					(*const_cast<T>(x))->GetLuaObject().push(L);
+			}
+			else
+			{
+				if(x.expired())
+					lua_pushnil(L);
+				else
+				{
+					if constexpr(std::is_reference_v<T>)
+						const_cast<T>(x)->GetLuaObject().push(L);
+					else
+						x->GetLuaObject().push(L);
+				}
+			}*/
+		}
+
+		template <class U>
+		int match(lua_State* L, U u, int index)
+		{
+			Con::cout<<"MATCH"<<Con::endl;
+			return m_converter.match(L,decorate_type_t<T>(),index);
+		}
+
+		template <class U>
+		void converter_postcall(lua_State*, U u, int) {}
+	private:
+		TConverter m_converter;
+	};
+
+	template <typename T> requires(is_property<T> && std::is_pointer_v<T> && !std::is_const_v<std::remove_pointer_t<T>>)
+	struct default_converter<T>
+		: property_converter<T,luabind::detail::pointer_converter>
+	{};
+	template <typename T> requires(is_property<T> && std::is_pointer_v<T> && std::is_const_v<std::remove_pointer_t<T>>)
+	struct default_converter<T>
+		: property_converter<T,luabind::detail::const_pointer_converter>
+	{};
+
+	template <typename T> requires(is_property<T> && std::is_reference_v<T> && !std::is_const_v<std::remove_reference_t<T>>)
+	struct default_converter<T>
+		: property_converter<T,luabind::detail::ref_converter>
+	{};
+	template <typename T> requires(is_property<T> && std::is_reference_v<T> && std::is_const_v<std::remove_reference_t<T>>)
+	struct default_converter<T>
+		: property_converter<T,luabind::detail::const_ref_converter>
+	{};
+
+	template <typename T> requires(is_property<T> && !std::is_pointer_v<T> && !std::is_reference_v<T> && !std::is_const_v<std::remove_reference_t<T>>)
+	struct default_converter<T>
+		: property_converter<T,luabind::detail::value_converter>
+	{};
+}
 
 using EntityHandleT = util::TestHandle<BaseEntity>;
 #include <pragma/entities/components/velocity_component.hpp>
@@ -860,7 +346,6 @@ void SGame::RegisterLuaClasses()
 	Game::RegisterLuaClasses();
 
 	auto &modGame = GetLuaInterface().RegisterLibrary("game");
-	
 	auto &modTestConverters = GetLuaInterface().RegisterLibrary("test_converters");
 	modTestConverters[
 		luabind::def("test_pair_param",static_cast<void(*)(const std::pair<std::string,float>&)>([](const std::pair<std::string,float> &pair) {
@@ -908,6 +393,21 @@ void SGame::RegisterLuaClasses()
 			return {Vector3{1,2,3},Vector3{6,5,4},Vector3{8,7,8},Vector3{1,1,1}};
 		})),
 
+		luabind::def("test_map_param",static_cast<void(*)(const std::map<std::string,uint32_t>&)>([](const std::map<std::string,uint32_t> &val) {
+			Con::cout<<"values: ";
+			for(auto &pair : val)
+				Con::cout<<pair.first<<" = "<<pair.second<<Con::endl;
+		})),
+		luabind::def("test_map_ret",static_cast<std::map<std::string,uint32_t>(*)()>([]() -> std::map<std::string,uint32_t> {
+			return {
+				{"Val_1",5},
+				{"Val_2",3},
+				{"Val_3",8},
+				{"Val_4",55},
+				{"Val_5",563}
+			};
+		})),
+
 		luabind::def("test_array_param",static_cast<void(*)(const std::array<Vector3,3>&)>([](const std::array<Vector3,3> &val) {
 			Con::cout<<"values: ";
 			for(auto &v : val)
@@ -935,8 +435,11 @@ void SGame::RegisterLuaClasses()
 			//luabind::default_converter<EntityHandleT> x;
 			//x.to_cpp(nullptr,luabind::by_reference<EntityHandleT>{},0);
 
-			constexpr auto b  = util::is_specialization<EntityHandleT,util::TestHandle>::value;
-			constexpr auto c = luabind::is_type_or_derived<luabind::base_type<typename EntityHandleT::value_type>,BaseEntity>;
+		//	constexpr auto b  = util::is_specialization<EntityHandleT,util::TestHandle>::value;
+			//constexpr auto c = luabind::is_type_or_derived<luabind::base_type<typename EntityHandleT::value_type>,BaseEntity>;
+
+			//luabind::default_converter<EntityHandleT> x{};
+		//	x.to_cpp(nullptr,luabind::by_value<EntityHandleT>{},0);
 
 			Con::cout<<"Entity: "<<ent->GetClass()<<Con::endl;
 		})),
@@ -1019,6 +522,11 @@ void SGame::RegisterLuaClasses()
 		})),
 
 		luabind::def("test_property_ret",static_cast<util::PFloatProperty(*)()>([]() {
+			//util::PFloatProperty prop;
+			//Lua::Property::push(nullptr);
+			//luabind::default_converter<util::PFloatProperty> x;
+			//constexpr auto b = luabind::is_property<util::PFloatProperty> && !std::is_pointer_v<util::PFloatProperty> && !std::is_reference_v<util::PFloatProperty> && !std::is_const_v<std::remove_reference_t<util::PFloatProperty>>;
+			//x.to_cpp();
 			return util::FloatProperty::Create(3.f);
 		}))
 	];

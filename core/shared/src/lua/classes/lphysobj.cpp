@@ -65,7 +65,7 @@ void Lua::PhysObj::register_class(lua_State *l,luabind::module_ &mod)
 	classDef.def("SetLinearFactor",&::PhysObj::SetLinearFactor);
 	classDef.def("SetAngularFactor",&::PhysObj::SetAngularFactor);
 	classDef.def("GetCollisionObjects",&GetCollisionObjects);
-	classDef.def("GetOwner",&::PhysObj::GetOwner,luabind::game_object_policy<0>{});
+	classDef.def("GetOwner",&::PhysObj::GetOwner);
 	classDef.def("SetCollisionFilterMask",&::PhysObj::SetCollisionFilterMask);
 	classDef.def("GetCollisionFilterMask",&::PhysObj::GetCollisionFilterMask);
 	classDef.def("SetCollisionFilterGroup",&SetCollisionFilterGroup);
@@ -96,7 +96,7 @@ void Lua::PhysObj::register_class(lua_State *l,luabind::module_ &mod)
 	classDef.def("SetSleepingThresholds",&::PhysObj::SetSleepingThresholds);
 	classDef.def("GetLinearSleepingThreshold",&::PhysObj::GetLinearSleepingThreshold);
 	classDef.def("GetAngularSleepingThreshold",&::PhysObj::GetAngularSleepingThreshold);
-	classDef.def("GetSleepingThreshold",&::PhysObj::GetSleepingThreshold,luabind::pair_policy<0>{});
+	classDef.def("GetSleepingThreshold",&::PhysObj::GetSleepingThreshold);
 
 	classDef.def("IsOnGround",&IsOnGround);
 	classDef.def("IsGroundWalkable",static_cast<bool(*)(lua_State*,::PhysObj&)>([](lua_State *l,::PhysObj &physObj) {
@@ -108,17 +108,17 @@ void Lua::PhysObj::register_class(lua_State *l,luabind::module_ &mod)
 		if(physObj.IsController() == false)
 			return nullptr;
 		return static_cast<ControllerPhysObj&>(physObj).GetGroundEntity();
-	}),luabind::game_object_policy<0>{});
+	}));
 	classDef.def("GetGroundPhysObject",static_cast<::PhysObj*(*)(lua_State*,::PhysObj&)>([](lua_State *l,::PhysObj &physObj) -> ::PhysObj* {
 		if(physObj.IsController() == false)
 			return nullptr;
 		return static_cast<ControllerPhysObj*>(&physObj)->GetGroundPhysObject();
-	}),luabind::game_object_policy<0>{});
+	}));
 	classDef.def("GetGroundPhysCollisionObject",static_cast<pragma::physics::ICollisionObject*(*)(lua_State*,::PhysObj&)>([](lua_State *l,::PhysObj &physObj) -> pragma::physics::ICollisionObject* {
 		if(physObj.IsController() == false)
 			return nullptr;
 		return static_cast<ControllerPhysObj*>(&physObj)->GetGroundPhysCollisionObject();
-	}),luabind::game_object_policy<0>{});
+	}));
 	classDef.def("GetGroundSurfaceMaterial",static_cast<int32_t(*)(lua_State*,::PhysObj&)>([](lua_State *l,::PhysObj &physObj) {
 		if(physObj.IsController() == false)
 			return -1;

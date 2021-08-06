@@ -14,6 +14,7 @@
 #include "pragma/lua/classes/c_lshader.h"
 #include "pragma/lua/classes/c_lmaterial.h"
 #include "pragma/lua/classes/c_lpoint_rendertarget.h"
+#include "pragma/lua/converters/shader_converter_t.hpp"
 #include "pragma/rendering/shaders/c_shader_lua.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/render_queue.hpp"
@@ -58,6 +59,7 @@
 #include <wgui/shaders/wishader_textured.hpp>
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/lua/policies/pair_policy.hpp>
+#include <pragma/lua/converters/pair_converter_t.hpp>
 #include <pragma/entities/func/basefuncwater.h>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
@@ -85,7 +87,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 
 	auto defTexInfo = luabind::class_<TextureInfo>("TextureInfo");
 	defTexInfo.def("GetTexture",&Lua::TextureInfo::GetTexture);
-	defTexInfo.def("GetSize",&Lua::TextureInfo::GetSize,luabind::pair_policy<0>{});
+	defTexInfo.def("GetSize",&Lua::TextureInfo::GetSize);
 	defTexInfo.def("GetWidth",&Lua::TextureInfo::GetWidth);
 	defTexInfo.def("GetHeight",&Lua::TextureInfo::GetHeight);
 	defTexInfo.def("GetName",static_cast<std::string(*)(lua_State*,TextureInfo&)>([](lua_State *l,TextureInfo &textureInfo) {
@@ -105,7 +107,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	auto frameDef = luabind::class_<SpriteSheetAnimation::Sequence::Frame>("Frame");
 	frameDef.def("GetUVBounds",static_cast<std::pair<Vector2,Vector2>(*)(lua_State*,SpriteSheetAnimation::Sequence::Frame&)>([](lua_State *l,SpriteSheetAnimation::Sequence::Frame &frame) {
 		return std::pair<Vector2,Vector2>{frame.uvStart,frame.uvEnd};
-	}),luabind::pair_policy<0>{});
+	}));
 	frameDef.def("GetDuration",static_cast<float(*)(lua_State*,SpriteSheetAnimation::Sequence::Frame&)>([](lua_State *l,SpriteSheetAnimation::Sequence::Frame &frame) -> float {
 		return frame.duration;
 	}));

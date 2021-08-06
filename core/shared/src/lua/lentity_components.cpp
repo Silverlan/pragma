@@ -239,8 +239,8 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	defVelocity.def("GetLocalVelocity",&pragma::VelocityComponent::GetLocalVelocity);
 	defVelocity.def("SetLocalVelocity",&pragma::VelocityComponent::SetLocalVelocity);
 	defVelocity.def("AddLocalVelocity",&pragma::VelocityComponent::AddLocalVelocity);
-	defVelocity.def("GetVelocityProperty",&pragma::VelocityComponent::GetVelocityProperty,luabind::property_policy<0>{});
-	defVelocity.def("GetAngularVelocityProperty",&pragma::VelocityComponent::GetAngularVelocityProperty,luabind::property_policy<0>{});
+	defVelocity.def("GetVelocityProperty",&pragma::VelocityComponent::GetVelocityProperty);
+	defVelocity.def("GetAngularVelocityProperty",&pragma::VelocityComponent::GetAngularVelocityProperty);
 	gameMod[defVelocity];
 
 	auto defGlobal = luabind::class_<pragma::GlobalNameComponent,pragma::BaseEntityComponent>("GlobalComponent");
@@ -339,7 +339,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	auto defAnimated2 = luabind::class_<pragma::Animated2Component,pragma::BaseEntityComponent>("Animated2Component");
 	defAnimated2.def("SetPlaybackRate",&pragma::Animated2Component::SetPlaybackRate);
 	defAnimated2.def("GetPlaybackRate",&pragma::Animated2Component::GetPlaybackRate);
-	defAnimated2.def("GetPlaybackRateProperty",&pragma::Animated2Component::GetPlaybackRateProperty,luabind::property_policy<0>{});
+	defAnimated2.def("GetPlaybackRateProperty",&pragma::Animated2Component::GetPlaybackRateProperty);
 	defAnimated2.def("ClearAnimationManagers",&pragma::Animated2Component::ClearAnimationManagers);
 	defAnimated2.def("AddAnimationManager",&pragma::Animated2Component::AddAnimationManager);
 	defAnimated2.def("RemoveAnimationManager",&pragma::Animated2Component::RemoveAnimationManager);
@@ -362,7 +362,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	defIK.def("SetIKControllerEnabled",&pragma::IKComponent::SetIKControllerEnabled);
 	defIK.def("IsIKControllerEnabled",&pragma::IKComponent::IsIKControllerEnabled);
 	defIK.def("SetIKEffectorPos",&pragma::IKComponent::SetIKEffectorPos);
-	defIK.def("GetIKEffectorPos",&pragma::IKComponent::GetIKEffectorPos,luabind::optional_policy<0>{});
+	defIK.def("GetIKEffectorPos",&pragma::IKComponent::GetIKEffectorPos);
 	gameMod[defIK];
 
 	auto defLogic = luabind::class_<pragma::LogicComponent,pragma::BaseEntityComponent>("LogicComponent");
@@ -383,8 +383,8 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	defSubmergible.def("IsFullySubmerged",&pragma::SubmergibleComponent::IsFullySubmerged);
 	defSubmergible.def("GetSubmergedFraction",&pragma::SubmergibleComponent::GetSubmergedFraction);
 	defSubmergible.def("IsInWater",&pragma::SubmergibleComponent::IsInWater);
-	defSubmergible.def("GetSubmergedFractionProperty",&pragma::SubmergibleComponent::GetSubmergedFractionProperty,luabind::property_policy<0>{});
-	defSubmergible.def("GetWaterEntity",static_cast<BaseEntity*(pragma::SubmergibleComponent::*)()>(&pragma::SubmergibleComponent::GetWaterEntity),luabind::game_object_policy<0>{});
+	defSubmergible.def("GetSubmergedFractionProperty",&pragma::SubmergibleComponent::GetSubmergedFractionProperty);
+	defSubmergible.def("GetWaterEntity",static_cast<BaseEntity*(pragma::SubmergibleComponent::*)()>(&pragma::SubmergibleComponent::GetWaterEntity));
 	defSubmergible.add_static_constant("EVENT_ON_WATER_SUBMERGED",pragma::SubmergibleComponent::EVENT_ON_WATER_SUBMERGED);
 	defSubmergible.add_static_constant("EVENT_ON_WATER_EMERGED",pragma::SubmergibleComponent::EVENT_ON_WATER_EMERGED);
 	defSubmergible.add_static_constant("EVENT_ON_WATER_ENTERED",pragma::SubmergibleComponent::EVENT_ON_WATER_ENTERED);
@@ -395,58 +395,5 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	defDamageable.def("TakeDamage",&pragma::DamageableComponent::TakeDamage);
 	defDamageable.add_static_constant("EVENT_ON_TAKE_DAMAGE",pragma::DamageableComponent::EVENT_ON_TAKE_DAMAGE);
 	gameMod[defDamageable];
-}
-
-//////////////
-
-DLLNETWORK void Lua::TraceData::FillTraceResultTable(lua_State *l,TraceResult &res)
-{
-	Lua::Push<TraceResult>(l,res);
-	//Lua::Push<boost::reference_wrapper<TraceResult>>(l,boost::ref<TraceResult>(res));
-
-	// Deprecated
-	/*auto tableIdx = Lua::CreateTable(l);
-
-	Lua::PushString(l,"hit");
-	Lua::PushBool(l,res.hit);
-	Lua::SetTableValue(l,tableIdx);
-
-	if(res.entity.IsValid())
-	{
-		Lua::PushString(l,"entity");
-		lua_pushentity(l,res.entity);
-		Lua::SetTableValue(l,tableIdx);
-	}
-
-	if(res.physObj.IsValid())
-	{
-		Lua::PushString(l,"physObj");
-		luabind::object(l,res.physObj).push(l);
-		Lua::SetTableValue(l,tableIdx);
-	}
-
-	if(res.collisionObj.IsValid())
-	{
-		Lua::PushString(l,"collisionObj");
-		res.collisionObj->GetLuaObject()->push(l);
-		Lua::SetTableValue(l,tableIdx);
-	}
-
-	Lua::PushString(l,"fraction");
-	Lua::PushNumber(l,res.fraction);
-	Lua::SetTableValue(l,tableIdx);
-
-	Lua::PushString(l,"distance");
-	Lua::PushNumber(l,res.distance);
-	Lua::SetTableValue(l,tableIdx);
-
-	Lua::PushString(l,"normal");
-	Lua::Push<Vector3>(l,res.normal);
-	Lua::SetTableValue(l,tableIdx);
-
-	Lua::PushString(l,"position");
-	Lua::Push<Vector3>(l,res.position);
-	Lua::SetTableValue(l,tableIdx);
-	//Lua::Push<TraceResult>(l,res);*/
 }
 #pragma optimize("",on)

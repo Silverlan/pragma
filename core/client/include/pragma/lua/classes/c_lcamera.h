@@ -22,7 +22,7 @@ namespace Lua
 	namespace Scene
 	{
 		DLLCLIENT void UpdateBuffers(lua_State *l,pragma::CSceneComponent &scene,prosper::ICommandBuffer &hCommandBuffer);
-		DLLCLIENT void GetWorldEnvironment(lua_State *l,pragma::CSceneComponent &scene);
+		DLLCLIENT std::shared_ptr<WorldEnvironment> GetWorldEnvironment(lua_State *l,pragma::CSceneComponent &scene);
 
 		DLLCLIENT void RenderPrepass(lua_State *l,pragma::CSceneComponent &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode);
 		DLLCLIENT void Render(lua_State *l,pragma::CSceneComponent &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode,RenderFlags renderFlags);
@@ -30,13 +30,12 @@ namespace Lua
 	};
 	namespace RasterizationRenderer
 	{
-		DLLCLIENT void GetPrepassDepthTexture(lua_State *l,pragma::CRasterizationRendererComponent &renderer);
-		DLLCLIENT void GetPrepassNormalTexture(lua_State *l,pragma::CRasterizationRendererComponent &renderer);
+		DLLCLIENT std::shared_ptr<prosper::Texture> GetPrepassDepthTexture(lua_State *l,pragma::CRasterizationRendererComponent &renderer);
+		DLLCLIENT std::shared_ptr<prosper::Texture> GetPrepassNormalTexture(lua_State *l,pragma::CRasterizationRendererComponent &renderer);
 
-		DLLCLIENT void GetRenderTarget(lua_State *l,pragma::CRasterizationRendererComponent &renderer);
-		DLLCLIENT void BeginRenderPass(lua_State *l,pragma::CRasterizationRendererComponent &renderer,const ::util::DrawSceneInfo &drawSceneInfo);
-		DLLCLIENT void BeginRenderPass(lua_State *l,pragma::CRasterizationRendererComponent &renderer,const ::util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass &rp);
-		DLLCLIENT void GetPrepassShader(lua_State *l,pragma::CRasterizationRendererComponent &renderer);
+		DLLCLIENT std::shared_ptr<prosper::RenderTarget> GetRenderTarget(lua_State *l,pragma::CRasterizationRendererComponent &renderer);
+		DLLCLIENT bool BeginRenderPass(lua_State *l,pragma::CRasterizationRendererComponent &renderer,const ::util::DrawSceneInfo &drawSceneInfo);
+		DLLCLIENT bool BeginRenderPass(lua_State *l,pragma::CRasterizationRendererComponent &renderer,const ::util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass &rp);
 
 		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,pragma::CRasterizationRendererComponent &renderer,pragma::CSceneComponent &scene,uint32_t renderMode,pragma::ShaderGameWorldLightingPass &shader,::Material &mat,BaseEntity &ent,ModelSubMesh &mesh);
 		DLLCLIENT void ScheduleMeshForRendering(lua_State *l,pragma::CRasterizationRendererComponent &renderer,pragma::CSceneComponent &scene,uint32_t renderMode,const std::string &shaderName,::Material &mat,BaseEntity &ent,ModelSubMesh &mesh);

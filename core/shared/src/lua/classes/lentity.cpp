@@ -20,6 +20,7 @@
 #include "pragma/lua/policies/handle_policy.hpp"
 #include "pragma/lua/policies/pair_policy.hpp"
 #include "pragma/lua/policies/vector_policy.hpp"
+#include "pragma/lua/converters/optional_converter_t.hpp"
 #include "pragma/lua/libraries/lray.h"
 #include "pragma/model/brush/brushmesh.h"
 #include "pragma/audio/alsound.h"
@@ -141,11 +142,11 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 	}));
 	classDef.def("GetCenter",&BaseEntity::GetCenter);
 
-	classDef.def("AddComponent",static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent>(BaseEntity::*)(const std::string&,bool)>(&BaseEntity::AddComponent),luabind::game_object_smartptr_policy<0>{});
+	classDef.def("AddComponent",static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent>(BaseEntity::*)(const std::string&,bool)>(&BaseEntity::AddComponent));
 	classDef.def("AddComponent",static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent>(*)(BaseEntity&,const std::string&)>([](BaseEntity &ent,const std::string &name) -> pragma::ComponentHandle<pragma::BaseEntityComponent> {
 		return ent.AddComponent(name);
-	}),luabind::game_object_smartptr_policy<0>{});
-	classDef.def("AddComponent",static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent>(BaseEntity::*)(pragma::ComponentId,bool)>(&BaseEntity::AddComponent),luabind::game_object_smartptr_policy<0>{});
+	}));
+	classDef.def("AddComponent",static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent>(BaseEntity::*)(pragma::ComponentId,bool)>(&BaseEntity::AddComponent));
 	classDef.def("AddComponent",static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent>(*)(BaseEntity&,pragma::ComponentId)>([](BaseEntity &ent,pragma::ComponentId componentId) {
 		return ent.AddComponent(componentId);
 	}));
@@ -164,8 +165,8 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 	}));
 	classDef.def("HasComponent",static_cast<bool(BaseEntity::*)(pragma::ComponentId) const>(&BaseEntity::HasComponent));
 	classDef.def("HasComponent",static_cast<bool(*)(BaseEntity&,luabind::object)>([](BaseEntity &ent,luabind::object) {return false;}));
-	classDef.def("GetComponent",static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent>(BaseEntity::*)(const std::string&) const>(&BaseEntity::FindComponent),luabind::game_object_smartptr_policy<0>{});
-	classDef.def("GetComponent",static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent>(BaseEntity::*)(pragma::ComponentId) const>(&BaseEntity::FindComponent),luabind::game_object_smartptr_policy<0>{});
+	classDef.def("GetComponent",static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent>(BaseEntity::*)(const std::string&) const>(&BaseEntity::FindComponent));
+	classDef.def("GetComponent",static_cast<pragma::ComponentHandle<pragma::BaseEntityComponent>(BaseEntity::*)(pragma::ComponentId) const>(&BaseEntity::FindComponent));
 	classDef.def("GetComponent",static_cast<void(*)(BaseEntity&,luabind::object)>([](BaseEntity &ent,luabind::object) {}));
 	if(Lua::get_extended_lua_modules_enabled())
 	{
@@ -184,19 +185,19 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 		}));
 		classDef.def("C",static_cast<luabind::optional<pragma::BaseEntityComponent>(*)(BaseEntity&,luabind::object)>([](BaseEntity &ent,luabind::object) -> luabind::optional<pragma::BaseEntityComponent> {return nil;}));
 	}
-	classDef.def("GetComponents",static_cast<std::vector<util::TSharedHandle<pragma::BaseEntityComponent>>&(BaseEntity::*)()>(&BaseEntity::GetComponents),luabind::vector_policy<0,util::TSharedHandle<pragma::BaseEntityComponent>,luabind::game_object_policy<0>>{});
-	classDef.def("GetTransformComponent",&BaseEntity::GetTransformComponent,luabind::game_object_policy<0>{});
-	classDef.def("GetPhysicsComponent",&BaseEntity::GetPhysicsComponent,luabind::game_object_policy<0>{});
-	classDef.def("GetGenericComponent",&BaseEntity::GetGenericComponent,luabind::game_object_policy<0>{});
-	classDef.def("GetCharacterComponent",&BaseEntity::GetCharacterComponent,luabind::game_object_smartptr_policy<0>{});
-	classDef.def("GetWeaponComponent",&BaseEntity::GetWeaponComponent,luabind::game_object_smartptr_policy<0>{});
-	classDef.def("GetVehicleComponent",&BaseEntity::GetVehicleComponent,luabind::game_object_smartptr_policy<0>{});
-	classDef.def("GetPlayerComponent",&BaseEntity::GetPlayerComponent,luabind::game_object_smartptr_policy<0>{});
-	classDef.def("GetTimeScaleComponent",&BaseEntity::GetTimeScaleComponent,luabind::game_object_smartptr_policy<0>{});
-	classDef.def("GetNameComponent",&BaseEntity::GetNameComponent,luabind::game_object_smartptr_policy<0>{});
-	classDef.def("GetAIComponent",&BaseEntity::GetAIComponent,luabind::game_object_smartptr_policy<0>{});
-	classDef.def("GetModelComponent",&BaseEntity::GetModelComponent,luabind::game_object_policy<0>{});
-	classDef.def("GetAnimatedComponent",&BaseEntity::GetAnimatedComponent,luabind::game_object_smartptr_policy<0>{});
+	classDef.def("GetComponents",static_cast<std::vector<util::TSharedHandle<pragma::BaseEntityComponent>>&(BaseEntity::*)()>(&BaseEntity::GetComponents));
+	classDef.def("GetTransformComponent",&BaseEntity::GetTransformComponent);
+	classDef.def("GetPhysicsComponent",&BaseEntity::GetPhysicsComponent);
+	classDef.def("GetGenericComponent",&BaseEntity::GetGenericComponent);
+	classDef.def("GetCharacterComponent",&BaseEntity::GetCharacterComponent);
+	classDef.def("GetWeaponComponent",&BaseEntity::GetWeaponComponent);
+	classDef.def("GetVehicleComponent",&BaseEntity::GetVehicleComponent);
+	classDef.def("GetPlayerComponent",&BaseEntity::GetPlayerComponent);
+	classDef.def("GetTimeScaleComponent",&BaseEntity::GetTimeScaleComponent);
+	classDef.def("GetNameComponent",&BaseEntity::GetNameComponent);
+	classDef.def("GetAIComponent",&BaseEntity::GetAIComponent);
+	classDef.def("GetModelComponent",&BaseEntity::GetModelComponent);
+	classDef.def("GetAnimatedComponent",&BaseEntity::GetAnimatedComponent);
 	classDef.def("GetUuid",static_cast<std::string(*)(BaseEntity&)>([](BaseEntity &ent) -> std::string {
 		return util::uuid_to_string(ent.GetUuid());
 	}));
@@ -206,7 +207,7 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 
 	classDef.def("Save",&BaseEntity::Save);
 	classDef.def("Load",&BaseEntity::Load);
-	classDef.def("Copy",&BaseEntity::Copy,luabind::game_object_policy<0>{});
+	classDef.def("Copy",&BaseEntity::Copy);
 
 	classDef.def("GetAirDensity",&GetAirDensity);
 
@@ -231,7 +232,7 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 	}));
 	classDef.def("GetModel",&BaseEntity::GetModel);
 	classDef.def("GetModelName",&BaseEntity::GetModelName);
-	classDef.def("GetAttachmentPose",&BaseEntity::GetAttachmentPose,luabind::optional_policy<0>{});
+	classDef.def("GetAttachmentPose",&BaseEntity::GetAttachmentPose);
 	classDef.def("GetSkin",&BaseEntity::GetSkin);
 	classDef.def("SetSkin",&BaseEntity::SetSkin);
 	classDef.def("GetBodyGroup",&BaseEntity::GetBodyGroup);
@@ -283,11 +284,11 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 	classDef.def("IsTurnedOff",&Lua::Entity::IsDisabled);
 	classDef.def("SetColor",&Lua::Entity::SetColor);
 	classDef.def("GetColor",&Lua::Entity::GetColor);
-	classDef.def("GetPhysicsObject",&BaseEntity::GetPhysicsObject,luabind::handle_policy<0>{});
-	classDef.def("InitializePhysics",&BaseEntity::InitializePhysics,luabind::handle_policy<0>{});
+	classDef.def("GetPhysicsObject",&BaseEntity::GetPhysicsObject);
+	classDef.def("InitializePhysics",&BaseEntity::InitializePhysics);
 	classDef.def("DestroyPhysicsObject",&BaseEntity::DestroyPhysicsObject);
 	classDef.def("DropToFloor",&BaseEntity::DropToFloor);
-	classDef.def("GetCollisionBounds",&BaseEntity::GetCollisionBounds,luabind::pair_policy<0>{});
+	classDef.def("GetCollisionBounds",&BaseEntity::GetCollisionBounds);
 	classDef.def("SetCollisionFilterMask",&BaseEntity::SetCollisionFilterMask);
 	classDef.def("SetCollisionFilterGroup",&BaseEntity::SetCollisionFilterGroup);
 	classDef.def("GetCollisionFilterGroup",&BaseEntity::GetCollisionFilterGroup);

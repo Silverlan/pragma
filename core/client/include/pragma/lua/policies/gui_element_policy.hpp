@@ -7,6 +7,7 @@
 #ifndef __GUI_ELEMENT_POLICY_HPP__
 #define __GUI_ELEMENT_POLICY_HPP__
 
+#if 0
 #include <luabind/detail/policy.hpp>
 #include <sharedutils/util.h>
 #include <sharedutils/util_shared_handle.hpp>
@@ -63,5 +64,6 @@ namespace luabind {
 	template< unsigned int N >
 	using gui_element_policy = meta::type_list< converter_policy_injector< N, detail::gui_element_policy > >;
 } // namespace luabind
+#endif
 
 #endif

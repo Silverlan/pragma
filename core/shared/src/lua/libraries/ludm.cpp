@@ -8,6 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/lua/libraries/ludm.hpp"
 #include "pragma/lua/libraries/lfile.h"
+#include "pragma/lua/converters/vector_converter_t.hpp"
 #include "pragma/util/util_game.hpp"
 #include <sharedutils/util_path.hpp>
 #include <luabind/iterator_policy.hpp>

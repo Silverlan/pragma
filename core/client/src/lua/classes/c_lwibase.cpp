@@ -17,6 +17,8 @@
 #include "pragma/lua/classes/c_ldef_wgui.h"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/lua/policies/gui_element_policy.hpp"
+#include "pragma/lua/converters/gui_element_converter_t.hpp"
+#include "pragma/lua/converters/shader_converter_t.hpp"
 #include "pragma/gui/wgui_luainterface.h"
 #include <pragma/lua/classes/ldef_vector.h>
 #include <pragma/lua/classes/lproperty.hpp>
@@ -26,6 +28,10 @@
 #include <pragma/lua/policies/string_view_policy.hpp>
 #include <pragma/lua/policies/pair_policy.hpp>
 #include <pragma/lua/policies/default_parameter_policy.hpp>
+#include <pragma/lua/converters/pair_converter_t.hpp>
+#include <pragma/lua/converters/string_view_converter_t.hpp>
+#include <pragma/lua/converters/vector_converter_t.hpp>
+#include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/lua_call.hpp>
 #include <prosper_command_buffer.hpp>
 #include <sharedutils/property/util_property_color.hpp>
@@ -105,11 +111,11 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("SetAbsolutePos",static_cast<void(*)(lua_State*,::WIBase&,float,float)>(&SetAbsolutePos));
 	classDef.def("GetColor",&::WIBase::GetColor);
 	classDef.def("GetColorProperty",&::WIBase::GetColorProperty);
-	classDef.def("GetFocusProperty",&::WIBase::GetFocusProperty,luabind::property_policy<0>{});
-	classDef.def("GetVisibilityProperty",&::WIBase::GetVisibilityProperty,luabind::property_policy<0>{});
-	classDef.def("GetPosProperty",&::WIBase::GetPosProperty,luabind::property_policy<0>{});
-	classDef.def("GetSizeProperty",&::WIBase::GetSizeProperty,luabind::property_policy<0>{});
-	classDef.def("GetMouseInBoundsProperty",&::WIBase::GetMouseInBoundsProperty,luabind::property_policy<0>{});
+	classDef.def("GetFocusProperty",&::WIBase::GetFocusProperty);
+	classDef.def("GetVisibilityProperty",&::WIBase::GetVisibilityProperty);
+	classDef.def("GetPosProperty",&::WIBase::GetPosProperty);
+	classDef.def("GetSizeProperty",&::WIBase::GetSizeProperty);
+	classDef.def("GetMouseInBoundsProperty",&::WIBase::GetMouseInBoundsProperty);
 	classDef.def("SetColor",&SetColor);
 	classDef.def("SetColorRGB",static_cast<void(*)(lua_State*,::WIBase&,const Color&)>([](lua_State *l,::WIBase &hPanel,const Color &color) {
 		auto vCol = color.ToVector4();
@@ -125,7 +131,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("SetSize",static_cast<void(*)(lua_State*,::WIBase&,float,float)>(&SetSize));
 	classDef.def("Wrap",static_cast<void(*)(lua_State*,::WIBase&,const std::string&)>(&Wrap));
 	classDef.def("Wrap",static_cast<bool(::WIBase::*)(::WIBase&)>(&::WIBase::Wrap));
-	classDef.def("GetParent",&::WIBase::GetParent,luabind::gui_element_policy<0>{});
+	classDef.def("GetParent",&::WIBase::GetParent);
 	classDef.def("SetParent",&::WIBase::SetParent);
 	classDef.def("SetParent",static_cast<void(*)(lua_State*,::WIBase&,::WIBase&,uint32_t)>([](lua_State *l,::WIBase &hPanel,::WIBase &hParent,uint32_t index) {
 		hPanel.SetParent(&hParent,index);
@@ -133,7 +139,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("ClearParent",&ClearParent);
 	classDef.def("GetChildren",static_cast<void(*)(lua_State*,::WIBase&)>(&GetChildren));
 	classDef.def("GetChildren",static_cast<void(*)(lua_State*,::WIBase&,std::string)>(&GetChildren));
-	classDef.def("GetFirstChild",&::WIBase::GetFirstChild,luabind::gui_element_policy<0>{});
+	classDef.def("GetFirstChild",&::WIBase::GetFirstChild);
 	classDef.def("GetChild",static_cast<void(*)(lua_State*,::WIBase&,unsigned int)>(&GetChild));
 	classDef.def("GetChild",static_cast<void(*)(lua_State*,::WIBase&,std::string,unsigned int)>(&GetChild));
 	classDef.def("IsPosInBounds",&PosInBounds);
@@ -221,7 +227,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("IsBackgroundElement",&::WIBase::IsBackgroundElement);
 	classDef.def("FindDescendantByName",static_cast<::WIBase*(*)(lua_State*,::WIBase&,const std::string&)>([](lua_State *l,::WIBase &hPanel,const std::string &name) {
 		return hPanel.FindDescendantByName(name);
-	}),luabind::gui_element_policy<0>{});
+	}));
 	classDef.def("FindDescendantsByName",static_cast<luabind::tableT<::WIBase>(*)(lua_State*,::WIBase&,const std::string&)>([](lua_State *l,::WIBase &hPanel,const std::string &name) -> luabind::tableT<::WIBase> {
 		std::vector<::WIHandle> children {};
 		hPanel.FindDescendantsByName(name,children);
@@ -250,7 +256,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("SetAttachmentPos",&::WIBase::SetAttachmentPos);
 	classDef.def("GetAttachmentPos",&::WIBase::GetAttachmentPos);
 	classDef.def("GetAbsoluteAttachmentPos",&::WIBase::GetAbsoluteAttachmentPos);
-	classDef.def("GetAttachmentPosProperty",&::WIBase::GetAttachmentPosProperty,luabind::property_policy<0>{});
+	classDef.def("GetAttachmentPosProperty",&::WIBase::GetAttachmentPosProperty);
 	classDef.def("SetAnchor",static_cast<void(::WIBase::*)(float,float,float,float,uint32_t,uint32_t)>(&::WIBase::SetAnchor));
 	classDef.def("SetAnchor",static_cast<void(*)(::WIBase&,float,float,float,float)>([](::WIBase &el,float left,float top,float right,float bottom) {el.SetAnchor(left,top,right,bottom);}));
 	classDef.def("SetAnchorLeft",&::WIBase::SetAnchorLeft);
@@ -276,13 +282,13 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("CenterToParentY",&::WIBase::CenterToParentY);
 	classDef.def("RemoveStyleClass",&::WIBase::RemoveStyleClass);
 	classDef.def("ClearStyleClasses",&::WIBase::ClearStyleClasses);
-	classDef.def("FindChildIndex",&::WIBase::FindChildIndex,luabind::optional_policy<0>{});
+	classDef.def("FindChildIndex",&::WIBase::FindChildIndex);
 	classDef.def("SetScale",static_cast<void(::WIBase::*)(const Vector2&)>(&::WIBase::SetScale));
 	classDef.def("SetScale",static_cast<void(::WIBase::*)(float,float)>(&::WIBase::SetScale));
 	classDef.def("GetScale",&::WIBase::GetScale);
-	classDef.def("GetScaleProperty",&::WIBase::GetScaleProperty,luabind::property_policy<0>{});
+	classDef.def("GetScaleProperty",&::WIBase::GetScaleProperty);
 	classDef.def("IsUpdateScheduled",&::WIBase::IsUpdateScheduled);
-	classDef.def("GetRootElement",static_cast<::WIBase*(::WIBase::*)()>(&::WIBase::GetRootElement),luabind::gui_element_policy<0>{});
+	classDef.def("GetRootElement",static_cast<::WIBase*(::WIBase::*)()>(&::WIBase::GetRootElement));
 	classDef.def("GetRootWindow",static_cast<prosper::Window*(::WIBase::*)()>(&::WIBase::GetRootWindow));
 
 	auto defDrawInfo = luabind::class_<::WIBase::DrawInfo>("DrawInfo");
@@ -324,10 +330,10 @@ void Lua::WIProgressBar::register_class(luabind::class_<::WIProgressBar,::WIBase
 	classDef.def("GetValue",static_cast<float(::WIProgressBar::*)() const>(&::WIProgressBar::GetValue));
 	classDef.def("SetRange",static_cast<void(::WIProgressBar::*)(float,float,float)>(&::WIProgressBar::SetRange));
 	classDef.def("SetRange",static_cast<void(*)(::WIProgressBar&,float,float)>([](::WIProgressBar &el,float min,float max) {el.SetRange(min,max);}));
-	classDef.def("SetOptions",&::WIProgressBar::SetOptions,luabind::vector_policy<0>{});
+	classDef.def("SetOptions",&::WIProgressBar::SetOptions);
 	classDef.def("AddOption",&::WIProgressBar::AddOption);
 	classDef.def("SetPostFix",&::WIProgressBar::SetPostFix);
-	classDef.def("GetRange",&::WIProgressBar::GetRange,luabind::array_policy<0,float,3>{});
+	classDef.def("GetRange",&::WIProgressBar::GetRange);
 	//classDef.def("SetValueTranslator",&SetValueTranslator);
 }
 
@@ -412,7 +418,7 @@ void Lua::WITreeList::register_class(luabind::class_<::WITreeList,luabind::bases
 {
 	classDef.def("AddItem",static_cast<::WITreeListElement*(*)(lua_State*,::WITreeList&,const std::string&)>([](lua_State *l,::WITreeList &hPanel,const std::string &text) -> ::WITreeListElement* {
 		return hPanel.AddItem(text);
-	}),luabind::gui_element_policy<0>{});
+	}));
 	classDef.def("AddItem",static_cast<::WIBase*(*)(lua_State*,::WITreeList&,const std::string&,Lua::func<void(::WIBase)>)>([](lua_State *l,::WITreeList &hPanel,const std::string &text,Lua::func<void(::WIBase)> populate) -> ::WIBase* {
 		auto fPopulate = [l,populate](::WITreeListElement &el) {
 			Lua::CallFunction(l,[&populate,&el](lua_State *l) {
@@ -437,7 +443,7 @@ void Lua::WITreeListElement::register_class(luabind::class_<::WITreeListElement,
 	classDef.def("GetItems",&::WITreeListElement::GetItems);
 	classDef.def("AddItem",static_cast<::WITreeListElement*(*)(lua_State*,::WITreeListElement&,const std::string&)>([](lua_State *l,::WITreeListElement &hPanel,const std::string &text) -> ::WITreeListElement* {
 		return hPanel.AddItem(text);
-	}),luabind::gui_element_policy<0>{});
+	}));
 	classDef.def("AddItem",static_cast<::WIBase*(*)(lua_State*,::WITreeListElement&,const std::string&,Lua::func<void(::WIBase)>)>([](lua_State *l,::WITreeListElement &hPanel,const std::string &text,Lua::func<void(::WIBase)> populate) -> ::WIBase* {
 		auto fPopulate = [l,populate](::WITreeListElement &el) {
 			Lua::CallFunction(l,[&populate,&el](lua_State *l) {
@@ -459,7 +465,7 @@ void Lua::WIContainer::register_class(luabind::class_<::WIContainer,::WIBase> &c
 	classDef.def("SetPaddingRight",&::WIContainer::SetPaddingRight);
 	classDef.def("SetPaddingBottom",&::WIContainer::SetPaddingBottom);
 	classDef.def("SetPaddingLeft",&::WIContainer::SetPaddingLeft);
-	classDef.def("GetPadding",static_cast<const std::array<int32_t,4>&(::WIContainer::*)() const>(&::WIContainer::GetPadding),luabind::array_policy<0,int32_t,4>{});
+	classDef.def("GetPadding",static_cast<const std::array<int32_t,4>&(::WIContainer::*)() const>(&::WIContainer::GetPadding));
 	classDef.def("GetPaddingTop",&::WIContainer::GetPaddingTop);
 	classDef.def("GetPaddingRight",&::WIContainer::GetPaddingRight);
 	classDef.def("GetPaddingBottom",&::WIContainer::GetPaddingBottom);
@@ -488,7 +494,7 @@ void Lua::WITable::register_class(luabind::class_<::WITable,luabind::bases<::WIC
 	classDef.def("MoveRow",&::WITable::MoveRow);
 	classDef.def("MoveRow",static_cast<void(*)(::WITable&,::WITableRow&,::WITableRow&)>([](::WITable &el,::WITableRow &a,::WITableRow &pos) {el.MoveRow(&a,&pos);}));
 	classDef.def("SelectRow",&::WITable::SelectRow);
-	classDef.def("GetFirstSelectedRow",&::WITable::GetFirstSelectedRow,luabind::gui_element_policy<0>{});
+	classDef.def("GetFirstSelectedRow",&::WITable::GetFirstSelectedRow);
 	classDef.add_static_constant("SELECTABLE_MODE_NONE",umath::to_integral(::WITable::SelectableMode::None));
 	classDef.add_static_constant("SELECTABLE_MODE_SINGLE",umath::to_integral(::WITable::SelectableMode::Single));
 	classDef.add_static_constant("SELECTABLE_MODE_MULTI",umath::to_integral(::WITable::SelectableMode::Multi));
@@ -502,7 +508,7 @@ void Lua::WITableRow::register_class(luabind::class_<::WITableRow,luabind::bases
 	classDef.def("SetCellWidth",&::WITableRow::SetCellWidth);
 	classDef.def("SetValue",&::WITableRow::SetValue);
 	classDef.def("GetValue",static_cast<std::string(::WIBase::*)(uint32_t) const>(&::WITableRow::GetValue));
-	classDef.def("InsertElement",static_cast<::WITableCell*(::WIBase::*)(uint32_t,::WIBase*)>(&::WITableRow::InsertElement),luabind::gui_element_policy<0>{});
+	classDef.def("InsertElement",static_cast<::WITableCell*(::WIBase::*)(uint32_t,::WIBase*)>(&::WITableRow::InsertElement));
 	classDef.def("GetCellCount",&::WITableRow::GetCellCount);
 	classDef.def("GetCell",&::WITableRow::GetCell);
 	classDef.def("GetRowIndex",static_cast<uint32_t(*)(lua_State*,::WITableRow&)>([](lua_State *l,::WITableRow &hRow) -> uint32_t {
@@ -544,8 +550,8 @@ void Lua::WIDropDownMenu::register_class(luabind::class_<::WIDropDownMenu,luabin
 	classDef.def("GetText",&::WIDropDownMenu::GetText);
 	classDef.def("SetText",&::WIDropDownMenu::SetText);
 	classDef.def("GetOptionCount",&::WIDropDownMenu::GetOptionCount);
-	classDef.def("AddOption",static_cast<::WIDropDownMenuOption*(::WIDropDownMenu::*)(const std::string&,const std::string&)>(&::WIDropDownMenu::AddOption),luabind::gui_element_policy<0>{});
-	classDef.def("AddOption",static_cast<::WIDropDownMenuOption*(::WIDropDownMenu::*)(const std::string&)>(&::WIDropDownMenu::AddOption),luabind::gui_element_policy<0>{});
+	classDef.def("AddOption",static_cast<::WIDropDownMenuOption*(::WIDropDownMenu::*)(const std::string&,const std::string&)>(&::WIDropDownMenu::AddOption));
+	classDef.def("AddOption",static_cast<::WIDropDownMenuOption*(::WIDropDownMenu::*)(const std::string&)>(&::WIDropDownMenu::AddOption));
 	classDef.def("OpenMenu",&::WIDropDownMenu::OpenMenu);
 	classDef.def("CloseMenu",&::WIDropDownMenu::CloseMenu);
 	classDef.def("ToggleMenu",&::WIDropDownMenu::ToggleMenu);
@@ -553,8 +559,8 @@ void Lua::WIDropDownMenu::register_class(luabind::class_<::WIDropDownMenu,luabin
 	classDef.def("HasOption",&::WIDropDownMenu::HasOption);
 	classDef.def("GetSelectedOption",&::WIDropDownMenu::GetSelectedOption);
 	classDef.def("ClearSelectedOption",&::WIDropDownMenu::ClearSelectedOption);
-	classDef.def("GetOptionElement",&::WIDropDownMenu::GetOptionElement,luabind::gui_element_policy<0>{});
-	classDef.def("FindOptionSelectedByCursor",&::WIDropDownMenu::FindOptionSelectedByCursor,luabind::gui_element_policy<0>{});
+	classDef.def("GetOptionElement",&::WIDropDownMenu::GetOptionElement);
+	classDef.def("FindOptionSelectedByCursor",&::WIDropDownMenu::FindOptionSelectedByCursor);
 	classDef.def("SetListItemCount",&::WIDropDownMenu::SetListItemCount);
 	classDef.def("ScrollToOption",static_cast<void(::WIDropDownMenu::*)(uint32_t,bool)>(&::WIDropDownMenu::ScrollToOption));
 	classDef.def("ScrollToOption",static_cast<void(*)(::WIDropDownMenu&,uint32_t)>([](::WIDropDownMenu &el,uint32_t offset) {el.ScrollToOption(offset);}));
@@ -590,7 +596,7 @@ void Lua::WIText::register_class(luabind::class_<::WIText,::WIBase> &classDef)
 		if(pLine == nullptr)
 			return {};
 		return pLine->GetUnformattedLine().GetText();
-	}),luabind::optional_policy<0>{});
+	}));
 	classDef.def("GetTextLength",static_cast<uint32_t(*)(lua_State*,::WIText&)>([](lua_State *l,::WIText &hPanel) -> uint32_t {
 		return hPanel.GetText().length();
 	}));
@@ -677,7 +683,7 @@ void Lua::WITextEntry::register_class(luabind::class_<::WITextEntry,::WIBase> &c
 
 	classDef.def("IsSelectable",&::WITextEntry::IsSelectable);
 	classDef.def("SetSelectable",&::WITextEntry::SetSelectable);
-	classDef.def("GetTextElement",&::WITextEntry::GetTextElement,luabind::gui_element_policy<0>{});
+	classDef.def("GetTextElement",&::WITextEntry::GetTextElement);
 }
 
 ////////////////////////////////////
@@ -713,8 +719,8 @@ void Lua::WILine::register_class(luabind::class_<::WILine,::WIBase> &classDef)
 	classDef.def("SetEndColor",&::WILine::SetEndColor);
 	classDef.def("GetStartColor",&::WILine::GetStartColor);
 	classDef.def("GetEndColor",&::WILine::GetEndColor);
-	classDef.def("GetStartPosProperty",&::WILine::GetStartPosProperty,luabind::property_policy<0>{});
-	classDef.def("GetEndPosProperty",&::WILine::GetEndPosProperty,luabind::property_policy<0>{});
+	classDef.def("GetStartPosProperty",&::WILine::GetStartPosProperty);
+	classDef.def("GetEndPosProperty",&::WILine::GetEndPosProperty);
 }
 
 void Lua::WIRoundedRect::register_class(luabind::class_<::WIRoundedRect,luabind::bases<::WIShape,::WIBase>> &classDef)
@@ -1778,7 +1784,7 @@ void Lua::WITransformable::register_class(luabind::class_<::WITransformable,::WI
 	classDef.def("IsBeingDragged",&::WITransformable::IsBeingDragged);
 	classDef.def("IsBeingResized",&::WITransformable::IsBeingResized);
 	classDef.def("SetDragBounds",&::WITransformable::SetDragBounds);
-	classDef.def("GetDragBounds",&::WITransformable::GetDragBounds,luabind::pair_policy<0>{});
+	classDef.def("GetDragBounds",&::WITransformable::GetDragBounds);
 	classDef.def("SetResizeRatioLocked",&::WITransformable::SetResizeRatioLocked);
 	classDef.def("IsResizeRatioLocked",&::WITransformable::IsResizeRatioLocked);
 	classDef.def("AddSnapTarget",&::WITransformable::AddSnapTarget);

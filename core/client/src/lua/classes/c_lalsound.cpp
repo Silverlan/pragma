@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/audio/c_lalsound.hpp"
 #include <pragma/lua/policies/pair_policy.hpp>
+#include <pragma/lua/converters/pair_converter_t.hpp>
 #include <se_scene.hpp>
 
 namespace Lua
@@ -62,10 +63,10 @@ void Lua::ALSound::Client::register_class(luabind::class_<::ALSound> &classDef)
 	classDef.def("GetLength",&Lua::ALSound::Client::GetLength);
 	classDef.def("GetLoopFramePoints",static_cast<std::pair<uint64_t,uint64_t>(*)(::ALSound&)>([](::ALSound &sound) {
 		return static_cast<CALSound&>(sound)->GetLoopFramePoints();
-	}),luabind::pair_policy<0>{});
+	}));
 	classDef.def("GetLoopTimePoints",static_cast<std::pair<float,float>(*)(::ALSound&)>([](::ALSound &sound) {
 		return static_cast<CALSound&>(sound)->GetLoopTimePoints();
-	}),luabind::pair_policy<0>{});
+	}));
 	classDef.def("SetPropagationIdentifier",static_cast<void(*)(::ALSound&,const std::string&)>([](::ALSound &sound,const std::string &identifier) {
 		static_cast<CALSound&>(sound)->SetIdentifier(identifier);
 	}));

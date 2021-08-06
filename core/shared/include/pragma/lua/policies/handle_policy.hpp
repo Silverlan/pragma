@@ -7,6 +7,8 @@
 #ifndef __HANDLE_POLICY_HPP__
 #define __HANDLE_POLICY_HPP__
 
+// TODO: Remove this file
+#if 0
 #include <luabind/detail/policy.hpp>
 
 namespace luabind {
@@ -44,5 +46,6 @@ namespace luabind {
 	using handle_policy = meta::type_list< converter_policy_injector< N, detail::handle_policy > >;
 
 } // namespace luabind
+#endif
 
 #endif

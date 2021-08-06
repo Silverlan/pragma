@@ -43,7 +43,7 @@ namespace Lua
 void Lua::register_sv_character_component(lua_State *l,luabind::module_ &module)
 {
 	auto def = luabind::class_<pragma::SCharacterComponent,pragma::BaseCharacterComponent>("CharacterComponent");
-	def.def("GiveWeapon",static_cast<BaseEntity*(pragma::SCharacterComponent::*)(std::string)>(&pragma::SCharacterComponent::GiveWeapon),luabind::game_object_policy<0>{});
+	def.def("GiveWeapon",static_cast<BaseEntity*(pragma::SCharacterComponent::*)(std::string)>(&pragma::SCharacterComponent::GiveWeapon));
 	def.def("DropActiveWeapon",&pragma::SCharacterComponent::DropActiveWeapon);
 	def.def("DropWeapon",static_cast<void(pragma::SCharacterComponent::*)(std::string)>(&pragma::SCharacterComponent::DropWeapon));
 	def.def("DropWeapon",&Lua::Character::Server::DropWeapon);

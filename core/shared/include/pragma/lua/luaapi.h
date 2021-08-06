@@ -386,4 +386,11 @@ namespace Lua
 	DLLNETWORK bool get_extended_lua_modules_enabled();
 };
 
+#include "pragma/lua/converters/file_converter.hpp"
+#include "pragma/lua/converters/game_type_converters.hpp"
+#include "pragma/lua/converters/optional_converter.hpp"
+#include "pragma/lua/converters/pair_converter.hpp"
+#include "pragma/lua/converters/string_view_converter.hpp"
+#include "pragma/lua/converters/vector_converter.hpp"
+
 #endif

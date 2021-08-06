@@ -7,6 +7,8 @@
 #ifndef __FILE_POLICY_HPP__
 #define __FILE_POLICY_HPP__
 
+// TODO: Remove this file
+#if 0
 #include <luabind/detail/policy.hpp>
 #include "pragma/lua/libraries/lfile.h"
 
@@ -48,5 +50,6 @@ namespace luabind {
 	using file_policy = meta::type_list< converter_policy_injector< N, detail::file_policy > >;
 
 } // namespace luabind
+#endif
 
 #endif

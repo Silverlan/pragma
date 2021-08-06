@@ -43,7 +43,7 @@ void Lua::AIMemory::register_class(lua_State *l,luabind::module_ &mod)
 	mod[classDef];
 
 	auto classDefFragment = luabind::class_<pragma::ai::Memory::Fragment>("MemoryFragment");
-	classDefFragment.def("GetEntity",&AIMemoryFragment::GetEntity,luabind::game_object_policy<0>{});
+	classDefFragment.def("GetEntity",&AIMemoryFragment::GetEntity);
 	classDefFragment.def("IsInView",&AIMemoryFragment::IsInView);
 	classDefFragment.def("GetLastKnownPosition",&AIMemoryFragment::GetLastKnownPosition);
 	classDefFragment.def("GetLastKnownVelocity",&AIMemoryFragment::GetLastVelocity);

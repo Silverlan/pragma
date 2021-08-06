@@ -90,6 +90,39 @@ namespace pragma
 		CallbackHandle BindEvent(lua_State *l,pragma::ComponentId eventId,luabind::object methodNameOrFunction);
 		CallbackHandle BindNetEvent(lua_State *l,pragma::NetEventId eventId,luabind::object methodNameOrFunction);
 		virtual void OnMemberValueChanged(uint32_t memberIdx);
+
+		void Lua_Initialize() {}
+		static void default_Lua_Initialize(lua_State *l,BaseLuaBaseEntityComponent &hComponent) {}
+
+		void Lua_OnTick(double dt) {}
+		static void default_Lua_OnTick(lua_State *l,BaseLuaBaseEntityComponent &hComponent,double dt) {}
+
+		void Lua_OnRemove() {}
+		static void default_Lua_OnRemove(lua_State *l,BaseLuaBaseEntityComponent &hComponent) {}
+
+		void Lua_OnEntitySpawn() {}
+		static void default_Lua_OnEntitySpawn(lua_State *l,BaseLuaBaseEntityComponent &hComponent) {}
+
+		void Lua_OnAttachedToEntity() {}
+		static void default_Lua_OnAttachedToEntity(lua_State *l,BaseLuaBaseEntityComponent &hComponent) {}
+
+		void Lua_OnDetachedToEntity() {}
+		static void default_Lua_OnDetachedToEntity(lua_State *l,BaseLuaBaseEntityComponent &hComponent) {}
+
+		void Lua_HandleEvent(uint32_t eventId) {}
+		static void default_Lua_HandleEvent(lua_State *l,BaseLuaBaseEntityComponent &hComponent,uint32_t eventId) {}
+
+		void Lua_Save(udm::LinkedPropertyWrapper &udm) {}
+		static void default_Lua_Save(lua_State *l,BaseLuaBaseEntityComponent &hComponent,udm::LinkedPropertyWrapper &udm) {}
+
+		void Lua_Load(udm::LinkedPropertyWrapper &udm,uint32_t version) {}
+		static void default_Lua_Load(lua_State *l,BaseLuaBaseEntityComponent &hComponent,udm::LinkedPropertyWrapper &udm,uint32_t version) {}
+
+		void Lua_OnEntityComponentAdded(BaseLuaBaseEntityComponent &hComponent) {}
+		static void default_Lua_OnEntityComponentAdded(lua_State *l,BaseLuaBaseEntityComponent &hComponent) {}
+
+		void Lua_OnEntityComponentRemoved(BaseLuaBaseEntityComponent &hComponent) {}
+		static void default_Lua_OnEntityComponentRemoved(lua_State *l,BaseLuaBaseEntityComponent &hComponent) {}
 	protected:
 		BaseLuaBaseEntityComponent(BaseEntity &ent);
 		virtual void InitializeLuaObject(lua_State *l) override;

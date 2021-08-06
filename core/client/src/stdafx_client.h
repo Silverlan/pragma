@@ -35,6 +35,8 @@
 #include "pragma/entities/entity_component_system.hpp"
 #include <pragma/lua/l_entity_handles.hpp>
 #include "pragma/lua/c_lentity_handles.hpp"
+#include "pragma/lua/converters/gui_element_converter.hpp"
+#include "pragma/lua/converters/shader_converter.hpp"
 #include <algorithm>
 #include <vector>
 #include <string>

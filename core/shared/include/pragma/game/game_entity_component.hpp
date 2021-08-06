@@ -16,6 +16,7 @@ template<class TComponent,class THolder>
 	if(o == nullptr)
 		return nullptr;
 	luabind::object r;
+	pragma::BaseEntityComponent *el = nullptr;
 #ifndef LUABIND_NO_EXCEPTIONS
 	try
 	{
@@ -28,6 +29,7 @@ template<class TComponent,class THolder>
 		{
 			elLua->SetupLua(r);
 			holder->SetHandle(util::weak_shared_handle_cast<pragma::BaseEntityComponent,TComponent>(elLua->GetHandle()));
+			el = elLua;
 		}
 		else
 		{
@@ -47,7 +49,7 @@ template<class TComponent,class THolder>
 		Con::cwar<<"WARNING: Unable to create lua entity component '"<<classname<<"'!"<<Con::endl;
 		return nullptr;
 	}
-	return nullptr;
+	return el;
 }
 
 #endif

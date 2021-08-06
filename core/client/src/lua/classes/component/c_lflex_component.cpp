@@ -49,8 +49,8 @@ void Lua::Flex::register_class(lua_State *l,luabind::module_ &entsMod)
 				
 				hEnt.SetFlexController(flexName,value);
 		}));
-	defCFlex.def("GetFlexController",static_cast<void(*)(lua_State*,pragma::CFlexComponent&,uint32_t)>(&Lua::Flex::GetFlexController));
-	defCFlex.def("GetFlexController",static_cast<void(*)(lua_State*,pragma::CFlexComponent&,const std::string&)>(&Lua::Flex::GetFlexController));
+	defCFlex.def("GetFlexController",static_cast<std::optional<float>(*)(pragma::CFlexComponent&,uint32_t)>(&Lua::Flex::GetFlexController));
+	defCFlex.def("GetFlexController",static_cast<std::optional<float>(*)(pragma::CFlexComponent&,const std::string&)>(&Lua::Flex::GetFlexController));
 	defCFlex.def("GetScaledFlexController",static_cast<void(*)(lua_State*,pragma::CFlexComponent&,uint32_t)>(
 		[](lua_State *l,pragma::CFlexComponent &hEnt,uint32_t flexControllerId
 			) {

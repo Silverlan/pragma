@@ -7,6 +7,8 @@
 #ifndef __TUPLE_POLICY_HPP__
 #define __TUPLE_POLICY_HPP__
 
+// TODO: Remove this file
+#if 0
 #include <luabind/detail/policy.hpp>
 
 namespace luabind {
@@ -46,5 +48,6 @@ namespace luabind {
 	using tuple_policy = meta::type_list< converter_policy_injector< N, detail::tuple_policy > >;
 
 } // namespace luabind
+#endif
 
 #endif

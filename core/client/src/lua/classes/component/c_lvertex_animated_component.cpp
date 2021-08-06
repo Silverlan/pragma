@@ -21,7 +21,7 @@ void Lua::VertexAnimated::register_class(lua_State *l,luabind::module_ &entsMod)
 			return;
 		hAnim.UpdateVertexAnimationBuffer(std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(drawCmd));
 	}));
-	defCVertexAnimated.def("GetVertexAnimationBuffer",&pragma::CVertexAnimatedComponent::GetVertexAnimationBuffer,luabind::optional_policy<0>{});
+	defCVertexAnimated.def("GetVertexAnimationBuffer",&pragma::CVertexAnimatedComponent::GetVertexAnimationBuffer);
 	defCVertexAnimated.def("GetVertexAnimationBufferMeshOffset",static_cast<Lua::opt<luabind::mult<uint32_t,uint32_t>>(*)(lua_State*,pragma::CVertexAnimatedComponent&,std::shared_ptr<::ModelSubMesh>&)>([](lua_State *l,pragma::CVertexAnimatedComponent &hAnim,std::shared_ptr<::ModelSubMesh> &subMesh) -> Lua::opt<luabind::mult<uint32_t,uint32_t>> {
 		uint32_t offset;
 		uint32_t animCount;

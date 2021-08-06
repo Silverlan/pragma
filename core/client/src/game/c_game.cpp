@@ -9,6 +9,7 @@
 #include "pragma/game/c_game.h"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/entities/environment/c_env_camera.h"
+#include "pragma/lua/converters/gui_element_converter_t.hpp"
 #include "pragma/model/c_polymesh.h"
 #include "pragma/model/brush/c_brushmesh.h"
 #include "pragma/entities/c_world.h"

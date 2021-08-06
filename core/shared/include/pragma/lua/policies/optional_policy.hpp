@@ -7,6 +7,8 @@
 #ifndef __OPTIONAL_POLICY_HPP__
 #define __OPTIONAL_POLICY_HPP__
 
+// TODO: Remove this file
+#if 0
 #include <luabind/detail/policy.hpp>
 #include <optional>
 
@@ -89,5 +91,6 @@ namespace luabind {
 	using optional_policy = meta::type_list< converter_policy_injector< N, detail::optional_policy<ValuePolicy> > >;
 
 } // namespace luabind
+#endif
 
 #endif

@@ -54,6 +54,7 @@
 #include "pragma/lua/lua_entity_handles.hpp"
 #include "pragma/lua/policies/handle_policy.hpp"
 #include "pragma/lua/policies/game_object_policy.hpp"
+#include "pragma/lua/converters/optional_converter_t.hpp"
 #include <pragma/util/transform.h>
 #include <sharedutils/datastream.h>
 #include <sharedutils/util_parallel_job.hpp>
@@ -1585,7 +1586,7 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	surfaceMatDef.def("GetHardImpactSound",&::SurfaceMaterial::GetHardImpactSound);
 	surfaceMatDef.def("SetSoftImpactSound",&::SurfaceMaterial::SetSoftImpactSound);
 	surfaceMatDef.def("GetSoftImpactSound",&::SurfaceMaterial::GetSoftImpactSound);
-	surfaceMatDef.def("GetIOR",&::SurfaceMaterial::GetIOR,luabind::optional_policy<0>{});
+	surfaceMatDef.def("GetIOR",&::SurfaceMaterial::GetIOR);
 	surfaceMatDef.def("SetIOR",&::SurfaceMaterial::SetIOR);
 	surfaceMatDef.def("ClearIOR",&::SurfaceMaterial::ClearIOR);
 
@@ -1681,9 +1682,9 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	classDefDamageInfo.def("AddDamage",&::DamageInfo::AddDamage);
 	classDefDamageInfo.def("ScaleDamage",&::DamageInfo::ScaleDamage);
 	classDefDamageInfo.def("GetDamage",&::DamageInfo::GetDamage);
-	classDefDamageInfo.def("GetAttacker",&::DamageInfo::GetAttacker,luabind::game_object_policy<0>{});
+	classDefDamageInfo.def("GetAttacker",&::DamageInfo::GetAttacker);
 	classDefDamageInfo.def("SetAttacker",static_cast<void(::DamageInfo::*)(const BaseEntity*)>(&::DamageInfo::SetAttacker));
-	classDefDamageInfo.def("GetInflictor",&::DamageInfo::GetInflictor,luabind::game_object_policy<0>{});
+	classDefDamageInfo.def("GetInflictor",&::DamageInfo::GetInflictor);
 	classDefDamageInfo.def("SetInflictor",static_cast<void(::DamageInfo::*)(const BaseEntity*)>(&::DamageInfo::SetInflictor));
 	classDefDamageInfo.def("GetDamageTypes",&::DamageInfo::GetDamageTypes);
 	classDefDamageInfo.def("SetDamageType",&::DamageInfo::SetDamageType);
@@ -1919,7 +1920,7 @@ static void RegisterIk(Lua::Interface &lua)
 	auto defIkHingeConstraint = luabind::class_<uvec::ik::IkHingeConstraint,uvec::ik::IkConstraint>("IkHingeConstraint");
 	defIkHingeConstraint.def("SetLimits",&uvec::ik::IkHingeConstraint::SetLimits);
 	defIkHingeConstraint.def("ClearLimits",&uvec::ik::IkHingeConstraint::ClearLimits);
-	defIkHingeConstraint.def("GetLimits",&uvec::ik::IkHingeConstraint::GetLimits,luabind::optional_policy<0>{});
+	defIkHingeConstraint.def("GetLimits",&uvec::ik::IkHingeConstraint::GetLimits);
 	modIk[defIkHingeConstraint];
 
 	auto defIkBallSocketConstraint = luabind::class_<uvec::ik::IkBallSocketConstraint,uvec::ik::IkConstraint>("IkBallSocketConstraint");
@@ -1929,7 +1930,7 @@ static void RegisterIk(Lua::Interface &lua)
 		if(constraint.GetLimit(limit) == false)
 			return {};
 		return limit;
-	}),luabind::optional_policy<0>{});
+	}));
 	modIk[defIkBallSocketConstraint];
 
 	auto defCcdSolver = luabind::class_<uvec::ik::CCDSolver,uvec::ik::IkSolver>("CCDIkSolver");

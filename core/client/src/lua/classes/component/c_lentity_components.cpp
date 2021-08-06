@@ -11,11 +11,13 @@
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/lua/classes/c_lcamera.h"
+#include "pragma/lua/converters/shader_converter_t.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/renderers/raytracing_renderer.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
+#include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include <pragma/lua/classes/lproperty_generic.hpp>
 #include <pragma/lua/classes/ldef_vector.h>
@@ -26,6 +28,9 @@
 #include <pragma/lua/policies/optional_policy.hpp>
 #include <pragma/lua/policies/shared_from_this_policy.hpp>
 #include <pragma/lua/policies/pair_policy.hpp>
+#include <pragma/lua/converters/optional_converter_t.hpp>
+#include <pragma/lua/converters/vector_converter_t.hpp>
+#include <pragma/lua/converters/pair_converter_t.hpp>
 #include <pragma/model/model.h>
 #include <pragma/physics/raytraces.h>
 #include <pragma/lua/lentity_components_base_types.hpp>
@@ -187,58 +192,55 @@ namespace Lua
 	};
 	namespace ParticleSystem
 	{
-		static std::string get_key_value(lua_State *l,int32_t argIdx)
+		static std::string get_key_value(lua_State *l,const luabind::object &value)
 		{
-			if(Lua::IsNumber(l,argIdx))
-				return std::to_string(Lua::CheckNumber(l,argIdx));
-			if(Lua::IsBool(l,argIdx))
-				return Lua::CheckBool(l,argIdx) ? "1" : "0";
-			if(Lua::IsVector4(l,argIdx))
+			auto type = luabind::type(value);
+			switch(type)
 			{
-				auto &v = *Lua::CheckVector4(l,argIdx);
-				return std::to_string(v.x) +" " +std::to_string(v.y) +" " +std::to_string(v.z) +" " +std::to_string(v.w);
-			}
-			if(Lua::IsVector(l,argIdx))
+			case LUA_TNUMBER:
+				return std::to_string(luabind::object_cast<double>(value));
+			case LUA_TBOOLEAN:
+				return luabind::object_cast<bool>(value) ? "1" : "0";
+			case LUA_TUSERDATA:
 			{
-				auto &v = *Lua::CheckVector(l,argIdx);
-				return std::to_string(v.x) +" " +std::to_string(v.y) +" " +std::to_string(v.z);
+				auto *v4 = luabind::object_cast_nothrow<Vector4*>(value,static_cast<Vector4*>(nullptr));
+				if(v4)
+					return std::to_string(v4->x) +" " +std::to_string(v4->y) +" " +std::to_string(v4->z) +" " +std::to_string(v4->w);
+				
+				auto *v3 = luabind::object_cast_nothrow<Vector3*>(value,static_cast<Vector3*>(nullptr));
+				if(v3)
+					return std::to_string(v3->x) +" " +std::to_string(v3->y) +" " +std::to_string(v3->z);
+				
+				auto *v2 = luabind::object_cast_nothrow<Vector2*>(value,static_cast<Vector2*>(nullptr));
+				if(v2)
+					return std::to_string(v2->x) +" " +std::to_string(v2->y);
+
+				auto *v4i = luabind::object_cast_nothrow<Vector4i*>(value,static_cast<Vector4i*>(nullptr));
+				if(v4i)
+					return std::to_string(v4i->x) +" " +std::to_string(v4i->y) +" " +std::to_string(v4i->z) +" " +std::to_string(v4i->w);
+				
+				auto *v3i = luabind::object_cast_nothrow<Vector3i*>(value,static_cast<Vector3i*>(nullptr));
+				if(v3i)
+					return std::to_string(v3i->x) +" " +std::to_string(v3i->y) +" " +std::to_string(v3i->z);
+				
+				auto *v2i = luabind::object_cast_nothrow<Vector2i*>(value,static_cast<Vector2i*>(nullptr));
+				if(v2i)
+					return std::to_string(v2i->x) +" " +std::to_string(v2i->y);
+				
+				auto *col = luabind::object_cast_nothrow<Color*>(value,static_cast<Color*>(nullptr));
+				if(col)
+					return std::to_string(col->r) +" " +std::to_string(col->g) +" " +std::to_string(col->b) +" " +std::to_string(col->a);
+				
+				auto *ang = luabind::object_cast_nothrow<EulerAngles*>(value,static_cast<EulerAngles*>(nullptr));
+				if(ang)
+					return std::to_string(ang->p) +" " +std::to_string(ang->y) +" " +std::to_string(ang->r);
+				
+				auto *rot = luabind::object_cast_nothrow<Quat*>(value,static_cast<Quat*>(nullptr));
+				if(rot)
+					return std::to_string(rot->w) +" " +std::to_string(rot->x) +" " +std::to_string(rot->y) +" " +std::to_string(rot->z);
 			}
-			if(Lua::IsVector2(l,argIdx))
-			{
-				auto &v = *Lua::CheckVector2(l,argIdx);
-				return std::to_string(v.x) +" " +std::to_string(v.y);
 			}
-			if(Lua::IsVector4i(l,argIdx))
-			{
-				auto &v = *Lua::CheckVector4i(l,argIdx);
-				return std::to_string(v.x) +" " +std::to_string(v.y) +" " +std::to_string(v.z) +" " +std::to_string(v.w);
-			}
-			if(Lua::IsVectori(l,argIdx))
-			{
-				auto &v = *Lua::CheckVectori(l,argIdx);
-				return std::to_string(v.x) +" " +std::to_string(v.y) +" " +std::to_string(v.z);
-			}
-			if(Lua::IsVector2i(l,argIdx))
-			{
-				auto &v = *Lua::CheckVector2i(l,argIdx);
-				return std::to_string(v.x) +" " +std::to_string(v.y);
-			}
-			if(Lua::IsColor(l,argIdx))
-			{
-				auto &c = *Lua::CheckColor(l,argIdx);
-				return std::to_string(c.r) +" " +std::to_string(c.g) +" " +std::to_string(c.b) +" " +std::to_string(c.a);
-			}
-			if(Lua::IsEulerAngles(l,argIdx))
-			{
-				auto &ang = *Lua::CheckEulerAngles(l,argIdx);
-				return std::to_string(ang.p) +" " +std::to_string(ang.y) +" " +std::to_string(ang.r);
-			}
-			if(Lua::IsQuaternion(l,argIdx))
-			{
-				auto &rot = *Lua::CheckQuaternion(l,argIdx);
-				return std::to_string(rot.w) +" " +std::to_string(rot.x) +" " +std::to_string(rot.y) +" " +std::to_string(rot.z);
-			}
-			return Lua::CheckString(l,argIdx);
+			return luabind::object_cast<std::string>(value);
 		}
 	};
 	namespace Decal
@@ -360,43 +362,30 @@ static void register_renderer_bindings(luabind::module_ &entsMod)
 	defRaster.def("GetPrepassDepthTexture",&Lua::RasterizationRenderer::GetPrepassDepthTexture);
 	defRaster.def("GetPrepassNormalTexture",&Lua::RasterizationRenderer::GetPrepassNormalTexture);
 	defRaster.def("GetRenderTarget",&Lua::RasterizationRenderer::GetRenderTarget);
-	defRaster.def("BeginRenderPass",static_cast<void(*)(lua_State*,pragma::CRasterizationRendererComponent&,const ::util::DrawSceneInfo&,prosper::IRenderPass&)>(&Lua::RasterizationRenderer::BeginRenderPass));
-	defRaster.def("BeginRenderPass",static_cast<void(*)(lua_State*,pragma::CRasterizationRendererComponent&,const ::util::DrawSceneInfo&)>(&Lua::RasterizationRenderer::BeginRenderPass));
+	defRaster.def("BeginRenderPass",static_cast<bool(*)(lua_State*,pragma::CRasterizationRendererComponent&,const ::util::DrawSceneInfo&,prosper::IRenderPass&)>(&Lua::RasterizationRenderer::BeginRenderPass));
+	defRaster.def("BeginRenderPass",static_cast<bool(*)(lua_State*,pragma::CRasterizationRendererComponent&,const ::util::DrawSceneInfo&)>(&Lua::RasterizationRenderer::BeginRenderPass));
 	defRaster.def("EndRenderPass",&pragma::CRasterizationRendererComponent::EndRenderPass);
-	defRaster.def("GetPrepassShader",&Lua::RasterizationRenderer::GetPrepassShader);
+	defRaster.def("GetPrepassShader",&pragma::CRasterizationRendererComponent::GetPrepassShader);
 	defRaster.def("SetShaderOverride",&pragma::CRasterizationRendererComponent::SetShaderOverride);
 	defRaster.def("ClearShaderOverride",&pragma::CRasterizationRendererComponent::ClearShaderOverride);
 	defRaster.def("SetPrepassMode",&pragma::CRasterizationRendererComponent::SetPrepassMode);
 	defRaster.def("GetPrepassMode",&pragma::CRasterizationRendererComponent::GetPrepassMode);
 	defRaster.def("SetSSAOEnabled",&pragma::CRasterizationRendererComponent::SetSSAOEnabled);
 	defRaster.def("IsSSAOEnabled", &pragma::CRasterizationRendererComponent::IsSSAOEnabled);
-	defRaster.def("GetLightSourceDescriptorSet", static_cast<void(*)(lua_State*, pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) {
-		
+	defRaster.def("GetLightSourceDescriptorSet", static_cast<std::shared_ptr<prosper::IDescriptorSetGroup>(*)(lua_State*, pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> {
 		auto *ds = pragma::CShadowManagerComponent::GetShadowManager()->GetDescriptorSet();
 		if(ds == nullptr)
-			return;
-		Lua::Push(l,ds->GetDescriptorSetGroup().shared_from_this());
+			return nullptr;
+		return ds->GetDescriptorSetGroup().shared_from_this();
 	}));
-	defRaster.def("GetPostPrepassDepthTexture", static_cast<void(*)(lua_State*, pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) {
-		
-		auto &depthTex = renderer.GetPrepass().textureDepth;
-		if (depthTex == nullptr)
-			return;
-		Lua::Push(l,depthTex);
+	defRaster.def("GetPostPrepassDepthTexture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*, pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::Texture> {
+		return renderer.GetPrepass().textureDepth;
 	}));
-	defRaster.def("GetPostProcessingDepthDescriptorSet", static_cast<void(*)(lua_State*, pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) {
-		
-		auto &depthTex = renderer.GetHDRInfo().dsgDepthPostProcessing;
-		if (depthTex == nullptr)
-			return;
-		Lua::Push(l,depthTex);
+	defRaster.def("GetPostProcessingDepthDescriptorSet",static_cast<std::shared_ptr<prosper::IDescriptorSetGroup>(*)(lua_State*, pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> {
+		return renderer.GetHDRInfo().dsgDepthPostProcessing;
 	}));
-	defRaster.def("GetPostProcessingHDRColorDescriptorSet",static_cast<void(*)(lua_State*,pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) {
-		
-		auto &dsg = renderer.GetHDRInfo().dsgHDRPostProcessing;
-		if(dsg == nullptr)
-			return;
-		Lua::Push(l,dsg);
+	defRaster.def("GetPostProcessingHDRColorDescriptorSet",static_cast<std::shared_ptr<prosper::IDescriptorSetGroup>(*)(lua_State*,pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> {
+		return renderer.GetHDRInfo().dsgHDRPostProcessing;
 	}));
 #if 0
 	defRaster.def("GetStagingRenderTarget",static_cast<void(*)(lua_State*,pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) {
@@ -411,12 +400,11 @@ static void register_renderer_bindings(luabind::module_ &entsMod)
 		renderer.GetHDRInfo().BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo);
 	}));
 #endif
-	defRaster.def("GetBloomTexture",static_cast<void(*)(lua_State*,pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) {
-		
+	defRaster.def("GetBloomTexture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::Texture> {
 		auto &rt = renderer.GetHDRInfo().bloomBlurRenderTarget;
 		if(rt == nullptr)
-			return;
-		Lua::Push(l,rt->GetTexture().shared_from_this());
+			return nullptr;
+		return rt->GetTexture().shared_from_this();
 	}));
 #if 0
 	defRaster.def("GetGlowTexture",static_cast<void(*)(lua_State*,pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) {
@@ -427,12 +415,8 @@ static void register_renderer_bindings(luabind::module_ &entsMod)
 		Lua::Push(l,rt->GetTexture().shared_from_this());
 	}));
 #endif
-	defRaster.def("GetRenderTargetTextureDescriptorSet",static_cast<void(*)(lua_State*,pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) {
-		
-		auto &dsg = renderer.GetHDRInfo().dsgHDRPostProcessing;
-		if(dsg == nullptr)
-			return;
-		Lua::Push(l,dsg);
+	defRaster.def("GetRenderTargetTextureDescriptorSet",static_cast<std::shared_ptr<prosper::IDescriptorSetGroup>(*)(lua_State*,pragma::CRasterizationRendererComponent&)>([](lua_State *l,pragma::CRasterizationRendererComponent &renderer) -> std::shared_ptr<prosper::IDescriptorSetGroup> {
+		return renderer.GetHDRInfo().dsgHDRPostProcessing;
 	}));
 	defRaster.def("ReloadPresentationRenderTarget",&pragma::CRasterizationRendererComponent::ReloadPresentationRenderTarget);
 	defRaster.def("ScheduleMeshForRendering",static_cast<void(*)(
@@ -506,84 +490,72 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defCRadius];
 
 	auto defCWorld = luabind::class_<pragma::CWorldComponent,pragma::BaseWorldComponent>("WorldComponent");
-	defCWorld.def("GetBSPTree",&pragma::CWorldComponent::GetBSPTree,luabind::optional_policy<0>{});
+	defCWorld.def("GetBSPTree",&pragma::CWorldComponent::GetBSPTree);
 
 	auto defCEye = luabind::class_<pragma::CEyeComponent,pragma::BaseEntityComponent>("EyeComponent");
-	defCEye.def("GetEyePose",&pragma::CEyeComponent::GetEyePose,luabind::optional_policy<0>{});
+	defCEye.def("GetEyePose",&pragma::CEyeComponent::GetEyePose);
 	defCEye.def("GetViewTarget",&pragma::CEyeComponent::GetViewTarget);
 	defCEye.def("SetViewTarget",&pragma::CEyeComponent::SetViewTarget);
 	defCEye.def("ClearViewTarget",&pragma::CEyeComponent::ClearViewTarget);
-	defCEye.def("GetEyeShift",static_cast<void(*)(lua_State*,pragma::CEyeComponent&,uint32_t)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex) {
-		
+	defCEye.def("GetEyeShift",static_cast<std::optional<Vector3>(*)(lua_State*,pragma::CEyeComponent&,uint32_t)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex) -> std::optional<Vector3> {
 		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
-			return;
-		Lua::Push<Vector3>(l,config->eyeShift);
-		}));
+			return {};
+		return config->eyeShift;
+	}));
 	defCEye.def("SetEyeShift",static_cast<void(*)(lua_State*,pragma::CEyeComponent&,uint32_t,const Vector3&)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex,const Vector3 &eyeShift) {
-		
 		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
 			return;
 		config->eyeShift = eyeShift;
-		}));
-	defCEye.def("GetEyeJitter",static_cast<void(*)(lua_State*,pragma::CEyeComponent&,uint32_t)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex) {
-		
+	}));
+	defCEye.def("GetEyeJitter",static_cast<std::optional<Vector2>(*)(lua_State*,pragma::CEyeComponent&,uint32_t)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex) -> std::optional<Vector2> {
 		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
-			return;
-		Lua::Push<Vector2>(l,config->jitter);
-		}));
+			return {};
+		return config->jitter;
+	}));
 	defCEye.def("SetEyeJitter",static_cast<void(*)(lua_State*,pragma::CEyeComponent&,uint32_t,const Vector2&)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex,const Vector2 &eyeJitter) {
-		
 		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
 			return;
 		config->jitter = eyeJitter;
 		}));
-	defCEye.def("GetEyeSize",static_cast<void(*)(lua_State*,pragma::CEyeComponent&,uint32_t)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex) {
-		
+	defCEye.def("GetEyeSize",static_cast<std::optional<float>(*)(lua_State*,pragma::CEyeComponent&,uint32_t)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex) -> std::optional<float> {
 		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
-			return;
-		Lua::PushNumber(l,config->eyeSize);
-		}));
+			return {};
+		return config->eyeSize;
+	}));
 	defCEye.def("SetEyeSize",static_cast<void(*)(lua_State*,pragma::CEyeComponent&,uint32_t,float)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex,float eyeSize) {
-		
 		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
 			return;
 		config->eyeSize = eyeSize;
-		}));
+	}));
 	defCEye.def("SetIrisDilation",static_cast<void(*)(lua_State*,pragma::CEyeComponent&,uint32_t,float)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex,float dilation) {
-		
 		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
 			return;
 		config->dilation = dilation;
-		}));
-	defCEye.def("GetIrisDilation",static_cast<void(*)(lua_State*,pragma::CEyeComponent&,uint32_t)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex) {
-		
+	}));
+	defCEye.def("GetIrisDilation",static_cast<std::optional<float>(*)(lua_State*,pragma::CEyeComponent&,uint32_t)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex) -> std::optional<float> {
 		auto *config = hEye.GetEyeballConfig(eyeIndex);
 		if(config == nullptr)
-			return;
-		Lua::PushNumber(l,config->dilation);
-		}));
-	defCEye.def("CalcEyeballPose",static_cast<void(*)(lua_State*,pragma::CEyeComponent&,uint32_t)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex) {
-		
+			return {};
+		return config->dilation;
+	}));
+	defCEye.def("CalcEyeballPose",static_cast<std::pair<umath::Transform,umath::Transform>(*)(lua_State*,pragma::CEyeComponent&,uint32_t)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex) -> std::pair<umath::Transform,umath::Transform> {
 		umath::Transform bonePose;
 		auto pose = hEye.CalcEyeballPose(eyeIndex,&bonePose);
-		Lua::Push(l,pose);
-		Lua::Push(l,bonePose);
+		return {pose,bonePose};
 	}));
-	defCEye.def("GetEyeballState",static_cast<void(*)(lua_State*,pragma::CEyeComponent&,uint32_t)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex) {
-		
+	defCEye.def("GetEyeballState",static_cast<pragma::CEyeComponent::EyeballState*(*)(lua_State*,pragma::CEyeComponent&,uint32_t)>([](lua_State *l,pragma::CEyeComponent &hEye,uint32_t eyeIndex) -> pragma::CEyeComponent::EyeballState* {
 		auto *eyeballData = hEye.GetEyeballData(eyeIndex);
 		if(eyeballData == nullptr)
-			return;
-		auto &eyeballState = eyeballData->state;
-		Lua::Push<pragma::CEyeComponent::EyeballState*>(l,&eyeballState);
-		}));
+			return nullptr;
+		return &eyeballData->state;
+	}));
 	defCEye.def("SetBlinkDuration",&pragma::CEyeComponent::SetBlinkDuration);
 	defCEye.def("GetBlinkDuration",&pragma::CEyeComponent::GetBlinkDuration);
 	defCEye.def("SetBlinkingEnabled",&pragma::CEyeComponent::SetBlinkingEnabled);
@@ -623,7 +595,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.add_static_constant("DEBUG_MODE_IBL_PREFILTER",umath::to_integral(pragma::SceneDebugMode::IBLPrefilter));
 	defCScene.add_static_constant("DEBUG_MODE_IBL_IRRADIANCE",umath::to_integral(pragma::SceneDebugMode::IBLIrradiance));
 	defCScene.add_static_constant("DEBUG_MODE_EMISSION",umath::to_integral(pragma::SceneDebugMode::Emission));
-	defCScene.def("GetActiveCamera",static_cast<pragma::ComponentHandle<pragma::CCameraComponent>&(pragma::CSceneComponent::*)()>(&pragma::CSceneComponent::GetActiveCamera),luabind::game_object_policy<0>{});
+	defCScene.def("GetActiveCamera",static_cast<pragma::ComponentHandle<pragma::CCameraComponent>&(pragma::CSceneComponent::*)()>(&pragma::CSceneComponent::GetActiveCamera));
 	defCScene.def("SetActiveCamera",static_cast<void(pragma::CSceneComponent::*)(pragma::CCameraComponent&)>(&pragma::CSceneComponent::SetActiveCamera));
 	defCScene.def("SetActiveCamera",static_cast<void(pragma::CSceneComponent::*)()>(&pragma::CSceneComponent::SetActiveCamera));
 	defCScene.def("SetOcclusionCullingMethod",static_cast<void(*)(lua_State*,pragma::CSceneComponent&,uint32_t)>([](lua_State *l,pragma::CSceneComponent &scene,uint32_t method) {
@@ -633,7 +605,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.def("GetHeight",&pragma::CSceneComponent::GetHeight);
 	defCScene.def("GetSize",static_cast<std::pair<uint32_t,uint32_t>(*)(const pragma::CSceneComponent&)>([](const pragma::CSceneComponent &scene) -> std::pair<uint32_t,uint32_t> {
 		return {scene.GetWidth(),scene.GetHeight()};
-	}),luabind::pair_policy<0>{});
+	}));
 	defCScene.def("Resize",&pragma::CSceneComponent::Resize);
 	// defCScene.def("BeginDraw",&pragma::CSceneComponent::BeginDraw);
 	defCScene.def("UpdateBuffers",&Lua::Scene::UpdateBuffers);
@@ -656,29 +628,19 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.def("RenderPrepass",&Lua::Scene::RenderPrepass);
 	defCScene.def("Render",static_cast<void(*)(lua_State*,pragma::CSceneComponent&,::util::DrawSceneInfo&,RenderMode,RenderFlags)>(Lua::Scene::Render));
 	defCScene.def("Render",static_cast<void(*)(lua_State*,pragma::CSceneComponent&,::util::DrawSceneInfo&,RenderMode)>(Lua::Scene::Render));
-	defCScene.def("GetRenderer",static_cast<pragma::CRendererComponent*(pragma::CSceneComponent::*)()>(&pragma::CSceneComponent::GetRenderer),luabind::game_object_policy<0>{});
+	defCScene.def("GetRenderer",static_cast<pragma::CRendererComponent*(pragma::CSceneComponent::*)()>(&pragma::CSceneComponent::GetRenderer));
 	defCScene.def("SetRenderer",&pragma::CSceneComponent::SetRenderer);
 	defCScene.def("GetSceneIndex",static_cast<pragma::CSceneComponent::SceneIndex(pragma::CSceneComponent::*)() const>(&pragma::CSceneComponent::GetSceneIndex));
 	defCScene.def("SetParticleSystemColorFactor",&pragma::CSceneComponent::SetParticleSystemColorFactor);
 	defCScene.def("GetParticleSystemColorFactor",&pragma::CSceneComponent::GetParticleSystemColorFactor);
-	defCScene.def("GetRenderParticleSystems",static_cast<void(*)(lua_State*,pragma::CSceneComponent&)>([](lua_State *l,pragma::CSceneComponent &scene) {
-		auto &particleSystems = scene.GetSceneRenderDesc().GetCulledParticles();
-		auto t = Lua::CreateTable(l);
-		int32_t idx = 1;
-		for(auto &pts : particleSystems)
-		{
-			if(pts == nullptr)
-				continue;
-			Lua::PushInt(l,idx++);
-			pts->PushLuaObject(l);
-			Lua::SetTableValue(l,t);
-		}
+	defCScene.def("GetRenderParticleSystems",static_cast<std::vector<pragma::CParticleSystemComponent*>(*)(lua_State*,pragma::CSceneComponent&)>([](lua_State *l,pragma::CSceneComponent &scene) -> std::vector<pragma::CParticleSystemComponent*> {
+		return scene.GetSceneRenderDesc().GetCulledParticles();
 	}));
-	defCScene.def("GetRenderQueue",static_cast<void(*)(lua_State*,pragma::CSceneComponent&,RenderMode,bool)>([](lua_State *l,pragma::CSceneComponent &scene,RenderMode renderMode,bool translucent) {
+	defCScene.def("GetRenderQueue",static_cast<pragma::rendering::RenderQueue*(*)(lua_State*,pragma::CSceneComponent&,RenderMode,bool)>([](lua_State *l,pragma::CSceneComponent &scene,RenderMode renderMode,bool translucent) -> pragma::rendering::RenderQueue* {
 		auto *renderQueue = scene.GetSceneRenderDesc().GetRenderQueue(renderMode,translucent);
 		if(renderQueue == nullptr)
-			return;
-		Lua::Push<pragma::rendering::RenderQueue*>(l,renderQueue);
+			return nullptr;
+		return renderQueue;
 	}));
 
 	// Texture indices for scene render target
@@ -841,23 +803,20 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defCFuncPortal];
 
 	auto defCWater = luabind::class_<pragma::CWaterComponent,pragma::BaseFuncWaterComponent>("WaterComponent");
-	defCWater.def("GetReflectionScene",static_cast<void(*)(lua_State*,pragma::CWaterComponent&)>([](lua_State *l,pragma::CWaterComponent &hEnt) {
-		
+	defCWater.def("GetReflectionScene",static_cast<pragma::CSceneComponent*(*)(lua_State*,pragma::CWaterComponent&)>([](lua_State *l,pragma::CWaterComponent &hEnt) -> pragma::CSceneComponent* {
 		if(hEnt.IsWaterSceneValid() == false)
-			return;
-		hEnt.GetWaterScene().sceneReflection->GetLuaObject().push(l);
+			return nullptr;
+		return const_cast<pragma::CSceneComponent*>(hEnt.GetWaterScene().sceneReflection.get());
 	}));
-	defCWater.def("GetWaterSceneTexture",static_cast<void(*)(lua_State*,pragma::CWaterComponent&)>([](lua_State *l,pragma::CWaterComponent &hEnt) {
-		
+	defCWater.def("GetWaterSceneTexture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,pragma::CWaterComponent&)>([](lua_State *l,pragma::CWaterComponent &hEnt) -> std::shared_ptr<prosper::Texture> {
 		if(hEnt.IsWaterSceneValid() == false)
-			return;
-		Lua::Push<std::shared_ptr<prosper::Texture>>(l,hEnt.GetWaterScene().texScene);
+			return nullptr;
+		return hEnt.GetWaterScene().texScene;
 	}));
-	defCWater.def("GetWaterSceneDepthTexture",static_cast<void(*)(lua_State*,pragma::CWaterComponent&)>([](lua_State *l,pragma::CWaterComponent &hEnt) {
-		
+	defCWater.def("GetWaterSceneDepthTexture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,pragma::CWaterComponent&)>([](lua_State *l,pragma::CWaterComponent &hEnt) -> std::shared_ptr<prosper::Texture> {
 		if(hEnt.IsWaterSceneValid() == false)
-			return;
-		Lua::Push<std::shared_ptr<prosper::Texture>>(l,hEnt.GetWaterScene().texSceneDepth);
+			return nullptr;
+		return hEnt.GetWaterScene().texSceneDepth;
 	}));
 	entsMod[defCWater];
 
@@ -959,8 +918,8 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defCViewBody];
 
 	auto defCViewModel = luabind::class_<pragma::CViewModelComponent,pragma::BaseEntityComponent>("ViewModelComponent");
-	defCViewModel.def("GetPlayer",&pragma::CViewModelComponent::GetPlayer,luabind::game_object_policy<0>{});
-	defCViewModel.def("GetWeapon",&pragma::CViewModelComponent::GetWeapon,luabind::game_object_policy<0>{});
+	defCViewModel.def("GetPlayer",&pragma::CViewModelComponent::GetPlayer);
+	defCViewModel.def("GetWeapon",&pragma::CViewModelComponent::GetWeapon);
 	entsMod[defCViewModel];
 
 	auto defCSoftBody = luabind::class_<pragma::CSoftBodyComponent,pragma::BaseSoftBodyComponent>("SoftBodyComponent");
@@ -1023,136 +982,80 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 
 //////////////
 
-void Lua::Flex::GetFlexController(lua_State *l,pragma::CFlexComponent &hEnt,uint32_t flexId)
+std::optional<float> Lua::Flex::GetFlexController(pragma::CFlexComponent &hEnt,uint32_t flexId)
 {
-	
 	auto val = 0.f;
 	if(hEnt.GetFlexController(flexId,val) == false)
-		return;
-	Lua::PushNumber(l,val);
+		return {};
+	return val;
 }
-void Lua::Flex::GetFlexController(lua_State *l,pragma::CFlexComponent &hEnt,const std::string &flexController)
+std::optional<float> Lua::Flex::GetFlexController(pragma::CFlexComponent &hEnt,const std::string &flexController)
 {
-	
 	auto flexId = 0u;
 	auto mdlComponent = hEnt.GetEntity().GetModelComponent();
 	if(!mdlComponent || mdlComponent->LookupFlexController(flexController,flexId) == false)
-		return;
+		return {};
 	auto val = 0.f;
 	if(hEnt.GetFlexController(flexId,val) == false)
-		return;
-	Lua::PushNumber(l,val);
+		return {};
+	return val;
 }
-void Lua::Flex::CalcFlexValue(lua_State *l,pragma::CFlexComponent &hEnt,uint32_t flexId)
+std::optional<float> Lua::Flex::CalcFlexValue(pragma::CFlexComponent &hEnt,uint32_t flexId)
 {
-	
 	auto val = 0.f;
 	if(hEnt.CalcFlexValue(flexId,val) == false)
-		return;
-	Lua::PushNumber(l,val);
-}
-
-//////////////
-
-void Lua::SoundEmitter::CreateSound(lua_State *l,pragma::CSoundEmitterComponent &hEnt,std::string sndname,uint32_t soundType,bool bTransmit)
-{
-	
-	auto snd = hEnt.CreateSound(sndname,static_cast<ALSoundType>(soundType));
-	if(snd == nullptr)
-		return;
-	luabind::object(l,snd).push(l);
-}
-void Lua::SoundEmitter::EmitSound(lua_State *l,pragma::CSoundEmitterComponent &hEnt,std::string sndname,uint32_t soundType,float gain,float pitch,bool bTransmit)
-{
-	
-	auto snd = hEnt.EmitSound(sndname,static_cast<ALSoundType>(soundType),gain,pitch);
-	if(snd == nullptr)
-		return;
-	luabind::object(l,snd).push(l);
+		return {};
+	return val;
 }
 
 //////////////
 
 void Lua::ParticleSystem::Stop(lua_State *l,pragma::CParticleSystemComponent &hComponent,bool bStopImmediately)
 {
-	
 	if(bStopImmediately == true)
 		hComponent.Stop();
 	else
 		hComponent.Die();
 }
-void Lua::ParticleSystem::AddInitializer(lua_State *l,pragma::CParticleSystemComponent &hComponent,std::string name,luabind::object o)
+CParticleInitializer *Lua::ParticleSystem::AddInitializer(lua_State *l,pragma::CParticleSystemComponent &hComponent,std::string name,const luabind::map<std::string,void> &keyValues)
 {
-	auto t = Lua::GetStackTop(l);
 	std::unordered_map<std::string,std::string> values;
-	Lua::CheckTable(l,t);
-	
-	auto ot = luabind::object{luabind::from_stack{l,t}};
-	for(luabind::iterator i{ot},end;i!=end;++i)
+	for(luabind::iterator i{keyValues},end;i!=end;++i)
 	{
 		auto key = luabind::object_cast<std::string>(i.key());
-		auto valRef = *i;
-		valRef.push(l);
-		auto idx = Lua::GetStackTop(l);
-		std::string val = Lua::ParticleSystem::get_key_value(l,idx);
-		Lua::Pop(l,1);
+		std::string val = Lua::ParticleSystem::get_key_value(l,*i);
 
 		ustring::to_lower(key);
 		values[key] = val;
 	}
 
-	auto *initializer = hComponent.AddInitializer(name,values);
-	if(initializer == nullptr)
-		return;
-	Lua::Push(l,initializer);
+	return hComponent.AddInitializer(name,values);
 }
-void Lua::ParticleSystem::AddOperator(lua_State *l,pragma::CParticleSystemComponent &hComponent,std::string name,luabind::object o)
+CParticleOperator *Lua::ParticleSystem::AddOperator(lua_State *l,pragma::CParticleSystemComponent &hComponent,std::string name,const luabind::map<std::string,void> &keyValues)
 {
-	auto t = Lua::GetStackTop(l);
 	std::unordered_map<std::string,std::string> values;
-	Lua::CheckTable(l,t);
-
-	auto ot = luabind::object{luabind::from_stack{l,t}};
-	for(luabind::iterator i{ot},end;i!=end;++i)
+	for(luabind::iterator i{keyValues},end;i!=end;++i)
 	{
 		auto key = luabind::object_cast<std::string>(i.key());
-		auto valRef = *i;
-		valRef.push(l);
-		auto idx = Lua::GetStackTop(l);
-		std::string val = Lua::ParticleSystem::get_key_value(l,idx);
-		Lua::Pop(l,1);
+		std::string val = Lua::ParticleSystem::get_key_value(l,*i);
 
 		ustring::to_lower(key);
 		values[key] = val;
 	}
 
-	auto *op = hComponent.AddOperator(name,values);
-	if(op == nullptr)
-		return;
-	Lua::Push(l,op);
+	return hComponent.AddOperator(name,values);;
 }
-void Lua::ParticleSystem::AddRenderer(lua_State *l,pragma::CParticleSystemComponent &hComponent,std::string name,luabind::object o)
+CParticleRenderer *Lua::ParticleSystem::AddRenderer(lua_State *l,pragma::CParticleSystemComponent &hComponent,std::string name,const luabind::map<std::string,void> &keyValues)
 {
-	auto t = Lua::GetStackTop(l);
 	std::unordered_map<std::string,std::string> values;
-	Lua::CheckTable(l,t);
-
-	auto ot = luabind::object{luabind::from_stack{l,t}};
-	for(luabind::iterator i{ot},end;i!=end;++i)
+	for(luabind::iterator i{keyValues},end;i!=end;++i)
 	{
 		auto key = luabind::object_cast<std::string>(i.key());
-		auto valRef = *i;
-		valRef.push(l);
-		auto idx = Lua::GetStackTop(l);
-		std::string val = Lua::ParticleSystem::get_key_value(l,idx);
-		Lua::Pop(l,1);
+		std::string val = Lua::ParticleSystem::get_key_value(l,*i);
 
 		ustring::to_lower(key);
 		values[key] = val;
 	}
 
-	auto *renderer = hComponent.AddRenderer(name,values);
-	if(renderer == nullptr)
-		return;
-	Lua::Push(l,renderer);
+	return hComponent.AddRenderer(name,values);
 }

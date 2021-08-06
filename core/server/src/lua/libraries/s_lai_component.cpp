@@ -90,7 +90,7 @@ void Lua::register_sv_ai_component(lua_State *l,luabind::module_ &module)
 	def.def("StartControl",&pragma::SAIComponent::StartControl);
 	def.def("EndControl",&pragma::SAIComponent::EndControl);
 	def.def("IsControlled",&pragma::SAIComponent::IsControlled);
-	def.def("GetController",&pragma::SAIComponent::GetController,luabind::game_object_policy<0>{});
+	def.def("GetController",&pragma::SAIComponent::GetController);
 	def.def("IsEnemy",&pragma::SAIComponent::IsEnemy);
 	def.def("LockAnimation",&pragma::SAIComponent::LockAnimation);
 	def.def("IsAnimationLocked",&pragma::SAIComponent::IsAnimationLocked);

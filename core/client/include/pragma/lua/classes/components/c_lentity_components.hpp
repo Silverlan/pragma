@@ -21,6 +21,9 @@ namespace pragma
 	class CFlexComponent;
 };
 
+class CParticleInitializer;
+class CParticleOperator;
+class CParticleRenderer;
 namespace Lua
 {
 	DLLCLIENT void register_cl_ai_component(lua_State *l,luabind::module_ &module);
@@ -33,9 +36,9 @@ namespace Lua
 	{
 		DLLCLIENT void Stop(lua_State *l,pragma::CParticleSystemComponent &hComponent,bool bStopImmediately);
 		DLLCLIENT void register_class(lua_State *l,luabind::module_ &entsMod);
-		DLLCLIENT void AddInitializer(lua_State *l,pragma::CParticleSystemComponent &hComponent,std::string name,luabind::object o);
-		DLLCLIENT void AddOperator(lua_State *l,pragma::CParticleSystemComponent &hComponent,std::string name,luabind::object o);
-		DLLCLIENT void AddRenderer(lua_State *l,pragma::CParticleSystemComponent &hComponent,std::string name,luabind::object o);
+		DLLCLIENT CParticleInitializer *AddInitializer(lua_State *l,pragma::CParticleSystemComponent &hComponent,std::string name,const luabind::map<std::string,void> &keyValues);
+		DLLCLIENT CParticleOperator *AddOperator(lua_State *l,pragma::CParticleSystemComponent &hComponent,std::string name,const luabind::map<std::string,void> &keyValues);
+		DLLCLIENT CParticleRenderer *AddRenderer(lua_State *l,pragma::CParticleSystemComponent &hComponent,std::string name,const luabind::map<std::string,void> &keyValues);
 	}
 	namespace ModelDef
 	{
@@ -83,14 +86,12 @@ namespace Lua
 	namespace SoundEmitter
 	{
 		DLLCLIENT void register_class(lua_State *l,luabind::module_ &entsMod);
-		DLLCLIENT void CreateSound(lua_State *l,pragma::CSoundEmitterComponent &hEnt,std::string sndname,uint32_t type,bool bTransmit);
-		DLLCLIENT void EmitSound(lua_State *l,pragma::CSoundEmitterComponent &hEnt,std::string sndname,uint32_t soundType,float gain,float pitch,bool bTransmit);
 	};
 	namespace Flex
 	{
-		DLLCLIENT void GetFlexController(lua_State *l,pragma::CFlexComponent &hEnt,uint32_t flexId);
-		DLLCLIENT void GetFlexController(lua_State *l,pragma::CFlexComponent &hEnt,const std::string &flexController);
-		DLLCLIENT void CalcFlexValue(lua_State *l,pragma::CFlexComponent &hEnt,uint32_t flexId);
+		DLLCLIENT std::optional<float> GetFlexController(pragma::CFlexComponent &hEnt,uint32_t flexId);
+		DLLCLIENT std::optional<float> GetFlexController(pragma::CFlexComponent &hEnt,const std::string &flexController);
+		DLLCLIENT std::optional<float> CalcFlexValue(pragma::CFlexComponent &hEnt,uint32_t flexId);
 	};
 };
 

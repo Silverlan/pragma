@@ -10,6 +10,7 @@
 #include "pragma/lua/policies/pair_policy.hpp"
 #include "pragma/lua/policies/tuple_policy.hpp"
 #include "pragma/lua/policies/game_object_policy.hpp"
+#include "pragma/lua/converters/pair_converter_t.hpp"
 #include "pragma/audio/alsound.h"
 #include "luasystem.h"
 #include <mathutil/umath.h>
@@ -92,21 +93,21 @@ void Lua::ALSound::register_class(luabind::class_<::ALSound> &classDef)
 	classDef.def("FadeOut",&::ALSound::FadeOut);
 	classDef.def("GetMaxAudibleDistance",&::ALSound::GetMaxAudibleDistance);
 	classDef.def("GetIntensity",&::ALSound::GetSoundIntensity);
-	classDef.def("GetSource",&::ALSound::GetSource,luabind::game_object_policy<0>{});
+	classDef.def("GetSource",&::ALSound::GetSource);
 	classDef.def("SetSource",static_cast<void(::ALSound::*)(BaseEntity*)>(&::ALSound::SetSource));
 	classDef.def("SetSource",static_cast<void(*)(lua_State*,::ALSound&)>(&Lua::ALSound::SetSource));
 	classDef.def("SetRange",&::ALSound::SetRange);
 	classDef.def("ClearRange",&::ALSound::ClearRange);
 	classDef.def("HasRange",&::ALSound::HasRange);
-	classDef.def("GetRange",&::ALSound::GetRange,luabind::pair_policy<0>{});
-	classDef.def("GetRangeOffsets",&::ALSound::GetRangeOffsets,luabind::pair_policy<0>{});
+	classDef.def("GetRange",&::ALSound::GetRange);
+	classDef.def("GetRangeOffsets",&::ALSound::GetRangeOffsets);
 	classDef.def("SetFadeInDuration",&::ALSound::SetFadeInDuration);
 	classDef.def("SetFadeOutDuration",&::ALSound::SetFadeOutDuration);
 	classDef.def("GetFadeInDuration",&::ALSound::GetFadeInDuration);
 	classDef.def("GetFadeOutDuration",&::ALSound::GetFadeOutDuration);
 
 	classDef.def("SetOrientation",&::ALSound::SetOrientation);
-	classDef.def("GetOrientation",&::ALSound::GetOrientation,luabind::pair_policy<0>{});
+	classDef.def("GetOrientation",&::ALSound::GetOrientation);
 	classDef.def("SetDopplerFactor",&::ALSound::SetDopplerFactor);
 	classDef.def("GetDopplerFactor",&::ALSound::GetDopplerFactor);
 	classDef.def("SetLeftStereoAngle",&::ALSound::SetLeftStereoAngle);
@@ -116,10 +117,10 @@ void Lua::ALSound::register_class(luabind::class_<::ALSound> &classDef)
 	classDef.def("SetAirAbsorptionFactor",&::ALSound::SetAirAbsorptionFactor);
 	classDef.def("GetAirAbsorptionFactor",&::ALSound::GetAirAbsorptionFactor);
 	classDef.def("SetGainAuto",&::ALSound::SetGainAuto);
-	classDef.def("GetGainAuto",&::ALSound::GetGainAuto,luabind::tuple_policy<0>{});
+	classDef.def("GetGainAuto",&::ALSound::GetGainAuto);
 	classDef.def("SetDirectFilter",static_cast<void(*)(lua_State*,::ALSound&,float,float,float)>(&Lua::ALSound::SetDirectFilter));
 	classDef.def("SetDirectFilter",static_cast<void(*)(lua_State*,::ALSound&,float)>(&Lua::ALSound::SetDirectFilter));
-	classDef.def("GetDirectFilter",&Lua::ALSound::GetDirectFilter,luabind::tuple_policy<0>{});
+	classDef.def("GetDirectFilter",&Lua::ALSound::GetDirectFilter);
 	classDef.def("AddEffect",static_cast<bool(*)(lua_State*,::ALSound&,const std::string&,float,float,float)>(&Lua::ALSound::AddEffect));
 	classDef.def("AddEffect",static_cast<bool(*)(lua_State*,::ALSound&,const std::string&,float)>(&Lua::ALSound::AddEffect));
 	classDef.def("RemoveEffect",&::ALSound::RemoveEffect);
@@ -127,20 +128,20 @@ void Lua::ALSound::register_class(luabind::class_<::ALSound> &classDef)
 	classDef.def("SetEffectParameters",static_cast<bool(*)(lua_State*,::ALSound&,const std::string&,float)>(&Lua::ALSound::AddEffect));
 
 	classDef.def("SetGainRange",&::ALSound::SetGainRange);
-	classDef.def("GetGainRange",&::ALSound::GetGainRange,luabind::pair_policy<0>{});
+	classDef.def("GetGainRange",&::ALSound::GetGainRange);
 	classDef.def("SetDistanceRange",&::ALSound::SetDistanceRange);
-	classDef.def("GetDistanceRange",&::ALSound::GetDistanceRange,luabind::pair_policy<0>{});
+	classDef.def("GetDistanceRange",&::ALSound::GetDistanceRange);
 	classDef.def("SetConeAngles",&::ALSound::SetConeAngles);
-	classDef.def("GetConeAngles",&::ALSound::GetConeAngles,luabind::pair_policy<0>{});
-	classDef.def("GetOuterConeGains",&::ALSound::GetOuterConeGains,luabind::pair_policy<0>{});
+	classDef.def("GetConeAngles",&::ALSound::GetConeAngles);
+	classDef.def("GetOuterConeGains",&::ALSound::GetOuterConeGains);
 	classDef.def("SetStereoAngles",&::ALSound::SetStereoAngles);
-	classDef.def("GetStereoAngles",&::ALSound::GetStereoAngles,luabind::pair_policy<0>{});
+	classDef.def("GetStereoAngles",&::ALSound::GetStereoAngles);
 	classDef.def("SetOuterConeGains",&::ALSound::SetOuterConeGains);
 	classDef.def("GetDirectGainHFAuto",&::ALSound::GetDirectGainHFAuto);
 	classDef.def("GetSendGainAuto",&::ALSound::GetSendGainAuto);
 	classDef.def("GetSendGainHFAuto",&::ALSound::GetSendGainHFAuto);
 	classDef.def("SetEffectGain",&::ALSound::SetEffectGain);
-	classDef.def("GetRolloffFactors",&::ALSound::GetRolloffFactors,luabind::pair_policy<0>{});
+	classDef.def("GetRolloffFactors",&::ALSound::GetRolloffFactors);
 	classDef.def("SetRolloffFactors",&::ALSound::SetRolloffFactors);
 }
 

@@ -50,7 +50,7 @@ LUA_DEFINE_PTR_TYPE(util,util::TSharedHandle,shared_handle);
 LUA_DEFINE_PTR_TYPE(util,util::WeakHandle,weak_handle);
 
 // Implementation similar to shared_ptr_converter.hpp
-#define LUA_DEFINE_PTR_TYPE_CONVERTER(TClass,CastFunc) \
+#define LUA_DEFINE_PTR_TYPE_CONVERTER(TClass,CastFunc,enableToCpp) \
 	namespace luabind { \
 		namespace detail { \
 			template<typename T> \
@@ -73,12 +73,17 @@ LUA_DEFINE_PTR_TYPE(util,util::WeakHandle,weak_handle);
 			template <class U> \
 			TClass<T> to_cpp(lua_State* L, U, int index) \
 			{ \
-				T* raw_ptr = default_converter<T*>::to_cpp(L, decorate_type_t<T*>(), index); \
-				if(!raw_ptr) { \
+				if constexpr(!enableToCpp) \
 					return TClass<T>(); \
-				} else { \
-					auto h = raw_ptr->GetHandle(); \
-					return util::CastFunc<decltype(h)::value_type,T>(h); \
+				else \
+				{ \
+					T* raw_ptr = default_converter<T*>::to_cpp(L, decorate_type_t<T*>(), index); \
+					if(!raw_ptr) { \
+						return TClass<T>(); \
+					} else { \
+						auto h = raw_ptr->GetHandle(); \
+						return util::CastFunc<decltype(h)::value_type,T>(h); \
+					} \
 				} \
 			} \
 			void to_lua(lua_State* L, TClass<T> const& p) \
@@ -95,7 +100,7 @@ LUA_DEFINE_PTR_TYPE(util,util::WeakHandle,weak_handle);
 		{}; \
 	}
 
-LUA_DEFINE_PTR_TYPE_CONVERTER(util::TWeakSharedHandle,weak_shared_handle_cast);
-LUA_DEFINE_PTR_TYPE_CONVERTER(util::TSharedHandle,shared_handle_cast);
+LUA_DEFINE_PTR_TYPE_CONVERTER(util::TWeakSharedHandle,weak_shared_handle_cast,true);
+LUA_DEFINE_PTR_TYPE_CONVERTER(util::TSharedHandle,shared_handle_cast,false);
 
 #endif

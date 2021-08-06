@@ -14,7 +14,11 @@
 #include "pragma/lua/policies/property_policy.hpp"
 #include "pragma/lua/policies/pair_policy.hpp"
 #include "pragma/lua/policies/shared_from_this_policy.hpp"
+#include "pragma/lua/converters/vector_converter_t.hpp"
+#include "pragma/lua/converters/optional_converter_t.hpp"
+#include "pragma/lua/converters/pair_converter_t.hpp"
 #include "pragma/lua/lua_component_event.hpp"
+#include "pragma/lua/lua_call.hpp"
 #include "pragma/entities/components/base_parent_component.hpp"
 #include <udm.hpp>
 #include <luabind/out_value_policy.hpp>
@@ -164,7 +168,7 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 		}
 		return hComponent.InvokeEventCallbacks(eventId,luaEvent);
 	}));
-	entityComponentDef.def("GetEntity",static_cast<BaseEntity&(pragma::BaseEntityComponent::*)()>(&pragma::BaseEntityComponent::GetEntity),luabind::game_object_policy<0>{});
+	entityComponentDef.def("GetEntity",static_cast<BaseEntity&(pragma::BaseEntityComponent::*)()>(&pragma::BaseEntityComponent::GetEntity));
 	entityComponentDef.def("GetComponentId",&pragma::BaseEntityComponent::GetComponentId);
 	entityComponentDef.def("SetTickPolicy",&pragma::BaseEntityComponent::SetTickPolicy);
 	entityComponentDef.def("GetTickPolicy",&pragma::BaseEntityComponent::GetTickPolicy);
@@ -373,9 +377,9 @@ void pragma::lua::base_attachable_component::register_class(luabind::module_ &mo
 		
 		hEnt.AttachToBone(&parent,bone);
 	}));
-	def.def("GetLocalPose",&pragma::BaseAttachableComponent::GetLocalPose,luabind::optional_policy<0>{});
-	def.def("SetLocalPose",&pragma::BaseAttachableComponent::SetLocalPose,luabind::optional_policy<0>{});
-	def.def("GetParent",&pragma::BaseAttachableComponent::GetParent,luabind::game_object_policy<0>{});
+	def.def("GetLocalPose",&pragma::BaseAttachableComponent::GetLocalPose);
+	def.def("SetLocalPose",&pragma::BaseAttachableComponent::SetLocalPose);
+	def.def("GetParent",&pragma::BaseAttachableComponent::GetParent);
 
 	def.def("GetBone",static_cast<luabind::object(*)(lua_State*,pragma::BaseAttachableComponent&)>([](lua_State *l,pragma::BaseAttachableComponent &hEnt) -> luabind::object {
 		
@@ -448,131 +452,123 @@ namespace Lua
 			return mdl->LookupBone(boneId);
 		}
 		template<typename TBoneId>
-			static void GetBoneMatrix(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier)
+			static std::optional<Mat4> GetBoneMatrix(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier)
 		{
 			auto boneId = get_bone_id(l,hAnim,boneIdentifier);
-			auto mat = hAnim.GetBoneMatrix(boneId);
-			if(mat.has_value() == false)
-				return;
-			luabind::object(l,*mat).push(l);
+			return hAnim.GetBoneMatrix(boneId);
 		}
 		template<typename TBoneId>
-			static void GetBoneTransform(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
+			static std::optional<std::tuple<Vector3,Quat,Vector3>> GetBoneTransform(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier)
+		{
 			auto boneId = get_bone_id(l,hAnim,boneIdentifier);
 			Vector3 pos = {};
 			auto rot = uquat::identity();
 			Vector3 scale = {1.f,1.f,1.f};
 			auto r = hAnim.GetBonePosition(boneId,pos,rot,scale);
 			if(r == false)
-				return;
-			Lua::Push<Vector3>(l,pos);
-			Lua::Push<Quat>(l,rot);
-			Lua::Push<Vector3>(l,scale);
+				return {};
+			return std::tuple<Vector3,Quat,Vector3>{pos,rot,scale};
 		}
 		template<typename TBoneId>
-			static void GetBonePose(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
+			static std::optional<umath::ScaledTransform> GetBonePose(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
 			auto boneId = get_bone_id(l,hAnim,boneIdentifier);
 			Vector3 pos = {};
 			auto rot = uquat::identity();
 			Vector3 scale = {1.f,1.f,1.f};
 			auto r = hAnim.GetBonePosition(boneId,pos,rot,scale);
 			if(r == false)
-				return;
-			Lua::Push<umath::ScaledTransform>(l,umath::ScaledTransform{pos,rot,scale});
+				return {};
+			return umath::ScaledTransform{pos,rot,scale};
 		}
 		template<typename TBoneId>
-			static void GetBoneBindPose(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
+			static std::optional<umath::ScaledTransform> GetBoneBindPose(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
 			auto boneId = get_bone_id(l,hAnim,boneIdentifier);
 			auto &ent = hAnim.GetEntity();
 			auto mdl = ent.GetModel();
 			if(mdl == nullptr)
-				return;
+				return {};
 			auto &ref = mdl->GetReference();
 			umath::ScaledTransform transform;
 			if(ref.GetBonePose(boneId,transform) == false)
-				return;
-			Lua::Push<umath::ScaledTransform>(l,transform);
+				return {};
+			return transform;
 		}
 		template<typename TBoneId>
-			static void GetBonePos(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
+			static std::optional<Vector3> GetBonePos(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
 			auto boneId = get_bone_id(l,hAnim,boneIdentifier);
 			auto *pos = hAnim.GetBonePosition(boneId);
 			if(pos == nullptr)
-				return;
-			Lua::Push<Vector3>(l,*pos);
+				return {};
+			return *pos;
 		}
 		template<typename TBoneId>
-			static void GetBoneRot(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
+			static std::optional<Quat> GetBoneRot(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
 			auto boneId = get_bone_id(l,hAnim,boneIdentifier);
 			auto *rot = hAnim.GetBoneRotation(boneId);
 			if(rot == nullptr)
-				return;
-			Lua::Push<Quat>(l,*rot);
+				return {};
+			return *rot;
 		}
 		template<typename TBoneId>
-			static void GetLocalBoneTransform(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
+			static std::optional<std::tuple<Vector3,Quat,Vector3>> GetLocalBoneTransform(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
 			auto boneId = get_bone_id(l,hAnim,boneIdentifier);
 			Vector3 pos = {};
 			auto rot = uquat::identity();
 			Vector3 scale(1.f,1.f,1.f);
 			auto r = hAnim.GetLocalBonePosition(boneId,pos,rot,&scale);
 			if(r == false)
-				return;
-			Lua::Push<Vector3>(l,pos);
-			Lua::Push<Quat>(l,rot);
-			Lua::Push<Vector3>(l,scale);
+				return {};
+			return std::tuple<Vector3,Quat,Vector3>{pos,rot,scale};
 		}
 		template<typename TBoneId>
-			static void GetLocalBonePose(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
+			static std::optional<umath::ScaledTransform> GetLocalBonePose(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
 			auto boneId = get_bone_id(l,hAnim,boneIdentifier);
 			Vector3 pos = {};
 			auto rot = uquat::identity();
 			Vector3 scale(1.f,1.f,1.f);
 			auto r = hAnim.GetLocalBonePosition(boneId,pos,rot,&scale);
 			if(r == false)
-				return;
-			Lua::Push<umath::ScaledTransform>(l,{pos,rot,scale});
+				return {};
+			return umath::ScaledTransform{pos,rot,scale};
 		}
 		template<typename TBoneId>
-			static void GetGlobalBoneTransform(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
+			static std::optional<std::tuple<Vector3,Quat,Vector3>> GetGlobalBoneTransform(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
 			auto boneId = get_bone_id(l,hAnim,boneIdentifier);
 			Vector3 pos = {};
 			auto rot = uquat::identity();
 			Vector3 scale(1.f,1.f,1.f);
 			auto r = hAnim.GetGlobalBonePosition(boneId,pos,rot,&scale);
 			if(r == false)
-				return;
-			Lua::Push<Vector3>(l,pos);
-			Lua::Push<Quat>(l,rot);
-			Lua::Push<Vector3>(l,scale);
+				return {};
+			return std::tuple<Vector3,Quat,Vector3>{pos,rot,scale};
 		}
 		template<typename TBoneId>
-			static void GetGlobalBonePose(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
+			static std::optional<umath::ScaledTransform> GetGlobalBonePose(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
 			auto boneId = get_bone_id(l,hAnim,boneIdentifier);
 			Vector3 pos = {};
 			auto rot = uquat::identity();
 			Vector3 scale(1.f,1.f,1.f);
 			auto r = hAnim.GetGlobalBonePosition(boneId,pos,rot,&scale);
 			if(r == false)
-				return;
-			Lua::Push<umath::ScaledTransform>(l,{pos,rot,scale});
+				return {};
+			return umath::ScaledTransform{pos,rot,scale};
 		}
 		template<typename TBoneId>
-			static void GetBoneRotation(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
+			static std::optional<Quat> GetBoneRotation(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
 			auto boneId = get_bone_id(l,hAnim,boneIdentifier);
 			auto *rot = hAnim.GetBoneRotation(boneId);
 			if(rot == nullptr)
-				return;
-			Lua::Push<Quat>(l,*rot);
+				return {};
+			return *rot;
 		}
 		template<typename TBoneId>
-			static void GetBoneAngles(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
+			static std::optional<EulerAngles> GetBoneAngles(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
 			auto boneId = get_bone_id(l,hAnim,boneIdentifier);
 			EulerAngles ang;
 			auto r = hAnim.GetBoneAngles(boneId,ang);
 			if(r == false)
-				return;
-			Lua::Push<EulerAngles>(l,ang);
+				return {};
+			return ang;
 		}
 		template<typename TBoneId>
 			static void SetBoneTransform(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier,const Vector3 &pos,const Quat &rot,const Vector3 &scale) {
@@ -626,12 +622,12 @@ namespace Lua
 			hAnim.SetBoneScale(boneId,scale);
 		}
 		template<typename TBoneId>
-			static void GetBoneScale(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
+			static std::optional<Vector3> GetBoneScale(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
 			auto boneId = get_bone_id(l,hAnim,boneIdentifier);
 			auto *scale = hAnim.GetBoneScale(boneId);
 			if(scale == nullptr)
-				return;
-			Lua::Push<Vector3>(l,*scale);
+				return {};
+			return *scale;
 		}
 
 		template<typename TBoneId>
@@ -676,12 +672,12 @@ namespace Lua
 			hAnim.SetGlobalBoneRotation(boneId,rot);
 		}
 		template<typename TBoneId>
-			static void GetEffectiveBoneTransform(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
+			static umath::ScaledTransform *GetEffectiveBoneTransform(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier) {
 			auto boneId = get_bone_id(l,hAnim,boneIdentifier);
 			auto &transforms = hAnim.GetProcessedBones();
 			if(boneId >= transforms.size())
-				return;
-			Lua::Push<umath::ScaledTransform*>(l,&transforms.at(boneId));
+				return nullptr;
+			return &transforms.at(boneId);
 		}
 		template<typename TBoneId>
 			static void SetEffectiveBoneTransform(lua_State *l,pragma::BaseAnimatedComponent &hAnim,const TBoneId &boneIdentifier,const umath::ScaledTransform &t) {
@@ -792,7 +788,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	def.def("ApplyLayeredAnimations",&pragma::BaseAnimatedComponent::MaintainGestures);
 	def.def("SetPlaybackRate",&pragma::BaseAnimatedComponent::SetPlaybackRate);
 	def.def("GetPlaybackRate",&pragma::BaseAnimatedComponent::GetPlaybackRate);
-	def.def("GetPlaybackRateProperty",&pragma::BaseAnimatedComponent::GetPlaybackRateProperty,luabind::property_policy<0>{});
+	def.def("GetPlaybackRateProperty",&pragma::BaseAnimatedComponent::GetPlaybackRateProperty);
 	register_base_animated_component_bone_methods<BoneId>(def);
 	register_base_animated_component_bone_methods<std::string>(def);
 	def.def("UpdateEffectiveBoneTransforms",&pragma::BaseAnimatedComponent::UpdateSkeleton);
@@ -912,13 +908,13 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		if(hEnt.GetVertexPosition(meshGroupId,meshId,subMeshId,vertexId,pos) == false)
 			return {};
 		return pos;
-	}),luabind::optional_policy<0,Vector3>{});
+	}));
 	def.def("GetVertexPosition",static_cast<std::optional<Vector3>(*)(lua_State*,pragma::BaseAnimatedComponent&,const std::shared_ptr<ModelSubMesh>&,uint32_t)>([](lua_State *l,pragma::BaseAnimatedComponent &hEnt,const std::shared_ptr<ModelSubMesh> &subMesh,uint32_t vertexId) -> std::optional<Vector3> {
 		auto pos = Vector3{};
 		if(hEnt.GetVertexPosition(*subMesh,vertexId,pos) == false)
 			return {};
 		return pos;
-	}),luabind::optional_policy<0,Vector3>{});
+	}));
 	def.def("SetBlendController",static_cast<void(*)(lua_State*,pragma::BaseAnimatedComponent&,unsigned int,float)>([](lua_State *l,pragma::BaseAnimatedComponent &hEnt,unsigned int controller,float val) {
 		
 		hEnt.SetBlendController(controller,val);
@@ -1064,7 +1060,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		def.def("IsTurnedOn",&pragma::BaseToggleComponent::IsTurnedOn);
 		def.def("IsTurnedOff",static_cast<bool(*)(lua_State*,pragma::BaseToggleComponent&)>([](lua_State *l,pragma::BaseToggleComponent &hEnt) {return !hEnt.IsTurnedOn();}));
 		def.def("SetTurnedOn",&pragma::BaseToggleComponent::SetTurnedOn);
-		def.def("GetTurnedOnProperty",&pragma::BaseToggleComponent::GetTurnedOnProperty,luabind::property_policy<0>{});
+		def.def("GetTurnedOnProperty",&pragma::BaseToggleComponent::GetTurnedOnProperty);
 		def.add_static_constant("EVENT_ON_TURN_ON",pragma::BaseToggleComponent::EVENT_ON_TURN_ON);
 		def.add_static_constant("EVENT_ON_TURN_OFF",pragma::BaseToggleComponent::EVENT_ON_TURN_OFF);
 	}
@@ -1120,7 +1116,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		Lua::ComponentClass<pragma::BaseEnvLightDirectionalComponent> def {"BaseEnvLightDirectionalComponent"};
 		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
 		def.def("GetAmbientColor",&pragma::BaseEnvLightDirectionalComponent::GetAmbientColor);
-		def.def("GetAmbientColorProperty",&pragma::BaseEnvLightDirectionalComponent::GetAmbientColorProperty,luabind::property_policy<0>{});
+		def.def("GetAmbientColorProperty",&pragma::BaseEnvLightDirectionalComponent::GetAmbientColorProperty);
 		def.def("SetAmbientColor",&pragma::BaseEnvLightDirectionalComponent::SetAmbientColor);
 	}
 #include "pragma/entities/environment/effects/env_particle_system.h"
@@ -1166,8 +1162,8 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 			
 			hEnt.SetIgnitable(b);
 		}));
-		def.def("GetOnFireProperty",&pragma::BaseFlammableComponent::GetOnFireProperty,luabind::property_policy<0>{});
-		def.def("GetIgnitableProperty",&pragma::BaseFlammableComponent::GetIgnitableProperty,luabind::property_policy<0>{});
+		def.def("GetOnFireProperty",&pragma::BaseFlammableComponent::GetOnFireProperty);
+		def.def("GetIgnitableProperty",&pragma::BaseFlammableComponent::GetIgnitableProperty);
 		def.add_static_constant("EVENT_ON_IGNITED",pragma::BaseFlammableComponent::EVENT_ON_IGNITED);
 		def.add_static_constant("EVENT_ON_EXTINGUISHED",pragma::BaseFlammableComponent::EVENT_ON_EXTINGUISHED);
 	}
@@ -1194,8 +1190,8 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 			
 			Lua::PushInt(l,hEnt.GetMaxHealth());
 		}));
-		def.def("GetHealthProperty",&pragma::BaseHealthComponent::GetHealthProperty,luabind::property_policy<0>{});
-		def.def("GetMaxHealthProperty",&pragma::BaseHealthComponent::GetMaxHealthProperty,luabind::property_policy<0>{});
+		def.def("GetHealthProperty",&pragma::BaseHealthComponent::GetHealthProperty);
+		def.def("GetMaxHealthProperty",&pragma::BaseHealthComponent::GetMaxHealthProperty);
 		def.add_static_constant("EVENT_ON_TAKEN_DAMAGE",pragma::BaseHealthComponent::EVENT_ON_TAKEN_DAMAGE);
 		def.add_static_constant("EVENT_ON_HEALTH_CHANGED",pragma::BaseHealthComponent::EVENT_ON_HEALTH_CHANGED);
 	}
@@ -1213,7 +1209,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 			
 			Lua::PushString(l,hEnt.GetName());
 		}));
-		def.def("GetNameProperty",&pragma::BaseNameComponent::GetNameProperty,luabind::property_policy<0>{});
+		def.def("GetNameProperty",&pragma::BaseNameComponent::GetNameProperty);
 	}
 
 	#include "pragma/entities/components/base_networked_component.hpp"
@@ -1491,8 +1487,8 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 			
 			hEnt.SetCameraEnabled(static_cast<pragma::BaseObservableComponent::CameraType>(camType),enabled);
 		}));
-		def.def("GetCameraEnabledProperty",&pragma::BaseObservableComponent::GetCameraEnabledProperty,luabind::property_policy<0>{});
-		def.def("GetCameraOffsetProperty",&pragma::BaseObservableComponent::GetCameraOffsetProperty,luabind::property_policy<0>{});
+		def.def("GetCameraEnabledProperty",&pragma::BaseObservableComponent::GetCameraEnabledProperty);
+		def.def("GetCameraOffsetProperty",&pragma::BaseObservableComponent::GetCameraOffsetProperty);
 		def.add_static_constant("CAMERA_TYPE_FIRST_PERSON",umath::to_integral(pragma::BaseObservableComponent::CameraType::FirstPerson));
 		def.add_static_constant("CAMERA_TYPE_THIRD_PERSON",umath::to_integral(pragma::BaseObservableComponent::CameraType::ThirdPerson));
 
@@ -1532,7 +1528,6 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 
 	#include "pragma/entities/components/base_shooter_component.hpp"
 #include "pragma/util/bulletinfo.h"
-namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &res);};
 	namespace Lua::Shooter
 	{
 		void FireBullets(lua_State *l,pragma::BaseShooterComponent &hEnt,const luabind::object&,bool bHitReport,bool bMaster)
@@ -1543,14 +1538,11 @@ namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &re
 			hEnt.FireBullets(*bulletInfo,results,bMaster);
 			if(bHitReport == false)
 				return;
-			auto t = Lua::CreateTable(l);
+			auto t = luabind::newtable(l);
 			for(auto i=decltype(results.size()){0};i<results.size();++i)
 			{
 				auto &r = results[i];
-				Lua::PushInt(l,i +1);
-				Lua::TraceData::FillTraceResultTable(l,r);
-
-				Lua::SetTableValue(l,t);
+				t[i +1] = r;
 			}
 		}
 	};
@@ -2223,7 +2215,7 @@ namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &re
 	{
 		Lua::ComponentClass<pragma::BaseColorComponent> def {"BaseColorComponent"};
 		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
-		def.def("GetColorProperty",&pragma::BaseColorComponent::GetColorProperty,luabind::property_policy<0>{});
+		def.def("GetColorProperty",&pragma::BaseColorComponent::GetColorProperty);
 
 		def.def("GetColor",&pragma::BaseColorComponent::GetColor);
 		def.def("SetColor",static_cast<void(pragma::BaseColorComponent::*)(const Color&)>(&pragma::BaseColorComponent::SetColor));
@@ -2237,7 +2229,7 @@ namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &re
 	{
 		Lua::ComponentClass<pragma::BaseScoreComponent> def {"BaseScoreComponent"};
 		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
-			def.def("GetScoreProperty",&pragma::BaseScoreComponent::GetScoreProperty,luabind::property_policy<0>{});
+			def.def("GetScoreProperty",&pragma::BaseScoreComponent::GetScoreProperty);
 			def.def("GetScore",&pragma::BaseScoreComponent::GetScore);
 			def.def("SetScore",&pragma::BaseScoreComponent::SetScore);
 			def.def("AddScore",&pragma::BaseScoreComponent::AddScore);
@@ -2250,7 +2242,7 @@ namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &re
 	{
 		Lua::ComponentClass<pragma::BaseRadiusComponent> def {"BaseRadiusComponent"};
 		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
-		def.def("GetRadiusProperty",&pragma::BaseRadiusComponent::GetRadiusProperty,luabind::property_policy<0>{});
+		def.def("GetRadiusProperty",&pragma::BaseRadiusComponent::GetRadiusProperty);
 		def.def("GetRadius",&pragma::BaseRadiusComponent::GetRadius);
 		def.def("SetRadius",&pragma::BaseRadiusComponent::SetRadius);
 		def.add_static_constant("EVENT_ON_RADIUS_CHANGED",pragma::BaseRadiusComponent::EVENT_ON_RADIUS_CHANGED);
@@ -2287,12 +2279,12 @@ namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &re
 		def.def("UpdateViewMatrix",&pragma::BaseEnvCameraComponent::UpdateViewMatrix);
 		def.def("UpdateProjectionMatrix",&pragma::BaseEnvCameraComponent::UpdateProjectionMatrix);
 		def.def("SetFOV",&pragma::BaseEnvCameraComponent::SetFOV);
-		def.def("GetProjectionMatrixProperty",&pragma::BaseEnvCameraComponent::GetProjectionMatrixProperty,luabind::property_policy<0>{});
-		def.def("GetViewMatrixProperty",&pragma::BaseEnvCameraComponent::GetViewMatrixProperty,luabind::property_policy<0>{});
-		def.def("GetNearZProperty",&pragma::BaseEnvCameraComponent::GetNearZProperty,luabind::property_policy<0>{});
-		def.def("GetFarZProperty",&pragma::BaseEnvCameraComponent::GetFarZProperty,luabind::property_policy<0>{});
-		def.def("GetFOVProperty",&pragma::BaseEnvCameraComponent::GetFOVProperty,luabind::property_policy<0>{});
-		def.def("GetAspectRatioProperty",&pragma::BaseEnvCameraComponent::GetAspectRatioProperty,luabind::property_policy<0>{});
+		def.def("GetProjectionMatrixProperty",&pragma::BaseEnvCameraComponent::GetProjectionMatrixProperty);
+		def.def("GetViewMatrixProperty",&pragma::BaseEnvCameraComponent::GetViewMatrixProperty);
+		def.def("GetNearZProperty",&pragma::BaseEnvCameraComponent::GetNearZProperty);
+		def.def("GetFarZProperty",&pragma::BaseEnvCameraComponent::GetFarZProperty);
+		def.def("GetFOVProperty",&pragma::BaseEnvCameraComponent::GetFOVProperty);
+		def.def("GetAspectRatioProperty",&pragma::BaseEnvCameraComponent::GetAspectRatioProperty);
 		def.def("SetAspectRatio",&pragma::BaseEnvCameraComponent::SetAspectRatio);
 		def.def("SetNearZ",&pragma::BaseEnvCameraComponent::SetNearZ);
 		def.def("SetFarZ",&pragma::BaseEnvCameraComponent::SetFarZ);
@@ -2305,7 +2297,7 @@ namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &re
 			std::vector<umath::Plane> planes;
 			hComponent.GetFrustumPlanes(planes);
 			return planes;
-		}),luabind::vector_policy<0,Vector3>{});
+		}));
 		def.def("GetFarPlaneCenter",&pragma::BaseEnvCameraComponent::GetFarPlaneCenter);
 		def.def("GetNearPlaneCenter",&pragma::BaseEnvCameraComponent::GetNearPlaneCenter);
 		def.def("GetPlaneCenter",&pragma::BaseEnvCameraComponent::GetPlaneCenter);
@@ -2313,17 +2305,17 @@ namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &re
 			std::array<Vector3,4> farBounds;
 			hComponent.GetFarPlaneBoundaries(farBounds);
 			return farBounds;
-		}),luabind::array_policy<0,Vector3,4>{});
+		}));
 		def.def("GetNearPlaneBoundaries",static_cast<std::array<Vector3,4>(*)(lua_State*,pragma::BaseEnvCameraComponent&)>([](lua_State *l,pragma::BaseEnvCameraComponent &hComponent) {
 			std::array<Vector3,4> nearBounds;
 			hComponent.GetNearPlaneBoundaries(nearBounds);
 			return nearBounds;
-		}),luabind::array_policy<0,Vector3,4>{});
+		}));
 		def.def("GetPlaneBoundaries",static_cast<std::array<Vector3,4>(*)(lua_State*,pragma::BaseEnvCameraComponent&,float)>([](lua_State *l,pragma::BaseEnvCameraComponent &hComponent,float z) {
 			std::array<Vector3,4> bounds;
 			hComponent.GetPlaneBoundaries(z,bounds);
 			return bounds;
-		}),luabind::array_policy<0,Vector3,4>{});
+		}));
 		def.def("GetPlaneBoundaries",static_cast<Lua::mult<luabind::tableT<Vector3>,luabind::tableT<Vector3>>(*)(lua_State*,pragma::BaseEnvCameraComponent&)>([](lua_State *l,pragma::BaseEnvCameraComponent &hComponent) -> Lua::mult<luabind::tableT<Vector3>,luabind::tableT<Vector3>> {
 			std::array<Vector3,8> bounds;
 			hComponent.GetPlaneBoundaries(bounds);
@@ -2342,7 +2334,7 @@ namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &re
 		def.def("GetNearPlaneBounds",&pragma::BaseEnvCameraComponent::GetNearPlaneBounds,luabind::meta::join<luabind::out_value<2>,luabind::out_value<3>>::type{});
 		def.def("GetFarPlaneBounds",&pragma::BaseEnvCameraComponent::GetFarPlaneBounds,luabind::meta::join<luabind::out_value<2>,luabind::out_value<3>>::type{});
 		def.def("GetFarPlaneBounds",&pragma::BaseEnvCameraComponent::GetPlaneBounds,luabind::meta::join<luabind::out_value<3>,luabind::out_value<4>>::type{});
-		def.def("GetFrustumPoints",static_cast<void(pragma::BaseEnvCameraComponent::*)(std::vector<Vector3>&) const>(&pragma::BaseEnvCameraComponent::GetFrustumPoints),luabind::out_value<2,luabind::vector_policy<1,Vector3>>{});
+		def.def("GetFrustumPoints",static_cast<void(pragma::BaseEnvCameraComponent::*)(std::vector<Vector3>&) const>(&pragma::BaseEnvCameraComponent::GetFrustumPoints),luabind::out_value<2>{});
 		def.def("GetNearPlanePoint",&pragma::BaseEnvCameraComponent::GetNearPlanePoint);
 		def.def("GetFarPlanePoint",&pragma::BaseEnvCameraComponent::GetFarPlanePoint);
 		def.def("GetPlanePoint",&pragma::BaseEnvCameraComponent::GetPlanePoint);
@@ -2369,7 +2361,7 @@ namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &re
 			Lua::PushInt(l,static_cast<int>(cornerPoints[0]));
 			Lua::PushInt(l,static_cast<int>(cornerPoints[1]));
 		}));
-		def.def("CreateFrustumKDop",static_cast<void(pragma::BaseEnvCameraComponent::*)(const Vector2&,const Vector2&,std::vector<umath::Plane>&) const>(&pragma::BaseEnvCameraComponent::CreateFrustumKDop),luabind::out_value<4,luabind::vector_policy<1,umath::Plane>>{});
+		def.def("CreateFrustumKDop",static_cast<void(pragma::BaseEnvCameraComponent::*)(const Vector2&,const Vector2&,std::vector<umath::Plane>&) const>(&pragma::BaseEnvCameraComponent::CreateFrustumKDop),luabind::out_value<4>{});
 		def.def("CreateFrustumMesh",static_cast<void(*)(lua_State*,pragma::BaseEnvCameraComponent&,const Vector2&,const Vector2&)>([](lua_State *l,pragma::BaseEnvCameraComponent &hComponent,const Vector2 &uvStart,const Vector2 &uvEnd) {
 			std::vector<Vector3> verts;
 			std::vector<uint16_t> indices;
@@ -2400,7 +2392,7 @@ namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &re
 			float dist;
 			auto uv = uvec::calc_screenspace_uv_from_worldspace_position(point,hComponent.GetProjectionMatrix() *hComponent.GetViewMatrix(),hComponent.GetNearZ(),hComponent.GetFarZ(),dist);
 			return {uv,dist};
-			}),luabind::pair_policy<0>{});
+			}));
 		def.def("WorldSpaceToScreenSpaceDirection",static_cast<Vector2(*)(lua_State*,pragma::BaseEnvCameraComponent&,const Vector3&)>([](lua_State *l,pragma::BaseEnvCameraComponent &hComponent,const Vector3 &dir) -> Vector2 {
 			return uvec::calc_screenspace_direction_from_worldspace_direction(dir,hComponent.GetProjectionMatrix() *hComponent.GetViewMatrix());
 		}));
@@ -2858,7 +2850,7 @@ namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &re
 		Lua::ComponentClass<pragma::BaseCharacterComponent> def {"BaseCharacterComponent"};
 		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
 		// Actor
-		def.def("GetFrozenProperty",&pragma::BaseCharacterComponent::GetFrozenProperty,luabind::property_policy<0>{});
+		def.def("GetFrozenProperty",&pragma::BaseCharacterComponent::GetFrozenProperty);
 		def.add_static_constant("EVENT_ON_KILLED",pragma::BaseActorComponent::EVENT_ON_KILLED);
 		def.add_static_constant("EVENT_ON_RESPAWN",pragma::BaseActorComponent::EVENT_ON_RESPAWN);
 
@@ -2897,7 +2889,7 @@ namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &re
 		def.def("SetViewRotation",&pragma::BaseCharacterComponent::SetViewOrientation);
 		def.def("NormalizeViewRotation",static_cast<void(pragma::BaseCharacterComponent::*)(Quat&)>(&pragma::BaseCharacterComponent::NormalizeViewOrientation));
 		def.def("NormalizeViewRotation",static_cast<const Quat&(pragma::BaseCharacterComponent::*)()>(&pragma::BaseCharacterComponent::NormalizeViewOrientation),luabind::copy_policy<0>{});
-		def.def("GetHitboxPhysicsObject",&pragma::BaseCharacterComponent::GetHitboxPhysicsObject,luabind::game_object_policy<0>{});
+		def.def("GetHitboxPhysicsObject",&pragma::BaseCharacterComponent::GetHitboxPhysicsObject);
 		def.def("GetWeapons",static_cast<void(*)(lua_State*,pragma::BaseCharacterComponent&)>([](lua_State *l,pragma::BaseCharacterComponent &hEnt) {
 			auto &weapons = hEnt.GetWeapons();
 			auto t = Lua::CreateTable(l);
@@ -2926,7 +2918,7 @@ namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &re
 		def.def("GetWeaponCount",static_cast<size_t(*)(lua_State*,pragma::BaseCharacterComponent&)>([](lua_State *l,pragma::BaseCharacterComponent &hEnt) -> size_t {
 			return hEnt.GetWeapons().size();
 		}));
-		def.def("GetActiveWeapon",&pragma::BaseCharacterComponent::GetActiveWeapon,luabind::game_object_policy<0>{});
+		def.def("GetActiveWeapon",&pragma::BaseCharacterComponent::GetActiveWeapon);
 		def.def("HasWeapon",&pragma::BaseCharacterComponent::HasWeapon);
 		def.def("GetAimRayData",static_cast<void(*)(lua_State*,pragma::BaseCharacterComponent&)>([](lua_State *l,pragma::BaseCharacterComponent &hEnt) {
 			Lua::Push<::TraceData>(l,hEnt.GetAimTraceData());
@@ -2967,14 +2959,14 @@ namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &re
 		def.def("AddAmmo",static_cast<void(pragma::BaseCharacterComponent::*)(uint32_t,int16_t)>(&pragma::BaseCharacterComponent::AddAmmo));
 		def.def("RemoveAmmo",static_cast<void(pragma::BaseCharacterComponent::*)(const std::string&,int16_t)>(&pragma::BaseCharacterComponent::RemoveAmmo));
 		def.def("RemoveAmmo",static_cast<void(pragma::BaseCharacterComponent::*)(uint32_t,int16_t)>(&pragma::BaseCharacterComponent::RemoveAmmo));
-		def.def("GetUpDirectionProperty",&pragma::BaseCharacterComponent::GetUpDirectionProperty,luabind::property_policy<0>{});
-		def.def("GetSlopeLimitProperty",&pragma::BaseCharacterComponent::GetSlopeLimitProperty,luabind::property_policy<0>{});
-		def.def("GetStepOffsetProperty",&pragma::BaseCharacterComponent::GetStepOffsetProperty,luabind::property_policy<0>{});
+		def.def("GetUpDirectionProperty",&pragma::BaseCharacterComponent::GetUpDirectionProperty);
+		def.def("GetSlopeLimitProperty",&pragma::BaseCharacterComponent::GetSlopeLimitProperty);
+		def.def("GetStepOffsetProperty",&pragma::BaseCharacterComponent::GetStepOffsetProperty);
 		def.def("GetJumpPower",&pragma::BaseCharacterComponent::GetJumpPower);
 		def.def("SetJumpPower",&pragma::BaseCharacterComponent::SetJumpPower);
 		def.def("Jump",static_cast<bool(pragma::BaseCharacterComponent::*)()>(&pragma::BaseCharacterComponent::Jump));
 		def.def("Jump",static_cast<bool(pragma::BaseCharacterComponent::*)(const Vector3&)>(&pragma::BaseCharacterComponent::Jump));
-		def.def("GetJumpPowerProperty",&pragma::BaseCharacterComponent::GetJumpPowerProperty,luabind::property_policy<0>{});
+		def.def("GetJumpPowerProperty",&pragma::BaseCharacterComponent::GetJumpPowerProperty);
 
 		def.add_static_constant("EVENT_ON_FOOT_STEP",pragma::BaseCharacterComponent::EVENT_ON_FOOT_STEP);
 		def.add_static_constant("EVENT_ON_CHARACTER_ORIENTATION_CHANGED",pragma::BaseCharacterComponent::EVENT_ON_CHARACTER_ORIENTATION_CHANGED);
@@ -3001,13 +2993,13 @@ namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &re
 		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
 		def.def("GetSpeedKmh",&pragma::BaseVehicleComponent::GetSpeedKmh);
 		def.def("GetSteeringFactor",&pragma::BaseVehicleComponent::GetSteeringFactor);
-		def.def("GetSteeringWheel",&pragma::BaseVehicleComponent::GetSteeringWheel,luabind::game_object_policy<0>{});
+		def.def("GetSteeringWheel",&pragma::BaseVehicleComponent::GetSteeringWheel);
 		def.def("HasDriver",&pragma::BaseVehicleComponent::HasDriver);
-		def.def("GetDriver",&pragma::BaseVehicleComponent::GetDriver,luabind::game_object_policy<0>{});
+		def.def("GetDriver",&pragma::BaseVehicleComponent::GetDriver);
 		def.def("SetDriver",&pragma::BaseVehicleComponent::SetDriver);
 		def.def("ClearDriver",&pragma::BaseVehicleComponent::ClearDriver);
 		def.def("SetupSteeringWheel",&pragma::BaseVehicleComponent::SetupSteeringWheel);
-		def.def("GetPhysicsVehicle",static_cast<physics::IVehicle*(pragma::BaseVehicleComponent::*)()>(&pragma::BaseVehicleComponent::GetPhysicsVehicle),luabind::game_object_policy<0>{});
+		def.def("GetPhysicsVehicle",static_cast<physics::IVehicle*(pragma::BaseVehicleComponent::*)()>(&pragma::BaseVehicleComponent::GetPhysicsVehicle));
 		def.def("SetupPhysics",&pragma::BaseVehicleComponent::SetupVehicle);
 		def.add_static_constant("EVENT_ON_DRIVER_ENTERED",pragma::BaseVehicleComponent::EVENT_ON_DRIVER_ENTERED);
 		def.add_static_constant("EVENT_ON_DRIVER_EXITED",pragma::BaseVehicleComponent::EVENT_ON_DRIVER_EXITED);
@@ -3045,22 +3037,22 @@ namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &re
 		def.def("IsAutomaticSecondary",&pragma::BaseWeaponComponent::IsAutomaticSecondary);
 		def.def("IsDeployed",&pragma::BaseWeaponComponent::IsDeployed);
 		def.def("GetPrimaryAmmoType",&pragma::BaseWeaponComponent::GetPrimaryAmmoType);
-		def.def("GetPrimaryAmmoTypeProperty",&pragma::BaseWeaponComponent::GetPrimaryAmmoTypeProperty,luabind::property_policy<0>{});
+		def.def("GetPrimaryAmmoTypeProperty",&pragma::BaseWeaponComponent::GetPrimaryAmmoTypeProperty);
 		def.def("GetSecondaryAmmoType",&pragma::BaseWeaponComponent::GetSecondaryAmmoType);
-		def.def("GetSecondaryAmmoTypeProperty",&pragma::BaseWeaponComponent::GetSecondaryAmmoTypeProperty,luabind::property_policy<0>{});
+		def.def("GetSecondaryAmmoTypeProperty",&pragma::BaseWeaponComponent::GetSecondaryAmmoTypeProperty);
 		def.def("HasPrimaryAmmo",&pragma::BaseWeaponComponent::HasPrimaryAmmo);
 		def.def("HasSecondaryAmmo",&pragma::BaseWeaponComponent::HasSecondaryAmmo);
 		def.def("IsPrimaryClipEmpty",&pragma::BaseWeaponComponent::IsPrimaryClipEmpty);
 		def.def("IsSecondaryClipEmpty",&pragma::BaseWeaponComponent::IsSecondaryClipEmpty);
 		def.def("HasAmmo",&pragma::BaseWeaponComponent::HasAmmo);
 		def.def("GetPrimaryClipSize",&pragma::BaseWeaponComponent::GetPrimaryClipSize);
-		def.def("GetPrimaryClipSizeProperty",&pragma::BaseWeaponComponent::GetPrimaryClipSizeProperty,luabind::property_policy<0>{});
+		def.def("GetPrimaryClipSizeProperty",&pragma::BaseWeaponComponent::GetPrimaryClipSizeProperty);
 		def.def("GetSecondaryClipSize",&pragma::BaseWeaponComponent::GetSecondaryClipSize);
-		def.def("GetSecondaryClipSizeProperty",&pragma::BaseWeaponComponent::GetSecondaryClipSizeProperty,luabind::property_policy<0>{});
+		def.def("GetSecondaryClipSizeProperty",&pragma::BaseWeaponComponent::GetSecondaryClipSizeProperty);
 		def.def("GetMaxPrimaryClipSize",&pragma::BaseWeaponComponent::GetMaxPrimaryClipSize);
-		def.def("GetMaxPrimaryClipSizeProperty",&pragma::BaseWeaponComponent::GetMaxPrimaryClipSizeProperty,luabind::property_policy<0>{});
+		def.def("GetMaxPrimaryClipSizeProperty",&pragma::BaseWeaponComponent::GetMaxPrimaryClipSizeProperty);
 		def.def("GetMaxSecondaryClipSize",&pragma::BaseWeaponComponent::GetMaxSecondaryClipSize);
-		def.def("GetMaxSecondaryClipSizeProperty",&pragma::BaseWeaponComponent::GetMaxSecondaryClipSizeProperty,luabind::property_policy<0>{});
+		def.def("GetMaxSecondaryClipSizeProperty",&pragma::BaseWeaponComponent::GetMaxSecondaryClipSizeProperty);
 		def.def("PrimaryAttack",static_cast<void(*)(lua_State*,pragma::BaseWeaponComponent&,bool)>([](lua_State *l,pragma::BaseWeaponComponent &hEnt,bool bOnce) {
 			Lua::Weapon::PrimaryAttack(l,hEnt,bOnce);
 		}));
@@ -3121,9 +3113,9 @@ namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &re
 		def.def("SetCrouchEyeLevel",&pragma::BasePlayerComponent::SetCrouchEyeLevel);
 		def.def("SetObserverMode",&pragma::BasePlayerComponent::SetObserverMode);
 		def.def("GetObserverMode",&pragma::BasePlayerComponent::GetObserverMode);
-		def.def("GetObserverModeProperty",&pragma::BasePlayerComponent::GetObserverModeProperty,luabind::property_policy<0>{});
+		def.def("GetObserverModeProperty",&pragma::BasePlayerComponent::GetObserverModeProperty);
 		def.def("SetObserverTarget",&pragma::BasePlayerComponent::SetObserverTarget);
-		def.def("GetObserverTarget",&pragma::BasePlayerComponent::GetObserverTarget,luabind::game_object_policy<0>{});
+		def.def("GetObserverTarget",&pragma::BasePlayerComponent::GetObserverTarget);
 		def.def("SetFlashlightEnabled",&pragma::BasePlayerComponent::SetFlashlight);
 		def.def("ToggleFlashlight",&pragma::BasePlayerComponent::ToggleFlashlight);
 		def.def("IsFlashlightEnabled",&pragma::BasePlayerComponent::IsFlashlightOn);
@@ -3250,7 +3242,7 @@ namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &re
 		def.def("SetModel",static_cast<void(pragma::BaseModelComponent::*)(const std::shared_ptr<Model>&)>(&pragma::BaseModelComponent::SetModel));
 		def.def("SetSkin",&pragma::BaseModelComponent::SetSkin);
 		def.def("GetSkin",&pragma::BaseModelComponent::GetSkin);
-		def.def("GetSkinProperty",&pragma::BaseModelComponent::GetSkinProperty,luabind::property_policy<0>{});
+		def.def("GetSkinProperty",&pragma::BaseModelComponent::GetSkinProperty);
 		def.def("SetRandomSkin",static_cast<void(*)(lua_State*,pragma::BaseModelComponent&)>([](lua_State *l,pragma::BaseModelComponent &hModel) {
 			auto &mdl = hModel.GetModel();
 			if(mdl == nullptr)
@@ -3264,7 +3256,7 @@ namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &re
 			return luabind::object{l,mdl};
 		}));
 		def.def("GetBodyGroup",&pragma::BaseModelComponent::GetBodyGroup);
-		def.def("GetBodyGroups",&pragma::BaseModelComponent::GetBodyGroups,luabind::vector_policy<0,uint32_t>{});
+		def.def("GetBodyGroups",&pragma::BaseModelComponent::GetBodyGroups);
 		def.def("SetBodyGroup",static_cast<bool(pragma::BaseModelComponent::*)(uint32_t,uint32_t)>(&pragma::BaseModelComponent::SetBodyGroup));
 		def.def("SetBodyGroup",static_cast<void(pragma::BaseModelComponent::*)(const std::string&,uint32_t)>(&pragma::BaseModelComponent::SetBodyGroup));
 		def.def("SetBodyGroups",static_cast<void(*)(lua_State*,pragma::BaseModelComponent&,luabind::table<>)>([](lua_State *l,pragma::BaseModelComponent &hModel,luabind::table<> t) {
@@ -3334,7 +3326,7 @@ namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &re
 				ownerComponent.ClearOwner();
 		}));
 		def.def("SetOwner",&pragma::BaseOwnableComponent::ClearOwner);
-		def.def("GetOwner",static_cast<BaseEntity*(pragma::BaseOwnableComponent::*)()>(&pragma::BaseOwnableComponent::GetOwner),luabind::game_object_policy<0>{});
+		def.def("GetOwner",static_cast<BaseEntity*(pragma::BaseOwnableComponent::*)()>(&pragma::BaseOwnableComponent::GetOwner));
 		def.add_static_constant("EVENT_ON_OWNER_CHANGED",pragma::BaseOwnableComponent::EVENT_ON_OWNER_CHANGED);
 	}
 
@@ -3400,5 +3392,5 @@ namespace Lua::TraceData {void FillTraceResultTable(lua_State *l,TraceResult &re
 				hEnt.ClearPointAtTarget();
 		}));
 		def.def("SetPointAtTarget",&pragma::BasePointAtTargetComponent::ClearPointAtTarget);
-		def.def("GetPointAtTarget",&pragma::BasePointAtTargetComponent::GetPointAtTarget,luabind::game_object_policy<0>{});
+		def.def("GetPointAtTarget",&pragma::BasePointAtTargetComponent::GetPointAtTarget);
 	}

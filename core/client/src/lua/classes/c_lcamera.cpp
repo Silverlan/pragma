@@ -38,12 +38,12 @@ void Lua::Scene::UpdateBuffers(lua_State *l,pragma::CSceneComponent &scene,prosp
 	auto pCmdBuffer = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(hCommandBuffer.shared_from_this());
 	scene.UpdateBuffers(pCmdBuffer);
 }
-void Lua::Scene::GetWorldEnvironment(lua_State *l,pragma::CSceneComponent &scene)
+std::shared_ptr<WorldEnvironment> Lua::Scene::GetWorldEnvironment(lua_State *l,pragma::CSceneComponent &scene)
 {
 	auto *worldEnv = scene.GetWorldEnvironment();
 	if(worldEnv == nullptr)
-		return;
-	Lua::Push<std::shared_ptr<WorldEnvironment>>(l,worldEnv->shared_from_this());
+		return nullptr;
+	return worldEnv->shared_from_this();
 }
 void Lua::Scene::RenderPrepass(lua_State *l,pragma::CSceneComponent &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode)
 {
@@ -79,31 +79,17 @@ void Lua::Scene::Render(lua_State *l,pragma::CSceneComponent &scene,::util::Draw
 
 ////////////////////////////////
 
-void Lua::RasterizationRenderer::GetPrepassDepthTexture(lua_State *l,pragma::CRasterizationRendererComponent &renderer)
+std::shared_ptr<prosper::Texture> Lua::RasterizationRenderer::GetPrepassDepthTexture(lua_State *l,pragma::CRasterizationRendererComponent &renderer)
 {
-	auto &depthTex = renderer.GetPrepass().textureDepth;
-	if(depthTex == nullptr)
-		return;
-	Lua::Push(l,depthTex);
+	return renderer.GetPrepass().textureDepth;
 }
-void Lua::RasterizationRenderer::GetPrepassNormalTexture(lua_State *l,pragma::CRasterizationRendererComponent &renderer)
+std::shared_ptr<prosper::Texture> Lua::RasterizationRenderer::GetPrepassNormalTexture(lua_State *l,pragma::CRasterizationRendererComponent &renderer)
 {
-	auto &normalTex = renderer.GetPrepass().textureNormals;
-	if(normalTex == nullptr)
-		return;
-	Lua::Push(l,normalTex);
+	return renderer.GetPrepass().textureNormals;
 }
-void Lua::RasterizationRenderer::GetRenderTarget(lua_State *l,pragma::CRasterizationRendererComponent &renderer)
+std::shared_ptr<prosper::RenderTarget> Lua::RasterizationRenderer::GetRenderTarget(lua_State *l,pragma::CRasterizationRendererComponent &renderer)
 {
-	auto &rt = renderer.GetHDRInfo().sceneRenderTarget;
-	if(rt == nullptr)
-		return;
-	Lua::Push(l,rt);
-}
-void Lua::RasterizationRenderer::GetPrepassShader(lua_State *l,pragma::CRasterizationRendererComponent &renderer)
-{
-	auto &shader = renderer.GetPrepassShader();
-	Lua::shader::push_shader(l,shader);
+	return renderer.GetHDRInfo().sceneRenderTarget;
 }
 
 void Lua::RasterizationRenderer::ScheduleMeshForRendering(
@@ -152,13 +138,13 @@ void Lua::RasterizationRenderer::ScheduleMeshForRendering(
 		return;
 	ScheduleMeshForRendering(l,renderer,scene,renderMode,*shader,mat,ent,mesh);
 }
-void Lua::RasterizationRenderer::BeginRenderPass(lua_State *l,pragma::CRasterizationRendererComponent &renderer,const ::util::DrawSceneInfo &drawSceneInfo)
+bool Lua::RasterizationRenderer::BeginRenderPass(lua_State *l,pragma::CRasterizationRendererComponent &renderer,const ::util::DrawSceneInfo &drawSceneInfo)
 {
-	Lua::PushBool(l,renderer.BeginRenderPass(drawSceneInfo));
+	return renderer.BeginRenderPass(drawSceneInfo);
 }
-void Lua::RasterizationRenderer::BeginRenderPass(lua_State *l,pragma::CRasterizationRendererComponent &renderer,const ::util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass &rp)
+bool Lua::RasterizationRenderer::BeginRenderPass(lua_State *l,pragma::CRasterizationRendererComponent &renderer,const ::util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass &rp)
 {
-	Lua::PushBool(l,renderer.BeginRenderPass(drawSceneInfo,&rp));
+	return renderer.BeginRenderPass(drawSceneInfo,&rp);
 }
 void Lua::RasterizationRenderer::ScheduleMeshForRendering(
 	lua_State *l,pragma::CRasterizationRendererComponent &renderer,pragma::CSceneComponent &scene,uint32_t renderMode,::Material &mat,BaseEntity &ent,ModelSubMesh &mesh

@@ -11,6 +11,8 @@
 #include "pragma/lua/policies/optional_policy.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/model/c_modelmesh.h"
+#include <pragma/lua/converters/optional_converter_t.hpp>
+#include <pragma/lua/converters/vector_converter_t.hpp>
 #include <buffers/prosper_swap_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 
@@ -22,14 +24,14 @@ void Lua::Animated::register_class(lua_State *l,luabind::module_ &entsMod)
 		if(!buf)
 			return {};
 		return buf->shared_from_this();
-	}),luabind::optional_policy<0>{});
+	}));
 	defCAnimated.def("GetBoneRenderMatrices",static_cast<const std::vector<Mat4>&(pragma::CAnimatedComponent::*)() const>(&pragma::CAnimatedComponent::GetBoneMatrices));
 	defCAnimated.def("GetBoneRenderMatrix",static_cast<std::optional<Mat4>(*)(lua_State*,pragma::CAnimatedComponent&,uint32_t)>([](lua_State *l,pragma::CAnimatedComponent &hAnim,uint32_t boneIndex) -> std::optional<Mat4> {
 		auto &mats = hAnim.GetBoneMatrices();
 		if(boneIndex >= mats.size())
 			return {};
 		return mats.at(boneIndex);
-	}),luabind::optional_policy<0>{});
+	}));
 	defCAnimated.def("SetBoneRenderMatrix",static_cast<void(*)(lua_State*,pragma::CAnimatedComponent&,uint32_t,const Mat4&)>([](lua_State *l,pragma::CAnimatedComponent &hAnim,uint32_t boneIndex,const Mat4 &m) {
 		auto &mats = hAnim.GetBoneMatrices();
 		if(boneIndex >= mats.size())

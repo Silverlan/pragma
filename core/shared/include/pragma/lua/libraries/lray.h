@@ -28,8 +28,6 @@ namespace Lua::TraceData
 	DLLNETWORK void GetTargetRotation(lua_State*,::TraceData &data);
 	DLLNETWORK void GetDistance(lua_State*,::TraceData &data);
 	DLLNETWORK void GetDirection(lua_State*,::TraceData &data);
-
-	DLLNETWORK void FillTraceResultTable(lua_State *l,TraceResult &res);
 };
 
 #endif

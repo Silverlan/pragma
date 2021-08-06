@@ -7,6 +7,8 @@
 #ifndef __GAME_OBJECT_POLICY_HPP__
 #define __GAME_OBJECT_POLICY_HPP__
 
+// TODO: Remove this file
+#if 0
 #include <luabind/detail/policy.hpp>
 #include <sharedutils/util.h>
 #include <sharedutils/util_shared_handle.hpp>
@@ -84,5 +86,6 @@ namespace luabind {
 	using game_object_smartptr_policy = meta::type_list< converter_policy_injector< N, detail::game_object_smartptr_policy > >;
 
 } // namespace luabind
+#endif
 
 #endif

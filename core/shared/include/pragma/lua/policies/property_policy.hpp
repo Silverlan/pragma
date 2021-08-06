@@ -7,6 +7,8 @@
 #ifndef __PROPERTY_POLICY_HPP__
 #define __PROPERTY_POLICY_HPP__
 
+// TODO: Remove this file
+#if 0
 #include <luabind/detail/policy.hpp>
 #include "pragma/lua/classes/lproperty.hpp"
 
@@ -47,5 +49,6 @@ namespace luabind {
 	using property_policy = meta::type_list< converter_policy_injector< N, detail::property_policy > >;
 
 } // namespace luabind
+#endif
 
 #endif

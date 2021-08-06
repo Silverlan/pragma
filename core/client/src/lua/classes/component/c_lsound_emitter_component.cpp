@@ -13,7 +13,7 @@
 void Lua::SoundEmitter::register_class(lua_State *l,luabind::module_ &entsMod)
 {
 	auto defCSoundEmitter = luabind::class_<pragma::CSoundEmitterComponent,pragma::BaseSoundEmitterComponent>("SoundEmitterComponent");
-	defCSoundEmitter.def("CreateSound",static_cast<void(*)(lua_State*,pragma::CSoundEmitterComponent&,std::string,uint32_t,bool)>(&Lua::SoundEmitter::CreateSound));
-	defCSoundEmitter.def("EmitSound",static_cast<void(*)(lua_State*,pragma::CSoundEmitterComponent&,std::string,uint32_t,float,float,bool)>(&Lua::SoundEmitter::EmitSound));
+	defCSoundEmitter.def("CreateSound",&pragma::CSoundEmitterComponent::CreateSound);
+	defCSoundEmitter.def("EmitSound",&pragma::CSoundEmitterComponent::EmitSound);
 	entsMod[defCSoundEmitter];
 }

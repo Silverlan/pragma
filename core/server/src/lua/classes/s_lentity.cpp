@@ -25,7 +25,7 @@ void Lua::Entity::Server::register_class(luabind::class_<SBaseEntity,BaseEntity>
 	classDef.def("IsSynchronized",&SBaseEntity::IsSynchronized);
 	classDef.def("SetSynchronized",&SBaseEntity::SetSynchronized);
 	classDef.def("SetSnapshotDirty",&SBaseEntity::MarkForSnapshot);
-	classDef.def("AddNetworkedComponent",&SBaseEntity::AddNetworkedComponent,luabind::game_object_smartptr_policy<0>{});
+	classDef.def("AddNetworkedComponent",&SBaseEntity::AddNetworkedComponent);
 }
 
 void Lua::Entity::Server::SendNetEvent(lua_State *l,SBaseEntity &ent,nwm::Protocol protocol,unsigned int eventId,::NetPacket packet,pragma::networking::TargetRecipientFilter &rp)

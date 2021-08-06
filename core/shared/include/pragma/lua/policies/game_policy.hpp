@@ -7,6 +7,8 @@
 #ifndef __GAME_POLICY_HPP__
 #define __GAME_POLICY_HPP__
 
+// TODO: Remove this file
+#if 0
 #include <luabind/config.hpp>
 #include <luabind/detail/policy.hpp>
 #include "pragma/engine.h"
@@ -47,6 +49,7 @@ namespace luabind {
 	using game_policy = meta::type_list< converter_policy_injector< N, detail::game_policy > >;
 
 } // namespace luabind
+#endif
 
 #endif
 

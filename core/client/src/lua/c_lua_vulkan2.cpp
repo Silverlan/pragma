@@ -9,8 +9,10 @@
 #include <luabind/class.hpp>
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include "pragma/lua/policies/shared_from_this_policy.hpp"
+#include "pragma/lua/converters/shader_converter_t.hpp"
 #include "pragma/model/vk_mesh.h"
 #include <pragma/lua/policies/vector_policy.hpp>
+#include <pragma/lua/converters/vector_converter_t.hpp>
 #include <prosper_framebuffer.hpp>
 #include <prosper_fence.hpp>
 #include <prosper_command_buffer.hpp>
@@ -385,15 +387,15 @@ void register_vulkan_lua_interface2(luabind::module_ &prosperMod)
 	}));
 	defVkCommandBuffer.def("RecordBindVertexBuffers",static_cast<bool(*)(
 		lua_State*,Lua::Vulkan::CommandBuffer&,prosper::ShaderGraphics&,const std::vector<prosper::IBuffer*>&,uint32_t,const std::vector<uint64_t>&
-		)>(&Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers),luabind::meta::join<luabind::vector_policy<4,prosper::IBuffer*>,luabind::vector_policy<6,uint64_t>>::type{}
+		)>(&Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers)
 	);
 	defVkCommandBuffer.def("RecordBindVertexBuffers",static_cast<bool(*)(
 		lua_State*,Lua::Vulkan::CommandBuffer&,prosper::ShaderGraphics&,const std::vector<prosper::IBuffer*>&,uint32_t
-		)>(&Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers),luabind::vector_policy<4,prosper::IBuffer*>{}
+		)>(&Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers)
 	);
 	defVkCommandBuffer.def("RecordBindVertexBuffers",static_cast<bool(*)(
 		lua_State*,Lua::Vulkan::CommandBuffer&,prosper::ShaderGraphics&,const std::vector<prosper::IBuffer*>&
-		)>(&Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers),luabind::vector_policy<4,prosper::IBuffer*>{}
+		)>(&Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers)
 	);
 #if 0
 bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(

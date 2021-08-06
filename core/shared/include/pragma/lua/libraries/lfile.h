@@ -8,7 +8,6 @@
 #define __LFILE_H__
 #include "pragma/networkdefinitions.h"
 #include <fsys/filesystem.h>
-#include <pragma/lua/luaapi.h>
 #include <mathutil/glmutil.h>
 #include <pragma/math/angle/wvangle.h>
 #include "luasystem.h"

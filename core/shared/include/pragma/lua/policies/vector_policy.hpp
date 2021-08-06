@@ -7,6 +7,8 @@
 #ifndef __VECTOR_POLICY_HPP__
 #define __VECTOR_POLICY_HPP__
 
+// TODO: Remove this file
+#if 0
 #include <luabind/detail/policy.hpp>
 #include "pragma/lua/ldefinitions.h"
 
@@ -182,5 +184,6 @@ namespace luabind {
 	using array_policy = meta::type_list< converter_policy_injector< N, detail::array_policy<TValue,SIZE,Policies> > >;
 
 } // namespace luabind
+#endif
 
 #endif

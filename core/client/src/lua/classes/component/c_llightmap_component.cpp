@@ -13,6 +13,7 @@
 #include "pragma/lua/policies/property_policy.hpp"
 #include "pragma/entities/components/c_light_map_component.hpp"
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
+#include <pragma/lua/converters/optional_converter_t.hpp>
 #include <util_image_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <texturemanager/texturemanager.h>
@@ -32,7 +33,7 @@ void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 		if(lightMap == nullptr)
 			return {};
 		return lightMap;
-	}),luabind::optional_policy<0>{});
+	}));
 	defCLightMap.def("ConvertLightmapToBSPLuxelData",&pragma::CLightMapComponent::ConvertLightmapToBSPLuxelData);
 	defCLightMap.def("UpdateLightmapUvBuffers",&pragma::CLightMapComponent::UpdateLightmapUvBuffers);
 	defCLightMap.def("ReloadLightmapData",&pragma::CLightMapComponent::ReloadLightMapData);
@@ -58,7 +59,7 @@ void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 	}));
 	defCLightMap.def("SetExposure",&pragma::CLightMapComponent::SetLightMapExposure);
 	defCLightMap.def("GetExposure",&pragma::CLightMapComponent::GetLightMapExposure);
-	defCLightMap.def("GetExposureProperty",&pragma::CLightMapComponent::GetLightMapExposureProperty,luabind::property_policy<0>{});
+	defCLightMap.def("GetExposureProperty",&pragma::CLightMapComponent::GetLightMapExposureProperty);
 
 	auto defLightmapBakeSettings = luabind::class_<pragma::CLightMapComponent::LightmapBakeSettings>("BakeSettings");
 	defLightmapBakeSettings.def(luabind::constructor<>());

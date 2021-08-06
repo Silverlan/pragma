@@ -9,6 +9,7 @@
 #include "pragma/util/transform.h"
 
 Transform::Transform()
+	: Transform{Vector3{},uquat::identity()}
 {}
 Transform::Transform(const Vector3 &position)
 	: m_pos(position)

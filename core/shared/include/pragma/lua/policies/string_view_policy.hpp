@@ -7,6 +7,8 @@
 #ifndef __STRING_VIEW_POLICY_HPP__
 #define __STRING_VIEW_POLICY_HPP__
 
+// TODO: Remove this file
+#if 0
 #include <luabind/detail/policy.hpp>
 #include <sharedutils/util.h>
 #include <sharedutils/util_shared_handle.hpp>
@@ -38,5 +40,6 @@ namespace luabind {
 	using string_view_policy = meta::type_list< converter_policy_injector< N, detail::string_view_policy > >;
 
 } // namespace luabind
+#endif
 
 #endif

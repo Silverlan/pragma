@@ -7,6 +7,8 @@
 #ifndef __NETWORK_STATE_POLICY_HPP__
 #define __NETWORK_STATE_POLICY_HPP__
 
+// TODO: Remove this file
+#if 0
 #include <luabind/config.hpp>
 #include <luabind/detail/policy.hpp>
 #include "pragma/engine.h"
@@ -47,6 +49,7 @@ namespace luabind {
 	using network_state_policy = meta::type_list< converter_policy_injector< N, detail::network_state_policy > >;
 
 } // namespace luabind
+#endif
 
 #endif
 

@@ -134,9 +134,10 @@ void SGame::RegisterLua()
 	//
 
 	// Needs to be registered AFTER RegisterLuaGameClasses has been called!
-	auto defEntCmp = luabind::class_<pragma::SLuaBaseEntityComponent,luabind::bases<pragma::BaseEntityComponent>,pragma::lua::SLuaBaseEntityComponentHolder>("BaseEntityComponent");
+	Lua::register_base_entity_component(modEnts);
+	auto defEntCmp = luabind::class_<pragma::SLuaBaseEntityComponent,luabind::bases<pragma::BaseLuaBaseEntityComponent,pragma::BaseEntityComponent>,pragma::lua::SLuaBaseEntityComponentHolder>("BaseEntityComponent");
 	defEntCmp.def(luabind::constructor<SBaseEntity&>());
-	Lua::register_base_entity_component<pragma::SLuaBaseEntityComponent>(defEntCmp);
+	defEntCmp.def(luabind::tostring(luabind::self));
 	defEntCmp.def("SendData",static_cast<void(*)(lua_State*,pragma::SLuaBaseEntityComponent&,NetPacket,pragma::networking::ClientRecipientFilter&)>([](lua_State *l,pragma::SLuaBaseEntityComponent &hComponent,NetPacket packet,pragma::networking::ClientRecipientFilter &rp) {
 		
 	}));

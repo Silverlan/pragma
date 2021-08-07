@@ -7,10 +7,16 @@
 #include "pragma/lua/converters/alias_types.hpp"
 
 void luabind::detail::AliasTypeConverter<Vector3,Vector2>::convert(const Vector2 &srcValue,Vector3 &outValue) {outValue = {srcValue.x,srcValue.y,0.f};}
+void luabind::detail::AliasTypeConverter<Vector3i,Vector2>::convert(const Vector2 &srcValue,Vector3i &outValue) {outValue = {srcValue.x,srcValue.y,0.f};}
 void luabind::detail::AliasTypeConverter<Vector3,Vector2i>::convert(const Vector2i &srcValue,Vector3 &outValue) {outValue = {srcValue.x,srcValue.y,0.f};}
+void luabind::detail::AliasTypeConverter<Vector3i,Vector2i>::convert(const Vector2i &srcValue,Vector3i &outValue) {outValue = {srcValue.x,srcValue.y,0.f};}
 void luabind::detail::AliasTypeConverter<Vector4,Vector2>::convert(const Vector2 &srcValue,Vector4 &outValue) {outValue = {srcValue.x,srcValue.y,0.f,0.f};}
+void luabind::detail::AliasTypeConverter<Vector4i,Vector2>::convert(const Vector2 &srcValue,Vector4i &outValue) {outValue = {srcValue.x,srcValue.y,0.f,0.f};}
 void luabind::detail::AliasTypeConverter<Vector4,Vector2i>::convert(const Vector2i &srcValue,Vector4 &outValue) {outValue = {srcValue.x,srcValue.y,0.f,0.f};}
+void luabind::detail::AliasTypeConverter<Vector4i,Vector2i>::convert(const Vector2i &srcValue,Vector4i &outValue) {outValue = {srcValue.x,srcValue.y,0.f,0.f};}
 void luabind::detail::AliasTypeConverter<Vector4,Vector3>::convert(const Vector3 &srcValue,Vector4 &outValue) {outValue = {srcValue.x,srcValue.y,srcValue.z,0.f};}
+void luabind::detail::AliasTypeConverter<Vector4i,Vector3>::convert(const Vector3 &srcValue,Vector4i &outValue) {outValue = {srcValue.x,srcValue.y,srcValue.z,0.f};}
 void luabind::detail::AliasTypeConverter<Vector4,Vector3i>::convert(const Vector3i &srcValue,Vector4 &outValue) {outValue = {srcValue.x,srcValue.y,srcValue.z,0.f};}
+void luabind::detail::AliasTypeConverter<Vector4i,Vector3i>::convert(const Vector3i &srcValue,Vector4i &outValue) {outValue = {srcValue.x,srcValue.y,srcValue.z,0.f};}
 void luabind::detail::AliasTypeConverter<EulerAngles,Quat>::convert(const Quat &srcValue,EulerAngles &outValue) {outValue = {srcValue};}
 void luabind::detail::AliasTypeConverter<Quat,EulerAngles>::convert(const EulerAngles &srcValue,Quat &outValue) {outValue = uquat::create(srcValue);}

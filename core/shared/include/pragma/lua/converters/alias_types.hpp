@@ -22,9 +22,19 @@ namespace luabind
 			static void convert(const Vector2 &srcValue,Vector3 &outValue);
 		};
 		template<>
+			struct AliasTypeConverter<Vector3i,Vector2>
+		{
+			static void convert(const Vector2 &srcValue,Vector3i &outValue);
+		};
+		template<>
 			struct AliasTypeConverter<Vector3,Vector2i>
 		{
 			static void convert(const Vector2i &srcValue,Vector3 &outValue);
+		};
+		template<>
+			struct AliasTypeConverter<Vector3i,Vector2i>
+		{
+			static void convert(const Vector2i &srcValue,Vector3i &outValue);
 		};
 
 		// Vector4
@@ -34,9 +44,19 @@ namespace luabind
 			static void convert(const Vector2 &srcValue,Vector4 &outValue);
 		};
 		template<>
+			struct AliasTypeConverter<Vector4i,Vector2>
+		{
+			static void convert(const Vector2 &srcValue,Vector4i &outValue);
+		};
+		template<>
 			struct AliasTypeConverter<Vector4,Vector2i>
 		{
 			static void convert(const Vector2i &srcValue,Vector4 &outValue);
+		};
+		template<>
+			struct AliasTypeConverter<Vector4i,Vector2i>
+		{
+			static void convert(const Vector2i &srcValue,Vector4i &outValue);
 		};
 		template<>
 			struct AliasTypeConverter<Vector4,Vector3>
@@ -44,9 +64,19 @@ namespace luabind
 			static void convert(const Vector3 &srcValue,Vector4 &outValue);
 		};
 		template<>
+			struct AliasTypeConverter<Vector4i,Vector3>
+		{
+			static void convert(const Vector3 &srcValue,Vector4i &outValue);
+		};
+		template<>
 			struct AliasTypeConverter<Vector4,Vector3i>
 		{
 			static void convert(const Vector3i &srcValue,Vector4 &outValue);
+		};
+		template<>
+			struct AliasTypeConverter<Vector4i,Vector3i>
+		{
+			static void convert(const Vector3i &srcValue,Vector4i &outValue);
 		};
 	};
 	template<typename T>
@@ -77,6 +107,16 @@ namespace luabind
 	struct default_converter<T>
 		: alias_converter<T,EulerAngles,Quat>
 	{};
+
+	// Specializations
+	template struct DLLNETWORK luabind::default_converter<Vector2>;
+	template struct DLLNETWORK luabind::default_converter<Vector2i>;
+	template struct DLLNETWORK luabind::default_converter<Vector3>;
+	template struct DLLNETWORK luabind::default_converter<Vector3i>;
+	template struct DLLNETWORK luabind::default_converter<Vector4>;
+	template struct DLLNETWORK luabind::default_converter<Vector4i>;
+	template struct DLLNETWORK luabind::default_converter<EulerAngles>;
+	template struct DLLNETWORK luabind::default_converter<Quat>;
 };
 
 #endif

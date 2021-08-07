@@ -32,10 +32,8 @@ int luabind::alias_converter<TBase,T...>::match(lua_State* L, U u, int index)
 	auto res = m_converter.match(L,decorate_type_t<TBase>(),index);
 	if(res != no_match)
 		return res;
-	auto idx = match_any<0,T...>(L,index);
-	if(!idx.has_value())
-		return no_match;
-	return 0;
+	auto hasMatch = match_any<0,T...>(L,index);
+	return hasMatch ? 0 : no_match;
 }
 
 template <class TBase,class ...T>

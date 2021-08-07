@@ -52,7 +52,7 @@ namespace luabind
 		template<typename T0,typename T1>
 			struct AliasTypeConverter
 		{
-			static void convert(const T1 &srcValue,T0 &outValue) {outValue = {srcValue};}
+			static void convert(const T1 &srcValue,T0 &outValue) {outValue = T1{srcValue};}
 		};
 	};
 

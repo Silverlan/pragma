@@ -901,9 +901,9 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	physMod[classTreeIkTree];
 
 	auto classIkController = luabind::class_<IKController>("IKController");
-	classIkController.def("GetEffectorName",&IKController::GetEffectorName,luabind::copy_policy<0>{});
+	classIkController.def("GetEffectorName",&IKController::GetEffectorName);
 	classIkController.def("GetChainLength",&IKController::GetChainLength);
-	classIkController.def("GetType",&IKController::GetType,luabind::copy_policy<0>{});
+	classIkController.def("GetType",&IKController::GetType);
 	classIkController.def("SetEffectorName",&IKController::SetEffectorName);
 	classIkController.def("SetChainLength",&IKController::SetChainLength);
 	classIkController.def("SetType",&IKController::SetType);

@@ -33,8 +33,13 @@ void luabind::gui_element_converter<T,TConverter>::to_lua(lua_State* L, T x)
 	}
 	else if constexpr(std::is_pointer_v<T>)
 	{
-		auto o = WGUILuaInterface::GetLuaObject(L,*const_cast<T>(x));
-		o.push(L);
+		if(!x)
+			lua_pushnil(L);
+		else
+		{
+			auto o = WGUILuaInterface::GetLuaObject(L,*const_cast<T>(x));
+			o.push(L);
+		}
 	}
 	else
 	{

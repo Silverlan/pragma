@@ -1566,7 +1566,7 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 
 	auto surfaceMatDef = luabind::class_<SurfaceMaterial>("SurfaceMaterial");
 	surfaceMatDef.def(luabind::tostring(luabind::self));
-	surfaceMatDef.def("GetName",&::SurfaceMaterial::GetIdentifier,luabind::copy_policy<0>{});
+	surfaceMatDef.def("GetName",&::SurfaceMaterial::GetIdentifier);
 	surfaceMatDef.def("GetIndex",&::SurfaceMaterial::GetIndex);
 	surfaceMatDef.def("SetFriction",&::SurfaceMaterial::SetFriction);
 	surfaceMatDef.def("SetStaticFriction",&::SurfaceMaterial::SetStaticFriction);
@@ -1575,16 +1575,16 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	surfaceMatDef.def("GetDynamicFriction",&::SurfaceMaterial::GetDynamicFriction);
 	surfaceMatDef.def("GetRestitution",&::SurfaceMaterial::GetRestitution);
 	surfaceMatDef.def("SetRestitution",&::SurfaceMaterial::SetRestitution);
-	surfaceMatDef.def("GetFootstepSound",&::SurfaceMaterial::GetFootstepType,luabind::copy_policy<0>{});
+	surfaceMatDef.def("GetFootstepSound",&::SurfaceMaterial::GetFootstepType);
 	surfaceMatDef.def("SetFootstepSound",&::SurfaceMaterial::SetFootstepType);
 	surfaceMatDef.def("SetImpactParticleEffect",&::SurfaceMaterial::SetImpactParticleEffect);
-	surfaceMatDef.def("GetImpactParticleEffect",&::SurfaceMaterial::GetImpactParticleEffect,luabind::copy_policy<0>{});
-	surfaceMatDef.def("GetBulletImpactSound",&::SurfaceMaterial::GetBulletImpactSound,luabind::copy_policy<0>{});
+	surfaceMatDef.def("GetImpactParticleEffect",&::SurfaceMaterial::GetImpactParticleEffect);
+	surfaceMatDef.def("GetBulletImpactSound",&::SurfaceMaterial::GetBulletImpactSound);
 	surfaceMatDef.def("SetBulletImpactSound",&::SurfaceMaterial::SetBulletImpactSound);
 	surfaceMatDef.def("SetHardImpactSound",&::SurfaceMaterial::SetHardImpactSound);
-	surfaceMatDef.def("GetHardImpactSound",&::SurfaceMaterial::GetHardImpactSound,luabind::copy_policy<0>{});
+	surfaceMatDef.def("GetHardImpactSound",&::SurfaceMaterial::GetHardImpactSound);
 	surfaceMatDef.def("SetSoftImpactSound",&::SurfaceMaterial::SetSoftImpactSound);
-	surfaceMatDef.def("GetSoftImpactSound",&::SurfaceMaterial::GetSoftImpactSound,luabind::copy_policy<0>{});
+	surfaceMatDef.def("GetSoftImpactSound",&::SurfaceMaterial::GetSoftImpactSound);
 	surfaceMatDef.def("GetIOR",&::SurfaceMaterial::GetIOR);
 	surfaceMatDef.def("SetIOR",&::SurfaceMaterial::SetIOR);
 	surfaceMatDef.def("ClearIOR",&::SurfaceMaterial::ClearIOR);

@@ -712,13 +712,13 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		return it->first;
 	};
 	auto classDefConVar = luabind::class_<ConVar>("Var");
-	classDefConVar.def("GetString",&ConVar::GetString,luabind::copy_policy<0>{});
+	classDefConVar.def("GetString",&ConVar::GetString);
 	classDefConVar.def("GetInt",&ConVar::GetInt);
 	classDefConVar.def("GetFloat",&ConVar::GetFloat);
 	classDefConVar.def("GetBool",&ConVar::GetBool);
 	classDefConVar.def("GetFlags",&ConVar::GetFlags);
 	classDefConVar.def("GetDefault",&ConVar::GetDefault,luabind::copy_policy<0>{});
-	classDefConVar.def("GetHelpText",&ConVar::GetHelpText,luabind::copy_policy<0>{});
+	classDefConVar.def("GetHelpText",&ConVar::GetHelpText);
 	classDefConVar.def("AddChangeCallback",static_cast<void(*)(lua_State*,ConVar&,const Lua::func<void,Lua::var<std::string,int32_t,float,bool>>&)>([](lua_State *l,ConVar &cvar,const Lua::func<void,Lua::var<std::string,int32_t,float,bool>> &function) {
 		engine->GetNetworkState(l)->GetGameState()->AddConVarCallback(fGetConVarName(l,cvar),function);
 	}));

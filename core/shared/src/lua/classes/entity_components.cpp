@@ -3150,10 +3150,10 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	{
 		Lua::ComponentClass<pragma::BaseGamemodeComponent> def {"BaseGamemodeComponent"};
 		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
-		def.def("GetName",&pragma::BaseGamemodeComponent::GetName,luabind::copy_policy<0>{});
-		def.def("GetIdentifier",&pragma::BaseGamemodeComponent::GetIdentifier,luabind::copy_policy<0>{});
-		def.def("GetComponentName",&pragma::BaseGamemodeComponent::GetComponentName,luabind::copy_policy<0>{});
-		def.def("GetAuthor",&pragma::BaseGamemodeComponent::GetAuthor,luabind::copy_policy<0>{});
+		def.def("GetName",&pragma::BaseGamemodeComponent::GetName);
+		def.def("GetIdentifier",&pragma::BaseGamemodeComponent::GetIdentifier);
+		def.def("GetComponentName",&pragma::BaseGamemodeComponent::GetComponentName);
+		def.def("GetAuthor",&pragma::BaseGamemodeComponent::GetAuthor);
 		def.def("GetGamemodeVersion",&pragma::BaseGamemodeComponent::GetGamemodeVersion);
 
 		// Enums

@@ -133,7 +133,9 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("Wrap",static_cast<void(*)(lua_State*,::WIBase&,const std::string&)>(&Wrap));
 	classDef.def("Wrap",static_cast<bool(::WIBase::*)(::WIBase&)>(&::WIBase::Wrap));
 	classDef.def("GetParent",&::WIBase::GetParent);
-	classDef.def("SetParent",&::WIBase::SetParent);
+	classDef.def("SetParent",static_cast<void(*)(lua_State*,::WIBase&,::WIBase&)>([](lua_State *l,::WIBase &hPanel,::WIBase &hParent) {
+		hPanel.SetParent(&hParent);
+	}));
 	classDef.def("SetParent",static_cast<void(*)(lua_State*,::WIBase&,::WIBase&,uint32_t)>([](lua_State *l,::WIBase &hPanel,::WIBase &hParent,uint32_t index) {
 		hPanel.SetParent(&hParent,index);
 	}));
@@ -193,7 +195,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("IsDescendantOf",&::WIBase::IsDescendantOf);
 	classDef.def("IsAncestor",&::WIBase::IsAncestor);
 	classDef.def("IsAncestorOf",&::WIBase::IsAncestorOf);
-	classDef.def("GetName",&::WIBase::GetName,luabind::copy_policy<0>{});
+	classDef.def("GetName",&::WIBase::GetName);
 	classDef.def("SetName",&::WIBase::SetName);
 	classDef.def("FindChildByName",&FindChildByName);
 	classDef.def("FindChildrenByName",&FindChildrenByName);
@@ -210,7 +212,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("SetCursor",&::WIBase::SetCursor);
 	classDef.def("GetCursor",&::WIBase::GetCursor);
 	classDef.def("RemoveElementOnRemoval",&::WIBase::RemoveOnRemoval);
-	classDef.def("GetTooltip",&::WIBase::GetTooltip,luabind::copy_policy<0>{});
+	classDef.def("GetTooltip",&::WIBase::GetTooltip);
 	classDef.def("SetTooltip",&::WIBase::SetTooltip);
 	classDef.def("HasTooltip",&::WIBase::HasTooltip);
 	classDef.def("GetLeft",&::WIBase::GetLeft);
@@ -572,7 +574,7 @@ void Lua::WIText::register_class(luabind::class_<::WIText,::WIBase> &classDef)
 	classDef.def("SetText",static_cast<void(*)(lua_State*,::WIText&,const std::string&)>([](lua_State *l,::WIText &hPanel,const std::string &text) {
 		hPanel.SetText(text);
 	}));
-	classDef.def("GetText",&::WIText::GetText,luabind::copy_policy<0>{});
+	classDef.def("GetText",&::WIText::GetText);
 	classDef.def("SetFont",static_cast<void(*)(lua_State*,::WIText&,const std::string&)>([](lua_State *l,::WIText &hPanel,const std::string &font) {
 		hPanel.SetFont(font);
 	}));

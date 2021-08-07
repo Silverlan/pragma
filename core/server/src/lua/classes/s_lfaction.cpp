@@ -36,7 +36,7 @@ void Lua::Faction::register_class(lua_State *l,luabind::module_ &mod)
 	classDef.def("HasClass",&::Faction::HasClass);
 	classDef.def("SetDefaultDisposition",&::Faction::SetDefaultDisposition);
 	classDef.def("GetDefaultDisposition",&::Faction::GetDefaultDisposition);
-	classDef.def("GetName",&::Faction::GetName,luabind::copy_policy<0>{});
+	classDef.def("GetName",&::Faction::GetName);
 	mod[classDef];
 }
 

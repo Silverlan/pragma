@@ -244,7 +244,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 
 	auto defShaderInfo = luabind::class_<util::ShaderInfo>("Info");
 	//defShaderInfo.def("GetID",&Lua_ShaderInfo_GetID);
-	defShaderInfo.def("GetName",&::util::ShaderInfo::GetIdentifier,luabind::copy_policy<0>{});
+	defShaderInfo.def("GetName",&::util::ShaderInfo::GetIdentifier);
 	modShader[defShaderInfo];
 
 	auto defShader = luabind::class_<prosper::Shader>("Shader");

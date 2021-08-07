@@ -245,7 +245,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	gameMod[defVelocity];
 
 	auto defGlobal = luabind::class_<pragma::GlobalNameComponent,pragma::BaseEntityComponent>("GlobalComponent");
-	defGlobal.def("GetGlobalName",&pragma::GlobalNameComponent::GetGlobalName,luabind::copy_policy<0>{});
+	defGlobal.def("GetGlobalName",&pragma::GlobalNameComponent::GetGlobalName);
 	defGlobal.def("SetGlobalName",&pragma::GlobalNameComponent::SetGlobalName);
 	gameMod[defGlobal];
 

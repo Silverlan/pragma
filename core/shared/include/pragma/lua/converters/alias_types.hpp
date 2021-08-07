@@ -107,16 +107,6 @@ namespace luabind
 	struct default_converter<T>
 		: alias_converter<T,EulerAngles,Quat>
 	{};
-
-	// Specializations
-	template struct DLLNETWORK luabind::default_converter<Vector2>;
-	template struct DLLNETWORK luabind::default_converter<Vector2i>;
-	template struct DLLNETWORK luabind::default_converter<Vector3>;
-	template struct DLLNETWORK luabind::default_converter<Vector3i>;
-	template struct DLLNETWORK luabind::default_converter<Vector4>;
-	template struct DLLNETWORK luabind::default_converter<Vector4i>;
-	template struct DLLNETWORK luabind::default_converter<EulerAngles>;
-	template struct DLLNETWORK luabind::default_converter<Quat>;
 };
 
 #endif

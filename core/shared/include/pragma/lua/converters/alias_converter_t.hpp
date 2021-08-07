@@ -42,7 +42,7 @@ TBase luabind::alias_converter<TBase,T...>::to_cpp(lua_State* L, U u, int index)
 {
 	if(m_tmp)
 		return *m_tmp;
-	return m_converter.to_cpp(L,u,index);
+	return m_converter.to_cpp(L,decorate_type_t<TBase>(),index);
 }
 
 template <class TBase,class ...T>

@@ -65,6 +65,7 @@
 #include <luainterface.hpp>
 #include <luabind/out_value_policy.hpp>
 #include <luabind/copy_policy.hpp>
+#include <luabind/discard_result_policy.hpp>
 
 extern DLLNETWORK Engine *engine;
 
@@ -629,11 +630,11 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	classDefDrawInfo.def(luabind::constructor<const umath::Transform&,const Color&,const Color&>());
 	classDefDrawInfo.def(luabind::constructor<const umath::Transform&,const Color&,float>());
 	classDefDrawInfo.def(luabind::constructor<const umath::Transform&,const Color&,const Color&,float>());
-	classDefDrawInfo.def("SetOrigin",&DebugRenderInfo::SetOrigin);
-	classDefDrawInfo.def("SetRotation",&DebugRenderInfo::SetRotation);
-	classDefDrawInfo.def("SetColor",&DebugRenderInfo::SetColor);
-	classDefDrawInfo.def("SetOutlineColor",&DebugRenderInfo::SetOutlineColor);
-	classDefDrawInfo.def("SetDuration",&DebugRenderInfo::SetDuration);
+	classDefDrawInfo.def("SetOrigin",&DebugRenderInfo::SetOrigin,luabind::discard_result{});
+	classDefDrawInfo.def("SetRotation",&DebugRenderInfo::SetRotation,luabind::discard_result{});
+	classDefDrawInfo.def("SetColor",&DebugRenderInfo::SetColor,luabind::discard_result{});
+	classDefDrawInfo.def("SetOutlineColor",&DebugRenderInfo::SetOutlineColor,luabind::discard_result{});
+	classDefDrawInfo.def("SetDuration",&DebugRenderInfo::SetDuration,luabind::discard_result{});
 	modDebug[classDefDrawInfo];
 
 	auto isBreakDefined = false;

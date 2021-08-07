@@ -38,6 +38,7 @@
 #include <luabind/out_value_policy.hpp>
 #include <util_formatted_text.hpp>
 #include <prosper_window.hpp>
+#include <luabind/copy_policy.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
@@ -103,7 +104,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("GetScrollInputEnabled",&::WIBase::GetScrollInputEnabled);
 	classDef.def("SetCursorMovementCheckEnabled",&::WIBase::SetMouseMovementCheckEnabled);
 	classDef.def("GetCursorMovementCheckEnabled",&::WIBase::GetMouseMovementCheckEnabled);
-	classDef.def("GetPos",static_cast<const Vector2i&(::WIBase::*)() const>(&::WIBase::GetPos));
+	classDef.def("GetPos",static_cast<const Vector2i&(::WIBase::*)() const>(&::WIBase::GetPos),luabind::copy_policy<0>{});
 	classDef.def("SetPos",static_cast<void(*)(lua_State*,::WIBase&,Vector2)>(&SetPos));
 	classDef.def("SetPos",static_cast<void(*)(lua_State*,::WIBase&,float,float)>(&SetPos));
 	classDef.def("GetAbsolutePos",&::WIBase::GetAbsolutePos);
@@ -126,7 +127,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("SetAlpha",&SetAlpha);
 	classDef.def("GetWidth",&::WIBase::GetWidth);
 	classDef.def("GetHeight",&::WIBase::GetHeight);
-	classDef.def("GetSize",static_cast<const Vector2i&(::WIBase::*)() const>(&::WIBase::GetSize));
+	classDef.def("GetSize",static_cast<const Vector2i&(::WIBase::*)() const>(&::WIBase::GetSize),luabind::copy_policy<0>{});
 	classDef.def("SetSize",static_cast<void(*)(lua_State*,::WIBase&,Vector2)>(&SetSize));
 	classDef.def("SetSize",static_cast<void(*)(lua_State*,::WIBase&,float,float)>(&SetSize));
 	classDef.def("Wrap",static_cast<void(*)(lua_State*,::WIBase&,const std::string&)>(&Wrap));
@@ -192,7 +193,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("IsDescendantOf",&::WIBase::IsDescendantOf);
 	classDef.def("IsAncestor",&::WIBase::IsAncestor);
 	classDef.def("IsAncestorOf",&::WIBase::IsAncestorOf);
-	classDef.def("GetName",&::WIBase::GetName);
+	classDef.def("GetName",&::WIBase::GetName,luabind::copy_policy<0>{});
 	classDef.def("SetName",&::WIBase::SetName);
 	classDef.def("FindChildByName",&FindChildByName);
 	classDef.def("FindChildrenByName",&FindChildrenByName);
@@ -209,7 +210,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("SetCursor",&::WIBase::SetCursor);
 	classDef.def("GetCursor",&::WIBase::GetCursor);
 	classDef.def("RemoveElementOnRemoval",&::WIBase::RemoveOnRemoval);
-	classDef.def("GetTooltip",&::WIBase::GetTooltip);
+	classDef.def("GetTooltip",&::WIBase::GetTooltip,luabind::copy_policy<0>{});
 	classDef.def("SetTooltip",&::WIBase::SetTooltip);
 	classDef.def("HasTooltip",&::WIBase::HasTooltip);
 	classDef.def("GetLeft",&::WIBase::GetLeft);
@@ -285,7 +286,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("FindChildIndex",&::WIBase::FindChildIndex);
 	classDef.def("SetScale",static_cast<void(::WIBase::*)(const Vector2&)>(&::WIBase::SetScale));
 	classDef.def("SetScale",static_cast<void(::WIBase::*)(float,float)>(&::WIBase::SetScale));
-	classDef.def("GetScale",&::WIBase::GetScale);
+	classDef.def("GetScale",&::WIBase::GetScale,luabind::copy_policy<0>{});
 	classDef.def("GetScaleProperty",&::WIBase::GetScaleProperty);
 	classDef.def("IsUpdateScheduled",&::WIBase::IsUpdateScheduled);
 	classDef.def("GetRootElement",static_cast<::WIBase*(::WIBase::*)()>(&::WIBase::GetRootElement));
@@ -571,7 +572,7 @@ void Lua::WIText::register_class(luabind::class_<::WIText,::WIBase> &classDef)
 	classDef.def("SetText",static_cast<void(*)(lua_State*,::WIText&,const std::string&)>([](lua_State *l,::WIText &hPanel,const std::string &text) {
 		hPanel.SetText(text);
 	}));
-	classDef.def("GetText",&::WIText::GetText);
+	classDef.def("GetText",&::WIText::GetText,luabind::copy_policy<0>{});
 	classDef.def("SetFont",static_cast<void(*)(lua_State*,::WIText&,const std::string&)>([](lua_State *l,::WIText &hPanel,const std::string &font) {
 		hPanel.SetFont(font);
 	}));
@@ -717,8 +718,8 @@ void Lua::WILine::register_class(luabind::class_<::WILine,::WIBase> &classDef)
 	classDef.def("GetEndPos",&GetEndPos);
 	classDef.def("SetStartColor",&::WILine::SetStartColor);
 	classDef.def("SetEndColor",&::WILine::SetEndColor);
-	classDef.def("GetStartColor",&::WILine::GetStartColor);
-	classDef.def("GetEndColor",&::WILine::GetEndColor);
+	classDef.def("GetStartColor",&::WILine::GetStartColor,luabind::copy_policy<0>{});
+	classDef.def("GetEndColor",&::WILine::GetEndColor,luabind::copy_policy<0>{});
 	classDef.def("GetStartPosProperty",&::WILine::GetStartPosProperty);
 	classDef.def("GetEndPosProperty",&::WILine::GetEndPosProperty);
 }
@@ -1771,14 +1772,14 @@ void Lua::WITransformable::register_class(luabind::class_<::WITransformable,::WI
 	classDef.def("SetMinSize",static_cast<void(::WITransformable::*)(Vector2i)>(&::WITransformable::SetMinSize));
 	classDef.def("GetMinWidth",&::WITransformable::GetMinWidth);
 	classDef.def("GetMinHeight",&::WITransformable::GetMinHeight);
-	classDef.def("GetMinSize",&::WITransformable::GetMinSize);
+	classDef.def("GetMinSize",&::WITransformable::GetMinSize,luabind::copy_policy<0>{});
 	classDef.def("SetMaxWidth",&::WITransformable::SetMaxWidth);
 	classDef.def("SetMaxHeight",&::WITransformable::SetMaxHeight);
 	classDef.def("SetMaxSize",static_cast<void(::WITransformable::*)(int,int)>(&::WITransformable::SetMaxSize));
 	classDef.def("SetMaxSize",static_cast<void(::WITransformable::*)(Vector2i)>(&::WITransformable::SetMaxSize));
 	classDef.def("GetMaxWidth",&::WITransformable::GetMaxWidth);
 	classDef.def("GetMaxHeight",&::WITransformable::GetMaxHeight);
-	classDef.def("GetMaxSize",&::WITransformable::GetMaxSize);
+	classDef.def("GetMaxSize",&::WITransformable::GetMaxSize,luabind::copy_policy<0>{});
 	classDef.def("Close",&::WITransformable::Close);
 	classDef.def("GetDragArea",&::WITransformable::GetDragArea);
 	classDef.def("IsBeingDragged",&::WITransformable::IsBeingDragged);

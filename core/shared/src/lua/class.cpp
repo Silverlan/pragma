@@ -72,7 +72,6 @@
 #include <fsys/directory_watcher.h>
 
 extern DLLNETWORK Engine *engine;
-#pragma optimize("",off)
 std::ostream &operator<<(std::ostream &out,const ALSound &snd)
 {
 	auto state = snd.GetState();
@@ -1402,7 +1401,7 @@ void Game::RegisterLuaClasses()
 	defPlane.def("Copy",static_cast<void(*)(lua_State*,umath::Plane&)>([](lua_State *l,umath::Plane &plane) {
 		Lua::Push<umath::Plane>(l,umath::Plane{plane});
 	}));
-	defPlane.def("GetNormal",static_cast<const Vector3&(umath::Plane::*)() const>(&umath::Plane::GetNormal));
+	defPlane.def("GetNormal",static_cast<const Vector3&(umath::Plane::*)() const>(&umath::Plane::GetNormal),luabind::copy_policy<0>{});
 	defPlane.def("GetPos",static_cast<Vector3(*)(const umath::Plane&)>([](const umath::Plane &plane) {return plane.GetPos();}));
 	defPlane.def("GetDistance",static_cast<double(umath::Plane::*)() const>(&umath::Plane::GetDistance));
 	defPlane.def("GetDistance",static_cast<float(umath::Plane::*)(const Vector3&) const>(&umath::Plane::GetDistance));
@@ -1567,7 +1566,7 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 
 	auto surfaceMatDef = luabind::class_<SurfaceMaterial>("SurfaceMaterial");
 	surfaceMatDef.def(luabind::tostring(luabind::self));
-	surfaceMatDef.def("GetName",&::SurfaceMaterial::GetIdentifier);
+	surfaceMatDef.def("GetName",&::SurfaceMaterial::GetIdentifier,luabind::copy_policy<0>{});
 	surfaceMatDef.def("GetIndex",&::SurfaceMaterial::GetIndex);
 	surfaceMatDef.def("SetFriction",&::SurfaceMaterial::SetFriction);
 	surfaceMatDef.def("SetStaticFriction",&::SurfaceMaterial::SetStaticFriction);
@@ -1576,16 +1575,16 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 	surfaceMatDef.def("GetDynamicFriction",&::SurfaceMaterial::GetDynamicFriction);
 	surfaceMatDef.def("GetRestitution",&::SurfaceMaterial::GetRestitution);
 	surfaceMatDef.def("SetRestitution",&::SurfaceMaterial::SetRestitution);
-	surfaceMatDef.def("GetFootstepSound",&::SurfaceMaterial::GetFootstepType);
+	surfaceMatDef.def("GetFootstepSound",&::SurfaceMaterial::GetFootstepType,luabind::copy_policy<0>{});
 	surfaceMatDef.def("SetFootstepSound",&::SurfaceMaterial::SetFootstepType);
 	surfaceMatDef.def("SetImpactParticleEffect",&::SurfaceMaterial::SetImpactParticleEffect);
-	surfaceMatDef.def("GetImpactParticleEffect",&::SurfaceMaterial::GetImpactParticleEffect);
-	surfaceMatDef.def("GetBulletImpactSound",&::SurfaceMaterial::GetBulletImpactSound);
+	surfaceMatDef.def("GetImpactParticleEffect",&::SurfaceMaterial::GetImpactParticleEffect,luabind::copy_policy<0>{});
+	surfaceMatDef.def("GetBulletImpactSound",&::SurfaceMaterial::GetBulletImpactSound,luabind::copy_policy<0>{});
 	surfaceMatDef.def("SetBulletImpactSound",&::SurfaceMaterial::SetBulletImpactSound);
 	surfaceMatDef.def("SetHardImpactSound",&::SurfaceMaterial::SetHardImpactSound);
-	surfaceMatDef.def("GetHardImpactSound",&::SurfaceMaterial::GetHardImpactSound);
+	surfaceMatDef.def("GetHardImpactSound",&::SurfaceMaterial::GetHardImpactSound,luabind::copy_policy<0>{});
 	surfaceMatDef.def("SetSoftImpactSound",&::SurfaceMaterial::SetSoftImpactSound);
-	surfaceMatDef.def("GetSoftImpactSound",&::SurfaceMaterial::GetSoftImpactSound);
+	surfaceMatDef.def("GetSoftImpactSound",&::SurfaceMaterial::GetSoftImpactSound,luabind::copy_policy<0>{});
 	surfaceMatDef.def("GetIOR",&::SurfaceMaterial::GetIOR);
 	surfaceMatDef.def("SetIOR",&::SurfaceMaterial::SetIOR);
 	surfaceMatDef.def("ClearIOR",&::SurfaceMaterial::ClearIOR);
@@ -1943,4 +1942,3 @@ static void RegisterIk(Lua::Interface &lua)
 	modIk[defCcdSolver];
 	modIk[defFABRIKSolver];
 }
-#pragma optimize("",on)

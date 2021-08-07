@@ -34,6 +34,7 @@
 #include <mathutil/color.h>
 #include <luainterface.hpp>
 #include <luabind/iterator_policy.hpp>
+#include <luabind/copy_policy.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
 extern DLLNETWORK Engine *engine;
@@ -256,7 +257,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefCon.def("GetPos",&pragma::physics::IController::GetPos);
 	classDefCon.def("GetFootPos",&pragma::physics::IController::GetFootPos);
 	classDefCon.def("GetUpDirection",&pragma::physics::IController::GetUpDirection);
-	classDefCon.def("GetMoveVelocity",&pragma::physics::IController::GetMoveVelocity);
+	classDefCon.def("GetMoveVelocity",&pragma::physics::IController::GetMoveVelocity,luabind::copy_policy<0>{});
 	classDefCon.def("GetSlopeLimit",&pragma::physics::IController::GetSlopeLimit);
 	classDefCon.def("GetStepHeight",&pragma::physics::IController::GetStepHeight);
 	classDefCon.def("GetCollisionObject",static_cast<pragma::physics::ICollisionObject*(pragma::physics::IController::*)()>(&pragma::physics::IController::GetCollisionObject));
@@ -560,8 +561,8 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefTransform.def("Set",static_cast<void(*)(lua_State*,umath::Transform&,const umath::Transform&)>([](lua_State *l,umath::Transform &t,const umath::Transform &tOther) {
 		t = tOther;
 	}));
-	classDefTransform.def("GetOrigin",static_cast<Vector3&(umath::Transform::*)()>(&umath::Transform::GetOrigin));
-	classDefTransform.def("GetRotation",static_cast<Quat&(umath::Transform::*)()>(&umath::Transform::GetRotation));
+	classDefTransform.def("GetOrigin",static_cast<Vector3&(umath::Transform::*)()>(&umath::Transform::GetOrigin),luabind::copy_policy<0>{});
+	classDefTransform.def("GetRotation",static_cast<Quat&(umath::Transform::*)()>(&umath::Transform::GetRotation),luabind::copy_policy<0>{});
 	classDefTransform.def("SetOrigin",&umath::Transform::SetOrigin);
 	classDefTransform.def("SetRotation",&umath::Transform::SetRotation);
 	classDefTransform.def("SetIdentity",&umath::Transform::SetIdentity);
@@ -620,7 +621,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	classDefScaledTransform.def("Set",static_cast<void(*)(lua_State*,umath::ScaledTransform&,const umath::ScaledTransform&)>([](lua_State *l,umath::ScaledTransform &t,const umath::ScaledTransform &tOther) {
 		t = tOther;
 	}));
-	classDefScaledTransform.def("GetScale",static_cast<Vector3&(umath::ScaledTransform::*)()>(&umath::ScaledTransform::GetScale));
+	classDefScaledTransform.def("GetScale",static_cast<Vector3&(umath::ScaledTransform::*)()>(&umath::ScaledTransform::GetScale),luabind::copy_policy<0>{});
 	classDefScaledTransform.def("SetScale",&umath::ScaledTransform::SetScale);
 	classDefScaledTransform.def("Scale",&umath::ScaledTransform::Scale);
 	classDefScaledTransform.def("GetInverse",&umath::ScaledTransform::GetInverse);
@@ -900,9 +901,9 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	physMod[classTreeIkTree];
 
 	auto classIkController = luabind::class_<IKController>("IKController");
-	classIkController.def("GetEffectorName",&IKController::GetEffectorName);
+	classIkController.def("GetEffectorName",&IKController::GetEffectorName,luabind::copy_policy<0>{});
 	classIkController.def("GetChainLength",&IKController::GetChainLength);
-	classIkController.def("GetType",&IKController::GetType);
+	classIkController.def("GetType",&IKController::GetType,luabind::copy_policy<0>{});
 	classIkController.def("SetEffectorName",&IKController::SetEffectorName);
 	classIkController.def("SetChainLength",&IKController::SetChainLength);
 	classIkController.def("SetType",&IKController::SetType);

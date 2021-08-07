@@ -55,6 +55,7 @@
 #include <cmaterialmanager.h>
 #include <impl_texture_formats.h>
 #include <prosper_window.hpp>
+#include <luabind/copy_policy.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
@@ -387,7 +388,7 @@ static void register_gui(Lua::Interface &lua)
 	wiConsoleClassDef.def("GetCommandLineEntryElement",&WIConsole::GetCommandLineEntryElement);
 	wiConsoleClassDef.def("GetTextLogElement",&WIConsole::GetTextLogElement);
 	wiConsoleClassDef.def("GetFrame",&WIConsole::GetFrame);
-	wiConsoleClassDef.def("GetText",&WIConsole::GetText);
+	wiConsoleClassDef.def("GetText",&WIConsole::GetText,luabind::copy_policy<0>{});
 	wiConsoleClassDef.def("SetText",&WIConsole::SetText);
 	wiConsoleClassDef.def("AppendText",&WIConsole::AppendText);
 	wiConsoleClassDef.def("Clear",&WIConsole::Clear);

@@ -22,6 +22,7 @@
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/entities/components/base_ai_component.hpp>
 #include <luabind/out_value_policy.hpp>
+#include <luabind/copy_policy.hpp>
 
 namespace Lua
 {
@@ -53,7 +54,7 @@ void Lua::register_sv_ai_component(lua_State *l,luabind::module_ &module)
 	def.def("SetMaxViewDistance",&pragma::SAIComponent::SetMaxViewDistance);
 	def.def("GetMaxViewAngle",&pragma::SAIComponent::GetMaxViewAngle);
 	def.def("SetMaxViewAngle",&pragma::SAIComponent::SetMaxViewAngle);
-	def.def("GetSquad",&pragma::SAIComponent::GetSquad);
+	def.def("GetSquad",&pragma::SAIComponent::GetSquad,luabind::copy_policy<0>{});
 	def.def("ClearRelationship",static_cast<void(pragma::SAIComponent::*)(BaseEntity*)>(&pragma::SAIComponent::ClearRelationship));
 	def.def("ClearRelationship",static_cast<void(pragma::SAIComponent::*)(std::string)>(&pragma::SAIComponent::ClearRelationship));
 	def.def("ClearRelationship",static_cast<void(pragma::SAIComponent::*)(Faction&)>(&pragma::SAIComponent::ClearRelationship));
@@ -101,7 +102,7 @@ void Lua::register_sv_ai_component(lua_State *l,luabind::module_ &module)
 		return ai.TurnStep(target);
 	}));
 	def.def("GetDistanceToMoveTarget",&pragma::SAIComponent::GetDistanceToMoveTarget);
-	def.def("GetMoveTarget",&pragma::SAIComponent::GetMoveTarget);
+	def.def("GetMoveTarget",&pragma::SAIComponent::GetMoveTarget,luabind::copy_policy<0>{});
 	def.def("MoveTo",&pragma::SAIComponent::MoveTo);
 	def.def("MoveTo",static_cast<pragma::BaseAIComponent::MoveResult(*)(pragma::SAIComponent&,const Vector3&)>([](pragma::SAIComponent &aiComponent,const Vector3 &pos) -> pragma::BaseAIComponent::MoveResult {
 		return aiComponent.MoveTo(pos);

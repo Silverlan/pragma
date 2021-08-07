@@ -8,6 +8,7 @@
 #include "pragma/lua/classes/s_lfaction.h"
 #include "pragma/lua/classes/ldef_entity.h"
 #include <pragma/lua/luaapi.h>
+#include <luabind/copy_policy.hpp>
 
 void Lua::Faction::register_class(lua_State *l,luabind::module_ &mod)
 {
@@ -35,7 +36,7 @@ void Lua::Faction::register_class(lua_State *l,luabind::module_ &mod)
 	classDef.def("HasClass",&::Faction::HasClass);
 	classDef.def("SetDefaultDisposition",&::Faction::SetDefaultDisposition);
 	classDef.def("GetDefaultDisposition",&::Faction::GetDefaultDisposition);
-	classDef.def("GetName",&::Faction::GetName);
+	classDef.def("GetName",&::Faction::GetName,luabind::copy_policy<0>{});
 	mod[classDef];
 }
 

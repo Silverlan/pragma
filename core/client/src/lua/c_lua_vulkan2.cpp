@@ -29,6 +29,7 @@
 #include <sharedutils/datastream.h>
 #include "pragma/c_engine.h"
 #include <pragma/rendering/shaders/image/c_shader_gradient.hpp>
+#include <luabind/copy_policy.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 
@@ -488,7 +489,7 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 	devVkBuffer.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Buffer&)>([](lua_State *l,Lua::Vulkan::Buffer &buf) {
 		Lua::Vulkan::VKContextObject::GetDebugName(l,buf);
 	}));
-	devVkBuffer.def("GetCreateInfo",&Lua::Vulkan::Buffer::GetCreateInfo);
+	devVkBuffer.def("GetCreateInfo",&Lua::Vulkan::Buffer::GetCreateInfo,luabind::copy_policy<0>{});
 	devVkBuffer.def("SetPermanentlyMapped",&Lua::Vulkan::Buffer::SetPermanentlyMapped);
 	devVkBuffer.def("GetParent",static_cast<std::shared_ptr<prosper::IBuffer>(prosper::IBuffer::*)()>(&Lua::Vulkan::Buffer::GetParent));
 	devVkBuffer.def("WriteMemory",&Lua::Vulkan::VKBuffer::Write);

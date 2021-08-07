@@ -11,6 +11,7 @@
 #include "luasystem.h"
 #include "material.h"
 #include <detail_mode.hpp>
+#include <luabind/copy_policy.hpp>
 #include <sharedutils/alpha_mode.hpp>
 #include <sharedutils/util_shaderinfo.hpp>
 #include <udm.hpp>
@@ -39,8 +40,8 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 		Lua::PushInt(l,umath::to_integral(msys::to_detail_mode(name)));
 	}))];
 	classDef.def("IsValid",&::Material::IsValid);
-	classDef.def("GetShaderName",&::Material::GetShaderIdentifier);
-	classDef.def("GetName",&::Material::GetName);
+	classDef.def("GetShaderName",&::Material::GetShaderIdentifier,luabind::copy_policy<0>{});
+	classDef.def("GetName",&::Material::GetName,luabind::copy_policy<0>{});
 	classDef.def("GetDataBlock",&::Material::GetDataBlock);
 	classDef.def("Copy",static_cast<void(*)(lua_State*,::Material&)>([](lua_State *l,::Material &mat) {
 		auto *matCopy = mat.Copy();

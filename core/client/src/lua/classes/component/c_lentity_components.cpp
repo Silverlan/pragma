@@ -151,6 +151,7 @@
 #include "pragma/entities/c_filter_entity_class.h"
 #include "pragma/entities/c_filter_entity_name.h"
 #include "pragma/entities/components/c_ownable_component.hpp"
+#include <luabind/copy_policy.hpp>
 
 namespace Lua
 {
@@ -632,7 +633,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.def("SetRenderer",&pragma::CSceneComponent::SetRenderer);
 	defCScene.def("GetSceneIndex",static_cast<pragma::CSceneComponent::SceneIndex(pragma::CSceneComponent::*)() const>(&pragma::CSceneComponent::GetSceneIndex));
 	defCScene.def("SetParticleSystemColorFactor",&pragma::CSceneComponent::SetParticleSystemColorFactor);
-	defCScene.def("GetParticleSystemColorFactor",&pragma::CSceneComponent::GetParticleSystemColorFactor);
+	defCScene.def("GetParticleSystemColorFactor",&pragma::CSceneComponent::GetParticleSystemColorFactor,luabind::copy_policy<0>{});
 	defCScene.def("GetRenderParticleSystems",static_cast<std::vector<pragma::CParticleSystemComponent*>(*)(lua_State*,pragma::CSceneComponent&)>([](lua_State *l,pragma::CSceneComponent &scene) -> std::vector<pragma::CParticleSystemComponent*> {
 		return scene.GetSceneRenderDesc().GetCulledParticles();
 	}));

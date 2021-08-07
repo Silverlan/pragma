@@ -9,6 +9,7 @@
 #include "pragma/lua/classes/c_lworldenvironment.hpp"
 #include "luasystem.h"
 #include <pragma/lua/classes/lproperty.hpp>
+#include <luabind/copy_policy.hpp>
 
 namespace Lua
 {
@@ -46,7 +47,7 @@ namespace Lua
 void Lua::WorldEnvironment::register_class(luabind::class_<::WorldEnvironment> &classDef)
 {
 	classDef.def("SetAmbientColor",&::WorldEnvironment::SetAmbientColor);
-	classDef.def("GetAmbientColor",&::WorldEnvironment::GetAmbientColor);
+	classDef.def("GetAmbientColor",&::WorldEnvironment::GetAmbientColor,luabind::copy_policy<0>{});
 	classDef.def("SetShaderQuality",&::WorldEnvironment::SetShaderQuality);
 	classDef.def("GetShaderQuality",&::WorldEnvironment::GetShaderQuality);
 	classDef.def("SetUnlit",&::WorldEnvironment::SetUnlit);

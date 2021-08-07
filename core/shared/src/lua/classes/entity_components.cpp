@@ -1028,7 +1028,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		def.def("SetStiffness",&pragma::BaseFuncWaterComponent::SetStiffness);
 		def.def("GetPropagation",&pragma::BaseFuncWaterComponent::GetPropagation);
 		def.def("SetPropagation",&pragma::BaseFuncWaterComponent::SetPropagation);
-		def.def("GetWaterVelocity",&pragma::BaseFuncWaterComponent::GetWaterVelocity);
+		def.def("GetWaterVelocity",&pragma::BaseFuncWaterComponent::GetWaterVelocity,luabind::copy_policy<0>{});
 		def.def("SetWaterVelocity",&pragma::BaseFuncWaterComponent::SetWaterVelocity);
 		def.def("GetDensity",&pragma::BaseFuncWaterComponent::GetDensity);
 		def.def("SetDensity",&pragma::BaseFuncWaterComponent::SetDensity);
@@ -1115,7 +1115,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	{
 		Lua::ComponentClass<pragma::BaseEnvLightDirectionalComponent> def {"BaseEnvLightDirectionalComponent"};
 		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
-		def.def("GetAmbientColor",&pragma::BaseEnvLightDirectionalComponent::GetAmbientColor);
+		def.def("GetAmbientColor",&pragma::BaseEnvLightDirectionalComponent::GetAmbientColor,luabind::copy_policy<0>{});
 		def.def("GetAmbientColorProperty",&pragma::BaseEnvLightDirectionalComponent::GetAmbientColorProperty);
 		def.def("SetAmbientColor",&pragma::BaseEnvLightDirectionalComponent::SetAmbientColor);
 	}
@@ -2217,7 +2217,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
 		def.def("GetColorProperty",&pragma::BaseColorComponent::GetColorProperty);
 
-		def.def("GetColor",&pragma::BaseColorComponent::GetColor);
+		def.def("GetColor",&pragma::BaseColorComponent::GetColor,luabind::copy_policy<0>{});
 		def.def("SetColor",static_cast<void(pragma::BaseColorComponent::*)(const Color&)>(&pragma::BaseColorComponent::SetColor));
 		def.def("SetColor",static_cast<void(pragma::BaseColorComponent::*)(const Vector3&)>(&pragma::BaseColorComponent::SetColor));
 		def.def("SetColor",static_cast<void(pragma::BaseColorComponent::*)(const Vector4&)>(&pragma::BaseColorComponent::SetColor));
@@ -2264,8 +2264,8 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		def.add_static_constant("DEFAULT_FAR_Z",pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z);
 		def.add_static_constant("DEFAULT_FOV",pragma::BaseEnvCameraComponent::DEFAULT_FOV);
 		def.add_static_constant("DEFAULT_VIEWMODEL_FOV",pragma::BaseEnvCameraComponent::DEFAULT_VIEWMODEL_FOV);
-		def.def("GetProjectionMatrix",&pragma::BaseEnvCameraComponent::GetProjectionMatrix);
-		def.def("GetViewMatrix",&pragma::BaseEnvCameraComponent::GetViewMatrix);
+		def.def("GetProjectionMatrix",&pragma::BaseEnvCameraComponent::GetProjectionMatrix,luabind::copy_policy<0>{});
+		def.def("GetViewMatrix",&pragma::BaseEnvCameraComponent::GetViewMatrix,luabind::copy_policy<0>{});
 		def.def("LookAt",static_cast<void(*)(lua_State*,pragma::BaseEnvCameraComponent&,const Vector3&)>([](lua_State *l,pragma::BaseEnvCameraComponent &hComponent,const Vector3 &lookAtPos) {
 			auto *trComponent = hComponent.GetEntity().GetTransformComponent();
 			if(!trComponent)
@@ -2779,7 +2779,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		Lua::ComponentClass<pragma::BaseSkyboxComponent> def {"BaseSkyboxComponent"};
 		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
 		def.def("SetSkyAngles",&pragma::BaseSkyboxComponent::SetSkyAngles);
-		def.def("GetSkyAngles",&pragma::BaseSkyboxComponent::GetSkyAngles);
+		def.def("GetSkyAngles",&pragma::BaseSkyboxComponent::GetSkyAngles,luabind::copy_policy<0>{});
 	}
 
 	#include "pragma/entities/baseworld.h"
@@ -2867,12 +2867,12 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 			Lua::Push<Vector3>(l,*right);
 			Lua::Push<Vector3>(l,*up);
 		}));
-		def.def("GetOrientationAxesRotation",&pragma::BaseCharacterComponent::GetOrientationAxesRotation);
+		def.def("GetOrientationAxesRotation",&pragma::BaseCharacterComponent::GetOrientationAxesRotation,luabind::copy_policy<0>{});
 		def.def("GetShootPos",&pragma::BaseCharacterComponent::GetShootPosition);
 		def.def("GetSlopeLimit",&pragma::BaseCharacterComponent::GetSlopeLimit);
 		def.def("GetStepOffset",&pragma::BaseCharacterComponent::GetStepOffset);
 		def.def("GetTurnSpeed",&pragma::BaseCharacterComponent::GetTurnSpeed);
-		def.def("GetUpDirection",&pragma::BaseCharacterComponent::GetUpDirection);
+		def.def("GetUpDirection",&pragma::BaseCharacterComponent::GetUpDirection,luabind::copy_policy<0>{});
 		def.def("GetViewAngles",&pragma::BaseCharacterComponent::GetViewAngles);
 		def.def("GetViewForward",&pragma::BaseCharacterComponent::GetViewForward);
 		def.def("GetViewRotation",static_cast<const Quat&(pragma::BaseCharacterComponent::*)() const>(&pragma::BaseCharacterComponent::GetViewOrientation),luabind::copy_policy<0>{});
@@ -2936,7 +2936,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		def.def("GetMoveController",static_cast<luabind::mult<int32_t,int32_t>(*)(lua_State*,pragma::BaseCharacterComponent&)>([](lua_State *l,pragma::BaseCharacterComponent &hEnt) -> luabind::mult<int32_t,int32_t> {
 			return {l,hEnt.GetMoveController(),hEnt.GetMoveControllerY()};
 		}));
-		def.def("GetMoveVelocity",&pragma::BaseCharacterComponent::GetMoveVelocity);
+		def.def("GetMoveVelocity",&pragma::BaseCharacterComponent::GetMoveVelocity,luabind::copy_policy<0>{});
 		def.def("GetRelativeVelocity",&pragma::BaseCharacterComponent::GetLocalVelocity);
 
 		def.def("SetOrientation",&pragma::BaseCharacterComponent::SetCharacterOrientation);
@@ -3119,7 +3119,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		def.def("SetFlashlightEnabled",&pragma::BasePlayerComponent::SetFlashlight);
 		def.def("ToggleFlashlight",&pragma::BasePlayerComponent::ToggleFlashlight);
 		def.def("IsFlashlightEnabled",&pragma::BasePlayerComponent::IsFlashlightOn);
-		def.def("GetViewPos",&pragma::BasePlayerComponent::GetViewPos);
+		def.def("GetViewPos",&pragma::BasePlayerComponent::GetViewPos,luabind::copy_policy<0>{});
 
 		def.def("ApplyViewRotationOffset",&pragma::BasePlayerComponent::ApplyViewRotationOffset);
 		def.def("ApplyViewRotationOffset",static_cast<void(*)(lua_State*,pragma::BasePlayerComponent&,EulerAngles&)>([](lua_State *l,pragma::BasePlayerComponent &hPl,EulerAngles &ang) {
@@ -3150,10 +3150,10 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	{
 		Lua::ComponentClass<pragma::BaseGamemodeComponent> def {"BaseGamemodeComponent"};
 		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
-		def.def("GetName",&pragma::BaseGamemodeComponent::GetName);
-		def.def("GetIdentifier",&pragma::BaseGamemodeComponent::GetIdentifier);
-		def.def("GetComponentName",&pragma::BaseGamemodeComponent::GetComponentName);
-		def.def("GetAuthor",&pragma::BaseGamemodeComponent::GetAuthor);
+		def.def("GetName",&pragma::BaseGamemodeComponent::GetName,luabind::copy_policy<0>{});
+		def.def("GetIdentifier",&pragma::BaseGamemodeComponent::GetIdentifier,luabind::copy_policy<0>{});
+		def.def("GetComponentName",&pragma::BaseGamemodeComponent::GetComponentName,luabind::copy_policy<0>{});
+		def.def("GetAuthor",&pragma::BaseGamemodeComponent::GetAuthor,luabind::copy_policy<0>{});
 		def.def("GetGamemodeVersion",&pragma::BaseGamemodeComponent::GetGamemodeVersion);
 
 		// Enums

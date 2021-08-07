@@ -66,6 +66,7 @@
 #include <prosper_render_pass.hpp>
 #include <pragma/lua/lua_call.hpp>
 #include <luainterface.hpp>
+#include <luabind/copy_policy.hpp>
 #include <cmaterialmanager.h>
 
 extern DLLCLIENT CEngine *c_engine;
@@ -243,7 +244,7 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 
 	auto defShaderInfo = luabind::class_<util::ShaderInfo>("Info");
 	//defShaderInfo.def("GetID",&Lua_ShaderInfo_GetID);
-	defShaderInfo.def("GetName",&::util::ShaderInfo::GetIdentifier);
+	defShaderInfo.def("GetName",&::util::ShaderInfo::GetIdentifier,luabind::copy_policy<0>{});
 	modShader[defShaderInfo];
 
 	auto defShader = luabind::class_<prosper::Shader>("Shader");
@@ -674,17 +675,17 @@ void CGame::RegisterLuaClasses()
 	defDebugRendererObject.def("Remove",&::DebugRenderer::BaseObject::Remove);
 	defDebugRendererObject.def("IsValid",&::DebugRenderer::BaseObject::IsValid);
 	defDebugRendererObject.def("SetPos",&::DebugRenderer::BaseObject::SetPos);
-	defDebugRendererObject.def("GetPos",&::DebugRenderer::BaseObject::GetPos);
+	defDebugRendererObject.def("GetPos",&::DebugRenderer::BaseObject::GetPos,luabind::copy_policy<0>{});
 	defDebugRendererObject.def("SetRotation",&::DebugRenderer::BaseObject::SetRotation);
-	defDebugRendererObject.def("GetRotation",&::DebugRenderer::BaseObject::GetRotation);
+	defDebugRendererObject.def("GetRotation",&::DebugRenderer::BaseObject::GetRotation,luabind::copy_policy<0>{});
 	defDebugRendererObject.def("SetAngles",&::DebugRenderer::BaseObject::SetAngles);
 	defDebugRendererObject.def("GetAngles",&::DebugRenderer::BaseObject::GetAngles);
 	defDebugRendererObject.def("IsVisible",&::DebugRenderer::BaseObject::IsVisible);
 	defDebugRendererObject.def("SetVisible",&::DebugRenderer::BaseObject::SetVisible);
 	defDebugRendererObject.def("SetScale",&::DebugRenderer::BaseObject::SetScale);
-	defDebugRendererObject.def("GetScale",&::DebugRenderer::BaseObject::GetScale);
+	defDebugRendererObject.def("GetScale",&::DebugRenderer::BaseObject::GetScale,luabind::copy_policy<0>{});
 	defDebugRendererObject.def("SetPose",&::DebugRenderer::BaseObject::SetPose);
-	defDebugRendererObject.def("GetPose",static_cast<const umath::ScaledTransform&(::DebugRenderer::BaseObject::*)() const>(&::DebugRenderer::BaseObject::GetPose));
+	defDebugRendererObject.def("GetPose",static_cast<const umath::ScaledTransform&(::DebugRenderer::BaseObject::*)() const>(&::DebugRenderer::BaseObject::GetPose),luabind::copy_policy<0>{});
 	debugMod[defDebugRendererObject];
 
 	auto &modGame = GetLuaInterface().RegisterLibrary("game");

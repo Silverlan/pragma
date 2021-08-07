@@ -41,6 +41,7 @@
 #include "pragma/lua/policies/game_object_policy.hpp"
 #include "pragma/lua/policies/optional_policy.hpp"
 #include <pragma/physics/movetypes.h>
+#include <luabind/copy_policy.hpp>
 #pragma optimize("",off)
 
 namespace Lua {bool get_bullet_master(BaseEntity &ent);};
@@ -227,10 +228,10 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	Lua::register_gravity_component(gameMod);
 
 	auto defVelocity = luabind::class_<pragma::VelocityComponent,pragma::BaseEntityComponent>("VelocityComponent");
-	defVelocity.def("GetVelocity",&pragma::VelocityComponent::GetVelocity);
+	defVelocity.def("GetVelocity",&pragma::VelocityComponent::GetVelocity,luabind::copy_policy<0>{});
 	defVelocity.def("SetVelocity",&pragma::VelocityComponent::SetVelocity);
 	defVelocity.def("AddVelocity",&pragma::VelocityComponent::AddVelocity);
-	defVelocity.def("GetAngularVelocity",&pragma::VelocityComponent::GetAngularVelocity);
+	defVelocity.def("GetAngularVelocity",&pragma::VelocityComponent::GetAngularVelocity,luabind::copy_policy<0>{});
 	defVelocity.def("SetAngularVelocity",&pragma::VelocityComponent::SetAngularVelocity);
 	defVelocity.def("AddAngularVelocity",&pragma::VelocityComponent::AddAngularVelocity);
 	defVelocity.def("GetLocalAngularVelocity",&pragma::VelocityComponent::GetLocalAngularVelocity);
@@ -244,7 +245,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	gameMod[defVelocity];
 
 	auto defGlobal = luabind::class_<pragma::GlobalNameComponent,pragma::BaseEntityComponent>("GlobalComponent");
-	defGlobal.def("GetGlobalName",&pragma::GlobalNameComponent::GetGlobalName);
+	defGlobal.def("GetGlobalName",&pragma::GlobalNameComponent::GetGlobalName,luabind::copy_policy<0>{});
 	defGlobal.def("SetGlobalName",&pragma::GlobalNameComponent::SetGlobalName);
 	gameMod[defGlobal];
 

@@ -64,7 +64,6 @@ namespace Lua
 		DLLCLIENT void SetSize(lua_State *l,::WIBase &hPanel,float x,float y);
 		DLLCLIENT void Wrap(lua_State *l,::WIBase &hPanel,const std::string &wrapperClassName);
 		DLLCLIENT void ClearParent(lua_State *l,::WIBase &hPanel);
-		DLLCLIENT void GetChildren(lua_State *l,::WIBase &hPanel);
 		DLLCLIENT void GetChildren(lua_State *l,::WIBase &hPanel,std::string className);
 		DLLCLIENT void GetChild(lua_State *l,::WIBase &hPanel,unsigned int idx);
 		DLLCLIENT void GetChild(lua_State *l,::WIBase &hPanel,std::string className,unsigned int idx);

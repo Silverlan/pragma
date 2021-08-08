@@ -23,6 +23,7 @@
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/rendering/lighting/c_light_data_buffer_manager.hpp"
 #include "pragma/lua/libraries/c_lua_vulkan.h"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <sharedutils/util_shaderinfo.hpp>

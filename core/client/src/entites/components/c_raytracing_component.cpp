@@ -23,6 +23,7 @@
 #include <prosper_command_buffer.hpp>
 #include <material_descriptor_array.hpp>
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 using namespace pragma;
 

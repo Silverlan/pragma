@@ -141,7 +141,9 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 		hPanel.SetParent(&hParent,index);
 	}));
 	classDef.def("ClearParent",&ClearParent);
-	classDef.def("GetChildren",static_cast<void(*)(lua_State*,::WIBase&)>(&GetChildren));
+	classDef.def("GetChildren",static_cast<std::vector<WIHandle>(*)(lua_State*,::WIBase&)>([](lua_State *l,::WIBase &hPanel) {
+		return *hPanel.GetChildren();
+	}));
 	classDef.def("GetChildren",static_cast<void(*)(lua_State*,::WIBase&,std::string)>(&GetChildren));
 	classDef.def("GetFirstChild",&::WIBase::GetFirstChild);
 	classDef.def("GetChild",static_cast<void(*)(lua_State*,::WIBase&,unsigned int)>(&GetChild));
@@ -846,26 +848,6 @@ void Lua::WIBase::ClearParent(lua_State *l,::WIBase &hPanel)
 {
 	
 	hPanel.SetParent(WGUI::GetInstance().GetBaseElement());
-}
-void Lua::WIBase::GetChildren(lua_State *l,::WIBase &hPanel)
-{
-	
-	std::vector<WIHandle> *children = hPanel.GetChildren();
-	int table = Lua::CreateTable(l);
-	unsigned int c = 1;
-	for(unsigned int i=0;i<children->size();i++)
-	{
-		WIHandle &hChild = (*children)[i];
-		if(hChild.IsValid())
-		{
-			auto *pChild = hChild.get();
-			auto oChild = WGUILuaInterface::GetLuaObject(l,*pChild);
-			Lua::PushInt(l,c);
-			oChild.push(l);
-			Lua::SetTableValue(l,table);
-			c++;
-		}
-	}
 }
 void Lua::WIBase::GetChildren(lua_State *l,::WIBase &hPanel,std::string className)
 {

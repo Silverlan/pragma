@@ -18,6 +18,7 @@
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/components/usable_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/physics/environment.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>

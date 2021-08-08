@@ -36,6 +36,7 @@
 #include <pragma/networking/enums.hpp>
 #include <sharedutils/scope_guard.h>
 #include <pragma/lua/libraries/ltimer.h>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/physics/raytraces.h>
 #include <pragma/physics/collisionmasks.h>
 #include <pragma/util/bulletinfo.h>

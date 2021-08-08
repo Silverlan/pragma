@@ -11,6 +11,7 @@
 #include "pragma/networking/iserver_client.hpp"
 #include <pragma/entities/components/map_component.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/networking/nwm_util.h>
@@ -18,17 +19,18 @@
 extern DLLSERVER SGame *s_game;
 extern DLLSERVER ServerState *server;
 #pragma optimize("",off)
-SLuaEntity::SLuaEntity(luabind::object &o,const std::string &className)
-	: SBaseEntity{},LuaObjectBase{}
-{
-	m_class = className;
-	SBaseEntity::SetLuaObject(o);
-	LuaObjectBase::SetLuaObject(o);
-}
+SLuaEntity::SLuaEntity()
+	: SBaseEntity{}
+{}
 void SLuaEntity::Initialize()
 {
 	SBaseEntity::Initialize();
-	CallLuaMember("Initialize");
+	CallLuaMethod("Initialize");
+}
+void SLuaEntity::SetupLua(const luabind::object &o,const std::string &className)
+{
+	m_class = className;
+	SetLuaObject(o);
 }
 bool SLuaEntity::IsScripted() const {return true;}
 void SLuaEntity::InitializeLuaObject(lua_State *lua)

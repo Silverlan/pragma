@@ -9,6 +9,7 @@
 #include "pragma/entities/components/composite_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
+#include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/lua/l_entity_handles.hpp"
 #include <pragma/entities/entity_iterator.hpp>
 #include <sharedutils/util_hash.hpp>

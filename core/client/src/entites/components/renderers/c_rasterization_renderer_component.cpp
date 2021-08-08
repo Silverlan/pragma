@@ -25,6 +25,7 @@
 #include <prosper_command_buffer.hpp>
 #include <buffers/prosper_buffer.hpp>
 #include <image/prosper_render_target.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;

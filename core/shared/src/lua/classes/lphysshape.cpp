@@ -12,6 +12,7 @@
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/lua/classes/ldef_quaternion.h"
 #include "pragma/lua/policies/shared_from_this_policy.hpp"
+#include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/model/modelmesh.h"
 #include <luabind/out_value_policy.hpp>

@@ -17,6 +17,7 @@
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/lua/l_entity_handles.hpp"
+#include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/model/model.h"
 #include "pragma/physics/raytraces.h"
 #include "pragma/physics/jointinfo.h"

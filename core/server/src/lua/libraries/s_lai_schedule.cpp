@@ -10,6 +10,7 @@
 #include "pragma/lua/classes/s_lentity.h"
 #include "pragma/ai/ai_schedule.h"
 #include "luasystem.h"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 namespace Lua
 {

@@ -7,6 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/entities/components/damageable_component.hpp"
+#include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/lua/l_entity_handles.hpp"
 
 using namespace pragma;

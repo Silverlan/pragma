@@ -18,6 +18,7 @@
 #include <prosper_command_buffer.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_texture.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

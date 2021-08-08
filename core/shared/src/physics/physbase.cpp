@@ -8,6 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/physics/environment.hpp"
 #include "pragma/physics/base.hpp"
+#include "pragma/lua/converters/game_type_converters_t.hpp"
 
 util::TWeakSharedHandle<pragma::physics::IBase> pragma::physics::IBase::GetHandle() const {return m_handle;}
 util::TSharedHandle<pragma::physics::IBase> pragma::physics::IBase::ClaimOwnership() const {return util::claim_shared_handle_ownership(m_handle);}

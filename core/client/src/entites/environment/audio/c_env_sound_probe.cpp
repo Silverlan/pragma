@@ -9,6 +9,7 @@
 #include "pragma/entities/environment/audio/c_env_sound_probe.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/lua/c_lentity_handles.hpp"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/util/util_handled.hpp>
 #include <pragma/entities/baseentity_events.hpp>
 #include <pragma/entities/components/base_transform_component.hpp>

@@ -45,6 +45,7 @@
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include "pragma/math/c_util_math.hpp"
 #include "pragma/console/c_cvar_global_functions.h"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;

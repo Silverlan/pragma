@@ -83,6 +83,7 @@
 #include <pragma/lua/lentity_components_base_types.hpp>
 #include <pragma/lua/lentity_components.hpp>
 #include <pragma/lua/lua_entity_component.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/physics/movetypes.h>
 #include <pragma/lua/lua_call.hpp>
 #include <sharedutils/netpacket.hpp>

@@ -19,6 +19,7 @@
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/entities/components/base_actor_component.hpp>
 #include <pragma/lua/policies/game_object_policy.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 namespace Lua
 {

@@ -8,6 +8,7 @@
 #include "pragma/entities/components/s_name_component.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <sharedutils/netpacket.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
 

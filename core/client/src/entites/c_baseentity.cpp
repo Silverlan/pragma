@@ -58,6 +58,7 @@
 #include <pragma/entities/components/base_physics_component.hpp>
 #include <pragma/entities/components/composite_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 LINK_ENTITY_TO_CLASS(entity,CBaseEntity);
 

@@ -119,6 +119,8 @@
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 void CGame::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
 {

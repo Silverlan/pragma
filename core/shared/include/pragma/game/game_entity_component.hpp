@@ -33,7 +33,7 @@ template<class TComponent,class THolder>
 		}
 		else
 		{
-			Con::csv<<"WARNING: Unable to create lua entity component '"<<classname<<"': Lua class is not derived from valid GUI base!"<<Con::endl;
+			Con::csv<<"WARNING: Unable to create lua entity component '"<<classname<<"': Lua class is not derived from valid entity component base!"<<Con::endl;
 			return nullptr;
 		}
 #ifndef LUABIND_NO_EXCEPTIONS

@@ -20,6 +20,7 @@
 #include <pragma/entities/components/usable_component.hpp>
 #include <pragma/entities/components/velocity_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <servermanager/interface/sv_nwm_manager.hpp>
 #include <sharedutils/datastream.h>
 #include <pragma/networking/nwm_util.h>

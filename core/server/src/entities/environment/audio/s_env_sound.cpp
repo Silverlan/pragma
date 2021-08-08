@@ -12,6 +12,7 @@
 #include <pragma/audio/alsound.h>
 #include "pragma/audio/s_alsound.h"
 #include "pragma/lua/s_lentity_handles.hpp"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/audio/alsound_type.h>
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>

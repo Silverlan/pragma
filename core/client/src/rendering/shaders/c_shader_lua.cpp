@@ -12,6 +12,7 @@
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/util.hpp>
 #include <shader/prosper_pipeline_create_info.hpp>

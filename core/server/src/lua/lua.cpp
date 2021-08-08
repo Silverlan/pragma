@@ -35,6 +35,7 @@
 #include <pragma/lua/lentity_component_lua.hpp>
 #include <pragma/lua/sh_lua_component.hpp>
 #include <pragma/lua/libraries/lnet.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/model/model.h>
 #include <pragma/networking/nwm_util.h>
 #include <luainterface.hpp>
@@ -112,7 +113,7 @@ void SGame::RegisterLua()
 		{"COMPONENT_FLAG_BIT_NETWORKED",umath::to_integral(pragma::ComponentFlags::Networked)}
 	});
 
-	auto entityClassDef = luabind::class_<BaseEntity>("BaseEntity");
+	auto entityClassDef = luabind::class_<BaseEntity>("BaseEntityBase");
 	Lua::Entity::register_class(entityClassDef);
 	modEnts[entityClassDef];
 	RegisterLuaGameClasses(gameMod);
@@ -125,7 +126,8 @@ void SGame::RegisterLua()
 	//modEnts[tmp];
 
 	// Obsolete?
-	auto classDefBase = luabind::class_<SLuaEntity,luabind::bases<SBaseEntity>,luabind::default_holder,SLuaEntity>("BaseEntity");
+	auto classDefBase = luabind::class_<SLuaEntity,luabind::bases<SBaseEntity>,pragma::lua::SLuaEntityHolder>("BaseEntity");
+	classDefBase.def(luabind::constructor<>());
 	// classDefBase.def(luabind::tostring(luabind::self));
 	//classDefBase.def(luabind::constructor<>());
 	classDefBase.def("Initialize",&SLuaEntity::LuaInitialize,&SLuaEntity::default_Initialize);

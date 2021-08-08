@@ -13,6 +13,7 @@
 #include "pragma/rendering/shaders/particles/c_shader_particle_blob_shadow.h"
 #include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/gui/widebugdepthtexture.h"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <wgui/types/wirect.h>
 
 

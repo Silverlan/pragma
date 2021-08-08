@@ -22,6 +22,7 @@
 #include <buffers/prosper_uniform_resizable_buffer.hpp>
 #include <buffers/prosper_swap_buffer.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 

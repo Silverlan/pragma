@@ -9,6 +9,7 @@
 #include "pragma/lua/classes/ldef_entity.h"
 #include <pragma/lua/luaapi.h>
 #include <luabind/copy_policy.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 void Lua::Faction::register_class(lua_State *l,luabind::module_ &mod)
 {

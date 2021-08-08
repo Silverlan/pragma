@@ -9,6 +9,7 @@
 #include "pragma/model/c_model.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/asset/util_asset.hpp>
 #include <prosper_command_buffer.hpp>
 #include <cmaterial.h>

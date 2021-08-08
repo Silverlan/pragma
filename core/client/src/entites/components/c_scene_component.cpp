@@ -32,6 +32,7 @@
 #include <sharedutils/property/util_property_color.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <prosper_command_buffer.hpp>
 
 using namespace pragma;

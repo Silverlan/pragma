@@ -29,6 +29,7 @@
 #include "pragma/rendering/shaders/util/c_shader_compose_rma.hpp"
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/logic_component.hpp>
 #include <util_texture_info.hpp>
 #include <pragma/model/modelmanager.h>

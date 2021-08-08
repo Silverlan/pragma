@@ -9,6 +9,7 @@
 #include "pragma/entities/components/c_networked_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <sharedutils/property/util_property_euler_angles.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/entity_property.hpp>
 
 using namespace pragma;

@@ -15,6 +15,7 @@
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/property_converter_t.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <util_image_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <texturemanager/texturemanager.h>

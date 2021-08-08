@@ -104,6 +104,7 @@
 #include "pragma/entities/components/s_point_at_target_component.hpp"
 #include "pragma/entities/components/s_gamemode_component.hpp"
 #include "pragma/entities/environment/s_env_timescale.h"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 void SGame::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
 {

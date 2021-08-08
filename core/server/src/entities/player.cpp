@@ -10,6 +10,7 @@
 #include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 LINK_ENTITY_TO_CLASS(player,Player);
 

@@ -11,6 +11,7 @@
 #include "pragma/physics/environment.hpp"
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/lua/classes/ldef_quaternion.h"
+#include "pragma/lua/converters/game_type_converters_t.hpp"
 
 // #define ENABLE_DEPRECATED_PHYSICS
 

@@ -14,6 +14,7 @@
 #include "pragma/entities/c_viewmodel.h"
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/lentity_components_base_types.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 void Lua::register_cl_weapon_component(lua_State *l,luabind::module_ &module)
 {

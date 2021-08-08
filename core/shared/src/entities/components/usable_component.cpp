@@ -9,6 +9,7 @@
 #include "pragma/entities/components/usable_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/lua/l_entity_handles.hpp"
+#include "pragma/lua/converters/game_type_converters_t.hpp"
 
 using namespace pragma;
 

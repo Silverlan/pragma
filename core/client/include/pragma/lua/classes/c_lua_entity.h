@@ -10,20 +10,25 @@
 
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/luaobjectbase.h>
+#include <pragma/lua/handle_holder.hpp>
 
 class DLLCLIENT CLuaEntity
-	: public CBaseEntity,
-	public LuaObjectBase,
-	public luabind::wrap_base
+	: public CBaseEntity
 {
 public:
-	CLuaEntity(luabind::object &o,const std::string &className);
+	CLuaEntity();
 	virtual void Initialize() override;
+	void SetupLua(const luabind::object &o,const std::string &className);
 
 	void LuaInitialize() {}
 	static void default_Initialize(CBaseEntity *ent);
 protected:
 	virtual void InitializeLuaObject(lua_State *lua) override;
+};
+
+namespace pragma::lua
+{
+	using CLuaEntityHolder = HandleHolder<CLuaEntity>;
 };
 
 #endif

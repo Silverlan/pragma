@@ -12,6 +12,7 @@
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/physics/raytraces.h>
 #include <pragma/physics/environment.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <sharedutils/scope_guard.h>
 #include <pragma/audio/alsound_type.h>
 

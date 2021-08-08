@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_bsp_component.hpp"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 

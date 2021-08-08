@@ -60,6 +60,7 @@
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
 #include <pragma/lua/policies/pair_policy.hpp>
 #include <pragma/lua/converters/pair_converter_t.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/func/basefuncwater.h>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>

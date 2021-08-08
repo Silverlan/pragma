@@ -25,6 +25,7 @@
 #include <pragma/entities/components/global_component.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/lua/lua_entity_type.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/map_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/game/game_lua_entity.hpp>
@@ -203,7 +204,7 @@ unsigned int SGame::GetFreeEntityIndex()
 SBaseEntity *SGame::CreateLuaEntity(std::string classname,bool bLoadIfNotExists)
 {
 	luabind::object oClass {};
-	auto *ent = static_cast<SBaseEntity*>(Game::CreateLuaEntity<SLuaEntity,util::WeakHandle<SLuaEntity>>(classname,oClass,bLoadIfNotExists));
+	auto *ent = static_cast<SBaseEntity*>(Game::CreateLuaEntity<SLuaEntity,pragma::lua::SLuaEntityHolder>(classname,oClass,bLoadIfNotExists));
 	if(ent == nullptr)
 		return nullptr;
 	auto oType = oClass["Type"];

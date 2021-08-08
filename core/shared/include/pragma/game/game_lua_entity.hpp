@@ -20,11 +20,25 @@ template<class TLuaEntity,class THandle>
 		return nullptr;
 	}
 	luabind::object r;
+	BaseEntity *el = nullptr;
 #ifndef LUABIND_NO_EXCEPTIONS
 	try
 	{
 #endif
 		r = (*o)();
+		auto *elLua = luabind::object_cast<TLuaEntity*>(r);
+		auto *holder = luabind::object_cast<THandle*>(r);
+		if(elLua && holder)
+		{
+			elLua->SetupLua(r,classname);
+			holder->SetHandle(util::weak_shared_handle_cast<BaseEntity,TLuaEntity>(elLua->GetHandle()));
+			el = elLua;
+		}
+		else
+		{
+			Con::csv<<"WARNING: Unable to create lua entity '"<<classname<<"': Lua class is not derived from valid entity base!"<<Con::endl;
+			return nullptr;
+		}
 #ifndef LUABIND_NO_EXCEPTIONS
 	}
 	catch(luabind::error&)
@@ -33,21 +47,13 @@ template<class TLuaEntity,class THandle>
 		return nullptr;
 	}
 #endif
-	if(!r)
+	if(!el)
 	{
 		Con::cwar<<"WARNING: Unable to create lua entity '"<<classname<<"'!"<<Con::endl;
 		return nullptr;
 	}
-	BaseEntity *ent = nullptr;
-	if(luabind::object_cast_nothrow<THandle*>(r,static_cast<THandle*>(nullptr)))
-		ent = new TLuaEntity(r,classname);
-	else
-	{
-		Con::cwar<<"WARNING: Unable to create lua entity '"<<classname<<"': Lua class is not derived from valid entity base!"<<Con::endl;
-		return nullptr;
-	}
 	oClass = *o;
-	return ent;
+	return el;
 }
 
 #endif

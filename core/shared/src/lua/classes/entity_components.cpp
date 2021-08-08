@@ -18,6 +18,7 @@
 #include "pragma/lua/converters/optional_converter_t.hpp"
 #include "pragma/lua/converters/pair_converter_t.hpp"
 #include "pragma/lua/converters/property_converter_t.hpp"
+#include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/lua/lua_component_event.hpp"
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/entities/components/base_parent_component.hpp"

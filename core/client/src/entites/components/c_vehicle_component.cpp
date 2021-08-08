@@ -16,6 +16,7 @@
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_observable_component.hpp"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/input/inkeys.h>
 
 using namespace pragma;

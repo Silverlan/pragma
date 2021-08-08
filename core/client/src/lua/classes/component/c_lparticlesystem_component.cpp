@@ -14,6 +14,7 @@
 #include <pragma/entities/environment/effects/particlesystemdata.h>
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/model/model.h>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>

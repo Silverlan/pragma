@@ -15,6 +15,7 @@
 #include "pragma/model/vk_mesh.h"
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <buffers/prosper_buffer.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;

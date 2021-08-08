@@ -16,6 +16,7 @@
 #include "pragma/lua/classes/ldef_angle.h"
 #include "pragma/lua/libraries/lray.h"
 #include "pragma/lua/class_manager.hpp"
+#include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/lua/libraries/lfile.h"
 #include <pragma/game/game.h>
 #include "luasystem.h"

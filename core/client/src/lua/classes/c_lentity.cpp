@@ -15,6 +15,7 @@
 #include "pragma/lua/libraries/c_lua_vulkan.h"
 #include <sharedutils/netpacket.hpp>
 #include <networkmanager/interface/nwm_manager.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 

@@ -15,6 +15,7 @@
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 #include "pragma/rendering/shaders/c_shader_shadow.hpp"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <image/prosper_texture.hpp>
 #include <image/prosper_image_view.hpp>

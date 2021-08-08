@@ -21,6 +21,7 @@
 #include <util_image_buffer.hpp>
 #include <util_texture_info.hpp>
 #include <prosper_command_buffer.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <image/prosper_image.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <buffers/prosper_buffer.hpp>

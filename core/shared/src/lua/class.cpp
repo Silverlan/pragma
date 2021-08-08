@@ -42,6 +42,7 @@
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/lua/lua_entity_iterator.hpp"
 #include "pragma/lua/libraries/lents.h"
+#include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/util/util_splash_damage_info.hpp"
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/lua/classes/lentity.h"

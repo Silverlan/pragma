@@ -11,6 +11,7 @@
 #include <pragma/game/game.h>
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
+#include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/util/util_ballistic.h"
 #include "pragma/lua/l_entity_handles.hpp"
 #include "pragma/physics/environment.hpp"

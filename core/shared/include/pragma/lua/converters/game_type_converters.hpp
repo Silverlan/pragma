@@ -145,20 +145,20 @@ namespace luabind
 	template <class T>
 		concept IsGameObjectType = IsHandleType<T> || IsPhysicsType<T>;
 
-	template <typename T> requires(IsGameObjectType<T> && std::is_pointer_v<T> && !std::is_const_v<std::remove_pointer_t<T>>)
+	template <typename T> requires(IsGameObjectType<base_type<T>> && std::is_pointer_v<T> && !std::is_const_v<std::remove_pointer_t<T>>)
 	struct default_converter<T>
 		: game_object_converter<T,luabind::detail::pointer_converter>
 	{};
-	template <typename T> requires(IsGameObjectType<T> && std::is_pointer_v<T> && std::is_const_v<std::remove_pointer_t<T>>)
+	template <typename T> requires(IsGameObjectType<base_type<T>> && std::is_pointer_v<T> && std::is_const_v<std::remove_pointer_t<T>>)
 	struct default_converter<T>
 		: game_object_converter<T,luabind::detail::const_pointer_converter>
 	{};
 
-	template <typename T> requires(IsGameObjectType<T> && std::is_reference_v<T> && !std::is_const_v<std::remove_reference_t<T>>)
+	template <typename T> requires(IsGameObjectType<base_type<T>> && std::is_reference_v<T> && !std::is_const_v<std::remove_reference_t<T>>)
 	struct default_converter<T>
 		: game_object_converter<T,luabind::detail::ref_converter>
 	{};
-	template <typename T> requires(IsGameObjectType<T> && std::is_reference_v<T> && std::is_const_v<std::remove_reference_t<T>>)
+	template <typename T> requires(IsGameObjectType<base_type<T>> && std::is_reference_v<T> && std::is_const_v<std::remove_reference_t<T>>)
 	struct default_converter<T>
 		: game_object_converter<T,luabind::detail::const_ref_converter>
 	{};

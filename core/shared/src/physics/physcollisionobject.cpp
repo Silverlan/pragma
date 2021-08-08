@@ -11,6 +11,7 @@
 #include "pragma/physics/shape.hpp"
 #include "pragma/physics/collisionmasks.h"
 #include "pragma/model/modelmesh.h"
+#include "pragma/lua/converters/game_type_converters_t.hpp"
 
 const double EPSILON = 4.9406564584125e-2;
 

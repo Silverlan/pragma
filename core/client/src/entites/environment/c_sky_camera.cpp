@@ -17,6 +17,7 @@
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/baseentity_events.hpp>
 
 extern DLLCLIENT CEngine *c_engine;

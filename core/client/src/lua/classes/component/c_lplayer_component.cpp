@@ -11,6 +11,7 @@
 #include "luasystem.h"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/classes/lproperty_generic.hpp>
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/lentity_components_base_types.hpp>

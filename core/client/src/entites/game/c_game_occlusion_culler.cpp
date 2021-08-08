@@ -17,6 +17,7 @@
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/rendering/occlusion_culling/c_occlusion_octree_impl.hpp"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/console/sh_cmd.h>
 
 extern DLLCLIENT CEngine *c_engine;

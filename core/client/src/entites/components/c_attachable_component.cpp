@@ -14,6 +14,7 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/networking/c_nwm_util.h"
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 using namespace pragma;
 

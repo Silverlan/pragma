@@ -10,6 +10,7 @@
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/entities/shared_spawnflags.h"
 #include <sharedutils/util_string.h>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>
 #include "pragma/lua/s_lentity_handles.hpp"

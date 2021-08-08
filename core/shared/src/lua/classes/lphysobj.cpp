@@ -15,6 +15,7 @@
 #include "pragma/lua/libraries/lray.h"
 #include "pragma/lua/policies/pair_policy.hpp"
 #include "pragma/lua/policies/game_object_policy.hpp"
+#include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/physics/environment.hpp"
 #include "pragma/physics/raytraces.h"

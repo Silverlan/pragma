@@ -10,6 +10,7 @@
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/networking/recipient_filter.hpp"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/networking/enums.hpp>
 #include <pragma/entities/components/damageable_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>

@@ -13,6 +13,7 @@
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <buffers/prosper_swap_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 

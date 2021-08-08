@@ -9,24 +9,29 @@
 
 #include "pragma/serverdefinitions.h"
 #include <pragma/lua/luaobjectbase.h>
+#include <pragma/lua/handle_holder.hpp>
 
 class DLLSERVER SLuaEntity
-	: public SBaseEntity,
-	public LuaObjectBase,
-	public luabind::wrap_base
+	: public SBaseEntity
 {
 public:
-	SLuaEntity(luabind::object &o,const std::string &className);
+	SLuaEntity();
 	virtual void Initialize() override;
 
 	virtual bool IsScripted() const override;
 	virtual void DoSpawn() override;
 	virtual void Remove() override;
+	void SetupLua(const luabind::object &o,const std::string &className);
 
 	void LuaInitialize() {}
 	static void default_Initialize(SBaseEntity *ent);
 protected:
 	virtual void InitializeLuaObject(lua_State *lua) override;
+};
+
+namespace pragma::lua
+{
+	using SLuaEntityHolder = HandleHolder<SLuaEntity>;
 };
 
 #endif

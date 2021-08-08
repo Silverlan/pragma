@@ -7,6 +7,7 @@
 #include "stdafx_server.h"
 #include "pragma/entities/prop/s_prop_base.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <sharedutils/netpacket.hpp>
 
 using namespace pragma;

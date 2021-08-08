@@ -36,6 +36,7 @@
 #include <pragma/math/intersection.h>
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/entities/entity_iterator.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 using namespace pragma;
 

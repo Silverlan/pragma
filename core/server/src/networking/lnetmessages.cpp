@@ -21,6 +21,7 @@
 #include <pragma/networking/enums.hpp>
 #include <pragma/lua/lua_handle.hpp>
 #include <pragma/lua/luaapi.h>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 void SGame::HandleLuaNetPacket(pragma::networking::IServerClient &session,NetPacket &packet)
 {

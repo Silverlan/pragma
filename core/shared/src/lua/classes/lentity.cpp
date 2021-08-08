@@ -21,6 +21,7 @@
 #include "pragma/lua/policies/pair_policy.hpp"
 #include "pragma/lua/policies/vector_policy.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
+#include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/lua/libraries/lray.h"
 #include "pragma/model/brush/brushmesh.h"
 #include "pragma/audio/alsound.h"

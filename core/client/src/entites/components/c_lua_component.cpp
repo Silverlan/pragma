@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/entities/components/c_lua_component.hpp"
 #include "pragma/lua/base_lua_handle_method.hpp"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 using namespace pragma;
 

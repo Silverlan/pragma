@@ -14,6 +14,7 @@
 #include "pragma/lua/classes/ldef_physobj.h"
 #include "pragma/lua/classes/ldef_tracedata.h"
 #include "pragma/lua/classes/lphysics.h"
+#include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/lua/lua_call.hpp"
 #include <pragma/game/game.h>
 #include "luasystem.h"

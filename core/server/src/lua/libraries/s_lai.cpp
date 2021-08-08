@@ -31,6 +31,7 @@
 #include "pragma/ai/ai_task_wait.h"
 #include <luainterface.hpp>
 #include <pragma/lua/libraries/lai.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 extern DLLSERVER SGame *s_game;
 

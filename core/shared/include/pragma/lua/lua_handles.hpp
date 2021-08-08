@@ -88,7 +88,7 @@ LUA_DEFINE_PTR_TYPE(util,util::WeakHandle,weak_handle);
 			} \
 			void to_lua(lua_State* L, TClass<T> const& p) \
 			{ \
-				default_converter<T>().to_lua(L, p); \
+				default_converter<T*>().to_lua(L, const_cast<TClass<T>&>(p).get()); \
 			} \
 			template <class U> \
 			void converter_postcall(lua_State*, U const&, int) \

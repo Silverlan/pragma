@@ -60,6 +60,7 @@
 #include <prosper_render_pass.hpp>
 #include <image/prosper_render_target.hpp>
 #include <pragma/lua/libraries/lfile.h>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <wgui/fontmanager.h>
 #include <udm.hpp>
 
@@ -207,7 +208,7 @@ void CGame::RegisterLua()
 		luabind::def("register_component_event",&Lua::ents::register_component_event)
 	];
 
-	auto entityClassDef = luabind::class_<BaseEntity>("BaseEntity");
+	auto entityClassDef = luabind::class_<BaseEntity>("BaseEntityBase");
 	Lua::Entity::register_class(entityClassDef);
 	modEnts[entityClassDef];
 
@@ -218,7 +219,8 @@ void CGame::RegisterLua()
 	//auto tmp = luabind::class_<EntityHandle>("EntityOld");
 	//modEnts[tmp];
 
-	auto classDefBase = luabind::class_<CLuaEntity,luabind::bases<CBaseEntity>,luabind::default_holder,CLuaEntity>("BaseEntity");
+	auto classDefBase = luabind::class_<CLuaEntity,luabind::bases<CBaseEntity>,pragma::lua::CLuaEntityHolder>("BaseEntity");
+	classDefBase.def(luabind::constructor<>());
 	// classDefBase.def(luabind::tostring(luabind::self));
 	//classDefBase.def(luabind::constructor<>());
 	classDefBase.def("Initialize",&CLuaEntity::LuaInitialize,&CLuaEntity::default_Initialize);

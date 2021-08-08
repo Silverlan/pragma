@@ -9,6 +9,7 @@
 #include "pragma/entities/components/c_softbody_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/lua/c_lentity_handles.hpp"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/physics/environment.hpp>
 #include <pragma/physics/collisionmesh.h>
 

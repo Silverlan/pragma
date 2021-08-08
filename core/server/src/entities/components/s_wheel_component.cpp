@@ -10,6 +10,7 @@
 #include "pragma/entities/s_entityfactories.h"
 #include "pragma/entities/baseentity_luaobject.h"
 #include "pragma/lua/s_lentity_handles.hpp"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/base_vehicle_component.hpp>
 #include <pragma/networking/nwm_util.h>
 #include <pragma/networking/enums.hpp>

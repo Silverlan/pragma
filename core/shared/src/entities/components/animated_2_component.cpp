@@ -12,6 +12,7 @@
 #include "pragma/model/animation/animation_manager.hpp"
 #include "pragma/model/animation/animation.hpp"
 #include "pragma/lua/l_entity_handles.hpp"
+#include "pragma/lua/converters/game_type_converters_t.hpp"
 
 using namespace pragma;
 

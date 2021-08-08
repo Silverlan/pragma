@@ -24,6 +24,7 @@
 #include "pragma/ai/ai_task_debug.h"
 #include "pragma/ai/ai_task_event.hpp"
 #include "pragma/ai/ai_task_wait.h"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 extern DLLSERVER SGame *s_game;
 

@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <prosper_command_buffer.hpp>
 
 void Lua::SoundEmitter::register_class(lua_State *l,luabind::module_ &entsMod)

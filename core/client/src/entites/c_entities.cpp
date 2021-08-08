@@ -16,6 +16,7 @@
 #include "pragma/game/c_game_entities.h"
 #include <sharedutils/util_string.h>
 #include <pragma/game/game_lua_entity.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 
 extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;
 pragma::CListenerComponent *CGame::GetListener()
@@ -124,7 +125,7 @@ CBaseEntity *CGame::GetEntityByClientIndex(unsigned int idx)
 CBaseEntity *CGame::CreateLuaEntity(std::string classname,unsigned int idx,bool bLoadIfNotExists)
 {
 	luabind::object oClass {};
-	auto *ent = static_cast<CBaseEntity*>(Game::CreateLuaEntity<CLuaEntity,util::WeakHandle<CLuaEntity>>(classname,oClass,bLoadIfNotExists));
+	auto *ent = static_cast<CBaseEntity*>(Game::CreateLuaEntity<CLuaEntity,pragma::lua::CLuaEntityHolder>(classname,oClass,bLoadIfNotExists));
 	if(ent == nullptr)
 		return nullptr;
 	SetupEntity(ent,idx);

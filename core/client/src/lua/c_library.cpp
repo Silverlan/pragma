@@ -44,6 +44,7 @@
 #include <pragma/lua/converters/string_view_converter_t.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/lua/converters/pair_converter_t.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/asset/util_asset.hpp>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
@@ -66,11 +67,11 @@ static void register_gui(Lua::Interface &lua)
 	auto *l = lua.GetState();
 	auto guiMod = luabind::module(l,"gui");
 	guiMod[
-		luabind::def("create",static_cast<::WIBase*(*)(lua_State*,const std::string&,::WIBase&,int32_t,int32_t,uint32_t,uint32_t,float,float,float,float)>(&Lua::gui::create)),
-		luabind::def("create",static_cast<::WIBase*(*)(lua_State*,const std::string&,::WIBase&,int32_t,int32_t,uint32_t,uint32_t)>(&Lua::gui::create)),
-		luabind::def("create",static_cast<::WIBase*(*)(lua_State*,const std::string&,::WIBase&,int32_t,int32_t)>(&Lua::gui::create)),
-		luabind::def("create",static_cast<::WIBase*(*)(lua_State*,const std::string&,::WIBase&)>(&Lua::gui::create)),
-		luabind::def("create",static_cast<::WIBase*(*)(lua_State*,const std::string&)>(&Lua::gui::create)),
+		luabind::def("create",static_cast<::WIBase*(*)(CGame*,const std::string&,::WIBase&,int32_t,int32_t,uint32_t,uint32_t,float,float,float,float)>(&Lua::gui::create)),
+		luabind::def("create",static_cast<::WIBase*(*)(CGame*,const std::string&,::WIBase&,int32_t,int32_t,uint32_t,uint32_t)>(&Lua::gui::create)),
+		luabind::def("create",static_cast<::WIBase*(*)(CGame*,const std::string&,::WIBase&,int32_t,int32_t)>(&Lua::gui::create)),
+		luabind::def("create",static_cast<::WIBase*(*)(CGame*,const std::string&,::WIBase&)>(&Lua::gui::create)),
+		luabind::def("create",static_cast<::WIBase*(*)(CGame*,const std::string&)>(&Lua::gui::create)),
 
 		luabind::def("create_label",static_cast<::WIBase*(*)(lua_State*,const std::string&,::WIBase&,int32_t,int32_t)>(&Lua::gui::create_label)),
 		luabind::def("create_label",static_cast<::WIBase*(*)(lua_State*,const std::string&,::WIBase&)>(&Lua::gui::create_label)),

@@ -32,6 +32,7 @@
 #include <pragma/lua/converters/string_view_converter_t.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
+#include <pragma/lua/converters/property_converter_t.hpp>
 #include <pragma/lua/lua_call.hpp>
 #include <prosper_command_buffer.hpp>
 #include <sharedutils/property/util_property_color.hpp>

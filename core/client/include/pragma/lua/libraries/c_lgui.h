@@ -15,11 +15,11 @@ namespace Lua
 {
 	namespace gui
 	{
-		DLLCLIENT ::WIBase *create(lua_State *l,const std::string &name,::WIBase &parent,int32_t x,int32_t y,uint32_t w,uint32_t h,float left,float top,float right,float bottom);
-		DLLCLIENT ::WIBase *create(lua_State *l,const std::string &name,::WIBase &parent,int32_t x,int32_t y,uint32_t w,uint32_t h);
-		DLLCLIENT ::WIBase *create(lua_State *l,const std::string &name,::WIBase &parent,int32_t x,int32_t y);
-		DLLCLIENT ::WIBase *create(lua_State *l,const std::string &name,::WIBase &parent);
-		DLLCLIENT ::WIBase *create(lua_State *l,const std::string &name);
+		DLLCLIENT ::WIBase *create(CGame *game,const std::string &name,::WIBase &parent,int32_t x,int32_t y,uint32_t w,uint32_t h,float left,float top,float right,float bottom);
+		DLLCLIENT ::WIBase *create(CGame *game,const std::string &name,::WIBase &parent,int32_t x,int32_t y,uint32_t w,uint32_t h);
+		DLLCLIENT ::WIBase *create(CGame *game,const std::string &name,::WIBase &parent,int32_t x,int32_t y);
+		DLLCLIENT ::WIBase *create(CGame *game,const std::string &name,::WIBase &parent);
+		DLLCLIENT ::WIBase *create(CGame *game,const std::string &name);
 
 		DLLCLIENT ::WIBase *create_button(lua_State *l,const std::string &text);
 		DLLCLIENT ::WIBase *create_button(lua_State *l,const std::string &text,::WIBase &parent);

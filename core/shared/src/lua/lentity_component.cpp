@@ -21,6 +21,7 @@
 #include "pragma/entities/entity_component_event.hpp"
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/lua/lua_component_event.hpp"
+#include "pragma/lua/converters/property_converter_t.hpp"
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 

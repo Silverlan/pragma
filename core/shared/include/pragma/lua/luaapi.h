@@ -393,5 +393,6 @@ namespace Lua
 #include "pragma/lua/converters/string_view_converter.hpp"
 #include "pragma/lua/converters/vector_converter.hpp"
 #include "pragma/lua/converters/alias_types.hpp"
+#include "pragma/lua/converters/property_converter.hpp"
 
 #endif

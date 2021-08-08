@@ -24,7 +24,7 @@
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-static void initialize_element(lua_State *l,::WIBase &p)
+static void initialize_element(::WIBase &p)
 {
 	auto data = p.GetUserData();
 	if(data != nullptr)
@@ -33,50 +33,50 @@ static void initialize_element(lua_State *l,::WIBase &p)
 		wrapper->lua = true;
 	}
 }
-::WIBase *Lua::gui::create(lua_State *l,const std::string &name,::WIBase &parent,int32_t x,int32_t y,uint32_t w,uint32_t h,float left,float top,float right,float bottom)
+::WIBase *Lua::gui::create(CGame *game,const std::string &name,::WIBase &parent,int32_t x,int32_t y,uint32_t w,uint32_t h,float left,float top,float right,float bottom)
 {
-	auto *el = WGUI::GetInstance().Create(name,&parent);
+	auto *el = game ? game->CreateGUIElement(name,&parent) : WGUI::GetInstance().Create(name,&parent);
 	if(!el)
 		return nullptr;
 	el->SetPos(x,y);
 	el->SetSize(w,h);
 	el->SetAnchor(left,top,right,bottom);
-	initialize_element(l,*el);
+	initialize_element(*el);
 	return el;
 }
-::WIBase *Lua::gui::create(lua_State *l,const std::string &name,::WIBase &parent,int32_t x,int32_t y,uint32_t w,uint32_t h)
+::WIBase *Lua::gui::create(CGame *game,const std::string &name,::WIBase &parent,int32_t x,int32_t y,uint32_t w,uint32_t h)
 {
-	auto *el = WGUI::GetInstance().Create(name,&parent);
+	auto *el = game ? game->CreateGUIElement(name,&parent) : WGUI::GetInstance().Create(name,&parent);
 	if(!el)
 		return nullptr;
 	el->SetPos(x,y);
 	el->SetSize(w,h);
-	initialize_element(l,*el);
+	initialize_element(*el);
 	return el;
 }
-::WIBase *Lua::gui::create(lua_State *l,const std::string &name,::WIBase &parent,int32_t x,int32_t y)
+::WIBase *Lua::gui::create(CGame *game,const std::string &name,::WIBase &parent,int32_t x,int32_t y)
 {
-	auto *el = WGUI::GetInstance().Create(name,&parent);
+	auto *el = game ? game->CreateGUIElement(name,&parent) : WGUI::GetInstance().Create(name,&parent);
 	if(!el)
 		return nullptr;
 	el->SetPos(x,y);
-	initialize_element(l,*el);
+	initialize_element(*el);
 	return el;
 }
-::WIBase *Lua::gui::create(lua_State *l,const std::string &name,::WIBase &parent)
+::WIBase *Lua::gui::create(CGame *game,const std::string &name,::WIBase &parent)
 {
-	auto *el = WGUI::GetInstance().Create(name,&parent);
+	auto *el = game ? game->CreateGUIElement(name,&parent) : WGUI::GetInstance().Create(name,&parent);
 	if(!el)
 		return nullptr;
-	initialize_element(l,*el);
+	initialize_element(*el);
 	return el;
 }
-::WIBase *Lua::gui::create(lua_State *l,const std::string &name)
+::WIBase *Lua::gui::create(CGame *game,const std::string &name)
 {
-	auto *el = c_game->CreateGUIElement(name);
+	auto *el = game ? game->CreateGUIElement(name) : WGUI::GetInstance().Create(name);
 	if(!el)
 		return nullptr;
-	initialize_element(l,*el);
+	initialize_element(*el);
 	return el;
 }
 
@@ -88,7 +88,7 @@ static void initialize_element(lua_State *l,::WIBase &p)
 	pButton->SetText(text);
 	pButton->SizeToContents();
 	pButton->SetPos(x,y);
-	initialize_element(l,*pButton);
+	initialize_element(*pButton);
 	return pButton;
 }
 ::WIBase *Lua::gui::create_button(lua_State *l,const std::string &text,::WIBase &parent)
@@ -98,7 +98,7 @@ static void initialize_element(lua_State *l,::WIBase &p)
 		return nullptr;
 	pButton->SetText(text);
 	pButton->SizeToContents();
-	initialize_element(l,*pButton);
+	initialize_element(*pButton);
 	return pButton;
 }
 ::WIBase *Lua::gui::create_button(lua_State *l,const std::string &text)
@@ -108,7 +108,7 @@ static void initialize_element(lua_State *l,::WIBase &p)
 		return nullptr;
 	pButton->SetText(text);
 	pButton->SizeToContents();
-	initialize_element(l,*pButton);
+	initialize_element(*pButton);
 	return pButton;
 }
 
@@ -158,7 +158,7 @@ Lua::opt<Lua::mult<Lua::type<::WIBase>,Lua::type<::WIBase>,Lua::type<::WIBase>>>
 	pText->SetText(str);
 	pText->SizeToContents();
 	pText->SetPos(x,y);
-	initialize_element(l,*pText);
+	initialize_element(*pText);
 	return pText;
 }
 ::WIBase *Lua::gui::create_label(lua_State *l,const std::string &str,::WIBase &parent)
@@ -168,7 +168,7 @@ Lua::opt<Lua::mult<Lua::type<::WIBase>,Lua::type<::WIBase>,Lua::type<::WIBase>>>
 		return nullptr;
 	pText->SetText(str);
 	pText->SizeToContents();
-	initialize_element(l,*pText);
+	initialize_element(*pText);
 	return pText;
 }
 ::WIBase *Lua::gui::create_label(lua_State *l,const std::string &str)
@@ -178,7 +178,7 @@ Lua::opt<Lua::mult<Lua::type<::WIBase>,Lua::type<::WIBase>,Lua::type<::WIBase>>>
 		return nullptr;
 	pText->SetText(str);
 	pText->SizeToContents();
-	initialize_element(l,*pText);
+	initialize_element(*pText);
 	return pText;
 }
 

@@ -16,7 +16,7 @@
 #undef max
 
 using namespace pragma::lua;
-#pragma optimize("",off)
+
 static std::string ConvertWCSToMBS(const wchar_t* pstr, long wslen)
 {
 	int len = ::WideCharToMultiByte(CP_ACP, 0, pstr, wslen, NULL, 0, NULL, NULL);
@@ -507,4 +507,3 @@ std::optional<ParameterInfo> PdbManager::SymbolToParameterInfo(IDiaSymbol *pSymb
 	}
 	return paramInfo;
 }
-#pragma optimize("",on)

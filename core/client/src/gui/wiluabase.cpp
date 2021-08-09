@@ -13,7 +13,7 @@
 #include "pragma/lua/classes/c_ldef_wgui.h"
 
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 extern ClientState *client;
 WILuaBase::WILuaBase()
 {}
@@ -206,4 +206,3 @@ void WILuaBase::default_OnFocusKilled(lua_State*,WILuaBase&) {}
 
 void WILuaBase::Lua_OnRemove() {}
 void WILuaBase::default_OnRemove(lua_State*,WILuaBase&) {}
-#pragma optimize("",on)

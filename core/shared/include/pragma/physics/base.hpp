@@ -75,14 +75,4 @@ namespace pragma::physics
 		bool m_bSpawned = false;
 	};
 };
-template<class T>
-	void pragma::physics::IBase::InitializeLuaObject(lua_State *lua)
-{
-	auto handle = ClaimOwnership();
-	if(handle.IsValid())
-		m_luaObj = std::make_unique<luabind::object>(lua,util::shared_handle_cast<IBase,T>(handle));
-	else
-		m_luaObj = std::make_unique<luabind::object>(lua,std::dynamic_pointer_cast<T>(shared_from_this()));
-}
-
 #endif

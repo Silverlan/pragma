@@ -10,7 +10,7 @@
 #include "pragma/model/animation/animation.hpp"
 #include "pragma/model/animation/animation_channel.hpp"
 #include "pragma/model/animation/animation_manager.hpp"
-#pragma optimize("",off)
+
 std::shared_ptr<pragma::animation::AnimationManager> pragma::animation::AnimationManager::Create(const Model &mdl)
 {
 	return std::shared_ptr<AnimationManager>{new AnimationManager{mdl}};
@@ -161,4 +161,3 @@ std::ostream &operator<<(std::ostream &out,const pragma::animation::AnimationMan
 	out<<"[Player:"<<*o<<"]";
 	return out;
 }
-#pragma optimize("",on)

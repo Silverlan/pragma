@@ -12,7 +12,6 @@
 #include "pragma/model/animation/animation_player.hpp"
 #include "pragma/model/animation/animation2.hpp"
 
-#pragma optimize("",off)
 std::shared_ptr<pragma::animation::AnimationPlayer> pragma::animation::AnimationPlayer::Create()
 {
 	return std::shared_ptr<AnimationPlayer>{new AnimationPlayer{}};
@@ -192,4 +191,3 @@ std::ostream &operator<<(std::ostream &out,const pragma::animation::AnimationSli
 	out<<"[Values:"<<o.channelValues.size()<<"]";
 	return out;
 }
-#pragma optimize("",on)

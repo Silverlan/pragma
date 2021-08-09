@@ -9,7 +9,6 @@
 #include "pragma/lua/base_lua_handle.hpp"
 #include "pragma/lua/base_lua_handle_method.hpp"
 
-#pragma optimize("",off)
 pragma::BaseLuaHandle::BaseLuaHandle()
 	: m_handle{this,[](BaseLuaHandle*) {}}
 {}
@@ -38,4 +37,3 @@ pragma::BaseLuaHandle::~BaseLuaHandle()
 {
 	InvalidateHandle();
 }
-#pragma optimize("",on)

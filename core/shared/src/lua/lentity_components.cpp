@@ -43,7 +43,6 @@
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 #include <pragma/physics/movetypes.h>
 #include <luabind/copy_policy.hpp>
-#pragma optimize("",off)
 
 namespace Lua {bool get_bullet_master(BaseEntity &ent);};
 bool Lua::get_bullet_master(BaseEntity &ent)
@@ -398,4 +397,3 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	defDamageable.add_static_constant("EVENT_ON_TAKE_DAMAGE",pragma::DamageableComponent::EVENT_ON_TAKE_DAMAGE);
 	gameMod[defDamageable];
 }
-#pragma optimize("",on)

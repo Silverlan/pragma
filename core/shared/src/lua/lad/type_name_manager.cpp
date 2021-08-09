@@ -11,7 +11,7 @@
 #pragma comment(lib,"Psapi.lib")
 
 using namespace pragma::lua;
-#pragma optimize("",off)
+
 void TypeNameManager::RegisterType(const std::type_info &typeInfo,const luabind::detail::class_rep &luaClassDef)
 {
 	auto it = m_types.find(&typeInfo);
@@ -104,4 +104,3 @@ void TypeNameManager::AssignType(const std::string &name)
 	else
 		m_assignedTypes[name] = nullptr;
 }
-#pragma optimize("",on)

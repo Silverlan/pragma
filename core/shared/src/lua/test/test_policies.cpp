@@ -18,7 +18,6 @@
 #include "pragma/lua/lua_error_handling.hpp"
 #include <sharedutils/property/util_property.hpp>
 
-#pragma optimize("",off)
 static void test_pair_policy_param(const std::pair<float,std::string> &pair)
 {
 	std::cout<<"Pair: ("<<pair.first<<","<<pair.second<<")"<<std::endl;
@@ -206,5 +205,4 @@ __declspec(dllexport) void test_lua_policies(lua_State *l)
 	Lua::HandleSyntaxError(l,r);
 
 }
-#pragma optimize("",on)
 #endif

@@ -11,6 +11,7 @@
 #include "pragma/gui/wgui_luainterface.h"
 #include <wgui/wibase.h>
 #include "pragma/lua/classes/c_ldef_wguihandles.h"
+#include <pragma/lua/raw_object.hpp>
 #include "pragma/gui/wiluahandlewrapper.h"
 #include <wgui/types/witextentry.h>
 #include "pragma/gui/wiluabase.h"
@@ -23,7 +24,7 @@ extern CGame *c_game;
 CallbackHandle WGUILuaInterface::m_cbGameStart;
 CallbackHandle WGUILuaInterface::m_cbLuaReleased;
 lua_State *WGUILuaInterface::m_guiLuaState = nullptr;
-#pragma optimize("",off)
+
 static std::optional<util::EventReply> GUI_Callback_OnMouseEvent(WIBase &p,GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
 {
 	lua_State *luaStates[2] = {client->GetGUILuaState(),NULL};
@@ -306,20 +307,9 @@ void WGUILuaInterface::InitializeGUIElement(WIBase &p)
 }
 
 template<typename T>
-	static luabind::object get_handle_object(lua_State *l,util::TWeakSharedHandle<T> handle)
-{
-	// Using the value_converter will prevent the default_converter from getting triggered, which would cause an infinite recursion here
-	luabind::detail::value_converter c;
-	c.to_lua<decltype(handle)>(l,decltype(handle){handle});
-	auto o = luabind::object{luabind::from_stack(l,-1)};
-	Lua::Pop(l,1);
-	return o;
-}
-
-template<typename T>
 	luabind::object cast_to_type(lua_State *l,::WIBase &el)
 {
-	return get_handle_object(l,util::weak_shared_handle_cast<::WIBase,T>(el.GetHandle()));
+	return pragma::lua::raw_object_to_luabind_object(l,util::weak_shared_handle_cast<::WIBase,T>(el.GetHandle()));
 }
 #include <luabind/copy_policy.hpp>
 luabind::object WGUILuaInterface::CreateLuaObject(lua_State *l,WIBase &p)
@@ -416,7 +406,7 @@ luabind::object WGUILuaInterface::CreateLuaObject(lua_State *l,WIBase &p)
 			return cast_to_type<WISlider>(l,p);
 		return cast_to_type<WIProgressBar>(l,p);
 	}
-	return get_handle_object(l,p.GetHandle());
+	return pragma::lua::raw_object_to_luabind_object(l,p.GetHandle());
 }
 
 luabind::object WGUILuaInterface::GetLuaObject(lua_State *l,WIBase &p)
@@ -446,5 +436,3 @@ luabind::object WGUILuaInterface::GetLuaObject(lua_State *l,WIBase &p)
 	}
 	return o;
 }
-
-#pragma optimize("",on)

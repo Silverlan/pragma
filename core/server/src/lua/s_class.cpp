@@ -36,7 +36,6 @@
 #include <pragma/entities/func/basefuncwater.h>
 #include <pragma/model/modelmesh.h>
 #include <luainterface.hpp>
-#pragma optimize("",off)
 
 #include <pragma/entities/components/velocity_component.hpp>
 #include <pragma/entities/entity_iterator.hpp>
@@ -429,4 +428,3 @@ void SGame::RegisterLuaClasses()
 		.def("AddParameter",(void(AITask::*)(EulerAngles&))&AITask::AddParameter)
 	);*/ // TODO
 }
-#pragma optimize("",on)

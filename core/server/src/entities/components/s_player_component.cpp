@@ -41,7 +41,7 @@ namespace pragma
 };
 
 extern ServerState *server;
-#pragma optimize("",off)
+
 std::vector<SPlayerComponent*> SPlayerComponent::s_players;
 const std::vector<SPlayerComponent*> &SPlayerComponent::GetAll() {return s_players;}
 unsigned int SPlayerComponent::GetPlayerCount() {return CUInt32(s_players.size());}
@@ -468,4 +468,3 @@ void SPlayerComponent::OnTakeDamage(DamageInfo &info)
 	if(charComponent != nullptr && charComponent->GetGodMode() == true)
 		info.SetDamage(0);
 }
-#pragma optimize("",on)

@@ -18,7 +18,7 @@
 
 extern DLLSERVER SGame *s_game;
 extern DLLSERVER ServerState *server;
-#pragma optimize("",off)
+
 SLuaEntity::SLuaEntity()
 	: SBaseEntity{}
 {}
@@ -67,4 +67,3 @@ void SLuaEntity::Remove()
 	SBaseEntity::Remove();
 }
 void SLuaEntity::default_Initialize(SBaseEntity *ent) {}
-#pragma optimize("",on)

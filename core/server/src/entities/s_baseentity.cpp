@@ -47,7 +47,6 @@
 #include <pragma/entities/components/base_character_component.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
 
-#pragma optimize("",off)
 extern EntityClassMap<SBaseEntity> *g_ServerEntityFactories;
 extern ServerEntityNetworkMap *g_SvEntityNetworkMap;
 
@@ -299,4 +298,3 @@ pragma::ComponentHandle<pragma::BaseEntityComponent> SBaseEntity::AddNetworkedCo
 	static_cast<ServerState*>(GetNetworkState())->SendPacket("add_shared_component",packet,pragma::networking::Protocol::SlowReliable);
 	return c;
 }
-#pragma optimize("",on)

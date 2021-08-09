@@ -43,7 +43,7 @@
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 DLLCLIENT Con::c_cout & operator<<(Con::c_cout &os,const ::WIBase &handle)
 {
 	const WIBase *p = &handle;
@@ -1822,4 +1822,3 @@ luabind::tableT<::WITableRow> Lua::WITable::GetRows(lua_State *l,::WITable &hTab
 	}
 	return t;
 }
-#pragma optimize("",on)

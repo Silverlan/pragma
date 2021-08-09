@@ -20,7 +20,7 @@
 #pragma comment(lib,"Psapi.lib")
 
 using namespace pragma::lua;
-#pragma optimize("",off)
+
 namespace luabind {
 
 	LUABIND_API class_info get_class_info(argument const& o);
@@ -1075,4 +1075,3 @@ void LuaDocGenerator::ParseLuaProperty(const std::string &name,const luabind::ob
 #endif
 	}
 };
-#pragma optimize("",on)

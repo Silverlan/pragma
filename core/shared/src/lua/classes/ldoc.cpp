@@ -29,7 +29,6 @@
 #include <luabind/detail/class_rep.hpp>
 #include <luabind/detail/call.hpp>
 #include <luabind/class_info.hpp>
-#pragma optimize("",off)
 
 #undef GetClassInfo
 
@@ -1909,7 +1908,7 @@ void Lua::doc::register_library(Lua::Interface &lua)
 	}));
 	docLib[cdefCollection];
 }
-#pragma optimize("",on)
+
 #else
 namespace Lua::doc
 {

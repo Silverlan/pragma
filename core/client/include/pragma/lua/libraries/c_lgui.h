@@ -18,7 +18,7 @@ namespace Lua
 		DLLCLIENT ::WIBase *create(CGame *game,const std::string &name,::WIBase &parent,int32_t x,int32_t y,uint32_t w,uint32_t h,float left,float top,float right,float bottom);
 		DLLCLIENT ::WIBase *create(CGame *game,const std::string &name,::WIBase &parent,int32_t x,int32_t y,uint32_t w,uint32_t h);
 		DLLCLIENT ::WIBase *create(CGame *game,const std::string &name,::WIBase &parent,int32_t x,int32_t y);
-		DLLCLIENT ::WIBase *create(CGame *game,const std::string &name,::WIBase &parent);
+		DLLCLIENT ::WIBase *create(CGame *game,const std::string &name,::WIBase *parent);
 		DLLCLIENT ::WIBase *create(CGame *game,const std::string &name);
 
 		DLLCLIENT ::WIBase *create_button(lua_State *l,const std::string &text);
@@ -41,9 +41,10 @@ namespace Lua
 		DLLCLIENT ::WIBase *get_element_at_position(lua_State *l,prosper::Window *window,::WIBase *baseElement);
 		DLLCLIENT ::WIBase *get_element_at_position(lua_State *l,prosper::Window *window,::WIBase *baseElement,int32_t x,int32_t y);
 		DLLCLIENT ::WIBase *get_element_at_position(lua_State *l,prosper::Window *window,::WIBase *baseElement,int32_t x,int32_t y,const Lua::func<bool,::WIBase> &condition);
-
+		
+		DLLCLIENT ::WIBase *get_element_under_cursor(lua_State *l,const prosper::Window *window,const Lua::func<bool,::WIBase> &condition);
 		DLLCLIENT ::WIBase *get_element_under_cursor(lua_State *l,const Lua::func<bool,::WIBase> &condition);
-		DLLCLIENT ::WIBase *get_element_under_cursor(lua_State *l);
+		DLLCLIENT ::WIBase *get_element_under_cursor(lua_State *l,const prosper::Window *window=nullptr);
 		DLLCLIENT ::WIBase *get_focused_element(lua_State *l);
 		DLLCLIENT bool register_skin(lua_State *l,const std::string &skin,const luabind::tableT<void> &vars,const luabind::tableT<void> &skinData);
 		DLLCLIENT bool register_skin(lua_State *l,const std::string &skin,const luabind::tableT<void> &vars,const luabind::tableT<void> &skinData,const std::string &baseName);

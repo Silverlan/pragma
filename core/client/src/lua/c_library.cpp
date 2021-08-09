@@ -70,7 +70,7 @@ static void register_gui(Lua::Interface &lua)
 		luabind::def("create",static_cast<::WIBase*(*)(CGame*,const std::string&,::WIBase&,int32_t,int32_t,uint32_t,uint32_t,float,float,float,float)>(&Lua::gui::create)),
 		luabind::def("create",static_cast<::WIBase*(*)(CGame*,const std::string&,::WIBase&,int32_t,int32_t,uint32_t,uint32_t)>(&Lua::gui::create)),
 		luabind::def("create",static_cast<::WIBase*(*)(CGame*,const std::string&,::WIBase&,int32_t,int32_t)>(&Lua::gui::create)),
-		luabind::def("create",static_cast<::WIBase*(*)(CGame*,const std::string&,::WIBase&)>(&Lua::gui::create)),
+		luabind::def("create",static_cast<::WIBase*(*)(CGame*,const std::string&,::WIBase*)>(&Lua::gui::create)),
 		luabind::def("create",static_cast<::WIBase*(*)(CGame*,const std::string&)>(&Lua::gui::create)),
 
 		luabind::def("create_label",static_cast<::WIBase*(*)(lua_State*,const std::string&,::WIBase&,int32_t,int32_t)>(&Lua::gui::create_label)),
@@ -95,7 +95,9 @@ static void register_gui(Lua::Interface &lua)
 		luabind::def("get_element_at_position",static_cast<::WIBase*(*)(lua_State*,prosper::Window*,::WIBase*,int32_t,int32_t,const Lua::func<bool,::WIBase>&)>(&Lua::gui::get_element_at_position)),
 		
 		luabind::def("get_element_under_cursor",static_cast<::WIBase*(*)(lua_State*,const Lua::func<bool,::WIBase>&)>(&Lua::gui::get_element_under_cursor)),
-		luabind::def("get_element_under_cursor",static_cast<::WIBase*(*)(lua_State*)>(&Lua::gui::get_element_under_cursor)),
+		luabind::def("get_element_under_cursor",static_cast<::WIBase*(*)(lua_State*,const prosper::Window*,const Lua::func<bool,::WIBase>&)>(&Lua::gui::get_element_under_cursor)),
+		luabind::def("get_element_under_cursor",static_cast<::WIBase*(*)(lua_State*,const prosper::Window*)>(&Lua::gui::get_element_under_cursor)),
+		luabind::def("get_element_under_cursor",static_cast<::WIBase*(*)(lua_State*,const prosper::Window*)>(&Lua::gui::get_element_under_cursor),luabind::default_parameter_policy<2,static_cast<const prosper::Window*>(nullptr)>{}),
 		
 		luabind::def("find_focused_window",static_cast<prosper::Window*(*)()>([]() -> prosper::Window* {
 			return WGUI::GetInstance().FindFocusedWindow();

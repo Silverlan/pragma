@@ -37,6 +37,7 @@
 #include "pragma/lua/c_lentity_handles.hpp"
 #include "pragma/lua/converters/gui_element_converter.hpp"
 #include "pragma/lua/converters/shader_converter.hpp"
+#include "pragma/lua/converters/cast_conversions.hpp"
 #include <algorithm>
 #include <vector>
 #include <string>

@@ -63,9 +63,9 @@ static void initialize_element(::WIBase &p)
 	initialize_element(*el);
 	return el;
 }
-::WIBase *Lua::gui::create(CGame *game,const std::string &name,::WIBase &parent)
+::WIBase *Lua::gui::create(CGame *game,const std::string &name,::WIBase *parent)
 {
-	auto *el = game ? game->CreateGUIElement(name,&parent) : WGUI::GetInstance().Create(name,&parent);
+	auto *el = game ? game->CreateGUIElement(name,parent) : WGUI::GetInstance().Create(name,parent);
 	if(!el)
 		return nullptr;
 	initialize_element(*el);
@@ -197,9 +197,12 @@ void Lua::gui::register_element(const std::string &className,const Lua::classObj
 	return WGUI::GetInstance().GetBaseElement();
 }
 
-::WIBase *Lua::gui::get_element_under_cursor(lua_State *l,const Lua::func<bool,::WIBase> &condition)
+::WIBase *Lua::gui::get_element_under_cursor(lua_State *l,const prosper::Window *window,const Lua::func<bool,::WIBase> &condition)
 {
-	return ::WGUI::GetInstance().GetCursorGUIElement(WGUI::GetInstance().GetBaseElement(),[l,condition](::WIBase *el) -> bool {
+	auto *el = WGUI::GetInstance().GetBaseElement(window);
+	if(!el)
+		return nullptr;
+	return ::WGUI::GetInstance().GetCursorGUIElement(el,[l,condition](::WIBase *el) -> bool {
 		auto &oFunc = condition;
 		auto result = Lua::CallFunction(l,[&oFunc,el](lua_State *l) -> Lua::StatusCode {
 			oFunc.push(l);
@@ -214,9 +217,16 @@ void Lua::gui::register_element(const std::string &className,const Lua::classObj
 		return Lua::CheckBool(l,-1);
 	});
 }
-::WIBase *Lua::gui::get_element_under_cursor(lua_State *l)
+::WIBase *Lua::gui::get_element_under_cursor(lua_State *l,const Lua::func<bool,::WIBase> &condition)
 {
-	return ::WGUI::GetInstance().GetCursorGUIElement(WGUI::GetInstance().GetBaseElement(),[l](::WIBase *el) -> bool {
+	return get_element_under_cursor(l,nullptr,condition);
+}
+::WIBase *Lua::gui::get_element_under_cursor(lua_State *l,const prosper::Window *window)
+{
+	auto *el = WGUI::GetInstance().GetBaseElement(window);
+	if(!el)
+		return nullptr;
+	return ::WGUI::GetInstance().GetCursorGUIElement(el,[l](::WIBase *el) -> bool {
 		return true;
 	});
 }

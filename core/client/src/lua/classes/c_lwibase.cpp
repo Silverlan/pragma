@@ -77,6 +77,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("HasFocus",&::WIBase::HasFocus);
 	classDef.def("RequestFocus",&::WIBase::RequestFocus);
 	classDef.def("KillFocus",&::WIBase::KillFocus);
+	classDef.def("KillFocus",&::WIBase::KillFocus,luabind::default_parameter_policy<2,false>{});
 	classDef.def("TrapFocus",static_cast<void(*)(lua_State*,::WIBase&,bool)>(&TrapFocus));
 	classDef.def("TrapFocus",static_cast<void(*)(lua_State*,::WIBase&)>(&TrapFocus));
 	classDef.def("IsFocusTrapped",&::WIBase::IsFocusTrapped);
@@ -493,6 +494,7 @@ void Lua::WITable::register_class(luabind::class_<::WITable,luabind::bases<::WIC
 	classDef.def("SetScrollable",&::WITable::SetScrollable);
 	classDef.def("IsScrollable",&::WITable::IsScrollable);
 	classDef.def("Clear",&::WITable::Clear);
+	classDef.def("Clear",&::WITable::Clear,luabind::default_parameter_policy<2,false>{});
 	classDef.def("GetRow",&::WITable::GetRow);
 	classDef.def("GetSelectedRows",&GetSelectedRows);
 	classDef.def("GetRows",&GetRows);

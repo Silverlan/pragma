@@ -9,6 +9,7 @@
 #include "pragma/physics/vehicle.hpp"
 #include "pragma/physics/environment.hpp"
 #include "pragma/physics/shape.hpp"
+#include "pragma/physics/base_t.hpp"
 
 pragma::physics::WheelCreateInfo pragma::physics::WheelCreateInfo::CreateStandardFrontWheel()
 {

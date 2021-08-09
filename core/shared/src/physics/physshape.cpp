@@ -14,6 +14,7 @@
 #include "pragma/lua/classes/lphysics.h"
 #include "pragma/networkstate/networkstate.h"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
+#include "pragma/physics/base_t.hpp"
 
 pragma::physics::IShape::IShape(IEnvironment &env)
 	: IBase{env}

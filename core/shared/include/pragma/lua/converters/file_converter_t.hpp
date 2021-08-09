@@ -13,7 +13,7 @@
 template <class U>
 int luabind::default_converter<std::shared_ptr<VFilePtrInternal>,void >::match(lua_State* L, U, int index)
 {
-	return Lua::IsFile(L,index);
+	return Lua::IsFile(L,index) ? 0 : no_match;
 }
 
 template <class U>

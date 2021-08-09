@@ -13,6 +13,7 @@
 #include <sharedutils/util_shared_handle.hpp>
 #include <sharedutils/functioncallback.h>
 #include "pragma/lua/lua_handles.hpp"
+#include "pragma/lua/raw_object.hpp"
 
 namespace pragma
 {
@@ -51,7 +52,7 @@ namespace pragma
 template<typename T>
 	void pragma::BaseLuaHandle::InitializeLuaObject(lua_State *l)
 {
-	m_luaObj = {l,GetHandle<T>()};
+	m_luaObj = {l,pragma::lua::raw_object_to_luabind_object(l,GetHandle<T>())};
 }
 
 template<typename T>

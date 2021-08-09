@@ -19,7 +19,7 @@ std::string_view luabind::default_converter<std::string_view>::to_cpp(lua_State*
 template <class U>
 int luabind::default_converter<std::string_view>::match(lua_State *l, U u, int index)
 {
-	return lua_isstring(l,index) ? 0 : no_match;
+	return lua_isstring(l,index) ? 1 : no_match;
 }
 
 #endif

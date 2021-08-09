@@ -23,7 +23,7 @@ template <class U>
 int luabind::default_converter<std::optional<T>>::match(lua_State *l, U u, int index)
 {
 	if(lua_isnil(l,index))
-		return 0;
+		return 1;
 	return m_converter.match(l,decorate_type_t<T>(),index);
 }
 

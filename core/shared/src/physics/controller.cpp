@@ -10,6 +10,7 @@
 #include "pragma/physics/collision_object.hpp"
 #include "pragma/physics/shape.hpp"
 #include "pragma/physics/controller.hpp"
+#include "pragma/physics/base_t.hpp"
 
 pragma::physics::IController::IController(IEnvironment &env,const util::TSharedHandle<ICollisionObject> &collisionObject,const Vector3 &halfExtents,ShapeType shapeType)
 	: IBase{env},m_collisionObject{collisionObject},m_halfExtents{halfExtents},m_shapeType{shapeType}

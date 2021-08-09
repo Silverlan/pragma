@@ -1293,8 +1293,8 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat.def("Lerp",&uquat::lerp);
 	defQuat.def("Slerp",&uquat::slerp);
 	defQuat.def("ToEulerAngles",Lua::Quaternion::ToEulerAngles);
-	defQuat.def("ToEulerAngles",static_cast<void(*)(lua_State*,Quat&)>([](lua_State *l,Quat &rot) {
-		Lua::Quaternion::ToEulerAngles(l,rot,umath::to_integral(pragma::RotationOrder::YXZ));
+	defQuat.def("ToEulerAngles",static_cast<EulerAngles(*)(lua_State*,Quat&)>([](lua_State *l,Quat &rot) {
+		return Lua::Quaternion::ToEulerAngles(l,rot,umath::to_integral(pragma::RotationOrder::YXZ));
 	}));
 	defQuat.def("ToAxisAngle",&Lua::Quaternion::ToAxisAngle);
 	defQuat.def("Set",&Lua::Quaternion::Set);

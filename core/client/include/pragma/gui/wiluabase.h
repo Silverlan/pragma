@@ -41,8 +41,7 @@
 struct lua_State;
 struct WILuaWrapper;
 class DLLCLIENT WILuaBase
-	: public WIBase,public LuaObjectBase,
-	public luabind::wrap_base
+	: public WIBase,public LuaObjectBase
 {
 public:
 	WILuaBase();

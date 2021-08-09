@@ -109,7 +109,7 @@
 #include <util_image_buffer.hpp>
 #include <udm.hpp>
 #include <prosper_window.hpp>
-
+#pragma optimize("",off)
 extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;
 extern ClientEntityNetworkMap *g_ClEntityNetworkMap;
 extern DLLCLIENT CEngine *c_engine;
@@ -874,6 +874,7 @@ WIBase *CGame::CreateGUIElement(std::string className,WIBase *parent)
 			auto *holder = luabind::object_cast<pragma::lua::WILuaBaseHolder*>(r);
 			if(elLua && holder)
 			{
+				ustring::to_lower(className);
 				elLua->SetupLua(r,className);
 				WGUI::GetInstance().RegisterElement(*elLua,className,parent);
 				holder->SetHandle(util::weak_shared_handle_cast<WIBase,WILuaBase>(elLua->GetHandle()));
@@ -1799,3 +1800,4 @@ Float CGame::GetRestitutionScale() const
 {
 	return cvRestitution->GetFloat();
 }
+#pragma optimize("",on)

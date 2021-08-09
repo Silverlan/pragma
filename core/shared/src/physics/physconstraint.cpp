@@ -9,6 +9,7 @@
 #include "pragma/physics/environment.hpp"
 #include "pragma/physics/constraint.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
+#include "pragma/physics/base_t.hpp"
 
 pragma::physics::IConstraint::IConstraint(IEnvironment &env)
 	: IBase{env}

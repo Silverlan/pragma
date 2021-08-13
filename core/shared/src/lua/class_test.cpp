@@ -121,6 +121,7 @@ static void test()
 #include "pragma/lua/ldefinitions.h"
 #include "pragma/entities/baseentity_handle.h"
 #include "pragma/entities/baseentity.h"
+#include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/util/bulletinfo.h"
 #include "pragma/lua/policies/handle_policy.hpp"
 #include <sharedutils/util_shared_handle.hpp>

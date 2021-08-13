@@ -287,4 +287,6 @@ DLLNETWORK std::ostream& operator<<(std::ostream &os,const EntityHandle ent);
 
 DLLNETWORK bool operator==(const EntityHandle &a,const EntityHandle &b);
 
+#include "pragma/lua/converters/entity_converter.hpp"
+
 #endif

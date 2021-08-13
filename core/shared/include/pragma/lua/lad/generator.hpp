@@ -50,7 +50,7 @@ namespace pragma::lua
 		LuaClassInfo GetClassInfo(luabind::detail::class_rep *crep);
 		void AddClass(luabind::detail::class_rep *crep,const std::string &path);
 		void InitializeRepositoryUrls();
-		std::optional<pragma::doc::Variant> CreateVariant(const luabind::detail::TypeInfo &typeInfo);
+		void GenerateDocParameters(const luabind::detail::TypeInfo &input,std::vector<pragma::doc::Parameter> &outputs,const std::optional<std::string> &argName={},bool keepTuples=false);
 		static std::optional<std::string> GetCommitId(const std::string &repositoryUrl);
 		static std::string BuildRepositoryUrl(const std::string &baseUrl,const std::string &commitUrl);
 		std::optional<std::string> SourceToUrl(const pragma::doc::Source &source);

@@ -8,6 +8,7 @@
 #define __LUA_GAME_TYPE_CONVERTERS_HPP__
 
 #include "pragma/networkdefinitions.h"
+#include "pragma/lua/core.hpp"
 #include <luabind/detail/conversion_policies/native_converter.hpp>
 #include <vector>
 #include <map>
@@ -17,15 +18,10 @@
 class Game;
 class NetworkState;
 class Engine;
+class BaseEntity;
+namespace pragma {class BaseEntityComponent;};
 namespace pragma::physics {class IEnvironment;};
 namespace luabind {
-
-	template <typename T>
-	using base_type = typename std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>;
-
-	template <class T,class Test>
-	concept is_type_or_derived = std::is_same_v<base_type<T>,Test> || std::derived_from<base_type<T>,Test>;
-
 	template <typename T,T(*FUNCTION)(lua_State*)>
 	struct parameter_emplacement_converter
 	{
@@ -145,20 +141,23 @@ namespace luabind
 	template <class T>
 		concept IsGameObjectType = IsHandleType<T> || IsPhysicsType<T>;
 
-	template <typename T> requires(IsGameObjectType<base_type<T>> && std::is_pointer_v<T> && !std::is_const_v<std::remove_pointer_t<T>>)
+	template <class T> // Note: BaseEntity and derived types are already handled by entity_converter.hpp, so we exclude them here
+		concept IsGenericGameObjectType = IsGameObjectType<T> && !is_type_or_derived<base_type<T>,BaseEntity>; // && !is_type_or_derived<base_type<T>,pragma::BaseEntityComponent>;
+
+	template <typename T> requires(IsGenericGameObjectType<base_type<T>> && std::is_pointer_v<T> && !std::is_const_v<std::remove_pointer_t<T>>)
 	struct default_converter<T>
 		: game_object_converter<T,luabind::detail::pointer_converter>
 	{};
-	template <typename T> requires(IsGameObjectType<base_type<T>> && std::is_pointer_v<T> && std::is_const_v<std::remove_pointer_t<T>>)
+	template <typename T> requires(IsGenericGameObjectType<base_type<T>> && std::is_pointer_v<T> && std::is_const_v<std::remove_pointer_t<T>>)
 	struct default_converter<T>
 		: game_object_converter<T,luabind::detail::const_pointer_converter>
 	{};
 
-	template <typename T> requires(IsGameObjectType<base_type<T>> && std::is_reference_v<T> && !std::is_const_v<std::remove_reference_t<T>>)
+	template <typename T> requires(IsGenericGameObjectType<base_type<T>> && std::is_reference_v<T> && !std::is_const_v<std::remove_reference_t<T>>)
 	struct default_converter<T>
 		: game_object_converter<T,luabind::detail::ref_converter>
 	{};
-	template <typename T> requires(IsGameObjectType<base_type<T>> && std::is_reference_v<T> && std::is_const_v<std::remove_reference_t<T>>)
+	template <typename T> requires(IsGenericGameObjectType<base_type<T>> && std::is_reference_v<T> && std::is_const_v<std::remove_reference_t<T>>)
 	struct default_converter<T>
 		: game_object_converter<T,luabind::detail::const_ref_converter>
 	{};

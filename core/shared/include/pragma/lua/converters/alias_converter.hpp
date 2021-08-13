@@ -8,6 +8,7 @@
 #define __LUA_ALIAS_CONVERTER_HPP__
 
 #include "pragma/networkdefinitions.h"
+#include "pragma/lua/core.hpp"
 #include <luabind/object.hpp>
 
 namespace luabind
@@ -17,9 +18,6 @@ namespace luabind
 
 	template<typename T>
 		concept is_const_reference = std::is_reference_v<T> && std::is_const_v<std::remove_reference_t<T>>;
-
-	template<typename T>
-		using type_converter = std::conditional_t<is_const_reference<T>,luabind::detail::const_ref_converter,luabind::detail::value_converter>;
 
 	template <class TBase,class ...T>
 	struct alias_converter
@@ -61,23 +59,6 @@ namespace luabind
 
 	template<typename T,typename ...Ts>
 		concept is_one_of_alias_candidates = std::disjunction_v<std::is_same<T,Ts>...> || std::disjunction_v<std::is_same<T,std::add_lvalue_reference_t<std::add_const_t<Ts>>>...>; // Is value or const reference?
-
-	template<typename T,typename U>
-	struct copy_qualifiers
-	{
-	private:
-		using R = std::remove_reference_t<T>;
-		using U1 = std::conditional_t<std::is_const<R>::value, std::add_const_t<U>, U>;
-		using U2 = std::conditional_t<std::is_volatile<R>::value, std::add_volatile_t<U1>, U1>;
-		using U3 = std::conditional_t<std::is_lvalue_reference<T>::value, std::add_lvalue_reference_t<U2>, U2>;
-		using U4 = std::conditional_t<std::is_rvalue_reference<T>::value, std::add_rvalue_reference_t<U3>, U3>;
-		using U5 = std::conditional_t<std::is_pointer<T>::value, std::add_pointer_t<U4>, U4>;
-	public:
-		using type = U5;
-	};
-
-	template<typename T,typename U>
-		using copy_qualifiers_t = typename copy_qualifiers<T,U>::type;
 };
 
 #endif

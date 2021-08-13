@@ -14,9 +14,12 @@
 #include <pragma/asset/util_asset.hpp>
 #include <prosper_command_buffer.hpp>
 #include <cmaterial.h>
-
+#pragma optimize("",off)
 void Lua::ModelDef::register_class(lua_State *l,luabind::module_ &entsMod)
 {
+	luabind::default_converter<BaseEntity> x;
+	luabind::default_converter<pragma::BaseEntityComponent> y;
+
 	auto defCModel = luabind::class_<pragma::CModelComponent,pragma::BaseModelComponent>("ModelComponent");
 	defCModel.add_static_constant("EVENT_ON_RENDER_MESHES_UPDATED",pragma::CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED);
 	//Lua::register_base_model_component_methods<luabind::class_<CModelHandle,BaseEntityComponentHandle>,CModelHandle>(l,defCModel);
@@ -38,9 +41,11 @@ void Lua::ModelDef::register_class(lua_State *l,luabind::module_ &entsMod)
 	}));
 	defCModel.def("ClearMaterialOverride",&pragma::CModelComponent::ClearMaterialOverride);
 	defCModel.def("GetMaterialOverride",&pragma::CModelComponent::GetMaterialOverride);
-	defCModel.def("GetRenderMaterial",&pragma::CModelComponent::GetRenderMaterial);
+	defCModel.def("GetRenderMaterial",static_cast<CMaterial*(pragma::CModelComponent::*)(uint32_t,uint32_t) const>(&pragma::CModelComponent::GetRenderMaterial));
+	defCModel.def("GetRenderMaterial",static_cast<CMaterial*(pragma::CModelComponent::*)(uint32_t) const>(&pragma::CModelComponent::GetRenderMaterial));
 	defCModel.def("GetLOD",&pragma::CModelComponent::GetLOD);
 	defCModel.def("SetMaxDrawDistance",&pragma::CModelComponent::SetMaxDrawDistance);
 	defCModel.def("GetMaxDrawDistance",&pragma::CModelComponent::GetMaxDrawDistance);
 	entsMod[defCModel];
 }
+#pragma optimize("",on)

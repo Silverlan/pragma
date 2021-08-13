@@ -226,4 +226,6 @@ template<class TComponent>
 	return pragma::BaseLuaHandle::GetHandle<TComponent>();
 }
 
+#include "pragma/lua/converters/entity_component_converter.hpp"
+
 #endif

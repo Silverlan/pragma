@@ -19,7 +19,6 @@
 
 extern DLLCLIENT CEngine *c_engine;
 
-
 void Lua::Entity::Client::register_class(luabind::class_<CBaseEntity,BaseEntity> &classDef)
 {
 	classDef.add_static_constant("EVENT_ON_SCENE_FLAGS_CHANGED",CBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED);

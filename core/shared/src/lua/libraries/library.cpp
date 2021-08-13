@@ -39,6 +39,7 @@
 #include "pragma/lua/classes/lcallback.h"
 #include "pragma/lua/classes/ldatastream.h"
 #include "pragma/lua/libraries/limport.hpp"
+#include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/math/util_easing.hpp"
 #include "pragma/lua/libraries/lnav.hpp"
 #include "pragma/lua/lua_call.hpp"

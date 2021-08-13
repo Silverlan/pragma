@@ -191,7 +191,7 @@ static bool save_image(
 	uimg::ImageBuffer &imgBuf,pragma::asset::ModelExportInfo::ImageFormat imageFormat,std::string &inOutImgOutputPath,bool normalMap,bool srgb,uimg::TextureInfo::AlphaMode alphaMode
 )
 {
-	imgBuf.Convert(uimg::ImageBuffer::Format::RGBA8); // TODO
+	imgBuf.Convert(uimg::Format::RGBA8); // TODO
 
 	if(imageFormat == pragma::asset::ModelExportInfo::ImageFormat::DDS || imageFormat == pragma::asset::ModelExportInfo::ImageFormat::KTX)
 	{
@@ -374,11 +374,11 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 			std::shared_ptr<uimg::ImageBuffer> imgBuf = nullptr;
 			auto numPixels = gltfImg.width *gltfImg.height;
 			auto bytesPerChannel = gltfImg.bits /8;
-			auto format = uimg::ImageBuffer::Format::RGBA8;
+			auto format = uimg::Format::RGBA8;
 			if(bytesPerChannel == 2)
-				format = uimg::ImageBuffer::Format::RGBA16;
+				format = uimg::Format::RGBA16;
 			else if(bytesPerChannel == 4)
-				format = uimg::ImageBuffer::Format::RGBA32;
+				format = uimg::Format::RGBA32;
 			auto numChannels = gltfImg.component;
 			if(numChannels < 4)
 			{

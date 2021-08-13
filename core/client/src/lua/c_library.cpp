@@ -697,11 +697,19 @@ static bool save_image(lua_State *l,luabind::table<> t,std::string fileName,uimg
 	if(imgBufs.empty())
 		return false;
 	auto &imgBuf = imgBufs.front();
+	uimg::TextureSaveInfo saveInfo {};
+	saveInfo.texInfo = texInfo;
+	saveInfo.width = imgBuf->GetWidth();
+	saveInfo.height = imgBuf->GetHeight();
+	saveInfo.szPerPixel = imgBuf->GetPixelSize();
+	saveInfo.numLayers = imgBufs.size();
+	saveInfo.numMipmaps = 0;
+	saveInfo.cubemap = cubemap;
 	return uimg::save_texture(fileName,[&imgBufs](uint32_t iLayer,uint32_t iMipmap,std::function<void(void)> &outDeleter) -> const uint8_t* {
 		if(iMipmap > 0)
 			return nullptr;
 		return static_cast<uint8_t*>(imgBufs.at(iLayer)->GetData());
-	},imgBuf->GetWidth(),imgBuf->GetHeight(),imgBuf->GetPixelSize(),imgBufs.size(),0,cubemap,texInfo);
+	},saveInfo);
 }
 static bool save_image(lua_State *l,luabind::table<> t,std::string fileName,uimg::TextureInfo &texInfo)
 {
@@ -715,7 +723,7 @@ static bool save_image(lua_State *l,prosper::IImage &img,std::string fileName,ui
 	return c_game->SaveImage(img,fileName,imgWriteInfo);
 }
 
-static luabind::object load_image(lua_State *l,const std::string &fileName,bool loadAsynch,const std::optional<uimg::ImageBuffer::Format> &targetFormat)
+static luabind::object load_image(lua_State *l,const std::string &fileName,bool loadAsynch,const std::optional<uimg::Format> &targetFormat)
 {
 	std::string ext;
 	if(ufile::get_extension(fileName,&ext) == false)
@@ -733,7 +741,7 @@ static luabind::object load_image(lua_State *l,const std::string &fileName,bool 
 			: public util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>>
 		{
 		public:
-			ImageLoadJob(VFilePtr f,uimg::PixelFormat pixelFormat,std::optional<uimg::ImageBuffer::Format> targetFormat)
+			ImageLoadJob(VFilePtr f,uimg::PixelFormat pixelFormat,std::optional<uimg::Format> targetFormat)
 			{
 				AddThread([this,f,pixelFormat,targetFormat]() {
 					m_imgBuffer = uimg::load_image(f,pixelFormat);
@@ -768,14 +776,14 @@ static luabind::object load_image(lua_State *l,const std::string &fileName,bool 
 	return {l,imgBuffer};
 }
 
-static luabind::object load_image(lua_State *l,const std::string &fileName,bool loadAsynch,uimg::ImageBuffer::Format targetFormat)
+static luabind::object load_image(lua_State *l,const std::string &fileName,bool loadAsynch,uimg::Format targetFormat)
 {
-	return load_image(l,fileName,loadAsynch,std::optional<uimg::ImageBuffer::Format>{targetFormat});
+	return load_image(l,fileName,loadAsynch,std::optional<uimg::Format>{targetFormat});
 }
 
 static luabind::object load_image(lua_State *l,const std::string &fileName,bool loadAsynch)
 {
-	return load_image(l,fileName,loadAsynch,std::optional<uimg::ImageBuffer::Format>{});
+	return load_image(l,fileName,loadAsynch,std::optional<uimg::Format>{});
 }
 
 static luabind::object load_image(lua_State *l,const std::string &fileName)
@@ -834,7 +842,7 @@ void CGame::RegisterLuaLibraries()
 		luabind::def("save_image",static_cast<bool(*)(lua_State*,luabind::table<>,std::string,uimg::TextureInfo&,bool)>(save_image)),
 		luabind::def("save_image",static_cast<bool(*)(lua_State*,luabind::table<>,std::string,uimg::TextureInfo&)>(save_image)),
 		luabind::def("save_image",static_cast<bool(*)(lua_State*,prosper::IImage&,std::string,uimg::TextureInfo&)>(save_image)),
-		luabind::def("load_image",static_cast<luabind::object(*)(lua_State*,const std::string&,bool,uimg::ImageBuffer::Format)>(load_image)),
+		luabind::def("load_image",static_cast<luabind::object(*)(lua_State*,const std::string&,bool,uimg::Format)>(load_image)),
 		luabind::def("load_image",static_cast<luabind::object(*)(lua_State*,const std::string&,bool)>(load_image)),
 		luabind::def("load_image",static_cast<luabind::object(*)(lua_State*,const std::string&)>(load_image)),
 		luabind::def("capture_raytraced_screenshot",static_cast<util::ParallelJob<std::shared_ptr<uimg::ImageBuffer>>(*)(lua_State*,uint32_t,uint32_t,uint32_t,bool,bool)>(capture_raytraced_screenshot)),

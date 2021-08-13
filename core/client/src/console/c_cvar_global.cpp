@@ -391,7 +391,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		if(itQuality != commandOptions.end() && itQuality->second.parameters.empty() == false)
 			quality = util::to_float(itQuality->second.parameters.front());
 
-		auto toneMapping = uimg::ImageBuffer::ToneMapping::GammaCorrection;
+		auto toneMapping = uimg::ToneMapping::GammaCorrection;
 		auto itToneMapping = commandOptions.find("tone_mapping");
 		if(itToneMapping != commandOptions.end() && itToneMapping->second.parameters.empty() == false)
 		{
@@ -684,7 +684,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		}
 	}
 #endif
-	auto imgBuf = uimg::ImageBuffer::Create(data,extents.width,extents.height,uimg::ImageBuffer::Format::RGBA8);
+	auto imgBuf = uimg::ImageBuffer::Create(data,extents.width,extents.height,uimg::Format::RGBA8);
 	uimg::save_image(f,*imgBuf,imgFormat);
 	bufScreenshot->Unmap();
 	//util::tga::write_tga(f,extents.width,extents.height,pixels);

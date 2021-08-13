@@ -15,7 +15,7 @@ extern DLLCLIENT CEngine *c_engine;
 
 
 bool util::to_image_buffer(
-	prosper::IImage &image,uimg::ImageBuffer::Format targetFormat,std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers,
+	prosper::IImage &image,uimg::Format targetFormat,std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers,
 	bool includeLayers,bool includeMipmaps
 )
 {
@@ -23,20 +23,20 @@ bool util::to_image_buffer(
 	prosper::Format dstFormat;
 	switch(targetFormat)
 	{
-	case uimg::ImageBuffer::Format::RGB8:
-	case uimg::ImageBuffer::Format::RGBA8:
+	case uimg::Format::RGB8:
+	case uimg::Format::RGBA8:
 		dstFormat = prosper::Format::R8G8B8A8_UNorm;
-		targetFormat = uimg::ImageBuffer::Format::RGBA8;
+		targetFormat = uimg::Format::RGBA8;
 		break;
-	case uimg::ImageBuffer::Format::RGB16:
-	case uimg::ImageBuffer::Format::RGBA16:
+	case uimg::Format::RGB16:
+	case uimg::Format::RGBA16:
 		dstFormat = prosper::Format::R16G16B16A16_SFloat;
-		targetFormat = uimg::ImageBuffer::Format::RGBA16;
+		targetFormat = uimg::Format::RGBA16;
 		break;
-	case uimg::ImageBuffer::Format::RGB32:
-	case uimg::ImageBuffer::Format::RGBA32:
+	case uimg::Format::RGB32:
+	case uimg::Format::RGBA32:
 		dstFormat = prosper::Format::R32G32B32A32_SFloat;
-		targetFormat = uimg::ImageBuffer::Format::RGBA32;
+		targetFormat = uimg::Format::RGBA32;
 		break;
 	default:
 		return false;
@@ -156,7 +156,7 @@ bool util::to_image_buffer(
 )
 {
 	auto format = image.GetFormat();
-	auto targetFormat = uimg::ImageBuffer::Format::RGBA8;
+	auto targetFormat = uimg::Format::RGBA8;
 	switch(format)
 	{
 	case prosper::Format::R8_UNorm:
@@ -231,7 +231,7 @@ bool util::to_image_buffer(
 	case prosper::Format::BC3_SRGB_Block:
 	case prosper::Format::BC4_UNorm_Block:
 	case prosper::Format::BC4_SNorm_Block:
-		targetFormat = uimg::ImageBuffer::Format::RGBA8;
+		targetFormat = uimg::Format::RGBA8;
 		break;
 	case prosper::Format::R16_UNorm:
 	case prosper::Format::R16_SNorm:
@@ -261,7 +261,7 @@ bool util::to_image_buffer(
 	case prosper::Format::R16G16B16A16_UInt:
 	case prosper::Format::R16G16B16A16_SInt:
 	case prosper::Format::R16G16B16A16_SFloat:
-		targetFormat = uimg::ImageBuffer::Format::RGBA16;
+		targetFormat = uimg::Format::RGBA16;
 		break;
 	case prosper::Format::R32_UInt:
 	case prosper::Format::R32_SInt:
@@ -301,7 +301,7 @@ bool util::to_image_buffer(
 	case prosper::Format::BC6H_SFloat_Block:
 	case prosper::Format::BC7_UNorm_Block:
 	case prosper::Format::BC7_SRGB_Block:
-		targetFormat = uimg::ImageBuffer::Format::RGBA32;
+		targetFormat = uimg::Format::RGBA32;
 		break;
 	}
 	return to_image_buffer(image,targetFormat,outImageBuffers,includeLayers,includeMipmaps);

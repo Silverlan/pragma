@@ -213,7 +213,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 		{
 			auto &imgBufferInfo = imageBufferInfos.at(iLayer *numMipmaps +iMipmap);
 
-			auto imgBuffer = uimg::ImageBuffer::Create(imgBufferInfo.width,imgBufferInfo.height,uimg::ImageBuffer::Format::RGBA8);
+			auto imgBuffer = uimg::ImageBuffer::Create(imgBufferInfo.width,imgBufferInfo.height,uimg::Format::RGBA8);
 			buf->Read(imgBufferInfo.bufferOffset,imgBufferInfo.bufferSize,imgBuffer->GetData());
 			mipmapBuffers.push_back(imgBuffer);
 		}

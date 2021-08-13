@@ -195,7 +195,7 @@ std::shared_ptr<prosper::IDynamicResizableBuffer> CLightMapComponent::GenerateLi
 
 std::shared_ptr<prosper::Texture> CLightMapComponent::CreateLightmapTexture(uimg::ImageBuffer &imgBuf)
 {
-	imgBuf.Convert(uimg::ImageBuffer::Format::RGBA16);
+	imgBuf.Convert(uimg::Format::RGBA16);
 	prosper::util::ImageCreateInfo lightMapCreateInfo {};
 	lightMapCreateInfo.width = imgBuf.GetWidth();
 	lightMapCreateInfo.height = imgBuf.GetHeight();
@@ -339,7 +339,8 @@ bool CLightMapComponent::ImportLightmapAtlas(uimg::ImageBuffer &imgBuffer)
 	tex = std::static_pointer_cast<Texture>(ptrTex)->texture;
 	}*/
 
-	uimg::TextureInfo texInfo {};
+	uimg::TextureSaveInfo texSaveInfo {};
+	auto &texInfo = texSaveInfo.texInfo;
 	texInfo.containerFormat = uimg::TextureInfo::ContainerFormat::DDS;
 	texInfo.inputFormat = uimg::TextureInfo::InputFormat::R16G16B16A16_Float;
 	texInfo.outputFormat = uimg::TextureInfo::OutputFormat::BC6;
@@ -347,7 +348,7 @@ bool CLightMapComponent::ImportLightmapAtlas(uimg::ImageBuffer &imgBuffer)
 //	auto f = FileManager::OpenFile<VFilePtrReal>("materials/maps/sfm_gtav_mp_apa_06/lightmap_atlas.dds","wb");
 //	if(f)
 	auto mapName = c_game->GetMapName();
-	Con::cout<<"Lightmap atlas save result: "<<uimg::save_texture("materials/maps/" +mapName +"/lightmap_atlas.dds",imgBuffer,texInfo,false)<<Con::endl;
+	Con::cout<<"Lightmap atlas save result: "<<uimg::save_texture("materials/maps/" +mapName +"/lightmap_atlas.dds",imgBuffer,texSaveInfo)<<Con::endl;
 
 	EntityIterator entIt {*c_game};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CLightMapComponent>>();
@@ -410,7 +411,7 @@ static void generate_lightmaps(
 		if(hdrOutput == false)
 		{
 			// No HDR output, but we'll still use HDR data
-			imgBuffer->Convert(uimg::ImageBuffer::Format::RGBA16);
+			imgBuffer->Convert(uimg::Format::RGBA16);
 		}
 
 		CLightMapComponent::ImportLightmapAtlas(*imgBuffer);

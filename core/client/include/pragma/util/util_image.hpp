@@ -17,7 +17,7 @@ namespace prosper {class Image;};
 namespace util
 {
 	DLLCLIENT bool to_image_buffer(
-		prosper::IImage &image,uimg::ImageBuffer::Format targetFormat,std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers,
+		prosper::IImage &image,uimg::Format targetFormat,std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> &outImageBuffers,
 		bool includeLayers=false,bool includeMipmaps=false
 	);
 	DLLCLIENT bool to_image_buffer(

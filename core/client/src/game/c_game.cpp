@@ -1776,7 +1776,13 @@ bool CGame::SaveImage(
 {
 	auto path = ufile::get_path_from_filename(fileName);
 	FileManager::CreatePath(path.c_str());
-	return uimg::save_texture(fileName,imgLayerMipmapData,width,height,szPerPixel,imageWriteInfo,cubemap,[fileName](const std::string &err) {
+	uimg::TextureSaveInfo texSaveInfo;
+	texSaveInfo.texInfo = imageWriteInfo;
+	texSaveInfo.width = width;
+	texSaveInfo.height = height;
+	texSaveInfo.szPerPixel = szPerPixel;
+	texSaveInfo.cubemap = cubemap;
+	return uimg::save_texture(fileName,imgLayerMipmapData,texSaveInfo,[fileName](const std::string &err) {
 		Con::cwar<<"WARNING: Unable to save image '"<<fileName<<"': "<<err<<Con::endl;
 	});
 }
@@ -1785,7 +1791,10 @@ bool CGame::SaveImage(uimg::ImageBuffer &imgBuffer,const std::string &fileName,c
 {
 	auto path = ufile::get_path_from_filename(fileName);
 	FileManager::CreatePath(path.c_str());
-	return uimg::save_texture(fileName,imgBuffer,imageWriteInfo,cubemap,[fileName](const std::string &err) {
+	uimg::TextureSaveInfo texSaveInfo;
+	texSaveInfo.texInfo = imageWriteInfo;
+	texSaveInfo.cubemap = cubemap;
+	return uimg::save_texture(fileName,imgBuffer,texSaveInfo,[fileName](const std::string &err) {
 		Con::cwar<<"WARNING: Unable to save image '"<<fileName<<"': "<<err<<Con::endl;
 	});
 }

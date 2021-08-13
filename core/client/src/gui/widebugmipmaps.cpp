@@ -9,6 +9,7 @@
 #include "pragma/gui/widebugmipmaps.h"
 #include <prosper_util.hpp>
 #include <image/prosper_sampler.hpp>
+#include <image/prosper_image_view.hpp>
 #include <prosper_command_buffer.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
@@ -44,6 +45,7 @@ void WIDebugMipMaps::SetTexture(const std::shared_ptr<prosper::Texture> &texture
 	auto wContext = context.GetWindowWidth();
 
 	auto &img = texture->GetImage();
+	auto *imgView = texture->GetImageView();
 	auto mipmapLevels = img.GetMipmapCount();
 	m_hTextures.reserve(mipmapLevels);
 	m_textures.reserve(mipmapLevels);
@@ -70,6 +72,14 @@ void WIDebugMipMaps::SetTexture(const std::shared_ptr<prosper::Texture> &texture
 		imgCreateInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 		auto dstImg = context.CreateImage(imgCreateInfo);
 		prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
+		if(imgView)
+		{
+			auto swizzle = imgView->GetSwizzleArray();
+			imgViewCreateInfo.swizzleRed = swizzle[0];
+			imgViewCreateInfo.swizzleGreen = swizzle[1];
+			imgViewCreateInfo.swizzleBlue = swizzle[2];
+			imgViewCreateInfo.swizzleAlpha = swizzle[3];
+		}
 		prosper::util::SamplerCreateInfo samplerCreateInfo {};
 		auto tex = context.CreateTexture({},*dstImg,imgViewCreateInfo,samplerCreateInfo);
 		mipTextures.push_back(tex);

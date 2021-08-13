@@ -551,7 +551,8 @@ bool pragma::asset::WorldData::SaveLightmapAtlas(const std::string &mapName)
 		return false;
 	}
 	// Build lightmap texture
-	uimg::TextureInfo texInfo {};
+	uimg::TextureSaveInfo saveInfo {};
+	auto &texInfo = saveInfo.texInfo;
 	texInfo.containerFormat = uimg::TextureInfo::ContainerFormat::DDS;
 	// texInfo.flags = uimg::TextureInfo::Flags::SRGB;
 	texInfo.inputFormat = uimg::TextureInfo::InputFormat::R16G16B16A16_Float;
@@ -559,7 +560,7 @@ bool pragma::asset::WorldData::SaveLightmapAtlas(const std::string &mapName)
 	auto matPath = "materials/maps/" +mapName;
 	FileManager::CreatePath(matPath.c_str());
 	auto filePath = matPath +"/lightmap_atlas.dds";
-	auto result = uimg::save_texture(filePath,*m_lightMapAtlas,texInfo,false,[](const std::string &msg) {
+	auto result = uimg::save_texture(filePath,*m_lightMapAtlas,saveInfo,[](const std::string &msg) {
 		Con::cwar<<"WARNING: Unable to save lightmap atlas: "<<msg<<Con::endl;
 	});
 	if(result)

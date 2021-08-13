@@ -363,46 +363,46 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 
 	auto defImageBuffer = luabind::class_<uimg::ImageBuffer>("ImageBuffer");
 	defImageBuffer.def(luabind::tostring(luabind::self));
-	defImageBuffer.add_static_constant("FORMAT_NONE",umath::to_integral(uimg::ImageBuffer::Format::None));
-	defImageBuffer.add_static_constant("FORMAT_RGB8",umath::to_integral(uimg::ImageBuffer::Format::RGB8));
-	defImageBuffer.add_static_constant("FORMAT_RGBA8",umath::to_integral(uimg::ImageBuffer::Format::RGBA8));
-	defImageBuffer.add_static_constant("FORMAT_RGB16",umath::to_integral(uimg::ImageBuffer::Format::RGB16));
-	defImageBuffer.add_static_constant("FORMAT_RGBA16",umath::to_integral(uimg::ImageBuffer::Format::RGBA16));
-	defImageBuffer.add_static_constant("FORMAT_RGB32",umath::to_integral(uimg::ImageBuffer::Format::RGB32));
-	defImageBuffer.add_static_constant("FORMAT_RGBA32",umath::to_integral(uimg::ImageBuffer::Format::RGBA32));
-	defImageBuffer.add_static_constant("FORMAT_COUNT",umath::to_integral(uimg::ImageBuffer::Format::Count));
+	defImageBuffer.add_static_constant("FORMAT_NONE",umath::to_integral(uimg::Format::None));
+	defImageBuffer.add_static_constant("FORMAT_RGB8",umath::to_integral(uimg::Format::RGB8));
+	defImageBuffer.add_static_constant("FORMAT_RGBA8",umath::to_integral(uimg::Format::RGBA8));
+	defImageBuffer.add_static_constant("FORMAT_RGB16",umath::to_integral(uimg::Format::RGB16));
+	defImageBuffer.add_static_constant("FORMAT_RGBA16",umath::to_integral(uimg::Format::RGBA16));
+	defImageBuffer.add_static_constant("FORMAT_RGB32",umath::to_integral(uimg::Format::RGB32));
+	defImageBuffer.add_static_constant("FORMAT_RGBA32",umath::to_integral(uimg::Format::RGBA32));
+	defImageBuffer.add_static_constant("FORMAT_COUNT",umath::to_integral(uimg::Format::Count));
 
-	defImageBuffer.add_static_constant("FORMAT_RGB_LDR",umath::to_integral(uimg::ImageBuffer::Format::RGB_LDR));
-	defImageBuffer.add_static_constant("FORMAT_RGBA_LDR",umath::to_integral(uimg::ImageBuffer::Format::RGBA_LDR));
-	defImageBuffer.add_static_constant("FORMAT_RGB_HDR",umath::to_integral(uimg::ImageBuffer::Format::RGB_HDR));
-	defImageBuffer.add_static_constant("FORMAT_RGBA_HDR",umath::to_integral(uimg::ImageBuffer::Format::RGBA_HDR));
-	defImageBuffer.add_static_constant("FORMAT_RGB_FLOAT",umath::to_integral(uimg::ImageBuffer::Format::RGB_FLOAT));
-	defImageBuffer.add_static_constant("FORMAT_RGBA_FLOAT",umath::to_integral(uimg::ImageBuffer::Format::RGBA_FLOAT));
+	defImageBuffer.add_static_constant("FORMAT_RGB_LDR",umath::to_integral(uimg::Format::RGB_LDR));
+	defImageBuffer.add_static_constant("FORMAT_RGBA_LDR",umath::to_integral(uimg::Format::RGBA_LDR));
+	defImageBuffer.add_static_constant("FORMAT_RGB_HDR",umath::to_integral(uimg::Format::RGB_HDR));
+	defImageBuffer.add_static_constant("FORMAT_RGBA_HDR",umath::to_integral(uimg::Format::RGBA_HDR));
+	defImageBuffer.add_static_constant("FORMAT_RGB_FLOAT",umath::to_integral(uimg::Format::RGB_FLOAT));
+	defImageBuffer.add_static_constant("FORMAT_RGBA_FLOAT",umath::to_integral(uimg::Format::RGBA_FLOAT));
 
-	defImageBuffer.add_static_constant("CHANNEL_RED",umath::to_integral(uimg::ImageBuffer::Channel::Red));
-	defImageBuffer.add_static_constant("CHANNEL_GREEN",umath::to_integral(uimg::ImageBuffer::Channel::Green));
-	defImageBuffer.add_static_constant("CHANNEL_BLUE",umath::to_integral(uimg::ImageBuffer::Channel::Blue));
-	defImageBuffer.add_static_constant("CHANNEL_ALPHA",umath::to_integral(uimg::ImageBuffer::Channel::Alpha));
-	defImageBuffer.add_static_constant("CHANNEL_R",umath::to_integral(uimg::ImageBuffer::Channel::R));
-	defImageBuffer.add_static_constant("CHANNEL_G",umath::to_integral(uimg::ImageBuffer::Channel::G));
-	defImageBuffer.add_static_constant("CHANNEL_B",umath::to_integral(uimg::ImageBuffer::Channel::B));
-	defImageBuffer.add_static_constant("CHANNEL_A",umath::to_integral(uimg::ImageBuffer::Channel::A));
+	defImageBuffer.add_static_constant("CHANNEL_RED",umath::to_integral(uimg::Channel::Red));
+	defImageBuffer.add_static_constant("CHANNEL_GREEN",umath::to_integral(uimg::Channel::Green));
+	defImageBuffer.add_static_constant("CHANNEL_BLUE",umath::to_integral(uimg::Channel::Blue));
+	defImageBuffer.add_static_constant("CHANNEL_ALPHA",umath::to_integral(uimg::Channel::Alpha));
+	defImageBuffer.add_static_constant("CHANNEL_R",umath::to_integral(uimg::Channel::R));
+	defImageBuffer.add_static_constant("CHANNEL_G",umath::to_integral(uimg::Channel::G));
+	defImageBuffer.add_static_constant("CHANNEL_B",umath::to_integral(uimg::Channel::B));
+	defImageBuffer.add_static_constant("CHANNEL_A",umath::to_integral(uimg::Channel::A));
 
-	defImageBuffer.add_static_constant("TONE_MAPPING_GAMMA_CORRECTION",umath::to_integral(uimg::ImageBuffer::ToneMapping::GammaCorrection));
-	defImageBuffer.add_static_constant("TONE_MAPPING_REINHARD",umath::to_integral(uimg::ImageBuffer::ToneMapping::Reinhard));
-	defImageBuffer.add_static_constant("TONE_MAPPING_HEJIL_RICHARD",umath::to_integral(uimg::ImageBuffer::ToneMapping::HejilRichard));
-	defImageBuffer.add_static_constant("TONE_MAPPING_UNCHARTED",umath::to_integral(uimg::ImageBuffer::ToneMapping::Uncharted));
-	defImageBuffer.add_static_constant("TONE_MAPPING_ACES",umath::to_integral(uimg::ImageBuffer::ToneMapping::Aces));
-	defImageBuffer.add_static_constant("TONE_MAPPING_GRAN_TURISMO",umath::to_integral(uimg::ImageBuffer::ToneMapping::GranTurismo));
+	defImageBuffer.add_static_constant("TONE_MAPPING_GAMMA_CORRECTION",umath::to_integral(uimg::ToneMapping::GammaCorrection));
+	defImageBuffer.add_static_constant("TONE_MAPPING_REINHARD",umath::to_integral(uimg::ToneMapping::Reinhard));
+	defImageBuffer.add_static_constant("TONE_MAPPING_HEJIL_RICHARD",umath::to_integral(uimg::ToneMapping::HejilRichard));
+	defImageBuffer.add_static_constant("TONE_MAPPING_UNCHARTED",umath::to_integral(uimg::ToneMapping::Uncharted));
+	defImageBuffer.add_static_constant("TONE_MAPPING_ACES",umath::to_integral(uimg::ToneMapping::Aces));
+	defImageBuffer.add_static_constant("TONE_MAPPING_GRAN_TURISMO",umath::to_integral(uimg::ToneMapping::GranTurismo));
 
 	defImageBuffer.scope[luabind::def("Create",static_cast<void(*)(lua_State*,uint32_t,uint32_t,uint32_t,DataStream&)>([](lua_State *l,uint32_t width,uint32_t height,uint32_t format,DataStream &ds) {
-		auto imgBuffer = uimg::ImageBuffer::Create(ds->GetData(),width,height,static_cast<uimg::ImageBuffer::Format>(format));
+		auto imgBuffer = uimg::ImageBuffer::Create(ds->GetData(),width,height,static_cast<uimg::Format>(format));
 		if(imgBuffer == nullptr)
 			return;
 		Lua::Push(l,imgBuffer);
 	}))];
 	defImageBuffer.scope[luabind::def("Create",static_cast<void(*)(lua_State*,uint32_t,uint32_t,uint32_t)>([](lua_State *l,uint32_t width,uint32_t height,uint32_t format) {
-		auto imgBuffer = uimg::ImageBuffer::Create(width,height,static_cast<uimg::ImageBuffer::Format>(format));
+		auto imgBuffer = uimg::ImageBuffer::Create(width,height,static_cast<uimg::Format>(format));
 		if(imgBuffer == nullptr)
 			return;
 		Lua::Push(l,imgBuffer);
@@ -474,13 +474,13 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		Lua::Push(l,imgBuffer.Copy());
 	}));
 	defImageBuffer.def("Copy",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t format) {
-		Lua::Push(l,imgBuffer.Copy(static_cast<uimg::ImageBuffer::Format>(format)));
+		Lua::Push(l,imgBuffer.Copy(static_cast<uimg::Format>(format)));
 	}));
 	defImageBuffer.def("Copy",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uimg::ImageBuffer&,uint32_t,uint32_t,uint32_t,uint32_t,uint32_t,uint32_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uimg::ImageBuffer &dst,uint32_t xSrc,uint32_t ySrc,uint32_t xDst,uint32_t yDst,uint32_t w,uint32_t h) {
 		imgBuffer.Copy(dst,xSrc,ySrc,xDst,yDst,w,h);
 	}));
 	defImageBuffer.def("Convert",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t format) {
-		imgBuffer.Convert(static_cast<uimg::ImageBuffer::Format>(format));
+		imgBuffer.Convert(static_cast<uimg::Format>(format));
 	}));
 	defImageBuffer.def("ToLDR",static_cast<void(*)(lua_State*,uimg::ImageBuffer&)>([](lua_State *l,uimg::ImageBuffer &imgBuffer) {
 		imgBuffer.ToLDR();
@@ -522,11 +522,11 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defImageBuffer.def("Flip",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,bool,bool)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,bool flipH,bool flipV) {
 		imgBuffer.Flip(flipH,flipV);
 	}));
-	defImageBuffer.def("SwapChannels",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uimg::ImageBuffer::Channel,uimg::ImageBuffer::Channel)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uimg::ImageBuffer::Channel channel0,uimg::ImageBuffer::Channel channel1) {
+	defImageBuffer.def("SwapChannels",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uimg::Channel,uimg::Channel)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uimg::Channel channel0,uimg::Channel channel1) {
 		imgBuffer.SwapChannels(channel0,channel1);
 	}));
 	defImageBuffer.def("ApplyToneMapping",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t toneMapping) {
-		auto tonemappedImg = imgBuffer.ApplyToneMapping(static_cast<uimg::ImageBuffer::ToneMapping>(toneMapping));
+		auto tonemappedImg = imgBuffer.ApplyToneMapping(static_cast<uimg::ToneMapping>(toneMapping));
 		if(tonemappedImg == nullptr)
 			return;
 		Lua::Push(l,tonemappedImg);
@@ -548,16 +548,16 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		Lua::PushInt(l,imgBuffer.GetPixelIndex(x,y));
 	}));
 	defImageBuffer.def("GetPixelValue",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t,uint32_t,uint32_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t x,uint32_t y,uint32_t channel) {
-		Lua::PushNumber(l,imgBuffer.GetPixelView(imgBuffer.GetPixelOffset(x,y)).GetFloatValue(static_cast<uimg::ImageBuffer::Channel>(channel)));
+		Lua::PushNumber(l,imgBuffer.GetPixelView(imgBuffer.GetPixelOffset(x,y)).GetFloatValue(static_cast<uimg::Channel>(channel)));
 	}));
 	defImageBuffer.def("SetPixelValue",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t,uint32_t,uint32_t,float)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t x,uint32_t y,uint32_t channel,float value) {
-		imgBuffer.GetPixelView(imgBuffer.GetPixelOffset(x,y)).SetValue(static_cast<uimg::ImageBuffer::Channel>(channel),value);
+		imgBuffer.GetPixelView(imgBuffer.GetPixelOffset(x,y)).SetValue(static_cast<uimg::Channel>(channel),value);
 	}));
 	defImageBuffer.def("SetPixelValueLDR",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t,uint32_t,uint32_t,uint8_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t x,uint32_t y,uint32_t channel,uint8_t value) {
-		imgBuffer.GetPixelView(imgBuffer.GetPixelOffset(x,y)).SetValue(static_cast<uimg::ImageBuffer::Channel>(channel),value);
+		imgBuffer.GetPixelView(imgBuffer.GetPixelOffset(x,y)).SetValue(static_cast<uimg::Channel>(channel),value);
 	}));
 	defImageBuffer.def("SetPixelValueHDR",static_cast<void(*)(lua_State*,uimg::ImageBuffer&,uint32_t,uint32_t,uint32_t,uint16_t)>([](lua_State *l,uimg::ImageBuffer &imgBuffer,uint32_t x,uint32_t y,uint32_t channel,uint16_t value) {
-		imgBuffer.GetPixelView(imgBuffer.GetPixelOffset(x,y)).SetValue(static_cast<uimg::ImageBuffer::Channel>(channel),value);
+		imgBuffer.GetPixelView(imgBuffer.GetPixelOffset(x,y)).SetValue(static_cast<uimg::Channel>(channel),value);
 	}));
 	defImageBuffer.def("CalcLuminance",static_cast<void(*)(lua_State*,uimg::ImageBuffer&)>([](lua_State *l,uimg::ImageBuffer &imgBuffer) {
 		float avgLuminance,minLuminance,maxLuminance,logAvgLuminance;

@@ -44,7 +44,7 @@ void CLightMapComponent::ConvertLightmapToBSPLuxelData() const
 #else
 	auto numPixels = extents.width *extents.height;
 #endif
-	auto imgBuf = uimg::ImageBuffer::Create(extents.width,extents.height,uimg::ImageBuffer::Format::RGBA16);
+	auto imgBuf = uimg::ImageBuffer::Create(extents.width,extents.height,uimg::Format::RGBA16);
 
 	// We can't read the image data directly, so we'll need a temporary buffer to copy it into
 	auto &context = c_engine->GetRenderContext();

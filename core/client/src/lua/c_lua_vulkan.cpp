@@ -1785,7 +1785,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkImage.def("GetCreateInfo",static_cast<prosper::util::ImageCreateInfo&(prosper::IImage::*)()>(&prosper::IImage::GetCreateInfo),luabind::copy_policy<0>{});
 	defVkImage.def("ToImageBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,bool,bool,uint32_t)>([](lua_State *l,Lua::Vulkan::Image &img,bool includeLayers,bool includeMipmaps,uint32_t targetFormat) {
 		std::vector<std::vector<std::shared_ptr<uimg::ImageBuffer>>> imgBuffers;
-		auto result = util::to_image_buffer(img,static_cast<uimg::ImageBuffer::Format>(targetFormat),imgBuffers,includeLayers,includeMipmaps);
+		auto result = util::to_image_buffer(img,static_cast<uimg::Format>(targetFormat),imgBuffers,includeLayers,includeMipmaps);
 		if(result == false || imgBuffers.empty())
 			return;
 		push_image_buffers(l,includeLayers,includeMipmaps,imgBuffers);

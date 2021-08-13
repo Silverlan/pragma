@@ -51,6 +51,7 @@ namespace pragma
 		CMaterial *GetMaterialOverride(uint32_t idx) const;
 		const std::vector<MaterialHandle> &GetMaterialOverrides() const;
 		CMaterial *GetRenderMaterial(uint32_t idx) const;
+		CMaterial *GetRenderMaterial(uint32_t idx,uint32_t skin) const;
 
 		bool IsWeighted() const;
 

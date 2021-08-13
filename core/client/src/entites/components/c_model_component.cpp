@@ -100,13 +100,12 @@ CMaterial *CModelComponent::GetMaterialOverride(uint32_t idx) const
 }
 const std::vector<MaterialHandle> &CModelComponent::GetMaterialOverrides() const {return m_materialOverrides;}
 
-CMaterial *CModelComponent::GetRenderMaterial(uint32_t idx) const
+CMaterial *CModelComponent::GetRenderMaterial(uint32_t idx,uint32_t skin) const
 {
 	// TODO: Move this to Model class
 	auto &mdl = GetModel();
 	if(mdl == nullptr)
 		return nullptr;
-	auto skin = GetSkin();
 	auto *texGroup = mdl->GetTextureGroup(skin);
 	if(texGroup == nullptr)
 		texGroup = mdl->GetTextureGroup(0); // Fall back to default skin
@@ -118,6 +117,10 @@ CMaterial *CModelComponent::GetRenderMaterial(uint32_t idx) const
 		return matOverride;
 	auto *mat = static_cast<CMaterial*>(mdl->GetMaterial(idx));
 	return mat ? mat : static_cast<CMaterial*>(client->GetMaterialManager().GetErrorMaterial());
+}
+CMaterial *CModelComponent::GetRenderMaterial(uint32_t idx) const
+{
+	return GetRenderMaterial(idx,GetSkin());
 }
 
 Bool CModelComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)

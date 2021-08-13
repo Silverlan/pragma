@@ -48,7 +48,7 @@ namespace Lua
 		DLLNETWORK opt<type<BaseEntity>> get_by_index(lua_State *l,uint32_t idx);
 		DLLNETWORK opt<type<BaseEntity>> get_by_local_index(lua_State *l,uint32_t idx);
 		DLLNETWORK opt<type<BaseEntity>> find_by_unique_index(lua_State *l,const std::string &uuid);
-		DLLNETWORK type<BaseEntity> get_null(lua_State *l);
+		DLLNETWORK type<EntityHandle> get_null(lua_State *l);
 		DLLNETWORK type<BaseEntity> create(lua_State *l,const std::string &classname);
 		DLLNETWORK Lua::type<BaseEntity> create_prop(lua_State *l,const std::string &mdl,const Vector3 *origin,const EulerAngles *angles,bool physicsProp);
 

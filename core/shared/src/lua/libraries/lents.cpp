@@ -26,9 +26,10 @@
 #include "pragma/lua/lentity_type.hpp"
 #include "pragma/lua/lua_entity_iterator.hpp"
 #include "pragma/lua/sh_lua_component.hpp"
+#include "pragma/lua/policies/core_policies.hpp"
 
 extern DLLNETWORK Engine *engine;
-
+#pragma optimize("",off)
 //void test_lua_policies(lua_State *l);
 void Lua::ents::register_library(lua_State *l)
 {
@@ -453,9 +454,54 @@ Lua::opt<Lua::type<BaseEntity>> Lua::ents::find_by_unique_index(lua_State *l,con
 	return it->GetLuaObject();
 }
 
-Lua::type<BaseEntity> Lua::ents::get_null(lua_State *l)
+namespace luabind::detail
 {
-	return luabind::object{l,EntityHandle{}};
+	template< typename ValueType,typename BaseType >
+	void make_null_value(lua_State* L, ValueType&& val)
+	{
+		// See luabind/detail/make_instance.hpp
+		detail::class_registry* registry = luabind::detail::class_registry::get_registry(L);
+		auto typeId = type_id{typeid(BaseType)};
+		auto *cls = registry->find_class(typeId);
+		if(!cls)
+		{
+			lua_pushnil(L);
+			return;
+		}
+		auto &classIdMap = cls->classes();
+		auto classId = classIdMap.get(typeId);
+		if(classId == unknown_class)
+		{
+			lua_pushnil(L);
+			return;
+		}
+
+		object_rep* instance = push_new_instance(L, cls);
+
+		using value_type = typename std::remove_reference<ValueType>::type;
+		using holder_type = pointer_like_holder<value_type>;
+
+		void* storage = instance->allocate(sizeof(holder_type));
+
+		try {
+			new (storage) holder_type(L, std::forward<ValueType>(val), classId, nullptr);
+		}
+		catch(...) {
+			instance->deallocate(storage);
+			lua_pop(L, 1);
+			throw;
+		}
+
+		instance->set_instance(static_cast<holder_type*>(storage));
+	}
+};
+
+Lua::type<EntityHandle> Lua::ents::get_null(lua_State *l)
+{
+	luabind::detail::make_null_value<EntityHandle,BaseEntity>(l,EntityHandle{});
+	luabind::object o {luabind::from_stack(l,-1)};
+	Lua::Pop(l,1);
+	return o;
 }
 
 Lua::tb<Lua::type<BaseEntity>> Lua::ents::find_by_filter(lua_State *l,const std::string &name)
@@ -654,3 +700,4 @@ Lua::opt<pragma::ComponentEventId> Lua::ents::register_component_event(lua_State
 	auto eventId = componentManager.RegisterEvent(netName);
 	return {l,eventId};
 }
+#pragma optimize("",on)

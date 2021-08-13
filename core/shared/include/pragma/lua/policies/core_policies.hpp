@@ -45,6 +45,14 @@ namespace luabind
 				using type = luabind::detail::const_pointer_converter;
 			};
 		};
+		struct value_policy
+		{
+			template <class T, class Direction>
+			struct specialize
+			{
+				using type = luabind::detail::value_converter;
+			};
+		};
 	};
 	template< unsigned int N >
 	using const_ref_policy = meta::type_list< converter_policy_injector< N, detail::const_ref_policy > >;
@@ -57,6 +65,9 @@ namespace luabind
 
 	template< unsigned int N >
 	using const_pointer_policy = meta::type_list< converter_policy_injector< N, detail::const_pointer_policy > >;
+
+	template< unsigned int N >
+	using value_policy = meta::type_list< converter_policy_injector< N, detail::value_policy > >;
 };
 
 #endif

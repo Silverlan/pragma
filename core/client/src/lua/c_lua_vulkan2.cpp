@@ -32,7 +32,7 @@
 #include <luabind/copy_policy.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
-
+#pragma optimize("",off)
 namespace Lua
 {
 	namespace Vulkan
@@ -363,28 +363,28 @@ void register_vulkan_lua_interface2(luabind::module_ &prosperMod)
 		return Lua::Vulkan::VKCommandBuffer::RecordImageBarrier(l,hCommandBuffer,img,srcStageMask,dstStageMask,oldLayout,newLayout,srcAccessMask,dstAccessMask,0u);
 	}));
 	defVkCommandBuffer.def("RecordBufferBarrier",&Lua::Vulkan::VKCommandBuffer::RecordBufferBarrier);
-	defVkCommandBuffer.def("RecordBufferBarrier",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Buffer&,uint32_t,uint32_t,uint32_t,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,Lua::Vulkan::Buffer &buf,uint32_t srcStageMask,uint32_t dstStageMask,uint32_t srcAccessMask,uint32_t dstAccessMask,uint32_t offset) {
-		Lua::Vulkan::VKCommandBuffer::RecordBufferBarrier(l,hCommandBuffer,buf,srcStageMask,dstStageMask,srcAccessMask,dstAccessMask,offset,std::numeric_limits<uint32_t>::max());
+	defVkCommandBuffer.def("RecordBufferBarrier",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Buffer&,uint32_t,uint32_t,uint32_t,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,Lua::Vulkan::Buffer &buf,uint32_t srcStageMask,uint32_t dstStageMask,uint32_t srcAccessMask,uint32_t dstAccessMask,uint32_t offset) {
+		return Lua::Vulkan::VKCommandBuffer::RecordBufferBarrier(l,hCommandBuffer,buf,srcStageMask,dstStageMask,srcAccessMask,dstAccessMask,offset,std::numeric_limits<uint32_t>::max());
 	}));
-	defVkCommandBuffer.def("RecordBufferBarrier",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Buffer&,uint32_t,uint32_t,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,Lua::Vulkan::Buffer &buf,uint32_t srcStageMask,uint32_t dstStageMask,uint32_t srcAccessMask,uint32_t dstAccessMask) {
-		Lua::Vulkan::VKCommandBuffer::RecordBufferBarrier(l,hCommandBuffer,buf,srcStageMask,dstStageMask,srcAccessMask,dstAccessMask,0u,std::numeric_limits<uint32_t>::max());
+	defVkCommandBuffer.def("RecordBufferBarrier",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Buffer&,uint32_t,uint32_t,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,Lua::Vulkan::Buffer &buf,uint32_t srcStageMask,uint32_t dstStageMask,uint32_t srcAccessMask,uint32_t dstAccessMask) {
+		return Lua::Vulkan::VKCommandBuffer::RecordBufferBarrier(l,hCommandBuffer,buf,srcStageMask,dstStageMask,srcAccessMask,dstAccessMask,0u,std::numeric_limits<uint32_t>::max());
 	}));
 	defVkCommandBuffer.def("RecordSetViewport",&Lua::Vulkan::VKCommandBuffer::RecordSetViewport);
 	defVkCommandBuffer.def("RecordSetScissor",&Lua::Vulkan::VKCommandBuffer::RecordSetScissor);
-	defVkCommandBuffer.def("RecordBeginRenderPass",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::RenderPassInfo&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,Lua::Vulkan::RenderPassInfo &rpInfo) {
-		Lua::Vulkan::VKCommandBuffer::RecordBeginRenderPass(l,hCommandBuffer,rpInfo);
+	defVkCommandBuffer.def("RecordBeginRenderPass",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::RenderPassInfo&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,Lua::Vulkan::RenderPassInfo &rpInfo) {
+		return Lua::Vulkan::VKCommandBuffer::RecordBeginRenderPass(l,hCommandBuffer,rpInfo);
 	}));
 	defVkCommandBuffer.def("RecordEndRenderPass",&Lua::Vulkan::VKCommandBuffer::RecordEndRenderPass);
 	defVkCommandBuffer.def("RecordBindIndexBuffer",&Lua::Vulkan::VKCommandBuffer::RecordBindIndexBuffer);
-	defVkCommandBuffer.def("RecordBindIndexBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Buffer&,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,Lua::Vulkan::Buffer &indexBuffer,uint32_t indexType) {
-		Lua::Vulkan::VKCommandBuffer::RecordBindIndexBuffer(l,hCommandBuffer,indexBuffer,indexType,0u);
+	defVkCommandBuffer.def("RecordBindIndexBuffer",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Buffer&,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,Lua::Vulkan::Buffer &indexBuffer,uint32_t indexType) {
+		return Lua::Vulkan::VKCommandBuffer::RecordBindIndexBuffer(l,hCommandBuffer,indexBuffer,indexType,0u);
 	}));
 	defVkCommandBuffer.def("RecordBindVertexBuffer",&Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffer);
-	defVkCommandBuffer.def("RecordBindVertexBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,prosper::ShaderGraphics&,Lua::Vulkan::Buffer&,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,prosper::ShaderGraphics &graphics,Lua::Vulkan::Buffer &vertexBuffer,uint32_t startBinding) {
-		Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffer(l,hCommandBuffer,graphics,vertexBuffer,startBinding,0u);
+	defVkCommandBuffer.def("RecordBindVertexBuffer",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,prosper::ShaderGraphics&,Lua::Vulkan::Buffer&,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,prosper::ShaderGraphics &graphics,Lua::Vulkan::Buffer &vertexBuffer,uint32_t startBinding) {
+		return Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffer(l,hCommandBuffer,graphics,vertexBuffer,startBinding,0u);
 	}));
-	defVkCommandBuffer.def("RecordBindVertexBuffer",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,prosper::ShaderGraphics&,Lua::Vulkan::Buffer&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,prosper::ShaderGraphics &graphics,Lua::Vulkan::Buffer &vertexBuffer) {
-		Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffer(l,hCommandBuffer,graphics,vertexBuffer,0u,0u);
+	defVkCommandBuffer.def("RecordBindVertexBuffer",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,prosper::ShaderGraphics&,Lua::Vulkan::Buffer&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,prosper::ShaderGraphics &graphics,Lua::Vulkan::Buffer &vertexBuffer) {
+		return Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffer(l,hCommandBuffer,graphics,vertexBuffer,0u,0u);
 	}));
 	defVkCommandBuffer.def("RecordBindVertexBuffers",static_cast<bool(*)(
 		lua_State*,Lua::Vulkan::CommandBuffer&,prosper::ShaderGraphics&,const std::vector<prosper::IBuffer*>&,uint32_t,const std::vector<uint64_t>&
@@ -423,27 +423,27 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 		Lua::Vulkan::VKCommandBuffer::RecordDispatchIndirect(l,hCommandBuffer,buffer,0u);
 	}));
 #endif
-	defVkCommandBuffer.def("RecordDraw",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t,uint32_t,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t vertexCount,uint32_t instanceCount,uint32_t firstVertex,uint32_t firstInstance) {
-		Lua::Vulkan::VKCommandBuffer::RecordDraw(l,hCommandBuffer,vertexCount,instanceCount,firstVertex,firstInstance);
+	defVkCommandBuffer.def("RecordDraw",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t,uint32_t,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t vertexCount,uint32_t instanceCount,uint32_t firstVertex,uint32_t firstInstance) {
+		return Lua::Vulkan::VKCommandBuffer::RecordDraw(l,hCommandBuffer,vertexCount,instanceCount,firstVertex,firstInstance);
 	}));
-	defVkCommandBuffer.def("RecordDraw",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t vertexCount,uint32_t instanceCount,uint32_t firstVertex) {
-		Lua::Vulkan::VKCommandBuffer::RecordDraw(l,hCommandBuffer,vertexCount,instanceCount,firstVertex,0u);
+	defVkCommandBuffer.def("RecordDraw",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t vertexCount,uint32_t instanceCount,uint32_t firstVertex) {
+		return Lua::Vulkan::VKCommandBuffer::RecordDraw(l,hCommandBuffer,vertexCount,instanceCount,firstVertex,0u);
 	}));
-	defVkCommandBuffer.def("RecordDraw",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t vertexCount,uint32_t instanceCount) {
-		Lua::Vulkan::VKCommandBuffer::RecordDraw(l,hCommandBuffer,vertexCount,instanceCount,0u,0u);
+	defVkCommandBuffer.def("RecordDraw",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t vertexCount,uint32_t instanceCount) {
+		return Lua::Vulkan::VKCommandBuffer::RecordDraw(l,hCommandBuffer,vertexCount,instanceCount,0u,0u);
 	}));
-	defVkCommandBuffer.def("RecordDraw",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t vertexCount) {
-		Lua::Vulkan::VKCommandBuffer::RecordDraw(l,hCommandBuffer,vertexCount,1u,0u,0u);
+	defVkCommandBuffer.def("RecordDraw",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t vertexCount) {
+		return Lua::Vulkan::VKCommandBuffer::RecordDraw(l,hCommandBuffer,vertexCount,1u,0u,0u);
 	}));
 	defVkCommandBuffer.def("RecordDrawIndexed",&Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed);
-	defVkCommandBuffer.def("RecordDrawIndexed",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex) {
-		Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed(l,hCommandBuffer,indexCount,instanceCount,firstIndex,0u);
+	defVkCommandBuffer.def("RecordDrawIndexed",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t indexCount,uint32_t instanceCount,uint32_t firstIndex) {
+		return Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed(l,hCommandBuffer,indexCount,instanceCount,firstIndex,0u);
 	}));
-	defVkCommandBuffer.def("RecordDrawIndexed",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t indexCount,uint32_t instanceCount) {
-		Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed(l,hCommandBuffer,indexCount,instanceCount,0u,0u);
+	defVkCommandBuffer.def("RecordDrawIndexed",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t indexCount,uint32_t instanceCount) {
+		return Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed(l,hCommandBuffer,indexCount,instanceCount,0u,0u);
 	}));
-	defVkCommandBuffer.def("RecordDrawIndexed",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t indexCount) {
-		Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed(l,hCommandBuffer,indexCount,1u,0u,0u);
+	defVkCommandBuffer.def("RecordDrawIndexed",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,uint32_t)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,uint32_t indexCount) {
+		return Lua::Vulkan::VKCommandBuffer::RecordDrawIndexed(l,hCommandBuffer,indexCount,1u,0u,0u);
 	}));
 	defVkCommandBuffer.def("RecordDrawIndexedIndirect",&Lua::Vulkan::VKCommandBuffer::RecordDrawIndexedIndirect);
 	defVkCommandBuffer.def("RecordDrawIndirect",&Lua::Vulkan::VKCommandBuffer::RecordDrawIndirect);
@@ -467,8 +467,8 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 	defVkCommandBuffer.def("SetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&,const std::string&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &cb,const std::string &name) {
 		Lua::Vulkan::VKContextObject::SetDebugName(l,cb,name);
 	}));
-	defVkCommandBuffer.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &cb) {
-		Lua::Vulkan::VKContextObject::GetDebugName(l,cb);
+	defVkCommandBuffer.def("GetDebugName",static_cast<std::string(*)(lua_State*,Lua::Vulkan::CommandBuffer&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &cb) {
+		return Lua::Vulkan::VKContextObject::GetDebugName(l,cb);
 	}));
 	defVkCommandBuffer.def("Flush",static_cast<void(*)(lua_State*,Lua::Vulkan::CommandBuffer&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &cb) {
 		c_engine->GetRenderContext().FlushCommandBuffer(cb);
@@ -486,15 +486,15 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 	devVkBuffer.def("SetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Buffer&,const std::string&)>([](lua_State *l,Lua::Vulkan::Buffer &buf,const std::string &name) {
 		Lua::Vulkan::VKContextObject::SetDebugName(l,buf,name);
 	}));
-	devVkBuffer.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Buffer&)>([](lua_State *l,Lua::Vulkan::Buffer &buf) {
-		Lua::Vulkan::VKContextObject::GetDebugName(l,buf);
+	devVkBuffer.def("GetDebugName",static_cast<std::string(*)(lua_State*,Lua::Vulkan::Buffer&)>([](lua_State *l,Lua::Vulkan::Buffer &buf) {
+		return Lua::Vulkan::VKContextObject::GetDebugName(l,buf);
 	}));
 	devVkBuffer.def("GetCreateInfo",&Lua::Vulkan::Buffer::GetCreateInfo,luabind::copy_policy<0>{});
 	devVkBuffer.def("SetPermanentlyMapped",&Lua::Vulkan::Buffer::SetPermanentlyMapped);
 	devVkBuffer.def("GetParent",static_cast<std::shared_ptr<prosper::IBuffer>(prosper::IBuffer::*)()>(&Lua::Vulkan::Buffer::GetParent));
 	devVkBuffer.def("WriteMemory",&Lua::Vulkan::VKBuffer::Write);
-	devVkBuffer.def("WriteMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Buffer&,uint32_t,::DataStream&)>([](lua_State *l,Lua::Vulkan::Buffer &hBuffer,uint32_t offset,::DataStream &ds) {
-		Lua::Vulkan::VKBuffer::Write(l,hBuffer,offset,ds,0u,ds->GetSize());
+	devVkBuffer.def("WriteMemory",static_cast<bool(*)(lua_State*,Lua::Vulkan::Buffer&,uint32_t,::DataStream&)>([](lua_State *l,Lua::Vulkan::Buffer &hBuffer,uint32_t offset,::DataStream &ds) {
+		return Lua::Vulkan::VKBuffer::Write(l,hBuffer,offset,ds,0u,ds->GetSize());
 	}));
 	devVkBuffer.def("ReadMemory",static_cast<bool(*)(lua_State*,Lua::Vulkan::Buffer&,uint32_t,uint32_t,::DataStream&,uint32_t)>(&Lua::Vulkan::VKBuffer::Read));
 	devVkBuffer.def("ReadMemory",static_cast<bool(*)(lua_State*,Lua::Vulkan::Buffer&,uint32_t,uint32_t,::DataStream&)>([](lua_State *l,Lua::Vulkan::Buffer &hBuffer,uint32_t offset,uint32_t size,::DataStream &ds) {
@@ -556,8 +556,8 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 	defVkDescriptorSet.def("SetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::DescriptorSet&,const std::string&)>([](lua_State *l,Lua::Vulkan::DescriptorSet &ds,const std::string &name) {
 		Lua::Vulkan::VKContextObject::SetDebugName(l,ds,name);
 	}));
-	defVkDescriptorSet.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::DescriptorSet&)>([](lua_State *l,Lua::Vulkan::DescriptorSet &ds) {
-		Lua::Vulkan::VKContextObject::GetDebugName(l,ds);
+	defVkDescriptorSet.def("GetDebugName",static_cast<std::string(*)(lua_State*,Lua::Vulkan::DescriptorSet&)>([](lua_State *l,Lua::Vulkan::DescriptorSet &ds) {
+		return Lua::Vulkan::VKContextObject::GetDebugName(l,ds);
 	}));
 	prosperMod[defVkDescriptorSet];
 	
@@ -1062,3 +1062,4 @@ bool Lua::Vulkan::VKDescriptorSet::SetBindingUniformBufferDynamic(lua_State *l,D
 {
 	return hDescSet.GetDescriptorSet()->SetBindingDynamicUniformBuffer(buffer,bindingIdx,startOffset,(size != std::numeric_limits<uint32_t>::max()) ? static_cast<uint64_t>(size) : std::numeric_limits<uint64_t>::max());
 }
+#pragma optimize("",on)

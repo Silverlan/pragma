@@ -22,6 +22,7 @@
 #include "pragma/lua/lua_component_event.hpp"
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/entities/components/base_parent_component.hpp"
+#include "pragma/physics/shape.hpp"
 #include <udm.hpp>
 #include <luabind/out_value_policy.hpp>
 #include <luabind/copy_policy.hpp>
@@ -1646,99 +1647,37 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 			
 			hEnt.DestroyPhysicsObject();
 		}));
-		def.def("DropToFloor",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt) {
-			
-			hEnt.DropToFloor();
-		}));
-		def.def("IsTrigger",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt) {
-			
-			Lua::PushBool(l,hEnt.IsTrigger());
-		}));
-		def.def("SetKinematic",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&,bool)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt,bool b) {
-			
-			hEnt.SetKinematic(b);
-		}));
-		def.def("IsKinematic",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt) {
-			
-			Lua::PushBool(l,hEnt.IsKinematic());
-		}));
+		def.def("DropToFloor",&pragma::BasePhysicsComponent::DropToFloor);
+		def.def("IsTrigger",&pragma::BasePhysicsComponent::IsTrigger);
+		def.def("SetKinematic",&pragma::BasePhysicsComponent::SetKinematic);
+		def.def("IsKinematic",&pragma::BasePhysicsComponent::IsKinematic);
 
-		def.def("GetCollisionCallbacksEnabled",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt) {
-			
-			Lua::PushBool(l,hEnt.GetCollisionCallbacksEnabled());
-		}));
+		def.def("GetCollisionCallbacksEnabled",&pragma::BasePhysicsComponent::GetCollisionCallbacksEnabled);
 		def.def("SetCollisionCallbacksEnabled",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&,bool)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt,bool) {
-			
 			hEnt.SetCollisionCallbacksEnabled(true);
 		}));
-		def.def("GetCollisionContactReportEnabled",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt) {
-			
-			Lua::PushBool(l,hEnt.GetCollisionContactReportEnabled());
-		}));
+		def.def("GetCollisionContactReportEnabled",&pragma::BasePhysicsComponent::GetCollisionContactReportEnabled);
 		def.def("SetCollisionContactReportEnabled",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&,bool)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt,bool) {
-			
 			hEnt.SetCollisionContactReportEnabled(true);
 		}));
-		def.def("SetCollisionFilterMask",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&,int)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt,int mask) {
-			
-			hEnt.SetCollisionFilterMask(static_cast<CollisionMask>(mask));
-		}));
-		def.def("GetCollisionFilterMask",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt) {
-			
-			Lua::PushInt(l,hEnt.GetCollisionFilterMask());
-		}));
-		def.def("SetCollisionFilterGroup",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&,int)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt,int group) {
-			
-			hEnt.SetCollisionFilterGroup(static_cast<CollisionMask>(group));
-		}));
-		def.def("GetCollisionFilterGroup",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt) {
-			
-			Lua::PushInt(l,hEnt.GetCollisionFilter());
-		}));
-		def.def("SetCollisionFilter",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&,int,int)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt,int group,int mask) {
-			
-			hEnt.SetCollisionFilter(static_cast<CollisionMask>(group),static_cast<CollisionMask>(mask));
-		}));
-		def.def("EnableCollisions",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&,pragma::BasePhysicsComponent&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt,pragma::BasePhysicsComponent &hEntOther) {
-			
-			
-			hEnt.EnableCollisions(&hEntOther.GetEntity());
-		}));
-		def.def("DisableCollisions",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&,pragma::BasePhysicsComponent&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt,pragma::BasePhysicsComponent &hEntOther) {
-			
-			
-			hEnt.DisableCollisions(&hEntOther.GetEntity());
-		}));
-		def.def("SetCollisionsEnabled",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&,pragma::BasePhysicsComponent&,bool)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt,pragma::BasePhysicsComponent &hEntOther,bool b) {
-			
-			
-			hEnt.SetCollisionsEnabled(&hEntOther.GetEntity(),b);
-		}));
+		def.def("SetCollisionFilterMask",&pragma::BasePhysicsComponent::SetCollisionFilterMask);
+		def.def("GetCollisionFilterMask",&pragma::BasePhysicsComponent::GetCollisionFilterMask);
+		def.def("SetCollisionFilterGroup",&pragma::BasePhysicsComponent::SetCollisionFilterGroup);
+		def.def("GetCollisionFilterGroup",static_cast<CollisionMask(pragma::BasePhysicsComponent::*)() const>(&pragma::BasePhysicsComponent::GetCollisionFilter));
+		def.def("SetCollisionFilter",static_cast<void(pragma::BasePhysicsComponent::*)(CollisionMask,CollisionMask)>(&pragma::BasePhysicsComponent::SetCollisionFilter));
+		def.def("EnableCollisions",&pragma::BasePhysicsComponent::EnableCollisions);
+		def.def("DisableCollisions",&pragma::BasePhysicsComponent::DisableCollisions);
+		def.def("SetCollisionsEnabled",static_cast<void(pragma::BasePhysicsComponent::*)(bool)>(&pragma::BasePhysicsComponent::SetCollisionsEnabled));
+		def.def("SetCollisionsEnabled",static_cast<void(pragma::BasePhysicsComponent::*)(BaseEntity*,bool)>(&pragma::BasePhysicsComponent::SetCollisionsEnabled));
 		def.def("EnableCollisions",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt) {
-			
 			hEnt.SetCollisionsEnabled(true);
 		}));
 		def.def("DisableCollisions",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt) {
-			
 			hEnt.SetCollisionsEnabled(false);
 		}));
-		def.def("SetCollisionsEnabled",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&,bool)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt,bool b) {
-			
-			hEnt.SetCollisionsEnabled(b);
-		}));
-		def.def("SetSimulationEnabled",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&,bool)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt,bool b) {
-			
-			hEnt.SetSimulationEnabled(b);
-		}));
-		def.def("IsSimulationEnabled",static_cast<bool(*)(lua_State*,pragma::BasePhysicsComponent&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt) -> bool {
-			
-			return hEnt.GetSimulationEnabled();
-		}));
-		def.def("ResetCollisions",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&,pragma::BasePhysicsComponent&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt,pragma::BasePhysicsComponent &hEntOther) {
-			
-			
-			hEnt.ResetCollisions(&hEntOther.GetEntity());
-		}));
+		def.def("SetSimulationEnabled",&pragma::BasePhysicsComponent::SetSimulationEnabled);
+		def.def("IsSimulationEnabled",&pragma::BasePhysicsComponent::GetSimulationEnabled);
+		def.def("ResetCollisions",&pragma::BasePhysicsComponent::ResetCollisions);
 
 		def.def("GetPhysJointConstraints",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt) {
 			
@@ -1772,27 +1711,13 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 				}
 			}
 		}));
-		def.def("GetRotatedCollisionBounds",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt) {
-			
-			Vector3 min,max;
-			hEnt.GetRotatedCollisionBounds(&min,&max);
-			Lua::Push<Vector3>(l,min);
-			Lua::Push<Vector3>(l,max);
-		}));
+		def.def("GetRotatedCollisionBounds",&pragma::BasePhysicsComponent::GetRotatedCollisionBounds,luabind::meta::join<luabind::out_value<2>,luabind::out_value<3>>::type{});
 
-		def.def("GetPhysicsType",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt) {
-			
-			auto type = hEnt.GetPhysicsType();
-			Lua::Push<std::underlying_type_t<decltype(type)>>(l,umath::to_integral(type));
-		}));
-		def.def("GetCollisionRadius",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt) {
-			
-			Lua::PushNumber(l,hEnt.GetCollisionRadius());
-		}));
-		def.def("IsPhysicsProp",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt) {
-			
+		def.def("GetPhysicsType",&pragma::BasePhysicsComponent::GetPhysicsType);
+		def.def("GetCollisionRadius",&pragma::BasePhysicsComponent::GetCollisionRadius);
+		def.def("IsPhysicsProp",static_cast<bool(*)(lua_State*,pragma::BasePhysicsComponent&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt) {
 			auto physType = hEnt.GetPhysicsType();
-			Lua::PushBool(l,(physType != PHYSICSTYPE::NONE && physType != PHYSICSTYPE::STATIC && physType != PHYSICSTYPE::BOXCONTROLLER && physType != PHYSICSTYPE::CAPSULECONTROLLER) ? true : false);
+			return (physType != PHYSICSTYPE::NONE && physType != PHYSICSTYPE::STATIC && physType != PHYSICSTYPE::BOXCONTROLLER && physType != PHYSICSTYPE::CAPSULECONTROLLER) ? true : false;
 		}));
 
 		def.def("GetAABBDistance",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&,const Vector3&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt,const Vector3 &p) {
@@ -1808,10 +1733,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 			Lua::PushNumber(l,hEnt.GetAABBDistance(other));
 		}));
 
-		def.def("IsRagdoll",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt) {
-			
-			Lua::PushBool(l,hEnt.IsRagdoll());
-		}));
+		def.def("IsRagdoll",&pragma::BasePhysicsComponent::IsRagdoll);
 
 		def.def("ApplyForce",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&,const Vector3&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt,const Vector3 &force) {
 			
@@ -1837,10 +1759,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 			
 			hEnt.ApplyTorqueImpulse(torque);
 		}));
-		def.def("GetMass",static_cast<void(*)(lua_State*,pragma::BasePhysicsComponent&)>([](lua_State *l,pragma::BasePhysicsComponent &hEnt) {
-			
-			Lua::PushNumber(l,hEnt.GetMass());
-		}));
+		def.def("GetMass",&pragma::BasePhysicsComponent::GetMass);
 		def.add_static_constant("EVENT_ON_PHYSICS_INITIALIZED",pragma::BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED);
 		def.add_static_constant("EVENT_ON_PHYSICS_DESTROYED",pragma::BasePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED);
 		def.add_static_constant("EVENT_ON_PHYSICS_UPDATED",pragma::BasePhysicsComponent::EVENT_ON_PHYSICS_UPDATED);
@@ -1861,25 +1780,19 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	}
 
 	#include "pragma/entities/components/base_render_component.hpp"
-		void pragma::lua::base_render_component::register_class(luabind::module_ &mod)
+	void pragma::lua::base_render_component::register_class(luabind::module_ &mod)
 	{
 		Lua::ComponentClass<pragma::BaseRenderComponent> def {"BaseRenderComponent"};
-	util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
-		def.def("SetCastShadows",static_cast<void(*)(lua_State*,pragma::BaseRenderComponent&,bool)>([](lua_State *l,pragma::BaseRenderComponent &hEnt,bool b) {
-			
-			hEnt.SetCastShadows(b);
-		}));
-		def.def("GetCastShadows",static_cast<void(*)(lua_State*,pragma::BaseRenderComponent&)>([](lua_State *l,pragma::BaseRenderComponent &hEnt) {
-			
-			Lua::PushBool(l,hEnt.GetCastShadows());
-		}));
+		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
+		def.def("SetCastShadows",&pragma::BaseRenderComponent::SetCastShadows);
+		def.def("GetCastShadows",&pragma::BaseRenderComponent::GetCastShadows);
 	}
 
 	#include "pragma/entities/components/base_softbody_component.hpp"
-		void pragma::lua::base_soft_body_component::register_class(luabind::module_ &mod)
+	void pragma::lua::base_soft_body_component::register_class(luabind::module_ &mod)
 	{
 		Lua::ComponentClass<pragma::BaseSoftBodyComponent> def {"BaseSoftBodyComponent"};
-	util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
+		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
 		
 	}
 
@@ -1894,10 +1807,10 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 			luabind::object(l,snd).push(l);
 		}
 	};
-		void pragma::lua::base_sound_emitter_component::register_class(luabind::module_ &mod)
+	void pragma::lua::base_sound_emitter_component::register_class(luabind::module_ &mod)
 	{
 		Lua::ComponentClass<pragma::BaseSoundEmitterComponent> def {"BaseSoundEmitterComponent"};
-	util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
+		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
 		def.def("CreateSound",static_cast<void(*)(lua_State*,pragma::BaseSoundEmitterComponent&,std::string,uint32_t)>([](lua_State *l,pragma::BaseSoundEmitterComponent &hEnt,std::string sndname,uint32_t soundType) {
 			
 			std::shared_ptr<ALSound> snd = hEnt.CreateSound(sndname,static_cast<ALSoundType>(soundType));
@@ -1936,234 +1849,104 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	#include "pragma/entities/components/base_transform_component.hpp"
 	namespace Lua::Transform
 	{
-		
-			void GetDirection(lua_State *l,pragma::BaseTransformComponent &hEnt,const Vector3 &p,bool bIgnoreYAxis)
-		{
-			
-			Lua::Push<Vector3>(l,hEnt.GetDirection(p,bIgnoreYAxis));
-		}
-		
-			void GetDirection(lua_State *l,pragma::BaseTransformComponent &hEnt,pragma::BaseTransformComponent &hOther,bool bIgnoreYAxis)
+		void GetDirection(lua_State *l,pragma::BaseTransformComponent &hEnt,pragma::BaseTransformComponent &hOther,bool bIgnoreYAxis)
 		{
 			
 			Lua::Push<Vector3>(l,hEnt.GetDirection(hOther.GetEntity(),bIgnoreYAxis));
 		}
 		
-			void GetDirection(lua_State *l,pragma::BaseTransformComponent &hEnt,BaseEntity &entOther,bool bIgnoreYAxis)
-		{
-			
-			Lua::Push<Vector3>(l,hEnt.GetDirection(entOther,bIgnoreYAxis));
-		}
-		
-			void GetAngles(lua_State *l,pragma::BaseTransformComponent &hEnt,const Vector3 &p,bool bIgnoreYAxis)
-		{
-			
-			Lua::Push<EulerAngles>(l,hEnt.GetAngles(p,bIgnoreYAxis));
-		}
-		
-			void GetAngles(lua_State *l,pragma::BaseTransformComponent &hEnt,pragma::BaseTransformComponent &hOther,bool bIgnoreYAxis)
+		void GetAngles(lua_State *l,pragma::BaseTransformComponent &hEnt,pragma::BaseTransformComponent &hOther,bool bIgnoreYAxis)
 		{
 			
 			Lua::Push<EulerAngles>(l,hEnt.GetAngles(hOther.GetEntity(),bIgnoreYAxis));
 		}
 		
-			void GetAngles(lua_State *l,pragma::BaseTransformComponent &hEnt,BaseEntity &entOther,bool bIgnoreYAxis)
-		{
-			
-			Lua::Push<EulerAngles>(l,hEnt.GetAngles(entOther,bIgnoreYAxis));
-		}
-		
-			void GetDotProduct(lua_State *l,pragma::BaseTransformComponent &hEnt,const Vector3 &p,bool bIgnoreYAxis)
-		{
-			
-			Lua::PushNumber(l,hEnt.GetDotProduct(p,bIgnoreYAxis));
-		}
-		
-			void GetDotProduct(lua_State *l,pragma::BaseTransformComponent &hEnt,pragma::BaseTransformComponent &hOther,bool bIgnoreYAxis)
+		void GetDotProduct(lua_State *l,pragma::BaseTransformComponent &hEnt,pragma::BaseTransformComponent &hOther,bool bIgnoreYAxis)
 		{
 			
 			Lua::PushNumber(l,hEnt.GetDotProduct(hOther.GetEntity(),bIgnoreYAxis));
 		}
-		
-			void GetDotProduct(lua_State *l,pragma::BaseTransformComponent &hEnt,BaseEntity &other,bool bIgnoreYAxis)
-		{
-			
-			Lua::PushNumber(l,hEnt.GetDotProduct(other,bIgnoreYAxis));
-		}
 	};
-		void pragma::lua::base_transform_component::register_class(luabind::module_ &mod)
+	void pragma::lua::base_transform_component::register_class(luabind::module_ &mod)
 	{
 		Lua::ComponentClass<pragma::BaseTransformComponent> def {"BaseTransformComponent"};
-	util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
-		def.def("GetOrigin",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt) {
-			
-			luabind::object(l,hEnt.GetOrigin()).push(l);
-		}));
-		def.def("GetPos",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt) {
-			
-			luabind::object(l,hEnt.GetPosition()).push(l);
-		}));
-		def.def("SetPos",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,Vector3)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,Vector3 pos) {
-			
-			hEnt.SetPosition(pos);
-		}));
-		def.def("GetRotation",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt) {
-			
-			luabind::object(l,hEnt.GetRotation()).push(l);
-		}));
-		def.def("SetRotation",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,Quat)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,Quat q) {
-			
-			hEnt.SetRotation(q);
-		}));
-		def.def("GetAngles",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt) {
-			
-			EulerAngles ang = hEnt.GetAngles();
-			luabind::object(l,ang).push(l);
-		}));
-		def.def("SetAngles",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,EulerAngles)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,EulerAngles ang) {
-			
-			hEnt.SetAngles(ang);
-		}));
-		def.def("GetForward",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt) {
-			
-			luabind::object(l,hEnt.GetForward()).push(l);
-		}));
-		def.def("GetRight",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt) {
-			
-			luabind::object(l,hEnt.GetRight()).push(l);
-		}));
-		def.def("GetUp",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt) {
-			
-			luabind::object(l,hEnt.GetUp()).push(l);
-		}));
+		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
+		def.def("GetOrigin",&pragma::BaseTransformComponent::GetOrigin);
+		def.def("GetPos",&pragma::BaseTransformComponent::GetPosition);
+		def.def("SetPos",static_cast<void(pragma::BaseTransformComponent::*)(const Vector3&)>(&pragma::BaseTransformComponent::SetPosition));
+		def.def("SetPos",static_cast<void(pragma::BaseTransformComponent::*)(const Vector3&,bool)>(&pragma::BaseTransformComponent::SetPosition));
+		def.def("GetRotation",&pragma::BaseTransformComponent::GetRotation);
+		def.def("SetRotation",&pragma::BaseTransformComponent::SetRotation);
+		def.def("GetAngles",static_cast<EulerAngles(pragma::BaseTransformComponent::*)(const Vector3&,bool) const>(&pragma::BaseTransformComponent::GetAngles));
+		def.def("GetAngles",static_cast<EulerAngles(pragma::BaseTransformComponent::*)(const Vector3&,bool) const>(&pragma::BaseTransformComponent::GetAngles),luabind::default_parameter_policy<3,false>{});
+		def.def("GetAngles",static_cast<EulerAngles(pragma::BaseTransformComponent::*)(const BaseEntity&,bool) const>(&pragma::BaseTransformComponent::GetAngles));
+		def.def("GetAngles",static_cast<EulerAngles(pragma::BaseTransformComponent::*)(const BaseEntity&,bool) const>(&pragma::BaseTransformComponent::GetAngles),luabind::default_parameter_policy<3,false>{});
+		def.def("GetAngles",static_cast<EulerAngles(pragma::BaseTransformComponent::*)() const>(&pragma::BaseTransformComponent::GetAngles));
+		def.def("SetAngles",&pragma::BaseTransformComponent::SetAngles);
+		def.def("GetForward",&pragma::BaseTransformComponent::GetForward);
+		def.def("GetRight",&pragma::BaseTransformComponent::GetRight);
+		def.def("GetUp",&pragma::BaseTransformComponent::GetUp);
 
-		def.def("GetEyePos",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt) {
-			
-			Lua::Push<Vector3>(l,hEnt.GetEyePosition());
-		}));
-		def.def("GetEyeOffset",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt) {
-			
-			Lua::Push<Vector3>(l,hEnt.GetEyeOffset());
-		}));
-		def.def("SetEyeOffset",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,Vector3&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,Vector3 &offset) {
-			
-			hEnt.SetEyeOffset(offset);
-		}));
+		def.def("GetEyePos",&pragma::BaseTransformComponent::GetEyePosition);
+		def.def("GetEyeOffset",&pragma::BaseTransformComponent::GetEyeOffset);
+		def.def("SetEyeOffset",&pragma::BaseTransformComponent::SetEyeOffset);
 
 		def.def("LocalToWorld",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,Vector3)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,Vector3 origin) {
-			
 			hEnt.LocalToWorld(&origin);
 			Lua::Push<Vector3>(l,origin);
 		}));
 		def.def("LocalToWorld",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,Quat)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,Quat rot) {
-			
 			hEnt.LocalToWorld(&rot);
 			Lua::Push<Quat>(l,rot);
 		}));
 		def.def("LocalToWorld",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,Vector3,Quat)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,Vector3 origin,Quat rot) {
-			
 			hEnt.LocalToWorld(&origin,&rot);
 			Lua::Push<Vector3>(l,origin);
 			Lua::Push<Quat>(l,rot);
 		}));
 		def.def("WorldToLocal",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,Vector3)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,Vector3 origin) {
-			
 			hEnt.WorldToLocal(&origin);
 			Lua::Push<Vector3>(l,origin);
 		}));
 		def.def("WorldToLocal",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,Quat)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,Quat rot) {
-			
 			hEnt.WorldToLocal(&rot);
 			Lua::Push<Quat>(l,rot);
 		}));
 		def.def("WorldToLocal",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,Vector3,Quat)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,Vector3 origin,Quat rot) {
-			
 			hEnt.WorldToLocal(&origin,&rot);
 			Lua::Push<Vector3>(l,origin);
 			Lua::Push<Quat>(l,rot);
 		}));
 
-		def.def("GetPitch",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt) {
-			
-			Lua::PushNumber(l,hEnt.GetPitch());
-		}));
-		def.def("GetYaw",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt) {
-			
-			Lua::PushNumber(l,hEnt.GetYaw());
-		}));
-		def.def("GetRoll",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt) {
-			
-			Lua::PushNumber(l,hEnt.GetRoll());
-		}));
-		def.def("SetPitch",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,float)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,float pitch) {
-			
-			hEnt.SetPitch(pitch);
-		}));
-		def.def("SetYaw",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,float)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,float yaw) {
-			
-			hEnt.SetYaw(yaw);
-		}));
-		def.def("SetRoll",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,float)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,float roll) {
-			
-			hEnt.SetRoll(roll);
-		}));
+		def.def("GetPitch",&pragma::BaseTransformComponent::GetPitch);
+		def.def("GetYaw",&pragma::BaseTransformComponent::GetYaw);
+		def.def("GetRoll",&pragma::BaseTransformComponent::GetRoll);
+		def.def("SetPitch",&pragma::BaseTransformComponent::SetPitch);
+		def.def("SetYaw",&pragma::BaseTransformComponent::SetYaw);
+		def.def("SetRoll",&pragma::BaseTransformComponent::SetRoll);
 
-		def.def("GetLastMoveTime",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt) {
-			
-			Lua::PushNumber(l,hEnt.GetLastMoveTime());
+		def.def("GetLastMoveTime",&pragma::BaseTransformComponent::GetLastMoveTime);
+		def.def("GetScale",&pragma::BaseTransformComponent::GetScale);
+		def.def("GetMaxAxisScale",&pragma::BaseTransformComponent::GetMaxAxisScale);
+		def.def("GetAbsMaxAxisScale",&pragma::BaseTransformComponent::GetAbsMaxAxisScale);
+		def.def("SetScale",static_cast<void(pragma::BaseTransformComponent::*)(float)>(&pragma::BaseTransformComponent::SetScale));
+		def.def("SetScale",static_cast<void(pragma::BaseTransformComponent::*)(const Vector3&)>(&pragma::BaseTransformComponent::SetScale));
+		
+		def.def("GetDistance",static_cast<float(pragma::BaseTransformComponent::*)(const Vector3&) const>(&pragma::BaseTransformComponent::GetDistance));
+		def.def("GetDistance",static_cast<float(pragma::BaseTransformComponent::*)(const BaseEntity&) const>(&pragma::BaseTransformComponent::GetDistance));
+		def.def("GetDistance",static_cast<float(*)(lua_State*,pragma::BaseTransformComponent&,pragma::BaseTransformComponent&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,pragma::BaseTransformComponent &hOther) {
+			return hEnt.GetDistance(hOther.GetEntity());
 		}));
-		def.def("GetScale",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt) {
-			
-			Lua::Push<Vector3>(l,hEnt.GetScale());
-		}));
-		def.def("GetMaxAxisScale",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt) {
-			
-			Lua::PushNumber(l,hEnt.GetMaxAxisScale());
-		}));
-		def.def("GetAbsMaxAxisScale",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt) {
-			
-			Lua::PushNumber(l,hEnt.GetAbsMaxAxisScale());
-		}));
-		def.def("SetScale",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,const Vector3&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,const Vector3 &scale) {
-			
-			hEnt.SetScale(scale);
-		}));
-		def.def("SetScale",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,float)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,float scale) {
-			
-			hEnt.SetScale(Vector3{scale,scale,scale});
-		}));
-
-		def.def("GetDistance",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,const Vector3&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,const Vector3 &p) {
-			
-			Lua::PushNumber(l,hEnt.GetDistance(p));
-		}));
-		def.def("GetDistance",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,pragma::BaseTransformComponent&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,pragma::BaseTransformComponent &hOther) {
-			
-			Lua::PushNumber(l,hEnt.GetDistance(hOther.GetEntity()));
-		}));
-		def.def("GetDistance",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,BaseEntity&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,BaseEntity &other) {
-			
-			Lua::PushNumber(l,hEnt.GetDistance(other));
-		}));
-
-		def.def("GetDirection",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,const Vector3&,bool)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,const Vector3 &p,bool bIgnoreYAxis) {
-			
-			Lua::Push<Vector3>(l,hEnt.GetDirection(p,bIgnoreYAxis));
-		}));
+		
+		def.def("GetDirection",static_cast<Vector3(pragma::BaseTransformComponent::*)(const BaseEntity&,bool) const>(&pragma::BaseTransformComponent::GetDirection));
+		def.def("GetDirection",static_cast<Vector3(pragma::BaseTransformComponent::*)(const BaseEntity&,bool) const>(&pragma::BaseTransformComponent::GetDirection),luabind::default_parameter_policy<3,false>{});
+		def.def("GetDirection",static_cast<Vector3(pragma::BaseTransformComponent::*)(const Vector3&,bool) const>(&pragma::BaseTransformComponent::GetDirection));
+		def.def("GetDirection",static_cast<Vector3(pragma::BaseTransformComponent::*)(const Vector3&,bool) const>(&pragma::BaseTransformComponent::GetDirection),luabind::default_parameter_policy<3,false>{});
 		def.def("GetDirection",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,pragma::BaseTransformComponent&,bool)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,pragma::BaseTransformComponent &hOther,bool bIgnoreYAxis) {
-			
 			Lua::Push<Vector3>(l,hEnt.GetDirection(hOther.GetEntity(),bIgnoreYAxis));
 		}));
-		def.def("GetDirection",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,BaseEntity&,bool)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,BaseEntity &other,bool bIgnoreYAxis) {
-			
-			Lua::Push<Vector3>(l,hEnt.GetDirection(other,bIgnoreYAxis));
-		}));
-		def.def("GetAngles",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,const Vector3&,bool)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,const Vector3 &p,bool bIgnoreYAxis) {
-			
-			Lua::Push<EulerAngles>(l,hEnt.GetAngles(p,bIgnoreYAxis));
-		}));
+
 		def.def("GetAngles",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,pragma::BaseTransformComponent&,bool)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,pragma::BaseTransformComponent &hOther,bool bIgnoreYAxis) {
-			
 			Lua::Push<EulerAngles>(l,hEnt.GetAngles(hOther.GetEntity(),bIgnoreYAxis));
 		}));
 		def.def("GetAngles",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,BaseEntity&,bool)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,BaseEntity &other,bool bIgnoreYAxis) {
@@ -2183,33 +1966,19 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 			Lua::PushNumber(l,hEnt.GetDotProduct(other,bIgnoreYAxis));
 		}));
 
-		def.def("GetDirection",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,const Vector3&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,const Vector3 &p) {
-			Lua::Transform::GetDirection(l,hEnt,p,false);
-		}));
 		def.def("GetDirection",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,pragma::BaseTransformComponent&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,pragma::BaseTransformComponent &hOther) {
 			Lua::Transform::GetDirection(l,hEnt,hOther,false);
-		}));
-		def.def("GetDirection",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,BaseEntity&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,BaseEntity &other) {
-			Lua::Transform::GetDirection(l,hEnt,other,false);
-		}));
-		def.def("GetAngles",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,const Vector3&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,const Vector3 &p) {
-			Lua::Transform::GetAngles(l,hEnt,p,false);
 		}));
 		def.def("GetAngles",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,pragma::BaseTransformComponent&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,pragma::BaseTransformComponent &hOther) {
 			Lua::Transform::GetAngles(l,hEnt,hOther,false);
 		}));
-		def.def("GetAngles",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,BaseEntity&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,BaseEntity &other) {
-			Lua::Transform::GetAngles(l,hEnt,other,false);
-		}));
-		def.def("GetDotProduct",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,const Vector3&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,const Vector3 &p) {
-			Lua::Transform::GetDotProduct(l,hEnt,p,false);
-		}));
 		def.def("GetDotProduct",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,pragma::BaseTransformComponent&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,pragma::BaseTransformComponent &hOther) {
 			Lua::Transform::GetDotProduct(l,hEnt,hOther,false);
 		}));
-		def.def("GetDotProduct",static_cast<void(*)(lua_State*,pragma::BaseTransformComponent&,BaseEntity&)>([](lua_State *l,pragma::BaseTransformComponent &hEnt,BaseEntity &other) {
-			Lua::Transform::GetDotProduct(l,hEnt,other,false);
-		}));
+		def.def("GetDotProduct",static_cast<float(pragma::BaseTransformComponent::*)(const BaseEntity&,bool) const>(&pragma::BaseTransformComponent::GetDotProduct));
+		def.def("GetDotProduct",static_cast<float(pragma::BaseTransformComponent::*)(const BaseEntity&,bool) const>(&pragma::BaseTransformComponent::GetDotProduct),luabind::default_parameter_policy<3,false>{});
+		def.def("GetDotProduct",static_cast<float(pragma::BaseTransformComponent::*)(const Vector3&,bool) const>(&pragma::BaseTransformComponent::GetDotProduct));
+		def.def("GetDotProduct",static_cast<float(pragma::BaseTransformComponent::*)(const Vector3&,bool) const>(&pragma::BaseTransformComponent::GetDotProduct),luabind::default_parameter_policy<3,false>{});
 	}
 
 	#include "pragma/entities/components/base_color_component.hpp"

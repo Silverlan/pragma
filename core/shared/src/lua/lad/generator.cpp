@@ -16,11 +16,12 @@
 #include <span>
 #include <Psapi.h>
 #include <luabind/class_info.hpp>
+#include <sharedutils/magic_enum.hpp>
 
 #pragma comment(lib,"Psapi.lib")
 
 using namespace pragma::lua;
-
+#pragma optimize("",off)
 namespace luabind {
 
 	LUABIND_API class_info get_class_info(argument const& o);
@@ -205,7 +206,23 @@ void LuaDocGenerator::InitializeRepositoryUrls()
 		{"mathutil",BuildRepositoryUrl("https://github.com/Silverlan/mathutil/","blob/%commitid%/")},
 		{"sharedutils",BuildRepositoryUrl("https://github.com/Silverlan/sharedutils/","blob/%commitid%/")},
 		{"util_udm",BuildRepositoryUrl("https://github.com/Silverlan/util_udm/","blob/%commitid%/")},
-		{"glm",BuildRepositoryUrl("https://github.com/g-truc/glm/","blob/%commitid%/")}
+		{"glm",BuildRepositoryUrl("https://github.com/g-truc/glm/","blob/%commitid%/")},
+		{"prosper",BuildRepositoryUrl("https://github.com/Silverlan/prosper/","blob/%commitid%/")},
+		{"vfilesystem",BuildRepositoryUrl("https://github.com/Silverlan/vfilesystem/","blob/%commitid%/")},
+		{"alsoundsystem",BuildRepositoryUrl("https://github.com/Silverlan/alsoundsystem/","blob/%commitid%/")},
+		{"datasystem",BuildRepositoryUrl("https://github.com/Silverlan/datasystem/","blob/%commitid%/")},
+		{"iglfw",BuildRepositoryUrl("https://github.com/Silverlan/iglfw/","blob/%commitid%/")},
+		{"materialsystem",BuildRepositoryUrl("https://github.com/Silverlan/materialsystem/","blob/%commitid%/")},
+		{"cmaterialsystem",BuildRepositoryUrl("https://github.com/Silverlan/materialsystem/","blob/%commitid%/")},
+		{"util_image",BuildRepositoryUrl("https://github.com/Silverlan/util_image/","blob/%commitid%/")},
+		{"util_pragma_doc",BuildRepositoryUrl("https://github.com/Silverlan/util_pragma_doc/","blob/%commitid%/")},
+		{"util_sound",BuildRepositoryUrl("https://github.com/Silverlan/util_sound/","blob/%commitid%/")},
+		{"util_udm",BuildRepositoryUrl("https://github.com/Silverlan/util_udm/","blob/%commitid%/")},
+		{"wgui",BuildRepositoryUrl("https://github.com/Silverlan/wgui/","blob/%commitid%/")},
+		{"pr_dmx",BuildRepositoryUrl("https://github.com/Silverlan/pr_dmx/","blob/%commitid%/")},
+		{"pr_cycles",BuildRepositoryUrl("https://github.com/Silverlan/pr_cycles/","blob/%commitid%/")},
+		{"pr_openvr",BuildRepositoryUrl("https://github.com/Silverlan/pr_openvr/","blob/%commitid%/")},
+		{"pr_steamworks",BuildRepositoryUrl("https://github.com/Silverlan/pr_steamworks/","blob/%commitid%/")}
 	};
 }
 
@@ -282,75 +299,291 @@ void LuaDocGenerator::PopulateMethods(lua_State *l)
 	}
 }
 
-std::optional<pragma::doc::Variant> LuaDocGenerator::CreateVariant(const luabind::detail::TypeInfo &typeInfo)
+void LuaDocGenerator::GenerateDocParameters(const luabind::detail::TypeInfo &input,std::vector<pragma::doc::Parameter> &outputs,const std::optional<std::string> &pargName,bool keepTuples)
 {
-	auto applyFlags = [&typeInfo](pragma::doc::Variant &variant) {
-		umath::set_flag(variant.flags,pragma::doc::Variant::Flags::Const,typeInfo.isConst);
-		umath::set_flag(variant.flags,pragma::doc::Variant::Flags::Pointer,typeInfo.isPointer);
-		umath::set_flag(variant.flags,pragma::doc::Variant::Flags::Reference,typeInfo.isReference);
-		umath::set_flag(variant.flags,pragma::doc::Variant::Flags::SmartPtr,typeInfo.isSmartPtr);
+	std::string argName = "unknown"; // TODO
+	if(pargName.has_value())
+		argName = *pargName;
+	auto applyFlags = [&input](pragma::doc::Variant &variant) {
+		umath::set_flag(variant.flags,pragma::doc::Variant::Flags::Const,input.isConst);
+		umath::set_flag(variant.flags,pragma::doc::Variant::Flags::Pointer,input.isPointer);
+		umath::set_flag(variant.flags,pragma::doc::Variant::Flags::Reference,input.isReference);
+		umath::set_flag(variant.flags,pragma::doc::Variant::Flags::SmartPtr,input.isSmartPtr);
+		umath::set_flag(variant.flags,pragma::doc::Variant::Flags::Enum,input.isEnum);
+		umath::set_flag(variant.flags,pragma::doc::Variant::Flags::Optional,input.isOptional);
 	};
-	if(typeInfo.isPseudoType)
+
+	if(input.typeIdentifier.has_value())
 	{
-		std::cout<<"";
+		auto createUnknown = [&outputs,&argName]() {
+			auto param = pragma::doc::Parameter::Create(argName);
+			auto &variant = param.GetType();
+			variant.name = "unknown";
+			outputs.push_back(std::move(param));
+		};
+		if(input.templateTypes.empty())
+		{
+			Con::cwar<<"WARNING: Got template type without template parameters!"<<Con::endl;
+			createUnknown();
+		}
+		else
+		{
+			std::vector<pragma::doc::Parameter> subParams;
+			for(auto &tempType : input.templateTypes)
+				GenerateDocParameters(tempType,subParams);
+			auto checkParamCount = [&subParams,&createUnknown](uint32_t expected,bool atLeast=false) -> bool {
+				if((!atLeast && subParams.size() != expected) || (atLeast && subParams.size() < expected))
+				{
+					Con::cwar<<"WARNING: Unexpected number of template parameters for template type!"<<Con::endl;
+					createUnknown();
+					return false;
+				}
+				return true;
+			};
+			
+			auto createTuple = [&argName,&subParams,&outputs]() {
+				auto param = pragma::doc::Parameter::Create(argName);
+				auto &variant = param.GetType();
+				variant.name = "tuple";
+				variant.typeParameters.reserve(subParams.size());
+				for(auto &subParam : subParams)
+					variant.typeParameters.push_back(std::move(subParam.GetType()));
+				outputs.push_back(std::move(param));
+			};
+
+			if(input.typeIdentifier == "shared_ptr" || input.typeIdentifier == "unique_ptr")
+			{
+				if(checkParamCount(1))
+				{
+					auto param = std::move(subParams.front());
+					param.SetName(argName);
+					auto &variant = param.GetType();
+					variant.flags |= pragma::doc::Variant::Flags::SmartPtr;
+					outputs.push_back(std::move(param));
+				}
+			}
+			else if(input.typeIdentifier == "typehint")
+			{
+				if(checkParamCount(1))
+				{
+					auto param = std::move(subParams.front());
+					param.SetName(argName);
+					outputs.push_back(std::move(param));
+				}
+			}
+			else if(input.typeIdentifier == "vector" || input.typeIdentifier == "array" || input.typeIdentifier == "tableT")
+			{
+				uint32_t numExpected = 1;
+				if(checkParamCount(numExpected,true))
+				{
+					auto param = pragma::doc::Parameter::Create(argName);
+					auto &variant = param.GetType();
+					variant.name = "table";
+
+					variant.typeParameters.push_back(std::move(subParams.front().GetType()));
+					outputs.push_back(std::move(param));
+				}
+			}
+			else if(input.typeIdentifier == "tableTT")
+			{
+				if(checkParamCount(2))
+				{
+					auto param = pragma::doc::Parameter::Create(argName);
+					auto &variant = param.GetType();
+					variant.name = "table";
+
+					variant.typeParameters.push_back(std::move(subParams[0].GetType()));
+					variant.typeParameters.push_back(std::move(subParams[1].GetType()));
+					outputs.push_back(std::move(param));
+				}
+			}
+			else if(input.typeIdentifier == "map")
+			{
+				if(checkParamCount(2,true))
+				{
+					auto param = pragma::doc::Parameter::Create(argName);
+					auto &variant = param.GetType();
+					variant.name = "map";
+
+					variant.typeParameters.push_back(std::move(subParams[0].GetType()));
+					variant.typeParameters.push_back(std::move(subParams[1].GetType()));
+					outputs.push_back(std::move(param));
+				}
+			}
+			else if(input.typeIdentifier == "pair")
+			{
+				if(checkParamCount(2))
+				{
+					if(keepTuples == false)
+					{
+						auto param0 = std::move(subParams[0]);
+						auto param1 = std::move(subParams[1]);
+						param0.SetName(argName +"_1");
+						param1.SetName(argName +"_2");
+						outputs.push_back(std::move(param0));
+						outputs.push_back(std::move(param1));
+					}
+					else
+						createTuple();
+				}
+			}
+			else if(input.typeIdentifier == "tuple" || input.typeIdentifier == "mult")
+			{
+				if(checkParamCount(1,true))
+				{
+					if(keepTuples == false)
+					{
+						outputs.reserve(outputs.size() +subParams.size());
+						uint32_t idx = 0;
+						for(auto &param : subParams)
+						{
+							auto tmp = std::move(param);
+							tmp.SetName(argName +"_" +std::to_string(++idx));
+							outputs.push_back(std::move(tmp));
+						}
+					}
+					else
+						createTuple();
+				}
+			}
+			else if(input.typeIdentifier == "optional")
+			{
+				if(checkParamCount(1,true))
+				{
+					outputs.reserve(outputs.size() +subParams.size());
+					uint32_t idx = 0;
+					auto multiple = subParams.size() > 1;
+					for(auto &param : subParams)
+					{
+						auto tmpName = argName;
+						if(multiple)
+							tmpName += "_" +std::to_string(++idx);
+						outputs.push_back(param);
+						outputs.back().SetName(tmpName);
+						outputs.back().GetType().flags |= pragma::doc::Variant::Flags::Optional;
+					}
+				}
+			}
+			else if(input.typeIdentifier == "userData" || input.typeIdentifier == "classObject")
+			{
+				auto param = pragma::doc::Parameter::Create(argName);
+				auto &variant = param.GetType();
+				variant.name = *input.typeIdentifier;
+				outputs.push_back(std::move(param));
+			}
+			else if(input.typeIdentifier == "functype")
+			{
+				createUnknown();
+				/*auto param = pragma::doc::Parameter::Create(argName);
+				auto &variant = param.GetType();
+				variant.name = "function";
+
+				
+				variant.typeParameters.push_back(std::move(subParams[0].GetType()));
+				variant.typeParameters.push_back(std::move(subParams[1].GetType()));*/
+				// TODO
+			}
+			else if(input.typeIdentifier == "variant")
+			{
+				if(checkParamCount(1,true))
+				{
+					auto param = pragma::doc::Parameter::Create(argName);
+					auto &variant = param.GetType();
+					variant.name = "variant";
+
+					variant.typeParameters.reserve(subParams.size());
+					for(auto &subParam : subParams)
+						variant.typeParameters.push_back(std::move(subParam.GetType()));
+					outputs.push_back(std::move(param));
+				}
+			}
+			else if(input.typeIdentifier == "variadic")
+			{
+				if(checkParamCount(1,true))
+				{
+					auto param = pragma::doc::Parameter::Create(argName);
+					auto &variant = param.GetType();
+					variant.name = "variadic";
+
+					variant.typeParameters.reserve(subParams.size());
+					for(auto &subParam : subParams)
+						variant.typeParameters.push_back(std::move(subParam.GetType()));
+					outputs.push_back(std::move(param));
+				}
+			}
+			else
+				Con::cwar<<"WARNING: Unknown template type!"<<Con::endl;
+		}
+		return;
 	}
-	auto createFundamentalVariant = [&applyFlags](const char *name) -> pragma::doc::Variant {
-		pragma::doc::Variant variant {};
+
+	// Generic type
+	auto param = pragma::doc::Parameter::Create(argName);
+
+	auto createFundamentalVariant = [&applyFlags,&param](const char *name) {
+		auto &variant = param.GetType();
 		variant.name = name;
 		applyFlags(variant);
-		return variant;
 	};
-	if(typeInfo.typeInfo == &typeid(char) || typeInfo.type == luabind::detail::TypeInfo::FundamentalType::Char)
-		return createFundamentalVariant("int8");
-	else if(typeInfo.typeInfo == &typeid(unsigned char) || typeInfo.type == luabind::detail::TypeInfo::FundamentalType::Char)
-		return createFundamentalVariant("uint8");
-	else if(typeInfo.typeInfo == &typeid(short) || typeInfo.type == luabind::detail::TypeInfo::FundamentalType::Short)
-		return createFundamentalVariant("int16");
-	else if(typeInfo.typeInfo == &typeid(unsigned short) || typeInfo.type == luabind::detail::TypeInfo::FundamentalType::UShort)
-		return createFundamentalVariant("uint16");
-	else if(typeInfo.typeInfo == &typeid(int) || typeInfo.type == luabind::detail::TypeInfo::FundamentalType::Int)
-		return createFundamentalVariant("int32");
-	else if(typeInfo.typeInfo == &typeid(unsigned int) || typeInfo.type == luabind::detail::TypeInfo::FundamentalType::UInt)
-		return createFundamentalVariant("uint32");
-	else if(typeInfo.typeInfo == &typeid(long) || typeInfo.type == luabind::detail::TypeInfo::FundamentalType::Long)
-		return createFundamentalVariant("int32");
-	else if(typeInfo.typeInfo == &typeid(unsigned long) || typeInfo.type == luabind::detail::TypeInfo::FundamentalType::ULong)
-		return createFundamentalVariant("uint32");
-	else if(typeInfo.typeInfo == &typeid(void) || typeInfo.type == luabind::detail::TypeInfo::FundamentalType::Void)
-		return createFundamentalVariant("nil");
-	else if(typeInfo.typeInfo == &typeid(bool) || typeInfo.type == luabind::detail::TypeInfo::FundamentalType::Bool)
-		return createFundamentalVariant("bool");
-	else if(typeInfo.typeInfo == &typeid(std::string) || typeInfo.type == luabind::detail::TypeInfo::FundamentalType::String)
-		return createFundamentalVariant("string");
-	else if(typeInfo.typeInfo == &typeid(luabind::object) || typeInfo.type == luabind::detail::TypeInfo::FundamentalType::LuabindObject)
-		return createFundamentalVariant("any");
-	else if(typeInfo.typeInfo == &typeid(luabind::argument) || typeInfo.type == luabind::detail::TypeInfo::FundamentalType::LuabindArgument)
-		return createFundamentalVariant("any");
-	else if(typeInfo.typeInfo == &typeid(float))
-		return createFundamentalVariant("float");
-	else if(typeInfo.typeInfo == &typeid(double))
-		return createFundamentalVariant("float");
-	else if(typeInfo.type == luabind::detail::TypeInfo::FundamentalType::LuaState)
-		return createFundamentalVariant("lua_State");
-	if(!typeInfo.crep)
+	if(input.typeInfo == &typeid(char) || input.type == luabind::detail::TypeInfo::FundamentalType::Char)
+		createFundamentalVariant("int8");
+	else if(input.typeInfo == &typeid(unsigned char) || input.type == luabind::detail::TypeInfo::FundamentalType::UChar)
+		createFundamentalVariant("uint8");
+	else if(input.typeInfo == &typeid(short) || input.type == luabind::detail::TypeInfo::FundamentalType::Short)
+		createFundamentalVariant("int16");
+	else if(input.typeInfo == &typeid(unsigned short) || input.type == luabind::detail::TypeInfo::FundamentalType::UShort)
+		createFundamentalVariant("uint16");
+	else if(input.typeInfo == &typeid(int) || input.type == luabind::detail::TypeInfo::FundamentalType::Int)
+		createFundamentalVariant("int32");
+	else if(input.typeInfo == &typeid(unsigned int) || input.type == luabind::detail::TypeInfo::FundamentalType::UInt)
+		createFundamentalVariant("uint32");
+	else if(input.typeInfo == &typeid(long) || input.type == luabind::detail::TypeInfo::FundamentalType::Long)
+		createFundamentalVariant("int32");
+	else if(input.typeInfo == &typeid(unsigned long) || input.type == luabind::detail::TypeInfo::FundamentalType::ULong)
+		createFundamentalVariant("uint32");
+	else if(input.typeInfo == &typeid(void) || input.type == luabind::detail::TypeInfo::FundamentalType::Void)
+		createFundamentalVariant("nil");
+	else if(input.typeInfo == &typeid(bool) || input.type == luabind::detail::TypeInfo::FundamentalType::Bool)
+		createFundamentalVariant("bool");
+	else if(input.typeInfo == &typeid(float) || input.typeInfo == &typeid(double) || input.type == luabind::detail::TypeInfo::FundamentalType::Float)
+		createFundamentalVariant("float");
+	else if(input.typeInfo == &typeid(std::string) || input.type == luabind::detail::TypeInfo::FundamentalType::String)
+		createFundamentalVariant("string");
+	else if(input.typeInfo == &typeid(luabind::object) || input.type == luabind::detail::TypeInfo::FundamentalType::LuabindObject)
+		createFundamentalVariant("any");
+	else if(input.typeInfo == &typeid(luabind::argument) || input.type == luabind::detail::TypeInfo::FundamentalType::LuabindArgument)
+		createFundamentalVariant("any");
+	else if(input.type == luabind::detail::TypeInfo::FundamentalType::LuaState)
+		createFundamentalVariant("lua_State");
+	else if(!input.crep)
 	{
 		std::string typeName;
-		if(typeInfo.typeInfo)
-			typeName = typeInfo.typeInfo->name();
+		if(input.typeInfo)
+		{
+			param.GetType().name = input.typeInfo->name();
+			typeName = input.typeInfo->name();
+		}
+		else
+			typeName = magic_enum::enum_name(input.type);
+		param.GetType().flags |= pragma::doc::Variant::Flags::UnknownType;
+		applyFlags(param.GetType());
 		Con::cwar<<"WARNING: Unknown type '"<<typeName<<"'!"<<Con::endl;
-		return {};
 	}
-	auto it = m_classRepToCollection.find(typeInfo.crep);
-	if(it == m_classRepToCollection.end())
-		return {};
-	auto *typeCol = it->second;
-	pragma::doc::Variant variant {};
-	variant.name = typeCol->GetFullName();
-	const char *prefix = "root.";
-	if(ustring::compare(variant.name.c_str(),prefix,true,strlen(prefix)))
-		variant.name = variant.name.substr(strlen(prefix));
-	applyFlags(variant);
-	return variant;
+	else
+	{
+		auto it = m_classRepToCollection.find(input.crep);
+		if(it != m_classRepToCollection.end())
+		{
+			auto *typeCol = it->second;
+			auto &variant = param.GetType();
+			variant.name = typeCol->GetFullName();
+			const char *prefix = "root.";
+			if(ustring::compare(variant.name.c_str(),prefix,true,strlen(prefix)))
+				variant.name = variant.name.substr(strlen(prefix));
+			applyFlags(variant);
+		}
+	}
+	outputs.push_back(param);
 }
 
 void LuaDocGenerator::AddFunction(lua_State *l,pragma::doc::Collection &collection,const LuaMethodInfo &method,bool isMethod)
@@ -360,31 +593,22 @@ void LuaDocGenerator::AddFunction(lua_State *l,pragma::doc::Collection &collecti
 	for(auto &overloadInfo : method.overloads)
 	{
 		auto overload = pragma::doc::Overload::Create();
+		auto &params = overload.GetParameters();
 		for(auto argIdx=decltype(overloadInfo.parameters.size()){0u};argIdx<overloadInfo.parameters.size();++argIdx)
 		{
-			auto &type = overloadInfo.parameters[argIdx];
 			std::string argName = "arg" +std::to_string(argIdx);
 			if(overloadInfo.namedParameters.has_value())
 				argName = (*overloadInfo.namedParameters)[argIdx];
-			auto param = pragma::doc::Parameter::Create(argName);
-
-			auto var = CreateVariant(type);
-			if(var.has_value())
-				param.SetType(std::move(*var));
-			
-			overload.AddParameter(param);
+			auto &type = overloadInfo.parameters[argIdx];
+			GenerateDocParameters(type,params,argName);
 		}
+
+		auto &returnValues = overload.GetReturnValues();
 		for(auto argIdx=decltype(overloadInfo.returnValues.size()){0u};argIdx<overloadInfo.returnValues.size();++argIdx)
 		{
-			auto &type = overloadInfo.returnValues[argIdx];
 			std::string argName = "ret" +std::to_string(argIdx);
-			auto param = pragma::doc::Parameter::Create(argName);
-
-			auto var = CreateVariant(type);
-			if(var.has_value())
-				param.SetType(std::move(*var));
-			
-			overload.AddReturnValue(param);
+			auto &type = overloadInfo.returnValues[argIdx];
+			GenerateDocParameters(type,returnValues,argName);
 		}
 		if(overloadInfo.source.has_value())
 		{
@@ -1075,3 +1299,4 @@ void LuaDocGenerator::ParseLuaProperty(const std::string &name,const luabind::ob
 #endif
 	}
 };
+#pragma optimize("",on)

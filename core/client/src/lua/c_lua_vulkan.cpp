@@ -17,6 +17,7 @@
 #include <pragma/lua/policies/shared_from_this_policy.hpp>
 #include <pragma/lua/policies/pair_policy.hpp>
 #include <pragma/lua/policies/vector_policy.hpp>
+#include <pragma/lua/policies/default_parameter_policy.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/pair_converter_t.hpp>
@@ -1763,7 +1764,9 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkImage.def("GetType",&Lua::Vulkan::Image::GetType);
 	defVkImage.def("GetUsage",&Lua::Vulkan::Image::GetUsageFlags);
 	defVkImage.def("GetWidth",&Lua::Vulkan::Image::GetWidth);
+	defVkImage.def("GetWidth",&Lua::Vulkan::Image::GetWidth,luabind::default_parameter_policy<2,uint32_t{0}>{});
 	defVkImage.def("GetHeight",&Lua::Vulkan::Image::GetHeight);
+	defVkImage.def("GetHeight",&Lua::Vulkan::Image::GetHeight,luabind::default_parameter_policy<2,uint32_t{0}>{});
 	defVkImage.def("WriteMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uint32_t,uint32_t,uimg::ImageBuffer&,uint32_t,uint32_t)>(Lua::Vulkan::VKImage::WriteMemory));
 	defVkImage.def("WriteMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uint32_t,uint32_t,uimg::ImageBuffer&,uint32_t)>(Lua::Vulkan::VKImage::WriteMemory));
 	defVkImage.def("WriteMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uint32_t,uint32_t,uimg::ImageBuffer&)>(Lua::Vulkan::VKImage::WriteMemory));

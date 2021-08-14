@@ -13,7 +13,7 @@
 #include "pragma/model/c_model.h"
 
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 static auto g_debugPrint = false;
 void pragma::CEyeComponent::UpdateEyeballsMT()
 {
@@ -76,19 +76,6 @@ Vector3 pragma::CEyeComponent::GetViewTarget() const
 
 void pragma::CEyeComponent::ClearViewTarget() {m_viewTarget = {};}
 
-static void angle_to_vector(const EulerAngles &angles,Vector3 &outForward)
-{
-	auto y = -umath::deg_to_rad(angles.y); // Needs to be inverted for some reason
-	auto sy = umath::sin(y);
-	auto cy = umath::cos(y);
-
-	auto sp = umath::sin(umath::deg_to_rad(angles.p));
-	auto cp = umath::cos(umath::deg_to_rad(angles.p));
-
-	outForward.x = cp *cy;
-	outForward.y = cp *sy;
-	outForward.z = -sp;
-}
 Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 {
 	auto flexC = GetEntity().GetComponent<CFlexComponent>();
@@ -131,14 +118,15 @@ Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 		if(m_eyeLeftRightFlexController != std::numeric_limits<uint32_t>::max())
 			flexC->GetFlexController(m_eyeLeftRightFlexController,eyeAng.y);
 
-		angle_to_vector(eyeAng,eyeDeflect);
-		eyeDeflect.x = 0;
+		umath::negate(eyeAng.p);
+		umath::negate(eyeAng.y);
+		eyeDeflect = eyeAng.Forward();
+		eyeDeflect.z = 0;
 
 		eyeDeflect = eyeDeflect *(localPos.z *localPos.z);
-		localPos = localPos +Vector3(eyeDeflect.y,-eyeDeflect.z,eyeDeflect.x);
+		localPos = localPos +eyeDeflect;//Vector3(eyeDeflect.y,-eyeDeflect.z,eyeDeflect.x);
 		uvec::normalize(&localPos);
 
-		// Is eye aiming outside the max eye deflection?
 		auto maxEyeDeflection = umath::cos(umath::deg_to_rad(mdl->GetMaxEyeDeflection()));
 		static auto testDeflection = true;
 		if(testDeflection)
@@ -146,7 +134,6 @@ Vector3 pragma::CEyeComponent::ClampViewTarget(const Vector3 &viewTarget) const
 		if(localPos.z < maxEyeDeflection)
 		{
 			// TODO: Unsure if this is correct, further testing required
-			// if so, clamp it to 30 degrees offset
 			localPos.z = 0;
 			auto d = uvec::length_sqr(localPos);
 			if(d > 0.0)
@@ -295,3 +282,4 @@ void pragma::CEyeComponent::UpdateEyeballMT(const Eyeball &eyeball,uint32_t eyeb
 		Con::cout<<"Up: "<<state.up<<Con::endl;
 	}
 }
+#pragma optimize("",on)

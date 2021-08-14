@@ -297,7 +297,10 @@ void print_member_documentation(const pragma::doc::Member &member)
 	util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 	Con::cout<<"Type: ";
 	util::set_console_color(util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Intensity);
-	Con::cout<<member.GetType().GetFullType()<<Con::endl;
+	auto typeName = member.GetType().GetFormattedType(pragma::doc::ParameterFormatType::Generic,[](const pragma::doc::Variant &var,std::string &inOutName) {
+		inOutName = wrap_link(inOutName);
+	});
+	Con::cout<<typeName<<Con::endl;
 
 	auto &def = member.GetDefault();
 	if(def.has_value())
@@ -382,7 +385,12 @@ void print_collection(const pragma::doc::Collection &collection)
 			auto &member = members.at(idx);
 			Con::cout<<"- ";
 			util::set_console_color(util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Intensity);
-			Con::cout<<"["<<wrap_link(member.GetType().GetFullType())<<"] ";
+
+			auto typeName = member.GetType().GetFormattedType(pragma::doc::ParameterFormatType::Generic,[](const pragma::doc::Variant &var,std::string &inOutName) {
+				inOutName = wrap_link(inOutName);
+			});
+
+			Con::cout<<"["<<wrap_link(typeName)<<"] ";
 			util::set_console_color(util::ConsoleColorFlags::White | util::ConsoleColorFlags::Intensity);
 			Con::cout<<member.GetFullName()<<Con::endl;
 		}
@@ -624,7 +632,11 @@ void print_function_documentation(const pragma::doc::Function &function)
 		util::set_console_color(util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Intensity);
 		if(returnValues.empty() == false)
 		{
-			for(auto &returnValue : returnValues)
+			auto retStr = pragma::doc::Parameter::GetFormattedParameterString(returnValues,pragma::doc::ParameterFormatType::Generic,false,[](const pragma::doc::Variant &var,std::string &inOutName) {
+				inOutName = wrap_link(inOutName);
+			});
+			Con::cout<<retStr;
+			/*for(auto &returnValue : returnValues)
 			{
 				if(bFirst == false)
 				{
@@ -635,7 +647,7 @@ void print_function_documentation(const pragma::doc::Function &function)
 					bFirst = false;
 				util::set_console_color(util::ConsoleColorFlags::Green | util::ConsoleColorFlags::Intensity);
 				Con::cout<<"["<<wrap_link(returnValue.GetFullType())<<"]";
-			}
+			}*/
 		}
 		else
 			Con::cout<<"[void]";
@@ -643,7 +655,11 @@ void print_function_documentation(const pragma::doc::Function &function)
 		Con::cout<<" "<<function.GetName()<<"(";
 
 		auto &parameters = overload.GetParameters();
-		bFirst = true;
+		auto paramStr = pragma::doc::Parameter::GetFormattedParameterString(parameters,pragma::doc::ParameterFormatType::Generic,true,[](const pragma::doc::Variant &var,std::string &inOutName) {
+			inOutName = wrap_link(inOutName);
+		});
+		Con::cout<<paramStr;
+		/*bFirst = true;
 		for(auto &param : parameters)
 		{
 			if(bFirst == false)
@@ -659,7 +675,7 @@ void print_function_documentation(const pragma::doc::Function &function)
 			if(def.has_value())
 				Con::cout<<"="<<*def;
 		//	param.GetGameStateFlags // TODO
-		}
+		}*/
 		Con::cout<<")"<<Con::endl;
 		util::reset_console_color();
 	}

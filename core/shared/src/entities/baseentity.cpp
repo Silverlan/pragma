@@ -84,7 +84,6 @@ pragma::ComponentEventId BaseEntity::GetEventId(const std::string &name) const
 }
 void BaseEntity::OnRemove()
 {
-	pragma::BaseLuaHandle::InvalidateHandle();
 	for(auto it=m_entsRemove.begin();it!=m_entsRemove.end();++it)
 	{
 		auto &hEnt = *it;
@@ -93,6 +92,7 @@ void BaseEntity::OnRemove()
 	}
 	BroadcastEvent(EVENT_ON_REMOVE);
 	ClearComponents();
+	pragma::BaseLuaHandle::InvalidateHandle();
 }
 
 void BaseEntity::Construct(unsigned int idx)

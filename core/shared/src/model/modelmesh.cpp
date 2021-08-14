@@ -669,7 +669,7 @@ void ModelSubMesh::GetBounds(Vector3 &min,Vector3 &max) const
 	min = m_min;
 	max = m_max;
 }
-void ModelSubMesh::Optimize()
+void ModelSubMesh::Optimize(double epsilon)
 {
 	std::vector<umath::Vertex> newVerts;
 	newVerts.reserve(m_vertices->size());
@@ -701,7 +701,7 @@ void ModelSubMesh::Optimize()
 			auto *weightOther = (j < newVertexWeights.size()) ? &newVertexWeights[j] : nullptr;
 			if((bCheckAlphas && alphaOther == nullptr) || (bCheckWeights && weightOther == nullptr))
 				break;
-			if(v == vOther && (bCheckAlphas == false || (umath::abs(alpha->x -alphaOther->x) <= umath::VERTEX_EPSILON && umath::abs(alpha->y -alphaOther->y) <= umath::VERTEX_EPSILON)) && (bCheckWeights == false || *weight == *weightOther))
+			if(v.Equal(vOther,epsilon) && (bCheckAlphas == false || (umath::abs(alpha->x -alphaOther->x) <= epsilon && umath::abs(alpha->y -alphaOther->y) <= epsilon)) && (bCheckWeights == false || *weight == *weightOther))
 			{
 				vertIdx = j;
 				break;

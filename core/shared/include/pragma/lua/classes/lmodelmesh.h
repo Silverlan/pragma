@@ -85,7 +85,6 @@ namespace Lua
 		DLLNETWORK void GetVertexAlpha(lua_State *l,::ModelSubMesh &mdl,uint32_t idx);
 		DLLNETWORK void GetVertexWeight(lua_State *l,::ModelSubMesh &mdl,uint32_t idx);
 		DLLNETWORK void GetCenter(lua_State *l,::ModelSubMesh &mdl);
-		DLLNETWORK void Optimize(lua_State *l,::ModelSubMesh &mdl);
 		DLLNETWORK void GenerateNormals(lua_State *l,::ModelSubMesh &mdl);
 		DLLNETWORK void NormalizeUVCoordinates(lua_State *l,::ModelSubMesh &mdl);
 		DLLNETWORK void ClipAgainstPlane(lua_State *l,::ModelSubMesh &mdl,const Vector3 &n,double d);

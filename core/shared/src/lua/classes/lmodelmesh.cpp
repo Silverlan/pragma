@@ -10,6 +10,7 @@
 #include "luasystem.h"
 #include "pragma/model/model.h"
 #include "pragma/model/modelmesh.h"
+#include <pragma/lua/policies/default_parameter_policy.hpp>
 
 extern DLLNETWORK Engine *engine;
 
@@ -172,7 +173,8 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("GetVertexUV",static_cast<void(*)(lua_State*,::ModelSubMesh&,uint32_t)>(&Lua::ModelSubMesh::GetVertexUV));
 	classDef.def("GetVertexAlpha",&Lua::ModelSubMesh::GetVertexAlpha);
 	classDef.def("GetVertexWeight",&Lua::ModelSubMesh::GetVertexWeight);
-	classDef.def("Optimize",&Lua::ModelSubMesh::Optimize);
+	classDef.def("Optimize",&::ModelSubMesh::Optimize);
+	classDef.def("Optimize",&::ModelSubMesh::Optimize,luabind::default_parameter_policy<2,double{umath::VERTEX_EPSILON}>{});
 	classDef.def("GenerateNormals",&Lua::ModelSubMesh::GenerateNormals);
 	classDef.def("NormalizeUVCoordinates",&Lua::ModelSubMesh::NormalizeUVCoordinates);
 	classDef.def("ClipAgainstPlane",static_cast<void(*)(lua_State*,::ModelSubMesh&,const Vector3&,double,bool,luabind::object)>(&Lua::ModelSubMesh::ClipAgainstPlane));
@@ -474,10 +476,6 @@ void Lua::ModelSubMesh::GetVertexWeight(lua_State *l,::ModelSubMesh &mdl,uint32_
 	if(idx >= mdl.GetVertexWeights().size())
 		return;
 	Lua::Push<umath::VertexWeight>(l,mdl.GetVertexWeight(idx));
-}
-void Lua::ModelSubMesh::Optimize(lua_State*,::ModelSubMesh &mdl)
-{
-	mdl.Optimize();
 }
 void Lua::ModelSubMesh::GenerateNormals(lua_State*,::ModelSubMesh &mdl)
 {

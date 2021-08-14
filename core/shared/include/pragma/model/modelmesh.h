@@ -104,7 +104,7 @@ public:
 	Vector2 GetVertexUV(uint32_t idx) const;
 	Vector2 GetVertexAlpha(uint32_t idx) const;
 	umath::VertexWeight GetVertexWeight(uint32_t idx) const;
-	void Optimize();
+	void Optimize(double epsilon=umath::VERTEX_EPSILON);
 	void Rotate(const Quat &rot);
 	void Translate(const Vector3 &t);
 	void Transform(const umath::ScaledTransform &pose);

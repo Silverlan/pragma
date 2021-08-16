@@ -40,6 +40,7 @@ namespace pragma::animation
 
 	using AnimationChannelId = uint16_t;
 	class Animation;
+	class Animation2;
 	class AnimationPlayer;
 	using PAnimationPlayer = std::shared_ptr<AnimationPlayer>;
 	class AnimatedPose;

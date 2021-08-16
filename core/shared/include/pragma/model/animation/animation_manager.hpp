@@ -24,6 +24,8 @@ namespace pragma::animation
 		std::function<void()> onStopAnimation = nullptr;
 		std::function<void(AnimationId&,FPlayAnim&)> translateAnimation = nullptr;
 	};
+	class AnimationChannel;
+	using ChannelValueSubmitter = std::function<void(AnimationChannel&,uint32_t&,double)>;
 	class AnimationPlayer;
 	using PAnimationPlayer = std::shared_ptr<AnimationPlayer>;
 	class DLLNETWORK AnimationManager
@@ -57,6 +59,8 @@ namespace pragma::animation
 		AnimationPlayer &GetPlayer() {return *m_player;}
 		const AnimationPlayer &GetPlayer() const {return const_cast<AnimationManager*>(this)->GetPlayer();}
 
+		std::vector<animation::ChannelValueSubmitter> &GetChannelValueSubmitters() {return m_channelValueSubmitters;}
+
 		void SetCallbackInterface(const AnimationPlayerCallbackInterface &i) {m_callbackInterface = i;}
 	private:
 		AnimationManager(const Model &mdl);
@@ -67,6 +71,7 @@ namespace pragma::animation
 		std::weak_ptr<const Model> m_model {};
 		AnimationId m_currentAnimation = std::numeric_limits<AnimationId>::max();
 		FPlayAnim m_currentFlags = FPlayAnim::None;
+		std::vector<animation::ChannelValueSubmitter> m_channelValueSubmitters {};
 		
 		AnimationSlice m_prevAnimSlice;
 		AnimationPlayerCallbackInterface m_callbackInterface {};

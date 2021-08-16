@@ -85,10 +85,10 @@ void pragma::animation::AnimationPlayer::SetCurrentTime(float t,bool forceUpdate
 	m_currentTime = t;
 	Advance(0.f,true);
 }
-void pragma::animation::AnimationPlayer::Advance(float dt,bool forceUpdate)
+bool pragma::animation::AnimationPlayer::Advance(float dt,bool forceUpdate)
 {
 	if(!m_animation)
-		return;
+		return false;
 	auto &anim = m_animation;
 	dt *= m_playbackRate;
 	auto newTime = m_currentTime;
@@ -105,10 +105,10 @@ void pragma::animation::AnimationPlayer::Advance(float dt,bool forceUpdate)
 			newTime = dur;
 	}
 	if(newTime == m_currentTime && !forceUpdate)
-		return;
+		return false;
 	m_currentTime = newTime;
-
-	auto &channels = anim->GetChannels();
+	return true;
+	/*auto &channels = anim->GetChannels();
 	auto numChannels = umath::min(channels.size(),m_currentSlice.channelValues.size());
 	auto vs = [this,newTime](auto tag,pragma::animation::AnimationChannel &channel,udm::Property &sliceData,uint32_t &inOutPivotTimeIndex) {
 		using T = decltype(tag)::type;
@@ -128,7 +128,7 @@ void pragma::animation::AnimationPlayer::Advance(float dt,bool forceUpdate)
 			std::visit([&vs,&channel,&sliceData,&lastChannelTimestampIndex](auto tag) {vs(tag,*channel,*sliceData,lastChannelTimestampIndex);},udm::get_numeric_tag(valueType));
 		else if(udm::is_generic_type(valueType))
 			std::visit([&vs,&channel,&sliceData,&lastChannelTimestampIndex](auto tag) {vs(tag,*channel,*sliceData,lastChannelTimestampIndex);},udm::get_generic_tag(valueType));
-	}
+	}*/
 	// TODO
 	// ApplySliceInterpolation(m_prevAnimSlice,m_currentSlice,fadeFactor);
 }

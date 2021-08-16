@@ -6,6 +6,7 @@
  */
 
 #include "stdafx_shared.h"
+#include "pragma/model/animation/animation2.hpp"
 #include <pragma/game/game.h>
 #include "pragma/lua/lentity_components.hpp"
 #include "pragma/lua/sh_lua_component.hpp"
@@ -357,6 +358,17 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 			return luabind::object{};
 		return luabind::object{l,animManagers[idx]};
 	}));
+	defAnimated2.def("PlayAnimation",&pragma::Animated2Component::PlayAnimation);
+	defAnimated2.def("AdvanceAnimations",&pragma::Animated2Component::AdvanceAnimations);
+	defAnimated2.add_static_constant("EVENT_HANDLE_ANIMATION_EVENT",pragma::Animated2Component::EVENT_HANDLE_ANIMATION_EVENT);
+	defAnimated2.add_static_constant("EVENT_ON_PLAY_ANIMATION",pragma::Animated2Component::EVENT_ON_PLAY_ANIMATION);
+	defAnimated2.add_static_constant("EVENT_ON_ANIMATION_COMPLETE",pragma::Animated2Component::EVENT_ON_ANIMATION_COMPLETE);
+	defAnimated2.add_static_constant("EVENT_ON_ANIMATION_START",pragma::Animated2Component::EVENT_ON_ANIMATION_START);
+	defAnimated2.add_static_constant("EVENT_MAINTAIN_ANIMATIONS",pragma::Animated2Component::EVENT_MAINTAIN_ANIMATIONS);
+	defAnimated2.add_static_constant("EVENT_ON_ANIMATIONS_UPDATED",pragma::Animated2Component::EVENT_ON_ANIMATIONS_UPDATED);
+	defAnimated2.add_static_constant("EVENT_PLAY_ANIMATION",pragma::Animated2Component::EVENT_PLAY_ANIMATION);
+	defAnimated2.add_static_constant("EVENT_TRANSLATE_ANIMATION",pragma::Animated2Component::EVENT_TRANSLATE_ANIMATION);
+	defAnimated2.add_static_constant("EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER",pragma::Animated2Component::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER);
 	gameMod[defAnimated2];
 
 	auto defIK = luabind::class_<pragma::IKComponent,pragma::BaseEntityComponent>("IKComponent");

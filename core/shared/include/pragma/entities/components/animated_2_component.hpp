@@ -12,12 +12,15 @@
 #include <sharedutils/property/util_property.hpp>
 
 struct AnimationEvent;
+namespace util {class Path;};
 namespace pragma
 {
 	namespace animation
 	{
 		class AnimationManager;
+		class AnimationChannel;
 		using PAnimationManager = std::shared_ptr<AnimationManager>;
+		using ChannelValueSubmitter = std::function<void(AnimationChannel&,uint32_t&,double)>;
 	};
 	class DLLNETWORK Animated2Component final
 		: public BaseEntityComponent
@@ -31,6 +34,7 @@ namespace pragma
 		static ComponentEventId EVENT_ON_ANIMATIONS_UPDATED;
 		static ComponentEventId EVENT_PLAY_ANIMATION;
 		static ComponentEventId EVENT_TRANSLATE_ANIMATION;
+		static ComponentEventId EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 		
 		Animated2Component(BaseEntity &ent);
@@ -43,6 +47,13 @@ namespace pragma
 		animation::PAnimationManager AddAnimationManager();
 		void RemoveAnimationManager(const animation::AnimationManager &player);
 		void ClearAnimationManagers();
+
+		bool MaintainAnimations(double dt);
+		virtual void OnTick(double dt) override;
+		void AdvanceAnimations(double dt);
+
+		virtual void Initialize() override;
+		void PlayAnimation(animation::AnimationManager &manager,pragma::animation::Animation2 &anim);
 		
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
@@ -50,7 +61,6 @@ namespace pragma
 	protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 		void ResetAnimation(const std::shared_ptr<Model> &mdl);
-		void MaintainAnimations(double dt);
 		util::PFloatProperty m_playbackRate = nullptr;
 		std::vector<animation::PAnimationManager> m_animationManagers;
 	};
@@ -104,6 +114,16 @@ namespace pragma
 		CEAnim2MaintainAnimations(double deltaTime);
 		virtual void PushArguments(lua_State *l) override;
 		double deltaTime;
+	};
+	struct DLLNETWORK CEAnim2InitializeChannelValueSubmitter
+		: public ComponentEvent
+	{
+		CEAnim2InitializeChannelValueSubmitter(const util::Path &path);
+		virtual void PushArguments(lua_State *l) override;
+		virtual uint32_t GetReturnCount() override;
+		virtual void HandleReturnValues(lua_State *l) override;
+		const util::Path &path;
+		animation::ChannelValueSubmitter submitter = nullptr;
 	};
 };
 

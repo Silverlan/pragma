@@ -37,7 +37,7 @@ namespace pragma::animation
 		static std::shared_ptr<AnimationPlayer> Create();
 		static std::shared_ptr<AnimationPlayer> Create(const AnimationPlayer &other);
 		static std::shared_ptr<AnimationPlayer> Create(AnimationPlayer &&other);
-		void Advance(float dt,bool force=false);
+		bool Advance(float dt,bool force=false);
 
 		float GetDuration() const;
 		float GetRemainingAnimationDuration() const;
@@ -58,6 +58,7 @@ namespace pragma::animation
 		void Reset();
 
 		const Animation2 *GetAnimation() const {return m_animation.get();}
+		uint32_t &GetLastChannelTimestampIndex(AnimationChannelId channelId) {return m_lastChannelTimestampIndices[channelId];}
 
 		AnimationPlayer &operator=(const AnimationPlayer &other);
 		AnimationPlayer &operator=(AnimationPlayer &&other);

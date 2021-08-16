@@ -28,15 +28,15 @@ pragma::animation::AnimationManager::AnimationManager(const Model &mdl)
 {}
 pragma::animation::AnimationManager::AnimationManager(const AnimationManager &other)
 	: m_player{AnimationPlayer::Create(*other.m_player)},m_model{other.m_model},m_currentAnimation{other.m_currentAnimation},
-	m_prevAnimSlice{other.m_prevAnimSlice}
+	m_prevAnimSlice{other.m_prevAnimSlice}/*,m_channelValueSubmitters{m_channelValueSubmitters}*/
 {
-	static_assert(sizeof(*this) == 272,"Update this implementation when class has changed!");
+	static_assert(sizeof(*this) == 296,"Update this implementation when class has changed!");
 }
 pragma::animation::AnimationManager::AnimationManager(AnimationManager &&other)
 	: m_player{AnimationPlayer::Create(*other.m_player)},m_model{other.m_model},m_currentAnimation{other.m_currentAnimation},
-	m_prevAnimSlice{std::move(other.m_prevAnimSlice)}
+	m_prevAnimSlice{std::move(other.m_prevAnimSlice)}/*,m_channelValueSubmitters{std::move(m_channelValueSubmitters)}*/
 {
-	static_assert(sizeof(*this) == 272,"Update this implementation when class has changed!");
+	static_assert(sizeof(*this) == 296,"Update this implementation when class has changed!");
 }
 pragma::animation::AnimationManager &pragma::animation::AnimationManager::operator=(const AnimationManager &other)
 {
@@ -45,7 +45,8 @@ pragma::animation::AnimationManager &pragma::animation::AnimationManager::operat
 	m_currentAnimation = other.m_currentAnimation;
 
 	m_prevAnimSlice = other.m_prevAnimSlice;
-	static_assert(sizeof(*this) == 272,"Update this implementation when class has changed!");
+	// m_channelValueSubmitters = other.m_channelValueSubmitters;
+	static_assert(sizeof(*this) == 296,"Update this implementation when class has changed!");
 	return *this;
 }
 pragma::animation::AnimationManager &pragma::animation::AnimationManager::operator=(AnimationManager &&other)
@@ -55,11 +56,12 @@ pragma::animation::AnimationManager &pragma::animation::AnimationManager::operat
 	m_currentAnimation = other.m_currentAnimation;
 
 	m_prevAnimSlice = std::move(other.m_prevAnimSlice);
-	static_assert(sizeof(*this) == 272,"Update this implementation when class has changed!");
+	// m_channelValueSubmitters = std::move(other.m_channelValueSubmitters);
+	static_assert(sizeof(*this) == 296,"Update this implementation when class has changed!");
 	return *this;
 }
 
-pragma::animation::Animation2 *pragma::animation::AnimationManager::GetCurrentAnimation() const {return nullptr;} // TODO
+pragma::animation::Animation2 *pragma::animation::AnimationManager::GetCurrentAnimation() const {return const_cast<pragma::animation::Animation2*>(m_player->GetAnimation());}
 const Model *pragma::animation::AnimationManager::GetModel() const {return m_model.lock().get();}
 
 void pragma::animation::AnimationManager::PlayAnimation(const std::string &animation,FPlayAnim flags)

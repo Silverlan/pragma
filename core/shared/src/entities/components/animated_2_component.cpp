@@ -8,14 +8,18 @@
 #include "stdafx_shared.h"
 #include "pragma/entities/components/animated_2_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
+#include "pragma/entities/components/base_time_scale_component.hpp"
 #include "pragma/model/model.h"
 #include "pragma/model/animation/animation_manager.hpp"
 #include "pragma/model/animation/animation.hpp"
+#include "pragma/model/animation/animation2.hpp"
+#include "pragma/model/animation/animation_channel.hpp"
 #include "pragma/lua/l_entity_handles.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
+#include "pragma/lua/lua_call.hpp"
 
 using namespace pragma;
-
+#pragma optimize("",off)
 ComponentEventId Animated2Component::EVENT_HANDLE_ANIMATION_EVENT = pragma::INVALID_COMPONENT_ID;
 ComponentEventId Animated2Component::EVENT_ON_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId Animated2Component::EVENT_ON_ANIMATION_COMPLETE = pragma::INVALID_COMPONENT_ID;
@@ -24,6 +28,7 @@ ComponentEventId Animated2Component::EVENT_MAINTAIN_ANIMATIONS = pragma::INVALID
 ComponentEventId Animated2Component::EVENT_ON_ANIMATIONS_UPDATED = pragma::INVALID_COMPONENT_ID;
 ComponentEventId Animated2Component::EVENT_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId Animated2Component::EVENT_TRANSLATE_ANIMATION = pragma::INVALID_COMPONENT_ID;
+ComponentEventId Animated2Component::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER = pragma::INVALID_COMPONENT_ID;
 void Animated2Component::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	EVENT_HANDLE_ANIMATION_EVENT = componentManager.RegisterEvent("A2_HANDLE_ANIMATION_EVENT");
@@ -34,6 +39,7 @@ void Animated2Component::RegisterEvents(pragma::EntityComponentManager &componen
 	EVENT_ON_ANIMATIONS_UPDATED = componentManager.RegisterEvent("A2_ON_ANIMATIONS_UPDATED");
 	EVENT_PLAY_ANIMATION = componentManager.RegisterEvent("A2_PLAY_ANIMATION");
 	EVENT_TRANSLATE_ANIMATION = componentManager.RegisterEvent("A2_TRANSLATE_ANIMATION");
+	EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER = componentManager.RegisterEvent("A2_INITIALIZE_CHANNEL_VALUE_SUBMITTER");
 }
 Animated2Component::Animated2Component(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_playbackRate(util::FloatProperty::Create(1.f))
@@ -73,17 +79,94 @@ void Animated2Component::RemoveAnimationManager(const animation::AnimationManage
 		return;
 	m_animationManagers.erase(it);
 }
+void Animated2Component::PlayAnimation(animation::AnimationManager &manager,pragma::animation::Animation2 &anim)
+{
+	manager->SetAnimation(anim);
+	auto &channels = anim.GetChannels();
+	auto &channelValueSubmitters = manager.GetChannelValueSubmitters();
+	channelValueSubmitters.resize(channels.size());
+	// TODO: Reload this when animation has changed, or if component data has changed (e.g. animated component has changed model and therefore bone positions and rotational data)
+	for(auto it=channels.begin();it!=channels.end();++it)
+	{
+		auto &channel = *it;
+		auto &path = channel->targetPath;
+		auto componentTypeName = path.GetFront();
+		// TODO: Needs to be updated whenever a new component has been added to the entity
+		auto hComponent = GetEntity().FindComponent(componentTypeName);
+		if(hComponent.expired())
+			continue;
+		auto localPath = path;
+		localPath.PopFront();
+
+		CEAnim2InitializeChannelValueSubmitter evData {localPath};
+		if(hComponent->InvokeEventCallbacks(EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER,evData) != util::EventReply::Handled || evData.submitter == nullptr)
+			continue;
+		channelValueSubmitters[it -channels.begin()] = std::move(evData.submitter);
+	}
+}
 void Animated2Component::ClearAnimationManagers()
 {
 	m_animationManagers.clear();
 }
-void Animated2Component::MaintainAnimations(double dt)
+bool Animated2Component::MaintainAnimations(double dt)
+{
+	BaseEntityComponent::OnTick(dt);
+	
+	auto &ent = GetEntity();
+	auto pTimeScaleComponent = ent.GetTimeScaleComponent();
+	dt *= pTimeScaleComponent.valid() ? pTimeScaleComponent->GetEffectiveTimeScale() : 1.f;
+	CEAnim2MaintainAnimations evData{dt};
+	if(InvokeEventCallbacks(EVENT_MAINTAIN_ANIMATIONS,evData) == util::EventReply::Handled)
+	{
+		InvokeEventCallbacks(EVENT_ON_ANIMATIONS_UPDATED);
+		return true;
+	}
+
+	AdvanceAnimations(dt);
+	InvokeEventCallbacks(EVENT_ON_ANIMATIONS_UPDATED);
+	return true;
+}
+
+void Animated2Component::OnTick(double dt)
+{
+	BaseEntityComponent::OnTick(dt);
+
+	auto &ent = GetEntity();
+	auto pTimeScaleComponent = ent.GetTimeScaleComponent();
+	MaintainAnimations(dt *(pTimeScaleComponent.valid() ? pTimeScaleComponent->GetEffectiveTimeScale() : 1.f));
+}
+void Animated2Component::AdvanceAnimations(double dt)
 {
 	dt *= GetPlaybackRate();
-	for(auto &animPlayer : m_animationManagers)
-		(*animPlayer)->Advance(dt);
+	for(auto &manager : m_animationManagers)
+	{
+		auto change = (*manager)->Advance(dt);
+		if(!change)
+			continue;
+		auto *anim = manager->GetCurrentAnimation();
+		if(!anim)
+			continue;
+		auto &channelValueSubmitters = manager->GetChannelValueSubmitters();
+		auto &channels = anim->GetChannels();
+		auto n = umath::min(channelValueSubmitters.size(),channels.size());
+		auto t = (*manager)->GetCurrentTime();
+		for(auto i=decltype(n){0u};i<n;++i)
+		{
+			auto &submitter = channelValueSubmitters[i];
+			if(!submitter)
+				continue;
+			auto &channel = channels[i];
+			submitter(*channel,(*manager)->GetLastChannelTimestampIndex(i),t);
+		}
+	}
 }
 void Animated2Component::InitializeLuaObject(lua_State *l) {pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+
+void Animated2Component::Initialize()
+{
+	BaseEntityComponent::Initialize();
+	SetTickPolicy(TickPolicy::WhenVisible);
+}
 
 void Animated2Component::Save(udm::LinkedPropertyWrapperArg udm) {}
 void Animated2Component::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) {}
@@ -176,3 +259,16 @@ void CEAnim2OnPlayAnimation::PushArguments(lua_State *l)
 	Lua::PushInt(l,animation);
 	Lua::PushInt(l,umath::to_integral(flags));
 }
+
+/////////////////
+
+CEAnim2InitializeChannelValueSubmitter::CEAnim2InitializeChannelValueSubmitter(const util::Path &path)
+	: path{path}
+{}
+void CEAnim2InitializeChannelValueSubmitter::PushArguments(lua_State *l) {}
+uint32_t CEAnim2InitializeChannelValueSubmitter::GetReturnCount() {return 0;}
+void CEAnim2InitializeChannelValueSubmitter::HandleReturnValues(lua_State *l)
+{
+	
+}
+#pragma optimize("",on)

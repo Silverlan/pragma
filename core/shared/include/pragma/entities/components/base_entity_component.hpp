@@ -47,6 +47,8 @@ namespace pragma
 	struct ComponentEvent;
 	class BaseEntityComponentSystem;
 	class EntityComponentManager;
+	struct ComponentMemberInfo;
+	using ComponentMemberIndex = uint32_t;
 
 	enum class TickPolicy : uint8_t
 	{
@@ -71,6 +73,7 @@ namespace pragma
 		static ComponentEventId EVENT_ON_ENTITY_COMPONENT_ADDED;
 		static ComponentEventId EVENT_ON_ENTITY_COMPONENT_REMOVED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember);
 		enum class StateFlags : uint32_t
 		{
 			None = 0u,
@@ -91,6 +94,8 @@ namespace pragma
 		BaseEntity &operator->();
 
 		ComponentId GetComponentId() const;
+		ComponentMemberInfo *FindMemberInfo(const std::string &name);
+		const ComponentMemberInfo *FindMemberInfo(const std::string &name) const {return const_cast<BaseEntityComponent*>(this)->FindMemberInfo(name);}
 
 		// Component version; Used for loading and saving the component
 		virtual uint32_t GetVersion() const {return 1u;}
@@ -178,6 +183,7 @@ namespace pragma
 		BaseEntityComponent(BaseEntity &ent);
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData);
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version);
+		virtual ComponentMemberInfo *DoFindMemberInfo(const std::string &name);
 
 		// Used for typed callback lookups. If this function doesn't change outTypeIndex, the actual component's type is used
 		// as reference. Overwrite this on the serverside or clientside version of the component,

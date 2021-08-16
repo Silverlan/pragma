@@ -179,6 +179,15 @@ EntityComponentManager::ComponentInfo *EntityComponentManager::GetComponentInfo(
 		return nullptr;
 	return &m_componentInfos.at(id);
 }
+ComponentMemberIndex EntityComponentManager::RegisterMember(ComponentInfo &componentInfo,ComponentMemberInfo &&memberInfo)
+{
+	auto lname = memberInfo.name;
+	ustring::to_lower(lname);
+	componentInfo.members.push_back(std::move(memberInfo));
+	auto idx = componentInfo.members.size() -1;
+	componentInfo.memberNameToIndex[lname] = idx;
+	return idx;
+}
 const std::vector<EntityComponentManager::ComponentInfo> &EntityComponentManager::GetRegisteredComponentTypes() const {return m_componentInfos;}
 void EntityComponentManager::OnComponentTypeRegistered(const ComponentInfo &componentInfo) {}
 ComponentEventId EntityComponentManager::RegisterEvent(const std::string &evName,std::type_index componentType)

@@ -24,9 +24,32 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 #endif
 
+namespace udm {enum class Type : uint8_t;};
+
 class BaseEntity;
 namespace pragma
 {
+	class BaseEntityComponent;
+	struct DLLNETWORK ComponentMemberInfo
+	{
+		using ApplyFunction = std::function<void(const ComponentMemberInfo&,BaseEntityComponent&,const void*)>;
+		using GetFunction = std::function<void(const ComponentMemberInfo&,BaseEntityComponent&,void*)>;
+		static ComponentMemberInfo CreateDummy()
+		{
+			return ComponentMemberInfo{};
+		}
+		ComponentMemberInfo(std::string &&name,udm::Type type,const ApplyFunction &applyFunc,const GetFunction &getFunc)
+			: name{std::move(name)},type{type},applyValue{applyValue},getValue{getValue}
+		{}
+		std::string name;
+		udm::Type type;
+		ApplyFunction applyValue;
+		GetFunction getValue;
+	private:
+		ComponentMemberInfo()=default;
+	};
+	using ComponentMemberIndex = uint32_t;
+
 	class BaseEntityComponent;
 	enum class ComponentFlags : uint8_t
 	{
@@ -61,6 +84,8 @@ namespace pragma
 			std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity&)> factory = nullptr;
 			ComponentId id = std::numeric_limits<uint32_t>::max();
 			ComponentFlags flags = ComponentFlags::None;
+			std::vector<ComponentMemberInfo> members;
+			std::unordered_map<std::string,ComponentMemberIndex> memberNameToIndex;
 
 			bool IsValid() const {return factory != nullptr;}
 		};
@@ -93,6 +118,7 @@ namespace pragma
 		bool GetComponentTypeIndex(ComponentId componentId,std::type_index &typeIndex) const;
 		bool GetComponentId(std::type_index typeIndex,ComponentId &componentId) const;
 		const std::vector<ComponentInfo> &GetRegisteredComponentTypes() const;
+		ComponentMemberIndex RegisterMember(ComponentInfo &componentInfo,ComponentMemberInfo &&memberInfo);
 
 		const ComponentInfo *GetComponentInfo(ComponentId id) const;
 		ComponentInfo *GetComponentInfo(ComponentId id);
@@ -156,9 +182,14 @@ template<class TComponent,typename>
 	if(std::is_base_of<pragma::BaseNetComponent,TComponent>::value)
 		flags |= ComponentFlags::Networked;
 	TComponent::RegisterEvents(*this);
-	return RegisterComponentType(name,[](BaseEntity &ent) {
+	auto id = RegisterComponentType(name,[](BaseEntity &ent) {
 		return util::TSharedHandle<BaseEntityComponent>{new TComponent{ent},[](pragma::BaseEntityComponent *c) {delete c;}};
 	},flags,std::type_index(typeid(TComponent)));
+	auto &componentInfo = m_componentInfos[id];
+	TComponent::RegisterMembers(*this,[this,&componentInfo](ComponentMemberInfo &&memberInfo) -> ComponentMemberIndex {
+		return RegisterMember(componentInfo,std::move(memberInfo));
+	});
+	return id;
 }
 
 template<class TComponent,typename>

@@ -24,6 +24,8 @@ namespace pragma
 		: public pragma::BaseEntityComponent
 	{
 	public:
+		using MemberIndex = uint32_t;
+		static constexpr auto INVALID_MEMBER = std::numeric_limits<MemberIndex>::max();
 		enum class MemberFlags : uint32_t
 		{
 			None = 0u,
@@ -52,8 +54,10 @@ namespace pragma
 			std::any initialValue;
 			BaseLuaBaseEntityComponent::MemberFlags flags;
 			uint32_t version;
+
+			std::optional<ComponentMemberInfo> componentMemberInfo {};
 		};
-		static void RegisterMember(const luabind::object &oClass,const std::string &memberName,util::VarType memberType,const std::any &initialValue,MemberFlags memberFlags,uint32_t version);
+		static MemberIndex RegisterMember(const luabind::object &oClass,const std::string &memberName,util::VarType memberType,const std::any &initialValue,MemberFlags memberFlags,uint32_t version);
 		static std::vector<MemberInfo> *GetMemberInfos(const luabind::object &oClass);
 		static void ClearMembers(lua_State *l);
 
@@ -125,9 +129,11 @@ namespace pragma
 		static void default_Lua_OnEntityComponentRemoved(lua_State *l,BaseLuaBaseEntityComponent &hComponent) {}
 	protected:
 		BaseLuaBaseEntityComponent(BaseEntity &ent);
+		luabind::object *GetClassObject();
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void InvokeNetEventHandle(const std::string &methodName,NetPacket &packet,pragma::BasePlayerComponent *pl)=0;
 		virtual void InitializeMember(const MemberInfo &memberInfo);
+		virtual ComponentMemberInfo *DoFindMemberInfo(const std::string &name) override;
 		std::any GetMemberValue(const MemberInfo &memberInfo) const;
 		void SetMemberValue(const MemberInfo &memberInfo,const std::any &value) const;
 		const std::vector<MemberInfo> &GetMembers() const;

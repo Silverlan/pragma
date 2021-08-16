@@ -11,10 +11,13 @@
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_observable_component.hpp"
+#include "pragma/entities/components/animated_2_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/lua/luacallback.h"
 #include "pragma/lua/luafunction_call.h"
 #include "pragma/model/model.h"
+#include "pragma/model/animation/animation_channel.hpp"
 #include <sharedutils/datastream.h>
 #include "pragma/physics/raytraces.h"
 #include "pragma/entities/baseentity_trace.hpp"
@@ -26,6 +29,13 @@ ComponentEventId BaseTransformComponent::EVENT_ON_POSE_CHANGED = pragma::INVALID
 void BaseTransformComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	EVENT_ON_POSE_CHANGED = componentManager.RegisterEvent("ON_POSE_CHANGED",std::type_index(typeid(BaseTransformComponent)));
+}
+void BaseTransformComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+{
+	using T = BaseTransformComponent;
+	registerMember(create_component_member_info<Vector3,T>("position",[](const ComponentMemberInfo&,T &component,const Vector3 &v) {component.SetPosition(v);},[](const ComponentMemberInfo&,T &component,Vector3 &value) {value = component.GetPosition();}));
+	registerMember(create_component_member_info<Quat,T>("rotation",[](const ComponentMemberInfo&,T &component,const Quat &v) {component.SetRotation(v);},[](const ComponentMemberInfo&,T &component,Quat &value) {value = component.GetRotation();}));
+	registerMember(create_component_member_info<Vector3,T>("scale",[](const ComponentMemberInfo&,T &component,const Vector3 &v) {component.SetScale(v);},[](const ComponentMemberInfo&,T &component,Vector3 &value) {value = component.GetScale();}));
 }
 BaseTransformComponent::BaseTransformComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)

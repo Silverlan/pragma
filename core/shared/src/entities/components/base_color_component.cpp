@@ -10,6 +10,7 @@
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/components/animated_2_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/model/animation/animation_channel.hpp"
 #include <udm.hpp>
 
@@ -19,6 +20,14 @@ ComponentEventId BaseColorComponent::EVENT_ON_COLOR_CHANGED = pragma::INVALID_CO
 void BaseColorComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	EVENT_ON_COLOR_CHANGED = componentManager.RegisterEvent("ON_COLOR_CHANGED");
+}
+void BaseColorComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+{
+	using T = BaseColorComponent;
+	registerMember(create_component_member_info<Vector4,T>("color",
+		[](const ComponentMemberInfo&,T &component,const Vector4 &v) {component.SetColor(v);},
+		[](const ComponentMemberInfo&,T &component,Vector4 &value) {value = component.GetColor().ToVector4();})
+	);
 }
 BaseColorComponent::BaseColorComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_color(util::SimpleProperty<util::ColorProperty,Color>::Create(Color(255,255,255,255)))

@@ -215,6 +215,14 @@ template<typename T>
 		return &uvec::lerp;
 	else if constexpr(std::is_same_v<T,Quat>)
 		return &uquat::lerp; // TODO: Maybe use slerp? Test performance!
+	else if constexpr(std::is_same_v<T,Vector2i> || std::is_same_v<T,Vector3i> || std::is_same_v<T,Vector4i>)
+	{
+		using Tf = std::conditional_t<std::is_same_v<T,Vector2i>,Vector2,std::conditional_t<std::is_same_v<T,Vector3i>,Vector3,Vector4>>;
+		return [](const T &v0,const T &v1,float f) -> T {return static_cast<T>(static_cast<Tf>(v0) +f *(static_cast<Tf>(v1) -static_cast<Tf>(v0)));};
+	}
+	// TODO: How should we interpolate integral values?
+	// else if constexpr(std::is_integral_v<T>)
+	// 	return [](const T &v0,const T &v1,float f) -> T {return static_cast<T>(round(static_cast<double>(v0) +f *(static_cast<double>(v1) -static_cast<double>(v0))));};
 	else
 		return [](const T &v0,const T &v1,float f) -> T {return (v0 +f *(v1 -v0));};
 }

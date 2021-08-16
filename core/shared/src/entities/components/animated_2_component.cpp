@@ -9,6 +9,7 @@
 #include "pragma/entities/components/animated_2_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_time_scale_component.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/model/model.h"
 #include "pragma/model/animation/animation_manager.hpp"
 #include "pragma/model/animation/animation.hpp"
@@ -97,11 +98,37 @@ void Animated2Component::PlayAnimation(animation::AnimationManager &manager,prag
 			continue;
 		auto localPath = path;
 		localPath.PopFront();
-
-		CEAnim2InitializeChannelValueSubmitter evData {localPath};
-		if(hComponent->InvokeEventCallbacks(EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER,evData) != util::EventReply::Handled || evData.submitter == nullptr)
+		if(localPath.IsEmpty())
 			continue;
-		channelValueSubmitters[it -channels.begin()] = std::move(evData.submitter);
+		auto channelIdx = it -channels.begin();
+		CEAnim2InitializeChannelValueSubmitter evData {localPath};
+		if(hComponent->InvokeEventCallbacks(EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER,evData) == util::EventReply::Handled)
+		{
+			if(evData.submitter == nullptr)
+				continue;
+			channelValueSubmitters[channelIdx] = std::move(evData.submitter);
+			continue;
+		}
+		auto *memberInfo = hComponent->FindMemberInfo(localPath.GetFront());
+		if(memberInfo == nullptr)
+			continue;
+		auto valueType = memberInfo->type;
+		auto &component = *hComponent;
+		auto vs = [this,&channelValueSubmitters,channelIdx,&component,memberInfo](auto tag) mutable {
+			using T = decltype(tag)::type;
+			if constexpr(is_animatable_type_v<T>)
+			{
+				channelValueSubmitters[channelIdx] = [this,&component,memberInfo](pragma::animation::AnimationChannel &channel,uint32_t &inOutPivotTimeIndex,double t) mutable {
+					auto value = channel.GetInterpolatedValue<T>(t,inOutPivotTimeIndex);
+					// TODO: memberInfo may become invalidated if new members are registered after this animation has started
+					memberInfo->applyValue(*memberInfo,component,&value);
+				};
+			}
+		};
+		if(udm::is_numeric_type(valueType))
+			std::visit(vs,udm::get_numeric_tag(valueType));
+		else if(udm::is_generic_type(valueType))
+			std::visit(vs,udm::get_generic_tag(valueType));
 	}
 }
 void Animated2Component::ClearAnimationManagers()

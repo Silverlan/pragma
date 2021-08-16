@@ -347,13 +347,21 @@ inline const char *lua_gettype(lua_State *l,int n)
 
 namespace Lua
 {
-	template<typename T,typename=std::enable_if_t<std::is_arithmetic<T>::value>>
+	template<typename T>
+		concept is_trivial_type = std::is_same_v<T,bool> || std::is_arithmetic_v<T> || util::is_string<T>::value;
+	template<typename T,typename=std::enable_if_t<is_trivial_type<T>>>
 		T Check(lua_State *l,int32_t n)
 	{
-		return Lua::CheckNumber(l,n);
+		if constexpr(std::is_same_v<T,bool>)
+			return Lua::CheckBool(l,n);
+		else if constexpr(std::is_integral_v<T>)
+			return Lua::CheckInt(l,n);
+		else if constexpr(std::is_arithmetic_v<T>)
+			return Lua::CheckNumber(l,n);
+		else// if constexpr(util::is_string<T>::value)
+			return Lua::CheckString(l,n);
 	}
-
-	template<typename T,typename=std::enable_if_t<!std::is_arithmetic<T>::value>>
+	template<typename T,typename=std::enable_if_t<!is_trivial_type<T>>>
 		T &Check(lua_State *l,int32_t n)
 	{
 		Lua::CheckUserData(l,n);
@@ -379,11 +387,20 @@ namespace Lua
 	template<typename T>
 		bool IsType(lua_State *l,int32_t n)
 	{
-		if(!lua_isuserdata(l,n))
-			return false;
-		luabind::object o(luabind::from_stack(l,n));
-		auto *pValue = luabind::object_cast_nothrow<T*>(o,static_cast<T*>(nullptr));
-		return (pValue != nullptr) ? true : false;
+		if constexpr(std::is_same_v<T,bool>)
+			return Lua::IsBool(l,n);
+		else if constexpr(std::is_arithmetic_v<T>)
+			return Lua::IsNumber(l,n);
+		else if constexpr(util::is_string<T>::value)
+			return Lua::IsString(l,n);
+		else
+		{
+			if(!lua_isuserdata(l,n))
+				return false;
+			luabind::object o(luabind::from_stack(l,n));
+			auto *pValue = luabind::object_cast_nothrow<T*>(o,static_cast<T*>(nullptr));
+			return (pValue != nullptr) ? true : false;
+		}
 	}
 };
 

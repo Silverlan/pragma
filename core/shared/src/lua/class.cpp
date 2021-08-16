@@ -187,7 +187,6 @@ static Quat QuaternionConstruct(const Vector3 &a,const Vector3 &b,const Vector3 
 static Quat QuaternionConstruct(const Quat &q) {return Quat(q);}
 static Quat QuaternionConstruct(const Vector3 &forward,const Vector3 &up) {return uquat::create_look_rotation(forward,up);}
 
-DLLNETWORK void test_shared_ptr(lua_State *l);
 void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 {
 	auto modString = luabind::module_(lua.GetState(),"string");

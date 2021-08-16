@@ -8,11 +8,13 @@
 #include "stdafx_shared.h"
 #include "pragma/entities/components/base_color_component.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
+#include "pragma/entities/components/animated_2_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
+#include "pragma/model/animation/animation_channel.hpp"
 #include <udm.hpp>
 
 using namespace pragma;
-
+#pragma optimize("",off)
 ComponentEventId BaseColorComponent::EVENT_ON_COLOR_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BaseColorComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
@@ -44,6 +46,24 @@ void BaseColorComponent::Initialize()
 			*m_color = Color{inputData.data};
 		else
 			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
+	});
+	AddEventCallback(Animated2Component::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &animEvData = static_cast<CEAnim2InitializeChannelValueSubmitter&>(evData.get());
+		if(animEvData.path.GetString() != "color")
+			return util::EventReply::Unhandled;
+		animEvData.submitter = [this](pragma::animation::AnimationChannel &channel,uint32_t &inOutPivotTimeIndex,double t) {
+			*m_color = channel.GetInterpolatedValue<Vector3>(t,inOutPivotTimeIndex,[](const Vector3 &v0,const Vector3 &v1,float t) -> Vector3 {
+				std::array<double,3> hsv0;
+				util::rgb_to_hsv(v0,hsv0[0],hsv0[1],hsv0[2]);
+
+				std::array<double,3> hsv1;
+				util::rgb_to_hsv(v1,hsv1[0],hsv1[1],hsv1[2]);
+
+				util::lerp_hsv(hsv0[0],hsv0[1],hsv0[2],hsv1[0],hsv1[1],hsv1[2],t);
+				return util::hsv_to_rgb(hsv0[0],hsv0[1],hsv0[2]);
+			});
+		};
 		return util::EventReply::Handled;
 	});
 	m_cbOnColorChanged = m_color->AddCallback([this](std::reference_wrapper<const Color> oldColor,std::reference_wrapper<const Color> newColor) {
@@ -84,3 +104,4 @@ void CEOnColorChanged::PushArguments(lua_State *l)
 	Lua::Push<Color>(l,oldColor);
 	Lua::Push<Color>(l,color);
 }
+#pragma optimize("",on)

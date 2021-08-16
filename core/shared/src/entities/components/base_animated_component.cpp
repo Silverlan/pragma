@@ -11,7 +11,9 @@
 #include "pragma/entities/components/base_time_scale_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_sound_emitter_component.hpp"
+#include "pragma/entities/components/animated_2_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
+#include "pragma/model/animation/animation_channel.hpp"
 #include "pragma/model/model.h"
 #include "pragma/audio/alsound_type.h"
 #include "pragma/lua/luafunction_call.h"
@@ -21,7 +23,7 @@
 #define DEBUG_VERBOSE_ANIMATION 0
 
 using namespace pragma;
-
+#pragma optimize("",off)
 ComponentEventId BaseAnimatedComponent::EVENT_HANDLE_ANIMATION_EVENT = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseAnimatedComponent::EVENT_ON_PLAY_LAYERED_ANIMATION = pragma::INVALID_COMPONENT_ID;
@@ -98,6 +100,39 @@ void BaseAnimatedComponent::Initialize()
 		auto *phys = pPhysComponent->GetPhysicsObject();
 		if(phys != nullptr && phys->IsController() == true)
 			MaintainAnimationMovement(m_animDisplacement);
+	});
+
+	AddEventCallback(Animated2Component::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		auto &animEvData = static_cast<CEAnim2InitializeChannelValueSubmitter&>(evData.get());
+		auto boneName = animEvData.path.GetFront();
+		auto &mdl = GetEntity().GetModel();
+		if(!mdl)
+			return util::EventReply::Unhandled;
+		auto boneId = mdl->LookupBone(boneName);
+		if(boneId == -1)
+			return util::EventReply::Unhandled;
+		auto attr = animEvData.path.GetBack();
+		if(attr == "position")
+		{
+			animEvData.submitter = [this,boneId](pragma::animation::AnimationChannel &channel,uint32_t &inOutPivotTimeIndex,double t) {
+				SetBonePosition(boneId,channel.GetInterpolatedValue<Vector3>(t,inOutPivotTimeIndex));
+			};
+		}
+		else if(attr == "rotation")
+		{
+			animEvData.submitter = [this,boneId](pragma::animation::AnimationChannel &channel,uint32_t &inOutPivotTimeIndex,double t) {
+				SetBoneRotation(boneId,channel.GetInterpolatedValue<Quat>(t,inOutPivotTimeIndex));
+			};
+		}
+		else if(attr == "scale")
+		{
+			animEvData.submitter = [this,boneId](pragma::animation::AnimationChannel &channel,uint32_t &inOutPivotTimeIndex,double t) {
+				SetBoneScale(boneId,channel.GetInterpolatedValue<Vector3>(t,inOutPivotTimeIndex));
+			};
+		}
+		else
+			return util::EventReply::Unhandled;
+		return util::EventReply::Handled;
 	});
 
 	auto &ent = GetEntity();
@@ -1561,3 +1596,4 @@ void CEMaintainAnimationMovement::PushArguments(lua_State *l)
 CEShouldUpdateBones::CEShouldUpdateBones()
 {}
 void CEShouldUpdateBones::PushArguments(lua_State *l) {}
+#pragma optimize("",on)

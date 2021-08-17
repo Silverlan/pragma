@@ -172,7 +172,7 @@ static constexpr udm::Type util_type_to_udm_type(util::VarType type)
 	}
 	return udm::Type::Invalid;
 }
-static BaseLuaBaseEntityComponent::MemberInfo *find_member_info(const luabind::object &oClass,const std::string &memberName)
+static ClassMembers *get_class_members(const luabind::object &oClass)
 {
 	auto &members = get_class_member_list(oClass.interpreter());
 	auto it = std::find_if(members.begin(),members.end(),[&oClass](const ClassMembers &classMembers) {
@@ -180,12 +180,29 @@ static BaseLuaBaseEntityComponent::MemberInfo *find_member_info(const luabind::o
 	});
 	if(it == members.end())
 		return nullptr;
-	auto itMember = std::find_if(it->memberDeclarations.begin(),it->memberDeclarations.end(),[&memberName](const BaseLuaBaseEntityComponent::MemberInfo &memberInfo) {
+	return &*it;
+}
+static uint32_t get_class_member_index(const luabind::object &oClass)
+{
+	auto &members = get_class_member_list(oClass.interpreter());
+	auto it = std::find_if(members.begin(),members.end(),[&oClass](const ClassMembers &classMembers) {
+		return oClass == classMembers.classObject;
+	});
+	if(it == members.end())
+		return std::numeric_limits<uint32_t>::max();
+	return it -members.begin();
+}
+static std::optional<BaseLuaBaseEntityComponent::MemberIndex> find_member_info_index(const luabind::object &oClass,const std::string &memberName)
+{
+	auto *members = get_class_members(oClass);
+	if(!members)
+		return {};
+	auto itMember = std::find_if(members->memberDeclarations.begin(),members->memberDeclarations.end(),[&memberName](const BaseLuaBaseEntityComponent::MemberInfo &memberInfo) {
 		return ustring::compare(memberName,memberInfo.name,false);
 	});
-	if(itMember == it->memberDeclarations.end())
-		return nullptr;
-	return &*itMember;
+	if(itMember == members->memberDeclarations.end())
+		return {};
+	return itMember -members->memberDeclarations.begin();
 }
 BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMember(const luabind::object &oClass,const std::string &memberName,util::VarType memberType,const std::any &initialValue,MemberFlags memberFlags,uint32_t version)
 {
@@ -219,21 +236,25 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 		auto udmType = util_type_to_udm_type(memberType);
 		auto tmpMemberName = memberName;
 		std::optional<ComponentMemberInfo> componentMemberInfo {};
+		// TODO: Add support for properties
 		if(pragma::is_animatable_type(udmType))
 		{
 			auto vs = [&tmpMemberName,&memberName,udmType](auto tag) -> pragma::ComponentMemberInfo {
 				using T = decltype(tag)::type;
 				if constexpr(pragma::is_animatable_type_v<T>)
 				{
-					return create_component_member_info<T,BaseLuaBaseEntityComponent>(std::move(tmpMemberName),[](const ComponentMemberInfo &memberInfo,BaseLuaBaseEntityComponent &component,const T &value) {
-						component.GetLuaObject()[memberInfo.name] = value;
-					},[](const ComponentMemberInfo &memberInfo,BaseLuaBaseEntityComponent &component,T &value) {
-						auto *v = luabind::object_cast_nothrow<T*>(component.GetLuaObject()[memberInfo.name],static_cast<T*>(nullptr));
-						if(!v)
-							value = {};
-						else
-							value = *v;
-					});
+					return create_component_member_info<
+						BaseLuaBaseEntityComponent,T,
+						[](const ComponentMemberInfo &memberInfo,BaseLuaBaseEntityComponent &component,const T &value) {
+							component.GetLuaObject()[memberInfo.name] = value;
+						},[](const ComponentMemberInfo &memberInfo,BaseLuaBaseEntityComponent &component,T &value) {
+							auto *v = luabind::object_cast_nothrow<T*>(component.GetLuaObject()[memberInfo.name],static_cast<T*>(nullptr));
+							if(!v)
+								value = {};
+							else
+								value = *v;
+						}
+					>(std::move(tmpMemberName));
 				}
 				else
 				{
@@ -398,94 +419,10 @@ void BaseLuaBaseEntityComponent::Initialize()
 	auto *o = GetClassObject();
 	if(o != nullptr)
 	{
+		m_classMemberIndex = get_class_member_index(*o);
 		auto *p = get_class_member_declarations(*o);
 		if(p != nullptr)
-		{
 			InitializeMembers(p->memberDeclarations);
-#if 0
-			AddEventCallback(Animated2Component::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER,[this,p](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-				auto &animEvData = static_cast<CEAnim2InitializeChannelValueSubmitter&>(evData.get());
-				auto targetName = animEvData.path.GetFront();
-				auto it = std::find_if(p->memberDeclarations.begin(),p->memberDeclarations.end(),[&targetName](const MemberInfo &memberInfo) {
-					return ustring::compare(memberInfo.name,targetName,false);
-				});
-				if(it == p->memberDeclarations.end())
-					return util::EventReply::Unhandled;
-				auto &memberInfo = *it;
-				auto udmType = util_type_to_udm_type(memberInfo.type);
-				if(udmType == udm::Type::Invalid && memberInfo.type != util::VarType::Color)
-					return util::EventReply::Unhandled;
-				auto methodName = "Set" +memberInfo.name;
-				luabind::object oMethod = GetLuaObject()[methodName];
-				if(luabind::type(oMethod) == LUA_TNIL)
-					return util::EventReply::Unhandled;
-				if(memberInfo.type == util::VarType::Color)
-				{
-					/*animEvData.submitter = [this,memberName](pragma::animation::AnimationChannel &channel,uint32_t &inOutPivotTimeIndex,double t) mutable {
-						auto oMember = GetLuaObject()[memberName];
-						oMember = Color{channel.GetInterpolatedValue<Vector3>(t,inOutPivotTimeIndex,[](const Vector3 &v0,const Vector3 &v1,float t) -> Vector3 {
-							std::array<double,3> hsv0;
-							util::rgb_to_hsv(v0,hsv0[0],hsv0[1],hsv0[2]);
-
-							std::array<double,3> hsv1;
-							util::rgb_to_hsv(v1,hsv1[0],hsv1[1],hsv1[2]);
-
-							util::lerp_hsv(hsv0[0],hsv0[1],hsv0[2],hsv1[0],hsv1[1],hsv1[2],t);
-							return util::hsv_to_rgb(hsv0[0],hsv0[1],hsv0[2]);
-						})};
-					};*/
-				}
-				else
-				{
-					if(umath::is_flag_set(memberInfo.flags,MemberFlags::PropertyBit))
-					{
-
-						/*auto varType = memberInfo.type;
-						animEvData.submitter = [this,memberName,varType](pragma::animation::AnimationChannel &channel,uint32_t &inOutPivotTimeIndex,double t) mutable {
-							//auto *baseProp = luabind::object_cast_nothrow<util::BaseProperty*>(luabind::object{oMember},static_cast<util::BaseProperty*>(nullptr));
-							auto oMember = GetLuaObject()[memberName];
-							auto *l = oMember.interpreter();
-							oMember.push(l);
-							auto indexProperty = Lua::GetStackTop(l);
-							Lua::SetAnyPropertyValue(l,indexProperty,varType,channel.GetInterpolatedValue<Vector3>(t,inOutPivotTimeIndex));
-							Lua::Pop(l,1);
-						};*/
-					}
-					else
-					{
-						auto vs = [this,&oMethod,&animEvData](auto tag) mutable {
-							using T = decltype(tag)::type;
-							if constexpr(
-								!std::is_same_v<T,udm::HdrColor> && !std::is_same_v<T,udm::Srgba> && !std::is_same_v<T,udm::Transform> && !std::is_same_v<T,udm::ScaledTransform> &&
-								!std::is_same_v<T,udm::Nil>
-							)
-							{
-								animEvData.submitter = [this,oMethod](pragma::animation::AnimationChannel &channel,uint32_t &inOutPivotTimeIndex,double t) mutable {
-									try
-									{
-									oMethod(GetLuaObject(),channel.GetInterpolatedValue<T>(t,inOutPivotTimeIndex));
-									}
-									catch(const luabind::error &err)
-									{
-										Con::cout<<"ERR: "<<err.what()<<Con::endl;
-									}
-									//auto oMember = GetLuaObject()[memberName];
-									//oMember = channel.GetInterpolatedValue<T>(t,inOutPivotTimeIndex);
-								};
-							}
-						};
-						if(udm::is_numeric_type(udmType))
-							std::visit(vs,udm::get_numeric_tag(udmType));
-						else if(udm::is_generic_type(udmType))
-							std::visit(vs,udm::get_generic_tag(udmType));
-						else
-							return util::EventReply::Unhandled;
-					}
-				}
-				return util::EventReply::Handled;
-			});
-#endif
-		}
 	}
 	if(m_networkedMemberInfo != nullptr)
 		m_networkedMemberInfo->netEvSetMember = SetupNetEvent("set_member_value");
@@ -589,16 +526,23 @@ void BaseLuaBaseEntityComponent::OnTick(double dt)
 
 void BaseLuaBaseEntityComponent::InitializeMember(const MemberInfo &memberInfo) {}
 
-ComponentMemberInfo *BaseLuaBaseEntityComponent::DoFindMemberInfo(const std::string &name)
+std::optional<ComponentMemberIndex> BaseLuaBaseEntityComponent::DoGetMemberIndex(const std::string &name) const
 {
 	auto *o = GetClassObject();
-	if(o)
-	{
-		auto *memberInfo = find_member_info(*o,name);
-		if(memberInfo && memberInfo->componentMemberInfo.has_value())
-			return &*memberInfo->componentMemberInfo;
-	}
-	return BaseEntityComponent::DoFindMemberInfo(name);
+	if(!o)
+		return {};
+	return find_member_info_index(*o,name);
+}
+const ComponentMemberInfo *BaseLuaBaseEntityComponent::GetMemberInfo(ComponentMemberIndex idx) const
+{
+	auto &classMembers = get_class_member_list(GetLuaObject().interpreter());
+	if(m_classMemberIndex >= classMembers.size())
+		return nullptr;
+	auto &members = classMembers[m_classMemberIndex];
+	if(idx >= members.memberDeclarations.size())
+		return nullptr;
+	auto &memberInfo = members.memberDeclarations[idx];
+	return memberInfo.componentMemberInfo.has_value() ? &*memberInfo.componentMemberInfo : nullptr;
 }
 
 const luabind::object &BaseLuaBaseEntityComponent::GetLuaObject() const {return pragma::BaseEntityComponent::GetLuaObject();}

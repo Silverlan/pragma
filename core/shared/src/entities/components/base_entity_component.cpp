@@ -49,21 +49,39 @@ void BaseEntityComponent::RegisterEvents(pragma::EntityComponentManager &compone
 	EVENT_ON_ENTITY_COMPONENT_REMOVED = componentManager.RegisterEvent("ON_ENTITY_COMPONENT_REMOVED");
 }
 void BaseEntityComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember) {}
-ComponentMemberInfo *BaseEntityComponent::FindMemberInfo(const std::string &name)
+const ComponentMemberInfo *BaseEntityComponent::FindMemberInfo(const std::string &name) const
+{
+	auto idx = GetMemberIndex(name);
+	if(!idx.has_value())
+		return nullptr;
+	return GetMemberInfo(*idx);
+}
+const ComponentMemberInfo *BaseEntityComponent::GetMemberInfo(ComponentMemberIndex idx) const
+{
+	auto *componentInfo = GetComponentInfo();
+	if(!componentInfo)
+		return {};
+	return &componentInfo->members[idx];
+}
+const EntityComponentManager::ComponentInfo *BaseEntityComponent::GetComponentInfo() const
+{
+	return GetEntity().GetComponentManager()->GetComponentInfo(GetComponentId());
+}
+std::optional<ComponentMemberIndex> BaseEntityComponent::GetMemberIndex(const std::string &name) const
 {
 	auto lname = name;
 	ustring::to_lower(lname);
-	return DoFindMemberInfo(lname);
+	return DoGetMemberIndex(lname);
 }
-ComponentMemberInfo *BaseEntityComponent::DoFindMemberInfo(const std::string &name)
+std::optional<ComponentMemberIndex> BaseEntityComponent::DoGetMemberIndex(const std::string &name) const
 {
 	auto *componentInfo = GetEntity().GetComponentManager()->GetComponentInfo(GetComponentId());
 	if(!componentInfo)
-		return nullptr;
+		return {};
 	auto itMember = componentInfo->memberNameToIndex.find(name);
 	if(itMember == componentInfo->memberNameToIndex.end())
-		return nullptr;
-	return &componentInfo->members[itMember->second];
+		return {};
+	return itMember->second;
 }
 util::TWeakSharedHandle<const BaseEntityComponent> BaseEntityComponent::GetHandle() const {return GetHandle<BaseEntityComponent>();}
 util::TWeakSharedHandle<BaseEntityComponent> BaseEntityComponent::GetHandle() {return GetHandle<BaseEntityComponent>();}

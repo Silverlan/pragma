@@ -22,14 +22,15 @@ namespace pragma
 	template<typename T>
 		concept is_animatable_type_v = is_animatable_type(udm::type_to_enum<T>());
 
-	template<typename T,typename TComponent=BaseEntityComponent> requires(is_animatable_type_v<T>)
-		static ComponentMemberInfo create_component_member_info(std::string &&name,void(*applyValue)(const ComponentMemberInfo&,TComponent&,const T&),void(*getValue)(const ComponentMemberInfo&,TComponent&,T&))
+	template<typename TComponent,typename T,auto TSetter,auto TGetter> requires(is_animatable_type_v<T>)
+		static ComponentMemberInfo create_component_member_info(std::string &&name)
 	{
-		return ComponentMemberInfo{std::move(name),udm::type_to_enum<T>(),[applyValue](const ComponentMemberInfo &memberInfo,BaseEntityComponent &component,const void *value) {
-			applyValue(memberInfo,static_cast<TComponent&>(component),*static_cast<const T*>(value));
-		},[getValue](const ComponentMemberInfo &memberInfo,BaseEntityComponent &component,void *value) {
-			getValue(memberInfo,static_cast<TComponent&>(component),*reinterpret_cast<T*>(value));
-		}};
+		auto memberInfo = ComponentMemberInfo::CreateDummy();
+		memberInfo.name = std::move(name);
+		memberInfo.type = udm::type_to_enum<T>();
+		memberInfo.SetGetterFunction<TComponent,T,TGetter>();
+		memberInfo.SetSetterFunction<TComponent,T,TSetter>();
+		return memberInfo;
 	}
 };
 

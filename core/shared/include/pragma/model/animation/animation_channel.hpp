@@ -110,7 +110,11 @@ namespace pragma::animation
 		template<typename T,bool ENABLE_VALIDATION=true>
 			T GetInterpolatedValue(float t,uint32_t &inOutPivotTimeIndex,T(*interpFunc)(const T&,const T&,float)=nullptr) const;
 		template<typename T,bool ENABLE_VALIDATION=true>
+			T GetInterpolatedValue(float t,uint32_t &inOutPivotTimeIndex,void(*interpFunc)(const void*,const void*,double,void*)) const;
+		template<typename T,bool ENABLE_VALIDATION=true>
 			T GetInterpolatedValue(float t,T(*interpFunc)(const T&,const T&,float)=nullptr) const;
+		template<typename T,bool ENABLE_VALIDATION=true>
+			T GetInterpolatedValue(float t,void(*interpFunc)(const void*,const void*,double,void*)) const;
 
 		void Resize(uint32_t numValues);
 		uint32_t GetSize() const;
@@ -243,6 +247,27 @@ template<typename T,bool ENABLE_VALIDATION>
 	auto &v1 = GetValue<T>(indices.second);
 	return interpFunc ? interpFunc(v0,v1,factor) : GetInterpolationFunction<T>()(v0,v1,factor);
 }
+	
+template<typename T,bool ENABLE_VALIDATION>
+	T pragma::animation::AnimationChannel::GetInterpolatedValue(float t,uint32_t &inOutPivotTimeIndex,void(*interpFunc)(const void*,const void*,double,void*)) const
+{
+	if(!interpFunc)
+		return GetInterpolatedValue<T,ENABLE_VALIDATION>(t,inOutPivotTimeIndex);
+	if constexpr(ENABLE_VALIDATION)
+	{
+		auto &times = GetTimesArray();
+		if(udm::type_to_enum<T>() != GetValueType() || times.IsEmpty())
+			return {};
+	}
+	float factor;
+	auto indices = FindInterpolationIndices(t,factor,inOutPivotTimeIndex);
+	inOutPivotTimeIndex = indices.first;
+	auto &v0 = GetValue<T>(indices.first);
+	auto &v1 = GetValue<T>(indices.second);
+	T v;
+	interpFunc(&v0,&v1,factor,&v);
+	return v;
+}
 
 template<typename T,bool ENABLE_VALIDATION>
 	T pragma::animation::AnimationChannel::GetInterpolatedValue(float t,T(*interpFunc)(const T&,const T&,float)) const
@@ -258,6 +283,26 @@ template<typename T,bool ENABLE_VALIDATION>
 	auto &v0 = GetValue<T>(indices.first);
 	auto &v1 = GetValue<T>(indices.second);
 	return interpFunc ? interpFunc(v0,v1,factor) : GetInterpolationFunction<T>()(v0,v1,factor);
+}
+
+template<typename T,bool ENABLE_VALIDATION>
+	T pragma::animation::AnimationChannel::GetInterpolatedValue(float t,void(*interpFunc)(const void*,const void*,double,void*)) const
+{
+	if(!interpFunc)
+		return GetInterpolatedValue<T,ENABLE_VALIDATION>(t);
+	if constexpr(ENABLE_VALIDATION)
+	{
+		auto &times = GetTimesArray();
+		if(udm::type_to_enum<T>() != GetValueType() || times.IsEmpty())
+			return {};
+	}
+	float factor;
+	auto indices = FindInterpolationIndices(t,factor);
+	auto &v0 = GetValue<T>(indices.first);
+	auto &v1 = GetValue<T>(indices.second);
+	T v;
+	interpFunc(&v0,&v1,factor,&v);
+	return v;
 }
 
 #endif

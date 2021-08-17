@@ -24,10 +24,26 @@ void BaseColorComponent::RegisterEvents(pragma::EntityComponentManager &componen
 void BaseColorComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
 {
 	using T = BaseColorComponent;
-	registerMember(create_component_member_info<Vector4,T>("color",
-		[](const ComponentMemberInfo&,T &component,const Vector4 &v) {component.SetColor(v);},
-		[](const ComponentMemberInfo&,T &component,Vector4 &value) {value = component.GetColor().ToVector4();})
-	);
+	auto memberInfo = create_component_member_info<
+		T,Vector4,
+		static_cast<void(BaseColorComponent::*)(const Vector4&)>(&BaseColorComponent::SetColor),
+		[](const ComponentMemberInfo&,T &component,Vector4 &value) {value = component.GetColor().ToVector4();}
+	>("color");
+	memberInfo.SetInterpolationFunction<T,Vector4,[](const Vector4 &col0,const Vector4 &col1,double t,Vector4 &vOut) {
+		double h0,s0,v0;
+		util::rgb_to_hsv(col0,h0,s0,v0);
+
+		double h1,s1,v1;
+		util::rgb_to_hsv(col1,h1,s1,v1);
+
+		util::lerp_hsv(h0,s0,v0,h1,s1,v1,t);
+
+		vOut = Vector4{
+			util::hsv_to_rgb(h0,s0,v0),
+			umath::lerp(col0.a,col1.a,t)
+		};
+	}>();
+	registerMember(std::move(memberInfo));
 }
 BaseColorComponent::BaseColorComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_color(util::SimpleProperty<util::ColorProperty,Color>::Create(Color(255,255,255,255)))
@@ -55,24 +71,6 @@ void BaseColorComponent::Initialize()
 			*m_color = Color{inputData.data};
 		else
 			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
-	});
-	AddEventCallback(Animated2Component::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &animEvData = static_cast<CEAnim2InitializeChannelValueSubmitter&>(evData.get());
-		if(animEvData.path.GetString() != "color")
-			return util::EventReply::Unhandled;
-		animEvData.submitter = [this](pragma::animation::AnimationChannel &channel,uint32_t &inOutPivotTimeIndex,double t) {
-			*m_color = channel.GetInterpolatedValue<Vector3>(t,inOutPivotTimeIndex,[](const Vector3 &v0,const Vector3 &v1,float t) -> Vector3 {
-				std::array<double,3> hsv0;
-				util::rgb_to_hsv(v0,hsv0[0],hsv0[1],hsv0[2]);
-
-				std::array<double,3> hsv1;
-				util::rgb_to_hsv(v1,hsv1[0],hsv1[1],hsv1[2]);
-
-				util::lerp_hsv(hsv0[0],hsv0[1],hsv0[2],hsv1[0],hsv1[1],hsv1[2],t);
-				return util::hsv_to_rgb(hsv0[0],hsv0[1],hsv0[2]);
-			});
-		};
 		return util::EventReply::Handled;
 	});
 	m_cbOnColorChanged = m_color->AddCallback([this](std::reference_wrapper<const Color> oldColor,std::reference_wrapper<const Color> newColor) {

@@ -30,25 +30,75 @@ class BaseEntity;
 namespace pragma
 {
 	class BaseEntityComponent;
+	using ComponentMemberIndex = uint32_t;
 	struct DLLNETWORK ComponentMemberInfo
 	{
-		using ApplyFunction = std::function<void(const ComponentMemberInfo&,BaseEntityComponent&,const void*)>;
-		using GetFunction = std::function<void(const ComponentMemberInfo&,BaseEntityComponent&,void*)>;
-		static ComponentMemberInfo CreateDummy()
+		using ApplyFunction = void(*)(const ComponentMemberInfo&,BaseEntityComponent&,const void*);
+		using GetFunction = void(*)(const ComponentMemberInfo&,BaseEntityComponent&,void*);
+		using InterpolationFunction = void(*)(const void*,const void*,double,void*);
+		static ComponentMemberInfo CreateDummy();
+		ComponentMemberInfo(std::string &&name,udm::Type type,const ApplyFunction &applyFunc,const GetFunction &getFunc);
+
+		template<typename TComponent,typename T,void(*TApply)(const ComponentMemberInfo&,TComponent&,const T&)>
+		void SetSetterFunction()
 		{
-			return ComponentMemberInfo{};
+			setterFunction = [](const ComponentMemberInfo &memberInfo,BaseEntityComponent &component,const void *value) {
+				TApply(memberInfo,static_cast<TComponent&>(component),*static_cast<const T*>(value));
+			};
 		}
-		ComponentMemberInfo(std::string &&name,udm::Type type,const ApplyFunction &applyFunc,const GetFunction &getFunc)
-			: name{std::move(name)},type{type},applyValue{applyValue},getValue{getValue}
-		{}
+		template<typename TComponent,typename T,void(TComponent::*TApply)(const T&)>
+		void SetSetterFunction()
+		{
+			setterFunction = [](const ComponentMemberInfo &memberInfo,BaseEntityComponent &component,const void *value) {
+				(static_cast<TComponent&>(component).*TApply)(*static_cast<const T*>(value));
+			};
+		}
+
+		template<typename TComponent,typename T,void(*TGetter)(const ComponentMemberInfo&,TComponent&,T&)>
+		void SetGetterFunction()
+		{
+			getterFunction = [](const ComponentMemberInfo &memberInfo,BaseEntityComponent &component,void *value) {
+				TGetter(memberInfo,static_cast<TComponent&>(component),*static_cast<T*>(value));
+			};
+		}
+		template<typename TComponent,typename T,auto(*TGetter)()>
+		void SetGetterFunction()
+		{
+			getterFunction = [](const ComponentMemberInfo &memberInfo,BaseEntityComponent &component,void *value) {
+				*static_cast<T*>(value) = TGetter();
+			};
+		}
+		template<typename TComponent,typename T,auto(TComponent::*TGetter)()>
+		void SetGetterFunction()
+		{
+			getterFunction = [](const ComponentMemberInfo &memberInfo,BaseEntityComponent &component,void *value) {
+				*static_cast<T*>(value) = (static_cast<TComponent&>(component).*TGetter)();
+			};
+		}
+		template<typename TComponent,typename T,auto(TComponent::*TGetter)() const>
+		void SetGetterFunction()
+		{
+			getterFunction = [](const ComponentMemberInfo &memberInfo,BaseEntityComponent &component,void *value) {
+				*static_cast<T*>(value) = (static_cast<TComponent&>(component).*TGetter)();
+			};
+		}
+
+		template<typename TComponent,typename T,void(*TInterp)(const T&,const T&,double,T&)>
+		void SetInterpolationFunction()
+		{
+			interpolationFunction = [](const void *v0,const void *v1,double t,void *out) {
+				TInterp(*static_cast<const T*>(v0),*static_cast<const T*>(v1),t,*static_cast<T*>(out));
+			};
+		}
+
 		std::string name;
 		udm::Type type;
-		ApplyFunction applyValue;
-		GetFunction getValue;
+		ApplyFunction setterFunction = nullptr;
+		GetFunction getterFunction = nullptr;
+		InterpolationFunction interpolationFunction = nullptr;
 	private:
 		ComponentMemberInfo()=default;
 	};
-	using ComponentMemberIndex = uint32_t;
 
 	class BaseEntityComponent;
 	enum class ComponentFlags : uint8_t
@@ -86,6 +136,7 @@ namespace pragma
 			ComponentFlags flags = ComponentFlags::None;
 			std::vector<ComponentMemberInfo> members;
 			std::unordered_map<std::string,ComponentMemberIndex> memberNameToIndex;
+			std::optional<ComponentMemberIndex> FindMember(const std::string &name) const;
 
 			bool IsValid() const {return factory != nullptr;}
 		};

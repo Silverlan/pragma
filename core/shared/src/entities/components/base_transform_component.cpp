@@ -24,7 +24,7 @@
 #include <udm.hpp>
 
 using namespace pragma;
-
+#pragma optimize("",off)
 ComponentEventId BaseTransformComponent::EVENT_ON_POSE_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BaseTransformComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
@@ -33,9 +33,21 @@ void BaseTransformComponent::RegisterEvents(pragma::EntityComponentManager &comp
 void BaseTransformComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
 {
 	using T = BaseTransformComponent;
-	registerMember(create_component_member_info<Vector3,T>("position",[](const ComponentMemberInfo&,T &component,const Vector3 &v) {component.SetPosition(v);},[](const ComponentMemberInfo&,T &component,Vector3 &value) {value = component.GetPosition();}));
-	registerMember(create_component_member_info<Quat,T>("rotation",[](const ComponentMemberInfo&,T &component,const Quat &v) {component.SetRotation(v);},[](const ComponentMemberInfo&,T &component,Quat &value) {value = component.GetRotation();}));
-	registerMember(create_component_member_info<Vector3,T>("scale",[](const ComponentMemberInfo&,T &component,const Vector3 &v) {component.SetScale(v);},[](const ComponentMemberInfo&,T &component,Vector3 &value) {value = component.GetScale();}));
+	registerMember(create_component_member_info<
+		T,Vector3,
+		static_cast<void(BaseTransformComponent::*)(const Vector3&)>(&BaseTransformComponent::SetPosition),
+		static_cast<const Vector3&(BaseTransformComponent::*)() const>(&BaseTransformComponent::GetPosition)
+	>("position"));
+	registerMember(create_component_member_info<
+		T,Quat,
+		static_cast<void(BaseTransformComponent::*)(const Quat&)>(&BaseTransformComponent::SetRotation),
+		static_cast<const Quat&(BaseTransformComponent::*)() const>(&BaseTransformComponent::GetRotation)
+	>("rotation"));
+	registerMember(create_component_member_info<
+		T,Vector3,
+		static_cast<void(BaseTransformComponent::*)(const Vector3&)>(&BaseTransformComponent::SetScale),
+		static_cast<const Vector3&(BaseTransformComponent::*)() const>(&BaseTransformComponent::GetScale)
+	>("scale"));
 }
 BaseTransformComponent::BaseTransformComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)
@@ -351,3 +363,4 @@ TraceData util::get_entity_trace_data(BaseTransformComponent &component)
 	}
 	return trData;
 }
+#pragma optimize("",on)

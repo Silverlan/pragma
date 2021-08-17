@@ -71,6 +71,7 @@ namespace pragma
 
 		bool ShouldTransmitSnapshotData() const;
 
+		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
 
 		virtual void OnAttached(BaseEntity &ent) override;
@@ -130,10 +131,11 @@ namespace pragma
 	protected:
 		BaseLuaBaseEntityComponent(BaseEntity &ent);
 		luabind::object *GetClassObject();
+		const luabind::object *GetClassObject() const {return const_cast<BaseLuaBaseEntityComponent*>(this)->GetClassObject();}
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void InvokeNetEventHandle(const std::string &methodName,NetPacket &packet,pragma::BasePlayerComponent *pl)=0;
 		virtual void InitializeMember(const MemberInfo &memberInfo);
-		virtual ComponentMemberInfo *DoFindMemberInfo(const std::string &name) override;
+		virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
 		std::any GetMemberValue(const MemberInfo &memberInfo) const;
 		void SetMemberValue(const MemberInfo &memberInfo,const std::any &value) const;
 		const std::vector<MemberInfo> &GetMembers() const;
@@ -155,6 +157,7 @@ namespace pragma
 	private:
 		std::vector<MemberInfo> m_members = {};
 		std::unordered_map<std::string,size_t> m_memberNameToIndex = {};
+		uint32_t m_classMemberIndex = std::numeric_limits<uint32_t>::max();
 		bool m_bShouldTransmitNetData = false;
 		bool m_bShouldTransmitSnapshotData = false;
 		uint32_t m_version = 1u;

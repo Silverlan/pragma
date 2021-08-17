@@ -109,19 +109,22 @@ void Animated2Component::PlayAnimation(animation::AnimationManager &manager,prag
 			channelValueSubmitters[channelIdx] = std::move(evData.submitter);
 			continue;
 		}
-		auto *memberInfo = hComponent->FindMemberInfo(localPath.GetFront());
-		if(memberInfo == nullptr)
+		auto memberIdx = hComponent->GetMemberIndex(localPath.GetFront());
+		if(!memberIdx.has_value())
 			continue;
+		auto *memberInfo = hComponent->GetMemberInfo(*memberIdx);
 		auto valueType = memberInfo->type;
 		auto &component = *hComponent;
-		auto vs = [this,&channelValueSubmitters,channelIdx,&component,memberInfo](auto tag) mutable {
+		auto vs = [this,&channelValueSubmitters,channelIdx,&component,&memberIdx,memberInfo](auto tag) mutable {
 			using T = decltype(tag)::type;
 			if constexpr(is_animatable_type_v<T>)
 			{
-				channelValueSubmitters[channelIdx] = [this,&component,memberInfo](pragma::animation::AnimationChannel &channel,uint32_t &inOutPivotTimeIndex,double t) mutable {
-					auto value = channel.GetInterpolatedValue<T>(t,inOutPivotTimeIndex);
-					// TODO: memberInfo may become invalidated if new members are registered after this animation has started
-					memberInfo->applyValue(*memberInfo,component,&value);
+				auto idx = *memberIdx;
+				channelValueSubmitters[channelIdx] = [this,&component,idx](pragma::animation::AnimationChannel &channel,uint32_t &inOutPivotTimeIndex,double t) mutable {
+					auto *memberInfo = component.GetMemberInfo(idx);
+					auto value = channel.GetInterpolatedValue<T>(t,inOutPivotTimeIndex,memberInfo->interpolationFunction);
+					assert(memberInfo);
+					memberInfo->setterFunction(*memberInfo,component,&value);
 				};
 			}
 		};

@@ -94,8 +94,12 @@ namespace pragma
 		BaseEntity &operator->();
 
 		ComponentId GetComponentId() const;
-		ComponentMemberInfo *FindMemberInfo(const std::string &name);
-		const ComponentMemberInfo *FindMemberInfo(const std::string &name) const {return const_cast<BaseEntityComponent*>(this)->FindMemberInfo(name);}
+		const ComponentMemberInfo *FindMemberInfo(const std::string &name) const;
+
+		std::optional<ComponentMemberIndex> GetMemberIndex(const std::string &name) const;
+		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const;
+
+		const EntityComponentManager::ComponentInfo *GetComponentInfo() const;
 
 		// Component version; Used for loading and saving the component
 		virtual uint32_t GetVersion() const {return 1u;}
@@ -183,7 +187,7 @@ namespace pragma
 		BaseEntityComponent(BaseEntity &ent);
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData);
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version);
-		virtual ComponentMemberInfo *DoFindMemberInfo(const std::string &name);
+		virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const;
 
 		// Used for typed callback lookups. If this function doesn't change outTypeIndex, the actual component's type is used
 		// as reference. Overwrite this on the serverside or clientside version of the component,

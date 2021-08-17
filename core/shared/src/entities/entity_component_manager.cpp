@@ -14,6 +14,16 @@ using namespace pragma;
 decltype(EntityComponentManager::s_nextEventId) EntityComponentManager::s_nextEventId = 0u;
 decltype(EntityComponentManager::s_componentEvents) EntityComponentManager::s_componentEvents = {};
 
+std::optional<ComponentMemberIndex> EntityComponentManager::ComponentInfo::FindMember(const std::string &name) const
+{
+	auto lname = name;
+	ustring::to_lower(lname);
+	auto it = std::find_if(members.begin(),members.end(),[&lname](const ComponentMemberInfo &memberInfo) {
+		return memberInfo.name == lname;
+	});
+	return (it != members.end()) ? (it -members.begin()) : std::numeric_limits<ComponentMemberIndex>::max();
+}
+
 util::TSharedHandle<BaseEntityComponent> EntityComponentManager::CreateComponent(ComponentId componentId,BaseEntity &ent) const
 {
 	if(componentId >= m_componentInfos.size() || m_componentInfos[componentId].id == INVALID_COMPONENT_ID)
@@ -320,3 +330,13 @@ void EntityComponentManager::ComponentContainerInfo::Pop(BaseEntityComponent &co
 }
 const std::vector<BaseEntityComponent*> &EntityComponentManager::ComponentContainerInfo::GetComponents() const {return m_components;}
 std::size_t EntityComponentManager::ComponentContainerInfo::GetCount() const {return m_count;}
+
+////////////////////
+
+ComponentMemberInfo pragma::ComponentMemberInfo::CreateDummy()
+{
+	return ComponentMemberInfo{};
+}
+pragma::ComponentMemberInfo::ComponentMemberInfo(std::string &&name,udm::Type type,const ApplyFunction &applyFunc,const GetFunction &getFunc)
+	: name{std::move(name)},type{type},setterFunction{applyFunc},getterFunction{getFunc}
+{}

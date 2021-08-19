@@ -75,8 +75,7 @@ static void set_property_value(lua_State *l,::udm::LinkedPropertyWrapper p,::udm
 	}
 	if(::udm::is_numeric_type(type))
 	{
-		auto tag = ::udm::get_numeric_tag(type);
-		std::visit([l,idx,&p](auto tag){
+		::udm::visit<true,false,false>(type,[l,idx,&p](auto tag){
 			using T = decltype(tag)::type;
 			if constexpr(std::is_same_v<T,::udm::Half>)
 				p = ::udm::Half{static_cast<float>(Lua::CheckNumber(l,idx))};
@@ -84,17 +83,16 @@ static void set_property_value(lua_State *l,::udm::LinkedPropertyWrapper p,::udm
 				p = Lua::CheckBool(l,idx);
 			else
 				p = static_cast<T>(Lua::CheckNumber(l,idx));
-		},tag);
+		});
 	}
 	if(::udm::is_generic_type(type))
 	{
-		auto tag = ::udm::get_generic_tag(type);
-		std::visit([l,idx,&p](auto tag) {
+		::udm::visit<false,true,false>(type,[l,idx,&p](auto tag) {
 			if constexpr(std::is_same_v<decltype(tag)::type,udm::Nil>)
 				return;
 			else
 				p = static_cast<decltype(tag)::type&>(Lua::Check<decltype(tag)::type>(l,idx));
-		},tag);
+		});
 	}
 	switch(type)
 	{
@@ -221,13 +219,11 @@ static luabind::object get_array_values(lua_State *l,::udm::LinkedPropertyWrappe
 			++p;
 		}
 	};
-	if(::udm::is_numeric_type(*type))
-		std::visit(vs,::udm::get_numeric_tag(*type));
-	else if(::udm::is_generic_type(*type))
-		std::visit(vs,::udm::get_generic_tag(*type));
+	if(::udm::is_numeric_type(*type) || ::udm::is_generic_type(*type))
+		udm::visit_ng(*type,vs);
 	else if(::udm::is_non_trivial_type(*type))
 	{
-		std::visit([&vs,size,pArray,&t](auto tag) {
+		udm::visit<false,false,true>(*type,[&vs,size,pArray,&t](auto tag) {
 			using T = decltype(tag)::type;
 			// TODO: Add support for other non-trivial types
 			if constexpr(std::is_same_v<T,udm::String>)
@@ -237,7 +233,7 @@ static luabind::object get_array_values(lua_State *l,::udm::LinkedPropertyWrappe
 				for(auto i=decltype(size){0u};i<size;++i)
 					t[i +1] = (*pArray)[i];
 			}
-		},::udm::get_non_trivial_tag(*type));
+		});
 	}
 	return t;
 }
@@ -253,10 +249,8 @@ static luabind::object get_blob_array_values(lua_State *l,const ::udm::PropertyW
 		for(auto i=decltype(n){0u};i<n;++i)
 			t[i +1] = ptr[i];
 	};
-	if(::udm::is_numeric_type(type))
-		std::visit(vs,::udm::get_numeric_tag(type));
-	else if(::udm::is_generic_type(type))
-		std::visit(vs,::udm::get_generic_tag(type));
+	if(::udm::is_ng_type(type))
+		::udm::visit_ng(type,vs);
 	return t;
 }
 
@@ -297,10 +291,8 @@ static void set_blob_array_values(lua_State *l,const::udm::PropertyWrapper &p,co
 			p[path] = ::udm::compress_lz4_blob(reinterpret_cast<uint8_t*>(values.data()),values.size() *sizeof(values.front()));
 		}
 	};
-	if(::udm::is_numeric_type(type))
-		std::visit(vs,::udm::get_numeric_tag(type));
-	else if(::udm::is_generic_type(type))
-		std::visit(vs,::udm::get_generic_tag(type));
+	if(::udm::is_ng_type(type))
+		::udm::visit_ng(type,vs);
 }
 
 static luabind::object get_property_value(lua_State *l,::udm::Type type,void *ptr)
@@ -317,10 +309,8 @@ static luabind::object get_property_value(lua_State *l,::udm::Type type,void *pt
 			return luabind::object{l,v};
 		}
 	};
-	if(::udm::is_numeric_type(type))
-		return std::visit(vs,::udm::get_numeric_tag(type));
-	if(::udm::is_generic_type(type))
-		return std::visit(vs,::udm::get_generic_tag(type));
+	if(::udm::is_ng_type(type))
+		return ::udm::visit_ng(type,vs);
 	switch(type)
 	{
 	case ::udm::Type::String:
@@ -386,11 +376,7 @@ static luabind::object get_property_value(lua_State *l,const ::udm::PropertyWrap
 			return luabind::object{};
 		return get_property_value(l,type,&*v);
 	};
-	if(::udm::is_numeric_type(type))
-		return std::visit(vs,::udm::get_numeric_tag(type));
-	if(::udm::is_generic_type(type))
-		return std::visit(vs,::udm::get_generic_tag(type));
-	return std::visit(vs,::udm::get_non_trivial_tag(type));
+	return udm::visit(type,vs);
 }
 
 class LuaUdmArrayIterator
@@ -616,12 +602,7 @@ static void set_array_values(lua_State *l,::udm::Array &a,::udm::Type type,luabi
 				set_array_values<T>(a,type,t,size,arrayType);
 		}
 	};
-	if(::udm::is_numeric_type(type))
-		std::visit(vs,::udm::get_numeric_tag(type));
-	else if(::udm::is_generic_type(type))
-		std::visit(vs,::udm::get_generic_tag(type));
-	else if(::udm::is_non_trivial_type(type))
-		std::visit(vs,::udm::get_non_trivial_tag(type));
+	udm::visit(type,vs);
 }
 static void set_array_values(lua_State *l,udm::PropertyWrapper &p,const std::string &name,::udm::Type type,luabind::table<> t,::udm::ArrayType arrayType=::udm::ArrayType::Raw)
 {
@@ -669,10 +650,8 @@ template<class T,class TPropertyWrapper,class TClassDef>
 			return static_cast<TPropertyWrapper>(p).GetBlobData(type);
 		};
 		::udm::Blob blob;
-		if(::udm::is_numeric_type(type))
-			blob = std::visit(vs,::udm::get_numeric_tag(type));
-		else if(::udm::is_generic_type(type))
-			blob = std::visit(vs,::udm::get_generic_tag(type));
+		if(::udm::is_ng_type(type))
+			blob = ::udm::visit_ng(type,vs);
 		else if(::udm::is_non_trivial_type(type))
 			return; // TODO
 		DataStream ds {static_cast<uint32_t>(blob.data.size())};
@@ -1195,6 +1174,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 				return luabind::object{};
 			else
 			{
+
 				auto &v = *reinterpret_cast<T*>(ptr);
 				if constexpr(std::is_same_v<T,::udm::Half>)
 					return luabind::object{l,static_cast<float>(v)};
@@ -1203,7 +1183,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		};
 		for(auto i=decltype(n){0u};i<n;++i)
 		{
-			t[i +1] = std::visit(vs,::udm::get_generic_tag(strct.description.types[i]));
+			t[i +1] = ::udm::visit<false,true,false>(strct.description.types[i],vs);
 			ptr += ::udm::size_of(strct.description.types[i]);
 		}
 		return t;

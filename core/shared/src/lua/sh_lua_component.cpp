@@ -263,10 +263,8 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 					return pragma::ComponentMemberInfo::CreateDummy();
 				}
 			};
-			if(udm::is_numeric_type(udmType))
-				componentMemberInfo = std::move(std::visit(vs,udm::get_numeric_tag(udmType)));
-			else if(udm::is_generic_type(udmType))
-				componentMemberInfo = std::move(std::visit(vs,udm::get_generic_tag(udmType)));
+			if(udm::is_ng_type(udmType))
+				componentMemberInfo = std::move(udm::visit_ng<false>(udmType,vs));
 		}
 		it->memberDeclarations.push_back({memberName,memberType,initialValue,memberFlags,version,std::move(componentMemberInfo)});
 		itMember = it->memberDeclarations.end() -1;

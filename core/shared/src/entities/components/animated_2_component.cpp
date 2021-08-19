@@ -80,6 +80,108 @@ void Animated2Component::RemoveAnimationManager(const animation::AnimationManage
 		return;
 	m_animationManagers.erase(it);
 }
+static constexpr uint8_t get_component_count(udm::Type type)
+{
+	if(udm::is_numeric_type(type))
+		return 1;
+	switch(type)
+	{
+	case udm::Type::Vector2:
+	case udm::Type::Vector2i:
+		return 2;
+	case udm::Type::Vector3:
+	case udm::Type::Vector3i:
+	case udm::Type::EulerAngles:
+		return 3;
+	case udm::Type::Vector4:
+	case udm::Type::Vector4i:
+		return 4;
+	}
+	return 0;
+}
+static constexpr bool is_type_compatible(udm::Type channelType,udm::Type memberType)
+{
+	return get_component_count(channelType) <= get_component_count(memberType);
+}
+
+template<typename TChannel,typename TMember,auto TMapArray> requires(is_animatable_type_v<TChannel> && is_animatable_type_v<TMember> && is_type_compatible(udm::type_to_enum<TChannel>(),udm::type_to_enum<TMember>()))
+static pragma::animation::ChannelValueSubmitter get_member_channel_submitter(pragma::BaseEntityComponent &component,uint32_t memberIdx)
+{
+	return [&component,memberIdx](pragma::animation::AnimationChannel &channel,uint32_t &inOutPivotTimeIndex,double t) mutable {
+		auto *memberInfo = component.GetMemberInfo(memberIdx);
+		assert(memberInfo);
+		if constexpr(std::is_same_v<TChannel,TMember>)
+		{
+			auto value = channel.GetInterpolatedValue<TChannel>(t,inOutPivotTimeIndex,memberInfo->interpolationFunction);
+			memberInfo->setterFunction(*memberInfo,component,&value);
+		}
+		else
+		{
+			// Interpolation function cannot be used unless the type is an exact match
+			auto value = channel.GetInterpolatedValue<TChannel>(t,inOutPivotTimeIndex);
+			constexpr auto numChannelComponents = get_component_count(udm::type_to_enum<TChannel>());
+			constexpr auto numMemberComponents = get_component_count(udm::type_to_enum<TMember>());
+			static_assert(numChannelComponents == TMapArray.size());
+			TMember curVal;
+			memberInfo->getterFunction(*memberInfo,component,&curVal);
+			if constexpr(numChannelComponents == 1)
+			{
+				if constexpr(numMemberComponents > 1)
+					curVal[TMapArray[0]] = value;
+				else
+					curVal = value;
+			}
+			else
+			{
+				// Would be nicer to use a loop, but since there are no constexpr
+				// loops as of C++20, we'll just do it manually...
+				curVal[TMapArray[0]] = value[0];
+				curVal[TMapArray[1]] = value[1];
+				if constexpr(numChannelComponents > 2)
+				{
+					curVal[TMapArray[2]] = value[2];
+					if constexpr(numChannelComponents > 3)
+						curVal[TMapArray[3]] = value[3];
+				}
+			}
+			memberInfo->setterFunction(*memberInfo,component,&curVal);
+		}
+	};
+}
+
+template<typename TChannel,typename TMember,typename T,uint32_t I,uint32_t ARRAY_INDEX_COUNT,T MAX_ARRAY_VALUE,template<typename TChannel,typename TMember,auto TTFunc> class TFunc,T... values>
+	static pragma::animation::ChannelValueSubmitter runtime_array_to_compile_time(pragma::BaseEntityComponent &component,uint32_t memberIdx,const std::array<T,ARRAY_INDEX_COUNT> &rtValues);
+
+template<typename TChannel,typename TMember,typename T,uint32_t I,uint32_t VAL,uint32_t ARRAY_INDEX_COUNT,T MAX_ARRAY_VALUE,template<typename TChannel,typename TMember,auto TTFunc> class TFunc,T... values>
+	static pragma::animation::ChannelValueSubmitter runtime_array_to_compile_time_it(pragma::BaseEntityComponent &component,uint32_t memberIdx,const std::array<T,ARRAY_INDEX_COUNT> &rtValues)
+{
+    if(rtValues[I] == VAL)
+		return runtime_array_to_compile_time<TChannel,TMember,T,I +1,ARRAY_INDEX_COUNT,MAX_ARRAY_VALUE,TFunc,values...,VAL>(component,memberIdx,rtValues);
+    else
+    {
+        if constexpr(VAL <= MAX_ARRAY_VALUE)
+            return runtime_array_to_compile_time_it<TChannel,TMember,T,I,VAL +1,ARRAY_INDEX_COUNT,MAX_ARRAY_VALUE,TFunc,values...>(component,memberIdx,rtValues);
+    }
+	return nullptr;
+}
+
+template<typename TChannel,typename TMember,typename T,uint32_t I,uint32_t ARRAY_INDEX_COUNT,T MAX_ARRAY_VALUE,template<typename TChannel,typename TMember,auto TTFunc> class TFunc,T... values>
+	pragma::animation::ChannelValueSubmitter runtime_array_to_compile_time(pragma::BaseEntityComponent &component,uint32_t memberIdx,const std::array<T,ARRAY_INDEX_COUNT> &rtValues)
+	{
+		if constexpr(I < ARRAY_INDEX_COUNT)
+			return runtime_array_to_compile_time_it<TChannel,TMember,T,I,0,ARRAY_INDEX_COUNT,MAX_ARRAY_VALUE,TFunc,values...>(component,memberIdx,rtValues);
+        else
+			return TFunc<TChannel,TMember,std::array<T,ARRAY_INDEX_COUNT>{values...}>{}(component,memberIdx);
+	}
+
+template<typename TChannel,typename TMember,auto TMapArray>
+struct get_member_channel_submitter_wrapper {
+    pragma::animation::ChannelValueSubmitter operator()(pragma::BaseEntityComponent &component,uint32_t memberIdx) const
+	{
+		return get_member_channel_submitter<TChannel,TMember,TMapArray>(component,memberIdx);
+	}
+};
+
 void Animated2Component::PlayAnimation(animation::AnimationManager &manager,pragma::animation::Animation2 &anim)
 {
 	manager->SetAnimation(anim);
@@ -112,26 +214,120 @@ void Animated2Component::PlayAnimation(animation::AnimationManager &manager,prag
 		auto memberIdx = hComponent->GetMemberIndex(localPath.GetFront());
 		if(!memberIdx.has_value())
 			continue;
+		localPath.PopFront();
+		auto channelValueType = channel->GetValueType();
 		auto *memberInfo = hComponent->GetMemberInfo(*memberIdx);
 		auto valueType = memberInfo->type;
+		
 		auto &component = *hComponent;
-		auto vs = [this,&channelValueSubmitters,channelIdx,&component,&memberIdx,memberInfo](auto tag) mutable {
-			using T = decltype(tag)::type;
-			if constexpr(is_animatable_type_v<T>)
+		auto vsGetMemberChannelSubmitter = [&localPath,&memberIdx,channelIdx,&channelValueSubmitters,&component]<typename TMember>(auto tag) mutable {
+			using TChannel = decltype(tag)::type;
+			auto strValueComponent = localPath.GetFront();
+			if(strValueComponent.empty())
 			{
-				auto idx = *memberIdx;
-				channelValueSubmitters[channelIdx] = [this,&component,idx](pragma::animation::AnimationChannel &channel,uint32_t &inOutPivotTimeIndex,double t) mutable {
-					auto *memberInfo = component.GetMemberInfo(idx);
-					auto value = channel.GetInterpolatedValue<T>(t,inOutPivotTimeIndex,memberInfo->interpolationFunction);
-					assert(memberInfo);
-					memberInfo->setterFunction(*memberInfo,component,&value);
-				};
+				if constexpr(std::is_same_v<TChannel,TMember>)
+					channelValueSubmitters[channelIdx] = get_member_channel_submitter<TChannel,TMember,0>(component,*memberIdx);
+				return;
+			}
+			constexpr auto channelType = udm::type_to_enum<TChannel>();
+			constexpr auto memberType = udm::type_to_enum<TMember>();
+			constexpr auto numComponentsChannel = get_component_count(channelType);
+			constexpr auto numComponentsMember = get_component_count(memberType);
+			if constexpr(numComponentsChannel > 0 && numComponentsMember > 0 && is_type_compatible(channelType,memberType))
+			{
+				std::vector<std::string> components;
+				ustring::explode(strValueComponent,",",components);
+				if(components.empty() || components.size() > numComponentsChannel)
+					return;
+				std::array<uint32_t,numComponentsChannel> componentIndices;
+				for(uint32_t idx = 0; auto &strComponent : components)
+				{
+					switch(memberType)
+					{
+					case udm::Type::Vector2:
+					case udm::Type::Vector2i:
+					{
+						if(strComponent == "x")
+							componentIndices[idx] = 0;
+						else if(strComponent == "y")
+							componentIndices[idx] = 1;
+						else return; // Unknown component type
+						break;
+					}
+					case udm::Type::Vector3:
+					case udm::Type::Vector3i:
+					{
+						if(strComponent == "x")
+							componentIndices[idx] = 0;
+						else if(strComponent == "y")
+							componentIndices[idx] = 1;
+						else if(strComponent == "z")
+							componentIndices[idx] = 2;
+						else return; // Unknown component type
+						break;
+					}
+					case udm::Type::Vector4:
+					case udm::Type::Vector4i:
+					{
+						if(strComponent == "x")
+							componentIndices[idx] = 0;
+						else if(strComponent == "y")
+							componentIndices[idx] = 1;
+						else if(strComponent == "z")
+							componentIndices[idx] = 2;
+						else if(strComponent == "w")
+							componentIndices[idx] = 3;
+						else return; // Unknown component type
+						break;
+					}
+					case udm::Type::Quaternion:
+					{
+						if(strComponent == "w")
+							componentIndices[idx] = 0;
+						else if(strComponent == "x")
+							componentIndices[idx] = 1;
+						else if(strComponent == "y")
+							componentIndices[idx] = 2;
+						else if(strComponent == "z")
+							componentIndices[idx] = 3;
+						else return; // Unknown component type
+						break;
+					}
+					case udm::Type::EulerAngles:
+					{
+						if(strComponent == "p")
+							componentIndices[idx] = 0;
+						else if(strComponent == "y")
+							componentIndices[idx] = 1;
+						else if(strComponent == "r")
+							componentIndices[idx] = 2;
+						else return; // Unknown component type
+						break;
+					}
+					}
+					++idx;
+				}
+				channelValueSubmitters[channelIdx] = runtime_array_to_compile_time<
+					TChannel,TMember,decltype(componentIndices)::value_type,0,componentIndices.size(),numComponentsMember,get_member_channel_submitter_wrapper
+				>(component,*memberIdx,componentIndices);
 			}
 		};
-		if(udm::is_numeric_type(valueType))
-			std::visit(vs,udm::get_numeric_tag(valueType));
-		else if(udm::is_generic_type(valueType))
-			std::visit(vs,udm::get_generic_tag(valueType));
+
+		auto vs = [&vsGetMemberChannelSubmitter,channelValueType](auto tag) mutable {
+			using TMember = decltype(tag)::type;
+			if constexpr(is_animatable_type_v<TMember>)
+			{
+				auto vs = [&vsGetMemberChannelSubmitter](auto tag) {
+					using TChannel = decltype(tag)::type;
+					if constexpr(is_animatable_type_v<TChannel>)
+						vsGetMemberChannelSubmitter.template operator()<TMember>(tag);
+				};
+				if(udm::is_ng_type(channelValueType))
+					udm::visit_ng(channelValueType,vs);
+			}
+		};
+		if(udm::is_ng_type(valueType))
+			udm::visit_ng(valueType,vs);
 	}
 }
 void Animated2Component::ClearAnimationManagers()
@@ -292,7 +488,7 @@ void CEAnim2OnPlayAnimation::PushArguments(lua_State *l)
 
 /////////////////
 
-CEAnim2InitializeChannelValueSubmitter::CEAnim2InitializeChannelValueSubmitter(const util::Path &path)
+CEAnim2InitializeChannelValueSubmitter::CEAnim2InitializeChannelValueSubmitter(util::Path &path)
 	: path{path}
 {}
 void CEAnim2InitializeChannelValueSubmitter::PushArguments(lua_State *l) {}

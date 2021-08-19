@@ -25,11 +25,15 @@ void BaseColorComponent::RegisterMembers(pragma::EntityComponentManager &compone
 {
 	using T = BaseColorComponent;
 	auto memberInfo = create_component_member_info<
-		T,Vector4,
-		static_cast<void(BaseColorComponent::*)(const Vector4&)>(&BaseColorComponent::SetColor),
-		[](const ComponentMemberInfo&,T &component,Vector4 &value) {value = component.GetColor().ToVector4();}
+		T,Vector3,
+		[](const ComponentMemberInfo&,T &component,const Vector3 &value) {
+			auto &curColor = component.GetColor();
+			Vector4 newColor {value,curColor.a /255.f};
+			component.SetColor(Color{newColor});
+		},
+		[](const ComponentMemberInfo&,T &component,Vector3 &value) {value = component.GetColor().ToVector4();}
 	>("color");
-	memberInfo.SetInterpolationFunction<T,Vector4,[](const Vector4 &col0,const Vector4 &col1,double t,Vector4 &vOut) {
+	memberInfo.SetInterpolationFunction<T,Vector3,[](const Vector3 &col0,const Vector3 &col1,double t,Vector3 &vOut) {
 		double h0,s0,v0;
 		util::rgb_to_hsv(col0,h0,s0,v0);
 
@@ -38,12 +42,21 @@ void BaseColorComponent::RegisterMembers(pragma::EntityComponentManager &compone
 
 		util::lerp_hsv(h0,s0,v0,h1,s1,v1,t);
 
-		vOut = Vector4{
-			util::hsv_to_rgb(h0,s0,v0),
-			umath::lerp(col0.a,col1.a,t)
+		vOut = Vector3{
+			util::hsv_to_rgb(h0,s0,v0)
 		};
 	}>();
 	registerMember(std::move(memberInfo));
+
+	registerMember(create_component_member_info<
+		T,float,
+		[](const ComponentMemberInfo&,T &component,const float &value) {
+			auto col = component.GetColor();
+			col.a = value *255.f;
+			component.SetColor(col);
+		},
+		[](const ComponentMemberInfo&,T &component,float &value) {value = component.GetColor().a /255.f;}
+	>("alpha"));
 }
 BaseColorComponent::BaseColorComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_color(util::SimpleProperty<util::ColorProperty,Color>::Create(Color(255,255,255,255)))

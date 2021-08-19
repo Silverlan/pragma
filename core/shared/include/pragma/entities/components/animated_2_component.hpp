@@ -118,11 +118,11 @@ namespace pragma
 	struct DLLNETWORK CEAnim2InitializeChannelValueSubmitter
 		: public ComponentEvent
 	{
-		CEAnim2InitializeChannelValueSubmitter(const util::Path &path);
+		CEAnim2InitializeChannelValueSubmitter(util::Path &path);
 		virtual void PushArguments(lua_State *l) override;
 		virtual uint32_t GetReturnCount() override;
 		virtual void HandleReturnValues(lua_State *l) override;
-		const util::Path &path;
+		util::Path &path;
 		animation::ChannelValueSubmitter submitter = nullptr;
 	};
 };

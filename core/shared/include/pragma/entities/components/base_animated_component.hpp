@@ -8,6 +8,7 @@
 #define __BASE_ANIMATED_COMPONENT_HPP__
 
 #include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/entities/components/base_entity_component_member_register.hpp"
 #include "pragma/model/animation/play_animation_flags.hpp"
 #include "pragma/model/animation/activities.h"
 #include "pragma/model/animation/animation_event.h"
@@ -25,7 +26,8 @@ namespace pragma
 {
 	namespace animation {class Animation;};
 	class DLLNETWORK BaseAnimatedComponent
-		: public BaseEntityComponent
+		: public BaseEntityComponent,
+		public DynamicMemberRegister
 	{
 	public:
 		static ComponentEventId EVENT_HANDLE_ANIMATION_EVENT;
@@ -247,11 +249,13 @@ namespace pragma
 		const Frame *GetBindPose() const;
 
 		CallbackHandle BindAnimationEvent(AnimationEvent::Type eventId,const std::function<void(std::reference_wrapper<const AnimationEvent>)> &fCallback);
+		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
 
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		using BaseEntityComponent::Load;
 	protected:
 		BaseAnimatedComponent(BaseEntity &ent);
+		virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
 		virtual void OnModelChanged(const std::shared_ptr<Model> &mdl);
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 		virtual void ResetAnimation(const std::shared_ptr<Model> &mdl);

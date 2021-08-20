@@ -60,6 +60,8 @@ namespace pragma
 		using BaseEntityComponent::Load;
 	protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
+		void InitializeAnimationChannelValueSubmitters();
+		void InitializeAnimationChannelValueSubmitters(animation::AnimationManager &manager);
 		void ResetAnimation(const std::shared_ptr<Model> &mdl);
 		util::PFloatProperty m_playbackRate = nullptr;
 		std::vector<animation::PAnimationManager> m_animationManagers;

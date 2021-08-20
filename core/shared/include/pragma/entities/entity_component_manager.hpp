@@ -96,6 +96,11 @@ namespace pragma
 		ApplyFunction setterFunction = nullptr;
 		GetFunction getterFunction = nullptr;
 		InterpolationFunction interpolationFunction = nullptr;
+		union
+		{
+			uint64_t userIndex;
+			void *userData = nullptr;
+		};
 	private:
 		ComponentMemberInfo()=default;
 	};
@@ -122,24 +127,27 @@ namespace pragma
 	protected:
 		BaseNetComponent()=default;
 	};
+
+	struct DLLNETWORK ComponentInfo
+	{
+		std::string name;
+		std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity&)> factory = nullptr;
+		ComponentId id = std::numeric_limits<uint32_t>::max();
+		ComponentFlags flags = ComponentFlags::None;
+		std::vector<ComponentMemberInfo> members;
+		std::unordered_map<std::string,ComponentMemberIndex> memberNameToIndex;
+		std::optional<ComponentMemberIndex> FindMember(const std::string &name) const;
+
+		bool IsValid() const {return factory != nullptr;}
+	};
+
 	class DLLNETWORK EntityComponentManager
 	{
 	public:
 		EntityComponentManager()=default;
 		EntityComponentManager(const EntityComponentManager&)=delete;
 		EntityComponentManager &operator=(const EntityComponentManager&)=delete;
-		struct DLLNETWORK ComponentInfo
-		{
-			std::string name;
-			std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity&)> factory = nullptr;
-			ComponentId id = std::numeric_limits<uint32_t>::max();
-			ComponentFlags flags = ComponentFlags::None;
-			std::vector<ComponentMemberInfo> members;
-			std::unordered_map<std::string,ComponentMemberIndex> memberNameToIndex;
-			std::optional<ComponentMemberIndex> FindMember(const std::string &name) const;
 
-			bool IsValid() const {return factory != nullptr;}
-		};
 		struct DLLNETWORK EventInfo
 		{
 			EventInfo(const std::string &name)

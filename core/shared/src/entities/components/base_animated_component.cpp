@@ -102,39 +102,6 @@ void BaseAnimatedComponent::Initialize()
 			MaintainAnimationMovement(m_animDisplacement);
 	});
 
-	AddEventCallback(Animated2Component::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &animEvData = static_cast<CEAnim2InitializeChannelValueSubmitter&>(evData.get());
-		auto boneName = animEvData.path.GetFront();
-		auto &mdl = GetEntity().GetModel();
-		if(!mdl)
-			return util::EventReply::Unhandled;
-		auto boneId = mdl->LookupBone(boneName);
-		if(boneId == -1)
-			return util::EventReply::Unhandled;
-		auto attr = animEvData.path.GetBack();
-		if(attr == "position")
-		{
-			animEvData.submitter = [this,boneId](pragma::animation::AnimationChannel &channel,uint32_t &inOutPivotTimeIndex,double t) {
-				SetBonePosition(boneId,channel.GetInterpolatedValue<Vector3>(t,inOutPivotTimeIndex));
-			};
-		}
-		else if(attr == "rotation")
-		{
-			animEvData.submitter = [this,boneId](pragma::animation::AnimationChannel &channel,uint32_t &inOutPivotTimeIndex,double t) {
-				SetBoneRotation(boneId,channel.GetInterpolatedValue<Quat>(t,inOutPivotTimeIndex));
-			};
-		}
-		else if(attr == "scale")
-		{
-			animEvData.submitter = [this,boneId](pragma::animation::AnimationChannel &channel,uint32_t &inOutPivotTimeIndex,double t) {
-				SetBoneScale(boneId,channel.GetInterpolatedValue<Vector3>(t,inOutPivotTimeIndex));
-			};
-		}
-		else
-			return util::EventReply::Unhandled;
-		return util::EventReply::Handled;
-	});
-
 	auto &ent = GetEntity();
 	auto *mdlComponent = static_cast<pragma::BaseModelComponent*>(ent.AddComponent("model").get());
 	if(mdlComponent != nullptr)
@@ -224,10 +191,88 @@ void BaseAnimatedComponent::ResetAnimation(const std::shared_ptr<Model> &mdl)
 	}
 }
 
+const ComponentMemberInfo *BaseAnimatedComponent::GetMemberInfo(ComponentMemberIndex idx) const
+{
+	auto numStatic = GetStaticMemberCount();
+	if(idx < numStatic)
+		return BaseEntityComponent::GetMemberInfo(idx);
+	return DynamicMemberRegister::GetMemberInfo(idx -numStatic);
+}
+std::optional<ComponentMemberIndex> BaseAnimatedComponent::DoGetMemberIndex(const std::string &name) const
+{
+	auto idx = BaseEntityComponent::DoGetMemberIndex(name);
+	if(idx.has_value())
+		return idx;
+	idx = DynamicMemberRegister::GetMemberIndex(name);
+	if(idx.has_value())
+		return *idx +GetStaticMemberCount();
+	return std::optional<ComponentMemberIndex>{};
+}
+
 void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 {
 	ResetAnimation(mdl);
 	BroadcastEvent(EVENT_ON_ANIMATION_RESET);
+
+	util::ScopeGuard sg {[this]() {OnMembersChanged();}};
+	ClearMembers();
+	if(!mdl)
+		return;
+	auto &skeleton = mdl->GetSkeleton();
+	auto &bones = skeleton.GetBones();
+	ReserveMembers(bones.size() *3);
+	for(auto &bone : skeleton.GetBones())
+	{
+		const auto &name = bone->name;
+		auto lname = name;
+		ustring::to_lower(lname);
+
+		auto memberInfoPos = pragma::ComponentMemberInfo::CreateDummy();
+		memberInfoPos.name = "bone/" +lname +"/position";
+		memberInfoPos.type = udm::Type::Vector3;
+		memberInfoPos.userIndex = bone->ID;
+		memberInfoPos.SetGetterFunction<BaseAnimatedComponent,Vector3,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,Vector3&)>(
+			[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,Vector3 &outValue) {
+			auto *pos = component.GetBonePosition(memberInfo.userIndex);
+			assert(pos);
+			outValue = *pos;
+		})>();
+		memberInfoPos.SetSetterFunction<BaseAnimatedComponent,Vector3,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,const Vector3&)>(
+			[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,const Vector3 &value) {
+			component.SetBonePosition(memberInfo.userIndex,value);
+		})>();
+
+		auto memberInfoRot = memberInfoPos;
+		memberInfoRot.name = "bone/" +lname +"/rotation";
+		memberInfoRot.type = udm::Type::Quaternion;
+		memberInfoRot.SetGetterFunction<BaseAnimatedComponent,Quat,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,Quat&)>(
+			[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,Quat &outValue) {
+			auto *rot = component.GetBoneRotation(memberInfo.userIndex);
+			assert(rot);
+			outValue = *rot;
+		})>();
+		memberInfoRot.SetSetterFunction<BaseAnimatedComponent,Quat,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,const Quat&)>(
+			[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,const Quat &value) {
+			component.SetBoneRotation(memberInfo.userIndex,value);
+		})>();
+
+		auto memberInfoScale = memberInfoPos;
+		memberInfoScale.name = "bone/" +lname +"/scale";
+		memberInfoScale.SetGetterFunction<BaseAnimatedComponent,Vector3,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,Vector3&)>(
+			[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,Vector3 &outValue) {
+			auto *scale = component.GetBoneScale(memberInfo.userIndex);
+			assert(scale);
+			outValue = *scale;
+		})>();
+		memberInfoScale.SetSetterFunction<BaseAnimatedComponent,Vector3,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,const Vector3&)>(
+			[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,const Vector3 &value) {
+			component.SetBoneScale(memberInfo.userIndex,value);
+		})>();
+
+		RegisterMember(std::move(memberInfoPos));
+		RegisterMember(std::move(memberInfoRot));
+		RegisterMember(std::move(memberInfoScale));
+	}
 }
 
 CallbackHandle BaseAnimatedComponent::BindAnimationEvent(AnimationEvent::Type eventId,const std::function<void(std::reference_wrapper<const AnimationEvent>)> &fCallback)

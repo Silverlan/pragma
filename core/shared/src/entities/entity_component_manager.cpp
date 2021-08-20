@@ -14,7 +14,7 @@ using namespace pragma;
 decltype(EntityComponentManager::s_nextEventId) EntityComponentManager::s_nextEventId = 0u;
 decltype(EntityComponentManager::s_componentEvents) EntityComponentManager::s_componentEvents = {};
 
-std::optional<ComponentMemberIndex> EntityComponentManager::ComponentInfo::FindMember(const std::string &name) const
+std::optional<ComponentMemberIndex> ComponentInfo::FindMember(const std::string &name) const
 {
 	auto lname = name;
 	ustring::to_lower(lname);
@@ -182,8 +182,8 @@ bool EntityComponentManager::GetComponentTypeId(const std::string &name,Componen
 	outId = it->id;
 	return true;
 }
-const EntityComponentManager::ComponentInfo *EntityComponentManager::GetComponentInfo(ComponentId id) const {return const_cast<EntityComponentManager*>(this)->GetComponentInfo(id);}
-EntityComponentManager::ComponentInfo *EntityComponentManager::GetComponentInfo(ComponentId id)
+const ComponentInfo *EntityComponentManager::GetComponentInfo(ComponentId id) const {return const_cast<EntityComponentManager*>(this)->GetComponentInfo(id);}
+ComponentInfo *EntityComponentManager::GetComponentInfo(ComponentId id)
 {
 	if(id >= m_componentInfos.size())
 		return nullptr;
@@ -198,7 +198,7 @@ ComponentMemberIndex EntityComponentManager::RegisterMember(ComponentInfo &compo
 	componentInfo.memberNameToIndex[lname] = idx;
 	return idx;
 }
-const std::vector<EntityComponentManager::ComponentInfo> &EntityComponentManager::GetRegisteredComponentTypes() const {return m_componentInfos;}
+const std::vector<ComponentInfo> &EntityComponentManager::GetRegisteredComponentTypes() const {return m_componentInfos;}
 void EntityComponentManager::OnComponentTypeRegistered(const ComponentInfo &componentInfo) {}
 ComponentEventId EntityComponentManager::RegisterEvent(const std::string &evName,std::type_index componentType)
 {

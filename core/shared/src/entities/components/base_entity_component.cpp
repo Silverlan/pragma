@@ -30,6 +30,7 @@ DLLNETWORK std::ostream& operator<<(std::ostream &os,const pragma::BaseEntityCom
 decltype(EEntityComponentCallbackEvent::Count) EEntityComponentCallbackEvent::Count = EEntityComponentCallbackEvent{umath::to_integral(E::Count)};
 decltype(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED) BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED = INVALID_COMPONENT_ID;
 decltype(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED) BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED = INVALID_COMPONENT_ID;
+decltype(BaseEntityComponent::EVENT_ON_MEMBERS_CHANGED) BaseEntityComponent::EVENT_ON_MEMBERS_CHANGED = INVALID_COMPONENT_ID;
 BaseEntityComponent::BaseEntityComponent(BaseEntity &ent)
 	: m_entity{ent}
 {}
@@ -47,6 +48,11 @@ void BaseEntityComponent::RegisterEvents(pragma::EntityComponentManager &compone
 {
 	EVENT_ON_ENTITY_COMPONENT_ADDED = componentManager.RegisterEvent("ON_ENTITY_COMPONENT_ADDED");
 	EVENT_ON_ENTITY_COMPONENT_REMOVED = componentManager.RegisterEvent("ON_ENTITY_COMPONENT_REMOVED");
+	EVENT_ON_MEMBERS_CHANGED = componentManager.RegisterEvent("ON_MEMBERS_CHANGED");
+}
+void BaseEntityComponent::OnMembersChanged()
+{
+	BroadcastEvent(EVENT_ON_MEMBERS_CHANGED);
 }
 void BaseEntityComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember) {}
 const ComponentMemberInfo *BaseEntityComponent::FindMemberInfo(const std::string &name) const
@@ -63,9 +69,16 @@ const ComponentMemberInfo *BaseEntityComponent::GetMemberInfo(ComponentMemberInd
 		return {};
 	return &componentInfo->members[idx];
 }
-const EntityComponentManager::ComponentInfo *BaseEntityComponent::GetComponentInfo() const
+const ComponentInfo *BaseEntityComponent::GetComponentInfo() const
 {
 	return GetEntity().GetComponentManager()->GetComponentInfo(GetComponentId());
+}
+uint32_t BaseEntityComponent::GetStaticMemberCount() const
+{
+	auto *componentInfo = GetComponentInfo();
+	if(!componentInfo)
+		return 0;
+	return componentInfo->members.size();
 }
 std::optional<ComponentMemberIndex> BaseEntityComponent::GetMemberIndex(const std::string &name) const
 {

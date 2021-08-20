@@ -182,17 +182,31 @@ struct get_member_channel_submitter_wrapper {
 	}
 };
 
-void Animated2Component::PlayAnimation(animation::AnimationManager &manager,pragma::animation::Animation2 &anim)
+void Animated2Component::InitializeAnimationChannelValueSubmitters()
 {
-	manager->SetAnimation(anim);
-	auto &channels = anim.GetChannels();
+	for(auto &animManager : m_animationManagers)
+		InitializeAnimationChannelValueSubmitters(*animManager);
+}
+
+void Animated2Component::InitializeAnimationChannelValueSubmitters(animation::AnimationManager &manager)
+{
+	auto *anim = manager.GetCurrentAnimation();
 	auto &channelValueSubmitters = manager.GetChannelValueSubmitters();
+	if(!anim)
+	{
+		channelValueSubmitters.clear();
+		return;
+	}
+	auto &channels = anim->GetChannels();
 	channelValueSubmitters.resize(channels.size());
 	// TODO: Reload this when animation has changed, or if component data has changed (e.g. animated component has changed model and therefore bone positions and rotational data)
 	for(auto it=channels.begin();it!=channels.end();++it)
 	{
 		auto &channel = *it;
 		auto &path = channel->targetPath;
+		if(path.GetFront() != "ec") // First path component denotes the type, which always has to be 'ec' for entity component in this case
+			continue;
+		path.PopFront();
 		auto componentTypeName = path.GetFront();
 		// TODO: Needs to be updated whenever a new component has been added to the entity
 		auto hComponent = GetEntity().FindComponent(componentTypeName);
@@ -211,10 +225,22 @@ void Animated2Component::PlayAnimation(animation::AnimationManager &manager,prag
 			channelValueSubmitters[channelIdx] = std::move(evData.submitter);
 			continue;
 		}
-		auto memberIdx = hComponent->GetMemberIndex(localPath.GetFront());
-		if(!memberIdx.has_value())
-			continue;
-		localPath.PopFront();
+
+		auto memberIdx = hComponent->GetMemberIndex(localPath.GetString());
+		if(memberIdx.has_value())
+			localPath = {};
+		else
+		{
+			auto component = localPath.GetBack();
+			localPath.PopBack();
+			auto memberName = localPath.GetString();
+			if(!memberName.empty())
+				memberName.pop_back();
+			memberIdx = hComponent->GetMemberIndex(memberName);
+			if(!memberIdx.has_value())
+				continue;
+			localPath = component;
+		}
 		auto channelValueType = channel->GetValueType();
 		auto *memberInfo = hComponent->GetMemberInfo(*memberIdx);
 		auto valueType = memberInfo->type;
@@ -330,6 +356,12 @@ void Animated2Component::PlayAnimation(animation::AnimationManager &manager,prag
 			udm::visit_ng(valueType,vs);
 	}
 }
+
+void Animated2Component::PlayAnimation(animation::AnimationManager &manager,pragma::animation::Animation2 &anim)
+{
+	manager->SetAnimation(anim);
+	InitializeAnimationChannelValueSubmitters(manager);
+}
 void Animated2Component::ClearAnimationManagers()
 {
 	m_animationManagers.clear();
@@ -392,6 +424,10 @@ void Animated2Component::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	SetTickPolicy(TickPolicy::WhenVisible);
+
+	BindEventUnhandled(BaseEntityComponent::EVENT_ON_MEMBERS_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		InitializeAnimationChannelValueSubmitters();
+	});
 }
 
 void Animated2Component::Save(udm::LinkedPropertyWrapperArg udm) {}

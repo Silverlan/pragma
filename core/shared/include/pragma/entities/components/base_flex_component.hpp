@@ -8,11 +8,13 @@
 #define __BASE_FLEX_COMPONENT_HPP__
 
 #include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/entities/components/base_entity_component_member_register.hpp"
 
 namespace pragma
 {
 	class DLLNETWORK BaseFlexComponent
-		: public BaseEntityComponent
+		: public BaseEntityComponent,
+		public DynamicMemberRegister
 	{
 	public:
 		virtual void Initialize() override;
@@ -27,7 +29,11 @@ namespace pragma
 
 		void SetFlexControllerScale(float scale);
 		float GetFlexControllerScale() const;
+
+		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const override;
 	protected:
+		void OnModelChanged(const std::shared_ptr<Model> &model);
+		virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const override;
 		BaseFlexComponent(BaseEntity &ent);
 		float m_flexControllerScale = 1.f;
 	};

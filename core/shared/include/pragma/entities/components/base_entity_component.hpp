@@ -44,6 +44,7 @@ namespace udm {struct LinkedPropertyWrapper; using LinkedPropertyWrapperArg = co
 class DataStream;
 namespace pragma
 {
+	struct ComponentInfo;
 	struct ComponentEvent;
 	class BaseEntityComponentSystem;
 	class EntityComponentManager;
@@ -72,6 +73,7 @@ namespace pragma
 		// instead of using this event!
 		static ComponentEventId EVENT_ON_ENTITY_COMPONENT_ADDED;
 		static ComponentEventId EVENT_ON_ENTITY_COMPONENT_REMOVED;
+		static ComponentEventId EVENT_ON_MEMBERS_CHANGED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember);
 		enum class StateFlags : uint32_t
@@ -98,8 +100,9 @@ namespace pragma
 
 		std::optional<ComponentMemberIndex> GetMemberIndex(const std::string &name) const;
 		virtual const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const;
+		uint32_t GetStaticMemberCount() const;
 
-		const EntityComponentManager::ComponentInfo *GetComponentInfo() const;
+		const ComponentInfo *GetComponentInfo() const;
 
 		// Component version; Used for loading and saving the component
 		virtual uint32_t GetVersion() const {return 1u;}
@@ -188,6 +191,7 @@ namespace pragma
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData);
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version);
 		virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const;
+		virtual void OnMembersChanged();
 
 		// Used for typed callback lookups. If this function doesn't change outTypeIndex, the actual component's type is used
 		// as reference. Overwrite this on the serverside or clientside version of the component,

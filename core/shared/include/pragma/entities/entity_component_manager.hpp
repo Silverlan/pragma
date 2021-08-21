@@ -46,7 +46,21 @@ namespace pragma
 				TApply(memberInfo,static_cast<TComponent&>(component),*static_cast<const T*>(value));
 			};
 		}
+		template<typename TComponent,typename T,void(*TApply)(const ComponentMemberInfo&,TComponent&,T)>
+		void SetSetterFunction()
+		{
+			setterFunction = [](const ComponentMemberInfo &memberInfo,BaseEntityComponent &component,const void *value) {
+				TApply(memberInfo,static_cast<TComponent&>(component),*static_cast<const T*>(value));
+			};
+		}
 		template<typename TComponent,typename T,void(TComponent::*TApply)(const T&)>
+		void SetSetterFunction()
+		{
+			setterFunction = [](const ComponentMemberInfo &memberInfo,BaseEntityComponent &component,const void *value) {
+				(static_cast<TComponent&>(component).*TApply)(*static_cast<const T*>(value));
+			};
+		}
+		template<typename TComponent,typename T,void(TComponent::*TApply)(T)>
 		void SetSetterFunction()
 		{
 			setterFunction = [](const ComponentMemberInfo &memberInfo,BaseEntityComponent &component,const void *value) {

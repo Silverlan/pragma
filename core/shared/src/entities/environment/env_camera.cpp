@@ -8,6 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/entities/environment/env_camera.h"
 #include "pragma/entities/components/base_transform_component.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/math/e_frustum.h"
 #include <algorithm>
 #include <mathutil/umath_frustum.hpp>
@@ -21,6 +22,26 @@
 using namespace pragma;
 
 static float normalize_plane_z(float z) {return umath::max(z,0.1f);} // z value must never be 0; values close to zero can cause visual artifacts
+
+void BaseEnvCameraComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+{
+	using T = BaseEnvCameraComponent;
+	registerMember(create_component_member_info<
+		T,float,
+		static_cast<void(T::*)(float)>(&T::SetFOV),
+		static_cast<float(T::*)() const>(&T::GetFOV)
+	>("fov"));
+	registerMember(create_component_member_info<
+		T,float,
+		static_cast<void(T::*)(float)>(&T::SetNearZ),
+		static_cast<float(T::*)() const>(&T::GetFarZ)
+	>("nearz"));
+	registerMember(create_component_member_info<
+		T,float,
+		static_cast<void(T::*)(float)>(&T::SetFarZ),
+		static_cast<float(T::*)() const>(&T::GetFarZ)
+	>("farz"));
+}
 
 decltype(BaseEnvCameraComponent::DEFAULT_NEAR_Z) BaseEnvCameraComponent::DEFAULT_NEAR_Z = 1.f;
 decltype(BaseEnvCameraComponent::DEFAULT_FAR_Z) BaseEnvCameraComponent::DEFAULT_FAR_Z = 32'768.f;

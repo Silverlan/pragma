@@ -220,7 +220,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdSlice.def("GetChannelValueCount",static_cast<uint32_t(*)(lua_State*,pragma::animation::AnimationSlice&)>([](lua_State *l,pragma::animation::AnimationSlice &slice) -> uint32_t {
 		return slice.channelValues.size();
 	}));
-	cdSlice.def("GetChannelProperty",static_cast<luabind::optional<::udm::PProperty>(*)(lua_State*,pragma::animation::AnimationSlice&,uint32_t)>([](lua_State *l,pragma::animation::AnimationSlice &slice,uint32_t idx) -> luabind::optional<udm::PProperty> {
+	cdSlice.def("GetChannelProperty",static_cast<luabind::optional<::udm::PProperty>(*)(lua_State*,pragma::animation::AnimationSlice&,uint32_t)>([](lua_State *l,pragma::animation::AnimationSlice &slice,uint32_t idx) -> luabind::optional<::udm::PProperty> {
 		if(idx >= slice.channelValues.size())
 			return nil;
 		return {l,slice.channelValues[idx]};

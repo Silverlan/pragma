@@ -254,7 +254,7 @@ static luabind::object get_blob_array_values(lua_State *l,const ::udm::PropertyW
 	return t;
 }
 
-static void set_blob_array_values(lua_State *l,const::udm::PropertyWrapper &p,const std::string &path,::udm::Type type,luabind::table<> t,::udm::Type blobType=::udm::Type::BlobLz4)
+static void set_blob_array_values(lua_State *l,const::udm::PropertyWrapper &p,const std::string &path,::udm::Type type,luabind::tableT<void> t,::udm::Type blobType=::udm::Type::BlobLz4)
 {
 	if(blobType != ::udm::Type::Blob && blobType != ::udm::Type::BlobLz4)
 		return;

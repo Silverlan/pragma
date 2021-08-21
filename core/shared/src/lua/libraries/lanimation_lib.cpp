@@ -13,6 +13,7 @@
 #include "pragma/model/animation/animation_manager.hpp"
 #include "pragma/model/animation/skeletal_animation.hpp"
 #include "pragma/model/animation/play_animation_flags.hpp"
+#include "pragma/lua/libraries/ludm.hpp"
 #include "pragma/model/model.h"
 #include <luainterface.hpp>
 
@@ -64,10 +65,10 @@ void Lua::animation::register_library(Lua::Interface &lua)
 
 	auto cdChannel = luabind::class_<pragma::animation::AnimationChannel>("Channel");
 	cdChannel.def(luabind::tostring(luabind::self));
-	cdChannel.def("GetValueType",static_cast<udm::Type(*)(lua_State*,pragma::animation::AnimationChannel&)>([](lua_State *l,pragma::animation::AnimationChannel &channel) -> udm::Type {
+	cdChannel.def("GetValueType",static_cast<::udm::Type(*)(lua_State*,pragma::animation::AnimationChannel&)>([](lua_State *l,pragma::animation::AnimationChannel &channel) -> ::udm::Type {
 		return channel.GetValueType();
 	}));
-	cdChannel.def("SetValueType",static_cast<void(*)(lua_State*,pragma::animation::AnimationChannel&,udm::Type)>([](lua_State *l,pragma::animation::AnimationChannel &channel,udm::Type type) {
+	cdChannel.def("SetValueType",static_cast<void(*)(lua_State*,pragma::animation::AnimationChannel&,::udm::Type)>([](lua_State *l,pragma::animation::AnimationChannel &channel,::udm::Type type) {
 		channel.SetValueType(type);
 	}));
 	cdChannel.def("GetInterpolation",static_cast<pragma::animation::AnimationChannelInterpolation(*)(lua_State*,pragma::animation::AnimationChannel&)>(
@@ -86,21 +87,27 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		[](lua_State *l,pragma::animation::AnimationChannel &channel,const std::string &path) {
 		channel.targetPath = path;
 	}));
-	cdChannel.def("GetTimesArray",static_cast<udm::LinkedPropertyWrapper(*)(lua_State*,pragma::animation::AnimationChannel&)>(
-		[](lua_State *l,pragma::animation::AnimationChannel &channel) -> udm::LinkedPropertyWrapper {
-			return udm::LinkedPropertyWrapper{channel.GetTimesProperty()};
+	cdChannel.def("GetTimesArray",static_cast<::udm::LinkedPropertyWrapper(*)(lua_State*,pragma::animation::AnimationChannel&)>(
+		[](lua_State *l,pragma::animation::AnimationChannel &channel) -> ::udm::LinkedPropertyWrapper {
+			return ::udm::LinkedPropertyWrapper{channel.GetTimesProperty()};
 	}));
-	cdChannel.def("GetValueArray",static_cast<udm::LinkedPropertyWrapper(*)(lua_State*,pragma::animation::AnimationChannel&)>(
-		[](lua_State *l,pragma::animation::AnimationChannel &channel) -> udm::LinkedPropertyWrapper {
-			return udm::LinkedPropertyWrapper{channel.GetValueProperty()};
+	cdChannel.def("GetValueArray",static_cast<::udm::LinkedPropertyWrapper(*)(lua_State*,pragma::animation::AnimationChannel&)>(
+		[](lua_State *l,pragma::animation::AnimationChannel &channel) -> ::udm::LinkedPropertyWrapper {
+			return ::udm::LinkedPropertyWrapper{channel.GetValueProperty()};
 	}));
-	cdChannel.def("Save",static_cast<bool(*)(lua_State*,pragma::animation::AnimationChannel&,udm::LinkedPropertyWrapper&)>(
-		[](lua_State *l,pragma::animation::AnimationChannel &channel,udm::LinkedPropertyWrapper &prop) -> bool {
+	cdChannel.def("Save",static_cast<bool(*)(lua_State*,pragma::animation::AnimationChannel&,::udm::LinkedPropertyWrapper&)>(
+		[](lua_State *l,pragma::animation::AnimationChannel &channel,::udm::LinkedPropertyWrapper &prop) -> bool {
 		return channel.Save(prop);
 	}));
-	cdChannel.def("Load",static_cast<bool(*)(lua_State*,pragma::animation::AnimationChannel&,udm::LinkedPropertyWrapper&)>(
-		[](lua_State *l,pragma::animation::AnimationChannel &channel,udm::LinkedPropertyWrapper &prop) -> bool {
+	cdChannel.def("Load",static_cast<bool(*)(lua_State*,pragma::animation::AnimationChannel&,::udm::LinkedPropertyWrapper&)>(
+		[](lua_State *l,pragma::animation::AnimationChannel &channel,::udm::LinkedPropertyWrapper &prop) -> bool {
 		return channel.Load(prop);
+	}));
+	cdChannel.def("SetValues",
+		static_cast<void(*)(lua_State*,pragma::animation::AnimationChannel&,luabind::tableT<float>,const luabind::tableT<void>)>(
+			[](lua_State *l,pragma::animation::AnimationChannel &channel,luabind::tableT<float> times,const luabind::tableT<void> values) {
+		Lua::udm::set_array_values(l,channel.GetTimesArray(),times,2);
+		Lua::udm::set_array_values(l,channel.GetValueArray(),values,3);
 	}));
 	animMod[cdChannel];
 
@@ -213,7 +220,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdSlice.def("GetChannelValueCount",static_cast<uint32_t(*)(lua_State*,pragma::animation::AnimationSlice&)>([](lua_State *l,pragma::animation::AnimationSlice &slice) -> uint32_t {
 		return slice.channelValues.size();
 	}));
-	cdSlice.def("GetChannelProperty",static_cast<luabind::optional<udm::PProperty>(*)(lua_State*,pragma::animation::AnimationSlice&,uint32_t)>([](lua_State *l,pragma::animation::AnimationSlice &slice,uint32_t idx) -> luabind::optional<udm::PProperty> {
+	cdSlice.def("GetChannelProperty",static_cast<luabind::optional<::udm::PProperty>(*)(lua_State*,pragma::animation::AnimationSlice&,uint32_t)>([](lua_State *l,pragma::animation::AnimationSlice &slice,uint32_t idx) -> luabind::optional<udm::PProperty> {
 		if(idx >= slice.channelValues.size())
 			return nil;
 		return {l,slice.channelValues[idx]};
@@ -243,13 +250,13 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdAnim2.def("AddChannel",static_cast<void(*)(lua_State*,pragma::animation::Animation2&,pragma::animation::AnimationChannel&)>([](lua_State *l,pragma::animation::Animation2 &anim,pragma::animation::AnimationChannel &channel) {
 		anim.AddChannel(channel);
 	}));
-	cdAnim2.def("AddChannel",static_cast<opt<std::shared_ptr<pragma::animation::AnimationChannel>>(*)(lua_State*,pragma::animation::Animation2&,const util::Path&,udm::Type)>([](lua_State *l,pragma::animation::Animation2 &anim,const util::Path &path,udm::Type valueType) -> opt<std::shared_ptr<pragma::animation::AnimationChannel>> {
+	cdAnim2.def("AddChannel",static_cast<opt<std::shared_ptr<pragma::animation::AnimationChannel>>(*)(lua_State*,pragma::animation::Animation2&,const util::Path&,::udm::Type)>([](lua_State *l,pragma::animation::Animation2 &anim,const util::Path &path,::udm::Type valueType) -> opt<std::shared_ptr<pragma::animation::AnimationChannel>> {
 		auto *channel = anim.AddChannel(path,valueType);
 		if(!channel)
 			return nil;
 		return {l,channel->shared_from_this()};
 	}));
-	cdAnim2.def("AddChannel",static_cast<opt<std::shared_ptr<pragma::animation::AnimationChannel>>(*)(lua_State*,pragma::animation::Animation2&,const std::string&,udm::Type)>([](lua_State *l,pragma::animation::Animation2 &anim,const std::string &path,udm::Type valueType) -> opt<std::shared_ptr<pragma::animation::AnimationChannel>> {
+	cdAnim2.def("AddChannel",static_cast<opt<std::shared_ptr<pragma::animation::AnimationChannel>>(*)(lua_State*,pragma::animation::Animation2&,const std::string&,::udm::Type)>([](lua_State *l,pragma::animation::Animation2 &anim,const std::string &path,::udm::Type valueType) -> opt<std::shared_ptr<pragma::animation::AnimationChannel>> {
 		auto *channel = anim.AddChannel(path,valueType);
 		if(!channel)
 			return nil;

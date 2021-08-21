@@ -570,7 +570,7 @@ static luabind::object get_children(lua_State *l,const ::udm::PropertyWrapper &p
 }
 
 template<typename T>
-	static void set_array_values(udm::Array &a,::udm::Type type,luabind::table<> t,size_t size,::udm::ArrayType arrayType)
+	static void set_array_values(udm::Array &a,::udm::Type type,luabind::tableT<void> t,size_t size,::udm::ArrayType arrayType)
 {
 	a.Resize(size);
 	auto *pVal = static_cast<T*>(a.GetValues());
@@ -581,12 +581,12 @@ template<typename T>
 	}
 }
 template<typename T>
-	static void set_array_values(udm::PropertyWrapper &p,const std::string &name,::udm::Type type,luabind::table<> t,size_t size,::udm::ArrayType arrayType)
+	static void set_array_values(udm::PropertyWrapper &p,const std::string &name,::udm::Type type,luabind::tableT<void> t,size_t size,::udm::ArrayType arrayType)
 {
 	auto a = p.AddArray(name,size,type,arrayType);
 	set_array_values<T>(a.GetValue<udm::Array>(),type,t,size,arrayType);
 }
-static void set_array_values(lua_State *l,::udm::Array &a,::udm::Type type,luabind::table<> t,uint32_t tIdx,::udm::ArrayType arrayType=::udm::ArrayType::Raw)
+static void set_array_values(lua_State *l,::udm::Array &a,::udm::Type type,luabind::tableT<void> t,uint32_t tIdx,::udm::ArrayType arrayType=::udm::ArrayType::Raw)
 {
 	auto size = Lua::GetObjectLength(l,tIdx);
 	auto vs = [&t,&a,type,tIdx,arrayType,size](auto tag) {
@@ -604,7 +604,11 @@ static void set_array_values(lua_State *l,::udm::Array &a,::udm::Type type,luabi
 	};
 	udm::visit(type,vs);
 }
-static void set_array_values(lua_State *l,udm::PropertyWrapper &p,const std::string &name,::udm::Type type,luabind::table<> t,::udm::ArrayType arrayType=::udm::ArrayType::Raw)
+void Lua::udm::set_array_values(lua_State *l,::udm::Array &a,luabind::tableT<void> t,uint32_t tIdx)
+{
+	::set_array_values(l,a,a.GetValueType(),t,tIdx,a.GetArrayType());
+}
+static void set_array_values(lua_State *l,udm::PropertyWrapper &p,const std::string &name,::udm::Type type,luabind::tableT<void> t,::udm::ArrayType arrayType=::udm::ArrayType::Raw)
 {
 	auto size = Lua::GetObjectLength(l,4);
 	auto a = p.AddArray(name,size,type,arrayType);
@@ -635,12 +639,12 @@ template<class T,class TPropertyWrapper,class TClassDef>
 	.def("GetArrayValuesFromBlob",static_cast<luabind::object(*)(lua_State*,T&,::udm::Type)>([](lua_State *l,T &p,::udm::Type type) -> luabind::object {
 		return get_blob_array_values(l,static_cast<TPropertyWrapper>(p),type);
 	}))
-	.def("AddBlobFromArrayValues",static_cast<void(*)(lua_State*,T&,const std::string&,::udm::Type,luabind::table<>,::udm::Type)>(
-		[](lua_State *l,T &p,const std::string &path,::udm::Type type,luabind::table<> t,::udm::Type blobType) {
+	.def("AddBlobFromArrayValues",static_cast<void(*)(lua_State*,T&,const std::string&,::udm::Type,luabind::tableT<void>,::udm::Type)>(
+		[](lua_State *l,T &p,const std::string &path,::udm::Type type,luabind::tableT<void> t,::udm::Type blobType) {
 		return set_blob_array_values(l,static_cast<TPropertyWrapper>(p),path,type,t,blobType);
 	}))
-	.def("AddBlobFromArrayValues",static_cast<void(*)(lua_State*,T&,const std::string&,::udm::Type,luabind::table<>)>(
-		[](lua_State *l,T &p,const std::string &path,::udm::Type type,luabind::table<> t) {
+	.def("AddBlobFromArrayValues",static_cast<void(*)(lua_State*,T&,const std::string&,::udm::Type,luabind::tableT<void>)>(
+		[](lua_State *l,T &p,const std::string &path,::udm::Type type,luabind::tableT<void> t) {
 		return set_blob_array_values(l,static_cast<TPropertyWrapper>(p),path,type,t);
 	}))
 	.def("GetBlobData",static_cast<void(*)(lua_State*,T&)>([](lua_State *l,T &p) {
@@ -711,21 +715,21 @@ template<class T,class TPropertyWrapper,class TClassDef>
 			return get_array_values(l,(*lp)[name],{});
 		return get_array_values(l,tp[name],{});
 	}))
-	.def("SetArrayValues",static_cast<void(*)(lua_State*,T&,::udm::Type,luabind::table<>)>([](lua_State *l,T &p,::udm::Type type,luabind::table<> t) {
+	.def("SetArrayValues",static_cast<void(*)(lua_State*,T&,::udm::Type,luabind::tableT<void>)>([](lua_State *l,T &p,::udm::Type type,luabind::tableT<void> t) {
 		TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
 		set_array_values(l,tmp.GetValue<::udm::Array>(),type,t,3);
 	}))
-	.def("SetArrayValues",static_cast<void(*)(lua_State*,T&,::udm::Type,luabind::table<>,::udm::Type)>([](lua_State *l,T &p,::udm::Type type,luabind::table<> t,::udm::Type arrayType) {
+	.def("SetArrayValues",static_cast<void(*)(lua_State*,T&,::udm::Type,luabind::tableT<void>,::udm::Type)>([](lua_State *l,T &p,::udm::Type type,luabind::tableT<void> t,::udm::Type arrayType) {
 		if(arrayType != ::udm::Type::Array && arrayType != ::udm::Type::ArrayLz4)
 			Lua::Error(l,"Invalid array type '" +std::string{::udm::enum_type_to_ascii(arrayType)} +"'!");
 		TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
 		set_array_values(l,tmp.GetValue<::udm::Array>(),type,t,3,(arrayType == ::udm::Type::ArrayLz4) ? ::udm::ArrayType::Compressed : ::udm::ArrayType::Raw);
 	}))
-	.def("SetArrayValues",static_cast<void(*)(lua_State*,T&,const std::string&,::udm::Type,luabind::table<>)>([](lua_State *l,T &p,const std::string &name,::udm::Type type,luabind::table<> t) {
+	.def("SetArrayValues",static_cast<void(*)(lua_State*,T&,const std::string&,::udm::Type,luabind::tableT<void>)>([](lua_State *l,T &p,const std::string &name,::udm::Type type,luabind::tableT<void> t) {
 		TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
 		set_array_values(l,tmp,name,type,t);
 	}))
-	.def("SetArrayValues",static_cast<void(*)(lua_State*,T&,const std::string&,::udm::Type,luabind::table<>,::udm::Type)>([](lua_State *l,T &p,const std::string &name,::udm::Type type,luabind::table<> t,::udm::Type arrayType) {
+	.def("SetArrayValues",static_cast<void(*)(lua_State*,T&,const std::string&,::udm::Type,luabind::tableT<void>,::udm::Type)>([](lua_State *l,T &p,const std::string &name,::udm::Type type,luabind::tableT<void> t,::udm::Type arrayType) {
 		if(arrayType != ::udm::Type::Array && arrayType != ::udm::Type::ArrayLz4)
 			Lua::Error(l,"Invalid array type '" +std::string{::udm::enum_type_to_ascii(arrayType)} +"'!");
 		TPropertyWrapper tmp = static_cast<TPropertyWrapper>(p);
@@ -1391,6 +1395,7 @@ void Lua::udm::register_library(Lua::Interface &lua)
 
 	auto cdArray = luabind::class_<::udm::Array>("Array");
 	cdArray.def(luabind::tostring(luabind::self));
+	cdArray.def("GetArrayType",&::udm::Array::GetArrayType);
 	modUdm[cdArray];
 
 	auto cdProp = luabind::class_<::udm::Property>("Property");

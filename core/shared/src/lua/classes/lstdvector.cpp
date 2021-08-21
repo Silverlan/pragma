@@ -60,6 +60,12 @@ template<typename T>
 	classDefVec.def("Clear",static_cast<void(*)(std::vector<T>&)>([](std::vector<T> &v) {
 		v.clear();
 	}),luabind::ref_policy<1>{});
+	classDefVec.def("ToTable",static_cast<std::vector<T>(*)(const std::vector<T>&)>([](const std::vector<T> &v) {
+		return v;
+	}),luabind::const_ref_policy<1>{});
+	classDefVec.def("SetValues",static_cast<void(*)(std::vector<T>&,std::vector<T>&)>([](std::vector<T> &v,std::vector<T> &newValues) {
+		v = std::move(newValues);
+	}),luabind::ref_policy<1>{});
 	auto utilMod = luabind::module(l,"util");
 	utilMod[classDefVec];
 }

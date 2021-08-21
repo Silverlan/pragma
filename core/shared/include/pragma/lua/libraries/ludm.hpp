@@ -10,12 +10,14 @@
 
 #include "pragma/networkdefinitions.h"
 
+namespace udm {struct Array;};
 namespace Lua
 {
 	class Interface;
 	namespace udm
 	{
 		DLLNETWORK void register_library(Lua::Interface &lua);
+		DLLNETWORK void set_array_values(lua_State *l,::udm::Array &a,luabind::tableT<void> t,uint32_t tIdx);
 	};
 };
 

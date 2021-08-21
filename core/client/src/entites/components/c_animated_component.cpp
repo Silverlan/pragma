@@ -271,8 +271,6 @@ void CAnimatedComponent::UpdateBoneMatricesMT()
 	}
 	for(unsigned int i=0;i<GetBoneCount();i++)
 	{
-		if(i == m_rootPoseBoneId)
-			continue;
 		auto &t = m_processedBones.at(i);
 		auto &pos = t.GetOrigin();
 		auto &orientation = t.GetRotation();

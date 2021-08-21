@@ -55,15 +55,13 @@ namespace pragma
 		static ComponentEventId EVENT_ON_BLEND_ANIMATION;
 		static ComponentEventId EVENT_PLAY_ANIMATION;
 		static ComponentEventId EVENT_ON_ANIMATION_RESET;
-		static constexpr auto *ROOT_POSE_BONE_NAME = "%rootPose%";
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
 		enum class StateFlags : uint8_t
 		{
 			None = 0u,
 			AbsolutePosesDirty = 1u,
-			BaseAnimationDirty = AbsolutePosesDirty<<1u,
-			RootPoseTransformEnabled = BaseAnimationDirty<<1u
+			BaseAnimationDirty = AbsolutePosesDirty<<1u
 		};
 
 		struct DLLNETWORK AnimationSlotInfo
@@ -172,13 +170,6 @@ namespace pragma
 		int SelectWeightedAnimation(Activity activity,int animAvoid=-1) const;
 		// Returns the time left until the current animation has finished playing
 		float GetAnimationDuration() const;
-
-		BoneId AddRootPoseBone();
-		void SetRootPoseBoneId(BoneId boneId);
-		BoneId GetRootPoseBoneId() const {return m_rootPoseBoneId;}
-
-		void SetAnimatedRootPoseTransformEnabled(bool enabled);
-		bool IsAnimatedRootPoseTransformEnabled() const;
 
 		void SetBlendController(unsigned int controller,float val);
 		void SetBlendController(const std::string &controller,float val);
@@ -333,7 +324,6 @@ namespace pragma
 		std::vector<TemplateAnimationEvent> m_animEventTemplates;
 		std::unordered_map<uint32_t,std::unordered_map<uint32_t,std::vector<CustomAnimationEvent>>> m_animEvents;
 		
-		BoneId m_rootPoseBoneId = std::numeric_limits<BoneId>::max();
 		StateFlags m_stateFlags = StateFlags::AbsolutePosesDirty;
 		std::shared_ptr<const Frame> m_bindPose = nullptr;
 		std::unordered_map<unsigned int,float> m_blendControllers = {};

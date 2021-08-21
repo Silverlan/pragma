@@ -249,11 +249,28 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 		hComponent.Save(prop);
 		hComponentOther.Load(prop);
 	}));
+	entityComponentDef.def("GetMemberInfos",static_cast<luabind::tableT<pragma::ComponentMemberInfo>(*)(lua_State*,pragma::BaseEntityComponent&)>([](lua_State *l,pragma::BaseEntityComponent &hComponent) -> luabind::tableT<pragma::ComponentMemberInfo> {
+		auto t = luabind::newtable(l);
+		uint32_t idx = 0;
+		auto *memberInfo = hComponent.GetMemberInfo(idx++);
+		while(memberInfo)
+		{
+			t[idx] = memberInfo;
+			memberInfo = hComponent.GetMemberInfo(idx++);
+		}
+		return t;
+	}));
 	entityComponentDef.add_static_constant("FREGISTER_NONE",umath::to_integral(pragma::ComponentFlags::None));
 	entityComponentDef.add_static_constant("FREGISTER_BIT_NETWORKED",umath::to_integral(pragma::ComponentFlags::Networked));
 
 	entityComponentDef.add_static_constant("CALLBACK_TYPE_ENTITY",umath::to_integral(pragma::BaseEntityComponent::CallbackType::Entity));
 	entityComponentDef.add_static_constant("CALLBACK_TYPE_COMPONENT",umath::to_integral(pragma::BaseEntityComponent::CallbackType::Component));
+
+	luabind::class_<pragma::ComponentMemberInfo> defMemberInfo {"ComponentMemberInfo"};
+	defMemberInfo.def_readonly("name",&pragma::ComponentMemberInfo::name);
+	defMemberInfo.def_readonly("type",&pragma::ComponentMemberInfo::type);
+	entityComponentDef.scope[defMemberInfo];
+
 	mod[entityComponentDef];
 
 	base_ai_component::register_class(mod);
@@ -935,11 +952,6 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		Lua::PushNumber(l,hEnt.GetBlendController(controller));
 	}));
 	def.def("GetBoneCount",&pragma::BaseAnimatedComponent::GetBoneCount);
-	def.def("SetRootPoseBoneId",&pragma::BaseAnimatedComponent::SetRootPoseBoneId);
-	def.def("GetRootPoseBoneId",&pragma::BaseAnimatedComponent::GetRootPoseBoneId);
-	def.def("SetAnimatedRootPoseTransformEnabled",&pragma::BaseAnimatedComponent::SetAnimatedRootPoseTransformEnabled);
-	def.def("IsAnimatedRootPoseTransformEnabled",&pragma::BaseAnimatedComponent::IsAnimatedRootPoseTransformEnabled);
-	def.def("AddRootPoseBone",&pragma::BaseAnimatedComponent::AddRootPoseBone);
 	def.def("GetBaseAnimationFlags",&pragma::BaseAnimatedComponent::GetBaseAnimationFlags);
 	def.def("SetBaseAnimationFlags",&pragma::BaseAnimatedComponent::SetBaseAnimationFlags);
 	def.def("GetLayeredAnimationFlags",static_cast<luabind::object(*)(lua_State*,pragma::BaseAnimatedComponent&,uint32_t)>([](lua_State *l,pragma::BaseAnimatedComponent &hEnt,uint32_t layerIdx) -> luabind::object {

@@ -130,7 +130,6 @@ void BaseAnimatedComponent::ResetAnimation(const std::shared_ptr<Model> &mdl)
 	m_bones.clear();
 	m_processedBones.clear();
 	m_bindPose = nullptr;
-	m_rootPoseBoneId = std::numeric_limits<decltype(m_rootPoseBoneId)>::max();
 	umath::set_flag(m_stateFlags,StateFlags::AbsolutePosesDirty);
 	ApplyAnimationEventTemplates();
 	if(mdl == nullptr || mdl->HasVertexWeights() == false)
@@ -147,9 +146,6 @@ void BaseAnimatedComponent::ResetAnimation(const std::shared_ptr<Model> &mdl)
 			val = 0;
 		m_blendControllers.insert(std::unordered_map<unsigned int,int>::value_type(i,val));
 	}
-	auto rootPoseBoneId = mdl->LookupBone(ROOT_POSE_BONE_NAME);
-	if(rootPoseBoneId != -1)
-		m_rootPoseBoneId = rootPoseBoneId;
 	Skeleton &skeleton = mdl->GetSkeleton();
 	auto numBones = skeleton.GetBoneCount();
 	m_bones.reserve(numBones);
@@ -727,34 +723,6 @@ bool BaseAnimatedComponent::MaintainAnimation(AnimationSlotInfo &animInfo,double
 void BaseAnimatedComponent::SetBindPose(const Frame &frame) {m_bindPose = frame.shared_from_this();}
 const Frame *BaseAnimatedComponent::GetBindPose() const {return m_bindPose.get();}
 
-void BaseAnimatedComponent::SetAnimatedRootPoseTransformEnabled(bool enabled) {umath::set_flag(m_stateFlags,StateFlags::RootPoseTransformEnabled,enabled);}
-bool BaseAnimatedComponent::IsAnimatedRootPoseTransformEnabled() const {return umath::is_flag_set(m_stateFlags,StateFlags::RootPoseTransformEnabled);}
-
-BoneId BaseAnimatedComponent::AddRootPoseBone()
-{
-	auto &ent = GetEntity();
-	auto &mdl = ent.GetModel();
-	if(mdl == nullptr)
-		return std::numeric_limits<BoneId>::max();
-	auto &skeleton = mdl->GetSkeleton();
-	auto boneId = skeleton.LookupBone(ROOT_POSE_BONE_NAME);
-	if(boneId == -1)
-	{
-		auto *bone = new Bone {};
-		bone->name = ROOT_POSE_BONE_NAME;
-		boneId = skeleton.AddBone(bone);
-		skeleton.GetRootBones()[boneId] = bone->shared_from_this();
-	}
-	if(boneId >= m_bones.size())
-	{
-		m_bones.resize(boneId +1,umath::ScaledTransform{});
-		m_processedBones.resize(boneId +1,umath::ScaledTransform{});
-	}
-	SetRootPoseBoneId(boneId);
-	return boneId;
-}
-void BaseAnimatedComponent::SetRootPoseBoneId(BoneId boneId) {m_rootPoseBoneId = boneId;}
-
 bool BaseAnimatedComponent::MaintainGestures(double dt)
 {
 	auto &hModel = GetEntity().GetModel();
@@ -824,14 +792,6 @@ bool BaseAnimatedComponent::MaintainAnimations(double dt)
 		SetBonePosition(boneId,orientation.GetOrigin(),orientation.GetRotation(),nullptr,false);
 		if(boneScales.empty() == false)
 			SetBoneScale(boneId,boneScales.at(i));
-	}
-
-	if(IsAnimatedRootPoseTransformEnabled() && m_rootPoseBoneId != std::numeric_limits<decltype(m_rootPoseBoneId)>::max() && m_rootPoseBoneId < m_bones.size())
-	{
-		auto &pose = m_bones[m_rootPoseBoneId];
-		auto &ent = GetEntity();
-		umath::Transform poseWithoutScale {pose};
-		ent.SetPose(poseWithoutScale);
 	}
 
 	InvokeEventCallbacks(EVENT_ON_ANIMATIONS_UPDATED);

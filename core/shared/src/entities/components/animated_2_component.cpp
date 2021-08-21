@@ -204,9 +204,9 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(animation::An
 	{
 		auto &channel = *it;
 		auto &path = channel->targetPath;
-		if(path.GetFront() != "ec") // First path component denotes the type, which always has to be 'ec' for entity component in this case
+		/*if(path.GetFront() != "ec") // First path component denotes the type, which always has to be 'ec' for entity component in this case
 			continue;
-		path.PopFront();
+		path.PopFront();*/
 		auto componentTypeName = path.GetFront();
 		// TODO: Needs to be updated whenever a new component has been added to the entity
 		auto hComponent = GetEntity().FindComponent(componentTypeName);
@@ -368,11 +368,6 @@ void Animated2Component::ClearAnimationManagers()
 }
 bool Animated2Component::MaintainAnimations(double dt)
 {
-	BaseEntityComponent::OnTick(dt);
-	
-	auto &ent = GetEntity();
-	auto pTimeScaleComponent = ent.GetTimeScaleComponent();
-	dt *= pTimeScaleComponent.valid() ? pTimeScaleComponent->GetEffectiveTimeScale() : 1.f;
 	CEAnim2MaintainAnimations evData{dt};
 	if(InvokeEventCallbacks(EVENT_MAINTAIN_ANIMATIONS,evData) == util::EventReply::Handled)
 	{
@@ -389,12 +384,13 @@ void Animated2Component::OnTick(double dt)
 {
 	BaseEntityComponent::OnTick(dt);
 
-	auto &ent = GetEntity();
-	auto pTimeScaleComponent = ent.GetTimeScaleComponent();
-	MaintainAnimations(dt *(pTimeScaleComponent.valid() ? pTimeScaleComponent->GetEffectiveTimeScale() : 1.f));
+	MaintainAnimations(dt);
 }
 void Animated2Component::AdvanceAnimations(double dt)
 {
+	auto &ent = GetEntity();
+	auto pTimeScaleComponent = ent.GetTimeScaleComponent();
+	dt *(pTimeScaleComponent.valid() ? pTimeScaleComponent->GetEffectiveTimeScale() : 1.f);
 	dt *= GetPlaybackRate();
 	for(auto &manager : m_animationManagers)
 	{

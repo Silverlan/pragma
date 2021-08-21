@@ -53,11 +53,10 @@ namespace pragma
 			util::VarType type;
 			std::any initialValue;
 			BaseLuaBaseEntityComponent::MemberFlags flags;
-			uint32_t version;
 
 			std::optional<ComponentMemberInfo> componentMemberInfo {};
 		};
-		static MemberIndex RegisterMember(const luabind::object &oClass,const std::string &memberName,util::VarType memberType,const std::any &initialValue,MemberFlags memberFlags,uint32_t version);
+		static MemberIndex RegisterMember(const luabind::object &oClass,const std::string &memberName,util::VarType memberType,const std::any &initialValue,MemberFlags memberFlags);
 		static std::vector<MemberInfo> *GetMemberInfos(const luabind::object &oClass);
 		static void ClearMembers(lua_State *l);
 

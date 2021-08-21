@@ -204,20 +204,19 @@ static std::optional<BaseLuaBaseEntityComponent::MemberIndex> find_member_info_i
 		return {};
 	return itMember -members->memberDeclarations.begin();
 }
-BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMember(const luabind::object &oClass,const std::string &memberName,util::VarType memberType,const std::any &initialValue,MemberFlags memberFlags,uint32_t version)
+BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMember(const luabind::object &oClass,const std::string &memberName,util::VarType memberType,const std::any &initialValue,MemberFlags memberFlags)
 {
 	if(memberName.empty())
 		return INVALID_MEMBER;
 	auto *l = oClass.interpreter();
-	if((memberFlags &MemberFlags::StoreBit) != MemberFlags::None && version == 0u)
+	/*if((memberFlags &MemberFlags::StoreBit) != MemberFlags::None)
 	{
 		std::string err = "If store flag is set, version number mustn't be 0! Please check 'lua_help ents.BaseEntityComponent.RegisterMember' for more information!";
 		lua_pushstring(l,err.c_str());
 		lua_error(l);
 		return INVALID_MEMBER;
-	}
+	}*/
 	auto lmemberName = get_member_variable_name(memberName);
-
 
 	auto &members = get_class_member_list(l);
 	auto it = std::find_if(members.begin(),members.end(),[&oClass](const ClassMembers &classMembers) {
@@ -266,7 +265,7 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 			if(udm::is_ng_type(udmType))
 				componentMemberInfo = std::move(udm::visit_ng<false>(udmType,vs));
 		}
-		it->memberDeclarations.push_back({memberName,memberType,initialValue,memberFlags,version,std::move(componentMemberInfo)});
+		it->memberDeclarations.push_back({memberName,memberType,initialValue,memberFlags,std::move(componentMemberInfo)});
 		itMember = it->memberDeclarations.end() -1;
 	}
 	auto idx = itMember -it->memberDeclarations.begin();
@@ -927,7 +926,7 @@ void BaseLuaBaseEntityComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t
 	auto &game = *GetEntity().GetNetworkState()->GetGameState();
 	for(auto &member : m_members)
 	{
-		if((member.flags &MemberFlags::StoreBit) == MemberFlags::None || version < member.version)
+		if((member.flags &MemberFlags::StoreBit) == MemberFlags::None)
 			continue;
 		std::any value;
 		auto udmMember = udm["members." +member.name];
@@ -1155,17 +1154,13 @@ void Lua::register_base_entity_component(luabind::module_ &modEnts)
 		return hNewComponent;
 	}));
 	classDef.def("OnMemberValueChanged",&pragma::BaseLuaBaseEntityComponent::OnMemberValueChanged);
-	classDef.scope[luabind::def("RegisterMember",static_cast<void(*)(lua_State*,luabind::object,const std::string&,uint32_t,luabind::object,uint32_t,uint32_t)>([](lua_State *l,luabind::object o,const std::string &memberName,uint32_t memberType,luabind::object oDefault,uint32_t memberFlags,uint32_t version) {
-		auto anyInitialValue = Lua::GetAnyValue(l,static_cast<::util::VarType>(memberType),4);
-		pragma::BaseLuaBaseEntityComponent::RegisterMember(o,memberName,static_cast<::util::VarType>(memberType),anyInitialValue,static_cast<pragma::BaseLuaBaseEntityComponent::MemberFlags>(memberFlags),version);
-	}))];
 	classDef.scope[luabind::def("RegisterMember",static_cast<void(*)(lua_State*,luabind::object,const std::string&,uint32_t,luabind::object,uint32_t)>([](lua_State *l,luabind::object o,const std::string &memberName,uint32_t memberType,luabind::object oDefault,uint32_t memberFlags) {
 		auto anyInitialValue = Lua::GetAnyValue(l,static_cast<::util::VarType>(memberType),4);
-		pragma::BaseLuaBaseEntityComponent::RegisterMember(o,memberName,static_cast<::util::VarType>(memberType),anyInitialValue,static_cast<pragma::BaseLuaBaseEntityComponent::MemberFlags>(memberFlags),0u);
+		pragma::BaseLuaBaseEntityComponent::RegisterMember(o,memberName,static_cast<::util::VarType>(memberType),anyInitialValue,static_cast<pragma::BaseLuaBaseEntityComponent::MemberFlags>(memberFlags));
 	}))];
 	classDef.scope[luabind::def("RegisterMember",static_cast<void(*)(lua_State*,luabind::object,const std::string&,uint32_t,luabind::object)>([](lua_State *l,luabind::object o,const std::string &memberName,uint32_t memberType,luabind::object oDefault) {
 		auto anyInitialValue = Lua::GetAnyValue(l,static_cast<::util::VarType>(memberType),4);
-		pragma::BaseLuaBaseEntityComponent::RegisterMember(o,memberName,static_cast<::util::VarType>(memberType),anyInitialValue,pragma::BaseLuaBaseEntityComponent::MemberFlags::Default,0u);
+		pragma::BaseLuaBaseEntityComponent::RegisterMember(o,memberName,static_cast<::util::VarType>(memberType),anyInitialValue,pragma::BaseLuaBaseEntityComponent::MemberFlags::Default);
 	}))];
 
 	classDef.add_static_constant("MEMBER_FLAG_NONE",umath::to_integral(pragma::BaseLuaBaseEntityComponent::MemberFlags::None));

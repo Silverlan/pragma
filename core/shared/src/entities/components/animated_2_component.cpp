@@ -13,11 +13,13 @@
 #include "pragma/model/model.h"
 #include "pragma/model/animation/animation_manager.hpp"
 #include "pragma/model/animation/animation.hpp"
-#include "pragma/model/animation/animation2.hpp"
-#include "pragma/model/animation/animation_channel.hpp"
 #include "pragma/lua/l_entity_handles.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/lua/lua_call.hpp"
+#include <panima/channel.hpp>
+#include <panima/animation.hpp>
+#include <panima/player.hpp>
+#include <panima/channel_t.hpp>
 
 using namespace pragma;
 #pragma optimize("",off)
@@ -56,14 +58,14 @@ animation::PAnimationManager Animated2Component::AddAnimationManager()
 	auto player = animation::AnimationManager::Create(*mdl);
 
 	animation::AnimationPlayerCallbackInterface callbackInteface {};
-	callbackInteface.onPlayAnimation = [this](animation::AnimationId animId,FPlayAnim flags) -> bool {
+	callbackInteface.onPlayAnimation = [this](panima::AnimationId animId,FPlayAnim flags) -> bool {
 		CEAnim2OnPlayAnimation evData{animId,flags};
 		return InvokeEventCallbacks(EVENT_PLAY_ANIMATION,evData) != util::EventReply::Handled;
 	};
 	callbackInteface.onStopAnimation = []() {
 	
 	};
-	callbackInteface.translateAnimation = [this](animation::AnimationId &animId,FPlayAnim &flags) {
+	callbackInteface.translateAnimation = [this](panima::AnimationId &animId,FPlayAnim &flags) {
 		CEAnim2TranslateAnimation evTranslateAnimData {animId,flags};
 		InvokeEventCallbacks(EVENT_TRANSLATE_ANIMATION,evTranslateAnimData);
 	};
@@ -107,7 +109,7 @@ static constexpr bool is_type_compatible(udm::Type channelType,udm::Type memberT
 template<typename TChannel,typename TMember,auto TMapArray> requires(is_animatable_type_v<TChannel> && is_animatable_type_v<TMember> && is_type_compatible(udm::type_to_enum<TChannel>(),udm::type_to_enum<TMember>()))
 static pragma::animation::ChannelValueSubmitter get_member_channel_submitter(pragma::BaseEntityComponent &component,uint32_t memberIdx)
 {
-	return [&component,memberIdx](pragma::animation::AnimationChannel &channel,uint32_t &inOutPivotTimeIndex,double t) mutable {
+	return [&component,memberIdx](panima::Channel &channel,uint32_t &inOutPivotTimeIndex,double t) mutable {
 		auto *memberInfo = component.GetMemberInfo(memberIdx);
 		assert(memberInfo);
 		if constexpr(std::is_same_v<TChannel,TMember>)
@@ -357,7 +359,7 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(animation::An
 	}
 }
 
-void Animated2Component::PlayAnimation(animation::AnimationManager &manager,pragma::animation::Animation2 &anim)
+void Animated2Component::PlayAnimation(animation::AnimationManager &manager,panima::Animation &anim)
 {
 	manager->SetAnimation(anim);
 	InitializeAnimationChannelValueSubmitters(manager);
@@ -390,7 +392,7 @@ void Animated2Component::AdvanceAnimations(double dt)
 {
 	auto &ent = GetEntity();
 	auto pTimeScaleComponent = ent.GetTimeScaleComponent();
-	dt *(pTimeScaleComponent.valid() ? pTimeScaleComponent->GetEffectiveTimeScale() : 1.f);
+	dt *= (pTimeScaleComponent.valid() ? pTimeScaleComponent->GetEffectiveTimeScale() : 1.f);
 	dt *= GetPlaybackRate();
 	for(auto &manager : m_animationManagers)
 	{
@@ -442,7 +444,7 @@ void CEAnim2MaintainAnimations::PushArguments(lua_State *l)
 
 /////////////////
 
-CEAnim2TranslateAnimation::CEAnim2TranslateAnimation(animation::AnimationId &animation,pragma::FPlayAnim &flags)
+CEAnim2TranslateAnimation::CEAnim2TranslateAnimation(panima::AnimationId &animation,pragma::FPlayAnim &flags)
 	: animation(animation),flags(flags)
 {}
 void CEAnim2TranslateAnimation::PushArguments(lua_State *l)
@@ -509,7 +511,7 @@ void CEAnim2HandleAnimationEvent::PushArgumentVariadic(lua_State *l)
 
 /////////////////
 
-CEAnim2OnPlayAnimation::CEAnim2OnPlayAnimation(animation::AnimationId animation,pragma::FPlayAnim flags)
+CEAnim2OnPlayAnimation::CEAnim2OnPlayAnimation(panima::AnimationId animation,pragma::FPlayAnim flags)
 	: animation(animation),flags(flags)
 {}
 void CEAnim2OnPlayAnimation::PushArguments(lua_State *l)

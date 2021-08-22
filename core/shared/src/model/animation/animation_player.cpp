@@ -4,43 +4,44 @@
  *
  * Copyright (c) 2021 Silverlan
  */
-
+#if 0
 #include "stdafx_shared.h"
 #include "pragma/model/model.h"
 #include "pragma/model/animation/animation.hpp"
 #include "pragma/model/animation/animation_channel.hpp"
 #include "pragma/model/animation/animation_player.hpp"
 #include "pragma/model/animation/animation2.hpp"
+#include <panima/player.hpp>
 
-std::shared_ptr<pragma::animation::AnimationPlayer> pragma::animation::AnimationPlayer::Create()
+std::shared_ptr<panima::Player> panima::Player::Create()
 {
-	return std::shared_ptr<AnimationPlayer>{new AnimationPlayer{}};
+	return std::shared_ptr<panima::Player>{new panima::Player{}};
 }
-std::shared_ptr<pragma::animation::AnimationPlayer> pragma::animation::AnimationPlayer::Create(const AnimationPlayer &other)
+std::shared_ptr<panima::Player> panima::Player::Create(const panima::Player &other)
 {
-	return std::shared_ptr<AnimationPlayer>{new AnimationPlayer{other}};
+	return std::shared_ptr<panima::Player>{new panima::Player{other}};
 }
-std::shared_ptr<pragma::animation::AnimationPlayer> pragma::animation::AnimationPlayer::Create(AnimationPlayer &&other)
+std::shared_ptr<panima::Player> panima::Player::Create(panima::Player &&other)
 {
-	return std::shared_ptr<AnimationPlayer>{new AnimationPlayer{std::move(other)}};
+	return std::shared_ptr<panima::Player>{new panima::Player{std::move(other)}};
 }
-pragma::animation::AnimationPlayer::AnimationPlayer()
+panima::Player::Player()
 {}
-pragma::animation::AnimationPlayer::AnimationPlayer(const AnimationPlayer &other)
+panima::Player::Player(const AnimationPlayer &other)
 	: m_playbackRate{other.m_playbackRate},
 	m_currentTime{other.m_currentTime},m_looping{other.m_looping},m_lastChannelTimestampIndices{other.m_lastChannelTimestampIndices},
 	m_animation{other.m_animation},m_currentSlice{other.m_currentSlice}
 {
 	static_assert(sizeof(*this) == 96,"Update this implementation when class has changed!");
 }
-pragma::animation::AnimationPlayer::AnimationPlayer(AnimationPlayer &&other)
+panima::Player::AnimationPlayer(AnimationPlayer &&other)
 	: m_playbackRate{other.m_playbackRate},
 	m_currentTime{other.m_currentTime},m_looping{other.m_looping},m_lastChannelTimestampIndices{std::move(other.m_lastChannelTimestampIndices)},
 	m_animation{other.m_animation},m_currentSlice{std::move(other.m_currentSlice)}
 {
 	static_assert(sizeof(*this) == 96,"Update this implementation when class has changed!");
 }
-pragma::animation::AnimationPlayer &pragma::animation::AnimationPlayer::operator=(const AnimationPlayer &other)
+panima::Player &panima::Player::operator=(const AnimationPlayer &other)
 {
 	m_playbackRate = other.m_playbackRate;
 	m_currentTime = other.m_currentTime;
@@ -52,7 +53,7 @@ pragma::animation::AnimationPlayer &pragma::animation::AnimationPlayer::operator
 	static_assert(sizeof(*this) == 96,"Update this implementation when class has changed!");
 	return *this;
 }
-pragma::animation::AnimationPlayer &pragma::animation::AnimationPlayer::operator=(AnimationPlayer &&other)
+panima::Player &panima::Player::operator=(AnimationPlayer &&other)
 {
 	m_playbackRate = other.m_playbackRate;
 	m_currentTime = other.m_currentTime;
@@ -64,28 +65,28 @@ pragma::animation::AnimationPlayer &pragma::animation::AnimationPlayer::operator
 	static_assert(sizeof(*this) == 96,"Update this implementation when class has changed!");
 	return *this;
 }
-float pragma::animation::AnimationPlayer::GetDuration() const
+float panima::Player::GetDuration() const
 {
 	if(!m_animation)
 		return 0.f;
 	return m_animation->GetDuration();
 }
-float pragma::animation::AnimationPlayer::GetRemainingAnimationDuration() const {return GetDuration() -GetCurrentTime();}
-float pragma::animation::AnimationPlayer::GetCurrentTimeFraction() const
+float panima::Player::GetRemainingAnimationDuration() const {return GetDuration() -GetCurrentTime();}
+float panima::Player::GetCurrentTimeFraction() const
 {
 	auto t = GetCurrentTime();
 	auto dur = GetDuration();
 	return (dur > 0.f) ? (t /dur) : 0.f;
 }
-void pragma::animation::AnimationPlayer::SetCurrentTimeFraction(float t,bool forceUpdate) {SetCurrentTime(t *GetDuration(),forceUpdate);}
-void pragma::animation::AnimationPlayer::SetCurrentTime(float t,bool forceUpdate)
+void panima::Player::SetCurrentTimeFraction(float t,bool forceUpdate) {SetCurrentTime(t *GetDuration(),forceUpdate);}
+void panima::Player::SetCurrentTime(float t,bool forceUpdate)
 {
 	if(t == m_currentTime && !forceUpdate)
 		return;
 	m_currentTime = t;
 	Advance(0.f,true);
 }
-bool pragma::animation::AnimationPlayer::Advance(float dt,bool forceUpdate)
+bool panima::Player::Advance(float dt,bool forceUpdate)
 {
 	if(!m_animation)
 		return false;
@@ -133,7 +134,7 @@ bool pragma::animation::AnimationPlayer::Advance(float dt,bool forceUpdate)
 	// ApplySliceInterpolation(m_prevAnimSlice,m_currentSlice,fadeFactor);
 }
 
-void pragma::animation::AnimationPlayer::SetAnimation(const Animation2 &animation)
+void panima::Player::SetAnimation(const Animation2 &animation)
 {
 	m_animation = animation.shared_from_this();
 	auto &channels = animation.GetChannels();
@@ -145,12 +146,12 @@ void pragma::animation::AnimationPlayer::SetAnimation(const Animation2 &animatio
 	Reset();
 }
 
-void pragma::animation::AnimationPlayer::Reset()
+void panima::Player::Reset()
 {
 	m_currentTime = 0.f;
 	m_lastChannelTimestampIndices.clear();
 }
-void pragma::animation::AnimationPlayer::ApplySliceInterpolation(const AnimationSlice &src,AnimationSlice &dst,float f)
+void panima::Player::ApplySliceInterpolation(const AnimationSlice &src,AnimationSlice &dst,float f)
 {
 	// TODO
 	/*if(f == 1.f)
@@ -169,7 +170,7 @@ void pragma::animation::AnimationPlayer::ApplySliceInterpolation(const Animation
 	}*/
 }
 
-std::ostream &operator<<(std::ostream &out,const pragma::animation::AnimationPlayer &o)
+std::ostream &operator<<(std::ostream &out,const panima::Player &o)
 {
 	out<<"AnimationPlayer";
 	out<<"[Time:"<<o.GetCurrentTime()<<"/"<<o.GetDuration()<<"]";
@@ -191,3 +192,4 @@ std::ostream &operator<<(std::ostream &out,const pragma::animation::AnimationSli
 	out<<"[Values:"<<o.channelValues.size()<<"]";
 	return out;
 }
+#endif

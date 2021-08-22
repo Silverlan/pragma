@@ -24,6 +24,8 @@
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_library.hpp>
 #include <stack>
+#include <panima/skeleton.hpp>
+#include <panima/bone.hpp>
 
 extern DLLNETWORK Engine *engine;
 
@@ -118,7 +120,7 @@ Model::Model(const Model &other)
 	m_name(other.m_name),m_animationIDs(other.m_animationIDs),m_bindPose(other.m_bindPose),m_collisionMin(other.m_collisionMin),
 	m_collisionMax(other.m_collisionMax),m_renderMin(other.m_renderMin),m_renderMax(other.m_renderMax),m_joints(other.m_joints),
 	m_baseMeshes(other.m_baseMeshes),m_lods(other.m_lods),m_attachments(other.m_attachments),
-	m_materials(other.m_materials),m_textureGroups(other.m_textureGroups),m_skeleton(std::make_unique<Skeleton>(*other.m_skeleton)),
+	m_materials(other.m_materials),m_textureGroups(other.m_textureGroups),m_skeleton(std::make_unique<panima::Skeleton>(*other.m_skeleton)),
 	m_reference(Frame::Create(*other.m_reference)),m_vertexCount(other.m_vertexCount),m_triangleCount(other.m_triangleCount),
 	m_bAllMaterialsLoaded(true),m_flexControllers(other.m_flexControllers),m_flexes(other.m_flexes),m_phonemeMap(other.m_phonemeMap)
 {
@@ -500,7 +502,7 @@ void Model::Construct()
 {
 	m_bValid = true;
 	m_name = "";
-	m_skeleton = std::make_unique<Skeleton>();
+	m_skeleton = std::make_unique<panima::Skeleton>();
 	m_mass = 0.f;
 	uvec::zero(&m_collisionMin);
 	uvec::zero(&m_collisionMax);
@@ -1674,8 +1676,8 @@ int32_t Model::LookupAnimation(const std::string &name) const
 
 void Model::GetAnimations(std::unordered_map<std::string,uint32_t> **anims) {*anims = &m_animationIDs;}
 
-const Skeleton &Model::GetSkeleton() const {return *m_skeleton;}
-Skeleton &Model::GetSkeleton() {return *m_skeleton;}
+const panima::Skeleton &Model::GetSkeleton() const {return *m_skeleton;}
+panima::Skeleton &Model::GetSkeleton() {return *m_skeleton;}
 
 std::shared_ptr<pragma::animation::Animation> Model::GetAnimation(uint32_t ID) const
 {

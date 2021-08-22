@@ -11,7 +11,6 @@
 #include "pragma/entities/components/animated_2_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/model/animation/animation_channel.hpp"
 #include <udm.hpp>
 
 using namespace pragma;

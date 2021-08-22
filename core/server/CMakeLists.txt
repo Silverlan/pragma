@@ -21,6 +21,7 @@ add_external_library(clientmanager)
 add_external_library(libvorbisfile)
 add_external_library(lz4)
 link_external_library(util_udm)
+link_external_library(panima)
 
 add_def(DLLSERVER_EX)
 add_def(WMS_STATIC)

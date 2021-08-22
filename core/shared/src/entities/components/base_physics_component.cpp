@@ -24,6 +24,8 @@
 #include <pragma/physics/movetypes.h>
 #include <pragma/physics/collisiontypes.h>
 #include <udm.hpp>
+#include <panima/bone.hpp>
+#include <panima/skeleton.hpp>
 
 using namespace pragma;
 
@@ -547,7 +549,7 @@ void BasePhysicsComponent::PrePhysicsSimulate()
 	dynamic_cast<PhysObjDynamic*>(phys)->PreSimulate();
 }
 
-static void entity_space_to_bone_space(std::vector<umath::ScaledTransform> &transforms,Bone &bone,Vector3 &pos,Quat &rot,Bool bSkip=true)
+static void entity_space_to_bone_space(std::vector<umath::ScaledTransform> &transforms,panima::Bone &bone,Vector3 &pos,Quat &rot,Bool bSkip=true)
 {
 	auto parent = bone.parent.lock();
 	if(parent != nullptr)
@@ -582,7 +584,7 @@ pragma::physics::ICollisionObject *BasePhysicsComponent::GetCollisionObject(UInt
 
 std::vector<BasePhysicsComponent::PhysJoint> &BasePhysicsComponent::GetPhysConstraints() {return m_joints;}
 
-void BasePhysicsComponent::UpdatePhysicsBone(Frame &reference,const std::shared_ptr<Bone> &bone,Quat &invRot,const Vector3*)
+void BasePhysicsComponent::UpdatePhysicsBone(Frame &reference,const std::shared_ptr<panima::Bone> &bone,Quat &invRot,const Vector3*)
 {
 	auto &ent = GetEntity();
 	auto animComponent = ent.GetAnimatedComponent();
@@ -623,7 +625,7 @@ void BasePhysicsComponent::UpdatePhysicsBone(Frame &reference,const std::shared_
 	animComponent->SetBonePosition(boneId,localOffset,localRot,nullptr,false);
 }
 
-void BasePhysicsComponent::PostPhysicsSimulate(Frame &reference,std::unordered_map<uint32_t,std::shared_ptr<Bone>> &bones,Vector3 &moveOffset,Quat &invRot,UInt32 physRootBoneId)
+void BasePhysicsComponent::PostPhysicsSimulate(Frame &reference,std::unordered_map<uint32_t,std::shared_ptr<panima::Bone>> &bones,Vector3 &moveOffset,Quat &invRot,UInt32 physRootBoneId)
 {
 	// Linear iteration; Causes jittering, depending on how far the physics object's bone is down the skeleton hierarchy
 	/*auto *phys = GetPhysicsObject();

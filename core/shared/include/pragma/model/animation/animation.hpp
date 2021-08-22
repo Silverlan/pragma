@@ -13,6 +13,7 @@
 #include "pragma/model/animation/fanim.h"
 #include "pragma/model/animation/activities.h"
 #include "pragma/model/animation/animation_event.h"
+#include "pragma/types.hpp"
 #include <sharedutils/util_enum_register.hpp>
 #include <optional>
 #include <vector>
@@ -69,7 +70,7 @@ namespace pragma::animation
 		};
 		static std::shared_ptr<Animation> Create();
 		static std::shared_ptr<Animation> Create(const Animation &other,ShareMode share=ShareMode::None);
-		static std::shared_ptr<Animation> Load(const udm::AssetData &data,std::string &outErr,const Skeleton *optSkeleton=nullptr,const Frame *optReference=nullptr);
+		static std::shared_ptr<Animation> Load(const udm::AssetData &data,std::string &outErr,const panima::Skeleton *optSkeleton=nullptr,const Frame *optReference=nullptr);
 		const std::pair<Vector3,Vector3> &GetRenderBounds() const;
 		void SetRenderBounds(const Vector3 &min,const Vector3 &max);
 		void CalcRenderBounds(Model &mdl);
@@ -108,9 +109,9 @@ namespace pragma::animation
 		AnimationBlendController *GetBlendController();
 		const AnimationBlendController *GetBlendController() const;
 		void ClearBlendController();
-		void Localize(const Skeleton &skeleton);
-		void Rotate(const Skeleton &skeleton,const Quat &rot);
-		void Translate(const Skeleton &skeleton,const Vector3 &t);
+		void Localize(const panima::Skeleton &skeleton);
+		void Rotate(const panima::Skeleton &skeleton,const Quat &rot);
+		void Translate(const panima::Skeleton &skeleton,const Vector3 &t);
 		void Scale(const Vector3 &scale);
 		// Reverses all frames in the animation
 		void Reverse();
@@ -132,7 +133,7 @@ namespace pragma::animation
 	private:
 		static util::EnumRegister s_activityEnumRegister;
 		static util::EnumRegister s_eventEnumRegister;
-		bool LoadFromAssetData(const udm::AssetData &data,std::string &outErr,const Skeleton *optSkeleton=nullptr,const Frame *optReference=nullptr);
+		bool LoadFromAssetData(const udm::AssetData &data,std::string &outErr,const panima::Skeleton *optSkeleton=nullptr,const Frame *optReference=nullptr);
 		Animation();
 		Animation(const Animation &other,ShareMode share=ShareMode::None);
 

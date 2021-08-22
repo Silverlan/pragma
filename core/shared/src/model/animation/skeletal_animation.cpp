@@ -8,12 +8,12 @@
 #include "stdafx_shared.h"
 #include "pragma/model/animation/skeletal_animation.hpp"
 #include "pragma/model/animation/animation.hpp"
-#include "pragma/model/animation/animation_channel.hpp"
-#include "pragma/model/animation/animation_player.hpp"
-#include "pragma/model/animation/animated_pose.hpp"
 #include <udm.hpp>
+#include <panima/channel.hpp>
+#include <panima/pose.hpp>
+#include <panima/slice.hpp>
 
-Activity pragma::animation::skeletal::get_activity(const Animation &anim)
+Activity pragma::animation::skeletal::get_activity(const panima::Animation &anim)
 {
 #ifdef PRAGMA_ENABLE_ANIMATION_SYSTEM_2
 	auto act = Activity::Invalid;
@@ -23,13 +23,13 @@ Activity pragma::animation::skeletal::get_activity(const Animation &anim)
 	return Activity::Invalid;
 #endif
 }
-void pragma::animation::skeletal::set_activity(Animation &anim,Activity act)
+void pragma::animation::skeletal::set_activity(panima::Animation &anim,Activity act)
 {
 #ifdef PRAGMA_ENABLE_ANIMATION_SYSTEM_2
 	anim.GetProperties()["activity"] = act;
 #endif
 }
-uint8_t pragma::animation::skeletal::get_activity_weight(const Animation &anim)
+uint8_t pragma::animation::skeletal::get_activity_weight(const panima::Animation &anim)
 {
 #ifdef PRAGMA_ENABLE_ANIMATION_SYSTEM_2
 	uint8_t weight = 1;
@@ -39,13 +39,13 @@ uint8_t pragma::animation::skeletal::get_activity_weight(const Animation &anim)
 	return 0;
 #endif
 }
-void pragma::animation::skeletal::set_activity_weight(Animation &anim,uint8_t weight)
+void pragma::animation::skeletal::set_activity_weight(panima::Animation &anim,uint8_t weight)
 {
 #ifdef PRAGMA_ENABLE_ANIMATION_SYSTEM_2
 	anim.GetProperties()["activityWeight"] = weight;
 #endif
 }
-std::pair<Vector3,Vector3> pragma::animation::skeletal::get_render_bounds(const Animation &anim)
+std::pair<Vector3,Vector3> pragma::animation::skeletal::get_render_bounds(const panima::Animation &anim)
 {
 #ifdef PRAGMA_ENABLE_ANIMATION_SYSTEM_2
 	auto udmRenderBounds = const_cast<Animation&>(anim).GetProperties()["renderBounds"];
@@ -57,7 +57,7 @@ std::pair<Vector3,Vector3> pragma::animation::skeletal::get_render_bounds(const 
 	return {};
 #endif
 }
-void pragma::animation::skeletal::set_render_bounds(Animation &anim,const Vector3 &min,const Vector3 &max)
+void pragma::animation::skeletal::set_render_bounds(panima::Animation &anim,const Vector3 &min,const Vector3 &max)
 {
 #ifdef PRAGMA_ENABLE_ANIMATION_SYSTEM_2
 	auto udmRenderBounds = anim.GetProperties()["renderBounds"];
@@ -65,7 +65,7 @@ void pragma::animation::skeletal::set_render_bounds(Animation &anim,const Vector
 	udmRenderBounds["max"] = max;
 #endif
 }
-pragma::animation::skeletal::BoneChannelMap pragma::animation::skeletal::get_bone_channel_map(const Animation &animation,const Skeleton &skeleton)
+pragma::animation::skeletal::BoneChannelMap pragma::animation::skeletal::get_bone_channel_map(const panima::Animation &animation,const panima::Skeleton &skeleton)
 {
 #ifdef PRAGMA_ENABLE_ANIMATION_SYSTEM_2
 	BoneChannelMap boneChannelMap;
@@ -107,7 +107,7 @@ pragma::animation::skeletal::BoneChannelMap pragma::animation::skeletal::get_bon
 	return {};
 #endif
 }
-void pragma::animation::skeletal::animation_slice_to_animated_pose(const BoneChannelMap &boneChannelMap,const AnimationSlice &slice,AnimatedPose &pose)
+void pragma::animation::skeletal::animation_slice_to_animated_pose(const BoneChannelMap &boneChannelMap,const panima::Slice &slice,panima::Pose &pose)
 {
 	auto &transforms = pose.GetTransforms();
 	pose.SetTransformCount(boneChannelMap.size());
@@ -133,7 +133,7 @@ util::EnumRegister &pragma::animation::skeletal::get_activity_enum_register()
 	static util::EnumRegister g_reg {};
 	return g_reg;
 }
-bool pragma::animation::skeletal::is_bone_position_channel(const AnimationChannel &channel)
+bool pragma::animation::skeletal::is_bone_position_channel(const panima::Channel &channel)
 {
 	auto it = channel.targetPath.begin();
 	auto end = channel.targetPath.end();
@@ -142,9 +142,9 @@ bool pragma::animation::skeletal::is_bone_position_channel(const AnimationChanne
 #ifdef PRAGMA_ENABLE_ANIMATION_SYSTEM_2
 	--end;
 #endif
-	return *it == SK_ANIMATED_COMPONENT_NAME && *end == ANIMATION_CHANNEL_PATH_POSITION;
+	return *it == SK_ANIMATED_COMPONENT_NAME && *end == panima::ANIMATION_CHANNEL_PATH_POSITION;
 }
-bool pragma::animation::skeletal::is_bone_rotation_channel(const AnimationChannel &channel)
+bool pragma::animation::skeletal::is_bone_rotation_channel(const panima::Channel &channel)
 {
 	auto it = channel.targetPath.begin();
 	auto end = channel.targetPath.end();
@@ -153,9 +153,9 @@ bool pragma::animation::skeletal::is_bone_rotation_channel(const AnimationChanne
 #ifdef PRAGMA_ENABLE_ANIMATION_SYSTEM_2
 	--end;
 #endif
-	return *it == SK_ANIMATED_COMPONENT_NAME && *end == ANIMATION_CHANNEL_PATH_ROTATION;
+	return *it == SK_ANIMATED_COMPONENT_NAME && *end == panima::ANIMATION_CHANNEL_PATH_ROTATION;
 }
-bool pragma::animation::skeletal::is_bone_scale_channel(const AnimationChannel &channel)
+bool pragma::animation::skeletal::is_bone_scale_channel(const panima::Channel &channel)
 {
 	auto it = channel.targetPath.begin();
 	auto end = channel.targetPath.end();
@@ -164,9 +164,9 @@ bool pragma::animation::skeletal::is_bone_scale_channel(const AnimationChannel &
 #ifdef PRAGMA_ENABLE_ANIMATION_SYSTEM_2
 	--end;
 #endif
-	return *it == SK_ANIMATED_COMPONENT_NAME && *end == ANIMATION_CHANNEL_PATH_SCALE;
+	return *it == SK_ANIMATED_COMPONENT_NAME && *end == panima::ANIMATION_CHANNEL_PATH_SCALE;
 }
-void pragma::animation::skeletal::translate(Animation &anim,const Vector3 &translation)
+void pragma::animation::skeletal::translate(panima::Animation &anim,const Vector3 &translation)
 {
 #ifdef PRAGMA_ENABLE_ANIMATION_SYSTEM_2
 	auto renderBounds = get_render_bounds(anim);
@@ -182,7 +182,7 @@ void pragma::animation::skeletal::translate(Animation &anim,const Vector3 &trans
 	}
 #endif
 }
-void pragma::animation::skeletal::rotate(Animation &anim,const Quat &rotation)
+void pragma::animation::skeletal::rotate(panima::Animation &anim,const Quat &rotation)
 {
 #ifdef PRAGMA_ENABLE_ANIMATION_SYSTEM_2
 	auto renderBounds = get_render_bounds(anim);
@@ -205,7 +205,7 @@ void pragma::animation::skeletal::rotate(Animation &anim,const Quat &rotation)
 	}
 #endif
 }
-void pragma::animation::skeletal::scale(Animation &anim,const Vector3 &scale)
+void pragma::animation::skeletal::scale(panima::Animation &anim,const Vector3 &scale)
 {
 #ifdef PRAGMA_ENABLE_ANIMATION_SYSTEM_2
 	auto renderBounds = get_render_bounds(anim);

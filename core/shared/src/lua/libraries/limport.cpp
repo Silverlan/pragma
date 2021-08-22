@@ -24,6 +24,8 @@
 #include <assimp/postprocess.h>
 #include <assimp/IOSystem.hpp>
 #include <assimp/IOStream.hpp>
+#include <panima/skeleton.hpp>
+#include <panima/bone.hpp>
 
 extern DLLNETWORK Engine *engine;
 
@@ -169,7 +171,7 @@ int Lua::import::import_wrmi(lua_State *l)
 	for(auto i=decltype(numBones){0};i<numBones;++i)
 	{
 		auto name = f.ReadString();
-		auto *bone = new Bone();
+		auto *bone = new panima::Bone();
 		bone->name = name;
 		skeleton.AddBone(bone);
 	}
@@ -183,8 +185,8 @@ int Lua::import::import_wrmi(lua_State *l)
 		reference.SetBoneOrientation(i,rot);
 	}
 
-	std::function<void(std::shared_ptr<Bone>&)> fReadChildBones = nullptr;
-	fReadChildBones = [&f,&fReadChildBones,&skeleton](std::shared_ptr<Bone> &parent) {
+	std::function<void(std::shared_ptr<panima::Bone>&)> fReadChildBones = nullptr;
+	fReadChildBones = [&f,&fReadChildBones,&skeleton](std::shared_ptr<panima::Bone> &parent) {
 		auto numChildren = f.Read<uint32_t>();
 		for(auto i=decltype(numChildren){0};i<numChildren;++i)
 		{
@@ -681,11 +683,11 @@ int Lua::import::import_model_asset(lua_State *l)
 	}
 
 	// Build skeleton
-	auto skeleton = std::make_shared<Skeleton>();
+	auto skeleton = std::make_shared<panima::Skeleton>();
 	auto referencePose = Frame::Create(1);
-	std::function<std::shared_ptr<Bone>(aiNode&,Bone*)> fIterateBones = nullptr;
-	fIterateBones = [&fIterateBones,&skeleton,&referencePose](aiNode &node,Bone *parent) -> std::shared_ptr<Bone> {
-		auto *bone = new Bone{};
+	std::function<std::shared_ptr<panima::Bone>(aiNode&,panima::Bone*)> fIterateBones = nullptr;
+	fIterateBones = [&fIterateBones,&skeleton,&referencePose](aiNode &node,panima::Bone *parent) -> std::shared_ptr<panima::Bone> {
+		auto *bone = new panima::Bone{};
 		bone->name = node.mName.C_Str();
 		auto boneIdx = skeleton->AddBone(bone);
 		if(parent)
@@ -729,7 +731,7 @@ int Lua::import::import_model_asset(lua_State *l)
 		anim->
 	}*/
 
-	Lua::Push<std::shared_ptr<Skeleton>>(l,skeleton);
+	Lua::Push<std::shared_ptr<panima::Skeleton>>(l,skeleton);
 	Lua::Push<std::shared_ptr<Frame>>(l,referencePose);
 
 	return 4;

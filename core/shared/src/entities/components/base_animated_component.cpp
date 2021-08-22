@@ -13,10 +13,11 @@
 #include "pragma/entities/components/base_sound_emitter_component.hpp"
 #include "pragma/entities/components/animated_2_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
-#include "pragma/model/animation/animation_channel.hpp"
 #include "pragma/model/model.h"
 #include "pragma/audio/alsound_type.h"
 #include "pragma/lua/luafunction_call.h"
+#include <panima/skeleton.hpp>
+#include <panima/bone.hpp>
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 
@@ -146,7 +147,7 @@ void BaseAnimatedComponent::ResetAnimation(const std::shared_ptr<Model> &mdl)
 			val = 0;
 		m_blendControllers.insert(std::unordered_map<unsigned int,int>::value_type(i,val));
 	}
-	Skeleton &skeleton = mdl->GetSkeleton();
+	auto &skeleton = mdl->GetSkeleton();
 	auto numBones = skeleton.GetBoneCount();
 	m_bones.reserve(numBones);
 	for(unsigned int i=0;i<numBones;i++)

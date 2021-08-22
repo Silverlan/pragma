@@ -16,7 +16,6 @@
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/components/animated_2_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
-#include "pragma/model/animation/animation_channel.hpp"
 #include "pragma/lua/base_lua_handle_method.hpp"
 #include "pragma/lua/sh_lua_component_t.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"

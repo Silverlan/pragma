@@ -14,6 +14,8 @@
 #include "pragma/model/modelmesh.h"
 #include "pragma/file_formats/wad.h"
 #include "pragma/util/util_game.hpp"
+#include <panima/skeleton.hpp>
+#include <panima/bone.hpp>
 #include <udm.hpp>
 
 std::shared_ptr<pragma::animation::Animation> Lua::Animation::Create(lua_State *l)
@@ -425,19 +427,19 @@ void Lua::Frame::SetBoneTransform(lua_State *l,::Frame &frame,unsigned int boneI
 	SetBoneTransform(l,frame,boneID,pos,rot);
 	frame.SetBoneScale(boneID,scale);
 }
-void Lua::Frame::Localize(lua_State*,::Frame &frame,pragma::animation::Animation &anim,::Skeleton *skeleton)
+void Lua::Frame::Localize(lua_State*,::Frame &frame,pragma::animation::Animation &anim,panima::Skeleton *skeleton)
 {
 	frame.Localize(anim,*skeleton);
 }
-void Lua::Frame::Globalize(lua_State*,::Frame &frame,pragma::animation::Animation &anim,::Skeleton *skeleton)
+void Lua::Frame::Globalize(lua_State*,::Frame &frame,pragma::animation::Animation &anim,panima::Skeleton *skeleton)
 {
 	frame.Globalize(anim,*skeleton);
 }
-void Lua::Frame::Localize(lua_State*,::Frame &frame,::Skeleton *skeleton)
+void Lua::Frame::Localize(lua_State*,::Frame &frame,panima::Skeleton *skeleton)
 {
 	frame.Localize(*skeleton);
 }
-void Lua::Frame::Globalize(lua_State*,::Frame &frame,::Skeleton *skeleton)
+void Lua::Frame::Globalize(lua_State*,::Frame &frame,panima::Skeleton *skeleton)
 {
 	frame.Globalize(*skeleton);
 }
@@ -447,11 +449,11 @@ void Lua::Frame::CalcRenderBounds(lua_State *l,::Frame &frame,pragma::animation:
 	Lua::Push<Vector3>(l,renderBounds.first);
 	Lua::Push<Vector3>(l,renderBounds.second);
 }
-void Lua::Frame::Rotate(lua_State*,::Frame &frame,pragma::animation::Animation &anim,::Skeleton *skeleton,const Quat &rot)
+void Lua::Frame::Rotate(lua_State*,::Frame &frame,pragma::animation::Animation &anim,panima::Skeleton *skeleton,const Quat &rot)
 {
 	frame.Rotate(anim,*skeleton,rot);
 }
-void Lua::Frame::Translate(lua_State*,::Frame &frame,pragma::animation::Animation &anim,::Skeleton *skeleton,const Vector3 &t)
+void Lua::Frame::Translate(lua_State*,::Frame &frame,pragma::animation::Animation &anim,panima::Skeleton *skeleton,const Vector3 &t)
 {
 	frame.Translate(anim,*skeleton,t);
 }
@@ -505,7 +507,7 @@ void Lua::Frame::GetBoneScale(lua_State *l,::Frame &frame,uint32_t boneId)
 		return;
 	Lua::Push<Vector3>(l,*scale);
 }
-void Lua::Frame::GetLocalBoneTransform(lua_State *l,::Frame &frame,::Skeleton &skeleton,uint32_t boneId)
+void Lua::Frame::GetLocalBoneTransform(lua_State *l,::Frame &frame,panima::Skeleton &skeleton,uint32_t boneId)
 {
 	auto wpBone = skeleton.GetBone(boneId);
 	if(wpBone.expired())
@@ -521,8 +523,8 @@ void Lua::Frame::GetLocalBoneTransform(lua_State *l,::Frame &frame,::Skeleton &s
 	};
 
 	// See also baseentity_bones.cpp
-	std::function<void(const std::shared_ptr<Bone>&,Vector3&,Quat&,Vector3*)> fIterateHierarchy = nullptr;
-	fIterateHierarchy = [fGetTransform,&fIterateHierarchy](const std::shared_ptr<Bone> &bone,Vector3 &pos,Quat &rot,Vector3 *scale) {
+	std::function<void(const std::shared_ptr<panima::Bone>&,Vector3&,Quat&,Vector3*)> fIterateHierarchy = nullptr;
+	fIterateHierarchy = [fGetTransform,&fIterateHierarchy](const std::shared_ptr<panima::Bone> &bone,Vector3 &pos,Quat &rot,Vector3 *scale) {
 		Vector3 *tpos = nullptr;
 		Quat *trot = nullptr;
 		Vector3 *tscale = nullptr;

@@ -12,6 +12,8 @@
 #include "pragma/model/animation/vertex_animation.hpp"
 #include "pragma/model/animation/flex_animation.hpp"
 #include "pragma/physics/physsoftbodyinfo.hpp"
+#include <panima/bone.hpp>
+#include <panima/skeleton.hpp>
 
 void FWMD::LoadBones(unsigned short version,unsigned int numBones,Model &mdl)
 {
@@ -22,7 +24,7 @@ void FWMD::LoadBones(unsigned short version,unsigned int numBones,Model &mdl)
 		reference->ReserveBoneIds(reference->GetBoneCount() +numBones);
 		for(unsigned int i=0;i<numBones;i++)
 		{
-			auto *bone = new Bone;
+			auto *bone = new panima::Bone;
 			bone->name = ReadString();
 			skeleton.AddBone(bone);
 			reference->AddBoneId(i);
@@ -31,7 +33,7 @@ void FWMD::LoadBones(unsigned short version,unsigned int numBones,Model &mdl)
 	auto frame = Frame::Create((numBones == 0) ? 1 : numBones);
 	if(numBones == 0)
 	{
-		auto *root = new Bone;
+		auto *root = new panima::Bone;
 		root->name = "root";
 		unsigned int rootID = skeleton.AddBone(root);
 		mdl.SetBindPoseBoneMatrix(0,glm::inverse(umat::identity()));

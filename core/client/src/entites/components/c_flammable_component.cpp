@@ -18,6 +18,8 @@
 #include <pragma/entities/entity_component_system_t.hpp>
 #include <pragma/audio/alsound_type.h>
 #include <pragma/model/model.h>
+#include <panima/skeleton.hpp>
+#include <panima/bone.hpp>
 
 using namespace pragma;
 

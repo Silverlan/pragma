@@ -7,6 +7,8 @@
 
 #include "stdafx_shared.h"
 #include "pragma/file_formats/wmd.h"
+#include <panima/skeleton.hpp>
+#include <panima/bone.hpp>
 
 FWMD::FWMD(Game *game)
 	: m_bStatic(false),m_gameState(game)
@@ -18,7 +20,7 @@ FWMD::~FWMD()
 		delete m_meshes[i];
 }
 
-void FWMD::ReadChildBones(const Skeleton &skeleton,std::shared_ptr<Bone> bone)
+void FWMD::ReadChildBones(const panima::Skeleton &skeleton,std::shared_ptr<panima::Bone> bone)
 {
 	unsigned int numChildren = Read<unsigned int>();
 	for(unsigned int i=0;i<numChildren;i++)

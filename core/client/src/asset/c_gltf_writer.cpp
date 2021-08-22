@@ -27,6 +27,8 @@
 #include <pragma/util/resource_watcher.h>
 #include <datasystem_color.h>
 #include <datasystem_vector.h>
+#include <panima/skeleton.hpp>
+#include <panima/bone.hpp>
 
 // #define ENABLE_GLTF_VALIDATION
 #define GLTF_ASSERT(c,msg) \
@@ -962,8 +964,8 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 		// Transform pose to relative
 		auto referenceRelative = Frame::Create(mdl.GetReference());
 		inverseBindPoseMatrices.resize(skeleton.GetBoneCount());
-		std::function<void(::Bone&,const umath::Transform&)> fToRelativeTransforms = nullptr;
-		fToRelativeTransforms = [this,&fToRelativeTransforms,&referenceRelative,&inverseBindPoseMatrices](::Bone &bone,const umath::Transform &parentPose) {
+		std::function<void(panima::Bone&,const umath::Transform&)> fToRelativeTransforms = nullptr;
+		fToRelativeTransforms = [this,&fToRelativeTransforms,&referenceRelative,&inverseBindPoseMatrices](panima::Bone &bone,const umath::Transform &parentPose) {
 			auto pose = referenceRelative->GetBoneTransform(bone.ID) ? *referenceRelative->GetBoneTransform(bone.ID) : umath::Transform{};
 
 			auto scaledPose = pose;
@@ -995,8 +997,8 @@ void pragma::asset::GLTFWriter::WriteSkeleton(ModelExportData &mdlData)
 		}
 
 		std::unordered_set<uint32_t> traversedJoints {};
-		std::function<void(::Bone&,tinygltf::Node&)> fIterateSkeleton = nullptr;
-		fIterateSkeleton = [this,&fIterateSkeleton,&referenceRelative,&traversedJoints](::Bone &bone,tinygltf::Node &parentNode) {
+		std::function<void(panima::Bone&,tinygltf::Node&)> fIterateSkeleton = nullptr;
+		fIterateSkeleton = [this,&fIterateSkeleton,&referenceRelative,&traversedJoints](panima::Bone &bone,tinygltf::Node &parentNode) {
 			auto nodeIdx = m_boneIdxToNodeIdx[bone.ID];
 			parentNode.children.push_back(nodeIdx);
 			traversedJoints.insert(nodeIdx);

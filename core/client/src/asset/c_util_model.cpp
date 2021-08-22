@@ -35,6 +35,8 @@
 #include <cmaterialmanager.h>
 #include <cmaterial.h>
 #include <udm.hpp>
+#include <panima/skeleton.hpp>
+#include <panima/bone.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -865,14 +867,14 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 		auto &skeleton = mdl->GetSkeleton();
 		auto &skin = gltfMdl.skins.front();
 		skeleton.GetBones().reserve(skin.joints.size());
-		std::unordered_map<int,Bone*> nodeIdxToBone;
+		std::unordered_map<int,panima::Bone*> nodeIdxToBone;
 		for(auto i=decltype(skin.joints.size()){0u};i<skin.joints.size();++i)
 		{
 			auto nodeIdx = skin.joints[i];
 			auto &node = gltfMdl.nodes[nodeIdx];
 			nodeToBoneIndex[&node] = i;
 
-			auto *bone = new Bone{};
+			auto *bone = new panima::Bone{};
 			bone->name = node.name;
 			skeleton.AddBone(bone);
 			nodeIdxToBone[nodeIdx] = bone;

@@ -9,6 +9,8 @@
 #include "pragma/model/modelmanager.h"
 #include "pragma/asset/util_asset.hpp"
 #include <sharedutils/util_path.hpp>
+#include <panima/skeleton.hpp>
+#include <panima/bone.hpp>
 
 extern DLLNETWORK Engine *engine;
 
@@ -134,7 +136,7 @@ std::shared_ptr<Model> pragma::asset::ModelManager::CreateModel(const std::strin
 	if(bAddReference == true)
 	{
 		auto frame = Frame::Create(1);
-		auto *root = new Bone;
+		auto *root = new panima::Bone;
 		root->name = "root";
 		auto rootID = skeleton.AddBone(root);
 		mdl->SetBindPoseBoneMatrix(0,glm::inverse(umat::identity()));

@@ -25,7 +25,6 @@ namespace umath
 
 enum class Activity : uint16_t;
 using BoneId = uint16_t;
-class Skeleton;
 namespace pragma
 {
 	using RenderBufferIndex = uint32_t;
@@ -35,17 +34,24 @@ namespace pragma
 namespace pragma::asset {enum class Type : uint8_t;};
 namespace pragma::animation
 {
-	using AnimationId = uint32_t;
-	constexpr auto INVALID_ANIMATION = std::numeric_limits<AnimationId>::max();
+	using LayeredAnimationSlot = uint32_t;
+};
 
+namespace panima
+{
+	using AnimationId = uint32_t;
 	using AnimationChannelId = uint16_t;
 	class Animation;
-	class Animation2;
-	class AnimationPlayer;
-	using PAnimationPlayer = std::shared_ptr<AnimationPlayer>;
-	class AnimatedPose;
+	class Channel;
+	class Manager;
+	class Player;
+	class Pose;
+	struct Slice;
+	using BoneId = uint16_t;
+	struct Bone;
+	class Skeleton;
 
-	using LayeredAnimationSlot = uint32_t;
+	using PPlayer = std::shared_ptr<Player>;
 };
 
 #endif

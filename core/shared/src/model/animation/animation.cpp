@@ -10,6 +10,7 @@
 #include "pragma/model/animation/activities.h"
 #include <udm.hpp>
 #include <mathutil/umath.h>
+#include <panima/skeleton.hpp>
 
 decltype(pragma::animation::Animation::s_activityEnumRegister) pragma::animation::Animation::s_activityEnumRegister;
 decltype(pragma::animation::Animation::s_eventEnumRegister) pragma::animation::Animation::s_eventEnumRegister;
@@ -17,7 +18,7 @@ decltype(pragma::animation::Animation::s_eventEnumRegister) pragma::animation::A
 util::EnumRegister &pragma::animation::Animation::GetActivityEnumRegister() {return s_activityEnumRegister;}
 util::EnumRegister &pragma::animation::Animation::GetEventEnumRegister() {return s_eventEnumRegister;}
 
-std::shared_ptr<pragma::animation::Animation> pragma::animation::Animation::Load(const udm::AssetData &data,std::string &outErr,const Skeleton *optSkeleton,const Frame *optReference)
+std::shared_ptr<pragma::animation::Animation> pragma::animation::Animation::Load(const udm::AssetData &data,std::string &outErr,const panima::Skeleton *optSkeleton,const Frame *optReference)
 {
 	auto anim = pragma::animation::Animation::Create();
 	if(anim->LoadFromAssetData(data,outErr,optSkeleton,optReference) == false)
@@ -89,7 +90,7 @@ template<typename T>
 	}
 }
 
-bool pragma::animation::Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr,const Skeleton *optSkeleton,const Frame *optReference)
+bool pragma::animation::Animation::LoadFromAssetData(const udm::AssetData &data,std::string &outErr,const panima::Skeleton *optSkeleton,const Frame *optReference)
 {
 	if(data.GetAssetType() != PANIM_IDENTIFIER)
 	{
@@ -993,14 +994,14 @@ void pragma::animation::Animation::Reverse()
 	std::reverse(m_frames.begin(),m_frames.end());
 }
 
-void pragma::animation::Animation::Rotate(const Skeleton &skeleton,const Quat &rot)
+void pragma::animation::Animation::Rotate(const panima::Skeleton &skeleton,const Quat &rot)
 {
 	uvec::rotate(&m_renderBounds.first,rot);
 	uvec::rotate(&m_renderBounds.second,rot);
 	for(auto &frame : m_frames)
 		frame->Rotate(*this,skeleton,rot);
 }
-void pragma::animation::Animation::Translate(const Skeleton &skeleton,const Vector3 &t)
+void pragma::animation::Animation::Translate(const panima::Skeleton &skeleton,const Vector3 &t)
 {
 	m_renderBounds.first += t;
 	m_renderBounds.second += t;
@@ -1055,7 +1056,7 @@ void pragma::animation::Animation::SetRenderBounds(const Vector3 &min,const Vect
 
 std::vector<std::shared_ptr<Frame>> &pragma::animation::Animation::GetFrames() {return m_frames;}
 
-void pragma::animation::Animation::Localize(const Skeleton &skeleton)
+void pragma::animation::Animation::Localize(const panima::Skeleton &skeleton)
 {
 	for(auto it=m_frames.begin();it!=m_frames.end();++it)
 		(*it)->Localize(*this,skeleton);

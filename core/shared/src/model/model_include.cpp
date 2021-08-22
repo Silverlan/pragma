@@ -9,6 +9,8 @@
 #include "pragma/model/model.h"
 #include "pragma/model/modelmesh.h"
 #include "pragma/physics/collisionmesh.h"
+#include <panima/skeleton.hpp>
+#include <panima/bone.hpp>
 
 static void subtract_frame(Frame &frame,const Frame &frameToSubtract)
 {
@@ -61,12 +63,12 @@ void Model::Merge(const Model &other,MergeFlags flags)
 		auto numOldBones = skeleton.GetBoneCount();
 		for(auto &boneOther : bonesOther)
 		{
-			auto it = std::find_if(bones.begin(),bones.end(),[&boneOther](const std::shared_ptr<Bone> &bone) {
+			auto it = std::find_if(bones.begin(),bones.end(),[&boneOther](const std::shared_ptr<panima::Bone> &bone) {
 				return (bone->name == boneOther->name) ? true : false;
 			});
 			if(it == bones.end())
 			{
-				auto boneId = skeleton.AddBone(new Bone());
+				auto boneId = skeleton.AddBone(new panima::Bone());
 				newBoneIndicesToOtherBoneIndices.push_back(otherBoneIndex);
 				auto bone = skeleton.GetBone(boneId).lock();
 				bone->name = boneOther->name;

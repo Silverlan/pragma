@@ -28,6 +28,8 @@
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_file.h>
 #include <mathutil/vertex.hpp>
+#include <panima/skeleton.hpp>
+#include <panima/bone.hpp>
 #include <udm.hpp>
 
 extern DLLNETWORK Engine *engine;
@@ -714,10 +716,10 @@ void Lua::Model::register_class(
 		.def("GetBoneRotation",&Lua::Frame::GetBoneOrientation)
 		.def("SetBonePosition",&Lua::Frame::SetBonePosition)
 		.def("SetBoneRotation",&Lua::Frame::SetBoneOrientation)
-		.def("Localize",static_cast<void(*)(lua_State*,::Frame&,pragma::animation::Animation&,::Skeleton*)>(&Lua::Frame::Localize))
-		.def("Localize",static_cast<void(*)(lua_State*,::Frame&,::Skeleton*)>(&Lua::Frame::Localize))
-		.def("Globalize",static_cast<void(*)(lua_State*,::Frame&,pragma::animation::Animation&,::Skeleton*)>(&Lua::Frame::Globalize))
-		.def("Globalize",static_cast<void(*)(lua_State*,::Frame&,::Skeleton*)>(&Lua::Frame::Globalize))
+		.def("Localize",static_cast<void(*)(lua_State*,::Frame&,pragma::animation::Animation&,panima::Skeleton*)>(&Lua::Frame::Localize))
+		.def("Localize",static_cast<void(*)(lua_State*,::Frame&,panima::Skeleton*)>(&Lua::Frame::Localize))
+		.def("Globalize",static_cast<void(*)(lua_State*,::Frame&,pragma::animation::Animation&,panima::Skeleton*)>(&Lua::Frame::Globalize))
+		.def("Globalize",static_cast<void(*)(lua_State*,::Frame&,panima::Skeleton*)>(&Lua::Frame::Globalize))
 		.def("CalcRenderBounds",&Lua::Frame::CalcRenderBounds)
 		.def("Rotate",&Lua::Frame::Rotate)
 		.def("Translate",&Lua::Frame::Translate)
@@ -1076,20 +1078,20 @@ void Lua::Model::register_class(
 		classDefMeshVertexAnimation
 	];
 
-	auto classDefSkeleton = luabind::class_<::Skeleton>("Skeleton");
+	auto classDefSkeleton = luabind::class_<panima::Skeleton>("Skeleton");
 	classDefSkeleton.def("GetBone",&Lua::Skeleton::GetBone);
 	classDefSkeleton.def("GetRootBones",&Lua::Skeleton::GetRootBones);
 	classDefSkeleton.def("GetBones",&Lua::Skeleton::GetBones);
 	classDefSkeleton.def("LookupBone",&Lua::Skeleton::LookupBone);
-	classDefSkeleton.def("AddBone",static_cast<std::shared_ptr<::Bone>(*)(lua_State*,::Skeleton&,const std::string&,::Bone&)>(&Lua::Skeleton::AddBone));
-	classDefSkeleton.def("AddBone",static_cast<std::shared_ptr<::Bone>(*)(lua_State*,::Skeleton&,const std::string&)>(&Lua::Skeleton::AddBone));
-	classDefSkeleton.def("GetBoneCount",&::Skeleton::GetBoneCount);
-	classDefSkeleton.def("Merge",&::Skeleton::Merge);
+	classDefSkeleton.def("AddBone",static_cast<std::shared_ptr<panima::Bone>(*)(lua_State*,panima::Skeleton&,const std::string&,panima::Bone&)>(&Lua::Skeleton::AddBone));
+	classDefSkeleton.def("AddBone",static_cast<std::shared_ptr<panima::Bone>(*)(lua_State*,panima::Skeleton&,const std::string&)>(&Lua::Skeleton::AddBone));
+	classDefSkeleton.def("GetBoneCount",&panima::Skeleton::GetBoneCount);
+	classDefSkeleton.def("Merge",&panima::Skeleton::Merge);
 	classDefSkeleton.def("ClearBones",&Lua::Skeleton::ClearBones);
 	classDefSkeleton.def("MakeRootBone",Lua::Skeleton::MakeRootBone);
 	classDefSkeleton.def("GetBoneHierarchy",Lua::Skeleton::GetBoneHierarchy);
-	classDefSkeleton.def("IsRootBone",static_cast<bool(*)(lua_State*,::Skeleton&,const std::string&)>(&Lua::Skeleton::IsRootBone));
-	classDefSkeleton.def("IsRootBone",static_cast<bool(*)(lua_State*,::Skeleton&,uint32_t)>(&Lua::Skeleton::IsRootBone));
+	classDefSkeleton.def("IsRootBone",static_cast<bool(*)(lua_State*,panima::Skeleton&,const std::string&)>(&Lua::Skeleton::IsRootBone));
+	classDefSkeleton.def("IsRootBone",static_cast<bool(*)(lua_State*,panima::Skeleton&,uint32_t)>(&Lua::Skeleton::IsRootBone));
 	Lua::Bone::register_class(l,classDefSkeleton);
 
 	auto modelMeshGroupClassDef = luabind::class_<::ModelMeshGroup>("MeshGroup");

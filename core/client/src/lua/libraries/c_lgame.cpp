@@ -35,6 +35,7 @@
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <cmaterial.h>
+#include <panima/bone.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -97,10 +98,10 @@ static void update_vehicle(Vehicle_Car *vhc)
 enum Method {IK_JACOB_TRANS=0, IK_PURE_PSEUDO, IK_DLS, IK_SDLS , IK_DLS_SVD};
 #include <pragma/model/model.h>
 #include <pragma/lua/classes/ldef_quaternion.h>
-static void get_local_bone_position(const std::function<Transform(uint32_t)> &fGetTransform,std::shared_ptr<Bone> &bone,const Vector3 &fscale={1.f,1.f,1.f},Vector3 *pos=nullptr,Quat *rot=nullptr,Vector3 *scale=nullptr)
+static void get_local_bone_position(const std::function<Transform(uint32_t)> &fGetTransform,std::shared_ptr<panima::Bone> &bone,const Vector3 &fscale={1.f,1.f,1.f},Vector3 *pos=nullptr,Quat *rot=nullptr,Vector3 *scale=nullptr)
 {
-	std::function<void(std::shared_ptr<Bone>&,Vector3*,Quat*,Vector3*)> apply;
-	apply = [fGetTransform,&apply,fscale](std::shared_ptr<Bone> &bone,Vector3 *pos,Quat *rot,Vector3 *scale) {
+	std::function<void(std::shared_ptr<panima::Bone>&,Vector3*,Quat*,Vector3*)> apply;
+	apply = [fGetTransform,&apply,fscale](std::shared_ptr<panima::Bone> &bone,Vector3 *pos,Quat *rot,Vector3 *scale) {
 		auto parent = bone->parent.lock();
 		if(parent != nullptr)
 			apply(parent,pos,rot,scale);
@@ -120,7 +121,7 @@ static void get_local_bone_position(const std::function<Transform(uint32_t)> &fG
 	if(parent != nullptr)
 		apply(parent,pos,rot,scale);
 }
-static void get_local_bone_position(const std::shared_ptr<Model> &mdl,const std::function<Transform(uint32_t)> &fGetTransform,std::shared_ptr<Bone> &bone,const Vector3 &fscale={1.f,1.f,1.f},Vector3 *pos=nullptr,Quat *rot=nullptr,Vector3 *scale=nullptr)
+static void get_local_bone_position(const std::shared_ptr<Model> &mdl,const std::function<Transform(uint32_t)> &fGetTransform,std::shared_ptr<panima::Bone> &bone,const Vector3 &fscale={1.f,1.f,1.f},Vector3 *pos=nullptr,Quat *rot=nullptr,Vector3 *scale=nullptr)
 {
 	get_local_bone_position(fGetTransform,bone,fscale,pos,rot,scale);
 	if(rot == nullptr)

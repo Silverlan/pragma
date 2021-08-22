@@ -40,7 +40,7 @@ namespace Lua
 	};
 	namespace Bone
 	{
-		DLLNETWORK void register_class(lua_State *l,luabind::class_<::Skeleton> &classDef);
+		DLLNETWORK void register_class(lua_State *l,luabind::class_<panima::Skeleton> &classDef);
 	};
 	namespace Model
 	{

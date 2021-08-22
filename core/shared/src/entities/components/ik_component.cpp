@@ -23,6 +23,8 @@
 #include "pragma/physics/jointinfo.h"
 #include "pragma/entities/baseentity_trace.hpp"
 #include <pragma/physics/environment.hpp>
+#include <panima/skeleton.hpp>
+#include <panima/bone.hpp>
 
 using namespace pragma;
 

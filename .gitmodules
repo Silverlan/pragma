@@ -172,3 +172,6 @@
 [submodule "external_libs/util_bsp"]
 	path = external_libs/util_bsp
 	url = https://github.com/Silverlan/util_bsp.git
+[submodule "external_libs/panima"]
+	path = external_libs/panima
+	url = https://github.com/Silverlan/panima.git

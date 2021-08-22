@@ -17,7 +17,6 @@
 #include "pragma/lua/luacallback.h"
 #include "pragma/lua/luafunction_call.h"
 #include "pragma/model/model.h"
-#include "pragma/model/animation/animation_channel.hpp"
 #include <sharedutils/datastream.h>
 #include "pragma/physics/raytraces.h"
 #include "pragma/entities/baseentity_trace.hpp"

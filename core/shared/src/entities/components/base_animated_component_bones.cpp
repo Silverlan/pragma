@@ -10,13 +10,15 @@
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/model/model.h"
+#include <panima/skeleton.hpp>
+#include <panima/bone.hpp>
 
 using namespace pragma;
 
-static void get_local_bone_position(std::vector<umath::ScaledTransform> &transforms,std::shared_ptr<Bone> &bone,const Vector3 &fscale={1.f,1.f,1.f},Vector3 *pos=nullptr,Quat *rot=nullptr,Vector3 *scale=nullptr)
+static void get_local_bone_position(std::vector<umath::ScaledTransform> &transforms,std::shared_ptr<panima::Bone> &bone,const Vector3 &fscale={1.f,1.f,1.f},Vector3 *pos=nullptr,Quat *rot=nullptr,Vector3 *scale=nullptr)
 {
-	std::function<void(std::shared_ptr<Bone>&,Vector3*,Quat*,Vector3*)> apply;
-	apply = [&transforms,&apply,fscale](std::shared_ptr<Bone> &bone,Vector3 *pos,Quat *rot,Vector3 *scale) {
+	std::function<void(std::shared_ptr<panima::Bone>&,Vector3*,Quat*,Vector3*)> apply;
+	apply = [&transforms,&apply,fscale](std::shared_ptr<panima::Bone> &bone,Vector3 *pos,Quat *rot,Vector3 *scale) {
 		auto parent = bone->parent.lock();
 		if(parent != nullptr)
 			apply(parent,pos,rot,scale);
@@ -36,7 +38,7 @@ static void get_local_bone_position(std::vector<umath::ScaledTransform> &transfo
 	if(parent != nullptr)
 		apply(parent,pos,rot,scale);
 }
-static void get_local_bone_position(const std::shared_ptr<Model> &mdl,std::vector<umath::ScaledTransform> &transforms,std::shared_ptr<Bone> &bone,const Vector3 &fscale={1.f,1.f,1.f},Vector3 *pos=nullptr,Quat *rot=nullptr,Vector3 *scale=nullptr)
+static void get_local_bone_position(const std::shared_ptr<Model> &mdl,std::vector<umath::ScaledTransform> &transforms,std::shared_ptr<panima::Bone> &bone,const Vector3 &fscale={1.f,1.f,1.f},Vector3 *pos=nullptr,Quat *rot=nullptr,Vector3 *scale=nullptr)
 {
 	get_local_bone_position(transforms,bone,fscale,pos,rot,scale);
 
@@ -443,7 +445,7 @@ void BaseAnimatedComponent::BlendBoneFrames(std::vector<umath::Transform> &tgt,s
 	}
 }
 
-static void get_global_bone_transforms(std::vector<umath::ScaledTransform> &transforms,std::unordered_map<uint32_t,std::shared_ptr<Bone>> &childBones,const umath::ScaledTransform &tParent={})
+static void get_global_bone_transforms(std::vector<umath::ScaledTransform> &transforms,std::unordered_map<uint32_t,std::shared_ptr<panima::Bone>> &childBones,const umath::ScaledTransform &tParent={})
 {
 	for(auto &pair : childBones)
 	{

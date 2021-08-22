@@ -8,8 +8,8 @@
 #include "stdafx_shared.h"
 #include "pragma/model/model.h"
 #include "pragma/model/animation/animation.hpp"
-#include "pragma/model/animation/animation_channel.hpp"
 #include "pragma/model/animation/animation_manager.hpp"
+#include <panima/player.hpp>
 
 std::shared_ptr<pragma::animation::AnimationManager> pragma::animation::AnimationManager::Create(const Model &mdl)
 {
@@ -24,23 +24,23 @@ std::shared_ptr<pragma::animation::AnimationManager> pragma::animation::Animatio
 	return std::shared_ptr<AnimationManager>{new AnimationManager{std::move(other)}};
 }
 pragma::animation::AnimationManager::AnimationManager(const Model &mdl)
-	: m_player{AnimationPlayer::Create()},m_model{mdl.shared_from_this()}
+	: m_player{panima::Player::Create()},m_model{mdl.shared_from_this()}
 {}
 pragma::animation::AnimationManager::AnimationManager(const AnimationManager &other)
-	: m_player{AnimationPlayer::Create(*other.m_player)},m_model{other.m_model},m_currentAnimation{other.m_currentAnimation},
+	: m_player{panima::Player::Create(*other.m_player)},m_model{other.m_model},m_currentAnimation{other.m_currentAnimation},
 	m_prevAnimSlice{other.m_prevAnimSlice}/*,m_channelValueSubmitters{m_channelValueSubmitters}*/
 {
 	static_assert(sizeof(*this) == 296,"Update this implementation when class has changed!");
 }
 pragma::animation::AnimationManager::AnimationManager(AnimationManager &&other)
-	: m_player{AnimationPlayer::Create(*other.m_player)},m_model{other.m_model},m_currentAnimation{other.m_currentAnimation},
+	: m_player{panima::Player::Create(*other.m_player)},m_model{other.m_model},m_currentAnimation{other.m_currentAnimation},
 	m_prevAnimSlice{std::move(other.m_prevAnimSlice)}/*,m_channelValueSubmitters{std::move(m_channelValueSubmitters)}*/
 {
 	static_assert(sizeof(*this) == 296,"Update this implementation when class has changed!");
 }
 pragma::animation::AnimationManager &pragma::animation::AnimationManager::operator=(const AnimationManager &other)
 {
-	m_player = AnimationPlayer::Create(*other.m_player);
+	m_player = panima::Player::Create(*other.m_player);
 	m_model = other.m_model;
 	m_currentAnimation = other.m_currentAnimation;
 
@@ -51,7 +51,7 @@ pragma::animation::AnimationManager &pragma::animation::AnimationManager::operat
 }
 pragma::animation::AnimationManager &pragma::animation::AnimationManager::operator=(AnimationManager &&other)
 {
-	m_player = AnimationPlayer::Create(*other.m_player);
+	m_player = panima::Player::Create(*other.m_player);
 	m_model = other.m_model;
 	m_currentAnimation = other.m_currentAnimation;
 
@@ -61,7 +61,7 @@ pragma::animation::AnimationManager &pragma::animation::AnimationManager::operat
 	return *this;
 }
 
-pragma::animation::Animation2 *pragma::animation::AnimationManager::GetCurrentAnimation() const {return const_cast<pragma::animation::Animation2*>(m_player->GetAnimation());}
+panima::Animation *pragma::animation::AnimationManager::GetCurrentAnimation() const {return const_cast<panima::Animation*>(m_player->GetAnimation());}
 const Model *pragma::animation::AnimationManager::GetModel() const {return m_model.lock().get();}
 
 void pragma::animation::AnimationManager::PlayAnimation(const std::string &animation,FPlayAnim flags)
@@ -81,16 +81,16 @@ void pragma::animation::AnimationManager::PlayAnimation(const std::string &anima
 	return PlayAnimation(id,flags);
 }
 
-void pragma::animation::AnimationManager::PlayAnimation(AnimationId animation,FPlayAnim flags)
+void pragma::animation::AnimationManager::PlayAnimation(panima::AnimationId animation,FPlayAnim flags)
 {
 	if(m_model.expired())
 	{
 		StopAnimation();
 		return;
 	}
-	if(m_callbackInterface.translateAnimation && animation != INVALID_ANIMATION)
+	if(m_callbackInterface.translateAnimation && animation != panima::INVALID_ANIMATION)
 		m_callbackInterface.translateAnimation(animation,flags);
-	if(animation == INVALID_ANIMATION)
+	if(animation == panima::INVALID_ANIMATION)
 	{
 		StopAnimation();
 		return;
@@ -130,15 +130,15 @@ void pragma::animation::AnimationManager::PlayAnimation(AnimationId animation,FP
 }
 void pragma::animation::AnimationManager::StopAnimation()
 {
-	if(m_currentAnimation == INVALID_ANIMATION)
+	if(m_currentAnimation == panima::INVALID_ANIMATION)
 		return;
 	if(m_callbackInterface.onStopAnimation)
 		m_callbackInterface.onStopAnimation();
-	m_currentAnimation = INVALID_ANIMATION;
+	m_currentAnimation = panima::INVALID_ANIMATION;
 	(*this)->Reset();
 	m_currentFlags = FPlayAnim::None;
 }
-void pragma::animation::AnimationManager::ApplySliceInterpolation(const AnimationSlice &src,AnimationSlice &dst,float f)
+void pragma::animation::AnimationManager::ApplySliceInterpolation(const panima::Slice &src,panima::Slice &dst,float f)
 {
 	// TODO
 	/*if(f == 1.f)

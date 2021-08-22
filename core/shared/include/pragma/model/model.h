@@ -400,8 +400,8 @@ public:
 
 	bool FindSubMeshIndex(const ModelMeshGroup *optMeshGroup,const ModelMesh *optMesh,const ModelSubMesh *optSubMesh,uint32_t &outGroupIdx,uint32_t &outMeshIdx,uint32_t &outSubMeshIdx) const;
 
-	const Skeleton &GetSkeleton() const;
-	Skeleton &GetSkeleton();
+	const panima::Skeleton &GetSkeleton() const;
+	panima::Skeleton &GetSkeleton();
 	uint32_t GetBoneCount() const;
 	bool GetLocalBonePosition(uint32_t animId,uint32_t frameId,uint32_t boneId,Vector3 &rPos,Quat &rRot,Vector3 *scale=nullptr);
 	bool IsRootBone(uint32_t boneId) const;
@@ -593,7 +593,7 @@ private:
 	std::vector<std::shared_ptr<pragma::animation::Animation>> m_animations;
 	std::vector<std::shared_ptr<VertexAnimation>> m_vertexAnimations;
 	std::unordered_map<std::string,unsigned int> m_animationIDs;
-	std::shared_ptr<Skeleton> m_skeleton = nullptr;
+	std::shared_ptr<panima::Skeleton> m_skeleton = nullptr;
 
 	std::vector<FlexController> m_flexControllers;
 	std::vector<Flex> m_flexes;

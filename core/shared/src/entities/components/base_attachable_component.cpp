@@ -16,6 +16,8 @@
 #include "pragma/entities/parentinfo.h"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/model/model.h"
+#include <panima/skeleton.hpp>
+#include <panima/bone.hpp>
 
 using namespace pragma;
 
@@ -107,12 +109,12 @@ void BaseAttachableComponent::UpdateAttachmentData(bool bForceReload)
 		auto &hMdl = GetEntity().GetModel();
 		if(hMdl != nullptr)
 		{
-			Skeleton &skel = hMdl->GetSkeleton();
+			auto &skel = hMdl->GetSkeleton();
 			auto &hMdlParent = entParent.GetModel();
 			if(hMdlParent != nullptr)
 			{
 				auto *mdlParent = hMdlParent.get();
-				Skeleton &skelParent = mdlParent->GetSkeleton();
+				auto &skelParent = mdlParent->GetSkeleton();
 				auto &bones = skel.GetBones();
 				auto &bonesParent = skelParent.GetBones();
 				m_attachment->boneMapping.resize(bones.size());
@@ -542,13 +544,13 @@ void BaseAttachableComponent::UpdateAttachmentOffset(bool invokeUpdateEvents)
 					auto *parent = m_attachment->parent.get();
 					auto &entParent = parent->GetEntity();
 
-					Skeleton &skel = hMdl->GetSkeleton();
+					auto &skel = hMdl->GetSkeleton();
 					auto mdlComponentParent = entParent.GetModelComponent();
 					auto animComponentParent = entParent.GetAnimatedComponent();
 					auto hMdlParent = mdlComponentParent ? mdlComponentParent->GetModel() : nullptr;
 					if(hMdlParent != nullptr && animComponentParent.valid())
 					{
-						Skeleton &skelParent = hMdlParent->GetSkeleton();
+						auto &skelParent = hMdlParent->GetSkeleton();
 						auto &bones = skel.GetBones();
 						auto &bonesParent = skelParent.GetBones();
 						for(unsigned int i=0;i<m_attachment->boneMapping.size();i++)

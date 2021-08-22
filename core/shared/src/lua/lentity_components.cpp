@@ -6,7 +6,6 @@
  */
 
 #include "stdafx_shared.h"
-#include "pragma/model/animation/animation2.hpp"
 #include <pragma/game/game.h>
 #include "pragma/lua/lentity_components.hpp"
 #include "pragma/lua/sh_lua_component.hpp"
@@ -44,6 +43,7 @@
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 #include <pragma/physics/movetypes.h>
 #include <luabind/copy_policy.hpp>
+#include <panima/animation.hpp>
 
 namespace Lua {bool get_bullet_master(BaseEntity &ent);};
 bool Lua::get_bullet_master(BaseEntity &ent)

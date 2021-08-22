@@ -8,10 +8,11 @@
 #include "stdafx_shared.h"
 #include "pragma/lua/classes/lmodel.h"
 #include "pragma/lua/classes/lskeleton.h"
+#include <panima/bone.hpp>
 
-void Lua::Bone::register_class(lua_State *l,luabind::class_<::Skeleton> &classDef)
+void Lua::Bone::register_class(lua_State *l,luabind::class_<panima::Skeleton> &classDef)
 {
-	auto classDefBone = luabind::class_<::Bone>("Bone");
+	auto classDefBone = luabind::class_<panima::Bone>("Bone");
 	classDefBone.def(luabind::tostring(luabind::self));
 	classDefBone.def("GetName",&Lua::Bone::GetName);
 	classDefBone.def("GetID",&Lua::Bone::GetID);
@@ -20,7 +21,7 @@ void Lua::Bone::register_class(lua_State *l,luabind::class_<::Skeleton> &classDe
 	classDefBone.def("SetName",&Lua::Bone::SetName);
 	classDefBone.def("SetParent",&Lua::Bone::SetParent);
 	classDefBone.def("ClearParent",&Lua::Bone::ClearParent);
-	classDefBone.def("IsAncestorOf",&::Bone::IsAncestorOf);
-	classDefBone.def("IsDescendantOf",&::Bone::IsDescendantOf);
+	classDefBone.def("IsAncestorOf",&panima::Bone::IsAncestorOf);
+	classDefBone.def("IsDescendantOf",&panima::Bone::IsDescendantOf);
 	classDef.scope[classDefBone];
 }

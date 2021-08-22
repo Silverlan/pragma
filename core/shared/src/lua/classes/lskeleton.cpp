@@ -8,40 +8,42 @@
 #include "stdafx_shared.h"
 #include "pragma/lua/classes/lskeleton.h"
 #include "luasystem.h"
+#include <panima/skeleton.hpp>
+#include <panima/bone.hpp>
 
-bool Lua::Skeleton::IsRootBone(lua_State *l,::Skeleton &skeleton,const std::string &boneName)
+bool Lua::Skeleton::IsRootBone(lua_State *l,panima::Skeleton &skeleton,const std::string &boneName)
 {
 	auto boneId = skeleton.LookupBone(boneName);
 	return IsRootBone(l,skeleton,boneId);
 }
-bool Lua::Skeleton::IsRootBone(lua_State *l,::Skeleton &skeleton,uint32_t boneId)
+bool Lua::Skeleton::IsRootBone(lua_State *l,panima::Skeleton &skeleton,uint32_t boneId)
 {
 	auto &rootBones = skeleton.GetRootBones();
 	return rootBones.find(boneId) != rootBones.end();
 }
 
-luabind::map<uint32_t,std::shared_ptr<::Bone>> Lua::Skeleton::GetRootBones(lua_State *l,::Skeleton &skeleton)
+luabind::map<uint32_t,std::shared_ptr<panima::Bone>> Lua::Skeleton::GetRootBones(lua_State *l,panima::Skeleton &skeleton)
 {
 	auto &rootBones = skeleton.GetRootBones();
 	return Lua::map_to_table(l,rootBones);
 }
 
-luabind::tableT<std::shared_ptr<::Bone>> Lua::Skeleton::GetBones(lua_State *l,::Skeleton &skeleton)
+luabind::tableT<std::shared_ptr<panima::Bone>> Lua::Skeleton::GetBones(lua_State *l,panima::Skeleton &skeleton)
 {
 	auto &bones = skeleton.GetBones();
 	return Lua::vector_to_table(l,bones);
 }
 
-std::shared_ptr<::Bone> Lua::Skeleton::GetBone(lua_State *l,::Skeleton &skeleton,uint32_t boneId)
+std::shared_ptr<panima::Bone> Lua::Skeleton::GetBone(lua_State *l,panima::Skeleton &skeleton,uint32_t boneId)
 {
 	return skeleton.GetBone(boneId).lock();
 }
 
-int32_t Lua::Skeleton::LookupBone(lua_State *l,::Skeleton &skeleton,const std::string &name) {return skeleton.LookupBone(name);}
+int32_t Lua::Skeleton::LookupBone(lua_State *l,panima::Skeleton &skeleton,const std::string &name) {return skeleton.LookupBone(name);}
 
-std::shared_ptr<::Bone> Lua::Skeleton::AddBone(lua_State *l,::Skeleton &skeleton,const std::string &name,::Bone &parent)
+std::shared_ptr<panima::Bone> Lua::Skeleton::AddBone(lua_State *l,panima::Skeleton &skeleton,const std::string &name,panima::Bone &parent)
 {
-	auto *bone = new ::Bone();
+	auto *bone = new panima::Bone();
 	bone->name = name;
 	bone->parent = parent.shared_from_this();
 	skeleton.AddBone(bone);
@@ -49,18 +51,18 @@ std::shared_ptr<::Bone> Lua::Skeleton::AddBone(lua_State *l,::Skeleton &skeleton
 	parent.children[bone->ID] = ptrBone;
 	return ptrBone;
 }
-std::shared_ptr<::Bone> Lua::Skeleton::AddBone(lua_State *l,::Skeleton &skeleton,const std::string &name)
+std::shared_ptr<panima::Bone> Lua::Skeleton::AddBone(lua_State *l,panima::Skeleton &skeleton,const std::string &name)
 {
-	auto *bone = new ::Bone();
+	auto *bone = new panima::Bone();
 	bone->name = name;
 	skeleton.AddBone(bone);
 	auto ptrBone = skeleton.GetBone(bone->ID).lock();
 	return ptrBone;
 }
-bool Lua::Skeleton::MakeRootBone(lua_State *l,::Skeleton &skeleton,::Bone &bone)
+bool Lua::Skeleton::MakeRootBone(lua_State *l,panima::Skeleton &skeleton,panima::Bone &bone)
 {
 	auto &bones = skeleton.GetBones();
-	auto it = std::find_if(bones.begin(),bones.end(),[&bone](const std::shared_ptr<::Bone> &boneOther) {
+	auto it = std::find_if(bones.begin(),bones.end(),[&bone](const std::shared_ptr<panima::Bone> &boneOther) {
 		return &bone == boneOther.get();
 	});
 	if(it == bones.end())
@@ -68,11 +70,11 @@ bool Lua::Skeleton::MakeRootBone(lua_State *l,::Skeleton &skeleton,::Bone &bone)
 	skeleton.GetRootBones()[bone.ID] = bone.shared_from_this();
 	return true;
 }
-luabind::map<uint16_t,luabind::tableT<void>> Lua::Skeleton::GetBoneHierarchy(lua_State *l,::Skeleton &skeleton)
+luabind::map<uint16_t,luabind::tableT<void>> Lua::Skeleton::GetBoneHierarchy(lua_State *l,panima::Skeleton &skeleton)
 {
 	auto t = luabind::newtable(l);
-	std::function<void(const ::Bone&,const luabind::object&)> fGetHierarchy = nullptr;
-	fGetHierarchy = [l,&fGetHierarchy](const ::Bone &bone,const luabind::object &t) {
+	std::function<void(const panima::Bone&,const luabind::object&)> fGetHierarchy = nullptr;
+	fGetHierarchy = [l,&fGetHierarchy](const panima::Bone &bone,const luabind::object &t) {
 		t[bone.ID] = luabind::newtable(l);
 		for(auto &pair : bone.children)
 			fGetHierarchy(*pair.second,t[bone.ID]);
@@ -81,15 +83,15 @@ luabind::map<uint16_t,luabind::tableT<void>> Lua::Skeleton::GetBoneHierarchy(lua
 		fGetHierarchy(*pair.second,t);
 	return t;
 }
-void Lua::Skeleton::ClearBones(lua_State *l,::Skeleton &skeleton) {skeleton.GetBones().clear(); skeleton.GetRootBones().clear();}
+void Lua::Skeleton::ClearBones(lua_State *l,panima::Skeleton &skeleton) {skeleton.GetBones().clear(); skeleton.GetRootBones().clear();}
 
 /////////////////////////////
 
-std::string Lua::Bone::GetName(lua_State *l,::Bone &bone) {return bone.name;}
+std::string Lua::Bone::GetName(lua_State *l,panima::Bone &bone) {return bone.name;}
 
-BoneId Lua::Bone::GetID(lua_State *l,::Bone &bone) {return bone.ID;}
+BoneId Lua::Bone::GetID(lua_State *l,panima::Bone &bone) {return bone.ID;}
 
-luabind::map<BoneId,std::shared_ptr<::Bone>> Lua::Bone::GetChildren(lua_State *l,::Bone &bone)
+luabind::map<BoneId,std::shared_ptr<panima::Bone>> Lua::Bone::GetChildren(lua_State *l,panima::Bone &bone)
 {
 	auto t = luabind::newtable(l);
 	for(auto &pair : bone.children)
@@ -97,15 +99,15 @@ luabind::map<BoneId,std::shared_ptr<::Bone>> Lua::Bone::GetChildren(lua_State *l
 	return t;
 }
 
-std::shared_ptr<::Bone> Lua::Bone::GetParent(lua_State *l,::Bone &bone) {return bone.parent.lock();}
-void Lua::Bone::SetName(lua_State *l,::Bone &bone,const std::string &name) {bone.name = name;}
-void Lua::Bone::SetParent(lua_State *l,::Bone &bone,::Bone &parent)
+std::shared_ptr<panima::Bone> Lua::Bone::GetParent(lua_State *l,panima::Bone &bone) {return bone.parent.lock();}
+void Lua::Bone::SetName(lua_State *l,panima::Bone &bone,const std::string &name) {bone.name = name;}
+void Lua::Bone::SetParent(lua_State *l,panima::Bone &bone,panima::Bone &parent)
 {
 	ClearParent(l,bone);
 	bone.parent = parent.shared_from_this();
 	parent.children[bone.ID] = bone.shared_from_this();
 }
-void Lua::Bone::ClearParent(lua_State *l,::Bone &bone)
+void Lua::Bone::ClearParent(lua_State *l,panima::Bone &bone)
 {
 	if(bone.parent.expired() == false)
 	{

@@ -13,7 +13,6 @@
 #include <sharedutils/util_shared_handle.hpp>
 
 class Frame;
-struct Bone;
 enum class MOVETYPE : int;
 enum class COLLISIONTYPE : int;
 namespace pragma
@@ -254,8 +253,8 @@ namespace pragma
 		bool m_bColCallbacksEnabled = false;
 		bool m_bColContactReportEnabled = false;
 		virtual void InitializePhysObj();
-		void UpdatePhysicsBone(Frame &reference,const std::shared_ptr<Bone> &bone,Quat &invRot,const Vector3 *mvOffset=nullptr);
-		void PostPhysicsSimulate(Frame &reference,std::unordered_map<uint32_t,std::shared_ptr<Bone>> &bones,Vector3 &moveOffset,Quat &invRot,UInt32 physRootBoneId);
+		void UpdatePhysicsBone(Frame &reference,const std::shared_ptr<panima::Bone> &bone,Quat &invRot,const Vector3 *mvOffset=nullptr);
+		void PostPhysicsSimulate(Frame &reference,std::unordered_map<uint32_t,std::shared_ptr<panima::Bone>> &bones,Vector3 &moveOffset,Quat &invRot,UInt32 physRootBoneId);
 		// Updates the entity's bones to match the transforms of the collision objects
 		void UpdateRagdollPose();
 		

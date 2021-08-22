@@ -10,7 +10,7 @@
 #include "pragma/networkdefinitions.h"
 #include "pragma/types.hpp"
 #include "pragma/model/animation/play_animation_flags.hpp"
-#include "pragma/model/animation/animation_player.hpp"
+#include <panima/slice.hpp>
 #include <udm.hpp>
 #include <vector>
 #include <memory>
@@ -20,14 +20,11 @@ namespace pragma::animation
 {
 	struct DLLNETWORK AnimationPlayerCallbackInterface
 	{
-		std::function<bool(AnimationId,FPlayAnim)> onPlayAnimation = nullptr;
+		std::function<bool(panima::AnimationId,FPlayAnim)> onPlayAnimation = nullptr;
 		std::function<void()> onStopAnimation = nullptr;
-		std::function<void(AnimationId&,FPlayAnim&)> translateAnimation = nullptr;
+		std::function<void(panima::AnimationId&,FPlayAnim&)> translateAnimation = nullptr;
 	};
-	class AnimationChannel;
-	using ChannelValueSubmitter = std::function<void(AnimationChannel&,uint32_t&,double)>;
-	class AnimationPlayer;
-	using PAnimationPlayer = std::shared_ptr<AnimationPlayer>;
+	using ChannelValueSubmitter = std::function<void(panima::Channel&,uint32_t&,double)>;
 	class DLLNETWORK AnimationManager
 		: public std::enable_shared_from_this<AnimationManager>
 	{
@@ -36,28 +33,28 @@ namespace pragma::animation
 		static std::shared_ptr<AnimationManager> Create(const AnimationManager &other);
 		static std::shared_ptr<AnimationManager> Create(AnimationManager &&other);
 		
-		AnimationId GetCurrentAnimationId() const {return m_currentAnimation;}
-		Animation2 *GetCurrentAnimation() const;
+		panima::AnimationId GetCurrentAnimationId() const {return m_currentAnimation;}
+		panima::Animation *GetCurrentAnimation() const;
 		const Model *GetModel() const;
 
-		void PlayAnimation(AnimationId animation,FPlayAnim flags=FPlayAnim::Default);
+		void PlayAnimation(panima::AnimationId animation,FPlayAnim flags=FPlayAnim::Default);
 		void PlayAnimation(const std::string &animation,FPlayAnim flags=FPlayAnim::Default);
 		void StopAnimation();
 
-		AnimationSlice &GetPreviousSlice() {return m_prevAnimSlice;}
-		const AnimationSlice &GetPreviousSlice() const {return const_cast<AnimationManager*>(this)->GetPreviousSlice();}
+		panima::Slice &GetPreviousSlice() {return m_prevAnimSlice;}
+		const panima::Slice &GetPreviousSlice() const {return const_cast<AnimationManager*>(this)->GetPreviousSlice();}
 
 		AnimationManager &operator=(const AnimationManager &other);
 		AnimationManager &operator=(AnimationManager &&other);
 
-		AnimationPlayer *operator->() {return m_player.get();}
-		const AnimationPlayer *operator->() const {return const_cast<AnimationManager*>(this)->operator->();}
+		panima::Player *operator->() {return m_player.get();}
+		const panima::Player *operator->() const {return const_cast<AnimationManager*>(this)->operator->();}
 
-		AnimationPlayer &operator*() {return *m_player;}
-		const AnimationPlayer &operator*() const {return const_cast<AnimationManager*>(this)->operator*();}
+		panima::Player &operator*() {return *m_player;}
+		const panima::Player &operator*() const {return const_cast<AnimationManager*>(this)->operator*();}
 
-		AnimationPlayer &GetPlayer() {return *m_player;}
-		const AnimationPlayer &GetPlayer() const {return const_cast<AnimationManager*>(this)->GetPlayer();}
+		panima::Player &GetPlayer() {return *m_player;}
+		const panima::Player &GetPlayer() const {return const_cast<AnimationManager*>(this)->GetPlayer();}
 
 		std::vector<animation::ChannelValueSubmitter> &GetChannelValueSubmitters() {return m_channelValueSubmitters;}
 
@@ -66,14 +63,14 @@ namespace pragma::animation
 		AnimationManager(const Model &mdl);
 		AnimationManager(const AnimationManager &other);
 		AnimationManager(AnimationManager &&other);
-		static void ApplySliceInterpolation(const AnimationSlice &src,AnimationSlice &dst,float f);
-		PAnimationPlayer m_player = nullptr;
+		static void ApplySliceInterpolation(const panima::Slice &src,panima::Slice &dst,float f);
+		panima::PPlayer m_player = nullptr;
 		std::weak_ptr<const Model> m_model {};
-		AnimationId m_currentAnimation = std::numeric_limits<AnimationId>::max();
+		panima::AnimationId m_currentAnimation = std::numeric_limits<panima::AnimationId>::max();
 		FPlayAnim m_currentFlags = FPlayAnim::None;
 		std::vector<animation::ChannelValueSubmitter> m_channelValueSubmitters {};
 		
-		AnimationSlice m_prevAnimSlice;
+		panima::Slice m_prevAnimSlice;
 		AnimationPlayerCallbackInterface m_callbackInterface {};
 	};
 	using PAnimationManager = std::shared_ptr<AnimationManager>;

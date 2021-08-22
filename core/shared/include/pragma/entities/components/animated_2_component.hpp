@@ -18,9 +18,8 @@ namespace pragma
 	namespace animation
 	{
 		class AnimationManager;
-		class AnimationChannel;
 		using PAnimationManager = std::shared_ptr<AnimationManager>;
-		using ChannelValueSubmitter = std::function<void(AnimationChannel&,uint32_t&,double)>;
+		using ChannelValueSubmitter = std::function<void(panima::Channel&,uint32_t&,double)>;
 	};
 	class DLLNETWORK Animated2Component final
 		: public BaseEntityComponent
@@ -53,7 +52,7 @@ namespace pragma
 		void AdvanceAnimations(double dt);
 
 		virtual void Initialize() override;
-		void PlayAnimation(animation::AnimationManager &manager,pragma::animation::Animation2 &anim);
+		void PlayAnimation(animation::AnimationManager &manager,panima::Animation &anim);
 		
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
@@ -86,9 +85,9 @@ namespace pragma
 	struct DLLNETWORK CEAnim2OnPlayAnimation
 		: public ComponentEvent
 	{
-		CEAnim2OnPlayAnimation(animation::AnimationId animation,pragma::FPlayAnim flags);
+		CEAnim2OnPlayAnimation(panima::AnimationId animation,pragma::FPlayAnim flags);
 		virtual void PushArguments(lua_State *l) override;
-		animation::AnimationId animation;
+		panima::AnimationId animation;
 		pragma::FPlayAnim flags;
 	};
 	struct DLLNETWORK CEAnim2OnAnimationStart
@@ -103,11 +102,11 @@ namespace pragma
 	struct DLLNETWORK CEAnim2TranslateAnimation
 		: public ComponentEvent
 	{
-		CEAnim2TranslateAnimation(animation::AnimationId &animation,pragma::FPlayAnim &flags);
+		CEAnim2TranslateAnimation(panima::AnimationId &animation,pragma::FPlayAnim &flags);
 		virtual void PushArguments(lua_State *l) override;
 		virtual uint32_t GetReturnCount() override;
 		virtual void HandleReturnValues(lua_State *l) override;
-		animation::AnimationId &animation;
+		panima::AnimationId &animation;
 		pragma::FPlayAnim &flags;
 	};
 	struct DLLNETWORK CEAnim2MaintainAnimations

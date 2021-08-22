@@ -92,7 +92,7 @@ class DLLNETWORK FWMD
 private:
 	bool m_bStatic;
 	Game *m_gameState;
-	void ReadChildBones(const Skeleton &skeleton,std::shared_ptr<Bone> bone);
+	void ReadChildBones(const panima::Skeleton &skeleton,std::shared_ptr<panima::Bone> bone);
 	std::vector<FWMDMesh*> m_meshes;
 
 	void LoadBones(unsigned short version,unsigned int numBones,Model &mdl);

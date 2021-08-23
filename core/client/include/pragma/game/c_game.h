@@ -66,6 +66,7 @@ namespace GLFW
 
 namespace pragma
 {
+	class CGameComponent;
 	namespace debug {class GPUProfilingStage;};
 	namespace physics {class IVisualDebugger;};
 	namespace rendering
@@ -305,6 +306,8 @@ public:
 	virtual void GetWeapons(std::vector<EntityHandle> *ents) override;
 	virtual void GetVehicles(std::vector<EntityHandle> *ents) override;
 
+	pragma::CGameComponent *GetGameComponent();
+	const pragma::CGameComponent *GetGameComponent() const {return const_cast<CGame*>(this)->GetGameComponent();}
 	CBaseEntity *CreateEntity(std::string classname);
 	template<class T> T *CreateEntity();
 	template<class T> T *CreateEntity(unsigned int idx);
@@ -565,6 +568,7 @@ private:
 	void UpdateShaderTimeData();
 
 	// Entities
+	pragma::ComponentHandle<pragma::CGameComponent> m_gameComponent;
 	std::vector<CBaseEntity*> m_ents;
 	std::vector<CBaseEntity*> m_shEnts;
 	std::vector<CBaseEntity*> m_entsOccluded;

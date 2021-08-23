@@ -239,7 +239,19 @@ void SGame::Initialize()
 		gmC->OnGameInitialized();
 }
 
-void SGame::SetUp() {Game::SetUp();}
+void SGame::SetUp()
+{
+	Game::SetUp();
+	auto *entGame = CreateEntity("game");
+	assert(entGame != nullptr);
+	if(entGame == nullptr)
+	{
+		Con::crit<<"ERROR: Unable to create game entity!"<<Con::endl;
+		// Unreachable
+	}
+	m_entGame = entGame->GetHandle();
+	entGame->Spawn();
+}
 
 std::shared_ptr<ModelMesh> SGame::CreateModelMesh() const {return std::make_shared<ModelMesh>();}
 std::shared_ptr<ModelSubMesh> SGame::CreateModelSubMesh() const {return std::make_shared<ModelSubMesh>();}

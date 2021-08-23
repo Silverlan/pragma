@@ -70,6 +70,7 @@
 #include "pragma/entities/components/s_entity_component.hpp"
 #include "pragma/entities/components/s_time_scale_component.hpp"
 #include "pragma/entities/components/s_gamemode_component.hpp"
+#include "pragma/entities/components/s_game_component.hpp"
 #include "pragma/entities/environment/s_env_timescale.h"
 #include <pragma/physics/raytraces.h>
 #include <pragma/model/model.h>
@@ -130,6 +131,9 @@ void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 
 	auto defSGamemode = luabind::class_<pragma::SGamemodeComponent,pragma::BaseGamemodeComponent>("GamemodeComponent");
 	entsMod[defSGamemode];
+
+	auto defSGame = luabind::class_<pragma::SGameComponent,pragma::BaseGameComponent>("GameComponent");
+	entsMod[defSGame];
 
 	auto defSColor = luabind::class_<pragma::SColorComponent,pragma::BaseColorComponent>("ColorComponent");
 	entsMod[defSColor];

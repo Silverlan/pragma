@@ -79,6 +79,7 @@ namespace pragma
 	class EntityComponentManager;
 	class BasePlayerComponent;
 	class BaseGamemodeComponent;
+	class BaseGameComponent;
 	namespace nav
 	{
 		class Mesh;
@@ -205,6 +206,7 @@ public:
 	GameModeInfo *GetGameMode();
 	void SetGameMode(const std::string &gameMode);
 	BaseEntity *GetGameModeEntity();
+	BaseEntity *GetGameEntity();
 	LuaEntityManager &GetLuaEntityManager();
 
 	void SetWorld(pragma::BaseWorldComponent *entWorld);
@@ -385,6 +387,7 @@ protected:
 	util::TWeakSharedHandle<pragma::BaseWorldComponent> m_worldComponent = util::TWeakSharedHandle<pragma::BaseWorldComponent>{};
 	GameModeInfo *m_gameMode = nullptr;
 	EntityHandle m_entGamemode;
+	EntityHandle m_entGame;
 	CallbackHandle m_cbProfilingHandle = {};
 	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_profilingStageManager = nullptr;
 	std::shared_ptr<pragma::nav::Mesh> m_navMesh = nullptr;

@@ -103,6 +103,7 @@
 #include "pragma/entities/components/s_generic_component.hpp"
 #include "pragma/entities/components/s_point_at_target_component.hpp"
 #include "pragma/entities/components/s_gamemode_component.hpp"
+#include "pragma/entities/components/s_game_component.hpp"
 #include "pragma/entities/environment/s_env_timescale.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
@@ -207,6 +208,7 @@ void SGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::SDebugPlaneComponent>("debug_plane");
 	componentManager.RegisterComponentType<pragma::SPointAtTargetComponent>("point_at_target");
 	componentManager.RegisterComponentType<pragma::SGamemodeComponent>("gamemode");
+	componentManager.RegisterComponentType<pragma::SGameComponent>("game");
 }
 
 pragma::BaseEntityComponent *SGame::CreateLuaEntityComponent(BaseEntity &ent,std::string classname)

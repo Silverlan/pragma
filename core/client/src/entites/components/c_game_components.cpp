@@ -99,6 +99,7 @@
 #include "pragma/entities/components/c_generic_component.hpp"
 #include "pragma/entities/components/c_point_at_target_component.hpp"
 #include "pragma/entities/components/c_gamemode_component.hpp"
+#include "pragma/entities/components/c_game_component.hpp"
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include "pragma/entities/c_wheel.hpp"
 #include "pragma/entities/environment/c_env_timescale.h"
@@ -119,7 +120,6 @@
 #include "pragma/entities/components/c_light_map_receiver_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
-#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 void CGame::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
@@ -207,6 +207,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::COcclusionCullerComponent>("occlusion_culler");
 	componentManager.RegisterComponentType<pragma::CSceneComponent>("scene");
 	componentManager.RegisterComponentType<pragma::CGamemodeComponent>("gamemode");
+	componentManager.RegisterComponentType<pragma::CGameComponent>("game");
 
 	componentManager.RegisterComponentType<pragma::CEnvSoundProbeComponent>("sound_probe");
 	componentManager.RegisterComponentType<pragma::CWeatherComponent>("weather");

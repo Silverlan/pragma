@@ -128,6 +128,7 @@
 #include "pragma/entities/components/c_generic_component.hpp"
 #include "pragma/entities/components/c_point_at_target_component.hpp"
 #include "pragma/entities/components/c_gamemode_component.hpp"
+#include "pragma/entities/components/c_game_component.hpp"
 #include "pragma/entities/environment/c_env_reflection_probe.hpp"
 #include "pragma/entities/c_wheel.hpp"
 #include "pragma/entities/environment/c_env_timescale.h"
@@ -460,6 +461,9 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 
 	auto defCGamemode = luabind::class_<pragma::CGamemodeComponent,pragma::BaseGamemodeComponent>("GamemodeComponent");
 	entsMod[defCGamemode];
+
+	auto defCGame = luabind::class_<pragma::CGameComponent,pragma::BaseGameComponent>("GameComponent");
+	entsMod[defCGame];
 
 	auto defCColor = luabind::class_<pragma::CColorComponent,pragma::BaseColorComponent>("ColorComponent");
 	entsMod[defCColor];

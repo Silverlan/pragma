@@ -34,6 +34,7 @@
 #include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/c_gamemode_component.hpp"
+#include "pragma/entities/components/c_game_component.hpp"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/util/c_util_pbr_converter.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
@@ -603,7 +604,14 @@ Material *CGame::GetLoadMaterial() {return m_matLoad.get();}
 void CGame::OnEntityCreated(BaseEntity *ent)
 {
 	Game::OnEntityCreated(ent);
+	if(typeid(*ent) == typeid(CGameEntity))
+	{
+		m_entGame = ent->GetHandle();
+		m_gameComponent = ent->GetComponent<pragma::CGameComponent>();
+	}
 }
+
+pragma::CGameComponent *CGame::GetGameComponent() {return m_gameComponent.get();}
 
 pragma::CViewModelComponent *CGame::GetViewModel()
 {

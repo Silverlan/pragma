@@ -278,6 +278,7 @@ void Game::InitializeLuaScriptWatcher()
 }
 
 BaseEntity *Game::GetGameModeEntity() {return m_entGamemode.get();}
+BaseEntity *Game::GetGameEntity() {return m_entGame.get();}
 bool Game::IsGameInitialized() const {return (m_flags &GameFlags::GameInitialized) != GameFlags::None;}
 bool Game::IsMapLoaded() const {return (m_flags &GameFlags::MapLoaded) != GameFlags::None;}
 

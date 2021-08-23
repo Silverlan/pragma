@@ -61,7 +61,8 @@
 	LINK_NETWORKED_ENTITY(EntDebugSphere,CEntDebugSphere); \
 	LINK_NETWORKED_ENTITY(EntDebugCone,CEntDebugCone); \
 	LINK_NETWORKED_ENTITY(EntDebugCylinder,CEntDebugCylinder); \
-	LINK_NETWORKED_ENTITY(EntDebugPlane,CEntDebugPlane);
+	LINK_NETWORKED_ENTITY(EntDebugPlane,CEntDebugPlane); \
+	LINK_NETWORKED_ENTITY(SGameEntity,CGameEntity);
 
 #ifdef DLLSERVER_EX
 	#include "pragma/entities/s_entityfactories.h"
@@ -111,6 +112,7 @@
 	#include "pragma/entities/s_bot.h"
 	#include "pragma/entities/point/s_point_target.h"
 	#include "pragma/entities/components/s_wheel_component.hpp"
+	#include "pragma/entities/components/s_game_component.hpp"
 	#include "pragma/entities/environment/effects/s_env_smoke_trail.h"
 	#include "pragma/entities/environment/effects/s_env_fire.h"
 	#include "pragma/entities/s_ent_debug.hpp"
@@ -164,6 +166,7 @@
 	#include "pragma/entities/c_wheel.hpp"
 	#include "pragma/entities/environment/effects/c_env_smoke_trail.h"
 	#include "pragma/entities/environment/effects/c_env_fire.h"
+	#include "pragma/entities/components/c_game_component.hpp"
 	#include "pragma/entities/c_player.hpp"
 	#include "pragma/entities/c_ent_debug.hpp"
 	LINK_NETWORKED_ENTITIES;

@@ -7,6 +7,7 @@
 #include "stdafx_shared.h"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/entities/components/base_attachable_component.hpp"
+#include "pragma/entities/components/base_game_component.hpp"
 #include "pragma/lua/policies/optional_policy.hpp"
 #include "pragma/lua/policies/game_object_policy.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
@@ -368,6 +369,9 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	base_weapon_component::register_class(mod);
 	base_wheel_component::register_class(mod);
 	base_world_component::register_class(mod);
+
+	Lua::ComponentClass<pragma::BaseGameComponent> defGameComponent {"BaseGameComponent"};
+	mod[defGameComponent];
 }
 void pragma::lua::base_attachable_component::register_class(luabind::module_ &mod)
 {

@@ -36,6 +36,7 @@
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/components/global_component.hpp"
 #include "pragma/entities/components/damageable_component.hpp"
+#include "pragma/entities/components/animation_driver_component.hpp"
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
 #include "pragma/lua/policies/game_object_policy.hpp"
@@ -370,6 +371,14 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	defAnimated2.add_static_constant("EVENT_TRANSLATE_ANIMATION",pragma::Animated2Component::EVENT_TRANSLATE_ANIMATION);
 	defAnimated2.add_static_constant("EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER",pragma::Animated2Component::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER);
 	gameMod[defAnimated2];
+
+	auto defDriver = luabind::class_<pragma::AnimationDriverComponent,pragma::BaseEntityComponent>("AnimationDriverComponent");
+	defDriver.def("AddDriver",static_cast<void(*)(pragma::AnimationDriverComponent&,pragma::ComponentId,pragma::ComponentMemberIndex,const std::string&)>(
+		[](pragma::AnimationDriverComponent &hComponent,pragma::ComponentId componentId,pragma::ComponentMemberIndex memberIdx,const std::string &expression) {
+		hComponent.AddDriver(componentId,memberIdx,expression);
+	}));
+	defDriver.def("ClearDrivers",&pragma::AnimationDriverComponent::ClearDrivers);
+	gameMod[defDriver];
 
 	auto defIK = luabind::class_<pragma::IKComponent,pragma::BaseEntityComponent>("IKComponent");
 	defIK.def("SetIKControllerEnabled",&pragma::IKComponent::SetIKControllerEnabled);

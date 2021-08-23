@@ -285,5 +285,14 @@ void Lua::animation::register_library(Lua::Interface &lua)
 			return nil;
 		return {l,channel->shared_from_this()};
 	}));
+	cdAnim2.def("Save",static_cast<bool(*)(panima::Animation&,::udm::LinkedPropertyWrapper&)>([](panima::Animation &anim,::udm::LinkedPropertyWrapper &assetData) -> bool {
+		return anim.Save(assetData);
+	}));
+	cdAnim2.scope[luabind::def("Load",static_cast<std::shared_ptr<panima::Animation>(*)(lua_State*,::udm::LinkedPropertyWrapper&)>([](lua_State *l,::udm::LinkedPropertyWrapper &assetData) -> std::shared_ptr<panima::Animation> {
+		auto anim = std::make_shared<panima::Animation>();
+		if(anim->Load(assetData) == false)
+			return nullptr;
+		return anim;
+	}))];
 	animMod[cdAnim2];
 }

@@ -9,6 +9,7 @@
 #include "pragma/entities/components/animated_2_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_time_scale_component.hpp"
+#include "pragma/entities/components/animation_driver_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/model/model.h"
 #include "pragma/model/animation/animation_manager.hpp"
@@ -107,15 +108,15 @@ static constexpr bool is_type_compatible(udm::Type channelType,udm::Type memberT
 }
 
 template<typename TChannel,typename TMember,auto TMapArray> requires(is_animatable_type_v<TChannel> && is_animatable_type_v<TMember> && is_type_compatible(udm::type_to_enum<TChannel>(),udm::type_to_enum<TMember>()))
-static pragma::animation::ChannelValueSubmitter get_member_channel_submitter(pragma::BaseEntityComponent &component,uint32_t memberIdx)
+static pragma::animation::ChannelValueSubmitter get_member_channel_submitter(pragma::BaseEntityComponent &component,uint32_t memberIdx,void(*setter)(const pragma::ComponentMemberInfo&,pragma::BaseEntityComponent&,const void*,void*),void *userData=nullptr)
 {
-	return [&component,memberIdx](panima::Channel &channel,uint32_t &inOutPivotTimeIndex,double t) mutable {
+	return [&component,memberIdx,setter,userData](panima::Channel &channel,uint32_t &inOutPivotTimeIndex,double t) mutable {
 		auto *memberInfo = component.GetMemberInfo(memberIdx);
 		assert(memberInfo);
 		if constexpr(std::is_same_v<TChannel,TMember>)
 		{
 			auto value = channel.GetInterpolatedValue<TChannel>(t,inOutPivotTimeIndex,memberInfo->interpolationFunction);
-			memberInfo->setterFunction(*memberInfo,component,&value);
+			setter(*memberInfo,component,&value,userData);
 		}
 		else
 		{
@@ -146,41 +147,41 @@ static pragma::animation::ChannelValueSubmitter get_member_channel_submitter(pra
 						curVal[TMapArray[3]] = value[3];
 				}
 			}
-			memberInfo->setterFunction(*memberInfo,component,&curVal);
+			setter(*memberInfo,component,&curVal,userData);
 		}
 	};
 }
 
-template<typename TChannel,typename TMember,typename T,uint32_t I,uint32_t ARRAY_INDEX_COUNT,T MAX_ARRAY_VALUE,template<typename TChannel,typename TMember,auto TTFunc> class TFunc,T... values>
-	static pragma::animation::ChannelValueSubmitter runtime_array_to_compile_time(pragma::BaseEntityComponent &component,uint32_t memberIdx,const std::array<T,ARRAY_INDEX_COUNT> &rtValues);
+template<typename TChannel,typename TMember,typename T,uint32_t I,uint32_t ARRAY_INDEX_COUNT,T MAX_ARRAY_VALUE,template<typename,typename,auto TTFunc> class TFunc,T... values>
+	static pragma::animation::ChannelValueSubmitter runtime_array_to_compile_time(pragma::BaseEntityComponent &component,uint32_t memberIdx,void(*setter)(const pragma::ComponentMemberInfo&,pragma::BaseEntityComponent&,const void*,void*),void *userData,const std::array<T,ARRAY_INDEX_COUNT> &rtValues);
 
-template<typename TChannel,typename TMember,typename T,uint32_t I,uint32_t VAL,uint32_t ARRAY_INDEX_COUNT,T MAX_ARRAY_VALUE,template<typename TChannel,typename TMember,auto TTFunc> class TFunc,T... values>
-	static pragma::animation::ChannelValueSubmitter runtime_array_to_compile_time_it(pragma::BaseEntityComponent &component,uint32_t memberIdx,const std::array<T,ARRAY_INDEX_COUNT> &rtValues)
+template<typename TChannel,typename TMember,typename T,uint32_t I,uint32_t VAL,uint32_t ARRAY_INDEX_COUNT,T MAX_ARRAY_VALUE,template<typename,typename,auto TTFunc> class TFunc,T... values>
+	static pragma::animation::ChannelValueSubmitter runtime_array_to_compile_time_it(pragma::BaseEntityComponent &component,uint32_t memberIdx,void(*setter)(const pragma::ComponentMemberInfo&,pragma::BaseEntityComponent&,const void*,void*),void *userData,const std::array<T,ARRAY_INDEX_COUNT> &rtValues)
 {
     if(rtValues[I] == VAL)
-		return runtime_array_to_compile_time<TChannel,TMember,T,I +1,ARRAY_INDEX_COUNT,MAX_ARRAY_VALUE,TFunc,values...,VAL>(component,memberIdx,rtValues);
+		return runtime_array_to_compile_time<TChannel,TMember,T,I +1,ARRAY_INDEX_COUNT,MAX_ARRAY_VALUE,TFunc,values...,VAL>(component,memberIdx,setter,userData,rtValues);
     else
     {
         if constexpr(VAL <= MAX_ARRAY_VALUE)
-            return runtime_array_to_compile_time_it<TChannel,TMember,T,I,VAL +1,ARRAY_INDEX_COUNT,MAX_ARRAY_VALUE,TFunc,values...>(component,memberIdx,rtValues);
+            return runtime_array_to_compile_time_it<TChannel,TMember,T,I,VAL +1,ARRAY_INDEX_COUNT,MAX_ARRAY_VALUE,TFunc,values...>(component,memberIdx,setter,userData,rtValues);
     }
 	return nullptr;
 }
 
-template<typename TChannel,typename TMember,typename T,uint32_t I,uint32_t ARRAY_INDEX_COUNT,T MAX_ARRAY_VALUE,template<typename TChannel,typename TMember,auto TTFunc> class TFunc,T... values>
-	pragma::animation::ChannelValueSubmitter runtime_array_to_compile_time(pragma::BaseEntityComponent &component,uint32_t memberIdx,const std::array<T,ARRAY_INDEX_COUNT> &rtValues)
+template<typename TChannel,typename TMember,typename T,uint32_t I,uint32_t ARRAY_INDEX_COUNT,T MAX_ARRAY_VALUE,template<typename,typename,auto TTFunc> class TFunc,T... values>
+	pragma::animation::ChannelValueSubmitter runtime_array_to_compile_time(pragma::BaseEntityComponent &component,uint32_t memberIdx,void(*setter)(const pragma::ComponentMemberInfo&,pragma::BaseEntityComponent&,const void*,void*),void *userData,const std::array<T,ARRAY_INDEX_COUNT> &rtValues)
 	{
 		if constexpr(I < ARRAY_INDEX_COUNT)
-			return runtime_array_to_compile_time_it<TChannel,TMember,T,I,0,ARRAY_INDEX_COUNT,MAX_ARRAY_VALUE,TFunc,values...>(component,memberIdx,rtValues);
+			return runtime_array_to_compile_time_it<TChannel,TMember,T,I,0,ARRAY_INDEX_COUNT,MAX_ARRAY_VALUE,TFunc,values...>(component,memberIdx,setter,userData,rtValues);
         else
-			return TFunc<TChannel,TMember,std::array<T,ARRAY_INDEX_COUNT>{values...}>{}(component,memberIdx);
+			return TFunc<TChannel,TMember,std::array<T,ARRAY_INDEX_COUNT>{values...}>{}(component,memberIdx,setter,userData);
 	}
 
 template<typename TChannel,typename TMember,auto TMapArray>
 struct get_member_channel_submitter_wrapper {
-    pragma::animation::ChannelValueSubmitter operator()(pragma::BaseEntityComponent &component,uint32_t memberIdx) const
+    pragma::animation::ChannelValueSubmitter operator()(pragma::BaseEntityComponent &component,uint32_t memberIdx,void(*setter)(const pragma::ComponentMemberInfo&,pragma::BaseEntityComponent&,const void*,void*),void *userData) const
 	{
-		return get_member_channel_submitter<TChannel,TMember,TMapArray>(component,memberIdx);
+		return get_member_channel_submitter<TChannel,TMember,TMapArray>(component,memberIdx,setter,userData);
 	}
 };
 
@@ -188,6 +189,19 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters()
 {
 	for(auto &animManager : m_animationManagers)
 		InitializeAnimationChannelValueSubmitters(*animManager);
+}
+
+void Animated2Component::OnEntityComponentAdded(BaseEntityComponent &component)
+{
+	BaseEntityComponent::OnEntityComponentAdded(component);
+	if(typeid(component) == typeid(AnimationDriverComponent))
+		m_driverComponent = &static_cast<AnimationDriverComponent&>(component);
+}
+void Animated2Component::OnEntityComponentRemoved(BaseEntityComponent &component)
+{
+	BaseEntityComponent::OnEntityComponentRemoved(component);
+	if(typeid(component) == typeid(AnimationDriverComponent))
+		m_driverComponent = nullptr;
 }
 
 void Animated2Component::InitializeAnimationChannelValueSubmitters(animation::AnimationManager &manager)
@@ -199,6 +213,7 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(animation::An
 		channelValueSubmitters.clear();
 		return;
 	}
+	auto *driverC = GetDriverComponent();
 	auto &channels = anim->GetChannels();
 	channelValueSubmitters.resize(channels.size());
 	// TODO: Reload this when animation has changed, or if component data has changed (e.g. animated component has changed model and therefore bone positions and rotational data)
@@ -246,15 +261,37 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(animation::An
 		auto channelValueType = channel->GetValueType();
 		auto *memberInfo = hComponent->GetMemberInfo(*memberIdx);
 		auto valueType = memberInfo->type;
+
+		AnimationDriver *driver = nullptr;
+		if(driverC)
+		{
+			driver = driverC->FindDriver(hComponent->GetComponentId(),*memberIdx);
+			if(driver && (!driver->dataValue.data || driver->dataValue.type != memberInfo->type))
+				continue;
+		}
 		
 		auto &component = *hComponent;
-		auto vsGetMemberChannelSubmitter = [&localPath,&memberIdx,channelIdx,&channelValueSubmitters,&component]<typename TMember>(auto tag) mutable {
+		auto vsGetMemberChannelSubmitter = [&localPath,&memberIdx,channelIdx,&channelValueSubmitters,&component,driver]<typename TMember>(auto tag) mutable {
 			using TChannel = decltype(tag)::type;
 			auto strValueComponent = localPath.GetFront();
+			constexpr auto setMemberValue = [](const pragma::ComponentMemberInfo &memberInfo,pragma::BaseEntityComponent &component,const void *value,void *userData) {
+				memberInfo.setterFunction(memberInfo,component,value);
+			};
+			constexpr auto setDriverValue = [](const pragma::ComponentMemberInfo &memberInfo,pragma::BaseEntityComponent &component,const void *value,void *userData) {
+				memcpy(static_cast<AnimationDriver*>(userData)->dataValue.data.get(),value,sizeof(TMember));
+			};
 			if(strValueComponent.empty())
 			{
 				if constexpr(std::is_same_v<TChannel,TMember>)
-					channelValueSubmitters[channelIdx] = get_member_channel_submitter<TChannel,TMember,0>(component,*memberIdx);
+				{
+					// If the channel has no driver, we can apply the value directly to maximize performance.
+					// Otherwise we have to relay the value to the driver first, which will then apply it when invoked later.
+					// This is because the driver may manipulate the value before it is actually applied.
+					if(!driver)
+						channelValueSubmitters[channelIdx] = get_member_channel_submitter<TChannel,TMember,0>(component,*memberIdx,setMemberValue);
+					else
+						channelValueSubmitters[channelIdx] = get_member_channel_submitter<TChannel,TMember,0>(component,*memberIdx,setDriverValue,driver);
+				}
 				return;
 			}
 			constexpr auto channelType = udm::type_to_enum<TChannel>();
@@ -335,9 +372,18 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(animation::An
 					}
 					++idx;
 				}
-				channelValueSubmitters[channelIdx] = runtime_array_to_compile_time<
-					TChannel,TMember,decltype(componentIndices)::value_type,0,componentIndices.size(),numComponentsMember,get_member_channel_submitter_wrapper
-				>(component,*memberIdx,componentIndices);
+				if(!driver)
+				{
+					channelValueSubmitters[channelIdx] = runtime_array_to_compile_time<
+						TChannel,TMember,decltype(componentIndices)::value_type,0,componentIndices.size(),numComponentsMember,get_member_channel_submitter_wrapper
+					>(component,*memberIdx,setMemberValue,nullptr,componentIndices);
+				}
+				else
+				{
+					channelValueSubmitters[channelIdx] = runtime_array_to_compile_time<
+						TChannel,TMember,decltype(componentIndices)::value_type,0,componentIndices.size(),numComponentsMember,get_member_channel_submitter_wrapper
+					>(component,*memberIdx,setDriverValue,driver,componentIndices);
+				}
 			}
 		};
 

@@ -18,6 +18,7 @@
 #include "pragma/entities/components/usable_component.hpp"
 #include "pragma/entities/components/animated_2_component.hpp"
 #include "pragma/entities/components/composite_component.hpp"
+#include "pragma/entities/components/animation_driver_component.hpp"
 #include "pragma/entities/components/basegravity.h"
 
 void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentManager)
@@ -33,6 +34,7 @@ void Game::InitializeEntityComponents(pragma::EntityComponentManager &componentM
 	componentManager.RegisterComponentType<pragma::GlobalNameComponent>("global");
 	componentManager.RegisterComponentType<pragma::Animated2Component>("animated2");
 	componentManager.RegisterComponentType<pragma::CompositeComponent>("composite");
+	componentManager.RegisterComponentType<pragma::AnimationDriverComponent>("animation_driver");
 
 	pragma::BaseEntityComponent::RegisterEvents(componentManager);
 	BaseEntity::RegisterEvents(componentManager);

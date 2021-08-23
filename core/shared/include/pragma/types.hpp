@@ -17,6 +17,12 @@ namespace util {class EnumRegister;};
 class PhysObj;
 using PhysObjHandle = util::TWeakSharedHandle<PhysObj>;
 
+namespace udm
+{
+	struct Property;
+	using PProperty = std::shared_ptr<Property>;
+};
+
 namespace umath
 {
 	struct Vertex;

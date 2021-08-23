@@ -1175,7 +1175,8 @@ static void autogenerate()
 		{"pr_dmx","E:/projects/pragma/build_winx64/modules/pr_dmx/RelWithDebInfo/pr_dmx.pdb"},
 		{"pr_cycles","E:/projects/pragma/build_winx64/modules/pr_cycles/RelWithDebInfo/pr_unirender.pdb"},
 		{"pr_openvr","E:/projects/pragma/build_winx64/modules/pr_openvr/RelWithDebInfo/pr_openvr.pdb"},
-		{"pr_steamworks","E:/projects/pragma/build_winx64/modules/pr_steamworks/RelWithDebInfo/pr_steamworks.pdb"}
+		{"pr_steamworks","E:/projects/pragma/build_winx64/modules/pr_steamworks/RelWithDebInfo/pr_steamworks.pdb"},
+		{"panima","E:/projects/pragma/build_winx64/external_libs/panima/RelWithDebInfo/panima.pdb"}
 	};
 	pragma::lua::PdbManager pdbManager {};
 	if(pdbManager.Initialize())

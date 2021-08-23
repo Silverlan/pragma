@@ -316,11 +316,15 @@ bool Model::LoadFromAssetData(Game &game,const udm::AssetData &data,std::string 
 	auto isStatic = umath::is_flag_set(flags,Model::Flags::Static);
 	if(!isStatic)
 	{
-		auto &ref = GetReference();
 		auto udmSkeleton = udm["skeleton"];
 		m_skeleton = panima::Skeleton::Load(udm::AssetData{udmSkeleton},outErr);
 		if(m_skeleton == nullptr)
 			return false;
+		auto &ref = GetReference();
+		auto &poses = m_skeleton->GetBonePoses();
+		ref.SetBoneCount(poses.size());
+		for(uint32_t boneId = 0u; auto &pose : poses)
+			ref.SetBonePose(boneId++,pose);
 
 		auto &attachments = GetAttachments();
 		auto udmAttachments = udm["attachments"];
@@ -742,6 +746,16 @@ bool Model::Save(Game &game,udm::AssetDataArg outData,std::string &outErr)
 		auto udmSkeleton = udm["skeleton"];
 		auto &skeleton = GetSkeleton();
 		auto &reference = GetReference();
+		for(uint32_t boneId = 0u; auto &pose : reference.GetBoneTransforms())
+		{
+			auto *pscale = reference.GetBoneScale(boneId);
+			umath::ScaledTransform scaledPose {pose};
+			if(pscale)
+				scaledPose.SetScale(*pscale);
+			skeleton.GetBonePoses()[boneId] = scaledPose;
+			++boneId;
+		}
+
 		if(skeleton.Save(udm::AssetData{udmSkeleton},outErr) == false)
 			return false;
 

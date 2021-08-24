@@ -228,7 +228,7 @@ namespace pragma
 		) const;
 
 		virtual bool MaintainAnimations(double dt);
-		virtual void OnTick(double dt) override;
+		void UpdateAnimations(double dt);
 		bool MaintainGestures(double dt);
 
 		virtual std::optional<Mat4> GetVertexTransformMatrix(const ModelSubMesh &subMesh,uint32_t vertexId) const;

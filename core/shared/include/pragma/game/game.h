@@ -73,6 +73,7 @@ class GibletCreateInfo;
 enum class RayCastFlags : uint32_t;
 namespace pragma
 {
+	using ComponentId = uint32_t;
 	class BaseWorldComponent;
 	class BaseEntityComponent;
 	class BasePhysicsComponent;
@@ -340,6 +341,9 @@ public:
 	std::vector<pragma::BaseEntityComponent*> &GetEntityTickComponents() {return m_entityTickComponents;}
 	std::vector<pragma::BaseGamemodeComponent*> &GetGamemodeComponents() {return m_gamemodeComponents;}
 
+	void UpdateEntityAnimations(double dt);
+	void UpdateEntityAnimationDrivers(double dt);
+
 	// Debug
 	virtual void DrawLine(const Vector3 &start,const Vector3 &end,const Color &color,float duration=0.f)=0;
 	virtual void DrawBox(const Vector3 &start,const Vector3 &end,const EulerAngles &ang,const Color &color,float duration=0.f)=0;
@@ -351,6 +355,9 @@ protected:
 	virtual void UpdateTime();
 
 	GameFlags m_flags = GameFlags::InitialTick;
+	pragma::ComponentId m_animatedComponentId = std::numeric_limits<pragma::ComponentId>::max();
+	pragma::ComponentId m_animated2ComponentId = std::numeric_limits<pragma::ComponentId>::max();
+	pragma::ComponentId m_animationDriverComponentId = std::numeric_limits<pragma::ComponentId>::max();
 	std::vector<BaseEntity*> m_baseEnts;
 	std::queue<EntityHandle> m_entsScheduledForRemoval;
 	std::vector<pragma::ComponentHandle<pragma::BasePhysicsComponent>> m_awakePhysicsEntities;

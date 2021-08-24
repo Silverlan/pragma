@@ -40,13 +40,13 @@ void pragma::AnimationDriverComponent::Initialize()
 void pragma::AnimationDriverComponent::OnRemove()
 {
 	BaseEntityComponent::OnRemove();
-	if(m_cbOnAnimationsUpdated.IsValid())
-		m_cbOnAnimationsUpdated.Remove();
+	//if(m_cbOnAnimationsUpdated.IsValid())
+	//	m_cbOnAnimationsUpdated.Remove();
 }
 void AnimationDriverComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);
-	if(typeid(component) == typeid(Animated2Component))
+	/*if(typeid(component) == typeid(Animated2Component))
 	{
 		if(m_cbOnAnimationsUpdated.IsValid())
 			m_cbOnAnimationsUpdated.Remove();
@@ -54,16 +54,16 @@ void AnimationDriverComponent::OnEntityComponentAdded(BaseEntityComponent &compo
 			ApplyDrivers();
 			return util::EventReply::Unhandled;
 		});
-	}
+	}*/
 }
 void AnimationDriverComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentRemoved(component);
-	if(typeid(component) == typeid(Animated2Component))
+	/*if(typeid(component) == typeid(Animated2Component))
 	{
 		if(m_cbOnAnimationsUpdated.IsValid())
 			m_cbOnAnimationsUpdated.Remove();
-	}
+	}*/
 }
 void pragma::AnimationDriverComponent::ClearDrivers()
 {

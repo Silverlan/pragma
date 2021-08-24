@@ -58,7 +58,6 @@ namespace pragma
 	protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 		std::unordered_map<AnimationDriverHash,AnimationDriver> m_drivers;
-		CallbackHandle m_cbOnAnimationsUpdated {};
 	};
 };
 

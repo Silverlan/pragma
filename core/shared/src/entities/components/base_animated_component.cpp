@@ -111,10 +111,10 @@ void BaseAnimatedComponent::Initialize()
 		OnModelChanged(mdl);
 	}
 
-	SetTickPolicy(TickPolicy::WhenVisible);
+	// SetTickPolicy(TickPolicy::WhenVisible);
 }
 
-void BaseAnimatedComponent::OnTick(double dt)
+void BaseAnimatedComponent::UpdateAnimations(double dt)
 {
 	if(ShouldUpdateBones() == false)
 		return;

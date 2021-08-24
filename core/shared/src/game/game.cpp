@@ -33,6 +33,9 @@
 #include "pragma/entities/trigger/base_trigger_touch.hpp"
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/components/base_gamemode_component.hpp"
+#include "pragma/entities/components/base_model_component.hpp"
+#include "pragma/entities/components/base_animated_component.hpp"
+#include "pragma/entities/components/animation_driver_component.hpp"
 #include "pragma/entities/entity_component_manager.hpp"
 #include "pragma/entities/prop/prop_base.h"
 #include "pragma/entities/components/base_physics_component.hpp"
@@ -380,6 +383,14 @@ void Game::Initialize()
 {
 	m_componentManager = InitializeEntityComponentManager();
 	InitializeEntityComponents(*m_componentManager);
+
+	auto r = m_componentManager->GetComponentTypeId("animated",m_animatedComponentId);
+	r = r && m_componentManager->GetComponentTypeId("animated2",m_animated2ComponentId);
+	r = r && m_componentManager->GetComponentTypeId("animation_driver",m_animationDriverComponentId);
+	assert(r);
+	if(!r)
+		Con::crit<<"ERROR: Unable to determine animated component id!"<<Con::endl;
+
 	InitializeLuaScriptWatcher();
 	m_scriptWatcher->MountDirectory("lua");
 	auto &addons = AddonSystem::GetMountedAddons();
@@ -598,6 +609,18 @@ std::size_t Game::GetBaseEntityCount() const {return m_numEnts;}
 
 void Game::ScheduleEntityForRemoval(BaseEntity &ent) {m_entsScheduledForRemoval.push(ent.GetHandle());}
 
+void Game::UpdateEntityAnimations(double dt)
+{
+	for(auto *ent : EntityIterator{*this,m_animatedComponentId})
+		ent->GetAnimatedComponent()->UpdateAnimations(dt);
+}
+
+void Game::UpdateEntityAnimationDrivers(double dt)
+{
+	for(auto *ent : EntityIterator{*this,m_animationDriverComponentId})
+		ent->GetComponent<pragma::AnimationDriverComponent>()->ApplyDrivers();
+}
+
 void Game::Tick()
 {
 	StartProfilingStage(CPUProfilingPhase::Tick);
@@ -695,6 +718,8 @@ void Game::Tick()
 		}
 		++i;
 	}
+	UpdateEntityAnimations(m_tDeltaTick);
+	UpdateEntityAnimationDrivers(m_tDeltaTick); // Drivers *have* to be updated *after* everything else!
 
 	StopProfilingStage(CPUProfilingPhase::GameObjectLogic);
 

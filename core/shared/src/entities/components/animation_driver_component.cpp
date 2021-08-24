@@ -69,6 +69,27 @@ void pragma::AnimationDriverComponent::ClearDrivers()
 {
 	m_drivers.clear();
 }
+bool pragma::AnimationDriverComponent::AddDriver(ComponentId componentId,const std::string &memberName,const std::string &expression,udm::PProperty constants)
+{
+	auto *info = GetEntity().GetComponentManager()->GetComponentInfo(componentId);
+	if(info)
+	{
+		auto memberIdx = info->FindMember(memberName);
+		if(memberIdx.has_value())
+		{
+			AddDriver(componentId,*memberIdx,expression,constants);
+			return true;
+		}
+	}
+	auto hComponent = GetEntity().FindComponent(componentId);
+	if(hComponent.expired())
+		return false;
+	auto memberIdx = hComponent->GetMemberIndex(memberName);
+	if(!memberIdx.has_value())
+		return false;
+	AddDriver(componentId,*memberIdx,expression,constants);
+	return true;
+}
 void pragma::AnimationDriverComponent::AddDriver(ComponentId componentId,ComponentMemberIndex memberIdx,const std::string &expression,udm::PProperty constants)
 {
 	AnimationDriver driver {};

@@ -377,6 +377,10 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 		[](pragma::AnimationDriverComponent &hComponent,pragma::ComponentId componentId,pragma::ComponentMemberIndex memberIdx,const std::string &expression) {
 		hComponent.AddDriver(componentId,memberIdx,expression);
 	}));
+	defDriver.def("AddDriver",static_cast<bool(*)(pragma::AnimationDriverComponent&,pragma::ComponentId,const std::string&,const std::string&)>(
+		[](pragma::AnimationDriverComponent &hComponent,pragma::ComponentId componentId,const std::string &memberName,const std::string &expression) {
+		return hComponent.AddDriver(componentId,memberName,expression);
+	}));
 	defDriver.def("ClearDrivers",&pragma::AnimationDriverComponent::ClearDrivers);
 	gameMod[defDriver];
 

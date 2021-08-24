@@ -43,6 +43,7 @@ namespace pragma
 
 		void ClearDrivers();
 		void AddDriver(ComponentId componentId,ComponentMemberIndex memberIdx,const std::string &expression,udm::PProperty constants=nullptr);
+		bool AddDriver(ComponentId componentId,const std::string &memberName,const std::string &expression,udm::PProperty constants=nullptr);
 		void ApplyDrivers();
 
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;

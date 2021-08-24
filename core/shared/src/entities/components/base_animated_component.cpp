@@ -225,7 +225,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		ustring::to_lower(lname);
 
 		auto memberInfoPos = pragma::ComponentMemberInfo::CreateDummy();
-		memberInfoPos.name = "bone/" +lname +"/position";
+		memberInfoPos.SetName("bone/" +lname +"/position");
 		memberInfoPos.type = udm::Type::Vector3;
 		memberInfoPos.userIndex = bone->ID;
 		memberInfoPos.SetGetterFunction<BaseAnimatedComponent,Vector3,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,Vector3&)>(
@@ -240,7 +240,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		})>();
 
 		auto memberInfoRot = memberInfoPos;
-		memberInfoRot.name = "bone/" +lname +"/rotation";
+		memberInfoRot.SetName("bone/" +lname +"/rotation");
 		memberInfoRot.type = udm::Type::Quaternion;
 		memberInfoRot.SetGetterFunction<BaseAnimatedComponent,Quat,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,Quat&)>(
 			[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,Quat &outValue) {
@@ -254,7 +254,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		})>();
 
 		auto memberInfoScale = memberInfoPos;
-		memberInfoScale.name = "bone/" +lname +"/scale";
+		memberInfoScale.SetName("bone/" +lname +"/scale");
 		memberInfoScale.SetGetterFunction<BaseAnimatedComponent,Vector3,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,Vector3&)>(
 			[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,Vector3 &outValue) {
 			auto *scale = component.GetBoneScale(memberInfo.userIndex);

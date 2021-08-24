@@ -14,15 +14,41 @@ using namespace pragma;
 decltype(EntityComponentManager::s_nextEventId) EntityComponentManager::s_nextEventId = 0u;
 decltype(EntityComponentManager::s_componentEvents) EntityComponentManager::s_componentEvents = {};
 
-std::optional<ComponentMemberIndex> ComponentInfo::FindMember(const std::string &name) const
+size_t pragma::get_component_member_name_hash(const std::string &name)
 {
 	auto lname = name;
 	ustring::to_lower(lname);
-	auto it = std::find_if(members.begin(),members.end(),[&lname](const ComponentMemberInfo &memberInfo) {
-		return memberInfo.name == lname;
+	return std::hash<std::string>{}(lname);
+}
+std::string pragma::get_normalized_component_member_name(const std::string &name)
+{
+	auto lname = name;
+	ustring::to_lower(lname);
+	return lname;
+}
+void ComponentMemberInfo::SetName(const std::string &name)
+{
+	m_name = name;
+	m_nameHash = get_component_member_name_hash(name);
+}
+void ComponentMemberInfo::SetName(std::string &&name)
+{
+	m_name = std::move(name);
+	m_nameHash = get_component_member_name_hash(m_name);
+}
+
+//////////////
+
+std::optional<ComponentMemberIndex> ComponentInfo::FindMember(const std::string &name) const
+{
+	auto hash = get_component_member_name_hash(name);
+	auto it = std::find_if(members.begin(),members.end(),[hash](const ComponentMemberInfo &memberInfo) {
+		return memberInfo.GetNameHash() == hash;
 	});
 	return (it != members.end()) ? (it -members.begin()) : std::numeric_limits<ComponentMemberIndex>::max();
 }
+
+//////////////
 
 util::TSharedHandle<BaseEntityComponent> EntityComponentManager::CreateComponent(ComponentId componentId,BaseEntity &ent) const
 {
@@ -191,7 +217,7 @@ ComponentInfo *EntityComponentManager::GetComponentInfo(ComponentId id)
 }
 ComponentMemberIndex EntityComponentManager::RegisterMember(ComponentInfo &componentInfo,ComponentMemberInfo &&memberInfo)
 {
-	auto lname = memberInfo.name;
+	auto lname = memberInfo.GetName();
 	ustring::to_lower(lname);
 	componentInfo.members.push_back(std::move(memberInfo));
 	auto idx = componentInfo.members.size() -1;
@@ -338,5 +364,5 @@ ComponentMemberInfo pragma::ComponentMemberInfo::CreateDummy()
 	return ComponentMemberInfo{};
 }
 pragma::ComponentMemberInfo::ComponentMemberInfo(std::string &&name,udm::Type type,const ApplyFunction &applyFunc,const GetFunction &getFunc)
-	: name{std::move(name)},type{type},setterFunction{applyFunc},getterFunction{getFunc}
+	: m_name{std::move(name)},m_nameHash{get_component_member_name_hash(m_name)},type{type},setterFunction{applyFunc},getterFunction{getFunc}
 {}

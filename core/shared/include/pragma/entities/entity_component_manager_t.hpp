@@ -26,7 +26,7 @@ namespace pragma
 		static ComponentMemberInfo create_component_member_info(std::string &&name)
 	{
 		auto memberInfo = ComponentMemberInfo::CreateDummy();
-		memberInfo.name = std::move(name);
+		memberInfo.SetName(std::move(name));
 		memberInfo.type = udm::type_to_enum<T>();
 		memberInfo.SetGetterFunction<TComponent,T,TGetter>();
 		memberInfo.SetSetterFunction<TComponent,T,TSetter>();

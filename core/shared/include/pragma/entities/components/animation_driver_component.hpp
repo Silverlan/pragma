@@ -8,6 +8,7 @@
 #define __ANIMATION_DRIVER_COMPONENT_HPP__
 
 #include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/entities/entity_uuid_ref.hpp"
 
 struct AnimationEvent;
 namespace util {class Path;};
@@ -20,8 +21,10 @@ namespace pragma
 	};
 	struct DLLNETWORK AnimationDriverVariable
 	{
-		util::Uuid entityUuid;
-		util::Path variable;
+		AnimationDriverVariable(util::Uuid entUuid,const util::Path &var);
+		AnimationDriverVariable(const AnimationDriverVariable&)=default;
+		AnimationDriverVariable &operator=(const AnimationDriverVariable&)=default;
+		EntityUuidComponentMemberRef memberRef;
 	};
 	using AnimationDriverVariableList = std::unordered_map<std::string,AnimationDriverVariable>;
 	struct DLLNETWORK AnimationDriver
@@ -30,10 +33,11 @@ namespace pragma
 		luabind::object luaExpression {};
 		AnimationDataValue dataValue {};
 		pragma::ComponentId componentId = std::numeric_limits<pragma::ComponentId>::max();
-		pragma::ComponentMemberIndex memberIndex = std::numeric_limits<pragma::ComponentMemberIndex>::max();
 		AnimationDriverVariableList variables;
-
+		
+		const ComponentMemberInfo *GetMemberInfo(const BaseEntityComponent &component) const;
 		const ComponentMemberInfo *GetMemberInfo(const BaseEntity &ent) const;
+		ComponentMemberReference memberReference;
 	};
 	class DLLNETWORK AnimationDriverComponent final
 		: public BaseEntityComponent

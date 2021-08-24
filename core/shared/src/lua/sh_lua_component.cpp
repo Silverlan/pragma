@@ -244,9 +244,9 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 					return create_component_member_info<
 						BaseLuaBaseEntityComponent,T,
 						[](const ComponentMemberInfo &memberInfo,BaseLuaBaseEntityComponent &component,const T &value) {
-							component.GetLuaObject()[memberInfo.name] = value;
+							component.GetLuaObject()[memberInfo.GetName()] = value;
 						},[](const ComponentMemberInfo &memberInfo,BaseLuaBaseEntityComponent &component,T &value) {
-							auto *v = luabind::object_cast_nothrow<T*>(component.GetLuaObject()[memberInfo.name],static_cast<T*>(nullptr));
+							auto *v = luabind::object_cast_nothrow<T*>(component.GetLuaObject()[memberInfo.GetName()],static_cast<T*>(nullptr));
 							if(!v)
 								value = {};
 							else

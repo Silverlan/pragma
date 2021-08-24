@@ -65,8 +65,8 @@ const ComponentMemberInfo *BaseEntityComponent::FindMemberInfo(const std::string
 const ComponentMemberInfo *BaseEntityComponent::GetMemberInfo(ComponentMemberIndex idx) const
 {
 	auto *componentInfo = GetComponentInfo();
-	if(!componentInfo)
-		return {};
+	if(!componentInfo || idx >= componentInfo->members.size())
+		return nullptr;
 	return &componentInfo->members[idx];
 }
 const ComponentInfo *BaseEntityComponent::GetComponentInfo() const

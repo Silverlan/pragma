@@ -268,7 +268,11 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	entityComponentDef.add_static_constant("CALLBACK_TYPE_COMPONENT",umath::to_integral(pragma::BaseEntityComponent::CallbackType::Component));
 
 	luabind::class_<pragma::ComponentMemberInfo> defMemberInfo {"ComponentMemberInfo"};
-	defMemberInfo.def_readonly("name",&pragma::ComponentMemberInfo::name);
+	defMemberInfo.property("name",static_cast<std::string(*)(lua_State*,const pragma::ComponentMemberInfo&)>([](lua_State *l,const pragma::ComponentMemberInfo &memInfo) {
+		return memInfo.GetName();
+	}),static_cast<void(*)(lua_State*,pragma::ComponentMemberInfo&,const std::string&)>([](lua_State *l,pragma::ComponentMemberInfo &memInfo,const std::string &name) {
+		memInfo.SetName(name);
+	}));
 	defMemberInfo.def_readonly("type",&pragma::ComponentMemberInfo::type);
 	entityComponentDef.scope[defMemberInfo];
 

@@ -9,6 +9,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/entities/entity_component_info.hpp"
+#include "pragma/entities/component_member_reference.hpp"
 #include "pragma/types.hpp"
 #include <cinttypes>
 #include <string>
@@ -30,7 +31,8 @@ class BaseEntity;
 namespace pragma
 {
 	class BaseEntityComponent;
-	using ComponentMemberIndex = uint32_t;
+	DLLNETWORK std::string get_normalized_component_member_name(const std::string &name);
+	DLLNETWORK size_t get_component_member_name_hash(const std::string &name);
 	struct DLLNETWORK ComponentMemberInfo
 	{
 		using ApplyFunction = void(*)(const ComponentMemberInfo&,BaseEntityComponent&,const void*);
@@ -105,7 +107,11 @@ namespace pragma
 			};
 		}
 
-		std::string name;
+		void SetName(const std::string &name);
+		void SetName(std::string &&name);
+		const std::string &GetName() const {return m_name;}
+		size_t GetNameHash() const {return m_nameHash;}
+
 		udm::Type type;
 		ApplyFunction setterFunction = nullptr;
 		GetFunction getterFunction = nullptr;
@@ -117,9 +123,10 @@ namespace pragma
 		};
 	private:
 		ComponentMemberInfo()=default;
+		std::string m_name;
+		size_t m_nameHash = 0;
 	};
 
-	class BaseEntityComponent;
 	enum class ComponentFlags : uint8_t
 	{
 		None = 0u,

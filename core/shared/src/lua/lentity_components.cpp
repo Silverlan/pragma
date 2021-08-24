@@ -238,9 +238,7 @@ template<typename TMemberId> requires(std::is_same_v<TMemberId,pragma::Component
 		util::Path path {pair.second};
 		auto uuid = path.GetFront();
 		path.PopFront();
-		auto &var = driverVars.insert(std::make_pair(pair.first,pragma::AnimationDriverVariable{})).first->second;
-		var.entityUuid = util::uuid_string_to_bytes(uuid);
-		var.variable = std::move(path);
+		driverVars.insert(std::make_pair(pair.first,pragma::AnimationDriverVariable{util::uuid_string_to_bytes(uuid),path}));
 	}
 	hComponent.AddDriver(componentId,memberIdx,expression,std::move(driverVars));
 }

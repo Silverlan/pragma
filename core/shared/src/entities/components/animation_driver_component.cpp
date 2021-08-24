@@ -15,13 +15,33 @@
 
 using namespace pragma;
 #pragma optimize("",off)
+static EntityUuidComponentMemberRef get_member_ref(util::Uuid entUuid,util::Path var)
+{
+	auto componentName = var.GetFront();
+	var.PopFront();
+	auto &memberName = var.GetString();
+	return EntityUuidComponentMemberRef{entUuid,componentName,memberName};
+}
+AnimationDriverVariable::AnimationDriverVariable(util::Uuid entUuid,const util::Path &var)
+	: memberRef{get_member_ref(entUuid,var)}
+{}
+
+////////////
+
+const ComponentMemberInfo *pragma::AnimationDriver::GetMemberInfo(const BaseEntityComponent &component) const
+{
+	return memberReference.GetMemberInfo(component);
+}
 const ComponentMemberInfo *pragma::AnimationDriver::GetMemberInfo(const BaseEntity &ent) const
 {
 	auto hComponent = ent.FindComponent(componentId);
 	if(hComponent.expired())
 		return nullptr;
-	return hComponent->GetMemberInfo(memberIndex);
+	return GetMemberInfo(*hComponent);
 }
+
+////////////
+
 static inline pragma::AnimationDriverComponent::AnimationDriverHash get_animation_driver_hash(ComponentId componentId,ComponentMemberIndex memberIdx)
 {
 	return util::hash_combine<uint64_t>(util::hash_combine<uint64_t>(0,componentId),memberIdx);
@@ -119,16 +139,20 @@ bool pragma::AnimationDriverComponent::AddDriver(ComponentId componentId,const s
 }
 void pragma::AnimationDriverComponent::AddDriver(ComponentId componentId,ComponentMemberIndex memberIdx,const std::string &expression,AnimationDriverVariableList &&vars)
 {
+	auto hComponent = GetEntity().FindComponent(componentId);
+	if(hComponent.expired())
+		return;
+	auto *memberInfo = hComponent->GetMemberInfo(memberIdx);
+	if(!memberInfo)
+		return;
+	RemoveDriver(componentId,memberIdx);
+
 	AnimationDriver driver {};
 	driver.expression = expression;
 	driver.variables = std::move(vars);
 	driver.componentId = componentId;
-	driver.memberIndex = memberIdx;
+	driver.memberReference = ComponentMemberReference{memberInfo->GetName()};
 	
-	auto *memberInfo = driver.GetMemberInfo(GetEntity());
-	if(!memberInfo)
-		return;
-	RemoveDriver(componentId,memberIdx);
 	driver.dataValue.type = memberInfo->type;
 	udm::visit_ng(memberInfo->type,[&driver](auto tag) {
 		using T = decltype(tag)::type;
@@ -168,6 +192,7 @@ pragma::AnimationDriver *pragma::AnimationDriverComponent::FindDriver(ComponentI
 void pragma::AnimationDriverComponent::ApplyDrivers()
 {
 	auto *l = GetLuaState();
+	auto &game = *GetEntity().GetNetworkState()->GetGameState();
 	for(auto &pair : m_drivers)
 	{
 		auto &driver = pair.second;
@@ -176,7 +201,8 @@ void pragma::AnimationDriverComponent::ApplyDrivers()
 			auto hComponent = GetEntity().FindComponent(driver.componentId);
 			if(hComponent.expired())
 				continue;
-			auto *member = hComponent->GetMemberInfo(driver.memberIndex);
+			auto &component = *hComponent;
+			auto *member = driver.GetMemberInfo(component);
 			if(!member)
 				continue;
 			// At this point driver.dataValue should contain the interpolated value, which was assigned by the
@@ -196,30 +222,13 @@ void pragma::AnimationDriverComponent::ApplyDrivers()
 			for(auto &pair : driver.variables)
 			{
 				auto &var = pair.second;
-				EntityIterator entIt {*GetEntity().GetNetworkState()->GetGameState()};
-				entIt.AttachFilter<EntityIteratorFilterUuid>(var.entityUuid);
-				auto it = entIt.begin();
-				if(it == entIt.end())
+				auto *memInfo = var.memberRef.GetMemberInfo(game);
+				if(memInfo == nullptr)
 				{
 					argsValid = false;
 					break;
 				}
-				auto *ent = *it;
-				ComponentMemberIndex memberIdx;
-				auto *c = ent->FindComponentMemberIndex(var.variable,memberIdx);
-				if(!c)
-				{
-					argsValid = false;
-					break;
-				}
-				auto *memInfo = c->GetMemberInfo(memberIdx);
-				assert(memInfo);
-				if(!memInfo)
-				{
-					// Unreachable
-					argsValid = false;
-					break;
-				}
+				auto *c = var.memberRef.GetComponent(game);
 				auto o = udm::visit_ng(memInfo->type,[memInfo,c,l](auto tag) {
 					using T = decltype(tag)::type;
 					T value;
@@ -246,12 +255,12 @@ void pragma::AnimationDriverComponent::ApplyDrivers()
 
 				if(result)
 				{
-					udm::visit_ng(driver.dataValue.type,[l,&driver,&result,&member,&hComponent](auto tag) {
+					udm::visit_ng(driver.dataValue.type,[l,&driver,&result,&member,&component](auto tag) {
 						using T = decltype(tag)::type;
 						try
 						{
 							auto ret = luabind::object_cast<T>(result);
-							member->setterFunction(*member,*hComponent,&ret);
+							member->setterFunction(*member,component,&ret);
 						}
 						catch(const luabind::cast_failed &e)
 						{

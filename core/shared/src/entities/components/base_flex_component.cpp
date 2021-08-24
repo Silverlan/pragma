@@ -46,7 +46,7 @@ void BaseFlexComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 		auto lname = name;
 		ustring::to_lower(lname);
 		auto memberInfo = pragma::ComponentMemberInfo::CreateDummy();
-		memberInfo.name = "flex/" +lname;
+		memberInfo.SetName("flex/" +lname);
 		memberInfo.type = udm::Type::Float;
 		memberInfo.userIndex = idx++;
 		memberInfo.SetGetterFunction<BaseFlexComponent,float,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseFlexComponent&,float&)>(

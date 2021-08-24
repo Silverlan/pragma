@@ -36,6 +36,13 @@ namespace pragma
 	using RenderBufferIndex = uint32_t;
 	template<class T>
 		using ComponentHandle = util::TWeakSharedHandle<T>;
+
+	using ComponentId = uint32_t;
+	using ComponentMemberIndex = uint32_t;
+	static constexpr auto INVALID_COMPONENT_MEMBER_INDEX = std::numeric_limits<ComponentMemberIndex>::max();
+	class BaseEntityComponent;
+	class EntityComponentManager;
+	struct ComponentMemberInfo;
 };
 namespace pragma::asset {enum class Type : uint8_t;};
 namespace pragma::animation

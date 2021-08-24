@@ -42,10 +42,11 @@
 #include "pragma/lua/policies/game_object_policy.hpp"
 #include "pragma/lua/policies/optional_policy.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
+#include "pragma/lua/converters/vector_converter_t.hpp"
 #include <pragma/physics/movetypes.h>
 #include <luabind/copy_policy.hpp>
 #include <panima/animation.hpp>
-
+#pragma optimize("",off)
 namespace Lua {bool get_bullet_master(BaseEntity &ent);};
 bool Lua::get_bullet_master(BaseEntity &ent)
 {
@@ -224,6 +225,33 @@ namespace luabind {
 
 } // namespace luabind
 
+template<typename TMemberId> requires(std::is_same_v<TMemberId,pragma::ComponentMemberIndex> || std::is_same_v<TMemberId,std::string>)
+	static void add_driver(
+	pragma::AnimationDriverComponent &hComponent,pragma::ComponentId componentId,TMemberId memberIdx,const std::string &expression,
+	std::unordered_map<std::string,std::string> vars
+)
+{
+	pragma::AnimationDriverVariableList driverVars {};
+	driverVars.reserve(vars.size());
+	for(auto &pair : vars)
+	{
+		util::Path path {pair.second};
+		auto uuid = path.GetFront();
+		path.PopFront();
+		auto &var = driverVars.insert(std::make_pair(pair.first,pragma::AnimationDriverVariable{})).first->second;
+		var.entityUuid = util::uuid_string_to_bytes(uuid);
+		var.variable = std::move(path);
+	}
+	hComponent.AddDriver(componentId,memberIdx,expression,std::move(driverVars));
+}
+template<typename TMemberId> requires(std::is_same_v<TMemberId,pragma::ComponentMemberIndex> || std::is_same_v<TMemberId,std::string>)
+	static void add_driver(
+	pragma::AnimationDriverComponent &hComponent,pragma::ComponentId componentId,TMemberId memberIdx,const std::string &expression
+)
+{
+	add_driver<TMemberId>(hComponent,componentId,memberIdx,expression);
+}
+
 void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 {
 	pragma::lua::register_entity_component_classes(gameMod);
@@ -373,14 +401,18 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	gameMod[defAnimated2];
 
 	auto defDriver = luabind::class_<pragma::AnimationDriverComponent,pragma::BaseEntityComponent>("AnimationDriverComponent");
-	defDriver.def("AddDriver",static_cast<void(*)(pragma::AnimationDriverComponent&,pragma::ComponentId,pragma::ComponentMemberIndex,const std::string&)>(
-		[](pragma::AnimationDriverComponent &hComponent,pragma::ComponentId componentId,pragma::ComponentMemberIndex memberIdx,const std::string &expression) {
-		hComponent.AddDriver(componentId,memberIdx,expression);
-	}));
-	defDriver.def("AddDriver",static_cast<bool(*)(pragma::AnimationDriverComponent&,pragma::ComponentId,const std::string&,const std::string&)>(
-		[](pragma::AnimationDriverComponent &hComponent,pragma::ComponentId componentId,const std::string &memberName,const std::string &expression) {
-		return hComponent.AddDriver(componentId,memberName,expression);
-	}));
+	defDriver.def("AddDriver",static_cast<
+		void(*)(pragma::AnimationDriverComponent&,pragma::ComponentId,pragma::ComponentMemberIndex,const std::string&,std::unordered_map<std::string,std::string>)
+	>(&add_driver<pragma::ComponentMemberIndex>));
+	defDriver.def("AddDriver",static_cast<
+		void(*)(pragma::AnimationDriverComponent&,pragma::ComponentId,std::string,const std::string&,std::unordered_map<std::string,std::string>)
+	>(&add_driver<std::string>));
+	defDriver.def("AddDriver",static_cast<
+		void(*)(pragma::AnimationDriverComponent&,pragma::ComponentId,pragma::ComponentMemberIndex,const std::string&)
+	>(&add_driver<pragma::ComponentMemberIndex>));
+	defDriver.def("AddDriver",static_cast<
+		void(*)(pragma::AnimationDriverComponent&,pragma::ComponentId,std::string,const std::string&)
+	>(&add_driver<std::string>));
 	defDriver.def("ClearDrivers",&pragma::AnimationDriverComponent::ClearDrivers);
 	gameMod[defDriver];
 
@@ -422,3 +454,4 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	defDamageable.add_static_constant("EVENT_ON_TAKE_DAMAGE",pragma::DamageableComponent::EVENT_ON_TAKE_DAMAGE);
 	gameMod[defDamageable];
 }
+#pragma optimize("",on)

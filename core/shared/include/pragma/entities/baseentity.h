@@ -125,6 +125,9 @@ public:
 	const Vector3 &GetScale() const;
 	void SetScale(const Vector3 &scale);
 
+	pragma::BaseEntityComponent *FindComponentMemberIndex(const util::Path &path,pragma::ComponentMemberIndex &outMemberIdx);
+	const pragma::BaseEntityComponent *FindComponentMemberIndex(const util::Path &path,pragma::ComponentMemberIndex &outMemberIdx) const {return const_cast<BaseEntity*>(this)->FindComponentMemberIndex(path,outMemberIdx);}
+
 	// Helper functions
 	virtual pragma::ComponentHandle<pragma::BaseAnimatedComponent> GetAnimatedComponent() const=0;
 	virtual pragma::ComponentHandle<pragma::BaseWeaponComponent> GetWeaponComponent() const=0;

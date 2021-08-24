@@ -82,6 +82,19 @@ pragma::ComponentEventId BaseEntity::GetEventId(const std::string &name) const
 {
 	return GetNetworkState()->GetGameState()->GetEntityComponentManager().GetEventId(name);
 }
+pragma::BaseEntityComponent *BaseEntity::FindComponentMemberIndex(const util::Path &path,pragma::ComponentMemberIndex &outMemberIdx)
+{
+	auto hComponent = FindComponent(path.GetFront());
+	if(!hComponent.valid())
+		return nullptr;
+	auto memPath = path;
+	memPath.PopFront();
+	auto memIdx = hComponent->GetMemberIndex(memPath.GetString());
+	if(!memIdx.has_value())
+		return nullptr;
+	outMemberIdx = *memIdx;
+	return hComponent.get();
+}
 void BaseEntity::OnRemove()
 {
 	for(auto it=m_entsRemove.begin();it!=m_entsRemove.end();++it)

@@ -8,6 +8,8 @@
 #include "stdafx_shared.h"
 #include "pragma/entities/components/animation_driver_component.hpp"
 #include "pragma/entities/components/animated_2_component.hpp"
+#include "pragma/entities/entity_iterator.hpp"
+#include "pragma/lua/lua_call.hpp"
 #include <sharedutils/util_hash.hpp>
 #include <udm.hpp>
 
@@ -69,38 +71,64 @@ void pragma::AnimationDriverComponent::ClearDrivers()
 {
 	m_drivers.clear();
 }
-bool pragma::AnimationDriverComponent::AddDriver(ComponentId componentId,const std::string &memberName,const std::string &expression,udm::PProperty constants)
+void pragma::AnimationDriverComponent::RemoveDriver(ComponentId componentId,ComponentMemberIndex memberIdx)
+{
+	auto it = m_drivers.find(get_animation_driver_hash(componentId,memberIdx));
+	if(it != m_drivers.end())
+		m_drivers.erase(it);
+}
+void pragma::AnimationDriverComponent::RemoveDriver(ComponentId componentId,const std::string &memberName)
+{
+	auto memberIdx = FindComponentMember(componentId,memberName);
+	if(!memberIdx.has_value())
+		return;
+	RemoveDriver(componentId,*memberIdx);
+}
+void pragma::AnimationDriverComponent::RemoveDrivers(ComponentId componentId)
+{
+	for(auto it=m_drivers.begin();it!=m_drivers.end();)
+	{
+		auto &driver = it->second;
+		if(driver.componentId == componentId)
+			it = m_drivers.erase(it);
+		else
+			++it;
+	}
+}
+std::optional<ComponentMemberIndex> pragma::AnimationDriverComponent::FindComponentMember(ComponentId componentId,const std::string &memberName)
 {
 	auto *info = GetEntity().GetComponentManager()->GetComponentInfo(componentId);
 	if(info)
 	{
 		auto memberIdx = info->FindMember(memberName);
 		if(memberIdx.has_value())
-		{
-			AddDriver(componentId,*memberIdx,expression,constants);
-			return true;
-		}
+			return memberIdx;
 	}
 	auto hComponent = GetEntity().FindComponent(componentId);
 	if(hComponent.expired())
-		return false;
-	auto memberIdx = hComponent->GetMemberIndex(memberName);
+		return {};
+	return hComponent->GetMemberIndex(memberName);
+}
+bool pragma::AnimationDriverComponent::AddDriver(ComponentId componentId,const std::string &memberName,const std::string &expression,AnimationDriverVariableList &&vars)
+{
+	auto memberIdx = FindComponentMember(componentId,memberName);
 	if(!memberIdx.has_value())
 		return false;
-	AddDriver(componentId,*memberIdx,expression,constants);
+	AddDriver(componentId,*memberIdx,expression,std::move(vars));
 	return true;
 }
-void pragma::AnimationDriverComponent::AddDriver(ComponentId componentId,ComponentMemberIndex memberIdx,const std::string &expression,udm::PProperty constants)
+void pragma::AnimationDriverComponent::AddDriver(ComponentId componentId,ComponentMemberIndex memberIdx,const std::string &expression,AnimationDriverVariableList &&vars)
 {
 	AnimationDriver driver {};
 	driver.expression = expression;
-	driver.constants = constants;
+	driver.variables = std::move(vars);
 	driver.componentId = componentId;
 	driver.memberIndex = memberIdx;
 	
 	auto *memberInfo = driver.GetMemberInfo(GetEntity());
 	if(!memberInfo)
 		return;
+	RemoveDriver(componentId,memberIdx);
 	driver.dataValue.type = memberInfo->type;
 	udm::visit_ng(memberInfo->type,[&driver](auto tag) {
 		using T = decltype(tag)::type;
@@ -110,8 +138,12 @@ void pragma::AnimationDriverComponent::AddDriver(ComponentId componentId,Compone
 		};
 	});
 
+	std::string argList = "value";
+	for(auto &pair : driver.variables)
+		argList += ',' +pair.first;
+
 	auto *l = GetLuaState();
-	std::string luaStr = "return function(value) return " +expression +" end";
+	std::string luaStr = "return function(" +argList +") return " +expression +" end";
 	auto r = Lua::RunString(l,luaStr,1,"internal"); /* 1 */
 	if(r == Lua::StatusCode::Ok)
 	{
@@ -157,21 +189,76 @@ void pragma::AnimationDriverComponent::ApplyDrivers()
 				else
 					arg = luabind::object{l,static_cast<T*>(driver.dataValue.data.get())};
 			});
-			auto result = driver.luaExpression(arg);
-			if(result)
+			driver.luaExpression.push(l);
+			arg.push(l);
+			uint32_t numPushed = 2;
+			auto argsValid = true;
+			for(auto &pair : driver.variables)
 			{
-				udm::visit_ng(driver.dataValue.type,[l,&driver,&result,&member,&hComponent](auto tag) {
+				auto &var = pair.second;
+				EntityIterator entIt {*GetEntity().GetNetworkState()->GetGameState()};
+				entIt.AttachFilter<EntityIteratorFilterUuid>(var.entityUuid);
+				auto it = entIt.begin();
+				if(it == entIt.end())
+				{
+					argsValid = false;
+					break;
+				}
+				auto *ent = *it;
+				ComponentMemberIndex memberIdx;
+				auto *c = ent->FindComponentMemberIndex(var.variable,memberIdx);
+				if(!c)
+				{
+					argsValid = false;
+					break;
+				}
+				auto *memInfo = c->GetMemberInfo(memberIdx);
+				assert(memInfo);
+				if(!memInfo)
+				{
+					// Unreachable
+					argsValid = false;
+					break;
+				}
+				auto o = udm::visit_ng(memInfo->type,[memInfo,c,l](auto tag) {
 					using T = decltype(tag)::type;
-					try
-					{
-						auto ret = luabind::object_cast<T>(result);
-						member->setterFunction(*member,*hComponent,&ret);
-					}
-					catch(const luabind::cast_failed &e)
-					{
-						Con::cwar<<"WARNING: Driver expression '"<<driver.expression<<"' return value is incompatible with expected type '"<<magic_enum::enum_name(driver.dataValue.type)<<"'!"<<Con::endl;
-					}
+					T value;
+					memInfo->getterFunction(*memInfo,*c,&value);
+					return luabind::object{l,value};
 				});
+				o.push(l);
+				++numPushed;
+			}
+			if(!argsValid)
+			{
+				// Can't execute the driver if one or more of the arguments
+				// couldn't be determined
+				Lua::Pop(l,numPushed);
+				continue;
+			}
+			auto c = Lua::ProtectedCall(l,numPushed -1,1);
+			if(c != Lua::StatusCode::Ok)
+				Lua::HandleLuaError(l,c);
+			else
+			{
+				luabind::object result {luabind::from_stack(l,-1)};
+				Lua::Pop(l,1);
+
+				if(result)
+				{
+					udm::visit_ng(driver.dataValue.type,[l,&driver,&result,&member,&hComponent](auto tag) {
+						using T = decltype(tag)::type;
+						try
+						{
+							auto ret = luabind::object_cast<T>(result);
+							member->setterFunction(*member,*hComponent,&ret);
+						}
+						catch(const luabind::cast_failed &e)
+						{
+							Con::cwar<<"WARNING: Driver expression '"<<driver.expression<<"' return value is incompatible with expected type '"<<magic_enum::enum_name(driver.dataValue.type)<<"'!"<<Con::endl;
+						}
+					});
+				}
 			}
 		}
 	}

@@ -18,14 +18,20 @@ namespace pragma
 		udm::Type type;
 		std::unique_ptr<void,void(*)(void*)> data = std::unique_ptr<void,void(*)(void*)>{nullptr,[](void*) {}};
 	};
+	struct DLLNETWORK AnimationDriverVariable
+	{
+		util::Uuid entityUuid;
+		util::Path variable;
+	};
+	using AnimationDriverVariableList = std::unordered_map<std::string,AnimationDriverVariable>;
 	struct DLLNETWORK AnimationDriver
 	{
 		std::string expression;
 		luabind::object luaExpression {};
-		udm::PProperty constants = nullptr;
 		AnimationDataValue dataValue {};
 		pragma::ComponentId componentId = std::numeric_limits<pragma::ComponentId>::max();
 		pragma::ComponentMemberIndex memberIndex = std::numeric_limits<pragma::ComponentMemberIndex>::max();
+		AnimationDriverVariableList variables;
 
 		const ComponentMemberInfo *GetMemberInfo(const BaseEntity &ent) const;
 	};
@@ -42,8 +48,11 @@ namespace pragma
 		virtual void OnRemove() override;
 
 		void ClearDrivers();
-		void AddDriver(ComponentId componentId,ComponentMemberIndex memberIdx,const std::string &expression,udm::PProperty constants=nullptr);
-		bool AddDriver(ComponentId componentId,const std::string &memberName,const std::string &expression,udm::PProperty constants=nullptr);
+		void AddDriver(ComponentId componentId,ComponentMemberIndex memberIdx,const std::string &expression,AnimationDriverVariableList &&vars={});
+		bool AddDriver(ComponentId componentId,const std::string &memberName,const std::string &expression,AnimationDriverVariableList &&vars={});
+		void RemoveDriver(ComponentId componentId,ComponentMemberIndex memberIdx);
+		void RemoveDriver(ComponentId componentId,const std::string &memberName);
+		void RemoveDrivers(ComponentId componentId);
 		void ApplyDrivers();
 
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
@@ -57,6 +66,7 @@ namespace pragma
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		using BaseEntityComponent::Load;
 	protected:
+		std::optional<ComponentMemberIndex> FindComponentMember(ComponentId componentId,const std::string &memberName);
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 		std::unordered_map<AnimationDriverHash,AnimationDriver> m_drivers;
 	};

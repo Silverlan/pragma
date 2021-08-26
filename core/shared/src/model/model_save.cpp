@@ -746,13 +746,15 @@ bool Model::Save(Game &game,udm::AssetDataArg outData,std::string &outErr)
 		auto udmSkeleton = udm["skeleton"];
 		auto &skeleton = GetSkeleton();
 		auto &reference = GetReference();
+		auto &skeletonPoses = skeleton.GetBonePoses();
+		skeletonPoses.resize(reference.GetBoneTransforms().size());
 		for(uint32_t boneId = 0u; auto &pose : reference.GetBoneTransforms())
 		{
 			auto *pscale = reference.GetBoneScale(boneId);
 			umath::ScaledTransform scaledPose {pose};
 			if(pscale)
 				scaledPose.SetScale(*pscale);
-			skeleton.GetBonePoses()[boneId] = scaledPose;
+			skeletonPoses[boneId] = scaledPose;
 			++boneId;
 		}
 

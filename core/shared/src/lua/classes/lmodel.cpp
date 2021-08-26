@@ -2120,6 +2120,7 @@ void Lua::Model::ClearAnimations(lua_State *l,::Model &mdl)
 {
 	//Lua::CheckModel(l,1);
 	mdl.GetAnimations().clear();
+	mdl.GetAnimationNames().clear();
 }
 void Lua::Model::ClipAgainstPlane(lua_State *l,::Model &mdl,const Vector3 &n,double d,::Model &clippedMdlA,::Model &clippedMdlB)
 {

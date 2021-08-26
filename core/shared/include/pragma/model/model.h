@@ -331,6 +331,8 @@ public:
 	void GetAnimations(std::unordered_map<std::string,uint32_t> **anims);
 	const std::vector<std::shared_ptr<pragma::animation::Animation>> &GetAnimations() const;
 	std::vector<std::shared_ptr<pragma::animation::Animation>> &GetAnimations();
+	std::unordered_map<std::string,unsigned int> &GetAnimationNames() {return m_animationIDs;}
+	const std::unordered_map<std::string,unsigned int> &GetAnimationNames() const {return const_cast<Model*>(this)->GetAnimationNames();}
 	bool GetAnimationName(uint32_t animId,std::string &name) const;
 	std::string GetAnimationName(uint32_t animId) const;
 	uint32_t GetAnimationCount() const;

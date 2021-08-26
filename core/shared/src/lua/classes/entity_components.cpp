@@ -27,6 +27,7 @@
 #include <udm.hpp>
 #include <luabind/out_value_policy.hpp>
 #include <luabind/copy_policy.hpp>
+#include <luabind/discard_result_policy.hpp>
 
 namespace Lua
 {
@@ -377,34 +378,45 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	Lua::ComponentClass<pragma::BaseGameComponent> defGameComponent {"BaseGameComponent"};
 	mod[defGameComponent];
 }
+
 void pragma::lua::base_attachable_component::register_class(luabind::module_ &mod)
 {
 	Lua::ComponentClass<pragma::BaseAttachableComponent> def {"BaseAttachableComponent"};
 	util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
-	def.def("AttachToEntity",&pragma::BaseAttachableComponent::AttachToEntity);
+	def.def("AttachToEntity",&pragma::BaseAttachableComponent::AttachToEntity,luabind::discard_result{});
+	def.def("AttachToEntity",static_cast<AttachmentData*(*)(pragma::BaseAttachableComponent&,BaseEntity*)>([](pragma::BaseAttachableComponent &component,BaseEntity *ent) {
+		return component.AttachToEntity(ent);
+	}),luabind::discard_result{});
+	//AttachmentData *AttachToEntity(BaseEntity *ent,const AttachmentInfo &attInfo={});
 	//def.def("AttachToEntity",&pragma::BaseAttachableComponent::AttachToEntity,luabind::default_parameter_policy<0,AttachmentInfo,att>{});
 	//def.def("AttachToEntity",std::bind(&pragma::BaseAttachableComponent::AttachToEntity,std::placeholders::_1,AttachmentInfo{}));
 	def.def("ClearAttachment",&pragma::BaseAttachableComponent::ClearAttachment);
-	def.def("AttachToAttachment",static_cast<AttachmentData*(pragma::BaseAttachableComponent::*)(BaseEntity*,uint32_t,const AttachmentInfo&)>(&pragma::BaseAttachableComponent::AttachToAttachment));
+	def.def("AttachToAttachment",static_cast<AttachmentData*(pragma::BaseAttachableComponent::*)(BaseEntity*,uint32_t,const AttachmentInfo&)>(&pragma::BaseAttachableComponent::AttachToAttachment),luabind::discard_result{});
+	def.def("AttachToAttachment",static_cast<AttachmentData*(*)(pragma::BaseAttachableComponent&,BaseEntity*,uint32_t)>([](pragma::BaseAttachableComponent &component,BaseEntity *ent,uint32_t attIdx) {
+		return component.AttachToAttachment(ent,attIdx);
+	}),luabind::discard_result{});
 	//def.def("AttachToAttachment",std::bind(static_cast<AttachmentData*(pragma::BaseAttachableComponent::*)(BaseEntity*,uint32_t,const AttachmentInfo&)>(&pragma::BaseAttachableComponent::AttachToAttachment),std::placeholders::_1,std::placeholders::_2,AttachmentInfo{}));
-	def.def("AttachToAttachment",static_cast<AttachmentData*(pragma::BaseAttachableComponent::*)(BaseEntity*,std::string,const AttachmentInfo&)>(&pragma::BaseAttachableComponent::AttachToAttachment));
+	def.def("AttachToAttachment",static_cast<AttachmentData*(pragma::BaseAttachableComponent::*)(BaseEntity*,std::string,const AttachmentInfo&)>(&pragma::BaseAttachableComponent::AttachToAttachment),luabind::discard_result{});
+	def.def("AttachToAttachment",static_cast<AttachmentData*(*)(pragma::BaseAttachableComponent&,BaseEntity*,std::string)>([](pragma::BaseAttachableComponent &component,BaseEntity *ent,std::string att) {
+		return component.AttachToAttachment(ent,att);
+	}),luabind::discard_result{});
 	//def.def("AttachToAttachment",std::bind(static_cast<AttachmentData*(pragma::BaseAttachableComponent::*)(BaseEntity*,std::string,const AttachmentInfo&)>(&pragma::BaseAttachableComponent::AttachToAttachment),std::placeholders::_1,std::placeholders::_2,AttachmentInfo{}));
 	def.def("AttachToBone",static_cast<void(*)(lua_State*,pragma::BaseAttachableComponent&,BaseEntity&,std::string,AttachmentInfo&)>([](lua_State *l,pragma::BaseAttachableComponent &hEnt,BaseEntity &parent,std::string bone,AttachmentInfo &attInfo) {
 		
 		hEnt.AttachToBone(&parent,bone,attInfo);
-	}));
+	}),luabind::discard_result{});
 	def.def("AttachToBone",static_cast<void(*)(lua_State*,pragma::BaseAttachableComponent&,BaseEntity&,std::string)>([](lua_State *l,pragma::BaseAttachableComponent &hEnt,BaseEntity &parent,std::string bone) {
 		
 		hEnt.AttachToBone(&parent,bone);
-	}));
+	}),luabind::discard_result{});
 	def.def("AttachToBone",static_cast<void(*)(lua_State*,pragma::BaseAttachableComponent&,BaseEntity&,int,AttachmentInfo&)>([](lua_State *l,pragma::BaseAttachableComponent &hEnt,BaseEntity &parent,int bone,AttachmentInfo &attInfo) {
 		
 		hEnt.AttachToBone(&parent,bone,attInfo);
-	}));
+	}),luabind::discard_result{});
 	def.def("AttachToBone",static_cast<void(*)(lua_State*,pragma::BaseAttachableComponent&,BaseEntity&,int)>([](lua_State *l,pragma::BaseAttachableComponent &hEnt,BaseEntity &parent,int bone) {
 		
 		hEnt.AttachToBone(&parent,bone);
-	}));
+	})),luabind::discard_result{};
 	def.def("GetLocalPose",&pragma::BaseAttachableComponent::GetLocalPose);
 	def.def("SetLocalPose",&pragma::BaseAttachableComponent::SetLocalPose);
 	def.def("GetParent",&pragma::BaseAttachableComponent::GetParent);
@@ -820,6 +832,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	register_base_animated_component_bone_methods<BoneId>(def);
 	register_base_animated_component_bone_methods<std::string>(def);
 	def.def("UpdateEffectiveBoneTransforms",&pragma::BaseAnimatedComponent::UpdateSkeleton);
+	def.def("AdvanceAnimations",&pragma::BaseAnimatedComponent::MaintainAnimations);
 	def.def("GetBindPose",&pragma::BaseAnimatedComponent::GetBindPose,luabind::shared_from_this_policy<0>{});
 	def.def("SetBindPose",&pragma::BaseAnimatedComponent::SetBindPose);
 	def.def("SetCycle",&pragma::BaseAnimatedComponent::SetCycle);

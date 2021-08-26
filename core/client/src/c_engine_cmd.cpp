@@ -340,7 +340,11 @@ void CEngine::RegisterConsoleCommands()
 		for(auto idx : sortedIndices)
 		{
 			auto &tex = textures[idx];
-			Con::cout<<tex->GetName()<<":"<<Con::endl;
+			Con::cout<<tex->GetName();
+			auto &filePath = tex->GetFilePath();
+			if(filePath.has_value())
+				Con::cout<<" ("<<*filePath<<")";
+			Con::cout<<":"<<Con::endl;
 
 			auto &vkTex = tex->GetVkTexture();
 			if(vkTex)

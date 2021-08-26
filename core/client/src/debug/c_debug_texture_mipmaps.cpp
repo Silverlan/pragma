@@ -11,7 +11,9 @@
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/debug/c_debug_game_gui.h"
 #include "pragma/gui/widebugmipmaps.h"
+#include <texture_type.h>
 #include <pragma/game/game_resources.hpp>
+#include <sharedutils/magic_enum.hpp>
 #include <wgui/wgui.h>
 #include <wgui/fontmanager.h>
 #include <cmaterialmanager.h>
@@ -86,6 +88,12 @@ void Console::commands::debug_texture_mipmaps(NetworkState*,pragma::BasePlayerCo
 		auto &vkTexture = texture->GetVkTexture();
 		auto numMipmaps = vkTexture->GetImage().GetMipmapCount();
 		Con::cout<<"Mipmap count for '"<<texPath<<"': "<<numMipmaps<<Con::endl;
+		auto &path = texture->GetFilePath();
+		if(path.has_value())
+			Con::cout<<"File path: "<<*path<<Con::endl;
+		auto type = texture->GetFileFormatType();
+		if(type != TextureType::Invalid)
+			Con::cout<<"File image type: "<<magic_enum::enum_name(type)<<Con::endl;
 		dbg = std::make_unique<DebugGameGUI>([vkTexture]() {
 			auto &wgui = WGUI::GetInstance();
 			auto *r = wgui.Create<WIDebugMipMaps>();

@@ -216,6 +216,7 @@ namespace pragma
 
 		Activity TranslateActivity(Activity act);
 		void SetBaseAnimationDirty();
+		void ClearPreviousAnimation();
 
 		void BlendBonePoses(
 			const std::vector<umath::Transform> &srcBonePoses,const std::vector<Vector3> *optSrcBoneScales,

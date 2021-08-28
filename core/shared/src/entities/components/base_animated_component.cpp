@@ -399,6 +399,20 @@ void BaseAnimatedComponent::GetAnimationBlendController(pragma::animation::Anima
 {
 	// Obsolete; TODO: Remove this!
 }
+void BaseAnimatedComponent::ClearPreviousAnimation()
+{
+	for(auto &pair : m_animSlots)
+	{
+		auto &animInfo = pair.second;
+		auto &lastAnim = animInfo.lastAnim;
+		lastAnim.blendTimeScale = {0.f,0.f};
+		lastAnim.animation = -1;
+	}
+	auto &animInfo = m_baseAnim;
+	auto &lastAnim = animInfo.lastAnim;
+	lastAnim.blendTimeScale = {0.f,0.f};
+	lastAnim.animation = -1;
+}
 Frame *BaseAnimatedComponent::GetPreviousAnimationBlendFrame(AnimationSlotInfo &animInfo,double tDelta,float &blendScale)
 {
 	auto mdlComponent = GetEntity().GetModelComponent();

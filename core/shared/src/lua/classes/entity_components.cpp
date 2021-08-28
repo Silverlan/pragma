@@ -833,6 +833,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	register_base_animated_component_bone_methods<std::string>(def);
 	def.def("UpdateEffectiveBoneTransforms",&pragma::BaseAnimatedComponent::UpdateSkeleton);
 	def.def("AdvanceAnimations",&pragma::BaseAnimatedComponent::MaintainAnimations);
+	def.def("ClearPreviousAnimation",&pragma::BaseAnimatedComponent::ClearPreviousAnimation);
 	def.def("GetBindPose",&pragma::BaseAnimatedComponent::GetBindPose,luabind::shared_from_this_policy<0>{});
 	def.def("SetBindPose",&pragma::BaseAnimatedComponent::SetBindPose);
 	def.def("SetCycle",&pragma::BaseAnimatedComponent::SetCycle);

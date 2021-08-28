@@ -21,6 +21,8 @@ void luabind::detail::AliasTypeConverter<Vector4,Vector3i>::convert(const Vector
 void luabind::detail::AliasTypeConverter<Vector4i,Vector3i>::convert(const Vector3i &srcValue,Vector4i &outValue) {outValue = {srcValue.x,srcValue.y,srcValue.z,0.f};}
 void luabind::detail::AliasTypeConverter<EulerAngles,Quat>::convert(const Quat &srcValue,EulerAngles &outValue) {outValue = {srcValue};}
 void luabind::detail::AliasTypeConverter<Quat,EulerAngles>::convert(const EulerAngles &srcValue,Quat &outValue) {outValue = uquat::create(srcValue);}
+void luabind::detail::AliasTypeConverter<util::Path,std::string>::convert(const std::string &srcValue,util::Path &outValue) {outValue = {srcValue};}
+void luabind::detail::AliasTypeConverter<std::string,util::Path>::convert(const util::Path &srcValue,std::string &outValue) {outValue = srcValue.GetString();}
 
 namespace luabind
 {
@@ -33,6 +35,8 @@ namespace luabind
 	template struct DLLNETWORK luabind::default_converter<Vector4i>;
 	template struct DLLNETWORK luabind::default_converter<EulerAngles>;
 	template struct DLLNETWORK luabind::default_converter<Quat>;
+	template struct DLLNETWORK luabind::default_converter<std::string>;
+	template struct DLLNETWORK luabind::default_converter<util::Path>;
 
 	template struct DLLNETWORK alias_converter<Vector2,Vector2,Vector2i,Vector3,Vector3i,Vector4,Vector4i>;
 	template struct DLLNETWORK alias_converter<Vector2i,Vector2,Vector2i,Vector3,Vector3i,Vector4,Vector4i>;
@@ -42,6 +46,8 @@ namespace luabind
 	template struct DLLNETWORK alias_converter<Vector4i,Vector2,Vector2i,Vector3,Vector3i,Vector4,Vector4i>;
 	template struct DLLNETWORK alias_converter<EulerAngles,EulerAngles,Quat>;
 	template struct DLLNETWORK alias_converter<Quat,EulerAngles,Quat>;
+	template struct DLLNETWORK alias_converter<std::string,std::string,util::Path>;
+	template struct DLLNETWORK alias_converter<util::Path,std::string,util::Path>;
 
 	template struct DLLNETWORK alias_converter<const Vector2&,Vector2,Vector2i,Vector3,Vector3i,Vector4,Vector4i>;
 	template struct DLLNETWORK alias_converter<const Vector2i&,Vector2,Vector2i,Vector3,Vector3i,Vector4,Vector4i>;
@@ -51,6 +57,8 @@ namespace luabind
 	template struct DLLNETWORK alias_converter<const Vector4i&,Vector2,Vector2i,Vector3,Vector3i,Vector4,Vector4i>;
 	template struct DLLNETWORK alias_converter<const EulerAngles&,EulerAngles,Quat>;
 	template struct DLLNETWORK alias_converter<const Quat&,EulerAngles,Quat>;
+	template struct DLLNETWORK alias_converter<const std::string&,std::string,util::Path>;
+	template struct DLLNETWORK alias_converter<const util::Path&,std::string,util::Path>;
 
 #define INSTANTIATE_TO_CPP_LB_TYPE_VEC(T,LBT) \
 	template DLLNETWORK T luabind::alias_converter<T,Vector2,Vector2i,Vector3,Vector3i,Vector4,Vector4i>::to_cpp<luabind::LBT<Vector2>>(lua_State*,luabind::LBT<Vector2>,int); \
@@ -77,21 +85,25 @@ namespace luabind
 	INSTANTIATE_TO_CPP_VEC(Vector4);
 	INSTANTIATE_TO_CPP_VEC(Vector4i);
 
-	template DLLNETWORK const Quat &luabind::alias_converter<const Quat&,EulerAngles,Quat>::to_cpp<luabind::by_const_reference<Quat>>(lua_State*,luabind::by_const_reference<Quat>,int);
-	template DLLNETWORK const Quat &luabind::alias_converter<const Quat&,EulerAngles,Quat>::to_cpp<luabind::by_const_reference<EulerAngles>>(lua_State*,luabind::by_const_reference<EulerAngles>,int);
-	template DLLNETWORK const EulerAngles &luabind::alias_converter<const EulerAngles&,EulerAngles,Quat>::to_cpp<luabind::by_const_reference<Quat>>(lua_State*,luabind::by_const_reference<Quat>,int);
-	template DLLNETWORK const EulerAngles &luabind::alias_converter<const EulerAngles&,EulerAngles,Quat>::to_cpp<luabind::by_const_reference<EulerAngles>>(lua_State*,luabind::by_const_reference<EulerAngles>,int);
-	template DLLNETWORK Quat luabind::alias_converter<Quat,EulerAngles,Quat>::to_cpp<luabind::by_value<Quat>>(lua_State*,luabind::by_value<Quat>,int);
-	template DLLNETWORK Quat luabind::alias_converter<Quat,EulerAngles,Quat>::to_cpp<luabind::by_value<EulerAngles>>(lua_State*,luabind::by_value<EulerAngles>,int);
-	template DLLNETWORK EulerAngles luabind::alias_converter<EulerAngles,EulerAngles,Quat>::to_cpp<luabind::by_value<Quat>>(lua_State*,luabind::by_value<Quat>,int);
-	template DLLNETWORK EulerAngles luabind::alias_converter<EulerAngles,EulerAngles,Quat>::to_cpp<luabind::by_value<EulerAngles>>(lua_State*,luabind::by_value<EulerAngles>,int);
+#define INSTANTIATE_TWOWAY(T0,T1) \
+	template DLLNETWORK const T0 &luabind::alias_converter<const T0&,T1,T0>::to_cpp<luabind::by_const_reference<T0>>(lua_State*,luabind::by_const_reference<T0>,int); \
+	template DLLNETWORK const T0 &luabind::alias_converter<const T0&,T1,T0>::to_cpp<luabind::by_const_reference<T1>>(lua_State*,luabind::by_const_reference<T1>,int); \
+	template DLLNETWORK const T1 &luabind::alias_converter<const T1&,T1,T0>::to_cpp<luabind::by_const_reference<T0>>(lua_State*,luabind::by_const_reference<T0>,int); \
+	template DLLNETWORK const T1 &luabind::alias_converter<const T1&,T1,T0>::to_cpp<luabind::by_const_reference<T1>>(lua_State*,luabind::by_const_reference<T1>,int); \
+	template DLLNETWORK T0 luabind::alias_converter<T0,T1,T0>::to_cpp<luabind::by_value<T0>>(lua_State*,luabind::by_value<T0>,int); \
+	template DLLNETWORK T0 luabind::alias_converter<T0,T1,T0>::to_cpp<luabind::by_value<T1>>(lua_State*,luabind::by_value<T1>,int); \
+	template DLLNETWORK T1 luabind::alias_converter<T1,T1,T0>::to_cpp<luabind::by_value<T0>>(lua_State*,luabind::by_value<T0>,int); \
+	template DLLNETWORK T1 luabind::alias_converter<T1,T1,T0>::to_cpp<luabind::by_value<T1>>(lua_State*,luabind::by_value<T1>,int); \
+	 \
+	template DLLNETWORK int luabind::alias_converter<const T0&,T1,T0>::match<luabind::by_const_reference<T0>>(lua_State*,luabind::by_const_reference<T0>,int); \
+	template DLLNETWORK int luabind::alias_converter<const T0&,T1,T0>::match<luabind::by_const_reference<T1>>(lua_State*,luabind::by_const_reference<T1>,int); \
+	template DLLNETWORK int luabind::alias_converter<const T1&,T1,T0>::match<luabind::by_const_reference<T0>>(lua_State*,luabind::by_const_reference<T0>,int); \
+	template DLLNETWORK int luabind::alias_converter<const T1&,T1,T0>::match<luabind::by_const_reference<T1>>(lua_State*,luabind::by_const_reference<T1>,int); \
+	template DLLNETWORK int luabind::alias_converter<T0,T1,T0>::match<luabind::by_value<T0>>(lua_State*,luabind::by_value<T0>,int); \
+	template DLLNETWORK int luabind::alias_converter<T0,T1,T0>::match<luabind::by_value<T1>>(lua_State*,luabind::by_value<T1>,int); \
+	template DLLNETWORK int luabind::alias_converter<T1,T1,T0>::match<luabind::by_value<T0>>(lua_State*,luabind::by_value<T0>,int); \
+	template DLLNETWORK int luabind::alias_converter<T1,T1,T0>::match<luabind::by_value<T1>>(lua_State*,luabind::by_value<T1>,int);
 
-	template DLLNETWORK int luabind::alias_converter<const Quat&,EulerAngles,Quat>::match<luabind::by_const_reference<Quat>>(lua_State*,luabind::by_const_reference<Quat>,int);
-	template DLLNETWORK int luabind::alias_converter<const Quat&,EulerAngles,Quat>::match<luabind::by_const_reference<EulerAngles>>(lua_State*,luabind::by_const_reference<EulerAngles>,int);
-	template DLLNETWORK int luabind::alias_converter<const EulerAngles&,EulerAngles,Quat>::match<luabind::by_const_reference<Quat>>(lua_State*,luabind::by_const_reference<Quat>,int);
-	template DLLNETWORK int luabind::alias_converter<const EulerAngles&,EulerAngles,Quat>::match<luabind::by_const_reference<EulerAngles>>(lua_State*,luabind::by_const_reference<EulerAngles>,int);
-	template DLLNETWORK int luabind::alias_converter<Quat,EulerAngles,Quat>::match<luabind::by_value<Quat>>(lua_State*,luabind::by_value<Quat>,int);
-	template DLLNETWORK int luabind::alias_converter<Quat,EulerAngles,Quat>::match<luabind::by_value<EulerAngles>>(lua_State*,luabind::by_value<EulerAngles>,int);
-	template DLLNETWORK int luabind::alias_converter<EulerAngles,EulerAngles,Quat>::match<luabind::by_value<Quat>>(lua_State*,luabind::by_value<Quat>,int);
-	template DLLNETWORK int luabind::alias_converter<EulerAngles,EulerAngles,Quat>::match<luabind::by_value<EulerAngles>>(lua_State*,luabind::by_value<EulerAngles>,int);
+	INSTANTIATE_TWOWAY(Quat,EulerAngles);
+	INSTANTIATE_TWOWAY(std::string,util::Path);
 };

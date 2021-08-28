@@ -8,6 +8,7 @@
 #define __LUA_ALIAS_TYPES_HPP__
 
 #include "pragma/lua/converters/alias_converter.hpp"
+#include <sharedutils/util_path.hpp>
 #include <mathutil/uvec.h>
 
 namespace luabind
@@ -106,6 +107,25 @@ namespace luabind
 	template <typename T> requires(is_one_of_alias_candidates<T,EulerAngles,Quat>)
 	struct default_converter<T>
 		: alias_converter<T,EulerAngles,Quat>
+	{};
+
+	// Path / String
+	namespace detail
+	{
+		template<>
+			struct AliasTypeConverter<std::string,util::Path>
+		{
+			static void convert(const util::Path &srcValue,std::string &outValue);
+		};
+		template<>
+			struct AliasTypeConverter<util::Path,std::string>
+		{
+			static void convert(const std::string &srcValue,util::Path &outValue);
+		};
+	};
+	template <typename T> requires(is_one_of_alias_candidates<T,std::string,util::Path>)
+	struct default_converter<T>
+		: alias_converter<T,std::string,util::Path>
 	{};
 };
 

@@ -55,7 +55,10 @@
 #include "pragma/lua/lua_entity_handles.hpp"
 #include "pragma/lua/policies/handle_policy.hpp"
 #include "pragma/lua/policies/game_object_policy.hpp"
+#include "pragma/lua/policies/generic_policy.hpp"
+#include "pragma/lua/custom_constructor.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
+#include "pragma/lua/converters/alias_converter_t.hpp"
 #include <pragma/util/transform.h>
 #include <sharedutils/datastream.h>
 #include <sharedutils/util_parallel_job.hpp>
@@ -71,7 +74,7 @@
 #include <mathutil/inverse_kinematics/constraints.hpp>
 #include <sharedutils/magic_enum.hpp>
 #include <fsys/directory_watcher.h>
-
+#pragma optimize("",off)
 extern DLLNETWORK Engine *engine;
 std::ostream &operator<<(std::ostream &out,const ALSound &snd)
 {
@@ -175,17 +178,6 @@ static void register_directory_watcher(luabind::module_ &modUtil)
 	}));
 	modUtil[defListener];
 }
-
-static Quat QuaternionConstruct() {return uquat::identity();}
-static Quat QuaternionConstruct(float w,float x,float y,float z) {return Quat(w,x,y,z);}
-static Quat QuaternionConstruct(const Vector3 &v,float f) {return uquat::create(v,f);}
-static Quat QuaternionConstruct(const Vector3 &a,const Vector3 &b,const Vector3 &c)
-{
-	auto m = umat::create_from_axes(a,b,c);
-	return Quat(m);
-}
-static Quat QuaternionConstruct(const Quat &q) {return Quat(q);}
-static Quat QuaternionConstruct(const Vector3 &forward,const Vector3 &up) {return uquat::create_look_rotation(forward,up);}
 
 void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 {
@@ -1248,15 +1240,9 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	}));
 	modMath[defEulerAngles];
 
-	modMath[
-		luabind::def("Quaternion",static_cast<Quat(*)()>(&QuaternionConstruct)) COMMA
-		luabind::def("Quaternion",static_cast<Quat(*)(float,float,float,float)>(&QuaternionConstruct)) COMMA
-		luabind::def("Quaternion",static_cast<Quat(*)(const Vector3&,float)>(&QuaternionConstruct)) COMMA
-		luabind::def("Quaternion",static_cast<Quat(*)(const Vector3&,const Vector3&,const Vector3&)>(&QuaternionConstruct)) COMMA
-		luabind::def("Quaternion",static_cast<Quat(*)(const Quat&)>(&QuaternionConstruct)) COMMA
-		luabind::def("Quaternion",static_cast<Quat(*)(const Vector3&,const Vector3&)>(&QuaternionConstruct))
-	];
-	auto defQuat = luabind::class_<Quat>("QuaternionInternal");
+	auto defQuat = luabind::class_<Quat>("Quaternion");
+	defQuat.def(luabind::constructor<float,float,float,float>());
+	defQuat.def(luabind::constructor<const Quat&>());
 	defQuat.def(luabind::tostring(luabind::self));
 	defQuat.def_readwrite("w",&Quat::w);
 	defQuat.def_readwrite("x",&Quat::x);
@@ -1327,6 +1313,14 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defQuat.def("Distance",&uquat::distance);
 	defQuat.def("GetConjugate",static_cast<Quat(*)(const Quat&)>(&glm::conjugate));
 	modMath[defQuat];
+	pragma::lua::define_custom_constructor<Quat,&uquat::identity>(lua.GetState());
+	pragma::lua::define_custom_constructor<Quat,static_cast<Quat(*)(const Vector3&,float)>(&uquat::create),const Vector3&,float>(lua.GetState());
+	pragma::lua::define_custom_constructor<Quat,[](const Vector3 &a,const Vector3 &b,const Vector3 &c) -> Quat {
+		auto m = umat::create_from_axes(a,b,c);
+		return Quat(m);
+	},const Vector3&,const Vector3&,const Vector3&>(lua.GetState());
+	pragma::lua::define_custom_constructor<Quat,&uquat::create_look_rotation,const Vector3&,const Vector3&>(lua.GetState());
+
 	auto _G = luabind::globals(lua.GetState());
 	_G["Vector2i"] = _G["math"]["Vector2i"];
 	_G["Vector"] = _G["math"]["Vector"];
@@ -1942,3 +1936,4 @@ static void RegisterIk(Lua::Interface &lua)
 	modIk[defCcdSolver];
 	modIk[defFABRIKSolver];
 }
+#pragma optimize("",on)

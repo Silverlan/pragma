@@ -35,47 +35,23 @@ namespace Lua
 
 		DLLNETWORK void GetFrame(lua_State *l,pragma::animation::Animation &anim,unsigned int ID);
 		DLLNETWORK luabind::tableT<uint16_t> GetBoneList(lua_State *l,pragma::animation::Animation &anim);
-		DLLNETWORK Activity GetActivity(lua_State *l,pragma::animation::Animation &anim);
-		DLLNETWORK void SetActivity(lua_State *l,pragma::animation::Animation &anim,Activity act);
-		DLLNETWORK uint8_t GetActivityWeight(lua_State *l,pragma::animation::Animation &anim);
-		DLLNETWORK void SetActivityWeight(lua_State *l,pragma::animation::Animation &anim,uint8_t weight);
-		DLLNETWORK void GetFPS(lua_State *l,pragma::animation::Animation &anim);
-		DLLNETWORK void SetFPS(lua_State *l,pragma::animation::Animation &anim,uint8_t fps);
-		DLLNETWORK void GetFlags(lua_State *l,pragma::animation::Animation &anim);
-		DLLNETWORK void SetFlags(lua_State *l,pragma::animation::Animation &anim,uint32_t flags);
-		DLLNETWORK void AddFlags(lua_State *l,pragma::animation::Animation &anim,uint32_t flags);
-		DLLNETWORK void RemoveFlags(lua_State *l,pragma::animation::Animation &anim,uint32_t flags);
 		DLLNETWORK void AddFrame(lua_State *l,pragma::animation::Animation &anim,::Frame &frame);
 		DLLNETWORK void GetFrames(lua_State *l,pragma::animation::Animation &anim);
-		DLLNETWORK void GetDuration(lua_State *l,pragma::animation::Animation &anim);
-		DLLNETWORK void GetBoneCount(lua_State *l,pragma::animation::Animation &anim);
-		DLLNETWORK void GetFrameCount(lua_State *l,pragma::animation::Animation &anim);
 		DLLNETWORK void AddEvent(lua_State *l,pragma::animation::Animation &anim,uint32_t frameId,uint32_t eventId,luabind::object tArgs);
 		DLLNETWORK void GetEvents(lua_State *l,pragma::animation::Animation &anim,uint32_t frameId);
 		DLLNETWORK void GetEvents(lua_State *l,pragma::animation::Animation &anim);
 		DLLNETWORK void GetEventCount(lua_State *l,pragma::animation::Animation &anim,uint32_t frameId);
 		DLLNETWORK void GetEventCount(lua_State *l,pragma::animation::Animation &anim);
-		DLLNETWORK void GetFadeInTime(lua_State *l,pragma::animation::Animation &anim);
-		DLLNETWORK void GetFadeOutTime(lua_State *l,pragma::animation::Animation &anim);
 		DLLNETWORK void GetBlendController(lua_State *l,pragma::animation::Animation &anim);
 		DLLNETWORK void CalcRenderBounds(lua_State *l,pragma::animation::Animation &anim,const std::shared_ptr<::Model> &mdl);
 		DLLNETWORK void GetRenderBounds(lua_State *l,pragma::animation::Animation &anim,const std::shared_ptr<::Model> &mdl);
-		DLLNETWORK void Rotate(lua_State *l,pragma::animation::Animation &anim,panima::Skeleton *skeleton,const Quat &rot);
-		DLLNETWORK void Translate(lua_State *l,pragma::animation::Animation &anim,panima::Skeleton *skeleton,const Vector3 &t);
-		DLLNETWORK void Scale(lua_State *l,pragma::animation::Animation &anim,const Vector3 &scale);
-		DLLNETWORK void Reverse(lua_State *l,pragma::animation::Animation &anim);
 		DLLNETWORK void RemoveEvent(lua_State *l,pragma::animation::Animation &anim,uint32_t frameId,uint32_t idx);
 		DLLNETWORK void SetEventData(lua_State *l,pragma::animation::Animation &anim,uint32_t frameId,uint32_t idx,uint32_t type,luabind::object tArgs);
 		DLLNETWORK void SetEventType(lua_State *l,pragma::animation::Animation &anim,uint32_t frameId,uint32_t idx,uint32_t type);
 		DLLNETWORK void SetEventArgs(lua_State *l,pragma::animation::Animation &anim,uint32_t frameId,uint32_t idx,luabind::object tArgs);
 		DLLNETWORK void LookupBone(lua_State *l,pragma::animation::Animation &anim,uint32_t boneId);
 		DLLNETWORK void SetBoneList(lua_State *l,pragma::animation::Animation &anim,luabind::object);
-		DLLNETWORK void AddBoneId(lua_State *l,pragma::animation::Animation &anim,uint32_t boneId);
-		DLLNETWORK void SetFadeInTime(lua_State *l,pragma::animation::Animation &anim,float t);
-		DLLNETWORK void SetFadeOutTime(lua_State *l,pragma::animation::Animation &anim,float t);
 
-		DLLNETWORK void SetBoneWeight(lua_State *l,pragma::animation::Animation &anim,uint32_t boneId,float t);
-		DLLNETWORK void GetBoneWeight(lua_State *l,pragma::animation::Animation &anim,uint32_t boneId);
 		DLLNETWORK void GetBoneWeights(lua_State *l,pragma::animation::Animation &anim);
 	};
 	namespace Frame

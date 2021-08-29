@@ -84,26 +84,30 @@ namespace luabind
 	INSTANTIATE_TO_CPP_VEC(Vector3i);
 	INSTANTIATE_TO_CPP_VEC(Vector4);
 	INSTANTIATE_TO_CPP_VEC(Vector4i);
+	
+#define INSTANTIATE_TWOWAY_value(T0,T1) \
+	template DLLNETWORK T0 luabind::alias_converter<T0,T1,T0>::to_cpp<luabind::by_value<T0>>(lua_State*,luabind::by_value<T0>,int); \
+	template DLLNETWORK T0 luabind::alias_converter<T0,T1,T0>::to_cpp<luabind::by_value<T1>>(lua_State*,luabind::by_value<T1>,int); \
+	template DLLNETWORK T1 luabind::alias_converter<T1,T1,T0>::to_cpp<luabind::by_value<T0>>(lua_State*,luabind::by_value<T0>,int); \
+	template DLLNETWORK T1 luabind::alias_converter<T1,T1,T0>::to_cpp<luabind::by_value<T1>>(lua_State*,luabind::by_value<T1>,int); \
+	 \
+	template DLLNETWORK int luabind::alias_converter<T0,T1,T0>::match<luabind::by_value<T0>>(lua_State*,luabind::by_value<T0>,int); \
+	template DLLNETWORK int luabind::alias_converter<T0,T1,T0>::match<luabind::by_value<T1>>(lua_State*,luabind::by_value<T1>,int); \
+	template DLLNETWORK int luabind::alias_converter<T1,T1,T0>::match<luabind::by_value<T0>>(lua_State*,luabind::by_value<T0>,int); \
+	template DLLNETWORK int luabind::alias_converter<T1,T1,T0>::match<luabind::by_value<T1>>(lua_State*,luabind::by_value<T1>,int);
 
 #define INSTANTIATE_TWOWAY(T0,T1) \
 	template DLLNETWORK const T0 &luabind::alias_converter<const T0&,T1,T0>::to_cpp<luabind::by_const_reference<T0>>(lua_State*,luabind::by_const_reference<T0>,int); \
 	template DLLNETWORK const T0 &luabind::alias_converter<const T0&,T1,T0>::to_cpp<luabind::by_const_reference<T1>>(lua_State*,luabind::by_const_reference<T1>,int); \
 	template DLLNETWORK const T1 &luabind::alias_converter<const T1&,T1,T0>::to_cpp<luabind::by_const_reference<T0>>(lua_State*,luabind::by_const_reference<T0>,int); \
 	template DLLNETWORK const T1 &luabind::alias_converter<const T1&,T1,T0>::to_cpp<luabind::by_const_reference<T1>>(lua_State*,luabind::by_const_reference<T1>,int); \
-	template DLLNETWORK T0 luabind::alias_converter<T0,T1,T0>::to_cpp<luabind::by_value<T0>>(lua_State*,luabind::by_value<T0>,int); \
-	template DLLNETWORK T0 luabind::alias_converter<T0,T1,T0>::to_cpp<luabind::by_value<T1>>(lua_State*,luabind::by_value<T1>,int); \
-	template DLLNETWORK T1 luabind::alias_converter<T1,T1,T0>::to_cpp<luabind::by_value<T0>>(lua_State*,luabind::by_value<T0>,int); \
-	template DLLNETWORK T1 luabind::alias_converter<T1,T1,T0>::to_cpp<luabind::by_value<T1>>(lua_State*,luabind::by_value<T1>,int); \
 	 \
 	template DLLNETWORK int luabind::alias_converter<const T0&,T1,T0>::match<luabind::by_const_reference<T0>>(lua_State*,luabind::by_const_reference<T0>,int); \
 	template DLLNETWORK int luabind::alias_converter<const T0&,T1,T0>::match<luabind::by_const_reference<T1>>(lua_State*,luabind::by_const_reference<T1>,int); \
 	template DLLNETWORK int luabind::alias_converter<const T1&,T1,T0>::match<luabind::by_const_reference<T0>>(lua_State*,luabind::by_const_reference<T0>,int); \
 	template DLLNETWORK int luabind::alias_converter<const T1&,T1,T0>::match<luabind::by_const_reference<T1>>(lua_State*,luabind::by_const_reference<T1>,int); \
-	template DLLNETWORK int luabind::alias_converter<T0,T1,T0>::match<luabind::by_value<T0>>(lua_State*,luabind::by_value<T0>,int); \
-	template DLLNETWORK int luabind::alias_converter<T0,T1,T0>::match<luabind::by_value<T1>>(lua_State*,luabind::by_value<T1>,int); \
-	template DLLNETWORK int luabind::alias_converter<T1,T1,T0>::match<luabind::by_value<T0>>(lua_State*,luabind::by_value<T0>,int); \
-	template DLLNETWORK int luabind::alias_converter<T1,T1,T0>::match<luabind::by_value<T1>>(lua_State*,luabind::by_value<T1>,int);
+	INSTANTIATE_TWOWAY_value(T0,T1); \
 
 	INSTANTIATE_TWOWAY(Quat,EulerAngles);
-	INSTANTIATE_TWOWAY(std::string,util::Path);
+	//INSTANTIATE_TWOWAY_value(std::string,util::Path);
 };

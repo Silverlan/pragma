@@ -100,15 +100,15 @@ static void call_callback(CallbackHandle &cb,std::initializer_list<luabind::obje
 
 static int32_t parse_math_expression(lua_State *l)
 {
-	class FunGeneric : public mup::ICallback
+	class FunLua : public mup::ICallback
 	{
 	public:
 
-		FunGeneric(const std::string &name,uint32_t numArgs)
+		FunLua(const std::string &name,uint32_t numArgs)
 			: ICallback(mup::cmFUNC, name.c_str(), numArgs),m_name{name},m_numArgs{numArgs}
 		{}
 
-		FunGeneric(const FunGeneric &other)
+		FunLua(const FunLua &other)
 			: mup::ICallback{other},m_name{other.m_name},
 			m_numArgs{other.m_numArgs}
 		{}
@@ -120,7 +120,7 @@ static int32_t parse_math_expression(lua_State *l)
 			return _T("");
 		}
 
-		virtual IToken* Clone() const override {return new FunGeneric(*this);}
+		virtual IToken* Clone() const override {return new FunLua(*this);}
 	private:
 		std::string m_name;
 		uint32_t m_numArgs = 0;
@@ -151,7 +151,7 @@ static int32_t parse_math_expression(lua_State *l)
 		Lua::GetTableValue(l,tF); /* 2 */
 		auto numArgs = Lua::CheckInt(l,-1);
 		Lua::Pop(l,1); /* 1 */
-		p.DefineFun(new FunGeneric{fnName,static_cast<uint32_t>(numArgs)});
+		p.DefineFun(new FunLua{fnName,static_cast<uint32_t>(numArgs)});
 
 		Lua::Pop(l,1); /* 0 */
 	}

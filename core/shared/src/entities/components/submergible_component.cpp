@@ -12,6 +12,7 @@
 
 using namespace pragma;
 
+#pragma optimize("",off)
 ComponentEventId SubmergibleComponent::EVENT_ON_WATER_SUBMERGED = INVALID_COMPONENT_ID;
 ComponentEventId SubmergibleComponent::EVENT_ON_WATER_EMERGED = INVALID_COMPONENT_ID;
 ComponentEventId SubmergibleComponent::EVENT_ON_WATER_ENTERED = INVALID_COMPONENT_ID;
@@ -81,3 +82,4 @@ const util::PFloatProperty &SubmergibleComponent::GetSubmergedFractionProperty()
 
 BaseEntity *SubmergibleComponent::GetWaterEntity() {return m_waterEntity.get();}
 const BaseEntity *SubmergibleComponent::GetWaterEntity() const {return const_cast<SubmergibleComponent*>(this)->GetWaterEntity();}
+#pragma optimize("",on)

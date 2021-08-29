@@ -111,6 +111,14 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		Lua::udm::set_array_values(l,channel.GetTimesArray(),times,2);
 		Lua::udm::set_array_values(l,channel.GetValueArray(),values,3);
 	}));
+	cdChannel.def("SetValueExpression",static_cast<Lua::var<bool,std::string>(*)(lua_State*,panima::Channel&,std::string)>([](lua_State *l,panima::Channel &channel,std::string expression) -> Lua::var<bool,std::string> {
+		std::string err;
+		auto res = channel.SetValueExpression(std::move(expression),err);
+		if(res)
+			return luabind::object{l,true};
+		return luabind::object{l,err};
+	}));
+	cdChannel.def("GetValueExpression",&panima::Channel::GetValueExpression);
 	animMod[cdChannel];
 
 	auto cdPlayer = luabind::class_<panima::Player>("Player");

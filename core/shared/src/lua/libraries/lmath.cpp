@@ -11,7 +11,6 @@
 #include <pragma/engine.h>
 #include <mathutil/umath.h>
 #include "luasystem.h"
-#include "pragma/math/perlinnoise.h"
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/math/util_hermite.h"
 #include "pragma/util/util_ballistic.h"
@@ -19,16 +18,17 @@
 #include "pragma/model/modelmesh.h"
 #include <mathutil/umath_equation_solver.h>
 #include <mathutil/umath_frustum.hpp>
+#include <mathutil/perlin_noise.hpp>
 
 extern DLLNETWORK Engine *engine;
 double Lua::math::perlin_noise(const Vector3 &v)
 {
-	PerlinNoise p;
+	umath::PerlinNoise p;
 	return p.GetNoise(const_cast<Vector3&>(v));
 }
 double Lua::math::perlin_noise(const Vector3 &v,uint32_t seed)
 {
-	PerlinNoise p(seed);
+	umath::PerlinNoise p(seed);
 	return p.GetNoise(const_cast<Vector3&>(v));
 }
 

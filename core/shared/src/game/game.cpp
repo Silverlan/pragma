@@ -637,6 +637,15 @@ void Game::Tick()
 			ent->ResetStateChangeFlags();
 	}
 
+	// Order:
+	// Animations are updated before logic and physics, because:
+	// 1) They may affect logic/physics-based properties like entity positions or rotations
+	// 2) They may generate logic-based animation events
+	UpdateEntityAnimations(m_tDeltaTick);
+
+	// Animation drivers require animations to be fully processed, so they are executed next.
+	UpdateEntityAnimationDrivers(m_tDeltaTick);
+
 	StartProfilingStage(CPUProfilingPhase::Physics);
 
 	auto &awakePhysics = GetAwakePhysicsComponents();
@@ -718,8 +727,6 @@ void Game::Tick()
 		}
 		++i;
 	}
-	UpdateEntityAnimations(m_tDeltaTick);
-	UpdateEntityAnimationDrivers(m_tDeltaTick); // Drivers *have* to be updated *after* everything else!
 
 	StopProfilingStage(CPUProfilingPhase::GameObjectLogic);
 

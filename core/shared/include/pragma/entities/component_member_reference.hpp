@@ -18,7 +18,9 @@ namespace pragma
 		static std::optional<ComponentMemberReference> Create(BaseEntityComponent &component,pragma::ComponentMemberIndex index);
 		static std::optional<ComponentMemberReference> Create(const EntityComponentManager &manager,ComponentId componentId,pragma::ComponentMemberIndex index);
 		ComponentMemberReference()=default;
+		ComponentMemberReference(const ComponentMemberReference&)=default;
 		ComponentMemberReference(const std::string &memberName);
+		ComponentMemberReference &operator=(const ComponentMemberReference&)=default;
 
 		pragma::ComponentMemberIndex GetMemberIndex() const {return m_index;}
 		const std::string &GetMemberName() const {return m_name;}

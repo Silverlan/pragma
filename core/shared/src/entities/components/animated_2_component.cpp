@@ -262,12 +262,12 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(animation::An
 		auto *memberInfo = hComponent->GetMemberInfo(*memberIdx);
 		auto valueType = memberInfo->type;
 
-		AnimationDriver *driver = nullptr;
+		ValueDriver *driver = nullptr;
 		if(driverC)
 		{
 			driver = driverC->FindDriver(hComponent->GetComponentId(),*memberIdx);
-			if(driver && (!driver->dataValue.data || driver->dataValue.type != memberInfo->type))
-				continue;
+			//if(driver && (!driver->dataValue.data || driver->dataValue.type != memberInfo->type))
+			//	continue;
 		}
 		
 		auto &component = *hComponent;
@@ -278,7 +278,7 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(animation::An
 				memberInfo.setterFunction(memberInfo,component,value);
 			};
 			constexpr auto setDriverValue = [](const pragma::ComponentMemberInfo &memberInfo,pragma::BaseEntityComponent &component,const void *value,void *userData) {
-				memcpy(static_cast<AnimationDriver*>(userData)->dataValue.data.get(),value,sizeof(TMember));
+				//memcpy(static_cast<ValueDriver*>(userData)->dataValue.data.get(),value,sizeof(TMember));// TODO
 			};
 			if(strValueComponent.empty())
 			{

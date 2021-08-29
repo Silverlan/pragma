@@ -16,6 +16,7 @@
 #include "pragma/lua/classes/ldef_entity.h"
 #include "pragma/lua/classes/lphysics.h"
 #include "pragma/lua/policies/property_policy.hpp"
+#include "pragma/lua/policies/generic_policy.hpp"
 #include "pragma/util/bulletinfo.h"
 #include "pragma/lua/libraries/lray.h"
 #include "pragma/model/animation/animation_manager.hpp"
@@ -84,176 +85,53 @@ AnimationEvent Lua::get_animation_event(lua_State *l,int32_t tArgs,uint32_t even
 	return ev;
 }
 
-namespace util
-{
-	template<typename T>
-		class TWeakSharedHandle;
-	template<typename T>
-		class TSharedHandle;
-	template<typename T>
-		class WeakHandle;
-};
-namespace luabind
-{
-	namespace detail
-	{
-		template<typename T>
-		struct pointer_traits<util::WeakHandle<T>>
-		{
-			enum { is_pointer = true };
-			using value_type = T;
-		};
-	};
-};
-
-namespace luabind {
-
-	namespace detail
-	{
-
-		struct weak_handle_deleter
-		{
-			weak_handle_deleter(lua_State* L, int index)
-				: life_support(get_main_thread(L), L, index)
-			{}
-
-			void operator()(void const*)
-			{
-				handle().swap(life_support);
-			}
-
-			handle life_support;
-		};
-
-	} // namespace detail
-
-	template <class T>
-	struct default_converter<util::WeakHandle<T> >
-		: default_converter<T*>
-	{
-		using is_native = std::false_type;
-
-		template <class U>
-		int match(lua_State* L, U, int index)
-		{
-			return default_converter<T*>::match(L, decorate_type_t<T*>(), index);
-		}
-
-		template <class U>
-		util::WeakHandle<T> to_cpp(lua_State* L, U, int index)
-		{
-			T* raw_ptr = default_converter<T*>::to_cpp(L, decorate_type_t<T*>(), index);
-
-			if(!raw_ptr) {
-				return util::WeakHandle<T>();
-			} else {
-				return util::WeakHandle<T>(raw_ptr, detail::weak_handle_deleter(L, index));
-			}
-		}
-
-		void to_lua(lua_State* L, util::WeakHandle<T> const& p)
-		{
-			if(detail::weak_handle_deleter* d = nullptr)
-			{
-				d->life_support.push(L);
-			} else {
-				detail::value_converter().to_lua(L, p);
-			}
-		}
-
-		template <class U>
-		void converter_postcall(lua_State*, U const&, int)
-		{}
-	};
-
-	template <class T>
-	struct default_converter<util::WeakHandle<T> const&>
-		: default_converter<util::WeakHandle<T> >
-	{};
-
-	template <typename T>
-	struct lua_proxy_traits<util::WeakHandle<T> >
-		: lua_proxy_traits<object>
-	{
-		static bool check(lua_State* L, int idx)
-		{
-			return lua_proxy_traits<object>::check(L, idx) && lua_istable(L, idx) && lua_isboolean(L,idx);
-		}
-	};
-
-	//////
-
-	namespace adl {
-		template <typename T>
-		struct TestWrapper : object
-		{
-			TestWrapper(from_stack const& stack_reference)
-				: object(stack_reference)
-			{}
-			TestWrapper(const object &o)
-				: object(o)
-			{}
-			TestWrapper(lua_State *l,const T &t)
-				: object(l,t)
-			{}
-			using value_type = T;
-		};
-	};
-
-	namespace detail
-	{
-		template<typename T>
-		struct pseudo_traits<adl::TestWrapper<T>>
-		{
-			enum { is_pseudo_type = true };
-			enum { is_variadic = false };
-			using value_type = T;
-		};
-
-	};
-	using adl::TestWrapper;
-
-	template <typename T>
-	struct lua_proxy_traits<adl::TestWrapper<T> >
-		: lua_proxy_traits<object>
-	{
-		static bool check(lua_State* L, int idx)
-		{
-			return lua_proxy_traits<object>::check(L, idx) && lua_istable(L,idx);//(lua_isnoneornil(L, idx) || lua_isnumber(L, idx));
-		}
-	};
-
-} // namespace luabind
-
-template<typename TMemberId> requires(std::is_same_v<TMemberId,pragma::ComponentMemberIndex> || std::is_same_v<TMemberId,std::string>)
+template<typename TMemberId> requires(std::is_same_v<TMemberId,pragma::ComponentMemberIndex> || std::is_same_v<TMemberId,const std::string&>)
 	static void add_driver(
-	pragma::AnimationDriverComponent &hComponent,pragma::ComponentId componentId,TMemberId memberIdx,const std::string &expression,
-	std::unordered_map<std::string,std::string> vars
+	pragma::AnimationDriverComponent &hComponent,pragma::ComponentId componentId,TMemberId memberIdx,pragma::ValueDriverDescriptor descriptor
 )
 {
-	pragma::AnimationDriverVariableList driverVars {};
-	driverVars.reserve(vars.size());
-	for(auto &pair : vars)
-	{
-		util::Path path {pair.second};
-		auto uuid = path.GetFront();
-		path.PopFront();
-		driverVars.insert(std::make_pair(pair.first,pragma::AnimationDriverVariable{util::uuid_string_to_bytes(uuid),path}));
-	}
-	hComponent.AddDriver(componentId,memberIdx,expression,std::move(driverVars));
-}
-template<typename TMemberId> requires(std::is_same_v<TMemberId,pragma::ComponentMemberIndex> || std::is_same_v<TMemberId,std::string>)
-	static void add_driver(
-	pragma::AnimationDriverComponent &hComponent,pragma::ComponentId componentId,TMemberId memberIdx,const std::string &expression
-)
-{
-	add_driver<TMemberId>(hComponent,componentId,memberIdx,expression);
+	hComponent.AddDriver(componentId,memberIdx,std::move(descriptor));
 }
 
-void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
+template<uint32_t N>
+	using ComponentMemberReferencePolicy = luabind::generic_policy<N,pragma::ComponentMemberReference,[](lua_State *l,int index) -> int {
+		return lua_isstring(l,index) ? 0 : luabind::no_match;
+	},[](lua_State *l,int index) -> pragma::ComponentMemberReference {
+		return pragma::ComponentMemberReference{Lua::CheckString(l,index)};
+	}>;
+
+template<uint32_t N>
+	using UuidPolicy = luabind::generic_policy<N,util::Uuid,[](lua_State *l,int index) -> int {
+		return lua_isstring(l,index) ? 0 : luabind::no_match;
+	},[](lua_State *l,int index) -> util::Uuid {
+		return util::uuid_string_to_bytes(Lua::CheckString(l,index));
+	}>;
+
+void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 {
-	pragma::lua::register_entity_component_classes(gameMod);
-	Lua::register_gravity_component(gameMod);
+	pragma::lua::register_entity_component_classes(entsMod);
+	Lua::register_gravity_component(entsMod);
+
+	auto classDefEntRef = luabind::class_<pragma::EntityUuidRef>("UniversalEntityReference");
+	classDefEntRef.def(luabind::constructor<const BaseEntity&>());
+	classDefEntRef.def(luabind::constructor<util::Uuid>(),UuidPolicy<2>{});
+	classDefEntRef.def("GetEntity",static_cast<BaseEntity*(pragma::EntityUuidRef::*)(Game&)>(&pragma::EntityUuidRef::GetEntity));
+	entsMod[classDefEntRef];
+
+	auto classDefCompRef = luabind::class_<pragma::EntityUuidComponentRef,pragma::EntityUuidRef>("UniversalComponentReference");
+	classDefCompRef.def(luabind::constructor<util::Uuid,pragma::ComponentId>(),UuidPolicy<2>{});
+	classDefCompRef.def(luabind::constructor<util::Uuid,const std::string&>(),UuidPolicy<2>{});
+	classDefCompRef.def(luabind::constructor<const BaseEntity&,pragma::ComponentId>());
+	classDefCompRef.def("GetComponent",static_cast<pragma::BaseEntityComponent*(pragma::EntityUuidComponentRef::*)(Game&)>(&pragma::EntityUuidComponentRef::GetComponent));
+	entsMod[classDefCompRef];
+
+	auto classDefMemRef = luabind::class_<pragma::EntityUuidComponentMemberRef,luabind::bases<pragma::EntityUuidComponentRef,pragma::EntityUuidRef>>("UniversalMemberReference");
+	classDefMemRef.def(luabind::constructor<util::Uuid,pragma::ComponentId,const std::string&>(),UuidPolicy<2>{});
+	classDefMemRef.def(luabind::constructor<util::Uuid,const std::string&,const std::string&>(),UuidPolicy<2>{});
+	classDefMemRef.def(luabind::constructor<const BaseEntity&,pragma::ComponentId,const std::string&>());
+	classDefMemRef.def(luabind::constructor<const BaseEntity&,const std::string&,const std::string&>());
+	classDefMemRef.def("GetMemberInfo",&pragma::EntityUuidComponentMemberRef::GetMemberInfo);
+	entsMod[classDefMemRef];
 
 	auto defVelocity = luabind::class_<pragma::VelocityComponent,pragma::BaseEntityComponent>("VelocityComponent");
 	defVelocity.def("GetVelocity",&pragma::VelocityComponent::GetVelocity,luabind::copy_policy<0>{});
@@ -270,12 +148,12 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	defVelocity.def("AddLocalVelocity",&pragma::VelocityComponent::AddLocalVelocity);
 	defVelocity.def("GetVelocityProperty",&pragma::VelocityComponent::GetVelocityProperty);
 	defVelocity.def("GetAngularVelocityProperty",&pragma::VelocityComponent::GetAngularVelocityProperty);
-	gameMod[defVelocity];
+	entsMod[defVelocity];
 
 	auto defGlobal = luabind::class_<pragma::GlobalNameComponent,pragma::BaseEntityComponent>("GlobalComponent");
 	defGlobal.def("GetGlobalName",&pragma::GlobalNameComponent::GetGlobalName);
 	defGlobal.def("SetGlobalName",&pragma::GlobalNameComponent::SetGlobalName);
-	gameMod[defGlobal];
+	entsMod[defGlobal];
 
 	auto defComposite = luabind::class_<pragma::CompositeComponent,pragma::BaseEntityComponent>("CompositeComponent");
 	defComposite.def("ClearEntities",&pragma::CompositeComponent::ClearEntities);
@@ -363,7 +241,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 		return t;
 	}));
 	defComposite.scope[defCompositeGroup];
-	gameMod[defComposite];
+	entsMod[defComposite];
 	
 	auto defAnimated2 = luabind::class_<pragma::Animated2Component,pragma::BaseEntityComponent>("Animated2Component");
 	defAnimated2.def("SetPlaybackRate",&pragma::Animated2Component::SetPlaybackRate);
@@ -396,43 +274,44 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	defAnimated2.add_static_constant("EVENT_PLAY_ANIMATION",pragma::Animated2Component::EVENT_PLAY_ANIMATION);
 	defAnimated2.add_static_constant("EVENT_TRANSLATE_ANIMATION",pragma::Animated2Component::EVENT_TRANSLATE_ANIMATION);
 	defAnimated2.add_static_constant("EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER",pragma::Animated2Component::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER);
-	gameMod[defAnimated2];
+	entsMod[defAnimated2];
 
-	auto defDriver = luabind::class_<pragma::AnimationDriverComponent,pragma::BaseEntityComponent>("AnimationDriverComponent");
-	defDriver.def("AddDriver",static_cast<
-		void(*)(pragma::AnimationDriverComponent&,pragma::ComponentId,pragma::ComponentMemberIndex,const std::string&,std::unordered_map<std::string,std::string>)
+	auto defDriverC = luabind::class_<pragma::AnimationDriverComponent,pragma::BaseEntityComponent>("AnimationDriverComponent");
+	defDriverC.def("AddDriver",static_cast<
+		void(*)(pragma::AnimationDriverComponent&,pragma::ComponentId,pragma::ComponentMemberIndex,pragma::ValueDriverDescriptor)
 	>(&add_driver<pragma::ComponentMemberIndex>));
-	defDriver.def("AddDriver",static_cast<
-		void(*)(pragma::AnimationDriverComponent&,pragma::ComponentId,std::string,const std::string&,std::unordered_map<std::string,std::string>)
-	>(&add_driver<std::string>));
-	defDriver.def("AddDriver",static_cast<
-		void(*)(pragma::AnimationDriverComponent&,pragma::ComponentId,pragma::ComponentMemberIndex,const std::string&)
-	>(&add_driver<pragma::ComponentMemberIndex>));
-	defDriver.def("AddDriver",static_cast<
-		void(*)(pragma::AnimationDriverComponent&,pragma::ComponentId,std::string,const std::string&)
-	>(&add_driver<std::string>));
-	defDriver.def("ClearDrivers",&pragma::AnimationDriverComponent::ClearDrivers);
-	gameMod[defDriver];
+	defDriverC.def("AddDriver",static_cast<
+		void(*)(pragma::AnimationDriverComponent&,pragma::ComponentId,const std::string&,pragma::ValueDriverDescriptor)
+	>(&add_driver<const std::string&>));
+	defDriverC.def("ClearDrivers",&pragma::AnimationDriverComponent::ClearDrivers);
+
+	auto defDriver = luabind::class_<pragma::ValueDriver>("Driver");
+	defDriver.def(luabind::constructor<pragma::ComponentId,pragma::ComponentMemberReference,pragma::ValueDriverDescriptor>(),ComponentMemberReferencePolicy<3>{});
+	defDriver.def("GetMemberReference",&pragma::ValueDriver::GetMemberReference);
+	defDriver.def("GetDescriptor",&pragma::ValueDriver::GetDescriptor);
+	defDriverC.scope[defDriver];
+
+	entsMod[defDriverC];
 
 	auto defIK = luabind::class_<pragma::IKComponent,pragma::BaseEntityComponent>("IKComponent");
 	defIK.def("SetIKControllerEnabled",&pragma::IKComponent::SetIKControllerEnabled);
 	defIK.def("IsIKControllerEnabled",&pragma::IKComponent::IsIKControllerEnabled);
 	defIK.def("SetIKEffectorPos",&pragma::IKComponent::SetIKEffectorPos);
 	defIK.def("GetIKEffectorPos",&pragma::IKComponent::GetIKEffectorPos);
-	gameMod[defIK];
+	entsMod[defIK];
 
 	auto defLogic = luabind::class_<pragma::LogicComponent,pragma::BaseEntityComponent>("LogicComponent");
 	defLogic.add_static_constant("EVENT_ON_TICK",pragma::LogicComponent::EVENT_ON_TICK);
-	gameMod[defLogic];
+	entsMod[defLogic];
 
 	auto defUsable = luabind::class_<pragma::UsableComponent,pragma::BaseEntityComponent>("UsableComponent");
 	defUsable.add_static_constant("EVENT_ON_USE",pragma::UsableComponent::EVENT_ON_USE);
 	defUsable.add_static_constant("EVENT_CAN_USE",pragma::UsableComponent::EVENT_CAN_USE);
-	gameMod[defUsable];
+	entsMod[defUsable];
 
 	auto defMap = luabind::class_<pragma::MapComponent,pragma::BaseEntityComponent>("MapComponent");
 	defMap.def("GetMapIndex",&pragma::MapComponent::GetMapIndex);
-	gameMod[defMap];
+	entsMod[defMap];
 
 	auto defSubmergible = luabind::class_<pragma::SubmergibleComponent,pragma::BaseEntityComponent>("SubmergibleComponent");
 	defSubmergible.def("IsSubmerged",&pragma::SubmergibleComponent::IsSubmerged);
@@ -445,11 +324,11 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &gameMod)
 	defSubmergible.add_static_constant("EVENT_ON_WATER_EMERGED",pragma::SubmergibleComponent::EVENT_ON_WATER_EMERGED);
 	defSubmergible.add_static_constant("EVENT_ON_WATER_ENTERED",pragma::SubmergibleComponent::EVENT_ON_WATER_ENTERED);
 	defSubmergible.add_static_constant("EVENT_ON_WATER_EXITED",pragma::SubmergibleComponent::EVENT_ON_WATER_EXITED);
-	gameMod[defSubmergible];
+	entsMod[defSubmergible];
 
 	auto defDamageable = luabind::class_<pragma::DamageableComponent,pragma::BaseEntityComponent>("DamageableComponent");
 	defDamageable.def("TakeDamage",&pragma::DamageableComponent::TakeDamage);
 	defDamageable.add_static_constant("EVENT_ON_TAKE_DAMAGE",pragma::DamageableComponent::EVENT_ON_TAKE_DAMAGE);
-	gameMod[defDamageable];
+	entsMod[defDamageable];
 }
 #pragma optimize("",on)

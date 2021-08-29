@@ -5,6 +5,8 @@
  * Copyright (c) 2021 Silverlan
  */
 
+#include "pragma/lua/luaapi.h"
+#include "pragma/lua/types/udm.hpp"
 #include "stdafx_shared.h"
 #include <pragma/engine.h>
 #include "pragma/networkstate/networkstate.h"
@@ -20,6 +22,8 @@
 #include "pragma/model/modelmesh.h"
 #include "pragma/lua/classes/ldef_tracedata.h"
 #include "pragma/lua/libraries/lray.h"
+#include "pragma/lua/converters/vector_converter_t.hpp"
+#include "pragma/lua/converters/alias_converter_t.hpp"
 #include "pragma/physics/environment.hpp"
 #include "pragma/entities/entity_iterator.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
@@ -27,6 +31,8 @@
 #include "pragma/entities/components/base_radius_component.hpp"
 #include "pragma/entities/components/base_color_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
+#include "pragma/lua/policies/core_policies.hpp"
+#include "pragma/game/value_driver.hpp"
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/ai/navsystem.h"
 #include <pragma/math/intersection.h>
@@ -401,4 +407,40 @@ void Lua::game::register_shared_functions(luabind::module_ &modGame)
 		luabind::def("get_map_name",Lua::game::get_map_name),
 		luabind::def("get_game_state_flags",Lua::game::get_game_state_flags)
 	];
+
+	auto classDefDescriptor = luabind::class_<pragma::ValueDriverDescriptor>("ValueDriverDescriptor");
+	classDefDescriptor.def(luabind::constructor<lua_State*,std::string,std::unordered_map<std::string,util::Path>,std::unordered_map<std::string,udm::PProperty>>());
+	classDefDescriptor.def(luabind::constructor<lua_State*,std::string,std::unordered_map<std::string,util::Path>>());
+	classDefDescriptor.def(luabind::constructor<lua_State*,std::string>());
+	classDefDescriptor.property("expression",static_cast<std::string(*)(lua_State*,pragma::ValueDriverDescriptor&)>([](lua_State *l,pragma::ValueDriverDescriptor &descriptor) -> std::string {
+		return descriptor.GetExpression();
+	}),static_cast<void(*)(lua_State*,pragma::ValueDriverDescriptor&,const std::string&)>([](lua_State *l,pragma::ValueDriverDescriptor &descriptor,const std::string &expr) {
+		descriptor.SetExpression(expr);
+	}));
+	classDefDescriptor.def("AddReference",&pragma::ValueDriverDescriptor::AddReference);
+	classDefDescriptor.def("AddConstant",static_cast<void(*)(pragma::ValueDriverDescriptor&,const std::string&,udm::PProperty)>([](pragma::ValueDriverDescriptor &descriptor,const std::string &name,udm::PProperty prop) {
+		descriptor.AddConstant(name,prop);
+	}));
+	classDefDescriptor.def("AddConstant",static_cast<void(*)(pragma::ValueDriverDescriptor&,const std::string&,const Lua::classObject&)>(
+		[](pragma::ValueDriverDescriptor &descriptor,const std::string &name,const Lua::classObject &udmType) {
+		for(auto type : udm::GENERIC_TYPES)
+		{
+			auto r = udm::visit<false,true,false>(type,[&udmType,&descriptor,&name](auto tag) mutable -> bool {
+				using T = decltype(tag)::type;
+				auto *o = luabind::object_cast_nothrow<T*>(udmType,luabind::pointer_policy<0>{},static_cast<T*>(nullptr));
+				if(o)
+				{
+					auto cpy = *o;
+					descriptor.AddConstant<T>(name,std::move(cpy));
+					return true;
+				}
+				return false;
+			});
+			if(r)
+				break;
+		}
+	}));
+	classDefDescriptor.def("GetConstants",&pragma::ValueDriverDescriptor::GetConstants);
+	classDefDescriptor.def("GetReferences",&pragma::ValueDriverDescriptor::GetReferences);
+	modGame[classDefDescriptor];
 }

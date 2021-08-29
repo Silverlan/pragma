@@ -124,7 +124,6 @@ static std::unordered_map<std::string,std::string> g_typeTranslationTable {
 	{"short","int16"},
 	{"unsigned char","uint8"},
 	{"unsigned int","uint32"},
-	{"QuaternionInternal","Quaternion"},
 	{"double","float"},
 	{"__int64","int64"},
 	{"luabind::object","any"},
@@ -160,7 +159,6 @@ static std::unordered_map<std::string,std::string> g_typeTranslationTable {
 	{"std::basic_string","string"},
 
 	{"std::basic_string","string"},
-	{"glm::qua","QuaternionInternal"},
 	{"luabind::argument","any"},
 	{"luabind::object","any"},
 	{"CallbackHandle","Callback"},

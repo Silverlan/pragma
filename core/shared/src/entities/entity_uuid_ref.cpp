@@ -45,10 +45,15 @@ EntityUuidComponentRef::EntityUuidComponentRef(const BaseEntity &ent,const std::
 EntityUuidComponentRef::EntityUuidComponentRef(const EntityUuidComponentRef &other)
 	: EntityUuidRef{other}
 {
+	operator=(other);
+}
+EntityUuidComponentRef &EntityUuidComponentRef::operator=(const EntityUuidComponentRef &other)
+{
 	m_componentId = other.m_componentId;
 	m_hComponent = other.m_hComponent;
 	if(other.m_componentName)
 		m_componentName = std::make_unique<std::string>(*other.m_componentName);
+	return *this;
 }
 BaseEntityComponent *EntityUuidComponentRef::GetComponent(Game &game)
 {

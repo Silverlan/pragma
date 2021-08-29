@@ -37,6 +37,7 @@ namespace pragma
 		EntityUuidComponentRef(const BaseEntity &ent,ComponentId componentId);
 		EntityUuidComponentRef(const BaseEntity &ent,const std::string &componentName);
 		EntityUuidComponentRef(const EntityUuidComponentRef &other);
+		EntityUuidComponentRef &operator=(const EntityUuidComponentRef &other);
 		BaseEntityComponent *GetComponent(Game &game);
 		const BaseEntityComponent *GetComponent(Game &game) const {return const_cast<EntityUuidComponentRef*>(this)->GetComponent(game);}
 	protected:
@@ -52,8 +53,10 @@ namespace pragma
 		EntityUuidComponentMemberRef(util::Uuid uuid,const std::string &componentName,const std::string &memberName);
 		EntityUuidComponentMemberRef(const BaseEntity &ent,ComponentId componentId,const std::string &memberName);
 		EntityUuidComponentMemberRef(const BaseEntity &ent,const std::string &componentName,const std::string &memberName);
+		EntityUuidComponentMemberRef(const EntityUuidComponentMemberRef&)=default;
 		const ComponentMemberInfo *GetMemberInfo(Game &game) const;
 
+		EntityUuidComponentMemberRef &operator=(const EntityUuidComponentMemberRef&)=default;
 		ComponentMemberReference &operator*() {return m_memberRef;}
 		const ComponentMemberReference &operator*() const {return const_cast<EntityUuidComponentMemberRef*>(this)->operator*();}
 		ComponentMemberReference *operator->() {return &m_memberRef;}

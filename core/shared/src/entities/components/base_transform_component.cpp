@@ -32,25 +32,33 @@ void BaseTransformComponent::RegisterEvents(pragma::EntityComponentManager &comp
 void BaseTransformComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
 {
 	using T = BaseTransformComponent;
+
+	using TPosition = Vector3;
 	registerMember(create_component_member_info<
-		T,Vector3,
-		static_cast<void(T::*)(const Vector3&)>(&T::SetPosition),
-		static_cast<const Vector3&(T::*)() const>(&T::GetPosition)
+		T,TPosition,
+		static_cast<void(T::*)(const TPosition&)>(&T::SetPosition),
+		static_cast<const TPosition&(T::*)() const>(&T::GetPosition)
 	>("position"));
+
+	using TRotation = Quat;
 	registerMember(create_component_member_info<
-		T,Quat,
-		static_cast<void(T::*)(const Quat&)>(&T::SetRotation),
-		static_cast<const Quat&(T::*)() const>(&T::GetRotation)
+		T,TRotation,
+		static_cast<void(T::*)(const TRotation&)>(&T::SetRotation),
+		static_cast<const TRotation&(T::*)() const>(&T::GetRotation)
 	>("rotation"));
+
+	using TAngles = EulerAngles;
 	registerMember(create_component_member_info<
-		T,EulerAngles,
-		static_cast<void(T::*)(const EulerAngles&)>(&T::SetAngles),
-		static_cast<EulerAngles(T::*)() const>(&T::GetAngles)
+		T,TAngles,
+		static_cast<void(T::*)(const TAngles&)>(&T::SetAngles),
+		static_cast<TAngles(T::*)() const>(&T::GetAngles)
 	>("angles"));
+
+	using TScale = Vector3;
 	registerMember(create_component_member_info<
-		T,Vector3,
-		static_cast<void(T::*)(const Vector3&)>(&T::SetScale),
-		static_cast<const Vector3&(T::*)() const>(&T::GetScale)
+		T,TScale,
+		static_cast<void(T::*)(const TScale&)>(&T::SetScale),
+		static_cast<const TScale&(T::*)() const>(&T::GetScale)
 	>("scale"));
 }
 BaseTransformComponent::BaseTransformComponent(BaseEntity &ent)

@@ -7,6 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/entities/environment/lights/env_light_spot.h"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include <sharedutils/util.h>
 #include "pragma/util/util_handled.hpp"
 #include "pragma/entities/baseentity_events.hpp"
@@ -16,6 +17,29 @@
 
 using namespace pragma;
 
+void BaseEnvLightSpotComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+{
+	using T = BaseEnvLightSpotComponent;
+
+	using TConeAngle = float;
+	registerMember(create_component_member_info<
+		T,TConeAngle,
+		static_cast<void(T::*)(TConeAngle)>(&T::SetInnerCutoffAngle),
+		static_cast<TConeAngle(T::*)() const>(&T::GetInnerCutoffAngle)
+	>("innerConeAngle"));
+
+	registerMember(create_component_member_info<
+		T,TConeAngle,
+		static_cast<void(T::*)(TConeAngle)>(&T::SetOuterCutoffAngle),
+		static_cast<TConeAngle(T::*)() const>(&T::GetOuterCutoffAngle)
+	>("outerConeAngle"));
+
+	registerMember(create_component_member_info<
+		T,TConeAngle,
+		static_cast<void(T::*)(TConeAngle)>(&T::SetConeStartOffset),
+		static_cast<TConeAngle(T::*)() const>(&T::GetConeStartOffset)
+	>("coneStartOffset"));
+}
 BaseEnvLightSpotComponent::BaseEnvLightSpotComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_angInnerCutoff(util::FloatProperty::Create(0.f)),
 	m_angOuterCutoff(util::FloatProperty::Create(0.f)),m_coneStartOffset(util::FloatProperty::Create(0.f))

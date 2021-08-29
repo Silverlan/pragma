@@ -12,6 +12,7 @@
 #include "pragma/entities/components/velocity_component.hpp"
 #include "pragma/entities/components/damageable_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 
@@ -23,6 +24,23 @@ void BaseHealthComponent::RegisterEvents(pragma::EntityComponentManager &compone
 {
 	EVENT_ON_TAKEN_DAMAGE = componentManager.RegisterEvent("ON_TAKEN_DAMAGE");
 	EVENT_ON_HEALTH_CHANGED = componentManager.RegisterEvent("ON_HEALTH_CHANGED");
+}
+void BaseHealthComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+{
+	using T = BaseHealthComponent;
+
+	using THealth = uint16_t;
+	registerMember(create_component_member_info<
+		T,THealth,
+		static_cast<void(T::*)(THealth)>(&T::SetHealth),
+		static_cast<THealth(T::*)() const>(&T::GetHealth)
+	>("health"));
+
+	registerMember(create_component_member_info<
+		T,THealth,
+		static_cast<void(T::*)(THealth)>(&T::SetMaxHealth),
+		static_cast<THealth(T::*)() const>(&T::GetMaxHealth)
+	>("maxHealth"));
 }
 BaseHealthComponent::BaseHealthComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_health(util::UInt16Property::Create(0)),

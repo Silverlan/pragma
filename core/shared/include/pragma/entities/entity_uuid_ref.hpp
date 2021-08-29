@@ -24,6 +24,8 @@ namespace pragma
 		EntityUuidRef(const BaseEntity &ent);
 		BaseEntity *GetEntity(Game &game);
 		const BaseEntity *GetEntity(Game &game) const {return const_cast<EntityUuidRef*>(this)->GetEntity(game);}
+
+		bool HasEntityReference() const;
 	protected:
 		util::Uuid m_uuid;
 		EntityHandle m_hEntity;
@@ -40,6 +42,8 @@ namespace pragma
 		EntityUuidComponentRef &operator=(const EntityUuidComponentRef &other);
 		BaseEntityComponent *GetComponent(Game &game);
 		const BaseEntityComponent *GetComponent(Game &game) const {return const_cast<EntityUuidComponentRef*>(this)->GetComponent(game);}
+
+		bool HasComponentReference() const;
 	protected:
 		ComponentId m_componentId = INVALID_COMPONENT_ID;
 		std::unique_ptr<std::string> m_componentName = nullptr;
@@ -61,6 +65,8 @@ namespace pragma
 		const ComponentMemberReference &operator*() const {return const_cast<EntityUuidComponentMemberRef*>(this)->operator*();}
 		ComponentMemberReference *operator->() {return &m_memberRef;}
 		const ComponentMemberReference *operator->() const {return const_cast<EntityUuidComponentMemberRef*>(this)->operator->();}
+
+		bool HasMemberReference() const;
 	protected:
 		ComponentMemberReference m_memberRef;
 	};

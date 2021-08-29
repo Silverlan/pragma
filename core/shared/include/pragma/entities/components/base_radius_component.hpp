@@ -18,6 +18,7 @@ namespace pragma
 	public:
 		static ComponentEventId EVENT_ON_RADIUS_CHANGED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember);
 		virtual void Initialize() override;
 		float GetRadius() const;
 		const util::PFloatProperty &GetRadiusProperty() const;

@@ -9,6 +9,7 @@
 #include "pragma/entities/components/base_name_component.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 
@@ -18,6 +19,10 @@ ComponentEventId BaseNameComponent::EVENT_ON_NAME_CHANGED = pragma::INVALID_COMP
 void BaseNameComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	EVENT_ON_NAME_CHANGED = componentManager.RegisterEvent("ON_NAME_CHANGED");
+}
+void BaseNameComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+{
+	using T = BaseNameComponent;
 }
 BaseNameComponent::BaseNameComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_name(util::StringProperty::Create())

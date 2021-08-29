@@ -10,6 +10,7 @@
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/util/util_ballistic.h"
 #include "pragma/entities/components/damageable_component.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/lua/l_entity_handles.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 #include <sharedutils/datastream.h>
@@ -19,7 +20,17 @@ using namespace pragma;
 
 constexpr uint32_t VELOCITY_EPSILON_DELTA_FOR_SNAPSHOT = 0.05f;
 
+void VelocityComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+{
+	using T = VelocityComponent;
 
+	using TVelocity = Vector3;
+	registerMember(create_component_member_info<
+		T,TVelocity,
+		static_cast<void(T::*)(const TVelocity&)>(&T::SetVelocity),
+		static_cast<const TVelocity&(T::*)() const>(&T::GetVelocity)
+	>("velocity"));
+}
 VelocityComponent::VelocityComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),
 	m_velocity(util::Vector3Property::Create()),

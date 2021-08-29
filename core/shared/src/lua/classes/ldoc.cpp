@@ -157,8 +157,7 @@ static std::unordered_map<std::string,std::string> g_typeTranslationTable {
 	{"LFile","file.File"},
 	{"Version","util.Version"},
 	{"std::basic_string","string"},
-
-	{"std::basic_string","string"},
+	{"glm::qua","Quaternion"},
 	{"luabind::argument","any"},
 	{"luabind::object","any"},
 	{"CallbackHandle","Callback"},

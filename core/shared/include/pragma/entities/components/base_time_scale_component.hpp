@@ -17,6 +17,8 @@ namespace pragma
 		: public BaseEntityComponent
 	{
 	public:
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember);
+
 		virtual void Initialize() override;
 
 		virtual void SetTimeScale(float timeScale);

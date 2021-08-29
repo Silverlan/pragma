@@ -10,11 +10,23 @@
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 
 using namespace pragma;
 
+void BaseTimeScaleComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+{
+	using T = BaseTimeScaleComponent;
+
+	using TTimeScale = float;
+	registerMember(create_component_member_info<
+		T,TTimeScale,
+		static_cast<void(T::*)(TTimeScale)>(&T::SetTimeScale),
+		static_cast<TTimeScale(T::*)() const>(&T::GetTimeScale)
+	>("timeScale"));
+}
 BaseTimeScaleComponent::BaseTimeScaleComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_timeScale{util::FloatProperty::Create(1.f)}
 {}

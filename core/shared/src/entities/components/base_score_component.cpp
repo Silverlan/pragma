@@ -9,6 +9,7 @@
 #include "pragma/entities/components/base_score_component.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 
 using namespace pragma;
 
@@ -16,6 +17,15 @@ ComponentEventId BaseScoreComponent::EVENT_ON_SCORE_CHANGED = pragma::INVALID_CO
 void BaseScoreComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	EVENT_ON_SCORE_CHANGED = componentManager.RegisterEvent("ON_SCORE_CHANGED");
+}
+void BaseScoreComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+{
+	using T = BaseScoreComponent;
+	registerMember(create_component_member_info<
+		T,Score,
+		static_cast<void(T::*)(Score)>(&T::SetScore),
+		static_cast<Score(T::*)() const>(&T::GetScore)
+	>("score"));
 }
 BaseScoreComponent::BaseScoreComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_score(util::Int32Property::Create(0))

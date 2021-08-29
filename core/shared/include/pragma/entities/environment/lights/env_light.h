@@ -47,6 +47,7 @@ namespace pragma
 			Lumen,
 			Lux // Lumen per square-meter; Directional lights only
 		};
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember);
 		static std::string LightIntensityTypeToString(LightIntensityType type);
 		static Candela GetLightIntensityCandela(float intensity,LightIntensityType type,std::optional<float> outerCutoffAngle={});
 		static Lumen GetLightIntensityLumen(float intensity,LightIntensityType type,std::optional<float> outerCutoffAngle={});

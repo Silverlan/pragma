@@ -20,6 +20,7 @@ namespace pragma
 		static ComponentEventId EVENT_ON_TAKEN_DAMAGE;
 		static ComponentEventId EVENT_ON_HEALTH_CHANGED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember);
 		virtual void Initialize() override;
 
 		const util::PUInt16Property &GetHealthProperty() const;

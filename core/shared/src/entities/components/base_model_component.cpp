@@ -10,6 +10,7 @@
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/model/model.h"
 #include "pragma/model/modelmanager.h"
 #include <sharedutils/datastream.h>
@@ -29,6 +30,17 @@ void BaseModelComponent::RegisterEvents(pragma::EntityComponentManager &componen
 	EVENT_ON_MODEL_MATERIALS_LOADED = componentManager.RegisterEvent("ON_MODEL_MATERIALS_LOADED");
 	EVENT_ON_SKIN_CHANGED = componentManager.RegisterEvent("ON_SKIN_CHANGED");
 	EVENT_ON_BODY_GROUP_CHANGED = componentManager.RegisterEvent("ON_BODY_GROUP_CHANGED");
+}
+void BaseModelComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+{
+	using T = BaseModelComponent;
+
+	using TSkin = uint32_t;
+	registerMember(create_component_member_info<
+		T,TSkin,
+		static_cast<void(T::*)(TSkin)>(&T::SetSkin),
+		static_cast<TSkin(T::*)() const>(&T::GetSkin)
+	>("skin"));
 }
 BaseModelComponent::BaseModelComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)

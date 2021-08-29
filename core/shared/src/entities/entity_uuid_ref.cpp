@@ -27,6 +27,10 @@ BaseEntity *EntityUuidRef::GetEntity(Game &game)
 	}
 	return m_hEntity.get();
 }
+bool EntityUuidRef::HasEntityReference() const
+{
+	return m_uuid != util::Uuid{};
+}
 
 //////////
 
@@ -34,13 +38,13 @@ EntityUuidComponentRef::EntityUuidComponentRef(util::Uuid uuid,ComponentId compo
 	: EntityUuidRef{uuid},m_componentId{componentId}
 {}
 EntityUuidComponentRef::EntityUuidComponentRef(util::Uuid uuid,const std::string &componentName)
-	: EntityUuidRef{uuid},m_componentName{std::make_unique<std::string>(componentName)}
+	: EntityUuidRef{uuid},m_componentName{componentName.empty() ? nullptr : std::make_unique<std::string>(componentName)}
 {}
 EntityUuidComponentRef::EntityUuidComponentRef(const BaseEntity &ent,ComponentId componentId)
 	: EntityUuidRef{ent},m_componentId{componentId}
 {}
 EntityUuidComponentRef::EntityUuidComponentRef(const BaseEntity &ent,const std::string &componentName)
-	: EntityUuidRef{ent},m_componentName{std::make_unique<std::string>(componentName)}
+	: EntityUuidRef{ent},m_componentName{componentName.empty() ? nullptr : std::make_unique<std::string>(componentName)}
 {}
 EntityUuidComponentRef::EntityUuidComponentRef(const EntityUuidComponentRef &other)
 	: EntityUuidRef{other}
@@ -52,8 +56,12 @@ EntityUuidComponentRef &EntityUuidComponentRef::operator=(const EntityUuidCompon
 	m_componentId = other.m_componentId;
 	m_hComponent = other.m_hComponent;
 	if(other.m_componentName)
-		m_componentName = std::make_unique<std::string>(*other.m_componentName);
+		m_componentName = other.m_componentName ? std::make_unique<std::string>(*other.m_componentName) : nullptr;
 	return *this;
+}
+bool EntityUuidComponentRef::HasComponentReference() const
+{
+	return m_componentName != nullptr || m_componentId != INVALID_COMPONENT_ID;
 }
 BaseEntityComponent *EntityUuidComponentRef::GetComponent(Game &game)
 {
@@ -95,4 +103,9 @@ const ComponentMemberInfo *EntityUuidComponentMemberRef::GetMemberInfo(Game &gam
 	if(!c)
 		return nullptr;
 	return m_memberRef.GetMemberInfo(*c);
+}
+
+bool EntityUuidComponentMemberRef::HasMemberReference() const
+{
+	return !m_memberRef.GetMemberName().empty();
 }

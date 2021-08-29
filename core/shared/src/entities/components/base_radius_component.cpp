@@ -9,6 +9,7 @@
 #include "pragma/entities/components/base_radius_component.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 
@@ -18,6 +19,16 @@ ComponentEventId BaseRadiusComponent::EVENT_ON_RADIUS_CHANGED = pragma::INVALID_
 void BaseRadiusComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	EVENT_ON_RADIUS_CHANGED = componentManager.RegisterEvent("ON_RADIUS_CHANGED");
+}
+void BaseRadiusComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+{
+	using T = BaseRadiusComponent;
+	using TRadius = float;
+	registerMember(create_component_member_info<
+		T,TRadius,
+		static_cast<void(T::*)(TRadius)>(&T::SetRadius),
+		static_cast<TRadius(T::*)() const>(&T::GetRadius)
+	>("radius"));
 }
 BaseRadiusComponent::BaseRadiusComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_radius(util::FloatProperty::Create(0.f))

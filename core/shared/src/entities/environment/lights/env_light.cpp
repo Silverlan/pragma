@@ -14,13 +14,31 @@
 #include "pragma/entities/environment/lights/env_light_spot.h"
 #include "pragma/entities/environment/lights/env_light_point.h"
 #include "pragma/entities/environment/lights/env_light_directional.h"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include <udm.hpp>
 #include <algorithm>
 
 using namespace pragma;
 
+void BaseEnvLightComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+{
+	using T = BaseEnvLightComponent;
 
+	using TFalloffExponent = float;
+	registerMember(create_component_member_info<
+		T,TFalloffExponent,
+		static_cast<void(T::*)(TFalloffExponent)>(&T::SetFalloffExponent),
+		static_cast<TFalloffExponent(T::*)() const>(&T::GetFalloffExponent)
+	>("falloffExponent"));
+
+	using TIntensity = float;
+	registerMember(create_component_member_info<
+		T,TIntensity,
+		static_cast<void(T::*)(TIntensity)>(&T::SetLightIntensity),
+		static_cast<TIntensity(T::*)() const>(&T::GetLightIntensity)
+	>("intensity"));
+}
 std::string BaseEnvLightComponent::LightIntensityTypeToString(LightIntensityType type)
 {
 	switch(type)

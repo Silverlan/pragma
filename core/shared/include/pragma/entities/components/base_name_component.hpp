@@ -28,6 +28,7 @@ namespace pragma
 	public:
 		static pragma::ComponentEventId EVENT_ON_NAME_CHANGED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember);
 		virtual void Initialize() override;
 		virtual ~BaseNameComponent() override;
 

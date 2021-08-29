@@ -105,20 +105,52 @@ bool pragma::ValueDriver::Apply(BaseEntity &ent)
 	{
 		auto &var = pair.second;
 		auto *memInfo = var.memberRef.GetMemberInfo(game);
-		if(memInfo == nullptr)
+		if(memInfo)
 		{
+			auto *c = var.memberRef.GetComponent(game);
+			auto o = udm::visit_ng(memInfo->type,[memInfo,c,l](auto tag) {
+				using T = decltype(tag)::type;
+				T value;
+				memInfo->getterFunction(*memInfo,*c,&value);
+				return luabind::object{l,value};
+			});
+			o.push(l);
+			++numPushed;
+			continue;
+		}
+		if(var.memberRef.HasMemberReference())
+		{
+			// Is a member reference, but member is not valid
 			argsValid = false;
 			break;
 		}
+
 		auto *c = var.memberRef.GetComponent(game);
-		auto o = udm::visit_ng(memInfo->type,[memInfo,c,l](auto tag) {
-			using T = decltype(tag)::type;
-			T value;
-			memInfo->getterFunction(*memInfo,*c,&value);
-			return luabind::object{l,value};
-		});
-		o.push(l);
-		++numPushed;
+		if(c)
+		{
+			c->PushLuaObject(l);
+			++numPushed;
+			continue;
+		}
+
+		if(var.memberRef.HasComponentReference())
+		{
+			// Is a component reference, but component is not valid
+			argsValid = false;
+			break;
+		}
+
+		auto *e = var.memberRef.GetEntity(game);
+		if(e)
+		{
+			e->PushLuaObject(l);
+			++numPushed;
+			continue;
+		}
+		
+		// Is either an invalid reference altogether or an invalid entity reference
+		argsValid = false;
+		break;
 	}
 	if(!argsValid)
 	{

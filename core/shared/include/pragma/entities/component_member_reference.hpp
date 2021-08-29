@@ -30,7 +30,7 @@ namespace pragma
 	private:
 		mutable pragma::ComponentMemberIndex m_index = INVALID_COMPONENT_MEMBER_INDEX;
 		std::string m_name;
-		size_t m_nameHash;
+		size_t m_nameHash = 0;
 	};
 };
 

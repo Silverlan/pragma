@@ -111,6 +111,51 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		Lua::udm::set_array_values(l,channel.GetTimesArray(),times,2);
 		Lua::udm::set_array_values(l,channel.GetValueArray(),values,3);
 	}));
+	cdChannel.def("SetValues",
+		static_cast<void(*)(lua_State*,panima::Channel&,luabind::tableT<void>)>(
+			[](lua_State *l,panima::Channel &channel,luabind::tableT<void> timeValueMap) {
+				auto type = channel.GetValueType();
+				if(type == ::udm::Type::Invalid)
+					return;
+				uint32_t count = 0;
+				for(luabind::iterator it{timeValueMap},end;it!=end;++it)
+					++count;
+
+				std::vector<std::pair<float,luabind::object>> timeValues;
+				std::vector<uint32_t> sortedIndices;
+				timeValues.resize(count);
+				sortedIndices.resize(count);
+
+				uint32_t idx = 0;
+				for(luabind::iterator it{timeValueMap},end;it!=end;++it)
+				{
+					auto &tv = timeValues[idx];
+					tv.first = luabind::object_cast<float>(it.key());
+					tv.second = luabind::object{*it};
+					sortedIndices[idx] = idx;
+					++idx;
+				}
+
+				std::sort(sortedIndices.begin(),sortedIndices.end(),[&timeValues](uint32_t idx0,uint32_t idx1) -> bool {
+					return timeValues[idx0].first < timeValues[idx1].first;
+				});
+
+				auto &times = channel.GetTimesArray();
+				auto &values = channel.GetValueArray();
+				times.Resize(count);
+				values.Resize(count);
+
+				for(uint32_t i=0;auto idx : sortedIndices)
+				{
+					auto &tv = timeValues[idx];
+					times[i] = tv.first;
+					::udm::visit_ng(type,[&tv,&values,i](auto tag) {
+						using T = decltype(tag)::type;
+						values[i] = luabind::object_cast<T>(tv.second);
+					});
+					++i;
+				}
+	}));
 	cdChannel.def("SetValueExpression",static_cast<Lua::var<bool,std::string>(*)(lua_State*,panima::Channel&,std::string)>([](lua_State *l,panima::Channel &channel,std::string expression) -> Lua::var<bool,std::string> {
 		std::string err;
 		auto res = channel.SetValueExpression(std::move(expression),err);

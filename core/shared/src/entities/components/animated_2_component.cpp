@@ -9,7 +9,6 @@
 #include "pragma/entities/components/animated_2_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_time_scale_component.hpp"
-#include "pragma/entities/components/animation_driver_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/model/model.h"
 #include "pragma/model/animation/animation_manager.hpp"
@@ -205,19 +204,6 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters()
 		InitializeAnimationChannelValueSubmitters(*animManager);
 }
 
-void Animated2Component::OnEntityComponentAdded(BaseEntityComponent &component)
-{
-	BaseEntityComponent::OnEntityComponentAdded(component);
-	if(typeid(component) == typeid(AnimationDriverComponent))
-		m_driverComponent = &static_cast<AnimationDriverComponent&>(component);
-}
-void Animated2Component::OnEntityComponentRemoved(BaseEntityComponent &component)
-{
-	BaseEntityComponent::OnEntityComponentRemoved(component);
-	if(typeid(component) == typeid(AnimationDriverComponent))
-		m_driverComponent = nullptr;
-}
-
 void Animated2Component::InitializeAnimationChannelValueSubmitters(animation::AnimationManager &manager)
 {
 	auto *anim = manager.GetCurrentAnimation();
@@ -227,7 +213,6 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(animation::An
 		channelValueSubmitters.clear();
 		return;
 	}
-	auto *driverC = GetDriverComponent();
 	auto &channels = anim->GetChannels();
 	channelValueSubmitters.resize(channels.size());
 	// TODO: Reload this when animation has changed, or if component data has changed (e.g. animated component has changed model and therefore bone positions and rotational data)
@@ -275,37 +260,18 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(animation::An
 		auto channelValueType = channel->GetValueType();
 		auto *memberInfo = hComponent->GetMemberInfo(*memberIdx);
 		auto valueType = memberInfo->type;
-
-		ValueDriver *driver = nullptr;
-		if(driverC)
-		{
-			driver = driverC->FindDriver(hComponent->GetComponentId(),*memberIdx);
-			//if(driver && (!driver->dataValue.data || driver->dataValue.type != memberInfo->type))
-			//	continue;
-		}
 		
 		auto &component = *hComponent;
-		auto vsGetMemberChannelSubmitter = [&localPath,&memberIdx,channelIdx,&channelValueSubmitters,&component,driver]<typename TMember>(auto tag) mutable {
+		auto vsGetMemberChannelSubmitter = [&localPath,&memberIdx,channelIdx,&channelValueSubmitters,&component]<typename TMember>(auto tag) mutable {
 			using TChannel = decltype(tag)::type;
 			auto strValueComponent = localPath.GetFront();
 			constexpr auto setMemberValue = [](const pragma::ComponentMemberInfo &memberInfo,pragma::BaseEntityComponent &component,const void *value,void *userData) {
 				memberInfo.setterFunction(memberInfo,component,value);
 			};
-			constexpr auto setDriverValue = [](const pragma::ComponentMemberInfo &memberInfo,pragma::BaseEntityComponent &component,const void *value,void *userData) {
-				//memcpy(static_cast<ValueDriver*>(userData)->dataValue.data.get(),value,sizeof(TMember));// TODO
-			};
 			if(strValueComponent.empty())
 			{
 				if constexpr(std::is_same_v<TChannel,TMember>)
-				{
-					// If the channel has no driver, we can apply the value directly to maximize performance.
-					// Otherwise we have to relay the value to the driver first, which will then apply it when invoked later.
-					// This is because the driver may manipulate the value before it is actually applied.
-					if(!driver)
-						channelValueSubmitters[channelIdx] = get_member_channel_submitter<TChannel,TMember,0>(component,*memberIdx,setMemberValue);
-					else
-						channelValueSubmitters[channelIdx] = get_member_channel_submitter<TChannel,TMember,0>(component,*memberIdx,setDriverValue,driver);
-				}
+					channelValueSubmitters[channelIdx] = get_member_channel_submitter<TChannel,TMember,0>(component,*memberIdx,setMemberValue);
 				return;
 			}
 			constexpr auto channelType = udm::type_to_enum<TChannel>();
@@ -386,18 +352,9 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(animation::An
 					}
 					++idx;
 				}
-				if(!driver)
-				{
-					channelValueSubmitters[channelIdx] = runtime_array_to_compile_time<
-						TChannel,TMember,decltype(componentIndices)::value_type,0,componentIndices.size(),numComponentsMember,get_member_channel_submitter_wrapper
-					>(component,*memberIdx,setMemberValue,nullptr,componentIndices);
-				}
-				else
-				{
-					channelValueSubmitters[channelIdx] = runtime_array_to_compile_time<
-						TChannel,TMember,decltype(componentIndices)::value_type,0,componentIndices.size(),numComponentsMember,get_member_channel_submitter_wrapper
-					>(component,*memberIdx,setDriverValue,driver,componentIndices);
-				}
+				channelValueSubmitters[channelIdx] = runtime_array_to_compile_time<
+					TChannel,TMember,decltype(componentIndices)::value_type,0,componentIndices.size(),numComponentsMember,get_member_channel_submitter_wrapper
+				>(component,*memberIdx,setMemberValue,nullptr,componentIndices);
 			}
 		};
 

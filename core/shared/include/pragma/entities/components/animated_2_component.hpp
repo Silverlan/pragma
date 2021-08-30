@@ -21,7 +21,6 @@ namespace pragma
 		using PAnimationManager = std::shared_ptr<AnimationManager>;
 		using ChannelValueSubmitter = std::function<void(panima::Channel&,uint32_t&,double)>;
 	};
-	class AnimationDriverComponent;
 	class DLLNETWORK Animated2Component final
 		: public BaseEntityComponent
 	{
@@ -41,9 +40,6 @@ namespace pragma
 		void SetPlaybackRate(float rate);
 		float GetPlaybackRate() const;
 		const util::PFloatProperty &GetPlaybackRateProperty() const;
-
-		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
-		virtual void OnEntityComponentRemoved(BaseEntityComponent &component) override;
 		
 		std::vector<animation::PAnimationManager> &GetAnimationManagers() {return m_animationManagers;}
 		const std::vector<animation::PAnimationManager> &GetAnimationManagers() const {return const_cast<Animated2Component*>(this)->GetAnimationManagers();}
@@ -58,9 +54,6 @@ namespace pragma
 		virtual void Initialize() override;
 		void PlayAnimation(animation::AnimationManager &manager,panima::Animation &anim);
 
-		AnimationDriverComponent *GetDriverComponent() {return m_driverComponent;}
-		const AnimationDriverComponent *GetDriverComponent() const {return const_cast<Animated2Component*>(this)->GetDriverComponent();}
-		
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		using BaseEntityComponent::Load;
@@ -71,7 +64,6 @@ namespace pragma
 		void ResetAnimation(const std::shared_ptr<Model> &mdl);
 		util::PFloatProperty m_playbackRate = nullptr;
 		std::vector<animation::PAnimationManager> m_animationManagers;
-		AnimationDriverComponent *m_driverComponent = nullptr;
 	};
 
 	struct DLLNETWORK CEAnim2OnAnimationComplete

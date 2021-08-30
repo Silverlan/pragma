@@ -47,8 +47,8 @@ namespace pragma
 		void RemoveAnimationManager(const animation::AnimationManager &player);
 		void ClearAnimationManagers();
 
+		bool UpdateAnimations(double dt);
 		bool MaintainAnimations(double dt);
-		virtual void OnTick(double dt) override;
 		void AdvanceAnimations(double dt);
 
 		virtual void Initialize() override;

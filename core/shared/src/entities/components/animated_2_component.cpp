@@ -385,6 +385,10 @@ void Animated2Component::ClearAnimationManagers()
 {
 	m_animationManagers.clear();
 }
+bool Animated2Component::UpdateAnimations(double dt)
+{
+	return MaintainAnimations(dt);
+}
 bool Animated2Component::MaintainAnimations(double dt)
 {
 	CEAnim2MaintainAnimations evData{dt};
@@ -399,12 +403,6 @@ bool Animated2Component::MaintainAnimations(double dt)
 	return true;
 }
 
-void Animated2Component::OnTick(double dt)
-{
-	BaseEntityComponent::OnTick(dt);
-
-	MaintainAnimations(dt);
-}
 void Animated2Component::AdvanceAnimations(double dt)
 {
 	auto &ent = GetEntity();
@@ -438,7 +436,6 @@ void Animated2Component::InitializeLuaObject(lua_State *l) {pragma::BaseLuaHandl
 void Animated2Component::Initialize()
 {
 	BaseEntityComponent::Initialize();
-	SetTickPolicy(TickPolicy::WhenVisible);
 
 	BindEventUnhandled(BaseEntityComponent::EVENT_ON_MEMBERS_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		InitializeAnimationChannelValueSubmitters();

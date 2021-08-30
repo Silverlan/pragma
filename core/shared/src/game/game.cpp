@@ -36,6 +36,7 @@
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/animation_driver_component.hpp"
+#include "pragma/entities/components/animated_2_component.hpp"
 #include "pragma/entities/entity_component_manager.hpp"
 #include "pragma/entities/prop/prop_base.h"
 #include "pragma/entities/components/base_physics_component.hpp"
@@ -613,6 +614,10 @@ void Game::UpdateEntityAnimations(double dt)
 {
 	for(auto *ent : EntityIterator{*this,m_animatedComponentId})
 		ent->GetAnimatedComponent()->UpdateAnimations(dt);
+	EntityIterator entIt {*this};
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::Animated2Component>>();
+	for(auto *ent : entIt)
+		ent->GetComponent<pragma::Animated2Component>()->UpdateAnimations(dt);
 }
 
 void Game::UpdateEntityAnimationDrivers(double dt)

@@ -112,29 +112,17 @@ static pragma::animation::ChannelValueSubmitter get_member_channel_submitter(pra
 	return [&component,memberIdx,setter,userData](panima::Channel &channel,uint32_t &inOutPivotTimeIndex,double t) mutable {
 		auto *memberInfo = component.GetMemberInfo(memberIdx);
 		assert(memberInfo);
-		constexpr auto applyValueExpression = [](panima::Channel &channel,auto &inOutValue,double t,uint32_t timeIndex) {
-			if constexpr(std::is_same_v<TChannel,double>)
-				channel.ApplyValueExpression(t,timeIndex,inOutValue);
-			else if constexpr(std::is_arithmetic_v<TChannel>)
-			{
-				double dvalue = inOutValue;
-				channel.ApplyValueExpression(t,timeIndex,dvalue);
-				inOutValue = dvalue; // TODO: Integer rounding?
-			}
-		};
 		if constexpr(std::is_same_v<TChannel,TMember>)
 		{
 			auto value = channel.GetInterpolatedValue<TChannel>(t,inOutPivotTimeIndex,memberInfo->interpolationFunction);
-			if constexpr(std::is_arithmetic_v<TChannel>)
-				applyValueExpression(channel,value,t,inOutPivotTimeIndex);
+			channel.ApplyValueExpression<TChannel>(t,inOutPivotTimeIndex,value);
 			setter(*memberInfo,component,&value,userData);
 		}
 		else
 		{
 			// Interpolation function cannot be used unless the type is an exact match
 			auto value = channel.GetInterpolatedValue<TChannel>(t,inOutPivotTimeIndex);
-			if constexpr(std::is_arithmetic_v<TChannel>)
-				applyValueExpression(channel,value,t,inOutPivotTimeIndex);
+			channel.ApplyValueExpression<TChannel>(t,inOutPivotTimeIndex,value);
 			constexpr auto numChannelComponents = get_component_count(udm::type_to_enum<TChannel>());
 			constexpr auto numMemberComponents = get_component_count(udm::type_to_enum<TMember>());
 			static_assert(numChannelComponents == TMapArray.size());

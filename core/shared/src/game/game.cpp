@@ -546,9 +546,10 @@ void Game::InitializeGame()
 			stagePhysics,
 			pragma::debug::ProfilingStage::Create(cpuProfiler,"PhysicsSimulation" +postFix,stagePhysics.get()),
 			pragma::debug::ProfilingStage::Create(cpuProfiler,"GameObjectLogic" +postFix,stageTick.get()),
-			pragma::debug::ProfilingStage::Create(cpuProfiler,"Timers" +postFix,stageTick.get())
-			});
-		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 5u,"Added new profiling phase, but did not create associated profiling stage!");
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"Timers" +postFix,stageTick.get()),
+			pragma::debug::ProfilingStage::Create(cpuProfiler,"Animations" +postFix,stageTick.get())
+		});
+		static_assert(umath::to_integral(CPUProfilingPhase::Count) == 6u,"Added new profiling phase, but did not create associated profiling stage!");
 	});
 }
 
@@ -642,6 +643,7 @@ void Game::Tick()
 			ent->ResetStateChangeFlags();
 	}
 
+	StartProfilingStage(CPUProfilingPhase::Animations);
 	// Order:
 	// Animations are updated before logic and physics, because:
 	// 1) They may affect logic/physics-based properties like entity positions or rotations
@@ -650,6 +652,7 @@ void Game::Tick()
 
 	// Animation drivers require animations to be fully processed, so they are executed next.
 	UpdateEntityAnimationDrivers(m_tDeltaTick);
+	StopProfilingStage(CPUProfilingPhase::Animations);
 
 	StartProfilingStage(CPUProfilingPhase::Physics);
 

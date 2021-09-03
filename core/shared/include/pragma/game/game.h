@@ -239,6 +239,7 @@ public:
 		PhysicsSimulation,
 		GameObjectLogic,
 		Timers,
+		Animations,
 
 		Count
 	};

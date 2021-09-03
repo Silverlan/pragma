@@ -19,7 +19,6 @@
 #include "pragma/lua/policies/generic_policy.hpp"
 #include "pragma/util/bulletinfo.h"
 #include "pragma/lua/libraries/lray.h"
-#include "pragma/model/animation/animation_manager.hpp"
 #include "pragma/util/util_ballistic.h"
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/physics/raytraces.h"
@@ -47,6 +46,7 @@
 #include <pragma/physics/movetypes.h>
 #include <luabind/copy_policy.hpp>
 #include <panima/animation.hpp>
+#include <panima/animation_manager.hpp>
 #pragma optimize("",off)
 namespace Lua {bool get_bullet_master(BaseEntity &ent);};
 bool Lua::get_bullet_master(BaseEntity &ent)
@@ -250,14 +250,14 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defAnimated2.def("ClearAnimationManagers",&pragma::Animated2Component::ClearAnimationManagers);
 	defAnimated2.def("AddAnimationManager",&pragma::Animated2Component::AddAnimationManager);
 	defAnimated2.def("RemoveAnimationManager",&pragma::Animated2Component::RemoveAnimationManager);
-	defAnimated2.def("GetAnimationManagers",static_cast<luabind::tableT<pragma::animation::AnimationManager>(*)(lua_State*,pragma::Animated2Component&)>([](lua_State *l,pragma::Animated2Component &hComponent) -> luabind::tableT<pragma::animation::AnimationManager> {
+	defAnimated2.def("GetAnimationManagers",static_cast<luabind::tableT<panima::AnimationManager>(*)(lua_State*,pragma::Animated2Component&)>([](lua_State *l,pragma::Animated2Component &hComponent) -> luabind::tableT<panima::AnimationManager> {
 		auto t = luabind::newtable(l);
 		auto &animManagers = hComponent.GetAnimationManagers();
 		for(auto i=decltype(animManagers.size()){0u};i<animManagers.size();++i)
 			animManagers[i +1] = animManagers[i];
 		return t;
 	}));
-	defAnimated2.def("GetAnimationManager",static_cast<luabind::tableT<pragma::animation::AnimationManager>(*)(lua_State*,pragma::Animated2Component&,uint32_t)>([](lua_State *l,pragma::Animated2Component &hComponent,uint32_t idx) -> luabind::tableT<pragma::animation::AnimationManager> {
+	defAnimated2.def("GetAnimationManager",static_cast<luabind::tableT<panima::AnimationManager>(*)(lua_State*,pragma::Animated2Component&,uint32_t)>([](lua_State *l,pragma::Animated2Component &hComponent,uint32_t idx) -> luabind::tableT<panima::AnimationManager> {
 		auto &animManagers = hComponent.GetAnimationManagers();
 		if(idx >= animManagers.size())
 			return luabind::object{};

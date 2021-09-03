@@ -69,7 +69,7 @@
 #include <luabind/discard_result_policy.hpp>
 
 extern DLLNETWORK Engine *engine;
-
+#pragma optimize("",off)
 static std::ostream &operator<<(std::ostream &out,const CallbackHandle &hCallback)
 {
 	out<<"Callback[";
@@ -165,7 +165,16 @@ static int32_t parse_math_expression(lua_State *l)
 		Lua::GetTableValue(l,t); /* 1 */
 		auto *varName = Lua::CheckString(l,-1);
 
-		p.DefineVar(varName,0);
+		try
+		{
+			p.DefineVar(varName,0);
+		}
+		catch(const mup::ParserError &err)
+		{
+			Lua::PushBool(l,false);
+			Lua::PushString(l,err.GetMsg());
+			return 2;
+		}
 
 		Lua::Pop(l,1); /* 0 */
 	}
@@ -1693,3 +1702,4 @@ void Game::RegisterLuaLibraries()
 	Lua::doc::register_library(GetLuaInterface());
 	Lua::animation::register_library(GetLuaInterface());
 }
+#pragma optimize("",on)

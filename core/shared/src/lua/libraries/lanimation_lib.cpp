@@ -6,7 +6,6 @@
  */
 
 #include "stdafx_shared.h"
-#include "pragma/model/animation/animation_manager.hpp"
 #include "pragma/model/animation/skeletal_animation.hpp"
 #include "pragma/model/animation/play_animation_flags.hpp"
 #include "pragma/lua/libraries/ludm.hpp"
@@ -17,6 +16,7 @@
 #include <panima/channel.hpp>
 #include <panima/player.hpp>
 #include <panima/animation.hpp>
+#include <panima/animation_manager.hpp>
 #include <panima/slice.hpp>
 
 namespace Lua::animation
@@ -223,50 +223,45 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	}));
 	animMod[cdPlayer];
 
-	auto cdManager = luabind::class_<pragma::animation::AnimationManager>("Manager");
+	auto cdManager = luabind::class_<panima::AnimationManager>("Manager");
 	cdManager.def(luabind::tostring(luabind::self));
-	cdManager.scope[luabind::def("create",static_cast<std::shared_ptr<pragma::animation::AnimationManager>(*)(lua_State*,Model&)>([](lua_State *l,Model &mdl) {
-		return pragma::animation::AnimationManager::Create(mdl);
+	cdManager.scope[luabind::def("create",static_cast<std::shared_ptr<panima::AnimationManager>(*)(lua_State*)>([](lua_State *l) {
+		return panima::AnimationManager::Create();
 	}))];
-	cdManager.def("GetPreviousSlice",static_cast<panima::Slice*(*)(lua_State*,pragma::animation::AnimationManager&)>(
-		[](lua_State *l,pragma::animation::AnimationManager &manager) {
+	cdManager.def("GetPreviousSlice",static_cast<panima::Slice*(*)(lua_State*,panima::AnimationManager&)>(
+		[](lua_State *l,panima::AnimationManager &manager) {
 		return &manager.GetPreviousSlice();
 	}));
-	cdManager.def("GetCurrentAnimationId",static_cast<panima::AnimationId(*)(lua_State*,pragma::animation::AnimationManager&)>([](lua_State *l,pragma::animation::AnimationManager &manager) {
+	cdManager.def("GetCurrentAnimationId",static_cast<panima::AnimationId(*)(lua_State*,panima::AnimationManager&)>([](lua_State *l,panima::AnimationManager &manager) {
 		return manager.GetCurrentAnimationId();
 	}));
-	cdManager.def("GetCurrentAnimation",static_cast<opt<std::shared_ptr<panima::Animation>>(*)(lua_State*,pragma::animation::AnimationManager&)>([](lua_State *l,pragma::animation::AnimationManager &manager) -> luabind::optional<std::shared_ptr<panima::Animation>> {
+	cdManager.def("GetCurrentAnimation",static_cast<opt<std::shared_ptr<panima::Animation>>(*)(lua_State*,panima::AnimationManager&)>([](lua_State *l,panima::AnimationManager &manager) -> luabind::optional<std::shared_ptr<panima::Animation>> {
 		auto *anim = manager.GetCurrentAnimation();
 		return anim ? opt<std::shared_ptr<panima::Animation>>{l,anim->shared_from_this()} : nil;
 	}));
-	cdManager.def("GetPlayer",static_cast<panima::PPlayer(*)(lua_State*,pragma::animation::AnimationManager&)>(
-		[](lua_State *l,pragma::animation::AnimationManager &manager) -> panima::PPlayer {
+	cdManager.def("GetPlayer",static_cast<panima::PPlayer(*)(lua_State*,panima::AnimationManager&)>(
+		[](lua_State *l,panima::AnimationManager &manager) -> panima::PPlayer {
 		return manager.GetPlayer().shared_from_this();
 	}));
-	cdManager.def("GetModel",static_cast<opt<std::shared_ptr<Model>>(*)(lua_State*,pragma::animation::AnimationManager&)>(
-		[](lua_State *l,pragma::animation::AnimationManager &manager) -> luabind::optional<std::shared_ptr<Model>> {
-		auto *mdl = const_cast<Model*>(manager.GetModel());
-		return mdl ? opt<std::shared_ptr<Model>>{l,mdl->shared_from_this()} : nil;
-	}));
-	cdManager.def("StopAnimation",static_cast<void(*)(lua_State*,pragma::animation::AnimationManager&)>(
-		[](lua_State *l,pragma::animation::AnimationManager &manager) {
+	cdManager.def("StopAnimation",static_cast<void(*)(lua_State*,panima::AnimationManager&)>(
+		[](lua_State *l,panima::AnimationManager &manager) {
 		manager.StopAnimation();
 	}));
-	cdManager.def("PlayAnimation",static_cast<void(*)(lua_State*,pragma::animation::AnimationManager&,panima::AnimationId,pragma::FPlayAnim)>(
-		[](lua_State *l,pragma::animation::AnimationManager &manager,panima::AnimationId id,pragma::FPlayAnim flags) {
-		manager.PlayAnimation(id,flags);
+	cdManager.def("PlayAnimation",static_cast<void(*)(lua_State*,panima::AnimationManager&,const std::string&,panima::AnimationId,panima::PlaybackFlags)>(
+		[](lua_State *l,panima::AnimationManager &manager,const std::string &setName,panima::AnimationId id,panima::PlaybackFlags flags) {
+		manager.PlayAnimation(setName,id,flags);
 	}));
-	cdManager.def("PlayAnimation",static_cast<void(*)(lua_State*,pragma::animation::AnimationManager&,panima::AnimationId)>(
-		[](lua_State *l,pragma::animation::AnimationManager &manager,panima::AnimationId id) {
-		manager.PlayAnimation(id);
+	cdManager.def("PlayAnimation",static_cast<void(*)(lua_State*,panima::AnimationManager&,const std::string&,panima::AnimationId)>(
+		[](lua_State *l,panima::AnimationManager &manager,const std::string &setName,panima::AnimationId id) {
+		manager.PlayAnimation(setName,id);
 	}));
-	cdManager.def("PlayAnimation",static_cast<void(*)(lua_State*,pragma::animation::AnimationManager&,const std::string&,pragma::FPlayAnim)>(
-		[](lua_State *l,pragma::animation::AnimationManager &manager,const std::string &anim,pragma::FPlayAnim flags) {
-		manager.PlayAnimation(anim,flags);
+	cdManager.def("PlayAnimation",static_cast<void(*)(lua_State*,panima::AnimationManager&,const std::string&,const std::string&,panima::PlaybackFlags)>(
+		[](lua_State *l,panima::AnimationManager &manager,const std::string &setName,const std::string &anim,panima::PlaybackFlags flags) {
+		manager.PlayAnimation(setName,anim,flags);
 	}));
-	cdManager.def("PlayAnimation",static_cast<void(*)(lua_State*,pragma::animation::AnimationManager&,const std::string&)>(
-		[](lua_State *l,pragma::animation::AnimationManager &manager,const std::string &anim) {
-		manager.PlayAnimation(anim);
+	cdManager.def("PlayAnimation",static_cast<void(*)(lua_State*,panima::AnimationManager&,const std::string&,const std::string&)>(
+		[](lua_State *l,panima::AnimationManager &manager,const std::string &setName,const std::string &anim) {
+		manager.PlayAnimation(setName,anim);
 	}));
 	animMod[cdManager];
 

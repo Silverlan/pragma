@@ -11,13 +11,14 @@
 #include "pragma/entities/components/base_time_scale_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/model/model.h"
-#include "pragma/model/animation/animation_manager.hpp"
 #include "pragma/model/animation/animation.hpp"
 #include "pragma/lua/l_entity_handles.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/lua/lua_call.hpp"
+#include <panima/animation_manager.hpp>
 #include <panima/channel.hpp>
 #include <panima/animation.hpp>
+#include <panima/animation_set.hpp>
 #include <panima/player.hpp>
 #include <panima/channel_t.hpp>
 
@@ -50,32 +51,28 @@ Animated2Component::Animated2Component(BaseEntity &ent)
 void Animated2Component::SetPlaybackRate(float rate) {*m_playbackRate = rate;}
 float Animated2Component::GetPlaybackRate() const {return *m_playbackRate;}
 const util::PFloatProperty &Animated2Component::GetPlaybackRateProperty() const {return m_playbackRate;}
-animation::PAnimationManager Animated2Component::AddAnimationManager()
+panima::PAnimationManager Animated2Component::AddAnimationManager()
 {
-	auto mdl = GetEntity().GetModel();
-	if(!mdl)
-		return nullptr;
-	auto player = animation::AnimationManager::Create(*mdl);
-
-	animation::AnimationPlayerCallbackInterface callbackInteface {};
-	callbackInteface.onPlayAnimation = [this](panima::AnimationId animId,FPlayAnim flags) -> bool {
-		CEAnim2OnPlayAnimation evData{animId,flags};
+	auto player = panima::AnimationManager::Create();
+	panima::AnimationPlayerCallbackInterface callbackInteface {};
+	callbackInteface.onPlayAnimation = [this](const panima::AnimationSet &set,panima::AnimationId animId,panima::PlaybackFlags flags) -> bool {
+		CEAnim2OnPlayAnimation evData{set,animId,flags};
 		return InvokeEventCallbacks(EVENT_PLAY_ANIMATION,evData) != util::EventReply::Handled;
 	};
 	callbackInteface.onStopAnimation = []() {
 	
 	};
-	callbackInteface.translateAnimation = [this](panima::AnimationId &animId,FPlayAnim &flags) {
-		CEAnim2TranslateAnimation evTranslateAnimData {animId,flags};
+	callbackInteface.translateAnimation = [this](const panima::AnimationSet &set,panima::AnimationId &animId,panima::PlaybackFlags &flags) {
+		CEAnim2TranslateAnimation evTranslateAnimData {set,animId,flags};
 		InvokeEventCallbacks(EVENT_TRANSLATE_ANIMATION,evTranslateAnimData);
 	};
 
 	m_animationManagers.push_back(player);
 	return player;
 }
-void Animated2Component::RemoveAnimationManager(const animation::AnimationManager &player)
+void Animated2Component::RemoveAnimationManager(const panima::AnimationManager &player)
 {
-	auto it = std::find_if(m_animationManagers.begin(),m_animationManagers.end(),[&player](const animation::PAnimationManager &playerOther) {
+	auto it = std::find_if(m_animationManagers.begin(),m_animationManagers.end(),[&player](const panima::PAnimationManager &playerOther) {
 		return playerOther.get() == &player;
 	});
 	if(it == m_animationManagers.end())
@@ -107,7 +104,7 @@ static constexpr bool is_type_compatible(udm::Type channelType,udm::Type memberT
 }
 
 template<typename TChannel,typename TMember,auto TMapArray> requires(is_animatable_type_v<TChannel> && is_animatable_type_v<TMember> && is_type_compatible(udm::type_to_enum<TChannel>(),udm::type_to_enum<TMember>()))
-static pragma::animation::ChannelValueSubmitter get_member_channel_submitter(pragma::BaseEntityComponent &component,uint32_t memberIdx,void(*setter)(const pragma::ComponentMemberInfo&,pragma::BaseEntityComponent&,const void*,void*),void *userData=nullptr)
+static panima::ChannelValueSubmitter get_member_channel_submitter(pragma::BaseEntityComponent &component,uint32_t memberIdx,void(*setter)(const pragma::ComponentMemberInfo&,pragma::BaseEntityComponent&,const void*,void*),void *userData=nullptr)
 {
 	return [&component,memberIdx,setter,userData](panima::Channel &channel,uint32_t &inOutPivotTimeIndex,double t) mutable {
 		auto *memberInfo = component.GetMemberInfo(memberIdx);
@@ -154,10 +151,10 @@ static pragma::animation::ChannelValueSubmitter get_member_channel_submitter(pra
 }
 
 template<typename TChannel,typename TMember,typename T,uint32_t I,uint32_t ARRAY_INDEX_COUNT,T MAX_ARRAY_VALUE,template<typename,typename,auto TTFunc> class TFunc,T... values>
-	static pragma::animation::ChannelValueSubmitter runtime_array_to_compile_time(pragma::BaseEntityComponent &component,uint32_t memberIdx,void(*setter)(const pragma::ComponentMemberInfo&,pragma::BaseEntityComponent&,const void*,void*),void *userData,const std::array<T,ARRAY_INDEX_COUNT> &rtValues);
+	static panima::ChannelValueSubmitter runtime_array_to_compile_time(pragma::BaseEntityComponent &component,uint32_t memberIdx,void(*setter)(const pragma::ComponentMemberInfo&,pragma::BaseEntityComponent&,const void*,void*),void *userData,const std::array<T,ARRAY_INDEX_COUNT> &rtValues);
 
 template<typename TChannel,typename TMember,typename T,uint32_t I,uint32_t VAL,uint32_t ARRAY_INDEX_COUNT,T MAX_ARRAY_VALUE,template<typename,typename,auto TTFunc> class TFunc,T... values>
-	static pragma::animation::ChannelValueSubmitter runtime_array_to_compile_time_it(pragma::BaseEntityComponent &component,uint32_t memberIdx,void(*setter)(const pragma::ComponentMemberInfo&,pragma::BaseEntityComponent&,const void*,void*),void *userData,const std::array<T,ARRAY_INDEX_COUNT> &rtValues)
+	static panima::ChannelValueSubmitter runtime_array_to_compile_time_it(pragma::BaseEntityComponent &component,uint32_t memberIdx,void(*setter)(const pragma::ComponentMemberInfo&,pragma::BaseEntityComponent&,const void*,void*),void *userData,const std::array<T,ARRAY_INDEX_COUNT> &rtValues)
 {
     if(rtValues[I] == VAL)
 		return runtime_array_to_compile_time<TChannel,TMember,T,I +1,ARRAY_INDEX_COUNT,MAX_ARRAY_VALUE,TFunc,values...,VAL>(component,memberIdx,setter,userData,rtValues);
@@ -170,7 +167,7 @@ template<typename TChannel,typename TMember,typename T,uint32_t I,uint32_t VAL,u
 }
 
 template<typename TChannel,typename TMember,typename T,uint32_t I,uint32_t ARRAY_INDEX_COUNT,T MAX_ARRAY_VALUE,template<typename,typename,auto TTFunc> class TFunc,T... values>
-	pragma::animation::ChannelValueSubmitter runtime_array_to_compile_time(pragma::BaseEntityComponent &component,uint32_t memberIdx,void(*setter)(const pragma::ComponentMemberInfo&,pragma::BaseEntityComponent&,const void*,void*),void *userData,const std::array<T,ARRAY_INDEX_COUNT> &rtValues)
+	panima::ChannelValueSubmitter runtime_array_to_compile_time(pragma::BaseEntityComponent &component,uint32_t memberIdx,void(*setter)(const pragma::ComponentMemberInfo&,pragma::BaseEntityComponent&,const void*,void*),void *userData,const std::array<T,ARRAY_INDEX_COUNT> &rtValues)
 	{
 		if constexpr(I < ARRAY_INDEX_COUNT)
 			return runtime_array_to_compile_time_it<TChannel,TMember,T,I,0,ARRAY_INDEX_COUNT,MAX_ARRAY_VALUE,TFunc,values...>(component,memberIdx,setter,userData,rtValues);
@@ -180,7 +177,7 @@ template<typename TChannel,typename TMember,typename T,uint32_t I,uint32_t ARRAY
 
 template<typename TChannel,typename TMember,auto TMapArray>
 struct get_member_channel_submitter_wrapper {
-    pragma::animation::ChannelValueSubmitter operator()(pragma::BaseEntityComponent &component,uint32_t memberIdx,void(*setter)(const pragma::ComponentMemberInfo&,pragma::BaseEntityComponent&,const void*,void*),void *userData) const
+    panima::ChannelValueSubmitter operator()(pragma::BaseEntityComponent &component,uint32_t memberIdx,void(*setter)(const pragma::ComponentMemberInfo&,pragma::BaseEntityComponent&,const void*,void*),void *userData) const
 	{
 		return get_member_channel_submitter<TChannel,TMember,TMapArray>(component,memberIdx,setter,userData);
 	}
@@ -192,7 +189,7 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters()
 		InitializeAnimationChannelValueSubmitters(*animManager);
 }
 
-void Animated2Component::InitializeAnimationChannelValueSubmitters(animation::AnimationManager &manager)
+void Animated2Component::InitializeAnimationChannelValueSubmitters(panima::AnimationManager &manager)
 {
 	auto *anim = manager.GetCurrentAnimation();
 	auto &channelValueSubmitters = manager.GetChannelValueSubmitters();
@@ -364,7 +361,7 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(animation::An
 	}
 }
 
-void Animated2Component::PlayAnimation(animation::AnimationManager &manager,panima::Animation &anim)
+void Animated2Component::PlayAnimation(panima::AnimationManager &manager,panima::Animation &anim)
 {
 	manager->SetAnimation(anim);
 	InitializeAnimationChannelValueSubmitters(manager);
@@ -446,11 +443,12 @@ void CEAnim2MaintainAnimations::PushArguments(lua_State *l)
 
 /////////////////
 
-CEAnim2TranslateAnimation::CEAnim2TranslateAnimation(panima::AnimationId &animation,pragma::FPlayAnim &flags)
-	: animation(animation),flags(flags)
+CEAnim2TranslateAnimation::CEAnim2TranslateAnimation(const panima::AnimationSet &set,panima::AnimationId &animation,panima::PlaybackFlags &flags)
+	: set{set},animation(animation),flags(flags)
 {}
 void CEAnim2TranslateAnimation::PushArguments(lua_State *l)
 {
+	Lua::Push<const panima::AnimationSet*>(l,&set);
 	Lua::PushInt(l,animation);
 	Lua::PushInt(l,umath::to_integral(flags));
 }
@@ -460,16 +458,17 @@ void CEAnim2TranslateAnimation::HandleReturnValues(lua_State *l)
 	if(Lua::IsSet(l,-2))
 		animation = Lua::CheckInt(l,-2);
 	if(Lua::IsSet(l,-1))
-		flags = static_cast<pragma::FPlayAnim>(Lua::CheckInt(l,-1));
+		flags = static_cast<panima::PlaybackFlags>(Lua::CheckInt(l,-1));
 }
 
 /////////////////
 
-CEAnim2OnAnimationStart::CEAnim2OnAnimationStart(int32_t animation,Activity activity,pragma::FPlayAnim flags)
-	: animation(animation),activity(activity),flags(flags)
+CEAnim2OnAnimationStart::CEAnim2OnAnimationStart(const panima::AnimationSet &set,int32_t animation,Activity activity,panima::PlaybackFlags flags)
+	: set{set},animation(animation),activity(activity),flags(flags)
 {}
 void CEAnim2OnAnimationStart::PushArguments(lua_State *l)
 {
+	Lua::Push<const panima::AnimationSet*>(l,&set);
 	Lua::PushInt(l,animation);
 	Lua::PushInt(l,umath::to_integral(activity));
 	Lua::PushInt(l,umath::to_integral(flags));
@@ -477,11 +476,12 @@ void CEAnim2OnAnimationStart::PushArguments(lua_State *l)
 
 /////////////////
 
-CEAnim2OnAnimationComplete::CEAnim2OnAnimationComplete(int32_t animation,Activity activity)
-	: animation(animation),activity(activity)
+CEAnim2OnAnimationComplete::CEAnim2OnAnimationComplete(const panima::AnimationSet &set,int32_t animation,Activity activity)
+	: set{set},animation(animation),activity(activity)
 {}
 void CEAnim2OnAnimationComplete::PushArguments(lua_State *l)
 {
+	Lua::Push<const panima::AnimationSet*>(l,&set);
 	Lua::PushInt(l,animation);
 	Lua::PushInt(l,umath::to_integral(activity));
 }
@@ -513,11 +513,12 @@ void CEAnim2HandleAnimationEvent::PushArgumentVariadic(lua_State *l)
 
 /////////////////
 
-CEAnim2OnPlayAnimation::CEAnim2OnPlayAnimation(panima::AnimationId animation,pragma::FPlayAnim flags)
-	: animation(animation),flags(flags)
+CEAnim2OnPlayAnimation::CEAnim2OnPlayAnimation(const panima::AnimationSet &set,panima::AnimationId animation,panima::PlaybackFlags flags)
+	: set{set},animation(animation),flags(flags)
 {}
 void CEAnim2OnPlayAnimation::PushArguments(lua_State *l)
 {
+	Lua::Push<const panima::AnimationSet*>(l,&set);
 	Lua::PushInt(l,animation);
 	Lua::PushInt(l,umath::to_integral(flags));
 }

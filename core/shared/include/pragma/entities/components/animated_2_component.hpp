@@ -9,18 +9,13 @@
 
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/types.hpp"
+#include <panima/types.hpp>
 #include <sharedutils/property/util_property.hpp>
 
 struct AnimationEvent;
 namespace util {class Path;};
 namespace pragma
 {
-	namespace animation
-	{
-		class AnimationManager;
-		using PAnimationManager = std::shared_ptr<AnimationManager>;
-		using ChannelValueSubmitter = std::function<void(panima::Channel&,uint32_t&,double)>;
-	};
 	class DLLNETWORK Animated2Component final
 		: public BaseEntityComponent
 	{
@@ -41,10 +36,10 @@ namespace pragma
 		float GetPlaybackRate() const;
 		const util::PFloatProperty &GetPlaybackRateProperty() const;
 		
-		std::vector<animation::PAnimationManager> &GetAnimationManagers() {return m_animationManagers;}
-		const std::vector<animation::PAnimationManager> &GetAnimationManagers() const {return const_cast<Animated2Component*>(this)->GetAnimationManagers();}
-		animation::PAnimationManager AddAnimationManager();
-		void RemoveAnimationManager(const animation::AnimationManager &player);
+		std::vector<panima::PAnimationManager> &GetAnimationManagers() {return m_animationManagers;}
+		const std::vector<panima::PAnimationManager> &GetAnimationManagers() const {return const_cast<Animated2Component*>(this)->GetAnimationManagers();}
+		panima::PAnimationManager AddAnimationManager();
+		void RemoveAnimationManager(const panima::AnimationManager &player);
 		void ClearAnimationManagers();
 
 		bool UpdateAnimations(double dt);
@@ -52,7 +47,7 @@ namespace pragma
 		void AdvanceAnimations(double dt);
 
 		virtual void Initialize() override;
-		void PlayAnimation(animation::AnimationManager &manager,panima::Animation &anim);
+		void PlayAnimation(panima::AnimationManager &manager,panima::Animation &anim);
 
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
@@ -60,17 +55,18 @@ namespace pragma
 	protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 		void InitializeAnimationChannelValueSubmitters();
-		void InitializeAnimationChannelValueSubmitters(animation::AnimationManager &manager);
+		void InitializeAnimationChannelValueSubmitters(panima::AnimationManager &manager);
 		void ResetAnimation(const std::shared_ptr<Model> &mdl);
 		util::PFloatProperty m_playbackRate = nullptr;
-		std::vector<animation::PAnimationManager> m_animationManagers;
+		std::vector<panima::PAnimationManager> m_animationManagers;
 	};
 
 	struct DLLNETWORK CEAnim2OnAnimationComplete
 		: public ComponentEvent
 	{
-		CEAnim2OnAnimationComplete(int32_t animation,Activity activity);
+		CEAnim2OnAnimationComplete(const panima::AnimationSet &set,int32_t animation,Activity activity);
 		virtual void PushArguments(lua_State *l) override;
+		const panima::AnimationSet &set;
 		int32_t animation;
 		Activity activity;
 	};
@@ -85,29 +81,32 @@ namespace pragma
 	struct DLLNETWORK CEAnim2OnPlayAnimation
 		: public ComponentEvent
 	{
-		CEAnim2OnPlayAnimation(panima::AnimationId animation,pragma::FPlayAnim flags);
+		CEAnim2OnPlayAnimation(const panima::AnimationSet &set,panima::AnimationId animation,panima::PlaybackFlags flags);
 		virtual void PushArguments(lua_State *l) override;
+		const panima::AnimationSet &set;
 		panima::AnimationId animation;
-		pragma::FPlayAnim flags;
+		panima::PlaybackFlags flags;
 	};
 	struct DLLNETWORK CEAnim2OnAnimationStart
 		: public ComponentEvent
 	{
-		CEAnim2OnAnimationStart(int32_t animation,Activity activity,pragma::FPlayAnim flags);
+		CEAnim2OnAnimationStart(const panima::AnimationSet &set,int32_t animation,Activity activity,panima::PlaybackFlags flags);
 		virtual void PushArguments(lua_State *l) override;
+		const panima::AnimationSet &set;
 		int32_t animation;
 		Activity activity;
-		pragma::FPlayAnim flags;
+		panima::PlaybackFlags flags;
 	};
 	struct DLLNETWORK CEAnim2TranslateAnimation
 		: public ComponentEvent
 	{
-		CEAnim2TranslateAnimation(panima::AnimationId &animation,pragma::FPlayAnim &flags);
+		CEAnim2TranslateAnimation(const panima::AnimationSet &set,panima::AnimationId &animation,panima::PlaybackFlags &flags);
 		virtual void PushArguments(lua_State *l) override;
 		virtual uint32_t GetReturnCount() override;
 		virtual void HandleReturnValues(lua_State *l) override;
+		const panima::AnimationSet &set;
 		panima::AnimationId &animation;
-		pragma::FPlayAnim &flags;
+		panima::PlaybackFlags &flags;
 	};
 	struct DLLNETWORK CEAnim2MaintainAnimations
 		: public ComponentEvent
@@ -124,7 +123,7 @@ namespace pragma
 		virtual uint32_t GetReturnCount() override;
 		virtual void HandleReturnValues(lua_State *l) override;
 		util::Path &path;
-		animation::ChannelValueSubmitter submitter = nullptr;
+		panima::ChannelValueSubmitter submitter = nullptr;
 	};
 };
 

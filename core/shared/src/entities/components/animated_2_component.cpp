@@ -189,6 +189,19 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters()
 		InitializeAnimationChannelValueSubmitters(*animManager);
 }
 
+template<uint32_t I> requires(I < 4)
+	static bool is_vector_component(const std::string &str)
+{
+	if constexpr(I == 0)
+		return str == "x" || str == "r" || str == "red";
+	else if constexpr(I == 1)
+		return str == "y" || str == "g" || str == "green";
+	else if constexpr(I == 2)
+		return str == "z" || str == "b" || str == "blue";
+	else if constexpr(I == 3)
+		return str == "w" || str == "a" || str == "alpha";
+}
+
 void Animated2Component::InitializeAnimationChannelValueSubmitters(panima::AnimationManager &manager)
 {
 	auto *anim = manager.GetCurrentAnimation();
@@ -277,9 +290,9 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(panima::Anima
 					case udm::Type::Vector2:
 					case udm::Type::Vector2i:
 					{
-						if(strComponent == "x")
+						if(is_vector_component<0>(strComponent))
 							componentIndices[idx] = 0;
-						else if(strComponent == "y")
+						else if(is_vector_component<1>(strComponent))
 							componentIndices[idx] = 1;
 						else return; // Unknown component type
 						break;
@@ -287,11 +300,11 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(panima::Anima
 					case udm::Type::Vector3:
 					case udm::Type::Vector3i:
 					{
-						if(strComponent == "x")
+						if(is_vector_component<0>(strComponent))
 							componentIndices[idx] = 0;
-						else if(strComponent == "y")
+						else if(is_vector_component<1>(strComponent))
 							componentIndices[idx] = 1;
-						else if(strComponent == "z")
+						else if(is_vector_component<2>(strComponent))
 							componentIndices[idx] = 2;
 						else return; // Unknown component type
 						break;
@@ -299,13 +312,13 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(panima::Anima
 					case udm::Type::Vector4:
 					case udm::Type::Vector4i:
 					{
-						if(strComponent == "x")
+						if(is_vector_component<0>(strComponent))
 							componentIndices[idx] = 0;
-						else if(strComponent == "y")
+						else if(is_vector_component<1>(strComponent))
 							componentIndices[idx] = 1;
-						else if(strComponent == "z")
+						else if(is_vector_component<2>(strComponent))
 							componentIndices[idx] = 2;
-						else if(strComponent == "w")
+						else if(is_vector_component<3>(strComponent))
 							componentIndices[idx] = 3;
 						else return; // Unknown component type
 						break;

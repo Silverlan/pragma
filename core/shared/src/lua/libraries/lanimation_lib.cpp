@@ -10,12 +10,16 @@
 #include "pragma/model/animation/play_animation_flags.hpp"
 #include "pragma/lua/libraries/ludm.hpp"
 #include "pragma/model/model.h"
+#include <pragma/lua/policies/default_parameter_policy.hpp>
+#include <pragma/lua/policies/shared_from_this_policy.hpp>
+#include <pragma/lua/converters/string_view_converter_t.hpp>
 #include <luainterface.hpp>
 #include <panima/pose.hpp>
 #include <panima/skeleton.hpp>
 #include <panima/channel.hpp>
 #include <panima/player.hpp>
 #include <panima/animation.hpp>
+#include <panima/animation_set.hpp>
 #include <panima/animation_manager.hpp>
 #include <panima/slice.hpp>
 
@@ -30,49 +34,21 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	auto cdPose = luabind::class_<panima::Pose>("Pose");
 	cdPose.def(luabind::tostring(luabind::self));
 	cdPose.def(luabind::constructor<>());
-	cdPose.def("SetTransformCount",static_cast<void(*)(lua_State*,panima::Pose&,uint32_t)>([](lua_State *l,panima::Pose &pose,uint32_t count) {
-		pose.SetTransformCount(count);
-	}));
-	cdPose.def("SetBoneIndex",static_cast<void(*)(lua_State*,panima::Pose&,uint32_t,uint32_t)>([](lua_State *l,panima::Pose &pose,uint32_t idx,uint32_t boneIdx) {
-		pose.SetBoneIndex(idx,boneIdx);
-	}));
-	cdPose.def("GetTransform",static_cast<umath::ScaledTransform*(*)(lua_State*,panima::Pose&,uint32_t)>([](lua_State *l,panima::Pose &pose,uint32_t boneIdx) -> umath::ScaledTransform* {
-		return pose.GetTransform(boneIdx);
-	}));
-	cdPose.def("SetTransform",static_cast<void(*)(lua_State*,panima::Pose&,uint32_t,const umath::ScaledTransform&)>(
-		[](lua_State *l,panima::Pose &pose,uint32_t boneIdx,const umath::ScaledTransform &transform) {
-		pose.SetTransform(boneIdx,transform);
-	}));
-	cdPose.def("Clear",static_cast<void(*)(lua_State*,panima::Pose&)>(
-		[](lua_State *l,panima::Pose &pose) {
-		pose.Clear();
-	}));
-	cdPose.def("Lerp",static_cast<void(*)(lua_State*,panima::Pose&,const panima::Pose&,float)>(
-		[](lua_State *l,panima::Pose &pose,const panima::Pose &other,float f) {
-		pose.Lerp(other,f);
-	}));
-	cdPose.def("Localize",static_cast<void(*)(lua_State*,panima::Pose&,const panima::Skeleton&)>(
-		[](lua_State *l,panima::Pose &pose,const panima::Skeleton &skeleton) {
-		pose.Localize(skeleton);
-	}));
-	cdPose.def("Globalize",static_cast<void(*)(lua_State*,panima::Pose&,const panima::Skeleton&)>(
-		[](lua_State *l,panima::Pose &pose,const panima::Skeleton &skeleton) {
-		pose.Globalize(skeleton);
-	}));
-	cdPose.def("GetBoneTranslationTable",static_cast<luabind::tableT<uint32_t>(*)(lua_State*,panima::Pose&)>(
-		[](lua_State *l,panima::Pose &pose) {
-		return luabind::tableT<uint32_t>{Lua::vector_to_table(l,pose.GetBoneTranslationTable())};
-	}));
+	cdPose.def("SetTransformCount",&panima::Pose::SetTransformCount);
+	cdPose.def("SetBoneIndex",&panima::Pose::SetBoneIndex);
+	cdPose.def("GetTransform",static_cast<umath::ScaledTransform*(panima::Pose::*)(BoneId)>(&panima::Pose::GetTransform));
+	cdPose.def("SetTransform",&panima::Pose::SetTransform);
+	cdPose.def("Clear",&panima::Pose::Clear);
+	cdPose.def("Lerp",&panima::Pose::Lerp);
+	cdPose.def("Localize",&panima::Pose::Localize);
+	cdPose.def("Globalize",&panima::Pose::Globalize);
+	cdPose.def("GetBoneTranslationTable",static_cast<std::vector<uint32_t>&(panima::Pose::*)()>(&panima::Pose::GetBoneTranslationTable));
 	animMod[cdPose];
 
 	auto cdChannel = luabind::class_<panima::Channel>("Channel");
 	cdChannel.def(luabind::tostring(luabind::self));
-	cdChannel.def("GetValueType",static_cast<::udm::Type(*)(lua_State*,panima::Channel&)>([](lua_State *l,panima::Channel &channel) -> ::udm::Type {
-		return channel.GetValueType();
-	}));
-	cdChannel.def("SetValueType",static_cast<void(*)(lua_State*,panima::Channel&,::udm::Type)>([](lua_State *l,panima::Channel &channel,::udm::Type type) {
-		channel.SetValueType(type);
-	}));
+	cdChannel.def("GetValueType",&panima::Channel::GetValueType);
+	cdChannel.def("SetValueType",&panima::Channel::SetValueType);
 	cdChannel.def("GetInterpolation",static_cast<panima::ChannelInterpolation(*)(lua_State*,panima::Channel&)>(
 		[](lua_State *l,panima::Channel &channel) -> panima::ChannelInterpolation {
 		return channel.interpolation;
@@ -97,14 +73,8 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		[](lua_State *l,panima::Channel &channel) -> ::udm::LinkedPropertyWrapper {
 			return ::udm::LinkedPropertyWrapper{channel.GetValueProperty()};
 	}));
-	cdChannel.def("Save",static_cast<bool(*)(lua_State*,panima::Channel&,::udm::LinkedPropertyWrapper&)>(
-		[](lua_State *l,panima::Channel &channel,::udm::LinkedPropertyWrapper &prop) -> bool {
-		return channel.Save(prop);
-	}));
-	cdChannel.def("Load",static_cast<bool(*)(lua_State*,panima::Channel&,::udm::LinkedPropertyWrapper&)>(
-		[](lua_State *l,panima::Channel &channel,::udm::LinkedPropertyWrapper &prop) -> bool {
-		return channel.Load(prop);
-	}));
+	cdChannel.def("Save",&panima::Channel::Save);
+	cdChannel.def("Load",&panima::Channel::Load);
 	cdChannel.def("SetValues",
 		static_cast<void(*)(lua_State*,panima::Channel&,luabind::tableT<float>,const luabind::tableT<void>)>(
 			[](lua_State *l,panima::Channel &channel,luabind::tableT<float> times,const luabind::tableT<void> values) {
@@ -166,103 +136,66 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdChannel.def("GetValueExpression",&panima::Channel::GetValueExpression);
 	animMod[cdChannel];
 
+	auto cdSet = luabind::class_<panima::AnimationSet>("Set");
+	cdSet.def(luabind::tostring(luabind::self));
+	cdSet.scope[luabind::def("create",&panima::AnimationSet::Create)];
+	cdSet.def("Clear",&panima::AnimationSet::Clear);
+	cdSet.def("AddAnimation",&panima::AnimationSet::AddAnimation);
+	cdSet.def("RemoveAnimation",static_cast<void(panima::AnimationSet::*)(const std::string_view&)>(&panima::AnimationSet::RemoveAnimation));
+	cdSet.def("RemoveAnimation",static_cast<void(panima::AnimationSet::*)(const panima::Animation&)>(&panima::AnimationSet::RemoveAnimation));
+	cdSet.def("RemoveAnimation",static_cast<void(panima::AnimationSet::*)(panima::AnimationId)>(&panima::AnimationSet::RemoveAnimation));
+	cdSet.def("LookupAnimation",&panima::AnimationSet::LookupAnimation);
+	cdSet.def("GetAnimation",static_cast<panima::Animation*(panima::AnimationSet::*)(panima::AnimationId)>(&panima::AnimationSet::GetAnimation),luabind::shared_from_this_policy<0>{});
+	cdSet.def("GetAnimations",static_cast<std::vector<std::shared_ptr<panima::Animation>>&(panima::AnimationSet::*)()>(&panima::AnimationSet::GetAnimations));
+	cdSet.def("FindAnimation",static_cast<panima::Animation*(panima::AnimationSet::*)(const std::string_view&)>(&panima::AnimationSet::FindAnimation),luabind::shared_from_this_policy<0>{});
+	cdSet.def("Reserve",&panima::AnimationSet::Reserve);
+	cdSet.def("GetSize",&panima::AnimationSet::GetSize);
+	animMod[cdSet];
+
 	auto cdPlayer = luabind::class_<panima::Player>("Player");
 	cdPlayer.def(luabind::tostring(luabind::self));
-	cdPlayer.scope[luabind::def("create",static_cast<std::shared_ptr<panima::Player>(*)(lua_State*)>([](lua_State *l) {
-		return panima::Player::Create();
-	}))];
-	cdPlayer.def("Advance",static_cast<void(*)(lua_State*,panima::Player&,float,bool)>([](lua_State *l,panima::Player &player,float dt,bool force) {
-		player.Advance(dt,force);
-	}));
-	cdPlayer.def("Advance",static_cast<void(*)(lua_State*,panima::Player&,float)>([](lua_State *l,panima::Player &player,float dt) {
-		player.Advance(dt);
-	}));
-	cdPlayer.def("GetDuration",static_cast<float(*)(lua_State*,panima::Player&)>([](lua_State *l,panima::Player &player) {
-		return player.GetDuration();
-	}));
-	cdPlayer.def("GetRemainingDuration",static_cast<float(*)(lua_State*,panima::Player&)>([](lua_State *l,panima::Player &player) {
-		return player.GetDuration();
-	}));
-	cdPlayer.def("GetCurrentTimeFraction",static_cast<float(*)(lua_State*,panima::Player&)>([](lua_State *l,panima::Player &player) {
-		return player.GetCurrentTimeFraction();
-	}));
-	cdPlayer.def("GetCurrentTime",static_cast<float(*)(lua_State*,panima::Player&)>([](lua_State *l,panima::Player &player) {
-		return player.GetCurrentTime();
-	}));
-	cdPlayer.def("GetPlaybackRate",static_cast<float(*)(lua_State*,panima::Player&)>([](lua_State *l,panima::Player &player) {
-		return player.GetPlaybackRate();
-	}));
-	cdPlayer.def("SetPlaybackRate",static_cast<void(*)(lua_State*,panima::Player&,float)>([](lua_State *l,panima::Player &player,float playbackRate) {
-		player.SetPlaybackRate(playbackRate);
-	}));
-	cdPlayer.def("SetCurrentTime",static_cast<void(*)(lua_State*,panima::Player&,float)>([](lua_State *l,panima::Player &player,float time) {
-		player.SetCurrentTime(time);
-	}));
-	cdPlayer.def("SetCurrentTime",static_cast<void(*)(lua_State*,panima::Player&,float,bool)>([](lua_State *l,panima::Player &player,float time,bool force) {
-		player.SetCurrentTime(time,force);
-	}));
-	cdPlayer.def("Reset",static_cast<void(*)(lua_State*,panima::Player&)>(
-		[](lua_State *l,panima::Player &player) {
-		player.Reset();
-	}));
+	cdPlayer.scope[luabind::def("create",static_cast<std::shared_ptr<panima::Player>(*)()>(&panima::Player::Create))];
+	cdPlayer.def("Advance",&panima::Player::Advance);
+	cdPlayer.def("Advance",&panima::Player::Advance,luabind::default_parameter_policy<3,false>{});
+	cdPlayer.def("GetDuration",&panima::Player::GetDuration);
+	cdPlayer.def("GetRemainingDuration",&panima::Player::GetRemainingAnimationDuration);
+	cdPlayer.def("GetCurrentTimeFraction",&panima::Player::GetCurrentTimeFraction);
+	cdPlayer.def("GetCurrentTime",&panima::Player::GetCurrentTime);
+	cdPlayer.def("GetPlaybackRate",&panima::Player::GetPlaybackRate);
+	cdPlayer.def("SetPlaybackRate",&panima::Player::SetPlaybackRate);
+	cdPlayer.def("SetCurrentTime",&panima::Player::SetCurrentTime);
+	cdPlayer.def("SetCurrentTime",&panima::Player::SetCurrentTime,luabind::default_parameter_policy<3,false>{});
+	cdPlayer.def("Reset",&panima::Player::Reset);
 	cdPlayer.def("GetCurrentSlice",static_cast<panima::Slice*(*)(lua_State*,panima::Player&)>(
 		[](lua_State *l,panima::Player &player) {
 		return &player.GetCurrentSlice();
 	}));
-	cdPlayer.def("SetLooping",static_cast<void(*)(lua_State*,panima::Player&,bool)>(
-		[](lua_State *l,panima::Player &player,bool looping) {
-		player.SetLooping(looping);
-	}));
-	cdPlayer.def("IsLooping",static_cast<bool(*)(lua_State*,const panima::Player&)>(
-		[](lua_State *l,const panima::Player &player) -> bool {
-		return player.IsLooping();
-	}));
-	cdPlayer.def("SetAnimation",static_cast<void(*)(lua_State*,panima::Player&,panima::Animation&)>(
-		[](lua_State *l,panima::Player &player,panima::Animation &anim) {
-		player.SetAnimation(anim);
-	}));
+	cdPlayer.def("SetLooping",&panima::Player::SetLooping);
+	cdPlayer.def("IsLooping",&panima::Player::IsLooping);
+	cdPlayer.def("SetAnimation",&panima::Player::SetAnimation);
 	animMod[cdPlayer];
 
 	auto cdManager = luabind::class_<panima::AnimationManager>("Manager");
 	cdManager.def(luabind::tostring(luabind::self));
-	cdManager.scope[luabind::def("create",static_cast<std::shared_ptr<panima::AnimationManager>(*)(lua_State*)>([](lua_State *l) {
-		return panima::AnimationManager::Create();
-	}))];
+	cdManager.scope[luabind::def("create",static_cast<std::shared_ptr<panima::AnimationManager>(*)()>(&panima::AnimationManager::Create))];
 	cdManager.def("GetPreviousSlice",static_cast<panima::Slice*(*)(lua_State*,panima::AnimationManager&)>(
 		[](lua_State *l,panima::AnimationManager &manager) {
 		return &manager.GetPreviousSlice();
 	}));
-	cdManager.def("GetCurrentAnimationId",static_cast<panima::AnimationId(*)(lua_State*,panima::AnimationManager&)>([](lua_State *l,panima::AnimationManager &manager) {
-		return manager.GetCurrentAnimationId();
-	}));
+	cdManager.def("GetCurrentAnimationId",&panima::AnimationManager::GetCurrentAnimationId);
+	cdManager.def("AddAnimationSet",&panima::AnimationManager::AddAnimationSet);
 	cdManager.def("GetCurrentAnimation",static_cast<opt<std::shared_ptr<panima::Animation>>(*)(lua_State*,panima::AnimationManager&)>([](lua_State *l,panima::AnimationManager &manager) -> luabind::optional<std::shared_ptr<panima::Animation>> {
 		auto *anim = manager.GetCurrentAnimation();
 		return anim ? opt<std::shared_ptr<panima::Animation>>{l,anim->shared_from_this()} : nil;
 	}));
-	cdManager.def("GetPlayer",static_cast<panima::PPlayer(*)(lua_State*,panima::AnimationManager&)>(
-		[](lua_State *l,panima::AnimationManager &manager) -> panima::PPlayer {
-		return manager.GetPlayer().shared_from_this();
-	}));
-	cdManager.def("StopAnimation",static_cast<void(*)(lua_State*,panima::AnimationManager&)>(
-		[](lua_State *l,panima::AnimationManager &manager) {
-		manager.StopAnimation();
-	}));
-	cdManager.def("PlayAnimation",static_cast<void(*)(lua_State*,panima::AnimationManager&,const std::string&,panima::AnimationId,panima::PlaybackFlags)>(
-		[](lua_State *l,panima::AnimationManager &manager,const std::string &setName,panima::AnimationId id,panima::PlaybackFlags flags) {
-		manager.PlayAnimation(setName,id,flags);
-	}));
-	cdManager.def("PlayAnimation",static_cast<void(*)(lua_State*,panima::AnimationManager&,const std::string&,panima::AnimationId)>(
-		[](lua_State *l,panima::AnimationManager &manager,const std::string &setName,panima::AnimationId id) {
-		manager.PlayAnimation(setName,id);
-	}));
-	cdManager.def("PlayAnimation",static_cast<void(*)(lua_State*,panima::AnimationManager&,const std::string&,const std::string&,panima::PlaybackFlags)>(
-		[](lua_State *l,panima::AnimationManager &manager,const std::string &setName,const std::string &anim,panima::PlaybackFlags flags) {
-		manager.PlayAnimation(setName,anim,flags);
-	}));
-	cdManager.def("PlayAnimation",static_cast<void(*)(lua_State*,panima::AnimationManager&,const std::string&,const std::string&)>(
-		[](lua_State *l,panima::AnimationManager &manager,const std::string &setName,const std::string &anim) {
-		manager.PlayAnimation(setName,anim);
-	}));
+	cdManager.def("GetPlayer",static_cast<panima::Player&(panima::AnimationManager::*)()>(&panima::AnimationManager::GetPlayer),luabind::shared_from_this_policy<0>{});
+	cdManager.def("StopAnimation",static_cast<void(panima::AnimationManager::*)()>(&panima::AnimationManager::StopAnimation));
+	cdManager.def("PlayAnimation",static_cast<void(panima::AnimationManager::*)(const std::string&,panima::AnimationId,panima::PlaybackFlags)>(&panima::AnimationManager::PlayAnimation));
+	cdManager.def("PlayAnimation",static_cast<void(panima::AnimationManager::*)(const std::string&,panima::AnimationId,panima::PlaybackFlags)>(&panima::AnimationManager::PlayAnimation),luabind::default_parameter_policy<4,panima::PlaybackFlags::Default>{});
+	cdManager.def("PlayAnimation",static_cast<void(panima::AnimationManager::*)(const std::string&,const std::string&,panima::PlaybackFlags)>(&panima::AnimationManager::PlayAnimation));
+	cdManager.def("PlayAnimation",static_cast<void(panima::AnimationManager::*)(const std::string&,const std::string&,panima::PlaybackFlags)>(&panima::AnimationManager::PlayAnimation),luabind::default_parameter_policy<4,panima::PlaybackFlags::Default>{});
+	cdManager.def("PlayAnimation",static_cast<void(panima::AnimationManager::*)(const std::string&,panima::PlaybackFlags)>(&panima::AnimationManager::PlayAnimation));
+	cdManager.def("PlayAnimation",static_cast<void(panima::AnimationManager::*)(const std::string&,panima::PlaybackFlags)>(&panima::AnimationManager::PlayAnimation),luabind::default_parameter_policy<4,panima::PlaybackFlags::Default>{});
 	animMod[cdManager];
 
 	auto cdSlice = luabind::class_<panima::Slice>("Slice");
@@ -282,21 +215,11 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdAnim2.scope[luabind::def("create",static_cast<std::shared_ptr<panima::Animation>(*)(lua_State*)>([](lua_State *l) {
 		return std::make_shared<panima::Animation>();
 	}))];
-	cdAnim2.def("GetChannelCount",static_cast<uint32_t(*)(lua_State*,panima::Animation&)>([](lua_State *l,panima::Animation &anim) {
-		return anim.GetChannelCount();
-	}));
-	cdAnim2.def("GetAnimationSpeedFactor",static_cast<float(*)(lua_State*,panima::Animation&)>([](lua_State *l,panima::Animation &anim) {
-		return anim.GetAnimationSpeedFactor();
-	}));
-	cdAnim2.def("SetAnimationSpeedFactor",static_cast<void(*)(lua_State*,panima::Animation&,float)>([](lua_State *l,panima::Animation &anim,float factor) {
-		anim.SetAnimationSpeedFactor(factor);
-	}));
-	cdAnim2.def("GetDuration",static_cast<float(*)(lua_State*,panima::Animation&)>([](lua_State *l,panima::Animation &anim) {
-		return anim.GetDuration();
-	}));
-	cdAnim2.def("SetDuration",static_cast<void(*)(lua_State*,panima::Animation&,float)>([](lua_State *l,panima::Animation &anim,float duration) {
-		anim.SetDuration(duration);
-	}));
+	cdAnim2.def("GetChannelCount",&panima::Animation::GetChannelCount);
+	cdAnim2.def("GetAnimationSpeedFactor",&panima::Animation::GetAnimationSpeedFactor);
+	cdAnim2.def("SetAnimationSpeedFactor",&panima::Animation::SetAnimationSpeedFactor);
+	cdAnim2.def("GetDuration",&panima::Animation::GetDuration);
+	cdAnim2.def("SetDuration",&panima::Animation::SetDuration);
 	cdAnim2.def("UpdateDuration",static_cast<float(*)(lua_State*,panima::Animation&)>([](lua_State *l,panima::Animation &anim) -> float {
 		auto duration = 0.f;
 		for(auto &channel : anim.GetChannels())
@@ -309,9 +232,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		anim.SetDuration(duration);
 		return duration;
 	}));
-	cdAnim2.def("AddChannel",static_cast<void(*)(lua_State*,panima::Animation&,panima::Channel&)>([](lua_State *l,panima::Animation &anim,panima::Channel &channel) {
-		anim.AddChannel(channel);
-	}));
+	cdAnim2.def("AddChannel",static_cast<void(panima::Animation::*)(panima::Channel&)>(&panima::Animation::AddChannel));
 	cdAnim2.def("AddChannel",static_cast<opt<std::shared_ptr<panima::Channel>>(*)(lua_State*,panima::Animation&,const util::Path&,::udm::Type)>([](lua_State *l,panima::Animation &anim,const util::Path &path,::udm::Type valueType) -> opt<std::shared_ptr<panima::Channel>> {
 		auto *channel = anim.AddChannel(path,valueType);
 		if(!channel)
@@ -324,18 +245,14 @@ void Lua::animation::register_library(Lua::Interface &lua)
 			return nil;
 		return {l,channel->shared_from_this()};
 	}));
-	cdAnim2.def("GetChannels",static_cast<tb<std::shared_ptr<panima::Channel>>(*)(lua_State*,panima::Animation&)>([](lua_State *l,panima::Animation &anim) -> tb<std::shared_ptr<panima::Channel>> {
-		return Lua::vector_to_table(l,anim.GetChannels());
-	}));
+	cdAnim2.def("GetChannels",static_cast<std::vector<std::shared_ptr<panima::Channel>>&(panima::Animation::*)()>(&panima::Animation::GetChannels));
 	cdAnim2.def("FindChannel",static_cast<opt<std::shared_ptr<panima::Channel>>(*)(lua_State*,panima::Animation&,const util::Path&)>([](lua_State *l,panima::Animation &anim,const util::Path &path) -> opt<std::shared_ptr<panima::Channel>> {
 		auto *channel = anim.FindChannel(path);
 		if(!channel)
 			return nil;
 		return {l,channel->shared_from_this()};
 	}));
-	cdAnim2.def("Save",static_cast<bool(*)(panima::Animation&,::udm::LinkedPropertyWrapper&)>([](panima::Animation &anim,::udm::LinkedPropertyWrapper &assetData) -> bool {
-		return anim.Save(assetData);
-	}));
+	cdAnim2.def("Save",&panima::Animation::Save);
 	cdAnim2.scope[luabind::def("Load",static_cast<std::shared_ptr<panima::Animation>(*)(lua_State*,::udm::LinkedPropertyWrapper&)>([](lua_State *l,::udm::LinkedPropertyWrapper &assetData) -> std::shared_ptr<panima::Animation> {
 		auto anim = std::make_shared<panima::Animation>();
 		if(anim->Load(assetData) == false)

@@ -31,6 +31,15 @@ namespace pragma
 		BaseEnvCameraComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 
+		enum class StateFlags : uint32_t
+		{
+			None = 0u,
+			ViewMatrixDirtyBit = 1u,
+			ProjectionMatrixDirtyBit = ViewMatrixDirtyBit<<1u,
+			CustomViewMatrix = ProjectionMatrixDirtyBit<<1u,
+			CustomProjectionMatrix = CustomViewMatrix<<1u
+		};
+
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
 
@@ -103,7 +112,9 @@ namespace pragma
 		util::PFloatProperty m_nearZ = nullptr;
 		util::PFloatProperty m_farZ = nullptr;
 		std::vector<umath::Plane> m_frustumPlanes;
+		StateFlags m_stateFlags = StateFlags::None;
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::BaseEnvCameraComponent::StateFlags)
 
 #endif

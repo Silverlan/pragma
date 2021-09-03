@@ -107,14 +107,19 @@ void BaseEnvCameraComponent::UpdateViewMatrix()
 		pos +whTrComponent->GetForward(),
 		whTrComponent->GetUp()
 	);
+	umath::set_flag(m_stateFlags,StateFlags::ViewMatrixDirtyBit,false);
+	umath::set_flag(m_stateFlags,StateFlags::CustomViewMatrix,false);
 }
 void BaseEnvCameraComponent::UpdateProjectionMatrix()
 {
 	*m_projectionMatrix = CalcProjectionMatrix(GetFOVRad(),*m_aspectRatio,normalize_plane_z(**m_nearZ),normalize_plane_z(**m_farZ));
+	umath::set_flag(m_stateFlags,StateFlags::ProjectionMatrixDirtyBit,false);
+	umath::set_flag(m_stateFlags,StateFlags::CustomProjectionMatrix,false);
 }
 void BaseEnvCameraComponent::SetViewMatrix(const Mat4 &mat)
 {
 	*m_viewMatrix = mat;
+	m_stateFlags |= StateFlags::CustomViewMatrix;
 	auto whTrComponent = GetEntity().GetTransformComponent();
 	if(whTrComponent)
 	{
@@ -139,7 +144,11 @@ void BaseEnvCameraComponent::SetViewMatrix(const Mat4 &mat)
 		whTrComponent->SetRotation(rotation);
 	}
 }
-void BaseEnvCameraComponent::SetProjectionMatrix(const Mat4 &mat) {*m_projectionMatrix = mat;}
+void BaseEnvCameraComponent::SetProjectionMatrix(const Mat4 &mat)
+{
+	*m_projectionMatrix = mat;
+	m_stateFlags |= StateFlags::CustomProjectionMatrix;
+}
 void BaseEnvCameraComponent::GetFrustumPlanes(std::vector<umath::Plane> &outPlanes) const
 {
 	std::vector<Vector3> points {};
@@ -286,12 +295,30 @@ void BaseEnvCameraComponent::GetPlaneBoundaries(float z,std::array<Vector3,4> &o
 	outPoints = umath::frustum::get_plane_boundaries(pos,forward,up,GetFOVRad(),z,*m_aspectRatio,wNear,hNear);
 }
 
-void BaseEnvCameraComponent::SetFOV(float fov) {*m_fov = fov;}
-void BaseEnvCameraComponent::SetAspectRatio(float aspectRatio) {*m_aspectRatio = aspectRatio;}
-void BaseEnvCameraComponent::SetNearZ(float nearZ) {*m_nearZ = nearZ;}
-void BaseEnvCameraComponent::SetFarZ(float farZ) {*m_farZ = farZ;}
-const Mat4 &BaseEnvCameraComponent::GetProjectionMatrix() const {return *m_projectionMatrix;}
-const Mat4 &BaseEnvCameraComponent::GetViewMatrix() const {return *m_viewMatrix;}
+void BaseEnvCameraComponent::SetFOV(float fov) {*m_fov = fov; m_stateFlags |= StateFlags::ProjectionMatrixDirtyBit;}
+void BaseEnvCameraComponent::SetAspectRatio(float aspectRatio) {*m_aspectRatio = aspectRatio; m_stateFlags |= StateFlags::ProjectionMatrixDirtyBit;}
+void BaseEnvCameraComponent::SetNearZ(float nearZ) {*m_nearZ = nearZ; m_stateFlags |= StateFlags::ProjectionMatrixDirtyBit;}
+void BaseEnvCameraComponent::SetFarZ(float farZ) {*m_farZ = farZ; m_stateFlags |= StateFlags::ProjectionMatrixDirtyBit;}
+const Mat4 &BaseEnvCameraComponent::GetProjectionMatrix() const
+{
+	if(umath::is_flag_set(m_stateFlags,StateFlags::ProjectionMatrixDirtyBit))
+	{
+		if(!umath::is_flag_set(m_stateFlags,StateFlags::CustomProjectionMatrix))
+			const_cast<BaseEnvCameraComponent*>(this)->UpdateProjectionMatrix();
+		umath::set_flag(const_cast<BaseEnvCameraComponent*>(this)->m_stateFlags,StateFlags::ProjectionMatrixDirtyBit,false);
+	}
+	return *m_projectionMatrix;
+}
+const Mat4 &BaseEnvCameraComponent::GetViewMatrix() const
+{
+	if(umath::is_flag_set(m_stateFlags,StateFlags::ViewMatrixDirtyBit))
+	{
+		if(!umath::is_flag_set(m_stateFlags,StateFlags::CustomViewMatrix))
+			const_cast<BaseEnvCameraComponent*>(this)->UpdateViewMatrix();
+		umath::set_flag(const_cast<BaseEnvCameraComponent*>(this)->m_stateFlags,StateFlags::ViewMatrixDirtyBit,false);
+	}
+	return *m_viewMatrix;
+}
 
 float BaseEnvCameraComponent::GetFOV() const {return *m_fov;}
 float BaseEnvCameraComponent::GetFOVRad() const {return umath::deg_to_rad(*m_fov);}

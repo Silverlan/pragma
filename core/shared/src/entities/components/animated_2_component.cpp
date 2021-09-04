@@ -192,14 +192,26 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters()
 template<uint32_t I> requires(I < 4)
 	static bool is_vector_component(const std::string &str)
 {
-	if constexpr(I == 0)
-		return str == "x" || str == "r" || str == "red";
-	else if constexpr(I == 1)
-		return str == "y" || str == "g" || str == "green";
-	else if constexpr(I == 2)
-		return str == "z" || str == "b" || str == "blue";
-	else if constexpr(I == 3)
-		return str == "w" || str == "a" || str == "alpha";
+	using namespace ustring::string_switch;
+	switch(hash(str))
+	{
+	case "x"_:
+	case "r"_:
+	case "red"_:
+		return I == 0;
+	case "y"_:
+	case "g"_:
+	case "green"_:
+		return I == 1;
+	case "z"_:
+	case "b"_:
+	case "blue"_:
+		return I == 2;
+	case "w"_:
+	case "a"_:
+	case "alpha"_:
+		return I == 3;
+	}
 }
 
 void Animated2Component::InitializeAnimationChannelValueSubmitters(panima::AnimationManager &manager)

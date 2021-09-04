@@ -45,7 +45,9 @@
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/lua/converters/pair_converter_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/asset/util_asset.hpp>
+#include <pragma/lua/converters/optional_converter_t.hpp>
+#include <pragma/lua/policies/core_policies.hpp>
+#include <pragma/input/inputhelper.h>
 #include <sharedutils/util_file.h>
 #include <sharedutils/util_path.hpp>
 #include <util_image.hpp>
@@ -101,13 +103,13 @@ static void register_gui(Lua::Interface &lua)
 		
 		luabind::def("find_focused_window",static_cast<prosper::Window*(*)()>([]() -> prosper::Window* {
 			return WGUI::GetInstance().FindFocusedWindow();
-		})),
+		}),luabind::pointer_policy<0>{}),
 		luabind::def("get_primary_window",static_cast<prosper::Window*(*)()>([]() -> prosper::Window* {
 			return &c_engine->GetRenderContext().GetWindow();
-		})),
+		}),luabind::pointer_policy<0>{}),
 		luabind::def("find_window_under_cursor",static_cast<prosper::Window*(*)()>([]() -> prosper::Window* {
 			return WGUI::GetInstance().FindWindowUnderCursor();
-		})),
+		}),luabind::pointer_policy<0>{}),
 		
 		luabind::def("get_focused_element",&Lua::gui::get_focused_element),
 		luabind::def("register_skin",static_cast<bool(*)(lua_State*,const std::string&,const luabind::tableT<void>&,const luabind::tableT<void>&)>(&Lua::gui::register_skin)),
@@ -404,36 +406,82 @@ static void register_gui(Lua::Interface &lua)
 	guiMod[wiScrollBarClassDef];
 }
 
+namespace luabind
+{
+	namespace detail
+	{
+		static prosper::Window *get_window(lua_State *l) {return &c_engine->GetWindow();}
+		template<typename T>
+			T get_window(lua_State *l)
+		{
+			if constexpr(std::is_pointer_v<T>)
+				return static_cast<T>(get_window(l));
+			else
+				return static_cast<T>(*get_window(l));
+		}
+	};
+	template <typename T> requires(is_type_or_derived<T,prosper::Window>)
+	struct default_converter<T>
+		: parameter_emplacement_converter<T,detail::get_window<T>>
+	{};
+};
+
+static std::vector<GLFW::Key> get_mapped_keys(const std::string &cvarName,uint32_t maxKeys=std::numeric_limits<uint32_t>::max())
+{
+	std::vector<GLFW::Key> mappedKeys;
+	c_engine->GetMappedKeys(cvarName,mappedKeys,maxKeys);
+	return mappedKeys;
+}
+
 void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua,bool bGUI)
 {
 	register_gui(lua);
 
-	Lua::RegisterLibrary(lua.GetState(),"input",{
-		{"get_mouse_button_state",Lua::input::get_mouse_button_state},
-		{"get_key_state",Lua::input::get_key_state},
-		{"add_callback",Lua::input::add_callback},
-		{"get_cursor_pos",Lua::input::get_cursor_pos},
-		{"set_cursor_pos",Lua::input::set_cursor_pos},
-		{"center_cursor",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-			auto *window = WGUI::GetInstance().FindFocusedWindow();
-			if(!window)
-				window = &c_engine->GetWindow();
-			if(!window || !window->IsValid())
-				return 0;
-			auto windowSize = (*window)->GetSize();
-			(*window)->SetCursorPos(windowSize /2);
-			return 0;
-		})},
-		{"get_controller_count",Lua::input::get_controller_count},
-		{"get_controller_name",Lua::input::get_controller_name},
-		{"get_controller_axes",Lua::input::get_joystick_axes},
-		{"get_controller_buttons",Lua::input::get_joystick_buttons},
-
-		{"key_to_string",Lua::input::key_to_string},
-		{"key_to_text",Lua::input::key_to_text},
-		{"string_to_key",Lua::input::string_to_key},
-		{"get_mapped_keys",Lua::input::get_mapped_keys}
-	});
+	auto inputMod = luabind::module(lua.GetState(),"input");
+	inputMod[
+		luabind::def("get_mouse_button_state",+[](prosper::Window &window,GLFW::MouseButton mouseButton) -> GLFW::KeyState {
+			return window->GetMouseButtonState(mouseButton);
+		}),
+		luabind::def("get_key_state",+[](prosper::Window &window,GLFW::Key key) -> GLFW::KeyState {
+			return window->GetKeyState(key);
+		}),
+		luabind::def("get_cursor_pos",+[](prosper::Window &window) -> Vector2 {
+			return window->GetCursorPos();
+		}),
+		luabind::def("set_cursor_pos",+[](prosper::Window &window,const Vector2 &pos) {
+			window->SetCursorPos(pos);
+		}),
+		luabind::def("get_controller_count",+[]() -> uint32_t {
+			return GLFW::get_joysticks().size();
+		}),
+		luabind::def("get_controller_name",&GLFW::get_joystick_name),
+		luabind::def("get_controller_axes",&GLFW::get_joystick_axes),
+		luabind::def("get_controller_buttons",&GLFW::get_joystick_buttons),
+		luabind::def("key_to_string",+[](short key) -> std::optional<std::string> {
+			std::string str;
+			if(!KeyToString(key,&str))
+				return {};
+			return str;
+		}),
+		luabind::def("key_to_text",+[](short key) -> std::optional<std::string> {
+			std::string str;
+			if(!KeyToText(key,&str))
+				return {};
+			return str;
+		}),
+		luabind::def("string_to_key",+[](const std::string &str) -> std::optional<short> {
+			short c;
+			if(!StringToKey(str,&c))
+				return {};
+			return c;
+		}),
+		luabind::def("get_mapped_keys",&get_mapped_keys),
+		luabind::def("get_mapped_keys",&get_mapped_keys,luabind::default_parameter_policy<2,std::numeric_limits<uint32_t>::max()>{}),
+		luabind::def("add_callback",+[](const std::string &identifier,const Lua::func<void> &f) -> CallbackHandle {
+			auto &inputHandler = c_game->GetInputCallbackHandler();
+			return inputHandler.AddLuaCallback(identifier,f);
+		})
+	];
 
 	Lua::RegisterLibrary(lua.GetState(),"sound",{
 		{"create",Lua::sound::create},

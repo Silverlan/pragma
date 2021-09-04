@@ -112,7 +112,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("GetAbsolutePos",&::WIBase::GetAbsolutePos);
 	classDef.def("SetAbsolutePos",static_cast<void(*)(lua_State*,::WIBase&,Vector2)>(&SetAbsolutePos));
 	classDef.def("SetAbsolutePos",static_cast<void(*)(lua_State*,::WIBase&,float,float)>(&SetAbsolutePos));
-	classDef.def("GetColor",&::WIBase::GetColor);
+	classDef.def("GetColor",&::WIBase::GetColor,luabind::copy_policy<0>{});
 	classDef.def("GetColorProperty",&::WIBase::GetColorProperty);
 	classDef.def("GetFocusProperty",&::WIBase::GetFocusProperty);
 	classDef.def("GetVisibilityProperty",&::WIBase::GetVisibilityProperty);
@@ -261,8 +261,8 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("AddAttachment",static_cast<WIAttachment*(::WIBase::*)(const std::string&,const Vector2&)>(&::WIBase::AddAttachment));
 	classDef.def("AddAttachment",static_cast<WIAttachment*(*)(::WIBase&,const std::string&)>([](::WIBase &el,const std::string &name) {return el.AddAttachment(name);}));
 	classDef.def("SetAttachmentPos",&::WIBase::SetAttachmentPos);
-	classDef.def("GetAttachmentPos",&::WIBase::GetAttachmentPos);
-	classDef.def("GetAbsoluteAttachmentPos",&::WIBase::GetAbsoluteAttachmentPos);
+	classDef.def("GetAttachmentPos",&::WIBase::GetAttachmentPos,luabind::copy_policy<0>{});
+	classDef.def("GetAbsoluteAttachmentPos",&::WIBase::GetAbsoluteAttachmentPos,luabind::copy_policy<0>{});
 	classDef.def("GetAttachmentPosProperty",&::WIBase::GetAttachmentPosProperty);
 	classDef.def("SetAnchor",static_cast<void(::WIBase::*)(float,float,float,float,uint32_t,uint32_t)>(&::WIBase::SetAnchor));
 	classDef.def("SetAnchor",static_cast<void(*)(::WIBase&,float,float,float,float)>([](::WIBase &el,float left,float top,float right,float bottom) {el.SetAnchor(left,top,right,bottom);}));

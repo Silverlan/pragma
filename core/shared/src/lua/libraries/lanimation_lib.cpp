@@ -10,6 +10,7 @@
 #include "pragma/model/animation/play_animation_flags.hpp"
 #include "pragma/lua/libraries/ludm.hpp"
 #include "pragma/lua/types/udm.hpp"
+#include "pragma/lua/custom_constructor.hpp"
 #include "pragma/model/model.h"
 #include <pragma/lua/policies/default_parameter_policy.hpp>
 #include <pragma/lua/policies/shared_from_this_policy.hpp>
@@ -46,9 +47,23 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdPose.def("Globalize",&panima::Pose::Globalize);
 	cdPose.def("GetBoneTranslationTable",static_cast<std::vector<uint32_t>&(panima::Pose::*)()>(&panima::Pose::GetBoneTranslationTable));
 	animMod[cdPose];
+	
+	auto cdTimeFrame = luabind::class_<panima::TimeFrame>("TimeFrame");
+	cdTimeFrame.def_readwrite("startOffset",&panima::TimeFrame::startOffset);
+	cdTimeFrame.def_readwrite("scale",&panima::TimeFrame::scale);
+	cdTimeFrame.def_readwrite("duration",&panima::TimeFrame::duration);
+	animMod[cdTimeFrame];
+	pragma::lua::define_custom_constructor<panima::TimeFrame,[](float startOffset,float scale,float duration) -> panima::TimeFrame {
+		return panima::TimeFrame{startOffset,scale,duration};
+	},float,float,float>(lua.GetState());
+	pragma::lua::define_custom_constructor<panima::TimeFrame,[]() -> panima::TimeFrame {
+		return panima::TimeFrame{};
+	}>(lua.GetState());
 
 	auto cdChannel = luabind::class_<panima::Channel>("Channel");
 	cdChannel.def(luabind::tostring(luabind::self));
+	cdChannel.def("GetTimeFrame",static_cast<panima::TimeFrame&(panima::Channel::*)()>(&panima::Channel::GetTimeFrame));
+	cdChannel.def("SetTimeFrame",&panima::Channel::SetTimeFrame);
 	cdChannel.def("GetValueType",&panima::Channel::GetValueType);
 	cdChannel.def("SetValueType",&panima::Channel::SetValueType);
 	cdChannel.def("GetInterpolation",+[](lua_State *l,panima::Channel &channel) -> panima::ChannelInterpolation {
@@ -192,6 +207,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdPlayer.def("GetCurrentTime",&panima::Player::GetCurrentTime);
 	cdPlayer.def("GetPlaybackRate",&panima::Player::GetPlaybackRate);
 	cdPlayer.def("SetPlaybackRate",&panima::Player::SetPlaybackRate);
+	cdPlayer.def("SetAnimationDirty",&panima::Player::SetAnimationDirty);
 	cdPlayer.def("SetCurrentTime",&panima::Player::SetCurrentTime);
 	cdPlayer.def("SetCurrentTime",&panima::Player::SetCurrentTime,luabind::default_parameter_policy<3,false>{});
 	cdPlayer.def("Reset",&panima::Player::Reset);

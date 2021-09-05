@@ -406,26 +406,6 @@ static void register_gui(Lua::Interface &lua)
 	guiMod[wiScrollBarClassDef];
 }
 
-namespace luabind
-{
-	namespace detail
-	{
-		static prosper::Window *get_window(lua_State *l) {return &c_engine->GetWindow();}
-		template<typename T>
-			T get_window(lua_State *l)
-		{
-			if constexpr(std::is_pointer_v<T>)
-				return static_cast<T>(get_window(l));
-			else
-				return static_cast<T>(*get_window(l));
-		}
-	};
-	template <typename T> requires(is_type_or_derived<T,prosper::Window>)
-	struct default_converter<T>
-		: parameter_emplacement_converter<T,detail::get_window<T>>
-	{};
-};
-
 static std::vector<GLFW::Key> get_mapped_keys(const std::string &cvarName,uint32_t maxKeys=std::numeric_limits<uint32_t>::max())
 {
 	std::vector<GLFW::Key> mappedKeys;
@@ -439,17 +419,26 @@ void ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua,bool bGUI)
 
 	auto inputMod = luabind::module(lua.GetState(),"input");
 	inputMod[
-		luabind::def("get_mouse_button_state",+[](prosper::Window &window,GLFW::MouseButton mouseButton) -> GLFW::KeyState {
-			return window->GetMouseButtonState(mouseButton);
+		luabind::def("get_mouse_button_state",+[](GLFW::MouseButton mouseButton) -> GLFW::KeyState {
+			return c_engine->GetWindow()->GetMouseButtonState(mouseButton);
 		}),
-		luabind::def("get_key_state",+[](prosper::Window &window,GLFW::Key key) -> GLFW::KeyState {
-			return window->GetKeyState(key);
+		luabind::def("get_key_state",+[](GLFW::Key key) -> GLFW::KeyState {
+			return c_engine->GetWindow()->GetKeyState(key);
 		}),
-		luabind::def("get_cursor_pos",+[](prosper::Window &window) -> Vector2 {
-			return window->GetCursorPos();
+		luabind::def("get_cursor_pos",+[]() -> Vector2 {
+			return c_engine->GetWindow()->GetCursorPos();
 		}),
-		luabind::def("set_cursor_pos",+[](prosper::Window &window,const Vector2 &pos) {
-			window->SetCursorPos(pos);
+		luabind::def("set_cursor_pos",+[](const Vector2 &pos) {
+			c_engine->GetWindow()->SetCursorPos(pos);
+		}),
+		luabind::def("center_cursor",+[]() {
+			auto *window = WGUI::GetInstance().FindFocusedWindow();
+			if(!window)
+				window = &c_engine->GetWindow();
+			if(!window || !window->IsValid())
+				return;
+			auto windowSize = (*window)->GetSize();
+			(*window)->SetCursorPos(windowSize /2);
 		}),
 		luabind::def("get_controller_count",+[]() -> uint32_t {
 			return GLFW::get_joysticks().size();

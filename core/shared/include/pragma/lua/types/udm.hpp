@@ -21,16 +21,16 @@ namespace luabind
 {
 	// Additional types for overload resolution
 	namespace adl {
-		template <typename T>
-		struct udm_generic : object
+		template <typename T,bool ENABLE_NUMERIC,bool ENABLE_GENERIC,bool ENABLE_NON_TRIVIAL>
+		struct udm_type : object
 		{
-			udm_generic(from_stack const& stack_reference)
+			udm_type(from_stack const& stack_reference)
 				: object(stack_reference)
 			{}
-			udm_generic(const object &o)
+			udm_type(const object &o)
 				: object(o)
 			{}
-			udm_generic(lua_State *l,const T &t)
+			udm_type(lua_State *l,const T &t)
 				: object(l,t)
 			{}
 			using value_type = T;
@@ -39,45 +39,109 @@ namespace luabind
 
 	namespace detail
 	{
-		template<typename T>
-		struct pseudo_traits<adl::udm_generic<T>>
+		template<typename T,bool ENABLE_NUMERIC,bool ENABLE_GENERIC,bool ENABLE_NON_TRIVIAL>
+		struct pseudo_traits<adl::udm_type<T,ENABLE_NUMERIC,ENABLE_GENERIC,ENABLE_NON_TRIVIAL>>
 		{
 			enum { is_variadic = false };
 			using value_type = T;
 		};
 	};
 
-	using adl::udm_generic;
+	using adl::udm_type;
 
-	template <typename T>
-	struct lua_proxy_traits<adl::udm_generic<T> >
-		: lua_proxy_traits<object>
+	template <bool ENABLE_NUMERIC,bool ENABLE_GENERIC,bool ENABLE_NON_TRIVIAL>
+		static bool check_udm(lua_State* L, int idx)
 	{
-		static bool check(lua_State* L, int idx)
-		{
-			if(!lua_proxy_traits<object>::check(L, idx))
-				return false;
-			//if(lua_isboolean(L,idx) || lua_isnumber(L,idx))
-			//	return true;
-			for(auto type : udm::GENERIC_TYPES)
+		if(!lua_proxy_traits<object>::check(L, idx))
+			return false;
+		auto fCheck = [L,idx]<bool LENABLE_NUMERIC,bool LENABLE_GENERIC,bool LENABLE_NON_TRIVIAL>(const auto &types) {
+			for(auto type : types)
 			{
-				auto r = udm::visit<false,true,false>(type,[](auto tag) {
+				auto r = udm::visit<LENABLE_NUMERIC,LENABLE_GENERIC,LENABLE_NON_TRIVIAL>(type,[L,idx](auto tag) {
 					using T = decltype(tag)::type;
-					if(luabind::object_cast_nothrow<T*>(luabind::from_stack{L,idx},static_cast<T*>(nullptr)) != nullptr)
-						return true;
-					return false;
+					return Lua::IsType<T>(L,idx);
 				});
 				if(r)
 					return true;
 			}
 			return false;
+		};
+		if constexpr(ENABLE_NUMERIC)
+		{
+			if(fCheck.template operator()<true,false,false>(udm::NUMERIC_TYPES))
+				return true;
+		}
+		if constexpr(ENABLE_GENERIC)
+		{
+			if(fCheck.template operator()<false,true,false>(udm::GENERIC_TYPES))
+				return true;
+		}
+		if constexpr(ENABLE_NON_TRIVIAL)
+		{
+			if(fCheck.template operator()<false,false,true>(udm::NON_TRIVIAL_TYPES))
+				return true;
+		}
+		return false;
+	}
+
+	template <typename T>
+	struct lua_proxy_traits<adl::udm_type<T,true,false,false> >
+		: lua_proxy_traits<object>
+	{
+		static bool check(lua_State* L, int idx)
+		{
+			return check_udm<true,false,false>(L,idx);
+		}
+	};
+
+	template <typename T>
+	struct lua_proxy_traits<adl::udm_type<T,false,true,false> >
+		: lua_proxy_traits<object>
+	{
+		static bool check(lua_State* L, int idx)
+		{
+			return check_udm<false,true,false>(L,idx);
+		}
+	};
+
+	template <typename T>
+	struct lua_proxy_traits<adl::udm_type<T,true,true,false> >
+		: lua_proxy_traits<object>
+	{
+		static bool check(lua_State* L, int idx)
+		{
+			return check_udm<true,true,false>(L,idx);
+		}
+	};
+
+	template <typename T>
+	struct lua_proxy_traits<adl::udm_type<T,false,false,true> >
+		: lua_proxy_traits<object>
+	{
+		static bool check(lua_State* L, int idx)
+		{
+			return check_udm<false,false,true>(L,idx);
+		}
+	};
+
+	template <typename T>
+	struct lua_proxy_traits<adl::udm_type<T,true,true,true> >
+		: lua_proxy_traits<object>
+	{
+		static bool check(lua_State* L, int idx)
+		{
+			return check_udm<true,true,true>(L,idx);
 		}
 	};
 };
 
 namespace Lua
 {
-	using udm_generic = luabind::udm_generic<luabind::object>;
+	using udm_numeric = luabind::udm_type<luabind::object,true,false,false>;
+	using udm_generic = luabind::udm_type<luabind::object,false,true,false>;
+	using udm_non_trivial = luabind::udm_type<luabind::object,false,false,true>;
+	using udm_ng = luabind::udm_type<luabind::object,true,true,false>;
+	using udm_type = luabind::udm_type<luabind::object,true,true,true>;
 };
 
 #endif

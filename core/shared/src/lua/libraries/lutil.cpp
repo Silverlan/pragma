@@ -106,6 +106,9 @@ void Lua::util::register_shared_generic(luabind::module_ &mod)
 		luabind::def("get_pretty_duration",static_cast<std::string(*)(lua_State*,uint32_t,uint32_t)>(Lua::util::get_pretty_duration)),
 		luabind::def("get_pretty_duration",static_cast<std::string(*)(lua_State*,uint32_t)>(Lua::util::get_pretty_duration)),
 		luabind::def("get_pretty_time",Lua::util::get_pretty_time),
+		luabind::def("get_object_hash",+[](Lua::userData o) {
+			return std::hash<void*>{}(lua_touserdata(o.interpreter(),1));
+		}),
 
 		luabind::def("fade_property",static_cast<luabind::object(*)(lua_State*,LColorProperty&,const Color&,float)>(Lua::util::fade_property)),
 		luabind::def("fade_property",static_cast<luabind::object(*)(lua_State*,LVector2iProperty&,const Vector2i&,float)>(Lua::util::fade_property)),

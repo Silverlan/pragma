@@ -103,6 +103,25 @@ static constexpr bool is_type_compatible(udm::Type channelType,udm::Type memberT
 	return get_component_count(channelType) <= get_component_count(memberType);
 }
 
+static constexpr auto g_debugPrint = false;
+
+template<typename T>
+	static std::string to_string(const T &value)
+	{
+		if constexpr(std::is_same_v<T,Quat>)
+			return uquat::to_string(value);
+		else if constexpr(umath::is_matrix_type<T>)
+			return umat::to_string(value);
+		else if constexpr(umath::is_vector_type<T>)
+			return uvec::to_string(value);
+		else
+		{
+			std::stringstream ss;
+			ss<<value;
+			return ss.str();
+		}
+	}
+
 template<typename TChannel,typename TMember,auto TMapArray> requires(is_animatable_type_v<TChannel> && is_animatable_type_v<TMember> && is_type_compatible(udm::type_to_enum<TChannel>(),udm::type_to_enum<TMember>()))
 static panima::ChannelValueSubmitter get_member_channel_submitter(pragma::BaseEntityComponent &component,uint32_t memberIdx,void(*setter)(const pragma::ComponentMemberInfo&,pragma::BaseEntityComponent&,const void*,void*),void *userData=nullptr)
 {
@@ -113,6 +132,12 @@ static panima::ChannelValueSubmitter get_member_channel_submitter(pragma::BaseEn
 		{
 			auto value = channel.GetInterpolatedValue<TChannel>(t,inOutPivotTimeIndex,memberInfo->interpolationFunction);
 			channel.ApplyValueExpression<TChannel>(t,inOutPivotTimeIndex,value);
+			if constexpr(g_debugPrint)
+			{
+				TMember curVal;
+				memberInfo->getterFunction(*memberInfo,component,&curVal);
+				Con::cout<<"Changing channel value '"<<channel.targetPath.GetString()<<" from "<<to_string(curVal)<<" to "<<to_string(value)<<" (t: "<<t<<")..."<<Con::endl;
+			}
 			setter(*memberInfo,component,&value,userData);
 		}
 		else
@@ -144,6 +169,12 @@ static panima::ChannelValueSubmitter get_member_channel_submitter(pragma::BaseEn
 					if constexpr(numChannelComponents > 3)
 						curVal[TMapArray[3]] = value[3];
 				}
+			}
+			if constexpr(g_debugPrint)
+			{
+				TMember curVal;
+				memberInfo->getterFunction(*memberInfo,component,&curVal);
+				Con::cout<<"Changing "<<TMapArray.size()<<" components of channel value '"<<channel.targetPath.GetString()<<" from "<<to_string(curVal)<<" to "<<to_string(value)<<" (t: "<<t<<")..."<<Con::endl;
 			}
 			setter(*memberInfo,component,&curVal,userData);
 		}

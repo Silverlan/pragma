@@ -40,6 +40,7 @@
 #include "pragma/util/util_variable_type.hpp"
 #include <sharedutils/netpacket.hpp>
 #include <sharedutils/util_file.h>
+#include <sharedutils/scope_guard.h>
 #include <luainterface.hpp>
 #include <se_scene.hpp>
 #include <pragma/math/intersection.h>
@@ -47,7 +48,7 @@
 #include <util_zip.h>
 
 extern DLLNETWORK Engine *engine;
-
+#pragma optimize("",off)
 static auto s_bIgnoreIncludeCache = false;
 void Lua::set_ignore_include_cache(bool b) {s_bIgnoreIncludeCache = b;}
 
@@ -84,9 +85,9 @@ void Lua::util::register_shared_generic(luabind::module_ &mod)
 		luabind::def("is_valid",static_cast<bool(*)(lua_State*,const luabind::object&)>(Lua::util::is_valid)),
 		luabind::def("remove",static_cast<void(*)(lua_State*,const luabind::object&)>(remove)),
 		luabind::def("remove",static_cast<void(*)(lua_State*,const luabind::object&,bool)>(remove)),
-		luabind::def("remove",static_cast<void(*)()>([]() {})),
-		luabind::def("remove",static_cast<void(*)(const luabind::detail::nil_type&,bool)>([](const luabind::detail::nil_type&,bool) {})),
-		luabind::def("remove",static_cast<void(*)(const luabind::detail::nil_type&)>([](const luabind::detail::nil_type&) {})),
+		luabind::def("remove",+[]() {}),
+		luabind::def("remove",+[](const luabind::detail::nil_type&,bool) {}),
+		luabind::def("remove",+[](const luabind::detail::nil_type&) {}),
 		luabind::def("register_class",static_cast<luabind::object(*)(lua_State*,const std::string&,const luabind::object&,const luabind::object&,const luabind::object&,const luabind::object&,const luabind::object&)>(Lua::util::register_class)),
 		luabind::def("register_class",static_cast<luabind::object(*)(lua_State*,const std::string&,const luabind::object&,const luabind::object&,const luabind::object&,const luabind::object&)>(Lua::util::register_class)),
 		luabind::def("register_class",static_cast<luabind::object(*)(lua_State*,const std::string&,const luabind::object&,const luabind::object&,const luabind::object&)>(Lua::util::register_class)),
@@ -169,20 +170,40 @@ void Lua::util::register_library(lua_State *l)
 		luabind::def("open_url_in_browser",Lua::util::open_url_in_browser),
 		luabind::def("get_addon_path",static_cast<std::string(*)(lua_State*)>(Lua::util::get_addon_path)),
 		luabind::def("get_string_hash",Lua::util::get_string_hash),
-		luabind::def("generate_uuid_v4",static_cast<std::string(*)()>([]() -> std::string {
+		luabind::def("generate_uuid_v4",+[]() -> std::string {
 			return ::util::uuid_to_string(::util::generate_uuid_v4());
-		}))
+		})
 	];
 }
 
-luabind::object Lua::global::include(lua_State *l,const std::string &f) {return include(l,f,s_bIgnoreIncludeCache);}
-luabind::object Lua::global::include(lua_State *l,const std::string &f,bool ignoreCache) {return include(l,f,ignoreCache,false);}
+luabind::object Lua::global::include(lua_State *l,const std::string &f)
+{
+	return include(l,f,s_bIgnoreIncludeCache);
+}
+luabind::object Lua::global::include(lua_State *l,const std::string &f,std::vector<std::string> *optCache) {return include(l,f,optCache,false);}
+static std::vector<std::string> g_globalTmpCache;
+static uint32_t g_globalTmpCacheRecursiveCount = 0;
+luabind::object Lua::global::include(lua_State *l,const std::string &f,bool ignoreGlobalCache)
+{
+	if(ignoreGlobalCache)
+	{
+		++g_globalTmpCacheRecursiveCount;
+		::util::ScopeGuard sg {[]() {
+			if(--g_globalTmpCacheRecursiveCount == 0)
+				g_globalTmpCache.clear();
+		}};
+		return include(l,f,&g_globalTmpCache);
+	}
+	return include(l,f,nullptr);
+}
 
-luabind::object Lua::global::include(lua_State *l,const std::string &f,bool ignoreCache,bool reload)
+luabind::object Lua::global::include(lua_State *l,const std::string &f,std::vector<std::string> *optCache,bool reload)
 {
 	auto *lInterface = engine->GetLuaInterface(l);
-	std::vector<std::string> *includeCache = (lInterface != nullptr) ? &lInterface->GetIncludeCache() : nullptr;
-	auto fShouldInclude = [includeCache,ignoreCache,reload](std::string fpath) -> bool {
+	std::vector<std::string> *includeCache = optCache;
+	if(!includeCache)
+		includeCache = (lInterface != nullptr) ? &lInterface->GetIncludeCache() : nullptr;
+	auto fShouldInclude = [includeCache,reload](std::string fpath) -> bool {
 		if(includeCache == nullptr)
 			return true;
 		if(fpath.empty() == false)
@@ -197,7 +218,7 @@ luabind::object Lua::global::include(lua_State *l,const std::string &f,bool igno
 			return ustring::compare(fpath,other,false);
 		});
 		if(!reload && it != includeCache->end())
-			return ignoreCache;
+			return false;
 		if(it == includeCache->end())
 			includeCache->push_back(fpath);
 		return true;
@@ -640,7 +661,7 @@ static luabind::object register_class(lua_State *l,const std::string &pclassName
 		game->GetLuaClassManager().RegisterClass(fullClassName,oClass,regFc);
 
 		// Init default constructor and print methods; They can still be overwritten by the Lua script
-		oClass["__init"] = luabind::make_function(l,static_cast<void(*)(lua_State*,const luabind::object&)>([](lua_State *l,const luabind::object &o) {
+		oClass["__init"] = luabind::make_function(l,+[](lua_State *l,const luabind::object &o) {
 			auto *crep = Lua::get_crep(o);
 			if(!crep)
 				return;
@@ -656,10 +677,10 @@ static luabind::object register_class(lua_State *l,const std::string &pclassName
 				oBase["__init"](o);
 				Lua::Pop(l,1);
 			}
-		}));
-		oClass["__tostring"] = luabind::make_function(l,static_cast<std::string(*)(lua_State*,const luabind::object&)>([](lua_State *l,const luabind::object &o) -> std::string {
+		});
+		oClass["__tostring"] = luabind::make_function(l,+[](lua_State *l,const luabind::object &o) -> std::string {
 			return luabind::get_class_info(luabind::from_stack(l,1)).name;
-		}));
+		});
 
 		fRegisterBaseClasses();
 		Lua::Pop(l,1); /* 0 */
@@ -1264,3 +1285,4 @@ std::string Lua::util::get_addon_path(lua_State *l)
 	path += '/';
 	return path;
 }
+#pragma optimize("",on)

@@ -63,36 +63,71 @@ void Lua::ents::register_library(lua_State *l)
 		luabind::def("create_trigger",static_cast<type<BaseEntity>(*)(lua_State*,const Vector3&,pragma::physics::IShape&)>(create_trigger)),
 		luabind::def("create_trigger",static_cast<type<BaseEntity>(*)(lua_State*,const Vector3&,const Vector3&,const Vector3&,const EulerAngles&)>(create_trigger)),
 		luabind::def("create_trigger",static_cast<type<BaseEntity>(*)(lua_State*,const Vector3&,float)>(create_trigger)),
-		luabind::def("create_prop",static_cast<type<BaseEntity>(*)(lua_State*,const std::string&,const Vector3*,const EulerAngles*)>(
-			[](lua_State *l,const std::string &mdl,const Vector3 *origin,const EulerAngles *angles) -> type<BaseEntity> {
-				return create_prop(l,mdl,origin,angles,false);
-			}
-		)),
-		luabind::def("create_prop",static_cast<type<BaseEntity>(*)(lua_State*,const std::string&,const Vector3*)>(
-			[](lua_State *l,const std::string &mdl,const Vector3 *origin) -> type<BaseEntity> {
-				return create_prop(l,mdl,origin,nullptr,false);
-			}
-		)),
-		luabind::def("create_prop",static_cast<type<BaseEntity>(*)(lua_State*,const std::string&)>(
-			[](lua_State *l,const std::string &mdl) -> type<BaseEntity> {
-				return create_prop(l,mdl,nullptr,nullptr,false);
-			}
-		)),
+		luabind::def("create_prop",+[](lua_State *l,const std::string &mdl,const Vector3 *origin,const EulerAngles *angles) -> type<BaseEntity> {
+			return create_prop(l,mdl,origin,angles,false);
+		}),
+		luabind::def("create_prop",+[](lua_State *l,const std::string &mdl,const Vector3 *origin) -> type<BaseEntity> {
+			return create_prop(l,mdl,origin,nullptr,false);
+		}),
+		luabind::def("create_prop",+[](lua_State *l,const std::string &mdl) -> type<BaseEntity> {
+			return create_prop(l,mdl,nullptr,nullptr,false);
+		}),
 		luabind::def("register",static_cast<void(*)(lua_State*,const std::string&,const Lua::classObject&)>(Lua::ents::register_class)),
 		luabind::def("register",static_cast<void(*)(lua_State*,const std::string&,const luabind::tableT<luabind::variant<std::string,pragma::ComponentId>>&,LuaEntityType)>(Lua::ents::register_class)),
-		luabind::def("register",static_cast<void(*)(lua_State*,const std::string&,const luabind::tableT<luabind::variant<std::string,pragma::ComponentId>>&)>(
-			[](lua_State *l,const std::string &className,const luabind::tableT<luabind::variant<std::string,pragma::ComponentId>> &tComponents) {
-				register_class(l,className,tComponents,LuaEntityType::Default);
-			}
-		)),
+		luabind::def("register",+[](lua_State *l,const std::string &className,const luabind::tableT<luabind::variant<std::string,pragma::ComponentId>> &tComponents) {
+			register_class(l,className,tComponents,LuaEntityType::Default);
+		}),
 		luabind::def("get_closest",get_closest),
 		luabind::def("get_farthest",get_farthest),
 		luabind::def("get_sorted_by_distance",get_sorted_by_distance),
 		luabind::def("get_random",get_random),
 		luabind::def("get_component_name",get_component_name),
 		luabind::def("get_component_id",get_component_id),
-		luabind::def("register_component_net_event",register_component_net_event)
+		luabind::def("register_component_net_event",register_component_net_event),
+		luabind::def("get_registered_component_types",+[](lua_State *l,Game &game) -> Lua::tb<pragma::ComponentId> {
+			auto &manager = game.GetEntityComponentManager();
+			auto t = luabind::newtable(l);
+			for(uint32_t idx = 1;auto &componentInfo : manager.GetRegisteredComponentTypes())
+				t[idx++] = componentInfo.id;
+			return t;
+		}),
+		luabind::def("get_component_info",+[](lua_State *l,Game &game,pragma::ComponentId componentId) {
+			auto &manager = game.GetEntityComponentManager();
+			return manager.GetComponentInfo(componentId);
+		}),
+		luabind::def("find_component_id",+[](lua_State *l,Game &game,const std::string &name) -> std::optional<pragma::ComponentId> {
+			auto &manager = game.GetEntityComponentManager();
+			pragma::ComponentId componentId;
+			if(manager.GetComponentTypeId(name,componentId) == false)
+				return {};
+			return componentId;
+		})
 	];
+
+	auto componentInfoDef = luabind::class_<pragma::ComponentInfo>("ComponentInfo");
+	componentInfoDef.def_readonly("name",&pragma::ComponentInfo::name);
+	componentInfoDef.def_readonly("id",&pragma::ComponentInfo::id);
+	componentInfoDef.def_readonly("flags",&pragma::ComponentInfo::flags);
+	componentInfoDef.def("GetMemberCount",+[](const pragma::ComponentInfo &componentInfo) {return componentInfo.members.size();});
+	componentInfoDef.def("FindMemberIndex",+[](const pragma::ComponentInfo &componentInfo,const std::string &name) -> std::optional<pragma::ComponentMemberIndex> {
+		auto it = componentInfo.memberNameToIndex.find(name);
+		if(it == componentInfo.memberNameToIndex.end())
+			return {};
+		return it->second;
+	});
+	componentInfoDef.def("GetMemberInfo",+[](const pragma::ComponentInfo &componentInfo,uint32_t memberIdx) -> const pragma::ComponentMemberInfo* {
+		if(memberIdx >= componentInfo.members.size())
+			return nullptr;
+		return &componentInfo.members[memberIdx];
+	});
+	
+	auto memberInfoDef = luabind::class_<pragma::ComponentMemberInfo>("MemberInfo");
+	memberInfoDef.def_readonly("type",&pragma::ComponentMemberInfo::type);
+	memberInfoDef.def("GetName",&pragma::ComponentMemberInfo::GetName);
+	memberInfoDef.def("GetNameHash",&pragma::ComponentMemberInfo::GetNameHash);
+	componentInfoDef.scope[memberInfoDef];
+
+	entsMod[componentInfoDef];
 }
 
 Lua::type<BaseEntity> Lua::ents::create(lua_State *l,const std::string &classname)

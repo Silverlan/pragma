@@ -389,9 +389,9 @@ void Lua::game::register_shared_functions(luabind::module_ &modGame)
 		luabind::def("call_callbacks",Lua::game::call_callbacks),
 		luabind::def("clear_callbacks",Lua::game::clear_callbacks),
 		luabind::def("register_ammo_type",Lua::game::register_ammo_type),
-		luabind::def("register_ammo_type",static_cast<bool(*)(lua_State*,const std::string&,int32_t,float)>([](lua_State *l,const std::string &name,int32_t damage,float force) {return Lua::game::register_ammo_type(l,name,damage,force);})),
-		luabind::def("register_ammo_type",static_cast<bool(*)(lua_State*,const std::string&,int32_t)>([](lua_State *l,const std::string &name,int32_t damage) {return Lua::game::register_ammo_type(l,name,damage);})),
-		luabind::def("register_ammo_type",static_cast<bool(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &name) {return Lua::game::register_ammo_type(l,name);})),
+		luabind::def("register_ammo_type",+[](lua_State *l,const std::string &name,int32_t damage,float force) {return Lua::game::register_ammo_type(l,name,damage,force);}),
+		luabind::def("register_ammo_type",+[](lua_State *l,const std::string &name,int32_t damage) {return Lua::game::register_ammo_type(l,name,damage);}),
+		luabind::def("register_ammo_type",+[](lua_State *l,const std::string &name) {return Lua::game::register_ammo_type(l,name);}),
 		luabind::def("get_ammo_type_id",Lua::game::get_ammo_type_id),
 		luabind::def("get_ammo_type_name",Lua::game::get_ammo_type_name),
 		luabind::def("get_game_mode",Lua::game::get_game_mode),
@@ -402,10 +402,14 @@ void Lua::game::register_shared_functions(luabind::module_ &modGame)
 		// luabind::def("raycast",Lua::game::raycast),
 		luabind::def("get_nav_mesh",Lua::game::get_nav_mesh),
 		luabind::def("load_nav_mesh",Lua::game::load_nav_mesh),
-		luabind::def("load_nav_mesh",static_cast<bool(*)(lua_State*)>([](lua_State *l) {return Lua::game::load_nav_mesh(l);})),
+		luabind::def("load_nav_mesh",+[](lua_State *l) {return Lua::game::load_nav_mesh(l);}),
 		luabind::def("is_map_loaded",Lua::game::is_map_loaded),
 		luabind::def("get_map_name",Lua::game::get_map_name),
-		luabind::def("get_game_state_flags",Lua::game::get_game_state_flags)
+		luabind::def("get_game_state_flags",Lua::game::get_game_state_flags),
+		luabind::def("update_animations",+[](Game &game,float dt) {
+			game.UpdateEntityAnimations(dt);
+			game.UpdateEntityAnimationDrivers(dt);
+		})
 	];
 
 	auto classDefDescriptor = luabind::class_<pragma::ValueDriverDescriptor>("ValueDriverDescriptor");

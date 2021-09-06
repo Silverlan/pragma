@@ -85,6 +85,9 @@ void RegisterLuaEntityComponents2(lua_State *l,luabind::module_ &entsMod)
 	auto defSPointTarget = luabind::class_<pragma::SPointTargetComponent,pragma::BasePointTargetComponent>("PointTargetComponent");
 	entsMod[defSPointTarget];
 
+	auto defSProp = luabind::class_<pragma::PropComponent,pragma::BasePropComponent>("PropComponent");
+	entsMod[defSProp];
+
 	auto defSPropDynamic = luabind::class_<pragma::SPropDynamicComponent,pragma::BasePropDynamicComponent>("PropDynamicComponent");
 	entsMod[defSPropDynamic];
 

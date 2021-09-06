@@ -15,6 +15,8 @@
 #include <pragma/lua/policies/default_parameter_policy.hpp>
 #include <pragma/lua/policies/shared_from_this_policy.hpp>
 #include <pragma/lua/converters/string_view_converter_t.hpp>
+#include <pragma/lua/converters/optional_converter_t.hpp>
+#include <pragma/lua/converters/vector_converter_t.hpp>
 #include <luainterface.hpp>
 #include <panima/pose.hpp>
 #include <panima/skeleton.hpp>
@@ -30,6 +32,7 @@ namespace Lua::animation
 {
 	void register_library(Lua::Interface &lua);
 };
+
 void Lua::animation::register_library(Lua::Interface &lua)
 {
 	auto animMod = luabind::module(lua.GetState(),"animation");
@@ -61,6 +64,15 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	}>(lua.GetState());
 
 	auto cdChannel = luabind::class_<panima::Channel>("Channel");
+
+	auto cdPath = luabind::class_<panima::ChannelPath>("Path");
+	cdPath.def(luabind::constructor<>());
+	cdPath.def(luabind::constructor<const std::string&>());
+	cdPath.def_readwrite("path",&panima::ChannelPath::path);
+	cdPath.def_readwrite("components",&panima::ChannelPath::components);
+	cdPath.def("ToUri",&panima::ChannelPath::ToUri);
+	cdChannel.scope[cdPath];
+
 	cdChannel.def(luabind::tostring(luabind::self));
 	cdChannel.def("GetTimeFrame",static_cast<panima::TimeFrame&(panima::Channel::*)()>(&panima::Channel::GetTimeFrame));
 	cdChannel.def("SetTimeFrame",&panima::Channel::SetTimeFrame);

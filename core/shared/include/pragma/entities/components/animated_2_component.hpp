@@ -48,6 +48,7 @@ namespace pragma
 
 		virtual void Initialize() override;
 		void PlayAnimation(panima::AnimationManager &manager,panima::Animation &anim);
+		void ReloadAnimation(panima::AnimationManager &manager);
 
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void Save(udm::LinkedPropertyWrapperArg udm) override;

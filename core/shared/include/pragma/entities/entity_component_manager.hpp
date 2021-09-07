@@ -139,7 +139,9 @@ namespace pragma
 		// Lua-based components! It also has no effect if the
 		// component has already been created at least one
 		// in the past.
-		MakeNetworked = Networked<<1u
+		MakeNetworked = Networked<<1u,
+
+		LuaBased = MakeNetworked<<1u
 	};
 	class DLLNETWORK BaseNetComponent
 	{

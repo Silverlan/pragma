@@ -52,6 +52,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	animMod[cdPose];
 	
 	auto cdTimeFrame = luabind::class_<panima::TimeFrame>("TimeFrame");
+	cdTimeFrame.def(luabind::tostring(luabind::self));
 	cdTimeFrame.def_readwrite("startOffset",&panima::TimeFrame::startOffset);
 	cdTimeFrame.def_readwrite("scale",&panima::TimeFrame::scale);
 	cdTimeFrame.def_readwrite("duration",&panima::TimeFrame::duration);
@@ -68,12 +69,15 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	auto cdPath = luabind::class_<panima::ChannelPath>("Path");
 	cdPath.def(luabind::constructor<>());
 	cdPath.def(luabind::constructor<const std::string&>());
+	cdPath.def(luabind::tostring(luabind::self));
 	cdPath.def_readwrite("path",&panima::ChannelPath::path);
 	cdPath.def_readwrite("components",&panima::ChannelPath::components);
 	cdPath.def("ToUri",&panima::ChannelPath::ToUri);
+	cdPath.def("ToUri",&panima::ChannelPath::ToUri,luabind::default_parameter_policy<2,true>{});
 	cdChannel.scope[cdPath];
 
 	cdChannel.def(luabind::tostring(luabind::self));
+	cdChannel.def(luabind::const_self ==luabind::const_self);
 	cdChannel.def("GetTimeFrame",static_cast<panima::TimeFrame&(panima::Channel::*)()>(&panima::Channel::GetTimeFrame));
 	cdChannel.def("SetTimeFrame",&panima::Channel::SetTimeFrame);
 	cdChannel.def("GetValueType",&panima::Channel::GetValueType);
@@ -194,6 +198,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 
 	auto cdSet = luabind::class_<panima::AnimationSet>("Set");
 	cdSet.def(luabind::tostring(luabind::self));
+	cdSet.def(luabind::const_self ==luabind::const_self);
 	cdSet.scope[luabind::def("create",&panima::AnimationSet::Create)];
 	cdSet.def("Clear",&panima::AnimationSet::Clear);
 	cdSet.def("AddAnimation",&panima::AnimationSet::AddAnimation);
@@ -210,6 +215,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 
 	auto cdPlayer = luabind::class_<panima::Player>("Player");
 	cdPlayer.def(luabind::tostring(luabind::self));
+	cdPlayer.def(luabind::const_self ==luabind::const_self);
 	cdPlayer.scope[luabind::def("create",static_cast<std::shared_ptr<panima::Player>(*)()>(&panima::Player::Create))];
 	cdPlayer.def("Advance",&panima::Player::Advance);
 	cdPlayer.def("Advance",&panima::Player::Advance,luabind::default_parameter_policy<3,false>{});
@@ -234,6 +240,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 
 	auto cdManager = luabind::class_<panima::AnimationManager>("Manager");
 	cdManager.def(luabind::tostring(luabind::self));
+	cdManager.def(luabind::const_self ==luabind::const_self);
 	cdManager.scope[luabind::def("create",static_cast<std::shared_ptr<panima::AnimationManager>(*)()>(&panima::AnimationManager::Create))];
 	cdManager.def("GetPreviousSlice",+[](lua_State *l,panima::AnimationManager &manager) {
 		return &manager.GetPreviousSlice();
@@ -268,6 +275,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 
 	auto cdAnim2 = luabind::class_<panima::Animation>("Animation2");
 	cdAnim2.def(luabind::tostring(luabind::self));
+	cdAnim2.def(luabind::const_self ==luabind::const_self);
 	cdAnim2.scope[luabind::def("create",+[](lua_State *l) {
 		return std::make_shared<panima::Animation>();
 	})];

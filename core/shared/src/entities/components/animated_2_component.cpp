@@ -422,6 +422,16 @@ void Animated2Component::PlayAnimation(panima::AnimationManager &manager,panima:
 	manager->SetAnimation(anim);
 	InitializeAnimationChannelValueSubmitters(manager);
 }
+void Animated2Component::ReloadAnimation(panima::AnimationManager &manager)
+{
+	auto *anim = manager->GetAnimation();
+	if(!anim)
+		return;
+	auto t = manager->GetCurrentTime();
+	PlayAnimation(manager,*const_cast<panima::Animation*>(anim));
+	manager->SetCurrentTime(t);
+
+}
 void Animated2Component::ClearAnimationManagers()
 {
 	m_animationManagers.clear();

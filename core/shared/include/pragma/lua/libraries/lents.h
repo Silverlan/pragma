@@ -89,6 +89,7 @@ namespace Lua
 			auto componentFlags = pragma::ComponentFlags::None;
 			if(Lua::IsSet(l,3))
 				componentFlags = static_cast<pragma::ComponentFlags>(Lua::CheckInt(l,3));
+			componentFlags |= pragma::ComponentFlags::LuaBased;
 
 			// Check if there's an __init-method defined for this class.
 			// If there isn't, generate one!

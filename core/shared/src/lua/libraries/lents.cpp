@@ -120,6 +120,33 @@ void Lua::ents::register_library(lua_State *l)
 			return nullptr;
 		return &componentInfo.members[memberIdx];
 	});
+	componentInfoDef.def("GetMemberInfo",+[](Game &game,const pragma::ComponentInfo &componentInfo,const std::string &name) -> const pragma::ComponentMemberInfo* {
+		auto lname = name;
+		ustring::to_lower(lname);
+		if(umath::is_flag_set(componentInfo.flags,pragma::ComponentFlags::LuaBased))
+		{
+			auto &manager = game.GetLuaEntityManager();
+			auto *o = manager.GetClassObject(componentInfo.name);
+			if(!o)
+				return nullptr;
+			auto *infos = pragma::BaseLuaBaseEntityComponent::GetMemberInfos(*o);
+			if(!infos)
+				return nullptr;
+			auto it = std::find_if(infos->begin(),infos->end(),[&lname](const pragma::BaseLuaBaseEntityComponent::MemberInfo &memberInfo) {
+				return memberInfo.name == lname;
+			});
+			if(it == infos->end() || !it->componentMemberInfo.has_value())
+				return nullptr;
+			return &*it->componentMemberInfo;
+		}
+		auto it = componentInfo.memberNameToIndex.find(lname);
+		if(it == componentInfo.memberNameToIndex.end())
+			return nullptr;
+		auto memberIdx = it->second;
+		if(memberIdx >= componentInfo.members.size())
+			return nullptr;
+		return &componentInfo.members[memberIdx];
+	});
 	
 	auto memberInfoDef = luabind::class_<pragma::ComponentMemberInfo>("MemberInfo");
 	memberInfoDef.def_readonly("type",&pragma::ComponentMemberInfo::type);

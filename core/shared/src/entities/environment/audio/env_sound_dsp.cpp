@@ -37,13 +37,13 @@ void BaseEnvSoundDspComponent::Initialize()
 
 bool BaseEnvSoundDspComponent::OnSetKeyValue(const std::string &key,const std::string &val)
 {
-	if(ustring::compare(key,"dsp",false))
+	if(ustring::compare<std::string>(key,"dsp",false))
 		m_kvDsp = val;
-	else if(ustring::compare(key,"inner_radius",false))
+	else if(ustring::compare<std::string>(key,"inner_radius",false))
 		m_kvInnerRadius = util::to_float(val);
-	else if(ustring::compare(key,"outer_radius",false))
+	else if(ustring::compare<std::string>(key,"outer_radius",false))
 		m_kvOuterRadius = util::to_float(val);
-	else if(ustring::compare(key,"intensity",false))
+	else if(ustring::compare<std::string>(key,"intensity",false))
 		m_kvDspGain = util::to_float(val);
 	else
 		return false;

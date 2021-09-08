@@ -39,7 +39,7 @@ void BaseRadiusComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"radius",false))
+		if(ustring::compare<std::string>(kvData.key,"radius",false))
 			SetRadius(util::to_float(kvData.value));
 		else
 			return util::EventReply::Unhandled;
@@ -47,7 +47,7 @@ void BaseRadiusComponent::Initialize()
 	});
 	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData&>(evData.get());
-		if(ustring::compare(inputData.input,"setradius",false))
+		if(ustring::compare<std::string>(inputData.input,"setradius",false))
 			SetRadius(util::to_float(inputData.data));
 		else
 			return util::EventReply::Unhandled;

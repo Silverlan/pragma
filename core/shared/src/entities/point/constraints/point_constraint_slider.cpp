@@ -30,9 +30,9 @@ void BasePointConstraintSliderComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"limit_low",false))
+		if(ustring::compare<std::string>(kvData.key,"limit_low",false))
 			m_kvLimitLinLow = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"limit_high",false))
+		else if(ustring::compare<std::string>(kvData.key,"limit_high",false))
 			m_kvLimitLinHigh = util::to_float(kvData.value);
 		else
 			return util::EventReply::Unhandled;

@@ -24,9 +24,9 @@ void BaseEnvLightDirectionalComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"color_ambient",false))
+		if(ustring::compare<std::string>(kvData.key,"color_ambient",false))
 			*m_ambientColor = Color(kvData.value);
-		else if(ustring::compare(kvData.key,"max_exposure",false))
+		else if(ustring::compare<std::string>(kvData.key,"max_exposure",false))
 			m_maxExposure = util::to_float(kvData.value);
 		else
 			return util::EventReply::Unhandled;

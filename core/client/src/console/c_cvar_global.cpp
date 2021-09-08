@@ -347,7 +347,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 	pragma::console::parse_command_options(argv,commandOptions);
 
 	auto mode = pragma::console::get_command_option_parameter_value(commandOptions,"mode");
-	if(ustring::compare(mode,"raytracing",false))
+	if(ustring::compare<std::string>(mode,"raytracing",false))
 	{
 		auto *pCam = c_game->GetRenderCamera();
 		Con::cout<<"Taking raytraced screenshot..."<<Con::endl;

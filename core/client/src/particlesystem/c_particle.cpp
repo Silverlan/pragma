@@ -120,31 +120,31 @@ const char *CParticle::field_id_to_name(FieldId id)
 }
 CParticle::FieldId CParticle::name_to_field_id(const std::string &fieldName)
 {
-	if(ustring::compare(fieldName,"pos",false))
+	if(ustring::compare<std::string>(fieldName,"pos",false))
 		return FieldId::Pos;
-	else if(ustring::compare(fieldName,"rot",false))
+	else if(ustring::compare<std::string>(fieldName,"rot",false))
 		return FieldId::Rot;
-	else if(ustring::compare(fieldName,"rot_yaw",false))
+	else if(ustring::compare<std::string>(fieldName,"rot_yaw",false))
 		return FieldId::RotYaw;
-	else if(ustring::compare(fieldName,"origin",false))
+	else if(ustring::compare<std::string>(fieldName,"origin",false))
 		return FieldId::Origin;
-	else if(ustring::compare(fieldName,"velocity",false))
+	else if(ustring::compare<std::string>(fieldName,"velocity",false))
 		return FieldId::Velocity;
-	else if(ustring::compare(fieldName,"angular_velocity",false))
+	else if(ustring::compare<std::string>(fieldName,"angular_velocity",false))
 		return FieldId::AngularVelocity;
-	else if(ustring::compare(fieldName,"radius",false))
+	else if(ustring::compare<std::string>(fieldName,"radius",false))
 		return FieldId::Radius;
-	else if(ustring::compare(fieldName,"length",false))
+	else if(ustring::compare<std::string>(fieldName,"length",false))
 		return FieldId::Length;
-	else if(ustring::compare(fieldName,"color",false))
+	else if(ustring::compare<std::string>(fieldName,"color",false))
 		return FieldId::Color;
-	else if(ustring::compare(fieldName,"alpha",false))
+	else if(ustring::compare<std::string>(fieldName,"alpha",false))
 		return FieldId::Alpha;
-	else if(ustring::compare(fieldName,"sequence",false))
+	else if(ustring::compare<std::string>(fieldName,"sequence",false))
 		return FieldId::Sequence;
-	else if(ustring::compare(fieldName,"life",false))
+	else if(ustring::compare<std::string>(fieldName,"life",false))
 		return FieldId::Life;
-	else if(ustring::compare(fieldName,"creation_time",false))
+	else if(ustring::compare<std::string>(fieldName,"creation_time",false))
 		return FieldId::CreationTime;
 	static_assert(umath::to_integral(FieldId::Count) == 13);
 	return FieldId::Invalid;

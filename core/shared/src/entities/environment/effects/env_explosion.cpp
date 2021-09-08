@@ -24,7 +24,7 @@ void BaseEnvExplosionComponent::Initialize()
 
 	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData&>(evData.get());
-		if(ustring::compare(inputData.input,"explode",false))
+		if(ustring::compare<std::string>(inputData.input,"explode",false))
 			Explode();
 		else
 			return util::EventReply::Unhandled;

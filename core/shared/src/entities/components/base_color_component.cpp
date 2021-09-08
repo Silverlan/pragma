@@ -71,7 +71,7 @@ void BaseColorComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"color",false))
+		if(ustring::compare<std::string>(kvData.key,"color",false))
 			*m_color = Color{kvData.value};
 		else
 			return util::EventReply::Unhandled;
@@ -79,7 +79,7 @@ void BaseColorComponent::Initialize()
 	});
 	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData&>(evData.get());
-		if(ustring::compare(inputData.input,"setcolor",false))
+		if(ustring::compare<std::string>(inputData.input,"setcolor",false))
 			*m_color = Color{inputData.data};
 		else
 			return util::EventReply::Unhandled;

@@ -329,7 +329,7 @@ static std::shared_ptr<Model> import_model(VFilePtr optFile,const std::string &o
 		std::string ext;
 		ufile::get_extension(fileName,&ext);
 
-		auto binary = ustring::compare(ext,"glb",false);
+		auto binary = ustring::compare<std::string>(ext,"glb",false);
 		result = binary ? reader.LoadBinaryFromFile(&gltfMdl,&err,&warn,absPathToFile) : reader.LoadASCIIFromFile(&gltfMdl,&err,&warn,absPathToFile);
 	}
 	if(verbose)

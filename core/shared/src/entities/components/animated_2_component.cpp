@@ -45,6 +45,13 @@ void Animated2Component::RegisterEvents(pragma::EntityComponentManager &componen
 	EVENT_TRANSLATE_ANIMATION = componentManager.RegisterEvent("A2_TRANSLATE_ANIMATION");
 	EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER = componentManager.RegisterEvent("A2_INITIALIZE_CHANNEL_VALUE_SUBMITTER");
 }
+std::optional<std::pair<std::string,util::Path>> Animated2Component::ParseComponentChannelPath(const panima::ChannelPath &path)
+{
+	auto componentName = path.path.GetFront();
+	auto componentPath = path.path;
+	componentPath.PopFront();
+	return std::pair<std::string,util::Path>{std::string{componentName},std::move(componentPath)};
+}
 Animated2Component::Animated2Component(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_playbackRate(util::FloatProperty::Create(1.f))
 {}
@@ -261,20 +268,23 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(panima::Anima
 	{
 		auto &channel = *it;
 		auto &path = channel->targetPath;
-		/*if(path.GetFront() != "ec") // First path component denotes the type, which always has to be 'ec' for entity component in this case
+		size_t offset = 0;
+		if(path.path.GetComponent(offset,&offset) != "ec") // First path component denotes the type, which always has to be 'ec' for entity component in this case
 			continue;
-		path.PopFront();*/
-		auto componentTypeName = path.GetFront();
+		auto componentPath = ParseComponentChannelPath(path);
+		if(!componentPath.has_value())
+			continue;
+		auto &componentTypeName = componentPath->first;
 		// TODO: Needs to be updated whenever a new component has been added to the entity
 		auto hComponent = GetEntity().FindComponent(componentTypeName);
 		if(hComponent.expired())
 			continue;
-		auto localPath = path;
-		localPath.PopFront();
-		if(localPath.IsEmpty())
+		auto &memberName = componentPath->second;
+		if(memberName.IsEmpty())
 			continue;
+		auto memberPath = memberName;
 		auto channelIdx = it -channels.begin();
-		CEAnim2InitializeChannelValueSubmitter evData {localPath};
+		CEAnim2InitializeChannelValueSubmitter evData {memberPath};
 		if(hComponent->InvokeEventCallbacks(EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER,evData) == util::EventReply::Handled)
 		{
 			if(evData.submitter == nullptr)
@@ -283,33 +293,19 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(panima::Anima
 			continue;
 		}
 
-		auto memberIdx = hComponent->GetMemberIndex(localPath.GetString());
-		if(memberIdx.has_value())
-			localPath = {};
-		else
-		{
-			auto component = localPath.GetBack();
-			localPath.PopBack();
-			auto memberName = localPath.GetString();
-			if(!memberName.empty())
-				memberName.pop_back();
-			memberIdx = hComponent->GetMemberIndex(memberName);
-			if(!memberIdx.has_value())
-				continue;
-			localPath = component;
-		}
+		auto memberIdx = hComponent->GetMemberIndex(memberPath.GetString());
 		auto channelValueType = channel->GetValueType();
 		auto *memberInfo = hComponent->GetMemberInfo(*memberIdx);
 		auto valueType = memberInfo->type;
 		
 		auto &component = *hComponent;
-		auto vsGetMemberChannelSubmitter = [&localPath,&memberIdx,channelIdx,&channelValueSubmitters,&component]<typename TMember>(auto tag) mutable {
+		auto *valueComponents = path.GetComponents();
+		auto vsGetMemberChannelSubmitter = [valueComponents,&memberIdx,channelIdx,&channelValueSubmitters,&component]<typename TMember>(auto tag) mutable {
 			using TChannel = decltype(tag)::type;
-			auto strValueComponent = localPath.GetFront();
 			constexpr auto setMemberValue = [](const pragma::ComponentMemberInfo &memberInfo,pragma::BaseEntityComponent &component,const void *value,void *userData) {
 				memberInfo.setterFunction(memberInfo,component,value);
 			};
-			if(strValueComponent.empty())
+			if(!valueComponents || valueComponents->empty())
 			{
 				if constexpr(std::is_same_v<TChannel,TMember>)
 					channelValueSubmitters[channelIdx] = get_member_channel_submitter<TChannel,TMember,0>(component,*memberIdx,setMemberValue);
@@ -321,12 +317,10 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(panima::Anima
 			constexpr auto numComponentsMember = get_component_count(memberType);
 			if constexpr(numComponentsChannel > 0 && numComponentsMember > 0 && is_type_compatible(channelType,memberType))
 			{
-				std::vector<std::string> components;
-				ustring::explode(strValueComponent,",",components);
-				if(components.empty() || components.size() > numComponentsChannel)
+				if(valueComponents->empty() || valueComponents->size() > numComponentsChannel)
 					return;
 				std::array<uint32_t,numComponentsChannel> componentIndices;
-				for(uint32_t idx = 0; auto &strComponent : components)
+				for(uint32_t idx = 0; auto &strComponent : *valueComponents)
 				{
 					switch(memberType)
 					{

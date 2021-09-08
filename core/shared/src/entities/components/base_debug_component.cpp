@@ -27,9 +27,9 @@ void BaseDebugTextComponent::Initialize()
 	ent.AddComponent("color");
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"text",false))
+		if(ustring::compare<std::string>(kvData.key,"text",false))
 			m_debugText = kvData.value;
-		else if(ustring::compare(kvData.key,"size",false))
+		else if(ustring::compare<std::string>(kvData.key,"size",false))
 			m_size = util::to_float(kvData.value);
 		else
 			return util::EventReply::Unhandled;
@@ -37,9 +37,9 @@ void BaseDebugTextComponent::Initialize()
 	});
 	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &ioData = static_cast<CEInputData&>(evData.get());
-		if(ustring::compare(ioData.input,"settext",false))
+		if(ustring::compare<std::string>(ioData.input,"settext",false))
 			SetText(ioData.data);
-		else if(ustring::compare(ioData.input,"setsize",false))
+		else if(ustring::compare<std::string>(ioData.input,"setsize",false))
 			SetSize(util::to_float(ioData.data));
 		else
 			return util::EventReply::Unhandled;
@@ -58,7 +58,7 @@ void BaseDebugOutlineComponent::Initialize(BaseEntityComponent &component)
 	m_netEvSetOutlineColor = component.SetupNetEvent("set_outline_color");
 	component.BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"outline_color",false))
+		if(ustring::compare<std::string>(kvData.key,"outline_color",false))
 			m_outlineColor = Color{kvData.value};
 		else
 			return util::EventReply::Unhandled;
@@ -66,7 +66,7 @@ void BaseDebugOutlineComponent::Initialize(BaseEntityComponent &component)
 	});
 	component.BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &ioData = static_cast<CEInputData&>(evData.get());
-		if(ustring::compare(ioData.input,"SetOutlineColor",false))
+		if(ustring::compare<std::string>(ioData.input,"SetOutlineColor",false))
 			m_outlineColor = Color{ioData.data};
 		else
 			return util::EventReply::Unhandled;
@@ -101,9 +101,9 @@ void BaseDebugLineComponent::Initialize()
 	ent.AddComponent("color");
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"end_target",false))
+		if(ustring::compare<std::string>(kvData.key,"end_target",false))
 			m_targetEntity = kvData.value;
-		else if(ustring::compare(kvData.key,"target_origin",false))
+		else if(ustring::compare<std::string>(kvData.key,"target_origin",false))
 			m_targetOrigin = uvec::create(kvData.value);
 		else
 			return util::EventReply::Unhandled;
@@ -126,9 +126,9 @@ void BaseDebugBoxComponent::Initialize()
 	ent.AddComponent("color");
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"min_bounds",false))
+		if(ustring::compare<std::string>(kvData.key,"min_bounds",false))
 			m_bounds.first = uvec::create(kvData.value);
-		else if(ustring::compare(kvData.key,"max_bounds",false))
+		else if(ustring::compare<std::string>(kvData.key,"max_bounds",false))
 			m_bounds.second = uvec::create(kvData.value);
 		else
 			return util::EventReply::Unhandled;
@@ -155,7 +155,7 @@ void BaseDebugSphereComponent::Initialize()
 	ent.AddComponent("color");
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"recursion_level",false))
+		if(ustring::compare<std::string>(kvData.key,"recursion_level",false))
 			m_recursionLevel = util::to_int(kvData.value);
 		else
 			return util::EventReply::Unhandled;
@@ -180,11 +180,11 @@ void BaseDebugConeComponent::Initialize()
 	ent.AddComponent("color");
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"start_radius",false))
+		if(ustring::compare<std::string>(kvData.key,"start_radius",false))
 			m_startRadius = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"cone_angle",false))
+		else if(ustring::compare<std::string>(kvData.key,"cone_angle",false))
 			m_coneAngle = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"segment_count",false))
+		else if(ustring::compare<std::string>(kvData.key,"segment_count",false))
 			m_segmentCount = util::to_int(kvData.value);
 		else
 			return util::EventReply::Unhandled;
@@ -215,9 +215,9 @@ void BaseDebugCylinderComponent::Initialize()
 	ent.AddComponent("radius");
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"length",false))
+		if(ustring::compare<std::string>(kvData.key,"length",false))
 			m_length = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"segment_count",false))
+		else if(ustring::compare<std::string>(kvData.key,"segment_count",false))
 			m_segmentCount = util::to_int(kvData.value);
 		else
 			return util::EventReply::Unhandled;

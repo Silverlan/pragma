@@ -159,7 +159,7 @@ void AddonSystem::MountAddons()
 			std::string ext;
 			if(ufile::get_extension(fName,&ext) == true)
 			{
-				if(ustring::compare(ext,"pad",false) == true)
+				if(ustring::compare<std::string>(ext,"pad",false) == true)
 				{
 					auto *pad = LoadPADPackage("addons\\" +fName);
 					if(pad != nullptr)
@@ -183,7 +183,7 @@ void AddonSystem::MountAddons()
 					}
 				}
 #ifdef _WIN32
-				else if(ustring::compare(ext,"lnk",false) == true)
+				else if(ustring::compare<std::string>(ext,"lnk",false) == true)
 					mount_linked_addon(fName,m_addons,false);
 #endif
 			}

@@ -23,17 +23,17 @@ void BaseEnvQuakeComponent::Initialize()
 	ent.AddComponent("toggle");
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"frequency",false))
+		if(ustring::compare<std::string>(kvData.key,"frequency",false))
 			m_frequency = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"amplitude",false))
+		else if(ustring::compare<std::string>(kvData.key,"amplitude",false))
 			m_amplitude = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"radius",false))
+		else if(ustring::compare<std::string>(kvData.key,"radius",false))
 			m_radius = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"duration",false))
+		else if(ustring::compare<std::string>(kvData.key,"duration",false))
 			m_duration = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"fadein",false))
+		else if(ustring::compare<std::string>(kvData.key,"fadein",false))
 			m_tFadeIn = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"fadeout",false))
+		else if(ustring::compare<std::string>(kvData.key,"fadeout",false))
 			m_tFadeOut = util::to_float(kvData.value);
 		else
 			return util::EventReply::Unhandled;
@@ -41,27 +41,27 @@ void BaseEnvQuakeComponent::Initialize()
 	});
 	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData&>(evData.get());
-		if(ustring::compare(inputData.input,"startshake",false))
+		if(ustring::compare<std::string>(inputData.input,"startshake",false))
 		{
 			auto whToggleComponent = GetEntity().FindComponent("toggle");
 			if(whToggleComponent.valid())
 				static_cast<pragma::BaseToggleComponent*>(whToggleComponent.get())->TurnOn();
 		}
-		else if(ustring::compare(inputData.input,"stopshake",false))
+		else if(ustring::compare<std::string>(inputData.input,"stopshake",false))
 		{
 			auto whToggleComponent = GetEntity().FindComponent("toggle");
 			if(whToggleComponent.valid())
 				static_cast<pragma::BaseToggleComponent*>(whToggleComponent.get())->TurnOff();
 		}
-		else if(ustring::compare(inputData.input,"setamplitude",false))
+		else if(ustring::compare<std::string>(inputData.input,"setamplitude",false))
 			m_amplitude = util::to_float(inputData.data);
-		else if(ustring::compare(inputData.input,"setfrequency",false))
+		else if(ustring::compare<std::string>(inputData.input,"setfrequency",false))
 			m_frequency = util::to_float(inputData.data);
-		else if(ustring::compare(inputData.input,"setduration",false))
+		else if(ustring::compare<std::string>(inputData.input,"setduration",false))
 			m_duration = util::to_float(inputData.data);
-		else if(ustring::compare(inputData.input,"setfadeinduration",false))
+		else if(ustring::compare<std::string>(inputData.input,"setfadeinduration",false))
 			m_tFadeIn = util::to_float(inputData.data);
-		else if(ustring::compare(inputData.input,"setfadeoutduration",false))
+		else if(ustring::compare<std::string>(inputData.input,"setfadeoutduration",false))
 			m_tFadeOut = util::to_float(inputData.data);
 		else
 			return util::EventReply::Unhandled;

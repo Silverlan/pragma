@@ -186,7 +186,7 @@ bool ClientState::PrecacheSound(std::string snd,std::pair<al::ISoundBuffer*,al::
 		return false;
 	}
 	std::string ext;
-	if(ufile::get_extension(path,&ext) == true && ustring::compare(ext,"wav",false) == true)
+	if(ufile::get_extension(path,&ext) == true && ustring::compare<std::string>(ext,"wav",false) == true)
 	{
 		auto f = FileManager::OpenFile(path.c_str(),"rb");
 		if(f != nullptr)

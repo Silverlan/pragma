@@ -24,15 +24,15 @@ void BaseEnvLightSpotVolComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"cone_height",false))
+		if(ustring::compare<std::string>(kvData.key,"cone_height",false))
 			GetEntity().SetKeyValue("radius",kvData.value);
-		else if(ustring::compare(kvData.key,"cone_angle",false))
+		else if(ustring::compare<std::string>(kvData.key,"cone_angle",false))
 			m_coneAngle = ustring::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"cone_color",false))
+		else if(ustring::compare<std::string>(kvData.key,"cone_color",false))
 			GetEntity().SetKeyValue("color",kvData.value);
-		else if(ustring::compare(kvData.key,"cone_start_offset",false))
+		else if(ustring::compare<std::string>(kvData.key,"cone_start_offset",false))
 			m_coneStartOffset = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"spotlight_target",false))
+		else if(ustring::compare<std::string>(kvData.key,"spotlight_target",false))
 			m_kvSpotlightTargetName = kvData.value;
 		else
 			return util::EventReply::Unhandled;

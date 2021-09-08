@@ -58,17 +58,17 @@ void BaseEnvLightComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"distance",false))
+		if(ustring::compare<std::string>(kvData.key,"distance",false))
 			GetEntity().SetKeyValue("radius",kvData.value);
-		else if(ustring::compare(kvData.key,"lightcolor",false))
+		else if(ustring::compare<std::string>(kvData.key,"lightcolor",false))
 			GetEntity().SetKeyValue("color",kvData.value);
-		else if(ustring::compare(kvData.key,"light_intensity",false))
+		else if(ustring::compare<std::string>(kvData.key,"light_intensity",false))
 			SetLightIntensity(ustring::to_float(kvData.value));
-		else if(ustring::compare(kvData.key,"light_intensity_type",false))
+		else if(ustring::compare<std::string>(kvData.key,"light_intensity_type",false))
 			SetLightIntensityType(static_cast<LightIntensityType>(ustring::to_int(kvData.value)));
-		else if(ustring::compare(kvData.key,"falloff_exponent",false))
+		else if(ustring::compare<std::string>(kvData.key,"falloff_exponent",false))
 			SetFalloffExponent(util::to_float(kvData.value));
-		else if(ustring::compare(kvData.key,"light_flags",false))
+		else if(ustring::compare<std::string>(kvData.key,"light_flags",false))
 			m_lightFlags = static_cast<LightFlags>(util::to_int(kvData.value));
 		else
 			return util::EventReply::Unhandled;

@@ -20,15 +20,15 @@ void BaseEnvFogControllerComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"fogcolor",false))
+		if(ustring::compare<std::string>(kvData.key,"fogcolor",false))
 			GetEntity().SetKeyValue("color",kvData.value);
-		else if(ustring::compare(kvData.key,"fogstart",false))
+		else if(ustring::compare<std::string>(kvData.key,"fogstart",false))
 			m_kvFogStart = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"fogend",false))
+		else if(ustring::compare<std::string>(kvData.key,"fogend",false))
 			m_kvFogEnd = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"fogmaxdensity",false))
+		else if(ustring::compare<std::string>(kvData.key,"fogmaxdensity",false))
 			m_kvMaxDensity = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"fogtype",false))
+		else if(ustring::compare<std::string>(kvData.key,"fogtype",false))
 			m_kvFogType = CUChar(util::to_int(kvData.value));
 		else
 			return util::EventReply::Unhandled;
@@ -36,11 +36,11 @@ void BaseEnvFogControllerComponent::Initialize()
 	});
 	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData&>(evData.get());
-		if(ustring::compare(inputData.input,"setstartdist",false))
+		if(ustring::compare<std::string>(inputData.input,"setstartdist",false))
 			m_kvFogStart = util::to_float(inputData.data);
-		else if(ustring::compare(inputData.input,"setenddist",false))
+		else if(ustring::compare<std::string>(inputData.input,"setenddist",false))
 			m_kvFogEnd = util::to_float(inputData.data);
-		else if(ustring::compare(inputData.input,"setmaxdensity",false))
+		else if(ustring::compare<std::string>(inputData.input,"setmaxdensity",false))
 			m_kvMaxDensity = util::to_float(inputData.data);
 		else
 			return util::EventReply::Unhandled;

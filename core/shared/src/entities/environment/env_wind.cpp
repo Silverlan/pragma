@@ -18,9 +18,9 @@ void BaseEnvWindComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"wind_direction",false))
+		if(ustring::compare<std::string>(kvData.key,"wind_direction",false))
 			SetWindDirection(uvec::create(kvData.value));
-		else if(ustring::compare(kvData.key,"wind_speed",false))
+		else if(ustring::compare<std::string>(kvData.key,"wind_speed",false))
 			SetWindSpeed(util::to_float(kvData.value));
 		else
 			return util::EventReply::Unhandled;

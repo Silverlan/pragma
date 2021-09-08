@@ -28,15 +28,15 @@ void BasePointConstraintHingeComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"limit_low",false))
+		if(ustring::compare<std::string>(kvData.key,"limit_low",false))
 			m_kvLimitLow = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"limit_high",false))
+		else if(ustring::compare<std::string>(kvData.key,"limit_high",false))
 			m_kvLimitHigh = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"softness",false))
+		else if(ustring::compare<std::string>(kvData.key,"softness",false))
 			m_kvLimitSoftness = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"biasfactor",false))
+		else if(ustring::compare<std::string>(kvData.key,"biasfactor",false))
 			m_kvLimitBiasFactor = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"relaxationfactor",false))
+		else if(ustring::compare<std::string>(kvData.key,"relaxationfactor",false))
 			m_kvLimitRelaxationFactor = util::to_float(kvData.value);
 		else
 			return util::EventReply::Unhandled;

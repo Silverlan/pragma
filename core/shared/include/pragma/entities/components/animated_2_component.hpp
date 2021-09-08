@@ -30,6 +30,7 @@ namespace pragma
 		static ComponentEventId EVENT_TRANSLATE_ANIMATION;
 		static ComponentEventId EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static std::optional<std::pair<std::string,util::Path>> ParseComponentChannelPath(const panima::ChannelPath &path);
 		
 		Animated2Component(BaseEntity &ent);
 		void SetPlaybackRate(float rate);

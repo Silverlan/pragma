@@ -19,9 +19,9 @@ void BaseFuncBrushComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"solidity",false))
+		if(ustring::compare<std::string>(kvData.key,"solidity",false))
 			m_kvSolid = util::to_boolean(kvData.value);
-		else if(ustring::compare(kvData.key,"surface_material",false))
+		else if(ustring::compare<std::string>(kvData.key,"surface_material",false))
 			m_kvSurfaceMaterial = kvData.value;
 		else
 			return util::EventReply::Unhandled;

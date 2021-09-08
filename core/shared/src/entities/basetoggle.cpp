@@ -33,7 +33,7 @@ void BaseToggleComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"startdisabled",false))
+		if(ustring::compare<std::string>(kvData.key,"startdisabled",false))
 			m_bStartDisabled = util::to_boolean(kvData.value);
 		else
 			return util::EventReply::Unhandled;
@@ -41,11 +41,11 @@ void BaseToggleComponent::Initialize()
 	});
 	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData&>(evData.get());
-		if(ustring::compare(inputData.input,"enable",false) || ustring::compare(inputData.input,"turnon",false))
+		if(ustring::compare<std::string>(inputData.input,"enable",false) || ustring::compare<std::string>(inputData.input,"turnon",false))
 			TurnOn();
-		else if(ustring::compare(inputData.input,"disable",false) || ustring::compare(inputData.input,"turnoff",false))
+		else if(ustring::compare<std::string>(inputData.input,"disable",false) || ustring::compare<std::string>(inputData.input,"turnoff",false))
 			TurnOff();
-		else if(ustring::compare(inputData.input,"toggle",false))
+		else if(ustring::compare<std::string>(inputData.input,"toggle",false))
 			Toggle();
 		else
 			return util::EventReply::Unhandled;

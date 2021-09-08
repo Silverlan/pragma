@@ -700,7 +700,7 @@ bool CEngine::Initialize(int argc,char *argv[])
 			return;
 		auto cmd = args.front();
 		args.erase(args.begin());
-		if(ustring::compare(cmd,"url",false))
+		if(ustring::compare<std::string>(cmd,"url",false))
 		{
 			if(args.empty() == false)
 				util::open_url_in_browser(args.front());

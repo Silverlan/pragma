@@ -71,7 +71,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdPath.def(luabind::constructor<const std::string&>());
 	cdPath.def(luabind::tostring(luabind::self));
 	cdPath.def_readwrite("path",&panima::ChannelPath::path);
-	cdPath.def_readwrite("components",&panima::ChannelPath::components);
+	cdPath.property("components",static_cast<std::vector<std::string>*(panima::ChannelPath::*)()>(&panima::ChannelPath::GetComponents));
 	cdPath.def("ToUri",&panima::ChannelPath::ToUri);
 	cdPath.def("ToUri",&panima::ChannelPath::ToUri,luabind::default_parameter_policy<2,true>{});
 	cdChannel.scope[cdPath];
@@ -88,8 +88,8 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdChannel.def("SetInterpolation",+[](lua_State *l,panima::Channel &channel,panima::ChannelInterpolation interp) {
 		channel.interpolation = interp;
 	});
-	cdChannel.def("GetTargetPath",+[](lua_State *l,panima::Channel &channel) -> util::Path {
-		return channel.targetPath;
+	cdChannel.def("GetTargetPath",+[](lua_State *l,panima::Channel &channel) -> panima::ChannelPath* {
+		return &channel.targetPath;
 	});
 	cdChannel.def("SetTargetPath",+[](lua_State *l,panima::Channel &channel,const std::string &path) {
 		channel.targetPath = path;
@@ -297,12 +297,6 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		return duration;
 	});
 	cdAnim2.def("AddChannel",static_cast<void(panima::Animation::*)(panima::Channel&)>(&panima::Animation::AddChannel));
-	cdAnim2.def("AddChannel",+[](lua_State *l,panima::Animation &anim,const util::Path &path,::udm::Type valueType) -> opt<std::shared_ptr<panima::Channel>> {
-		auto *channel = anim.AddChannel(path,valueType);
-		if(!channel)
-			return nil;
-		return {l,channel->shared_from_this()};
-	});
 	cdAnim2.def("AddChannel",+[](lua_State *l,panima::Animation &anim,const std::string &path,::udm::Type valueType) -> opt<std::shared_ptr<panima::Channel>> {
 		auto *channel = anim.AddChannel(path,valueType);
 		if(!channel)

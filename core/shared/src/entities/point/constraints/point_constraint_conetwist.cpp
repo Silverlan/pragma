@@ -27,17 +27,17 @@ void BasePointConstraintConeTwistComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"swingspan1",false))
+		if(ustring::compare<std::string>(kvData.key,"swingspan1",false))
 			m_kvSwingSpan1 = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"swingspan2",false))
+		else if(ustring::compare<std::string>(kvData.key,"swingspan2",false))
 			m_kvSwingSpan2 = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"twistspan",false))
+		else if(ustring::compare<std::string>(kvData.key,"twistspan",false))
 			m_kvTwistSpan = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"softness",false))
+		else if(ustring::compare<std::string>(kvData.key,"softness",false))
 			m_kvSoftness = util::to_float(kvData.value);
-		// else if(ustring::compare(kvData.key,"biasfactor",false))
+		// else if(ustring::compare<std::string>(kvData.key,"biasfactor",false))
 		// 	m_kvBiasFactor = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"relaxationfactor",false))
+		else if(ustring::compare<std::string>(kvData.key,"relaxationfactor",false))
 			m_kvRelaxationFactor = util::to_float(kvData.value);
 		else
 			return util::EventReply::Unhandled;

@@ -769,7 +769,7 @@ static luabind::object load_image(lua_State *l,const std::string &fileName,bool 
 	if(f == nullptr)
 		return {};
 	auto pixelFormat = uimg::PixelFormat::LDR;
-	if(ustring::compare(ext,"hdr"))
+	if(ustring::compare<std::string>(ext,"hdr"))
 		pixelFormat = uimg::PixelFormat::Float;
 
 	if(loadAsynch)

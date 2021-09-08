@@ -52,43 +52,43 @@ struct CustomAlphaBlendMode
 
 static prosper::BlendFactor name_to_blend_factor(const std::string &name)
 {
-	if(ustring::compare(name,"zero",false))
+	if(ustring::compare<std::string>(name,"zero",false))
 		return prosper::BlendFactor::Zero;
-	else if(ustring::compare(name,"one",false))
+	else if(ustring::compare<std::string>(name,"one",false))
 		return prosper::BlendFactor::One;
-	else if(ustring::compare(name,"src_color",false))
+	else if(ustring::compare<std::string>(name,"src_color",false))
 		return prosper::BlendFactor::SrcColor;
-	else if(ustring::compare(name,"one_minus_src_color",false))
+	else if(ustring::compare<std::string>(name,"one_minus_src_color",false))
 		return prosper::BlendFactor::OneMinusSrcColor;
-	else if(ustring::compare(name,"dst_color",false))
+	else if(ustring::compare<std::string>(name,"dst_color",false))
 		return prosper::BlendFactor::DstColor;
-	else if(ustring::compare(name,"one_minus_dst_color",false))
+	else if(ustring::compare<std::string>(name,"one_minus_dst_color",false))
 		return prosper::BlendFactor::OneMinusDstColor;
-	else if(ustring::compare(name,"src_alpha",false))
+	else if(ustring::compare<std::string>(name,"src_alpha",false))
 		return prosper::BlendFactor::SrcAlpha;
-	else if(ustring::compare(name,"one_minus_src_alpha",false))
+	else if(ustring::compare<std::string>(name,"one_minus_src_alpha",false))
 		return prosper::BlendFactor::OneMinusSrcAlpha;
-	else if(ustring::compare(name,"dst_alpha",false))
+	else if(ustring::compare<std::string>(name,"dst_alpha",false))
 		return prosper::BlendFactor::DstAlpha;
-	else if(ustring::compare(name,"one_minus_dst_alpha",false))
+	else if(ustring::compare<std::string>(name,"one_minus_dst_alpha",false))
 		return prosper::BlendFactor::OneMinusDstAlpha;
-	else if(ustring::compare(name,"constant_color",false))
+	else if(ustring::compare<std::string>(name,"constant_color",false))
 		return prosper::BlendFactor::ConstantColor;
-	else if(ustring::compare(name,"one_minus_constant_color",false))
+	else if(ustring::compare<std::string>(name,"one_minus_constant_color",false))
 		return prosper::BlendFactor::OneMinusConstantColor;
-	else if(ustring::compare(name,"constant_alpha",false))
+	else if(ustring::compare<std::string>(name,"constant_alpha",false))
 		return prosper::BlendFactor::ConstantAlpha;
-	else if(ustring::compare(name,"one_minus_constant_alpha",false))
+	else if(ustring::compare<std::string>(name,"one_minus_constant_alpha",false))
 		return prosper::BlendFactor::OneMinusConstantAlpha;
-	else if(ustring::compare(name,"src_alpha_saturate",false))
+	else if(ustring::compare<std::string>(name,"src_alpha_saturate",false))
 		return prosper::BlendFactor::SrcAlphaSaturate;
-	else if(ustring::compare(name,"src1_color",false))
+	else if(ustring::compare<std::string>(name,"src1_color",false))
 		return prosper::BlendFactor::Src1Color;
-	else if(ustring::compare(name,"one_minus_src1_color",false))
+	else if(ustring::compare<std::string>(name,"one_minus_src1_color",false))
 		return prosper::BlendFactor::OneMinusSrc1Color;
-	else if(ustring::compare(name,"src1_alpha",false))
+	else if(ustring::compare<std::string>(name,"src1_alpha",false))
 		return prosper::BlendFactor::Src1Alpha;
-	else if(ustring::compare(name,"one_minus_src1_alpha",false))
+	else if(ustring::compare<std::string>(name,"one_minus_src1_alpha",false))
 		return prosper::BlendFactor::OneMinusSrc1Alpha;
 	Con::cwar<<"WARNING: Invalid blend factor type '"<<name<<"'!"<<Con::endl;
 	return prosper::BlendFactor::One;
@@ -96,15 +96,15 @@ static prosper::BlendFactor name_to_blend_factor(const std::string &name)
 
 static prosper::BlendOp name_to_blend_op(const std::string &name)
 {
-	if(ustring::compare(name,"add",false))
+	if(ustring::compare<std::string>(name,"add",false))
 		return prosper::BlendOp::Add;
-	else if(ustring::compare(name,"subtract",false))
+	else if(ustring::compare<std::string>(name,"subtract",false))
 		return prosper::BlendOp::Subtract;
-	else if(ustring::compare(name,"reverse_subtract",false))
+	else if(ustring::compare<std::string>(name,"reverse_subtract",false))
 		return prosper::BlendOp::ReverseSubtract;
-	else if(ustring::compare(name,"min",false))
+	else if(ustring::compare<std::string>(name,"min",false))
 		return prosper::BlendOp::Min;
-	else if(ustring::compare(name,"max",false))
+	else if(ustring::compare<std::string>(name,"max",false))
 		return prosper::BlendOp::Max;
 	Con::cwar<<"WARNING: Invalid blend operation '"<<name<<"'!"<<Con::endl;
 	return prosper::BlendOp::Add;

@@ -38,7 +38,7 @@ void BaseNameComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"name",false) || ustring::compare(kvData.key,"targetname",false))
+		if(ustring::compare<std::string>(kvData.key,"name",false) || ustring::compare<std::string>(kvData.key,"targetname",false))
 			*m_name = kvData.value;
 		else
 			return util::EventReply::Unhandled;
@@ -46,7 +46,7 @@ void BaseNameComponent::Initialize()
 	});
 	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData&>(evData.get());
-		if(ustring::compare(inputData.input,"setname",false))
+		if(ustring::compare<std::string>(inputData.input,"setname",false))
 			*m_name = inputData.data;
 		else
 			return util::EventReply::Unhandled;

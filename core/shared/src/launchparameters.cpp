@@ -106,7 +106,7 @@ void Engine::InitLaunchOptions(int argc,char *argv[])
 extern Engine *engine;
 DLLNETWORK void LPARAM_console(const std::vector<std::string> &argv)
 {
-	if(argv.empty() == false && (ustring::compare(argv[0],"external") || ustring::compare(argv[0],"terminal")))
+	if(argv.empty() == false && (ustring::compare<std::string>(argv[0],"external") || ustring::compare<std::string>(argv[0],"terminal")))
 	{
 		engine->Engine::OpenConsole();
 		return;

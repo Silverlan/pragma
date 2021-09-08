@@ -38,7 +38,7 @@ void CParticleSystemComponent::Initialize()
 	});
 	BindEvent(CIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<pragma::CEInputData&>(evData.get());
-		if(ustring::compare(inputData.input,"setcontinuous",false))
+		if(ustring::compare<std::string>(inputData.input,"setcontinuous",false))
 		{
 			SetContinuous(util::to_boolean(inputData.data));
 			return util::EventReply::Handled;

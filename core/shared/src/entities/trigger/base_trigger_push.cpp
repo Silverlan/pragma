@@ -23,14 +23,14 @@ void BaseTriggerPushComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"push_dir",false))
+		if(ustring::compare<std::string>(kvData.key,"push_dir",false))
 		{
 			EulerAngles ang(kvData.value);
 			m_kvPushDir = ang.Forward();
 		}
-		else if(ustring::compare(kvData.key,"push_speed",false))
+		else if(ustring::compare<std::string>(kvData.key,"push_speed",false))
 			m_kvPushSpeed = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"change_duration",false))
+		else if(ustring::compare<std::string>(kvData.key,"change_duration",false))
 			m_kvChangeDuration = util::to_float(kvData.value);
 		else
 			return util::EventReply::Unhandled;

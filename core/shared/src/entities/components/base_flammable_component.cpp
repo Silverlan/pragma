@@ -37,7 +37,7 @@ void BaseFlammableComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"flammable",false))
+		if(ustring::compare<std::string>(kvData.key,"flammable",false))
 			*m_bIgnitable = util::to_boolean(kvData.value);
 		else
 			return util::EventReply::Unhandled;
@@ -45,9 +45,9 @@ void BaseFlammableComponent::Initialize()
 	});
 	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData&>(evData.get());
-		if(ustring::compare(inputData.input,"setflammable",false))
+		if(ustring::compare<std::string>(inputData.input,"setflammable",false))
 			*m_bIgnitable = util::to_boolean(inputData.data);
-		else if(ustring::compare(inputData.input,"ignite",false))
+		else if(ustring::compare<std::string>(inputData.input,"ignite",false))
 			Ignite(util::to_float(inputData.data));
 		else
 			return util::EventReply::Unhandled;

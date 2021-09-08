@@ -37,7 +37,7 @@ void BaseAttachableComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"parent",false) || ustring::compare(kvData.key,"parentname",false))
+		if(ustring::compare<std::string>(kvData.key,"parent",false) || ustring::compare<std::string>(kvData.key,"parentname",false))
 			m_parentName = kvData.value;
 		else
 			return util::EventReply::Unhandled;

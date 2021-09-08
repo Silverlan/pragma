@@ -30,14 +30,14 @@ void STriggerGravityComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"gravity_dir",false))
+		if(ustring::compare<std::string>(kvData.key,"gravity_dir",false))
 		{
 			EulerAngles ang(kvData.value);
 			m_kvGravityDir = ang.Forward();
 		}
-		else if(ustring::compare(kvData.key,"gravity_force",false))
+		else if(ustring::compare<std::string>(kvData.key,"gravity_force",false))
 			m_kvGravityForce = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"use_force",false))
+		else if(ustring::compare<std::string>(kvData.key,"use_force",false))
 			m_kvUseForce = util::to_boolean(kvData.value);
 		else
 			return util::EventReply::Unhandled;

@@ -301,7 +301,7 @@ std::string Lua::file::to_relative_path(lua_State *l,const std::string &path)
 {
 	auto opath = util::Path::CreateFile(path);
 	opath.Canonicalize();
-	if(ustring::compare(opath.GetFront(),"addons",false))
+	if(ustring::compare<std::string_view>(opath.GetFront(),"addons",false))
 	{
 		opath.PopFront();
 		opath.PopFront();
@@ -320,7 +320,7 @@ bool Lua::file::validate_write_operation(lua_State *l,std::string &path,std::str
 		while(addonPath.GetComponentCount() > 2)
 			addonPath.PopBack();
 
-		if(ustring::compare(addonPath.GetFront(),"addons",false) && FileManager::Exists(addonPath.GetString()))
+		if(ustring::compare<std::string_view>(addonPath.GetFront(),"addons",false) && FileManager::Exists(addonPath.GetString()))
 		{
 			opath.PopFront();
 			opath.PopFront();
@@ -496,7 +496,7 @@ bool Lua::file::Write(lua_State *l,std::string strPath,const std::string &conten
 	if(validate_write_operation(l,strPath) == false)
 		return false;
 	auto path = util::Path::CreateFile(strPath);
-	FileManager::CreatePath(path.GetPath().c_str());
+	FileManager::CreatePath(path.GetPath().data());
 	auto f = FileManager::OpenFile(path.GetString().c_str(),"w");
 	if(f == NULL || f->GetType() != VFILE_LOCAL)
 		return false;

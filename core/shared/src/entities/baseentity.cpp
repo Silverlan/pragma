@@ -84,7 +84,7 @@ pragma::ComponentEventId BaseEntity::GetEventId(const std::string &name) const
 }
 pragma::BaseEntityComponent *BaseEntity::FindComponentMemberIndex(const util::Path &path,pragma::ComponentMemberIndex &outMemberIdx)
 {
-	auto hComponent = FindComponent(path.GetFront());
+	auto hComponent = FindComponent(std::string{path.GetFront()});
 	if(!hComponent.valid())
 		return nullptr;
 	auto memPath = path;

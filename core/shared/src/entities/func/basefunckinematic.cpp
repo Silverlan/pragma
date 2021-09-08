@@ -32,11 +32,11 @@ void BaseFuncKinematicComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"first_node",false))
+		if(ustring::compare<std::string>(kvData.key,"first_node",false))
 			m_kvFirstNode = kvData.value;
-		else if(ustring::compare(kvData.key,"move_speed",false))
+		else if(ustring::compare<std::string>(kvData.key,"move_speed",false))
 			m_kvMoveSpeed = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"start_sound",false))
+		else if(ustring::compare<std::string>(kvData.key,"start_sound",false))
 			m_kvStartSound = kvData.value;
 		else
 			return util::EventReply::Unhandled;
@@ -44,9 +44,9 @@ void BaseFuncKinematicComponent::Initialize()
 	});
 	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData&>(evData.get());
-		if(ustring::compare(inputData.input,"startforward",false))
+		if(ustring::compare<std::string>(inputData.input,"startforward",false))
 			StartForward();
-		else if(ustring::compare(inputData.input,"startbackward",false))
+		else if(ustring::compare<std::string>(inputData.input,"startbackward",false))
 			StartBackward();
 		else
 			return util::EventReply::Unhandled;

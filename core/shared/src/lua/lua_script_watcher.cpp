@@ -52,7 +52,7 @@ void LuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &fName)
 				m_game->LoadLuaEntity(ufile::to_path(splitPath,0,splitPath.size() -1));
 				return true;
 			}
-			if(ustring::compare(splitPath.at(1),"components",false))
+			if(ustring::compare<std::string>(splitPath.at(1),"components",false))
 			{
 				m_game->LoadLuaComponent(ufile::to_path(splitPath,0,2));
 				return true;

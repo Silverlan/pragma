@@ -907,7 +907,7 @@ void Lua::util::open_path_in_explorer(const std::string &spath,const std::string
 	if(FileManager::FindAbsolutePath(path.GetString(),strAbsPath) == false)
 		return;
 	auto absPath = ::util::Path::CreateFile(strAbsPath);
-	::util::open_path_in_explorer(absPath.GetPath(),absPath.GetFileName());
+	::util::open_path_in_explorer(std::string{absPath.GetPath()},std::string{absPath.GetFileName()});
 }
 void Lua::util::open_path_in_explorer(const std::string &spath)
 {
@@ -916,7 +916,7 @@ void Lua::util::open_path_in_explorer(const std::string &spath)
 	if(FileManager::FindAbsolutePath(path.GetString(),strAbsPath) == false)
 		return;
 	auto absPath = ::util::Path::CreatePath(strAbsPath);
-	::util::open_path_in_explorer(absPath.GetPath());
+	::util::open_path_in_explorer(std::string{absPath.GetPath()});
 }
 void Lua::util::clamp_resolution_to_aspect_ratio(lua_State *l,uint32_t w,uint32_t h,float aspectRatio)
 {

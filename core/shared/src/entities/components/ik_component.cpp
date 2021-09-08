@@ -231,7 +231,7 @@ bool IKComponent::InitializeIKController(uint32_t ikControllerId)
 
 	ikTreeInfo->jacobian = std::make_shared<Jacobian>(ikTree.get());
 
-	if(ustring::compare(ikController->GetType(),"foot",false) == true)
+	if(ustring::compare<std::string>(ikController->GetType(),"foot",false) == true)
 	{
 		auto &ent = GetEntity();
 		auto mdlComponent = ent.GetModelComponent();

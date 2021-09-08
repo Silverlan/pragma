@@ -28,13 +28,13 @@ void BasePointConstraintDoFComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"limit_lin_lower",false))
+		if(ustring::compare<std::string>(kvData.key,"limit_lin_lower",false))
 			m_kvLimLinLower = uvec::create(kvData.value);
-		else if(ustring::compare(kvData.key,"limit_lin_upper",false))
+		else if(ustring::compare<std::string>(kvData.key,"limit_lin_upper",false))
 			m_kvLimLinUpper = uvec::create(kvData.value);
-		else if(ustring::compare(kvData.key,"limit_ang_lower",false))
+		else if(ustring::compare<std::string>(kvData.key,"limit_ang_lower",false))
 			m_kvLimAngLower = uvec::create(kvData.value);
-		else if(ustring::compare(kvData.key,"limit_ang_upper",false))
+		else if(ustring::compare<std::string>(kvData.key,"limit_ang_upper",false))
 			m_kvLimAngUpper = uvec::create(kvData.value);
 		else
 			return util::EventReply::Unhandled;

@@ -83,7 +83,7 @@ void BaseTransformComponent::Initialize()
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
 		/*if(ustring::compare(kvData.key,"origin",false))
 			SetPosition(uvec::create(kvData.value));
-		else */if(ustring::compare(kvData.key,"angles",false))
+		else */if(ustring::compare<std::string>(kvData.key,"angles",false))
 		{
 			EulerAngles ang;
 			ustring::string_to_array<float,double>(kvData.value,&ang.p,atof,3);

@@ -52,9 +52,9 @@ void BaseHealthComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"health",false))
+		if(ustring::compare<std::string>(kvData.key,"health",false))
 			*m_health = util::to_int(kvData.value);
-		else if(ustring::compare(kvData.key,"max_health",false))
+		else if(ustring::compare<std::string>(kvData.key,"max_health",false))
 			*m_maxHealth = util::to_int(kvData.value);
 		else
 			return util::EventReply::Unhandled;
@@ -62,9 +62,9 @@ void BaseHealthComponent::Initialize()
 	});
 	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData&>(evData.get());
-		if(ustring::compare(inputData.input,"sethealth",false))
+		if(ustring::compare<std::string>(inputData.input,"sethealth",false))
 			*m_health = util::to_int(inputData.data);
-		else if(ustring::compare(inputData.input,"setmaxhealth",false))
+		else if(ustring::compare<std::string>(inputData.input,"setmaxhealth",false))
 			*m_maxHealth = util::to_int(inputData.data);
 		else
 			return util::EventReply::Unhandled;

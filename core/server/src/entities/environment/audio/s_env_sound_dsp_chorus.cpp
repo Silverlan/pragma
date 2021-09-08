@@ -21,17 +21,17 @@ bool SSoundDspChorusComponent::OnSetKeyValue(const std::string &key,const std::s
 {
 	if(SBaseSoundDspComponent::OnSetKeyValue(key,val))
 		return true;
-	if(ustring::compare(key,"waveform",false))
+	if(ustring::compare<std::string>(key,"waveform",false))
 		m_kvWaveform = util::to_int(val);
-	else if(ustring::compare(key,"phase",false))
+	else if(ustring::compare<std::string>(key,"phase",false))
 		m_kvPhase = util::to_int(val);
-	else if(ustring::compare(key,"rate",false))
+	else if(ustring::compare<std::string>(key,"rate",false))
 		m_kvRate = util::to_float(val);
-	else if(ustring::compare(key,"depth",false))
+	else if(ustring::compare<std::string>(key,"depth",false))
 		m_kvDepth = util::to_float(val);
-	else if(ustring::compare(key,"feedback",false))
+	else if(ustring::compare<std::string>(key,"feedback",false))
 		m_kvFeedback = util::to_float(val);
-	else if(ustring::compare(key,"delay",false))
+	else if(ustring::compare<std::string>(key,"delay",false))
 		m_kvDelay = util::to_float(val);
 	else
 		return false;

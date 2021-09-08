@@ -34,11 +34,11 @@ void CEnvSoundProbeComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"spacing",false))
+		if(ustring::compare<std::string>(kvData.key,"spacing",false))
 			m_spacing = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"height_above_floor",false))
+		else if(ustring::compare<std::string>(kvData.key,"height_above_floor",false))
 			m_heightAboveFloor = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"radius",false))
+		else if(ustring::compare<std::string>(kvData.key,"radius",false))
 			m_radius = util::to_float(kvData.value);
 		else
 			return util::EventReply::Unhandled;

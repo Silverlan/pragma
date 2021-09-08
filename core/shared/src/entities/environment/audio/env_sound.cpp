@@ -20,27 +20,27 @@ void BaseEnvSoundComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"sound",false))
+		if(ustring::compare<std::string>(kvData.key,"sound",false))
 			m_kvSoundName = kvData.value;
-		else if(ustring::compare(kvData.key,"pitch",false))
+		else if(ustring::compare<std::string>(kvData.key,"pitch",false))
 			m_kvPitch = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"gain",false))
+		else if(ustring::compare<std::string>(kvData.key,"gain",false))
 			m_kvGain = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"rolloff",false))
+		else if(ustring::compare<std::string>(kvData.key,"rolloff",false))
 			m_kvRolloff = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"min_gain",false))
+		else if(ustring::compare<std::string>(kvData.key,"min_gain",false))
 			m_kvMinGain = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"max_gain",false))
+		else if(ustring::compare<std::string>(kvData.key,"max_gain",false))
 			m_kvMaxGain = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"inner_cone",false))
+		else if(ustring::compare<std::string>(kvData.key,"inner_cone",false))
 			m_kvInnerCone = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"outer_cone",false))
+		else if(ustring::compare<std::string>(kvData.key,"outer_cone",false))
 			m_kvOuterCone = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"offset",false))
+		else if(ustring::compare<std::string>(kvData.key,"offset",false))
 			m_kvOffset = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"reference_dist",false))
+		else if(ustring::compare<std::string>(kvData.key,"reference_dist",false))
 			m_kvReferenceDist = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"max_dist",false))
+		else if(ustring::compare<std::string>(kvData.key,"max_dist",false))
 			m_kvMaxDist = util::to_float(kvData.value);
 		else
 			return util::EventReply::Unhandled;
@@ -49,11 +49,11 @@ void BaseEnvSoundComponent::Initialize()
 	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData&>(evData.get());
 		ALSound *snd = (m_sound != NULL) ? m_sound.get() : NULL;
-		if(ustring::compare(inputData.input,"play",false))
+		if(ustring::compare<std::string>(inputData.input,"play",false))
 			if(snd != NULL) snd->Play();
-		else if(ustring::compare(inputData.input,"stop",false))
+		else if(ustring::compare<std::string>(inputData.input,"stop",false))
 			if(snd != NULL) snd->Stop();
-		else if(ustring::compare(inputData.input,"toggle",false))
+		else if(ustring::compare<std::string>(inputData.input,"toggle",false))
 		{
 			if(snd != NULL)
 			{
@@ -63,37 +63,37 @@ void BaseEnvSoundComponent::Initialize()
 					snd->Play();
 			}
 		}
-		else if(ustring::compare(inputData.input,"fadein",false))
+		else if(ustring::compare<std::string>(inputData.input,"fadein",false))
 			if(snd != NULL) snd->FadeIn(util::to_float(inputData.data));
-		else if(ustring::compare(inputData.input,"fadeout",false))
+		else if(ustring::compare<std::string>(inputData.input,"fadeout",false))
 			if(snd != NULL) snd->FadeOut(util::to_float(inputData.data));
-		else if(ustring::compare(inputData.input,"rewind",false))
+		else if(ustring::compare<std::string>(inputData.input,"rewind",false))
 			if(snd != NULL) snd->Rewind();
-		else if(ustring::compare(inputData.input,"pause",false))
+		else if(ustring::compare<std::string>(inputData.input,"pause",false))
 			if(snd != NULL) snd->Pause();
-		else if(ustring::compare(inputData.input,"setpitch",false))
+		else if(ustring::compare<std::string>(inputData.input,"setpitch",false))
 			if(snd != NULL) snd->SetPitch(util::to_float(inputData.data));
-		else if(ustring::compare(inputData.input,"setlooping",false))
+		else if(ustring::compare<std::string>(inputData.input,"setlooping",false))
 			if(snd != NULL) snd->SetLooping(util::to_boolean(inputData.data));
-		else if(ustring::compare(inputData.input,"setgain",false))
+		else if(ustring::compare<std::string>(inputData.input,"setgain",false))
 			if(snd != NULL) snd->SetGain(util::to_float(inputData.data));
-		else if(ustring::compare(inputData.input,"setrelativetolistener",false))
+		else if(ustring::compare<std::string>(inputData.input,"setrelativetolistener",false))
 			if(snd != NULL) snd->SetRelative(util::to_boolean(inputData.data));
-		else if(ustring::compare(inputData.input,"setoffset",false))
+		else if(ustring::compare<std::string>(inputData.input,"setoffset",false))
 			if(snd != NULL) snd->SetOffset(util::to_float(inputData.data));
-		else if(ustring::compare(inputData.input,"setsecoffset",false))
+		else if(ustring::compare<std::string>(inputData.input,"setsecoffset",false))
 			if(snd != NULL) snd->SetTimeOffset(util::to_float(inputData.data));
-		else if(ustring::compare(inputData.input,"setrollofffactor",false))
+		else if(ustring::compare<std::string>(inputData.input,"setrollofffactor",false))
 			if(snd != NULL) snd->SetRolloffFactor(util::to_float(inputData.data));
-		else if(ustring::compare(inputData.input,"setmaxdistance",false))
+		else if(ustring::compare<std::string>(inputData.input,"setmaxdistance",false))
 			if(snd != NULL) snd->SetMaxDistance(util::to_float(inputData.data));
-		else if(ustring::compare(inputData.input,"setmingain",false))
+		else if(ustring::compare<std::string>(inputData.input,"setmingain",false))
 			if(snd != NULL) snd->SetMinGain(util::to_float(inputData.data));
-		else if(ustring::compare(inputData.input,"setmaxgain",false))
+		else if(ustring::compare<std::string>(inputData.input,"setmaxgain",false))
 			if(snd != NULL) snd->SetMaxGain(util::to_float(inputData.data));
-		else if(ustring::compare(inputData.input,"setconeinnerangle",false))
+		else if(ustring::compare<std::string>(inputData.input,"setconeinnerangle",false))
 			if(snd != NULL) snd->SetInnerConeAngle(util::to_float(inputData.data));
-		else if(ustring::compare(inputData.input,"setconeouterangle",false))
+		else if(ustring::compare<std::string>(inputData.input,"setconeouterangle",false))
 			if(snd != NULL) snd->SetOuterConeAngle(util::to_float(inputData.data));
 		else
 			return util::EventReply::Unhandled;

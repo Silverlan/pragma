@@ -708,16 +708,16 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		Lua::PushString(l,p.GetString());
 	}));
 	defPath.def("GetPath",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
-		Lua::PushString(l,p.GetPath());
+		Lua::PushString(l,std::string{p.GetPath()});
 	}));
 	defPath.def("GetFileName",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
-		Lua::PushString(l,p.GetFileName());
+		Lua::PushString(l,std::string{p.GetFileName()});
 	}));
 	defPath.def("GetFront",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
-		Lua::PushString(l,p.GetFront());
+		Lua::PushString(l,std::string{p.GetFront()});
 	}));
 	defPath.def("GetBack",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
-		Lua::PushString(l,p.GetBack());
+		Lua::PushString(l,std::string{p.GetBack()});
 	}));
 	defPath.def("MoveUp",static_cast<void(*)(lua_State*,util::Path&)>([](lua_State *l,util::Path &p) {
 		p.MoveUp();

@@ -711,7 +711,7 @@ Material *ClientState::LoadMaterial(const std::string &path,const std::function<
 		// Material has been fully loaded!
 
 		std::string ext;
-		if(ustring::compare(mat->GetShaderIdentifier(),"eye",false) && ufile::get_extension(mat->GetName(),&ext) && ustring::compare(ext,"vmt",false))
+		if(ustring::compare<std::string>(mat->GetShaderIdentifier(),"eye",false) && ufile::get_extension(mat->GetName(),&ext) && ustring::compare<std::string>(ext,"vmt",false))
 		{
 			// Material was loaded from a VMT and uses the eye shader. In this case we have to save the material as WMI, otherwise
 			// we may run into a loop where the eye material would be loaded over and over again because it involves decomposing the eye

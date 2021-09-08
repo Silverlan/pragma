@@ -248,13 +248,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	
 	auto defAnimated2 = luabind::class_<pragma::Animated2Component,pragma::BaseEntityComponent>("Animated2Component");
 	defAnimated2.scope[
-		luabind::def("parse_component_channel_path",+[](const panima::ChannelPath &path) -> std::optional<std::pair<std::string,std::string>> {
-			std::vector<std::string> components;
-			ustring::explode(path.path,"/",components);
-			if(components.size() < 2)
-				return {};
-			return std::pair<std::string,std::string>{components[0],components[1]};
-		})
+		luabind::def("parse_component_channel_path",&pragma::Animated2Component::ParseComponentChannelPath)
 	];
 	defAnimated2.def("SetPlaybackRate",&pragma::Animated2Component::SetPlaybackRate);
 	defAnimated2.def("GetPlaybackRate",&pragma::Animated2Component::GetPlaybackRate);

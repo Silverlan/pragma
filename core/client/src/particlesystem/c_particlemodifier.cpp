@@ -178,15 +178,15 @@ void CParticleOperator::Initialize(pragma::CParticleSystemComponent &pSystem,con
 	CParticleModifier::Initialize(pSystem,values);
 	for(auto &pair : values)
 	{
-		if(ustring::compare(pair.first,"op_start_fadein"))
+		if(ustring::compare<std::string>(pair.first,"op_start_fadein"))
 			m_opStartFadein = util::to_float(pair.second);
-		else if(ustring::compare(pair.first,"op_start_fadeout"))
+		else if(ustring::compare<std::string>(pair.first,"op_start_fadeout"))
 			m_opStartFadeout = util::to_float(pair.second);
-		else if(ustring::compare(pair.first,"op_end_fadein"))
+		else if(ustring::compare<std::string>(pair.first,"op_end_fadein"))
 			m_opEndFadein = util::to_float(pair.second);
-		else if(ustring::compare(pair.first,"op_end_fadeout"))
+		else if(ustring::compare<std::string>(pair.first,"op_end_fadeout"))
 			m_opEndFadeout = util::to_float(pair.second);
-		else if(ustring::compare(pair.first,"op_fade_oscillate_period"))
+		else if(ustring::compare<std::string>(pair.first,"op_fade_oscillate_period"))
 			m_opFadeOscillate = util::to_float(pair.second);
 	}
 }

@@ -24,7 +24,7 @@ void GlobalNameComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"globalname",false))
+		if(ustring::compare<std::string>(kvData.key,"globalname",false))
 			m_globalName = kvData.value;
 		else
 			return util::EventReply::Unhandled;

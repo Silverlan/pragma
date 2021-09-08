@@ -58,19 +58,19 @@ void BaseModelComponent::Initialize()
 	m_netEvMaxDrawDist = SetupNetEvent("set_max_draw_distance");
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"model",false))
+		if(ustring::compare<std::string>(kvData.key,"model",false))
 		{
 			m_kvModel = kvData.value;
 			if(GetEntity().IsSpawned())
 				SetModel(m_kvModel);
 		}
-		else if(ustring::compare(kvData.key,"skin",false))
+		else if(ustring::compare<std::string>(kvData.key,"skin",false))
 		{
 			m_kvSkin = util::to_int(kvData.value);
 			if(GetEntity().IsSpawned())
 				SetSkin(m_kvSkin);
 		}
-		else if(ustring::compare(kvData.key,"maxvisibledist",false))
+		else if(ustring::compare<std::string>(kvData.key,"maxvisibledist",false))
 			SetMaxDrawDistance(ustring::to_float(kvData.value));
 		else
 			return util::EventReply::Unhandled;

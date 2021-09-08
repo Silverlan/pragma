@@ -191,7 +191,7 @@ bool Game::LoadLuaComponent(const std::string &mainPath,const std::string &compo
 bool Game::LoadLuaEntity(std::string path)
 {
 	std::string ext;
-	if(ufile::get_extension(path,&ext) == true && (ustring::compare(ext,"lua",false) == true || ustring::compare(ext,"clua",false) == true))
+	if(ufile::get_extension(path,&ext) == true && (ustring::compare<std::string>(ext,"lua",false) == true || ustring::compare<std::string>(ext,"clua",false) == true))
 		return ExecuteLuaFile(path);
 	path = "lua\\" +path;
 
@@ -213,7 +213,7 @@ bool Game::LoadLuaEntity(std::string path)
 bool Game::LoadLuaComponent(std::string path)
 {
 	std::string ext;
-	if(ufile::get_extension(path,&ext) == true && (ustring::compare(ext,"lua",false) == true || ustring::compare(ext,"clua",false) == true))
+	if(ufile::get_extension(path,&ext) == true && (ustring::compare<std::string>(ext,"lua",false) == true || ustring::compare<std::string>(ext,"clua",false) == true))
 		return ExecuteLuaFile(path);
 	path = "lua\\" +path;
 	auto nwStateDirName = GetLuaNetworkDirectoryName();

@@ -23,7 +23,7 @@ void SLogicRelayComponent::Initialize()
 
 	BindEvent(SIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData&>(evData.get());
-		if(ustring::compare(inputData.input,"trigger",false))
+		if(ustring::compare<std::string>(inputData.input,"trigger",false))
 			Trigger(inputData.activator);
 		else
 			return util::EventReply::Unhandled;

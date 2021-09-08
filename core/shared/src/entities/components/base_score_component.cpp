@@ -41,7 +41,7 @@ void BaseScoreComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"score",false))
+		if(ustring::compare<std::string>(kvData.key,"score",false))
 			*m_score = util::to_int(kvData.value);
 		else
 			return util::EventReply::Unhandled;
@@ -49,7 +49,7 @@ void BaseScoreComponent::Initialize()
 	});
 	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData&>(evData.get());
-		if(ustring::compare(inputData.input,"setscore",false))
+		if(ustring::compare<std::string>(inputData.input,"setscore",false))
 			*m_score = util::to_int(inputData.data);
 		else
 			return util::EventReply::Unhandled;

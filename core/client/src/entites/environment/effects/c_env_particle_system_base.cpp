@@ -429,57 +429,57 @@ const auto PARTICLE_ANIM_BUFFER_INSTANCE_SIZE = sizeof(Vector2) *2;
 ::util::EventReply CParticleSystemComponent::HandleKeyValue(const std::string &key,const std::string &value)
 {
 #pragma message ("TODO: Calculate max particles automatically!")
-	if(ustring::compare(key,"maxparticles",false))
+	if(ustring::compare<std::string>(key,"maxparticles",false))
 	{
 		if(m_state != State::Initial)
 			Con::cwar<<"WARNING: Attempted to change max particle count for particle system which has already been started! Ignoring..."<<Con::endl;
 		else
 			m_maxParticles = ::util::to_int(value);
 	}
-	else if(ustring::compare(key,"limit_particle_count"))
+	else if(ustring::compare<std::string>(key,"limit_particle_count"))
 		m_particleLimit = ::util::to_int(value);
-	else if(ustring::compare(key,"emission_rate"))
+	else if(ustring::compare<std::string>(key,"emission_rate"))
 		m_emissionRate = ::util::to_int(value);
-	else if(ustring::compare(key,"cast_shadows"))
+	else if(ustring::compare<std::string>(key,"cast_shadows"))
 		SetCastShadows(::util::to_boolean(value));
-	else if(ustring::compare(key,"static_scale"))
+	else if(ustring::compare<std::string>(key,"static_scale"))
 		m_worldScale = ::util::to_float(value);
-	else if(ustring::compare(key,"random_start_frame"))
+	else if(ustring::compare<std::string>(key,"random_start_frame"))
 		umath::set_flag(m_flags,Flags::RandomStartFrame,::util::to_boolean(value));
-	else if(ustring::compare(key,"material"))
+	else if(ustring::compare<std::string>(key,"material"))
 		SetMaterial(client->LoadMaterial(value));
-	else if(ustring::compare(key,"radius"))
+	else if(ustring::compare<std::string>(key,"radius"))
 		SetRadius(::util::to_float(value));
-	else if(ustring::compare(key,"extent"))
+	else if(ustring::compare<std::string>(key,"extent"))
 		SetExtent(::util::to_float(value));
-	else if(ustring::compare(key,"sort_particles"))
+	else if(ustring::compare<std::string>(key,"sort_particles"))
 		umath::set_flag(m_flags,Flags::SortParticles,::util::to_boolean(value));
-	else if(ustring::compare(key,"orientation_type"))
+	else if(ustring::compare<std::string>(key,"orientation_type"))
 		m_orientationType = static_cast<OrientationType>(::util::to_int(value));
-	else if(ustring::compare(key,"color"))
+	else if(ustring::compare<std::string>(key,"color"))
 		m_initialColor = Color(value);
-	else if(ustring::compare(key,"loop"))
+	else if(ustring::compare<std::string>(key,"loop"))
 		SetContinuous(::util::to_boolean(value));
-	else if(ustring::compare(key,"origin"))
+	else if(ustring::compare<std::string>(key,"origin"))
 		m_origin = uvec::create(value);
-	else if(ustring::compare(key,"bloom_scale"))
+	else if(ustring::compare<std::string>(key,"bloom_scale"))
 	{
 		auto bloomFactor = ::util::to_float(value);
 		SetBloomColorFactor({bloomFactor,bloomFactor,bloomFactor,1.f});
 	}
-	else if(ustring::compare(key,"color_factor"))
+	else if(ustring::compare<std::string>(key,"color_factor"))
 		m_colorFactor = uvec::create_v4(value);
-	else if(ustring::compare(key,"bloom_color_factor"))
+	else if(ustring::compare<std::string>(key,"bloom_color_factor"))
 		SetBloomColorFactor(uvec::create_v4(value));
-	else if(ustring::compare(key,"max_node_count"))
+	else if(ustring::compare<std::string>(key,"max_node_count"))
 		m_maxNodes = ::util::to_int(value);
-	else if(ustring::compare(key,"lifetime"))
+	else if(ustring::compare<std::string>(key,"lifetime"))
 		m_lifeTime = ::util::to_float(value);
-	else if(ustring::compare(key,"soft_particles"))
+	else if(ustring::compare<std::string>(key,"soft_particles"))
 		SetSoftParticles(::util::to_boolean(value));
-	else if(ustring::compare(key,"texture_scrolling_enabled"))
+	else if(ustring::compare<std::string>(key,"texture_scrolling_enabled"))
 		SetTextureScrollingEnabled(::util::to_boolean(value));
-	else if(ustring::compare(key,"world_rotation"))
+	else if(ustring::compare<std::string>(key,"world_rotation"))
 	{
 		std::array<float,4> values;
 		ustring::string_to_array(value,values.data(),atof,values.size());
@@ -488,7 +488,7 @@ const auto PARTICLE_ANIM_BUFFER_INSTANCE_SIZE = sizeof(Vector2) *2;
 		m_particleRot.y = values.at(2);
 		m_particleRot.z = values.at(3);
 	}
-	else if(ustring::compare(key,"alpha_mode"))
+	else if(ustring::compare<std::string>(key,"alpha_mode"))
 	{
 		auto alphaMode = value;
 		ustring::to_lower(alphaMode);
@@ -505,26 +505,26 @@ const auto PARTICLE_ANIM_BUFFER_INSTANCE_SIZE = sizeof(Vector2) *2;
 		else if(alphaMode == "custom")
 			m_alphaMode = pragma::ParticleAlphaMode::Custom;
 	}
-	else if(ustring::compare(key,"premultiply_alpha"))
+	else if(ustring::compare<std::string>(key,"premultiply_alpha"))
 		SetAlphaPremultiplied(::util::to_boolean(value));
-	else if(ustring::compare(key,"angles"))
+	else if(ustring::compare<std::string>(key,"angles"))
 	{
 		auto ang = EulerAngles(value);
 		m_particleRot = uquat::create(ang);
 	}
-	else if(ustring::compare(key,"black_to_alpha"))
+	else if(ustring::compare<std::string>(key,"black_to_alpha"))
 		m_alphaMode = pragma::ParticleAlphaMode::AdditiveByColor;
-	else if(ustring::compare(key,"move_with_emitter"))
+	else if(ustring::compare<std::string>(key,"move_with_emitter"))
 		umath::set_flag(m_flags,Flags::MoveWithEmitter,::util::to_boolean(value));
-	else if(ustring::compare(key,"rotate_with_emitter"))
+	else if(ustring::compare<std::string>(key,"rotate_with_emitter"))
 		umath::set_flag(m_flags,Flags::RotateWithEmitter,::util::to_boolean(value));
-	else if(ustring::compare(key,"transform_with_emitter"))
+	else if(ustring::compare<std::string>(key,"transform_with_emitter"))
 		umath::set_flag(m_flags,Flags::MoveWithEmitter | Flags::RotateWithEmitter,::util::to_boolean(value));
-	else if(ustring::compare(key,"auto_simulate"))
+	else if(ustring::compare<std::string>(key,"auto_simulate"))
 		SetAutoSimulate(::util::to_boolean(value));
-	else if(ustring::compare(key,"bounding_box_min"))
+	else if(ustring::compare<std::string>(key,"bounding_box_min"))
 		m_renderBounds.first = uvec::create(value);
-	else if(ustring::compare(key,"bounding_box_max"))
+	else if(ustring::compare<std::string>(key,"bounding_box_max"))
 		m_renderBounds.second = uvec::create(value);
 	else
 		return ::util::EventReply::Unhandled;

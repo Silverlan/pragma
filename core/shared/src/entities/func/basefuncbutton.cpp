@@ -25,9 +25,9 @@ void BaseFuncButtonComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"use_sound",false))
+		if(ustring::compare<std::string>(kvData.key,"use_sound",false))
 			m_kvUseSound = kvData.value;
-		else if(ustring::compare(kvData.key,"wait",false))
+		else if(ustring::compare<std::string>(kvData.key,"wait",false))
 			m_kvWaitTime = util::to_float(kvData.value);
 		else
 			return util::EventReply::Unhandled;

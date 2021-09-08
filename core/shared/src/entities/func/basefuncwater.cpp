@@ -42,15 +42,15 @@ void BaseFuncWaterComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"surface_material",false))
+		if(ustring::compare<std::string>(kvData.key,"surface_material",false))
 		{
-			if(ustring::compare(kvData.value,"default",false) == false)
+			if(ustring::compare<std::string>(kvData.value,"default",false) == false)
 			{
 				m_kvSurfaceMaterial = kvData.value;
 				SetSurfaceMaterial(kvData.value);
 			}
 		}
-		else if(ustring::compare(kvData.key,"max_wave_height",false))
+		else if(ustring::compare<std::string>(kvData.key,"max_wave_height",false))
 			SetMaxWaveHeight(ustring::to_float(kvData.value));
 		else
 			return util::EventReply::Unhandled;

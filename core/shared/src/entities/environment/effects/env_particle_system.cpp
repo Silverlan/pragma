@@ -21,9 +21,9 @@ void BaseEnvParticleSystemComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"particle",false))
+		if(ustring::compare<std::string>(kvData.key,"particle",false))
 			m_particleName = kvData.value;
-		else if(ustring::compare(kvData.key,"particle_file",false))
+		else if(ustring::compare<std::string>(kvData.key,"particle_file",false))
 			SetParticleFile(kvData.value);
 		else
 			return util::EventReply::Unhandled;
@@ -31,7 +31,7 @@ void BaseEnvParticleSystemComponent::Initialize()
 	});
 	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData&>(evData.get());
-		if(ustring::compare(inputData.input,"setcontinuous",false))
+		if(ustring::compare<std::string>(inputData.input,"setcontinuous",false))
 		{
 			auto b = (util::to_int(inputData.data) == 0) ? false : true;
 			SetContinuous(b);

@@ -244,7 +244,7 @@ void SAIComponent::OnEntitySpawn()
 bool SAIComponent::OnInput(std::string input,BaseEntity *activator,BaseEntity *caller,const std::string &data)
 {
 #if DEBUG_AI_MOVEMENT == 1
-	if(ustring::compare(input,"dbg_move",false))
+	if(ustring::compare<std::string>(input,"dbg_move",false))
 	{
 		auto pTrComponentActivator = (activator != nullptr) ? activator->GetTransformComponent() : nullptr;
 		if(pTrComponentActivator)

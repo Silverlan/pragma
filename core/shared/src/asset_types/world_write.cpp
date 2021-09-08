@@ -222,7 +222,7 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData,const std::string 
 	for(auto &str : m_materialTable)
 	{
 		util::Path path{str};
-		if(ustring::compare(path.GetFront(),"materials",false))
+		if(ustring::compare<std::string_view>(path.GetFront(),"materials",false))
 			path.PopFront();
 
 		auto strPath = path.GetString();
@@ -331,7 +331,7 @@ bool pragma::asset::WorldData::Save(udm::AssetDataArg outData,const std::string 
 void pragma::asset::WorldData::Write(VFilePtrReal &f)
 {
 	auto mapName = util::Path::CreateFile(f->GetPath());
-	while(ustring::compare(mapName.GetFront(),"maps",false) == false)
+	while(ustring::compare<std::string_view>(mapName.GetFront(),"maps",false) == false)
 		mapName.PopFront();
 	mapName.PopFront(); // Pop "maps"
 	auto strMapName = mapName.GetString();
@@ -418,7 +418,7 @@ void pragma::asset::WorldData::WriteMaterials(VFilePtrReal &f)
 	for(auto &str : m_materialTable)
 	{
 		util::Path path{str};
-		if(ustring::compare(path.GetFront(),"materials",false))
+		if(ustring::compare<std::string_view>(path.GetFront(),"materials",false))
 			path.PopFront();
 
 		auto strPath = path.GetString();

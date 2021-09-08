@@ -184,7 +184,7 @@ static void CMD_lua_compile(NetworkState *state,pragma::BasePlayerComponent*,std
 			for(auto &f : files)
 			{
 				std::string ext;
-				if(ufile::get_extension(f,&ext) == false || ustring::compare(ext,"lua",false) == false)
+				if(ufile::get_extension(f,&ext) == false || ustring::compare<std::string>(ext,"lua",false) == false)
 					continue;
 				compile_lua_file(l,*game,path +'/' +f);
 			}

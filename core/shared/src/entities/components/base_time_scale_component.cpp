@@ -36,7 +36,7 @@ void BaseTimeScaleComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"time_scale",false))
+		if(ustring::compare<std::string>(kvData.key,"time_scale",false))
 			*m_timeScale = util::to_float(kvData.value);
 		else
 			return util::EventReply::Unhandled;
@@ -44,7 +44,7 @@ void BaseTimeScaleComponent::Initialize()
 	});
 	BindEvent(BaseIOComponent::EVENT_HANDLE_INPUT,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &inputData = static_cast<CEInputData&>(evData.get());
-		if(ustring::compare(inputData.input,"settimescale",false))
+		if(ustring::compare<std::string>(inputData.input,"settimescale",false))
 			*m_timeScale = util::to_float(inputData.data);
 		else
 			return util::EventReply::Unhandled;

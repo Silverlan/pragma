@@ -192,7 +192,7 @@ static EntityUuidComponentMemberRef get_member_ref(util::Uuid entUuid,util::Path
 	auto componentName = var.GetFront();
 	var.PopFront();
 	auto &memberName = var.GetString();
-	return EntityUuidComponentMemberRef{entUuid,componentName,memberName};
+	return EntityUuidComponentMemberRef{entUuid,std::string{componentName},memberName};
 }
 ValueDriverVariable::ValueDriverVariable(util::Uuid entUuid,const util::Path &var)
 	: memberRef{get_member_ref(entUuid,var)}
@@ -201,6 +201,6 @@ std::optional<ValueDriverVariable> ValueDriverVariable::Create(util::Path path)
 {
 	auto uuid = path.GetFront();
 	path.PopFront();
-	return ValueDriverVariable{util::uuid_string_to_bytes(uuid),std::move(path)};
+	return ValueDriverVariable{util::uuid_string_to_bytes(std::string{uuid}),std::move(path)};
 }
 #pragma optimize("",on)

@@ -270,7 +270,7 @@ void ResourceWatcherManager::OnResourceChanged(const std::string &rootPath,const
 	else if(rootPath == "scripts")
 	{
 		util::Path p {path};
-		if(p.GetFront() == "sounds" && ustring::compare(ext,"udm",false))
+		if(p.GetFront() == "sounds" && ustring::compare<std::string>(ext,"udm",false))
 		{
 			if(game != nullptr)
 			{

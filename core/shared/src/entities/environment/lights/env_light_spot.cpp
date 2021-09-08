@@ -50,11 +50,11 @@ void BaseEnvLightSpotComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"outercutoff",false))
+		if(ustring::compare<std::string>(kvData.key,"outercutoff",false))
 			*m_angOuterCutoff = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"innercutoff",false))
+		else if(ustring::compare<std::string>(kvData.key,"innercutoff",false))
 			*m_angInnerCutoff = util::to_float(kvData.value);
-		else if(ustring::compare(kvData.key,"cone_start_offset",false))
+		else if(ustring::compare<std::string>(kvData.key,"cone_start_offset",false))
 			SetConeStartOffset(util::to_float(kvData.value));
 		else
 			return util::EventReply::Unhandled;

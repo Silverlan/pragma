@@ -340,11 +340,11 @@ void CReflectionProbeComponent::Initialize()
 
 	BindEvent(BaseEntity::EVENT_HANDLE_KEY_VALUE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &kvData = static_cast<CEKeyValueData&>(evData.get());
-		if(ustring::compare(kvData.key,"env_map",false))
+		if(ustring::compare<std::string>(kvData.key,"env_map",false))
 			m_srcEnvMap = kvData.value;
-		else if(ustring::compare(kvData.key,"ibl_material",false))
+		else if(ustring::compare<std::string>(kvData.key,"ibl_material",false))
 			m_iblMat = kvData.value;
-		else if(ustring::compare(kvData.key,"ibl_strength",false))
+		else if(ustring::compare<std::string>(kvData.key,"ibl_strength",false))
 			m_strength = kvData.value.empty() ? std::optional<float>{} : util::to_float(kvData.value);
 		else
 			return util::EventReply::Unhandled;

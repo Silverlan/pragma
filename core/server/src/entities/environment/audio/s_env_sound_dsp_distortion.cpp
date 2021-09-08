@@ -21,15 +21,15 @@ bool SSoundDspDistortionComponent::OnSetKeyValue(const std::string &key,const st
 {
 	if(SBaseSoundDspComponent::OnSetKeyValue(key,val))
 		return true;
-	if(ustring::compare(key,"edge",false))
+	if(ustring::compare<std::string>(key,"edge",false))
 		m_kvEdge = util::to_float(val);
-	else if(ustring::compare(key,"gain",false))
+	else if(ustring::compare<std::string>(key,"gain",false))
 		m_kvGain = util::to_float(val);
-	else if(ustring::compare(key,"lowpass_cutoff",false))
+	else if(ustring::compare<std::string>(key,"lowpass_cutoff",false))
 		m_kvLowpassCutoff = util::to_float(val);
-	else if(ustring::compare(key,"eqcenter",false))
+	else if(ustring::compare<std::string>(key,"eqcenter",false))
 		m_kvEqCenter = util::to_float(val);
-	else if(ustring::compare(key,"eqbandwith",false))
+	else if(ustring::compare<std::string>(key,"eqbandwith",false))
 		m_kvEqBandwidth = util::to_float(val);
 	else
 		return false;

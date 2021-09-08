@@ -135,36 +135,39 @@ util::EnumRegister &pragma::animation::skeletal::get_activity_enum_register()
 }
 bool pragma::animation::skeletal::is_bone_position_channel(const panima::Channel &channel)
 {
-	auto it = channel.targetPath.begin();
+	/*auto it = channel.targetPath.begin();
 	auto end = channel.targetPath.end();
 	if(it == end)
 		return false;
 #ifdef PRAGMA_ENABLE_ANIMATION_SYSTEM_2
 	--end;
 #endif
-	return *it == SK_ANIMATED_COMPONENT_NAME && *end == panima::ANIMATION_CHANNEL_PATH_POSITION;
+	return *it == SK_ANIMATED_COMPONENT_NAME && *end == panima::ANIMATION_CHANNEL_PATH_POSITION;*/
+	return false;
 }
 bool pragma::animation::skeletal::is_bone_rotation_channel(const panima::Channel &channel)
 {
-	auto it = channel.targetPath.begin();
+	/*auto it = channel.targetPath.begin();
 	auto end = channel.targetPath.end();
 	if(it == end)
 		return false;
 #ifdef PRAGMA_ENABLE_ANIMATION_SYSTEM_2
 	--end;
 #endif
-	return *it == SK_ANIMATED_COMPONENT_NAME && *end == panima::ANIMATION_CHANNEL_PATH_ROTATION;
+	return *it == SK_ANIMATED_COMPONENT_NAME && *end == panima::ANIMATION_CHANNEL_PATH_ROTATION;*/
+	return false;
 }
 bool pragma::animation::skeletal::is_bone_scale_channel(const panima::Channel &channel)
 {
-	auto it = channel.targetPath.begin();
+	/*auto it = channel.targetPath.begin();
 	auto end = channel.targetPath.end();
 	if(it == end)
 		return false;
 #ifdef PRAGMA_ENABLE_ANIMATION_SYSTEM_2
 	--end;
 #endif
-	return *it == SK_ANIMATED_COMPONENT_NAME && *end == panima::ANIMATION_CHANNEL_PATH_SCALE;
+	return *it == SK_ANIMATED_COMPONENT_NAME && *end == panima::ANIMATION_CHANNEL_PATH_SCALE;*/
+	return false;
 }
 void pragma::animation::skeletal::translate(panima::Animation &anim,const Vector3 &translation)
 {

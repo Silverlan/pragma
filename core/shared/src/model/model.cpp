@@ -608,7 +608,7 @@ uint32_t Model::AddMaterial(uint32_t skin,Material *mat,std::optional<uint32_t> 
 	AddTexturePath(ufile::get_path_from_filename(texName));
 	texName = ufile::get_file_from_filename(texName);
 	std::string ext;
-	if(ufile::get_extension(texName,&ext) == true && (ustring::compare(ext,"wmi",false) || ustring::compare(ext,"vmt",false) || ustring::compare(ext,"vmat_c",false)))
+	if(ufile::get_extension(texName,&ext) == true && (ustring::compare<std::string>(ext,"wmi",false) || ustring::compare<std::string>(ext,"vmt",false) || ustring::compare<std::string>(ext,"vmat_c",false)))
 		ufile::remove_extension_from_filename(texName);
 	auto r = AddTexture(texName,mat);
 	if(skin < m_textureGroups.size())
@@ -1359,7 +1359,7 @@ std::optional<uint32_t> Model::AssignDistinctMaterial(const ModelMeshGroup &grou
 	while(path.GetFront() != "materials") // TODO: What if inside addon called "materials"?
 	{
 		auto front = path.GetFront();
-		rootPath += util::Path::CreatePath(front);
+		rootPath += util::Path::CreatePath(std::string{front});
 		path.PopFront();
 	}
 	auto mpath = path.GetString();

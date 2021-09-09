@@ -304,8 +304,8 @@ void Lua::animation::register_library(Lua::Interface &lua)
 		return {l,channel->shared_from_this()};
 	});
 	cdAnim2.def("GetChannels",static_cast<std::vector<std::shared_ptr<panima::Channel>>&(panima::Animation::*)()>(&panima::Animation::GetChannels));
-	cdAnim2.def("FindChannel",+[](lua_State *l,panima::Animation &anim,const util::Path &path) -> opt<std::shared_ptr<panima::Channel>> {
-		auto *channel = anim.FindChannel(path);
+	cdAnim2.def("FindChannel",+[](lua_State *l,panima::Animation &anim,std::string path) -> opt<std::shared_ptr<panima::Channel>> {
+		auto *channel = anim.FindChannel(std::move(path));
 		if(!channel)
 			return nil;
 		return {l,channel->shared_from_this()};

@@ -47,9 +47,11 @@ void Animated2Component::RegisterEvents(pragma::EntityComponentManager &componen
 }
 std::optional<std::pair<std::string,util::Path>> Animated2Component::ParseComponentChannelPath(const panima::ChannelPath &path)
 {
-	auto componentName = path.path.GetFront();
-	auto componentPath = path.path;
-	componentPath.PopFront();
+	size_t offset = 0;
+	if(path.path.GetComponent(offset,&offset) != "ec")
+		return {};
+	auto componentName = path.path.GetComponent(offset,&offset);
+	util::Path componentPath {path.path.GetString().substr(offset)};
 	return std::pair<std::string,util::Path>{std::string{componentName},std::move(componentPath)};
 }
 Animated2Component::Animated2Component(BaseEntity &ent)
@@ -143,7 +145,7 @@ static panima::ChannelValueSubmitter get_member_channel_submitter(pragma::BaseEn
 			{
 				TMember curVal;
 				memberInfo->getterFunction(*memberInfo,component,&curVal);
-				Con::cout<<"Changing channel value '"<<channel.targetPath.GetString()<<" from "<<to_string(curVal)<<" to "<<to_string(value)<<" (t: "<<t<<")..."<<Con::endl;
+				Con::cout<<"Changing channel value '"<<channel.targetPath.ToUri()<<" from "<<to_string(curVal)<<" to "<<to_string(value)<<" (t: "<<t<<")..."<<Con::endl;
 			}
 			setter(*memberInfo,component,&value,userData);
 		}
@@ -181,7 +183,7 @@ static panima::ChannelValueSubmitter get_member_channel_submitter(pragma::BaseEn
 			{
 				TMember curVal;
 				memberInfo->getterFunction(*memberInfo,component,&curVal);
-				Con::cout<<"Changing "<<TMapArray.size()<<" components of channel value '"<<channel.targetPath.GetString()<<" from "<<to_string(curVal)<<" to "<<to_string(value)<<" (t: "<<t<<")..."<<Con::endl;
+				Con::cout<<"Changing "<<TMapArray.size()<<" components of channel value '"<<channel.targetPath.ToUri()<<" from "<<to_string(curVal)<<" to "<<to_string(value)<<" (t: "<<t<<")..."<<Con::endl;
 			}
 			setter(*memberInfo,component,&curVal,userData);
 		}
@@ -250,6 +252,7 @@ template<uint32_t I> requires(I < 4)
 	case "alpha"_:
 		return I == 3;
 	}
+	return false;
 }
 
 void Animated2Component::InitializeAnimationChannelValueSubmitters(panima::AnimationManager &manager)
@@ -270,18 +273,30 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(panima::Anima
 		auto &path = channel->targetPath;
 		size_t offset = 0;
 		if(path.path.GetComponent(offset,&offset) != "ec") // First path component denotes the type, which always has to be 'ec' for entity component in this case
+		{
+			Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but path is not a valid entity component URI!"<<Con::endl;
 			continue;
+		}
 		auto componentPath = ParseComponentChannelPath(path);
 		if(!componentPath.has_value())
+		{
+			Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but could not determine path components!"<<Con::endl;
 			continue;
+		}
 		auto &componentTypeName = componentPath->first;
 		// TODO: Needs to be updated whenever a new component has been added to the entity
 		auto hComponent = GetEntity().FindComponent(componentTypeName);
 		if(hComponent.expired())
+		{
+			Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but entity has no component of type '"<<componentTypeName<<"'!"<<Con::endl;
 			continue;
+		}
 		auto &memberName = componentPath->second;
 		if(memberName.IsEmpty())
+		{
+			Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but no member name has been specified!"<<Con::endl;
 			continue;
+		}
 		auto memberPath = memberName;
 		auto channelIdx = it -channels.begin();
 		CEAnim2InitializeChannelValueSubmitter evData {memberPath};
@@ -294,13 +309,18 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(panima::Anima
 		}
 
 		auto memberIdx = hComponent->GetMemberIndex(memberPath.GetString());
+		if(!memberIdx.has_value())
+		{
+			Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', entity component has no member with name '"<<memberName<<"'!"<<Con::endl;
+			continue;
+		}
 		auto channelValueType = channel->GetValueType();
 		auto *memberInfo = hComponent->GetMemberInfo(*memberIdx);
 		auto valueType = memberInfo->type;
 		
 		auto &component = *hComponent;
 		auto *valueComponents = path.GetComponents();
-		auto vsGetMemberChannelSubmitter = [valueComponents,&memberIdx,channelIdx,&channelValueSubmitters,&component]<typename TMember>(auto tag) mutable {
+		auto vsGetMemberChannelSubmitter = [valueComponents,&path,&memberIdx,channelIdx,&channelValueSubmitters,&component]<typename TMember>(auto tag) mutable {
 			using TChannel = decltype(tag)::type;
 			constexpr auto setMemberValue = [](const pragma::ComponentMemberInfo &memberInfo,pragma::BaseEntityComponent &component,const void *value,void *userData) {
 				memberInfo.setterFunction(memberInfo,component,value);
@@ -318,7 +338,10 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(panima::Anima
 			if constexpr(numComponentsChannel > 0 && numComponentsMember > 0 && is_type_compatible(channelType,memberType))
 			{
 				if(valueComponents->empty() || valueComponents->size() > numComponentsChannel)
+				{
+					Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but member component count is not in the allowed range of [1,"<<numComponentsChannel<<"] for the type of the specified member!"<<Con::endl;
 					return;
+				}
 				std::array<uint32_t,numComponentsChannel> componentIndices;
 				for(uint32_t idx = 0; auto &strComponent : *valueComponents)
 				{
@@ -331,7 +354,11 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(panima::Anima
 							componentIndices[idx] = 0;
 						else if(is_vector_component<1>(strComponent))
 							componentIndices[idx] = 1;
-						else return; // Unknown component type
+						else
+						{
+							Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but member component '"<<strComponent<<"' is not recognized as a valid identifier for the member type!"<<Con::endl;
+							return; // Unknown component type
+						}
 						break;
 					}
 					case udm::Type::Vector3:
@@ -343,7 +370,11 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(panima::Anima
 							componentIndices[idx] = 1;
 						else if(is_vector_component<2>(strComponent))
 							componentIndices[idx] = 2;
-						else return; // Unknown component type
+						else
+						{
+							Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but member component '"<<strComponent<<"' is not recognized as a valid identifier for the member type!"<<Con::endl;
+							return; // Unknown component type
+						}
 						break;
 					}
 					case udm::Type::Vector4:
@@ -357,7 +388,11 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(panima::Anima
 							componentIndices[idx] = 2;
 						else if(is_vector_component<3>(strComponent))
 							componentIndices[idx] = 3;
-						else return; // Unknown component type
+						else
+						{
+							Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but member component '"<<strComponent<<"' is not recognized as a valid identifier for the member type!"<<Con::endl;
+							return; // Unknown component type
+						}
 						break;
 					}
 					case udm::Type::Quaternion:
@@ -370,7 +405,11 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(panima::Anima
 							componentIndices[idx] = 2;
 						else if(strComponent == "z")
 							componentIndices[idx] = 3;
-						else return; // Unknown component type
+						else
+						{
+							Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but member component '"<<strComponent<<"' is not recognized as a valid identifier for the member type!"<<Con::endl;
+							return; // Unknown component type
+						}
 						break;
 					}
 					case udm::Type::EulerAngles:
@@ -381,7 +420,11 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(panima::Anima
 							componentIndices[idx] = 1;
 						else if(strComponent == "r")
 							componentIndices[idx] = 2;
-						else return; // Unknown component type
+						else
+						{
+							Con::cwar<<"WARNING: Attempted to play animation channel with path '"<<path.ToUri()<<"', but member component '"<<strComponent<<"' is not recognized as a valid identifier for the member type!"<<Con::endl;
+							return; // Unknown component type
+						}
 						break;
 					}
 					}

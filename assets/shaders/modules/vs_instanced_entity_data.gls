@@ -26,6 +26,6 @@ EntityInstanceData get_instance_data()
 }
 mat4 get_instanced_model_matrix() {return get_instance_data().M;}
 vec4 get_instanced_instance_color() {return get_instance_data().color;}
-bool is_instanced_weighted() {return (get_instance_data().flags.x &FINSTANCE_WEIGHTED) != 0;}
+bool is_instanced_weighted() {return (get_instance_data().flags &FINSTANCE_WEIGHTED) != 0;}
 
 #endif

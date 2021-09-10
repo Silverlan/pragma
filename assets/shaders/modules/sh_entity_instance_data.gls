@@ -5,7 +5,9 @@ struct EntityInstanceData
 {
 	mat4 M;
 	vec4 color;
-	ivec4 flags; // flags.x = flags, rest is padding
+	uint flags;
+	uint entityIndex;
+	ivec2 padding;
 };
 
 #endif

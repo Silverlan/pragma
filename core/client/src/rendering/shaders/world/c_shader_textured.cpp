@@ -25,6 +25,7 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_command_buffer.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <sharedutils/magic_enum.hpp>
 #include <sharedutils/util_path.hpp>
 #include <cmaterial.h>
 
@@ -262,20 +263,16 @@ void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelin
 	//if(pipelineIdx == umath::to_integral(ShaderGameWorldPipeline::Reflection))
 	//	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::FrontBit);
 
-#if 0
-	// TODO: Technically we shouldn't have to write depth values, since
-	// they've already been written in the depth prepass, but that causes
-	// visual glitches for translucent objects. Find the cause!
-	pipelineInfo.ToggleDepthWrites(true);
-#else
-	pipelineInfo.ToggleDepthWrites(false);
-#endif
+	//uint32_t isSet = static_cast<uint32_t>(IsSpecializationConstantSet(pipelineIdx,flag));
+	auto isTranslucentPipeline = IsSpecializationConstantSet(pipelineIdx,GameShaderSpecializationConstantFlag::EnableTranslucencyBit);
+	if(isTranslucentPipeline)
+		SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
+	pipelineInfo.ToggleDepthWrites(false); // Already written in depth pre-pass
 	pipelineInfo.ToggleDepthTest(true,prosper::CompareOp::LessOrEqual);
 
 	//pipelineInfo.ToggleDepthBias(true,0.f,0.f,0.f);
 	//pipelineInfo.ToggleDynamicState(true,prosper::DynamicState::DepthBias); // Required for decals
 
-	SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
 	InitializeGfxPipelineVertexAttributes(pipelineInfo,pipelineIdx);
 	InitializeGfxPipelinePushConstantRanges(pipelineInfo,pipelineIdx);
 	InitializeGfxPipelineDescriptorSets(pipelineInfo,pipelineIdx);
@@ -405,6 +402,9 @@ std::optional<ShaderGameWorldLightingPass::MaterialData> ShaderGameWorldLighting
 	data->GetVector3("color_factor",reinterpret_cast<Vector3*>(&matData.color));
 	data->GetFloat("alpha_factor",&matData.color.a);
 
+	if(data->GetBool("debug_mode",false))
+		matFlags |= MaterialFlags::Debug;
+
 	auto *glowMap = mat.GetGlowMap();
 	if(glowMap != nullptr && glowMap->texture != nullptr)
 	{
@@ -476,9 +476,15 @@ std::optional<ShaderGameWorldLightingPass::MaterialData> ShaderGameWorldLighting
 		matData.roughnessFactor *= (1.f -specularFactor);
 	}
 
-	auto alphaMode = static_cast<int32_t>(AlphaMode::Opaque);
-	data->GetInt("alpha_mode",&alphaMode);
-	matData.alphaMode = static_cast<AlphaMode>(alphaMode);
+	auto alphaMode = AlphaMode::Opaque;
+	if(data->IsString("alpha_mode"))
+	{
+		auto e = magic_enum::enum_cast<AlphaMode>(data->GetString("alpha_mode"));
+		alphaMode = e.has_value() ? *e : AlphaMode::Opaque;
+	}
+	else
+		alphaMode = static_cast<AlphaMode>(data->GetInt("alpha_mode",umath::to_integral(AlphaMode::Opaque)));
+	matData.alphaMode = alphaMode;
 
 	auto alphaCutoff = 0.5f;
 	data->GetFloat("alpha_cutoff",&alphaCutoff);

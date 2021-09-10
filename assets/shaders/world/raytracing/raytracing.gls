@@ -146,7 +146,7 @@ void raycast_mesh_detail(
 		vec3 pos1 = v1.position.xyz;
 		vec3 pos2 = v2.position.xyz;
 
-		if((instanceData.flags.x &FINSTANCE_WEIGHTED) != 0 && subMeshInfo.vertexWeightBufferIndex != INVALID_ARRAY_INDEX)
+		if((instanceData.flags &FINSTANCE_WEIGHTED) != 0 && subMeshInfo.vertexWeightBufferIndex != INVALID_ARRAY_INDEX)
 		{
 			VertexWeight vw0 = vertexWeightBuffer.weights[subMeshInfo.vertexWeightBufferIndex +idx0];
 			VertexWeight vw1 = vertexWeightBuffer.weights[subMeshInfo.vertexWeightBufferIndex +idx1];

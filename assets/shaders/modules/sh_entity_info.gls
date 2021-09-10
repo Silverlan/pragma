@@ -15,6 +15,7 @@ mat4 get_model_matrix() {return u_instance.data.M;}
 vec4 get_instance_color() {return u_instance.data.color;}
 #endif
 
-bool is_weighted() {return (u_instance.data.flags.x &FINSTANCE_WEIGHTED) != 0;}
+bool is_weighted() {return (u_instance.data.flags &FINSTANCE_WEIGHTED) != 0;}
+uint get_entity_index() {return u_instance.data.entityIndex;}
 
 #endif

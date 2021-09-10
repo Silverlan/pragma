@@ -578,6 +578,7 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 		m_instanceData.modelMatrix = m;
 		m_instanceData.color = color;
 		m_instanceData.renderFlags = renderFlags;
+		m_instanceData.entityIndex = GetEntity().GetLocalIndex();
 		bufferDirty = true;
 	}
 	auto &renderBuffer = GetSwapRenderBuffer();

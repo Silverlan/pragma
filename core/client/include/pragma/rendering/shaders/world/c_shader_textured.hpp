@@ -181,7 +181,8 @@ namespace pragma
 			FMAT_GLOW_MODE_4 = FMAT_GLOW_MODE_3<<1,
 
 			DiffuseSRGB = FMAT_GLOW_MODE_4<<1u,
-			GlowSRGB = DiffuseSRGB<<1u
+			GlowSRGB = DiffuseSRGB<<1u,
+			Debug = GlowSRGB<<1u
 		};
 
 #pragma pack(push,1)

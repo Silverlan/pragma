@@ -179,6 +179,8 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	entityComponentDef.def("GetTickPolicy",&pragma::BaseEntityComponent::GetTickPolicy);
 	entityComponentDef.def("GetNextTick",&pragma::BaseEntityComponent::GetNextTick);
 	entityComponentDef.def("SetNextTick",&pragma::BaseEntityComponent::SetNextTick);
+	entityComponentDef.def("GetMemberIndex",&pragma::BaseEntityComponent::GetMemberIndex);
+	entityComponentDef.def("GetMemberInfo",&pragma::BaseEntityComponent::GetMemberInfo);
 	entityComponentDef.def("IsValid",static_cast<bool(*)(lua_State*,pragma::BaseEntityComponent*)>([](lua_State *l,pragma::BaseEntityComponent *hComponent) {
 		return hComponent != nullptr;
 	}));

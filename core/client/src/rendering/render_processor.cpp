@@ -671,8 +671,11 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const pragma::rendering:
 				// the regular depth prepass doesn't do any texture lookups, so we may have to
 				// switch the pipeline here.
 				// TODO: This isn't very pretty, find a better way to do this?
-				auto translucent = (mat->GetAlphaMode() != AlphaMode::Opaque);
-				auto pipeline = translucent ? ShaderPrepass::Pipeline::AlphaTest : ShaderPrepass::Pipeline::Opaque;
+				auto alphaMode = mat->GetAlphaMode();
+				if(alphaMode == AlphaMode::Blend)
+					continue; // Skip translucent objects for prepass
+				auto enableAlphaTest = (alphaMode == AlphaMode::Mask);
+				auto pipeline = enableAlphaTest ? ShaderPrepass::Pipeline::AlphaTest : ShaderPrepass::Pipeline::Opaque;
 
 				prosper::PipelineID pipelineId;
 				if(!static_cast<pragma::ShaderPrepass*>(m_shaderScene)->GetPipelineId(pipelineId,umath::to_integral(pipeline)) || !BindShader(pipelineId))

@@ -22,10 +22,9 @@ void BaseFlexComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	AddEventCallback(BaseModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto &changeData = static_cast<CEOnModelChanged&>(evData.get());
 		OnModelChanged(changeData.model);
-		return util::EventReply::Unhandled;
 	});
 
 	auto &mdl = GetEntity().GetModel();

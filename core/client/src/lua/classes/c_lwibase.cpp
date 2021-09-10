@@ -340,7 +340,10 @@ void Lua::WIProgressBar::register_class(luabind::class_<::WIProgressBar,::WIBase
 	classDef.def("SetOptions",&::WIProgressBar::SetOptions);
 	classDef.def("AddOption",&::WIProgressBar::AddOption);
 	classDef.def("SetPostFix",&::WIProgressBar::SetPostFix);
-	classDef.def("GetRange",&::WIProgressBar::GetRange);
+	classDef.def("GetRange",+[](::WIProgressBar &el) -> std::tuple<float,float,float> {
+		auto range = el.GetRange();
+		return {range[0],range[1],range[2]};
+	});
 	//classDef.def("SetValueTranslator",&SetValueTranslator);
 }
 

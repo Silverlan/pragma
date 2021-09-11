@@ -6,7 +6,7 @@
  */
 
 #include "stdafx_shared.h"
-#include "pragma/entities/components/animated_2_component.hpp"
+#include "pragma/entities/components/panima_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_time_scale_component.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
@@ -24,16 +24,16 @@
 
 using namespace pragma;
 #pragma optimize("",off)
-ComponentEventId Animated2Component::EVENT_HANDLE_ANIMATION_EVENT = pragma::INVALID_COMPONENT_ID;
-ComponentEventId Animated2Component::EVENT_ON_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
-ComponentEventId Animated2Component::EVENT_ON_ANIMATION_COMPLETE = pragma::INVALID_COMPONENT_ID;
-ComponentEventId Animated2Component::EVENT_ON_ANIMATION_START = pragma::INVALID_COMPONENT_ID;
-ComponentEventId Animated2Component::EVENT_MAINTAIN_ANIMATIONS = pragma::INVALID_COMPONENT_ID;
-ComponentEventId Animated2Component::EVENT_ON_ANIMATIONS_UPDATED = pragma::INVALID_COMPONENT_ID;
-ComponentEventId Animated2Component::EVENT_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
-ComponentEventId Animated2Component::EVENT_TRANSLATE_ANIMATION = pragma::INVALID_COMPONENT_ID;
-ComponentEventId Animated2Component::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER = pragma::INVALID_COMPONENT_ID;
-void Animated2Component::RegisterEvents(pragma::EntityComponentManager &componentManager)
+ComponentEventId PanimaComponent::EVENT_HANDLE_ANIMATION_EVENT = pragma::INVALID_COMPONENT_ID;
+ComponentEventId PanimaComponent::EVENT_ON_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
+ComponentEventId PanimaComponent::EVENT_ON_ANIMATION_COMPLETE = pragma::INVALID_COMPONENT_ID;
+ComponentEventId PanimaComponent::EVENT_ON_ANIMATION_START = pragma::INVALID_COMPONENT_ID;
+ComponentEventId PanimaComponent::EVENT_MAINTAIN_ANIMATIONS = pragma::INVALID_COMPONENT_ID;
+ComponentEventId PanimaComponent::EVENT_ON_ANIMATIONS_UPDATED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId PanimaComponent::EVENT_PLAY_ANIMATION = pragma::INVALID_COMPONENT_ID;
+ComponentEventId PanimaComponent::EVENT_TRANSLATE_ANIMATION = pragma::INVALID_COMPONENT_ID;
+ComponentEventId PanimaComponent::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER = pragma::INVALID_COMPONENT_ID;
+void PanimaComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	EVENT_HANDLE_ANIMATION_EVENT = componentManager.RegisterEvent("A2_HANDLE_ANIMATION_EVENT");
 	EVENT_ON_PLAY_ANIMATION = componentManager.RegisterEvent("A2_ON_PLAY_ANIMATION");
@@ -45,7 +45,7 @@ void Animated2Component::RegisterEvents(pragma::EntityComponentManager &componen
 	EVENT_TRANSLATE_ANIMATION = componentManager.RegisterEvent("A2_TRANSLATE_ANIMATION");
 	EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER = componentManager.RegisterEvent("A2_INITIALIZE_CHANNEL_VALUE_SUBMITTER");
 }
-std::optional<std::pair<std::string,util::Path>> Animated2Component::ParseComponentChannelPath(const panima::ChannelPath &path)
+std::optional<std::pair<std::string,util::Path>> PanimaComponent::ParseComponentChannelPath(const panima::ChannelPath &path)
 {
 	size_t offset = 0;
 	if(path.path.GetComponent(offset,&offset) != "ec")
@@ -54,13 +54,13 @@ std::optional<std::pair<std::string,util::Path>> Animated2Component::ParseCompon
 	util::Path componentPath {path.path.GetString().substr(offset)};
 	return std::pair<std::string,util::Path>{std::string{componentName},std::move(componentPath)};
 }
-Animated2Component::Animated2Component(BaseEntity &ent)
+PanimaComponent::PanimaComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_playbackRate(util::FloatProperty::Create(1.f))
 {}
-void Animated2Component::SetPlaybackRate(float rate) {*m_playbackRate = rate;}
-float Animated2Component::GetPlaybackRate() const {return *m_playbackRate;}
-const util::PFloatProperty &Animated2Component::GetPlaybackRateProperty() const {return m_playbackRate;}
-panima::PAnimationManager Animated2Component::AddAnimationManager()
+void PanimaComponent::SetPlaybackRate(float rate) {*m_playbackRate = rate;}
+float PanimaComponent::GetPlaybackRate() const {return *m_playbackRate;}
+const util::PFloatProperty &PanimaComponent::GetPlaybackRateProperty() const {return m_playbackRate;}
+panima::PAnimationManager PanimaComponent::AddAnimationManager()
 {
 	auto player = panima::AnimationManager::Create();
 	panima::AnimationPlayerCallbackInterface callbackInteface {};
@@ -79,7 +79,7 @@ panima::PAnimationManager Animated2Component::AddAnimationManager()
 	m_animationManagers.push_back(player);
 	return player;
 }
-void Animated2Component::RemoveAnimationManager(const panima::AnimationManager &player)
+void PanimaComponent::RemoveAnimationManager(const panima::AnimationManager &player)
 {
 	auto it = std::find_if(m_animationManagers.begin(),m_animationManagers.end(),[&player](const panima::PAnimationManager &playerOther) {
 		return playerOther.get() == &player;
@@ -223,7 +223,7 @@ struct get_member_channel_submitter_wrapper {
 	}
 };
 
-void Animated2Component::InitializeAnimationChannelValueSubmitters()
+void PanimaComponent::InitializeAnimationChannelValueSubmitters()
 {
 	for(auto &animManager : m_animationManagers)
 		InitializeAnimationChannelValueSubmitters(*animManager);
@@ -255,7 +255,7 @@ template<uint32_t I> requires(I < 4)
 	return false;
 }
 
-void Animated2Component::InitializeAnimationChannelValueSubmitters(panima::AnimationManager &manager)
+void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::AnimationManager &manager)
 {
 	auto *anim = manager.GetCurrentAnimation();
 	auto &channelValueSubmitters = manager.GetChannelValueSubmitters();
@@ -454,12 +454,12 @@ void Animated2Component::InitializeAnimationChannelValueSubmitters(panima::Anima
 	}
 }
 
-void Animated2Component::PlayAnimation(panima::AnimationManager &manager,panima::Animation &anim)
+void PanimaComponent::PlayAnimation(panima::AnimationManager &manager,panima::Animation &anim)
 {
 	manager->SetAnimation(anim);
 	InitializeAnimationChannelValueSubmitters(manager);
 }
-void Animated2Component::ReloadAnimation(panima::AnimationManager &manager)
+void PanimaComponent::ReloadAnimation(panima::AnimationManager &manager)
 {
 	auto *anim = manager->GetAnimation();
 	if(!anim)
@@ -469,15 +469,15 @@ void Animated2Component::ReloadAnimation(panima::AnimationManager &manager)
 	manager->SetCurrentTime(t);
 
 }
-void Animated2Component::ClearAnimationManagers()
+void PanimaComponent::ClearAnimationManagers()
 {
 	m_animationManagers.clear();
 }
-bool Animated2Component::UpdateAnimations(double dt)
+bool PanimaComponent::UpdateAnimations(double dt)
 {
 	return MaintainAnimations(dt);
 }
-bool Animated2Component::MaintainAnimations(double dt)
+bool PanimaComponent::MaintainAnimations(double dt)
 {
 	CEAnim2MaintainAnimations evData{dt};
 	if(InvokeEventCallbacks(EVENT_MAINTAIN_ANIMATIONS,evData) == util::EventReply::Handled)
@@ -491,7 +491,7 @@ bool Animated2Component::MaintainAnimations(double dt)
 	return true;
 }
 
-void Animated2Component::AdvanceAnimations(double dt)
+void PanimaComponent::AdvanceAnimations(double dt)
 {
 	auto &ent = GetEntity();
 	auto pTimeScaleComponent = ent.GetTimeScaleComponent();
@@ -519,9 +519,9 @@ void Animated2Component::AdvanceAnimations(double dt)
 		}
 	}
 }
-void Animated2Component::InitializeLuaObject(lua_State *l) {pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void PanimaComponent::InitializeLuaObject(lua_State *l) {pragma::BaseLuaHandle::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
-void Animated2Component::Initialize()
+void PanimaComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
@@ -530,9 +530,9 @@ void Animated2Component::Initialize()
 	});
 }
 
-void Animated2Component::Save(udm::LinkedPropertyWrapperArg udm) {}
-void Animated2Component::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) {}
-void Animated2Component::ResetAnimation(const std::shared_ptr<Model> &mdl) {}
+void PanimaComponent::Save(udm::LinkedPropertyWrapperArg udm) {}
+void PanimaComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) {}
+void PanimaComponent::ResetAnimation(const std::shared_ptr<Model> &mdl) {}
 
 /////////////////
 

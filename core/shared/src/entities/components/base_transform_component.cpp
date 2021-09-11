@@ -11,7 +11,7 @@
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_observable_component.hpp"
-#include "pragma/entities/components/animated_2_component.hpp"
+#include "pragma/entities/components/panima_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/lua/luacallback.h"

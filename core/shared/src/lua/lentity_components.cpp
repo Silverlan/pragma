@@ -23,7 +23,7 @@
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/physics/raytraces.h"
 #include "pragma/lua/lentity_components_base_types.hpp"
-#include "pragma/entities/components/animated_2_component.hpp"
+#include "pragma/entities/components/panima_component.hpp"
 #include "pragma/entities/components/velocity_component.hpp"
 #include "pragma/entities/components/composite_component.hpp"
 #include "pragma/entities/components/submergible_component.hpp"
@@ -246,41 +246,41 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defComposite.scope[defCompositeGroup];
 	entsMod[defComposite];
 	
-	auto defAnimated2 = luabind::class_<pragma::Animated2Component,pragma::BaseEntityComponent>("Animated2Component");
+	auto defAnimated2 = luabind::class_<pragma::PanimaComponent,pragma::BaseEntityComponent>("PanimaComponent");
 	defAnimated2.scope[
-		luabind::def("parse_component_channel_path",&pragma::Animated2Component::ParseComponentChannelPath)
+		luabind::def("parse_component_channel_path",&pragma::PanimaComponent::ParseComponentChannelPath)
 	];
-	defAnimated2.def("SetPlaybackRate",&pragma::Animated2Component::SetPlaybackRate);
-	defAnimated2.def("GetPlaybackRate",&pragma::Animated2Component::GetPlaybackRate);
-	defAnimated2.def("GetPlaybackRateProperty",&pragma::Animated2Component::GetPlaybackRateProperty);
-	defAnimated2.def("ClearAnimationManagers",&pragma::Animated2Component::ClearAnimationManagers);
-	defAnimated2.def("AddAnimationManager",&pragma::Animated2Component::AddAnimationManager);
-	defAnimated2.def("RemoveAnimationManager",&pragma::Animated2Component::RemoveAnimationManager);
-	defAnimated2.def("GetAnimationManagers",+[](lua_State *l,pragma::Animated2Component &hComponent) -> luabind::tableT<panima::AnimationManager> {
+	defAnimated2.def("SetPlaybackRate",&pragma::PanimaComponent::SetPlaybackRate);
+	defAnimated2.def("GetPlaybackRate",&pragma::PanimaComponent::GetPlaybackRate);
+	defAnimated2.def("GetPlaybackRateProperty",&pragma::PanimaComponent::GetPlaybackRateProperty);
+	defAnimated2.def("ClearAnimationManagers",&pragma::PanimaComponent::ClearAnimationManagers);
+	defAnimated2.def("AddAnimationManager",&pragma::PanimaComponent::AddAnimationManager);
+	defAnimated2.def("RemoveAnimationManager",&pragma::PanimaComponent::RemoveAnimationManager);
+	defAnimated2.def("GetAnimationManagers",+[](lua_State *l,pragma::PanimaComponent &hComponent) -> luabind::tableT<panima::AnimationManager> {
 		auto t = luabind::newtable(l);
 		auto &animManagers = hComponent.GetAnimationManagers();
 		for(auto i=decltype(animManagers.size()){0u};i<animManagers.size();++i)
 			animManagers[i +1] = animManagers[i];
 		return t;
 	});
-	defAnimated2.def("GetAnimationManager",+[](lua_State *l,pragma::Animated2Component &hComponent,uint32_t idx) -> luabind::tableT<panima::AnimationManager> {
+	defAnimated2.def("GetAnimationManager",+[](lua_State *l,pragma::PanimaComponent &hComponent,uint32_t idx) -> luabind::tableT<panima::AnimationManager> {
 		auto &animManagers = hComponent.GetAnimationManagers();
 		if(idx >= animManagers.size())
 			return luabind::object{};
 		return luabind::object{l,animManagers[idx]};
 	});
-	defAnimated2.def("PlayAnimation",&pragma::Animated2Component::PlayAnimation);
-	defAnimated2.def("ReloadAnimation",&pragma::Animated2Component::ReloadAnimation);
-	defAnimated2.def("AdvanceAnimations",&pragma::Animated2Component::AdvanceAnimations);
-	defAnimated2.add_static_constant("EVENT_HANDLE_ANIMATION_EVENT",pragma::Animated2Component::EVENT_HANDLE_ANIMATION_EVENT);
-	defAnimated2.add_static_constant("EVENT_ON_PLAY_ANIMATION",pragma::Animated2Component::EVENT_ON_PLAY_ANIMATION);
-	defAnimated2.add_static_constant("EVENT_ON_ANIMATION_COMPLETE",pragma::Animated2Component::EVENT_ON_ANIMATION_COMPLETE);
-	defAnimated2.add_static_constant("EVENT_ON_ANIMATION_START",pragma::Animated2Component::EVENT_ON_ANIMATION_START);
-	defAnimated2.add_static_constant("EVENT_MAINTAIN_ANIMATIONS",pragma::Animated2Component::EVENT_MAINTAIN_ANIMATIONS);
-	defAnimated2.add_static_constant("EVENT_ON_ANIMATIONS_UPDATED",pragma::Animated2Component::EVENT_ON_ANIMATIONS_UPDATED);
-	defAnimated2.add_static_constant("EVENT_PLAY_ANIMATION",pragma::Animated2Component::EVENT_PLAY_ANIMATION);
-	defAnimated2.add_static_constant("EVENT_TRANSLATE_ANIMATION",pragma::Animated2Component::EVENT_TRANSLATE_ANIMATION);
-	defAnimated2.add_static_constant("EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER",pragma::Animated2Component::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER);
+	defAnimated2.def("PlayAnimation",&pragma::PanimaComponent::PlayAnimation);
+	defAnimated2.def("ReloadAnimation",&pragma::PanimaComponent::ReloadAnimation);
+	defAnimated2.def("AdvanceAnimations",&pragma::PanimaComponent::AdvanceAnimations);
+	defAnimated2.add_static_constant("EVENT_HANDLE_ANIMATION_EVENT",pragma::PanimaComponent::EVENT_HANDLE_ANIMATION_EVENT);
+	defAnimated2.add_static_constant("EVENT_ON_PLAY_ANIMATION",pragma::PanimaComponent::EVENT_ON_PLAY_ANIMATION);
+	defAnimated2.add_static_constant("EVENT_ON_ANIMATION_COMPLETE",pragma::PanimaComponent::EVENT_ON_ANIMATION_COMPLETE);
+	defAnimated2.add_static_constant("EVENT_ON_ANIMATION_START",pragma::PanimaComponent::EVENT_ON_ANIMATION_START);
+	defAnimated2.add_static_constant("EVENT_MAINTAIN_ANIMATIONS",pragma::PanimaComponent::EVENT_MAINTAIN_ANIMATIONS);
+	defAnimated2.add_static_constant("EVENT_ON_ANIMATIONS_UPDATED",pragma::PanimaComponent::EVENT_ON_ANIMATIONS_UPDATED);
+	defAnimated2.add_static_constant("EVENT_PLAY_ANIMATION",pragma::PanimaComponent::EVENT_PLAY_ANIMATION);
+	defAnimated2.add_static_constant("EVENT_TRANSLATE_ANIMATION",pragma::PanimaComponent::EVENT_TRANSLATE_ANIMATION);
+	defAnimated2.add_static_constant("EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER",pragma::PanimaComponent::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER);
 	entsMod[defAnimated2];
 
 	auto defDriverC = luabind::class_<pragma::AnimationDriverComponent,pragma::BaseEntityComponent>("AnimationDriverComponent");

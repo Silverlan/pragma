@@ -35,7 +35,7 @@ namespace Lua::animation
 
 void Lua::animation::register_library(Lua::Interface &lua)
 {
-	auto animMod = luabind::module(lua.GetState(),"animation");
+	auto animMod = luabind::module(lua.GetState(),"panima");
 
 	auto cdPose = luabind::class_<panima::Pose>("Pose");
 	cdPose.def(luabind::tostring(luabind::self));
@@ -273,7 +273,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	});
 	animMod[cdSlice];
 
-	auto cdAnim2 = luabind::class_<panima::Animation>("Animation2");
+	auto cdAnim2 = luabind::class_<panima::Animation>("Animation");
 	cdAnim2.def(luabind::tostring(luabind::self));
 	cdAnim2.def(luabind::const_self ==luabind::const_self);
 	cdAnim2.scope[luabind::def("create",+[](lua_State *l) {

@@ -4,8 +4,8 @@
  *
  * Copyright (c) 2021 Silverlan */
 
-#ifndef __ANIMATED_COMPONENT_HPP__
-#define __ANIMATED_COMPONENT_HPP__
+#ifndef __PANIMA_COMPONENT_HPP__
+#define __PANIMA_COMPONENT_HPP__
 
 #include "pragma/entities/components/base_entity_component.hpp"
 #include "pragma/types.hpp"
@@ -16,7 +16,7 @@ struct AnimationEvent;
 namespace util {class Path;};
 namespace pragma
 {
-	class DLLNETWORK Animated2Component final
+	class DLLNETWORK PanimaComponent final
 		: public BaseEntityComponent
 	{
 	public:
@@ -32,13 +32,13 @@ namespace pragma
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 		static std::optional<std::pair<std::string,util::Path>> ParseComponentChannelPath(const panima::ChannelPath &path);
 		
-		Animated2Component(BaseEntity &ent);
+		PanimaComponent(BaseEntity &ent);
 		void SetPlaybackRate(float rate);
 		float GetPlaybackRate() const;
 		const util::PFloatProperty &GetPlaybackRateProperty() const;
 		
 		std::vector<panima::PAnimationManager> &GetAnimationManagers() {return m_animationManagers;}
-		const std::vector<panima::PAnimationManager> &GetAnimationManagers() const {return const_cast<Animated2Component*>(this)->GetAnimationManagers();}
+		const std::vector<panima::PAnimationManager> &GetAnimationManagers() const {return const_cast<PanimaComponent*>(this)->GetAnimationManagers();}
 		panima::PAnimationManager AddAnimationManager();
 		void RemoveAnimationManager(const panima::AnimationManager &player);
 		void ClearAnimationManagers();

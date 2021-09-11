@@ -36,7 +36,7 @@
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_animated_component.hpp"
 #include "pragma/entities/components/animation_driver_component.hpp"
-#include "pragma/entities/components/animated_2_component.hpp"
+#include "pragma/entities/components/panima_component.hpp"
 #include "pragma/entities/entity_component_manager.hpp"
 #include "pragma/entities/prop/prop_base.h"
 #include "pragma/entities/components/base_physics_component.hpp"
@@ -386,7 +386,7 @@ void Game::Initialize()
 	InitializeEntityComponents(*m_componentManager);
 
 	auto r = m_componentManager->GetComponentTypeId("animated",m_animatedComponentId);
-	r = r && m_componentManager->GetComponentTypeId("animated2",m_animated2ComponentId);
+	r = r && m_componentManager->GetComponentTypeId("panima",m_animated2ComponentId);
 	r = r && m_componentManager->GetComponentTypeId("animation_driver",m_animationDriverComponentId);
 	assert(r);
 	if(!r)
@@ -616,9 +616,9 @@ void Game::UpdateEntityAnimations(double dt)
 	for(auto *ent : EntityIterator{*this,m_animatedComponentId})
 		ent->GetAnimatedComponent()->UpdateAnimations(dt);
 	EntityIterator entIt {*this};
-	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::Animated2Component>>();
+	entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::PanimaComponent>>();
 	for(auto *ent : entIt)
-		ent->GetComponent<pragma::Animated2Component>()->UpdateAnimations(dt);
+		ent->GetComponent<pragma::PanimaComponent>()->UpdateAnimations(dt);
 }
 
 void Game::UpdateEntityAnimationDrivers(double dt)

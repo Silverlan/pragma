@@ -11,7 +11,7 @@
 #include "pragma/entities/components/base_time_scale_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_sound_emitter_component.hpp"
-#include "pragma/entities/components/animated_2_component.hpp"
+#include "pragma/entities/components/panima_component.hpp"
 #include "pragma/entities/entity_component_system_t.hpp"
 #include "pragma/model/model.h"
 #include "pragma/audio/alsound_type.h"

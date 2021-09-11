@@ -7,7 +7,7 @@
 
 #include "stdafx_shared.h"
 #include "pragma/entities/components/animation_driver_component.hpp"
-#include "pragma/entities/components/animated_2_component.hpp"
+#include "pragma/entities/components/panima_component.hpp"
 #include "pragma/entities/entity_iterator.hpp"
 #include <sharedutils/util_hash.hpp>
 #include <udm.hpp>
@@ -40,11 +40,11 @@ void pragma::AnimationDriverComponent::OnRemove()
 void AnimationDriverComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);
-	/*if(typeid(component) == typeid(Animated2Component))
+	/*if(typeid(component) == typeid(PanimaComponent))
 	{
 		if(m_cbOnAnimationsUpdated.IsValid())
 			m_cbOnAnimationsUpdated.Remove();
-		m_cbOnAnimationsUpdated = component.AddEventCallback(Animated2Component::EVENT_ON_ANIMATIONS_UPDATED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+		m_cbOnAnimationsUpdated = component.AddEventCallback(PanimaComponent::EVENT_ON_ANIMATIONS_UPDATED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			ApplyDrivers();
 			return util::EventReply::Unhandled;
 		});
@@ -53,7 +53,7 @@ void AnimationDriverComponent::OnEntityComponentAdded(BaseEntityComponent &compo
 void AnimationDriverComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentRemoved(component);
-	/*if(typeid(component) == typeid(Animated2Component))
+	/*if(typeid(component) == typeid(PanimaComponent))
 	{
 		if(m_cbOnAnimationsUpdated.IsValid())
 			m_cbOnAnimationsUpdated.Remove();

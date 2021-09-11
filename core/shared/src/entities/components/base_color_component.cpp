@@ -8,7 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/entities/components/base_color_component.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
-#include "pragma/entities/components/animated_2_component.hpp"
+#include "pragma/entities/components/panima_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include <udm.hpp>

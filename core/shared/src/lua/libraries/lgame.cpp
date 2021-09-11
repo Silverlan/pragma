@@ -413,8 +413,8 @@ void Lua::game::register_shared_functions(luabind::module_ &modGame)
 	];
 
 	auto classDefDescriptor = luabind::class_<pragma::ValueDriverDescriptor>("ValueDriverDescriptor");
-	classDefDescriptor.def(luabind::constructor<lua_State*,std::string,std::unordered_map<std::string,util::Path>,std::unordered_map<std::string,udm::PProperty>>());
-	classDefDescriptor.def(luabind::constructor<lua_State*,std::string,std::unordered_map<std::string,util::Path>>());
+	classDefDescriptor.def(luabind::constructor<lua_State*,std::string,std::unordered_map<std::string,std::string>,std::unordered_map<std::string,udm::PProperty>>());
+	classDefDescriptor.def(luabind::constructor<lua_State*,std::string,std::unordered_map<std::string,std::string>>());
 	classDefDescriptor.def(luabind::constructor<lua_State*,std::string>());
 	classDefDescriptor.property("expression",static_cast<std::string(*)(lua_State*,pragma::ValueDriverDescriptor&)>([](lua_State *l,pragma::ValueDriverDescriptor &descriptor) -> std::string {
 		return descriptor.GetExpression();

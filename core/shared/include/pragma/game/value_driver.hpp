@@ -18,11 +18,11 @@ namespace pragma
 	{
 		ValueDriverDescriptor()=default;
 		ValueDriverDescriptor(
-			lua_State *l,std::string expression,std::unordered_map<std::string,util::Path> variables,
+			lua_State *l,std::string expression,std::unordered_map<std::string,std::string> variables,
 			std::unordered_map<std::string,udm::PProperty> constants
 		);
 		ValueDriverDescriptor(
-			lua_State *l,std::string expression,std::unordered_map<std::string,util::Path> variables
+			lua_State *l,std::string expression,std::unordered_map<std::string,std::string> variables
 		) : ValueDriverDescriptor{l,expression,std::move(variables),{}} {}
 		ValueDriverDescriptor(
 			lua_State *l,std::string expression
@@ -37,10 +37,10 @@ namespace pragma
 			return AddConstant(name,udm::Property::Create<T>(std::forward<T>(value)));
 		}
 		void AddConstant(const std::string &name,const udm::PProperty &prop);
-		void AddReference(const std::string &name,util::Path path);
+		void AddReference(const std::string &name,std::string path);
 
 		const std::unordered_map<std::string,udm::PProperty> &GetConstants() const {return m_constants;}
-		const std::unordered_map<std::string,util::Path> &GetReferences() const {return m_variables;}
+		const std::unordered_map<std::string,std::string> &GetReferences() const {return m_variables;}
 	private:
 		void RebuildLuaExpression() const;
 		std::string m_expression;
@@ -49,12 +49,13 @@ namespace pragma
 		lua_State *m_luaState = nullptr;
 
 		std::unordered_map<std::string,udm::PProperty> m_constants;
-		std::unordered_map<std::string,util::Path> m_variables;
+		std::unordered_map<std::string,std::string> m_variables;
 	};
 	struct DLLNETWORK ValueDriverVariable
 	{
-		static std::optional<ValueDriverVariable> Create(util::Path path);
-		ValueDriverVariable(util::Uuid entUuid,const util::Path &var);
+		// Path format: pragma:game/entity/ec/<componentTypeName>/<memberName>?entity_uuid=<uuid>
+		static std::optional<ValueDriverVariable> Create(std::string path);
+		ValueDriverVariable(util::Uuid entUuid,const std::string &var);
 		ValueDriverVariable(const ValueDriverVariable&)=default;
 		EntityUuidComponentMemberRef memberRef;
 	};

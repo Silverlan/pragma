@@ -8,11 +8,12 @@
 #include "stdafx_shared.h"
 #include "pragma/game/value_driver.hpp"
 #include "pragma/lua/lua_call.hpp"
+#include <sharedutils/util_uri.hpp>
 
 using namespace pragma;
 #pragma optimize("",off)
 pragma::ValueDriverDescriptor::ValueDriverDescriptor(
-	lua_State *l,std::string expression,std::unordered_map<std::string,util::Path> variables,
+	lua_State *l,std::string expression,std::unordered_map<std::string,std::string> variables,
 	std::unordered_map<std::string,udm::PProperty> constants
 ) : m_luaState{l},m_expression{std::move(expression)},m_variables{std::move(variables)},m_constants{std::move(constants)}
 {}
@@ -56,7 +57,7 @@ void pragma::ValueDriverDescriptor::AddConstant(const std::string &name,const ud
 	m_constants[name] = prop;
 	m_expressionDirty = true;
 }
-void pragma::ValueDriverDescriptor::AddReference(const std::string &name,util::Path path)
+void pragma::ValueDriverDescriptor::AddReference(const std::string &name,std::string path)
 {
 	m_variables[name] = std::move(path);
 	m_expressionDirty = true;
@@ -187,20 +188,38 @@ bool pragma::ValueDriver::Apply(BaseEntity &ent)
 
 ////////////
 
-static EntityUuidComponentMemberRef get_member_ref(util::Uuid entUuid,util::Path var)
+static EntityUuidComponentMemberRef get_member_ref(util::Uuid entUuid,const std::string &var)
 {
-	auto componentName = var.GetFront();
-	var.PopFront();
-	auto &memberName = var.GetString();
-	return EntityUuidComponentMemberRef{entUuid,std::string{componentName},memberName};
+	util::Path path {var};
+	size_t offset = 0;
+	if(path.GetComponent(offset,&offset) != "ec")
+		return EntityUuidComponentMemberRef{entUuid,"",""};
+	auto componentName = path.GetComponent(offset,&offset);
+	auto memberName = path.GetComponent(offset,&offset);
+	return EntityUuidComponentMemberRef{entUuid,std::string{componentName},std::string{memberName}};
 }
-ValueDriverVariable::ValueDriverVariable(util::Uuid entUuid,const util::Path &var)
+ValueDriverVariable::ValueDriverVariable(util::Uuid entUuid,const std::string &var)
 	: memberRef{get_member_ref(entUuid,var)}
 {}
-std::optional<ValueDriverVariable> ValueDriverVariable::Create(util::Path path)
+std::optional<ValueDriverVariable> ValueDriverVariable::Create(std::string uriPath)
 {
-	auto uuid = path.GetFront();
-	path.PopFront();
-	return ValueDriverVariable{util::uuid_string_to_bytes(std::string{uuid}),std::move(path)};
+	uriparser::Uri uri {std::move(uriPath)};
+	auto scheme = uri.scheme();
+	if(!scheme.empty() && uri.scheme() != "pragma")
+		return {};
+	util::Path path {uri.path()};
+	size_t offset = 0;
+	if(path.GetComponent(offset,&offset) != "game" || path.GetComponent(offset,&offset) != "entity")
+		return {};
+	auto ecOffset = offset;
+	if(path.GetComponent(offset,&offset) != "ec")
+		return {};
+	std::unordered_map<std::string_view,std::string_view> query;
+	uriparser::parse_uri_query(uri.query(),query);
+	auto itUuid = query.find("entity_uuid");
+	if(itUuid == query.end())
+		return {};
+	auto uuid = itUuid->second;
+	return ValueDriverVariable{util::uuid_string_to_bytes(std::string{uuid}),path.GetString().substr(ecOffset)};
 }
 #pragma optimize("",on)

@@ -63,6 +63,10 @@ endif()
 
 set(PRECOMPILED_HEADER "stdafx_client")
 
+if(WIN32)
+	add_compile_options(/bigobj)
+endif()
+
 def_project(client lib)
 
 link_boost_library(client DEPENDENCY_BOOST_DATE_TIME_LIBRARY date_time)

@@ -13,6 +13,8 @@
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/classes/lproperty_generic.hpp>
+#include <pragma/lua/lua_util_component.hpp>
+#include <pragma/lua/lua_util_component_stream.hpp>
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/lentity_components_base_types.hpp>
 #include <pragma/entities/entity_component_system_t.hpp>
@@ -31,7 +33,7 @@ namespace Lua
 };
 void Lua::register_cl_player_component(lua_State *l,luabind::module_ &module)
 {
-	auto def = luabind::class_<pragma::CPlayerComponent,pragma::BasePlayerComponent>("PlayerComponent");
+	auto def = pragma::lua::create_entity_component_class<pragma::CPlayerComponent,pragma::BasePlayerComponent>("PlayerComponent");
 	def.def("SetViewOffset",&Lua::Player::Client::SetViewOffset);
 	def.def("GetViewOffset",&Lua::Player::Client::GetViewOffset);
 	def.def("IsInFirstPersonMode",&Lua::Player::Client::IsInFirstPersonMode);

@@ -9,11 +9,13 @@
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/lua/lua_util_component.hpp>
+#include <pragma/lua/lua_util_component_stream.hpp>
 #include <prosper_command_buffer.hpp>
 
 void Lua::SoundEmitter::register_class(lua_State *l,luabind::module_ &entsMod)
 {
-	auto defCSoundEmitter = luabind::class_<pragma::CSoundEmitterComponent,pragma::BaseSoundEmitterComponent>("SoundEmitterComponent");
+	auto defCSoundEmitter = pragma::lua::create_entity_component_class<pragma::CSoundEmitterComponent,pragma::BaseSoundEmitterComponent>("SoundEmitterComponent");
 	defCSoundEmitter.def("CreateSound",&pragma::CSoundEmitterComponent::CreateSound);
 	defCSoundEmitter.def("EmitSound",&pragma::CSoundEmitterComponent::EmitSound);
 	entsMod[defCSoundEmitter];

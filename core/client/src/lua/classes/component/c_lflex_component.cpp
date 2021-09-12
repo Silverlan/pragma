@@ -9,11 +9,13 @@
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/entities/components/c_flex_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/lua/lua_util_component.hpp>
+#include <pragma/lua/lua_util_component_stream.hpp>
 #include <prosper_command_buffer.hpp>
 
 void Lua::Flex::register_class(lua_State *l,luabind::module_ &entsMod)
 {
-	auto defCFlex = luabind::class_<pragma::CFlexComponent,pragma::BaseFlexComponent>("FlexComponent");
+	auto defCFlex = pragma::lua::create_entity_component_class<pragma::CFlexComponent,pragma::BaseFlexComponent>("FlexComponent");
 	defCFlex.def("SetFlexController",static_cast<void(*)(lua_State*,pragma::CFlexComponent&,uint32_t,float,float,bool)>(
 		[](lua_State *l,pragma::CFlexComponent &hEnt,uint32_t flexId,float value,float duration,bool clampToLimits
 			) {

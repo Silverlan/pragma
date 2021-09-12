@@ -11,15 +11,17 @@
 #include "pragma/lua/policies/optional_policy.hpp"
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/model/c_modelmesh.h"
+#include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/lua/lua_util_component_stream.hpp>
 #include <buffers/prosper_swap_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 
 void Lua::Animated::register_class(lua_State *l,luabind::module_ &entsMod)
 {
-	auto defCAnimated = luabind::class_<pragma::CAnimatedComponent,pragma::BaseAnimatedComponent>("AnimatedComponent");
+	auto defCAnimated = pragma::lua::create_entity_component_class<pragma::CAnimatedComponent,pragma::BaseAnimatedComponent>("AnimatedComponent");
 	defCAnimated.def("GetBoneBuffer",static_cast<std::optional<std::shared_ptr<prosper::SwapBuffer>>(*)(lua_State*,pragma::CAnimatedComponent&)>([](lua_State *l,pragma::CAnimatedComponent &hAnim) -> std::optional<std::shared_ptr<prosper::SwapBuffer>> {
 		auto buf = hAnim.GetSwapBoneBuffer();
 		if(!buf)

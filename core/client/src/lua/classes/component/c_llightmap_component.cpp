@@ -16,6 +16,8 @@
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/property_converter_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/lua/lua_util_component.hpp>
+#include <pragma/lua/lua_util_component_stream.hpp>
 #include <util_image_buffer.hpp>
 #include <prosper_command_buffer.hpp>
 #include <texturemanager/texturemanager.h>
@@ -25,7 +27,7 @@ extern DLLCLIENT CEngine *c_engine;
 
 void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 {
-	auto defCLightMap = luabind::class_<pragma::CLightMapComponent,pragma::BaseEntityComponent>("LightMapComponent");
+	auto defCLightMap = pragma::lua::create_entity_component_class<pragma::CLightMapComponent,pragma::BaseEntityComponent>("LightMapComponent");
 	defCLightMap.scope[luabind::def("bake_lightmaps",&pragma::CLightMapComponent::BakeLightmaps)];
 	defCLightMap.scope[luabind::def("import_lightmap_atlas",static_cast<bool(*)(const std::string&)>(&pragma::CLightMapComponent::ImportLightmapAtlas))];
 	defCLightMap.scope[luabind::def("import_lightmap_atlas",static_cast<bool(*)(uimg::ImageBuffer&)>(&pragma::CLightMapComponent::ImportLightmapAtlas))];
@@ -103,7 +105,7 @@ void Lua::Lightmap::register_class(lua_State *l,luabind::module_ &entsMod)
 
 	entsMod[defCLightMap];
 
-	auto defCLightMapReceiver = luabind::class_<pragma::CLightMapReceiverComponent,pragma::BaseEntityComponent>("LightMapReceiverComponent");
+	auto defCLightMapReceiver = pragma::lua::create_entity_component_class<pragma::CLightMapReceiverComponent,pragma::BaseEntityComponent>("LightMapReceiverComponent");
 	defCLightMapReceiver.def("UpdateLightmapUvData",&pragma::CLightMapReceiverComponent::UpdateLightMapUvData);
 	entsMod[defCLightMapReceiver];
 }

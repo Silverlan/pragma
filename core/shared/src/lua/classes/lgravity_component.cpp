@@ -10,6 +10,7 @@
 #include "pragma/lua/l_entity_handles.hpp"
 #include "pragma/lua/lua_entity_component.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
+#include "pragma/lua/lua_util_component.hpp"
 
 namespace Lua
 {
@@ -20,7 +21,7 @@ namespace Lua
 };
 void Lua::register_gravity_component(luabind::module_ &module)
 {
-	auto def = luabind::class_<pragma::GravityComponent,pragma::BaseEntityComponent>("GravityComponent");
+	auto def = pragma::lua::create_entity_component_class<pragma::GravityComponent,pragma::BaseEntityComponent>("GravityComponent");
 	def.def("SetGravityScale",&pragma::GravityComponent::SetGravityScale);
 	def.def("SetGravityOverride",static_cast<void(pragma::GravityComponent::*)(const Vector3&,float)>(&pragma::GravityComponent::SetGravityOverride));
 	def.def("SetGravityOverride",static_cast<void(pragma::GravityComponent::*)(const Vector3&)>(&pragma::GravityComponent::SetGravityOverride));

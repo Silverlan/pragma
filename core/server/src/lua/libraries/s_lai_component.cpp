@@ -17,6 +17,7 @@
 #include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/lua/policies/game_object_policy.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
+#include <pragma/lua/lua_util_component.hpp>
 #include <pragma/model/model.h>
 #include <pragma/lua/lentity_components_base_types.hpp>
 #include <pragma/lua/lua_entity_component.hpp>
@@ -39,7 +40,7 @@ namespace Lua
 
 void Lua::register_sv_ai_component(lua_State *l,luabind::module_ &module)
 {
-	auto def = luabind::class_<pragma::SAIComponent,pragma::BaseAIComponent>("AIComponent");
+	auto def = pragma::lua::create_entity_component_class<pragma::SAIComponent,pragma::BaseAIComponent>("AIComponent");
 	def.def("StartSchedule",&pragma::SAIComponent::StartSchedule);
 	def.def("CancelSchedule",&pragma::SAIComponent::CancelSchedule);
 	def.def("SetSquad",&pragma::SAIComponent::SetSquad);

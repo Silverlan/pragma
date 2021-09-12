@@ -15,6 +15,7 @@
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/lua/lua_util_component.hpp>
 #include <pragma/model/model.h>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
@@ -135,7 +136,7 @@ static void push_particle_system_definition_data(lua_State *l,const CParticleSys
 
 void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 {
-	auto defCParticleSystem = luabind::class_<pragma::CParticleSystemComponent,pragma::BaseEnvParticleSystemComponent>("ParticleSystemComponent");
+	auto defCParticleSystem = pragma::lua::create_entity_component_class<pragma::CParticleSystemComponent,pragma::BaseEnvParticleSystemComponent>("ParticleSystemComponent");
 	defCParticleSystem.add_static_constant("RENDER_FLAG_NONE",umath::to_integral(pragma::ParticleRenderFlags::None));
 	defCParticleSystem.add_static_constant("RENDER_FLAG_BIT_BLOOM",umath::to_integral(pragma::ParticleRenderFlags::Bloom));
 	defCParticleSystem.add_static_constant("RENDER_FLAG_BIT_DEPTH_ONLY",umath::to_integral(pragma::ParticleRenderFlags::DepthOnly));

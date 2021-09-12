@@ -29,6 +29,10 @@ add_def(ENGINE_SERVER)
 
 set(PRECOMPILED_HEADER "stdafx_server")
 
+if(WIN32)
+	add_compile_options(/bigobj)
+endif()
+
 def_project(server lib)
 
 link_boost_library(server DEPENDENCY_BOOST_DATE_TIME_LIBRARY date_time)

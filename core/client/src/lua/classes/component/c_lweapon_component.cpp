@@ -12,13 +12,15 @@
 #include "pragma/lua/classes/components/c_lentity_components.hpp"
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/c_viewmodel.h"
+#include <pragma/lua/lua_util_component.hpp>
+#include <pragma/lua/lua_util_component_stream.hpp>
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/lentity_components_base_types.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 void Lua::register_cl_weapon_component(lua_State *l,luabind::module_ &module)
 {
-	auto def = luabind::class_<pragma::CWeaponComponent,pragma::BaseWeaponComponent>("WeaponComponent");
+	auto def = pragma::lua::create_entity_component_class<pragma::CWeaponComponent,pragma::BaseWeaponComponent>("WeaponComponent");
 	def.def("PlayViewActivity",&pragma::CWeaponComponent::PlayViewActivity);
 	def.def("PlayViewActivity",static_cast<bool(*)(pragma::CWeaponComponent &wepComponent,Activity)>([](pragma::CWeaponComponent &wepComponent,Activity activity) {
 		return wepComponent.PlayViewActivity(activity);

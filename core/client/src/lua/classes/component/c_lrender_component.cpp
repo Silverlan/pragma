@@ -11,13 +11,15 @@
 #include "pragma/entities/components/c_animated_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/lua/lua_util_component.hpp>
+#include <pragma/lua/lua_util_component_stream.hpp>
 #include <prosper_command_buffer.hpp>
 #include <buffers/prosper_swap_buffer.hpp>
 #include <pragma/math/intersection.h>
 
 void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 {
-	auto defCRender = luabind::class_<pragma::CRenderComponent,pragma::BaseRenderComponent>("RenderComponent");
+	auto defCRender = pragma::lua::create_entity_component_class<pragma::CRenderComponent,pragma::BaseRenderComponent>("RenderComponent");
 	defCRender.def("GetTransformationMatrix",&Lua::Render::GetTransformationMatrix);
 	defCRender.def("SetRenderMode",&Lua::Render::SetRenderMode);
 	defCRender.def("GetRenderMode",&Lua::Render::GetRenderMode);

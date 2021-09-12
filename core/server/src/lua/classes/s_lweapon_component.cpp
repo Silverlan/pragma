@@ -10,13 +10,14 @@
 #include "pragma/entities/components/s_weapon_component.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/lua/s_lentity_components.hpp"
+#include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/lentity_components_base_types.hpp>
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 void Lua::register_sv_weapon_component(lua_State *l,luabind::module_ &module)
 {
-	auto def = luabind::class_<pragma::SWeaponComponent,pragma::BaseWeaponComponent>("WeaponComponent");
+	auto def = pragma::lua::create_entity_component_class<pragma::SWeaponComponent,pragma::BaseWeaponComponent>("WeaponComponent");
 	def.def("SetPrimaryClipSize",&pragma::SWeaponComponent::SetPrimaryClipSize);
 	def.def("SetSecondaryClipSize",&pragma::SWeaponComponent::SetSecondaryClipSize);
 	def.def("SetMaxPrimaryClipSize",&pragma::SWeaponComponent::SetMaxPrimaryClipSize);

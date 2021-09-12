@@ -12,6 +12,7 @@
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_ai_component.hpp"
+#include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/classes/lproperty.hpp>
 #include <pragma/physics/raytraces.h>
 #include <pragma/lua/lentity_components_base_types.hpp>
@@ -43,7 +44,7 @@ namespace Lua
 
 void Lua::register_sv_character_component(lua_State *l,luabind::module_ &module)
 {
-	auto def = luabind::class_<pragma::SCharacterComponent,pragma::BaseCharacterComponent>("CharacterComponent");
+	auto def = pragma::lua::create_entity_component_class<pragma::SCharacterComponent,pragma::BaseCharacterComponent>("CharacterComponent");
 	def.def("GiveWeapon",static_cast<BaseEntity*(pragma::SCharacterComponent::*)(std::string)>(&pragma::SCharacterComponent::GiveWeapon));
 	def.def("DropActiveWeapon",&pragma::SCharacterComponent::DropActiveWeapon);
 	def.def("DropWeapon",static_cast<void(pragma::SCharacterComponent::*)(std::string)>(&pragma::SCharacterComponent::DropWeapon));

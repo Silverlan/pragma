@@ -28,6 +28,7 @@
 #include "pragma/lua/classes/s_lentity.h"
 #include "pragma/lua/classes/s_lua_entity.h"
 #include "pragma/lua/sh_lua_component_t.hpp"
+#include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/classes/lentity.h>
 #include <pragma/lua/lua_component_event.hpp>
 #include <pragma/lua/lua_entity_component.hpp>
@@ -137,7 +138,7 @@ void SGame::RegisterLua()
 
 	// Needs to be registered AFTER RegisterLuaGameClasses has been called!
 	Lua::register_base_entity_component(modEnts);
-	auto defEntCmp = luabind::class_<pragma::SLuaBaseEntityComponent,luabind::bases<pragma::BaseLuaBaseEntityComponent,pragma::BaseEntityComponent>,pragma::lua::SLuaBaseEntityComponentHolder>("BaseEntityComponent");
+	auto defEntCmp = pragma::lua::create_entity_component_class<pragma::SLuaBaseEntityComponent,luabind::bases<pragma::BaseLuaBaseEntityComponent,pragma::BaseEntityComponent>,pragma::lua::SLuaBaseEntityComponentHolder>("BaseEntityComponent");
 	defEntCmp.def(luabind::constructor<SBaseEntity&>());
 	defEntCmp.def(luabind::tostring(luabind::self));
 	defEntCmp.def("SendData",static_cast<void(*)(lua_State*,pragma::SLuaBaseEntityComponent&,NetPacket,pragma::networking::ClientRecipientFilter&)>([](lua_State *l,pragma::SLuaBaseEntityComponent &hComponent,NetPacket packet,pragma::networking::ClientRecipientFilter &rp) {

@@ -10,13 +10,15 @@
 #include "pragma/entities/components/c_vertex_animated_component.hpp"
 #include <pragma/lua/policies/optional_policy.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/lua/lua_util_component.hpp>
+#include <pragma/lua/lua_util_component_stream.hpp>
 #include "pragma/model/c_modelmesh.h"
 #include <prosper_command_buffer.hpp>
 #include <buffers/prosper_swap_buffer.hpp>
 
 void Lua::VertexAnimated::register_class(lua_State *l,luabind::module_ &entsMod)
 {
-	auto defCVertexAnimated = luabind::class_<pragma::CVertexAnimatedComponent,pragma::BaseEntityComponent>("VertexAnimatedComponent");
+	auto defCVertexAnimated = pragma::lua::create_entity_component_class<pragma::CVertexAnimatedComponent,pragma::BaseEntityComponent>("VertexAnimatedComponent");
 	defCVertexAnimated.def("UpdateVertexAnimationBuffer",static_cast<void(*)(lua_State*,pragma::CVertexAnimatedComponent&,std::shared_ptr<prosper::ICommandBuffer>&)>([](lua_State *l,pragma::CVertexAnimatedComponent &hAnim,std::shared_ptr<prosper::ICommandBuffer> &drawCmd) {
 		if(drawCmd->IsPrimary() == false)
 			return;

@@ -45,6 +45,7 @@
 #include "pragma/lua/converters/vector_converter_t.hpp"
 #include "pragma/lua/converters/pair_converter_t.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
+#include "pragma/lua/lua_util_component.hpp"
 #include <pragma/physics/movetypes.h>
 #include <luabind/copy_policy.hpp>
 #include <panima/animation.hpp>
@@ -136,7 +137,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	classDefMemRef.def("GetMemberInfo",&pragma::EntityUuidComponentMemberRef::GetMemberInfo);
 	entsMod[classDefMemRef];
 
-	auto defVelocity = luabind::class_<pragma::VelocityComponent,pragma::BaseEntityComponent>("VelocityComponent");
+	auto defVelocity = pragma::lua::create_entity_component_class<pragma::VelocityComponent,pragma::BaseEntityComponent>("VelocityComponent");
 	defVelocity.def("GetVelocity",&pragma::VelocityComponent::GetVelocity,luabind::copy_policy<0>{});
 	defVelocity.def("SetVelocity",&pragma::VelocityComponent::SetVelocity);
 	defVelocity.def("AddVelocity",&pragma::VelocityComponent::AddVelocity);
@@ -153,12 +154,12 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defVelocity.def("GetAngularVelocityProperty",&pragma::VelocityComponent::GetAngularVelocityProperty);
 	entsMod[defVelocity];
 
-	auto defGlobal = luabind::class_<pragma::GlobalNameComponent,pragma::BaseEntityComponent>("GlobalComponent");
+	auto defGlobal = pragma::lua::create_entity_component_class<pragma::GlobalNameComponent,pragma::BaseEntityComponent>("GlobalComponent");
 	defGlobal.def("GetGlobalName",&pragma::GlobalNameComponent::GetGlobalName);
 	defGlobal.def("SetGlobalName",&pragma::GlobalNameComponent::SetGlobalName);
 	entsMod[defGlobal];
 
-	auto defComposite = luabind::class_<pragma::CompositeComponent,pragma::BaseEntityComponent>("CompositeComponent");
+	auto defComposite = pragma::lua::create_entity_component_class<pragma::CompositeComponent,pragma::BaseEntityComponent>("CompositeComponent");
 	defComposite.def("ClearEntities",&pragma::CompositeComponent::ClearEntities);
 	defComposite.def("ClearEntities",&pragma::CompositeComponent::ClearEntities,luabind::default_parameter_policy<2,true>{});
 	defComposite.def("ClearEntities",+[](lua_State *l,pragma::CompositeComponent &hComponent,const std::string &groupName) {
@@ -246,7 +247,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defComposite.scope[defCompositeGroup];
 	entsMod[defComposite];
 	
-	auto defAnimated2 = luabind::class_<pragma::PanimaComponent,pragma::BaseEntityComponent>("PanimaComponent");
+	auto defAnimated2 = pragma::lua::create_entity_component_class<pragma::PanimaComponent,pragma::BaseEntityComponent>("PanimaComponent");
 	defAnimated2.scope[
 		luabind::def("parse_component_channel_path",&pragma::PanimaComponent::ParseComponentChannelPath)
 	];
@@ -284,7 +285,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defAnimated2.add_static_constant("EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER",pragma::PanimaComponent::EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER);
 	entsMod[defAnimated2];
 
-	auto defDriverC = luabind::class_<pragma::AnimationDriverComponent,pragma::BaseEntityComponent>("AnimationDriverComponent");
+	auto defDriverC = pragma::lua::create_entity_component_class<pragma::AnimationDriverComponent,pragma::BaseEntityComponent>("AnimationDriverComponent");
 	defDriverC.def("AddDriver",static_cast<
 		void(*)(pragma::AnimationDriverComponent&,pragma::ComponentId,pragma::ComponentMemberIndex,pragma::ValueDriverDescriptor)
 	>(&add_driver<pragma::ComponentMemberIndex>));
@@ -301,27 +302,27 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 
 	entsMod[defDriverC];
 
-	auto defIK = luabind::class_<pragma::IKComponent,pragma::BaseEntityComponent>("IKComponent");
+	auto defIK = pragma::lua::create_entity_component_class<pragma::IKComponent,pragma::BaseEntityComponent>("IKComponent");
 	defIK.def("SetIKControllerEnabled",&pragma::IKComponent::SetIKControllerEnabled);
 	defIK.def("IsIKControllerEnabled",&pragma::IKComponent::IsIKControllerEnabled);
 	defIK.def("SetIKEffectorPos",&pragma::IKComponent::SetIKEffectorPos);
 	defIK.def("GetIKEffectorPos",&pragma::IKComponent::GetIKEffectorPos);
 	entsMod[defIK];
 
-	auto defLogic = luabind::class_<pragma::LogicComponent,pragma::BaseEntityComponent>("LogicComponent");
+	auto defLogic = pragma::lua::create_entity_component_class<pragma::LogicComponent,pragma::BaseEntityComponent>("LogicComponent");
 	defLogic.add_static_constant("EVENT_ON_TICK",pragma::LogicComponent::EVENT_ON_TICK);
 	entsMod[defLogic];
 
-	auto defUsable = luabind::class_<pragma::UsableComponent,pragma::BaseEntityComponent>("UsableComponent");
+	auto defUsable = pragma::lua::create_entity_component_class<pragma::UsableComponent,pragma::BaseEntityComponent>("UsableComponent");
 	defUsable.add_static_constant("EVENT_ON_USE",pragma::UsableComponent::EVENT_ON_USE);
 	defUsable.add_static_constant("EVENT_CAN_USE",pragma::UsableComponent::EVENT_CAN_USE);
 	entsMod[defUsable];
 
-	auto defMap = luabind::class_<pragma::MapComponent,pragma::BaseEntityComponent>("MapComponent");
+	auto defMap = pragma::lua::create_entity_component_class<pragma::MapComponent,pragma::BaseEntityComponent>("MapComponent");
 	defMap.def("GetMapIndex",&pragma::MapComponent::GetMapIndex);
 	entsMod[defMap];
 
-	auto defSubmergible = luabind::class_<pragma::SubmergibleComponent,pragma::BaseEntityComponent>("SubmergibleComponent");
+	auto defSubmergible = pragma::lua::create_entity_component_class<pragma::SubmergibleComponent,pragma::BaseEntityComponent>("SubmergibleComponent");
 	defSubmergible.def("IsSubmerged",&pragma::SubmergibleComponent::IsSubmerged);
 	defSubmergible.def("IsFullySubmerged",&pragma::SubmergibleComponent::IsFullySubmerged);
 	defSubmergible.def("GetSubmergedFraction",&pragma::SubmergibleComponent::GetSubmergedFraction);
@@ -334,7 +335,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defSubmergible.add_static_constant("EVENT_ON_WATER_EXITED",pragma::SubmergibleComponent::EVENT_ON_WATER_EXITED);
 	entsMod[defSubmergible];
 
-	auto defDamageable = luabind::class_<pragma::DamageableComponent,pragma::BaseEntityComponent>("DamageableComponent");
+	auto defDamageable = pragma::lua::create_entity_component_class<pragma::DamageableComponent,pragma::BaseEntityComponent>("DamageableComponent");
 	defDamageable.def("TakeDamage",&pragma::DamageableComponent::TakeDamage);
 	defDamageable.add_static_constant("EVENT_ON_TAKE_DAMAGE",pragma::DamageableComponent::EVENT_ON_TAKE_DAMAGE);
 	entsMod[defDamageable];

@@ -10,6 +10,8 @@
 #include "pragma/entities/components/s_vehicle_component.hpp"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include "pragma/lua/s_lentity_components.hpp"
+#include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/lentity_components_base_types.hpp>
 #include <pragma/lua/lua_entity_component.hpp>
 
@@ -25,6 +27,6 @@ namespace Lua
 };
 void Lua::register_sv_vehicle_component(lua_State *l,luabind::module_ &module)
 {
-	auto def = luabind::class_<pragma::SVehicleComponent,pragma::BaseVehicleComponent>("VehicleComponent");
+	auto def = pragma::lua::create_entity_component_class<pragma::SVehicleComponent,pragma::BaseVehicleComponent>("VehicleComponent");
 	module[def];
 }

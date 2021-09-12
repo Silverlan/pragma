@@ -10,6 +10,7 @@
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/entities/components/s_player_component.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
+#include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/libraries/lfile.h>
 #include <pragma/lua/luaapi.h>
 #include <pragma/lua/lentity_components_base_types.hpp>
@@ -32,7 +33,7 @@ extern DLLSERVER ServerState *server;
 
 void Lua::register_sv_player_component(lua_State *l,luabind::module_ &module)
 {
-	auto def = luabind::class_<pragma::SPlayerComponent,pragma::BasePlayerComponent>("PlayerComponent");
+	auto def = pragma::lua::create_entity_component_class<pragma::SPlayerComponent,pragma::BasePlayerComponent>("PlayerComponent");
 	def.def("Respawn",&Lua::Player::Server::Respawn);
 	def.def("SetActionInput",&Lua::Player::Server::SetActionInput);
 	def.def("Kick",&pragma::SPlayerComponent::Kick);

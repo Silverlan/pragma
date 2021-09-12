@@ -32,15 +32,13 @@ void pragma::ValueDriverDescriptor::RebuildLuaExpression() const
 
 	auto *l = m_luaState;
 	std::string luaStr = "return function(" +argList +") return " +m_expression +" end";
-	auto r = Lua::RunString(l,luaStr,1,"internal"); /* 1 */
+	auto r = Lua::RunString(l,luaStr,1,"internal",&Lua::HandleTracebackError); /* 1 */
 	if(r == Lua::StatusCode::Ok)
 	{
 		luabind::object oFunc {luabind::from_stack(l,-1)};
 		m_luaExpression = oFunc;
 		Lua::Pop(l,1); /* 0 */
 	}
-	else
-		Lua::HandleLuaError(l);
 	m_expressionDirty = false;
 }
 const luabind::object &pragma::ValueDriverDescriptor::GetLuaExpression() const

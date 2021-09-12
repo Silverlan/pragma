@@ -22,7 +22,7 @@ DLLNETWORK std::ostream& operator<<(std::ostream &os,const pragma::BaseEntityCom
 	if(!info)
 		os<<"NULL";
 	else
-		os<<info->name<<"]["<<info->id<<"]"<<magic_enum::flags::enum_name(info->flags);
+		os<<info->name<<"]["<<info->id<<"]["<<magic_enum::flags::enum_name(info->flags);
 	os<<"]";
 	return os;
 }

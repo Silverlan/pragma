@@ -19,6 +19,7 @@
 #include "pragma/lua/base_lua_handle_method.hpp"
 #include "pragma/lua/sh_lua_component_t.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
+#include "pragma/lua/lua_util_component.hpp"
 #include <sharedutils/scope_guard.h>
 #include <sharedutils/datastream.h>
 #include <sharedutils/netpacket.hpp>
@@ -1105,7 +1106,7 @@ CallbackHandle BaseLuaBaseEntityComponent::BindEvent(lua_State *l,pragma::Compon
 
 void Lua::register_base_entity_component(luabind::module_ &modEnts)
 {
-	auto classDef = luabind::class_<pragma::BaseLuaBaseEntityComponent,pragma::BaseEntityComponent>("BaseBaseEntityComponent");
+	auto classDef = pragma::lua::create_entity_component_class<pragma::BaseLuaBaseEntityComponent,pragma::BaseEntityComponent>("BaseBaseEntityComponent");
 	classDef.def("SetNetworked",&pragma::BaseLuaBaseEntityComponent::SetNetworked);
 	classDef.def("IsNetworked",&pragma::BaseLuaBaseEntityComponent::IsNetworked);
 	classDef.def("SetShouldTransmitSnapshotData",&pragma::BaseLuaBaseEntityComponent::SetShouldTransmitSnapshotData);

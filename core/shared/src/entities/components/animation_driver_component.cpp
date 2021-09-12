@@ -121,7 +121,7 @@ void pragma::AnimationDriverComponent::AddDriver(ComponentId componentId,Compone
 	if(!ref.has_value())
 		return;
 	RemoveDriver(componentId,memberIdx);
-	m_drivers[get_value_driver_hash(componentId,memberIdx)] = ValueDriver{componentId,std::move(*ref),std::move(descriptor)};
+	m_drivers[get_value_driver_hash(componentId,memberIdx)] = ValueDriver{componentId,std::move(*ref),std::move(descriptor),GetEntity().GetUuid()};
 }
 bool pragma::AnimationDriverComponent::HasDriver(ComponentId componentId,ComponentMemberIndex memberIdx) const
 {

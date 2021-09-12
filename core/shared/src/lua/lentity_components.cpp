@@ -19,6 +19,7 @@
 #include "pragma/lua/policies/generic_policy.hpp"
 #include "pragma/util/bulletinfo.h"
 #include "pragma/lua/libraries/lray.h"
+#include "pragma/lua/custom_constructor.hpp"
 #include "pragma/util/util_ballistic.h"
 #include "pragma/lua/classes/lproperty.hpp"
 #include "pragma/physics/raytraces.h"
@@ -295,12 +296,13 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defDriverC.def("ClearDrivers",&pragma::AnimationDriverComponent::ClearDrivers);
 
 	auto defDriver = luabind::class_<pragma::ValueDriver>("Driver");
-	defDriver.def(luabind::constructor<pragma::ComponentId,pragma::ComponentMemberReference,pragma::ValueDriverDescriptor>(),ComponentMemberReferencePolicy<3>{});
 	defDriver.def("GetMemberReference",&pragma::ValueDriver::GetMemberReference);
 	defDriver.def("GetDescriptor",&pragma::ValueDriver::GetDescriptor);
 	defDriverC.scope[defDriver];
-
 	entsMod[defDriverC];
+	pragma::lua::define_custom_constructor<pragma::ValueDriver,[](pragma::ComponentId componentId,const std::string &memberRef,pragma::ValueDriverDescriptor descriptor,const std::string &self) -> pragma::ValueDriver {
+		return pragma::ValueDriver{componentId,memberRef,descriptor,util::uuid_string_to_bytes(self)};
+	},pragma::ComponentId,const std::string&,pragma::ValueDriverDescriptor,const std::string&>(GetLuaState());
 
 	auto defIK = pragma::lua::create_entity_component_class<pragma::IKComponent,pragma::BaseEntityComponent>("IKComponent");
 	defIK.def("SetIKControllerEnabled",&pragma::IKComponent::SetIKControllerEnabled);

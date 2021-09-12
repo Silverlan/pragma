@@ -26,7 +26,7 @@ void pragma::ValueDriverDescriptor::RebuildLuaExpression() const
 {
 	if(!m_luaState)
 		return;
-	std::string argList = "value";
+	std::string argList = "value,self";
 	for(auto &pair : m_variables)
 		argList += ',' +pair.first;
 
@@ -63,14 +63,14 @@ void pragma::ValueDriverDescriptor::AddReference(const std::string &name,std::st
 
 ////////////
 
-ValueDriver::ValueDriver(pragma::ComponentId componentId,ComponentMemberReference memberRef,ValueDriverDescriptor descriptor)
+ValueDriver::ValueDriver(pragma::ComponentId componentId,ComponentMemberReference memberRef,ValueDriverDescriptor descriptor,const util::Uuid &self)
 	: m_componentId{componentId},m_memberReference{std::move(memberRef)},m_descriptor{std::move(descriptor)}
 {
 	auto &references = m_descriptor.GetReferences();
 	m_variables.reserve(references.size());
 	for(auto &pair : references)
 	{
-		auto var = ValueDriverVariable::Create(pair.second);
+		auto var = ValueDriverVariable::Create(pair.second,self);
 		if(!var.has_value())
 			continue;
 		m_variables.insert(std::make_pair(pair.first,*var));
@@ -102,7 +102,8 @@ bool pragma::ValueDriver::Apply(BaseEntity &ent)
 	});
 	luaExpression.push(l);
 	arg.push(l);
-	uint32_t numPushed = 2;
+	component->PushLuaObject(l);
+	uint32_t numPushed = 3;
 	auto argsValid = true;
 	for(auto &pair : m_variables)
 	{
@@ -223,11 +224,11 @@ bool pragma::ValueDriver::Apply(BaseEntity &ent)
 
 ////////////
 
-static EntityUuidComponentMemberRef get_member_ref(util::Uuid entUuid,const std::string &var)
+static EntityUuidComponentMemberRef get_member_ref(util::Uuid entUuid,std::string var)
 {
 	if(var.empty())
 		return EntityUuidComponentMemberRef{entUuid,"",""};
-	util::Path path {var};
+	util::Path path {std::move(var)};
 	size_t offset = 0;
 	if(path.GetComponent(offset,&offset) != "ec")
 		return EntityUuidComponentMemberRef{entUuid,"",""};
@@ -235,10 +236,10 @@ static EntityUuidComponentMemberRef get_member_ref(util::Uuid entUuid,const std:
 	auto memberName = path.GetComponent(offset,&offset);
 	return EntityUuidComponentMemberRef{entUuid,std::string{componentName},std::string{memberName}};
 }
-ValueDriverVariable::ValueDriverVariable(util::Uuid entUuid,const std::string &var)
-	: memberRef{get_member_ref(entUuid,var)}
+ValueDriverVariable::ValueDriverVariable(util::Uuid entUuid,std::string var)
+	: memberRef{get_member_ref(entUuid,std::move(var))}
 {}
-std::optional<ValueDriverVariable> ValueDriverVariable::Create(std::string uriPath)
+std::optional<ValueDriverVariable> ValueDriverVariable::Create(std::string uriPath,const util::Uuid &self)
 {
 	uriparser::Uri uri {std::move(uriPath)};
 	auto scheme = uri.scheme();
@@ -250,11 +251,12 @@ std::optional<ValueDriverVariable> ValueDriverVariable::Create(std::string uriPa
 		return {};
 	std::unordered_map<std::string_view,std::string_view> query;
 	uriparser::parse_uri_query(uri.query(),query);
+	util::Uuid uuid {};
 	auto itUuid = query.find("entity_uuid");
-	if(itUuid == query.end())
-		return {};
-	auto &strUuid = itUuid->second;
-	auto uuid = util::uuid_string_to_bytes(std::string{strUuid});
+	if(itUuid != query.end())
+		uuid = util::uuid_string_to_bytes(std::string{itUuid->second}); // TODO: uuid_string_to_bytes should take a string_view argument!
+	else
+		uuid = util::uuid_string_to_bytes(util::uuid_to_string(self));
 	auto &str = path.GetString();
 	return ValueDriverVariable{uuid,(offset < str.size()) ? str.substr(offset) : std::string{}};
 }

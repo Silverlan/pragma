@@ -54,8 +54,8 @@ namespace pragma
 	struct DLLNETWORK ValueDriverVariable
 	{
 		// Path format: pragma:game/entity/ec/<componentTypeName>/<memberName>?entity_uuid=<uuid>
-		static std::optional<ValueDriverVariable> Create(std::string path);
-		ValueDriverVariable(util::Uuid entUuid,const std::string &var);
+		static std::optional<ValueDriverVariable> Create(std::string path,const util::Uuid &self);
+		ValueDriverVariable(util::Uuid entUuid,std::string var);
 		ValueDriverVariable(const ValueDriverVariable&)=default;
 		EntityUuidComponentMemberRef memberRef;
 	};
@@ -69,7 +69,7 @@ namespace pragma
 			EntityRefFailed = ComponentRefFailed<<1u
 		};
 		ValueDriver()=default;
-		ValueDriver(pragma::ComponentId componentId,ComponentMemberReference memberRef,ValueDriverDescriptor descriptor);
+		ValueDriver(pragma::ComponentId componentId,ComponentMemberReference memberRef,ValueDriverDescriptor descriptor,const util::Uuid &self);
 		const ComponentMemberReference &GetMemberReference() const {return m_memberReference;}
 		const ValueDriverDescriptor &GetDescriptor() const {return m_descriptor;}
 		pragma::ComponentId GetComponentId() const {return m_componentId;}

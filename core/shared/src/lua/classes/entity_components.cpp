@@ -1914,10 +1914,10 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		auto def = Lua::create_base_entity_component_class<pragma::BaseTransformComponent>("BaseTransformComponent");
 		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
 		def.def("GetOrigin",&pragma::BaseTransformComponent::GetOrigin);
-		def.def("GetPos",&pragma::BaseTransformComponent::GetPosition);
+		def.def("GetPos",&pragma::BaseTransformComponent::GetPosition,luabind::copy_policy<0>{});
 		def.def("SetPos",static_cast<void(pragma::BaseTransformComponent::*)(const Vector3&)>(&pragma::BaseTransformComponent::SetPosition));
 		def.def("SetPos",static_cast<void(pragma::BaseTransformComponent::*)(const Vector3&,bool)>(&pragma::BaseTransformComponent::SetPosition));
-		def.def("GetRotation",&pragma::BaseTransformComponent::GetRotation);
+		def.def("GetRotation",&pragma::BaseTransformComponent::GetRotation,luabind::copy_policy<0>{});
 		def.def("SetRotation",&pragma::BaseTransformComponent::SetRotation);
 		def.def("GetAngles",static_cast<EulerAngles(pragma::BaseTransformComponent::*)(const Vector3&,bool) const>(&pragma::BaseTransformComponent::GetAngles));
 		def.def("GetAngles",static_cast<EulerAngles(pragma::BaseTransformComponent::*)(const Vector3&,bool) const>(&pragma::BaseTransformComponent::GetAngles),luabind::default_parameter_policy<3,false>{});
@@ -1968,7 +1968,7 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		def.def("SetRoll",&pragma::BaseTransformComponent::SetRoll);
 
 		def.def("GetLastMoveTime",&pragma::BaseTransformComponent::GetLastMoveTime);
-		def.def("GetScale",&pragma::BaseTransformComponent::GetScale);
+		def.def("GetScale",&pragma::BaseTransformComponent::GetScale,luabind::copy_policy<0>{});
 		def.def("GetMaxAxisScale",&pragma::BaseTransformComponent::GetMaxAxisScale);
 		def.def("GetAbsMaxAxisScale",&pragma::BaseTransformComponent::GetAbsMaxAxisScale);
 		def.def("SetScale",static_cast<void(pragma::BaseTransformComponent::*)(float)>(&pragma::BaseTransformComponent::SetScale));

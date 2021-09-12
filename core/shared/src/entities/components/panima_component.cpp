@@ -60,8 +60,17 @@ PanimaComponent::PanimaComponent(BaseEntity &ent)
 void PanimaComponent::SetPlaybackRate(float rate) {*m_playbackRate = rate;}
 float PanimaComponent::GetPlaybackRate() const {return *m_playbackRate;}
 const util::PFloatProperty &PanimaComponent::GetPlaybackRateProperty() const {return m_playbackRate;}
-panima::PAnimationManager PanimaComponent::AddAnimationManager()
+std::vector<std::pair<std::string,panima::PAnimationManager>>::iterator PanimaComponent::FindAnimationManager(const std::string_view &name)
 {
+	return std::find_if(m_animationManagers.begin(),m_animationManagers.end(),[&name](const std::pair<std::string,panima::PAnimationManager> &pair) {
+		return pair.first == name;
+	});
+}
+panima::PAnimationManager PanimaComponent::AddAnimationManager(std::string name)
+{
+	auto it = FindAnimationManager(name);
+	if(it != m_animationManagers.end())
+		return it->second;
 	auto player = panima::AnimationManager::Create();
 	panima::AnimationPlayerCallbackInterface callbackInteface {};
 	callbackInteface.onPlayAnimation = [this](const panima::AnimationSet &set,panima::AnimationId animId,panima::PlaybackFlags flags) -> bool {
@@ -75,14 +84,20 @@ panima::PAnimationManager PanimaComponent::AddAnimationManager()
 		CEAnim2TranslateAnimation evTranslateAnimData {set,animId,flags};
 		InvokeEventCallbacks(EVENT_TRANSLATE_ANIMATION,evTranslateAnimData);
 	};
-
-	m_animationManagers.push_back(player);
+	m_animationManagers.push_back(std::make_pair<std::string,panima::PAnimationManager>(std::move(name),std::move(player)));
 	return player;
+}
+void PanimaComponent::RemoveAnimationManager(const std::string_view &name)
+{
+	auto it = FindAnimationManager(name);
+	if(it == m_animationManagers.end())
+		return;
+	m_animationManagers.erase(it);
 }
 void PanimaComponent::RemoveAnimationManager(const panima::AnimationManager &player)
 {
-	auto it = std::find_if(m_animationManagers.begin(),m_animationManagers.end(),[&player](const panima::PAnimationManager &playerOther) {
-		return playerOther.get() == &player;
+	auto it = std::find_if(m_animationManagers.begin(),m_animationManagers.end(),[&player](const std::pair<std::string,panima::PAnimationManager> &pair) {
+		return pair.second.get() == &player;
 	});
 	if(it == m_animationManagers.end())
 		return;
@@ -225,8 +240,8 @@ struct get_member_channel_submitter_wrapper {
 
 void PanimaComponent::InitializeAnimationChannelValueSubmitters()
 {
-	for(auto &animManager : m_animationManagers)
-		InitializeAnimationChannelValueSubmitters(*animManager);
+	for(auto &pair : m_animationManagers)
+		InitializeAnimationChannelValueSubmitters(*pair.second);
 }
 
 template<uint32_t I> requires(I < 4)
@@ -497,8 +512,9 @@ void PanimaComponent::AdvanceAnimations(double dt)
 	auto pTimeScaleComponent = ent.GetTimeScaleComponent();
 	dt *= (pTimeScaleComponent.valid() ? pTimeScaleComponent->GetEffectiveTimeScale() : 1.f);
 	dt *= GetPlaybackRate();
-	for(auto &manager : m_animationManagers)
+	for(auto &pair : m_animationManagers)
 	{
+		auto &manager = pair.second;
 		auto change = (*manager)->Advance(dt);
 		if(!change)
 			continue;

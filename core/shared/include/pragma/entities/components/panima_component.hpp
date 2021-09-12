@@ -37,10 +37,11 @@ namespace pragma
 		float GetPlaybackRate() const;
 		const util::PFloatProperty &GetPlaybackRateProperty() const;
 		
-		std::vector<panima::PAnimationManager> &GetAnimationManagers() {return m_animationManagers;}
-		const std::vector<panima::PAnimationManager> &GetAnimationManagers() const {return const_cast<PanimaComponent*>(this)->GetAnimationManagers();}
-		panima::PAnimationManager AddAnimationManager();
+		std::vector<std::pair<std::string,panima::PAnimationManager>> &GetAnimationManagers() {return m_animationManagers;}
+		const std::vector<std::pair<std::string,panima::PAnimationManager>> &GetAnimationManagers() const {return const_cast<PanimaComponent*>(this)->GetAnimationManagers();}
+		panima::PAnimationManager AddAnimationManager(std::string name);
 		void RemoveAnimationManager(const panima::AnimationManager &player);
+		void RemoveAnimationManager(const std::string_view &name);
 		void ClearAnimationManagers();
 
 		bool UpdateAnimations(double dt);
@@ -56,11 +57,12 @@ namespace pragma
 		using BaseEntityComponent::Load;
 	protected:
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) override;
+		std::vector<std::pair<std::string,panima::PAnimationManager>>::iterator FindAnimationManager(const std::string_view &name);
 		void InitializeAnimationChannelValueSubmitters();
 		void InitializeAnimationChannelValueSubmitters(panima::AnimationManager &manager);
 		void ResetAnimation(const std::shared_ptr<Model> &mdl);
 		util::PFloatProperty m_playbackRate = nullptr;
-		std::vector<panima::PAnimationManager> m_animationManagers;
+		std::vector<std::pair<std::string,panima::PAnimationManager>> m_animationManagers;
 	};
 
 	struct DLLNETWORK CEAnim2OnAnimationComplete

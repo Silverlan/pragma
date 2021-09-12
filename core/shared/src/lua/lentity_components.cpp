@@ -255,12 +255,13 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defAnimated2.def("GetPlaybackRateProperty",&pragma::PanimaComponent::GetPlaybackRateProperty);
 	defAnimated2.def("ClearAnimationManagers",&pragma::PanimaComponent::ClearAnimationManagers);
 	defAnimated2.def("AddAnimationManager",&pragma::PanimaComponent::AddAnimationManager);
-	defAnimated2.def("RemoveAnimationManager",&pragma::PanimaComponent::RemoveAnimationManager);
+	defAnimated2.def("RemoveAnimationManager",static_cast<void(pragma::PanimaComponent::*)(const panima::AnimationManager&)>(&pragma::PanimaComponent::RemoveAnimationManager));
+	defAnimated2.def("RemoveAnimationManager",static_cast<void(pragma::PanimaComponent::*)(const std::string_view&)>(&pragma::PanimaComponent::RemoveAnimationManager));
 	defAnimated2.def("GetAnimationManagers",+[](lua_State *l,pragma::PanimaComponent &hComponent) -> luabind::tableT<panima::AnimationManager> {
 		auto t = luabind::newtable(l);
 		auto &animManagers = hComponent.GetAnimationManagers();
-		for(auto i=decltype(animManagers.size()){0u};i<animManagers.size();++i)
-			animManagers[i +1] = animManagers[i];
+		for(auto &pair : animManagers)
+			t[pair.first] = pair.second;
 		return t;
 	});
 	defAnimated2.def("GetAnimationManager",+[](lua_State *l,pragma::PanimaComponent &hComponent,uint32_t idx) -> luabind::tableT<panima::AnimationManager> {

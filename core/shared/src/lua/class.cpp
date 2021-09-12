@@ -74,7 +74,7 @@
 #include <mathutil/inverse_kinematics/constraints.hpp>
 #include <sharedutils/magic_enum.hpp>
 #include <fsys/directory_watcher.h>
-#pragma optimize("",off)
+
 extern DLLNETWORK Engine *engine;
 std::ostream &operator<<(std::ostream &out,const ALSound &snd)
 {
@@ -1936,4 +1936,3 @@ static void RegisterIk(Lua::Interface &lua)
 	modIk[defCcdSolver];
 	modIk[defFABRIKSolver];
 }
-#pragma optimize("",on)

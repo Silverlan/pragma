@@ -31,7 +31,7 @@
 #include <luabind/class_info.hpp>
 
 #undef GetClassInfo
-#pragma optimize("",off)
+
 static const pragma::doc::Collection *find_class(const std::vector<pragma::doc::PCollection> &collections,const std::string &className)
 {
 	for(auto &col : collections)
@@ -2013,4 +2013,3 @@ namespace Lua::doc
 	void register_library(Lua::Interface &lua) {}
 };
 #endif
-#pragma optimize("",on)

@@ -23,7 +23,7 @@
 #include <udm.hpp>
 
 using namespace pragma;
-#pragma optimize("",off)
+
 ComponentEventId BaseTransformComponent::EVENT_ON_POSE_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BaseTransformComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
@@ -375,4 +375,3 @@ TraceData util::get_entity_trace_data(BaseTransformComponent &component)
 	}
 	return trData;
 }
-#pragma optimize("",on)

@@ -14,7 +14,7 @@
 #include <udm.hpp>
 
 using namespace pragma;
-#pragma optimize("",off)
+
 ComponentEventId BaseColorComponent::EVENT_ON_COLOR_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BaseColorComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
@@ -123,4 +123,3 @@ void CEOnColorChanged::PushArguments(lua_State *l)
 	Lua::Push<Color>(l,oldColor);
 	Lua::Push<Color>(l,color);
 }
-#pragma optimize("",on)

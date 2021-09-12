@@ -32,7 +32,7 @@
 #include <luabind/copy_policy.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
-#pragma optimize("",off)
+
 namespace Lua
 {
 	namespace Vulkan
@@ -1062,4 +1062,3 @@ bool Lua::Vulkan::VKDescriptorSet::SetBindingUniformBufferDynamic(lua_State *l,D
 {
 	return hDescSet.GetDescriptorSet()->SetBindingDynamicUniformBuffer(buffer,bindingIdx,startOffset,(size != std::numeric_limits<uint32_t>::max()) ? static_cast<uint64_t>(size) : std::numeric_limits<uint64_t>::max());
 }
-#pragma optimize("",on)

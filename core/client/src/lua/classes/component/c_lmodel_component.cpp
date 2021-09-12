@@ -14,7 +14,7 @@
 #include <pragma/asset/util_asset.hpp>
 #include <prosper_command_buffer.hpp>
 #include <cmaterial.h>
-#pragma optimize("",off)
+
 void Lua::ModelDef::register_class(lua_State *l,luabind::module_ &entsMod)
 {
 	luabind::default_converter<BaseEntity> x;
@@ -48,4 +48,3 @@ void Lua::ModelDef::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCModel.def("GetMaxDrawDistance",&pragma::CModelComponent::GetMaxDrawDistance);
 	entsMod[defCModel];
 }
-#pragma optimize("",on)

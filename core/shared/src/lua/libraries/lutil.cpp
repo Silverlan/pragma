@@ -48,7 +48,7 @@
 #include <util_zip.h>
 
 extern DLLNETWORK Engine *engine;
-#pragma optimize("",off)
+
 static auto s_bIgnoreIncludeCache = false;
 void Lua::set_ignore_include_cache(bool b) {s_bIgnoreIncludeCache = b;}
 
@@ -1285,4 +1285,3 @@ std::string Lua::util::get_addon_path(lua_State *l)
 	path += '/';
 	return path;
 }
-#pragma optimize("",on)

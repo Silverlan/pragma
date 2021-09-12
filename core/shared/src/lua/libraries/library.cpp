@@ -69,7 +69,7 @@
 #include <luabind/discard_result_policy.hpp>
 
 extern DLLNETWORK Engine *engine;
-#pragma optimize("",off)
+
 static std::ostream &operator<<(std::ostream &out,const CallbackHandle &hCallback)
 {
 	out<<"Callback[";
@@ -1702,4 +1702,3 @@ void Game::RegisterLuaLibraries()
 	Lua::doc::register_library(GetLuaInterface());
 	Lua::animation::register_library(GetLuaInterface());
 }
-#pragma optimize("",on)

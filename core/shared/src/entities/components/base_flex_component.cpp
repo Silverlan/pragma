@@ -14,7 +14,7 @@
 #include <udm_types.hpp>
 
 using namespace pragma;
-#pragma optimize("",off)
+
 BaseFlexComponent::BaseFlexComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)
 {}
@@ -108,4 +108,3 @@ float BaseFlexComponent::GetFlexController(const std::string &flexController) co
 		return 0.f;
 	return GetFlexController(flexId);
 }
-#pragma optimize("",on)

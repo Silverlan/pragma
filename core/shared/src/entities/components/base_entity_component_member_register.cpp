@@ -10,7 +10,6 @@
 
 using namespace pragma;
 
-#pragma optimize("",off)
 pragma::DynamicMemberRegister::DynamicMemberRegister()
 {}
 void pragma::DynamicMemberRegister::ReserveMembers(uint32_t count)
@@ -84,4 +83,3 @@ pragma::ComponentMemberIndex pragma::DynamicMemberRegister::RegisterMember(const
 	auto cpy = memberInfo;
 	return RegisterMember(std::move(cpy));
 }
-#pragma optimize("",on)

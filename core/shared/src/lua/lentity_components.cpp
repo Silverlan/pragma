@@ -50,7 +50,7 @@
 #include <panima/animation.hpp>
 #include <panima/animation_manager.hpp>
 #include <panima/channel.hpp>
-#pragma optimize("",off)
+
 namespace Lua {bool get_bullet_master(BaseEntity &ent);};
 bool Lua::get_bullet_master(BaseEntity &ent)
 {
@@ -338,4 +338,3 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defDamageable.add_static_constant("EVENT_ON_TAKE_DAMAGE",pragma::DamageableComponent::EVENT_ON_TAKE_DAMAGE);
 	entsMod[defDamageable];
 }
-#pragma optimize("",on)

@@ -13,7 +13,7 @@
 #include "pragma/model/c_model.h"
 
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 static auto g_debugPrint = false;
 void pragma::CEyeComponent::UpdateEyeballsMT()
 {
@@ -282,4 +282,3 @@ void pragma::CEyeComponent::UpdateEyeballMT(const Eyeball &eyeball,uint32_t eyeb
 		Con::cout<<"Up: "<<state.up<<Con::endl;
 	}
 }
-#pragma optimize("",on)

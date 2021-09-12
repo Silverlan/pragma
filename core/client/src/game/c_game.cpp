@@ -110,7 +110,7 @@
 #include <util_image_buffer.hpp>
 #include <udm.hpp>
 #include <prosper_window.hpp>
-#pragma optimize("",off)
+
 extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;
 extern ClientEntityNetworkMap *g_ClEntityNetworkMap;
 extern DLLCLIENT CEngine *c_engine;
@@ -1817,4 +1817,3 @@ Float CGame::GetRestitutionScale() const
 {
 	return cvRestitution->GetFloat();
 }
-#pragma optimize("",on)

@@ -13,7 +13,7 @@
 #include <udm.hpp>
 
 using namespace pragma;
-
+#pragma optimize("",off)
 static inline pragma::AnimationDriverComponent::ValueDriverHash get_value_driver_hash(ComponentId componentId,ComponentMemberIndex memberIdx)
 {
 	return util::hash_combine<uint64_t>(util::hash_combine<uint64_t>(0,componentId),memberIdx);
@@ -152,3 +152,4 @@ void pragma::AnimationDriverComponent::Load(udm::LinkedPropertyWrapperArg udm,ui
 	BaseEntityComponent::Load(udm,version);
 
 }
+#pragma optimize("",on)

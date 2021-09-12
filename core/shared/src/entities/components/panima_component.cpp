@@ -84,8 +84,9 @@ panima::PAnimationManager PanimaComponent::AddAnimationManager(std::string name)
 		CEAnim2TranslateAnimation evTranslateAnimData {set,animId,flags};
 		InvokeEventCallbacks(EVENT_TRANSLATE_ANIMATION,evTranslateAnimData);
 	};
+	auto r = player;
 	m_animationManagers.push_back(std::make_pair<std::string,panima::PAnimationManager>(std::move(name),std::move(player)));
-	return player;
+	return r;
 }
 void PanimaComponent::RemoveAnimationManager(const std::string_view &name)
 {

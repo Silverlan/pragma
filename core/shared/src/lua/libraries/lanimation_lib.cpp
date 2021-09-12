@@ -78,6 +78,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 
 	cdChannel.def(luabind::tostring(luabind::self));
 	cdChannel.def(luabind::const_self ==luabind::const_self);
+	cdChannel.def("Update",&panima::Channel::Update);
 	cdChannel.def("GetTimeFrame",static_cast<panima::TimeFrame&(panima::Channel::*)()>(&panima::Channel::GetTimeFrame));
 	cdChannel.def("SetTimeFrame",&panima::Channel::SetTimeFrame);
 	cdChannel.def("GetValueType",&panima::Channel::GetValueType);
@@ -112,6 +113,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdChannel.def("SetValues",+[](lua_State *l,panima::Channel &channel,luabind::tableT<float> times,luabind::tableT<void> values) {
 		Lua::udm::set_array_values(l,channel.GetTimesArray(),times,2);
 		Lua::udm::set_array_values(l,channel.GetValueArray(),values,3);
+		channel.Update();
 	});
 	cdChannel.def("SetValues",+[](lua_State *l,panima::Channel &channel,luabind::tableT<void> timeValueMap) {
 		auto type = channel.GetValueType();
@@ -155,6 +157,7 @@ void Lua::animation::register_library(Lua::Interface &lua)
 			});
 			++i;
 		}
+		channel.Update();
 	});
 	cdChannel.def("SetValueExpression",+[](lua_State *l,panima::Channel &channel,std::string expression) -> Lua::var<bool,std::string> {
 		std::string err;

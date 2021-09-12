@@ -61,6 +61,13 @@ namespace pragma
 	};
 	struct DLLNETWORK ValueDriver
 	{
+		enum class StateFlags : uint32_t
+		{
+			None = 0u,
+			MemberRefFailed = 1u,
+			ComponentRefFailed = MemberRefFailed<<1u,
+			EntityRefFailed = ComponentRefFailed<<1u
+		};
 		ValueDriver()=default;
 		ValueDriver(pragma::ComponentId componentId,ComponentMemberReference memberRef,ValueDriverDescriptor descriptor);
 		const ComponentMemberReference &GetMemberReference() const {return m_memberReference;}
@@ -68,12 +75,15 @@ namespace pragma
 		pragma::ComponentId GetComponentId() const {return m_componentId;}
 
 		bool Apply(BaseEntity &ent);
+		void ResetFailureState();
 	private:
 		ValueDriverDescriptor m_descriptor;
 		std::unordered_map<std::string,ValueDriverVariable> m_variables;
 		pragma::ComponentId m_componentId = std::numeric_limits<pragma::ComponentId>::max();
 		ComponentMemberReference m_memberReference;
+		StateFlags m_stateFlags = StateFlags::None;
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::ValueDriver::StateFlags)
 
 #endif

@@ -11,7 +11,7 @@
 #include <sharedutils/util_uri.hpp>
 
 using namespace pragma;
-
+#pragma optimize("",off)
 pragma::ValueDriverDescriptor::ValueDriverDescriptor(
 	lua_State *l,std::string expression,std::unordered_map<std::string,std::string> variables,
 	std::unordered_map<std::string,udm::PProperty> constants
@@ -78,6 +78,10 @@ ValueDriver::ValueDriver(pragma::ComponentId componentId,ComponentMemberReferenc
 		m_variables.insert(std::make_pair(pair.first,*var));
 	}
 }
+void pragma::ValueDriver::ResetFailureState()
+{
+	umath::set_flag(m_stateFlags,StateFlags::MemberRefFailed | StateFlags::ComponentRefFailed | StateFlags::EntityRefFailed,false);
+}
 bool pragma::ValueDriver::Apply(BaseEntity &ent)
 {
 	auto &luaExpression = m_descriptor.GetLuaExpression();
@@ -123,6 +127,20 @@ bool pragma::ValueDriver::Apply(BaseEntity &ent)
 		{
 			// Is a member reference, but member is not valid
 			argsValid = false;
+
+			if(!umath::is_flag_set(m_stateFlags,StateFlags::MemberRefFailed))
+			{
+				ResetFailureState(); // Clear other failure flags
+				Con::cwar<<"WARNING: Unable to apply value driver with expression '"<<m_descriptor.GetExpression()<<"': Variable '"<<pair.first<<"' is member reference, but is pointing to invalid ";
+				if(!var.memberRef.GetEntity(game))
+					Con::cwar<<"entity";
+				else if(!var.memberRef.GetComponent(game))
+					Con::cwar<<"component";
+				else
+					Con::cwar<<"member";
+				Con::cwar<<"!"<<Con::endl;
+				umath::set_flag(m_stateFlags,StateFlags::MemberRefFailed);
+			}
 			break;
 		}
 
@@ -138,6 +156,18 @@ bool pragma::ValueDriver::Apply(BaseEntity &ent)
 		{
 			// Is a component reference, but component is not valid
 			argsValid = false;
+			
+			if(!umath::is_flag_set(m_stateFlags,StateFlags::ComponentRefFailed))
+			{
+				ResetFailureState(); // Clear other failure flags
+				Con::cwar<<"WARNING: Unable to apply value driver with expression '"<<m_descriptor.GetExpression()<<"': Variable '"<<pair.first<<"' is component reference, but is pointing to invalid ";
+				if(!var.memberRef.GetEntity(game))
+					Con::cwar<<"entity";
+				else
+					Con::cwar<<"component";
+				Con::cwar<<"!"<<Con::endl;
+				umath::set_flag(m_stateFlags,StateFlags::ComponentRefFailed);
+			}
 			break;
 		}
 
@@ -151,6 +181,13 @@ bool pragma::ValueDriver::Apply(BaseEntity &ent)
 		
 		// Is either an invalid reference altogether or an invalid entity reference
 		argsValid = false;
+		
+		if(!umath::is_flag_set(m_stateFlags,StateFlags::EntityRefFailed))
+		{
+			ResetFailureState(); // Clear other failure flags
+			Con::cwar<<"WARNING: Unable to apply value driver with expression '"<<m_descriptor.GetExpression()<<"': Variable '"<<pair.first<<"' is entity reference, but is pointing to invalid entity!"<<Con::endl;
+			umath::set_flag(m_stateFlags,StateFlags::EntityRefFailed);
+		}
 		break;
 	}
 	if(!argsValid)
@@ -190,6 +227,8 @@ bool pragma::ValueDriver::Apply(BaseEntity &ent)
 
 static EntityUuidComponentMemberRef get_member_ref(util::Uuid entUuid,const std::string &var)
 {
+	if(var.empty())
+		return EntityUuidComponentMemberRef{entUuid,"",""};
 	util::Path path {var};
 	size_t offset = 0;
 	if(path.GetComponent(offset,&offset) != "ec")
@@ -211,14 +250,14 @@ std::optional<ValueDriverVariable> ValueDriverVariable::Create(std::string uriPa
 	size_t offset = 0;
 	if(path.GetComponent(offset,&offset) != "game" || path.GetComponent(offset,&offset) != "entity")
 		return {};
-	auto ecOffset = offset;
-	if(path.GetComponent(offset,&offset) != "ec")
-		return {};
 	std::unordered_map<std::string_view,std::string_view> query;
 	uriparser::parse_uri_query(uri.query(),query);
 	auto itUuid = query.find("entity_uuid");
 	if(itUuid == query.end())
 		return {};
-	auto uuid = itUuid->second;
-	return ValueDriverVariable{util::uuid_string_to_bytes(std::string{uuid}),path.GetString().substr(ecOffset)};
+	auto &strUuid = itUuid->second;
+	auto uuid = util::uuid_string_to_bytes(std::string{strUuid});
+	auto &str = path.GetString();
+	return ValueDriverVariable{uuid,(offset < str.size()) ? str.substr(offset) : std::string{}};
 }
+#pragma optimize("",on)

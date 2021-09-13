@@ -76,6 +76,7 @@ namespace pragma
 
 		bool Apply(BaseEntity &ent);
 		void ResetFailureState();
+		bool IsFailureFlagSet() const;
 	private:
 		ValueDriverDescriptor m_descriptor;
 		std::unordered_map<std::string,ValueDriverVariable> m_variables;
@@ -85,5 +86,8 @@ namespace pragma
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ValueDriver::StateFlags)
+
+std::ostream &operator<<(std::ostream &out,const pragma::ValueDriverDescriptor &descriptor);
+std::ostream &operator<<(std::ostream &out,const pragma::ValueDriver &driver);
 
 #endif

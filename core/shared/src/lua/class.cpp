@@ -19,6 +19,7 @@
 #include "pragma/lua/classes/lphysobj.h"
 #include "pragma/lua/classes/lphysics.h"
 #include "pragma/lua/classes/ldamageinfo.h"
+#include "pragma/lua/lua_util_class.hpp"
 #include "pragma/game/damageinfo.h"
 #include "pragma/lua/classes/lplane.h"
 #include "pragma/model/modelmesh.h"
@@ -153,8 +154,7 @@ static void create_directory_change_listener(lua_State *l,const std::string &pat
 
 static void register_directory_watcher(luabind::module_ &modUtil)
 {
-	auto defListener = luabind::class_<DirectoryWatcherCallback>("DirectoryChangeListener");
-	defListener.def(luabind::tostring(luabind::self));
+	auto defListener = pragma::lua::register_class<"DirectoryChangeListener",DirectoryWatcherCallback>();
 	defListener.add_static_constant("LISTENER_FLAG_NONE",umath::to_integral(DirectoryWatcherCallback::WatchFlags::None));
 	defListener.add_static_constant("LISTENER_FLAG_BIT_WATCH_SUB_DIRECTORIES",umath::to_integral(DirectoryWatcherCallback::WatchFlags::WatchSubDirectories));
 	defListener.add_static_constant("LISTENER_FLAG_ABSOLUTE_PATH",umath::to_integral(DirectoryWatcherCallback::WatchFlags::AbsolutePath));
@@ -303,8 +303,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	auto &modUtil = lua.RegisterLibrary("util");
 	register_directory_watcher(modUtil);
 
-	auto defParallelJob = luabind::class_<util::BaseParallelJob>("ParallelJob");
-	defParallelJob.def(luabind::tostring(luabind::self));
+	auto defParallelJob = pragma::lua::register_class<util::BaseParallelJob>("ParallelJob");
 	defParallelJob.add_static_constant("JOB_STATUS_FAILED",umath::to_integral(util::JobStatus::Failed));
 	defParallelJob.add_static_constant("JOB_STATUS_SUCCESSFUL",umath::to_integral(util::JobStatus::Successful));
 	defParallelJob.add_static_constant("JOB_STATUS_INITIAL",umath::to_integral(util::JobStatus::Initial));
@@ -352,8 +351,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	}));
 	modUtil[defParallelJob];
 
-	auto defImageBuffer = luabind::class_<uimg::ImageBuffer>("ImageBuffer");
-	defImageBuffer.def(luabind::tostring(luabind::self));
+	auto defImageBuffer = pragma::lua::register_class<uimg::ImageBuffer>("ImageBuffer");
 	defImageBuffer.add_static_constant("FORMAT_NONE",umath::to_integral(uimg::Format::None));
 	defImageBuffer.add_static_constant("FORMAT_RGB8",umath::to_integral(uimg::Format::RGB8));
 	defImageBuffer.add_static_constant("FORMAT_RGBA8",umath::to_integral(uimg::Format::RGBA8));
@@ -638,7 +636,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	modUtil[defDataBlock];
 
 	// Version
-	auto defVersion = luabind::class_<util::Version>("Version");
+	auto defVersion = pragma::lua::register_class<util::Version>("Version");
 	defVersion.def(luabind::constructor<>());
 	defVersion.def(luabind::constructor<uint32_t,uint32_t>());
 	defVersion.def(luabind::constructor<uint32_t,uint32_t,uint32_t>());
@@ -646,7 +644,6 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVersion.def(luabind::const_self ==luabind::const_self);
 	defVersion.def(luabind::const_self <luabind::const_self);
 	defVersion.def(luabind::const_self <=luabind::const_self);
-	defVersion.def(luabind::tostring(luabind::self));
 	defVersion.def_readwrite("major",&util::Version::major);
 	defVersion.def_readwrite("minor",&util::Version::minor);
 	defVersion.def_readwrite("revision",&util::Version::revision);
@@ -656,7 +653,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	//
 
 	// Path
-	auto defPath = luabind::class_<util::Path>("Path");
+	auto defPath = pragma::lua::register_class<util::Path>("Path");
 	defPath.scope[luabind::def("CreateFilePath",static_cast<void(*)(lua_State*,const std::string&)>([](lua_State *l,const std::string &path) {
 		Lua::Push<util::Path>(l,util::Path::CreateFile(path));
 	}))];
@@ -683,7 +680,6 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defPath.def(luabind::constructor<const util::Path&>());
 	defPath.def(luabind::constructor<const std::string&>());
 
-	defPath.def(luabind::tostring(luabind::self));
 	defPath.def(luabind::self +luabind::const_self);
 	defPath.def(luabind::self +std::string{});
 
@@ -766,8 +762,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	auto &modMath = lua.RegisterLibrary("math");
 
 	// Transform
-	auto classDefTransform = luabind::class_<Transform>("Transform");
-	classDefTransform.def(luabind::tostring(luabind::self));
+	auto classDefTransform = pragma::lua::register_class<Transform>("Transform");
 	classDefTransform.def(luabind::constructor<>());
 	classDefTransform.def(luabind::constructor<const Vector3&>());
 	classDefTransform.def(luabind::constructor<const Quat&>());
@@ -971,10 +966,9 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	modMath[noiseMap];
 	//
 
-	auto defVectori = luabind::class_<Vector3i>("Vectori");
+	auto defVectori = pragma::lua::register_class<Vector3i>("Vectori");
 	defVectori.def(luabind::constructor<>());
 	defVectori.def(luabind::constructor<int32_t,int32_t,int32_t>());
-	defVectori.def(luabind::tostring(luabind::self));
 	defVectori.def(-luabind::const_self);
 	defVectori.def_readwrite("x",&Vector3i::x);
 	defVectori.def_readwrite("y",&Vector3i::y);
@@ -992,10 +986,9 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	}));
 	modMath[defVectori];
 	
-	auto defVector2i = luabind::class_<Vector2i>("Vector2i");
+	auto defVector2i = pragma::lua::register_class<Vector2i>("Vector2i");
 	defVector2i.def(luabind::constructor<>());
 	defVector2i.def(luabind::constructor<int32_t,int32_t>());
-	defVector2i.def(luabind::tostring(luabind::self));
 	defVector2i.def(-luabind::const_self);
 	defVector2i.def_readwrite("x",&Vector2i::x);
 	defVector2i.def_readwrite("y",&Vector2i::y);
@@ -1012,10 +1005,9 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	}));
 	modMath[defVector2i];
 
-	auto defVector4i = luabind::class_<Vector4i>("Vector4i");
+	auto defVector4i = pragma::lua::register_class<Vector4i>("Vector4i");
 	defVector4i.def(luabind::constructor<>());
 	defVector4i.def(luabind::constructor<int32_t,int32_t,int32_t,int32_t>());
-	defVector4i.def(luabind::tostring(luabind::self));
 	defVector4i.def(-luabind::const_self);
 	defVector4i.def_readwrite("w",&Vector4i::w);
 	defVector4i.def_readwrite("x",&Vector4i::x);
@@ -1035,11 +1027,10 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	}));
 	modMath[defVector4i];
 
-	auto defVector = luabind::class_<Vector3>("Vector");
+	auto defVector = pragma::lua::register_class<Vector3>("Vector");
 	defVector.def(luabind::constructor<>());
 	defVector.def(luabind::constructor<float,float,float>());
 	defVector.def(luabind::constructor<const Vector2&,float>());
-	defVector.def(luabind::tostring(luabind::self));
 	defVector.def(-luabind::const_self);
 	defVector.def_readwrite("x",&Vector3::x);
 	defVector.def_readwrite("y",&Vector3::y);
@@ -1117,10 +1108,9 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector.def("ToScreenUv",&umat::to_screen_uv);
 	modMath[defVector];
 
-	auto defVector2 = luabind::class_<Vector2>("Vector2");
+	auto defVector2 = pragma::lua::register_class<Vector2>("Vector2");
 	defVector2.def(luabind::constructor<>());
 	defVector2.def(luabind::constructor<float,float>());
-	defVector2.def(luabind::tostring(luabind::self));
 	defVector2.def(-luabind::const_self);
 	defVector2.def_readwrite("x",&Vector2::x);
 	defVector2.def_readwrite("y",&Vector2::y);
@@ -1152,11 +1142,10 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector2.def("Project",&Lua::Vector2::Project);
 	modMath[defVector2];
 
-	auto defVector4 = luabind::class_<Vector4>("Vector4");
+	auto defVector4 = pragma::lua::register_class<Vector4>("Vector4");
 	defVector4.def(luabind::constructor<>());
 	defVector4.def(luabind::constructor<float,float,float,float>());
 	defVector4.def(luabind::constructor<const Vector3&,float>());
-	defVector4.def(luabind::tostring(luabind::self));
 	defVector4.def(-luabind::const_self);
 	defVector4.def_readwrite("w",&Vector4::w);
 	defVector4.def_readwrite("x",&Vector4::x);
@@ -1192,7 +1181,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector4.def("Project",&Lua::Vector4::Project);
 	modMath[defVector4];
 
-	auto defEulerAngles = luabind::class_<EulerAngles>("EulerAngles");
+	auto defEulerAngles = pragma::lua::register_class<EulerAngles>("EulerAngles");
 	defEulerAngles.def(luabind::constructor<>());
 	defEulerAngles.def(luabind::constructor<float,float,float>());
 	defEulerAngles.def(luabind::constructor<const EulerAngles&>());
@@ -1200,7 +1189,6 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defEulerAngles.def(luabind::constructor<const Vector3&>());
 	defEulerAngles.def(luabind::constructor<const Vector3&,const Vector3&>());
 	defEulerAngles.def(luabind::constructor<const Quat&>());
-	defEulerAngles.def(luabind::tostring(luabind::self));
 	defEulerAngles.def(-luabind::const_self);
 	defEulerAngles.def_readwrite("p",&EulerAngles::p);
 	defEulerAngles.def_readwrite("y",&EulerAngles::y);
@@ -1240,10 +1228,9 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	}));
 	modMath[defEulerAngles];
 
-	auto defQuat = luabind::class_<Quat>("Quaternion");
+	auto defQuat = pragma::lua::register_class<Quat>("Quaternion");
 	defQuat.def(luabind::constructor<float,float,float,float>());
 	defQuat.def(luabind::constructor<const Quat&>());
-	defQuat.def(luabind::tostring(luabind::self));
 	defQuat.def_readwrite("w",&Quat::w);
 	defQuat.def_readwrite("x",&Quat::x);
 	defQuat.def_readwrite("y",&Quat::y);
@@ -1558,8 +1545,7 @@ void Game::RegisterLuaGameClasses(luabind::module_ &gameMod)
 		{"TICK_POLICY_WHEN_VISIBLE",umath::to_integral(pragma::TickPolicy::WhenVisible)}
 	});
 
-	auto surfaceMatDef = luabind::class_<SurfaceMaterial>("SurfaceMaterial");
-	surfaceMatDef.def(luabind::tostring(luabind::self));
+	auto surfaceMatDef = pragma::lua::register_class<SurfaceMaterial>("SurfaceMaterial");
 	surfaceMatDef.def("GetName",&::SurfaceMaterial::GetIdentifier);
 	surfaceMatDef.def("GetIndex",&::SurfaceMaterial::GetIndex);
 	surfaceMatDef.def("SetFriction",&::SurfaceMaterial::SetFriction);

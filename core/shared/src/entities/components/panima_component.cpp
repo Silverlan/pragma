@@ -66,6 +66,11 @@ std::vector<std::pair<std::string,panima::PAnimationManager>>::iterator PanimaCo
 		return pair.first == name;
 	});
 }
+panima::PAnimationManager PanimaComponent::GetAnimationManager(std::string name)
+{
+	auto it = FindAnimationManager(name);
+	return (it != m_animationManagers.end()) ? it->second : nullptr;
+}
 panima::PAnimationManager PanimaComponent::AddAnimationManager(std::string name)
 {
 	auto it = FindAnimationManager(name);

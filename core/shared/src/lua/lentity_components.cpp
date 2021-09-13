@@ -266,11 +266,8 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 			t[pair.first] = pair.second;
 		return t;
 	});
-	defAnimated2.def("GetAnimationManager",+[](lua_State *l,pragma::PanimaComponent &hComponent,uint32_t idx) -> luabind::tableT<panima::AnimationManager> {
-		auto &animManagers = hComponent.GetAnimationManagers();
-		if(idx >= animManagers.size())
-			return luabind::object{};
-		return luabind::object{l,animManagers[idx]};
+	defAnimated2.def("GetAnimationManager",+[](lua_State *l,pragma::PanimaComponent &hComponent,const std::string &name) {
+		return hComponent.GetAnimationManager(name);
 	});
 	defAnimated2.def("PlayAnimation",&pragma::PanimaComponent::PlayAnimation);
 	defAnimated2.def("ReloadAnimation",&pragma::PanimaComponent::ReloadAnimation);
@@ -296,6 +293,7 @@ void Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defDriverC.def("ClearDrivers",&pragma::AnimationDriverComponent::ClearDrivers);
 
 	auto defDriver = luabind::class_<pragma::ValueDriver>("Driver");
+	defDriver.def(luabind::tostring(luabind::self));
 	defDriver.def("GetMemberReference",&pragma::ValueDriver::GetMemberReference);
 	defDriver.def("GetDescriptor",&pragma::ValueDriver::GetDescriptor);
 	defDriverC.scope[defDriver];

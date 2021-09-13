@@ -61,6 +61,17 @@ void pragma::ValueDriverDescriptor::AddReference(const std::string &name,std::st
 	m_expressionDirty = true;
 }
 
+std::ostream &operator<<(std::ostream &out,const pragma::ValueDriverDescriptor &descriptor)
+{
+	out<<"ValueDriverDescriptor[Expr:"<<descriptor.GetExpression()<<"][Vars:"<<descriptor.GetReferences().size()<<"][Constants:"<<descriptor.GetConstants().size()<<"]";
+	return out;
+}
+std::ostream &operator<<(std::ostream &out,const pragma::ValueDriver &driver)
+{
+	out<<"ValueDriver[Expr:"<<driver.GetDescriptor()<<"][State:"<<((driver.IsFailureFlagSet()) ? "failed" : "base")<<"]";
+	return out;
+}
+
 ////////////
 
 ValueDriver::ValueDriver(pragma::ComponentId componentId,ComponentMemberReference memberRef,ValueDriverDescriptor descriptor,const util::Uuid &self)
@@ -79,6 +90,10 @@ ValueDriver::ValueDriver(pragma::ComponentId componentId,ComponentMemberReferenc
 void pragma::ValueDriver::ResetFailureState()
 {
 	umath::set_flag(m_stateFlags,StateFlags::MemberRefFailed | StateFlags::ComponentRefFailed | StateFlags::EntityRefFailed,false);
+}
+bool pragma::ValueDriver::IsFailureFlagSet() const
+{
+	return umath::is_flag_set(m_stateFlags,StateFlags::MemberRefFailed | StateFlags::ComponentRefFailed | StateFlags::EntityRefFailed);
 }
 bool pragma::ValueDriver::Apply(BaseEntity &ent)
 {

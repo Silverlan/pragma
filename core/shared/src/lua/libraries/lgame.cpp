@@ -16,6 +16,7 @@
 #include "pragma/lua/luacallback.h"
 #include "luasystem.h"
 #include "pragma/lua/classes/ldef_vector.h"
+#include "pragma/lua/lua_util_class.hpp"
 #include "pragma/entities/environment/lights/env_light.h"
 #include "pragma/entities/components/base_gamemode_component.hpp"
 #include "pragma/entities/baseworld.h"
@@ -412,7 +413,7 @@ void Lua::game::register_shared_functions(luabind::module_ &modGame)
 		})
 	];
 
-	auto classDefDescriptor = luabind::class_<pragma::ValueDriverDescriptor>("ValueDriverDescriptor");
+	auto classDefDescriptor = pragma::lua::register_class<pragma::ValueDriverDescriptor>("ValueDriverDescriptor");
 	classDefDescriptor.def(luabind::constructor<lua_State*,std::string,std::unordered_map<std::string,std::string>,std::unordered_map<std::string,udm::PProperty>>());
 	classDefDescriptor.def(luabind::constructor<lua_State*,std::string,std::unordered_map<std::string,std::string>>());
 	classDefDescriptor.def(luabind::constructor<lua_State*,std::string>());

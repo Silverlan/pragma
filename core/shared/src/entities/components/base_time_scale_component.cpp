@@ -21,11 +21,15 @@ void BaseTimeScaleComponent::RegisterMembers(pragma::EntityComponentManager &com
 	using T = BaseTimeScaleComponent;
 
 	using TTimeScale = float;
-	registerMember(create_component_member_info<
-		T,TTimeScale,
-		static_cast<void(T::*)(TTimeScale)>(&T::SetTimeScale),
-		static_cast<TTimeScale(T::*)() const>(&T::GetTimeScale)
-	>("timeScale"));
+	{
+		auto memberInfo = create_component_member_info<
+			T,TTimeScale,
+			static_cast<void(T::*)(TTimeScale)>(&T::SetTimeScale),
+			static_cast<TTimeScale(T::*)() const>(&T::GetTimeScale)
+		>("timeScale",1.f);
+		memberInfo.SetMin(0.f);
+		registerMember(std::move(memberInfo));
+	}
 }
 BaseTimeScaleComponent::BaseTimeScaleComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_timeScale{util::FloatProperty::Create(1.f)}

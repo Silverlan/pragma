@@ -38,28 +38,28 @@ void BaseTransformComponent::RegisterMembers(pragma::EntityComponentManager &com
 		T,TPosition,
 		static_cast<void(T::*)(const TPosition&)>(&T::SetPosition),
 		static_cast<const TPosition&(T::*)() const>(&T::GetPosition)
-	>("position"));
+	>("position",TPosition{}));
 
 	using TRotation = Quat;
 	registerMember(create_component_member_info<
 		T,TRotation,
 		static_cast<void(T::*)(const TRotation&)>(&T::SetRotation),
 		static_cast<const TRotation&(T::*)() const>(&T::GetRotation)
-	>("rotation"));
+	>("rotation",uquat::identity()));
 
 	using TAngles = EulerAngles;
 	registerMember(create_component_member_info<
 		T,TAngles,
 		static_cast<void(T::*)(const TAngles&)>(&T::SetAngles),
 		static_cast<TAngles(T::*)() const>(&T::GetAngles)
-	>("angles"));
+	>("angles",TAngles{}));
 
 	using TScale = Vector3;
 	registerMember(create_component_member_info<
 		T,TScale,
 		static_cast<void(T::*)(const TScale&)>(&T::SetScale),
 		static_cast<const TScale&(T::*)() const>(&T::GetScale)
-	>("scale"));
+	>("scale",TScale{1.f,1.f,1.f}));
 }
 BaseTransformComponent::BaseTransformComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)

@@ -22,23 +22,57 @@ void BaseEnvLightSpotComponent::RegisterMembers(pragma::EntityComponentManager &
 	using T = BaseEnvLightSpotComponent;
 
 	using TConeAngle = float;
-	registerMember(create_component_member_info<
-		T,TConeAngle,
-		static_cast<void(T::*)(TConeAngle)>(&T::SetInnerCutoffAngle),
-		static_cast<TConeAngle(T::*)() const>(&T::GetInnerCutoffAngle)
-	>("innerConeAngle"));
+	{
+		auto memberInfo = create_component_member_info<
+			T,TConeAngle,
+			static_cast<void(T::*)(TConeAngle)>(&T::SetInnerCutoffAngle),
+			static_cast<TConeAngle(T::*)() const>(&T::GetInnerCutoffAngle)
+		>("innerConeAngle",0.f,AttributeSpecializationType::Angle);
+		memberInfo.SetMin(0.f);
+		memberInfo.SetMax(179.99f);
+		memberInfo.updateDependenciesFunction = [](BaseEntityComponent &component,std::vector<std::string> &outAffectedProps) {
+			auto &c = static_cast<T&>(component);
+			auto outerAngle = c.GetOuterCutoffAngle();
+			auto innerAngle = c.GetInnerCutoffAngle();
+			if(innerAngle >= outerAngle)
+			{
+				c.SetOuterCutoffAngle(innerAngle +0.01f);
+				outAffectedProps.push_back("outerConeAngle");
+			}
+		};
+		registerMember(std::move(memberInfo));
+	}
 
-	registerMember(create_component_member_info<
-		T,TConeAngle,
-		static_cast<void(T::*)(TConeAngle)>(&T::SetOuterCutoffAngle),
-		static_cast<TConeAngle(T::*)() const>(&T::GetOuterCutoffAngle)
-	>("outerConeAngle"));
+	{
+		auto memberInfo = create_component_member_info<
+			T,TConeAngle,
+			static_cast<void(T::*)(TConeAngle)>(&T::SetOuterCutoffAngle),
+			static_cast<TConeAngle(T::*)() const>(&T::GetOuterCutoffAngle)
+		>("outerConeAngle",0.f,AttributeSpecializationType::Angle);
+		memberInfo.SetMin(0.f);
+		memberInfo.SetMax(179.99f);
+		memberInfo.updateDependenciesFunction = [](BaseEntityComponent &component,std::vector<std::string> &outAffectedProps) {
+			auto &c = static_cast<T&>(component);
+			auto outerAngle = c.GetOuterCutoffAngle();
+			auto innerAngle = c.GetInnerCutoffAngle();
+			if(outerAngle < innerAngle)
+			{
+				c.SetInnerCutoffAngle(outerAngle -0.01f);
+				outAffectedProps.push_back("innerConeAngle");
+			}
+		};
+		registerMember(std::move(memberInfo));
+	}
 
-	registerMember(create_component_member_info<
-		T,TConeAngle,
-		static_cast<void(T::*)(TConeAngle)>(&T::SetConeStartOffset),
-		static_cast<TConeAngle(T::*)() const>(&T::GetConeStartOffset)
-	>("coneStartOffset"));
+	{
+		auto memberInfo = create_component_member_info<
+			T,TConeAngle,
+			static_cast<void(T::*)(TConeAngle)>(&T::SetConeStartOffset),
+			static_cast<TConeAngle(T::*)() const>(&T::GetConeStartOffset)
+		>("coneStartOffset",0.f,AttributeSpecializationType::Distance);
+		memberInfo.SetMin(0.f);
+		registerMember(std::move(memberInfo));
+	}
 }
 BaseEnvLightSpotComponent::BaseEnvLightSpotComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_angInnerCutoff(util::FloatProperty::Create(0.f)),

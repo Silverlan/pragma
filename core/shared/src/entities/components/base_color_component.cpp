@@ -23,39 +23,46 @@ void BaseColorComponent::RegisterEvents(pragma::EntityComponentManager &componen
 void BaseColorComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
 {
 	using T = BaseColorComponent;
-	auto memberInfo = create_component_member_info<
-		T,Vector3,
-		[](const ComponentMemberInfo&,T &component,const Vector3 &value) {
-			auto &curColor = component.GetColor();
-			Vector4 newColor {value,curColor.a /255.f};
-			component.SetColor(Color{newColor});
-		},
-		[](const ComponentMemberInfo&,T &component,Vector3 &value) {value = component.GetColor().ToVector4();}
-	>("color");
-	memberInfo.SetInterpolationFunction<T,Vector3,[](const Vector3 &col0,const Vector3 &col1,double t,Vector3 &vOut) {
-		double h0,s0,v0;
-		util::rgb_to_hsv(col0,h0,s0,v0);
+	{
+		auto memberInfo = create_component_member_info<
+			T,Vector3,
+			[](const ComponentMemberInfo&,T &component,const Vector3 &value) {
+				auto &curColor = component.GetColor();
+				Vector4 newColor {value,curColor.a /255.f};
+				component.SetColor(Color{newColor});
+			},
+			[](const ComponentMemberInfo&,T &component,Vector3 &value) {value = component.GetColor().ToVector4();}
+		>("color",Color::White.ToVector3(),AttributeSpecializationType::Color);
+		memberInfo.SetInterpolationFunction<T,Vector3,[](const Vector3 &col0,const Vector3 &col1,double t,Vector3 &vOut) {
+			double h0,s0,v0;
+			util::rgb_to_hsv(col0,h0,s0,v0);
 
-		double h1,s1,v1;
-		util::rgb_to_hsv(col1,h1,s1,v1);
+			double h1,s1,v1;
+			util::rgb_to_hsv(col1,h1,s1,v1);
 
-		util::lerp_hsv(h0,s0,v0,h1,s1,v1,t);
+			util::lerp_hsv(h0,s0,v0,h1,s1,v1,t);
 
-		vOut = Vector3{
-			util::hsv_to_rgb(h0,s0,v0)
-		};
-	}>();
-	registerMember(std::move(memberInfo));
+			vOut = Vector3{
+				util::hsv_to_rgb(h0,s0,v0)
+			};
+		}>();
+		registerMember(std::move(memberInfo));
+	}
 
-	registerMember(create_component_member_info<
-		T,float,
-		[](const ComponentMemberInfo&,T &component,const float &value) {
-			auto col = component.GetColor();
-			col.a = value *255.f;
-			component.SetColor(col);
-		},
-		[](const ComponentMemberInfo&,T &component,float &value) {value = component.GetColor().a /255.f;}
-	>("alpha"));
+	{
+		auto memberInfo = create_component_member_info<
+			T,float,
+			[](const ComponentMemberInfo&,T &component,const float &value) {
+				auto col = component.GetColor();
+				col.a = value *255.f;
+				component.SetColor(col);
+			},
+			[](const ComponentMemberInfo&,T &component,float &value) {value = component.GetColor().a /255.f;}
+		>("alpha",1.f);
+		memberInfo.SetMin(0.f);
+		memberInfo.SetMax(1.f);
+		registerMember(std::move(memberInfo));
+	}
 }
 BaseColorComponent::BaseColorComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_color(util::SimpleProperty<util::ColorProperty,Color>::Create(Color(255,255,255,255)))

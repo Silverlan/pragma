@@ -36,11 +36,15 @@ void BaseModelComponent::RegisterMembers(pragma::EntityComponentManager &compone
 	using T = BaseModelComponent;
 
 	using TSkin = uint32_t;
-	registerMember(create_component_member_info<
-		T,TSkin,
-		static_cast<void(T::*)(TSkin)>(&T::SetSkin),
-		static_cast<TSkin(T::*)() const>(&T::GetSkin)
-	>("skin"));
+	{
+		auto memberInfo = create_component_member_info<
+			T,TSkin,
+			static_cast<void(T::*)(TSkin)>(&T::SetSkin),
+			static_cast<TSkin(T::*)() const>(&T::GetSkin)
+		>("skin",0);
+		memberInfo.SetMin(0.f);
+		registerMember(std::move(memberInfo));
+	}
 }
 BaseModelComponent::BaseModelComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)

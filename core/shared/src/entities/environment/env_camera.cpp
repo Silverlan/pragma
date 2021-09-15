@@ -26,21 +26,56 @@ static float normalize_plane_z(float z) {return umath::max(z,0.1f);} // z value 
 void BaseEnvCameraComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
 {
 	using T = BaseEnvCameraComponent;
-	registerMember(create_component_member_info<
-		T,float,
-		static_cast<void(T::*)(float)>(&T::SetFOV),
-		static_cast<float(T::*)() const>(&T::GetFOV)
-	>("fov"));
-	registerMember(create_component_member_info<
-		T,float,
-		static_cast<void(T::*)(float)>(&T::SetNearZ),
-		static_cast<float(T::*)() const>(&T::GetFarZ)
-	>("nearz"));
-	registerMember(create_component_member_info<
-		T,float,
-		static_cast<void(T::*)(float)>(&T::SetFarZ),
-		static_cast<float(T::*)() const>(&T::GetFarZ)
-	>("farz"));
+	{
+		auto memberInfo = create_component_member_info<
+			T,float,
+			static_cast<void(T::*)(float)>(&T::SetFOV),
+			static_cast<float(T::*)() const>(&T::GetFOV)
+		>("fov",DEFAULT_FOV,AttributeSpecializationType::Angle);
+		memberInfo.SetMin(0.01f);
+		memberInfo.SetMax(179.99f);
+		registerMember(std::move(memberInfo));
+	}
+
+	{
+		auto memberInfo = create_component_member_info<
+			T,float,
+			static_cast<void(T::*)(float)>(&T::SetNearZ),
+			static_cast<float(T::*)() const>(&T::GetFarZ)
+		>("nearz",DEFAULT_FAR_Z,AttributeSpecializationType::Distance);
+		memberInfo.SetMin(0.1f);
+		memberInfo.updateDependenciesFunction = [](BaseEntityComponent &component,std::vector<std::string> &outAffectedProps) {
+			auto &c = static_cast<T&>(component);
+			auto farZ = c.GetFarZ();
+			auto nearZ = c.GetNearZ();
+			if(nearZ >= farZ)
+			{
+				c.SetFarZ(nearZ +0.01f);
+				outAffectedProps.push_back("farz");
+			}
+		};
+		registerMember(std::move(memberInfo));
+	}
+
+	{
+		auto memberInfo = create_component_member_info<
+			T,float,
+			static_cast<void(T::*)(float)>(&T::SetFarZ),
+			static_cast<float(T::*)() const>(&T::GetFarZ)
+		>("farz",DEFAULT_NEAR_Z,AttributeSpecializationType::Distance);
+		memberInfo.SetMin(0.1f);
+		memberInfo.updateDependenciesFunction = [](BaseEntityComponent &component,std::vector<std::string> &outAffectedProps) {
+			auto &c = static_cast<T&>(component);
+			auto farZ = c.GetFarZ();
+			auto nearZ = c.GetNearZ();
+			if(farZ < nearZ)
+			{
+				c.SetNearZ(farZ -0.01f);
+				outAffectedProps.push_back("nearz");
+			}
+		};
+		registerMember(std::move(memberInfo));
+	}
 }
 
 decltype(BaseEnvCameraComponent::DEFAULT_NEAR_Z) BaseEnvCameraComponent::DEFAULT_NEAR_Z = 1.f;

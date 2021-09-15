@@ -21,11 +21,14 @@ void BaseScoreComponent::RegisterEvents(pragma::EntityComponentManager &componen
 void BaseScoreComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
 {
 	using T = BaseScoreComponent;
-	registerMember(create_component_member_info<
-		T,Score,
-		static_cast<void(T::*)(Score)>(&T::SetScore),
-		static_cast<Score(T::*)() const>(&T::GetScore)
-	>("score"));
+	{
+		auto memberInfo = create_component_member_info<
+			T,Score,
+			static_cast<void(T::*)(Score)>(&T::SetScore),
+			static_cast<Score(T::*)() const>(&T::GetScore)
+		>("score",0);
+		registerMember(std::move(memberInfo));
+	}
 }
 BaseScoreComponent::BaseScoreComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_score(util::Int32Property::Create(0))

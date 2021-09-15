@@ -24,11 +24,15 @@ void BaseRadiusComponent::RegisterMembers(pragma::EntityComponentManager &compon
 {
 	using T = BaseRadiusComponent;
 	using TRadius = float;
-	registerMember(create_component_member_info<
-		T,TRadius,
-		static_cast<void(T::*)(TRadius)>(&T::SetRadius),
-		static_cast<TRadius(T::*)() const>(&T::GetRadius)
-	>("radius"));
+	{
+		auto memberInfo = create_component_member_info<
+			T,TRadius,
+			static_cast<void(T::*)(TRadius)>(&T::SetRadius),
+			static_cast<TRadius(T::*)() const>(&T::GetRadius)
+		>("radius",0.f,AttributeSpecializationType::Distance);
+		memberInfo.SetMin(0.f);
+		registerMember(std::move(memberInfo));
+	}
 }
 BaseRadiusComponent::BaseRadiusComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_radius(util::FloatProperty::Create(0.f))

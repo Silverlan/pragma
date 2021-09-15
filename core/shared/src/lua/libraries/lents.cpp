@@ -23,10 +23,12 @@
 #include "pragma/entities/components/base_weapon_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
+#include "pragma/entities/attribute_specialization_type.hpp"
 #include "pragma/lua/lentity_type.hpp"
 #include "pragma/lua/lua_entity_iterator.hpp"
 #include "pragma/lua/sh_lua_component.hpp"
 #include "pragma/lua/policies/core_policies.hpp"
+#include <sharedutils/magic_enum.hpp>
 
 extern DLLNETWORK Engine *engine;
 
@@ -152,6 +154,18 @@ void Lua::ents::register_library(lua_State *l)
 	memberInfoDef.def_readonly("type",&pragma::ComponentMemberInfo::type);
 	memberInfoDef.def("GetName",&pragma::ComponentMemberInfo::GetName);
 	memberInfoDef.def("GetNameHash",&pragma::ComponentMemberInfo::GetNameHash);
+	memberInfoDef.def("GetSpecializationType",&pragma::ComponentMemberInfo::GetSpecializationType);
+	memberInfoDef.def("GetCustomSpecializationType",&pragma::ComponentMemberInfo::GetCustomSpecializationType);
+	memberInfoDef.def("GetMin",&pragma::ComponentMemberInfo::GetMin);
+	memberInfoDef.def("GetMax",&pragma::ComponentMemberInfo::GetMax);
+	memberInfoDef.def("GetStepSize",&pragma::ComponentMemberInfo::GetStepSize);
+	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_NONE",umath::to_integral(pragma::AttributeSpecializationType::None));
+	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_COLOR",umath::to_integral(pragma::AttributeSpecializationType::Color));
+	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_DISTANCE",umath::to_integral(pragma::AttributeSpecializationType::Distance));
+	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_LIGHT_INTENSITY",umath::to_integral(pragma::AttributeSpecializationType::LightIntensity));
+	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_CUSTOM",umath::to_integral(pragma::AttributeSpecializationType::Custom));
+	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_ANGLE",umath::to_integral(pragma::AttributeSpecializationType::Angle));
+	static_assert(umath::to_integral(pragma::AttributeSpecializationType::Count) == 6u);
 	componentInfoDef.scope[memberInfoDef];
 
 	entsMod[componentInfoDef];

@@ -33,11 +33,14 @@ namespace pragma
 	class BaseEntityComponent;
 	DLLNETWORK std::string get_normalized_component_member_name(const std::string &name);
 	DLLNETWORK size_t get_component_member_name_hash(const std::string &name);
+
+	enum class AttributeSpecializationType : uint8_t;
 	struct DLLNETWORK ComponentMemberInfo
 	{
 		using ApplyFunction = void(*)(const ComponentMemberInfo&,BaseEntityComponent&,const void*);
 		using GetFunction = void(*)(const ComponentMemberInfo&,BaseEntityComponent&,void*);
 		using InterpolationFunction = void(*)(const void*,const void*,double,void*);
+		using UpdateDependenciesFunction = void(*)(BaseEntityComponent&,std::vector<std::string>&);
 		static ComponentMemberInfo CreateDummy();
 		ComponentMemberInfo(std::string &&name,udm::Type type,const ApplyFunction &applyFunc,const GetFunction &getFunc);
 
@@ -112,19 +115,49 @@ namespace pragma
 		const std::string &GetName() const {return m_name;}
 		size_t GetNameHash() const {return m_nameHash;}
 
+		AttributeSpecializationType GetSpecializationType() const {return m_specializationType;}
+		const std::string *GetCustomSpecializationType() const {return m_customSpecializationType.get();}
+		void SetSpecializationType(AttributeSpecializationType type);
+		void SetSpecializationType(std::string customType);
+		
+		ComponentMemberInfo(const ComponentMemberInfo&);
+		ComponentMemberInfo &operator=(const ComponentMemberInfo &other);
+
+		void SetMin(float min);
+		void SetMax(float max);
+		void SetStepSize(float stepSize);
+		std::optional<float> GetMin() const {return m_min;}
+		std::optional<float> GetMax() const {return m_max;}
+		std::optional<float> GetStepSize() const {return m_stepSize;}
+		template<typename T>
+			void SetDefault(T value);
+
+		void UpdateDependencies(BaseEntityComponent &component,std::vector<std::string> &outAffectedProps);
+		void ResetToDefault(BaseEntityComponent &component);
+
 		udm::Type type;
 		ApplyFunction setterFunction = nullptr;
 		GetFunction getterFunction = nullptr;
 		InterpolationFunction interpolationFunction = nullptr;
+		UpdateDependenciesFunction updateDependenciesFunction = nullptr;
+
 		union
 		{
 			uint64_t userIndex;
 			void *userData = nullptr;
 		};
 	private:
-		ComponentMemberInfo()=default;
+		ComponentMemberInfo();
 		std::string m_name;
 		size_t m_nameHash = 0;
+
+		AttributeSpecializationType m_specializationType;
+		std::unique_ptr<std::string> m_customSpecializationType = nullptr;
+
+		std::optional<float> m_min {};
+		std::optional<float> m_max {};
+		std::optional<float> m_stepSize {};
+		std::unique_ptr<void,void(*)(void*)> m_default = std::unique_ptr<void,void(*)(void*)>{nullptr,[](void*) {}};
 	};
 
 	enum class ComponentFlags : uint8_t

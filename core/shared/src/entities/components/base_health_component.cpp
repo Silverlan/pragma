@@ -30,17 +30,25 @@ void BaseHealthComponent::RegisterMembers(pragma::EntityComponentManager &compon
 	using T = BaseHealthComponent;
 
 	using THealth = uint16_t;
-	registerMember(create_component_member_info<
-		T,THealth,
-		static_cast<void(T::*)(THealth)>(&T::SetHealth),
-		static_cast<THealth(T::*)() const>(&T::GetHealth)
-	>("health"));
+	{
+		auto memberInfo = create_component_member_info<
+			T,THealth,
+			static_cast<void(T::*)(THealth)>(&T::SetHealth),
+			static_cast<THealth(T::*)() const>(&T::GetHealth)
+		>("health",0);
+		memberInfo.SetMin(0.f);
+		registerMember(std::move(memberInfo));
+	}
 
-	registerMember(create_component_member_info<
-		T,THealth,
-		static_cast<void(T::*)(THealth)>(&T::SetMaxHealth),
-		static_cast<THealth(T::*)() const>(&T::GetMaxHealth)
-	>("maxHealth"));
+	{
+		auto memberInfo = create_component_member_info<
+			T,THealth,
+			static_cast<void(T::*)(THealth)>(&T::SetMaxHealth),
+			static_cast<THealth(T::*)() const>(&T::GetMaxHealth)
+		>("maxHealth",0);
+		memberInfo.SetMin(0.f);
+		registerMember(std::move(memberInfo));
+	}
 }
 BaseHealthComponent::BaseHealthComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_health(util::UInt16Property::Create(0)),

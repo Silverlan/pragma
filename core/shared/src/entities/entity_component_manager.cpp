@@ -7,7 +7,10 @@
 
 #include "stdafx_shared.h"
 #include "pragma/entities/entity_component_manager.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/entities/attribute_specialization_type.hpp"
+#include <udm.hpp>
 
 using namespace pragma;
 
@@ -25,6 +28,68 @@ std::string pragma::get_normalized_component_member_name(const std::string &name
 	auto lname = name;
 	ustring::to_lower(lname);
 	return lname;
+}
+ComponentMemberInfo::ComponentMemberInfo()
+	: m_specializationType{AttributeSpecializationType::None}
+{}
+ComponentMemberInfo::ComponentMemberInfo(const ComponentMemberInfo &other)
+{
+	operator=(other);
+}
+ComponentMemberInfo &ComponentMemberInfo::operator=(const ComponentMemberInfo &other)
+{
+	type = other.type;
+	setterFunction = other.setterFunction;
+	getterFunction = other.getterFunction;
+	interpolationFunction = other.interpolationFunction;
+	updateDependenciesFunction = other.updateDependenciesFunction;
+	userIndex = other.userIndex;
+	m_name = other.m_name;
+	m_nameHash = other.m_nameHash;
+	m_specializationType = other.m_specializationType;
+	m_customSpecializationType = other.m_customSpecializationType ? std::make_unique<std::string>(*other.m_customSpecializationType) : nullptr;
+	m_min = other.m_min;
+	m_max = other.m_max;
+	m_stepSize = other.m_stepSize;
+	if(m_default)
+	{
+		udm::visit(type,[this](auto tag) {
+			using T = decltype(tag)::type;
+			constexpr auto eType = udm::type_to_enum<T>();
+			if constexpr(eType != udm::Type::Element && eType != udm::Type::Array && eType != udm::Type::ArrayLz4)
+				SetDefault<T>(*static_cast<T*>(m_default.get()));
+		});
+	}
+	static_assert(sizeof(*this) == 144);
+	return *this;
+}
+void ComponentMemberInfo::SetSpecializationType(AttributeSpecializationType type)
+{
+	m_specializationType = type;
+	m_customSpecializationType = nullptr;
+}
+void ComponentMemberInfo::SetSpecializationType(std::string customType)
+{
+	m_specializationType = AttributeSpecializationType::Custom;
+	m_customSpecializationType = std::make_unique<std::string>(customType);
+}
+void ComponentMemberInfo::SetMin(float min) {m_min = min;}
+void ComponentMemberInfo::SetMax(float max) {m_max = max;}
+void ComponentMemberInfo::SetStepSize(float stepSize) {m_stepSize = stepSize;}
+void ComponentMemberInfo::UpdateDependencies(BaseEntityComponent &component,std::vector<std::string> &outAffectedProps)
+{
+	if(!updateDependenciesFunction)
+		return;
+	updateDependenciesFunction(component,outAffectedProps);
+}
+void ComponentMemberInfo::ResetToDefault(BaseEntityComponent &component)
+{
+	if(!m_default)
+		return;
+	udm::visit(type,[this,&component](auto tag) {
+		using T = decltype(tag)::type;
+		setterFunction(*this,component,m_default.get());
+	});
 }
 void ComponentMemberInfo::SetName(const std::string &name)
 {

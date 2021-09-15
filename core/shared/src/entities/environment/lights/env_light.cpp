@@ -30,14 +30,18 @@ void BaseEnvLightComponent::RegisterMembers(pragma::EntityComponentManager &comp
 		T,TFalloffExponent,
 		static_cast<void(T::*)(TFalloffExponent)>(&T::SetFalloffExponent),
 		static_cast<TFalloffExponent(T::*)() const>(&T::GetFalloffExponent)
-	>("falloffExponent"));
+	>("falloffExponent",1.f));
 
-	using TIntensity = float;
-	registerMember(create_component_member_info<
-		T,TIntensity,
-		static_cast<void(T::*)(TIntensity)>(&T::SetLightIntensity),
-		static_cast<TIntensity(T::*)() const>(&T::GetLightIntensity)
-	>("intensity"));
+	{
+		using TIntensity = float;
+		auto memberInfo = create_component_member_info<
+			T,TIntensity,
+			static_cast<void(T::*)(TIntensity)>(&T::SetLightIntensity),
+			static_cast<TIntensity(T::*)() const>(&T::GetLightIntensity)
+		>("intensity",1.f,AttributeSpecializationType::LightIntensity);
+		memberInfo.SetMin(0.f);
+		registerMember(std::move(memberInfo));
+	}
 }
 std::string BaseEnvLightComponent::LightIntensityTypeToString(LightIntensityType type)
 {

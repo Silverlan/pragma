@@ -223,7 +223,7 @@ void LuaDocGenerator::InitializeRepositoryUrls()
 		{"pr_cycles",BuildRepositoryUrl("https://github.com/Silverlan/pr_cycles/","blob/%commitid%/")},
 		{"pr_openvr",BuildRepositoryUrl("https://github.com/Silverlan/pr_openvr/","blob/%commitid%/")},
 		{"pr_steamworks",BuildRepositoryUrl("https://github.com/Silverlan/pr_steamworks/","blob/%commitid%/")},
-		{"panima",BuildRepositoryUrl("https://github.com/Silverlan/panima.git","blob/%commitid%/")}
+		{"panima",BuildRepositoryUrl("https://github.com/Silverlan/panima/","blob/%commitid%/")}
 	};
 }
 

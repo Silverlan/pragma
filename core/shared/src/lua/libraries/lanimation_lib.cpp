@@ -111,6 +111,10 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdChannel.def("Save",&panima::Channel::Save);
 	cdChannel.def("Load",&panima::Channel::Load);
 	cdChannel.def("SetValues",+[](lua_State *l,panima::Channel &channel,luabind::tableT<float> times,luabind::tableT<void> values) {
+		auto numTimes = Lua::GetObjectLength(l,times);
+		auto numValues = Lua::GetObjectLength(l,values);
+		if(numTimes != numValues)
+			throw std::runtime_error{"Number of elements in times array (" +std::to_string(numTimes) +") doesn't match number of values in values array (" +std::to_string(numValues) +")! This is not allowed."};
 		Lua::udm::set_array_values(l,channel.GetTimesArray(),times,2);
 		Lua::udm::set_array_values(l,channel.GetValueArray(),values,3);
 		channel.Update();

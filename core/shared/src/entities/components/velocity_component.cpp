@@ -29,7 +29,7 @@ void VelocityComponent::RegisterMembers(pragma::EntityComponentManager &componen
 		T,TVelocity,
 		static_cast<void(T::*)(const TVelocity&)>(&T::SetVelocity),
 		static_cast<const TVelocity&(T::*)() const>(&T::GetVelocity)
-	>("velocity"));
+	>("velocity",TVelocity{}));
 }
 VelocityComponent::VelocityComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),

@@ -186,7 +186,12 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 		}));
 		classDef.def("C",static_cast<luabind::optional<pragma::BaseEntityComponent>(*)(BaseEntity&,luabind::object)>([](BaseEntity &ent,luabind::object) -> luabind::optional<pragma::BaseEntityComponent> {return nil;}));
 	}
-	classDef.def("GetComponents",static_cast<std::vector<util::TSharedHandle<pragma::BaseEntityComponent>>&(BaseEntity::*)()>(&BaseEntity::GetComponents));
+	classDef.def("GetComponents",+[](lua_State *l,BaseEntity &ent) -> Lua::tb<pragma::BaseEntityComponent> {
+		auto t = luabind::newtable(l);
+		for(uint32_t idx=1;auto &c : ent.GetComponents())
+			t[idx++] = c->GetLuaObject();
+		return t;
+	});
 	classDef.def("GetTransformComponent",&BaseEntity::GetTransformComponent);
 	classDef.def("GetPhysicsComponent",&BaseEntity::GetPhysicsComponent);
 	classDef.def("GetGenericComponent",&BaseEntity::GetGenericComponent);

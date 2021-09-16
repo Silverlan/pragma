@@ -13,6 +13,7 @@
 #include "pragma/lua/luaobjectbase.h"
 #include "pragma/util/util_variable_type.hpp"
 #include <pragma/lua/luaapi.h>
+#include <udm.hpp>
 #include <any>
 
 extern DLLNETWORK Engine *engine;
@@ -20,6 +21,91 @@ extern DLLNETWORK Engine *engine;
 class BaseEntity;
 namespace pragma
 {
+	namespace detail
+	{
+		constexpr udm::Type util_type_to_udm_type(util::VarType type)
+		{
+			switch(type)
+			{
+			case util::VarType::Bool:
+				return udm::Type::Boolean;
+			case util::VarType::Double:
+				return udm::Type::Double;
+			case util::VarType::Float:
+				return udm::Type::Float;
+			case util::VarType::Int8:
+				return udm::Type::Int8;
+			case util::VarType::Int16:
+				return udm::Type::Int16;
+			case util::VarType::Int32:
+				return udm::Type::Int32;
+			case util::VarType::Int64:
+				return udm::Type::Int64;
+			case util::VarType::String:
+				return udm::Type::String;
+			case util::VarType::UInt8:
+				return udm::Type::UInt8;
+			case util::VarType::UInt16:
+				return udm::Type::UInt16;
+			case util::VarType::UInt32:
+				return udm::Type::UInt32;
+			case util::VarType::UInt64:
+				return udm::Type::UInt64;
+			case util::VarType::EulerAngles:
+				return udm::Type::EulerAngles;
+			case util::VarType::Vector:
+				return udm::Type::Vector3;
+			case util::VarType::Vector2:
+				return udm::Type::Vector2;
+			case util::VarType::Vector4:
+				return udm::Type::Vector4;
+			case util::VarType::Quaternion:
+				return udm::Type::Quaternion;
+			}
+			return udm::Type::Invalid;
+		}
+		constexpr util::VarType udm_type_to_util_type(udm::Type type)
+		{
+			switch(type)
+			{
+			case udm::Type::Boolean:
+				return util::VarType::Bool;
+			case udm::Type::Double:
+				return util::VarType::Double;
+			case udm::Type::Float:
+				return util::VarType::Float;
+			case udm::Type::Int8:
+				return util::VarType::Int8;
+			case udm::Type::Int16:
+				return util::VarType::Int16;
+			case udm::Type::Int32:
+				return util::VarType::Int32;
+			case udm::Type::Int64:
+				return util::VarType::Int64;
+			case udm::Type::String:
+				return util::VarType::String;
+			case udm::Type::UInt8:
+				return util::VarType::UInt8;
+			case udm::Type::UInt16:
+				return util::VarType::UInt16;
+			case udm::Type::UInt32:
+				return util::VarType::UInt32;
+			case udm::Type::UInt64:
+				return util::VarType::UInt64;
+			case udm::Type::EulerAngles:
+				return util::VarType::EulerAngles;
+			case udm::Type::Vector3:
+				return util::VarType::Vector;
+			case udm::Type::Vector2:
+				return util::VarType::Vector2;
+			case udm::Type::Vector4:
+				return util::VarType::Vector4;
+			case udm::Type::Quaternion:
+				return util::VarType::Quaternion;
+			}
+			return util::VarType::Invalid;
+		}
+	};
 	class DLLNETWORK BaseLuaBaseEntityComponent
 		: public pragma::BaseEntityComponent
 	{
@@ -50,13 +136,13 @@ namespace pragma
 		struct MemberInfo
 		{
 			std::string name;
-			util::VarType type;
+			udm::Type type;
 			std::any initialValue;
 			BaseLuaBaseEntityComponent::MemberFlags flags;
 
 			std::optional<ComponentMemberInfo> componentMemberInfo {};
 		};
-		static MemberIndex RegisterMember(const luabind::object &oClass,const std::string &memberName,util::VarType memberType,const std::any &initialValue,MemberFlags memberFlags);
+		static MemberIndex RegisterMember(const luabind::object &oClass,const std::string &memberName,udm::Type memberType,const std::any &initialValue,MemberFlags memberFlags,const Lua::map<std::string,void> &attributes);
 		static std::vector<MemberInfo> *GetMemberInfos(const luabind::object &oClass);
 		static void ClearMembers(lua_State *l);
 

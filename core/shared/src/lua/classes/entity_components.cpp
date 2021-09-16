@@ -23,6 +23,7 @@
 #include "pragma/lua/lua_component_event.hpp"
 #include "pragma/lua/lua_call.hpp"
 #include "pragma/lua/lua_util_component.hpp"
+#include "pragma/lua/types/udm.hpp"
 #include "pragma/entities/components/base_parent_component.hpp"
 #include "pragma/physics/shape.hpp"
 #include <udm.hpp>
@@ -187,6 +188,50 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	entityComponentDef.def("SetNextTick",&pragma::BaseEntityComponent::SetNextTick);
 	entityComponentDef.def("GetMemberIndex",&pragma::BaseEntityComponent::GetMemberIndex);
 	entityComponentDef.def("GetMemberInfo",&pragma::BaseEntityComponent::GetMemberInfo);
+	entityComponentDef.def("GetMemberValue",+[](lua_State *l,pragma::BaseEntityComponent &component,const std::string &memberName) -> std::optional<Lua::udm_type> {
+		auto *info = component.FindMemberInfo(memberName);
+		if(!info)
+			return {};
+		return udm::visit(info->type,[info,&component,l](auto tag) -> std::optional<Lua::udm_type> {
+			using T = decltype(tag)::type;
+			constexpr auto type = udm::type_to_enum<T>();
+			if constexpr(type == udm::Type::Element || udm::is_array_type(type))
+				return {};
+			else
+			{
+				T value;
+				info->getterFunction(*info,component,&value);
+				return Lua::udm_type{luabind::object{l,value}};
+			}
+		});
+	});
+	entityComponentDef.def("SetMemberValue",+[](lua_State *l,pragma::BaseEntityComponent &component,const std::string &memberName,Lua::udm_type value) -> bool {
+		auto *info = component.FindMemberInfo(memberName);
+		if(!info)
+			return false;
+		return udm::visit(info->type,[info,&component,l,&value](auto tag) -> bool {
+			using T = decltype(tag)::type;
+			constexpr auto type = udm::type_to_enum<T>();
+			if constexpr(type == udm::Type::Element || udm::is_array_type(type))
+				return false;
+			else
+			{
+				if constexpr(udm::is_numeric_type(type))
+				{
+					auto v = luabind::object_cast<T>(value);
+					info->setterFunction(*info,component,&v);
+				}
+				else
+				{
+					auto *v = luabind::object_cast<T*>(value);
+					if(!v)
+						return false;
+					info->setterFunction(*info,component,v);
+				}
+				return true;
+			}
+		});
+	});
 	entityComponentDef.def("IsValid",static_cast<bool(*)(lua_State*,pragma::BaseEntityComponent*)>([](lua_State *l,pragma::BaseEntityComponent *hComponent) {
 		return hComponent != nullptr;
 	}));
@@ -275,16 +320,6 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 
 	entityComponentDef.add_static_constant("CALLBACK_TYPE_ENTITY",umath::to_integral(pragma::BaseEntityComponent::CallbackType::Entity));
 	entityComponentDef.add_static_constant("CALLBACK_TYPE_COMPONENT",umath::to_integral(pragma::BaseEntityComponent::CallbackType::Component));
-
-	luabind::class_<pragma::ComponentMemberInfo> defMemberInfo {"ComponentMemberInfo"};
-	defMemberInfo.property("name",static_cast<std::string(*)(lua_State*,const pragma::ComponentMemberInfo&)>([](lua_State *l,const pragma::ComponentMemberInfo &memInfo) {
-		return memInfo.GetName();
-	}),static_cast<void(*)(lua_State*,pragma::ComponentMemberInfo&,const std::string&)>([](lua_State *l,pragma::ComponentMemberInfo &memInfo,const std::string &name) {
-		memInfo.SetName(name);
-	}));
-	defMemberInfo.def_readonly("type",&pragma::ComponentMemberInfo::type);
-	entityComponentDef.scope[defMemberInfo];
-
 	mod[entityComponentDef];
 
 	base_ai_component::register_class(mod);

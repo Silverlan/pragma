@@ -17,6 +17,7 @@
 #include "pragma/lua/classes/lphysics.h"
 #include "pragma/physics/environment.hpp"
 #include "pragma/entities/entity_iterator.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/components/base_ai_component.hpp"
 #include "pragma/entities/components/base_vehicle_component.hpp"
@@ -28,6 +29,8 @@
 #include "pragma/lua/lua_entity_iterator.hpp"
 #include "pragma/lua/sh_lua_component.hpp"
 #include "pragma/lua/policies/core_policies.hpp"
+#include "pragma/lua/types/udm.hpp"
+#include <udm.hpp>
 #include <sharedutils/magic_enum.hpp>
 
 extern DLLNETWORK Engine *engine;
@@ -152,13 +155,42 @@ void Lua::ents::register_library(lua_State *l)
 	
 	auto memberInfoDef = luabind::class_<pragma::ComponentMemberInfo>("MemberInfo");
 	memberInfoDef.def_readonly("type",&pragma::ComponentMemberInfo::type);
-	memberInfoDef.def("GetName",&pragma::ComponentMemberInfo::GetName);
-	memberInfoDef.def("GetNameHash",&pragma::ComponentMemberInfo::GetNameHash);
-	memberInfoDef.def("GetSpecializationType",&pragma::ComponentMemberInfo::GetSpecializationType);
-	memberInfoDef.def("GetCustomSpecializationType",&pragma::ComponentMemberInfo::GetCustomSpecializationType);
-	memberInfoDef.def("GetMin",&pragma::ComponentMemberInfo::GetMin);
-	memberInfoDef.def("GetMax",&pragma::ComponentMemberInfo::GetMax);
-	memberInfoDef.def("GetStepSize",&pragma::ComponentMemberInfo::GetStepSize);
+	memberInfoDef.property("name",+[](lua_State *l,const pragma::ComponentMemberInfo &memInfo) {
+		return memInfo.GetName();
+	});
+	memberInfoDef.property("nameHash",+[](lua_State *l,const pragma::ComponentMemberInfo &memInfo) {
+		return memInfo.GetNameHash();
+	});
+	memberInfoDef.property("specializationType",+[](lua_State *l,const pragma::ComponentMemberInfo &memInfo) {
+		return memInfo.GetSpecializationType();
+	});
+	memberInfoDef.property("customSpecializationType",+[](lua_State *l,const pragma::ComponentMemberInfo &memInfo) {
+		return memInfo.GetCustomSpecializationType();
+	});
+	memberInfoDef.property("minValue",+[](lua_State *l,const pragma::ComponentMemberInfo &memInfo) {
+		return memInfo.GetMin();
+	});
+	memberInfoDef.property("maxValue",+[](lua_State *l,const pragma::ComponentMemberInfo &memInfo) {
+		return memInfo.GetMax();
+	});
+	memberInfoDef.property("stepSize",+[](lua_State *l,const pragma::ComponentMemberInfo &memInfo) {
+		return memInfo.GetStepSize();
+	});
+	memberInfoDef.property("default",+[](lua_State *l,const pragma::ComponentMemberInfo &memInfo) -> udm_type {
+		return udm::visit(memInfo.type,[&memInfo,l](auto tag) {
+			using T = decltype(tag)::type;
+			constexpr auto type = udm::type_to_enum<T>();
+			if constexpr(type != udm::Type::Element && !udm::is_array_type(type))
+			{
+				T val;
+				if(!memInfo.GetDefault(val))
+					return nil;
+				return luabind::object{l,std::move(val)};
+			}
+			else
+				return nil;
+		});
+	});
 	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_NONE",umath::to_integral(pragma::AttributeSpecializationType::None));
 	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_COLOR",umath::to_integral(pragma::AttributeSpecializationType::Color));
 	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_DISTANCE",umath::to_integral(pragma::AttributeSpecializationType::Distance));

@@ -53,6 +53,15 @@ namespace pragma
 			delete static_cast<T*>(ptr);
 		}};
 	}
+
+	template<typename T>
+		bool ComponentMemberInfo::GetDefault(T &outValue) const
+	{
+		if(!m_default || udm::type_to_enum<T>() != type)
+			return false;
+		outValue = *static_cast<T*>(m_default.get());
+		return true;
+	}
 };
 
 #endif

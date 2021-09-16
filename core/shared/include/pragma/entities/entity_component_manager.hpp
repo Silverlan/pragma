@@ -130,6 +130,8 @@ namespace pragma
 		std::optional<float> GetMax() const {return m_max;}
 		std::optional<float> GetStepSize() const {return m_stepSize;}
 		template<typename T>
+			bool GetDefault(T &outValue) const;
+		template<typename T>
 			void SetDefault(T value);
 
 		void UpdateDependencies(BaseEntityComponent &component,std::vector<std::string> &outAffectedProps);

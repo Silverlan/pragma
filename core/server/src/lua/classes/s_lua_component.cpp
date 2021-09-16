@@ -49,7 +49,7 @@ void SLuaBaseEntityComponent::OnMemberValueChanged(uint32_t memberIdx)
 	auto value = GetMemberValue(member);
 	NetPacket p {};
 	p->Write<uint8_t>(nwIndex);
-	Lua::WriteAny(p,member.type,value);
+	Lua::WriteAny(p,detail::udm_type_to_util_type(member.type),value);
 	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_networkedMemberInfo->netEvSetMember,p,pragma::networking::Protocol::SlowReliable);
 }
 void SLuaBaseEntityComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
@@ -61,7 +61,7 @@ void SLuaBaseEntityComponent::SendData(NetPacket &packet,networking::ClientRecip
 		{
 			auto &member = members.at(idx);
 			auto value = GetMemberValue(member);
-			Lua::WriteAny(packet,member.type,value);
+			Lua::WriteAny(packet,detail::udm_type_to_util_type(member.type),value);
 		}
 	}
 
@@ -89,7 +89,7 @@ void SLuaBaseEntityComponent::SendSnapshotData(NetPacket &packet,pragma::BasePla
 		{
 			auto &member = members.at(idx);
 			auto value = GetMemberValue(member);
-			Lua::WriteAny(packet,member.type,value);
+			Lua::WriteAny(packet,detail::udm_type_to_util_type(member.type),value);
 		}
 	}
 	CallLuaMethod<void,NetPacket,luabind::object>("SendSnapshotData",packet,pl.GetLuaObject());

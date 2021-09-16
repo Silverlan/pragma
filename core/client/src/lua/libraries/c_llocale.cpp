@@ -43,6 +43,8 @@ int Lua::Locale::get_text(lua_State *l)
 		}
 		++argIdx;
 	}
+	else if(Lua::IsNil(l,argIdx))
+		++argIdx;
 	if(Lua::IsSet(l,argIdx))
 		bReturnSuccess = Lua::CheckBool(l,argIdx);
 	uint32_t numResults = 1;

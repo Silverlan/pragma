@@ -18,6 +18,8 @@ namespace pragma
 		Distance,
 		LightIntensity,
 		Angle,
+		File,
+		Directory,
 
 		Custom,
 

@@ -127,7 +127,6 @@ void Lua::ents::register_library(lua_State *l)
 	});
 	componentInfoDef.def("GetMemberInfo",+[](Game &game,const pragma::ComponentInfo &componentInfo,const std::string &name) -> const pragma::ComponentMemberInfo* {
 		auto lname = name;
-		ustring::to_lower(lname);
 		if(umath::is_flag_set(componentInfo.flags,pragma::ComponentFlags::LuaBased))
 		{
 			auto &manager = game.GetLuaEntityManager();
@@ -138,12 +137,13 @@ void Lua::ents::register_library(lua_State *l)
 			if(!infos)
 				return nullptr;
 			auto it = std::find_if(infos->begin(),infos->end(),[&lname](const pragma::BaseLuaBaseEntityComponent::MemberInfo &memberInfo) {
-				return memberInfo.name == lname;
+				return memberInfo.memberName == lname;
 			});
 			if(it == infos->end() || !it->componentMemberInfo.has_value())
 				return nullptr;
 			return &*it->componentMemberInfo;
 		}
+		ustring::to_lower(lname);
 		auto it = componentInfo.memberNameToIndex.find(lname);
 		if(it == componentInfo.memberNameToIndex.end())
 			return nullptr;
@@ -176,6 +176,9 @@ void Lua::ents::register_library(lua_State *l)
 	memberInfoDef.property("stepSize",+[](lua_State *l,const pragma::ComponentMemberInfo &memInfo) {
 		return memInfo.GetStepSize();
 	});
+	memberInfoDef.property("metaData",+[](lua_State *l,const pragma::ComponentMemberInfo &memInfo) -> udm::PProperty {
+		return memInfo.GetMetaData();
+	});
 	memberInfoDef.property("default",+[](lua_State *l,const pragma::ComponentMemberInfo &memInfo) -> udm_type {
 		return udm::visit(memInfo.type,[&memInfo,l](auto tag) {
 			using T = decltype(tag)::type;
@@ -197,7 +200,9 @@ void Lua::ents::register_library(lua_State *l)
 	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_LIGHT_INTENSITY",umath::to_integral(pragma::AttributeSpecializationType::LightIntensity));
 	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_CUSTOM",umath::to_integral(pragma::AttributeSpecializationType::Custom));
 	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_ANGLE",umath::to_integral(pragma::AttributeSpecializationType::Angle));
-	static_assert(umath::to_integral(pragma::AttributeSpecializationType::Count) == 6u);
+	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_FILE",umath::to_integral(pragma::AttributeSpecializationType::File));
+	memberInfoDef.add_static_constant("SPECIALIZATION_TYPE_DIRECTORY",umath::to_integral(pragma::AttributeSpecializationType::Directory));
+	static_assert(umath::to_integral(pragma::AttributeSpecializationType::Count) == 8u);
 	componentInfoDef.scope[memberInfoDef];
 
 	entsMod[componentInfoDef];

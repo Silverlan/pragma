@@ -13,6 +13,7 @@
 #include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/model/model.h"
 #include "pragma/model/modelmanager.h"
+#include "pragma/asset/util_asset.hpp"
 #include <sharedutils/datastream.h>
 #include <pragma/util/transform.h>
 #include <pragma/entities/baseentity_events.hpp>
@@ -35,14 +36,31 @@ void BaseModelComponent::RegisterMembers(pragma::EntityComponentManager &compone
 {
 	using T = BaseModelComponent;
 
-	using TSkin = uint32_t;
 	{
+		using TSkin = uint32_t;
 		auto memberInfo = create_component_member_info<
 			T,TSkin,
 			static_cast<void(T::*)(TSkin)>(&T::SetSkin),
 			static_cast<TSkin(T::*)() const>(&T::GetSkin)
 		>("skin",0);
 		memberInfo.SetMin(0.f);
+		registerMember(std::move(memberInfo));
+	}
+	{
+		using TModel = std::string;
+		auto memberInfo = create_component_member_info<
+			T,TModel,
+			+[](const ComponentMemberInfo &info,T &component,const TModel &mdl) {
+				component.SetModel(mdl);
+			},
+			static_cast<TModel(T::*)() const>(&T::GetModelName)
+		>("model","",AttributeSpecializationType::File);
+		auto &metaData = memberInfo.AddMetaData();
+		metaData["assetType"] = "model";
+		metaData["rootPath"] = util::Path::CreatePath(pragma::asset::get_asset_root_directory(pragma::asset::Type::Model)).GetString();
+		metaData["extensions"] = pragma::asset::get_supported_extensions(pragma::asset::Type::Model,true);
+		metaData["stripRootPath"] = true;
+		metaData["stripExtension"] = true;
 		registerMember(std::move(memberInfo));
 	}
 }

@@ -9,6 +9,7 @@
 #define __LUDM_HPP__
 
 #include "pragma/networkdefinitions.h"
+#include <udm_types.hpp>
 
 namespace udm {struct Array;};
 namespace Lua
@@ -18,6 +19,8 @@ namespace Lua
 	{
 		DLLNETWORK void register_library(Lua::Interface &lua);
 		DLLNETWORK void set_array_values(lua_State *l,::udm::Array &a,luabind::tableT<void> t,uint32_t tIdx);
+		DLLNETWORK void table_to_udm(const Lua::tb<void> &t,::udm::LinkedPropertyWrapper &udm);
+		DLLNETWORK luabind::object udm_to_value(lua_State *l,::udm::LinkedPropertyWrapperArg udm);
 	};
 };
 

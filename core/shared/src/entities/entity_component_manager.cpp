@@ -51,6 +51,7 @@ ComponentMemberInfo &ComponentMemberInfo::operator=(const ComponentMemberInfo &o
 	m_min = other.m_min;
 	m_max = other.m_max;
 	m_stepSize = other.m_stepSize;
+	m_metaData = other.m_metaData;
 	if(m_default)
 	{
 		udm::visit(type,[this](auto tag) {
@@ -60,7 +61,7 @@ ComponentMemberInfo &ComponentMemberInfo::operator=(const ComponentMemberInfo &o
 				SetDefault<T>(*static_cast<T*>(m_default.get()));
 		});
 	}
-	static_assert(sizeof(*this) == 144);
+	static_assert(sizeof(*this) == 160);
 	return *this;
 }
 void ComponentMemberInfo::SetSpecializationType(AttributeSpecializationType type)
@@ -76,6 +77,17 @@ void ComponentMemberInfo::SetSpecializationType(std::string customType)
 void ComponentMemberInfo::SetMin(float min) {m_min = min;}
 void ComponentMemberInfo::SetMax(float max) {m_max = max;}
 void ComponentMemberInfo::SetStepSize(float stepSize) {m_stepSize = stepSize;}
+udm::Property &ComponentMemberInfo::AddMetaData()
+{
+	auto prop = udm::Property::Create(udm::Type::Element);
+	AddMetaData(prop);
+	return *prop;
+}
+void ComponentMemberInfo::AddMetaData(const udm::PProperty &prop)
+{
+	m_metaData = prop;
+}
+const udm::PProperty &ComponentMemberInfo::GetMetaData() const {return m_metaData;}
 void ComponentMemberInfo::UpdateDependencies(BaseEntityComponent &component,std::vector<std::string> &outAffectedProps)
 {
 	if(!updateDependenciesFunction)

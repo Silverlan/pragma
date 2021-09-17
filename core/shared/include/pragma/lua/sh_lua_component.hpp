@@ -19,6 +19,7 @@
 extern DLLNETWORK Engine *engine;
 
 class BaseEntity;
+struct ClassMembers;
 namespace pragma
 {
 	namespace detail
@@ -135,10 +136,14 @@ namespace pragma
 		};
 		struct MemberInfo
 		{
-			std::string name;
+			std::string functionName;
+			std::string memberName;
+			size_t memberNameHash;
+			std::string memberVariableName;
 			udm::Type type;
 			std::any initialValue;
 			BaseLuaBaseEntityComponent::MemberFlags flags;
+			mutable luabind::object onChange;
 
 			std::optional<ComponentMemberInfo> componentMemberInfo {};
 		};
@@ -146,6 +151,7 @@ namespace pragma
 		static std::vector<MemberInfo> *GetMemberInfos(const luabind::object &oClass);
 		static void ClearMembers(lua_State *l);
 
+		const MemberInfo *GetLuaMemberInfo(ComponentMemberInfo &memberInfo) const;
 		virtual void Initialize() override;
 		virtual void InitializeMembers(const std::vector<BaseLuaBaseEntityComponent::MemberInfo> &members);
 		virtual void OnTick(double dt) override;
@@ -240,6 +246,8 @@ namespace pragma
 
 		using BaseEntityComponent::InitializeLuaObject;
 	private:
+		mutable ClassMembers *m_classMembers = nullptr;
+
 		std::vector<MemberInfo> m_members = {};
 		std::unordered_map<std::string,size_t> m_memberNameToIndex = {};
 		uint32_t m_classMemberIndex = std::numeric_limits<uint32_t>::max();

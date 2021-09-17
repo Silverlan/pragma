@@ -216,7 +216,7 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 				return false;
 			else
 			{
-				if constexpr(udm::is_numeric_type(type))
+				if constexpr(Lua::is_native_type<T>)
 				{
 					auto v = luabind::object_cast<T>(value);
 					info->setterFunction(*info,component,&v);

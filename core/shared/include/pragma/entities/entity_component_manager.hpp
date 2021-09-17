@@ -25,7 +25,13 @@
 #include "pragma/entities/components/base_entity_component.hpp"
 #endif
 
-namespace udm {enum class Type : uint8_t;};
+namespace udm
+{
+	enum class Type : uint8_t;
+	struct Element;
+	struct Property;
+	using PProperty = std::shared_ptr<Property>;
+};
 
 class BaseEntity;
 namespace pragma
@@ -126,6 +132,9 @@ namespace pragma
 		void SetMin(float min);
 		void SetMax(float max);
 		void SetStepSize(float stepSize);
+		udm::Property &AddMetaData();
+		void AddMetaData(const udm::PProperty &prop);
+		const udm::PProperty &GetMetaData() const;
 		std::optional<float> GetMin() const {return m_min;}
 		std::optional<float> GetMax() const {return m_max;}
 		std::optional<float> GetStepSize() const {return m_stepSize;}
@@ -155,7 +164,8 @@ namespace pragma
 
 		AttributeSpecializationType m_specializationType;
 		std::unique_ptr<std::string> m_customSpecializationType = nullptr;
-
+		
+		udm::PProperty m_metaData = nullptr;
 		std::optional<float> m_min {};
 		std::optional<float> m_max {};
 		std::optional<float> m_stepSize {};

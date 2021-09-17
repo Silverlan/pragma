@@ -36,14 +36,14 @@ void SLuaBaseEntityComponent::OnMemberValueChanged(uint32_t memberIdx)
 	if(itNwIndex == m_networkedMemberInfo->memberIndexToNetworkedIndex.end())
 	{
 		// This should be unreachable!
-		throw std::logic_error("Invalid networked variable '" +member.name +"'!");
+		throw std::logic_error("Invalid networked variable '" +member.functionName +"'!");
 		return;
 	}
 	auto nwIndex = itNwIndex->second;
 	const auto maxNwVars = std::numeric_limits<uint8_t>::max();
 	if(nwIndex > maxNwVars)
 	{
-		Con::cwar<<"WARNING: Networked member index of '"<<member.name<<"' exceeds maximum allowed number of networked variables ("<<maxNwVars<<")!"<<Con::endl;
+		Con::cwar<<"WARNING: Networked member index of '"<<member.functionName<<"' exceeds maximum allowed number of networked variables ("<<maxNwVars<<")!"<<Con::endl;
 		return;
 	}
 	auto value = GetMemberValue(member);

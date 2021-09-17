@@ -21,10 +21,16 @@ namespace pragma
 			type != udm::Type::Transform && type != udm::Type::ScaledTransform && type != udm::Type::Nil &&
 			type != udm::Type::Half;
 	}
+	constexpr bool is_valid_component_property_type(udm::Type type)
+	{
+		return is_animatable_type(type) || type == udm::Type::String;
+	}
 	template<typename T>
 		concept is_animatable_type_v = is_animatable_type(udm::type_to_enum<T>());
+	template<typename T>
+		concept is_valid_component_property_type_v = is_valid_component_property_type(udm::type_to_enum<T>());
 
-	template<typename TComponent,typename T,auto TSetter,auto TGetter,typename TSpecializationType> requires(is_animatable_type_v<T> && (std::is_same_v<TSpecializationType,AttributeSpecializationType> || util::is_string<TSpecializationType>::value))
+	template<typename TComponent,typename T,auto TSetter,auto TGetter,typename TSpecializationType> requires(is_valid_component_property_type_v<T> && (std::is_same_v<TSpecializationType,AttributeSpecializationType> || util::is_string<TSpecializationType>::value))
 		static ComponentMemberInfo create_component_member_info(std::string &&name,std::optional<T> defaultValue,TSpecializationType specialization)
 	{
 		auto memberInfo = ComponentMemberInfo::CreateDummy();
@@ -38,7 +44,7 @@ namespace pragma
 		return memberInfo;
 	}
 
-	template<typename TComponent,typename T,auto TSetter,auto TGetter> requires(is_animatable_type_v<T>)
+	template<typename TComponent,typename T,auto TSetter,auto TGetter> requires(is_valid_component_property_type_v<T>)
 		static ComponentMemberInfo create_component_member_info(std::string &&name,std::optional<T> defaultValue={})
 	{
 		return create_component_member_info<TComponent,T,TSetter,TGetter,AttributeSpecializationType>(std::move(name),std::move(defaultValue),AttributeSpecializationType::None);

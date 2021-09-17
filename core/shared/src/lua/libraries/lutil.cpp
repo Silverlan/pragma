@@ -425,14 +425,17 @@ static void safely_remove(const luabind::object &o,const char *removeFunction,bo
 
 void Lua::util::remove(lua_State *l,const luabind::object &o,bool removeSafely)
 {
-	if(is_valid(l,o) == false)
+	auto type = luabind::type(o);
+	if(type != LUA_TTABLE && is_valid(l,o) == false)
 		return;
 	auto *removeFunction = removeSafely ? "RemoveSafely" : "Remove";
-	if(luabind::type(o) == LUA_TTABLE)
+	if(type == LUA_TTABLE)
 	{
 		for(luabind::iterator i(o), e; i != e; ++i)
 		{
 			auto o = luabind::object{*i};
+			if(is_valid(l,o) == false)
+				continue;
 			safely_remove(o,removeFunction,removeSafely);
 		}
 		return;

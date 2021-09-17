@@ -43,7 +43,7 @@
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 DLLCLIENT Con::c_cout & operator<<(Con::c_cout &os,const ::WIBase &handle)
 {
 	const WIBase *p = &handle;
@@ -1043,11 +1043,15 @@ namespace Lua
 				return;
 			uint32_t argOffset = 3;
 			auto numArgs = Lua::GetStackTop(l) -argOffset +1;
-			for(auto it=itCallbacks->second.begin();it!=itCallbacks->second.end();)
+			auto &callbacks = itCallbacks->second;
+			std::vector<LuaCallbacks::CallbackInfo> tmp;
+			tmp = std::move(callbacks); // Move callbacks to tmp, in case new callbacks are added while we're executing the current callbacks (which would mess up our iterator)
+			callbacks.clear();
+			for(auto it=tmp.begin();it!=tmp.end();)
 			{
 				auto &cbInfo = *it;
 				if(!cbInfo.hCallback.IsValid())
-					it = itCallbacks->second.erase(it);
+					it = tmp.erase(it);
 				else if(cbInfo.luaState == l)
 				{
 					auto &o = cbInfo.luaFunction;
@@ -1078,8 +1082,11 @@ namespace Lua
 					++it;
 				}
 			}
-			if(itCallbacks->second.empty())
-				callbackPtr->callbacks.erase(itCallbacks);
+			// LuaCallbacks map may have changed, we need to retrieve the callback list again
+			auto &callbacksNew = callbackPtr->callbacks[name];
+			for(auto &cb : callbacksNew)
+				tmp.push_back(std::move(cb));
+			callbacksNew = std::move(tmp);
 		}
 	};
 };
@@ -1827,3 +1834,4 @@ luabind::tableT<::WITableRow> Lua::WITable::GetRows(lua_State *l,::WITable &hTab
 	}
 	return t;
 }
+#pragma optimize("",on)

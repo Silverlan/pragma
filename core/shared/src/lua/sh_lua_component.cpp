@@ -236,15 +236,12 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 		luabind::object onChange {};
 		if(pragma::is_valid_component_property_type(memberType))
 		{
-			if(udm::is_ng_type(memberType))
+			onChange = attributes["onChange"];
+			if(onChange)
 			{
-				onChange = attributes["onChange"];
-				if(onChange)
-				{
-					onChange.push(l);
-					Lua::CheckFunction(l,-1);
-					Lua::Pop(l,1);
-				}
+				onChange.push(l);
+				Lua::CheckFunction(l,-1);
+				Lua::Pop(l,1);
 			}
 			auto vs = [&tmpMemberName,&functionName,&onChange,memberType](auto tag) -> pragma::ComponentMemberInfo {
 				using T = decltype(tag)::type;

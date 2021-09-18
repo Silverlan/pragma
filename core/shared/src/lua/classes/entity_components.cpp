@@ -8,6 +8,7 @@
 #include "pragma/lua/classes/entity_components.hpp"
 #include "pragma/entities/components/base_attachable_component.hpp"
 #include "pragma/entities/components/base_game_component.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/lua/policies/optional_policy.hpp"
 #include "pragma/lua/policies/game_object_policy.hpp"
 #include "pragma/lua/policies/default_parameter_policy.hpp"
@@ -194,8 +195,7 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 			return {};
 		return udm::visit(info->type,[info,&component,l](auto tag) -> std::optional<Lua::udm_type> {
 			using T = decltype(tag)::type;
-			constexpr auto type = udm::type_to_enum<T>();
-			if constexpr(type == udm::Type::Element || udm::is_array_type(type))
+			if constexpr(!is_valid_component_property_type_v<T>)
 				return {};
 			else
 			{
@@ -211,8 +211,7 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 			return false;
 		return udm::visit(info->type,[info,&component,l,&value](auto tag) -> bool {
 			using T = decltype(tag)::type;
-			constexpr auto type = udm::type_to_enum<T>();
-			if constexpr(type == udm::Type::Element || udm::is_array_type(type))
+			if constexpr(!pragma::is_valid_component_property_type_v<T>)
 				return false;
 			else
 			{

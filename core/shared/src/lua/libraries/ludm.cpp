@@ -1284,6 +1284,18 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			::udm::to_json(udm,ss);
 			Lua::PushString(l,ss.str());
 			return 1;
+		}},
+		{"is_numeric_type",+[](lua_State *l) {
+			Lua::PushBool(l,::udm::is_numeric_type(static_cast<::udm::Type>(Lua::CheckInt(l,1))));
+			return 1;
+		}},
+		{"is_generic_type",+[](lua_State *l) {
+			Lua::PushBool(l,::udm::is_generic_type(static_cast<::udm::Type>(Lua::CheckInt(l,1))));
+			return 1;
+		}},
+		{"is_non_trivial_type",+[](lua_State *l) {
+			Lua::PushBool(l,::udm::is_non_trivial_type(static_cast<::udm::Type>(Lua::CheckInt(l,1))));
+			return 1;
 		}}
 	});
 

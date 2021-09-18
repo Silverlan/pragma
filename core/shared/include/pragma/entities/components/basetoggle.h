@@ -23,6 +23,7 @@ namespace pragma
 		static ComponentEventId EVENT_ON_TURN_ON;
 		static ComponentEventId EVENT_ON_TURN_OFF;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember);
 		enum class SpawnFlags : uint32_t
 		{
 			StartOn = SF_STARTON

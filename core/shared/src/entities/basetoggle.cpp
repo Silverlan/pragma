@@ -11,6 +11,7 @@
 #include "pragma/util/util_handled.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include <sharedutils/datastream.h>
 #include <algorithm>
 #include <udm.hpp>
@@ -23,6 +24,20 @@ void BaseToggleComponent::RegisterEvents(pragma::EntityComponentManager &compone
 {
 	EVENT_ON_TURN_ON = componentManager.RegisterEvent("ON_TURN_ON");
 	EVENT_ON_TURN_OFF = componentManager.RegisterEvent("ON_TURN_OFF");
+}
+void BaseToggleComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+{
+	using T = BaseToggleComponent;
+
+	{
+		using TEnabled = bool;
+		auto memberInfo = create_component_member_info<
+			T,TEnabled,
+			static_cast<void(T::*)(TEnabled)>(&T::SetTurnedOn),
+			static_cast<TEnabled(T::*)() const>(&T::IsTurnedOn)
+		>("enabled",false);
+		registerMember(std::move(memberInfo));
+	}
 }
 BaseToggleComponent::BaseToggleComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_bTurnedOn(util::BoolProperty::Create(false))

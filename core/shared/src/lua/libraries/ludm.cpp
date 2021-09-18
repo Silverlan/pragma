@@ -1296,6 +1296,10 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		{"is_non_trivial_type",+[](lua_State *l) {
 			Lua::PushBool(l,::udm::is_non_trivial_type(static_cast<::udm::Type>(Lua::CheckInt(l,1))));
 			return 1;
+		}},
+		{"type_to_string",+[](lua_State *l) {
+			Lua::PushString(l,std::string{magic_enum::enum_name(static_cast<::udm::Type>(Lua::CheckInt(l,1)))});
+			return 1;
 		}}
 	});
 

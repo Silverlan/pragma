@@ -274,6 +274,15 @@ void Game::OnRemove()
 		m_cbProfilingHandle.Remove();
 }
 
+void Game::GetLuaRegisteredEntities(std::vector<std::string> &luaClasses) const
+{
+	auto &manager = GetLuaEntityManager();
+	auto &ents = manager.GetRegisteredEntities();
+	luaClasses.reserve(luaClasses.size() +ents.size());
+	for(auto &pair : ents)
+		luaClasses.push_back(pair.first);
+}
+
 void Game::OnMapLoaded() {}
 
 void Game::InitializeLuaScriptWatcher()

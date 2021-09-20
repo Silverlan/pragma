@@ -127,6 +127,7 @@ public:
 	virtual std::shared_ptr<ModelMesh> CreateModelMesh() const=0;
 	virtual std::shared_ptr<ModelSubMesh> CreateModelSubMesh() const=0;
 
+	virtual void GetRegisteredEntities(std::vector<std::string> &classes,std::vector<std::string> &luaClasses) const=0;
 	void ScheduleEntityForRemoval(BaseEntity &ent);
 	
 	virtual pragma::NetEventId FindNetEvent(const std::string &name) const=0;
@@ -209,6 +210,7 @@ public:
 	BaseEntity *GetGameModeEntity();
 	BaseEntity *GetGameEntity();
 	LuaEntityManager &GetLuaEntityManager();
+	const LuaEntityManager &GetLuaEntityManager() const {return const_cast<Game*>(this)->GetLuaEntityManager();}
 
 	void SetWorld(pragma::BaseWorldComponent *entWorld);
 	void CloseMap();
@@ -354,6 +356,7 @@ public:
 	bool StopProfilingStage(CPUProfilingPhase stage);
 protected:
 	virtual void UpdateTime();
+	void GetLuaRegisteredEntities(std::vector<std::string> &luaClasses) const;
 
 	GameFlags m_flags = GameFlags::InitialTick;
 	pragma::ComponentId m_animatedComponentId = std::numeric_limits<pragma::ComponentId>::max();

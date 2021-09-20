@@ -258,6 +258,7 @@ public:
 	virtual void CreateGiblet(const GibletCreateInfo &info) override;
 	virtual std::shared_ptr<ModelMesh> CreateModelMesh() const override;
 	virtual std::shared_ptr<ModelSubMesh> CreateModelSubMesh() const override;
+	virtual void GetRegisteredEntities(std::vector<std::string> &classes,std::vector<std::string> &luaClasses) const override;
 
 	bool StartProfilingStage(GPUProfilingPhase stage);
 	bool StopProfilingStage(GPUProfilingPhase stage);

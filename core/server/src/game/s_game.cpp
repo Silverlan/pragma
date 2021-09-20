@@ -170,6 +170,16 @@ SGame::SGame(NetworkState *state)
 
 SGame::~SGame() {}
 
+void SGame::GetRegisteredEntities(std::vector<std::string> &classes,std::vector<std::string> &luaClasses) const
+{
+	std::unordered_map<std::string,SBaseEntity*(*)(void)> *factories = nullptr;
+	g_ServerEntityFactories->GetFactories(&factories);
+	classes.reserve(classes.size() +factories->size());
+	for(auto &pair : *factories)
+		classes.push_back(pair.first);
+	GetLuaRegisteredEntities(luaClasses);
+}
+
 void SGame::OnRemove()
 {
 	m_flags |= GameFlags::ClosingGame;

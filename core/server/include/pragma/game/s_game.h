@@ -111,6 +111,7 @@ public:
 	void SendSnapshot(pragma::SPlayerComponent *pl);
 	virtual std::shared_ptr<ModelMesh> CreateModelMesh() const override;
 	virtual std::shared_ptr<ModelSubMesh> CreateModelSubMesh() const override;
+	virtual void GetRegisteredEntities(std::vector<std::string> &classes,std::vector<std::string> &luaClasses) const override;
 	virtual bool RunLua(const std::string &lua) override;
 	void RegisterGameResource(const std::string &fileName);
 	bool IsValidGameResource(const std::string &fileName);

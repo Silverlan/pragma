@@ -370,6 +370,16 @@ void CGame::OnRemove()
 	Game::OnRemove();
 }
 
+void CGame::GetRegisteredEntities(std::vector<std::string> &classes,std::vector<std::string> &luaClasses) const
+{
+	std::unordered_map<std::string,CBaseEntity*(*)(void)> *factories = nullptr;
+	g_ClientEntityFactories->GetFactories(&factories);
+	classes.reserve(classes.size() +factories->size());
+	for(auto &pair : *factories)
+		classes.push_back(pair.first);
+	GetLuaRegisteredEntities(luaClasses);
+}
+
 void CGame::UpdateGameWorldShaderSettings()
 {
 	auto oldSettings = m_worldShaderSettings;

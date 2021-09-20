@@ -34,7 +34,7 @@
 #include <sharedutils/magic_enum.hpp>
 
 extern DLLNETWORK Engine *engine;
-
+#pragma optimize("",off)
 //void test_lua_policies(lua_State *l);
 void Lua::ents::register_library(lua_State *l)
 {
@@ -106,6 +106,36 @@ void Lua::ents::register_library(lua_State *l)
 			if(manager.GetComponentTypeId(name,componentId) == false)
 				return {};
 			return componentId;
+		}),
+		luabind::def("find_installed_custom_components",+[](lua_State *l,Game &game) -> Lua::tb<std::string> {
+			std::vector<std::string> dirs;
+			std::string rootPath {"lua/entities/components/"};
+			filemanager::find_files(rootPath +'*',nullptr,&dirs);
+			auto customComponents = luabind::newtable(l);
+			auto nwStateDirName = game.GetLuaNetworkDirectoryName();
+			auto luaFileName = game.GetLuaNetworkFileName();
+
+			auto nwStateDirNameC = nwStateDirName;
+			auto luaFileNameC = luaFileName;
+			ufile::remove_extension_from_filename(nwStateDirNameC,std::vector<std::string>{"lua"});
+			ufile::remove_extension_from_filename(luaFileNameC,std::vector<std::string>{"lua"});
+			nwStateDirNameC += ".clua";
+			luaFileNameC += ".clua";
+			for(uint32_t idx=1;auto &dir : dirs)
+			{
+				auto cdir = rootPath +dir +'/';
+				if(
+					filemanager::exists(cdir +luaFileName) || filemanager::exists(cdir +nwStateDirName +'/' +luaFileName) ||
+					filemanager::exists(cdir +luaFileNameC) || filemanager::exists(cdir +nwStateDirName +'/' +luaFileNameC)
+				)
+					customComponents[idx++] = dir;
+			}
+			return customComponents;
+		}),
+		luabind::def("get_registered_entity_types",+[](Game &game) -> std::vector<std::string> {
+			std::vector<std::string> entities;
+			game.GetRegisteredEntities(entities,entities);
+			return entities;
 		})
 	];
 
@@ -813,3 +843,4 @@ Lua::opt<pragma::ComponentEventId> Lua::ents::register_component_event(lua_State
 	auto eventId = componentManager.RegisterEvent(netName);
 	return {l,eventId};
 }
+#pragma optimize("",on)

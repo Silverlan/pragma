@@ -10,6 +10,7 @@
 #include "pragma/lua/libraries/lfile.h"
 #include "pragma/lua/util.hpp"
 #include "pragma/lua/converters/vector_converter_t.hpp"
+#include "pragma/lua/converters/optional_converter_t.hpp"
 #include "pragma/util/util_game.hpp"
 #include <sharedutils/util_path.hpp>
 #include <luabind/iterator_policy.hpp>
@@ -1065,118 +1066,84 @@ template<class T,class TPropertyWrapper,class TClassDef>
 	});
 }
 
+static Lua::var<Lua::mult<bool,std::string>,::udm::Data> create(lua_State *l,::udm::PProperty rootProp,std::optional<std::string> assetType,std::optional<uint32_t> assetVersion)
+{
+	try
+	{
+		auto udmData = ::udm::Data::Create(assetType.has_value() ? *assetType : "",assetVersion.has_value() ? *assetVersion : 1);
+		if(rootProp)
+			udmData->GetAssetData().GetData() = rootProp;
+		return luabind::object{l,udmData};
+	}
+	catch(const ::udm::Exception &e)
+	{
+		return Lua::mult<bool,std::string>{l,false,e.what()};
+	}
+}
+
 void Lua::udm::register_library(Lua::Interface &lua)
 {
-	auto &modUdm = lua.RegisterLibrary("udm",std::unordered_map<std::string,int(*)(lua_State*)>{
-		{"load",+[](lua_State *l) {
-			if(Lua::IsString(l,1))
-			{
-				std::string fileName = Lua::CheckString(l,1);
-				std::string err;
-				auto udmData = ::util::load_udm_asset(fileName,&err);
-				if(udmData == nullptr)
-				{
-					Lua::PushBool(l,false);
-					Lua::PushString(l,err);
-					return 2;
-				}
-				Lua::Push(l,udmData);
-				return 1;
-			}
-			auto &f = Lua::Check<LFile>(l,1);
-			if(!f.GetHandle())
-			{
-				Lua::PushBool(l,false);
-				Lua::PushString(l,"Invalid file handle!");
-				return 2;
-			}
+	auto modUdm = luabind::module(lua.GetState(),"udm");
+	modUdm[
+		luabind::def("load",+[](lua_State *l,const std::string &fileName) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
 			std::string err;
-			auto udmData = ::util::load_udm_asset(f.GetHandle(),&err);
+			auto udmData = ::util::load_udm_asset(fileName,&err);
 			if(udmData == nullptr)
-			{
-				Lua::PushBool(l,false);
-				Lua::PushString(l,err);
-				return 2;
-			}
-			Lua::Push(l,udmData);
-			return 1;
-		}},
-		{"open",+[](lua_State *l) {
-			if(Lua::IsString(l,1))
-			{
-				std::string fileName = Lua::CheckString(l,1);
-				try
-				{
-					auto udmData = ::udm::Data::Open(fileName);
-					Lua::Push(l,udmData);
-				}
-				catch(const ::udm::Exception &e)
-				{
-					Lua::PushBool(l,false);
-					Lua::PushString(l,e.what());
-					return 2;
-				}
-				return 1;
-			}
-			auto &f = Lua::Check<LFile>(l,1);
+				return Lua::mult<bool,std::string>{l,false,std::move(err)};
+			return luabind::object{l,udmData};
+		}),
+		luabind::def("load",+[](lua_State *l,LFile &file) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
+			if(!file.GetHandle())
+				return Lua::mult<bool,std::string>{l,false,"Invalid file handle!"};
+			std::string err;
+			auto udmData = ::util::load_udm_asset(file.GetHandle(),&err);
+			if(udmData == nullptr)
+				return Lua::mult<bool,std::string>{l,false,std::move(err)};
+			return luabind::object{l,udmData};
+		}),
+		luabind::def("open",+[](lua_State *l,const std::string &fileName) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
 			try
 			{
-				auto udmData = ::udm::Data::Open(f.GetHandle());
-				Lua::Push(l,udmData);
+				auto udmData = ::udm::Data::Open(fileName);
+				return luabind::object{l,udmData};
 			}
 			catch(const ::udm::Exception &e)
 			{
-				Lua::PushBool(l,false);
-				Lua::PushString(l,e.what());
-				return 2;
+				return Lua::mult<bool,std::string>{l,false,e.what()};
 			}
-			return 1;
-		}},
-		{"create",+[](lua_State *l) {
-			std::string assetType = "";
-			uint32_t assetVersion = 1;
-			::udm::PProperty rootProp = nullptr;
-			int32_t argIdx = 1;
-			if(Lua::IsSet(l,argIdx) && Lua::IsType<::udm::Property>(l,argIdx))
-				rootProp = Lua::Check<::udm::PProperty>(l,argIdx++);
-			if(Lua::IsSet(l,argIdx))
-				assetType = Lua::CheckString(l,argIdx++);
-			if(Lua::IsSet(l,argIdx))
-				assetVersion = Lua::CheckInt(l,argIdx++);
-
+		}),
+		luabind::def("open",+[](lua_State *l,LFile &file) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
 			try
 			{
-				auto udmData = ::udm::Data::Create(assetType,assetVersion);
-				if(rootProp)
-					udmData->GetAssetData().GetData() = rootProp;
-				Lua::Push(l,udmData);
+				auto udmData = ::udm::Data::Open(file.GetHandle());
+				return luabind::object{l,udmData};
 			}
 			catch(const ::udm::Exception &e)
 			{
-				Lua::PushBool(l,false);
-				Lua::PushString(l,e.what());
-				return 2;
+				return Lua::mult<bool,std::string>{l,false,e.what()};
 			}
-			return 1;
-		}},
-		{"create_property",+[](lua_State *l) {
-			auto type = static_cast<::udm::Type>(Lua::CheckInt(l,1));
-			auto prop = ::udm::Property::Create(type);
-			if(!prop)
-				return 0;
-			Lua::Push(l,prop);
-			return 1;
-		}},
-		{"create_element",+[](lua_State *l) {
-			auto type = ::udm::Type::Element;
-			auto prop = ::udm::Property::Create(type);
-			if(!prop)
-				return 0;
-			Lua::Push(l,prop);
-			return 1;
-		}},
-		{"compress_lz4",+[](lua_State *l) {
-			auto &ds = Lua::Check<DataStream>(l,1);
+		}),
+		luabind::def("create",&create),
+		luabind::def("create",+[](lua_State *l,::udm::PProperty rootProp,std::optional<std::string> assetType) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
+			return create(l,rootProp,assetType,{});
+		}),
+		luabind::def("create",+[](lua_State *l,::udm::PProperty rootProp) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
+			return create(l,rootProp,{},{});
+		}),
+		luabind::def("create",+[](lua_State *l) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
+			return create(l,nullptr,{},{});
+		}),
+		luabind::def("create",+[](lua_State *l,std::optional<std::string> assetType,std::optional<uint32_t> assetVersion) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
+			return create(l,nullptr,assetType,assetVersion);
+		}),
+		luabind::def("create",+[](lua_State *l,std::optional<std::string> assetType) -> Lua::var<Lua::mult<bool,std::string>,::udm::Data> {
+			return create(l,nullptr,assetType,{});
+		}),
+		luabind::def("create_property",static_cast<::udm::PProperty(*)(::udm::Type)>(&::udm::Property::Create)),
+		luabind::def("create_element",+[](lua_State *l) -> ::udm::PProperty {
+			return ::udm::Property::Create(::udm::Type::Element);
+		}),
+		luabind::def("compress_lz4",+[](lua_State *l,DataStream ds) -> DataStream {
 			auto offset = ds->GetOffset();
 			ds->SetOffset(0);
 			auto lz4Blob = ::udm::compress_lz4_blob(ds->GetData(),ds->GetInternalSize());
@@ -1187,12 +1154,9 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			DataStream dsCompressed {static_cast<uint32_t>(lz4Blob.compressedData.size())};
 			dsCompressed->Write(lz4Blob.compressedData.data(),lz4Blob.compressedData.size());
 			t[2] = dsCompressed;
-			t.push(l);
-			return 1;
-		}},
-		{"decompress_lz4",+[](lua_State *l) {
-			Lua::CheckTable(l,1);
-			auto t = luabind::table<>{luabind::from_stack(l,1)};
+			return dsCompressed;
+		}),
+		luabind::def("decompress_lz4",+[](Lua::tb<void> t) -> DataStream {
 			uint64_t uncompressedSize = luabind::object_cast_nothrow<uint64_t>(t[1],uint64_t{});
 			DataStream ds = luabind::object_cast_nothrow<DataStream>(t[2],DataStream{});
 
@@ -1203,35 +1167,19 @@ void Lua::udm::register_library(Lua::Interface &lua)
 
 			DataStream dsDecompressed {static_cast<uint32_t>(blob.data.size())};
 			dsDecompressed->Write(blob.data.data(),blob.data.size());
-			Lua::Push(l,dsDecompressed);
-			return 1;
-		}},
-		{"data_block_to_udm",+[](lua_State *l) {
-			auto &dataBlock = Lua::Check<ds::Block>(l,1);
-			auto &udm = Lua::Check<::udm::LinkedPropertyWrapper>(l,2);
-			data_block_to_udm(dataBlock,udm);
-			return 0;
-		}},
-		{"data_file_to_udm",+[](lua_State *l) {
-			std::string fileName = Lua::CheckString(l,1);
+			return dsDecompressed;
+		}),
+		luabind::def("data_block_to_udm",&data_block_to_udm),
+		luabind::def("data_file_to_udm",+[](const std::string &fileName) -> bool {
 			std::string rpath;
 			if(FileManager::FindAbsolutePath(fileName,rpath) == false)
-			{
-				Lua::PushBool(l,false);
-				return 1;
-			}
+				return false;
 			auto f = FileManager::OpenFile(fileName.c_str(),"r");
 			if(f == nullptr)
-			{
-				Lua::PushBool(l,false);
-				return 1;
-			}
+				return false;
 			auto root = ds::System::ReadData(f);
 			if(root == nullptr)
-			{
-				Lua::PushBool(l,false);
-				return 1;
-			}
+				return false;
 			ufile::remove_extension_from_filename(rpath);
 			rpath += ".udm";
 			auto p = util::Path::CreateFile(rpath);
@@ -1239,23 +1187,15 @@ void Lua::udm::register_library(Lua::Interface &lua)
 			rpath = p.GetString();
 			auto fout = FileManager::OpenFile<VFilePtrReal>(rpath.c_str(),"w");
 			if(fout == nullptr)
-			{
-				Lua::PushBool(l,false);
-				return 1;
-			}
+				return false;
 			auto udmData = ::udm::Data::Create();
 			data_block_to_udm(*root,udmData->GetAssetData().GetData());
-			Lua::PushBool(l,udmData->SaveAscii(fout));
-			return 1;
-		}},
-		{"debug_test",+[](lua_State *l) {
-			::udm::Data::DebugTest();
-			return 0;
-		}},
-		{"define_struct",+[](lua_State *l) {
-			auto t = luabind::table{luabind::from_stack(l,1)};
+			return udmData->SaveAscii(fout);
+		}),
+		luabind::def("debug_test",&::udm::Data::DebugTest),
+		luabind::def("define_struct",+[](Lua::tb<void> t) -> ::udm::StructDescription {
 			::udm::StructDescription structDesc {};
-			auto n = Lua::GetObjectLength(l,1);
+			auto n = Lua::GetObjectLength(t.interpreter(),t);
 			structDesc.types.resize(n);
 			structDesc.names.resize(n);
 			for(auto i=decltype(n){0u};i<n;++i)
@@ -1264,44 +1204,22 @@ void Lua::udm::register_library(Lua::Interface &lua)
 				structDesc.types[i] = luabind::object_cast<::udm::Type>(o["type"]);
 				structDesc.names[i] = luabind::object_cast<std::string>(o["name"]);
 			}
-			Lua::Push(l,structDesc);
-			return 1;
-		}},
-		{"enum_type_to_ascii",+[](lua_State *l) {
-			auto type = Lua::CheckInt(l,1);
-			Lua::PushString(l,::udm::enum_type_to_ascii(static_cast<::udm::Type>(type)));
-			return 1;
-		}},
-		{"ascii_type_to_enum",+[](lua_State *l) {
-			std::string stype = Lua::CheckString(l,1);
-			auto type = ::udm::ascii_type_to_enum(stype);
-			Lua::PushInt(l,umath::to_integral(type));
-			return 1;
-		}},
-		{"to_json",+[](lua_State *l) {
-			auto &udm = Lua::Check<::udm::LinkedPropertyWrapper>(l,1);
+			return structDesc;
+		}),
+		luabind::def("enum_type_to_ascii",&::udm::enum_type_to_ascii),
+		luabind::def("ascii_type_to_enum",&::udm::ascii_type_to_enum),
+		luabind::def("to_json",+[](::udm::LinkedPropertyWrapper &udm) -> std::string {
 			std::stringstream ss;
 			::udm::to_json(udm,ss);
-			Lua::PushString(l,ss.str());
-			return 1;
-		}},
-		{"is_numeric_type",+[](lua_State *l) {
-			Lua::PushBool(l,::udm::is_numeric_type(static_cast<::udm::Type>(Lua::CheckInt(l,1))));
-			return 1;
-		}},
-		{"is_generic_type",+[](lua_State *l) {
-			Lua::PushBool(l,::udm::is_generic_type(static_cast<::udm::Type>(Lua::CheckInt(l,1))));
-			return 1;
-		}},
-		{"is_non_trivial_type",+[](lua_State *l) {
-			Lua::PushBool(l,::udm::is_non_trivial_type(static_cast<::udm::Type>(Lua::CheckInt(l,1))));
-			return 1;
-		}},
-		{"type_to_string",+[](lua_State *l) {
-			Lua::PushString(l,std::string{magic_enum::enum_name(static_cast<::udm::Type>(Lua::CheckInt(l,1)))});
-			return 1;
-		}}
-	});
+			return ss.str();
+		}),
+		luabind::def("is_numeric_type",&::udm::is_numeric_type),
+		luabind::def("is_generic_type",&::udm::is_generic_type),
+		luabind::def("is_non_trivial_type",&::udm::is_non_trivial_type),
+		luabind::def("type_to_string",+[](::udm::Type type) -> std::string {
+			return std::string{magic_enum::enum_name(type)};
+		})
+	];
 
 	Lua::RegisterLibraryEnums(lua.GetState(),"udm",{
         {"TYPE_NIL",umath::to_integral(::udm::Type::Nil)},

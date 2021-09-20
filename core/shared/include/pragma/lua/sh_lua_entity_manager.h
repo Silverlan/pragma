@@ -23,6 +23,9 @@ public:
 
 	void RegisterComponent(std::string className,luabind::object &o);
 	luabind::object *GetComponentClassObject(std::string className);
+
+	const std::unordered_map<std::string,luabind::object> &GetRegisteredEntities() const {return m_ents;}
+	const std::unordered_map<std::string,luabind::object> &GetRegisteredComponents() const {return m_components;}
 };
 
 #endif

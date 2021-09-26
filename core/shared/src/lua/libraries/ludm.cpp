@@ -546,7 +546,7 @@ void Lua::udm::table_to_udm(const Lua::tb<void> &t,::udm::LinkedPropertyWrapper 
 						}
 					});
 				}
-				return;
+				continue;
 			}
 			auto udmSub = udm[key];
 			table_to_udm(val,udmSub);

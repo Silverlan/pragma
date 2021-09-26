@@ -36,6 +36,7 @@
 #include <pragma/util/giblet_create_info.hpp>
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/classes/ldef_entity.h>
+#include <pragma/lua/classes/thread_pool.hpp>
 #include <pragma/lua/libraries/lfile.h>
 #include <pragma/lua/libraries/lutil.hpp>
 #include <pragma/lua/policies/default_parameter_policy.hpp>
@@ -698,15 +699,26 @@ static bool save_image(lua_State *l,uimg::ImageBuffer &imgBuffer,std::string fil
 	return save_image(l,imgBuffer,fileName,imgWriteInfo,false);
 }
 
-static bool save_image(lua_State *l,uimg::ImageBuffer &imgBuffer,std::string fileName,uimg::ImageFormat format,float quality)
+static bool save_image(lua_State *l,uimg::ImageBuffer &imgBuffer,std::string fileName,uimg::ImageFormat format,float quality,pragma::lua::LuaThreadPool *threadPool=nullptr)
 {
 	if(Lua::file::validate_write_operation(l,fileName) == false)
 		return false;
 	ufile::remove_extension_from_filename(fileName);
 	fileName += '.' +uimg::get_file_extension(format);
-	auto f = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(),"wb");
+	auto f = filemanager::open_file<VFilePtrReal>(fileName,filemanager::FileMode::Write | filemanager::FileMode::Binary);
 	if(!f)
 		return false;
+	if(threadPool)
+	{
+		auto pImgBuffer = imgBuffer.shared_from_this();
+		threadPool->AddTask([f,pImgBuffer,format,quality]() -> pragma::lua::LuaThreadPool::ResultHandler {
+			auto result = uimg::save_image(f,*pImgBuffer,format,quality);
+			return [result](lua_State *l) {
+				luabind::object{l,result}.push(l);
+			};
+		});
+		return true;
+	}
 	return uimg::save_image(f,imgBuffer,format,quality);
 }
 static bool save_image(lua_State *l,uimg::ImageBuffer &imgBuffer,std::string fileName,uimg::ImageFormat format)
@@ -874,7 +886,10 @@ void CGame::RegisterLuaLibraries()
 		luabind::def("fire_bullets",static_cast<luabind::object(*)(lua_State*,BulletInfo&)>(Lua::util::fire_bullets)),
 		luabind::def("save_image",static_cast<bool(*)(lua_State*,uimg::ImageBuffer&,std::string,uimg::TextureInfo&,bool)>(save_image)),
 		luabind::def("save_image",static_cast<bool(*)(lua_State*,uimg::ImageBuffer&,std::string,uimg::TextureInfo&)>(save_image)),
-		luabind::def("save_image",static_cast<bool(*)(lua_State*,uimg::ImageBuffer&,std::string,uimg::ImageFormat,float)>(save_image)),
+		luabind::def("save_image",static_cast<bool(*)(lua_State*,uimg::ImageBuffer&,std::string,uimg::ImageFormat,float,pragma::lua::LuaThreadPool*)>(save_image)),
+		luabind::def("save_image",+[](lua_State *l,uimg::ImageBuffer &imgBuffer,std::string fileName,uimg::ImageFormat format,float quality) {
+			return save_image(l,imgBuffer,fileName,format,quality);
+		}),
 		luabind::def("save_image",static_cast<bool(*)(lua_State*,uimg::ImageBuffer&,std::string,uimg::ImageFormat)>(save_image)),
 		luabind::def("save_image",static_cast<bool(*)(lua_State*,luabind::table<>,std::string,uimg::TextureInfo&,bool)>(save_image)),
 		luabind::def("save_image",static_cast<bool(*)(lua_State*,luabind::table<>,std::string,uimg::TextureInfo&)>(save_image)),

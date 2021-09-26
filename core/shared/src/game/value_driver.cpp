@@ -31,7 +31,7 @@ void pragma::ValueDriverDescriptor::RebuildLuaExpression() const
 		argList += ',' +pair.first;
 
 	auto *l = m_luaState;
-	std::string luaStr = "return function(" +argList +") return " +m_expression +" end";
+	std::string luaStr = "return function(" +argList +") " +m_expression +" end";
 	auto r = Lua::RunString(l,luaStr,1,"internal",&Lua::HandleTracebackError); /* 1 */
 	if(r == Lua::StatusCode::Ok)
 	{

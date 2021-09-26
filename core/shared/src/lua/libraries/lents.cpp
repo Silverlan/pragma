@@ -136,6 +136,34 @@ void Lua::ents::register_library(lua_State *l)
 			std::vector<std::string> entities;
 			game.GetRegisteredEntities(entities,entities);
 			return entities;
+		}),
+		luabind::def("add_component_creation_listener",+[](Game &game,pragma::ComponentId id,Lua::func<void,pragma::BaseEntityComponent> callback) {
+			EntityIterator it {game};
+			it.AttachFilter<EntityIteratorFilterComponent>(id);
+			auto entIt = it.begin();
+			if(entIt != it.end())
+			{
+				auto *ent = *entIt;
+				callback(ent->FindComponent(id)->GetLuaObject());
+			}
+
+			return game.GetEntityComponentManager().AddCreationCallback(id,[callback](std::reference_wrapper<pragma::BaseEntityComponent> c) mutable {
+				callback(c.get().GetLuaObject());
+			});
+		}),
+		luabind::def("add_component_creation_listener",+[](Game &game,const std::string &componentName,Lua::func<void,pragma::BaseEntityComponent> callback) {
+			EntityIterator it {game};
+			it.AttachFilter<EntityIteratorFilterComponent>(componentName);
+			auto entIt = it.begin();
+			if(entIt != it.end())
+			{
+				auto *ent = *entIt;
+				callback(ent->FindComponent(componentName)->GetLuaObject());
+			}
+
+			return game.GetEntityComponentManager().AddCreationCallback(componentName,[callback](std::reference_wrapper<pragma::BaseEntityComponent> c) mutable {
+				callback(c.get().GetLuaObject());
+			});
 		})
 	];
 

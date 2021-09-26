@@ -52,13 +52,13 @@ ComponentMemberInfo &ComponentMemberInfo::operator=(const ComponentMemberInfo &o
 	m_max = other.m_max;
 	m_stepSize = other.m_stepSize;
 	m_metaData = other.m_metaData;
-	if(m_default)
+	if(other.m_default)
 	{
-		udm::visit(type,[this](auto tag) {
+		udm::visit(type,[this,&other](auto tag) {
 			using T = decltype(tag)::type;
 			constexpr auto eType = udm::type_to_enum<T>();
-			if constexpr(eType != udm::Type::Element && eType != udm::Type::Array && eType != udm::Type::ArrayLz4)
-				SetDefault<T>(*static_cast<T*>(m_default.get()));
+			if constexpr(eType != udm::Type::Element && !udm::is_array_type(eType))
+				SetDefault<T>(*static_cast<T*>(other.m_default.get()));
 		});
 	}
 	static_assert(sizeof(*this) == 160);
@@ -116,6 +116,45 @@ void ComponentMemberInfo::SetName(std::string &&name)
 
 //////////////
 
+ComponentInfo::ComponentInfo(const ComponentInfo &other)
+{
+	operator=(other);
+}
+ComponentInfo::ComponentInfo(ComponentInfo &&other)
+{
+	operator=(std::move(other));
+}
+ComponentInfo &ComponentInfo::operator=(const ComponentInfo &other)
+{
+	name = other.name;
+	factory = other.factory;
+	id = other.id;
+	flags = other.flags;
+	members = other.members;
+	memberNameToIndex = other.memberNameToIndex;
+	onCreateCallbacks = nullptr;
+	if(other.onCreateCallbacks)
+	{
+		onCreateCallbacks = std::make_unique<std::vector<CallbackHandle>>();
+		onCreateCallbacks->reserve(other.onCreateCallbacks->size());
+		for(auto &cb : *other.onCreateCallbacks)
+			onCreateCallbacks->push_back(cb);
+	}
+	static_assert(sizeof(*this) == 200);
+	return *this;
+}
+ComponentInfo &ComponentInfo::operator=(ComponentInfo &&other)
+{
+	name = std::move(other.name);
+	factory = std::move(other.factory);
+	id = other.id;
+	flags = other.flags,
+	members = std::move(other.members);
+	memberNameToIndex = std::move(other.memberNameToIndex);
+	onCreateCallbacks = std::move(other.onCreateCallbacks);
+	static_assert(sizeof(*this) == 200);
+	return *this;
+}
 std::optional<ComponentMemberIndex> ComponentInfo::FindMember(const std::string &name) const
 {
 	auto hash = get_component_member_name_hash(name);
@@ -157,6 +196,23 @@ util::TSharedHandle<BaseEntityComponent> EntityComponentManager::CreateComponent
 		return nullptr;
 	r->m_componentId = info.id;
 	m_components.at(r->m_componentId).Push(*r);
+	if(info.onCreateCallbacks)
+	{
+		for(auto it=info.onCreateCallbacks->begin();it!=info.onCreateCallbacks->end();)
+		{
+			auto &cb = *it;
+			if(cb.IsValid())
+				cb.Call<void,std::reference_wrapper<BaseEntityComponent>>(*r);
+			if(cb.IsValid() == false)
+			{
+				it = info.onCreateCallbacks->erase(it);
+				continue;
+			}
+			++it;
+		}
+		if(info.onCreateCallbacks->empty())
+			info.onCreateCallbacks = nullptr;
+	}
 	return r;
 }
 util::TSharedHandle<BaseEntityComponent> EntityComponentManager::CreateComponent(const std::string &name,BaseEntity &ent) const
@@ -172,12 +228,7 @@ util::TSharedHandle<BaseEntityComponent> EntityComponentManager::CreateComponent
 	auto *componentInfo = GetComponentInfo(componentId);
 	if(componentInfo == nullptr || componentInfo->IsValid() == false)
 		return nullptr;
-	auto r = componentInfo->factory(ent);
-	if(r == nullptr)
-		return nullptr;
-	r->m_componentId = componentInfo->id;
-	m_components.at(r->m_componentId).Push(*r);
-	return r;
+	return CreateComponent(componentInfo->id,ent);
 }
 ComponentId EntityComponentManager::PreRegisterComponentType(const std::string &name)
 {
@@ -203,6 +254,31 @@ ComponentId EntityComponentManager::RegisterComponentType(const std::string &nam
 ComponentId EntityComponentManager::RegisterComponentType(const std::string &name,const std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity&)> &factory,ComponentFlags flags)
 {
 	return RegisterComponentType(name,factory,flags,nullptr);
+}
+CallbackHandle EntityComponentManager::AddCreationCallback(ComponentId componentId,const std::function<void(std::reference_wrapper<BaseEntityComponent>)> &onCreate)
+{
+	auto *info = GetComponentInfo(componentId);
+	if(!info)
+	{
+		auto it = std::find_if(m_preRegistered.begin(),m_preRegistered.end(),[componentId](const ComponentInfo &componentInfo) {
+			return componentInfo.id == componentId;
+		});
+		if(it == m_preRegistered.end())
+			throw std::runtime_error{"Invalid component (" +std::to_string(componentId) +")"};
+		info = &*it;
+	}
+	if(!info->onCreateCallbacks)
+		info->onCreateCallbacks = std::make_unique<std::vector<CallbackHandle>>();
+	auto cb = FunctionCallback<void,std::reference_wrapper<BaseEntityComponent>>::Create(onCreate);
+	info->onCreateCallbacks->push_back(cb);
+	return cb;
+}
+CallbackHandle EntityComponentManager::AddCreationCallback(const std::string &componentName,const std::function<void(std::reference_wrapper<BaseEntityComponent>)> &onCreate)
+{
+	ComponentId id;
+	if(!GetComponentTypeId(componentName,id))
+		id = PreRegisterComponentType(componentName);
+	return AddCreationCallback(id,onCreate);
 }
 ComponentId EntityComponentManager::RegisterComponentType(const std::string &name,const std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity&)> &factory,ComponentFlags flags,const std::type_index *typeIndex)
 {

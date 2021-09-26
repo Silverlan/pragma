@@ -1189,6 +1189,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defEulerAngles.def(luabind::constructor<const Vector3&>());
 	defEulerAngles.def(luabind::constructor<const Vector3&,const Vector3&>());
 	defEulerAngles.def(luabind::constructor<const Quat&>());
+	defEulerAngles.def(luabind::constructor<const std::string&>());
 	defEulerAngles.def(-luabind::const_self);
 	defEulerAngles.def_readwrite("p",&EulerAngles::p);
 	defEulerAngles.def_readwrite("y",&EulerAngles::y);

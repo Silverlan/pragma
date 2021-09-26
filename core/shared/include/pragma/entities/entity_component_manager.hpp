@@ -198,8 +198,14 @@ namespace pragma
 
 	struct DLLNETWORK ComponentInfo
 	{
+		ComponentInfo()=default;
+		ComponentInfo(const ComponentInfo &other);
+		ComponentInfo(ComponentInfo &&other);
+		ComponentInfo &operator=(const ComponentInfo &other);
+		ComponentInfo &operator=(ComponentInfo &&other);
 		std::string name;
 		std::function<util::TSharedHandle<BaseEntityComponent>(BaseEntity&)> factory = nullptr;
+		mutable std::unique_ptr<std::vector<CallbackHandle>> onCreateCallbacks = nullptr;
 		ComponentId id = std::numeric_limits<uint32_t>::max();
 		ComponentFlags flags = ComponentFlags::None;
 		std::vector<ComponentMemberInfo> members;
@@ -246,6 +252,9 @@ namespace pragma
 		bool GetComponentId(std::type_index typeIndex,ComponentId &componentId) const;
 		const std::vector<ComponentInfo> &GetRegisteredComponentTypes() const;
 		ComponentMemberIndex RegisterMember(ComponentInfo &componentInfo,ComponentMemberInfo &&memberInfo);
+
+		CallbackHandle AddCreationCallback(ComponentId componentId,const std::function<void(std::reference_wrapper<BaseEntityComponent>)> &onCreate);
+		CallbackHandle AddCreationCallback(const std::string &componentName,const std::function<void(std::reference_wrapper<BaseEntityComponent>)> &onCreate);
 
 		const ComponentInfo *GetComponentInfo(ComponentId id) const;
 		ComponentInfo *GetComponentInfo(ComponentId id);

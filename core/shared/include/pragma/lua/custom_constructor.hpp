@@ -17,11 +17,48 @@ namespace pragma::lua
 	template<typename T,auto TCnstrct,typename ...TArgs>
 	static void custom_constructor(luabind::argument const &self_, TArgs... args)
 	{
-		using holder_type = luabind::detail::value_holder<T>;
 		luabind::detail::object_rep* self = luabind::touserdata<luabind::detail::object_rep>(self_);
+		using TResult = decltype(std::function{TCnstrct})::result_type;
+		if constexpr(!util::is_specialization<TResult,std::shared_ptr>::value)
+		{
+			using holder_type = luabind::detail::value_holder<TResult>;
 
-		void* storage = self->allocate(sizeof(holder_type));
-		self->set_instance(new (storage) holder_type(nullptr,TCnstrct(std::forward<TArgs>(args)...)));
+			void* storage = self->allocate(sizeof(holder_type));
+			self->set_instance(new (storage) holder_type(nullptr,TCnstrct(std::forward<TArgs>(args)...)));
+		}
+		else
+		{
+			// See luabind::detail::make_pointer_instance
+			auto *L = self_.interpreter();
+			auto p = TCnstrct(std::forward<TArgs>(args)...);
+			using P = TResult;
+			auto dynamic = luabind::detail::get_dynamic_class(L, luabind::get_pointer(p));
+
+			auto* cls = luabind::detail::get_pointee_class(L, p, dynamic.first);
+
+			if(!cls)
+			{
+				throw std::runtime_error("Trying to use unregistered class: " + std::string(typeid(P).name()));
+			}
+
+			using value_type = typename std::remove_reference<P>::type;
+			using holder_type = luabind::detail::pointer_holder<value_type>;
+
+			void* storage = self->allocate(sizeof(holder_type));
+
+			try
+			{
+				new (storage) holder_type(std::move(p), dynamic.first, dynamic.second);
+			}
+			catch(...)
+			{
+				self->deallocate(storage);
+				lua_pop(L, 1);
+				throw;
+			}
+
+			self->set_instance(static_cast<holder_type*>(storage));
+		}
 	}
 
 	template<typename T,auto TCnstrct,typename ...TArgs>

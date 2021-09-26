@@ -386,8 +386,7 @@ static void iterate_entities(lua_State *l,const std::function<void(BaseEntity*)>
 		Lua::Call(l,0,1); /* 1 */
 		if(Lua::IsSet(l,-1))
 		{
-			auto &hEnt = Lua::Check<EntityHandle>(l,-1);
-			ent = hEnt.get();
+			ent = luabind::object_cast<BaseEntity*>(luabind::object{luabind::from_stack(l,-1)});
 			if(ent != nullptr)
 				fCallback(ent);
 		}

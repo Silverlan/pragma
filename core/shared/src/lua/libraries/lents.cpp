@@ -68,6 +68,7 @@ void Lua::ents::register_library(lua_State *l)
 		luabind::def("create_trigger",static_cast<type<BaseEntity>(*)(lua_State*,const Vector3&,pragma::physics::IShape&)>(create_trigger)),
 		luabind::def("create_trigger",static_cast<type<BaseEntity>(*)(lua_State*,const Vector3&,const Vector3&,const Vector3&,const EulerAngles&)>(create_trigger)),
 		luabind::def("create_trigger",static_cast<type<BaseEntity>(*)(lua_State*,const Vector3&,float)>(create_trigger)),
+		luabind::def("create_prop",&create_prop),
 		luabind::def("create_prop",+[](lua_State *l,const std::string &mdl,const Vector3 *origin,const EulerAngles *angles) -> type<BaseEntity> {
 			return create_prop(l,mdl,origin,angles,false);
 		}),

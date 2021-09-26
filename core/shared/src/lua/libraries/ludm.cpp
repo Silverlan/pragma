@@ -762,8 +762,11 @@ static luabind::object get_children(lua_State *l,const ::udm::PropertyWrapper &p
 	}
 	else
 	{
-		for(auto pair : linked->ElIt())
+		for(auto it=p.begin_el();it!=p.end_el();++it)
+		{
+			auto &pair = *it;
 			t[std::string{pair.key}] = p[pair.key];
+		}
 	}
 	return t;
 }

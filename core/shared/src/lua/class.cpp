@@ -1332,7 +1332,10 @@ static std::ostream& operator<<(std::ostream &str,const LEntityProperty &v)
 	return str;
 }
 void Lua::Property::push(lua_State *l,pragma::EntityProperty &prop) {Lua::Property::push_property<LEntityPropertyWrapper>(l,prop);}
-
+namespace pragma::lua
+{
+	void register_thread_pool(lua_State *l,luabind::module_ &modUtil);
+};
 void Game::RegisterLuaClasses()
 {
 	NetworkState::RegisterSharedLuaClasses(GetLuaInterface());
@@ -1340,6 +1343,7 @@ void Game::RegisterLuaClasses()
 
 	// Entity
 	auto &modUtil = GetLuaInterface().RegisterLibrary("util");
+	pragma::lua::register_thread_pool(GetLuaState(),modUtil);
 	auto entDef = luabind::class_<LEntityProperty,LBasePropertyWrapper>("EntityProperty");
 	//Lua::Property::add_generic_methods<LEntityProperty,EntityHandle,luabind::class_<LEntityProperty,LBasePropertyWrapper>>(entDef);
 	entDef.def(luabind::constructor<>());

@@ -34,7 +34,7 @@ namespace Lua
 		DLLNETWORK opt<uint32_t> get_component_id(lua_State *l,const std::string &componentName);
 
 		DLLNETWORK tb<type<BaseEntity>> get_all(lua_State *l);
-		DLLNETWORK tb<type<BaseEntity>> get_all(lua_State *l,func<bool,type<BaseEntity>> func);
+		DLLNETWORK tb<type<BaseEntity>> get_all(lua_State *l,func<type<BaseEntity>> func);
 		DLLNETWORK tb<type<BaseEntity>> get_all(lua_State *l,EntityIterator::FilterFlags filterFlags=EntityIterator::FilterFlags::Default);
 		DLLNETWORK tb<type<BaseEntity>> get_all(lua_State *l,EntityIterator::FilterFlags filterFlags,const tb<LuaEntityIteratorFilterBase> &filters);
 		DLLNETWORK tb<type<BaseEntity>> get_all(lua_State *l,const tb<LuaEntityIteratorFilterBase> &filters);

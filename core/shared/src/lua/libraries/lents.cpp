@@ -44,7 +44,7 @@ void Lua::ents::register_library(lua_State *l)
 		luabind::def("create",create),
 
 		luabind::def("get_all",static_cast<tb<type<BaseEntity>>(*)(lua_State*)>(get_all)),
-		luabind::def("get_all",static_cast<tb<type<BaseEntity>>(*)(lua_State*,func<bool,type<BaseEntity>>)>(get_all)),
+		luabind::def("get_all",static_cast<tb<type<BaseEntity>>(*)(lua_State*,func<type<BaseEntity>>)>(get_all)),
 		luabind::def("get_all",static_cast<tb<type<BaseEntity>>(*)(lua_State*,EntityIterator::FilterFlags)>(get_all)),
 		luabind::def("get_all",static_cast<tb<type<BaseEntity>>(*)(lua_State*,EntityIterator::FilterFlags,const tb<LuaEntityIteratorFilterBase>&)>(get_all)),
 		luabind::def("get_all",static_cast<tb<type<BaseEntity>>(*)(lua_State*,const tb<LuaEntityIteratorFilterBase>&)>(get_all)),
@@ -486,7 +486,7 @@ Lua::tb<Lua::type<BaseEntity>> Lua::ents::get_all(lua_State *l)
 	game->GetEntities(&ents);
 	return entities_to_table(l,*ents);
 }
-Lua::tb<Lua::type<BaseEntity>> Lua::ents::get_all(lua_State *l,func<bool,type<BaseEntity>> func)
+Lua::tb<Lua::type<BaseEntity>> Lua::ents::get_all(lua_State *l,func<type<BaseEntity>> func)
 {
 	std::vector<BaseEntity*> ents {};
 	iterate_entities(l,[&ents](BaseEntity *ent) {ents.push_back(ent);});
@@ -497,8 +497,8 @@ Lua::tb<Lua::type<BaseEntity>> Lua::ents::get_all(lua_State *l,func<bool,type<Ba
 	for(auto *ent : ents)
 	{
 		auto &o = ent->GetLuaObject();
-		if(!luabind::object_cast<bool>(func(o)))
-			continue;
+		//if(!luabind::object_cast<bool>(func(o)))
+		//	continue;
 		t[idx++] = o;
 	}
 	return t;

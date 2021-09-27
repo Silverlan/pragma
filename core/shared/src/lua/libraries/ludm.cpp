@@ -939,7 +939,7 @@ template<class T,class TPropertyWrapper,class TClassDef>
 		return get_children(l,static_cast<TPropertyWrapper>(p));
 	})
 	.def("GetChildren",+[](lua_State *l,T &p,const std::string &key) -> luabind::object {
-		return get_children(l,static_cast<TPropertyWrapper>(p));
+		return get_children(l,static_cast<TPropertyWrapper>(p)[key]);
 	})
 	.def("GetChildCount",+[](lua_State *l,T &p) -> uint32_t {
 		return static_cast<TPropertyWrapper>(p).GetChildCount();

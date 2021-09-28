@@ -14,6 +14,7 @@
 #include "pragma/model/c_model.h"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/entities/entity_component_system_t.hpp>
+#include <pragma/entities/entity_component_manager_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 extern DLLCLIENT CGame *c_game;
@@ -28,6 +29,40 @@ void CEyeComponent::RegisterEvents(pragma::EntityComponentManager &componentMana
 	BaseAnimatedComponent::RegisterEvents(componentManager);
 	// EVENT_ON_EYEBALLS_UPDATED = componentManager.RegisterEvent("ON_EYEBALLS_UPDATED",std::type_index(typeid(CEyeComponent)));
 	// EVENT_ON_BLINK = componentManager.RegisterEvent("EVENT_ON_BLINK");
+}
+void CEyeComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+{
+	using T = CEyeComponent;
+
+	{
+		using TViewTarget = Vector3;
+		auto memberInfo = create_component_member_info<
+			T,TViewTarget,
+			static_cast<void(T::*)(const Vector3&)>(&T::SetViewTarget),
+			static_cast<Vector3(T::*)() const>(&T::GetViewTarget)
+		>("viewTarget",Vector3{});
+		registerMember(std::move(memberInfo));
+	}
+
+	{
+		using TBlinkDuration = float;
+		auto memberInfo = create_component_member_info<
+			T,TBlinkDuration,
+			static_cast<void(T::*)(TBlinkDuration)>(&T::SetBlinkDuration),
+			static_cast<TBlinkDuration(T::*)() const>(&T::GetBlinkDuration)
+		>("blinkDuration",0.2f);
+		registerMember(std::move(memberInfo));
+	}
+
+	{
+		using TBlinkingEnabled = bool;
+		auto memberInfo = create_component_member_info<
+			T,TBlinkingEnabled,
+			static_cast<void(T::*)(TBlinkingEnabled)>(&T::SetBlinkingEnabled),
+			static_cast<TBlinkingEnabled(T::*)() const>(&T::IsBlinkingEnabled)
+		>("blinkingEnabled",true);
+		registerMember(std::move(memberInfo));
+	}
 }
 void CEyeComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 

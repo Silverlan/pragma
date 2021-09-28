@@ -58,6 +58,7 @@ namespace pragma
 		// static ComponentEventId EVENT_ON_EYEBALLS_UPDATED;
 		// static ComponentEventId EVENT_ON_BLINK;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember);
 
 		CEyeComponent(BaseEntity &ent);
 

@@ -98,6 +98,11 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 		
 		hPanel.SetAutoSizeToContents(x,y);
 	}));
+	classDef.def("SetStencilEnabled",&::WIBase::SetStencilEnabled);
+	classDef.def("IsStencilEnabled",&::WIBase::IsStencilEnabled);
+	classDef.def("SetLocalRenderTransform",&::WIBase::SetLocalRenderTransform);
+	classDef.def("ClearLocalRenderTransform",&::WIBase::ClearLocalRenderTransform);
+	classDef.def("GetLocalRenderTransform",static_cast<const umath::ScaledTransform*(::WIBase::*)() const>(&::WIBase::GetLocalRenderTransform),luabind::copy_policy<0>{});
 	classDef.def("GetMouseInputEnabled",&::WIBase::GetMouseInputEnabled);
 	classDef.def("SetMouseInputEnabled",&::WIBase::SetMouseInputEnabled);
 	classDef.def("GetKeyboardInputEnabled",&::WIBase::GetKeyboardInputEnabled);

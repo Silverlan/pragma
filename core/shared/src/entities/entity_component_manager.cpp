@@ -161,7 +161,7 @@ std::optional<ComponentMemberIndex> ComponentInfo::FindMember(const std::string 
 	auto it = std::find_if(members.begin(),members.end(),[hash](const ComponentMemberInfo &memberInfo) {
 		return memberInfo.GetNameHash() == hash;
 	});
-	return (it != members.end()) ? (it -members.begin()) : std::numeric_limits<ComponentMemberIndex>::max();
+	return (it != members.end()) ? (it -members.begin()) : std::optional<ComponentMemberIndex>{};
 }
 
 //////////////

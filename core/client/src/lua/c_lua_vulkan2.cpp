@@ -13,6 +13,7 @@
 #include "pragma/model/vk_mesh.h"
 #include <pragma/lua/policies/vector_policy.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
+#include <pragma/lua/converters/optional_converter_t.hpp>
 #include <prosper_framebuffer.hpp>
 #include <prosper_fence.hpp>
 #include <prosper_command_buffer.hpp>
@@ -67,9 +68,9 @@ namespace Lua
 		{
 			static bool IsValid(lua_State *l,CommandBuffer &hCommandBuffer);
 			static bool RecordClearImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &img,const Color &col,const prosper::util::ClearImageInfo &clearImageInfo={});
-			static bool RecordClearImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &img,float clearDepth,const prosper::util::ClearImageInfo &clearImageInfo={});
+			static bool RecordClearImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &img,std::optional<float> clearDepth,std::optional<uint32_t> clearStencil,const prosper::util::ClearImageInfo &clearImageInfo={});
 			static bool RecordClearAttachment(lua_State *l,CommandBuffer &hCommandBuffer,Image &img,const Color &col,uint32_t attId=0u);
-			static bool RecordClearAttachment(lua_State *l,CommandBuffer &hCommandBuffer,Image &img,float clearDepth);
+			static bool RecordClearAttachment(lua_State *l,CommandBuffer &hCommandBuffer,Image &img,std::optional<float> clearDepth,std::optional<uint32_t> clearStencil);
 			static bool RecordCopyImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &imgSrc,Image &imgDst,const prosper::util::CopyInfo &copyInfo);
 			static bool RecordCopyBufferToImage(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &bufSrc,Image &imgDst,const prosper::util::BufferImageCopyInfo &copyInfo);
 			static bool RecordCopyBuffer(lua_State *l,CommandBuffer &hCommandBuffer,Buffer &bufSrc,Buffer &bufDst,const prosper::util::BufferCopy &copyInfo);
@@ -332,16 +333,20 @@ void register_vulkan_lua_interface2(luabind::module_ &prosperMod)
 	auto defVkCommandBuffer = luabind::class_<Lua::Vulkan::CommandBuffer>("CommandBuffer");
 	defVkCommandBuffer.def(luabind::tostring(luabind::self));
 	defVkCommandBuffer.def(luabind::const_self ==luabind::const_self);
+	defVkCommandBuffer.def("IsRecording",&Lua::Vulkan::CommandBuffer::IsRecording);
 	defVkCommandBuffer.def("RecordClearImage",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Image&,const Color&,const prosper::util::ClearImageInfo&)>(&Lua::Vulkan::VKCommandBuffer::RecordClearImage));
 	defVkCommandBuffer.def("RecordClearImage",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Image&,const Color&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &cmdBuffer,Lua::Vulkan::Image &img,const Color &col) {
 		return Lua::Vulkan::VKCommandBuffer::RecordClearImage(l,cmdBuffer,img,col);
 	}));
-	defVkCommandBuffer.def("RecordClearImage",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Image&,float,const prosper::util::ClearImageInfo&)>(&Lua::Vulkan::VKCommandBuffer::RecordClearImage));
-	defVkCommandBuffer.def("RecordClearImage",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Image&,float)>([](lua_State *l,Lua::Vulkan::CommandBuffer &cmdBuffer,Lua::Vulkan::Image &img,float depth) {
-		return Lua::Vulkan::VKCommandBuffer::RecordClearImage(l,cmdBuffer,img,depth);
-	}));
+	defVkCommandBuffer.def("RecordClearImage",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Image&,std::optional<float>,std::optional<uint32_t>,const prosper::util::ClearImageInfo&)>(&Lua::Vulkan::VKCommandBuffer::RecordClearImage));
+	defVkCommandBuffer.def("RecordClearImage",+[](lua_State *l,Lua::Vulkan::CommandBuffer &cmdBuffer,Lua::Vulkan::Image &img,std::optional<float> clearDepth,std::optional<uint32_t> clearStencil) {
+		return Lua::Vulkan::VKCommandBuffer::RecordClearImage(l,cmdBuffer,img,clearDepth,clearStencil);
+	});
 	defVkCommandBuffer.def("RecordClearAttachment",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Image&,const Color&,uint32_t)>(&Lua::Vulkan::VKCommandBuffer::RecordClearAttachment));
-	defVkCommandBuffer.def("RecordClearAttachment",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Image&,float)>(&Lua::Vulkan::VKCommandBuffer::RecordClearAttachment));
+	defVkCommandBuffer.def("RecordClearAttachment",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Image&,std::optional<float>,std::optional<uint32_t>)>(&Lua::Vulkan::VKCommandBuffer::RecordClearAttachment));
+	defVkCommandBuffer.def("RecordClearAttachment",+[](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,Lua::Vulkan::Image &img,std::optional<float> clearDepth) {
+		return Lua::Vulkan::VKCommandBuffer::RecordClearAttachment(l,hCommandBuffer,img,clearDepth,std::optional<uint32_t>{});
+	});
 	defVkCommandBuffer.def("RecordCopyImage",&Lua::Vulkan::VKCommandBuffer::RecordCopyImage);
 	defVkCommandBuffer.def("RecordCopyBufferToImage",&Lua::Vulkan::VKCommandBuffer::RecordCopyBufferToImage);
 	defVkCommandBuffer.def("RecordCopyBufferToImage",static_cast<bool(*)(lua_State*,Lua::Vulkan::CommandBuffer&,Lua::Vulkan::Buffer&,Lua::Vulkan::Image&)>([](lua_State *l,Lua::Vulkan::CommandBuffer &hCommandBuffer,Lua::Vulkan::Buffer &bufSrc,Lua::Vulkan::Image &imgDst) {
@@ -703,18 +708,18 @@ bool Lua::Vulkan::VKCommandBuffer::RecordClearImage(lua_State *l,CommandBuffer &
 	auto vcol = col.ToVector4();
 	return hCommandBuffer.RecordClearImage(img,prosper::ImageLayout::TransferDstOptimal,{vcol.r,vcol.g,vcol.b,vcol.a},clearImageInfo);
 }
-bool Lua::Vulkan::VKCommandBuffer::RecordClearImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &img,float clearDepth,const prosper::util::ClearImageInfo &clearImageInfo)
+bool Lua::Vulkan::VKCommandBuffer::RecordClearImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &img,std::optional<float> clearDepth,std::optional<uint32_t> clearStencil,const prosper::util::ClearImageInfo &clearImageInfo)
 {
-	return hCommandBuffer.RecordClearImage(img,prosper::ImageLayout::TransferDstOptimal,clearDepth,clearImageInfo);
+	return hCommandBuffer.RecordClearImage(img,prosper::ImageLayout::TransferDstOptimal,clearDepth,clearStencil,clearImageInfo);
 }
 bool Lua::Vulkan::VKCommandBuffer::RecordClearAttachment(lua_State *l,CommandBuffer &hCommandBuffer,Image &img,const Color &col,uint32_t attId)
 {
 	auto vcol = col.ToVector4();
 	return hCommandBuffer.RecordClearAttachment(img,{vcol.r,vcol.g,vcol.b,vcol.a},attId);
 }
-bool Lua::Vulkan::VKCommandBuffer::RecordClearAttachment(lua_State *l,CommandBuffer &hCommandBuffer,Image &img,float clearDepth)
+bool Lua::Vulkan::VKCommandBuffer::RecordClearAttachment(lua_State *l,CommandBuffer &hCommandBuffer,Image &img,std::optional<float> clearDepth,std::optional<uint32_t> clearStencil)
 {
-	return hCommandBuffer.RecordClearAttachment(img,clearDepth);
+	return hCommandBuffer.RecordClearAttachment(img,clearDepth,clearStencil);
 }
 bool Lua::Vulkan::VKCommandBuffer::RecordCopyImage(lua_State *l,CommandBuffer &hCommandBuffer,Image &imgSrc,Image &imgDst,const prosper::util::CopyInfo &copyInfo)
 {

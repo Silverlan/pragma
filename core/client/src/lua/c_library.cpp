@@ -283,7 +283,8 @@ static void register_gui(Lua::Interface &lua)
 	auto wiDebugDepthTextureClassDef = luabind::class_<WIDebugDepthTexture,::WIBase>("DebugDepthTexture");
 	wiDebugDepthTextureClassDef.def("SetContrastFactor",&WIDebugDepthTexture::SetContrastFactor);
 	wiDebugDepthTextureClassDef.def("GetContrastFactor",&WIDebugDepthTexture::GetContrastFactor);
-	wiDebugDepthTextureClassDef.def("SetTexture",static_cast<void(WIDebugDepthTexture::*)(prosper::Texture&)>(&WIDebugDepthTexture::SetTexture));
+	wiDebugDepthTextureClassDef.def("SetTexture",static_cast<void(WIDebugDepthTexture::*)(prosper::Texture&,bool)>(&WIDebugDepthTexture::SetTexture));
+	wiDebugDepthTextureClassDef.def("SetTexture",static_cast<void(WIDebugDepthTexture::*)(prosper::Texture&,bool)>(&WIDebugDepthTexture::SetTexture),luabind::default_parameter_policy<3,false>{});
 	guiMod[wiDebugDepthTextureClassDef];
 
 	auto wiDebugShadowMapClassDef = luabind::class_<WIDebugShadowMap,::WIBase>("DebugShadowMap");

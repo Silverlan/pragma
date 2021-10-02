@@ -20,8 +20,8 @@ public:
 	virtual ~WIDebugDepthTexture() override;
 	virtual void Initialize() override;
 
-	void SetTexture(prosper::Texture &texture);
-	void SetTexture(prosper::Texture &texture,prosper::util::BarrierImageLayout srcLayout,prosper::util::BarrierImageLayout dstLayout,uint32_t layerId=0u);
+	void SetTexture(prosper::Texture &texture,bool stencil=false);
+	void SetTexture(prosper::Texture &texture,prosper::util::BarrierImageLayout srcLayout,prosper::util::BarrierImageLayout dstLayout,uint32_t layerId=0u,bool stencil=false);
 
 	void SetContrastFactor(float contrastFactor);
 	float GetContrastFactor() const;

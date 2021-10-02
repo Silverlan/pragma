@@ -12,6 +12,7 @@
 #include <image/prosper_render_target.hpp>
 #include <prosper_util.hpp>
 #include <image/prosper_sampler.hpp>
+#include <image/prosper_image_view.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 
@@ -19,7 +20,7 @@ extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
 
 LINK_WGUI_TO_CLASS(widebugdepthtexture,WIDebugDepthTexture);
-
+#pragma optimize("",off)
 WIDebugDepthTexture::WIDebugDepthTexture()
 	: WIBase(),m_imageLayer(0)
 {
@@ -34,16 +35,16 @@ WIDebugDepthTexture::~WIDebugDepthTexture()
 		m_depthToRgbCallback.Remove();
 }
 
-void WIDebugDepthTexture::SetTexture(prosper::Texture &texture)
+void WIDebugDepthTexture::SetTexture(prosper::Texture &texture,bool stencil)
 {
 	SetTexture(texture,{
 		prosper::PipelineStageFlags::LateFragmentTestsBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit
 	},{
 		prosper::PipelineStageFlags::EarlyFragmentTestsBit,prosper::ImageLayout::DepthStencilAttachmentOptimal,prosper::AccessFlags::DepthStencilAttachmentWriteBit
-	});
+	},0u,stencil);
 }
 
-void WIDebugDepthTexture::SetTexture(prosper::Texture &texture,prosper::util::BarrierImageLayout srcLayout,prosper::util::BarrierImageLayout dstLayout,uint32_t layerId)
+void WIDebugDepthTexture::SetTexture(prosper::Texture &texture,prosper::util::BarrierImageLayout srcLayout,prosper::util::BarrierImageLayout dstLayout,uint32_t layerId,bool stencil)
 {
 	m_srcDepthTex = nullptr;
 
@@ -73,6 +74,7 @@ void WIDebugDepthTexture::SetTexture(prosper::Texture &texture,prosper::util::Ba
 	imgViewCreateInfo = {};
 	imgViewCreateInfo.baseLayer = layerId;
 	imgViewCreateInfo.levelCount = 1u;//inputImg.get_image_n_layers();
+	imgViewCreateInfo.aspectFlags = stencil ? prosper::ImageAspectFlags::StencilBit : prosper::ImageAspectFlags::DepthBit;
 	samplerCreateInfo = {};
 	m_srcDepthTex = context.CreateTexture({},texture.GetImage(),imgViewCreateInfo,samplerCreateInfo);
 	m_srcDepthTex->SetDebugName("debug_depth_src_rt");
@@ -115,11 +117,13 @@ void WIDebugDepthTexture::Setup(float nearZ,float farZ)
 		auto &img = m_renderTarget->GetTexture().GetImage();
 		drawCmd->RecordImageBarrier(img,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
 		auto &depthImg = m_srcDepthTex->GetImage();
+		auto &imgView = *m_srcDepthTex->GetImageView();
 		drawCmd->RecordImageBarrier(
 			depthImg,
 			m_srcBarrierImageLayout.stageMask,prosper::PipelineStageFlags::FragmentShaderBit,
 			m_srcBarrierImageLayout.layout,prosper::ImageLayout::ShaderReadOnlyOptimal,
-			m_srcBarrierImageLayout.accessMask,prosper::AccessFlags::ShaderReadBit
+			m_srcBarrierImageLayout.accessMask,prosper::AccessFlags::ShaderReadBit,
+			std::numeric_limits<uint32_t>::max(),imgView.GetAspectMask()
 		);
 		if(drawCmd->RecordBeginRenderPass(*m_renderTarget) == true)
 		{
@@ -156,7 +160,8 @@ void WIDebugDepthTexture::Setup(float nearZ,float farZ)
 			depthImg,
 			prosper::PipelineStageFlags::FragmentShaderBit,m_dstBarrierImageLayout.stageMask,
 			prosper::ImageLayout::ShaderReadOnlyOptimal,m_dstBarrierImageLayout.layout,
-			prosper::AccessFlags::ShaderReadBit,m_dstBarrierImageLayout.accessMask
+			prosper::AccessFlags::ShaderReadBit,m_dstBarrierImageLayout.accessMask,
+			std::numeric_limits<uint32_t>::max(),imgView.GetAspectMask()
 		);
 	}));
 }
@@ -166,8 +171,17 @@ float WIDebugDepthTexture::GetContrastFactor() const {return m_contrastFactor;}
 
 void WIDebugDepthTexture::DoUpdate()
 {
-	auto *cam = c_game->GetPrimaryCamera();
-	if(cam == nullptr)
-		return;
-	Setup(cam->GetNearZ(),cam->GetFarZ());
+	auto nearZ = pragma::BaseEnvCameraComponent::DEFAULT_NEAR_Z;
+	auto farZ = pragma::BaseEnvCameraComponent::DEFAULT_FAR_Z;
+	if(c_game)
+	{
+		auto *cam = c_game->GetPrimaryCamera();
+		if(cam)
+		{
+			nearZ = cam->GetNearZ();
+			farZ = cam->GetFarZ();
+		}
+	}
+	Setup(nearZ,farZ);
 }
+#pragma optimize("",on)

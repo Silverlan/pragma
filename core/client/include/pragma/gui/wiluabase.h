@@ -58,7 +58,7 @@ public:
 	virtual void OnVisibilityChanged(bool bVisible) override;
 	virtual void SetColor(float r,float g,float b,float a=1.f) override;
 	virtual void SetAlpha(float alpha) override;
-	virtual void Render(const DrawInfo &drawInfo,const Mat4 &matDraw,const Vector2 &scale) override;
+	virtual void Render(const DrawInfo &drawInfo,const Mat4 &matDraw,const Vector2 &scale={1.f,1.f},uint32_t testStencilLevel=0u,StencilPipeline stencilPipeline=StencilPipeline::Test) override;
 	virtual void OnCursorEntered() override;
 	virtual void OnCursorExited() override;
 	virtual void OnFocusGained() override;

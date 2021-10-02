@@ -53,7 +53,7 @@
 #include <queries/prosper_timer_query.hpp>
 #include <pragma/asset/util_asset.hpp>
 #include <prosper_window.hpp>
-
+#pragma optimize("",off)
 extern "C"
 {
 	void DLLCLIENT RunCEngine(int argc,char *argv[])
@@ -1192,7 +1192,7 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 				continue;
 			auto &swapCmdGroup = window->GetSwapCommandBufferGroup();
 			swapCmdGroup.StartRecording(rt->GetRenderPass(),rt->GetFramebuffer());
-				swapCmdGroup.Record([&rp,&fb,window](prosper::ISecondaryCommandBuffer &drawCmd) {
+				swapCmdGroup.Record([&rt,&rp,&fb,window](prosper::ISecondaryCommandBuffer &drawCmd) {
 					auto &gui = WGUI::GetInstance();
 					gui.Draw(*window,drawCmd);
 				});
@@ -1241,7 +1241,13 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 			if(!window || !window->IsValid())
 				continue;
 			auto &rt = window->GetStagingRenderTarget();
-			drawCmd->RecordBeginRenderPass(*rt,prosper::IPrimaryCommandBuffer::RenderPassFlags::SecondaryCommandBuffers);
+
+			static std::vector<prosper::ClearValue> clearVals = {
+				prosper::ClearValue{},
+				prosper::ClearValue {prosper::ClearDepthStencilValue {0.f,0}}
+			};
+			
+			drawCmd->RecordBeginRenderPass(*rt,clearVals,prosper::IPrimaryCommandBuffer::RenderPassFlags::SecondaryCommandBuffers);
 			window->GetSwapCommandBufferGroup().ExecuteCommands(*drawCmd);
 			drawCmd->RecordEndRenderPass();
 		}
@@ -1544,3 +1550,4 @@ REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled,[](NetworkState*,ConVar
 		return;
 	c_engine->SetGPUProfilingEnabled(enabled);
 })
+#pragma optimize("",on)

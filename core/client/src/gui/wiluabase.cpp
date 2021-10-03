@@ -122,7 +122,7 @@ void WILuaBase::SetAlpha(float alpha)
 }
 void WILuaBase::Render(const DrawInfo &drawInfo,const Mat4 &matDraw,const Vector2 &scale,uint32_t testStencilLevel,StencilPipeline stencilPipeline)
 {
-	WIBase::Render(drawInfo,matDraw);
+	WIBase::Render(drawInfo,matDraw,scale,testStencilLevel,stencilPipeline);
 	// No longer supported, since UI rendering is now multi-threaded
 	//CallLuaMember<void,std::reference_wrapper<const DrawInfo>,Mat4,Vector2>("OnDraw",std::ref(drawInfo),matDraw,scale);
 }

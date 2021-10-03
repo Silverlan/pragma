@@ -100,6 +100,10 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	}));
 	classDef.def("SetStencilEnabled",&::WIBase::SetStencilEnabled);
 	classDef.def("IsStencilEnabled",&::WIBase::IsStencilEnabled);
+	classDef.def("ResetRotation",&::WIBase::ResetRotation);
+	classDef.def("GetRotationMatrix",&::WIBase::GetRotationMatrix);
+	classDef.def("SetRotation",static_cast<void(::WIBase::*)(umath::Degree,const Vector2&)>(&::WIBase::SetRotation));
+	classDef.def("SetRotation",static_cast<void(::WIBase::*)(const Mat4&)>(&::WIBase::SetRotation));
 	classDef.def("SetLocalRenderTransform",&::WIBase::SetLocalRenderTransform);
 	classDef.def("ClearLocalRenderTransform",&::WIBase::ClearLocalRenderTransform);
 	classDef.def("GetLocalRenderTransform",static_cast<const umath::ScaledTransform*(::WIBase::*)() const>(&::WIBase::GetLocalRenderTransform),luabind::copy_policy<0>{});
@@ -362,6 +366,9 @@ void Lua::WIShape::register_class(luabind::class_<::WIShape,::WIBase> &classDef)
 	classDef.def("AddVertex",&::WIShape::AddVertex);
 	classDef.def("SetVertexPos",&::WIShape::SetVertexPos);
 	classDef.def("ClearVertices",&::WIShape::ClearVertices);
+	classDef.def("GetBuffer",&::WIShape::GetBuffer);
+	classDef.def("SetBuffer",&::WIShape::SetBuffer);
+	classDef.def("GetVertexCount",&::WIShape::GetVertexCount);
 	classDef.def("InvertVertexPositions",static_cast<void(::WIShape::*)(bool,bool)>(&::WIShape::InvertVertexPositions));
 	classDef.def("InvertVertexPositions",static_cast<void(*)(::WIShape&,bool)>([](::WIShape &el,bool x) {el.InvertVertexPositions(x);}));
 	classDef.def("InvertVertexPositions",static_cast<void(*)(::WIShape&)>([](::WIShape &el) {el.InvertVertexPositions();}));

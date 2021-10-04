@@ -221,19 +221,19 @@ void GUIDebugCursorManager::SetTargetGUIElement(WIBase *optEl,bool clear)
 	// Initialize border to highlight the element
 	auto pos = el.GetAbsolutePos();
 	auto size = el.GetSize();
-	auto constrainedEndPos = pos +size;
+	auto constrainedEndPos = pos +Vector2{size};
 	auto *parent = el.GetParent();
 	while(parent)
 	{
-		auto endPos = parent->GetAbsolutePos() +parent->GetSize();
+		auto endPos = parent->GetAbsolutePos() +Vector2{parent->GetSize()};
 		constrainedEndPos.x = umath::min(constrainedEndPos.x,endPos.x);
 		constrainedEndPos.y = umath::min(constrainedEndPos.y,endPos.y);
 
 		parent = parent->GetParent();
 	}
 	auto constrainedSize = constrainedEndPos -pos;
-	constrainedSize.x = umath::max(constrainedSize.x,0);
-	constrainedSize.y = umath::max(constrainedSize.y,0);
+	constrainedSize.x = umath::max(constrainedSize.x,0.f);
+	constrainedSize.y = umath::max(constrainedSize.y,0.f);
 
 	auto fInitBorder = [](std::array<WIHandle,4> &elements,const Vector2i &pos,const Vector2i &size) {
 		auto *top = elements.at(0).get();

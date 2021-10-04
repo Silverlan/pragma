@@ -120,6 +120,14 @@ void WILuaBase::SetAlpha(float alpha)
 	WIBase::SetAlpha(alpha);
 	CallLuaMember<void,float>("OnAlphaChanged",alpha);
 }
+bool WILuaBase::DoPosInBounds(const Vector2i &pos) const
+{
+	bool res = false;
+	auto r = const_cast<WILuaBase*>(this)->CallLuaMember<bool,Vector2i>("CheckPosInBounds",&res,pos);
+	if(r == CallbackReturnType::HasReturnValue)
+		return res;
+	return WIBase::DoPosInBounds(pos);
+}
 void WILuaBase::Render(const DrawInfo &drawInfo,const Mat4 &matDraw,const Vector2 &scale,uint32_t testStencilLevel,StencilPipeline stencilPipeline)
 {
 	WIBase::Render(drawInfo,matDraw,scale,testStencilLevel,stencilPipeline);
@@ -207,3 +215,6 @@ void WILuaBase::default_OnFocusKilled(lua_State*,WILuaBase&) {}
 
 void WILuaBase::Lua_OnRemove() {}
 void WILuaBase::default_OnRemove(lua_State*,WILuaBase&) {}
+
+bool WILuaBase::Lua_CheckPosInBounds(const Vector2i &pos) {return WIBase::DoPosInBounds(pos);}
+bool WILuaBase::default_CheckPosInBounds(lua_State *l,WILuaBase &hElement,const Vector2i &pos) {return hElement.WIBase::DoPosInBounds(pos);}

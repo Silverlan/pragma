@@ -102,6 +102,9 @@ public:
 	void Lua_OnSetAlpha(float alpha);
 	static void default_OnSetAlpha(lua_State *l,WILuaBase &hElement,float alpha);
 
+	bool Lua_CheckPosInBounds(const Vector2i &pos);
+	static bool default_CheckPosInBounds(lua_State *l,WILuaBase &hElement,const Vector2i &pos);
+
 	void Lua_Render(const ::WIBase::DrawInfo &drawInfo,const Mat4 &matDraw,const Vector2 &scale);
 	static void default_Render(lua_State *l,WILuaBase &hElement,const ::WIBase::DrawInfo &drawInfo,const Mat4 &matDraw,const Vector2 &scale);
 
@@ -121,6 +124,7 @@ public:
 	static void default_OnRemove(lua_State *l,WILuaBase &hElement);
 protected:
 	virtual void DoUpdate() override;
+	virtual bool DoPosInBounds(const Vector2i &pos) const override;
 };
 
 namespace pragma::lua

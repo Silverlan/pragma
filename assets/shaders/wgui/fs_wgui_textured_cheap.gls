@@ -7,9 +7,10 @@ layout(location = 0) in vec2 vs_vert_uv;
 
 layout(LAYOUT_ID(0,0)) uniform sampler2D u_texture;
 
+#include "sh_wgui_base_push_constants.gls"
+
 layout(LAYOUT_PUSH_CONSTANTS()) uniform PushConstants {
-	mat4 modelMatrix;
-	vec4 color;
+	GUI_BASE_PUSH_CONSTANTS
 	int alphaOnly;
 	float lod;
 	uint channels;

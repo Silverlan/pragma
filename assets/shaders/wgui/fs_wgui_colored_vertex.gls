@@ -7,9 +7,10 @@ layout(location = 0) out vec4 fs_color;
 
 layout(location = 0) in vec4 vs_vert_col;
 
+#include "sh_wgui_base_push_constants.gls"
+
 layout(LAYOUT_PUSH_CONSTANTS()) uniform PushConstants {
-	mat4 modelMatrix;
-	vec4 color;
+	GUI_BASE_PUSH_CONSTANTS
 } u_pushConstants;
 
 void main()

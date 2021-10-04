@@ -103,8 +103,10 @@ function ents.ClickComponent.raycast(pos,dir,filter)
 	local pl = ents.get_local_player()
 	if(pl == nil) then return end
 	local entPl = pl:GetEntity()
-	-- print(pos,dir)
-	-- debug.draw_line(pos,pos +dir *1000,Color.Aqua,12)
+	--[[local drawInfo = debug.DrawInfo()
+	drawInfo:SetDuration(12)
+	drawInfo:SetColor(Color.Aqua)
+	debug.draw_line(pos,pos +dir *1000,drawInfo)]]
 	local distClosest = math.huge
 	local actorClosest = nil
 	local hitPos

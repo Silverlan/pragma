@@ -8,14 +8,17 @@ layout(location = 1) in vec4 in_vert_col;
 
 layout(location = 0) out vec4 vs_vert_col;
 
+#include "sh_wgui_base_push_constants.gls"
+
 layout(LAYOUT_PUSH_CONSTANTS()) uniform PushConstants {
-	mat4 modelMatrix;
-	vec4 color;
+	GUI_BASE_PUSH_CONSTANTS
 } u_pushConstants;
+
+#include "vs_wgui_shared.gls"
 
 void main()
 {
-	gl_Position = u_pushConstants.modelMatrix *vec4(in_vert_pos,0.0,1.0);
+	gl_Position = get_vertex_position();
 	vs_vert_col = in_vert_col;
 }
 

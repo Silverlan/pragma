@@ -5,13 +5,16 @@
 
 layout(location = 0) in vec2 in_vert_pos;
 
+#include "sh_wgui_base_push_constants.gls"
+
 layout(LAYOUT_PUSH_CONSTANTS()) uniform PushConstants {
-	mat4 modelMatrix;
-	vec4 color;
+	GUI_BASE_PUSH_CONSTANTS
 } u_pushConstants;
+
+#include "vs_wgui_shared.gls"
 
 void main()
 {
-	gl_Position = u_pushConstants.modelMatrix *vec4(in_vert_pos,0.0,1.0);
+	gl_Position = get_vertex_position();
 }
 

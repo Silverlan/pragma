@@ -10,21 +10,24 @@ layout(location = 3) in vec4 in_glyph_bounds;
 
 layout(location = 0) out vec2 vs_vert_uv;
 
+#include "sh_wgui_base_push_constants.gls"
+
 layout(LAYOUT_PUSH_CONSTANTS()) uniform Font {
-	mat4 modelMatrix;
-	vec4 color;
+	GUI_BASE_PUSH_CONSTANTS
 	float widthScale;
 	float heightScale;
 	uint glyphMapWidth;
 	uint glyphMapHeight;
 	uint maxGlyphBitmapWidth;
 	uint yOffset;
-} u_font;
+} u_pushConstants;
 
 #ifdef USE_VERTEX_COLOR
 	layout(location = 4) in vec4 in_vert_col;
 	layout(location = 1) out vec4 vs_vert_col;
 #endif
+
+#include "vs_wgui_shared.gls"
 
 void main()
 {
@@ -32,16 +35,16 @@ void main()
 	vec2 vertPos = in_vert_pos;
 
 	vertPos = (vertPos +vec2(1.0,1.0)) /2.0; // Transform to range [0,1]
-	vertPos = vec2(vertPos.x *(in_glyph_bounds[2] *u_font.widthScale),vertPos.y *(in_glyph_bounds[3] *u_font.heightScale) +u_font.yOffset *u_font.heightScale);
+	vertPos = vec2(vertPos.x *(in_glyph_bounds[2] *u_pushConstants.widthScale),vertPos.y *(in_glyph_bounds[3] *u_pushConstants.heightScale) +u_pushConstants.yOffset *u_pushConstants.heightScale);
 	vertPos += in_glyph_bounds.xy;
 
-	gl_Position = u_font.modelMatrix *vec4(vertPos,0.0,1);
+	gl_Position = get_vertex_position(vertPos);
 
 	// Calc uv coordinates
-	float glyphSize = float(u_font.maxGlyphBitmapWidth) /float(u_font.glyphMapWidth);
+	float glyphSize = float(u_pushConstants.maxGlyphBitmapWidth) /float(u_pushConstants.glyphMapWidth);
 	float glyphOffset = glyphSize *float(in_glyph_index);
-	float actualGlyphWidth = in_glyph_bounds[2] /float(u_font.glyphMapWidth);
-	float actualGlyphHeight = in_glyph_bounds[3] /float(u_font.glyphMapHeight);
+	float actualGlyphWidth = in_glyph_bounds[2] /float(u_pushConstants.glyphMapWidth);
+	float actualGlyphHeight = in_glyph_bounds[3] /float(u_pushConstants.glyphMapHeight);
 	vs_vert_uv = vec2(glyphOffset +in_vert_uv.x *actualGlyphWidth,in_vert_uv.y *actualGlyphHeight);
 
 #ifdef USE_VERTEX_COLOR

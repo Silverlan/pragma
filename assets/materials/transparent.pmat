@@ -1,0 +1,9 @@
+"pbr"
+{
+	"textures"
+	{
+		$string albedo_map "transparent"
+		$uint32 alpha_mode 1
+		$float alpha_cutoff 0.5
+	}
+}

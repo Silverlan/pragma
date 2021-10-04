@@ -1134,6 +1134,9 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector2.def("RotateAround",&Lua::Vector2::RotateAround);
 	defVector2.def("Lerp",&Lua::Vector2::Lerp);
 	defVector2.def("Copy",&Lua::Vector2::Copy);
+	defVector2.def("GetAngle",static_cast<float(*)(lua_State*,const Vector2&,const Vector2&)>([](lua_State *l,const Vector2 &a,const Vector2 &b) -> float {
+		return umath::deg_to_rad(uvec::get_angle(Vector3{a,0.f},Vector3{b,0.f}));
+	}));
 	defVector2.def("Set",static_cast<void(*)(lua_State*,Vector2&,const Vector2&)>(&Lua::Vector2::Set));
 	defVector2.def("Set",static_cast<void(*)(lua_State*,Vector2&,float,float)>(&Lua::Vector2::Set));
 	defVector2.def("Get",static_cast<void(*)(lua_State*,const Vector2&,uint32_t)>([](lua_State *l,const Vector2 &v,uint32_t idx) {

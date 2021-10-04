@@ -101,7 +101,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("SetStencilEnabled",&::WIBase::SetStencilEnabled);
 	classDef.def("IsStencilEnabled",&::WIBase::IsStencilEnabled);
 	classDef.def("ResetRotation",&::WIBase::ResetRotation);
-	classDef.def("GetRotationMatrix",&::WIBase::GetRotationMatrix);
+	classDef.def("GetRotationMatrix",&::WIBase::GetRotationMatrix,luabind::copy_policy<0>{});
 	classDef.def("SetRotation",static_cast<void(::WIBase::*)(umath::Degree,const Vector2&)>(&::WIBase::SetRotation));
 	classDef.def("SetRotation",static_cast<void(::WIBase::*)(const Mat4&)>(&::WIBase::SetRotation));
 	classDef.def("SetLocalRenderTransform",&::WIBase::SetLocalRenderTransform);
@@ -118,9 +118,14 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("GetPos",static_cast<const Vector2i&(::WIBase::*)() const>(&::WIBase::GetPos),luabind::copy_policy<0>{});
 	classDef.def("SetPos",static_cast<void(*)(lua_State*,::WIBase&,Vector2)>(&SetPos));
 	classDef.def("SetPos",static_cast<void(*)(lua_State*,::WIBase&,float,float)>(&SetPos));
-	classDef.def("GetAbsolutePos",&::WIBase::GetAbsolutePos);
+	classDef.def("GetAbsolutePos",static_cast<Vector2(::WIBase::*)(bool) const>(&::WIBase::GetAbsolutePos));
+	classDef.def("GetAbsolutePos",static_cast<Vector2(::WIBase::*)(bool) const>(&::WIBase::GetAbsolutePos),luabind::default_parameter_policy<2,true>{});
+	classDef.def("GetAbsolutePos",static_cast<Vector2(::WIBase::*)(const Vector2&,bool) const>(&::WIBase::GetAbsolutePos));
+	classDef.def("GetAbsolutePos",static_cast<Vector2(::WIBase::*)(const Vector2&,bool) const>(&::WIBase::GetAbsolutePos),luabind::default_parameter_policy<3,true>{});
 	classDef.def("SetAbsolutePos",static_cast<void(*)(lua_State*,::WIBase&,Vector2)>(&SetAbsolutePos));
 	classDef.def("SetAbsolutePos",static_cast<void(*)(lua_State*,::WIBase&,float,float)>(&SetAbsolutePos));
+	classDef.def("GetAbsolutePose",static_cast<Mat4(::WIBase::*)() const>(&::WIBase::GetAbsolutePose));
+	classDef.def("GetRelativePos",&::WIBase::GetRelativePos);
 	classDef.def("GetColor",&::WIBase::GetColor,luabind::copy_policy<0>{});
 	classDef.def("GetColorProperty",&::WIBase::GetColorProperty);
 	classDef.def("GetFocusProperty",&::WIBase::GetFocusProperty);
@@ -290,6 +295,8 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("GetHalfHeight",&::WIBase::GetHalfHeight);
 	classDef.def("GetHalfSize",&::WIBase::GetHalfSize);
 	classDef.def("SetCenterPos",&::WIBase::SetCenterPos);
+	classDef.def("SetLocalAlpha",&::WIBase::SetLocalAlpha);
+	classDef.def("GetLocalAlpha",&::WIBase::GetLocalAlpha);
 	classDef.def("CenterToParent",static_cast<void(::WIBase::*)(bool)>(&::WIBase::CenterToParent));
 	classDef.def("CenterToParent",static_cast<void(*)(lua_State*,::WIBase&)>([](lua_State *l,::WIBase &hPanel) {
 		hPanel.CenterToParent(false);
@@ -372,6 +379,9 @@ void Lua::WIShape::register_class(luabind::class_<::WIShape,::WIBase> &classDef)
 	classDef.def("InvertVertexPositions",static_cast<void(::WIShape::*)(bool,bool)>(&::WIShape::InvertVertexPositions));
 	classDef.def("InvertVertexPositions",static_cast<void(*)(::WIShape&,bool)>([](::WIShape &el,bool x) {el.InvertVertexPositions(x);}));
 	classDef.def("InvertVertexPositions",static_cast<void(*)(::WIShape&)>([](::WIShape &el) {el.InvertVertexPositions();}));
+	classDef.def("SetShape",&::WIShape::SetShape);
+	classDef.add_static_constant("SHAPE_RECTANGLE",umath::to_integral(::WIShape::BasicShape::Rectangle));
+	classDef.add_static_constant("SHAPE_CIRCLE",umath::to_integral(::WIShape::BasicShape::Circle));
 }
 
 void Lua::WITexturedShape::register_class(luabind::class_<::WITexturedShape,luabind::bases<::WIShape,::WIBase>> &classDef)

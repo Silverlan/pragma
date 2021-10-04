@@ -234,6 +234,7 @@ static void register_gui(Lua::Interface &lua)
 	wiBaseWIElement.def("OnSizeChanged",&WILuaBase::Lua_OnSetSize,&WILuaBase::default_OnSetSize);
 	wiBaseWIElement.def("OnColorChanged",&WILuaBase::Lua_OnSetColor,&WILuaBase::default_OnSetColor);
 	wiBaseWIElement.def("OnAlphaChanged",&WILuaBase::Lua_OnSetAlpha,&WILuaBase::default_OnSetAlpha);
+	wiBaseWIElement.def("CheckPosInBounds",&WILuaBase::Lua_CheckPosInBounds,&WILuaBase::default_CheckPosInBounds);
 	wiBaseWIElement.def("OnDraw",&WILuaBase::Lua_Render,&WILuaBase::default_Render);
 	wiBaseWIElement.def("OnCursorEntered",&WILuaBase::Lua_OnCursorEntered,&WILuaBase::default_OnCursorEntered);
 	wiBaseWIElement.def("OnCursorExited",&WILuaBase::Lua_OnCursorExited,&WILuaBase::default_OnCursorExited);

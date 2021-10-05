@@ -1481,7 +1481,8 @@ void Game::RegisterLuaLibraries()
 
 	auto boundingVolMod = luabind::module(GetLuaState(),"boundingvolume");
 	boundingVolMod[
-		luabind::def("get_rotated_aabb",Lua::boundingvolume::GetRotatedAABB)
+		luabind::def("get_rotated_aabb",static_cast<luabind::mult<Vector3,Vector3>(*)(lua_State*,const Vector3&,const Vector3&,const Mat3&)>(Lua::boundingvolume::GetRotatedAABB)),
+		luabind::def("get_rotated_aabb",static_cast<luabind::mult<Vector3,Vector3>(*)(lua_State*,const Vector3&,const Vector3&,const Quat&)>(Lua::boundingvolume::GetRotatedAABB))
 	];
 
 	auto intersectMod = luabind::module(GetLuaState(),"intersect");

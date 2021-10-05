@@ -48,7 +48,7 @@
 #include <util_zip.h>
 
 extern DLLNETWORK Engine *engine;
-
+#pragma optimize("",off)
 static auto s_bIgnoreIncludeCache = false;
 void Lua::set_ignore_include_cache(bool b) {s_bIgnoreIncludeCache = b;}
 
@@ -665,7 +665,9 @@ static luabind::object register_class(lua_State *l,const std::string &pclassName
 
 		// Init default constructor and print methods; They can still be overwritten by the Lua script
 		oClass["__init"] = luabind::make_function(l,+[](lua_State *l,const luabind::object &o) {
-			auto *crep = Lua::get_crep(o);
+			static luabind::detail::class_rep *crep = nullptr;
+			if(crep == nullptr)
+				crep = Lua::get_crep(o);
 			if(!crep)
 				return;
 			std::vector<luabind::detail::class_rep*> initialized;
@@ -677,9 +679,12 @@ static luabind::object register_class(lua_State *l,const std::string &pclassName
 
 				base.base->get_table(l);
 				auto oBase = luabind::object{luabind::from_stack(l,-1)};
-				oBase["__init"](o);
+				crep = base.base;
+				if(crep)
+					oBase["__init"](o);
 				Lua::Pop(l,1);
 			}
+			crep = nullptr;
 		});
 		oClass["__tostring"] = luabind::make_function(l,+[](lua_State *l,const luabind::object &o) -> std::string {
 			return luabind::get_class_info(luabind::from_stack(l,1)).name;
@@ -1288,3 +1293,4 @@ std::string Lua::util::get_addon_path(lua_State *l)
 	path += '/';
 	return path;
 }
+#pragma optimize("",on)

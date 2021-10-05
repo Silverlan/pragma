@@ -99,7 +99,7 @@ bool GUIDebugCursorManager::Initialize()
 		hEl = el->GetHandle();
 	}
 
-	m_cbScroll = c_engine->AddCallback("OnScrollInput",FunctionCallback<bool,std::reference_wrapper<GLFW::Window>,Vector2>::CreateWithOptionalReturn([this](bool *reply,std::reference_wrapper<GLFW::Window> window,Vector2 scrollAmount) -> CallbackReturnType {
+	m_cbScroll = c_engine->AddCallback("OnScrollInput",FunctionCallback<bool,std::reference_wrapper<prosper::Window>,Vector2>::CreateWithOptionalReturn([this](bool *reply,std::reference_wrapper<prosper::Window> window,Vector2 scrollAmount) -> CallbackReturnType {
 		if(scrollAmount.y == 0.f)
 			return CallbackReturnType::NoReturnValue;
 		*reply = true;

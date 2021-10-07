@@ -243,7 +243,7 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 		mat->GetDataBlock()->AddValue("texture","skybox",matName);
 		auto savePath = pragma::asset::relative_path_to_absolute_path(matName,pragma::asset::Type::Material,util::CONVERT_PATH);
 		std::string err;
-		if(mat->Save(savePath.GetString(),err))
+		if(mat->Save(savePath.GetString(),err,true))
 		{
 			client->LoadMaterial(matName,true);
 			Con::cout<<"Skybox material saved as '"<<(matName +".wmi")<<"'"<<Con::endl;

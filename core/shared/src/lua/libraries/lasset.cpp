@@ -106,7 +106,29 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 		luabind::def("is_loaded",Lua::asset::is_loaded),
 		luabind::def("delete",static_cast<bool(*)(lua_State*,const std::string&,pragma::asset::Type)>([](lua_State *l,const std::string &name,pragma::asset::Type type) -> bool {
 			return pragma::asset::remove_asset(name,type);
-		}))
+		})),
+		luabind::def("find",+[](lua_State *l,const std::string &path,pragma::asset::Type type) -> Lua::tb<std::string> {
+			auto exts = pragma::asset::get_supported_extensions(type);
+			std::string rootPath = pragma::asset::get_asset_root_directory(type);
+			if(!rootPath.empty())
+				rootPath += '/';
+			std::vector<std::string> files;
+			filemanager::find_files(rootPath +path,&files,nullptr);
+
+			std::unordered_set<std::string> extMap;
+			for(auto &ext : exts)
+				extMap.insert(ext);
+
+			auto tFiles = luabind::newtable(l);
+			for(uint32_t idx=1;auto &f : files)
+			{
+				std::string ext;
+				if(ufile::get_extension(f,&ext) == false || extMap.find(ext) == extMap.end())
+					continue;
+				tFiles[idx++] = f;
+			}
+			return tFiles;
+		})
 	];
 
 	Lua::RegisterLibraryEnums(lua.GetState(),"asset",{

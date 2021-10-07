@@ -28,6 +28,7 @@
 #include <pragma/lua/policies/string_view_policy.hpp>
 #include <pragma/lua/policies/pair_policy.hpp>
 #include <pragma/lua/policies/default_parameter_policy.hpp>
+#include <pragma/lua/policies/shared_from_this_policy.hpp>
 #include <pragma/lua/converters/pair_converter_t.hpp>
 #include <pragma/lua/converters/string_view_converter_t.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
@@ -311,6 +312,7 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("GetScale",&::WIBase::GetScale,luabind::copy_policy<0>{});
 	classDef.def("GetScaleProperty",&::WIBase::GetScaleProperty);
 	classDef.def("IsUpdateScheduled",&::WIBase::IsUpdateScheduled);
+	classDef.def("IsRemovalScheduled",&::WIBase::IsRemovalScheduled);
 	classDef.def("GetRootElement",static_cast<::WIBase*(::WIBase::*)()>(&::WIBase::GetRootElement));
 	classDef.def("GetRootWindow",static_cast<prosper::Window*(::WIBase::*)()>(&::WIBase::GetRootWindow));
 
@@ -373,8 +375,9 @@ void Lua::WIShape::register_class(luabind::class_<::WIShape,::WIBase> &classDef)
 	classDef.def("AddVertex",&::WIShape::AddVertex);
 	classDef.def("SetVertexPos",&::WIShape::SetVertexPos);
 	classDef.def("ClearVertices",&::WIShape::ClearVertices);
-	classDef.def("GetBuffer",&::WIShape::GetBuffer);
+	classDef.def("GetBuffer",&::WIShape::GetBuffer,luabind::shared_from_this_policy<0>{});
 	classDef.def("SetBuffer",&::WIShape::SetBuffer);
+	classDef.def("ClearBuffer",&::WIShape::ClearBuffer);
 	classDef.def("GetVertexCount",&::WIShape::GetVertexCount);
 	classDef.def("InvertVertexPositions",static_cast<void(::WIShape::*)(bool,bool)>(&::WIShape::InvertVertexPositions));
 	classDef.def("InvertVertexPositions",static_cast<void(*)(::WIShape&,bool)>([](::WIShape &el,bool x) {el.InvertVertexPositions(x);}));

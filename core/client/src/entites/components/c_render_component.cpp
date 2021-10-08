@@ -672,6 +672,7 @@ void CRenderComponent::UpdateBoneBuffer()
 	m_renderDescSetGroup->SetBindingUniformBuffer(
 		*wpBoneBuffer,umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices)
 	);
+	m_renderDescSetGroup->Update();
 }
 void CRenderComponent::ClearRenderBuffers()
 {

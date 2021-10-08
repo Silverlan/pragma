@@ -133,6 +133,7 @@ void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 	auto &vertAnimBuffer = static_cast<CModel&>(*mdl).GetVertexAnimationBuffer();
 	pRenderDescSet->SetBindingStorageBuffer(*m_vertexAnimationBuffer,umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::VertexAnimationFrameData));
 	pRenderDescSet->SetBindingStorageBuffer(*vertAnimBuffer,umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::VertexAnimations));
+	pRenderDescSet->Update();
 }
 
 void CVertexAnimatedComponent::DestroyVertexAnimationBuffer()
@@ -146,7 +147,10 @@ void CVertexAnimatedComponent::DestroyVertexAnimationBuffer()
 	auto whRenderComponent = ent.GetComponent<CRenderComponent>();
 	auto *pRenderDescSet = whRenderComponent.valid() ? whRenderComponent->GetSwapRenderDescriptorSet() : nullptr;
 	if(pRenderDescSet)
+	{
 		pRenderDescSet->SetBindingStorageBuffer(*c_engine->GetRenderContext().GetDummyBuffer(),umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::VertexAnimationFrameData)); // Reset buffer
+		pRenderDescSet->Update();
+	}
 }
 
 const std::shared_ptr<prosper::SwapBuffer> &CVertexAnimatedComponent::GetVertexAnimationBuffer() const {return m_vertexAnimationBuffer;}

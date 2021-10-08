@@ -47,6 +47,7 @@
 #include <wgui/wgui.h>
 #include <luabind/copy_policy.hpp>
 #include <luabind/detail/meta.hpp>
+#include <shader/prosper_shader_blur.hpp>
 
 extern CEngine *c_engine;
 
@@ -108,6 +109,7 @@ namespace Lua
 		static prosper::util::ImageCreateInfo create_image_create_info(const uimg::ImageBuffer &imgBuf,bool cubemap);
 		static prosper::util::ImageCreateInfo create_image_create_info(const uimg::ImageBuffer &imgBuf);
 		static std::shared_ptr<prosper::Texture> create_gradient_texture(lua_State *l,uint32_t width,uint32_t height,prosper::Format format,const Vector2 &dir,const luabind::tableT<void> &tNodes);
+		static Lua::var<prosper::Texture,Lua::mult<bool,std::string>> blur_texture(lua_State *l,prosper::Texture &srcTex,uint32_t blurStrength);
 		static std::shared_ptr<prosper::IFence> create_fence(bool createSignalled);
 		static std::shared_ptr<prosper::IFence> create_fence();
 		static std::shared_ptr<prosper::IFramebuffer> create_framebuffer(uint32_t width,uint32_t height,const std::vector<prosper::IImageView*> &attachments,uint32_t layers);
@@ -590,6 +592,53 @@ std::vector<pragma::ShaderGradient::Node> Lua::Vulkan::get_gradient_nodes(lua_St
 	}
 	return nodes;
 }
+Lua::var<prosper::Texture,Lua::mult<bool,std::string>> Lua::Vulkan::blur_texture(lua_State *l,prosper::Texture &srcTex,uint32_t blurStrength)
+{
+	auto &context = c_engine->GetRenderContext();
+	auto &srcImg = srcTex.GetImage();
+
+	prosper::util::ImageCreateInfo createInfo {};
+	createInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
+	createInfo.width = srcImg.GetWidth();
+	createInfo.height = srcImg.GetHeight();
+	createInfo.format = prosper::Format::R8G8B8A8_UNorm;
+	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
+
+	auto img = context.CreateImage(createInfo);
+	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
+	prosper::util::SamplerCreateInfo samplerCreateInfo {};
+	auto tex = context.CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
+	prosper::util::RenderPassCreateInfo rpInfo {{img->GetFormat()}};
+	auto rp = context.CreateRenderPass(rpInfo);
+	auto rt = context.CreateRenderTarget({tex},rp);
+	rt->SetDebugName("img_slideshow_rt");
+
+	auto blurSet = prosper::BlurSet::Create(context,rt);
+	if(!blurSet)
+		return Lua::mult<bool,std::string>{l,false,"Unable to create blur set!"};
+	auto &setupCmd = context.GetSetupCommandBuffer();
+
+	setupCmd->RecordImageBarrier(srcImg,prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferSrcOptimal);
+	setupCmd->RecordImageBarrier(rt->GetTexture().GetImage(),prosper::ImageLayout::ShaderReadOnlyOptimal,prosper::ImageLayout::TransferDstOptimal);
+	setupCmd->RecordBlitImage({},srcImg,rt->GetTexture().GetImage());
+	setupCmd->RecordImageBarrier(srcImg,prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+	setupCmd->RecordImageBarrier(rt->GetTexture().GetImage(),prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+
+	try
+	{
+		prosper::util::record_blur_image(context,setupCmd,*blurSet,{
+			Vector4(1.f,1.f,1.f,1.f),
+			1.75f,
+			9
+		},blurStrength);
+	}
+	catch(const std::logic_error &e)
+	{
+		return Lua::mult<bool,std::string>{l,false,e.what()};
+	}
+	context.FlushSetupCommandBuffer();
+	return luabind::object{l,blurSet->GetFinalRenderTarget()->GetTexture().shared_from_this()};
+}
 std::shared_ptr<prosper::Texture> Lua::Vulkan::create_gradient_texture(lua_State *l,uint32_t width,uint32_t height,prosper::Format format,const Vector2 &dir,const luabind::tableT<void> &tNodes)
 {
 	auto whShader = c_engine->GetShader("gradient");
@@ -704,6 +753,8 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		luabind::def("create_render_target",static_cast<std::shared_ptr<prosper::RenderTarget>(*)(const prosper::util::RenderTargetCreateInfo&,const std::vector<std::shared_ptr<prosper::Texture>>&)>(&Lua::Vulkan::create_render_target)),
 
 		luabind::def("create_gradient_texture",&Lua::Vulkan::create_gradient_texture),
+		luabind::def("blur_texture",&Lua::Vulkan::blur_texture),
+		luabind::def("blur_texture",&Lua::Vulkan::blur_texture,luabind::default_parameter_policy<3,static_cast<uint32_t>(1)>{}),
 		luabind::def("create_event",&prosper::IPrContext::CreateEvent,luabind::render_context_policy<1>{}),
 		luabind::def("create_fence",static_cast<std::shared_ptr<prosper::IFence>(*)(bool)>(&Lua::Vulkan::create_fence)),
 		luabind::def("create_fence",static_cast<std::shared_ptr<prosper::IFence>(*)()>(&Lua::Vulkan::create_fence)),

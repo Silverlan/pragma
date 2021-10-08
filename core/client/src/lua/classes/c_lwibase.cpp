@@ -36,6 +36,8 @@
 #include <pragma/lua/converters/property_converter_t.hpp>
 #include <pragma/lua/lua_call.hpp>
 #include <prosper_command_buffer.hpp>
+#include <prosper_render_pass.hpp>
+#include <shader/prosper_shader_copy_image.hpp>
 #include <sharedutils/property/util_property_color.hpp>
 #include <luabind/out_value_policy.hpp>
 #include <util_formatted_text.hpp>
@@ -63,6 +65,119 @@ extern DLLCLIENT ClientState *client;
 static bool operator==(::WIBase &a,::WIBase &b)
 {
 	return &a == &b;
+}
+
+static std::shared_ptr<prosper::IImage> create_color_image(prosper::IPrContext &context,uint32_t w,uint32_t h,prosper::ImageUsageFlags usageFlags,prosper::ImageLayout initialLayout,bool msaa)
+{
+	auto &rtStaging = context.GetWindow().GetStagingRenderTarget();
+	auto &texCol = rtStaging->GetTexture();
+	auto *texStencil = rtStaging->GetTexture(1);
+	if(!texStencil)
+		return nullptr;
+	auto imgCreateInfo = texCol.GetImage().GetCreateInfo();
+	imgCreateInfo.width = w;
+	imgCreateInfo.height = h;
+	imgCreateInfo.usage = usageFlags;
+	imgCreateInfo.postCreateLayout = initialLayout;
+	if(msaa)
+		imgCreateInfo.samples = WGUI::GetInstance().MSAA_SAMPLE_COUNT;
+	return context.CreateImage(imgCreateInfo);
+}
+
+static std::shared_ptr<prosper::RenderTarget> create_render_target(prosper::IPrContext &context,uint32_t w,uint32_t h,bool enableMsaa,bool enableSampling)
+{
+	auto &rtStaging = context.GetWindow().GetStagingRenderTarget();
+	auto *texStencil = rtStaging->GetTexture(1);
+	if(!texStencil)
+		return nullptr;
+	auto usageFlags = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit;
+	if(enableSampling)
+		usageFlags |= prosper::ImageUsageFlags::SampledBit;
+	auto img = create_color_image(context,w,h,usageFlags,prosper::ImageLayout::ColorAttachmentOptimal,enableMsaa);
+	if(!img)
+		return nullptr;
+	auto imgCreateInfo = texStencil->GetImage().GetCreateInfo();
+	imgCreateInfo.width = w;
+	imgCreateInfo.height = h;
+	if(enableMsaa)
+		imgCreateInfo.samples = WGUI::GetInstance().MSAA_SAMPLE_COUNT;
+	auto depthStencilImg = context.CreateImage(imgCreateInfo);
+	
+	auto tex = context.CreateTexture(prosper::util::TextureCreateInfo{},*img,prosper::util::ImageViewCreateInfo{},prosper::util::SamplerCreateInfo{});
+	if(!tex)
+		return nullptr;
+
+	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
+	imgViewCreateInfo.aspectFlags = prosper::ImageAspectFlags::StencilBit;
+	auto depthStencilTex = context.CreateTexture({},*depthStencilImg,imgViewCreateInfo);
+
+	auto &rp = enableMsaa ? WGUI::GetInstance().GetMsaaRenderPass() : context.GetWindow().GetStagingRenderPass();
+	return context.CreateRenderTarget({tex,depthStencilTex},rp.shared_from_this());
+}
+
+static bool render_ui(WIBase &el,prosper::RenderTarget &rt,prosper::IImage *imgDst=nullptr)
+{
+	auto &context = rt.GetContext();
+	auto drawCmd = context.GetSetupCommandBuffer();
+	auto &img = rt.GetTexture().GetImage();
+	auto useMsaa = (img.GetSampleCount() > prosper::SampleCountFlags::e1Bit);
+	if(useMsaa && !imgDst)
+		return false;
+	auto *texStencil = rt.GetTexture(1);
+	if(!texStencil)
+		return false;
+	auto &imgStencil = texStencil->GetImage();
+
+	std::vector<prosper::ClearValue> clearVals = {
+		prosper::ClearValue{},
+		prosper::ClearValue {prosper::ClearDepthStencilValue {0.f,0}}
+	};
+
+	drawCmd->RecordBeginRenderPass(rt,clearVals);
+	drawCmd->RecordClearAttachment(img,{});
+
+	WIBase::DrawInfo drawInfo {drawCmd};
+	drawInfo.size = {el.GetWidth(),el.GetHeight()};
+	drawInfo.msaa = useMsaa;
+	el.Draw(drawInfo);
+	drawCmd->RecordEndRenderPass();
+
+	if(!useMsaa)
+	{
+		drawCmd->RecordImageBarrier(img,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+		context.FlushSetupCommandBuffer();
+		return true;
+	}
+
+	drawCmd->RecordImageBarrier(img,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferSrcOptimal);
+	drawCmd->RecordResolveImage(img,*imgDst);
+	drawCmd->RecordImageBarrier(*imgDst,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+
+	context.FlushSetupCommandBuffer();
+	return true;
+}
+
+static std::shared_ptr<prosper::Texture> draw_to_texture(WIBase &el,bool enableMsaa,std::optional<uint32_t> w,std::optional<uint32_t> h)
+{
+	auto &context = c_engine->GetRenderContext();
+	w = w.has_value() ? *w : el.GetWidth();
+	h = h.has_value() ? *h : el.GetHeight();
+	auto rt = create_render_target(context,*w,*h,enableMsaa,!enableMsaa);
+	if(!rt)
+		return nullptr;
+	if(!enableMsaa)
+	{
+		if(!render_ui(el,*rt))
+			return nullptr;
+		return rt->GetTexture().shared_from_this();
+	}
+	auto imgDst = create_color_image(
+		context,*w,*h,prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferDstBit | prosper::ImageUsageFlags::TransferSrcBit,
+		prosper::ImageLayout::TransferDstOptimal,false
+	);
+	if(!render_ui(el,*rt,imgDst.get()))
+		return nullptr;
+	return context.CreateTexture({},*imgDst,prosper::util::ImageViewCreateInfo{},prosper::util::SamplerCreateInfo{});
 }
 
 void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
@@ -170,6 +285,10 @@ void Lua::WIBase::register_class(luabind::class_<::WIBase> &classDef)
 	classDef.def("Draw",static_cast<void(*)(lua_State*,::WIBase&,const ::WIBase::DrawInfo&,const Vector2i&,const Vector2i&,const Vector2i&)>(&Draw));
 	classDef.def("Draw",static_cast<void(*)(lua_State*,::WIBase&,const ::WIBase::DrawInfo&,const Vector2i&,const Vector2i&)>(&Draw));
 	classDef.def("Draw",static_cast<void(*)(lua_State*,::WIBase&,const ::WIBase::DrawInfo&)>(&Draw));
+	classDef.def("DrawToTexture",&render_ui);
+	classDef.def("DrawToTexture",&draw_to_texture);
+	classDef.def("DrawToTexture",+[](::WIBase &el,bool enableMsaa) {return draw_to_texture(el,enableMsaa,{},{});});
+	classDef.def("DrawToTexture",+[](::WIBase &el) {return draw_to_texture(el,true,{},{});});
 	classDef.def("GetX",&GetX);
 	classDef.def("GetY",&GetY);
 	classDef.def("SetX",&SetX);

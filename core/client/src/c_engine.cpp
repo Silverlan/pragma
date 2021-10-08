@@ -1180,11 +1180,13 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 {
 	auto perfTimers = umath::is_flag_set(m_stateFlags,StateFlags::EnableGpuPerformanceTimers);
 	auto drawGui = !cvHideGui->GetBool();
+
 	if(drawGui)
 	{
 		auto &rp = rt->GetRenderPass();
 		auto &fb = rt->GetFramebuffer();
 		StartProfilingStage(GPUProfilingPhase::GUI);
+
 		for(auto &wpWindow : GetRenderContext().GetWindows())
 		{
 			auto window = wpWindow.lock();
@@ -1192,12 +1194,13 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 				continue;
 			auto &swapCmdGroup = window->GetSwapCommandBufferGroup();
 			swapCmdGroup.StartRecording(rt->GetRenderPass(),rt->GetFramebuffer());
-				swapCmdGroup.Record([&rt,&rp,&fb,window](prosper::ISecondaryCommandBuffer &drawCmd) {
+				swapCmdGroup.Record([window](prosper::ISecondaryCommandBuffer &drawCmd) {
 					auto &gui = WGUI::GetInstance();
 					gui.Draw(*window,drawCmd);
 				});
 			swapCmdGroup.EndRecording();
 		}
+
 		StopProfilingStage(GPUProfilingPhase::GUI);
 	}
 
@@ -1246,7 +1249,7 @@ void CEngine::DrawScene(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 				prosper::ClearValue{},
 				prosper::ClearValue {prosper::ClearDepthStencilValue {0.f,0}}
 			};
-			
+
 			drawCmd->RecordBeginRenderPass(*rt,clearVals,prosper::IPrimaryCommandBuffer::RenderPassFlags::SecondaryCommandBuffers);
 			window->GetSwapCommandBufferGroup().ExecuteCommands(*drawCmd);
 			drawCmd->RecordEndRenderPass();

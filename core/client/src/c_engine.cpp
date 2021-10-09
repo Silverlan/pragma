@@ -71,7 +71,6 @@ extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
 //__declspec(dllimport) std::vector<void*> _vkImgPtrs;
 decltype(CEngine::AXIS_PRESS_THRESHOLD) CEngine::AXIS_PRESS_THRESHOLD = 0.5f;
-
 // If set to true, each joystick axes will be split into a positive and a negative axis, which
 // can be bound individually
 static const auto SEPARATE_JOYSTICK_AXES = true;

@@ -138,8 +138,18 @@ static bool render_ui(WIBase &el,prosper::RenderTarget &rt,prosper::IImage *imgD
 
 	WIBase::DrawInfo drawInfo {drawCmd};
 	drawInfo.size = {el.GetWidth(),el.GetHeight()};
+	drawInfo.useScissor = false;
 	drawInfo.msaa = useMsaa;
-	el.Draw(drawInfo);
+	std::optional<Mat4> rotMat = el.GetRotationMatrix() ? *el.GetRotationMatrix() : std::optional<Mat4>{};
+	if(rotMat.has_value())
+	{
+		el.ResetRotation(); // We'll temporarily disable the rotation for this element
+		drawInfo.useStencil = true;
+	}
+	WGUI::GetInstance().SetScissor(0,0,drawInfo.size.x,drawInfo.size.y);
+	el.Draw(drawInfo,{},{},drawInfo.size,el.GetScale());
+	if(rotMat.has_value())
+		el.SetRotation(*rotMat);
 	drawCmd->RecordEndRenderPass();
 
 	if(!useMsaa)

@@ -246,7 +246,13 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescr
 void ShaderPBR::OnPipelinesInitialized()
 {
 	ShaderGameWorldLightingPass::OnPipelinesInitialized();
-	m_defaultPbrDsg = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_PBR);
+	auto &context = c_engine->GetRenderContext();
+	m_defaultPbrDsg = context.CreateDescriptorSetGroup(pragma::ShaderPBR::DESCRIPTOR_SET_PBR);
+	auto &dummyTex = context.GetDummyCubemapTexture();
+	auto &ds =* m_defaultPbrDsg->GetDescriptorSet(0);
+	ds.SetBindingTexture(*dummyTex,umath::to_integral(PBRBinding::IrradianceMap));
+	ds.SetBindingTexture(*dummyTex,umath::to_integral(PBRBinding::PrefilterMap));
+	ds.SetBindingTexture(*dummyTex,umath::to_integral(PBRBinding::BRDFMap));
 }
 prosper::IDescriptorSet &ShaderPBR::GetDefaultPbrDescriptorSet() const {return *m_defaultPbrDsg->GetDescriptorSet();}
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescriptorSet(CMaterial &mat)

@@ -48,5 +48,6 @@ void Lua::ModelDef::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCModel.def("GetLOD",&pragma::CModelComponent::GetLOD);
 	defCModel.def("SetMaxDrawDistance",&pragma::CModelComponent::SetMaxDrawDistance);
 	defCModel.def("GetMaxDrawDistance",&pragma::CModelComponent::GetMaxDrawDistance);
+	defCModel.def("UpdateRenderMeshes",&pragma::CModelComponent::UpdateRenderMeshes);
 	entsMod[defCModel];
 }

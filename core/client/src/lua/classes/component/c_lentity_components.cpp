@@ -520,6 +520,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 
 	auto defCWorld = pragma::lua::create_entity_component_class<pragma::CWorldComponent,pragma::BaseWorldComponent>("WorldComponent");
 	defCWorld.def("GetBSPTree",&pragma::CWorldComponent::GetBSPTree);
+	defCWorld.def("RebuildRenderQueues",&pragma::CWorldComponent::RebuildRenderQueues);
 
 	auto defCEye = pragma::lua::create_entity_component_class<pragma::CEyeComponent,pragma::BaseEntityComponent>("EyeComponent");
 	defCEye.def("GetEyePose",&pragma::CEyeComponent::GetEyePose);

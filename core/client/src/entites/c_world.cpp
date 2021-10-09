@@ -170,6 +170,29 @@ const pragma::rendering::RenderQueue *CWorldComponent::GetClusterRenderQueue(uti
 	return (clusterIndex < queue.size()) ? queue.at(clusterIndex).get() : nullptr;
 }
 
+void CWorldComponent::RebuildRenderQueues()
+{
+	c_game->UpdateEnvironmentLightSource();
+
+	m_lodBaseMeshIds.clear();
+	auto &ent = GetEntity();
+	auto &mdl = ent.GetModel();
+	if(mdl == nullptr)
+	{
+		ReloadMeshCache();
+		return;
+	}
+	auto &lods = mdl->GetLODs();
+	for(auto &lod : lods)
+	{
+		for(auto &pair : lod.meshReplacements)
+			m_lodBaseMeshIds[pair.first] = true;
+	}
+	ReloadMeshCache();
+	UpdateRenderMeshes();
+	BuildOfflineRenderQueues(true);
+}
+
 #include "pragma/rendering/shaders/world/c_shader_pbr.hpp"
 void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 {

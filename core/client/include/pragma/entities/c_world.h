@@ -41,6 +41,7 @@ namespace pragma
 		const rendering::RenderQueue *GetClusterRenderQueue(util::BSPTree::ClusterIndex clusterIndex,bool translucent=false) const;
 		void SetBSPTree(const std::shared_ptr<util::BSPTree> &bspTree,const std::vector<std::vector<RenderMeshIndex>> &meshesPerCluster);
 		const std::shared_ptr<util::BSPTree> &GetBSPTree() const;
+		void RebuildRenderQueues();
 	protected:
 		void BuildOfflineRenderQueues(bool rebuild=false);
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;

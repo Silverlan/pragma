@@ -81,18 +81,21 @@ void CModelComponent::SetMaterialOverride(uint32_t idx,const std::string &matOve
 		m_materialOverrides.resize(idx +1);
 	auto *mat = client->LoadMaterial(matOverride);
 	m_materialOverrides.at(idx) = mat ? mat->GetHandle() : MaterialHandle{};
+	umath::set_flag(m_stateFlags,StateFlags::RenderMeshUpdateRequired);
 }
 void CModelComponent::SetMaterialOverride(uint32_t idx,CMaterial &mat)
 {
 	if(idx >= m_materialOverrides.size())
 		m_materialOverrides.resize(idx +1);
 	m_materialOverrides.at(idx) = mat.GetHandle();
+	umath::set_flag(m_stateFlags,StateFlags::RenderMeshUpdateRequired);
 }
 void CModelComponent::ClearMaterialOverride(uint32_t idx)
 {
 	if(idx >= m_materialOverrides.size())
 		return;
 	m_materialOverrides.at(idx) = {};
+	umath::set_flag(m_stateFlags,StateFlags::RenderMeshUpdateRequired);
 }
 CMaterial *CModelComponent::GetMaterialOverride(uint32_t idx) const
 {

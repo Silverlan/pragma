@@ -38,6 +38,7 @@
 #include <sharedutils/netpacket.hpp>
 #include <pragma/console/convars.h>
 #include "pragma/console/engine_cvar.h"
+#include "pragma/debug/intel_vtune.hpp"
 #include "pragma/model/modelmanager.h"
 #include "pragma/engine_version.h"
 #include "pragma/console/cvar.h"
@@ -117,6 +118,9 @@ Engine::Engine(int,char*[])
 	m_logFile(nullptr),
 	m_tickRate(Engine::DEFAULT_TICK_RATE)
 {
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::open_domain();
+#endif
 	Locale::Init();
 	OpenConsole();
 
@@ -872,6 +876,9 @@ Engine::~Engine()
 	engine = nullptr;
 	if(umath::is_flag_set(m_stateFlags,StateFlags::Running))
 		throw std::runtime_error("Engine has to be closed before it can be destroyed!");
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::close_domain();
+#endif
 }
 
 Engine *pragma::get_engine() {return engine;}

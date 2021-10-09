@@ -20,6 +20,7 @@
 #include "pragma/lua/libraries/lasset.hpp"
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/debug/debug_render_info.hpp"
+#include "pragma/debug/intel_vtune.hpp"
 #include "luasystem.h"
 #include <pragma/math/angle/wvquaternion.h>
 #include "pragma/lua/classes/lvector.h"
@@ -672,7 +673,17 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	{
 		lua_pushtablecfunction(lua.GetState(),"debug","breakpoint",static_cast<int(*)(lua_State*)>([](lua_State *l) -> int {return 0;}))
 	}
-	//lua_pushtablecfunction(lua.GetState(),"debug","enable_remote_debugging",Lua::debug::enable_remote_debugging);
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	lua_pushtablecfunction(lua.GetState(),"debug","start_profiling_task",+[](lua_State *l) -> int {
+		std::string name = Lua::CheckString(l,1);
+		debug::get_domain().BeginTask(name);
+		return 0;
+	})
+	lua_pushtablecfunction(lua.GetState(),"debug","stop_profiling_task",+[](lua_State *l) -> int {
+		debug::get_domain().EndTask();
+		return 0;
+	})
+#endif
 
 	lua_register(lua.GetState(),"print",Lua::console::print);
 	Lua::RegisterLibrary(lua.GetState(),"console",{

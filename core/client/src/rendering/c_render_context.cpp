@@ -128,6 +128,22 @@ const std::shared_ptr<prosper::IPrimaryCommandBuffer> &RenderContext::GetDrawCom
 const std::shared_ptr<prosper::IPrimaryCommandBuffer> &RenderContext::GetDrawCommandBuffer(uint32_t swapchainIdx) const {return GetRenderContext().GetDrawCommandBuffer(swapchainIdx);}
 void RenderContext::FlushSetupCommandBuffer() {GetRenderContext().FlushSetupCommandBuffer();}
 prosper::WindowSettings &RenderContext::GetInitialWindowSettings() {return GetRenderContext().GetInitialWindowSettings();}
+void RenderContext::SetValidationErrorDisabled(const std::string &id,bool disabled)
+{
+	if(!disabled)
+	{
+		auto it = m_disabledValidationErrors.find(id);
+		if(it != m_disabledValidationErrors.end())
+			m_disabledValidationErrors.erase(it);
+		return;
+	}
+	m_disabledValidationErrors.insert(id);
+}
+bool RenderContext::IsValidationErrorDisabled(const std::string &id) const
+{
+	auto it = m_disabledValidationErrors.find(id);
+	return (it != m_disabledValidationErrors.end());
+}
 void RenderContext::ValidationCallback(
 	prosper::DebugMessageSeverityFlags severityFlags,
 	const std::string &message
@@ -141,6 +157,17 @@ void RenderContext::ValidationCallback(
 		// TODO: Remove this condition once the Anvil bug has been dealt with.
 		if(strMsg.find("value of stencilUsage must not be 0. The Vulkan spec states: stencilUsage must not be 0") != std::string::npos)
 			return;
+
+		auto p = strMsg.find("[ VUID-");
+		if(p != std::string::npos)
+		{
+			p += 2;
+			auto pEnd = strMsg.find(" ]",p);
+			auto id = strMsg.substr(p,(pEnd != std::string::npos) ? (pEnd -p) : std::numeric_limits<size_t>::max());
+			if(IsValidationErrorDisabled(id))
+				return;
+		}
+
 		Con::cerr<<"[PR] "<<strMsg<<Con::endl;
 		if(std::this_thread::get_id() == c_engine->GetMainThreadId())
 		{

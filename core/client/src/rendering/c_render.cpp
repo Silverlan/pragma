@@ -159,6 +159,20 @@ static void CVAR_CALLBACK_debug_physics_draw(NetworkState*,ConVar*,int,int val,b
 REGISTER_CONVAR_CALLBACK_CL(debug_physics_draw,[](NetworkState *nw,ConVar *cv,int oldVal,int val) {CVAR_CALLBACK_debug_physics_draw(nw,cv,oldVal,val,false);});
 REGISTER_CONVAR_CALLBACK_CL(sv_debug_physics_draw,[](NetworkState *nw,ConVar *cv,int oldVal,int val) {CVAR_CALLBACK_debug_physics_draw(nw,cv,oldVal,val,true);});
 
+void Console::commands::debug_render_validation_error_enabled(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
+{
+	if(argv.empty())
+	{
+		Con::cwar<<"WARNING: No validation error id specified!"<<Con::endl;
+		return;
+	}
+	auto &id = argv.front();
+	auto enabled = true;
+	if(argv.size() > 1)
+		enabled = util::to_boolean(argv[1]);
+	c_engine->SetValidationErrorDisabled(id,!enabled);
+}
+
 void Console::commands::debug_render_depth_buffer(NetworkState *state,pragma::BasePlayerComponent *pl,std::vector<std::string> &argv)
 {
 	static std::unique_ptr<DebugGameGUI> dbg = nullptr;

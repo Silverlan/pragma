@@ -40,6 +40,7 @@ REGISTER_CONCOMMAND_CL(debug_light_sources,Console::commands::debug_light_source
 REGISTER_CONCOMMAND_CL(debug_gui_cursor,Console::commands::debug_gui_cursor,ConVarFlags::None,"Prints information about the GUI element currently hovered over by the cursor.");
 REGISTER_CONCOMMAND_CL(debug_font_glyph_map,Console::commands::debug_font_glyph_map,ConVarFlags::None,"Displays the glyph map for the specified font.");
 REGISTER_CONCOMMAND_CL(debug_render_depth_buffer,Console::commands::debug_render_depth_buffer,ConVarFlags::None,"Draws the scene depth buffer to screen.");
+REGISTER_CONCOMMAND_CL(debug_render_validation_error_enabled,Console::commands::debug_render_validation_error_enabled,ConVarFlags::None,"Enables or disables the specified validation error.");
 
 REGISTER_CONCOMMAND_CL(debug_render_info,Console::commands::debug_render_info,ConVarFlags::None,"Prints some timing information to the console.");
 

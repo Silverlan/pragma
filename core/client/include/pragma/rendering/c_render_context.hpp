@@ -11,6 +11,7 @@
 #include "pragma/c_enginedefinitions.h"
 #include <prosper_context.hpp>
 #include <iglfw/glfw_window.h>
+#include <unordered_set>
 #include <memory>
 #include <optional>
 
@@ -55,6 +56,9 @@ namespace pragma
 		void SetGfxAPIValidationEnabled(bool b);
 		void SetRenderAPI(const std::string &renderAPI);
 		const std::string &GetRenderAPI() const;
+
+		void SetValidationErrorDisabled(const std::string &id,bool disabled);
+		bool IsValidationErrorDisabled(const std::string &id) const;
 	protected:
 		virtual void OnClose();
 		virtual void DrawFrame();
@@ -67,6 +71,7 @@ namespace pragma
 		);
 	private:
 		std::shared_ptr<prosper::IPrContext> m_renderContext = nullptr;
+		std::unordered_set<std::string> m_disabledValidationErrors;
 		StateFlags m_stateFlags = StateFlags::None;
 		std::shared_ptr<util::Library> m_graphicsAPILib = nullptr;
 		std::unique_ptr<GLFW::Monitor> m_monitor = nullptr;

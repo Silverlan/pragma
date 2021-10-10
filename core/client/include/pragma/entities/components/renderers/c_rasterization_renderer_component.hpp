@@ -66,6 +66,8 @@ namespace pragma
 	{
 		class Prepass;
 		class ForwardPlusInstance;
+		class LightingStageRenderProcessor;
+		class DepthStageRenderProcessor;
 	};
 	class CLightMapComponent;
 	class DLLCLIENT CRasterizationRendererComponent final
@@ -82,6 +84,21 @@ namespace pragma
 		static ComponentEventId EVENT_POST_PREPASS;
 		static ComponentEventId EVENT_PRE_LIGHTING_PASS;
 		static ComponentEventId EVENT_POST_LIGHTING_PASS;
+
+		static ComponentEventId EVENT_MT_BEGIN_RECORD_SKYBOX;
+		static ComponentEventId EVENT_MT_END_RECORD_SKYBOX;
+		static ComponentEventId EVENT_MT_BEGIN_RECORD_WORLD;
+		static ComponentEventId EVENT_MT_END_RECORD_WORLD;
+		static ComponentEventId EVENT_MT_BEGIN_RECORD_PARTICLES;
+		static ComponentEventId EVENT_MT_END_RECORD_PARTICLES;
+		static ComponentEventId EVENT_MT_BEGIN_RECORD_DEBUG;
+		static ComponentEventId EVENT_MT_END_RECORD_DEBUG;
+		static ComponentEventId EVENT_MT_BEGIN_RECORD_WATER;
+		static ComponentEventId EVENT_MT_END_RECORD_WATER;
+		static ComponentEventId EVENT_MT_BEGIN_RECORD_VIEW;
+		static ComponentEventId EVENT_MT_END_RECORD_VIEW;
+		static ComponentEventId EVENT_MT_BEGIN_RECORD_PREPASS;
+
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 
 		static void UpdateLightmap(CLightMapComponent &lightMapC);
@@ -286,6 +303,23 @@ namespace pragma
 
 		std::unordered_map<size_t,::util::WeakHandle<prosper::Shader>> m_shaderOverrides;
 		mutable ::util::WeakHandle<prosper::Shader> m_whShaderWireframe = {};
+	};
+
+	struct DLLCLIENT CELightingStageData
+		: public ComponentEvent
+	{
+		CELightingStageData(pragma::rendering::LightingStageRenderProcessor &renderProcessor);
+		virtual void PushArguments(lua_State *l) override;
+		pragma::rendering::LightingStageRenderProcessor &renderProcessor;
+	};
+
+	struct DLLCLIENT CEPrepassStageData
+		: public ComponentEvent
+	{
+		CEPrepassStageData(pragma::rendering::DepthStageRenderProcessor &renderProcessor,pragma::ShaderPrepassBase &shader);
+		virtual void PushArguments(lua_State *l) override;
+		pragma::rendering::DepthStageRenderProcessor &renderProcessor;
+		pragma::ShaderPrepassBase &shader;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::CRasterizationRendererComponent::StateFlags)

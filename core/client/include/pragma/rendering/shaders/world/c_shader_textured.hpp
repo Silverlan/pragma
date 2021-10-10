@@ -241,7 +241,7 @@ namespace pragma
 		virtual bool SetDebugMode(pragma::SceneDebugMode debugMode) override;
 		virtual void Set3DSky(bool is3dSky) override;
 		void SetShadowsEnabled(bool enabled);
-		bool PushSceneConstants(rendering::ShaderProcessor &shaderProcessor,const pragma::CSceneComponent &scene) const;
+		bool PushSceneConstants(rendering::ShaderProcessor &shaderProcessor,const pragma::CSceneComponent &scene,const Vector4 &drawOrigin) const;
 
 		virtual uint32_t GetMaterialDescriptorSetIndex() const override;
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
@@ -259,7 +259,7 @@ namespace pragma
 			prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
 			prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
 			prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
-			ShaderGameWorld::SceneFlags &inOutSceneFlags
+			const Vector4 &drawOrigin,ShaderGameWorld::SceneFlags &inOutSceneFlags
 		) const override;
 		virtual bool IsUsingLightmaps() const override {return true;}
 	protected:

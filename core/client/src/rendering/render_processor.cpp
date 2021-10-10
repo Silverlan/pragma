@@ -398,7 +398,7 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::PipelineID pipe
 	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : ComponentHandle<pragma::CRasterizationRendererComponent>{};
 	if(raster.expired())
 		return false;
-	m_shaderProcessor.RecordBindShader(scene,*raster,bView,*shaderScene,pipelineIdx);
+	m_shaderProcessor.RecordBindShader(scene,*raster,bView,m_baseSceneFlags,*shaderScene,pipelineIdx);
 	
 	if(m_stats)
 	{
@@ -423,6 +423,7 @@ void pragma::rendering::BaseRenderProcessor::SetCameraType(CameraType camType)
 }
 void pragma::rendering::BaseRenderProcessor::Set3DSky(bool enabled)
 {
+	umath::set_flag(m_baseSceneFlags,ShaderGameWorld::SceneFlags::RenderAs3DSky,enabled);
 	umath::set_flag(m_renderFlags,RenderFlags::RenderAs3DSky,enabled);
 	if(umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
 		return;
@@ -431,6 +432,7 @@ void pragma::rendering::BaseRenderProcessor::Set3DSky(bool enabled)
 void pragma::rendering::BaseRenderProcessor::SetDrawOrigin(const Vector4 &drawOrigin)
 {
 	m_drawOrigin = drawOrigin;
+	m_shaderProcessor.SetDrawOrigin(drawOrigin);
 	if(umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
 		return;
 	//m_shaderScene->BindDrawOrigin(drawOrigin);

@@ -285,13 +285,14 @@ namespace pragma
 			prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
 			prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
 			prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
-			SceneFlags &inOutSceneFlags
+			const Vector4 &drawOrigin,SceneFlags &inOutSceneFlags
 		) const {}
 		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor,CMaterial &mat) const;
 		virtual void RecordSceneFlags(rendering::ShaderProcessor &shaderProcessor,SceneFlags sceneFlags) const;
 		virtual void RecordBindLight(rendering::ShaderProcessor &shaderProcessor,CLightComponent &light,uint32_t layerId) const {}
 		virtual void RecordAlphaCutoff(rendering::ShaderProcessor &shaderProcessor,float alphaCutoff) const {}
 		virtual void RecordClipPlane(rendering::ShaderProcessor &shaderProcessor,const Vector4 &clipPlane) const;
+		virtual void RecordDrawOrigin(rendering::ShaderProcessor &shaderProcessor,const Vector4 &drawOrigin) const;
 		virtual void RecordDepthBias(rendering::ShaderProcessor &shaderProcessor,const Vector2 &depthBias) const;
 		virtual void RecordVertexAnimationOffset(rendering::ShaderProcessor &shaderProcessor,uint32_t vertexAnimationOffset) const;
 		virtual bool OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor,CModelSubMesh &mesh) const {return true;}

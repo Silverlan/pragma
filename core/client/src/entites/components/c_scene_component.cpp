@@ -63,6 +63,7 @@ void CSceneComponent::RegisterEvents(pragma::EntityComponentManager &componentMa
 {
 	EVENT_ON_ACTIVE_CAMERA_CHANGED = componentManager.RegisterEvent("ON_ACTIVE_CAMERA_CHANGED");
 	EVENT_ON_BUILD_RENDER_QUEUES = componentManager.RegisterEvent("ON_BUILD_RENDER_QUEUES",typeid(CSceneComponent));
+	EVENT_ON_RENDERER_CHANGED = componentManager.RegisterEvent("ON_RENDERER_CHANGED");
 	EVENT_POST_RENDER_PREPASS = componentManager.RegisterEvent("POST_RENDER_PREPASS",typeid(CSceneComponent));
 }
 
@@ -99,6 +100,7 @@ static std::array<CSceneComponent*,32> g_scenes {};
 
 ComponentEventId CSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED = INVALID_COMPONENT_ID;
 ComponentEventId CSceneComponent::EVENT_ON_BUILD_RENDER_QUEUES = INVALID_COMPONENT_ID;
+ComponentEventId CSceneComponent::EVENT_ON_RENDERER_CHANGED = INVALID_COMPONENT_ID;
 ComponentEventId CSceneComponent::EVENT_POST_RENDER_PREPASS = INVALID_COMPONENT_ID;
 CSceneComponent *CSceneComponent::Create(const CreateInfo &createInfo,CSceneComponent *optParent)
 {
@@ -609,6 +611,7 @@ void CSceneComponent::SetRenderer(CRendererComponent *renderer)
 	m_renderer = renderer ? renderer->GetHandle<CRendererComponent>() : pragma::ComponentHandle<CRendererComponent>{};
 	UpdateRenderSettings();
 	UpdateRendererLightMap();
+	BroadcastEvent(EVENT_ON_RENDERER_CHANGED);
 }
 pragma::CRendererComponent *CSceneComponent::GetRenderer() {return m_renderer.get();}
 const pragma::CRendererComponent *CSceneComponent::GetRenderer() const {return const_cast<CSceneComponent*>(this)->GetRenderer();}

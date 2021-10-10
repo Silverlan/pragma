@@ -165,7 +165,7 @@ void ShaderShadow::RecordBindScene(
 	prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
 	prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
 	prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
-	ShaderGameWorld::SceneFlags &inOutSceneFlags
+	const Vector4 &drawOrigin,ShaderGameWorld::SceneFlags &inOutSceneFlags
 ) const
 {
 	std::array<prosper::IDescriptorSet*,3> descSets {

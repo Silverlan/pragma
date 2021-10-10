@@ -90,13 +90,14 @@ namespace pragma
 			prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
 			prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
 			prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
-			ShaderGameWorld::SceneFlags &inOutSceneFlags
+			const Vector4 &drawOrigin,ShaderGameWorld::SceneFlags &inOutSceneFlags
 		) const override;
 		virtual void RecordSceneFlags(rendering::ShaderProcessor &shaderProcessor,SceneFlags sceneFlags) const override;
 		virtual void RecordBindLight(rendering::ShaderProcessor &shaderProcessor,CLightComponent &light,uint32_t layerId) const override;
 		virtual void RecordAlphaCutoff(rendering::ShaderProcessor &shaderProcessor,float alphaCutoff) const override;
 		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor,CMaterial &mat) const override;
 		virtual void RecordClipPlane(rendering::ShaderProcessor &shaderProcessor,const Vector4 &clipPlane) const override {}
+		virtual void RecordDrawOrigin(rendering::ShaderProcessor &shaderProcessor,const Vector4 &drawOrigin) const {}
 		virtual void RecordDepthBias(rendering::ShaderProcessor &shaderProcessor,const Vector2 &depthBias) const override {}
 		virtual void RecordVertexAnimationOffset(rendering::ShaderProcessor &shaderProcessor,uint32_t vertexAnimationOffset) const override;
 	protected:

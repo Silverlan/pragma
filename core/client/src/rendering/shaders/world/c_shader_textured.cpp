@@ -655,7 +655,7 @@ void ShaderGameWorldLightingPass::RecordBindScene(
 	prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
 	prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
 	prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
-	ShaderGameWorld::SceneFlags &inOutSceneFlags
+	const Vector4 &drawOrigin,ShaderGameWorld::SceneFlags &inOutSceneFlags
 ) const
 {
 	std::array<prosper::IDescriptorSet*,6> descSets {
@@ -667,15 +667,16 @@ void ShaderGameWorldLightingPass::RecordBindScene(
 		descSets[5] = &dsShadows
 	};
 
-	PushSceneConstants(shaderProcessor,scene);
+	PushSceneConstants(shaderProcessor,scene,drawOrigin);
 	static const std::vector<uint32_t> dynamicOffsets {};
 	shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,shaderProcessor.GetCurrentPipelineLayout(),pragma::ShaderGameWorld::MATERIAL_DESCRIPTOR_SET_INDEX,descSets,dynamicOffsets);
 }
 
-bool ShaderGameWorldLightingPass::PushSceneConstants(rendering::ShaderProcessor &shaderProcessor,const pragma::CSceneComponent &scene) const
+bool ShaderGameWorldLightingPass::PushSceneConstants(rendering::ShaderProcessor &shaderProcessor,const pragma::CSceneComponent &scene,const Vector4 &drawOrigin) const
 {
 	ShaderGameWorldLightingPass::PushConstants pushConstants {};
 	pushConstants.Initialize();
+	pushConstants.drawOrigin = drawOrigin;
 	auto &hCam = scene.GetActiveCamera();
 	assert(hCam.valid());
 	pushConstants.debugMode = scene.GetDebugMode();

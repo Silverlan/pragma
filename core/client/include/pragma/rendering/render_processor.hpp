@@ -43,13 +43,16 @@ namespace pragma::rendering
 		ShaderProcessor(prosper::ICommandBuffer &cmdBuffer)
 			: m_cmdBuffer{cmdBuffer}
 		{}
-		bool RecordBindShader(const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,bool view,pragma::ShaderGameWorld &shader,uint32_t pipelineIdx=0u);
+		bool RecordBindShader(
+			const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,bool view,ShaderGameWorld::SceneFlags sceneFlags,pragma::ShaderGameWorld &shader,uint32_t pipelineIdx=0u
+		);
 		bool RecordBindEntity(CBaseEntity &ent);
 		bool RecordBindMaterial(CMaterial &mat);
 		bool RecordBindLight(CLightComponent &light,uint32_t layerId);
 		bool RecordDraw(CModelSubMesh &mesh,pragma::RenderMeshIndex meshIdx,const pragma::rendering::RenderQueue::InstanceSet *instanceSet=nullptr);
 
 		void SetStats(RenderPassStats *stats) {m_stats = stats;}
+		void SetDrawOrigin(const Vector4 &drawOrigin);
 
 		inline prosper::ICommandBuffer &GetCommandBuffer() const {return m_cmdBuffer;}
 		inline prosper::IShaderPipelineLayout &GetCurrentPipelineLayout() const {return *m_currentPipelineLayout;}
@@ -63,6 +66,7 @@ namespace pragma::rendering
 		std::unique_ptr<prosper::IShaderPipelineLayout> m_currentPipelineLayout = nullptr;
 		std::optional<Vector4> m_clipPlane {};
 		std::optional<Vector2> m_depthBias {};
+		Vector4 m_drawOrigin {};
 		pragma::CVertexAnimatedComponent *m_vertexAnimC = nullptr;
 		pragma::CModelComponent *m_modelC = nullptr;
 		pragma::CLightMapReceiverComponent *m_lightMapReceiverC = nullptr;
@@ -113,6 +117,7 @@ namespace pragma::rendering
 		void SetCountNonOpaqueMaterialsOnly(bool b);
 		prosper::Extent2D GetExtents() const;
 		void RecordViewport();
+		const util::RenderPassDrawInfo &GetRenderPassDrawInfo() const {return m_drawSceneInfo;}
 	protected:
 		uint32_t Render(const pragma::rendering::RenderQueue &renderQueue,bool bindShaders,RenderPassStats *optStats=nullptr,std::optional<uint32_t> worldRenderQueueIndex={});
 		bool BindInstanceSet(pragma::ShaderGameWorld &shaderScene,const RenderQueue::InstanceSet *instanceSet=nullptr);
@@ -131,6 +136,7 @@ namespace pragma::rendering
 		pragma::CRenderComponent *m_curRenderC = nullptr;
 		std::vector<std::shared_ptr<ModelSubMesh>> *m_curEntityMeshList = nullptr;
 		const RenderQueue::InstanceSet *m_curInstanceSet = nullptr;
+		ShaderGameWorld::SceneFlags m_baseSceneFlags = ShaderGameWorld::SceneFlags::None;
 
 		CameraType m_camType = CameraType::World;
 		const util::RenderPassDrawInfo &m_drawSceneInfo;

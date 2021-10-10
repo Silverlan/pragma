@@ -305,7 +305,7 @@ void ShaderPBR::RecordBindScene(
 	prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
 	prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
 	prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
-	ShaderGameWorld::SceneFlags &inOutSceneFlags
+	const Vector4 &drawOrigin,ShaderGameWorld::SceneFlags &inOutSceneFlags
 ) const
 {
 	auto iblStrength = 1.f;
@@ -319,7 +319,8 @@ void ShaderPBR::RecordBindScene(
 	pushConstants.Initialize();
 	pushConstants.debugMode = scene.GetDebugMode();
 	pushConstants.reflectionProbeIntensity = iblStrength;
-	pushConstants.flags = m_sceneFlags;
+	pushConstants.flags = inOutSceneFlags;
+	pushConstants.drawOrigin = drawOrigin;
 	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0u,sizeof(pushConstants),&pushConstants);
 }
 

@@ -446,6 +446,13 @@ void pragma::ShaderGameWorld::RecordClipPlane(rendering::ShaderProcessor &shader
 	);
 }
 
+void pragma::ShaderGameWorld::RecordDrawOrigin(rendering::ShaderProcessor &shaderProcessor,const Vector4 &drawOrigin) const
+{
+	shaderProcessor.GetCommandBuffer().RecordPushConstants(
+		shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(pragma::ShaderGameWorld::ScenePushConstants,drawOrigin),sizeof(drawOrigin),&drawOrigin
+	);
+}
+
 void pragma::ShaderGameWorld::RecordDepthBias(rendering::ShaderProcessor &shaderProcessor,const Vector2 &depthBias) const
 {
 	shaderProcessor.GetCommandBuffer().RecordPushConstants(

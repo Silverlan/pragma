@@ -613,6 +613,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_OCTREE",umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::Octree));
 	defCScene.add_static_constant("OCCLUSION_CULLING_METHOD_INERT",umath::to_integral(SceneRenderDesc::OcclusionCullingMethod::Inert));
 	defCScene.add_static_constant("EVENT_ON_ACTIVE_CAMERA_CHANGED",pragma::CSceneComponent::CSceneComponent::EVENT_ON_ACTIVE_CAMERA_CHANGED);
+	defCScene.add_static_constant("EVENT_ON_RENDERER_CHANGED",pragma::CSceneComponent::CSceneComponent::EVENT_ON_RENDERER_CHANGED);
 	defCScene.add_static_constant("DEBUG_MODE_NONE",umath::to_integral(pragma::SceneDebugMode::None));
 	defCScene.add_static_constant("DEBUG_MODE_AMBIENT_OCCLUSION",umath::to_integral(pragma::SceneDebugMode::AmbientOcclusion));
 	defCScene.add_static_constant("DEBUG_MODE_ALBEDO",umath::to_integral(pragma::SceneDebugMode::Albedo));

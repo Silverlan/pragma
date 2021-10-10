@@ -182,6 +182,7 @@ namespace pragma
 
 		static ComponentEventId EVENT_ON_ACTIVE_CAMERA_CHANGED;
 		static ComponentEventId EVENT_ON_BUILD_RENDER_QUEUES;
+		static ComponentEventId EVENT_ON_RENDERER_CHANGED;
 		static ComponentEventId EVENT_POST_RENDER_PREPASS;
 
 		friend SceneRenderDesc;

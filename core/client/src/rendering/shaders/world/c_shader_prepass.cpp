@@ -209,7 +209,7 @@ void ShaderPrepassBase::RecordBindScene(
 	prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
 	prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
 	prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
-	ShaderGameWorld::SceneFlags &inOutSceneFlags
+	const Vector4 &drawOrigin,ShaderGameWorld::SceneFlags &inOutSceneFlags
 ) const
 {
 	std::array<prosper::IDescriptorSet*,3> descSets {
@@ -220,6 +220,8 @@ void ShaderPrepassBase::RecordBindScene(
 
 	ShaderPrepass::PushConstants pushConstants {};
 	pushConstants.Initialize();
+	pushConstants.drawOrigin = drawOrigin;
+	pushConstants.flags = inOutSceneFlags;
 	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,0u,sizeof(pushConstants),&pushConstants);
 
 	static const std::vector<uint32_t> dynamicOffsets {};

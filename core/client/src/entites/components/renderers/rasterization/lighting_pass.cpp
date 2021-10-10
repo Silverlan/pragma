@@ -59,7 +59,9 @@ void pragma::CRasterizationRendererComponent::RecordPrepass(const util::DrawScen
 	m_prepassCommandBufferGroup->Record([this,&drawSceneInfo,&shaderPrepass,&worldRenderQueues,&sceneRenderDesc,prepassStats](prosper::ISecondaryCommandBuffer &cmd) {
 		util::RenderPassDrawInfo renderPassDrawInfo {drawSceneInfo,cmd};
 		pragma::rendering::DepthStageRenderProcessor rsys {renderPassDrawInfo,RenderFlags::None,{} /* drawOrigin */,};
-
+		
+		CEPrepassStageData evDataPrepassStage {rsys,shaderPrepass};
+		InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_PREPASS,evDataPrepassStage);
 		rsys.BindShader(shaderPrepass,umath::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));
 		// Render static world geometry
 		if((renderPassDrawInfo.drawSceneInfo.renderFlags &FRender::World) != FRender::None)
@@ -364,15 +366,16 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 		pragma::rendering::LightingStageRenderProcessor rsys {rpDrawInfo,rsFlags,{} /* drawOrigin */};
 		auto &sceneRenderDesc = drawSceneInfo.scene->GetSceneRenderDesc();
 
+		CELightingStageData evDataLightingStage {rsys};
 		if((drawSceneInfo.renderFlags &FRender::Skybox) != FRender::None)
 		{
 			c_game->StartProfilingStage(CGame::GPUProfilingPhase::Skybox);
-			// c_game->CallCallbacks("PreRenderSkybox");
+			InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_SKYBOX,evDataLightingStage);
 
 			rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,false /* translucent */),lightingStageStats);
 			rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::Skybox,true /* translucent */),lightingStageTranslucentStats);
 
-			//c_game->CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>,std::reference_wrapper<pragma::rendering::LightingStageRenderProcessor>>("PostRenderSkybox",std::ref(drawSceneInfo),std::ref(rsys));
+			InvokeEventCallbacks(EVENT_MT_END_RECORD_SKYBOX,evDataLightingStage);
 			c_game->StopProfilingStage(CGame::GPUProfilingPhase::Skybox);
 		}
 
@@ -384,7 +387,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 		if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
 		{
 			c_game->StartProfilingStage(CGame::GPUProfilingPhase::World);
-			// c_game->CallCallbacks("PreRenderWorld");
+			InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_WORLD,evDataLightingStage);
 
 			// For optimization purposes, world geometry is stored in separate render queues.
 			// This could be less efficient if many models in the scene use the same materials as
@@ -407,9 +410,8 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 			// Note: The non-translucent render queues also include transparent (alpha masked) objects
 			rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::World,false /* translucent */),lightingStageStats);
 			rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::World,true /* translucent */),lightingStageTranslucentStats);
-
-			// c_game->CallCallbacks("PostRenderWorld");
-			// c_game->CallLuaCallbacks<void,const util::DrawSceneInfo*,pragma::rendering::LightingStageRenderProcessor*>("PostRenderWorld",&drawSceneInfo,&rsys);
+			
+			InvokeEventCallbacks(EVENT_MT_END_RECORD_WORLD,evDataLightingStage);
 			c_game->StopProfilingStage(CGame::GPUProfilingPhase::World);
 		}
 	#if DEBUG_RENDER_PERFORMANCE_TEST_ENABLED == 1
@@ -419,7 +421,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 		if(bShouldDrawParticles)
 		{
 			c_game->StartProfilingStage(CGame::GPUProfilingPhase::Particles);
-			// c_game->CallCallbacks("PreRenderParticles");
+			InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_PARTICLES,evDataLightingStage);
 
 			//auto &glowInfo = GetGlowInfo();
 
@@ -465,8 +467,8 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 			//	glowInfo.tmpBloomParticles.clear();
 			//if(!glowInfo.tmpBloomParticles.empty())
 			//	glowInfo.bGlowScheduled = true;
-
-			// c_game->CallCallbacks("PostRenderParticles");
+			
+			InvokeEventCallbacks(EVENT_MT_END_RECORD_PARTICLES,evDataLightingStage);
 			c_game->StopProfilingStage(CGame::GPUProfilingPhase::Particles);
 		}
 		//c_engine->StopGPUTimer(GPUTimerEvent::Particles); // prosper TODO
@@ -477,7 +479,7 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 		if((drawSceneInfo.renderFlags &FRender::Debug) == FRender::Debug)
 		{
 			c_game->StartProfilingStage(CGame::GPUProfilingPhase::Debug);
-			// c_game->CallCallbacks("PreRenderDebug");
+			InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_DEBUG,evDataLightingStage);
 
 			if(cam.valid())
 				DebugRenderer::Render(pcmd,*cam);
@@ -578,19 +580,17 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 			}
 		}
 #endif
-
-			// c_game->CallCallbacks("PostRenderDebug");
+		
+			InvokeEventCallbacks(EVENT_MT_END_RECORD_DEBUG,evDataLightingStage);
 			c_game->StopProfilingStage(CGame::GPUProfilingPhase::Debug);
 		}
 
 		if((drawSceneInfo.renderFlags &FRender::Water) != FRender::None)
 		{
 			c_game->StartProfilingStage(CGame::GPUProfilingPhase::Water);
-			// c_game->CallCallbacks("PreRenderWater");
+			InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_WATER,evDataLightingStage);
 
 			auto numShaderInvocations = rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::Water,false /* translucent */),lightingStageStats);
-
-			// c_game->CallCallbacks("PostRenderWater");
 
 			if(numShaderInvocations > 0)
 			{
@@ -601,13 +601,14 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 				//prepass.textureDepth->Reset(); // prosper TODO
 				//prepass.textureDepth->Resolve(); // prosper TODO
 			}
+			InvokeEventCallbacks(EVENT_MT_END_RECORD_WATER,evDataLightingStage);
 			c_game->StopProfilingStage(CGame::GPUProfilingPhase::Water);
 		}
 
 		if((drawSceneInfo.renderFlags &FRender::View) != FRender::None)
 		{
 			c_game->StartProfilingStage(CGame::GPUProfilingPhase::View);
-			// c_game->CallCallbacks("PreRenderView");
+			InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_VIEW,evDataLightingStage);
 
 			rsys.SetCameraType(pragma::rendering::BaseRenderProcessor::CameraType::View);
 			rsys.Render(*sceneRenderDesc.GetRenderQueue(RenderMode::View,false /* translucent */),lightingStageStats);
@@ -624,8 +625,8 @@ void pragma::CRasterizationRendererComponent::RecordLightingPass(const util::Dra
 				//	glowInfo.bGlowScheduled = true;
 			}
 			//RenderGlowMeshes(cam,true);
-
-			// c_game->CallCallbacks("PostRenderView");
+			
+			InvokeEventCallbacks(EVENT_MT_END_RECORD_VIEW,evDataLightingStage);
 			c_game->StopProfilingStage(CGame::GPUProfilingPhase::View);
 		}
 	});

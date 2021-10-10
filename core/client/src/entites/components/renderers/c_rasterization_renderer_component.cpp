@@ -44,6 +44,20 @@ ComponentEventId CRasterizationRendererComponent::EVENT_PRE_PREPASS = INVALID_CO
 ComponentEventId CRasterizationRendererComponent::EVENT_POST_PREPASS = INVALID_COMPONENT_ID;
 ComponentEventId CRasterizationRendererComponent::EVENT_PRE_LIGHTING_PASS = INVALID_COMPONENT_ID;
 ComponentEventId CRasterizationRendererComponent::EVENT_POST_LIGHTING_PASS = INVALID_COMPONENT_ID;
+
+ComponentEventId CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_SKYBOX = INVALID_COMPONENT_ID;
+ComponentEventId CRasterizationRendererComponent::EVENT_MT_END_RECORD_SKYBOX = INVALID_COMPONENT_ID;
+ComponentEventId CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_WORLD = INVALID_COMPONENT_ID;
+ComponentEventId CRasterizationRendererComponent::EVENT_MT_END_RECORD_WORLD = INVALID_COMPONENT_ID;
+ComponentEventId CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_PARTICLES = INVALID_COMPONENT_ID;
+ComponentEventId CRasterizationRendererComponent::EVENT_MT_END_RECORD_PARTICLES = INVALID_COMPONENT_ID;
+ComponentEventId CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_DEBUG = INVALID_COMPONENT_ID;
+ComponentEventId CRasterizationRendererComponent::EVENT_MT_END_RECORD_DEBUG = INVALID_COMPONENT_ID;
+ComponentEventId CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_WATER = INVALID_COMPONENT_ID;
+ComponentEventId CRasterizationRendererComponent::EVENT_MT_END_RECORD_WATER = INVALID_COMPONENT_ID;
+ComponentEventId CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_VIEW = INVALID_COMPONENT_ID;
+ComponentEventId CRasterizationRendererComponent::EVENT_MT_END_RECORD_VIEW = INVALID_COMPONENT_ID;
+ComponentEventId CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_PREPASS = INVALID_COMPONENT_ID;
 void CRasterizationRendererComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	EVENT_ON_RECORD_PREPASS = componentManager.RegisterEvent("ON_RECORD_PREPASS",typeid(CRasterizationRendererComponent));
@@ -56,6 +70,20 @@ void CRasterizationRendererComponent::RegisterEvents(pragma::EntityComponentMana
 	EVENT_POST_PREPASS = componentManager.RegisterEvent("POST_PREPASS",typeid(CRasterizationRendererComponent));
 	EVENT_PRE_LIGHTING_PASS = componentManager.RegisterEvent("PRE_LIGHTING_PASS",typeid(CRasterizationRendererComponent));
 	EVENT_POST_LIGHTING_PASS = componentManager.RegisterEvent("POST_LIGHTING_PASS",typeid(CRasterizationRendererComponent));
+	
+	EVENT_MT_BEGIN_RECORD_SKYBOX = componentManager.RegisterEvent("MT_BEGIN_RECORD_SKYBOX",typeid(CRasterizationRendererComponent));
+	EVENT_MT_END_RECORD_SKYBOX = componentManager.RegisterEvent("MT_END_RECORD_SKYBOX",typeid(CRasterizationRendererComponent));
+	EVENT_MT_BEGIN_RECORD_WORLD = componentManager.RegisterEvent("MT_BEGIN_RECORD_WORLD",typeid(CRasterizationRendererComponent));
+	EVENT_MT_END_RECORD_WORLD = componentManager.RegisterEvent("MT_END_RECORD_WORLD",typeid(CRasterizationRendererComponent));
+	EVENT_MT_BEGIN_RECORD_PARTICLES = componentManager.RegisterEvent("MT_BEGIN_RECORD_PARTICLES",typeid(CRasterizationRendererComponent));
+	EVENT_MT_END_RECORD_PARTICLES = componentManager.RegisterEvent("MT_END_RECORD_PARTICLES",typeid(CRasterizationRendererComponent));
+	EVENT_MT_BEGIN_RECORD_DEBUG = componentManager.RegisterEvent("MT_BEGIN_RECORD_DEBUG",typeid(CRasterizationRendererComponent));
+	EVENT_MT_END_RECORD_DEBUG = componentManager.RegisterEvent("MT_END_RECORD_DEBUG",typeid(CRasterizationRendererComponent));
+	EVENT_MT_BEGIN_RECORD_WATER = componentManager.RegisterEvent("MT_BEGIN_RECORD_WATER",typeid(CRasterizationRendererComponent));
+	EVENT_MT_END_RECORD_WATER = componentManager.RegisterEvent("MT_END_RECORD_WATER",typeid(CRasterizationRendererComponent));
+	EVENT_MT_BEGIN_RECORD_VIEW = componentManager.RegisterEvent("MT_BEGIN_RECORD_VIEW",typeid(CRasterizationRendererComponent));
+	EVENT_MT_END_RECORD_VIEW = componentManager.RegisterEvent("MT_END_RECORD_VIEW",typeid(CRasterizationRendererComponent));
+	EVENT_MT_BEGIN_RECORD_PREPASS = componentManager.RegisterEvent("MT_BEGIN_RECORD_PREPASS",typeid(CRasterizationRendererComponent));
 }
 
 void CRasterizationRendererComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
@@ -514,6 +542,26 @@ bool CRasterizationRendererComponent::ResolveRenderPass(const util::DrawSceneInf
 }
 
 prosper::Shader *CRasterizationRendererComponent::GetWireframeShader() const {return m_whShaderWireframe.get();}
+
+////////
+
+CELightingStageData::CELightingStageData(pragma::rendering::LightingStageRenderProcessor &renderProcessor)
+	: renderProcessor{renderProcessor}
+{}
+void CELightingStageData::PushArguments(lua_State *l)
+{
+
+}
+
+////////
+
+CEPrepassStageData::CEPrepassStageData(pragma::rendering::DepthStageRenderProcessor &renderProcessor,pragma::ShaderPrepassBase &shader)
+	: renderProcessor{renderProcessor},shader{shader}
+{}
+void CEPrepassStageData::PushArguments(lua_State *l)
+{
+
+}
 
 ////////
 

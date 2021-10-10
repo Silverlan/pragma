@@ -39,16 +39,19 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneCom
 	assert(dsLights);
 	assert(dsShadows);
 	auto &dsMat = shader.GetDefaultMaterialDescriptorSet();
-	m_sceneFlags = ShaderGameWorld::SceneFlags::None;
+	// m_sceneFlags = ShaderGameWorld::SceneFlags::None;
 	shader.RecordBindScene(
 		*this,scene,renderer,
 		*dsScene,*dsRenderer,dsRenderSettings,
 		*dsLights,*dsShadows,dsMat,
-		m_sceneFlags
+		m_drawOrigin,m_sceneFlags
 	);
 	return true;
 }
-bool pragma::rendering::ShaderProcessor::RecordBindShader(const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,bool view,pragma::ShaderGameWorld &shader,uint32_t pipelineIdx)
+void pragma::rendering::ShaderProcessor::SetDrawOrigin(const Vector4 &drawOrigin) {m_drawOrigin = drawOrigin;}
+bool pragma::rendering::ShaderProcessor::RecordBindShader(
+	const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,bool view,ShaderGameWorld::SceneFlags sceneFlags,pragma::ShaderGameWorld &shader,uint32_t pipelineIdx
+)
 {
 	auto &context = c_engine->GetRenderContext();
 	m_curShader = &shader;
@@ -62,13 +65,11 @@ bool pragma::rendering::ShaderProcessor::RecordBindShader(const pragma::CSceneCo
 	m_modelC = nullptr;
 	m_lightMapReceiverC = nullptr;
 	m_curVertexAnimationOffset = std::numeric_limits<uint32_t>::max();
-	m_sceneFlags = ShaderGameWorld::SceneFlags::None;
+	m_sceneFlags = sceneFlags;
 	m_alphaCutoff = std::numeric_limits<float>::max();
 
 	if(m_cmdBuffer.RecordBindShaderPipeline(shader,pipelineIdx) == false)
 		return false;
-
-
 
 #if 0
 	// Reset depth bias

@@ -71,10 +71,10 @@ void ShaderEye::RecordBindScene(
 	prosper::IDescriptorSet &dsScene,prosper::IDescriptorSet &dsRenderer,
 	prosper::IDescriptorSet &dsRenderSettings,prosper::IDescriptorSet &dsLights,
 	prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
-	ShaderGameWorld::SceneFlags &inOutSceneFlags
+	const Vector4 &drawOrigin,ShaderGameWorld::SceneFlags &inOutSceneFlags
 ) const
 {
-	PushSceneConstants(shaderProcessor,scene);
+	PushSceneConstants(shaderProcessor,scene,drawOrigin);
 
 	// I'm not sure why we have to push these at this point in time (since the actual constants we want are pushed in :BindEyeball),
 	// but for some reason if we don't do it here, it can cause the Engine to permanently freeze on AMD GPUs

@@ -17,7 +17,7 @@
 namespace pragma
 {
 	class ShaderGameWorld;
-	namespace rendering {struct BaseRenderProcessor; class RenderQueue;};
+	namespace rendering {struct BaseRenderProcessor; class LightingStageRenderProcessor; class RenderQueue;};
 	class DLLCLIENT CSkyCameraComponent final
 		: public BaseEntityComponent
 	{
@@ -30,11 +30,22 @@ namespace pragma
 
 		float GetSkyboxScale() const;
 	private:
+		void UpdateScenes();
+		void UpdateToggleState();
 		void BindToShader(pragma::rendering::BaseRenderProcessor &processor);
 		void UnbindFromShader(pragma::rendering::BaseRenderProcessor &processor);
+		void BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo);
+		void Render3dSkybox(pragma::rendering::LightingStageRenderProcessor &rsys);
 		float m_skyboxScale = 1.f;
-		CallbackHandle m_cbOnBuildRenderQueue = {};
-		CallbackHandle m_cbPostRenderSkybox = {};
+		struct SceneCallbacks
+		{
+			~SceneCallbacks();
+			CallbackHandle onBuildRenderQueue = {};
+			CallbackHandle onRendererChanged = {};
+			CallbackHandle renderSkybox = {};
+			CallbackHandle renderPrepass = {};
+		};
+		std::unordered_map<pragma::CSceneComponent::SceneIndex,SceneCallbacks> m_sceneCallbacks;
 		std::shared_ptr<pragma::rendering::RenderQueue> m_renderQueue = nullptr;
 		std::shared_ptr<pragma::rendering::RenderQueue> m_renderQueueTranslucent = nullptr;
 	};

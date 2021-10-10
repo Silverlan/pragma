@@ -179,19 +179,7 @@ CGame::CGame(NetworkState *state)
 
 	RegisterCallback<void,CGame*>("OnGameEnd");
 	RegisterCallback<void,pragma::CLightDirectionalComponent*,pragma::CLightDirectionalComponent*>("OnEnvironmentLightSourceChanged");
-	RegisterCallback<void>("PreRenderSkybox");
-	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>,std::reference_wrapper<pragma::rendering::LightingStageRenderProcessor>>("PostRenderSkybox");
-	RegisterCallback<void>("PreRenderWorld");
-	RegisterCallback<void>("PostRenderWorld");
-	RegisterCallback<void>("PreRenderParticles");
-	RegisterCallback<void>("PostRenderParticles");
 	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("Render");
-	RegisterCallback<void>("PreRenderDebug");
-	RegisterCallback<void>("PostRenderDebug");
-	RegisterCallback<void>("PreRenderWater");
-	RegisterCallback<void>("PostRenderWater");
-	RegisterCallback<void>("PreRenderView");
-	RegisterCallback<void>("PostRenderView");
 	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes");
 	RegisterCallback<void>("OnRenderScenes");
 	RegisterCallbackWithOptionalReturn<bool,std::reference_wrapper<const util::DrawSceneInfo>>("DrawScene");

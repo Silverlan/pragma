@@ -246,6 +246,7 @@ void LightShadowRenderer::UpdateSceneCallbacks()
 			hCb.Remove();
 	}
 	m_sceneCallbacks.clear();
+#if 0
 	auto scenes = static_cast<CBaseEntity&>(m_hLight->GetEntity()).GetScenes();
 	for(auto *scene : scenes)
 	{
@@ -263,6 +264,7 @@ void LightShadowRenderer::UpdateSceneCallbacks()
 			return util::EventReply::Unhandled;
 		});
 	}
+#endif
 }
 
 static auto cvLodBias = GetClientConVar("cl_render_shadow_lod_bias");

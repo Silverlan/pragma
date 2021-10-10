@@ -174,7 +174,10 @@ std::vector<pragma::CSceneComponent*> CBaseEntity::GetScenes() const
 	scenes.reserve(numScenes);
 	for(auto i=decltype(numScenes){0u};i<numScenes;++i)
 	{
-		auto *scene = pragma::CSceneComponent::GetByIndex(pragma::CSceneComponent::GetSceneIndex(static_cast<pragma::CSceneComponent::SceneFlags>(i)));
+		auto sceneFlag = static_cast<pragma::CSceneComponent::SceneFlags>(1<<i);
+		if((**m_sceneFlags &sceneFlag) == 0)
+			continue;
+		auto *scene = pragma::CSceneComponent::GetByIndex(i);
 		if(scene == nullptr)
 			continue;
 		scenes.push_back(scene);

@@ -31,6 +31,13 @@ void CFogControllerComponent::Initialize()
 		GetFog().SetEnabled(false);
 	});
 }
+void CFogControllerComponent::OnRemove()
+{
+	BaseEnvFogControllerComponent::OnRemove();
+	auto toggleC = GetEntity().GetComponent<pragma::CToggleComponent>();
+	if(toggleC.expired() || toggleC->IsTurnedOn())
+		GetFog().SetEnabled(false);
+}
 void CFogControllerComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEnvFogControllerComponent::OnEntityComponentAdded(component);

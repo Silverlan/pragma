@@ -25,6 +25,7 @@ namespace pragma
 		CFogControllerComponent(BaseEntity &ent) : BaseEnvFogControllerComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void ReceiveData(NetPacket &packet) override;
+		virtual void OnRemove() override;
 
 		virtual void SetFogStart(float start) override;
 		virtual void SetFogEnd(float end) override;

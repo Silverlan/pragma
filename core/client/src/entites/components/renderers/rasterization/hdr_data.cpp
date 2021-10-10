@@ -298,8 +298,8 @@ bool HDRData::Initialize(uint32_t width,uint32_t height,prosper::SampleCountFlag
 	imgCreateInfo.usage |= prosper::ImageUsageFlags::TransferSrcBit;
 	auto hdrImgStaging = context.CreateImage(imgCreateInfo);
 	auto hdrTexStaging = context.CreateTexture(texCreateInfo,*hdrImgStaging,hdrImgViewCreateInfo,hdrSamplerCreateInfo);
-	//hdrPostProcessingRenderTarget = context.CreateRenderTarget({hdrTexStaging},prosper::ShaderGraphics::GetRenderPass<pragma::ShaderPPBase>(context));
-	//hdrPostProcessingRenderTarget->SetDebugName("scene_staging_rt");
+	hdrPostProcessingRenderTarget = context.CreateRenderTarget({hdrTexStaging},prosper::ShaderGraphics::GetRenderPass<pragma::ShaderPPBase>(context));
+	hdrPostProcessingRenderTarget->SetDebugName("scene_staging_rt");
 
 	dsgBloomTonemapping = c_engine->GetRenderContext().CreateDescriptorSetGroup(pragma::ShaderPPHDR::DESCRIPTOR_SET_TEXTURE);
 	auto &descSetHdrResolve = *dsgBloomTonemapping->GetDescriptorSet();
@@ -456,7 +456,7 @@ prosper::RenderTarget &HDRData::GetRenderTarget(const util::DrawSceneInfo &drawS
 	return drawSceneInfo.renderTarget ? *drawSceneInfo.renderTarget : *sceneRenderTarget;
 }
 
-/*bool HDRData::BlitStagingRenderTargetToMainRenderTarget(const util::DrawSceneInfo &drawSceneInfo)
+bool HDRData::BlitStagingRenderTargetToMainRenderTarget(const util::DrawSceneInfo &drawSceneInfo)
 {
 	auto &rt = GetRenderTarget(drawSceneInfo);
 	auto &hdrTex = rt.GetTexture();
@@ -476,7 +476,7 @@ prosper::RenderTarget &HDRData::GetRenderTarget(const util::DrawSceneInfo &drawS
 	if(b == false)
 		return false;
 	return cmdBuffer.RecordImageBarrier(hdrPostProcessingRenderTarget->GetTexture().GetImage(),prosper::ImageLayout::TransferSrcOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
-}*/
+}
 
 void HDRData::SwapIOTextures() {m_curTex = (m_curTex == 1u) ? 0u : 1u;}
 

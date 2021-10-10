@@ -772,9 +772,9 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 				if(renderer)
 				{
 					m_scene->SetRenderer(renderer);
+					rasterization->SetSSAOEnabled(GetConVarBool("cl_render_ssao"));
 					m_scene->ReloadRenderTarget(static_cast<uint32_t>(resolution.x),static_cast<uint32_t>(resolution.y));
 					m_scene->SetWorldEnvironment(GetWorldEnvironment());
-					rasterization->SetSSAOEnabled(GetConVarBool("cl_render_ssao"));
 				}
 			}
 		}
@@ -782,7 +782,7 @@ void CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 		SetRenderScene(*scene);
 	}
 
-	Resize();
+	Resize(false);
 
 	m_hCbDrawFrame = c_engine->AddCallback("DrawFrame",FunctionCallback<void,std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>::Create([this](std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>> drawCmd) {
 		auto baseDrawCmd = std::static_pointer_cast<prosper::ICommandBuffer>(drawCmd.get());
@@ -829,9 +829,10 @@ void CGame::RequestResource(const std::string &fileName)
 	Con::ccl<<"[CGame] Request sent!"<<Con::endl;
 }
 
-void CGame::Resize()
+void CGame::Resize(bool reloadRenderTarget)
 {
-	ReloadRenderFrameBuffer();
+	if(reloadRenderTarget)
+		ReloadRenderFrameBuffer();
 	auto *cam = GetPrimaryCamera();
 	if(cam == nullptr)
 		return;

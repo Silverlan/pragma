@@ -397,7 +397,7 @@ public:
 	void PostGUIDraw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
 
 	// HDR
-	void Resize();
+	void Resize(bool reloadRenderTarget);
 	Float GetHDRExposure() const;
 	Float GetMaxHDRExposure() const;
 	void SetMaxHDRExposure(Float exposure);

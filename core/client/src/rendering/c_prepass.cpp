@@ -26,7 +26,7 @@
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 bool pragma::rendering::Prepass::Initialize(prosper::IPrContext &context,uint32_t width,uint32_t height,prosper::SampleCountFlags samples,bool bExtended)
 {
 	m_shaderPrepass = context.GetShader("prepass");
@@ -206,3 +206,4 @@ void Console::commands::debug_prepass(NetworkState *state,pragma::BasePlayerComp
 
 	pEl->SizeToContents();
 }
+#pragma optimize("",on)

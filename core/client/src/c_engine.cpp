@@ -33,6 +33,7 @@
 #include <pragma/input/inputhelper.h>
 #include <fsys/directory_watcher.h>
 #include <pragma/game/game_resources.hpp>
+#include <pragma/debug/intel_vtune.hpp>
 #include <sharedutils/util_file.h>
 #include <pragma/engine_info.hpp>
 #include <prosper_util.hpp>
@@ -1027,9 +1028,15 @@ bool CEngine::IsMultiPlayer() const
 
 void CEngine::StartDefaultGame(const std::string &map,bool singlePlayer)
 {
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().BeginTask("Load map " +map);
+#endif
 	EndGame();
 	StartNewGame(map.c_str(),singlePlayer);
 	Connect("localhost");
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+	debug::get_domain().EndTask();
+#endif
 }
 
 void CEngine::StartDefaultGame(const std::string &map) {StartDefaultGame(map,true);}
@@ -1444,7 +1451,7 @@ void CEngine::OnRenderResolutionChanged(uint32_t width,uint32_t height)
 	auto *game = static_cast<CGame*>(cl->GetGameState());
 	if(game == nullptr)
 		return;
-	game->Resize();
+	game->Resize(true);
 }
 
 uint32_t CEngine::DoClearUnusedAssets(pragma::asset::Type type) const

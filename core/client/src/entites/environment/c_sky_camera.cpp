@@ -23,6 +23,7 @@
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/render_processor.hpp"
 #include "pragma/rendering/shaders/world/c_shader_prepass.hpp"
+#include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/baseentity_events.hpp>
 
@@ -122,12 +123,15 @@ void CSkyCameraComponent::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 		{
 			auto vp = hCam->GetProjectionMatrix() *hCam->GetViewMatrix();
 			auto &dynOctree = culler->GetOcclusionOctree();
+			// TODO: Find out why Enable3dOriginBit specialization constant isn't working properly.
+			// (Also see shaders/modules/vs_world.gls)
+			// Also take into account that world render queues are built offline, but don't include the flag for the constant -> How to handle?
 			SceneRenderDesc::CollectRenderMeshesFromOctree(
 				drawSceneInfo,dynOctree,scene,*hCam,vp,drawSceneInfo.renderFlags,
 				[this](RenderMode renderMode,bool translucent) -> pragma::rendering::RenderQueue* {
 					return (renderMode != RenderMode::World) ? nullptr : (translucent ? m_renderQueueTranslucent.get() : m_renderQueue.get());
 				},
-				nullptr,&trees,&bspLeafNodes
+				nullptr,&trees,&bspLeafNodes,0,nullptr,pragma::GameShaderSpecializationConstantFlag::None//Enable3dOriginBit
 			);
 		}
 
@@ -187,6 +191,13 @@ void CSkyCameraComponent::UpdateScenes()
 		callbacks.renderPrepass = rasterizationC->AddEventCallback(pragma::CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_PREPASS,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 			auto &stageData = static_cast<pragma::CEPrepassStageData&>(evData.get());
 			auto &rsys = stageData.renderProcessor;
+			auto &rpDrawInfo = rsys.GetRenderPassDrawInfo();
+			auto &drawSceneInfo = rpDrawInfo.drawSceneInfo;
+			auto &drawCmd = drawSceneInfo.commandBuffer;
+			// Need to update the render buffers for our render queues
+			CSceneComponent::UpdateRenderBuffers(drawCmd,*m_renderQueue,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
+			CSceneComponent::UpdateRenderBuffers(drawCmd,*m_renderQueueTranslucent,drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(RenderStats::RenderPass::Prepass) : nullptr);
+
 			rsys.UnbindShader();
 			BindToShader(rsys);
 			rsys.BindShader(stageData.shader,umath::to_integral(pragma::ShaderPrepass::Pipeline::Opaque));

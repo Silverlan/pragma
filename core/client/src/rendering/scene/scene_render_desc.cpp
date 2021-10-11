@@ -166,7 +166,8 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 	const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,
 	const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
 	const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,
-	int32_t lodBias,const std::function<void(pragma::rendering::RenderQueue&,const pragma::rendering::RenderQueueItem&)> &fOptInsertItemToQueue
+	int32_t lodBias,const std::function<void(pragma::rendering::RenderQueue&,const pragma::rendering::RenderQueueItem&)> &fOptInsertItemToQueue,
+	pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags
 )
 {
 	auto *mdlC = renderC.GetModelComponent();
@@ -182,7 +183,7 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 	auto rasterizer = renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>();
 	if(rasterizer.expired())
 		return;
-	auto baseShaderSpecializationFlags = mdlC->GetBaseShaderSpecializationFlags();
+	auto baseShaderSpecializationFlags = mdlC->GetBaseShaderSpecializationFlags() | baseSpecializationFlags;
 	auto isBaseTranslucent = umath::is_flag_set(baseShaderSpecializationFlags,pragma::GameShaderSpecializationConstantFlag::EnableTranslucencyBit);
 	auto &context = c_engine->GetRenderContext();
 	auto renderTranslucent = umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Translucent);
@@ -231,10 +232,11 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 }
 void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 	const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,
-	const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull
+	const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,
+	pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags
 )
 {
-	AddRenderMeshesToRenderQueue(drawSceneInfo,renderC,[this](RenderMode renderMode,bool translucent) {return GetRenderQueue(renderMode,translucent);},scene,cam,vp,fShouldCull);
+	AddRenderMeshesToRenderQueue(drawSceneInfo,renderC,[this](RenderMode renderMode,bool translucent) {return GetRenderQueue(renderMode,translucent);},scene,cam,vp,fShouldCull,0,nullptr,baseSpecializationFlags);
 }
 
 bool SceneRenderDesc::ShouldCull(CBaseEntity &ent,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull)
@@ -273,12 +275,13 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 	const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
 	const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
 	const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,const std::vector<util::BSPTree*> *bspTrees,const std::vector<util::BSPTree::Node*> *bspLeafNodes,
-	int32_t lodBias,const std::function<bool(CBaseEntity&,const pragma::CSceneComponent&,FRender)> &shouldConsiderEntity
+	int32_t lodBias,const std::function<bool(CBaseEntity&,const pragma::CSceneComponent&,FRender)> &shouldConsiderEntity,
+	pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags
 )
 {
 	auto numEntitiesPerWorkerJob = umath::max(cvEntitiesPerJob->GetInt(),1);
 	std::function<void(const OcclusionOctree<CBaseEntity*>::Node &node)> iterateTree = nullptr;
-	iterateTree = [&iterateTree,&shouldConsiderEntity,&scene,&cam,renderFlags,fShouldCull,&drawSceneInfo,&getRenderQueue,&vp,bspLeafNodes,bspTrees,lodBias,numEntitiesPerWorkerJob](const OcclusionOctree<CBaseEntity*>::Node &node) {
+	iterateTree = [&iterateTree,&shouldConsiderEntity,&scene,&cam,renderFlags,fShouldCull,&drawSceneInfo,&getRenderQueue,&vp,bspLeafNodes,bspTrees,lodBias,numEntitiesPerWorkerJob,baseSpecializationFlags](const OcclusionOctree<CBaseEntity*>::Node &node) {
 		auto &nodeBounds = node.GetWorldBounds();
 		if(fShouldCull && fShouldCull(nodeBounds.first,nodeBounds.second))
 			return;
@@ -305,7 +308,7 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 		{
 			auto iStart = i *numEntitiesPerWorkerJob;
 			auto iEnd = umath::min(static_cast<size_t>(iStart +numEntitiesPerWorkerJob),numObjects);
-			c_game->GetRenderQueueWorkerManager().AddJob([iStart,iEnd,&drawSceneInfo,shouldConsiderEntity,&objs,renderFlags,getRenderQueue,&scene,&cam,vp,fShouldCull,lodBias]() {
+			c_game->GetRenderQueueWorkerManager().AddJob([iStart,iEnd,&drawSceneInfo,shouldConsiderEntity,&objs,renderFlags,getRenderQueue,&scene,&cam,vp,fShouldCull,lodBias,baseSpecializationFlags]() {
 				// Note: We don't add individual items directly to the render queue, because that would invoke
 				// a mutex lock which can stall all of the worker threads.
 				// Instead we'll collect the entire batch of items, then add all of them to the render queue at once.
@@ -341,7 +344,7 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 						if(v.size() == v.capacity())
 							v.reserve(v.size() *1.1f +50);
 						v.push_back(item);
-					});
+					},baseSpecializationFlags);
 				}
 				for(auto &pair : items)
 					pair.first->Add(pair.second);

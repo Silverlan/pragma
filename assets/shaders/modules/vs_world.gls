@@ -18,6 +18,7 @@
 #include "../modules/vs_vertex_animation.gls"
 #include "../modules/light_map/vs_lightmap.gls"
 #include "../modules/vs_instanced_entity_data.gls"
+#include "../modules/vs_sky_camera.gls"
 #include "../math/depth_bias.gls"
 
 layout(location = SHADER_VERTEX_BUFFER_LOCATION) in vec3 in_vert_pos;
@@ -58,15 +59,12 @@ void export_world_fragment_data(mat4 mdlMatrix,vec3 vpos)
 	//mat4 MV = V *mdlMatrix;
 	//mat4 MVP = u_camera.P *MV;
 
-	vec4 vposWs = mdlMatrix *vertPos;
-	if(CSPEC_ENABLE_3D_ORIGIN == 1)
+	//if(CSPEC_ENABLE_3D_ORIGIN == 1)
 	{
 		if(is_3d_sky())
-		{
-			vposWs.xyz -= u_pushConstants.scene.drawOrigin.xyz;
-			vposWs.xyz *= u_pushConstants.scene.drawOrigin.w;
-		}
+			apply_sky_camera_transform(u_pushConstants.scene.drawOrigin,mdlMatrix);
 	}
+	vec4 vposWs = mdlMatrix *vertPos;
 
 	mat4 P = u_camera.P;
 	if(CSPEC_ENABLE_DEPTH_BIAS == 1)

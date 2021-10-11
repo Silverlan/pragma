@@ -16,6 +16,7 @@
 #include "pragma/lua/lad/generator.hpp"
 #include "pragma/lua/lad/repository_manager.hpp"
 #include "pragma/lua/lad/type_name_manager.hpp"
+#include "pragma/launchparameters.h"
 #include <util_pragma_doc.hpp>
 #include <pragma/util/util_game.hpp>
 #include <luasystem.h>
@@ -1648,6 +1649,16 @@ namespace Lua::doc
 {
 	void register_library(Lua::Interface &lua);
 };
+
+static void generate_launch_param_doc()
+{
+	// TODO
+}
+
+static void generate_convar_doc()
+{
+	// TODO
+}
 
 void Lua::doc::register_library(Lua::Interface &lua)
 {

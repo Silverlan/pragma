@@ -9,6 +9,7 @@
 #include "../../modules/vs_weighted.gls"
 #include "../../modules/vs_vertex_animation.gls"
 #include "../../modules/vs_instanced_entity_data.gls"
+#include "../../modules/vs_sky_camera.gls"
 #include "../../math/depth_bias.gls"
 
 layout(location = SHADER_VERTEX_BUFFER_LOCATION) in vec3 in_vert_pos;
@@ -40,12 +41,9 @@ void main()
 		normal = normalize((mBone *vec4(normal.xyz,0.0)).xyz);
 	}
 
-	vec4 vposWs = mdlMatrix *vertPos;
 	if(is_3d_sky())
-	{
-		vposWs.xyz -= u_pushConstants.scene.drawOrigin.xyz;
-		vposWs.xyz *= u_pushConstants.scene.drawOrigin.w;
-	}
+		apply_sky_camera_transform(u_pushConstants.scene.drawOrigin,mdlMatrix);
+	vec4 vposWs = mdlMatrix *vertPos;
 
 	mat4 P = u_camera.P;
 	if(u_pushConstants.scene.depthBias.x > 0.0)

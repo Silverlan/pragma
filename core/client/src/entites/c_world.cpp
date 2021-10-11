@@ -304,7 +304,7 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 			if(shader == nullptr)
 				continue;
 			uint32_t pipelineIdx = 0;
-			auto t = shader->FindPipelineIndex(pragma::ShaderPBR::PassType::Generic,renderC->GetShaderPipelineSpecialization(),shader->GetMaterialPipelineSpecializationRequirements(*mat));
+			auto t = shader->FindPipelineIndex(pragma::ShaderPBR::PassType::Generic,renderC->GetShaderPipelineSpecialization(),shader->GetMaterialPipelineSpecializationRequirements(*mat));// | pragma::GameShaderSpecializationConstantFlag::Enable3dOriginBit);
 			if(t.has_value())
 				pipelineIdx = *t;
 			prosper::PipelineID pipelineId;

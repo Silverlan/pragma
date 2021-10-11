@@ -32,6 +32,7 @@ namespace pragma
 	struct OcclusionMeshInfo;
 	using RenderMeshIndex = uint32_t;
 	namespace rendering {class RenderQueue; struct RenderQueueItem;};
+	enum class GameShaderSpecializationConstantFlag : uint32_t;
 };
 template<class T>
 	class OcclusionOctree;
@@ -66,7 +67,8 @@ public:
 		const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,
 		const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
 		const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,
-		int32_t lodBias=0,const std::function<void(pragma::rendering::RenderQueue&,const pragma::rendering::RenderQueueItem&)> &fOptInsertItemToQueue=nullptr
+		int32_t lodBias=0,const std::function<void(pragma::rendering::RenderQueue&,const pragma::rendering::RenderQueueItem&)> &fOptInsertItemToQueue=nullptr,
+		pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags=static_cast<pragma::GameShaderSpecializationConstantFlag>(0)
 	);
 	// Note: All arguments have to be thread safe for the duration of the render (except vp)
 	static void CollectRenderMeshesFromOctree(
@@ -74,7 +76,8 @@ public:
 		const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
 		const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,const std::vector<util::BSPTree*> *bspTrees=nullptr,const std::vector<util::BSPTree::Node*> *bspLeafNodes=nullptr,
 		int32_t lodBias=0,
-		const std::function<bool(CBaseEntity&,const pragma::CSceneComponent&,FRender)> &shouldConsiderEntity=nullptr
+		const std::function<bool(CBaseEntity&,const pragma::CSceneComponent&,FRender)> &shouldConsiderEntity=nullptr,
+		pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags=static_cast<pragma::GameShaderSpecializationConstantFlag>(0)
 	);
 	static bool ShouldConsiderEntity(CBaseEntity &ent,const pragma::CSceneComponent &scene,FRender renderFlags);
 	static bool ShouldCull(CBaseEntity &ent,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);
@@ -116,7 +119,8 @@ public:
 private:
 	void AddRenderMeshesToRenderQueue(
 		const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,
-		const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull
+		const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,
+		pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags=static_cast<pragma::GameShaderSpecializationConstantFlag>(0)
 	);
 	void CollectRenderMeshesFromOctree(
 		const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,

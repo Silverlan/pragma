@@ -32,6 +32,6 @@ void main()
 	fs_color = texture(u_texture,vs_vert_uv);
 
 	float d = texture(u_depthBuffer,vs_vert_uv).r;
-	float depthDist = get_depth_distance(d,u_renderSettings.nearZ,u_renderSettings.farZ) *2.0;
+	float depthDist = get_depth_distance(d,u_renderSettings.nearZ,u_renderSettings.farZ);
 	fs_color.rgb = calculate_fog(fs_color.rgb,depthDist);
 }

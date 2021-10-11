@@ -38,7 +38,7 @@ namespace Lua
 		static void IsFogEnabled(lua_State *l,::WorldEnvironment &worldEnv);
 		static void SetFogDensity(lua_State *l,::WorldEnvironment &worldEnv,float density);
 		static void GetFogDensity(lua_State *l,::WorldEnvironment &worldEnv);
-		static void SetFogType(lua_State *l,::WorldEnvironment &worldEnv,uint32_t type);
+		static void SetFogType(lua_State *l,::WorldEnvironment &worldEnv,util::FogType type);
 		static void GetFogType(lua_State *l,::WorldEnvironment &worldEnv);
 		static void GetFogFarDistance(lua_State *l,::WorldEnvironment &worldEnv);
 	};
@@ -100,9 +100,9 @@ void Lua::WorldEnvironment::register_class(luabind::class_<::WorldEnvironment> &
 		Lua::Property::push(l,*pEnv->GetFogSettings().GetEnabledProperty());
 	}));
 
-	classDef.add_static_constant("FOG_TYPE_LINEAR",umath::to_integral(::WorldEnvironment::Fog::Type::Linear));
-	classDef.add_static_constant("FOG_TYPE_EXPONENTIAL",umath::to_integral(::WorldEnvironment::Fog::Type::Exponential));
-	classDef.add_static_constant("FOG_TYPE_EXPONENTIAL2",umath::to_integral(::WorldEnvironment::Fog::Type::Exponential2));
+	classDef.add_static_constant("FOG_TYPE_LINEAR",umath::to_integral(util::FogType::Linear));
+	classDef.add_static_constant("FOG_TYPE_EXPONENTIAL",umath::to_integral(util::FogType::Exponential));
+	classDef.add_static_constant("FOG_TYPE_EXPONENTIAL2",umath::to_integral(util::FogType::Exponential2));
 }
 
 ////////////////////////////////
@@ -157,10 +157,10 @@ void Lua::WorldEnvironment::GetFogDensity(lua_State *l,::WorldEnvironment &world
 	auto &fog = worldEnv.GetFogSettings();
 	Lua::PushNumber(l,fog.GetMaxDensity());
 }
-void Lua::WorldEnvironment::SetFogType(lua_State *l,::WorldEnvironment &worldEnv,uint32_t type)
+void Lua::WorldEnvironment::SetFogType(lua_State *l,::WorldEnvironment &worldEnv,util::FogType type)
 {
 	auto &fog = worldEnv.GetFogSettings();
-	fog.SetType(static_cast<::WorldEnvironment::Fog::Type>(type));
+	fog.SetType(type);
 }
 void Lua::WorldEnvironment::GetFogType(lua_State *l,::WorldEnvironment &worldEnv)
 {

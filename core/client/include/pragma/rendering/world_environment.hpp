@@ -9,6 +9,7 @@
 #define __WORLD_ENVIRONMENT_HPP__
 
 #include "pragma/clientdefinitions.h"
+#include <pragma/util/util_game.hpp>
 #include <mathutil/color.h>
 #include <mathutil/glmutil.h>
 #include <memory>
@@ -32,12 +33,6 @@ public:
 	class DLLCLIENT Fog
 	{
 	public:
-		enum class DLLCLIENT Type : uint8_t
-		{
-			Linear = 0,
-			Exponential = 1,
-			Exponential2 = 2
-		};
 		Fog();
 
 		void SetColor(const Color &col);
@@ -56,8 +51,8 @@ public:
 		float GetMaxDensity() const;
 		const std::shared_ptr<util::FloatProperty> &GetMaxDensityProperty() const;
 
-		void SetType(Type type);
-		Type GetType() const;
+		void SetType(util::FogType type);
+		util::FogType GetType() const;
 		const std::shared_ptr<util::UInt8Property> &GetTypeProperty() const;
 
 		void SetEnabled(bool bEnabled);

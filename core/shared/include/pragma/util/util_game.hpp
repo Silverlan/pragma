@@ -49,6 +49,13 @@ namespace util
 		util::HairConfig m_hairConfig;
 		HairData m_hairData;
 	};
+
+	enum class FogType : uint8_t
+	{
+		Linear = 0,
+		Exponential = 1,
+		Exponential2 = 2
+	};
 };
 
 #endif

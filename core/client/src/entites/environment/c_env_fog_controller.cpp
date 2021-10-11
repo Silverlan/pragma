@@ -54,7 +54,7 @@ void CFogControllerComponent::OnEntitySpawn()
 
 	auto &ent = GetEntity();
 	auto &fog = GetFog();
-	fog.SetType(static_cast<WorldEnvironment::Fog::Type>(m_kvFogType));
+	fog.SetType(m_kvFogType);
 	auto pColComponent = ent.GetComponent<CColorComponent>();
 	if(pColComponent.valid())
 		fog.SetColor(pColComponent->GetColor());
@@ -67,7 +67,7 @@ void CFogControllerComponent::OnEntitySpawn()
 }
 void CFogControllerComponent::ReceiveData(NetPacket &packet)
 {
-	m_kvFogType = packet->Read<unsigned char>();
+	m_kvFogType = packet->Read<util::FogType>();
 	m_kvFogStart = packet->Read<float>();
 	m_kvFogEnd = packet->Read<float>();
 	m_kvMaxDensity = packet->Read<float>();
@@ -91,6 +91,11 @@ void CFogControllerComponent::SetMaxDensity(float density)
 {
 	BaseEnvFogControllerComponent::SetMaxDensity(density);
 	GetFog().SetMaxDensity(density);
+}
+void CFogControllerComponent::SetFogType(util::FogType type)
+{
+	BaseEnvFogControllerComponent::SetFogType(type);
+	GetFog().SetType(type);
 }
 void CFogControllerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 

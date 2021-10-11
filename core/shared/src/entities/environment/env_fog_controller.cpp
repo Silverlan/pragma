@@ -10,10 +10,55 @@
 #include "pragma/util/util_handled.hpp"
 #include "pragma/entities/components/basetoggle.h"
 #include "pragma/entities/baseentity_events.hpp"
+#include "pragma/entities/entity_component_manager_t.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
 
 using namespace pragma;
 
+void BaseEnvFogControllerComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+{
+	using T = BaseEnvFogControllerComponent;
+	
+	{
+		using TStart = float;
+		auto memberInfo = create_component_member_info<
+			T,TStart,
+			static_cast<void(T::*)(TStart)>(&T::SetFogStart),
+			static_cast<TStart(T::*)() const>(&T::GetFogStart)
+		>("start",500.f);
+		registerMember(std::move(memberInfo));
+	}
+	
+	{
+		using TEnd = float;
+		auto memberInfo = create_component_member_info<
+			T,TEnd,
+			static_cast<void(T::*)(TEnd)>(&T::SetFogEnd),
+			static_cast<TEnd(T::*)() const>(&T::GetFogEnd)
+		>("end",2'000.f);
+		registerMember(std::move(memberInfo));
+	}
+	
+	{
+		using TDensity = float;
+		auto memberInfo = create_component_member_info<
+			T,TDensity,
+			static_cast<void(T::*)(TDensity)>(&T::SetMaxDensity),
+			static_cast<TDensity(T::*)() const>(&T::GetMaxDensity)
+		>("density",1.f);
+		registerMember(std::move(memberInfo));
+	}
+	
+	{
+		using TType = util::FogType;
+		auto memberInfo = create_component_member_info<
+			T,TType,
+			static_cast<void(T::*)(TType)>(&T::SetFogType),
+			static_cast<TType(T::*)() const>(&T::GetFogType)
+		>("type",util::FogType::Linear);
+		registerMember(std::move(memberInfo));
+	}
+}
 void BaseEnvFogControllerComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
@@ -29,7 +74,7 @@ void BaseEnvFogControllerComponent::Initialize()
 		else if(ustring::compare<std::string>(kvData.key,"fogmaxdensity",false))
 			m_kvMaxDensity = util::to_float(kvData.value);
 		else if(ustring::compare<std::string>(kvData.key,"fogtype",false))
-			m_kvFogType = CUChar(util::to_int(kvData.value));
+			m_kvFogType = static_cast<util::FogType>(util::to_int(kvData.value));
 		else
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
@@ -65,7 +110,7 @@ void BaseEnvFogControllerComponent::SetMaxDensity(float density)
 {
 	m_kvMaxDensity = density;
 }
-void BaseEnvFogControllerComponent::SetFogType(unsigned char type)
+void BaseEnvFogControllerComponent::SetFogType(util::FogType type)
 {
 	m_kvFogType = type;
 }

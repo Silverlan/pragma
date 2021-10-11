@@ -15,7 +15,7 @@ WorldEnvironment::Fog::Fog()
 	m_start = std::make_shared<util::FloatProperty>(0.f);
 	m_end = std::make_shared<util::FloatProperty>(0.f);
 	m_maxDensity = std::make_shared<util::FloatProperty>(0.f);
-	m_type = std::make_shared<util::UInt8Property>(umath::to_integral(Type::Linear));
+	m_type = std::make_shared<util::UInt8Property>(umath::to_integral(util::FogType::Linear));
 	m_bEnabled = std::make_shared<util::BoolProperty>(false);
 }
 void WorldEnvironment::Fog::SetColor(const Color &col) {*m_color = col;}
@@ -34,8 +34,8 @@ void WorldEnvironment::Fog::SetMaxDensity(float density) {*m_maxDensity = densit
 float WorldEnvironment::Fog::GetMaxDensity() const {return *m_maxDensity;}
 const std::shared_ptr<util::FloatProperty> &WorldEnvironment::Fog::GetMaxDensityProperty() const {return m_maxDensity;}
 
-void WorldEnvironment::Fog::SetType(Type type) {*m_type = umath::to_integral(type);}
-WorldEnvironment::Fog::Type WorldEnvironment::Fog::GetType() const {return static_cast<Type>(static_cast<std::underlying_type_t<Type>>(*m_type));}
+void WorldEnvironment::Fog::SetType(util::FogType type) {*m_type = umath::to_integral(type);}
+util::FogType WorldEnvironment::Fog::GetType() const {return static_cast<util::FogType>(**m_type);}
 const std::shared_ptr<util::UInt8Property> &WorldEnvironment::Fog::GetTypeProperty() const {return m_type;}
 
 void WorldEnvironment::Fog::SetEnabled(bool bEnabled) {*m_bEnabled = bEnabled;}
@@ -53,9 +53,9 @@ float WorldEnvironment::Fog::GetFarDistance() const
 {
 	switch(GetType())
 	{
-	case Type::Exponential:
+	case util::FogType::Exponential:
 		return logf(1.f /0.0019f) /GetMaxDensity();
-	case Type::Exponential2:
+	case util::FogType::Exponential2:
 		return sqrtf(logf(1.f /0.0019f)) /GetMaxDensity();
 	}
 	return GetEnd();

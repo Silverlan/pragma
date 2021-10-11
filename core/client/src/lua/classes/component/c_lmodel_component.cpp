@@ -46,6 +46,8 @@ void Lua::ModelDef::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCModel.def("GetRenderMaterial",static_cast<CMaterial*(pragma::CModelComponent::*)(uint32_t,uint32_t) const>(&pragma::CModelComponent::GetRenderMaterial));
 	defCModel.def("GetRenderMaterial",static_cast<CMaterial*(pragma::CModelComponent::*)(uint32_t) const>(&pragma::CModelComponent::GetRenderMaterial));
 	defCModel.def("GetLOD",&pragma::CModelComponent::GetLOD);
+	defCModel.def("IsAutoLodEnabled",&pragma::CModelComponent::IsAutoLodEnabled);
+	defCModel.def("SetAutoLodEnabled",&pragma::CModelComponent::SetAutoLodEnabled);
 	defCModel.def("SetMaxDrawDistance",&pragma::CModelComponent::SetMaxDrawDistance);
 	defCModel.def("GetMaxDrawDistance",&pragma::CModelComponent::GetMaxDrawDistance);
 	defCModel.def("UpdateRenderMeshes",&pragma::CModelComponent::UpdateRenderMeshes);

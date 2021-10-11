@@ -59,25 +59,25 @@ void pragma::CRasterizationRendererComponent::RenderSceneFog(const util::DrawSce
 
 	auto &hdrTex = hdrInfo.sceneRenderTarget->GetTexture();
 	drawCmd->RecordImageBarrier(hdrTex.GetImage(),prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::ShaderReadOnlyOptimal);
+	drawCmd->RecordBufferBarrier(
+		*scene.GetCameraBuffer(),
+		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
+		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
+	);
+	drawCmd->RecordBufferBarrier(
+		*scene.GetRenderSettingsBuffer(),
+		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
+		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
+	);
+	drawCmd->RecordBufferBarrier(
+		*scene.GetFogBuffer(),
+		prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
+		prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
+	);
 	if(drawCmd->RecordBeginRenderPass(*hdrInfo.hdrPostProcessingRenderTarget) == true)
 	{
 		if(shaderFog.BeginDraw(drawCmd) == true)
 		{
-			drawCmd->RecordBufferBarrier(
-				*scene.GetCameraBuffer(),
-				prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
-				prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
-			);
-			drawCmd->RecordBufferBarrier(
-				*scene.GetRenderSettingsBuffer(),
-				prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
-				prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
-			);
-			drawCmd->RecordBufferBarrier(
-				*scene.GetFogBuffer(),
-				prosper::PipelineStageFlags::TransferBit,prosper::PipelineStageFlags::FragmentShaderBit,
-				prosper::AccessFlags::TransferWriteBit,prosper::AccessFlags::ShaderReadBit
-			);
 			shaderFog.Draw(
 				*hdrInfo.dsgHDRPostProcessing->GetDescriptorSet(),
 				*hdrInfo.dsgDepthPostProcessing->GetDescriptorSet(),

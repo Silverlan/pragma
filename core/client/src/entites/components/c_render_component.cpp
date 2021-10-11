@@ -646,7 +646,8 @@ void CRenderComponent::InitializeRenderBuffers()
 	// Initialize render buffer if it doesn't exist
 	if(m_renderBuffer != nullptr || pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE.IsValid() == false)
 		return;
-
+	
+	c_engine->GetRenderContext().WaitIdle();
 	m_renderBuffer = prosper::SwapBuffer::Create(*s_instanceBuffer);
 	m_renderDescSetGroup = prosper::SwapDescriptorSet::Create(c_engine->GetRenderContext(),pragma::ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
 	m_renderDescSetGroup->SetBindingUniformBuffer(
@@ -669,6 +670,7 @@ void CRenderComponent::UpdateBoneBuffer()
 	auto wpBoneBuffer = static_cast<pragma::CAnimatedComponent&>(*pAnimComponent).GetSwapBoneBuffer();
 	if(!wpBoneBuffer)
 		return;
+	c_engine->GetRenderContext().WaitIdle();
 	m_renderDescSetGroup->SetBindingUniformBuffer(
 		*wpBoneBuffer,umath::to_integral(pragma::ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices)
 	);

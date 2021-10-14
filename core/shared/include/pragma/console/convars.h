@@ -11,6 +11,7 @@
 #include <pragma/console/fcvar.h>
 #include "pragma/networkstate/networkstate.h"
 #include "pragma/lua/luafunction.h"
+#include <udm.hpp>
 
 enum class DLLNETWORK ConType : uint32_t
 {
@@ -22,6 +23,23 @@ enum class DLLNETWORK ConType : uint32_t
 
 	LuaCmd = 2,
 	LuaCommand = 2
+};
+
+using ConVarValue = std::unique_ptr<void,void(*)(void*)>;
+namespace console
+{
+	constexpr bool is_valid_convar_type(udm::Type type)
+	{
+		return !udm::is_non_trivial_type(type) || type == udm::Type::String;
+	}
+	template<typename T>
+		concept is_valid_convar_type_v = is_valid_convar_type(udm::type_to_enum<T>());
+
+	template<bool ENABLE_DEFAULT_RETURN=true>
+	constexpr decltype(auto) visit(udm::Type type,auto vs)
+	{
+		return udm::visit<true,true,true,ENABLE_DEFAULT_RETURN>(type,vs);
+	}
 };
 
 class ServerState;
@@ -37,11 +55,13 @@ public:
 protected:
 	ConConf(ConVarFlags flags=ConVarFlags::None);
 	std::string m_help;
+	std::string m_usageHelp;
 	ConType m_type;
 	uint32_t m_ID;
 	ConVarFlags m_flags;
 public:
 	const std::string &GetHelpText() const;
+	const std::string &GetUsageHelp() const;
 	ConType GetType() const;
 	virtual ConConf *Copy();
 	uint32_t GetID() const;
@@ -49,24 +69,31 @@ public:
 	ConVarFlags GetFlags() const;
 };
 
+DLLNETWORK ConVarValue create_convar_value(udm::Type type,const void *value);
+DLLNETWORK ConVarValue create_convar_value();
 class DLLNETWORK ConVar
 	: public ConConf
 {
 public:
 	friend CVarHandler;
 	friend NetworkState;
-	ConVar();
-	ConVar(const std::string &val,const std::string &help="");
-	ConVar(const std::string &val,ConVarFlags flags,const std::string &help="");
+	template<typename T>
+		static std::shared_ptr<ConVar> Create(const T &value,ConVarFlags flags,const std::string &help="",const std::string &usageHelp="")
+	{
+		return std::shared_ptr<ConVar>{new ConVar{udm::type_to_enum<T>(),&value,flags,help,usageHelp}};
+	}
 private:
-	std::string m_value;
-	std::string m_default;
+	ConVarValue m_value {nullptr,[](void*){}};
+	ConVarValue m_default {nullptr,[](void*){}};
+	udm::Type m_varType = udm::Type::Invalid;
 protected:
 	std::vector<int> m_callbacks;
 	void SetValue(const std::string &val);
 public:
-	const std::string &GetString() const;
-	const std::string &GetDefault() const;
+	ConVar(udm::Type type,const void *value,ConVarFlags flags,const std::string &help,const std::string &usageHelp);
+	std::string GetString() const;
+	std::string GetDefault() const;
+	udm::Type GetVarType() const {return m_varType;}
 	int32_t GetInt() const;
 	float GetFloat() const;
 	bool GetBool() const;
@@ -154,13 +181,20 @@ public:
 struct DLLNETWORK ConVarCreateInfo
 {
 	ConVarCreateInfo()=default;
-	ConVarCreateInfo(const std::string &name,const std::string &defaultValue,ConVarFlags flags={},const std::string &helpText="")
-		: name{name},defaultValue{defaultValue},flags{flags},helpText{helpText}
-	{}
+	ConVarCreateInfo(udm::Type type,const std::string &name,const void *pdefaultValue,ConVarFlags flags={},const std::string &helpText="",const std::string &usageHelp="")
+		: type{type},name{name},flags{flags},helpText{helpText},usageHelp{usageHelp}
+	{
+		console::visit(type,[this,type,pdefaultValue](auto tag) {
+			using T = decltype(tag)::type;
+			defaultValue = create_convar_value(type,pdefaultValue);
+		});
+	}
+	udm::Type type = udm::Type::Invalid;
 	std::string name = {};
-	std::string defaultValue = {};
+	ConVarValue defaultValue {nullptr,[](void*) {}};
 	ConVarFlags flags = {};
 	std::string helpText = {};
+	std::string usageHelp = {};
 };
 
 struct DLLNETWORK ConCommandCreateInfo
@@ -186,14 +220,23 @@ private:
 	std::unordered_map<unsigned int,std::string> m_conVarIdentifiers;
 	unsigned int m_conVarID;
 	std::unordered_map<std::string,std::vector<std::shared_ptr<CvarCallbackFunction>>> m_conVarCallbacks;
+
+	std::shared_ptr<ConVar> RegisterConVar(
+		const std::string &scmd,udm::Type type,const void *value,ConVarFlags flags,const std::string &help="",const std::optional<std::string> &usageHelp={},
+		std::function<void(const std::string&,std::vector<std::string>&)> autoCompleteFunction=nullptr
+	);
 public:
 	std::shared_ptr<ConCommand> PreRegisterConCommand(const std::string &scmd,ConVarFlags flags,const std::string &help="");
 	void PreRegisterConVarCallback(const std::string &scvar);
 
+	template<typename T>
 	std::shared_ptr<ConVar> RegisterConVar(
-		const std::string &scmd,const std::string &value,ConVarFlags flags,const std::string &help="",
+		const std::string &scmd,const T &value,ConVarFlags flags,const std::string &help="",const std::optional<std::string> &usageHelp={},
 		std::function<void(const std::string&,std::vector<std::string>&)> autoCompleteFunction=nullptr
-	);
+	)
+	{
+		return RegisterConVar(scmd,udm::type_to_enum<T>(),&value,flags,help,usageHelp,autoCompleteFunction);
+	}
 	std::shared_ptr<ConVar> RegisterConVar(const ConVarCreateInfo &createInfo);
 	std::shared_ptr<ConCommand> RegisterConCommand(
 		const std::string &scmd,const std::function<void(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&,float)> &fc,

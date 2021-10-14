@@ -1655,9 +1655,105 @@ static void generate_launch_param_doc()
 	// TODO
 }
 
-static void generate_convar_doc()
+enum class CvarStateFlag : uint32_t
 {
-	// TODO
+	None = 0,
+	Engine,
+	Client,
+	Server
+};
+REGISTER_BASIC_BITWISE_OPERATORS(CvarStateFlag)
+static std::string generate_convar_doc()
+{
+	auto *en = pragma::get_engine();
+	if(!en)
+		return "";
+	struct CvarInfo
+	{
+		std::string name;
+		CvarStateFlag stateFlags = CvarStateFlag::None;
+		std::shared_ptr<ConConf> cvar;
+	};
+	std::unordered_map<std::string,CvarInfo> uniqueCvarList;
+	auto getAllVars = [&uniqueCvarList](ConVarMap &cvMap,CvarStateFlag flag) {
+		auto &cvars = cvMap.GetConVars();
+		uniqueCvarList.reserve(uniqueCvarList.size() +cvars.size());
+		for(auto &pair : cvars)
+		{
+			auto it = uniqueCvarList.find(pair.first);
+			if(it == uniqueCvarList.end())
+				it = uniqueCvarList.insert(std::make_pair(pair.first,CvarInfo{})).first;
+			it->second.name = pair.first;
+			it->second.stateFlags |= flag;
+			it->second.cvar = pair.second;
+		}
+	};
+	auto *cvMap = en->GetConVarMap();
+	if(cvMap)
+		getAllVars(*cvMap,CvarStateFlag::Engine);
+
+	auto *sv = en->GetServerNetworkState();
+	auto *svMap = sv ? sv->GetConVarMap() : nullptr;
+	if(svMap)
+		getAllVars(*svMap,CvarStateFlag::Server);
+	
+	auto *cl = en->GetClientState();
+	auto *clMap = cl ? cl->GetConVarMap() : nullptr;
+	if(clMap)
+		getAllVars(*clMap,CvarStateFlag::Client);
+
+
+	std::vector<std::string> cvarNames;
+	std::vector<std::string> cmdNames;
+	for(auto &pair : uniqueCvarList)
+	{
+		auto &cvarInfo = pair.second;
+		if(cvarInfo.cvar->GetType() == ConType::Variable)
+			cvarNames.push_back(cvarInfo.name);
+		else if(cvarInfo.cvar->GetType() == ConType::Command)
+			cmdNames.push_back(cvarInfo.name);
+	}
+	std::sort(cvarNames.begin(),cvarNames.end());
+	std::sort(cmdNames.begin(),cmdNames.end());
+
+	auto getConVar = [&uniqueCvarList](const std::string &name) -> std::shared_ptr<ConConf> {
+		auto it = uniqueCvarList.find(name);
+		assert(it != uniqueCvarList.end());
+		return it->second.cvar;
+	};
+
+	auto replaceSpecialChars = [](std::string &str) {
+		ustring::replace(str,"<","&lt;");
+		ustring::replace(str,">","&gt;");
+	};
+	auto listToStr = [&getConVar,&replaceSpecialChars](const std::vector<std::string> &list,std::stringstream &ss,bool isVar) {
+		for(auto name : list)
+		{
+			auto cf = getConVar(name);
+			replaceSpecialChars(name);
+			auto help = cf->GetUsageHelp();
+			if(isVar && help.empty())
+				help = "<value>";
+			replaceSpecialChars(help);
+			ss<<"<h5>"<<name<<" "<<help<<"</h5>\n";
+			ss<<"<p>";
+			if(cf->GetType() == ConType::Variable)
+			{
+				auto &cv = *static_cast<ConVar*>(cf.get());
+				ss<<"<strong>Type:</strong> "<<magic_enum::enum_name(cv.GetVarType())<<"</p>\n";
+			}
+			auto helpText = cf->GetHelpText();
+			replaceSpecialChars(helpText);
+			ss<<"<p>"<<helpText<<"</p>\n";
+		}
+	};
+	std::stringstream ss;
+	ss<<"<h1>Variables</h1>\n";
+	listToStr(cvarNames,ss,true);
+
+	ss<<"\n<h1>Commands</h1>\n";
+	listToStr(cmdNames,ss,false);
+	return ss.str();
 }
 
 void Lua::doc::register_library(Lua::Interface &lua)
@@ -1687,7 +1783,8 @@ void Lua::doc::register_library(Lua::Interface &lua)
 		})),
 		luabind::def("generate_zerobrane_autocomplete_script",static_cast<void(*)(lua_State*)>([](lua_State *l) {
 			Lua::doc::generate_autocomplete_script();
-		}))
+		})),
+		luabind::def("generate_convar_documentation",generate_convar_doc)
 	];
 	Lua::RegisterLibraryEnums(l,libName,{
 		{"GAME_STATE_FLAG_NONE",umath::to_integral(pragma::doc::GameStateFlags::None)},

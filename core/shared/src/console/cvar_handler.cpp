@@ -71,7 +71,7 @@ std::shared_ptr<ConVar> CVarHandler::RegisterConVar(const std::string &scmd,cons
 			return nullptr;
 		return std::static_pointer_cast<ConVar>(it->second);
 	}
-	it = m_conVars.insert(decltype(m_conVars)::value_type(scmd,std::make_shared<ConVar>(value,flags,help))).first;
+	it = m_conVars.insert(decltype(m_conVars)::value_type(scmd,ConVar::Create<std::string>(value,flags,help))).first;
 	return std::static_pointer_cast<ConVar>(it->second);
 }
 std::shared_ptr<ConCommand> CVarHandler::RegisterConCommand(const std::string &scmd,const std::function<void(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::string>&,float)> &fc,ConVarFlags flags,const std::string &help)

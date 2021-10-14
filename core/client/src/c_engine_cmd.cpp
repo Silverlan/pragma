@@ -61,16 +61,22 @@ void CEngine::RegisterConsoleCommands()
 			autoCompleteOptions.push_back(fullPath);
 		}
 	});
-	conVarMap.RegisterConVar("cl_downscale_imported_high_resolution_rma_textures","1",ConVarFlags::Archive,"If enabled, imported high-resolution RMA textures will be downscaled to a more memory-friendly size.");
+	conVarMap.RegisterConVar<bool>(
+		"cl_downscale_imported_high_resolution_rma_textures",true,ConVarFlags::Archive,
+		"If enabled, imported high-resolution RMA textures will be downscaled to a more memory-friendly size."
+	);
 	conVarMap.RegisterConVarCallback("cl_downscale_imported_high_resolution_rma_textures",std::function<void(NetworkState*,ConVar*,bool,bool)>{[](
 		NetworkState *nw,ConVar *cv,bool oldVal,bool newVal) -> void {
 			static_cast<CMaterialManager&>(static_cast<ClientState*>(nw)->GetMaterialManager()).SetDownscaleImportedRMATextures(newVal);
 	}});
-	conVarMap.RegisterConVar("render_debug_mode","0",ConVarFlags::None,"0 = Disabled, 1 = Ambient Occlusion, 2 = Albedo Colors, 3 = Metalness, 4 = Roughness, 5 = Diffuse Lighting, 6 = Normals, 7 = Normal Map, 8 = Reflectance, 9 = IBL Prefilter, 10 = IBL Irradiance, 11 = Emission, 12 = Lightmaps, 13 = Lightmap Uvs, 14 = Unlit, 15 = Show CSM cascades, 16 = Shadow Map Depth, 17 = Forward+ Heatmap.");
-	conVarMap.RegisterConVar("render_ibl_enabled","1",ConVarFlags::Archive,"Enables or disables image-based lighting.");
-	conVarMap.RegisterConVar("render_dynamic_lighting_enabled","1",ConVarFlags::Archive,"Enables or disables dynamic lighting.");
-	conVarMap.RegisterConVar("render_dynamic_shadows_enabled","1",ConVarFlags::Archive,"Enables or disables dynamic shadows.");
-	conVarMap.RegisterConVar("render_api","vulkan",ConVarFlags::Archive | ConVarFlags::Replicated,"The underlying rendering API to use.",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
+	conVarMap.RegisterConVar<bool>(
+		"render_debug_mode",false,ConVarFlags::None,
+		"0 = Disabled, 1 = Ambient Occlusion, 2 = Albedo Colors, 3 = Metalness, 4 = Roughness, 5 = Diffuse Lighting, 6 = Normals, 7 = Normal Map, 8 = Reflectance, 9 = IBL Prefilter, 10 = IBL Irradiance, 11 = Emission, 12 = Lightmaps, 13 = Lightmap Uvs, 14 = Unlit, 15 = Show CSM cascades, 16 = Shadow Map Depth, 17 = Forward+ Heatmap."
+	);
+	conVarMap.RegisterConVar<bool>("render_ibl_enabled",true,ConVarFlags::Archive,"Enables or disables image-based lighting.");
+	conVarMap.RegisterConVar<bool>("render_dynamic_lighting_enabled",true,ConVarFlags::Archive,"Enables or disables dynamic lighting.");
+	conVarMap.RegisterConVar<bool>("render_dynamic_shadows_enabled",true,ConVarFlags::Archive,"Enables or disables dynamic shadows.");
+	conVarMap.RegisterConVar<std::string>("render_api","vulkan",ConVarFlags::Archive | ConVarFlags::Replicated,"The underlying rendering API to use.","<renderApi>",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
 		auto renderAPIs = pragma::rendering::get_available_graphics_apis();
 		auto it = renderAPIs.begin();
 		std::vector<std::string_view> similarCandidates {};
@@ -101,7 +107,7 @@ void CEngine::RegisterConsoleCommands()
 		auto full = util::to_boolean(pragma::console::get_command_option_parameter_value(commandOptions,"full","0"));
 		debug_render_stats(true,full,true,false);
 	},ConVarFlags::None,"Prints information about the next frame.");
-	conVarMap.RegisterConVar("render_multithreaded_rendering_enabled","1",ConVarFlags::Archive,"Enables or disables multi-threaded rendering. Some renderers (like OpenGL) don't support multi-threaded rendering and will ignore this flag.");
+	conVarMap.RegisterConVar<bool>("render_multithreaded_rendering_enabled",true,ConVarFlags::Archive,"Enables or disables multi-threaded rendering. Some renderers (like OpenGL) don't support multi-threaded rendering and will ignore this flag.");
 	conVarMap.RegisterConVarCallback("render_multithreaded_rendering_enabled",std::function<void(NetworkState*,ConVar*,bool,bool)>{[this](
 		NetworkState *nw,ConVar *cv,bool,bool enabled) -> void {
 			GetRenderContext().SetMultiThreadedRenderingEnabled(enabled);
@@ -200,15 +206,15 @@ void CEngine::RegisterConsoleCommands()
 		}
 		Con::cout<<"Done! Written shader files to '"<<path<<"'!"<<Con::endl;
 	},ConVarFlags::None,"Dumps the glsl code for the specified shader.");
-	conVarMap.RegisterConVar("debug_hide_gui","0",ConVarFlags::None,"Disables GUI rendering.");
+	conVarMap.RegisterConVar<bool>("debug_hide_gui",false,ConVarFlags::None,"Disables GUI rendering.");
 
-	conVarMap.RegisterConVar("render_vsync_enabled","1",ConVarFlags::Archive,"Enables or disables vsync. OpenGL only.");
+	conVarMap.RegisterConVar<bool>("render_vsync_enabled",true,ConVarFlags::Archive,"Enables or disables vsync. OpenGL only.");
 	conVarMap.RegisterConVarCallback("render_vsync_enabled",std::function<void(NetworkState*,ConVar*,bool,bool)>{[this](
 		NetworkState *nw,ConVar *cv,bool oldVal,bool newVal) -> void {
 			GetRenderContext().GetWindow()->SetVSyncEnabled(newVal);
 	}});
 
-	conVarMap.RegisterConVar("audio_api","fmod",ConVarFlags::Archive | ConVarFlags::Replicated,"The underlying audio API to use.",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
+	conVarMap.RegisterConVar<std::string>("audio_api","fmod",ConVarFlags::Archive | ConVarFlags::Replicated,"The underlying audio API to use.","<audioApi>",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
 		auto audioAPIs = pragma::audio::get_available_audio_apis();
 		auto it = audioAPIs.begin();
 		std::vector<std::string_view> similarCandidates {};
@@ -229,11 +235,25 @@ void CEngine::RegisterConsoleCommands()
 		}
 	});
 	
-	conVarMap.RegisterConVar("render_instancing_threshold","2",ConVarFlags::Archive,"The threshold at which to start instancing entities if instanced rendering is enabled (render_instancing_threshold). Must not be lower than 2!");
-	conVarMap.RegisterConVar("render_instancing_enabled","0",ConVarFlags::Archive,"Enables or disables instanced rendering.");
-	conVarMap.RegisterConVar("render_queue_worker_thread_count","3",ConVarFlags::Archive,"Number of threads to use for generating render queues.");
-	conVarMap.RegisterConVar("render_queue_entities_per_worker_job","5",ConVarFlags::Archive,"Number of entities for each job processed by a worker thread.");
-	conVarMap.RegisterConVar("render_queue_worker_jobs_per_batch","2",ConVarFlags::Archive,"Number of worker jobs to accumulate in a batch before assigning a worker.");
+	conVarMap.RegisterConVar<uint32_t>(
+		"render_instancing_threshold",2,ConVarFlags::Archive,
+		"The threshold at which to start instancing entities if instanced rendering is enabled (render_instancing_threshold). Must not be lower than 2!",
+		"[2,inf]"
+	);
+	conVarMap.RegisterConVar<bool>("render_instancing_enabled",false,ConVarFlags::Archive,"Enables or disables instanced rendering.");
+	conVarMap.RegisterConVar<uint32_t>(
+		"render_queue_worker_thread_count",3,ConVarFlags::Archive,
+		"Number of threads to use for generating render queues.",
+		"[1,10]"
+	);
+	conVarMap.RegisterConVar<uint32_t>(
+		"render_queue_entities_per_worker_job",5,ConVarFlags::Archive,"Number of entities for each job processed by a worker thread.",
+		"[1,50]"
+	);
+	conVarMap.RegisterConVar<uint32_t>(
+		"render_queue_worker_jobs_per_batch",2,ConVarFlags::Archive,"Number of worker jobs to accumulate in a batch before assigning a worker.",
+		"[0,10]"
+	);
 	
 	conVarMap.RegisterConCommand("debug_textures",[this](NetworkState *state,pragma::BasePlayerComponent*,std::vector<std::string> &argv,float) {
 		auto &texManager = static_cast<CMaterialManager&>(static_cast<ClientState*>(GetClientState())->GetMaterialManager()).GetTextureManager();

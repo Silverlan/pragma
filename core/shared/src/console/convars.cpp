@@ -9,11 +9,12 @@
 #include "pragma/networkstate/networkstate.h"
 #include <pragma/console/convars.h>
 #include <pragma/console/conout.h>
-
+#pragma optimize("",off)
 ConConf::ConConf(ConVarFlags flags)
 	: m_help(""),m_ID(0),m_type(ConType::Var),m_flags(flags)
 {}
 const std::string &ConConf::GetHelpText() const {return m_help;}
+const std::string &ConConf::GetUsageHelp() const {return m_usageHelp;}
 ConType ConConf::GetType() const {return m_type;}
 ConConf *ConConf::Copy() {return nullptr;}
 uint32_t ConConf::GetID() const {return m_ID;}
@@ -57,36 +58,90 @@ void ConConf::Print(const std::string &name)
 
 //////////////////////////////////
 
-ConVar::ConVar()
-	: ConConf()
+ConVarValue create_convar_value(udm::Type type,const void *value)
 {
+	if(!value)
+		return ConVarValue{nullptr,[](void*){}};
+	return console::visit<false>(type,[type,value](auto tag) -> ConVarValue {
+		using T = decltype(tag)::type;
+		if constexpr(console::is_valid_convar_type_v<T>)
+		{
+			return ConVarValue{new T{*static_cast<const T*>(value)},[](void *val) {
+				delete static_cast<T*>(val);
+			}};
+		}
+		else
+			return create_convar_value();
+	});
+}
+ConVarValue create_convar_value() {return create_convar_value(udm::Type::Invalid,nullptr);}
+ConVar::ConVar(udm::Type type,const void *value,ConVarFlags flags,const std::string &help,const std::string &usageHelp)
+	: ConConf{},m_varType{type}
+{
+	assert(value != nullptr);
 	m_type = ConType::Var;
-}
-ConVar::ConVar(const std::string &val,ConVarFlags flags,const std::string &help)
-	: ConConf(flags)
-{
-	m_type = ConType::Var;
-	m_value = val;
-	m_default = val;
 	m_help = help;
+	m_usageHelp = usageHelp;
+	m_value = create_convar_value(type,value);
+	m_default = create_convar_value(type,value);
 }
-ConVar::ConVar(const std::string &val,const std::string &help)
-	: ConVar()
+void ConVar::SetValue(const std::string &val)
 {
-	m_value = val;
-	m_default = val;
-	m_help = help;
+	console::visit(m_varType,[this,&val](auto tag) {
+		using T = decltype(tag)::type;
+		if constexpr(udm::is_convertible<std::string,T>())
+			*static_cast<T*>(m_value.get()) = udm::convert<std::string,T>(val);
+	});
 }
-void ConVar::SetValue(const std::string &val) {m_value = val;}
-const std::string &ConVar::GetString() const {return m_value;}
-const std::string &ConVar::GetDefault() const {return m_default;}
-int32_t ConVar::GetInt() const {return atoi(m_value.c_str());}
-float ConVar::GetFloat() const {return static_cast<float>(atof(m_value.c_str()));}
-bool ConVar::GetBool() const {return (!m_value.empty() && m_value != "0") ? true : false;}
+std::string ConVar::GetString() const
+{
+	return console::visit(m_varType,[this](auto tag) {
+		using T = decltype(tag)::type;
+		if constexpr(udm::is_convertible<T,std::string>())
+			return udm::convert<T,std::string>(*static_cast<T*>(m_value.get()));
+		return std::string{};
+	});
+}
+std::string ConVar::GetDefault() const
+{
+	return console::visit(m_varType,[this](auto tag) {
+		using T = decltype(tag)::type;
+		if constexpr(udm::is_convertible<T,std::string>())
+			return udm::convert<T,std::string>(*static_cast<T*>(m_default.get()));
+		return std::string{};
+	});
+}
+int32_t ConVar::GetInt() const
+{
+	return console::visit(m_varType,[this](auto tag) {
+		using T = decltype(tag)::type;
+		if constexpr(udm::is_convertible<T,int32_t>())
+			return udm::convert<T,int32_t>(*static_cast<T*>(m_value.get()));
+		return 0;
+	});
+}
+float ConVar::GetFloat() const
+{
+	return console::visit(m_varType,[this](auto tag) {
+		using T = decltype(tag)::type;
+		if constexpr(udm::is_convertible<T,float>())
+			return udm::convert<T,float>(*static_cast<T*>(m_value.get()));
+		return 0.f;
+	});
+}
+bool ConVar::GetBool() const
+{
+	return console::visit(m_varType,[this](auto tag) {
+		using T = decltype(tag)::type;
+		if constexpr(udm::is_convertible<T,bool>())
+			return udm::convert<T,bool>(*static_cast<T*>(m_value.get()));
+		return false;
+	});
+}
 void ConVar::AddCallback(int function) {m_callbacks.push_back(function);}
 ConConf *ConVar::Copy()
 {
-	ConVar *cvar = new ConVar(m_value,m_flags,m_help);
+	auto *cvar = new ConVar{m_varType,m_value.get(),m_flags,m_help,m_usageHelp};
 	cvar->m_ID = m_ID;
 	return static_cast<ConConf*>(cvar);
 }
@@ -249,7 +304,7 @@ DLLNETWORK ConVarMap *g_ConVars##suffix = nullptr; \
 bool console_system::glname::register_convar(const std::string &cvar,const std::string &value,ConVarFlags flags,const std::string &help) \
 { \
 	initialize_convar_map(g_ConVars##suffix); \
-	g_ConVars##suffix->RegisterConVar(cvar,value,flags,help); \
+	g_ConVars##suffix->RegisterConVar<std::string>(cvar,value,flags,help); \
 	return true; \
 } \
 bool console_system::glname::register_convar_callback(const std::string &scvar,int) \
@@ -317,13 +372,24 @@ ConVarMap::ConVarMap()
 	: m_conVarID(1)
 {}
 
-std::shared_ptr<ConVar> ConVarMap::RegisterConVar(const std::string &scmd,const std::string &value,ConVarFlags flags,const std::string &help,std::function<void(const std::string&,std::vector<std::string>&)> autoCompleteFunction)
+std::shared_ptr<ConVar> ConVarMap::RegisterConVar(
+	const std::string &scmd,udm::Type type,const void *value,ConVarFlags flags,const std::string &help,const std::optional<std::string> &optUsageHelp,
+	std::function<void(const std::string&,std::vector<std::string>&)> autoCompleteFunction
+)
 {
 	auto lscmd = scmd;
 	ustring::to_lower(lscmd);
 	if(m_conVars.find(lscmd) != m_conVars.end())
 		return nullptr;
-	auto cv = std::make_shared<ConVar>(value,flags,help);
+	std::string usageHelp;
+	if(optUsageHelp.has_value())
+		usageHelp = *optUsageHelp;
+	else if(type == udm::Type::Boolean)
+		usageHelp = "1/0";
+	auto cv = console::visit(type,[value,flags,&help,&usageHelp](auto tag) {
+		using T = decltype(tag)::type;
+		return ConVar::Create<T>(*static_cast<const T*>(value),flags,help,usageHelp);
+	});
 	cv->m_ID = m_conVarID;
 	m_conVars.insert(std::map<std::string,std::shared_ptr<ConConf>>::value_type(lscmd,cv));
 	m_conVarIDs.insert(std::unordered_map<std::string,unsigned int>::value_type(lscmd,m_conVarID));
@@ -334,7 +400,7 @@ std::shared_ptr<ConVar> ConVarMap::RegisterConVar(const std::string &scmd,const 
 
 std::shared_ptr<ConVar> ConVarMap::RegisterConVar(const ConVarCreateInfo &createInfo)
 {
-	return RegisterConVar(createInfo.name,createInfo.defaultValue,createInfo.flags,createInfo.helpText);
+	return RegisterConVar(createInfo.name,createInfo.type,createInfo.defaultValue.get(),createInfo.flags,createInfo.helpText,createInfo.usageHelp);
 }
 
 template<class T>
@@ -474,3 +540,4 @@ bool ConVarMap::GetConVarIdentifier(unsigned int ID,std::string **str)
 	*str = &it->second;
 	return true;
 }
+#pragma optimize("",on)

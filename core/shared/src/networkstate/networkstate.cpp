@@ -662,7 +662,7 @@ ConVar *NetworkState::CreateConVar(const std::string &scmd,const std::string &va
 			return nullptr;
 		return static_cast<ConVar*>(cf.get());
 	}
-	auto itNew = m_conVars.insert(decltype(m_conVars)::value_type(scmd,std::make_shared<ConVar>(value,flags,help)));
+	auto itNew = m_conVars.insert(decltype(m_conVars)::value_type(scmd,ConVar::Create<std::string>(value,flags,help)));
 	return static_cast<ConVar*>(itNew.first->second.get());
 }
 

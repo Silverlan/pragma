@@ -84,6 +84,7 @@ ConVar::ConVar(udm::Type type,const void *value,ConVarFlags flags,const std::str
 	m_usageHelp = usageHelp;
 	m_value = create_convar_value(type,value);
 	m_default = create_convar_value(type,value);
+	m_flags = flags;
 }
 void ConVar::SetValue(const std::string &val)
 {

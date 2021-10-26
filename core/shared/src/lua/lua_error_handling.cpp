@@ -20,7 +20,7 @@
 #include <stack>
 
 extern DLLNETWORK Engine *engine;
-
+#pragma optimize("",off)
 static void print_lua_error_message(lua_State *l,const std::stringstream &ssMsg)
 {
 	auto colorMode = Lua::GetErrorColorMode(l);
@@ -212,7 +212,7 @@ bool Lua::get_callstack(lua_State *l,std::stringstream &ss)
 				break;
 			}
 			else
-				ss<<"\n"<<t<<level<<": "<<(d.name != nullptr ? d.name : "?")<<"["<<d.linedefined<<":"<<d.lastlinedefined<<"] ["<<d.what<<":"<<d.namewhat<<"] : "<<d.short_src<<":"<<d.currentline;
+				ss<<"\n"<<t<<level<<": "<<(d.name != nullptr ? d.name : "?")<<"["<<d.linedefined<<":"<<d.lastlinedefined<<"] ["<<d.what<<":"<<d.namewhat<<"] : "<<d.source<<":"<<d.currentline;
 		}
 		++level;
 		r = lua_getstack(l,level,&d);
@@ -459,3 +459,4 @@ void Lua::initialize_error_handler()
 		});
 	});
 }
+#pragma optimize("",on)

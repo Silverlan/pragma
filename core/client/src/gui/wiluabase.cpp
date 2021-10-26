@@ -97,8 +97,8 @@ void WILuaBase::SetSize(int x,int y)
 }
 void WILuaBase::OnVisibilityChanged(bool bVisible)
 {
-	if(bVisible == *GetVisibilityProperty())
-		return;
+	// if(bVisible == *GetVisibilityProperty())
+	// 	return;
 	WIBase::OnVisibilityChanged(bVisible);
 	CallLuaMember<void,bool>("OnVisibilityChanged",bVisible);
 }

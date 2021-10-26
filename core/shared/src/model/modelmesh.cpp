@@ -10,7 +10,7 @@
 #include <mathutil/uvec.h>
 #include <pragma/math/intersection.h>
 #include <udm.hpp>
-
+#pragma optimize("",off)
 ModelMesh::ModelMesh()
 	: std::enable_shared_from_this<ModelMesh>(),m_numVerts(0),m_numTriangleVerts(0)
 {}
@@ -310,7 +310,7 @@ void ModelSubMesh::Merge(const ModelSubMesh &other)
 			m_triangles->push_back(vertCount +idx);
 	}
 
-	if(other.m_alphas != nullptr)
+	if(other.m_alphas != nullptr && ((m_alphas && !m_alphas->empty()) || !other.m_alphas->empty()))
 	{
 		if(m_alphas == nullptr)
 			m_alphas = std::make_shared<std::vector<Vector2>>();
@@ -320,7 +320,7 @@ void ModelSubMesh::Merge(const ModelSubMesh &other)
 			m_alphas->push_back(alpha);
 	}
 
-	if(other.m_vertexWeights != nullptr)
+	if(other.m_vertexWeights != nullptr && ((m_vertexWeights && !m_vertexWeights->empty()) || !other.m_vertexWeights->empty()))
 	{
 		if(m_vertexWeights == nullptr)
 			m_vertexWeights = std::make_shared<std::vector<umath::VertexWeight>>();
@@ -330,7 +330,7 @@ void ModelSubMesh::Merge(const ModelSubMesh &other)
 			m_vertexWeights->push_back(vw);
 	}
 
-	if(other.m_extendedVertexWeights != nullptr)
+	if(other.m_extendedVertexWeights != nullptr && ((m_extendedVertexWeights && !m_extendedVertexWeights->empty()) || !other.m_extendedVertexWeights->empty()))
 	{
 		if(m_extendedVertexWeights == nullptr)
 			m_extendedVertexWeights = std::make_shared<std::vector<umath::VertexWeight>>();
@@ -863,3 +863,4 @@ std::ostream &operator<<(std::ostream &out,const ModelSubMesh &o)
 	out<<"[Bounds:("<<min<<")("<<max<<")]";
 	return out;
 }
+#pragma optimize("",on)

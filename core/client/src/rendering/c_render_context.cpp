@@ -159,6 +159,8 @@ void RenderContext::ValidationCallback(
 			return;
 
 		auto p = strMsg.find("[ VUID-");
+		if(p == std::string::npos)
+			p = strMsg.find("[ UNASSIGNED");
 		if(p != std::string::npos)
 		{
 			p += 2;

@@ -59,6 +59,7 @@
 #include <cmaterialmanager.h>
 #include <impl_texture_formats.h>
 #include <prosper_window.hpp>
+#include <prosper_command_buffer.hpp>
 #include <luabind/copy_policy.hpp>
 
 extern DLLCLIENT CGame *c_game;
@@ -90,6 +91,9 @@ static void register_gui(Lua::Interface &lua)
 		luabind::def("register",&Lua::gui::register_element),
 		luabind::def("get_base_element",static_cast<::WIBase*(*)(const prosper::Window&)>(&Lua::gui::get_base_element)),
 		luabind::def("get_base_element",static_cast<::WIBase*(*)()>(&Lua::gui::get_base_element)),
+			
+		luabind::def("create_render_target",&Lua::gui::create_render_target),
+		luabind::def("create_color_image",&Lua::gui::create_color_image),
 		
 		luabind::def("get_element_at_position",static_cast<::WIBase*(*)(lua_State*)>(&Lua::gui::get_element_at_position)),
 		luabind::def("get_element_at_position",static_cast<::WIBase*(*)(lua_State*,prosper::Window*)>(&Lua::gui::get_element_at_position)),
@@ -218,6 +222,17 @@ static void register_gui(Lua::Interface &lua)
 	auto wiElementClassDef = luabind::class_<::WIBase>("Element");
 	Lua::WIBase::register_class(wiElementClassDef);
 	guiMod[wiElementClassDef];
+
+
+	auto defDrawToTex = luabind::class_<Lua::gui::DrawToTextureInfo>("DrawToTextureInfo");
+	defDrawToTex.def(luabind::constructor<>());
+	defDrawToTex.def_readwrite("enableMsaa",&Lua::gui::DrawToTextureInfo::enableMsaa);
+	defDrawToTex.def_readwrite("width",&Lua::gui::DrawToTextureInfo::width);
+	defDrawToTex.def_readwrite("height",&Lua::gui::DrawToTextureInfo::height);
+	defDrawToTex.def_readwrite("clearColor",&Lua::gui::DrawToTextureInfo::clearColor);
+	defDrawToTex.def_readwrite("resolvedImage",&Lua::gui::DrawToTextureInfo::resolvedImage);
+	defDrawToTex.def_readwrite("commandBuffer",&Lua::gui::DrawToTextureInfo::commandBuffer);
+	guiMod[defDrawToTex];
 
 	// Custom Classes
 	auto wiBaseWIElement = luabind::class_<WILuaBase,luabind::bases<WIBase>,pragma::lua::WILuaBaseHolder>("Base");

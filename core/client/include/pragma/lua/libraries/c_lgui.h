@@ -11,10 +11,21 @@
 #include "pragma/clientdefinitions.h"
 #include <pragma/lua/ldefinitions.h>
 
+namespace prosper {class ICommandBuffer;};
 namespace Lua
 {
 	namespace gui
 	{
+		struct DrawToTextureInfo
+		{
+			bool enableMsaa = false;
+			std::optional<uint32_t> width {};
+			std::optional<uint32_t> height {};
+			std::optional<Color> clearColor {};
+			std::shared_ptr<prosper::IImage> resolvedImage = nullptr;
+			std::shared_ptr<prosper::ICommandBuffer> commandBuffer = nullptr;
+		};
+
 		DLLCLIENT ::WIBase *create(CGame *game,const std::string &name,::WIBase &parent,int32_t x,int32_t y,uint32_t w,uint32_t h,float left,float top,float right,float bottom);
 		DLLCLIENT ::WIBase *create(CGame *game,const std::string &name,::WIBase &parent,int32_t x,int32_t y,uint32_t w,uint32_t h);
 		DLLCLIENT ::WIBase *create(CGame *game,const std::string &name,::WIBase &parent,int32_t x,int32_t y);
@@ -62,6 +73,8 @@ namespace Lua
 		DLLCLIENT bool inject_char_input(const std::string &c);
 		DLLCLIENT bool inject_scroll_input(lua_State *l,const Vector2 &offset,const ::Vector2i &pCursorPos);
 		DLLCLIENT bool inject_scroll_input(lua_State *l,const Vector2 &offset);
+		DLLCLIENT std::shared_ptr<prosper::IImage> create_color_image(uint32_t w,uint32_t h,prosper::ImageUsageFlags usageFlags,prosper::ImageLayout initialLayout,bool msaa);
+		DLLCLIENT std::shared_ptr<prosper::RenderTarget> create_render_target(uint32_t w,uint32_t h,bool enableMsaa,bool enableSampling);
 
 		DLLCLIENT float RealTime(lua_State *l);
 		DLLCLIENT float DeltaTime(lua_State *l);

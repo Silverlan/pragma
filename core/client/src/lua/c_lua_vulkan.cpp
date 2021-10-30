@@ -723,6 +723,22 @@ static void push_image_buffers(lua_State *l,bool includeLayers,bool includeMipma
 	}
 }
 
+static std::shared_ptr<prosper::Texture> get_color_attachment_texture(lua_State *l,Lua::Vulkan::RenderTarget &rt,uint32_t idx)
+{
+	auto n = rt.GetAttachmentCount();
+	for(auto i=decltype(n){0u};i<n;++i)
+	{
+		auto *tex = rt.GetTexture(i);
+		if(!tex)
+			return nullptr;
+		if(prosper::util::is_depth_format(tex->GetImage().GetFormat()))
+			continue;
+		if(idx-- == 0)
+			return tex->shared_from_this();
+	}
+	return nullptr;
+}
+
 void register_vulkan_lua_interface2(luabind::module_ &prosperMod); // Registration is split up to avoid compiler errors
 void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 {
@@ -1948,6 +1964,21 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkRenderTarget.def("GetWidth",&Lua::Vulkan::VKRenderTarget::GetWidth);
 	defVkRenderTarget.def("GetHeight",&Lua::Vulkan::VKRenderTarget::GetHeight);
 	defVkRenderTarget.def("GetFormat",&Lua::Vulkan::VKRenderTarget::GetFormat);
+	defVkRenderTarget.def("GetColorAttachmentTexture",&get_color_attachment_texture);
+	defVkRenderTarget.def("GetColorAttachmentTexture",&get_color_attachment_texture,luabind::default_parameter_policy<3,0u>{});
+	defVkRenderTarget.def("GetDepthStencilAttachmentTexture",+[](lua_State *l,Lua::Vulkan::RenderTarget &rt) -> std::shared_ptr<prosper::Texture> {
+		auto n = rt.GetAttachmentCount();
+		for(auto i=decltype(n){0u};i<n;++i)
+		{
+			auto *tex = rt.GetTexture(i);
+			if(!tex)
+				return nullptr;
+			if(!prosper::util::is_depth_format(tex->GetImage().GetFormat()))
+				continue;
+			return tex->shared_from_this();
+		}
+		return nullptr;
+	});
 	defVkRenderTarget.def("SetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::RenderTarget&,const std::string&)>([](lua_State *l,Lua::Vulkan::RenderTarget &rt,const std::string &name) {
 		Lua::Vulkan::VKContextObject::SetDebugName(l,rt,name);
 	}));

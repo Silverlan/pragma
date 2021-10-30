@@ -20,6 +20,7 @@
 #include <pragma/lua/lua_call.hpp>
 #include <pragma/lua/classes/ldef_vector.h>
 #include <prosper_window.hpp>
+#include <prosper_render_pass.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -348,6 +349,56 @@ void Lua::gui::set_cursor_input_mode(GLFW::CursorMode mode)
 	auto &context = WGUI::GetInstance().GetContext();
 	auto &window = context.GetWindow();
 	return window->GetSize();
+}
+
+std::shared_ptr<prosper::IImage> Lua::gui::create_color_image(uint32_t w,uint32_t h,prosper::ImageUsageFlags usageFlags,prosper::ImageLayout initialLayout,bool msaa)
+{
+	auto &context = c_engine->GetRenderContext();
+	auto &rtStaging = context.GetWindow().GetStagingRenderTarget();
+	auto &texCol = rtStaging->GetTexture();
+	auto *texStencil = rtStaging->GetTexture(1);
+	if(!texStencil)
+		return nullptr;
+	auto imgCreateInfo = texCol.GetImage().GetCreateInfo();
+	imgCreateInfo.width = w;
+	imgCreateInfo.height = h;
+	imgCreateInfo.usage = usageFlags;
+	imgCreateInfo.postCreateLayout = initialLayout;
+	if(msaa)
+		imgCreateInfo.samples = WGUI::GetInstance().MSAA_SAMPLE_COUNT;
+	return context.CreateImage(imgCreateInfo);
+}
+
+std::shared_ptr<prosper::RenderTarget> Lua::gui::create_render_target(uint32_t w,uint32_t h,bool enableMsaa,bool enableSampling)
+{
+	auto &context = c_engine->GetRenderContext();
+	auto &rtStaging = context.GetWindow().GetStagingRenderTarget();
+	auto *texStencil = rtStaging->GetTexture(1);
+	if(!texStencil)
+		return nullptr;
+	auto usageFlags = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit;
+	if(enableSampling)
+		usageFlags |= prosper::ImageUsageFlags::SampledBit;
+	auto img = create_color_image(w,h,usageFlags,prosper::ImageLayout::ColorAttachmentOptimal,enableMsaa);
+	if(!img)
+		return nullptr;
+	auto imgCreateInfo = texStencil->GetImage().GetCreateInfo();
+	imgCreateInfo.width = w;
+	imgCreateInfo.height = h;
+	if(enableMsaa)
+		imgCreateInfo.samples = WGUI::GetInstance().MSAA_SAMPLE_COUNT;
+	auto depthStencilImg = context.CreateImage(imgCreateInfo);
+	
+	auto tex = context.CreateTexture(prosper::util::TextureCreateInfo{},*img,prosper::util::ImageViewCreateInfo{},prosper::util::SamplerCreateInfo{});
+	if(!tex)
+		return nullptr;
+
+	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
+	imgViewCreateInfo.aspectFlags = prosper::ImageAspectFlags::StencilBit;
+	auto depthStencilTex = context.CreateTexture({},*depthStencilImg,imgViewCreateInfo);
+
+	auto &rp = enableMsaa ? WGUI::GetInstance().GetMsaaRenderPass() : context.GetWindow().GetStagingRenderPass();
+	return context.CreateRenderTarget({tex,depthStencilTex},rp.shared_from_this());
 }
 
 bool Lua::gui::inject_mouse_input(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods,const Vector2i &pCursorPos)

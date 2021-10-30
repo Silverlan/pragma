@@ -388,6 +388,12 @@ void NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		copy_table(l,luabind::object{luabind::from_stack(l,1)},deepCopy).push(l);
 		return 1;
 	}));
+	lua_pushtablecfunction(lua.GetState(),"table","is_empty",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+		Lua::CheckTable(l,1);
+		luabind::iterator it {luabind::object{luabind::from_stack(l,1)}};
+		Lua::PushBool(l,it == luabind::iterator{});
+		return 1;
+	}));
 
 	auto modMath = luabind::module_(lua.GetState(),"math");
 	modMath[
@@ -1633,7 +1639,20 @@ void Game::RegisterLuaLibraries()
 		//luabind::def("triangulate_point_cloud",Lua::geometry::triangulate_point_cloud),
 		luabind::def("triangulate",Lua::geometry::triangulate),
 		luabind::def("calc_triangle_area",&uvec::calc_area_of_triangle),
-		luabind::def("calc_point_on_triangle",&uvec::calc_point_on_triangle)
+		luabind::def("calc_point_on_triangle",&uvec::calc_point_on_triangle),
+		luabind::def("calc_rect_circle_touching_position",+[](const Vector2 &rectPos,const Vector2 &rectSize,const Vector2 &circlePos,float circleRadius) -> Vector2 {
+			auto rectCenter = rectPos +rectSize /2.f;
+
+			Vector3 p;
+			umath::geometry::closest_point_on_aabb_to_point(Vector3{rectCenter -rectSize /2.f,0.f},Vector3{rectCenter +rectSize /2.f,0.f},Vector3{circlePos,0.f},&p);
+			p = p -Vector3{rectPos,0.f};
+
+			auto dir = (Vector3(rectCenter,0) -Vector3(circlePos,0));
+			uvec::normalize(&dir);
+			auto dir2 = Vector2(dir.x,dir.y);
+
+			return (circlePos +dir2 *circleRadius) -Vector2{p.x,p.y};
+		})
 	];
 	Lua::RegisterLibraryEnums(GetLuaState(),"geometry",{
 		{"WINDING_ORDER_CLOCKWISE",umath::to_integral(umath::geometry::WindingOrder::Clockwise)},

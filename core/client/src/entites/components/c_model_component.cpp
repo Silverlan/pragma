@@ -55,6 +55,8 @@ void CModelComponent::Initialize()
 	BindEventUnhandled(CColorComponent::EVENT_ON_COLOR_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		UpdateBaseShaderSpecializationFlags();
 	});
+	BindEventUnhandled(EVENT_ON_SKIN_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {UpdateRenderBufferList();});
+	BindEventUnhandled(EVENT_ON_BODY_GROUP_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {UpdateRenderMeshes();});
 }
 
 void CModelComponent::UpdateBaseShaderSpecializationFlags()
@@ -403,6 +405,8 @@ void CModelComponent::OnModelChanged(const std::shared_ptr<Model> &model)
 	m_lodMeshGroups.push_back({0,0});
 	m_lodRenderMeshGroups.clear();
 	m_lodRenderMeshGroups.push_back({0,0});
+
+	m_materialOverrides.clear();
 
 	SetRenderMeshesDirty();
 

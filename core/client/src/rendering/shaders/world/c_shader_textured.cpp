@@ -34,7 +34,7 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-
+#pragma optimize("",off)
 /*ShaderGameWorldPipeline ShaderGameWorldLightingPass::GetPipelineIndex(prosper::SampleCountFlags sampleCount,bool bReflection)
 {
 	if(sampleCount == prosper::SampleCountFlags::e1Bit)
@@ -126,25 +126,33 @@ ShaderGameWorldLightingPass::ShaderGameWorldLightingPass(prosper::IPrContext &co
 		initialize_material_settings_buffer();
 
 	auto n = umath::to_integral(GameShaderSpecialization::Count);
-	for(auto i=decltype(n){0u};i<n;++i)
+	auto nPassTypes = umath::to_integral(rendering::PassType::Count);
+	for(auto j=decltype(nPassTypes){0u};j<nPassTypes;++j)
 	{
-		auto dynamicFlags = GameShaderSpecializationConstantFlag::EmissionEnabledBit | GameShaderSpecializationConstantFlag::EnableRmaMapBit |
-			GameShaderSpecializationConstantFlag::EnableNormalMapBit | GameShaderSpecializationConstantFlag::ParallaxEnabledBit |
-			GameShaderSpecializationConstantFlag::EnableDepthBias | GameShaderSpecializationConstantFlag::EnableTranslucencyBit |
-			GameShaderSpecializationConstantFlag::EnableClippingBit;
-		switch(static_cast<GameShaderSpecialization>(i))
+		// Note: Every pass type has to have the exact same number of pipelines in the exact same order!
+		auto startIdx = ShaderSpecializationManager::GetPipelineCount();
+		for(auto i=decltype(n){0u};i<n;++i)
 		{
-		case GameShaderSpecialization::Generic:
-			break;
-		case GameShaderSpecialization::Lightmapped:
-			break;
-		case GameShaderSpecialization::Animated:
-			dynamicFlags |= GameShaderSpecializationConstantFlag::WrinklesEnabledBit |
-				GameShaderSpecializationConstantFlag::EnableExtendedVertexWeights;
-			break;
+			auto dynamicFlags = GameShaderSpecializationConstantFlag::EmissionEnabledBit | GameShaderSpecializationConstantFlag::EnableRmaMapBit |
+				GameShaderSpecializationConstantFlag::EnableNormalMapBit | GameShaderSpecializationConstantFlag::ParallaxEnabledBit |
+				GameShaderSpecializationConstantFlag::EnableDepthBias | GameShaderSpecializationConstantFlag::EnableTranslucencyBit |
+				GameShaderSpecializationConstantFlag::EnableClippingBit;
+			switch(static_cast<GameShaderSpecialization>(i))
+			{
+			case GameShaderSpecialization::Generic:
+				break;
+			case GameShaderSpecialization::Lightmapped:
+				break;
+			case GameShaderSpecialization::Animated:
+				dynamicFlags |= GameShaderSpecializationConstantFlag::WrinklesEnabledBit |
+					GameShaderSpecializationConstantFlag::EnableExtendedVertexWeights;
+				break;
+			}
+			auto staticFlags = GetStaticSpecializationConstantFlags(static_cast<GameShaderSpecialization>(i));
+			RegisterSpecializations(static_cast<rendering::PassType>(j),staticFlags,dynamicFlags);
 		}
-		auto staticFlags = GetStaticSpecializationConstantFlags(static_cast<GameShaderSpecialization>(i));
-		RegisterSpecializations(PassType::Generic,staticFlags,dynamicFlags);
+		auto endIdx = ShaderSpecializationManager::GetPipelineCount();
+		SetPipelineIndexRange(j,startIdx,endIdx);
 	}
 
 	auto numPipelines = ShaderSpecializationManager::GetPipelineCount();
@@ -155,6 +163,7 @@ ShaderGameWorldLightingPass::~ShaderGameWorldLightingPass()
 	if(--g_instanceCount == 0)
 		g_materialSettingsBuffer = nullptr;
 }
+uint32_t ShaderGameWorldLightingPass::GetPassPipelineIndexStartOffset(rendering::PassType passType) const {return GetPipelineIndexStartOffset(umath::to_integral(passType));}
 void ShaderGameWorldLightingPass::OnPipelinesInitialized()
 {
 	ShaderGameWorld::OnPipelinesInitialized();
@@ -176,7 +185,7 @@ GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetStaticSpeci
 	}
 	return staticFlags;
 }
-std::optional<uint32_t> ShaderGameWorldLightingPass::FindPipelineIndex(PassType passType,GameShaderSpecialization specialization,GameShaderSpecializationConstantFlag specializationFlags) const
+std::optional<uint32_t> ShaderGameWorldLightingPass::FindPipelineIndex(rendering::PassType passType,GameShaderSpecialization specialization,GameShaderSpecializationConstantFlag specializationFlags) const
 {
 	return ShaderSpecializationManager::FindSpecializationPipelineIndex(passType,GetStaticSpecializationConstantFlags(specialization) | specializationFlags);
 }
@@ -259,10 +268,14 @@ void ShaderGameWorldLightingPass::InitializeGfxPipelineDescriptorSets(prosper::G
 void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderEntity::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
-
-	//if(pipelineIdx == umath::to_integral(ShaderGameWorldPipeline::Reflection))
-	//	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::FrontBit);
-
+	
+	auto isReflection = (static_cast<rendering::PassType>(GetBasePassType(pipelineIdx)) == rendering::PassType::Reflection);
+	if(isReflection)
+	{
+		prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::FrontBit);
+		//pipelineInfo.SetRasterizationProperties(prosper::PolygonMode::Line,prosper::CullModeFlags::FrontBit,prosper::FrontFace::Clockwise,1.f);
+	}
+	
 	//uint32_t isSet = static_cast<uint32_t>(IsSpecializationConstantSet(pipelineIdx,flag));
 	auto isTranslucentPipeline = IsSpecializationConstantSet(pipelineIdx,GameShaderSpecializationConstantFlag::EnableTranslucencyBit);
 	if(isTranslucentPipeline)
@@ -572,6 +585,7 @@ bool ShaderGameWorldLightingPass::GetRenderBufferTargets(
 	outOffsets.push_back(0ull);
 	return true;
 }
+bool ShaderGameWorldLightingPass::IsDepthPrepassEnabled() const {return m_depthPrepassEnabled;}
 uint32_t ShaderGameWorldLightingPass::GetCameraDescriptorSetIndex() const {return DESCRIPTOR_SET_SCENE.setIndex;}
 uint32_t ShaderGameWorldLightingPass::GetRendererDescriptorSetIndex() const {return DESCRIPTOR_SET_RENDERER.setIndex;}
 uint32_t ShaderGameWorldLightingPass::GetInstanceDescriptorSetIndex() const {return DESCRIPTOR_SET_INSTANCE.setIndex;}
@@ -686,6 +700,27 @@ bool ShaderGameWorldLightingPass::PushSceneConstants(rendering::ShaderProcessor 
 
 ////////
 
+uint32_t ShaderSpecializationManager::GetPipelineIndexStartOffset(PassTypeIndex passType) const
+{
+	if(passType >= m_passTypeSpecializationToPipelineIdx.size())
+		return 0;
+	return m_passTypeSpecializationToPipelineIdx[passType].pipelineIndexRange.first;
+}
+void ShaderSpecializationManager::SetPipelineIndexRange(PassTypeIndex passType,uint32_t startIndex,uint32_t endIndex)
+{
+	auto &info = InitializePassTypeSpecializations(passType);
+	info.pipelineIndexRange = {startIndex,endIndex};
+}
+ShaderSpecializationManager::PassTypeIndex ShaderSpecializationManager::GetBasePassType(uint32_t pipelineIdx) const
+{
+	for(auto it=m_passTypeSpecializationToPipelineIdx.begin();it!=m_passTypeSpecializationToPipelineIdx.end();++it)
+	{
+		auto &info = *it;
+		if(pipelineIdx >= info.pipelineIndexRange.first && pipelineIdx < info.pipelineIndexRange.second)
+			return it -m_passTypeSpecializationToPipelineIdx.begin();
+	}
+	throw std::logic_error{"Invalid pipeline index " +std::to_string(pipelineIdx) +"!"};
+}
 bool ShaderSpecializationManager::IsSpecializationConstantSet(uint32_t pipelineIdx,SpecializationFlags flag) const
 {
 	if(pipelineIdx >= m_pipelineSpecializations.size())
@@ -693,20 +728,24 @@ bool ShaderSpecializationManager::IsSpecializationConstantSet(uint32_t pipelineI
 	auto flags = m_pipelineSpecializations[pipelineIdx];
 	return (flags &flag) != 0;
 }
-void ShaderSpecializationManager::RegisterSpecializations(PassType passType,SpecializationFlags staticFlags,SpecializationFlags dynamicFlags)
+ShaderSpecializationManager::PassTypeInfo &ShaderSpecializationManager::InitializePassTypeSpecializations(PassTypeIndex passType)
 {
-	if(passType >= m_specializationToPipelineIdx.size())
+	if(passType >= m_passTypeSpecializationToPipelineIdx.size())
 	{
-		auto n = m_specializationToPipelineIdx.size();
-		m_specializationToPipelineIdx.resize(passType +1);
-		for(auto i=n;i<m_specializationToPipelineIdx.size();++i)
-			std::fill(m_specializationToPipelineIdx[i].begin(),m_specializationToPipelineIdx[i].end(),std::numeric_limits<uint32_t>::max());
+		auto n = m_passTypeSpecializationToPipelineIdx.size();
+		m_passTypeSpecializationToPipelineIdx.resize(passType +1);
+		for(auto i=n;i<m_passTypeSpecializationToPipelineIdx.size();++i)
+			std::fill(m_passTypeSpecializationToPipelineIdx[i].specializationToPipelineIdx.begin(),m_passTypeSpecializationToPipelineIdx[i].specializationToPipelineIdx.end(),std::numeric_limits<uint32_t>::max());
 	}
-	auto &specializationMap = m_specializationToPipelineIdx[passType];
+	return m_passTypeSpecializationToPipelineIdx[passType];
+}
+void ShaderSpecializationManager::RegisterSpecializations(PassTypeIndex passType,SpecializationFlags staticFlags,SpecializationFlags dynamicFlags)
+{
+	auto &specializationMap = InitializePassTypeSpecializations(passType).specializationToPipelineIdx;
 	auto dynamicFlagValues = umath::get_power_of_2_values(dynamicFlags);
 	auto &permutations = m_pipelineSpecializations;
 	std::function<void(uint32_t,SpecializationFlags)> registerSpecialization = nullptr;
-	permutations.reserve(umath::pow(static_cast<size_t>(2),dynamicFlagValues.size()));
+	permutations.reserve(permutations.size() +umath::pow(static_cast<size_t>(2),dynamicFlagValues.size()));
 	registerSpecialization = [&specializationMap,&registerSpecialization,&dynamicFlagValues,&permutations](uint32_t idx,SpecializationFlags perm) {
 		if(idx >= dynamicFlagValues.size())
 		{
@@ -720,11 +759,12 @@ void ShaderSpecializationManager::RegisterSpecializations(PassType passType,Spec
 	};
 	registerSpecialization(0,staticFlags);
 }
-std::optional<uint32_t> ShaderSpecializationManager::FindSpecializationPipelineIndex(PassType passType,uint64_t specializationFlags) const
+std::optional<uint32_t> ShaderSpecializationManager::FindSpecializationPipelineIndex(PassTypeIndex passType,uint64_t specializationFlags) const
 {
-	if(passType >= m_specializationToPipelineIdx.size())
+	if(passType >= m_passTypeSpecializationToPipelineIdx.size())
 		return {};
-	auto specToPipelineIdx = m_specializationToPipelineIdx[passType];
+	auto &specToPipelineIdx = m_passTypeSpecializationToPipelineIdx[passType].specializationToPipelineIdx;
 	auto pipelineIdx = specToPipelineIdx[specializationFlags];
 	return (pipelineIdx != std::numeric_limits<uint32_t>::max()) ? pipelineIdx : std::optional<uint32_t>{};
 }
+#pragma optimize("",on)

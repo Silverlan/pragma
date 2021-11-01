@@ -30,7 +30,7 @@
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 CWaterObject::WaterScene::~WaterScene()
 {
 	if(hRenderScene.IsValid())
@@ -107,6 +107,7 @@ static auto cvReflectionQuality = GetClientConVar("cl_render_reflection_quality"
 static auto cvDrawWater = GetClientConVar("render_draw_water");
 void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &planeNormal,const Vector3 &waterAabbMin,const Vector3 &waterAabbMax)
 {
+	c_engine->GetShaderManager().GetShader("water"); // Make sure water shader is loaded
 	m_waterAabbBounds = {waterAabbMin,waterAabbMax};
 	auto *mat = GetWaterMaterial();
 	if(mat == nullptr || pragma::ShaderWater::DESCRIPTOR_SET_WATER.IsValid() == false || pragma::ShaderPPFog::DESCRIPTOR_SET_FOG.IsValid() == false)
@@ -456,3 +457,4 @@ void CWaterObject::InitializeWaterScene(const Vector3 &refPos,const Vector3 &pla
 		return CallbackReturnType::NoReturnValue;
 	}));
 }
+#pragma optimize("",on)

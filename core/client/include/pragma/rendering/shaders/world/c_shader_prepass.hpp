@@ -74,6 +74,7 @@ namespace pragma
 		virtual void Set3DSky(bool is3dSky) override;
 		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
 		virtual GameShaderType GetPassType() const {return GameShaderType::DepthPrepass;}
+		virtual bool IsDepthPrepassShader() const override {return true;}
 
 		//
 		virtual void RecordBindScene(
@@ -139,6 +140,7 @@ namespace pragma
 		};
 
 		ShaderPrepass(prosper::IPrContext &context,const std::string &identifier);
+		virtual uint32_t GetPassPipelineIndexStartOffset(rendering::PassType passType) const override;
 	protected:
 		virtual void InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx) override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;

@@ -19,6 +19,7 @@ namespace Lua
 {
 	namespace global
 	{
+		DLLNETWORK luabind::object include(lua_State *l,const std::string &f,std::vector<std::string> *optCache,bool reload,bool throwErr);
 		DLLNETWORK luabind::object include(lua_State *l,const std::string &f,std::vector<std::string> *optCache,bool reload);
 		DLLNETWORK luabind::object include(lua_State *l,const std::string &f,std::vector<std::string> *optCache);
 		DLLNETWORK luabind::object include(lua_State *l,const std::string &f,bool ignoreGlobalCache);

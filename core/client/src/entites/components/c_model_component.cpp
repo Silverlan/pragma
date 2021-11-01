@@ -178,7 +178,19 @@ void CModelComponent::GetBaseModelMeshes(std::vector<std::shared_ptr<ModelMesh>>
 }
 
 const std::shared_ptr<prosper::IRenderBuffer> &CModelComponent::GetRenderBuffer(uint32_t idx) const {return m_lodMeshRenderBufferData[idx].renderBuffer;}
+const rendering::RenderBufferData *CModelComponent::GetRenderBufferData(uint32_t idx) const {return &m_lodMeshRenderBufferData[idx];}
 pragma::GameShaderSpecializationConstantFlag CModelComponent::GetPipelineSpecializationFlags(uint32_t idx) const {return m_lodMeshRenderBufferData[idx].pipelineSpecializationFlags;}
+
+void CModelComponent::ReloadRenderBufferList(bool immediate)
+{
+	if(immediate)
+		UpdateRenderBufferList();
+	else
+		umath::set_flag(m_stateFlags,StateFlags::RenderBufferListUpdateRequired);
+}
+
+bool CModelComponent::IsDepthPrepassEnabled() const {return !umath::is_flag_set(m_stateFlags,StateFlags::DepthPrepassDisabled);}
+void CModelComponent::SetDepthPrepassEnabled(bool enabled) {umath::set_flag(m_stateFlags,StateFlags::DepthPrepassDisabled,!enabled);}
 
 void CModelComponent::UpdateRenderBufferList()
 {
@@ -187,8 +199,10 @@ void CModelComponent::UpdateRenderBufferList()
 		Con::cwar<<"WARNING: Attempted to update render meshes from non-main thread, this is illegal!"<<Con::endl;
 		return;
 	}
+	umath::set_flag(m_stateFlags,StateFlags::RenderBufferListUpdateRequired,false);
 	m_lodMeshRenderBufferData.clear();
 	m_lodMeshRenderBufferData.reserve(m_lodRenderMeshes.size());
+	auto depthPrepassEnabled = IsDepthPrepassEnabled();
 	for(auto i=decltype(m_lodRenderMeshes.size()){0u};i<m_lodRenderMeshes.size();++i)
 	{
 		auto &mesh = static_cast<CModelSubMesh&>(*m_lodRenderMeshes[i]);
@@ -201,6 +215,7 @@ void CModelComponent::UpdateRenderBufferList()
 		auto &renderBufferData = m_lodMeshRenderBufferData.back();
 		renderBufferData.renderBuffer = renderBuffer;
 		renderBufferData.material = mat ? mat->GetHandle() : MaterialHandle{};
+		renderBufferData.enableDepthPrepass = depthPrepassEnabled && shader->IsDepthPrepassEnabled();
 		if(mat == nullptr || shader == nullptr)
 			continue;
 		renderBufferData.pipelineSpecializationFlags = shader->GetMaterialPipelineSpecializationRequirements(*mat);
@@ -211,42 +226,45 @@ void CModelComponent::SetBaseShaderSpecializationFlag(pragma::GameShaderSpeciali
 
 void CModelComponent::UpdateRenderMeshes()
 {
-	if(umath::is_flag_set(m_stateFlags,StateFlags::RenderMeshUpdateRequired) == false)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::RenderMeshUpdateRequired | StateFlags::RenderBufferListUpdateRequired) == false)
 		return;
 	if(std::this_thread::get_id() != c_engine->GetMainThreadId())
 	{
 		Con::cwar<<"WARNING: Attempted to update render meshes from non-main thread, this is illegal!"<<Con::endl;
 		return;
 	}
-	umath::set_flag(m_stateFlags,StateFlags::RenderMeshUpdateRequired,false);
-	m_lodRenderMeshes.clear();
-	m_lodMeshes.clear();
-	m_lodMeshGroups.clear();
-	m_lodRenderMeshGroups.clear();
-
-	auto &mdl = GetModel();
-	auto numLods = umath::max(mdl ? mdl->GetLODCount() : 1u,static_cast<uint32_t>(1));
-	m_lodRenderMeshGroups.resize(numLods);
-	m_lodMeshGroups.resize(numLods);
-	if(mdl != nullptr)
+	if(umath::is_flag_set(m_stateFlags,StateFlags::RenderMeshUpdateRequired))
 	{
-		for(auto i=decltype(numLods){0u};i<numLods;++i)
+		umath::set_flag(m_stateFlags,StateFlags::RenderMeshUpdateRequired,false);
+		m_lodRenderMeshes.clear();
+		m_lodMeshes.clear();
+		m_lodMeshGroups.clear();
+		m_lodRenderMeshGroups.clear();
+
+		auto &mdl = GetModel();
+		auto numLods = umath::max(mdl ? mdl->GetLODCount() : 1u,static_cast<uint32_t>(1));
+		m_lodRenderMeshGroups.resize(numLods);
+		m_lodMeshGroups.resize(numLods);
+		if(mdl != nullptr)
 		{
-			auto meshOffset = m_lodMeshes.size();
-			auto subMeshOffset = m_lodRenderMeshes.size();
-			mdl->GetBodyGroupMeshes(GetBodyGroups(),i,m_lodMeshes);
-			for(auto i=meshOffset;i<m_lodMeshes.size();++i)
+			for(auto i=decltype(numLods){0u};i<numLods;++i)
 			{
-				auto &mesh = m_lodMeshes[i];
-				for(auto &subMesh : mesh->GetSubMeshes())
+				auto meshOffset = m_lodMeshes.size();
+				auto subMeshOffset = m_lodRenderMeshes.size();
+				mdl->GetBodyGroupMeshes(GetBodyGroups(),i,m_lodMeshes);
+				for(auto i=meshOffset;i<m_lodMeshes.size();++i)
 				{
-					if(m_lodRenderMeshes.size() == m_lodRenderMeshes.capacity())
-						m_lodRenderMeshes.reserve(m_lodRenderMeshes.size() *1.4 +10);
-					m_lodRenderMeshes.push_back(subMesh);
+					auto &mesh = m_lodMeshes[i];
+					for(auto &subMesh : mesh->GetSubMeshes())
+					{
+						if(m_lodRenderMeshes.size() == m_lodRenderMeshes.capacity())
+							m_lodRenderMeshes.reserve(m_lodRenderMeshes.size() *1.4 +10);
+						m_lodRenderMeshes.push_back(subMesh);
+					}
 				}
+				m_lodMeshGroups[i] = {meshOffset,m_lodMeshes.size() -meshOffset};
+				m_lodRenderMeshGroups[i] = {subMeshOffset,m_lodRenderMeshes.size() -subMeshOffset};
 			}
-			m_lodMeshGroups[i] = {meshOffset,m_lodMeshes.size() -meshOffset};
-			m_lodRenderMeshGroups[i] = {subMeshOffset,m_lodRenderMeshes.size() -subMeshOffset};
 		}
 	}
 	UpdateRenderBufferList();

@@ -21,6 +21,7 @@ namespace pragma::rendering
 		std::shared_ptr<prosper::IRenderBuffer> renderBuffer;
 		pragma::GameShaderSpecializationConstantFlag pipelineSpecializationFlags;
 		MaterialHandle material;
+		bool enableDepthPrepass = true;
 	};
 };
 

@@ -32,7 +32,9 @@ namespace pragma
 		{
 			None = 0u,
 			AutoLodDisabled = 1u,
-			RenderMeshUpdateRequired = AutoLodDisabled<<1u
+			RenderMeshUpdateRequired = AutoLodDisabled<<1u,
+			RenderBufferListUpdateRequired = RenderMeshUpdateRequired<<1u,
+			DepthPrepassDisabled = RenderBufferListUpdateRequired<<1u
 		};
 
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
@@ -64,6 +66,7 @@ namespace pragma
 		std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes();
 		const std::vector<std::shared_ptr<ModelSubMesh>> &GetRenderMeshes() const;
 		const std::shared_ptr<prosper::IRenderBuffer> &GetRenderBuffer(uint32_t idx) const;
+		const rendering::RenderBufferData *GetRenderBufferData(uint32_t idx) const;
 		pragma::GameShaderSpecializationConstantFlag GetPipelineSpecializationFlags(uint32_t idx) const;
 		const std::vector<rendering::RenderBufferData> &GetRenderBufferData() const {return const_cast<CModelComponent*>(this)->GetRenderBufferData();};
 		std::vector<rendering::RenderBufferData> &GetRenderBufferData() {return m_lodMeshRenderBufferData;};
@@ -86,8 +89,12 @@ namespace pragma
 		GameShaderSpecializationConstantFlag GetBaseShaderSpecializationFlags() const {return m_baseShaderSpecializationConstantFlags;}
 		void SetBaseShaderSpecializationFlags(pragma::GameShaderSpecializationConstantFlag flags) {m_baseShaderSpecializationConstantFlags = flags;}
 		void SetBaseShaderSpecializationFlag(pragma::GameShaderSpecializationConstantFlag flag,bool enabled=true);
+
+		bool IsDepthPrepassEnabled() const;
+		void SetDepthPrepassEnabled(bool enabled);
 		
 		void UpdateRenderMeshes();
+		void ReloadRenderBufferList(bool immediate=false);
 		// Only use if LOD is handled externally!
 		void SetLOD(uint32_t lod);
 	protected:

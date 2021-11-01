@@ -21,6 +21,7 @@
 #include "pragma/rendering/renderers/base_renderer.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include "pragma/rendering/render_processor.hpp"
 #include "pragma/entities/components/renderers/rasterization/culled_mesh_data.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
@@ -40,7 +41,7 @@
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 SceneRenderDesc::SceneRenderDesc(pragma::CSceneComponent &scene)
 	: m_scene{scene}
 {
@@ -207,7 +208,7 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 		if(shader == nullptr)
 			continue;
 		auto pipelineIdx = shader->FindPipelineIndex(
-			pragma::ShaderGameWorldLightingPass::PassType::Generic,
+			pragma::rendering::PassType::Generic, // The translation to the actual pass type will happen in the render processor
 			renderC.GetShaderPipelineSpecialization(),
 			baseShaderSpecializationFlags | renderBufferData[meshIdx].pipelineSpecializationFlags
 		);
@@ -814,3 +815,4 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 		--g_activeRenderQueueThreads;
 	});
 }
+#pragma optimize("",on)

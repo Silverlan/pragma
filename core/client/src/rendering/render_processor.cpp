@@ -315,7 +315,8 @@ DLLCLIENT void debug_render_stats(bool enabled,bool full,bool print,bool continu
 }
 
 pragma::rendering::BaseRenderProcessor::BaseRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo,RenderFlags flags,const Vector4 &drawOrigin)
-	: m_drawSceneInfo{drawSceneInfo},m_drawOrigin{drawOrigin},m_renderFlags{flags},m_shaderProcessor{*drawSceneInfo.commandBuffer}
+	: m_drawSceneInfo{drawSceneInfo},m_drawOrigin{drawOrigin},m_renderFlags{flags},
+	m_shaderProcessor{*drawSceneInfo.commandBuffer,umath::is_flag_set(drawSceneInfo.drawSceneInfo.flags,util::DrawSceneInfo::Flags::Reflection) ? PassType::Reflection : PassType::Generic}
 {
 	auto &scene = drawSceneInfo.drawSceneInfo.scene;
 	auto *renderer = scene->GetRenderer();
@@ -367,9 +368,17 @@ bool pragma::rendering::BaseRenderProcessor::BindInstanceSet(pragma::ShaderGameW
 	return true;
 }
 
+uint32_t pragma::rendering::BaseRenderProcessor::TranslateBasePipelineIndexToPassPipelineIndex(prosper::Shader &shader,uint32_t pipelineIdx,PassType passType) const
+{
+	auto *shaderScene = static_cast<pragma::ShaderGameWorld*>(&shader);
+	return shaderScene->GetPassPipelineIndexStartOffset(passType) +pipelineIdx;
+}
 
 bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::Shader &shader,uint32_t pipelineIdx)
 {
+	if(shader.GetBaseTypeHashCode() != pragma::ShaderGameWorld::HASH_TYPE || shader.IsValid() == false)
+		return false;
+	//pipelineIdx = TranslateBasePipelineIndexToPassPipelineIndex(shader,pipelineIdx,m_shaderProcessor.GetPassType());
 	prosper::PipelineID pipelineId;
 	return shader.GetPipelineId(pipelineId,pipelineIdx) && pipelineId != std::numeric_limits<decltype(pipelineId)>::max() && BindShader(pipelineId);
 }
@@ -381,10 +390,15 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::PipelineID pipe
 	uint32_t pipelineIdx;
 	auto *shader = c_engine->GetRenderContext().GetShaderPipeline(pipelineId,pipelineIdx);
 	assert(shader);
+	pipelineIdx = TranslateBasePipelineIndexToPassPipelineIndex(*shader,pipelineIdx,m_shaderProcessor.GetPassType());
 	UnbindShader();
 	UnbindMaterial();
 	UnbindEntity();
+
+	// Note: This may not match the actual pipeline id that we're using for rendering if we're using a non-generic pass type,
+	// but 'm_curPipeline' is only used to check if we need to do a pipeline state change.
 	m_curPipeline = pipelineId;
+
 	m_curShader = shader;
 	if(shader->GetBaseTypeHashCode() != pragma::ShaderGameWorld::HASH_TYPE || shader->IsValid() == false)
 		return false;

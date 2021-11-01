@@ -129,6 +129,12 @@ CBaseEntity *CGame::CreateLuaEntity(std::string classname,unsigned int idx,bool 
 	if(ent == nullptr)
 		return nullptr;
 	SetupEntity(ent,idx);
+
+	auto *info = m_luaEnts->GetEntityInfo(classname);
+	assert(info);
+	for(auto componentId : info->components)
+		ent->AddComponent(componentId);
+
 	return ent;
 }
 

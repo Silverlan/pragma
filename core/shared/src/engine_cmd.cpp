@@ -218,7 +218,7 @@ void Engine::RegisterConsoleCommands()
 			Lua::set_ignore_include_cache(false);
 			return;
 		}
-		Lua::global::include(state->GetLuaState(),fname,false,true);
+		Lua::global::include(state->GetLuaState(),fname,false,true,false);
 	},ConVarFlags::None,"Opens and executes a lua-file on the server.",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
 		std::vector<std::string> resFiles;
 		auto path = "lua\\" +arg;

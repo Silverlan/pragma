@@ -197,7 +197,7 @@ luabind::object Lua::global::include(lua_State *l,const std::string &f,bool igno
 	return include(l,f,nullptr);
 }
 
-luabind::object Lua::global::include(lua_State *l,const std::string &f,std::vector<std::string> *optCache,bool reload)
+luabind::object Lua::global::include(lua_State *l,const std::string &f,std::vector<std::string> *optCache,bool reload,bool throwErr)
 {
 	auto *lInterface = engine->GetLuaInterface(l);
 	std::vector<std::string> *includeCache = optCache;
@@ -294,7 +294,13 @@ luabind::object Lua::global::include(lua_State *l,const std::string &f,std::vect
 		switch(r)
 		{
 			case Lua::StatusCode::ErrorFile:
-				lua_error(l);
+				if(throwErr)
+					lua_error(l);
+				else
+				{
+					Con::cwar<<"WARNING: File not found: '"<<fileName<<"'!"<<Con::endl;
+					return {};
+				}
 				/* unreachable */
 				break;
 			case Lua::StatusCode::ErrorSyntax:
@@ -305,6 +311,11 @@ luabind::object Lua::global::include(lua_State *l,const std::string &f,std::vect
 		}
 	}
 	return {};
+}
+
+luabind::object Lua::global::include(lua_State *l,const std::string &f,std::vector<std::string> *optCache,bool reload)
+{
+	return include(l,f,optCache,reload,true);
 }
 
 luabind::object Lua::global::exec(lua_State *l,const std::string &f)

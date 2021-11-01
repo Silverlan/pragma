@@ -23,6 +23,7 @@ namespace pragma
 	class SceneMesh;
 	enum class SceneDebugMode : uint32_t;
 	class CRasterizationRendererComponent;
+	namespace rendering {enum class PassType : uint32_t;};
 	class DLLCLIENT ShaderScene
 		: public Shader3DBase,
 		public ShaderTexturedBase
@@ -274,6 +275,7 @@ namespace pragma
 		virtual bool SetDepthBias(const Vector2 &depthBias)=0;
 		//
 
+		virtual bool IsDepthPrepassShader() const {return false;}
 		virtual GameShaderType GetPassType() const {return GameShaderType::LightingPass;}
 		virtual size_t GetBaseTypeHashCode() const override;
 		virtual uint32_t GetMaterialDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
@@ -297,6 +299,7 @@ namespace pragma
 		virtual void RecordVertexAnimationOffset(rendering::ShaderProcessor &shaderProcessor,uint32_t vertexAnimationOffset) const;
 		virtual bool OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor,CModelSubMesh &mesh) const {return true;}
 		virtual bool IsUsingLightmaps() const {return false;}
+		virtual uint32_t GetPassPipelineIndexStartOffset(rendering::PassType passType) const {return 0;}
 	protected:
 		SceneFlags m_sceneFlags = SceneFlags::None;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_defaultMatDsg = nullptr;

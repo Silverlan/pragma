@@ -22,7 +22,7 @@ using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 decltype(ShaderPrepassBase::VERTEX_BINDING_RENDER_BUFFER_INDEX) ShaderPrepassBase::VERTEX_BINDING_RENDER_BUFFER_INDEX = {prosper::VertexInputRate::Instance};
 decltype(ShaderPrepassBase::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX) ShaderPrepassBase::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX = {ShaderEntity::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX,VERTEX_BINDING_RENDER_BUFFER_INDEX};
 
@@ -163,9 +163,6 @@ void ShaderPrepassBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInf
 {
 	ShaderEntity::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
 
-	//if(pipelineIdx == umath::to_integral(Pipeline::Reflection))
-	//	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::FrontBit);
-
 	pipelineInfo.ToggleDepthWrites(true);
 	pipelineInfo.ToggleDepthTest(true,prosper::CompareOp::Less);
 	ToggleDynamicScissorState(pipelineInfo,true);
@@ -260,8 +257,10 @@ ShaderPrepass::ShaderPrepass(prosper::IPrContext &context,const std::string &ide
 	: ShaderPrepassBase(context,identifier,"world/prepass/vs_prepass","world/prepass/fs_prepass")
 {
 	// SetBaseShader<ShaderTextured3DBase>();
-	SetPipelineCount(umath::to_integral(Pipeline::Count));
+	SetPipelineCount(umath::to_integral(Pipeline::Count) *umath::to_integral(rendering::PassType::Count));
 }
+
+uint32_t ShaderPrepass::GetPassPipelineIndexStartOffset(rendering::PassType passType) const {return umath::to_integral(passType) *umath::to_integral(Pipeline::Count);}
 
 void ShaderPrepass::InitializeRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass,uint32_t pipelineIdx)
 {
@@ -282,7 +281,7 @@ void ShaderPrepass::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &p
 	auto enableAnimation = false;
 	auto enableMorphTargetAnimation = false;
 	auto extendedVertexWeights = false;
-	switch(static_cast<Pipeline>(pipelineIdx))
+	switch(static_cast<Pipeline>(pipelineIdx %umath::to_integral(Pipeline::Count)))
 	{
 	case Pipeline::Opaque:
 		enableAnimation = true;
@@ -304,6 +303,11 @@ void ShaderPrepass::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &p
 		enableMorphTargetAnimation = true;
 		break;
 	}
+
+	auto isReflection = (static_cast<rendering::PassType>(pipelineIdx /umath::to_integral(Pipeline::Count)) == rendering::PassType::Reflection);
+	if(isReflection)
+		prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::FrontBit);
+
 	if(c_game->GetGameWorldShaderSettings().ssaoEnabled)
 		enableNormalOutput = true;
 	AddSpecializationConstant(pipelineInfo,prosper::ShaderStageFlags::FragmentBit,umath::to_integral(SpecializationConstant::EnableAlphaTest),static_cast<uint32_t>(enableAlphaTest));
@@ -314,3 +318,4 @@ void ShaderPrepass::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &p
 
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_NORMAL);
 }
+#pragma optimize("",on)

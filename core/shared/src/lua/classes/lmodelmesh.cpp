@@ -11,6 +11,8 @@
 #include "pragma/model/model.h"
 #include "pragma/model/modelmesh.h"
 #include <pragma/lua/policies/default_parameter_policy.hpp>
+#include <pragma/lua/converters/optional_converter_t.hpp>
+#include <pragma/lua/converters/pair_converter_t.hpp>
 
 extern DLLNETWORK Engine *engine;
 
@@ -183,6 +185,13 @@ void Lua::ModelSubMesh::register_class(luabind::class_<::ModelSubMesh> &classDef
 	classDef.def("ApplyUVMapping",static_cast<void(*)(lua_State*,::ModelSubMesh&,::Model&,const Vector3&,const Vector3&,float,float,float,float)>(&Lua::ModelSubMesh::ApplyUVMapping));
 	classDef.def("ApplyUVMapping",static_cast<void(*)(lua_State*,::ModelSubMesh&,const Vector3&,const Vector3&,uint32_t,uint32_t,float,float,float,float)>(&Lua::ModelSubMesh::ApplyUVMapping));
 	classDef.def("Scale",&Lua::ModelSubMesh::Scale);
+	classDef.def("GetTriangle",+[](lua_State *l,::ModelSubMesh &mesh,uint32_t idx) -> std::optional<std::tuple<uint16_t,uint16_t,uint16_t>> {
+		auto &tris = mesh.GetTriangles();
+		idx *= 3;
+		if(idx +2 >= tris.size())
+			return {};
+		return std::tuple<uint16_t,uint16_t,uint16_t>{tris[idx],tris[idx +1],tris[idx +2]};
+	});
 	classDef.def("Copy",static_cast<std::shared_ptr<::ModelSubMesh>(*)(lua_State*,::ModelSubMesh&,bool)>([](lua_State *l,::ModelSubMesh &mesh,bool fullCopy) -> std::shared_ptr<::ModelSubMesh> {
 		return mesh.Copy(fullCopy);
 	}));

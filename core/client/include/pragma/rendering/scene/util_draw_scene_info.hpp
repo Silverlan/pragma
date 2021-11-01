@@ -28,7 +28,8 @@ namespace util
 		{
 			None = 0u,
 			FlipVertically = 1u,
-			DisableRender = FlipVertically<<1u
+			DisableRender = FlipVertically<<1u,
+			Reflection = DisableRender<<1u
 		};
 		DrawSceneInfo()=default;
 		DrawSceneInfo(const DrawSceneInfo &other)

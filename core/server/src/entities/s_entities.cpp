@@ -213,6 +213,12 @@ SBaseEntity *SGame::CreateLuaEntity(std::string classname,bool bLoadIfNotExists)
 	else
 		ent->SetShared(false);
 	SetupEntity(ent,GetFreeEntityIndex());
+
+	auto *info = m_luaEnts->GetEntityInfo(classname);
+	assert(info);
+	for(auto componentId : info->components)
+		ent->AddComponent(componentId);
+
 	return ent;
 	/*int ref = Lua::PushTable(m_lua,m_luaRefEntityTable);
 	Lua::PushString(m_lua,classname);

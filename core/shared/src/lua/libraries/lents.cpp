@@ -770,7 +770,7 @@ void Lua::ents::register_class(lua_State *l,const std::string &className,const L
 	auto *state = engine->GetNetworkState(l);
 	auto *game = state->GetGameState();
 	auto &manager = game->GetLuaEntityManager();
-	manager.RegisterEntity(className,const_cast<Lua::classObject&>(classObject));
+	manager.RegisterEntity(className,const_cast<Lua::classObject&>(classObject),{});
 }
 void Lua::ents::register_class(lua_State *l,const std::string &className,const luabind::tableT<luabind::variant<std::string,pragma::ComponentId>> &tComponents,LuaEntityType type)
 {
@@ -814,11 +814,6 @@ void Lua::ents::register_class(lua_State *l,const std::string &className,const l
 	ss<<"function "<<luaClassName<<":__init()\n";
 	ss<<"    BaseEntity.__init(self)\n";
 	ss<<"end\n";
-	ss<<"function "<<luaClassName<<":Initialize()\n";
-	ss<<"    BaseEntity.Initialize(self)\n";
-	for(auto componentId : components)
-		ss<<"    self:AddComponent("<<componentId<<")\n";
-	ss<<"end\n";
 
 	auto r = Lua::RunString(l,ss.str(),"internal");
 	if(r == Lua::StatusCode::Ok)
@@ -829,7 +824,7 @@ void Lua::ents::register_class(lua_State *l,const std::string &className,const l
 			o["Type"] = umath::to_integral(type);
 
 			auto &manager = game->GetLuaEntityManager();
-			manager.RegisterEntity(className,o);
+			manager.RegisterEntity(className,o,components);
 		}
 	}
 	else

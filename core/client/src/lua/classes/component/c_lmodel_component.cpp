@@ -11,6 +11,7 @@
 #include "pragma/entities/components/c_model_component.hpp"
 #include <pragma/lua/converters/cast_converter_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
+#include <pragma/lua/policies/default_parameter_policy.hpp>
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/lua_util_component_stream.hpp>
 #include <pragma/asset/util_asset.hpp>
@@ -19,9 +20,6 @@
 
 void Lua::ModelDef::register_class(lua_State *l,luabind::module_ &entsMod)
 {
-	luabind::default_converter<BaseEntity> x;
-	luabind::default_converter<pragma::BaseEntityComponent> y;
-
 	auto defCModel = pragma::lua::create_entity_component_class<pragma::CModelComponent,pragma::BaseModelComponent>("ModelComponent");
 	defCModel.add_static_constant("EVENT_ON_RENDER_MESHES_UPDATED",pragma::CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED);
 	//Lua::register_base_model_component_methods<luabind::class_<CModelHandle,BaseEntityComponentHandle>,CModelHandle>(l,defCModel);
@@ -51,5 +49,9 @@ void Lua::ModelDef::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCModel.def("SetMaxDrawDistance",&pragma::CModelComponent::SetMaxDrawDistance);
 	defCModel.def("GetMaxDrawDistance",&pragma::CModelComponent::GetMaxDrawDistance);
 	defCModel.def("UpdateRenderMeshes",&pragma::CModelComponent::UpdateRenderMeshes);
+	defCModel.def("ReloadRenderBufferList",&pragma::CModelComponent::ReloadRenderBufferList,luabind::default_parameter_policy<2,false>{});
+	defCModel.def("ReloadRenderBufferList",&pragma::CModelComponent::ReloadRenderBufferList);
+	defCModel.def("IsDepthPrepassEnabled",&pragma::CModelComponent::IsDepthPrepassEnabled);
+	defCModel.def("SetDepthPrepassEnabled",&pragma::CModelComponent::SetDepthPrepassEnabled);
 	entsMod[defCModel];
 }

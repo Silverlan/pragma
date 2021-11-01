@@ -17,6 +17,11 @@ namespace pragma
 	const float DefaultParallaxHeightScale = 0.025f;
 	const float DefaultAlphaDiscardThreshold = 0.99f;
 
+	namespace rendering
+	{
+		enum class PassType : uint32_t;
+	};
+
 	enum class GameShaderSpecializationConstantFlag : uint32_t
 	{
 		None = 0u,
@@ -45,28 +50,31 @@ namespace pragma
 	class DLLCLIENT ShaderSpecializationManager
 	{
 	public:
-		using PassType = uint32_t;
+		using PassTypeIndex = uint32_t;
 		using SpecializationFlags = uint64_t;
 		using ConstantId = uint32_t;
 		uint32_t GetPipelineCount() const {return m_pipelineSpecializations.size();}
-		std::optional<uint32_t> FindSpecializationPipelineIndex(PassType passType,SpecializationFlags specializationFlags) const;
+		PassTypeIndex GetBasePassType(uint32_t pipelineIdx) const;
+		uint32_t GetPipelineIndexStartOffset(PassTypeIndex passType) const;
+		std::optional<uint32_t> FindSpecializationPipelineIndex(PassTypeIndex passType,SpecializationFlags specializationFlags) const;
 		template<typename TPassType,typename TSpecializationFlags>
 			std::optional<uint32_t> FindSpecializationPipelineIndex(TPassType passType,TSpecializationFlags specializationFlags) const
 			{
-				return FindSpecializationPipelineIndex(static_cast<PassType>(passType),static_cast<SpecializationFlags>(specializationFlags));
+				return FindSpecializationPipelineIndex(static_cast<PassTypeIndex>(passType),static_cast<SpecializationFlags>(specializationFlags));
 			}
 	protected:
 		bool IsSpecializationConstantSet(uint32_t pipelineIdx,SpecializationFlags flag) const;
+		void SetPipelineIndexRange(PassTypeIndex passType,uint32_t startIndex,uint32_t endIndex);
 		template<typename TSpecializationConstantFlag>
 			bool IsSpecializationConstantSet(uint32_t pipelineIdx,TSpecializationConstantFlag flag) const
 			{
 				return IsSpecializationConstantSet(pipelineIdx,static_cast<SpecializationFlags>(flag));
 			}
-		void RegisterSpecializations(PassType passType,SpecializationFlags staticFlags,SpecializationFlags dynamicFlags);
+		void RegisterSpecializations(PassTypeIndex passType,SpecializationFlags staticFlags,SpecializationFlags dynamicFlags);
 		template<typename TPassType,typename TSpecializationConstantFlag>
 			void RegisterSpecializations(TPassType passType,TSpecializationConstantFlag staticFlags,TSpecializationConstantFlag dynamicFlags)
 			{
-				RegisterSpecializations(static_cast<PassType>(passType),static_cast<SpecializationFlags>(staticFlags),static_cast<SpecializationFlags>(dynamicFlags));
+				RegisterSpecializations(static_cast<PassTypeIndex>(passType),static_cast<SpecializationFlags>(staticFlags),static_cast<SpecializationFlags>(dynamicFlags));
 			}
 		template<typename TSpecializationConstantFlag>
 			bool AddSpecializationConstant(prosper::ShaderGraphics &shader,prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx,prosper::ShaderStageFlags stageFlags,TSpecializationConstantFlag flag)
@@ -76,8 +84,14 @@ namespace pragma
 		}
 	private:
 		std::vector<SpecializationFlags> m_pipelineSpecializations;
+		struct PassTypeInfo
+		{
+			std::array<uint32_t,umath::to_integral(GameShaderSpecializationConstantFlag::PermutationCount)> specializationToPipelineIdx;
+			std::pair<uint32_t,uint32_t> pipelineIndexRange {0,0};
+		};
+		PassTypeInfo &InitializePassTypeSpecializations(PassTypeIndex passType);
 		// Per pass-type
-		std::vector<std::array<uint32_t,umath::to_integral(GameShaderSpecializationConstantFlag::PermutationCount)>> m_specializationToPipelineIdx;
+		std::vector<PassTypeInfo> m_passTypeSpecializationToPipelineIdx;
 	};
 
 	enum class GameShaderSpecializationPropertyIndex : uint32_t
@@ -134,12 +148,6 @@ namespace pragma
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_LIGHTS;
 		static prosper::DescriptorSetInfo DESCRIPTOR_SET_SHADOWS;
 		
-		enum class PassType : uint32_t
-		{
-			Generic = 0u,
-			Reflection
-		};
-
 		enum class VertexBinding : uint32_t
 		{
 			LightmapUv = umath::to_integral(ShaderEntity::VertexBinding::Count)
@@ -249,7 +257,8 @@ namespace pragma
 		virtual uint32_t GetInstanceDescriptorSetIndex() const override;
 		virtual uint32_t GetRenderSettingsDescriptorSetIndex() const override;
 		virtual uint32_t GetLightDescriptorSetIndex() const override;
-		std::optional<uint32_t> FindPipelineIndex(PassType passType,GameShaderSpecialization specialization,GameShaderSpecializationConstantFlag specializationFlags) const;
+		virtual uint32_t GetPassPipelineIndexStartOffset(rendering::PassType passType) const override;
+		std::optional<uint32_t> FindPipelineIndex(rendering::PassType passType,GameShaderSpecialization specialization,GameShaderSpecializationConstantFlag specializationFlags) const;
 		virtual GameShaderSpecializationConstantFlag GetMaterialPipelineSpecializationRequirements(CMaterial &mat) const;
 
 		//
@@ -262,6 +271,8 @@ namespace pragma
 			const Vector4 &drawOrigin,ShaderGameWorld::SceneFlags &inOutSceneFlags
 		) const override;
 		virtual bool IsUsingLightmaps() const override {return true;}
+		bool IsDepthPrepassEnabled() const;
+		void SetDepthPrepassEnabled(bool enabled) {m_depthPrepassEnabled = enabled;}
 	protected:
 		using ShaderEntity::Draw;
 		GameShaderSpecializationConstantFlag GetStaticSpecializationConstantFlags(GameShaderSpecialization specialization) const;
@@ -282,6 +293,7 @@ namespace pragma
 		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const;
 		virtual void GetVertexAnimationPushConstantInfo(uint32_t &offset) const override;
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+		bool m_depthPrepassEnabled = true;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ShaderGameWorldLightingPass::MaterialFlags)

@@ -648,6 +648,8 @@ void ClientState::RegisterSharedLuaClasses(Lua::Interface &lua,bool bGUI)
 	defShaderTextured3DBase.def("OnBindScene",&pragma::LuaShaderTextured3D::Lua_OnBindScene,&pragma::LuaShaderTextured3D::Lua_default_OnBindScene);
 	defShaderTextured3DBase.def("OnBeginDraw",&pragma::LuaShaderTextured3D::Lua_OnBeginDraw,&pragma::LuaShaderTextured3D::Lua_default_OnBeginDraw);
 	defShaderTextured3DBase.def("OnEndDraw",&pragma::LuaShaderTextured3D::Lua_OnEndDraw,&pragma::LuaShaderTextured3D::Lua_default_OnEndDraw);
+	defShaderTextured3DBase.def("IsDepthPrepassEnabled",&pragma::LuaShaderTextured3D::IsDepthPrepassEnabled);
+	defShaderTextured3DBase.def("SetDepthPrepassEnabled",&pragma::LuaShaderTextured3D::SetDepthPrepassEnabled);
 	modShader[defShaderTextured3DBase];
 
 	auto defShaderPbr = luabind::class_<pragma::LuaShaderPbr,luabind::bases<pragma::LuaShaderGraphicsBase,pragma::ShaderGameWorldLightingPass,prosper::ShaderGraphics,prosper::Shader,pragma::LuaShaderBase>>("BasePbr");
@@ -774,6 +776,7 @@ void CGame::RegisterLuaClasses()
 	auto defDrawSceneInfo = luabind::class_<::util::DrawSceneInfo>("DrawSceneInfo");
 	defDrawSceneInfo.add_static_constant("FLAG_FLIP_VERTICALLY_BIT",umath::to_integral(::util::DrawSceneInfo::Flags::FlipVertically));
 	defDrawSceneInfo.add_static_constant("FLAG_DISABLE_RENDER_BIT",umath::to_integral(::util::DrawSceneInfo::Flags::DisableRender));
+	defDrawSceneInfo.add_static_constant("FLAG_REFLECTION_BIT",umath::to_integral(::util::DrawSceneInfo::Flags::Reflection));
 	defDrawSceneInfo.def(luabind::constructor<>());
 	defDrawSceneInfo.property("scene",static_cast<luabind::object(*)(const ::util::DrawSceneInfo&)>([](const ::util::DrawSceneInfo &drawSceneInfo) -> luabind::object {
 		return drawSceneInfo.scene.valid() ? drawSceneInfo.scene->GetLuaObject() : luabind::object{};

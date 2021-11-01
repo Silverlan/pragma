@@ -23,6 +23,7 @@
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 #include "pragma/rendering/render_queue.hpp"
 #include "pragma/rendering/world_environment.hpp"
+#include "pragma/rendering/render_processor.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <util_bsp.hpp>
 #include <buffers/prosper_buffer.hpp>
@@ -304,7 +305,7 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 			if(shader == nullptr)
 				continue;
 			uint32_t pipelineIdx = 0;
-			auto t = shader->FindPipelineIndex(pragma::ShaderPBR::PassType::Generic,renderC->GetShaderPipelineSpecialization(),shader->GetMaterialPipelineSpecializationRequirements(*mat));// | pragma::GameShaderSpecializationConstantFlag::Enable3dOriginBit);
+			auto t = shader->FindPipelineIndex(pragma::rendering::PassType::Generic,renderC->GetShaderPipelineSpecialization(),shader->GetMaterialPipelineSpecializationRequirements(*mat));// | pragma::GameShaderSpecializationConstantFlag::Enable3dOriginBit);
 			if(t.has_value())
 				pipelineIdx = *t;
 			prosper::PipelineID pipelineId;

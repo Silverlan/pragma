@@ -28,6 +28,7 @@
 #include <pragma/lua/policies/optional_policy.hpp>
 #include <pragma/lua/policies/shared_from_this_policy.hpp>
 #include <pragma/lua/policies/pair_policy.hpp>
+#include <pragma/lua/policies/default_parameter_policy.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/lua/converters/pair_converter_t.hpp>
@@ -653,7 +654,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.def("GetViewCameraDescriptorSet",&pragma::CSceneComponent::GetViewCameraDescriptorSet);
 	defCScene.def("GetDebugMode",&pragma::CSceneComponent::GetDebugMode);
 	defCScene.def("SetDebugMode",&pragma::CSceneComponent::SetDebugMode);
-	defCScene.def("Link",&pragma::CSceneComponent::Link);
+	defCScene.def("Link",&pragma::CSceneComponent::Link,luabind::default_parameter_policy<3,true>{});
 	defCScene.def("Link",&pragma::CSceneComponent::Link);
 	// defCScene.def("BuildRenderQueue",&pragma::CSceneComponent::BuildRenderQueue);
 	defCScene.def("RenderPrepass",&Lua::Scene::RenderPrepass);

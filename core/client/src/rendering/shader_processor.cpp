@@ -67,6 +67,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindShader(
 	m_curVertexAnimationOffset = std::numeric_limits<uint32_t>::max();
 	m_sceneFlags = sceneFlags;
 	m_alphaCutoff = std::numeric_limits<float>::max();
+	m_depthPrepass = shader.IsDepthPrepassShader();
 
 	if(m_cmdBuffer.RecordBindShaderPipeline(shader,pipelineIdx) == false)
 		return false;
@@ -195,8 +196,8 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(CModelSubMesh &mesh,pragma::
 		return false;
 	}
 	auto &vkMesh = mesh.GetSceneMesh();
-	auto &renderBuffer = m_modelC->GetRenderBuffer(meshIdx);
-	if(renderBuffer == nullptr || m_cmdBuffer.RecordBindRenderBuffer(*renderBuffer) == false)
+	auto &bufferData =  *m_modelC->GetRenderBufferData(meshIdx);
+	if(bufferData.renderBuffer == nullptr || (m_depthPrepass && !bufferData.enableDepthPrepass) || m_cmdBuffer.RecordBindRenderBuffer(*bufferData.renderBuffer) == false)
 		return false;
 
 	uint32_t instanceCount = 1;

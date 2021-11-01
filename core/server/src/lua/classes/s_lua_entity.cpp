@@ -25,7 +25,6 @@ SLuaEntity::SLuaEntity()
 void SLuaEntity::Initialize()
 {
 	SBaseEntity::Initialize();
-	CallLuaMethod("Initialize");
 }
 void SLuaEntity::SetupLua(const luabind::object &o,const std::string &className)
 {

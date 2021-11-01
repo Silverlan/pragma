@@ -14,7 +14,6 @@ CLuaEntity::CLuaEntity()
 void CLuaEntity::Initialize()
 {
 	CBaseEntity::Initialize();
-	CallLuaMethod("Initialize");
 }
 void CLuaEntity::SetupLua(const luabind::object &o,const std::string &className)
 {

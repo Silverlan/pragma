@@ -8,6 +8,8 @@
 #include "stdafx_shared.h"
 #include "pragma/entities/baseentity.h"
 #include "pragma/entities/entity_component_manager.hpp"
+#include "pragma/entities/entity_uuid_ref.hpp"
+#include <sharedutils/util_uri.hpp>
 #include <sharedutils/datastream.h>
 #include <udm.hpp>
 
@@ -78,3 +80,53 @@ BaseEntity *BaseEntity::Copy()
 	ent->Load(assetData);
 	return ent;
 }
+
+bool BaseEntity::CreateMemberReference(pragma::EntityIdentifier identifier,std::string var,pragma::EntityUComponentMemberRef &outRef)
+{
+	if(var.empty())
+	{
+		outRef = pragma::EntityUComponentMemberRef{std::move(identifier),"",""};
+		return true;
+	}
+	util::Path path {std::move(var)};
+	size_t offset = 0;
+	if(path.GetComponent(offset,&offset) != "ec")
+	{
+		outRef = pragma::EntityUComponentMemberRef{std::move(identifier),"",""};
+		return true;
+	}
+	auto componentName = path.GetComponent(offset,&offset);
+	auto memberName = path.GetComponent(offset,&offset);
+	outRef = pragma::EntityUComponentMemberRef{std::move(identifier),std::string{componentName},std::string{memberName}};
+	return true;
+}
+bool BaseEntity::ParseUri(std::string uriPath,pragma::EntityUComponentMemberRef &outRef,const util::Uuid *optSelf)
+{
+	uriparser::Uri uri {std::move(uriPath)};
+	auto scheme = uri.scheme();
+	if(!scheme.empty() && uri.scheme() != "pragma")
+		return false;
+	util::Path path {uri.path()};
+	size_t offset = 0;
+	if(path.GetComponent(offset,&offset) != "game" || path.GetComponent(offset,&offset) != "entity")
+		return false;
+	std::unordered_map<std::string_view,std::string_view> query;
+	uriparser::parse_uri_query(uri.query(),query);
+
+	auto &str = path.GetString();
+	auto memberName = (offset < str.size()) ? str.substr(offset) : std::string{};
+
+	util::Uuid uuid {};
+	auto itUuid = query.find("entity_uuid");
+	if(itUuid != query.end())
+		return CreateMemberReference(util::uuid_string_to_bytes(std::string{itUuid->second}),std::move(memberName),outRef);
+	auto itName = query.find("entity_name");
+	if(itName != query.end())
+		return CreateMemberReference(std::string{itName->second},std::move(memberName),outRef);
+	if(optSelf)
+		return CreateMemberReference(*optSelf,std::move(memberName),outRef);
+	return false;
+}
+std::string BaseEntity::GetUri() const {return GetUri(GetUuid());}
+std::string BaseEntity::GetUri(util::Uuid uuid) {return "pragma:game/entity?entity_uuid=" +util::uuid_to_string(uuid);}
+std::string BaseEntity::GetUri(const std::string name) {return "pragma:game/entity?entity_name=" +name;}

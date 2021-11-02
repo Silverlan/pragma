@@ -184,6 +184,12 @@ namespace pragma
 		// For internal use only!
 		StateFlags GetStateFlags() const {return m_stateFlags;}
 		void SetStateFlags(StateFlags stateFlags) {m_stateFlags = stateFlags;}
+
+		std::string GetUri() const;
+		std::string GetMemberUri(const std::string &memberName) const;
+		std::optional<std::string> GetMemberUri(ComponentMemberIndex memberIdx) const;
+		static std::optional<std::string> GetUri(Game *game,std::variant<util::Uuid,std::string> entityIdentifier,std::variant<ComponentId,std::string> componentIdentifier);
+		static std::optional<std::string> GetMemberUri(Game *game,std::variant<util::Uuid,std::string> entityIdentifier,std::variant<ComponentId,std::string> componentIdentifier,std::variant<ComponentMemberIndex,std::string> memberIdentifier);
 	protected:
 		friend EntityComponentManager;
 		friend BaseEntityComponentSystem;

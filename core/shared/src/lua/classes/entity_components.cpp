@@ -181,6 +181,9 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 		}
 		return hComponent.InvokeEventCallbacks(eventId,luaEvent);
 	}));
+	entityComponentDef.def("GetUri",static_cast<std::string(pragma::BaseEntityComponent::*)() const>(&pragma::BaseEntityComponent::GetUri));
+	entityComponentDef.def("GetMemberUri",static_cast<std::string(pragma::BaseEntityComponent::*)(const std::string&) const>(&pragma::BaseEntityComponent::GetMemberUri));
+	entityComponentDef.def("GetMemberUri",static_cast<std::optional<std::string>(pragma::BaseEntityComponent::*)(ComponentMemberIndex) const>(&pragma::BaseEntityComponent::GetMemberUri));
 	entityComponentDef.def("GetEntity",static_cast<BaseEntity&(pragma::BaseEntityComponent::*)()>(&pragma::BaseEntityComponent::GetEntity));
 	entityComponentDef.def("GetComponentId",&pragma::BaseEntityComponent::GetComponentId);
 	entityComponentDef.def("SetTickPolicy",&pragma::BaseEntityComponent::SetTickPolicy);
@@ -193,7 +196,7 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 		auto *info = component.FindMemberInfo(memberName);
 		if(!info)
 			return {};
-		return udm::visit(info->type,[info,&component,l](auto tag) -> std::optional<Lua::udm_type> {
+		return ents::visit_member(info->type,[info,&component,l](auto tag) -> std::optional<Lua::udm_type> {
 			using T = decltype(tag)::type;
 			if constexpr(!is_valid_component_property_type_v<T>)
 				return {};
@@ -209,7 +212,7 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 		auto *info = component.FindMemberInfo(memberName);
 		if(!info)
 			return false;
-		return udm::visit(info->type,[info,&component,l,&value](auto tag) -> bool {
+		return ents::visit_member(info->type,[info,&component,l,&value](auto tag) -> bool {
 			using T = decltype(tag)::type;
 			if constexpr(!pragma::is_valid_component_property_type_v<T>)
 				return false;

@@ -93,6 +93,7 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 	classDef.def("IsWeapon",&BaseEntity::IsWeapon);
 	classDef.def("IsVehicle",&BaseEntity::IsVehicle);
 	classDef.def("RemoveSafely",&BaseEntity::RemoveSafely);
+	classDef.def("GetUri",static_cast<std::string(BaseEntity::*)() const>(&BaseEntity::GetUri));
 	classDef.def("RemoveEntityOnRemoval",static_cast<void(*)(BaseEntity&,BaseEntity&)>(&RemoveEntityOnRemoval));
 	classDef.def("RemoveEntityOnRemoval",static_cast<void(*)(BaseEntity&,BaseEntity&,Bool)>(&RemoveEntityOnRemoval));
 	classDef.def("GetSpawnFlags",&BaseEntity::GetSpawnFlags);

@@ -46,6 +46,7 @@ namespace pragma
 	class BaseNameComponent;
 	class BaseTransformComponent;
 	class BaseParentComponent;
+	struct EntityUComponentMemberRef;
 
 	using NetEventId = uint32_t;
 };
@@ -256,6 +257,12 @@ public:
 	virtual void Load(udm::LinkedPropertyWrapper &udm);
 	virtual void Save(udm::LinkedPropertyWrapper &udm);
 	virtual BaseEntity *Copy();
+
+	std::string GetUri() const;
+	static std::string GetUri(util::Uuid uuid);
+	static std::string GetUri(const std::string name);
+	static bool ParseUri(std::string uriPath,pragma::EntityUComponentMemberRef &outRef,const util::Uuid *optSelf=nullptr);
+	static bool CreateMemberReference(pragma::EntityIdentifier identifier,std::string var,pragma::EntityUComponentMemberRef &outRef);
 protected:
 	StateFlags m_stateFlags = StateFlags::None;
 

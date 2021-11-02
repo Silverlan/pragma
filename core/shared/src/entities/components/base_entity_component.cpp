@@ -481,3 +481,84 @@ bool BaseEntityComponent::Tick(double tDelta)
 	}
 	return true;
 }
+
+std::string BaseEntityComponent::GetUri() const
+{
+	auto uri = GetUri(nullptr,GetEntity().GetUuid(),GetComponentInfo()->name);
+	assert(uri.has_value());
+	return *uri;
+}
+std::string BaseEntityComponent::GetMemberUri(const std::string &memberName) const
+{
+	auto uri = GetUri();
+	auto q = uri.find('?');
+	return uri.substr(0,q) +"/" +memberName +uri.substr(q);
+}
+std::optional<std::string> BaseEntityComponent::GetMemberUri(ComponentMemberIndex memberIdx) const
+{
+	auto *info = GetMemberInfo(memberIdx);
+	if(!info)
+		return {};
+	return GetMemberUri(GetEntity().GetNetworkState()->GetGameState(),GetEntity().GetUuid(),GetComponentId(),info->GetName());
+}
+std::optional<std::string> BaseEntityComponent::GetUri(Game *game,std::variant<util::Uuid,std::string> entityIdentifier,std::variant<ComponentId,std::string> componentIdentifier)
+{
+	return std::visit([&componentIdentifier,game](auto &value) -> std::optional<std::string> {
+		auto uri = BaseEntity::GetUri(value);
+		auto q = uri.find('?');
+		auto componentName = std::visit([game](auto &value) -> std::optional<std::string> {
+			using T = util::base_type<decltype(value)>;
+			if constexpr(std::is_same_v<T,ComponentId>)
+			{
+				if(!game)
+					return {};
+				auto *info = game->GetEntityComponentManager().GetComponentInfo(value);
+				if(!info)
+					return {};
+				return info->name;
+			}
+			else
+				return value;
+		},componentIdentifier);
+		if(!componentName.has_value())
+			return {};
+		return uri.substr(0,q) +"/ec/" +*componentName +uri.substr(q);
+	},entityIdentifier);
+}
+std::optional<std::string> BaseEntityComponent::GetMemberUri(Game *game,std::variant<util::Uuid,std::string> entityIdentifier,std::variant<ComponentId,std::string> componentIdentifier,std::variant<ComponentMemberIndex,std::string> memberIdentifier)
+{
+	auto uri = GetUri(game,entityIdentifier,componentIdentifier);
+	if(!uri.has_value())
+		return {};
+	auto memberName = std::visit([game,&componentIdentifier](auto &memberId) -> std::optional<std::string> {
+		using T = util::base_type<decltype(memberId)>;
+		if constexpr(std::is_same_v<T,ComponentMemberIndex>)
+		{
+			if(!game)
+				return {};
+			return std::visit([game,&memberId](auto &value) -> std::optional<std::string> {
+				using T = util::base_type<decltype(value)>;
+				ComponentId componentId;
+				if constexpr(std::is_same_v<T,ComponentId>)
+					componentId = value;
+				else
+				{
+					if(game->GetEntityComponentManager().GetComponentTypeId(value,componentId) == false)
+						return {};
+				}
+
+				auto *info = game->GetEntityComponentManager().GetComponentInfo(componentId);
+				if(!info || memberId >= info->members.size())
+					return {};
+				auto &memberInfo = info->members[memberId];
+				return memberInfo.GetName();
+			},componentIdentifier);
+		}
+		else
+			return memberId;
+	},memberIdentifier);
+	if(!memberName.has_value())
+		return {};
+	auto q = uri->find('?');
+	return uri->substr(0,q) +"/" +*memberName +uri->substr(q);
+}

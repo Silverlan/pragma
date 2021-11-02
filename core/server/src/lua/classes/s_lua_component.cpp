@@ -13,7 +13,7 @@
 #include <pragma/networking/enums.hpp>
 
 using namespace pragma;
-
+#pragma optimize("",off)
 SLuaBaseEntityComponent::SLuaBaseEntityComponent(BaseEntity &ent)
 	: BaseLuaBaseEntityComponent(ent),SBaseSnapshotComponent()
 {}
@@ -46,10 +46,11 @@ void SLuaBaseEntityComponent::OnMemberValueChanged(uint32_t memberIdx)
 		Con::cwar<<"WARNING: Networked member index of '"<<member.functionName<<"' exceeds maximum allowed number of networked variables ("<<maxNwVars<<")!"<<Con::endl;
 		return;
 	}
+
 	auto value = GetMemberValue(member);
 	NetPacket p {};
 	p->Write<uint8_t>(nwIndex);
-	Lua::WriteAny(p,detail::udm_type_to_util_type(member.type),value);
+	Lua::WriteAny(p,detail::member_type_to_util_type(member.type),value);
 	static_cast<SBaseEntity&>(GetEntity()).SendNetEvent(m_networkedMemberInfo->netEvSetMember,p,pragma::networking::Protocol::SlowReliable);
 }
 void SLuaBaseEntityComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
@@ -61,7 +62,7 @@ void SLuaBaseEntityComponent::SendData(NetPacket &packet,networking::ClientRecip
 		{
 			auto &member = members.at(idx);
 			auto value = GetMemberValue(member);
-			Lua::WriteAny(packet,detail::udm_type_to_util_type(member.type),value);
+			Lua::WriteAny(packet,detail::member_type_to_util_type(member.type),value);
 		}
 	}
 
@@ -89,7 +90,7 @@ void SLuaBaseEntityComponent::SendSnapshotData(NetPacket &packet,pragma::BasePla
 		{
 			auto &member = members.at(idx);
 			auto value = GetMemberValue(member);
-			Lua::WriteAny(packet,detail::udm_type_to_util_type(member.type),value);
+			Lua::WriteAny(packet,detail::member_type_to_util_type(member.type),value);
 		}
 	}
 	CallLuaMethod<void,NetPacket,luabind::object>("SendSnapshotData",packet,pl.GetLuaObject());
@@ -100,3 +101,4 @@ void SLuaBaseEntityComponent::InvokeNetEventHandle(const std::string &methodName
 {
 	CallLuaMethod<void,luabind::object,NetPacket>(methodName,pl->GetLuaObject(),packet);
 }
+#pragma optimize("",on)

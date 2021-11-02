@@ -11,7 +11,7 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 using namespace pragma;
-
+#pragma optimize("",off)
 CLuaBaseEntityComponent::CLuaBaseEntityComponent(BaseEntity &ent)
 	: BaseLuaBaseEntityComponent(ent),CBaseSnapshotComponent()
 {}
@@ -25,7 +25,7 @@ void CLuaBaseEntityComponent::ReceiveData(NetPacket &packet)
 		{
 			auto &member = members.at(idx);
 			std::any value;
-			Lua::ReadAny(packet,detail::udm_type_to_util_type(member.type),value);
+			Lua::ReadAny(packet,detail::member_type_to_util_type(member.type),value);
 			SetMemberValue(member,value);
 		}
 	}
@@ -44,7 +44,7 @@ Bool CLuaBaseEntityComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPack
 		auto memberIdx = m_networkedMemberInfo->networkedMembers.at(nwIdx);
 		auto &member = GetMembers().at(memberIdx);
 		std::any value;
-		Lua::ReadAny(packet,detail::udm_type_to_util_type(member.type),value);
+		Lua::ReadAny(packet,detail::member_type_to_util_type(member.type),value);
 		SetMemberValue(member,value);
 		return true;
 	}
@@ -68,7 +68,7 @@ void CLuaBaseEntityComponent::ReceiveSnapshotData(NetPacket &packet)
 		{
 			auto &member = members.at(idx);
 			std::any value;
-			Lua::ReadAny(packet,detail::udm_type_to_util_type(member.type),value);
+			Lua::ReadAny(packet,detail::member_type_to_util_type(member.type),value);
 			SetMemberValue(member,value);
 		}
 	}
@@ -80,3 +80,4 @@ void CLuaBaseEntityComponent::InvokeNetEventHandle(const std::string &methodName
 {
 	CallLuaMethod<void,NetPacket>(methodName,packet);
 }
+#pragma optimize("",on)

@@ -167,6 +167,40 @@ void Lua::ents::register_library(lua_State *l)
 			});
 		})
 	];
+	Lua::RegisterLibraryEnums(l,"ents",{
+		{"MEMBER_TYPE_STRING",umath::to_integral(pragma::ents::EntityMemberType::String)},
+		{"MEMBER_TYPE_INT8",umath::to_integral(pragma::ents::EntityMemberType::Int8)},
+		{"MEMBER_TYPE_UINT8",umath::to_integral(pragma::ents::EntityMemberType::UInt8)},
+		{"MEMBER_TYPE_INT16",umath::to_integral(pragma::ents::EntityMemberType::Int16)},
+		{"MEMBER_TYPE_UINT16",umath::to_integral(pragma::ents::EntityMemberType::UInt16)},
+		{"MEMBER_TYPE_INT32",umath::to_integral(pragma::ents::EntityMemberType::Int32)},
+		{"MEMBER_TYPE_UINT32",umath::to_integral(pragma::ents::EntityMemberType::UInt32)},
+		{"MEMBER_TYPE_INT64",umath::to_integral(pragma::ents::EntityMemberType::Int64)},
+		{"MEMBER_TYPE_UINT64",umath::to_integral(pragma::ents::EntityMemberType::UInt64)},
+		{"MEMBER_TYPE_FLOAT",umath::to_integral(pragma::ents::EntityMemberType::Float)},
+		{"MEMBER_TYPE_DOUBLE",umath::to_integral(pragma::ents::EntityMemberType::Double)},
+		{"MEMBER_TYPE_BOOLEAN",umath::to_integral(pragma::ents::EntityMemberType::Boolean)},
+		{"MEMBER_TYPE_VECTOR2",umath::to_integral(pragma::ents::EntityMemberType::Vector2)},
+		{"MEMBER_TYPE_VECTOR3",umath::to_integral(pragma::ents::EntityMemberType::Vector3)},
+		{"MEMBER_TYPE_VECTOR4",umath::to_integral(pragma::ents::EntityMemberType::Vector4)},
+		{"MEMBER_TYPE_QUATERNION",umath::to_integral(pragma::ents::EntityMemberType::Quaternion)},
+		{"MEMBER_TYPE_EULER_ANGLES",umath::to_integral(pragma::ents::EntityMemberType::EulerAngles)},
+		{"MEMBER_TYPE_SRGBA",umath::to_integral(pragma::ents::EntityMemberType::Srgba)},
+		{"MEMBER_TYPE_HDR_COLOR",umath::to_integral(pragma::ents::EntityMemberType::HdrColor)},
+		{"MEMBER_TYPE_TRANSFORM",umath::to_integral(pragma::ents::EntityMemberType::Transform)},
+		{"MEMBER_TYPE_SCALED_TRANSFORM",umath::to_integral(pragma::ents::EntityMemberType::ScaledTransform)},
+		{"MEMBER_TYPE_MAT4",umath::to_integral(pragma::ents::EntityMemberType::Mat4)},
+		{"MEMBER_TYPE_MAT3X4",umath::to_integral(pragma::ents::EntityMemberType::Mat3x4)},
+		{"MEMBER_TYPE_HALF",umath::to_integral(pragma::ents::EntityMemberType::Half)},
+		{"MEMBER_TYPE_VECTOR2I",umath::to_integral(pragma::ents::EntityMemberType::Vector2i)},
+		{"MEMBER_TYPE_VECTOR3I",umath::to_integral(pragma::ents::EntityMemberType::Vector3i)},
+		{"MEMBER_TYPE_VECTOR4I",umath::to_integral(pragma::ents::EntityMemberType::Vector4i)},
+		{"MEMBER_TYPE_ENTITY",umath::to_integral(pragma::ents::EntityMemberType::Entity)},
+		{"MEMBER_TYPE_MULTI_ENTITY",umath::to_integral(pragma::ents::EntityMemberType::MultiEntity)},
+		{"MEMBER_TYPE_COUNT",umath::to_integral(pragma::ents::EntityMemberType::Count)},
+		{"MEMBER_TYPE_LAST",umath::to_integral(pragma::ents::EntityMemberType::Last)},
+		{"MEMBER_TYPE_INVALID",umath::to_integral(pragma::ents::EntityMemberType::Invalid)}
+	});
 
 	auto componentInfoDef = luabind::class_<pragma::ComponentInfo>("ComponentInfo");
 	componentInfoDef.def_readonly("name",&pragma::ComponentInfo::name);
@@ -239,7 +273,10 @@ void Lua::ents::register_library(lua_State *l)
 		return memInfo.GetMetaData();
 	});
 	memberInfoDef.property("default",+[](lua_State *l,const pragma::ComponentMemberInfo &memInfo) -> udm_type {
-		return udm::visit(memInfo.type,[&memInfo,l](auto tag) {
+		// Default value is currently only allowed for UDM types. Tag: component-member-udm-default
+		if(!pragma::ents::is_udm_member_type(memInfo.type))
+			return nil;
+		return udm::visit(pragma::ents::member_type_to_udm_type(memInfo.type),[&memInfo,l](auto tag) {
 			using T = decltype(tag)::type;
 			constexpr auto type = udm::type_to_enum<T>();
 			if constexpr(type != udm::Type::Element && !udm::is_array_type(type))

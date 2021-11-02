@@ -242,57 +242,82 @@ struct EntityHandler
 {
 	virtual std::any GetValue(lua_State *l,int32_t idx) const override
 	{
-		if(Lua::IsType<EntityHandle>(l,idx) == false)
-			return EntityHandle{};
-		return Lua::Check<EntityHandle>(l,idx);
+		if(Lua::IsType<pragma::EntityURef>(l,idx) == false)
+			return pragma::EntityURef{};
+		return Lua::Check<pragma::EntityURef>(l,idx);
 	}
 	virtual void Push(lua_State *l,const std::any &value) const override
 	{
-		auto hEnt = Get<EntityHandle>(value);
-		if(hEnt.valid())
-		{
-			lua_pushentity(l,hEnt);
-			return;
-		}
-		Lua::Push<EntityHandle>(l,hEnt);
+		Lua::Push(l,Get<pragma::EntityURef>(value));
 	}
 	virtual void PushNewProperty(lua_State *l,const std::any &value) const override
 	{
-		Lua::Property::push(l,*pragma::EntityProperty::Create(Get<EntityHandle>(value)));
+		// Lua::Property::push(l,*pragma::EntityProperty::Create(Get<EntityHandle>(value)));
 	}
 	virtual void Write(DataStream &ds,const std::any &value,uint32_t *pos=nullptr) const override
 	{
-		auto hEnt = Get<EntityHandle>(value);
-		auto idx = hEnt.valid() ? hEnt->GetIndex() : std::numeric_limits<uint32_t>::max();
-		ds->Write<uint32_t>(idx);
+		// auto hEnt = Get<EntityHandle>(value);
+		// auto idx = hEnt.valid() ? hEnt->GetIndex() : std::numeric_limits<uint32_t>::max();
+		// ds->Write<uint32_t>(idx);
 	}
 	virtual void Write(NetPacket &ds,const std::any &value,uint32_t *pos=nullptr) const override
 	{
-		auto hEnt = Get<EntityHandle>(value);
-		nwm::write_entity(ds,hEnt);
+		auto &ref = Get<pragma::EntityURef>(value);
+		auto *identifier = ref.GetIdentifier();
+		if(!identifier)
+		{
+			ds->Write<uint8_t>(static_cast<uint8_t>(0));
+			return;
+		}
+		std::visit([&ds](auto &val) {
+			using T = util::base_type<decltype(val)>;
+			if constexpr(std::is_same_v<T,util::Uuid>)
+			{
+				ds->Write<uint8_t>(static_cast<uint8_t>(1));
+				ds->Write(reinterpret_cast<const uint8_t*>(&val[0]),sizeof(util::Uuid));
+			}
+			else
+			{
+				ds->Write<uint8_t>(static_cast<uint8_t>(2));
+				ds->WriteString(val);
+			}
+		},*identifier);
 	}
 	virtual void Read(Game &game,DataStream &ds,std::any &outValue) const override
 	{
-		auto idx = ds->Read<uint32_t>();
-		auto *ent = game.GetEntity(idx);
-		outValue = (ent != nullptr) ? ent->GetHandle() : EntityHandle{};
+		outValue = pragma::EntityURef{};
+		// auto idx = ds->Read<uint32_t>();
+		// auto *ent = game.GetEntity(idx);
+		// outValue = (ent != nullptr) ? ent->GetHandle() : EntityHandle{};
 	}
 	virtual void Read(NetPacket &ds,std::any &outValue) const override
 	{
-		auto *ent = nwm::read_entity(ds);
-		outValue = (ent != nullptr) ? ent->GetHandle() : EntityHandle{};
+		auto type = ds->Read<uint8_t>();
+		switch(type)
+		{
+		case 0:
+			outValue = pragma::EntityURef{};
+			return;
+		case 1:
+			outValue = pragma::EntityURef{ds->Read<util::Uuid>()};
+			return;
+		case 2:
+			outValue = pragma::EntityURef{ds->ReadString()};
+			return;
+		}
 	}
 	virtual void SetPropertyValue(lua_State *l,int32_t indexProperty,const std::any &value) const override
 	{
-		if(Lua::IsType<LEntityProperty>(l,indexProperty) == false)
-			return;
-		*Lua::Check<LEntityProperty>(l,indexProperty) = std::any_cast<EntityHandle>(value);
+		// if(Lua::IsType<LEntityProperty>(l,indexProperty) == false)
+		// 	return;
+		// *Lua::Check<LEntityProperty>(l,indexProperty) = std::any_cast<EntityHandle>(value);
 	}
 	virtual std::any GetPropertyValue(lua_State *l,int32_t indexProperty) const override
 	{
-		if(Lua::IsType<LEntityProperty>(l,indexProperty) == false)
-			return EntityHandle{};
-		return static_cast<EntityHandle>(Lua::Check<LEntityProperty>(l,indexProperty)->GetValue());
+		return pragma::EntityURef{};
+		// if(Lua::IsType<LEntityProperty>(l,indexProperty) == false)
+		// 	return EntityHandle{};
+		// return static_cast<EntityHandle>(Lua::Check<LEntityProperty>(l,indexProperty)->GetValue());
 	}
 } static s_entityHandler;
 

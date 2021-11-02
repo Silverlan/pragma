@@ -226,7 +226,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 
 		auto memberInfoPos = pragma::ComponentMemberInfo::CreateDummy();
 		memberInfoPos.SetName("bone/" +lname +"/position");
-		memberInfoPos.type = udm::Type::Vector3;
+		memberInfoPos.type = ents::EntityMemberType::Vector3;
 		memberInfoPos.userIndex = bone->ID;
 		memberInfoPos.SetGetterFunction<BaseAnimatedComponent,Vector3,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,Vector3&)>(
 			[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,Vector3 &outValue) {
@@ -241,7 +241,7 @@ void BaseAnimatedComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 
 		auto memberInfoRot = memberInfoPos;
 		memberInfoRot.SetName("bone/" +lname +"/rotation");
-		memberInfoRot.type = udm::Type::Quaternion;
+		memberInfoRot.type = ents::EntityMemberType::Quaternion;
 		memberInfoRot.SetGetterFunction<BaseAnimatedComponent,Quat,static_cast<void(*)(const pragma::ComponentMemberInfo&,BaseAnimatedComponent&,Quat&)>(
 			[](const pragma::ComponentMemberInfo &memberInfo,BaseAnimatedComponent &component,Quat &outValue) {
 			auto *rot = component.GetBoneRotation(memberInfo.userIndex);

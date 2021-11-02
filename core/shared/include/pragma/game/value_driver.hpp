@@ -56,8 +56,9 @@ namespace pragma
 		// Path format: pragma:game/entity/ec/<componentTypeName>/<memberName>?entity_uuid=<uuid>
 		static std::optional<ValueDriverVariable> Create(std::string path,const util::Uuid &self);
 		ValueDriverVariable(util::Uuid entUuid,std::string var);
+		ValueDriverVariable(EntityUComponentMemberRef memberRef);
 		ValueDriverVariable(const ValueDriverVariable&)=default;
-		EntityUuidComponentMemberRef memberRef;
+		EntityUComponentMemberRef memberRef;
 	};
 	struct DLLNETWORK ValueDriver
 	{

@@ -15,9 +15,11 @@
 #include "pragma/lua/classes/ldef_damageinfo.h"
 #include "pragma/lua/classes/ldef_angle.h"
 #include "pragma/lua/libraries/lray.h"
+#include "pragma/lua/custom_constructor.hpp"
 #include "pragma/lua/class_manager.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/lua/libraries/lfile.h"
+#include "pragma/lua/policies/core_policies.hpp"
 #include <pragma/game/game.h>
 #include "luasystem.h"
 #include "pragma/game/damageinfo.h"
@@ -174,6 +176,13 @@ void Lua::util::register_library(lua_State *l)
 			return ::util::uuid_to_string(::util::generate_uuid_v4());
 		})
 	];
+
+	auto defUuid = luabind::class_<::util::Uuid>("Uuid");
+	defUuid.def("__tostring",&::util::uuid_to_string,luabind::const_ref_policy<1>{});
+	utilMod[defUuid];
+	pragma::lua::define_custom_constructor<::util::Uuid,[](const std::string &uuid) -> ::util::Uuid {
+		return ::util::uuid_string_to_bytes(uuid);
+	},const std::string&>(l);
 }
 
 luabind::object Lua::global::include(lua_State *l,const std::string &f)

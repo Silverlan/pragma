@@ -10,6 +10,7 @@
 #include "pragma/networkdefinitions.h"
 #include "pragma/entities/entity_component_info.hpp"
 #include "pragma/entities/component_member_reference.hpp"
+#include "pragma/entities/member_type.hpp"
 #include "pragma/types.hpp"
 #include <cinttypes>
 #include <string>
@@ -48,7 +49,7 @@ namespace pragma
 		using InterpolationFunction = void(*)(const void*,const void*,double,void*);
 		using UpdateDependenciesFunction = void(*)(BaseEntityComponent&,std::vector<std::string>&);
 		static ComponentMemberInfo CreateDummy();
-		ComponentMemberInfo(std::string &&name,udm::Type type,const ApplyFunction &applyFunc,const GetFunction &getFunc);
+		ComponentMemberInfo(std::string &&name,ents::EntityMemberType type,const ApplyFunction &applyFunc,const GetFunction &getFunc);
 
 		template<typename TComponent,typename T,void(*TApply)(const ComponentMemberInfo&,TComponent&,const T&)>
 		void SetSetterFunction()
@@ -146,7 +147,7 @@ namespace pragma
 		void UpdateDependencies(BaseEntityComponent &component,std::vector<std::string> &outAffectedProps);
 		void ResetToDefault(BaseEntityComponent &component);
 
-		udm::Type type;
+		ents::EntityMemberType type;
 		ApplyFunction setterFunction = nullptr;
 		GetFunction getterFunction = nullptr;
 		InterpolationFunction interpolationFunction = nullptr;

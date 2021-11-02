@@ -10,6 +10,7 @@
 
 #include "pragma/networkdefinitions.h"
 #include "pragma/entities/components/base_entity_component.hpp"
+#include "pragma/entities/member_type.hpp"
 #include "pragma/lua/luaobjectbase.h"
 #include "pragma/util/util_variable_type.hpp"
 #include <pragma/lua/luaapi.h>
@@ -24,85 +25,89 @@ namespace pragma
 {
 	namespace detail
 	{
-		constexpr udm::Type util_type_to_udm_type(util::VarType type)
+		constexpr ents::EntityMemberType util_type_to_member_type(util::VarType type)
 		{
 			switch(type)
 			{
 			case util::VarType::Bool:
-				return udm::Type::Boolean;
+				return ents::EntityMemberType::Boolean;
 			case util::VarType::Double:
-				return udm::Type::Double;
+				return ents::EntityMemberType::Double;
 			case util::VarType::Float:
-				return udm::Type::Float;
+				return ents::EntityMemberType::Float;
 			case util::VarType::Int8:
-				return udm::Type::Int8;
+				return ents::EntityMemberType::Int8;
 			case util::VarType::Int16:
-				return udm::Type::Int16;
+				return ents::EntityMemberType::Int16;
 			case util::VarType::Int32:
-				return udm::Type::Int32;
+				return ents::EntityMemberType::Int32;
 			case util::VarType::Int64:
-				return udm::Type::Int64;
+				return ents::EntityMemberType::Int64;
 			case util::VarType::String:
-				return udm::Type::String;
+				return ents::EntityMemberType::String;
 			case util::VarType::UInt8:
-				return udm::Type::UInt8;
+				return ents::EntityMemberType::UInt8;
 			case util::VarType::UInt16:
-				return udm::Type::UInt16;
+				return ents::EntityMemberType::UInt16;
 			case util::VarType::UInt32:
-				return udm::Type::UInt32;
+				return ents::EntityMemberType::UInt32;
 			case util::VarType::UInt64:
-				return udm::Type::UInt64;
+				return ents::EntityMemberType::UInt64;
 			case util::VarType::EulerAngles:
-				return udm::Type::EulerAngles;
+				return ents::EntityMemberType::EulerAngles;
 			case util::VarType::Vector:
-				return udm::Type::Vector3;
+				return ents::EntityMemberType::Vector3;
 			case util::VarType::Vector2:
-				return udm::Type::Vector2;
+				return ents::EntityMemberType::Vector2;
 			case util::VarType::Vector4:
-				return udm::Type::Vector4;
+				return ents::EntityMemberType::Vector4;
 			case util::VarType::Quaternion:
-				return udm::Type::Quaternion;
+				return ents::EntityMemberType::Quaternion;
+			case util::VarType::Entity:
+				return ents::EntityMemberType::Entity;
 			}
-			return udm::Type::Invalid;
+			return ents::EntityMemberType::Invalid;
 		}
-		constexpr util::VarType udm_type_to_util_type(udm::Type type)
+		constexpr util::VarType member_type_to_util_type(ents::EntityMemberType type)
 		{
 			switch(type)
 			{
-			case udm::Type::Boolean:
+			case ents::EntityMemberType::Boolean:
 				return util::VarType::Bool;
-			case udm::Type::Double:
+			case ents::EntityMemberType::Double:
 				return util::VarType::Double;
-			case udm::Type::Float:
+			case ents::EntityMemberType::Float:
 				return util::VarType::Float;
-			case udm::Type::Int8:
+			case ents::EntityMemberType::Int8:
 				return util::VarType::Int8;
-			case udm::Type::Int16:
+			case ents::EntityMemberType::Int16:
 				return util::VarType::Int16;
-			case udm::Type::Int32:
+			case ents::EntityMemberType::Int32:
 				return util::VarType::Int32;
-			case udm::Type::Int64:
+			case ents::EntityMemberType::Int64:
 				return util::VarType::Int64;
-			case udm::Type::String:
+			case ents::EntityMemberType::String:
 				return util::VarType::String;
-			case udm::Type::UInt8:
+			case ents::EntityMemberType::UInt8:
 				return util::VarType::UInt8;
-			case udm::Type::UInt16:
+			case ents::EntityMemberType::UInt16:
 				return util::VarType::UInt16;
-			case udm::Type::UInt32:
+			case ents::EntityMemberType::UInt32:
 				return util::VarType::UInt32;
-			case udm::Type::UInt64:
+			case ents::EntityMemberType::UInt64:
 				return util::VarType::UInt64;
-			case udm::Type::EulerAngles:
+			case ents::EntityMemberType::EulerAngles:
 				return util::VarType::EulerAngles;
-			case udm::Type::Vector3:
+			case ents::EntityMemberType::Vector3:
 				return util::VarType::Vector;
-			case udm::Type::Vector2:
+			case ents::EntityMemberType::Vector2:
 				return util::VarType::Vector2;
-			case udm::Type::Vector4:
+			case ents::EntityMemberType::Vector4:
 				return util::VarType::Vector4;
-			case udm::Type::Quaternion:
+			case ents::EntityMemberType::Quaternion:
 				return util::VarType::Quaternion;
+			case ents::EntityMemberType::Entity:
+				return util::VarType::Entity;
 			}
 			return util::VarType::Invalid;
 		}
@@ -140,14 +145,14 @@ namespace pragma
 			std::string memberName;
 			size_t memberNameHash;
 			std::string memberVariableName;
-			udm::Type type;
+			ents::EntityMemberType type;
 			std::any initialValue;
 			BaseLuaBaseEntityComponent::MemberFlags flags;
 			mutable luabind::object onChange;
 
 			std::optional<ComponentMemberInfo> componentMemberInfo {};
 		};
-		static MemberIndex RegisterMember(const luabind::object &oClass,const std::string &memberName,udm::Type memberType,const std::any &initialValue,MemberFlags memberFlags,const Lua::map<std::string,void> &attributes);
+		static MemberIndex RegisterMember(const luabind::object &oClass,const std::string &memberName,ents::EntityMemberType memberType,const std::any &initialValue,MemberFlags memberFlags,const Lua::map<std::string,void> &attributes);
 		static std::vector<MemberInfo> *GetMemberInfos(const luabind::object &oClass);
 		static void ClearMembers(lua_State *l);
 

@@ -470,8 +470,9 @@ void PanimaComponent::InitializeAnimationChannelValueSubmitters(panima::Animatio
 					udm::visit_ng(channelValueType,vs);
 			}
 		};
-		if(udm::is_ng_type(valueType))
-			udm::visit_ng(valueType,vs);
+		auto udmType = ents::member_type_to_udm_type(valueType);
+		if(udm::is_ng_type(udmType))
+			udm::visit_ng(udmType,vs);
 	}
 }
 

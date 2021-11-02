@@ -9,6 +9,7 @@
 
 #include "pragma/entities/entity_component_manager.hpp"
 #include "pragma/entities/attribute_specialization_type.hpp"
+#include "pragma/entities/member_type.hpp"
 #include <sharedutils/util.h>
 #include <udm.hpp>
 
@@ -25,17 +26,21 @@ namespace pragma
 	{
 		return is_animatable_type(type) || type == udm::Type::String;
 	}
+	constexpr bool is_valid_component_property_type(pragma::ents::EntityMemberType type)
+	{
+		return is_valid_component_property_type(static_cast<udm::Type>(type)) || type == pragma::ents::EntityMemberType::Entity;
+	}
 	template<typename T>
 		concept is_animatable_type_v = is_animatable_type(udm::type_to_enum<T>());
 	template<typename T>
-		concept is_valid_component_property_type_v = is_valid_component_property_type(udm::type_to_enum<T>());
+		concept is_valid_component_property_type_v = is_valid_component_property_type(pragma::ents::member_type_to_enum<T>());
 
 	template<typename TComponent,typename T,auto TSetter,auto TGetter,typename TSpecializationType> requires(is_valid_component_property_type_v<T> && (std::is_same_v<TSpecializationType,AttributeSpecializationType> || util::is_string<TSpecializationType>::value))
 		static ComponentMemberInfo create_component_member_info(std::string &&name,std::optional<T> defaultValue,TSpecializationType specialization)
 	{
 		auto memberInfo = ComponentMemberInfo::CreateDummy();
 		memberInfo.SetName(std::move(name));
-		memberInfo.type = udm::type_to_enum<T>();
+		memberInfo.type = ents::member_type_to_enum<T>();
 		memberInfo.SetGetterFunction<TComponent,T,TGetter>();
 		memberInfo.SetSetterFunction<TComponent,T,TSetter>();
 		memberInfo.SetSpecializationType(specialization);
@@ -53,8 +58,8 @@ namespace pragma
 	template<typename T>
 		void ComponentMemberInfo::SetDefault(T value)
 	{
-		if(udm::type_to_enum<T>() != type)
-			throw std::runtime_error{"Unable to set default member value: Value type " +std::string{magic_enum::enum_name(udm::type_to_enum<T>())} +" does not match member type " +std::string{magic_enum::enum_name(type)} +"!"};
+		if(ents::member_type_to_enum<T>() != type)
+			throw std::runtime_error{"Unable to set default member value: Value type " +std::string{magic_enum::enum_name(ents::member_type_to_enum<T>())} +" does not match member type " +std::string{magic_enum::enum_name(type)} +"!"};
 		m_default = std::unique_ptr<void,void(*)(void*)>{new T{std::move(value)},[](void *ptr) {
 			delete static_cast<T*>(ptr);
 		}};
@@ -63,7 +68,7 @@ namespace pragma
 	template<typename T>
 		bool ComponentMemberInfo::GetDefault(T &outValue) const
 	{
-		if(!m_default || udm::type_to_enum<T>() != type)
+		if(!m_default || ents::member_type_to_enum<T>() != type)
 			return false;
 		outValue = *static_cast<T*>(m_default.get());
 		return true;

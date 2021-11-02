@@ -54,12 +54,16 @@ ComponentMemberInfo &ComponentMemberInfo::operator=(const ComponentMemberInfo &o
 	m_metaData = other.m_metaData;
 	if(other.m_default)
 	{
-		udm::visit(type,[this,&other](auto tag) {
-			using T = decltype(tag)::type;
-			constexpr auto eType = udm::type_to_enum<T>();
-			if constexpr(eType != udm::Type::Element && !udm::is_array_type(eType))
-				SetDefault<T>(*static_cast<T*>(other.m_default.get()));
-		});
+		// Default value is currently only allowed for UDM types. Tag: component-member-udm-default
+		if(ents::is_udm_member_type(type))
+		{
+			udm::visit(ents::member_type_to_udm_type(type),[this,&other](auto tag) {
+				using T = decltype(tag)::type;
+				constexpr auto eType = udm::type_to_enum<T>();
+				if constexpr(eType != udm::Type::Element && !udm::is_array_type(eType))
+					SetDefault<T>(*static_cast<T*>(other.m_default.get()));
+			});
+		}
 	}
 	static_assert(sizeof(*this) == 160);
 	return *this;
@@ -98,7 +102,7 @@ void ComponentMemberInfo::ResetToDefault(BaseEntityComponent &component)
 {
 	if(!m_default)
 		return;
-	udm::visit(type,[this,&component](auto tag) {
+	ents::visit_member(type,[this,&component](auto tag) {
 		using T = decltype(tag)::type;
 		setterFunction(*this,component,m_default.get());
 	});
@@ -516,6 +520,6 @@ ComponentMemberInfo pragma::ComponentMemberInfo::CreateDummy()
 {
 	return ComponentMemberInfo{};
 }
-pragma::ComponentMemberInfo::ComponentMemberInfo(std::string &&name,udm::Type type,const ApplyFunction &applyFunc,const GetFunction &getFunc)
+pragma::ComponentMemberInfo::ComponentMemberInfo(std::string &&name,ents::EntityMemberType type,const ApplyFunction &applyFunc,const GetFunction &getFunc)
 	: m_name{std::move(name)},m_nameHash{get_component_member_name_hash(m_name)},type{type},setterFunction{applyFunc},getterFunction{getFunc}
 {}

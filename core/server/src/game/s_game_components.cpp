@@ -161,7 +161,7 @@ void SGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::SKinematicComponent>("kinematic");
 	componentManager.RegisterComponentType<pragma::SFuncPhysicsComponent>("func_physics");
 	componentManager.RegisterComponentType<pragma::SFuncSoftPhysicsComponent>("func_soft_physics");
-	componentManager.RegisterComponentType<pragma::SFuncPortalComponent>("func_portal");
+	// componentManager.RegisterComponentType<pragma::SFuncPortalComponent>("func_portal");
 	componentManager.RegisterComponentType<pragma::SWaterComponent>("water");
 	componentManager.RegisterComponentType<pragma::SButtonComponent>("button");
 	componentManager.RegisterComponentType<pragma::SPlayerSpawnComponent>("player_spawn");

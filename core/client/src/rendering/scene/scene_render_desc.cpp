@@ -280,6 +280,8 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 	pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags
 )
 {
+	if(drawSceneInfo.clipPlane.has_value())
+		baseSpecializationFlags |= pragma::GameShaderSpecializationConstantFlag::EnableClippingBit;
 	auto numEntitiesPerWorkerJob = umath::max(cvEntitiesPerJob->GetInt(),1);
 	std::function<void(const OcclusionOctree<CBaseEntity*>::Node &node)> iterateTree = nullptr;
 	iterateTree = [&iterateTree,&shouldConsiderEntity,&scene,&cam,renderFlags,fShouldCull,&drawSceneInfo,&getRenderQueue,&vp,bspLeafNodes,bspTrees,lodBias,numEntitiesPerWorkerJob,baseSpecializationFlags](const OcclusionOctree<CBaseEntity*>::Node &node) {
@@ -618,7 +620,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 
 	auto &cam = *hCam;
 	// c_game->StartProfilingStage(CGame::CPUProfilingPhase::BuildRenderQueue);
-	auto &posCam = g_debugFreezeCamData.has_value() ? g_debugFreezeCamData->pos : cam.GetEntity().GetPosition();
+	auto &posCam = g_debugFreezeCamData.has_value() ? g_debugFreezeCamData->pos : drawSceneInfo.pvsOrigin.has_value() ? *drawSceneInfo.pvsOrigin : cam.GetEntity().GetPosition();
 
 	c_game->GetRenderQueueBuilder().Append([this,&cam,posCam,&drawSceneInfo]() {
 		++g_activeRenderQueueThreads;

@@ -703,6 +703,7 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defCToggle];
 
 	auto defCTransform = pragma::lua::create_entity_component_class<pragma::CTransformComponent,pragma::BaseTransformComponent>("TransformComponent");
+	defCTransform.add_static_constant("EVENT_ON_POSE_CHANGED",pragma::CTransformComponent::EVENT_ON_POSE_CHANGED);
 	entsMod[defCTransform];
 
 	auto defCWheel = pragma::lua::create_entity_component_class<pragma::CWheelComponent,pragma::BaseWheelComponent>("WheelComponent");
@@ -831,8 +832,8 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto defCFuncSoftPhysics = pragma::lua::create_entity_component_class<pragma::CFuncSoftPhysicsComponent,pragma::BaseFuncSoftPhysicsComponent>("FuncSoftPhysicsComponent");
 	entsMod[defCFuncSoftPhysics];
 
-	auto defCFuncPortal = pragma::lua::create_entity_component_class<pragma::CFuncPortalComponent,pragma::BaseFuncPortalComponent>("FuncPortalComponent");
-	entsMod[defCFuncPortal];
+	// auto defCFuncPortal = pragma::lua::create_entity_component_class<pragma::CFuncPortalComponent,pragma::BaseFuncPortalComponent>("FuncPortalComponent");
+	// entsMod[defCFuncPortal];
 
 	auto defCWater = pragma::lua::create_entity_component_class<pragma::CWaterComponent,pragma::BaseFuncWaterComponent>("WaterComponent");
 	defCWater.def("GetReflectionScene",static_cast<pragma::CSceneComponent*(*)(lua_State*,pragma::CWaterComponent&)>([](lua_State *l,pragma::CWaterComponent &hEnt) -> pragma::CSceneComponent* {

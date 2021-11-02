@@ -114,6 +114,15 @@ bool pragma::rendering::ShaderProcessor::RecordBindMaterial(CMaterial &mat)
 	UpdateSceneFlags(flags);
 	return true;
 }
+void pragma::rendering::ShaderProcessor::UpdateClipPlane()
+{
+	auto clipPlane = m_entityClipPlane.has_value() ? *m_entityClipPlane : m_clipPlane.has_value() ? *m_clipPlane : Vector4{};
+	if(clipPlane != m_boundClipPlane)
+	{
+		m_curShader->RecordClipPlane(*this,clipPlane);
+		m_boundClipPlane = clipPlane;
+	}
+}
 bool pragma::rendering::ShaderProcessor::RecordBindEntity(CBaseEntity &ent)
 {
 	auto *renderC = ent.GetRenderComponent();
@@ -126,13 +135,11 @@ bool pragma::rendering::ShaderProcessor::RecordBindEntity(CBaseEntity &ent)
 	m_cmdBuffer.RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,*m_currentPipelineLayout,m_entityInstanceDescriptorSetIndex,*descSet);
 
 	auto *clipPlane = renderC->GetRenderClipPlane();
-	if(static_cast<bool>(clipPlane) != m_clipPlane.has_value() && (!clipPlane || !m_clipPlane.has_value() || *clipPlane != *m_clipPlane))
-	{
-		auto vClipPlane = clipPlane ? *clipPlane : Vector4{};
-		m_curShader->RecordClipPlane(*this,vClipPlane);
-
-		m_clipPlane = clipPlane ? *clipPlane : std::optional<Vector4>{};
-	}
+	if(clipPlane)
+		m_entityClipPlane = *clipPlane;
+	else
+		m_entityClipPlane = {};
+	UpdateClipPlane();
 
 	auto *depthBias = renderC->GetDepthBias();
 	if(static_cast<bool>(depthBias) != m_depthBias.has_value() && (!depthBias || !m_depthBias.has_value() || *depthBias != *m_depthBias))

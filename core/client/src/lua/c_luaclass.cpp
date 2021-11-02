@@ -822,6 +822,22 @@ void CGame::RegisterLuaClasses()
 		else
 			drawSceneInfo.clearColor = Lua::Check<Color>(l,2);
 	}));
+	defDrawSceneInfo.property("clipPlane",static_cast<Vector4(*)(::util::DrawSceneInfo&)>([](::util::DrawSceneInfo &drawSceneInfo) -> Vector4 {
+		return *drawSceneInfo.clipPlane;
+	}),static_cast<void(*)(lua_State*,::util::DrawSceneInfo&,const luabind::object&)>([](lua_State *l,::util::DrawSceneInfo &drawSceneInfo,const luabind::object &clipPlane) {
+		if(luabind::type(clipPlane) == LUA_TNIL)
+			drawSceneInfo.clipPlane = {};
+		else
+			drawSceneInfo.clipPlane = Lua::Check<Vector4>(l,2);
+	}));
+	defDrawSceneInfo.property("pvsOrigin",static_cast<Vector3(*)(::util::DrawSceneInfo&)>([](::util::DrawSceneInfo &drawSceneInfo) -> Vector3 {
+		return *drawSceneInfo.pvsOrigin;
+	}),static_cast<void(*)(lua_State*,::util::DrawSceneInfo&,const luabind::object&)>([](lua_State *l,::util::DrawSceneInfo &drawSceneInfo,const luabind::object &pvsOrigin) {
+		if(luabind::type(pvsOrigin) == LUA_TNIL)
+			drawSceneInfo.pvsOrigin = {};
+		else
+			drawSceneInfo.pvsOrigin = Lua::Check<Vector3>(l,2);
+	}));
 	defDrawSceneInfo.property("renderStats",static_cast<luabind::object(*)(lua_State*,::util::DrawSceneInfo&)>([](lua_State *l,::util::DrawSceneInfo &drawSceneInfo) -> luabind::object {
 		if(drawSceneInfo.renderStats == nullptr)
 			return {};

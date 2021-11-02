@@ -6,6 +6,7 @@
 
 #include "stdafx_server.h"
 #include "pragma/entities/point/s_point_target.h"
+#include "pragma/entities/components/s_transform_component.hpp"
 #include "pragma/entities/s_entityfactories.h"
 #include "pragma/lua/s_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -20,5 +21,6 @@ void SPointTargetComponent::InitializeLuaObject(lua_State *l) {return BaseEntity
 void PointTarget::Initialize()
 {
 	SBaseEntity::Initialize();
+	AddComponent<STransformComponent>();
 	AddComponent<SPointTargetComponent>();
 }

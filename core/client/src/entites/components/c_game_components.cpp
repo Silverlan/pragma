@@ -174,7 +174,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CBrushComponent>("brush");
 	componentManager.RegisterComponentType<pragma::CKinematicComponent>("kinematic");
 	componentManager.RegisterComponentType<pragma::CFuncPhysicsComponent>("func_physics");
-	componentManager.RegisterComponentType<pragma::CFuncPortalComponent>("func_portal");
+	// componentManager.RegisterComponentType<pragma::CFuncPortalComponent>("func_portal");
 	componentManager.RegisterComponentType<pragma::CWaterComponent>("water");
 	componentManager.RegisterComponentType<pragma::CButtonComponent>("button");
 	componentManager.RegisterComponentType<pragma::CBotComponent>("bot");

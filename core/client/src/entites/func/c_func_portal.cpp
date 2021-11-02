@@ -18,7 +18,7 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(func_portal,CFuncPortal);
+// LINK_ENTITY_TO_CLASS(func_portal,CFuncPortal);
 
 void CFuncPortalComponent::Initialize()
 {

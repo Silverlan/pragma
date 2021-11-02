@@ -178,6 +178,7 @@ void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defSToggle];
 
 	auto defSTransform = pragma::lua::create_entity_component_class<pragma::STransformComponent,pragma::BaseTransformComponent>("TransformComponent");
+	defSTransform.add_static_constant("EVENT_ON_POSE_CHANGED",pragma::STransformComponent::EVENT_ON_POSE_CHANGED);
 	entsMod[defSTransform];
 
 	auto defSWheel = pragma::lua::create_entity_component_class<pragma::SWheelComponent,pragma::BaseWheelComponent>("WheelComponent");
@@ -279,8 +280,8 @@ void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto defSFuncSoftPhysics = pragma::lua::create_entity_component_class<pragma::SFuncSoftPhysicsComponent,pragma::BaseFuncSoftPhysicsComponent>("FuncSoftPhysicsComponent");
 	entsMod[defSFuncSoftPhysics];
 
-	auto defSFuncPortal = pragma::lua::create_entity_component_class<pragma::SFuncPortalComponent,pragma::BaseFuncPortalComponent>("FuncPortalComponent");
-	entsMod[defSFuncPortal];
+	// auto defSFuncPortal = pragma::lua::create_entity_component_class<pragma::SFuncPortalComponent,pragma::BaseFuncPortalComponent>("FuncPortalComponent");
+	// entsMod[defSFuncPortal];
 
 	auto defSWater = pragma::lua::create_entity_component_class<pragma::SWaterComponent,pragma::BaseFuncWaterComponent>("WaterComponent");
 	entsMod[defSWater];

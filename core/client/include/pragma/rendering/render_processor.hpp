@@ -61,6 +61,7 @@ namespace pragma::rendering
 
 		void SetStats(RenderPassStats *stats) {m_stats = stats;}
 		void SetDrawOrigin(const Vector4 &drawOrigin);
+		void SetClipPlane(const std::optional<Vector4> &clipPlane) {m_clipPlane = clipPlane;}
 
 		inline prosper::ICommandBuffer &GetCommandBuffer() const {return m_cmdBuffer;}
 		inline prosper::IShaderPipelineLayout &GetCurrentPipelineLayout() const {return *m_currentPipelineLayout;}
@@ -70,10 +71,13 @@ namespace pragma::rendering
 		bool RecordBindScene(const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,const pragma::ShaderGameWorld &referenceShader,bool view);
 		bool BindInstanceSet(pragma::ShaderGameWorld &shaderScene,const pragma::rendering::RenderQueue::InstanceSet *instanceSet=nullptr);
 		void UpdateSceneFlags(ShaderGameWorld::SceneFlags sceneFlags);
+		void UpdateClipPlane();
 
 		prosper::ICommandBuffer &m_cmdBuffer;
 		std::unique_ptr<prosper::IShaderPipelineLayout> m_currentPipelineLayout = nullptr;
 		std::optional<Vector4> m_clipPlane {};
+		std::optional<Vector4> m_entityClipPlane {};
+		Vector4 m_boundClipPlane {};
 		std::optional<Vector2> m_depthBias {};
 		Vector4 m_drawOrigin {};
 		pragma::CVertexAnimatedComponent *m_vertexAnimC = nullptr;

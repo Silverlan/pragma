@@ -412,6 +412,7 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::PipelineID pipe
 	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : ComponentHandle<pragma::CRasterizationRendererComponent>{};
 	if(raster.expired())
 		return false;
+	m_shaderProcessor.SetClipPlane(m_drawSceneInfo.drawSceneInfo.clipPlane);
 	m_shaderProcessor.RecordBindShader(scene,*raster,bView,m_baseSceneFlags,*shaderScene,pipelineIdx);
 	
 	if(m_stats)

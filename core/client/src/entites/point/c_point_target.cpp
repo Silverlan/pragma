@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/entities/point/c_point_target.h"
+#include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -20,5 +21,6 @@ void CPointTargetComponent::InitializeLuaObject(lua_State *l) {return BaseEntity
 void CPointTarget::Initialize()
 {
 	CBaseEntity::Initialize();
+	AddComponent<CTransformComponent>();
 	AddComponent<CPointTargetComponent>();
 }

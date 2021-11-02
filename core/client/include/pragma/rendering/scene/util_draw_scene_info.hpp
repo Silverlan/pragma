@@ -36,6 +36,7 @@ namespace util
 			: scene{other.scene},commandBuffer{other.commandBuffer},renderTarget{other.renderTarget},
 			renderFlags{other.renderFlags},clearColor{other.clearColor},toneMapping{other.toneMapping},
 			prepassFilter{other.prepassFilter},renderFilter{other.renderFilter},outputImage{other.outputImage},
+			clipPlane{other.clipPlane},pvsOrigin{other.pvsOrigin},
 			outputLayerId{other.outputLayerId},flags{other.flags},renderStats{other.renderStats ? std::make_unique<RenderStats>(*other.renderStats) : nullptr}
 		{}
 		DrawSceneInfo &operator=(const DrawSceneInfo &other)
@@ -46,6 +47,8 @@ namespace util
 			renderFlags = other.renderFlags;
 			clearColor = other.clearColor;
 			toneMapping = other.toneMapping;
+			clipPlane = other.clipPlane;
+			pvsOrigin = other.pvsOrigin;
 
 			prepassFilter = other.prepassFilter;
 			renderFilter = other.renderFilter;
@@ -62,6 +65,8 @@ namespace util
 		FRender renderFlags = FRender::All;
 		std::optional<Color> clearColor = {};
 		std::optional<::pragma::rendering::ToneMapping> toneMapping {};
+		std::optional<Vector4> clipPlane {};
+		std::optional<Vector3> pvsOrigin {};
 		
 		std::function<bool(CBaseEntity&)> prepassFilter = nullptr;
 		std::function<bool(CBaseEntity&)> renderFilter = nullptr;

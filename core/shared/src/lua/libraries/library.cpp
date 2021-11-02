@@ -1677,6 +1677,7 @@ void Game::RegisterLuaLibraries()
 	modMat[
 		luabind::def("create_from_axis_angle",umat::create_from_axis_angle),
 		luabind::def("create_from_axes",umat::create_from_axes),
+		luabind::def("create_reflection",umat::create_reflection),
 		luabind::def("create_orthogonal_matrix",Lua::matrix::create_orthogonal_matrix),
 		luabind::def("create_perspective_matrix",Lua::matrix::create_perspective_matrix),
 		luabind::def("create_look_at_matrix",glm::lookAtRH<float,glm::packed_highp>),

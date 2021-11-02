@@ -597,6 +597,7 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	}));
 	classDefTransform.def("Interpolate",&umath::Transform::Interpolate);
 	classDefTransform.def("InterpolateToIdentity",&umath::Transform::InterpolateToIdentity);
+	classDefTransform.def("Reflect",&umath::Transform::Reflect);
 	classDefTransform.def(luabind::const_self *luabind::const_self);
 	classDefTransform.def(luabind::const_self *umath::ScaledTransform());
 	classDefTransform.def(luabind::const_self *Vector3());

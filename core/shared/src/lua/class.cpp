@@ -1073,6 +1073,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector.def("Rotate",static_cast<void(*)(lua_State*,Vector3&,const Quat&)>(&Lua::Vector::Rotate));
 	defVector.def("RotateAround",&Lua::Vector::RotateAround);
 	defVector.def("Lerp",&Lua::Vector::Lerp);
+	defVector.def("Reflect",&uvec::reflect);
 	defVector.def("Equals",static_cast<void(*)(lua_State*,const Vector3&,const Vector3&,float)>([](lua_State *l,const Vector3 &a,const Vector3 &b,float epsilon) {
 		Lua::PushBool(l,umath::abs(a.x -b.x) <= epsilon && umath::abs(a.y -b.y) <= epsilon && umath::abs(a.z -b.z) <= epsilon);
 	}));

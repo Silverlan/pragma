@@ -57,7 +57,7 @@ BaseEntity *EntityURef::GetEntity(Game &game)
 	{
 		if(!m_identifier)
 			return nullptr;
-		EntityIterator entIt {game};
+		EntityIterator entIt {game,EntityIterator::FilterFlags::Any};
 		AttachEntityFilter(entIt,*m_identifier);
 		auto it = entIt.begin();
 		if(it == entIt.end())
@@ -202,7 +202,7 @@ void MultiEntityURef::FindEntities(Game &game,std::vector<BaseEntity*> &outEnts)
 {
 	if(!m_identifier)
 		return;
-	EntityIterator entIt {game};
+	EntityIterator entIt {game,EntityIterator::FilterFlags::Any};
 	std::visit([&entIt](auto &val) {
 		using T = decltype(val);
 		if constexpr(std::is_same_v<std::remove_cv_t<std::remove_pointer_t<std::remove_reference_t<T>>>,util::Uuid>)
@@ -274,7 +274,7 @@ void MultiEntityUComponentRef::FindComponents(Game &game,std::vector<BaseEntityC
 {
 	if(!m_identifier)
 		return;
-	EntityIterator entIt {game};
+	EntityIterator entIt {game,EntityIterator::FilterFlags::Any};
 	if(m_componentId == INVALID_COMPONENT_ID)
 	{
 		if(!m_componentName)

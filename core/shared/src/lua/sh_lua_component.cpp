@@ -1245,6 +1245,7 @@ static pragma::BaseLuaBaseEntityComponent::MemberFlags string_to_member_flag(lua
 static pragma::BaseLuaBaseEntityComponent::MemberFlags string_to_member_flags(lua_State *l,std::string_view strFlags)
 {
 	auto flags = pragma::BaseLuaBaseEntityComponent::MemberFlags::None;
+	auto flagsRem = pragma::BaseLuaBaseEntityComponent::MemberFlags::None;
 	
 	auto start = strFlags.find_first_of("+-");
 	while(start != std::string::npos)
@@ -1263,7 +1264,7 @@ static pragma::BaseLuaBaseEntityComponent::MemberFlags string_to_member_flags(lu
 					flags |= flag;
 					break;
 				case '-':
-					flags &= ~flag;
+					flagsRem |= flag;
 					break;
 				default:
 					Lua::Error(l,"Invalid definition of component member flags (" +std::string{strFlags} +")! Every flag has to be prefixed by '+' or '-'!");
@@ -1275,6 +1276,7 @@ static pragma::BaseLuaBaseEntityComponent::MemberFlags string_to_member_flags(lu
 		strFlags = strFlags.substr(end);
 		start = 0;
 	}
+	flags &= ~flagsRem;
 	return flags;
 }
 

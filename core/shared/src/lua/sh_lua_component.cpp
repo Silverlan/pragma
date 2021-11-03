@@ -759,6 +759,8 @@ void BaseLuaBaseEntityComponent::SetMemberValue(const MemberInfo &memberInfo,con
 		Lua::SetTableValue(l,t); /* 1 */
 	}
 	Lua::Pop(l,1); /* 0 */
+	if(memberInfo.onChange)
+		memberInfo.onChange(o);
 }
 
 static void write_value(udm::LinkedPropertyWrapperArg udm,const std::any &value,util::VarType type)
@@ -1247,18 +1249,21 @@ static pragma::BaseLuaBaseEntityComponent::MemberFlags string_to_member_flags(lu
 	auto flags = pragma::BaseLuaBaseEntityComponent::MemberFlags::None;
 	auto flagsRem = pragma::BaseLuaBaseEntityComponent::MemberFlags::None;
 	
-	auto start = strFlags.find_first_of("+-");
+	size_t start = strFlags.empty() ? std::string::npos : 0;
 	while(start != std::string::npos)
 	{
 		auto end = strFlags.find_first_of("+-",start +1);
 		auto sub = (end != std::string::npos) ? strFlags.substr(start,end -start) : strFlags.substr(start);
 		if(sub.length() > 1)
 		{
-			auto val = sub.substr(1);
+			// Very first sign of string may be omitted
+			auto hasSign = (sub[0] == '+' || sub[0] == '-');
+			auto sign = hasSign ? sub[0] : '+';
+			auto val = sub.substr(hasSign ? 1 : 0);
 			auto flag = string_to_member_flag(l,val);
 			if(flag != pragma::BaseLuaBaseEntityComponent::MemberFlags::None)
 			{
-				switch(sub[0])
+				switch(sign)
 				{
 				case '+':
 					flags |= flag;

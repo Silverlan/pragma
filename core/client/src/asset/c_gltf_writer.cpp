@@ -39,7 +39,7 @@
 	}
 
 extern DLLCLIENT ClientState *client;
-
+#pragma optimize("",off)
 bool pragma::asset::GLTFWriter::Export(const SceneDesc &sceneDesc,const std::string &outputFileName,const pragma::asset::ModelExportInfo &exportInfo,std::string &outErrMsg)
 {
 	GLTFWriter writer {sceneDesc,exportInfo,std::optional<std::string>{}};
@@ -1371,7 +1371,7 @@ void pragma::asset::GLTFWriter::WriteAnimations(::Model &mdl)
 				for(auto flexId=decltype(numFlexes){0u};flexId<numFlexes;++flexId)
 				{
 					auto weight = mdl.CalcFlexWeight(flexId,[&flexControllerWeights](uint32_t flexConId) -> std::optional<float> {
-						return flexControllerWeights.at(flexConId);
+						return (flexConId < flexControllerWeights.size()) ? flexControllerWeights.at(flexConId) : std::optional<float>{};
 					},[&flexControllerWeights](uint32_t flexId) -> std::optional<float> {
 						return std::optional<float>{};
 					});
@@ -1605,3 +1605,4 @@ void pragma::asset::GLTFWriter::WriteMaterials()
 		m_materialToGltfIndex[mat] = m_gltfMdl.materials.size() -1;
 	}
 }
+#pragma optimize("",on)

@@ -28,7 +28,7 @@
 // #define ENABLE_DEPRECATED_PHYSICS
 
 using namespace pragma;
-
+#pragma optimize("",off)
 ComponentEventId BaseFuncWaterComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED = pragma::INVALID_COMPONENT_ID;
 void BaseFuncWaterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
@@ -62,6 +62,9 @@ void BaseFuncWaterComponent::Initialize()
 	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_UPDATED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		SimulateBuoyancy();
 	});
+	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
+		static_cast<CEPostPhysicsSimulate&>(evData.get()).keepAwake = true;
+	});
 	BindEvent(BasePhysicsComponent::EVENT_HANDLE_RAYCAST,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &raycastData = static_cast<CEHandleRaycast&>(evData.get());
 		auto r = OnRayResultCallback(raycastData.rayCollisionGroup,raycastData.rayCollisionMask);
@@ -76,7 +79,8 @@ void BaseFuncWaterComponent::Initialize()
 	auto &ent = GetEntity();
 	ent.AddComponent("name");
 	ent.AddComponent("render");
-	ent.AddComponent("touch");
+	auto touchC = ent.AddComponent("touch");
+	static_cast<BaseTouchComponent*>(touchC.get())->SetNeverDisablePhysicsCallbacks(true);
 	ent.AddComponent("model");
 }
 
@@ -122,6 +126,7 @@ void BaseFuncWaterComponent::OnPhysicsInitialized()
 		return;
 	pPhysComponent->SetCollisionFilterMask(CollisionMask::Dynamic | CollisionMask::Generic);
 	pPhysComponent->SetCollisionFilterGroup(CollisionMask::Water | CollisionMask::WaterSurface);
+	pPhysComponent->SetForcePhysicsAwakeCallbacksEnabled(true);
 }
 
 bool BaseFuncWaterComponent::OnRayResultCallback(CollisionMask rayCollisionGroup,CollisionMask rayCollisionMask)
@@ -440,4 +445,4 @@ bool BaseFuncWaterComponent::CalcLineSurfaceIntersection(const Vector3 &lineOrig
 	}
 	return false;
 }
-
+#pragma optimize("",on)

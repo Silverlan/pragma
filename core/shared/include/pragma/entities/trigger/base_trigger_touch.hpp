@@ -94,7 +94,9 @@ namespace pragma
 
 		void EndAllTouch();
 		virtual void OnEntitySpawn() override;
+		void SetNeverDisablePhysicsCallbacks(bool b);
 	protected:
+		void UpdatePhysics();
 		bool IsTouching(BaseEntity &ent) const;
 
 		std::vector<physics::ContactInfo> m_contactReport;
@@ -104,6 +106,7 @@ namespace pragma
 		std::queue<ContactEvent> m_contactEventQueue;
 
 		TriggerFlags m_triggerFlags = TriggerFlags::None;
+		bool m_neverDisablePhysicsCallbacks = false;
 		BaseTouchComponent(BaseEntity &ent);
 		void OnPhysicsInitialized();
 		void UpdateTouch();

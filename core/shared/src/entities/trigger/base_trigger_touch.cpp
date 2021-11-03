@@ -14,6 +14,7 @@
 #include "pragma/entities/trigger/trigger_spawnflags.h"
 #include "pragma/lua/luafunction_call.h"
 #include "pragma/entities/components/base_physics_component.hpp"
+#include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_io_component.hpp"
 #include "pragma/entities/components/basetoggle.h"
 
@@ -42,19 +43,21 @@ void BaseTouchComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-		OnPhysicsInitialized();
-	});
+	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {OnPhysicsInitialized();});
 	BindEventUnhandled(BasePhysicsComponent::EVENT_ON_POST_PHYSICS_SIMULATE,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		UpdateTouch();
 
-		// Note this *has* to be called before calling SetForcePhysicsAwakeCallbacksEnabled below!
-		static_cast<pragma::CEPostPhysicsSimulate&>(evData.get()).keepAwake = false;
+		if(!m_neverDisablePhysicsCallbacks)
+		{
+			// Note this *has* to be called before calling SetForcePhysicsAwakeCallbacksEnabled below!
+			static_cast<pragma::CEPostPhysicsSimulate&>(evData.get()).keepAwake = false;
 
-		auto pPhysComponent = GetEntity().GetPhysicsComponent();
-		if(pPhysComponent)
-			pPhysComponent->SetForcePhysicsAwakeCallbacksEnabled(false,false);
+			auto pPhysComponent = GetEntity().GetPhysicsComponent();
+			if(pPhysComponent)
+				pPhysComponent->SetForcePhysicsAwakeCallbacksEnabled(false,false);
+		}
 	});
+	BindEventUnhandled(BaseModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {UpdatePhysics();});
 
 	auto &ent = GetEntity();
 
@@ -69,6 +72,7 @@ void BaseTouchComponent::OnRemove()
 	BaseEntityComponent::OnRemove();
 	EndAllTouch();
 }
+void BaseTouchComponent::SetNeverDisablePhysicsCallbacks(bool b) {m_neverDisablePhysicsCallbacks = b;}
 void BaseTouchComponent::OnPhysicsInitialized()
 {
 	auto &ent = GetEntity();
@@ -103,6 +107,16 @@ void BaseTouchComponent::OnPhysicsInitialized()
 	}
 	BroadcastEvent(EVENT_ON_TRIGGER_INITIALIZED);
 }
+void BaseTouchComponent::UpdatePhysics()
+{
+	auto &ent = GetEntity();
+	auto pPhysComponent = ent.GetPhysicsComponent();
+	if(!pPhysComponent)
+		return;
+	auto *physObj = pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
+	if(physObj)
+		physObj->SetTrigger(true);
+}
 void BaseTouchComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
@@ -116,14 +130,7 @@ void BaseTouchComponent::OnEntitySpawn()
 		m_triggerFlags |= TriggerFlags::NPCs;
 	if(flags &SF_TRIGGER_PHYSICS)
 		m_triggerFlags |= TriggerFlags::Physics;
-
-	auto pPhysComponent = ent.GetPhysicsComponent();
-	if(pPhysComponent != nullptr)
-	{
-		auto *physObj = pPhysComponent->InitializePhysics(PHYSICSTYPE::STATIC);
-		if(physObj)
-			physObj->SetTrigger(true);
-	}
+	UpdatePhysics();
 }
 util::EventReply BaseTouchComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
 {

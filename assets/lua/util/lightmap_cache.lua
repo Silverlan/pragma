@@ -156,7 +156,7 @@ function util.save_lightmap_uv_cache(fileName,entities)
 			local origin = pose:GetOrigin()
 			local udmEntity = udmEntities:Get(entIdx)
 			entIdx = entIdx +1
-			udmEntity:Set("pose",phys.Transform(pose:GetOrigin(),pose:GetRotation()))
+			udmEntity:Set("pose",math.Transform(pose:GetOrigin(),pose:GetRotation()))
 			udmEntity:Set("model",model)
 
 			local udmMeshes = udmEntity:AddArray("meshes",#lightmappedMeshes)

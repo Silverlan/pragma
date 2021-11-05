@@ -143,9 +143,9 @@ function gui.WIContextMenu:AddItem(name,fcOnClick,keybind)
 	table.insert(self.m_tItems,pItem)
 	return pItem
 end
-function gui.WIContextMenu:AddSubMenu(name)
+function gui.WIContextMenu:AddSubMenu(name,onClick)
 	local pSubMenu
-	local pItem = self:AddItem(name,function() return false end)
+	local pItem = self:AddItem(name,onClick or function() return false end)
 	if(pItem == nil) then return end
 	pItem:AddCallback("OnCursorEntered",function()
 		if(util.is_valid(pSubMenu)) then

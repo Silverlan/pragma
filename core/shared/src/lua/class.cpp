@@ -75,6 +75,7 @@
 #include <mathutil/inverse_kinematics/constraints.hpp>
 #include <sharedutils/magic_enum.hpp>
 #include <fsys/directory_watcher.h>
+#include <glm/gtx/matrix_decompose.hpp>
 
 extern DLLNETWORK Engine *engine;
 std::ostream &operator<<(std::ostream &out,const ALSound &snd)
@@ -762,40 +763,121 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	auto &modMath = lua.RegisterLibrary("math");
 
 	// Transform
-	auto classDefTransform = pragma::lua::register_class<Transform>("Transform");
-	classDefTransform.def(luabind::constructor<>());
+	auto classDefTransform = luabind::class_<umath::Transform>("Transform");
+	classDefTransform.def(luabind::constructor<const Mat4&>());
+	classDefTransform.def(luabind::constructor<const Vector3&,const Quat&>());
 	classDefTransform.def(luabind::constructor<const Vector3&>());
 	classDefTransform.def(luabind::constructor<const Quat&>());
-	classDefTransform.def(luabind::constructor<const Vector3&,const Quat&>());
-	classDefTransform.def("GetScale",static_cast<void(*)(lua_State*,Transform&)>([](lua_State *l,Transform &t) {
-		auto scale = t.GetScale();
-		Lua::Push<Vector3>(l,scale);
+	classDefTransform.def(luabind::constructor<>());
+	classDefTransform.def(luabind::tostring(luabind::self));
+	classDefTransform.def("Copy",static_cast<umath::Transform(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &t) -> umath::Transform {return t;}));
+	classDefTransform.property("x",static_cast<float(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &pose) {
+		return pose.GetOrigin().x;
+	}),static_cast<void(*)(lua_State*,umath::Transform&,float)>([](lua_State *l,umath::Transform &pose,float x) {
+		pose.GetOrigin().x = x;
 	}));
-	classDefTransform.def("GetPosition",static_cast<void(*)(lua_State*,Transform&)>([](lua_State *l,Transform &t) {
-		auto pos = t.GetPosition();
-		Lua::Push<Vector3>(l,pos);
+	classDefTransform.property("y",static_cast<float(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &pose) {
+		return pose.GetOrigin().y;
+	}),static_cast<void(*)(lua_State*,umath::Transform&,float)>([](lua_State *l,umath::Transform &pose,float y) {
+		pose.GetOrigin().y = y;
 	}));
-	classDefTransform.def("GetRotation",static_cast<void(*)(lua_State*,Transform&)>([](lua_State *l,Transform &t) {
-		auto rot = t.GetOrientation();
-		Lua::Push<Quat>(l,rot);
+	classDefTransform.property("z",static_cast<float(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &pose) {
+		return pose.GetOrigin().z;
+	}),static_cast<void(*)(lua_State*,umath::Transform&,float)>([](lua_State *l,umath::Transform &pose,float z) {
+		pose.GetOrigin().z = z;
 	}));
-	classDefTransform.def("GetTransformationMatrix",static_cast<void(*)(lua_State*,Transform&)>([](lua_State *l,Transform &t) {
-		auto m = t.GetTransformationMatrix();
-		Lua::Push<Mat4>(l,m);
+	classDefTransform.property("pitch",static_cast<float(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &pose) {
+		return pose.GetAngles().p;
 	}));
-	classDefTransform.def("SetScale",static_cast<void(*)(lua_State*,Transform&,const Vector3&)>([](lua_State *l,Transform &t,const Vector3 &scale) {
-		t.SetScale(scale);
+	classDefTransform.property("yaw",static_cast<float(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &pose) {
+		return pose.GetAngles().y;
 	}));
-	classDefTransform.def("SetPosition",static_cast<void(*)(lua_State*,Transform&,const Vector3&)>([](lua_State *l,Transform &t,const Vector3 &pos) {
-		t.SetPosition(pos);
+	classDefTransform.property("roll",static_cast<float(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &pose) {
+		return pose.GetAngles().r;
 	}));
-	classDefTransform.def("SetRotation",static_cast<void(*)(lua_State*,Transform&,const Quat&)>([](lua_State *l,Transform &t,const Quat &rot) {
-		t.SetOrientation(rot);
+	classDefTransform.def("GetAngles",&umath::Transform::GetAngles);
+	classDefTransform.def("SetAngles",&umath::Transform::SetAngles);
+	classDefTransform.def("GetForward",&umath::Transform::GetForward);
+	classDefTransform.def("GetRight",&umath::Transform::GetRight);
+	classDefTransform.def("GetUp",&umath::Transform::GetUp);
+	classDefTransform.def("Set",static_cast<void(*)(lua_State*,umath::Transform&,const umath::Transform&)>([](lua_State *l,umath::Transform &t,const umath::Transform &tOther) {
+		t = tOther;
 	}));
-	classDefTransform.def("UpdateMatrix",static_cast<void(*)(lua_State*,Transform&)>([](lua_State *l,Transform &t) {
-		t.UpdateMatrix();
+	classDefTransform.def("GetOrigin",static_cast<Vector3&(umath::Transform::*)()>(&umath::Transform::GetOrigin),luabind::copy_policy<0>{});
+	classDefTransform.def("GetRotation",static_cast<Quat&(umath::Transform::*)()>(&umath::Transform::GetRotation),luabind::copy_policy<0>{});
+	classDefTransform.def("SetOrigin",&umath::Transform::SetOrigin);
+	classDefTransform.def("SetRotation",&umath::Transform::SetRotation);
+	classDefTransform.def("SetIdentity",&umath::Transform::SetIdentity);
+	classDefTransform.def("IsIdentity",static_cast<bool(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &t) -> bool {
+		auto &origin = t.GetOrigin();
+		auto &rotation = t.GetRotation();
+		return umath::abs(origin.x) < 0.001f && umath::abs(origin.y) < 0.001f && umath::abs(origin.z) < 0.001f &&
+			umath::abs(1.f -rotation.w) < 0.001f && umath::abs(rotation.x) < 0.001f && umath::abs(rotation.y) < 0.001f && umath::abs(rotation.z) < 0.001f;
 	}));
+	classDefTransform.def("TranslateGlobal",&umath::Transform::TranslateGlobal);
+	classDefTransform.def("TranslateLocal",&umath::Transform::TranslateLocal);
+	classDefTransform.def("RotateGlobal",&umath::Transform::RotateGlobal);
+	classDefTransform.def("RotateLocal",&umath::Transform::RotateLocal);
+	classDefTransform.def("TransformGlobal",static_cast<void(*)(lua_State*,umath::Transform&,const umath::Transform&)>([](lua_State *l,umath::Transform &t,const umath::Transform &t2) {
+		t = t2 *t;
+	}));
+	classDefTransform.def("TransformLocal",static_cast<void(*)(lua_State*,umath::Transform&,const umath::Transform&)>([](lua_State *l,umath::Transform &t,const umath::Transform &t2) {
+		t *= t2;
+	}));
+	classDefTransform.def("GetInverse",&umath::Transform::GetInverse);
+	classDefTransform.def("ToMatrix",&umath::Transform::ToMatrix);
+	classDefTransform.def("SetMatrix",static_cast<void(*)(lua_State*,umath::Transform&,const Mat4&)>([](lua_State *l,umath::Transform &t,const Mat4 &m) {
+		Mat4 transformation;
+		Vector3 scale;
+		Quat rotation;
+		Vector3 translation;
+		Vector3 skew;
+		Vector4 perspective;
+		glm::decompose(transformation,scale,rotation,translation,skew,perspective);
+		t.SetOrigin(translation);
+		t.SetRotation(rotation);
+	}));
+	classDefTransform.def("Interpolate",&umath::Transform::Interpolate);
+	classDefTransform.def("InterpolateToIdentity",&umath::Transform::InterpolateToIdentity);
+	classDefTransform.def("Reflect",&umath::Transform::Reflect);
+	classDefTransform.def(luabind::const_self *luabind::const_self);
+	classDefTransform.def(luabind::const_self *umath::ScaledTransform());
+	classDefTransform.def(luabind::const_self *Vector3());
+	classDefTransform.def(luabind::const_self *Quat());
+
 	modMath[classDefTransform];
+	Lua::RegisterLibraryValues<umath::Transform>(lua.GetState(),"math.Transform",{
+		std::pair<std::string,umath::Transform>{"IDENTITY",umath::Transform{}}
+	});
+
+	auto classDefScaledTransform = luabind::class_<umath::ScaledTransform,umath::Transform>("ScaledTransform");
+	classDefScaledTransform.def(luabind::constructor<const Mat4&>());
+	classDefScaledTransform.def(luabind::constructor<const Vector3&,const Quat&>());
+	classDefScaledTransform.def(luabind::constructor<const Vector3&,const Quat&,const Vector3&>());
+	classDefScaledTransform.def(luabind::constructor<const umath::Transform&,const Vector3&>());
+	classDefScaledTransform.def(luabind::constructor<const umath::Transform&>());
+	classDefScaledTransform.def(luabind::constructor<>());
+	classDefScaledTransform.def(luabind::tostring(luabind::self));
+	classDefScaledTransform.def("Copy",static_cast<umath::ScaledTransform(*)(lua_State*,umath::ScaledTransform&)>([](lua_State *l,umath::ScaledTransform &t) -> umath::ScaledTransform {
+		return t;
+	}));
+	classDefScaledTransform.def("Set",static_cast<void(*)(lua_State*,umath::ScaledTransform&,const umath::ScaledTransform&)>([](lua_State *l,umath::ScaledTransform &t,const umath::ScaledTransform &tOther) {
+		t = tOther;
+	}));
+	classDefScaledTransform.def("GetScale",static_cast<Vector3&(umath::ScaledTransform::*)()>(&umath::ScaledTransform::GetScale),luabind::copy_policy<0>{});
+	classDefScaledTransform.def("SetScale",&umath::ScaledTransform::SetScale);
+	classDefScaledTransform.def("Scale",&umath::ScaledTransform::Scale);
+	classDefScaledTransform.def("GetInverse",&umath::ScaledTransform::GetInverse);
+	classDefScaledTransform.def("Interpolate",&umath::ScaledTransform::Interpolate);
+	classDefScaledTransform.def("InterpolateToIdentity",&umath::ScaledTransform::InterpolateToIdentity);
+	classDefScaledTransform.def(luabind::const_self *umath::Transform());
+	classDefScaledTransform.def(luabind::const_self *umath::ScaledTransform()); // Note: We use umath::ScaledTransform instead of luabind::const_self, because otherwise the overload of the base class ("Transform") would be used if two ScaledTransforms are multiplied
+	classDefScaledTransform.def(luabind::const_self *Vector3());
+	classDefScaledTransform.def(luabind::const_self *Quat());
+	modMath[classDefScaledTransform];
+	Lua::RegisterLibraryValues<umath::ScaledTransform>(lua.GetState(),"math.ScaledTransform",{
+		std::pair<std::string,umath::ScaledTransform>{"IDENTITY",umath::ScaledTransform{}}
+	});
 
 	// PID Controller
 	auto defPIDController = luabind::class_<util::PIDController>("PIDController");

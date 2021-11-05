@@ -11,6 +11,8 @@
 #include "pragma/definitions.h"
 #include <mathutil/glmutil.h>
 
+// Deprecated, replaced by umath::Transform
+// TODO: Remove all instances of this, then remove this file!
 class DLLNETWORK Transform
 {
 protected:

@@ -136,10 +136,12 @@ void WIMainMenuNewGame::ReloadMapList()
 		filemanager::find_files("maps/*." +ext,&files,nullptr);
 
 	std::unordered_set<std::string> uniqueFiles;
+	std::unordered_set<std::string> nativeFiles;
 	uniqueFiles.reserve(files.size());
 	for(auto &f : files)
 	{
 		ufile::remove_extension_from_filename(f,exts);
+		nativeFiles.insert(f);
 		uniqueFiles.insert(std::move(f));
 	}
 
@@ -168,7 +170,6 @@ void WIMainMenuNewGame::ReloadMapList()
 	files.reserve(uniqueFiles.size());
 	for(auto &f : uniqueFiles)
 		files.push_back(f);
-	std::sort(files.begin(),files.end());
 
 	// Remove duplicates
 	if(files.size() > 1)
@@ -185,36 +186,59 @@ void WIMainMenuNewGame::ReloadMapList()
 		}
 	}
 
-	for(unsigned int i=0;i<files.size();i++)
+	std::vector<std::string> nativeMaps;
+	nativeMaps.reserve(files.size());
+	for(auto it=files.begin();it!=files.end();)
 	{
-		auto &fName = files[i];
-		auto displayName = fName;
-		auto f = FileManager::OpenFile((std::string("maps/") +fName +".txt").c_str(),"r");
-		if(f != nullptr)
+		auto &f = *it;
+		if(nativeFiles.find(f) != nativeFiles.end())
 		{
-			auto root = ds::System::ReadData(f);
-			if(root != nullptr)
+			nativeMaps.push_back(std::move(f));
+			it = files.erase(it);
+			continue;
+		}
+		++it;
+	}
+	
+	std::sort(nativeMaps.begin(),nativeMaps.end());
+	std::sort(files.begin(),files.end());
+
+	auto fAddMaps = [pMap](const std::vector<std::string> &files,const std::optional<Color> &color={}) {
+		for(unsigned int i=0;i<files.size();i++)
+		{
+			auto &fName = files[i];
+			auto displayName = fName;
+			auto f = FileManager::OpenFile((std::string("maps/") +fName +".txt").c_str(),"r");
+			if(f != nullptr)
 			{
-				auto block = root->GetBlock(fName.c_str(),0);
-				if(block != nullptr)
+				auto root = ds::System::ReadData(f);
+				if(root != nullptr)
 				{
-					auto name = block->GetString("name");
-					auto author = block->GetString("author");
-					std::stringstream newName;
-					if(!name.empty())
-						newName<<name;
-					else
-						newName<<fName;
-					if(!author.empty())
-						newName<<" ("<<author<<")";
-					displayName = newName.str();
+					auto block = root->GetBlock(fName.c_str(),0);
+					if(block != nullptr)
+					{
+						auto name = block->GetString("name");
+						auto author = block->GetString("author");
+						std::stringstream newName;
+						if(!name.empty())
+							newName<<name;
+						else
+							newName<<fName;
+						if(!author.empty())
+							newName<<" ("<<author<<")";
+						displayName = newName.str();
+					}
 				}
 			}
+			auto *opt = pMap->AddOption(displayName,fName);
+			auto *el = opt ? opt->GetTextElement() : nullptr;
+			if(el && color.has_value())
+				el->SetColor(*color);
 		}
-		pMap->AddOption(displayName,fName);
-	}
-	//pMap->SizeToContents();
-	//
+	};
+	// Show native maps (i.e. maps that don't have to be imported) first
+	fAddMaps(nativeMaps);
+	fAddMaps(files,Color{200,0,0,255});
 }
 
 void WIMainMenuNewGame::InitializeGameSettings()

@@ -108,23 +108,6 @@ static pragma::physics::VehicleCreateInfo create_standard_four_wheel_drive(lua_S
 	return pragma::physics::VehicleCreateInfo::CreateStandardFourWheelDrive(wheelCenterOffsets,handBrakeTorque,maxSteeringAngle);
 }
 
-static std::ostream &operator<<(std::ostream &out,const umath::Transform &t)
-{
-	auto &origin = t.GetOrigin();
-	auto &rot = t.GetRotation();
-	auto ang = EulerAngles{rot};
-	out<<"Transform["<<origin.x<<","<<origin.y<<","<<origin.z<<"]["<<ang.p<<","<<ang.y<<","<<ang.r<<"]";
-	return out;
-}
-static std::ostream &operator<<(std::ostream &out,const umath::ScaledTransform &t)
-{
-	auto &origin = t.GetOrigin();
-	auto &rot = t.GetRotation();
-	auto ang = EulerAngles{rot};
-	auto &scale = t.GetScale();
-	out<<"ScaledTransform["<<origin.x<<","<<origin.y<<","<<origin.z<<"]["<<ang.p<<","<<ang.y<<","<<ang.r<<"]["<<scale.x<<","<<scale.y<<","<<scale.z<<"]";
-	return out;
-}
 void Lua::physenv::register_library(Lua::Interface &lua)
 {
 	auto *l = lua.GetState();

@@ -180,6 +180,23 @@ static void register_directory_watcher(luabind::module_ &modUtil)
 	modUtil[defListener];
 }
 
+static std::ostream &operator<<(std::ostream &out,const umath::Transform &t)
+{
+	auto &origin = t.GetOrigin();
+	auto &rot = t.GetRotation();
+	auto ang = EulerAngles{rot};
+	out<<"Transform["<<origin.x<<","<<origin.y<<","<<origin.z<<"]["<<ang.p<<","<<ang.y<<","<<ang.r<<"]";
+	return out;
+}
+static std::ostream &operator<<(std::ostream &out,const umath::ScaledTransform &t)
+{
+	auto &origin = t.GetOrigin();
+	auto &rot = t.GetRotation();
+	auto ang = EulerAngles{rot};
+	auto &scale = t.GetScale();
+	out<<"ScaledTransform["<<origin.x<<","<<origin.y<<","<<origin.z<<"]["<<ang.p<<","<<ang.y<<","<<ang.r<<"]["<<scale.x<<","<<scale.y<<","<<scale.z<<"]";
+	return out;
+}
 void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 {
 	auto modString = luabind::module_(lua.GetState(),"string");
@@ -795,6 +812,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	classDefTransform.property("roll",static_cast<float(*)(lua_State*,umath::Transform&)>([](lua_State *l,umath::Transform &pose) {
 		return pose.GetAngles().r;
 	}));
+	classDefTransform.def("ToPlane",&umath::Transform::ToPlane);
 	classDefTransform.def("GetAngles",&umath::Transform::GetAngles);
 	classDefTransform.def("SetAngles",&umath::Transform::SetAngles);
 	classDefTransform.def("GetForward",&umath::Transform::GetForward);
@@ -1337,6 +1355,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 		return a *b;
 	}));
 	defQuat.def(float() *luabind::const_self);
+	defQuat.def("MirrorAxis",&uquat::mirror_on_axis);
 	defQuat.def("GetForward",&uquat::forward);
 	defQuat.def("GetRight",&uquat::right);
 	defQuat.def("GetUp",&uquat::up);
@@ -1470,6 +1489,11 @@ void Game::RegisterLuaClasses()
 	defPlane.def(luabind::constructor<Vector3,Vector3,Vector3>());
 	defPlane.def(luabind::constructor<Vector3,Vector3>());
 	defPlane.def(luabind::constructor<Vector3,double>());
+	defPlane.def("__tostring",+[](umath::Plane &plane) -> std::string {
+		std::stringstream ss;
+		ss<<"Plane["<<plane.GetNormal()<<"]["<<plane.GetDistance()<<"]";
+		return ss.str();
+	});
 	defPlane.def("Copy",static_cast<void(*)(lua_State*,umath::Plane&)>([](lua_State *l,umath::Plane &plane) {
 		Lua::Push<umath::Plane>(l,umath::Plane{plane});
 	}));

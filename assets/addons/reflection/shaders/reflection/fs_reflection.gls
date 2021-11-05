@@ -1,0 +1,22 @@
+#version 440
+
+#extension GL_ARB_separate_shader_objects : enable
+#extension GL_ARB_shading_language_420pack : enable
+
+#define DEBUG_MODE DEBUG_MODE_NONE
+
+#include "../world/pbr/fs_config.gls"
+#include "../world/pbr/pbr.gls"
+
+void main()
+{
+	vec4 coords = u_camera.VP *vec4(fs_in.vert_pos_ws,1.0);
+	coords.xy /= coords.w;
+	coords.x = coords.x *0.5 +0.5;
+	coords.y = coords.y *0.5 +0.5;
+
+	vec2 reflectUv = coords.xy;
+	reflectUv = clamp(reflectUv,0.001,0.999);
+	
+	fs_color = texture(u_albedoMap,reflectUv);
+}

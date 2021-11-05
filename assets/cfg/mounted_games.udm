@@ -669,3 +669,19 @@
 		$string name "source_engine"
 	}
 }
+
+"ff"
+{
+	$bool enabled 1
+	$string localization_name "mount_game_ff"
+	"steam"
+	{
+		$uint32 app_id 253530
+		$string game_path "common/Fortress Forever/FortressForever/"
+		$bool mount_workshop 0
+	}
+	"engine"
+	{
+		$string name "source_engine"
+	}
+}

@@ -533,6 +533,26 @@ void BaseLuaBaseEntityComponent::Initialize()
 	pragma::BaseEntityComponent::Initialize();
 }
 
+static std::string name_to_keyvalue_name(const std::string &name)
+{
+	std::string kvName;
+	size_t pos = 0;
+	while(pos < name.length())
+	{
+		auto c = name[pos];
+		if(std::isupper(c))
+		{
+			if(!kvName.empty())
+				kvName += '_';
+			kvName += std::tolower(c);
+		}
+		else
+			kvName += c;
+		++pos;
+	}
+	return kvName;
+}
+
 void BaseLuaBaseEntityComponent::InitializeMembers(const std::vector<BaseLuaBaseEntityComponent::MemberInfo> &members)
 {
 	m_members = members;
@@ -574,7 +594,12 @@ void BaseLuaBaseEntityComponent::InitializeMembers(const std::vector<BaseLuaBase
 			// We only need this for quick keyvalue or input lookups
 			auto lmemberName = member.functionName;
 			ustring::to_lower(lmemberName);
-			m_memberNameToIndex[lmemberName] = idxMember;
+
+			auto kvName = name_to_keyvalue_name(member.functionName);
+			if(kvName != lmemberName)
+				m_memberNameToIndex[std::move(kvName)] = idxMember; // Alternative kv name with underscores
+
+			m_memberNameToIndex[std::move(lmemberName)] = idxMember;
 		}
 
 		++idxMember;
@@ -1293,7 +1318,6 @@ void Lua::register_base_entity_component(luabind::module_ &modEnts)
 	classDef.def("SetShouldTransmitSnapshotData",&pragma::BaseLuaBaseEntityComponent::SetShouldTransmitSnapshotData);
 	classDef.def("ShouldTransmitSnapshotData",&pragma::BaseLuaBaseEntityComponent::ShouldTransmitSnapshotData);
 	classDef.def("GetVersion",&pragma::BaseLuaBaseEntityComponent::GetVersion);
-	classDef.def("RegisterNetEvent",&pragma::BaseLuaBaseEntityComponent::SetupNetEvent);
 	classDef.def("FlagCallbackForRemoval",static_cast<void(*)(lua_State*,pragma::BaseLuaBaseEntityComponent&,CallbackHandle&,pragma::BaseEntityComponent::CallbackType,pragma::BaseLuaBaseEntityComponent&)>([](lua_State *l,pragma::BaseLuaBaseEntityComponent &hComponent,CallbackHandle &hCb,pragma::BaseEntityComponent::CallbackType callbackType,pragma::BaseLuaBaseEntityComponent &hComponentOther) {
 		if(hCb.IsValid() == false)
 			return;
@@ -1354,6 +1378,7 @@ void Lua::register_base_entity_component(luabind::module_ &modEnts)
 		auto anyInitialValue = Lua::GetAnyValue(l,detail::member_type_to_util_type(memberType),4);
 		pragma::BaseLuaBaseEntityComponent::RegisterMember(o,memberName,memberType,anyInitialValue,pragma::BaseLuaBaseEntityComponent::MemberFlags::Default,luabind::newtable(l));
 	})];
+	classDef.scope[luabind::def("RegisterNetEvent",&Game::SetupNetEvent)];
 
 	classDef.add_static_constant("MEMBER_FLAG_NONE",umath::to_integral(pragma::BaseLuaBaseEntityComponent::MemberFlags::None));
 	classDef.add_static_constant("MEMBER_FLAG_BIT_PROPERTY",umath::to_integral(pragma::BaseLuaBaseEntityComponent::MemberFlags::PropertyBit));

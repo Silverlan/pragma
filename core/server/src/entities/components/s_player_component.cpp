@@ -121,6 +121,22 @@ void SPlayerComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 	}
 }
 
+void SPlayerComponent::SetViewRotation(const Quat &rot)
+{
+	auto &ent = static_cast<SBaseEntity&>(GetEntity());
+	auto charC = ent.GetCharacterComponent();
+	if(charC.valid())
+		charC->SetViewOrientation(rot);
+	if(ent.IsShared() == false)
+		return;
+	auto *session = GetClientSession();
+	if(session == nullptr)
+		return;
+	NetPacket p;
+	p->Write<Quat>(rot);
+	ent.SendNetEvent(m_netEvSetViewOrientation,p,pragma::networking::Protocol::SlowReliable,*session);
+}
+
 util::EventReply SPlayerComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
 {
 	if(BasePlayerComponent::HandleEvent(eventId,evData) == util::EventReply::Handled)

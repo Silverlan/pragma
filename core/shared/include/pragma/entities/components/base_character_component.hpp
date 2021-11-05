@@ -220,6 +220,8 @@ namespace pragma
 		// Unsticks the character from ground (disabling friction and also making sure gravity is applied) for the specified duration.
 		void DetachFromGround(float duration=0.1f);
 
+		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
+
 		bool Jump();
 		bool Jump(const Vector3 &velocity);
 		float GetJumpPower() const;

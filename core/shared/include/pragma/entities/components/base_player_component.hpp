@@ -50,6 +50,8 @@ namespace pragma
 		OBSERVERMODE GetObserverMode() const;
 		const util::PEnumProperty<OBSERVERMODE> &GetObserverModeProperty() const;
 
+		virtual void SetViewRotation(const Quat &rot);
+
 		void SetFlashlight(bool b);
 		void ToggleFlashlight();
 		bool IsFlashlightOn() const;

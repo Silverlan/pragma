@@ -23,11 +23,13 @@
 #include <udm.hpp>
 
 using namespace pragma;
-
+#pragma optimize("",off)
 ComponentEventId BaseTransformComponent::EVENT_ON_POSE_CHANGED = pragma::INVALID_COMPONENT_ID;
+ComponentEventId BaseTransformComponent::EVENT_ON_TELEPORT = pragma::INVALID_COMPONENT_ID;
 void BaseTransformComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
 	EVENT_ON_POSE_CHANGED = componentManager.RegisterEvent("ON_POSE_CHANGED",std::type_index(typeid(BaseTransformComponent)));
+	EVENT_ON_TELEPORT = componentManager.RegisterEvent("ON_TELEPORT");
 }
 void BaseTransformComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
 {
@@ -93,6 +95,15 @@ void BaseTransformComponent::Initialize()
 			return util::EventReply::Unhandled;
 		return util::EventReply::Handled;
 	});
+}
+void BaseTransformComponent::Teleport(const umath::Transform &targetPose)
+{
+	umath::Transform curPose = GetPose();
+	auto deltaPose = targetPose *curPose.GetInverse();
+	CETeleport evData {curPose,targetPose,deltaPose};
+	if(BroadcastEvent(EVENT_ON_TELEPORT,evData) == util::EventReply::Handled)
+		return;
+	SetPose(targetPose);
 }
 void BaseTransformComponent::OnPoseChanged(TransformChangeFlags changeFlags,bool updatePhysics)
 {
@@ -375,3 +386,14 @@ TraceData util::get_entity_trace_data(BaseTransformComponent &component)
 	}
 	return trData;
 }
+
+CETeleport::CETeleport(const umath::Transform &originalPose,const umath::Transform &targetPose,const umath::Transform &deltaPose)
+	: originalPose{originalPose},targetPose{targetPose},deltaPose{deltaPose}
+{}
+void CETeleport::PushArguments(lua_State *l)
+{
+	Lua::Push(l,originalPose);
+	Lua::Push(l,targetPose);
+	Lua::Push(l,deltaPose);
+}
+#pragma optimize("",on)

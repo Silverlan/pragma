@@ -12,6 +12,7 @@
 #include "pragma/lua/s_lentity_components.hpp"
 #include "pragma/entities/components/s_character_component.hpp"
 #include "pragma/entities/components/s_ai_component.hpp"
+#include "pragma/entities/components/s_player_component.hpp"
 #include <pragma/lua/lua_util_component.hpp>
 #include <pragma/lua/classes/lproperty.hpp>
 #include <pragma/physics/raytraces.h>
@@ -70,6 +71,21 @@ void Lua::register_sv_character_component(lua_State *l,luabind::module_ &module)
 	def.def("GetFaction",&pragma::SCharacterComponent::GetFaction);
 	def.def("SetFaction",static_cast<void(*)(lua_State*,pragma::SCharacterComponent&,const std::string&)>(&Lua::Actor::Server::SetFaction));
 	def.def("SetFaction",&pragma::SCharacterComponent::SetFaction);
+
+	// This is a bit of a hack: Usually the client controls the view angles of the player, which means changing it serverside would
+	// have no effect, however that would make these Lua-bindings useless. Instead, when changing the angles of a player through Lua,
+	// we'll redirect it to another function which will forcibly overwrite the client angles.
+	def.def("SetViewAngles",+[](pragma::SCharacterComponent &c,const EulerAngles &ang) {
+		auto hPl = c.GetEntity().GetPlayerComponent();
+		if(hPl.valid())
+			static_cast<pragma::SPlayerComponent*>(hPl.get())->SetViewRotation(uquat::create(ang));
+	});
+	def.def("SetViewRotation",+[](pragma::SCharacterComponent &c,const Quat &rot) {
+		auto hPl = c.GetEntity().GetPlayerComponent();
+		if(hPl.valid())
+			static_cast<pragma::SPlayerComponent*>(hPl.get())->SetViewRotation(rot);
+	});
+
 	module[def];
 }
 void Lua::Character::Server::DropWeapon(lua_State *l,pragma::SCharacterComponent &hEnt,pragma::SWeaponComponent &hWep)

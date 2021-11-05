@@ -57,6 +57,8 @@ namespace pragma
 		bool SendResource(const std::string &fileName) const;
 		virtual void PrintMessage(std::string message,MESSAGE type) override;
 
+		virtual void SetViewRotation(const Quat &rot) override;
+
 		virtual void SetObserverTarget(BaseObservableComponent *ent) override;
 		virtual void ApplyViewRotationOffset(const EulerAngles &ang,float dur=0.5f) override;
 

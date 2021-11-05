@@ -20,6 +20,7 @@
 #include "pragma/math/util_engine_math.hpp"
 #include "pragma/util/util_handled.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
+#include "pragma/entities/components/base_player_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_sound_emitter_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
@@ -313,6 +314,28 @@ void BaseCharacterComponent::SetViewOrientation(const Quat &orientation)
 		m_turnYaw = std::make_unique<float>(angView.y);
 	else
 		*m_turnYaw = angView.y;
+}
+
+util::EventReply BaseCharacterComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
+{
+	if(BaseEntityComponent::HandleEvent(eventId,evData) == util::EventReply::Handled)
+		return util::EventReply::Handled;
+	if(eventId == BaseTransformComponent::EVENT_ON_TELEPORT)
+	{
+		auto &te = static_cast<CETeleport&>(evData);
+		auto rot = GetViewOrientation();
+		rot = te.deltaPose *rot;
+		auto plC = GetEntity().GetPlayerComponent();
+		if(plC.valid()) // TODO: This is pretty messy, handle this another way?
+		{
+			// Player rotation needs to be handled differently, since the client usually
+			// has precedence for controlling the view angles.
+			plC->SetViewRotation(rot);
+		}
+		else
+			SetViewOrientation(rot);
+	}
+	return util::EventReply::Unhandled;
 }
 
 EulerAngles BaseCharacterComponent::GetLocalOrientationAngles() const {return EulerAngles(GetLocalOrientationRotation());}

@@ -19,7 +19,7 @@
 using namespace pragma;
 
 constexpr uint32_t VELOCITY_EPSILON_DELTA_FOR_SNAPSHOT = 0.05f;
-
+#pragma optimize("",off)
 void VelocityComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
 {
 	using T = VelocityComponent;
@@ -53,6 +53,13 @@ util::EventReply VelocityComponent::HandleEvent(ComponentEventId eventId,Compone
 	{
 		auto &force = static_cast<CEOnTakeDamage&>(evData).damageInfo.GetForce();
 		AddVelocity(force);
+	}
+	else if(eventId == BaseTransformComponent::EVENT_ON_TELEPORT)
+	{
+		auto &te = static_cast<CETeleport&>(evData);
+		auto vel = GetVelocity();
+		uvec::rotate(&vel,te.deltaPose.GetRotation());
+		SetVelocity(vel);
 	}
 	return util::EventReply::Unhandled;
 }
@@ -151,3 +158,4 @@ Vector3 VelocityComponent::GetLocalVelocity() const
 void VelocityComponent::SetRawVelocity(const Vector3 &vel) {*m_velocity = vel;}
 void VelocityComponent::SetRawAngularVelocity(const Vector3 &vel) {*m_angVelocity = vel;}
 
+#pragma optimize("",on)

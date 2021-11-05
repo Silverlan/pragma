@@ -86,6 +86,12 @@ void BasePlayerComponent::OnKilled(DamageInfo *dmgInfo)
 	auto charComponent = ent.GetCharacterComponent();
 	charComponent->RemoveWeapons();
 }
+void BasePlayerComponent::SetViewRotation(const Quat &rot)
+{
+	auto charComponent = GetEntity().GetCharacterComponent();
+	if(charComponent.valid())
+		charComponent->SetViewOrientation(rot);
+}
 util::EventReply BasePlayerComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
 {
 	if(BaseEntityComponent::HandleEvent(eventId,evData) == util::EventReply::Handled)

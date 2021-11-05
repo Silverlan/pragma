@@ -32,6 +32,7 @@ namespace pragma
 	{
 	public:
 		static pragma::ComponentEventId EVENT_ON_POSE_CHANGED;
+		static pragma::ComponentEventId EVENT_ON_TELEPORT;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember);
 		virtual void Initialize() override;
@@ -58,6 +59,8 @@ namespace pragma
 		float GetDistance(const Vector3 &p) const;
 		float GetDistance(const BaseEntity &ent) const;
 		void GetOrientation(Vector3 *forward,Vector3 *right,Vector3 *up=nullptr) const;
+		
+		void Teleport(const umath::Transform &targetPose);
 
 		void LocalToWorld(Vector3 *origin) const;
 		void LocalToWorld(Quat *rot) const;
@@ -106,6 +109,15 @@ namespace pragma
 		double m_tLastMoved = 0.0; // Last time the entity moved or changed rotation
 		Vector3 m_eyeOffset = {};
 		umath::ScaledTransform m_pose {};
+	};
+	struct DLLNETWORK CETeleport
+		: public ComponentEvent
+	{
+		CETeleport(const umath::Transform &originalPose,const umath::Transform &targetPose,const umath::Transform &deltaPose);
+		virtual void PushArguments(lua_State *l) override;
+		umath::Transform originalPose;
+		umath::Transform targetPose;
+		umath::Transform deltaPose;
 	};
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::TransformChangeFlags)

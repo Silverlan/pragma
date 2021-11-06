@@ -16,6 +16,7 @@
 #include "pragma/types.hpp"
 #include <luasystem.h>
 #include <unordered_map>
+#include <variant>
 #include <sharedutils/callback_handler.h>
 #include <sharedutils/util_extensible_enum.hpp>
 #include <sharedutils/util_weak_handle.hpp>

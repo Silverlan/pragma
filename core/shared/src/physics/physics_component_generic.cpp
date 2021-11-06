@@ -411,6 +411,20 @@ PhysObjHandle BasePhysicsComponent::InitializePhysics(const physics::PhysObjCrea
 	}
 	if(bPhys == false)
 		return {};
+	// Collision group/mask have to be set before spawning the physics object, otherwise
+	// there may be incorrect collisions directly after spawn.
+	if(umath::is_flag_set(flags,PhysFlags::Dynamic) == true)
+	{
+		m_physicsType = PHYSICSTYPE::DYNAMIC;
+		SetCollisionFilter(CollisionMask::Dynamic | CollisionMask::Generic,CollisionMask::All);
+		SetMoveType(MOVETYPE::PHYSICS);
+	}
+	else
+	{
+		m_physicsType = PHYSICSTYPE::STATIC;
+		SetCollisionFilter(CollisionMask::Static | CollisionMask::Generic,CollisionMask::All);
+		SetMoveType(MOVETYPE::NONE);
+	}
 	m_physObject->Spawn();
 	auto &collisionObjs = m_physObject->GetCollisionObjects();
 	auto animComponent = ent.GetAnimatedComponent();
@@ -505,18 +519,6 @@ PhysObjHandle BasePhysicsComponent::InitializePhysics(const physics::PhysObjCrea
 		//
 	}
 
-	if(umath::is_flag_set(flags,PhysFlags::Dynamic) == true)
-	{
-		m_physicsType = PHYSICSTYPE::DYNAMIC;
-		SetCollisionFilter(CollisionMask::Dynamic | CollisionMask::Generic,CollisionMask::All);
-		SetMoveType(MOVETYPE::PHYSICS);
-	}
-	else
-	{
-		m_physicsType = PHYSICSTYPE::STATIC;
-		SetCollisionFilter(CollisionMask::Static | CollisionMask::Generic,CollisionMask::All);
-		SetMoveType(MOVETYPE::NONE);
-	}
 	InitializePhysObj();
 	OnPhysicsInitialized();
 	return PhysObjHandle{m_physObject};

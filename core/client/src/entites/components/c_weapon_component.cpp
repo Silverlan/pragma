@@ -215,7 +215,7 @@ void CWeaponComponent::UpdateWorldModel()
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(!pRenderComponent)
 		return;
-	pRenderComponent->SetRenderMode(IsInFirstPersonMode() ? ((m_bHideWorldModelInFirstPerson == true) ? RenderMode::None : RenderMode::View) : RenderMode::World);
+	pRenderComponent->SetRenderMode(IsInFirstPersonMode() ? ((umath::is_flag_set(m_stateFlags,StateFlags::HideWorldModelInFirstPerson) == true) ? RenderMode::None : RenderMode::View) : RenderMode::World);
 }
 
 void CWeaponComponent::SetViewModel(const std::string &mdl)
@@ -330,15 +330,21 @@ void CWeaponComponent::UpdateOwnerAttachment()
 
 void CWeaponComponent::SetHideWorldModelInFirstPerson(bool b)
 {
-	m_bHideWorldModelInFirstPerson = b;
+	umath::set_flag(m_stateFlags,StateFlags::HideWorldModelInFirstPerson,b);
 	UpdateWorldModel();
 }
-bool CWeaponComponent::GetHideWorldModelInFirstPerson() const {return m_bHideWorldModelInFirstPerson;}
+bool CWeaponComponent::GetHideWorldModelInFirstPerson() const {return umath::is_flag_set(m_stateFlags,StateFlags::HideWorldModelInFirstPerson);}
 
 void CWeaponComponent::UpdateDeployState()
 {
 	if(IsDeployed() == false)
 		return;
+
+	if(umath::is_flag_set(m_stateFlags,StateFlags::UpdatingDeployState))
+		return; // Prevent infinite recursion
+	umath::set_flag(m_stateFlags,StateFlags::UpdatingDeployState);
+	util::ScopeGuard sg {[this]() {umath::set_flag(m_stateFlags,StateFlags::UpdatingDeployState,false);}};
+
 	UpdateOwnerAttachment();
 	UpdateViewModel();
 	auto *vm = GetViewModel();

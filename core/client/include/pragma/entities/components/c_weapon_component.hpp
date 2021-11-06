@@ -33,6 +33,13 @@ namespace pragma
 		static unsigned int GetWeaponCount();
 		static const std::vector<CWeaponComponent*> &GetAll();
 
+		enum class StateFlags : uint8_t
+		{
+			None = 0u,
+			HideWorldModelInFirstPerson = 1u,
+			UpdatingDeployState = HideWorldModelInFirstPerson<<1u
+		};
+
 		virtual ~CWeaponComponent() override;
 		
 		CWeaponComponent(BaseEntity &ent);
@@ -66,7 +73,7 @@ namespace pragma
 	protected:
 		// Either the view-model or the character that owns the weapon
 		EntityHandle m_hTarget;
-		bool m_bHideWorldModelInFirstPerson = false;
+		StateFlags m_stateFlags = StateFlags::None;
 		std::optional<std::string> m_viewModel {};
 		Vector3 m_viewModelOffset;
 		pragma::ComponentId m_viewModelComponent = pragma::INVALID_COMPONENT_ID;
@@ -91,5 +98,6 @@ namespace pragma
 		CViewModelComponent *viewModel = nullptr;
 	};
 };
+REGISTER_BASIC_BITWISE_OPERATORS(pragma::CWeaponComponent::StateFlags)
 
 #endif

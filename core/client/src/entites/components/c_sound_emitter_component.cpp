@@ -45,24 +45,24 @@ void CSoundEmitterComponent::ReceiveData(NetPacket &packet)
 	}
 }
 
-std::shared_ptr<ALSound> CSoundEmitterComponent::CreateSound(std::string sndname,ALSoundType type)
+std::shared_ptr<ALSound> CSoundEmitterComponent::CreateSound(std::string sndname,ALSoundType type,const SoundInfo &sndInfo)
 {
 	std::shared_ptr<ALSound> snd = client->CreateSound(sndname,type,ALCreateFlags::Mono);
 	if(snd == NULL)
 		return snd;
 	InitializeSound(snd);
+	snd->SetGain(sndInfo.gain);
+	snd->SetPitch(sndInfo.pitch);
 	return snd;
 }
 
-std::shared_ptr<ALSound> CSoundEmitterComponent::EmitSound(std::string sndname,ALSoundType type,float gain,float pitch)
+std::shared_ptr<ALSound> CSoundEmitterComponent::EmitSound(std::string sndname,ALSoundType type,const SoundInfo &sndInfo)
 {
-	std::shared_ptr<ALSound> snd = CreateSound(sndname,type);
+	std::shared_ptr<ALSound> snd = CreateSound(sndname,type,sndInfo);
 	if(snd == NULL)
 		return snd;
 	auto pTrComponent = GetEntity().GetTransformComponent();
 	ALSound *al = snd.get();
-	al->SetGain(gain);
-	al->SetPitch(pitch);
 	al->SetPosition(pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{});
 	//al->SetVelocity(*GetVelocity());
 	// TODO: Orientation

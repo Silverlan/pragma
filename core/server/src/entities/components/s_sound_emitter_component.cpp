@@ -51,18 +51,20 @@ void SSoundEmitterComponent::UpdateSoundTransform(ALSound &snd) const
 	if(pVelComponent.valid())
 		baseSnd->SetVelocity(pVelComponent->GetVelocity(),true);
 }
-std::shared_ptr<ALSound> SSoundEmitterComponent::CreateSound(std::string sndname,ALSoundType type,bool bTransmit)
+std::shared_ptr<ALSound> SSoundEmitterComponent::CreateSound(std::string sndname,ALSoundType type,const SoundInfo &sndInfo)
 {
 	auto flags = ALCreateFlags::Mono;
-	if(bTransmit == false)
+	if(sndInfo.transmit == false)
 		flags |= ALCreateFlags::DontTransmit;
 	auto ptrSnd = server->CreateSound(sndname,type,flags);
 	auto *snd = static_cast<ALSound*>(ptrSnd.get());
 	if(snd == nullptr)
 		return ptrSnd;
 	InitializeSound(ptrSnd);
+	ptrSnd->SetGain(sndInfo.gain);
+	ptrSnd->SetPitch(sndInfo.pitch);
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
-	if(ent.IsShared() && bTransmit == true)
+	if(ent.IsShared() && sndInfo.transmit == true)
 	{
 		NetPacket p;
 		nwm::write_entity(p,&ent);
@@ -71,15 +73,12 @@ std::shared_ptr<ALSound> SSoundEmitterComponent::CreateSound(std::string sndname
 	}
 	return ptrSnd;
 }
-std::shared_ptr<ALSound> SSoundEmitterComponent::EmitSharedSound(const std::string &snd,ALSoundType type,float gain,float pitch) {return EmitSound(snd,type,gain,pitch,false);}
-std::shared_ptr<ALSound> SSoundEmitterComponent::EmitSound(std::string sndname,ALSoundType type,float gain,float pitch,bool bTransmit)
+std::shared_ptr<ALSound> SSoundEmitterComponent::EmitSound(std::string sndname,ALSoundType type,const SoundInfo &sndInfo)
 {
-	std::shared_ptr<ALSound> snd = CreateSound(sndname,type,bTransmit);
+	std::shared_ptr<ALSound> snd = CreateSound(sndname,type,sndInfo);
 	ALSound *al = snd.get();
 	if(al == NULL)
 		return snd;
-	al->SetGain(gain);
-	al->SetPitch(pitch);
 	auto &ent = GetEntity();
 	auto pTrComponent = ent.GetTransformComponent();
 	if(pTrComponent != nullptr)
@@ -91,6 +90,3 @@ std::shared_ptr<ALSound> SSoundEmitterComponent::EmitSound(std::string sndname,A
 	al->Play();
 	return snd;
 }
-std::shared_ptr<ALSound> SSoundEmitterComponent::EmitSound(std::string sndname,ALSoundType type,float gain,float pitch) {return EmitSound(sndname,type,gain,pitch,true);}
-
-std::shared_ptr<ALSound> SSoundEmitterComponent::CreateSound(std::string sndname,ALSoundType type) {return CreateSound(sndname,type,true);}

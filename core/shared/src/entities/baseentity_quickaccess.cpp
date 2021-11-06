@@ -42,7 +42,7 @@ std::shared_ptr<ALSound> BaseEntity::EmitSound(const std::string &snd,ALSoundTyp
 	auto *sndC = static_cast<pragma::BaseSoundEmitterComponent*>(AddNetworkedComponent("sound_emitter").get());
 	if(sndC == nullptr)
 		return nullptr;
-	return sndC->EmitSound(snd,type,gain,pitch);
+	return sndC->EmitSound(snd,type,{gain,pitch});
 }
 
 std::string BaseEntity::GetName() const

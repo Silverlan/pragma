@@ -1878,40 +1878,28 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	#include "pragma/entities/components/base_sound_emitter_component.hpp"
 	namespace Lua::SoundEmitter
 	{
-		void EmitSound(lua_State *l,pragma::BaseSoundEmitterComponent &hEnt,std::string sndname,uint32_t soundType,float gain,float pitch)
+		DLLNETWORK luabind::class_<pragma::BaseSoundEmitterComponent::SoundInfo> RegisterSoundInfo()
 		{
-			std::shared_ptr<ALSound> snd = hEnt.EmitSound(sndname,static_cast<ALSoundType>(soundType),gain,pitch);
-			if(snd == nullptr)
-				return;
-			luabind::object(l,snd).push(l);
+			auto defSoundInfo = luabind::class_<pragma::BaseSoundEmitterComponent::SoundInfo>("SoundInfo");
+			defSoundInfo.def(luabind::constructor<float,float>());
+			defSoundInfo.def(luabind::constructor<float>());
+			defSoundInfo.def(luabind::constructor<>());
+			defSoundInfo.def_readwrite("gain",&pragma::BaseSoundEmitterComponent::SoundInfo::gain);
+			defSoundInfo.def_readwrite("pitch",&pragma::BaseSoundEmitterComponent::SoundInfo::pitch);
+			defSoundInfo.def_readwrite("transmit",&pragma::BaseSoundEmitterComponent::SoundInfo::transmit);
+			return defSoundInfo;
 		}
 	};
 	void pragma::lua::base_sound_emitter_component::register_class(luabind::module_ &mod)
 	{
 		auto def = Lua::create_base_entity_component_class<pragma::BaseSoundEmitterComponent>("BaseSoundEmitterComponent");
 		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
-		def.def("CreateSound",static_cast<void(*)(lua_State*,pragma::BaseSoundEmitterComponent&,std::string,uint32_t)>([](lua_State *l,pragma::BaseSoundEmitterComponent &hEnt,std::string sndname,uint32_t soundType) {
-			
-			std::shared_ptr<ALSound> snd = hEnt.CreateSound(sndname,static_cast<ALSoundType>(soundType));
-			if(snd == nullptr)
-				return;
-			luabind::object(l,snd).push(l);
-		}));
-		def.def("EmitSound",static_cast<void(*)(lua_State*,pragma::BaseSoundEmitterComponent&,std::string,uint32_t,float,float)>([](lua_State *l,pragma::BaseSoundEmitterComponent &hEnt,std::string sndname,uint32_t soundType,float gain,float pitch) {
-			Lua::SoundEmitter::EmitSound(l,hEnt,sndname,soundType,gain,pitch);
-		}));
-		def.def("EmitSound",static_cast<void(*)(lua_State*,pragma::BaseSoundEmitterComponent&,std::string,uint32_t,float)>([](lua_State *l,pragma::BaseSoundEmitterComponent &hEnt,std::string sndname,uint32_t soundType,float gain) {
-			Lua::SoundEmitter::EmitSound(l,hEnt,sndname,soundType,gain,1.f);
-		}));
-		def.def("EmitSound",static_cast<void(*)(lua_State*,pragma::BaseSoundEmitterComponent&,std::string,uint32_t)>([](lua_State *l,pragma::BaseSoundEmitterComponent &hEnt,std::string sndname,uint32_t soundType) {
-			Lua::SoundEmitter::EmitSound(l,hEnt,sndname,soundType,1.f,1.f);
-		}));
-		def.def("StopSounds",static_cast<void(*)(lua_State*,pragma::BaseSoundEmitterComponent&)>([](lua_State *l,pragma::BaseSoundEmitterComponent &hEnt) {
-			
-			hEnt.StopSounds();
-		}));
+		def.def("CreateSound",&pragma::BaseSoundEmitterComponent::CreateSound);
+		def.def("CreateSound",+[](pragma::BaseSoundEmitterComponent &c,std::string snd,ALSoundType type) {return c.CreateSound(std::move(snd),type);});
+		def.def("EmitSound",&pragma::BaseSoundEmitterComponent::EmitSound);
+		def.def("EmitSound",+[](pragma::BaseSoundEmitterComponent &c,std::string snd,ALSoundType type) {return c.EmitSound(std::move(snd),type);});
+		def.def("StopSounds",&pragma::BaseSoundEmitterComponent::StopSounds);
 		def.def("GetSounds",static_cast<void(*)(lua_State*,pragma::BaseSoundEmitterComponent&)>([](lua_State *l,pragma::BaseSoundEmitterComponent &hEnt) {
-			
 			std::vector<std::shared_ptr<ALSound>> *sounds;
 			hEnt.GetSounds(&sounds);
 			lua_newtable(l);

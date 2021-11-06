@@ -17,16 +17,24 @@ namespace pragma
 	public:
 		static ComponentEventId EVENT_ON_SOUND_CREATED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+
+		struct DLLNETWORK SoundInfo
+		{
+			SoundInfo(float gain=1.f,float pitch=1.f)
+				: gain{gain},pitch{pitch}
+			{}
+			float gain = 1.f;
+			float pitch = 1.f;
+			bool transmit = true;
+		};
+
 		virtual ~BaseSoundEmitterComponent() override;
 		virtual void Initialize() override;
 
 		virtual void OnTick(double dt) override;
 		virtual void PrecacheSounds();
-		virtual std::shared_ptr<ALSound> CreateSound(std::string snd,ALSoundType type);
-		virtual std::shared_ptr<ALSound> EmitSound(std::string snd,ALSoundType type,float gain,float pitch=1.f);
-		std::shared_ptr<ALSound> EmitSound(std::string snd,ALSoundType type);
-		// Same as EmitSound, but doesn't trasmit to clients if called serverside
-		virtual std::shared_ptr<ALSound> EmitSharedSound(const std::string &snd,ALSoundType type,float gain=1.f,float pitch=1.f);
+		virtual std::shared_ptr<ALSound> CreateSound(std::string snd,ALSoundType type,const SoundInfo &sndInfo={});
+		virtual std::shared_ptr<ALSound> EmitSound(std::string snd,ALSoundType type,const SoundInfo &sndInfo={});
 		void StopSounds();
 		void GetSounds(std::vector<std::shared_ptr<ALSound>> **sounds);
 	protected:

@@ -21,8 +21,8 @@ namespace pragma
 	public:
 		CSoundEmitterComponent(BaseEntity &ent) : BaseSoundEmitterComponent(ent) {}
 		// Sounds
-		virtual std::shared_ptr<ALSound> CreateSound(std::string sndname,ALSoundType type) override;
-		virtual std::shared_ptr<ALSound> EmitSound(std::string sndname,ALSoundType type,float gain,float pitch=1.f) override;
+		virtual std::shared_ptr<ALSound> CreateSound(std::string sndname,ALSoundType type,const SoundInfo &sndInfo={}) override;
+		virtual std::shared_ptr<ALSound> EmitSound(std::string sndname,ALSoundType type,const SoundInfo &sndInfo={}) override;
 		void AddSound(std::shared_ptr<ALSound> snd); // Only to be used from netmessage
 
 		virtual void PrecacheSounds() override;

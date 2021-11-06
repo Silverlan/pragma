@@ -39,10 +39,8 @@ void BaseSoundEmitterComponent::Initialize()
 	auto &ent = GetEntity();
 	ent.AddComponent("transform");
 }
-std::shared_ptr<ALSound> BaseSoundEmitterComponent::CreateSound(std::string snd,ALSoundType) {return std::shared_ptr<ALSound>();}
-std::shared_ptr<ALSound> BaseSoundEmitterComponent::EmitSound(std::string snd,ALSoundType,float,float) {return std::shared_ptr<ALSound>();}
-std::shared_ptr<ALSound> BaseSoundEmitterComponent::EmitSound(std::string snd,ALSoundType type) {return EmitSound(snd,type,1.f,1.f);}
-std::shared_ptr<ALSound> BaseSoundEmitterComponent::EmitSharedSound(const std::string &snd,ALSoundType type,float gain,float pitch) {return EmitSound(snd,type,gain,pitch);}
+std::shared_ptr<ALSound> BaseSoundEmitterComponent::CreateSound(std::string snd,ALSoundType,const SoundInfo&) {return std::shared_ptr<ALSound>();}
+std::shared_ptr<ALSound> BaseSoundEmitterComponent::EmitSound(std::string snd,ALSoundType,const SoundInfo&) {return std::shared_ptr<ALSound>();}
 
 void BaseSoundEmitterComponent::StopSounds()
 {

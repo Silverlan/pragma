@@ -710,14 +710,22 @@ void BaseCharacterComponent::PlayFootStepSound(FootType foot,const SurfaceMateri
 	auto pSubmergibleComponent = ent.GetComponent<SubmergibleComponent>();
 	if(pSubmergibleComponent.valid() && pSubmergibleComponent->IsSubmerged() == true)
 		return; // Don't play footsteps when underwater
+	pragma::BaseSoundEmitterComponent::SoundInfo sndInfo {};
+	sndInfo.transmit = false;
 	if(pSubmergibleComponent.valid() == false || pSubmergibleComponent->GetSubmergedFraction() == 0.f)
-		pSoundEmitterComponent->EmitSharedSound(surfMat.GetFootstepType(),soundType,maxGain *scale,1.f);
+	{
+		sndInfo.gain = maxGain *scale;
+		pSoundEmitterComponent->EmitSound(surfMat.GetFootstepType(),soundType,sndInfo);
+	}
 	else
 	{
 		// Play water footstep sounds if we're knee-deep in water
 		auto *pSurfWaterMat = ent.GetNetworkState()->GetGameState()->GetSurfaceMaterial("water");
 		if(pSurfWaterMat != nullptr)
-			pSoundEmitterComponent->EmitSharedSound(pSurfWaterMat->GetFootstepType(),soundType,maxGain *scale,1.f);
+		{
+			sndInfo.gain = maxGain *scale;
+			pSoundEmitterComponent->EmitSound(pSurfWaterMat->GetFootstepType(),soundType,sndInfo);
+		}
 	}
 }
 

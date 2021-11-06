@@ -13,13 +13,10 @@
 #include <pragma/lua/lua_util_component_stream.hpp>
 #include <prosper_command_buffer.hpp>
 
+namespace Lua::SoundEmitter {DLLNETWORK luabind::class_<pragma::BaseSoundEmitterComponent::SoundInfo> RegisterSoundInfo();};
 void Lua::SoundEmitter::register_class(lua_State *l,luabind::module_ &entsMod)
 {
 	auto defCSoundEmitter = pragma::lua::create_entity_component_class<pragma::CSoundEmitterComponent,pragma::BaseSoundEmitterComponent>("SoundEmitterComponent");
-	defCSoundEmitter.def("CreateSound",&pragma::CSoundEmitterComponent::CreateSound);
-	defCSoundEmitter.def("EmitSound",&pragma::CSoundEmitterComponent::EmitSound);
-	defCSoundEmitter.def("EmitSound",+[](pragma::CSoundEmitterComponent &c,std::string sndname,ALSoundType type,float gain,float pitch,bool) ->  std::shared_ptr<ALSound> {
-		return c.EmitSound(sndname,type,gain,pitch);
-	});
+	defCSoundEmitter.scope[Lua::SoundEmitter::RegisterSoundInfo()];
 	entsMod[defCSoundEmitter];
 }

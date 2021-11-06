@@ -22,7 +22,7 @@ ai::BehaviorNode::Result ai::TaskPlaySound::Start(const Schedule *sched,pragma::
 	auto pSoundComponent = ent.GetEntity().GetComponent<pragma::SSoundEmitterComponent>();
 	if(pSoundComponent.expired())
 		return Result::Failed;
-	pSoundComponent->EmitSound(*sndName,ALSoundType::NPC,GetGain(sched),GetPitch(sched));
+	pSoundComponent->EmitSound(*sndName,ALSoundType::NPC,{GetGain(sched),GetPitch(sched)});
 	return Result::Succeeded;
 }
 

@@ -1093,7 +1093,11 @@ void BaseAnimatedComponent::HandleAnimationEvent(const AnimationEvent &ev)
 			{
 				auto pSoundEmitterComponent = static_cast<pragma::BaseSoundEmitterComponent*>(GetEntity().FindComponent("sound_emitter").get());
 				if(pSoundEmitterComponent != nullptr)
-					pSoundEmitterComponent->EmitSharedSound(ev.arguments.front(),ALSoundType::Generic);
+				{
+					pragma::BaseSoundEmitterComponent::SoundInfo sndInfo {};
+					sndInfo.transmit = false;
+					pSoundEmitterComponent->EmitSound(ev.arguments.front(),ALSoundType::Generic,sndInfo);
+				}
 			}
 			break;
 		}

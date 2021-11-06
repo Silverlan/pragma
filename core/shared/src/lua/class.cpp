@@ -180,7 +180,7 @@ static void register_directory_watcher(luabind::module_ &modUtil)
 	modUtil[defListener];
 }
 
-static std::ostream &operator<<(std::ostream &out,const umath::Transform &t)
+std::ostream &operator<<(std::ostream &out,const umath::Transform &t)
 {
 	auto &origin = t.GetOrigin();
 	auto &rot = t.GetRotation();
@@ -188,7 +188,7 @@ static std::ostream &operator<<(std::ostream &out,const umath::Transform &t)
 	out<<"Transform["<<origin.x<<","<<origin.y<<","<<origin.z<<"]["<<ang.p<<","<<ang.y<<","<<ang.r<<"]";
 	return out;
 }
-static std::ostream &operator<<(std::ostream &out,const umath::ScaledTransform &t)
+std::ostream &operator<<(std::ostream &out,const umath::ScaledTransform &t)
 {
 	auto &origin = t.GetOrigin();
 	auto &rot = t.GetRotation();

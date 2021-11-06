@@ -108,6 +108,9 @@ static pragma::physics::VehicleCreateInfo create_standard_four_wheel_drive(lua_S
 	return pragma::physics::VehicleCreateInfo::CreateStandardFourWheelDrive(wheelCenterOffsets,handBrakeTorque,maxSteeringAngle);
 }
 
+extern std::ostream &operator<<(std::ostream &out,const umath::Transform &t);
+extern std::ostream &operator<<(std::ostream &out,const umath::ScaledTransform &t);
+
 void Lua::physenv::register_library(Lua::Interface &lua)
 {
 	auto *l = lua.GetState();
@@ -323,6 +326,13 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	physMod[classDefVhc];
 
 	auto classMat = luabind::class_<pragma::physics::IMaterial,pragma::physics::IBase>("Material");
+	classMat.def("__tostring",+[](const pragma::physics::IMaterial &mat) -> std::string {
+		std::stringstream ss;
+		ss<<"PhysMaterial[SFriction:"<<mat.GetStaticFriction()<<"][DFriction:"<<mat.GetDynamicFriction()<<"][Restitution:"<<mat.GetRestitution()<<"]";
+		auto *surfMat = mat.GetSurfaceMaterial();
+		ss<<"[SurfMat:"<<(surfMat ? surfMat->GetIdentifier() : "NULL")<<"]";
+		return ss.str();
+	});
 	classMat.def("SetFriction",&pragma::physics::IMaterial::SetFriction);
 	classMat.def("GetStaticFriction",&pragma::physics::IMaterial::GetStaticFriction);
 	classMat.def("SetStaticFriction",&pragma::physics::IMaterial::SetStaticFriction);
@@ -336,6 +346,17 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 
 	auto classDefRayCastData = luabind::class_<::TraceData>("RayCastData");
 	classDefRayCastData.def(luabind::constructor<>());
+	classDefRayCastData.def("__tostring",+[](const ::TraceData &data) -> std::string {
+		std::stringstream ss;
+		ss<<"RayCastData[Flags:"<<magic_enum::enum_name(data.GetFlags())<<"]";
+		auto &src = data.GetSource();
+		ss<<"[Source:"<<src<<"]";
+		auto &dst = data.GetTarget();
+		ss<<"[Target:"<<dst<<"]";
+		ss<<"[FilterGroup:"<<magic_enum::enum_name(data.GetCollisionFilterGroup())<<"]";
+		ss<<"[FilterMask:"<<magic_enum::enum_name(data.GetCollisionFilterMask())<<"]";
+		return ss.str();
+	});
 	classDefRayCastData.def("SetShape",static_cast<void(*)(lua_State*,::TraceData&,const pragma::physics::IConvexShape&)>(&Lua::TraceData::SetSource));
 	classDefRayCastData.def("SetSource",static_cast<void(::TraceData::*)(const Vector3&)>(&::TraceData::SetSource));
 	classDefRayCastData.def("SetSourceRotation",&::TraceData::SetSourceRotation);
@@ -359,6 +380,32 @@ void Lua::physenv::register_library(Lua::Interface &lua)
 	physMod[classDefRayCastData];
 
 	auto classDefRayCastResult = luabind::class_<TraceResult>("RayCastResult");
+	classDefRayCastResult.def("__tostring",+[](const ::TraceResult &res) -> std::string {
+		std::stringstream ss;
+		ss<<"RayCastResult";
+		ss<<"[HitType:"<<magic_enum::enum_name(res.hitType)<<"]";
+		ss<<"[HitPos:"<<res.position<<"]";
+		ss<<"[HitNorm:"<<res.normal<<"]";
+
+		ss<<"[HitEnt:";
+		if(res.entity.IsValid())
+			const_cast<BaseEntity*>(res.entity.get())->print(ss);
+		else
+			ss<<"NULL";
+		ss<<"]";
+
+		ss<<"[HitMat:";
+		auto *mat = const_cast<::TraceResult&>(res).GetMaterial();
+		if(mat)
+			ss<<mat->GetName();
+		else
+			ss<<"NULL";
+		ss<<"]";
+
+		ss<<"[Frac:"<<res.fraction<<"]";
+		ss<<"[StartPos:"<<res.startPosition<<"]";
+		return ss.str();
+	});
 	classDefRayCastResult.add_static_constant("HIT_TYPE_BLOCK",umath::to_integral(RayCastHitType::Block));
 	classDefRayCastResult.add_static_constant("HIT_TYPE_TOUCH",umath::to_integral(RayCastHitType::Touch));
 	classDefRayCastResult.add_static_constant("HIT_TYPE_NONE",umath::to_integral(RayCastHitType::None));

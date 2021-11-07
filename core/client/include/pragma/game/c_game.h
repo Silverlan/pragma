@@ -236,10 +236,14 @@ public:
 	const Vector4 &GetRenderClipPlane() const;
 
 	void ReloadMaterialShader(CMaterial *mat);
-	void SetRenderModeEnabled(RenderMode renderMode,bool bEnabled);
-	void EnableRenderMode(RenderMode renderMode);
-	void DisableRenderMode(RenderMode renderMode);
-	bool IsRenderModeEnabled(RenderMode renderMode) const;
+	void SetRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode,bool bEnabled);
+	void EnableRenderMode(pragma::rendering::SceneRenderPass renderMode);
+	void DisableRenderMode(pragma::rendering::SceneRenderPass renderMode);
+	bool IsRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode) const;
+
+	pragma::rendering::RenderMask RegisterCustomRenderMask(const std::string &name);
+	std::optional<pragma::rendering::RenderMask> GetRenderMask(const std::string &name);
+	const std::string *FindRenderMaskName(pragma::rendering::RenderMask mask) const;
 
 	std::shared_ptr<prosper::IPrimaryCommandBuffer> GetCurrentDrawCommandBuffer() const;
 	void InitializeLua();
@@ -487,7 +491,7 @@ protected:
 private:
 	std::queue<WIHandle> m_luaGUIObjects = {};
 	double m_tLastClientUpdate = 0.0;
-	std::array<bool,umath::to_integral(RenderMode::Count)> m_renderModesEnabled;
+	std::array<bool,umath::to_integral(pragma::rendering::SceneRenderPass::Count)> m_renderModesEnabled;
 	CallbackHandle m_hCbDrawFrame = {};
 
 	struct {
@@ -567,6 +571,9 @@ private:
 	void CalcLocalPlayerOrientation();
 	Quat m_curFrameRotationModifier = uquat::identity();
 	void UpdateShaderTimeData();
+
+	std::unordered_map<std::string,pragma::rendering::RenderMask> m_customRenderMasks;
+	pragma::rendering::RenderMask m_nextCustomRenderMaskIndex = pragma::rendering::RenderMask::CustomStartBit;
 
 	// Entities
 	pragma::ComponentHandle<pragma::CGameComponent> m_gameComponent;

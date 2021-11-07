@@ -138,7 +138,7 @@ void CPlayerComponent::OnDeployWeapon(BaseEntity &ent)
 		return;
 	auto pRenderComponent = static_cast<CBaseEntity&>(vm->GetEntity()).GetRenderComponent();
 	if(pRenderComponent)
-		pRenderComponent->SetRenderMode(RenderMode::View); // TODO: Set render mode to none when weapon is holstered
+		pRenderComponent->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::View); // TODO: Set render mode to none when weapon is holstered
 }
 
 void CPlayerComponent::OnEntityComponentAdded(BaseEntityComponent &component)
@@ -452,7 +452,7 @@ void CPlayerComponent::Initialize()
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(pRenderComponent)
-		pRenderComponent->SetRenderMode(RenderMode::World);
+		pRenderComponent->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::World);
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr)
 		pPhysComponent->SetCollisionType(COLLISIONTYPE::AABB);

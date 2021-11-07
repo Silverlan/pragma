@@ -53,7 +53,7 @@ void CWaterSurfaceComponent::Initialize()
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(pRenderComponent)
 	{
-		pRenderComponent->SetRenderMode(RenderMode::Water);
+		pRenderComponent->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::Water);
 		pRenderComponent->SetCastShadows(false);
 	}
 }

@@ -811,6 +811,7 @@ void CGame::RegisterLuaClasses()
 	static_assert(sizeof(::util::DrawSceneInfo::renderFlags) == sizeof(uint32_t));
 	defDrawSceneInfo.def_readwrite("renderFlags",reinterpret_cast<uint32_t util::DrawSceneInfo::*>(&::util::DrawSceneInfo::renderFlags));
 	defDrawSceneInfo.def_readwrite("renderTarget",&::util::DrawSceneInfo::renderTarget);
+	defDrawSceneInfo.def_readwrite("renderMask",&::util::DrawSceneInfo::renderMask);
 	defDrawSceneInfo.def_readwrite("outputImage",&::util::DrawSceneInfo::outputImage);
 	static_assert(sizeof(::util::DrawSceneInfo::outputLayerId) == sizeof(uint32_t));
 	defDrawSceneInfo.def_readwrite("outputLayerId",reinterpret_cast<uint32_t util::DrawSceneInfo::*>(&::util::DrawSceneInfo::outputLayerId));
@@ -878,6 +879,23 @@ void CGame::RegisterLuaClasses()
 		};
 	}));
 	modGame[defDrawSceneInfo];
+
+	Lua::RegisterLibraryEnums(GetLuaState(),"game",{
+		{"RENDER_MASK_NONE",umath::to_integral(pragma::rendering::RenderMask::None)},
+		{"RENDER_MASK_WORLD_BIT",umath::to_integral(pragma::rendering::RenderMask::WorldBit)},
+		{"RENDER_MASK_VIEW_BIT",umath::to_integral(pragma::rendering::RenderMask::ViewBit)},
+		{"RENDER_MASK_SKY_BIT",umath::to_integral(pragma::rendering::RenderMask::SkyBit)},
+		{"RENDER_MASK_WATER_BIT",umath::to_integral(pragma::rendering::RenderMask::WaterBit)},
+		{"RENDER_MASK_DEPTH_PREPASS_BIT",umath::to_integral(pragma::rendering::RenderMask::DepthPrepassBit)},
+		{"RENDER_MASK_ANY_SCENE",umath::to_integral(pragma::rendering::RenderMask::AnyScene)},
+		
+		{"SCENE_RENDER_PASS_NONE",umath::to_integral(pragma::rendering::SceneRenderPass::None)},
+		{"SCENE_RENDER_PASS_WORLD",umath::to_integral(pragma::rendering::SceneRenderPass::World)},
+		{"SCENE_RENDER_PASS_VIEW",umath::to_integral(pragma::rendering::SceneRenderPass::View)},
+		{"SCENE_RENDER_PASS_SKY",umath::to_integral(pragma::rendering::SceneRenderPass::Skybox)},
+		{"SCENE_RENDER_PASS_WATER",umath::to_integral(pragma::rendering::SceneRenderPass::Water)},
+		{"SCENE_RENDER_PASS_COUNT",umath::to_integral(pragma::rendering::SceneRenderPass::Count)}
+	});
 
 	auto defRenderQueue = luabind::class_<pragma::rendering::RenderQueue>("RenderQueue");
 	defRenderQueue.def("WaitForCompletion",static_cast<void(*)(lua_State*,const pragma::rendering::RenderQueue&)>(

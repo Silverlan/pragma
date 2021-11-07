@@ -330,7 +330,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 			bspLeafNodes.reserve(entItWorld.GetCount());
 			for(auto *entWorld : entItWorld)
 			{
-				if(SceneRenderDesc::ShouldConsiderEntity(*static_cast<CBaseEntity*>(entWorld),scene,drawSceneInfo.renderFlags) == false)
+				if(SceneRenderDesc::ShouldConsiderEntity(*static_cast<CBaseEntity*>(entWorld),scene,drawSceneInfo.renderFlags,drawSceneInfo.renderMask) == false)
 					continue;
 				auto worldC = entWorld->GetComponent<pragma::CWorldComponent>();
 				auto &bspTree = worldC->GetBSPTree();
@@ -370,12 +370,12 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 				}
 			}
 
-			auto fGetRenderQueue = [&mainRenderQueue](RenderMode renderMode,bool translucent) -> pragma::rendering::RenderQueue* {
-				return (renderMode == RenderMode::World) ? mainRenderQueue.get() : nullptr;
+			auto fGetRenderQueue = [&mainRenderQueue](pragma::rendering::SceneRenderPass renderMode,bool translucent) -> pragma::rendering::RenderQueue* {
+				return (renderMode == pragma::rendering::SceneRenderPass::World) ? mainRenderQueue.get() : nullptr;
 			};
 			for(auto *pRenderComponent : pragma::CRenderComponent::GetEntitiesExemptFromOcclusionCulling())
 			{
-				if(SceneRenderDesc::ShouldConsiderEntity(static_cast<CBaseEntity&>(pRenderComponent->GetEntity()),scene,drawSceneInfo.renderFlags) == false || pRenderComponent->ShouldDrawShadow() == false)
+				if(SceneRenderDesc::ShouldConsiderEntity(static_cast<CBaseEntity&>(pRenderComponent->GetEntity()),scene,drawSceneInfo.renderFlags,drawSceneInfo.renderMask) == false || pRenderComponent->ShouldDrawShadow() == false)
 					continue;
 				SceneRenderDesc::AddRenderMeshesToRenderQueue(drawSceneInfo,*pRenderComponent,fGetRenderQueue,scene,*hCam,vp,nullptr);
 			}

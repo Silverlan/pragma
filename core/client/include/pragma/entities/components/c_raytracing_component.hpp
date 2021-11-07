@@ -52,7 +52,7 @@ namespace pragma
 
 				UseNormalMap = RenderModeWater<<1u
 			};
-			static_assert(umath::to_integral(RenderMode::Count) == 5);
+			static_assert(umath::to_integral(pragma::rendering::SceneRenderPass::Count) == 5);
 			// Bounds for the sub-mesh. w-component is unused.
 			Vector4 aabbMin = {};
 			Vector4 aabbMax = {};

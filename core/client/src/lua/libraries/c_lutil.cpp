@@ -89,7 +89,7 @@ int Lua::util::Client::create_muzzle_flash(lua_State *l)
 			return 0;
 		auto pRenderComponent = static_cast<CBaseEntity*>(&ent)->GetRenderComponent();
 		if(pRenderComponent)
-			pt->SetRenderMode(pRenderComponent->GetRenderMode());
+			pt->SetSceneRenderGroupPass(pRenderComponent->GetSceneRenderGroupPass());
 		pt->GetEntity().SetKeyValue("transform_with_emitter","1");
 		pt->SetRemoveOnComplete(true);
 		auto &entPt = pt->GetEntity();

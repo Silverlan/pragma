@@ -425,15 +425,6 @@ static void register_renderer_bindings(luabind::module_ &entsMod)
 		return renderer.GetHDRInfo().dsgHDRPostProcessing;
 	}));
 	defRaster.def("ReloadPresentationRenderTarget",&pragma::CRasterizationRendererComponent::ReloadPresentationRenderTarget);
-	defRaster.def("ScheduleMeshForRendering",static_cast<void(*)(
-		lua_State*,pragma::CRasterizationRendererComponent&,pragma::CSceneComponent&,uint32_t,pragma::ShaderGameWorldLightingPass&,Material&,BaseEntity&,ModelSubMesh&
-	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));
-	defRaster.def("ScheduleMeshForRendering",static_cast<void(*)(
-		lua_State*,pragma::CRasterizationRendererComponent&,pragma::CSceneComponent&,uint32_t,const std::string&,Material&,BaseEntity&,ModelSubMesh&
-	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));
-	defRaster.def("ScheduleMeshForRendering",static_cast<void(*)(
-		lua_State*,pragma::CRasterizationRendererComponent&,pragma::CSceneComponent&,uint32_t,::Material&,BaseEntity&,ModelSubMesh&
-	)>(&Lua::RasterizationRenderer::ScheduleMeshForRendering));
 	defRaster.def("RecordPrepass",&pragma::CRasterizationRendererComponent::RecordPrepass);
 	defRaster.def("RecordLightingPass",&pragma::CRasterizationRendererComponent::RecordLightingPass);
 	defRaster.def("ExecutePrepass",&pragma::CRasterizationRendererComponent::ExecutePrepass);
@@ -657,23 +648,20 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.def("Link",&pragma::CSceneComponent::Link,luabind::default_parameter_policy<3,true>{});
 	defCScene.def("Link",&pragma::CSceneComponent::Link);
 	// defCScene.def("BuildRenderQueue",&pragma::CSceneComponent::BuildRenderQueue);
-	defCScene.def("RenderPrepass",&Lua::Scene::RenderPrepass);
-	defCScene.def("Render",static_cast<void(*)(lua_State*,pragma::CSceneComponent&,::util::DrawSceneInfo&,RenderMode,RenderFlags)>(Lua::Scene::Render));
-	defCScene.def("Render",static_cast<void(*)(lua_State*,pragma::CSceneComponent&,::util::DrawSceneInfo&,RenderMode)>(Lua::Scene::Render));
 	defCScene.def("GetRenderer",static_cast<pragma::CRendererComponent*(pragma::CSceneComponent::*)()>(&pragma::CSceneComponent::GetRenderer));
 	defCScene.def("SetRenderer",&pragma::CSceneComponent::SetRenderer);
 	defCScene.def("GetSceneIndex",static_cast<pragma::CSceneComponent::SceneIndex(pragma::CSceneComponent::*)() const>(&pragma::CSceneComponent::GetSceneIndex));
 	defCScene.def("SetParticleSystemColorFactor",&pragma::CSceneComponent::SetParticleSystemColorFactor);
 	defCScene.def("GetParticleSystemColorFactor",&pragma::CSceneComponent::GetParticleSystemColorFactor,luabind::copy_policy<0>{});
-	defCScene.def("GetRenderParticleSystems",static_cast<std::vector<pragma::CParticleSystemComponent*>(*)(lua_State*,pragma::CSceneComponent&)>([](lua_State *l,pragma::CSceneComponent &scene) -> std::vector<pragma::CParticleSystemComponent*> {
-		return scene.GetSceneRenderDesc().GetCulledParticles();
-	}));
-	defCScene.def("GetRenderQueue",static_cast<pragma::rendering::RenderQueue*(*)(lua_State*,pragma::CSceneComponent&,RenderMode,bool)>([](lua_State *l,pragma::CSceneComponent &scene,RenderMode renderMode,bool translucent) -> pragma::rendering::RenderQueue* {
+	//defCScene.def("GetRenderParticleSystems",static_cast<std::vector<pragma::CParticleSystemComponent*>(*)(lua_State*,pragma::CSceneComponent&)>([](lua_State *l,pragma::CSceneComponent &scene) -> std::vector<pragma::CParticleSystemComponent*> {
+	//	return scene.GetSceneRenderDesc().GetCulledParticles();
+	//}));
+	defCScene.def("GetRenderQueue",+[](lua_State *l,pragma::CSceneComponent &scene,pragma::rendering::SceneRenderPass renderMode,bool translucent) -> pragma::rendering::RenderQueue* {
 		auto *renderQueue = scene.GetSceneRenderDesc().GetRenderQueue(renderMode,translucent);
 		if(renderQueue == nullptr)
 			return nullptr;
 		return renderQueue;
-	}));
+	});
 
 	// Texture indices for scene render target
 	defCScene.add_static_constant("RENDER_TARGET_TEXTURE_COLOR",0u);

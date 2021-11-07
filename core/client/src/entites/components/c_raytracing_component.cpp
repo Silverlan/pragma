@@ -122,20 +122,20 @@ void CRaytracingComponent::InitializeModelRaytracingBuffers()
 		return;
 	}
 	auto renderC = ent.GetComponent<CRenderComponent>();
-	auto renderMode = renderC.valid() ? renderC->GetRenderMode() : RenderMode::World;
+	auto renderMode = renderC.valid() ? renderC->GetSceneRenderGroupPass() : pragma::rendering::SceneRenderPass::World;
 	auto flags = SubMeshRenderInfoBufferData::Flags::None;
 	switch(renderMode)
 	{
-	case RenderMode::World:
+	case pragma::rendering::SceneRenderPass::World:
 		flags |= SubMeshRenderInfoBufferData::Flags::RenderModeWorld;
 		break;
-	case RenderMode::View:
+	case pragma::rendering::SceneRenderPass::View:
 		flags |= SubMeshRenderInfoBufferData::Flags::RenderModeView;
 		break;
-	case RenderMode::Skybox:
+	case pragma::rendering::SceneRenderPass::Skybox:
 		flags |= SubMeshRenderInfoBufferData::Flags::RenderModeSkybox;
 		break;
-	case RenderMode::Water:
+	case pragma::rendering::SceneRenderPass::Water:
 		flags |= SubMeshRenderInfoBufferData::Flags::RenderModeWater;
 		break;
 	}

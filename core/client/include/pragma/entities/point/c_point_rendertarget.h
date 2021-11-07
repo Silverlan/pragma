@@ -47,7 +47,7 @@ namespace pragma
 
 		void Spawn();
 		unsigned int GetTextureBuffer();
-		void Render(RenderMode renderMode);
+		void Render(pragma::rendering::SceneRenderPass renderMode);
 
 		std::unique_ptr<Texture> m_texture = nullptr;
 		Material *m_matRender = nullptr;

@@ -49,7 +49,7 @@ void CViewBodyComponent::Initialize()
 	auto pRenderComponent = ent.AddComponent<CRenderComponent>();
 	if(pRenderComponent.valid())
 	{
-		pRenderComponent->SetRenderMode(RenderMode::View);
+		pRenderComponent->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::View);
 		pRenderComponent->SetCastShadows(false);
 	}
 	ent.AddComponent<CAnimatedComponent>();

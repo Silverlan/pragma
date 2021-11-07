@@ -40,7 +40,7 @@ extern DLLCLIENT CGame *c_game;
 
 using namespace pragma::rendering;
 
-void pragma::CRasterizationRendererComponent::RenderParticleSystems(const util::DrawSceneInfo &drawSceneInfo,std::vector<pragma::CParticleSystemComponent*> &particles,RenderMode renderMode,Bool bloom,std::vector<pragma::CParticleSystemComponent*> *bloomParticles)
+void pragma::CRasterizationRendererComponent::RenderParticleSystems(const util::DrawSceneInfo &drawSceneInfo,std::vector<pragma::CParticleSystemComponent*> &particles,pragma::rendering::SceneRenderPass renderMode,Bool bloom,std::vector<pragma::CParticleSystemComponent*> *bloomParticles)
 {
 	auto depthOnly = umath::is_flag_set(drawSceneInfo.renderFlags,FRender::ParticleDepth);
 	if((depthOnly && bloom) || drawSceneInfo.scene.expired())
@@ -53,7 +53,7 @@ void pragma::CRasterizationRendererComponent::RenderParticleSystems(const util::
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	for(auto *particle : particles)
 	{
-		if(particle != nullptr && particle->IsActive() == true && particle->GetRenderMode() == renderMode && particle->GetParent() == nullptr)
+		if(particle != nullptr && particle->IsActive() == true && particle->GetSceneRenderGroupPass() == renderMode && particle->GetParent() == nullptr)
 		{
 			if(bFirst == true)
 			{

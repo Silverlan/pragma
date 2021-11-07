@@ -122,13 +122,13 @@ void CVehicleComponent::ClearDriver()
 		auto plComponent = entDriver->GetPlayerComponent();
 		if(plComponent->IsLocalPlayer())
 		{
-			c_game->EnableRenderMode(RenderMode::View);
+			c_game->EnableRenderMode(pragma::rendering::SceneRenderPass::View);
 			auto *vb = c_game->GetViewBody();
 			if(vb != nullptr)
 			{
 				auto pRenderComponent = static_cast<CBaseEntity&>(vb->GetEntity()).GetRenderComponent();
 				if(pRenderComponent)
-					pRenderComponent->SetRenderMode(RenderMode::View);
+					pRenderComponent->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::View);
 			}
 
 			plComponent->SetObserverTarget(nullptr);
@@ -145,13 +145,13 @@ void CVehicleComponent::SetDriver(BaseEntity *ent)
 	BaseVehicleComponent::SetDriver(ent);
 	if(!ent->IsPlayer() || !ent->GetPlayerComponent()->IsLocalPlayer())
 		return;
-	c_game->DisableRenderMode(RenderMode::View);
+	c_game->DisableRenderMode(pragma::rendering::SceneRenderPass::View);
 	auto *vb = c_game->GetViewBody();
 	if(vb != nullptr)
 	{
 		auto pRenderComponent = static_cast<CBaseEntity&>(vb->GetEntity()).GetRenderComponent();
 		if(pRenderComponent)
-			pRenderComponent->SetRenderMode(RenderMode::None);
+			pRenderComponent->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::None);
 	}
 	auto plComponent = ent->GetPlayerComponent();
 	plComponent->SetObserverMode(OBSERVERMODE::THIRDPERSON);

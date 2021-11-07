@@ -31,7 +31,7 @@ using namespace pragma;
 LINK_ENTITY_TO_CLASS(func_water,CFuncWater);
 
 extern DLLCLIENT CGame *c_game;
-
+#pragma optimize("",off)
 static std::vector<CWaterComponent*> s_waterEntities = {};
 REGISTER_CONVAR_CALLBACK_CL(cl_water_surface_simulation_spacing,[](NetworkState*,ConVar*,int,int val) {
 	for(auto *entWater : s_waterEntities)
@@ -99,7 +99,7 @@ void CWaterComponent::OnEntitySpawn()
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(pRenderComponent)
 	{
-		pRenderComponent->SetRenderMode(RenderMode::Water);
+		pRenderComponent->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::Water);
 		// pRenderComponent->GetRenderModeProperty()->SetLocked(true);
 	}
 
@@ -314,3 +314,4 @@ void CFuncWater::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CWaterComponent>();
 }
+#pragma optimize("",on)

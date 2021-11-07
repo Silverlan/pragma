@@ -177,6 +177,12 @@ CGame::CGame(NetworkState *state)
 	umath::set_flag(m_stateFlags,StateFlags::PrepassShaderPipelineReloadRequired,false);
 	umath::set_flag(m_stateFlags,StateFlags::GameWorldShaderPipelineReloadRequired,false);
 
+	m_customRenderMasks["world"] = pragma::rendering::RenderMask::WorldBit;
+	m_customRenderMasks["view"] = pragma::rendering::RenderMask::ViewBit;
+	m_customRenderMasks["sky"] = pragma::rendering::RenderMask::SkyBit;
+	m_customRenderMasks["water"] = pragma::rendering::RenderMask::WaterBit;
+	m_customRenderMasks["depth_prepass"] = pragma::rendering::RenderMask::DepthPrepassBit;
+
 	RegisterCallback<void,CGame*>("OnGameEnd");
 	RegisterCallback<void,pragma::CLightDirectionalComponent*,pragma::CLightDirectionalComponent*>("OnEnvironmentLightSourceChanged");
 	RegisterCallback<void,std::reference_wrapper<const util::DrawSceneInfo>>("Render");
@@ -593,10 +599,10 @@ pragma::CParticleSystemComponent *CGame::CreateParticleTracer(const Vector3 &sta
 	return particle;
 }
 
-void CGame::SetRenderModeEnabled(RenderMode renderMode,bool bEnabled) {m_renderModesEnabled[umath::to_integral(renderMode)] = bEnabled;}
-void CGame::EnableRenderMode(RenderMode renderMode) {SetRenderModeEnabled(renderMode,true);}
-void CGame::DisableRenderMode(RenderMode renderMode) {SetRenderModeEnabled(renderMode,false);}
-bool CGame::IsRenderModeEnabled(RenderMode renderMode) const {return m_renderModesEnabled[umath::to_integral(renderMode)];}
+void CGame::SetRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode,bool bEnabled) {m_renderModesEnabled[umath::to_integral(renderMode)] = bEnabled;}
+void CGame::EnableRenderMode(pragma::rendering::SceneRenderPass renderMode) {SetRenderModeEnabled(renderMode,true);}
+void CGame::DisableRenderMode(pragma::rendering::SceneRenderPass renderMode) {SetRenderModeEnabled(renderMode,false);}
+bool CGame::IsRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode) const {return m_renderModesEnabled[umath::to_integral(renderMode)];}
 
 Material *CGame::GetLoadMaterial() {return m_matLoad.get();}
 void CGame::OnEntityCreated(BaseEntity *ent)
@@ -1426,6 +1432,31 @@ uint16_t CGame::GetLatency() const
 	if(cl == nullptr)
 		return 0;
 	return cl->GetLatency();
+}
+
+pragma::rendering::RenderMask CGame::RegisterCustomRenderMask(const std::string &name)
+{
+	auto mask = GetRenderMask(name);
+	if(mask.has_value())
+		return *mask;
+	auto id = m_nextCustomRenderMaskIndex;
+	m_customRenderMasks.insert(std::make_pair(name,id));
+	m_nextCustomRenderMaskIndex = static_cast<decltype(m_nextCustomRenderMaskIndex)>(umath::to_integral(m_nextCustomRenderMaskIndex) +1);
+	return id;
+}
+std::optional<pragma::rendering::RenderMask> CGame::GetRenderMask(const std::string &name)
+{
+	auto it = m_customRenderMasks.find(name);
+	return (it != m_customRenderMasks.end()) ? it->second : std::optional<pragma::rendering::RenderMask>{};
+}
+const std::string *CGame::FindRenderMaskName(pragma::rendering::RenderMask mask) const
+{
+	auto it = std::find_if(m_customRenderMasks.begin(),m_customRenderMasks.end(),[mask](const std::pair<std::string,pragma::rendering::RenderMask> &pair) {
+		return pair.second == mask;
+	});
+	if(it == m_customRenderMasks.end())
+		return nullptr;
+	return &it->first;
 }
 
 void CGame::SendUserInput()

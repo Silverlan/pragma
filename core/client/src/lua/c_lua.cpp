@@ -18,6 +18,7 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/classes/lentity.h>
 #include <pragma/lua/classes/ldef_entity.h>
 #include <mathutil/glmutil.h>
@@ -148,6 +149,24 @@ void CGame::RegisterLua()
 		})},
 		{"is_default_game_render_enabled",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
 			Lua::PushBool(l,c_game->IsDefaultGameRenderEnabled());
+			return 1;
+		})},
+
+		{"get_render_mask",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto mask = c_game->GetRenderMask(Lua::CheckString(l,1));
+			Lua::Push(l,mask);
+			return 1;
+		})},
+		{"find_render_mask_name",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto *name = c_game->FindRenderMaskName(Lua::Check<pragma::rendering::RenderMask>(l,1));
+			if(!name)
+				return 0;
+			Lua::PushString(l,*name);
+			return 1;
+		})},
+		{"register_render_mask",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
+			auto mask = c_game->RegisterCustomRenderMask(Lua::CheckString(l,1));
+			Lua::Push(l,mask);
 			return 1;
 		})}
 		

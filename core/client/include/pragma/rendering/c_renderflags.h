@@ -32,4 +32,12 @@ enum class FRender : uint32_t
 };
 REGISTER_BASIC_BITWISE_OPERATORS(FRender)
 
+enum class RenderFlags : uint8_t
+{
+	None = 0u,
+	Reflection = 1u,
+	RenderAs3DSky = Reflection<<1u
+};
+REGISTER_BASIC_BITWISE_OPERATORS(RenderFlags)
+
 #endif

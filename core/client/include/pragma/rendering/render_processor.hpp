@@ -30,7 +30,6 @@ namespace pragma
 	class ShaderTextured3DBase;
 	enum class ShaderGameWorldPipeline : uint32_t;
 };
-enum class DLLCLIENT RenderMode : uint32_t;
 using MaterialIndex = uint32_t;
 using EntityIndex = uint32_t;
 enum class RenderFlags : uint8_t;

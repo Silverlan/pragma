@@ -89,7 +89,7 @@ void CWeaponComponent::UpdateViewModel()
 		if(m_viewModel->empty() == true)
 		{
 			if(pRenderComponentVm)
-				pRenderComponentVm->SetRenderMode(RenderMode::None);
+				pRenderComponentVm->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::None);
 			vm->SetViewModelOffset({});
 			return;
 		}
@@ -97,7 +97,7 @@ void CWeaponComponent::UpdateViewModel()
 			mdlComponentVm->SetModel(*m_viewModel);
 	}
 	if(pRenderComponentVm)
-		pRenderComponentVm->SetRenderMode(RenderMode::View);
+		pRenderComponentVm->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::View);
 	vm->SetViewModelOffset(GetViewModelOffset());
 	vm->SetViewFOV(GetViewFOV());
 }
@@ -128,10 +128,10 @@ void CWeaponComponent::Initialize()
 		auto &shouldDrawData = static_cast<CEShouldDraw&>(evData.get());
 		auto &ent = static_cast<CBaseEntity&>(GetEntity());
 		auto pRenderComponent = ent.GetComponent<pragma::CRenderComponent>();
-		auto renderMode = pRenderComponent.valid() ? pRenderComponent->GetRenderMode() : RenderMode::None;
-		if(renderMode != RenderMode::None)
+		auto renderMode = pRenderComponent.valid() ? pRenderComponent->GetSceneRenderGroupPass() : pragma::rendering::SceneRenderPass::None;
+		if(renderMode != pragma::rendering::SceneRenderPass::None)
 		{
-			if(renderMode == RenderMode::View)
+			if(renderMode == pragma::rendering::SceneRenderPass::View)
 			{
 				auto *pl = c_game->GetLocalPlayer();
 				auto *plComponent = static_cast<CPlayerComponent*>(pl->GetEntity().GetPlayerComponent().get());
@@ -215,7 +215,14 @@ void CWeaponComponent::UpdateWorldModel()
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(!pRenderComponent)
 		return;
-	pRenderComponent->SetRenderMode(IsInFirstPersonMode() ? ((umath::is_flag_set(m_stateFlags,StateFlags::HideWorldModelInFirstPerson) == true) ? RenderMode::None : RenderMode::View) : RenderMode::World);
+	pRenderComponent->SetSceneRenderGroupPass(
+		IsInFirstPersonMode() ?
+			((umath::is_flag_set(m_stateFlags,StateFlags::HideWorldModelInFirstPerson) == true)
+				? pragma::rendering::SceneRenderPass::None
+				: pragma::rendering::SceneRenderPass::View
+			)
+		: pragma::rendering::SceneRenderPass::World
+	);
 }
 
 void CWeaponComponent::SetViewModel(const std::string &mdl)

@@ -39,11 +39,6 @@ uint32_t pragma::rendering::DepthStageRenderProcessor::Render(const pragma::rend
 	return BaseRenderProcessor::Render(renderQueue,true,optStats,worldRenderQueueIndex);
 }
 
-void RenderSystem::RenderPrepass(const util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode)
-{
-	// TODO: Remove me
-}
-
 void pragma::rendering::DepthStageRenderProcessor::BindLight(CLightComponent &light,uint32_t layerId)
 {
 	m_shaderProcessor.RecordBindLight(light,layerId);

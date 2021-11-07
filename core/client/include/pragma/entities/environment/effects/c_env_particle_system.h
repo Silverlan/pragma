@@ -182,8 +182,10 @@ namespace pragma
 		float GetStaticWorldScale() const;
 		void SetStaticWorldScale(float scale);
 		bool IsStatic() const;
-		void SetRenderMode(RenderMode mode);
-		RenderMode GetRenderMode() const;
+		void SetRenderGroups(pragma::rendering::RenderGroup mode);
+		pragma::rendering::RenderGroup GetRenderGroups() const;
+		pragma::rendering::SceneRenderPass GetSceneRenderGroupPass() const;
+		void SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass pass);
 		bool IsRendererBufferUpdateRequired() const;
 		CallbackHandle AddRenderCallback(const std::function<void(void)> &cb);
 		void AddRenderCallback(const CallbackHandle &hCb);
@@ -346,7 +348,7 @@ namespace pragma
 		std::vector<std::size_t> m_bufferIndicesToParticleIndices;
 		bool FindFreeParticle(uint32_t *idx);
 
-		RenderMode m_renderMode = RenderMode::World;
+		pragma::rendering::RenderGroup m_renderMode = pragma::rendering::RenderGroup::WorldBit;
 		std::string m_particleSystemName;
 		Quat m_particleRot = uquat::identity();
 		uint32_t m_idxLast = 0u;

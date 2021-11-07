@@ -15,7 +15,7 @@
 class CALSound;
 class Engine;
 class NetPacket;
-enum class RenderMode : uint32_t;
+namespace pragma::rendering {enum class RenderMask : uint64_t; using RenderGroup = RenderMask;};
 class RenderInstance;
 class RenderObject;
 class Material;

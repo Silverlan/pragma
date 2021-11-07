@@ -86,13 +86,13 @@ util::EventReply CLightSpotVolComponent::HandleEvent(ComponentEventId eventId,Co
 	{
 		auto pRenderComponent = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
 		if(pRenderComponent)
-			pRenderComponent->SetRenderMode(RenderMode::World);
+			pRenderComponent->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::World);
 	}
 	else if(eventId == BaseToggleComponent::EVENT_ON_TURN_OFF)
 	{
 		auto pRenderComponent = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
 		if(pRenderComponent)
-			pRenderComponent->SetRenderMode(RenderMode::None);
+			pRenderComponent->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::None);
 	}
 	return util::EventReply::Unhandled;
 }

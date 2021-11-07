@@ -76,7 +76,7 @@ void CRenderComponent::RegisterEvents(pragma::EntityComponentManager &componentM
 	EVENT_ON_DEPTH_BIAS_CHANGED = componentManager.RegisterEvent("ON_DEPTH_BIAS_CHANGED");
 }
 CRenderComponent::CRenderComponent(BaseEntity &ent)
-	: BaseRenderComponent(ent),m_renderMode{util::TEnumProperty<RenderMode>::Create(RenderMode::World)}
+	: BaseRenderComponent(ent),m_renderGroups{util::TEnumProperty<pragma::rendering::RenderGroup>::Create(pragma::rendering::RenderGroup::WorldBit)}
 {}
 void CRenderComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CRenderComponent::InitializeBuffers()
@@ -620,14 +620,45 @@ void CRenderComponent::UpdateRenderDataMT(const std::shared_ptr<prosper::IPrimar
 	}
 }
 
-void CRenderComponent::SetRenderMode(RenderMode mode)
+bool CRenderComponent::AddToRenderGroup(const std::string &name)
 {
-	if(mode == *m_renderMode)
+	auto mask = static_cast<CGame*>(GetEntity().GetNetworkState()->GetGameState())->GetRenderMask(name);
+	if(!mask.has_value())
+		return false;
+	AddToRenderGroup(*mask);
+	return true;
+}
+pragma::rendering::SceneRenderPass CRenderComponent::GetSceneRenderGroupPass() const
+{
+	if(IsInRenderGroup(pragma::rendering::RenderGroup::WorldBit))
+		return pragma::rendering::SceneRenderPass::World;
+	if(IsInRenderGroup(pragma::rendering::RenderGroup::ViewBit))
+		return pragma::rendering::SceneRenderPass::View;
+	if(IsInRenderGroup(pragma::rendering::RenderGroup::SkyBit))
+		return pragma::rendering::SceneRenderPass::Skybox;
+	if(IsInRenderGroup(pragma::rendering::RenderGroup::WaterBit))
+		return pragma::rendering::SceneRenderPass::Water;
+	static_assert(umath::to_integral(pragma::rendering::SceneRenderPass::Count) == 5);
+	return pragma::rendering::SceneRenderPass::None;
+}
+bool CRenderComponent::IsInRenderGroup(pragma::rendering::RenderGroup group) const {return umath::is_flag_set(GetRenderGroups(),group);}
+void CRenderComponent::SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass pass)
+{
+	RemoveFromSceneRenderGroups();
+	AddToRenderGroup(pragma::rendering::scene_render_pass_to_render_mask(pass));
+}
+void CRenderComponent::AddToRenderGroup(pragma::rendering::RenderGroup group) {SetRenderGroups(GetRenderGroups() | group);}
+void CRenderComponent::RemoveFromRenderGroup(pragma::rendering::RenderGroup group) {SetRenderGroups(GetRenderGroups() &~group);}
+
+void CRenderComponent::RemoveFromSceneRenderGroups() {RemoveFromRenderGroup(rendering::RenderGroup::AnyScene);}
+void CRenderComponent::SetRenderGroups(pragma::rendering::RenderGroup mode)
+{
+	if(mode == *m_renderGroups)
 		return;
-	*m_renderMode = mode;
+	*m_renderGroups = mode;
 
 	auto it = std::find(s_ocExemptEntities.begin(),s_ocExemptEntities.end(),this);
-	if(mode == RenderMode::View)
+	if(umath::is_flag_set(mode,rendering::RenderGroup::ViewBit))
 	{
 		if(it == s_ocExemptEntities.end())
 			s_ocExemptEntities.push_back(this);
@@ -635,7 +666,7 @@ void CRenderComponent::SetRenderMode(RenderMode mode)
 	else if(it != s_ocExemptEntities.end() && IsExemptFromOcclusionCulling() == false)
 		s_ocExemptEntities.erase(it);
 
-	if(mode == RenderMode::None)
+	if((mode &rendering::RenderGroup::AnyScene) == rendering::RenderGroup::None)
 		ClearRenderBuffers();
 
 	UpdateShouldDrawState();
@@ -681,8 +712,8 @@ void CRenderComponent::ClearRenderBuffers()
 	m_renderBuffer = nullptr;
 	m_renderDescSetGroup = nullptr;
 }
-RenderMode CRenderComponent::GetRenderMode() const {return *m_renderMode;}
-const util::PEnumProperty<RenderMode> &CRenderComponent::GetRenderModeProperty() const {return m_renderMode;}
+pragma::rendering::RenderGroup CRenderComponent::GetRenderGroups() const {return *m_renderGroups;}
+const util::PEnumProperty<pragma::rendering::RenderGroup> &CRenderComponent::GetRenderGroupsProperty() const {return m_renderGroups;}
 bool CRenderComponent::ShouldDraw() const {return umath::is_flag_set(m_stateFlags,StateFlags::ShouldDraw);}
 bool CRenderComponent::ShouldDrawShadow() const
 {

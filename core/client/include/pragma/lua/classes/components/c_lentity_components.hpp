@@ -69,8 +69,6 @@ namespace Lua
 		DLLCLIENT void register_class(lua_State *l,luabind::module_ &entsMod);
 		DLLCLIENT void GetTransformationMatrix(lua_State *l,pragma::CRenderComponent &hEnt);
 		DLLCLIENT void RenderModel(lua_State *l,pragma::CRenderComponent &hEnt);
-		DLLCLIENT void SetRenderMode(lua_State *l,pragma::CRenderComponent &hEnt,unsigned int mode);
-		DLLCLIENT void GetRenderMode(lua_State *l,pragma::CRenderComponent &hEnt);
 		DLLCLIENT void GetLocalRenderBounds(lua_State *l,pragma::CRenderComponent &hEnt);
 		DLLCLIENT void GetLocalRenderSphereBounds(lua_State *l,pragma::CRenderComponent &hEnt);
 		DLLCLIENT void GetAbsoluteRenderBounds(lua_State *l,pragma::CRenderComponent &hEnt);

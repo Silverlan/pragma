@@ -86,7 +86,7 @@ void CViewModelComponent::Initialize()
 	auto pRenderComponent = ent.AddComponent<pragma::CRenderComponent>();
 	if(pRenderComponent.valid())
 	{
-		pRenderComponent->SetRenderMode(RenderMode::None);
+		pRenderComponent->RemoveFromSceneRenderGroups();
 		pRenderComponent->SetCastShadows(false);
 	}
 	auto pMdlComponent = ent.AddComponent<CModelComponent>();

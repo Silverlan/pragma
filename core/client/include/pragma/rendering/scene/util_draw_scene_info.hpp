@@ -11,6 +11,7 @@
 #include "pragma/rendering/c_renderflags.h"
 #include "pragma/rendering/c_settings.hpp"
 #include "pragma/rendering/render_stats.hpp"
+#include "pragma/rendering/c_rendermode.h"
 #include <sharedutils/util_shared_handle.hpp>
 #include <memory>
 #include <optional>
@@ -67,6 +68,7 @@ namespace util
 		std::optional<::pragma::rendering::ToneMapping> toneMapping {};
 		std::optional<Vector4> clipPlane {};
 		std::optional<Vector3> pvsOrigin {};
+		::pragma::rendering::RenderMask renderMask = ::pragma::rendering::RenderMask::AnyScene &~::pragma::rendering::RenderMask::WaterBit;
 		
 		std::function<bool(CBaseEntity&)> prepassFilter = nullptr;
 		std::function<bool(CBaseEntity&)> renderFilter = nullptr;

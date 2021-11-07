@@ -21,6 +21,7 @@
 #include "pragma/entities/components/renderers/rasterization/culled_mesh_data.hpp"
 #include "pragma/entities/components/renderers/c_rasterization_renderer_component.hpp"
 #include "pragma/entities/components/renderers/c_renderer_component.hpp"
+#include "pragma/entities/components/c_scene_component.hpp"
 #include "pragma/model/c_modelmesh.h"
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/classes/ldef_entity.h>
@@ -45,37 +46,6 @@ std::shared_ptr<WorldEnvironment> Lua::Scene::GetWorldEnvironment(lua_State *l,p
 		return nullptr;
 	return worldEnv->shared_from_this();
 }
-void Lua::Scene::RenderPrepass(lua_State *l,pragma::CSceneComponent &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode)
-{
-	auto *renderer = scene.GetRenderer();
-	auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent>{};
-	if(raster.expired())
-		return;
-	auto &shaderPrepass = raster->GetPrepass().GetShader();
-	auto curScene = drawSceneInfo.scene;
-	drawSceneInfo.scene = scene.GetHandle<pragma::CSceneComponent>();
-	shaderPrepass.BindSceneCamera(scene,*raster,false);
-	RenderSystem::RenderPrepass(drawSceneInfo,renderMode);
-	drawSceneInfo.scene = curScene;
-}
-void Lua::Scene::Render(lua_State *l,pragma::CSceneComponent &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode,RenderFlags renderFlags)
-{
-	auto &cam = scene.GetActiveCamera();
-	auto *renderInfo = scene.GetSceneRenderDesc().GetRenderInfo(renderMode);
-	if(renderInfo != nullptr && cam.valid())
-	{
-		auto curScene = drawSceneInfo.scene;
-		drawSceneInfo.scene = scene.GetHandle<pragma::CSceneComponent>();
-
-		RenderSystem::Render(drawSceneInfo,renderMode,renderFlags);
-		auto *renderInfo = scene.GetSceneRenderDesc().GetRenderInfo(renderMode);
-		if(renderInfo != nullptr && cam.valid())
-			RenderSystem::Render(drawSceneInfo,*cam,renderMode,renderFlags,renderInfo->translucentMeshes);
-
-		drawSceneInfo.scene = curScene;
-	}
-}
-void Lua::Scene::Render(lua_State *l,pragma::CSceneComponent &scene,::util::DrawSceneInfo &drawSceneInfo,RenderMode renderMode) {Render(l,scene,drawSceneInfo,renderMode,RenderFlags::None);}
 
 ////////////////////////////////
 
@@ -92,52 +62,6 @@ std::shared_ptr<prosper::RenderTarget> Lua::RasterizationRenderer::GetRenderTarg
 	return renderer.GetHDRInfo().sceneRenderTarget;
 }
 
-void Lua::RasterizationRenderer::ScheduleMeshForRendering(
-	lua_State *l,pragma::CRasterizationRendererComponent &renderer,pragma::CSceneComponent &scene,uint32_t renderMode,pragma::ShaderGameWorldLightingPass &shader,Material &mat,BaseEntity &ent,ModelSubMesh &mesh
-)
-{
-	auto *meshData = scene.GetSceneRenderDesc().GetRenderInfo(static_cast<RenderMode>(renderMode));
-	if(meshData == nullptr)
-		return;
-	auto itShader = std::find_if(meshData->containers.begin(),meshData->containers.end(),[&shader](const std::unique_ptr<ShaderMeshContainer> &c) -> bool {
-		return c->shader.get() == &shader;
-		});
-	if(itShader == meshData->containers.end())
-	{
-		meshData->containers.emplace_back(std::make_unique<ShaderMeshContainer>(&shader));
-		itShader = meshData->containers.end() -1;
-		(*itShader)->shader = shader.GetHandle();
-	}
-
-	auto &shaderC = **itShader;
-	auto itMat = std::find_if(shaderC.containers.begin(),shaderC.containers.end(),[&mat](const std::unique_ptr<RenderSystem::MaterialMeshContainer> &c) {
-		return c->material == &mat;
-		});
-	if(itMat == shaderC.containers.end())
-	{
-		shaderC.containers.emplace_back(std::make_unique<RenderSystem::MaterialMeshContainer>(&mat));
-		itMat = shaderC.containers.end() -1;
-	}
-
-	auto &matC = **itMat;
-	auto *cent = static_cast<CBaseEntity*>(&ent);
-	auto itEnt = matC.containers.find(cent);
-	if(itEnt == matC.containers.end())
-		itEnt = matC.containers.insert(std::make_pair(cent,EntityMeshInfo{cent})).first;
-
-	auto &entC = itEnt->second;
-	entC.meshes.push_back(&static_cast<CModelSubMesh&>(mesh));
-}
-void Lua::RasterizationRenderer::ScheduleMeshForRendering(
-	lua_State *l,pragma::CRasterizationRendererComponent &renderer,pragma::CSceneComponent &scene,uint32_t renderMode,const std::string &shaderName,Material &mat,BaseEntity &ent,ModelSubMesh &mesh
-)
-{
-	auto hShader = c_engine->GetShader(shaderName);
-	auto *shader = hShader.valid() ? dynamic_cast<pragma::ShaderGameWorldLightingPass*>(hShader.get()) : nullptr;
-	if(shader == nullptr)
-		return;
-	ScheduleMeshForRendering(l,renderer,scene,renderMode,*shader,mat,ent,mesh);
-}
 bool Lua::RasterizationRenderer::BeginRenderPass(lua_State *l,pragma::CRasterizationRendererComponent &renderer,const ::util::DrawSceneInfo &drawSceneInfo)
 {
 	return renderer.BeginRenderPass(drawSceneInfo);
@@ -145,15 +69,4 @@ bool Lua::RasterizationRenderer::BeginRenderPass(lua_State *l,pragma::CRasteriza
 bool Lua::RasterizationRenderer::BeginRenderPass(lua_State *l,pragma::CRasterizationRendererComponent &renderer,const ::util::DrawSceneInfo &drawSceneInfo,prosper::IRenderPass &rp)
 {
 	return renderer.BeginRenderPass(drawSceneInfo,&rp);
-}
-void Lua::RasterizationRenderer::ScheduleMeshForRendering(
-	lua_State *l,pragma::CRasterizationRendererComponent &renderer,pragma::CSceneComponent &scene,uint32_t renderMode,::Material &mat,BaseEntity &ent,ModelSubMesh &mesh
-)
-{
-	auto *shaderInfo = mat.GetShaderInfo();
-	auto *shader = shaderInfo ? static_cast<::util::WeakHandle<prosper::Shader>*>(shaderInfo->GetShader().get()) : nullptr;
-	if(shader == nullptr || shader->expired() || (*shader)->GetBaseTypeHashCode() != pragma::ShaderGameWorldLightingPass::HASH_TYPE)
-		return;
-	auto &shaderTex = static_cast<pragma::ShaderGameWorldLightingPass&>(**shader);
-	ScheduleMeshForRendering(l,renderer,scene,renderMode,shaderTex,mat,ent,mesh);
 }

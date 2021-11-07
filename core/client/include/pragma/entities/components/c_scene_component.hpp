@@ -11,11 +11,13 @@
 #include "pragma/clientdefinitions.h"
 #include "pragma/entities/c_baseentity.h"
 #include "pragma/rendering/shaders/world/c_shader_textured_uniform_data.hpp"
+#include "pragma/rendering/c_rendermode.h"
 #include "pragma/rendering/c_renderflags.h"
 #include "pragma/rendering/render_mesh_collection_handler.hpp"
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <shader/prosper_descriptor_array_manager.hpp>
 #include <mathutil/plane.hpp>
+#include <cinttypes>
 
 namespace pragma
 {
@@ -36,6 +38,8 @@ namespace pragma
 };
 template<class T>
 	class OcclusionOctree;
+
+namespace util {struct DrawSceneInfo;};
 class DLLCLIENT SceneRenderDesc
 {
 public:
@@ -65,7 +69,7 @@ public:
 	// Note: All arguments have to be thread safe for the duration of the render (except vp)
 	static void AddRenderMeshesToRenderQueue(
 		const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,
-		const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
+		const std::function<pragma::rendering::RenderQueue*(pragma::rendering::SceneRenderPass,bool)> &getRenderQueue,
 		const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,
 		int32_t lodBias=0,const std::function<void(pragma::rendering::RenderQueue&,const pragma::rendering::RenderQueueItem&)> &fOptInsertItemToQueue=nullptr,
 		pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags=static_cast<pragma::GameShaderSpecializationConstantFlag>(0)
@@ -73,13 +77,13 @@ public:
 	// Note: All arguments have to be thread safe for the duration of the render (except vp)
 	static void CollectRenderMeshesFromOctree(
 		const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
-		const std::function<pragma::rendering::RenderQueue*(RenderMode,bool)> &getRenderQueue,
+		const std::function<pragma::rendering::RenderQueue*(pragma::rendering::SceneRenderPass,bool)> &getRenderQueue,
 		const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,const std::vector<util::BSPTree*> *bspTrees=nullptr,const std::vector<util::BSPTree::Node*> *bspLeafNodes=nullptr,
 		int32_t lodBias=0,
 		const std::function<bool(CBaseEntity&,const pragma::CSceneComponent&,FRender)> &shouldConsiderEntity=nullptr,
 		pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags=static_cast<pragma::GameShaderSpecializationConstantFlag>(0)
 	);
-	static bool ShouldConsiderEntity(CBaseEntity &ent,const pragma::CSceneComponent &scene,FRender renderFlags);
+	static bool ShouldConsiderEntity(CBaseEntity &ent,const pragma::CSceneComponent &scene,FRender renderFlags,pragma::rendering::RenderMask renderMask);
 	static bool ShouldCull(CBaseEntity &ent,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);
 	static bool ShouldCull(pragma::CRenderComponent &renderC,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);
 	static bool ShouldCull(pragma::CRenderComponent &renderC,pragma::RenderMeshIndex meshIdx,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);
@@ -100,22 +104,12 @@ public:
 
 	bool IsWorldMeshVisible(uint32_t worldRenderQueueIndex,pragma::RenderMeshIndex meshIdx) const;
 
-	// Culled objects
-	const std::vector<pragma::OcclusionMeshInfo> &GetCulledMeshes() const;
-	std::vector<pragma::OcclusionMeshInfo> &GetCulledMeshes();
-	const std::vector<pragma::CParticleSystemComponent*> &GetCulledParticles() const;
-	std::vector<pragma::CParticleSystemComponent*> &GetCulledParticles();
-
-	pragma::rendering::RenderMeshCollectionHandler &GetRenderMeshCollectionHandler();
-	const pragma::rendering::RenderMeshCollectionHandler &GetRenderMeshCollectionHandler() const;
-	
 	void WaitForWorldRenderQueues() const;
 
-	RenderQueueId GetRenderQueueId(RenderMode renderMode,bool translucent) const;
-	pragma::rendering::RenderQueue *GetRenderQueue(RenderMode renderMode,bool translucent);
-	const pragma::rendering::RenderQueue *GetRenderQueue(RenderMode renderMode,bool translucent) const;
+	RenderQueueId GetRenderQueueId(pragma::rendering::SceneRenderPass renderMode,bool translucent) const;
+	pragma::rendering::RenderQueue *GetRenderQueue(pragma::rendering::SceneRenderPass renderMode,bool translucent);
+	const pragma::rendering::RenderQueue *GetRenderQueue(pragma::rendering::SceneRenderPass renderMode,bool translucent) const;
 	const std::vector<std::shared_ptr<const pragma::rendering::RenderQueue>> &GetWorldRenderQueues() const;
-	pragma::rendering::CulledMeshData *GetRenderInfo(RenderMode mode) const;
 private:
 	void AddRenderMeshesToRenderQueue(
 		const util::DrawSceneInfo &drawSceneInfo,pragma::CRenderComponent &renderC,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,
@@ -129,7 +123,6 @@ private:
 
 	// TODO: Remove these, they're obsolete
 	std::shared_ptr<pragma::OcclusionCullingHandler> m_occlusionCullingHandler = nullptr;
-	pragma::rendering::RenderMeshCollectionHandler m_renderMeshCollectionHandler = {};
 
 	std::vector<WorldMeshVisibility> m_worldMeshVisibility;
 	std::array<std::shared_ptr<pragma::rendering::RenderQueue>,umath::to_integral(RenderQueueId::Count)> m_renderQueues;
@@ -138,18 +131,6 @@ private:
 
 	pragma::CSceneComponent &m_scene;
 };
-
-#pragma warning(push)
-#pragma warning(disable : 4251)
-struct DLLCLIENT ShaderMeshContainer
-{
-	ShaderMeshContainer(pragma::ShaderGameWorldLightingPass *shader);
-	ShaderMeshContainer(ShaderMeshContainer&)=delete;
-	ShaderMeshContainer &operator=(const ShaderMeshContainer &other)=delete;
-	::util::WeakHandle<prosper::Shader> shader = {};
-	std::vector<std::unique_ptr<RenderSystem::MaterialMeshContainer>> containers;
-};
-#pragma warning(pop)
 
 class WorldEnvironment;
 struct RenderPassStats;

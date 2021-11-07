@@ -109,7 +109,7 @@ void pragma::CRasterizationRendererComponent::RenderGlowObjects(const util::Draw
 #endif
 }
 
-void pragma::CRasterizationRendererComponent::RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::CSceneComponent &scene,RenderMode renderMode)
+void pragma::CRasterizationRendererComponent::RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const pragma::CSceneComponent &scene,pragma::rendering::SceneRenderPass renderMode)
 {
 	// TODO
 #if 0

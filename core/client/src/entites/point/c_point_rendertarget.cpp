@@ -63,7 +63,7 @@ void CRenderTargetComponent::Spawn()
 
 unsigned int CRenderTargetComponent::GetTextureBuffer() {return 0;} // Obsolete
 
-void CRenderTargetComponent::Render(RenderMode renderMode)
+void CRenderTargetComponent::Render(pragma::rendering::SceneRenderPass renderMode)
 {
 	// TODO
 }

@@ -26,7 +26,7 @@ void CFuncPhysicsComponent::Initialize()
 	BaseFuncPhysicsComponent::Initialize();
 	auto pRenderComponent = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
 	if(pRenderComponent)
-		pRenderComponent->SetRenderMode(RenderMode::World);
+		pRenderComponent->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::World);
 }
 
 void CFuncPhysicsComponent::ReceiveData(NetPacket &packet)

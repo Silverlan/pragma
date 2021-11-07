@@ -24,7 +24,7 @@ void CButtonComponent::Initialize()
 	BaseFuncButtonComponent::Initialize();
 	auto pRenderComponent = static_cast<CBaseEntity&>(GetEntity()).GetRenderComponent();
 	if(pRenderComponent)
-		pRenderComponent->SetRenderMode(RenderMode::World);
+		pRenderComponent->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::World);
 }
 void CButtonComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 

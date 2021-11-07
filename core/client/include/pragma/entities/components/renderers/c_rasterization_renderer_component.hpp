@@ -202,10 +202,10 @@ namespace pragma
 		pragma::ShaderPrepassBase &GetPrepassShader() const;
 
 		// Render
-		void RenderParticleSystems(const util::DrawSceneInfo &drawSceneInfo,std::vector<pragma::CParticleSystemComponent*> &particles,RenderMode renderMode,Bool bloom=false,std::vector<pragma::CParticleSystemComponent*> *bloomParticles=nullptr);
+		void RenderParticleSystems(const util::DrawSceneInfo &drawSceneInfo,std::vector<pragma::CParticleSystemComponent*> &particles,pragma::rendering::SceneRenderPass renderMode,Bool bloom=false,std::vector<pragma::CParticleSystemComponent*> *bloomParticles=nullptr);
 
 		// Renders all meshes from m_glowInfo.tmpGlowMeshes, and clears the container when done
-		void RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const CSceneComponent &scene,RenderMode renderMode);
+		void RenderGlowMeshes(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd,const CSceneComponent &scene,pragma::rendering::SceneRenderPass renderMode);
 
 		// If this flag is set, the prepass depth buffer will be blitted into a sampleable buffer
 		// before rendering, which can then be used as shader sampler input. This flag will be reset once
@@ -238,9 +238,6 @@ namespace pragma
 		const std::shared_ptr<prosper::ISwapCommandBufferGroup> &GetPrepassCommandBufferRecorder() const {return m_prepassCommandBufferGroup;}
 		const std::shared_ptr<prosper::ISwapCommandBufferGroup> &GetShadowCommandBufferRecorder() const {return m_shadowCommandBufferGroup;}
 		const std::shared_ptr<prosper::ISwapCommandBufferGroup> &GetLightingPassCommandBufferRecorder() const {return m_lightingCommandBufferGroup;}
-
-		// For internal use only
-		void RenderPrepass(const util::DrawSceneInfo &drawSceneInfo);
 	private:
 		void UpdateRendererBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
 		void UpdateRenderSettings();

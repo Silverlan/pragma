@@ -25,7 +25,7 @@ void CKinematicComponent::Initialize()
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(pRenderComponent)
-		pRenderComponent->SetRenderMode(RenderMode::World);
+		pRenderComponent->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::World);
 }
 
 Bool CKinematicComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)

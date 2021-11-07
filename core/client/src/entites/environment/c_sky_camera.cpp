@@ -99,7 +99,7 @@ void CSkyCameraComponent::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 		trees.reserve(entItWorld.GetCount());
 		for(auto *entWorld : entItWorld)
 		{
-			if(SceneRenderDesc::ShouldConsiderEntity(*static_cast<CBaseEntity*>(entWorld),scene,drawSceneInfo.renderFlags) == false)
+			if(SceneRenderDesc::ShouldConsiderEntity(*static_cast<CBaseEntity*>(entWorld),scene,drawSceneInfo.renderFlags,drawSceneInfo.renderMask) == false)
 				continue;
 			auto worldC = entWorld->GetComponent<pragma::CWorldComponent>();
 			auto &bspTree = worldC->GetBSPTree();
@@ -128,8 +128,8 @@ void CSkyCameraComponent::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 			// Also take into account that world render queues are built offline, but don't include the flag for the constant -> How to handle?
 			SceneRenderDesc::CollectRenderMeshesFromOctree(
 				drawSceneInfo,dynOctree,scene,*hCam,vp,drawSceneInfo.renderFlags,
-				[this](RenderMode renderMode,bool translucent) -> pragma::rendering::RenderQueue* {
-					return (renderMode != RenderMode::World) ? nullptr : (translucent ? m_renderQueueTranslucent.get() : m_renderQueue.get());
+				[this](pragma::rendering::SceneRenderPass renderMode,bool translucent) -> pragma::rendering::RenderQueue* {
+					return (renderMode != pragma::rendering::SceneRenderPass::World) ? nullptr : (translucent ? m_renderQueueTranslucent.get() : m_renderQueue.get());
 				},
 				nullptr,&trees,&bspLeafNodes,0,nullptr,pragma::GameShaderSpecializationConstantFlag::None//Enable3dOriginBit
 			);

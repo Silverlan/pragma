@@ -21,12 +21,18 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 {
 	auto defCRender = pragma::lua::create_entity_component_class<pragma::CRenderComponent,pragma::BaseRenderComponent>("RenderComponent");
 	defCRender.def("GetTransformationMatrix",&Lua::Render::GetTransformationMatrix);
-	defCRender.def("SetRenderMode",&Lua::Render::SetRenderMode);
-	defCRender.def("GetRenderMode",&Lua::Render::GetRenderMode);
-	defCRender.def("GetRenderModeProperty",static_cast<void(*)(lua_State*,pragma::CRenderComponent&)>([](lua_State *l,pragma::CRenderComponent &hComponent) {
-		
-		Lua::Property::push(l,*hComponent.GetRenderModeProperty());
-	}));
+	defCRender.def("IsInRenderGroup",&pragma::CRenderComponent::IsInRenderGroup);
+	defCRender.def("GetSceneRenderGroupPass",&pragma::CRenderComponent::GetSceneRenderGroupPass);
+	defCRender.def("SetSceneRenderGroupPass",&pragma::CRenderComponent::SetSceneRenderGroupPass);
+	defCRender.def("AddToRenderGroup",static_cast<bool(pragma::CRenderComponent::*)(const std::string&)>(&pragma::CRenderComponent::AddToRenderGroup));
+	defCRender.def("AddToRenderGroup",static_cast<void(pragma::CRenderComponent::*)(pragma::rendering::RenderGroup)>(&pragma::CRenderComponent::AddToRenderGroup));
+	defCRender.def("RemoveFromRenderGroup",&pragma::CRenderComponent::RemoveFromRenderGroup);
+	defCRender.def("RemoveFromSceneRenderGroups",&pragma::CRenderComponent::RemoveFromSceneRenderGroups);
+	defCRender.def("SetRenderGroups",&pragma::CRenderComponent::SetRenderGroups);
+	defCRender.def("GetRenderGroups",&pragma::CRenderComponent::GetRenderGroups);
+	defCRender.def("GetRenderGroupsProperty",+[](lua_State *l,pragma::CRenderComponent &c) {
+		Lua::Property::push(l,*c.GetRenderGroupsProperty());
+	});
 	defCRender.def("GetLocalRenderBounds",&Lua::Render::GetLocalRenderBounds);
 	defCRender.def("GetLocalRenderSphereBounds",&Lua::Render::GetLocalRenderSphereBounds);
 	defCRender.def("GetAbsoluteRenderBounds",&Lua::Render::GetAbsoluteRenderBounds);
@@ -191,13 +197,6 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 	defCRender.add_static_constant("EVENT_UPDATE_INSTANTIABILITY",pragma::CRenderComponent::EVENT_UPDATE_INSTANTIABILITY);
 	defCRender.add_static_constant("EVENT_ON_CLIP_PLANE_CHANGED",pragma::CRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED);
 	defCRender.add_static_constant("EVENT_ON_DEPTH_BIAS_CHANGED",pragma::CRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED);
-
-	// Enums
-	defCRender.add_static_constant("RENDERMODE_NONE",umath::to_integral(RenderMode::None));
-	defCRender.add_static_constant("RENDERMODE_WORLD",umath::to_integral(RenderMode::World));
-	defCRender.add_static_constant("RENDERMODE_VIEW",umath::to_integral(RenderMode::View));
-	defCRender.add_static_constant("RENDERMODE_SKYBOX",umath::to_integral(RenderMode::Skybox));
-	defCRender.add_static_constant("RENDERMODE_WATER",umath::to_integral(RenderMode::Water));
 	entsMod[defCRender];
 }
 void Lua::Render::CalcRayIntersection(lua_State *l,pragma::CRenderComponent &hComponent,const Vector3 &start,const Vector3 &dir,bool precise)
@@ -241,18 +240,6 @@ void Lua::Render::GetTransformationMatrix(lua_State *l,pragma::CRenderComponent 
 	luabind::object(l,mat).push(l);
 }
 
-void Lua::Render::SetRenderMode(lua_State *l,pragma::CRenderComponent &hEnt,unsigned int mode)
-{
-	
-	hEnt.SetRenderMode(RenderMode(mode));
-}
-
-void Lua::Render::GetRenderMode(lua_State *l,pragma::CRenderComponent &hEnt)
-{
-	
-	RenderMode mode = hEnt.GetRenderMode();
-	Lua::PushInt(l,static_cast<int>(mode));
-}
 void Lua::Render::GetLocalRenderBounds(lua_State *l,pragma::CRenderComponent &hEnt)
 {
 	

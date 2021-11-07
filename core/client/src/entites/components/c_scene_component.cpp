@@ -47,12 +47,6 @@ CSceneComponent::CSMCascadeDescriptor::CSMCascadeDescriptor()
 
 ///////////////////////////
 
-ShaderMeshContainer::ShaderMeshContainer(pragma::ShaderGameWorldLightingPass *shader)
-	: shader(shader->GetHandle())
-{}
-
-///////////////////////////
-
 CSceneComponent::CreateInfo::CreateInfo()
 	: sampleCount{static_cast<prosper::SampleCountFlags>(c_game->GetMSAASampleCount())}
 {}

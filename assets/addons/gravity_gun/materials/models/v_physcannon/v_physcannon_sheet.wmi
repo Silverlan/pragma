@@ -1,0 +1,10 @@
+"textured"
+{
+	$texture diffusemap "Models/Weapons/V_physcannon/v_physcannon_sheet"
+	$texture normalmap "Models/Weapons/V_physcannon/v_physcannon_normal"
+	$texture glowmap "Models/Weapons/V_physcannon/v_physcannon_sheet"
+	$int glow_blend_diffuse_mode 1
+	$float glow_blend_diffuse_scale 10
+	$bool glow_alpha_only 1
+	$float phong_shininess 16
+}

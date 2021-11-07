@@ -1,0 +1,165 @@
+"weapon_physcannon.hold_loop"
+{
+	$array events [element][
+		{
+			$string type "playsound"
+			$float gain 1.0
+			$float pitch 1.0
+			$string mode "mono"
+			$bool loop 1
+			$string source "weapons/physcannon/hold_loop.wav"
+			$string sound_type "Weapon|Effect"
+		}
+	]
+}
+
+"weapon_physcannon.charge"
+{
+	$array events [element][
+		{
+			$string type "playsound"
+			$float gain 1.0
+			$float pitch 1.0
+			$string mode "mono"
+			$string source "weapons/physcannon/physcannon_charge.wav"
+			$string sound_type "Weapon|Effect"
+		}
+	]
+}
+
+"weapon_physcannon.claws_close"
+{
+	$array events [element][
+		{
+			$string type "playsound"
+			$float gain 1.0
+			$float pitch 1.0
+			$string mode "mono"
+			$string source "weapons/physcannon/physcannon_claws_close.wav"
+			$string sound_type "Weapon|Effect"
+		}
+	]
+}
+
+"weapon_physcannon.claws_open"
+{
+	$array events [element][
+		{
+			$string type "playsound"
+			$float gain 1.0
+			$float pitch 1.0
+			$string mode "mono"
+			$string source "weapons/physcannon/physcannon_claws_open.wav"
+			$string sound_type "Weapon|Effect"
+		}
+	]
+}
+
+"weapon_physcannon.drop"
+{
+	$array events [element][
+		{
+			$string type "playsound"
+			$float gain 1.0
+			$float pitch 1.0
+			$string mode "mono"
+			$string source "weapons/physcannon/physcannon_drop.wav"
+			$string sound_type "Weapon|Effect"
+		}
+	]
+}
+
+"weapon_physcannon.dryfire"
+{
+	$array events [element][
+		{
+			$string type "playsound"
+			$float gain 1.0
+			$float pitch 1.0
+			$string mode "mono"
+			$string source "weapons/physcannon/physcannon_dryfire.wav"
+			$string sound_type "Weapon|Effect"
+		}
+	]
+}
+
+"weapon_physcannon.pickup"
+{
+	$array events [element][
+		{
+			$string type "playsound"
+			$float gain 1.0
+			$float pitch 1.0
+			$string mode "mono"
+			$string source "weapons/physcannon/physcannon_pickup.wav"
+			$string sound_type "Weapon|Effect"
+		}
+	]
+}
+
+"weapon_physcannon.tooheavy"
+{
+	$array events [element][
+		{
+			$string type "playsound"
+			$float gain 1.0
+			$float pitch 1.0
+			$string mode "mono"
+			$string source "weapons/physcannon/physcannon_tooheavy.wav"
+			$string sound_type "Weapon|Effect"
+		}
+	]
+}
+
+"weapon_physcannon.super_hold_loop"
+{
+	$array events [element][
+		{
+			$string type "playsound"
+			$float gain 1.0
+			$float pitch 1.0
+			$string mode "mono"
+			$bool loop 1
+			$string source "weapons/physcannon/superphys_hold_loop.wav"
+			$string sound_type "Weapon|Effect"
+		}
+	]
+}
+
+"weapon_physcannon.launch"
+{
+	$array events [element][
+		{
+			$string type "playsound"
+			$float gain 1.0
+			$float pitch 1.0
+			$string mode "mono"
+			$array source [string][
+				"weapons/physcannon/superphys_launch1.wav",
+				"weapons/physcannon/superphys_launch2.wav",
+				"weapons/physcannon/superphys_launch3.wav",
+				"weapons/physcannon/superphys_launch4.wav"
+			]
+			$string sound_type "Weapon|Effect"
+		}
+	]
+}
+
+"weapon_physcannon.small_zap"
+{
+	$array events [element][
+		{
+			$string type "playsound"
+			$float gain 1.0
+			$float pitch 1.0
+			$string mode "mono"
+			$array source [string][
+				"weapons/physcannon/superphys_small_zap1.wav",
+				"weapons/physcannon/superphys_small_zap2.wav",
+				"weapons/physcannon/superphys_small_zap3.wav",
+				"weapons/physcannon/superphys_small_zap4.wav"
+			]
+			$string sound_type "Weapon|Effect"
+		}
+	]
+}

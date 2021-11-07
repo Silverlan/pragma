@@ -113,7 +113,7 @@ function ents.ClickComponent.raycast(pos,dir,filter)
 	for ent in ents.iterator({ents.IteratorFilterComponent(ents.COMPONENT_CLICK),ents.IteratorFilterComponent(ents.COMPONENT_MODEL),ents.IteratorFilterComponent(ents.COMPONENT_RENDER)}) do
 		local mdl = ent:GetModel()
 		local renderC = ent:GetComponent(ents.COMPONENT_RENDER)
-		if(mdl ~= nil and ent ~= entPl and renderC ~= nil and renderC:GetRenderMode() ~= ents.RenderComponent.RENDERMODE_VIEW and renderC:GetRenderMode() ~= ents.RenderComponent.RENDERMODE_NONE and (filter == nil or filter(ent,renderC) == true)) then
+		if(mdl ~= nil and ent ~= entPl and renderC ~= nil and renderC:GetSceneRenderGroupPass() ~= game.SCENE_RENDER_PASS_VIEW and renderC:GetSceneRenderGroupPass() ~= game.SCENE_RENDER_PASS_NONE and (filter == nil or filter(ent,renderC) == true)) then
 			local r,hitData = renderC:CalcRayIntersection(pos,dir *32768,false)
 			-- print("Intersection with ",ent,": ",r)
 			-- Note: Distance of 0 usually means we're inside the object, in which case we probably don't intend to select it

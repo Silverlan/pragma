@@ -36,11 +36,12 @@ PhysObj::PhysObj(pragma::BaseEntityComponent *owner,const std::vector<pragma::ph
 	for(unsigned int i=0;i<objects.size();i++)
 		AddCollisionObject(*objects[i]);
 }
-bool PhysObj::Initialize() {return true;}
-void PhysObj::InitializeLuaObject(lua_State *lua)
+bool PhysObj::Initialize()
 {
-
+	InitializeLuaObject(GetNetworkState()->GetLuaState());
+	return true;
 }
+void PhysObj::InitializeLuaObject(lua_State *lua) {SetLuaObject(pragma::lua::raw_object_to_luabind_object(lua,GetHandle()));}
 void PhysObj::OnCollisionObjectWake(pragma::physics::ICollisionObject &o)
 {
 	if(m_colObjAwakeCount++ == 0)

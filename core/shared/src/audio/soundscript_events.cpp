@@ -16,7 +16,7 @@
 #undef CreateEvent
 
 extern DLLNETWORK Engine *engine;
-
+#pragma optimize("",off)
 SoundScriptEventContainer::~SoundScriptEventContainer()
 {
 	m_events.clear();
@@ -208,11 +208,14 @@ void SSEPlaySound::Initialize(udm::LinkedPropertyWrapper &prop)
 	coneInnerAngle.Load(prop["cone_inner_angle"]);
 	coneOuterAngle.Load(prop["cone_outer_angle"]);
 	coneOuterGain.Load(prop["cone_outer_gain"]);
-	auto udmType = prop["type"];
+	auto udmType = prop["sound_type"];
 	if(udmType.IsType(udm::Type::String))
-		type = umath::to_integral(udm::string_to_enum<ALSoundType>(udmType,ALSoundType::Generic));
+	{
+		type = umath::to_integral(udm::string_to_flags<ALSoundType>(udmType,ALSoundType::Generic));
+		type.SetSet(true);
+	}
 	else
-		type.Load(prop["type"]);
+		type.Load(prop["sound_type"]);
 
 	startTime.Load(prop["start"]);
 	endTime.Load(prop["end"]);
@@ -270,3 +273,4 @@ void SoundScriptValue::Initialize(float min,float max)
 }
 float SoundScriptValue::GetValue() const {return umath::random(m_min,m_max);}
 bool SoundScriptValue::IsSet() const {return m_bIsSet;}
+#pragma optimize("",on)

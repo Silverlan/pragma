@@ -51,6 +51,7 @@ public:
 	bool Load(const udm::LinkedPropertyWrapper &prop);
 	float GetValue() const;
 	bool IsSet() const;
+	void SetSet(bool set) {m_bIsSet = set;}
 };
 
 class DLLNETWORK SSEBase;

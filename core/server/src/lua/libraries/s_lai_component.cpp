@@ -23,7 +23,7 @@
 #include <pragma/lua/lua_entity_component.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/entities/components/base_ai_component.hpp>
-#include <luabind/out_value_policy.hpp>
+#include <pragma/lua/converters/pair_converter_t.hpp>
 #include <luabind/copy_policy.hpp>
 
 namespace Lua
@@ -60,9 +60,21 @@ void Lua::register_sv_ai_component(lua_State *l,luabind::module_ &module)
 	def.def("ClearRelationship",static_cast<void(pragma::SAIComponent::*)(BaseEntity*)>(&pragma::SAIComponent::ClearRelationship));
 	def.def("ClearRelationship",static_cast<void(pragma::SAIComponent::*)(std::string)>(&pragma::SAIComponent::ClearRelationship));
 	def.def("ClearRelationship",static_cast<void(pragma::SAIComponent::*)(Faction&)>(&pragma::SAIComponent::ClearRelationship));
-	def.def("GetDisposition",static_cast<DISPOSITION(pragma::SAIComponent::*)(BaseEntity*,int*)>(&pragma::SAIComponent::GetDisposition),luabind::out_value<3>{});
-	def.def("GetDisposition",static_cast<DISPOSITION(pragma::SAIComponent::*)(std::string,int*)>(&pragma::SAIComponent::GetDisposition),luabind::out_value<3>{});
-	def.def("GetDisposition",static_cast<DISPOSITION(pragma::SAIComponent::*)(Faction&,int*)>(&pragma::SAIComponent::GetDisposition),luabind::out_value<3>{});
+	def.def("GetDisposition",+[](pragma::SAIComponent &c,BaseEntity *ent) -> std::pair<DISPOSITION,int> {
+		int priority;
+		auto disp = c.GetDisposition(ent,&priority);
+		return {disp,priority};
+	});
+	def.def("GetDisposition",+[](pragma::SAIComponent &c,const std::string &className) -> std::pair<DISPOSITION,int> {
+		int priority;
+		auto disp = c.GetDisposition(className,&priority);
+		return {disp,priority};
+	});
+	def.def("GetDisposition",+[](pragma::SAIComponent &c,Faction &faction) -> std::pair<DISPOSITION,int> {
+		int priority;
+		auto disp = c.GetDisposition(faction,&priority);
+		return {disp,priority};
+	});
 	def.def("GetCurrentSchedule",&pragma::SAIComponent::GetCurrentSchedule);
 	def.def("GetMemory",static_cast<pragma::ai::Memory::Fragment*(pragma::SAIComponent::*)(BaseEntity*)>(&pragma::SAIComponent::GetMemory));
 	def.def("GetMemory",static_cast<pragma::ai::Memory&(pragma::SAIComponent::*)()>(&pragma::SAIComponent::GetMemory));
@@ -79,7 +91,9 @@ void Lua::register_sv_ai_component(lua_State *l,luabind::module_ &module)
 	def.def("GetHearingStrength",&pragma::SAIComponent::GetHearingStrength);
 	def.def("CanHear",&pragma::SAIComponent::CanHear);
 	def.def("GetMemoryFragmentCount",&pragma::SAIComponent::GetMemoryFragmentCount);
-	def.def("GetPrimaryTarget",&pragma::SAIComponent::GetPrimaryTarget);
+	def.def("GetPrimaryTarget",+[](pragma::SAIComponent &c) {
+		return const_cast<pragma::ai::Memory::Fragment*>(c.GetPrimaryTarget());
+	});
 	def.def("HasPrimaryTarget",&Lua::NPC::Server::HasPrimaryTarget);
 	def.def("GetNPCState",&pragma::SAIComponent::GetNPCState);
 	def.def("SetNPCState",&pragma::SAIComponent::SetNPCState);

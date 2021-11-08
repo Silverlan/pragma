@@ -53,12 +53,12 @@ CSceneComponent::CreateInfo::CreateInfo()
 
 ///////////////////////////
 
-void CSceneComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void CSceneComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_ACTIVE_CAMERA_CHANGED = componentManager.RegisterEvent("ON_ACTIVE_CAMERA_CHANGED");
-	EVENT_ON_BUILD_RENDER_QUEUES = componentManager.RegisterEvent("ON_BUILD_RENDER_QUEUES",typeid(CSceneComponent));
-	EVENT_ON_RENDERER_CHANGED = componentManager.RegisterEvent("ON_RENDERER_CHANGED");
-	EVENT_POST_RENDER_PREPASS = componentManager.RegisterEvent("POST_RENDER_PREPASS",typeid(CSceneComponent));
+	EVENT_ON_ACTIVE_CAMERA_CHANGED = registerEvent("ON_ACTIVE_CAMERA_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_BUILD_RENDER_QUEUES = registerEvent("ON_BUILD_RENDER_QUEUES",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_RENDERER_CHANGED = registerEvent("ON_RENDERER_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_POST_RENDER_PREPASS = registerEvent("POST_RENDER_PREPASS",EntityComponentManager::EventInfo::Type::Explicit);
 }
 
 static std::shared_ptr<rendering::EntityInstanceIndexBuffer> g_entityInstanceIndexBuffer = nullptr;

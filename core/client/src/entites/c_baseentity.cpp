@@ -124,7 +124,7 @@ extern EntityClassMap<CBaseEntity> *g_ClientEntityFactories;
 pragma::ComponentEventId CBaseEntity::EVENT_ON_SCENE_FLAGS_CHANGED = pragma::INVALID_COMPONENT_ID;
 void CBaseEntity::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
-	EVENT_ON_SCENE_FLAGS_CHANGED = componentManager.RegisterEvent("ON_SCENE_FLAGS_CHANGED");
+	EVENT_ON_SCENE_FLAGS_CHANGED = componentManager.RegisterEvent("ON_SCENE_FLAGS_CHANGED",typeid(BaseEntity),pragma::EntityComponentManager::EventInfo::Type::Broadcast);
 }
 
 CBaseEntity::CBaseEntity()

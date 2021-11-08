@@ -36,7 +36,7 @@ namespace pragma
 	public:
 		static ComponentEventId EVENT_HANDLE_ACTION_INPUT;
 		static ComponentEventId EVENT_ON_OBSERVATION_MODE_CHANGED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 		friend Engine;
 		virtual ~BasePlayerComponent() override;
 		virtual Con::c_cout& print(Con::c_cout&);

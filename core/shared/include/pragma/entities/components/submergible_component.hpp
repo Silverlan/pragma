@@ -22,7 +22,7 @@ namespace pragma
 		static ComponentEventId EVENT_ON_WATER_EMERGED;
 		static ComponentEventId EVENT_ON_WATER_ENTERED;
 		static ComponentEventId EVENT_ON_WATER_EXITED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		SubmergibleComponent(BaseEntity &ent);
 		virtual void Initialize() override;

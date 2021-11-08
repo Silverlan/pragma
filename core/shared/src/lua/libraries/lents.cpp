@@ -790,10 +790,6 @@ Lua::tb<Lua::type<BaseEntity>> Lua::ents::find_in_cone(lua_State *l,const Vector
 	return entities_to_table(l,entIt);
 }
 
-pragma::ComponentEventId Lua::ents::register_event(lua_State *l,const std::string &name)
-{
-	return engine->GetNetworkState(l)->GetGameState()->GetEntityComponentManager().RegisterEvent(name);
-}
 Lua::opt<pragma::ComponentEventId> Lua::ents::get_event_id(lua_State *l,const std::string &name)
 {
 	pragma::ComponentEventId eventId;
@@ -900,7 +896,7 @@ Lua::opt<pragma::ComponentEventId> Lua::ents::register_component_event(lua_State
 	}
 
 	auto netName = componentInfo->name +'_' +std::string{name};
-	auto eventId = componentManager.RegisterEvent(netName);
+	auto eventId = componentManager.RegisterEventById(netName,componentId,pragma::EntityComponentManager::EventInfo::Type::Broadcast);
 	return {l,eventId};
 }
 #pragma optimize("",on)

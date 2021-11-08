@@ -15,10 +15,10 @@ using namespace pragma;
 
 pragma::ComponentEventId UsableComponent::EVENT_ON_USE = pragma::INVALID_COMPONENT_ID;
 pragma::ComponentEventId UsableComponent::EVENT_CAN_USE = pragma::INVALID_COMPONENT_ID;
-void UsableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void UsableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_USE = componentManager.RegisterEvent("ON_USE");
-	EVENT_CAN_USE = componentManager.RegisterEvent("CAN_USE");
+	EVENT_ON_USE = registerEvent("ON_USE",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_CAN_USE = registerEvent("CAN_USE",EntityComponentManager::EventInfo::Type::Broadcast);
 }
 UsableComponent::UsableComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)

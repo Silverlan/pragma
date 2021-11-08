@@ -16,7 +16,7 @@ namespace pragma
 	{
 	public:
 		static ComponentEventId EVENT_ON_TICK;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		LogicComponent(BaseEntity &ent);
 		virtual void Initialize() override;

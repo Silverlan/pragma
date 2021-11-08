@@ -21,7 +21,7 @@ namespace pragma
 	{
 	public:
 		using ValueDriverHash = uint64_t; // ComponentId +ComponentMemberIndex
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 		
 		AnimationDriverComponent(BaseEntity &ent);
 

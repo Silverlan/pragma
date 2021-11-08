@@ -28,10 +28,10 @@ using namespace pragma;
 
 ComponentEventId BaseVehicleComponent::EVENT_ON_DRIVER_ENTERED = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseVehicleComponent::EVENT_ON_DRIVER_EXITED = pragma::INVALID_COMPONENT_ID;
-void BaseVehicleComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void BaseVehicleComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_DRIVER_ENTERED = componentManager.RegisterEvent("ON_DRIVER_ENTERED");
-	EVENT_ON_DRIVER_EXITED = componentManager.RegisterEvent("ON_DRIVER_EXITED");
+	EVENT_ON_DRIVER_ENTERED = registerEvent("ON_DRIVER_ENTERED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_DRIVER_EXITED = registerEvent("ON_DRIVER_EXITED",EntityComponentManager::EventInfo::Type::Broadcast);
 }
 BaseVehicleComponent::BaseVehicleComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)

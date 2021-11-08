@@ -64,7 +64,6 @@ namespace Lua
 		DLLNETWORK tb<type<BaseEntity>> find_in_sphere(lua_State *l,const Vector3 &origin,float radius);
 		DLLNETWORK tb<type<BaseEntity>> find_in_box(lua_State *l,const Vector3 &min,const Vector3 &max);
 		DLLNETWORK tb<type<BaseEntity>> find_in_cone(lua_State *l,const Vector3 &origin,const Vector3 &dir,float radius,float angle);
-		DLLNETWORK pragma::ComponentEventId register_event(lua_State *l,const std::string &name);
 		DLLNETWORK opt<pragma::ComponentEventId> get_event_id(lua_State *l,const std::string &name);
 		DLLNETWORK void register_class(lua_State *l,const std::string &className,const Lua::classObject &classObject);
 		DLLNETWORK void register_class(lua_State *l,const std::string &className,const luabind::tableT<luabind::variant<std::string,pragma::ComponentId>> &tComponents,LuaEntityType type);

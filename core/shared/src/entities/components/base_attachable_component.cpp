@@ -23,10 +23,9 @@ using namespace pragma;
 
 
 ComponentEventId BaseAttachableComponent::EVENT_ON_ATTACHMENT_UPDATE = INVALID_COMPONENT_ID;
-void BaseAttachableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void BaseAttachableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	auto componentType = std::type_index(typeid(BaseAttachableComponent));
-	EVENT_ON_ATTACHMENT_UPDATE = componentManager.RegisterEvent("ON_ATTACHMENT_UPDATE",componentType);
+	EVENT_ON_ATTACHMENT_UPDATE = registerEvent("ON_ATTACHMENT_UPDATE",EntityComponentManager::EventInfo::Type::Explicit);
 }
 BaseAttachableComponent::BaseAttachableComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)

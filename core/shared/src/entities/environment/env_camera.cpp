@@ -23,7 +23,7 @@ using namespace pragma;
 
 static float normalize_plane_z(float z) {return umath::max(z,0.1f);} // z value must never be 0; values close to zero can cause visual artifacts
 
-void BaseEnvCameraComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+void BaseEnvCameraComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
 {
 	using T = BaseEnvCameraComponent;
 	{

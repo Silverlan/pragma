@@ -22,7 +22,7 @@ namespace pragma
 	{
 	public:
 		static ComponentEventId EVENT_ON_ATTACHMENT_UPDATE;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		enum class StateFlags : uint32_t
 		{

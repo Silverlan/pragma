@@ -30,7 +30,7 @@ namespace pragma
 		static ComponentEventId EVENT_GET_HDR_PRESENTATION_TEXTURE;
 		static ComponentEventId EVENT_RECORD_COMMAND_BUFFERS;
 		static ComponentEventId EVENT_RENDER;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		CRendererComponent(BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual void InitializeLuaObject(lua_State *l) override;

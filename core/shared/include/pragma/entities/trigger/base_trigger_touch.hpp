@@ -69,7 +69,7 @@ namespace pragma
 		static ComponentEventId EVENT_ON_END_TOUCH;
 		static ComponentEventId EVENT_ON_TRIGGER;
 		static ComponentEventId EVENT_ON_TRIGGER_INITIALIZED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 		using BaseEntityComponent::BaseEntityComponent;
 		// Only called if collision callbacks are enabled (Entity::SetCollisionCallbacksEnabled(true))
 		void StartTouch(BaseEntity &entOther,PhysObj &physOther,physics::ICollisionObject &objThis,physics::ICollisionObject &objOther);

@@ -36,7 +36,7 @@ static uint32_t m_entityMeshCount = 0;
 static std::shared_ptr<MaterialDescriptorArrayManager> s_materialDescriptorArrayManager = nullptr;
 static std::shared_ptr<prosper::IDescriptorSetGroup> s_gameSceneDsg = nullptr;
 static bool s_allResourcesInitialized = false;
-void CRaytracingComponent::RegisterEvents(pragma::EntityComponentManager &componentManager) {}
+void CRaytracingComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent) {}
 bool CRaytracingComponent::InitializeBuffers()
 {
 	if(s_allResourcesInitialized)

@@ -26,7 +26,7 @@ namespace pragma
 	{
 	public:
 		static ComponentEventId EVENT_ON_OWNER_CHANGED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;
 		const pragma::PEntityProperty &GetOwnerProperty() const;

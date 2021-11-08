@@ -26,12 +26,12 @@ using namespace pragma;
 #pragma optimize("",off)
 ComponentEventId BaseTransformComponent::EVENT_ON_POSE_CHANGED = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseTransformComponent::EVENT_ON_TELEPORT = pragma::INVALID_COMPONENT_ID;
-void BaseTransformComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void BaseTransformComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_POSE_CHANGED = componentManager.RegisterEvent("ON_POSE_CHANGED",std::type_index(typeid(BaseTransformComponent)));
-	EVENT_ON_TELEPORT = componentManager.RegisterEvent("ON_TELEPORT");
+	EVENT_ON_POSE_CHANGED = registerEvent("ON_POSE_CHANGED",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_TELEPORT = registerEvent("ON_TELEPORT",EntityComponentManager::EventInfo::Type::Broadcast);
 }
-void BaseTransformComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+void BaseTransformComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
 {
 	using T = BaseTransformComponent;
 

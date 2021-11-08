@@ -14,11 +14,11 @@
 using namespace pragma;
 
 ComponentEventId BaseScoreComponent::EVENT_ON_SCORE_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseScoreComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void BaseScoreComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_SCORE_CHANGED = componentManager.RegisterEvent("ON_SCORE_CHANGED");
+	EVENT_ON_SCORE_CHANGED = registerEvent("ON_SCORE_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
 }
-void BaseScoreComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+void BaseScoreComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
 {
 	using T = BaseScoreComponent;
 	{

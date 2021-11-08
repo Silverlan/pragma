@@ -44,17 +44,17 @@ BaseEntityComponent::~BaseEntityComponent()
 	}
 	GetEntity().GetNetworkState()->GetGameState()->GetEntityComponentManager().DeregisterComponent(*this);
 }
-void BaseEntityComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void BaseEntityComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_ENTITY_COMPONENT_ADDED = componentManager.RegisterEvent("ON_ENTITY_COMPONENT_ADDED");
-	EVENT_ON_ENTITY_COMPONENT_REMOVED = componentManager.RegisterEvent("ON_ENTITY_COMPONENT_REMOVED");
-	EVENT_ON_MEMBERS_CHANGED = componentManager.RegisterEvent("ON_MEMBERS_CHANGED");
+	EVENT_ON_ENTITY_COMPONENT_ADDED = registerEvent("ON_ENTITY_COMPONENT_ADDED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_ENTITY_COMPONENT_REMOVED = registerEvent("ON_ENTITY_COMPONENT_REMOVED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_MEMBERS_CHANGED = registerEvent("ON_MEMBERS_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
 }
 void BaseEntityComponent::OnMembersChanged()
 {
 	BroadcastEvent(EVENT_ON_MEMBERS_CHANGED);
 }
-void BaseEntityComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember) {}
+void BaseEntityComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember) {}
 const ComponentMemberInfo *BaseEntityComponent::FindMemberInfo(const std::string &name) const
 {
 	auto idx = GetMemberIndex(name);
@@ -174,7 +174,7 @@ CallbackHandle BaseEntityComponent::AddEventCallback(ComponentEventId eventId,co
 	GetBaseTypeIndex(baseTypeIndex);
 	auto &events = GetEntity().GetNetworkState()->GetGameState()->GetEntityComponentManager().GetEvents();
 	auto it = events.find(eventId);
-	if(it != events.end() && it->second.componentType != nullptr && componentTypeIndex != *it->second.componentType && baseTypeIndex != *it->second.componentType)
+	if(it != events.end() && it->second.typeIndex.has_value() && componentTypeIndex != *it->second.typeIndex && baseTypeIndex != *it->second.typeIndex)
 		throw std::logic_error("Attempted to add callback for component event " +std::to_string(eventId) +" (" +it->second.name +") to component " +std::string(typeid(*this).name()) +", which this event does not belong to!");
 	
 	auto itEv = m_eventCallbacks.find(eventId);
@@ -265,14 +265,14 @@ CallbackHandle BaseEntityComponent::BindEvent(ComponentEventId eventId,const std
 	if(itInfo != events.end())
 	{
 		auto &info = itInfo->second;
-		if(info.componentType != nullptr)
+		if(info.typeIndex.has_value())
 		{
 			for(auto &pComponent : ent.GetComponents())
 			{
 				auto componentTypeIndex = std::type_index(typeid(*pComponent));
 				auto baseTypeIndex = componentTypeIndex;
 				pComponent->GetBaseTypeIndex(baseTypeIndex);
-				if(componentTypeIndex != *info.componentType && baseTypeIndex != *info.componentType)
+				if(componentTypeIndex != *info.typeIndex && baseTypeIndex != *info.typeIndex)
 					continue;
 				pComponent->AddEventCallback(eventId,hCallback);
 			}
@@ -319,12 +319,12 @@ void BaseEntityComponent::OnEntityComponentAdded(BaseEntityComponent &component,
 		{
 			auto evId = pair.first;
 			auto &info = events.at(evId);
-			if(info.componentType == nullptr)
+			if(!info.typeIndex.has_value())
 				continue;
 			auto componentTypeIndex = std::type_index(typeid(component));
 			auto baseTypeIndex = componentTypeIndex;
 			component.GetBaseTypeIndex(baseTypeIndex);
-			if(componentTypeIndex != *info.componentType && baseTypeIndex != *info.componentType)
+			if(componentTypeIndex != *info.typeIndex && baseTypeIndex != *info.typeIndex)
 				continue;
 			for(auto &hCb : pair.second)
 				component.AddEventCallback(evId,hCb);
@@ -339,12 +339,12 @@ void BaseEntityComponent::OnEntityComponentRemoved(BaseEntityComponent &componen
 	{
 		auto evId = pair.first;
 		auto &info = events.at(evId);
-		if(info.componentType == nullptr)
+		if(!info.typeIndex.has_value())
 			continue;
 		auto componentTypeIndex = std::type_index(typeid(component));
 		auto baseTypeIndex = componentTypeIndex;
 		component.GetBaseTypeIndex(baseTypeIndex);
-		if(componentTypeIndex != *info.componentType && baseTypeIndex != *info.componentType)
+		if(componentTypeIndex != *info.typeIndex && baseTypeIndex != *info.typeIndex)
 			continue;
 		for(auto &hCb : pair.second)
 			component.RemoveEventCallback(evId,hCb);
@@ -366,6 +366,9 @@ void BaseEntityComponent::OnEntityComponentRemoved(BaseEntityComponent &componen
 	if(BroadcastEvent(EVENT_ON_ENTITY_COMPONENT_REMOVED,evData) != util::EventReply::Handled && genericC)
 		genericC->InvokeEventCallbacks(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED,evData);
 }
+Game &BaseEntityComponent::GetGame() {return *GetNetworkState().GetGameState();}
+NetworkState &BaseEntityComponent::GetNetworkState() {return *GetEntity().GetNetworkState();}
+EntityComponentManager &BaseEntityComponent::GetComponentManager() {return GetGame().GetEntityComponentManager();}
 void BaseEntityComponent::Save(udm::LinkedPropertyWrapperArg udm)
 {
 	udm["version"] = GetVersion();

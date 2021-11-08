@@ -21,7 +21,7 @@
 
 using namespace pragma;
 
-void BaseEnvLightComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+void BaseEnvLightComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
 {
 	using T = BaseEnvLightComponent;
 

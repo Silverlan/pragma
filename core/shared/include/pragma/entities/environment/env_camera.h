@@ -27,7 +27,7 @@ namespace pragma
 		static const float DEFAULT_FOV;
 		static const float DEFAULT_VIEWMODEL_FOV;
 		
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
 		BaseEnvCameraComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 

@@ -35,7 +35,7 @@ namespace pragma
 		static ComponentEventId EVENT_ON_SKELETON_UPDATED;
 		static ComponentEventId EVENT_ON_BONE_MATRICES_UPDATED;
 		static ComponentEventId EVENT_ON_BONE_BUFFER_INITIALIZED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		CAnimatedComponent(BaseEntity &ent) : BaseAnimatedComponent(ent) {}
 

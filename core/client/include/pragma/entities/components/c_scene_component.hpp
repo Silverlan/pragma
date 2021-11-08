@@ -163,7 +163,7 @@ namespace pragma
 		: public BaseEntityComponent
 	{
 	public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		static ComponentEventId EVENT_ON_ACTIVE_CAMERA_CHANGED;
 		static ComponentEventId EVENT_ON_BUILD_RENDER_QUEUES;

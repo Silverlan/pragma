@@ -34,7 +34,7 @@ namespace pragma
 	public:
 		static pragma::ComponentEventId EVENT_ON_USE;
 		static pragma::ComponentEventId EVENT_CAN_USE;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 		UsableComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;

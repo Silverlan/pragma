@@ -30,9 +30,9 @@
 using namespace pragma;
 #pragma optimize("",off)
 ComponentEventId BaseFuncWaterComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseFuncWaterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void BaseFuncWaterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED = componentManager.RegisterEvent("ON_WATER_SURFACE_SIMULATOR_CHANGED");
+	EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED = registerEvent("ON_WATER_SURFACE_SIMULATOR_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
 }
 void BaseFuncWaterComponent::Initialize()
 {

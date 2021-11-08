@@ -17,7 +17,7 @@ namespace pragma
 		: public BaseCharacterComponent
 	{
 	public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 		SCharacterComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 		virtual void SetActiveWeapon(BaseEntity *ent) override;

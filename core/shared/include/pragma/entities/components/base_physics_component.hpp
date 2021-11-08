@@ -109,7 +109,7 @@ namespace pragma
 		static ComponentEventId EVENT_ON_WAKE;
 		static ComponentEventId EVENT_HANDLE_RAYCAST;
 		static ComponentEventId EVENT_INITIALIZE_PHYSICS;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;
 		virtual void OnRemove() override;

@@ -114,7 +114,7 @@ namespace pragma
 		static pragma::ComponentEventId EVENT_GET_TRANSFORMATION_MATRIX;
 		static pragma::ComponentEventId EVENT_HANDLE_SHADOW_MAP;
 		static pragma::ComponentEventId EVENT_ON_SHADOW_BUFFER_INITIALIZED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		static prosper::IUniformResizableBuffer &GetGlobalRenderBuffer();
 		static prosper::IUniformResizableBuffer &GetGlobalShadowBuffer();

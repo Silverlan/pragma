@@ -29,7 +29,7 @@ namespace pragma
 		static ComponentEventId EVENT_ON_KILLED;
 		static ComponentEventId EVENT_ON_RESPAWN;
 		static ComponentEventId EVENT_ON_DEATH;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;
 		virtual void Kill(DamageInfo *dmgInfo=nullptr);

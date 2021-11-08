@@ -26,10 +26,10 @@
 using namespace pragma;
 
 ComponentEventId CWeaponComponent::EVENT_ATTACH_TO_OWNER = INVALID_COMPONENT_ID;
-void CWeaponComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void CWeaponComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	BaseWeaponComponent::RegisterEvents(componentManager);
-	EVENT_ATTACH_TO_OWNER = componentManager.RegisterEvent("ATTACH_TO_OWNER",std::type_index(typeid(CWeaponComponent)));
+	BaseWeaponComponent::RegisterEvents(componentManager,registerEvent);
+	EVENT_ATTACH_TO_OWNER = registerEvent("ATTACH_TO_OWNER",EntityComponentManager::EventInfo::Type::Explicit);
 }
 
 std::vector<CWeaponComponent*> CWeaponComponent::s_weapons;

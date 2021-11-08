@@ -21,7 +21,7 @@ namespace pragma
 	public:
 		static ComponentEventId EVENT_ON_DRIVER_ENTERED;
 		static ComponentEventId EVENT_ON_DRIVER_EXITED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 		enum class StateFlags : uint32_t
 		{
 			None = 0u,

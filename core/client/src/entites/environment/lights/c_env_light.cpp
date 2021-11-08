@@ -49,15 +49,15 @@ ComponentEventId CLightComponent::EVENT_SHOULD_UPDATE_RENDER_PASS = pragma::INVA
 ComponentEventId CLightComponent::EVENT_GET_TRANSFORMATION_MATRIX = pragma::INVALID_COMPONENT_ID;
 ComponentEventId CLightComponent::EVENT_HANDLE_SHADOW_MAP = pragma::INVALID_COMPONENT_ID;
 ComponentEventId CLightComponent::EVENT_ON_SHADOW_BUFFER_INITIALIZED = pragma::INVALID_COMPONENT_ID;
-void CLightComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void CLightComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_SHOULD_PASS_ENTITY = componentManager.RegisterEvent("SHOULD_PASS_ENTITY",std::type_index(typeid(CLightComponent)));
-	EVENT_SHOULD_PASS_ENTITY_MESH = componentManager.RegisterEvent("SHOULD_PASS_ENTITY_MESH",std::type_index(typeid(CLightComponent)));
-	EVENT_SHOULD_PASS_MESH = componentManager.RegisterEvent("SHOULD_PASS_MESH",std::type_index(typeid(CLightComponent)));
-	EVENT_SHOULD_UPDATE_RENDER_PASS = componentManager.RegisterEvent("SHOULD_UPDATE_RENDER_PASS",std::type_index(typeid(CLightComponent)));
-	EVENT_GET_TRANSFORMATION_MATRIX = componentManager.RegisterEvent("GET_TRANSFORMATION_MATRIX",std::type_index(typeid(CLightComponent)));
-	EVENT_HANDLE_SHADOW_MAP = componentManager.RegisterEvent("HANDLE_SHADOW_MAP");
-	EVENT_ON_SHADOW_BUFFER_INITIALIZED = componentManager.RegisterEvent("ON_SHADOW_BUFFER_INITIALIZED");
+	EVENT_SHOULD_PASS_ENTITY = registerEvent("SHOULD_PASS_ENTITY",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_SHOULD_PASS_ENTITY_MESH = registerEvent("SHOULD_PASS_ENTITY_MESH",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_SHOULD_PASS_MESH = registerEvent("SHOULD_PASS_MESH",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_SHOULD_UPDATE_RENDER_PASS = registerEvent("SHOULD_UPDATE_RENDER_PASS",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_GET_TRANSFORMATION_MATRIX = registerEvent("GET_TRANSFORMATION_MATRIX",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_HANDLE_SHADOW_MAP = registerEvent("HANDLE_SHADOW_MAP",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_SHADOW_BUFFER_INITIALIZED = registerEvent("ON_SHADOW_BUFFER_INITIALIZED",EntityComponentManager::EventInfo::Type::Broadcast);
 }
 void CLightComponent::InitializeBuffers()
 {

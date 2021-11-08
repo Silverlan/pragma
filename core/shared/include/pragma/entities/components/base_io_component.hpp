@@ -35,7 +35,7 @@ namespace pragma
 		};
 
 		static pragma::ComponentEventId EVENT_HANDLE_INPUT;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 		virtual void Initialize() override;
 
 		void StoreOutput(std::string name,std::string entities,std::string input,std::string param,float delay=0.f,int times=-1);

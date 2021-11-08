@@ -18,7 +18,7 @@ namespace pragma
 	public:
 		static ComponentEventId EVENT_ON_IGNITED;
 		static ComponentEventId EVENT_ON_EXTINGUISHED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 		virtual ~BaseFlammableComponent() override;
 		virtual void Initialize() override;
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;

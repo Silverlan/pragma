@@ -225,16 +225,21 @@ namespace pragma
 
 		struct DLLNETWORK EventInfo
 		{
-			EventInfo(const std::string &name)
-				: name(name)
+			enum class Type : uint8_t
+			{
+				Broadcast = 0,
+				Explicit
+			};
+			EventInfo(const std::string &name,std::optional<ComponentId> componentId={},std::optional<std::type_index> typeIndex={},Type type=Type::Broadcast)
+				: name(name),type{type},typeIndex{typeIndex},componentId{componentId.has_value() ? *componentId : INVALID_COMPONENT_ID}
 			{}
-			EventInfo(const std::string &name,std::type_index typeId)
-				: name(name),componentType(std::make_unique<std::type_index>(typeId))
-			{}
+			ComponentEventId id = std::numeric_limits<ComponentEventId>::max();
 			std::string name;
-			// If componentType is set, this event can only be caught by
-			// using AddEventCallback on the component of this type
-			std::unique_ptr<std::type_index> componentType = nullptr;
+			ComponentId componentId = INVALID_COMPONENT_ID;
+			Type type = Type::Broadcast;
+
+			// Only set if this is a C++ component
+			std::optional<std::type_index> typeIndex {};
 		};
 
 		util::TSharedHandle<BaseEntityComponent> CreateComponent(const std::string &name,BaseEntity &ent) const;
@@ -260,14 +265,20 @@ namespace pragma
 		const ComponentInfo *GetComponentInfo(ComponentId id) const;
 		ComponentInfo *GetComponentInfo(ComponentId id);
 
-		ComponentEventId RegisterEvent(const std::string &evName,std::type_index componentType);
-		ComponentEventId RegisterEvent(const std::string &evName);
+		template<class T>
+			ComponentEventId RegisterEvent(const std::string &evName,EventInfo::Type type=EventInfo::Type::Broadcast)
+		{
+			return RegisterEvent(evName,typeid(T),type);
+		}
+		ComponentEventId RegisterEvent(const std::string &evName,std::type_index typeIndex,EventInfo::Type type=EventInfo::Type::Broadcast);
+		ComponentEventId RegisterEventById(const std::string &evName,ComponentId componentId,EventInfo::Type type=EventInfo::Type::Broadcast);
+		std::optional<ComponentEventId> FindEventId(ComponentId componentId,const std::string &evName) const;
+		std::optional<ComponentEventId> FindEventId(const std::string &componentName,const std::string &evName) const;
 		bool GetEventId(const std::string &evName,ComponentEventId &evId) const;
 		ComponentEventId GetEventId(const std::string &evName) const;
 		bool GetEventName(ComponentEventId evId,std::string &outEvName) const;
 		std::string GetEventName(ComponentEventId evId) const;
 		const std::unordered_map<ComponentEventId,EventInfo> &GetEvents() const;
-
 
 		struct DLLNETWORK ComponentContainerInfo
 		{
@@ -304,11 +315,10 @@ namespace pragma
 		// List of all created components by component id
 		mutable std::vector<ComponentContainerInfo> m_components;
 
-		// These HAVE to be static, since event ids are usually static class variables,
-		// and have to be the same on the client and server.
-		static ComponentEventId s_nextEventId;
-		static std::unordered_map<ComponentEventId,EventInfo> s_componentEvents;
+		std::unordered_map<ComponentEventId,EventInfo> m_componentEvents;
 	};
+	using TRegisterComponentEvent = const std::function<ComponentEventId(const std::string&,EntityComponentManager::EventInfo::Type)>&;
+	using TRegisterComponentMember = const std::function<ComponentMemberIndex(ComponentMemberInfo&&)>&;
 };
 REGISTER_BASIC_BITWISE_OPERATORS(pragma::ComponentFlags);
 
@@ -318,15 +328,22 @@ template<class TComponent,typename>
 	auto flags = ComponentFlags::None;
 	if(std::is_base_of<pragma::BaseNetComponent,TComponent>::value)
 		flags |= ComponentFlags::Networked;
-	TComponent::RegisterEvents(*this);
-	auto id = RegisterComponentType(name,[](BaseEntity &ent) {
+	auto componentId = PreRegisterComponentType(name);
+	TComponent::RegisterEvents(*this,[this,componentId](const std::string &evName,EventInfo::Type type) {
+		auto id = RegisterEvent<TComponent>(evName,type);
+		auto it = m_componentEvents.find(id);
+		assert(it != m_componentEvents.end());
+		it->second.componentId = componentId;
+		return id;
+	});
+	RegisterComponentType(name,[](BaseEntity &ent) {
 		return util::TSharedHandle<BaseEntityComponent>{new TComponent{ent},[](pragma::BaseEntityComponent *c) {delete c;}};
 	},flags,std::type_index(typeid(TComponent)));
-	auto &componentInfo = m_componentInfos[id];
+	auto &componentInfo = m_componentInfos[componentId];
 	TComponent::RegisterMembers(*this,[this,&componentInfo](ComponentMemberInfo &&memberInfo) -> ComponentMemberIndex {
 		return RegisterMember(componentInfo,std::move(memberInfo));
 	});
-	return id;
+	return componentId;
 }
 
 template<class TComponent,typename>

@@ -21,7 +21,7 @@ namespace pragma
 		: public BaseEntityComponent
 	{
 	public:
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
 		BaseEnvLightSpotComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 		// Changes the half-angle for for outer cone

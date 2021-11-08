@@ -23,9 +23,9 @@ using namespace pragma;
 extern DLLSERVER ServerState *server;
 extern DLLSERVER SGame *s_game;
 
-void SPhysicsComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void SPhysicsComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	BasePhysicsComponent::RegisterEvents(componentManager);
+	BasePhysicsComponent::RegisterEvents(componentManager,registerEvent);
 }
 void SPhysicsComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {

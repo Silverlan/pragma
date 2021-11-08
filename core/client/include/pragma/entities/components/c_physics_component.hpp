@@ -21,7 +21,7 @@ namespace pragma
 		public nwm::VelocityCorrection
 	{
 	public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 		CPhysicsComponent(BaseEntity &ent) : BasePhysicsComponent(ent) {}
 		virtual void Initialize() override;
 

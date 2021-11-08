@@ -16,9 +16,9 @@
 using namespace pragma;
 
 ComponentEventId BaseSoundEmitterComponent::EVENT_ON_SOUND_CREATED = pragma::INVALID_COMPONENT_ID;
-void BaseSoundEmitterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void BaseSoundEmitterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_SOUND_CREATED = componentManager.RegisterEvent("ON_SOUND_CREATED");
+	EVENT_ON_SOUND_CREATED = registerEvent("ON_SOUND_CREATED",EntityComponentManager::EventInfo::Type::Broadcast);
 }
 BaseSoundEmitterComponent::BaseSoundEmitterComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)

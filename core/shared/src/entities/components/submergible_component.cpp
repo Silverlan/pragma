@@ -16,12 +16,12 @@ ComponentEventId SubmergibleComponent::EVENT_ON_WATER_SUBMERGED = INVALID_COMPON
 ComponentEventId SubmergibleComponent::EVENT_ON_WATER_EMERGED = INVALID_COMPONENT_ID;
 ComponentEventId SubmergibleComponent::EVENT_ON_WATER_ENTERED = INVALID_COMPONENT_ID;
 ComponentEventId SubmergibleComponent::EVENT_ON_WATER_EXITED = INVALID_COMPONENT_ID;
-void SubmergibleComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void SubmergibleComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_WATER_SUBMERGED = componentManager.RegisterEvent("ON_WATER_SUBMERGED");
-	EVENT_ON_WATER_EMERGED = componentManager.RegisterEvent("ON_WATER_EMERGED");
-	EVENT_ON_WATER_ENTERED = componentManager.RegisterEvent("ON_WATER_ENTERED");
-	EVENT_ON_WATER_EXITED = componentManager.RegisterEvent("ON_WATER_EXITED");
+	EVENT_ON_WATER_SUBMERGED = registerEvent("ON_WATER_SUBMERGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_WATER_EMERGED = registerEvent("ON_WATER_EMERGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_WATER_ENTERED = registerEvent("ON_WATER_ENTERED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_WATER_EXITED = registerEvent("ON_WATER_EXITED",EntityComponentManager::EventInfo::Type::Broadcast);
 }
 SubmergibleComponent::SubmergibleComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_submergedFraction(util::FloatProperty::Create(0.f))

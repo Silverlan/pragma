@@ -21,17 +21,16 @@ ComponentEventId BaseGamemodeComponent::EVENT_ON_PLAYER_JOINED = INVALID_COMPONE
 ComponentEventId BaseGamemodeComponent::EVENT_ON_GAME_INITIALIZED = INVALID_COMPONENT_ID;
 ComponentEventId BaseGamemodeComponent::EVENT_ON_MAP_INITIALIZED = INVALID_COMPONENT_ID;
 ComponentEventId BaseGamemodeComponent::EVENT_ON_GAME_READY = INVALID_COMPONENT_ID;
-void BaseGamemodeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void BaseGamemodeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	auto componentType = std::type_index(typeid(BaseGamemodeComponent));
-	EVENT_ON_PLAYER_DEATH = componentManager.RegisterEvent("ON_PLAYER_DEATH",componentType);
-	EVENT_ON_PLAYER_SPAWNED = componentManager.RegisterEvent("ON_PLAYER_SPAWNED",componentType);
-	EVENT_ON_PLAYER_DROPPED = componentManager.RegisterEvent("ON_PLAYER_DROPPED",componentType);
-	EVENT_ON_PLAYER_READY = componentManager.RegisterEvent("ON_PLAYER_READY",componentType);
-	EVENT_ON_PLAYER_JOINED = componentManager.RegisterEvent("ON_PLAYER_JOINED",componentType);
-	EVENT_ON_GAME_INITIALIZED = componentManager.RegisterEvent("ON_GAME_INITIALIZED",componentType);
-	EVENT_ON_MAP_INITIALIZED = componentManager.RegisterEvent("ON_MAP_INITIALIZED",componentType);
-	EVENT_ON_GAME_READY = componentManager.RegisterEvent("ON_GAME_READY",componentType);
+	EVENT_ON_PLAYER_DEATH = registerEvent("ON_PLAYER_DEATH",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_PLAYER_SPAWNED = registerEvent("ON_PLAYER_SPAWNED",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_PLAYER_DROPPED = registerEvent("ON_PLAYER_DROPPED",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_PLAYER_READY = registerEvent("ON_PLAYER_READY",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_PLAYER_JOINED = registerEvent("ON_PLAYER_JOINED",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_GAME_INITIALIZED = registerEvent("ON_GAME_INITIALIZED",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_MAP_INITIALIZED = registerEvent("ON_MAP_INITIALIZED",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_GAME_READY = registerEvent("ON_GAME_READY",EntityComponentManager::EventInfo::Type::Explicit);
 }
 BaseGamemodeComponent::BaseGamemodeComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)

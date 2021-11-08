@@ -27,10 +27,10 @@ extern DLLCLIENT ClientState *client;
 
 ComponentEventId CModelComponent::EVENT_ON_RENDER_MESHES_UPDATED = INVALID_COMPONENT_ID;
 void CModelComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-void CModelComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void CModelComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	BaseModelComponent::RegisterEvents(componentManager);
-	EVENT_ON_RENDER_MESHES_UPDATED = componentManager.RegisterEvent("EVENT_ON_RENDER_MESHES_UPDATED");
+	BaseModelComponent::RegisterEvents(componentManager,registerEvent);
+	EVENT_ON_RENDER_MESHES_UPDATED = registerEvent("EVENT_ON_RENDER_MESHES_UPDATED",EntityComponentManager::EventInfo::Type::Explicit);
 }
 
 CModelComponent::CModelComponent(BaseEntity &ent)

@@ -18,7 +18,7 @@ namespace pragma
 		public SBaseNetComponent
 	{
 	public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 		SPhysicsComponent(BaseEntity &ent) : BasePhysicsComponent(ent) {}
 
 		virtual void OnPhysicsInitialized() override;

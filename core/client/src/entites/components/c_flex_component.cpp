@@ -27,10 +27,10 @@ extern DLLCLIENT CGame *c_game;
 static auto cvFlexPhonemeDrag = GetClientConVar("cl_flex_phoneme_drag");
 
 ComponentEventId CFlexComponent::EVENT_ON_FLEX_CONTROLLERS_UPDATED = INVALID_COMPONENT_ID;
-void CFlexComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void CFlexComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	BaseFlexComponent::RegisterEvents(componentManager);
-	EVENT_ON_FLEX_CONTROLLERS_UPDATED = componentManager.RegisterEvent("ON_FLEX_CONTROLLERS_UPDATED",std::type_index(typeid(CFlexComponent)));
+	BaseFlexComponent::RegisterEvents(componentManager,registerEvent);
+	EVENT_ON_FLEX_CONTROLLERS_UPDATED = registerEvent("ON_FLEX_CONTROLLERS_UPDATED",EntityComponentManager::EventInfo::Type::Explicit);
 }
 
 void CFlexComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}

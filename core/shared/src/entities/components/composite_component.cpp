@@ -89,10 +89,10 @@ void CompositeGroup::ClearEntities(bool safely)
 
 ComponentEventId CompositeComponent::EVENT_ON_ENTITY_ADDED = INVALID_COMPONENT_ID;
 ComponentEventId CompositeComponent::EVENT_ON_ENTITY_REMOVED = INVALID_COMPONENT_ID;
-void CompositeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void CompositeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_ENTITY_ADDED = componentManager.RegisterEvent("ON_COMPOSITE_ENTITY_ADDED");
-	EVENT_ON_ENTITY_REMOVED = componentManager.RegisterEvent("ON_COMPOSITE_ENTITY_REMOVED");
+	EVENT_ON_ENTITY_ADDED = registerEvent("ON_COMPOSITE_ENTITY_ADDED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_ENTITY_REMOVED = registerEvent("ON_COMPOSITE_ENTITY_REMOVED",EntityComponentManager::EventInfo::Type::Broadcast);
 }
 
 CompositeComponent::CompositeComponent(BaseEntity &ent)

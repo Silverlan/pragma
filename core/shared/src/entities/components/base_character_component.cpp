@@ -82,22 +82,21 @@ ComponentEventId BaseCharacterComponent::EVENT_CALC_MOVEMENT_DIRECTION = INVALID
 ComponentEventId BaseCharacterComponent::EVENT_IS_MOVING = INVALID_COMPONENT_ID;
 ComponentEventId BaseCharacterComponent::EVENT_HANDLE_VIEW_ROTATION = INVALID_COMPONENT_ID;
 ComponentEventId BaseCharacterComponent::EVENT_ON_JUMP = INVALID_COMPONENT_ID;
-void BaseCharacterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void BaseCharacterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	BaseActorComponent::RegisterEvents(componentManager);
-	auto componentType = std::type_index(typeid(BaseCharacterComponent));
-	EVENT_ON_FOOT_STEP = componentManager.RegisterEvent("ON_FOOT_STEP");
-	EVENT_ON_CHARACTER_ORIENTATION_CHANGED = componentManager.RegisterEvent("ON_CHARACTER_ORIENTATION_CHANGED");
-	EVENT_ON_DEPLOY_WEAPON = componentManager.RegisterEvent("ON_DEPLOY_WEAPON");
-	EVENT_ON_SET_ACTIVE_WEAPON = componentManager.RegisterEvent("ON_SET_ACTIVE_WEAPON");
-	EVENT_PLAY_FOOTSTEP_SOUND = componentManager.RegisterEvent("PLAY_FOOTSTEP_SOUND");
-	EVENT_CALC_MOVEMENT_SPEED = componentManager.RegisterEvent("CALC_MOVEMENT_SPEED",componentType);
-	EVENT_CALC_AIR_MOVEMENT_MODIFIER = componentManager.RegisterEvent("CALC_AIR_MOVEMENT_MODIFIER",componentType);
-	EVENT_CALC_MOVEMENT_ACCELERATION = componentManager.RegisterEvent("CALC_MOVEMENT_ACCELERATION",componentType);
-	EVENT_CALC_MOVEMENT_DIRECTION = componentManager.RegisterEvent("CALC_MOVEMENT_DIRECTION",componentType);
-	EVENT_IS_MOVING = componentManager.RegisterEvent("IS_MOVING",componentType);
-	EVENT_HANDLE_VIEW_ROTATION = componentManager.RegisterEvent("HANDLE_VIEW_ROTATION",componentType);
-	EVENT_ON_JUMP = componentManager.RegisterEvent("ON_JUMP");
+	BaseActorComponent::RegisterEvents(componentManager,registerEvent);
+	EVENT_ON_FOOT_STEP = registerEvent("ON_FOOT_STEP",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_CHARACTER_ORIENTATION_CHANGED = registerEvent("ON_CHARACTER_ORIENTATION_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_DEPLOY_WEAPON = registerEvent("ON_DEPLOY_WEAPON",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_SET_ACTIVE_WEAPON = registerEvent("ON_SET_ACTIVE_WEAPON",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_PLAY_FOOTSTEP_SOUND = registerEvent("PLAY_FOOTSTEP_SOUND",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_CALC_MOVEMENT_SPEED = registerEvent("CALC_MOVEMENT_SPEED",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_CALC_AIR_MOVEMENT_MODIFIER = registerEvent("CALC_AIR_MOVEMENT_MODIFIER",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_CALC_MOVEMENT_ACCELERATION = registerEvent("CALC_MOVEMENT_ACCELERATION",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_CALC_MOVEMENT_DIRECTION = registerEvent("CALC_MOVEMENT_DIRECTION",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_IS_MOVING = registerEvent("IS_MOVING",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_HANDLE_VIEW_ROTATION = registerEvent("HANDLE_VIEW_ROTATION",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_JUMP = registerEvent("ON_JUMP",EntityComponentManager::EventInfo::Type::Broadcast);
 }
 
 BaseCharacterComponent::BaseCharacterComponent(BaseEntity &ent)

@@ -112,7 +112,7 @@ namespace pragma
 		static ComponentEventId EVENT_IS_MOVING;
 		static ComponentEventId EVENT_HANDLE_VIEW_ROTATION;
 		static ComponentEventId EVENT_ON_JUMP;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		//
 		enum class FootType : uint8_t

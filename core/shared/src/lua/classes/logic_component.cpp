@@ -14,9 +14,9 @@
 using namespace pragma;
 
 ComponentEventId LogicComponent::EVENT_ON_TICK = INVALID_COMPONENT_ID;
-void LogicComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void LogicComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_TICK = componentManager.RegisterEvent("ON_TICK",std::type_index(typeid(LogicComponent)));
+	EVENT_ON_TICK = registerEvent("ON_TICK",EntityComponentManager::EventInfo::Type::Explicit);
 }
 
 LogicComponent::LogicComponent(BaseEntity &ent)

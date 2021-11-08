@@ -24,13 +24,13 @@ using namespace pragma;
 
 // ComponentEventId CEyeComponent::EVENT_ON_EYEBALLS_UPDATED = INVALID_COMPONENT_ID;
 // ComponentEventId CEyeComponent::EVENT_ON_BLINK = INVALID_COMPONENT_ID;
-void CEyeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void CEyeComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	BaseAnimatedComponent::RegisterEvents(componentManager);
-	// EVENT_ON_EYEBALLS_UPDATED = componentManager.RegisterEvent("ON_EYEBALLS_UPDATED",std::type_index(typeid(CEyeComponent)));
-	// EVENT_ON_BLINK = componentManager.RegisterEvent("EVENT_ON_BLINK");
+	BaseAnimatedComponent::RegisterEvents(componentManager,registerEvent);
+	// EVENT_ON_EYEBALLS_UPDATED = registerEvent("ON_EYEBALLS_UPDATED",EntityComponentManager::EventInfo::Type::Explicit);
+	// EVENT_ON_BLINK = registerEvent("EVENT_ON_BLINK");
 }
-void CEyeComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+void CEyeComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
 {
 	using T = CEyeComponent;
 

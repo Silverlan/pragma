@@ -140,7 +140,7 @@ namespace pragma
 		static ComponentEventId EVENT_ON_LOOK_TARGET_CHANGED;
 		static ComponentEventId EVENT_ON_SCHEDULE_STARTED;
 
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		SAIComponent(BaseEntity &ent);
 		virtual ~SAIComponent() override;

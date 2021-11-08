@@ -67,7 +67,7 @@ namespace pragma
 		static ComponentEventId EVENT_UPDATE_INSTANTIABILITY;
 		static ComponentEventId EVENT_ON_CLIP_PLANE_CHANGED;
 		static ComponentEventId EVENT_ON_DEPTH_BIAS_CHANGED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		CRenderComponent(BaseEntity &ent);
 		const std::shared_ptr<prosper::SwapBuffer> &GetSwapRenderBuffer() const;

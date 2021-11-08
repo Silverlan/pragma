@@ -49,11 +49,10 @@ using namespace pragma;
 
 ComponentEventId BasePlayerComponent::EVENT_HANDLE_ACTION_INPUT = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BasePlayerComponent::EVENT_ON_OBSERVATION_MODE_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BasePlayerComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void BasePlayerComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	auto componentType = std::type_index(typeid(BasePlayerComponent));
-	EVENT_HANDLE_ACTION_INPUT = componentManager.RegisterEvent("HANDLE_ACTION_INPUT",componentType);
-	EVENT_ON_OBSERVATION_MODE_CHANGED = componentManager.RegisterEvent("ON_OBSERVATION_MODE_CHANGED");
+	EVENT_HANDLE_ACTION_INPUT = registerEvent("HANDLE_ACTION_INPUT",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_OBSERVATION_MODE_CHANGED = registerEvent("ON_OBSERVATION_MODE_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
 }
 
 void BasePlayerComponent::SetStandHeight(float height)

@@ -14,8 +14,18 @@
 
 using namespace pragma;
 
-decltype(EntityComponentManager::s_nextEventId) EntityComponentManager::s_nextEventId = 0u;
-decltype(EntityComponentManager::s_componentEvents) EntityComponentManager::s_componentEvents = {};
+static ComponentEventId g_nextEventId = 0u;
+static std::unordered_map<std::string,ComponentEventId> g_componentEventIds;
+
+static ComponentEventId get_component_event_id(const std::string &name)
+{
+	auto it = g_componentEventIds.find(name);
+	if(it != g_componentEventIds.end())
+		return it->second;
+	auto id = g_nextEventId++;
+	g_componentEventIds[name] = id;
+	return id;
+}
 
 size_t pragma::get_component_member_name_hash(const std::string &name)
 {
@@ -383,30 +393,57 @@ ComponentMemberIndex EntityComponentManager::RegisterMember(ComponentInfo &compo
 }
 const std::vector<ComponentInfo> &EntityComponentManager::GetRegisteredComponentTypes() const {return m_componentInfos;}
 void EntityComponentManager::OnComponentTypeRegistered(const ComponentInfo &componentInfo) {}
-ComponentEventId EntityComponentManager::RegisterEvent(const std::string &evName,std::type_index componentType)
+ComponentEventId EntityComponentManager::RegisterEvent(const std::string &evName,std::type_index typeIndex,EventInfo::Type type)
 {
-	auto it = std::find_if(s_componentEvents.begin(),s_componentEvents.end(),[&evName](const std::pair<const ComponentEventId,EventInfo> &pair) {
+	auto it = std::find_if(m_componentEvents.begin(),m_componentEvents.end(),[&evName](const std::pair<const ComponentEventId,EventInfo> &pair) {
 		return evName == pair.second.name;
 	});
-	if(it == s_componentEvents.end())
-		it = s_componentEvents.insert(std::make_pair(s_nextEventId++,EventInfo{evName,componentType})).first;
+	if(it == m_componentEvents.end())
+	{
+		auto id = get_component_event_id(evName);
+		it = m_componentEvents.insert(std::make_pair(id,EventInfo{evName,{},typeIndex,type})).first;
+		it->second.id = id;
+	}
 	return it->first;
 }
-ComponentEventId EntityComponentManager::RegisterEvent(const std::string &evName)
+std::optional<ComponentEventId> EntityComponentManager::FindEventId(const std::string &componentName,const std::string &evName) const
 {
-	auto it = std::find_if(s_componentEvents.begin(),s_componentEvents.end(),[&evName](const std::pair<const ComponentEventId,EventInfo> &pair) {
+	ComponentId componentId;
+	if(GetComponentTypeId(componentName,componentId) == false)
+		return {};
+	return FindEventId(componentId,evName);
+}
+std::optional<ComponentEventId> EntityComponentManager::FindEventId(ComponentId componentId,const std::string &evName) const
+{
+	auto *componentInfo = GetComponentInfo(componentId);
+	if(!componentInfo)
+		return {};
+	auto fullName = componentInfo->name +'_' +evName;
+	auto it = std::find_if(m_componentEvents.begin(),m_componentEvents.end(),[componentId,&fullName](const std::pair<ComponentEventId,EventInfo> &pair) {
+		return pair.second.componentId == componentId && pair.second.name == fullName;
+	});
+	if(it == m_componentEvents.end())
+		return {};
+	return it->first;
+}
+ComponentEventId EntityComponentManager::RegisterEventById(const std::string &evName,ComponentId componentId,EventInfo::Type type)
+{
+	auto it = std::find_if(m_componentEvents.begin(),m_componentEvents.end(),[&evName](const std::pair<const ComponentEventId,EventInfo> &pair) {
 		return evName == pair.second.name;
 	});
-	if(it == s_componentEvents.end())
-		it = s_componentEvents.insert(std::make_pair(s_nextEventId++,EventInfo{evName})).first;
+	if(it == m_componentEvents.end())
+	{
+		auto id = get_component_event_id(evName);
+		it = m_componentEvents.insert(std::make_pair(id,EventInfo{evName,componentId,{},type})).first;
+	}
 	return it->first;
 }
 bool EntityComponentManager::GetEventId(const std::string &evName,ComponentEventId &evId) const
 {
-	auto it = std::find_if(s_componentEvents.begin(),s_componentEvents.end(),[&evName](const std::pair<const ComponentEventId,EventInfo> &pair) {
+	auto it = std::find_if(m_componentEvents.begin(),m_componentEvents.end(),[&evName](const std::pair<const ComponentEventId,EventInfo> &pair) {
 		return evName == pair.second.name;
 	});
-	if(it == s_componentEvents.end())
+	if(it == m_componentEvents.end())
 		return false;
 	evId = it->first;
 	return true;
@@ -420,8 +457,8 @@ pragma::ComponentEventId EntityComponentManager::GetEventId(const std::string &e
 }
 bool EntityComponentManager::GetEventName(ComponentEventId evId,std::string &outEvName) const
 {
-	auto it = s_componentEvents.find(evId);
-	if(it == s_componentEvents.end())
+	auto it = m_componentEvents.find(evId);
+	if(it == m_componentEvents.end())
 		return false;
 	outEvName = it->second.name;
 	return true;
@@ -433,7 +470,7 @@ std::string EntityComponentManager::GetEventName(ComponentEventId evId) const
 		throw std::logic_error("Entity component event '" +std::to_string(evId) +"' has not been registered!");
 	return name;
 }
-const std::unordered_map<pragma::ComponentEventId,EntityComponentManager::EventInfo> &EntityComponentManager::GetEvents() const {return s_componentEvents;}
+const std::unordered_map<pragma::ComponentEventId,EntityComponentManager::EventInfo> &EntityComponentManager::GetEvents() const {return m_componentEvents;}
 const std::vector<EntityComponentManager::ComponentContainerInfo> &EntityComponentManager::GetComponents() const {return const_cast<EntityComponentManager*>(this)->GetComponents();}
 std::vector<EntityComponentManager::ComponentContainerInfo> &EntityComponentManager::GetComponents() {return m_components;}
 const std::vector<BaseEntityComponent*> &EntityComponentManager::GetComponents(ComponentId componentId) const

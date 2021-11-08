@@ -33,11 +33,11 @@ BaseActorComponent::HitboxData::HitboxData(uint32_t _boneId,const Vector3 &_offs
 ComponentEventId BaseActorComponent::EVENT_ON_KILLED = INVALID_COMPONENT_ID;
 ComponentEventId BaseActorComponent::EVENT_ON_RESPAWN = INVALID_COMPONENT_ID;
 ComponentEventId BaseActorComponent::EVENT_ON_DEATH = INVALID_COMPONENT_ID;
-void BaseActorComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void BaseActorComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_KILLED = componentManager.RegisterEvent("ON_KILLED");
-	EVENT_ON_RESPAWN = componentManager.RegisterEvent("ON_RESPAWN");
-	EVENT_ON_DEATH = componentManager.RegisterEvent("ON_DEATH");
+	EVENT_ON_KILLED = registerEvent("ON_KILLED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_RESPAWN = registerEvent("ON_RESPAWN",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_DEATH = registerEvent("ON_DEATH",EntityComponentManager::EventInfo::Type::Broadcast);
 }
 BaseActorComponent::BaseActorComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_bAlive(true),m_bFrozen(util::BoolProperty::Create(false))

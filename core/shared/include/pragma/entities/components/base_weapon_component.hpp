@@ -37,7 +37,7 @@ namespace pragma
 		static ComponentEventId EVENT_ON_RELOAD;
 		static ComponentEventId EVENT_ON_PRIMARY_CLIP_SIZE_CHANGED;
 		static ComponentEventId EVENT_ON_SECONDARY_CLIP_SIZE_CHANGED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;
 		virtual void Deploy();

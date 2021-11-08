@@ -16,11 +16,11 @@
 using namespace pragma;
 
 ComponentEventId BaseRadiusComponent::EVENT_ON_RADIUS_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseRadiusComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void BaseRadiusComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_RADIUS_CHANGED = componentManager.RegisterEvent("ON_RADIUS_CHANGED");
+	EVENT_ON_RADIUS_CHANGED = registerEvent("ON_RADIUS_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
 }
-void BaseRadiusComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+void BaseRadiusComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
 {
 	using T = BaseRadiusComponent;
 	using TRadius = float;

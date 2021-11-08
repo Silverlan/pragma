@@ -10,7 +10,7 @@
 
 using namespace pragma;
 
-void BaseGameComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void BaseGameComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
 }
 BaseGameComponent::BaseGameComponent(BaseEntity &ent)

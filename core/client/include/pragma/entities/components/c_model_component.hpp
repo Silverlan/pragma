@@ -37,7 +37,7 @@ namespace pragma
 			DepthPrepassDisabled = RenderBufferListUpdateRequired<<1u
 		};
 
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		CModelComponent(BaseEntity &ent);
 

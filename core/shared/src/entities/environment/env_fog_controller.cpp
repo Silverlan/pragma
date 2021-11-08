@@ -15,7 +15,7 @@
 
 using namespace pragma;
 
-void BaseEnvFogControllerComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+void BaseEnvFogControllerComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
 {
 	using T = BaseEnvFogControllerComponent;
 	

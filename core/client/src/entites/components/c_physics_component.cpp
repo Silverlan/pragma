@@ -23,9 +23,9 @@ using namespace pragma;
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
 
-void CPhysicsComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void CPhysicsComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	BasePhysicsComponent::RegisterEvents(componentManager);
+	BasePhysicsComponent::RegisterEvents(componentManager,registerEvent);
 }
 void CPhysicsComponent::Initialize()
 {

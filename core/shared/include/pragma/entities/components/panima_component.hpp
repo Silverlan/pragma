@@ -29,7 +29,7 @@ namespace pragma
 		static ComponentEventId EVENT_PLAY_ANIMATION;
 		static ComponentEventId EVENT_TRANSLATE_ANIMATION;
 		static ComponentEventId EVENT_INITIALIZE_CHANNEL_VALUE_SUBMITTER;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 		static std::optional<std::pair<std::string,util::Path>> ParseComponentChannelPath(const panima::ChannelPath &path);
 		
 		PanimaComponent(BaseEntity &ent);

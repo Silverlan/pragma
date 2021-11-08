@@ -18,7 +18,7 @@ namespace pragma
 		public SBaseNetComponent
 	{
 	public:
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		SAnimatedComponent(BaseEntity &ent) : BaseAnimatedComponent(ent) {}
 		virtual void Initialize() override;

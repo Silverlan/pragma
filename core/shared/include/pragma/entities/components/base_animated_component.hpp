@@ -55,7 +55,7 @@ namespace pragma
 		static ComponentEventId EVENT_ON_BLEND_ANIMATION;
 		static ComponentEventId EVENT_PLAY_ANIMATION;
 		static ComponentEventId EVENT_ON_ANIMATION_RESET;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		enum class StateFlags : uint8_t
 		{

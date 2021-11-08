@@ -33,8 +33,8 @@ namespace pragma
 	public:
 		static pragma::ComponentEventId EVENT_ON_POSE_CHANGED;
 		static pragma::ComponentEventId EVENT_ON_TELEPORT;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
 
 		void SetPosition(const Vector3 &pos);

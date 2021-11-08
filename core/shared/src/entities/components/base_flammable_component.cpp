@@ -18,10 +18,10 @@ using namespace pragma;
 
 ComponentEventId BaseFlammableComponent::EVENT_ON_IGNITED = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseFlammableComponent::EVENT_ON_EXTINGUISHED = pragma::INVALID_COMPONENT_ID;
-void BaseFlammableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void BaseFlammableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_IGNITED = componentManager.RegisterEvent("ON_IGNITED");
-	EVENT_ON_EXTINGUISHED = componentManager.RegisterEvent("ON_EXTINGUISHED");
+	EVENT_ON_IGNITED = registerEvent("ON_IGNITED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_EXTINGUISHED = registerEvent("ON_EXTINGUISHED",EntityComponentManager::EventInfo::Type::Broadcast);
 }
 BaseFlammableComponent::BaseFlammableComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_bIsOnFire(util::BoolProperty::Create(false)),

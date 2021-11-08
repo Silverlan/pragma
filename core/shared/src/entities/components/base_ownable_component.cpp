@@ -12,9 +12,9 @@
 using namespace pragma;
 
 ComponentEventId BaseOwnableComponent::EVENT_ON_OWNER_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseOwnableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void BaseOwnableComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_OWNER_CHANGED = componentManager.RegisterEvent("ON_OWNER_CHANGED");
+	EVENT_ON_OWNER_CHANGED = registerEvent("ON_OWNER_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
 }
 BaseOwnableComponent::BaseOwnableComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent),m_owner(pragma::EntityProperty::Create())

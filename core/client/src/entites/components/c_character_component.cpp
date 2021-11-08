@@ -37,9 +37,9 @@ extern DLLCLIENT ClientState *client;
 
 using namespace pragma;
 
-void CCharacterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void CCharacterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	BaseCharacterComponent::RegisterEvents(componentManager);
+	BaseCharacterComponent::RegisterEvents(componentManager,registerEvent);
 }
 CCharacterComponent::CCharacterComponent(BaseEntity &ent)
 	: BaseCharacterComponent(ent)

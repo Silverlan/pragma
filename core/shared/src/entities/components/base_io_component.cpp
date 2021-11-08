@@ -16,9 +16,9 @@
 using namespace pragma;
 
 ComponentEventId BaseIOComponent::EVENT_HANDLE_INPUT = pragma::INVALID_COMPONENT_ID;
-void BaseIOComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void BaseIOComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_HANDLE_INPUT = componentManager.RegisterEvent("HANDLE_INPUT");
+	EVENT_HANDLE_INPUT = registerEvent("HANDLE_INPUT",EntityComponentManager::EventInfo::Type::Broadcast);
 }
 
 BaseIOComponent::BaseIOComponent(BaseEntity &ent)

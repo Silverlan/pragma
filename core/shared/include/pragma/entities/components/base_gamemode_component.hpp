@@ -27,7 +27,7 @@ namespace pragma
 		static ComponentEventId EVENT_ON_GAME_INITIALIZED;
 		static ComponentEventId EVENT_ON_MAP_INITIALIZED;
 		static ComponentEventId EVENT_ON_GAME_READY;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		virtual void Initialize() override;
 		virtual void OnRemove() override;

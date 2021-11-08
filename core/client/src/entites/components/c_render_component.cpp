@@ -61,19 +61,19 @@ ComponentEventId CRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES = INVALID_COM
 ComponentEventId CRenderComponent::EVENT_UPDATE_INSTANTIABILITY = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED = INVALID_COMPONENT_ID;
 ComponentEventId CRenderComponent::EVENT_ON_DEPTH_BIAS_CHANGED = INVALID_COMPONENT_ID;
-void CRenderComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void CRenderComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_UPDATE_RENDER_DATA_MT = componentManager.RegisterEvent("ON_UPDATE_RENDER_DATA_MT",std::type_index(typeid(CRenderComponent)));
-	EVENT_ON_RENDER_BUFFERS_INITIALIZED = componentManager.RegisterEvent("ON_RENDER_BUFFERS_INITIALIZED");
-	EVENT_ON_RENDER_BOUNDS_CHANGED = componentManager.RegisterEvent("ON_RENDER_BOUNDS_CHANGED");
-	EVENT_ON_RENDER_MODE_CHANGED = componentManager.RegisterEvent("ON_RENDER_MODE_CHANGED");
-	EVENT_SHOULD_DRAW = componentManager.RegisterEvent("SHOULD_DRAW",std::type_index(typeid(CRenderComponent)));
-	EVENT_SHOULD_DRAW_SHADOW = componentManager.RegisterEvent("SHOULD_DRAW_SHADOW",std::type_index(typeid(CRenderComponent)));
-	EVENT_ON_UPDATE_RENDER_BUFFERS = componentManager.RegisterEvent("ON_UPDATE_RENDER_BUFFERS",std::type_index(typeid(CRenderComponent)));
-	EVENT_ON_UPDATE_RENDER_MATRICES = componentManager.RegisterEvent("ON_UPDATE_RENDER_MATRICES",std::type_index(typeid(CRenderComponent)));
-	EVENT_UPDATE_INSTANTIABILITY = componentManager.RegisterEvent("UPDATE_INSTANTIABILITY");
-	EVENT_ON_CLIP_PLANE_CHANGED = componentManager.RegisterEvent("ON_CLIP_PLANE_CHANGED");
-	EVENT_ON_DEPTH_BIAS_CHANGED = componentManager.RegisterEvent("ON_DEPTH_BIAS_CHANGED");
+	EVENT_ON_UPDATE_RENDER_DATA_MT = registerEvent("ON_UPDATE_RENDER_DATA_MT",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_RENDER_BUFFERS_INITIALIZED = registerEvent("ON_RENDER_BUFFERS_INITIALIZED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_RENDER_BOUNDS_CHANGED = registerEvent("ON_RENDER_BOUNDS_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_RENDER_MODE_CHANGED = registerEvent("ON_RENDER_MODE_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_SHOULD_DRAW = registerEvent("SHOULD_DRAW",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_SHOULD_DRAW_SHADOW = registerEvent("SHOULD_DRAW_SHADOW",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_UPDATE_RENDER_BUFFERS = registerEvent("ON_UPDATE_RENDER_BUFFERS",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_UPDATE_RENDER_MATRICES = registerEvent("ON_UPDATE_RENDER_MATRICES",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_UPDATE_INSTANTIABILITY = registerEvent("UPDATE_INSTANTIABILITY",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_CLIP_PLANE_CHANGED = registerEvent("ON_CLIP_PLANE_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_DEPTH_BIAS_CHANGED = registerEvent("ON_DEPTH_BIAS_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
 }
 CRenderComponent::CRenderComponent(BaseEntity &ent)
 	: BaseRenderComponent(ent),m_renderGroups{util::TEnumProperty<pragma::rendering::RenderGroup>::Create(pragma::rendering::RenderGroup::WorldBit)}

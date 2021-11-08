@@ -75,8 +75,8 @@ namespace pragma
 		static ComponentEventId EVENT_ON_ENTITY_COMPONENT_ADDED;
 		static ComponentEventId EVENT_ON_ENTITY_COMPONENT_REMOVED;
 		static ComponentEventId EVENT_ON_MEMBERS_CHANGED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
 		enum class StateFlags : uint32_t
 		{
 			None = 0u,
@@ -95,6 +95,13 @@ namespace pragma
 		BaseEntity &GetEntity();
 		const BaseEntity &operator->() const;
 		BaseEntity &operator->();
+
+		Game &GetGame();
+		const Game &GetGame() const {return const_cast<BaseEntityComponent*>(this)->GetGame();}
+		NetworkState &GetNetworkState();
+		const NetworkState &GetNetworkState() const {return const_cast<BaseEntityComponent*>(this)->GetNetworkState();}
+		EntityComponentManager &GetComponentManager();
+		const EntityComponentManager &GetComponentManager() const {return const_cast<BaseEntityComponent*>(this)->GetComponentManager();}
 
 		ComponentId GetComponentId() const;
 		const ComponentMemberInfo *FindMemberInfo(const std::string &name) const;

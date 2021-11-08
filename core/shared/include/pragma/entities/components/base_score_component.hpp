@@ -17,8 +17,8 @@ namespace pragma
 	{
 	public:
 		static pragma::ComponentEventId EVENT_ON_SCORE_CHANGED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
 		using Score = int32_t;
 		virtual void Initialize() override;
 		virtual ~BaseScoreComponent() override;

@@ -74,14 +74,6 @@ BaseEntity::StateFlags BaseEntity::GetStateFlags() const {return m_stateFlags;}
 void BaseEntity::ResetStateChangeFlags() {m_stateFlags &= ~(StateFlags::CollisionBoundsChanged | StateFlags::PositionChanged | StateFlags::RenderBoundsChanged | StateFlags::RotationChanged);}
 bool BaseEntity::HasStateFlag(StateFlags flag) const {return ((m_stateFlags &flag) == flag) ? true : false;}
 void BaseEntity::SetStateFlag(StateFlags flag) {m_stateFlags |= flag;}
-pragma::ComponentEventId BaseEntity::RegisterComponentEvent(const std::string &name) const
-{
-	return GetNetworkState()->GetGameState()->GetEntityComponentManager().RegisterEvent(name);
-}
-pragma::ComponentEventId BaseEntity::GetEventId(const std::string &name) const
-{
-	return GetNetworkState()->GetGameState()->GetEntityComponentManager().GetEventId(name);
-}
 pragma::BaseEntityComponent *BaseEntity::FindComponentMemberIndex(const util::Path &path,pragma::ComponentMemberIndex &outMemberIdx)
 {
 	auto hComponent = FindComponent(std::string{path.GetFront()});
@@ -177,10 +169,11 @@ pragma::NetEventId BaseEntity::SetupNetEvent(const std::string &name) const {ret
 
 void BaseEntity::RegisterEvents(pragma::EntityComponentManager &componentManager)
 {
-	EVENT_HANDLE_KEY_VALUE = componentManager.RegisterEvent("HANDLE_KEY_VALUE");
-	EVENT_ON_SPAWN = componentManager.RegisterEvent("ON_SPAWN");
-	EVENT_ON_POST_SPAWN = componentManager.RegisterEvent("ON_POST_SPAWN");
-	EVENT_ON_REMOVE = componentManager.RegisterEvent("ON_REMOVE");
+	std::type_index typeIndex = typeid(BaseEntity);
+	EVENT_HANDLE_KEY_VALUE = componentManager.RegisterEvent("HANDLE_KEY_VALUE",typeIndex);
+	EVENT_ON_SPAWN = componentManager.RegisterEvent("ON_SPAWN",typeIndex);
+	EVENT_ON_POST_SPAWN = componentManager.RegisterEvent("ON_POST_SPAWN",typeIndex);
+	EVENT_ON_REMOVE = componentManager.RegisterEvent("ON_REMOVE",typeIndex);
 }
 
 void BaseEntity::Initialize()

@@ -28,7 +28,7 @@ namespace pragma
 	{
 	public:
 		static ComponentEventId EVENT_ATTACH_TO_OWNER;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		static unsigned int GetWeaponCount();
 		static const std::vector<CWeaponComponent*> &GetAll();

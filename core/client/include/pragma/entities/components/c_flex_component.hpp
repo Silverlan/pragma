@@ -21,7 +21,7 @@ namespace pragma
 	{
 	public:
 		static ComponentEventId EVENT_ON_FLEX_CONTROLLERS_UPDATED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		struct FlexAnimationData
 		{

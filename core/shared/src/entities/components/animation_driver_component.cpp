@@ -18,7 +18,7 @@ static inline pragma::AnimationDriverComponent::ValueDriverHash get_value_driver
 {
 	return util::hash_combine<uint64_t>(util::hash_combine<uint64_t>(0,componentId),memberIdx);
 }
-void pragma::AnimationDriverComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void pragma::AnimationDriverComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
 
 }

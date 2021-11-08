@@ -64,27 +64,27 @@ ComponentEventId SAIComponent::EVENT_ON_END_CONTROL = INVALID_COMPONENT_ID;
 ComponentEventId SAIComponent::EVENT_ON_PATH_NODE_CHANGED = INVALID_COMPONENT_ID;
 ComponentEventId SAIComponent::EVENT_ON_LOOK_TARGET_CHANGED = INVALID_COMPONENT_ID;
 ComponentEventId SAIComponent::EVENT_ON_SCHEDULE_STARTED = INVALID_COMPONENT_ID;
-void SAIComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void SAIComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	BaseAIComponent::RegisterEvents(componentManager);
-	EVENT_SELECT_SCHEDULE = componentManager.RegisterEvent("SELECT_SCHEDULE");
-	EVENT_SELECT_CONTROLLER_SCHEDULE = componentManager.RegisterEvent("SELECT_CONTROLLER_SCHEDULE");
-	EVENT_ON_SCHEDULE_COMPLETE = componentManager.RegisterEvent("ON_SCHEDULE_COMPLETE");
-	EVENT_ON_PRIMARY_TARGET_CHANGED = componentManager.RegisterEvent("ON_PRIMARY_TARGET_CHANGED");
-	EVENT_ON_PATH_CHANGED = componentManager.RegisterEvent("ON_PATH_CHANGED");
-	EVENT_ON_NPC_STATE_CHANGED = componentManager.RegisterEvent("ON_NPC_STATE_CHANGED");
-	EVENT_ON_TARGET_VISIBILITY_LOST = componentManager.RegisterEvent("ON_TARGET_VISIBILITY_LOST");
-	EVENT_ON_TARGET_VISIBILITY_REACQUIRED = componentManager.RegisterEvent("ON_TARGET_VISIBILITY_REACQUIRED");
-	EVENT_ON_MEMORY_GAINED = componentManager.RegisterEvent("ON_MEMORY_GAINED");
-	EVENT_ON_MEMORY_LOST = componentManager.RegisterEvent("ON_MEMORY_LOST");
-	EVENT_ON_TARGET_ACQUIRED = componentManager.RegisterEvent("ON_TARGET_ACQUIRED");
-	EVENT_ON_SUSPICIOUS_SOUND_HEARED = componentManager.RegisterEvent("ON_SUSPICIOUS_SOUND_HEARED");
-	EVENT_ON_CONTROLLER_ACTION_INPUT = componentManager.RegisterEvent("ON_CONTROLLER_ACTION_INPUT");
-	EVENT_ON_START_CONTROL = componentManager.RegisterEvent("ON_START_CONTROL");
-	EVENT_ON_END_CONTROL = componentManager.RegisterEvent("ON_END_CONTROL");
-	EVENT_ON_PATH_NODE_CHANGED = componentManager.RegisterEvent("ON_PATH_NODE_CHANGED");
-	EVENT_ON_LOOK_TARGET_CHANGED = componentManager.RegisterEvent("ON_LOOK_TARGET_CHANGED");
-	EVENT_ON_SCHEDULE_STARTED = componentManager.RegisterEvent("ON_SCHEDULE_STARTED");
+	BaseAIComponent::RegisterEvents(componentManager,registerEvent);
+	EVENT_SELECT_SCHEDULE = registerEvent("SELECT_SCHEDULE",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_SELECT_CONTROLLER_SCHEDULE = registerEvent("SELECT_CONTROLLER_SCHEDULE",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_SCHEDULE_COMPLETE = registerEvent("ON_SCHEDULE_COMPLETE",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_PRIMARY_TARGET_CHANGED = registerEvent("ON_PRIMARY_TARGET_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_PATH_CHANGED = registerEvent("ON_PATH_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_NPC_STATE_CHANGED = registerEvent("ON_NPC_STATE_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_TARGET_VISIBILITY_LOST = registerEvent("ON_TARGET_VISIBILITY_LOST",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_TARGET_VISIBILITY_REACQUIRED = registerEvent("ON_TARGET_VISIBILITY_REACQUIRED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_MEMORY_GAINED = registerEvent("ON_MEMORY_GAINED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_MEMORY_LOST = registerEvent("ON_MEMORY_LOST",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_TARGET_ACQUIRED = registerEvent("ON_TARGET_ACQUIRED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_SUSPICIOUS_SOUND_HEARED = registerEvent("ON_SUSPICIOUS_SOUND_HEARED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_CONTROLLER_ACTION_INPUT = registerEvent("ON_CONTROLLER_ACTION_INPUT",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_START_CONTROL = registerEvent("ON_START_CONTROL",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_END_CONTROL = registerEvent("ON_END_CONTROL",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_PATH_NODE_CHANGED = registerEvent("ON_PATH_NODE_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_LOOK_TARGET_CHANGED = registerEvent("ON_LOOK_TARGET_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_SCHEDULE_STARTED = registerEvent("ON_SCHEDULE_STARTED",EntityComponentManager::EventInfo::Type::Broadcast);
 }
 
 SAIComponent::SAIComponent(BaseEntity &ent)

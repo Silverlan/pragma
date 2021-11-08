@@ -16,11 +16,11 @@
 using namespace pragma;
 
 ComponentEventId BaseColorComponent::EVENT_ON_COLOR_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseColorComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void BaseColorComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_COLOR_CHANGED = componentManager.RegisterEvent("ON_COLOR_CHANGED");
+	EVENT_ON_COLOR_CHANGED = registerEvent("ON_COLOR_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
 }
-void BaseColorComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+void BaseColorComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
 {
 	using T = BaseColorComponent;
 	{

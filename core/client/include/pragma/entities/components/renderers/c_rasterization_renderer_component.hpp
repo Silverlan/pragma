@@ -99,7 +99,7 @@ namespace pragma
 		static ComponentEventId EVENT_MT_END_RECORD_VIEW;
 		static ComponentEventId EVENT_MT_BEGIN_RECORD_PREPASS;
 
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		static void UpdateLightmap(CLightMapComponent &lightMapC);
 		enum class PrepassMode : uint32_t

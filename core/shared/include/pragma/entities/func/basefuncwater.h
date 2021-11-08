@@ -23,7 +23,7 @@ namespace pragma
 	{
 	public:
 		static ComponentEventId EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 		using BaseEntityComponent::BaseEntityComponent;
 		enum class DLLNETWORK SpawnFlags : uint32_t
 		{

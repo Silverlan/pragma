@@ -15,9 +15,9 @@
 
 using namespace pragma;
 
-void SCharacterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void SCharacterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	BaseCharacterComponent::RegisterEvents(componentManager);
+	BaseCharacterComponent::RegisterEvents(componentManager,registerEvent);
 }
 SCharacterComponent::SCharacterComponent(BaseEntity &ent)
 	: BaseCharacterComponent(ent),m_faction(nullptr),

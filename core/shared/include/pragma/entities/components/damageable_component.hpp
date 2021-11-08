@@ -18,7 +18,7 @@ namespace pragma
 	{
 	public:
 		static ComponentEventId EVENT_ON_TAKE_DAMAGE;
-		static void RegisterEvents(pragma::EntityComponentManager &componentManager);
+		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 		DamageableComponent(BaseEntity &ent);
 		virtual void Initialize() override;
 

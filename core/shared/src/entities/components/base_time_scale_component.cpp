@@ -16,7 +16,7 @@
 
 using namespace pragma;
 
-void BaseTimeScaleComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+void BaseTimeScaleComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
 {
 	using T = BaseTimeScaleComponent;
 

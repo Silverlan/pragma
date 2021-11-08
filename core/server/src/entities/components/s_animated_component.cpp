@@ -21,9 +21,9 @@ void SAnimatedComponent::Initialize()
 	BaseAnimatedComponent::Initialize();
 }
 void SAnimatedComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-void SAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void SAnimatedComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	BaseAnimatedComponent::RegisterEvents(componentManager);
+	BaseAnimatedComponent::RegisterEvents(componentManager,registerEvent);
 }
 void SAnimatedComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const {outTypeIndex = std::type_index(typeid(BaseAnimatedComponent));}
 void SAnimatedComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)

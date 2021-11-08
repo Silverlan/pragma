@@ -20,12 +20,12 @@ using namespace pragma;
 
 ComponentEventId BaseHealthComponent::EVENT_ON_TAKEN_DAMAGE = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseHealthComponent::EVENT_ON_HEALTH_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseHealthComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void BaseHealthComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_ON_TAKEN_DAMAGE = componentManager.RegisterEvent("ON_TAKEN_DAMAGE");
-	EVENT_ON_HEALTH_CHANGED = componentManager.RegisterEvent("ON_HEALTH_CHANGED");
+	EVENT_ON_TAKEN_DAMAGE = registerEvent("ON_TAKEN_DAMAGE",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_HEALTH_CHANGED = registerEvent("ON_HEALTH_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
 }
-void BaseHealthComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember)
+void BaseHealthComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
 {
 	using T = BaseHealthComponent;
 

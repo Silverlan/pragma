@@ -16,7 +16,7 @@ namespace pragma
 		: public BaseEntityComponent
 	{
 	public:
-		static void RegisterMembers(pragma::EntityComponentManager &componentManager,const std::function<ComponentMemberIndex(ComponentMemberInfo&&)> &registerMember);
+		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
 
 		VelocityComponent(BaseEntity &ent);
 		virtual void Initialize() override;

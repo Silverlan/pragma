@@ -108,8 +108,6 @@ public:
 	virtual NetworkState *GetNetworkState() const=0;
 
 	pragma::NetEventId FindNetEvent(const std::string &name) const;
-	pragma::ComponentEventId RegisterComponentEvent(const std::string &name) const;
-	pragma::ComponentEventId GetEventId(const std::string &name) const;
 
 	// Returns IDENTITY if the entity has no transform component
 	const umath::ScaledTransform &GetPose() const;

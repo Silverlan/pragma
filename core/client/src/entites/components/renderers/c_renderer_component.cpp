@@ -30,20 +30,20 @@ ComponentEventId CRendererComponent::EVENT_GET_PRESENTATION_TEXTURE = INVALID_CO
 ComponentEventId CRendererComponent::EVENT_GET_HDR_PRESENTATION_TEXTURE = INVALID_COMPONENT_ID;
 ComponentEventId CRendererComponent::EVENT_RECORD_COMMAND_BUFFERS = INVALID_COMPONENT_ID;
 ComponentEventId CRendererComponent::EVENT_RENDER = INVALID_COMPONENT_ID;
-void CRendererComponent::RegisterEvents(pragma::EntityComponentManager &componentManager)
+void CRendererComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
-	EVENT_RELOAD_RENDER_TARGET = componentManager.RegisterEvent("EVENT_RELOAD_RENDER_TARGET",typeid(CRendererComponent));
-	EVENT_RELOAD_BLOOM_RENDER_TARGET = componentManager.RegisterEvent("EVENT_RELOAD_BLOOM_RENDER_TARGET",typeid(CRendererComponent));
-	EVENT_BEGIN_RENDERING = componentManager.RegisterEvent("EVENT_BEGIN_RENDERING",typeid(CRendererComponent));
-	EVENT_END_RENDERING = componentManager.RegisterEvent("EVENT_END_RENDERING",typeid(CRendererComponent));
-	EVENT_UPDATE_CAMERA_DATA = componentManager.RegisterEvent("EVENT_UPDATE_CAMERA_DATA",typeid(CRendererComponent));
-	EVENT_UPDATE_RENDER_SETTINGS = componentManager.RegisterEvent("EVENT_UPDATE_RENDER_SETTINGS",typeid(CRendererComponent));
-	EVENT_UPDATE_RENDERER_BUFFER = componentManager.RegisterEvent("EVENT_UPDATE_RENDERER_BUFFER",typeid(CRendererComponent));
-	EVENT_GET_SCENE_TEXTURE = componentManager.RegisterEvent("EVENT_GET_SCENE_TEXTURE",typeid(CRendererComponent));
-	EVENT_GET_PRESENTATION_TEXTURE = componentManager.RegisterEvent("EVENT_GET_PRESENTATION_TEXTURE",typeid(CRendererComponent));
-	EVENT_GET_HDR_PRESENTATION_TEXTURE = componentManager.RegisterEvent("EVENT_GET_HDR_PRESENTATION_TEXTURE",typeid(CRendererComponent));
-	EVENT_RECORD_COMMAND_BUFFERS = componentManager.RegisterEvent("EVENT_RECORD_COMMAND_BUFFERS",typeid(CRendererComponent));
-	EVENT_RENDER = componentManager.RegisterEvent("EVENT_RENDER",typeid(CRendererComponent));
+	EVENT_RELOAD_RENDER_TARGET = registerEvent("EVENT_RELOAD_RENDER_TARGET",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_RELOAD_BLOOM_RENDER_TARGET = registerEvent("EVENT_RELOAD_BLOOM_RENDER_TARGET",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_BEGIN_RENDERING = registerEvent("EVENT_BEGIN_RENDERING",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_END_RENDERING = registerEvent("EVENT_END_RENDERING",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_UPDATE_CAMERA_DATA = registerEvent("EVENT_UPDATE_CAMERA_DATA",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_UPDATE_RENDER_SETTINGS = registerEvent("EVENT_UPDATE_RENDER_SETTINGS",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_UPDATE_RENDERER_BUFFER = registerEvent("EVENT_UPDATE_RENDERER_BUFFER",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_GET_SCENE_TEXTURE = registerEvent("EVENT_GET_SCENE_TEXTURE",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_GET_PRESENTATION_TEXTURE = registerEvent("EVENT_GET_PRESENTATION_TEXTURE",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_GET_HDR_PRESENTATION_TEXTURE = registerEvent("EVENT_GET_HDR_PRESENTATION_TEXTURE",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_RECORD_COMMAND_BUFFERS = registerEvent("EVENT_RECORD_COMMAND_BUFFERS",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_RENDER = registerEvent("EVENT_RENDER",EntityComponentManager::EventInfo::Type::Explicit);
 }
 
 void CRendererComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}

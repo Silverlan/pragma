@@ -61,7 +61,7 @@
 #include <pragma/lua/policies/pair_policy.hpp>
 #include <pragma/lua/converters/pair_converter_t.hpp>
 #include <pragma/lua/converters/game_type_converters_t.hpp>
-#include <pragma/entities/func/basefuncwater.h>
+#include <pragma/entities/components/liquid/base_liquid_component.hpp>
 #include <prosper_command_buffer.hpp>
 #include <prosper_descriptor_set_group.hpp>
 #include <prosper_render_pass.hpp>

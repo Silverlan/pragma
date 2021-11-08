@@ -12,14 +12,14 @@ local Component = ents.FuncPortalComponent
 
 function Component:InitializeReflectionMaterial()
 	local portalC = self:GetEntity():GetComponent(ents.COMPONENT_PORTAL)
-	local renderer = portalC:GetReflectionRenderer()
-	if(util.is_valid(renderer) == false or self.m_meshInfo == nil) then return end
-
-	local mdl = self:GetEntity():GetModel()
-	local subMesh = mdl:GetMeshGroup(self.m_meshInfo[1]):GetMesh(self.m_meshInfo[2]):GetSubMesh(self.m_meshInfo[3])
+	local surfC = self:GetEntity():GetComponent(ents.COMPONENT_SURFACE)
+	local renderer = portalC:GetRenderer()
+	if(util.is_valid(renderer) == false or surfC == nil) then return end
+	local mesh = surfC:GetMesh()
+	if(mesh == nil) then return end
 	local mat = game.create_material("reflection")
 	mat:SetTexture("albedo_map",renderer:GetHDRPresentationTexture())
 	mat:UpdateTextures()
-	local matIdx = mdl:AddMaterial(0,mat)
-	subMesh:SetSkinTextureIndex(matIdx)
+	local matIdx = self:GetEntity():GetModel():AddMaterial(0,mat)
+	mesh:SetSkinTextureIndex(matIdx)
 end

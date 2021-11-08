@@ -6,7 +6,7 @@
  */
 
 #include "stdafx_shared.h"
-#include "pragma/entities/func/basefuncwater.h"
+#include "pragma/entities/components/liquid/base_liquid_component.hpp"
 #include "pragma/physics/environment.hpp"
 #include "pragma/physics/phys_water_buoyancy_simulator.hpp"
 #include "pragma/physics/phys_water_surface_simulator.hpp"
@@ -20,21 +20,21 @@
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/base_model_component.hpp"
 #include "pragma/entities/components/base_render_component.hpp"
+#include "pragma/entities/components/base_surface_component.hpp"
 #include "pragma/entities/components/submergible_component.hpp"
 #include "pragma/entities/baseentity_events.hpp"
 #include "pragma/model/model.h"
-#include <pragma/math/intersection.h>
 
 // #define ENABLE_DEPRECATED_PHYSICS
 
 using namespace pragma;
 #pragma optimize("",off)
-ComponentEventId BaseFuncWaterComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED = pragma::INVALID_COMPONENT_ID;
-void BaseFuncWaterComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
+ComponentEventId BaseFuncLiquidComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED = pragma::INVALID_COMPONENT_ID;
+void BaseFuncLiquidComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
 	EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED = registerEvent("ON_WATER_SURFACE_SIMULATOR_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
 }
-void BaseFuncWaterComponent::Initialize()
+void BaseFuncLiquidComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 	m_netEvCreateSplash = SetupNetEvent("create_splash");
@@ -79,28 +79,32 @@ void BaseFuncWaterComponent::Initialize()
 	auto &ent = GetEntity();
 	ent.AddComponent("name");
 	ent.AddComponent("render");
+	m_surfaceC = ent.AddComponent("surface")->GetHandle<BaseSurfaceComponent>();
 	auto touchC = ent.AddComponent("touch");
 	static_cast<BaseTouchComponent*>(touchC.get())->SetNeverDisablePhysicsCallbacks(true);
 	ent.AddComponent("model");
 }
 
-void BaseFuncWaterComponent::OnEntitySpawn()
+void BaseFuncLiquidComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
 }
 
-void BaseFuncWaterComponent::OnEntityComponentAdded(BaseEntityComponent &component)
+void BaseFuncLiquidComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
 	BaseEntityComponent::OnEntityComponentAdded(component);
 	auto *pRenderComponent = dynamic_cast<pragma::BaseRenderComponent*>(&component);
 	auto *pPhysicsComponent = dynamic_cast<pragma::BasePhysicsComponent*>(&component);
+	auto *pSurfC = dynamic_cast<pragma::BaseSurfaceComponent*>(&component);
 	if(pRenderComponent != nullptr)
 		pRenderComponent->SetCastShadows(false);
 	else if(pPhysicsComponent != nullptr)
 		pPhysicsComponent->SetRayResultCallbackEnabled(true);
+	else if(pSurfC)
+		m_surfaceC = pSurfC->GetHandle<BaseSurfaceComponent>();
 }
 
-util::EventReply BaseFuncWaterComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
+util::EventReply BaseFuncLiquidComponent::HandleEvent(ComponentEventId eventId,ComponentEvent &evData)
 {
 	if(BaseEntityComponent::HandleEvent(eventId,evData) == util::EventReply::Handled)
 		return util::EventReply::Handled;
@@ -118,7 +122,7 @@ util::EventReply BaseFuncWaterComponent::HandleEvent(ComponentEventId eventId,Co
 	return util::EventReply::Unhandled;
 }
 
-void BaseFuncWaterComponent::OnPhysicsInitialized()
+void BaseFuncLiquidComponent::OnPhysicsInitialized()
 {
 	auto &ent = GetEntity();
 	auto pPhysComponent = ent.GetPhysicsComponent();
@@ -129,7 +133,7 @@ void BaseFuncWaterComponent::OnPhysicsInitialized()
 	pPhysComponent->SetForcePhysicsAwakeCallbacksEnabled(true);
 }
 
-bool BaseFuncWaterComponent::OnRayResultCallback(CollisionMask rayCollisionGroup,CollisionMask rayCollisionMask)
+bool BaseFuncLiquidComponent::OnRayResultCallback(CollisionMask rayCollisionGroup,CollisionMask rayCollisionMask)
 {
 #ifdef ENABLE_DEPRECATED_PHYSICS
 	if(m_physSurfaceSim == nullptr || (rayCollisionMask &CollisionMask::WaterSurface) == CollisionMask::None)
@@ -154,12 +158,12 @@ bool BaseFuncWaterComponent::OnRayResultCallback(CollisionMask rayCollisionGroup
 #endif
 }
 
-void BaseFuncWaterComponent::SetMaxWaveHeight(float height) {m_kvMaxWaveHeight = height;}
+void BaseFuncLiquidComponent::SetMaxWaveHeight(float height) {m_kvMaxWaveHeight = height;}
 
-const PhysWaterSurfaceSimulator *BaseFuncWaterComponent::GetSurfaceSimulator() const {return const_cast<BaseFuncWaterComponent*>(this)->GetSurfaceSimulator();}
-PhysWaterSurfaceSimulator *BaseFuncWaterComponent::GetSurfaceSimulator() {return m_physSurfaceSim.get();}
+const PhysWaterSurfaceSimulator *BaseFuncLiquidComponent::GetSurfaceSimulator() const {return const_cast<BaseFuncLiquidComponent*>(this)->GetSurfaceSimulator();}
+PhysWaterSurfaceSimulator *BaseFuncLiquidComponent::GetSurfaceSimulator() {return m_physSurfaceSim.get();}
 
-bool BaseFuncWaterComponent::OnBulletHit(const BulletInfo &bulletInfo,const TraceData &data,PhysObj *phys,pragma::physics::ICollisionObject *col,const LocalRayResult &result)
+bool BaseFuncLiquidComponent::OnBulletHit(const BulletInfo &bulletInfo,const TraceData &data,PhysObj *phys,pragma::physics::ICollisionObject *col,const LocalRayResult &result)
 {
 	if(m_physSurfaceSim != nullptr)
 	{
@@ -174,88 +178,44 @@ bool BaseFuncWaterComponent::OnBulletHit(const BulletInfo &bulletInfo,const Trac
 	return false;
 }
 
-const Vector3 &BaseFuncWaterComponent::GetWaterVelocity() const {return m_waterVelocity;}
-void BaseFuncWaterComponent::SetWaterVelocity(const Vector3 &velocity) {m_waterVelocity = velocity;}
+const Vector3 &BaseFuncLiquidComponent::GetWaterVelocity() const {return m_waterVelocity;}
+void BaseFuncLiquidComponent::SetWaterVelocity(const Vector3 &velocity) {m_waterVelocity = velocity;}
 
-const PhysLiquid &BaseFuncWaterComponent::GetLiquidDescription() const {return const_cast<BaseFuncWaterComponent*>(this)->GetLiquidDescription();}
-PhysLiquid &BaseFuncWaterComponent::GetLiquidDescription() {return m_liquid;}
+const PhysLiquid &BaseFuncLiquidComponent::GetLiquidDescription() const {return const_cast<BaseFuncLiquidComponent*>(this)->GetLiquidDescription();}
+PhysLiquid &BaseFuncLiquidComponent::GetLiquidDescription() {return m_liquid;}
 
-double BaseFuncWaterComponent::GetDensity() const {return m_liquid.density;}
-void BaseFuncWaterComponent::SetDensity(double density) {m_liquid.density = density;}
+double BaseFuncLiquidComponent::GetDensity() const {return m_liquid.density;}
+void BaseFuncLiquidComponent::SetDensity(double density) {m_liquid.density = density;}
 
-double BaseFuncWaterComponent::GetLinearDragCoefficient() const {return m_liquid.linearDragCoefficient;}
-void BaseFuncWaterComponent::SetLinearDragCoefficient(double coefficient) {m_liquid.linearDragCoefficient = coefficient;}
+double BaseFuncLiquidComponent::GetLinearDragCoefficient() const {return m_liquid.linearDragCoefficient;}
+void BaseFuncLiquidComponent::SetLinearDragCoefficient(double coefficient) {m_liquid.linearDragCoefficient = coefficient;}
 
-double BaseFuncWaterComponent::GetTorqueDragCoefficient() const {return m_liquid.torqueDragCoefficient;}
-void BaseFuncWaterComponent::SetTorqueDragCoefficient(double coefficient) {m_liquid.torqueDragCoefficient = coefficient;}
+double BaseFuncLiquidComponent::GetTorqueDragCoefficient() const {return m_liquid.torqueDragCoefficient;}
+void BaseFuncLiquidComponent::SetTorqueDragCoefficient(double coefficient) {m_liquid.torqueDragCoefficient = coefficient;}
 
-float BaseFuncWaterComponent::GetStiffness() const {return m_liquid.stiffness;}
-void BaseFuncWaterComponent::SetStiffness(float stiffness) {m_liquid.stiffness = stiffness;}
-float BaseFuncWaterComponent::GetPropagation() const {return m_liquid.propagation;}
-void BaseFuncWaterComponent::SetPropagation(float propagation) {m_liquid.propagation = propagation;}
-uint32_t BaseFuncWaterComponent::GetSpacing() const {return m_spacing;}
-void BaseFuncWaterComponent::SetSpacing(uint32_t spacing) {m_spacing = spacing;}
+float BaseFuncLiquidComponent::GetStiffness() const {return m_liquid.stiffness;}
+void BaseFuncLiquidComponent::SetStiffness(float stiffness) {m_liquid.stiffness = stiffness;}
+float BaseFuncLiquidComponent::GetPropagation() const {return m_liquid.propagation;}
+void BaseFuncLiquidComponent::SetPropagation(float propagation) {m_liquid.propagation = propagation;}
+uint32_t BaseFuncLiquidComponent::GetSpacing() const {return m_spacing;}
+void BaseFuncLiquidComponent::SetSpacing(uint32_t spacing) {m_spacing = spacing;}
 
-void BaseFuncWaterComponent::InitializeWaterSurface()
+void BaseFuncLiquidComponent::InitializeWaterSurface()
 {
 	ClearWaterSurface();
 	auto &ent = GetEntity();
 	auto &hMdl = ent.GetModel();
 	if(hMdl == nullptr)
 		return;
-	Material *mat = nullptr;
-	auto dir = Vector3(0.f,1.f,0.f); // TODO
-	auto &mats = hMdl->GetMaterials();
-	std::vector<std::shared_ptr<ModelMesh>> meshes;
-	hMdl->GetBodyGroupMeshes({},0,meshes);
-	auto minDot = std::numeric_limits<float>::max();
-	auto bFoundWaterShader = false;
-
-	// Find best plane candidate
-	for(auto &mesh : meshes)
+	if(m_surfaceC.expired())
+		return;
+	auto meshInfo = m_surfaceC->FindAndAssignMesh([](ModelMesh &mesh,ModelSubMesh &subMesh,Material &mat,const std::string &shader) -> uint32_t {
+		return (shader == "water") ? 1 : 0;
+	});
+	m_originalWaterPlaneDistance = meshInfo.has_value() ? m_surfaceC->GetPlaneDistance() : 0;
+	if(meshInfo.has_value() && m_kvSurfaceMaterial.empty() == true)
 	{
-		for(auto &subMesh : mesh->GetSubMeshes())
-		{
-			auto matId = hMdl->GetMaterialIndex(*subMesh);
-			if(matId.has_value() == false || *matId >= mats.size())
-				continue;
-			auto &hMat = mats.at(*matId);
-			if(hMat.IsValid() == false)
-				continue;
-			auto shaderName = hMat->GetShaderIdentifier();
-			ustring::to_lower(shaderName);
-			ustring::substr(shaderName,0,5);
-
-			if(shaderName == "water")
-				bFoundWaterShader = true;
-			else if(bFoundWaterShader == true) // Surfaces with water shader have priority
-				continue;
-			auto &verts = subMesh->GetVertices();
-			if(verts.size() < 3)
-				continue;
-			auto &v0 = verts.at(0);
-			auto &v1 = verts.at(1);
-			auto &v2 = verts.at(2);
-
-			umath::Plane p {v0.position,v1.position,v2.position};
-			auto dot = umath::abs(uvec::dot(dir,p.GetNormal()) -1.f);
-			if(dot >= minDot)
-				continue;
-			minDot = dot;
-			m_waterPlane = p;
-			m_originalWaterPlaneDistance = p.GetDistance();
-			m_waterMesh = subMesh;
-			mat = hMat.get();
-		}
-	}
-	if(minDot == std::numeric_limits<float>::max())
-	{
-		ClearWaterSurface();
-		Con::cwar<<"WARNING: No water plane found for func_water entity '"<<ent.GetClass()<<" ("<<ent.GetIndex()<<")"<<"'!"<<Con::endl;
-	}
-	else if(m_kvSurfaceMaterial.empty() == true)
-	{
-		auto &data = mat->GetDataBlock();
+		auto &data = meshInfo->material->GetDataBlock();
 		if(data != nullptr)
 		{
 			std::string surfaceMatIdentifier;
@@ -265,7 +225,7 @@ void BaseFuncWaterComponent::InitializeWaterSurface()
 	}
 }
 
-void BaseFuncWaterComponent::SetSurfaceMaterial(const std::string &mat)
+void BaseFuncLiquidComponent::SetSurfaceMaterial(const std::string &mat)
 {
 	auto &ent = GetEntity();
 	auto *nw = ent.GetNetworkState();
@@ -273,7 +233,7 @@ void BaseFuncWaterComponent::SetSurfaceMaterial(const std::string &mat)
 	SetSurfaceMaterial(game->GetSurfaceMaterial(mat));
 }
 
-void BaseFuncWaterComponent::SetSurfaceMaterial(const SurfaceMaterial *mat)
+void BaseFuncLiquidComponent::SetSurfaceMaterial(const SurfaceMaterial *mat)
 {
 	if(mat == nullptr)
 		return;
@@ -284,17 +244,18 @@ void BaseFuncWaterComponent::SetSurfaceMaterial(const SurfaceMaterial *mat)
 	SetPropagation(mat->GetWavePropagation());
 }
 
-void BaseFuncWaterComponent::ReloadSurfaceSimulator()
+void BaseFuncLiquidComponent::ReloadSurfaceSimulator()
 {
 	m_physSurfaceSim = nullptr;
 	auto &ent = GetEntity();
-	if(ShouldSimulateSurface() == false || m_waterMesh.expired() == true)
+	auto *surfC = static_cast<BaseSurfaceComponent*>(m_surfaceC.get());
+	auto *mesh = surfC ? surfC->GetMesh() : nullptr;
+	if(ShouldSimulateSurface() == false || !mesh)
 	{
 		BroadcastEvent(EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED);
 		return;
 	}
 	auto pTrComponent = ent.GetTransformComponent();
-	auto mesh = m_waterMesh.lock();
 	Vector3 min,max;
 	mesh->GetBounds(min,max);
 	if(pTrComponent != nullptr)
@@ -303,18 +264,18 @@ void BaseFuncWaterComponent::ReloadSurfaceSimulator()
 		pTrComponent->LocalToWorld(&max);
 	}
 
-	m_waterPlane.SetDistance(m_originalWaterPlaneDistance +m_kvMaxWaveHeight);
+	surfC->SetPlaneDistance(m_originalWaterPlaneDistance +m_kvMaxWaveHeight);
 
 	Vector3 n;
-	double d;
-	GetWaterPlaneWs(n,d);
+	float d;
+	surfC->GetPlaneWs(n,d);
 	m_physSurfaceSim = InitializeSurfaceSimulator(Vector2(min.x,min.z),Vector2(max.x,max.z),(n *static_cast<float>(d)).y); // TODO
 	m_physSurfaceSim->SetMaxWaveHeight(m_kvMaxWaveHeight);
 	m_physSurfaceSim->Initialize();
 	BroadcastEvent(EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED);
 }
 
-void BaseFuncWaterComponent::CreateSplash(const Vector3 &origin,float radius,float force)
+void BaseFuncLiquidComponent::CreateSplash(const Vector3 &origin,float radius,float force)
 {
 	m_splashes.push({});
 	auto &splashInfo = m_splashes.back();
@@ -323,27 +284,31 @@ void BaseFuncWaterComponent::CreateSplash(const Vector3 &origin,float radius,flo
 	splashInfo.force = force;
 }
 
-bool BaseFuncWaterComponent::ShouldSimulateSurface() const {return ((GetEntity().GetSpawnFlags() &umath::to_integral(SpawnFlags::SurfaceSimulation)) != 0) ? true : false;}
+bool BaseFuncLiquidComponent::ShouldSimulateSurface() const {return ((GetEntity().GetSpawnFlags() &umath::to_integral(SpawnFlags::SurfaceSimulation)) != 0) ? true : false;}
 
-void BaseFuncWaterComponent::ClearWaterSurface()
+void BaseFuncLiquidComponent::ClearWaterSurface()
 {
-	m_waterMesh = {};
-	m_waterPlane = {{0.f,1.f,0.f},0.f};
-	m_originalWaterPlaneDistance = m_waterPlane.GetDistance();
+	if(m_surfaceC.valid())
+	{
+		m_surfaceC->Clear();
+		m_originalWaterPlaneDistance = m_surfaceC->GetPlaneDistance();
+	}
 	m_physSurfaceSim = nullptr;
 	BroadcastEvent(EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED);
 }
 
-std::shared_ptr<PhysWaterSurfaceSimulator> BaseFuncWaterComponent::InitializeSurfaceSimulator(const Vector2 &min,const Vector2 &max,float originY) {return std::make_shared<PhysWaterSurfaceSimulator>(min,max,originY,GetSpacing(),GetStiffness(),GetPropagation());}
-void BaseFuncWaterComponent::OnEndTouch(BaseEntity *ent,PhysObj *phys)
+std::shared_ptr<PhysWaterSurfaceSimulator> BaseFuncLiquidComponent::InitializeSurfaceSimulator(const Vector2 &min,const Vector2 &max,float originY) {return std::make_shared<PhysWaterSurfaceSimulator>(min,max,originY,GetSpacing(),GetStiffness(),GetPropagation());}
+void BaseFuncLiquidComponent::OnEndTouch(BaseEntity *ent,PhysObj *phys)
 {
 	auto pSubmergibleComponent = ent->GetComponent<pragma::SubmergibleComponent>();
 	if(pSubmergibleComponent.valid())
 		pSubmergibleComponent->SetSubmergedFraction(GetEntity(),0.f);
 }
 
-void BaseFuncWaterComponent::SimulateBuoyancy() const
+void BaseFuncLiquidComponent::SimulateBuoyancy() const
 {
+	if(m_surfaceC.expired())
+		return;
 	auto &ent = GetEntity();
 	auto *nw = ent.GetNetworkState();
 	auto *game = nw->GetGameState();
@@ -352,8 +317,8 @@ void BaseFuncWaterComponent::SimulateBuoyancy() const
 	auto *touchComponent = static_cast<BaseTouchComponent*>(ent.FindComponent("touch").get());
 
 	Vector3 n;
-	double d;
-	GetWaterPlaneWs(n,d);
+	float d;
+	m_surfaceC->GetPlaneWs(n,d);
 
 	if(m_physSurfaceSim != nullptr)
 		m_physSurfaceSim->LockParticleHeights();
@@ -378,19 +343,7 @@ void BaseFuncWaterComponent::SimulateBuoyancy() const
 		m_physSurfaceSim->UnlockParticleHeights();*/
 }
 
-Vector3 BaseFuncWaterComponent::ProjectToSurface(const Vector3 &pos) const
-{
-	if(m_physSurfaceSim != nullptr)
-	{
-		// TODO
-	}
-	Vector3 n;
-	double d;
-	GetWaterPlaneWs(n,d);
-	return uvec::project_to_plane(pos,n,d);
-}
-
-bool BaseFuncWaterComponent::CalcLineSurfaceIntersection(const Vector3 &lineOrigin,const Vector3 &lineDir,double *outT,double *outU,double *outV,bool bCull) const
+bool BaseFuncLiquidComponent::CalcLineSurfaceIntersection(const Vector3 &lineOrigin,const Vector3 &lineDir,double *outT,double *outU,double *outV,bool bCull) const
 {
 	double t,u,v;
 	if(m_physSurfaceSim != nullptr)
@@ -434,14 +387,9 @@ bool BaseFuncWaterComponent::CalcLineSurfaceIntersection(const Vector3 &lineOrig
 	}
 	else
 	{
-		Vector3 n;
-		double d;
-		GetWaterPlaneWs(n,d);
-		auto t = 0.f;
-		auto r = umath::intersection::line_plane(lineOrigin,lineDir,n,d,&t);
-		if(outT != nullptr)
-			*outT = t;
-		return r == umath::intersection::Result::Intersect;
+		if(m_surfaceC.expired())
+			return false;
+		return m_surfaceC->CalcLineSurfaceIntersection(lineOrigin,lineDir,outT);
 	}
 	return false;
 }

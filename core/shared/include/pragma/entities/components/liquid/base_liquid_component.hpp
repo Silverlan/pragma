@@ -17,9 +17,9 @@ class PhysWaterSurfaceSimulator;
 struct BulletInfo;
 namespace pragma
 {
-	class DLLNETWORK BaseFuncWaterComponent
-		: public BaseEntityComponent,
-		virtual public BaseWaterObject
+	class BaseSurfaceComponent;
+	class DLLNETWORK BaseFuncLiquidComponent
+		: public BaseEntityComponent
 	{
 	public:
 		static ComponentEventId EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED;
@@ -69,7 +69,6 @@ namespace pragma
 		virtual void ReloadSurfaceSimulator();
 		virtual void OnEndTouch(BaseEntity *ent,PhysObj *phys);
 
-		Vector3 ProjectToSurface(const Vector3 &pos) const;
 		bool CalcLineSurfaceIntersection(const Vector3 &lineOrigin,const Vector3 &lineDir,double *outT=nullptr,double *outU=nullptr,double *outV=nullptr,bool bCull=false) const;
 		virtual bool OnRayResultCallback(CollisionMask rayCollisionGroup,CollisionMask rayCollisionMask);
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData) override;
@@ -96,12 +95,12 @@ namespace pragma
 		pragma::NetEventId m_netEvCreateSplash = pragma::INVALID_NET_EVENT;
 		pragma::NetEventId m_netEvSetWaterPlane = pragma::INVALID_NET_EVENT;
 
+		pragma::ComponentHandle<BaseSurfaceComponent> m_surfaceC {};
 		double m_originalWaterPlaneDistance = 0.0;
 		Vector3 m_waterVelocity;
 		uint32_t m_spacing = 10;
 		std::string m_kvSurfaceMaterial;
 		float m_kvMaxWaveHeight = 100.f;
-		std::weak_ptr<ModelSubMesh> m_waterMesh = {};
 		PhysLiquid m_liquid = {};
 		std::shared_ptr<PhysWaterSurfaceSimulator> m_physSurfaceSim = nullptr;
 	};

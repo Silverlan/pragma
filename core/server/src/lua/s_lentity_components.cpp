@@ -61,7 +61,11 @@
 #include "pragma/entities/func/s_func_physics.h"
 #include "pragma/entities/func/s_func_softphysics.hpp"
 #include "pragma/entities/func/s_func_portal.h"
-#include "pragma/entities/func/s_func_water.h"
+#include "pragma/entities/components/s_surface_component.hpp"
+#include "pragma/entities/components/liquid/s_liquid_component.hpp"
+#include "pragma/entities/components/liquid/s_liquid_surface_component.hpp"
+#include "pragma/entities/components/liquid/s_liquid_volume_component.hpp"
+#include "pragma/entities/components/liquid/s_buoyancy_component.hpp"
 #include "pragma/entities/func/s_funcbutton.h"
 #include "pragma/entities/game_player_spawn.h"
 #include "pragma/entities/logic/s_logic_relay.h"
@@ -274,10 +278,22 @@ void SGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto defSFuncSoftPhysics = pragma::lua::create_entity_component_class<pragma::SFuncSoftPhysicsComponent,pragma::BaseFuncSoftPhysicsComponent>("FuncSoftPhysicsComponent");
 	entsMod[defSFuncSoftPhysics];
 
+	auto defSSurface = pragma::lua::create_entity_component_class<pragma::SSurfaceComponent,pragma::BaseSurfaceComponent>("SurfaceComponent");
+	entsMod[defSSurface];
+
 	// auto defSFuncPortal = pragma::lua::create_entity_component_class<pragma::SFuncPortalComponent,pragma::BaseFuncPortalComponent>("FuncPortalComponent");
 	// entsMod[defSFuncPortal];
 
-	auto defSWater = pragma::lua::create_entity_component_class<pragma::SWaterComponent,pragma::BaseFuncWaterComponent>("WaterComponent");
+	auto defSLiquidSurf = pragma::lua::create_entity_component_class<pragma::SLiquidSurfaceComponent,pragma::BaseLiquidSurfaceComponent>("LiquidSurfaceComponent");
+	entsMod[defSLiquidSurf];
+
+	auto defSLiquidVol = pragma::lua::create_entity_component_class<pragma::SLiquidVolumeComponent,pragma::BaseLiquidVolumeComponent>("LiquidVolumeComponent");
+	entsMod[defSLiquidVol];
+
+	auto defSBuoyancy = pragma::lua::create_entity_component_class<pragma::SBuoyancyComponent,pragma::BaseBuoyancyComponent>("BuoyancyComponent");
+	entsMod[defSBuoyancy];
+
+	auto defSWater = pragma::lua::create_entity_component_class<pragma::SLiquidComponent,pragma::BaseFuncLiquidComponent>("LiquidComponent");
 	entsMod[defSWater];
 
 	auto defSButton = pragma::lua::create_entity_component_class<pragma::SButtonComponent,pragma::BaseFuncButtonComponent>("ButtonComponent");

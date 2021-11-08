@@ -5,7 +5,7 @@
  * Copyright (c) 2021 Silverlan */
 
 #include "stdafx_server.h"
-#include "pragma/entities/func/s_func_water.h"
+#include "pragma/entities/components/liquid/s_liquid_component.hpp"
 #include "pragma/entities/s_entityfactories.h"
 #include <pragma/physics/physobj.h>
 #include <sharedutils/util_string.h>
@@ -27,18 +27,18 @@ extern DLLSERVER SGame *s_game;
 
 LINK_ENTITY_TO_CLASS(func_water,FuncWater);
 
-static std::vector<SWaterComponent*> s_waterEntities = {};
+static std::vector<SLiquidComponent*> s_waterEntities = {};
 REGISTER_CONVAR_CALLBACK_CL(sv_water_surface_simulation_shared,[](NetworkState*,ConVar*,int,int val) {
 	for(auto *entWater : s_waterEntities)
 		entWater->UpdateSurfaceSimulator();
 });
 
-SWaterComponent::SWaterComponent(BaseEntity &ent)
-	: BaseFuncWaterComponent(ent)
+SLiquidComponent::SLiquidComponent(BaseEntity &ent)
+	: BaseFuncLiquidComponent(ent)
 {
 	s_waterEntities.push_back(this);
 }
-SWaterComponent::~SWaterComponent()
+SLiquidComponent::~SLiquidComponent()
 {
 	auto it = std::find(s_waterEntities.begin(),s_waterEntities.end(),this);
 	if(it != s_waterEntities.end())
@@ -50,9 +50,9 @@ SWaterComponent::~SWaterComponent()
 }
 
 static auto cvSimShared = GetServerConVar("sv_water_surface_simulation_shared");
-void SWaterComponent::Initialize()
+void SLiquidComponent::Initialize()
 {
-	BaseFuncWaterComponent::Initialize();
+	BaseFuncLiquidComponent::Initialize();
 
 	BindEventUnhandled(SModelComponent::EVENT_ON_MODEL_CHANGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		// TODO: Move this to shared
@@ -72,7 +72,7 @@ void SWaterComponent::Initialize()
 	SetTickPolicy(TickPolicy::Always); // TODO
 }
 
-void SWaterComponent::OnTick(double dt)
+void SLiquidComponent::OnTick(double dt)
 {
 	if(m_bUsingClientsideSimulation == true || m_physSurfaceSim == nullptr)
 		return;
@@ -82,9 +82,9 @@ void SWaterComponent::OnTick(double dt)
 	sim->Simulate(0.01); // TODO
 }
 
-void SWaterComponent::OnEntitySpawn()
+void SLiquidComponent::OnEntitySpawn()
 {
-	BaseFuncWaterComponent::OnEntitySpawn();
+	BaseFuncLiquidComponent::OnEntitySpawn();
 	// TODO: Move this to shared
 	auto &ent = GetEntity();
 	auto *game = ent.GetNetworkState()->GetGameState();
@@ -104,9 +104,9 @@ void SWaterComponent::OnEntitySpawn()
 	UpdateSurfaceSimulator();
 }
 
-bool SWaterComponent::ShouldSimulateSurface() const {return (BaseFuncWaterComponent::ShouldSimulateSurface() == true && (cvSimShared->GetBool() == true || static_cast<const SBaseEntity&>(GetEntity()).GetClientsideEntity() == nullptr)) ? true : false;}
+bool SLiquidComponent::ShouldSimulateSurface() const {return (BaseFuncLiquidComponent::ShouldSimulateSurface() == true && (cvSimShared->GetBool() == true || static_cast<const SBaseEntity&>(GetEntity()).GetClientsideEntity() == nullptr)) ? true : false;}
 
-void SWaterComponent::UpdateSurfaceSimulator()
+void SLiquidComponent::UpdateSurfaceSimulator()
 {
 	if(m_cbGameInitialized.IsValid())
 		m_cbGameInitialized.Remove();
@@ -117,7 +117,7 @@ void SWaterComponent::UpdateSurfaceSimulator()
 		auto *cent = static_cast<const SBaseEntity&>(GetEntity()).GetClientsideEntity();
 		if(cent != nullptr)
 		{
-			auto *pWaterComponent = static_cast<pragma::BaseFuncWaterComponent*>(cent->FindComponent("water").get());
+			auto *pWaterComponent = static_cast<pragma::BaseFuncLiquidComponent*>(cent->FindComponent("water").get());
 			if(pWaterComponent != nullptr)
 			{
 				auto *surfSim = pWaterComponent->GetSurfaceSimulator();
@@ -126,10 +126,10 @@ void SWaterComponent::UpdateSurfaceSimulator()
 					m_bUsingClientsideSimulation = true;
 					m_physSurfaceSim = surfSim->shared_from_this();
 					auto hEnt = cent->GetHandle();
-					m_cbClientSimulatorUpdate = pWaterComponent->BindEventUnhandled(BaseFuncWaterComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED,[this,hEnt](std::reference_wrapper<pragma::ComponentEvent> evData) {
+					m_cbClientSimulatorUpdate = pWaterComponent->BindEventUnhandled(BaseFuncLiquidComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED,[this,hEnt](std::reference_wrapper<pragma::ComponentEvent> evData) {
 						if(hEnt.valid() == false)
 							return;
-						auto *pWaterComponent = static_cast<pragma::BaseFuncWaterComponent*>(hEnt.get()->FindComponent("water").get());
+						auto *pWaterComponent = static_cast<pragma::BaseFuncLiquidComponent*>(hEnt.get()->FindComponent("water").get());
 						auto *surfSim = (pWaterComponent != nullptr) ? pWaterComponent->GetSurfaceSimulator() : nullptr;
 						m_physSurfaceSim = (surfSim != nullptr) ? surfSim->shared_from_this() : nullptr;
 					});
@@ -141,18 +141,18 @@ void SWaterComponent::UpdateSurfaceSimulator()
 	ReloadSurfaceSimulator();
 }
 
-void SWaterComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
+void SLiquidComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {
 	packet->WriteString(m_kvSurfaceMaterial);
 	packet->Write<float>(m_kvMaxWaveHeight);
 }
-void SWaterComponent::CreateSplash(const Vector3 &origin,float radius,float force)
+void SLiquidComponent::CreateSplash(const Vector3 &origin,float radius,float force)
 {
 	auto &ent = static_cast<SBaseEntity&>(GetEntity());
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent == nullptr || pPhysComponent->GetPhysicsObject() == nullptr)
 		return;
-	BaseFuncWaterComponent::CreateSplash(origin,radius,force);
+	BaseFuncLiquidComponent::CreateSplash(origin,radius,force);
 	if(ent.IsShared() == false)
 		return;
 	NetPacket packet {};
@@ -161,24 +161,13 @@ void SWaterComponent::CreateSplash(const Vector3 &origin,float radius,float forc
 	packet->Write<float>(force);
 	ent.SendNetEvent(m_netEvCreateSplash,packet,pragma::networking::Protocol::SlowReliable);
 }
-const Vector3 &SWaterComponent::GetPosition() const
-{
-	auto pTrComponent = GetEntity().GetTransformComponent();
-	return pTrComponent != nullptr ? pTrComponent->GetPosition() : uvec::ORIGIN;
-}
-const Quat &SWaterComponent::GetOrientation() const
-{
-	auto pTrComponent = GetEntity().GetTransformComponent();
-	static auto identity = uquat::identity();
-	return pTrComponent != nullptr ? pTrComponent->GetRotation() : identity;
-}
 
 ///////////////
 
-void SWaterComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
+void SLiquidComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 void FuncWater::Initialize()
 {
 	SBaseEntity::Initialize();
-	AddComponent<SWaterComponent>();
+	AddComponent<SLiquidComponent>();
 }

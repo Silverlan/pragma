@@ -17,8 +17,8 @@ function Component:Initialize()
 
 	self:AddEntityComponent(ents.COMPONENT_MODEL)
 	self:AddEntityComponent(ents.COMPONENT_RENDER)
+	self:AddEntityComponent(ents.COMPONENT_SURFACE)
 	self.m_relativePortalOrigin = Vector()
-	self:SetReflectionPlane(math.Plane(Vector(0,0,1),0))
 	self:UpdatePortalOrigin()
 	if(CLIENT) then
 		self:SetResolution(1024,1024)
@@ -39,6 +39,7 @@ function Component:Initialize()
 		self:BindEvent(ents.TouchComponent.EVENT_CAN_TRIGGER,"CanTrigger")
 	end
 	self:BindEvent(ents.TransformComponent.EVENT_ON_POSE_CHANGED,"OnPoseChanged")
+	self:BindEvent(ents.SurfaceComponent.EVENT_ON_SURFACE_PLANE_CHANGED,function() self.m_posesDirty = true end)
 end
 
 function Component:OnEntitySpawn()
@@ -83,21 +84,24 @@ function Component:UpdatePoses()
 	if(self.m_posesDirty ~= true) then return end
 	self.m_posesDirty = nil
 
+	local surfC = self:GetEntity():GetComponent(ents.COMPONENT_SURFACE)
+	if(surfC == nil) then return end
 	local srcPos = self:GetEntity():GetPose() *self:GetRelativePortalOrigin()
-	local srcRot = self:GetPlaneRotation()
+	local srcRot = surfC:GetPlaneRotation()
 	local srcPose = math.Transform(srcPos,srcRot)
 
 	local tgtPose = srcPose:Copy()
-	local tgtPlane = self:GetReflectionPlane()
+	local tgtPlane = surfC:GetPlane()
 
 	local target = self:GetTarget()
 	if(util.is_valid(target)) then
 		local portalC = target:GetComponent(ents.COMPONENT_PORTAL)
-		if(portalC ~= nil) then
+		local surfCTgt = target:GetComponent(ents.COMPONENT_SURFACE)
+		if(portalC ~= nil and surfCTgt ~= nil) then
 			local tgtPos = target:GetPose() *portalC:GetRelativePortalOrigin()
-			local tgtRot = portalC:GetPlaneRotation()
+			local tgtRot = surfCTgt:GetPlaneRotation()
 			tgtPose = math.Transform(tgtPos,tgtRot)
-			tgtPlane = portalC:GetReflectionPlane()
+			tgtPlane = surfCTgt:GetPlane()
 		else
 			tgtPose = target:GetPose()
 			tgtPlane = tgtPose:ToPlane()
@@ -121,28 +125,10 @@ end
 
 function Component:GetRelativePortalOrigin() return self.m_relativePortalOrigin end
 
-function Component:GetPlaneRotation()
-	local n = self.m_plane:GetNormal()
-	local d = self.m_plane:GetDistance()
-	local up = vector.UP -vector.UP:Project(n)
-	up:Normalize()
-	return Quaternion(n,up)
-end
-
-function Component:SetSurfacePose(pose)
-	self.m_surfacePose = pose
-	self:SetReflectionPlane(math.Plane(pose:GetForward(),pose:GetRight(),pose:GetUp()))
-end
 function Component:GetSurfacePose() self:UpdatePoses() return self.m_surfacePose end
 function Component:SetTargetPose(pose) self.m_targetPose = pose end
 function Component:GetTargetPose() self:UpdatePoses() return self.m_targetPose end
 function Component:GetTargetPlane() self:UpdatePoses() return self.m_targetPlane end
-
-function Component:SetReflectionPlane(plane)
-	self.m_plane = plane
-	self.m_posesDirty = true
-end
-function Component:GetReflectionPlane() return self.m_plane end
 
 local rot180Yaw = EulerAngles(0,180,0):ToQuaternion()
 function Component:ProjectPoseToTarget(pose)

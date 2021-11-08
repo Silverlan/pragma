@@ -17,6 +17,7 @@
 #include "pragma/entities/components/c_ai_component.hpp"
 #include "pragma/entities/components/c_character_component.hpp"
 #include "pragma/entities/components/c_color_component.hpp"
+#include "pragma/entities/components/c_surface_component.hpp"
 #include "pragma/entities/components/c_score_component.hpp"
 #include "pragma/entities/components/c_flammable_component.hpp"
 #include "pragma/entities/components/c_health_component.hpp"
@@ -33,6 +34,9 @@
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_raytracing_component.hpp"
+#include "pragma/entities/components/liquid/c_buoyancy_component.hpp"
+#include "pragma/entities/components/liquid/c_liquid_surface_component.hpp"
+#include "pragma/entities/components/liquid/c_liquid_volume_component.hpp"
 #include "pragma/entities/environment/audio/c_env_sound_dsp.h"
 #include "pragma/entities/environment/audio/c_env_sound_dsp_chorus.h"
 #include "pragma/entities/environment/audio/c_env_sound_dsp_distortion.h"
@@ -67,7 +71,7 @@
 #include "pragma/entities/func/c_func_physics.h"
 #include "pragma/entities/func/c_func_softphysics.hpp"
 #include "pragma/entities/func/c_func_portal.h"
-#include "pragma/entities/func/c_func_water.h"
+#include "pragma/entities/components/liquid/c_liquid_component.hpp"
 #include "pragma/entities/func/c_funcbutton.h"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/c_bot.h"
@@ -129,6 +133,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CAIComponent>("ai");
 	componentManager.RegisterComponentType<pragma::CCharacterComponent>("character");
 	componentManager.RegisterComponentType<pragma::CColorComponent>("color");
+	componentManager.RegisterComponentType<pragma::CSurfaceComponent>("surface");
 	componentManager.RegisterComponentType<pragma::CScoreComponent>("score");
 	componentManager.RegisterComponentType<pragma::CFlammableComponent>("flammable");
 	componentManager.RegisterComponentType<pragma::CHealthComponent>("health");
@@ -175,7 +180,6 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CKinematicComponent>("kinematic");
 	componentManager.RegisterComponentType<pragma::CFuncPhysicsComponent>("func_physics");
 	// componentManager.RegisterComponentType<pragma::CFuncPortalComponent>("func_portal");
-	componentManager.RegisterComponentType<pragma::CWaterComponent>("water");
 	componentManager.RegisterComponentType<pragma::CButtonComponent>("button");
 	componentManager.RegisterComponentType<pragma::CBotComponent>("bot");
 	componentManager.RegisterComponentType<pragma::CPointConstraintBallSocketComponent>("constraint_ball_socket");
@@ -208,11 +212,16 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CSceneComponent>("scene");
 	componentManager.RegisterComponentType<pragma::CGamemodeComponent>("gamemode");
 	componentManager.RegisterComponentType<pragma::CGameComponent>("game");
+	
+	componentManager.RegisterComponentType<pragma::CLiquidComponent>("liquid");
+	componentManager.RegisterComponentType<pragma::CBuoyancyComponent>("buoyancy");
+	componentManager.RegisterComponentType<pragma::CLiquidSurfaceComponent>("liquid_surface");
+	componentManager.RegisterComponentType<pragma::CLiquidVolumeComponent>("liquid_volume");
+	componentManager.RegisterComponentType<pragma::CWaterSurfaceComponent>("water_surface");
 
 	componentManager.RegisterComponentType<pragma::CEnvSoundProbeComponent>("sound_probe");
 	componentManager.RegisterComponentType<pragma::CWeatherComponent>("weather");
 	componentManager.RegisterComponentType<pragma::CFuncSoftPhysicsComponent>("func_soft_physics");
-	componentManager.RegisterComponentType<pragma::CWaterSurfaceComponent>("water_surface");
 	componentManager.RegisterComponentType<pragma::CFlashlightComponent>("flashlight");
 	componentManager.RegisterComponentType<pragma::CListenerComponent>("listener");
 	componentManager.RegisterComponentType<pragma::CViewBodyComponent>("view_body");

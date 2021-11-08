@@ -33,7 +33,7 @@
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/string_view_converter_t.hpp>
 #include <pragma/lua/converters/file_converter_t.hpp>
-#include <pragma/entities/func/basefuncwater.h>
+#include <pragma/entities/components/liquid/base_liquid_component.hpp>
 #include <pragma/model/modelmesh.h>
 #include <luainterface.hpp>
 

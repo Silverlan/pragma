@@ -5,9 +5,12 @@ local Component = ents.PortalComponent
 function Component:OnTick(dt)
 	local touchC = self:GetEntity():GetComponent(ents.COMPONENT_TOUCH)
 	if(touchC == nil) then return end
+	local surfC = self:GetEntity():GetComponent(ents.COMPONENT_SURFACE)
+	if(surfC == nil) then return end
+	local plane = surfC:GetPlaneWs()
 	for _,ent in ipairs(touchC:GetTouchingEntities()) do
-		local n = self.m_plane:GetNormal()
-		local d = -self.m_plane:GetDistance()
+		local n = plane:GetNormal()
+		local d = -plane:GetDistance()
 		local pos = ent:GetPos()
 		local side = geometry.get_side_of_point_to_plane(n,d,pos)
 		if(side == geometry.PLANE_SIDE_FRONT) then

@@ -10,7 +10,7 @@
 #include "pragma/model/c_modelmesh.h"
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/physics/c_phys_water_surface_simulator.hpp"
-#include "pragma/entities/func/c_func_water.h"
+#include "pragma/entities/components/liquid/c_liquid_component.hpp"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
@@ -63,17 +63,19 @@ CWaterSurfaceComponent::~CWaterSurfaceComponent()
 	DestroySurface();
 }
 
-void CWaterSurfaceComponent::SetWaterObject(CWaterComponent *ent)
+void CWaterSurfaceComponent::SetWaterObject(CLiquidComponent *ent)
 {
-	m_hFuncWater = (ent != nullptr) ? ent->GetHandle<CWaterComponent>() : pragma::ComponentHandle<CWaterComponent>{};
-	if(ent != nullptr && ent->IsWaterSceneValid())
-		InitializeWaterScene(ent->GetWaterScene());
+	// TODO
+	//m_hFuncWater = (ent != nullptr) ? ent->GetHandle<CWaterComponent>() : pragma::ComponentHandle<CWaterComponent>{};
+	//if(ent != nullptr && ent->IsWaterSceneValid())
+	//	InitializeWaterScene(ent->GetWaterScene());
 }
 
 CMaterial *CWaterSurfaceComponent::GetWaterMaterial() const
 {
-	auto *pFuncWaterComponent = m_hFuncWater.get();
-	return (pFuncWaterComponent != nullptr) ? pFuncWaterComponent->GetWaterMaterial() : nullptr;
+	return nullptr; // TODO
+	//auto *pFuncWaterComponent = m_hFuncWater.get();
+	//return (pFuncWaterComponent != nullptr) ? pFuncWaterComponent->GetWaterMaterial() : nullptr;
 }
 
 CModelSubMesh *CWaterSurfaceComponent::GetWaterSurfaceMesh() const
@@ -92,11 +94,11 @@ void CWaterSurfaceComponent::UpdateSurfaceMesh()
 	CPhysWaterSurfaceSimulator *sim = nullptr;
 	if(svEntWater != nullptr)
 	{
-		auto *pWaterComponent = static_cast<pragma::BaseFuncWaterComponent*>(svEntWater->FindComponent("water").get());
+		auto *pWaterComponent = static_cast<pragma::BaseFuncLiquidComponent*>(svEntWater->FindComponent("water").get());
 		if(pWaterComponent != nullptr)
 			sim = const_cast<CPhysWaterSurfaceSimulator*>(static_cast<const CPhysWaterSurfaceSimulator*>(pWaterComponent->GetSurfaceSimulator()));
 	}
-	auto *pWaterComponent = static_cast<pragma::BaseFuncWaterComponent*>(entWater->FindComponent("water").get());
+	auto *pWaterComponent = static_cast<pragma::BaseFuncLiquidComponent*>(entWater->FindComponent("water").get());
 	if(sim == nullptr && pWaterComponent != nullptr)
 		sim = const_cast<CPhysWaterSurfaceSimulator*>(static_cast<const CPhysWaterSurfaceSimulator*>(pWaterComponent->GetSurfaceSimulator()));
 
@@ -200,17 +202,6 @@ void CWaterSurfaceComponent::DestroySurface()
 		m_cbRenderSurface.Remove();
 }
 void CWaterSurfaceComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
-const Vector3 &CWaterSurfaceComponent::GetPosition() const
-{
-	auto pTrComponent = GetEntity().GetTransformComponent();
-	return pTrComponent != nullptr ? pTrComponent->GetPosition() : uvec::ORIGIN;
-}
-const Quat &CWaterSurfaceComponent::GetOrientation() const
-{
-	auto pTrComponent = GetEntity().GetTransformComponent();
-	static auto identity = uquat::identity();
-	return pTrComponent != nullptr ? pTrComponent->GetRotation() : identity;
-}
 
 ////////////
 

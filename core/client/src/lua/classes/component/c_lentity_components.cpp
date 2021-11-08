@@ -64,6 +64,10 @@
 #include "pragma/entities/components/c_weapon_component.hpp"
 #include "pragma/entities/components/c_player_component.hpp"
 #include "pragma/entities/components/c_raytracing_component.hpp"
+#include "pragma/entities/components/c_surface_component.hpp"
+#include "pragma/entities/components/liquid/c_liquid_surface_component.hpp"
+#include "pragma/entities/components/liquid/c_liquid_volume_component.hpp"
+#include "pragma/entities/components/liquid/c_buoyancy_component.hpp"
 #include "pragma/entities/environment/audio/c_env_sound_dsp.h"
 #include "pragma/entities/environment/audio/c_env_sound_dsp_chorus.h"
 #include "pragma/entities/environment/audio/c_env_sound_dsp_distortion.h"
@@ -98,7 +102,7 @@
 #include "pragma/entities/func/c_func_physics.h"
 #include "pragma/entities/func/c_func_softphysics.hpp"
 #include "pragma/entities/func/c_func_portal.h"
-#include "pragma/entities/func/c_func_water.h"
+#include "pragma/entities/components/liquid/c_liquid_component.hpp"
 #include "pragma/entities/func/c_funcbutton.h"
 #include "pragma/entities/game/c_game_occlusion_culler.hpp"
 #include "pragma/entities/c_bot.h"
@@ -455,7 +459,7 @@ namespace pragma
 		std::is_same_v<T,pragma::CLightDirectionalComponent> ||
 		std::is_same_v<T,pragma::CLightPointComponent> ||
 		std::is_same_v<T,pragma::CLightSpotComponent> ||
-		std::is_same_v<T,pragma::CWaterComponent> ||
+		std::is_same_v<T,pragma::CLiquidComponent> ||
 		std::is_same_v<T,pragma::CWaterSurfaceComponent>
 	)
 	static std::ostream& operator<<(std::ostream &os,const T &component)
@@ -820,25 +824,22 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto defCFuncSoftPhysics = pragma::lua::create_entity_component_class<pragma::CFuncSoftPhysicsComponent,pragma::BaseFuncSoftPhysicsComponent>("FuncSoftPhysicsComponent");
 	entsMod[defCFuncSoftPhysics];
 
+	auto defCSurface = pragma::lua::create_entity_component_class<pragma::CSurfaceComponent,pragma::BaseSurfaceComponent>("SurfaceComponent");
+	entsMod[defCSurface];
+
 	// auto defCFuncPortal = pragma::lua::create_entity_component_class<pragma::CFuncPortalComponent,pragma::BaseFuncPortalComponent>("FuncPortalComponent");
 	// entsMod[defCFuncPortal];
 
-	auto defCWater = pragma::lua::create_entity_component_class<pragma::CWaterComponent,pragma::BaseFuncWaterComponent>("WaterComponent");
-	defCWater.def("GetReflectionScene",static_cast<pragma::CSceneComponent*(*)(lua_State*,pragma::CWaterComponent&)>([](lua_State *l,pragma::CWaterComponent &hEnt) -> pragma::CSceneComponent* {
-		if(hEnt.IsWaterSceneValid() == false)
-			return nullptr;
-		return const_cast<pragma::CSceneComponent*>(hEnt.GetWaterScene().sceneReflection.get());
-	}));
-	defCWater.def("GetWaterSceneTexture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,pragma::CWaterComponent&)>([](lua_State *l,pragma::CWaterComponent &hEnt) -> std::shared_ptr<prosper::Texture> {
-		if(hEnt.IsWaterSceneValid() == false)
-			return nullptr;
-		return hEnt.GetWaterScene().texScene;
-	}));
-	defCWater.def("GetWaterSceneDepthTexture",static_cast<std::shared_ptr<prosper::Texture>(*)(lua_State*,pragma::CWaterComponent&)>([](lua_State *l,pragma::CWaterComponent &hEnt) -> std::shared_ptr<prosper::Texture> {
-		if(hEnt.IsWaterSceneValid() == false)
-			return nullptr;
-		return hEnt.GetWaterScene().texSceneDepth;
-	}));
+	auto defCLiquidSurf = pragma::lua::create_entity_component_class<pragma::CLiquidSurfaceComponent,pragma::BaseLiquidSurfaceComponent>("LiquidSurfaceComponent");
+	entsMod[defCLiquidSurf];
+
+	auto defCLiquidVol = pragma::lua::create_entity_component_class<pragma::CLiquidVolumeComponent,pragma::BaseLiquidVolumeComponent>("LiquidVolumeComponent");
+	entsMod[defCLiquidVol];
+
+	auto defCBuoyancy = pragma::lua::create_entity_component_class<pragma::CBuoyancyComponent,pragma::BaseBuoyancyComponent>("BuoyancyComponent");
+	entsMod[defCBuoyancy];
+
+	auto defCWater = pragma::lua::create_entity_component_class<pragma::CLiquidComponent,pragma::BaseFuncLiquidComponent>("LiquidComponent");
 	entsMod[defCWater];
 
 	auto defCButton = pragma::lua::create_entity_component_class<pragma::CButtonComponent,pragma::BaseFuncButtonComponent>("ButtonComponent");

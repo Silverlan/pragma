@@ -9,26 +9,24 @@
 
 #include "pragma/serverdefinitions.h"
 #include "pragma/entities/trigger/s_trigger_touch.h"
-#include "pragma/entities/func/basefuncwater.h"
 #include "pragma/entities/components/s_entity_component.hpp"
+#include <pragma/entities/components/liquid/base_liquid_component.hpp>
 
 namespace pragma
 {
-	class DLLSERVER SWaterComponent final
-		: public BaseFuncWaterComponent,
+	class DLLSERVER SLiquidComponent final
+		: public BaseFuncLiquidComponent,
 		public SBaseNetComponent
 	{
 	public:
-		SWaterComponent(BaseEntity &ent);
-		virtual ~SWaterComponent() override;
+		SLiquidComponent(BaseEntity &ent);
+		virtual ~SLiquidComponent() override;
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
 		virtual void OnTick(double dt) override;
 		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
 		virtual void CreateSplash(const Vector3 &origin,float radius,float force) override;
 		void UpdateSurfaceSimulator();
-		virtual const Vector3 &GetPosition() const override;
-		virtual const Quat &GetOrientation() const override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual void InitializeLuaObject(lua_State *l) override;
 	protected:

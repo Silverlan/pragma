@@ -66,7 +66,7 @@
 #include "pragma/entities/func/s_func_physics.h"
 #include "pragma/entities/func/s_func_softphysics.hpp"
 #include "pragma/entities/func/s_func_portal.h"
-#include "pragma/entities/func/s_func_water.h"
+#include "pragma/entities/components/liquid/s_liquid_component.hpp"
 #include "pragma/entities/func/s_funcbutton.h"
 #include "pragma/entities/game_player_spawn.h"
 #include "pragma/entities/logic/s_logic_relay.h"
@@ -104,6 +104,10 @@
 #include "pragma/entities/components/s_point_at_target_component.hpp"
 #include "pragma/entities/components/s_gamemode_component.hpp"
 #include "pragma/entities/components/s_game_component.hpp"
+#include "pragma/entities/components/s_surface_component.hpp"
+#include "pragma/entities/components/liquid/s_buoyancy_component.hpp"
+#include "pragma/entities/components/liquid/s_liquid_surface_component.hpp"
+#include "pragma/entities/components/liquid/s_liquid_volume_component.hpp"
 #include "pragma/entities/environment/s_env_timescale.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
@@ -113,6 +117,7 @@ void SGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::SAIComponent>("ai");
 	componentManager.RegisterComponentType<pragma::SCharacterComponent>("character");
 	componentManager.RegisterComponentType<pragma::SColorComponent>("color");
+	componentManager.RegisterComponentType<pragma::SSurfaceComponent>("surface");
 	componentManager.RegisterComponentType<pragma::SScoreComponent>("score");
 	componentManager.RegisterComponentType<pragma::SFlammableComponent>("flammable");
 	componentManager.RegisterComponentType<pragma::SHealthComponent>("health");
@@ -162,7 +167,6 @@ void SGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::SFuncPhysicsComponent>("func_physics");
 	componentManager.RegisterComponentType<pragma::SFuncSoftPhysicsComponent>("func_soft_physics");
 	// componentManager.RegisterComponentType<pragma::SFuncPortalComponent>("func_portal");
-	componentManager.RegisterComponentType<pragma::SWaterComponent>("water");
 	componentManager.RegisterComponentType<pragma::SButtonComponent>("button");
 	componentManager.RegisterComponentType<pragma::SPlayerSpawnComponent>("player_spawn");
 	componentManager.RegisterComponentType<pragma::SLogicRelayComponent>("relay");
@@ -209,6 +213,11 @@ void SGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::SPointAtTargetComponent>("point_at_target");
 	componentManager.RegisterComponentType<pragma::SGamemodeComponent>("gamemode");
 	componentManager.RegisterComponentType<pragma::SGameComponent>("game");
+
+	componentManager.RegisterComponentType<pragma::SLiquidComponent>("liquid");
+	componentManager.RegisterComponentType<pragma::SBuoyancyComponent>("buoyancy");
+	componentManager.RegisterComponentType<pragma::SLiquidSurfaceComponent>("liquid_surface");
+	componentManager.RegisterComponentType<pragma::SLiquidVolumeComponent>("liquid_volume");
 }
 
 pragma::BaseEntityComponent *SGame::CreateLuaEntityComponent(BaseEntity &ent,std::string classname)

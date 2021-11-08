@@ -9,7 +9,8 @@
 #include "pragma/rendering/shaders/world/water/c_shader_water.hpp"
 #include "pragma/rendering/renderers/rasterization_renderer.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
-#include "pragma/entities/func/c_func_water.h"
+#include "pragma/entities/components/liquid/c_liquid_surface_component.hpp"
+#include "pragma/entities/components/c_surface_component.hpp"
 #include "pragma/c_water_object.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
@@ -98,15 +99,15 @@ bool ShaderWater::UpdateBindFogDensity()
 	auto fogIntensity = 1.f;
 	if(m_boundEntity.valid() == false || m_boundScene.expired() == true)
 		return true;
-	auto whWaterComponent = m_boundEntity->GetComponent<CWaterComponent>();
-	if(whWaterComponent.expired())
+	auto surfC = m_boundEntity->GetComponent<CSurfaceComponent>();
+	if(surfC.expired())
 		return true;
 	auto &scene = *m_boundScene;
 	auto &cam = scene.GetActiveCamera();
 	if(cam.expired())
 		return false;
 	auto &pos = cam->GetEntity().GetPosition();
-	if(whWaterComponent->IsPointBelowWaterPlane(pos) == true)
+	if(surfC->IsPointBelowSurface(pos) == true)
 		fogIntensity = 0.f;
 	return RecordPushConstants(fogIntensity,sizeof(ShaderGameWorldLightingPass::PushConstants) +offsetof(PushConstants,waterFogIntensity));
 }
@@ -133,7 +134,7 @@ bool ShaderWater::BindSceneCamera(pragma::CSceneComponent &scene,const CRasteriz
 
 bool ShaderWater::BindEntity(CBaseEntity &ent)
 {
-	auto whWaterComponent = ent.GetComponent<CWaterComponent>();
+	auto whWaterComponent = ent.GetComponent<CLiquidSurfaceComponent>();
 	if(whWaterComponent.expired())
 		return false;
 	if(ShaderGameWorldLightingPass::BindEntity(ent) == false)

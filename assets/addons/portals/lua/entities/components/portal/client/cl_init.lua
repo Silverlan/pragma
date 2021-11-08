@@ -12,9 +12,9 @@ include("../shared.lua")
 local Component = ents.PortalComponent
 function Component:SetResolution(w,h) self.m_resolution = Vector2i(w,h) end
 function Component:GetResolution() return self.m_resolution end
-function Component:GetReflectionRenderer() return self.m_renderer end
-function Component:GetReflectionScene() return self.m_scene end
-function Component:GetReflectionCamera() return self.m_camera end
+function Component:GetRenderer() return self.m_renderer end
+function Component:GetScene() return self.m_scene end
+function Component:GetCamera() return self.m_camera end
 
 function Component:SetDebugWireframeCameraEnabled(enabled)
 	if(util.is_valid(self.m_camera) == false) then return end
@@ -63,8 +63,11 @@ function Component:SetDebugCameraFrozen(frozen)
 end
 
 function Component:UpdateCamera()
-	local n = self.m_plane:GetNormal()
-	local d = self.m_plane:GetDistance()
+	local surfC = self:GetEntity():GetComponent(ents.COMPONENT_SURFACE)
+	if(surfC == nil) then return end
+	local plane = surfC:GetPlaneWs()
+	local n = plane:GetNormal()
+	local d = plane:GetDistance()
 	local matReflect = matrix.create_reflection(n,0.0)
 
 	local gameScene = game.get_scene()

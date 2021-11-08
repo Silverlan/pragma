@@ -51,6 +51,7 @@ namespace pragma::lua
 	namespace base_bot_component {static void register_class(luabind::module_ &mod);};
 	namespace base_character_component {static void register_class(luabind::module_ &mod);};
 	namespace base_color_component {static void register_class(luabind::module_ &mod);};
+	namespace base_surface_component {static void register_class(luabind::module_ &mod);};
 	namespace base_debug_box_component {static void register_class(luabind::module_ &mod);};
 	namespace base_debug_cone_component {static void register_class(luabind::module_ &mod);};
 	namespace base_debug_cylinder_component {static void register_class(luabind::module_ &mod);};
@@ -330,6 +331,7 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	base_bot_component::register_class(mod);
 	base_character_component::register_class(mod);
 	base_color_component::register_class(mod);
+	base_surface_component::register_class(mod);
 	base_debug_box_component::register_class(mod);
 	base_debug_cone_component::register_class(mod);
 	base_debug_cylinder_component::register_class(mod);
@@ -512,7 +514,7 @@ void pragma::lua::base_attachable_component::register_class(luabind::module_ &mo
 #include "pragma/model/model.h"
 	namespace pragma
 	{
-		class BaseFuncWaterComponent;
+		class BaseFuncLiquidComponent;
 	};
 
 
@@ -1074,24 +1076,13 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	def.add_static_constant("FPLAYANIM_DEFAULT",umath::to_integral(pragma::FPlayAnim::Default));
 	def.add_static_constant("FPLAYANIM_LOOP",umath::to_integral(pragma::FPlayAnim::Loop));
 }
-
-#include "pragma/entities/func/basefuncwater.h"
+#include "pragma/entities/components/liquid/base_liquid_component.hpp"
+#include "pragma/entities/components/liquid/base_liquid_surface_component.hpp"
+#include "pragma/entities/components/liquid/base_liquid_volume_component.hpp"
+#include "pragma/entities/components/liquid/base_buoyancy_component.hpp"
 	namespace Lua::FuncWater
 	{
-		void GetWaterPlane(lua_State *l,pragma::BaseFuncWaterComponent &hEnt,bool bLocalSpace)
-		{
-			Vector3 n;
-			double d;
-			if(bLocalSpace == false)
-				hEnt.GetWaterPlaneWs(n,d);
-			else
-				hEnt.GetWaterPlane(n,d);
-			Lua::Push<Vector3>(l,n);
-			Lua::PushNumber(l,d);
-		}
-
-		
-		void CalcLineSurfaceIntersection(lua_State *l,pragma::BaseFuncWaterComponent &hEnt,const Vector3 &lineOrigin,const Vector3 &lineDir,bool bCull)
+		void CalcLineSurfaceIntersection(lua_State *l,pragma::BaseFuncLiquidComponent &hEnt,const Vector3 &lineOrigin,const Vector3 &lineDir,bool bCull)
 		{
 			double t,u,v;
 			auto r = hEnt.CalcLineSurfaceIntersection(lineOrigin,lineDir,&t,&u,&v,bCull);
@@ -1103,33 +1094,38 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	};
 	void pragma::lua::base_func_water_component::register_class(luabind::module_ &mod)
 	{
-		auto def = Lua::create_base_entity_component_class<pragma::BaseFuncWaterComponent>("BaseFuncWaterComponent");
+		{
+			auto def = Lua::create_base_entity_component_class<pragma::BaseLiquidSurfaceComponent>("BaseLiquidSurfaceComponent");
+			util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
+		}
+		{
+			auto def = Lua::create_base_entity_component_class<pragma::BaseLiquidVolumeComponent>("BaseLiquidVolumeComponent");
+			util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
+		}
+		{
+			auto def = Lua::create_base_entity_component_class<pragma::BaseBuoyancyComponent>("BaseBuoyancyComponent");
+			util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
+		}
+		auto def = Lua::create_base_entity_component_class<pragma::BaseFuncLiquidComponent>("BaseFuncLiquidComponent");
 		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
-		def.def("CreateSplash",&pragma::BaseFuncWaterComponent::CreateSplash);
-		def.def("GetStiffness",&pragma::BaseFuncWaterComponent::GetStiffness);
-		def.def("SetStiffness",&pragma::BaseFuncWaterComponent::SetStiffness);
-		def.def("GetPropagation",&pragma::BaseFuncWaterComponent::GetPropagation);
-		def.def("SetPropagation",&pragma::BaseFuncWaterComponent::SetPropagation);
-		def.def("GetWaterVelocity",&pragma::BaseFuncWaterComponent::GetWaterVelocity,luabind::copy_policy<0>{});
-		def.def("SetWaterVelocity",&pragma::BaseFuncWaterComponent::SetWaterVelocity);
-		def.def("GetDensity",&pragma::BaseFuncWaterComponent::GetDensity);
-		def.def("SetDensity",&pragma::BaseFuncWaterComponent::SetDensity);
-		def.def("GetLinearDragCoefficient",&pragma::BaseFuncWaterComponent::GetLinearDragCoefficient);
-		def.def("SetLinearDragCoefficient",&pragma::BaseFuncWaterComponent::SetLinearDragCoefficient);
-		def.def("GetTorqueDragCoefficient",&pragma::BaseFuncWaterComponent::GetTorqueDragCoefficient);
-		def.def("SetTorqueDragCoefficient",&pragma::BaseFuncWaterComponent::SetTorqueDragCoefficient);
-		def.def("CalcLineSurfaceIntersection",static_cast<void(*)(lua_State*,pragma::BaseFuncWaterComponent&,const Vector3&,const Vector3&)>([](lua_State *l,pragma::BaseFuncWaterComponent &hEnt,const Vector3 &lineOrigin,const Vector3 &lineDir) {
+		def.def("CreateSplash",&pragma::BaseFuncLiquidComponent::CreateSplash);
+		def.def("GetStiffness",&pragma::BaseFuncLiquidComponent::GetStiffness);
+		def.def("SetStiffness",&pragma::BaseFuncLiquidComponent::SetStiffness);
+		def.def("GetPropagation",&pragma::BaseFuncLiquidComponent::GetPropagation);
+		def.def("SetPropagation",&pragma::BaseFuncLiquidComponent::SetPropagation);
+		def.def("GetWaterVelocity",&pragma::BaseFuncLiquidComponent::GetWaterVelocity,luabind::copy_policy<0>{});
+		def.def("SetWaterVelocity",&pragma::BaseFuncLiquidComponent::SetWaterVelocity);
+		def.def("GetDensity",&pragma::BaseFuncLiquidComponent::GetDensity);
+		def.def("SetDensity",&pragma::BaseFuncLiquidComponent::SetDensity);
+		def.def("GetLinearDragCoefficient",&pragma::BaseFuncLiquidComponent::GetLinearDragCoefficient);
+		def.def("SetLinearDragCoefficient",&pragma::BaseFuncLiquidComponent::SetLinearDragCoefficient);
+		def.def("GetTorqueDragCoefficient",&pragma::BaseFuncLiquidComponent::GetTorqueDragCoefficient);
+		def.def("SetTorqueDragCoefficient",&pragma::BaseFuncLiquidComponent::SetTorqueDragCoefficient);
+		def.def("CalcLineSurfaceIntersection",static_cast<void(*)(lua_State*,pragma::BaseFuncLiquidComponent&,const Vector3&,const Vector3&)>([](lua_State *l,pragma::BaseFuncLiquidComponent &hEnt,const Vector3 &lineOrigin,const Vector3 &lineDir) {
 			Lua::FuncWater::CalcLineSurfaceIntersection(l,hEnt,lineOrigin,lineDir,false);
 		}));
-		def.def("CalcLineSurfaceIntersection",&pragma::BaseFuncWaterComponent::CalcLineSurfaceIntersection);
-		def.def("GetWaterPlane",static_cast<void(*)(lua_State*,pragma::BaseFuncWaterComponent&,bool)>([](lua_State *l,pragma::BaseFuncWaterComponent &hEnt,bool localSpace) {
-			Lua::FuncWater::GetWaterPlane(l,hEnt,localSpace);
-		}));
-		def.def("GetWaterPlane",static_cast<void(*)(lua_State*,pragma::BaseFuncWaterComponent&)>([](lua_State *l,pragma::BaseFuncWaterComponent &hEnt) {
-			Lua::FuncWater::GetWaterPlane(l,hEnt,false);
-		}));
-		def.def("ProjectToSurface",&pragma::BaseFuncWaterComponent::ProjectToSurface);
-		def.add_static_constant("EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED",pragma::BaseFuncWaterComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED);
+		def.def("CalcLineSurfaceIntersection",&pragma::BaseFuncLiquidComponent::CalcLineSurfaceIntersection);
+		def.add_static_constant("EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED",pragma::BaseFuncLiquidComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED);
 	}
 	#include "pragma/entities/components/basetoggle.h"
 	void pragma::lua::base_toggle_component::register_class(luabind::module_ &mod)
@@ -2060,6 +2056,58 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		def.def("SetColor",static_cast<void(pragma::BaseColorComponent::*)(const Vector3&)>(&pragma::BaseColorComponent::SetColor));
 		def.def("SetColor",static_cast<void(pragma::BaseColorComponent::*)(const Vector4&)>(&pragma::BaseColorComponent::SetColor));
 		def.add_static_constant("EVENT_ON_COLOR_CHANGED",pragma::BaseColorComponent::EVENT_ON_COLOR_CHANGED);
+	}
+
+	#include "pragma/entities/components/base_surface_component.hpp"
+
+	static std::optional<std::tuple<std::shared_ptr<ModelMesh>,std::shared_ptr<ModelSubMesh>,Material*>> FindAndAssignSurfaceMesh(pragma::BaseSurfaceComponent &c,luabind::object oFilter)
+	{
+		std::function<int32_t(ModelMesh&,ModelSubMesh&,Material&,const std::string&)> filter = nullptr;
+		if(oFilter)
+		{
+			filter = [&oFilter](ModelMesh &mesh,ModelSubMesh &subMesh,Material &mat,const std::string &shader) -> int32_t {
+				auto res = oFilter(&mat,shader);
+				return luabind::object_cast<int32_t>(res);
+			};
+		}
+		auto res = c.FindAndAssignMesh(filter);
+		if(!res.has_value())
+			return {};
+		return std::tuple<std::shared_ptr<ModelMesh>,std::shared_ptr<ModelSubMesh>,Material*>{res->mesh->shared_from_this(),res->subMesh->shared_from_this(),res->material};
+	}
+
+	void pragma::lua::base_surface_component::register_class(luabind::module_ &mod)
+	{
+		auto def = Lua::create_base_entity_component_class<pragma::BaseSurfaceComponent>("BaseSurfaceComponent");
+		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
+		def.def("SetPlane",static_cast<void(pragma::BaseSurfaceComponent::*)(const umath::Plane&)>(&pragma::BaseSurfaceComponent::SetPlane));
+		def.def("SetPlane",static_cast<void(pragma::BaseSurfaceComponent::*)(const Vector3&,float)>(&pragma::BaseSurfaceComponent::SetPlane));
+		def.def("GetPlane",static_cast<const umath::Plane&(pragma::BaseSurfaceComponent::*)() const>(&pragma::BaseSurfaceComponent::GetPlane),luabind::copy_policy<0>{});
+		def.def("GetPlaneWs",static_cast<umath::Plane(pragma::BaseSurfaceComponent::*)() const>(&pragma::BaseSurfaceComponent::GetPlaneWs));
+		def.def("GetPlaneNormal",&pragma::BaseSurfaceComponent::GetPlaneNormal);
+		def.def("SetPlaneNormal",&pragma::BaseSurfaceComponent::SetPlaneNormal);
+		def.def("GetPlaneDistance",&pragma::BaseSurfaceComponent::GetPlaneDistance);
+		def.def("SetPlaneDistance",&pragma::BaseSurfaceComponent::SetPlaneDistance);
+		def.def("ProjectToSurface",&pragma::BaseSurfaceComponent::ProjectToSurface);
+		def.def("Clear",&pragma::BaseSurfaceComponent::Clear);
+		def.def("ProjectToSurface",&pragma::BaseSurfaceComponent::ProjectToSurface);
+		def.def("IsPointBelowSurface",&pragma::BaseSurfaceComponent::IsPointBelowSurface);
+		def.def("GetPlaneRotation",&pragma::BaseSurfaceComponent::GetPlaneRotation);
+		def.def("CalcLineSurfaceIntersection",+[](pragma::BaseSurfaceComponent &c,const Vector3 &lineOrigin,const Vector3 &lineDir) {
+			double t;
+			auto r = c.CalcLineSurfaceIntersection(lineOrigin,lineDir,&t);
+			return std::pair<bool,double>{r,t};
+		});
+		def.def("GetMesh",static_cast<ModelSubMesh*(pragma::BaseSurfaceComponent::*)()>(&pragma::BaseSurfaceComponent::GetMesh),luabind::shared_from_this_policy<0>{});
+		def.def("FindAndAssignSurfaceMesh",+[](pragma::BaseSurfaceComponent &c,luabind::object oFilter)
+			-> std::optional<std::tuple<std::shared_ptr<ModelMesh>,std::shared_ptr<ModelSubMesh>,Material*>> {
+			return FindAndAssignSurfaceMesh(c,oFilter);
+		});
+		def.def("FindAndAssignSurfaceMesh",+[](pragma::BaseSurfaceComponent &c)
+			-> std::optional<std::tuple<std::shared_ptr<ModelMesh>,std::shared_ptr<ModelSubMesh>,Material*>> {
+			return FindAndAssignSurfaceMesh(c,Lua::nil);
+		});
+		def.add_static_constant("EVENT_ON_SURFACE_PLANE_CHANGED",pragma::BaseSurfaceComponent::EVENT_ON_SURFACE_PLANE_CHANGED);
 	}
 
 	#include "pragma/entities/components/base_score_component.hpp"

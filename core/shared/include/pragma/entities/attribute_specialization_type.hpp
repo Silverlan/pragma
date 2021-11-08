@@ -20,6 +20,8 @@ namespace pragma
 		Angle,
 		File,
 		Directory,
+		Plane,
+		Normal,
 
 		Custom,
 

@@ -24,7 +24,7 @@
 #include "pragma/entities/components/c_sound_emitter_component.hpp"
 #include "pragma/entities/components/c_transform_component.hpp"
 #include "pragma/entities/environment/effects/c_env_particle_system.h"
-#include "pragma/entities/func/c_func_water.h"
+#include "pragma/entities/components/c_surface_component.hpp"
 #include "pragma/entities/components/c_eye_component.hpp"
 #include "pragma/lua/c_lentity_handles.hpp"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
@@ -99,11 +99,11 @@ void CCharacterComponent::CreateWaterSplash()
 	auto pSubmergibleComponent = ent.GetComponent<SubmergibleComponent>();
 	auto pSoundEmitterComponent = ent.GetComponent<CSoundEmitterComponent>();
 	auto *pWater = pSubmergibleComponent.valid() ? pSubmergibleComponent->GetWaterEntity() : nullptr;
-	auto pWaterComponent = (pWater != nullptr) ? pWater->GetComponent<CWaterComponent>() : pragma::ComponentHandle<CWaterComponent>{};
-	if(pSoundEmitterComponent.valid() && pTrComponent != nullptr && pWaterComponent.valid())
+	auto pSurfC = (pWater != nullptr) ? pWater->GetComponent<CSurfaceComponent>() : pragma::ComponentHandle<CSurfaceComponent>{};
+	if(pSoundEmitterComponent.valid() && pTrComponent != nullptr && pSurfC.valid())
 	{
 		auto pos = pTrComponent->GetPosition();
-		pos = pWaterComponent->ProjectToSurface(pos);
+		pos = pSurfC->ProjectToSurface(pos);
 		client->PlayWorldSound("fx.water_slosh",ALSoundType::Effect,pos);
 		auto *pt = pragma::CParticleSystemComponent::Create("watersplash");
 		if(pt != nullptr)
@@ -113,8 +113,8 @@ void CCharacterComponent::CreateWaterSplash()
 			{
 				pTrComponent->SetPosition(pos);
 				Vector3 n;
-				double d;
-				pWaterComponent->GetWaterPlaneWs(n,d);
+				float d;
+				pSurfC->GetPlaneWs(n,d);
 				auto up = uvec::create(n);
 				uvec::normalize(&up);
 				const auto rot = Quat{0.5f,-0.5f,-0.5f,-0.5f};

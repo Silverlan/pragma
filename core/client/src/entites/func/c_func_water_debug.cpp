@@ -6,7 +6,8 @@
  */
 
 #include "stdafx_client.h"
-#include "pragma/entities/func/c_func_water.h"
+#include "pragma/entities/components/liquid/c_liquid_component.hpp"
+#include "pragma/entities/components/liquid/c_liquid_surface_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/debug/c_debug_game_gui.h"
@@ -61,7 +62,7 @@ void Console::commands::debug_water(NetworkState *state,pragma::BasePlayerCompon
 				const auto size = 256u;
 				r->SetSize(size *4,size);
 
-				auto pWaterComponent = entWater->GetComponent<pragma::CWaterComponent>();
+				auto pWaterComponent = entWater->GetComponent<pragma::CLiquidSurfaceComponent>();
 				if(pWaterComponent.valid() == false || pWaterComponent->IsWaterSceneValid() == false)
 					return WIHandle{};
 				auto &waterScene = pWaterComponent->GetWaterScene();
@@ -109,7 +110,7 @@ void Console::commands::debug_water(NetworkState *state,pragma::BasePlayerCompon
 			}));
 
 			// Debug surface points
-			auto pWaterComponent = entWater->GetComponent<pragma::CWaterComponent>();
+			auto pWaterComponent = entWater->GetComponent<pragma::CLiquidComponent>();
 			auto *entSurface = pWaterComponent.valid() ? pWaterComponent->GetSurfaceEntity() : nullptr;
 			if(entSurface != nullptr)
 			{

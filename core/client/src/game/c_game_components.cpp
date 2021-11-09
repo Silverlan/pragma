@@ -37,6 +37,9 @@
 #include "pragma/entities/components/liquid/c_buoyancy_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_surface_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_volume_component.hpp"
+#include "pragma/entities/components/liquid/c_liquid_control_component.hpp"
+#include "pragma/entities/components/liquid/c_liquid_surface_simulation_component.hpp"
+// --template-include-location
 #include "pragma/entities/environment/audio/c_env_sound_dsp.h"
 #include "pragma/entities/environment/audio/c_env_sound_dsp_chorus.h"
 #include "pragma/entities/environment/audio/c_env_sound_dsp_distortion.h"
@@ -250,6 +253,9 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CRendererComponent>("renderer");
 	componentManager.RegisterComponentType<pragma::CRasterizationRendererComponent>("rasterization_renderer");
 	componentManager.RegisterComponentType<pragma::CRaytracingRendererComponent>("raytracing_renderer");
+	componentManager.RegisterComponentType<pragma::CLiquidControlComponent>("liquid_control");
+	componentManager.RegisterComponentType<pragma::CLiquidSurfaceSimulationComponent>("liquid_surface_simulation");
+	// --template-component-register-location
 
 	auto *l = GetLuaState();
 	for(auto &evName : {

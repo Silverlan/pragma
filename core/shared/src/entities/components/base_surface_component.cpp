@@ -15,9 +15,11 @@
 using namespace pragma;
 
 ComponentEventId BaseSurfaceComponent::EVENT_ON_SURFACE_PLANE_CHANGED = INVALID_COMPONENT_ID;
+ComponentEventId BaseSurfaceComponent::EVENT_ON_SURFACE_MESH_CHANGED = INVALID_COMPONENT_ID;
 void BaseSurfaceComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
 	EVENT_ON_SURFACE_PLANE_CHANGED = registerEvent("ON_SURFACE_PLANE_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
+	EVENT_ON_SURFACE_MESH_CHANGED = registerEvent("ON_SURFACE_MESH_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
 }
 
 void BaseSurfaceComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember)
@@ -196,7 +198,6 @@ std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssig
 				continue;
 			minDot = dot;
 			plane = p;
-			m_mesh = subMesh;
 			mat = hMat.get();
 
 			meshInfo = {mesh.get(),subMesh.get(),mat};
@@ -210,7 +211,10 @@ std::optional<BaseSurfaceComponent::MeshInfo> BaseSurfaceComponent::FindAndAssig
 	}
 	else
 	{
+		assert(meshInfo.has_value());
 		SetPlane(plane);
+		m_mesh = meshInfo->subMesh->shared_from_this();
+		BroadcastEvent(EVENT_ON_SURFACE_MESH_CHANGED,CEOnSurfaceMeshChanged{*meshInfo});
 		return meshInfo;
 	}
 	return {};
@@ -240,4 +244,16 @@ bool BaseSurfaceComponent::CalcLineSurfaceIntersection(const Vector3 &lineOrigin
 	if(outT != nullptr)
 		*outT = t;
 	return r == umath::intersection::Result::Intersect;
+}
+
+/////////////////////////////////
+
+CEOnSurfaceMeshChanged::CEOnSurfaceMeshChanged(const BaseSurfaceComponent::MeshInfo &meshInfo)
+	: meshInfo{meshInfo}
+{}
+void CEOnSurfaceMeshChanged::PushArguments(lua_State *l)
+{
+	Lua::Push(l,meshInfo.mesh->shared_from_this());
+	Lua::Push(l,meshInfo.subMesh->shared_from_this());
+	Lua::Push(l,meshInfo.material);
 }

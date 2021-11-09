@@ -25,26 +25,17 @@ namespace pragma
 		CLiquidComponent(BaseEntity &ent);
 		virtual ~CLiquidComponent() override;
 		virtual void Initialize() override;
-		virtual bool OnBulletHit(const BulletInfo &bulletInfo,const TraceData &data,PhysObj *phys,pragma::physics::ICollisionObject *col,const LocalRayResult &result) override;
 		virtual void ReceiveData(NetPacket &packet) override;
-		virtual Bool ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet) override;
-		virtual void CreateSplash(const Vector3 &origin,float radius,float force) override;
 		void UpdateSurfaceSimulator();
-		CWaterSurface *GetSurfaceEntity() const;
 
-		virtual void SetStiffness(float stiffness) override;
-		virtual void SetPropagation(float propagation) override;
-		virtual void ReloadSurfaceSimulator() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 	protected:
 		virtual void OnEntitySpawn() override;
-		virtual std::shared_ptr<PhysWaterSurfaceSimulator> InitializeSurfaceSimulator(const Vector2 &min,const Vector2 &max,float originY) override;
 		void SetupWater();
 		bool m_bUsingClientsideSimulation = false;
 		CallbackHandle m_cbClientSimulatorUpdate = {};
 		CallbackHandle m_cbGameInitialized = {};
-		mutable EntityHandle m_hWaterSurface = {};
 	};
 };
 

@@ -17,6 +17,7 @@ namespace pragma
 	{
 	public:
 		static pragma::ComponentEventId EVENT_ON_SURFACE_PLANE_CHANGED;
+		static pragma::ComponentEventId EVENT_ON_SURFACE_MESH_CHANGED;
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 		static void RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember);
 		virtual void Initialize() override;
@@ -61,6 +62,14 @@ namespace pragma
 		std::weak_ptr<ModelSubMesh> m_mesh = {};
 		pragma::NetEventId m_netEvSetPlane = pragma::INVALID_NET_EVENT;
 		std::string m_kvSurfaceMaterial;
+	};
+
+	struct DLLNETWORK CEOnSurfaceMeshChanged
+		: public ComponentEvent
+	{
+		CEOnSurfaceMeshChanged(const BaseSurfaceComponent::MeshInfo &meshInfo);
+		virtual void PushArguments(lua_State *l) override;
+		BaseSurfaceComponent::MeshInfo meshInfo;
 	};
 };
 

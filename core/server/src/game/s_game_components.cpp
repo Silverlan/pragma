@@ -108,6 +108,9 @@
 #include "pragma/entities/components/liquid/s_buoyancy_component.hpp"
 #include "pragma/entities/components/liquid/s_liquid_surface_component.hpp"
 #include "pragma/entities/components/liquid/s_liquid_volume_component.hpp"
+#include "pragma/entities/components/liquid/s_liquid_control_component.hpp"
+#include "pragma/entities/components/liquid/s_liquid_surface_simulation_component.hpp"
+// --template-include-location
 #include "pragma/entities/environment/s_env_timescale.h"
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
@@ -218,6 +221,9 @@ void SGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::SBuoyancyComponent>("buoyancy");
 	componentManager.RegisterComponentType<pragma::SLiquidSurfaceComponent>("liquid_surface");
 	componentManager.RegisterComponentType<pragma::SLiquidVolumeComponent>("liquid_volume");
+	componentManager.RegisterComponentType<pragma::SLiquidControlComponent>("liquid_control");
+	componentManager.RegisterComponentType<pragma::SLiquidSurfaceSimulationComponent>("liquid_surface_simulation");
+	// --template-component-register-location
 }
 
 pragma::BaseEntityComponent *SGame::CreateLuaEntityComponent(BaseEntity &ent,std::string classname)

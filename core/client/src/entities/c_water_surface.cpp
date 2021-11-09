@@ -11,6 +11,7 @@
 #include "pragma/entities/c_entityfactories.h"
 #include "pragma/physics/c_phys_water_surface_simulator.hpp"
 #include "pragma/entities/components/liquid/c_liquid_component.hpp"
+#include "pragma/entities/components/liquid/c_liquid_surface_simulation_component.hpp"
 #include "pragma/model/vk_mesh.h"
 #include "pragma/entities/components/c_render_component.hpp"
 #include "pragma/entities/components/c_model_component.hpp"
@@ -63,7 +64,33 @@ CWaterSurfaceComponent::~CWaterSurfaceComponent()
 	DestroySurface();
 }
 
-void CWaterSurfaceComponent::SetWaterObject(CLiquidComponent *ent)
+void CWaterSurfaceComponent::UpdateSurfaceMesh()
+{
+	if(m_hFuncWater.expired() || m_waterSurfaceMesh.expired() == true)
+		return;
+	auto *entWater = static_cast<CBaseEntity*>(&m_hFuncWater->GetEntity());
+	auto *svEntWater = entWater->GetServersideEntity();
+	CPhysWaterSurfaceSimulator *sim = nullptr;
+	if(svEntWater != nullptr)
+	{
+		auto *pWaterComponent = static_cast<pragma::BaseLiquidSurfaceSimulationComponent*>(svEntWater->FindComponent("liquid_surface_simulation").get());
+		if(pWaterComponent != nullptr)
+			sim = const_cast<CPhysWaterSurfaceSimulator*>(static_cast<const CPhysWaterSurfaceSimulator*>(pWaterComponent->GetSurfaceSimulator()));
+	}
+	auto *pWaterComponent = static_cast<pragma::BaseLiquidSurfaceSimulationComponent*>(entWater->FindComponent("liquid_surface_simulation").get());
+	if(sim == nullptr && pWaterComponent != nullptr)
+		sim = const_cast<CPhysWaterSurfaceSimulator*>(static_cast<const CPhysWaterSurfaceSimulator*>(pWaterComponent->GetSurfaceSimulator()));
+
+	if(sim == nullptr)
+		return;
+	auto drawCmd = c_game->GetCurrentDrawCommandBuffer();
+	if(drawCmd == nullptr)
+		return;
+	auto *cmesh = static_cast<CModelSubMesh*>(m_waterSurfaceMesh.lock().get());
+	sim->Draw(drawCmd,*cmesh);
+}
+
+void CWaterSurfaceComponent::SetWaterObject(CLiquidSurfaceSimulationComponent *ent)
 {
 	// TODO
 	//m_hFuncWater = (ent != nullptr) ? ent->GetHandle<CWaterComponent>() : pragma::ComponentHandle<CWaterComponent>{};
@@ -83,32 +110,6 @@ CModelSubMesh *CWaterSurfaceComponent::GetWaterSurfaceMesh() const
 	if(m_waterSurfaceMesh.expired() == true)
 		return nullptr;
 	return m_waterSurfaceMesh.lock().get();
-}
-
-void CWaterSurfaceComponent::UpdateSurfaceMesh()
-{
-	if(m_hFuncWater.expired() || m_waterSurfaceMesh.expired() == true)
-		return;
-	auto *entWater = static_cast<CBaseEntity*>(&m_hFuncWater->GetEntity());
-	auto *svEntWater = entWater->GetServersideEntity();
-	CPhysWaterSurfaceSimulator *sim = nullptr;
-	if(svEntWater != nullptr)
-	{
-		auto *pWaterComponent = static_cast<pragma::BaseFuncLiquidComponent*>(svEntWater->FindComponent("water").get());
-		if(pWaterComponent != nullptr)
-			sim = const_cast<CPhysWaterSurfaceSimulator*>(static_cast<const CPhysWaterSurfaceSimulator*>(pWaterComponent->GetSurfaceSimulator()));
-	}
-	auto *pWaterComponent = static_cast<pragma::BaseFuncLiquidComponent*>(entWater->FindComponent("water").get());
-	if(sim == nullptr && pWaterComponent != nullptr)
-		sim = const_cast<CPhysWaterSurfaceSimulator*>(static_cast<const CPhysWaterSurfaceSimulator*>(pWaterComponent->GetSurfaceSimulator()));
-
-	if(sim == nullptr)
-		return;
-	auto drawCmd = c_game->GetCurrentDrawCommandBuffer();
-	if(drawCmd == nullptr)
-		return;
-	auto *cmesh = static_cast<CModelSubMesh*>(m_waterSurfaceMesh.lock().get());
-	sim->Draw(drawCmd,*cmesh);
 }
 
 void CWaterSurfaceComponent::SetSurfaceSimulator(const std::shared_ptr<PhysWaterSurfaceSimulator> &simulator)

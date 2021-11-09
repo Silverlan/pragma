@@ -141,6 +141,9 @@ namespace pragma::lua
 	namespace base_weapon_component {static void register_class(luabind::module_ &mod);};
 	namespace base_wheel_component {static void register_class(luabind::module_ &mod);};
 	namespace base_world_component {static void register_class(luabind::module_ &mod);};
+	namespace base_liquid_control_component {static void register_class(luabind::module_ &mod);};
+	namespace base_liquid_surface_simulation_component {static void register_class(luabind::module_ &mod);};
+	// --template-namespace-declaration-location
 };
 void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 {
@@ -421,6 +424,9 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	base_weapon_component::register_class(mod);
 	base_wheel_component::register_class(mod);
 	base_world_component::register_class(mod);
+	base_liquid_control_component::register_class(mod);
+	base_liquid_surface_simulation_component::register_class(mod);
+	// --template-register-call-location
 
 	auto defGameComponent = Lua::create_base_entity_component_class<pragma::BaseGameComponent>("BaseGameComponent");
 	mod[defGameComponent];
@@ -1108,24 +1114,10 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		}
 		auto def = Lua::create_base_entity_component_class<pragma::BaseFuncLiquidComponent>("BaseFuncLiquidComponent");
 		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
-		def.def("CreateSplash",&pragma::BaseFuncLiquidComponent::CreateSplash);
-		def.def("GetStiffness",&pragma::BaseFuncLiquidComponent::GetStiffness);
-		def.def("SetStiffness",&pragma::BaseFuncLiquidComponent::SetStiffness);
-		def.def("GetPropagation",&pragma::BaseFuncLiquidComponent::GetPropagation);
-		def.def("SetPropagation",&pragma::BaseFuncLiquidComponent::SetPropagation);
-		def.def("GetWaterVelocity",&pragma::BaseFuncLiquidComponent::GetWaterVelocity,luabind::copy_policy<0>{});
-		def.def("SetWaterVelocity",&pragma::BaseFuncLiquidComponent::SetWaterVelocity);
-		def.def("GetDensity",&pragma::BaseFuncLiquidComponent::GetDensity);
-		def.def("SetDensity",&pragma::BaseFuncLiquidComponent::SetDensity);
-		def.def("GetLinearDragCoefficient",&pragma::BaseFuncLiquidComponent::GetLinearDragCoefficient);
-		def.def("SetLinearDragCoefficient",&pragma::BaseFuncLiquidComponent::SetLinearDragCoefficient);
-		def.def("GetTorqueDragCoefficient",&pragma::BaseFuncLiquidComponent::GetTorqueDragCoefficient);
-		def.def("SetTorqueDragCoefficient",&pragma::BaseFuncLiquidComponent::SetTorqueDragCoefficient);
 		def.def("CalcLineSurfaceIntersection",static_cast<void(*)(lua_State*,pragma::BaseFuncLiquidComponent&,const Vector3&,const Vector3&)>([](lua_State *l,pragma::BaseFuncLiquidComponent &hEnt,const Vector3 &lineOrigin,const Vector3 &lineDir) {
 			Lua::FuncWater::CalcLineSurfaceIntersection(l,hEnt,lineOrigin,lineDir,false);
 		}));
 		def.def("CalcLineSurfaceIntersection",&pragma::BaseFuncLiquidComponent::CalcLineSurfaceIntersection);
-		def.add_static_constant("EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED",pragma::BaseFuncLiquidComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED);
 	}
 	#include "pragma/entities/components/basetoggle.h"
 	void pragma::lua::base_toggle_component::register_class(luabind::module_ &mod)
@@ -3280,3 +3272,33 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		def.def("SetPointAtTarget",&pragma::BasePointAtTargetComponent::ClearPointAtTarget);
 		def.def("GetPointAtTarget",&pragma::BasePointAtTargetComponent::GetPointAtTarget);
 	}
+
+	#include "pragma/entities/components/liquid/base_liquid_control_component.hpp"
+	void pragma::lua::base_liquid_control_component::register_class(luabind::module_ &mod)
+	{
+		auto def = Lua::create_base_entity_component_class<pragma::BaseLiquidControlComponent>("BaseLiquidControlComponent");
+		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
+		def.def("CreateSplash",&pragma::BaseLiquidControlComponent::CreateSplash);
+		def.def("GetStiffness",&pragma::BaseLiquidControlComponent::GetStiffness);
+		def.def("SetStiffness",&pragma::BaseLiquidControlComponent::SetStiffness);
+		def.def("GetPropagation",&pragma::BaseLiquidControlComponent::GetPropagation);
+		def.def("SetPropagation",&pragma::BaseLiquidControlComponent::SetPropagation);
+		def.def("GetWaterVelocity",&pragma::BaseLiquidControlComponent::GetLiquidVelocity,luabind::copy_policy<0>{});
+		def.def("SetWaterVelocity",&pragma::BaseLiquidControlComponent::SetLiquidVelocity);
+		def.def("GetDensity",&pragma::BaseLiquidControlComponent::GetDensity);
+		def.def("SetDensity",&pragma::BaseLiquidControlComponent::SetDensity);
+		def.def("GetLinearDragCoefficient",&pragma::BaseLiquidControlComponent::GetLinearDragCoefficient);
+		def.def("SetLinearDragCoefficient",&pragma::BaseLiquidControlComponent::SetLinearDragCoefficient);
+		def.def("GetTorqueDragCoefficient",&pragma::BaseLiquidControlComponent::GetTorqueDragCoefficient);
+		def.def("SetTorqueDragCoefficient",&pragma::BaseLiquidControlComponent::SetTorqueDragCoefficient);
+	}
+
+	#include "pragma/entities/components/liquid/base_liquid_surface_simulation_component.hpp"
+	void pragma::lua::base_liquid_surface_simulation_component::register_class(luabind::module_ &mod)
+	{
+		auto def = Lua::create_base_entity_component_class<pragma::BaseLiquidSurfaceSimulationComponent>("BaseLiquidSurfaceSimulationComponent");
+		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
+		def.add_static_constant("EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED",pragma::BaseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED);
+	}
+
+	// --template-register-definition

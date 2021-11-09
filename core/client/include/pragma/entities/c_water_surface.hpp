@@ -15,7 +15,7 @@
 class PhysWaterSurfaceSimulator;
 namespace pragma
 {
-	class CLiquidComponent;
+	class CLiquidSurfaceSimulationComponent;
 	class DLLCLIENT CWaterSurfaceComponent final
 		: public BaseEntityComponent
 	{
@@ -26,7 +26,7 @@ namespace pragma
 		virtual ~CWaterSurfaceComponent() override;
 		void SetSurfaceSimulator(const std::shared_ptr<PhysWaterSurfaceSimulator> &simulator);
 		CMaterial *GetWaterMaterial() const;
-		void SetWaterObject(CLiquidComponent *ent);
+		void SetWaterObject(CLiquidSurfaceSimulationComponent *ent);
 		CModelSubMesh *GetWaterSurfaceMesh() const;
 		virtual void InitializeLuaObject(lua_State *l) override;
 		virtual void OnEntitySpawn() override;
@@ -34,7 +34,7 @@ namespace pragma
 		std::shared_ptr<PhysWaterSurfaceSimulator> m_surfaceSimulator = nullptr;
 		mutable std::weak_ptr<CModelSubMesh> m_waterSurfaceMesh = {};
 		CallbackHandle m_cbRenderSurface = {};
-		ComponentHandle<CLiquidComponent> m_hFuncWater = {};
+		ComponentHandle<CLiquidSurfaceSimulationComponent> m_hFuncWater = {};
 		void UpdateSurfaceMesh();
 		void InitializeSurface();
 		void DestroySurface();

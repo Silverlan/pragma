@@ -23,16 +23,10 @@ namespace pragma
 		virtual ~SLiquidComponent() override;
 		virtual void Initialize() override;
 		virtual void OnEntitySpawn() override;
-		virtual void OnTick(double dt) override;
 		virtual void SendData(NetPacket &packet,networking::ClientRecipientFilter &rp) override;
-		virtual void CreateSplash(const Vector3 &origin,float radius,float force) override;
-		void UpdateSurfaceSimulator();
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual void InitializeLuaObject(lua_State *l) override;
 	protected:
-		virtual bool ShouldSimulateSurface() const override;
-		bool m_bUsingClientsideSimulation = false;
-		CallbackHandle m_cbClientSimulatorUpdate = {};
 		CallbackHandle m_cbGameInitialized = {};
 	};
 };

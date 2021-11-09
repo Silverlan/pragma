@@ -35,31 +35,12 @@ LINK_ENTITY_TO_CLASS(func_water,CFuncWater);
 
 extern DLLCLIENT CGame *c_game;
 #pragma optimize("",off)
-static std::vector<CLiquidComponent*> s_waterEntities = {};
-REGISTER_CONVAR_CALLBACK_CL(cl_water_surface_simulation_spacing,[](NetworkState*,ConVar*,int,int val) {
-	for(auto *entWater : s_waterEntities)
-		entWater->ReloadSurfaceSimulator();
-});
-
-REGISTER_CONVAR_CALLBACK_CL(cl_water_surface_simulation_enable_gpu_acceleration,[](NetworkState*,ConVar*,bool,bool val) {
-	for(auto *entWater : s_waterEntities)
-		entWater->ReloadSurfaceSimulator();
-});
-
 CLiquidComponent::CLiquidComponent(BaseEntity &ent)
 	: BaseFuncLiquidComponent(ent)
 {
 	pragma::CParticleSystemComponent::Precache("water");
-
-	s_waterEntities.push_back(this);
 }
-CLiquidComponent::~CLiquidComponent()
-{
-	auto it = std::find(s_waterEntities.begin(),s_waterEntities.end(),this);
-	if(it == s_waterEntities.end())
-		return;
-	s_waterEntities.erase(it);
-}
+CLiquidComponent::~CLiquidComponent() {}
 void CLiquidComponent::Initialize()
 {
 	BaseFuncLiquidComponent::Initialize();
@@ -101,94 +82,8 @@ void CLiquidComponent::OnEntitySpawn()
 		return;
 	BaseFuncLiquidComponent::InitializeWaterSurface();
 	SetupWater();
-	ReloadSurfaceSimulator();
 }
-void CLiquidComponent::ReceiveData(NetPacket &packet)
-{
-	auto surfMat = packet->ReadString();
-	GetEntity().SetKeyValue("surface_material",surfMat);
-	auto height = packet->Read<float>();
-	SetMaxWaveHeight(height);
-}
-CWaterSurface *CLiquidComponent::GetSurfaceEntity() const {return static_cast<CWaterSurface*>(m_hWaterSurface.get());}
-
-void CLiquidComponent::CreateSplash(const Vector3 &origin,float radius,float force)
-{
-	auto pPhysComponent = GetEntity().GetPhysicsComponent();
-	if(pPhysComponent == nullptr || pPhysComponent->GetPhysicsObject() == nullptr)
-		return;
-	BaseFuncLiquidComponent::CreateSplash(origin,radius,force); // TODO
-	if(m_physSurfaceSim != nullptr)
-		static_cast<CPhysWaterSurfaceSimulator&>(*m_physSurfaceSim).CreateSplash(origin,radius,force);
-}
-Bool CLiquidComponent::ReceiveNetEvent(pragma::NetEventId eventId,NetPacket &packet)
-{
-	if(eventId == m_netEvSetWaterPlane)
-	{
-		//auto n = packet->Read<Vector3>();
-		//auto d = packet->Read<double>();
-		//m_waterPlane = Plane{n,d};
-	}
-	else if(eventId == m_netEvCreateSplash)
-	{
-		auto origin = packet->Read<Vector3>();
-		auto radius = packet->Read<float>();
-		auto force = packet->Read<float>();
-		CreateSplash(origin,radius,force);
-	}
-	else
-		return CLiquidComponent::ReceiveNetEvent(eventId,packet);
-	return true;
-}
-
-bool CLiquidComponent::OnBulletHit(const BulletInfo &bulletInfo,const TraceData &data,PhysObj *phys,pragma::physics::ICollisionObject *col,const LocalRayResult &result)
-{
-	auto srcOrigin = data.GetSourceOrigin();
-	auto dir = data.GetDirection();
-	auto dist = data.GetDistance();
-	auto hitPos = srcOrigin +dir *(dist *static_cast<float>(result.friction));
-
-	auto surfMatId = col->GetSurfaceMaterial();
-	auto *surfMat = c_game->GetSurfaceMaterial(surfMatId);
-	if(surfMat != nullptr)
-	{
-		auto &ptEffect = surfMat->GetImpactParticleEffect();
-		if(ptEffect.empty() == false)
-		{
-			auto *pt = pragma::CParticleSystemComponent::Create(ptEffect);
-			if(pt != nullptr)
-			{
-				auto pTrComponent = pt->GetEntity().GetTransformComponent();
-				if(pTrComponent != nullptr)
-				{
-					pTrComponent->SetPosition(hitPos);
-
-					auto up = result.hitNormalLocal;
-					uvec::normalize(&up);
-					const auto rot = Quat{0.5f,-0.5f,-0.5f,-0.5f};
-					pTrComponent->SetRotation(uquat::create_look_rotation(uvec::get_perpendicular(up),up) *rot);
-				}
-				pt->SetRemoveOnComplete(true);
-				pt->Start();
-			}
-		}
-
-		auto &bulletImpactSnd = surfMat->GetBulletImpactSound();
-		if(bulletImpactSnd.empty() == false)
-		{
-			auto snd = client->CreateSound(bulletImpactSnd,ALSoundType::Effect | ALSoundType::Physics,ALCreateFlags::Mono);
-			if(snd != nullptr)
-			{
-				snd->SetPosition(hitPos);
-				snd->SetType(ALSoundType::Effect);
-				snd->Play();
-			}
-		}
-	}
-	return BaseFuncLiquidComponent::OnBulletHit(bulletInfo,data,phys,col,result);
-}
-
-std::shared_ptr<PhysWaterSurfaceSimulator> CLiquidComponent::InitializeSurfaceSimulator(const Vector2 &min,const Vector2 &max,float originY) {return std::make_shared<CPhysWaterSurfaceSimulator>(min,max,originY,GetSpacing(),GetStiffness(),GetPropagation());}
+void CLiquidComponent::ReceiveData(NetPacket &packet) {}
 
 void CLiquidComponent::SetupWater()
 {
@@ -253,43 +148,6 @@ void CLiquidComponent::SetupWater()
 	renderC->InitializeWaterScene(meshSurface->GetVertexPosition(0),meshSurface->GetVertexNormal(0),min,max);
 }
 
-void CLiquidComponent::ReloadSurfaceSimulator()
-{
-	SetSpacing(c_game->GetConVarInt("cl_water_surface_simulation_spacing"));
-	BaseFuncLiquidComponent::ReloadSurfaceSimulator();
-	if(m_hWaterSurface.valid())
-		m_hWaterSurface->Remove();
-	if(m_physSurfaceSim == nullptr)
-		return;
-	auto *entSurface = c_game->CreateEntity<CWaterSurface>();
-	if(entSurface == nullptr)
-		return;
-	auto &ent = GetEntity();
-	ent.RemoveEntityOnRemoval(entSurface);
-	m_hWaterSurface = entSurface->GetHandle();
-	auto pWaterSurfComponent = entSurface->GetComponent<pragma::CWaterSurfaceComponent>();
-	if(pWaterSurfComponent.valid())
-	{
-		pWaterSurfComponent->SetWaterObject(this);
-		pWaterSurfComponent->SetSurfaceSimulator(m_physSurfaceSim);
-	}
-	entSurface->Spawn();
-}
-
-void CLiquidComponent::SetStiffness(float stiffness)
-{
-	BaseFuncLiquidComponent::SetStiffness(stiffness);
-	if(m_physSurfaceSim == nullptr)
-		return;
-	m_physSurfaceSim->SetStiffness(stiffness);
-}
-void CLiquidComponent::SetPropagation(float propagation)
-{
-	BaseFuncLiquidComponent::SetPropagation(propagation);
-	if(m_physSurfaceSim == nullptr)
-		return;
-	m_physSurfaceSim->SetPropagation(propagation);
-}
 void CLiquidComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
 ///////////////

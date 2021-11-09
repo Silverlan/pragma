@@ -8,6 +8,7 @@
 #include "stdafx_client.h"
 #include "pragma/entities/components/liquid/c_liquid_component.hpp"
 #include "pragma/entities/components/liquid/c_liquid_surface_component.hpp"
+#include "pragma/entities/components/liquid/c_liquid_surface_simulation_component.hpp"
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/console/c_cvar_global_functions.h"
 #include "pragma/debug/c_debug_game_gui.h"
@@ -110,7 +111,7 @@ void Console::commands::debug_water(NetworkState *state,pragma::BasePlayerCompon
 			}));
 
 			// Debug surface points
-			auto pWaterComponent = entWater->GetComponent<pragma::CLiquidComponent>();
+			auto pWaterComponent = entWater->GetComponent<pragma::CLiquidSurfaceSimulationComponent>();
 			auto *entSurface = pWaterComponent.valid() ? pWaterComponent->GetSurfaceEntity() : nullptr;
 			if(entSurface != nullptr)
 			{

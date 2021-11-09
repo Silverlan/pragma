@@ -15,6 +15,9 @@
 #include "pragma/entities/point/constraints/s_point_constraint_fixed.h"
 #include "pragma/entities/point/constraints/s_point_constraint_hinge.h"
 #include "pragma/entities/point/constraints/s_point_constraint_slider.h"
+#include "pragma/entities/components/liquid/s_liquid_control_component.hpp"
+#include "pragma/entities/components/liquid/s_liquid_surface_simulation_component.hpp"
+// --template-include-location
 #include "pragma/entities/point/s_point_path_node.h"
 #include "pragma/entities/point/s_point_rendertarget.h"
 #include "pragma/entities/point/s_point_target.h"
@@ -176,4 +179,11 @@ void RegisterLuaEntityComponents2(lua_State *l,luabind::module_ &entsMod)
 
 	auto defSGeneric = pragma::lua::create_entity_component_class<pragma::SGenericComponent,pragma::BaseGenericComponent>("GenericComponent");
 	entsMod[defSGeneric];
+
+	auto defLiquidControl = pragma::lua::create_entity_component_class<pragma::SLiquidControlComponent,pragma::BaseLiquidControlComponent>("LiquidControlComponent");
+	entsMod[defLiquidControl];
+
+	auto defLiquidSurfaceSimulation = pragma::lua::create_entity_component_class<pragma::SLiquidSurfaceSimulationComponent,pragma::BaseLiquidSurfaceSimulationComponent>("LiquidSurfaceSimulationComponent");
+	entsMod[defLiquidSurfaceSimulation];
+	// --template-component-register-location
 }

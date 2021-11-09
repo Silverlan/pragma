@@ -39,7 +39,7 @@
 #include "pragma/entities/components/base_radius_component.hpp"
 #include "pragma/entities/components/base_attachable_component.hpp"
 #include "pragma/entities/components/submergible_component.hpp"
-#include "pragma/entities/components/liquid/base_liquid_component.hpp"
+#include "pragma/entities/components/liquid/base_liquid_surface_simulation_component.hpp"
 
 bool Game::InjectEntityEvent(pragma::BaseEntityComponent &component,uint32_t eventId,int32_t argsIdx) {return InvokeEntityEvent(component,eventId,argsIdx,true);}
 bool Game::BroadcastEntityEvent(pragma::BaseEntityComponent &component,uint32_t eventId,int32_t argsIdx) {return InvokeEntityEvent(component,eventId,argsIdx,false);}
@@ -758,7 +758,7 @@ bool Game::InvokeEntityEvent(pragma::BaseEntityComponent &component,uint32_t eve
 		eventId == pragma::BaseActorComponent::EVENT_ON_RESPAWN ||
 		eventId == pragma::BasePhysicsComponent::EVENT_ON_PHYSICS_DESTROYED ||
 		eventId == pragma::BasePhysicsComponent::EVENT_ON_PHYSICS_INITIALIZED ||
-		eventId == pragma::BaseFuncLiquidComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED ||
+		eventId == pragma::BaseLiquidSurfaceSimulationComponent::EVENT_ON_WATER_SURFACE_SIMULATOR_CHANGED ||
 		eventId == pragma::BaseAttachableComponent::EVENT_ON_ATTACHMENT_UPDATE
 	)
 	{

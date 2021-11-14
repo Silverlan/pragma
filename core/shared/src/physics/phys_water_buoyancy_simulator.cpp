@@ -14,13 +14,17 @@
 #include "pragma/physics/shape.hpp"
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/util/util_best_fitting_plane.hpp"
+#include "pragma/util/util_game.hpp"
 #include "pragma/entities/components/base_physics_component.hpp"
 #include "pragma/entities/components/base_transform_component.hpp"
 #include "pragma/entities/components/submergible_component.hpp"
 #include "pragma/entities/components/velocity_component.hpp"
 #include <pragma/physics/movetypes.h>
-
+#pragma optimize("",off)
 // See http://www.randygaul.net/wp-content/uploads/2014/02/RigidBodies_WaterSurface.pdf for algorithms
+
+#define ENABLE_DEBUG_DRAW 0
+
 pragma::physics::WaterBuoyancySimulator::WaterBuoyancySimulator()
 {}
 
@@ -38,8 +42,8 @@ template<class InputItVert,class InputItIndex>
 	double volBody,
 	const Vector3 &bodyVelocity,
 	const Vector3 &bodyAngularVelocity,
-	Vector3 *force,
-	Vector3 *torque
+	Vector3 *force,Vector3 *torque,
+	Vector3 *optOutSubmergedCenter
 ) const
 {
 	auto C = waterPlaneRelObj *static_cast<float>(waterPlaneDistRelObj);
@@ -65,7 +69,29 @@ template<class InputItVert,class InputItIndex>
 		auto d2 = CalcDistanceFromVertexToPlane(v2,waterPlaneRelObj,waterPlaneDistRelObj);
 		Vector3 center;
 		uint32_t vertCount;
-		auto clipVol = CalcClipVolume(C,v0,v1,v2,d0,d1,d2,&center,&vertCount);
+#if ENABLE_DEBUG_DRAW == 1
+		std::vector<Vector3> clippedVerts;
+		std::vector<Vector3> *pclippedVerts = &clippedVerts;
+#else
+		std::vector<Vector3> *pclippedVerts = nullptr;
+#endif
+		auto clipVol = CalcClipVolume(C,v0,v1,v2,d0,d1,d2,&center,&vertCount,pclippedVerts);
+#if ENABLE_DEBUG_DRAW == 1
+		for(auto i=decltype(clippedVerts.size()){0u};i<clippedVerts.size();i+=3)
+		{
+			auto &v0 = clippedVerts[i];
+			auto &v1 = clippedVerts[i +1];
+			auto &v2 = clippedVerts[i +2];
+			std::stringstream ss;
+			ss<<"local drawInfo = debug.DrawInfo(); drawInfo:SetColor(Color(0,255,255,64));";
+			ss<<"drawInfo:SetDuration(0.1);";
+			ss<<"debug.draw_mesh({";
+			ss<<"Vector("<<v0.x<<","<<v0.y<<","<<v0.z<<"),";
+			ss<<"Vector("<<v1.x<<","<<v1.y<<","<<v1.z<<"),";
+			ss<<"Vector("<<v2.x<<","<<v2.y<<","<<v2.z<<")},drawInfo)";
+			pragma::get_engine()->GetClientState()->GetGameState()->RunLua(ss.str());
+		}
+#endif
 		submergedCenter += center;
 		submergedVertCount += vertCount;
 
@@ -76,21 +102,37 @@ template<class InputItVert,class InputItIndex>
 	if(submergedVertCount > 0)
 		submergedCenter /= static_cast<float>(submergedVertCount);
 
+	if(optOutSubmergedCenter)
+		*optOutSubmergedCenter = submergedCenter;
+
 	auto bSubmerged = (submergedVolume > 0.0) ? true : false;
 	if(bSubmerged == false)
 		return 0.0;
 
-	if(force != nullptr)
-	{
-		*force = CalcBuoyancy(liquid.density,submergedVolume,gravity,waterPlane);
-		*force += CalcCattoDragLinearForceApproximation(liquid.linearDragCoefficient,mass,submergedVolume,volBody,waterVelocity,bodyVelocity); // TODO
-	}
+	// These factors shouldn't be necessary, but without them
+	// the forces are excessive. Reason is currently unknown. FIXME?
+	constexpr auto forceFactor = 0.0700000301;
+	constexpr auto torqueFactor = 0.0700000301;
 
-	if(torque != nullptr)
+	if(force || torque)
 	{
-		*torque = CalcTorque(rorigin,bodyCenter,submergedCenter,liquid.density,submergedVolume,gravity,waterPlane);
-		auto lenPolyhedron = uvec::distance(bodyCenter,submergedCenter); // TODO: Optimize
-		*torque += CalcCattoDragTorqueForceApproximation(liquid.torqueDragCoefficient,mass,submergedVolume,volBody,lenPolyhedron,bodyAngularVelocity);
+		// Liquid density is specified in kg/m^3, we'll have to convert it to Pragma's scale
+		constexpr auto scale = umath::pow3(util::pragma::units_to_metres(1.0));
+		auto density = liquid.density *scale;
+		if(force != nullptr)
+		{
+			*force = CalcBuoyancy(density,submergedVolume,gravity,waterPlane);
+			*force *= forceFactor;
+			*force += CalcCattoDragLinearForceApproximation(liquid.linearDragCoefficient,mass,submergedVolume,volBody,waterVelocity,bodyVelocity); // TODO
+		}
+
+		if(torque != nullptr)
+		{
+			*torque = CalcTorque(rorigin,bodyCenter,submergedCenter,density,submergedVolume,gravity,waterPlane);
+			*torque *= torqueFactor;
+			auto lenPolyhedron = uvec::distance(bodyCenter,submergedCenter); // TODO: Optimize
+			*torque += CalcCattoDragTorqueForceApproximation(liquid.torqueDragCoefficient,mass,submergedVolume,volBody,lenPolyhedron,bodyAngularVelocity);
+		}
 	}
 	return submergedVolume;
 }
@@ -255,13 +297,12 @@ void pragma::physics::WaterBuoyancySimulator::Simulate(BaseEntity &entWater,cons
 		totalVolume += volume;
 
 		// Move water plane to collision object coordinate system
-		auto waterPlaneRelObj = waterPlane;
-		auto waterPlaneDistRelObj = waterPlaneDist;
-		auto posEnt = pTrComponent != nullptr ? pTrComponent->GetPosition() : Vector3{};
-		waterPlaneDistRelObj = uvec::dot(waterPlaneRelObj,waterPlaneRelObj *static_cast<float>(waterPlaneDistRelObj) -posEnt);
-		//uvec::rotate(&waterPlaneRelObj,uquat::get_inverse(rot)); // No rotation
-
-		calc_surface_plane(surfaceSim,posEnt,rot,verts.begin(),verts.end(),waterPlane,waterPlaneDist,waterPlaneRelObj,waterPlaneDistRelObj);
+		auto pose = pTrComponent->GetPose();
+		pose.SetRotation(uquat::identity()); // No rotation; TODO: Why?
+		auto relPlane = pose.GetInverse() *umath::Plane{waterPlane,waterPlaneDist};
+		auto &waterPlaneRelObj = relPlane.GetNormal();
+		auto waterPlaneDistRelObj = relPlane.GetDistance();
+		calc_surface_plane(surfaceSim,pose.GetOrigin(),rot,verts.begin(),verts.end(),waterPlane,waterPlaneDist,waterPlaneRelObj,waterPlaneDistRelObj);
 
 		auto pVelComponent = ent.GetComponent<pragma::VelocityComponent>();
 		auto velEnt = pVelComponent.valid() ? pVelComponent->GetVelocity() : Vector3{};
@@ -277,7 +318,7 @@ void pragma::physics::WaterBuoyancySimulator::Simulate(BaseEntity &entWater,cons
 			mass,volume,velEnt,{},
 			nullptr,nullptr
 		);
-		const auto gravityScale = -0.1f;
+		constexpr auto gravityScale = -0.1f;
 		bouyany = gravity *gravityScale *static_cast<float>(totalSubmerged /totalVolume);
 		bouyany += CalcCattoDragLinearForceApproximation(dragCoefficient,mass,totalSubmerged,totalVolume,waterVelocity,velEnt);
 		if(pVelComponent.valid())
@@ -301,8 +342,9 @@ void pragma::physics::WaterBuoyancySimulator::Simulate(BaseEntity &entWater,cons
 			Vector3 buoyancy;
 			Vector3 torque;
 
-			auto pos = colObj->GetPos();
-			auto rot = colObj->GetRotation();
+			umath::Transform pose {colObj->GetPos(),colObj->GetRotation()};
+			// TODO: Add colObj:GetPose() and colObj:GetRootPose()
+			pose = pose *colObj->GetCollisionShape()->GetLocalPose(); // We need the center point of the physics mesh
 
 			if(shape->IsConvex())
 			{
@@ -335,7 +377,9 @@ void pragma::physics::WaterBuoyancySimulator::Simulate(BaseEntity &entWater,cons
 						// If physics mesh has no triangles, build generic mesh from AABB
 						Vector3 min,max;
 						colMesh->GetAABB(&min,&max);
-
+#if ENABLE_DEBUG_DRAW == 1
+						pragma::get_engine()->GetClientState()->GetGameState()->DrawBox(min,max,EulerAngles{},Color::Aqua,0.1f);
+#endif
 						aabbVerts = {
 							min, // 0
 							Vector3(max.x,min.y,min.z), // 1
@@ -349,20 +393,28 @@ void pragma::physics::WaterBuoyancySimulator::Simulate(BaseEntity &entWater,cons
 
 						verts = &aabbVerts;
 						triangles = &aabbTris;
+						volume = (max.x -min.x) *(max.y -min.y) *(max.z -min.z);
 					}
 
 					totalVolume += volume;
-
-					auto waterPlaneRelObj = waterPlane;
-					auto waterPlaneDistRelObj = waterPlaneDist;
+					
 					// Move water plane to collision object coordinate system
-					waterPlaneDistRelObj = uvec::dot(waterPlaneRelObj,waterPlaneRelObj *static_cast<float>(waterPlaneDistRelObj) -pos);
-					uvec::rotate(&waterPlaneRelObj,uquat::get_inverse(rot));
+					auto relPlane = pose.GetInverse() *umath::Plane{waterPlane,waterPlaneDist};
+					auto &waterPlaneRelObj = relPlane.GetNormal();
+					auto waterPlaneDistRelObj = relPlane.GetDistance();
+#if ENABLE_DEBUG_DRAW == 1
+					//pragma::get_engine()->GetClientState()->GetGameState()->DrawPlane(
+					//	waterPlaneRelObj,waterPlaneDistRelObj,Color{255,255,0,64},0.1f
+					//);
+#endif
 
-					calc_surface_plane(surfaceSim,pos,rot,verts->begin(),verts->end(),waterPlane,waterPlaneDist,waterPlaneRelObj,waterPlaneDistRelObj);
+					calc_surface_plane(
+						surfaceSim,pose.GetOrigin(),pose.GetRotation(),verts->begin(),verts->end(),waterPlane,waterPlaneDist,waterPlaneRelObj,waterPlaneDistRelObj
+					);
 
+					Vector3 submergedCenter;
 					totalSubmerged += CalcBuoyancy(
-						rot,
+						pose.GetRotation(),
 						liquid,
 						waterPlane,waterPlaneDist,
 						waterPlaneRelObj,waterPlaneDistRelObj,
@@ -370,10 +422,18 @@ void pragma::physics::WaterBuoyancySimulator::Simulate(BaseEntity &entWater,cons
 						-gravity.y,
 						verts->begin(),triangles->begin(),triangles->end(),
 						colObj->GetMass(),volume,colObj->GetLinearVelocity(),colObj->GetAngularVelocity(),
-						&buoyancy,&torque
+						&buoyancy,&torque,&submergedCenter
 					);
 
-					colObj->ApplyForce(buoyancy);
+#if ENABLE_DEBUG_DRAW == 1
+					ent.GetNetworkState()->GetGameState()
+						->DrawLine(submergedCenter,submergedCenter +uvec::get_normal(buoyancy) *20.f,Color::White,0.1f);
+#endif
+					static auto applyAtCenter = false;
+					if(applyAtCenter)
+						colObj->ApplyForce(buoyancy,submergedCenter);
+					else
+						colObj->ApplyForce(buoyancy);
 					colObj->ApplyTorque(torque);
 				}
 			}
@@ -437,6 +497,14 @@ void pragma::physics::WaterBuoyancySimulator::Simulate(BaseEntity &entWater,cons
 	if(pSubmergedComponent.expired())
 		return;
 	auto submergedPercent = (totalVolume > 0.0) ? (totalSubmerged /totalVolume) : 0.0;
+
+	static auto prev = submergedPercent;
+	if(submergedPercent != prev)
+	{
+		prev = submergedPercent;
+		//Con::cout<<"Submerged: "<<submergedPercent<<Con::endl;
+	}
+
 	pSubmergedComponent->SetSubmergedFraction(entWater,submergedPercent);
 }
 
@@ -615,3 +683,4 @@ Vector3 pragma::physics::WaterBuoyancySimulator::CalcCattoDragTorqueForceApproxi
 {
 	return static_cast<float>(dragCoefficientHz *mass *(submergedLiquidVolume /volume) *umath::pow2(lenPolyhedron)) *-bodyAngularVelocity;
 }
+#pragma optimize("",on)

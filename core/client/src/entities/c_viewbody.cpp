@@ -31,17 +31,6 @@ void CViewBodyComponent::Initialize()
 {
 	BaseEntityComponent::Initialize();
 
-	BindEvent(CRenderComponent::EVENT_SHOULD_DRAW,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &shouldDrawData = static_cast<CEShouldDraw&>(evData.get());
-		auto *pl = c_game->GetLocalPlayer();
-		if(pl == nullptr || pl->GetObserverMode() != OBSERVERMODE::FIRSTPERSON)
-		{
-			shouldDrawData.shouldDraw = false;
-			return util::EventReply::Handled;
-		}
-		return util::EventReply::Unhandled;
-	});
-
 	auto &ent = GetEntity();
 	ent.AddComponent<CTransformComponent>();
 	ent.AddComponent<CModelComponent>();
@@ -49,7 +38,8 @@ void CViewBodyComponent::Initialize()
 	auto pRenderComponent = ent.AddComponent<CRenderComponent>();
 	if(pRenderComponent.valid())
 	{
-		pRenderComponent->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::View);
+		pRenderComponent->AddToRenderGroup("firstperson");
+		pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::View);
 		pRenderComponent->SetCastShadows(false);
 	}
 	ent.AddComponent<CAnimatedComponent>();

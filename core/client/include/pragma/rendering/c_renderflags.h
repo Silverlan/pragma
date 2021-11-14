@@ -10,7 +10,7 @@
 
 #include <mathutil/umath.h>
 
-enum class FRender : uint32_t
+enum class RenderFlags : uint32_t
 {
 	None = 0,
 	World = 1,
@@ -29,14 +29,6 @@ enum class FRender : uint32_t
 	Reflection = Translucent<<1,
 	HDR = Reflection<<1,
 	ParticleDepth = HDR<<1
-};
-REGISTER_BASIC_BITWISE_OPERATORS(FRender)
-
-enum class RenderFlags : uint8_t
-{
-	None = 0u,
-	Reflection = 1u,
-	RenderAs3DSky = Reflection<<1u
 };
 REGISTER_BASIC_BITWISE_OPERATORS(RenderFlags)
 

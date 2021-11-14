@@ -129,17 +129,7 @@ CPlayerComponent::~CPlayerComponent()
 
 void CPlayerComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 
-void CPlayerComponent::OnDeployWeapon(BaseEntity &ent)
-{
-	if(IsLocalPlayer() == false)
-		return;
-	auto *vm = c_game->GetViewModel();
-	if(vm == nullptr)
-		return;
-	auto pRenderComponent = static_cast<CBaseEntity&>(vm->GetEntity()).GetRenderComponent();
-	if(pRenderComponent)
-		pRenderComponent->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::View); // TODO: Set render mode to none when weapon is holstered
-}
+void CPlayerComponent::OnDeployWeapon(BaseEntity &ent) {}
 
 void CPlayerComponent::OnEntityComponentAdded(BaseEntityComponent &component)
 {
@@ -427,15 +417,6 @@ void CPlayerComponent::Initialize()
 	BindEventUnhandled(SubmergibleComponent::EVENT_ON_WATER_EMERGED,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		OnWaterEmerged();
 	});
-	BindEvent(CRenderComponent::EVENT_SHOULD_DRAW,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-		auto &shouldDrawData = static_cast<CEShouldDraw&>(evData.get());
-		if(ShouldDraw() == false)
-		{
-			shouldDrawData.shouldDraw = false;
-			return util::EventReply::Handled;
-		}
-		return util::EventReply::Unhandled;
-	});
 	BindEvent(CRenderComponent::EVENT_SHOULD_DRAW_SHADOW,[this](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
 		auto &shouldDrawData = static_cast<CEShouldDraw&>(evData.get());
 		if(ShouldDrawShadow() == false)
@@ -451,8 +432,6 @@ void CPlayerComponent::Initialize()
 
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	auto pRenderComponent = ent.GetRenderComponent();
-	if(pRenderComponent)
-		pRenderComponent->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::World);
 	auto pPhysComponent = ent.GetPhysicsComponent();
 	if(pPhysComponent != nullptr)
 		pPhysComponent->SetCollisionType(COLLISIONTYPE::AABB);
@@ -505,6 +484,16 @@ void CPlayerComponent::UpdateViewFOV()
 void CPlayerComponent::SetLocalPlayer(bool b)
 {
 	BasePlayerComponent::SetLocalPlayer(b);
+
+	auto renderC = GetEntity().GetComponent<CRenderComponent>();
+	if(renderC.valid())
+	{
+		if(b)
+			renderC->AddToRenderGroup("thirdperson");
+		else
+			renderC->RemoveFromRenderGroup("thirdperson");
+	}
+
 	if(b == false)
 		return;
 	auto *vm = c_game->GetViewModel();

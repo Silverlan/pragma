@@ -89,7 +89,7 @@ void CWeaponComponent::UpdateViewModel()
 		if(m_viewModel->empty() == true)
 		{
 			if(pRenderComponentVm)
-				pRenderComponentVm->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::None);
+				pRenderComponentVm->SetSceneRenderPass(pragma::rendering::SceneRenderPass::None);
 			vm->SetViewModelOffset({});
 			return;
 		}
@@ -97,7 +97,7 @@ void CWeaponComponent::UpdateViewModel()
 			mdlComponentVm->SetModel(*m_viewModel);
 	}
 	if(pRenderComponentVm)
-		pRenderComponentVm->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::View);
+		pRenderComponentVm->SetSceneRenderPass(pragma::rendering::SceneRenderPass::View);
 	vm->SetViewModelOffset(GetViewModelOffset());
 	vm->SetViewFOV(GetViewFOV());
 }
@@ -128,7 +128,7 @@ void CWeaponComponent::Initialize()
 		auto &shouldDrawData = static_cast<CEShouldDraw&>(evData.get());
 		auto &ent = static_cast<CBaseEntity&>(GetEntity());
 		auto pRenderComponent = ent.GetComponent<pragma::CRenderComponent>();
-		auto renderMode = pRenderComponent.valid() ? pRenderComponent->GetSceneRenderGroupPass() : pragma::rendering::SceneRenderPass::None;
+		auto renderMode = pRenderComponent.valid() ? pRenderComponent->GetSceneRenderPass() : pragma::rendering::SceneRenderPass::None;
 		if(renderMode != pragma::rendering::SceneRenderPass::None)
 		{
 			if(renderMode == pragma::rendering::SceneRenderPass::View)
@@ -215,7 +215,7 @@ void CWeaponComponent::UpdateWorldModel()
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(!pRenderComponent)
 		return;
-	pRenderComponent->SetSceneRenderGroupPass(
+	pRenderComponent->SetSceneRenderPass(
 		IsInFirstPersonMode() ?
 			((umath::is_flag_set(m_stateFlags,StateFlags::HideWorldModelInFirstPerson) == true)
 				? pragma::rendering::SceneRenderPass::None

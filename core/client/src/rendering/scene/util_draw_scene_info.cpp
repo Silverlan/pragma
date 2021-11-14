@@ -10,7 +10,50 @@
 #include <prosper_command_buffer.hpp>
 
 using namespace pragma::rendering;
+#pragma optimize("",off)
+util::DrawSceneInfo::DrawSceneInfo()
+{}
+util::DrawSceneInfo::DrawSceneInfo(const DrawSceneInfo &other)
+	: scene{other.scene},commandBuffer{other.commandBuffer},renderTarget{other.renderTarget},
+	renderFlags{other.renderFlags},clearColor{other.clearColor},toneMapping{other.toneMapping},
+	prepassFilter{other.prepassFilter},renderFilter{other.renderFilter},outputImage{other.outputImage},
+	clipPlane{other.clipPlane},pvsOrigin{other.pvsOrigin},
+	outputLayerId{other.outputLayerId},flags{other.flags},renderStats{other.renderStats ? std::make_unique<RenderStats>(*other.renderStats) : nullptr},
+	exclusionMask{other.exclusionMask},inclusionMask{other.inclusionMask}
+{}
+util::DrawSceneInfo &util::DrawSceneInfo::operator=(const DrawSceneInfo &other)
+{
+	scene = other.scene;
+	commandBuffer = other.commandBuffer;
+	renderTarget = other.renderTarget;
+	renderFlags = other.renderFlags;
+	clearColor = other.clearColor;
+	toneMapping = other.toneMapping;
+	clipPlane = other.clipPlane;
+	pvsOrigin = other.pvsOrigin;
+
+	prepassFilter = other.prepassFilter;
+	renderFilter = other.renderFilter;
+	outputImage = other.outputImage;
+
+	exclusionMask = other.exclusionMask;
+	inclusionMask = other.inclusionMask;
+
+	outputLayerId = other.outputLayerId;
+	flags = other.flags;
+	renderStats = other.renderStats ? std::make_unique<RenderStats>(*other.renderStats) : nullptr;
+	return *this;
+}
+
+::pragma::rendering::RenderMask util::DrawSceneInfo::GetRenderMask(CGame &game) const
+{
+	auto mask = game.GetInclusiveRenderMasks();
+	mask |= inclusionMask;
+	mask &= ~exclusionMask;
+	return mask;
+}
 
 util::RenderPassDrawInfo::RenderPassDrawInfo(const DrawSceneInfo &drawSceneInfo,prosper::ICommandBuffer &cmdBuffer)
 	: drawSceneInfo{drawSceneInfo},commandBuffer{cmdBuffer.shared_from_this()}
 {}
+#pragma optimize("",on)

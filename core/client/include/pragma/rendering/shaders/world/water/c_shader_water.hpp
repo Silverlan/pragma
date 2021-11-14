@@ -43,20 +43,17 @@ namespace pragma
 		{
 			float waterFogIntensity;
 			uint32_t enableReflection;
-			Mat4 reflectionVp;
 		};
 #pragma pack(pop)
 
 		ShaderWater(prosper::IPrContext &context,const std::string &identifier);
-		void SetReflectionEnabled(bool b);
-		virtual bool BeginDraw(
-			const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin={0.f,0.f,0.f,1.f},
-			RecordFlags recordFlags=RecordFlags::RenderPassTargetAsViewportAndScissor
-		) override;
-		virtual void EndDraw() override;
-		virtual bool BindSceneCamera(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,bool bView) override;
-		virtual bool BindEntity(CBaseEntity &ent) override;
 		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
+
+		virtual bool RecordBindEntity(
+			rendering::ShaderProcessor &shaderProcessor,CRenderComponent &renderC,
+			prosper::IShaderPipelineLayout &layout,uint32_t entityInstanceDescriptorSetIndex
+		) const override;
+		virtual GameShaderSpecializationConstantFlag GetBaseSpecializationFlags() const override;
 	protected:
 		virtual void InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		virtual void InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
@@ -64,9 +61,6 @@ namespace pragma
 		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const;
 	private:
 		bool UpdateBindFogDensity();
-		bool m_bReflectionEnabled = false;
-		ComponentHandle<pragma::CSceneComponent> m_boundScene = {};
-		EntityHandle m_boundEntity = {};
 	};
 };
 

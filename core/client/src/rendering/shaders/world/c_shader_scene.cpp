@@ -428,6 +428,16 @@ void pragma::ShaderGameWorld::RecordSceneFlags(rendering::ShaderProcessor &shade
 	shaderProcessor.GetCommandBuffer().RecordPushConstants(shaderProcessor.GetCurrentPipelineLayout(),prosper::ShaderStageFlags::VertexBit | prosper::ShaderStageFlags::FragmentBit,offsetof(ScenePushConstants,flags),sizeof(sceneFlags),&sceneFlags);
 }
 
+bool pragma::ShaderGameWorld::RecordBindEntity(
+	rendering::ShaderProcessor &shaderProcessor,CRenderComponent &renderC,
+	prosper::IShaderPipelineLayout &layout,uint32_t entityInstanceDescriptorSetIndex
+) const
+{
+	return shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(
+		prosper::PipelineBindPoint::Graphics,layout,entityInstanceDescriptorSetIndex,*renderC.GetRenderDescriptorSet()
+	);
+}
+
 bool pragma::ShaderGameWorld::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor,CMaterial &mat) const
 {
 	auto descSetGroup = mat.GetDescriptorSetGroup(const_cast<pragma::ShaderGameWorld&>(*this));

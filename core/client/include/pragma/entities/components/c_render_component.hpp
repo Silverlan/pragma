@@ -115,13 +115,15 @@ namespace pragma
 		bounding_volume::AABB CalcAbsoluteRenderBounds() const;
 		Sphere CalcAbsoluteRenderSphere() const;
 
-		pragma::rendering::SceneRenderPass GetSceneRenderGroupPass() const;
+		pragma::rendering::SceneRenderPass GetSceneRenderPass() const;
+		void SetSceneRenderPass(pragma::rendering::SceneRenderPass pass);
+		const util::PEnumProperty<pragma::rendering::SceneRenderPass> &GetSceneRenderPassProperty() const;
+
 		bool IsInRenderGroup(pragma::rendering::RenderGroup group) const;
-		void SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass pass);
 		bool AddToRenderGroup(const std::string &name);
 		void AddToRenderGroup(pragma::rendering::RenderGroup group);
+		bool RemoveFromRenderGroup(const std::string &name);
 		void RemoveFromRenderGroup(pragma::rendering::RenderGroup group);
-		void RemoveFromSceneRenderGroups();
 		void SetRenderGroups(pragma::rendering::RenderGroup group);
 		pragma::rendering::RenderGroup GetRenderGroups() const;
 		const util::PEnumProperty<pragma::rendering::RenderGroup> &GetRenderGroupsProperty() const;
@@ -200,6 +202,7 @@ namespace pragma
 		umath::ScaledTransform m_renderPose {};
 		Mat4 m_matTransformation = umat::identity();
 		util::PEnumProperty<pragma::rendering::RenderGroup> m_renderGroups = nullptr;
+		util::PEnumProperty<rendering::SceneRenderPass> m_renderPass = nullptr;
 
 		// Used for quick access to avoid having to do a lookup on the entity's components
 		mutable CAttachableComponent *m_attachableComponent = nullptr;

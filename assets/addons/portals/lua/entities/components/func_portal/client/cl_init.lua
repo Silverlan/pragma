@@ -11,9 +11,9 @@ include("../shared.lua")
 local Component = ents.FuncPortalComponent
 
 function Component:InitializeReflectionMaterial()
-	local portalC = self:GetEntity():GetComponent(ents.COMPONENT_PORTAL)
+	local renderTargetC = self:GetEntity():GetComponent(ents.COMPONENT_RENDER_TARGET)
 	local surfC = self:GetEntity():GetComponent(ents.COMPONENT_SURFACE)
-	local renderer = portalC:GetRenderer()
+	local renderer = renderTargetC:GetRenderer()
 	if(util.is_valid(renderer) == false or surfC == nil) then return end
 	local mesh = surfC:GetMesh()
 	if(mesh == nil) then return end

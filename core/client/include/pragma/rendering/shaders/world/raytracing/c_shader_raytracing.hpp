@@ -44,8 +44,8 @@ namespace pragma
 			RenderWorld = umath::to_integral(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeWorld),
 			RenderView = umath::to_integral(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeView),
 			RenderSkybox = umath::to_integral(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeSkybox),
-			RenderWater = umath::to_integral(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeWater),
-			NoIBL = RenderWater<<1u
+			// RenderWater = umath::to_integral(pragma::CRaytracingComponent::SubMeshRenderInfoBufferData::Flags::RenderModeWater),
+			NoIBL = RenderSkybox<<1u
 		};
 
 #pragma pack(push,1)

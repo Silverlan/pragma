@@ -42,7 +42,7 @@ using namespace pragma::rendering;
 
 void pragma::CRasterizationRendererComponent::RenderParticleSystems(const util::DrawSceneInfo &drawSceneInfo,std::vector<pragma::CParticleSystemComponent*> &particles,pragma::rendering::SceneRenderPass renderMode,Bool bloom,std::vector<pragma::CParticleSystemComponent*> *bloomParticles)
 {
-	auto depthOnly = umath::is_flag_set(drawSceneInfo.renderFlags,FRender::ParticleDepth);
+	auto depthOnly = umath::is_flag_set(drawSceneInfo.renderFlags,RenderFlags::ParticleDepth);
 	if((depthOnly && bloom) || drawSceneInfo.scene.expired())
 		return;
 	auto &scene = *drawSceneInfo.scene;
@@ -53,7 +53,7 @@ void pragma::CRasterizationRendererComponent::RenderParticleSystems(const util::
 	auto &drawCmd = drawSceneInfo.commandBuffer;
 	for(auto *particle : particles)
 	{
-		if(particle != nullptr && particle->IsActive() == true && particle->GetSceneRenderGroupPass() == renderMode && particle->GetParent() == nullptr)
+		if(particle != nullptr && particle->IsActive() == true && particle->GetSceneRenderPass() == renderMode && particle->GetParent() == nullptr)
 		{
 			if(bFirst == true)
 			{
@@ -153,7 +153,7 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 	// We still have to update entity buffers *before* we start the render pass (since buffer updates
 	// are not allowed during a render pass).
 	auto &worldRenderQueues = sceneRenderDesc.GetWorldRenderQueues();
-	if((drawSceneInfo.renderFlags &FRender::World) != FRender::None)
+	if((drawSceneInfo.renderFlags &RenderFlags::World) != RenderFlags::None)
 	{
 		std::chrono::steady_clock::time_point t;
 		if(drawSceneInfo.renderStats)
@@ -273,7 +273,7 @@ void pragma::CRasterizationRendererComponent::Render(const util::DrawSceneInfo &
 	if(drawSceneInfo.renderStats) (*drawSceneInfo.renderStats)->EndGpuTimer(RenderStats::RenderStage::PostProcessingGpuBloom,*drawSceneInfo.commandBuffer);
 	
 	// Tone mapping
-	if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::HDR))
+	if(umath::is_flag_set(drawSceneInfo.renderFlags,RenderFlags::HDR))
 	{
 		// Don't bother resolving HDR; Just apply the barrier
 		drawCmd->RecordImageBarrier(

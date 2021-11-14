@@ -165,7 +165,7 @@ void CGame::RegisterLua()
 			return 1;
 		})},
 		{"register_render_mask",static_cast<int32_t(*)(lua_State*)>([](lua_State *l) -> int32_t {
-			auto mask = c_game->RegisterCustomRenderMask(Lua::CheckString(l,1));
+			auto mask = c_game->RegisterRenderMask(Lua::CheckString(l,1));
 			Lua::Push(l,mask);
 			return 1;
 		})}
@@ -363,21 +363,21 @@ void CGame::RegisterLua()
 
 	Lua::RegisterLibraryEnums(GetLuaState(),"game",{
 		{"RENDER_FLAG_NONE",0},
-		{"RENDER_FLAG_BIT_WORLD",umath::to_integral(FRender::World)},
-		{"RENDER_FLAG_BIT_VIEW",umath::to_integral(FRender::View)},
-		{"RENDER_FLAG_BIT_SKYBOX",umath::to_integral(FRender::Skybox)},
-		{"RENDER_FLAG_BIT_SHADOWS",umath::to_integral(FRender::Shadows)},
-		{"RENDER_FLAG_BIT_PARTICLES",umath::to_integral(FRender::Particles)},
-		{"RENDER_FLAG_BIT_GLOW",umath::to_integral(FRender::Glow)},
-		{"RENDER_FLAG_BIT_DEBUG",umath::to_integral(FRender::Debug)},
-		{"RENDER_FLAG_ALL",umath::to_integral(FRender::All)},
-		{"RENDER_FLAG_REFLECTION_BIT",umath::to_integral(FRender::Reflection)},
-		{"RENDER_FLAG_WATER_BIT",umath::to_integral(FRender::Water)},
-		{"RENDER_FLAG_STATIC_BIT",umath::to_integral(FRender::Static)},
-		{"RENDER_FLAG_DYNAMIC_BIT",umath::to_integral(FRender::Dynamic)},
-		{"RENDER_FLAG_TRANSLUCENT_BIT",umath::to_integral(FRender::Translucent)},
-		{"RENDER_FLAG_HDR_BIT",umath::to_integral(FRender::HDR)},
-		{"RENDER_FLAG_PARTICLE_DEPTH_BIT",umath::to_integral(FRender::ParticleDepth)},
+		{"RENDER_FLAG_BIT_WORLD",umath::to_integral(RenderFlags::World)},
+		{"RENDER_FLAG_BIT_VIEW",umath::to_integral(RenderFlags::View)},
+		{"RENDER_FLAG_BIT_SKYBOX",umath::to_integral(RenderFlags::Skybox)},
+		{"RENDER_FLAG_BIT_SHADOWS",umath::to_integral(RenderFlags::Shadows)},
+		{"RENDER_FLAG_BIT_PARTICLES",umath::to_integral(RenderFlags::Particles)},
+		{"RENDER_FLAG_BIT_GLOW",umath::to_integral(RenderFlags::Glow)},
+		{"RENDER_FLAG_BIT_DEBUG",umath::to_integral(RenderFlags::Debug)},
+		{"RENDER_FLAG_ALL",umath::to_integral(RenderFlags::All)},
+		{"RENDER_FLAG_REFLECTION_BIT",umath::to_integral(RenderFlags::Reflection)},
+		{"RENDER_FLAG_WATER_BIT",umath::to_integral(RenderFlags::Water)},
+		{"RENDER_FLAG_STATIC_BIT",umath::to_integral(RenderFlags::Static)},
+		{"RENDER_FLAG_DYNAMIC_BIT",umath::to_integral(RenderFlags::Dynamic)},
+		{"RENDER_FLAG_TRANSLUCENT_BIT",umath::to_integral(RenderFlags::Translucent)},
+		{"RENDER_FLAG_HDR_BIT",umath::to_integral(RenderFlags::HDR)},
+		{"RENDER_FLAG_PARTICLE_DEPTH_BIT",umath::to_integral(RenderFlags::ParticleDepth)},
 
 		{"TEXTURE_LOAD_FLAG_NONE",umath::to_integral(TextureLoadFlags::None)},
 		{"TEXTURE_LOAD_FLAG_BIT_LOAD_INSTANTLY",umath::to_integral(TextureLoadFlags::LoadInstantly)},

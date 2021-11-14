@@ -314,8 +314,8 @@ DLLCLIENT void debug_render_stats(bool enabled,bool full,bool print,bool continu
 	}));
 }
 
-pragma::rendering::BaseRenderProcessor::BaseRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo,RenderFlags flags,const Vector4 &drawOrigin)
-	: m_drawSceneInfo{drawSceneInfo},m_drawOrigin{drawOrigin},m_renderFlags{flags},
+pragma::rendering::BaseRenderProcessor::BaseRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo,const Vector4 &drawOrigin)
+	: m_drawSceneInfo{drawSceneInfo},m_drawOrigin{drawOrigin},
 	m_shaderProcessor{*drawSceneInfo.commandBuffer,umath::is_flag_set(drawSceneInfo.drawSceneInfo.flags,util::DrawSceneInfo::Flags::Reflection) ? PassType::Reflection : PassType::Generic}
 {
 	auto &scene = drawSceneInfo.drawSceneInfo.scene;
@@ -439,7 +439,7 @@ void pragma::rendering::BaseRenderProcessor::SetCameraType(CameraType camType)
 void pragma::rendering::BaseRenderProcessor::Set3DSky(bool enabled)
 {
 	umath::set_flag(m_baseSceneFlags,ShaderGameWorld::SceneFlags::RenderAs3DSky,enabled);
-	umath::set_flag(m_renderFlags,RenderFlags::RenderAs3DSky,enabled);
+	// umath::set_flag(m_renderFlags,RenderFlags::RenderAs3DSky,enabled);
 	if(umath::is_flag_set(m_stateFlags,StateFlags::ShaderBound) == false || m_shaderScene == nullptr)
 		return;
 	//m_shaderScene->Set3DSky(enabled);

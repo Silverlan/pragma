@@ -291,9 +291,10 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 		renderQueue->Lock();
 	}
 
+	auto renderMask = drawSceneInfo.GetRenderMask(*c_game);
 	// TODO: Use separate shadow queue builder thread
 	auto lodBias = cvLodBias->GetInt();
-	c_game->GetRenderQueueBuilder().Append([this,&drawSceneInfo,&scene,&light,&ent,lodBias]() {
+	c_game->GetRenderQueueBuilder().Append([this,&drawSceneInfo,&scene,&light,&ent,lodBias,renderMask]() {
 		for(auto &renderQueue : m_renderQueues)
 			renderQueue->instanceSets.clear();
 		auto &mainRenderQueue = m_renderQueues.front();
@@ -330,7 +331,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 			bspLeafNodes.reserve(entItWorld.GetCount());
 			for(auto *entWorld : entItWorld)
 			{
-				if(SceneRenderDesc::ShouldConsiderEntity(*static_cast<CBaseEntity*>(entWorld),scene,drawSceneInfo.renderFlags,drawSceneInfo.renderMask) == false)
+				if(SceneRenderDesc::ShouldConsiderEntity(*static_cast<CBaseEntity*>(entWorld),scene,drawSceneInfo.renderFlags,renderMask) == false)
 					continue;
 				auto worldC = entWorld->GetComponent<pragma::CWorldComponent>();
 				auto &bspTree = worldC->GetBSPTree();
@@ -339,7 +340,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 					continue;
 				bspLeafNodes.push_back(node);
 
-				if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Static) == false)
+				if(umath::is_flag_set(drawSceneInfo.renderFlags,RenderFlags::Static) == false)
 					continue;
 
 				auto *renderC = static_cast<CBaseEntity&>(worldC->GetEntity()).GetRenderComponent();
@@ -375,7 +376,7 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 			};
 			for(auto *pRenderComponent : pragma::CRenderComponent::GetEntitiesExemptFromOcclusionCulling())
 			{
-				if(SceneRenderDesc::ShouldConsiderEntity(static_cast<CBaseEntity&>(pRenderComponent->GetEntity()),scene,drawSceneInfo.renderFlags,drawSceneInfo.renderMask) == false || pRenderComponent->ShouldDrawShadow() == false)
+				if(SceneRenderDesc::ShouldConsiderEntity(static_cast<CBaseEntity&>(pRenderComponent->GetEntity()),scene,drawSceneInfo.renderFlags,renderMask) == false || pRenderComponent->ShouldDrawShadow() == false)
 					continue;
 				SceneRenderDesc::AddRenderMeshesToRenderQueue(drawSceneInfo,*pRenderComponent,fGetRenderQueue,scene,*hCam,vp,nullptr);
 			}
@@ -385,8 +386,8 @@ void LightShadowRenderer::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 			{
 				auto &dynOctree = culler->GetOcclusionOctree();
 				SceneRenderDesc::CollectRenderMeshesFromOctree(
-					drawSceneInfo,dynOctree,scene,*hCam,vp,drawSceneInfo.renderFlags,fGetRenderQueue,fShouldCull,nullptr,nullptr,lodBias,
-					[](CBaseEntity &ent,const pragma::CSceneComponent&,FRender) -> bool {
+					drawSceneInfo,dynOctree,scene,*hCam,vp,drawSceneInfo.renderFlags,renderMask,fGetRenderQueue,fShouldCull,nullptr,nullptr,lodBias,
+					[](CBaseEntity &ent,const pragma::CSceneComponent&,RenderFlags) -> bool {
 						return ent.GetRenderComponent()->ShouldDrawShadow();
 					}
 				);
@@ -523,7 +524,7 @@ void LightShadowRenderer::Render(const util::DrawSceneInfo &drawSceneInfo)
 	auto pipeline = m_hLight->AreMorphTargetsInShadowsEnabled() ? ShaderShadow::Pipeline::WithMorphTargetAnimations : ShaderShadow::Pipeline::Default;
 	
 	util::RenderPassDrawInfo rpDrawInfo {drawSceneInfo,*drawSceneInfo.commandBuffer};
-	rendering::DepthStageRenderProcessor shadowRenderProcessor {rpDrawInfo,RenderFlags::None,{}};
+	rendering::DepthStageRenderProcessor shadowRenderProcessor {rpDrawInfo,{}};
 	for(auto layerId=decltype(numLayers){0};layerId<numLayers;++layerId)
 	{
 		auto *framebuffer = shadowC->GetFramebuffer(layerId);

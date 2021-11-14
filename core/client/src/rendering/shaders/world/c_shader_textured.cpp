@@ -663,6 +663,11 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::Initi
 
 ////////
 
+GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetBaseSpecializationFlags() const
+{
+	return GameShaderSpecializationConstantFlag::None;
+}
+
 void ShaderGameWorldLightingPass::RecordBindScene(
 	rendering::ShaderProcessor &shaderProcessor,
 	const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,

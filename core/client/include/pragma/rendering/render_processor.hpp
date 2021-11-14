@@ -32,7 +32,7 @@ namespace pragma
 };
 using MaterialIndex = uint32_t;
 using EntityIndex = uint32_t;
-enum class RenderFlags : uint8_t;
+enum class RenderFlags : uint32_t;
 namespace prosper {class Shader;};
 namespace pragma::rendering
 {
@@ -65,6 +65,7 @@ namespace pragma::rendering
 		inline prosper::ICommandBuffer &GetCommandBuffer() const {return m_cmdBuffer;}
 		inline prosper::IShaderPipelineLayout &GetCurrentPipelineLayout() const {return *m_currentPipelineLayout;}
 		inline CBaseEntity &GetCurrentEntity() const;
+		inline const pragma::CSceneComponent &GetCurrentScene() const;
 		PassType GetPassType() const {return m_passType;}
 	private:
 		bool RecordBindScene(const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,const pragma::ShaderGameWorld &referenceShader,bool view);
@@ -79,6 +80,7 @@ namespace pragma::rendering
 		Vector4 m_boundClipPlane {};
 		std::optional<Vector2> m_depthBias {};
 		Vector4 m_drawOrigin {};
+		const pragma::CSceneComponent *m_sceneC = nullptr;
 		pragma::CVertexAnimatedComponent *m_vertexAnimC = nullptr;
 		pragma::CModelComponent *m_modelC = nullptr;
 		pragma::CLightMapReceiverComponent *m_lightMapReceiverC = nullptr;
@@ -115,7 +117,7 @@ namespace pragma::rendering
 			World = 0,
 			View
 		};
-		BaseRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo,RenderFlags flags,const Vector4 &drawOrigin);
+		BaseRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo,const Vector4 &drawOrigin);
 		~BaseRenderProcessor();
 		void SetCameraType(CameraType camType);
 		void Set3DSky(bool enabled);
@@ -160,7 +162,6 @@ namespace pragma::rendering
 		std::optional<Vector2> m_depthBias {};
 		RenderPassStats *m_stats = nullptr;
 		const pragma::CRasterizationRendererComponent *m_renderer = nullptr;
-		RenderFlags m_renderFlags;
 		uint32_t m_numShaderInvocations = 0;
 		StateFlags m_stateFlags = StateFlags::None;
 	};
@@ -169,7 +170,7 @@ namespace pragma::rendering
 		: public pragma::rendering::BaseRenderProcessor
 	{
 	public:
-		DepthStageRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo,RenderFlags flags,const Vector4 &drawOrigin);
+		DepthStageRenderProcessor(const util::RenderPassDrawInfo &drawSceneInfo,const Vector4 &drawOrigin);
 		uint32_t Render(const pragma::rendering::RenderQueue &renderQueue,RenderPassStats *optStats=nullptr,std::optional<uint32_t> worldRenderQueueIndex={});
 		void BindLight(CLightComponent &light,uint32_t layerId);
 	};

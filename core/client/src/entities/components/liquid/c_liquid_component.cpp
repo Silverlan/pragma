@@ -73,7 +73,7 @@ void CLiquidComponent::OnEntitySpawn()
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(pRenderComponent)
 	{
-		pRenderComponent->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::Water);
+		// pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::Water);
 		// pRenderComponent->GetRenderModeProperty()->SetLocked(true);
 	}
 

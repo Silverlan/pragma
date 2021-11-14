@@ -16,7 +16,7 @@
 
 using namespace pragma;
 
-LINK_ENTITY_TO_CLASS(point_rendertarget,PointRenderTarget);
+// LINK_ENTITY_TO_CLASS(point_rendertarget,PointRenderTarget);
 
 void SRenderTargetComponent::SendData(NetPacket &packet,networking::ClientRecipientFilter &rp)
 {

@@ -84,8 +84,8 @@ void RegisterLuaEntityComponents2(lua_State *l,luabind::module_ &entsMod)
 	auto defSPathNode = pragma::lua::create_entity_component_class<pragma::SPathNodeComponent,pragma::BasePointPathNodeComponent>("PathNodeComponent");
 	entsMod[defSPathNode];
 
-	auto defSRenderTarget = pragma::lua::create_entity_component_class<pragma::SRenderTargetComponent,pragma::BasePointRenderTargetComponent>("RenderTargetComponent");
-	entsMod[defSRenderTarget];
+	// auto defSRenderTarget = pragma::lua::create_entity_component_class<pragma::SRenderTargetComponent,pragma::BasePointRenderTargetComponent>("RenderTargetComponent");
+	// entsMod[defSRenderTarget];
 
 	auto defSPointTarget = pragma::lua::create_entity_component_class<pragma::SPointTargetComponent,pragma::BasePointTargetComponent>("PointTargetComponent");
 	entsMod[defSPointTarget];

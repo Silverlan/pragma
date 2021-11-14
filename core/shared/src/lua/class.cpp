@@ -862,6 +862,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	classDefTransform.def(luabind::const_self *umath::ScaledTransform());
 	classDefTransform.def(luabind::const_self *Vector3());
 	classDefTransform.def(luabind::const_self *Quat());
+	classDefTransform.def(luabind::const_self *umath::Plane());
 
 	modMath[classDefTransform];
 	Lua::RegisterLibraryValues<umath::Transform>(lua.GetState(),"math.Transform",{
@@ -892,6 +893,7 @@ void NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	classDefScaledTransform.def(luabind::const_self *umath::ScaledTransform()); // Note: We use umath::ScaledTransform instead of luabind::const_self, because otherwise the overload of the base class ("Transform") would be used if two ScaledTransforms are multiplied
 	classDefScaledTransform.def(luabind::const_self *Vector3());
 	classDefScaledTransform.def(luabind::const_self *Quat());
+	classDefScaledTransform.def(luabind::const_self *umath::Plane());
 	modMath[classDefScaledTransform];
 	Lua::RegisterLibraryValues<umath::ScaledTransform>(lua.GetState(),"math.ScaledTransform",{
 		std::pair<std::string,umath::ScaledTransform>{"IDENTITY",umath::ScaledTransform{}}
@@ -1441,6 +1443,7 @@ namespace pragma::lua
 {
 	void register_thread_pool(lua_State *l,luabind::module_ &modUtil);
 };
+
 void Game::RegisterLuaClasses()
 {
 	NetworkState::RegisterSharedLuaClasses(GetLuaInterface());
@@ -1497,6 +1500,8 @@ void Game::RegisterLuaClasses()
 	defPlane.def("Copy",static_cast<void(*)(lua_State*,umath::Plane&)>([](lua_State *l,umath::Plane &plane) {
 		Lua::Push<umath::Plane>(l,umath::Plane{plane});
 	}));
+	defPlane.def("SetNormal",&umath::Plane::SetNormal);
+	defPlane.def("SetDistance",&umath::Plane::SetDistance);
 	defPlane.def("GetNormal",static_cast<const Vector3&(umath::Plane::*)() const>(&umath::Plane::GetNormal),luabind::copy_policy<0>{});
 	defPlane.def("GetPos",static_cast<Vector3(*)(const umath::Plane&)>([](const umath::Plane &plane) {return plane.GetPos();}));
 	defPlane.def("GetDistance",static_cast<double(umath::Plane::*)() const>(&umath::Plane::GetDistance));

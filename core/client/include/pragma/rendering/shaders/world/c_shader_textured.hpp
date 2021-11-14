@@ -262,6 +262,7 @@ namespace pragma
 		virtual GameShaderSpecializationConstantFlag GetMaterialPipelineSpecializationRequirements(CMaterial &mat) const;
 
 		//
+		virtual GameShaderSpecializationConstantFlag GetBaseSpecializationFlags() const;
 		virtual void RecordBindScene(
 			rendering::ShaderProcessor &shaderProcessor,
 			const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,

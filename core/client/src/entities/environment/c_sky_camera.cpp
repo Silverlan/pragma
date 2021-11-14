@@ -85,8 +85,9 @@ void CSkyCameraComponent::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 	m_renderQueueTranslucent->Clear();
 	m_renderQueue->Lock();
 	m_renderQueueTranslucent->Lock();
-		
-	c_game->GetRenderQueueBuilder().Append([this,&drawSceneInfo]() {
+
+	auto renderMask = drawSceneInfo.GetRenderMask(*c_game);
+	c_game->GetRenderQueueBuilder().Append([this,&drawSceneInfo,renderMask]() {
 		auto &scene = *drawSceneInfo.scene.get();
 
 		auto &pos = GetEntity().GetPosition();
@@ -99,7 +100,7 @@ void CSkyCameraComponent::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 		trees.reserve(entItWorld.GetCount());
 		for(auto *entWorld : entItWorld)
 		{
-			if(SceneRenderDesc::ShouldConsiderEntity(*static_cast<CBaseEntity*>(entWorld),scene,drawSceneInfo.renderFlags,drawSceneInfo.renderMask) == false)
+			if(SceneRenderDesc::ShouldConsiderEntity(*static_cast<CBaseEntity*>(entWorld),scene,drawSceneInfo.renderFlags,renderMask) == false)
 				continue;
 			auto worldC = entWorld->GetComponent<pragma::CWorldComponent>();
 			auto &bspTree = worldC->GetBSPTree();
@@ -127,7 +128,7 @@ void CSkyCameraComponent::BuildRenderQueues(const util::DrawSceneInfo &drawScene
 			// (Also see shaders/modules/vs_world.gls)
 			// Also take into account that world render queues are built offline, but don't include the flag for the constant -> How to handle?
 			SceneRenderDesc::CollectRenderMeshesFromOctree(
-				drawSceneInfo,dynOctree,scene,*hCam,vp,drawSceneInfo.renderFlags,
+				drawSceneInfo,dynOctree,scene,*hCam,vp,drawSceneInfo.renderFlags,renderMask,
 				[this](pragma::rendering::SceneRenderPass renderMode,bool translucent) -> pragma::rendering::RenderQueue* {
 					return (renderMode != pragma::rendering::SceneRenderPass::World) ? nullptr : (translucent ? m_renderQueueTranslucent.get() : m_renderQueue.get());
 				},

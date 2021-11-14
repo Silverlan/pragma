@@ -181,7 +181,7 @@ void SGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::SPointConstraintHingeComponent>("constraint_hinge");
 	componentManager.RegisterComponentType<pragma::SPointConstraintSliderComponent>("constraint_slider");
 	componentManager.RegisterComponentType<pragma::SPathNodeComponent>("path_node");
-	componentManager.RegisterComponentType<pragma::SRenderTargetComponent>("render_target");
+	// componentManager.RegisterComponentType<pragma::SRenderTargetComponent>("render_target");
 	componentManager.RegisterComponentType<pragma::SPointTargetComponent>("target");
 	componentManager.RegisterComponentType<pragma::PropComponent>("prop");
 	componentManager.RegisterComponentType<pragma::SPropDynamicComponent>("prop_dynamic");

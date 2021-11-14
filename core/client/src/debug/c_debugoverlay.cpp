@@ -607,7 +607,7 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawSpline(const std::
 std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPlane(const Vector3 &n,float dist,const Color &color,float duration)
 {
 	auto perp = uvec::get_perpendicular(n);
-	auto origin = n *-dist;
+	auto origin = n *dist;
 	auto c = uvec::cross(n,perp);
 	uvec::normalize(&c);
 	const auto d = 50'000.f;
@@ -634,7 +634,8 @@ std::shared_ptr<DebugRenderer::BaseObject> DebugRenderer::DrawPlane(const Vector
 	};
 	auto rLines = DrawLines({
 		v0,v2,
-		v1,v3
+		v1,v3,
+		origin,origin +n *100.f
 	},colInv,duration);
 	if(rLines != nullptr)
 		r->AddObject(rLines);

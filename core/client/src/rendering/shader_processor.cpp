@@ -38,6 +38,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const pragma::CSceneCom
 	assert(dsRenderer);
 	assert(dsLights);
 	assert(dsShadows);
+	m_sceneC = &scene;
 	auto &dsMat = shader.GetDefaultMaterialDescriptorSet();
 	// m_sceneFlags = ShaderGameWorld::SceneFlags::None;
 	shader.RecordBindScene(
@@ -59,7 +60,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindShader(
 	m_materialDescriptorSetIndex = m_curShader->GetMaterialDescriptorSetIndex();
 	m_entityInstanceDescriptorSetIndex = m_curShader->GetInstanceDescriptorSetIndex();
 	m_curInstanceSet = nullptr;
-	m_clipPlane = {};
+	// m_clipPlane = {};
 	m_boundClipPlane = {};
 	m_depthBias = {};
 	m_vertexAnimC = nullptr;
@@ -133,7 +134,8 @@ bool pragma::rendering::ShaderProcessor::RecordBindEntity(CBaseEntity &ent)
 	if(descSet == nullptr)
 		return false;
 	auto sceneFlags = m_sceneFlags;
-	m_cmdBuffer.RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics,*m_currentPipelineLayout,m_entityInstanceDescriptorSetIndex,*descSet);
+	if(m_curShader->RecordBindEntity(*this,*renderC,*m_currentPipelineLayout,m_entityInstanceDescriptorSetIndex) == false)
+		return false;
 
 	auto *clipPlane = renderC->GetRenderClipPlane();
 	if(clipPlane)
@@ -235,4 +237,5 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(CModelSubMesh &mesh,pragma::
 	return m_curShader->OnRecordDrawMesh(*this,mesh) && m_cmdBuffer.RecordDrawIndexed(mesh.GetTriangleVertexCount(),instanceCount);
 }
 inline CBaseEntity &pragma::rendering::ShaderProcessor::GetCurrentEntity() const {return static_cast<CBaseEntity&>(m_modelC->GetEntity());}
+inline const pragma::CSceneComponent &pragma::rendering::ShaderProcessor::GetCurrentScene() const {return *m_sceneC;}
 #pragma optimize("",on)

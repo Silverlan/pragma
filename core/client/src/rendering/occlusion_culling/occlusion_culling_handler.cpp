@@ -56,8 +56,8 @@ bool OcclusionCullingHandler::ShouldExamine(pragma::CSceneComponent &scene,const
 	auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
 	if(mdl == nullptr)
 		return false;
-	outViewModel = (pRenderComponent->GetSceneRenderGroupPass() == pragma::rendering::SceneRenderPass::View) ? true : false; // TODO: Remove me once the render bounds accurately encompass animation bounds
-	*outPlanes = (pRenderComponent->GetSceneRenderGroupPass() == pragma::rendering::SceneRenderPass::Skybox) ? const_cast<std::vector<umath::Plane>*>(&renderer.GetFrustumPlanes()) : const_cast<std::vector<umath::Plane>*>(&renderer.GetClippedFrustumPlanes());
+	outViewModel = (pRenderComponent->GetSceneRenderPass() == pragma::rendering::SceneRenderPass::View) ? true : false; // TODO: Remove me once the render bounds accurately encompass animation bounds
+	*outPlanes = (pRenderComponent->GetSceneRenderPass() == pragma::rendering::SceneRenderPass::Sky) ? const_cast<std::vector<umath::Plane>*>(&renderer.GetFrustumPlanes()) : const_cast<std::vector<umath::Plane>*>(&renderer.GetClippedFrustumPlanes());
 	if(pRenderComponent->IsExemptFromOcclusionCulling() || outViewModel)
 		return true; // Always draw
 	auto &sphere = pRenderComponent->GetUpdatedAbsoluteRenderSphere();

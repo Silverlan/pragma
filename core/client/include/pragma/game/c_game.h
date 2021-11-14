@@ -241,7 +241,11 @@ public:
 	void DisableRenderMode(pragma::rendering::SceneRenderPass renderMode);
 	bool IsRenderModeEnabled(pragma::rendering::SceneRenderPass renderMode) const;
 
-	pragma::rendering::RenderMask RegisterCustomRenderMask(const std::string &name);
+	pragma::rendering::RenderMask RegisterRenderMask(const std::string &name,bool inclusiveByDefault=true);
+	pragma::rendering::RenderMask GetInclusiveRenderMasks() const;
+	pragma::rendering::RenderMask GetExclusiveRenderMasks() const;
+	bool IsInclusiveRenderMask(pragma::rendering::RenderMask mask) const;
+	bool IsExclusiveRenderMask(pragma::rendering::RenderMask mask) const;
 	std::optional<pragma::rendering::RenderMask> GetRenderMask(const std::string &name);
 	const std::string *FindRenderMaskName(pragma::rendering::RenderMask mask) const;
 
@@ -319,6 +323,7 @@ public:
 	void RemoveEntity(BaseEntity *ent);
 	pragma::CListenerComponent *GetListener();
 	pragma::CPlayerComponent *GetLocalPlayer();
+	void GetPrimaryCameraRenderMask(::pragma::rendering::RenderMask &inclusionMask,::pragma::rendering::RenderMask &exclusionMask) const;
 	void SetLocalPlayer(pragma::CPlayerComponent *pl);
 	void SpawnEntity(BaseEntity *ent);
 	void GetEntities(std::vector<CBaseEntity*> **ents);
@@ -573,7 +578,11 @@ private:
 	void UpdateShaderTimeData();
 
 	std::unordered_map<std::string,pragma::rendering::RenderMask> m_customRenderMasks;
-	pragma::rendering::RenderMask m_nextCustomRenderMaskIndex = pragma::rendering::RenderMask::CustomStartBit;
+	pragma::rendering::RenderMask m_inclusiveRenderMasks = pragma::rendering::RenderMask::None;
+	pragma::rendering::RenderMask m_exclusiveRenderMasks = pragma::rendering::RenderMask::None;
+	pragma::rendering::RenderMask m_nextCustomRenderMaskIndex = static_cast<pragma::rendering::RenderMask>(1);
+	pragma::rendering::RenderMask m_firstPersonRenderMask = pragma::rendering::RenderMask::None;
+	pragma::rendering::RenderMask m_thirdPersonRenderMask = pragma::rendering::RenderMask::None;
 
 	// Entities
 	pragma::ComponentHandle<pragma::CGameComponent> m_gameComponent;

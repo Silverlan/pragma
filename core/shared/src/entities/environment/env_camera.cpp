@@ -234,44 +234,44 @@ void BaseEnvCameraComponent::GetFrustumPlanes(const std::vector<Vector3> &points
 	// Left Plane
 	outPlanes.push_back(umath::Plane{
 		points.at(umath::to_integral(FrustumPoint::NearBottomLeft)),
-		points.at(umath::to_integral(FrustumPoint::FarBottomLeft)),
 		points.at(umath::to_integral(FrustumPoint::NearTopLeft)),
-		});
+		points.at(umath::to_integral(FrustumPoint::FarBottomLeft)),
+	});
 
 	// Right Plane
 	outPlanes.push_back(umath::Plane{
 		points.at(umath::to_integral(FrustumPoint::NearBottomRight)),
-		points.at(umath::to_integral(FrustumPoint::NearTopRight)),
 		points.at(umath::to_integral(FrustumPoint::FarBottomRight)),
-		});
+		points.at(umath::to_integral(FrustumPoint::NearTopRight)),
+	});
 
 	// Top Plane
 	outPlanes.push_back(umath::Plane{
 		points.at(umath::to_integral(FrustumPoint::NearBottomRight)),
-		points.at(umath::to_integral(FrustumPoint::FarBottomLeft)),
 		points.at(umath::to_integral(FrustumPoint::NearBottomLeft)),
-		});
+		points.at(umath::to_integral(FrustumPoint::FarBottomLeft)),
+	});
 
 	// Bottom Plane
 	outPlanes.push_back(umath::Plane{
 		points.at(umath::to_integral(FrustumPoint::NearTopRight)),
-		points.at(umath::to_integral(FrustumPoint::NearTopLeft)),
 		points.at(umath::to_integral(FrustumPoint::FarTopLeft)),
-		});
+		points.at(umath::to_integral(FrustumPoint::NearTopLeft)),
+	});
 
 	// Near Plane
 	outPlanes.push_back(umath::Plane{
 		points.at(umath::to_integral(FrustumPoint::NearTopRight)),
-		points.at(umath::to_integral(FrustumPoint::NearBottomLeft)),
 		points.at(umath::to_integral(FrustumPoint::NearTopLeft)),
-		});
+		points.at(umath::to_integral(FrustumPoint::NearBottomLeft)),
+	});
 
 	// Far Plane
 	outPlanes.push_back(umath::Plane{
 		points.at(umath::to_integral(FrustumPoint::FarTopRight)),
-		points.at(umath::to_integral(FrustumPoint::FarTopLeft)),
 		points.at(umath::to_integral(FrustumPoint::FarBottomLeft)),
-		});
+		points.at(umath::to_integral(FrustumPoint::FarTopLeft)),
+	});
 }
 void BaseEnvCameraComponent::GetFrustumPoints(std::vector<Vector3> &outPoints) const
 {

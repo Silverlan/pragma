@@ -122,7 +122,7 @@ void CRaytracingComponent::InitializeModelRaytracingBuffers()
 		return;
 	}
 	auto renderC = ent.GetComponent<CRenderComponent>();
-	auto renderMode = renderC.valid() ? renderC->GetSceneRenderGroupPass() : pragma::rendering::SceneRenderPass::World;
+	auto renderMode = renderC.valid() ? renderC->GetSceneRenderPass() : pragma::rendering::SceneRenderPass::World;
 	auto flags = SubMeshRenderInfoBufferData::Flags::None;
 	switch(renderMode)
 	{
@@ -132,12 +132,12 @@ void CRaytracingComponent::InitializeModelRaytracingBuffers()
 	case pragma::rendering::SceneRenderPass::View:
 		flags |= SubMeshRenderInfoBufferData::Flags::RenderModeView;
 		break;
-	case pragma::rendering::SceneRenderPass::Skybox:
+	case pragma::rendering::SceneRenderPass::Sky:
 		flags |= SubMeshRenderInfoBufferData::Flags::RenderModeSkybox;
 		break;
-	case pragma::rendering::SceneRenderPass::Water:
-		flags |= SubMeshRenderInfoBufferData::Flags::RenderModeWater;
-		break;
+	// case pragma::rendering::SceneRenderPass::Water:
+	// 	flags |= SubMeshRenderInfoBufferData::Flags::RenderModeWater;
+	// 	break;
 	}
 
 	std::vector<std::shared_ptr<ModelMesh>> lodMeshes {};

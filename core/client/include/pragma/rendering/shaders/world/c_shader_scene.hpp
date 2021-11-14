@@ -281,6 +281,7 @@ namespace pragma
 		virtual uint32_t GetMaterialDescriptorSetIndex() const {return std::numeric_limits<uint32_t>::max();}
 		prosper::IDescriptorSet &GetDefaultMaterialDescriptorSet() const;
 
+		// Note: All recording functions are called in a multi-threaded environment! Handle with care!
 		virtual void RecordBindScene(
 			rendering::ShaderProcessor &shaderProcessor,
 			const pragma::CSceneComponent &scene,const pragma::CRasterizationRendererComponent &renderer,
@@ -289,6 +290,10 @@ namespace pragma
 			prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
 			const Vector4 &drawOrigin,SceneFlags &inOutSceneFlags
 		) const {}
+		virtual bool RecordBindEntity(
+			rendering::ShaderProcessor &shaderProcessor,CRenderComponent &renderC,
+			prosper::IShaderPipelineLayout &layout,uint32_t entityInstanceDescriptorSetIndex
+		) const;
 		virtual bool RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor,CMaterial &mat) const;
 		virtual void RecordSceneFlags(rendering::ShaderProcessor &shaderProcessor,SceneFlags sceneFlags) const;
 		virtual void RecordBindLight(rendering::ShaderProcessor &shaderProcessor,CLightComponent &light,uint32_t layerId) const {}

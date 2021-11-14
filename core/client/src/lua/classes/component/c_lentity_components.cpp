@@ -468,6 +468,7 @@ namespace pragma
 	}
 };
 
+void RegisterLuaEntityComponents2(lua_State *l,luabind::module_ &entsMod);
 void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 {
 	Game::RegisterLuaEntityComponents(entsMod);
@@ -831,6 +832,11 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	// entsMod[defCFuncPortal];
 
 	auto defCLiquidSurf = pragma::lua::create_entity_component_class<pragma::CLiquidSurfaceComponent,pragma::BaseLiquidSurfaceComponent>("LiquidSurfaceComponent");
+	defCLiquidSurf.def("Test",+[](pragma::CLiquidSurfaceComponent &c,prosper::Texture &tex) {
+		auto &scene = c.GetWaterScene();
+		scene.descSetGroupTexEffects->GetDescriptorSet()->SetBindingTexture(tex,0);
+		scene.descSetGroupTexEffects->GetDescriptorSet()->Update();
+	});
 	entsMod[defCLiquidSurf];
 
 	auto defCLiquidVol = pragma::lua::create_entity_component_class<pragma::CLiquidVolumeComponent,pragma::BaseLiquidVolumeComponent>("LiquidVolumeComponent");
@@ -866,8 +872,8 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	auto defCPointConstraintSlider = pragma::lua::create_entity_component_class<pragma::CPointConstraintSliderComponent,pragma::BasePointConstraintSliderComponent>("PointConstraintSliderComponent");
 	entsMod[defCPointConstraintSlider];
 
-	auto defCRenderTarget = pragma::lua::create_entity_component_class<pragma::CRenderTargetComponent,pragma::BasePointRenderTargetComponent>("RenderTargetComponent");
-	entsMod[defCRenderTarget];
+	// auto defCRenderTarget = pragma::lua::create_entity_component_class<pragma::CRenderTargetComponent,pragma::BasePointRenderTargetComponent>("RenderTargetComponent");
+	// entsMod[defCRenderTarget];
 
 	auto defCPointTarget = pragma::lua::create_entity_component_class<pragma::CPointTargetComponent,pragma::BasePointTargetComponent>("PointTargetComponent");
 	entsMod[defCPointTarget];
@@ -1000,6 +1006,8 @@ void CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 
 	auto defCGeneric = pragma::lua::create_entity_component_class<pragma::CGenericComponent,pragma::BaseGenericComponent>("GenericComponent");
 	entsMod[defCGeneric];
+
+	RegisterLuaEntityComponents2(l,entsMod);
 }
 
 //////////////

@@ -5,12 +5,13 @@
 
 #include "sh_prepass.gls"
 #include "sh_prepass_vertex_data.gls"
-#include "../../modules/sh_rendersettings.gls"
-#include "../../modules/vs_weighted.gls"
-#include "../../modules/vs_vertex_animation.gls"
-#include "../../modules/vs_instanced_entity_data.gls"
-#include "../../modules/vs_sky_camera.gls"
-#include "../../math/depth_bias.gls"
+#include "/modules/sh_rendersettings.gls"
+#include "/modules/vs_weighted.gls"
+#include "/modules/vs_vertex_animation.gls"
+#include "/modules/vs_instanced_entity_data.gls"
+#include "/modules/vs_sky_camera.gls"
+#include "/modules/sh_clip_plane.gls"
+#include "/math/depth_bias.gls"
 
 layout(location = SHADER_VERTEX_BUFFER_LOCATION) in vec3 in_vert_pos;
 layout(location = SHADER_UV_BUFFER_LOCATION) in vec2 in_vert_uv;
@@ -53,10 +54,7 @@ void main()
 	vposWs.xyz /= vposWs.w;
 	vposWs.w = 1.0;
 
-	if(length_sqr(u_pushConstants.scene.clipPlane.xyz) > 0.0)
-		gl_ClipDistance[0] = dot(vec4(vposWs.xyz,1.0),u_pushConstants.scene.clipPlane);
-	else
-		gl_ClipDistance[0] = 1.0;
+	apply_clip_plane(u_pushConstants.scene.clipPlane,vposWs.xyz);
 
 	vs_out.vert_normal_cs = (V *mdlMatrix *vec4(normal,0)).xyz;
 	vs_out.vert_uv = in_vert_uv.xy;

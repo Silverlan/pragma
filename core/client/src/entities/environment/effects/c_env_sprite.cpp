@@ -152,7 +152,7 @@ void CSpriteComponent::StartParticle()
 	});
 
 	if(m_particleRenderMode != std::numeric_limits<uint32_t>::max())
-		pt->SetSceneRenderGroupPass(static_cast<pragma::rendering::SceneRenderPass>(m_particleRenderMode));
+		pt->SetSceneRenderPass(static_cast<pragma::rendering::SceneRenderPass>(m_particleRenderMode));
 	pt->SetContinuous(true);
 	auto pTrComponent = ent.GetTransformComponent();
 	auto pTrComponentPt = pt->GetEntity().GetTransformComponent();

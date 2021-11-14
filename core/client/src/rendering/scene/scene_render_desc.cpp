@@ -103,33 +103,31 @@ static auto cvDrawTranslucent = GetClientConVar("render_draw_translucent");
 static auto cvDrawSky = GetClientConVar("render_draw_sky");
 static auto cvDrawWater = GetClientConVar("render_draw_water");
 static auto cvDrawView = GetClientConVar("render_draw_view");
-static FRender render_mode_to_render_flag(pragma::rendering::SceneRenderPass renderMode)
+static RenderFlags render_mode_to_render_flag(pragma::rendering::SceneRenderPass renderMode)
 {
 	switch(renderMode)
 	{
 	case pragma::rendering::SceneRenderPass::World:
-		return FRender::World;
+		return RenderFlags::World;
 	case pragma::rendering::SceneRenderPass::View:
-		return FRender::View;
-	case pragma::rendering::SceneRenderPass::Skybox:
-		return FRender::Skybox;
-	case pragma::rendering::SceneRenderPass::Water:
-		return FRender::Water;
+		return RenderFlags::View;
+	case pragma::rendering::SceneRenderPass::Sky:
+		return RenderFlags::Skybox;
 	}
-	static_assert(umath::to_integral(pragma::rendering::SceneRenderPass::Count) == 5);
-	return FRender::None;
+	static_assert(umath::to_integral(pragma::rendering::SceneRenderPass::Count) == 4);
+	return RenderFlags::None;
 }
 
 SceneRenderDesc::RenderQueueId SceneRenderDesc::GetRenderQueueId(pragma::rendering::SceneRenderPass renderMode,bool translucent) const
 {
 	switch(renderMode)
 	{
-	case pragma::rendering::SceneRenderPass::Skybox:
+	case pragma::rendering::SceneRenderPass::Sky:
 		return !translucent ? RenderQueueId::Skybox : RenderQueueId::SkyboxTranslucent;
 	case pragma::rendering::SceneRenderPass::View:
 		return !translucent ? RenderQueueId::View : RenderQueueId::ViewTranslucent;
-	case pragma::rendering::SceneRenderPass::Water:
-		return !translucent ? RenderQueueId::Water : RenderQueueId::Invalid;
+	// case pragma::rendering::SceneRenderPass::Water:
+	// 	return !translucent ? RenderQueueId::Water : RenderQueueId::Invalid;
 	case pragma::rendering::SceneRenderPass::World:
 		return !translucent ? RenderQueueId::World : RenderQueueId::WorldTranslucent;
 	}
@@ -161,7 +159,7 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 	auto &renderBufferData = renderC.GetRenderBufferData();
 	auto &lodGroup = renderC.GetLodRenderMeshGroup(lod);
 	renderC.UpdateRenderDataMT(drawSceneInfo.commandBuffer,scene,cam,vp);
-	auto renderMode = renderC.GetSceneRenderGroupPass();
+	auto renderMode = renderC.GetSceneRenderPass();
 	auto *renderer = drawSceneInfo.scene->GetRenderer();
 	if(renderer == nullptr)
 		return;
@@ -171,7 +169,7 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 	auto baseShaderSpecializationFlags = mdlC->GetBaseShaderSpecializationFlags() | baseSpecializationFlags;
 	auto isBaseTranslucent = umath::is_flag_set(baseShaderSpecializationFlags,pragma::GameShaderSpecializationConstantFlag::EnableTranslucencyBit);
 	auto &context = c_engine->GetRenderContext();
-	auto renderTranslucent = umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Translucent);
+	auto renderTranslucent = umath::is_flag_set(drawSceneInfo.renderFlags,RenderFlags::Translucent);
 	for(auto meshIdx=lodGroup.first;meshIdx<lodGroup.first +lodGroup.second;++meshIdx)
 	{
 		if(fShouldCull && ShouldCull(renderC,meshIdx,fShouldCull))
@@ -191,10 +189,12 @@ void SceneRenderDesc::AddRenderMeshesToRenderQueue(
 		shader = rasterizer->GetShaderOverride(shader);
 		if(shader == nullptr)
 			continue;
+		auto specializationFlags = baseShaderSpecializationFlags | renderBufferData[meshIdx].pipelineSpecializationFlags |
+			shader->GetBaseSpecializationFlags();
 		auto pipelineIdx = shader->FindPipelineIndex(
 			pragma::rendering::PassType::Generic, // The translation to the actual pass type will happen in the render processor
 			renderC.GetShaderPipelineSpecialization(),
-			baseShaderSpecializationFlags | renderBufferData[meshIdx].pipelineSpecializationFlags
+			specializationFlags
 		);
 		prosper::PipelineID pipelineId;
 		if(pipelineIdx.has_value() == false || shader->GetPipelineId(pipelineId,*pipelineIdx) == false || pipelineId == std::numeric_limits<decltype(pipelineId)>::max())
@@ -257,10 +257,11 @@ bool SceneRenderDesc::ShouldCull(const Vector3 &min,const Vector3 &max,const std
 
 static auto cvEntitiesPerJob = GetClientConVar("render_queue_entities_per_worker_job");
 void SceneRenderDesc::CollectRenderMeshesFromOctree(
-	const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
+	const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,
+	const Mat4 &vp,RenderFlags renderFlags,pragma::rendering::RenderMask renderMask,
 	const std::function<pragma::rendering::RenderQueue*(pragma::rendering::SceneRenderPass,bool)> &getRenderQueue,
 	const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,const std::vector<util::BSPTree*> *bspTrees,const std::vector<util::BSPTree::Node*> *bspLeafNodes,
-	int32_t lodBias,const std::function<bool(CBaseEntity&,const pragma::CSceneComponent&,FRender)> &shouldConsiderEntity,
+	int32_t lodBias,const std::function<bool(CBaseEntity&,const pragma::CSceneComponent&,RenderFlags)> &shouldConsiderEntity,
 	pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags
 )
 {
@@ -268,7 +269,7 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 		baseSpecializationFlags |= pragma::GameShaderSpecializationConstantFlag::EnableClippingBit;
 	auto numEntitiesPerWorkerJob = umath::max(cvEntitiesPerJob->GetInt(),1);
 	std::function<void(const OcclusionOctree<CBaseEntity*>::Node &node)> iterateTree = nullptr;
-	iterateTree = [&iterateTree,&shouldConsiderEntity,&scene,&cam,renderFlags,fShouldCull,&drawSceneInfo,&getRenderQueue,&vp,bspLeafNodes,bspTrees,lodBias,numEntitiesPerWorkerJob,baseSpecializationFlags](const OcclusionOctree<CBaseEntity*>::Node &node) {
+	iterateTree = [&iterateTree,&shouldConsiderEntity,&scene,&cam,renderFlags,fShouldCull,renderMask,&drawSceneInfo,&getRenderQueue,&vp,bspLeafNodes,bspTrees,lodBias,numEntitiesPerWorkerJob,baseSpecializationFlags](const OcclusionOctree<CBaseEntity*>::Node &node) {
 		auto &nodeBounds = node.GetWorldBounds();
 		if(fShouldCull && fShouldCull(nodeBounds.first,nodeBounds.second))
 			return;
@@ -295,7 +296,7 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 		{
 			auto iStart = i *numEntitiesPerWorkerJob;
 			auto iEnd = umath::min(static_cast<size_t>(iStart +numEntitiesPerWorkerJob),numObjects);
-			c_game->GetRenderQueueWorkerManager().AddJob([iStart,iEnd,&drawSceneInfo,shouldConsiderEntity,&objs,renderFlags,getRenderQueue,&scene,&cam,vp,fShouldCull,lodBias,baseSpecializationFlags]() {
+			c_game->GetRenderQueueWorkerManager().AddJob([iStart,iEnd,&drawSceneInfo,shouldConsiderEntity,renderMask,&objs,renderFlags,getRenderQueue,&scene,&cam,vp,fShouldCull,lodBias,baseSpecializationFlags]() {
 				// Note: We don't add individual items directly to the render queue, because that would invoke
 				// a mutex lock which can stall all of the worker threads.
 				// Instead we'll collect the entire batch of items, then add all of them to the render queue at once.
@@ -319,7 +320,7 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 					}
 					auto *renderC = static_cast<CBaseEntity*>(ent)->GetRenderComponent();
 					if(
-						!renderC || renderC->IsExemptFromOcclusionCulling() || ShouldConsiderEntity(*static_cast<CBaseEntity*>(ent),scene,renderFlags,drawSceneInfo.renderMask) == false || 
+						!renderC || renderC->IsExemptFromOcclusionCulling() || ShouldConsiderEntity(*static_cast<CBaseEntity*>(ent),scene,renderFlags,renderMask) == false || 
 						(shouldConsiderEntity && shouldConsiderEntity(*static_cast<CBaseEntity*>(ent),scene,renderFlags) == false) //||
 						//(camClusterIdx.has_value() && renderC->IsVisibleInCluster(*camClusterIdx) == false)
 					)
@@ -350,22 +351,23 @@ void SceneRenderDesc::CollectRenderMeshesFromOctree(
 	iterateTree(tree.GetRootNode());
 }
 void SceneRenderDesc::CollectRenderMeshesFromOctree(
-	const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
+	const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,
+	const Mat4 &vp,RenderFlags renderFlags,pragma::rendering::RenderMask renderMask,
 	const std::vector<umath::Plane> &frustumPlanes,const std::vector<util::BSPTree*> *bspTrees,const std::vector<util::BSPTree::Node*> *bspLeafNodes
 )
 {
-	CollectRenderMeshesFromOctree(drawSceneInfo,tree,scene,cam,vp,renderFlags,[this](pragma::rendering::SceneRenderPass renderMode,bool translucent) {return GetRenderQueue(renderMode,translucent);},
+	CollectRenderMeshesFromOctree(drawSceneInfo,tree,scene,cam,vp,renderFlags,renderMask,[this](pragma::rendering::SceneRenderPass renderMode,bool translucent) {return GetRenderQueue(renderMode,translucent);},
 	[&frustumPlanes](const Vector3 &min,const Vector3 &max) -> bool {
 		return umath::intersection::aabb_in_plane_mesh(min,max,frustumPlanes) == umath::intersection::Intersect::Outside;
 	},bspTrees,bspLeafNodes,0,nullptr);
 }
 
-bool SceneRenderDesc::ShouldConsiderEntity(CBaseEntity &ent,const pragma::CSceneComponent &scene,FRender renderFlags,pragma::rendering::RenderMask renderMask)
+bool SceneRenderDesc::ShouldConsiderEntity(CBaseEntity &ent,const pragma::CSceneComponent &scene,RenderFlags renderFlags,pragma::rendering::RenderMask renderMask)
 {
 	if(ent.IsInScene(scene) == false || !ent.GetRenderComponent())
 		return false;
 	auto *renderC = ent.GetRenderComponent();
-	auto renderMode = renderC->GetSceneRenderGroupPass();
+	auto renderMode = renderC->GetSceneRenderPass();
 	auto renderGroups = renderC->GetRenderGroups();
 	return umath::is_flag_set(renderFlags,render_mode_to_render_flag(renderMode)) && (renderGroups &renderMask) == renderGroups && ent.GetModel() != nullptr && renderC->ShouldDraw();
 }
@@ -608,7 +610,8 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 	// c_game->StartProfilingStage(CGame::CPUProfilingPhase::BuildRenderQueue);
 	auto &posCam = g_debugFreezeCamData.has_value() ? g_debugFreezeCamData->pos : drawSceneInfo.pvsOrigin.has_value() ? *drawSceneInfo.pvsOrigin : cam.GetEntity().GetPosition();
 
-	c_game->GetRenderQueueBuilder().Append([this,&cam,posCam,&drawSceneInfo]() {
+	auto renderMask = drawSceneInfo.GetRenderMask(*c_game);
+	c_game->GetRenderQueueBuilder().Append([this,&cam,posCam,&drawSceneInfo,renderMask]() {
 		++g_activeRenderQueueThreads;
 		auto *stats = drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->renderQueueBuilderStats : nullptr;
 		std::chrono::steady_clock::time_point tStart;
@@ -638,7 +641,10 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 				umath::Plane{uvec::FORWARD,d}
 			};
 		}
-		auto &frustumPlanes = frustumCullingEnabled ? (g_debugFreezeCamData.has_value() ? g_debugFreezeCamData->frustumPlanes : cam.GetFrustumPlanes()) : frustumPlanesCube;
+
+		auto frustumPlanes = frustumCullingEnabled ? (g_debugFreezeCamData.has_value() ? g_debugFreezeCamData->frustumPlanes : cam.GetFrustumPlanes()) : frustumPlanesCube;
+		if(drawSceneInfo.clipPlane.has_value())
+			frustumPlanes.push_back(*drawSceneInfo.clipPlane);
 		auto fShouldCull = [&frustumPlanes](const Vector3 &min,const Vector3 &max) -> bool {return SceneRenderDesc::ShouldCull(min,max,frustumPlanes);};
 		auto vp = cam.GetProjectionMatrix() *cam.GetViewMatrix();
 
@@ -662,7 +668,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 		m_worldMeshVisibility.reserve(entItWorld.GetCount());
 		for(auto *entWorld : entItWorld)
 		{
-			if(ShouldConsiderEntity(*static_cast<CBaseEntity*>(entWorld),m_scene,drawSceneInfo.renderFlags,drawSceneInfo.renderMask) == false)
+			if(ShouldConsiderEntity(*static_cast<CBaseEntity*>(entWorld),m_scene,drawSceneInfo.renderFlags,renderMask) == false)
 				continue;
 			auto worldC = entWorld->GetComponent<pragma::CWorldComponent>();
 			auto &bspTree = worldC->GetBSPTree();
@@ -672,7 +678,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 			bspLeafNodes.push_back(node);
 			bspTrees.push_back(bspTree.get());
 
-			if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Static) == false)
+			if(umath::is_flag_set(drawSceneInfo.renderFlags,RenderFlags::Static) == false)
 				continue;
 
 			auto *renderC = static_cast<CBaseEntity&>(worldC->GetEntity()).GetRenderComponent();
@@ -698,12 +704,12 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 				}
 			}
 
-			if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Translucent))
+			if(umath::is_flag_set(drawSceneInfo.renderFlags,RenderFlags::Translucent))
 			{
 				// Translucent meshes will have to be sorted dynamically with all other non-world translucent objects,
 				// so we'll copy the information to the dynamic queue
 				auto *renderQueueTranslucentSrc = worldC->GetClusterRenderQueue(node->cluster,true /* translucent */);
-				auto *renderQueueTranslucentDst = renderQueueTranslucentSrc ? GetRenderQueue(static_cast<CBaseEntity*>(entWorld)->GetRenderComponent()->GetSceneRenderGroupPass(),true) : nullptr;
+				auto *renderQueueTranslucentDst = renderQueueTranslucentSrc ? GetRenderQueue(static_cast<CBaseEntity*>(entWorld)->GetRenderComponent()->GetSceneRenderPass(),true) : nullptr;
 				if(renderQueueTranslucentDst == nullptr || renderQueueTranslucentSrc->queue.empty())
 					continue;
 				renderQueueTranslucentDst->queue.reserve(renderQueueTranslucentDst->queue.size() +renderQueueTranslucentSrc->queue.size());
@@ -732,7 +738,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 		if(stats)
 			(*stats)->AddTime(RenderQueueBuilderStats::Timer::WorldQueueUpdate,std::chrono::steady_clock::now() -t);
 
-		if(umath::is_flag_set(drawSceneInfo.renderFlags,FRender::Dynamic))
+		if(umath::is_flag_set(drawSceneInfo.renderFlags,RenderFlags::Dynamic))
 		{
 			if(stats)
 				t = std::chrono::steady_clock::now();
@@ -744,13 +750,13 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 				// Some entities are exempt from occlusion culling altogether, we'll handle them here
 				for(auto *pRenderComponent : pragma::CRenderComponent::GetEntitiesExemptFromOcclusionCulling())
 				{
-					if(ShouldConsiderEntity(static_cast<CBaseEntity&>(pRenderComponent->GetEntity()),m_scene,drawSceneInfo.renderFlags,drawSceneInfo.renderMask) == false)
+					if(ShouldConsiderEntity(static_cast<CBaseEntity&>(pRenderComponent->GetEntity()),m_scene,drawSceneInfo.renderFlags,renderMask) == false)
 						continue;
 					AddRenderMeshesToRenderQueue(drawSceneInfo,*pRenderComponent,m_scene,cam,vp,nullptr);
 				}
 
 				auto &dynOctree = culler->GetOcclusionOctree();
-				CollectRenderMeshesFromOctree(drawSceneInfo,dynOctree,m_scene,cam,vp,drawSceneInfo.renderFlags,frustumPlanes,&bspTrees,&bspLeafNodes);
+				CollectRenderMeshesFromOctree(drawSceneInfo,dynOctree,m_scene,cam,vp,drawSceneInfo.renderFlags,renderMask,frustumPlanes,&bspTrees,&bspLeafNodes);
 			}
 			else
 			{
@@ -759,7 +765,7 @@ void SceneRenderDesc::BuildRenderQueues(const util::DrawSceneInfo &drawSceneInfo
 				entIt.AttachFilter<TEntityIteratorFilterComponent<pragma::CRenderComponent>>();
 				for(auto *ent : entIt)
 				{
-					if(ShouldConsiderEntity(*static_cast<CBaseEntity*>(ent),m_scene,drawSceneInfo.renderFlags,drawSceneInfo.renderMask) == false)
+					if(ShouldConsiderEntity(*static_cast<CBaseEntity*>(ent),m_scene,drawSceneInfo.renderFlags,renderMask) == false)
 						continue;
 					AddRenderMeshesToRenderQueue(drawSceneInfo,*static_cast<CBaseEntity*>(ent)->GetRenderComponent(),m_scene,cam,vp,nullptr);
 				}

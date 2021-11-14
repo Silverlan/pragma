@@ -14,7 +14,7 @@ function Component:Initialize()
 	self:AddEntityComponent("portal")
 	self:BindEvent(ents.ModelComponent.EVENT_ON_MODEL_CHANGED,"InitializeReflectionPlane")
 	if(CLIENT) then
-		self:BindEvent(ents.PortalComponent.EVENT_ON_RENDER_SCENE_INITIALIZED,"InitializeReflectionMaterial")
+		self:BindEvent(ents.RenderTargetComponent.EVENT_ON_RENDER_SCENE_INITIALIZED,"InitializeReflectionMaterial")
 	end
 end
 

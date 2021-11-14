@@ -49,6 +49,10 @@ void BaseFuncLiquidComponent::Initialize()
 	auto &ent = GetEntity();
 	ent.AddComponent("name");
 	ent.AddComponent("render");
+	ent.AddComponent("liquid_control");
+	ent.AddComponent("liquid_volume");
+	ent.AddComponent("liquid_surface");
+	ent.AddComponent("buoyancy");
 	m_surfaceC = ent.AddComponent("surface")->GetHandle<BaseSurfaceComponent>();
 	m_surfSim = ent.AddComponent("liquid_surface_simulation")->GetHandle<BaseLiquidSurfaceSimulationComponent>();
 	ent.AddComponent("model");
@@ -70,7 +74,7 @@ void BaseFuncLiquidComponent::OnEntityComponentAdded(BaseEntityComponent &compon
 	else if(pSurfC)
 		m_surfaceC = pSurfC->GetHandle<BaseSurfaceComponent>();
 	else if(pSurfSim)
-		m_surfSim = pSurfC->GetHandle<BaseLiquidSurfaceSimulationComponent>();
+		m_surfSim = pSurfSim->GetHandle<BaseLiquidSurfaceSimulationComponent>();
 }
 
 bool BaseFuncLiquidComponent::OnRayResultCallback(CollisionMask rayCollisionGroup,CollisionMask rayCollisionMask)

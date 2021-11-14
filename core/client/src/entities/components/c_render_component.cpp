@@ -76,7 +76,8 @@ void CRenderComponent::RegisterEvents(pragma::EntityComponentManager &componentM
 	EVENT_ON_DEPTH_BIAS_CHANGED = registerEvent("ON_DEPTH_BIAS_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
 }
 CRenderComponent::CRenderComponent(BaseEntity &ent)
-	: BaseRenderComponent(ent),m_renderGroups{util::TEnumProperty<pragma::rendering::RenderGroup>::Create(pragma::rendering::RenderGroup::WorldBit)}
+	: BaseRenderComponent(ent),m_renderGroups{util::TEnumProperty<pragma::rendering::RenderGroup>::Create(pragma::rendering::RenderGroup::None)},
+	m_renderPass{util::TEnumProperty<pragma::rendering::SceneRenderPass>::Create(rendering::SceneRenderPass::World)}
 {}
 void CRenderComponent::InitializeLuaObject(lua_State *l) {return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l);}
 void CRenderComponent::InitializeBuffers()
@@ -628,46 +629,48 @@ bool CRenderComponent::AddToRenderGroup(const std::string &name)
 	AddToRenderGroup(*mask);
 	return true;
 }
-pragma::rendering::SceneRenderPass CRenderComponent::GetSceneRenderGroupPass() const
+const util::PEnumProperty<pragma::rendering::SceneRenderPass> &CRenderComponent::GetSceneRenderPassProperty() const {return m_renderPass;}
+pragma::rendering::SceneRenderPass CRenderComponent::GetSceneRenderPass() const {return *m_renderPass;}
+void CRenderComponent::SetSceneRenderPass(pragma::rendering::SceneRenderPass pass)
 {
-	if(IsInRenderGroup(pragma::rendering::RenderGroup::WorldBit))
-		return pragma::rendering::SceneRenderPass::World;
-	if(IsInRenderGroup(pragma::rendering::RenderGroup::ViewBit))
-		return pragma::rendering::SceneRenderPass::View;
-	if(IsInRenderGroup(pragma::rendering::RenderGroup::SkyBit))
-		return pragma::rendering::SceneRenderPass::Skybox;
-	if(IsInRenderGroup(pragma::rendering::RenderGroup::WaterBit))
-		return pragma::rendering::SceneRenderPass::Water;
-	static_assert(umath::to_integral(pragma::rendering::SceneRenderPass::Count) == 5);
-	return pragma::rendering::SceneRenderPass::None;
+	*m_renderPass = pass;
+
+	auto it = std::find(s_ocExemptEntities.begin(),s_ocExemptEntities.end(),this);
+	switch(pass)
+	{
+	case rendering::SceneRenderPass::View:
+	{
+		if(it == s_ocExemptEntities.end())
+			s_ocExemptEntities.push_back(this);
+		break;
+	}
+	default:
+	{
+		if(it != s_ocExemptEntities.end() && IsExemptFromOcclusionCulling() == false)
+			s_ocExemptEntities.erase(it);
+	}
+	}
+
+	if(pass == rendering::SceneRenderPass::None)
+		ClearRenderBuffers();
 }
 bool CRenderComponent::IsInRenderGroup(pragma::rendering::RenderGroup group) const {return umath::is_flag_set(GetRenderGroups(),group);}
-void CRenderComponent::SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass pass)
-{
-	RemoveFromSceneRenderGroups();
-	AddToRenderGroup(pragma::rendering::scene_render_pass_to_render_mask(pass));
-}
 void CRenderComponent::AddToRenderGroup(pragma::rendering::RenderGroup group) {SetRenderGroups(GetRenderGroups() | group);}
+bool CRenderComponent::RemoveFromRenderGroup(const std::string &name)
+{
+	auto mask = static_cast<CGame*>(GetEntity().GetNetworkState()->GetGameState())->GetRenderMask(name);
+	if(!mask.has_value())
+		return false;
+	RemoveFromRenderGroup(*mask);
+	return true;
+}
 void CRenderComponent::RemoveFromRenderGroup(pragma::rendering::RenderGroup group) {SetRenderGroups(GetRenderGroups() &~group);}
 
-void CRenderComponent::RemoveFromSceneRenderGroups() {RemoveFromRenderGroup(rendering::RenderGroup::AnyScene);}
 void CRenderComponent::SetRenderGroups(pragma::rendering::RenderGroup mode)
 {
 	if(mode == *m_renderGroups)
 		return;
 	*m_renderGroups = mode;
-
-	auto it = std::find(s_ocExemptEntities.begin(),s_ocExemptEntities.end(),this);
-	if(umath::is_flag_set(mode,rendering::RenderGroup::ViewBit))
-	{
-		if(it == s_ocExemptEntities.end())
-			s_ocExemptEntities.push_back(this);
-	}
-	else if(it != s_ocExemptEntities.end() && IsExemptFromOcclusionCulling() == false)
-		s_ocExemptEntities.erase(it);
-
-	if((mode &rendering::RenderGroup::AnyScene) == rendering::RenderGroup::None)
-		ClearRenderBuffers();
 
 	UpdateShouldDrawState();
 	BroadcastEvent(EVENT_ON_RENDER_MODE_CHANGED);

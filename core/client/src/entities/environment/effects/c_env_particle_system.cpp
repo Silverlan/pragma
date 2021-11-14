@@ -98,25 +98,8 @@ void CParticleSystemComponent::SetParticleFile(const std::string &fileName)
 	BaseEnvParticleSystemComponent::SetParticleFile(fileName);
 	CParticleSystemComponent::Precache(fileName);
 }
-pragma::rendering::SceneRenderPass CParticleSystemComponent::GetSceneRenderGroupPass() const
-{
-	if(umath::is_flag_set(m_renderMode,pragma::rendering::RenderGroup::WorldBit))
-		return pragma::rendering::SceneRenderPass::World;
-	if(umath::is_flag_set(m_renderMode,pragma::rendering::RenderGroup::ViewBit))
-		return pragma::rendering::SceneRenderPass::View;
-	if(umath::is_flag_set(m_renderMode,pragma::rendering::RenderGroup::SkyBit))
-		return pragma::rendering::SceneRenderPass::Skybox;
-	if(umath::is_flag_set(m_renderMode,pragma::rendering::RenderGroup::WaterBit))
-		return pragma::rendering::SceneRenderPass::Water;
-	static_assert(umath::to_integral(pragma::rendering::SceneRenderPass::Count) == 5);
-	return pragma::rendering::SceneRenderPass::None;
-}
-void CParticleSystemComponent::SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass pass)
-{
-	SetRenderGroups((GetRenderGroups() &~ pragma::rendering::RenderGroup::AnyScene) | pragma::rendering::scene_render_pass_to_render_mask(pass));
-}
-void CParticleSystemComponent::SetRenderGroups(pragma::rendering::RenderGroup mode) {m_renderMode = mode;}
-pragma::rendering::RenderGroup CParticleSystemComponent::GetRenderGroups() const {return m_renderMode;}
+pragma::rendering::SceneRenderPass CParticleSystemComponent::GetSceneRenderPass() const {return m_renderPass;}
+void CParticleSystemComponent::SetSceneRenderPass(pragma::rendering::SceneRenderPass pass) {m_renderPass = pass;}
 
 void CParticleSystemComponent::CreateParticle()
 {

@@ -42,7 +42,7 @@ void CSkyboxComponent::Initialize()
 	auto pRenderComponent = ent.GetComponent<pragma::CRenderComponent>();
 	if(pRenderComponent.valid())
 	{
-		pRenderComponent->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::Skybox);
+		pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::Sky);
 		pRenderComponent->SetCastShadows(false);
 		pRenderComponent->SetDepthPassEnabled(false);
 	}

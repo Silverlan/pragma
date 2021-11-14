@@ -128,7 +128,7 @@ void CVehicleComponent::ClearDriver()
 			{
 				auto pRenderComponent = static_cast<CBaseEntity&>(vb->GetEntity()).GetRenderComponent();
 				if(pRenderComponent)
-					pRenderComponent->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::View);
+					pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::View);
 			}
 
 			plComponent->SetObserverTarget(nullptr);
@@ -151,7 +151,7 @@ void CVehicleComponent::SetDriver(BaseEntity *ent)
 	{
 		auto pRenderComponent = static_cast<CBaseEntity&>(vb->GetEntity()).GetRenderComponent();
 		if(pRenderComponent)
-			pRenderComponent->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::None);
+			pRenderComponent->SetSceneRenderPass(pragma::rendering::SceneRenderPass::None);
 	}
 	auto plComponent = ent->GetPlayerComponent();
 	plComponent->SetObserverMode(OBSERVERMODE::THIRDPERSON);

@@ -11,16 +11,19 @@
 #include "pragma/entities/environment/c_env_camera.h"
 #include "pragma/entities/components/liquid/c_liquid_surface_component.hpp"
 #include "pragma/entities/components/c_surface_component.hpp"
+#include "pragma/entities/components/c_render_component.hpp"
+#include "pragma/rendering/render_processor.hpp"
 #include "pragma/c_water_object.hpp"
 #include <shader/prosper_pipeline_create_info.hpp>
 #include <prosper_util.hpp>
 #include <prosper_descriptor_set_group.hpp>
+#include <prosper_command_buffer.hpp>
 #include <cmaterial.h>
 
 using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
-
+#pragma optimize("",off)
 decltype(ShaderWater::DESCRIPTOR_SET_MATERIAL) ShaderWater::DESCRIPTOR_SET_MATERIAL = {
 	{
 		prosper::DescriptorSetInfo::Binding { // DuDv Map
@@ -58,7 +61,7 @@ decltype(ShaderWater::DESCRIPTOR_SET_WATER) ShaderWater::DESCRIPTOR_SET_WATER = 
 	}
 };
 ShaderWater::ShaderWater(prosper::IPrContext &context,const std::string &identifier)
-	: ShaderGameWorldLightingPass(context,identifier,"world/vs_water","world/fs_water")
+	: ShaderGameWorldLightingPass(context,identifier,"world/vs_textured","world/fs_water")
 {
 	// SetBaseShader<ShaderTextured3DBase>();
 }
@@ -69,7 +72,7 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderWater::InitializeMaterialDes
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
 
-	auto *dudvMap = mat.GetTextureInfo("dudvmap");
+	auto *dudvMap = mat.GetTextureInfo(Material::DUDV_MAP_IDENTIFIER);
 	if(dudvMap != nullptr && dudvMap->texture != nullptr)
 	{
 		auto texture = std::static_pointer_cast<Texture>(dudvMap->texture);
@@ -86,79 +89,54 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderWater::InitializeMaterialDes
 	}
 	return descSetGroup;
 }
-bool ShaderWater::BeginDraw(const std::shared_ptr<prosper::ICommandBuffer> &cmdBuffer,const Vector4 &clipPlane,const Vector4 &drawOrigin,RecordFlags recordFlags)
+bool ShaderWater::RecordBindEntity(
+	rendering::ShaderProcessor &shaderProcessor,CRenderComponent &renderC,
+	prosper::IShaderPipelineLayout &layout,uint32_t entityInstanceDescriptorSetIndex
+) const
 {
-	if(ShaderGameWorldLightingPass::BeginDraw(cmdBuffer,clipPlane,drawOrigin,recordFlags) == false)
+	if(ShaderGameWorldLightingPass::RecordBindEntity(shaderProcessor,renderC,layout,entityInstanceDescriptorSetIndex) == false)
 		return false;
-	decltype(PushConstants::enableReflection) enableReflection = {m_bReflectionEnabled == true ? 1u : 0u};
-	return RecordPushConstants(enableReflection,sizeof(ShaderGameWorldLightingPass::PushConstants) +offsetof(PushConstants,enableReflection));
-}
-void ShaderWater::SetReflectionEnabled(bool b) {m_bReflectionEnabled = b;}
-bool ShaderWater::UpdateBindFogDensity()
-{
-	auto fogIntensity = 1.f;
-	if(m_boundEntity.valid() == false || m_boundScene.expired() == true)
-		return true;
-	auto surfC = m_boundEntity->GetComponent<CSurfaceComponent>();
+	auto liquidSurfC = renderC.GetEntity().GetComponent<CLiquidSurfaceComponent>();
+	if(liquidSurfC.expired() || liquidSurfC->IsWaterSceneValid() == false)
+		return false;
+	auto *ds = liquidSurfC->GetEffectDescriptorSet();
+	if(!ds)
+		return false;
+	auto surfC = renderC.GetEntity().GetComponent<CSurfaceComponent>();
 	if(surfC.expired())
-		return true;
-	auto &scene = *m_boundScene;
+		return false;
+	// TODO: This is a bit messy, how can we do this a better way?
+	auto &scene = shaderProcessor.GetCurrentScene();
 	auto &cam = scene.GetActiveCamera();
-	if(cam.expired())
-		return false;
-	auto &pos = cam->GetEntity().GetPosition();
-	if(surfC->IsPointBelowSurface(pos) == true)
-		fogIntensity = 0.f;
-	return RecordPushConstants(fogIntensity,sizeof(ShaderGameWorldLightingPass::PushConstants) +offsetof(PushConstants,waterFogIntensity));
+	auto posCam = cam.valid() ? cam->GetEntity().GetPosition() : uvec::ORIGIN;
+	PushConstants pushConstants {};
+	if(surfC->IsPointBelowSurface(posCam))
+	{
+		// Reflections aren't rendered if the camera is below the water surface, so we don't
+		// want to sample the reflection map. Same goes for the fog.
+		pushConstants.waterFogIntensity = 0.f;
+		pushConstants.enableReflection = false;
+	}
+	else
+	{
+		pushConstants.waterFogIntensity = 1.f;
+		pushConstants.enableReflection = true;
+	}
+	auto &cmd = shaderProcessor.GetCommandBuffer();
+	return cmd.RecordBindDescriptorSets(
+		prosper::PipelineBindPoint::Graphics,layout,DESCRIPTOR_SET_WATER.setIndex,*ds
+	) && cmd.RecordPushConstants(layout,prosper::ShaderStageFlags::FragmentBit,sizeof(ShaderGameWorldLightingPass::PushConstants),sizeof(PushConstants),&pushConstants);
 }
 
-void ShaderWater::EndDraw()
+GameShaderSpecializationConstantFlag ShaderWater::GetBaseSpecializationFlags() const
 {
-	m_boundEntity = EntityHandle{};
-	m_boundScene = decltype(m_boundScene){};
-}
-
-bool ShaderWater::BindSceneCamera(pragma::CSceneComponent &scene,const CRasterizationRendererComponent &renderer,bool bView)
-{
-	auto r = ShaderGameWorldLightingPass::BindSceneCamera(scene,renderer,bView);
-	if(r == false)
-		return false;
-	auto &cam = scene.GetActiveCamera();
-	if(cam.expired())
-		return false;
-	auto m = cam->GetProjectionMatrix() *cam->GetViewMatrix();
-	m_boundScene = scene.GetHandle<pragma::CSceneComponent>();
-	return UpdateBindFogDensity() &&
-		RecordPushConstants(m,sizeof(ShaderGameWorldLightingPass::PushConstants) +offsetof(PushConstants,reflectionVp));
-}
-
-bool ShaderWater::BindEntity(CBaseEntity &ent)
-{
-	auto whWaterComponent = ent.GetComponent<CLiquidSurfaceComponent>();
-	if(whWaterComponent.expired())
-		return false;
-	if(ShaderGameWorldLightingPass::BindEntity(ent) == false)
-		return false;
-	auto *descSetEffect = whWaterComponent->GetEffectDescriptorSet();
-	if(descSetEffect == nullptr || whWaterComponent->IsWaterSceneValid() == false)
-		return false;
-	auto &waterScene = whWaterComponent->GetWaterScene();
-	auto &sceneReflection = waterScene.sceneReflection;
-//	auto &sceneRefraction = waterScene.sceneRefraction;
-	//auto &rtReflection = sceneReflection->GetRenderTarget(); // prosper TODO
-	//auto &rtRefraction = sceneRefraction->GetRenderTarget();
-
-	//rtReflection->GetTexture()->GetImage()->SetDrawLayout(prosper::ImageLayout::ShaderReadOnlyOptimal); // prosper TODO
-
-	//rtRefraction->GetTexture()->GetImage()->SetDrawLayout(prosper::ImageLayout::ShaderReadOnlyOptimal);
-	//sceneRefraction->GetDepthTexture()->GetImage()->SetDrawLayout(prosper::ImageLayout::ShaderReadOnlyOptimal);
-	m_boundEntity = ent.GetHandle();
-	return UpdateBindFogDensity() && RecordBindDescriptorSet(*descSetEffect,DESCRIPTOR_SET_WATER.setIndex);
+	return ShaderGameWorldLightingPass::GetBaseSpecializationFlags() | GameShaderSpecializationConstantFlag::EnableTranslucencyBit;
 }
 
 void ShaderWater::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx)
 {
 	ShaderGameWorldLightingPass::InitializeGfxPipeline(pipelineInfo,pipelineIdx);
+	prosper::util::set_generic_alpha_color_blend_attachment_properties(pipelineInfo);
 	prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo,prosper::CullModeFlags::None);
 	pipelineInfo.ToggleDepthWrites(true); // Water is not part of render pre-pass, but we need the depth for post-processing
 }
@@ -175,3 +153,4 @@ void ShaderWater::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipel
 }
 
 prosper::DescriptorSetInfo &ShaderWater::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
+#pragma optimize("",on)

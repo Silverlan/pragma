@@ -18,15 +18,13 @@ function Component:Initialize()
 	self:AddEntityComponent(ents.COMPONENT_MODEL)
 	self:AddEntityComponent(ents.COMPONENT_RENDER)
 	self:AddEntityComponent(ents.COMPONENT_SURFACE)
+	local renderTargetC = self:AddEntityComponent("render_target")
 	self.m_relativePortalOrigin = Vector()
 	self:UpdatePortalOrigin()
 	if(CLIENT) then
-		self:SetResolution(1024,1024)
-
-		self.m_drawSceneInfo = game.DrawSceneInfo()
-		self.m_drawSceneInfo.toneMapping = shader.TONE_MAPPING_NONE
-
 		self:SetMirrored(false)
+
+		renderTargetC:AddEventCallback(ents.RenderTargetComponent.EVENT_PRE_RENDER_SCENE,function(c) self:UpdateCamera(renderTargetC,c) end)
 	end
 
 	if(SERVER) then
@@ -43,13 +41,16 @@ function Component:Initialize()
 end
 
 function Component:OnEntitySpawn()
-	if(CLIENT) then self:InitializeReflectionScene() end
 	self:UpdateTarget()
 end
 
 function Component:UpdateMirrored()
 	if(CLIENT) then
-		self.m_drawSceneInfo.flags = self:IsMirrored() and bit.bor(self.m_drawSceneInfo.flags,game.DrawSceneInfo.FLAG_REFLECTION_BIT) or bit.band(self.m_drawSceneInfo.flags,bit.bnot(game.DrawSceneInfo.FLAG_REFLECTION_BIT))
+		local renderTargetC = self:GetEntity():GetComponent(ents.COMPONENT_RENDER_TARGET)
+		if(renderTargetC ~= nil) then
+			local drawSceneInfo = renderTargetC:GetDrawSceneInfo()
+			drawSceneInfo.flags = self:IsMirrored() and bit.bor(drawSceneInfo.flags,game.DrawSceneInfo.FLAG_REFLECTION_BIT) or bit.band(drawSceneInfo.flags,bit.bnot(game.DrawSceneInfo.FLAG_REFLECTION_BIT))
+		end
 		return
 	end
 	self:UpdateMirrorState()
@@ -74,10 +75,6 @@ end
 
 function Component:OnRemove()
 	util.remove({self.m_cbOnTargetPoseChanged,self.m_cbOnTargetPoseChanged})
-
-	if(SERVER) then return end
-	util.remove({self.m_dbgElTex,self.m_cbRenderScenes})
-	self:ClearScene()
 end
 
 function Component:UpdatePoses()
@@ -112,8 +109,12 @@ function Component:UpdatePoses()
 	self.m_targetPlane = tgtPlane
 
 	if(CLIENT) then
-		self.m_drawSceneInfo.pvsOrigin = self:GetTargetPose():GetOrigin()
-		self.m_drawSceneInfo.clipPlane = Vector4(tgtPlane:GetNormal(),tgtPlane:GetDistance())
+		local renderTargetC = self:GetEntity():GetComponent(ents.COMPONENT_RENDER_TARGET)
+		if(renderTargetC ~= nil) then
+			local drawSceneInfo = renderTargetC:GetDrawSceneInfo()
+			drawSceneInfo.pvsOrigin = self:GetTargetPose():GetOrigin()
+			drawSceneInfo.clipPlane = -Vector4(tgtPlane:GetNormal(),tgtPlane:GetDistance())
+		end
 	end
 end
 

@@ -34,7 +34,8 @@ namespace pragma::physics
 			const Vector3 &bodyVelocity,
 			const Vector3 &bodyAngularVelocity,
 			Vector3 *force=nullptr,
-			Vector3 *torque=nullptr
+			Vector3 *torque=nullptr,
+			Vector3 *optOutSubmergedCenter=nullptr
 		) const;
 		// Not safe to call, unless particle heights of surface simulator were locked!
 		void Simulate(BaseEntity &entWater,const PhysLiquid &liquid,BaseEntity &ent,Vector3 waterPlane,double waterPlaneDist,const Vector3 &waterVelocity,const PhysWaterSurfaceSimulator *surfaceSim=nullptr) const;

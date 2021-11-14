@@ -126,9 +126,9 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 			return util::EventReply::Unhandled;
 		}
 		auto pRenderComponent = ent.GetComponent<pragma::CRenderComponent>();
-		auto renderMode = pRenderComponent.valid() ? pRenderComponent->GetSceneRenderGroupPass() : pragma::rendering::SceneRenderPass::None;
+		auto renderMode = pRenderComponent.valid() ? pRenderComponent->GetSceneRenderPass() : pragma::rendering::SceneRenderPass::None;
 		auto &occlusionTree = GetOcclusionOctree();
-		if(renderMode == pragma::rendering::SceneRenderPass::World || renderMode == pragma::rendering::SceneRenderPass::Skybox || renderMode == pragma::rendering::SceneRenderPass::Water)
+		if(renderMode == pragma::rendering::SceneRenderPass::World || renderMode == pragma::rendering::SceneRenderPass::Sky)
 		{
 			if(occlusionTree.ContainsObject(&ent) == false)
 				fInsertOctreeObject(&ent);
@@ -138,8 +138,8 @@ void COcclusionCullerComponent::AddEntity(CBaseEntity &ent)
 		return util::EventReply::Unhandled;
 	});
 	pRenderComponent->AddEventCallback(CRenderComponent::EVENT_ON_RENDER_MODE_CHANGED,cbRenderMode);
-	auto renderMode = pRenderComponent->GetSceneRenderGroupPass();
-	if(renderMode != pragma::rendering::SceneRenderPass::World && renderMode != pragma::rendering::SceneRenderPass::Skybox && renderMode != pragma::rendering::SceneRenderPass::Water)
+	auto renderMode = pRenderComponent->GetSceneRenderPass();
+	if(renderMode != pragma::rendering::SceneRenderPass::World && renderMode != pragma::rendering::SceneRenderPass::Sky)
 		return;
 	fInsertOctreeObject(&ent);
 }

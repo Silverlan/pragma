@@ -22,12 +22,15 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 	auto defCRender = pragma::lua::create_entity_component_class<pragma::CRenderComponent,pragma::BaseRenderComponent>("RenderComponent");
 	defCRender.def("GetTransformationMatrix",&Lua::Render::GetTransformationMatrix);
 	defCRender.def("IsInRenderGroup",&pragma::CRenderComponent::IsInRenderGroup);
-	defCRender.def("GetSceneRenderGroupPass",&pragma::CRenderComponent::GetSceneRenderGroupPass);
-	defCRender.def("SetSceneRenderGroupPass",&pragma::CRenderComponent::SetSceneRenderGroupPass);
+	defCRender.def("GetSceneRenderPass",&pragma::CRenderComponent::GetSceneRenderPass);
+	defCRender.def("SetSceneRenderPass",&pragma::CRenderComponent::SetSceneRenderPass);
+	defCRender.def("GetSceneRenderPassProperty",+[](lua_State *l,pragma::CRenderComponent &c) {
+		Lua::Property::push(l,*c.GetSceneRenderPassProperty());
+	});
 	defCRender.def("AddToRenderGroup",static_cast<bool(pragma::CRenderComponent::*)(const std::string&)>(&pragma::CRenderComponent::AddToRenderGroup));
 	defCRender.def("AddToRenderGroup",static_cast<void(pragma::CRenderComponent::*)(pragma::rendering::RenderGroup)>(&pragma::CRenderComponent::AddToRenderGroup));
-	defCRender.def("RemoveFromRenderGroup",&pragma::CRenderComponent::RemoveFromRenderGroup);
-	defCRender.def("RemoveFromSceneRenderGroups",&pragma::CRenderComponent::RemoveFromSceneRenderGroups);
+	defCRender.def("RemoveFromRenderGroup",static_cast<bool(pragma::CRenderComponent::*)(const std::string&)>(&pragma::CRenderComponent::RemoveFromRenderGroup));
+	defCRender.def("RemoveFromRenderGroup",static_cast<void(pragma::CRenderComponent::*)(pragma::rendering::RenderGroup)>(&pragma::CRenderComponent::RemoveFromRenderGroup));
 	defCRender.def("SetRenderGroups",&pragma::CRenderComponent::SetRenderGroups);
 	defCRender.def("GetRenderGroups",&pragma::CRenderComponent::GetRenderGroups);
 	defCRender.def("GetRenderGroupsProperty",+[](lua_State *l,pragma::CRenderComponent &c) {

@@ -32,43 +32,19 @@ namespace util
 			DisableRender = FlipVertically<<1u,
 			Reflection = DisableRender<<1u
 		};
-		DrawSceneInfo()=default;
-		DrawSceneInfo(const DrawSceneInfo &other)
-			: scene{other.scene},commandBuffer{other.commandBuffer},renderTarget{other.renderTarget},
-			renderFlags{other.renderFlags},clearColor{other.clearColor},toneMapping{other.toneMapping},
-			prepassFilter{other.prepassFilter},renderFilter{other.renderFilter},outputImage{other.outputImage},
-			clipPlane{other.clipPlane},pvsOrigin{other.pvsOrigin},
-			outputLayerId{other.outputLayerId},flags{other.flags},renderStats{other.renderStats ? std::make_unique<RenderStats>(*other.renderStats) : nullptr}
-		{}
-		DrawSceneInfo &operator=(const DrawSceneInfo &other)
-		{
-			scene = other.scene;
-			commandBuffer = other.commandBuffer;
-			renderTarget = other.renderTarget;
-			renderFlags = other.renderFlags;
-			clearColor = other.clearColor;
-			toneMapping = other.toneMapping;
-			clipPlane = other.clipPlane;
-			pvsOrigin = other.pvsOrigin;
-
-			prepassFilter = other.prepassFilter;
-			renderFilter = other.renderFilter;
-			outputImage = other.outputImage;
-
-			outputLayerId = other.outputLayerId;
-			flags = other.flags;
-			renderStats = other.renderStats ? std::make_unique<RenderStats>(*other.renderStats) : nullptr;
-			return *this;
-		}
+		DrawSceneInfo();
+		DrawSceneInfo(const DrawSceneInfo &other);
+		DrawSceneInfo &operator=(const DrawSceneInfo &other);
 		util::TWeakSharedHandle<::pragma::CSceneComponent> scene = util::TWeakSharedHandle<::pragma::CSceneComponent>{};
 		mutable std::shared_ptr<prosper::IPrimaryCommandBuffer> commandBuffer = nullptr;
 		std::shared_ptr<prosper::RenderTarget> renderTarget = nullptr;
-		FRender renderFlags = FRender::All;
+		RenderFlags renderFlags = RenderFlags::All;
 		std::optional<Color> clearColor = {};
 		std::optional<::pragma::rendering::ToneMapping> toneMapping {};
 		std::optional<Vector4> clipPlane {};
 		std::optional<Vector3> pvsOrigin {};
-		::pragma::rendering::RenderMask renderMask = ::pragma::rendering::RenderMask::AnyScene &~::pragma::rendering::RenderMask::WaterBit;
+		::pragma::rendering::RenderMask exclusionMask = ::pragma::rendering::RenderMask::None;
+		::pragma::rendering::RenderMask inclusionMask = ::pragma::rendering::RenderMask::None;
 		
 		std::function<bool(CBaseEntity&)> prepassFilter = nullptr;
 		std::function<bool(CBaseEntity&)> renderFilter = nullptr;
@@ -78,6 +54,8 @@ namespace util
 		Flags flags = Flags::None;
 
 		mutable std::unique_ptr<RenderStats> renderStats = nullptr;
+
+		::pragma::rendering::RenderMask GetRenderMask(CGame & game) const;
 	};
 	struct DLLCLIENT RenderPassDrawInfo
 	{

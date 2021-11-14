@@ -10,7 +10,7 @@ function Component:OnTick(dt)
 	local plane = surfC:GetPlaneWs()
 	for _,ent in ipairs(touchC:GetTouchingEntities()) do
 		local n = plane:GetNormal()
-		local d = -plane:GetDistance()
+		local d = plane:GetDistance()
 		local pos = ent:GetPos()
 		local side = geometry.get_side_of_point_to_plane(n,d,pos)
 		if(side == geometry.PLANE_SIDE_FRONT) then

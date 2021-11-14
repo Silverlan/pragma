@@ -191,7 +191,7 @@ void CGame::InitializeEntityComponents(pragma::EntityComponentManager &component
 	componentManager.RegisterComponentType<pragma::CPointConstraintFixedComponent>("constraint_fixed");
 	componentManager.RegisterComponentType<pragma::CPointConstraintHingeComponent>("constraint_hinge");
 	componentManager.RegisterComponentType<pragma::CPointConstraintSliderComponent>("constraint_slider");
-	componentManager.RegisterComponentType<pragma::CPointTargetComponent>("render_target");
+	componentManager.RegisterComponentType<pragma::CPointTargetComponent>("target");
 	componentManager.RegisterComponentType<pragma::CPropComponent>("prop");
 	componentManager.RegisterComponentType<pragma::CPropDynamicComponent>("prop_dynamic");
 	componentManager.RegisterComponentType<pragma::CPropPhysicsComponent>("prop_physics");

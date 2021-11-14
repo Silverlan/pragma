@@ -215,7 +215,7 @@ void CModelComponent::UpdateRenderBufferList()
 		auto &renderBufferData = m_lodMeshRenderBufferData.back();
 		renderBufferData.renderBuffer = renderBuffer;
 		renderBufferData.material = mat ? mat->GetHandle() : MaterialHandle{};
-		renderBufferData.enableDepthPrepass = depthPrepassEnabled && shader->IsDepthPrepassEnabled();
+		renderBufferData.enableDepthPrepass = depthPrepassEnabled && shader && shader->IsDepthPrepassEnabled();
 		if(mat == nullptr || shader == nullptr)
 			continue;
 		renderBufferData.pipelineSpecializationFlags = shader->GetMaterialPipelineSpecializationRequirements(*mat);

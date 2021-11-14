@@ -475,13 +475,13 @@ void Lua::ParticleSystem::register_class(lua_State *l,luabind::module_ &entsMod)
 		
 		Lua::PushBool(l,hComponent.IsActive());
 		}));
-	defCParticleSystem.def("GetSceneRenderGroupPass",static_cast<void(*)(lua_State*,pragma::CParticleSystemComponent&)>([](lua_State *l,pragma::CParticleSystemComponent &hComponent) {
+	defCParticleSystem.def("GetSceneRenderPass",static_cast<void(*)(lua_State*,pragma::CParticleSystemComponent&)>([](lua_State *l,pragma::CParticleSystemComponent &hComponent) {
 		
-		Lua::PushInt(l,hComponent.GetSceneRenderGroupPass());
+		Lua::PushInt(l,hComponent.GetSceneRenderPass());
 		}));
-	defCParticleSystem.def("SetSceneRenderGroupPass",static_cast<void(*)(lua_State*,pragma::CParticleSystemComponent&,uint32_t)>([](lua_State *l,pragma::CParticleSystemComponent &hComponent,uint32_t renderMode) {
+	defCParticleSystem.def("SetSceneRenderPass",static_cast<void(*)(lua_State*,pragma::CParticleSystemComponent&,uint32_t)>([](lua_State *l,pragma::CParticleSystemComponent &hComponent,uint32_t renderMode) {
 		
-		hComponent.SetSceneRenderGroupPass(static_cast<pragma::rendering::SceneRenderPass>(renderMode));
+		hComponent.SetSceneRenderPass(static_cast<pragma::rendering::SceneRenderPass>(renderMode));
 		}));
 	defCParticleSystem.def("SetName",static_cast<void(*)(lua_State*,pragma::CParticleSystemComponent&,const std::string&)>([](lua_State *l,pragma::CParticleSystemComponent &hComponent,const std::string &name) {
 		

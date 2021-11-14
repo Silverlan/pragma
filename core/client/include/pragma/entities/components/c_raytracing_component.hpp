@@ -48,11 +48,10 @@ namespace pragma
 				RenderModeWorld = Visible<<1u,
 				RenderModeView = RenderModeWorld<<1u,
 				RenderModeSkybox = RenderModeView<<1u,
-				RenderModeWater = RenderModeSkybox<<1u,
 
-				UseNormalMap = RenderModeWater<<1u
+				UseNormalMap = RenderModeSkybox<<1u
 			};
-			static_assert(umath::to_integral(pragma::rendering::SceneRenderPass::Count) == 5);
+			static_assert(umath::to_integral(pragma::rendering::SceneRenderPass::Count) == 4);
 			// Bounds for the sub-mesh. w-component is unused.
 			Vector4 aabbMin = {};
 			Vector4 aabbMax = {};

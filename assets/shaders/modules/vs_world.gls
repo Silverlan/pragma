@@ -19,6 +19,7 @@
 #include "../modules/light_map/vs_lightmap.gls"
 #include "../modules/vs_instanced_entity_data.gls"
 #include "../modules/vs_sky_camera.gls"
+#include "../modules/sh_clip_plane.gls"
 #include "../math/depth_bias.gls"
 
 layout(location = SHADER_VERTEX_BUFFER_LOCATION) in vec3 in_vert_pos;
@@ -78,12 +79,7 @@ void export_world_fragment_data(mat4 mdlMatrix,vec3 vpos)
 	vposWs.w = 1.0;
 
 	//if(CSPEC_ENABLE_CLIPPING == 1)
-	{
-		if(length_sqr(u_pushConstants.scene.clipPlane.xyz) > 0.0)
-			gl_ClipDistance[0] = dot(vec4(vposWs.xyz,1.0),u_pushConstants.scene.clipPlane);
-		else
-			gl_ClipDistance[0] = 1.0;
-	}
+		apply_clip_plane(u_pushConstants.scene.clipPlane,vposWs.xyz);
 	//else
 	//	gl_ClipDistance[0] = 1.0;
 	

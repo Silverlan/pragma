@@ -24,7 +24,7 @@ using namespace pragma;
 
 #pragma message ("FIXME: If point_rendertarget is out of view of the local player, but one of the texture targets isn't, they won't get updated! Find a solution!")
 
-LINK_ENTITY_TO_CLASS(point_rendertarget,CPointRenderTarget);
+// LINK_ENTITY_TO_CLASS(point_rendertarget,CPointRenderTarget);
 
 void CRenderTargetComponent::ReceiveData(NetPacket &packet)
 {

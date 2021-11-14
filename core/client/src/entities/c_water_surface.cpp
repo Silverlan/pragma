@@ -53,10 +53,7 @@ void CWaterSurfaceComponent::Initialize()
 	auto &ent = static_cast<CBaseEntity&>(GetEntity());
 	auto pRenderComponent = ent.GetRenderComponent();
 	if(pRenderComponent)
-	{
-		pRenderComponent->SetSceneRenderGroupPass(pragma::rendering::SceneRenderPass::Water);
 		pRenderComponent->SetCastShadows(false);
-	}
 }
 
 CWaterSurfaceComponent::~CWaterSurfaceComponent()

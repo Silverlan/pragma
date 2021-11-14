@@ -63,7 +63,7 @@ void CParticleRendererSprite::Render(const std::shared_ptr<prosper::IPrimaryComm
 		return;
 	shader->BindLights(*renderer.GetLightSourceDescriptorSet());
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
-	shader->BindSceneCamera(scene,renderer,(m_particleSystem->GetSceneRenderGroupPass() == pragma::rendering::SceneRenderPass::View) ? true : false);
+	shader->BindSceneCamera(scene,renderer,(m_particleSystem->GetSceneRenderPass() == pragma::rendering::SceneRenderPass::View) ? true : false);
 	if(m_bPlanarRotation == false)
 		static_cast<pragma::ShaderParticleRotational&>(*shader).BindWorldRotationBuffer(*m_rotationalBuffer->GetBuffer());
 	shader->Draw(

@@ -120,7 +120,7 @@ void CParticleRendererBeam::Render(const std::shared_ptr<prosper::IPrimaryComman
 	if(shader == nullptr || shader->BeginDraw(drawCmd,GetParticleSystem(),renderFlags) == false)
 		return;
 	shader->BindLights(*renderer.GetLightSourceDescriptorSet());
-	shader->BindSceneCamera(scene,renderer,(GetParticleSystem().GetSceneRenderGroupPass() == pragma::rendering::SceneRenderPass::View) ? true : false);
+	shader->BindSceneCamera(scene,renderer,(GetParticleSystem().GetSceneRenderPass() == pragma::rendering::SceneRenderPass::View) ? true : false);
 	shader->BindRenderSettings(c_game->GetGlobalRenderSettingsDescriptorSet());
 	shader->Draw(scene,renderer,*m_particleSystem,*m_vertexBuffer,*m_indexBuffer,m_indexCount,GetParticleSystem().GetRadius(),m_curvature); // TODO: bloom
 	shader->EndDraw();

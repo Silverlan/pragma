@@ -76,14 +76,15 @@ public:
 	);
 	// Note: All arguments have to be thread safe for the duration of the render (except vp)
 	static void CollectRenderMeshesFromOctree(
-		const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
+		const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,
+		const Mat4 &vp,RenderFlags renderFlags,pragma::rendering::RenderMask renderMask,
 		const std::function<pragma::rendering::RenderQueue*(pragma::rendering::SceneRenderPass,bool)> &getRenderQueue,
 		const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull,const std::vector<util::BSPTree*> *bspTrees=nullptr,const std::vector<util::BSPTree::Node*> *bspLeafNodes=nullptr,
 		int32_t lodBias=0,
-		const std::function<bool(CBaseEntity&,const pragma::CSceneComponent&,FRender)> &shouldConsiderEntity=nullptr,
+		const std::function<bool(CBaseEntity&,const pragma::CSceneComponent&,RenderFlags)> &shouldConsiderEntity=nullptr,
 		pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags=static_cast<pragma::GameShaderSpecializationConstantFlag>(0)
 	);
-	static bool ShouldConsiderEntity(CBaseEntity &ent,const pragma::CSceneComponent &scene,FRender renderFlags,pragma::rendering::RenderMask renderMask);
+	static bool ShouldConsiderEntity(CBaseEntity &ent,const pragma::CSceneComponent &scene,RenderFlags renderFlags,pragma::rendering::RenderMask renderMask);
 	static bool ShouldCull(CBaseEntity &ent,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);
 	static bool ShouldCull(pragma::CRenderComponent &renderC,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);
 	static bool ShouldCull(pragma::CRenderComponent &renderC,pragma::RenderMeshIndex meshIdx,const std::function<bool(const Vector3&,const Vector3&)> &fShouldCull);
@@ -117,7 +118,8 @@ private:
 		pragma::GameShaderSpecializationConstantFlag baseSpecializationFlags=static_cast<pragma::GameShaderSpecializationConstantFlag>(0)
 	);
 	void CollectRenderMeshesFromOctree(
-		const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,const Mat4 &vp,FRender renderFlags,
+		const util::DrawSceneInfo &drawSceneInfo,const OcclusionOctree<CBaseEntity*> &tree,const pragma::CSceneComponent &scene,const pragma::CCameraComponent &cam,
+		const Mat4 &vp,RenderFlags renderFlags,pragma::rendering::RenderMask renderMask,
 		const std::vector<umath::Plane> &frustumPlanes,const std::vector<util::BSPTree*> *bspTrees=nullptr,const std::vector<util::BSPTree::Node*> *bspLeafNodes=nullptr
 	);
 

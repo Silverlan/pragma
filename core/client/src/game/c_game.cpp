@@ -177,11 +177,9 @@ CGame::CGame(NetworkState *state)
 	umath::set_flag(m_stateFlags,StateFlags::PrepassShaderPipelineReloadRequired,false);
 	umath::set_flag(m_stateFlags,StateFlags::GameWorldShaderPipelineReloadRequired,false);
 
-	m_customRenderMasks["world"] = pragma::rendering::RenderMask::WorldBit;
-	m_customRenderMasks["view"] = pragma::rendering::RenderMask::ViewBit;
-	m_customRenderMasks["sky"] = pragma::rendering::RenderMask::SkyBit;
-	m_customRenderMasks["water"] = pragma::rendering::RenderMask::WaterBit;
-	m_customRenderMasks["depth_prepass"] = pragma::rendering::RenderMask::DepthPrepassBit;
+	RegisterRenderMask("water",true);
+	m_thirdPersonRenderMask = RegisterRenderMask("thirdperson",true);
+	m_firstPersonRenderMask = RegisterRenderMask("firstperson",false);
 
 	RegisterCallback<void,CGame*>("OnGameEnd");
 	RegisterCallback<void,pragma::CLightDirectionalComponent*,pragma::CLightDirectionalComponent*>("OnEnvironmentLightSourceChanged");
@@ -1434,14 +1432,25 @@ uint16_t CGame::GetLatency() const
 	return cl->GetLatency();
 }
 
-pragma::rendering::RenderMask CGame::RegisterCustomRenderMask(const std::string &name)
+pragma::rendering::RenderMask CGame::GetInclusiveRenderMasks() const {return m_inclusiveRenderMasks;}
+pragma::rendering::RenderMask CGame::GetExclusiveRenderMasks() const {return m_exclusiveRenderMasks;}
+bool CGame::IsInclusiveRenderMask(pragma::rendering::RenderMask mask) const {return umath::is_flag_set(m_inclusiveRenderMasks,mask);}
+bool CGame::IsExclusiveRenderMask(pragma::rendering::RenderMask mask) const {return umath::is_flag_set(m_exclusiveRenderMasks,mask);}
+pragma::rendering::RenderMask CGame::RegisterRenderMask(const std::string &name,bool inclusiveByDefault)
 {
+	constexpr auto highestAllowedMask = (static_cast<uint64_t>(1)<<(sizeof(uint64_t) *8 -1));
+	if(umath::to_integral(m_nextCustomRenderMaskIndex) == highestAllowedMask)
+		throw std::runtime_error{"Exceeded maximum allowed number of custom render masks!"};
 	auto mask = GetRenderMask(name);
 	if(mask.has_value())
 		return *mask;
 	auto id = m_nextCustomRenderMaskIndex;
 	m_customRenderMasks.insert(std::make_pair(name,id));
-	m_nextCustomRenderMaskIndex = static_cast<decltype(m_nextCustomRenderMaskIndex)>(umath::to_integral(m_nextCustomRenderMaskIndex) +1);
+	m_nextCustomRenderMaskIndex = static_cast<decltype(m_nextCustomRenderMaskIndex)>(umath::to_integral(m_nextCustomRenderMaskIndex)<<1);
+	if(inclusiveByDefault)
+		m_inclusiveRenderMasks |= id;
+	else
+		m_exclusiveRenderMasks |= id;
 	return id;
 }
 std::optional<pragma::rendering::RenderMask> CGame::GetRenderMask(const std::string &name)

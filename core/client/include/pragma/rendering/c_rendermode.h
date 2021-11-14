@@ -21,42 +21,15 @@ namespace pragma::rendering
 		None = 0,
 		World,
 		View,
-		Skybox,
-		Water,
+		Sky,
 		Count
 	};
 
 	enum class RenderMask : uint64_t
 	{
-		None = 0u,
-		WorldBit = 1u,
-		ViewBit = WorldBit<<1u,
-		SkyBit = ViewBit<<1u,
-		WaterBit = SkyBit<<1u,
-		DepthPrepassBit = WaterBit<<1u,
-
-		CustomStartBit = DepthPrepassBit<<1u,
-		AnyScene = WorldBit | ViewBit | SkyBit | WaterBit | DepthPrepassBit
+		None = 0u
 	};
 	using RenderGroup = RenderMask;
-
-	constexpr RenderMask scene_render_pass_to_render_mask(SceneRenderPass pass)
-	{
-		switch(pass)
-		{
-		case SceneRenderPass::World:
-			return RenderMask::WorldBit;
-		case SceneRenderPass::View:
-			return RenderMask::ViewBit;
-		case SceneRenderPass::Skybox:
-			return RenderMask::SkyBit;
-		case SceneRenderPass::Water:
-			return RenderMask::WaterBit;
-		case SceneRenderPass::None:
-			return RenderMask::None;
-		}
-		throw std::runtime_error{"Invalid scene render pass " +std::string{magic_enum::enum_name(pass)}};
-	}
 };
 REGISTER_BASIC_BITWISE_OPERATORS_2WAY(pragma::rendering::RenderMask)
 

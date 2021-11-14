@@ -62,7 +62,7 @@ function ents.WeaponPhyscannon:CreateLaunchParticles(hitPos)
 	ptBeam:SetNodeTarget(1,posMuzzle)
 	ptBeam:SetNodeTarget(2,hitPos)
 	self:AttachParticleEntity(ptBeam:GetEntity(),"muzzle")
-	ptBeam:SetSceneRenderGroupPass(game.SCENE_RENDER_PASS_VIEW)
+	ptBeam:SetSceneRenderPass(game.SCENE_RENDER_PASS_VIEW)
 	ptBeam:Start()
 
 	local ptFlash = game.create_particle_system({
@@ -89,7 +89,7 @@ function ents.WeaponPhyscannon:CreateLaunchParticles(hitPos)
 	local trComponent = ptFlash:GetEntity():GetComponent(ents.COMPONENT_TRANSFORM)
 	if(trComponent ~= nil) then trComponent:SetPos(posMuzzle) end
 	self:AttachParticleEntity(ptFlash:GetEntity(),"muzzle")
-	ptFlash:SetSceneRenderGroupPass(game.SCENE_RENDER_PASS_VIEW)
+	ptFlash:SetSceneRenderPass(game.SCENE_RENDER_PASS_VIEW)
 	ptFlash:Start()
 end
 

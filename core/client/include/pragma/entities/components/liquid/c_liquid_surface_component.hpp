@@ -14,6 +14,7 @@
 #include <pragma/entities/components/liquid/base_liquid_surface_component.hpp>
 #include <image/prosper_texture.hpp>
 #include <buffers/prosper_buffer.hpp>
+#include <mathutil/umath_geometry.hpp>
 
 namespace pragma
 {
@@ -29,9 +30,7 @@ namespace pragma
 		std::shared_ptr<prosper::IDescriptorSetGroup> fogDescSetGroup = nullptr;
 
 		std::shared_ptr<prosper::IDescriptorSetGroup> descSetGroupTexEffects = nullptr;
-		CallbackHandle hRenderScene = {};
 
-		CallbackHandle hRender = {};
 		CallbackHandle hPostProcessing = {};
 
 		std::shared_ptr<prosper::Texture> texScene = nullptr;
@@ -68,7 +67,7 @@ namespace pragma
 
 		pragma::ComponentHandle<CSurfaceComponent> m_surfaceComponent;
 		std::unique_ptr<WaterScene> m_waterScene = nullptr;
-		uint8_t m_reflectionRendered = 0;
+		umath::geometry::PlaneSide m_curCameraSurfaceSide = umath::geometry::PlaneSide::OnPlane;
 		std::pair<Vector3,Vector3> m_waterAabbBounds = {};
 	};
 };

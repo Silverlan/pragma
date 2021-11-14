@@ -273,7 +273,10 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderScenes",std::ref(drawSceneInfo));
 
 	if(IsDefaultGameRenderEnabled())
+	{
+		GetPrimaryCameraRenderMask(drawSceneInfo.inclusionMask,drawSceneInfo.exclusionMask);
 		QueueForRendering(drawSceneInfo);
+	}
 
 	// Note: At this point no changes must be done to the scene whatsoever!
 	// Any change in the scene will result in undefined behavior until this function
@@ -290,6 +293,27 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 	m_sceneRenderQueue.clear();
 }
 
+void CGame::GetPrimaryCameraRenderMask(::pragma::rendering::RenderMask &inclusionMask,::pragma::rendering::RenderMask &exclusionMask) const
+{
+	auto *lp = m_plLocal.get();
+	if(lp && lp->IsInFirstPersonMode())
+	{
+		exclusionMask |= m_thirdPersonRenderMask;
+		inclusionMask |= m_firstPersonRenderMask;
+		
+		exclusionMask &= ~m_firstPersonRenderMask;
+		inclusionMask &= ~m_thirdPersonRenderMask;
+	}
+	else
+	{
+		exclusionMask |= m_firstPersonRenderMask;
+		inclusionMask |= m_thirdPersonRenderMask;
+
+		exclusionMask &= ~m_thirdPersonRenderMask;
+		inclusionMask &= ~m_firstPersonRenderMask;
+	}
+}
+
 void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 {
 	if(cvDrawScene->GetBool() == false)
@@ -302,19 +326,19 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 			continue;
 
 		if(drawWorld == 2)
-			drawSceneInfo.renderFlags &= ~(FRender::Shadows | FRender::Glow);
+			drawSceneInfo.renderFlags &= ~(RenderFlags::Shadows | RenderFlags::Glow);
 		else if(drawWorld == 0)
-			drawSceneInfo.renderFlags &= ~(FRender::Shadows | FRender::Glow | FRender::View | FRender::World | FRender::Skybox);
+			drawSceneInfo.renderFlags &= ~(RenderFlags::Shadows | RenderFlags::Glow | RenderFlags::View | RenderFlags::World | RenderFlags::Skybox);
 
 		if(cvDrawStatic->GetBool() == false)
-			drawSceneInfo.renderFlags &= ~FRender::Static;
+			drawSceneInfo.renderFlags &= ~RenderFlags::Static;
 		if(cvDrawDynamic->GetBool() == false)
-			drawSceneInfo.renderFlags &= ~FRender::Dynamic;
+			drawSceneInfo.renderFlags &= ~RenderFlags::Dynamic;
 		if(cvDrawTranslucent->GetBool() == false)
-			drawSceneInfo.renderFlags &= ~FRender::Translucent;
+			drawSceneInfo.renderFlags &= ~RenderFlags::Translucent;
 
 		if(cvParticleQuality->GetInt() <= 0)
-			drawSceneInfo.renderFlags &= ~FRender::Particles;
+			drawSceneInfo.renderFlags &= ~RenderFlags::Particles;
 
 		if(drawSceneInfo.commandBuffer == nullptr)
 			drawSceneInfo.commandBuffer = c_engine->GetRenderContext().GetDrawCommandBuffer();
@@ -322,11 +346,11 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 		auto &renderFlags = drawSceneInfo.renderFlags;
 		auto drawWorld = cvDrawWorld->GetBool();
 		if(drawWorld == false)
-			umath::set_flag(renderFlags,FRender::World,false);
+			umath::set_flag(renderFlags,RenderFlags::World,false);
 
 		auto *pl = c_game->GetLocalPlayer();
 		if(pl == nullptr || pl->IsInFirstPersonMode() == false)
-			umath::set_flag(renderFlags,FRender::View,false);
+			umath::set_flag(renderFlags,RenderFlags::View,false);
 
 		drawSceneInfo.scene->BuildRenderQueues(drawSceneInfo);
 	}

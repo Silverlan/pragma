@@ -1406,6 +1406,8 @@ void CEngine::Tick()
 {
 	Locale::Poll();
 	ProcessConsoleInput();
+	RunTickEvents();
+
 	Engine::StartProfilingStage(Engine::CPUProfilingPhase::Tick);
 	// The client tick has to run BEFORE the server tick!!!
 	// This is to avoid issues in singleplayer, where the client would use data it received from the server and apply the same calculations on the already modified data.

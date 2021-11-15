@@ -234,6 +234,8 @@ protected:
 	void WriteServerConfig(VFilePtrReal f);
 	void WriteEngineConfig(VFilePtrReal f);
 	void RegisterSharedConsoleCommands(ConVarMap &map);
+	void RunTickEvents();
+	void AddTickEvent(const std::function<void()> &ev);
 	virtual uint32_t DoClearUnusedAssets(pragma::asset::Type type) const;
 	virtual void RegisterConsoleCommands();
 	virtual void UpdateTickCount();
@@ -280,6 +282,7 @@ protected:
 	std::shared_ptr<pragma::debug::CPUProfiler> m_cpuProfiler;
 	std::vector<CallbackHandle> m_profileHandlers = {};
 	
+	std::queue<std::function<void()>> m_tickEventQueue;
 	StateFlags m_stateFlags = StateFlags::Running;
 	mutable upad::PackageManager *m_padPackageManager = nullptr;
 	std::unique_ptr<pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage,CPUProfilingPhase>> m_profilingStageManager = nullptr;

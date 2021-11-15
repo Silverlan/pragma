@@ -492,11 +492,22 @@ bool Engine::StopProfilingStage(CPUProfilingPhase stage)
 	return m_profilingStageManager && m_profilingStageManager->StopProfilerStage(stage);
 }
 
+void Engine::RunTickEvents()
+{
+	while(!m_tickEventQueue.empty())
+	{
+		m_tickEventQueue.front()();
+		m_tickEventQueue.pop();
+	}
+}
+void Engine::AddTickEvent(const std::function<void()> &ev) {m_tickEventQueue.push(ev);}
+
 void Engine::Tick()
 {
 	Locale::Poll();
 	m_ctTick.Update();
 	ProcessConsoleInput();
+	RunTickEvents();
 
 	StartProfilingStage(CPUProfilingPhase::Tick);
 	StartProfilingStage(CPUProfilingPhase::ServerTick);

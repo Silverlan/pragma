@@ -178,7 +178,12 @@ void Engine::RegisterConsoleCommands()
 			Con::cout<<state->GetMap()<<Con::endl;
 			return;
 		}
-		StartDefaultGame(argv.front());
+		auto map = argv.front();
+		// We can't change the map within a console command callback, so
+		// we'll delay it to a safe point.
+		AddTickEvent([this,map]() {
+			StartDefaultGame(map);
+		});
 	},ConVarFlags::None,"Loads the given map immediately. Usage: map <mapName>",[](const std::string &arg,std::vector<std::string> &autoCompleteOptions) {
 		std::vector<std::string> resFiles;
 		auto exts = pragma::asset::get_supported_extensions(pragma::asset::Type::Map);

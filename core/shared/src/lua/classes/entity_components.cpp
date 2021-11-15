@@ -2082,7 +2082,6 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 		def.def("SetPlaneDistance",&pragma::BaseSurfaceComponent::SetPlaneDistance);
 		def.def("ProjectToSurface",&pragma::BaseSurfaceComponent::ProjectToSurface);
 		def.def("Clear",&pragma::BaseSurfaceComponent::Clear);
-		def.def("ProjectToSurface",&pragma::BaseSurfaceComponent::ProjectToSurface);
 		def.def("IsPointBelowSurface",&pragma::BaseSurfaceComponent::IsPointBelowSurface);
 		def.def("GetPlaneRotation",&pragma::BaseSurfaceComponent::GetPlaneRotation);
 		def.def("CalcLineSurfaceIntersection",+[](pragma::BaseSurfaceComponent &c,const Vector3 &lineOrigin,const Vector3 &lineDir) {

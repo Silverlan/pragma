@@ -1,9 +1,0 @@
-<root>
-	<collection type="library">
-		<name>engine</name>
-		<collection type="class" client="1">
-			<name>FontInfo</name>
-			<desc>TODO</desc>
-		</collection>
-	</collection>
-</root>

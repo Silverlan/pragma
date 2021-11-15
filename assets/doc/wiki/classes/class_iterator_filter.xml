@@ -1,9 +1,0 @@
-<root>
-	<collection type="library">
-		<name>ents</name>
-		<collection type="class">
-			<name>IteratorFilter</name>
-			<desc>TODO</desc>
-		</collection>
-	</collection>
-</root>

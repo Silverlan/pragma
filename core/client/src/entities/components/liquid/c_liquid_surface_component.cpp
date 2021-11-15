@@ -49,39 +49,7 @@ void CLiquidSurfaceComponent::Initialize()
 	auto evId = GetComponentManager().FindEventId("render_target","on_render_scene_initialized");
 	if(evId.has_value())
 	{
-		// TODO: Clear this up
-		{
-			auto *matTmp = static_cast<CMaterial*>(client->LoadMaterial("nature/water_coast01_beneath"));
-			if(matTmp)
-			{
-				static_cast<CModelComponent*>(GetEntity().GetModelComponent())->SetMaterialOverride(0,"tools/toolsinvisible");
-				//auto db = matTmp->GetDataBlock();
-				//if(db == nullptr)
-				//	return;
-				//auto shaderInfo = c_engine->GetShaderManager().PreRegisterShader("nodraw");
-				//matTmp->Initialize(shaderInfo,db);
-				//matTmp->SetLoaded(true);
-			}
-		}
-
 		BindEventUnhandled(*evId,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
-			auto mdl = GetEntity().GetModel();
-			auto meshGroup = mdl->GetMeshGroup(0);
-			auto &meshes = meshGroup->GetMeshes();
-			for(auto &mesh : meshes)
-			{
-				auto &subMeshes = mesh->GetSubMeshes();
-				for(auto it=subMeshes.begin();it!=subMeshes.end();)
-				{
-					auto subMesh = *it;
-					if(subMesh->GetSkinTextureIndex() == 0)
-						it = subMeshes.erase(it);
-					else
-						++it;
-				}
-			}
-
-
 			auto renderTargetC = GetEntity().FindComponent("render_target");
 			if(!renderTargetC.valid())
 				return;
@@ -123,84 +91,98 @@ void CLiquidSurfaceComponent::Initialize()
 		mdlC->SetDepthPrepassEnabled(false);
 	}
 }
+void CLiquidSurfaceComponent::OnRemove()
+{
+	BaseEntityComponent::OnRemove();
+	if(m_hEntUnderwater.IsValid())
+		m_hEntUnderwater.Remove();
+}
 void CLiquidSurfaceComponent::OnEntitySpawn()
 {
 	BaseEntityComponent::OnEntitySpawn();
 
 	auto *entRt = c_game->CreateEntity("render_target");
-	auto evId = GetComponentManager().FindEventId("render_target","on_render_scene_initialized");
-	auto rtC = entRt->FindComponent("render_target");
-	if(rtC.valid() && evId.has_value())
+	if(entRt)
 	{
-		auto &cam = c_game->GetRenderScene()->GetActiveCamera();
-		if(cam.valid())
-			rtC->CallLuaMethod<void>("SetCamera",cam->GetLuaObject());
+		m_hEntUnderwater = entRt->GetHandle();
 
-		rtC->AddEventCallback(*evId,[this,rtC](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
-			auto *renderer = rtC->CallLuaMethod<pragma::CRendererComponent*>("GetRenderer");
-			if(renderer)
-			{
-				auto *tex = renderer->GetHDRPresentationTexture();
-				if(tex && m_waterScene && m_waterScene->descSetGroupTexEffects)
-				{
-					auto *descSetEffects = m_waterScene->descSetGroupTexEffects->GetDescriptorSet();
-					descSetEffects->SetBindingTexture(*tex,umath::to_integral(pragma::ShaderWater::WaterBinding::RefractionMap));
-
-					auto rasterC = renderer->GetEntity().GetComponent<CRasterizationRendererComponent>();
-					if(rasterC.valid())
-					{
-						auto &texDepth = rasterC->GetHDRInfo().prepass.textureDepth;
-						descSetEffects->SetBindingTexture(*texDepth,umath::to_integral(pragma::ShaderWater::WaterBinding::RefractionDepth));
-						//descSetEffects.SetBindingUniformBuffer(*m_waterScene->settingsBuffer,umath::to_integral(pragma::ShaderWater::WaterBinding::WaterSettings));
-					}
-					descSetEffects->Update();
-
-					auto renderC = GetEntity().GetComponent<CModelComponent>();
-					renderC->SetRenderMeshesDirty();
-					renderC->UpdateRenderMeshes();
-				}
-			}
-			return util::EventReply::Unhandled;
-		});
-		
-		auto evPreRenderScene = GetComponentManager().FindEventId("render_target","pre_render_scene");
-		if(evPreRenderScene.has_value())
+		auto evId = GetComponentManager().FindEventId("render_target","on_render_scene_initialized");
+		auto rtC = entRt->FindComponent("render_target");
+		if(rtC.valid() && evId.has_value())
 		{
-			rtC->AddEventCallback(*evPreRenderScene,[this,rtC](std::reference_wrapper<pragma::ComponentEvent> evData) {
-				auto &data = static_cast<LuaComponentEvent&>(evData.get());
-				if(data.arguments.size() > 0)
+			auto &cam = c_game->GetRenderScene()->GetActiveCamera();
+			if(cam.valid())
+				rtC->CallLuaMethod<void>("SetCamera",cam->GetLuaObject());
+
+			rtC->AddEventCallback(*evId,[this,rtC](std::reference_wrapper<pragma::ComponentEvent> evData) mutable {
+				auto *renderer = rtC->CallLuaMethod<pragma::CRendererComponent*>("GetRenderer");
+				if(renderer)
 				{
-					auto &arg = data.arguments[0];
-					try
+					auto *tex = renderer->GetHDRPresentationTexture();
+					if(tex && m_waterScene && m_waterScene->descSetGroupTexEffects)
 					{
-						auto *drawSceneInfo = luabind::object_cast_nothrow<util::DrawSceneInfo*>(arg,static_cast<util::DrawSceneInfo*>(nullptr));
-						if(drawSceneInfo)
+						auto *descSetEffects = m_waterScene->descSetGroupTexEffects->GetDescriptorSet();
+						descSetEffects->SetBindingTexture(*tex,umath::to_integral(pragma::ShaderWater::WaterBinding::RefractionMap));
+
+						auto rasterC = renderer->GetEntity().GetComponent<CRasterizationRendererComponent>();
+						if(rasterC.valid())
 						{
-							auto maskWater = c_game->GetRenderMask("water");
-							if(maskWater.has_value())
-								drawSceneInfo->exclusionMask |= *maskWater; // Don't render water surfaces
-							c_game->GetPrimaryCameraRenderMask(drawSceneInfo->inclusionMask,drawSceneInfo->exclusionMask);
-							if(m_surfaceComponent.valid())
-							{
-								auto &plane = m_surfaceComponent->GetPlane();
-								drawSceneInfo->clipPlane = plane.ToVector4();
-							}
+							auto &texDepth = rasterC->GetHDRInfo().prepass.textureDepth;
+							descSetEffects->SetBindingTexture(*texDepth,umath::to_integral(pragma::ShaderWater::WaterBinding::RefractionDepth));
+							//descSetEffects.SetBindingUniformBuffer(*m_waterScene->settingsBuffer,umath::to_integral(pragma::ShaderWater::WaterBinding::WaterSettings));
 						}
+						descSetEffects->Update();
+
+						auto renderC = GetEntity().GetComponent<CModelComponent>();
+						renderC->SetRenderMeshesDirty();
+						renderC->UpdateRenderMeshes();
 					}
-					catch(const luabind::error &err) {}
 				}
 				return util::EventReply::Unhandled;
 			});
+		
+			auto evPreRenderScene = GetComponentManager().FindEventId("render_target","pre_render_scene");
+			if(evPreRenderScene.has_value())
+			{
+				rtC->AddEventCallback(*evPreRenderScene,[this,rtC](std::reference_wrapper<pragma::ComponentEvent> evData) {
+					auto &data = static_cast<LuaComponentEvent&>(evData.get());
+					if(data.arguments.size() > 0)
+					{
+						auto &arg = data.arguments[0];
+						try
+						{
+							auto *drawSceneInfo = luabind::object_cast_nothrow<util::DrawSceneInfo*>(arg,static_cast<util::DrawSceneInfo*>(nullptr));
+							if(drawSceneInfo)
+							{
+								auto maskWater = c_game->GetRenderMask("water");
+								if(maskWater.has_value())
+									drawSceneInfo->exclusionMask |= *maskWater; // Don't render water surfaces
+								c_game->GetPrimaryCameraRenderMask(drawSceneInfo->inclusionMask,drawSceneInfo->exclusionMask);
+								if(m_surfaceComponent.valid())
+								{
+									auto &plane = m_surfaceComponent->GetPlane();
+									// We need to add an offset to the clipping plane to avoid
+									// artifacts at the water's edges.
+									static Vector4 offset {0.f,0.f,0.f,0.4f};
+									drawSceneInfo->clipPlane = plane.ToVector4() +offset;
+								}
+							}
+						}
+						catch(const luabind::error &err) {}
+					}
+					return util::EventReply::Unhandled;
+				});
+			}
+			/*auto rasterC = c_game->GetRenderScene()->GetRenderer()->GetEntity().GetComponent<CRasterizationRendererComponent>();
+			rasterC->AddEventCallback(CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_WATER,
+				[](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
+					//auto *tex = c_game->GetRenderScene()->GetRenderer()->GetHDRPresentationTexture();
+					//	m_waterScene->texScene
+				return util::EventReply::Unhandled;
+			});*/
 		}
-		/*auto rasterC = c_game->GetRenderScene()->GetRenderer()->GetEntity().GetComponent<CRasterizationRendererComponent>();
-		rasterC->AddEventCallback(CRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_WATER,
-			[](std::reference_wrapper<pragma::ComponentEvent> evData) -> util::EventReply {
-				//auto *tex = c_game->GetRenderScene()->GetRenderer()->GetHDRPresentationTexture();
-				//	m_waterScene->texScene
-			return util::EventReply::Unhandled;
-		});*/
+		entRt->Spawn();
 	}
-	entRt->Spawn();
 
 	//InvokeEventCallbacks(EVENT_MT_BEGIN_RECORD_WATER,evDataLightingStage);
 }
@@ -381,6 +363,8 @@ void CLiquidSurfaceComponent::InitializeWaterScene(const Vector3 &refPos,const V
 		auto img = c_engine->GetRenderContext().CreateImage(imgCreateInfo);
 		prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 		prosper::util::SamplerCreateInfo samplerCreateInfo {};
+		samplerCreateInfo.addressModeU = prosper::SamplerAddressMode::ClampToEdge;
+		samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
 		m_waterScene->texScene = c_engine->GetRenderContext().CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
 	}
 	if(m_waterScene->texSceneDepth == nullptr)
@@ -397,6 +381,8 @@ void CLiquidSurfaceComponent::InitializeWaterScene(const Vector3 &refPos,const V
 		auto img = c_engine->GetRenderContext().CreateImage(imgCreateInfo);
 		prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 		prosper::util::SamplerCreateInfo samplerCreateInfo {};
+		samplerCreateInfo.addressModeU = prosper::SamplerAddressMode::ClampToEdge;
+		samplerCreateInfo.addressModeV = prosper::SamplerAddressMode::ClampToEdge;
 		m_waterScene->texSceneDepth = c_engine->GetRenderContext().CreateTexture({},*img,imgViewCreateInfo,samplerCreateInfo);
 	}
 

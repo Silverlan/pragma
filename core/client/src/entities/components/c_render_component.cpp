@@ -299,6 +299,24 @@ void CRenderComponent::SetLocalRenderBounds(Vector3 min,Vector3 max)
 	umath::set_flag(m_stateFlags,StateFlags::RenderBoundsDirty);
 	GetEntity().SetStateFlag(BaseEntity::StateFlags::RenderBoundsChanged);
 
+	if(uvec::distance_sqr(min,max) > 0.001f)
+	{
+		// If the render bounds form a plane, we'll add a slight width to it to
+		// prevent potential culling errors.
+		for(uint8_t i=0;i<3;++i)
+		{
+			if(max[i] < min[i])
+				continue;
+			constexpr float minWidth = 0.01f;
+			auto diff = minWidth -(max[i] -min[i]);
+			if(diff > 0.f)
+			{
+				max[i] += diff /2.f;
+				min[i] -= diff /2.f;
+			}
+		}
+	}
+
 	m_localRenderBounds = {min,max};
 	m_localRenderSphere.pos = (min +max) *0.5f;
 	
@@ -392,6 +410,28 @@ CLightMapReceiverComponent *CRenderComponent::GetLightMapReceiverComponent() con
 void CRenderComponent::SetRenderOffsetTransform(const umath::ScaledTransform &t) {m_renderOffset = t; SetRenderBufferDirty();}
 void CRenderComponent::ClearRenderOffsetTransform() {m_renderOffset = {}; SetRenderBufferDirty();}
 const umath::ScaledTransform *CRenderComponent::GetRenderOffsetTransform() const {return m_renderOffset.has_value() ? &*m_renderOffset : nullptr;}
+bool CRenderComponent::IsInPvs(const Vector3 &camPos) const
+{
+	for(auto &c : c_game->GetWorldComponents())
+	{
+		if(c.expired())
+			continue;
+		if(IsInPvs(camPos,static_cast<const CWorldComponent&>(*c)))
+			return true;
+	}
+	return false;
+}
+bool CRenderComponent::IsInPvs(const Vector3 &camPos,const CWorldComponent &world) const
+{
+	auto &bspTree = world.GetBSPTree();
+	if(!bspTree)
+		return true;
+	auto *leafNode = bspTree->FindLeafNode(camPos);
+	if(!leafNode)
+		return false;
+	auto &renderBounds = GetUpdatedAbsoluteRenderBounds();
+	return bspTree->IsAabbVisibleInCluster(renderBounds.min,renderBounds.max,leafNode->cluster);
+}
 GameShaderSpecialization CRenderComponent::GetShaderPipelineSpecialization() const
 {
 	if(GetAnimatedComponent())

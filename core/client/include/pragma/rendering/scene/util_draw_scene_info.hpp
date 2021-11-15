@@ -54,8 +54,12 @@ namespace util
 		Flags flags = Flags::None;
 
 		mutable std::unique_ptr<RenderStats> renderStats = nullptr;
+		std::unique_ptr<std::vector<DrawSceneInfo>> subPasses = nullptr;
 
 		::pragma::rendering::RenderMask GetRenderMask(CGame & game) const;
+		Vector3 GetPvsOrigin() const;
+		void AddSubPass(const DrawSceneInfo &drawSceneInfo);
+		const std::vector<DrawSceneInfo> *GetSubPasses() const;
 	};
 	struct DLLCLIENT RenderPassDrawInfo
 	{

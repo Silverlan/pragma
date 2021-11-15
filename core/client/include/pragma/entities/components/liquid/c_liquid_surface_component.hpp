@@ -51,6 +51,7 @@ namespace pragma
 		CLiquidSurfaceComponent(BaseEntity &ent) : BaseLiquidSurfaceComponent(ent) {}
 		virtual void Initialize() override;
 		virtual void InitializeLuaObject(lua_State *l) override;
+		virtual void OnRemove() override;
 		virtual bool ShouldTransmitNetData() const override {return true;}
 		virtual void ReceiveData(NetPacket &packet) override;
 		
@@ -65,6 +66,7 @@ namespace pragma
 		virtual void OnEntitySpawn() override;
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 
+		EntityHandle m_hEntUnderwater {};
 		pragma::ComponentHandle<CSurfaceComponent> m_surfaceComponent;
 		std::unique_ptr<WaterScene> m_waterScene = nullptr;
 		umath::geometry::PlaneSide m_curCameraSurfaceSide = umath::geometry::PlaneSide::OnPlane;

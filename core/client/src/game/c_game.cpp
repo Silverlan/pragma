@@ -339,7 +339,7 @@ void CGame::OnRemove()
 		ent->Remove();
 	}
 	m_listener = decltype(m_listener){};
-	m_worldComponent = decltype(m_worldComponent){};
+	m_worldComponents.clear();
 	m_plLocal = decltype(m_plLocal){};
 	m_viewModel = decltype(m_viewModel){};
 	m_viewBody = decltype(m_viewBody){};
@@ -842,6 +842,11 @@ void CGame::PostGUIDraw(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd
 }
 void CGame::SetDefaultGameRenderEnabled(bool enabled) {m_defaultGameRenderEnabled = enabled;}
 bool CGame::IsDefaultGameRenderEnabled() const {return m_defaultGameRenderEnabled;}
+uint32_t CGame::GetNumberOfScenesQueuedForRendering() const {return m_sceneRenderQueue.size();}
+util::DrawSceneInfo *CGame::GetQueuedSceneRenderInfo(uint32_t i)
+{
+	return (i < m_sceneRenderQueue.size()) ? &m_sceneRenderQueue[i] : nullptr;
+}
 void CGame::QueueForRendering(const util::DrawSceneInfo &drawSceneInfo) {m_sceneRenderQueue.push_back(drawSceneInfo);}
 const std::vector<util::DrawSceneInfo> &CGame::GetQueuedRenderScenes() const {return m_sceneRenderQueue;}
 void CGame::SetRenderScene(pragma::CSceneComponent &scene) {m_renderScene = scene.GetHandle<pragma::CSceneComponent>();}

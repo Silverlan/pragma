@@ -182,6 +182,9 @@ namespace pragma
 		void ClearRenderOffsetTransform();
 		const umath::ScaledTransform *GetRenderOffsetTransform() const;
 
+		bool IsInPvs(const Vector3 &camPos,const CWorldComponent &world) const;
+		bool IsInPvs(const Vector3 &camPos) const;
+
 		GameShaderSpecialization GetShaderPipelineSpecialization() const;
 		void ClearRenderBuffers();
 	protected:

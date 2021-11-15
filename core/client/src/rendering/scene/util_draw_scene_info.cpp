@@ -7,6 +7,7 @@
 
 #include "stdafx_client.h"
 #include "pragma/rendering/scene/util_draw_scene_info.hpp"
+#include "pragma/entities/environment/c_env_camera.h"
 #include <prosper_command_buffer.hpp>
 
 using namespace pragma::rendering;
@@ -43,6 +44,24 @@ util::DrawSceneInfo &util::DrawSceneInfo::operator=(const DrawSceneInfo &other)
 	flags = other.flags;
 	renderStats = other.renderStats ? std::make_unique<RenderStats>(*other.renderStats) : nullptr;
 	return *this;
+}
+
+void util::DrawSceneInfo::AddSubPass(const DrawSceneInfo &drawSceneInfo)
+{
+	if(!subPasses)
+		subPasses = std::make_unique<std::vector<DrawSceneInfo>>();
+	subPasses->push_back(drawSceneInfo);
+}
+const std::vector<util::DrawSceneInfo> *util::DrawSceneInfo::GetSubPasses() const {return subPasses.get();}
+
+Vector3 util::DrawSceneInfo::GetPvsOrigin() const
+{
+	if(pvsOrigin)
+		return *pvsOrigin;
+	auto *cam = scene.valid() ? scene->GetActiveCamera().get() : nullptr;
+	if(!cam)
+		return {};
+	return cam->GetEntity().GetPosition();
 }
 
 ::pragma::rendering::RenderMask util::DrawSceneInfo::GetRenderMask(CGame &game) const

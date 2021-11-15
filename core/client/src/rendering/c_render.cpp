@@ -277,6 +277,10 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 		GetPrimaryCameraRenderMask(drawSceneInfo.inclusionMask,drawSceneInfo.exclusionMask);
 		QueueForRendering(drawSceneInfo);
 	}
+	
+	// This is the only callback that allows adding sub-passes
+	CallCallbacks("OnRenderScenes");
+	CallLuaCallbacks<void>("OnRenderScenes");
 
 	// Note: At this point no changes must be done to the scene whatsoever!
 	// Any change in the scene will result in undefined behavior until this function
@@ -284,7 +288,6 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 
 	// We'll queue up building the render queues before we start rendering, so
 	// most of it can be done in the background
-	CallCallbacks("OnRenderScenes");
 	RenderScenes(m_sceneRenderQueue);
 
 	CallCallbacks("PostRenderScenes");
@@ -319,41 +322,52 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 	if(cvDrawScene->GetBool() == false)
 		return;
 	auto drawWorld = cvDrawWorld->GetInt();
-	for(auto &cdrawSceneInfo : drawSceneInfos)
-	{
-		auto &drawSceneInfo = const_cast<util::DrawSceneInfo&>(cdrawSceneInfo);
-		if(drawSceneInfo.scene.expired())
-			continue;
 
-		if(drawWorld == 2)
-			drawSceneInfo.renderFlags &= ~(RenderFlags::Shadows | RenderFlags::Glow);
-		else if(drawWorld == 0)
-			drawSceneInfo.renderFlags &= ~(RenderFlags::Shadows | RenderFlags::Glow | RenderFlags::View | RenderFlags::World | RenderFlags::Skybox);
+	std::function<void(const std::vector<util::DrawSceneInfo>&)> buildRenderQueues = nullptr;
+	buildRenderQueues = [&buildRenderQueues,drawWorld](const std::vector<util::DrawSceneInfo> &drawSceneInfos) {
+		for(auto &cdrawSceneInfo : drawSceneInfos)
+		{
+			auto &drawSceneInfo = const_cast<util::DrawSceneInfo&>(cdrawSceneInfo);
+			if(drawSceneInfo.scene.expired())
+				continue;
 
-		if(cvDrawStatic->GetBool() == false)
-			drawSceneInfo.renderFlags &= ~RenderFlags::Static;
-		if(cvDrawDynamic->GetBool() == false)
-			drawSceneInfo.renderFlags &= ~RenderFlags::Dynamic;
-		if(cvDrawTranslucent->GetBool() == false)
-			drawSceneInfo.renderFlags &= ~RenderFlags::Translucent;
+			if(drawSceneInfo.subPasses)
+			{
+				// This scene has sub-scenes we have to consider first!
+				buildRenderQueues(*drawSceneInfo.subPasses);
+			}
 
-		if(cvParticleQuality->GetInt() <= 0)
-			drawSceneInfo.renderFlags &= ~RenderFlags::Particles;
+			if(drawWorld == 2)
+				drawSceneInfo.renderFlags &= ~(RenderFlags::Shadows | RenderFlags::Glow);
+			else if(drawWorld == 0)
+				drawSceneInfo.renderFlags &= ~(RenderFlags::Shadows | RenderFlags::Glow | RenderFlags::View | RenderFlags::World | RenderFlags::Skybox);
 
-		if(drawSceneInfo.commandBuffer == nullptr)
-			drawSceneInfo.commandBuffer = c_engine->GetRenderContext().GetDrawCommandBuffer();
-		// Modify render flags depending on console variables
-		auto &renderFlags = drawSceneInfo.renderFlags;
-		auto drawWorld = cvDrawWorld->GetBool();
-		if(drawWorld == false)
-			umath::set_flag(renderFlags,RenderFlags::World,false);
+			if(cvDrawStatic->GetBool() == false)
+				drawSceneInfo.renderFlags &= ~RenderFlags::Static;
+			if(cvDrawDynamic->GetBool() == false)
+				drawSceneInfo.renderFlags &= ~RenderFlags::Dynamic;
+			if(cvDrawTranslucent->GetBool() == false)
+				drawSceneInfo.renderFlags &= ~RenderFlags::Translucent;
 
-		auto *pl = c_game->GetLocalPlayer();
-		if(pl == nullptr || pl->IsInFirstPersonMode() == false)
-			umath::set_flag(renderFlags,RenderFlags::View,false);
+			if(cvParticleQuality->GetInt() <= 0)
+				drawSceneInfo.renderFlags &= ~RenderFlags::Particles;
 
-		drawSceneInfo.scene->BuildRenderQueues(drawSceneInfo);
-	}
+			if(drawSceneInfo.commandBuffer == nullptr)
+				drawSceneInfo.commandBuffer = c_engine->GetRenderContext().GetDrawCommandBuffer();
+			// Modify render flags depending on console variables
+			auto &renderFlags = drawSceneInfo.renderFlags;
+			auto drawWorld = cvDrawWorld->GetBool();
+			if(drawWorld == false)
+				umath::set_flag(renderFlags,RenderFlags::World,false);
+
+			auto *pl = c_game->GetLocalPlayer();
+			if(pl == nullptr || pl->IsInFirstPersonMode() == false)
+				umath::set_flag(renderFlags,RenderFlags::View,false);
+
+			drawSceneInfo.scene->BuildRenderQueues(drawSceneInfo);
+		}
+	};
+	buildRenderQueues(drawSceneInfos);
 
 	// Update time
 	UpdateShaderTimeData();
@@ -361,75 +375,95 @@ void CGame::RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos)
 	// Initiate the command buffer build threads for all queued scenes.
 	// If we have multiple scenes to render (e.g. left eye and right eye for VR),
 	// the command buffers can all be built in parallel.
-	for(auto &cdrawSceneInfo : drawSceneInfos)
-	{
-		auto &drawSceneInfo = const_cast<util::DrawSceneInfo&>(cdrawSceneInfo);
-		if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags,util::DrawSceneInfo::Flags::DisableRender))
-			continue;
-		drawSceneInfo.scene->RecordRenderCommandBuffers(drawSceneInfo);
-	}
+	std::function<void(const std::vector<util::DrawSceneInfo>&)> buildCommandBuffers = nullptr;
+	buildCommandBuffers = [&buildCommandBuffers,drawWorld](const std::vector<util::DrawSceneInfo> &drawSceneInfos) {
+		for(auto &cdrawSceneInfo : drawSceneInfos)
+		{
+			auto &drawSceneInfo = const_cast<util::DrawSceneInfo&>(cdrawSceneInfo);
+			if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags,util::DrawSceneInfo::Flags::DisableRender))
+				continue;
+			if(drawSceneInfo.subPasses)
+			{
+				// This scene has sub-scenes we have to consider first!
+				buildCommandBuffers(*drawSceneInfo.subPasses);
+			}
+			drawSceneInfo.scene->RecordRenderCommandBuffers(drawSceneInfo);
+		}
+	};
+	buildCommandBuffers(drawSceneInfos);
 
 	// Render the scenes
-	for(auto &cdrawSceneInfo : drawSceneInfos)
-	{
-		auto &drawSceneInfo = const_cast<util::DrawSceneInfo&>(cdrawSceneInfo);
-		if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags,util::DrawSceneInfo::Flags::DisableRender))
-			continue;
-		auto &scene = drawSceneInfo.scene;
-		auto &drawCmd = drawSceneInfo.commandBuffer;
-		if(drawCmd == nullptr || drawCmd->IsPrimary() == false)
-			continue;
-		auto *primCmd = static_cast<prosper::IPrimaryCommandBuffer*>(drawCmd.get());
-		auto newRecording = !primCmd->IsRecording();
-		if(newRecording)
-			static_cast<prosper::IPrimaryCommandBuffer*>(drawCmd.get())->StartRecording();
-		if(cvClearScene->GetBool() == true || drawWorld == 2 || drawSceneInfo.clearColor.has_value())
+	std::function<void(const std::vector<util::DrawSceneInfo>&)> renderScenes = nullptr;
+	renderScenes = [this,&renderScenes,drawWorld](const std::vector<util::DrawSceneInfo> &drawSceneInfos) {
+		for(auto &cdrawSceneInfo : drawSceneInfos)
 		{
-			auto clearCol = drawSceneInfo.clearColor.has_value() ? drawSceneInfo.clearColor->ToVector4() : Color(cvClearSceneColor->GetString()).ToVector4();
-			auto &hdrImg = scene->GetRenderer()->GetSceneTexture()->GetImage();
-			drawCmd->RecordImageBarrier(hdrImg,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferDstOptimal);
-			drawCmd->RecordClearImage(hdrImg,prosper::ImageLayout::TransferDstOptimal,{{clearCol.r,clearCol.g,clearCol.b,clearCol.a}});
-			drawCmd->RecordImageBarrier(hdrImg,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
-		}
+			auto &drawSceneInfo = const_cast<util::DrawSceneInfo&>(cdrawSceneInfo);
+			if(drawSceneInfo.scene.expired() || umath::is_flag_set(drawSceneInfo.flags,util::DrawSceneInfo::Flags::DisableRender))
+				continue;
 
-		// Update Exposure
-		auto *renderer = scene->GetRenderer();
-		auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent>{};
-		if(raster.valid())
-		{
-			//c_engine->StartGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
-			auto frame = c_engine->GetRenderContext().GetLastFrameId();
-			if(frame > 0)
-				raster->GetHDRInfo().UpdateExposure();
-			//c_engine->StopGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
-		}
-		// TODO
+			if(drawSceneInfo.subPasses)
+			{
+				// This scene has sub-scenes we have to consider first!
+				renderScenes(*drawSceneInfo.subPasses);
+			}
+
+			auto &scene = drawSceneInfo.scene;
+			auto &drawCmd = drawSceneInfo.commandBuffer;
+			if(drawCmd == nullptr || drawCmd->IsPrimary() == false)
+				continue;
+			auto *primCmd = static_cast<prosper::IPrimaryCommandBuffer*>(drawCmd.get());
+			auto newRecording = !primCmd->IsRecording();
+			if(newRecording)
+				static_cast<prosper::IPrimaryCommandBuffer*>(drawCmd.get())->StartRecording();
+			if(cvClearScene->GetBool() == true || drawWorld == 2 || drawSceneInfo.clearColor.has_value())
+			{
+				auto clearCol = drawSceneInfo.clearColor.has_value() ? drawSceneInfo.clearColor->ToVector4() : Color(cvClearSceneColor->GetString()).ToVector4();
+				auto &hdrImg = scene->GetRenderer()->GetSceneTexture()->GetImage();
+				drawCmd->RecordImageBarrier(hdrImg,prosper::ImageLayout::ColorAttachmentOptimal,prosper::ImageLayout::TransferDstOptimal);
+				drawCmd->RecordClearImage(hdrImg,prosper::ImageLayout::TransferDstOptimal,{{clearCol.r,clearCol.g,clearCol.b,clearCol.a}});
+				drawCmd->RecordImageBarrier(hdrImg,prosper::ImageLayout::TransferDstOptimal,prosper::ImageLayout::ColorAttachmentOptimal);
+			}
+
+			// Update Exposure
+			auto *renderer = scene->GetRenderer();
+			auto raster = renderer ? renderer->GetEntity().GetComponent<pragma::CRasterizationRendererComponent>() : pragma::ComponentHandle<pragma::CRasterizationRendererComponent>{};
+			if(raster.valid())
+			{
+				//c_engine->StartGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
+				auto frame = c_engine->GetRenderContext().GetLastFrameId();
+				if(frame > 0)
+					raster->GetHDRInfo().UpdateExposure();
+				//c_engine->StopGPUTimer(GPUTimerEvent::UpdateExposure); // prosper TODO
+			}
+			// TODO
 #if 0
-		auto ret = false;
-		m_bMainRenderPass = false;
+			auto ret = false;
+			m_bMainRenderPass = false;
 
-		auto bSkipScene = CallCallbacksWithOptionalReturn<
-			bool,std::reference_wrapper<const util::DrawSceneInfo>
-		>("DrawScene",ret,std::ref(drawSceneInfo)) == CallbackReturnType::HasReturnValue;
-		m_bMainRenderPass = true;
-		if(bSkipScene == true && ret == true)
-			return;
-		m_bMainRenderPass = false;
-		if(CallLuaCallbacks<
-			bool,std::reference_wrapper<const util::DrawSceneInfo>
-		>("DrawScene",&bSkipScene,std::ref(drawSceneInfo)) == CallbackReturnType::HasReturnValue && bSkipScene == true)
-		{
-			CallCallbacks("PostRenderScenes");
+			auto bSkipScene = CallCallbacksWithOptionalReturn<
+				bool,std::reference_wrapper<const util::DrawSceneInfo>
+			>("DrawScene",ret,std::ref(drawSceneInfo)) == CallbackReturnType::HasReturnValue;
 			m_bMainRenderPass = true;
-			return;
-		}
-		else
-			m_bMainRenderPass = true;
+			if(bSkipScene == true && ret == true)
+				return;
+			m_bMainRenderPass = false;
+			if(CallLuaCallbacks<
+				bool,std::reference_wrapper<const util::DrawSceneInfo>
+			>("DrawScene",&bSkipScene,std::ref(drawSceneInfo)) == CallbackReturnType::HasReturnValue && bSkipScene == true)
+			{
+				CallCallbacks("PostRenderScenes");
+				m_bMainRenderPass = true;
+				return;
+			}
+			else
+				m_bMainRenderPass = true;
 #endif
-		RenderScene(drawSceneInfo);
-		if(newRecording)
-			static_cast<prosper::IPrimaryCommandBuffer*>(drawCmd.get())->StopRecording();
-	}
+			RenderScene(drawSceneInfo);
+			if(newRecording)
+				static_cast<prosper::IPrimaryCommandBuffer*>(drawCmd.get())->StopRecording();
+		}
+	};
+	renderScenes(drawSceneInfos);
 	m_renderQueueBuilder->Flush();
 
 	// At this point all render threads (render queue and command buffer builders) are guaranteed

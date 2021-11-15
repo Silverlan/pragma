@@ -170,6 +170,7 @@ public:
 	virtual BaseEntity *GetEntity(unsigned int idx);
 	virtual BaseEntity *GetEntityByLocalIndex(uint32_t idx);
 	pragma::BaseWorldComponent *GetWorld();
+	const std::vector<util::TWeakSharedHandle<pragma::BaseWorldComponent>> &GetWorldComponents() const;
 	unsigned char GetPlayerCount();
 	unsigned int GetEntityCount();
 	virtual void SpawnEntity(BaseEntity *ent);
@@ -395,7 +396,7 @@ protected:
 	// for the next tick.
 	float m_tPhysDeltaRemainder = 0.f;
 	Vector3 m_gravity = {0,-600,0};
-	util::TWeakSharedHandle<pragma::BaseWorldComponent> m_worldComponent = util::TWeakSharedHandle<pragma::BaseWorldComponent>{};
+	std::vector<util::TWeakSharedHandle<pragma::BaseWorldComponent>> m_worldComponents {};
 	GameModeInfo *m_gameMode = nullptr;
 	EntityHandle m_entGamemode;
 	EntityHandle m_entGame;

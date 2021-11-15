@@ -96,6 +96,8 @@ namespace pragma::physics
 		virtual void SetPos(const Vector3 &pos)=0;
 		virtual Quat GetRotation() const=0;
 		virtual void SetRotation(const Quat &rot)=0;
+		virtual umath::Transform GetBaseTransform()=0;
+		virtual void SetBaseTransform(const umath::Transform &t)=0;
 		virtual umath::Transform GetWorldTransform()=0;
 		virtual void SetWorldTransform(const umath::Transform &t)=0;
 		virtual void WakeUp(bool forceActivation=false)=0;

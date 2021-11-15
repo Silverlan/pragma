@@ -452,6 +452,8 @@ public:
 	void SetDefaultGameRenderEnabled(bool enabled);
 	bool IsDefaultGameRenderEnabled() const;
 
+	uint32_t GetNumberOfScenesQueuedForRendering() const;
+	util::DrawSceneInfo *GetQueuedSceneRenderInfo(uint32_t i);
 	void QueueForRendering(const util::DrawSceneInfo &drawSceneInfo);
 	void RenderScenes(const std::vector<util::DrawSceneInfo> &drawSceneInfos);
 	void SetRenderScene(pragma::CSceneComponent &scene);

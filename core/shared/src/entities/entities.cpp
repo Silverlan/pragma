@@ -18,7 +18,8 @@
 #include "pragma/asset_types/world.hpp"
 
 
-pragma::BaseWorldComponent *Game::GetWorld() {return m_worldComponent.get();}
+pragma::BaseWorldComponent *Game::GetWorld() {return !m_worldComponents.empty() ? m_worldComponents[0].get() : nullptr;}
+const std::vector<util::TWeakSharedHandle<pragma::BaseWorldComponent>> &Game::GetWorldComponents() const {return m_worldComponents;}
 unsigned int Game::GetEntityCount() {return 0;}
 void Game::RemoveEntity(BaseEntity*) {}
 BaseEntity *Game::CreateEntity() {return NULL;}

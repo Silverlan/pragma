@@ -199,7 +199,9 @@ void CGame::RegisterLua()
 		luabind::def("precache_particle_system",static_cast<bool(*)(lua_State*,const std::string&)>(Lua::engine::precache_particle_system)),
 		luabind::def("load_sound_scripts",static_cast<void(*)(lua_State*,const std::string&,bool)>(Lua::engine::LoadSoundScripts)),
 		luabind::def("load_sound_scripts",static_cast<void(*)(lua_State*,const std::string&)>(Lua::engine::LoadSoundScripts)),
-		luabind::def("get_model",Lua::engine::get_model)
+		luabind::def("get_model",Lua::engine::get_model),
+		luabind::def("get_number_of_scenes_queued_for_rendering",&CGame::GetNumberOfScenesQueuedForRendering),
+		luabind::def("get_queued_scene_render_info",&CGame::GetQueuedSceneRenderInfo)
 	];
 
 	Lua::ents::register_library(GetLuaState());

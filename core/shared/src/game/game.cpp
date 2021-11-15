@@ -911,7 +911,12 @@ void Game::OnGameReady()
 		gmC->OnGameReady();
 }
 
-void Game::SetWorld(pragma::BaseWorldComponent *entWorld) {m_worldComponent = (entWorld != nullptr) ? entWorld->GetHandle<pragma::BaseWorldComponent>() : pragma::ComponentHandle<pragma::BaseWorldComponent>{};}
+void Game::SetWorld(pragma::BaseWorldComponent *entWorld)
+{
+	if(!entWorld)
+		return;
+	m_worldComponents.push_back(entWorld->GetHandle<pragma::BaseWorldComponent>());
+}
 
 std::vector<pragma::ComponentHandle<pragma::BasePhysicsComponent>> &Game::GetAwakePhysicsComponents() {return m_awakePhysicsEntities;}
 

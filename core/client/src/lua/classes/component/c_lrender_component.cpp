@@ -21,6 +21,8 @@ void Lua::Render::register_class(lua_State *l,luabind::module_ &entsMod)
 {
 	auto defCRender = pragma::lua::create_entity_component_class<pragma::CRenderComponent,pragma::BaseRenderComponent>("RenderComponent");
 	defCRender.def("GetTransformationMatrix",&Lua::Render::GetTransformationMatrix);
+	defCRender.def("IsInPvs",static_cast<bool(pragma::CRenderComponent::*)(const Vector3&,const pragma::CWorldComponent&) const>(&pragma::CRenderComponent::IsInPvs));
+	defCRender.def("IsInPvs",static_cast<bool(pragma::CRenderComponent::*)(const Vector3&) const>(&pragma::CRenderComponent::IsInPvs));
 	defCRender.def("IsInRenderGroup",&pragma::CRenderComponent::IsInRenderGroup);
 	defCRender.def("GetSceneRenderPass",&pragma::CRenderComponent::GetSceneRenderPass);
 	defCRender.def("SetSceneRenderPass",&pragma::CRenderComponent::SetSceneRenderPass);

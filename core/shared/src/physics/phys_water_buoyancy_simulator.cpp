@@ -342,10 +342,7 @@ void pragma::physics::WaterBuoyancySimulator::Simulate(BaseEntity &entWater,cons
 			Vector3 buoyancy;
 			Vector3 torque;
 
-			umath::Transform pose {colObj->GetPos(),colObj->GetRotation()};
-			// TODO: Add colObj:GetPose() and colObj:GetRootPose()
-			pose = pose *colObj->GetCollisionShape()->GetLocalPose(); // We need the center point of the physics mesh
-
+			auto pose = colObj->GetBaseTransform(); // Pose without local pose of physics object
 			if(shape->IsConvex())
 			{
 				auto *convexShape = shape->GetConvexShape();

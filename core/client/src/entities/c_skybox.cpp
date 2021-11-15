@@ -82,11 +82,11 @@ bool CSkyboxComponent::CreateCubemapFromIndividualTextures(const std::string &ma
 	// Check if this skybox is made of individual textures
 	// (e.g. if it came from the source engine)
 	auto matName = materialPath;
-	ufile::remove_extension_from_filename(matName);
+	ufile::remove_extension_from_filename(matName,pragma::asset::get_supported_extensions(pragma::asset::Type::Material,true));
 
 	auto containerFormat = uimg::TextureInfo::ContainerFormat::DDS;
 	auto ext = "dds";
-	if(FileManager::Exists("materials/" +matName +"." +ext))
+	if(FileManager::Exists("materials/" +matName +"." +ext) && pragma::asset::exists(matName,pragma::asset::Type::Material))
 		return true; // Skybox texture already exists; There's nothing for us to do
 
 	// Load all sides as textures
@@ -273,7 +273,7 @@ void CSkyboxComponent::ValidateMaterials()
 	if(mat.IsValid() && mat->GetTextureInfo("skybox"))
 		return; // Skybox is valid; Skip the material
 	// Attempt to use HDR textures, otherwise LDR
-	if(CreateCubemapFromIndividualTextures(texturePath +texture +".wmi","_hdr") || CreateCubemapFromIndividualTextures(texturePath +texture +".wmi"))
+	if(CreateCubemapFromIndividualTextures(texturePath +texture +".pmat","_hdr") || CreateCubemapFromIndividualTextures(texturePath +texture +".pmat"))
 	{
 		mdl->LoadMaterials([](const std::string &str,bool b) -> Material* {
 			return client->LoadMaterial(str,b);

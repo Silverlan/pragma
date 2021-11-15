@@ -114,12 +114,14 @@ layout(std140,LAYOUT_ID(DESCRIPTOR_SET_WATER,DESCRIPTOR_SET_WATER_BINDING_WATER_
 	Fog fog;
 } u_waterFog;
 
+#define DEBUG_WATER_MODE_NONE 0
+#define DEBUG_WATER_MODE_REFRACTION 1
+#define DEBUG_WATER_MODE_REFLECTION 2
+
+#define DEBUG_WATER_MODE DEBUG_WATER_MODE_NONE
+
 void main()
 {
-	//vec4 col = texture(u_reflectionMap,fs_in.vert_uv);
-	//fs_color = col;
-
-	/*
 	vec4 coords = u_camera.VP *vec4(fs_in.vert_pos_ws,1.0);
 	coords.xy /= coords.w;
 	coords.x = coords.x *0.5 +0.5;
@@ -127,37 +129,20 @@ void main()
 
 	vec2 reflectUv = coords.xy;
 	reflectUv = clamp(reflectUv,0.001,0.999);
-	
+#if DEBUG_WATER_MODE == DEBUG_WATER_MODE_REFRACTION
+	fs_color = texture(u_refractionMap,reflectUv);
+#elif DEBUG_WATER_MODE == DEBUG_WATER_MODE_REFLECTION
 	fs_color = texture(u_reflectionMap,reflectUv);
 	fs_color.a = 1;
-	*/
-
-	vec4 coords = u_camera.VP *vec4(fs_in.vert_pos_ws,1.0);
-	coords.xy /= coords.w;
-	coords.x = coords.x *0.5 +0.5;
-	coords.y = coords.y *0.5 +0.5;
-
-	vec2 reflectUv = coords.xy;
-	reflectUv = clamp(reflectUv,0.001,0.999);
-
+#else
 	vec4 wposWorld = inverse(get_view_matrix()) *get_model_matrix() *vec4(fs_in.vert_pos_ws,1.0);
-	//vec4 shadowCoord = u_material.reflectionVp *vec4(fs_in.vert_pos_ws,1.0);
 
-	//shadowCoord.xy /= shadowCoord.w;
-	//shadowCoord.x = shadowCoord.x *0.5 +0.5;
-	//shadowCoord.y = shadowCoord.y *0.5 +0.5;
-
-	//const float waterScale = 4.0;
-	//const float waveStrength = 0.004;
-	//const float waveSpeed = 0.03 *waterScale;
-	//const float reflectiveIntensity = 1.2;
 	float waterScale = u_water.waterScale;
 	float waveStrength = u_water.waveStrength;
-	float waveSpeed = 0.03 *u_water.waveSpeed *u_water.waterScale; // ?
+	float waveSpeed = 0.03 *u_water.waveSpeed *u_water.waterScale;
 	float reflectiveIntensity = u_water.reflectiveIntensity;
 
-	vec2 refractUv = reflectUv;//shadowCoord.xy;
-	//vec2 reflectUv = reflectUv;//shadowCoord.xy;
+	vec2 refractUv = reflectUv;
 
 	float depthWaterFloor = get_depth_distance(texture(u_refractionDepthMap,refractUv).x,u_renderSettings.nearZ,u_renderSettings.farZ);
 	float depthWaterSurf = gl_FragCoord.z /gl_FragCoord.w;
@@ -193,22 +178,6 @@ void main()
 
 	vec3 specularHighlights = calc_light_specular(normal,viewVector);
 
-	//
-
-	/*if(true)
-	{
-		float scale = 1.0 /10.0;
-		fs_color = vec4((sin(fs_in.vert_pos_ws.x *scale *M_PI) +1.0) /2.0,(sin(fs_in.vert_pos_ws.y *scale *M_PI) +1.0) /2.0,(sin(fs_in.vert_pos_ws.z *scale *M_PI) +1.0) /2.0,0.4);
-		
-		fs_color = reflectColor;//mix(reflectColor,refractColor,refractiveFactor);
-		fs_color = mix(fs_color,vec4(0.0,0.3,0.5,1.0),0.2) +vec4(specularHighlights,0.0);
-		fs_color.a = 0.95;
-		//fs_color.a = 0.0;
-		//fs_color = mix(fs_color,vec4(0.0,0.3,0.5,1.0),0.2) +vec4(specularHighlights,0.0);
-		//fs_color = vec4(fs_in.vert_normal,0.8);
-		//fs_color.a = 0.8;
-		return;
-	}*/
 	if(u_pushConstants.enableReflection == 1)
 	{
 		vec4 reflectColor = texture(u_reflectionMap,reflectUv);
@@ -217,9 +186,7 @@ void main()
 	}
 	else
 		fs_color = texture(u_reflectionMap,reflectUv);
-	//fs_color = mix(fs_color,u_waterFog.fog.color,0.6) +vec4(specularHighlights,0.0);
-
-	//fs_color.rgb = calculate_fog(u_waterFog.fog,fs_color.rgb,u_renderSettings.nearZ,u_renderSettings.farZ).rgb;
 
 	fs_color.a = clamp(depthWater /20.0,0.0,1.0);
+#endif
 }

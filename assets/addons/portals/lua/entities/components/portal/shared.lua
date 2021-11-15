@@ -9,8 +9,9 @@
 local Component = util.register_class("ents.PortalComponent",BaseEntityComponent)
 
 Component:RegisterMember("Target",ents.MEMBER_TYPE_ENTITY,"",{onChange = CLIENT and function(self) self:UpdateTarget() end or nil},"def+trans")
-Component:RegisterMember("PortalOrigin",ents.MEMBER_TYPE_VECTOR3,"",{onChange = function(self) self:UpdatePortalOrigin() self:InvokeEventCallbacks(ents.PortalComponent.EVENT_ON_PORTAL_ORIGIN_CHANGED) end},"def+trans")
+Component:RegisterMember("PortalOrigin",ents.MEMBER_TYPE_VECTOR3,Vector(0,0,0),{onChange = function(self) self:UpdatePortalOrigin() self:InvokeEventCallbacks(ents.PortalComponent.EVENT_ON_PORTAL_ORIGIN_CHANGED) end},"def+trans")
 Component:RegisterMember("Mirrored",ents.MEMBER_TYPE_BOOLEAN,false,{onChange = function(self) self:UpdateMirrored() end},"def+trans+is")
+Component:RegisterMember("PortalOriginEnabled",ents.MEMBER_TYPE_BOOLEAN,true,{onChange = function(self) self.m_posesDirty = true end},"def+trans+is")
 
 function Component:Initialize()
 	BaseEntityComponent.Initialize(self)
@@ -78,6 +79,10 @@ function Component:OnRemove()
 end
 
 function Component:UpdatePoses()
+	if(self.m_t ~= engine.get_current_frame_index()) then
+		self.m_t = engine.get_current_frame_index()
+		self.m_posesDirty = true
+	end
 	if(self.m_posesDirty ~= true) then return end
 	self.m_posesDirty = nil
 
@@ -112,7 +117,6 @@ function Component:UpdatePoses()
 		local renderTargetC = self:GetEntity():GetComponent(ents.COMPONENT_RENDER_TARGET)
 		if(renderTargetC ~= nil) then
 			local drawSceneInfo = renderTargetC:GetDrawSceneInfo()
-			drawSceneInfo.pvsOrigin = self:GetTargetPose():GetOrigin()
 			drawSceneInfo.clipPlane = -Vector4(tgtPlane:GetNormal(),tgtPlane:GetDistance())
 		end
 	end
@@ -124,7 +128,15 @@ function Component:UpdatePortalOrigin()
 	self.m_posesDirty = true
 end
 
-function Component:GetRelativePortalOrigin() return self.m_relativePortalOrigin end
+function Component:GetRelativePortalOrigin()
+	if(self:IsPortalOriginEnabled() == false) then
+		local surfC = self:GetEntity():GetComponent(ents.COMPONENT_SURFACE)
+		if(surfC == nil) then return Vector() end
+		local plane = surfC:GetPlane()
+		return plane:GetNormal() *plane:GetDistance()
+	end
+	return self.m_relativePortalOrigin
+end
 
 function Component:GetSurfacePose() self:UpdatePoses() return self.m_surfacePose end
 function Component:SetTargetPose(pose) self.m_targetPose = pose end
@@ -132,15 +144,20 @@ function Component:GetTargetPose() self:UpdatePoses() return self.m_targetPose e
 function Component:GetTargetPlane() self:UpdatePoses() return self.m_targetPlane end
 
 local rot180Yaw = EulerAngles(0,180,0):ToQuaternion()
-function Component:ProjectPoseToTarget(pose)
+function Component:ProjectPoseToTarget(pose,planeSide,ignoreMirror)
+	planeSide = planeSide or geometry.PLANE_SIDE_FRONT
 	local newPose = self:GetSurfacePose():GetInverse() *pose
 	local rot = newPose:GetRotation()
-	rot = rot180Yaw *rot
-	if(self:IsMirrored()) then rot:MirrorAxis(math.AXIS_X) end
+	if(planeSide == geometry.PLANE_SIDE_FRONT) then
+		rot = rot180Yaw *rot
+		if(self:IsMirrored()) then rot:MirrorAxis(math.AXIS_X) end
+	end
 	newPose:SetRotation(rot)
 	local pos = newPose:GetOrigin()
-	if(self:IsMirrored() == false) then pos:Rotate(rot180Yaw)
-	else pos.z = -pos.z end
+	if(planeSide == geometry.PLANE_SIDE_FRONT) then
+		if(self:IsMirrored() == false) then pos:Rotate(rot180Yaw)
+		elseif(ignoreMirror ~= true) then pos.z = -pos.z end
+	end
 	newPose:SetOrigin(pos)
 	return self:GetTargetPose() *newPose
 end

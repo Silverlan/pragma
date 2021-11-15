@@ -55,7 +55,6 @@ function Component:UpdateCamera(renderTargetC)
 	local targetRotMat = Mat4(1.0)
 
 	targetRotMat:Rotate(srcRot:GetInverse() *targetRot)
-	vm = vm
 	vm:Translate(srcPos)
 
 	local tmp = Vector(vm:Get(3,0),vm:Get(3,1),vm:Get(3,2))
@@ -73,6 +72,9 @@ function Component:UpdateCamera(renderTargetC)
 	local cam = renderTargetC:GetCamera()
 	cam:SetViewMatrix(vm)
 
-	local newCamPose = self:ProjectPoseToTarget(camPose)
+	local side = geometry.get_side_of_point_to_plane(plane:GetNormal(),plane:GetDistance(),camPose:GetOrigin())
+	local newCamPose = self:ProjectPoseToTarget(camPose,side)
 	cam:GetEntity():SetPose(newCamPose)
+
+	renderTargetC:GetDrawSceneInfo().pvsOrigin = camPose:GetOrigin()
 end

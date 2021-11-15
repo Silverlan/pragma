@@ -45,7 +45,10 @@ void CLiquidSurfaceComponent::Initialize()
 	m_surfaceComponent = GetEntity().AddComponent<CSurfaceComponent>()->GetHandle<CSurfaceComponent>();
 	auto portalC = GetEntity().AddComponent("portal");
 	if(portalC.valid())
+	{
 		portalC->CallLuaMethod<void>("SetMirrored",true);
+		portalC->CallLuaMethod<void>("SetPortalOriginEnabled",false);
+	}
 	auto evId = GetComponentManager().FindEventId("render_target","on_render_scene_initialized");
 	if(evId.has_value())
 	{

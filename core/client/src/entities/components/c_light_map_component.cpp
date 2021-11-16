@@ -74,6 +74,7 @@ void CLightMapComponent::InitializeLightMapData(
 			mdlC->UpdateLOD(0);
 		}
 	}
+	CRasterizationRendererComponent::UpdateLightmap();
 }
 
 void CLightMapComponent::SetLightMapAtlas(const std::shared_ptr<prosper::Texture> &lightMap)

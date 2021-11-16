@@ -102,6 +102,7 @@ namespace pragma
 		static void RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent);
 
 		static void UpdateLightmap(CLightMapComponent &lightMapC);
+		static void UpdateLightmap();
 		enum class PrepassMode : uint32_t
 		{
 			NoPrepass = 0,

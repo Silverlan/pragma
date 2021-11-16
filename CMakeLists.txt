@@ -172,7 +172,7 @@ search_lib_recursive_ext(DEPENDENCY_UTIL_BSP_LIBRARY util_bsp STATIC)
 # set(DEPENDENCY_UTIL_ARCHIVE_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_archive/include CACHE PATH "Path to include directory.")
 # search_lib_recursive_ext(DEPENDENCY_UTIL_ARCHIVE_LIBRARY util_archive)
 
-set(DEPENDENCY_UTIL_FGD_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_fgd/include CACHE PATH "Path to include directory.")
+set(DEPENDENCY_UTIL_FGD_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/modules/pr_source/external_libs/util_fgd/include CACHE PATH "Path to include directory.")
 search_lib_recursive_ext(DEPENDENCY_UTIL_FGD_LIBRARY util_fgd STATIC)
 
 set(DEPENDENCY_UTIL_FORMATTED_TEXT_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/external_libs/util_formatted_text/include CACHE PATH "Path to include directory.")
@@ -305,7 +305,7 @@ search_lib_recursive(DEPENDENCY_POLY2TRI_LIBRARY third_party_libs/clip2tri/poly2
 set(DEPENDENCY_MUPARSERX_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/muparserx/parser CACHE PATH "Path to include directory.")
 search_lib_recursive(DEPENDENCY_MUPARSERX_LIBRARY third_party_libs/muparserx/${BINARY_PRAGMA_DIR} muparserx STATIC)
 
-set(DEPENDENCY_BA2_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/ba2lib/BA2Lib CACHE PATH "Path to include directory.")
+set(DEPENDENCY_BA2_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/modules/pr_source/third_party/ba2lib/BA2Lib CACHE PATH "Path to include directory.")
 
 # set(DEPENDENCY_BSA_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/third_party_libs/libbsa/include CACHE PATH "Path to include directory.")
 # search_lib_recursive(DEPENDENCY_BSA_LIBRARY third_party_libs/libbsa/${BINARY_PRAGMA_DIR} bsa)
@@ -712,6 +712,7 @@ target_include_directories(materialsystem PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/thi
 set(ZLIB_VERSION_STRING "1.2.0" CACHE STRING "" FORCE) # Arbitrary version number larger then 1.1.2 to disable an error message from libzip, because the zlib-library does not exist at this point in time yet
 set(ZLIB_INCLUDE_DIR ${DEPENDENCY_ZLIB_INCLUDE} CACHE STRING "" FORCE)
 set(ZLIB_LIBRARY ${DEPENDENCY_ZLIB_LIBRARY} CACHE STRING "" FORCE)
+set(LIBZIP_DO_INSTALL OFF CACHE BOOL ".." FORCE)
 register_third_party_library(libzip)
 target_include_directories(zip PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/third_party_libs/zlib)
 set_target_properties(add_from_filep PROPERTIES FOLDER third_party_libs/libzip)
@@ -730,7 +731,7 @@ set_target_properties(nonrandomopen PROPERTIES FOLDER third_party_libs/libzip)
 set_target_properties(nonrandomopentest PROPERTIES FOLDER third_party_libs/libzip)
 set_target_properties(testinput PROPERTIES FOLDER third_party_libs/libzip)
 set_target_properties(tryopen PROPERTIES FOLDER third_party_libs/libzip)
-set_target_properties(update_zip_err_str PROPERTIES FOLDER third_party_libs/libzip)
+# set_target_properties(update_zip_err_str PROPERTIES FOLDER third_party_libs/libzip)
 set_target_properties(update_zip_errors PROPERTIES FOLDER third_party_libs/libzip)
 set_target_properties(update-html PROPERTIES FOLDER third_party_libs/libzip)
 set_target_properties(update-man PROPERTIES FOLDER third_party_libs/libzip)

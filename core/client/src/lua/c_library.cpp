@@ -1170,9 +1170,13 @@ void CGame::RegisterLuaLibraries()
 		luabind::def("draw_box",&Lua::DebugRenderer::Client::DrawBox),
 		luabind::def("draw_mesh",&Lua::DebugRenderer::Client::DrawMeshes),
 		luabind::def("draw_sphere",&Lua::DebugRenderer::Client::DrawSphere,luabind::default_parameter_policy<3,1>{}),
+		luabind::def("draw_sphere",&Lua::DebugRenderer::Client::DrawSphere),
 		luabind::def("draw_truncated_cone",&Lua::DebugRenderer::Client::DrawTruncatedCone,luabind::default_parameter_policy<6,12u>{}),
+		luabind::def("draw_truncated_cone",&Lua::DebugRenderer::Client::DrawTruncatedCone),
 		luabind::def("draw_cylinder",&Lua::DebugRenderer::Client::DrawCylinder,luabind::default_parameter_policy<5,12u>{}),
+		luabind::def("draw_cylinder",&Lua::DebugRenderer::Client::DrawCylinder),
 		luabind::def("draw_cone",&Lua::DebugRenderer::Client::DrawCone,luabind::default_parameter_policy<5,12u>{}),
+		luabind::def("draw_cone",&Lua::DebugRenderer::Client::DrawCone),
 		luabind::def("draw_pose",&Lua::DebugRenderer::Client::DrawAxis),
 		luabind::def("draw_text",
 			static_cast<std::shared_ptr<::DebugRenderer::BaseObject>(*)(const std::string&,const Vector2&,const DebugRenderInfo&)>(&Lua::DebugRenderer::Client::DrawText)

@@ -817,6 +817,25 @@ void CEngine::SetGPUProfilingEnabled(bool bEnabled)
 		++it;
 	}
 }
+std::shared_ptr<prosper::Window> CEngine::CreateWindow(prosper::WindowSettings &settings)
+{
+	auto &mainWindowCreateInfo = c_engine->GetRenderContext().GetWindow().GetWindowSettings();
+	settings.flags = mainWindowCreateInfo.flags;
+	settings.api = mainWindowCreateInfo.api;
+	auto window = c_engine->GetRenderContext().CreateWindow(settings);
+	if(!window)
+		return nullptr;
+	auto *pWindow = window.get();
+	(*pWindow)->SetWindowSizeCallback([pWindow](GLFW::Window &window,Vector2i size) {
+		pWindow->ReloadStagingRenderTarget();
+		auto *el = ::WGUI::GetInstance().GetBaseElement(pWindow);
+		if(el)
+			el->SetSize(size);
+	});
+	InitializeWindowInputCallbacks(*pWindow);
+	WGUI::GetInstance().AddBaseElement(pWindow);
+	return window;
+}
 void CEngine::InitializeWindowInputCallbacks(prosper::Window &window)
 {
 	window->SetKeyCallback([this,&window](GLFW::Window &glfwWindow,GLFW::Key key,int scanCode,GLFW::KeyState state,GLFW::Modifier mods) mutable {
@@ -1072,6 +1091,33 @@ void CEngine::Start()
 
 void CEngine::Close()
 {
+	if(umath::is_flag_set(m_stateFlags,StateFlags::CEClosed))
+		return;
+	umath::set_flag(m_stateFlags,StateFlags::CEClosed);
+
+	auto closeSecondaryWindows = [this]() {
+		auto &renderContext = GetRenderContext();
+		auto &primWindow = renderContext.GetWindow();
+		auto &wpWindows = GetRenderContext().GetWindows();
+		std::vector<std::shared_ptr<prosper::Window>> windows;
+		windows.reserve(wpWindows.size());
+		for(auto &wpWindow : wpWindows)
+		{
+			if(wpWindow.expired())
+				continue;
+			windows.push_back(wpWindow.lock()); // Temporarily claim ownership of the window
+		}
+		// Close all windows that aren't the primary window
+		for(auto &w : windows)
+		{
+			if(w.get() == &primWindow)
+				continue;
+			w->Close();
+		}
+		windows.clear(); // Release windows
+	};
+	closeSecondaryWindows();
+
 	CloseClientState();
 	m_auxEffects.clear();
 	CloseSoundEngine(); // Has to be closed after client state (since clientstate may still have some references at this point)
@@ -1156,7 +1202,7 @@ void CEngine::DrawFrame(prosper::IPrimaryCommandBuffer &drawCmd,uint32_t n_curre
 		if(wpWindow.expired())
 			continue;
 		auto window = wpWindow.lock();
-		if(window->IsValid() == false)
+		if(window->IsValid() == false || window->GetState() != prosper::Window::State::Active)
 			continue;
 		auto &finalImg = window->GetStagingRenderTarget()->GetTexture().GetImage();
 		drawCmd.RecordImageBarrier(
@@ -1360,14 +1406,20 @@ void CEngine::Think()
 	CallCallbacks("Draw");
 	StopProfilingStage(CPUProfilingPhase::DrawFrame);
 	GLFW::poll_events(); // Needs to be called AFTER rendering!
-	for(auto &wpWindow : GetRenderContext().GetWindows())
+	auto &windows = GetRenderContext().GetWindows();
+	for(auto it=windows.begin();it!=windows.end();)
 	{
+		auto &wpWindow = *it;
 		if(wpWindow.expired())
+		{
+			it = windows.erase(it);
 			continue;
+		}
 		auto window = wpWindow.lock();
 		if((*window)->ShouldClose() == false)
 		{
 			window->UpdateWindow();
+			++it;
 			continue;
 		}
 		if(window.get() == &GetRenderContext().GetWindow())
@@ -1376,6 +1428,7 @@ void CEngine::Think()
 			return;
 		}
 		window->Close();
+		it = windows.erase(it);
 	}
 }
 

@@ -73,7 +73,8 @@ public:
 		VulkanValidationEnabled = UniformBlocksInitialized<<1u,
 		ConsoleOpen = VulkanValidationEnabled<<1u,
 		TickDeltaTimeTiedToFrameRate = ConsoleOpen<<1u,
-		EnableGpuPerformanceTimers = TickDeltaTimeTiedToFrameRate<<1u
+		EnableGpuPerformanceTimers = TickDeltaTimeTiedToFrameRate<<1u,
+		CEClosed = EnableGpuPerformanceTimers<<1u
 	};
 	enum class GPUTimer : uint32_t
 	{
@@ -209,6 +210,7 @@ public:
 	void SetTickDeltaTimeTiedToFrameRate(bool tieToFrameRate);
 
 	void InitializeWindowInputCallbacks(prosper::Window &window);
+	std::shared_ptr<prosper::Window> CreateWindow(prosper::WindowSettings &settings);
 
 	void SetGpuPerformanceTimersEnabled(bool enabled);
 	std::chrono::nanoseconds GetGpuExecutionTime(uint32_t swapchainIdx,GPUTimer timer) const;

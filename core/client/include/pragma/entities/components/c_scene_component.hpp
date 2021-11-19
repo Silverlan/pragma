@@ -14,6 +14,7 @@
 #include "pragma/rendering/c_rendermode.h"
 #include "pragma/rendering/c_renderflags.h"
 #include "pragma/rendering/render_mesh_collection_handler.hpp"
+#include <pragma/util/util_bsp_tree.hpp>
 #include <pragma/entities/components/base_entity_component.hpp>
 #include <shader/prosper_descriptor_array_manager.hpp>
 #include <mathutil/plane.hpp>

@@ -90,7 +90,8 @@ public:
 		Verbose = 1u,
 		Running = Verbose<<1u,
 		Initialized = Running<<1u,
-		DeveloperMode = Initialized<<1u
+		DeveloperMode = Initialized<<1u,
+		Closed = DeveloperMode<<1u
 	};
 
 	enum class CPUProfilingPhase : uint32_t

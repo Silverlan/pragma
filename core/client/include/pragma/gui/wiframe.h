@@ -14,21 +14,26 @@
 class DLLCLIENT WIFrame
 	: public WITransformable
 {
-protected:
-	WIHandle m_hBg;
-	WIHandle m_hTitle;
-	WIHandle m_hTitleBar;
-	WIHandle m_hClose;
 public:
 	WIFrame();
 	virtual ~WIFrame() override;
 	virtual void Initialize() override;
 	virtual void SetSize(int x,int y) override;
+	WIBase *GetContents();
 	using WITransformable::SetSize;
 	void SetTitle(std::string title);
 	std::string GetTitle() const;
 	void SetCloseButtonEnabled(bool b);
+	void SetDetachButtonEnabled(bool b);
 	virtual util::EventReply MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
+protected:
+	WIHandle m_hBg;
+	WIHandle m_hTitle;
+	WIHandle m_hTitleBar;
+	WIHandle m_hClose;
+	WIHandle m_hDetachButton;
+	WIHandle m_hContents;
+	void OnDetachButtonPressed();
 };
 
 #endif

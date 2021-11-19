@@ -9,6 +9,7 @@
 #include "pragma/console/c_cvar_global_functions.h"
 #include <wgui/types/witext.h>
 #include <wgui/types/wirect.h>
+#include <prosper_window.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
@@ -25,6 +26,7 @@ private:
 	void OnThink();
 	bool ShouldPass(WIBase &el) const;
 	void SetTargetGUIElement(WIBase *optEl,bool clear);
+	void SetWindow(prosper::Window &window);
 
 	void SelectNextParentInHierarchy();
 	void SelectNextChildInHierarchy();
@@ -32,6 +34,7 @@ private:
 	CallbackHandle m_cbThink = {};
 	CallbackHandle m_cbScroll = {};
 	CallbackHandle m_cbOnClose = {};
+	std::weak_ptr<prosper::Window> m_curWindow {};
 	WIHandle m_hText = {};
 	std::array<WIHandle,4> m_borderElements = {};
 	std::array<WIHandle,4> m_borderElementsConstrained = {};
@@ -136,13 +139,39 @@ bool GUIDebugCursorManager::ShouldPass(WIBase &el) const
 	return true;
 }
 
+void GUIDebugCursorManager::SetWindow(prosper::Window &window)
+{
+	auto pwindow = window.shared_from_this();
+	if(m_curWindow.lock() == pwindow)
+		return;
+	m_curWindow = pwindow;
+	auto *elBase = WGUI::GetInstance().GetBaseElement(&window);
+	if(!elBase)
+		return;
+	if(m_hText.IsValid())
+		m_hText->SetParent(elBase);
+	for(auto &hEl : m_borderElements)
+	{
+		if(!hEl.IsValid())
+			continue;
+		hEl->SetParent(elBase);
+	}
+	for(auto &hEl : m_borderElementsConstrained)
+	{
+		if(!hEl.IsValid())
+			continue;
+		hEl->SetParent(elBase);
+	}
+	m_cursorElementList.clear();
+}
+
 std::string GUIDebugCursorManager::GetElementInfo(WIBase &el)
 {
 	std::stringstream ss;
 	auto pos = el.GetAbsolutePos();
 	auto size = el.GetSize();
 
-	ss<<"Element: "<<std::string(typeid(el).name())<<
+	ss<<"Element: "<<el<<
 		"; Class: "<<el.GetClass()<<
 		"; Name: "<<el.GetName()<<
 		"; Index: "<<el.GetIndex()<<
@@ -285,14 +314,17 @@ void GUIDebugCursorManager::OnThink()
 	if(m_hText.IsValid() == false)
 		return;
 	auto &gui = WGUI::GetInstance();
+	auto *window = gui.FindWindowUnderCursor();
+	if(window)
+		SetWindow(*window);
 	auto *pText = static_cast<WIText*>(m_hText.get());
-	auto *pEl = gui.GetCursorGUIElement(nullptr,[this](WIBase *pEl) -> bool {return ShouldPass(*pEl);});
+	auto *pEl = gui.GetCursorGUIElement(nullptr,[this](WIBase *pEl) -> bool {return ShouldPass(*pEl);},window);
 	SetTargetGUIElement(pEl,true);
 
 	if(m_hText.IsValid())
 	{
 		int32_t x,y;
-		gui.GetMousePos(x,y);
+		gui.GetMousePos(x,y,window);
 		m_hText->SetPos(x,y);
 	}
 }

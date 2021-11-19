@@ -12,6 +12,7 @@
 #include <wgui/types/wibutton.h>
 #include <wgui/types/wirect.h>
 #include <mathutil/umath.h>
+#include <prosper_window.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 
@@ -29,7 +30,7 @@ WITransformable::WITransformable()
 WITransformable::~WITransformable()
 {
 	if(m_resizeMode != ResizeMode::none)
-		WGUI::GetInstance().SetCursor(GLFW::Cursor::Shape::Arrow);
+		WGUI::GetInstance().SetCursor(GLFW::Cursor::Shape::Arrow,GetRootWindow());
 }
 void WITransformable::DoUpdate() {WIBase::DoUpdate(); Resize();}
 void WITransformable::SetResizeRatioLocked(bool bLocked)
@@ -108,13 +109,14 @@ void WITransformable::OnTitleBarMouseEvent(GLFW::MouseButton button,GLFW::KeySta
 Vector2i WITransformable::GetConfinedMousePos()
 {
 	Vector2i pos;
-	WGUI::GetInstance().GetMousePos(pos.x,pos.y);
+	auto *window = GetRootWindow();
+	WGUI::GetInstance().GetMousePos(pos.x,pos.y,window);
 	if(pos.x < WIFRAME_DRAG_OFFSET_BORDER)
 		pos.x = WIFRAME_DRAG_OFFSET_BORDER;
 	if(pos.y < WIFRAME_DRAG_OFFSET_BORDER)
 		pos.y = WIFRAME_DRAG_OFFSET_BORDER;
-	auto wViewport = c_engine->GetRenderContext().GetWindowWidth();
-	auto hViewport = c_engine->GetRenderContext().GetWindowHeight();
+	auto wViewport = window ? (*window)->GetSize().x : GetWidth();
+	auto hViewport = window ? (*window)->GetSize().y : GetHeight();
 	if(pos.x > static_cast<int32_t>(wViewport -WIFRAME_DRAG_OFFSET_BORDER))
 		pos.x = wViewport -WIFRAME_DRAG_OFFSET_BORDER;
 	if(pos.y > static_cast<int32_t>(hViewport -WIFRAME_DRAG_OFFSET_BORDER))
@@ -139,7 +141,7 @@ void WITransformable::OnVisibilityChanged(bool bVisible)
 		if(m_resizeMode != ResizeMode::none)
 		{
 			EndResizing();
-			WGUI::GetInstance().SetCursor(GLFW::Cursor::Shape::Arrow);
+			WGUI::GetInstance().SetCursor(GLFW::Cursor::Shape::Arrow,GetRootWindow());
 		}
 		EndDrag();
 	}
@@ -245,7 +247,10 @@ void WITransformable::OnCursorMoved(int x,int y)
 		return;
 	const auto fValidateCursorOverlap = [this]() {
 		auto &wgui = WGUI::GetInstance();
-		auto *pElCursor = wgui.GetCursorGUIElement(wgui.GetBaseElement(),[](WIBase *el) -> bool {return true;});
+		auto *pElCursor = wgui.GetCursorGUIElement(
+			wgui.GetBaseElement(),[](WIBase *el) -> bool {return true;},
+			GetRootWindow()
+		);
 		if(pElCursor != nullptr && pElCursor != this && pElCursor->IsDescendantOf(this) == false)
 		{
 			SetResizeMode(ResizeMode::none);
@@ -450,7 +455,7 @@ void WITransformable::Think()
 	else if(umath::is_flag_set(m_stateFlags,StateFlags::Dragging) == true && m_hMoveRect.IsValid())
 	{
 		Vector2i mousePos;
-		WGUI::GetInstance().GetMousePos(mousePos.x,mousePos.y);
+		WGUI::GetInstance().GetMousePos(mousePos.x,mousePos.y,GetRootWindow());
 		auto npos = mousePos -m_dragCursorOffset;
 		SetAbsolutePos(npos);
 

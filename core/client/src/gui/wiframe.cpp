@@ -7,10 +7,12 @@
 
 #include "stdafx_client.h"
 #include "pragma/gui/wiframe.h"
+#include "pragma/gui/widetachable.hpp"
 #include <wgui/types/witext.h>
 #include <wgui/types/wibutton.h>
 #include <wgui/types/wirect.h>
 #include <mathutil/umath.h>
+#include <prosper_window.hpp>
 
 LINK_WGUI_TO_CLASS(WIFrame,WIFrame);
 
@@ -26,15 +28,32 @@ WIFrame::~WIFrame()
 		WGUI::GetInstance().SetCursor(GLFW::Cursor::Shape::Arrow);
 }
 
+WIBase *WIFrame::GetContents() {return m_hContents.get();}
+
+void WIFrame::OnDetachButtonPressed()
+{
+	auto *detachable = dynamic_cast<WIDetachable*>(m_hContents.get());
+	if(!detachable)
+		return;
+	detachable->Detach();
+}
+
 void WIFrame::Initialize()
 {
 	SetDraggable(true);
 	SetResizable(true);
+	SetSize(256,256);
 
 	m_hBg = CreateChild<WIRect>();
 	m_hBg->SetName("background");
 	m_hBg->SetAutoAlignToParent(true);
 	m_hBg->GetColorProperty()->Link(*GetColorProperty());
+
+	m_hContents = CreateChild<WIDetachable>();
+	m_hContents->SetY(30);
+	m_hContents->SetSize(GetWidth(),GetHeight() -m_hContents->GetY());
+	m_hContents->SetAnchor(0.f,0.f,1.f,1.f);
+
 	WITransformable::Initialize();
 	if(m_hMoveRect.IsValid())
 	{
@@ -57,6 +76,12 @@ void WIFrame::Initialize()
 				pButton->SetX(pTitleBar->GetWidth() -pButton->GetWidth() -10);
 				pButton->SetY(CInt32(pTitleBar->GetHeight() *0.5f -pButton->GetHeight() *0.5f));
 			}
+			if(pFrame->m_hClose.IsValid() && pFrame->m_hDetachButton.IsValid())
+			{
+				WIButton *pButton = static_cast<WIButton*>(pFrame->m_hDetachButton.get());
+				pButton->SetX(pFrame->m_hClose->GetX() -pButton->GetWidth() -5);
+				pButton->SetY(pFrame->m_hClose->GetY());
+			}
 			if(pFrame->m_hTitle.IsValid())
 			{
 				WIText *pText = static_cast<WIText*>(pFrame->m_hTitle.get());
@@ -71,16 +96,30 @@ void WIFrame::Initialize()
 		pTitle->SetName("frame_title");
 		if(pTitle != nullptr)
 			pTitle->SetVisible(false);
+		
+		{
+			m_hDetachButton = gui.Create<WIButton>(pTitleBar)->GetHandle();
+			WIButton *pButton = static_cast<WIButton*>(m_hDetachButton.get());
+			pButton->SetText(".");
+			pButton->AddCallback("OnPressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this](util::EventReply *reply) -> CallbackReturnType {
+				*reply = util::EventReply::Handled;
+				OnDetachButtonPressed();
+				return CallbackReturnType::HasReturnValue;
+			}));
+			pButton->SetSize(20,20);
+		}
 
-		m_hClose = gui.Create<WIButton>(pTitleBar)->GetHandle();
-		WIButton *pButton = static_cast<WIButton*>(m_hClose.get());
-		pButton->SetText("X");
-		pButton->AddCallback("OnPressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this](util::EventReply *reply) -> CallbackReturnType {
-			*reply = util::EventReply::Handled;
-			OnCloseButtonPressed();
-			return CallbackReturnType::HasReturnValue;
-		}));
-		pButton->SetSize(20,20);
+		{
+			m_hClose = gui.Create<WIButton>(pTitleBar)->GetHandle();
+			WIButton *pButton = static_cast<WIButton*>(m_hClose.get());
+			pButton->SetText("X");
+			pButton->AddCallback("OnPressed",FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this](util::EventReply *reply) -> CallbackReturnType {
+				*reply = util::EventReply::Handled;
+				OnCloseButtonPressed();
+				return CallbackReturnType::HasReturnValue;
+			}));
+			pButton->SetSize(20,20);
+		}
 	}
 }
 util::EventReply WIFrame::MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods)
@@ -95,6 +134,12 @@ void WIFrame::SetCloseButtonEnabled(bool b)
 	if(!m_hClose.IsValid())
 		return;
 	m_hClose->SetVisible(b);
+}
+void WIFrame::SetDetachButtonEnabled(bool b)
+{
+	if(!m_hDetachButton.IsValid())
+		return;
+	m_hDetachButton->SetVisible(b);
 }
 void WIFrame::SetSize(int x,int y)
 {

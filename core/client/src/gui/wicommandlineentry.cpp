@@ -10,6 +10,7 @@
 #include <wgui/types/wimenuitem.hpp>
 #include <wgui/types/wicontextmenu.hpp>
 #include <wgui/types/witext.h>
+#include <mathutil/umath_geometry.hpp>
 
 LINK_WGUI_TO_CLASS(WICommandLineEntry,WICommandLineEntry);
 
@@ -136,6 +137,7 @@ void WICommandLineEntry::InitializeAutoCompleteList()
 	if(m_hAutoCompleteList.IsValid() == false)
 	{
 		auto *pContextMenu = WGUI::GetInstance().Create<WIContextMenu>();
+		pContextMenu->SetParentAndUpdateWindow(GetRootElement());
 		pContextMenu->SetZPos(100'000);
 		m_hAutoCompleteList = pContextMenu->GetHandle();
 		RemoveOnRemoval(pContextMenu);
@@ -164,6 +166,9 @@ void WICommandLineEntry::InitializeAutoCompleteList()
 		}));*/
 	}
 	pContextMenu->Update();
+	auto *p = pContextMenu->GetParent();
+	if(p && p->IsInBounds(pContextMenu->GetX(),pContextMenu->GetY(),pContextMenu->GetWidth(),pContextMenu->GetHeight()) != umath::intersection::Intersect::Inside)
+		pContextMenu->SetY(pos.y -pContextMenu->GetHeight());
 	// pContextMenu->SetWidth(size.x);
 }
 void WICommandLineEntry::SetAutocompleteEnabled(bool enabled)

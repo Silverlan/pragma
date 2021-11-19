@@ -288,6 +288,9 @@ void Engine::AddParallelJob(const util::ParallelJobWrapper &job,const std::strin
 
 void Engine::Close()
 {
+	if(umath::is_flag_set(m_stateFlags,StateFlags::Closed))
+		return;
+	umath::set_flag(m_stateFlags,StateFlags::Closed);
 	// Cancel all running jobs, then wait until
 	// they have completed
 	for(auto &jobInfo : m_parallelJobs)

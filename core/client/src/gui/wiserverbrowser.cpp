@@ -253,14 +253,17 @@ void WIServerBrowser::Initialize()
 	EnableThinking();
 	AddStyleClass("serverbrowser");
 	SetTitle(Locale::GetText("server_browser"));
-	m_hServerList = CreateChild<WITable>();
+
+	auto *contents = GetContents();
+	if(!contents)
+		return;
+	auto &wgui = WGUI::GetInstance();
+	m_hServerList = wgui.Create<WITable>(contents)->GetHandle();
 	WITable *t = m_hServerList.get<WITable>();
 	if(t != nullptr)
 	{
 		t->SetSortable(true);
 		t->SetScrollable(true);
-		if(m_hTitleBar.IsValid())
-			t->SetY(30);
 		t->SetSelectable(WITable::SelectableMode::Single);
 		WITableRow *row = t->AddHeaderRow();
 		if(row != nullptr)
@@ -274,8 +277,12 @@ void WIServerBrowser::Initialize()
 		}
 		t->SetColumnWidth(0,30);
 		t->SizeToContents();
+
+		t->SetSize(contents->GetWidth() -20,contents->GetHeight() -100);
+		t->SetX(10);
+		t->SetAnchor(0.f,0.f,1.f,1.f);
 	}
-	m_hRefresh = CreateChild<WIButton>();
+	m_hRefresh = wgui.Create<WIButton>(contents)->GetHandle();
 	WIButton *buttonRefresh = m_hRefresh.get<WIButton>();
 	if(buttonRefresh != nullptr)
 	{
@@ -289,8 +296,12 @@ void WIServerBrowser::Initialize()
 			sb->Refresh();
 			return CallbackReturnType::HasReturnValue;
 		}));
+		
+		buttonRefresh->SetWidth(100);
+		buttonRefresh->SetPos(contents->GetWidth() -buttonRefresh->GetWidth() -10,contents->GetHeight() -buttonRefresh->GetHeight() -20);
+		buttonRefresh->SetAnchor(1.f,1.f,1.f,1.f);
 	}
-	m_hConnect = CreateChild<WIButton>();
+	m_hConnect = wgui.Create<WIButton>(contents)->GetHandle();
 	WIButton *buttonConnect = m_hConnect.get<WIButton>();
 	if(buttonConnect != nullptr)
 	{
@@ -313,6 +324,10 @@ void WIServerBrowser::Initialize()
 			OnServerDoubleClick(*data);
 			return CallbackReturnType::HasReturnValue;
 		}));
+
+		buttonConnect->SetWidth(100);
+		buttonConnect->SetPos(contents->GetWidth() -buttonConnect->GetWidth() -120,contents->GetHeight() -buttonConnect->GetHeight() -20);
+		buttonConnect->SetAnchor(1.f,1.f,1.f,1.f);
 	}
 	SetSize(800,400);
 	SetMinSize(400,300);
@@ -333,24 +348,6 @@ void WIServerBrowser::Refresh() {m_bRefreshScheduled = true;}
 void WIServerBrowser::SetSize(int x,int y)
 {
 	WIFrame::SetSize(x,y);
-	WITable *t = m_hServerList.get<WITable>();
-	if(t != nullptr)
-	{
-		t->SetSize(x -20,y -100);
-		t->SetX(10);
-	}
-	WIButton *buttonRefresh = m_hRefresh.get<WIButton>();
-	if(buttonRefresh != nullptr)
-	{
-		buttonRefresh->SetWidth(100);
-		buttonRefresh->SetPos(x -buttonRefresh->GetWidth() -10,y -buttonRefresh->GetHeight() -20);
-	}
-	WIButton *buttonConnect = m_hConnect.get<WIButton>();
-	if(buttonConnect != nullptr)
-	{
-		buttonConnect->SetWidth(100);
-		buttonConnect->SetPos(x -buttonConnect->GetWidth() -120,y -buttonConnect->GetHeight() -20);
-	}
 }
 
 void WIServerBrowser::AddServer(const pragma::networking::MasterServerQueryResult &queryResult)

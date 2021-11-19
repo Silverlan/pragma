@@ -16,6 +16,7 @@
 #include "pragma/gui/wisnaparea.hpp"
 #include "pragma/gui/wiframe.h"
 #include "pragma/gui/mainmenu/wimainmenu.h"
+#include <pragma/engine_info.hpp>
 #include <pragma/lua/lua_error_handling.hpp>
 #include <pragma/localization.h>
 
@@ -23,7 +24,7 @@ extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 
 extern DLLCLIENT ClientState *client;
-
+#pragma optimize("",off)
 static WIHandle s_hConsole = {};
 WIConsole *WIConsole::Open()
 {
@@ -48,9 +49,20 @@ WIConsole *WIConsole::Open()
 	pFrame->SetAnchor(0,0,1,1,1'280,1'024);
 	pFrame->SetRemoveOnClose(false);
 
-	auto *pConsole = wgui.Create<WIConsole>(pFrame);
-	pConsole->SetY(24);
-	pConsole->SetSize(pFrame->GetWidth(),pFrame->GetHeight() -pConsole->GetTop());
+	auto *contents = pFrame->GetContents();
+	assert(contents);
+
+	auto *pConsole = wgui.Create<WIConsole>(contents);
+	contents->AddCallback("OnDetaching",FunctionCallback<void>::Create([pConsole]() {
+		pConsole->SetSimpleConsoleMode(false,true);
+	}));
+	contents->AddCallback("OnDetached",FunctionCallback<void>::Create([pConsole]() {
+		pConsole->m_mode = Mode::ExternalWindow;
+	}));
+	contents->AddCallback("OnReattached",FunctionCallback<void>::Create([pConsole]() {
+		pConsole->m_mode = Mode::Standard;
+	}));
+	pConsole->SetSize(contents->GetWidth(),contents->GetHeight() -pConsole->GetTop());
 	pConsole->SetAnchor(0,0,1,1);
 	pConsole->SetFrame(*pFrame);
 	pConsole->SetIgnoreParentAlpha(true);
@@ -59,6 +71,7 @@ WIConsole *WIConsole::Open()
 	pConsole->RequestFocus();
 	s_hConsole = pConsole->GetHandle();
 
+	auto wikiUrl = engine_info::get_wiki_url();
 	pConsole->SetText(
 		"{[c:c2003b]}"
 		"    _____ ____  _   _  _____  ____  _      ______ \n"
@@ -77,6 +90,10 @@ WIConsole *WIConsole::Open()
 		"- {[c:f4b8da]}lua_run / lua_run_cl{[/c]} <luaCode>: Executes the specified Lua-code serverside/clientside.\n"
 		"- {[c:eea1cd]}map{[/c]} <mapName>: Disconnects from the current game and starts a new game with the specified map.\n"
 		"- {[c:e68bbe]}exit{[/c]}: Exits the engine\n\n"
+		"Useful links:\n"
+		"- {[l:url \"" +wikiUrl +"\"]}{[c:fde4f2]}Wiki{[/c]}{[/l]}\n"
+		"- {[l:url \"https://wiki.pragma-engine.com/books/lua-api/page/introduction\"]}{[c:fde4f2]}Lua Documentation{[/c]}{[/l]}\n"
+		"\n"
 	);
 	return pConsole;
 }
@@ -93,9 +110,11 @@ WIConsole *WIConsole::GetConsole() {return static_cast<WIConsole*>(s_hConsole.ge
 /////////////
 
 LINK_WGUI_TO_CLASS(WIConsole,WIConsole);
-void WIConsole::SetSimpleConsoleMode(bool simple)
+void WIConsole::SetSimpleConsoleMode(bool simple,bool force)
 {
-	if(simple == m_bSimpleMode)
+	if(m_mode == Mode::ExternalWindow)
+		return;
+	if(simple == (m_mode == Mode::SimplifiedOverlay) && !force)
 		return;
 	auto a = simple ? 0.f : 1.f;
 	auto *pFrame = GetFrame();
@@ -137,8 +156,9 @@ void WIConsole::SetSimpleConsoleMode(bool simple)
 	}
 	if(m_hLog.IsValid())
 		m_hLog->SetIgnoreParentAlpha(simple);
-	m_bSimpleMode = simple;
+	m_mode = simple ? Mode::SimplifiedOverlay : Mode::Standard;
 }
+
 void WIConsole::Initialize()
 {
 	WIBase::Initialize();
@@ -333,7 +353,7 @@ void WIConsole::OnDescendantFocusKilled(WIBase &el)
 {
 	WIBase::OnDescendantFocusKilled(el);
 	if(&el == m_hCommandEntry.get())
-		el.SetVisible(!m_bSimpleMode);
+		el.SetVisible(m_mode != Mode::SimplifiedOverlay);
 }
 void WIConsole::RequestFocus()
 {
@@ -462,8 +482,8 @@ void WIConsole::SetFrame(WIFrame &frame)
 	m_menuConsoleSize = frame.GetSize();
 
 	// Reload current console mode
-	m_bSimpleMode = !m_bSimpleMode;
-	SetSimpleConsoleMode(!m_bSimpleMode);
+	if(m_mode != Mode::ExternalWindow)
+		SetSimpleConsoleMode(m_mode == Mode::SimplifiedOverlay,true);
 }
 WIFrame *WIConsole::GetFrame() {return static_cast<WIFrame*>(m_hFrame.get());}
 
@@ -552,3 +572,4 @@ std::string_view WIConsole::AppendText(const std::string &text)
 void WIConsole::SetMaxLogLineCount(uint32_t count) {m_maxLogLineCount = count;}
 uint32_t WIConsole::GetMaxLogLineCount() const {return m_maxLogLineCount;}
 void WIConsole::Clear() {SetText("");}
+#pragma optimize("",on)

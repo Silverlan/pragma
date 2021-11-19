@@ -18,6 +18,7 @@
 #include <pragma/lua/policies/pair_policy.hpp>
 #include <pragma/lua/policies/vector_policy.hpp>
 #include <pragma/lua/policies/default_parameter_policy.hpp>
+#include <pragma/lua/converters/game_type_converters_t.hpp>
 #include <pragma/lua/converters/vector_converter_t.hpp>
 #include <pragma/lua/converters/optional_converter_t.hpp>
 #include <pragma/lua/converters/pair_converter_t.hpp>
@@ -804,24 +805,7 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 			uint32_t universalQueueFamilyIndex;
 			return c_engine->GetRenderContext().AllocateSecondaryLevelCommandBuffer(prosper::QueueFamilyType::Universal,universalQueueFamilyIndex);
 		})),
-		luabind::def("create_window",static_cast<std::shared_ptr<prosper::Window>(*)(prosper::WindowSettings&)>([](prosper::WindowSettings &windowSettings) -> std::shared_ptr<prosper::Window> {
-			auto &context = c_engine->GetRenderContext();
-			auto &mainWindowCreateInfo = c_engine->GetRenderContext().GetWindow().GetWindowSettings();
-			windowSettings.flags = mainWindowCreateInfo.flags;
-			windowSettings.api = mainWindowCreateInfo.api;
-			auto window = context.CreateWindow(windowSettings);
-			if(!window)
-				return nullptr;
-			auto *pWindow = window.get();
-			(*window)->SetWindowSizeCallback([pWindow](GLFW::Window &window,Vector2i size) {
-				pWindow->ReloadStagingRenderTarget();
-				auto *el = ::WGUI::GetInstance().GetBaseElement(pWindow);
-				if(el)
-					el->SetSize(size);
-			});
-			c_engine->InitializeWindowInputCallbacks(*window);
-			return window;
-		}))
+		luabind::def("create_window",&CEngine::CreateWindow)
 	];
 
 	prosperMod[
@@ -1780,12 +1764,12 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		return tex.GetImage().GetFormat();
 	}));
 	defVkTexture.def("IsValid",&Lua::Vulkan::VKTexture::IsValid);
-	defVkTexture.def("SetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Texture&,const std::string&)>([](lua_State *l,Lua::Vulkan::Texture &tex,const std::string &name) {
+	defVkTexture.def("SetDebugName",+[](lua_State *l,Lua::Vulkan::Texture &tex,const std::string &name) {
 		Lua::Vulkan::VKContextObject::SetDebugName(l,tex,name);
-	}));
-	defVkTexture.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Texture&)>([](lua_State *l,Lua::Vulkan::Texture &tex) {
-		Lua::Vulkan::VKContextObject::GetDebugName(l,tex);
-	}));
+	});
+	defVkTexture.def("GetDebugName",+[](lua_State *l,Lua::Vulkan::Texture &tex) {
+		return Lua::Vulkan::VKContextObject::GetDebugName(l,tex);
+	});
 	defVkTexture.def("SetImageView",&Lua::Vulkan::Texture::SetImageView);
 	//
 	prosperMod[defVkTexture];
@@ -1837,12 +1821,12 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkImage.def("WriteMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uint32_t,uint32_t,uimg::ImageBuffer&,uint32_t,uint32_t)>(Lua::Vulkan::VKImage::WriteMemory));
 	defVkImage.def("WriteMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uint32_t,uint32_t,uimg::ImageBuffer&,uint32_t)>(Lua::Vulkan::VKImage::WriteMemory));
 	defVkImage.def("WriteMemory",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,uint32_t,uint32_t,uimg::ImageBuffer&)>(Lua::Vulkan::VKImage::WriteMemory));
-	defVkImage.def("SetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&,const std::string&)>([](lua_State *l,Lua::Vulkan::Image &img,const std::string &name) {
+	defVkImage.def("SetDebugName",+[](lua_State *l,Lua::Vulkan::Image &img,const std::string &name) {
 		Lua::Vulkan::VKContextObject::SetDebugName(l,img,name);
-	}));
-	defVkImage.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Image&)>([](lua_State *l,Lua::Vulkan::Image &img) {
-		Lua::Vulkan::VKContextObject::GetDebugName(l,img);
-	}));
+	});
+	defVkImage.def("GetDebugName",+[](lua_State *l,Lua::Vulkan::Image &img) {
+		return Lua::Vulkan::VKContextObject::GetDebugName(l,img);
+	});
 	defVkImage.def("Convert",static_cast<std::shared_ptr<prosper::IImage>(*)(lua_State*,Lua::Vulkan::Image&,Lua::Vulkan::CommandBuffer&,prosper::Format)>([](lua_State *l,Lua::Vulkan::Image &img,Lua::Vulkan::CommandBuffer &cmd,prosper::Format format) -> std::shared_ptr<prosper::IImage> {
 		return img.Convert(cmd,format);
 	}));
@@ -1903,12 +1887,12 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkImageView.def("GetMipmapCount",&Lua::Vulkan::ImageView::GetMipmapCount);
 	defVkImageView.def("GetSwizzleArray",&Lua::Vulkan::ImageView::GetSwizzleArray);
 	defVkImageView.def("GetType",&Lua::Vulkan::ImageView::GetType);
-	defVkImageView.def("SetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::ImageView&,const std::string&)>([](lua_State *l,Lua::Vulkan::ImageView &imgView,const std::string &name) {
+	defVkImageView.def("SetDebugName",+[](lua_State *l,Lua::Vulkan::ImageView &imgView,const std::string &name) {
 		Lua::Vulkan::VKContextObject::SetDebugName(l,imgView,name);
-	}));
-	defVkImageView.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::ImageView&)>([](lua_State *l,Lua::Vulkan::ImageView &imgView) {
-		Lua::Vulkan::VKContextObject::GetDebugName(l,imgView);
-	}));
+	});
+	defVkImageView.def("GetDebugName",+[](lua_State *l,Lua::Vulkan::ImageView &imgView) {
+		return Lua::Vulkan::VKContextObject::GetDebugName(l,imgView);
+	});
 	prosperMod[defVkImageView];
 
 	auto defVkSampler = luabind::class_<Lua::Vulkan::Sampler>("Sampler");
@@ -1946,12 +1930,12 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defVkSampler.def("SetMaxLod",&Lua::Vulkan::Sampler::SetMaxLod);
 	defVkSampler.def("SetBorderColor",&Lua::Vulkan::Sampler::SetBorderColor);
 	// defVkSampler.def("SetUnnormalizedCoordinates",&Lua::Vulkan::VKSampler::SetUseUnnormalizedCoordinates);
-	defVkSampler.def("SetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Sampler&,const std::string&)>([](lua_State *l,Lua::Vulkan::Sampler &smp,const std::string &name) {
+	defVkSampler.def("SetDebugName",+[](lua_State *l,Lua::Vulkan::Sampler &smp,const std::string &name) {
 		Lua::Vulkan::VKContextObject::SetDebugName(l,smp,name);
-	}));
-	defVkSampler.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::Sampler&)>([](lua_State *l,Lua::Vulkan::Sampler &smp) {
-		Lua::Vulkan::VKContextObject::GetDebugName(l,smp);
-	}));
+	});
+	defVkSampler.def("GetDebugName",+[](lua_State *l,Lua::Vulkan::Sampler &smp) {
+		return Lua::Vulkan::VKContextObject::GetDebugName(l,smp);
+	});
 	prosperMod[defVkSampler];
 
 	auto defVkRenderTarget = luabind::class_<Lua::Vulkan::RenderTarget>("RenderTarget");
@@ -1979,12 +1963,12 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		}
 		return nullptr;
 	});
-	defVkRenderTarget.def("SetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::RenderTarget&,const std::string&)>([](lua_State *l,Lua::Vulkan::RenderTarget &rt,const std::string &name) {
+	defVkRenderTarget.def("SetDebugName",+[](lua_State *l,Lua::Vulkan::RenderTarget &rt,const std::string &name) {
 		Lua::Vulkan::VKContextObject::SetDebugName(l,rt,name);
-	}));
-	defVkRenderTarget.def("GetDebugName",static_cast<void(*)(lua_State*,Lua::Vulkan::RenderTarget&)>([](lua_State *l,Lua::Vulkan::RenderTarget &rt) {
-		Lua::Vulkan::VKContextObject::GetDebugName(l,rt);
-	}));
+	});
+	defVkRenderTarget.def("GetDebugName",+[](lua_State *l,Lua::Vulkan::RenderTarget &rt) {
+		return Lua::Vulkan::VKContextObject::GetDebugName(l,rt);
+	});
 	prosperMod[defVkRenderTarget];
 	
 	auto defVkTimestampQuery = luabind::class_<Lua::Vulkan::TimestampQuery>("TimestampQuery");
@@ -2189,8 +2173,8 @@ void ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defWindow.def("IsValid",static_cast<bool(*)(prosper::Window&)>([](prosper::Window &window) -> bool {
 		return window.IsValid();
 	}));
-	defWindow.def("SetCloseCallback",static_cast<void(*)(lua_State*,prosper::Window&,const Lua::func<void>&)>([](lua_State *l,prosper::Window &window,const Lua::func<void> &function) {
-		window.SetCloseCallback([function]() mutable {
+	defWindow.def("AddCloseListener",static_cast<void(*)(lua_State*,prosper::Window&,const Lua::func<void>&)>([](lua_State *l,prosper::Window &window,const Lua::func<void> &function) {
+		window.AddCloseListener([function]() mutable {
 			const_cast<Lua::func<void>&>(function)();
 		});
 	}));

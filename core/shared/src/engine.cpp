@@ -58,6 +58,7 @@
 #include <pragma/model/animation/animation_event.h>
 #include <sharedutils/util_library.hpp>
 #include <sharedutils/util_path.hpp>
+#include <fsys/filesystem.h>
 
 const pragma::IServerState &Engine::GetServerStateInterface() const
 {
@@ -118,6 +119,8 @@ Engine::Engine(int,char*[])
 	m_logFile(nullptr),
 	m_tickRate(Engine::DEFAULT_TICK_RATE)
 {
+	filemanager::set_use_file_index_cache(true);
+
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::open_domain();
 #endif

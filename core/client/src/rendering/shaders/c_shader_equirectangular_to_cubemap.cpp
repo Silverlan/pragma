@@ -14,6 +14,7 @@
 #include <prosper_descriptor_set_group.hpp>
 #include <util_image.hpp>
 #include <util_image_buffer.hpp>
+#include <fsys/ifile.hpp>
 
 extern DLLCLIENT CEngine *c_engine;
 
@@ -51,8 +52,9 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectan
 		return nullptr;
 	return LoadEquirectangularImage(f,resolution);
 }
-std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectangularImage(VFilePtr f,uint32_t resolution)
+std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::LoadEquirectangularImage(VFilePtr fp,uint32_t resolution)
 {
+	fsys::File f {fp};
 	auto imgBuffer = uimg::load_image(f,uimg::PixelFormat::Float);
 	if(imgBuffer == nullptr)
 		return nullptr;

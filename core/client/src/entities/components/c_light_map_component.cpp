@@ -33,6 +33,7 @@
 #include <util_texture_info.hpp>
 #include <pragma/console/command_options.hpp>
 #include <pragma/util/util_game.hpp>
+#include <fsys/ifile.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
@@ -421,8 +422,9 @@ static void generate_lightmaps(
 	c_engine->AddParallelJob(job,"Baked lightmaps");
 }
 
-bool CLightMapComponent::ImportLightmapAtlas(VFilePtr f)
+bool CLightMapComponent::ImportLightmapAtlas(VFilePtr fp)
 {
+	fsys::File f {fp};
 	auto imgBuf = uimg::load_image(f,uimg::PixelFormat::Float);
 	if(imgBuf == nullptr)
 		return false;

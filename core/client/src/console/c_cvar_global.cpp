@@ -52,6 +52,7 @@
 #include <pragma/entities/components/base_transform_component.hpp>
 #include <pragma/entities/entity_iterator.hpp>
 #include <pragma/console/command_options.hpp>
+#include <fsys/ifile.hpp>
 #include <util_image.hpp>
 #include <util_image_buffer.hpp>
 #include <sharedutils/util_file.h>
@@ -427,8 +428,8 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 
 				auto path = get_screenshot_name(client ? client->GetGameState() : nullptr,format);
 				Con::cout<<"Raytracing complete! Saving screenshot as '"<<path<<"'..."<<Con::endl;
-				auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(),"wb");
-				if(f == nullptr)
+				auto fp = FileManager::OpenFile<VFilePtrReal>(path.c_str(),"wb");
+				if(fp == nullptr)
 				{
 					Con::cwar<<"WARNING: Unable to open file '"<<path<<"' for writing!"<<Con::endl;
 					return;
@@ -436,6 +437,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 				auto imgBuffer = worker.GetResult();
 				if(imgBuffer->IsHDRFormat())
 					imgBuffer = imgBuffer->ApplyToneMapping(toneMapping);
+				fsys::File f {fp};
 				if(uimg::save_image(f,*imgBuffer,format,quality) == false)
 					Con::cwar<<"WARNING: Unable to save screenshot as '"<<path<<"'!"<<Con::endl;
 
@@ -585,8 +587,8 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 		return;
 	auto imgFormat = uimg::ImageFormat::PNG;
 	auto path = get_screenshot_name(game,imgFormat);
-	auto f = FileManager::OpenFile<VFilePtrReal>(path.c_str(),"wb");
-	if(f == nullptr)
+	auto fp = FileManager::OpenFile<VFilePtrReal>(path.c_str(),"wb");
+	if(fp == nullptr)
 		return;
 	auto format = imgScreenshot->GetFormat();
 	auto bSwapped = false;
@@ -685,6 +687,7 @@ void CMD_screenshot(NetworkState*,pragma::BasePlayerComponent*,std::vector<std::
 	}
 #endif
 	auto imgBuf = uimg::ImageBuffer::Create(data,extents.width,extents.height,uimg::Format::RGBA8);
+	fsys::File f {fp};
 	uimg::save_image(f,*imgBuf,imgFormat);
 	bufScreenshot->Unmap();
 	//util::tga::write_tga(f,extents.width,extents.height,pixels);

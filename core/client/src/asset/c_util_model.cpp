@@ -28,6 +28,7 @@
 #include <sharedutils/util_path.hpp>
 #include <sharedutils/util_parallel_job.hpp>
 #include <sharedutils/util_library.hpp>
+#include <fsys/ifile.hpp>
 #include <pragma/asset_types/world.hpp>
 #include <pragma/engine_version.h>
 #include <image/prosper_sampler.hpp>
@@ -232,7 +233,8 @@ static bool save_image(
 	auto fImg = FileManager::OpenFile<VFilePtrReal>(inOutImgOutputPath.c_str(),"wb");
 	if(fImg == nullptr)
 		return false;
-	return uimg::save_image(fImg,imgBuf,saveFormat);
+	fsys::File f {fImg};
+	return uimg::save_image(f,imgBuf,saveFormat);
 };
 
 struct GLTFInputData

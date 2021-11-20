@@ -61,6 +61,7 @@
 #include <prosper_window.hpp>
 #include <prosper_command_buffer.hpp>
 #include <luabind/copy_policy.hpp>
+#include <fsys/ifile.hpp>
 
 extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT ClientState *client;
@@ -722,13 +723,14 @@ static bool save_image(lua_State *l,uimg::ImageBuffer &imgBuffer,std::string fil
 		return false;
 	ufile::remove_extension_from_filename(fileName);
 	fileName += '.' +uimg::get_file_extension(format);
-	auto f = filemanager::open_file<VFilePtrReal>(fileName,filemanager::FileMode::Write | filemanager::FileMode::Binary);
-	if(!f)
+	auto fp = filemanager::open_file<VFilePtrReal>(fileName,filemanager::FileMode::Write | filemanager::FileMode::Binary);
+	if(!fp)
 		return false;
 	if(threadPool)
 	{
 		auto pImgBuffer = imgBuffer.shared_from_this();
-		threadPool->AddTask([f,pImgBuffer,format,quality]() -> pragma::lua::LuaThreadPool::ResultHandler {
+		threadPool->AddTask([fp,pImgBuffer,format,quality]() -> pragma::lua::LuaThreadPool::ResultHandler {
+			fsys::File f {fp};
 			auto result = uimg::save_image(f,*pImgBuffer,format,quality);
 			return [result](lua_State *l) {
 				luabind::object{l,result}.push(l);
@@ -736,6 +738,7 @@ static bool save_image(lua_State *l,uimg::ImageBuffer &imgBuffer,std::string fil
 		});
 		return true;
 	}
+	fsys::File f {fp};
 	return uimg::save_image(f,imgBuffer,format,quality);
 }
 static bool save_image(lua_State *l,uimg::ImageBuffer &imgBuffer,std::string fileName,uimg::ImageFormat format)
@@ -794,8 +797,8 @@ static luabind::object load_image(lua_State *l,const std::string &fileName,bool 
 	std::string ext;
 	if(ufile::get_extension(fileName,&ext) == false)
 		return {};
-	auto f = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(),"rb");
-	if(f == nullptr)
+	auto fp = FileManager::OpenFile<VFilePtrReal>(fileName.c_str(),"rb");
+	if(fp == nullptr)
 		return {};
 	auto pixelFormat = uimg::PixelFormat::LDR;
 	if(ustring::compare<std::string>(ext,"hdr"))
@@ -807,9 +810,10 @@ static luabind::object load_image(lua_State *l,const std::string &fileName,bool 
 			: public util::ParallelWorker<std::shared_ptr<uimg::ImageBuffer>>
 		{
 		public:
-			ImageLoadJob(VFilePtr f,uimg::PixelFormat pixelFormat,std::optional<uimg::Format> targetFormat)
+			ImageLoadJob(VFilePtr fp,uimg::PixelFormat pixelFormat,std::optional<uimg::Format> targetFormat)
 			{
-				AddThread([this,f,pixelFormat,targetFormat]() {
+				AddThread([this,fp,pixelFormat,targetFormat]() {
+					fsys::File f {fp};
 					m_imgBuffer = uimg::load_image(f,pixelFormat);
 					if(m_imgBuffer == nullptr)
 					{
@@ -832,8 +836,9 @@ static luabind::object load_image(lua_State *l,const std::string &fileName,bool 
 		private:
 			std::shared_ptr<uimg::ImageBuffer> m_imgBuffer = nullptr;
 		};
-		return {l,util::create_parallel_job<ImageLoadJob>(f,pixelFormat,targetFormat)};
+		return {l,util::create_parallel_job<ImageLoadJob>(fp,pixelFormat,targetFormat)};
 	}
+	fsys::File f {fp};
 	auto imgBuffer = uimg::load_image(f,pixelFormat);
 	if(imgBuffer == nullptr)
 		return {};

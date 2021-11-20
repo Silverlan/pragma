@@ -20,7 +20,7 @@
 #include "pragma/entities/components/submergible_component.hpp"
 #include "pragma/entities/components/velocity_component.hpp"
 #include <pragma/physics/movetypes.h>
-#pragma optimize("",off)
+
 // See http://www.randygaul.net/wp-content/uploads/2014/02/RigidBodies_WaterSurface.pdf for algorithms
 
 #define ENABLE_DEBUG_DRAW 0
@@ -680,4 +680,3 @@ Vector3 pragma::physics::WaterBuoyancySimulator::CalcCattoDragTorqueForceApproxi
 {
 	return static_cast<float>(dragCoefficientHz *mass *(submergedLiquidVolume /volume) *umath::pow2(lenPolyhedron)) *-bodyAngularVelocity;
 }
-#pragma optimize("",on)

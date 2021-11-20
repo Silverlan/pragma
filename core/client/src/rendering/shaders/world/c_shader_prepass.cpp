@@ -22,7 +22,7 @@ using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 decltype(ShaderPrepassBase::VERTEX_BINDING_RENDER_BUFFER_INDEX) ShaderPrepassBase::VERTEX_BINDING_RENDER_BUFFER_INDEX = {prosper::VertexInputRate::Instance};
 decltype(ShaderPrepassBase::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX) ShaderPrepassBase::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX = {ShaderEntity::VERTEX_ATTRIBUTE_RENDER_BUFFER_INDEX,VERTEX_BINDING_RENDER_BUFFER_INDEX};
 
@@ -318,4 +318,3 @@ void ShaderPrepass::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &p
 
 	AddVertexAttribute(pipelineInfo,VERTEX_ATTRIBUTE_NORMAL);
 }
-#pragma optimize("",on)

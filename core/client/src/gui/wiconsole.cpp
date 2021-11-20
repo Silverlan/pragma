@@ -24,7 +24,7 @@ extern DLLCLIENT CEngine *c_engine;
 extern DLLCLIENT ClientState *client;
 
 extern DLLCLIENT ClientState *client;
-#pragma optimize("",off)
+
 static WIHandle s_hConsole = {};
 WIConsole *WIConsole::Open()
 {
@@ -572,4 +572,3 @@ std::string_view WIConsole::AppendText(const std::string &text)
 void WIConsole::SetMaxLogLineCount(uint32_t count) {m_maxLogLineCount = count;}
 uint32_t WIConsole::GetMaxLogLineCount() const {return m_maxLogLineCount;}
 void WIConsole::Clear() {SetText("");}
-#pragma optimize("",on)

@@ -23,7 +23,7 @@
 #include <udm.hpp>
 
 using namespace pragma;
-#pragma optimize("",off)
+
 ComponentEventId BaseTransformComponent::EVENT_ON_POSE_CHANGED = pragma::INVALID_COMPONENT_ID;
 ComponentEventId BaseTransformComponent::EVENT_ON_TELEPORT = pragma::INVALID_COMPONENT_ID;
 void BaseTransformComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
@@ -396,4 +396,3 @@ void CETeleport::PushArguments(lua_State *l)
 	Lua::Push(l,targetPose);
 	Lua::Push(l,deltaPose);
 }
-#pragma optimize("",on)

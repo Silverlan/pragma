@@ -21,7 +21,7 @@
 using namespace pragma::rendering;
 
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 void pragma::CRasterizationRendererComponent::RenderSceneFog(const util::DrawSceneInfo &drawSceneInfo)
 {
 	if(drawSceneInfo.scene.expired())
@@ -92,4 +92,3 @@ void pragma::CRasterizationRendererComponent::RenderSceneFog(const util::DrawSce
 
 	hdrInfo.BlitStagingRenderTargetToMainRenderTarget(drawSceneInfo);
 }
-#pragma optimize("",on)

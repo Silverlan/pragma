@@ -54,7 +54,7 @@
 #include <queries/prosper_timer_query.hpp>
 #include <pragma/asset/util_asset.hpp>
 #include <prosper_window.hpp>
-#pragma optimize("",off)
+
 extern "C"
 {
 	void DLLCLIENT RunCEngine(int argc,char *argv[])
@@ -1614,4 +1614,3 @@ REGISTER_CONVAR_CALLBACK_CL(cl_gpu_timer_queries_enabled,[](NetworkState*,ConVar
 		return;
 	c_engine->SetGPUProfilingEnabled(enabled);
 })
-#pragma optimize("",on)

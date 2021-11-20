@@ -9,7 +9,7 @@
 #include "pragma/networkstate/networkstate.h"
 #include <pragma/console/convars.h>
 #include <pragma/console/conout.h>
-#pragma optimize("",off)
+
 ConConf::ConConf(ConVarFlags flags)
 	: m_help(""),m_ID(0),m_type(ConType::Var),m_flags(flags)
 {}
@@ -541,4 +541,3 @@ bool ConVarMap::GetConVarIdentifier(unsigned int ID,std::string **str)
 	*str = &it->second;
 	return true;
 }
-#pragma optimize("",on)

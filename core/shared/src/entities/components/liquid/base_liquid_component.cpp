@@ -29,7 +29,7 @@
 // #define ENABLE_DEPRECATED_PHYSICS
 
 using namespace pragma;
-#pragma optimize("",off)
+
 void BaseFuncLiquidComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent) {}
 void BaseFuncLiquidComponent::Initialize()
 {
@@ -134,4 +134,3 @@ bool BaseFuncLiquidComponent::CalcLineSurfaceIntersection(const Vector3 &lineOri
 		return false;
 	return m_surfaceC->CalcLineSurfaceIntersection(lineOrigin,lineDir,outT);
 }
-#pragma optimize("",on)

@@ -20,7 +20,7 @@
 #include <stack>
 
 extern DLLNETWORK Engine *engine;
-#pragma optimize("",off)
+
 static void print_lua_error_message(lua_State *l,const std::stringstream &ssMsg)
 {
 	auto colorMode = Lua::GetErrorColorMode(l);
@@ -459,4 +459,3 @@ void Lua::initialize_error_handler()
 		});
 	});
 }
-#pragma optimize("",on)

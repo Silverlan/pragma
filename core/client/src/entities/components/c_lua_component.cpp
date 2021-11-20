@@ -11,7 +11,7 @@
 #include <pragma/lua/converters/game_type_converters_t.hpp>
 
 using namespace pragma;
-#pragma optimize("",off)
+
 CLuaBaseEntityComponent::CLuaBaseEntityComponent(BaseEntity &ent)
 	: BaseLuaBaseEntityComponent(ent),CBaseSnapshotComponent()
 {}
@@ -80,4 +80,3 @@ void CLuaBaseEntityComponent::InvokeNetEventHandle(const std::string &methodName
 {
 	CallLuaMethod<void,NetPacket>(methodName,packet);
 }
-#pragma optimize("",on)

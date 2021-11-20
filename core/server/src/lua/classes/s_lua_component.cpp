@@ -13,7 +13,7 @@
 #include <pragma/networking/enums.hpp>
 
 using namespace pragma;
-#pragma optimize("",off)
+
 SLuaBaseEntityComponent::SLuaBaseEntityComponent(BaseEntity &ent)
 	: BaseLuaBaseEntityComponent(ent),SBaseSnapshotComponent()
 {}
@@ -101,4 +101,3 @@ void SLuaBaseEntityComponent::InvokeNetEventHandle(const std::string &methodName
 {
 	CallLuaMethod<void,luabind::object,NetPacket>(methodName,pl->GetLuaObject(),packet);
 }
-#pragma optimize("",on)

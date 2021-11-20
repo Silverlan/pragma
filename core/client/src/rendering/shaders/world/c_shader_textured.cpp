@@ -34,7 +34,7 @@ extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
 
-#pragma optimize("",off)
+
 /*ShaderGameWorldPipeline ShaderGameWorldLightingPass::GetPipelineIndex(prosper::SampleCountFlags sampleCount,bool bReflection)
 {
 	if(sampleCount == prosper::SampleCountFlags::e1Bit)
@@ -772,4 +772,3 @@ std::optional<uint32_t> ShaderSpecializationManager::FindSpecializationPipelineI
 	auto pipelineIdx = specToPipelineIdx[specializationFlags];
 	return (pipelineIdx != std::numeric_limits<uint32_t>::max()) ? pipelineIdx : std::optional<uint32_t>{};
 }
-#pragma optimize("",on)

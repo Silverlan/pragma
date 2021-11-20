@@ -19,7 +19,7 @@
 using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
-#pragma optimize("",off)
+
 RenderContext::RenderContext()
 	: m_monitor(nullptr),m_renderAPI{"vulkan"}
 {}
@@ -205,4 +205,3 @@ void RenderContext::DrawFrame()
 void RenderContext::SetGfxAPIValidationEnabled(bool b) {umath::set_flag(m_stateFlags,StateFlags::GfxAPIValidationEnabled,b);}
 void RenderContext::SetRenderAPI(const std::string &renderAPI) {m_renderAPI = renderAPI;}
 const std::string &RenderContext::GetRenderAPI() const {return m_renderAPI;}
-#pragma optimize("",on)

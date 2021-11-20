@@ -34,7 +34,7 @@ extern DLLCLIENT CGame *c_game;
 using namespace pragma;
 
 LINK_ENTITY_TO_CLASS(skybox,CSkybox);
-#pragma optimize("",off)
+
 void CSkyboxComponent::Initialize()
 {
 	BaseSkyboxComponent::Initialize();
@@ -307,4 +307,3 @@ static void sky_override(NetworkState*,ConVar*,std::string,std::string skyMat)
 	}
 }
 REGISTER_CONVAR_CALLBACK_CL(sky_override,sky_override);
-#pragma optimize("",on)

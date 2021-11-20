@@ -11,7 +11,7 @@
 #include <prosper_command_buffer.hpp>
 
 using namespace pragma::rendering;
-#pragma optimize("",off)
+
 util::DrawSceneInfo::DrawSceneInfo()
 {}
 util::DrawSceneInfo::DrawSceneInfo(const DrawSceneInfo &other)
@@ -75,4 +75,3 @@ Vector3 util::DrawSceneInfo::GetPvsOrigin() const
 util::RenderPassDrawInfo::RenderPassDrawInfo(const DrawSceneInfo &drawSceneInfo,prosper::ICommandBuffer &cmdBuffer)
 	: drawSceneInfo{drawSceneInfo},commandBuffer{cmdBuffer.shared_from_this()}
 {}
-#pragma optimize("",on)

@@ -34,7 +34,7 @@
 #include <sharedutils/magic_enum.hpp>
 
 extern DLLNETWORK Engine *engine;
-#pragma optimize("",off)
+
 //void test_lua_policies(lua_State *l);
 void Lua::ents::register_library(lua_State *l)
 {
@@ -901,4 +901,3 @@ Lua::opt<pragma::ComponentEventId> Lua::ents::register_component_event(lua_State
 	auto eventId = componentManager.RegisterEventById(netName,componentId,pragma::EntityComponentManager::EventInfo::Type::Broadcast);
 	return {l,eventId};
 }
-#pragma optimize("",on)

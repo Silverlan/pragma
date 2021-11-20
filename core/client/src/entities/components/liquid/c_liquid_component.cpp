@@ -34,7 +34,7 @@ using namespace pragma;
 LINK_ENTITY_TO_CLASS(func_water,CFuncWater);
 
 extern DLLCLIENT CGame *c_game;
-#pragma optimize("",off)
+
 CLiquidComponent::CLiquidComponent(BaseEntity &ent)
 	: BaseFuncLiquidComponent(ent)
 {
@@ -157,4 +157,3 @@ void CFuncWater::Initialize()
 	CBaseEntity::Initialize();
 	AddComponent<CLiquidComponent>();
 }
-#pragma optimize("",on)

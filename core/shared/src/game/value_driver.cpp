@@ -11,7 +11,7 @@
 #include <sharedutils/util_uri.hpp>
 
 using namespace pragma;
-#pragma optimize("",off)
+
 pragma::ValueDriverDescriptor::ValueDriverDescriptor(
 	lua_State *l,std::string expression,std::unordered_map<std::string,std::string> variables,
 	std::unordered_map<std::string,udm::PProperty> constants
@@ -256,4 +256,3 @@ std::optional<ValueDriverVariable> ValueDriverVariable::Create(std::string uriPa
 		return {};
 	return ValueDriverVariable{std::move(ref)};
 }
-#pragma optimize("",on)

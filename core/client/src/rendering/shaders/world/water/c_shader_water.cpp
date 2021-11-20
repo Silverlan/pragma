@@ -23,7 +23,7 @@
 using namespace pragma;
 
 extern DLLCLIENT CEngine *c_engine;
-#pragma optimize("",off)
+
 decltype(ShaderWater::DESCRIPTOR_SET_MATERIAL) ShaderWater::DESCRIPTOR_SET_MATERIAL = {
 	{
 		prosper::DescriptorSetInfo::Binding { // DuDv Map
@@ -153,4 +153,3 @@ void ShaderWater::InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipel
 }
 
 prosper::DescriptorSetInfo &ShaderWater::GetMaterialDescriptorSetInfo() const {return DESCRIPTOR_SET_MATERIAL;}
-#pragma optimize("",on)

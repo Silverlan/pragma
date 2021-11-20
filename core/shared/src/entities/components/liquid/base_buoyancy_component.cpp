@@ -20,7 +20,7 @@
 #include "pragma/physics/phys_water_buoyancy_simulator.hpp"
 
 using namespace pragma;
-#pragma optimize("",off)
+
 void BaseBuoyancyComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
 {
 
@@ -146,4 +146,3 @@ void BaseBuoyancyComponent::SimulateBuoyancy() const
 	if(m_physSurfaceSim != nullptr)
 		m_physSurfaceSim->UnlockParticleHeights();*/
 }
-#pragma optimize("",on)

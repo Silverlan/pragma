@@ -78,6 +78,7 @@ void pragma::asset::EntityData::SetClassName(const std::string &className)
 	ustring::to_lower(m_className);
 }
 void pragma::asset::EntityData::SetOrigin(const Vector3 &origin) {m_origin = origin;}
+void pragma::asset::EntityData::SetRotation(const Quat &rot) {m_rotation = rot;}
 void pragma::asset::EntityData::SetKeyValue(const std::string &key,const std::string &value) {m_keyValues[key] = value;}
 void pragma::asset::EntityData::AddOutput(const Output &output)
 {
@@ -119,6 +120,7 @@ umath::Transform pragma::asset::EntityData::GetPose() const
 	auto origin = GetOrigin();
 	umath::Transform pose {};
 	pose.SetOrigin(origin);
+	pose.SetRotation(m_rotation);
 	auto &keyValues = GetKeyValues();
 	auto itAngles = keyValues.find("angles");
 	if(itAngles != keyValues.end())

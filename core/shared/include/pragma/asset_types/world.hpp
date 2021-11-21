@@ -53,6 +53,7 @@ namespace pragma::asset
 		bool IsClientSideOnly() const;
 		void SetClassName(const std::string &className);
 		void SetOrigin(const Vector3 &origin);
+		void SetRotation(const Quat &rot);
 		void SetLeafData(uint32_t firstLeaf,uint32_t numLeaves);
 		void SetKeyValue(const std::string &key,const std::string &value);
 		void AddOutput(const Output &output);
@@ -83,6 +84,7 @@ namespace pragma::asset
 		std::vector<Output> m_outputs;
 		uint32_t m_mapIndex = 0u;
 		Vector3 m_origin = {};
+		Quat m_rotation = uquat::identity();
 		std::vector<uint16_t> m_leaves = {};
 		Flags m_flags = Flags::None;
 

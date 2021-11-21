@@ -91,6 +91,8 @@ void CRasterizationRendererComponent::InitializeLuaObject(lua_State *l) {return 
 static pragma::ComponentHandle<pragma::CLightMapComponent> g_lightmapC = {};
 void CRasterizationRendererComponent::UpdateLightmap(CLightMapComponent &lightMapC)
 {
+	if(!lightMapC.GetLightMap())
+		return;
 	for(auto &renderer : EntityCIterator<CRasterizationRendererComponent>{*c_game})
 		renderer.SetLightMap(lightMapC);
 	g_lightmapC = lightMapC.GetHandle<CLightMapComponent>();

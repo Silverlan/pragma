@@ -119,13 +119,13 @@ void WICommandLineEntry::InitializeAutoCompleteList()
 	if(text.empty())
 	{
 		auto numCmds = umath::min(static_cast<int32_t>(m_commandHistoryCount),static_cast<int32_t>(GetAutoCompleteEntryLimit()));
-		options.reserve(numCmds);
+		options.resize(numCmds);
 		for(auto i=0;i<numCmds;++i)
 		{
 			auto idx = static_cast<int32_t>(m_nextCommandHistoryInsertPos) -1 -i;
 			if(idx < 0)
 				idx += m_commandHistory.size();
-			options.push_back(m_commandHistory.at(idx));
+			options[numCmds -i -1] = m_commandHistory.at(idx);
 		}
 	}
 	else

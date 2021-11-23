@@ -118,7 +118,9 @@ Engine::Engine(int,char*[])
 	m_logFile(nullptr),
 	m_tickRate(Engine::DEFAULT_TICK_RATE)
 {
-	filemanager::set_use_file_index_cache(true);
+	// TODO: File cache doesn't work with absolute paths at the moment
+	// (e.g. addons/imported/models/some_model.pmdl would return false even if the file exists)
+	// filemanager::set_use_file_index_cache(true);
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	debug::open_domain();

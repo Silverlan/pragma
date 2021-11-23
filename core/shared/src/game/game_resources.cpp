@@ -124,6 +124,8 @@ static bool port_model(
 			return false;
 		}
 		auto r = udmData->Save(f);
+		if(r)
+			filemanager::update_file_index_cache("models/" +outPath);
 		r = r ? FileManager::Exists(util::CONVERT_PATH +"models\\" +outPath) : false;
 		if(r == true)
 			Con::cout<<"Successfully ported "<<formatName<<" Model '"<<(path +mdlName)<<"' and saved it as '"<<outPath<<"'!"<<Con::endl;

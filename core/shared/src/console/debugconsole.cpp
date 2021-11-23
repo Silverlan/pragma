@@ -40,29 +40,38 @@ void Engine::ToggleConsole()
 	OpenConsole();
 }
 
+Engine::ConsoleInstance::ConsoleInstance()
+{
+	console = std::make_unique<DebugConsole>();
+	console->open();
+	consoleThread = std::make_unique<std::thread>(std::bind(&KeyboardInput));
+}
+
+Engine::ConsoleInstance::~ConsoleInstance()
+{
+	console->close();
+	consoleThread->join();
+}
+
 void Engine::OpenConsole()
 {
-	if(m_console == NULL)
+	if(m_consoleInfo == nullptr)
 	{
-		m_console = new DebugConsole();
-		m_console->open();
+		m_consoleInfo = std::unique_ptr<ConsoleInstance>{new ConsoleInstance{}};
 		bCheckInput = true;
-		m_consoleThread = new std::thread(std::bind(&KeyboardInput));
 	}
 }
 
 void Engine::CloseConsole()
 {
-	if(m_console == NULL) return;
+	if(!m_consoleInfo)
+		return;
 	bCheckInput = false;
-	m_console->close();
-	m_console = NULL;
-	m_consoleThread->join();
-	delete m_consoleThread;
+	m_consoleInfo = nullptr;
 }
 
-bool Engine::IsConsoleOpen() const {return m_console != NULL;}
-DebugConsole *Engine::GetConsole() {return m_console;}
+bool Engine::IsConsoleOpen() const {return m_consoleInfo != NULL;}
+DebugConsole *Engine::GetConsole() {return m_consoleInfo ? m_consoleInfo->console.get() : nullptr;}
 
 void Engine::ProcessConsoleInput(KeyState pressState)
 {

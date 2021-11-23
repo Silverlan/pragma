@@ -10,6 +10,7 @@
 #include "pragma/model/modelmanager.h"
 #include "pragma/asset/util_asset.hpp"
 #include "pragma/lua/libraries/lfile.h"
+#include "pragma/lua/converters/game_type_converters_t.hpp"
 #include <luainterface.hpp>
 
 extern DLLNETWORK Engine *engine;
@@ -35,8 +36,9 @@ void Lua::asset::register_library(Lua::Interface &lua,bool extended)
 			auto *nw = engine->GetNetworkState(l);
 			return nw->GetMaterialManager().ClearUnused();
 		})),
-		luabind::def("lock_asset_watchers",&Lua::asset::lock_asset_watchers),
-		luabind::def("unlock_asset_watchers",&Lua::asset::unlock_asset_watchers),
+		luabind::def("lock_asset_watchers",&::Engine::LockResourceWatchers),
+		luabind::def("unlock_asset_watchers",&::Engine::UnlockResourceWatchers),
+		luabind::def("poll_asset_watchers",&::Engine::PollResourceWatchers),
 		luabind::def("get_supported_import_file_extensions",&Lua::asset::get_supported_import_file_extensions),
 		luabind::def("get_supported_export_file_extensions",&Lua::asset::get_supported_export_file_extensions),
 		luabind::def("matches",&pragma::asset::matches),
@@ -174,14 +176,6 @@ bool Lua::asset::is_loaded(lua_State *l,const std::string &name,pragma::asset::T
 {
 	auto *nw = engine->GetNetworkState(l);
 	return pragma::asset::is_loaded(*nw,name,type);
-}
-void Lua::asset::lock_asset_watchers(lua_State *l)
-{
-	engine->LockResourceWatchers();
-}
-void Lua::asset::unlock_asset_watchers(lua_State *l)
-{
-	engine->UnlockResourceWatchers();
 }
 Lua::tb<std::string> Lua::asset::get_supported_import_file_extensions(lua_State *l,pragma::asset::Type type)
 {

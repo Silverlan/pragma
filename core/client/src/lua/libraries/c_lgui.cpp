@@ -213,9 +213,13 @@ void Lua::gui::register_element(const std::string &className,const Lua::classObj
 		},1);
 		if(result != Lua::StatusCode::Ok)
 			return true;
-		if(Lua::IsSet(l,-1) == false)
-			return false;
-		return Lua::CheckBool(l,-1);
+		auto r = false;
+		if(Lua::IsSet(l,-1))
+		{
+			r = Lua::CheckBool(l,-1);
+			Lua::Pop(l,1);
+		}
+		return r;
 	});
 }
 ::WIBase *Lua::gui::get_element_under_cursor(lua_State *l,const Lua::func<bool,::WIBase> &condition)

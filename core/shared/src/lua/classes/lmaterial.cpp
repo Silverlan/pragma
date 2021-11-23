@@ -8,6 +8,7 @@
 #include "stdafx_shared.h"
 #include "pragma/lua/classes/lmaterial.h"
 #include "pragma/lua/libraries/lfile.h"
+#include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "luasystem.h"
 #include "material.h"
 #include <detail_mode.hpp>
@@ -64,13 +65,14 @@ void Lua::Material::register_class(luabind::class_<::Material> &classDef)
 			return luabind::object{l,err};
 		return luabind::object{l,result};
 	}));
-	classDef.def("Save",static_cast<luabind::variant<std::string,bool>(*)(lua_State*,::Material&,const std::string&)>([](lua_State *l,::Material &mat,const std::string &fname) -> luabind::variant<std::string,bool> {
+	classDef.def("Save",+[](lua_State *l,::Engine *engine,::Material &mat,const std::string &fname) -> luabind::variant<std::string,bool> {
 		std::string err;
 		auto result = mat.Save(fname,err);
 		if(result == false)
 			return luabind::object{l,err};
+		engine->PollResourceWatchers();
 		return luabind::object{l,result};
-	}));
+	});
 	classDef.def("IsError",&::Material::IsError);
 	classDef.def("IsLoaded",&::Material::IsLoaded);
 	classDef.def("IsTranslucent",&::Material::IsTranslucent);

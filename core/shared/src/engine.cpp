@@ -115,7 +115,6 @@ ConVarHandle Engine::GetConVarHandle(std::string scvar)
 DLLNETWORK Engine *engine = NULL;
 Engine::Engine(int,char*[])
 	: CVarHandler(),
-	m_console(nullptr),m_consoleThread(nullptr),
 	m_logFile(nullptr),
 	m_tickRate(Engine::DEFAULT_TICK_RATE)
 {
@@ -180,6 +179,8 @@ void Engine::ClearConsole()
 {
 	std::system("cls");
 }
+
+void Engine::SetConsoleType(ConsoleType type) {m_consoleType = type;}
 
 void Engine::SetReplicatedConVar(const std::string &cvar,const std::string &val)
 {
@@ -261,6 +262,15 @@ void Engine::UnlockResourceWatchers()
 		sv->GetResourceWatcher().Unlock();
 	if(cl)
 		cl->GetResourceWatcher().Unlock();
+}
+void Engine::PollResourceWatchers()
+{
+	auto *sv = GetServerNetworkState();
+	auto *cl = GetClientState();
+	if(sv)
+		sv->GetResourceWatcher().Poll();
+	if(cl)
+		cl->GetResourceWatcher().Poll();
 }
 util::ScopeGuard Engine::ScopeLockResourceWatchers()
 {

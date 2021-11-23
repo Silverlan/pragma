@@ -106,10 +106,14 @@ void Engine::InitLaunchOptions(int argc,char *argv[])
 extern Engine *engine;
 DLLNETWORK void LPARAM_console(const std::vector<std::string> &argv)
 {
-	if(argv.empty() == false && (ustring::compare<std::string>(argv[0],"external") || ustring::compare<std::string>(argv[0],"terminal")))
+	if(!argv.empty())
 	{
-		engine->Engine::OpenConsole();
-		return;
+		auto conType = Engine::ConsoleType::Terminal;
+		if(ustring::compare<std::string>(argv[0],"guid"))
+			conType = Engine::ConsoleType::GUIDetached;
+		else if(ustring::compare<std::string>(argv[0],"gui"))
+			conType = Engine::ConsoleType::GUI;
+		engine->SetConsoleType(conType);
 	}
 	engine->OpenConsole();
 }

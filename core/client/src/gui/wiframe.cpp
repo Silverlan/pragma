@@ -30,13 +30,7 @@ WIFrame::~WIFrame()
 
 WIBase *WIFrame::GetContents() {return m_hContents.get();}
 
-void WIFrame::OnDetachButtonPressed()
-{
-	auto *detachable = dynamic_cast<WIDetachable*>(m_hContents.get());
-	if(!detachable)
-		return;
-	detachable->Detach();
-}
+void WIFrame::OnDetachButtonPressed() {Detach();}
 
 void WIFrame::Initialize()
 {
@@ -134,6 +128,20 @@ void WIFrame::SetCloseButtonEnabled(bool b)
 	if(!m_hClose.IsValid())
 		return;
 	m_hClose->SetVisible(b);
+}
+void WIFrame::Detach()
+{
+	auto *detachable = dynamic_cast<WIDetachable*>(m_hContents.get());
+	if(!detachable)
+		return;
+	detachable->Detach();
+}
+void WIFrame::Reattach()
+{
+	auto *detachable = dynamic_cast<WIDetachable*>(m_hContents.get());
+	if(!detachable)
+		return;
+	detachable->Reattach();
 }
 void WIFrame::SetDetachButtonEnabled(bool b)
 {

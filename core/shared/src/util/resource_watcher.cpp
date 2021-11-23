@@ -288,6 +288,15 @@ void ResourceWatcherManager::OnResourceChanged(const std::string &rootPath,const
 
 void ResourceWatcherManager::OnResourceChanged(const std::string &rootPath,const std::string &path)
 {
+	filemanager::update_file_index_cache(rootPath +'/' +path);
+	/*std::string absPath;
+	if(FileManager::FindAbsolutePath(rootPath +'/' +path,absPath))
+	{
+		auto path = util::Path::CreateFile(absPath);
+		path.MakeRelative(util::get_program_path());
+		absPath = path.GetString();
+		filemanager::update_file_index_cache(absPath);
+	}*/
 	std::string ext;
 	if(ufile::get_extension(path,&ext) == false)
 		return;

@@ -73,6 +73,12 @@ public:
 		Con::MessageFlags messageFlags;
 		std::shared_ptr<Color> color;
 	};
+	enum class ConsoleType : uint8_t
+	{
+		Terminal = 0,
+		GUI,
+		GUIDetached
+	};
 protected:
 	bool ExecConfig(const std::string &cfg,const std::function<void(std::string&,std::vector<std::string>&)> &callback);
 	std::unique_ptr<StateInstance> m_svInstance;
@@ -178,6 +184,7 @@ public:
 
 	std::optional<ConsoleOutput> PollConsoleOutput();
 	void SetRecordConsoleOutput(bool record);
+	virtual void SetConsoleType(ConsoleType type);
 
 	virtual bool IsMultiPlayer() const;
 	bool IsSinglePlayer() const;
@@ -223,6 +230,7 @@ public:
 	void LockResourceWatchers();
 	void UnlockResourceWatchers();
 	util::ScopeGuard ScopeLockResourceWatchers();
+	void PollResourceWatchers();
 
 	pragma::asset::AssetManager &GetAssetManager();
 	const pragma::asset::AssetManager &GetAssetManager() const;
@@ -251,9 +259,16 @@ protected:
 	virtual void InitializeExternalArchiveManager();
 
 	// Console
+	struct ConsoleInstance
+	{
+		ConsoleInstance();
+		~ConsoleInstance();
+		std::unique_ptr<DebugConsole> console;
+		std::unique_ptr<std::thread> consoleThread;
+	};
+	std::unique_ptr<ConsoleInstance> m_consoleInfo = nullptr;
+	ConsoleType m_consoleType = ConsoleType::Terminal;
 	std::queue<std::string> m_consoleInput;
-	DebugConsole *m_console;
-	std::thread *m_consoleThread;
 
 	std::queue<ConsoleOutput> m_consoleOutput = {};
 	void ProcessConsoleInput(KeyState pressState=KeyState::Press);

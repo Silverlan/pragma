@@ -779,16 +779,60 @@ void CEngine::ClearConsole()
 }
 void CEngine::OpenConsole()
 {
-	if(WGUI::IsOpen())
-		WIConsole::Open();
+	switch(m_consoleType)
+	{
+	case ConsoleType::Terminal:
+		Engine::OpenConsole();
+		break;
+	default:
+	{
+		if(WGUI::IsOpen())
+		{
+			auto *console = WIConsole::Open();
+			if(console && m_consoleType == ConsoleType::GUIDetached)
+			{
+				console->Update();
+				auto *frame = console->GetFrame();
+				if(frame)
+				{
+					frame->Update();
+					frame->Detach();
+				}
+			}
+		}
+		break;
+	}
+	}
 	umath::set_flag(m_stateFlags,StateFlags::ConsoleOpen,true);
 	// Engine::OpenConsole();
 }
 void CEngine::CloseConsole()
 {
-	WIConsole::Close();
+	switch(m_consoleType)
+	{
+	case ConsoleType::Terminal:
+		Engine::CloseConsole();
+		break;
+	default:
+	{
+		if(WGUI::IsOpen())
+			WIConsole::Close();
+		break;
+	}
+	}
+
 	// Engine::CloseConsole();
 	umath::set_flag(m_stateFlags,StateFlags::ConsoleOpen,false);
+}
+void CEngine::SetConsoleType(ConsoleType type)
+{
+	if(type == m_consoleType)
+		return;
+	auto isOpen = IsConsoleOpen();
+	CloseConsole();
+	Engine::SetConsoleType(type);
+	if(isOpen)
+		OpenConsole();
 }
 bool CEngine::IsConsoleOpen() const
 {

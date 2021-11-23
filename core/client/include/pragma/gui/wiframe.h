@@ -26,6 +26,9 @@ public:
 	void SetCloseButtonEnabled(bool b);
 	void SetDetachButtonEnabled(bool b);
 	virtual util::EventReply MouseCallback(GLFW::MouseButton button,GLFW::KeyState state,GLFW::Modifier mods) override;
+
+	void Detach();
+	void Reattach();
 protected:
 	WIHandle m_hBg;
 	WIHandle m_hTitle;

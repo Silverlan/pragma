@@ -13,6 +13,7 @@
 #include "pragma/lua/classes/lskeleton.h"
 #include "pragma/lua/classes/lvector.h"
 #include "pragma/lua/libraries/lfile.h"
+#include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/physics/collisionmesh.h"
 #include "pragma/lua/classes/lcollisionmesh.h"
 #include "luasystem.h"
@@ -317,7 +318,7 @@ void Lua::Model::register_class(
 		else
 			Lua::PushBool(l,result);
 	}));
-	classDef.def("Save",static_cast<void(*)(lua_State*,::Model&,const std::string&)>([](lua_State *l,::Model &mdl,const std::string &fname) {
+	classDef.def("Save",+[](lua_State *l,::Engine *engine,::Model &mdl,const std::string &fname) {
 		auto *nw = engine->GetNetworkState(l);
 		auto *game = nw ? nw->GetGameState() : nullptr;
 		if(game == nullptr)
@@ -327,8 +328,11 @@ void Lua::Model::register_class(
 		if(result == false)
 			Lua::PushString(l,err);
 		else
+		{
+			engine->PollResourceWatchers();
 			Lua::PushBool(l,result);
-	}));
+		}
+	});
 	classDef.def("Copy",static_cast<void(*)(lua_State*,::Model&)>(&Lua::Model::Copy));
 	classDef.def("Copy",static_cast<void(*)(lua_State*,::Model&,uint32_t)>(&Lua::Model::Copy));
 	classDef.def("GetVertexCount",&Lua::Model::GetVertexCount);

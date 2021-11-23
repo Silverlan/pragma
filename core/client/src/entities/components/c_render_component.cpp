@@ -148,7 +148,7 @@ void CRenderComponent::ClearRenderClipPlane()
 const Vector4 *CRenderComponent::GetRenderClipPlane() const {return m_renderClipPlane.has_value() ? &*m_renderClipPlane : nullptr;}
 void CRenderComponent::SetDepthBias(float d,float delta)
 {
-	if(m_depthBias->x == d && m_depthBias->y == delta)
+	if(m_depthBias.has_value() && m_depthBias->x == d && m_depthBias->y == delta)
 		return;
 	m_depthBias = {d,delta};
 	BroadcastEvent(EVENT_ON_DEPTH_BIAS_CHANGED);

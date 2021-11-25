@@ -205,19 +205,20 @@ util::EventReply BaseEntityComponent::InvokeEventCallbacks(ComponentEventId even
 	if(itEv == m_eventCallbacks.end())
 		return util::EventReply::Unhandled;
 	auto hThis = GetHandle();
-	for(auto it=itEv->second.begin();it!=itEv->second.end();)
+	auto &evs = itEv->second;
+	for(auto i=decltype(evs.size()){0u};i<evs.size();)
 	{
-		auto &hCb = *it;
+		auto &hCb = evs[i];
 		if(hCb.IsValid() == false)
 		{
-			it = itEv->second.erase(it);
+			itEv->second.erase(itEv->second.begin() +i);
 			continue;
 		}
 		if(hCb.Call<util::EventReply,std::reference_wrapper<ComponentEvent>>(std::reference_wrapper<ComponentEvent>(evData)) == util::EventReply::Handled)
 			return util::EventReply::Handled;
 		if(hThis.expired()) // This component has been removed directly or indirectly by the callback; Return immediately
 			return util::EventReply::Unhandled;
-		++it;
+		++i;
 	}
 	return util::EventReply::Unhandled;
 }

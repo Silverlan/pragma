@@ -692,6 +692,7 @@ bool Model::Save(Game &game,const std::string &fileName,std::string &outErr)
 		outErr = "Unable to save UDM data!";
 		return false;
 	}
+	pragma::get_engine()->PollResourceWatchers();
 	return true;
 }
 bool Model::Save(Game &game,std::string &outErr)

@@ -278,6 +278,8 @@ void WIMainMenu::Initialize()
 	pVersion->SetText(get_pretty_engine_version());
 	pVersion->SizeToContents();
 	pVersion->SetName("engine_version");
+	pVersion->SetPos(GetWidth() -pVersion->GetWidth() -40,GetHeight() -pVersion->GetHeight() -20);
+	pVersion->SetAnchor(1.f,1.f,1.f,1.f);
 
 	m_cbOnSteamworksInit = client->AddCallback("OnSteamworksInitialized",FunctionCallback<void,std::reference_wrapper<struct ISteamworks>>::Create([this](std::reference_wrapper<struct ISteamworks> isteamworks) {
 		if(m_hVersion.IsValid() == false || isteamworks.get().get_build_id == nullptr)
@@ -290,8 +292,8 @@ void WIMainMenu::Initialize()
 		pBuildId->SizeToContents();
 		if(m_hVersion.IsValid())
 		{
-			auto pos = m_hVersion->GetPos();
-			pBuildId->SetPos(pos.x,pos.y -m_hVersion->GetHeight());
+			pBuildId->SetPos(m_hVersion->GetX() /*m_hVersion->GetRight() -pBuildId->GetWidth()*/,m_hVersion->GetY() -m_hVersion->GetHeight() -5);
+			pBuildId->SetAnchor(1.f,1.f,1.f,1.f);
 		}
 	}));
 	m_cbOnSteamworksShutdown = client->AddCallback("OnSteamworksShutdown",FunctionCallback<void>::Create([this]() {
@@ -307,6 +309,11 @@ void WIMainMenu::Initialize()
 		pAttributes->SetColor(Color::Red);
 		pAttributes->SetText("[D]");
 		pAttributes->SizeToContents();
+		if(m_hVersion.IsValid())
+		{
+			pAttributes->SetPos(m_hVersion->GetRight() +4,m_hVersion->GetY());
+			pAttributes->SetAnchor(1.f,1.f,1.f,1.f);
+		}
 	}
 
 	/*m_hRenderAPI = CreateChild<WIText>();
@@ -442,16 +449,6 @@ void WIMainMenu::SetNewGameMenu()
 void WIMainMenu::SetSize(int x,int y)
 {
 	WIBase::SetSize(x,y);
-	if(m_hVersion.IsValid())
-	{
-		auto *pVersion = m_hVersion.get();
-		pVersion->SetPos(x -pVersion->GetWidth() -20,y -pVersion->GetHeight() -20);
-		if(m_hVersionAttributes.IsValid())
-		{
-			pVersion->SetX(pVersion->GetX() -(m_hVersionAttributes->GetWidth() +4));
-			m_hVersionAttributes->SetPos(pVersion->GetRight() +4,pVersion->GetY());
-		}
-	}
 	uint32_t logoYBottom = 50;
 #if WIMENU_ENABLE_PATREON_LOGO != 0
 	if(m_hPatreonIcon.IsValid())

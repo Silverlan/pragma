@@ -78,13 +78,22 @@ void CSceneComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimar
 			continue;
 		curEntity = item.entity;
 		auto &ent = static_cast<CBaseEntity&>(*c_game->GetEntityByLocalIndex(item.entity));
-		auto &renderC = *ent.GetRenderComponent();
-		if(optStats && umath::is_flag_set(renderC.GetStateFlags(),CRenderComponent::StateFlags::RenderBufferDirty))
+		auto *renderC = ent.GetRenderComponent();
+		assert(renderC);
+		if(!renderC)
+		{
+			// TODO: This should be unreachable, but there are cases where the render component does
+			// end up as nullptr for some unknown reason.
+			// This could happen if the render component is removed after the render queues have been built,
+			// which is not allowed.
+			continue;
+		}
+		if(optStats && umath::is_flag_set(renderC->GetStateFlags(),CRenderComponent::StateFlags::RenderBufferDirty))
 			(*optStats)->Increment(RenderPassStats::Counter::EntityBufferUpdates);
-		auto *animC = renderC.GetAnimatedComponent();
+		auto *animC = renderC->GetAnimatedComponent();
 		if(animC && animC->AreSkeletonUpdateCallbacksEnabled())
 			animC->UpdateBoneMatricesMT();
-		renderC.UpdateRenderBuffers(drawCmd);
+		renderC->UpdateRenderBuffers(drawCmd);
 	}
 }
 

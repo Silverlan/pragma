@@ -395,7 +395,7 @@ void BaseEntityComponent::Load(udm::LinkedPropertyWrapperArg udm)
 }
 void BaseEntityComponent::Load(udm::LinkedPropertyWrapperArg udm,uint32_t version) {}
 void BaseEntityComponent::OnEntitySpawn() {}
-void BaseEntityComponent::OnEntityPostSpawn() {}
+void BaseEntityComponent::OnEntityPostSpawn() {UpdateTickPolicy();}
 void BaseEntityComponent::OnAttached(BaseEntity &ent) {}
 void BaseEntityComponent::OnDetached(BaseEntity &ent)
 {
@@ -426,15 +426,10 @@ bool BaseEntityComponent::ShouldThink() const
 	//return toggleC ? toggleC->IsTurnedOn() : true;
 	return true;
 }
-void BaseEntityComponent::SetTickPolicy(TickPolicy policy)
+void BaseEntityComponent::UpdateTickPolicy()
 {
-	if(policy == m_tickData.tickPolicy)
+	if(!GetEntity().IsSpawned())
 		return;
-	m_tickData.tickPolicy = policy;
-
-	if(umath::is_flag_set(m_stateFlags,StateFlags::IsThinking))
-		return; // Tick policy update will be handled by game
-	
 	auto &logicComponents = GetEntity().GetNetworkState()->GetGameState()->GetEntityTickComponents();
 	if(ShouldThink())
 	{
@@ -448,6 +443,16 @@ void BaseEntityComponent::SetTickPolicy(TickPolicy policy)
 		return;
 	logicComponents.erase(std::find(logicComponents.begin(),logicComponents.end(),this));
 	umath::set_flag(m_stateFlags,StateFlags::IsLogicEnabled,false);
+}
+void BaseEntityComponent::SetTickPolicy(TickPolicy policy)
+{
+	if(policy == m_tickData.tickPolicy)
+		return;
+	m_tickData.tickPolicy = policy;
+
+	if(umath::is_flag_set(m_stateFlags,StateFlags::IsThinking))
+		return; // Tick policy update will be handled by game
+	UpdateTickPolicy();
 }
 
 double BaseEntityComponent::GetNextTick() const {return m_tickData.nextTick;}

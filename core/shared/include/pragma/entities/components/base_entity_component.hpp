@@ -202,6 +202,7 @@ namespace pragma
 		friend EntityComponentManager;
 		friend BaseEntityComponentSystem;
 		BaseEntityComponent(BaseEntity &ent);
+		void UpdateTickPolicy();
 		virtual util::EventReply HandleEvent(ComponentEventId eventId,ComponentEvent &evData);
 		virtual void Load(udm::LinkedPropertyWrapperArg udm,uint32_t version);
 		virtual std::optional<ComponentMemberIndex> DoGetMemberIndex(const std::string &name) const;

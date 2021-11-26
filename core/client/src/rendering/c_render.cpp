@@ -269,8 +269,8 @@ void CGame::RenderScenes(util::DrawSceneInfo &drawSceneInfo)
 		return;
 	}
 	CallCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes",std::ref(drawSceneInfo));
-	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("PreRenderScenes",std::ref(drawSceneInfo));
-	CallLuaCallbacks<void,std::reference_wrapper<const util::DrawSceneInfo>>("RenderScenes",std::ref(drawSceneInfo));
+	CallLuaCallbacks<void,util::DrawSceneInfo*>("PreRenderScenes",&drawSceneInfo);
+	CallLuaCallbacks<void,util::DrawSceneInfo*>("RenderScenes",&drawSceneInfo);
 
 	if(IsDefaultGameRenderEnabled())
 	{

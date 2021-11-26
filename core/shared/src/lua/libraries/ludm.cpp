@@ -788,12 +788,40 @@ template<typename T>
 	auto a = p.AddArray(name,size,type,arrayType);
 	set_array_values<T>(a.GetValue<udm::Array>(),type,t,size,arrayType);
 }
+template<typename T>
+	concept is_assignable_type = !std::is_same_v<T,::udm::Element> && !std::is_same_v<T,::udm::Utf8String> && !std::is_same_v<T,::udm::Array> && !std::is_same_v<T,::udm::ArrayLz4>;
+bool Lua::udm::set_array_value(lua_State *l,::udm::Array &a,uint32_t idx,const luabind::object &o)
+{
+	if(idx >= a.GetSize())
+		return false;
+	auto arrayType = a.GetArrayType();
+	::udm::visit(a.GetValueType(),[&a,idx,&o,arrayType](auto tag) {
+		using T = decltype(tag)::type;
+		if constexpr(is_assignable_type<T>)
+		{
+			if(arrayType == ::udm::ArrayType::Raw)
+			{
+				if constexpr(::udm::Array::IsValueTypeSupported(::udm::type_to_enum<T>()))
+				{
+					auto *pVal = static_cast<T*>(a.GetValues());
+					pVal[idx] = luabind::object_cast<T>(o);
+				}
+			}
+			else if constexpr(::udm::ArrayLz4::IsValueTypeSupported(::udm::type_to_enum<T>()))
+			{
+				auto *pVal = static_cast<T*>(a.GetValues());
+				pVal[idx] = luabind::object_cast<T>(o);
+			}
+		}
+	});
+	return true;
+}
 static void set_array_values(lua_State *l,::udm::Array &a,::udm::Type type,luabind::tableT<void> t,uint32_t tIdx,::udm::ArrayType arrayType=::udm::ArrayType::Raw)
 {
 	auto size = Lua::GetObjectLength(l,tIdx);
 	auto vs = [&t,&a,type,tIdx,arrayType,size](auto tag) {
 		using T = decltype(tag)::type;
-		if constexpr(!std::is_same_v<T,::udm::Element> && !std::is_same_v<T,::udm::Utf8String> && !std::is_same_v<T,::udm::Array> && !std::is_same_v<T,::udm::ArrayLz4>)
+		if constexpr(is_assignable_type<T>)
 		{
 			if(arrayType == ::udm::ArrayType::Raw)
 			{

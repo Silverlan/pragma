@@ -101,6 +101,8 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdChannel.def("GetValueArray",+[](lua_State *l,panima::Channel &channel) -> ::udm::LinkedPropertyWrapper {
 			return ::udm::LinkedPropertyWrapper{channel.GetValueProperty()};
 	});
+	cdChannel.def("Resize",&panima::Channel::Resize);
+	cdChannel.def("GetSize",&panima::Channel::GetSize);
 	cdChannel.def("AddValue",+[](lua_State *l,panima::Channel &channel,float t,Lua::udm_ng value) {
 		::udm::visit_ng(channel.GetValueType(),[&channel,t,&value](auto tag) {
 			using T = decltype(tag)::type;
@@ -110,6 +112,16 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	});
 	cdChannel.def("Save",&panima::Channel::Save);
 	cdChannel.def("Load",&panima::Channel::Load);
+	cdChannel.def("SetTime",+[](lua_State *l,panima::Channel &channel,uint32_t idx,float time) -> bool {
+		auto r = Lua::udm::set_array_value(l,channel.GetTimesArray(),idx,luabind::object{l,time});
+		channel.Update();
+		return r;
+	});
+	cdChannel.def("SetValue",+[](lua_State *l,panima::Channel &channel,uint32_t idx,const luabind::object &value) -> bool {
+		auto r = Lua::udm::set_array_value(l,channel.GetValueArray(),idx,value);
+		channel.Update();
+		return r;
+	});
 	cdChannel.def("SetValues",+[](lua_State *l,panima::Channel &channel,luabind::tableT<float> times,luabind::tableT<void> values) {
 		auto numTimes = Lua::GetObjectLength(l,times);
 		auto numValues = Lua::GetObjectLength(l,values);

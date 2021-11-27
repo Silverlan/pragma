@@ -298,6 +298,12 @@ void Lua::animation::register_library(Lua::Interface &lua)
 	cdAnim2.scope[luabind::def("create",+[](lua_State *l) {
 		return std::make_shared<panima::Animation>();
 	})];
+	cdAnim2.scope[luabind::def("load",+[](lua_State *l,::udm::LinkedPropertyWrapper &prop) -> Lua::var<bool,std::shared_ptr<panima::Animation>> {
+		auto anim = std::make_shared<panima::Animation>();
+		if(anim->Load(prop) == false)
+			return luabind::object{l,false};
+		return luabind::object{l,anim};
+	})];
 	cdAnim2.def("GetChannelCount",&panima::Animation::GetChannelCount);
 	cdAnim2.def("GetAnimationSpeedFactor",&panima::Animation::GetAnimationSpeedFactor);
 	cdAnim2.def("SetAnimationSpeedFactor",&panima::Animation::SetAnimationSpeedFactor);

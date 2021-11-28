@@ -1414,9 +1414,16 @@ void Lua::udm::register_library(Lua::Interface &lua)
 	auto cdData = luabind::class_<::udm::Data>("Data");
 	cdData.def(luabind::tostring(luabind::self));
 	cdData.def("Save",+[](lua_State *l,::udm::Data &udmData,const std::string &fileName) {
+		auto fname = fileName;
+		if(Lua::file::validate_write_operation(l,fname) == false)
+		{
+			Lua::PushBool(l,false);
+			Lua::PushString(l,"Invalid write location!");
+			return;
+		}
 		try
 		{
-			udmData.Save(fileName);
+			udmData.Save(fname);
 			Lua::PushBool(l,true);
 		}
 		catch(const ::udm::Exception &e)
@@ -1426,9 +1433,16 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		}
 	});
 	cdData.def("SaveAscii",+[](lua_State *l,::udm::Data &udmData,const std::string &fileName) {
+		auto fname = fileName;
+		if(Lua::file::validate_write_operation(l,fname) == false)
+		{
+			Lua::PushBool(l,false);
+			Lua::PushString(l,"Invalid write location!");
+			return;
+		}
 		try
 		{
-			udmData.SaveAscii(fileName);
+			udmData.SaveAscii(fname);
 			Lua::PushBool(l,true);
 		}
 		catch(const ::udm::Exception &e)
@@ -1438,9 +1452,16 @@ void Lua::udm::register_library(Lua::Interface &lua)
 		}
 	});
 	cdData.def("SaveAscii",+[](lua_State *l,::udm::Data &udmData,const std::string &fileName,::udm::AsciiSaveFlags flags) {
+		auto fname = fileName;
+		if(Lua::file::validate_write_operation(l,fname) == false)
+		{
+			Lua::PushBool(l,false);
+			Lua::PushString(l,"Invalid write location!");
+			return;
+		}
 		try
 		{
-			udmData.SaveAscii(fileName,flags);
+			udmData.SaveAscii(fname,flags);
 			Lua::PushBool(l,true);
 		}
 		catch(const ::udm::Exception &e)

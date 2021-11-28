@@ -172,16 +172,25 @@ void Lua::util::register_library(lua_State *l)
 		luabind::def("open_url_in_browser",Lua::util::open_url_in_browser),
 		luabind::def("get_addon_path",static_cast<std::string(*)(lua_State*)>(Lua::util::get_addon_path)),
 		luabind::def("get_string_hash",Lua::util::get_string_hash),
-		luabind::def("generate_uuid_v4",+[]() -> std::string {
-			return ::util::uuid_to_string(::util::generate_uuid_v4());
+		luabind::def("generate_uuid_v4",+[]() -> util::Uuid {
+			return util::Uuid{::util::generate_uuid_v4()};
+		}),
+		luabind::def("generate_uuid_v4",+[](size_t seed) -> util::Uuid {
+			return util::Uuid{::util::generate_uuid_v4(seed)};
+		}),
+		luabind::def("generate_uuid_v4",+[](const std::string &str) -> util::Uuid {
+			auto seed = std::hash<std::string>{}(str);
+			return util::Uuid{::util::generate_uuid_v4(seed)};
 		})
 	];
 
-	auto defUuid = luabind::class_<::util::Uuid>("Uuid");
-	defUuid.def("__tostring",&::util::uuid_to_string,luabind::const_ref_policy<1>{});
+	auto defUuid = luabind::class_<util::Uuid>("Uuid");
+	defUuid.def("__tostring",+[](const util::Uuid &uuid) {
+		return ::util::uuid_to_string(uuid.value);
+	});
 	utilMod[defUuid];
-	pragma::lua::define_custom_constructor<::util::Uuid,[](const std::string &uuid) -> ::util::Uuid {
-		return ::util::uuid_string_to_bytes(uuid);
+	pragma::lua::define_custom_constructor<util::Uuid,[](const std::string &uuid) -> util::Uuid {
+		return util::Uuid{::util::uuid_string_to_bytes(uuid)};
 	},const std::string&>(l);
 }
 

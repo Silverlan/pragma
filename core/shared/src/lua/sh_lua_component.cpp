@@ -241,11 +241,12 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 				if constexpr(pragma::is_valid_component_property_type_v<T>)
 				{
 					constexpr auto getter = +[](const ComponentMemberInfo &memberInfo,BaseLuaBaseEntityComponent &component,T &value) {
+						auto *info = component.GetLuaMemberInfo(const_cast<ComponentMemberInfo&>(memberInfo));
 						if constexpr(Lua::is_native_type<T>)
-							value = luabind::object_cast_nothrow<T>(component.GetLuaObject()[memberInfo.GetName()],T{});
+							value = luabind::object_cast_nothrow<T>(component.GetLuaObject()[info->memberVariableName],T{});
 						else
 						{
-							auto *v = luabind::object_cast_nothrow<T*>(component.GetLuaObject()[memberInfo.GetName()],static_cast<T*>(nullptr));
+							auto *v = luabind::object_cast_nothrow<T*>(component.GetLuaObject()[info->memberVariableName],static_cast<T*>(nullptr));
 							if(!v)
 								value = {};
 							else

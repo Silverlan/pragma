@@ -85,6 +85,15 @@ namespace pragma
 			Removed = IsLogicEnabled<<1u
 		};
 
+		enum class LogSeverity : uint8_t
+		{
+			Normal = 0,
+			Warning,
+			Error,
+			Critical,
+			Debug
+		};
+
 		BaseEntityComponent(const BaseEntityComponent&)=delete;
 		BaseEntityComponent &operator=(const BaseEntityComponent&)=delete;
 		BaseEntityComponent(BaseEntityComponent&&)=delete;
@@ -192,6 +201,8 @@ namespace pragma
 		// For internal use only!
 		StateFlags GetStateFlags() const {return m_stateFlags;}
 		void SetStateFlags(StateFlags stateFlags) {m_stateFlags = stateFlags;}
+
+		void Log(const std::string &msg,LogSeverity severity) const;
 
 		std::string GetUri() const;
 		std::string GetMemberUri(const std::string &memberName) const;

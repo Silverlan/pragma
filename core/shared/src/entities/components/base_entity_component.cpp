@@ -50,9 +50,35 @@ void BaseEntityComponent::RegisterEvents(pragma::EntityComponentManager &compone
 	EVENT_ON_ENTITY_COMPONENT_REMOVED = registerEvent("ON_ENTITY_COMPONENT_REMOVED",EntityComponentManager::EventInfo::Type::Broadcast);
 	EVENT_ON_MEMBERS_CHANGED = registerEvent("ON_MEMBERS_CHANGED",EntityComponentManager::EventInfo::Type::Broadcast);
 }
+void BaseEntityComponent::Log(const std::string &msg,LogSeverity severity) const
+{
+	auto print = [&msg](auto &con) {
+		con<<msg<<Con::endl;
+	};
+	switch(severity)
+	{
+	case LogSeverity::Normal:
+	case LogSeverity::Debug:
+		print(Con::cout);
+		break;
+	case LogSeverity::Warning:
+		print(Con::cwar);
+		break;
+	case LogSeverity::Error:
+		print(Con::cerr);
+		break;
+	case LogSeverity::Critical:
+		print(Con::crit);
+		break;
+	}
+}
 void BaseEntityComponent::OnMembersChanged()
 {
 	BroadcastEvent(EVENT_ON_MEMBERS_CHANGED);
+
+	auto *genericC = GetEntity().GetGenericComponent();
+	if(genericC)
+		genericC->InvokeEventCallbacks(BaseGenericComponent::EVENT_ON_MEMBERS_CHANGED);
 }
 void BaseEntityComponent::RegisterMembers(pragma::EntityComponentManager &componentManager,TRegisterComponentMember registerMember) {}
 const ComponentMemberInfo *BaseEntityComponent::FindMemberInfo(const std::string &name) const
@@ -365,7 +391,7 @@ void BaseEntityComponent::OnEntityComponentRemoved(BaseEntityComponent &componen
 	pragma::CEOnEntityComponentRemoved evData{*this};
 	auto *genericC = GetEntity().GetGenericComponent();
 	if(BroadcastEvent(EVENT_ON_ENTITY_COMPONENT_REMOVED,evData) != util::EventReply::Handled && genericC)
-		genericC->InvokeEventCallbacks(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED,evData);
+		genericC->InvokeEventCallbacks(BaseGenericComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED,evData);
 }
 Game &BaseEntityComponent::GetGame() {return *GetNetworkState().GetGameState();}
 NetworkState &BaseEntityComponent::GetNetworkState() {return *GetEntity().GetNetworkState();}

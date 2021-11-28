@@ -10,6 +10,16 @@
 
 using namespace pragma;
 
+decltype(BaseGenericComponent::EVENT_ON_ENTITY_COMPONENT_ADDED) BaseGenericComponent::EVENT_ON_ENTITY_COMPONENT_ADDED = INVALID_COMPONENT_ID;
+decltype(BaseGenericComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED) BaseGenericComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED = INVALID_COMPONENT_ID;
+decltype(BaseGenericComponent::EVENT_ON_MEMBERS_CHANGED) BaseGenericComponent::EVENT_ON_MEMBERS_CHANGED = INVALID_COMPONENT_ID;
+void BaseGenericComponent::RegisterEvents(pragma::EntityComponentManager &componentManager,TRegisterComponentEvent registerEvent)
+{
+	EVENT_ON_ENTITY_COMPONENT_ADDED = registerEvent("GENERIC_ON_ENTITY_COMPONENT_ADDED",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_ENTITY_COMPONENT_REMOVED = registerEvent("GENERIC_ON_ENTITY_COMPONENT_REMOVED",EntityComponentManager::EventInfo::Type::Explicit);
+	EVENT_ON_MEMBERS_CHANGED = registerEvent("GENERIC_ON_MEMBERS_CHANGED",EntityComponentManager::EventInfo::Type::Explicit);
+}
+
 BaseGenericComponent::BaseGenericComponent(BaseEntity &ent)
 	: BaseEntityComponent(ent)
 {}

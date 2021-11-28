@@ -88,7 +88,7 @@ pragma::ComponentHandle<pragma::BaseEntityComponent> BaseEntityComponentSystem::
 	pragma::CEOnEntityComponentAdded evData{*ptrComponent};
 	auto *genericC = m_entity->GetGenericComponent();
 	if(BroadcastEvent(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED,evData,ptrComponent.get()) != util::EventReply::Handled && genericC)
-		genericC->InvokeEventCallbacks(BaseEntityComponent::EVENT_ON_ENTITY_COMPONENT_ADDED,evData);
+		genericC->InvokeEventCallbacks(BaseGenericComponent::EVENT_ON_ENTITY_COMPONENT_ADDED,evData);
 
 	for(auto &ptrComponentOther : components)
 	{

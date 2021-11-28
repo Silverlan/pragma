@@ -15,11 +15,13 @@
 #include "pragma/lua/classes/ldef_vector.h"
 #include "pragma/lua/classes/ldef_angle.h"
 #include "pragma/lua/classes/ldef_color.h"
+#include "pragma/lua/libraries/lutil.hpp"
 #include "pragma/lua/policies/game_object_policy.hpp"
 #include "pragma/lua/policies/optional_policy.hpp"
 #include "pragma/lua/policies/handle_policy.hpp"
 #include "pragma/lua/policies/pair_policy.hpp"
 #include "pragma/lua/policies/vector_policy.hpp"
+#include "pragma/lua/policies/core_policies.hpp"
 #include "pragma/lua/converters/optional_converter_t.hpp"
 #include "pragma/lua/converters/game_type_converters_t.hpp"
 #include "pragma/lua/libraries/lray.h"
@@ -206,11 +208,14 @@ void Lua::Entity::register_class(luabind::class_<BaseEntity> &classDef)
 	classDef.def("GetModelComponent",&BaseEntity::GetModelComponent);
 	classDef.def("GetAnimatedComponent",&BaseEntity::GetAnimatedComponent);
 	classDef.def("GetUuid",static_cast<std::string(*)(BaseEntity&)>([](BaseEntity &ent) -> std::string {
-		return util::uuid_to_string(ent.GetUuid());
+		return ::util::uuid_to_string(ent.GetUuid());
 	}));
 	classDef.def("SetUuid",static_cast<void(*)(BaseEntity&,const std::string&)>([](BaseEntity &ent,const std::string &uuid) {
-		ent.SetUuid(util::uuid_string_to_bytes(uuid));
+		ent.SetUuid(::util::uuid_string_to_bytes(uuid));
 	}));
+	classDef.def("SetUuid",+[](BaseEntity &ent,const Lua::util::Uuid &uuid) {
+		ent.SetUuid(uuid.value);
+	},luabind::const_ref_policy<2>{});
 
 	classDef.def("Save",&BaseEntity::Save);
 	classDef.def("Load",&BaseEntity::Load);

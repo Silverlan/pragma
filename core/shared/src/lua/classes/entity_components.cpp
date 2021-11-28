@@ -145,6 +145,48 @@ namespace pragma::lua
 	namespace base_liquid_surface_simulation_component {static void register_class(luabind::module_ &mod);};
 	// --template-namespace-declaration-location
 };
+static std::optional<Lua::udm_type> get_member_value(
+	lua_State *l,pragma::BaseEntityComponent &component,const pragma::ComponentMemberInfo &memberInfo
+)
+{
+	return pragma::ents::visit_member(memberInfo.type,[&memberInfo,&component,l](auto tag) -> std::optional<Lua::udm_type> {
+		using T = decltype(tag)::type;
+		if constexpr(!pragma::is_valid_component_property_type_v<T>)
+			return {};
+		else
+		{
+			T value;
+			memberInfo.getterFunction(memberInfo,component,&value);
+			return Lua::udm_type{luabind::object{l,value}};
+		}
+	});
+}
+static bool set_member_value(
+	lua_State *l,pragma::BaseEntityComponent &component,const pragma::ComponentMemberInfo &memberInfo,Lua::udm_type value
+)
+{
+	return pragma::ents::visit_member(memberInfo.type,[&memberInfo,&component,l,&value](auto tag) -> bool {
+		using T = decltype(tag)::type;
+		if constexpr(!pragma::is_valid_component_property_type_v<T>)
+			return false;
+		else
+		{
+			if constexpr(Lua::is_native_type<T>)
+			{
+				auto v = luabind::object_cast<T>(value);
+				memberInfo.setterFunction(memberInfo,component,&v);
+			}
+			else
+			{
+				auto *v = luabind::object_cast<T*>(value);
+				if(!v)
+					return false;
+				memberInfo.setterFunction(memberInfo,component,v);
+			}
+			return true;
+		}
+	});
+}
 void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 {
 	auto entityComponentDef = pragma::lua::create_entity_component_class<pragma::BaseEntityComponent>("EntityComponent");
@@ -196,47 +238,31 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 	entityComponentDef.def("SetNextTick",&pragma::BaseEntityComponent::SetNextTick);
 	entityComponentDef.def("GetMemberIndex",&pragma::BaseEntityComponent::GetMemberIndex);
 	entityComponentDef.def("GetMemberInfo",&pragma::BaseEntityComponent::GetMemberInfo);
+	entityComponentDef.def("GetMemberValue",&get_member_value);
 	entityComponentDef.def("GetMemberValue",+[](lua_State *l,pragma::BaseEntityComponent &component,const std::string &memberName) -> std::optional<Lua::udm_type> {
 		auto *info = component.FindMemberInfo(memberName);
 		if(!info)
 			return {};
-		return ents::visit_member(info->type,[info,&component,l](auto tag) -> std::optional<Lua::udm_type> {
-			using T = decltype(tag)::type;
-			if constexpr(!is_valid_component_property_type_v<T>)
-				return {};
-			else
-			{
-				T value;
-				info->getterFunction(*info,component,&value);
-				return Lua::udm_type{luabind::object{l,value}};
-			}
-		});
+		return get_member_value(l,component,*info);
+	});
+	entityComponentDef.def("GetMemberValue",+[](lua_State *l,pragma::BaseEntityComponent &component,uint32_t memberIndex) -> std::optional<Lua::udm_type> {
+		auto *info = component.GetMemberInfo(memberIndex);
+		if(!info)
+			return {};
+		return get_member_value(l,component,*info);
+	});
+	entityComponentDef.def("SetMemberValue",&set_member_value);
+	entityComponentDef.def("SetMemberValue",+[](lua_State *l,pragma::BaseEntityComponent &component,uint32_t memberIndex,Lua::udm_type value) -> bool {
+		auto *info = component.GetMemberInfo(memberIndex);
+		if(!info)
+			return false;
+		return set_member_value(l,component,*info,value);
 	});
 	entityComponentDef.def("SetMemberValue",+[](lua_State *l,pragma::BaseEntityComponent &component,const std::string &memberName,Lua::udm_type value) -> bool {
 		auto *info = component.FindMemberInfo(memberName);
 		if(!info)
 			return false;
-		return ents::visit_member(info->type,[info,&component,l,&value](auto tag) -> bool {
-			using T = decltype(tag)::type;
-			if constexpr(!pragma::is_valid_component_property_type_v<T>)
-				return false;
-			else
-			{
-				if constexpr(Lua::is_native_type<T>)
-				{
-					auto v = luabind::object_cast<T>(value);
-					info->setterFunction(*info,component,&v);
-				}
-				else
-				{
-					auto *v = luabind::object_cast<T*>(value);
-					if(!v)
-						return false;
-					info->setterFunction(*info,component,v);
-				}
-				return true;
-			}
-		});
+		return set_member_value(l,component,*info,value);
 	});
 	entityComponentDef.def("IsValid",static_cast<bool(*)(lua_State*,pragma::BaseEntityComponent*)>([](lua_State *l,pragma::BaseEntityComponent *hComponent) {
 		return hComponent != nullptr;
@@ -321,11 +347,18 @@ void pragma::lua::register_entity_component_classes(luabind::module_ &mod)
 		}
 		return t;
 	}));
+	entityComponentDef.def("Log",&pragma::BaseEntityComponent::Log);
+	entityComponentDef.def("Log",&pragma::BaseEntityComponent::Log,luabind::default_parameter_policy<3,pragma::BaseEntityComponent::LogSeverity::Warning>{});
 	entityComponentDef.add_static_constant("FREGISTER_NONE",umath::to_integral(pragma::ComponentFlags::None));
 	entityComponentDef.add_static_constant("FREGISTER_BIT_NETWORKED",umath::to_integral(pragma::ComponentFlags::Networked));
 
 	entityComponentDef.add_static_constant("CALLBACK_TYPE_ENTITY",umath::to_integral(pragma::BaseEntityComponent::CallbackType::Entity));
 	entityComponentDef.add_static_constant("CALLBACK_TYPE_COMPONENT",umath::to_integral(pragma::BaseEntityComponent::CallbackType::Component));
+	entityComponentDef.add_static_constant("LOG_SEVERITY_NORMAL",umath::to_integral(pragma::BaseEntityComponent::LogSeverity::Normal));
+	entityComponentDef.add_static_constant("LOG_SEVERITY_WARNING",umath::to_integral(pragma::BaseEntityComponent::LogSeverity::Warning));
+	entityComponentDef.add_static_constant("LOG_SEVERITY_ERROR",umath::to_integral(pragma::BaseEntityComponent::LogSeverity::Error));
+	entityComponentDef.add_static_constant("LOG_SEVERITY_CRITICAL",umath::to_integral(pragma::BaseEntityComponent::LogSeverity::Critical));
+	entityComponentDef.add_static_constant("LOG_SEVERITY_DEBUG",umath::to_integral(pragma::BaseEntityComponent::LogSeverity::Debug));
 	mod[entityComponentDef];
 
 	base_ai_component::register_class(mod);
@@ -3048,6 +3081,9 @@ void pragma::lua::base_animated_component::register_class(luabind::module_ &mod)
 	void pragma::lua::base_generic_component::register_class(luabind::module_ &mod)
 	{
 		auto def = Lua::create_base_entity_component_class<pragma::BaseGenericComponent>("BaseGenericComponent");
+		def.add_static_constant("EVENT_ON_COMPONENT_ADDED",pragma::BaseGenericComponent::EVENT_ON_ENTITY_COMPONENT_ADDED);
+		def.add_static_constant("EVENT_ON_COMPONENT_REMOVED",pragma::BaseGenericComponent::EVENT_ON_ENTITY_COMPONENT_REMOVED);
+		def.add_static_constant("EVENT_ON_MEMBERS_CHANGED",pragma::BaseGenericComponent::EVENT_ON_MEMBERS_CHANGED);
 		util::ScopeGuard sgReg {[&mod,&def]() {mod[def];}};
 	}
 		

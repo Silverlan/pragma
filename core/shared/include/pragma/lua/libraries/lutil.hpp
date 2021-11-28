@@ -126,6 +126,11 @@ namespace Lua
 
 		DLLNETWORK void register_shared_generic(luabind::module_ &mod);
 		DLLNETWORK void register_shared(luabind::module_ &mod);
+
+		struct DLLNETWORK Uuid
+		{
+			::util::Uuid value;
+		};
 	};
 };
 

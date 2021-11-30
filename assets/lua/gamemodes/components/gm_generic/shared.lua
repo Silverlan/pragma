@@ -47,7 +47,9 @@ function Component:InitializePlayer(pl)
 			local sndComponent = charComponent:GetEntity():GetComponent(ents.COMPONENT_SOUND_EMITTER)
 			if(sndComponent == nil) then return end
 			local maxGain = 0.5
-			sndComponent:EmitSound(surfMat:GetFootstepSound(),bit.bor(sound.TYPE_EFFECT,sound.TYPE_PLAYER),maxGain *intensity,1.0,false)
+			local sndInfo = ents.SoundEmitterComponent.SoundInfo(maxGain *intensity,1.0)
+			sndInfo.transmit = false
+			sndComponent:EmitSound(surfMat:GetFootstepSound(),bit.bor(sound.TYPE_EFFECT,sound.TYPE_PLAYER),sndInfo)
 		end)
 	end
 	self:InitializePlayerModel(pl)

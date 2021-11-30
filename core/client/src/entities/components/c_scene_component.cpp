@@ -609,6 +609,12 @@ void CSceneComponent::LinkWorldEnvironment(CSceneComponent &other)
 	fogSettings.GetTypeProperty()->Link(*fogSettingsOther.GetTypeProperty());
 }
 
+void CSceneComponent::UpdateRenderData()
+{
+	UpdateRenderSettings();
+	UpdateRendererLightMap();
+}
+
 void CSceneComponent::SetRenderer(CRendererComponent *renderer)
 {
 	m_renderer = renderer ? renderer->GetHandle<CRendererComponent>() : pragma::ComponentHandle<CRendererComponent>{};

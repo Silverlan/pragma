@@ -270,6 +270,7 @@ namespace pragma
 		void SwapPreviouslyVisibleLights(std::vector<ComponentHandle<pragma::CLightComponent>> &&components) {std::swap(m_previouslyVisibleShadowedLights,components);}
 		
 		void RecordRenderCommandBuffers(const util::DrawSceneInfo &drawSceneInfo);
+		void UpdateRenderData();
 	private:
 		static float CalcLightMapPowExposure(pragma::CLightMapComponent &lightMapC);
 		void InitializeShadowDescriptorSet();

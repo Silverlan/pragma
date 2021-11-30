@@ -31,7 +31,7 @@ extern DLLCLIENT CGame *c_game;
 extern DLLCLIENT CEngine *c_engine;
 
 using namespace pragma;
-
+#pragma optimize("",off)
 LINK_ENTITY_TO_CLASS(rasterization_renderer,CRasterizationRenderer);
 
 ComponentEventId CRasterizationRendererComponent::EVENT_ON_RECORD_PREPASS = INVALID_COMPONENT_ID;
@@ -187,6 +187,8 @@ void CRasterizationRendererComponent::Initialize()
 
 	auto &ent = GetEntity();
 	m_rendererComponent = ent.AddComponent<CRendererComponent>().get();
+
+	UpdateLightmap();
 }
 
 void CRasterizationRendererComponent::UpdateRendererBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
@@ -593,3 +595,4 @@ static void cl_render_ssao_callback(NetworkState*,ConVar*,bool,bool enabled)
 		c.SetSSAOEnabled(enabled);
 }
 REGISTER_CONVAR_CALLBACK_CL(cl_render_ssao,cl_render_ssao_callback);
+#pragma optimize("",on)

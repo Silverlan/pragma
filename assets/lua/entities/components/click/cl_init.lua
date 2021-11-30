@@ -19,7 +19,7 @@ local function get_viewport_data()
 	local cursorPos = input.get_cursor_pos()
 	local vpData = {}
 	-- Check if element under cursor is a viewport
-	local elFocus = gui.get_focused_element()
+	local elFocus = gui.get_element_under_cursor(function(el) return el:GetClass() == "wiviewport" end)
 	if(util.is_valid(elFocus)) then
 		local viewport
 		if(elFocus:GetClass() == "wiviewport") then viewport = elFocus

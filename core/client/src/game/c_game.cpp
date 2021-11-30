@@ -1240,6 +1240,10 @@ void CGame::OnMapLoaded()
 {
 	Game::OnMapLoaded();
 
+	auto *scene = GetRenderScene();
+	if(scene)
+		scene->UpdateRenderData();
+
 	// Update reflection probes
 	// TODO: Make sure all map materials have been fully loaded before doing this!
 	// pragma::CReflectionProbeComponent::BuildAllReflectionProbes(*this);

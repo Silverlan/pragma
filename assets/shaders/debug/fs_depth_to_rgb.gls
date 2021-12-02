@@ -49,14 +49,6 @@ void main()
 	float l3 = u_depth.near +d2 *(u_depth.far -u_depth.near);
 	float l4 = u_depth.near +d3 *(u_depth.far -u_depth.near);
 
-	float dTarget = 2000 +54;
-	float dmin = dTarget -1;
-	float dmax = dTarget +1;
-	if((l > dmin && l < dmax))
-	{
-		fs_color = vec4(1,0,0,1);
-		return;
-	}
 	d = pow(d,u_depth.contrastFactor);
 	fs_color = vec4(d,d,d,1.0);
 }

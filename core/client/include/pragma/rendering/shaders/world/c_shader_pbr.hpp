@@ -10,6 +10,7 @@
 
 #include "pragma/rendering/shaders/world/c_shader_textured.hpp"
 
+class Texture;
 namespace pragma
 {
 	class DLLCLIENT ShaderPBR
@@ -64,6 +65,15 @@ namespace pragma
 			prosper::IDescriptorSet &dsShadows,prosper::IDescriptorSet &dsMaterial,
 			const Vector4 &drawOrigin,ShaderGameWorld::SceneFlags &inOutSceneFlags
 		) const override;
+
+		static bool BindDescriptorSetTexture(
+			Material &mat,prosper::IDescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,
+			const std::string &defaultTexName,Texture **optOutTex=nullptr
+		);
+		static bool BindDescriptorSetTexture(
+			Material &mat,prosper::IDescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,
+			Texture *optDefaultTex=nullptr
+		);
 	protected:
 		using ShaderGameWorldLightingPass::Draw;
 		void RecordBindSceneDescriptorSets(
@@ -81,6 +91,7 @@ namespace pragma
 		virtual prosper::DescriptorSetInfo &GetMaterialDescriptorSetInfo() const override;
 		virtual void InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
 		std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo);
+		bool BindDescriptorSetBaseTextures(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo,prosper::IDescriptorSet &ds);
 
 		SceneFlags m_extRenderFlags = SceneFlags::None;
 		bool m_bNonIBLMode = false;

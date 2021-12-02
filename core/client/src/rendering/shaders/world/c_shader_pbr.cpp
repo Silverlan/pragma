@@ -137,7 +137,7 @@ void ShaderPBR::InitializeGfxPipelineDescriptorSets(prosper::GraphicsPipelineCre
 	AddDescriptorSetGroup(pipelineInfo,DESCRIPTOR_SET_PBR);
 }
 
-static bool bind_texture(Material &mat,prosper::IDescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,Texture *optDefaultTex=nullptr)
+bool ShaderPBR::BindDescriptorSetTexture(Material &mat,prosper::IDescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,Texture *optDefaultTex)
 {
 	auto &matManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
@@ -166,7 +166,7 @@ static TextureManager::LoadInfo get_texture_load_info()
 	return loadInfo;
 }
 
-static bool bind_default_texture(prosper::IDescriptorSet &ds,const std::string &defaultTexName,uint32_t bindingIndex)
+static bool bind_default_texture(prosper::IDescriptorSet &ds,const std::string &defaultTexName,uint32_t bindingIndex,Texture **optOutTex)
 {
 	auto &matManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
@@ -177,10 +177,14 @@ static bool bind_default_texture(prosper::IDescriptorSet &ds,const std::string &
 
 	if(tex && tex->HasValidVkTexture())
 		ds.SetBindingTexture(*tex->GetVkTexture(),bindingIndex);
+	if(optOutTex)
+		*optOutTex = tex.get();
 	return true;
 }
 
-static bool bind_texture(Material &mat,prosper::IDescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,const std::string &defaultTexName)
+bool ShaderPBR::BindDescriptorSetTexture(
+	Material &mat,prosper::IDescriptorSet &ds,TextureInfo *texInfo,uint32_t bindingIndex,const std::string &defaultTexName,Texture **optOutTex
+)
 {
 	auto &matManager = static_cast<CMaterialManager&>(client->GetMaterialManager());
 	auto &texManager = matManager.GetTextureManager();
@@ -192,12 +196,47 @@ static bool bind_texture(Material &mat,prosper::IDescriptorSet &ds,TextureInfo *
 		if(tex->HasValidVkTexture())
 		{
 			ds.SetBindingTexture(*tex->GetVkTexture(),bindingIndex);
+			if(optOutTex)
+				*optOutTex = tex.get();
 			return true;
 		}
 	}
 	else if(defaultTexName.empty())
 		return false;
-	return bind_default_texture(ds,defaultTexName,bindingIndex);
+	return bind_default_texture(ds,defaultTexName,bindingIndex,optOutTex);
+}
+
+bool ShaderPBR::BindDescriptorSetBaseTextures(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo,prosper::IDescriptorSet &ds)
+{
+	auto matData = InitializeMaterialBuffer(ds,mat);
+	if(matData.has_value() == false)
+		return false;
+
+	Texture *texAlbedo = nullptr;
+	if(BindDescriptorSetTexture(mat,ds,mat.GetAlbedoMap(),umath::to_integral(MaterialBinding::AlbedoMap),"white",&texAlbedo) == false)
+		return false;
+
+	if(BindDescriptorSetTexture(mat,ds,mat.GetNormalMap(),umath::to_integral(MaterialBinding::NormalMap),"black") == false)
+		return false;
+
+	if(BindDescriptorSetTexture(mat,ds,mat.GetRMAMap(),umath::to_integral(MaterialBinding::RMAMap),"pbr/rma_neutral") == false)
+		return false;
+
+	BindDescriptorSetTexture(mat,ds,mat.GetGlowMap(),umath::to_integral(MaterialBinding::EmissionMap));
+
+	if(BindDescriptorSetTexture(mat,ds,mat.GetParallaxMap(),umath::to_integral(MaterialBinding::ParallaxMap),"black") == false)
+		return false;
+
+	if(BindDescriptorSetTexture(mat,ds,mat.GetTextureInfo("wrinkle_stretch_map"),umath::to_integral(MaterialBinding::WrinkleStretchMap),texAlbedo) == false)
+		return false;
+
+	if(BindDescriptorSetTexture(mat,ds,mat.GetTextureInfo("wrinkle_compress_map"),umath::to_integral(MaterialBinding::WrinkleCompressMap),texAlbedo) == false)
+		return false;
+
+	if(BindDescriptorSetTexture(mat,ds,mat.GetTextureInfo("exponent_map"),umath::to_integral(MaterialBinding::ExponentMap),"white") == false)
+		return false;
+
+	return true;
 }
 
 std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescriptorSet(CMaterial &mat,const prosper::DescriptorSetInfo &descSetInfo)
@@ -209,32 +248,12 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderPBR::InitializeMaterialDescr
 	auto albedoTexture = std::static_pointer_cast<Texture>(albedoMap->texture);
 	if(albedoTexture->HasValidVkTexture() == false)
 		return nullptr;
+
 	auto descSetGroup = c_engine->GetRenderContext().CreateDescriptorSetGroup(descSetInfo);
 	mat.SetDescriptorSetGroup(*this,descSetGroup);
 	auto &descSet = *descSetGroup->GetDescriptorSet();
-	descSet.SetBindingTexture(*albedoTexture->GetVkTexture(),umath::to_integral(MaterialBinding::AlbedoMap));
-	auto matData = InitializeMaterialBuffer(descSet,mat);
-	if(matData.has_value() == false)
-		return nullptr;
-
-	if(bind_texture(mat,descSet,mat.GetNormalMap(),umath::to_integral(MaterialBinding::NormalMap),"black") == false)
-		return nullptr;
-
-	if(bind_texture(mat,descSet,mat.GetRMAMap(),umath::to_integral(MaterialBinding::RMAMap),"pbr/rma_neutral") == false)
-		return nullptr;
-
-	bind_texture(mat,descSet,mat.GetGlowMap(),umath::to_integral(MaterialBinding::EmissionMap));
-
-	if(bind_texture(mat,descSet,mat.GetParallaxMap(),umath::to_integral(MaterialBinding::ParallaxMap),"black") == false)
-		return nullptr;
-
-	if(bind_texture(mat,descSet,mat.GetTextureInfo("wrinkle_stretch_map"),umath::to_integral(MaterialBinding::WrinkleStretchMap),albedoTexture.get()) == false)
-		return nullptr;
-
-	if(bind_texture(mat,descSet,mat.GetTextureInfo("wrinkle_compress_map"),umath::to_integral(MaterialBinding::WrinkleCompressMap),albedoTexture.get()) == false)
-		return nullptr;
-
-	if(bind_texture(mat,descSet,mat.GetTextureInfo("exponent_map"),umath::to_integral(MaterialBinding::ExponentMap),"white") == false)
+	
+	if(BindDescriptorSetBaseTextures(mat,descSetInfo,descSet) == false)
 		return nullptr;
 
 	// TODO: FIXME: It would probably be a good idea to update the descriptor set lazily (i.e. not update it here), but

@@ -197,6 +197,21 @@ bool pragma::CEyeComponent::GetEyeballProjectionVectors(uint32_t eyeballIndex,Ve
 	outProjV = eyeballData->state.irisProjectionV;
 	return true;
 }
+void pragma::CEyeComponent::UpdateEyeMaterialData()
+{
+	auto &mdl = GetEntity().GetModel();
+	for(auto &data : m_eyeballData)
+		data.config.irisScale = 1.f;
+	auto numEyeballs = umath::min(mdl->GetEyeballCount(),static_cast<uint32_t>(m_eyeballData.size()));
+	for(auto eyeballIndex=decltype(numEyeballs){0u};eyeballIndex<numEyeballs;++eyeballIndex)
+	{
+		auto &eyeball = *mdl->GetEyeball(eyeballIndex);
+		auto *mat = mdl->GetMaterial(0,eyeball.irisMaterialIndex);
+		if(!mat)
+			continue;
+		m_eyeballData[eyeballIndex].config.irisScale = mat->GetDataBlock()->GetFloat("iris_scale",1.f);
+	}
+}
 void pragma::CEyeComponent::UpdateEyeballMT(const Eyeball &eyeball,uint32_t eyeballIndex)
 {
 	if(eyeballIndex >= m_eyeballData.size() || m_animC.expired())
@@ -243,7 +258,8 @@ void pragma::CEyeComponent::UpdateEyeballMT(const Eyeball &eyeball,uint32_t eyeb
 	uvec::normalize(&state.up);
 	
 	auto &vScale = GetEntity().GetScale();
-	auto scale = static_cast<float>((1.0 /eyeball.irisScale) +config.eyeSize) *vScale;
+	auto configIrisScale = (config.irisScale != 0.f) ? config.irisScale : 1.f;
+	auto scale = static_cast<float>((1.0 /(eyeball.irisScale /configIrisScale)) +config.eyeSize) *vScale;
 	for(uint8_t i=0;i<3;++i)
 	{
 		if(scale[i] > 0.0)

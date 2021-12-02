@@ -47,6 +47,7 @@ namespace pragma
 			Vector2 jitter = {};
 			float eyeSize = 0.f;
 			float dilation = 0.5f;
+			float irisScale = 1.f;
 		};
 
 		struct EyeballData
@@ -95,6 +96,7 @@ namespace pragma
 		void OnModelChanged(const std::shared_ptr<Model> &mdl);
 		Vector3 ClampViewTarget(const Vector3 &viewTarget) const;
 		void UpdateEyeballMT(const Eyeball &eyeball,uint32_t eyeballIndex);
+		void UpdateEyeMaterialData();
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
 	private:
 		EyeballConfig m_eyeballConfig = {};

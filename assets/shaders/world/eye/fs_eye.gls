@@ -77,7 +77,7 @@ void main()
 #if ENABLE_NOISE == 1
 	float irisOffset = texture(u_parallaxMap,vSphereUv.xy).b;
 	float parallaxStrength = 1.0;
-	vec2 vParallax = ((viewVecTangent.xz *irisOffset *parallaxStrength ) /( 1.0 -viewVecTangent.y)); // Note: 0.25 is a magic number
+	vec2 vParallax = ((viewVecTangent.xz *irisOffset *parallaxStrength ) /( 1.0 -viewVecTangent.y));
 	vParallax.x = -vParallax.x;
 
 	vec2 uvCorneaNoise = vSphereUv.xy +(vParallax.xy *0.5);

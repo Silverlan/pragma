@@ -142,4 +142,6 @@ void CEyeComponent::OnModelChanged(const std::shared_ptr<Model> &mdl)
 		auto &eyeball = *mdl->GetEyeball(eyeballIndex);
 		m_skinMaterialIndexToEyeballIndex.insert(std::make_pair(eyeball.irisMaterialIndex,eyeballIndex));
 	}
+
+	UpdateEyeMaterialData();
 }

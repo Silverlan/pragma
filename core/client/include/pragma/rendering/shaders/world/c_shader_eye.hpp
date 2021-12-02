@@ -31,9 +31,6 @@ namespace pragma
 #pragma pack(pop)
 
 		ShaderEye(prosper::IPrContext &context,const std::string &identifier);
-		virtual bool Draw(CModelSubMesh &mesh,const std::optional<pragma::RenderMeshIndex> &meshIdx,prosper::IBuffer &renderBufferIndexBuffer,uint32_t instanceCount=1) override;
-
-		bool Draw(pragma::rendering::ShaderProcessor &shaderProcessor);
 
 		//
 		virtual void RecordBindScene(
@@ -46,8 +43,18 @@ namespace pragma
 		) const override;
 		virtual bool OnRecordDrawMesh(rendering::ShaderProcessor &shaderProcessor,CModelSubMesh &mesh) const override;
 	protected:
+		ShaderEye(prosper::IPrContext &context,const std::string &identifier,const std::string &vsShader,const std::string &fsShader,const std::string &gsShader="");
 		bool BindEyeball(rendering::ShaderProcessor &shaderProcessor,uint32_t skinMatIdx) const;
 		virtual void InitializeGfxPipelinePushConstantRanges(prosper::GraphicsPipelineCreateInfo &pipelineInfo,uint32_t pipelineIdx) override;
+	};
+
+	class DLLCLIENT ShaderEyeLegacy
+		: public ShaderEye
+	{
+	public:
+		ShaderEyeLegacy(prosper::IPrContext &context,const std::string &identifier);
+		virtual std::shared_ptr<prosper::IDescriptorSetGroup> InitializeMaterialDescriptorSet(CMaterial &mat) override;
+	private:
 	};
 };
 
